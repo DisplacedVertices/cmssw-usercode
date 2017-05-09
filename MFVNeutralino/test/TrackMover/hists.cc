@@ -35,25 +35,25 @@ int main(int argc, char** argv) {
 
   TH1F* h_norm = new TH1F("h_norm", "", 1, 0, 1);
   if (is_mc)
-    h_norm->Fill(0.5, ((TH1F*)fat.f->Get("mcStat/h_sums"))->GetBinContent(1));
+    h_norm->Fill(0.5, h_sums->GetBinContent(1));
 
-  TH1F* h_weight = new TH1F("h_weight", ";weight;events/0.01", 200, 0, 2);
-  TH1F* h_npu = new TH1F("h_npu", ";# PU;events/1", 100, 0, 100);
+  TH1D* h_weight = new TH1D("h_weight", ";weight;events/0.01", 200, 0, 2);
+  TH1D* h_npu = new TH1D("h_npu", ";# PU;events/1", 100, 0, 100);
 
   const int num_numdens = 3;
 
-  TH1F* h_vtxntracks     [num_numdens] = {0};
-  TH1F* h_vtxntracksptgt3[num_numdens] = {0};
-  TH1F* h_vtxdrmin       [num_numdens] = {0};
-  TH1F* h_vtxdrmax       [num_numdens] = {0};
-  TH1F* h_vtxbs2derr     [num_numdens] = {0};
+  TH1D* h_vtxntracks     [num_numdens] = {0};
+  TH1D* h_vtxntracksptgt3[num_numdens] = {0};
+  TH1D* h_vtxdrmin       [num_numdens] = {0};
+  TH1D* h_vtxdrmax       [num_numdens] = {0};
+  TH1D* h_vtxbs2derr     [num_numdens] = {0};
 
   for (int i = 0; i < num_numdens; ++i) {
-    h_vtxntracks     [i] = new TH1F(TString::Format("h_%i_vtxntracks",      i), ";# tracks in largest vertex;events/1", 40, 0, 40);
-    h_vtxntracksptgt3[i] = new TH1F(TString::Format("h_%i_vtxntracksptgt3", i), ";# tracks w/ p_{T} > 3 GeV in largest vertex;events/1", 40, 0, 40);
-    h_vtxdrmin       [i] = new TH1F(TString::Format("h_%i_vtxdrmin",        i), ";min #Delta R_{ij} of tracks in largest vertex;events/0.05", 10, 0, 0.5);
-    h_vtxdrmax       [i] = new TH1F(TString::Format("h_%i_vtxdrmax",        i), ";max #Delta R_{ij} of tracks in largest vertex;events/0.5", 14, 0, 7);
-    h_vtxbs2derr     [i] = new TH1F(TString::Format("h_%i_vtxbs2derr",      i), ";#sigma(d_{BV}) of largest vertex (cm);events/2 #mum", 50, 0, 0.01);
+    h_vtxntracks     [i] = new TH1D(TString::Format("h_%i_vtxntracks",      i), ";# tracks in largest vertex;events/1", 40, 0, 40);
+    h_vtxntracksptgt3[i] = new TH1D(TString::Format("h_%i_vtxntracksptgt3", i), ";# tracks w/ p_{T} > 3 GeV in largest vertex;events/1", 40, 0, 40);
+    h_vtxdrmin       [i] = new TH1D(TString::Format("h_%i_vtxdrmin",        i), ";min #Delta R_{ij} of tracks in largest vertex;events/0.05", 10, 0, 0.5);
+    h_vtxdrmax       [i] = new TH1D(TString::Format("h_%i_vtxdrmax",        i), ";max #Delta R_{ij} of tracks in largest vertex;events/0.5", 14, 0, 7);
+    h_vtxbs2derr     [i] = new TH1D(TString::Format("h_%i_vtxbs2derr",      i), ";#sigma(d_{BV}) of largest vertex (cm);events/2 #mum", 50, 0, 0.01);
   }
 
   numdens nds[num_numdens] = {
@@ -89,7 +89,7 @@ int main(int argc, char** argv) {
   std::map<std::string, double> nums;
 
   //TFile* f_pvzweights = TFile::Open("../pvzweights.root");
-  //TH1F* h_pvzweights = (TH1F*)f_pvzweights->Get("rat");
+  //TH1D* h_pvzweights = (TH1D*)f_pvzweights->Get("rat");
 
   for (int j = 0, je = t->GetEntries(); j < je; ++j) {
     //if (j == 100000) break;
@@ -117,8 +117,6 @@ int main(int argc, char** argv) {
 
     const bool pass_800 = bool(nt.pass_hlt & 0x2);
     const bool pass_900_450_AK450 = bool(nt.pass_hlt & 0x1C);
-    std::string in_fn_str(in_fn);
-    std::string filename = in_fn_str.substr(in_fn_str.find_last_of("/") + 1);
     const bool H_data = nt.run > 281000;
 
     double jet_sume = 0;
@@ -151,7 +149,7 @@ int main(int argc, char** argv) {
     h_weight->Fill(w);
     h_npu->Fill(nt.npu, w);
 
-    auto Fill = [&w](TH1F* h, double v) { h->Fill(v, w); };
+    auto Fill = [&w](TH1D* h, double v) { h->Fill(v, w); };
 
     for (numdens& nd : nds) {
       Fill(nd("movedist2")    .den, movedist2);

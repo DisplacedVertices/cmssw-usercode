@@ -6,7 +6,7 @@
 #include <string>
 #include "JMTucker/MFVNeutralino/interface/MovedTracksNtuple.h"
 
-class TH1F;
+class TH1D;
 class TFile;
 class TTree;
 
@@ -30,8 +30,8 @@ interval clopper_pearson_binom(const double n_on, const double n_tot,
 struct numden {
   numden(const char* name, const char* title, int nbins, double xlo, double xhi);
   // no ownership, the TFile owns the histos
-  TH1F* num;
-  TH1F* den;
+  TH1D* num;
+  TH1D* den;
 };
 
 struct numdens {

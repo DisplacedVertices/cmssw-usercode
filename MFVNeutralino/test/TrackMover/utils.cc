@@ -25,8 +25,8 @@ interval clopper_pearson_binom(const double n_on, const double n_tot, const doub
 }
 
 numden::numden(const char* name, const char* title, int nbins, double xlo, double xhi)
-  : num(new TH1F(TString::Format("%s_num", name), title, nbins, xlo, xhi)),
-    den(new TH1F(TString::Format("%s_den", name), title, nbins, xlo, xhi))
+  : num(new TH1D(TString::Format("%s_num", name), title, nbins, xlo, xhi)),
+    den(new TH1D(TString::Format("%s_den", name), title, nbins, xlo, xhi))
 {}
 
 numdens::numdens(const char* c)

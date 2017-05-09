@@ -23,8 +23,8 @@ int main(int argc, char** argv) {
   TTree* t = fat.t;
   mfv::MovedTracksNtuple& nt = fat.nt;
 
-  TH1F* h_weight = new TH1F("h_weight", ";weight;events/0.01", 200, 0, 2);
-  TH1F* h_npu = new TH1F("h_npu", ";# PU;events/1", 100, 0, 100);
+  TH1D* h_weight = new TH1D("h_weight", ";weight;events/0.01", 200, 0, 2);
+  TH1D* h_npu = new TH1D("h_npu", ";# PU;events/1", 100, 0, 100);
 
   const int num_numdens = 3;
 
@@ -72,7 +72,7 @@ int main(int argc, char** argv) {
     const double w = apply_weight ? nt.weight : 1.;
     h_weight->Fill(w);
     h_npu->Fill(nt.npu, w);
-    auto Fill = [&w](TH1F* h, double v) { h->Fill(v, w); };
+    auto Fill = [&w](TH1D* h, double v) { h->Fill(v, w); };
 
     const size_t n_raw_vtx = nt.p_vtxs_x->size();
 
