@@ -41,23 +41,13 @@ process.p *= process.mfvResolutionsFullSelByDistCutTrksJets
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
-    import JMTucker.Tools.Samples as Samples 
+    import JMTucker.Tools.Samples as Samples
+    samples = Samples.registry.from_argv([Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800, Samples.mfv_neu_tau01000um_M0400, Samples.mfv_neu_tau01000um_M1600])
 
-    samples = Samples.registry.from_argv([Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800])
-
+    dataset = 'ntuplev14'
     for sample in samples:
-        if sample.is_mc:
-            sample.events_per = 250000
-        else:
-            sample.json = 'ana_10pc.json'
-            sample.lumis_per = 200
+        sample.datasets[dataset].files_per = 100
 
-    cs = CRABSubmitter('MFVResolutionsV6p1_76x_nstlays3',
-                       dataset = 'ntuplev6p1_76x_nstlays3',
-                       job_control_from_sample = True,
-                       aaa = True, # stored at FNAL, easy to run on T2_USes
-                       use_ana_dataset = True,
-                       )
-
+    from JMTucker.Tools.CondorSubmitter import CondorSubmitter
+    cs = CondorSubmitter('ResolutionsV14p1', dataset = dataset)
     cs.submit_all(samples)
