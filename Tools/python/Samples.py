@@ -464,6 +464,12 @@ for x in ttbar_samples + ttbar_samples_2015 + qcd_samples + qcd_samples_ext + qc
     if x.name != 'qcdht0700':
         x.add_dataset('pick1vtxv14')
 
+for x in ttbar_samples + qcd_samples + qcd_samples_ext:
+    x.add_dataset('ntuplev14p2')
+    x.add_dataset('ntuplev14p2_3tkseeds')
+    x.add_dataset('ntuplev14p2_4tkseeds')
+    x.add_dataset('ntuplev14p2_5tkseeds')
+
 ########
 # other condor declarations
 ########
