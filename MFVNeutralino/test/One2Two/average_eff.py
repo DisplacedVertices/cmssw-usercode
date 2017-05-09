@@ -63,3 +63,43 @@ for i in [3,4,5]:
     h2.Draw('sames')
     l.Draw()
     ps.save('ntk%i_zoom'%i)
+
+
+for n in ['']:
+    l = ROOT.TLegend(0.50,0.15,0.85,0.30)
+    for i in [3,4,5]:
+        h = f1.Get('maxtk%i%s' % (i,n))
+        h.SetLineColor(colors[i])
+        h.SetLineWidth(3)
+        h.Scale(1./h.GetBinContent(10))
+        h.GetXaxis().SetRangeUser(0,0.1)
+        h.GetYaxis().SetRangeUser(0,1)
+        if i == 3:
+            h.SetTitle('maxtk%s;d_{VV} (cm);efficiency' % n)
+            h.Draw('hist')
+        else:
+            h.Draw('hist sames')
+        l.AddEntry(h, h.GetName())
+    l.SetFillColor(0)
+    l.Draw()
+    ps.save('maxtk%s_zoom' % n)
+
+for n in ['overlay_']:
+    l = ROOT.TLegend(0.50,0.15,0.85,0.30)
+    for i in [3,4,5]:
+        h = f2.Get('%sntk%i' % (n,i))
+        h.SetStats(0)
+        h.SetLineColor(colors[i])
+        h.SetLineWidth(3)
+        h.Scale(1./h.GetBinContent(10))
+        h.GetXaxis().SetRangeUser(0,0.1)
+        h.GetYaxis().SetRangeUser(0,1)
+        if i == 3:
+            h.SetTitle('%sntk;d_{VV} (cm);efficiency' % n)
+            h.Draw()
+        else:
+            h.Draw('sames')
+        l.AddEntry(h, h.GetName())
+    l.SetFillColor(0)
+    l.Draw()
+    ps.save('%sntk_zoom' % n)
