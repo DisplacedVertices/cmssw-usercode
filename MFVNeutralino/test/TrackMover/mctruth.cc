@@ -85,8 +85,8 @@ int main(int argc, char** argv) {
 
     //printf("lspdist2 %f dist3 %f distz %f n_raw_vtx %lu  weight %f\n", lspdist2, lspdist3, lspdistz, n_raw_vtx, w);
 
-    if (lspdist2 < 0 ||
-        lspdist2 < min_lspdist3 || // JMTBAD put back to lspdist3 after fixing
+    if (lspdist3 < 0 ||
+        lspdist3 < min_lspdist3 ||
         lspdistz < 0)
       continue;
 
@@ -128,8 +128,8 @@ int main(int argc, char** argv) {
 
       for (size_t ivtx = 0; ivtx < n_raw_vtx; ++ivtx) {
         const double dist2move = mag(gen_vx - nt.p_vtxs_x->at(ivtx),
-                                     gen_vy - nt.p_vtxs_y->at(ivtx));
-                                     //                                     gen_vz - nt.p_vtxs_z->at(ivtx));  // JMTBAD maybe put back to 3D
+                                     gen_vy - nt.p_vtxs_y->at(ivtx),
+                                     gen_vz - nt.p_vtxs_z->at(ivtx));
         //printf("ivtx %lu dist2move %f\n", ivtx, dist2move);
         if (dist2move > 0.0084)
           continue;
