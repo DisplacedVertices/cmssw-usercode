@@ -4,10 +4,10 @@ import os, sys, argparse
 from fnmatch import fnmatch
 from pprint import pprint
 from JMTucker.Tools.CRAB3ToolsBase import crab_dirs_from_argv
-from JMTucker.Tools.CRAB3ToolsSh import crab_get_njobs_from_log, crab_get_output_dataset_from_log
+from JMTucker.Tools.CRAB3ToolsSh import crab_get_njobs_from_log, crab_get_output_dataset_from_log, crab_get_output_dir
 from JMTucker.Tools.CondorTools import cs_dirs_from_argv, cs_njobs, cs_primaryds, cs_eventswritten
 from JMTucker.Tools.DBS import files_in_dataset, numevents_in_dataset
-from JMTucker.Tools.general import coderep_files
+from JMTucker.Tools.general import coderep_files, popen
 from JMTucker.Tools import Samples, colors
 from JMTucker.Tools.SampleFiles import _enc
 
@@ -22,6 +22,7 @@ parser.add_argument('--pattern',
                     help='Glob-style pattern to filter the files, useful if there are multiple files output per job.')
 parser.add_argument('--partial', action='store_true',
                     help='If set, partial publishing is allowed.')
+parser.add_argument('--no-lpc-shortcut', action='store_false', dest='lpc_shortcut', help='whether to use the lpc shortcut on crab dirs')
 parser.add_argument('--include-condor-nevents', action='store_true',
                     help='If set, parse xmls to get nevents from condor wds.')
 
@@ -52,11 +53,30 @@ for wd in wds:
 
     if is_crab:
         njobs = crab_get_njobs_from_log(wd)
+
         ds = crab_get_output_dataset_from_log(wd)
         if ds is None and not options.partial:
             raise ValueError('no dataset in log for ' + wd)
-        files = files_in_dataset(ds, 3)
+        dbs_files = files_in_dataset(ds, 3)
         nevents = numevents_in_dataset(ds, 3)
+
+        files = []
+        if options.lpc_shortcut:
+            path = '/eos/uscms' + crab_get_output_dir(wd)
+            zero_dirs = [x.strip() for x in popen('eos root://cmseos.fnal.gov ls %s' % path).split('\n') if x.strip()]
+            dbase = path.replace('/eos/uscms', 'root://cmseos.fnal.gov/') + '/'
+            for zd in zero_dirs:
+                d = dbase + zd + '/'
+                files += [d + x.strip() for x in popen('eos root://cmseos.fnal.gov ls %s/%s' % (path, zd)).split() if x.strip() and x.strip().endswith('.root') and (not options.pattern or fnmatch(os.path.basename(x.strip()), options.pattern))]
+
+            if set(files) != set(dbs_files):
+                msg = '%i files from lpc shortcut != %i files from dbs' % (len(files), len(dbs_files))
+                if options.partial:
+                    print colors.yellow(msg)
+                else:
+                    raise ValueError(msg)
+        else:
+            files = dbs_files
     else:
         njobs = cs_njobs(wd)
         ds = '/%s/None/None' % cs_primaryds(wd)
@@ -65,7 +85,7 @@ for wd in wds:
             publish_fn = os.path.join(wd, 'publish_%i.txt' % job)
             if not os.path.isfile(publish_fn):
                 if options.partial:
-                    print 'warning: missing', fn
+                    print colors.yellow('warning: missing', fn)
                 else:
                     raise IOError('no publish file %s' % publish_fn)
             else:
@@ -98,6 +118,8 @@ print colors.bold('new entries:')
 print '_add_ds("%s", {' % options.dataset
 for k in sorted(publish.keys()):
     n,c = publish[k]
+    if type(c) == unicode:
+        c = str(c)
     if type(c) == str:
         if '_fromnum' in c:
             if int(c.replace(')', '').split(',')[1]) != n:
