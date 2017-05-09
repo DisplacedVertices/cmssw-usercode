@@ -329,4 +329,12 @@ D('3t1v_dbv',
   x_title = 'd_{BV} (cm)',
   y_title = 'Vertices/50 #mum',
   x_range = (0, 0.4),
+  y_range = (1, 1e4),
+  )
+
+D('3t1v_dbv_unzoom',
+  histogram_path = 'Ntk3mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist',
+  x_title = 'd_{BV} (cm)',
+  y_title = 'Vertices/50 #mum',
+  y_range = (1, 1e4),
   )
