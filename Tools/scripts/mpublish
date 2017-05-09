@@ -62,12 +62,11 @@ for wd in wds:
 
         files = []
         if options.lpc_shortcut:
-            path = '/eos/uscms' + crab_get_output_dir(wd)
-            zero_dirs = [x.strip() for x in popen('eos root://cmseos.fnal.gov ls %s' % path).split('\n') if x.strip()]
-            dbase = path.replace('/eos/uscms', 'root://cmseos.fnal.gov/') + '/'
+            path = crab_get_output_dir(wd)
+            zero_dirs = [x.strip() for x in popen('eos root://cmseos.fnal.gov ls /eos/uscms%s' % path).split('\n') if x.strip()]
             for zd in zero_dirs:
-                d = dbase + zd + '/'
-                files += [d + x.strip() for x in popen('eos root://cmseos.fnal.gov ls %s/%s' % (path, zd)).split() if x.strip() and x.strip().endswith('.root') and (not options.pattern or fnmatch(os.path.basename(x.strip()), options.pattern))]
+                d = os.path.join(path, zd) + '/'
+                files += [d + x.strip() for x in popen('eos root://cmseos.fnal.gov ls /eos/uscms%s/%s' % (path, zd)).split() if x.strip() and x.strip().endswith('.root') and (not options.pattern or fnmatch(os.path.basename(x.strip()), options.pattern))]
 
             if set(files) != set(dbs_files):
                 msg = '%i files from lpc shortcut != %i files from dbs' % (len(files), len(dbs_files))
