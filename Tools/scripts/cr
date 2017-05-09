@@ -29,6 +29,8 @@ elif 'get' in argv:
     simple_cmd('crab out -d %s')
 elif 'res' in argv:
     simple_cmd('crab resubmit -d %s')
+elif 'respub' in argv:
+    simple_cmd('crab resubmit --publication -d %s')
 elif 'rep' in argv:
     simple_cmd('crab report -d %s')
 elif 'hl' in argv:
