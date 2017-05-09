@@ -1,7 +1,7 @@
 import sys
-from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
+from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-process.source.fileNames = ['/store/user/dquach/mfv_neu_tau01000um_M0800/ntuplev6p1_76x_signal/160329_200918/0000/ntuple_1.root']
+sample_files(process, 'mfv_neu_tau01000um_M0800', 'ntuplev14', -1)
 process.TFileService.fileName = 'resolutions.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
@@ -39,18 +39,6 @@ process.p *= process.mfvResolutionsFullSelByDistCutJets
 process.mfvResolutionsFullSelByDistCutTrksJets = mfvResolutions.clone(which_mom = 2)
 process.p *= process.mfvResolutionsFullSelByDistCutTrksJets
 
-
-
-#if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-#    import JMTucker.Tools.Samples as Samples
-#    from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-#    from JMTucker.Tools.SampleFiles import SampleFiles
-#
-#    cs = CRABSubmitter('MFVResolutionsV18',
-#                       job_control_from_sample = True,
-#                       use_ana_dataset = True,
-#                       )
-#    cs.submit_all([Samples.mfv_neutralino_tau0100um_M0400, Samples.mfv_neutralino_tau1000um_M0400, Samples.mfv_neutralino_tau9900um_M0400])
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
