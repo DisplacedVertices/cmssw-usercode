@@ -18,7 +18,7 @@ PREMIX=$6 # no afteq here because the pythons use the premix= prefix to find it 
 export DUMMYFORHASH=$(afteq $7)
 OUTPUTLEVEL=$(afteq $8)
 TODO=$9  # no afteq here because the pythons need the todo= prefix to find the args
-TODO2=$10
+TODO2=${10}
 
 INDIR=$(pwd)
 OUTDIR=$(pwd)
