@@ -6,6 +6,8 @@ from_lhe = False
 output_level = 'reco'
 output_dataset_tag = 'RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6'
 fixed_salt = ''
+use_this_cmssw = False
+premix = True
 
 if 1:
     meta, taus, masses = 'neu', [100, 300, 1000, 10000, 30000], [300, 400, 600, 800, 1200, 1600]
@@ -46,7 +48,7 @@ import sys, os
 from pprint import pprint
 from time import time
 from JMTucker.Tools.CRAB3Tools import Config, crab_dirs_root, crab_command
-from JMTucker.Tools.general import save_git_status
+from JMTucker.Tools.general import index_startswith, save_git_status
 import JMTucker.Tools.colors as colors
 
 testing = 'testing' in sys.argv
@@ -77,7 +79,7 @@ config.JobType.psetName = 'dummy.py'
 config.JobType.scriptExe = 'nstep.sh'
 config.JobType.sendPythonFolder = True
 
-config.JobType.inputFiles = ['todoify.sh', 'lhe.py', 'gensim.py', 'modify.py', 'rawhlt.py', 'minbias.py', 'minbias.txt.gz', 'minbias_premix.txt.gz', 'reco.py', 'fixfjr.py']
+config.JobType.inputFiles = ['todoify.sh', 'lhe.py', 'gensim.py', 'dynamicconf.py', 'modify.py', 'rawhlt.py', 'minbias.py', 'minbias.txt.gz', 'minbias_premix.txt.gz', 'reco.py', 'fixfjr.py']
 if output_level == 'minitree':
     config.JobType.inputFiles += ['ntuple.py', 'minitree.py']
 
@@ -88,15 +90,23 @@ elif output_level == 'gensim':
 elif output_level == 'minitree':
     config.JobType.outputFiles = ['minitree.root', 'vertex_histos.root']
 
-config.JobType.scriptArgs = [
+config.JobType.scriptArgs = l = [
+    # arg indices are two numbers ahead in the bash because of
+    # 0-indexing here vs 1-indexing there plus crab gives a first
+    # argument that is the job number before all the rest.
     'maxevents=%i' % events_per,
     'salt=' + fixed_salt,
+    'usethiscmssw=%i' % use_this_cmssw,
     'fromlhe=%i' % from_lhe,
+    'premix=%i' % premix,
     'dummyforhash=%i' % dummy_for_hash,  # stupid crab requires a =
     'outputlevel=%s' % output_level,
     'todo=SETME',
     'todo2=placeholder', # yes this gets replaced with todo= below
     ]
+salt_index  = index_startswith(l, 'salt=')
+todo_index  = index_startswith(l, 'todo=')
+todo2_index = index_startswith(l, 'todo2=')
 
 config.Data.splitting = 'EventBased'
 config.Data.unitsPerJob = events_per
@@ -156,12 +166,12 @@ def submit(config, name, todo, todo2=None):
     config.General.requestName = name
     config.Data.outputPrimaryDataset = name
     if not fixed_salt:
-        config.JobType.scriptArgs[1] = 'salt=' + name + todo
-    config.JobType.scriptArgs[5] = todo
+        config.JobType.scriptArgs[salt_index] = 'salt=' + name + todo
+    config.JobType.scriptArgs[todo_index] = todo
     if todo2 is not None:
-        config.JobType.scriptArgs[6] = todo2
+        config.JobType.scriptArgs[todo2_index] = todo2
         if not fixed_salt:
-            config.JobType.scriptArgs[1] += todo2
+            config.JobType.scriptArgs[salt_index] += todo2
 
     if not testing:
         output = crab_command('submit', config=config)
