@@ -5,7 +5,11 @@
 import os, sys, FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
 
-premix = 'nopremix' not in sys.argv
+premix = True
+
+for arg in sys.argv:
+    if arg.startswith('premix='):
+        premix = arg.replace('premix=','') != '0'
 
 process = cms.Process('RECO', eras.Run2_2016)
 
@@ -43,7 +47,8 @@ process.AODSIMoutput = cms.OutputModule("PoolOutputModule",
                                         )
 
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '80X_mcRun2_asymptotic_2016_TrancheIV_v6', '')
+from dynamicconf import globaltag
+process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
 
 process.raw2digi_step = cms.Path(process.RawToDigi)
 if not premix:

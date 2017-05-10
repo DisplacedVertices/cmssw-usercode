@@ -7,7 +7,7 @@ from Configuration.StandardSequences.Eras import eras
 
 randomize = 'norandomize' not in sys.argv
 salt = ''
-premix = 'nopremix' not in sys.argv
+premix = True
 jobnum = 1
 
 for arg in sys.argv:
@@ -15,6 +15,8 @@ for arg in sys.argv:
         salt = arg.replace('salt=','')
     elif arg.startswith('jobnum='):
         jobnum = int(arg.replace('jobnum=',''))
+    elif arg.startswith('premix='):
+        premix = arg.replace('premix=','') != '0'
 
 process = cms.Process('HLT', eras.Run2_2016)
 
@@ -64,7 +66,8 @@ else:
     process.mix.input.fileNames = minbias.files()
 
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '80X_mcRun2_asymptotic_2016_TrancheIV_v6', '')
+from dynamicconf import globaltag
+process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
 
 process.digitisation_step = cms.Path(process.pdigi)
 if premix:
