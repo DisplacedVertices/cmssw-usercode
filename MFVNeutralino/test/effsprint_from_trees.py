@@ -18,7 +18,14 @@ elif year == 2016:
     int_lumi = ac.int_lumi_2016 * ac.scale_factor_2016
 
 if not fns:
-    file_path = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV14'
+    file_path = None
+    for x in sys.argv:
+        if os.path.isdir(x) and os.path.isfile(os.path.join(x, 'ttbar.root')):
+            file_path = x
+    if file_path is None:
+        file_path = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV14'
+    print 'using', file_path
+
     if year == 2015:
         background_samples = Samples.qcd_samples_sum_2015 + Samples.ttbar_samples_2015
         signal_samples = [] #[Samples.mfv_neu_tau00100um_M0800_2015, Samples.mfv_neu_tau00300um_M0800_2015, Samples.mfv_neu_tau01000um_M0800_2015, Samples.mfv_neu_tau10000um_M0800_2015]
