@@ -103,6 +103,7 @@ void construct_dvvc(std::string year, int ntracks, bool correct_bquarks, int bqu
   }
 
   if (vary_eff) {
+    //maxtk_merge efficiency
     if (year == "2015") {
       eff_file = "eff_2015_v14.root";
     } else if (year == "2016") {
@@ -120,6 +121,42 @@ void construct_dvvc(std::string year, int ntracks, bool correct_bquarks, int bqu
     } else if (ntracks == 7) {
       eff_hist = "maxtk3_merge";
     }
+
+/*
+    //overlay efficiency
+    eff_file = "~tucker/public/mfv/overlay_eff_v14.root";
+    if (ntracks == 3) {
+      eff_hist = "overlay_ntk3";
+    } else if (ntracks == 4) {
+      eff_hist = "overlay_ntk4";
+    } else if (ntracks == 5) {
+      eff_hist = "overlay_ntk5";
+    } else if (ntracks == 7) {
+      eff_hist = "overlay_ntk3";
+    }
+*/
+
+/*
+    //ntkseeds efficiency
+    if (ntracks == 3) {
+      eff_file = "eff_3tkseeds_2016_v14.root";
+      eff_hist = "maxtk3";
+    } else if (ntracks == 4) {
+      eff_file = "eff_4tkseeds_2016_v14.root";
+      eff_hist = "maxtk4";
+    } else if (ntracks == 5) {
+      eff_file = "eff_5tkseeds_2016_v14.root";
+      eff_hist = "maxtk5";
+    } else if (ntracks == 7) {
+      eff_file = "eff_3tkseeds_2016_v14.root";
+      eff_hist = "maxtk3";
+    }
+*/
+
+/*
+    //uniform efficiency
+    clearing_from_eff = false;
+*/
   }
 
   printf("\tdphi_pdf_c = %.2f, dphi_pdf_e = %.2f, dphi_pdf_a = %.2f, eff_file = %s, eff_hist = %s\n", dphi_pdf_c, dphi_pdf_e, dphi_pdf_a, eff_file, eff_hist);
