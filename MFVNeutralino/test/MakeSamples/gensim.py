@@ -1,4 +1,4 @@
-import sys, FWCore.ParameterSet.Config as cms
+import sys, FWCore.ParameterSet.Config as cms, dynamicconf
 
 genonly = 'genonly' in sys.argv
 debug = 'debug' in sys.argv
@@ -10,8 +10,6 @@ jobnum = 1
 
 for arg in sys.argv:
     if arg == 'fromlhe=1':
-        print 'fromlhe: wiping out todos'
-        todos = []
         fromlhe = True
     elif arg.startswith('salt='):
         salt = arg.replace('salt=','')
@@ -22,7 +20,11 @@ for arg in sys.argv:
 
 ################################################################################
 
-process = cms.Process('GENSIM')
+if dynamicconf.cmssw_version[0] == 8: 
+    from Configuration.StandardSequences.Eras import eras
+    process = cms.Process('GENSIM', eras.Run2_25ns)
+else:
+    process = cms.Process('GENSIM')
 
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
@@ -55,7 +57,7 @@ else:
 process.genstepfilter.triggerConditions = cms.vstring('generation_step')
 
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'MCRUN2_71_V1::All', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, dynamicconf.globaltag, '')
 
 process.generator = cms.EDFilter('Pythia8HadronizerFilter' if fromlhe else 'Pythia8GeneratorFilter',
     comEnergy = cms.double(13000.0),
@@ -145,8 +147,9 @@ process.ProductionFilterSequence = cms.Sequence(process.generator)
 for path in process.paths:
     getattr(process,path)._seq = process.ProductionFilterSequence * getattr(process,path)._seq
 
-from SLHCUpgradeSimulations.Configuration.postLS1Customs import customisePostLS1
-process = customisePostLS1(process)
+if dynamicconf.cmssw_version[0] == 7: 
+    from SLHCUpgradeSimulations.Configuration.postLS1Customs import customisePostLS1
+    process = customisePostLS1(process)
 
 if randomize:
     from modify import deterministic_seeds
