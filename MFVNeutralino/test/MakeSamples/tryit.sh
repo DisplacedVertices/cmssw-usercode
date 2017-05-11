@@ -13,6 +13,17 @@ scram project CMSSW $input_version
 cd $input_version
 cmsMakeTarball.py input.tgz
 tar xf input.tgz
+cat > $tmpdir/steering.sh <<EOF
+MAXEVENTS=2
+SALT=mfv_neu_tau10000um_M0800mfv_neutralino,10.0,800
+USETHISCMSSW=1
+FROMLHE=0
+PREMIX=0
+export DUMMYFORHASH=1494462430446983
+OUTPUTLEVEL=reco
+TODO=todo=mfv_neutralino,10.0,800
+TODO2=SETME
+EOF
 echo in new shell, issue e.g.
-echo "cd $tmpdir/$input_version/src ; source /cvmfs/cms.cern.ch/cmsset_default.sh ; eval \$(scramv1 runtime -sh) ; cd ../.. ; ./nstep.sh 1 maxevents=2 salt=mfv_neu_tau10000um_M0800todo=mfv_neutralino,10.0,800 usethiscmssw=1 fromlhe=0 premix=0 dummyforhash=1494430883486142 outputlevel=reco todo=mfv_neutralino,10.0,800 todo2=placeholder"
+echo "cd $tmpdir/$input_version/src ; source /cvmfs/cms.cern.ch/cmsset_default.sh ; eval \$(scramv1 runtime -sh) ; cd ../.. ; ./nstep.sh 1"
 cd $owd
