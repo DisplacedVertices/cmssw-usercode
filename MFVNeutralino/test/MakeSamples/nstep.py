@@ -41,7 +41,7 @@ ex = ''
 
 ################################################################################
 
-if output_level not in ('reco', 'minitree', 'gensim'):
+if output_level not in ('reco', 'ntuple', 'minitree', 'gensim'):
     raise ValueError('output_level %s not supported' % output_level)
 
 import sys, os
@@ -64,7 +64,7 @@ config = Config()
 
 to_rm = []
 
-if output_level == 'minitree':
+if output_level in ('minitree', 'ntuple'):
     for x in ['ntuple.py', 'minitree.py']:
         to_rm.append(x)
         os.system('cmsDumpPython.py ../%s > %s' % (x,x))
@@ -82,13 +82,15 @@ config.JobType.sendPythonFolder = True
 steering_fn = 'steering.sh'
 
 config.JobType.inputFiles = ['todoify.sh', steering_fn, 'lhe.py', 'gensim.py', 'dynamicconf.py', 'modify.py', 'rawhlt.py', 'minbias.py', 'minbias.txt.gz', 'minbias_premix.txt.gz', 'reco.py', 'fixfjr.py']
-if output_level == 'minitree':
+if output_level in ('minitree', 'ntuple'):
     config.JobType.inputFiles += ['ntuple.py', 'minitree.py']
 
 if output_level == 'reco':
     config.JobType.outputFiles = ['reco.root']
 elif output_level == 'gensim':
     config.JobType.outputFiles = ['gensim.root']
+elif output_level == 'ntuple':
+    config.JobType.outputFiles = ['ntuple.root', 'vertex_histos.root']
 elif output_level == 'minitree':
     config.JobType.outputFiles = ['minitree.root', 'vertex_histos.root']
 
@@ -112,7 +114,7 @@ todo2_index = index_startswith(steering, 'TODO2=')
 config.Data.splitting = 'EventBased'
 config.Data.unitsPerJob = events_per
 config.Data.totalUnits = nevents
-config.Data.publication = output_level != 'minitree'
+config.Data.publication = output_level not in ('minitree', 'ntuple')
 config.Data.outputPrimaryDataset = 'SETME'
 config.Data.outputDatasetTag = output_dataset_tag
 
