@@ -62,27 +62,28 @@ int main(int argc, char** argv) {
     numdens("all")
   };
 
+  enum { k_movedist2, k_movedist3, k_npv, k_pvx, k_pvy, k_pvz, k_pvrho, k_pvntracks, k_pvsumpt2, k_ht, k_met, k_nlep, k_ntracks, k_nseltracks, k_npreseljets, k_npreselbjets, k_jetsume, k_jetdrmax, k_jetdravg, k_jetsumntracks };
   for (numdens& nd : nds) {
-    nd.book("movedist2", ";movement 2-dist;events/0.01 cm", 200, 0, 2);
-    nd.book("movedist3", ";movement 3-dist;events/0.01 cm", 200, 0, 2);
-    nd.book("npv", ";# PV;events/1", 100, 0, 100);
-    nd.book("pvx", ";PV x (cm);events/1.5 #mum", 200, -0.015, 0.015);
-    nd.book("pvy", ";PV y (cm);events/1.5 #mum", 200, -0.015, 0.015);
-    nd.book("pvz", ";PV z (cm);events/0.24 cm", 200, -24, 24);
-    nd.book("pvrho", ";PV #rho (cm);events/1 #mum", 200, 0, 0.02);
-    nd.book("pvntracks", ";PV # tracks;events/2", 200, 0, 400);
-    nd.book("pvsumpt2", ";PV #Sigma p_{T}^{2} (GeV^{2});events/200 GeV^{2}", 200, 0, 40000);
-    nd.book("ht", ";#Sigma H_{T} (GeV);events/50 GeV", 50, 0, 2500);
-    nd.book("met", ";MET (GeV);events/20 GeV", 25, 0, 500);
-    nd.book("nlep", ";# leptons;events", 5, 0, 5);
-    nd.book("ntracks", ";# tracks;events/10", 200, 0, 2000);
-    nd.book("nseltracks", ";# selected tracks;events/2", 200, 0, 400);
-    nd.book("npreseljets", ";# preselected jets;events/1", 20, 0, 20);
-    nd.book("npreselbjets", ";# preselected b jets;events/1", 20, 0, 20);
-    nd.book("jetsume", ";#Sigma jet energy (GeV);events/5 GeV", 200, 0, 1000);
-    nd.book("jetdrmax", ";max jet #Delta R;events/0.1", 70, 0, 7);
-    nd.book("jetdravg", ";avg jet #Delta R;events/0.1", 70, 0, 7);
-    nd.book("jetsumntracks", ";#Sigma jet # tracks;events/5", 200, 0, 1000);
+    nd.book(k_movedist2, "movedist2", ";movement 2-dist;events/0.01 cm", 200, 0, 2);
+    nd.book(k_movedist3, "movedist3", ";movement 3-dist;events/0.01 cm", 200, 0, 2);
+    nd.book(k_npv, "npv", ";# PV;events/1", 100, 0, 100);
+    nd.book(k_pvx, "pvx", ";PV x (cm);events/1.5 #mum", 200, -0.015, 0.015);
+    nd.book(k_pvy, "pvy", ";PV y (cm);events/1.5 #mum", 200, -0.015, 0.015);
+    nd.book(k_pvz, "pvz", ";PV z (cm);events/0.24 cm", 200, -24, 24);
+    nd.book(k_pvrho, "pvrho", ";PV #rho (cm);events/1 #mum", 200, 0, 0.02);
+    nd.book(k_pvntracks, "pvntracks", ";PV # tracks;events/2", 200, 0, 400);
+    nd.book(k_pvsumpt2, "pvsumpt2", ";PV #Sigma p_{T}^{2} (GeV^{2});events/200 GeV^{2}", 200, 0, 40000);
+    nd.book(k_ht, "ht", ";#Sigma H_{T} (GeV);events/50 GeV", 50, 0, 2500);
+    nd.book(k_met, "met", ";MET (GeV);events/20 GeV", 25, 0, 500);
+    nd.book(k_nlep, "nlep", ";# leptons;events", 5, 0, 5);
+    nd.book(k_ntracks, "ntracks", ";# tracks;events/10", 200, 0, 2000);
+    nd.book(k_nseltracks, "nseltracks", ";# selected tracks;events/2", 200, 0, 400);
+    nd.book(k_npreseljets, "npreseljets", ";# preselected jets;events/1", 20, 0, 20);
+    nd.book(k_npreselbjets, "npreselbjets", ";# preselected b jets;events/1", 20, 0, 20);
+    nd.book(k_jetsume, "jetsume", ";#Sigma jet energy (GeV);events/5 GeV", 200, 0, 1000);
+    nd.book(k_jetdrmax, "jetdrmax", ";max jet #Delta R;events/0.1", 70, 0, 7);
+    nd.book(k_jetdravg, "jetdravg", ";avg jet #Delta R;events/0.1", 70, 0, 7);
+    nd.book(k_jetsumntracks, "jetsumntracks", ";#Sigma jet # tracks;events/5", 200, 0, 1000);
   }
 
   double den = 0;
@@ -152,26 +153,26 @@ int main(int argc, char** argv) {
     auto Fill = [&w](TH1D* h, double v) { h->Fill(v, w); };
 
     for (numdens& nd : nds) {
-      Fill(nd("movedist2")    .den, movedist2);
-      Fill(nd("movedist3")    .den, movedist3);
-      Fill(nd("npv")          .den, nt.npv);
-      Fill(nd("pvx")          .den, nt.pvx);
-      Fill(nd("pvy")          .den, nt.pvy);
-      Fill(nd("pvz")          .den, nt.pvz);
-      Fill(nd("pvrho")        .den, mag(nt.pvx, nt.pvy));
-      Fill(nd("pvntracks")    .den, nt.pvntracks);
-      Fill(nd("pvsumpt2")     .den, nt.pvsumpt2);
-      Fill(nd("ht")           .den, nt.jetht);
-      Fill(nd("met")          .den, nt.met);
-      Fill(nd("nlep")         .den, nt.nlep);
-      Fill(nd("ntracks")      .den, nt.ntracks);
-      Fill(nd("nseltracks")   .den, nt.nseltracks);
-      Fill(nd("npreseljets")  .den, nt.npreseljets);
-      Fill(nd("npreselbjets") .den, nt.npreselbjets);
-      Fill(nd("jetsume")      .den, jet_sume);
-      Fill(nd("jetdrmax")     .den, jet_drmax);
-      Fill(nd("jetdravg")     .den, jet_dravg);
-      Fill(nd("jetsumntracks").den, jet_sumntracks);
+      Fill(nd(k_movedist2)    .den, movedist2);
+      Fill(nd(k_movedist3)    .den, movedist3);
+      Fill(nd(k_npv)          .den, nt.npv);
+      Fill(nd(k_pvx)          .den, nt.pvx);
+      Fill(nd(k_pvy)          .den, nt.pvy);
+      Fill(nd(k_pvz)          .den, nt.pvz);
+      Fill(nd(k_pvrho)        .den, mag(nt.pvx, nt.pvy));
+      Fill(nd(k_pvntracks)    .den, nt.pvntracks);
+      Fill(nd(k_pvsumpt2)     .den, nt.pvsumpt2);
+      Fill(nd(k_ht)           .den, nt.jetht);
+      Fill(nd(k_met)          .den, nt.met);
+      Fill(nd(k_nlep)         .den, nt.nlep);
+      Fill(nd(k_ntracks)      .den, nt.ntracks);
+      Fill(nd(k_nseltracks)   .den, nt.nseltracks);
+      Fill(nd(k_npreseljets)  .den, nt.npreseljets);
+      Fill(nd(k_npreselbjets) .den, nt.npreselbjets);
+      Fill(nd(k_jetsume)      .den, jet_sume);
+      Fill(nd(k_jetdrmax)     .den, jet_drmax);
+      Fill(nd(k_jetdravg)     .den, jet_dravg);
+      Fill(nd(k_jetsumntracks).den, jet_sumntracks);
     }
 
     den += w;
@@ -222,26 +223,26 @@ int main(int argc, char** argv) {
     for (int i = 0; i < num_numdens; ++i) {
       if (passes[i]) {
         numdens& nd = nds[i];
-        Fill(nd("movedist2")    .num, movedist2);
-        Fill(nd("movedist3")    .num, movedist3);
-        Fill(nd("npv")          .num, nt.npv);
-        Fill(nd("pvx")          .num, nt.pvx);
-        Fill(nd("pvy")          .num, nt.pvy);
-        Fill(nd("pvz")          .num, nt.pvz);
-        Fill(nd("pvrho")        .num, mag(nt.pvx, nt.pvy));
-        Fill(nd("pvntracks")    .num, nt.pvntracks);
-        Fill(nd("pvsumpt2")     .num, nt.pvsumpt2);
-        Fill(nd("ht")           .num, nt.jetht);
-        Fill(nd("met")          .num, nt.met);
-        Fill(nd("nlep")         .num, nt.nlep);
-        Fill(nd("ntracks")      .num, nt.ntracks);
-        Fill(nd("nseltracks")   .num, nt.nseltracks);
-        Fill(nd("npreseljets")  .num, nt.npreseljets);
-        Fill(nd("npreselbjets") .num, nt.npreselbjets);
-        Fill(nd("jetsume")      .num, jet_sume);
-        Fill(nd("jetdrmax")     .num, jet_drmax);
-        Fill(nd("jetdravg")     .num, jet_dravg);
-        Fill(nd("jetsumntracks").num, jet_sumntracks);
+        Fill(nd(k_movedist2)    .num, movedist2);
+        Fill(nd(k_movedist3)    .num, movedist3);
+        Fill(nd(k_npv)          .num, nt.npv);
+        Fill(nd(k_pvx)          .num, nt.pvx);
+        Fill(nd(k_pvy)          .num, nt.pvy);
+        Fill(nd(k_pvz)          .num, nt.pvz);
+        Fill(nd(k_pvrho)        .num, mag(nt.pvx, nt.pvy));
+        Fill(nd(k_pvntracks)    .num, nt.pvntracks);
+        Fill(nd(k_pvsumpt2)     .num, nt.pvsumpt2);
+        Fill(nd(k_ht)           .num, nt.jetht);
+        Fill(nd(k_met)          .num, nt.met);
+        Fill(nd(k_nlep)         .num, nt.nlep);
+        Fill(nd(k_ntracks)      .num, nt.ntracks);
+        Fill(nd(k_nseltracks)   .num, nt.nseltracks);
+        Fill(nd(k_npreseljets)  .num, nt.npreseljets);
+        Fill(nd(k_npreselbjets) .num, nt.npreselbjets);
+        Fill(nd(k_jetsume)      .num, jet_sume);
+        Fill(nd(k_jetdrmax)     .num, jet_drmax);
+        Fill(nd(k_jetdravg)     .num, jet_dravg);
+        Fill(nd(k_jetsumntracks).num, jet_sumntracks);
       }
     }
   }

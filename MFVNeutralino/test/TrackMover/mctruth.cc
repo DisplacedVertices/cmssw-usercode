@@ -34,18 +34,19 @@ int main(int argc, char** argv) {
     numdens("all")
   };
 
+  enum { k_lspdist2, k_lspdist3, k_lspdistz, k_movedist2, k_movedist3, k_npv, k_pvz, k_pvrho, k_pvntracks, k_pvsumpt2, k_ht };
   for (numdens& nd : nds) {
-    nd.book("lspdist2", ";2-dist between gen verts;events/0.01 cm", 200, 0, 2);
-    nd.book("lspdist3", ";3-dist between gen verts;events/0.01 cm", 200, 0, 2);
-    nd.book("lspdistz", ";z-dist between gen verts;events/0.01 cm", 200, 0, 2);
-    nd.book("movedist2", ";movement 2-dist;events/0.01 cm", 200, 0, 2);
-    nd.book("movedist3", ";movement 3-dist;events/0.01 cm", 200, 0, 2);
-    nd.book("npv", ";# PV;events/1", 100, 0, 100);
-    nd.book("pvz", ";PV z (cm);events/0.24 cm", 200, -24, 24);
-    nd.book("pvrho", ";PV #rho (cm);events/1 #mum", 200, 0, 0.02);
-    nd.book("pvntracks", ";PV # tracks;events/2", 200, 0, 400);
-    nd.book("pvsumpt2", ";PV #Sigma p_{T}^{2} (GeV^{2});events/200 GeV^{2}", 200, 0, 40000);
-    nd.book("ht", ";#Sigma H_{T} (GeV);events/50 GeV", 50, 0, 2500);
+    nd.book(k_lspdist2, "lspdist2", ";2-dist between gen verts;events/0.01 cm", 200, 0, 2);
+    nd.book(k_lspdist3, "lspdist3", ";3-dist between gen verts;events/0.01 cm", 200, 0, 2);
+    nd.book(k_lspdistz, "lspdistz", ";z-dist between gen verts;events/0.01 cm", 200, 0, 2);
+    nd.book(k_movedist2, "movedist2", ";movement 2-dist;events/0.01 cm", 200, 0, 2);
+    nd.book(k_movedist3, "movedist3", ";movement 3-dist;events/0.01 cm", 200, 0, 2);
+    nd.book(k_npv, "npv", ";# PV;events/1", 100, 0, 100);
+    nd.book(k_pvz, "pvz", ";PV z (cm);events/0.24 cm", 200, -24, 24);
+    nd.book(k_pvrho, "pvrho", ";PV #rho (cm);events/1 #mum", 200, 0, 0.02);
+    nd.book(k_pvntracks, "pvntracks", ";PV # tracks;events/2", 200, 0, 400);
+    nd.book(k_pvsumpt2, "pvsumpt2", ";PV #Sigma p_{T}^{2} (GeV^{2});events/200 GeV^{2}", 200, 0, 40000);
+    nd.book(k_ht, "ht", ";#Sigma H_{T} (GeV);events/50 GeV", 50, 0, 2500);
   }
 
   double den = 0;
@@ -104,17 +105,17 @@ int main(int argc, char** argv) {
         continue;
 
       for (numdens& nd : nds) {
-        Fill(nd("lspdist2")     .den, lspdist2);
-        Fill(nd("lspdist3")     .den, lspdist3);
-        Fill(nd("lspdistz")     .den, lspdistz);
-        Fill(nd("movedist2")    .den, movedist2);
-        Fill(nd("movedist3")    .den, movedist3);
-        Fill(nd("npv")          .den, nt.npv);
-        Fill(nd("pvz")          .den, nt.pvz);
-        Fill(nd("pvrho")        .den, mag(nt.pvx, nt.pvy));
-        Fill(nd("pvntracks")    .den, nt.pvntracks);
-        Fill(nd("pvsumpt2")     .den, nt.pvsumpt2);
-        Fill(nd("ht")        .den, nt.jetht);
+        Fill(nd(k_lspdist2)     .den, lspdist2);
+        Fill(nd(k_lspdist3)     .den, lspdist3);
+        Fill(nd(k_lspdistz)     .den, lspdistz);
+        Fill(nd(k_movedist2)    .den, movedist2);
+        Fill(nd(k_movedist3)    .den, movedist3);
+        Fill(nd(k_npv)          .den, nt.npv);
+        Fill(nd(k_pvz)          .den, nt.pvz);
+        Fill(nd(k_pvrho)        .den, mag(nt.pvx, nt.pvy));
+        Fill(nd(k_pvntracks)    .den, nt.pvntracks);
+        Fill(nd(k_pvsumpt2)     .den, nt.pvsumpt2);
+        Fill(nd(k_ht)        .den, nt.jetht);
       }
 
       den += w;
@@ -168,17 +169,17 @@ int main(int argc, char** argv) {
       for (int i = 0; i < num_numdens; ++i) {
         if (passes[i]) {
           numdens& nd = nds[i];
-          Fill(nd("lspdist2")     .num, lspdist2);
-          Fill(nd("lspdist3")     .num, lspdist3);
-          Fill(nd("lspdistz")     .num, lspdistz);
-          Fill(nd("movedist2")    .num, movedist2);
-          Fill(nd("movedist3")    .num, movedist3);
-          Fill(nd("npv")          .num, nt.npv);
-          Fill(nd("pvz")          .num, nt.pvz);
-          Fill(nd("pvrho")        .num, mag(nt.pvx, nt.pvy));
-          Fill(nd("pvntracks")    .num, nt.pvntracks);
-          Fill(nd("pvsumpt2")     .num, nt.pvsumpt2);
-          Fill(nd("ht")        .num, nt.jetht);
+          Fill(nd(k_lspdist2)     .num, lspdist2);
+          Fill(nd(k_lspdist3)     .num, lspdist3);
+          Fill(nd(k_lspdistz)     .num, lspdistz);
+          Fill(nd(k_movedist2)    .num, movedist2);
+          Fill(nd(k_movedist3)    .num, movedist3);
+          Fill(nd(k_npv)          .num, nt.npv);
+          Fill(nd(k_pvz)          .num, nt.pvz);
+          Fill(nd(k_pvrho)        .num, mag(nt.pvx, nt.pvy));
+          Fill(nd(k_pvntracks)    .num, nt.pvntracks);
+          Fill(nd(k_pvsumpt2)     .num, nt.pvsumpt2);
+          Fill(nd(k_ht)        .num, nt.jetht);
         }
       }
     }

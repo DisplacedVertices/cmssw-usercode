@@ -28,6 +28,7 @@ interval clopper_pearson_binom(const double n_on, const double n_tot,
                                const double alpha=1-0.6827, const bool equal_tailed=true);
 
 struct numden {
+  numden() : num(0), den(0) {}
   numden(const char* name, const char* title, int nbins, double xlo, double xhi);
   // no ownership, the TFile owns the histos
   TH1D* num;
@@ -36,11 +37,11 @@ struct numden {
 
 struct numdens {
   numdens(const char* c);
-  void book(const char* name, const char* title, int nbins, double xlo, double xhi);
-  numden& operator()(const std::string& w);
+  void book(int key, const char* name, const char* title, int nbins, double xlo, double xhi);
+  numden& operator()(int);
 
   std::string common;
-  std::map<std::string, numden> m;
+  std::map<int, numden> m;
 };
 
 void root_setup();

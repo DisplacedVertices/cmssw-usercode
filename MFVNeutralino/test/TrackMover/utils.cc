@@ -33,14 +33,12 @@ numdens::numdens(const char* c)
   : common(c + std::string("_"))
 {}
 
-void numdens::book(const char* name, const char* title, int nbins, double xlo, double xhi) {
-  m.insert(std::make_pair(std::string(name), numden((common + name).c_str(), title, nbins, xlo, xhi)));
+void numdens::book(int key, const char* name, const char* title, int nbins, double xlo, double xhi) {
+  m.insert(std::make_pair(key, numden((common + name).c_str(), title, nbins, xlo, xhi)));
 }
 
-numden& numdens::operator()(const std::string& w) {
-  auto it = m.find(w);
-  //  assert(it != m.end());
-  return it->second;
+numden& numdens::operator()(int k) {
+  return m[k];
 }
 
 void root_setup() {
