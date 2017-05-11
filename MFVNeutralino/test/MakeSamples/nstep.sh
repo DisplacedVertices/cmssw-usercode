@@ -7,8 +7,6 @@ for fn in lhe.py gensim.py rawhlt.py reco.py ntuple.py minitree.py; do
     fi
 done
 
-function afteq { echo $1 | cut -d = -f 2; } # crab scriptArgs requires a =
-
 JOBNUM=$1
 
 source steering.sh
@@ -40,10 +38,14 @@ function scramproj {
     cd ../..
 }
 
-function exitbanner {
+function fixfjr {
     if [[ -e tempfjr.xml ]]; then
         python fixfjr.py
     fi
+}
+
+function exitbanner {
+    fixfjr
 
     if [[ $1 -ne 0 ]]; then
       echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -139,35 +141,38 @@ echo END RECO at $(date)
 
 ################################################################################
 
-if [[ $OUTPUTLEVEL == "minitree" ]]; then
-    echo START NTUPLE+MINITREE at $(date)
+if [[ $OUTPUTLEVEL == "ntuple" || $OUTPUTLEVEL == "minitree" ]]; then
+    echo START NTUPLE\|MINITREE at $(date)
 
-    echo "process.source.fileNames = ['file:reco.root']" >> ntuple.py
-    echo "process.maxEvents.input = -1" >> ntuple.py
-    echo cmsRun ntuple.py
-    cmsRun ntuple.py ${TODO2} 2>&1
+    function doit {
+        echo "process.source.fileNames = ['file:$2']" >> $1
+        echo "process.maxEvents.input = -1" >> $1
+        cmd="cmsRun -j tempfjr.xml $1 ${TODO2}"
+        echo $cmd at $(date) ; eval $cmd 2>&1
+        exitcode=$?
+        fixfjr
+        return $exitcode
+    }
 
-    EXITCODE=${PIPESTATUS[0]}
-    if [ $EXITCODE -eq 0 ]; then
+    doit ntuple.py reco.root ; exitcode=$?
+
+    if [[ $exitcode -eq 0 ]]; then
         echo NTUPLE nevents $(edmEventSize -v ntuple.root | grep Events)
 
-        echo "process.source.fileNames = ['file:ntuple.root']" >> minitree.py
-        echo "process.maxEvents.input = -1" >> minitree.py
-        echo cmsRun minitree.py
-        cmsRun -j tempfjr.xml minitree.py ${TODO2} 2>&1
-        EXITCODE=${PIPESTATUS[0]}
-        python fixfjr.py
-        if [ $EXITCODE -eq 0 ]; then
-            echo MINITREE nevents $(python -c "import sys; sys.argv.append('-b'); import ROOT; f=ROOT.TFile('minitree.root'); print f.Get('tre33/t').GetEntries(), f.Get('tre44/t').GetEntries(), f.Get('mfvMiniTree/t').GetEntries()")
+        if [[ $OUTPUTLEVEL == "minitree" ]]; then
+            doit minitree.py ntuple.root ; exitcode=$?
+            if [[ $exitcode -eq 0 ]]; then
+                echo MINITREE nevents $(python -c "import sys; sys.argv.append('-b'); import ROOT; f=ROOT.TFile('minitree.root'); print f.Get('mfvMiniTreeNtk3/t').GetEntries(), f.Get('mfvMiniTreeNtk4/t').GetEntries(), f.Get('mfvMiniTree/t').GetEntries()")
+            fi
         fi
     fi
 
-    if [ $EXITCODE -ne 0 ]; then
+    if [[ $exitcode -ne 0 ]]; then
       echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-      echo @@@@ cmsRun exited NTUPLE+MINITREE step with error code $EXITCODE
+      echo @@@@ cmsRun exited NTUPLE\|MINITREE step with error code $exitcode at $(date)
       echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-      exit $EXITCODE
+      exit $exitcode
     fi
 
-    echo END NTUPLE+MINITREE at $(date)
+    echo END NTUPLE\|MINITREE at $(date)
 fi
