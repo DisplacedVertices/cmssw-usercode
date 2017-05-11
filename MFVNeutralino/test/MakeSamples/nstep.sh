@@ -64,7 +64,7 @@ function gensim {
 }
 
 function rawhlt {
-    cmd="cmsRun rawhlt.py salt=${SALT} jobnum=${JOBNUM} premix=${PREMIX} ${TODO2}"
+    cmd="cmsRun -j tempfjr.xml rawhlt.py salt=${SALT} jobnum=${JOBNUM} premix=${PREMIX} ${TODO2}"
     echo $cmd at $(date) ; eval $cmd 2>&1
 }
 
