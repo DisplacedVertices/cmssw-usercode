@@ -1,4 +1,5 @@
 from JMTucker.Tools.ROOTTools import *
+ROOT.TH1.AddDirectory(0)
 
 year = 2016
 
@@ -48,6 +49,7 @@ for i in [3,4,5]:
     h1.Draw()
 
     h2 = f2.Get('overlay_ntk%i'%i)
+    h2.SetStats(0)
     h2.SetLineColor(ROOT.kBlue)
     h2.SetLineWidth(3)
     h2.Draw('sames')
@@ -63,6 +65,31 @@ for i in [3,4,5]:
     h2.Draw('sames')
     l.Draw()
     ps.save('ntk%i_zoom'%i)
+
+for i in [3,4,5]:
+    h1 = ROOT.TFile('eff_%itkseeds_%s_v14.root' % (i,year)).Get('maxtk%i'%i)
+    h1.SetTitle('%i-track;d_{VV} (cm);Efficiency'%i)
+    h1.SetLineColor(ROOT.kRed)
+    h1.SetLineWidth(3)
+    h1.Draw()
+
+    h2 = f2.Get('overlay_ntk%i'%i)
+    h2.SetStats(0)
+    h2.SetLineColor(ROOT.kBlue)
+    h2.SetLineWidth(3)
+    h2.Draw('sames')
+
+    l = ROOT.TLegend(0.50,0.15,0.85,0.30)
+    l.AddEntry(h1, 'ntkseeds method')
+    l.AddEntry(h2, 'overlay method')
+    l.Draw()
+    ps.save('ntkseeds%i'%i)
+
+    h1.GetXaxis().SetRangeUser(0,0.4)
+    h1.Draw('hist')
+    h2.Draw('sames')
+    l.Draw()
+    ps.save('ntkseeds%i_zoom'%i)
 
 
 for n in ['']:
