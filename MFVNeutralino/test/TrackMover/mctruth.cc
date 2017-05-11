@@ -52,15 +52,9 @@ int main(int argc, char** argv) {
   double den = 0;
   std::map<std::string, double> nums;
 
-  printf("\n*********************************\nafter fixing gen z bug in ntuple, redo moved tracks treer and fix the min_lspdist3 and movedist cut in vtx loop below\n*********************************\n");
-
   for (int j = 0, je = t->GetEntries(); j < je; ++j) {
     if (t->LoadTree(j) < 0) break;
     if (t->GetEntry(j) <= 0) continue;
-    if (j % 250000 == 0) {
-      printf("\r%i/%i", j, je);
-      fflush(stdout);
-    }
 
     const bool pass_800 = bool(nt.pass_hlt & 0x2);
     const bool pass_900_450_AK450 = bool(nt.pass_hlt & 0x1C);
@@ -185,11 +179,10 @@ int main(int argc, char** argv) {
     }
   }
 
-  printf("\r                                \n");
-  printf("%f events in denominator\n", den);
-  printf("%20s  %12s  %10s +- %10s\n", "name", "num", "eff", "seff");
-  for (const auto& p : nums) {
-    const interval i = clopper_pearson_binom(p.second, den);
-    printf("%20s  %12.2f  %10.4f +- %10.4f\n", p.first.c_str(), p.second, i.value, (i.upper - i.lower)/2);
+  printf("%12.1f", den);
+  for (const std::string& c : {"nocuts", "ntracks", "all"}) {
+    const interval i = clopper_pearson_binom(nums[c], den);
+    printf("    %6.4f +- %6.4f", i.value, i.error());
   }
+  printf("\n");
 }
