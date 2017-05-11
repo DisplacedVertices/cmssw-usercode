@@ -1,5 +1,12 @@
 import FWCore.ParameterSet.Config as cms
 
+def set_qcdht(process, which):
+    process.externalLHEProducer.args = [{
+            1000: '/cvmfs/cms.cern.ch/phys_generator/gridpacks/slc6_amd64_gcc481/13TeV/madgraph/V5_2.2.2/QCD_HT_LO_MLM/QCD_HT1000to1500/v1/QCD_HT1000to1500_tarball.tar.xz',
+            1500: '/cvmfs/cms.cern.ch/phys_generator/gridpacks/slc6_amd64_gcc481/13TeV/madgraph/V5_2.2.2/QCD_HT_LO_MLM/QCD_HT1500to2000/v1/QCD_HT1500to2000_tarball.tar.xz',
+            2000: '/cvmfs/cms.cern.ch/phys_generator/gridpacks/slc6_amd64_gcc481/13TeV/madgraph/V5_2.2.2/QCD_HT_LO_MLM/QCD_HT2000toInf/v1/QCD_HT2000toInf_tarball.tar.xz',
+            }[which]]
+
 def set_qcdht2000(process):
     process.externalLHEProducer.args = ['/cvmfs/cms.cern.ch/phys_generator/gridpacks/slc6_amd64_gcc481/13TeV/madgraph/V5_2.2.2/QCD_HT_LO_MLM/QCD_HT2000toInf/v1/QCD_HT2000toInf_tarball.tar.xz']
 
