@@ -10,15 +10,8 @@ done
 function afteq { echo $1 | cut -d = -f 2; } # crab scriptArgs requires a =
 
 JOBNUM=$1
-MAXEVENTS=$2
-SALT=$3 # why don't we do afteq here? I guess putting the salt packet in with the salt doesn't matter
-USETHISCMSSW=$(afteq $4)
-FROMLHE=$(afteq $5)
-PREMIX=$6 # no afteq here because the pythons use the premix= prefix to find it and we don't need to do anything special here
-export DUMMYFORHASH=$(afteq $7)
-OUTPUTLEVEL=$(afteq $8)
-TODO=$9  # no afteq here because the pythons need the todo= prefix to find the args
-TODO2=${10}
+
+source steering.sh
 
 INDIR=$(pwd)
 OUTDIR=$(pwd)
@@ -61,42 +54,23 @@ function exitbanner {
 }
 
 function lhe {
-    echo cmsRun lhe.py at $(date)
-    cmsRun lhe.py \
-        salt=${SALT} \
-        jobnum=${JOBNUM} \
-        ${MAXEVENTS} \
-        ${TODO} \
-        2>&1
+    cmd="cmsRun lhe.py salt=${SALT} jobnum=${JOBNUM} maxevents=${MAXEVENTS} ${TODO}"
+    echo $cmd at $(date) ; eval $cmd 2>&1
 }
 
 function gensim {
-    echo cmsRun gensim.py at $(date)
-    cmsRun -j tempfjr.xml gensim.py \
-        fromlhe=${FROMLHE} \
-        salt=${SALT} \
-        jobnum=${JOBNUM} \
-        ${MAXEVENTS} \
-        ${TODO} \
-        2>&1
+    cmd="cmsRun -j tempfjr.xml gensim.py fromlhe=${FROMLHE} salt=${SALT} jobnum=${JOBNUM} maxevents=${MAXEVENTS} ${TODO}"
+    echo $cmd at $(date) ; eval $cmd 2>&1
 }
 
 function rawhlt {
-    echo cmsRun rawhlt.py at $(date)
-    cmsRun rawhlt.py \
-        salt=${SALT} \
-        jobnum=${JOBNUM} \
-        ${PREMIX} \
-        ${TODO2} \
-        2>&1
+    cmd="cmsRun rawhlt.py salt=${SALT} jobnum=${JOBNUM} premix=${PREMIX} ${TODO2}"
+    echo $cmd at $(date) ; eval $cmd 2>&1
 }
 
 function reco {
-    echo cmsRun reco.py at $(date)
-    cmsRun -j tempfjr.xml reco.py \
-        ${PREMIX} \
-        ${TODO2} \
-        2>&1
+    cmd="cmsRun -j tempfjr.xml reco.py premix=${PREMIX} ${TODO2}"
+    echo $cmd at $(date) ; eval $cmd 2>&1
 }
 
 ################################################################################

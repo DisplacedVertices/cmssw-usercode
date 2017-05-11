@@ -79,7 +79,9 @@ config.JobType.psetName = 'dummy.py'
 config.JobType.scriptExe = 'nstep.sh'
 config.JobType.sendPythonFolder = True
 
-config.JobType.inputFiles = ['todoify.sh', 'lhe.py', 'gensim.py', 'dynamicconf.py', 'modify.py', 'rawhlt.py', 'minbias.py', 'minbias.txt.gz', 'minbias_premix.txt.gz', 'reco.py', 'fixfjr.py']
+steering_fn = 'steering.sh'
+
+config.JobType.inputFiles = ['todoify.sh', steering_fn, 'lhe.py', 'gensim.py', 'dynamicconf.py', 'modify.py', 'rawhlt.py', 'minbias.py', 'minbias.txt.gz', 'minbias_premix.txt.gz', 'reco.py', 'fixfjr.py']
 if output_level == 'minitree':
     config.JobType.inputFiles += ['ntuple.py', 'minitree.py']
 
@@ -90,23 +92,22 @@ elif output_level == 'gensim':
 elif output_level == 'minitree':
     config.JobType.outputFiles = ['minitree.root', 'vertex_histos.root']
 
-config.JobType.scriptArgs = l = [
-    # arg indices are two numbers ahead in the bash because of
-    # 0-indexing here vs 1-indexing there plus crab gives a first
-    # argument that is the job number before all the rest.
-    'maxevents=%i' % events_per,
-    'salt=' + fixed_salt,
-    'usethiscmssw=%i' % use_this_cmssw,
-    'fromlhe=%i' % from_lhe,
-    'premix=%i' % premix,
-    'dummyforhash=%i' % dummy_for_hash,  # stupid crab requires a =
-    'outputlevel=%s' % output_level,
-    'todo=SETME',
-    'todo2=placeholder', # yes this gets replaced with todo= below
+config.JobType.scriptArgs = [] # steering file will take care of what we did before
+
+steering = [
+    'MAXEVENTS=%i' % events_per,
+    'SALT=' + fixed_salt,
+    'USETHISCMSSW=%i' % use_this_cmssw,
+    'FROMLHE=%i' % from_lhe,
+    'PREMIX=%i' % premix,
+    'export DUMMYFORHASH=%i' % dummy_for_hash,  # stupid crab requires a =
+    'OUTPUTLEVEL=%s' % output_level,
+    'TODO=SETME',
+    'TODO2=SETME',
     ]
-salt_index  = index_startswith(l, 'salt=')
-todo_index  = index_startswith(l, 'todo=')
-todo2_index = index_startswith(l, 'todo2=')
+salt_index  = index_startswith(steering, 'SALT=')
+todo_index  = index_startswith(steering, 'TODO=')
+todo2_index = index_startswith(steering, 'TODO2=')
 
 config.Data.splitting = 'EventBased'
 config.Data.unitsPerJob = events_per
@@ -166,47 +167,54 @@ def submit(config, name, todo, todo2=None):
     config.General.requestName = name
     config.Data.outputPrimaryDataset = name
     if not fixed_salt:
-        config.JobType.scriptArgs[salt_index] = 'salt=' + name + todo
-    config.JobType.scriptArgs[todo_index] = todo
+        steering[salt_index] = 'SALT=' + name + todo
+    steering[todo_index] = 'TODO=todo=' + todo
     if todo2 is not None:
-        config.JobType.scriptArgs[todo2_index] = todo2
+        steering[todo2_index] = 'TODO2=todo=' + todo2
         if not fixed_salt:
-            config.JobType.scriptArgs[salt_index] += todo2
+            steering[salt_index] += todo2
 
+    open(steering_fn, 'wt').write('\n'.join(steering) + '\n')
+    
     if not testing:
         output = crab_command('submit', config=config)
         print colors.boldwhite(name)
         pprint(output)
         print
     else:
+        print 'crab config:'
         print config
+        print 'steering.sh:'
+        os.system('cat ' + steering_fn)
+    os.remove(steering_fn)
+
 
 if meta == 'neu':
     for tau in taus:
         for mass in masses:
             name = 'mfv_neu_tau%05ium_M%04i' % (tau, mass)
-            todo = 'todo=mfv_neutralino,%.1f,%i' % (tau/1000., mass)
+            todo = 'mfv_neutralino,%.1f,%i' % (tau/1000., mass)
             submit(config, name, todo)
 
 elif meta == 'glu':
     for tau in taus:
         for mass in masses:
             name = 'mfv_glu_tau%05ium_M%04i' % (tau, mass)
-            todo = 'todo=mfv_gluino,%.1f,%i' % (tau/1000., mass)
+            todo = 'mfv_gluino,%.1f,%i' % (tau/1000., mass)
             submit(config, name, todo)
 
 elif meta == 'ddbar':
     for tau in taus:
         for mass in masses:
             name = 'mfv_ddbar_tau%05ium_M%04i' % (tau, mass)
-            todo = 'todo=gluino_ddbar,%.1f,%i' % (tau/1000., mass)
+            todo = 'gluino_ddbar,%.1f,%i' % (tau/1000., mass)
             submit(config, name, todo)
 
 elif meta == 'lq2':
     for tau in taus:
         for mass in masses:
             name = 'mfv_lq2_tau%05ium_M%04i' % (tau, mass)
-            todo = 'todo=leptoquark,%.1f,%i,2' % (tau/1000., mass)
+            todo = 'leptoquark,%.1f,%i,2' % (tau/1000., mass)
             submit(config, name, todo)
 
 elif meta == 'ttbar':
@@ -214,16 +222,16 @@ elif meta == 'ttbar':
     todo2s = ['nominal'] + [x for x in dir(DummyBeamSpots) if not x.startswith('_')]
     for todo2 in todo2s:
         name = 'ttbar_%s' % todo2
-        todo = 'todo=ttbar'
+        todo = 'ttbar'
         if todo2 != 'nominal':
-            todo2 = 'todo=weakmode,' + todo2
+            todo2 = 'weakmode,' + todo2
         else:
             todo2 = None
         submit(config, name, todo, todo2)
 
 elif meta.startswith('qcdht2000_gensim'):
     name = meta
-    todo = 'todo=qcdht2000'
+    todo = 'qcdht2000'
     submit(config, name, todo)
 
 if not testing:
