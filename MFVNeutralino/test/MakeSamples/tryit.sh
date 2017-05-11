@@ -5,9 +5,13 @@
 owd=$(pwd)
 input_version=$CMSSW_VERSION
 tmpdir=/uscmst1b_scratch/lpc1/3DayLifetime/$USER/$(date +%s)
+echo $tmpdir
 mkdir $tmpdir 
 edmConfigDump dummy.py > $tmpdir/pset.py
 cp nstep.sh todoify.sh lhe.py gensim.py modify.py dynamicconf.py rawhlt.py minbias.py minbias.txt.gz minbias_premix.txt.gz reco.py fixfjr.py $tmpdir
+for x in ntuple.py minitree.py; do
+    cmsDumpPython.py ../$x > $tmpdir/$x
+done
 cd $tmpdir
 scram project CMSSW $input_version
 cd $input_version
