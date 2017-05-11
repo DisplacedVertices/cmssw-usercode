@@ -2,7 +2,8 @@
 
 import os
 
-cmssw_version = tuple(int(x) for x in os.environ['CMSSW_VERSION'].split('_')[1:])
+cmssw_version = os.environ['CMSSW_VERSION'].replace('patch', '').replace('pre', '-')
+cmssw_version = tuple(int(x) for x in cmssw_version.split('_')[1:])
 if cmssw_version[0] not in (7,8):
     raise ValueError('unsupported cmssw version')
 
