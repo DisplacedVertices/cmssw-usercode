@@ -13,6 +13,7 @@ class MFVVertexerPairEffs : public edm::EDAnalyzer {
 
  private:
   const edm::EDGetTokenT<VertexerPairEffs> vpeff_token;
+  const bool allow_duplicate_pairs;
   const bool verbose;
 
   // 1st index is min_ntracks, 2nd index is max_ntracks, with 0 inclusive, 1 unused
@@ -29,6 +30,7 @@ class MFVVertexerPairEffs : public edm::EDAnalyzer {
 
 MFVVertexerPairEffs::MFVVertexerPairEffs(const edm::ParameterSet& cfg)
   : vpeff_token(consumes<VertexerPairEffs>(cfg.getParameter<edm::InputTag>("vpeff_src"))),
+    allow_duplicate_pairs(cfg.getParameter<bool>("allow_duplicate_pairs")),
     verbose(cfg.getUntrackedParameter<bool>("verbose", false))
 {
   edm::Service<TFileService> fs;
@@ -63,6 +65,8 @@ void MFVVertexerPairEffs::analyze(const edm::Event& event, const edm::EventSetup
   int n_merge[6][6] = {{0}};
   int n_erase[6][6] = {{0}};
 
+  std::vector<float> d2ds;
+
   if (verbose) printf("\nrun = %u, lumi = %u, event = %llu, npveffs = %d\n", event.id().run(), event.luminosityBlock(), event.id().event(), nvpeffs);
 
   for (int ivpeff = 0; ivpeff < nvpeffs; ++ivpeff) {
@@ -74,6 +78,18 @@ void MFVVertexerPairEffs::analyze(const edm::Event& event, const edm::EventSetup
 
     const float d2d = vpeff.d2d();
     const float d3d = vpeff.d3d();
+
+    if (!allow_duplicate_pairs) {
+      bool seen = false;
+      for (size_t i = 0, ie = d2ds.size(); i < ie; ++i) {
+        if (fabs(d2d - d2ds.at(i)) < 0.000001) {
+          seen = true;
+          break;
+        }
+      }
+      if (seen) continue;
+      d2ds.push_back(d2d);
+    }
 
     if (verbose) printf("\tivpeff = %d, ntk_min = %d, ntk_max = %d, d2d = %f, kind = %d\n", ivpeff, ntk_min, ntk_max, d2d, vpeff.kind());
 
