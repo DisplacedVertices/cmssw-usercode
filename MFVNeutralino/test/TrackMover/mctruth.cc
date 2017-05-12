@@ -49,6 +49,14 @@ int main(int argc, char** argv) {
     nd.book(k_ht, "ht", ";#Sigma H_{T} (GeV);events/50 GeV", 50, 0, 2500);
   }
 
+  TH1D* h_vtxntracks[num_numdens] = {0};
+  TH1D* h_vtxbs2derr[num_numdens] = {0};
+
+  for (int i = 0; i < num_numdens; ++i) {
+    h_vtxntracks[i] = new TH1D(TString::Format("h_%i_vtxntracks",      i), ";# tracks in largest vertex;events/1", 40, 0, 40);
+    h_vtxbs2derr[i] = new TH1D(TString::Format("h_%i_vtxbs2derr",      i), ";#sigma(d_{BV}) of largest vertex (cm);events/2 #mum", 50, 0, 0.01);
+  }
+
   double den = 0;
   std::map<std::string, double> nums;
 
@@ -99,17 +107,17 @@ int main(int argc, char** argv) {
         continue;
 
       for (numdens& nd : nds) {
-        Fill(nd(k_lspdist2)     .den, lspdist2);
-        Fill(nd(k_lspdist3)     .den, lspdist3);
-        Fill(nd(k_lspdistz)     .den, lspdistz);
-        Fill(nd(k_movedist2)    .den, movedist2);
-        Fill(nd(k_movedist3)    .den, movedist3);
-        Fill(nd(k_npv)          .den, nt.npv);
-        Fill(nd(k_pvz)          .den, nt.pvz);
-        Fill(nd(k_pvrho)        .den, mag(nt.pvx, nt.pvy));
-        Fill(nd(k_pvntracks)    .den, nt.pvntracks);
-        Fill(nd(k_pvsumpt2)     .den, nt.pvsumpt2);
-        Fill(nd(k_ht)        .den, nt.jetht);
+        Fill(nd(k_lspdist2) .den, lspdist2);
+        Fill(nd(k_lspdist3) .den, lspdist3);
+        Fill(nd(k_lspdistz) .den, lspdistz);
+        Fill(nd(k_movedist2).den, movedist2);
+        Fill(nd(k_movedist3).den, movedist3);
+        Fill(nd(k_npv)      .den, nt.npv);
+        Fill(nd(k_pvz)      .den, nt.pvz);
+        Fill(nd(k_pvrho)    .den, mag(nt.pvx, nt.pvy));
+        Fill(nd(k_pvntracks).den, nt.pvntracks);
+        Fill(nd(k_pvsumpt2) .den, nt.pvsumpt2);
+        Fill(nd(k_ht)       .den, nt.jetht);
       }
 
       den += w;
@@ -139,20 +147,17 @@ int main(int argc, char** argv) {
         if (pass_ntracks && pass_bs2derr)  { set_it_if_first(first_vtx_to_pass[2], ivtx); ++n_pass_all; }
       }
 
-      //for (int i = 0; i < num_numdens; ++i) {
-      //  int ivtx = first_vtx_to_pass[i];
-      //  if (ivtx != -1) {
-      //    h_vtxntracks      [i]->Fill(nt.p_vtxs_ntracks     ->at(ivtx));
-      //    h_vtxntracksptgt3 [i]->Fill(nt.p_vtxs_ntracksptgt3->at(ivtx));
-      //    h_vtxdrmin        [i]->Fill(nt.p_vtxs_drmin       ->at(ivtx));
-      //    h_vtxdrmax        [i]->Fill(nt.p_vtxs_drmax       ->at(ivtx));
-      //    h_vtxbs2derr      [i]->Fill(nt.p_vtxs_bs2derr     ->at(ivtx));
-      //  }
-      //}
+      for (int i = 0; i < num_numdens; ++i) {
+        int ivtx = first_vtx_to_pass[i];
+        if (ivtx != -1) {
+          h_vtxntracks      [i]->Fill(nt.p_vtxs_ntracks->at(ivtx));
+          h_vtxbs2derr      [i]->Fill(nt.p_vtxs_bs2derr->at(ivtx));
+        }
+      }
 
-      if (n_pass_nocuts)       nums["nocuts"]       += w;
-      if (n_pass_ntracks)      nums["ntracks"]      += w;
-      if (n_pass_all)          nums["all"]          += w;
+      if (n_pass_nocuts)  nums["nocuts"]  += w;
+      if (n_pass_ntracks) nums["ntracks"] += w;
+      if (n_pass_all)     nums["all"]     += w;
 
       const int passes[num_numdens] = {
         n_pass_nocuts,
@@ -163,17 +168,17 @@ int main(int argc, char** argv) {
       for (int i = 0; i < num_numdens; ++i) {
         if (passes[i]) {
           numdens& nd = nds[i];
-          Fill(nd(k_lspdist2)     .num, lspdist2);
-          Fill(nd(k_lspdist3)     .num, lspdist3);
-          Fill(nd(k_lspdistz)     .num, lspdistz);
-          Fill(nd(k_movedist2)    .num, movedist2);
-          Fill(nd(k_movedist3)    .num, movedist3);
-          Fill(nd(k_npv)          .num, nt.npv);
-          Fill(nd(k_pvz)          .num, nt.pvz);
-          Fill(nd(k_pvrho)        .num, mag(nt.pvx, nt.pvy));
-          Fill(nd(k_pvntracks)    .num, nt.pvntracks);
-          Fill(nd(k_pvsumpt2)     .num, nt.pvsumpt2);
-          Fill(nd(k_ht)        .num, nt.jetht);
+          Fill(nd(k_lspdist2) .num, lspdist2);
+          Fill(nd(k_lspdist3) .num, lspdist3);
+          Fill(nd(k_lspdistz) .num, lspdistz);
+          Fill(nd(k_movedist2).num, movedist2);
+          Fill(nd(k_movedist3).num, movedist3);
+          Fill(nd(k_npv)      .num, nt.npv);
+          Fill(nd(k_pvz)      .num, nt.pvz);
+          Fill(nd(k_pvrho)    .num, mag(nt.pvx, nt.pvy));
+          Fill(nd(k_pvntracks).num, nt.pvntracks);
+          Fill(nd(k_pvsumpt2) .num, nt.pvsumpt2);
+          Fill(nd(k_ht)       .num, nt.jetht);
         }
       }
     }

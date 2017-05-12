@@ -42,20 +42,6 @@ int main(int argc, char** argv) {
 
   const int num_numdens = 3;
 
-  TH1D* h_vtxntracks     [num_numdens] = {0};
-  TH1D* h_vtxntracksptgt3[num_numdens] = {0};
-  TH1D* h_vtxdrmin       [num_numdens] = {0};
-  TH1D* h_vtxdrmax       [num_numdens] = {0};
-  TH1D* h_vtxbs2derr     [num_numdens] = {0};
-
-  for (int i = 0; i < num_numdens; ++i) {
-    h_vtxntracks     [i] = new TH1D(TString::Format("h_%i_vtxntracks",      i), ";# tracks in largest vertex;events/1", 40, 0, 40);
-    h_vtxntracksptgt3[i] = new TH1D(TString::Format("h_%i_vtxntracksptgt3", i), ";# tracks w/ p_{T} > 3 GeV in largest vertex;events/1", 40, 0, 40);
-    h_vtxdrmin       [i] = new TH1D(TString::Format("h_%i_vtxdrmin",        i), ";min #Delta R_{ij} of tracks in largest vertex;events/0.05", 10, 0, 0.5);
-    h_vtxdrmax       [i] = new TH1D(TString::Format("h_%i_vtxdrmax",        i), ";max #Delta R_{ij} of tracks in largest vertex;events/0.5", 14, 0, 7);
-    h_vtxbs2derr     [i] = new TH1D(TString::Format("h_%i_vtxbs2derr",      i), ";#sigma(d_{BV}) of largest vertex (cm);events/2 #mum", 50, 0, 0.01);
-  }
-
   numdens nds[num_numdens] = {
     numdens("nocuts"),
     numdens("ntracks"),
@@ -84,6 +70,14 @@ int main(int argc, char** argv) {
     nd.book(k_jetdrmax, "jetdrmax", ";max jet #Delta R;events/0.1", 70, 0, 7);
     nd.book(k_jetdravg, "jetdravg", ";avg jet #Delta R;events/0.1", 70, 0, 7);
     nd.book(k_jetsumntracks, "jetsumntracks", ";#Sigma jet # tracks;events/5", 200, 0, 1000);
+  }
+
+  TH1D* h_vtxntracks[num_numdens] = {0};
+  TH1D* h_vtxbs2derr[num_numdens] = {0};
+
+  for (int i = 0; i < num_numdens; ++i) {
+    h_vtxntracks[i] = new TH1D(TString::Format("h_%i_vtxntracks",      i), ";# tracks in largest vertex;events/1", 40, 0, 40);
+    h_vtxbs2derr[i] = new TH1D(TString::Format("h_%i_vtxbs2derr",      i), ";#sigma(d_{BV}) of largest vertex (cm);events/2 #mum", 50, 0, 0.01);
   }
 
   double den = 0;
@@ -203,9 +197,6 @@ int main(int argc, char** argv) {
       int ivtx = first_vtx_to_pass[i];
       if (ivtx != -1) {
         h_vtxntracks      [i]->Fill(nt.p_vtxs_ntracks     ->at(ivtx));
-        h_vtxntracksptgt3 [i]->Fill(nt.p_vtxs_ntracksptgt3->at(ivtx));
-        h_vtxdrmin        [i]->Fill(nt.p_vtxs_drmin       ->at(ivtx));
-        h_vtxdrmax        [i]->Fill(nt.p_vtxs_drmax       ->at(ivtx));
         h_vtxbs2derr      [i]->Fill(nt.p_vtxs_bs2derr     ->at(ivtx));
       }
     }
