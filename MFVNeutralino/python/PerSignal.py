@@ -53,8 +53,8 @@ class PerSignal:
 
         taus   = sorted(self.taus)
         masses = sorted(self.masses)
-        points = [(tau, mass) for tau in taus for mass in masses]
-        npoints = len(points)
+        points = self.points = [(tau, mass) for tau in taus for mass in masses]
+        npoints = self.npoints = len(points)
 
         for curve in self.curves:
             x,y,eyl,eyh = [], [], [], []
@@ -104,8 +104,8 @@ class PerSignal:
                 curve.g_missing.Draw('P')
 
         # now draw the accoutrements
-        ntaus = len(taus)
-        nmasses = len(masses)
+        ntaus   = self.ntaus   = len(taus)
+        nmasses = self.nmasses = len(masses)
         self.tau_paves = []
         self.tau_lines = []
         for i, tau in enumerate(taus):
