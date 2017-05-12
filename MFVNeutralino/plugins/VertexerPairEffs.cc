@@ -13,6 +13,7 @@ class MFVVertexerPairEffs : public edm::EDAnalyzer {
 
  private:
   const edm::EDGetTokenT<VertexerPairEffs> vpeff_token;
+  const bool verbose;
 
   // 1st index is min_ntracks, 2nd index is max_ntracks, with 0 inclusive, 1 unused
   TH1F* h_n_pairs[6][6];
@@ -27,7 +28,8 @@ class MFVVertexerPairEffs : public edm::EDAnalyzer {
 };
 
 MFVVertexerPairEffs::MFVVertexerPairEffs(const edm::ParameterSet& cfg)
-  : vpeff_token(consumes<VertexerPairEffs>(cfg.getParameter<edm::InputTag>("vpeff_src")))
+  : vpeff_token(consumes<VertexerPairEffs>(cfg.getParameter<edm::InputTag>("vpeff_src"))),
+    verbose(cfg.getUntrackedParameter<bool>("verbose", false))
 {
   edm::Service<TFileService> fs;
 
@@ -61,6 +63,8 @@ void MFVVertexerPairEffs::analyze(const edm::Event& event, const edm::EventSetup
   int n_merge[6][6] = {{0}};
   int n_erase[6][6] = {{0}};
 
+  if (verbose) printf("\nrun = %u, lumi = %u, event = %llu, npveffs = %d\n", event.id().run(), event.luminosityBlock(), event.id().event(), nvpeffs);
+
   for (int ivpeff = 0; ivpeff < nvpeffs; ++ivpeff) {
     const VertexerPairEff& vpeff = vpeffs->at(ivpeff);
 
@@ -70,6 +74,8 @@ void MFVVertexerPairEffs::analyze(const edm::Event& event, const edm::EventSetup
 
     const float d2d = vpeff.d2d();
     const float d3d = vpeff.d3d();
+
+    if (verbose) printf("\tivpeff = %d, ntk_min = %d, ntk_max = %d, d2d = %f, kind = %d\n", ivpeff, ntk_min, ntk_max, d2d, vpeff.kind());
 
     ++n_pairs[0][0];
     ++n_pairs[ntk_min][0];
