@@ -5,6 +5,28 @@ from JMTucker.Tools.Sample import *
 
 ########################################################################
 
+def _tau(sample):
+    s = sample.name
+    is_um = '0um_' in s
+    x = int(s[s.index('tau')+3:s.index('um_' if is_um else 'mm_')])
+    if not is_um:
+        x *= 1000
+    return x
+
+def _mass(sample):
+    s = sample.name
+    x = s.index('_M')
+    y = s.find('_',x+1)
+    if y == -1:
+        y = len(s)
+    return int(s[x+2:y])
+
+def _set_tau_mass(sample):
+    sample.tau  = _tau (sample)
+    sample.mass = _mass(sample)
+
+########################################################################
+
 ########
 # 2015 MC
 ########
@@ -118,11 +140,13 @@ xx4j_samples_2015 = [    # M = 50, 100 GeV also exist
     ]
 
 for s in mfv_signal_samples_2015:
+    _set_tau_mass(s)
     s.dbs_inst = 'phys03'
     s.xsec = 1e-3
     s.condor = True
 
 for s in xx4j_samples_2015:
+    _set_tau_mass(s)
     s.xsec = 1e-3
 
 ########
@@ -239,6 +263,7 @@ mfv_hip_samples = [
     ]
 
 for s in mfv_ddbar_samples + mfv_signal_samples + mfv_hip_samples:
+    _set_tau_mass(s)
     s.xsec = 1e-3
     s.is_private = s.dataset.startswith('/mfv_')
     if s.is_private:
