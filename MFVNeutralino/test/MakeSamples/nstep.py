@@ -8,6 +8,7 @@ output_dataset_tag = 'RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_
 fixed_salt = ''
 use_this_cmssw = False
 premix = True
+ex = ''
 
 if 1:
     meta, taus, masses = 'neu', [100, 300, 1000, 10000, 30000], [300, 400, 600, 800, 1200, 1600]
@@ -27,12 +28,22 @@ elif 0:
     from_lhe = True
     output_level = 'gensim'
     output_dataset_tag = 'RunIISummer15GS-MCRUN2_71_V1'
-elif 1:
+elif 0:
     meta = 'qcdht2000_80'
     nevents, events_per = 396000, 1500
     from_lhe = True
     output_level = 'gensim'
     output_dataset_tag = 'RunIISummer15GS-MCRUN2_71_V1'
+elif 1:
+    meta = 'qcdht1000'
+    nevents, events_per = 1500, 1500
+    from_lhe = True
+    output_level = 'ntuple'
+elif 0:
+    meta, taus, masses = 'neu', [1000, 10000], [800]
+    use_this_cmssw = True
+    premix = False
+    ex = '_hip1p0'
 
 ex = ''
 #ex = '_test'
@@ -119,45 +130,7 @@ config.Data.outputPrimaryDataset = 'SETME'
 config.Data.outputDatasetTag = output_dataset_tag
 
 config.Site.storageSite = 'T3_US_FNALLPC'
-config.Site.whitelist = '''T1_US_FNAL
-T2_AT_Vienna
-T2_BE_IIHE
-T2_BE_UCL
-T2_BR_SPRACE
-T2_CH_CERN
-T2_CH_CSCS
-T2_CN_Beijing
-T2_DE_DESY
-T2_DE_RWTH
-T2_EE_Estonia
-T2_ES_CIEMAT
-T2_ES_IFCA
-T2_FI_HIP
-T2_FR_CCIN2P3
-T2_FR_GRIF_LLR
-T2_FR_IPHC
-T2_GR_Ioannina
-T2_HU_Budapest
-T2_IT_Bari
-T2_IT_Legnaro
-T2_IT_Pisa
-T2_IT_Rome
-T2_PK_NCP
-T2_PL_Swierk
-T2_PT_NCG_Lisbon
-T2_RU_INR
-T2_RU_JINR
-T2_TH_CUNSTDA
-T2_UA_KIPT
-T2_UK_SGrid_RALPP
-T2_US_Caltech
-T2_US_Florida
-T2_US_MIT
-T2_US_Nebraska
-T2_US_Purdue
-T2_US_UCSD
-T2_US_Vanderbilt
-T2_US_Wisconsin'''.split('\n')
+config.Site.whitelist = ['T1_US_FNAL', 'T2_CH_CERN', 'T2_DE_DESY', 'T2_DE_RWTH', 'T2_ES_CIEMAT', 'T2_ES_IFCA', 'T2_FR_CCIN2P3', 'T2_RU_JINR', 'T2_US_Caltech', 'T2_US_Florida', 'T2_US_MIT', 'T2_US_Nebraska', 'T2_US_Purdue', 'T2_US_UCSD', 'T2_US_Vanderbilt', 'T2_US_Wisconsin']
 
 outputs = {}
 
@@ -230,6 +203,11 @@ elif meta == 'ttbar':
 elif meta.startswith('qcdht2000_gensim'):
     name = meta
     todo = 'qcdht2000'
+    submit(config, name, todo)
+
+elif meta.startswith('qcdht'):
+    name = meta
+    todo = meta.replace('qcdht', 'qcdht,')
     submit(config, name, todo)
 
 if not testing:
