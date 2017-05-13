@@ -25,6 +25,7 @@ class PerSignal:
         # separate from TGraph creation in draw, have to know all the
         # (tau,mass) points first.
 
+        samples = sorted(samples, key=lambda s: s.name)
         tm = [(s.tau, s.mass) for s in samples]
         if len(tm) != len(set(tm)):
             raise ValueError('duplicate (tau,mass) seen')
