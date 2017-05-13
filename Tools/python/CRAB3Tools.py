@@ -65,6 +65,10 @@ def crab_command(*args, **kwargs):
         result['pycurlError'] = e
         result['status'] = 'pycurlError'
 
+    for k,v in result.get('shortResult', {}).iteritems():
+        if not result.has_key(k):
+            result[k] = v
+
     if suppress_stdout:
         result['stdout'] = buf.getvalue()
         sys.stdout = old_stdout
