@@ -25,8 +25,6 @@ for line in open(mctruths_fn):
 
 multijet = [s for s in Samples.mfv_signal_samples if not s.name.startswith('my_')]
 dijet = Samples.mfv_ddbar_samples
-for ss in multijet, dijet:
-    ss.sort(key=lambda s: s.name)
 
 trackmover_data = [
     [(89.07, 0.01),
