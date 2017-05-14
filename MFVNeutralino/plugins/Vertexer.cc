@@ -163,6 +163,7 @@ private:
   const double max_seed_track_dxyerr;
   const double max_seed_track_dxyipverr;
   const double max_seed_track_d3dipverr;
+  const int n_tracks_per_seed_vertex;
   const double max_seed_vertex_chi2;
   const bool use_2d_vertex_dist;
   const bool use_2d_track_dist;
@@ -221,8 +222,6 @@ private:
   TH1F* h_seed_vertex_r;
   TH1F* h_seed_vertex_paird2d;
   TH1F* h_seed_vertex_pairdphi;
-  TH1F* h_seed_track_multiplicity;
-  TH1F* h_max_seed_track_multiplicity;
   TH1F* h_n_resets;
   TH1F* h_n_onetracks;
   TH1F* h_noshare_vertex_tkvtxdist;
@@ -404,6 +403,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     max_seed_track_dxyerr(cfg.getParameter<double>("max_seed_track_dxyerr")),
     max_seed_track_dxyipverr(cfg.getParameter<double>("max_seed_track_dxyipverr")),
     max_seed_track_d3dipverr(cfg.getParameter<double>("max_seed_track_d3dipverr")),
+    n_tracks_per_seed_vertex(cfg.getParameter<int>("n_tracks_per_seed_vertex")),
     max_seed_vertex_chi2(cfg.getParameter<double>("max_seed_vertex_chi2")),
     use_2d_vertex_dist(cfg.getParameter<bool>("use_2d_vertex_dist")),
     use_2d_track_dist(cfg.getParameter<bool>("use_2d_track_dist")),
@@ -430,6 +430,9 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 
   if ((use_non_pv_tracks || use_non_pvs_tracks) && !use_primary_vertices)
     throw cms::Exception("MFVVertexer", "can't use_non_pv_tracks || use_non_pvs_tracks if !use_primary_vertices");
+
+  if (n_tracks_per_seed_vertex < 2 || n_tracks_per_seed_vertex > 5)
+    throw cms::Exception("MFVVertexer", "n_tracks_per_seed_vertex must be one of 2,3,4,5");
 
   edm::Service<edm::RandomNumberGenerator> rng;
   if ((jumble_tracks || remove_tracks_frac > 0) && !rng.isAvailable())
@@ -511,8 +514,6 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_seed_vertex_r                  = fs->make<TH1F>("h_seed_vertex_r",                  "", 100,   0,      2);
     h_seed_vertex_paird2d            = fs->make<TH1F>("h_seed_vertex_paird2d",            "", 100,   0,      0.2);
     h_seed_vertex_pairdphi           = fs->make<TH1F>("h_seed_vertex_pairdphi",           "", 100,  -3.14,   3.14);
-    h_seed_track_multiplicity        = fs->make<TH1F>("h_seed_track_multiplicity",        "",  40,   0,     40);
-    h_max_seed_track_multiplicity    = fs->make<TH1F>("h_max_seed_track_multiplicity",    "",  40,   0,     40);
 
     h_n_resets                       = fs->make<TH1F>("h_n_resets",                       "", 50,   0,   500);
     h_n_onetracks                    = fs->make<TH1F>("h_n_onetracks",                    "",  5,   0,     5);
@@ -830,7 +831,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
   std::auto_ptr<reco::VertexCollection> vertices(new reco::VertexCollection);
   std::auto_ptr<VertexerPairEffs> vpeffs(new VertexerPairEffs);
-  std::vector<std::vector<std::pair<int, int> > > track_use(ntk);
 
   if (ntk == 0 || track_histos_only) {
     if (verbose) {
@@ -853,48 +853,64 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   }
   if (verbose) printf("\n");
 
-  for (size_t itk = 0; itk < ntk-1; ++itk) {
-    if (!seed_use[itk])
-      continue;
+  std::vector<size_t> itks(n_tracks_per_seed_vertex, 0);
 
+  auto try_seed_vertex = [&]() {
+    std::vector<reco::TransientTrack> ttks(n_tracks_per_seed_vertex);
+    for (int i = 0; i < n_tracks_per_seed_vertex; ++i)
+      ttks[i] = seed_tracks[itks[i]];
+
+    TransientVertex seed_vertex = kv_reco->vertex(ttks);
+    if (seed_vertex.isValid() && seed_vertex.normalisedChiSquared() < max_seed_vertex_chi2) {
+      vertices->push_back(reco::Vertex(seed_vertex));
+
+      if (verbose || histos) {
+        const reco::Vertex& v = vertices->back();
+        const double vchi2 = v.normalizedChi2();
+        const double vndof = v.ndof();
+        const double vx = v.position().x() - bs_x;
+        const double vy = v.position().y() - bs_y;
+        const double vz = v.position().z() - bs_z;
+        const double phi = atan2(vy, vx);
+        const double rho = mag(vx, vy);
+        const double r = mag(vx, vy, vz);
+        if (verbose) {
+          printf("from tracks");
+          for (auto itk : itks)
+            printf(" %lu", itk);
+          printf(": vertex #%3lu: chi2/dof: %7.3f dof: %7.3f pos: <%7.3f, %7.3f, %7.3f>  rho: %7.3f  phi: %7.3f  r: %7.3f\n", vertices->size()-1, vchi2, vndof, vx, vy, vz, rho, phi, r);
+        }
+        if (histos) {
+          for (auto it = v.tracks_begin(), ite = v.tracks_end(); it != ite; ++it)
+            h_seed_vertex_track_weights->Fill(v.trackWeight(*it));
+          h_seed_vertex_chi2->Fill(vchi2);
+          h_seed_vertex_ndof->Fill(vndof);
+          h_seed_vertex_x->Fill(vx);
+          h_seed_vertex_y->Fill(vy);
+          h_seed_vertex_rho->Fill(rho);
+          h_seed_vertex_phi->Fill(phi);
+          h_seed_vertex_z->Fill(vz);
+          h_seed_vertex_r->Fill(r);
+        }
+      }
+    }
+  };
+
+  // ha
+  for (size_t itk = 0; itk < ntk; ++itk) {
+    if (!seed_use[itk]) continue; itks[0] = itk;
     for (size_t jtk = itk+1; jtk < ntk; ++jtk) {
-      if (!seed_use[jtk])
-        continue;
-
-      std::vector<reco::TransientTrack> ttks;
-      ttks.push_back(seed_tracks[itk]);
-      ttks.push_back(seed_tracks[jtk]);
-
-      //printf("itk %lu jtk %lu\n", itk, jtk); fflush(stdout);
-
-      TransientVertex seed_vertex = kv_reco->vertex(ttks);
-      if (seed_vertex.isValid() && seed_vertex.normalisedChiSquared() < max_seed_vertex_chi2) {
-        vertices->push_back(reco::Vertex(seed_vertex));
-        track_use[itk].push_back(std::make_pair(jtk, int(vertices->size()-1)));
-
-        if (verbose || histos) {
-          const reco::Vertex& v = vertices->back();
-          const double vchi2 = v.normalizedChi2();
-          const double vndof = v.ndof();
-          const double vx = v.position().x() - bs_x;
-          const double vy = v.position().y() - bs_y;
-          const double vz = v.position().z() - bs_z;
-          const double phi = atan2(vy, vx);
-          const double rho = mag(vx, vy);
-          const double r = mag(vx, vy, vz);
-          if (verbose)
-            printf("from tracks %3lu and %3lu: vertex #%3lu: chi2/dof: %7.3f dof: %7.3f pos: <%7.3f, %7.3f, %7.3f>  rho: %7.3f  phi: %7.3f  r: %7.3f\n", itk, jtk, vertices->size()-1, vchi2, vndof, vx, vy, vz, rho, phi, r);
-          if (histos) {
-            for (auto it = v.tracks_begin(), ite = v.tracks_end(); it != ite; ++it)
-              h_seed_vertex_track_weights->Fill(v.trackWeight(*it));
-            h_seed_vertex_chi2->Fill(vchi2);
-            h_seed_vertex_ndof->Fill(vndof);
-            h_seed_vertex_x->Fill(vx);
-            h_seed_vertex_y->Fill(vy);
-            h_seed_vertex_rho->Fill(rho);
-            h_seed_vertex_phi->Fill(phi);
-            h_seed_vertex_z->Fill(vz);
-            h_seed_vertex_r->Fill(r);
+      if (!seed_use[jtk]) continue; itks[1] = jtk;
+      if (n_tracks_per_seed_vertex == 2) { try_seed_vertex(); continue; }
+      for (size_t ktk = jtk+1; ktk < ntk; ++ktk) {
+        if (!seed_use[ktk]) continue; itks[2] = ktk;
+        if (n_tracks_per_seed_vertex == 3) { try_seed_vertex(); continue; }
+        for (size_t ltk = ktk+1; ltk < ntk; ++ltk) {
+          if (!seed_use[ltk]) continue; itks[3] = ltk;
+          if (n_tracks_per_seed_vertex == 4) { try_seed_vertex(); continue; }
+          for (size_t mtk = ltk+1; mtk < ntk; ++mtk) {
+            if (!seed_use[mtk]) continue; itks[4] = mtk;
+            try_seed_vertex();
           }
         }
       }
@@ -920,31 +936,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     printf("n_seed_vertices: %lu\n", vertices->size());
   if (histos)
     h_n_seed_vertices->Fill(vertices->size());
-
-  if (histos || verbose) {
-    int max_seed_track_multiplicity = 0;
-
-    for (size_t i = 0; i < ntk; ++i) {
-      const auto& vec = track_use[i];
-      int mult = int(vec.size());
-
-      if (verbose && mult > 1) {
-        printf("track %3lu used %3i times:", i, mult);
-        for (const auto& pii : vec)
-          printf(" (%i, %i)", pii.first, pii.second);
-        printf("\n");
-      }
-
-      if (histos)
-        h_seed_track_multiplicity->Fill(mult);
-
-      if (mult > max_seed_track_multiplicity)
-        max_seed_track_multiplicity = mult;
-    }
-
-    if (histos)
-      h_max_seed_track_multiplicity->Fill(max_seed_track_multiplicity);
-  }
 
   //////////////////////////////////////////////////////////////////////
   // Take care of track sharing. If a track is in two vertices, and
