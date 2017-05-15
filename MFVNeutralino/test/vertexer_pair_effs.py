@@ -5,13 +5,14 @@ sample_files(process, 'qcdht2000', 'ntuplev14p2', 1)
 process.TFileService.fileName = 'vertexer_pair_effs.root'
 process.maxEvents.input = -1
 
+process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 process.load('JMTucker.MFVNeutralino.VertexerPairEffs_cfi')
 
 process.mfvAnalysisCutsPreSel = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)
 
-process.p = cms.Path(process.mfvAnalysisCutsPreSel * process.mfvVertexerPairEffs)
+process.p = cms.Path(process.mfvWeight * process.mfvAnalysisCutsPreSel * process.mfvVertexerPairEffs)
 
 ntks = [5,3,4,7]
 
