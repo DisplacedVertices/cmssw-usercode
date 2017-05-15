@@ -75,5 +75,4 @@ mfvVertices = cms.EDProducer('MFVVertexer',
                              scatterplots = cms.untracked.bool(False),
                              track_histos_only = cms.untracked.bool(False),
                              verbose = cms.untracked.bool(False),
-                             phitest = cms.untracked.bool(False),
                              )
