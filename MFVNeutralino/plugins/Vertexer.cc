@@ -83,6 +83,7 @@ private:
     for (auto it = v.tracks_begin(), ite = v.tracks_end(); it != ite; ++it) {
       const double w = v.trackWeight(*it);
       const bool use = w >= min_weight;
+      assert(use);
       //if (verbose) ("trk #%2i pt %6.3f eta %6.3f phi %6.3f dxy %6.3f dz %6.3f w %5.3f  use? %i\n", int(it-v.tracks_begin()), (*it)->pt(), (*it)->eta(), (*it)->phi(), (*it)->dxy(), (*it)->dz(), w, use);
       if (use)
         result.insert(it->castTo<reco::TrackRef>());
@@ -558,14 +559,26 @@ void MFVVertexer::finish(edm::Event& event, const std::vector<reco::TransientTra
   std::auto_ptr<reco::TrackCollection> tracks_seed      (new reco::TrackCollection);
   std::auto_ptr<reco::TrackCollection> tracks_inVertices(new reco::TrackCollection);
 
-  for (const reco::TransientTrack& ttk : seed_tracks)
-    tracks_seed->push_back(ttk.track());
+  if (verbose) printf("finish:\nseed tracks:\n");
 
-  for (const reco::Vertex& v : *vertices)
+  for (const reco::TransientTrack& ttk : seed_tracks) {
+    tracks_seed->push_back(ttk.track());
+    if (verbose) {
+      const reco::TrackBaseRef& tk(ttk.trackBaseRef());
+      printf("id: %i key: %lu pt: %f\n", tk.id().id(), tk.key(), tk->pt());
+    }
+  }
+
+  if (verbose) printf("vertices:\n");
+
+  for (const reco::Vertex& v : *vertices) {
+    if (verbose) printf("x: %f y %f z %f\n", v.x(), v.y(), v.z());
     for (auto it = v.tracks_begin(), ite = v.tracks_end(); it != ite; ++it) {
       reco::TrackRef tk = it->castTo<reco::TrackRef>();
+      if (verbose) printf("id: %i key: %u pt: %f\n", tk.id().id(), tk.key(), tk->pt());
       tracks_inVertices->push_back(*tk);
     }
+  }
 
   if (verbose)
     printf("n_output_vertices: %lu\n", vertices->size());
