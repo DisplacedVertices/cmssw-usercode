@@ -25,14 +25,14 @@ parser.add_option('--max-processes', type='int', default=5,
                   help='Max number of status-checking processes to run at once.')
 parser.add_option('-r', '--resub', action='store_true', default=False,
                   help='Send resubmit request to any batch that has failed jobs, obeying the white and black lists below.')
-parser.add_option('--resub-white-list', default='',
-                  help='Comma-separated list (no spaces!) of sites to whitelist when resubmitting.')
-parser.add_option('--resub-black-list', default='',
-                  help='Comma-separated list (no spaces!) of sites to blacklist when resubmitting.')
-parser.add_option('--resub-white-codes', default='',
-                  help='Comma-separated list (no spaces!) of codes that are allowed to resubmit -- all others not resubmitted.')
-parser.add_option('--resub-black-codes', default='',
-                  help='Comma-separated list (no spaces!) of codes that are not allowed to resubmit -- all others are resubmitted.')
+#parser.add_option('--resub-white-list', default='',
+#                  help='Comma-separated list (no spaces!) of sites to whitelist when resubmitting.')
+#parser.add_option('--resub-black-list', default='',
+#                  help='Comma-separated list (no spaces!) of sites to blacklist when resubmitting.')
+#parser.add_option('--resub-white-codes', default='',
+#                  help='Comma-separated list (no spaces!) of codes that are allowed to resubmit -- all others not resubmitted.')
+#parser.add_option('--resub-black-codes', default='',
+#                  help='Comma-separated list (no spaces!) of codes that are not allowed to resubmit -- all others are resubmitted.')
 parser.add_option('--tee', type='str', metavar='FILE',
                   help='Duplicate stdout to FILE.')
 parser.add_option('--fake-results', type='str', metavar='FILE',
@@ -61,14 +61,14 @@ def print_header(s):
 def print_subheader(s):
     print '\033[32m%s\033[0m' % s
 
-if options.resub_white_list and options.resub_black_list:
-    raise ValueError('cannot have both --resub-white-list and --resub-black-list')
-
-if options.resub_white_codes and options.resub_black_codes:
-    raise ValueError('cannot have both --resub-white-codes and --resub-black-codes')
-
-options.resub_white_codes = options.resub_white_codes.split(',')
-options.resub_black_codes = options.resub_black_codes.split(',')
+#if options.resub_white_list and options.resub_black_list:
+#    raise ValueError('cannot have both --resub-white-list and --resub-black-list')
+#
+#if options.resub_white_codes and options.resub_black_codes:
+#    raise ValueError('cannot have both --resub-white-codes and --resub-black-codes')
+#
+#options.resub_white_codes = options.resub_white_codes.split(',')
+#options.resub_black_codes = options.resub_black_codes.split(',')
 
 if options.continuous and options.fake_results:
     print '--fake-results implies not continuous, setting it.'
@@ -213,23 +213,27 @@ while 1:
         crab_cleanup()
         os.system('mkdir -p /tmp/%s' % os.environ['USER'])
         open('/tmp/%s/crmontmp' % os.environ['USER'], 'wt').write(repr(results))
+        #pprint(results)
 
         # Resubmit those allowed.
         if options.resub:
             to_resub = defaultdict(list)
             for d, res in results.iteritems():
                 for job_num in res['jobListByStatus'].get('failed', []):
-                    job = res['jobs'][str(job_num)]
-                    err_code = job['Error'][0]
-                    if any((not options.resub_white_list and not options.resub_black_list,
-                            options.resub_white_list and err_code in options.resub_white_list,
-                            options.resub_black_list and err_code not in options.resub_black_list)):
-                        to_resub[d].append(job_num)
+                    to_resub[d].append(job_num)
+# 'Error' not present in job json since 5/14/2017
+#                    job = res['jobs'][str(job_num)]
+#                    err_code = job['Error'][0]
+#                    if any((not options.resub_white_list and not options.resub_black_list,
+#                            options.resub_white_list and err_code in options.resub_white_list,
+#                            options.resub_black_list and err_code not in options.resub_black_list)):
+#                        to_resub[d].append(job_num)
 
             for d, jobs in to_resub.iteritems():
                 jobs = ','.join(str(j) for j in jobs)
                 print 'resubmit', d, jobs
-                crab_command('resubmit', dir=d, jobids=jobs, sitewhitelist=options.resub_white_list, siteblacklist=options.resub_black_list, suppress_stdout=False)
+                #crab_command('resubmit', dir=d, jobids=jobs, sitewhitelist=options.resub_white_list, siteblacklist=options.resub_black_list, suppress_stdout=False)
+                crab_command('resubmit', dir=d, jobids=jobs, suppress_stdout=True)
 
     # Print task statuses. I don't know what all these mean yet.
     #print
