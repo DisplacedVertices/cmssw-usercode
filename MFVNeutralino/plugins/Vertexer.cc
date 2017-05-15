@@ -561,9 +561,9 @@ void MFVVertexer::finish(edm::Event& event, const std::vector<reco::TransientTra
 
   if (verbose) printf("finish:\nseed tracks:\n");
 
-  std::map<std::pair<unsigned, unsigned>, unsigned> seed_track_ref_map;
-
-  unsigned itk = 0;
+  std::map<std::pair<unsigned, unsigned>, unsigned char> seed_track_ref_map;
+  assert(seed_tracks.size() <= 255);
+  unsigned char itk = 0;
   for (const reco::TransientTrack& ttk : seed_tracks) {
     tracks_seed->push_back(ttk.track());
     const reco::TrackBaseRef& tk(ttk.trackBaseRef());
