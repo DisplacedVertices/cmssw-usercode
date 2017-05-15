@@ -91,7 +91,12 @@ void MFVVertexerPairEffs::analyze(const edm::Event& event, const edm::EventSetup
       d2ds.push_back(d2d);
     }
 
-    if (verbose) printf("\tivpeff = %d, ntk_min = %d, ntk_max = %d, d2d = %f, kind = %d\n", ivpeff, ntk_min, ntk_max, d2d, vpeff.kind());
+    if (verbose) {
+      printf("\tivpeff = %d, ntk_min = %d, ntk_max = %d, d2d = %f, kind = %d", ivpeff, ntk_min, ntk_max, d2d, vpeff.kind());
+      printf("  tks0:"); for (auto tk : vpeff.tracks(0)) printf(" %u", tk);
+      printf("  tks1:"); for (auto tk : vpeff.tracks(1)) printf(" %u", tk);
+      printf("\n");
+    }
 
     ++n_pairs[0][0];
     ++n_pairs[ntk_min][0];
@@ -108,7 +113,7 @@ void MFVVertexerPairEffs::analyze(const edm::Event& event, const edm::EventSetup
     h_pairs_d3d[0][ntk_max]->Fill(d3d);
     h_pairs_d3d[ntk_min][ntk_max]->Fill(d3d);
 
-    if (vpeff.kind() == VertexerPairEff::merge) {
+    if (vpeff.kind() & VertexerPairEff::merge) {
       ++n_merge[0][0];
       ++n_merge[ntk_min][0];
       ++n_merge[0][ntk_max];
@@ -125,7 +130,7 @@ void MFVVertexerPairEffs::analyze(const edm::Event& event, const edm::EventSetup
       h_merge_d3d[ntk_min][ntk_max]->Fill(d3d);
     }
 
-    if (vpeff.kind() == VertexerPairEff::erase) {
+    if (vpeff.kind() & VertexerPairEff::erase) {
       ++n_erase[0][0];
       ++n_erase[ntk_min][0];
       ++n_erase[0][ntk_max];
