@@ -4,15 +4,15 @@ year = '2016'
 ntkseeds = ''
 
 set_style()
-ps = plot_saver('../plots/bkgest/v14p2/vertexer_eff_%s%s' % (year, ntkseeds), size=(700,700), log=False, root=False)
+ps = plot_saver('../plots/bkgest/v14p2/vertexer_pair_effs_%s%s' % (year, ntkseeds), size=(700,700), log=False, root=False)
 
-f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/VertexerHistos/v14p2%s/background%s.root' % (ntkseeds, '' if year=='2016' else '_%s'%year))
-fh = ROOT.TFile('eff_%s_v14p2%s.root' % (year, ntkseeds), 'recreate')
+f = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_8025/VertexerPairEffsV14p2%s/background%s.root' % (ntkseeds, '' if year=='2016' else '_%s'%year))
+fh = ROOT.TFile('vpeffs_%s_v14p2%s.root' % (year, ntkseeds), 'recreate')
 
 for maxtk in ['maxtk3', 'maxtk4', 'maxtk5']:
-    h_merge = f.Get('mfvVertices/h_merge_d2d_jetht1000_%s' % maxtk)
-    h_pairs = f.Get('mfvVertices/h_pairs_d2d_jetht1000_%s' % maxtk)
-    h_erase = f.Get('mfvVertices/h_erase_d2d_jetht1000_%s' % maxtk)
+    h_merge = f.Get('mfvVertexerPairEffs/h_merge_d2d_mintk0_%s' % maxtk)
+    h_pairs = f.Get('mfvVertexerPairEffs/h_pairs_d2d_mintk0_%s' % maxtk)
+    h_erase = f.Get('mfvVertexerPairEffs/h_erase_d2d_mintk0_%s' % maxtk)
 
     h_merge.Rebin(10)
     h_pairs.Rebin(10)
@@ -55,7 +55,7 @@ for maxtk in ['maxtk3', 'maxtk4', 'maxtk5']:
 fh.Close()
 
 
-f = ROOT.TFile('eff_%s_v14p2%s.root' % (year, ntkseeds))
+f = ROOT.TFile('vpeffs_%s_v14p2%s.root' % (year, ntkseeds))
 #h = f.Get('maxtk5')
 #h.SetTitle(';d_{VV} (cm);Efficiency')
 #h.GetXaxis().SetRangeUser(0,0.4)
