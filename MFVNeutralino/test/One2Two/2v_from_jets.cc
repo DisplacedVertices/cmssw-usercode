@@ -103,15 +103,12 @@ void construct_dvvc(std::string year, int ntracks, bool correct_bquarks, int bqu
   }
 
   if (vary_eff) {
-    //maxtk_merge efficiency
-    if (year == "2015") {
-      eff_file = "eff_2015_v14.root";
-    } else if (year == "2016") {
-      eff_file = "eff_2016_v14.root";
-    } else if (year == "2015p6") {
-      eff_file = "eff_2015p6_v14.root";
-    }
+/*
+    //uniform efficiency
+    clearing_from_eff = false;
+*/
 
+    //maxtk_merge efficiency
     if (ntracks == 3) {
       eff_hist = "maxtk3_merge";
     } else if (ntracks == 4) {
@@ -136,27 +133,12 @@ void construct_dvvc(std::string year, int ntracks, bool correct_bquarks, int bqu
     }
 */
 
-/*
-    //ntkseeds efficiency
-    if (ntracks == 3) {
-      eff_file = "eff_3tkseeds_2016_v14.root";
-      eff_hist = "maxtk3";
-    } else if (ntracks == 4) {
-      eff_file = "eff_4tkseeds_2016_v14.root";
-      eff_hist = "maxtk4";
-    } else if (ntracks == 5) {
-      eff_file = "eff_5tkseeds_2016_v14.root";
-      eff_hist = "maxtk5";
-    } else if (ntracks == 7) {
-      eff_file = "eff_3tkseeds_2016_v14.root";
-      eff_hist = "maxtk3";
-    }
-*/
-
-/*
-    //uniform efficiency
-    clearing_from_eff = false;
-*/
+    //vertexer efficiency variations
+    //eff_file = "vpeffs_2016_v14p2_ntkseeds.root";
+    //eff_file = "vpeffs_2016_v14p2_ntkseeds_mintk.root";
+    //eff_file = "vpeffs_2016_v14p2_noduplicate.root";
+    //eff_file = "vpeffs_2016_v14p2_ntkseeds_noduplicate.root";
+    //eff_file = "vpeffs_2016_v14p2_ntkseeds_mintk_noduplicate.root";
   }
 
   printf("\tdphi_pdf_c = %.2f, dphi_pdf_e = %.2f, dphi_pdf_a = %.2f, eff_file = %s, eff_hist = %s\n", dphi_pdf_c, dphi_pdf_e, dphi_pdf_a, eff_file, eff_hist);
