@@ -68,3 +68,6 @@ eval $(scram ru -sh)
 cd ../..
 
 ./hists.exe root://cmseos.fnal.gov//store/user/tucker/TrackMoverV1/$z/$fn $outfn $nl $nb 2>&1
+
+# when done:
+# for x in 20 21 22 30 31 32 ; do mkdir $x ; for y in ${x}*root; do mv $y $x/${y/${x}_/} ; done ; cd $x ; py $CMSSW_BASE/src/JMTucker/MFVNeutralino/test/utilities.py merge_background ; cd - ; done
