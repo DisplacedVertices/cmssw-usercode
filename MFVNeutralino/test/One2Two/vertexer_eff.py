@@ -1,41 +1,43 @@
 from JMTucker.Tools.ROOTTools import *
 
 year = '2016'
-ntkseeds = ''
+ntkseeds = False
 
 set_style()
-ps = plot_saver('../plots/bkgest/v14p2/vertexer_pair_effs_%s%s' % (year, ntkseeds), size=(700,700), log=False, root=False)
+ps = plot_saver('../plots/bkgest/v14p2/vertexer_pair_effs_%s%s' % (year, '_ntkseeds' if ntkseeds else ''), size=(700,700), log=False, root=False)
 
-f = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_8025/VertexerPairEffsV14p2%s/background%s.root' % (ntkseeds, '' if year=='2016' else '_%s'%year))
-fh = ROOT.TFile('vpeffs_%s_v14p2%s.root' % (year, ntkseeds), 'recreate')
+f = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_8025/VertexerPairEffsV14p2/background%s.root' % ('' if year=='2016' else '_%s'%year))
+fh = ROOT.TFile('vpeffs_%s_v14p2%s.root' % (year, '_ntkseeds' if ntkseeds else ''), 'recreate')
 
-for maxtk in ['maxtk3', 'maxtk4', 'maxtk5']:
-    h_merge = f.Get('mfvVertexerPairEffs/h_merge_d2d_mintk0_%s' % maxtk)
-    h_pairs = f.Get('mfvVertexerPairEffs/h_pairs_d2d_mintk0_%s' % maxtk)
-    h_erase = f.Get('mfvVertexerPairEffs/h_erase_d2d_mintk0_%s' % maxtk)
+for itk in [3,4,5]:
+    if ntkseeds:
+        f = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_8025/VertexerPairEffsV14p2_%itkseeds/background%s.root' % (itk, '' if year=='2016' else '_%s'%year))
+    h_merge = f.Get('mfvVertexerPairEffs/h_merge_d2d_mintk0_maxtk%i' % itk)
+    h_pairs = f.Get('mfvVertexerPairEffs/h_pairs_d2d_mintk0_maxtk%i' % itk)
+    h_erase = f.Get('mfvVertexerPairEffs/h_erase_d2d_mintk0_maxtk%i' % itk)
 
     h_merge.Rebin(10)
     h_pairs.Rebin(10)
     h_erase.Rebin(10)
 
-    h_add_eff = h_merge.Clone('%s' % maxtk)
+    h_add_eff = h_merge.Clone('maxtk%i' % itk)
     h_add_eff.Add(h_erase)
     h_add_eff.Divide(h_add_eff, h_pairs, 1,1,'B')
     for i in range(1, h_add_eff.GetNbinsX()+2):
         h_add_eff.SetBinContent(i, 1-h_add_eff.GetBinContent(i))
     h_add_eff.Scale(1./h_add_eff.GetBinContent(h_add_eff.GetNbinsX()))
-    h_add_eff.SetTitle('%s;d_{VV} (cm);efficiency' % maxtk)
+    h_add_eff.SetTitle('maxtk%i;d_{VV} (cm);efficiency' % itk)
     h_add_eff.GetYaxis().SetRangeUser(0,1.05)
     h_add_eff.SetLineColor(ROOT.kGreen+2)
     h_add_eff.SetStats(0)
     h_add_eff.Draw()
 
-    h_merge_eff = h_merge.Clone('%s_merge' % maxtk)
+    h_merge_eff = h_merge.Clone('maxtk%i_merge' % itk)
     h_merge_eff.Divide(h_merge_eff, h_pairs, 1,1,'B')
     for i in range(1, h_merge_eff.GetNbinsX()+2):
         h_merge_eff.SetBinContent(i, 1-h_merge_eff.GetBinContent(i))
     h_merge_eff.Scale(1./h_merge_eff.GetBinContent(h_merge_eff.GetNbinsX()))
-    h_merge_eff.SetTitle('%s merge;d_{VV} (cm);efficiency' % maxtk)
+    h_merge_eff.SetTitle('maxtk%i merge;d_{VV} (cm);efficiency' % itk)
     h_merge_eff.GetYaxis().SetRangeUser(0,1.05)
     h_merge_eff.SetLineColor(ROOT.kBlue)
     h_merge_eff.SetStats(0)
@@ -47,7 +49,7 @@ for maxtk in ['maxtk3', 'maxtk4', 'maxtk5']:
     l.SetFillColor(0)
     l.Draw()
 
-    ps.save('h_eff_%s' % maxtk)
+    ps.save('h_eff_maxtk%i' % itk)
     fh.cd()
     h_add_eff.Write()
     h_merge_eff.Write()
@@ -55,7 +57,7 @@ for maxtk in ['maxtk3', 'maxtk4', 'maxtk5']:
 fh.Close()
 
 
-f = ROOT.TFile('vpeffs_%s_v14p2%s.root' % (year, ntkseeds))
+f = ROOT.TFile('vpeffs_%s_v14p2%s.root' % (year, '_ntkseeds' if ntkseeds else ''))
 #h = f.Get('maxtk5')
 #h.SetTitle(';d_{VV} (cm);Efficiency')
 #h.GetXaxis().SetRangeUser(0,0.4)
