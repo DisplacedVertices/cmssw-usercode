@@ -162,7 +162,8 @@ dirs_done = []
 #    print 'checking these %i dirs:' % len(dirs)
 #    for d in dirs:
 #        print d
-print 'crmon: checking %i dirs, be patient' % len(dirs)
+ndirs = len(dirs)
+print 'crmon: checking %i dir%s, be patient' % (ndirs, 's' if ndirs > 1 else '')
 
 def check_proxies():
     if options.renew_proxies:

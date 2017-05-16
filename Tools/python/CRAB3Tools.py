@@ -69,6 +69,12 @@ def crab_command(*args, **kwargs):
         if not result.has_key(k):
             result[k] = v
 
+    if not result.has_key('jobList'):
+        result['jobList'] = []
+        result['unhandledProblem'] = True
+
+    #pprint(result)
+
     if suppress_stdout:
         result['stdout'] = buf.getvalue()
         sys.stdout = old_stdout
