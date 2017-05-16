@@ -5,7 +5,7 @@ year = '2016'
 set_style()
 ps = plot_saver('../plots/bkgest/v14/vertexer_eff_%s' % year, size=(700,700), log=False, root=False)
 
-f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/VertexerHistosV14/background%s.root' % ('' if year=='2016' else '_%s'%year))
+f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/VertexerHistos/v14/background%s.root' % ('' if year=='2016' else '_%s'%year))
 fh = ROOT.TFile('eff_%s_v14.root' % year, 'recreate')
 
 for maxtk in ['maxtk3', 'maxtk4', 'maxtk5']:
