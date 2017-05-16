@@ -2,19 +2,20 @@ from JMTucker.Tools.ROOTTools import *
 
 year = '2016'
 ntkseeds = False
+mintk = False
 
 set_style()
-ps = plot_saver('../plots/bkgest/v14p2/vertexer_pair_effs_%s%s' % (year, '_ntkseeds' if ntkseeds else ''), size=(700,700), log=False, root=False)
+ps = plot_saver('../plots/bkgest/v14p2/vertexer_pair_effs_%s%s%s' % (year, '_ntkseeds' if ntkseeds else '', '_mintk' if mintk else ''), size=(700,700), log=False, root=False)
 
 f = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_8025/VertexerPairEffsV14p2/background%s.root' % ('' if year=='2016' else '_%s'%year))
-fh = ROOT.TFile('vpeffs_%s_v14p2%s.root' % (year, '_ntkseeds' if ntkseeds else ''), 'recreate')
+fh = ROOT.TFile('vpeffs_%s_v14p2%s%s.root' % (year, '_ntkseeds' if ntkseeds else '', '_mintk' if mintk else ''), 'recreate')
 
 for itk in [3,4,5]:
     if ntkseeds:
         f = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_8025/VertexerPairEffsV14p2_%itkseeds/background%s.root' % (itk, '' if year=='2016' else '_%s'%year))
-    h_merge = f.Get('mfvVertexerPairEffs/h_merge_d2d_mintk0_maxtk%i' % itk)
-    h_pairs = f.Get('mfvVertexerPairEffs/h_pairs_d2d_mintk0_maxtk%i' % itk)
-    h_erase = f.Get('mfvVertexerPairEffs/h_erase_d2d_mintk0_maxtk%i' % itk)
+    h_merge = f.Get('mfvVertexerPairEffs/h_merge_d2d_mintk%i_maxtk%i' % (itk if mintk else 0, itk))
+    h_pairs = f.Get('mfvVertexerPairEffs/h_pairs_d2d_mintk%i_maxtk%i' % (itk if mintk else 0, itk))
+    h_erase = f.Get('mfvVertexerPairEffs/h_erase_d2d_mintk%i_maxtk%i' % (itk if mintk else 0, itk))
 
     h_merge.Rebin(10)
     h_pairs.Rebin(10)
@@ -57,7 +58,7 @@ for itk in [3,4,5]:
 fh.Close()
 
 
-f = ROOT.TFile('vpeffs_%s_v14p2%s.root' % (year, '_ntkseeds' if ntkseeds else ''))
+f = ROOT.TFile('vpeffs_%s_v14p2%s%s.root' % (year, '_ntkseeds' if ntkseeds else '', '_mintk' if mintk else ''))
 #h = f.Get('maxtk5')
 #h.SetTitle(';d_{VV} (cm);Efficiency')
 #h.GetXaxis().SetRangeUser(0,0.4)
