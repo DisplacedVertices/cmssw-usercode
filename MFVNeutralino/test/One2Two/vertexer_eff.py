@@ -1,12 +1,13 @@
 from JMTucker.Tools.ROOTTools import *
 
 year = '2016'
+ntkseeds = ''
 
 set_style()
-ps = plot_saver('../plots/bkgest/v14p2/vertexer_eff_%s' % year, size=(700,700), log=False, root=False)
+ps = plot_saver('../plots/bkgest/v14p2/vertexer_eff_%s%s' % (year, ntkseeds), size=(700,700), log=False, root=False)
 
-f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/VertexerHistos/v14p2/background%s.root' % ('' if year=='2016' else '_%s'%year))
-fh = ROOT.TFile('eff_%s_v14p2.root' % year, 'recreate')
+f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/VertexerHistos/v14p2%s/background%s.root' % (ntkseeds, '' if year=='2016' else '_%s'%year))
+fh = ROOT.TFile('eff_%s_v14p2%s.root' % (year, ntkseeds), 'recreate')
 
 for maxtk in ['maxtk3', 'maxtk4', 'maxtk5']:
     h_merge = f.Get('mfvVertices/h_merge_d2d_jetht1000_%s' % maxtk)
@@ -54,7 +55,7 @@ for maxtk in ['maxtk3', 'maxtk4', 'maxtk5']:
 fh.Close()
 
 
-f = ROOT.TFile('eff_%s_v14p2.root' % year)
+f = ROOT.TFile('eff_%s_v14p2%s.root' % (year, ntkseeds))
 #h = f.Get('maxtk5')
 #h.SetTitle(';d_{VV} (cm);Efficiency')
 #h.GetXaxis().SetRangeUser(0,0.4)
