@@ -92,6 +92,7 @@ if [[ $FROMLHE -eq 1 ]]; then
         ( scramproj LHE 7_1_16_patch1 && lhe )
     fi
     exitbanner $? LHE
+    echo LHE nevents $(edmEventSize -v lhe.root | grep Events)
     echo END LHE at $(date)
 fi
 
