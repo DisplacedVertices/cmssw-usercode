@@ -19,6 +19,7 @@ echo MAXEVENTS: ${MAXEVENTS}
 echo SALT: ${SALT}
 echo USETHISCMSSW: ${USETHISCMSSW}
 echo FROMLHE: ${FROMLHE}
+echo TRIGFILTER: ${TRIGFILTER}
 echo DUMMYFORHASH: ${DUMMYFORHASH}
 echo OUTPUTLEVEL: ${OUTPUTLEVEL}
 echo TODO: ${TODO}
@@ -68,7 +69,7 @@ function gensim {
 }
 
 function rawhlt {
-    cmd="cmsRun -j tempfjr.xml rawhlt.py salt=${SALT} jobnum=${JOBNUM} premix=${PREMIX} ${TODO2}"
+    cmd="cmsRun -j tempfjr.xml rawhlt.py salt=${SALT} jobnum=${JOBNUM} premix=${PREMIX} trigfilter=${TRIGFILTER} ${TODO2}"
     echo $cmd at $(date) ; eval $cmd 2>&1
 }
 
