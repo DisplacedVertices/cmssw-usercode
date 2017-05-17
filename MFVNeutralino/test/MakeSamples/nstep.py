@@ -10,7 +10,7 @@ use_this_cmssw = False
 premix = True
 ex = ''
 
-if 1:
+if 0:
     meta, taus, masses = 'neu', [100, 300, 1000, 10000, 30000], [300, 400, 600, 800, 1200, 1600]
 elif 0:
     meta, taus, masses = 'lq2', [100, 300, 1000, 10000], [300, 400, 600, 800, 1200, 1600]
@@ -34,21 +34,20 @@ elif 0:
     from_lhe = True
     output_level = 'gensim'
     output_dataset_tag = 'RunIISummer15GS-MCRUN2_71_V1'
-elif 1:
+elif 0:
     meta = 'qcdht1000'
     nevents, events_per = 1500, 1500
     from_lhe = True
     output_level = 'ntuple'
-elif 0:
-    meta, taus, masses = 'neu', [1000, 10000], [800]
+elif 1:
+    meta, taus, masses = 'neu', [300, 1000, 10000], [400, 800]
     use_this_cmssw = True
     premix = False
-    ex = '_hip1p0'
+    ex = '_retest'
 
-ex = ''
 #ex = '_test'
-#nevents, events_per = 10,10 
-#meta, taus, masses = 'neu', [10000], [800]
+#nevents, events_per = 10,10
+#meta, taus, masses = 'neu', [1000, 10000], [800]
 
 ################################################################################
 
