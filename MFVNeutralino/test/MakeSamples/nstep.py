@@ -140,6 +140,9 @@ def submit(config, name, todo, todo2=None):
     if not fixed_salt:
         steering[salt_index] = 'SALT=' + name + todo
     steering[todo_index] = 'TODO=todo=' + todo
+    if todo2 is None:
+        if 'hip1p0' in ex:
+            todo2 = 'hip,1.0'
     if todo2 is not None:
         steering[todo2_index] = 'TODO2=todo=' + todo2
         if not fixed_salt:
