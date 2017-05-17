@@ -83,7 +83,7 @@ def effs(fn):
     else:
         print '%s (w = %.3e): # ev: %10.1f  pass evt+vtx: %5.1f -> %5.3e  pass vtx only: %5.1f -> %5.3e' % (sname.ljust(30), weight, den, numall, float(numall)/den, numvtx, float(numvtx)/den)
         if weighted:
-            print '  weighted to %.1f/fb: %5.2f +/- %5.2f' % (ac.int_lumi, numall*weight, numall**0.5 * weight)
+            print '  weighted to %.1f/pb: %5.2f +/- %5.2f' % (ac.int_lumi, numall*weight, numall**0.5 * weight)
         else:
             print '  number of events: %5.2f +/- %5.2f' % (numall*weight, numall**0.5 * weight)
         if cuts:
