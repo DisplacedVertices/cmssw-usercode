@@ -178,24 +178,18 @@ _add_ds("main", {
 
 # HIP effect simulation samples
 _add_ds("main", {
-'mfv_ddbar_tau00300um_M0800_hip1p0': _fromnum1("/store/user/tucker/mfv_ddbar_tau00300um_M0800_hip1p0/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170429_055113", 100, fnbase="reco"),
-'mfv_ddbar_tau00300um_M0800_hip1p2': _fromnum1("/store/user/tucker/mfv_ddbar_tau00300um_M0800_hip1p2/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170429_055344", 100, fnbase="reco"),
-'mfv_ddbar_tau01000um_M0400_hip1p0': _fromnum1("/store/user/tucker/mfv_ddbar_tau01000um_M0400_hip1p0/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170429_055229", 100, fnbase="reco"),
-'mfv_ddbar_tau01000um_M0800_hip1p0': (99, ['/store/user/tucker/mfv_ddbar_tau01000um_M0800_hip1p0/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170429_055128/0000/reco_%i.root' % i for i in chain(xrange(1,91), xrange(92,101))]),
-'mfv_ddbar_tau01000um_M0800_hip1p2': _fromnum1("/store/user/tucker/mfv_ddbar_tau01000um_M0800_hip1p2/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170429_055359", 100, fnbase="reco"),
-'mfv_ddbar_tau01000um_M1600_hip1p0': _fromnum1("/store/user/tucker/mfv_ddbar_tau01000um_M1600_hip1p0/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170429_055303", 100, fnbase="reco"),
-'mfv_ddbar_tau10000um_M0800_hip1p0': _fromnum1("/store/user/tucker/mfv_ddbar_tau10000um_M0800_hip1p0/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170429_055143", 100, fnbase="reco"),
-'mfv_ddbar_tau10000um_M0800_hip1p2': _fromnum1("/store/user/tucker/mfv_ddbar_tau10000um_M0800_hip1p2/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170429_055416", 100, fnbase="reco"),
-'mfv_neu_tau00300um_M0800_hip1p0': _fromnum1("/store/user/tucker/mfv_neu_tau00300um_M0800_hip1p0/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170429_053957", 100, fnbase="reco"),
-'mfv_neu_tau00300um_M0800_hip1p2': _fromnum1("/store/user/tucker/mfv_neu_tau00300um_M0800_hip1p2/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170429_054730", 100, fnbase="reco"),
-'mfv_neu_tau01000um_M0400_hip1p0': _fromnum1("/store/user/tucker/mfv_neu_tau01000um_M0400_hip1p0/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170429_054504", 100, fnbase="reco"),
-'mfv_neu_tau01000um_M0400_hip1p2': _fromnum1("/store/user/tucker/mfv_neu_tau01000um_M0400_hip1p2/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170429_054941", 100, fnbase="reco"),
-'mfv_neu_tau01000um_M0800_hip1p0': _fromnum1("/store/user/tucker/mfv_neu_tau01000um_M0800_hip1p0/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170429_054013", 100, fnbase="reco"),
-'mfv_neu_tau01000um_M0800_hip1p2': _fromnum1("/store/user/tucker/mfv_neu_tau01000um_M0800_hip1p2/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170429_054746", 100, fnbase="reco"),
-'mfv_neu_tau01000um_M1600_hip1p0': (98, ['/store/user/tucker/mfv_neu_tau01000um_M1600_hip1p0/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170429_054535/0000/reco_%i.root' % i for i in chain(xrange(1,30), xrange(31,65), xrange(66,101))]),
-'mfv_neu_tau01000um_M1600_hip1p2': (98, ['/store/user/tucker/mfv_neu_tau01000um_M1600_hip1p2/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170429_055012/0000/reco_%i.root' % i for i in chain(xrange(1,16), xrange(17,34), xrange(35,101))]),
-'mfv_neu_tau10000um_M0800_hip1p0': _fromnum1("/store/user/tucker/mfv_neu_tau10000um_M0800_hip1p0/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170429_054029", 100, fnbase="reco"),
-'mfv_neu_tau10000um_M0800_hip1p2': _fromnum1("/store/user/tucker/mfv_neu_tau10000um_M0800_hip1p2/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170429_054802", 100, fnbase="reco"),
+'mfv_ddbar_tau00300um_M0400_hip1p0': _fromnum1("/store/user/tucker/mfv_ddbar_tau00300um_M0400/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170513_221235", 100, fnbase="reco"),
+'mfv_ddbar_tau00300um_M0800_hip1p0': _fromnum1("/store/user/tucker/mfv_ddbar_tau00300um_M0800/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170513_221250", 100, fnbase="reco"),
+'mfv_ddbar_tau01000um_M0400_hip1p0': _fromnum1("/store/user/tucker/mfv_ddbar_tau01000um_M0400/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170513_221304", 100, fnbase="reco"),
+'mfv_ddbar_tau01000um_M0800_hip1p0': _fromnum1("/store/user/tucker/mfv_ddbar_tau01000um_M0800/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170513_221320", 100, fnbase="reco"),
+'mfv_ddbar_tau10000um_M0400_hip1p0': _fromnum1("/store/user/tucker/mfv_ddbar_tau10000um_M0400/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170513_221335", 100, fnbase="reco"),
+'mfv_ddbar_tau10000um_M0800_hip1p0': _fromnum1("/store/user/tucker/mfv_ddbar_tau10000um_M0800/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170513_221351", 100, fnbase="reco"),
+'mfv_neu_tau00300um_M0400_hip1p0': _fromnum1("/store/user/tucker/mfv_neu_tau00300um_M0400/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170513_221102", 100, fnbase="reco"),
+'mfv_neu_tau00300um_M0800_hip1p0': _fromnum1("/store/user/tucker/mfv_neu_tau00300um_M0800/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170513_221118", 100, fnbase="reco"),
+'mfv_neu_tau01000um_M0400_hip1p0': _fromnum1("/store/user/tucker/mfv_neu_tau01000um_M0400/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170513_221133", 100, fnbase="reco"),
+'mfv_neu_tau01000um_M0800_hip1p0': _fromnum1("/store/user/tucker/mfv_neu_tau01000um_M0800/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170511_171823", 100, fnbase="reco"),
+'mfv_neu_tau10000um_M0400_hip1p0': _fromnum1("/store/user/tucker/mfv_neu_tau10000um_M0400/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170513_221149", 100, fnbase="reco"),
+'mfv_neu_tau10000um_M0800_hip1p0': _fromnum1("/store/user/tucker/mfv_neu_tau10000um_M0800/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170511_171840", 100, fnbase="reco"),
 })
 
 _add_ds('validation', {
