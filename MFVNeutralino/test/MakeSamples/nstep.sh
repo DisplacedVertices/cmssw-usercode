@@ -89,12 +89,19 @@ fi
 if [[ $FROMLHE -eq 1 ]]; then
     echo
     echo START LHE at $(date)
+
     if [[ $USETHISCMSSW -eq 1 ]]; then
-        lhe
-    else
-        ( scramproj LHE 7_1_16_patch1 && lhe )
+        eval $(scram unsetenv -sh)
     fi
+
+    scramproj LHE 7_1_16_patch1 && lhe
     exitbanner $? LHE
+
+    if [[ $USETHISCMSSW -eq 1 ]]; then
+        cd CMSSW_8_0_25/src
+        eval $(scram runtime -sh)
+        cd ../..
+    fi
 fi
 
 ################################################################################
