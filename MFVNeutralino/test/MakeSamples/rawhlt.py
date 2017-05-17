@@ -52,7 +52,7 @@ if 'debug' in sys.argv:
     process.maxEvents.input = 50
 
 process.output = cms.OutputModule('PoolOutputModule',
-                                  fileName = cms.untracked.string('hlt.root'),
+                                  fileName = cms.untracked.string('rawhlt.root'),
                                   outputCommands = process.PREMIXRAWEventContent.outputCommands if premix else process.RAWSIMEventContent.outputCommands,
                                   eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
                                   splitLevel = cms.untracked.int32(0),
