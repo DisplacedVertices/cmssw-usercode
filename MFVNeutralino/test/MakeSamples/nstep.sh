@@ -53,6 +53,8 @@ function exitbanner {
       echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
       exit $1
     fi
+
+    echo END $2 at $(date) nevents $(edmEventSize -v ${2,,}.root | grep Events)
 }
 
 function lhe {
@@ -92,8 +94,6 @@ if [[ $FROMLHE -eq 1 ]]; then
         ( scramproj LHE 7_1_16_patch1 && lhe )
     fi
     exitbanner $? LHE
-    echo LHE nevents $(edmEventSize -v lhe.root | grep Events)
-    echo END LHE at $(date)
 fi
 
 ################################################################################
@@ -106,7 +106,6 @@ else
     ( scramproj GENSIM 7_1_21_patch2 && gensim )
 fi
 exitbanner $? GENSIM
-echo END GENSIM at $(date)
 
 if [[ $OUTPUTLEVEL == "gensim" ]]; then
     echo OUTPUTLEVEL told me to exit
@@ -123,7 +122,6 @@ else
     ( scramproj RAWHLT 8_0_21 && rawhlt )
 fi
 exitbanner $? RAWHLT
-echo END RAWHLT at $(date)
 
 ################################################################################
 
@@ -138,7 +136,6 @@ fi
 
 reco
 exitbanner $? RECO
-echo END RECO at $(date)
 
 ################################################################################
 
