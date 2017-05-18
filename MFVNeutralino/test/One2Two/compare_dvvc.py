@@ -9,14 +9,14 @@ mode = 'vary_eff'
 
 set_style()
 ROOT.gStyle.SetOptFit(0)
-ps = plot_saver('../plots/bkgest/v14/compare_dvvc_%s_%s' % (mode, year), size=(700,700), root=False, log=False)
+ps = plot_saver('../plots/bkgest/v14p2/compare_dvvc_%s_%s' % (mode, year), size=(700,700), root=False, log=False)
 
-fn1 = ['2v_from_jets_%s_3track_default_v14.root' % year, '2v_from_jets_%s_3track_%s_v14.root' % (year, mode)]
-fn2 = ['2v_from_jets_%s_4track_default_v14.root' % year, '2v_from_jets_%s_4track_%s_v14.root' % (year, mode)]
-fn3 = ['2v_from_jets_%s_5track_default_v14.root' % year, '2v_from_jets_%s_5track_%s_v14.root' % (year, mode)]
+fn1 = ['2v_from_jets_%s_3track_default_v14p2.root' % year, '2v_from_jets_%s_3track_%s_v14p2.root' % (year, mode)]
+fn2 = ['2v_from_jets_%s_4track_default_v14p2.root' % year, '2v_from_jets_%s_4track_%s_v14p2.root' % (year, mode)]
+fn3 = ['2v_from_jets_%s_5track_default_v14p2.root' % year, '2v_from_jets_%s_5track_%s_v14p2.root' % (year, mode)]
 
 if mode == 'vary_eff':
-    ls = ['vertex pair survival efficiency', 'vertex survival efficiency']
+    ls = ['vertexer efficiency', 'ntkseeds efficiency']
 
 if mode == 'vary_dphi':
     ls = ['|#Delta#phi| from 3-track #Delta#phi_{JJ}', 'uniform |#Delta#phi|']
@@ -265,39 +265,14 @@ for i in range(3):
     line.SetLineWidth(2)
     line.Draw()
 
-    if mode == 'vary_dphi':
-        t5 = ROOT.TLatex()
-        t5.SetTextFont(42)
-        t5.SetTextSize(0.04)
-        t5.DrawLatex(0, ys[i][2] - eys[i][2] - t5.GetTextSize(), '%.2f #pm %.2f' % (ys[i][2], eys[i][2]))
+    t5 = ROOT.TLatex()
+    t5.SetTextFont(42)
+    t5.SetTextSize(0.04)
+    t5.DrawLatex(0, ys[i][2] - eys[i][2] - t5.GetTextSize(), '%.2f #pm %.2f' % (ys[i][2], eys[i][2]))
 
-        t = ROOT.TLatex()
-        t.SetTextFont(42)
-        t.SetTextSize(0.04)
-        t.DrawLatex(-2.5, 0.2, '#splitline{difference of 5-or-more-track ratio from 1:}{%.2f #pm %.2f}' % (abs(ys[i][2] - 1), eys[i][2]))
-
-    else:
-        r = g.Fit('pol1','S','',-2,-1)
-        g5 = ROOT.TGraphErrors(1, array('d',[-0.1]), array('d',[r.Value(0)]), array('d',[0]), array('d',[r.ParError(0)]))
-        g5.SetLineColor(ROOT.kRed)
-        g5.SetMarkerColor(ROOT.kRed)
-        g5.SetMarkerStyle(21)
-        g5.Draw('P')
-
-        t5 = ROOT.TLatex()
-        t5.SetTextFont(42)
-        t5.SetTextSize(0.04)
-        t5.SetTextColor(ROOT.kRed)
-        t5.DrawLatex(-0.1, r.Value(0) - r.ParError(0) - t5.GetTextSize(), '%.2f #pm %.2f' % (r.Value(0), r.ParError(0)))
-
-        t3 = ROOT.TLatex()
-        t3.SetTextFont(42)
-        t3.SetTextSize(0.04)
-        t3.DrawLatex(-2, ys[i][0] - eys[i][0] - t3.GetTextSize(), '%.2f #pm %.2f' % (ys[i][0], eys[i][0]))
-
-        t = ROOT.TLatex()
-        t.SetTextFont(42)
-        t.SetTextSize(0.04)
-        t.DrawLatex(-2.5, 0.2, '#splitline{difference from 3-track to 5-or-more-track:}{%.2f #pm %.2f}' % (abs(r.Value(0) - ys[i][0]), (r.ParError(0)**2 + eys[i][0]**2)**0.5))
+    t = ROOT.TLatex()
+    t.SetTextFont(42)
+    t.SetTextSize(0.04)
+    t.DrawLatex(-2.5, 0.2, '#splitline{difference of 5-or-more-track ratio from 1:}{%.2f #pm %.2f}' % (abs(ys[i][2] - 1), eys[i][2]))
 
     ps.save('ratio_%s_%s' % (bins[i], mode))

@@ -8,6 +8,7 @@ output_dataset_tag = 'RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_
 fixed_salt = ''
 use_this_cmssw = False
 premix = True
+trig_filter = False
 ex = ''
 
 if 0:
@@ -111,6 +112,7 @@ steering = [
     'SALT=' + fixed_salt,
     'USETHISCMSSW=%i' % use_this_cmssw,
     'FROMLHE=%i' % from_lhe,
+    'TRIGFILTER=%i' % trig_filter,
     'PREMIX=%i' % premix,
     'export DUMMYFORHASH=%i' % dummy_for_hash,  # stupid crab requires a =
     'OUTPUTLEVEL=%s' % output_level,

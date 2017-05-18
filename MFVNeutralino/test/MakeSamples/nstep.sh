@@ -19,6 +19,7 @@ echo MAXEVENTS: ${MAXEVENTS}
 echo SALT: ${SALT}
 echo USETHISCMSSW: ${USETHISCMSSW}
 echo FROMLHE: ${FROMLHE}
+echo TRIGFILTER: ${TRIGFILTER}
 echo DUMMYFORHASH: ${DUMMYFORHASH}
 echo OUTPUTLEVEL: ${OUTPUTLEVEL}
 echo TODO: ${TODO}
@@ -44,6 +45,10 @@ function fixfjr {
     fi
 }
 
+function nevents {
+    echo $(edmEventSize -v $1 | grep Events)
+}
+
 function exitbanner {
     fixfjr
 
@@ -53,6 +58,8 @@ function exitbanner {
       echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
       exit $1
     fi
+
+    echo END $2 at $(date) nevents $(nevents ${2,,}.root)
 }
 
 function lhe {
@@ -66,7 +73,7 @@ function gensim {
 }
 
 function rawhlt {
-    cmd="cmsRun -j tempfjr.xml rawhlt.py salt=${SALT} jobnum=${JOBNUM} premix=${PREMIX} ${TODO2}"
+    cmd="cmsRun -j tempfjr.xml rawhlt.py salt=${SALT} jobnum=${JOBNUM} premix=${PREMIX} trigfilter=${TRIGFILTER} ${TODO2}"
     echo $cmd at $(date) ; eval $cmd 2>&1
 }
 
@@ -86,13 +93,19 @@ fi
 if [[ $FROMLHE -eq 1 ]]; then
     echo
     echo START LHE at $(date)
+
     if [[ $USETHISCMSSW -eq 1 ]]; then
-        lhe
-    else
-        ( scramproj LHE 7_1_16_patch1 && lhe )
+        eval $(scram unsetenv -sh)
     fi
+
+    scramproj LHE 7_1_16_patch1 && lhe
     exitbanner $? LHE
-    echo END LHE at $(date)
+
+    if [[ $USETHISCMSSW -eq 1 ]]; then
+        cd CMSSW_8_0_25/src
+        eval $(scram runtime -sh)
+        cd ../..
+    fi
 fi
 
 ################################################################################
@@ -105,7 +118,6 @@ else
     ( scramproj GENSIM 7_1_21_patch2 && gensim )
 fi
 exitbanner $? GENSIM
-echo END GENSIM at $(date)
 
 if [[ $OUTPUTLEVEL == "gensim" ]]; then
     echo OUTPUTLEVEL told me to exit
@@ -122,7 +134,6 @@ else
     ( scramproj RAWHLT 8_0_21 && rawhlt )
 fi
 exitbanner $? RAWHLT
-echo END RAWHLT at $(date)
 
 ################################################################################
 
@@ -137,7 +148,6 @@ fi
 
 reco
 exitbanner $? RECO
-echo END RECO at $(date)
 
 ################################################################################
 
@@ -157,12 +167,12 @@ if [[ $OUTPUTLEVEL == "ntuple" || $OUTPUTLEVEL == "minitree" ]]; then
     doit ntuple.py reco.root ; exitcode=$?
 
     if [[ $exitcode -eq 0 ]]; then
-        echo NTUPLE nevents $(edmEventSize -v ntuple.root | grep Events)
+        echo NTUPLE done at $(date) nevents $(nevents ntuple.root)
 
         if [[ $OUTPUTLEVEL == "minitree" ]]; then
             doit minitree.py ntuple.root ; exitcode=$?
             if [[ $exitcode -eq 0 ]]; then
-                echo MINITREE nevents $(python -c "import sys; sys.argv.append('-b'); import ROOT; f=ROOT.TFile('minitree.root'); print f.Get('mfvMiniTreeNtk3/t').GetEntries(), f.Get('mfvMiniTreeNtk4/t').GetEntries(), f.Get('mfvMiniTree/t').GetEntries()")
+                echo MINITREE done at $(date) nevents $(python -c "import sys; sys.argv.append('-b'); import ROOT; f=ROOT.TFile('minitree.root'); print f.Get('mfvMiniTreeNtk3/t').GetEntries(), f.Get('mfvMiniTreeNtk4/t').GetEntries(), f.Get('mfvMiniTree/t').GetEntries()")
             fi
         fi
     fi
@@ -176,3 +186,15 @@ if [[ $OUTPUTLEVEL == "ntuple" || $OUTPUTLEVEL == "minitree" ]]; then
 
     echo END NTUPLE\|MINITREE at $(date)
 fi
+
+################################################################################
+
+echo recap of events in files:
+for fn in lhe gensim rawhlt reco ntuple; do
+    fn=${fn}.root
+    if [[ -e $fn ]]; then
+        echo $(nevents $fn)
+    else
+        echo no file $fn
+    fi
+done
