@@ -27,7 +27,7 @@ process.load('Configuration.StandardSequences.Reconstruction_cff')
 process.load('CommonTools.ParticleFlow.EITopPAG_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
-process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('file:hlt.root'))
+process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('file:rawhlt.root'))
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 process.options = cms.untracked.PSet(
     wantSummary = cms.untracked.bool(True),

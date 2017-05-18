@@ -8,6 +8,8 @@ from Configuration.StandardSequences.Eras import eras
 randomize = 'norandomize' not in sys.argv
 salt = ''
 premix = True
+trigfilter = False
+trigfilterpath = 'HLT_PFHT800_v7'
 jobnum = 1
 
 for arg in sys.argv:
@@ -16,7 +18,9 @@ for arg in sys.argv:
     elif arg.startswith('jobnum='):
         jobnum = int(arg.replace('jobnum=',''))
     elif arg.startswith('premix='):
-        premix = arg.replace('premix=','') != '0'
+        premix = arg.replace('premix=','') == '1'
+    elif arg.startswith('trigfilter='):
+        trigfilter = arg.replace('trigfilter=','') == '1'
 
 process = cms.Process('HLT', eras.Run2_2016)
 
@@ -52,11 +56,13 @@ if 'debug' in sys.argv:
     process.maxEvents.input = 50
 
 process.output = cms.OutputModule('PoolOutputModule',
-                                  fileName = cms.untracked.string('hlt.root'),
+                                  fileName = cms.untracked.string('rawhlt.root'),
                                   outputCommands = process.PREMIXRAWEventContent.outputCommands if premix else process.RAWSIMEventContent.outputCommands,
                                   eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
                                   splitLevel = cms.untracked.int32(0),
                                   )
+if trigfilter:
+    process.output.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring(trigfilterpath))
 
 import minbias
 if premix:
@@ -80,7 +86,11 @@ process.schedule = cms.Schedule(process.digitisation_step)
 if premix:
     process.schedule.append(process.datamixing_step)
 process.schedule.extend([process.L1simulation_step,process.digi2raw_step])
+
+if trigfilter:
+    process.HLTSchedule = cms.Schedule(process.HLTriggerFirstPath, getattr(process, trigfilterpath), process.HLTriggerFinalPath, process.HLTAnalyzerEndpath)
 process.schedule.extend(process.HLTSchedule)
+
 process.schedule.append(process.output_step)
 
 from HLTrigger.Configuration.customizeHLTforMC import customizeHLTforFullSim 
@@ -89,3 +99,9 @@ process = customizeHLTforFullSim(process)
 if randomize: # for minbias
     from modify import deterministic_seeds
     deterministic_seeds(process, 74205, salt, jobnum)
+
+categories = ['L1TGlobal']
+print 'silencing MessageLogger about these categories:', categories
+for category in categories:
+    process.MessageLogger.categories.append(category)
+    setattr(process.MessageLogger.cerr, category, cms.untracked.PSet(limit=cms.untracked.int32(0)))

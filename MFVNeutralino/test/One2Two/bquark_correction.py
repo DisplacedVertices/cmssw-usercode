@@ -5,7 +5,7 @@ ROOT.TH1.AddDirectory(0)
 year = '2016'
 
 set_style()
-ps = plot_saver('../plots/bkgest/v14/bquark_correction_%s' % year, size=(700,700), root=False, log=False)
+ps = plot_saver('../plots/bkgest/v14p2/bquark_correction_%s' % year, size=(700,700), root=False, log=False)
 
 ntk = ['3-track', '4-track', '5-track', '4-track-3-track']
 
@@ -34,7 +34,7 @@ ey3 = []
 for i,ntracks in enumerate([3,4,5,7]):
     print ntk[i]
 
-    h1 = ROOT.TFile('2v_from_jets_%s_%itrack_bquark_uncorrected_v14.root' % (year, ntracks)).Get('h_c1v_dvv')
+    h1 = ROOT.TFile('2v_from_jets_%s_%itrack_bquark_uncorrected_v14p2.root' % (year, ntracks)).Get('h_c1v_dvv')
     h1.SetStats(0)
     h1.SetLineColor(ROOT.kBlack)
     h1.SetLineWidth(2)
@@ -44,7 +44,7 @@ for i,ntracks in enumerate([3,4,5,7]):
         h1.GetYaxis().SetRangeUser(0,0.4)
     h1.Draw('hist e')
 
-    h2 = ROOT.TFile('2v_from_jets_%s_%itrack_bquark_corrected_v14.root' % (year, ntracks)).Get('h_c1v_dvv')
+    h2 = ROOT.TFile('2v_from_jets_%s_%itrack_bquark_corrected_v14p2.root' % (year, ntracks)).Get('h_c1v_dvv')
     h2.SetStats(0)
     h2.SetLineColor(ROOT.kRed)
     h2.SetLineWidth(2)

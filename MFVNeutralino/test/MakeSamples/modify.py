@@ -2,6 +2,8 @@ import FWCore.ParameterSet.Config as cms
 
 def set_qcdht(process, which):
     process.externalLHEProducer.args = [{
+            # yes octal
+            0700: '/cvmfs/cms.cern.ch/phys_generator/gridpacks/slc6_amd64_gcc481/13TeV/madgraph/V5_2.2.2/QCD_HT_LO_MLM/QCD_HT700to1000/v1/QCD_HT700to1000_tarball.tar.xz',
             1000: '/cvmfs/cms.cern.ch/phys_generator/gridpacks/slc6_amd64_gcc481/13TeV/madgraph/V5_2.2.2/QCD_HT_LO_MLM/QCD_HT1000to1500/v1/QCD_HT1000to1500_tarball.tar.xz',
             1500: '/cvmfs/cms.cern.ch/phys_generator/gridpacks/slc6_amd64_gcc481/13TeV/madgraph/V5_2.2.2/QCD_HT_LO_MLM/QCD_HT1500to2000/v1/QCD_HT1500to2000_tarball.tar.xz',
             2000: '/cvmfs/cms.cern.ch/phys_generator/gridpacks/slc6_amd64_gcc481/13TeV/madgraph/V5_2.2.2/QCD_HT_LO_MLM/QCD_HT2000toInf/v1/QCD_HT2000toInf_tarball.tar.xz',
@@ -464,7 +466,7 @@ def set_oldduplicatemerge(process, outliers_rejection=False):
         if outliers_rejection:
             process.mergedDuplicateTracks.Fitter = 'KFFittingSmootherWithOutliersRejectionAndRK'
 
-def set_hip(process, scale=1.0): # scale relative to 6e33
+def set_hip_simulation(process, scale=1.0): # scale relative to 6e33
     for x in 'process.SiStripSimBlock process.stripDigitizer process.theDigitizers.strip process.theDigitizersValid.strip process.theDigitizersMixPreMix.strip process.theDigitizersMixPreMixValid.strip process.mix.digitizers.strip process.mixData'.split():
         try:
             y = eval(x)
@@ -472,3 +474,7 @@ def set_hip(process, scale=1.0): # scale relative to 6e33
             continue
         y.APVSaturationFromHIP = True
         y.APVSaturationProbScaling = scale
+
+def set_hip_mitigation(process):
+    from RecoTracker.Configuration.customizeMinPtForHitRecoveryInGluedDet import customizeHitRecoveryInGluedDetOn
+    customizeHitRecoveryInGluedDetOn(process)

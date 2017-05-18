@@ -4,6 +4,7 @@
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MovedTracksNtuple.h"
 #include "utils.h"
+#include <cassert>
 #include <iostream>
 
 // #error need to support picking hlt bit and final ht cut
@@ -25,9 +26,10 @@ int main(int argc, char** argv) {
   file_and_tree fat(in_fn, out_fn);
   TTree* t = fat.t;
   mfv::MovedTracksNtuple& nt = fat.nt;
+  t->GetEntry(0);
 
-  TH1F* h_sums = ((TH1F*)fat.f->Get("mcStat/h_sums"));
-  bool is_mc = h_sums != 0;
+  const bool is_mc = nt.run == 1;
+  TH1F* h_sums = is_mc ? ((TH1F*)fat.f->Get("mcStat/h_sums")) : 0;
 
   fat.f_out->mkdir("mfvWeight")->cd();
   fat.f->Get("mcStat/h_sums")->Clone("h_sums");
@@ -83,8 +85,19 @@ int main(int argc, char** argv) {
   double den = 0;
   std::map<std::string, double> nums;
 
-  //TFile* f_pvzweights = TFile::Open("../pvzweights.root");
-  //TH1D* h_pvzweights = (TH1D*)f_pvzweights->Get("rat");
+  const std::vector<std::string> extra_weights_hists = {
+    //"nocuts_npv_den",
+    //"nocuts_pvz_den",
+    //"nocuts_pvx_den",
+    //"nocuts_pvy_den",
+    //"nocuts_ntracks_den",
+    //"nocuts_npv_den_redo"
+    //"nocuts_ht_den",
+    //"nocuts_pvntracks_den",
+  };
+  TFile* extra_weights = extra_weights_hists.size() > 0 ? TFile::Open("reweight.root") : 0;
+  const bool use_extra_weights = extra_weights != 0 && extra_weights->IsOpen();
+  printf("using extra weights from reweight.root? %i\n", use_extra_weights);
 
   for (int j = 0, je = t->GetEntries(); j < je; ++j) {
     //if (j == 100000) break;
@@ -95,12 +108,32 @@ int main(int argc, char** argv) {
       fflush(stdout);
     }
 
-    const double w = apply_weight ? nt.weight : 1.;
-    //if (0) {
-    //  int bin = h_pvzweights->FindBin(nt.pvz);
-    //  if (bin >= 1 && bin <= h_pvzweights->GetNbinsX())
-    //    w *= h_pvzweights->GetBinContent(bin);
-    //}
+    double w = 1;
+
+    if (is_mc && apply_weight) {
+      w *= nt.weight;
+
+      if (use_extra_weights) {
+        for (const auto& name : extra_weights_hists) {
+          TH1D* hw = (TH1D*)extra_weights->Get(name.c_str());
+          assert(hw);
+          const double v =
+            name == "nocuts_npv_den" ? nt.npv :
+            name == "nocuts_pvz_den" ? nt.pvz :
+            name == "nocuts_pvx_den" ? nt.pvx :
+            name == "nocuts_pvy_den" ? nt.pvy :
+            name == "nocuts_ntracks_den" ? nt.ntracks :
+            name == "nocuts_npv_den_redo" ? nt.npv :
+            name == "nocuts_ht_den" ? nt.jetht :
+            name == "nocuts_pvntracks_den" ? nt.pvntracks :
+            -1e99;
+          assert(v > -1e98);
+          const int bin = hw->FindBin(v);
+          if (bin >= 1 && bin <= hw->GetNbinsX())  
+            w *= hw->GetBinContent(bin);
+        }
+      }
+    }
 
     const double movedist2 = mag(nt.move_x - nt.pvx,
                                  nt.move_y - nt.pvy);
@@ -185,25 +218,25 @@ int main(int argc, char** argv) {
       if (dist2move > 0.005)
         continue;
 
-      const bool pass_ntracks      = nt.p_vtxs_ntracks     ->at(ivtx) >= 5;
-      const bool pass_bs2derr      = nt.p_vtxs_bs2derr     ->at(ivtx) < 0.0025;
+      const bool pass_ntracks = nt.p_vtxs_ntracks->at(ivtx) >= 5;
+      const bool pass_bs2derr = nt.p_vtxs_bs2derr->at(ivtx) < 0.0025;
 
-      if (1)                                           { set_it_if_first(first_vtx_to_pass[0], ivtx); ++n_pass_nocuts;        }
-      if (pass_ntracks)                                { set_it_if_first(first_vtx_to_pass[1], ivtx); ++n_pass_ntracks;       }
-      if (pass_ntracks && pass_bs2derr)  { set_it_if_first(first_vtx_to_pass[2], ivtx); ++n_pass_all;           }
+      if (1)                            { set_it_if_first(first_vtx_to_pass[0], ivtx); ++n_pass_nocuts;  }
+      if (pass_ntracks)                 { set_it_if_first(first_vtx_to_pass[1], ivtx); ++n_pass_ntracks; }
+      if (pass_ntracks && pass_bs2derr) { set_it_if_first(first_vtx_to_pass[2], ivtx); ++n_pass_all;     }
     }
 
     for (int i = 0; i < num_numdens; ++i) {
       int ivtx = first_vtx_to_pass[i];
       if (ivtx != -1) {
-        h_vtxntracks      [i]->Fill(nt.p_vtxs_ntracks     ->at(ivtx));
-        h_vtxbs2derr      [i]->Fill(nt.p_vtxs_bs2derr     ->at(ivtx));
+        h_vtxntracks[i]->Fill(nt.p_vtxs_ntracks->at(ivtx), w);
+        h_vtxbs2derr[i]->Fill(nt.p_vtxs_bs2derr->at(ivtx), w);
       }
     }
 
-    if (n_pass_nocuts)             nums["nocuts"]             += w;
-    if (n_pass_ntracks)            nums["ntracks"]            += w;
-    if (n_pass_all)                nums["all"]                += w;
+    if (n_pass_nocuts)  nums["nocuts"]  += w;
+    if (n_pass_ntracks) nums["ntracks"] += w;
+    if (n_pass_all)     nums["all"]     += w;
 
     const int passes[num_numdens] = {
       n_pass_nocuts,

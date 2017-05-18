@@ -8,9 +8,12 @@ output_dataset_tag = 'RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_
 fixed_salt = ''
 use_this_cmssw = False
 premix = True
+trig_filter = False
+hip_simulation = False
+hip_mitigation = False
 ex = ''
 
-if 1:
+if 0:
     meta, taus, masses = 'neu', [100, 300, 1000, 10000, 30000], [300, 400, 600, 800, 1200, 1600]
 elif 0:
     meta, taus, masses = 'lq2', [100, 300, 1000, 10000], [300, 400, 600, 800, 1200, 1600]
@@ -34,21 +37,20 @@ elif 0:
     from_lhe = True
     output_level = 'gensim'
     output_dataset_tag = 'RunIISummer15GS-MCRUN2_71_V1'
-elif 1:
+elif 0:
     meta = 'qcdht1000'
     nevents, events_per = 1500, 1500
     from_lhe = True
     output_level = 'ntuple'
-elif 0:
-    meta, taus, masses = 'neu', [1000, 10000], [800]
+elif 1:
+    meta, taus, masses = 'neu', [300, 1000, 10000], [400, 800]
     use_this_cmssw = True
     premix = False
-    ex = '_hip1p0'
+    ex = '_retest'
 
-ex = ''
 #ex = '_test'
-#nevents, events_per = 10,10 
-#meta, taus, masses = 'neu', [10000], [800]
+#nevents, events_per = 10,10
+#meta, taus, masses = 'neu', [1000, 10000], [800]
 
 ################################################################################
 
@@ -68,8 +70,6 @@ if os.path.isdir(work_area):
     sys.exit('work_area %s exists' % work_area)
 os.makedirs(work_area)
 save_git_status(os.path.join(work_area, 'gitstatus'))
-
-dummy_for_hash = int(time()*1e6)
 
 config = Config()
 
@@ -107,21 +107,6 @@ elif output_level == 'minitree':
 
 config.JobType.scriptArgs = [] # steering file will take care of what we did before
 
-steering = [
-    'MAXEVENTS=%i' % events_per,
-    'SALT=' + fixed_salt,
-    'USETHISCMSSW=%i' % use_this_cmssw,
-    'FROMLHE=%i' % from_lhe,
-    'PREMIX=%i' % premix,
-    'export DUMMYFORHASH=%i' % dummy_for_hash,  # stupid crab requires a =
-    'OUTPUTLEVEL=%s' % output_level,
-    'TODO=SETME',
-    'TODO2=SETME',
-    ]
-salt_index  = index_startswith(steering, 'SALT=')
-todo_index  = index_startswith(steering, 'TODO=')
-todo2_index = index_startswith(steering, 'TODO2=')
-
 config.Data.splitting = 'EventBased'
 config.Data.unitsPerJob = events_per
 config.Data.totalUnits = nevents
@@ -130,20 +115,48 @@ config.Data.outputPrimaryDataset = 'SETME'
 config.Data.outputDatasetTag = output_dataset_tag
 
 config.Site.storageSite = 'T3_US_FNALLPC'
-config.Site.whitelist = ['T1_US_FNAL', 'T2_CH_CERN', 'T2_DE_DESY', 'T2_DE_RWTH', 'T2_ES_CIEMAT', 'T2_ES_IFCA', 'T2_FR_CCIN2P3', 'T2_RU_JINR', 'T2_US_Caltech', 'T2_US_Florida', 'T2_US_MIT', 'T2_US_Nebraska', 'T2_US_Purdue', 'T2_US_UCSD', 'T2_US_Vanderbilt', 'T2_US_Wisconsin']
+config.Site.whitelist = ['T1_US_FNAL', 'T2_CH_CERN', 'T2_DE_DESY', 'T2_DE_RWTH', 'T2_ES_IFCA', 'T2_FR_CCIN2P3', 'T2_RU_JINR', 'T2_US_Caltech', 'T2_US_Florida', 'T2_US_MIT', 'T2_US_Nebraska', 'T2_US_Purdue', 'T2_US_UCSD', 'T2_US_Vanderbilt', 'T2_US_Wisconsin']
 
 outputs = {}
 
-def submit(config, name, todo, todo2=None):
+def submit(config, name, todo, todo_rawhlt=[], todo_reco=[], todo_ntuple=[]):
     config.General.requestName = name
     config.Data.outputPrimaryDataset = name
+
+    dummy_for_hash = int(time()*1e6)
+    steering = [
+        'MAXEVENTS=%i' % events_per,
+        'USETHISCMSSW=%i' % use_this_cmssw,
+        'FROMLHE=%i' % from_lhe,
+        'TRIGFILTER=%i' % trig_filter,
+        'PREMIX=%i' % premix,
+        'export DUMMYFORHASH=%i' % dummy_for_hash,  # exported so the python script executed in cmsRun can just get it from os.environ instead of parsing argv like we do the rest
+        'OUTPUTLEVEL=%s' % output_level,
+        'TODO=todo=' + todo,
+        ]
+
+    salt = fixed_salt
     if not fixed_salt:
-        steering[salt_index] = 'SALT=' + name + todo
-    steering[todo_index] = 'TODO=todo=' + todo
-    if todo2 is not None:
-        steering[todo2_index] = 'TODO2=todo=' + todo2
-        if not fixed_salt:
-            steering[salt_index] += todo2
+        salt = '%s %s' % (name, todo)
+
+    if hip_simulation:
+        assert type(hip_simulation) in (float,int)
+        todo_rawhlt.append('hip_simulation,%f' % float(hip_simulation))
+
+    if hip_mitigation:
+        todo_reco  .append('hip_mitigation')
+        todo_ntuple.append('hip_mitigation')
+
+    todo2s = ('RAWHLT', todo_rawhlt), ('RECO', todo_reco), ('NTUPLE', todo_ntuple)
+    for todo2_name, todo2 in todo2s:
+        if todo2:
+            todo2 = ' '.join('todo=%s' % x for x in todo2)
+            steering.append('%s="%s"' % (todo2_name, todo2))
+
+            if not fixed_salt:
+                salt += ' ' + todo2
+
+    steering.append('SALT="%s"' % salt)
 
     open(steering_fn, 'wt').write('\n'.join(steering) + '\n')
     
@@ -198,7 +211,10 @@ elif meta == 'ttbar':
             todo2 = 'weakmode,' + todo2
         else:
             todo2 = None
-        submit(config, name, todo, todo2)
+        submit(config, name, todo,
+               todo_rawhlt=(todo2,),
+               todo_reco  =(todo2,),
+               todo_ntuple=(todo2,))
 
 elif meta.startswith('qcdht2000_gensim'):
     name = meta
@@ -209,6 +225,7 @@ elif meta.startswith('qcdht'):
     name = meta
     todo = meta.replace('qcdht', 'qcdht,')
     submit(config, name, todo)
+
 
 if not testing:
     for x in to_rm:
