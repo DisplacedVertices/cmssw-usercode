@@ -99,3 +99,9 @@ process = customizeHLTforFullSim(process)
 if randomize: # for minbias
     from modify import deterministic_seeds
     deterministic_seeds(process, 74205, salt, jobnum)
+
+categories = ['L1TGlobal']
+print 'silencing MessageLogger about these categories:', categories
+for category in categories:
+    process.MessageLogger.categories.append(category)
+    setattr(process.MessageLogger.cerr, category, cms.untracked.PSet(limit=cms.untracked.int32(0)))
