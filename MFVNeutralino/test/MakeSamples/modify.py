@@ -474,3 +474,7 @@ def set_hip(process, scale=1.0): # scale relative to 6e33
             continue
         y.APVSaturationFromHIP = True
         y.APVSaturationProbScaling = scale
+
+def set_hip_mitigation(process):
+    from RecoTracker.Configuration.customizeMinPtForHitRecoveryInGluedDet import customizeHitRecoveryInGluedDetOn
+    customizeHitRecoveryInGluedDetOn(process)
