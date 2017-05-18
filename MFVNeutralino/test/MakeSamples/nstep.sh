@@ -23,7 +23,9 @@ echo TRIGFILTER: ${TRIGFILTER}
 echo DUMMYFORHASH: ${DUMMYFORHASH}
 echo OUTPUTLEVEL: ${OUTPUTLEVEL}
 echo TODO: ${TODO}
-echo TODO2: ${TODO2}
+echo TODORAWHLT: ${TODORAWHLT}
+echo TODORECO: ${TODORECO}
+echo TODONTUPLE: ${TODONTUPLE}
 
 ################################################################################
 
@@ -73,12 +75,12 @@ function gensim {
 }
 
 function rawhlt {
-    cmd="cmsRun -j tempfjr.xml rawhlt.py salt=${SALT} jobnum=${JOBNUM} premix=${PREMIX} trigfilter=${TRIGFILTER} ${TODO2}"
+    cmd="cmsRun -j tempfjr.xml rawhlt.py salt=${SALT} jobnum=${JOBNUM} premix=${PREMIX} trigfilter=${TRIGFILTER} ${TODORAWHLT}"
     echo $cmd at $(date) ; eval $cmd 2>&1
 }
 
 function reco {
-    cmd="cmsRun -j tempfjr.xml reco.py premix=${PREMIX} ${TODO2}"
+    cmd="cmsRun -j tempfjr.xml reco.py premix=${PREMIX} ${TODORECO}"
     echo $cmd at $(date) ; eval $cmd 2>&1
 }
 
@@ -157,7 +159,7 @@ if [[ $OUTPUTLEVEL == "ntuple" || $OUTPUTLEVEL == "minitree" ]]; then
     function doit {
         echo "process.source.fileNames = ['file:$2']" >> $1
         echo "process.maxEvents.input = -1" >> $1
-        cmd="cmsRun -j tempfjr.xml $1 ${TODO2}"
+        cmd="cmsRun -j tempfjr.xml $1 ${TODONTUPLE}"
         echo $cmd at $(date) ; eval $cmd 2>&1
         exitcode=$?
         fixfjr
