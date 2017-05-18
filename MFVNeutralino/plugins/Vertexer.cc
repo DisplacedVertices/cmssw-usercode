@@ -1022,11 +1022,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
       vpeffs->push_back(VertexerPairEff());
       VertexerPairEff& vpeff = vpeffs->back();
-      vpeff.d2d(mag(v[0]->x() - v[1]->x(),
-                    v[0]->y() - v[1]->y()));
-      vpeff.d3d(mag(v[0]->x() - v[1]->x(),
-                    v[0]->y() - v[1]->y(),
-                    v[0]->z() - v[1]->z()));
+      vpeff.set_vertices(*v[0], *v[1]);
       vpeffs_tracks.push_back(std::make_pair(tracks[0], tracks[1]));
 
       if (histos) {
