@@ -9,6 +9,8 @@ fixed_salt = ''
 use_this_cmssw = False
 premix = True
 trig_filter = False
+hip_simulation = False
+hip_mitigation = False
 ex = ''
 
 if 0:
@@ -69,8 +71,6 @@ if os.path.isdir(work_area):
 os.makedirs(work_area)
 save_git_status(os.path.join(work_area, 'gitstatus'))
 
-dummy_for_hash = int(time()*1e6)
-
 config = Config()
 
 to_rm = []
@@ -107,22 +107,6 @@ elif output_level == 'minitree':
 
 config.JobType.scriptArgs = [] # steering file will take care of what we did before
 
-steering = [
-    'MAXEVENTS=%i' % events_per,
-    'SALT=' + fixed_salt,
-    'USETHISCMSSW=%i' % use_this_cmssw,
-    'FROMLHE=%i' % from_lhe,
-    'TRIGFILTER=%i' % trig_filter,
-    'PREMIX=%i' % premix,
-    'export DUMMYFORHASH=%i' % dummy_for_hash,  # stupid crab requires a =
-    'OUTPUTLEVEL=%s' % output_level,
-    'TODO=SETME',
-    'TODO2=SETME',
-    ]
-salt_index  = index_startswith(steering, 'SALT=')
-todo_index  = index_startswith(steering, 'TODO=')
-todo2_index = index_startswith(steering, 'TODO2=')
-
 config.Data.splitting = 'EventBased'
 config.Data.unitsPerJob = events_per
 config.Data.totalUnits = nevents
@@ -135,19 +119,44 @@ config.Site.whitelist = ['T1_US_FNAL', 'T2_CH_CERN', 'T2_DE_DESY', 'T2_DE_RWTH',
 
 outputs = {}
 
-def submit(config, name, todo, todo2=None):
+def submit(config, name, todo, todo_rawhlt=[], todo_reco=[], todo_ntuple=[]):
     config.General.requestName = name
     config.Data.outputPrimaryDataset = name
+
+    dummy_for_hash = int(time()*1e6)
+    steering = [
+        'MAXEVENTS=%i' % events_per,
+        'USETHISCMSSW=%i' % use_this_cmssw,
+        'FROMLHE=%i' % from_lhe,
+        'TRIGFILTER=%i' % trig_filter,
+        'PREMIX=%i' % premix,
+        'export DUMMYFORHASH=%i' % dummy_for_hash,  # exported so the python script executed in cmsRun can just get it from os.environ instead of parsing argv like we do the rest
+        'OUTPUTLEVEL=%s' % output_level,
+        'TODO=todo=' + todo,
+        ]
+
+    salt = fixed_salt
     if not fixed_salt:
-        steering[salt_index] = 'SALT=' + name + todo
-    steering[todo_index] = 'TODO=todo=' + todo
-    if todo2 is None:
-        if 'hip1p0' in ex:
-            todo2 = 'hip,1.0'
-    if todo2 is not None:
-        steering[todo2_index] = 'TODO2=todo=' + todo2
-        if not fixed_salt:
-            steering[salt_index] += todo2
+        salt = '%s %s' % (name, todo)
+
+    if hip_simulation:
+        assert type(hip_simulation) in (float,int)
+        todo_rawhlt.append('hip_simulation,%f' % float(hip_simulation))
+
+    if hip_mitigation:
+        todo_reco  .append('hip_mitigation')
+        todo_ntuple.append('hip_mitigation')
+
+    todo2s = ('RAWHLT', todo_rawhlt), ('RECO', todo_reco), ('NTUPLE', todo_ntuple)
+    for todo2_name, todo2 in todo2s:
+        if todo2:
+            todo2 = ' '.join('todo=%s' % x for x in todo2)
+            steering.append('%s="%s"' % (todo2_name, todo2))
+
+            if not fixed_salt:
+                salt += ' ' + todo2
+
+    steering.append('SALT="%s"' % salt)
 
     open(steering_fn, 'wt').write('\n'.join(steering) + '\n')
     
@@ -202,7 +211,10 @@ elif meta == 'ttbar':
             todo2 = 'weakmode,' + todo2
         else:
             todo2 = None
-        submit(config, name, todo, todo2)
+        submit(config, name, todo,
+               todo_rawhlt=(todo2,),
+               todo_reco  =(todo2,),
+               todo_ntuple=(todo2,))
 
 elif meta.startswith('qcdht2000_gensim'):
     name = meta
@@ -213,6 +225,7 @@ elif meta.startswith('qcdht'):
     name = meta
     todo = meta.replace('qcdht', 'qcdht,')
     submit(config, name, todo)
+
 
 if not testing:
     for x in to_rm:
