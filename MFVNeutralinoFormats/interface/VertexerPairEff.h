@@ -12,19 +12,13 @@ class VertexerPairEff {
   VertexerPairEff() : kind_(0) {}
 
   void set_vertices(const reco::Vertex& v0, const reco::Vertex& v1) {
-    point_[0] = v0.position();
-    point_[1] = v1.position();
+    point_[0] = v0.position(); error_[0] = v0.error();
+    point_[1] = v1.position(); error_[1] = v1.error();
   }
 
-  reco::Vertex::Point point(const int which) const {
-    assert(which == 0 || which == 1);
-    return point_[which];
-  }
-
-  reco::Vertex vertex(const int which) const {
-    assert(which == 0 || which == 1);
-    return reco::Vertex(point(which), reco::Vertex::Error());
-  }
+  reco::Vertex::Point point(const int which) const { assert(which == 0 || which == 1); return point_[which]; }
+  reco::Vertex::Error error(const int which) const { assert(which == 0 || which == 1); return error_[which]; }
+  reco::Vertex vertex(const int which) const { assert(which == 0 || which == 1); return reco::Vertex(point(which), error(which)); }
 
   float d2d() const { return (point(0) - point(1)).rho(); }
   float d3d() const { return (point(0) - point(1)).r();   }
@@ -47,6 +41,7 @@ class VertexerPairEff {
 
  private:
   reco::Vertex::Point point_[2];
+  reco::Vertex::Error error_[2];
   unsigned char kind_;
   std::vector<unsigned char> tracks_[2];
 };
