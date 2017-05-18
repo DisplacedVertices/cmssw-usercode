@@ -45,6 +45,10 @@ function fixfjr {
     fi
 }
 
+function nevents {
+    echo $(edmEventSize -v $1 | grep Events)
+}
+
 function exitbanner {
     fixfjr
 
@@ -55,7 +59,7 @@ function exitbanner {
       exit $1
     fi
 
-    echo END $2 at $(date) nevents $(edmEventSize -v ${2,,}.root | grep Events)
+    echo END $2 at $(date) nevents $(nevents ${2,,}.root)
 }
 
 function lhe {
@@ -163,12 +167,12 @@ if [[ $OUTPUTLEVEL == "ntuple" || $OUTPUTLEVEL == "minitree" ]]; then
     doit ntuple.py reco.root ; exitcode=$?
 
     if [[ $exitcode -eq 0 ]]; then
-        echo NTUPLE nevents $(edmEventSize -v ntuple.root | grep Events)
+        echo NTUPLE done at $(date) nevents $(nevents ntuple.root)
 
         if [[ $OUTPUTLEVEL == "minitree" ]]; then
             doit minitree.py ntuple.root ; exitcode=$?
             if [[ $exitcode -eq 0 ]]; then
-                echo MINITREE nevents $(python -c "import sys; sys.argv.append('-b'); import ROOT; f=ROOT.TFile('minitree.root'); print f.Get('mfvMiniTreeNtk3/t').GetEntries(), f.Get('mfvMiniTreeNtk4/t').GetEntries(), f.Get('mfvMiniTree/t').GetEntries()")
+                echo MINITREE done at $(date) nevents $(python -c "import sys; sys.argv.append('-b'); import ROOT; f=ROOT.TFile('minitree.root'); print f.Get('mfvMiniTreeNtk3/t').GetEntries(), f.Get('mfvMiniTreeNtk4/t').GetEntries(), f.Get('mfvMiniTree/t').GetEntries()")
             fi
         fi
     fi
@@ -182,3 +186,15 @@ if [[ $OUTPUTLEVEL == "ntuple" || $OUTPUTLEVEL == "minitree" ]]; then
 
     echo END NTUPLE\|MINITREE at $(date)
 fi
+
+################################################################################
+
+echo recap of events in files:
+for fn in lhe gensim rawhlt reco ntuple; do
+    fn=${fn}.root
+    if [[ -e $fn ]]; then
+        echo $(nevents $fn)
+    else
+        echo no file $fn
+    fi
+done
