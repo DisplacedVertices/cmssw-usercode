@@ -151,7 +151,7 @@ def submit(config, name, todo, todo_rawhlt=[], todo_reco=[], todo_ntuple=[]):
     for todo2_name, todo2 in todo2s:
         if todo2:
             todo2 = ' '.join('todo=%s' % x for x in todo2)
-            steering.append('%s="%s"' % (todo2_name, todo2))
+            steering.append('TODO%s="%s"' % (todo2_name, todo2))
 
             if not fixed_salt:
                 salt += ' ' + todo2
