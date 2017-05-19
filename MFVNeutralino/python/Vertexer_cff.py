@@ -28,7 +28,8 @@ for n_tk_seed in 3,4,5:
     exec '''
 mfvVerticesNTKTkSeed = mfvVertices.clone(n_tracks_per_seed_vertex = n_tk_seed)
 mfvVerticesAuxTmpNTKTkSeed = mfvVerticesAuxTmp.clone(vertex_src = 'mfvVerticesNTKTkSeed')
-mfvSelectedVerticesTmpNTKTkSeed = mfvSelectedVerticesTmp.clone(vertex_aux_src = 'mfvVerticesAuxTmpNTKTkSeed')
+mfvSelectedVerticesTmpNTKTkSeed = mfvSelectedVerticesTmp.clone(vertex_src = 'mfvVerticesNTKTkSeed',
+                                                               vertex_aux_src = 'mfvVerticesAuxTmpNTKTkSeed')
 mfvVerticesToJetsNTKTkSeed = mfvVerticesToJets.clone(vertex_src = 'mfvSelectedVerticesTmpNTKTkSeed')
 mfvVerticesAuxPreselNTKTkSeed = mfvVerticesAuxPresel.clone(vertex_src = 'mfvVerticesNTKTkSeed',
                                                            sv_to_jets_src = 'mfvVerticesToJetsNTKTkSeed')
