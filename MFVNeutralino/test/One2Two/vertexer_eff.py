@@ -1,17 +1,23 @@
 from JMTucker.Tools.ROOTTools import *
 
+is_mc = True
 year = '2016'
 ntkseeds = False
 mintk = False
 noduplicate = False
 
 set_style()
-ps = plot_saver('../plots/bkgest/v14p2/vertexer_pair_effs_%s%s%s%s' % (year, '_ntkseeds' if ntkseeds else '', '_mintk' if mintk else '', '_noduplicate' if noduplicate else ''), size=(700,700), log=False, root=False)
+ps = plot_saver('../plots/bkgest/v14/vertexer_pair_effs%s_%s%s%s%s' % ('' if is_mc else '_data', year, '_ntkseeds' if ntkseeds else '', '_mintk' if mintk else '', '_noduplicate' if noduplicate else ''), size=(700,700), log=False, root=False)
 
-f = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_8025/VertexerPairEffsV14p2%s/background%s.root' % ('_0' if noduplicate else '', '' if year=='2016' else '_%s'%year))
-fh = ROOT.TFile('vpeffs_%s_v14p2%s%s%s.root' % (year, '_ntkseeds' if ntkseeds else '', '_mintk' if mintk else '', '_noduplicate' if noduplicate else ''), 'recreate')
+f = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_8025/VertexerPairEffsV14%s/background%s.root' % ('p2_0' if noduplicate else '', '' if year=='2016' else '_%s'%year))
+if not is_mc:
+    f = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_8025/VertexerPairEffsV14/JetHT%s.root' % year)
+
+fh = ROOT.TFile('vpeffs%s_%s_v14%s%s%s.root' % ('' if is_mc else '_data', year, '_ntkseeds' if ntkseeds else '', '_mintk' if mintk else '', '_noduplicate' if noduplicate else ''), 'recreate')
 
 for itk in [3,4,5]:
+    if not is_mc and itk != 3:
+        continue
     if ntkseeds:
         f = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_8025/VertexerPairEffsV14p2%s_%itkseeds/background%s.root' % ('_0' if noduplicate else '', itk, '' if year=='2016' else '_%s'%year))
     h_merge = f.Get('mfvVertexerPairEffs/h_merge_d2d_mintk%i_maxtk%i' % (itk if mintk else 0, itk))
@@ -59,76 +65,77 @@ for itk in [3,4,5]:
 fh.Close()
 
 
-f = ROOT.TFile('vpeffs_%s_v14p2%s%s%s.root' % (year, '_ntkseeds' if ntkseeds else '', '_mintk' if mintk else '', '_noduplicate' if noduplicate else ''))
-colors = [0, 0, 0, ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2]
-l = ROOT.TLegend(0.50,0.15,0.85,0.30)
-for i in [3,4,5]:
-    h = f.Get('maxtk%i'%i)
-    h.SetStats(0)
-    h.SetLineWidth(3)
-    h.SetLineColor(colors[i])
-    if i == 3:
-        h.SetTitle(';d_{VV} (cm);Efficiency')
-        h.GetXaxis().SetRangeUser(0,0.4)
-        h.Draw('hist')
-    else:
-        h.Draw('hist sames')
-    l.AddEntry(h, '%i-track'%i)
-l.SetFillColor(0)
-l.Draw()
-ps.save('efficiency')
-
-if not ntkseeds and not mintk and not noduplicate:
-    h = f.Get('maxtk3')
-    h.Draw('hist')
-    ps.save('efficiency3')
-
-    ROOT.TH1.AddDirectory(0)
-
-    h2 = ROOT.TFile('vpeffs_2016_v14p2_ntkseeds.root').Get('maxtk5')
-    h2.SetLineWidth(3)
-    h.Draw('hist')
-    h2.Draw('hist sames')
+if is_mc:
+    f = ROOT.TFile('vpeffs_%s_v14%s%s%s.root' % (year, '_ntkseeds' if ntkseeds else '', '_mintk' if mintk else '', '_noduplicate' if noduplicate else ''))
+    colors = [0, 0, 0, ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2]
     l = ROOT.TLegend(0.50,0.15,0.85,0.30)
-    l.AddEntry(h, 'default')
-    l.AddEntry(h2, 'variation')
+    for i in [3,4,5]:
+        h = f.Get('maxtk%i'%i)
+        h.SetStats(0)
+        h.SetLineWidth(3)
+        h.SetLineColor(colors[i])
+        if i == 3:
+            h.SetTitle(';d_{VV} (cm);Efficiency')
+            h.GetXaxis().SetRangeUser(0,0.4)
+            h.Draw('hist')
+        else:
+            h.Draw('hist sames')
+        l.AddEntry(h, '%i-track'%i)
+    l.SetFillColor(0)
     l.Draw()
-    ps.save('compare_efficiency')
+    ps.save('efficiency')
 
-    fn1 = ['2v_from_jets_%s_3track_default_v14p2.root' % year, '2v_from_jets_%s_3track_noclearing_v14p2.root' % year]
-    fn2 = ['2v_from_jets_%s_4track_default_v14p2.root' % year, '2v_from_jets_%s_4track_noclearing_v14p2.root' % year]
-    fn3 = ['2v_from_jets_%s_5track_default_v14p2.root' % year, '2v_from_jets_%s_5track_noclearing_v14p2.root' % year]
+    if year == '2016' and not ntkseeds and not mintk and not noduplicate:
+        h = f.Get('maxtk3')
+        h.Draw('hist')
+        ps.save('efficiency3')
 
-    fns = [fn1, fn2, fn3]
-    ntk = ['3-track', '4-track', '5-track']
+        ROOT.TH1.AddDirectory(0)
 
-    n2v = [934., 7., 1.]
-    if year == '2015':
-        n2v = [44., 1., 1.]
-    if year == '2015p6':
-        n2v = [978., 7., 1.]
-
-    for i in range(3):
-        h0 = ROOT.TFile(fns[i][0]).Get('h_c1v_dvv')
-        h0.SetTitle(';d_{VV}^{C} (cm);Events')
-        h0.SetStats(0)
-        h0.SetLineColor(ROOT.kRed)
-        h0.SetLineWidth(3)
-        h0.Scale(n2v[i]/h0.Integral())
-        if i == 2:
-            h0.GetYaxis().SetRangeUser(0,0.4)
-        h0.Draw('hist e')
-
-        h1 = ROOT.TFile(fns[i][1]).Get('h_c1v_dvv')
-        h1.SetStats(0)
-        h1.SetLineColor(ROOT.kBlack)
-        h1.SetLineWidth(3)
-        h1.Scale(n2v[i]/h1.Integral())
-        h1.Draw('hist e sames')
-
-        l = ROOT.TLegend(0.35,0.75,0.85,0.85)
-        l.AddEntry(h1, 'without efficiency correction')
-        l.AddEntry(h0, 'with efficiency correction')
-        l.SetFillColor(0)
+        h2 = ROOT.TFile('vpeffs_2016_v14p2_ntkseeds.root').Get('maxtk5')
+        h2.SetLineWidth(3)
+        h.Draw('hist')
+        h2.Draw('hist sames')
+        l = ROOT.TLegend(0.50,0.15,0.85,0.30)
+        l.AddEntry(h, 'default')
+        l.AddEntry(h2, 'variation')
         l.Draw()
-        ps.save(ntk[i])
+        ps.save('compare_efficiency')
+
+        fn1 = ['2v_from_jets_%s_3track_default_v14p2.root' % year, '2v_from_jets_%s_3track_noclearing_v14p2.root' % year]
+        fn2 = ['2v_from_jets_%s_4track_default_v14p2.root' % year, '2v_from_jets_%s_4track_noclearing_v14p2.root' % year]
+        fn3 = ['2v_from_jets_%s_5track_default_v14p2.root' % year, '2v_from_jets_%s_5track_noclearing_v14p2.root' % year]
+
+        fns = [fn1, fn2, fn3]
+        ntk = ['3-track', '4-track', '5-track']
+
+        n2v = [934., 7., 1.]
+        if year == '2015':
+            n2v = [44., 1., 1.]
+        if year == '2015p6':
+            n2v = [978., 7., 1.]
+
+        for i in range(3):
+            h0 = ROOT.TFile(fns[i][0]).Get('h_c1v_dvv')
+            h0.SetTitle(';d_{VV}^{C} (cm);Events')
+            h0.SetStats(0)
+            h0.SetLineColor(ROOT.kRed)
+            h0.SetLineWidth(3)
+            h0.Scale(n2v[i]/h0.Integral())
+            if i == 2:
+                h0.GetYaxis().SetRangeUser(0,0.4)
+            h0.Draw('hist e')
+
+            h1 = ROOT.TFile(fns[i][1]).Get('h_c1v_dvv')
+            h1.SetStats(0)
+            h1.SetLineColor(ROOT.kBlack)
+            h1.SetLineWidth(3)
+            h1.Scale(n2v[i]/h1.Integral())
+            h1.Draw('hist e sames')
+
+            l = ROOT.TLegend(0.35,0.75,0.85,0.85)
+            l.AddEntry(h1, 'without efficiency correction')
+            l.AddEntry(h0, 'with efficiency correction')
+            l.SetFillColor(0)
+            l.Draw()
+            ps.save(ntk[i])

@@ -1,13 +1,18 @@
 from JMTucker.Tools.ROOTTools import *
 ROOT.TH1.AddDirectory(0)
 
+is_mc = True
 year = '2016'
 
 set_style()
-ps = plot_saver('../plots/bkgest/v14p2/closure_%s' % year, size=(700,700), root=False, log=False)
+ps = plot_saver('../plots/bkgest/v14p2/closure%s_%s' % ('' if is_mc else '_data', year), size=(700,700), root=False, log=False)
 
 fns = ['2v_from_jets_%s_3track_default_v14p2.root' % year, '2v_from_jets_%s_7track_default_v14p2.root' % year, '2v_from_jets_%s_4track_default_v14p2.root' % year, '2v_from_jets_%s_5track_default_v14p2.root' % year]
 ntk = ['3-track', '4-track-3-track', '4-track', '5-track']
+
+if not is_mc:
+    fns = ['2v_from_jets_data_%s_3track_default_v14p2.root' % year]
+    ntk = ['3-track']
 
 n2v = [934., 211., 7., 1.]
 ebin1 = [0.0026, 0.0062, 0.0062, 0.0124]
@@ -27,15 +32,19 @@ if year == '2015p6':
     ebin3 = [0.0058, 0.0229, 0.0229, 0.1019]
 
 for i in range(4):
+    if not is_mc and i > 0:
+        continue
+
     hh = ROOT.TFile(fns[i]).Get('h_2v_dvv')
     hh.SetTitle(';d_{VV} (cm);Events')
     hh.SetStats(0)
     hh.SetLineColor(ROOT.kBlue)
     hh.SetLineWidth(2)
-    if hh.Integral() > 0:
-        hh.Scale(n2v[i]/hh.Integral())
-    else:
-        hh.SetMaximum(0.4)
+    if is_mc:
+        if hh.Integral() > 0:
+            hh.Scale(n2v[i]/hh.Integral())
+        else:
+            hh.SetMaximum(0.4)
     hh.SetMinimum(0)
     hh.Draw()
 
@@ -43,11 +52,14 @@ for i in range(4):
     h.SetStats(0)
     h.SetLineColor(ROOT.kRed)
     h.SetLineWidth(2)
-    h.Scale(n2v[i]/h.Integral())
+    if is_mc:
+        h.Scale(n2v[i]/h.Integral())
+    else:
+        h.Scale(hh.Integral()/h.Integral())
     h.Draw('hist e sames')
 
     l1 = ROOT.TLegend(0.35, 0.75, 0.85, 0.85)
-    l1.AddEntry(hh, 'Simulated events')
+    l1.AddEntry(hh, 'Simulated events' if is_mc else 'Data')
     l1.AddEntry(h, 'd_{VV}^{C}')
     l1.SetFillColor(0)
     l1.Draw()
