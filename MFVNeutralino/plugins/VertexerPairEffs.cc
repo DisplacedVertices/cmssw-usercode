@@ -100,11 +100,6 @@ void MFVVertexerPairEffs::analyze(const edm::Event& event, const edm::EventSetup
     h_pairs_d2d[0][ntk_max]->Fill(d2d);
     h_pairs_d2d[ntk_min][ntk_max]->Fill(d2d);
 
-    h_pairs_d3d[0][0]->Fill(d3d);
-    h_pairs_d3d[ntk_min][0]->Fill(d3d);
-    h_pairs_d3d[0][ntk_max]->Fill(d3d);
-    h_pairs_d3d[ntk_min][ntk_max]->Fill(d3d);
-
     if (vpeff.kind() & VertexerPairEff::merge) {
       ++n_merge[0][0];
       ++n_merge[ntk_min][0];
