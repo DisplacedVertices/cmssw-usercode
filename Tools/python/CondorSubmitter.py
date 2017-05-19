@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys, os, string, shutil, time, base64, zlib, imp, cPickle as pickle
-from datetime import datetime
+from datetime import datetime, timedelta
 from JMTucker.Tools.CMSSWTools import make_tarball, find_output_files
 from JMTucker.Tools.CRAB3ToolsBase import crab_dirs_root, crab_renew_proxy_if_needed
 from JMTucker.Tools.CondorTools import cs_timestamp
@@ -156,6 +156,8 @@ def get(i): return _l[i]
                  _fail = [],
                  ):
 
+        self.nsubmits = -1
+
         self.testing = testing
         if '$' in pset_template_fn:
             pset_template_fn =  os.path.expandvars(pset_template_fn)
@@ -210,7 +212,7 @@ def get(i): return _l[i]
             self.get_proxy = False
 
         username = os.environ['USER']
-        self.timestamp = cs_timestamp()
+        self.timestamp = datetime.now()
         #os.system('mkdir -p /tmp/%s' % username)
 
         print 'CondorSubmitter init: saving git status'
@@ -272,7 +274,7 @@ def get(i): return _l[i]
                 stageout_path = 'root://cmseos.fnal.gov//store/user/' + stageout_user + stageout_path
                 if not publish_name:
                     publish_name = batch_name.replace('/', '_')
-                stageout_path += '/$(<cs_primaryds)/' + publish_name + '_$(<cs_samplename)/$(<cs_timestamp)/$(printf "%04i" $(($job/1000)) )'
+                stageout_path += '/$(<cs_primaryds)/' + publish_name + '/$(<cs_timestamp)/$(printf "%04i" $(($job/1000)) )'
 
             print 'CondorSubmitter init: stageout files are', stageout_files
             print 'CondorSubmitter init: stageout path is', stageout_path
@@ -326,8 +328,9 @@ def get(i): return _l[i]
             ('cs_jobmap',        '\n'.join(str(i) for i in xrange(njobs)) + '\n'), # will be more complicated for resubmits
             ('cs_primaryds',     sample.primary_dataset),
             ('cs_samplename',    sample.name),
-            ('cs_timestamp',     self.timestamp),
+            ('cs_timestamp',     (self.timestamp + timedelta(seconds=self.nsubmits)).strftime('%y%m%d_%H%M%S'),
             ]
+
         for fn, content in files_to_write:
             open(os.path.join(working_dir, fn), 'wt').write(content)
 
@@ -399,6 +402,7 @@ def get(i): return _l[i]
             os.chdir(cwd)
 
     def submit(self, sample):
+        self.nsubmits += 1
         print 'batch', self.batch_name, 'sample', sample.name, 
 
         try:
