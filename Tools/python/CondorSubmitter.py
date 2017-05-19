@@ -328,7 +328,7 @@ def get(i): return _l[i]
             ('cs_jobmap',        '\n'.join(str(i) for i in xrange(njobs)) + '\n'), # will be more complicated for resubmits
             ('cs_primaryds',     sample.primary_dataset),
             ('cs_samplename',    sample.name),
-            ('cs_timestamp',     (self.timestamp + timedelta(seconds=self.nsubmits)).strftime('%y%m%d_%H%M%S'),
+            ('cs_timestamp',     (self.timestamp + timedelta(seconds=self.nsubmits)).strftime('%y%m%d_%H%M%S')),
             ]
 
         for fn, content in files_to_write:
