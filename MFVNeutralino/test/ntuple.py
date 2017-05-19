@@ -41,13 +41,21 @@ remove_met_filters(process)
 #process.patJets.userData.userInts.src = []
 
 process.out.fileName = 'ntuple.root'
-process.out.outputCommands = output_commands = [
+output_commands = [
     'drop *',
     'keep *_mcStat_*_*',
+    'keep MFVEvent_mfvEvent__*',
     'keep VertexerPairEffs_mfvVertices_*_*',
     'keep MFVVertexAuxs_mfvVerticesAux_*_*',
-    'keep MFVEvent_mfvEvent__*',
     ]
+
+for n_tk_seed in 3,4,5:
+    output_commands += [
+        'keep VertexerPairEffs_mfvVertices%iTkSeed_*_*' % n_tk_seed,
+        'keep MFVVertexAuxs_mfvVerticesAux%iTkSeed_*_*' % n_tk_seed,
+        ]
+
+process.out.outputCommands = output_commands
 
 tfileservice(process, 'vertex_histos.root')
 random_service(process, {'mfvVertices': 1222})
@@ -56,7 +64,7 @@ process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
 process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 
-process.p = cms.Path(process.mfvVertexSequence * process.mfvTriggerFloats * process.mfvEvent)
+process.p = cms.Path(process.mfvVertexSequenceEx * process.mfvTriggerFloats * process.mfvEvent)
 
 if event_filter:
     import JMTucker.MFVNeutralino.EventFilter
