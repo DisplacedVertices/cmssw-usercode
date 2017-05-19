@@ -616,11 +616,11 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       fill_multi(h_sv_track_weight, isv, aux.track_weight(i), w);
       fill_multi(h_sv_track_q, isv, aux.track_q(i), w);
       fill_multi(h_sv_track_pt, isv, aux.track_pt(i), w);
-      fill_multi(h_sv_track_eta, isv, aux.track_eta(i), w);
-      fill_multi(h_sv_track_phi, isv, aux.track_phi(i), w);
+      fill_multi(h_sv_track_eta, isv, aux.track_eta[i], w);
+      fill_multi(h_sv_track_phi, isv, aux.track_phi[i], w);
       fill_multi(h_sv_track_dxy, isv, aux.track_dxy[i], w);
       fill_multi(h_sv_track_dz, isv, aux.track_dz[i], w);
-      fill_multi(h_sv_track_pt_err, isv, aux.track_pt_err(i), w);
+      fill_multi(h_sv_track_pt_err, isv, aux.track_pt_err[i], w);
       fill_multi(h_sv_track_eta_err, isv, aux.track_eta_err(i), w);
       fill_multi(h_sv_track_phi_err, isv, aux.track_phi_err(i), w);
       fill_multi(h_sv_track_dxy_err, isv, aux.track_dxy_err(i), w);
@@ -634,13 +634,13 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       fill_multi(h_sv_track_injet, isv, aux.track_injet[i], w);
       fill_multi(h_sv_track_inpv, isv, aux.track_inpv[i], w);
 
-      fill_multi(h_sv_track_nsthits_track_eta, isv, aux.track_eta(i), aux.track_nsthits(i), w);
+      fill_multi(h_sv_track_nsthits_track_eta, isv, aux.track_eta[i], aux.track_nsthits(i), w);
       fill_multi(h_sv_bs2derr_track_pt, isv, aux.track_pt(i), aux.bs2derr, w);
-      fill_multi(h_sv_bs2derr_track_eta, isv, aux.track_eta(i), aux.bs2derr, w);
-      fill_multi(h_sv_bs2derr_track_phi, isv, aux.track_phi(i), aux.bs2derr, w);
+      fill_multi(h_sv_bs2derr_track_eta, isv, aux.track_eta[i], aux.bs2derr, w);
+      fill_multi(h_sv_bs2derr_track_phi, isv, aux.track_phi[i], aux.bs2derr, w);
       fill_multi(h_sv_bs2derr_track_dxy, isv, aux.track_dxy[i], aux.bs2derr, w);
       fill_multi(h_sv_bs2derr_track_dz, isv, aux.track_dz[i], aux.bs2derr, w);
-      fill_multi(h_sv_bs2derr_track_pt_err, isv, aux.track_pt_err(i), aux.bs2derr, w);
+      fill_multi(h_sv_bs2derr_track_pt_err, isv, aux.track_pt_err[i], aux.bs2derr, w);
       fill_multi(h_sv_bs2derr_track_eta_err, isv, aux.track_eta_err(i), aux.bs2derr, w);
       fill_multi(h_sv_bs2derr_track_phi_err, isv, aux.track_phi_err(i), aux.bs2derr, w);
       fill_multi(h_sv_bs2derr_track_dxy_err, isv, aux.track_dxy_err(i), aux.bs2derr, w);
@@ -673,11 +673,11 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
           v[TString::Format("track%i_weight",        i).Data()] = aux.track_weight(itk_pt[i].first);
           v[TString::Format("track%i_q",             i).Data()] = aux.track_q(itk_pt[i].first);
           v[TString::Format("track%i_pt",            i).Data()] = aux.track_pt(itk_pt[i].first);
-          v[TString::Format("track%i_eta",           i).Data()] = aux.track_eta(itk_pt[i].first);
-          v[TString::Format("track%i_phi",           i).Data()] = aux.track_phi(itk_pt[i].first);
+          v[TString::Format("track%i_eta",           i).Data()] = aux.track_eta[itk_pt[i].first];
+          v[TString::Format("track%i_phi",           i).Data()] = aux.track_phi[itk_pt[i].first];
           v[TString::Format("track%i_dxy",           i).Data()] = aux.track_dxy[itk_pt[i].first];
           v[TString::Format("track%i_dz",            i).Data()] = aux.track_dz[itk_pt[i].first];
-          v[TString::Format("track%i_pt_err",        i).Data()] = aux.track_pt_err(itk_pt[i].first);
+          v[TString::Format("track%i_pt_err",        i).Data()] = aux.track_pt_err[itk_pt[i].first];
           v[TString::Format("track%i_eta_err",       i).Data()] = aux.track_eta_err(itk_pt[i].first);
           v[TString::Format("track%i_phi_err",       i).Data()] = aux.track_phi_err(itk_pt[i].first);
           v[TString::Format("track%i_dxy_err",       i).Data()] = aux.track_dxy_err(itk_pt[i].first);
@@ -693,7 +693,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
           std::vector<double> jetdeltaphis;
           for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
-            jetdeltaphis.push_back(fabs(reco::deltaPhi(aux.track_phi(itk_pt[i].first), mevent->jet_phi[ijet])));
+            jetdeltaphis.push_back(fabs(reco::deltaPhi(aux.track_phi[itk_pt[i].first], mevent->jet_phi[ijet])));
           }
           std::sort(jetdeltaphis.begin(), jetdeltaphis.end());
           int njets = jetdeltaphis.size();
