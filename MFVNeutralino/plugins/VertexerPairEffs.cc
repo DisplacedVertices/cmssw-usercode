@@ -23,9 +23,6 @@ class MFVVertexerPairEffs : public edm::EDAnalyzer {
   TH1D* h_pairs_d2d[6][6];
   TH1D* h_merge_d2d[6][6];
   TH1D* h_erase_d2d[6][6];
-  TH1D* h_pairs_d3d[6][6];
-  TH1D* h_merge_d3d[6][6];
-  TH1D* h_erase_d3d[6][6];
 };
 
 MFVVertexerPairEffs::MFVVertexerPairEffs(const edm::ParameterSet& cfg)
@@ -47,10 +44,6 @@ MFVVertexerPairEffs::MFVVertexerPairEffs(const edm::ParameterSet& cfg)
       h_pairs_d2d[i][j] = fs->make<TH1D>(TString::Format("h_pairs_d2d_mintk%i_maxtk%i", i, j), "", 4000, 0, 4);
       h_merge_d2d[i][j] = fs->make<TH1D>(TString::Format("h_merge_d2d_mintk%i_maxtk%i", i, j), "", 4000, 0, 4);
       h_erase_d2d[i][j] = fs->make<TH1D>(TString::Format("h_erase_d2d_mintk%i_maxtk%i", i, j), "", 4000, 0, 4);
-
-      h_pairs_d3d[i][j] = fs->make<TH1D>(TString::Format("h_pairs_d3d_mintk%i_maxtk%i", i, j), "", 4000, 0, 4);
-      h_merge_d3d[i][j] = fs->make<TH1D>(TString::Format("h_merge_d3d_mintk%i_maxtk%i", i, j), "", 4000, 0, 4);
-      h_erase_d3d[i][j] = fs->make<TH1D>(TString::Format("h_erase_d3d_mintk%i_maxtk%i", i, j), "", 4000, 0, 4);
     }
   }
 }
@@ -77,7 +70,6 @@ void MFVVertexerPairEffs::analyze(const edm::Event& event, const edm::EventSetup
     assert(ntk_min >= 2 && ntk_max <= 5 && ntk_min <= ntk_max);
 
     const float d2d = vpeff.d2d();
-    const float d3d = vpeff.d3d();
 
     if (!allow_duplicate_pairs) {
       bool seen = false;
@@ -123,11 +115,6 @@ void MFVVertexerPairEffs::analyze(const edm::Event& event, const edm::EventSetup
       h_merge_d2d[ntk_min][0]->Fill(d2d);
       h_merge_d2d[0][ntk_max]->Fill(d2d);
       h_merge_d2d[ntk_min][ntk_max]->Fill(d2d);
-
-      h_merge_d3d[0][0]->Fill(d3d);
-      h_merge_d3d[ntk_min][0]->Fill(d3d);
-      h_merge_d3d[0][ntk_max]->Fill(d3d);
-      h_merge_d3d[ntk_min][ntk_max]->Fill(d3d);
     }
 
     if (vpeff.kind() & VertexerPairEff::erase) {
@@ -140,11 +127,6 @@ void MFVVertexerPairEffs::analyze(const edm::Event& event, const edm::EventSetup
       h_erase_d2d[ntk_min][0]->Fill(d2d);
       h_erase_d2d[0][ntk_max]->Fill(d2d);
       h_erase_d2d[ntk_min][ntk_max]->Fill(d2d);
-
-      h_erase_d3d[0][0]->Fill(d3d);
-      h_erase_d3d[ntk_min][0]->Fill(d3d);
-      h_erase_d3d[0][ntk_max]->Fill(d3d);
-      h_erase_d3d[ntk_min][ntk_max]->Fill(d3d);
     }
   }
 
