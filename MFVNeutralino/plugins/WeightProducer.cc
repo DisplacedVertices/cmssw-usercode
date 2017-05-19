@@ -31,7 +31,7 @@ private:
   double npv_weight(int mc_npu) const;
 
   enum { sum_nevents_total, sum_gen_weight_total, sum_gen_weightprod_total, sum_gen_weight, sum_gen_weightprod, sum_pileup_weight, sum_npv_weight, sum_weight, n_sums };
-  TH1F* h_sums;
+  TH1D* h_sums;
 };
 
 MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
@@ -55,7 +55,7 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
   if (histos) {
     edm::Service<TFileService> fs;
     TH1::SetDefaultSumw2();
-    h_sums = fs->make<TH1F>("h_sums", "", n_sums+1, 0, n_sums+1);
+    h_sums = fs->make<TH1D>("h_sums", "", n_sums+1, 0, n_sums+1);
     int ibin = 1;
     for (const char* x : { "sum_nevents_total", "sum_gen_weight_total", "sum_gen_weightprod_total", "sum_gen_weight", "sum_gen_weightprod", "sum_pileup_weight", "sum_npv_weight", "sum_weight", "n_sums" })
       h_sums->GetXaxis()->SetBinLabel(ibin++, x);
