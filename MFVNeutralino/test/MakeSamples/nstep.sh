@@ -16,6 +16,7 @@ OUTDIR=$(pwd)
 
 echo JOBNUM: ${JOBNUM}
 echo MAXEVENTS: ${MAXEVENTS}
+echo EXPECTEDEVENTS: ${EXPECTEDEVENTS}
 echo SALT: ${SALT}
 echo USETHISCMSSW: ${USETHISCMSSW}
 echo FROMLHE: ${FROMLHE}
@@ -75,7 +76,7 @@ function gensim {
 }
 
 function rawhlt {
-    cmd="cmsRun -j tempfjr.xml rawhlt.py salt=${SALT} jobnum=${JOBNUM} premix=${PREMIX} trigfilter=${TRIGFILTER} ${TODORAWHLT}"
+    cmd="cmsRun -j tempfjr.xml rawhlt.py expectedevents=${EXPECTEDEVENTS} salt=${SALT} jobnum=${JOBNUM} premix=${PREMIX} trigfilter=${TRIGFILTER} ${TODORAWHLT}"
     echo $cmd at $(date) ; eval $cmd 2>&1
 }
 

@@ -58,6 +58,7 @@ if output_level not in ('reco', 'ntuple', 'minitree', 'gensim'):
     raise ValueError('output_level %s not supported' % output_level)
 
 import sys, os
+from math import ceil
 from pprint import pprint
 from time import time
 from JMTucker.Tools.CRAB3Tools import Config, crab_dirs_root, crab_command
@@ -126,6 +127,7 @@ def submit(config, name, todo, todo_rawhlt=[], todo_reco=[], todo_ntuple=[]):
     dummy_for_hash = int(time()*1e6)
     steering = [
         'MAXEVENTS=%i' % events_per,
+        'EXPECTEDEVENTS=%i' % (ceil(events_per*0.06) if from_lhe else events_per),
         'USETHISCMSSW=%i' % use_this_cmssw,
         'FROMLHE=%i' % from_lhe,
         'TRIGFILTER=%i' % trig_filter,
