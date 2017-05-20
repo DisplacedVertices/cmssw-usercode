@@ -182,6 +182,7 @@ private:
   const bool scatterplots;
   const bool track_histos_only;
   const bool verbose;
+  const std::string module_label;
 
   TH1F* h_n_all_tracks;
   TH1F* h_all_track_pars[6];
@@ -421,7 +422,8 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     histos(cfg.getUntrackedParameter<bool>("histos", false)),
     scatterplots(cfg.getUntrackedParameter<bool>("scatterplots", false)),
     track_histos_only(cfg.getUntrackedParameter<bool>("track_histos_only", false)),
-    verbose(cfg.getUntrackedParameter<bool>("verbose", false))
+    verbose(cfg.getUntrackedParameter<bool>("verbose", false)),
+    module_label(cfg.getParameter<std::string>("@module_label"))
 {
   if ((min_all_track_hit_r != 1 && min_all_track_hit_r != 999) || (min_seed_track_hit_r != 1 && min_seed_track_hit_r != 999))
     throw cms::Exception("MFVVertexer") << "hit_r cuts may only be 1";
@@ -618,7 +620,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
   if (verbose) {
     printf("------------------------------------------------------------------------\n");
-    printf("MFVVertexer::produce: run %u, lumi %u, event ", run, event.luminosityBlock());
+    printf("MFVVertexer %s: run %u, lumi %u, event ", module_label.c_str(), run, event.luminosityBlock());
     std::cout << event.id().event() << "\n";
   }
 
