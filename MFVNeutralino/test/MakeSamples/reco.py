@@ -9,7 +9,7 @@ premix = True
 
 for arg in sys.argv:
     if arg.startswith('premix='):
-        premix = arg.replace('premix=','') != '0'
+        premix = arg.replace('premix=','') == '1'
 
 process = cms.Process('RECO', eras.Run2_2016)
 
