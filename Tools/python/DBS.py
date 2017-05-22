@@ -81,10 +81,19 @@ def files_numevents_in_dataset(dataset, instance='global'):
     return das_query(instance)('dataset=%s file | grep file.name,file.nevents' % dataset,
                                line_xform=xform)
 
-def sites_for_dataset(dataset, instance='global'):
-    l = das_query(instance)('site dataset=%s' % dataset,
-                            line_filter=lambda s: s.startswith('T'))
-    return sorted(set(l)) # dasgo gives same lines to you many times
+def sites_for_dataset(dataset, instance='global', json=False):
+    l = das_query(instance, json)('site dataset=%s' % dataset,
+                                  line_filter=lambda s: s.startswith('T'))
+    if json:
+        r = []
+        for x in l:
+            assert sorted(x.keys()) == ['das', 'qhash', 'site']
+            y = x['site']
+            assert type(y) == list and len(y) == 1
+            r.append(y[0])
+        return r
+    else:
+        return sorted(set(l)) # dasgo gives same lines to you many times
 
 def file_details_run_lumis(dataset, instance='global'):
     objs = das_query(instance, json=True)('file,run,lumi dataset=%s' % dataset)
