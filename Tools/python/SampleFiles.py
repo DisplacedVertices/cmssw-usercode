@@ -527,5 +527,5 @@ if __name__ == '__main__':
             for fn in fns:
                 print fn
 
-    else:
+    elif 'summary' in sys.argv:
         summary()
