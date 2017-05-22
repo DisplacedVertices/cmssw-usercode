@@ -142,12 +142,14 @@ xx4j_samples_2015 = [    # M = 50, 100 GeV also exist
 
 for s in mfv_signal_samples_2015:
     _set_tau_mass(s)
+    s.is_private = True
     s.dbs_inst = 'phys03'
     s.xsec = 1e-3
     s.condor = True
 
 for s in xx4j_samples_2015:
     _set_tau_mass(s)
+    s.is_private = False
     s.xsec = 1e-3
 
 ########
@@ -506,29 +508,9 @@ JetHT2015C.condor = True
 JetHT2015D.condor = True
 JetHT2015D.xrootd_url = 'root://dcache-cms-xrootd.desy.de/'
 
-for x in (qcdht2000ext,
-          qcdht0500_2015, qcdht0700_2015, qcdht1000_2015, qcdht1500_2015, qcdht2000_2015,
-          qcdht0500ext_2015, qcdht0700ext_2015, qcdht1000ext_2015, qcdht1500ext_2015, qcdht2000ext_2015,
-          ttbar_2015, ttbar):
+for x in (qcdht0500_2015, qcdht0700_2015, qcdht1000_2015, qcdht2000_2015, qcdht0500ext_2015, qcdht1500ext_2015, qcdht2000ext_2015, ttbar_2015):
     x.condor = True
     x.xrootd_url = 'root://cmseos.fnal.gov/'
-
-for x in (JetHT2016G,
-          SingleMuon2016B3, SingleMuon2016C, SingleMuon2016E, SingleMuon2016H2,
-          qcdht0500, qcdht0700, qcdht1500, qcdht0500ext, qcdht0700ext, qcdht1000ext, qcdht1500ext, #qcdht2000,
-          wjetstolnu, dyjetstollM50, qcdmupt15,
-          mfv_neu_tau00100um_M0300, mfv_neu_tau10000um_M0300,
-          mfv_neu_tau00100um_M0800, mfv_neu_tau00300um_M0800, mfv_neu_tau01000um_M0800,
-          mfv_neu_tau01000um_M1200, mfv_neu_tau10000um_M1200,
-          mfv_neu_tau00100um_M1600, mfv_neu_tau10000um_M1600,
-          mfv_neu_tau10000um_M0800,
-          xx4j_tau00001mm_M0300_2015, xx4j_tau00003mm_M0300_2015, xx4j_tau00300mm_M0300_2015, xx4j_tau01000mm_M0300_2015, xx4j_tau02000mm_M0300_2015, xx4j_tau00010mm_M0500_2015, xx4j_tau00010mm_M0700_2015, xx4j_tau00300mm_M1500_2015, xx4j_tau01000mm_M1500_2015, xx4j_tau00003mm_M3000_2015, xx4j_tau00100mm_M3000_2015, xx4j_tau00300mm_M3000_2015, xx4j_tau01000mm_M3000_2015, xx4j_tau02000mm_M3000_2015,
-          ):
-    x.condor = True
-
-#qcdht2000.xrootd_url = 'root://ccmsdlf.ads.rl.ac.uk//castor/ads.rl.ac.uk/prod/cms/disk'
-mfv_neu_tau10000um_M1200.xrootd_url = 'root://xrootd2.ihepa.ufl.edu/'
-mfv_neu_tau00300um_M0800.xrootd_url = 'root://cmseos.fnal.gov/'
 
 for x in qcd_samples_2015:
     x.datasets['miniaod'].condor = True
@@ -574,6 +556,14 @@ if __name__ == '__main__':
                         else:
                             if not _d.has_key((s.name, 'ntuplev11')):
                                 print s.name, 'no files'
+
+    if 0:
+        for x in registry.all():
+            if x.condor:
+                if x.is_signal and x.is_private:
+                    continue
+                print x.name
+        # for x in $(<curr_condor.txt); samples site $x main
 
     if 0:
         for l in [mfv_signal_samples]:
