@@ -31,6 +31,7 @@ MFVVertexerPairEffs::MFVVertexerPairEffs(const edm::ParameterSet& cfg)
     verbose(cfg.getUntrackedParameter<bool>("verbose", false))
 {
   edm::Service<TFileService> fs;
+  TH1::SetDefaultSumw2();
 
   for (int i = 0; i <= 5; ++i) {
     if (i == 1) continue;
@@ -54,11 +55,13 @@ void MFVVertexerPairEffs::analyze(const edm::Event& event, const edm::EventSetup
 
   const int nvpeffs = int(vpeffs->size());
 
-  int n_pairs[6][6] = {{0}};
-  int n_merge[6][6] = {{0}};
-  int n_erase[6][6] = {{0}};
+  double n_pairs[6][6] = {{0}};
+  double n_merge[6][6] = {{0}};
+  double n_erase[6][6] = {{0}};
 
   std::vector<float> d2ds;
+
+  const double weight = 1; // PU reweighting?
 
   if (verbose) printf("\nrun = %u, lumi = %u, event = %llu, npveffs = %d\n", event.id().run(), event.luminosityBlock(), event.id().event(), nvpeffs);
 
@@ -69,7 +72,8 @@ void MFVVertexerPairEffs::analyze(const edm::Event& event, const edm::EventSetup
     const int ntk_max = vpeff.ntkmax();
     assert(ntk_min >= 2 && ntk_max <= 5 && ntk_min <= ntk_max);
 
-    const float d2d = vpeff.d2d();
+    const double d2d = vpeff.d2d();
+    const double w = weight * vpeff.weight();
 
     if (!allow_duplicate_pairs) {
       bool seen = false;
@@ -90,38 +94,38 @@ void MFVVertexerPairEffs::analyze(const edm::Event& event, const edm::EventSetup
       printf("\n");
     }
 
-    ++n_pairs[0][0];
-    ++n_pairs[ntk_min][0];
-    ++n_pairs[0][ntk_max];
-    ++n_pairs[ntk_min][ntk_max];
+    n_pairs[0][0] += w;
+    n_pairs[ntk_min][0] += w;
+    n_pairs[0][ntk_max] += w;
+    n_pairs[ntk_min][ntk_max] += w;
 
-    h_pairs_d2d[0][0]->Fill(d2d);
-    h_pairs_d2d[ntk_min][0]->Fill(d2d);
-    h_pairs_d2d[0][ntk_max]->Fill(d2d);
-    h_pairs_d2d[ntk_min][ntk_max]->Fill(d2d);
+    h_pairs_d2d[0][0]->Fill(d2d, w);
+    h_pairs_d2d[ntk_min][0]->Fill(d2d, w);
+    h_pairs_d2d[0][ntk_max]->Fill(d2d, w);
+    h_pairs_d2d[ntk_min][ntk_max]->Fill(d2d, w);
 
     if (vpeff.kind() & VertexerPairEff::merge) {
-      ++n_merge[0][0];
-      ++n_merge[ntk_min][0];
-      ++n_merge[0][ntk_max];
-      ++n_merge[ntk_min][ntk_max];
+      n_merge[0][0] += w;
+      n_merge[ntk_min][0] += w;
+      n_merge[0][ntk_max] += w;
+      n_merge[ntk_min][ntk_max] += w;
 
-      h_merge_d2d[0][0]->Fill(d2d);
-      h_merge_d2d[ntk_min][0]->Fill(d2d);
-      h_merge_d2d[0][ntk_max]->Fill(d2d);
-      h_merge_d2d[ntk_min][ntk_max]->Fill(d2d);
+      h_merge_d2d[0][0]->Fill(d2d, w);
+      h_merge_d2d[ntk_min][0]->Fill(d2d, w);
+      h_merge_d2d[0][ntk_max]->Fill(d2d, w);
+      h_merge_d2d[ntk_min][ntk_max]->Fill(d2d, w);
     }
 
     if (vpeff.kind() & VertexerPairEff::erase) {
-      ++n_erase[0][0];
-      ++n_erase[ntk_min][0];
-      ++n_erase[0][ntk_max];
-      ++n_erase[ntk_min][ntk_max];
+      n_erase[0][0] += w;
+      n_erase[ntk_min][0] += w;
+      n_erase[0][ntk_max] += w;
+      n_erase[ntk_min][ntk_max] += w;
 
-      h_erase_d2d[0][0]->Fill(d2d);
-      h_erase_d2d[ntk_min][0]->Fill(d2d);
-      h_erase_d2d[0][ntk_max]->Fill(d2d);
-      h_erase_d2d[ntk_min][ntk_max]->Fill(d2d);
+      h_erase_d2d[0][0]->Fill(d2d, w);
+      h_erase_d2d[ntk_min][0]->Fill(d2d, w);
+      h_erase_d2d[0][ntk_max]->Fill(d2d, w);
+      h_erase_d2d[ntk_min][ntk_max]->Fill(d2d, w);
     }
   }
 
