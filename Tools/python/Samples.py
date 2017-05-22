@@ -22,6 +22,7 @@ def _mass(sample):
     return int(s[x+2:y])
 
 def _set_tau_mass(sample):
+    sample.is_signal = True
     sample.tau  = _tau (sample)
     sample.mass = _mass(sample)
 

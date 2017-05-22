@@ -69,7 +69,8 @@ class Sample(object):
         self.name = name
         self.curr_dataset = 'main'
         self.datasets = {'main': Dataset(dataset, nevents_orig, **kwargs)}
-        
+        self.is_signal = False
+
         self.is_mc      = kwargs.get('is_mc',      self.IS_MC)
         self.is_fastsim = kwargs.get('is_fastsim', self.IS_FASTSIM)
         self.generator  = kwargs.get('generator',  self.GENERATOR)
