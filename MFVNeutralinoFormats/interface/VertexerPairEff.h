@@ -2,6 +2,7 @@
 #define JMTucker_MFVNeutralinoFormats_VertexerPairEff_h
 
 #include <algorithm>
+#include <limits>
 #include <vector>
 #include "DataFormats/VertexReco/interface/Vertex.h"
 
@@ -9,7 +10,10 @@ class VertexerPairEff {
  public:
   enum kind_t { merge=1, erase=2, share=4 };
 
-  VertexerPairEff() : kind_(0) {}
+  VertexerPairEff() : weight_(1), kind_(0) {}
+
+  double weight() const { return weight_; }
+  void inc_weight() { if (weight_ < std::numeric_limits<unsigned short>::max()) ++weight_; }
 
   void set_vertices(const reco::Vertex& v0, const reco::Vertex& v1) {
     point_[0] = v0.position(); error_[0] = v0.error();
@@ -40,6 +44,7 @@ class VertexerPairEff {
   bool operator!=(const VertexerPairEff& o) const { return !((*this) == o); }
 
  private:
+  unsigned short weight_;
   reco::Vertex::Point point_[2];
   reco::Vertex::Error error_[2];
   unsigned char kind_;
