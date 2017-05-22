@@ -22,7 +22,6 @@
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexerPairEff.h"
-#include "JMTucker/Tools/interface/ByRunTH1.h"
 
 namespace {
   template <typename T>
@@ -245,14 +244,6 @@ private:
   TH1F* h_noshare_track_multiplicity;
   TH1F* h_max_noshare_track_multiplicity;
   TH1F* h_n_output_vertices;
-
-  // 1st index is jet ht cut, 2nd index is max_ntracks, with 0 inclusive, 1 unused
-  ByRunTH1<TH1D> h_pairs_d2d[2][6];
-  ByRunTH1<TH1D> h_merge_d2d[2][6];
-  ByRunTH1<TH1D> h_erase_d2d[2][6];
-  ByRunTH1<TH1D> h_pairs_d3d[2][6];
-  ByRunTH1<TH1D> h_merge_d3d[2][6];
-  ByRunTH1<TH1D> h_erase_d3d[2][6];
 
   struct track_cuts {
     const MFVVertexer& mv;
@@ -540,20 +531,6 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_noshare_track_multiplicity     = fs->make<TH1F>("h_noshare_track_multiplicity",     "",  40,   0,     40);
     h_max_noshare_track_multiplicity = fs->make<TH1F>("h_max_noshare_track_multiplicity", "",  40,   0,     40);
     h_n_output_vertices           = fs->make<TH1F>("h_n_output_vertices",           "", 50, 0, 50);
-
-    for (int iht = 0; iht < 2; ++iht) {
-      const int jet_ht_cut[2] = {-1, 1000};
-      for (int i = 0; i <= 5; ++i) {
-        if (i == 1) continue;
-        h_pairs_d2d[iht][i].set(&fs, TString::Format("h_pairs_d2d_jetht%i_maxtk%i", jet_ht_cut[iht], i), "", 4000, 0, 4);
-        h_merge_d2d[iht][i].set(&fs, TString::Format("h_merge_d2d_jetht%i_maxtk%i", jet_ht_cut[iht], i), "", 4000, 0, 4);
-        h_erase_d2d[iht][i].set(&fs, TString::Format("h_erase_d2d_jetht%i_maxtk%i", jet_ht_cut[iht], i), "", 4000, 0, 4);
-
-        h_pairs_d3d[iht][i].set(&fs, TString::Format("h_pairs_d3d_jetht%i_maxtk%i", jet_ht_cut[iht], i), "", 4000, 0, 4);
-        h_merge_d3d[iht][i].set(&fs, TString::Format("h_merge_d3d_jetht%i_maxtk%i", jet_ht_cut[iht], i), "", 4000, 0, 4);
-        h_erase_d3d[iht][i].set(&fs, TString::Format("h_erase_d3d_jetht%i_maxtk%i", jet_ht_cut[iht], i), "", 4000, 0, 4);
-      }
-    }
   }
 }
 
@@ -603,24 +580,9 @@ void MFVVertexer::finish(edm::Event& event, const std::vector<reco::TransientTra
 }
 
 void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
-  const unsigned run = event.id().run();
-
-  if (histos)
-    for (int iht = 0; iht < 2; ++iht) {
-      for (int i = 0; i <= 5; ++i) {
-        if (i == 1) continue;
-        h_pairs_d2d[iht][i].book(run);
-        h_merge_d2d[iht][i].book(run);
-        h_erase_d2d[iht][i].book(run);
-        h_pairs_d3d[iht][i].book(run);
-        h_merge_d3d[iht][i].book(run);
-        h_erase_d3d[iht][i].book(run);
-      }
-    }
-
   if (verbose) {
     printf("------------------------------------------------------------------------\n");
-    printf("MFVVertexer %s: run %u, lumi %u, event ", module_label.c_str(), run, event.luminosityBlock());
+    printf("MFVVertexer %s: run %u, lumi %u, event ", module_label.c_str(), event.id().run(), event.luminosityBlock());
     std::cout << event.id().event() << "\n";
   }
 
@@ -636,16 +598,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     event.getByToken(primary_vertices_token, primary_vertices);
     if (primary_vertices->size())
       primary_vertex = &primary_vertices->at(0);
-  }
-
-  int njets = 0;
-  double jet_ht = 0;
-  if (histos) {
-    edm::Handle<pat::JetCollection> jets_for_ht;
-    event.getByToken(pat_jet_token, jets_for_ht);
-    njets = jets_for_ht->size(); // JMTBAD relies on pt cut in selectedPatJets
-    jet_ht = std::accumulate(jets_for_ht->begin(), jets_for_ht->end(), 0.,
-                             [this](double init, const pat::Jet& j) { if (j.pt() > min_jet_pt_for_ht) init += j.pt(); return init; });
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -1027,8 +979,10 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       if (vpeffs->size() < max_vpeffs_size) {
         std::pair<track_set, track_set> vpeff_tracks(tracks[0], tracks[1]);
         auto it = std::find(vpeffs_tracks.begin(), vpeffs_tracks.end(), vpeff_tracks);
-        if (it != vpeffs_tracks.end())
+        if (it != vpeffs_tracks.end()) {
+          vpeffs->at(it - vpeffs_tracks.begin()).inc_weight();
           vpeff = 0;
+        }
         else {
           vpeffs->push_back(VertexerPairEff());
           vpeff = &vpeffs->back();
@@ -1039,21 +993,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       else
         vpeff = 0;
 
-      if (vpeff && histos) {
-        const int ntk_max = std::min(5, int(std::max(tracks[0].size(), tracks[1].size())));
-        for (int iht = 0; iht < 2; ++iht) {
-          const int jet_ht_cut[2] = {-1, 1000};
-          if (njets >= 4 && jet_ht > jet_ht_cut[iht]) {
-            if (ntk_max >= 2) {
-              h_pairs_d2d[iht][ntk_max][run]->Fill(vpeff->d2d());
-              h_pairs_d3d[iht][ntk_max][run]->Fill(vpeff->d3d());
-            }
-            h_pairs_d2d[iht][0][run]->Fill(vpeff->d2d());
-            h_pairs_d3d[iht][0][run]->Fill(vpeff->d3d());
-          }
-        }
-      }
-      
       reco::TrackRefVector shared_tracks;
       for (auto tk : tracks[0])
         if (tracks[1].count(tk) > 0)
@@ -1184,24 +1123,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         if (verbose)
           printf("   merge worked!\n");   
 
-        if (vpeff) {
+        if (vpeff)
           vpeff->kind(VertexerPairEff::merge);
-
-          if (histos) {
-            const int ntk_max = std::min(5, int(std::max(tracks[0].size(), tracks[1].size())));
-            for (int iht = 0; iht < 2; ++iht) {
-              const int jet_ht_cut[2] = {-1, 1000};
-              if (njets >= 4 && jet_ht > jet_ht_cut[iht]) {
-                if (ntk_max >= 2) {
-                  h_merge_d2d[iht][ntk_max][run]->Fill(vpeff->d2d());
-                  h_merge_d3d[iht][ntk_max][run]->Fill(vpeff->d3d());
-                }
-                h_merge_d2d[iht][0][run]->Fill(vpeff->d2d());
-                h_merge_d3d[iht][0][run]->Fill(vpeff->d3d());
-              }
-            }
-          }
-        }
 
         vertices->erase(v[1]);
         *v[0] = reco::Vertex(new_vertices[0]); // ok to use v[0] after the erase(v[1]) because v[0] is by construction before v[1]
@@ -1256,24 +1179,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           erase[i] = true;
       }
 
-      if (vpeff && (erase[0] || erase[1])) {
+      if (vpeff && (erase[0] || erase[1]))
         vpeff->kind(VertexerPairEff::erase);
-
-        if (histos) {
-          const int ntk_max = std::min(5, int(std::max(tracks[0].size(), tracks[1].size())));
-          for (int iht = 0; iht < 2; ++iht) {
-            const int jet_ht_cut[3] = {-1, 1000};
-            if (njets >= 4 && jet_ht > jet_ht_cut[iht]) {
-              if (ntk_max >= 2) {
-                h_erase_d2d[iht][ntk_max][run]->Fill(vpeff->d2d());
-                h_erase_d3d[iht][ntk_max][run]->Fill(vpeff->d3d());
-              }
-              h_erase_d2d[iht][0][run]->Fill(vpeff->d2d());
-              h_erase_d3d[iht][0][run]->Fill(vpeff->d3d());
-            }
-          }
-        }
-      }
 
       if (erase[1]) vertices->erase(v[1]);
       if (erase[0]) vertices->erase(v[0]);
