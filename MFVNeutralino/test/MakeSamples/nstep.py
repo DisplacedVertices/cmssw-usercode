@@ -37,16 +37,31 @@ elif 0:
     from_lhe = True
     output_level = 'gensim'
     output_dataset_tag = 'RunIISummer15GS-MCRUN2_71_V1'
-elif 0:
-    meta = 'qcdht1000'
-    nevents, events_per = 1500, 1500
-    from_lhe = True
-    output_level = 'ntuple'
 elif 1:
+    meta = 'qcdht1000'
+    fixed_salt = 'fixedsalt'
+    output_dataset_tag = 'RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6'
+    nevents, events_per = 200000, 1000 # 0.06 eff at gen matching with lhe events for both qcdht0700,1000
+    from_lhe = True
+    use_this_cmssw = True
+    premix = False
+    trig_filter = True
+    hip_simulation = False
+    hip_mitigation = False
+    ex = ''
+elif 0:
     meta, taus, masses = 'neu', [300, 1000, 10000], [400, 800]
     use_this_cmssw = True
     premix = False
-    ex = '_retest'
+    hip_simulation = 1.0
+    hip_mitigation = True
+    ex = '_hip1p0_mit'
+
+if hip_simulation:
+    exx = '%.1f' % hip_simulation
+    ex += '_hip' + exx.replace('.','p')
+    if hip_mitigation:
+        ex += '_mit'
 
 #ex = '_test'
 #nevents, events_per = 10,10
@@ -146,6 +161,7 @@ def submit(config, name, todo, todo_rawhlt=[], todo_reco=[], todo_ntuple=[]):
         todo_rawhlt.append('hip_simulation,%f' % float(hip_simulation))
 
     if hip_mitigation:
+        assert hip_simulation
         todo_reco  .append('hip_mitigation')
         todo_ntuple.append('hip_mitigation')
 
