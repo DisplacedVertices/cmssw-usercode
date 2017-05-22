@@ -6,6 +6,7 @@ from JMTucker.MFVNeutralino.Year import year
 
 is_mc = True
 H = False
+run_n_tk_seeds = True
 minitree_only = False
 prepare_vis = False
 keep_all = prepare_vis
@@ -49,11 +50,12 @@ output_commands = [
     'keep MFVVertexAuxs_mfvVerticesAux_*_*',
     ]
 
-for n_tk_seed in 3,4,5:
-    output_commands += [
-        'keep VertexerPairEffs_mfvVertices%iTkSeed_*_*' % n_tk_seed,
-        'keep MFVVertexAuxs_mfvVerticesAux%iTkSeed_*_*' % n_tk_seed,
-        ]
+if run_n_tk_seeds:
+    for n_tk_seed in 3,4,5:
+        output_commands += [
+            'keep VertexerPairEffs_mfvVertices%iTkSeed_*_*' % n_tk_seed,
+            'keep MFVVertexAuxs_mfvVerticesAux%iTkSeed_*_*' % n_tk_seed,
+            ]
 
 process.out.outputCommands = output_commands
 
@@ -64,7 +66,8 @@ process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
 process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 
-process.p = cms.Path(process.mfvVertexSequenceEx * process.mfvTriggerFloats * process.mfvEvent)
+process.p = cms.Path(process.mfvVertexSequenceEx if run_n_tk_seeds else process.mfvVertexSequence)
+process.p *= process.mfvTriggerFloats * process.mfvEvent
 
 if event_filter:
     import JMTucker.MFVNeutralino.EventFilter
@@ -162,8 +165,15 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         'qcdht0700ext_2015': {'lumis': '135728', 'events': '401297681'},
         'qcdht1000ext_2015': {'lumis': '32328',  'events': '108237235'},
         }
-            
-    modify = chain_modifiers(is_mc_modifier, H_modifier, event_veto_modifier(skips, 'p'))
+
+    def n_tk_seeds_modifier(sample):
+        to_replace = []
+        if sample.is_signal:
+            magic = 'run_n_tk_seeds = True'
+            to_replace.append((magic, 'run_n_tk_seeds = False', 'ntuple template does not contain the magic string "%s"' % magic))
+        return [], to_replace
+
+    modify = chain_modifiers(is_mc_modifier, H_modifier, n_tk_seeds_modifier, event_veto_modifier(skips, 'p'))
     ms = MetaSubmitter(batch_name)
     if 'validation' in sys.argv:
         modify.append(max_output_modifier(500))
