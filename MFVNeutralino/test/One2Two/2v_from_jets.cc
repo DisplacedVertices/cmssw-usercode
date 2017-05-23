@@ -59,6 +59,16 @@ void construct_dvvc(bool is_mc, std::string year, int ntracks, bool correct_bqua
       fprintf(stderr, "bad year"); exit(1);
     }
   } else {
+
+    samples[0] = "JetHT2016B3"; weights[0] = 1;
+    samples[1] = "JetHT2016C";  weights[1] = 1;
+    samples[2] = "JetHT2016D";  weights[2] = 1;
+    samples[3] = "JetHT2016E";  weights[3] = 1;
+    samples[4] = "JetHT2016F";  weights[4] = 1;
+    samples[5] = "JetHT2016G";  weights[5] = 1;
+    samples[6] = "JetHT2016H2"; weights[6] = 1;
+    samples[7] = "JetHT2016H3"; weights[7] = 1;
+
     if (year == "2015") {
       samples[0] = "JetHT2015C";  weights[0] = 1;
       samples[1] = "JetHT2015D";  weights[1] = 1;
@@ -67,17 +77,33 @@ void construct_dvvc(bool is_mc, std::string year, int ntracks, bool correct_bqua
       dphi_pdf_a = 4.35;
       eff_file = "vpeffs_data_2015_v14.root";
     } else if (year == "2016") {
-      samples[0] = "JetHT2016B3"; weights[0] = 1;
-      samples[1] = "JetHT2016C";  weights[1] = 1;
-      samples[2] = "JetHT2016D";  weights[2] = 1;
-      samples[3] = "JetHT2016E";  weights[3] = 1;
-      samples[4] = "JetHT2016F";  weights[4] = 1;
-      samples[5] = "JetHT2016G";  weights[5] = 1;
-      samples[6] = "JetHT2016H2"; weights[6] = 1;
-      samples[7] = "JetHT2016H3"; weights[7] = 1;
       dphi_pdf_c = 1.32;
       dphi_pdf_a = 4.65;
       eff_file = "vpeffs_data_2016_v14.root";
+    } else if (year == "2016BCD") {
+      ibkg_begin = 0;
+      ibkg_end = 3;
+      dphi_pdf_c = 1.36;
+      dphi_pdf_a = 4.59;
+      eff_file = "vpeffs_data_2016BCD_v14.root";
+    } else if (year == "2016EF") {
+      ibkg_begin = 3;
+      ibkg_end = 5;
+      dphi_pdf_c = 1.21;
+      dphi_pdf_a = 4.83;
+      eff_file = "vpeffs_data_2016EF_v14.root";
+    } else if (year == "2016G") {
+      ibkg_begin = 5;
+      ibkg_end = 6;
+      dphi_pdf_c = 1.38;
+      dphi_pdf_a = 4.38;
+      eff_file = "vpeffs_data_2016G_v14.root";
+    } else if (year == "2016H") {
+      ibkg_begin = 6;
+      ibkg_end = 8;
+      dphi_pdf_c = 1.24;
+      dphi_pdf_a = 4.99;
+      eff_file = "vpeffs_data_2016H_v14.root";
     } else {
       fprintf(stderr, "bad year"); exit(1);
     }
@@ -440,6 +466,10 @@ int main(int argc, const char* argv[]) {
       */
     }
   }
-  construct_dvvc(false, "2015", 3,  true, -1, false,  true, false, 0, 255, "2v_from_jets_data_2015_3track_default_v14p2.root");
-  construct_dvvc(false, "2016", 3,  true, -1, false,  true, false, 0, 255, "2v_from_jets_data_2016_3track_default_v14p2.root");
+  construct_dvvc(false, "2015",    3,  true, -1, false,  true, false, 0, 255, "2v_from_jets_data_2015_3track_default_v14p2.root");
+  construct_dvvc(false, "2016",    3,  true, -1, false,  true, false, 0, 255, "2v_from_jets_data_2016_3track_default_v14p2.root");
+  construct_dvvc(false, "2016BCD", 3,  true, -1, false,  true, false, 0, 255, "2v_from_jets_data_2016BCD_3track_default_v14p2.root");
+  construct_dvvc(false, "2016EF",  3,  true, -1, false,  true, false, 0, 255, "2v_from_jets_data_2016EF_3track_default_v14p2.root");
+  construct_dvvc(false, "2016G",   3,  true, -1, false,  true, false, 0, 255, "2v_from_jets_data_2016G_3track_default_v14p2.root");
+  construct_dvvc(false, "2016H",   3,  true, -1, false,  true, false, 0, 255, "2v_from_jets_data_2016H_3track_default_v14p2.root");
 }
