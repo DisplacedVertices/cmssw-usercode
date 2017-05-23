@@ -42,6 +42,8 @@ elif 1:
     fixed_salt = 'fixedsalt'
     output_dataset_tag = 'RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6'
     nevents, events_per = 200000, 1000 # 0.06 eff at gen matching with lhe events for both qcdht0700,1000
+    if meta.endswith('0700'):
+        nevents *= 5
     from_lhe = True
     use_this_cmssw = True
     premix = False
