@@ -11,6 +11,7 @@
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "JMTucker/Tools/interface/TrackerSpaceExtent.h"
+#include "JMTucker/Tools/interface/Utilities.h"
 
 class TrackerMapper : public edm::EDAnalyzer {
  public:
@@ -37,6 +38,12 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH1D* h_bsz;
 
   TH1D* h_npv;
+  TH1D* h_pvx[2];
+  TH1D* h_pvy[2];
+  TH1D* h_pvz[2];
+  TH1D* h_pvrho[2];
+  TH1D* h_pvntracks[2];
+  TH1D* h_pvsumpt2[2];
 
   TH1D* h_ntracks[3];
   TH1D* h_ntracks_quality[3][5]; // 0th of 2nd is not used
@@ -110,11 +117,20 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
   h_npu = fs->make<TH1D>("h_npu", ";number of pileup interactions;events", 100, 0, 100);
   h_w = fs->make<TH1D>("h_w", ";event weight;events", 20, 0, 10);
 
-  h_bsx = fs->make<TH1D>("h_bsx", ";beamspot x (cm);events", 200, -1, 1);
-  h_bsy = fs->make<TH1D>("h_bsy", ";beamspot y (cm);events", 200, -1, 1);
-  h_bsz = fs->make<TH1D>("h_bsz", ";beamspot z (cm);events", 200, -1, 1);
+  h_bsx = fs->make<TH1D>("h_bsx", ";beamspot x (cm);events/100 #mum", 200, -1, 1);
+  h_bsy = fs->make<TH1D>("h_bsy", ";beamspot y (cm);events/100 #mum", 200, -1, 1);
+  h_bsz = fs->make<TH1D>("h_bsz", ";beamspot z (cm);events/100 #mum", 200, -1, 1);
 
   h_npv = fs->make<TH1D>("h_npv", ";number of primary vertices;events", 100, 0, 100);
+  for (int i = 0; i < 2; ++i) {
+    const char* ex = i == 0 ? "the" : "all";
+    h_pvx[i] = fs->make<TH1D>(TString::Format("h_pvx_%i", i), TString::Format(";%s pv x (cm);events/100 #mum", ex), 200, -1, 1);
+    h_pvy[i] = fs->make<TH1D>(TString::Format("h_pvy_%i", i), TString::Format(";%s pv y (cm);events/100 #mum", ex), 200, -1, 1);
+    h_pvz[i] = fs->make<TH1D>(TString::Format("h_pvz_%i", i), TString::Format(";%s pv z (cm);events/100 #mum", ex), 200, -1, 1);
+    h_pvrho[i] = fs->make<TH1D>(TString::Format("h_pvrho_%i", i), TString::Format(";%s pv #rho x (cm);events/100 #mum", ex), 200, 0, 2);
+    h_pvntracks[i] = fs->make<TH1D>(TString::Format("h_pvntracks_%i", i), TString::Format(";%s pv # tracks;events/1", ex), 200, 0, 200);
+    h_pvsumpt2[i] = fs->make<TH1D>(TString::Format("h_pvsumpt2_%i", i), TString::Format(";%s pv #Sigma p_{T}^{2} (GeV^{2});events/100 GeV^{2}", ex), 100, 0, 10000);
+  }
 
   const char* ex[3] = {"all", "sel", "seed"};
   for (int i = 0; i < 3; ++i) {
@@ -220,7 +236,26 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
 
   edm::Handle<reco::VertexCollection> primary_vertices;
   event.getByToken(primary_vertex_token, primary_vertices);
+
   h_npv->Fill(int(primary_vertices->size()), w);
+
+  for (int j = 0; j < 2; ++j) {
+    for (size_t i = 0, ie = j == 0 ? 1 : primary_vertices->size(); i < ie; ++i) {
+      const reco::Vertex& pv = (*primary_vertices)[i];
+      h_pvx[j]->Fill(pv.x() - bsx, w);
+      h_pvy[j]->Fill(pv.y() - bsy, w);
+      h_pvz[j]->Fill(pv.z() - bsz, w);
+      h_pvrho[j]->Fill(mag(pv.x() - bsx, pv.y() - bsy), w);
+      h_pvntracks[j]->Fill(pv.nTracks());
+      double pvsumpt2 = 0;
+      for (auto trki = pv.tracks_begin(), trke = pv.tracks_end(); trki != trke; ++trki) {
+        const double trkpt = (*trki)->pt();
+        pvsumpt2 += trkpt * trkpt;
+      }
+      h_pvsumpt2[j]->Fill(pvsumpt2);
+    }
+  }
+
   const reco::Vertex* pv = primary_vertices->size() ? &primary_vertices->at(0) : 0;
 
   edm::Handle<reco::TrackCollection> tracks;
