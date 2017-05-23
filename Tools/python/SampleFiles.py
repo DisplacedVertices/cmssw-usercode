@@ -205,6 +205,10 @@ _add_ds("main", {
 'mfv_neu_tau10000um_M0400_hip1p0_mit': _fromnum1("/store/user/tucker/mfv_neu_tau10000um_M0400/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170520_145609", 100, fnbase="reco"),
 'mfv_neu_tau10000um_M0800_hip1p0_mit': _fromnum1("/store/user/tucker/mfv_neu_tau10000um_M0800/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170520_145624", 100, fnbase="reco"),
 
+'qcdht1000_retest': _fromnum1("/store/user/tucker/qcdht1000/RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170522_213727", 200, fnbase="reco"),
+'qcdht1000_hip1p0': _fromnum1("/store/user/tucker/qcdht1000/RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170522_213840", 200, fnbase="reco"),
+'qcdht1000_hip1p0_mit': _fromnum1("/store/user/tucker/qcdht1000/RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170522_213930", 200, fnbase="reco"),
+
 })
 
 _add_ds('validation', {

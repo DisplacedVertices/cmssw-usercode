@@ -299,6 +299,18 @@ for s in mfv_ddbar_samples + mfv_signal_samples + mfv_hip_samples:
         s.dbs_inst = 'phys03'
         s.condor = True
 
+qcd_hip_samples = [
+    MCSample('qcdht1000_retest',     '/qcdht1000/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-7a425b8b8a432c226f185cf5f63c4c07/USER', 13172, xsec=1.206e3),
+    MCSample('qcdht1000_hip1p0',     '/qcdht1000/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-0736ec5973f30890a5611f7bf83fdf93/USER', 13165, xsec=1.206e3),
+    MCSample('qcdht1000_hip1p0_mit', '/qcdht1000/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-1b1bd2d472ac43148cc5c94d020891ea/USER', 13166, xsec=1.206e3),
+    ]
+
+for s in qcd_hip_samples:
+    s.is_private = True
+    s.dbs_inst = 'phys03'
+    s.condor = True
+
+
 ########################################################################
 
 ########
