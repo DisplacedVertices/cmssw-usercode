@@ -392,7 +392,7 @@ def get(i): return _l[i]
                 print '\033[1m problem! \033[0m'
                 print submit_out
             else:
-                print 'success! cluster', cluster
+                print '\x1b[92msuccess!\x1b[0m cluster', cluster
                 cluster_link = os.path.join(cls.links_dir, str(cluster))
                 if os.path.islink(cluster_link):
                     print 'warning: clobbering old link:', os.readlink(cluster_link)
