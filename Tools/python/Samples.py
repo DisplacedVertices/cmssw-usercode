@@ -377,6 +377,7 @@ __all__ = [
     'qcd_samples',
     'qcd_samples_ext',
     'qcd_samples_sum',
+    'qcd_hip_samples',
     'ttbar_samples',
     'leptonic_background_samples',
     'mfv_ddbar_samples',
