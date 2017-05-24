@@ -246,13 +246,13 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
       h_pvy[j]->Fill(pv.y() - bsy, w);
       h_pvz[j]->Fill(pv.z() - bsz, w);
       h_pvrho[j]->Fill(mag(pv.x() - bsx, pv.y() - bsy), w);
-      h_pvntracks[j]->Fill(pv.nTracks());
+      h_pvntracks[j]->Fill(pv.nTracks(), w);
       double pvsumpt2 = 0;
       for (auto trki = pv.tracks_begin(), trke = pv.tracks_end(); trki != trke; ++trki) {
         const double trkpt = (*trki)->pt();
         pvsumpt2 += trkpt * trkpt;
       }
-      h_pvsumpt2[j]->Fill(pvsumpt2);
+      h_pvsumpt2[j]->Fill(pvsumpt2, w);
     }
   }
 
@@ -346,7 +346,7 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
       if (tk.charge() > 0) h_tracks_qp_dxy[i]->Fill(dxy, w);
       if (tk.charge() < 0) h_tracks_qm_dxy[i]->Fill(dxy, w);
 
-      const double z = tk.vz() - bsz;
+      const double z = tk.vz();
       if (z<-5)         h_tracks_dxy_zslices[i][0]->Fill(dxy, w);
       if (z>-5 && z<-2) h_tracks_dxy_zslices[i][1]->Fill(dxy, w);
       if (z>-2 && z<0)  h_tracks_dxy_zslices[i][2]->Fill(dxy, w);
