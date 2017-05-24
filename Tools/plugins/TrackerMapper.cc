@@ -124,12 +124,12 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
   h_npv = fs->make<TH1D>("h_npv", ";number of primary vertices;events", 100, 0, 100);
   for (int i = 0; i < 2; ++i) {
     const char* ex = i == 0 ? "the" : "all";
-    h_pvx[i] = fs->make<TH1D>(TString::Format("h_pvx_%i", i), TString::Format(";%s pv x (cm);events/100 #mum", ex), 200, -1, 1);
-    h_pvy[i] = fs->make<TH1D>(TString::Format("h_pvy_%i", i), TString::Format(";%s pv y (cm);events/100 #mum", ex), 200, -1, 1);
-    h_pvz[i] = fs->make<TH1D>(TString::Format("h_pvz_%i", i), TString::Format(";%s pv z (cm);events/100 #mum", ex), 200, -1, 1);
-    h_pvrho[i] = fs->make<TH1D>(TString::Format("h_pvrho_%i", i), TString::Format(";%s pv #rho x (cm);events/100 #mum", ex), 200, 0, 2);
+    h_pvx[i] = fs->make<TH1D>(TString::Format("h_pvx_%i", i), TString::Format(";%s pv x (cm);events/10 #mum", ex), 2000, -1, 1);
+    h_pvy[i] = fs->make<TH1D>(TString::Format("h_pvy_%i", i), TString::Format(";%s pv y (cm);events/10 #mum", ex), 2000, -1, 1);
+    h_pvz[i] = fs->make<TH1D>(TString::Format("h_pvz_%i", i), TString::Format(";%s pv z (cm);events/1 mm", ex), 4000, -20, 20);
+    h_pvrho[i] = fs->make<TH1D>(TString::Format("h_pvrho_%i", i), TString::Format(";%s pv #rho x (cm);events/10 #mum", ex), 1000, 0, 1);
     h_pvntracks[i] = fs->make<TH1D>(TString::Format("h_pvntracks_%i", i), TString::Format(";%s pv # tracks;events/1", ex), 200, 0, 200);
-    h_pvsumpt2[i] = fs->make<TH1D>(TString::Format("h_pvsumpt2_%i", i), TString::Format(";%s pv #Sigma p_{T}^{2} (GeV^{2});events/100 GeV^{2}", ex), 100, 0, 10000);
+    h_pvsumpt2[i] = fs->make<TH1D>(TString::Format("h_pvsumpt2_%i", i), TString::Format(";%s pv #Sigma p_{T}^{2} (GeV^{2});events/200 GeV^{2}", ex), 500, 0, 100000);
   }
 
   const char* ex[3] = {"all", "sel", "seed"};
