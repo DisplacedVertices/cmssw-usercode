@@ -506,10 +506,14 @@ for x in data_samples + [qcdht0700, qcdht2000, ttbar, my_mfv_neu_tau00300um_M080
     x.add_dataset('validation')
     x.datasets['validation'].condor = True
 
-for x in data_samples + data_samples_2015 + \
-        ttbar_samples + ttbar_samples_2015 + qcd_samples + qcd_samples_2015 + qcd_samples_ext + qcd_samples_ext_2015 + \
-        mfv_signal_samples + mfv_signal_samples_2015 + mfv_ddbar_samples + mfv_hip_samples:
-    x.add_dataset('ntuplev14')
+for x in (Samples.data_samples_2015 +
+          Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015 +
+          Samples.mfv_signal_samples_2015 +
+          Samples.data_samples +
+          Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext +
+          Samples.mfv_signal_samples + Samples.mfv_ddbar_samples + Samples.mfv_hip_samples):
+    if x not in (JetHT2015D, mfv_neu_tau10000um_M1600_2015, mfv_neu_tau10000um_M3000, JetHT2016B3, qcdht0700, qcdht0700ext, qcdht2000ext): # these not done yet
+        x.add_dataset('ntuplev15')
 
 for x in ttbar_samples + ttbar_samples_2015 + qcd_samples + qcd_samples_ext + qcd_samples_2015 + qcd_samples_ext_2015 + data_samples + data_samples_2015:
     if x.name != 'qcdht0700':
@@ -528,6 +532,7 @@ for x in ttbar_samples + qcd_samples + qcd_samples_ext:
 JetHT2015C.condor = True
 JetHT2015D.condor = True
 JetHT2015D.xrootd_url = 'root://dcache-cms-xrootd.desy.de/'
+#qcdht0700ext.condor = True
 
 for x in (qcdht0500_2015, qcdht0700_2015, qcdht1000_2015, qcdht2000_2015, qcdht0500ext_2015, qcdht1500ext_2015, qcdht2000ext_2015, ttbar_2015):
     x.condor = True
