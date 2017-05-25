@@ -506,12 +506,12 @@ for x in data_samples + [qcdht0700, qcdht2000, ttbar, my_mfv_neu_tau00300um_M080
     x.add_dataset('validation')
     x.datasets['validation'].condor = True
 
-for x in (Samples.data_samples_2015 +
-          Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015 +
-          Samples.mfv_signal_samples_2015 +
-          Samples.data_samples +
-          Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext +
-          Samples.mfv_signal_samples + Samples.mfv_ddbar_samples + Samples.mfv_hip_samples):
+for x in (data_samples_2015 +
+          ttbar_samples_2015 + qcd_samples_2015 + qcd_samples_ext_2015 +
+          mfv_signal_samples_2015 +
+          data_samples +
+          ttbar_samples + qcd_samples + qcd_samples_ext +
+          mfv_signal_samples + mfv_ddbar_samples + mfv_hip_samples):
     if x not in (JetHT2015D, mfv_neu_tau10000um_M1600_2015, mfv_neu_tau10000um_M3000, JetHT2016B3, qcdht0700, qcdht0700ext, qcdht2000ext): # these not done yet
         x.add_dataset('ntuplev15')
 
