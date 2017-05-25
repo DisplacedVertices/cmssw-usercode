@@ -119,24 +119,24 @@ void construct_dvvc(bool is_mc, std::string year, int ntracks, bool correct_bqua
 
   if (ntracks == 3) {
     tree_path = "mfvMiniTreeNtk3/t";
-    if (year == "2015")   { bquark_correction[0] = 0.91; bquark_correction[1] = 1.07; bquark_correction[2] = 1.11; }
-    if (year == "2016")   { bquark_correction[0] = 0.93; bquark_correction[1] = 1.07; bquark_correction[2] = 1.11; }
-    if (year == "2015p6") { bquark_correction[0] = 0.92; bquark_correction[1] = 1.08; bquark_correction[2] = 1.12; }
+    if (year == "2015")   { bquark_correction[0] = 0.93; bquark_correction[1] = 1.06; bquark_correction[2] = 1.09; }
+    if (year == "2016")   { bquark_correction[0] = 0.94; bquark_correction[1] = 1.06; bquark_correction[2] = 1.10; }
+    if (year == "2015p6") { bquark_correction[0] = 0.93; bquark_correction[1] = 1.07; bquark_correction[2] = 1.10; }
   } else if (ntracks == 4) {
     tree_path = "mfvMiniTreeNtk4/t";
-    if (year == "2015")   { bquark_correction[0] = 0.91; bquark_correction[1] = 1.12; bquark_correction[2] = 1.14; }
-    if (year == "2016")   { bquark_correction[0] = 0.93; bquark_correction[1] = 1.11; bquark_correction[2] = 1.20; }
-    if (year == "2015p6") { bquark_correction[0] = 0.92; bquark_correction[1] = 1.12; bquark_correction[2] = 1.23; }
+    if (year == "2015")   { bquark_correction[0] = 0.93; bquark_correction[1] = 1.10; bquark_correction[2] = 1.12; }
+    if (year == "2016")   { bquark_correction[0] = 0.93; bquark_correction[1] = 1.10; bquark_correction[2] = 1.19; }
+    if (year == "2015p6") { bquark_correction[0] = 0.93; bquark_correction[1] = 1.11; bquark_correction[2] = 1.20; }
   } else if (ntracks == 5) {
     tree_path = "mfvMiniTree/t";
-    if (year == "2015")   { bquark_correction[0] = 0.90; bquark_correction[1] = 1.32; bquark_correction[2] = 1.27; }
-    if (year == "2016")   { bquark_correction[0] = 0.93; bquark_correction[1] = 1.22; bquark_correction[2] = 1.47; }
-    if (year == "2015p6") { bquark_correction[0] = 0.92; bquark_correction[1] = 1.24; bquark_correction[2] = 1.56; }
+    if (year == "2015")   { bquark_correction[0] = 0.90; bquark_correction[1] = 1.31; bquark_correction[2] = 1.26; }
+    if (year == "2016")   { bquark_correction[0] = 0.92; bquark_correction[1] = 1.24; bquark_correction[2] = 1.52; }
+    if (year == "2015p6") { bquark_correction[0] = 0.92; bquark_correction[1] = 1.25; bquark_correction[2] = 1.57; }
   } else if (ntracks == 7) {
     tree_path = "mfvMiniTreeNtk3or4/t";
-    if (year == "2015")   { bquark_correction[0] = 0.91; bquark_correction[1] = 1.09; bquark_correction[2] = 1.12; }
-    if (year == "2016")   { bquark_correction[0] = 0.93; bquark_correction[1] = 1.09; bquark_correction[2] = 1.14; }
-    if (year == "2015p6") { bquark_correction[0] = 0.92; bquark_correction[1] = 1.10; bquark_correction[2] = 1.15; }
+    if (year == "2015")   { bquark_correction[0] = 0.93; bquark_correction[1] = 1.07; bquark_correction[2] = 1.11; }
+    if (year == "2016")   { bquark_correction[0] = 0.94; bquark_correction[1] = 1.08; bquark_correction[2] = 1.13; }
+    if (year == "2015p6") { bquark_correction[0] = 0.93; bquark_correction[1] = 1.09; bquark_correction[2] = 1.14; }
     min_ntracks0 = 4;
     max_ntracks0 = 4;
     min_ntracks1 = 3;
@@ -363,6 +363,7 @@ void construct_dvvc(bool is_mc, std::string year, int ntracks, bool correct_bqua
   h_2v_npu->Write();
 
   h_c1v_dbv->Write();
+  h_c1v_dvv->Scale(1./h_c1v_dvv->Integral());
   h_c1v_dvv->Write();
   h_c1v_absdphivv->Write();
   h_c1v_dbv0->Write();
