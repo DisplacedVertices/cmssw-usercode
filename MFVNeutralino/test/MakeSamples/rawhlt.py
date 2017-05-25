@@ -6,6 +6,7 @@ import sys, FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
 
 randomize = 'norandomize' not in sys.argv
+expectedevents = 100
 salt = ''
 premix = True
 trigfilter = False
@@ -17,6 +18,8 @@ for arg in sys.argv:
         salt = arg.replace('salt=','')
     elif arg.startswith('jobnum='):
         jobnum = int(arg.replace('jobnum=',''))
+    elif arg.startswith('expectedevents='):
+        jobnum = int(arg.replace('expectedevents=',''))
     elif arg.startswith('premix='):
         premix = arg.replace('premix=','') == '1'
     elif arg.startswith('trigfilter='):
@@ -66,10 +69,19 @@ if trigfilter:
 
 import minbias
 if premix:
+    minbias_input = process.mixData.input
     process.mixData.input.fileNames = minbias.premix_files()
     process.mix.digitizers = cms.PSet(process.theDigitizersMixPreMix)
 else:
+    minbias_input = process.mix.input
     process.mix.input.fileNames = minbias.files()
+
+if not randomize or salt.startswith('fixed'):
+    minbias_input.sequential = cms.untracked.bool(True)
+    skip = jobnum * expectedevents
+    if not premix:
+        skip *= 2*23 # 2*average PU
+    minbias_input.skipEvents = cms.untracked.uint32(skip)
 
 from Configuration.AlCa.GlobalTag import GlobalTag
 from dynamicconf import globaltag

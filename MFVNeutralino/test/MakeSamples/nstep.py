@@ -37,16 +37,33 @@ elif 0:
     from_lhe = True
     output_level = 'gensim'
     output_dataset_tag = 'RunIISummer15GS-MCRUN2_71_V1'
-elif 0:
-    meta = 'qcdht1000'
-    nevents, events_per = 1500, 1500
-    from_lhe = True
-    output_level = 'ntuple'
 elif 1:
+    meta = 'qcdht1000'
+    fixed_salt = 'fixedsalt'
+    output_dataset_tag = 'RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6'
+    nevents, events_per = 200000, 1000 # 0.06 eff at gen matching with lhe events for 1000, more like 0.025 for 700
+    if meta.endswith('0700'):
+        nevents *= 14
+    from_lhe = True
+    use_this_cmssw = True
+    premix = False
+    trig_filter = True
+    hip_simulation = False
+    hip_mitigation = False
+    ex = ''
+elif 0:
     meta, taus, masses = 'neu', [300, 1000, 10000], [400, 800]
     use_this_cmssw = True
     premix = False
-    ex = '_retest'
+    hip_simulation = 1.0
+    hip_mitigation = True
+    ex = '_hip1p0_mit'
+
+if hip_simulation:
+    exx = '%.1f' % hip_simulation
+    ex += '_hip' + exx.replace('.','p')
+    if hip_mitigation:
+        ex += '_mit'
 
 #ex = '_test'
 #nevents, events_per = 10,10
@@ -58,6 +75,7 @@ if output_level not in ('reco', 'ntuple', 'minitree', 'gensim'):
     raise ValueError('output_level %s not supported' % output_level)
 
 import sys, os
+from math import ceil
 from pprint import pprint
 from time import time
 from JMTucker.Tools.CRAB3Tools import Config, crab_dirs_root, crab_command
@@ -126,6 +144,7 @@ def submit(config, name, todo, todo_rawhlt=[], todo_reco=[], todo_ntuple=[]):
     dummy_for_hash = int(time()*1e6)
     steering = [
         'MAXEVENTS=%i' % events_per,
+        'EXPECTEDEVENTS=%i' % (ceil(events_per*0.06) if from_lhe else events_per),
         'USETHISCMSSW=%i' % use_this_cmssw,
         'FROMLHE=%i' % from_lhe,
         'TRIGFILTER=%i' % trig_filter,
@@ -144,6 +163,7 @@ def submit(config, name, todo, todo_rawhlt=[], todo_reco=[], todo_ntuple=[]):
         todo_rawhlt.append('hip_simulation,%f' % float(hip_simulation))
 
     if hip_mitigation:
+        assert hip_simulation
         todo_reco  .append('hip_mitigation')
         todo_ntuple.append('hip_mitigation')
 
@@ -151,7 +171,7 @@ def submit(config, name, todo, todo_rawhlt=[], todo_reco=[], todo_ntuple=[]):
     for todo2_name, todo2 in todo2s:
         if todo2:
             todo2 = ' '.join('todo=%s' % x for x in todo2)
-            steering.append('%s="%s"' % (todo2_name, todo2))
+            steering.append('TODO%s="%s"' % (todo2_name, todo2))
 
             if not fixed_salt:
                 salt += ' ' + todo2

@@ -9,8 +9,9 @@ noduplicate = False
 set_style()
 ps = plot_saver('../plots/bkgest/v14/vertexer_pair_effs%s_%s%s%s%s' % ('' if is_mc else '_data', year, '_ntkseeds' if ntkseeds else '', '_mintk' if mintk else '', '_noduplicate' if noduplicate else ''), size=(700,700), log=False, root=False)
 
-f = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_8025/VertexerPairEffsV14%s/background%s.root' % ('p2_0' if noduplicate else '', '' if year=='2016' else '_%s'%year))
-if not is_mc:
+if is_mc:
+    f = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_8025/VertexerPairEffsV14%s/background%s.root' % ('p2_0' if noduplicate else '', '' if year=='2016' else '_%s'%year))
+else:
     f = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_8025/VertexerPairEffsV14/JetHT%s.root' % year)
 
 fh = ROOT.TFile('vpeffs%s_%s_v14%s%s%s.root' % ('' if is_mc else '_data', year, '_ntkseeds' if ntkseeds else '', '_mintk' if mintk else '', '_noduplicate' if noduplicate else ''), 'recreate')
