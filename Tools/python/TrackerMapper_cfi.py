@@ -1,4 +1,6 @@
 import FWCore.ParameterSet.Config as cms
+from PileupWeights import pileup_weights
+from Year import year
 
 TrackerMapper = cms.EDAnalyzer('TrackerMapper',
                                track_src = cms.InputTag('generalTracks'),
@@ -6,5 +8,5 @@ TrackerMapper = cms.EDAnalyzer('TrackerMapper',
                                primary_vertex_src = cms.InputTag('offlinePrimaryVertices'),
                                use_duplicateMerge = cms.int32(-1),
                                old_stlayers_cut = cms.bool(False),
-                               pileup_weights = cms.vdouble(*([1]*100)),
+                               pileup_weights = cms.vdouble(*pileup_weights[year]),
                                )
