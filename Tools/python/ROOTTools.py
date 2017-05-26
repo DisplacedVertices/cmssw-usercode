@@ -1497,6 +1497,160 @@ def rainbow_palette(num_colors=500):
     ROOT.TColor.CreateGradientColorTable(5, stops, r, g, b, num_colors)
     ROOT.gStyle.SetNumberContours(num_colors)
 
+def ratios_plot(name,
+                hists,
+                plot_saver = None,
+                output_fn = None,
+                canvas_size = (600, 600),
+                canvas_top_margin = 0.01,
+                canvas_bottom_margin = 0.3,
+                canvas_left_margin = 0.12,
+                canvas_right_margin = 0.08,
+                x_title_offset = 1.,
+                y_title_offset = 1.5,
+                x_title_size = 0.04,
+                y_title_size = 0.04,
+                y_label_size = 0.03,
+                res_divide_opt = 'pois',
+                res_line_width = 2,
+                res_x_title_size = 0.04,
+                res_x_title_offset = 1.,
+                res_y_title = 'ratio',
+                res_y_title_offset = None,
+                res_y_title_size = None,
+                res_x_label_size = 0.03,
+                res_y_label_size = 0.03,
+                res_y_range = (0., 2.),
+                res_draw_cmd = 'pez',
+                res_fit = True,
+                legend = None,
+                draw_normalized = False,
+                ):
+    '''With n hists, draw them and the n-1 ratios to hists[0].'''
+
+    hists = hists[:] # gonna modify the list
+
+    # Sanity checks on the parameters.
+    if output_fn is None and plot_saver is None:
+        raise ValueError('at least one of output_fn, plot_saver must be supplied')
+    elif output_fn is not None and plot_saver is not None:
+        raise ValueError('only one of output_fn and plot_saver may be supplied')
+    if 'a' in res_draw_cmd:
+        raise ValueError('no "a" in res_draw_cmd')
+
+    canvas = ROOT.TCanvas('c_ratiosplot_' + name, '', *canvas_size)
+    canvas.SetTopMargin(canvas_top_margin)
+    canvas.SetBottomMargin(canvas_bottom_margin)
+    canvas.SetLeftMargin(canvas_left_margin)
+    canvas.SetRightMargin(canvas_right_margin)
+
+    if plot_saver is not None:
+        plot_saver.old_c = plot_saver.c
+        plot_saver.c = canvas
+
+    for i,h in enumerate(hists):
+        h.GetXaxis().SetLabelSize(0) # the data/MC ratio part will show the labels
+        h.GetXaxis().SetTitleSize(x_title_size)
+        h.GetYaxis().SetTitleSize(y_title_size)
+        h.GetXaxis().SetTitleOffset(x_title_offset)
+        h.GetYaxis().SetTitleOffset(y_title_offset)
+        h.GetYaxis().SetLabelSize(y_label_size)
+
+        if draw_normalized:
+            h.v = h.GetMaximum() / h.Integral(0,h.GetNbinsX()+1)
+        else:
+            h.v = h.GetMaximum()
+
+    for i,h in enumerate(sorted(hists, key=lambda h: h.v, reverse=True)):
+        cmd = h.DrawNormalized if draw_normalized else h.Draw
+        if i == 0:
+            cmd()
+        else:
+            cmd('sames')
+
+    if legend is not None:
+        legend = ROOT.TLegend(*legend)
+        legend.SetTextFont(42)
+        legend.SetBorderSize(0)
+        for h in hists:
+            legend.AddEntry(h, h.nice, 'LPE')
+        legend.Draw()
+
+    h0 = hists.pop(0)
+    
+    ratio_pad = ROOT.TPad('ratio_pad_' + name, '', 0, 0, 1, 1)
+    ratio_pad.SetTopMargin(1-canvas_bottom_margin + 0.015)
+    ratio_pad.SetLeftMargin(canvas_left_margin)
+    ratio_pad.SetRightMargin(canvas_right_margin)
+    ratio_pad.SetFillColor(0)
+    ratio_pad.SetFillStyle(0)
+    ratio_pad.Draw()
+    ratio_pad.cd(0)
+
+    ratios = []
+    old_opt_fit = None
+    fit_tpt = None
+    for i,h in enumerate(hists):
+        r = ROOT.TGraphAsymmErrors(h, h0, res_divide_opt)
+        ratios.append(r)
+        r.SetMarkerStyle(20)
+        r.SetMarkerSize(0)
+        r.SetLineWidth(h.GetLineWidth())
+        r.SetLineColor(h.GetLineColor())
+        x_range = h.GetXaxis().GetXmin(), h.GetXaxis().GetXmax()
+        r.GetXaxis().SetLimits(*x_range)
+        r.GetXaxis().SetTitleSize(res_x_title_size)
+        r.GetXaxis().SetTitleOffset(res_x_title_offset)
+        r.GetXaxis().SetLabelSize(res_x_label_size)
+        r.GetYaxis().SetLabelSize(res_y_label_size)
+        r.GetYaxis().SetTitleOffset(res_y_title_offset if res_y_title_offset is not None else y_title_offset)
+        r.GetYaxis().SetTitleSize(res_y_title_size if res_y_title_size is not None else y_title_size)
+        r.GetYaxis().SetRangeUser(*res_y_range)
+        r.GetYaxis().SetNdivisions(505)
+        r.SetTitle(';%s;%s' % (h.GetXaxis().GetTitle(), res_y_title))
+        if i == 0:
+            r.Draw('a' + res_draw_cmd)
+        else:
+            r.Draw(res_draw_cmd)
+
+        if res_fit:
+            old_opt_fit = ROOT.gStyle.GetOptFit()
+            ROOT.gStyle.SetOptFit(0)
+            fit_opt = 'sqe'
+            fcn = ROOT.TF1('f_rat_' + h.GetName(), 'pol0')
+            fcn.SetLineColor(h.GetLineColor())
+            fit_res = r.Fit(fcn, fit_opt)
+            ratio_pad.Update()
+
+            if fit_tpt is None:
+                x_width = x_range[1] - x_range[0]
+                res_y_width = res_y_range[1] - res_y_range[0]
+                fit_tpt = ROOT.TPaveText(x_range[0] + x_width/100,
+                                         res_y_range[1] - res_y_width/6 * len(hists),
+                                         x_range[0] + x_width / 2,
+                                         res_y_range[1] - res_y_width/10)
+                fit_tpt.SetBorderSize(0)
+                fit_tpt.SetFillColor(ROOT.kWhite)
+                fit_tpt.SetTextFont(42)
+            txt = fit_tpt.AddText('p0 = %.2f #pm %.2f  #chi^{2}/ndf = %.2f/%i  p = %.3f' % (fit_res.Parameter(0), fit_res.ParError(0), fit_res.Chi2(), fit_res.Ndf(), fit_res.Prob()))
+            txt.SetTextAlign(12)
+            txt.SetTextColor(h.GetLineColor())
+
+    if fit_tpt:
+        fit_tpt.Draw()
+
+    if plot_saver is not None:
+        plot_saver.save(name)
+        plot_saver.c = plot_saver.old_c
+        plot_saver.c.cd()
+    elif output_fn is not None:
+        canvas.SaveAs(output_fn)
+
+    if old_opt_fit is not None:
+        ROOT.gStyle.SetOptFit(old_opt_fit)
+
+    return canvas, legend, ratio_pad, ratios
+
 def real_hist_max(h, return_bin=False, user_range=None, use_error_bars=True):
     """Find the real maximum value of the histogram, taking into
     account the error bars and/or the specified range."""
@@ -1789,6 +1943,7 @@ __all__ = [
     'poisson_intervalize',
     'poisson_means_divide',
     'rainbow_palette',
+    'ratios_plot',
     'real_hist_max',
     'real_hist_min',
     'set_style',
