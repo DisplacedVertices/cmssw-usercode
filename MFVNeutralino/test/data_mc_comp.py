@@ -8,8 +8,8 @@ from JMTucker.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, plot_s
 
 year = '2016'
 
-root_file_dir = '/uscms_data/d2/tucker/crab_dirs/HistosV14'
-plot_dir = 'plots/data_mc_comp/HistosV14_%s' % year
+root_file_dir = '/uscms_data/d2/tucker/crab_dirs/HistosV14_v2'
+plot_dir = 'plots/data_mc_comp/HistosV14_v2_%s' % year
 
 set_style()
 ps = plot_saver(plot_dir)
@@ -206,27 +206,27 @@ if year == '2016':
       )
 
 if year == '2015':
-    int_lumi = 268.3 * (247778.0 / 273178.525733)
+    int_lumi = 268.3 * (247778.0 / 273157.370031)
     int_lumi_nice = '0.27 fb^{-1} (13 TeV)'
     data_samples = Samples.data_samples_2015
 elif year == '2016':
-    int_lumi = 3586.7 * (3021371.0 / 3472683.11285)
+    int_lumi = 3586.7 * (3021371.0 / 3472795.60464)
     int_lumi_nice = '3.59 fb^{-1} (13 TeV)'
     data_samples = Samples.data_samples
 elif year == '2016BCD':
-    int_lumi = 1259. * (1069961.0 / 1218977.92012)
+    int_lumi = 1259. * (1069961.0 / 1219017.39351)
     int_lumi_nice = '1.26 fb^{-1} (13 TeV)'
     data_samples = [Samples.JetHT2016B3, Samples.JetHT2016C, Samples.JetHT2016D]
 elif year == '2016EF':
-    int_lumi = 711. * (600771.0 / 688398.165594)
+    int_lumi = 711. * (600771.0 / 688420.47135)
     int_lumi_nice = '0.71 fb^{-1} (13 TeV)'
     data_samples = [Samples.JetHT2016E, Samples.JetHT2016F]
 elif year == '2016G':
-    int_lumi = 763. * (643165.0 / 738745.15367)
+    int_lumi = 763. * (643165.0 / 738769.072188)
     int_lumi_nice = '0.76 fb^{-1} (13 TeV)'
     data_samples = [Samples.JetHT2016G]
 elif year == '2016H':
-    int_lumi = 855. * (707474.0 / 827820.588491)
+    int_lumi = 855. * (707474.0 / 827847.407197)
     int_lumi_nice = '0.86 fb^{-1} (13 TeV)'
     data_samples = [Samples.JetHT2016H2, Samples.JetHT2016H3]
 
@@ -340,7 +340,6 @@ D('3t1v_dbv_unzoom',
   )
 
 D('3t2v_dvv',
-  file_path = os.path.join('/uscms_data/d2/tucker/crab_dirs/HistosV14_v2', '%(name)s.root'),
   histogram_path = 'Ntk3mfvVertexHistosFullSel/h_svdist2d',
   rebin = 5,
   x_title = 'd_{VV} (cm)',
