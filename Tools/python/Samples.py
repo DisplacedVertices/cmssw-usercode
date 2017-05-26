@@ -512,7 +512,7 @@ for x in (data_samples_2015 +
           data_samples +
           ttbar_samples + qcd_samples + qcd_samples_ext +
           mfv_signal_samples + mfv_ddbar_samples + mfv_hip_samples):
-    if x not in (JetHT2015D, mfv_neu_tau00300um_M1600, mfv_neu_tau10000um_M1600_2015, mfv_neu_tau10000um_M3000, JetHT2016B3, qcdht0700, qcdht0700ext, qcdht2000ext): # these not done yet
+    if x not in (JetHT2015D, mfv_neu_tau00300um_M1600, mfv_neu_tau10000um_M1600_2015, mfv_neu_tau10000um_M3000, JetHT2016B3, qcdht0700, qcdht2000ext): # these not done yet
         x.add_dataset('ntuplev15')
 
 for x in ttbar_samples + ttbar_samples_2015 + qcd_samples + qcd_samples_ext + qcd_samples_2015 + qcd_samples_ext_2015 + data_samples + data_samples_2015:
