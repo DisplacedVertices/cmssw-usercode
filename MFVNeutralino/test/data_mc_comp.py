@@ -347,3 +347,42 @@ D('3t2v_dvv',
   x_range = (0, 0.4),
   y_range = (1e-2, 1e2),
   )
+
+D('4t1v_onevtx_ntracks',
+  histogram_path = 'Ntk4vtxHst1VNoNtracks/h_sv_all_ntracks',
+  x_title = 'Number of tracks per vertex',
+  y_title = 'Vertices',
+  cut_line = ((5, 0, 5, 2.1e6), 2, 5, 1),
+  )
+
+D('4t1v_onevtx_bs2derr',
+  histogram_path = 'Ntk4vtxHst1VNoBs2derr/h_sv_all_bs2derr',
+  x_title = 'Uncertainty in d_{BV} (cm)',
+  y_title = 'Vertices/5 #mum',
+  y_range = (1, 1e4),
+  cut_line = ((0.0025, 0, 0.0025, 1.8e4), 2, 5, 1),
+  )
+
+D('4t1v_onevtx_dbv',
+  histogram_path = 'Ntk4vtxHst1VNoBsbs2ddist/h_sv_all_bsbs2ddist',
+  x_title = 'd_{BV} (cm)',
+  y_title = 'Vertices/50 #mum',
+  x_range = (0, 0.4),
+  y_range = (1, 1e4),
+  cut_line = ((0.01, 0, 0.01, 1.8e4), 2, 5, 1),
+  )
+
+D('4t1v_dbv',
+  histogram_path = 'Ntk4mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist',
+  x_title = 'd_{BV} (cm)',
+  y_title = 'Vertices/50 #mum',
+  x_range = (0, 0.4),
+  y_range = (1, 1e4),
+  )
+
+D('4t1v_dbv_unzoom',
+  histogram_path = 'Ntk4mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist',
+  x_title = 'd_{BV} (cm)',
+  y_title = 'Vertices/50 #mum',
+  y_range = (1, 1e4),
+  )
