@@ -65,9 +65,16 @@ for itk in [3,4,5]:
 
 fh.Close()
 
+f = ROOT.TFile('vpeffs%s_%s_v14%s%s%s.root' % ('' if is_mc else '_data', year, '_ntkseeds' if ntkseeds else '', '_mintk' if mintk else '', '_noduplicate' if noduplicate else ''))
+h = f.Get('maxtk3')
+h.SetLineWidth(3)
+h.SetLineColor(ROOT.kRed)
+h.SetTitle(';d_{VV} (cm);Efficiency')
+h.GetXaxis().SetRangeUser(0,0.4)
+h.Draw('hist')
+ps.save('efficiency3')
 
 if is_mc:
-    f = ROOT.TFile('vpeffs_%s_v14%s%s%s.root' % (year, '_ntkseeds' if ntkseeds else '', '_mintk' if mintk else '', '_noduplicate' if noduplicate else ''))
     colors = [0, 0, 0, ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2]
     l = ROOT.TLegend(0.50,0.15,0.85,0.30)
     for i in [3,4,5]:
@@ -88,8 +95,6 @@ if is_mc:
 
     if year == '2016' and not ntkseeds and not mintk and not noduplicate:
         h = f.Get('maxtk3')
-        h.Draw('hist')
-        ps.save('efficiency3')
 
         ROOT.TH1.AddDirectory(0)
 
