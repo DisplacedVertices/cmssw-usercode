@@ -371,7 +371,7 @@ _add_ds("ntuplev15", {
 'qcdht0500_2015': _fromnum0("/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_2015/170522_152140", 115),
 'qcdht0500ext': _fromnum1("/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_2016/170522_202350", 89),
 'qcdht0500ext_2015': _fromnum0("/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_2015/170522_152144", 274),
-'qcdht0700': _fromnum0("/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_2016/170522_202136", 32),
+'qcdht0700': _fromnum1("/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_2016/170522_202136", 32, but=[2]),
 'qcdht0700_2015': (111, ['/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_2015/170522_165812/0000/ntuple_104.root'] + ['/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_2015/170522_152141/0000/ntuple_%i.root' % i for i in chain(xrange(104), xrange(105,111))]),
 'qcdht0700ext': (62, ['/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_2016/170525_133257/0000/ntuple_12.root'] + ['/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_2016/170525_092317/0000/ntuple_%i.root' % i for i in chain(xrange(12), xrange(13,62))]),
 'qcdht0700ext_2015': _fromnum1("/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_2015/170522_202052", 237),
