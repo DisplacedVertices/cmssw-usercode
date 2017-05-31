@@ -22,6 +22,7 @@ def _mass(sample):
     return int(s[x+2:y])
 
 def _set_tau_mass(sample):
+    sample.is_signal = True
     sample.tau  = _tau (sample)
     sample.mass = _mass(sample)
 
@@ -141,12 +142,14 @@ xx4j_samples_2015 = [    # M = 50, 100 GeV also exist
 
 for s in mfv_signal_samples_2015:
     _set_tau_mass(s)
+    s.is_private = True
     s.dbs_inst = 'phys03'
     s.xsec = 1e-3
     s.condor = True
 
 for s in xx4j_samples_2015:
     _set_tau_mass(s)
+    s.is_private = False
     s.xsec = 1e-3
 
 ########
@@ -280,6 +283,12 @@ mfv_hip_samples = [
     MCSample('mfv_neu_tau10000um_M0400_retest', '/mfv_neu_tau10000um_M0400/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-d438cbb0e697a06aeebfb0d2d350a7f7/USER', 9900),
     MCSample('mfv_neu_tau10000um_M0800_retest', '/mfv_neu_tau10000um_M0800/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-d438cbb0e697a06aeebfb0d2d350a7f7/USER', 10000),
 
+    MCSample('mfv_neu_tau00300um_M0400_hip1p0_mit', '/mfv_neu_tau00300um_M0400/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-5f5d6ef2ffb6a650dd2c91d2feda49ce/USER', 10000),
+    MCSample('mfv_neu_tau00300um_M0800_hip1p0_mit', '/mfv_neu_tau00300um_M0800/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-42adc6a10357c55389b6a60e7bd3274b/USER', 10000),
+    MCSample('mfv_neu_tau01000um_M0400_hip1p0_mit', '/mfv_neu_tau01000um_M0400/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-3824911761fa1d58c752de20493bfc44/USER', 10000),
+    MCSample('mfv_neu_tau01000um_M0800_hip1p0_mit', '/mfv_neu_tau01000um_M0800/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-7465d401a02b15ec03cc491dd62ad01c/USER', 10000),
+    MCSample('mfv_neu_tau10000um_M0400_hip1p0_mit', '/mfv_neu_tau10000um_M0400/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-49f888181b3f2e089819514e45257b78/USER', 10000),
+    MCSample('mfv_neu_tau10000um_M0800_hip1p0_mit', '/mfv_neu_tau10000um_M0800/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-aba1e2e9fe3baf3380691657497b73bd/USER', 10000),
     ]
 
 for s in mfv_ddbar_samples + mfv_signal_samples + mfv_hip_samples:
@@ -289,6 +298,20 @@ for s in mfv_ddbar_samples + mfv_signal_samples + mfv_hip_samples:
     if s.is_private:
         s.dbs_inst = 'phys03'
         s.condor = True
+
+qcd_hip_samples = [
+    MCSample('qcdht0700_retest',     '/qcdht0700/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-8dfca419742c7a8461180d5c47913166/USER', 26434, xsec=6.802e3),
+    MCSample('qcdht0700_hip1p0',     '/qcdht0700/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-1941e1504f1c4b0fdfc3f73cf2e530f1/USER', 25411, xsec=6.802e3),
+    MCSample('qcdht0700_hip1p0_mit', '/qcdht0700/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-de9e9f9c2951885a85d93dfb6395e7a7/USER', 25257, xsec=6.802e3),
+    MCSample('qcdht1000_retest',     '/qcdht1000/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-7a425b8b8a432c226f185cf5f63c4c07/USER', 13172, xsec=1.206e3),
+    MCSample('qcdht1000_hip1p0',     '/qcdht1000/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-0736ec5973f30890a5611f7bf83fdf93/USER', 13165, xsec=1.206e3),
+    MCSample('qcdht1000_hip1p0_mit', '/qcdht1000/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-1b1bd2d472ac43148cc5c94d020891ea/USER', 13166, xsec=1.206e3),
+    ]
+
+for s in qcd_hip_samples:
+    s.is_private = True
+    s.dbs_inst = 'phys03'
+    s.condor = True
 
 ########################################################################
 
@@ -354,6 +377,7 @@ __all__ = [
     'qcd_samples',
     'qcd_samples_ext',
     'qcd_samples_sum',
+    'qcd_hip_samples',
     'ttbar_samples',
     'leptonic_background_samples',
     'mfv_ddbar_samples',
@@ -482,10 +506,14 @@ for x in data_samples + [qcdht0700, qcdht2000, ttbar, my_mfv_neu_tau00300um_M080
     x.add_dataset('validation')
     x.datasets['validation'].condor = True
 
-for x in data_samples + data_samples_2015 + \
-        ttbar_samples + ttbar_samples_2015 + qcd_samples + qcd_samples_2015 + qcd_samples_ext + qcd_samples_ext_2015 + \
-        mfv_signal_samples + mfv_signal_samples_2015 + mfv_ddbar_samples + mfv_hip_samples:
-    x.add_dataset('ntuplev14')
+for x in (data_samples_2015 +
+          ttbar_samples_2015 + qcd_samples_2015 + qcd_samples_ext_2015 +
+          mfv_signal_samples_2015 +
+          data_samples +
+          ttbar_samples + qcd_samples + qcd_samples_ext +
+          mfv_signal_samples + mfv_ddbar_samples + mfv_hip_samples):
+    if x not in (JetHT2015D, mfv_neu_tau00300um_M1600, mfv_neu_tau10000um_M1600_2015, mfv_neu_tau10000um_M3000): # these not done yet
+        x.add_dataset('ntuplev15')
 
 for x in ttbar_samples + ttbar_samples_2015 + qcd_samples + qcd_samples_ext + qcd_samples_2015 + qcd_samples_ext_2015 + data_samples + data_samples_2015:
     if x.name != 'qcdht0700':
@@ -504,30 +532,12 @@ for x in ttbar_samples + qcd_samples + qcd_samples_ext:
 JetHT2015C.condor = True
 JetHT2015D.condor = True
 JetHT2015D.xrootd_url = 'root://dcache-cms-xrootd.desy.de/'
+#qcdht0700ext.condor = True
+mfv_neu_tau00300um_M1600.condor = True
 
-for x in (qcdht2000ext,
-          qcdht0500_2015, qcdht0700_2015, qcdht1000_2015, qcdht1500_2015, qcdht2000_2015,
-          qcdht0500ext_2015, qcdht0700ext_2015, qcdht1000ext_2015, qcdht1500ext_2015, qcdht2000ext_2015,
-          ttbar_2015, ttbar):
+for x in (qcdht0500_2015, qcdht0700_2015, qcdht1000_2015, qcdht2000_2015, qcdht0500ext_2015, qcdht1500ext_2015, qcdht2000ext_2015, ttbar_2015):
     x.condor = True
     x.xrootd_url = 'root://cmseos.fnal.gov/'
-
-for x in (JetHT2016G,
-          SingleMuon2016B3, SingleMuon2016C, SingleMuon2016E, SingleMuon2016H2,
-          qcdht0500, qcdht1500, qcdht0500ext, qcdht0700ext, qcdht1000ext, qcdht1500ext, #qcdht2000,
-          wjetstolnu, dyjetstollM50, qcdmupt15,
-          mfv_neu_tau00100um_M0300, mfv_neu_tau10000um_M0300,
-          mfv_neu_tau00100um_M0800, mfv_neu_tau00300um_M0800, mfv_neu_tau01000um_M0800,
-          mfv_neu_tau01000um_M1200, mfv_neu_tau10000um_M1200,
-          mfv_neu_tau00100um_M1600, mfv_neu_tau10000um_M1600,
-          mfv_neu_tau10000um_M0800,
-          xx4j_tau00001mm_M0300_2015, xx4j_tau00003mm_M0300_2015, xx4j_tau00300mm_M0300_2015, xx4j_tau01000mm_M0300_2015, xx4j_tau02000mm_M0300_2015, xx4j_tau00010mm_M0500_2015, xx4j_tau00010mm_M0700_2015, xx4j_tau00300mm_M1500_2015, xx4j_tau01000mm_M1500_2015, xx4j_tau00003mm_M3000_2015, xx4j_tau00100mm_M3000_2015, xx4j_tau00300mm_M3000_2015, xx4j_tau01000mm_M3000_2015, xx4j_tau02000mm_M3000_2015,
-          ):
-    x.condor = True
-
-#qcdht2000.xrootd_url = 'root://ccmsdlf.ads.rl.ac.uk//castor/ads.rl.ac.uk/prod/cms/disk'
-mfv_neu_tau10000um_M1200.xrootd_url = 'root://xrootd2.ihepa.ufl.edu/'
-mfv_neu_tau00300um_M0800.xrootd_url = 'root://cmseos.fnal.gov/'
 
 for x in qcd_samples_2015:
     x.datasets['miniaod'].condor = True
@@ -573,6 +583,14 @@ if __name__ == '__main__':
                         else:
                             if not _d.has_key((s.name, 'ntuplev11')):
                                 print s.name, 'no files'
+
+    if 0:
+        for x in registry.all():
+            if x.condor:
+                if x.is_signal and x.is_private:
+                    continue
+                print x.name
+        # for x in $(<curr_condor.txt); samples site $x main
 
     if 0:
         for l in [mfv_signal_samples]:

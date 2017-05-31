@@ -282,6 +282,9 @@ def set_splitting(samples, dataset, jobtype, data_json=None):
                 erate, frate = d[sample.name]
                 sample.events_per = min(int(target * erate + 1), 200000)
                 sample.files_per = int(frate * sample.events_per / erate + 1)
+            # from analysis on first try of v15, 4x maybe OK but there's a tail due to file opening problems
+            sample.events_per = int(2.5 * sample.events_per)
+            sample.files_per  = int(2.5 * sample.files_per)
 
     else:
         raise ValueError("don't know anything about jobtype %s" % jobtype)

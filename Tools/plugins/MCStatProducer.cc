@@ -23,7 +23,7 @@ private:
   float sumweightprod;
 
   enum { sum_nevents_total, sum_gen_weight_total, sum_gen_weight_prod_total, n_sums };
-  TH1F* h_sums;
+  TH1D* h_sums;
 };
 
 MCStatProducer::MCStatProducer(const edm::ParameterSet& cfg)
@@ -40,7 +40,7 @@ MCStatProducer::MCStatProducer(const edm::ParameterSet& cfg)
   edm::Service<TFileService> fs;
   if (fs) {
     TH1::SetDefaultSumw2();
-    h_sums = fs->make<TH1F>("h_sums", "", n_sums, 0, n_sums);
+    h_sums = fs->make<TH1D>("h_sums", "", n_sums, 0, n_sums);
     int ibin = 1;
     for (const char* x : { "sum_nevents_total", "sum_gen_weight_total", "sum_gen_weight_prod_total" })
       h_sums->GetXaxis()->SetBinLabel(ibin++, x);

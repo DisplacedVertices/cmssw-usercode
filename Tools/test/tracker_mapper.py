@@ -20,7 +20,8 @@ JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process)
 process.load('JMTucker.Tools.JetFilter_cfi')
 
 process.load('JMTucker.Tools.TrackerMapper_cfi')
-process.p = cms.Path(process.triggerFilter * process.jmtJetFilter * process.TrackerMapper)
+process.TrackerMapperOldStCut = process.TrackerMapper.clone(old_stlayers_cut = True)
+process.p = cms.Path(process.triggerFilter * process.jmtJetFilter * process.TrackerMapper * process.TrackerMapperOldStCut)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples

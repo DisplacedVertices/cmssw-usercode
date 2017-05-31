@@ -1,7 +1,8 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-sample_files(process, 'qcdht2000', 'ntuplev14', 1)
+dataset = 'ntuplev15'
+sample_files(process, 'qcdht2000', dataset, 1)
 process.TFileService.fileName = 'histos.root'
 process.maxEvents.input = -1
 file_event_from_argv(process)
@@ -118,8 +119,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
             Samples.mfv_signal_samples + Samples.mfv_ddbar_samples + Samples.mfv_hip_samples
 
+    samples = [s for s in samples if s.has_dataset(dataset)]
+
     from JMTucker.Tools.MetaSubmitter import set_splitting
-    dataset = 'ntuplev14'
     set_splitting(samples, dataset, 'histos', data_json='ana_2015p6_10pc.json')
 
     def modify(sample):
@@ -127,13 +129,13 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         if not sample.is_mc:
             to_add.append('''
 for p in process.paths.keys():
-    if not (p == 'pSkimSel' or p == 'pEventPreSel' or p.startswith('Ntk3') or p.startswith('Ntk4') or p.startswith('p0V')):
+    if not (p == 'pSkimSel' or p == 'pEventPreSel' or p == 'pOnlyOneVtx' or p.startswith('Ntk3') or p.startswith('Ntk4') or p.startswith('p0V') or p.startswith('p1V')):
         delattr(process, p)
 ''')
         return to_add, to_replace
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('HistosV14_v2',
+    cs = CondorSubmitter('HistosV15',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = modify,

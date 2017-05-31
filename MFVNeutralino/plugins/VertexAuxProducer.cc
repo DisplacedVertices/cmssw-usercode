@@ -298,6 +298,9 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       aux.track_chi2.push_back(tri->chi2());
       aux.track_ndof.push_back(tri->ndof());
       aux.track_cov.push_back(tri->covariance());
+      aux.track_pt_err.push_back(tri->ptError());
+      aux.track_eta.push_back(tri->eta());
+      aux.track_phi.push_back(tri->phi());
     }
 
     const mfv::vertex_distances vtx_distances(sv, *gen_vertices, *beamspot, primary_vertex, p4s);

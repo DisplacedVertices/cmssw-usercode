@@ -6,11 +6,12 @@ from JMTucker.MFVNeutralino.Year import year
 
 is_mc = True
 H = False
+run_n_tk_seeds = True
 minitree_only = False
 prepare_vis = False
 keep_all = prepare_vis
 event_filter = not keep_all
-version = 'V14p2'
+version = 'V15'
 batch_name = 'Ntuple' + version
 if minitree_only:
     batch_name = 'MiniNtuple'  + version
@@ -41,13 +42,22 @@ remove_met_filters(process)
 #process.patJets.userData.userInts.src = []
 
 process.out.fileName = 'ntuple.root'
-process.out.outputCommands = output_commands = [
+output_commands = [
     'drop *',
     'keep *_mcStat_*_*',
+    'keep MFVEvent_mfvEvent__*',
     'keep VertexerPairEffs_mfvVertices_*_*',
     'keep MFVVertexAuxs_mfvVerticesAux_*_*',
-    'keep MFVEvent_mfvEvent__*',
     ]
+
+if run_n_tk_seeds:
+    for n_tk_seed in 3,4,5:
+        output_commands += [
+            'keep VertexerPairEffs_mfvVertices%iTkSeed_*_*' % n_tk_seed,
+            'keep MFVVertexAuxs_mfvVerticesAux%iTkSeed_*_*' % n_tk_seed,
+            ]
+
+process.out.outputCommands = output_commands
 
 tfileservice(process, 'vertex_histos.root')
 random_service(process, {'mfvVertices': 1222})
@@ -56,7 +66,8 @@ process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
 process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 
-process.p = cms.Path(process.mfvVertexSequence * process.mfvTriggerFloats * process.mfvEvent)
+process.p = cms.Path(process.mfvVertexSequenceEx if run_n_tk_seeds else process.mfvVertexSequence)
+process.p *= process.mfvTriggerFloats * process.mfvEvent
 
 if event_filter:
     import JMTucker.MFVNeutralino.EventFilter
@@ -139,7 +150,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = \
             Samples.data_samples + \
             Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
-            Samples.mfv_signal_samples + Samples.mfv_ddbar_samples + Samples.mfv_hip_samples
+            Samples.mfv_signal_samples + Samples.mfv_ddbar_samples
 
     if 'validation' in sys.argv:
         batch_name += '_validation'
@@ -154,8 +165,15 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         'qcdht0700ext_2015': {'lumis': '135728', 'events': '401297681'},
         'qcdht1000ext_2015': {'lumis': '32328',  'events': '108237235'},
         }
-            
-    modify = chain_modifiers(is_mc_modifier, H_modifier, event_veto_modifier(skips, 'p'))
+
+    def n_tk_seeds_modifier(sample):
+        to_replace = []
+        if sample.is_signal:
+            magic = 'run_n_tk_seeds = True'
+            to_replace.append((magic, 'run_n_tk_seeds = False', 'ntuple template does not contain the magic string "%s"' % magic))
+        return [], to_replace
+
+    modify = chain_modifiers(is_mc_modifier, H_modifier, n_tk_seeds_modifier, event_veto_modifier(skips, 'p'))
     ms = MetaSubmitter(batch_name)
     if 'validation' in sys.argv:
         modify.append(max_output_modifier(500))

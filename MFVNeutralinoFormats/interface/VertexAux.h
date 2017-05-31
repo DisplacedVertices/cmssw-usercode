@@ -216,6 +216,10 @@ struct MFVVertexAux {
   std::vector<double> track_chi2;
   std::vector<double> track_ndof;
   std::vector<reco::TrackBase::CovarianceMatrix> track_cov;
+  // next are expensive to compute so store them anyway
+  std::vector<float> track_pt_err;
+  std::vector<float> track_eta;
+  std::vector<float> track_phi;
 
   void  track_weight(int i, float w) { assert(w >= 0 && w <= 1); _set(track_w_, i, uchar(w*255)); }
   float track_weight(int i) const { return float(track_w_[i])/255.f; }
@@ -245,23 +249,8 @@ struct MFVVertexAux {
 
   double track_p(int i) const { return mag(track_px[i], track_py[i], track_pz[i]); }
   double track_pt(int i) const { return mag(track_px[i], track_py[i]); }
-  double track_pt_err(int i) const {
-    const int charge = track_q(i);
-    const double pt = track_pt(i);
-    const double p = track_p(i);
-    const double pz = track_pz[i];
-    const reco::TrackBase::CovarianceMatrix& covariance = track_cov[i];
-    return sqrt(pt * pt * p * p / charge / charge * covariance(reco::TrackBase::i_qoverp, reco::TrackBase::i_qoverp)
-                + 2 * pt * p / charge * pz * covariance(reco::TrackBase::i_qoverp, reco::TrackBase::i_lambda)
-                + pz * pz * covariance(reco::TrackBase::i_lambda, reco::TrackBase::i_lambda));
-  }
-  double track_eta(int i) const {
-    const double p = track_p(i);
-    return 0.5 * log((p + track_pz[i]) / (p - track_pz[i]));
-  }
   double track_err(int i, int j) const { return sqrt(track_cov[i](j,j)); }
   double track_eta_err(int i) const { return track_err(i, reco::TrackBase::i_lambda) * track_p(i) / track_pt(i); }
-  double track_phi(int i) const { return atan2(track_py[i], track_px[i]); }
   double track_phi_err(int i) const { return track_err(i, reco::TrackBase::i_phi); }
   double track_dxy_err(int i) const { return track_err(i, reco::TrackBase::i_dxy); }
   double track_dz_err(int i) const { return track_err(i, reco::TrackBase::i_dsz) * track_p(i) / track_pt(i); }
@@ -488,7 +477,7 @@ struct MFVVertexAux {
     std::vector<float> v;
     for (size_t i = 0, ie = ntracks(); i < ie; ++i)
       if (use_track(i))
-        v.push_back(track_pt_err(i));
+        v.push_back(track_pt_err[i]);
     return v;
   }
 
@@ -582,7 +571,7 @@ struct MFVVertexAux {
         if (use_track(i))
           for (size_t j = i+1, je = n; j < je; ++j)
             if (use_track(j))
-              v.push_back(fabs(track_eta(i) - track_eta(j)));
+              v.push_back(fabs(track_eta[i] - track_eta[j]));
     return v;
   }
 
@@ -599,7 +588,7 @@ struct MFVVertexAux {
         if (use_track(i))
           for (size_t j = i+1, je = n; j < je; ++j)
             if (use_track(j))
-              v.push_back(reco::deltaPhi(track_phi(i), track_phi(j)));
+              v.push_back(reco::deltaPhi(track_phi[i], track_phi[j]));
     return v;
   }
 
@@ -616,8 +605,8 @@ struct MFVVertexAux {
         if (use_track(i))
           for (size_t j = i+1, je = n; j < je; ++j)
             if (use_track(j))
-              v.push_back(reco::deltaR(track_eta(i), track_phi(i),
-                                       track_eta(j), track_phi(j)));
+              v.push_back(reco::deltaR(track_eta[i], track_phi[i],
+                                       track_eta[j], track_phi[j]));
     return v;
   }
 
@@ -700,12 +689,12 @@ struct MFVVertexAux {
     float sum = 0;
     for (size_t i = 0, ie = ntracks(); i < ie; ++i) {
       if (use_track(i)) {
-        float px_i = track_pt(i) * cos(track_phi(i));
-        float py_i = track_pt(i) * sin(track_phi(i));
+        float px_i = track_pt(i) * cos(track_phi[i]);
+        float py_i = track_pt(i) * sin(track_phi[i]);
         for (size_t j = 0, je = ntracks(); j < je; ++j) {
           if (use_track(j)) {
-            float px_j = track_pt(j) * cos(track_phi(j));
-            float py_j = track_pt(j) * sin(track_phi(j));
+            float px_j = track_pt(j) * cos(track_phi[j]);
+            float py_j = track_pt(j) * sin(track_phi[j]);
             sum += (px_i*px_i * py_j*py_j - px_i*py_i * px_j*py_j) / (track_pt(i) * track_pt(j));
           }
         }

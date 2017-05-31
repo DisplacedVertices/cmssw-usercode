@@ -69,7 +69,8 @@ class Sample(object):
         self.name = name
         self.curr_dataset = 'main'
         self.datasets = {'main': Dataset(dataset, nevents_orig, **kwargs)}
-        
+        self.is_signal = False
+
         self.is_mc      = kwargs.get('is_mc',      self.IS_MC)
         self.is_fastsim = kwargs.get('is_fastsim', self.IS_FASTSIM)
         self.generator  = kwargs.get('generator',  self.GENERATOR)
@@ -470,6 +471,7 @@ def sample_from_end_string(namespace, d):
 
 def main(samples_registry):
     import sys
+    from JMTucker.Tools import colors
 
     if 'merge' in sys.argv:
         samples = samples_registry.from_argv(from_root_fns=True, raise_if_none=True)
@@ -522,11 +524,18 @@ def main(samples_registry):
         for sample in samples:
             sample.set_curr_dataset(dataset)
             try:
-                sites = DBS.sites_for_dataset(sample.dataset)
+                sites = DBS.sites_for_dataset(sample.dataset, json=True)
             except RuntimeError:
                 print sample.name, 'PROBLEM'
                 continue
-            print sample.name.ljust(mlen+5), ' '.join(s for s in sites if not s.endswith('_Buffer') and not s.endswith('_MSS'))
+            print sample.name.ljust(mlen+5),
+            sites.sort(key=lambda x: x['name'])
+            for site in sites:
+                name = site['name']
+                if name.endswith('_Buffer') or name.endswith('_MSS'):
+                    continue
+                is_complete = all(site[x] == '100.00%' for x in ('block_completion', 'block_fraction', 'dataset_fraction', 'replica_fraction'))
+                print (colors.green if is_complete else colors.yellow)(name),
 
     elif 'samplefiles' in sys.argv:
         samples = samples_registry.from_argv(raise_if_none=True)
