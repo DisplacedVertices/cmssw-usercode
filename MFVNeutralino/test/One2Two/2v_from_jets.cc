@@ -13,7 +13,7 @@
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
-const char* file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV14";
+const char* file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV14_v2";
 
 double dphi_pdf_e = 2;
 
@@ -470,13 +470,13 @@ void construct_dvvc(bool is_mc, std::string year, int ntracks, bool correct_bqua
 int main(int argc, const char* argv[]) {
   for (const char* year : {"2015", "2016", "2015p6"}) {
     for (int ntracks : {3, 4, 5, 7}) {
-      construct_dvvc(true, year, ntracks, false, -1, false,  true, false, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_bquark_uncorrected_v14p2.root", year, ntracks));
-      construct_dvvc(true, year, ntracks, false,  1, false,  true, false, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_bquarks_v14p2.root", year, ntracks));
-      construct_dvvc(true, year, ntracks, false,  0, false,  true, false, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_nobquarks_v14p2.root", year, ntracks));
-      construct_dvvc(true, year, ntracks,  true, -1, false,  true, false, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_default_v14p2.root", year, ntracks));
-      construct_dvvc(true, year, ntracks,  true, -1,  true,  true, false, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_vary_dphi_v14p2.root", year, ntracks));
-      construct_dvvc(true, year, ntracks,  true, -1, false, false, false, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_noclearing_v14p2.root", year, ntracks));
-      construct_dvvc(true, year, ntracks,  true, -1, false,  true,  true, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_vary_eff_v14p2.root", year, ntracks));
+      construct_dvvc(true, year, ntracks, false, -1, false,  true, false, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_bquark_uncorrected_v14_v2.root", year, ntracks));
+      construct_dvvc(true, year, ntracks, false,  1, false,  true, false, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_bquarks_v14_v2.root", year, ntracks));
+      construct_dvvc(true, year, ntracks, false,  0, false,  true, false, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_nobquarks_v14_v2.root", year, ntracks));
+      construct_dvvc(true, year, ntracks,  true, -1, false,  true, false, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_default_v14_v2.root", year, ntracks));
+      construct_dvvc(true, year, ntracks,  true, -1,  true,  true, false, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_vary_dphi_v14_v2.root", year, ntracks));
+      construct_dvvc(true, year, ntracks,  true, -1, false, false, false, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_noclearing_v14_v2.root", year, ntracks));
+      construct_dvvc(true, year, ntracks,  true, -1, false,  true,  true, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_vary_eff_v14_v2.root", year, ntracks));
 
       /*
       construct_dvvc(year, ntracks, true, -1, false,  true, false, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_default_v14.root", year, ntracks));
@@ -488,11 +488,9 @@ int main(int argc, const char* argv[]) {
       */
     }
   }
-  construct_dvvc(false, "2015",    3,  true, -1, false,  true, false, 0, 255, "2v_from_jets_data_2015_3track_default_v14p2.root");
-  construct_dvvc(false, "2016",    3,  true, -1, false,  true, false, 0, 255, "2v_from_jets_data_2016_3track_default_v14p2.root");
-  construct_dvvc(false, "2015p6",  3,  true, -1, false,  true, false, 0, 255, "2v_from_jets_data_2015p6_3track_default_v14p2.root");
-  construct_dvvc(false, "2016BCD", 3,  true, -1, false,  true, false, 0, 255, "2v_from_jets_data_2016BCD_3track_default_v14p2.root");
-  construct_dvvc(false, "2016EF",  3,  true, -1, false,  true, false, 0, 255, "2v_from_jets_data_2016EF_3track_default_v14p2.root");
-  construct_dvvc(false, "2016G",   3,  true, -1, false,  true, false, 0, 255, "2v_from_jets_data_2016G_3track_default_v14p2.root");
-  construct_dvvc(false, "2016H",   3,  true, -1, false,  true, false, 0, 255, "2v_from_jets_data_2016H_3track_default_v14p2.root");
+  for (const char* year : {"2015", "2016", "2015p6", "2016BCD", "2016EF", "2016G", "2016H"}) {
+    for (int ntracks : {3, 4, 7}) {
+      construct_dvvc(false, year, ntracks,  true, -1, false,  true, false, 0, 255, TString::Format("2v_from_jets_data_%s_%dtrack_default_v14_v2.root", year, ntracks));
+    }
+  }
 }
