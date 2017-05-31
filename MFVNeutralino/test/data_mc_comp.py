@@ -386,3 +386,13 @@ D('4t1v_dbv_unzoom',
   y_title = 'Vertices/50 #mum',
   y_range = (1, 1e4),
   )
+
+D('4t2v_dvv',
+  histogram_path = 'Ntk4mfvVertexHistosFullSel/h_svdist2d',
+  rebin = 5,
+  x_title = 'd_{VV} (cm)',
+  y_title = 'Events/100 #mum',
+  x_range = (0, 0.4),
+  y_range = (1e-2, 1e2),
+  res_fit = False,
+  )
