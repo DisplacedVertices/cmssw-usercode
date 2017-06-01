@@ -237,17 +237,17 @@ def crab_get_output_dir(working_dir):
     rq_name = rq['RequestName'].split(':')
     timestamp = rq_name[0]
     username = rq_name[1].split('_')[0]
-    try:
-        primary_dataset = rq['OriginalConfig'].Data.inputDataset.split('/')[1]
-    except AttributeError:
-        primary_dataset = 'CRAB_PrivateMC'
-    try:
-        publish_name = rq['OriginalConfig'].Data.outputDatasetTag
-    except AttributeError:
-        publish_name = None
-    if not publish_name:
-        assert not rq['OriginalConfig'].Data.publication
-        publish_name = rq['RequestName'].split(username + '_')[1]
+    cfg = rq['OriginalConfig']
+    primary_dataset = 'CRAB_PrivateMC' # what you get if you specify neither of the following
+    if hasattr(cfg.Data, 'inputDataset'):
+        primary_dataset = cfg.Data.inputDataset.split('/')[1]
+    elif hasattr(cfg.Data, 'outputPrimaryDataset'):
+        primary_dataset = cfg.Data.outputPrimaryDataset
+    if hasattr(cfg.Data, 'outputDatasetTag'):
+        publish_name = cfg.Data.outputDatasetTag
+    else:
+        assert not cfg.Data.publication
+        publish_name = rq['RequestName'].split(username + '_')[1] # maybe?
     return '/store/user/%s/%s/%s/%s' % (username, primary_dataset, publish_name, timestamp)
 
 if __name__ == '__main__':
