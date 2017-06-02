@@ -133,7 +133,7 @@ config.Data.outputPrimaryDataset = 'SETME'
 config.Data.outputDatasetTag = output_dataset_tag
 
 config.Site.storageSite = 'T3_US_FNALLPC'
-config.Site.whitelist = ['T1_US_FNAL', 'T2_CH_CERN', 'T2_DE_DESY', 'T2_DE_RWTH', 'T2_ES_IFCA', 'T2_FR_CCIN2P3', 'T2_RU_JINR', 'T2_US_Caltech', 'T2_US_Florida', 'T2_US_MIT', 'T2_US_Nebraska', 'T2_US_Purdue', 'T2_US_UCSD', 'T2_US_Vanderbilt', 'T2_US_Wisconsin']
+config.Site.whitelist = ['T1_US_FNAL', 'T2_CH_CERN', 'T2_DE_DESY', 'T2_DE_RWTH', 'T2_FR_CCIN2P3', 'T2_US_Caltech', 'T2_US_Florida', 'T2_US_MIT', 'T2_US_Nebraska', 'T2_US_Purdue', 'T2_US_UCSD', 'T2_US_Vanderbilt', 'T2_US_Wisconsin']
 
 outputs = {}
 
