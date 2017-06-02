@@ -1847,6 +1847,15 @@ def to_array(*l):
     else:
         return array('d', l)
 
+def to_TH1D(h, name):
+    hh = ROOT.TH1D(name, h.GetTitle(), h.GetNbinsX(), h.GetXaxis().GetXmin(), h.GetXaxis().GetXmax())
+    hh.Sumw2()
+    for ibin in xrange(h.GetNbinsX()+2):
+        hh.SetBinContent(ibin, h.GetBinContent(ibin))
+        hh.SetBinError  (ibin, h.GetBinError  (ibin))
+        hh.SetEntries(h.GetEntries())
+    return hh
+
 def ttree_iterator(tree, return_tree=False):
     for jentry in xrange(tree.GetEntriesFast()):
         if tree.LoadTree(jentry) < 0: break
@@ -1952,6 +1961,7 @@ __all__ = [
     'tdr_style',
     'tgraph_getpoint',
     'to_array',
+    'to_TH1D',
     'ttree_iterator',
     'zbi',
     'zgammatau',
