@@ -20,7 +20,7 @@ namespace mfv {
       dphi_c(env.get_double("dphi_c", 1.37)),
       dphi_e(env.get_double("dphi_e", 2)),
       dphi_a(env.get_double("dphi_a", 3.50)),
-      eff_fn(env.get_string("eff_fn", "eff.root")),
+      eff_fn(env.get_string("eff_fn", "/uscms/home/jchu/public/eff_2016_v14.root")),
       eff_path(env.get_string("eff_path", "maxtk5")),
       noversamples(env.get_int("noversamples", 20)),
       sample_count(env.get_int("sample_count", -1)),

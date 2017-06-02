@@ -16,7 +16,7 @@ namespace mfv {
       path(path_),
 
       env("mfvo2t_toythrower" + uname),
-      from_histograms(env.get_bool("from_histograms", false)),
+      from_histograms(env.get_bool("from_histograms", true)),
       from_histograms_fn(env.get_string("from_histograms_fn", "throwhists.root")),
       min_ntracks(env.get_int("min_ntracks", 5)),
       min_ntracks0(env.get_int("min_ntracks0", 0)),
@@ -33,7 +33,7 @@ namespace mfv {
       sample_only(env.get_int("sample_only", 0)),
       injected_signal(env.get_int("injected_signal", 0)),
       injected_signal_scale(env.get_double("injected_signal_scale", 1.)),
-      template_signal(env.get_int("template_signal", -10)),
+      template_signal(env.get_int("template_signal", -53)),
 
       ntoys(-1),
 
