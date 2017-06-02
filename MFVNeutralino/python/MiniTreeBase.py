@@ -1,4 +1,5 @@
-import sys, os, glob
+import sys, os
+from glob import glob
 from array import array
 from collections import namedtuple
 from itertools import combinations, permutations

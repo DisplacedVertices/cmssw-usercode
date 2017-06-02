@@ -58,7 +58,7 @@ elif 'manuallist' in sys.argv:
 
     roots = []
     while not roots:
-        paths = glob.glob(os.path.join(path, '*'))
+        paths = glob(os.path.join(path, '*'))
         if all(x.endswith('.root') for x in paths):
             roots = paths
         else:

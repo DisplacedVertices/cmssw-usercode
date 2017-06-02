@@ -14,7 +14,7 @@ if os.path.isdir(out_dir) and not force_overwrite:
 elif not force_overwrite:
     os.mkdir(out_dir)
 
-fns = glob.glob('trees/mfv*root')
+fns = glob('trees/mfv*root')
 fns.sort()
 
 hs = []
