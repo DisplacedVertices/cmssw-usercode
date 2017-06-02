@@ -177,6 +177,7 @@ private:
   const bool remove_one_track_at_a_time;
   const bool jumble_tracks;
   const double remove_tracks_frac;
+  const double remove_seed_tracks_frac;
   const bool histos;
   const bool scatterplots;
   const bool track_histos_only;
@@ -410,6 +411,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     remove_one_track_at_a_time(cfg.getParameter<bool>("remove_one_track_at_a_time")),
     jumble_tracks(cfg.getParameter<bool>("jumble_tracks")),
     remove_tracks_frac(cfg.getParameter<double>("remove_tracks_frac")),
+    remove_seed_tracks_frac(cfg.getParameter<double>("remove_seed_tracks_frac")),
     histos(cfg.getUntrackedParameter<bool>("histos", false)),
     scatterplots(cfg.getUntrackedParameter<bool>("scatterplots", false)),
     track_histos_only(cfg.getUntrackedParameter<bool>("track_histos_only", false)),
@@ -429,7 +431,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     throw cms::Exception("MFVVertexer", "n_tracks_per_seed_vertex must be one of 2,3,4,5");
 
   edm::Service<edm::RandomNumberGenerator> rng;
-  if ((jumble_tracks || remove_tracks_frac > 0) && !rng.isAvailable())
+  if ((jumble_tracks || remove_tracks_frac > 0 || remove_seed_tracks_frac > 0) && !rng.isAvailable())
     throw cms::Exception("Vertexer") << "RandomNumberGeneratorService not available for jumbling or removing tracks!\n";
 
   produces<reco::VertexCollection>();
@@ -826,6 +828,12 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   for (size_t itk = 0; itk < ntk; ++itk) {
     const track_cuts itk_tc(this, seed_tracks[itk].track(), *beamspot, primary_vertex, *tt_builder);
     seed_use[itk] = no_track_cuts || seed_track_is_second[itk] || itk_tc.use(true);
+    if (seed_use[itk] && remove_seed_tracks_frac > 0) {
+      edm::Service<edm::RandomNumberGenerator> rng;
+      CLHEP::HepRandomEngine& rng_engine = rng->getEngine(event.streamID());
+      if (rng_engine.flat() < remove_seed_tracks_frac)
+        seed_use[itk] = false;
+    }
     if (verbose && seed_use[itk]) printf(" %lu", itk);
   }
   if (verbose) printf("\n");
