@@ -98,6 +98,7 @@ namespace mfv {
     tree->Branch("bs2derr1", &nt.bs2derr1);
     tree->Branch("geo2ddist1", &nt.geo2ddist1);
 
+    tree->SetAlias("jetht", "Sum$((jet_pt>40)*jet_pt)");
     tree->SetAlias("dist0", "sqrt(x0**2 + y0**2)");
     tree->SetAlias("dist1", "sqrt(x1**2 + y1**2)");
     tree->SetAlias("phi0",  "atan2(y0,x0)");
