@@ -243,7 +243,7 @@ def crab_get_output_dir(working_dir):
         primary_dataset = cfg.Data.inputDataset.split('/')[1]
     elif hasattr(cfg.Data, 'outputPrimaryDataset'):
         primary_dataset = cfg.Data.outputPrimaryDataset
-    if hasattr(cfg.Data, 'outputDatasetTag'):
+    if hasattr(cfg.Data, 'outputDatasetTag') and cfg.Data.outputDatasetTag:
         publish_name = cfg.Data.outputDatasetTag
     else:
         assert not cfg.Data.publication
