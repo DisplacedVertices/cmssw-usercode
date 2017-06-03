@@ -8,7 +8,7 @@ from JMTucker.Tools import colors
 if len(sys.argv) < 2 or '-h' in sys.argv or '--help' in sys.argv:
     print 'usage: cs_status [options] wd [wd2 ...]'
     print '   -h   print this msg'
-#    print '   -v   verbose: give a report on the exit codes of each failed job, and print list of done directories'
+    print '   -l   print list of done directories'
     print '   -a   resubmit: resubmit any jobs that failed (no check on exit code)'
     print '   -r   resubmit: resubmit jobs that failed because of xrdcp problems'
     print '   -k   resubmit killed: resubmit all killed jobs (with no check on reason)'
@@ -17,6 +17,7 @@ if len(sys.argv) < 2 or '-h' in sys.argv or '--help' in sys.argv:
 resubmit_all = '-a' in sys.argv
 resubmit = resubmit_all or '-r' in sys.argv
 resubmit_killed = '-k' in sys.argv
+list_done = '-l' in sys.argv
 verbose = True #'-v' in sys.argv
 wds = cs_dirs_from_argv()
 ml = max(len(wd) for wd in wds) + 3
@@ -89,7 +90,7 @@ for wd in wds:
 header()
 print colors.bold(fmt % (('totals'.ljust(ml),) + tuple(sums)))
 
-#if verbose and done:
-#    print '\nthese are done:', ' '.join(done)
+if list_done:
+    print '\nthese are done:', ' '.join(done)
 if len(done) == len(wds):
     print '\nAll done!'
