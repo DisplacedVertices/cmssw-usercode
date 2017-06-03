@@ -45,10 +45,6 @@ parser.add_option('--no-shorten-statuses', action='store_false', dest='shorten_s
                   help='Do not shorten statuses in the status table.')
 parser.add_option('--no-suppress-zeroes', action='store_false', dest='suppress_zeroes', default=True,
                   help='Do not suppress zeroes in the status table.')
-parser.add_option('--use-debugger', action='store_true', default=False,
-                  help='Enter the debugger upon thrown exception.')
-parser.add_option('--run-in-debugger', action='store_true', default=False,
-                  help='Run the whole loop in the debugger.')
 parser.add_option('--post-process', type='str', metavar='FILE.PY',
                   help='Call the function "post_process_fcn" defined in FILE.PY, which takes the directory name and results dict as its arguments.')
 options, args = parser.parse_args()
@@ -96,17 +92,6 @@ if options.post_process:
         raise AttributeError('--post-process: module %s does not define a "post_process_fcn" function' % options.post_process)
 else:
     post_process_fcn = None
-
-if options.use_debugger:
-    def info(type, value, tb):
-        if hasattr(sys, 'ps1') or not sys.stderr.isatty():
-            sys.__excepthook__(type, value, tb)
-        else:
-            import traceback, pdb
-            traceback.print_exception(type, value, tb)
-            print
-            pdb.pm()
-    sys.excepthook = info
 
 class Tee(object):
     def __init__(self, filename, mode='w'):
@@ -185,10 +170,6 @@ if options.delay:
     time.sleep(options.wait_time)
 
 to_resub_done = {}
-
-if options.run_in_debugger:
-    print 'running in debugger (this does not work in the subprocesses though)'
-    pdb.set_trace()
 
 pass_count = 0
 pass_string = ''
