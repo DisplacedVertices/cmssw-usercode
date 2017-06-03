@@ -34,8 +34,6 @@ parser.add_option('-n', '--no-renew-proxies', action='store_false', dest='renew_
                   help='Do not renew proxies first.')
 parser.add_option('--no-shorten-statuses', action='store_false', dest='shorten_statuses', default=True,
                   help='Do not shorten statuses in the status table.')
-parser.add_option('--no-suppress-zeroes', action='store_false', dest='suppress_zeroes', default=True,
-                  help='Do not suppress zeroes in the status table.')
 options, args = parser.parse_args()
 #print options ; print args ; import sys ; print sys.argv ; raise 1
 
@@ -265,8 +263,7 @@ while 1:
         sums[0] += row_total
         for i, x in enumerate(sub_row):
             sums[i+1] += x
-        if options.suppress_zeroes:
-            sub_row = tuple('-' if x == 0 else x for x in sub_row)
+        sub_row = tuple('-' if x == 0 else x for x in sub_row) # suppress zeroes to make table easier to read
         row = (d, '%s |' % row_total) + sub_row
         if nfin == row_total:
             color = colors.green
