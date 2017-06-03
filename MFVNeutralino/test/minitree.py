@@ -20,8 +20,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
             Samples.mfv_signal_samples + Samples.mfv_ddbar_samples + Samples.mfv_hip_samples
 
-    samples = [s for s in samples if s.has_dataset(dataset)]
-
     from JMTucker.Tools.MetaSubmitter import set_splitting
     set_splitting(samples, dataset, 'minitree', data_json='ana_2015p6_10pc.json')
 
