@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import datetime, optparse, os, pdb, sys, time
+import datetime, optparse, os, sys, time
 from collections import defaultdict
 from JMTucker.Tools.CRAB3Tools import *
 from JMTucker.Tools import colors
