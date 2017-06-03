@@ -206,7 +206,7 @@ if year == '2016':
       )
 
 if year == '2015':
-    int_lumi = 268.3 * (247778.0 / 273157.370031)
+    int_lumi = 268.3 * (247778.0 / 273198.338214)
     int_lumi_nice = '0.27 fb^{-1} (13 TeV)'
     data_samples = Samples.data_samples_2015
 elif year == '2016':
