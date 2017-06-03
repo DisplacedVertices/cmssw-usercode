@@ -33,8 +33,6 @@ parser.add_option('-r', '--resub', action='store_true', default=False,
 #                  help='Comma-separated list (no spaces!) of codes that are allowed to resubmit -- all others not resubmitted.')
 #parser.add_option('--resub-black-codes', default='',
 #                  help='Comma-separated list (no spaces!) of codes that are not allowed to resubmit -- all others are resubmitted.')
-parser.add_option('--tee', type='str', metavar='FILE',
-                  help='Duplicate stdout to FILE.')
 parser.add_option('--fake-results', type='str', metavar='FILE',
                   help='Read fake results dict from FILE.')
 parser.add_option('--no-dir-sort', action='store_false', dest='dir_sort', default=True,
@@ -92,21 +90,6 @@ if options.post_process:
         raise AttributeError('--post-process: module %s does not define a "post_process_fcn" function' % options.post_process)
 else:
     post_process_fcn = None
-
-class Tee(object):
-    def __init__(self, filename, mode='w'):
-        self.file = open(filename, mode)
-        self.stdout = sys.stdout
-        sys.stdout = self
-    def __del__(self):
-        sys.stdout = self.stdout
-        self.file.close()
-    def write(self, data):
-        self.file.write(data)
-        self.stdout.write(data)
-    def flush(self):
-        self.file.flush()
-        self.stdout.flush()
 
 def timestamp():
     return str(int(time.time()*1e6))
@@ -180,9 +163,6 @@ while 1:
     if (the_time - last_proxy_check)/3600. > 8:
         check_proxies()
         last_proxy_check = the_time
-
-    if options.tee:
-        tee = Tee(options.tee)
 
     pass_string = str(int(time.time()))
     if options.continuous:
@@ -467,9 +447,6 @@ while 1:
     then = now + datetime.timedelta(seconds=options.wait_time)
     print colors.bold('That was pass #%i string %s. Going to sleep for %i seconds at %s. Will wake up at %s.' % (pass_count, pass_string, options.wait_time, now, then))
     print '(Hit Ctrl-C, then enter to immediately start the next iteration. Or, hit Ctrl-C, then Ctrl-C to quit.)'
-
-    if options.tee:
-        del tee
 
     pass_count += 1
 
