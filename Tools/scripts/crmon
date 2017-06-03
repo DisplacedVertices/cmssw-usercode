@@ -43,8 +43,6 @@ parser.add_option('--no-shorten-statuses', action='store_false', dest='shorten_s
                   help='Do not shorten statuses in the status table.')
 parser.add_option('--no-suppress-zeroes', action='store_false', dest='suppress_zeroes', default=True,
                   help='Do not suppress zeroes in the status table.')
-parser.add_option('--post-process', type='str', metavar='FILE.PY',
-                  help='Call the function "post_process_fcn" defined in FILE.PY, which takes the directory name and results dict as its arguments.')
 options, args = parser.parse_args()
 #print options ; print args ; import sys ; print sys.argv ; raise 1
 
@@ -72,24 +70,6 @@ if options.wait_time > 0 or options.delay:
     options.continuous = True
 if options.continuous and options.wait_time < 0:
     options.wait_time = 60*10
-
-if options.post_process:
-    raise NotImplementedError('--post-process not implemented')
-    #exec open(options.post_process).read()
-    if options.post_process.endswith('.py'):
-        options.post_process = options.post_process.replace('.py', '')
-    pp_dir, pp_fn = os.path.split(options.post_process)
-    sys.path.append(os.path.abspath(pp_dir))
-    try:
-        post_process_module = __import__(pp_fn)
-    except ImportError:
-        raise ImportError('--post-process: cannot find module %s' % options.post_process)
-    try:
-        post_process_fcn = post_process_module.post_process_fcn
-    except AttributeError:
-        raise AttributeError('--post-process: module %s does not define a "post_process_fcn" function' % options.post_process)
-else:
-    post_process_fcn = None
 
 def timestamp():
     return str(int(time.time()*1e6))
