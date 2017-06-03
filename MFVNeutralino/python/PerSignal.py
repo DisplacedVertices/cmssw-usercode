@@ -19,7 +19,7 @@ class PerSignal:
         self.y_span = y_range[1] - y_range[0]
         self.curves = []
 
-    def add(self, samples, title='', color=ROOT.kRed):
+    def add(self, samples, title='', color=ROOT.kRed, style=1):
         # samples already has members y, ye or yl,yh for the ordinate
         # values, or will be marked absent on plot. This is why add
         # separate from TGraph creation in draw, have to know all the
@@ -33,15 +33,16 @@ class PerSignal:
         c = PerSignal.curve()
         c.title = title
         c.color = color
+        c.style = style
         self.curves.append(c)
         for s in samples:
             self.taus.add(s.tau)
             self.masses.add(s.mass)
-            if hasattr(s, 'y'):
-                if hasattr(s, 'yl') and hasattr(s, 'yh'):
+            if hasattr(s, 'y') and s.y is not None:
+                if hasattr(s, 'yl') and hasattr(s, 'yh') and s.yl is not None and s.yh is not None:
                     eyl = s.y - s.yl
                     eyh = s.yh - s.y
-                elif hasattr(s, 'ye'):
+                elif hasattr(s, 'ye') and s.ye is not None:
                     eyl = eyh = s.ye
                 else:
                     eyl = eyh = 0.
@@ -92,6 +93,7 @@ class PerSignal:
             g.SetTitle('')
             g.SetLineWidth(2)
             g.SetLineColor(curve.color)
+            g.SetLineStyle(curve.style)
             g.Draw('APZ' if ic == 0 else 'PZ')
             # these must come after the draw because a TGraph* doesn't have an axis until it is drawn (when will I remember this the first time?)
             xax, yax = g.GetXaxis(), g.GetYaxis()
