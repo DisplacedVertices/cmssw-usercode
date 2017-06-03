@@ -17,7 +17,7 @@ parser.add_option('-v', '--verbose', action='store_true', default=False,
                   help='Print way more.')
 parser.add_option('-c', '--continuous', action='store_true', default=False,
                   help='Keep making passes.')
-parser.add_option('-w', '--wait-time', type='int', default=60*10,
+parser.add_option('-w', '--wait-time', type='int', default=-1,
                   help='Time between passes, in seconds. Default is %default.')
 parser.add_option('-d', '--delay', action='store_true', default=False,
                   help='Wait once before starting passes.')
@@ -73,6 +73,11 @@ def print_subheader(s):
 if options.continuous and options.fake_results:
     print '--fake-results implies not continuous, setting it.'
     options.continuous = False
+
+if options.wait_time > 0 or options.delay:
+    options.continuous = True
+if options.continuous and options.wait_time < 0:
+    options.wait_time = 60*10
 
 if options.post_process:
     raise NotImplementedError('--post-process not implemented')
