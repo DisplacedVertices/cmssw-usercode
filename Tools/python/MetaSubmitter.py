@@ -271,15 +271,16 @@ def set_splitting(samples, dataset, jobtype, data_json=None):
             # prefer to split by file with CondorSubmitter  for these jobs to not overload xrootd aaa
             sample.set_curr_dataset(dataset)
             sample.split_by = 'files' if sample.condor else 'events'
-            if not d.has_key(sample.name):
-                if 'mfv' in sample.name:
-                    sample.events_per = 1000
-                    sample.files_per = 1 if 'official' in sample.name else 10
+            name = sample.name.replace('_2015', '')
+            if not d.has_key(name):
+                if sample.is_signal:
+                    sample.events_per = 500
+                    sample.files_per = 5 if sample.is_private else 1
                 else:
                     sample.events_per = 50000
                     sample.files_per = 5
             else:
-                erate, frate = d[sample.name]
+                erate, frate = d[name]
                 sample.events_per = min(int(target * erate + 1), 200000)
                 sample.files_per = int(frate * sample.events_per / erate + 1)
             # from analysis on first try of v15, 4x maybe OK but there's a tail due to file opening problems
