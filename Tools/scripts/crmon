@@ -1,13 +1,6 @@
 #!/usr/bin/env python
 
-# author: J. Tucker
-
-import datetime
-import optparse
-import os
-import pdb
-import sys
-import time
+import datetime, optparse, os, pdb, sys, time
 from collections import defaultdict
 from JMTucker.Tools.CRAB3Tools import *
 from JMTucker.Tools import colors
@@ -107,24 +100,12 @@ if options.dir_sort:
     dirs.sort()
 dirs_done = []
 
-#print 'crmon, called with options:'
-#pprint(options.__dict__)
-#if options.fake_results:
-#    print 'using fake results dict from %s' % options.fake_results
-#else:
-#    print 'checking these %i dirs:' % len(dirs)
-#    for d in dirs:
-#        print d
 ndirs = len(dirs)
 print 'crmon: checking %i dir%s, be patient' % (ndirs, 's' if ndirs > 1 else '')
 
 def check_proxies():
     if options.renew_proxies:
-        #print 'checking proxies, might ask for password twice (but you can skip it with ^C if you know what you are doing).'
         crab_renew_proxy_if_needed()
-        #for d in dirs:
-        #    if crab_is_using_server(d):
-        #        print_run_cmd('crab -c %s -renewCredential' % d)
 
 check_proxies()
 
@@ -182,17 +163,6 @@ while 1:
                 #crab_command('resubmit', dir=d, jobids=jobs, sitewhitelist=options.resub_white_list, siteblacklist=options.resub_black_list, suppress_stdout=False)
                 crab_command('resubmit', dir=d, jobids=jobs, suppress_stdout=True)
 
-    # Print task statuses. I don't know what all these mean yet.
-    #print
-    #print_header('Task statuses:')
-    #tasks_by_status = defaultdict(list)
-    #for d in dirs:
-    #    tasks_by_status[results[d]['status']].append(d)
-    #for k,v in tasks_by_status.iteritems():
-    #    print_subheader('%s:' % k)
-    #    for d in sorted(v):
-    #        print d
-
     if options.verbose:
         # Print a recap of all the status summaries.
         print
@@ -225,38 +195,6 @@ while 1:
     #print_header('Recap (skipping exit code 0 but  where X, Y != 0):')
     to_resub = defaultdict(list)
     to_resub.update(to_resub_done)
-    #for d in dirs:
-    #    statuses = results[d]
-    #    printed = False
-    #    for status in sorted(statuses.keys()):
-    #        if status == options.retrieved_0_str or 'Retrieved' not in status:
-    #            continue
-    #        if not printed:
-    #            print_subheader('%s:' % d)
-    #            printed = True
-    #        jobs = statuses[status]
-    #        if 'Retrieved' in status:
-    #            to_resub[d].extend(jobs)
-    #        print '%s: %s' % (status.ljust(25), crabify_list(jobs, simple=False))
-    #print
-    #
-    #resub_crlogs = []
-    #resub_crrejobs = []
-    #resub_crjobprobs = ['cat << EOF | crjobprobs']
-    #for d,jobs in to_resub.iteritems():
-    #    jobs = crabify_list(jobs, False)
-    #    resub_crlogs.append('crlog %s %s ; \\' % (d, jobs))
-    #    resub_crrejobs.append('crrejob %s %s doit ; \\' % (d, jobs))
-    #    resub_crjobprobs.append('%s %s' % (d, jobs))
-    #resub_crjobprobs.append('EOF')
-    #
-    #if not options.resub_any:
-    #    print_header('To view logs for resubmits:')
-    #    backdoor_print('crlogs', resub_crlogs)
-    #    print_header('To resubmit:')
-    #    backdoor_print('crrejobs', resub_crrejobs)
-    #print_header('To diagnose by site:')
-    #backdoor_print('crjobprobs', resub_crjobprobs)
 
     # Now print a big summary table where the rows are directories and
     # the columns are the statuses, with the entries being the number
@@ -286,15 +224,6 @@ while 1:
             status_short = status
             for a,b in to_replace:
                 status_short = status_short.replace(a,b)
-
-            #if '0_0' in status_short:
-            #    status_short = status_short.replace('0_0', '0')
-            #elif '_' in status_short and status_short.count('_') == 2:
-            #    a,b,c = status_short.split('_')
-            #    if b == '0':
-            #        status_short = status_short.replace('0_', '')
-            #    elif b == c:
-            #        status_short = a + '_' + b
 
             status_columns_short.append(status_short)
             status_columns_xlate[status_short] = status
