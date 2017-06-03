@@ -12,6 +12,7 @@ trig_filter = False
 hip_simulation = False
 hip_mitigation = False
 ex = ''
+already = []
 
 if 0:
     meta, taus, masses = 'neu', [100, 300, 1000, 10000, 30000], [300, 400, 600, 800, 1200, 1600]
@@ -37,33 +38,34 @@ elif 0:
     from_lhe = True
     output_level = 'gensim'
     output_dataset_tag = 'RunIISummer15GS-MCRUN2_71_V1'
-elif 1:
-    meta = 'qcdht1000'
+elif 0:
+    meta = 'qcdht1500'
     fixed_salt = 'fixedsalt'
-    output_dataset_tag = 'RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6'
     nevents, events_per = 200000, 1000 # 0.06 eff at gen matching with lhe events for 1000, more like 0.025 for 700
     if meta.endswith('0700'):
         nevents *= 14
     from_lhe = True
-    use_this_cmssw = True
-    premix = False
     trig_filter = True
-    hip_simulation = False
-    hip_mitigation = False
-    ex = ''
-elif 0:
-    meta, taus, masses = 'neu', [300, 1000, 10000], [400, 800]
-    use_this_cmssw = True
-    premix = False
     hip_simulation = 1.0
     hip_mitigation = True
-    ex = '_hip1p0_mit'
+    ex = ''
+elif 1:
+    meta, taus, masses = 'neu', [100, 300, 1000, 10000, 30000], [300, 400, 600, 800, 1200, 1600]
+    already = [] # [(t,m) for t in [300, 1000, 10000] for m in [400, 800]]
+    hip_simulation = 1.0
+    hip_mitigation = True
+    ex = ''
 
 if hip_simulation:
+    use_this_cmssw = True
+    premix = False
     exx = '%.1f' % hip_simulation
     ex += '_hip' + exx.replace('.','p')
     if hip_mitigation:
         ex += '_mit'
+
+if not premix:
+    output_dataset_tag = output_dataset_tag.replace('Premix', '')
 
 #ex = '_test'
 #nevents, events_per = 10,10
@@ -193,33 +195,37 @@ def submit(config, name, todo, todo_rawhlt=[], todo_reco=[], todo_ntuple=[]):
     os.remove(steering_fn)
 
 
-if meta == 'neu':
+def taus_masses():
     for tau in taus:
         for mass in masses:
-            name = 'mfv_neu_tau%05ium_M%04i' % (tau, mass)
-            todo = 'mfv_neutralino,%.1f,%i' % (tau/1000., mass)
-            submit(config, name, todo)
+            tm = tau, mass
+            if tm in already:
+                continue
+            yield tm
+
+if meta == 'neu':
+    for tau, mass in taus_masses():
+        name = 'mfv_neu_tau%05ium_M%04i' % (tau, mass)
+        todo = 'mfv_neutralino,%.1f,%i' % (tau/1000., mass)
+        submit(config, name, todo)
 
 elif meta == 'glu':
-    for tau in taus:
-        for mass in masses:
-            name = 'mfv_glu_tau%05ium_M%04i' % (tau, mass)
-            todo = 'mfv_gluino,%.1f,%i' % (tau/1000., mass)
-            submit(config, name, todo)
+    for tau, mass in taus_masses():
+        name = 'mfv_glu_tau%05ium_M%04i' % (tau, mass)
+        todo = 'mfv_gluino,%.1f,%i' % (tau/1000., mass)
+        submit(config, name, todo)
 
 elif meta == 'ddbar':
-    for tau in taus:
-        for mass in masses:
-            name = 'mfv_ddbar_tau%05ium_M%04i' % (tau, mass)
-            todo = 'gluino_ddbar,%.1f,%i' % (tau/1000., mass)
-            submit(config, name, todo)
+    for tau, mass in taus_masses():
+        name = 'mfv_ddbar_tau%05ium_M%04i' % (tau, mass)
+        todo = 'gluino_ddbar,%.1f,%i' % (tau/1000., mass)
+        submit(config, name, todo)
 
 elif meta == 'lq2':
-    for tau in taus:
-        for mass in masses:
-            name = 'mfv_lq2_tau%05ium_M%04i' % (tau, mass)
-            todo = 'leptoquark,%.1f,%i,2' % (tau/1000., mass)
-            submit(config, name, todo)
+    for tau, mass in taus_masses():
+        name = 'mfv_lq2_tau%05ium_M%04i' % (tau, mass)
+        todo = 'leptoquark,%.1f,%i,2' % (tau/1000., mass)
+        submit(config, name, todo)
 
 elif meta == 'ttbar':
     from modify import DummyBeamSpots

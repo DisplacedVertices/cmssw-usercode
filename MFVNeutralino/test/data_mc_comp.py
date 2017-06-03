@@ -8,8 +8,8 @@ from JMTucker.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, plot_s
 
 year = '2016'
 
-root_file_dir = '/uscms_data/d2/tucker/crab_dirs/HistosV14_v2'
-plot_dir = 'plots/data_mc_comp/HistosV14_v2_%s' % year
+root_file_dir = '/uscms_data/d2/tucker/crab_dirs/HistosV15'
+plot_dir = 'plots/data_mc_comp/HistosV15_%s' % year
 
 set_style()
 ps = plot_saver(plot_dir)
@@ -210,23 +210,23 @@ if year == '2015':
     int_lumi_nice = '0.27 fb^{-1} (13 TeV)'
     data_samples = Samples.data_samples_2015
 elif year == '2016':
-    int_lumi = 3586.7 * (3021371.0 / 3472795.60464)
+    int_lumi = 3586.7 * (3021752.0 / 3461692.4549)
     int_lumi_nice = '3.59 fb^{-1} (13 TeV)'
     data_samples = Samples.data_samples
 elif year == '2016BCD':
-    int_lumi = 1259. * (1069961.0 / 1219017.39351)
+    int_lumi = 1259. * (1069513.0 / 1215119.97856)
     int_lumi_nice = '1.26 fb^{-1} (13 TeV)'
     data_samples = [Samples.JetHT2016B3, Samples.JetHT2016C, Samples.JetHT2016D]
 elif year == '2016EF':
-    int_lumi = 711. * (600771.0 / 688420.47135)
+    int_lumi = 711. * (600771.0 / 686219.450021)
     int_lumi_nice = '0.71 fb^{-1} (13 TeV)'
     data_samples = [Samples.JetHT2016E, Samples.JetHT2016F]
 elif year == '2016G':
-    int_lumi = 763. * (643165.0 / 738769.072188)
+    int_lumi = 763. * (643368.0 / 736407.109157)
     int_lumi_nice = '0.76 fb^{-1} (13 TeV)'
     data_samples = [Samples.JetHT2016G]
 elif year == '2016H':
-    int_lumi = 855. * (707474.0 / 827847.407197)
+    int_lumi = 855. * (708100.0 / 825200.622583)
     int_lumi_nice = '0.86 fb^{-1} (13 TeV)'
     data_samples = [Samples.JetHT2016H2, Samples.JetHT2016H3]
 
@@ -304,6 +304,7 @@ D('3t1v_onevtx_ntracks',
   histogram_path = 'Ntk3vtxHst1VNoNtracks/h_sv_all_ntracks',
   x_title = 'Number of tracks per vertex',
   y_title = 'Vertices',
+  y_range = (1, 1e6),
   cut_line = ((5, 0, 5, 2.1e6), 2, 5, 1),
   )
 
@@ -352,6 +353,7 @@ D('4t1v_onevtx_ntracks',
   histogram_path = 'Ntk4vtxHst1VNoNtracks/h_sv_all_ntracks',
   x_title = 'Number of tracks per vertex',
   y_title = 'Vertices',
+  y_range = (1, 1e6),
   cut_line = ((5, 0, 5, 2.1e6), 2, 5, 1),
   )
 
@@ -395,4 +397,44 @@ D('4t2v_dvv',
   x_range = (0, 0.4),
   y_range = (1e-2, 1e2),
   res_fit = False,
+  )
+
+D('5t1v_onevtx_ntracks',
+  histogram_path = 'vtxHst1VNoNtracks/h_sv_all_ntracks',
+  x_title = 'Number of tracks per vertex',
+  y_title = 'Vertices',
+  y_range = (1, 1e6),
+  cut_line = ((5, 0, 5, 2.1e6), 2, 5, 1),
+  )
+
+D('5t1v_onevtx_bs2derr',
+  histogram_path = 'vtxHst1VNoBs2derr/h_sv_all_bs2derr',
+  x_title = 'Uncertainty in d_{BV} (cm)',
+  y_title = 'Vertices/5 #mum',
+  y_range = (1, 1e4),
+  cut_line = ((0.0025, 0, 0.0025, 1.8e4), 2, 5, 1),
+  )
+
+D('5t1v_onevtx_dbv',
+  histogram_path = 'vtxHst1VNoBsbs2ddist/h_sv_all_bsbs2ddist',
+  x_title = 'd_{BV} (cm)',
+  y_title = 'Vertices/50 #mum',
+  x_range = (0, 0.4),
+  y_range = (1, 1e4),
+  cut_line = ((0.01, 0, 0.01, 1.8e4), 2, 5, 1),
+  )
+
+D('5t1v_dbv',
+  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist',
+  x_title = 'd_{BV} (cm)',
+  y_title = 'Vertices/50 #mum',
+  x_range = (0, 0.4),
+  y_range = (1, 1e4),
+  )
+
+D('5t1v_dbv_unzoom',
+  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist',
+  x_title = 'd_{BV} (cm)',
+  y_title = 'Vertices/50 #mum',
+  y_range = (1, 1e4),
   )
