@@ -299,6 +299,7 @@ _add_ds("trigskimv1", {
 
 _add_ds("ntuplev15", {
 'JetHT2015C': _fromnum0("/store/user/tucker/JetHT/NtupleV15_2015/170522_152137", 2),
+'JetHT2015D': (834, ['/store/user/tucker/JetHT/NtupleV15_2015/170531_154731/0000/ntuple_%i.root' % i for i in [65, 219, 464, 506]] + ['/store/user/tucker/JetHT/NtupleV15_2015/170531_154359/0000/ntuple_%i.root' % i for i in chain(xrange(65), xrange(66,210), xrange(211,219), xrange(220,254), xrange(255,464), xrange(465,506), xrange(507,575), xrange(576,781), xrange(782,834))] + ['/store/user/tucker/JetHT/NtupleV15_2015/170601_211414/0000/ntuple_%i.root' % i for i in [210, 254, 575, 781]]),
 'JetHT2016B3': (570, ['/store/user/tucker/JetHT/NtupleV15_2016/170522_201532/0000/ntuple_%i.root' % i for i in chain(xrange(1,145), xrange(146,572))]),
 'JetHT2016C': _fromnum1("/store/user/tucker/JetHT/NtupleV15_2016/170522_201609", 222),
 'JetHT2016D': _fromnum1("/store/user/tucker/JetHT/NtupleV15_2016/170522_201646", 313),
@@ -375,6 +376,7 @@ _add_ds("ntuplev15", {
 'mfv_neu_tau00300um_M0800_retest': _fromnum0("/store/user/tucker/mfv_neu_tau00300um_M0800/NtupleV15_2016/170522_155917", 4),
 'mfv_neu_tau00300um_M1200': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV15_2016/170522_203446", 42),
 'mfv_neu_tau00300um_M1200_2015': _fromnum0("/store/user/tucker/mfv_neu_tau00300um_M1200/NtupleV15_2015/170522_152155", 2),
+'mfv_neu_tau00300um_M1600': _fromnum0("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV15_2016/170531_154613", 4),
 'mfv_neu_tau00300um_M1600_2015': _fromnum0("/store/user/tucker/mfv_neu_tau00300um_M1600/NtupleV15_2015/170522_152156", 2),
 'mfv_neu_tau00300um_M3000': _fromnum0("/store/user/tucker/mfv_neu_tau00300um_M3000/NtupleV15_2016/170522_153842", 4),
 'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_2016/170522_202843", 42),
@@ -411,6 +413,8 @@ _add_ds("ntuplev15", {
 'mfv_neu_tau10000um_M1200': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_2016/170522_203552", 42),
 'mfv_neu_tau10000um_M1200_2015': _fromnum0("/store/user/tucker/mfv_neu_tau10000um_M1200/NtupleV15_2015/170522_152205", 2),
 'mfv_neu_tau10000um_M1600': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_2016/170522_203829", 41),
+'mfv_neu_tau10000um_M1600_2015': (5, ['/store/user/tucker/mfv_neu_tau10000um_M1600/NtupleV15_2015/170601_211415/0000/ntuple_%i.root' % i for i in chain(xrange(3,5), [1])] + ['/store/user/tucker/mfv_neu_tau10000um_M1600/NtupleV15_2015/170531_154400/0000/ntuple_%i.root' % i for i in [0, 2]]),
+'mfv_neu_tau10000um_M3000': _fromnum0("/store/user/tucker/mfv_neu_tau10000um_M3000/NtupleV15_2016/170531_154612", 10),
 'mfv_neu_tau30000um_M0300': _fromnum0("/store/user/tucker/mfv_neu_tau30000um_M0300/NtupleV15_2016/170522_153830", 4),
 'mfv_neu_tau30000um_M0400': _fromnum0("/store/user/tucker/mfv_neu_tau30000um_M0400/NtupleV15_2016/170522_153831", 4),
 'mfv_neu_tau30000um_M0600': _fromnum0("/store/user/tucker/mfv_neu_tau30000um_M0600/NtupleV15_2016/170522_153836", 4),
