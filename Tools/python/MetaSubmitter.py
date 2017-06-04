@@ -239,7 +239,8 @@ def set_splitting(samples, dataset, jobtype, data_json=None):
         for sample in samples:
             sample.set_curr_dataset(dataset)
             sample.split_by = 'files'
-            sample.files_per = d.get(sample.name, 20)
+            n = sample.name.replace('_hip1p0_mit', '').replace('_hip1p0', '').replace('_retest', '')
+            sample.files_per = d.get(n, 20)
 
     elif jobtype == 'ntuple':
         target = 5000
@@ -272,6 +273,7 @@ def set_splitting(samples, dataset, jobtype, data_json=None):
             sample.set_curr_dataset(dataset)
             sample.split_by = 'files' if sample.condor else 'events'
             name = sample.name.replace('_2015', '')
+            name = name.replace('_hip1p0_mit', '').replace('_hip1p0', '').replace('_retest', '')
             if not d.has_key(name):
                 if sample.is_signal:
                     sample.events_per = 500
