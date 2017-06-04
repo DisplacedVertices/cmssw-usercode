@@ -239,7 +239,7 @@ _add_ds("main", {
 'mfv_neu_tau00300um_M0300_hip1p0_mit': _fromnum1("/store/user/tucker/mfv_neu_tau00300um_M0300/RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170528_162206", 100, fnbase="reco"),
 'mfv_neu_tau00300um_M0600_hip1p0_mit': (99, ['/store/user/tucker/mfv_neu_tau00300um_M0600/RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170528_162220/0000/reco_%i.root' % i for i in chain(xrange(1,59), xrange(60,101))]),
 'mfv_neu_tau00300um_M1200_hip1p0_mit': _fromnum1("/store/user/tucker/mfv_neu_tau00300um_M1200/RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170528_162235", 100, fnbase="reco"),
-'mfv_neu_tau00300um_M1600_hip1p0_mit': _fromnum0("/store/user/tucker/mfv_neu_tau00300um_M1600/RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170528_162250", 99, fnbase="reco"),
+'mfv_neu_tau00300um_M1600_hip1p0_mit': _fromnum1("/store/user/tucker/mfv_neu_tau00300um_M1600/RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170528_162250", 100, fnbase="reco", but=[1]),
 'mfv_neu_tau01000um_M0300_hip1p0_mit': _fromnum1("/store/user/tucker/mfv_neu_tau01000um_M0300/RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170528_162305", 100, fnbase="reco"),
 'mfv_neu_tau01000um_M0600_hip1p0_mit': _fromnum1("/store/user/tucker/mfv_neu_tau01000um_M0600/RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170528_162323", 100, fnbase="reco"),
 'mfv_neu_tau01000um_M1200_hip1p0_mit': (98, ['/store/user/tucker/mfv_neu_tau01000um_M1200/RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170528_162337/0000/reco_%i.root' % i for i in chain(xrange(1,73), xrange(74,93), xrange(94,101))]),
