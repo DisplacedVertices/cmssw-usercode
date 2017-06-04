@@ -567,7 +567,7 @@ for x in (data_samples_2015 +
           mfv_signal_samples_2015 +
           data_samples +
           ttbar_samples + qcd_samples + qcd_samples_ext +
-          mfv_signal_samples + mfv_ddbar_samples + mfv_hip_samples):
+          mfv_signal_samples + mfv_ddbar_samples + mfv_hip_samples + qcd_hip_samples):
     x.add_dataset('ntuplev15')
 
 for x in ttbar_samples + ttbar_samples_2015 + qcd_samples + qcd_samples_ext + qcd_samples_2015 + qcd_samples_ext_2015 + data_samples + data_samples_2015:
