@@ -23,12 +23,12 @@ if not fns:
         if os.path.isdir(x) and os.path.isfile(os.path.join(x, 'ttbar.root')):
             file_path = x
     if file_path is None:
-        file_path = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV14'
+        file_path = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV15'
     print 'using', file_path
 
     if year == 2015:
         background_samples = Samples.qcd_samples_sum_2015 + Samples.ttbar_samples_2015
-        signal_samples = [] #[Samples.mfv_neu_tau00100um_M0800_2015, Samples.mfv_neu_tau00300um_M0800_2015, Samples.mfv_neu_tau01000um_M0800_2015, Samples.mfv_neu_tau10000um_M0800_2015]
+        signal_samples = [Samples.mfv_neu_tau00100um_M0800_2015, Samples.mfv_neu_tau00300um_M0800_2015, Samples.mfv_neu_tau01000um_M0800_2015, Samples.mfv_neu_tau10000um_M0800_2015]
     elif year == 2016:
         background_samples = Samples.qcd_samples_sum + Samples.ttbar_samples
         signal_samples = [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800]
@@ -44,7 +44,7 @@ def getit(fn, ntk):
     n1v = t.Draw('dist0', 'nvtx==1', 'goff')
     n2v = t.Draw('dist0', 'nvtx>=2', 'goff')
     if ntk == 'mfvMiniTreeNtk3or4':
-        n2v = t.Draw('dist0', 'nvtx==2 && ntk0==4 && ntk1==3', 'goff') # nvtx >= 2 here too?
+        n2v = t.Draw('dist0', 'nvtx>=2 && ntk0==4 && ntk1==3', 'goff')
     return n1v, n2v
 
 for ntk in ['mfvMiniTree', 'mfvMiniTreeNtk3', 'mfvMiniTreeNtk3or4', 'mfvMiniTreeNtk4']:

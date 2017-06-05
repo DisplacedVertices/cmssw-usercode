@@ -68,8 +68,8 @@ void MFVVertexerPairEffs::analyze(const edm::Event& event, const edm::EventSetup
   for (int ivpeff = 0; ivpeff < nvpeffs; ++ivpeff) {
     const VertexerPairEff& vpeff = vpeffs->at(ivpeff);
 
-    const int ntk_min = vpeff.ntkmin();
-    const int ntk_max = vpeff.ntkmax();
+    const int ntk_min = std::min(5, vpeff.ntkmin());
+    const int ntk_max = std::min(5, vpeff.ntkmax());
     assert(ntk_min >= 2 && ntk_max <= 5 && ntk_min <= ntk_max);
 
     const double d2d = vpeff.d2d();
