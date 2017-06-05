@@ -90,8 +90,8 @@ _add('eJzdfcuuZTeO5dw/kjlRhURREjnUs+BBdicqXYWeBYwsd5WB9APOcKLr71s692xRYd+YpQTsEz
 _add({('JetHT2015C', 'main'): _fromnum0('/store/user/wsun/croncopyeos/JetHT/TrigSkim_2015C', 16, fnbase='trigskim', numbereddirs=False)})
 
 _add({('testqcdht2000', 'gensim') : (60 + 263,
-                                     ['/store/user/tucker/qcdht2000_gensim/RunIISummer15GS-MCRUN2_71_V1/170224_171809/0000/gensim_%i.root' % i for i in chain(xrange(1,5), xrange(6,8), xrange(11,16), xrange(17,40), xrange(41,67))] +
-                                     ['/store/user/tucker/qcdht2000_gensim_ext1/RunIISummer15GS-MCRUN2_71_V1/170224_210305/0000/gensim_%i.root' % i for i in chain(xrange(1,255), xrange(256,265))]
+                                     ['/store/user/wsun/croncopyeos/qcdht2000_gensim/RunIISummer15GS-MCRUN2_71_V1/170224_171809/0000/gensim_%i.root' % i for i in chain(xrange(1,5), xrange(6,8), xrange(11,16), xrange(17,40), xrange(41,67))] +
+                                     ['/store/user/wsun/croncopyeos/qcdht2000_gensim_ext1/RunIISummer15GS-MCRUN2_71_V1/170224_210305/0000/gensim_%i.root' % i for i in chain(xrange(1,255), xrange(256,265))]
                                      )})
 
 # moved to Werner's space--overwrite those in "2015 main" above
