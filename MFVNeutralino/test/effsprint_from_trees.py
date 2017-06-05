@@ -9,7 +9,7 @@ import JMTucker.MFVNeutralino.AnalysisConstants as ac
 ROOT.gErrorIgnoreLevel = 6000
 
 fns = [x for x in sys.argv[1:] if x.endswith('.root') and os.path.isfile(x)]
-include = [0]*len(fns)
+include = [1 if 'sum' in sys.argv else 0]*len(fns)
 
 year = typed_from_argv(int, 2016)
 if year == 2015:
@@ -51,13 +51,15 @@ for ntk in ['mfvMiniTree', 'mfvMiniTreeNtk3', 'mfvMiniTreeNtk3or4', 'mfvMiniTree
     print ntk
     raw_n1v, sum_n1v, var_n1v, raw_n2v, sum_n2v, var_n2v = 0, 0, 0, 0, 0, 0
     summaried = None
-    for fn, inc in zip(fns, include):
+    for fn, inc in zip(fns, include) + [(None, None)]:
         if inc:
             summaried = False
         if not inc and summaried == False:
             summaried = True
             print '%36s %d %9s %8s %8s raw n1v = %6d %7s, weighted n1v = %9.2f +/- %6.2f, raw n2v = %6d %6s, weighted n2v = %7.2f +/- %5.2f' % ('total background', int_lumi, '', '', '', raw_n1v, '', sum_n1v, var_n1v**0.5, raw_n2v, '', sum_n2v, var_n2v**0.5)
             print
+        if fn is None:
+            break
 
         x = getit(fn, ntk)
         if x:
