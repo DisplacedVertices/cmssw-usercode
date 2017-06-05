@@ -464,7 +464,7 @@ _add_ds("ntuplev15", {
 'my_mfv_neu_tau00300um_M0800': _fromnum0("/store/user/tucker/mfv_neu_tau00300um_M0800/NtupleV15_2016/170522_153837", 8),
 
 'qcdht0500': _fromnum1("/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_2016/170522_202050", 38),
-'qcdht0700': _fromnum1("/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_2016/170522_202136", 32, but=[2]),
+'qcdht0700': _fromnum1("/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_2016/170522_202136", 32, but=[1]),
 'qcdht1000': _fromnum1("/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_2016/170522_202210", 254),
 'qcdht1500': _fromnum1("/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_2016/170522_202243", 269),
 'qcdht2000': _fromnum1("/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_2016/170522_202316", 131),
