@@ -11,7 +11,7 @@ process.load('JMTucker.MFVNeutralino.VertexerPairEffs_cfi')
 
 process.mfvAnalysisCutsPreSel = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)
 
-process.p = cms.Path(process.mfvWeight * process.mfvAnalysisCutsPreSel * process.mfvVertexerPairEffs)
+process.p = cms.Path(process.mfvWeight * process.mfvAnalysisCutsPreSel * process.mfvVertexerPairEffsSeq)
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
