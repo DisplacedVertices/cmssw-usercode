@@ -4,10 +4,10 @@ import JMTucker.MFVNeutralino.AnalysisConstants as ac
 year = 2016
 
 set_style()
-ps = plot_saver('plots/geo2ddist/HistosV14_%s' % year, size=(700,700), root=False, log=False)
+ps = plot_saver('plots/geo2ddist/HistosV15_%s' % year, size=(700,700), root=False, log=False)
 
-f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/HistosV14/background%s.root' % ('_2015' if year==2015 else ''))
-h = f.Get('vtxHst1VNoGeo2ddist/h_sv_pos_2d_xy')
+f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/HistosV15/background%s.root' % ('_2015' if year==2015 else ''))
+h = f.Get('vtxHst1VNoGeo2ddist/h_sv_pos_bs2dxy')
 h.SetStats(0)
 h.SetTitle(';Vertex x (cm);Vertex y (cm)')
 h.Draw('colz')
