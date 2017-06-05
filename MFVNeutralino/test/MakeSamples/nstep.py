@@ -178,6 +178,7 @@ def submit(config, name, todo, todo_rawhlt=[], todo_reco=[], todo_ntuple=[]):
             if not fixed_salt:
                 salt += ' ' + todo2
 
+    salt = salt.replace(' ', '_').replace('=','EQ')
     steering.append('SALT="%s"' % salt)
 
     open(steering_fn, 'wt').write('\n'.join(steering) + '\n')
