@@ -138,6 +138,7 @@ def cmd_histos():
     cmd_hadd_data()
     cmd_hadd_qcd_sum()
     cmd_merge_background()
+    hadd('background_2015p6.root', ['background.root', 'background_2015.root'])
     cmd_effsprint()
 
 def cmd_minitree():
