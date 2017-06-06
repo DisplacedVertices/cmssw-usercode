@@ -22,7 +22,7 @@ if ntk == 3:
 if ntk == 4:
     tree_path = 'mfvMiniTreeNtk4/t'
 
-path = 'MiniTreeV14'
+path = 'MiniTreeV15'
 ps = plot_saver('../../plots/bkgest/%s/%s_ntk%i' % (path, year, ntk), size=(700,700), root=False)
 trees = '/uscms_data/d2/tucker/crab_dirs/%s' % path
 

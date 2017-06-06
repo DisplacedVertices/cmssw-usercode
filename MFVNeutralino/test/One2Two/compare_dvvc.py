@@ -9,11 +9,11 @@ mode = 'vary_eff'
 
 set_style()
 ROOT.gStyle.SetOptFit(0)
-ps = plot_saver('../plots/bkgest/v14p2/compare_dvvc_%s_%s' % (mode, year), size=(700,700), root=False, log=False)
+ps = plot_saver('../plots/bkgest/v15/compare_dvvc_%s_%s' % (mode, year), size=(700,700), root=False, log=False)
 
-fn1 = ['2v_from_jets_%s_3track_default_v14p2.root' % year, '2v_from_jets_%s_3track_%s_v14p2.root' % (year, mode)]
-fn2 = ['2v_from_jets_%s_4track_default_v14p2.root' % year, '2v_from_jets_%s_4track_%s_v14p2.root' % (year, mode)]
-fn3 = ['2v_from_jets_%s_5track_default_v14p2.root' % year, '2v_from_jets_%s_5track_%s_v14p2.root' % (year, mode)]
+fn1 = ['2v_from_jets_%s_3track_default_v15.root' % year, '2v_from_jets_%s_3track_%s_v15.root' % (year, mode)]
+fn2 = ['2v_from_jets_%s_4track_default_v15.root' % year, '2v_from_jets_%s_4track_%s_v15.root' % (year, mode)]
+fn3 = ['2v_from_jets_%s_5track_default_v15.root' % year, '2v_from_jets_%s_5track_%s_v15.root' % (year, mode)]
 
 if mode == 'vary_eff':
     ls = ['vertexer efficiency', 'ntkseeds efficiency']
@@ -24,22 +24,22 @@ if mode == 'vary_dphi':
 fns = [fn1, fn2, fn3]
 ntk = ['3-track', '4-track', '5-track']
 
-n2v = [934., 7., 1.]
-ebin1 = [0.0026, 0.0062, 0.0124]
-ebin2 = [0.0023, 0.0078, 0.0328]
-ebin3 = [0.0060, 0.0231, 0.1019]
+n2v = [939., 7., 1.]
+ebin1 = [0.0026, 0.0063, 0.0123]
+ebin2 = [0.0023, 0.0077, 0.0318]
+ebin3 = [0.0060, 0.0228, 0.1011]
 
 if year == '2015':
-    n2v = [44., 1., 1.]
-    ebin1 = [0.0118, 0.0291, 0.0567]
-    ebin2 = [0.0106, 0.0371, 0.1513]
-    ebin3 = [0.0271, 0.1100, 0.4761]
+    n2v = [45., 1., 1.]
+    ebin1 = [0.0117, 0.0298, 0.0573]
+    ebin2 = [0.0106, 0.0365, 0.1488]
+    ebin3 = [0.0271, 0.1106, 0.4731]
 
 if year == '2015p6':
-    n2v = [978., 7., 1.]
-    ebin1 = [0.0025, 0.0062, 0.0123]
-    ebin2 = [0.0023, 0.0076, 0.0323]
-    ebin3 = [0.0058, 0.0229, 0.1019]
+    n2v = [984., 7., 1.]
+    ebin1 = [0.0025, 0.0062, 0.0119]
+    ebin2 = [0.0023, 0.0076, 0.0303]
+    ebin3 = [0.0059, 0.0227, 0.0995]
 
 colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kOrange, ROOT.kViolet, ROOT.kPink+1]
 
