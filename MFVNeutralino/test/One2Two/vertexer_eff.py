@@ -4,26 +4,23 @@ is_mc = True
 year = '2016'
 ntkseeds = False
 mintk = False
-noduplicate = False
 
 set_style()
-ps = plot_saver('../plots/bkgest/v14/vertexer_pair_effs%s_%s%s%s%s' % ('' if is_mc else '_data', year, '_ntkseeds' if ntkseeds else '', '_mintk' if mintk else '', '_noduplicate' if noduplicate else ''), size=(700,700), log=False, root=False)
+ps = plot_saver('../plots/bkgest/v15/vertexer_pair_effs%s_%s%s%s' % ('' if is_mc else '_data', year, '_ntkseeds' if ntkseeds else '', '_mintk' if mintk else ''), size=(700,700), log=False, root=False)
 
 if is_mc:
-    f = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_8025/VertexerPairEffsV14%s/background%s.root' % ('p2_0' if noduplicate else '', '' if year=='2016' else '_%s'%year))
+    f = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_8025/VertexerPairEffsV15/background%s.root' % ('' if year=='2016' else '_%s'%year))
 else:
-    f = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_8025/VertexerPairEffsV14/JetHT%s.root' % year)
+    f = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_8025/VertexerPairEffsV15/JetHT%s.root' % year)
 
-fh = ROOT.TFile('vpeffs%s_%s_v14%s%s%s.root' % ('' if is_mc else '_data', year, '_ntkseeds' if ntkseeds else '', '_mintk' if mintk else '', '_noduplicate' if noduplicate else ''), 'recreate')
+fh = ROOT.TFile('vpeffs%s_%s_v15%s%s.root' % ('' if is_mc else '_data', year, '_ntkseeds' if ntkseeds else '', '_mintk' if mintk else ''), 'recreate')
 
 for itk in [3,4,5]:
     if not is_mc and itk != 3:
         continue
-    if ntkseeds:
-        f = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_8025/VertexerPairEffsV14p2%s_%itkseeds/background%s.root' % ('_0' if noduplicate else '', itk, '' if year=='2016' else '_%s'%year))
-    h_merge = f.Get('mfvVertexerPairEffs/h_merge_d2d_mintk%i_maxtk%i' % (itk if mintk else 0, itk))
-    h_pairs = f.Get('mfvVertexerPairEffs/h_pairs_d2d_mintk%i_maxtk%i' % (itk if mintk else 0, itk))
-    h_erase = f.Get('mfvVertexerPairEffs/h_erase_d2d_mintk%i_maxtk%i' % (itk if mintk else 0, itk))
+    h_merge = f.Get('mfvVertexerPairEffs%s/h_merge_d2d_mintk%i_maxtk%i' % ('%iTkSeed' % itk if ntkseeds else '', itk if mintk else 0, itk))
+    h_pairs = f.Get('mfvVertexerPairEffs%s/h_pairs_d2d_mintk%i_maxtk%i' % ('%iTkSeed' % itk if ntkseeds else '', itk if mintk else 0, itk))
+    h_erase = f.Get('mfvVertexerPairEffs%s/h_erase_d2d_mintk%i_maxtk%i' % ('%iTkSeed' % itk if ntkseeds else '', itk if mintk else 0, itk))
 
     h_merge.Rebin(10)
     h_pairs.Rebin(10)
@@ -65,7 +62,7 @@ for itk in [3,4,5]:
 
 fh.Close()
 
-f = ROOT.TFile('vpeffs%s_%s_v14%s%s%s.root' % ('' if is_mc else '_data', year, '_ntkseeds' if ntkseeds else '', '_mintk' if mintk else '', '_noduplicate' if noduplicate else ''))
+f = ROOT.TFile('vpeffs%s_%s_v15%s%s.root' % ('' if is_mc else '_data', year, '_ntkseeds' if ntkseeds else '', '_mintk' if mintk else ''))
 h = f.Get('maxtk3')
 h.SetLineWidth(3)
 h.SetLineColor(ROOT.kRed)
@@ -93,12 +90,12 @@ if is_mc:
     l.Draw()
     ps.save('efficiency')
 
-    if year == '2016' and not ntkseeds and not mintk and not noduplicate:
+    if not ntkseeds and not mintk:
         h = f.Get('maxtk3')
 
         ROOT.TH1.AddDirectory(0)
 
-        h2 = ROOT.TFile('vpeffs_2016_v14p2_ntkseeds.root').Get('maxtk5')
+        h2 = ROOT.TFile('vpeffs_%s_v15_ntkseeds.root' % year).Get('maxtk5')
         h2.SetLineWidth(3)
         h.Draw('hist')
         h2.Draw('hist sames')
