@@ -17,7 +17,7 @@ def is_mc_modifier(sample):
 
 def H_modifier(sample):
     to_replace = []
-    if sample.name.startswith('JetHT2016H'):
+    if '2016H' in sample.name:
         magic = 'H = False'
         to_replace.append((magic, 'H = True', 'trying to submit on 2016H and no magic string "%s"' % magic))
     return [], to_replace
