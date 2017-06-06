@@ -97,18 +97,18 @@ if not ntkseeds:
     ps.save('compare_efficiency')
 
 if is_mc and not ntkseeds:
-    fn1 = ['2v_from_jets_%s_3track_default_v14p2.root' % year, '2v_from_jets_%s_3track_noclearing_v14p2.root' % year]
-    fn2 = ['2v_from_jets_%s_4track_default_v14p2.root' % year, '2v_from_jets_%s_4track_noclearing_v14p2.root' % year]
-    fn3 = ['2v_from_jets_%s_5track_default_v14p2.root' % year, '2v_from_jets_%s_5track_noclearing_v14p2.root' % year]
+    fn1 = ['2v_from_jets_%s_3track_default_v15.root' % year, '2v_from_jets_%s_3track_noclearing_v15.root' % year]
+    fn2 = ['2v_from_jets_%s_4track_default_v15.root' % year, '2v_from_jets_%s_4track_noclearing_v15.root' % year]
+    fn3 = ['2v_from_jets_%s_5track_default_v15.root' % year, '2v_from_jets_%s_5track_noclearing_v15.root' % year]
 
     fns = [fn1, fn2, fn3]
     ntk = ['3-track', '4-track', '5-track']
 
-    n2v = [934., 7., 1.]
+    n2v = [939., 7., 1.]
     if year == '2015':
-        n2v = [44., 1., 1.]
+        n2v = [45., 1., 1.]
     if year == '2015p6':
-        n2v = [978., 7., 1.]
+        n2v = [984., 7., 1.]
 
     for i in range(3):
         h0 = ROOT.TFile(fns[i][0]).Get('h_c1v_dvv')

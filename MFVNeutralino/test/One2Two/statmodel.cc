@@ -210,11 +210,11 @@ int main(int, char**) {
 
   jmt::ConfigFromEnv env("sm", true);
 
-  const double default_n1v[3][6] = {{ -1, -1, -1,  8338, 1003, 160 }, { -1, -1, -1, 175485, 22427, 3532 }, { -1, -1, -1, 183823, 23430, 3692 }};
-  const double default_n2v[3][6] = {{ -1, -1, -1,    44,    1,   1 }, { -1, -1, -1,    934,     7,    1 }, { -1, -1, -1,    978,     7,    1 }};
+  const double default_n1v[3][6] = {{ -1, -1, -1,  8338, 1003, 160 }, { -1, -1, -1, 174873, 22368, 3516 }, { -1, -1, -1, 183211, 23371, 3676 }};
+  const double default_n2v[3][6] = {{ -1, -1, -1,    45,    1,   1 }, { -1, -1, -1,    939,     7,    1 }, { -1, -1, -1,    984,     7,    1 }};
 
-  const double  mc_eff_n1v[3][6] = {{ -1, -1, -1, 41481, 5150, 902 }, { -1, -1, -1,  65121,  8597, 1412 }, { -1, -1, -1,  71203,  9103, 1538 }};
-  const double  mc_eff_n2v[3][6] = {{ -1, -1, -1,   237,    3,   1 }, { -1, -1, -1,    390,     5,    1 }, { -1, -1, -1,    426,     6,    1 }};
+  const double  mc_eff_n1v[3][6] = {{ -1, -1, -1, 41481, 5150, 902 }, { -1, -1, -1,  65119,  8598, 1413 }, { -1, -1, -1,  71224,  9355, 1540 }};
+  const double  mc_eff_n2v[3][6] = {{ -1, -1, -1,   239,    3,   1 }, { -1, -1, -1,    392,     5,    1 }, { -1, -1, -1,    429,     6,    1 }};
 
   const int inst = env.get_int("inst", 0);
   const int seed = env.get_int("seed", 12919135 + inst);
@@ -237,8 +237,8 @@ int main(int, char**) {
   phi_c = env.get_double("phi_c", 1.34);
   phi_e = env.get_double("phi_e", 2);
   phi_a = env.get_double("phi_a", 3.86);
-  const std::string eff_fn = env.get_string("eff_fn", "eff_2016_v14.root");
-  const std::string eff_path = env.get_string("eff_path", TString::Format("maxtk%i", ntracks).Data());
+  const std::string eff_fn = env.get_string("eff_fn", "vpeffs_2016_v15.root");
+  const std::string eff_path = env.get_string("eff_path", "maxtk3");
 
   /////////////////////////////////////////////
 

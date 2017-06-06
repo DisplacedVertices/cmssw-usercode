@@ -5,23 +5,23 @@ ROOT.TH1.AddDirectory(0)
 year = '2016'
 
 set_style()
-ps = plot_saver('../plots/bkgest/v14p2/bquark_correction_%s' % year, size=(700,700), root=False, log=False)
+ps = plot_saver('../plots/bkgest/v15/bquark_correction_%s' % year, size=(700,700), root=False, log=False)
 
 ntk = ['3-track', '4-track', '5-track', '4-track-3-track']
 
-ebin1 = [0.0043, 0.0100, 0.0198, 0.0100]
-ebin2 = [0.0038, 0.0126, 0.0519, 0.0126]
-ebin3 = [0.0098, 0.0372, 0.1640, 0.0372]
+ebin1 = [0.0042, 0.0102, 0.0193, 0.0102]
+ebin2 = [0.0038, 0.0124, 0.0496, 0.0124]
+ebin3 = [0.0098, 0.0374, 0.1599, 0.0374]
 
 if year == '2015':
-    ebin1 = [0.0052, 0.0130, 0.0242, 0.0130]
-    ebin2 = [0.0047, 0.0162, 0.0651, 0.0162]
-    ebin3 = [0.0119, 0.0484, 0.2054, 0.0484]
+    ebin1 = [0.0053, 0.0130, 0.0243, 0.0130]
+    ebin2 = [0.0047, 0.0161, 0.0626, 0.0161]
+    ebin3 = [0.0122, 0.0478, 0.2007, 0.0478]
 
 if year == '2015p6':
-    ebin1 = [0.0040, 0.0097, 0.0188, 0.0097]
-    ebin2 = [0.0036, 0.0124, 0.0494, 0.0124]
-    ebin3 = [0.0093, 0.0365, 0.1576, 0.0365]
+    ebin1 = [0.0040, 0.0095, 0.0187, 0.0095]
+    ebin2 = [0.0036, 0.0119, 0.0478, 0.0119]
+    ebin3 = [0.0094, 0.0354, 0.1533, 0.0354]
 
 x = []
 ex = []
@@ -34,7 +34,7 @@ ey3 = []
 for i,ntracks in enumerate([3,4,5,7]):
     print ntk[i]
 
-    h1 = ROOT.TFile('2v_from_jets_%s_%itrack_bquark_uncorrected_v14p2.root' % (year, ntracks)).Get('h_c1v_dvv')
+    h1 = ROOT.TFile('2v_from_jets_%s_%itrack_bquark_uncorrected_v15.root' % (year, ntracks)).Get('h_c1v_dvv')
     h1.SetStats(0)
     h1.SetLineColor(ROOT.kBlack)
     h1.SetLineWidth(2)
@@ -44,7 +44,7 @@ for i,ntracks in enumerate([3,4,5,7]):
         h1.GetYaxis().SetRangeUser(0,0.4)
     h1.Draw('hist e')
 
-    h2 = ROOT.TFile('2v_from_jets_%s_%itrack_bquark_corrected_v14p2.root' % (year, ntracks)).Get('h_c1v_dvv')
+    h2 = ROOT.TFile('2v_from_jets_%s_%itrack_bquark_corrected_v15.root' % (year, ntracks)).Get('h_c1v_dvv')
     h2.SetStats(0)
     h2.SetLineColor(ROOT.kRed)
     h2.SetLineWidth(2)
