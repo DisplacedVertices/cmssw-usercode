@@ -513,6 +513,8 @@ int main(int argc, const char* argv[]) {
   for (const char* year : {"2015", "2016", "2015p6", "2016BCD", "2016EF", "2016G", "2016H"}) {
     for (int ntracks : {3, 4, 5, 7}) {
       construct_dvvc(false, false, year, ntracks,  true, -1, false,  true, false, 0, 255, TString::Format("2v_from_jets_data_%s_%dtrack_default_v15.root", year, ntracks));
+      //construct_dvvc(false, false, year, ntracks,  true, -1,  true,  true, false, 0, 255, TString::Format("2v_from_jets_data_%s_%dtrack_vary_dphi_v15.root", year, ntracks));
+      //construct_dvvc(false, false, year, ntracks,  true, -1, false,  true,  true, 0, 255, TString::Format("2v_from_jets_data_%s_%dtrack_vary_eff_v15.root", year, ntracks));
     }
   }
 }
