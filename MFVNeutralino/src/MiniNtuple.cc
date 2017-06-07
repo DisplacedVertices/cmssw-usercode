@@ -6,6 +6,7 @@ namespace mfv {
   MiniNtuple::MiniNtuple() {
     clear();
     p_tk0_qchi2 = p_tk0_ndof = p_tk0_vx = p_tk0_vy = p_tk0_vz = p_tk0_px = p_tk0_py = p_tk0_pz = p_tk1_qchi2 = p_tk1_ndof = p_tk1_vx = p_tk1_vy = p_tk1_vz = p_tk1_px = p_tk1_py = p_tk1_pz = 0;
+    p_tk0_inpv = p_tk1_inpv = 0;
     p_tk0_cov = p_tk1_cov = 0;
   }
 
@@ -26,6 +27,7 @@ namespace mfv {
     tk0_px.clear();
     tk0_py.clear();
     tk0_pz.clear();
+    tk0_inpv.clear();
     tk0_cov.clear();
     tk1_qchi2.clear();
     tk1_ndof.clear();
@@ -35,6 +37,7 @@ namespace mfv {
     tk1_px.clear();
     tk1_py.clear();
     tk1_pz.clear();
+    tk1_inpv.clear();
     tk1_cov.clear();
   }
 
@@ -67,6 +70,7 @@ namespace mfv {
     tree->Branch("tk0_px", &nt.tk0_px);
     tree->Branch("tk0_py", &nt.tk0_py);
     tree->Branch("tk0_pz", &nt.tk0_pz);
+    tree->Branch("tk0_inpv", &nt.tk0_inpv);
     tree->Branch("tk0_cov", &nt.tk0_cov);
     tree->Branch("x0", &nt.x0);
     tree->Branch("y0", &nt.y0);
@@ -87,6 +91,7 @@ namespace mfv {
     tree->Branch("tk1_px", &nt.tk1_px);
     tree->Branch("tk1_py", &nt.tk1_py);
     tree->Branch("tk1_pz", &nt.tk1_pz);
+    tree->Branch("tk1_inpv", &nt.tk1_inpv);
     tree->Branch("tk1_cov", &nt.tk1_cov);
     tree->Branch("x1", &nt.x1);
     tree->Branch("y1", &nt.y1);
@@ -135,6 +140,7 @@ namespace mfv {
     tree->SetBranchAddress("tk0_px", &nt.p_tk0_px);
     tree->SetBranchAddress("tk0_py", &nt.p_tk0_py);
     tree->SetBranchAddress("tk0_pz", &nt.p_tk0_pz);
+    tree->SetBranchAddress("tk0_inpv", &nt.p_tk0_inpv);
     tree->SetBranchAddress("tk0_cov", &nt.p_tk0_cov);
     tree->SetBranchAddress("x0", &nt.x0);
     tree->SetBranchAddress("y0", &nt.y0);
@@ -154,6 +160,7 @@ namespace mfv {
     tree->SetBranchAddress("tk1_px", &nt.p_tk1_px);
     tree->SetBranchAddress("tk1_py", &nt.p_tk1_py);
     tree->SetBranchAddress("tk1_pz", &nt.p_tk1_pz);
+    tree->SetBranchAddress("tk1_inpv", &nt.p_tk1_inpv);
     tree->SetBranchAddress("tk1_cov", &nt.p_tk1_cov);
     tree->SetBranchAddress("x1", &nt.x1);
     tree->SetBranchAddress("y1", &nt.y1);
@@ -177,6 +184,7 @@ namespace mfv {
     if (nt.p_tk0_px   ) nnt->tk0_px    = *nt.p_tk0_px;
     if (nt.p_tk0_py   ) nnt->tk0_py    = *nt.p_tk0_py;
     if (nt.p_tk0_pz   ) nnt->tk0_pz    = *nt.p_tk0_pz;
+    if (nt.p_tk0_inpv ) nnt->tk0_inpv  = *nt.p_tk0_inpv;
     if (nt.p_tk0_cov  ) nnt->tk0_cov   = *nt.p_tk0_cov;
 
     if (nt.p_tk1_qchi2) nnt->tk1_qchi2 = *nt.p_tk1_qchi2;
@@ -187,9 +195,11 @@ namespace mfv {
     if (nt.p_tk1_px   ) nnt->tk1_px    = *nt.p_tk1_px;
     if (nt.p_tk1_py   ) nnt->tk1_py    = *nt.p_tk1_py;
     if (nt.p_tk1_pz   ) nnt->tk1_pz    = *nt.p_tk1_pz;
+    if (nt.p_tk1_inpv ) nnt->tk1_inpv  = *nt.p_tk1_inpv;
     if (nt.p_tk1_cov  ) nnt->tk1_cov   = *nt.p_tk1_cov;
 
     nnt->p_tk0_qchi2 = nnt->p_tk0_ndof = nnt->p_tk0_vx = nnt->p_tk0_vy = nnt->p_tk0_vz = nnt->p_tk0_px = nnt->p_tk0_py = nnt->p_tk0_pz = nnt->p_tk1_qchi2 = nnt->p_tk1_ndof = nnt->p_tk1_vx = nnt->p_tk1_vy = nnt->p_tk1_vz = nnt->p_tk1_px = nnt->p_tk1_py = nnt->p_tk1_pz = 0;
+    nnt->p_tk0_inpv = nnt->p_tk1_inpv = 0;
     nnt->p_tk0_cov = nnt->p_tk1_cov = 0;
 
     return nnt;

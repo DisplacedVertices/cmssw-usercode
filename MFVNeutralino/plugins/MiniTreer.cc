@@ -112,6 +112,7 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
         nt.tk0_px.push_back(v0.track_px[i]);
         nt.tk0_py.push_back(v0.track_py[i]);
         nt.tk0_pz.push_back(v0.track_pz[i]);
+        nt.tk0_inpv.push_back(v0.track_inpv[i]);
         nt.tk0_cov.push_back(v0.track_cov[i]);
       }      
     nt.x0 = v0.x;
@@ -142,6 +143,7 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
         nt.tk0_px.push_back(v0.track_px[i]);
         nt.tk0_py.push_back(v0.track_py[i]);
         nt.tk0_pz.push_back(v0.track_pz[i]);
+        nt.tk0_inpv.push_back(v0.track_inpv[i]);
         nt.tk0_cov.push_back(v0.track_cov[i]);
       }      
       for (int i = 0, ie = v1.ntracks(); i < ie; ++i) {
@@ -153,6 +155,7 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
         nt.tk1_px.push_back(v1.track_px[i]);
         nt.tk1_py.push_back(v1.track_py[i]);
         nt.tk1_pz.push_back(v1.track_pz[i]);
+        nt.tk1_inpv.push_back(v1.track_inpv[i]);
         nt.tk1_cov.push_back(v1.track_cov[i]);
       }      
     }

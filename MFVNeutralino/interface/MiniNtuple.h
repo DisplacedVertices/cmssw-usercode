@@ -38,6 +38,7 @@ namespace mfv {
     std::vector<double> tk0_px;
     std::vector<double> tk0_py;
     std::vector<double> tk0_pz;
+    std::vector<short>  tk0_inpv;
     std::vector<TrackCovarianceMatrix> tk0_cov;
     std::vector<double>* p_tk0_qchi2;
     std::vector<double>* p_tk0_ndof;
@@ -47,6 +48,7 @@ namespace mfv {
     std::vector<double>* p_tk0_px;
     std::vector<double>* p_tk0_py;
     std::vector<double>* p_tk0_pz;
+    std::vector<short>*  p_tk0_inpv;
     std::vector<TrackCovarianceMatrix>* p_tk0_cov;
     float x0;
     float y0;
@@ -67,6 +69,7 @@ namespace mfv {
     std::vector<double> tk1_px;
     std::vector<double> tk1_py;
     std::vector<double> tk1_pz;
+    std::vector<short>  tk1_inpv;
     std::vector<TrackCovarianceMatrix> tk1_cov;
     std::vector<double>* p_tk1_qchi2;
     std::vector<double>* p_tk1_ndof;
@@ -76,6 +79,7 @@ namespace mfv {
     std::vector<double>* p_tk1_px;
     std::vector<double>* p_tk1_py;
     std::vector<double>* p_tk1_pz;
+    std::vector<short>*  p_tk1_inpv;
     std::vector<TrackCovarianceMatrix>* p_tk1_cov;
     float x1;
     float y1;
