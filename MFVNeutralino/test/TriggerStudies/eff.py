@@ -20,7 +20,6 @@ elif year == 2016 and H:
 use_ak8450 = True and year == 2016
 
 version = 'v8'
-json = '../ana_2015p6.json'
 batch_name = 'TrigEff%s' % version
 
 if year == 2015:
@@ -51,10 +50,6 @@ if input_is_aod:
     process.source.fileNames = ['/store/user/wsun/croncopyeos/mfv_ddbar_tau10000um_M0800/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170322_122934/0000/reco_1.root']
 
 process.load('JMTucker.Tools.MCStatProducer_cff')
-
-if not is_mc:
-    from FWCore.PythonUtilities.LumiList import LumiList
-    process.source.lumisToProcess = LumiList(json).getVLuminosityBlockRange()
 
 from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
 process.mutrig = hltHighLevel.clone()
@@ -134,7 +129,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     for sample in samples:
         if not sample.is_mc:
-            sample.json = json
+            sample.json = '../ana_2015p6.json'
         sample.set_curr_dataset(dataset)
         sample.split_by = 'files'
         sample.files_per = 30
