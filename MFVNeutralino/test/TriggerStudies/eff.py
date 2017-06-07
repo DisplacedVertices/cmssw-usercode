@@ -2,13 +2,14 @@
 
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
-from JMTucker.Tools.MiniAOD_cfg import which_global_tag
+from JMTucker.Tools.MiniAOD_cfg import *
 from JMTucker.Tools.PATTupleSelection_cfi import jtupleParams
 from JMTucker.MFVNeutralino.Year import year
 
 # 1st two magic
 is_mc = True
 H = False
+input_is_aod = False
 to_do = (800, 900)
 if year == 2015:
     to_do = (800,)
@@ -29,6 +30,12 @@ elif year == 2016:
     mu_thresh_hlt = 24
     mu_thresh_offline = 27
 
+if input_is_aod:
+    process = pat_tuple_process(None, is_mc, year, H)
+    remove_met_filters(process)
+    remove_output_module(process)
+    tfileservice(process, 'eff.root')
+
 process.TFileService.fileName = 'eff.root'
 global_tag(process, which_global_tag(is_mc, year, H))
 #process.options.wantSummary = True
@@ -40,6 +47,8 @@ process.source.fileNames = {
     (2016,False): ['/store/data/Run2016H/SingleMuon/MINIAOD/PromptReco-v2/000/283/283/00000/780D7FAA-FF95-E611-AC56-02163E011B49.root' if H else '/store/data/Run2016G/SingleMuon/MINIAOD/23Sep2016-v1/90000/94F15529-0694-E611-9B67-848F69FD4FC1.root'],
     }[(year, is_mc)]
 #process.source.fileNames = ['/store/data/Run2016B/SingleMuon/MINIAOD/23Sep2016-v3/120000/58678DBC-1599-E611-AE77-FA163E4986BD.root']
+if input_is_aod:
+    process.source.fileNames = ['/store/user/wsun/croncopyeos/mfv_ddbar_tau10000um_M0800/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170322_122934/0000/reco_1.root']
 
 process.load('JMTucker.Tools.MCStatProducer_cff')
 
@@ -71,12 +80,14 @@ process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
 
 process.denht1000 = process.den.clone(require_ht = 1000)
 process.denjet6pt75 = process.den.clone(require_6thjetpt = 75)
-process.p = cms.Path(process.mutrig * process.mfvTriggerFloats * process.den * process.denht1000 * process.denjet6pt75)
+process.denht1000jet6pt75 = process.den.clone(require_ht = 1000, require_6thjetpt = 75)
+process.p = cms.Path(process.mutrig * process.mfvTriggerFloats * process.den * process.denht1000 * process.denjet6pt75 * process.denht1000jet6pt75)
 
 process.dennomu = process.den.clone(require_muon = False)
 process.dennomuht1000 = process.den.clone(require_muon = False, require_ht = 1000)
 process.dennomujet6pt75 = process.den.clone(require_muon = False, require_6thjetpt = 75)
-process.pforsig = cms.Path(process.mfvTriggerFloats * process.dennomu * process.dennomuht1000 * process.dennomujet6pt75)
+process.dennomuht1000jet6pt75 = process.den.clone(require_muon = False, require_ht = 1000, require_6thjetpt = 75)
+process.pforsig = cms.Path(process.mfvTriggerFloats * process.dennomu * process.dennomuht1000 * process.dennomujet6pt75 * process.dennomuht1000jet6pt75)
 
 def a(name, obj, p=process.p):
     setattr(process, name, obj)
@@ -94,14 +105,13 @@ for require_l1, l1_threshold in (-1, 0), (-2, 240), (-3, 255), (-4, 280), (-5, 3
 
             a('num%inomu%s' % z, process.dennomu.clone(require_hlt = hlt1, require_l1 = require_l1), process.pforsig)
             a('num%inomuht1000%s' % z, process.dennomuht1000.clone(require_hlt = hlt1, require_l1 = require_l1), process.pforsig)
+            a('num%inomujet6pt75%s' % z, process.dennomujet6pt75.clone(require_hlt = hlt1, require_l1 = require_l1), process.pforsig)
+            a('num%inomuht1000jet6pt75%s' % z, process.dennomuht1000jet6pt75.clone(require_hlt = hlt1, require_l1 = require_l1), process.pforsig)
 
-            a('num%i%sjet6pt75'    % z, process.denjet6pt75.clone(require_hlt = hlt1, require_l1 = require_l1))
-            a('num%i450%sjet6pt75' % z, process.denjet6pt75.clone(require_hlt = hlt2, require_l1 = require_l1))
+            a('num%ijet6pt75%s'    % z, process.denjet6pt75.clone(require_hlt = hlt1, require_l1 = require_l1))
+            a('num%i450jet6pt75%s' % z, process.denjet6pt75.clone(require_hlt = hlt2, require_l1 = require_l1))
             if use_ak8450:
-                a('num%i450ak%sjet6pt75' % z, process.denjet6pt75.clone(require_hlt = hlt3, require_l1 = require_l1))
-
-            a('num%inomu%sjet6pt75' % z, process.dennomujet6pt75.clone(require_hlt = hlt1, require_l1 = require_l1), process.pforsig)
-            
+                a('num%i450akjet6pt75%s' % z, process.denjet6pt75.clone(require_hlt = hlt3, require_l1 = require_l1))
 
 import JMTucker.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
 SimpleTriggerEfficiency.setup_endpath(process)
@@ -113,11 +123,15 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = Samples.auxiliary_data_samples_2015 + Samples.leptonic_background_samples_2015 + Samples.ttbar_samples_2015
     elif year == 2016:
         samples = Samples.auxiliary_data_samples + Samples.leptonic_background_samples + Samples.ttbar_samples
-        masses = (300, 400, 800, 1200, 1600) #, 500, 600  no miniaod 
+        masses = (300, 400, 800, 1200, 1600)
         samples += [getattr(Samples, 'mfv_neu_tau01000um_M%04i'   % m) for m in masses] + [Samples.mfv_neu_tau10000um_M0800]
-        #samples += [getattr(Samples, 'mfv_ddbar_tau01000um_M%04i' % m) for m in masses] + [Samples.mfv_ddbar_tau10000um_M0800]   no miniaod
 
-    dataset = 'miniaod'
+    if input_is_aod:
+        dataset = 'main'
+        samples = [Samples.mfv_neu_tau01000um_M0600, Samples.mfv_ddbar_tau10000um_M0800] + [getattr(Samples, 'mfv_ddbar_tau01000um_M%04i' % m) for m in masses]
+    else:
+        dataset = 'miniaod'
+
     for sample in samples:
         if not sample.is_mc:
             sample.json = json
