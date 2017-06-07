@@ -638,7 +638,7 @@ for x in qcd_samples_2015:
     x.datasets['miniaod'].xrootd_url = 'root://cmseos.fnal.gov/'
 
 for x in (JetHT2016B3,
-          SingleMuon2016B3, SingleMuon2016C, SingleMuon2016E,
+
           qcdht0700, qcdht1000, qcdht1500, qcdht0700ext, qcdht1500ext, qcdht2000ext, ttbar,
           mfv_neu_tau10000um_M0300, mfv_neu_tau01000um_M0400, mfv_neu_tau00100um_M0800,
           mfv_neu_tau00300um_M0800, mfv_neu_tau01000um_M1200, mfv_neu_tau00100um_M1600, mfv_neu_tau10000um_M1600):
