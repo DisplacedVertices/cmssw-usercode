@@ -620,6 +620,23 @@ struct MFVVertexAux {
   float dravg() const { return trackpairdravg(); }
   float drrms() const { return trackpairdrrms(); }
 
+  std::vector<float> trackpairdzs() const {
+    std::vector<float> v;
+    size_t n = ntracks();
+    if (n >= 2)
+      for (size_t i = 0, ie = n-1; i < ie; ++i)
+        if (use_track(i))
+          for (size_t j = i+1, je = n; j < je; ++j)
+            if (use_track(j))
+              v.push_back(fabs(track_vz[i] - track_vz[j]));
+    return v;
+  }
+
+  float trackpairdzmin() const { return stats(this, trackpairdzs()).min; }
+  float trackpairdzmax() const { return stats(this, trackpairdzs()).max; }
+  float trackpairdzavg() const { return stats(this, trackpairdzs()).avg; }
+  float trackpairdzrms() const { return stats(this, trackpairdzs()).rms; }
+
   std::vector<float> trackpairmasses(float mass=0) const {
     std::vector<float> v;
     size_t n = ntracks();

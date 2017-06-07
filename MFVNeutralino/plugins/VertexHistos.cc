@@ -262,6 +262,11 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("trackdzerravg", "SV avg{#sigma trk_{i} dz(PV)} (cm)", 32, 0, 0.1);
   hs.add("trackdzerrrms", "SV rms{#sigma trk_{i} dz(PV)} (cm)", 32, 0, 0.1);
 
+  hs.add("trackpairdzmin", "SV min{|#Delta trk_{i,j} vz|} (cm)", 250, 0, 5);
+  hs.add("trackpairdzmax", "SV max{|#Delta trk_{i,j} vz|} (cm)", 250, 0, 5);
+  hs.add("trackpairdzavg", "SV avg{|#Delta trk_{i,j} vz|} (cm)", 250, 0, 5);
+  hs.add("trackpairdzrms", "SV rms{|#Delta trk_{i,j} vz|} (cm)", 250, 0, 5);
+
   hs.add("trackpairdetamin", "SV min{#Delta #eta(i,j)}", 150,    0,       1.5);
   hs.add("trackpairdetamax", "SV max{#Delta #eta(i,j)}", 150,    0,       7);
   hs.add("trackpairdetaavg", "SV avg{#Delta #eta(i,j)}", 150,    0,       5);
@@ -444,6 +449,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
     MFVVertexAux::stats trackpairdeta_stats(&aux, aux.trackpairdetas());
     MFVVertexAux::stats   trackpairdr_stats(&aux, aux.trackpairdrs());
+    MFVVertexAux::stats   trackpairdz_stats(&aux, aux.trackpairdzs());
 
     PairwiseHistos::ValueMap v = {
         {"nlep",                    aux.which_lep.size()},
@@ -543,6 +549,11 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         {"trackdzerrmax", aux.trackdzerrmax()},
         {"trackdzerravg", aux.trackdzerravg()},
         {"trackdzerrrms", aux.trackdzerrrms()},
+
+        {"trackpairdzmin", trackpairdz_stats.min},
+        {"trackpairdzmax", trackpairdz_stats.max},
+        {"trackpairdzavg", trackpairdz_stats.avg},
+        {"trackpairdzrms", trackpairdz_stats.rms},
 
         {"trackpairdetamin", trackpairdeta_stats.min},
         {"trackpairdetamax", trackpairdeta_stats.max},
