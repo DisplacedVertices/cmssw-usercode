@@ -69,8 +69,8 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
       zrms += dz*dz;
       thetarms += dth*dth;
 
-      h_deltaz->Fill(dz);
-      h_deltatheta->Fill(dth);
+      h_deltaz->Fill(fabs(dz));
+      h_deltatheta->Fill(fabs(dth));
     }
     zrms     = sqrt(zrms/(ntracks - 1));
     thetarms = sqrt(thetarms/(ntracks - 1));
@@ -81,8 +81,8 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
       const double dz  = z - zmean;
       const double dth = th - thetamean;
 
-      h_deltazorms->Fill(dz/zrms);
-      h_deltathetaorms->Fill(dth/thetarms);
+      h_deltazorms->Fill(fabs(dz)/zrms);
+      h_deltathetaorms->Fill(fabs(dth)/thetarms);
     }
   }
 
@@ -97,10 +97,10 @@ int main(int argc, char** argv) {
 
   TFile out_f(out_fn, "recreate");
 
-  h_deltaz     = new TH1F("h_deltaz",     ";trk_{i} vz - mean trk vz (cm);events/0.1 cm", 1000, -5, 5);
-  h_deltazorms = new TH1F("h_deltazorms", ";(trk_{i} vz - mean trk vz)/(rms trk vz);events/0.1", 1000, -5, 5);
-  h_deltatheta = new TH1F("h_deltatheta", ";trk_{i} theta - mean trk theta (rad);events/0.1", 1000, -5, 5);
-  h_deltathetaorms = new TH1F("h_deltathetaorms", ";(trk_{i} theta - mean trk theta)/(rms trk theta);events/0.1", 1000, -5, 5);
+  h_deltaz     = new TH1F("h_deltaz",     ";trk_{i} vz - mean trk vz (cm);events/0.1 cm", 1000, 0, 10);
+  h_deltazorms = new TH1F("h_deltazorms", ";(trk_{i} vz - mean trk vz)/(rms trk vz);events/0.1", 1000, 0, 10);
+  h_deltatheta = new TH1F("h_deltatheta", ";trk_{i} theta - mean trk theta (rad);events/0.063", 1000, 0, 6.3);
+  h_deltathetaorms = new TH1F("h_deltathetaorms", ";(trk_{i} theta - mean trk theta)/(rms trk theta);events/0.1", 1000, 0, 10);
 
   mfv::loop(fn, "mfvMiniTree/t", analyze);
 
