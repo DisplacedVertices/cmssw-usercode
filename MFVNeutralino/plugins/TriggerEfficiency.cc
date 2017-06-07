@@ -24,6 +24,9 @@ private:
   const int require_bits[2]; // HLT then L1
   const bool require_muon;
   const bool require_4jets;
+  const bool require_6jets;
+  const double require_4thjetpt;
+  const double require_6thjetpt;
   const double require_ht;
   const edm::EDGetTokenT<mfv::TriggerFloats> triggerfloats_token;
   const edm::EDGetTokenT<pat::MuonCollection> muons_token;
@@ -67,6 +70,9 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
     require_bits{cfg.getParameter<int>("require_hlt"), cfg.getParameter<int>("require_l1")},
     require_muon(cfg.getParameter<bool>("require_muon")),
     require_4jets(cfg.getParameter<bool>("require_4jets")),
+    require_6jets(cfg.getParameter<bool>("require_6jets")),
+    require_4thjetpt(cfg.getParameter<double>("require_4thjetpt")),
+    require_6thjetpt(cfg.getParameter<double>("require_6thjetpt")),
     require_ht(cfg.getParameter<double>("require_ht")),
     triggerfloats_token(consumes<mfv::TriggerFloats>(edm::InputTag("mfvTriggerFloats"))),
     muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
@@ -293,7 +299,11 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
       return;
   }
 
-  if ((require_4jets && triggerfloats->njets() < 4) || (require_ht > 0 && triggerfloats->ht < require_ht))
+  if ((require_4jets && triggerfloats->njets() < 4) ||
+      (require_6jets && triggerfloats->njets() < 6) ||
+      (require_4thjetpt > 0 && (triggerfloats->njets() < 4 || triggerfloats->jets[3].Pt() < require_4thjetpt)) || 
+      (require_6thjetpt > 0 && (triggerfloats->njets() < 6 || triggerfloats->jets[5].Pt() < require_6thjetpt)) ||
+      (require_ht > 0 && triggerfloats->ht < require_ht))
     return;
 
   h_nnoseljets->Fill(triggerfloats->nalljets, w);
