@@ -7,69 +7,12 @@
 #include "TH2.h"
 #include "TTree.h"
 #include "TVector2.h"
+#include "JMTucker/Tools/interface/Utilities.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
 bool genmatch_only = false;
 TH1F* h_val = 0;
 
-struct stats {
-  // ith value of these are the corresponding stat with the ith value
-  // of the n-length input removed, value n is the stat with no input
-  // values removed
-  std::vector<double> min; 
-  std::vector<double> max;
-  std::vector<double> med;
-  std::vector<double> avg;
-  std::vector<double> rms;
-  std::vector<double> mad;
-
-  void calc(std::vector<double> v,
-            double& min, double& max, double& med, double& avg, double& rms, double& mad) {
-    std::sort(v.begin(), v.end());
-    const size_t m = v.size();
-    min = v.front();
-    max = v.back();
-    if (m % 2 == 0)
-      med = (v[m/2] + v[m/2-1])/2;
-    else
-      med = v[m/2];
-
-    avg = rms = 0;
-    std::vector<double> v2(v.size());
-    for (size_t i = 0; i < m; ++i) {
-      avg += v[i];
-      v2[i] = fabs(v[i] - med);
-    }
-    avg /= m;
-    std::sort(v2.begin(), v2.end());
-    if (m % 2 == 0)
-      mad = (v2[m/2] + v2[m/2-1])/2;
-    else
-      mad = v2[m/2];
-
-    for (auto a : v)
-      rms += pow(a - avg, 2);
-    rms = sqrt(rms/m); //m-1
-  }
-
-  stats(const std::vector<double>& v) {
-    const size_t n = v.size();
-    min.assign(n+1, 0);
-    max.assign(n+1, 0);
-    med.assign(n+1, 0);
-    avg.assign(n+1, 0);
-    rms.assign(n+1, 0);
-    mad.assign(n+1, 0);
-
-    calc(v, min[n], max[n], med[n], avg[n], rms[n], mad[n]);
-
-    for (size_t i = 0; i < n; ++i) {
-      std::vector<double> v2(v);
-      v2.erase(v2.begin()+i);
-      calc(v2, min[i], max[i], med[i], avg[i], rms[i], mad[i]);
-    }
-  }
-};
 
 bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
   const bool prints = false;
@@ -114,7 +57,7 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
       thetas[itk] = TVector2::Phi_mpi_pi(atan2(pt, pz));
     }
 
-    stats s(thetas);
+    distrib_calculator s(thetas);
     double mx = 0;
 
     for (int itk = 0; itk < ntracks; ++itk) {
@@ -131,7 +74,7 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
 int main(int argc, char** argv) {
   if (argc == 1) {
     std::vector<double> xx = {2.8703831, 2.8554926, 2.8583482, 0.6880658, 2.8493017};
-    stats s_xx(xx);
+    distrib_calculator s_xx(xx);
     for (int i = 0; i < 5; ++i) {
       const double dth = fabs(xx[i] - s_xx.med[i]);
       const double dthospread = dth / s_xx.mad[i];
