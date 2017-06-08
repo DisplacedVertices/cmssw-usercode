@@ -1,24 +1,36 @@
 import sys
+from JMTucker.Tools.BasicAnalyzer_cfg import *
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.MiniAOD_cfg import *
 from JMTucker.MFVNeutralino.Year import year
 
 is_mc = True
 H = False
+test_event_filter = False
 
-process = pat_tuple_process(None, is_mc, year, H)
-jets_only(process)
+if test_event_filter:
+    process = pat_tuple_process(None, is_mc, year, H)
+    jets_only(process)
 
 file_event_from_argv(process)
 tfileservice(process, 'trigfiltcheck.root')
 
 from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-setup_event_filter(process, event_filter=True)
 
-setup_event_filter(process, 'ponlytrig')
+if test_event_filter:
+    setup_event_filter(process, event_filter=True)
 
-setup_event_filter(process, 'ponlyHT800', 'onlyHT800')
-process.onlyHT800.HLTPaths = ["HLT_PFHT800_v*"]
+setup_event_filter(process, 'ptrigger')
+
+paths = process.triggerFilter.HLTPaths.value()
+
+for x in paths:
+    filt_name = x.split('_')[1]
+    setup_event_filter(process, 'p%s' % filt_name, filt_name)
+    getattr(process, filt_name).HLTPaths = [x]
+
+setup_event_filter(process, 'pHcombination', 'Hcombination')
+process.Hcombination.HLTPaths = paths[1:]
 
 import JMTucker.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
 SimpleTriggerEfficiency.setup_endpath(process)
@@ -32,17 +44,17 @@ if 'argv' in sys.argv:
     want_summary(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
-    from JMTucker.Tools.Sample import anon_samples
     import JMTucker.Tools.Samples as Samples
 
-    samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.xx4j_samples + Samples.mfv_signal_samples
+    samples = Samples.ttbar_samples + Samples.qcd_samples
+    samples = Samples.mfv_signal_samples + Samples.mfv_ddbar_samples
 
-    samples = Samples.auxiliary_background_samples
+    for s in samples:
+        s.split_by = 'files'
+        s.files_per = 20
 
-    cs = CRABSubmitter('TrigFiltChkV3_76_ttaux_qcdpt',
-                       splitting = 'EventAwareLumiBased',
-                       units_per_job = 200000,
-                       total_units = 1000000,
-                       )
-    cs.submit_all(samples)
+    from JMTucker.Tools.MetaSubmitter import *
+    ms = MetaSubmitter('TrigFiltCheckV1')
+    ms.common.ex = 2016
+    ms.crab.job_control_from_sample = True
+    ms.submit(samples)
