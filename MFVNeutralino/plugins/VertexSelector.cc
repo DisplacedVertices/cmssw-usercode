@@ -100,7 +100,6 @@ private:
   const double min_geo2ddist;
   const double max_geo2ddist;
   const int max_sumnhitsbehind;
-  const int bs_hemisphere;
   const int max_ntrackssharedwpv;
   const int max_ntrackssharedwpvs;
   const int max_npvswtracksshared;
@@ -194,7 +193,6 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     min_geo2ddist(cfg.getParameter<double>("min_geo2ddist")),
     max_geo2ddist(cfg.getParameter<double>("max_geo2ddist")),
     max_sumnhitsbehind(cfg.getParameter<int>("max_sumnhitsbehind")),
-    bs_hemisphere(cfg.getParameter<int>("bs_hemisphere")),
     max_ntrackssharedwpv(cfg.getParameter<int>("max_ntrackssharedwpv")),
     max_ntrackssharedwpvs(cfg.getParameter<int>("max_ntrackssharedwpvs")),
     max_npvswtracksshared(cfg.getParameter<int>("max_npvswtracksshared")),
@@ -379,9 +377,6 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx, const MFVEvent* meve
     vtx.geo2ddist() >= min_geo2ddist &&
     vtx.geo2ddist() < max_geo2ddist &&
     vtx.sumnhitsbehind() <= max_sumnhitsbehind &&
-    ((bs_hemisphere == 0) ||
-     (bs_hemisphere == 1 && (atan2(vtx.y - 0.3928, vtx.x - 0.244) >=  2.5857  || atan2(vtx.y - 0.3928, vtx.x - 0.244) < -0.5558)) ||
-     (bs_hemisphere == 2 && (atan2(vtx.y - 0.3928, vtx.x - 0.244) >= -0.5558  && atan2(vtx.y - 0.3928, vtx.x - 0.244) <  2.5857))) &&
     vtx.ntrackssharedwpv() <= max_ntrackssharedwpv &&
     vtx.ntrackssharedwpvs() <= max_ntrackssharedwpvs &&
     vtx.npvswtracksshared() <= max_npvswtracksshared;
