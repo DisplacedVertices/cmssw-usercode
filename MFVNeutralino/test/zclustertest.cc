@@ -4,15 +4,71 @@
 #include <iostream>
 #include "TCanvas.h"
 #include "TFile.h"
-#include "TH1.h"
+#include "TH2.h"
 #include "TTree.h"
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
-TH1F* h_deltaz = 0;
-TH1F* h_deltazorms = 0;
-TH1F* h_deltatheta = 0;
-TH1F* h_deltathetaorms = 0;
+TH1F* h_val = 0;
+
+struct stats {
+  // ith value of these are the corresponding stat with the ith value
+  // of the n-length input removed, value n is the stat with no input
+  // values removed
+  std::vector<double> min; 
+  std::vector<double> max;
+  std::vector<double> med;
+  std::vector<double> avg;
+  std::vector<double> rms;
+  std::vector<double> mad;
+
+  void calc(std::vector<double> v,
+            double& min, double& max, double& med, double& avg, double& rms, double& mad) {
+    std::sort(v.begin(), v.end());
+    const size_t m = v.size();
+    min = v.front();
+    max = v.back();
+    if (m % 2 == 0)
+      med = (v[m/2] + v[m/2-1])/2;
+    else
+      med = v[m/2];
+
+    avg = rms = 0;
+    std::vector<double> v2(v.size());
+    for (size_t i = 0; i < m; ++i) {
+      avg += v[i];
+      v2[i] = fabs(v[i] - med);
+    }
+    avg /= m;
+    std::sort(v2.begin(), v2.end());
+    if (m % 2 == 0)
+      mad = (v2[m/2] + v2[m/2-1])/2;
+    else
+      mad = v2[m/2];
+
+    for (auto a : v)
+      rms += pow(a - avg, 2);
+    rms = sqrt(rms/m); //m-1
+  }
+
+  stats(const std::vector<double>& v) {
+    const size_t n = v.size();
+    min.assign(n+1, 0);
+    max.assign(n+1, 0);
+    med.assign(n+1, 0);
+    avg.assign(n+1, 0);
+    rms.assign(n+1, 0);
+    mad.assign(n+1, 0);
+
+    calc(v, min[n], max[n], med[n], avg[n], rms[n], mad[n]);
+
+    for (size_t i = 0; i < n; ++i) {
+      std::vector<double> v2(v);
+      v2.erase(v2.begin()+i);
+      calc(v2, min[i], max[i], med[i], avg[i], rms[i], mad[i]);
+    }
+  }
+};
 
 bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
   const bool prints = false;
@@ -41,55 +97,42 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
       tk_pz = nt.p_tk1_pz;
     }
 
-    double zmean = 0;
-    double zrms = 0;
-    double thetamean = 0;
-    double thetarms = 0;
-    std::vector<double> theta(ntracks, 0);
+    std::vector<double> thetas(ntracks);
+
     for (int itk = 0; itk < ntracks; ++itk) {
-      const double z = (*tk_vz)[itk];
       const double px = (*tk_px)[itk];
       const double py = (*tk_py)[itk];
       const double pz = (*tk_pz)[itk];
       const double pt = sqrt(px*px + py*py);
-      theta[itk] = TVector2::Phi_mpi_pi(atan2(pt, pz));
-
-      zmean += z;
-      thetamean += theta[itk];
+      thetas[itk] = TVector2::Phi_mpi_pi(atan2(pt, pz));
     }
-    zmean /= ntracks;
-    thetamean /= ntracks;
+
+    stats s(thetas);
+    double mx = 0;
 
     for (int itk = 0; itk < ntracks; ++itk) {
-      const double z = (*tk_vz)[itk];
-      const double th = theta[itk];
-      const double dz  = z - zmean;
-      const double dth = th - thetamean;
-
-      zrms += dz*dz;
-      thetarms += dth*dth;
-
-      h_deltaz->Fill(fabs(dz));
-      h_deltatheta->Fill(fabs(dth));
+      const double var = fabs(thetas[itk] - s.med[itk]) / s.mad[itk];
+      if (var > mx) mx = var;
     }
-    zrms     = sqrt(zrms/(ntracks - 1));
-    thetarms = sqrt(thetarms/(ntracks - 1));
 
-    for (int itk = 0; itk < ntracks; ++itk) {
-      const double z = (*tk_vz)[itk];
-      const double th = theta[itk];
-      const double dz  = z - zmean;
-      const double dth = th - thetamean;
-
-      h_deltazorms->Fill(fabs(dz)/zrms);
-      h_deltathetaorms->Fill(fabs(dth)/thetarms);
-    }
+    h_val->Fill(mx);
   }
 
   return true;
 }
 
 int main(int argc, char** argv) {
+  if (argc == 1) {
+    std::vector<double> xx = {2.8703831, 2.8554926, 2.8583482, 0.6880658, 2.8493017};
+    stats s_xx(xx);
+    for (int i = 0; i < 5; ++i) {
+      const double dth = fabs(xx[i] - s_xx.med[i]);
+      const double dthospread = dth / s_xx.mad[i];
+      printf("i %i dth %f outl %f\n", i, dth, dthospread);
+    }
+    return 1;
+  }
+
   assert(argc > 2);
 
   const char* fn = argv[1];
@@ -97,12 +140,38 @@ int main(int argc, char** argv) {
 
   TFile out_f(out_fn, "recreate");
 
-  h_deltaz     = new TH1F("h_deltaz",     ";trk_{i} vz - mean trk vz (cm);events/0.1 cm", 1000, 0, 10);
-  h_deltazorms = new TH1F("h_deltazorms", ";(trk_{i} vz - mean trk vz)/(rms trk vz);events/0.1", 1000, 0, 10);
-  h_deltatheta = new TH1F("h_deltatheta", ";trk_{i} theta - mean trk theta (rad);events/0.063", 1000, 0, 6.3);
-  h_deltathetaorms = new TH1F("h_deltathetaorms", ";(trk_{i} theta - mean trk theta)/(rms trk theta);events/0.1", 1000, 0, 10);
+  TH1::SetDefaultSumw2();
+
+  int nbins = 40000;
+  double vmax = 400;
+  h_val = new TH1F("h_val", ";max (trk_{i} theta - <trk theta>)/(spread trk theta);events/0.1", nbins, 0, vmax);
 
   mfv::loop(fn, "mfvMiniTree/t", analyze);
+
+  out_f.cd();
+
+  TH1F* h_cumu = (TH1F*)h_val->Clone("h_cumu");
+  double integ = h_val->Integral(0,nbins+1);
+  const int ntgts = 5;
+  double vs[ntgts] = {-1,-1,-1,-1,-1};
+  double tgt[ntgts] = {0.95, 0.99, 0.999, 0.9999, 1.};
+  for (int ibin = 1; ibin <= nbins; ++ibin) {
+    const double m1c  = h_cumu->GetBinContent(ibin-1);
+    const double m1ce = h_cumu->GetBinError  (ibin-1);
+    const double c  = h_cumu->GetBinContent(ibin);
+    const double ce = h_cumu->GetBinError  (ibin);
+    double cumu = m1c + c;
+    h_cumu->SetBinContent(ibin, cumu);
+    h_cumu->SetBinError  (ibin, sqrt(m1ce*m1ce + ce*ce));
+    for (int i = 0; i < ntgts; ++i)
+      if (vs[i] < 0 && cumu >= tgt[i] * integ)
+        vs[i] = h_val->GetXaxis()->GetBinLowEdge(ibin);
+  }
+
+  for (int i = 0; i < ntgts; ++i) {
+    TH1F* h = new TH1F(TString::Format("h_%04i", int(tgt[i]*10000)), "", nbins, 0, vmax);
+    h->Fill(vs[i]);
+  }
 
   out_f.Write();
   out_f.Close();
