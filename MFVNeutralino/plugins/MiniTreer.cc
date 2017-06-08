@@ -87,6 +87,19 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.jet_id[i] = mevent->jet_id[i];
   }
 
+  for (int i = 0; i < 2; ++i) {
+    const double z = mevent->gen_lsp_decay[i*3+2];
+    nt.gen_x[i] = mevent->gen_lsp_decay[i*3+0] - mevent->bsx_at_z(z);
+    nt.gen_y[i] = mevent->gen_lsp_decay[i*3+1] - mevent->bsy_at_z(z);
+    nt.gen_z[i] = z - mevent->bsz;
+  }
+
+  auto gen_matches = [&](const MFVVertexAux& v) { // already xformed
+    return
+      mag(v.x - nt.gen_x[0], v.y - nt.gen_y[0], v.z - nt.gen_z[0]) < 0.0084 ||
+      mag(v.x - nt.gen_x[1], v.y - nt.gen_y[1], v.z - nt.gen_z[1]) < 0.0084;
+  };
+
   edm::Handle<MFVVertexAuxCollection> input_vertices;
   event.getByToken(vertex_token, input_vertices);
 
@@ -115,6 +128,7 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
         nt.tk0_inpv.push_back(v0.track_inpv[i]);
         nt.tk0_cov.push_back(v0.track_cov[i]);
       }      
+    nt.genmatch0 = gen_matches(v0);
     nt.x0 = v0.x;
     nt.y0 = v0.y;
     nt.z0 = v0.z;
@@ -159,6 +173,8 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
         nt.tk1_cov.push_back(v1.track_cov[i]);
       }      
     }
+    nt.genmatch0 = gen_matches(v0);
+    nt.genmatch1 = gen_matches(v1);
     nt.x0 = v0.x; nt.y0 = v0.y; nt.z0 = v0.z;
     nt.x1 = v1.x; nt.y1 = v1.y; nt.z1 = v1.z;
     nt.ntracksptgt30 = int2uchar(v0.ntracksptgt(3));

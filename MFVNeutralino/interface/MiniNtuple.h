@@ -27,6 +27,9 @@ namespace mfv {
     float jet_phi[50];
     float jet_energy[50];
     unsigned char jet_id[50];
+    float gen_x[2];
+    float gen_y[2];
+    float gen_z[2];
 
     unsigned char nvtx;
     unsigned char ntk0;
@@ -50,6 +53,7 @@ namespace mfv {
     std::vector<double>* p_tk0_pz;
     std::vector<short>*  p_tk0_inpv;
     std::vector<TrackCovarianceMatrix>* p_tk0_cov;
+    bool genmatch0;
     float x0;
     float y0;
     float z0;
@@ -81,6 +85,7 @@ namespace mfv {
     std::vector<double>* p_tk1_pz;
     std::vector<short>*  p_tk1_inpv;
     std::vector<TrackCovarianceMatrix>* p_tk1_cov;
+    bool genmatch1;
     float x1;
     float y1;
     float z1;

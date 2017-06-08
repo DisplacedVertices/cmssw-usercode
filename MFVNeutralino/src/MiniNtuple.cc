@@ -15,6 +15,8 @@ namespace mfv {
     event = 0;
     gen_flavor_code = npv = npu = njets = nvtx = ntk0 = ntracksptgt30 = njetsntks0 = ntk1 = ntracksptgt31 = njetsntks1 = 0;
     pvx = pvy = pvz = weight = x0 = y0 = z0 = drmin0 = drmax0 = bs2derr0 = geo2ddist0 = x1 = y1 = z1 = drmin1 = drmax1 = bs2derr1 = geo2ddist1 = 0;
+    genmatch0 = genmatch1 = 0;
+    gen_x[0] = gen_y[0] = gen_z[0] = gen_x[1] = gen_y[1] = gen_z[1] = 0;
     for (int i = 0; i < 50; ++i) {
       jet_pt[i] = jet_eta[i] = jet_phi[i] = jet_energy[i] = 0;
       jet_id[i] = 0;
@@ -59,6 +61,9 @@ namespace mfv {
     tree->Branch("jet_phi", nt.jet_phi, "jet_phi[njets]/F");
     tree->Branch("jet_energy", nt.jet_energy, "jet_energy[njets]/F");
     tree->Branch("jet_id", nt.jet_id, "jet_id[njets]/b");
+    tree->Branch("gen_x", nt.gen_x, "gen_x[2]/F");
+    tree->Branch("gen_y", nt.gen_y, "gen_y[2]/F");
+    tree->Branch("gen_z", nt.gen_z, "gen_z[2]/F");
 
     tree->Branch("nvtx", &nt.nvtx);
     tree->Branch("ntk0", &nt.ntk0);
@@ -72,6 +77,7 @@ namespace mfv {
     tree->Branch("tk0_pz", &nt.tk0_pz);
     tree->Branch("tk0_inpv", &nt.tk0_inpv);
     tree->Branch("tk0_cov", &nt.tk0_cov);
+    tree->Branch("genmatch0", &nt.genmatch0);
     tree->Branch("x0", &nt.x0);
     tree->Branch("y0", &nt.y0);
     tree->Branch("z0", &nt.z0);
@@ -93,6 +99,7 @@ namespace mfv {
     tree->Branch("tk1_pz", &nt.tk1_pz);
     tree->Branch("tk1_inpv", &nt.tk1_inpv);
     tree->Branch("tk1_cov", &nt.tk1_cov);
+    tree->Branch("genmatch1", &nt.genmatch1);
     tree->Branch("x1", &nt.x1);
     tree->Branch("y1", &nt.y1);
     tree->Branch("z1", &nt.z1);
@@ -130,6 +137,9 @@ namespace mfv {
     tree->SetBranchAddress("jet_phi", nt.jet_phi);
     tree->SetBranchAddress("jet_energy", nt.jet_energy);
     tree->SetBranchAddress("jet_id", nt.jet_id);
+    tree->SetBranchAddress("gen_x", nt.gen_x);
+    tree->SetBranchAddress("gen_y", nt.gen_y);
+    tree->SetBranchAddress("gen_z", nt.gen_z);
     tree->SetBranchAddress("nvtx", &nt.nvtx);
     tree->SetBranchAddress("ntk0", &nt.ntk0);
     tree->SetBranchAddress("tk0_qchi2", &nt.p_tk0_qchi2);
@@ -142,6 +152,7 @@ namespace mfv {
     tree->SetBranchAddress("tk0_pz", &nt.p_tk0_pz);
     tree->SetBranchAddress("tk0_inpv", &nt.p_tk0_inpv);
     tree->SetBranchAddress("tk0_cov", &nt.p_tk0_cov);
+    tree->SetBranchAddress("genmatch0", &nt.genmatch0);
     tree->SetBranchAddress("x0", &nt.x0);
     tree->SetBranchAddress("y0", &nt.y0);
     tree->SetBranchAddress("z0", &nt.z0);
@@ -162,6 +173,7 @@ namespace mfv {
     tree->SetBranchAddress("tk1_pz", &nt.p_tk1_pz);
     tree->SetBranchAddress("tk1_inpv", &nt.p_tk1_inpv);
     tree->SetBranchAddress("tk1_cov", &nt.p_tk1_cov);
+    tree->SetBranchAddress("genmatch1", &nt.genmatch1);
     tree->SetBranchAddress("x1", &nt.x1);
     tree->SetBranchAddress("y1", &nt.y1);
     tree->SetBranchAddress("z1", &nt.z1);
