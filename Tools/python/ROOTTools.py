@@ -912,6 +912,8 @@ def differentiate_stat_box(hist, movement=1, new_color=None, new_size=None, colo
     appropriate) or else the stat box will not exist."""
 
     s = hist.FindObject('stats')
+    if not s:
+        return
 
     if color_from_hist:
         new_color = hist.GetLineColor()
