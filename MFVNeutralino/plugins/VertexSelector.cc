@@ -104,6 +104,7 @@ private:
   const int max_ntrackssharedwpv;
   const int max_ntrackssharedwpvs;
   const int max_npvswtracksshared;
+  const double min_thetaoutlier;
   const double max_thetaoutlier;
 
   const bool use_cluster_cuts;
@@ -198,6 +199,7 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     max_ntrackssharedwpv(cfg.getParameter<int>("max_ntrackssharedwpv")),
     max_ntrackssharedwpvs(cfg.getParameter<int>("max_ntrackssharedwpvs")),
     max_npvswtracksshared(cfg.getParameter<int>("max_npvswtracksshared")),
+    min_thetaoutlier(cfg.getParameter<double>("min_thetaoutlier")),
     max_thetaoutlier(cfg.getParameter<double>("max_thetaoutlier")),
     use_cluster_cuts(cfg.getParameter<bool>("use_cluster_cuts")),
     min_nclusters(cfg.getParameter<int>("min_nclusters")),
@@ -320,7 +322,7 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx, const MFVEvent* meve
       return false;
   }
 
-  if (max_thetaoutlier < 1e9) {
+  if (min_thetaoutlier > 0 || max_thetaoutlier < 1e9) {
     double mx = 0;
     const size_t n = vtx.ntracks();
     std::vector<double> thetas(n);
@@ -331,7 +333,7 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx, const MFVEvent* meve
       const double v = fabs(thetas[i] - s.med[i]) / s.mad[i];
       if (v > mx) mx = v;
     }
-    if (mx > max_thetaoutlier)
+    if (mx < min_thetaoutlier || mx > max_thetaoutlier)
       return false;
   }
 
