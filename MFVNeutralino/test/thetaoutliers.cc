@@ -9,6 +9,7 @@
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
+bool genmatch_only = false;
 TH1F* h_val = 0;
 
 struct stats {
@@ -77,6 +78,7 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
 
   for (int ivtx = 0, ivtxe = std::min(int(nt.nvtx), 2); ivtx < ivtxe; ++ivtx) {
     int ntracks = 0;
+    bool genmatch = false;
     const std::vector<double>* tk_vz = 0;
     const std::vector<double>* tk_px = 0;
     const std::vector<double>* tk_py = 0;
@@ -84,6 +86,7 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
 
     if (ivtx == 0) {
       ntracks = nt.ntk0;
+      genmatch = nt.genmatch0;
       tk_vz = nt.p_tk0_vz;
       tk_px = nt.p_tk0_px;
       tk_py = nt.p_tk0_py;
@@ -91,11 +94,15 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
     }
     else {
       ntracks = nt.ntk1;
+      genmatch = nt.genmatch1;
       tk_vz = nt.p_tk1_vz;
       tk_px = nt.p_tk1_px;
       tk_py = nt.p_tk1_py;
       tk_pz = nt.p_tk1_pz;
     }
+
+    if (genmatch_only && !genmatch)
+      continue;
 
     std::vector<double> thetas(ntracks);
 
@@ -133,17 +140,23 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  assert(argc > 2);
+  if (argc < 3) {
+    fprintf(stderr, "usage: thetaoutliers.exe in_fn out_fn [genmatch]\n");
+    return 1;
+  }
 
   const char* fn = argv[1];
   const char* out_fn = argv[2];
+  if (argc > 3)
+    genmatch_only = strcmp(argv[3], "genmatch") == 0;
+  printf("%s -> %s genmatch? %i\n", fn, out_fn, genmatch_only);
 
   TFile out_f(out_fn, "recreate");
 
   TH1::SetDefaultSumw2();
 
-  int nbins = 40000;
-  double vmax = 400;
+  const int nbins = 20000;
+  const double vmax = 10000;
   h_val = new TH1F("h_val", ";max (trk_{i} theta - <trk theta>)/(spread trk theta);events/0.1", nbins, 0, vmax);
 
   mfv::loop(fn, "mfvMiniTree/t", analyze);
@@ -154,7 +167,7 @@ int main(int argc, char** argv) {
   double integ = h_val->Integral(0,nbins+1);
   const int ntgts = 5;
   double vs[ntgts] = {-1,-1,-1,-1,-1};
-  double tgt[ntgts] = {0.95, 0.99, 0.999, 0.9999, 1.};
+  double tgt[ntgts] = {0.5, 0.8, 0.95, 0.99, 0.999};
   for (int ibin = 1; ibin <= nbins; ++ibin) {
     const double m1c  = h_cumu->GetBinContent(ibin-1);
     const double m1ce = h_cumu->GetBinError  (ibin-1);
