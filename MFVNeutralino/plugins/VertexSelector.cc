@@ -7,6 +7,7 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/MFVNeutralino/interface/VertexTools.h"
+#include "JMTucker/Tools/interface/Utilities.h"
 //#include "JMTucker/MFVNeutralino/plugins/VertexMVAWrap.h"
 
 class MFVVertexSelector : public edm::EDProducer {
@@ -103,6 +104,7 @@ private:
   const int max_ntrackssharedwpv;
   const int max_ntrackssharedwpvs;
   const int max_npvswtracksshared;
+  const double max_thetaoutlier;
 
   const bool use_cluster_cuts;
   const int min_nclusters;
@@ -196,6 +198,7 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     max_ntrackssharedwpv(cfg.getParameter<int>("max_ntrackssharedwpv")),
     max_ntrackssharedwpvs(cfg.getParameter<int>("max_ntrackssharedwpvs")),
     max_npvswtracksshared(cfg.getParameter<int>("max_npvswtracksshared")),
+    max_thetaoutlier(cfg.getParameter<double>("max_thetaoutlier")),
     use_cluster_cuts(cfg.getParameter<bool>("use_cluster_cuts")),
     min_nclusters(cfg.getParameter<int>("min_nclusters")),
     max_nsingleclusters(cfg.getParameter<int>("max_nsingleclusters")),
@@ -221,13 +224,6 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
   }
 
   produces<MFVVertexAuxCollection>();
-}
-
-namespace {
-  template <typename T>
-  T mag(T x, T y, T z) {
-    return sqrt(x*x + y*y + z*z);
-  }
 }
 
 bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx, const MFVEvent* mevent) const {
@@ -321,6 +317,21 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx, const MFVEvent* meve
         s.min >= max_drmin ||
         s.max <  min_drmax ||
         s.max >= max_drmax)
+      return false;
+  }
+
+  if (max_thetaoutlier < 1e9) {
+    double mx = 0;
+    const size_t n = vtx.ntracks();
+    std::vector<double> thetas(n);
+    for (size_t i = 0; i < n; ++i)
+      thetas[i] = reco::reduceRange(atan2(vtx.track_pt(i), vtx.track_pz[i]));
+    distrib_calculator s(thetas);
+    for (size_t i = 0; i < n; ++i) {
+      const double v = fabs(thetas[i] - s.med[i]) / s.mad[i];
+      if (v > mx) mx = v;
+    }
+    if (mx > max_thetaoutlier)
       return false;
   }
 
