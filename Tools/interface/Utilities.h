@@ -128,6 +128,7 @@ struct distrib_calculator {
     min.assign(n+1, 0);
     max.assign(n+1, 0);
     med.assign(n+1, 0);
+    sum.assign(n+1, 0);
     avg.assign(n+1, 0);
     rms.assign(n+1, 0);
     mad.assign(n+1, 0);
