@@ -407,6 +407,8 @@ qcd_hip_samples = [
     MCSample('qcdht1500_retest',     '/qcdht1500/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-57b8172a07d94b03fac9c39db7e976db/USER', 13191, xsec=120),
     MCSample('qcdht1500_hip1p0',     '/qcdht1500/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-df145f431123addbda1013d14f17e10d/USER', 13191, xsec=120), # dbs was screwed up for this, may be OK now
     MCSample('qcdht1500_hip1p0_mit', '/qcdht1500/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-79e713faf20ba5bd8efbca26edc5132a/USER', 13191, xsec=120),
+
+    MCSample('qcdht1000_bigpriv_hip1p0_mit', '/qcdht1000/None/USER', -1, xsec=1.206e3),
     ]
 
 for s in qcd_hip_samples:
