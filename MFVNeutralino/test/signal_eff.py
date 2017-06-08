@@ -6,16 +6,19 @@ from JMTucker.Tools import Samples
 from JMTucker.MFVNeutralino.PerSignal import PerSignal
 
 set_style()
-ps = plot_saver(plot_dir('sigeff_v14_new'), size=(600,600), log=False)
+ps = plot_saver(plot_dir('sigeff_v15'), size=(600,600), log=False)
 
-root_file_dir = '/uscms_data/d2/tucker/crab_dirs/HistosV14'
+root_file_dir = '/uscms_data/d2/tucker/crab_dirs/HistosV15'
 num_path = 'mfvEventHistosFullSel/h_bsx'
 
 multijet = [s for s in Samples.mfv_signal_samples if not s.name.startswith('my_')]
 dijet = Samples.mfv_ddbar_samples
 
 for sample in multijet + dijet:
-    f = ROOT.TFile(os.path.join(root_file_dir, sample.name + '.root'))
+    fn = os.path.join(root_file_dir, sample.name + '.root')
+    if not os.path.exists(fn):
+        continue
+    f = ROOT.TFile(fn)
     hnum = f.Get(num_path)
     hden = f.Get('mfvWeight/h_sums')
     num = hnum.Integral(0, hnum.GetNbinsX() + 2)
