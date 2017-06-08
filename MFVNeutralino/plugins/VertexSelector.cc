@@ -325,7 +325,7 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx, const MFVEvent* meve
     const size_t n = vtx.ntracks();
     std::vector<double> thetas(n);
     for (size_t i = 0; i < n; ++i)
-      thetas[i] = reco::reduceRange(atan2(vtx.track_pt(i), vtx.track_pz[i]));
+      thetas[i] = atan2(vtx.track_pt(i), vtx.track_pz[i]);
     distrib_calculator s(thetas);
     for (size_t i = 0; i < n; ++i) {
       const double v = fabs(thetas[i] - s.med[i]) / s.mad[i];
