@@ -5,38 +5,56 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.MFVNeutralino.PerSignal import PerSignal
 
-set_style()
-ps = plot_saver(plot_dir('thetaoutliers_v15'), size=(900,600), log=False)
+cutplays = True
 
+plot_path = 'thetaoutliers_v15'
 root_file_dir = '.'
-paths = [
-#    ('h_5000', ROOT.kBlack),
-    ('h_8000', ROOT.kBlue),
-    ('h_9500', ROOT.kRed),
-    ('h_9900', ROOT.kGreen+2),
-#    ('h_9990', ROOT.kBlue),
-#    ('h_9999', ROOT.kOrange+2),
-#    ('h_10000',ROOT.kMagenta),
-    ]
+if cutplays:
+    plot_path += '_cutplays'
+    root_file_dir = '/uscms_data/d2/tucker/crab_dirs/CutPlayV15'
+
+set_style()
+ps = plot_saver(plot_dir(plot_path), size=(900,600), log=False)
+
+colors = [ROOT.kRed, ROOT.kGreen+2, ROOT.kBlue]
+if cutplays:
+    xs = [50, 75, 100]
+    ymax = 1.05
+else:
+    xs = ['h_8000', 'h_9500', 'h_9900']
+    ymax = 500
 
 multijet = [s for s in Samples.mfv_signal_samples if not s.name.startswith('my_')]
 dijet = Samples.mfv_ddbar_samples
 
-#for kind, samples in ('multijet', multijet), ('dijet', dijet):
-per = PerSignal('cut', y_range=(0, 500))
-for path,color in paths:
-    pathname = path.replace('h_', '')
-    #pathname = '%s.%s%%' % (pathname[:-2], pathname[-2:])
-    pathname = '%s%%' % (pathname[:-2])
+per = PerSignal('cut', y_range=(0, ymax))
+for x, color in zip(xs, colors):
     for sample in multijet + dijet:
+        fn = os.path.join(root_file_dir, sample.name + '.root')
+        if not os.path.exists(fn):
+            continue
         if not hasattr(sample, 'f'):
-            sample.f = ROOT.TFile(os.path.join(root_file_dir, sample.name + '.root'))
-        h = sample.f.Get(path)
-        assert h.GetEntries() == 1
-        sample.y = h.GetMean()
-        print sample.name, path, sample.y
-    title = 'keep %s' % pathname
+            sample.f = ROOT.TFile(fn)
+
+        if cutplays:
+            h = sample.f.Get('SimpleTriggerEfficiency/triggers_pass_num')
+            ibin = x + 2
+            num = h.GetBinContent(ibin)
+            den = h.GetBinContent(1)
+            sample.y, sample.yl, sample.yh = clopper_pearson(num, den)
+        else:
+            h = sample.f.Get(x)
+            assert h.GetEntries() == 1
+            sample.y = h.GetMean()
+            print sample.name, x, sample.y
+
+    if cutplays:
+        title = 'cut at %s' % x
+    else:
+        title = 'keep %s%%' % (x.replace('h_', '')[:-2])
     per.add(multijet, color=color, title=title)
     per.add(dijet,    color=color, style=2, in_legend=False)
 per.draw(canvas=ps.c)
 ps.save('duh')
+
+
