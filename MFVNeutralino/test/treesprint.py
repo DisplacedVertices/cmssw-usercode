@@ -2,6 +2,7 @@
 
 import sys, os
 from JMTucker.Tools.ROOTTools import *
+from JMTucker.Tools.Sample import norm_from_file
 from JMTucker.Tools.general import typed_from_argv
 from JMTucker.Tools import Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
@@ -40,11 +41,12 @@ def getit(fn, ntk):
     f = ROOT.TFile(fn)
     t = f.Get('%s/t' % ntk)
     if not t:
-        return None
+
     n1v = t.Draw('dist0', 'nvtx==1', 'goff')
-    n2v = t.Draw('dist0', 'nvtx>=2', 'goff')
     if ntk == 'mfvMiniTreeNtk3or4':
         n2v = t.Draw('dist0', 'nvtx>=2 && ntk0==4 && ntk1==3', 'goff')
+    else:
+        n2v = t.Draw('dist0', 'nvtx>=2', 'goff')
     return n1v, n2v
 
 for ntk in ['mfvMiniTree', 'mfvMiniTreeNtk3', 'mfvMiniTreeNtk3or4', 'mfvMiniTreeNtk4']:
@@ -68,7 +70,7 @@ for ntk in ['mfvMiniTree', 'mfvMiniTreeNtk3', 'mfvMiniTreeNtk3or4', 'mfvMiniTree
             sname = os.path.basename(fn).replace('.root', '')
             if hasattr(Samples, sname):
                 sample = getattr(Samples, sname)
-                w = int_lumi * sample.xsec / sample.nevents_orig if sample.is_mc else 1.
+                w = int_lumi * sample.partial_weight(fn)
                 print '%36s %d %9.3f %8d %8.5f raw n1v = %6d +/- %3d, weighted n1v = %9.2f +/- %6.2f, raw n2v = %6d +/- %2d, weighted n2v = %7.2f +/- %5.2f' % (sample.name, int_lumi, sample.xsec if sample.is_mc else -1, sample.nevents_orig, w, n1v, n1v**0.5, w*n1v, w*n1v**0.5, n2v, n2v**0.5, w*n2v, w*n2v**0.5)
             else:
                 print '%36s  n1v = %9.2f  n2v = %9.2f' % (sname, n1v, n2v)
