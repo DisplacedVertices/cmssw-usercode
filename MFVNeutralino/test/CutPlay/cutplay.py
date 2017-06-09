@@ -1,18 +1,23 @@
-import os, sys
-from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
+import sys
+from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 use_weights = True
-do_nominal = True
+single_vertex = False
+do_nominal = False
 do_distances = False
 do_clusters = False
 
-process.source.fileNames = ['/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/ntuplev9/161019_211934/0000/ntuple_1.root']
+dataset = 'ntuplev15'
+sample_files(process, 'qcdht2000', dataset, 1)
 process.TFileService.fileName = 'cutplay.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 vtx_sel = process.mfvSelectedVerticesTight
 ana_sel = process.mfvAnalysisCuts
+
+if single_vertex:
+    ana_sel.min_nvertex = 1
 
 def pize(f,sz):
     fmt = '%.' + str(sz) + 'f'
@@ -22,6 +27,8 @@ changes = []
 changes.append(('nm1', '', ''))
 
 if do_nominal:
+    for i in xrange(0,200):
+        changes.append(('thetaoutlierX%i' % i, 'max_thetaoutlier = %i' % i, ''))
     for i in xrange(0,10):
         changes.append(('njetsX%i'%i, '', 'min_njets = %i'%i))
     for i in xrange(250,1001,50):
@@ -108,20 +115,18 @@ SimpleTriggerEfficiency.setup_endpath(process, weight_src='mfvWeight' if use_wei
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
+    from JMTucker.MFVNeutralino.Year import year
+    from JMTucker.Tools import Samples
+    if year == 2015:
+        samples = Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015 + \
+            Samples.mfv_signal_samples_2015
+    elif year == 2016:
+        samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext
+#            Samples.mfv_signal_samples + Samples.mfv_ddbar_samples + Samples.mfv_hip_samples + Samples.qcd_hip_samples
+
+    from JMTucker.Tools.MetaSubmitter import set_splitting
+    set_splitting(samples, dataset, 'minitree', data_json='ana_2015p6_10pc.json')
+
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    import JMTucker.Tools.Samples as Samples
-
-    samples = Samples.registry.from_argv(
-        Samples.data_samples + \
-        Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
-        [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + \
-        [Samples.xx4j_tau00001mm_M0300, Samples.xx4j_tau00010mm_M0300, Samples.xx4j_tau00001mm_M0700, Samples.xx4j_tau00010mm_M0700]
-        )
-
-    for sample in samples:
-        sample.files_per = 50
-        if not sample.is_mc:
-            sample.json = 'ana_10pc.json'
-
-    cs = CondorSubmitter('CutPlayV10', dataset='ntuplev10')
+    cs = CondorSubmitter('CutPlayV15_nvtx1', ex=year, dataset=dataset)
     cs.submit_all(samples)
