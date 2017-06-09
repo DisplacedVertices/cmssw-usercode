@@ -40,8 +40,6 @@ if not fns:
 def getit(fn, ntk):
     f = ROOT.TFile(fn)
     t = f.Get('%s/t' % ntk)
-    if not t:
-
     n1v = t.Draw('dist0', 'nvtx==1', 'goff')
     if ntk == 'mfvMiniTreeNtk3or4':
         n2v = t.Draw('dist0', 'nvtx>=2 && ntk0==4 && ntk1==3', 'goff')
