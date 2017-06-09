@@ -614,6 +614,9 @@ _add_ds("ntuplev15", {
 'qcdht1500_hip1p0': _fromnum0("/store/user/tucker/qcdht1500/NtupleV15_2016/170603_172454", 17),
 'qcdht1500_hip1p0_mit': _fromnum0("/store/user/tucker/qcdht1500/NtupleV15_2016/170603_172455", 17),
 'qcdht1500_retest': _fromnum0("/store/user/tucker/qcdht1500/NtupleV15_2016/170603_172453", 17),
+
+'qcdht1000_bigpriv_hip1p0_mit': _fromnum0("/store/user/tucker/qcdht1000/NtupleV15_2016/170609_123313", 777),
+
 })
 
 _add_ds("pick1vtxv14", {
