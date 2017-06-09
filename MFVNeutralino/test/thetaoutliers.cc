@@ -12,6 +12,7 @@
 
 bool genmatch_only = false;
 TH1F* h_val = 0;
+TH2F* h_val_v_dbv = 0;
 
 
 bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
@@ -22,6 +23,7 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
   for (int ivtx = 0, ivtxe = std::min(int(nt.nvtx), 2); ivtx < ivtxe; ++ivtx) {
     int ntracks = 0;
     bool genmatch = false;
+    double dbv = 0;
     const std::vector<double>* tk_vz = 0;
     const std::vector<double>* tk_px = 0;
     const std::vector<double>* tk_py = 0;
@@ -30,6 +32,7 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
     if (ivtx == 0) {
       ntracks = nt.ntk0;
       genmatch = nt.genmatch0;
+      dbv = hypot(nt.x0, nt.y0);
       tk_vz = nt.p_tk0_vz;
       tk_px = nt.p_tk0_px;
       tk_py = nt.p_tk0_py;
@@ -38,6 +41,7 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
     else {
       ntracks = nt.ntk1;
       genmatch = nt.genmatch1;
+      dbv = hypot(nt.x1, nt.y1);
       tk_vz = nt.p_tk1_vz;
       tk_px = nt.p_tk1_px;
       tk_py = nt.p_tk1_py;
@@ -66,6 +70,7 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
     }
 
     h_val->Fill(mx);
+    h_val_v_dbv->Fill(dbv, mx);
   }
 
   return true;
@@ -101,16 +106,19 @@ int main(int argc, char** argv) {
   const int nbins = 20000;
   const double vmax = 10000;
   h_val = new TH1F("h_val", ";max (trk_{i} theta - <trk theta>)/(spread trk theta);events/0.1", nbins, 0, vmax);
+  h_val_v_dbv = new TH2F("h_val_v_dbv", ";d_{BV} (cm);max (trk_{i} theta - <trk theta>)/(spread trk theta)", 100,0,1,nbins, 0, vmax);
 
   mfv::loop(fn, "mfvMiniTree/t", analyze);
 
   out_f.cd();
 
   TH1F* h_cumu = (TH1F*)h_val->Clone("h_cumu");
-  double integ = h_val->Integral(0,nbins+1);
+  h_cumu->SetStats(0);
+  h_cumu->GetYaxis()->SetTitle("");
+  const double integ = h_val->Integral(0,nbins+1);
   const int ntgts = 5;
   double vs[ntgts] = {-1,-1,-1,-1,-1};
-  double tgt[ntgts] = {0.5, 0.8, 0.95, 0.99, 0.999};
+  const double tgt[ntgts] = {0.5, 0.8, 0.95, 0.99, 0.999};
   for (int ibin = 1; ibin <= nbins; ++ibin) {
     const double m1c  = h_cumu->GetBinContent(ibin-1);
     const double m1ce = h_cumu->GetBinError  (ibin-1);
@@ -123,6 +131,7 @@ int main(int argc, char** argv) {
       if (vs[i] < 0 && cumu >= tgt[i] * integ)
         vs[i] = h_val->GetXaxis()->GetBinLowEdge(ibin);
   }
+  h_cumu->Scale(1/h_cumu->GetBinContent(nbins));
 
   for (int i = 0; i < ntgts; ++i) {
     TH1F* h = new TH1F(TString::Format("h_%04i", int(tgt[i]*10000)), "", nbins, 0, vmax);
