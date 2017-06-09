@@ -2,6 +2,7 @@ import sys, os
 from glob import glob
 from array import array
 from collections import namedtuple
+from functools import partial
 from itertools import combinations, permutations
 from math import log, pi
 from JMTucker.Tools.general import typed_from_argv
@@ -11,17 +12,24 @@ import JMTucker.Tools.Samples as Samples
 set_style()
 ROOT.TH1.AddDirectory(0)
 
-def get_f_t(x, min_ntracks=None, tree_path='trees'):
+def t_path(ntk):
+    if ntk in (3,4):
+        return 'mfvMiniTreeNtk%i/t' % ntk
+    elif ntk == 7:
+        return 'mfvMiniTreeNtk3or4/t'
+    elif ntk == 5:
+        return 'mfvMiniTree/t'
+    else:
+        raise ValueError('ntk = %i' % ntk)
+
+def get_f_t(x, min_ntracks=5, tree_path='trees'):
     if issubclass(type(x), Samples.Sample):
         sample = x
         input_fn = os.path.join(tree_path, '%s.root' % sample.name)
     elif type(x) == str:
         input_fn = x
     f = ROOT.TFile.Open(input_fn)
-    if min_ntracks and min_ntracks != 5:
-        t = f.Get('mfvMiniTreeNtk%i/t' % min_ntracks)
-    else:
-        t = f.Get('mfvMiniTree/t')
+    t = f.Get(t_path(min_ntracks))
     t.SetAlias('jetht', 'Sum$((jet_pt>40)*jet_pt)')
     t.SetAlias('svdist', 'sqrt((x0-x1)**2 + (y0-y1)**2)')
     t.SetAlias('svdphi', 'TVector2::Phi_mpi_pi(atan2(y0,x0)-atan2(y1,x1))')
