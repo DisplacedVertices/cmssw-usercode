@@ -1,4 +1,3 @@
-from functools import partial
 from JMTucker.MFVNeutralino.MiniTreeBase import *
 
 set_style()
