@@ -1150,7 +1150,15 @@ class draw_hist_register:
         varexp = self.name_for_draw(draw_str, binning)
         option = 'e' if self.use_weight else ''
         n = (tree if tree else self.tree).Draw(varexp, cut, option)
-        h = getattr(ROOT, self.names[-1])
+        try:
+            h = getattr(ROOT, self.names[-1])
+        except AttributeError:
+            b = binning.split(',')
+            if len(b) == 3:
+                h = ROOT.TH1F(self.names[-1], '', int(b[0]), float(b[1]), float(b[2]))
+            else:
+                assert len(b) == 6
+                h = ROOT.TH2F(self.names[-1], '', int(b[0]), float(b[1]), float(b[2]), int(b[3]), float(b[4]), float(b[5]))
         self.hists.append(h)
         h.is2d = ':' in draw_str
         if nice_name is None:
