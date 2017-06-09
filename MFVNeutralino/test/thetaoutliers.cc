@@ -78,7 +78,7 @@ int main(int argc, char** argv) {
     for (int i = 0; i < 5; ++i) {
       const double dth = fabs(xx[i] - s_xx.med[i]);
       const double dthospread = dth / s_xx.mad[i];
-      printf("i %i dth %f outl %f\n", i, dth, dthospread);
+      printf("i %i th %f dth %f x %f\n", i, xx[i], dth, dthospread);
     }
     return 1;
   }
