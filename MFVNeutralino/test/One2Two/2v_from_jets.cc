@@ -291,6 +291,9 @@ void construct_dvvc(bool is_mc, bool inject_signal, std::string year, int ntrack
         h_2v_npu->Fill(nt.npu, w);
       }
     }
+
+    f->Close();
+    delete f;
   }
 
   //construct dvvc
@@ -495,6 +498,12 @@ void construct_dvvc(bool is_mc, bool inject_signal, std::string year, int ntrack
   delete h_2v_npu;
   delete c_dvv;
   delete c_absdphivv;
+  delete h_c1v_dbv;
+  delete h_c1v_dvv;
+  delete h_c1v_absdphivv;
+  delete h_c1v_dbv0;
+  delete h_c1v_dbv1;
+  delete h_c1v_dbv1_dbv0;
 }
 
 int main(int argc, const char* argv[]) {
