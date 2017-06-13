@@ -182,54 +182,97 @@ def cmssw_setup():
     ROOT.gSystem.Load('libDataFormatsFWLite.so')
     ROOT.gSystem.Load('libDataFormatsPatCandidates.so')
     
-def histogram_divide(h1, h2, confint=clopper_pearson, use_effective=False, force_lt_1=True, no_zeroes=False, confint_params=()):
-    nbins = h1.GetNbinsX()
-    xax = h1.GetXaxis()
-    if h2.GetNbinsX() != nbins: # or xax2.GetBinLowEdge(1) != xax.GetBinLowEdge(1) or xax2.GetBinLowEdge(nbins) != xax.GetBinLowEdge(nbins):
-        raise ValueError('incompatible histograms to divide')
-    x = []
-    y = []
-    exl = []
-    exh = []
-    eyl = []
-    eyh = []
-    xax = h1.GetXaxis()
-    for ibin in xrange(1, nbins+1):
-        sold,told=s,t = h1.GetBinContent(ibin), h2.GetBinContent(ibin)
+def histogram_divide(h1, h2,
+                     confint=clopper_pearson,
+                     use_effective=False,
+                     force_le_1=True,
+                     no_zeroes=False,
+                     confint_params=()):
+    '''TGraphAsymmErrors(TH1,TH1) exists, but this is kept for
+    flexibility (different confidence intervals, using effective
+    n=(content/error)**2, etc. Works with TGraph* inputs too.'''
+
+    class vals:
+        def __init__(self, z):
+            self.x, self.exl, self.exh, self.y, self.eyl, self.eyh = [], [], [], [], [], []
+
+            if z.Class().GetName().startswith('TH1'):
+                self.n = z.GetNbinsX()
+                xax = z.GetXaxis()
+                for ibin in xrange(1, self.n+1):
+                    self.x.append(xax.GetBinCenter(ibin))
+                    _xw = xax.GetBinWidth(ibin)/2
+                    self.exl.append(_xw)
+                    self.exh.append(_xw)
+                    self.y.append(z.GetBinContent(ibin))
+                    ey = z.GetBinError(ibin)
+                    self.eyl.append(ey)
+                    self.eyh.append(ey)
+
+            elif z.Class().GetName().startswith('TGraph'):
+                self.n = z.GetN()
+                for i in xrange(self.n):
+                    x,y = ROOT.Double(), ROOT.Double()
+                    z.GetPoint(i,x,y)
+                    self.x.append(float(x))
+                    self.y.append(float(y))
+                    self.exl.append(z.GetErrorXlow(i))
+                    self.exh.append(z.GetErrorXhigh(i))
+                    self.eyl.append(z.GetErrorYlow(i))
+                    self.eyh.append(z.GetErrorYhigh(i))
+
+            else:
+                assert ValueError('only works with TH1- or TGraph-descended objects')
+
+            self.ey = [(l+h)/2 for l,h in zip(self.eyl, self.eyh)]
+
+        def check_compatible(self, other):
+            if self.n != other.n or \
+                    self.x != other.x or \
+                    self.exl != other.exl or \
+                    self.exh != other.exh: # why did I not require equal abscissae before?
+                raise ValueError('incompatible objects to divide')
+
+    h1.v = vals(h1)
+    h2.v = vals(h2)
+    h1.v.check_compatible(h2.v)
+
+    n = h2.v.n
+    x = h2.v.x[:]
+    exl = h2.v.exl[:]
+    exh = h2.v.exh[:]
+    y, eyl, eyh = [], [], []
+
+    for i in xrange(n):
+        sold, told = s, t = h1.v.y[i], h2.v.y[i]
         if t == 0:
             continue
         if s == 0 and no_zeroes:
             continue
         if use_effective:
             assert confint == clopper_pearson
-            effective_t = t**2 / h2.GetBinError(ibin)**2
+            effective_t = t**2 / h2.v.ey[i]**2
             s = s/t * effective_t
             t = effective_t
             #print ibin,sold,told,s,t
 
-        p_hat = float(s)/t
-        if s > t and force_lt_1:
-            print 'warning: bin %i has p_hat > 1, in interval forcing p_hat = 1' % ibin
+        if s > t and force_le_1:
+            print 'warning: point %i has s > t, in interval forcing rat = 1' % i
             s = t
-        rat, a,b = confint(s,t, *confint_params)
+        r, a, b = confint(s,t, *confint_params)
         #print ibin, s, t, a, b
 
         if b is None: # JMTBAD
             assert confint is not clopper_pearson
             b = 1e99
 
-        _x  = xax.GetBinCenter(ibin)
-        _xw = xax.GetBinWidth(ibin)/2
-        
-        x.append(_x)
-        exl.append(_xw)
-        exh.append(_xw)
+        y.append(r)
+        eyl.append(r - a)
+        eyh.append(b - r)
 
-        y.append(p_hat)
-        eyl.append(p_hat - a)
-        eyh.append(b - p_hat)
-    eff = ROOT.TGraphAsymmErrors(len(x), *[array('d', obj) for obj in (x,y,exl,exh,eyl,eyh)])
-    return eff
+    return ROOT.TGraphAsymmErrors(len(x), *[to_array(z) for z in (x,y,exl,exh,eyl,eyh)])
+
+graph_divide = histogram_divide
 
 def core_gaussian(hist, factor, i=[0]):
     core_mean  = hist.GetMean()
@@ -1521,7 +1564,7 @@ def ratios_plot(name,
                 x_title_size = 0.04,
                 y_title_size = 0.04,
                 y_label_size = 0.03,
-                res_divide_opt = 'pois',
+                res_divide_opt = {},
                 res_line_width = 2,
                 res_x_title_size = 0.04,
                 res_x_title_offset = 1.,
@@ -1536,11 +1579,31 @@ def ratios_plot(name,
                 legend = None,
                 draw_normalized = False,
                 ):
-    '''With n hists, draw them and the n-1 ratios to hists[0].'''
+    '''With n hists/graphs, draw them and the n-1 ratios to hists[0].
+    hists can be a list of just the hists/graphs, or it can be a list
+    of tuples (object, draw_cmd).
+    '''
 
-    hists = hists[:] # gonna modify the list
+    _hists, draw_cmds = [], []
+    for x in hists:
+        if type(x) in (tuple,list):
+            h,dc = x
+            assert type(dc) == str
+            _hists.append(h)
+            draw_cmds.append(dc)
+        else:
+            _hists.append(x)
+            draw_cmds.append('')
+    hists = _hists
+    
+    are_hists  = all(h.Class().GetName().startswith('TH1')    for h in hists)
+    are_graphs = all(h.Class().GetName().startswith('TGraph') for h in hists)
 
     # Sanity checks on the parameters.
+    if not are_hists and not are_graphs:
+        raise ValueError('hists must be either all TH1-descended or TGraph-descended')
+    if draw_normalized and are_graphs:
+        raise ValueError('no draw_normalized for graphs')
     if output_fn is None and plot_saver is None:
         raise ValueError('at least one of output_fn, plot_saver must be supplied')
     elif output_fn is not None and plot_saver is not None:
@@ -1558,7 +1621,7 @@ def ratios_plot(name,
         plot_saver.old_c = plot_saver.c
         plot_saver.c = canvas
 
-    for i,h in enumerate(hists):
+    def zzz(h):
         h.GetXaxis().SetLabelSize(0) # the data/MC ratio part will show the labels
         h.GetXaxis().SetTitleSize(x_title_size)
         h.GetYaxis().SetTitleSize(y_title_size)
@@ -1566,17 +1629,39 @@ def ratios_plot(name,
         h.GetYaxis().SetTitleOffset(y_title_offset)
         h.GetYaxis().SetLabelSize(y_label_size)
 
-        if draw_normalized:
-            h.v = h.GetMaximum() / h.Integral(0,h.GetNbinsX()+1)
-        else:
-            h.v = h.GetMaximum()
+    if are_graphs:
+        gg = ROOT.TMultiGraph()
 
-    for i,h in enumerate(sorted(hists, key=lambda h: h.v, reverse=True)):
-        cmd = h.DrawNormalized if draw_normalized else h.Draw
-        if i == 0:
-            cmd()
-        else:
-            cmd('sames')
+    for i,(h,dc) in enumerate(zip(hists, draw_cmds)):
+        zzz(h)
+
+        if are_graphs:
+            if 'a' in dc:
+                dc.replace('a', '')
+            if not dc:
+                dc = 'p'
+            gg.Add(h, dc)
+        elif are_hists:
+            if draw_normalized:
+                h.v = h.GetMaximum() / h.Integral(0,h.GetNbinsX()+1)
+            else:
+                h.v = h.GetMaximum()
+
+    if are_graphs:
+        gg.Draw('a')
+        zzz(gg)
+        #canvas.Update()
+    else:
+        for i,h in enumerate(sorted(hists, key=lambda h: h.v, reverse=True)):
+            cmd = h.DrawNormalized if draw_normalized else h.Draw
+            dc = draw_cmds[i]
+            if i == 0:
+                if dc: # Draw never liked Draw('')
+                    cmd(dc)
+                else:
+                    cmd()
+            else:
+                cmd('sames ' + dc)
 
     if legend is not None:
         legend = ROOT.TLegend(*legend)
@@ -1601,7 +1686,7 @@ def ratios_plot(name,
     old_opt_fit = None
     fit_tpt = None
     for i,h in enumerate(hists):
-        r = ROOT.TGraphAsymmErrors(h, h0, res_divide_opt)
+        r = histogram_divide(h, h0, **res_divide_opt)
         ratios.append(r)
         r.SetMarkerStyle(20)
         r.SetMarkerSize(0)
@@ -1950,6 +2035,7 @@ __all__ = [
     'get_hist_quantiles',
     'get_quantiles',
     'get_hist_stats',
+    'graph_divide',
     'draw_hist_register',
     'make_rms_hist',
     'move_below_into_bin',
