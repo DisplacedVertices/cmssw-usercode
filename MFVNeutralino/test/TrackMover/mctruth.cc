@@ -1,4 +1,5 @@
 #include "TH1.h"
+#include "TRandom3.h"
 #include "TTree.h"
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MovedTracksNtuple.h"
@@ -9,6 +10,8 @@ int main(int argc, char** argv) {
     fprintf(stderr, "usage: mctruth.exe in.root out.root min_lspdist3\n");
     return 1;
   }
+
+  gRandom->SetSeed(4916823);
 
   const char* in_fn  = argv[1];
   const char* out_fn = argv[2];
@@ -66,10 +69,13 @@ int main(int argc, char** argv) {
 
     const bool pass_800 = bool(nt.pass_hlt & 0x2);
     const bool pass_900_450_AK450 = bool(nt.pass_hlt & 0x1C);
-    const bool H_scheme = false; // could throw random number?
+    const double data_set_frac = gRandom->Rndm();
+    const bool is_H = data_set_frac > 0.81; // 81% of the 2015+16 data is B-G, rest is H
+    const bool pass_trig = pass_800 || (is_H && pass_900_450_AK450);
 
     if (nt.jetht < 1000 ||
-        !(pass_800 || (H_scheme && pass_900_450_AK450)))
+        nt.nalljets < 4 ||
+        !pass_trig)
       continue;
 
     const double w = apply_weight ? nt.weight : 1.;
@@ -88,8 +94,7 @@ int main(int argc, char** argv) {
 
     //printf("lspdist2 %f dist3 %f distz %f n_raw_vtx %lu  weight %f\n", lspdist2, lspdist3, lspdistz, n_raw_vtx, w);
 
-    if (lspdist3 < 0 ||
-        lspdist3 < min_lspdist3 ||
+    if (lspdist3 < min_lspdist3 ||
         lspdistz < 0)
       continue;
 
@@ -103,7 +108,7 @@ int main(int argc, char** argv) {
       //printf("ilsp %i movedist2 %f dist3 %f\n", ilsp, movedist2, movedist3);
 
       if (movedist2 < 0.03 ||
-          movedist2 > 2.5)
+          movedist2 > 2.0)
         continue;
 
       for (numdens& nd : nds) {
