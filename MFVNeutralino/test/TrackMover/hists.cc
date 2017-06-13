@@ -145,7 +145,8 @@ int main(int argc, char** argv) {
 
     const bool pass_800 = bool(nt.pass_hlt & 0x2);
     const bool pass_900_450_AK450 = bool(nt.pass_hlt & 0x1C);
-    const bool H_data = nt.run > 281000;
+    const bool is_H = nt.run > 281000;
+    const bool pass_trig = pass_800 || (is_H && pass_900_450_AK450);
 
     double jet_sume = 0;
     double jet_drmax = 0;
@@ -168,9 +169,10 @@ int main(int argc, char** argv) {
     if (nt.npreseljets < njets_req || 
         nt.npreselbjets < nbjets_req ||
         nt.jetht < 1000 ||
+        nt.nalljets < 4 ||
+	!pass_trig || 
         movedist2 < 0.03 ||
-	!(pass_800 || (H_data && pass_900_450_AK450)) ||
-        movedist2 > 2.5) {
+        movedist2 > 2.0) {
       continue;
     }
 
@@ -215,7 +217,7 @@ int main(int argc, char** argv) {
       const double dist2move = mag(nt.move_x - nt.p_vtxs_x->at(ivtx),
                                    nt.move_y - nt.p_vtxs_y->at(ivtx),
                                    nt.move_z - nt.p_vtxs_z->at(ivtx));
-      if (dist2move > 0.005)
+      if (dist2move > 0.0084)
         continue;
 
       const bool pass_ntracks = nt.p_vtxs_ntracks->at(ivtx) >= 5;
