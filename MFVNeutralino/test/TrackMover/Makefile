@@ -28,7 +28,7 @@ test:
 .PRECIOUS: bin/%.o
 
 clean:	
-	-rm -f hists.exe
+	-rm -f *.exe 
 	-rm -rf bin/
 
 setup:
