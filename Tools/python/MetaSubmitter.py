@@ -289,6 +289,8 @@ def set_splitting(samples, dataset, jobtype, data_json=None):
             if sample.name != 'JetHT2015D' and not sample.name.startswith('mfv_'):
                 sample.events_per = int(2.5 * sample.events_per)
                 sample.files_per  = int(2.5 * sample.files_per)
+            if 'bigpriv' in sample.name:
+                sample.files_per *= 3
 
     else:
         raise ValueError("don't know anything about jobtype %s" % jobtype)
