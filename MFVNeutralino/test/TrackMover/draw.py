@@ -1,24 +1,11 @@
 #!/usr/bin/env python
 
-'''
-bash -c 'for x in /store/user/tucker/TrackMover21/*root; do ../hists.exe ${fnalxrootd}${x} `basename $x` 2 1 2>&1 | tee $(basename $x .root).log; done'
-hadd.py data.root MultiJetPk2012*root
-py ~/cmswork/Tools/python/Samples.py merge qcdht0500.root qcdht1000.root ttbar*root -3629.809 ; mv merge.root mc.root
-'''
-
 extra_factor = 1. #17600/3629.809
+use_effective = True
 
-from array import array
 from JMTucker.Tools.ROOTTools import *
 set_style()
 ROOT.TH1.AddDirectory(0)
-
-def arr(*l):
-    return array('d', l)
-
-def rebin(obj, binning):
-    b = arr(binning)
-    return obj.Rebin(len(b)-1, obj.GetName(), b)
 
 def get_em(fn, alpha=1-0.6827):
     f = ROOT.TFile(fn)
@@ -28,12 +15,9 @@ def get_em(fn, alpha=1-0.6827):
     ltmp = []
 
     def skip(name, obj):
-        if 'jetsumntracks' == name:
-            return True
-        return False
+        return obj.GetName() in ('h_norm', 'h_weight', 'h_npu') #or name in ('nlep')
 
     def rebin(name, obj):
-        #print name
         if 'jetdravg' == name or \
            'jetdrmax' == name or \
            'npv' == name or \
@@ -53,8 +37,13 @@ def get_em(fn, alpha=1-0.6827):
             obj.Rebin(4)
         return obj
 
+    integ = f.Get('h_weight').Integral(0,100000)
+    print 'integral:', integ
+
     for key in f.GetListOfKeys():
         name = key.GetName()
+        if '_' not in name:
+            continue
         obj = f.Get(name)
         sub = name.split('_')[1]
 
@@ -64,9 +53,6 @@ def get_em(fn, alpha=1-0.6827):
         obj = rebin(sub, obj)
 
         if name.startswith('h_'):
-            if name == 'h_weight':
-                integ = obj.Integral(0,100000)
-                print 'integral:', integ
             l.append(name)
         else:
             ltmp.append(name)
@@ -81,7 +67,7 @@ def get_em(fn, alpha=1-0.6827):
         if name.endswith('_num'):
             num = d[name]
             den = d[name.replace('_num', '_den')]
-            g = histogram_divide(num, den, confint_params=(alpha,))
+            g = histogram_divide(num, den, confint_params=(alpha,), use_effective=use_effective)
             g.SetTitle('')
             g.GetXaxis().SetTitle(num.GetXaxis().GetTitle())
             g.GetYaxis().SetTitle('efficiency')
@@ -90,12 +76,13 @@ def get_em(fn, alpha=1-0.6827):
             d[rat_name] = g
             l.append(rat_name)
 
-            if 'nlep' in name:
+            if 'nlep' in name: # nlep is just a convenient one to take the integral of, can be any
                 cutset = name.split('nlep')[0]
                 num_err, den_err = ROOT.Double(), ROOT.Double()
                 num_int = num.IntegralAndError(0, 100, num_err)
                 den_int = den.IntegralAndError(0, 100, den_err)
                 cutsets.append((cutset, num_int, num_err, den_int, den_err))
+
 
     cutsets.sort()
     c = []
@@ -110,32 +97,18 @@ def get_em(fn, alpha=1-0.6827):
         ef, lo, hi = 100*ef, 100*lo, 100*hi
         print '%40s %.2f [%.2f, %.2f] +%.2f -%.2f' % (cutset, ef, lo, hi, hi-ef, ef-lo)
         c.append((cutset, ef, (hi-lo)/2))
-        g = histogram_divide(num, den, confint_params=(alpha,))
+        g = histogram_divide(num, den, confint_params=(alpha,), use_effective=use_effective)
         rat_name = cutset + '_rat'
         d[rat_name] = g
         l.append(rat_name)
 
     return f, l, d, c, integ
 
-def test():
-    ps = plot_saver('plots/trackmover_tmp', log=False)
-
-    f,l,d = get_em('qcdht0250.root')
-    for name in l:
-        if name.endswith('_rat'):
-            g = d[name]
-            g.SetLineWidth(2)
-            g.SetMarkerStyle(20)
-            g.SetMarkerSize(0.8)
-            g.Draw('AP')
-            g.GetYaxis().SetRangeUser(0., 1.05)
-            ps.save(name)
-        
 def comp(ex, fn1='data.root', fn2='mc.root', is_data_mc=True):
     print ex
     if ex:
         ex = '_' + ex
-    ps = plot_saver('/publicweb/d/dquach/plots/TrackMover/V6p1_76x' + ex, size=(600,600), log=False)
+    ps = plot_saver(('trackmover_tmp' + ex), size=(600,600), log=False)
 
     print 'is_data_mc:', is_data_mc
     print 'fn1:', fn1
@@ -155,8 +128,9 @@ def comp(ex, fn1='data.root', fn2='mc.root', is_data_mc=True):
        print '%40s %.2f +- %.2f' % (cutset, eff_2 - eff_1, (eeff_2**2 + eeff_1**2)**0.5)
 
     for name in l:
+        print name
         data = d_1[name]
-        mc   = d_2  [name]
+        mc   = d_2[name]
         both = (data, mc)
 
         if name.endswith('_rat'):
@@ -200,7 +174,7 @@ def comp(ex, fn1='data.root', fn2='mc.root', is_data_mc=True):
                     exh.append(errxhigh)
                     eyl.append(errylow)
                     eyh.append(erryhigh)
-            h_ratio = ROOT.TGraphAsymmErrors(len(x), *[array('d', obj) for obj in (x, y, exl, exh, eyl, eyh)])
+            h_ratio = ROOT.TGraphAsymmErrors(len(x), *[to_array(obj) for obj in (x, y, exl, exh, eyl, eyh)])
             h_ratio.SetTitle()
             h_ratio.GetXaxis().SetTitle('%s' % data.GetXaxis().GetTitle())
             h_ratio.SetLineWidth(2)
@@ -243,5 +217,5 @@ def comp(ex, fn1='data.root', fn2='mc.root', is_data_mc=True):
 #comp('21_gt500_leadweight1_ttbup20pc', 'merge_gt500_leadweight1_ttbup20pc.root')
 #comp('21_gt500_leadweight1_ttbup100pc', 'merge_gt500_leadweight1_ttbup100pc.root')
 
-#comp('21', 'TrackMoverV6p1_76x_21/data.root', 'TrackMoverV6p1_76x_21/merge.root')
-comp('mctruth', 'mfv_neu_tau01000um_M0800.root', 'mfv_neu_tau01000um_M0800.root')
+comp('20', '20/JetHT2016.root', '20/background.root')
+#comp('mctruth', 'mfv_neu_tau01000um_M0800.root', 'mfv_neu_tau01000um_M0800.root')
