@@ -112,7 +112,7 @@ class PerSignal:
         nmasses = self.nmasses = len(masses)
         self.tau_paves = []
         self.tau_lines = []
-        y_tau = self.y_range[1] + 0.05 * self.y_span
+        y_tau = self.y_range[1] + 0.025 * self.y_span
         for i, tau in enumerate(taus):
             tau_name = PerSignal.tau_names[tau]
             ymin = y_tau
