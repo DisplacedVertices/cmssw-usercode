@@ -176,12 +176,17 @@ def clopper_pearson_poisson_means(x, y, alpha=1-0.6827):
         return None, pl, None
     return r/(1-r), pl, rh/(1 - rh)
 
+def propagate_ratio(x, y, ex, ey):
+    r = x/y
+    e = ((ex/x)**2 + (ey/y)**2)**0.5
+    return r, r-e, r+e
+
 def cmssw_setup():
     ROOT.gSystem.Load('libFWCoreFWLite')
     ROOT.FWLiteEnabler.enable()
     ROOT.gSystem.Load('libDataFormatsFWLite.so')
     ROOT.gSystem.Load('libDataFormatsPatCandidates.so')
-    
+
 def histogram_divide(h1, h2,
                      confint=clopper_pearson,
                      use_effective=False,
@@ -245,22 +250,28 @@ def histogram_divide(h1, h2,
 
     for i in xrange(n):
         sold, told = s, t = h1.v.y[i], h2.v.y[i]
+        es, et = h1.v.ey[i], h2.v.ey[i]
         if t == 0:
             continue
         if s == 0 and no_zeroes:
             continue
         if use_effective:
-            assert confint == clopper_pearson
-            effective_t = t**2 / h2.v.ey[i]**2
+            assert confint == clopper_pearson or confint == propagate_ratio
+            effective_t = t**2 / et**2
+            et = effective_t**0.5
             s = s/t * effective_t
+            es = es/t * effective_t
             t = effective_t
-            #print ibin,sold,told,s,t
+            #print i,sold,told,s,t,
 
         if s > t and force_le_1:
             print 'warning: point %i has s > t, in interval forcing rat = 1' % i
             s = t
-        r, a, b = confint(s,t, *confint_params)
-        #print ibin, s, t, a, b
+        if confint == propagate_ratio:
+            r,a,b = confint(s,t,es,et, *confint_params)
+        else:
+            r,a,b = confint(s,t, *confint_params)
+        #print x[i],exl[i],exh[i], s, t, a, b
 
         if b is None: # JMTBAD
             assert confint is not clopper_pearson
@@ -2019,6 +2030,7 @@ __all__ = [
     'wilson_score',
     'clopper_pearson',
     'clopper_pearson_poisson_means',
+    'propagate_ratio',
     'cmssw_setup',
     'compare_all_hists',
     'core_gaussian',
