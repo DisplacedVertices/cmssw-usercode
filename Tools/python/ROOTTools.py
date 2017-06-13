@@ -1575,6 +1575,7 @@ def ratios_plot(name,
                 x_title_size = 0.04,
                 y_title_size = 0.04,
                 y_label_size = 0.03,
+                y_range = None,
                 res_divide_opt = {},
                 res_line_width = 2,
                 res_x_title_size = 0.04,
@@ -1639,6 +1640,8 @@ def ratios_plot(name,
         h.GetXaxis().SetTitleOffset(x_title_offset)
         h.GetYaxis().SetTitleOffset(y_title_offset)
         h.GetYaxis().SetLabelSize(y_label_size)
+        if y_range:
+            h.GetYaxis().SetRangeUser(*y_range)
 
     if are_graphs:
         gg = ROOT.TMultiGraph()
@@ -1661,6 +1664,7 @@ def ratios_plot(name,
     if are_graphs:
         gg.Draw('a')
         zzz(gg)
+        gg.GetYaxis().SetTitle(hists[0].GetYaxis().GetTitle())
         #canvas.Update()
     else:
         for i,h in enumerate(sorted(hists, key=lambda h: h.v, reverse=True)):
@@ -1703,7 +1707,10 @@ def ratios_plot(name,
         r.SetMarkerSize(0)
         r.SetLineWidth(h.GetLineWidth())
         r.SetLineColor(h.GetLineColor())
-        x_range = h.GetXaxis().GetXmin(), h.GetXaxis().GetXmax()
+        if are_hists:
+            x_range = h.GetXaxis().GetXmin(), h.GetXaxis().GetXmax()
+        elif are_graphs:
+            x_range = gg.GetXaxis().GetXmin(), gg.GetXaxis().GetXmax()
         r.GetXaxis().SetLimits(*x_range)
         r.GetXaxis().SetTitleSize(res_x_title_size)
         r.GetXaxis().SetTitleOffset(res_x_title_offset)
