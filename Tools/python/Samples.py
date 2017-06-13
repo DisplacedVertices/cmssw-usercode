@@ -403,13 +403,11 @@ qcd_hip_samples = [
     MCSample('qcdht0700_hip1p0_mit', '/qcdht0700/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-de9e9f9c2951885a85d93dfb6395e7a7/USER', 25257, xsec=6.802e3),
     MCSample('qcdht1000_retest',     '/qcdht1000/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-7a425b8b8a432c226f185cf5f63c4c07/USER', 13172, xsec=1.206e3),
     MCSample('qcdht1000_hip1p0',     '/qcdht1000/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-0736ec5973f30890a5611f7bf83fdf93/USER', 13165, xsec=1.206e3),
-    MCSample('qcdht1000_hip1p0_mit', '/qcdht1000/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-1b1bd2d472ac43148cc5c94d020891ea/USER', 13166, xsec=1.206e3),
     MCSample('qcdht1500_retest',     '/qcdht1500/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-57b8172a07d94b03fac9c39db7e976db/USER', 13191, xsec=120),
     MCSample('qcdht1500_hip1p0',     '/qcdht1500/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-df145f431123addbda1013d14f17e10d/USER', 13191, xsec=120), # dbs was screwed up for this, may be OK now
-    MCSample('qcdht1500_hip1p0_mit', '/qcdht1500/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-79e713faf20ba5bd8efbca26edc5132a/USER', 13191, xsec=120),
 
-    MCSample('qcdht1000_bigpriv_hip1p0_mit', '/qcdht1000/None/USER', 511738 + 447284 + 435441, xsec=1.206e3),
-    MCSample('qcdht1500_bigpriv_hip1p0_mit', '/qcdht1500/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-88f7eac3ad6536b10bb56426728dc593/USER', 446881, xsec=120),
+    MCSample('qcdht1000_hip1p0_mit', '/qcdht1000/None/USER', 511738 + 447284 + 435441, xsec=1.206e3),
+    MCSample('qcdht1500_hip1p0_mit', '/qcdht1500/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-88f7eac3ad6536b10bb56426728dc593/USER', 446881, xsec=120),
     ]
 
 for s in qcd_hip_samples:
@@ -616,8 +614,7 @@ for x in (data_samples_2015 +
           data_samples +
           ttbar_samples + qcd_samples + qcd_samples_ext +
           mfv_signal_samples + mfv_ddbar_samples + mfv_hip_samples + qcd_hip_samples):
-    if x not in (qcdht1000_bigpriv_hip1p0_mit, qcdht1500_bigpriv_hip1p0_mit):
-        x.add_dataset('ntuplev15')
+    x.add_dataset('ntuplev15')
 
 for x in ttbar_samples + ttbar_samples_2015 + qcd_samples + qcd_samples_ext + qcd_samples_2015 + qcd_samples_ext_2015 + data_samples + data_samples_2015:
     if x.name != 'qcdht0700':

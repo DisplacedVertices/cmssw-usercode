@@ -273,7 +273,7 @@ def set_splitting(samples, dataset, jobtype, data_json=None):
             sample.set_curr_dataset(dataset)
             sample.split_by = 'files' if sample.condor else 'events'
             name = sample.name.replace('_2015', '')
-            name = name.replace('_hip1p0_mit', '').replace('_hip1p0', '').replace('_retest', '').replace('_bigpriv', '')
+            name = name.replace('_hip1p0_mit', '').replace('_hip1p0', '').replace('_retest', '')
             if not d.has_key(name):
                 if sample.is_signal:
                     sample.events_per = 500
@@ -289,7 +289,7 @@ def set_splitting(samples, dataset, jobtype, data_json=None):
             if sample.name != 'JetHT2015D' and not sample.name.startswith('mfv_'):
                 sample.events_per = int(2.5 * sample.events_per)
                 sample.files_per  = int(2.5 * sample.files_per)
-            if 'bigpriv' in sample.name:
+            if sample.name in ('qcdht1000_hip1p0_mit', 'qcdht1500_hip1p0_mit'):
                 sample.files_per *= 3
 
     else:
