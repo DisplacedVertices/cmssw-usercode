@@ -1195,7 +1195,7 @@ class draw_hist_register:
             binning = '(%s)' % binning
         return draw_str + '>>' + name + binning
 
-    def draw(self, draw_str, cut='', binning='', get_n=False, tree=None, nice_name=None):
+    def draw(self, draw_str, cut='', binning='', get_n=False, tree=None, nice_name=None, goff=False):
         if self.use_weight:
             if cut:
                 cut = 'weight*(%s)' % cut
@@ -1203,6 +1203,8 @@ class draw_hist_register:
                 cut = 'weight'
         varexp = self.name_for_draw(draw_str, binning)
         option = 'e' if self.use_weight else ''
+        if goff:
+            option += ' goff'
         n = (tree if tree else self.tree).Draw(varexp, cut, option)
         try:
             h = getattr(ROOT, self.names[-1])
