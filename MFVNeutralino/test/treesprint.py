@@ -40,12 +40,19 @@ if not fns:
 def getit(fn, ntk):
     f = ROOT.TFile(fn)
     t = f.Get('%s/t' % ntk)
-    n1v = t.Draw('dist0', 'nvtx==1', 'goff')
+    hr = draw_hist_register(t, True)
+    def c(cut):
+        h,n = hr.draw('weight', cut, binning='1,0,1', get_n=True, goff=True)
+        return n, h.Integral(0,h.GetNbinsX()+2)
+    n1v = c('nvtx==1')
     if ntk == 'mfvMiniTreeNtk3or4':
-        n2v = t.Draw('dist0', 'nvtx>=2 && ntk0==4 && ntk1==3', 'goff')
+        n2v = c('nvtx>=2 && ntk0==4 && ntk1==3')
     else:
-        n2v = t.Draw('dist0', 'nvtx>=2', 'goff')
+        n2v = c('nvtx>=2')
     return n1v, n2v
+
+fmt = '%40s %9s %9s %9s %9s   %9s +/- %9s  %9s +/- %9s  %9s +/- %9s  %9s +/- %9s'
+print fmt % ('sample', 'int.lumi', 'xsec', 'nevents', 'weight', 'rn1v', 'unc', 'wn1v', 'unc', 'rn2v', 'unc', 'wn2v', 'unc')
 
 for ntk in ['mfvMiniTree', 'mfvMiniTreeNtk3', 'mfvMiniTreeNtk3or4', 'mfvMiniTreeNtk4']:
     print ntk
@@ -56,28 +63,48 @@ for ntk in ['mfvMiniTree', 'mfvMiniTreeNtk3', 'mfvMiniTreeNtk3or4', 'mfvMiniTree
             summaried = False
         if not inc and summaried == False:
             summaried = True
-            print '%36s %d %9s %8s %8s raw n1v = %6d %7s, weighted n1v = %9.2f +/- %6.2f, raw n2v = %6d %6s, weighted n2v = %7.2f +/- %5.2f' % ('total background', int_lumi, '', '', '', raw_n1v, '', sum_n1v, var_n1v**0.5, raw_n2v, '', sum_n2v, var_n2v**0.5)
+            print fmt % ('total background', '%.0f' % int_lumi, '', '', '',
+                         raw_n1v, '-',
+                         '%9.2f' % sum_n1v, '%9.2f' % (var_n1v**0.5),
+                         raw_n2v, '-',
+                         '%9.2f' % sum_n2v, '%9.2f' % (var_n2v**0.5))
             print
         if fn is None:
             break
 
         x = getit(fn, ntk)
         if x:
-            n1v, n2v = x
+            (r1v, n1v), (r2v, n2v) = x
 
             sname = os.path.basename(fn).replace('.root', '')
             if hasattr(Samples, sname):
                 sample = getattr(Samples, sname)
                 w = int_lumi * sample.partial_weight(fn)
-                print '%36s %d %9.3f %8d %8.5f raw n1v = %6d +/- %3d, weighted n1v = %9.2f +/- %6.2f, raw n2v = %6d +/- %2d, weighted n2v = %7.2f +/- %5.2f' % (sample.name, int_lumi, sample.xsec if sample.is_mc else -1, sample.nevents_orig, w, n1v, n1v**0.5, w*n1v, w*n1v**0.5, n2v, n2v**0.5, w*n2v, w*n2v**0.5)
+                if sample.is_signal:
+                    xsec = '%9.3f' % sample.xsec
+                else:
+                    xsec = '%9.0f' % (sample.xsec if sample.is_mc else -1)
+                print fmt % (sample.name,
+                             '%.0f' % int_lumi,
+                             xsec,
+                             '%.0f' % sample.nevents(fn),
+                             '%9.3g' % w,
+                             r1v,
+                             '%9.2f' % (r1v**0.5),
+                             '%9.2f' % (w*n1v),
+                             '%9.2f' % (w*n1v**0.5),
+                             r2v,
+                             '%9.2f' % (n2v**0.5),
+                             '%9.2f' % (w*n2v),
+                             '%9.2f' % (w*n2v**0.5))
             else:
                 print '%36s  n1v = %9.2f  n2v = %9.2f' % (sname, n1v, n2v)
 
             if inc:
-                raw_n1v += n1v
+                raw_n1v += r1v
                 sum_n1v += n1v * w
                 var_n1v += n1v * w**2
-                raw_n2v += n2v
+                raw_n2v += r2v
                 sum_n2v += n2v * w
                 var_n2v += n2v * w**2
     print
