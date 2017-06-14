@@ -250,7 +250,7 @@ D = partial(data_mc_comparison,
             simulation = False,
             )
 
-D('3t1v_presel_njets',
+D('0v_presel_njets',
   file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV12_2', '%(name)s.root'),
   histogram_path = 'evtHst0VNoNjets/h_njets',
   x_title = 'Number of jets',
@@ -259,7 +259,7 @@ D('3t1v_presel_njets',
   cut_line = ((4, 0, 4, 2.4e7), 2, 5, 1),
   )
 
-D('3t1v_presel_ht40',
+D('0v_presel_ht40',
   file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV12_2', '%(name)s.root'),
   histogram_path = 'evtHst0VNoHt/h_jet_ht_40',
   rebin = 4,
@@ -270,31 +270,32 @@ D('3t1v_presel_ht40',
   cut_line = ((1000, 0, 1000, 2.4e7), 2, 5, 1),
   )
 
-D('3t1v_presel_npv',
+D('0v_presel_npv',
   histogram_path = 'mfvEventHistosPreSel/h_npv',
   x_title = 'Number of primary vertices',
   y_title = 'Events',
+  y_range = (1, 1e6),
   )
 
-D('3t1v_presel_nseedtracks',
+D('0v_presel_nseedtracks',
   histogram_path = 'mfvEventHistosPreSel/h_n_vertex_seed_tracks',
   x_title = 'Number of seed tracks',
   y_title = 'Events',
   )
 
-D('3t1v_presel_seedtrack_pt',
+D('0v_presel_seedtrack_pt',
   histogram_path = 'mfvEventHistosPreSel/h_vertex_seed_track_pt',
   x_title = 'Seed track p_{T} (GeV)',
   y_title = 'Tracks/GeV',
   )
 
-D('3t1v_presel_seedtrack_npxlayers',
+D('0v_presel_seedtrack_npxlayers',
   histogram_path = 'mfvEventHistosPreSel/h_vertex_seed_track_npxlayers',
   x_title = 'Seed track number of pixel layers',
   y_title = 'Tracks',
   )
 
-D('3t1v_presel_seedtrack_nstlayers',
+D('0v_presel_seedtrack_nstlayers',
   histogram_path = 'mfvEventHistosPreSel/h_vertex_seed_track_nstlayers',
   x_title = 'Seed track number of strip layers',
   y_title = 'Tracks',
