@@ -177,8 +177,12 @@ def clopper_pearson_poisson_means(x, y, alpha=1-0.6827):
     return r/(1-r), pl, rh/(1 - rh)
 
 def propagate_ratio(x, y, ex, ey):
+    #print x, y, ex, ey
     r = x/y
-    e = ((ex/x)**2 + (ey/y)**2)**0.5
+    if x == 0.:
+        e = ex/y
+    else:
+        e = r*((ex/x)**2 + (ey/y)**2)**0.5
     return r, r-e, r+e
 
 def cmssw_setup():
