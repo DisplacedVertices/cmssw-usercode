@@ -1714,14 +1714,12 @@ def ratios_plot(name,
                 cmd('sames ' + dc)
 
     if are_hists:
-        print 'hi'
         canvas.Update()
         if statbox_size is None:
             for h in hists:
                 h.SetStats(0)
         else:
             for i,h in enumerate(hists):
-                print i,h
                 differentiate_stat_box(h, i, new_size=statbox_size)
 
     if legend is not None:
