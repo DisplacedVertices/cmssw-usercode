@@ -18,6 +18,7 @@ def get_em(fn, alpha=1-0.6827):
         return obj.GetName() in ('h_norm', 'h_weight', 'h_npu') #or name in ('nlep')
 
     def rebin(name, obj):
+        return obj
         if 'jetdravg' == name or \
            'jetdrmax' == name or \
            'npv' == name or \
@@ -108,7 +109,7 @@ def comp(ex, fn1='data.root', fn2='mc.root', is_data_mc=True):
     print ex
     if ex:
         ex = '_' + ex
-    ps = plot_saver(('trackmover_tmp' + ex), size=(600,600), log=False)
+    ps = plot_saver(plot_dir('trackmover_tmp' + ex), size=(600,600), log=False)
 
     print 'is_data_mc:', is_data_mc
     print 'fn1:', fn1
@@ -129,93 +130,46 @@ def comp(ex, fn1='data.root', fn2='mc.root', is_data_mc=True):
 
     for name in l:
         print name
+
         data = d_1[name]
         mc   = d_2[name]
         both = (data, mc)
 
-        if name.endswith('_rat'):
+        if name.endswith('_rat') or (not name.endswith('_num') and not name.endswith('_den')):
             data.SetLineWidth(2)
             data.SetMarkerStyle(20)
             data.SetMarkerSize(0.8)
-            data.Draw('AP')
+            data.SetLineColor(ROOT.kBlack)
 
             mc.SetFillStyle(3001)
+            mc.SetMarkerStyle(24)
+            mc.SetMarkerSize(0.8)
+            mc.SetMarkerColor(2)
+            mc.SetLineColor(2)
             mc.SetFillColor(2)
-            mc.Draw('PE2 same')
 
-            for g in both:
-                g.GetYaxis().SetRangeUser(0., 1.05)
-
-            ps.save(name)
-
-            x = []
-            y = []
-            exl = []
-            exh = []
-            eyl = []
-            eyh = []
-            for i in xrange(0, data.GetN()):
-                xdat = ROOT.Double(0)
-                ydat = ROOT.Double(0)
-                xmc  = ROOT.Double(0)
-                ymc  = ROOT.Double(0)
-                data.GetPoint(i, xdat, ydat)
-                mc.GetPoint(i, xmc, ymc)
-                if ymc == 0 or xmc == 0 or xdat == 0 or ydat == 0:
-                    continue
-                else:
-                    y.append(ydat / ymc)
-                    x.append(xdat)
-                    errxlow = ((xdat / xmc)**2 * ((data.GetErrorXlow(i)/xdat)**2 + (mc.GetErrorXlow(i)/xmc)**2))**0.5
-                    errxhigh = ((xdat / xmc)**2 * ((data.GetErrorXhigh(i)/xdat)**2 + (mc.GetErrorXhigh(i)/xmc)**2))**0.5
-                    errylow = ((ydat / ymc)**2 * ((data.GetErrorYlow(i)/ydat)**2 + (mc.GetErrorYlow(i)/ymc)**2))**0.5
-                    erryhigh = ((ydat / ymc)**2 * ((data.GetErrorYhigh(i)/ydat)**2 + (mc.GetErrorYhigh(i)/ymc)**2))**0.5
-                    exl.append(errxlow)
-                    exh.append(errxhigh)
-                    eyl.append(errylow)
-                    eyh.append(erryhigh)
-            h_ratio = ROOT.TGraphAsymmErrors(len(x), *[to_array(obj) for obj in (x, y, exl, exh, eyl, eyh)])
-            h_ratio.SetTitle()
-            h_ratio.GetXaxis().SetTitle('%s' % data.GetXaxis().GetTitle())
-            h_ratio.SetLineWidth(2)
-            h_ratio.SetLineColor(ROOT.kGreen+2)
-            h_ratio.Draw('AP')
-            h_ratio.GetYaxis().SetRangeUser(0, 1.2)
-            ps.save(name + '_hratio')
-
-        elif not name.endswith('_num') and not name.endswith('_den'):
-            mc.SetLineColor(ROOT.kRed)
-            mc.Scale(scale)
-
-            if data.GetMaximum() > mc.GetMaximum():
-                data.Draw()
-                mc.Draw('sames')
+            if name.endswith('_rat'):
+                for g in both:
+                    g.GetYaxis().SetTitle('efficiency')
+                objs = [(mc, 'PE2'), (data, 'P')]
+                y_range = (0, 1.05)
+                statbox_size = None
             else:
-                mc.Draw()
-                data.Draw('sames')
+                objs = [mc, data]
+                y_range = None
+                statbox_size = (0.2,0.2)
 
-            ps.c.Update()
-            for i,h in enumerate((data, mc)):
-                h.SetLineWidth(2)
-                differentiate_stat_box(h, i, new_size=(0.2,0.2))
+            ratios_plot(name, 
+                        objs,
+                        plot_saver=ps,
+                        y_range=y_range,
+                        res_y_range=0.05,
+                        res_y_title='data/MC',
+                        res_fit=False,
+                        res_divide_opt={'confint': propagate_ratio, 'force_le_1': False, 'allow_subset': True}, #name in ('all_jetsumntracks_rat', )},
+                        statbox_size=statbox_size,
+                        )
 
-            ps.save(name)
-
-            ratio = data.Clone(data.GetName() + '_ratio')
-            ratio.Divide(mc)
-            ratio.SetLineColor(ROOT.kGreen+2)
-            ratio.SetLineWidth(2)
-            #ratio.Scale(max(data.GetMaximum(), mc.GetMaximum())/2.)
-            ratio.Draw()
-            ratio.GetYaxis().SetRangeUser(0, 3)
-            #ratio.Fit('pol1', 'Q')
-            ps.save(name + '_ratio')
-
-#comp('32_all', 'merge_all.root')
-#comp('32_gt500', 'merge_gt500.root')
-#comp('21_gt250_leadweight1', 'merge_gt250_leadweight1.root')
-#comp('21_gt500_leadweight1_ttbup20pc', 'merge_gt500_leadweight1_ttbup20pc.root')
-#comp('21_gt500_leadweight1_ttbup100pc', 'merge_gt500_leadweight1_ttbup100pc.root')
 
 comp('20', '20/JetHT2016.root', '20/background.root')
 #comp('mctruth', 'mfv_neu_tau01000um_M0800.root', 'mfv_neu_tau01000um_M0800.root')
