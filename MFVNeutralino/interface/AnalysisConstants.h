@@ -14,7 +14,7 @@ namespace mfv {
     int_lumi_2016 = 35916.;
 
     const double
-    int_lumi = 38529.;
+    int_lumi_2015p6 = 38529.;
 
     const char*
     int_lumi_nice_2015 = "  2.6 fb^{-1} (13 TeV)";
