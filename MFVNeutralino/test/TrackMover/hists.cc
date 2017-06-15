@@ -74,12 +74,14 @@ int main(int argc, char** argv) {
     nd.book(k_jetsumntracks, "jetsumntracks", ";#Sigma jet # tracks;events/5", 200, 0, 1000);
   }
 
+  TH1D* h_vtxdbv[num_numdens] = {0};
   TH1D* h_vtxntracks[num_numdens] = {0};
   TH1D* h_vtxbs2derr[num_numdens] = {0};
 
   for (int i = 0; i < num_numdens; ++i) {
-    h_vtxntracks[i] = new TH1D(TString::Format("h_%i_vtxntracks",      i), ";# tracks in largest vertex;events/1", 40, 0, 40);
-    h_vtxbs2derr[i] = new TH1D(TString::Format("h_%i_vtxbs2derr",      i), ";#sigma(d_{BV}) of largest vertex (cm);events/2 #mum", 50, 0, 0.01);
+    h_vtxdbv[i] = new TH1D(TString::Format("h_%i_vtxdbv",      i), ";d_{BV} of largest vertex (cm);events/50 #mum", 400, 0, 2);
+    h_vtxntracks[i] = new TH1D(TString::Format("h_%i_vtxntracks",      i), ";# tracks in largest vertex;events/1", 60, 0, 60);
+    h_vtxbs2derr[i] = new TH1D(TString::Format("h_%i_vtxbs2derr",      i), ";#sigma(d_{BV}) of largest vertex (cm);events/1 #mum", 500, 0, 0.05);
   }
 
   double den = 0;
@@ -231,6 +233,8 @@ int main(int argc, char** argv) {
     for (int i = 0; i < num_numdens; ++i) {
       int ivtx = first_vtx_to_pass[i];
       if (ivtx != -1) {
+        h_vtxdbv[i]->Fill(mag(nt.p_vtxs_x->at(ivtx),
+                              nt.p_vtxs_y->at(ivtx)));
         h_vtxntracks[i]->Fill(nt.p_vtxs_ntracks->at(ivtx), w);
         h_vtxbs2derr[i]->Fill(nt.p_vtxs_bs2derr->at(ivtx), w);
       }
