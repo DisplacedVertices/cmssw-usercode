@@ -1746,6 +1746,16 @@ def ratios_plot(name,
     ratios = []
     old_opt_fit = None
     fit_tpt = None
+
+    if type(res_y_range) == float: # dynamic, the number is the fraction to add under/over min/max
+        min_r, max_r = 1e99, -1e99
+        for i,h in enumerate(hists):
+            v1, v2 = histogram_divide_values(h, h0, True)
+            rs = [v1.y[i] / v2.y[i] for i in xrange(v2.n) if v2.y[i] != 0.]
+            min_r = min(min_r, min(rs))
+            max_r = max(max_r, max(rs))
+        res_y_range = min_r-res_y_range, max_r+res_y_range
+
     for i,h in enumerate(hists):
         r = histogram_divide(h, h0, **res_divide_opt)
         ratios.append(r)
