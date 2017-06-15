@@ -191,74 +191,98 @@ def cmssw_setup():
     ROOT.gSystem.Load('libDataFormatsFWLite.so')
     ROOT.gSystem.Load('libDataFormatsPatCandidates.so')
 
+class HorGValues:
+    def __init__(self, z):
+        self.x, self.exl, self.exh, self.y, self.eyl, self.eyh = [], [], [], [], [], []
+
+        if z.Class().GetName().startswith('TH1'):
+            self.n = z.GetNbinsX()
+            xax = z.GetXaxis()
+            for ibin in xrange(1, self.n+1):
+                self.x.append(xax.GetBinCenter(ibin))
+                _xw = xax.GetBinWidth(ibin)/2
+                self.exl.append(_xw)
+                self.exh.append(_xw)
+                self.y.append(z.GetBinContent(ibin))
+                ey = z.GetBinError(ibin)
+                self.eyl.append(ey)
+                self.eyh.append(ey)
+
+        elif z.Class().GetName().startswith('TGraph'):
+            self.n = z.GetN()
+            for i in xrange(self.n):
+                x,y = ROOT.Double(), ROOT.Double()
+                z.GetPoint(i,x,y)
+                self.x.append(float(x))
+                self.y.append(float(y))
+                self.exl.append(z.GetErrorXlow(i))
+                self.exh.append(z.GetErrorXhigh(i))
+                self.eyl.append(z.GetErrorYlow(i))
+                self.eyh.append(z.GetErrorYhigh(i))
+
+        else:
+            assert ValueError('only works with TH1- or TGraph-descended objects')
+
+        self.ey = [(l+h)/2 for l,h in zip(self.eyl, self.eyh)]
+
+    @classmethod
+    def check_compatible(_, a, b):
+        if a.n != b.n or \
+                a.x != b.x or \
+                a.exl != b.exl or \
+                a.exh != b.exh: # why did I not require equal abscissae before?
+            raise ValueError('incompatible objects to divide')
+
+    def filter(self, keep):
+        keep = [i for i,x in enumerate(self.x) if x in keep]
+        def _filter(l):
+            return [z for i,z in enumerate(l) if i in keep]
+        self.x   = _filter(self.x)
+        self.exl = _filter(self.exl)
+        self.exh = _filter(self.exh)
+        self.y   = _filter(self.y)
+        self.eyl = _filter(self.eyl)
+        self.eyh = _filter(self.eyh)
+        self.n = len(self.x)
+
+    @classmethod
+    def mutualize(_, a, b):
+        keep = sorted(set(a.x) & set(b.x))
+        a.filter(keep)
+        b.filter(keep)
+
+def histogram_divide_values(h1, h2, allow_subset):
+    v1 = HorGValues(h1)
+    v2 = HorGValues(h2)
+    if allow_subset:
+        HorGValues.mutualize(v1, v2)
+    else:
+        HorGValues.check_compatible(v1, v2)
+    return v1, v2
+
 def histogram_divide(h1, h2,
                      confint=clopper_pearson,
                      use_effective=False,
                      force_le_1=True,
                      no_zeroes=False,
-                     confint_params=()):
+                     confint_params=(),
+                     allow_subset=False):
     '''TGraphAsymmErrors(TH1,TH1) exists, but this is kept for
     flexibility (different confidence intervals, using effective
     n=(content/error)**2, etc. Works with TGraph* inputs too.'''
 
-    class vals:
-        def __init__(self, z):
-            self.x, self.exl, self.exh, self.y, self.eyl, self.eyh = [], [], [], [], [], []
-
-            if z.Class().GetName().startswith('TH1'):
-                self.n = z.GetNbinsX()
-                xax = z.GetXaxis()
-                for ibin in xrange(1, self.n+1):
-                    self.x.append(xax.GetBinCenter(ibin))
-                    _xw = xax.GetBinWidth(ibin)/2
-                    self.exl.append(_xw)
-                    self.exh.append(_xw)
-                    self.y.append(z.GetBinContent(ibin))
-                    ey = z.GetBinError(ibin)
-                    self.eyl.append(ey)
-                    self.eyh.append(ey)
-
-            elif z.Class().GetName().startswith('TGraph'):
-                self.n = z.GetN()
-                for i in xrange(self.n):
-                    x,y = ROOT.Double(), ROOT.Double()
-                    z.GetPoint(i,x,y)
-                    self.x.append(float(x))
-                    self.y.append(float(y))
-                    self.exl.append(z.GetErrorXlow(i))
-                    self.exh.append(z.GetErrorXhigh(i))
-                    self.eyl.append(z.GetErrorYlow(i))
-                    self.eyh.append(z.GetErrorYhigh(i))
-
-            else:
-                assert ValueError('only works with TH1- or TGraph-descended objects')
-
-            self.ey = [(l+h)/2 for l,h in zip(self.eyl, self.eyh)]
-
-        def check_compatible(self, other):
-            if self.n != other.n or \
-                    self.x != other.x or \
-                    self.exl != other.exl or \
-                    self.exh != other.exh: # why did I not require equal abscissae before?
-                raise ValueError('incompatible objects to divide')
-
-    h1.v = vals(h1)
-    h2.v = vals(h2)
-    h1.v.check_compatible(h2.v)
-
-    n = h2.v.n
-    x = h2.v.x[:]
-    exl = h2.v.exl[:]
-    exh = h2.v.exh[:]
-    y, eyl, eyh = [], [], []
+    v1, v2 = histogram_divide_values(h1, h2, allow_subset)
+    n = v2.n
+    x, exl, exh, y, eyl, eyh = [], [], [], [], [], []
 
     for i in xrange(n):
-        sold, told = s, t = h1.v.y[i], h2.v.y[i]
-        es, et = h1.v.ey[i], h2.v.ey[i]
-        if t == 0:
+        #print i,
+        sold, told = s, t = v1.y[i], v2.y[i]
+        es, et = v1.ey[i], v2.ey[i]
+
+        if t == 0 or (s == 0 and no_zeroes):
             continue
-        if s == 0 and no_zeroes:
-            continue
+
         if use_effective:
             assert confint == clopper_pearson or confint == propagate_ratio
             effective_t = t**2 / et**2
@@ -266,11 +290,12 @@ def histogram_divide(h1, h2,
             s = s/t * effective_t
             es = es/t * effective_t
             t = effective_t
-            #print i,sold,told,s,t,
+            #print sold,told,s,t,
 
         if s > t and force_le_1:
             print 'warning: point %i has s > t, in interval forcing rat = 1' % i
             s = t
+
         if confint == propagate_ratio:
             r,a,b = confint(s,t,es,et, *confint_params)
         else:
@@ -281,6 +306,9 @@ def histogram_divide(h1, h2,
             assert confint is not clopper_pearson
             b = 1e99
 
+        x.append(v2.x[i])
+        exl.append(v2.exl[i])
+        exh.append(v2.exh[i])
         y.append(r)
         eyl.append(r - a)
         eyh.append(b - r)
