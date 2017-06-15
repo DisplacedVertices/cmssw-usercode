@@ -1624,6 +1624,7 @@ def ratios_plot(name,
                 res_fit = True,
                 legend = None,
                 draw_normalized = False,
+                statbox_size = None,
                 ):
     '''With n hists/graphs, draw them and the n-1 ratios to hists[0].
     hists can be a list of just the hists/graphs, or it can be a list
@@ -1711,6 +1712,17 @@ def ratios_plot(name,
                     cmd()
             else:
                 cmd('sames ' + dc)
+
+    if are_hists:
+        print 'hi'
+        canvas.Update()
+        if statbox_size is None:
+            for h in hists:
+                h.SetStats(0)
+        else:
+            for i,h in enumerate(hists):
+                print i,h
+                differentiate_stat_box(h, i, new_size=statbox_size)
 
     if legend is not None:
         legend = ROOT.TLegend(*legend)
