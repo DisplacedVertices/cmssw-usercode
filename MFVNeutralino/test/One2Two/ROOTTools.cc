@@ -128,20 +128,12 @@ namespace jmt {
   }
   
   void set_root_style() {
-    gStyle->SetPalette(1);
+    TH1::SetDefaultSumw2();
     gStyle->SetOptStat(1222222);
     gStyle->SetOptFit(2222);
-    gStyle->SetStatX(0.85);
-    gStyle->SetStatY(0.85);
-    gStyle->SetStatW(0.2);
-    gStyle->SetStatH(0.05); 
     gStyle->SetPadTickX(1);
     gStyle->SetPadTickY(1);
-    gStyle->SetGridStyle(3);
-    gROOT->ProcessLine("gErrorIgnoreLevel = kWarning;");
-    double palinfo[4][5] = {{0,0,0,1,1},{0,1,1,1,0},{1,1,0,0,0},{0,0.25,0.5,0.75,1}};
-    TColor::CreateGradientColorTable(5, palinfo[3], palinfo[0], palinfo[1], palinfo[2], 500);
-    gStyle->SetNumberContours(500);
+    //gROOT->ProcessLine("gErrorIgnoreLevel = kWarning;"); // this line takes an entire second to run!
   }
 
   TH1D* shift_hist(const TH1D* h, const int shift) {
