@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
     nd.book(k_pvrho, "pvrho", ";PV #rho (cm);events/1 #mum", 200, 0, 0.02);
     nd.book(k_pvntracks, "pvntracks", ";PV # tracks;events/2", 200, 0, 400);
     nd.book(k_pvsumpt2, "pvsumpt2", ";PV #Sigma p_{T}^{2} (GeV^{2});events/200 GeV^{2}", 200, 0, 40000);
-    nd.book(k_ht, "ht", ";#Sigma H_{T} (GeV);events/50 GeV", 50, 0, 2500);
+    nd.book(k_ht, "ht", ";H_{T} (GeV);events/50 GeV", 50, 0, 2500);
     nd.book(k_met, "met", ";MET (GeV);events/20 GeV", 25, 0, 500);
     nd.book(k_nlep, "nlep", ";# leptons;events", 5, 0, 5);
     nd.book(k_ntracks, "ntracks", ";# tracks;events/10", 200, 0, 2000);
