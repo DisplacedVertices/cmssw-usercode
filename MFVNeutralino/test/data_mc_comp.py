@@ -19,7 +19,6 @@ int_lumi_nice = ac.int_lumi_nice_2016
 qcd_samples = Samples.qcd_samples_sum
 ttbar_samples = Samples.ttbar_samples
 signal_sample = Samples.mfv_neu_tau01000um_M0800
-data_samples = Samples.data_samples
 
 if year == '2015':
     int_lumi = ac.int_lumi_2015 * ac.scale_factor_2015
@@ -27,7 +26,19 @@ if year == '2015':
     qcd_samples = Samples.qcd_samples_sum_2015
     ttbar_samples = Samples.ttbar_samples_2015
     signal_sample = Samples.mfv_neu_tau01000um_M0800_2015
+
+if year == '2015':
     data_samples = Samples.data_samples_2015
+elif year == '2016':
+    data_samples = Samples.data_samples
+elif year == '2016BCD':
+    data_samples = [Samples.JetHT2016B3, Samples.JetHT2016C, Samples.JetHT2016D]
+elif year == '2016EF':
+    data_samples = [Samples.JetHT2016E, Samples.JetHT2016F]
+elif year == '2016G':
+    data_samples = [Samples.JetHT2016G]
+elif year == '2016H':
+    data_samples = [Samples.JetHT2016H2, Samples.JetHT2016H3]
 
 background_samples = ttbar_samples + qcd_samples
 for s in qcd_samples:
@@ -203,29 +214,23 @@ if year == '2016':
       )
 
 if year == '2015':
-    int_lumi = 268.3 * (247778.0 / 273198.338214)
-    int_lumi_nice = '0.27 fb^{-1} (13 TeV)'
-    data_samples = Samples.data_samples_2015
+    int_lumi = 261.3 * (247778.0 / 266070.538021)
+    int_lumi_nice = '0.26 fb^{-1} (13 TeV)'
 elif year == '2016':
-    int_lumi = 3586.7 * (3021752.0 / 3461692.4549)
+    int_lumi = 3591.6 * (3021752.0 / 3466421.6999)
     int_lumi_nice = '3.59 fb^{-1} (13 TeV)'
-    data_samples = Samples.data_samples
 elif year == '2016BCD':
-    int_lumi = 1259. * (1069513.0 / 1215119.97856)
+    int_lumi = 1256. * (1069513.0 / 1212224.52201)
     int_lumi_nice = '1.26 fb^{-1} (13 TeV)'
-    data_samples = [Samples.JetHT2016B3, Samples.JetHT2016C, Samples.JetHT2016D]
 elif year == '2016EF':
-    int_lumi = 711. * (600771.0 / 686219.450021)
+    int_lumi = 714. * (600771.0 / 689114.910163)
     int_lumi_nice = '0.71 fb^{-1} (13 TeV)'
-    data_samples = [Samples.JetHT2016E, Samples.JetHT2016F]
 elif year == '2016G':
-    int_lumi = 763. * (643368.0 / 736407.109157)
+    int_lumi = 758. * (643368.0 / 731581.373748)
     int_lumi_nice = '0.76 fb^{-1} (13 TeV)'
-    data_samples = [Samples.JetHT2016G]
 elif year == '2016H':
-    int_lumi = 855. * (708100.0 / 825200.622583)
-    int_lumi_nice = '0.86 fb^{-1} (13 TeV)'
-    data_samples = [Samples.JetHT2016H2, Samples.JetHT2016H3]
+    int_lumi = 865. * (708100.0 / 834852.091914)
+    int_lumi_nice = '0.87 fb^{-1} (13 TeV)'
 
 D = partial(data_mc_comparison,
             background_samples = background_samples,
@@ -440,11 +445,21 @@ D('10pc_5t1v_onevtx_dbv_unzoom',
 if year == '2015':
     int_lumi = 2613. * (2482166.0 / 2660705.41664)
     int_lumi_nice = '2.6 fb^{-1} (13 TeV)'
-    data_samples = Samples.data_samples_2015
 elif year == '2016':
     int_lumi = 35916. * (30206710.0 / 34709587.7891)
     int_lumi_nice = '35.9 fb^{-1} (13 TeV)'
-    data_samples = Samples.data_samples
+elif year == '2016BCD':
+    int_lumi = 12560. * (10714065.0 / 12138111.5891)
+    int_lumi_nice = '12.6 fb^{-1} (13 TeV)'
+elif year == '2016EF':
+    int_lumi = 7140. * (5994415.0 / 6900168.65957)
+    int_lumi_nice = '7.1 fb^{-1} (13 TeV)'
+elif year == '2016G':
+    int_lumi = 7580. * (6365977.0 / 7325389.10296)
+    int_lumi_nice = '7.6 fb^{-1} (13 TeV)'
+elif year == '2016H':
+    int_lumi = 8650. * (7132253.0 / 8359447.89656)
+    int_lumi_nice = '8.7 fb^{-1} (13 TeV)'
 
 E = partial(data_mc_comparison,
             background_samples = background_samples,
