@@ -104,11 +104,11 @@ if is_mc and not ntkseeds:
     fns = [fn1, fn2, fn3]
     ntk = ['3-track', '4-track', '5-track']
 
-    n2v = [939., 7., 1.]
+    n2v = [946., 8., 1.]
     if year == '2015':
-        n2v = [45., 1., 1.]
+        n2v = [44., 1., 1.]
     if year == '2015p6':
-        n2v = [984., 7., 1.]
+        n2v = [991., 8., 1.]
 
     for i in range(3):
         h0 = ROOT.TFile(fns[i][0]).Get('h_c1v_dvv')
