@@ -1659,7 +1659,7 @@ namespace mfv {
         const test_stat_t t_obs_limit_ = calc_test_stat(mu_sig_limit);
 
         if (print_toys) {
-          printf("sig_limit: %f  mu_sig_limit: %f data: [ ", sig_limit_scan, mu_sig_limit);
+          printf("\nsig_limit: %f  mu_sig_limit: %f data: [ ", sig_limit_scan, mu_sig_limit);
           for (int i = 1; i <= fit::n_bins; ++i)
             printf("%i ", int(fit::h_data->GetBinContent(i)));
           printf("] ");
@@ -1680,12 +1680,13 @@ namespace mfv {
 
         for (int i_toy_limit = 0; i_toy_limit < n_toy_limit; ++i_toy_limit) {
           const double mu_sig_limit_toy = mu_sig_limit * (sig_eff_uncert > 0 ? jmt::lognormal(rand, 0, sig_eff_uncert) : 1);
-          if (mu_sig_limit_toy >= n_data) {
-            --i_toy_limit;
-            continue;
-          }
+          //if (mu_sig_limit_toy >= n_data) {
+          //  printf("burned: %f >= %i\n", mu_sig_limit_toy, n_data);
+          //  --i_toy_limit;
+          //  continue;
+          //}
           const int n_sig_limit = rand->Poisson(mu_sig_limit_toy);
-          const int n_bkg_limit = rand->Poisson(n_data - mu_sig_limit_toy);
+          const int n_bkg_limit = mu_sig_limit_toy >= n_data ? 0 : rand->Poisson(n_data - mu_sig_limit_toy);
 
           make_toy_data(-1, i_toy_limit, -1, n_sig_limit, n_bkg_limit, h_bkg_obs_0);
       
