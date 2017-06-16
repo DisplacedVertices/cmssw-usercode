@@ -113,12 +113,12 @@ namespace mfv {
       }
     }
 
+    printf("\nRun2Templater values:");
     for (Template* t : templates) {
       Template::finalize_template_in_place(t->h);
       for (int ibin = 0; ibin <= t->h->GetNbinsX()+1; ++ibin)
-        printf("ZZZ template ibin %i = %f\n", ibin, t->h->GetBinContent(ibin));
+        printf(" %.4f", t->h->GetBinContent(ibin));
     }
-
     printf("\n");
   }
 

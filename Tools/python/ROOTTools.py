@@ -1609,6 +1609,7 @@ def ratios_plot(name,
                 x_title_size = 0.04,
                 y_title_size = 0.04,
                 y_label_size = 0.03,
+                x_range = None,
                 y_range = None,
                 res_divide_opt = {},
                 res_line_width = 2,
@@ -1675,6 +1676,8 @@ def ratios_plot(name,
         h.GetXaxis().SetTitleOffset(x_title_offset)
         h.GetYaxis().SetTitleOffset(y_title_offset)
         h.GetYaxis().SetLabelSize(y_label_size)
+        if x_range:
+            h.GetXaxis().SetRangeUser(*x_range)
         if y_range:
             h.GetYaxis().SetRangeUser(*y_range)
 

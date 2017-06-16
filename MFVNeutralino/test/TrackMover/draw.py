@@ -129,8 +129,6 @@ def comp(ex, fn1='data.root', fn2='mc.root', is_data_mc=True):
        print '%40s %.2f +- %.2f' % (cutset, eff_2 - eff_1, (eeff_2**2 + eeff_1**2)**0.5)
 
     for name in l:
-        print name
-
         data = d_1[name]
         mc   = d_2[name]
         both = (data, mc)
@@ -170,6 +168,7 @@ def comp(ex, fn1='data.root', fn2='mc.root', is_data_mc=True):
                         statbox_size=statbox_size,
                         )
 
-
-comp('20', '20/JetHT2016.root', '20/background.root')
+import sys
+x = sys.argv[1]
+comp(x, '%s/JetHT2016.root'%x, '%s/background.root'%x)
 #comp('mctruth', 'mfv_neu_tau01000um_M0800.root', 'mfv_neu_tau01000um_M0800.root')

@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# btag wp changed for rereco https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco
+raise ValueError('change the btag working points before rerunning')
+
 import sys
 from JMTucker.Tools.general import typed_from_argv
 from JMTucker.Tools.MiniAOD_cfg import *
@@ -48,8 +51,8 @@ process.mfvMovedTracks = cms.EDProducer('MFVTrackMover',
                                         min_jet_pt = cms.double(50),
                                         min_jet_ntracks = cms.uint32(4),
                                         b_discriminator = cms.string('pfCombinedInclusiveSecondaryVertexV2BJetTags'),
-                                        b_discriminator_veto = cms.double(0.46),
-                                        b_discriminator_tag = cms.double(0.935),
+                                        b_discriminator_veto = cms.double(0.46), # change to 0.5426
+                                        b_discriminator_tag = cms.double(0.935), #   "     " 0.9535
                                         njets = cms.uint32(njets),
                                         nbjets = cms.uint32(nbjets),
                                         tau = cms.double(1),
