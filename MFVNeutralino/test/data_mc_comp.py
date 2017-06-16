@@ -509,21 +509,18 @@ E = partial(data_mc_comparison,
             )
 
 E('100pc_presel_njets',
-  histogram_path = 'evtHst0VNoNjets/h_njets',
+  histogram_path = 'mfvEventHistosPreSel/h_njets',
   x_title = 'Number of jets',
   y_title = 'Events',
   y_range = (1, 1e8),
-  cut_line = ((4, 0, 4, 2.5e8), 2, 5, 1),
   )
 
 E('100pc_presel_ht40',
-  histogram_path = 'evtHst0VNoHt/h_jet_ht_40',
+  histogram_path = 'mfvEventHistosPreSel/h_jet_ht_40',
   rebin = 4,
   x_title = 'Jet H_{T} (GeV)',
   y_title = 'Events/100 GeV',
-  x_range = (800, 5000),
   y_range = (1, 1e8),
-  cut_line = ((1000, 0, 1000, 2.5e8), 2, 5, 1),
   )
 
 E('100pc_presel_npv',
