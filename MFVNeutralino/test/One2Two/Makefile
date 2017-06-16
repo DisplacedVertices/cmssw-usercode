@@ -28,5 +28,5 @@ test:
 .PRECIOUS: bin/%.o
 
 clean:	
-	-rm -f mfvo2t.exe test_templates.exe
+	-rm -f mfvo2t.exe test_templates.exe statmodel.exe
 	-rm -rf bin/
