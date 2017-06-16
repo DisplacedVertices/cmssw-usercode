@@ -531,6 +531,8 @@ def data_mc_comparison(name,
                        file_path = None,
                        fcn_for_nevents_check = None,
                        int_lumi = None,
+                       int_lumi_2015 = None,
+                       int_lumi_2016 = None,
                        int_lumi_bkg_scale = None,
                        int_lumi_nice = None,
                        canvas_title = '',
@@ -691,6 +693,11 @@ def data_mc_comparison(name,
             xax = None
 
             if sample not in data_samples:
+                if int_lumi_2015 is not None and int_lumi_2016 is not None and sample in background_samples:
+                    if sample.name.endswith('_2015'):
+                        int_lumi = int_lumi_2015
+                    else:
+                        int_lumi = int_lumi_2016
                 sample.hist.Scale(sample.partial_weight_orig * int_lumi)
                 if int_lumi_bkg_scale is not None and sample not in signal_samples:
                     sample.hist.Scale(int_lumi_bkg_scale)

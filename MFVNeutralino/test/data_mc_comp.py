@@ -14,23 +14,34 @@ plot_dir = 'plots/data_mc_comp/HistosV15_%s' % year
 set_style()
 ps = plot_saver(plot_dir)
 
-int_lumi = ac.int_lumi_2016 * ac.scale_factor_2016
+int_lumi_2015 = ac.int_lumi_2015 * ac.scale_factor_2015
+int_lumi_2016 = ac.int_lumi_2016 * ac.scale_factor_2016
+
+int_lumi = int_lumi_2016
 int_lumi_nice = ac.int_lumi_nice_2016
 qcd_samples = Samples.qcd_samples_sum
 ttbar_samples = Samples.ttbar_samples
 signal_sample = Samples.mfv_neu_tau01000um_M0800
 
 if year == '2015':
-    int_lumi = ac.int_lumi_2015 * ac.scale_factor_2015
+    int_lumi = int_lumi_2015
     int_lumi_nice = ac.int_lumi_nice_2015
     qcd_samples = Samples.qcd_samples_sum_2015
     ttbar_samples = Samples.ttbar_samples_2015
     signal_sample = Samples.mfv_neu_tau01000um_M0800_2015
 
+if year == '2015p6':
+    int_lumi = ac.int_lumi_2015p6 * ac.scale_factor_2015p6
+    int_lumi_nice = ac.int_lumi_nice_2015p6
+    qcd_samples = Samples.qcd_samples_sum_2015 + Samples.qcd_samples_sum
+    ttbar_samples = Samples.ttbar_samples_2015 + Samples.ttbar_samples
+
 if year == '2015':
     data_samples = Samples.data_samples_2015
 elif year == '2016':
     data_samples = Samples.data_samples
+elif year == '2015p6':
+    data_samples = Samples.data_samples_2015 + Samples.data_samples
 elif year == '2016BCD':
     data_samples = [Samples.JetHT2016B3, Samples.JetHT2016C, Samples.JetHT2016D]
 elif year == '2016EF':
@@ -57,6 +68,8 @@ C = partial(data_mc_comparison,
             plot_saver = ps,
             file_path = os.path.join(root_file_dir, '%(name)s.root'),
             int_lumi = int_lumi,
+            int_lumi_2015 = int_lumi_2015 if year == '2015p6' else None,
+            int_lumi_2016 = int_lumi_2016 if year == '2015p6' else None,
             int_lumi_nice = int_lumi_nice,
             canvas_top_margin = 0.08,
             overflow_in_last = True,
@@ -70,7 +83,7 @@ C = partial(data_mc_comparison,
             simulation = True,
             )
 
-if year == '2015' or year == '2016':
+if year == '2015' or year == '2016' or year == '2015p6':
     C('presel_njets',
       file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV12_2', '%(name)s.root'),
       histogram_path = 'evtHst0VNoNjets/h_njets',
@@ -213,12 +226,17 @@ if year == '2016':
       cut_line = ((4, 0, 4, 2.8e10), 2, 5, 1),
       )
 
+int_lumi_2015 = 261.3 * (247778.0 / 266070.538021)
+int_lumi_2016 = 3591.6 * (3021752.0 / 3466421.6999)
 if year == '2015':
-    int_lumi = 261.3 * (247778.0 / 266070.538021)
+    int_lumi = int_lumi_2015
     int_lumi_nice = '0.26 fb^{-1} (13 TeV)'
 elif year == '2016':
-    int_lumi = 3591.6 * (3021752.0 / 3466421.6999)
+    int_lumi = int_lumi_2016
     int_lumi_nice = '3.59 fb^{-1} (13 TeV)'
+elif year == '2015p6':
+    int_lumi = 3852.9 * (3269530.0 / 37324922.4333)
+    int_lumi_nice = '3.85 fb^{-1} (13 TeV)'
 elif year == '2016BCD':
     int_lumi = 1256. * (1069513.0 / 1212224.52201)
     int_lumi_nice = '1.26 fb^{-1} (13 TeV)'
@@ -239,6 +257,8 @@ D = partial(data_mc_comparison,
             plot_saver = ps,
             file_path = os.path.join(root_file_dir, '%(name)s.root'),
             int_lumi = int_lumi,
+            int_lumi_2015 = int_lumi_2015 if year == '2015p6' else None,
+            int_lumi_2016 = int_lumi_2016 if year == '2015p6' else None,
             int_lumi_nice = int_lumi_nice,
             canvas_top_margin = 0.08,
             overflow_in_last = True,
@@ -442,12 +462,17 @@ D('10pc_5t1v_onevtx_dbv_unzoom',
   y_range = (1, 1e4),
   )
 
+int_lumi_2015 = 2613. * (2482166.0 / 2660705.41664)
+int_lumi_2016 = 35916. * (30206710.0 / 34709587.7891)
 if year == '2015':
-    int_lumi = 2613. * (2482166.0 / 2660705.41664)
+    int_lumi = int_lumi_2015
     int_lumi_nice = '2.6 fb^{-1} (13 TeV)'
 elif year == '2016':
-    int_lumi = 35916. * (30206710.0 / 34709587.7891)
+    int_lumi = int_lumi_2016
     int_lumi_nice = '35.9 fb^{-1} (13 TeV)'
+elif year == '2015p6':
+    int_lumi = 38529. * (32688876.0 / 37370293.037)
+    int_lumi_nice = '38.5 fb^{-1} (13 TeV)'
 elif year == '2016BCD':
     int_lumi = 12560. * (10714065.0 / 12138111.5891)
     int_lumi_nice = '12.6 fb^{-1} (13 TeV)'
@@ -468,6 +493,8 @@ E = partial(data_mc_comparison,
             plot_saver = ps,
             file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15', '%(name)s.root'),
             int_lumi = int_lumi,
+            int_lumi_2015 = int_lumi_2015 if year == '2015p6' else None,
+            int_lumi_2016 = int_lumi_2016 if year == '2015p6' else None,
             int_lumi_nice = int_lumi_nice,
             canvas_top_margin = 0.08,
             overflow_in_last = True,
