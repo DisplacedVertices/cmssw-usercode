@@ -577,7 +577,7 @@ namespace mfv {
     t_fit_info->Branch("fs_prob", &fit_stat.prob);
     t_fit_info->Branch("fs_ks", &fit_stat.ks);
     t_fit_info->Branch("pval_signif", &pval_signif);
-    t_fit_info->Branch("pval_cls", &pval_signif);
+    t_fit_info->Branch("pval_cls", &pval_cls);
     t_fit_info->Branch("sig_limits", &sig_limits);
     t_fit_info->Branch("pval_limits", &pval_limits);
     t_fit_info->Branch("pval_limit_errs", &pval_limit_errs);
