@@ -10,22 +10,22 @@ ps = plot_saver('../plots/bkgest/v15/closure%s_%s' % ('' if is_mc else '_data', 
 fns = ['2v_from_jets%s_%s_3track_default_v15.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_7track_default_v15.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_4track_default_v15.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_5track_default_v15.root' % ('' if is_mc else '_data', year)]
 ntk = ['3-track', '4-track-3-track', '4-track', '5-track']
 
-n2v = [939., 211., 7., 1.]
-ebin1 = [0.0026, 0.0063, 0.0063, 0.0123]
-ebin2 = [0.0023, 0.0077, 0.0077, 0.0318]
-ebin3 = [0.0060, 0.0228, 0.0228, 0.1011]
+n2v = [946., 204., 8., 1.]
+ebin1 = [0.0026, 0.0063, 0.0063, 0.0124]
+ebin2 = [0.0023, 0.0078, 0.0078, 0.0318]
+ebin3 = [0.0060, 0.0231, 0.0231, 0.1028]
 
 if year == '2015':
-    n2v = [45., 9., 1., 1.]
-    ebin1 = [0.0117, 0.0298, 0.0298, 0.0573]
-    ebin2 = [0.0106, 0.0365, 0.0365, 0.1488]
-    ebin3 = [0.0271, 0.1106, 0.1106, 0.4731]
+    n2v = [44., 9., 1., 1.]
+    ebin1 = [0.0120, 0.0300, 0.0300, 0.0590]
+    ebin2 = [0.0106, 0.0368, 0.0368, 0.1498]
+    ebin3 = [0.0277, 0.1098, 0.1098, 0.4845]
 
 if year == '2015p6':
-    n2v = [984., 220., 7., 1.]
-    ebin1 = [0.0025, 0.0062, 0.0062, 0.0119]
-    ebin2 = [0.0023, 0.0076, 0.0076, 0.0303]
-    ebin3 = [0.0059, 0.0227, 0.0227, 0.0995]
+    n2v = [991., 213., 8., 1.]
+    ebin1 = [0.0025, 0.0062, 0.0062, 0.0120]
+    ebin2 = [0.0023, 0.0077, 0.0077, 0.0308]
+    ebin3 = [0.0059, 0.0227, 0.0227, 0.1011]
 
 for i in range(4):
     if not is_mc and i > 2:
