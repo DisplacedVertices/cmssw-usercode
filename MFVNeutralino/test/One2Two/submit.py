@@ -39,9 +39,9 @@ exit $EXITCODE
     jdl_template = '''universe = vanilla
 Executable = run.sh
 arguments = $(Process)
-Output = run.stdout.$(Process)
-Error = run.stderr.$(Process)
-Log = run.log.$(Process)
+Output = stdout.$(Process)
+Error = stderr.$(Process)
+Log = log.$(Process)
 stream_output = false
 stream_error = false
 notification = never
@@ -131,9 +131,12 @@ Queue __NJOBS__
         jdl = jdl.replace('__NJOBS__', str(njobs))
         open(os.path.join(batch_dir, 'submit.jdl'), 'wt').write(jdl)
 
+        open(os.path.join(batch_dir, 'cs_dir'), 'wt')
+        open(os.path.join(batch_dir, 'njobs'), 'wt').write(str(njobs))
+
         pwd = os.getcwd()
         os.chdir(batch_dir)
-        #os.system('condor_submit submit.jdl')
+        os.system('condor_submit submit.jdl')
         os.chdir(pwd)
 
 ###
