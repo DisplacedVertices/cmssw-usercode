@@ -5,7 +5,7 @@ from JMTucker.Tools.ROOTTools import *
 set_style()
 
 fn = sys.argv[1]
-plot_dir = plot_dir('draw_fit_run2')
+plot_dir = sys.argv[2]
 
 f = ROOT.TFile(fn)
 t = f.Get('Fitter/t_fit_info')
@@ -44,7 +44,6 @@ def tree_xform(x):
 def do_detree():
     return list(detree(t, tree_vars.replace(' ', ':'), xform=tree_xform))
 
-sig_scale = 0
 def skip(h0_istat, h1_istat, sig_limit_fit_n):
     return False #h0_istat <= 1
 
@@ -228,15 +227,15 @@ for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwol
     h_sig_limit_fit_prob.Fill(sig_limit_fit_prob)
 
 for x in 'h_seed h_toy h_mu_sig_true h_mu_bkg_true h_istat h_istatsum_v_seed h_h1_maxtwolnL h_h1_mu_sig h_h1_mu_sig_err h_h1_mu_sig_eplus h_h1_mu_sig_eminus h_h1_mu_sig_err_v_sig h_h1_mu_sig_v_true h_h1_mu_sig_pull h_h1_mu_bkg h_h1_mu_bkg_err h_h1_mu_bkg_eplus h_h1_mu_bkg_eminus h_h1_mu_bkg_err_v_bkg h_h1_mu_bkg_v_true h_h1_mu_bkg_pull h_h1_nuis0 h_h1_nuis0_err h_h1_nuis0_eplus h_h1_nuis0_eminus h_h1_nuis0_pull h_h1_nuis1 h_h1_nuis1_err h_h1_nuis1_eplus h_h1_nuis1_eminus h_h1_nuis1_pull h_h1_nuis1_nuis0 h_h1_nuis_correlation h_h0_maxtwolnL h_h0_mu_bkg h_h0_mu_bkg_err h_h0_mu_bkg_eplus h_h0_mu_bkg_eminus h_h0_mu_bkg_err_v_bkg h_h0_mu_bkg_v_true h_h0_mu_bkg_pull h_h0_nuis0 h_h0_nuis0_err h_h0_nuis0_eplus h_h0_nuis0_eminus h_h0_nuis0_pull h_h0_nuis1 h_h0_nuis1_err h_h0_nuis1_eplus h_h0_nuis1_eminus h_h0_nuis1_pull h_h0_nuis1_nuis0 h_h0_nuis_correlation h_t h_chi2 h_ndof h_chi2ndof h_prob h_pval_signif h_zval_signif h_zval2_wilks h_zvals h_pval_cls h_sig_limit h_sig_limit_scaled h_sig_limit_err h_sig_limit_fit_n h_sig_limit_fit_a h_sig_limit_fit_b h_sig_limit_fit_a_err h_sig_limit_fit_b_err h_sig_limit_fit_prob'.split():
-    print x
+    if 'nuis' in x:
+        continue
+    #print x
     h = eval(x)
     log = False
     if type(h) == ROOT.TH1D:
         log = True
         if 'pull' in x:
-            if sig_scale < 0:
-                continue
-            h.Fit('gaus')
+            h.Fit('gaus', 'q')
         else:
             h.Draw()
         ps.c.Update()
@@ -262,12 +261,12 @@ for n in ns:
     dr = f.Get('Fitter/seed%02i_toy%02i/fit_results' % (seed, toy))
     for t in 'sb b'.split():
         leg = ROOT.TLegend(0.502, 0.620, 0.848, 0.861)
-        s = dr.Get('h_sig_%s_fit_bb_nodiv_shortened' % t)
-        b = dr.Get('h_bkg_%s_fit_bb_nodiv_shortened' % t)
-        sb = dr.Get('h_sum_%s_fit_bb_nodiv_shortened' % t)
-        dt = dr.Get('h_data_%s_fit_bb_nodiv_shortened' % t)
+        s = dr.Get('h_sig_%s_fit_bb_nodiv' % t)
+        b = dr.Get('h_bkg_%s_fit_bb_nodiv' % t)
+        dt = dr.Get('h_data_%s_fit_bb_nodiv' % t)
+        sb = b.Clone('sb')
+        sb.Add(s)
         for h in (s,b,sb,dt):
-            h.SetStats(0)
             h.SetTitle(';d_{VV} (cm)')
             h.GetYaxis().SetRangeUser(1e-2, 50)
         if dt.GetMaximum() > sb.GetMaximum():
@@ -290,61 +289,62 @@ for n in ns:
         ps.save(nm)
 
         h = dr.Get('h_likelihood_%s_scannuis' % t)
-        h.Draw('colz')
-        h.SetStats(0)
-        h.GetXaxis().SetLabelSize(0.02)
-        h.GetYaxis().SetLabelSize(0.02)
-        ti = h.GetTitle().split(';')[0]
-        nums = []
-        for v in ti.replace(',', ' ').split():
-            try:
-                nums.append(float(v))
-            except ValueError:
-                pass
-        assert len(nums) == 8
-        best_mu_sig = nums[0]
-        best_mu_bkg = nums[2]
-        best_nuis0 = nums[4]
-        best_nuis1 = nums[6]
-        h.SetTitle('%s;#mu_{clear} (cm);#sigma_{clear} (cm)' % ti)
-        m = ROOT.TMarker(best_nuis0, best_nuis1, 5)
-        m.SetMarkerColor(ROOT.kWhite)
-        m.SetMarkerSize(1)
-        m.Draw()
-        ps.save(nm + '_scannuis')
-
-        h.SetMinimum(h.GetMaximum() - 4)
-        h.Draw('colz')
-        m.Draw()
-        ps.save(nm + '_scannuis_2sg')
-
-        if t == 'sb':
-            h = dr.Get('h_likelihood_%s_scanmus' % t)
+        if h:
             h.Draw('colz')
             h.SetStats(0)
-            assert ti == h.GetTitle().split(';')[0]
-            h.SetTitle('%s;s;b' % ti)
-            m = ROOT.TMarker(best_mu_sig, best_mu_bkg, 5)
+            h.GetXaxis().SetLabelSize(0.02)
+            h.GetYaxis().SetLabelSize(0.02)
+            ti = h.GetTitle().split(';')[0]
+            nums = []
+            for v in ti.replace(',', ' ').split():
+                try:
+                    nums.append(float(v))
+                except ValueError:
+                    pass
+            assert len(nums) == 8
+            best_mu_sig = nums[0]
+            best_mu_bkg = nums[2]
+            best_nuis0 = nums[4]
+            best_nuis1 = nums[6]
+            h.SetTitle('%s;#mu_{clear} (cm);#sigma_{clear} (cm)' % ti)
+            m = ROOT.TMarker(best_nuis0, best_nuis1, 5)
             m.SetMarkerColor(ROOT.kWhite)
             m.SetMarkerSize(1)
             m.Draw()
-            h.GetYaxis().SetTitleOffset(1.25)
-            ps.save(nm + '_scanmus')
-
+            ps.save(nm + '_scannuis')
             h.SetMinimum(h.GetMaximum() - 4)
             h.Draw('colz')
             m.Draw()
-            ps.save(nm + '_scanmus_2sg')
+            ps.save(nm + '_scannuis_2sg')
 
-        for par in ['mubkg_nuis0', 'mubkg_nuis1', 'musig_nuis0', 'musig_nuis1', 'mubkg', 'musig', 'nuis0', 'nuis1']:
+        if t == 'sb':
+            h = dr.Get('h_likelihood_%s_scanmus' % t)
+            if h:
+                h.Draw('colz')
+                h.SetStats(0)
+                assert ti == h.GetTitle().split(';')[0]
+                h.SetTitle('%s;s;b' % ti)
+                m = ROOT.TMarker(best_mu_sig, best_mu_bkg, 5)
+                m.SetMarkerColor(ROOT.kWhite)
+                m.SetMarkerSize(1)
+                m.Draw()
+                h.GetYaxis().SetTitleOffset(1.25)
+                ps.save(nm + '_scanmus')
+                h.SetMinimum(h.GetMaximum() - 4)
+                h.Draw('colz')
+                m.Draw()
+                ps.save(nm + '_scanmus_2sg')
+
+        #for par in ['mubkg_nuis0', 'mubkg_nuis1', 'musig_nuis0', 'musig_nuis1', 'mubkg', 'musig', 'nuis0', 'nuis1']:
+        for par in 'mubkg', 'musig':
             h = dr.Get('h_likelihood_%s_scan_%s' % (t,par))
-            h.Draw('colz')
-            h.SetStats(0)
-            ps.save(nm + '_scan_%s'%par)
-
-            h.SetMinimum(h.GetMaximum() - 4)
-            h.Draw('colz')
-            ps.save(nm + '_scan_%s_2sg'%par)
+            if h:
+                h.Draw('colz')
+                h.SetStats(0)
+                ps.save(nm + '_scan_%s'%par)
+                h.SetMinimum(h.GetMaximum() - 4)
+                h.Draw('colz')
+                ps.save(nm + '_scan_%s_2sg'%par)
 
     g = dr.Get('g_limit_bracket_fit')
     if g:
@@ -373,9 +373,8 @@ def stats(l, header=''):
     return median, lo68, hi68, lo95, hi95
 
 stats(pval_signifs, 'pval_signif')
-if sig_scale < 0:
-    stats(sig_limits, 'mu_sig_limit')
-    stats(sig_limits_scaled, 'sigma_sig_limit')
+stats(sig_limits, 'mu_sig_limit')
+stats(sig_limits_scaled, 'sigma_sig_limit')
 
 '''
 foreach x (lsts/*lst)
