@@ -1,15 +1,25 @@
 #!/usr/bin/env python
 
+import sys
 from JMTucker.Tools.ROOTTools import *
 set_style()
 
-fn = '~/scratch/mfvo2t.root'
-plot_dir = '../plots/o2t_fit/h0_istat/3or4track'
-mu_sig_true_mean = 0
-mu_bkg_true_mean = 89.97
+fn = sys.argv[1]
+plot_dir = plot_dir('draw_fit_run2')
 
 f = ROOT.TFile(fn)
 t = f.Get('Fitter/t_fit_info')
+
+skip = ''
+t.Draw('true_pars[0]>>htruesig(1000,0,1000)', skip, 'goff')
+t.Draw('true_pars[1]>>htruebkg(1000,0,1000)', skip, 'goff')
+t.Draw('true_pars[2]>>htruenuis0(1000,0,10)', skip, 'goff')
+t.Draw('true_pars[3]>>htruenuis1(1000,0,10)', skip, 'goff')
+mu_sig_true_mean = ROOT.htruesig.GetMean()
+mu_bkg_true_mean = ROOT.htruebkg.GetMean()
+nuis0_true_mean = ROOT.htruenuis0.GetMean()
+nuis1_true_mean = ROOT.htruenuis1.GetMean()
+print '<true sig> = %f, <true bkg> = %f' % (mu_sig_true_mean, mu_bkg_true_mean)
 
 t.SetMarkerStyle(20)
 t.SetMarkerSize(1.)
@@ -36,7 +46,7 @@ def do_detree():
 
 sig_scale = 0
 def skip(h0_istat, h1_istat, sig_limit_fit_n):
-    return h0_istat <= 1
+    return False #h0_istat <= 1
 
 d = do_detree()
 
@@ -118,17 +128,6 @@ h_sig_limit_fit_a_err = h('h_sig_limit_fit_a_err', '', 50, 0, 5)
 h_sig_limit_fit_b_err = h('h_sig_limit_fit_b_err', '', 50, 0, 1)
 h_sig_limit_fit_prob = h('h_sig_limit_fit_prob', '', 50, 0, 1)
 
-nuis0_true_mean = 0
-nuis1_true_mean = 0
-for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwolnL,h1_mu_sig,h1_err_mu_sig,h1_eplus_mu_sig,h1_eminus_mu_sig,h1_mu_bkg,h1_err_mu_bkg,h1_eplus_mu_bkg,h1_eminus_mu_bkg,h1_nuis0,h1_err_nuis0,h1_eplus_nuis0,h1_eminus_nuis0,h1_nuis1,h1_err_nuis1,h1_eplus_nuis1,h1_eminus_nuis1,h1_correlation_nuis,h0_istat,h0_maxtwolnL,h0_mu_sig,h0_err_mu_sig,h0_eplus_mu_sig,h0_eminus_mu_sig,h0_mu_bkg,h0_err_mu_bkg,h0_eplus_mu_bkg,h0_eminus_mu_bkg,h0_nuis0,h0_err_nuis0,h0_eplus_nuis0,h0_eminus_nuis0,h0_nuis1,h0_err_nuis1,h0_eplus_nuis1,h0_eminus_nuis1,h0_correlation_nuis,chi2,ndof,prob,pval_signif,pval_cls,sig_limit,sig_limit_err,sig_limit_fit_n,sig_limit_fit_a,sig_limit_fit_b,sig_limit_fit_a_err,sig_limit_fit_b_err,sig_limit_fit_prob in d:
-    if skip(h0_istat, h1_istat, sig_limit_fit_n):
-        continue
-    nuis0_true_mean += true_pars_2
-    nuis1_true_mean += true_pars_3
-n = len(d)
-nuis0_true_mean /= n
-nuis1_true_mean /= n
-
 pval_signifs = []
 sig_limits = []
 sig_limits_scaled = []
@@ -160,22 +159,22 @@ for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwol
     h_h1_mu_bkg_err_v_bkg.Fill(h1_mu_bkg, h1_err_mu_bkg)
     h_h1_mu_bkg_v_true.Fill(true_pars_1, h1_mu_bkg)
     h_h1_mu_bkg_pull.Fill((h1_mu_bkg - mu_bkg_true_mean)/h1_err_mu_bkg)
-    h_h1_nuis0.Fill(h1_nuis0)
-    h_h1_nuis0_err.Fill(h1_err_nuis0)
-    if h1_eplus_nuis0 != 0:
-        h_h1_nuis0_eplus.Fill(h1_eplus_nuis0)
-    if h1_eminus_nuis0 != 0:
-        h_h1_nuis0_eminus.Fill(h1_eminus_nuis0)
-    h_h1_nuis0_pull.Fill((h1_nuis0 - nuis0_true_mean)/h1_err_nuis0)
-    h_h1_nuis_correlation.Fill(h1_correlation_nuis)
-    h_h1_nuis1.Fill(h1_nuis1)
-    h_h1_nuis1_err.Fill(h1_err_nuis1)
-    if h1_eplus_nuis1 != 0:
-        h_h1_nuis1_eplus.Fill(h1_eplus_nuis1)
-    if h1_eminus_nuis1 != 0:
-        h_h1_nuis1_eminus.Fill(h1_eminus_nuis1)
-    h_h1_nuis1_pull.Fill((h1_nuis1 - nuis1_true_mean)/h1_err_nuis1)
-    h_h1_nuis1_nuis0.Fill(h1_nuis0, h1_nuis1)
+    #h_h1_nuis0.Fill(h1_nuis0)
+    #h_h1_nuis0_err.Fill(h1_err_nuis0)
+    #if h1_eplus_nuis0 != 0:
+    #    h_h1_nuis0_eplus.Fill(h1_eplus_nuis0)
+    #if h1_eminus_nuis0 != 0:
+    #    h_h1_nuis0_eminus.Fill(h1_eminus_nuis0)
+    #h_h1_nuis0_pull.Fill((h1_nuis0 - nuis0_true_mean)/h1_err_nuis0)
+    #h_h1_nuis_correlation.Fill(h1_correlation_nuis)
+    #h_h1_nuis1.Fill(h1_nuis1)
+    #h_h1_nuis1_err.Fill(h1_err_nuis1)
+    #if h1_eplus_nuis1 != 0:
+    #    h_h1_nuis1_eplus.Fill(h1_eplus_nuis1)
+    #if h1_eminus_nuis1 != 0:
+    #    h_h1_nuis1_eminus.Fill(h1_eminus_nuis1)
+    #h_h1_nuis1_pull.Fill((h1_nuis1 - nuis1_true_mean)/h1_err_nuis1)
+    #h_h1_nuis1_nuis0.Fill(h1_nuis0, h1_nuis1)
     h_h0_maxtwolnL.Fill(h0_maxtwolnL)
     h_h0_mu_bkg.Fill(h0_mu_bkg)
     h_h0_mu_bkg_err.Fill(h0_err_mu_bkg)
@@ -186,22 +185,22 @@ for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwol
     h_h0_mu_bkg_err_v_bkg.Fill(h0_mu_bkg, h0_err_mu_bkg)
     h_h0_mu_bkg_v_true.Fill(true_pars_1, h0_mu_bkg)
     h_h0_mu_bkg_pull.Fill((h0_mu_bkg - mu_bkg_true_mean)/h0_err_mu_bkg)
-    h_h0_nuis0.Fill(h0_nuis0)
-    h_h0_nuis0_err.Fill(h0_err_nuis0)
-    if h0_eplus_nuis0 != 0:
-        h_h0_nuis0_eplus.Fill(h0_eplus_nuis0)
-    if h0_eminus_nuis0 != 0:
-        h_h0_nuis0_eminus.Fill(h0_eminus_nuis0)
-    h_h0_nuis0_pull.Fill((h0_nuis0 - nuis0_true_mean)/h0_err_nuis0)
-    h_h0_nuis1.Fill(h0_nuis1)
-    h_h0_nuis1_err.Fill(h0_err_nuis1)
-    if h0_eplus_nuis1 != 0:
-        h_h0_nuis1_eplus.Fill(h0_eplus_nuis1)
-    if h0_eminus_nuis1 != 0:
-        h_h0_nuis1_eminus.Fill(h0_eminus_nuis1)
-    h_h0_nuis1_pull.Fill((h0_nuis1 - nuis1_true_mean)/h0_err_nuis1)
-    h_h0_nuis1_nuis0.Fill(h0_nuis0, h0_nuis1)
-    h_h0_nuis_correlation.Fill(h0_correlation_nuis)
+    #h_h0_nuis0.Fill(h0_nuis0)
+    #h_h0_nuis0_err.Fill(h0_err_nuis0)
+    #if h0_eplus_nuis0 != 0:
+    #    h_h0_nuis0_eplus.Fill(h0_eplus_nuis0)
+    #if h0_eminus_nuis0 != 0:
+    #    h_h0_nuis0_eminus.Fill(h0_eminus_nuis0)
+    #h_h0_nuis0_pull.Fill((h0_nuis0 - nuis0_true_mean)/h0_err_nuis0)
+    #h_h0_nuis1.Fill(h0_nuis1)
+    #h_h0_nuis1_err.Fill(h0_err_nuis1)
+    #if h0_eplus_nuis1 != 0:
+    #    h_h0_nuis1_eplus.Fill(h0_eplus_nuis1)
+    #if h0_eminus_nuis1 != 0:
+    #    h_h0_nuis1_eminus.Fill(h0_eminus_nuis1)
+    #h_h0_nuis1_pull.Fill((h0_nuis1 - nuis1_true_mean)/h0_err_nuis1)
+    #h_h0_nuis1_nuis0.Fill(h0_nuis0, h0_nuis1)
+    #h_h0_nuis_correlation.Fill(h0_correlation_nuis)
     h_t.Fill(h1_maxtwolnL - h0_maxtwolnL)
     h_chi2.Fill(chi2)
     h_ndof.Fill(ndof)
