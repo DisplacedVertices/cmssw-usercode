@@ -88,7 +88,7 @@ config.JobType.scriptExe = 'runme.sh'
 config.JobType.inputFiles = %(files_needed)r
 config.JobType.outputFiles = ['mfvo2t.root']
 
-config.Data.primaryDataset = '%(batch_name)s'
+config.Data.outputPrimaryDataset = '%(batch_name)s'
 config.Site.storageSite = 'T3_US_FNALLPC'
 #config.Site.blacklist = ['T3_GR_IASA', 'T3_IT_Napoli']
 config.Data.splitting = 'EventBased'
@@ -107,7 +107,7 @@ if os.path.isdir(crab_submit_dir):
 os.mkdir(crab_submit_dir)
 i_submit = 0
 
-def submit(njobs, signal_sample, template_signal):
+def submit(njobs, bkg_scale, signal_sample, template_signal):
     global made
     global setuped
     global i_submit
@@ -134,12 +134,15 @@ def submit(njobs, signal_sample, template_signal):
         open(dummy_pset_fn, 'wt').write(dummy_pset)
         setuped = True
 
-    batch_name = '%sSigTmp%s_SigSam%s' % (extra_name, template_signal, 'no' if signal_sample is None else 'n%ix%i' % signal_sample)
+    batch_name = '%sBkgScale%i_SigTmp%s_SigSam%s' % (extra_name, bkg_scale, template_signal, 'no' if signal_sample is None else 'n%ix%i' % signal_sample)
     files_needed = [os.path.abspath(x) for x in ['mfvo2t.exe', 'filtertee.py', 'vpeffs_2016_v15.root', 'throwhists.root']]
 
     env = [
         'toythrower_template_signal=%i' % template_signal,
         ]
+
+    if bkg_scale != 1:
+        env.append('toythrower_scale_2v=%i' % bkg_scale)
 
     #if template_signal >= -12 or (template_signal <= -101 and template_signal >= -126):
     #    env.append('fitter_sig_limit_step=1')
@@ -161,7 +164,7 @@ def submit(njobs, signal_sample, template_signal):
             env.append('toythrower_injected_signal=%i' % sig_samp)
             env.append('toythrower_injected_signal_scale=%f' % sig_scale)
     else:
-        env.append('fitter_do_limit=0')
+        pass #env.append('fitter_do_limit=0')
 
     env = '\n'.join('export mfvo2t_' + e for e in env)
 
@@ -178,17 +181,17 @@ if 1:
     sig_first = [-15, -21, -9, -6]
     signals = sig_first + sorted(set(range(-24, 0)) - set(sig_first))
 
-    strengths = (-1, -2, None, 1, 5)
-
-    signals = [-53]
-    #strengths = [-1,-2]
+    strengths = (-1, -2, None, 1, 5, 25, 100)
+    signals = [-39,-46,-53,-60]
 
     batches = []
-    for strength in strengths:
-        for signal in signals:
-            sg = (signal, strength) if strength is not None else None
-            njobs = 20 if strength == -1 else 500
-            batches.append((njobs, sg, signal))
+
+    for bkg_scale in (1, 10):
+        for strength in strengths:
+            for signal in signals:
+                sg = (signal, strength) if strength is not None else None
+                njobs = 20 if strength == -1 else 500
+                batches.append((njobs, sg, signal))
 
     for batch in batches:
         #print batch
