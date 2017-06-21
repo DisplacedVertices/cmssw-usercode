@@ -14,7 +14,7 @@ for line in open('signals.h'):
         num2name[num] = name
         name2num[name] = num
 
-sample_nums = [-39,-46,-53,-60]
+sample_nums = [-105,-124,-143,-162]
 samples = []
 for i in sample_nums:
     s = getattr(Samples, num2name[i])
@@ -24,6 +24,7 @@ for i in sample_nums:
 __all__ = [
     'num2name',
     'name2num',
+    'sample_nums'
     'samples',
     'Samples'
     ]
