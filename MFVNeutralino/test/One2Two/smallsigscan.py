@@ -14,7 +14,9 @@ for line in open('signals.h'):
         num2name[num] = name
         name2num[name] = num
 
-sample_nums = [-105,-124,-143,-162]
+sample_nums = [-105,-124,-143,-162] # 800 GeV tau scan
+sample_nums += [-134,-137,-140,-146,-149,-152] # 1mm mass scan
+
 samples = []
 for i in sample_nums:
     s = getattr(Samples, num2name[i])
