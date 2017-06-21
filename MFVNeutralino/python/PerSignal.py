@@ -54,6 +54,7 @@ class PerSignal:
         if type(canvas) == str:
             canvas = ROOT.TCanvas(canvas, '', *size)
         self.canvas = canvas
+        self.canvas.cd()
 
         taus   = sorted(self.taus)
         masses = sorted(self.masses)
