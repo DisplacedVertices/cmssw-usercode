@@ -96,7 +96,7 @@ def make():
     f.Close()
 
 def draw():
-    ps = plot_saver(plot_dir('throwhists'), size=(600,600))
+    ps = plot_saver(plot_dir('o2t_templates_run2'), size=(600,600))
 
     whiches = [
         ('multijet', [
