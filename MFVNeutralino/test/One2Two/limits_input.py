@@ -27,6 +27,9 @@ def make():
     in_f = ROOT.TFile(in_fn)
     f = ROOT.TFile(out_fn, 'recreate')
 
+    h_int_lumi = ROOT.TH1D('h_int_lumi', '', 1, 0, 1)
+    h_int_lumi.SetBinContent(1, int_lumi)
+
     h_observed = ROOT.TH1D('h_observed', '', nbins, bins)
     for i,v in enumerate(observed):
         h_observed.SetBinContent(i+1, v)
