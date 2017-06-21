@@ -1,58 +1,207 @@
 from JMTucker.MFVNeutralino.MiniTreeBase import *
-ROOT.TH1.AddDirectory(1)
 
-in_fn = sys.argv[1]
-in_f = ROOT.TFile(in_fn)
+bins = to_array(0., 0.04, 0.07, 4)
+nbins = len(bins) - 1
 
-f = ROOT.TFile('throwhists.root', 'recreate')
+observed = [1,0,0]
 
-h_bkg_dbv  = to_TH1D(in_f.Get('h_1v_dbv') , 'h_bkg_dbv')
-h_bkg_dvv  = to_TH1D(in_f.Get('h_c1v_dvv'), 'h_bkg_dvv')
+int_lumi = ac.int_lumi_2015p6 * ac.scale_factor_2015p6
 
-h_bkg_dphi = ROOT.TH1D('h_bkg_dphi', '', 100, 0, pi)
-f_dphi = in_f.Get('f_dphi')
-for ibin in xrange(1, h_bkg_dphi.GetNbinsX()+1):
-    a = h_bkg_dphi.GetXaxis().GetBinLowEdge(ibin)
-    b = h_bkg_dphi.GetXaxis().GetBinLowEdge(ibin+1)
-    h_bkg_dphi.SetBinContent(ibin, f_dphi.Integral(a,b)/(b-a))
+bkg_n1v = 3637.
+bkg_n2v = 1.
 
-n1v = 1100.
-n2v = 1.
-h_bkg_dbv.Scale(n1v/h_bkg_dbv.Integral())
-for h in h_bkg_dvv, h_bkg_dphi:
-    h.Scale(n2v/h.Integral())
+sig_uncert = [0.20, 0.20, 0.20]
+bkg_uncert = [0.13, 0.29, 0.52]
 
+in_fn = '2v_from_jets_2015p6_5track_default_v15.root'
+in_trees = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV15_v3/mfv*root'
 
-fns = glob('trees/mfv*root')
-fns = sorted(x for x in fns if '_2015' not in x) + sorted(x for x in fns if '_2015' in x)
-hs_sig = []
-for ifn, fn in enumerate(fns):
-    isample = -(ifn+1)
-    name = os.path.basename(fn).replace('.root', '')
-    print 'samples.push_back({%i, "%s", 0, 0});' % (isample, name)
-    sig_f = ROOT.TFile(fn)
-    sig_t = sig_f.Get('mfvMiniTree/t')
+out_fn = 'limits_input.root'
 
-    f.cd()
+assert len(observed) == nbins
+assert len(sig_uncert) == nbins
+assert len(bkg_uncert) == nbins
 
-    h_dbv_name = 'h_signal_%i_dbv' % isample
-    h_dbv = ROOT.TH1D(h_dbv_name, name, 1250, 0, 2.5)
-    n1v = sig_t.Draw('dist0>>%s' % h_dbv_name, 'nvtx==1')
+def make():
+    ROOT.TH1.AddDirectory(1)
+    in_f = ROOT.TFile(in_fn)
+    f = ROOT.TFile(out_fn, 'recreate')
 
-    h_dvv_name = 'h_signal_%i_dvv' % isample
-    h_dvv = ROOT.TH1D(h_dvv_name, name, 4000, 0, 4)
-    n2v = sig_t.Draw('svdist>>%s' % h_dvv_name, 'nvtx>=2')
+    h_observed = ROOT.TH1D('h_observed', '', nbins, bins)
+    for i,v in enumerate(observed):
+        h_observed.SetBinContent(i+1, v)
+    
+    # bkg comes from Jen's 2v_from_hists
+    h_bkg_dbv  = to_TH1D(in_f.Get('h_1v_dbv') , 'h_bkg_dbv')
+    h_bkg_dvv  = to_TH1D(in_f.Get('h_c1v_dvv'), 'h_bkg_dvv')
 
-    h_dphi_name = 'h_signal_%i_dphi' % isample
-    h_dphi = ROOT.TH1D(h_dphi_name, name, 10, -3.15, 3.15)
-    sig_t.Draw('svdphi>>%s' % h_dphi_name, 'nvtx>=2')
+    h_bkg_dphi = ROOT.TH1D('h_bkg_dphi', '', 100, 0, pi)
+    f_dphi = in_f.Get('f_dphi')
+    for ibin in xrange(1, h_bkg_dphi.GetNbinsX()+1):
+        a = h_bkg_dphi.GetXaxis().GetBinLowEdge(ibin)
+        b = h_bkg_dphi.GetXaxis().GetBinLowEdge(ibin+1)
+        h_bkg_dphi.SetBinContent(ibin, f_dphi.Integral(a,b)/(b-a))
 
-    h_norm = ROOT.TH1D('h_signal_%i_norm' % isample, name, 2, 0, 2)
-    norm = 1e-3 / sig_f.Get('mfvWeight/h_sums').GetBinContent(1)  # 1 fb xsec in pb / number of events read, int lumi will be added in ToyThrower
-    h_norm.SetBinContent(1, norm * n1v)
-    h_norm.SetBinContent(2, norm * n2v)
+    h_bkg_dbv.Scale(bkg_n1v/h_bkg_dbv.Integral())
+    for h in h_bkg_dvv, h_bkg_dphi:
+        h.Scale(bkg_n2v/h.Integral())
 
-    hs_sig += [h_dbv, h_dvv, h_dphi, h_norm]
+    h_bkg_dvv_rebin = h_bkg_dvv.Rebin(len(bins)-1, 'h_bkg_dvv_rebin', bins)
+    move_overflow_into_last_bin(h_bkg_dvv_rebin)
 
-f.Write()
-f.Close()
+    h_bkg_uncert = ROOT.TH1D('h_bkg_uncert', '', nbins, bins)
+    for i,v in enumerate(bkg_uncert):
+        h_bkg_uncert.SetBinContent(i+1, v)
+
+    # now signals. grab the printout and put in signals.h for the fitting code to pick up
+    fns = glob(in_trees)
+    fns = sorted(x for x in fns if '_2015' not in x) + sorted(x for x in fns if '_2015' in x)
+    hs_sig = []
+    for ifn, fn in enumerate(fns):
+        isample = -(ifn+1)
+        name = os.path.basename(fn).replace('.root', '')
+        print 'samples.push_back({%i, "%s", 0, 0});' % (isample, name)
+        sig_f = ROOT.TFile(fn)
+        sig_t = sig_f.Get('mfvMiniTree/t')
+
+        f.cd()
+
+        h_dbv_name = 'h_signal_%i_dbv' % isample
+        h_dbv = ROOT.TH1D(h_dbv_name, name, 1250, 0, 2.5)
+        sig_t.Draw('dist0>>%s' % h_dbv_name, 'weight*(nvtx==1)')
+
+        h_dvv_name = 'h_signal_%i_dvv' % isample
+        h_dvv = ROOT.TH1D(h_dvv_name, name, 4000, 0, 4)
+        sig_t.Draw('svdist>>%s' % h_dvv_name, 'weight*(nvtx>=2)')
+
+        h_dphi_name = 'h_signal_%i_dphi' % isample
+        h_dphi = ROOT.TH1D(h_dphi_name, name, 10, -3.15, 3.15)
+        sig_t.Draw('svdphi>>%s' % h_dphi_name, 'weight*(nvtx>=2)')
+
+        h_norm = ROOT.TH1D('h_signal_%i_norm' % isample, name, 2, 0, 2)
+        norm = 1e-3 / sig_f.Get('mfvWeight/h_sums').GetBinContent(1)  # 1 fb xsec in pb / number of events read, int lumi will be added in ToyThrower
+        h_norm.SetBinContent(1, norm)
+        h_norm.SetBinContent(2, norm)
+
+        h_dvv_rebin = h_dvv.Rebin(len(bins)-1, 'h_signal_%i_dvv_rebin' % isample, bins)
+        move_overflow_into_last_bin(h_dvv_rebin)
+
+        h_uncert = ROOT.TH1D('h_signal_%i_uncert' % isample, '', nbins, bins)
+        for i,v in enumerate(sig_uncert):
+            h_uncert.SetBinContent(i+1, v)
+
+        hs_sig += [h_dbv, h_dvv, h_dphi, h_norm, h_dvv_rebin, h_uncert]
+
+    f.Write()
+    f.Close()
+
+def draw():
+    ps = plot_saver(plot_dir('throwhists'), size=(600,600))
+
+    whiches = [
+        ('multijet', [
+            (-39, ROOT.kRed,      'multijet M = 800 GeV, #tau = 100 #mum'),
+            (-46, ROOT.kGreen+2,  'multijet M = 800 GeV, #tau = 300 #mum'),
+            (-53, ROOT.kBlue,     'multijet M = 800 GeV, #tau = 1 mm'),
+            (-60, ROOT.kMagenta,  'multijet M = 800 GeV, #tau = 10 mm'),
+            (-67, ROOT.kOrange+2, 'multijet M = 800 GeV, #tau = 30 mm'),
+            ]),
+        ('dijet', [
+            ( -5, ROOT.kRed,      'dijet M = 800 GeV, #tau = 100 #mum'),
+            (-12, ROOT.kGreen+2,  'dijet M = 800 GeV, #tau = 300 #mum'),
+            (-19, ROOT.kBlue,     'dijet M = 800 GeV, #tau = 1 mm'),
+            (-26, ROOT.kMagenta,  'dijet M = 800 GeV, #tau = 10 mm'),
+            (-33, ROOT.kOrange+2, 'dijet M = 800 GeV, #tau = 30 mm'),
+            ]),
+        ]
+
+    f = ROOT.TFile(out_fn)
+
+    def fmt(h, name, color, save=[]):
+        binning = to_array(0., 0.04, 0.07, 0.15)
+        h = h.Rebin(len(binning)-1, name, binning)
+        h.Sumw2()
+        h.SetStats(0)
+        h.SetLineWidth(3)
+        h.SetLineColor(color)
+        h.SetTitle(';d_{VV} (cm);event rate (unit norm.)')
+        move_overflow_into_last_bin(h)
+        h.Scale(1./h.Integral(0,h.GetNbinsX()+2))
+        save.append(h)
+        return h
+    
+    for which_name, which in whiches: 
+        hbkg = fmt(f.Get('h_bkg_dvv'), 'bkg', ROOT.kBlack)
+        hbkg.Draw('hist e')
+        hbkg.GetYaxis().SetRangeUser(0,1.5)
+
+        leg = ROOT.TLegend(0.142, 0.657, 0.702, 0.857)
+        leg.SetBorderSize(0)
+        leg.AddEntry(hbkg, 'Simulated d_{VV}^{C}', 'LE')
+
+        for isample, color, title in which:
+            h = fmt(f.Get('h_signal_%i_dvv' % isample), title, color)
+            h.Draw('hist e same')
+            leg.AddEntry(h, title, 'LE')
+
+        leg.Draw()
+
+        ps.save(which_name, log=False)
+
+def combine_datacard():
+    which = int(sys.argv[sys.argv.index('combine_datacard')+1])
+
+    f = ROOT.TFile(out_fn)
+
+    def _strit(fmt,typ,n,offset=0,mult=1):
+        h = f.Get(n)
+        return ' '.join(fmt % typ(offset + mult*h.GetBinContent(ibin)) for ibin in xrange(1,nbins+1))
+    def intstrit(n, offset=0, mult=1):
+        return _strit('%i',int,n,offset,mult)
+    def floatstrit(n, offset=0, mult=1):
+        return _strit('%.9f',float,n,offset,mult)
+
+    ndata = f.Get('h_observed').Integral(0,nbins+2)
+    observed = intstrit('h_observed')
+
+    sig_norm = int_lumi * f.Get('h_signal_%i_norm' % which).GetBinContent(2)
+
+    sig_name = 'h_signal_%i_dvv_rebin' % which
+    sig_rate = floatstrit(sig_name, mult=sig_norm)
+    bkg_rate = floatstrit('h_bkg_dvv_rebin', mult=ndata)
+
+    sig_uncert = floatstrit('h_signal_%i_uncert' % which, offset=1.)
+    bkg_uncert = floatstrit('h_bkg_uncert', offset=1.)
+
+    h_sig = f.Get(sig_name)
+    nsig = int(h_sig.GetEntries())
+    sig_mc = ' '.join('%.9g' % (float(x)/nsig) for x in sig_rate.split())
+
+    print '''
+imax 3
+jmax 1
+kmax 3
+------------
+bin             0  1  2
+observation     %(observed)s
+------------
+bin 0 1 2 0 1 2
+process sig sig sig bkg bkg bkg
+process 0 0 0 1 1 1
+rate %(sig_rate)s %(bkg_rate)s
+------------
+sig lnN %(sig_uncert)s - - -
+sigMC gmN %(nsig)s %(sig_mc)s - - -
+bkg lnN - - - %(bkg_uncert)s
+''' % locals()
+
+    
+if __name__ == '__main__':
+    if 'make' in sys.argv:
+        make()
+    elif 'draw' in sys.argv:
+        draw()
+    elif 'combine_datacard' in sys.argv:
+        combine_datacard()
+    else:
+        print 'dunno'
