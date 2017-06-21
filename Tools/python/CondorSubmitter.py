@@ -382,8 +382,8 @@ def get(i): return _l[i]
                     try:
                         njobs_sub = int(line[0])
                         cluster = int(line[-1][:-1])
-                        open(os.path.join(working_dir, 'njobs'), 'wt').write(str(njobs_sub))
-                        open(os.path.join(working_dir, 'cluster'), 'wt').write(str(cluster))
+                        open('njobs', 'wt').write(str(njobs_sub))
+                        open('cluster', 'wt').write(str(cluster))
                         if njobs_sub != njobs:
                             ok = False
                     except ValueError:
@@ -397,7 +397,7 @@ def get(i): return _l[i]
                 if os.path.islink(cluster_link):
                     print 'warning: clobbering old link:', os.readlink(cluster_link)
                     os.unlink(cluster_link)
-                os.symlink(working_dir, cluster_link)
+                os.symlink(os.path.abspath(working_dir), cluster_link)
         finally:
             os.chdir(cwd)
 
