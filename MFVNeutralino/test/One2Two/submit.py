@@ -124,7 +124,6 @@ Queue __NJOBS__
         script = script.replace('__ROOTSYS__', os.environ['ROOTSYS'])
         script_fn = os.path.join(batch_dir, 'run.sh')
         open(script_fn, 'wt').write(script)
-        os.chmod(script_fn, 0644)
 
         jdl = self.jdl_template
         jdl = jdl.replace('__INPUT_FILES__', input_files)
