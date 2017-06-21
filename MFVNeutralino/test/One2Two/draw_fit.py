@@ -129,7 +129,6 @@ h_sig_limit_fit_prob = h('h_sig_limit_fit_prob', '', 50, 0, 1)
 
 pval_signifs = []
 sig_limits = []
-sig_limits_scaled = []
 for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwolnL,h1_mu_sig,h1_err_mu_sig,h1_eplus_mu_sig,h1_eminus_mu_sig,h1_mu_bkg,h1_err_mu_bkg,h1_eplus_mu_bkg,h1_eminus_mu_bkg,h1_nuis0,h1_err_nuis0,h1_eplus_nuis0,h1_eminus_nuis0,h1_nuis1,h1_err_nuis1,h1_eplus_nuis1,h1_eminus_nuis1,h1_correlation_nuis,h0_istat,h0_maxtwolnL,h0_mu_sig,h0_err_mu_sig,h0_eplus_mu_sig,h0_eminus_mu_sig,h0_mu_bkg,h0_err_mu_bkg,h0_eplus_mu_bkg,h0_eminus_mu_bkg,h0_nuis0,h0_err_nuis0,h0_eplus_nuis0,h0_eminus_nuis0,h0_nuis1,h0_err_nuis1,h0_eplus_nuis1,h0_eminus_nuis1,h0_correlation_nuis,chi2,ndof,prob,pval_signif,pval_cls,sig_limit,sig_limit_err,sig_limit_fit_n,sig_limit_fit_a,sig_limit_fit_b,sig_limit_fit_a_err,sig_limit_fit_b_err,sig_limit_fit_prob in d:
     if skip(h0_istat, h1_istat, sig_limit_fit_n):
         continue
@@ -215,9 +214,6 @@ for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwol
     h_pval_cls.Fill(pval_cls)
     sig_limits.append(sig_limit)
     h_sig_limit.Fill(sig_limit)
-    #sig_limit_scaled = sig_limit / (sig_eff * xsec2nevt)
-    #h_sig_limit_scaled.Fill(sig_limit_scaled)
-    #sig_limits_scaled.append(sig_limit_scaled)
     h_sig_limit_err.Fill(sig_limit_err)
     h_sig_limit_fit_n.Fill(sig_limit_fit_n)
     h_sig_limit_fit_a.Fill(sig_limit_fit_a)
@@ -374,10 +370,3 @@ def stats(l, header=''):
 
 stats(pval_signifs, 'pval_signif')
 stats(sig_limits, 'mu_sig_limit')
-stats(sig_limits_scaled, 'sigma_sig_limit')
-
-'''
-foreach x (lsts/*lst)
-  echo $x; py draw_fit.py $x >& `echo $x | sed -e s/.lst/.out/`
-end
-'''
