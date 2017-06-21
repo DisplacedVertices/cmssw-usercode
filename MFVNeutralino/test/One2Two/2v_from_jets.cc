@@ -507,6 +507,12 @@ void construct_dvvc(bool is_mc, bool inject_signal, std::string year, int ntrack
 }
 
 int main(int argc, const char* argv[]) {
+  const bool only_default = strcmp(getenv("USER"), "tucker") == 0;
+  if (only_default) {
+    construct_dvvc(true, false, "2015p6", 5,  true, -1, false,  true, false, 0, 255, "2v_from_jets_2015p6_5track_default_v15.root");
+    return 0;
+  }
+
   for (const char* year : {"2015", "2016", "2015p6"}) {
     for (int ntracks : {3, 4, 5, 7}) {
       construct_dvvc(true, false, year, ntracks, false, -1, false,  true, false, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_bquark_uncorrected_v15.root", year, ntracks));
