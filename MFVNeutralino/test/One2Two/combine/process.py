@@ -1,7 +1,11 @@
 import os, sys, glob
+from JMTucker.Tools.ROOTTools import *
 
-def stats(fn, l, header='sigma_sig_limit'):
-    f = open(fn, 'wt')
+def stats(fn_or_f, obs, obs_nosyst, l, header='sigma_sig_limit'):
+    if type(fn_or_f) == file:
+        f = fn_or_f
+    else:
+        f = open(fn_or_f, 'wt')
     l.sort()
     n = len(l)
     if n % 2 == 0:
@@ -17,63 +21,31 @@ def stats(fn, l, header='sigma_sig_limit'):
     f.write(header + ':Expected 50.0%: r < ' + '%f\n' % median)
     f.write(header + ':Expected 84.0%: r < ' + '%f\n' % hi68)
     f.write(header + ':Expected 97.5%: r < ' + '%f\n' % hi95)
-    f.write(header + ':Observed Limit: r < ' + '%f\n' % median)
+    f.write(header + ':Observed Limit: r < ' + '%f\n' % obs)
+    f.write(header + ':NoSystObserved Limit: r < ' + '%f\n' % obs_nosyst)
     f.close()
     return median, lo68, hi68, lo95, hi95
 
-signals = [x for x in '''
-mfv_neutralino_tau0100um_M0200
-mfv_neutralino_tau0100um_M0300
-mfv_neutralino_tau0100um_M0400
-mfv_neutralino_tau0100um_M0600
-mfv_neutralino_tau0100um_M0800
-mfv_neutralino_tau0100um_M1000
-mfv_neutralino_tau0300um_M0200
-mfv_neutralino_tau0300um_M0300
-mfv_neutralino_tau0300um_M0400
-mfv_neutralino_tau0300um_M0600
-mfv_neutralino_tau0300um_M0800
-mfv_neutralino_tau0300um_M1000
-mfv_neutralino_tau1000um_M0200
-mfv_neutralino_tau1000um_M0300
-mfv_neutralino_tau1000um_M0400
-mfv_neutralino_tau1000um_M0600
-mfv_neutralino_tau1000um_M0800
-mfv_neutralino_tau1000um_M1000
-mfv_neutralino_tau9900um_M0200
-mfv_neutralino_tau9900um_M0300
-mfv_neutralino_tau9900um_M0400
-mfv_neutralino_tau9900um_M0600
-mfv_neutralino_tau9900um_M0800
-mfv_neutralino_tau9900um_M1000
-'''.split('\n') if x]
+def fromtree(fn):
+    f = ROOT.TFile(fn)
+    t = f.Get('limit')
+    return [x[0] for x in detree(t, 'limit', '', float)]
 
-try:
-    signal = signals[int(sys.argv[1])]
-    signals = [signal]
-except IndexError:
-    pass
+def doit(path, out_fn):
+    x = fromtree(os.path.join(path, 'observed.root'))
+    assert len(x) == 1
+    obs = x[0]
 
-def get_l(path):
-    fns = glob.glob('/uscms_data/d1/tucker/combine/' + path + '/*stdout')
-    l = []
-    for fn in fns:
-        lim = None
-        for line in open(fn):
-            if 'Limit:' in line:
-                lim = float(line.split()[3])
-        if lim is not None:
-            l.append(lim)
-    return l
+    x = fromtree(os.path.join(path, 'observed_nosyst.root'))
+    assert len(x) == 1
+    obs_nosyst = x[0]
 
-for isig, signal in enumerate(signals):
-    isignal = -1 - isig
+    x = fromtree(os.path.join(path, 'expected.root'))
+    assert len(x) == 100
+    expected = x
 
-    jobs = get_l('jobs_' + signal)
-    toys = get_l('jobs_toys_' + signal)
-    print signal, len(jobs), len(toys)
-    if len(jobs) == 0:
-        continue
-    stats('combine_n%ix-1.out' % isignal, jobs)
-    stats('combine_n%ix-2.out' % isignal, toys)
+    stats(out_fn, obs, obs_nosyst, expected)
 
+if __name__ == '__main__':
+    import sys
+    doit(sys.argv[1], sys.stdout)
