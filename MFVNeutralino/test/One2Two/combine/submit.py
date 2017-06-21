@@ -1,4 +1,4 @@
-import sys, os, shutil
+import sys, os, shutil, time
 from JMTucker.Tools.general import save_git_status
 from JMTucker.Tools.CondorSubmitter import CondorSubmitter
 import smallsigscan
@@ -59,7 +59,7 @@ transfer_input_files = %(input_files)s
 Queue 1
 '''
 
-batch_root = 'combine_output'
+batch_root = 'combine_output_%i' % time.time()
 if os.path.isdir(batch_root):
     raise IOError('%s exists' % batch_root)
 os.mkdir(batch_root)
@@ -76,7 +76,7 @@ input_files = ','.join(input_files)
 
 for sample_num in smallsigscan.sample_nums:
     nice = smallsigscan.num2name[sample_num]
-    print nice
+    print sample_num, nice,
 
     batch_dir = os.path.join(batch_root, 'signal_%03i' % sample_num)
     os.mkdir(batch_dir)
