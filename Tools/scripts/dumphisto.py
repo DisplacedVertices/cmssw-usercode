@@ -22,5 +22,12 @@ else:
         x.Print()
         nbins = x.GetNbinsX()
         print 'nbins:', nbins
+        print '%10s %10s %10s %10s' % ('ibin', 'low edge', 'content', 'error')
         for i in xrange(0, nbins+2):
-            print '%7i %10.1f %10.1f %10.1f' % (i, x.GetBinLowEdge(i), x.GetBinContent(i), x.GetBinError(i))
+            if i == 0:
+                bin = 'underflow'
+            elif i == nbins+1:
+                bin = 'overflow'
+            else:
+                bin = str(i)
+            print '%10s %10.2f %10.2f %10.2f' % (bin, x.GetBinLowEdge(i), x.GetBinContent(i), x.GetBinError(i))
