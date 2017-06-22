@@ -241,7 +241,7 @@ int main(int argc, char** argv) {
 	const int nhits = npxhits + nsthits;
 	const int npxlays = nt.p_tk_npxlay->at(itk);
 	const int nstlays = nt.p_tk_nstlay->at(itk);
-	const double dz = nt.p_tk_dz->at(itk);
+	const double vz = nt.p_tk_vz->at(itk);
 	const double dzpv = nt.p_tk_dzpv->at(itk);
 	const int min_r = nt.tk_min_r(itk);
 	const int min_z = nt.tk_min_z(itk);
@@ -264,7 +264,7 @@ int main(int argc, char** argv) {
 	const bool use_nosigcut = pt > min_all_track_pt && npxlays >= min_all_track_npxlays && nstlays >= min_all_track_nstlays && min_r == min_all_track_min_r;
 	
 
-	bool z_slice_use = dz > z_slice_bounds[0] && dz < z_slice_bounds[1];
+	bool z_slice_use = vz > z_slice_bounds[0] && vz < z_slice_bounds[1];
 	bool nhits_slice_use = nhits > nhits_slice_bounds[0] && nhits < nhits_slice_bounds[1];
 	bool pt_slice_use = pt > pt_slice_bounds[0] && pt < pt_slice_bounds[1];
 	bool eta_slice_use = eta > eta_slice_bounds[0] && eta < eta_slice_bounds[1];
@@ -281,7 +281,7 @@ int main(int argc, char** argv) {
 	if (!eta_slice)
 	  eta_slice_use = true;
 
-	const double pars[9] = {pt, nt.p_tk_eta->at(itk), nt.p_tk_phi->at(itk), nt.p_tk_dxybs->at(itk), nt.p_tk_dxypv->at(itk), nt.p_tk_dxy->at(itk), dz, dzpv, dzpv};
+	const double pars[9] = {pt, nt.p_tk_eta->at(itk), nt.p_tk_phi->at(itk), nt.p_tk_dxybs->at(itk), nt.p_tk_dxypv->at(itk), nt.p_tk_dxybs->at(itk), vz, dzpv, dzpv};
 	const double errs[5] = {nt.p_tk_err_qpt->at(itk), nt.p_tk_err_eta->at(itk), nt.p_tk_err_phi->at(itk), nt.p_tk_err_dxy->at(itk), nt.p_tk_err_dz->at(itk)};
 	const int hitpars[12] = {nhits, npxhits, npxlays, nsthits, nstlays, min_r, max_r, maxpx_r, min_z, max_z, maxpx_z, deltarpx};
 	if (z_slice_use && nhits_slice_use && pt_slice_use && eta_slice_use) {
