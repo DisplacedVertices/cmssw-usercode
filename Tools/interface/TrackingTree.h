@@ -2,6 +2,7 @@
 #define JMTucker_Tools_TrackingTree_h
 
 #include <vector>
+#include "TVector3.h"
 
 class TTree;
 
@@ -46,10 +47,9 @@ struct TrackingTree {
   std::vector<float> tk_qpt;
   std::vector<float> tk_eta;
   std::vector<float> tk_phi;
-  std::vector<float> tk_dxy;
   std::vector<float> tk_dxybs;
   std::vector<float> tk_dxypv;
-  std::vector<float> tk_dz;
+  std::vector<float> tk_dzbs;
   std::vector<float> tk_dzpv;
   std::vector<float> tk_vx;
   std::vector<float> tk_vy;
@@ -75,6 +75,8 @@ struct TrackingTree {
   void tk_maxpxhit(int max_r, int max_z);
   int tk_maxpx_r(int i);
   int tk_maxpx_z(int i);
+  int tk_charge(int i);
+  TVector3 tk_v3(int i);
 
   TrackingTree();
   void clear();
@@ -100,10 +102,9 @@ struct TrackingTree {
   std::vector<float>* p_tk_qpt;
   std::vector<float>* p_tk_eta;
   std::vector<float>* p_tk_phi;
-  std::vector<float>* p_tk_dxy;
   std::vector<float>* p_tk_dxybs;
   std::vector<float>* p_tk_dxypv;
-  std::vector<float>* p_tk_dz;
+  std::vector<float>* p_tk_dzbs;
   std::vector<float>* p_tk_dzpv;
   std::vector<float>* p_tk_vx;
   std::vector<float>* p_tk_vy;
