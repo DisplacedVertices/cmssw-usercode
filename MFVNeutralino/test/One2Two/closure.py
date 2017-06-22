@@ -4,6 +4,8 @@ ROOT.TH1.AddDirectory(0)
 is_mc = True
 year = '2016'
 
+rebin = False
+
 set_style()
 ps = plot_saver('../plots/bkgest/v15/closure%s_%s' % ('' if is_mc else '_data', year), size=(700,700), root=False, log=False)
 
@@ -27,6 +29,12 @@ if year == '2015p6':
     ebin2 = [0.0023, 0.0077, 0.0077, 0.0308]
     ebin3 = [0.0059, 0.0227, 0.0227, 0.1011]
 
+bins = to_array(0.0000, 0.0100, 0.0200, 0.0300, 0.0400, 0.0500, 0.0600, 0.0700, 0.0800, 0.0900, 0.1000, 0.4000)
+ebins_3track = [0.0043, 0.0033, 0.0032, 0.0026, 0.0026, 0.0033, 0.0042, 0.0054, 0.0068, 0.0083, 0.0110]
+ebins_4track = [0.0109, 0.0084, 0.0081, 0.0066, 0.0080, 0.0114, 0.0155, 0.0203, 0.0268, 0.0337, 0.0444]
+ebins_5track = [0.0235, 0.0177, 0.0171, 0.0171, 0.0291, 0.0468, 0.0712, 0.0994, 0.1300, 0.1774, 0.1714]
+ebins = [ebins_3track, ebins_4track, ebins_4track, ebins_5track]
+
 for i in range(4):
     if not is_mc and i > 2:
         h = ROOT.TFile(fns[i]).Get('h_c1v_dvv')
@@ -35,7 +43,13 @@ for i in range(4):
         h.SetLineColor(ROOT.kRed)
         h.SetLineWidth(2)
         h.Scale(1./h.Integral())
-        h.Draw('hist e')
+        if rebin:
+            hr = h.Rebin(len(bins)-1, h.GetName() + '_rebin', bins)
+            for j in range(len(ebins[i])):
+                hr.SetBinError(j+1, ebins[i][j] * hr.GetBinContent(j+1))
+            hr.Draw('hist e')
+        else:
+            h.Draw('hist e')
         ps.save(ntk[i])
 
         ec = ROOT.Double(0)
@@ -64,7 +78,11 @@ for i in range(4):
         else:
             hh.SetMaximum(0.4)
     hh.SetMinimum(0)
-    hh.Draw()
+    if rebin:
+        hhr = hh.Rebin(len(bins)-1, hh.GetName() + '_rebin', bins)
+        hhr.Draw()
+    else:
+        hh.Draw()
 
     h = ROOT.TFile(fns[i]).Get('h_c1v_dvv')
     h.SetStats(0)
@@ -77,7 +95,13 @@ for i in range(4):
             h.Scale(hh.Integral()/h.Integral())
         else:
             h.Scale(1./h.Integral())
-    h.Draw('hist e sames')
+    if rebin:
+        hr = h.Rebin(len(bins)-1, h.GetName() + '_rebin', bins)
+        for j in range(len(ebins[i])):
+            hr.SetBinError(j+1, ebins[i][j] * hr.GetBinContent(j+1))
+        hr.Draw('hist e sames')
+    else:
+        h.Draw('hist e sames')
 
     l1 = ROOT.TLegend(0.35, 0.75, 0.85, 0.85)
     l1.AddEntry(hh, 'Simulated events' if is_mc else 'Data')
