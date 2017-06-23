@@ -458,6 +458,15 @@ auxiliary_data_samples = [
     DataSample('SingleMuon2016G', '/SingleMuon/Run2016G-23Sep2016-v1/AOD'),
     DataSample('SingleMuon2016H2', '/SingleMuon/Run2016H-PromptReco-v2/AOD'),
     DataSample('SingleMuon2016H3', '/SingleMuon/Run2016H-PromptReco-v3/AOD'),
+
+    DataSample('ZeroBias2016B3', '/ZeroBias/Run2016B-23Sep2016-v3/AOD'),
+    DataSample('ZeroBias2016C', '/ZeroBias/Run2016C-23Sep2016-v1/AOD'),
+    DataSample('ZeroBias2016D', '/ZeroBias/Run2016D-23Sep2016-v1/AOD'),
+    DataSample('ZeroBias2016E', '/ZeroBias/Run2016E-23Sep2016-v1/AOD'),
+    DataSample('ZeroBias2016F', '/ZeroBias/Run2016F-23Sep2016-v1/AOD'),
+    DataSample('ZeroBias2016G', '/ZeroBias/Run2016G-23Sep2016-v1/AOD'),
+    DataSample('ZeroBias2016H2', '/ZeroBias/Run2016H-PromptReco-v2/AOD'),
+    DataSample('ZeroBias2016H3', '/ZeroBias/Run2016H-PromptReco-v3/AOD'),
     ]
 
 for s in data_samples + auxiliary_data_samples:

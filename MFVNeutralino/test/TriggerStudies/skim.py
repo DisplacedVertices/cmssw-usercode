@@ -34,7 +34,7 @@ a('myhttwbug', ht_cut = 1000, myhttwbug_m_l1htt_cut = 0.4)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
-    samples = Samples.auxiliary_data_samples
+    samples = [s for s in Samples.auxiliary_data_samples if s.name.startswith('SingleMuon')]
 
     for sample in samples:
         sample.json = '../ana_2015p6.json'

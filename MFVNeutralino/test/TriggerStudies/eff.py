@@ -117,7 +117,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if year == 2015:
         samples = Samples.auxiliary_data_samples_2015 + Samples.leptonic_background_samples_2015 + Samples.ttbar_samples_2015
     elif year == 2016:
-        samples = Samples.auxiliary_data_samples + Samples.leptonic_background_samples + Samples.ttbar_samples
+        muon_data_samples = [s for s in Samples.auxiliary_data_samples if s.name.startswith('SingleMuon')]
+        samples = muon_data_samples + Samples.leptonic_background_samples + Samples.ttbar_samples
         masses = (300, 400, 800, 1200, 1600)
         samples += [getattr(Samples, 'mfv_neu_tau01000um_M%04i'   % m) for m in masses] + [Samples.mfv_neu_tau10000um_M0800]
 
