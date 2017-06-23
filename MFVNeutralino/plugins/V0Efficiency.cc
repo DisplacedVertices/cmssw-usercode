@@ -96,6 +96,10 @@ private:
   TH1D* h_vtx_costh3[nsel][nhyp][ncut];
   TH1D* h_vtx_costh2[nsel][nhyp][ncut];
   TH1D* h_vtx_mass[nsel][nhyp][ncut];
+
+  int sgn(double x) const { return std::signbit(x) ? -1 : 1; };
+  const TransientTrackBuilder* tt_builder;
+  void do_hyps(const int isel, const reco::Vertex& pv, const std::vector<reco::TrackRef> tracks);
 };
 
 const char* MFVV0Efficiency::sel_names[] = { "MFVSelection" };
@@ -237,6 +241,10 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
   edm::Handle<reco::TrackCollection> tracks;
   event.getByToken(tracks_token, tracks);
 
+  edm::ESHandle<TransientTrackBuilder> tt_builder_;
+  setup.get<TransientTrackRecord>().get("TransientTrackBuilder", tt_builder_);
+  tt_builder = &*tt_builder_;
+
   const int nalltracks = int(tracks->size());
   h_nalltracks->Fill(nalltracks);
 
@@ -290,154 +298,158 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
     }
   }
 
-  auto v3 = [](const reco::Track& tk) { TVector3 v; v.SetPtEtaPhi(tk.pt(), tk.eta(), tk.phi()); return v; };
-  auto sgn = [](double x) { return std::signbit(x) ? -1 : 1; };
-  edm::ESHandle<TransientTrackBuilder> tt_builder;
-  setup.get<TransientTrackRecord>().get("TransientTrackBuilder", tt_builder);
-
   for (int isel = 0; isel < nsel; ++isel) { 
     const size_t nseltracks = seltracks[isel].size();
     h_ntracks[isel]->Fill(nseltracks);
     if (debug) printf("%s # selected tracks: %lu\n", sel_names[isel], nseltracks);
 
     for (size_t iseltk = 0; iseltk < nseltracks; ++iseltk) {
-      const size_t itk = seltracks[isel][iseltk];
-      const reco::Track& tki = (*tracks)[itk];
-      const int icharge = tki.charge();
-      const TVector3 iv3 = v3(tki);
+      reco::TrackRef itk(tracks, seltracks[isel][iseltk]);
 
       for (size_t jseltk = iseltk+1; jseltk < nseltracks; ++jseltk) {
-        const size_t jtk = seltracks[isel][jseltk];
-        const reco::Track& tkj = (*tracks)[jtk];
-        const int jcharge = tkj.charge();
-        const TVector3 jv3 = v3(tkj);
+        reco::TrackRef jtk(tracks, seltracks[isel][jseltk]);
 
-        const std::vector<size_t> indices = { itk, jtk };
-        const std::vector<int> charges = { icharge, jcharge };
-        const std::vector<TVector3> v3s = { iv3, jv3 };
-        const size_t ndaughters = charges.size();
+        do_hyps(isel, pv, {itk, jtk});
 
-        bool v_tried = false;
-        std::vector<reco::TransientTrack> ttks(ndaughters);
-        TransientVertex v;
+        for (size_t kseltk = jseltk+1; kseltk < nseltracks; ++kseltk) {
+          reco::TrackRef ktk(tracks, seltracks[isel][kseltk]);
 
-        if (debug) {
-          printf("track set:\n");
-          for (size_t idau = 0; idau < ndaughters; ++idau)
-            printf("  %4lu: %s <%10.4f %10.4f %10.4f>\n", indices[idau], charges[idau] > 0 ? "+" : "-", v3s[idau].Pt(), v3s[idau].Eta(), v3s[idau].Phi());
-        }
-        
-        for (size_t ihyp = 0; ihyp < nhyp; ++ihyp) {
-          const particle_hypo& hyp = particle_hypos[ihyp];
-          if (hyp.ndaughters() != ndaughters)
-            continue;
-          if (debug) printf("hypothesis %s:\n", hyp.name);
-
-          std::vector<double> test(hyp.charges_and_masses);
-
-          do {
-            if (debug) {
-              printf("permutation:");
-              for (size_t idau = 0; idau < ndaughters; ++idau)
-                printf(" %10.4f", test[idau]);
-              printf("\n");
-            }
-
-            bool all_same = true, all_opp = true;
-            for (size_t idau = 0; idau < ndaughters; ++idau) {
-              const int x = charges[idau] * sgn(test[idau]);
-              if (x > 0) all_opp = false;
-              if (x < 0) all_same = false;
-            }
-            if (debug) printf("all same? %i opp? %i\n", all_same, all_opp);
-
-            if (!(all_same || all_opp))
-              continue;
-            
-            if (!v_tried) {
-              for (size_t idau = 0; idau < ndaughters; ++idau)
-                ttks[idau] = tt_builder->build((*tracks)[indices[idau]]);
-              const std::vector<TransientVertex> vv(1, kv_reco->vertex(ttks));
-              v = vv[0];
-              v_tried = true;
-            }
-
-            TLorentzVector sum_prefit, p4;
-            for (size_t idau = 0; idau < ndaughters; ++idau) {
-              const double mass = fabs(test[idau]);
-              p4.SetVectM(v3s[idau], mass);
-              sum_prefit += p4;
-            }
-
-            if (debug) printf(" pre-fit 4-vector: p = %10.4f y = %10.4f eta = %10.4f phi = %10.4f M = %10.4f>\n", sum_prefit.P(), sum_prefit.Rapidity(), sum_prefit.Eta(), sum_prefit.Phi(), sum_prefit.M());
-
-            bool v_use[ncut] = {1,0,0,0};
-
-            if (v.isValid()) {
-              const double chi2ndof = v.normalisedChiSquared();
-              const GlobalPoint pos = v.position();
-              const GlobalError cov = v.positionError();
-              const double x = pos.x();
-              const double y = pos.y();
-              const double z = pos.z();
-              const double nsigrho = VertexDistanceXY().distance(v.vertexState(), pv).significance();
-
-              const TVector3 flight(x - pvx, y - pvy, z - pvz);
-              const TVector3 flight_dir(flight.Unit());
-              const TVector2 flight_dir_2(flight_dir.X(), flight_dir.Y());
-
-              TLorentzVector sum;
-              for (size_t idau = 0; idau < ndaughters; ++idau) {
-                const double mass = fabs(test[idau]);
-                const reco::TransientTrack refit_tk = v.refittedTrack(ttks[idau]);
-                p4.SetXYZM(refit_tk.track().px(), refit_tk.track().py(), refit_tk.track().pz(), mass);
-                sum += p4;
-              }
-
-              if (debug) {
-                printf("vertex chi2: %10.4f (%.1f dof)  position: <%10.4f %10.4f %10.4f>  err: <%10.4f %10.4f %10.4f / %10.4f %10.4f / %10.4f>\n",
-                       chi2ndof, v.degreesOfFreedom(), x, y, z, cov.cxx(), cov.cyx(), cov.czx(), cov.cyy(), cov.czy(), cov.czz());
-                printf("post-fit 4-vector: p = %10.4f y = %10.4f eta = %10.4f phi = %10.4f M = %10.4f>\n", sum.P(), sum.Rapidity(), sum.Eta(), sum.Phi(), sum.M());
-              }
-
-              v_use[1] = chi2ndof < 7;
-              v_use[2] = chi2ndof < 7 && fabs(sum.M() - hyp.inv_mass) < hyp.inv_mass_window;
-              v_use[3] = chi2ndof < 7 && fabs(sum.M() - hyp.inv_mass) < hyp.inv_mass_window && nsigrho > 15;
-
-              for (int icut = 0; icut < ncut; ++icut) {
-                if (!v_use[icut])
-                  continue;
-
-                h_vtx_chi2[isel][ihyp][icut]->Fill(chi2ndof);
-                h_vtx_x[isel][ihyp][icut]->Fill(flight.X());
-                h_vtx_y[isel][ihyp][icut]->Fill(flight.Y());
-                h_vtx_z[isel][ihyp][icut]->Fill(flight.Z());
-                h_vtx_r[isel][ihyp][icut]->Fill(flight.Mag());
-                h_vtx_rho[isel][ihyp][icut]->Fill(flight.Perp());
-                h_vtx_nsigrho[isel][ihyp][icut]->Fill(nsigrho);
-
-                h_vtx_p[isel][ihyp][icut]->Fill(sum.P());
-                h_vtx_costh3[isel][ihyp][icut]->Fill(sum.Vect().Unit().Dot(flight_dir));
-                h_vtx_costh2[isel][ihyp][icut]->Fill(cos(sum.Vect().Unit().XYvector().DeltaPhi(flight_dir_2)));
-                h_vtx_mass[isel][ihyp][icut]->Fill(sum.M());
-              }
-            }
-            else if (debug)
-              printf("vertex is invalid!\n");
-
-            for (int icut = 0; icut < ncut; ++icut) {
-              if (!v_use[icut])
-                continue;
-              h_prefit_p[isel][ihyp][icut]->Fill(sum_prefit.P());
-              h_prefit_mass[isel][ihyp][icut]->Fill(sum_prefit.M());
-            }
-          }
-          while (std::next_permutation(test.begin(), test.end()));
+          do_hyps(isel, pv, {itk, jtk, ktk});
         }
       }
     }
   }
 }
 
-DEFINE_FWK_MODULE(MFVV0Efficiency);
+void MFVV0Efficiency::do_hyps(const int isel, const reco::Vertex& pv, const std::vector<reco::TrackRef> tracks) {
+  const size_t ndaughters = tracks.size();
+  std::vector<int> charges(ndaughters, 0);
+  std::vector<TVector3> v3s(ndaughters);
 
+  for (size_t i = 0; i < ndaughters; ++i) {
+    const reco::Track& tk = *tracks[i];
+    charges[i] = tk.charge();
+    v3s[i].SetPtEtaPhi(tk.pt(), tk.eta(), tk.phi());
+  }
+
+
+  bool v_tried = false;
+  std::vector<reco::TransientTrack> ttks(ndaughters);
+  TransientVertex v;
+
+  if (debug) {
+    printf("track set:\n");
+    for (size_t idau = 0; idau < ndaughters; ++idau)
+      printf("  %4u: %s <%10.4f %10.4f %10.4f>\n", tracks[idau].key(), charges[idau] > 0 ? "+" : "-", v3s[idau].Pt(), v3s[idau].Eta(), v3s[idau].Phi());
+  }
+        
+  for (size_t ihyp = 0; ihyp < nhyp; ++ihyp) {
+    const particle_hypo& hyp = particle_hypos[ihyp];
+    if (hyp.ndaughters() != ndaughters)
+      continue;
+    if (debug) printf("hypothesis %s:\n", hyp.name);
+
+    std::vector<double> test(hyp.charges_and_masses);
+
+    do {
+      if (debug) {
+        printf("permutation:");
+        for (size_t idau = 0; idau < ndaughters; ++idau)
+          printf(" %10.4f", test[idau]);
+        printf("\n");
+      }
+
+      bool all_same = true, all_opp = true;
+      for (size_t idau = 0; idau < ndaughters; ++idau) {
+        const int x = charges[idau] * sgn(test[idau]);
+        if (x > 0) all_opp = false;
+        if (x < 0) all_same = false;
+      }
+      if (debug) printf("all same? %i opp? %i\n", all_same, all_opp);
+
+      if (!(all_same || all_opp))
+        continue;
+            
+      if (!v_tried) {
+        for (size_t idau = 0; idau < ndaughters; ++idau)
+          ttks[idau] = tt_builder->build(tracks[idau]);
+        const std::vector<TransientVertex> vv(1, kv_reco->vertex(ttks));
+        v = vv[0];
+        v_tried = true;
+      }
+
+      TLorentzVector sum_prefit, p4;
+      for (size_t idau = 0; idau < ndaughters; ++idau) {
+        const double mass = fabs(test[idau]);
+        p4.SetVectM(v3s[idau], mass);
+        sum_prefit += p4;
+      }
+
+      if (debug) printf(" pre-fit 4-vector: p = %10.4f y = %10.4f eta = %10.4f phi = %10.4f M = %10.4f>\n", sum_prefit.P(), sum_prefit.Rapidity(), sum_prefit.Eta(), sum_prefit.Phi(), sum_prefit.M());
+
+      bool v_use[ncut] = {1,0,0,0};
+
+      if (v.isValid()) {
+        const double chi2ndof = v.normalisedChiSquared();
+        const GlobalPoint pos = v.position();
+        const GlobalError cov = v.positionError();
+        const double x = pos.x();
+        const double y = pos.y();
+        const double z = pos.z();
+        const double nsigrho = VertexDistanceXY().distance(v.vertexState(), pv).significance();
+
+        const TVector3 flight(x - pv.x(), y - pv.y(), z - pv.z());
+        const TVector3 flight_dir(flight.Unit());
+        const TVector2 flight_dir_2(flight_dir.X(), flight_dir.Y());
+
+        TLorentzVector sum;
+        for (size_t idau = 0; idau < ndaughters; ++idau) {
+          const double mass = fabs(test[idau]);
+          const reco::TransientTrack refit_tk = v.refittedTrack(ttks[idau]);
+          p4.SetXYZM(refit_tk.track().px(), refit_tk.track().py(), refit_tk.track().pz(), mass);
+          sum += p4;
+        }
+
+        if (debug) {
+          printf("vertex chi2: %10.4f (%.1f dof)  position: <%10.4f %10.4f %10.4f>  err: <%10.4f %10.4f %10.4f / %10.4f %10.4f / %10.4f>\n",
+                 chi2ndof, v.degreesOfFreedom(), x, y, z, cov.cxx(), cov.cyx(), cov.czx(), cov.cyy(), cov.czy(), cov.czz());
+          printf("post-fit 4-vector: p = %10.4f y = %10.4f eta = %10.4f phi = %10.4f M = %10.4f>\n", sum.P(), sum.Rapidity(), sum.Eta(), sum.Phi(), sum.M());
+        }
+
+        v_use[1] = chi2ndof < 7;
+        v_use[2] = chi2ndof < 7 && fabs(sum.M() - hyp.inv_mass) < hyp.inv_mass_window;
+        v_use[3] = chi2ndof < 7 && fabs(sum.M() - hyp.inv_mass) < hyp.inv_mass_window && nsigrho > 15;
+
+        for (int icut = 0; icut < ncut; ++icut) {
+          if (!v_use[icut])
+            continue;
+
+          h_vtx_chi2[isel][ihyp][icut]->Fill(chi2ndof);
+          h_vtx_x[isel][ihyp][icut]->Fill(flight.X());
+          h_vtx_y[isel][ihyp][icut]->Fill(flight.Y());
+          h_vtx_z[isel][ihyp][icut]->Fill(flight.Z());
+          h_vtx_r[isel][ihyp][icut]->Fill(flight.Mag());
+          h_vtx_rho[isel][ihyp][icut]->Fill(flight.Perp());
+          h_vtx_nsigrho[isel][ihyp][icut]->Fill(nsigrho);
+
+          h_vtx_p[isel][ihyp][icut]->Fill(sum.P());
+          h_vtx_costh3[isel][ihyp][icut]->Fill(sum.Vect().Unit().Dot(flight_dir));
+          h_vtx_costh2[isel][ihyp][icut]->Fill(cos(sum.Vect().Unit().XYvector().DeltaPhi(flight_dir_2)));
+          h_vtx_mass[isel][ihyp][icut]->Fill(sum.M());
+        }
+      }
+      else if (debug)
+        printf("vertex is invalid!\n");
+
+      for (int icut = 0; icut < ncut; ++icut) {
+        if (!v_use[icut])
+          continue;
+        h_prefit_p[isel][ihyp][icut]->Fill(sum_prefit.P());
+        h_prefit_mass[isel][ihyp][icut]->Fill(sum_prefit.M());
+      }
+    }
+    while (std::next_permutation(test.begin(), test.end()));
+  }
+}
+
+DEFINE_FWK_MODULE(MFVV0Efficiency);
