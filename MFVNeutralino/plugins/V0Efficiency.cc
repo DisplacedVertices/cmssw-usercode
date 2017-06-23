@@ -48,7 +48,7 @@ private:
   TH1D* h_pvntracks;
   TH1D* h_nalltracks;
 
-  enum { self_mfv, nsel };
+  enum { sel_mfv, nsel };
   static const char* sel_names[nsel];
 
   TH1D* h_ntracks[nsel];
@@ -72,34 +72,39 @@ private:
     const char* name;
     std::vector<double> charges_and_masses;
     double inv_mass;
-    double inv_mass_lo;
-    double inv_mass_hi;
+    double inv_mass_window;
     size_t ndaughters() const { return charges_and_masses.size(); }
     //    int charge(size_t i) const { return sgn(charges_and_masses[i]); }
     //    double mass(size_t i) const { return fabs(charges_and_masses[i]); }
   };
-  enum { K0_pi_pi, Lambda_p_pi, nhyp };
+  enum { K0_2pi, Kp_3pi, Lambda_p_pi, nhyp };
   static const particle_hypo particle_hypos[nhyp];
 
-  TH1D* h_prefit_p[nsel][nhyp];
-  TH1D* h_prefit_costh[nsel][nhyp];
-  TH1D* h_prefit_mass[nsel][nhyp];
-  TH1D* h_vtx_chi2[nsel][nhyp];
-  TH1D* h_vtx_x[nsel][nhyp];
-  TH1D* h_vtx_y[nsel][nhyp];
-  TH1D* h_vtx_z[nsel][nhyp];
-  TH1D* h_vtx_r[nsel][nhyp];
-  TH1D* h_vtx_rho[nsel][nhyp];
-  TH1D* h_vtx_p[nsel][nhyp];
-  TH1D* h_vtx_costh[nsel][nhyp];
-  TH1D* h_vtx_mass[nsel][nhyp];
+  enum { cut_nocuts, cut_chi2, cut_chi2mass, cut_chi2massNsig, ncut };
+  static const char* cut_names[ncut];
+
+  TH1D* h_prefit_p[nsel][nhyp][ncut];
+  TH1D* h_prefit_mass[nsel][nhyp][ncut];
+  TH1D* h_vtx_chi2[nsel][nhyp][ncut];
+  TH1D* h_vtx_x[nsel][nhyp][ncut];
+  TH1D* h_vtx_y[nsel][nhyp][ncut];
+  TH1D* h_vtx_z[nsel][nhyp][ncut];
+  TH1D* h_vtx_r[nsel][nhyp][ncut];
+  TH1D* h_vtx_rho[nsel][nhyp][ncut];
+  TH1D* h_vtx_nsigrho[nsel][nhyp][ncut];
+  TH1D* h_vtx_p[nsel][nhyp][ncut];
+  TH1D* h_vtx_costh3[nsel][nhyp][ncut];
+  TH1D* h_vtx_costh2[nsel][nhyp][ncut];
+  TH1D* h_vtx_mass[nsel][nhyp][ncut];
 };
 
 const char* MFVV0Efficiency::sel_names[] = { "MFVSelection" };
 const MFVV0Efficiency::particle_hypo MFVV0Efficiency::particle_hypos[] = {
-  { "K0_pi_pi",    { 0.139570, -0.139570 }, 0.497611, 0, 5 },
-  { "Lambda_p_pi", { 0.938272, -0.139570 }, 1.115683, 0, 5 }
+  { "K0_2pi",    { 0.139570, -0.139570 }, 0.497611, 0.07 },
+  { "Kp_3pi",    { 0.139570,  0.139570, -0.139570 }, 0.493677, 0.07 },
+  { "Lambda_p_pi", { 0.938272, -0.139570 }, 1.115683, 0.05 }
 };
+const char* MFVV0Efficiency::cut_names[] = { "no cuts", "chi2 only", "chi2, mass", "chi2, mass, NsigLxy" };
 
 MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
   : kv_reco(new KalmanVertexFitter(cfg.getParameter<edm::ParameterSet>("kvr_params"), cfg.getParameter<edm::ParameterSet>("kvr_params").getParameter<bool>("doSmoothing"))),
@@ -149,20 +154,25 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
     for (int ihyp = 0; ihyp < nhyp; ++ihyp) {
       TFileDirectory dd = d.mkdir(particle_hypos[ihyp].name);
 
-      h_prefit_p[isel][ihyp] = dd.make<TH1D>("h_prefit_p", ";pre-fit candidate momentum (GeV);candidates/1 GeV", 500, 0, 500);
-      h_prefit_costh[isel][ihyp] = dd.make<TH1D>("h_prefit_costh", ";pre-fit candidate cos(angle between displacement and flight dir);candidates/0.01", 201, -1, 1.01);
-      h_prefit_mass[isel][ihyp] = dd.make<TH1D>("h_prefit_mass", ";pre-fit candidate invariant mass (GeV);candidates/10 MeV", 500, 0, 5);
+      for (int icut = 0; icut < ncut; ++icut) {
+        TFileDirectory ddd = dd.mkdir(cut_names[icut]);
 
-      h_vtx_chi2[isel][ihyp] = dd.make<TH1D>("h_vtx_chi2", ";candidate vertex #chi^{2}/ndf;candidates/0.05", 200, 0, 10);
-      h_vtx_x[isel][ihyp] = dd.make<TH1D>("h_vtx_x", ";candidate vertex x - pv x (cm);candidates/10 #mum", 4000, -2,2);
-      h_vtx_y[isel][ihyp] = dd.make<TH1D>("h_vtx_y", ";candidate vertex y - pv y (cm);candidates/10 #mum", 4000, -2,2);
-      h_vtx_z[isel][ihyp] = dd.make<TH1D>("h_vtx_y", ";candidate vertex z - pv z (cm);candidates/10 #mum", 4000, -2,2);
-      h_vtx_r[isel][ihyp] = dd.make<TH1D>("h_vtx_y", ";candidate vertex - pv (cm);candidates/10 #mum", 4000, -2,2);
-      h_vtx_rho[isel][ihyp] = dd.make<TH1D>("h_vtx_y", ";candidate vertex - pv (2D) (cm);candidates/10 #mum", 4000, -2,2);
+        h_prefit_p[isel][ihyp][icut] = ddd.make<TH1D>("h_prefit_p", ";pre-fit candidate momentum (GeV);candidates/1 GeV", 500, 0, 500);
+        h_prefit_mass[isel][ihyp][icut] = ddd.make<TH1D>("h_prefit_mass", ";pre-fit candidate invariant mass (GeV);candidates/10 MeV", 500, 0, 5);
 
-      h_vtx_p[isel][ihyp] = dd.make<TH1D>("h_vtx_p", ";post-fit candidate momentum (GeV);candidates/1 GeV", 500, 0, 500);
-      h_vtx_costh[isel][ihyp] = dd.make<TH1D>("h_vtx_costh", ";post-fit candidate cos(angle between displacement and flight dir);candidates/0.01", 201, -1, 1.01);
-      h_vtx_mass[isel][ihyp] = dd.make<TH1D>("h_vtx_mass", ";post-fit candidate invariant mass (GeV);candidates/10 MeV", 500, 0, 5);
+        h_vtx_chi2[isel][ihyp][icut] = ddd.make<TH1D>("h_vtx_chi2", ";candidate vertex #chi^{2}/ndf;candidates/0.05", 200, 0, 10);
+        h_vtx_x[isel][ihyp][icut] = ddd.make<TH1D>("h_vtx_x", ";candidate vertex x - pv x (cm);candidates/40 #mum", 2000, -4,4);
+        h_vtx_y[isel][ihyp][icut] = ddd.make<TH1D>("h_vtx_y", ";candidate vertex y - pv y (cm);candidates/40 #mum", 2000, -4,4);
+        h_vtx_z[isel][ihyp][icut] = ddd.make<TH1D>("h_vtx_z", ";candidate vertex z - pv z (cm);candidates/40 #mum", 2000, -4,4);
+        h_vtx_r[isel][ihyp][icut] = ddd.make<TH1D>("h_vtx_r", ";candidate vertex - pv (cm);candidates/40 #mum", 2000, 0, 8);
+        h_vtx_rho[isel][ihyp][icut] = ddd.make<TH1D>("h_vtx_rho", ";candidate vertex - pv (2D) (cm);candidates/10 #mum", 2000, 0, 8);
+        h_vtx_nsigrho[isel][ihyp][icut] = ddd.make<TH1D>("h_vtx_nsigrho", ";N#sigma(candidate vertex - pv (2D));candidates/0.1", 1000, 0, 100);
+
+        h_vtx_p[isel][ihyp][icut] = ddd.make<TH1D>("h_vtx_p", ";post-fit candidate momentum (GeV);candidates/1 GeV", 500, 0, 500);
+        h_vtx_costh3[isel][ihyp][icut] = ddd.make<TH1D>("h_vtx_costh3", ";post-fit candidate cos(angle between displacement and flight dir);candidates/0.01", 201, -1, 1.01);
+        h_vtx_costh2[isel][ihyp][icut] = ddd.make<TH1D>("h_vtx_costh2", ";post-fit candidate cos(angle between displacement and flight dir (2D));candidates/0.01", 201, -1, 1.01);
+        h_vtx_mass[isel][ihyp][icut] = ddd.make<TH1D>("h_vtx_mass", ";post-fit candidate invariant mass (GeV);candidates/10 MeV", 500, 0, 5);
+      }
     }
   }
 }
@@ -253,6 +263,7 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
     const int min_r = tk.hitPattern().hasValidHitInFirstPixelBarrel() ? 1 : 2000000000;
 
     const bool use[nsel] = {
+      //tk.quality(reco::TrackBase::loose) && tk.normalizedChi2() < 5 && tk.hitPattern().numberOfValidHits() >= 6,  V0Producer cuts, but too many combinatorics without the PCA calculation
       pt > 1 && npxlayers >= 2 && ((aeta < 2 && nstlayers >= 6) || (aeta >= 2 && nstlayers >= 7)) && fabs(nsigmadxybs) > 4 && min_r == 1
     };
 
@@ -306,12 +317,16 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
         const std::vector<TVector3> v3s = { iv3, jv3 };
         const size_t ndaughters = charges.size();
 
+        bool v_tried = false;
+        std::vector<reco::TransientTrack> ttks(ndaughters);
+        TransientVertex v;
+
         if (debug) {
           printf("track set:\n");
           for (size_t idau = 0; idau < ndaughters; ++idau)
             printf("  %4lu: %s <%10.4f %10.4f %10.4f>\n", indices[idau], charges[idau] > 0 ? "+" : "-", v3s[idau].Pt(), v3s[idau].Eta(), v3s[idau].Phi());
         }
-
+        
         for (size_t ihyp = 0; ihyp < nhyp; ++ihyp) {
           const particle_hypo& hyp = particle_hypos[ihyp];
           if (hyp.ndaughters() != ndaughters)
@@ -339,56 +354,83 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
             if (!(all_same || all_opp))
               continue;
             
-            std::vector<reco::TransientTrack> ttks(ndaughters);
-            for (size_t idau = 0; idau < ndaughters; ++idau)
-              ttks[idau] = tt_builder->build((*tracks)[indices[idau]]);
+            if (!v_tried) {
+              for (size_t idau = 0; idau < ndaughters; ++idau)
+                ttks[idau] = tt_builder->build((*tracks)[indices[idau]]);
+              const std::vector<TransientVertex> vv(1, kv_reco->vertex(ttks));
+              v = vv[0];
+              v_tried = true;
+            }
 
-            const std::vector<TransientVertex> vv(1, kv_reco->vertex(ttks));
-            const TransientVertex& v(vv[0]);
-            const double chi2ndof = v.normalisedChiSquared();
-            const double ndof = v.degreesOfFreedom();
-            const double x = v.position().x();
-            const double y = v.position().y();
-            const double z = v.position().z();
-            const GlobalError cov = v.positionError();
-
-            const TVector3 flight(x - pvx, y - pvy, z - pvz);
-            const TVector3 flight_dir(flight.Unit());
-
-            TLorentzVector sum_prefit, sum, p4;
+            TLorentzVector sum_prefit, p4;
             for (size_t idau = 0; idau < ndaughters; ++idau) {
               const double mass = fabs(test[idau]);
-
               p4.SetVectM(v3s[idau], mass);
               sum_prefit += p4;
-
-              reco::TransientTrack refit_tk(ttks[idau]);
-              p4.SetXYZM(refit_tk.track().px(), refit_tk.track().py(), refit_tk.track().pz(), mass);
-              sum += p4;
             }
 
-            if (debug) {
-              printf("vertex valid? %i chi2: %10.4f (%.1f dof)  position: <%10.4f %10.4f %10.4f>  err: <%10.4f %10.4f %10.4f / %10.4f %10.4f / %10.4f>\n",
-                     v.isValid(), chi2ndof, ndof, x, y, z,
-                     cov.cxx(), cov.cyx(), cov.czx(), cov.cyy(), cov.czy(), cov.czz());
-              printf(" pre-fit 4-vector: p = %10.4f y = %10.4f eta = %10.4f phi = %10.4f M = %10.4f>\n", sum_prefit.P(), sum_prefit.Rapidity(), sum_prefit.Eta(), sum_prefit.Phi(), sum_prefit.M());
-              printf("post-fit 4-vector: p = %10.4f y = %10.4f eta = %10.4f phi = %10.4f M = %10.4f>\n", sum.P(), sum.Rapidity(), sum.Eta(), sum.Phi(), sum.M());
+            if (debug) printf(" pre-fit 4-vector: p = %10.4f y = %10.4f eta = %10.4f phi = %10.4f M = %10.4f>\n", sum_prefit.P(), sum_prefit.Rapidity(), sum_prefit.Eta(), sum_prefit.Phi(), sum_prefit.M());
+
+            bool v_use[ncut] = {1,0,0,0};
+
+            if (v.isValid()) {
+              const double chi2ndof = v.normalisedChiSquared();
+              const GlobalPoint pos = v.position();
+              const GlobalError cov = v.positionError();
+              const double x = pos.x();
+              const double y = pos.y();
+              const double z = pos.z();
+              const double nsigrho = VertexDistanceXY().distance(v.vertexState(), pv).significance();
+
+              const TVector3 flight(x - pvx, y - pvy, z - pvz);
+              const TVector3 flight_dir(flight.Unit());
+              const TVector2 flight_dir_2(flight_dir.X(), flight_dir.Y());
+
+              TLorentzVector sum;
+              for (size_t idau = 0; idau < ndaughters; ++idau) {
+                const double mass = fabs(test[idau]);
+                const reco::TransientTrack refit_tk = v.refittedTrack(ttks[idau]);
+                p4.SetXYZM(refit_tk.track().px(), refit_tk.track().py(), refit_tk.track().pz(), mass);
+                sum += p4;
+              }
+
+              if (debug) {
+                printf("vertex chi2: %10.4f (%.1f dof)  position: <%10.4f %10.4f %10.4f>  err: <%10.4f %10.4f %10.4f / %10.4f %10.4f / %10.4f>\n",
+                       chi2ndof, v.degreesOfFreedom(), x, y, z, cov.cxx(), cov.cyx(), cov.czx(), cov.cyy(), cov.czy(), cov.czz());
+                printf("post-fit 4-vector: p = %10.4f y = %10.4f eta = %10.4f phi = %10.4f M = %10.4f>\n", sum.P(), sum.Rapidity(), sum.Eta(), sum.Phi(), sum.M());
+              }
+
+              v_use[1] = chi2ndof < 7;
+              v_use[2] = chi2ndof < 7 && fabs(sum.M() - hyp.inv_mass) < hyp.inv_mass_window;
+              v_use[3] = chi2ndof < 7 && fabs(sum.M() - hyp.inv_mass) < hyp.inv_mass_window && nsigrho > 15;
+
+              for (int icut = 0; icut < ncut; ++icut) {
+                if (!v_use[icut])
+                  continue;
+
+                h_vtx_chi2[isel][ihyp][icut]->Fill(chi2ndof);
+                h_vtx_x[isel][ihyp][icut]->Fill(flight.X());
+                h_vtx_y[isel][ihyp][icut]->Fill(flight.Y());
+                h_vtx_z[isel][ihyp][icut]->Fill(flight.Z());
+                h_vtx_r[isel][ihyp][icut]->Fill(flight.Mag());
+                h_vtx_rho[isel][ihyp][icut]->Fill(flight.Perp());
+                h_vtx_nsigrho[isel][ihyp][icut]->Fill(nsigrho);
+
+                h_vtx_p[isel][ihyp][icut]->Fill(sum.P());
+                h_vtx_costh3[isel][ihyp][icut]->Fill(sum.Vect().Unit().Dot(flight_dir));
+                h_vtx_costh2[isel][ihyp][icut]->Fill(cos(sum.Vect().Unit().XYvector().DeltaPhi(flight_dir_2)));
+                h_vtx_mass[isel][ihyp][icut]->Fill(sum.M());
+              }
             }
-              
-            h_prefit_p[isel][ihyp]->Fill(sum_prefit.P());
-            h_prefit_costh[isel][ihyp]->Fill(sum_prefit.Vect().Unit().Dot(flight_dir));
-            h_prefit_mass[isel][ihyp]->Fill(sum_prefit.M());
+            else if (debug)
+              printf("vertex is invalid!\n");
 
-            h_vtx_chi2[isel][ihyp]->Fill(chi2ndof);
-            h_vtx_x[isel][ihyp]->Fill(flight.X());
-            h_vtx_y[isel][ihyp]->Fill(flight.Y());
-            h_vtx_z[isel][ihyp]->Fill(flight.Z());
-            h_vtx_r[isel][ihyp]->Fill(flight.Mag());
-            h_vtx_rho[isel][ihyp]->Fill(flight.Perp());
-
-            h_vtx_p[isel][ihyp]->Fill(sum.P());
-            h_vtx_costh[isel][ihyp]->Fill(sum.Vect().Unit().Dot(flight_dir));
-            h_vtx_mass[isel][ihyp]->Fill(sum.M());
+            for (int icut = 0; icut < ncut; ++icut) {
+              if (!v_use[icut])
+                continue;
+              h_prefit_p[isel][ihyp][icut]->Fill(sum_prefit.P());
+              h_prefit_mass[isel][ihyp][icut]->Fill(sum_prefit.M());
+            }
           }
           while (std::next_permutation(test.begin(), test.end()));
         }

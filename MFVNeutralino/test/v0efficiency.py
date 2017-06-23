@@ -24,12 +24,12 @@ process.v0eff = cms.EDAnalyzer('MFVV0Efficiency',
                                beamspot_src = cms.InputTag('offlineBeamSpot'),
                                primary_vertices_src = cms.InputTag('goodOfflinePrimaryVertices'),
                                tracks_src = cms.InputTag('generalTracks'),
-                               debug = cms.untracked.bool(True)
+                               #debug = cms.untracked.bool(True)
                                )
 
 process.p = cms.Path(process.goodOfflinePrimaryVertices * process.v0eff)
 
-process.maxEvents.input = 100
-report_every(process, 200)
+process.maxEvents.input = -1
 set_lumis_to_process_from_json(process, 'ana_2016.json')
-want_summary(process)
+#report_every(process, 1)
+#want_summary(process)
