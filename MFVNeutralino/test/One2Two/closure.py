@@ -4,6 +4,8 @@ ROOT.TH1.AddDirectory(0)
 is_mc = True
 year = '2016'
 
+rebin = False
+
 set_style()
 ps = plot_saver('../plots/bkgest/v15/closure%s_%s' % ('' if is_mc else '_data', year), size=(700,700), root=False, log=False)
 
@@ -27,6 +29,18 @@ if year == '2015p6':
     ebin2 = [0.0023, 0.0077, 0.0077, 0.0308]
     ebin3 = [0.0059, 0.0227, 0.0227, 0.1011]
 
+bins = to_array(0.0000, 0.0100, 0.0200, 0.0300, 0.0400, 0.0500, 0.0600, 0.0700, 0.0800, 0.0900, 0.1000, 0.4000)
+ebins_3track = [0.0043, 0.0033, 0.0032, 0.0026, 0.0026, 0.0033, 0.0042, 0.0054, 0.0068, 0.0083, 0.0110]
+ebins_4track = [0.0109, 0.0084, 0.0081, 0.0066, 0.0080, 0.0114, 0.0155, 0.0203, 0.0268, 0.0337, 0.0444]
+ebins_5track = [0.0235, 0.0177, 0.0171, 0.0171, 0.0291, 0.0468, 0.0712, 0.0994, 0.1300, 0.1774, 0.1714]
+ebins = [ebins_3track, ebins_4track, ebins_4track, ebins_5track]
+
+#bins = to_array(0.0000, 0.0100, 0.0200, 0.0300, 0.0400, 0.0500, 0.0600, 0.0700, 0.0800, 0.0900, 0.1000, 0.1100, 0.1200, 0.1300, 0.1400, 0.1500, 0.1600, 0.1700, 0.1800, 0.1900, 0.2000, 0.2100, 0.2200, 0.2300, 0.2400, 0.2500, 0.2600, 0.2700, 0.2800, 0.2900, 0.3000, 0.3100, 0.3200, 0.3300, 0.3400, 0.3500, 0.3600, 0.3700, 0.3800, 0.3900, 0.4000)
+#ebins_3track = [0.0043, 0.0033, 0.0031, 0.0026, 0.0026, 0.0032, 0.0042, 0.0054, 0.0066, 0.0081, 0.0099, 0.0116, 0.0140, 0.0162, 0.0192, 0.0213, 0.0253, 0.0282, 0.0314, 0.0379, 0.0435, 0.0492, 0.0578, 0.0629, 0.0656, 0.0798, 0.0793, 0.0965, 0.1182, 0.0966, 0.1272, 0.1340, 0.1445, 0.2003, 0.2222, 0.2087, 0.2332, 0.2101, 0.2060, 0.1022]
+#ebins_4track = [0.0109, 0.0083, 0.0080, 0.0065, 0.0078, 0.0111, 0.0153, 0.0203, 0.0263, 0.0329, 0.0415, 0.0496, 0.0628, 0.0731, 0.0888, 0.0976, 0.1186, 0.1364, 0.1618, 0.1887, 0.2093, 0.2162, 0.2414, 0.2800, 0.3158, 0.3000, 0.3158, 0.3571, 0.4167, 0.4167, 0.3846, 0.5000, 0.5000, 0.5000, 0.4444, 0.4000, 0.4000, 0.5000, 0.4444, 0.1775]
+#ebins_5track = [0.0235, 0.0170, 0.0168, 0.0171, 0.0282, 0.0452, 0.0680, 0.0936, 0.1300, 0.1613, 0.2093, 0.2414, 0.2609, 0.3529, 0.3571, 0.4545, 0.4000, 0.4000, 0.5000, 0.5714, 0.5000, 0.6000, 0.6000, 0.7500, 0.7500, 0.6667, 0.6667, 1.0000, 1.0000, 1.0000, 1.0000, 1.0000, 2.0000, 2.0000, 2.0000, 1.0000, 1.0000, 1.0000, 1.0000, 0.4098]
+#ebins = [ebins_3track, ebins_4track, ebins_4track, ebins_5track]
+
 for i in range(4):
     if not is_mc and i > 2:
         h = ROOT.TFile(fns[i]).Get('h_c1v_dvv')
@@ -35,7 +49,13 @@ for i in range(4):
         h.SetLineColor(ROOT.kRed)
         h.SetLineWidth(2)
         h.Scale(1./h.Integral())
-        h.Draw('hist e')
+        if rebin:
+            hr = h.Rebin(len(bins)-1, h.GetName() + '_rebin', bins)
+            for j in range(len(ebins[i])):
+                hr.SetBinError(j+1, ebins[i][j] * hr.GetBinContent(j+1))
+            hr.Draw('hist e')
+        else:
+            h.Draw('hist e')
         ps.save(ntk[i])
 
         ec = ROOT.Double(0)
@@ -64,7 +84,11 @@ for i in range(4):
         else:
             hh.SetMaximum(0.4)
     hh.SetMinimum(0)
-    hh.Draw()
+    if rebin:
+        hhr = hh.Rebin(len(bins)-1, hh.GetName() + '_rebin', bins)
+        hhr.Draw()
+    else:
+        hh.Draw()
 
     h = ROOT.TFile(fns[i]).Get('h_c1v_dvv')
     h.SetStats(0)
@@ -77,7 +101,13 @@ for i in range(4):
             h.Scale(hh.Integral()/h.Integral())
         else:
             h.Scale(1./h.Integral())
-    h.Draw('hist e sames')
+    if rebin:
+        hr = h.Rebin(len(bins)-1, h.GetName() + '_rebin', bins)
+        for j in range(len(ebins[i])):
+            hr.SetBinError(j+1, ebins[i][j] * hr.GetBinContent(j+1))
+        hr.Draw('hist e sames')
+    else:
+        h.Draw('hist e sames')
 
     l1 = ROOT.TLegend(0.35, 0.75, 0.85, 0.85)
     l1.AddEntry(hh, 'Simulated events' if is_mc else 'Data')
