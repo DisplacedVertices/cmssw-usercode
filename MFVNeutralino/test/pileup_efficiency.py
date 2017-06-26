@@ -19,7 +19,7 @@ hists = [
     ('sigreg', 'mfvEventHistosSigReg')
     ]
 
-for sample in ['background']:
+for sample in ['background', 'mfv_neu_tau01000um_M0800']:
     xxx = [
         (3, '/uscms_data/d2/tucker/crab_dirs/HistosV15/%s.root' % sample, 'Ntk3'),
         (4, '/uscms_data/d2/tucker/crab_dirs/HistosV15/%s.root' % sample, 'Ntk4'),
@@ -54,6 +54,5 @@ for sample in ['background']:
             else:
                 h.Draw()
             h.GetXaxis().SetRangeUser(0,70)
-            if ntk == 4 and n == 'onevtx':
-                h.GetYaxis().SetRangeUser(0,0.005)
-            ps.save(n + '_ntk%i' % ntk, log=False)
+            ps.save(n + '_ntk%i_' % ntk + sample, log=False)
+    print
