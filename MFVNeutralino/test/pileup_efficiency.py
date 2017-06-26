@@ -38,6 +38,7 @@ for ntk, fn, s2 in xxx:
         exec n+'=h'
         if n != 'presel':
             g = histogram_divide(h, presel, use_effective=True)
+            g.SetTitle('%s-track %s;true nPU;efficiency' % (ntk,n))
             g.Draw('AP')
             fcn = ROOT.TF1('fcn', 'pol1', 10, 50)
             g.Fit(fcn, 'QR')
