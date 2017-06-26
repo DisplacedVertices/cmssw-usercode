@@ -1,8 +1,13 @@
+import os
+
 from JMTucker.Tools.ROOTTools import *
 ROOT.TH1.AddDirectory(0)
 set_style()
 
-ps = plot_saver(plot_dir('pileup_efficiency_run2_v15'), size=(600,600), pdf=True)
+if os.environ['USER'] == 'tucker':
+    ps = plot_saver(plot_dir('pileup_efficiency_run2_v15'), size=(600,600), pdf=True)
+else:
+    ps = plot_saver('plots/pileup/v15/efficiency', size=(700,700), root=False)
 
 bins = to_array([0,10,13,15,65])
 nbins = len(bins)-1
