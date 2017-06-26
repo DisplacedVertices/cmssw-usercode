@@ -33,3 +33,16 @@ process.maxEvents.input = -1
 set_lumis_to_process_from_json(process, 'ana_2016.json')
 #report_every(process, 1)
 #want_summary(process)
+
+if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
+    import JMTucker.Tools.Samples as Samples 
+    samples = Samples.data_samples + [s for s in Samples.auxiliary_data_samples if s.name.startswith('ZeroBias')]
+    for s in samples:
+        s.files_per = 50
+
+    from JMTucker.Tools.MetaSubmitter import *
+    ms = MetaSubmitter('V0EfficiencyV1')
+    ms.common.ex = year
+    ms.common.pset_modifier = H_modifier #chain_modifiers(is_mc_modifier, H_modifier)
+    ms.crab.job_control_from_sample = True
+    ms.submit(samples)
