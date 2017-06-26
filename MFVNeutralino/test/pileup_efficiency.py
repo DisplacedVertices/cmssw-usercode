@@ -2,7 +2,7 @@ from JMTucker.Tools.ROOTTools import *
 ROOT.TH1.AddDirectory(0)
 set_style()
 
-ps = plot_saver(plot_dir('pileup_efficiency_run2_v14'), size=(600,600), pdf=True)
+ps = plot_saver(plot_dir('pileup_efficiency_run2_v15'), size=(600,600), pdf=True)
 
 bins = to_array([0,10,13,15,65])
 nbins = len(bins)-1
@@ -15,9 +15,9 @@ hists = [
     ]
 
 xxx = [
-    (3, '/uscms_data/d2/tucker/crab_dirs/HistosV14/background.root', 'Ntk3'),
-    (4, '/uscms_data/d2/tucker/crab_dirs/HistosV14/background.root', 'Ntk4'),
-    (5, '/uscms_data/d2/tucker/crab_dirs/HistosV14/background.root', ''),
+    (3, '/uscms_data/d2/tucker/crab_dirs/HistosV15/background.root', 'Ntk3'),
+    (4, '/uscms_data/d2/tucker/crab_dirs/HistosV15/background.root', 'Ntk4'),
+    (5, '/uscms_data/d2/tucker/crab_dirs/HistosV15/background.root', ''),
 ]
 
 for ntk, fn, s2 in xxx:
