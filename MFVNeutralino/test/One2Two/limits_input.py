@@ -157,7 +157,5 @@ if __name__ == '__main__':
         make()
     elif 'draw' in sys.argv:
         draw()
-    elif 'combine_datacard' in sys.argv:
-        combine_datacard()
     else:
         print 'dunno'
