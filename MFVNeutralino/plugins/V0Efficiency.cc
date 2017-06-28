@@ -1,4 +1,4 @@
-#include "TH1.h"
+#include "TH2.h"
 #include "TLorentzVector.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
@@ -77,7 +77,7 @@ private:
     //    int charge(size_t i) const { return sgn(charges_and_masses[i]); }
     //    double mass(size_t i) const { return fabs(charges_and_masses[i]); }
   };
-  enum { K0_2pi, Kp_3pi, Lambda_p_pi, nhyp };
+  enum { K0_2pi, Lambda_p_pi, X_2e, Kp_3pi, nhyp };
   static const particle_hypo particle_hypos[nhyp];
 
   enum { cut_nocuts, cut_chi2, cut_chi2mass, cut_chi2massNsig, ncut };
@@ -91,6 +91,7 @@ private:
   TH1D* h_vtx_z[nsel][nhyp][ncut];
   TH1D* h_vtx_r[nsel][nhyp][ncut];
   TH1D* h_vtx_rho[nsel][nhyp][ncut];
+  TH2D* h_vtx_rho_vs_p[nsel][nhyp][ncut];
   TH1D* h_vtx_nsigrho[nsel][nhyp][ncut];
   TH1D* h_vtx_p[nsel][nhyp][ncut];
   TH1D* h_vtx_costh3[nsel][nhyp][ncut];
@@ -105,8 +106,9 @@ private:
 const char* MFVV0Efficiency::sel_names[] = { "MFVSelection" };
 const MFVV0Efficiency::particle_hypo MFVV0Efficiency::particle_hypos[] = {
   { "K0_2pi",    { 0.139570, -0.139570 }, 0.497611, 0.07 },
+  { "Lambda_p_pi", { 0.938272, -0.139570 }, 1.115683, 0.05 },
+  { "X_2e",    { 0.000511, -0.000511 }, 0., 1000. },
   { "Kp_3pi",    { 0.139570,  0.139570, -0.139570 }, 0.493677, 0.07 },
-  { "Lambda_p_pi", { 0.938272, -0.139570 }, 1.115683, 0.05 }
 };
 const char* MFVV0Efficiency::cut_names[] = { "no cuts", "chi2 only", "chi2, mass", "chi2, mass, NsigLxy" };
 
@@ -170,6 +172,7 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
         h_vtx_z[isel][ihyp][icut] = ddd.make<TH1D>("h_vtx_z", ";candidate vertex z - pv z (cm);candidates/40 #mum", 2000, -4,4);
         h_vtx_r[isel][ihyp][icut] = ddd.make<TH1D>("h_vtx_r", ";candidate vertex - pv (cm);candidates/40 #mum", 2000, 0, 8);
         h_vtx_rho[isel][ihyp][icut] = ddd.make<TH1D>("h_vtx_rho", ";candidate vertex - pv (2D) (cm);candidates/10 #mum", 2000, 0, 8);
+        h_vtx_rho_vs_p[isel][ihyp][icut] = ddd.make<TH2D>("h_vtx_rho_vs_p", ";candidate p (GeV);candidate vertex - pv (2D) (cm)", 20,0,10,2000, 0, 8);
         h_vtx_nsigrho[isel][ihyp][icut] = ddd.make<TH1D>("h_vtx_nsigrho", ";N#sigma(candidate vertex - pv (2D));candidates/0.1", 1000, 0, 100);
 
         h_vtx_p[isel][ihyp][icut] = ddd.make<TH1D>("h_vtx_p", ";post-fit candidate momentum (GeV);candidates/1 GeV", 500, 0, 500);
@@ -430,6 +433,7 @@ void MFVV0Efficiency::do_hyps(const int isel, const reco::Vertex& pv, const std:
           h_vtx_z[isel][ihyp][icut]->Fill(flight.Z());
           h_vtx_r[isel][ihyp][icut]->Fill(flight.Mag());
           h_vtx_rho[isel][ihyp][icut]->Fill(flight.Perp());
+          h_vtx_rho_vs_p[isel][ihyp][icut]->Fill(sum.P(), flight.Perp());
           h_vtx_nsigrho[isel][ihyp][icut]->Fill(nsigrho);
 
           h_vtx_p[isel][ihyp][icut]->Fill(sum.P());
