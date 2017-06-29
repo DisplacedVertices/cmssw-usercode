@@ -82,6 +82,8 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
 {
   assert(use_weight >= 0 && use_weight <= 2);
 
+  // JMTBAD the bits checking is now duplicated in TriggerFloatsFilter, should understand how to clean that up
+  //
   // require_bits:
   // -1 = don't care, ORs or other combinations represented by negative numbers other than -1
   // HLT:
