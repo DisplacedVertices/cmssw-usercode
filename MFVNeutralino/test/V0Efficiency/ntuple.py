@@ -11,25 +11,23 @@ jets_only(process)
 
 process.source.fileNames = ['/store/data/Run2016E/ZeroBias/AOD/23Sep2016-v1/100000/18151C77-4486-E611-84FD-0CC47A7C357A.root']
 
-process.firstGoodPrimaryVertex = cms.EDFilter('JMTFirstGoodPrimaryVertex', cut = cms.bool(True))
+process.load('JMTucker.Tools.FirstGoodPrimaryVertex_cfi')
+process.firstGoodPrimaryVertex.cut = True
 
 process.load('JMTucker.MFVNeutralino.SkimmedTracks_cfi')
 process.mfvSkimmedTracks.min_pt = 0.9
 process.mfvSkimmedTracks.min_nsigmadxybs = 3
 process.mfvSkimmedTracks.cut = True
 
-from JMTucker.MFVNeutralino.Vertexer_cfi import kvr_params
-process.mfvV0Vertices = cms.EDFilter('MFVV0Vertexer',
-                                     kvr_params = kvr_params,
-                                     tracks_src = cms.InputTag('mfvSkimmedTracks'),
-                                     max_chi2ndf = cms.double(10),
-                                     cut = cms.bool(True),
-                                     #debug = cms.untracked.bool(True)
-                                     )
+process.load('JMTucker.MFVNeutralino.V0Vertexer_cff')
+process.mfvV0Vertices.cut = True
 
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
 
 process.p = cms.Path(process.firstGoodPrimaryVertex * process.mfvSkimmedTracks * process.mfvTriggerFloats * process.mfvV0Vertices)
+if is_mc:
+    process.load('PhysicsTools.PatAlgos.slimming.slimmedAddPileupInfo_cfi')
+    process.p *= process.slimmedAddPileupInfo
 
 output_commands = [
     'drop *',
@@ -47,8 +45,7 @@ import JMTucker.MFVNeutralino.EventFilter as ef
 ef.setup_event_filter(process, path_name='p')
 process.triggerFilter.HLTPaths.append('HLT_ZeroBias_v*') # what are the ZeroBias_part* paths?
 
-process.maxEvents.input = 10000
-set_lumis_to_process_from_json(process, 'ana_2016.json')
+process.maxEvents.input = 1000
 #report_every(process, 1)
 want_summary(process)
 
