@@ -24,7 +24,7 @@ hists = [
     ('sigreg', 'mfvEventHistosSigReg')
     ]
 
-for sample in ['background', 'mfv_neu_tau01000um_M0800']:
+for sample in ['background', 'mfv_neu_tau00100um_M0800', 'mfv_neu_tau00300um_M0800', 'mfv_neu_tau01000um_M0800', 'mfv_neu_tau10000um_M0800']:
     print sample
     f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/HistosV15/%s.root' % sample)
     presel = f.Get('mfvEventHistosPreSel/h_npu').Clone('presel')
