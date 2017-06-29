@@ -29,7 +29,7 @@ bool JMTFirstGoodPrimaryVertex::filter(edm::Event& event, const edm::EventSetup&
   
   std::unique_ptr<reco::VertexCollection> output(new reco::VertexCollection);
   std::unique_ptr<int> nall(new int(vertices->size()));
-  std::unique_ptr<int> ngood(new int);
+  std::unique_ptr<int> ngood(new int(0));
 
   for (const reco::Vertex& v : *vertices) {
     if (!v.isFake() && v.ndof() > 4 && fabs(v.z()) <= 24 && v.position().rho() < 2) {
