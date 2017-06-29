@@ -63,7 +63,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     from JMTucker.Tools.MetaSubmitter import *
     batch_name = 'V0NtupleV1'
-    ms = MetaSubmitter(batch_name
+    ms = MetaSubmitter(batch_name)
     ms.common.ex = year
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, H_modifier)
     ms.common.publish_name = batch_name + '_' + str(year)
