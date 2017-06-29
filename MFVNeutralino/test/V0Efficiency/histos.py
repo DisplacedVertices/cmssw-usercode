@@ -11,6 +11,11 @@ process.TFileService.fileName = 'v0histos.root'
 
 process.source.fileNames = ['file:v0ntuple.root']
 
+process.load('JMTucker.MFVNeutralino.TriggerFloatsFilter_cfi')
+process.mfvTriggerFloatsFilter.require_hlt = -5 if H else 1
+process.mfvTriggerFloatsFilter.ht_cut = 1000
+process.mfvTriggerFloatsFilter.min_njets = 4
+
 process.v0eff = cms.EDAnalyzer('MFVV0Efficiency',
                                vertices_src = cms.InputTag('mfvV0Vertices'),
                                pileup_weights = cms.vdouble(*pileup_weights[year]),
@@ -28,7 +33,7 @@ process.v0eff = cms.EDAnalyzer('MFVV0Efficiency',
                                debug = cms.untracked.bool(True)
                                )
 
-process.p = cms.Path(process.v0eff)
+process.p = cms.Path(process.mfvTriggerFloatsFilter * process.v0eff)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples 
