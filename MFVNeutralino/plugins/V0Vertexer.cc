@@ -10,6 +10,7 @@
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
+#include "JMTucker/MFVNeutralino/interface/V0Hypotheses.h"
 
 class MFVV0Vertexer : public edm::EDFilter {
 public:
@@ -25,24 +26,8 @@ private:
   const bool cut;
   const bool debug;
 
-  struct particle_hypo {
-    const int type;
-    const std::vector<double> charges_and_masses;
-    size_t ndaughters() const { return charges_and_masses.size(); }
-  };
-  enum { K0_2pi, Lambda_p_pi, X_2e, Kp_3pi, nhyp };
-  static const particle_hypo particle_hypos[nhyp];
-
-  typedef std::vector<int> MFVV0VertexAuxCollection; // just the particle_hypo code per vertex for now
   void do_hyps(const std::vector<reco::TrackRef>,
-               std::unique_ptr<reco::VertexCollection>&, std::unique_ptr<MFVV0VertexAuxCollection>&);
-};
-
-const MFVV0Vertexer::particle_hypo MFVV0Vertexer::particle_hypos[] = {
-  { MFVV0Vertexer::K0_2pi,      { 0.139570, -0.139570 } },
-  { MFVV0Vertexer::Lambda_p_pi, { 0.938272, -0.139570 } },
-  { MFVV0Vertexer::X_2e,        { 0.000511, -0.000511 } },
-  { MFVV0Vertexer::Kp_3pi,      { 0.139570,  0.139570, -0.139570 } },
+               std::unique_ptr<reco::VertexCollection>&, std::unique_ptr<mfv::V0VertexAuxCollection>&);
 };
 
 MFVV0Vertexer::MFVV0Vertexer(const edm::ParameterSet& cfg)
@@ -54,12 +39,12 @@ MFVV0Vertexer::MFVV0Vertexer(const edm::ParameterSet& cfg)
     debug(cfg.getUntrackedParameter<bool>("debug", false))
 {
   produces<reco::VertexCollection>();
-  produces<MFVV0VertexAuxCollection>(); 
+  produces<mfv::V0VertexAuxCollection>(); 
 }
 
 bool MFVV0Vertexer::filter(edm::Event& event, const edm::EventSetup& setup) {
   std::unique_ptr<reco::VertexCollection> vertices(new reco::VertexCollection);
-  std::unique_ptr<MFVV0VertexAuxCollection> codes(new std::vector<int>);
+  std::unique_ptr<mfv::V0VertexAuxCollection> codes(new std::vector<int>);
 
   if (debug) printf("\nEVENT (%u, %u, %llu)\n", event.id().run(), event.luminosityBlock(), event.id().event());
 
@@ -92,12 +77,13 @@ bool MFVV0Vertexer::filter(edm::Event& event, const edm::EventSetup& setup) {
 }
 
 void MFVV0Vertexer::do_hyps(const std::vector<reco::TrackRef> tracks,
-                            std::unique_ptr<reco::VertexCollection>& vertices, std::unique_ptr<MFVV0VertexAuxCollection>& codes) {
+                            std::unique_ptr<reco::VertexCollection>& vertices, std::unique_ptr<mfv::V0VertexAuxCollection>& codes) {
 
   const size_t ndaughters = tracks.size();
   std::vector<reco::TransientTrack> ttks(ndaughters);
   bool v_tried = false;
   TransientVertex v;
+  const int daughters_charge = std::accumulate(tracks.begin(), tracks.end(), 0, [](const int a, const reco::TrackRef& tk) { return a + tk->charge(); });
 
   if (debug) {
     printf("track set:\n");
@@ -106,52 +92,31 @@ void MFVV0Vertexer::do_hyps(const std::vector<reco::TrackRef> tracks,
       printf("  %4u: %s <%10.4f %10.4f %10.4f>\n", tk.key(), tk->charge() > 0 ? "+" : "-", tk->pt(), tk->eta(), tk->phi());
     }
   }
-        
-  for (size_t ihyp = 0; ihyp < nhyp; ++ihyp) {
-    const particle_hypo& hyp = particle_hypos[ihyp];
-    if (hyp.ndaughters() != ndaughters)
+
+  for (const auto& hyp : mfv::V0_hypotheses) {
+    if (debug) printf("hypothesis #%i %s:\n", hyp.type, hyp.name);
+
+    if (hyp.ndaughters() != ndaughters || hyp.charge() != daughters_charge) {
+      if (debug) printf("failed # or total charge check\n");
       continue;
-    if (debug) printf("hypothesis %i:\n", hyp.type);
-
-    std::vector<double> test(hyp.charges_and_masses);
-
-    do {
-      if (debug) {
-        printf("permutation:");
-        for (size_t idau = 0; idau < ndaughters; ++idau)
-          printf(" %10.4f", test[idau]);
-        printf("\n");
-      }
-
-      bool all_same = true, all_opp = true;
-      for (size_t idau = 0; idau < ndaughters; ++idau) {
-        const int x = tracks[idau]->charge() * (test[idau] > 0 ? 1 : -1);
-        if (x > 0) all_opp = false;
-        if (x < 0) all_same = false;
-      }
-      if (debug) printf("all same? %i opp? %i\n", all_same, all_opp);
-
-      if (!all_same && !all_opp)
-        continue;
-            
-      if (!v_tried) {
-        for (size_t idau = 0; idau < ndaughters; ++idau)
-          ttks[idau] = tt_builder->build(tracks[idau]);
-        const std::vector<TransientVertex> vv(1, kv_reco->vertex(ttks));
-        v = vv[0];
-        v_tried = true;
-      }
-
-      const bool valid = v.isValid();
-      if (debug) printf("vertex valid? %i chi2/ndf %f\n", valid, (valid ? v.normalisedChiSquared() : -1));
-      if (valid && v.normalisedChiSquared() < max_chi2ndf) {
-        vertices->push_back(reco::Vertex(v));
-        codes->push_back(hyp.type);
-      }
-      else if (debug)
-        printf("vertex is invalid!\n");
     }
-    while (std::next_permutation(test.begin(), test.end()));
+            
+    if (!v_tried) {
+      for (size_t idau = 0; idau < ndaughters; ++idau)
+        ttks[idau] = tt_builder->build(tracks[idau]);
+      const std::vector<TransientVertex> vv(1, kv_reco->vertex(ttks));
+      v = vv[0];
+      v_tried = true;
+    }
+
+    const bool valid = v.isValid();
+    if (debug) printf("vertex valid? %i chi2/ndf %f\n", valid, (valid ? v.normalisedChiSquared() : -1));
+    if (valid && v.normalisedChiSquared() < max_chi2ndf) {
+      vertices->push_back(reco::Vertex(v));
+      codes->push_back(hyp.type);
+    }
+    else if (debug)
+      printf("vertex is invalid!\n");
   }
 }
 
