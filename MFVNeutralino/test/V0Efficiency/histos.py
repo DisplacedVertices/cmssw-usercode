@@ -1,38 +1,34 @@
-from JMTucker.Tools.CMSSWTools import *
-from JMTucker.Tools.MiniAOD_cfg import *
+from JMTucker.Tools.BasicAnalyzer_cfg import *
+from JMTucker.Tools.MiniAOD_cfg import which_global_tag
 from JMTucker.Tools.PileupWeights import pileup_weights
 from JMTucker.MFVNeutralino.Year import year
 
 is_mc = False
 H = False
 
-process = pat_tuple_process(None, is_mc, year, H)
-jets_only(process)
-tfileservice(process, 'v0efficiency.root')
+global_tag(process, which_global_tag(is_mc, year, H))
+process.TFileService.fileName = 'v0histos.root'
 
-process.source.fileNames = ['/store/data/Run2016E/ZeroBias/AOD/23Sep2016-v1/100000/18151C77-4486-E611-84FD-0CC47A7C357A.root']
-
-process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
-process.goodOfflinePrimaryVertices.filter = cms.bool(True)
+process.source.fileNames = ['file:v0ntuple.root']
 
 process.v0eff = cms.EDAnalyzer('MFVV0Efficiency',
-                               kvr_params = cms.PSet(maxDistance = cms.double(0.01),
-                                                     maxNbrOfIterations = cms.int32(10),
-                                                     doSmoothing = cms.bool(True),
-                                                     ),
+                               vertices_src = cms.InputTag('mfvV0Vertices'),
                                pileup_weights = cms.vdouble(*pileup_weights[year]),
                                beamspot_src = cms.InputTag('offlineBeamSpot'),
-                               primary_vertices_src = cms.InputTag('goodOfflinePrimaryVertices'),
-                               tracks_src = cms.InputTag('generalTracks'),
-                               #debug = cms.untracked.bool(True)
+                               primary_vertices_src = cms.InputTag('firstGoodPrimaryVertex'),
+                               tracks_src = cms.InputTag('mfvSkimmedTracks'),
+                               min_track_pt = cms.double(1),
+                               min_track_nsigmadxybs = cms.double(4),
+                               max_chi2ndf = cms.double(7),
+                               min_p = cms.double(0),
+                               max_p = cms.double(1e9),
+                               mass_window_lo = cms.double(1e9),
+                               mass_window_hi = cms.double(1e9),
+                               min_costh3 = cms.double(-2),
+                               debug = cms.untracked.bool(False)
                                )
 
-process.p = cms.Path(process.goodOfflinePrimaryVertices * process.v0eff)
-
-process.maxEvents.input = -1
-set_lumis_to_process_from_json(process, 'ana_2016.json')
-#report_every(process, 1)
-#want_summary(process)
+process.p = cms.Path(process.v0eff)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples 
