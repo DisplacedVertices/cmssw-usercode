@@ -9,7 +9,7 @@ H = False
 process = pat_tuple_process(None, is_mc, year, H)
 jets_only(process)
 
-process.source.fileNames = ['/store/data/Run2016E/ZeroBias/AOD/23Sep2016-v1/100000/18151C77-4486-E611-84FD-0CC47A7C357A.root']
+process.source.fileNames = ['file:/uscmst1b_scratch/lpc1/3DayLifetime/tucker/18151C77-4486-E611-84FD-0CC47A7C357A.root']
 
 process.load('JMTucker.Tools.FirstGoodPrimaryVertex_cfi')
 process.firstGoodPrimaryVertex.cut = True
@@ -24,7 +24,8 @@ process.mfvV0Vertices.cut = True
 
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
 
-process.p = cms.Path(process.firstGoodPrimaryVertex * process.mfvSkimmedTracks * process.mfvTriggerFloats * process.mfvV0Vertices)
+process.p = cms.Path(process.firstGoodPrimaryVertex * process.mfvSkimmedTracks * process.mfvV0Vertices * process.mfvTriggerFloats)
+
 if is_mc:
     process.load('PhysicsTools.PatAlgos.slimming.slimmedAddPileupInfo_cfi')
     process.p *= process.slimmedAddPileupInfo
@@ -45,7 +46,7 @@ import JMTucker.MFVNeutralino.EventFilter as ef
 ef.setup_event_filter(process, path_name='p')
 process.triggerFilter.HLTPaths.append('HLT_ZeroBias_v*') # what are the ZeroBias_part* paths?
 
-process.maxEvents.input = 1000
+process.maxEvents.input = -1
 #report_every(process, 1)
 want_summary(process)
 

@@ -21,9 +21,6 @@ namespace mfv {
     { V0_X_2e,        "X_2e",        0.,       { 0.000511, -0.000511 } },
     { V0_Kp_3pi,      "Kp_3pi",      0.493677, { 0.139570,  0.139570, -0.139570 } },
   };
-
-  typedef int V0VertexAux;
-  typedef std::vector<V0VertexAux> V0VertexAuxCollection; // just the code per vertex for now
 }
 
 #endif

@@ -15,7 +15,7 @@ process.v0eff = cms.EDAnalyzer('MFVV0Efficiency',
                                vertices_src = cms.InputTag('mfvV0Vertices'),
                                pileup_weights = cms.vdouble(*pileup_weights[year]),
                                beamspot_src = cms.InputTag('offlineBeamSpot'),
-                               primary_vertices_src = cms.InputTag('firstGoodPrimaryVertex'),
+                               primary_vertex_src = cms.InputTag('firstGoodPrimaryVertex'),
                                tracks_src = cms.InputTag('mfvSkimmedTracks'),
                                min_track_pt = cms.double(1),
                                min_track_nsigmadxybs = cms.double(4),
@@ -25,7 +25,7 @@ process.v0eff = cms.EDAnalyzer('MFVV0Efficiency',
                                mass_window_lo = cms.double(1e9),
                                mass_window_hi = cms.double(1e9),
                                min_costh3 = cms.double(-2),
-                               debug = cms.untracked.bool(False)
+                               debug = cms.untracked.bool(True)
                                )
 
 process.p = cms.Path(process.v0eff)
