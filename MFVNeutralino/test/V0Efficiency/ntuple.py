@@ -3,13 +3,15 @@ from JMTucker.Tools.MiniAOD_cfg import *
 from JMTucker.Tools.PileupWeights import pileup_weights
 from JMTucker.MFVNeutralino.Year import year
 
-is_mc = False
+is_mc = True
 H = False
 
 process = pat_tuple_process(None, is_mc, year, H)
 jets_only(process)
 
-process.source.fileNames = ['file:/uscmst1b_scratch/lpc1/3DayLifetime/tucker/18151C77-4486-E611-84FD-0CC47A7C357A.root']
+process.source.fileNames = ['/store/user/wsun/croncopyeos/qcdht1000/RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170606_165644/0000/reco_%i.root' % i for i in xrange(1,11)]
+if not is_mc:
+    process.source.fileNames = ['/store/data/Run2016E/ZeroBias/AOD/23Sep2016-v1/100000/18151C77-4486-E611-84FD-0CC47A7C357A.root']
 
 process.load('JMTucker.Tools.FirstGoodPrimaryVertex_cfi')
 process.firstGoodPrimaryVertex.cut = True
@@ -32,6 +34,7 @@ if is_mc:
 
 output_commands = [
     'drop *',
+    'keep *_mcStat_*_*',
     'keep *_mfvSkimmedTracks_*_*',
     'keep *_mfvV0Vertices_*_*',
     'keep *_mfvTriggerFloats_*_*',
@@ -53,12 +56,14 @@ want_summary(process)
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples 
     samples = Samples.data_samples + [s for s in Samples.auxiliary_data_samples if s.name.startswith('ZeroBias')]
+    samples += Samples.qcd_samples + Samples.qcd_samples_ext + Samples.qcd_hip_samples[-2:]
+
     for s in samples:
-        s.files_per = 50
+        s.files_per = 20
 
     from JMTucker.Tools.MetaSubmitter import *
     ms = MetaSubmitter('V0NtupleV1')
     ms.common.ex = year
-    ms.common.pset_modifier = H_modifier #chain_modifiers(is_mc_modifier, H_modifier)
+    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, H_modifier)
     ms.crab.job_control_from_sample = True
     ms.submit(samples)
