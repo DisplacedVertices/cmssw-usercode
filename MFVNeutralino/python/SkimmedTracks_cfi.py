@@ -1,5 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 
-mfvSkimmedTracks = cms.EDProducer('MFVSkimmedTracks',
-                                  apply_sigmadxybs = cms.bool(False),
-                                  )
+mfvSkimmedTracks = cms.EDFilter('MFVSkimmedTracks',
+                                min_pt = cms.double(1),
+                                min_nsigmadxybs = cms.double(4),
+                                primary_vertices_src = cms.InputTag('goodOfflinePrimaryVertices'),
+                                cut = cms.bool(False),
+                                )
