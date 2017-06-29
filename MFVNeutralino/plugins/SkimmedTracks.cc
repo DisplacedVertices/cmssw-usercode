@@ -23,7 +23,7 @@ private:
 };
 
 MFVSkimmedTracks::MFVSkimmedTracks(const edm::ParameterSet& cfg)
-  : tracks_token(consumes<reco::TrackCollection>(edm::InputTag("generalTracks"))),
+  : tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("tracks_src"))),
     beamspot_token(consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"))),
     primary_vertices_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertices_src"))),
     min_pt(cfg.getParameter<double>("min_pt")),
