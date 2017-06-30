@@ -38,6 +38,7 @@ private:
   const double mass_window_hi;
   const double min_costh2;
   const double min_costh3;
+  const double max_geo2ddist;
   const bool debug;
 
   TH1D* h_npu;
