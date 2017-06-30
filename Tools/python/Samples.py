@@ -661,10 +661,12 @@ for x in (JetHT2016B3,
 ttbar_2015.datasets['miniaod'].condor = True
 ttbar_2015.datasets['miniaod'].xrootd_url = 'root://dcache-cms-xrootd.desy.de/'
 
+ds4condor = ['ntuple', 'v0ntuple', 'pick1vtx']
 for s in registry.all():
     for ds in s.datasets.keys():
-        if ds.startswith('ntuple') or ds.startswith('pick1vtx'):
-            s.datasets[ds].condor = True
+        for ds4 in ds4condor:
+            if ds.startswith(ds4):
+                s.datasets[ds].condor = True
 
 ########################################################################
 
