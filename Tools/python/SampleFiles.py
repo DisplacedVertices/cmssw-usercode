@@ -655,8 +655,8 @@ _add_ds("pick1vtxv14", {
 
 _add_ds('v0ntuplev1', {
 
-'qcdht1000_hip1p0_mit': _fromnum0("/store/user/tucker/qcdht1000/V0NtupleV1_2016", 289, fnbase='v0ntuple'),
-'qcdht1500_hip1p0_mit': _fromnum0("/store/user/tucker/qcdht1500/V0NtupleV1_2016", 97, fnbase='v0ntuple'),
+'qcdht1000_hip1p0_mit': _fromnum0("/store/user/tucker/qcdht1000/V0NtupleV1_2016", 289, fnbase='v0ntuple', numbereddirs=False),
+'qcdht1500_hip1p0_mit': _fromnum0("/store/user/tucker/qcdht1500/V0NtupleV1_2016", 97, fnbase='v0ntuple', numbereddirs=False),
 
 'qcdht0500': _fromnum1('/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_V0NtupleV1_qcdht0500/170629_191935', 115, fnbase='v0ntuple'),
 'qcdht0700': _fromnum1('/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_V0NtupleV1_qcdht0700/170629_192008', 93, fnbase='v0ntuple'),
