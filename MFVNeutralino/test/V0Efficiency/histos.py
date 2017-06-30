@@ -27,11 +27,12 @@ process.v0eff = cms.EDAnalyzer('MFVV0Efficiency',
                                tracks_src = cms.InputTag('mfvSkimmedTracks'),
                                min_track_pt = cms.double(1),
                                min_track_nsigmadxybs = cms.double(4),
-                               max_chi2ndf = cms.double(10),
+                               max_chi2ndf = cms.double(5),
                                min_p = cms.double(0),
                                max_p = cms.double(1e9),
                                mass_window_lo = cms.double(1e9),
                                mass_window_hi = cms.double(1e9),
+                               min_costh2 = cms.double(0.995),
                                min_costh3 = cms.double(-2),
                                debug = cms.untracked.bool(False)
                                )
@@ -40,10 +41,10 @@ process.p = cms.Path(process.v0eff)
 if not zerobias:
     process.p.insert(0, process.mfvTriggerFloatsFilter)
 
-for c in range(3, 10):
-    v = process.v0eff.clone(max_chi2ndf = c)
-    setattr(process, 'v0effchi2%i' % c, v)
-    process.p *= v
+process.v0effbkglo = process.v0eff.clone(mass_window_lo = -0.380, mass_window_hi = -0.440)
+process.v0effbkghi = process.v0eff.clone(mass_window_lo = -0.550, mass_window_hi = -0.600)
+process.v0effon = process.v0eff.clone(mass_window_lo = -0.490, mass_window_hi = -0.505)
+process.p *= process.v0effbkglo * process.v0effbkghi * process.v0effon
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
@@ -52,12 +53,13 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     dataset = 'v0ntuplev1'
     samples = [s for s in Samples.registry.all() if s.has_dataset(dataset)]
-    set_splitting(samples, dataset, 'default', '../ana_2015p6.json', 10)
+    samples = [Samples.qcdht1000, Samples.ZeroBias2016H2]
+    set_splitting(samples, dataset, 'default', '../ana_2015p6.json', 1)
 
     def zerobias_modifier(sample):
         return [], [('zerobias =XFalse'.replace('X', ' '), 'zerobias = True', 'no magic zerobias?')]
 
-    cs = CondorSubmitter('V0EfficiencyV1_v0',
+    cs = CondorSubmitter('V0EfficiencyV1_v4',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, zerobias_modifier),
