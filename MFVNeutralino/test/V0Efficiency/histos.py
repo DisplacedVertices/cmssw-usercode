@@ -34,6 +34,7 @@ process.v0eff = cms.EDAnalyzer('MFVV0Efficiency',
                                mass_window_hi = cms.double(1e9),
                                min_costh2 = cms.double(0.995),
                                min_costh3 = cms.double(-2),
+                               max_geo2ddist = cms.double(2),
                                debug = cms.untracked.bool(False)
                                )
 

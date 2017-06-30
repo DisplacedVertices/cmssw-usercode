@@ -106,6 +106,7 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
     mass_window_hi(cfg.getParameter<double>("mass_window_hi")),
     min_costh2(cfg.getParameter<double>("min_costh2")),
     min_costh3(cfg.getParameter<double>("min_costh3")),
+    max_geo2ddist(cfg.getParameter<double>("max_geo2ddist")),
     debug(cfg.getUntrackedParameter<bool>("debug", false))
 {
   edm::Service<TFileService> fs;
@@ -354,7 +355,7 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
         const double p = sum.P();
         const double costh3 = sum.Vect().Unit().Dot(flight_dir);
         const double costh2 = cos(sum.Vect().Unit().XYvector().DeltaPhi(flight_dir_2)); // wtf
-
+        const double geo2ddist = hypot(x, y);
         const double mass_lo = mass_window_lo < 0 ? -mass_window_lo : hyp.mass - mass_window_lo;
         const double mass_hi = mass_window_hi < 0 ? -mass_window_hi : hyp.mass + mass_window_hi;
         const bool use =
@@ -363,7 +364,8 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
           mass >= mass_lo &&
           mass <= mass_hi &&
           costh2 >= min_costh2 &&
-          costh3 >= min_costh3;
+          costh3 >= min_costh3 &&
+          geo2ddist < max_geo2ddist;
 
         if (debug) {
           printf("vertex chi2: %10.4f (%.1f dof)  position: <%10.4f %10.4f %10.4f>  err: <%10.4f %10.4f %10.4f / %10.4f %10.4f / %10.4f>\n",
