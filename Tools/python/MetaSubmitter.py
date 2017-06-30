@@ -67,7 +67,7 @@ class chain_modifiers:
 
 ####
 
-def set_splitting(samples, dataset, jobtype, data_json=None):
+def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=20):
     if jobtype == 'trackmover':
         d = {
             'JetHT2015C':         ( 200000,    33),
@@ -291,6 +291,12 @@ def set_splitting(samples, dataset, jobtype, data_json=None):
                 sample.files_per  = int(2.5 * sample.files_per)
             if sample.name in ('qcdht1000_hip1p0_mit', 'qcdht1500_hip1p0_mit'):
                 sample.files_per *= 3
+
+    elif jobtype == 'default':
+        for sample in samples:
+            sample.set_curr_dataset(dataset)
+            sample.split_by = 'files'
+            sample.files_per = default_files_per 
 
     else:
         raise ValueError("don't know anything about jobtype %s" % jobtype)
