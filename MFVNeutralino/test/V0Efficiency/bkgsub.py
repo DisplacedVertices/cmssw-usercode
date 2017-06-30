@@ -1,13 +1,15 @@
+import sys
 from JMTucker.Tools.ROOTTools import *
 set_style()
 ps = plot_saver(plot_dir('v0bkgsub'), size=(600,600))
 
-f = ROOT.TFile('v0histos.root')
-h = f.Get('v0eff/K0_2pi/h_vtx_mass')
+f = ROOT.TFile(sys.argv[1])
+ex = sys.argv[2] if len(sys.argv) >= 3 else ''
+h = f.Get('v0eff%s/K0_2pi/h_vtx_mass' % ex)
 h.Sumw2()
 
-fit_range = 0.38, 0.65
-fit_exclude = 0.46, 0.55
+fit_range = 0.38, 0.6
+fit_exclude = 0.44, 0.55
 
 def fitfunc(x, p):
     x = x[0]
@@ -52,7 +54,7 @@ for ibin in xrange(xax.FindBin(fit_range[0]), xax.FindBin(fit_range[1])):
     ie = (fit_errs[0]**2 + fit_errs[1]**2 * xmd**2)**0.5
     r = (i - c) / i
     re = (ie**2 + ce**2)**0.5 / i
-    print i, ie, c, ce, r
+    #print i, ie, c, ce, r
     hbkg.SetBinContent(ibin, i)
     hbkg.SetBinError(ibin, ie)
     if fit_exclude[0] <= xmd <= fit_exclude[1]:
@@ -66,17 +68,17 @@ ps.save('res', log=False)
 
 h.Draw('hist e')
 hbkg.SetLineColor(ROOT.kOrange+2)
-hbkg.Draw('hist e same')
+hbkg.Draw('hist same')
 ps.save('wbkg')
 
 xax = h.GetXaxis()
-ibinc = xax.FindBin(0.495)
+ibinc, _ = real_hist_max(h, return_bin=True)
 print 'ibinc', ibinc
 max_s, max_p, max_z = 0, 0, 0
-for lo in xrange(5):
+for lo in [7]: #xrange(50):
     ibinlo = ibinc - lo
     xlo = xax.GetBinLowEdge(ibinlo)
-    for hi in xrange(5):
+    for hi in [7]: #xrange(50):
         ibinhi = ibinc + hi
         xhi = xax.GetBinLowEdge(ibinhi+1)
         ne, be = ROOT.Double(), ROOT.Double()
@@ -86,8 +88,8 @@ for lo in xrange(5):
         se = (ne**2 + be**2)**0.5
         z = s / (b + be**2)**0.5
         p = s/n
-        if s > max_s or p > max_p or z > max_z:
-            print '%.3f-%.3f: %10.1f +- %5.1f  %10.1f +- %5.1f  %10.1f +- %5.1f : %6.4f : %6.1f' % (xlo, xhi, n, ne, b, be, s, se, p, z)
+        if (s > max_s or p > max_p or z > max_z) and p > 0.85:
+            print '%.3f-%.3f: %10.1f +- %5.1f  %10.1f +- %5.1f  %10.1f +- %5.1f : %5.2f : %5.1f' % (xlo, xhi, n, ne, b, be, s, se, p, z)
         if s > max_s:
             max_s = s
         if p > max_p:
@@ -95,3 +97,34 @@ for lo in xrange(5):
         if z > max_z:
             max_z = z
 
+hbkglo = f.Get('v0effbkglo/K0_2pi/h_vtx_rho')
+hbkghi = f.Get('v0effbkghi/K0_2pi/h_vtx_rho')
+hon = f.Get('v0effon/K0_2pi/h_vtx_rho')
+z = hon.GetXaxis().FindBin(1.9)
+
+for i,h in enumerate((hbkghi, hbkglo, hon)):
+    h.Scale(1/h.Integral(0,z))
+    h.SetLineColor(2+i)
+    h.Rebin(10)
+    h.SetLineWidth(2)
+    if i == 0:
+        h.Draw('hist')
+    else:
+        h.Draw('hist same')
+ps.save('rhocmp')
+
+hbkghi = f.Get('v0effbkghi/K0_2pi/h_vtx_rho')
+hon = f.Get('v0effon/K0_2pi/h_vtx_rho')
+z = hon.GetXaxis().FindBin(1.9)
+
+for i,h in enumerate((hbkghi, hon)):
+    if h == hbkghi:
+        h.Scale(23593./h.Integral(0,z))
+    h.SetLineColor(2+i)
+    h.Rebin(10)
+    h.SetLineWidth(2)
+    if i == 0:
+        h.Draw('hist')
+    else:
+        h.Draw('hist same')
+ps.save('rhocmp')
