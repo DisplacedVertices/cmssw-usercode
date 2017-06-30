@@ -74,6 +74,7 @@ private:
   TH1D* h_prefit_p[nhyp];
   TH1D* h_prefit_mass[nhyp];
   TH1D* h_vtx_chi2ndf[nhyp];
+  TH2D* h_vtx_2d[nhyp];
   TH1D* h_vtx_x[nhyp];
   TH1D* h_vtx_y[nhyp];
   TH1D* h_vtx_z[nhyp];
@@ -147,13 +148,14 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
     h_prefit_mass[ihyp] = d.make<TH1D>("h_prefit_mass", ";pre-fit candidate invariant mass (GeV);candidates/1 MeV", 5000, 0, 5);
 
     h_vtx_chi2ndf[ihyp] = d.make<TH1D>("h_vtx_chi2ndf", ";candidate vertex #chi^{2}/ndf;candidates/0.05", 200, 0, 10);
+    h_vtx_2d[ihyp] = d.make<TH2D>("h_vtx_2d", ";candidate vertex x (cm);candidate veretx y (cm)", 800, -4,4, 800, -4, 4);
     h_vtx_x[ihyp] = d.make<TH1D>("h_vtx_x", ";candidate vertex x - pv x (cm);candidates/40 #mum", 2000, -4,4);
     h_vtx_y[ihyp] = d.make<TH1D>("h_vtx_y", ";candidate vertex y - pv y (cm);candidates/40 #mum", 2000, -4,4);
     h_vtx_z[ihyp] = d.make<TH1D>("h_vtx_z", ";candidate vertex z - pv z (cm);candidates/40 #mum", 2000, -4,4);
     h_vtx_r[ihyp] = d.make<TH1D>("h_vtx_r", ";candidate vertex - pv (cm);candidates/40 #mum", 2000, 0, 8);
     h_vtx_rho[ihyp] = d.make<TH1D>("h_vtx_rho", ";candidate vertex - pv (2D) (cm);candidates/10 #mum", 2000, 0, 8);
     h_vtx_rho_vs_p[ihyp] = d.make<TH2D>("h_vtx_rho_vs_p", ";candidate p (GeV);candidate vertex - pv (2D) (cm)", 20,0,10, 400, 0, 4);
-    h_vtx_rho_vs_mass[ihyp] = d.make<TH2D>("h_vtx_rho_vs_p", ";candidate p (GeV);candidate vertex - pv (2D) (cm)", 220, 0.380,0.600, 400, 0, 4);
+    h_vtx_rho_vs_mass[ihyp] = d.make<TH2D>("h_vtx_rho_vs_mass", ";candidate mass (GeV);candidate vertex - pv (2D) (cm)", 220, 0.380,0.600, 400, 0, 4);
     h_vtx_nsigrho[ihyp] = d.make<TH1D>("h_vtx_nsigrho", ";N#sigma(candidate vertex - pv (2D));candidates/0.01", 10000, 0, 100);
 
     h_vtx_p[ihyp] = d.make<TH1D>("h_vtx_p", ";post-fit candidate momentum (GeV);candidates/1 GeV", 500, 0, 500);
@@ -374,6 +376,7 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
           continue;
 
         h_vtx_chi2ndf[ihyp]->Fill(chi2ndf);
+        h_vtx_2d[ihyp]->Fill(x, y);
         h_vtx_x[ihyp]->Fill(flight.X());
         h_vtx_y[ihyp]->Fill(flight.Y());
         h_vtx_z[ihyp]->Fill(flight.Z());
