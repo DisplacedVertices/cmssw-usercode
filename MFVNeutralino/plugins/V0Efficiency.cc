@@ -36,6 +36,7 @@ private:
   const double max_p;
   const double mass_window_lo;
   const double mass_window_hi;
+  const double min_costh2;
   const double min_costh3;
   const bool debug;
 
@@ -79,6 +80,7 @@ private:
   TH1D* h_vtx_r[nhyp];
   TH1D* h_vtx_rho[nhyp];
   TH2D* h_vtx_rho_vs_p[nhyp];
+  TH2D* h_vtx_rho_vs_mass[nhyp];
   TH1D* h_vtx_nsigrho[nhyp];
   TH1D* h_vtx_p[nhyp];
   TH1D* h_vtx_costh3[nhyp];
@@ -101,6 +103,7 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
     max_p(cfg.getParameter<double>("max_p")),
     mass_window_lo(cfg.getParameter<double>("mass_window_lo")),
     mass_window_hi(cfg.getParameter<double>("mass_window_hi")),
+    min_costh2(cfg.getParameter<double>("min_costh2")),
     min_costh3(cfg.getParameter<double>("min_costh3")),
     debug(cfg.getUntrackedParameter<bool>("debug", false))
 {
@@ -149,7 +152,8 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
     h_vtx_z[ihyp] = d.make<TH1D>("h_vtx_z", ";candidate vertex z - pv z (cm);candidates/40 #mum", 2000, -4,4);
     h_vtx_r[ihyp] = d.make<TH1D>("h_vtx_r", ";candidate vertex - pv (cm);candidates/40 #mum", 2000, 0, 8);
     h_vtx_rho[ihyp] = d.make<TH1D>("h_vtx_rho", ";candidate vertex - pv (2D) (cm);candidates/10 #mum", 2000, 0, 8);
-    h_vtx_rho_vs_p[ihyp] = d.make<TH2D>("h_vtx_rho_vs_p", ";candidate p (GeV);candidate vertex - pv (2D) (cm)", 20,0,10, 2000, 0, 8);
+    h_vtx_rho_vs_p[ihyp] = d.make<TH2D>("h_vtx_rho_vs_p", ";candidate p (GeV);candidate vertex - pv (2D) (cm)", 20,0,10, 400, 0, 4);
+    h_vtx_rho_vs_mass[ihyp] = d.make<TH2D>("h_vtx_rho_vs_p", ";candidate p (GeV);candidate vertex - pv (2D) (cm)", 220, 0.380,0.600, 400, 0, 4);
     h_vtx_nsigrho[ihyp] = d.make<TH1D>("h_vtx_nsigrho", ";N#sigma(candidate vertex - pv (2D));candidates/0.01", 10000, 0, 100);
 
     h_vtx_p[ihyp] = d.make<TH1D>("h_vtx_p", ";post-fit candidate momentum (GeV);candidates/1 GeV", 500, 0, 500);
@@ -356,6 +360,7 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
           p < max_p && // < and not <= for disjoint bins
           mass >= mass_lo &&
           mass <= mass_hi &&
+          costh2 >= min_costh2 &&
           costh3 >= min_costh3;
 
         if (debug) {
@@ -375,6 +380,7 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
         h_vtx_r[ihyp]->Fill(flight.Mag());
         h_vtx_rho[ihyp]->Fill(flight.Perp());
         h_vtx_rho_vs_p[ihyp]->Fill(sum.P(), flight.Perp());
+        h_vtx_rho_vs_mass[ihyp]->Fill(mass, flight.Perp());
         h_vtx_nsigrho[ihyp]->Fill(nsigrho);
 
         h_vtx_p[ihyp]->Fill(p);
