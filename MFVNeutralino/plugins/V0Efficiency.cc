@@ -69,7 +69,7 @@ private:
   TH1D* h_track_nsigmadxybs;
   TH1D* h_track_nsigmadxypv;
 
-  enum { nhyp = mfv::n_V0_hyp };
+  enum { nhyp = 1 }; //mfv::n_V0_hyp };
   TH1D* h_prefit_p[nhyp];
   TH1D* h_prefit_mass[nhyp];
   TH1D* h_vtx_chi2ndf[nhyp];
@@ -349,11 +349,13 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
         const double costh3 = sum.Vect().Unit().Dot(flight_dir);
         const double costh2 = cos(sum.Vect().Unit().XYvector().DeltaPhi(flight_dir_2)); // wtf
 
+        const double mass_lo = mass_window_lo < 0 ? -mass_window_lo : hyp.mass - mass_window_lo;
+        const double mass_hi = mass_window_hi < 0 ? -mass_window_hi : hyp.mass + mass_window_hi;
         const bool use =
           p >= min_p &&
           p < max_p && // < and not <= for disjoint bins
-          mass >= hyp.mass - mass_window_lo &&
-          mass <= hyp.mass + mass_window_hi &&
+          mass >= mass_lo &&
+          mass <= mass_hi &&
           costh3 >= min_costh3;
 
         if (debug) {
