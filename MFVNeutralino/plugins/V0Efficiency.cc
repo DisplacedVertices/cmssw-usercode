@@ -349,13 +349,13 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
         const double costh3 = sum.Vect().Unit().Dot(flight_dir);
         const double costh2 = cos(sum.Vect().Unit().XYvector().DeltaPhi(flight_dir_2)); // wtf
 
-        const bool use = true;/*
+        const bool use =
           p >= min_p &&
           p < max_p && // < and not <= for disjoint bins
           mass >= hyp.mass - mass_window_lo &&
           mass <= hyp.mass + mass_window_hi &&
           costh3 >= min_costh3;
-                              */
+
         if (debug) {
           printf("vertex chi2: %10.4f (%.1f dof)  position: <%10.4f %10.4f %10.4f>  err: <%10.4f %10.4f %10.4f / %10.4f %10.4f / %10.4f>\n",
                  chi2ndf, v.ndof(), x, y, z, v.covariance(0,0), v.covariance(0,1), v.covariance(0,2), v.covariance(1,1), v.covariance(1,2), v.covariance(2,2));
