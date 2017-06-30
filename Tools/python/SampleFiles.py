@@ -652,6 +652,30 @@ _add_ds("pick1vtxv14", {
 'ttbar_2015': _fromnum0("/store/user/tucker/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/Pick1VtxV14_2015_ttbar_2015/170421_233005", 107, fnbase="skimpick"),
 })
 
+
+_add_ds('v0ntuplev1', {
+
+'qcdht1000_hip1p0_mit': _fromnum0("/store/user/tucker/qcdht1000/V0NtupleV1_2016", 289, fnbase='v0ntuple'),
+'qcdht1500_hip1p0_mit': _fromnum0("/store/user/tucker/qcdht1500/V0NtupleV1_2016", 97, fnbase='v0ntuple'),
+
+'qcdht0500': _fromnum1('/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_V0NtupleV1_qcdht0500/170629_191935', 115, fnbase='v0ntuple'),
+'qcdht0700': _fromnum1('/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_V0NtupleV1_qcdht0700/170629_192008', 93, fnbase='v0ntuple'),
+'qcdht1000': _fromnum1('/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_V0NtupleV1_qcdht1000/170629_192042', 39, fnbase='v0ntuple'),
+'qcdht1500': _fromnum1('/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_V0NtupleV1_qcdht1500/170629_192111', 34, fnbase='v0ntuple'),
+'qcdht2000': _fromnum1('/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_V0NtupleV1_qcdht2000/170629_192141', 14, fnbase='v0ntuple'),
+
+'JetHT2016G': _fromnum1('/store/user/tucker/JetHT/crab_V0NtupleV1_JetHT2016G/170629_191304', 492, fnbase='v0ntuple'),
+'ZeroBias2016B3': _fromnum1('/store/user/tucker/ZeroBias/crab_V0NtupleV1_ZeroBias2016B3/170629_191450', 113, fnbase='v0ntuple'),
+'ZeroBias2016C': _fromnum1('/store/user/tucker/ZeroBias/crab_V0NtupleV1_ZeroBias2016C/170629_191520', 20, fnbase='v0ntuple'),
+'ZeroBias2016D': _fromnum1('/store/user/tucker/ZeroBias/crab_V0NtupleV1_ZeroBias2016D/170629_191552', 32, fnbase='v0ntuple'),
+'ZeroBias2016E': _fromnum1('/store/user/tucker/ZeroBias/crab_V0NtupleV1_ZeroBias2016E/170629_191624', 38, fnbase='v0ntuple'),
+'ZeroBias2016F': _fromnum1('/store/user/tucker/ZeroBias/crab_V0NtupleV1_ZeroBias2016F/170629_191715', 31, fnbase='v0ntuple'),
+'ZeroBias2016G': _fromnum1('/store/user/tucker/ZeroBias/crab_V0NtupleV1_ZeroBias2016G/170629_191757', 60, fnbase='v0ntuple'),
+'ZeroBias2016H2': _fromnum1('/store/user/tucker/ZeroBias/crab_V0NtupleV1_ZeroBias2016H2/170629_191830', 86, fnbase='v0ntuple'),
+'ZeroBias2016H3': _fromnum1('/store/user/tucker/ZeroBias/crab_V0NtupleV1_ZeroBias2016H3/170629_191901', 3, fnbase='v0ntuple'),
+
+})
+
 __all__ = [
     'dump',
     'get',
