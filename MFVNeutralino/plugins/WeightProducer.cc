@@ -109,13 +109,12 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
   if (prints)
     printf("MFVWeight: r,l,e: %u, %u, %llu  ", event.id().run(), event.luminosityBlock(), event.id().event());
 
-  edm::Handle<MFVEvent> mevent;
-  event.getByToken(mevent_token, mevent);
-
-  std::auto_ptr<double> weight(new double);
-  *weight = 1;
+  std::auto_ptr<double> weight(new double(1.));
 
   if (enable) {
+    edm::Handle<MFVEvent> mevent;
+    event.getByToken(mevent_token, mevent);
+
     if (!event.isRealData()) {
       if (weight_gen) {
         assert((mevent->gen_weight - mevent->gen_weightprod)/mevent->gen_weightprod < 1e-3); // JMTBAD
