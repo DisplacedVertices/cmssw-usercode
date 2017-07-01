@@ -14,6 +14,9 @@ process.source.fileNames = ['file:v0ntuple.root']
 process.source.fileNames = ['/store/user/tucker/V0NtupleV1_qcdht1000_hip1p0_mit.root']
 report_every(process, 100)
 
+process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
+process.mfvWeight.enable = False # just do mcStat
+
 process.load('JMTucker.MFVNeutralino.TriggerFloatsFilter_cfi')
 process.mfvTriggerFloatsFilter.require_hlt = -5 if H else 1
 process.mfvTriggerFloatsFilter.ht_cut = 1000
@@ -38,7 +41,7 @@ process.v0eff = cms.EDAnalyzer('MFVV0Efficiency',
                                debug = cms.untracked.bool(False)
                                )
 
-process.p = cms.Path(process.v0eff)
+process.p = cms.Path(process.mfvWeight * process.v0eff)
 if not zerobias:
     process.p.insert(0, process.mfvTriggerFloatsFilter)
 
@@ -54,12 +57,12 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     dataset = 'v0ntuplev1'
     samples = [s for s in Samples.registry.all() if s.has_dataset(dataset)]
-    set_splitting(samples, dataset, 'default', '../ana_2015p6.json', 1)
+    set_splitting(samples, dataset, 'default', '../ana_2015p6.json', 2)
 
     def zerobias_modifier(sample):
         return [], [('zerobias =XFalse'.replace('X', ' '), 'zerobias = True', 'no magic zerobias?')]
 
-    cs = CondorSubmitter('V0EfficiencyV1_v5',
+    cs = CondorSubmitter('V0EfficiencyV1_v6',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, zerobias_modifier),
