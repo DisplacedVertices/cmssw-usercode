@@ -630,8 +630,7 @@ for x in ttbar_samples + ttbar_samples_2015 + qcd_samples + qcd_samples_ext + qc
         x.add_dataset('pick1vtxv14')
 
 for x in data_samples + [s for s in auxiliary_data_samples if s.name.startswith('ZeroBias')] + qcd_samples + qcd_samples_ext + qcd_hip_samples[-2:]:
-    if x not in (JetHT2016D, JetHT2016E):
-        x.add_dataset('v0ntuplev1')
+    x.add_dataset('v0ntuplev1')
 
 ########
 # other condor declarations

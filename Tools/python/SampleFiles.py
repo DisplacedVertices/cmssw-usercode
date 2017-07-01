@@ -672,8 +672,8 @@ _add_ds('v0ntuplev1', {
 
 'JetHT2016B3': _fromnum1('/store/user/tucker/JetHT/crab_V0NtupleV1_JetHT2016B3/170629_191015', 396, fnbase='v0ntuple'),
 'JetHT2016C': _fromnum1('/store/user/tucker/JetHT/crab_V0NtupleV1_JetHT2016C/170629_191050',  161, fnbase='v0ntuple'),
-'JetHT2016D': _fromnum1('/store/user/tucker/JetHT/crab_V0NtupleV1_JetHT2016D/170629_191125',  252, fnbase='v0ntuple'),
-'JetHT2016E': _fromnum1('/store/user/tucker/JetHT/crab_V0NtupleV1_JetHT2016E/170629_191157',  255, fnbase='v0ntuple'),
+'JetHT2016D': _fromnum1('/store/user/tucker/JetHT/crab_V0NtupleV1_JetHT2016D/170629_191125',  252, fnbase='v0ntuple', but=[84]),
+'JetHT2016E': _fromnum1('/store/user/tucker/JetHT/crab_V0NtupleV1_JetHT2016E/170629_191157',  255, fnbase='v0ntuple', but=[28,30,53,99]),
 'JetHT2016F': _fromnum1('/store/user/tucker/JetHT/crab_V0NtupleV1_JetHT2016F/170629_191231',  202, fnbase='v0ntuple'),
 'JetHT2016G': _fromnum1('/store/user/tucker/JetHT/crab_V0NtupleV1_JetHT2016G/170629_191304',  492, fnbase='v0ntuple'),
 'JetHT2016H2': _fromnum1('/store/user/tucker/JetHT/crab_V0NtupleV1_JetHT2016H2/170629_191339', 468, fnbase='v0ntuple'),
