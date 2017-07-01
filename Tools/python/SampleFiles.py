@@ -664,11 +664,11 @@ _add_ds('v0ntuplev1', {
 'qcdht1500': _fromnum1('/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_V0NtupleV1_qcdht1500/170629_192111', 34, fnbase='v0ntuple'),
 'qcdht2000': _fromnum1('/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_V0NtupleV1_qcdht2000/170629_192141', 14, fnbase='v0ntuple'),
 
-'qcdht0500ext': _fromnum1('/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_V0NtupleV1_qcdht1000ext/170629_192318', 269, fnbase='v0ntuple'),
-'qcdht0700ext': _fromnum1('/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_V0NtupleV1_qcdht1500ext/170629_192351', 176, fnbase='v0ntuple'),
-'qcdht1000ext': _fromnum1('/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_V0NtupleV1_qcdht2000ext/170629_192425',   73, fnbase='v0ntuple'),
-'qcdht1500ext': _fromnum1('/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_V0NtupleV1_qcdht0500ext/170629_192210',    64, fnbase='v0ntuple'),
-'qcdht2000ext': _fromnum1('/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_V0NtupleV1_qcdht0700ext/170629_192246',   31, fnbase='v0ntuple', but=[20]),
+'qcdht0500ext': _fromnum1('/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_V0NtupleV1_qcdht0500ext/170629_192210', 269, fnbase='v0ntuple'),
+'qcdht0700ext': _fromnum1('/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_V0NtupleV1_qcdht0700ext/170629_192246', 176, fnbase='v0ntuple'),
+'qcdht1000ext': _fromnum1('/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_V0NtupleV1_qcdht1000ext/170629_192318',  73, fnbase='v0ntuple'),
+'qcdht1500ext': _fromnum1('/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_V0NtupleV1_qcdht1500ext/170629_192351',  64, fnbase='v0ntuple'),
+'qcdht2000ext': _fromnum1('/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/crab_V0NtupleV1_qcdht2000ext/170629_192425',  31, fnbase='v0ntuple', but=[20]),
 
 'JetHT2016B3': _fromnum1('/store/user/tucker/JetHT/crab_V0NtupleV1_JetHT2016B3/170629_191015', 396, fnbase='v0ntuple'),
 'JetHT2016C': _fromnum1('/store/user/tucker/JetHT/crab_V0NtupleV1_JetHT2016C/170629_191050',  161, fnbase='v0ntuple'),
