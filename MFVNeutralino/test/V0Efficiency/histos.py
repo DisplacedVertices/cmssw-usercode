@@ -50,6 +50,9 @@ process.v0effbkghi = process.v0eff.clone(mass_window_lo = -0.550, mass_window_hi
 process.v0effon = process.v0eff.clone(mass_window_lo = -0.490, mass_window_hi = -0.505)
 process.p *= process.v0effbkglo * process.v0effbkghi * process.v0effon
 
+process.v0effonmaxp3 = process.v0effon.clone(max_p = 3)
+process.p *= process.v0effonmaxp3
+
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
     from JMTucker.Tools.MetaSubmitter import *
@@ -62,7 +65,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     def zerobias_modifier(sample):
         return [], [('zerobias =XFalse'.replace('X', ' '), 'zerobias = True', 'no magic zerobias?')]
 
-    cs = CondorSubmitter('V0EfficiencyV1_v6',
+    cs = CondorSubmitter('V0EfficiencyV1_v7',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, zerobias_modifier),
