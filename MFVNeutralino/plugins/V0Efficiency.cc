@@ -133,34 +133,34 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
   h_pvbsz = fs->make<TH1D>("h_pvbsz", ";primary vertex z - beam spot z (cm)", 4000, -20, 20);
   h_pvntracks = fs->make<TH1D>("h_pvntracks", ";# tracks in primary vertex;events/5", 100, 0, 500);
 
-  auto booktracks = [&](int i) {
-    h_ntracks[i] = fs->make<TH1D>("h_ntracks", ";# of selected tracks;events/1", 500, 0, 500);
-    h_max_track_multiplicity[i] = fs->make<TH1D>("h_max_track_multiplicity", ";max multiplicity of any track in vertices;events/1", 10, 0, 10);
-    h_track_charge[i] = fs->make<TH1D>("h_track_charge", ";track charge;tracks/1", 3, -1, 2);
-    h_track_pt[i] = fs->make<TH1D>("h_track_pt", ";track p_{T} (GeV);tracks/100 MeV", 1000, 0, 100);
-    h_track_eta[i] = fs->make<TH1D>("h_track_eta", ";track #eta;tracks/0.01", 540, -2.7, 2.7);
-    h_track_phi[i] = fs->make<TH1D>("h_track_phi", ";track #eta;tracks/0.01", 628, -M_PI, M_PI);
-    h_track_npxhits[i] = fs->make<TH1D>("h_track_npxhits", ";track # pixel hits;tracks/1", 15, 0, 15);
-    h_track_nsthits[i] = fs->make<TH1D>("h_track_nsthits", ";track # strip hits;tracks/1", 40, 0, 40);
-    h_track_npxlayers[i] = fs->make<TH1D>("h_track_npxlayers", ";track # pixel layers;tracks/1", 7, 0, 7);
-    h_track_nstlayers[i] = fs->make<TH1D>("h_track_nstlayers", ";track # strip layers;tracks/1", 20, 0, 20);
-    h_track_dxybs[i] = fs->make<TH1D>("h_track_dxybs", ";track dxy to BS (cm);tracks/10 #mum", 4000, -2, 2);
-    h_track_dxypv[i] = fs->make<TH1D>("h_track_dxypv", ";track dxy to PV (cm);tracks/10 #mum", 4000, -2, 2);
-    h_track_dzbs[i] = fs->make<TH1D>("h_track_dzbs", ";track dz to BS (cm);tracks/100 #mum", 4000, -20, 20);
-    h_track_dzpv[i] = fs->make<TH1D>("h_track_dzpv", ";track dz to PV (cm);tracks/100 #mum", 4000, -20, 20);
-    h_track_sigmadxy[i] = fs->make<TH1D>("h_track_sigmadxy", ";track #sigma(dxy) (cm);tracks/5 #mum", 200, 0, 0.1);
-    h_track_nsigmadxybs[i] = fs->make<TH1D>("h_track_nsigmadxybs", ";track N#sigma(dxy) to BS (cm);tracks/0.1", 1000, 0, 100);
-    h_track_nsigmadxypv[i] = fs->make<TH1D>("h_track_nsigmadxypv", ";track N#sigma(dxy) to PV (cm);tracks/0.1", 1000, 0, 100);
+  auto booktracks = [&](TFileDirectory& d, int i) {
+    h_ntracks[i] = d.make<TH1D>("h_ntracks", ";# of selected tracks;events/1", 500, 0, 500);
+    h_max_track_multiplicity[i] = d.make<TH1D>("h_max_track_multiplicity", ";max multiplicity of any track in vertices;events/1", 10, 0, 10);
+    h_track_charge[i] = d.make<TH1D>("h_track_charge", ";track charge;tracks/1", 3, -1, 2);
+    h_track_pt[i] = d.make<TH1D>("h_track_pt", ";track p_{T} (GeV);tracks/100 MeV", 1000, 0, 100);
+    h_track_eta[i] = d.make<TH1D>("h_track_eta", ";track #eta;tracks/0.01", 540, -2.7, 2.7);
+    h_track_phi[i] = d.make<TH1D>("h_track_phi", ";track #eta;tracks/0.01", 628, -M_PI, M_PI);
+    h_track_npxhits[i] = d.make<TH1D>("h_track_npxhits", ";track # pixel hits;tracks/1", 15, 0, 15);
+    h_track_nsthits[i] = d.make<TH1D>("h_track_nsthits", ";track # strip hits;tracks/1", 40, 0, 40);
+    h_track_npxlayers[i] = d.make<TH1D>("h_track_npxlayers", ";track # pixel layers;tracks/1", 7, 0, 7);
+    h_track_nstlayers[i] = d.make<TH1D>("h_track_nstlayers", ";track # strip layers;tracks/1", 20, 0, 20);
+    h_track_dxybs[i] = d.make<TH1D>("h_track_dxybs", ";track dxy to BS (cm);tracks/10 #mum", 4000, -2, 2);
+    h_track_dxypv[i] = d.make<TH1D>("h_track_dxypv", ";track dxy to PV (cm);tracks/10 #mum", 4000, -2, 2);
+    h_track_dzbs[i] = d.make<TH1D>("h_track_dzbs", ";track dz to BS (cm);tracks/100 #mum", 4000, -20, 20);
+    h_track_dzpv[i] = d.make<TH1D>("h_track_dzpv", ";track dz to PV (cm);tracks/100 #mum", 4000, -20, 20);
+    h_track_sigmadxy[i] = d.make<TH1D>("h_track_sigmadxy", ";track #sigma(dxy) (cm);tracks/5 #mum", 200, 0, 0.1);
+    h_track_nsigmadxybs[i] = d.make<TH1D>("h_track_nsigmadxybs", ";track N#sigma(dxy) to BS (cm);tracks/0.1", 1000, 0, 100);
+    h_track_nsigmadxypv[i] = d.make<TH1D>("h_track_nsigmadxypv", ";track N#sigma(dxy) to PV (cm);tracks/0.1", 1000, 0, 100);
   };
 
-  booktracks(nhyp);
+  booktracks(fs->tFileDirectory(), nhyp);
 
   h_nvtx = fs->make<TH1D>("h_nvtx", ";# of vertices;events/1", 50, 0, 50);
 
   for (int ihyp = 0; ihyp < nhyp; ++ihyp) {
     TFileDirectory d = fs->mkdir(mfv::V0_hypotheses[ihyp].name);
 
-    booktracks(ihyp);
+    booktracks(d, ihyp);
 
     h_prefit_p[ihyp] = d.make<TH1D>("h_prefit_p", ";pre-fit candidate momentum (GeV);candidates/100 MeV", 5000, 0, 500);
     h_prefit_mass[ihyp] = d.make<TH1D>("h_prefit_mass", ";pre-fit candidate invariant mass (GeV);candidates/1 MeV", 5000, 0, 5);
