@@ -209,8 +209,6 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
       w *= pileup_weights[npu];
   }
 
-  h_npu->Fill(npu);
-
   edm::Handle<reco::BeamSpot> beamspot;
   event.getByToken(beamspot_token, beamspot);
 
@@ -229,7 +227,7 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
 
   const reco::Vertex& pv = (*primary_vertex)[0];
   const int npv = *n_good_primary_vertices;
-  h_npv->Fill(npv);
+  h_npv->Fill(npv, w);
 
   const double pvx = pv.x();
   const double pvy = pv.y();
@@ -249,7 +247,7 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
   edm::Handle<reco::TrackCollection> tracks;
   event.getByToken(tracks_token, tracks);
   const size_t ntracks = tracks->size();
-  h_ntracks[nhyp]->Fill(ntracks);
+  h_ntracks[nhyp]->Fill(ntracks, w);
 
   auto filltrack = [&](const int i, const reco::Track& tk) {
     h_track_charge[i]->Fill(tk.charge(), w);
@@ -426,7 +424,7 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
       if (mult > max_mult)
         max_mult = mult;
     }
-    h_max_track_multiplicity[ihyp]->Fill(max_mult);
+    h_max_track_multiplicity[ihyp]->Fill(max_mult, w);
 
     for (auto tkref : tracks_used[ihyp])
       filltrack(ihyp, *tkref);
