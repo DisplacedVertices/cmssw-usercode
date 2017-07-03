@@ -43,7 +43,7 @@ output_commands = [
     'keep *_firstGoodPrimaryVertex_*_*',
     'keep *_TriggerResults_*_HLT', # for ZeroBias since I don't wanna mess with MFVTriggerFloats for it
     ]
-output_file(process, 'v0ntuple.root', output_commands)
+output_file(process, 'ntuple.root', output_commands)
 
 import JMTucker.MFVNeutralino.EventFilter as ef
 ef.setup_event_filter(process, path_name='p')
