@@ -74,6 +74,8 @@ private:
   TH1D* h_track_nsigmadxybs[nhyp+1];
   TH1D* h_track_nsigmadxypv[nhyp+1];
 
+  TH1D* h_nvtx;
+
   TH1D* h_prefit_p[nhyp];
   TH1D* h_prefit_mass[nhyp];
   TH1D* h_vtx_chi2ndf[nhyp];
@@ -152,6 +154,8 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
   };
 
   booktracks(nhyp);
+
+  h_nvtx = fs->make<TH1D>("h_nvtx", ";# of vertices;events/1", 50, 0, 50);
 
   for (int ihyp = 0; ihyp < nhyp; ++ihyp) {
     TFileDirectory d = fs->mkdir(mfv::V0_hypotheses[ihyp].name);
@@ -271,6 +275,7 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
   edm::Handle<reco::VertexCollection> vertices;
   event.getByToken(vertices_token, vertices);
   const size_t nvtx = vertices->size();
+  h_nvtx->Fill(nvtx, w);
 
   std::vector<std::multiset<reco::TrackRef>> tracks_used(nhyp);
 
