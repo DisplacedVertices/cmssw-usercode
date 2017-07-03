@@ -84,6 +84,7 @@ private:
   TH2D* h_vtx_rho_vs_p[nhyp];
   TH2D* h_vtx_rho_vs_mass[nhyp];
   TH1D* h_vtx_nsigrho[nhyp];
+  TH1D* h_vtx_angle[nhyp];
   TH1D* h_vtx_p[nhyp];
   TH1D* h_vtx_costh3[nhyp];
   TH1D* h_vtx_costh2[nhyp];
@@ -156,9 +157,10 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
     h_vtx_z[ihyp] = d.make<TH1D>("h_vtx_z", ";candidate vertex z - pv z (cm);candidates/40 #mum", 2000, -4,4);
     h_vtx_r[ihyp] = d.make<TH1D>("h_vtx_r", ";candidate vertex - pv (cm);candidates/40 #mum", 2000, 0, 8);
     h_vtx_rho[ihyp] = d.make<TH1D>("h_vtx_rho", ";candidate vertex - pv (2D) (cm);candidates/10 #mum", 2000, 0, 8);
-    h_vtx_rho_vs_p[ihyp] = d.make<TH2D>("h_vtx_rho_vs_p", ";candidate p (GeV);candidate vertex - pv (2D) (cm)", 20,0,10, 400, 0, 4);
+    h_vtx_rho_vs_p[ihyp] = d.make<TH2D>("h_vtx_rho_vs_p", ";candidate p (GeV);candidate vertex - pv (2D) (cm)", 400,0,100, 400, 0, 4);
     h_vtx_rho_vs_mass[ihyp] = d.make<TH2D>("h_vtx_rho_vs_mass", ";candidate mass (GeV);candidate vertex - pv (2D) (cm)", 220, 0.380,0.600, 400, 0, 4);
     h_vtx_nsigrho[ihyp] = d.make<TH1D>("h_vtx_nsigrho", ";N#sigma(candidate vertex - pv (2D));candidates/0.01", 10000, 0, 100);
+    h_vtx_angle[ihyp] = d.make<TH1D>("h_vtx_angle", ";candidate vertex oepning angle (rad);candidates/0.0315", 100, 0, M_PI);
 
     h_vtx_p[ihyp] = d.make<TH1D>("h_vtx_p", ";post-fit candidate momentum (GeV);candidates/1 GeV", 500, 0, 500);
     h_vtx_costh3[ihyp] = d.make<TH1D>("h_vtx_costh3", ";post-fit candidate cos(angle between displacement and flight dir);candidates/0.001", 2001, -1, 1.01);
@@ -352,6 +354,8 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
           sum += p4;
         }
 
+        auto get_angle = [&](const reco::Track& tk0, const reco::Track& tk1) { return acos((tk0.px() * tk1.px() + tk0.py() * tk1.py() + tk0.pz() * tk1.pz()) / tk0.p() / tk1.p()); };
+        const double angle = ndaughters == 2 ? get_angle(v.refittedTrack(refs[0]), v.refittedTrack(refs[1])) : -1;
         const double mass = sum.M();
         const double p = sum.P();
         const double costh3 = sum.Vect().Unit().Dot(flight_dir);
@@ -389,6 +393,7 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
         h_vtx_rho_vs_mass[ihyp]->Fill(mass, flight.Perp());
         h_vtx_nsigrho[ihyp]->Fill(nsigrho);
 
+        h_vtx_angle[ihyp]->Fill(angle);
         h_vtx_p[ihyp]->Fill(p);
         h_vtx_costh3[ihyp]->Fill(costh3);
         h_vtx_costh2[ihyp]->Fill(costh2);
