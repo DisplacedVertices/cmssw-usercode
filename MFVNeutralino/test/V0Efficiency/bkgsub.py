@@ -86,8 +86,7 @@ hbkg.Draw('hist same')
 ps.save('wbkg')
 
 xax = h.GetXaxis()
-ibinc, _ = real_hist_max(h, return_bin=True)
-print 'ibinc', ibinc
+ibinc = xax.FindBin(0.4976)
 max_s, max_p, max_z = 0, 0, 0
 def do(lo,hi,prnt=False):
     ibinlo = ibinc - lo
