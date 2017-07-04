@@ -30,4 +30,4 @@ else:
                 bin = 'overflow'
             else:
                 bin = str(i)
-            print '%10s %10.2f %10.2f %10.2f' % (bin, x.GetBinLowEdge(i), x.GetBinContent(i), x.GetBinError(i))
+            print '%10s %10.2f %10.2f %10.2f %s' % (bin, x.GetBinLowEdge(i), x.GetBinContent(i), x.GetBinError(i), x.GetXaxis().GetBinLabel(i))
