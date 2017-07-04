@@ -1,16 +1,23 @@
-import sys
+import sys, os
 from JMTucker.Tools.ROOTTools import *
 set_style()
 
-fn = sys.argv[1]
-ex = '_' + sys.argv[2] if len(sys.argv) >= 3 else ''
+in_fn = sys.argv[1]
+out_fn = os.path.basename(in_fn)
+if in_fn == out_fn or os.path.exists(out_fn):
+    raise IOError('refusing to clobber existing file %s' % out_fn)
 
-ps = plot_saver(plot_dir('v0bkgsub%s' % ex), size=(600,600))
+sample = out_fn.replace('.root', '')
 
-f = ROOT.TFile(fn)
-h = f.Get('v0eff/K0_2pi/h_vtx_mass')
+ps = plot_saver(plot_dir('v0bkgsub/' + sample), size=(600,600))
 
-fit_range = 0.38, 0.6
+# fit for s and b using sidebands
+
+in_f = ROOT.TFile(in_fn)
+h = in_f.Get('v0eff/K0_2pi/h_vtx_mass')
+
+# must keep these numbers in sync with histos!
+fit_range = 0.38, 0.6 
 fit_exclude = 0.44, 0.55
 
 def fitfunc(x, p):
@@ -38,7 +45,9 @@ h.GetXaxis().SetRangeUser(0.28,0.9)
 h.GetYaxis().SetLabelSize(0.025)
 h.GetYaxis().SetTitleOffset(1.5)
 fdraw.Draw('same')
-ps.save('duh')
+ps.save('mass_fit')
+
+# draw the fit residuals
 
 xax = h.GetXaxis()
 hbkg = ROOT.TH1F('hbkg', h.GetTitle(), h.GetNbinsX(), xax.GetXmin(), xax.GetXmax())
@@ -67,6 +76,9 @@ for ibin in xrange(xax.FindBin(fit_range[0]), xax.FindBin(fit_range[1])):
 hres.GetYaxis().SetTitle('fit residual')
 hres.Fit('pol1')
 ps.save('res', log=False)
+
+# scan mass window for best yield, purity, and significance z = s/sqrt(b + sigb^2)
+# -- but mass window is fixed in histos to 490-505 MeV, so if you want to change it you have to do it there and rerun histos
 
 h.Draw('hist e')
 hbkg.SetLineColor(ROOT.kOrange+2)
@@ -105,46 +117,64 @@ for lo in xrange(50):
         if z > max_z:
             max_z = z
 print
-xlo,xhi,n,ne,b,be,s,se,p,z = do(7,7, True)
-assert abs(xlo-0.490) < 1e-5 and abs(xhi-0.505) < 1e-5
+xlo,xhi,n,ne,b,be,s,se,p,z = do(7,7, True) # print the one we're using
+assert abs(xlo-0.490) < 1e-5 and abs(xhi-0.505) < 1e-5 # check that we're in sync with histos
 
-hbkglo = f.Get('v0effbkglo/K0_2pi/h_vtx_rho')
-hbkghi = f.Get('v0effbkghi/K0_2pi/h_vtx_rho')
-hon = f.Get('v0effon/K0_2pi/h_vtx_rho')
+out_f = ROOT.TFile(out_fn, 'recreate')
+integ = lambda h: h.Integral(0,h.GetNbinsX()+2)
 
-for i,h in enumerate((hbkglo, hbkghi, hon)):
-    h.Rebin(10)
-    h.SetLineWidth(2)
-    h.SetLineColor(2+i)
-    h.SetStats(0)
-    h.GetXaxis().SetRangeUser(0,2.5)
+# do the bkg subtraction in whatever variables you want as long as the histos exist
+# written out to file in folders so the cmp script can do the rest
 
-hsiglo = hon.Clone('hsiglo')
-hsighi = hon.Clone('hsighi')
-hsiglo.SetLineColor(2)
-hsighi.SetLineColor(3)
-hsig = hsiglo, hsighi
+colors = (2,3,4,6)
+variables = [
+    ('h_vtx_rho', 1, 10, (0,2)),
+    ('h_track_dxybs', 2, 10, (-0.5,0.5)),
+    ]
 
-for i,h in enumerate((hon, hbkglo, hbkghi)):
-    hint = h.Integral(0,h.GetNbinsX()+2)
-    if i == 0:
-        assert abs(hint - n) < 1e-5
-    else:
-        h.Scale(b/hint)
-        hsig[i-1].Add(h, -1)
- 
-    if i == 0:
-        h.Draw('hist')
-    else:
-        h.Draw('hist same')
-ps.save('rhocmp')
+for hname, integ_factor, rebin, x_range in variables:
+    hon = in_f.Get('v0effon/K0_2pi/' + hname)
+    hbkglo = in_f.Get('v0effbkglo/K0_2pi/' + hname)
+    hbkghi = in_f.Get('v0effbkghi/K0_2pi/' + hname)
 
-hsiglo.Draw('hist e')
-hsighi.Draw('hist e same')
-ps.save('sig')
+    d = out_f.mkdir(hname)
+    d.cd()
+    hon = hon.Clone('hon')
+    hbkglo = hbkglo.Clone('hbkglo')
+    hbkghi = hbkghi.Clone('hbkghi')
+    hbkg = hbkglo.Clone('hbkg')
+    hbkg.Add(hbkghi)
+    hsig = [hon.Clone(name) for name in 'hsiglo', 'hsighi', 'hsig']
+    hoth = [hbkglo, hbkghi, hbkg, hon]
 
-fout = ROOT.TFile('bkgsub.root', 'recreate')
-for x in hon, hbkglo, hbkghi, hsiglo, hsighi:
-    x.Write()
-fout.Write()
-fout.Close()
+    for i,h in enumerate(hoth + hsig):
+        h.Rebin(rebin)
+        h.SetLineWidth(2)
+        h.SetLineColor(colors[i-len(hoth) if h in hsig else i])
+        h.SetStats(0)
+        h.GetXaxis().SetRangeUser(*x_range)
+
+    for i,h in enumerate(reversed(hoth)):
+        hint = integ(h)
+        if i == 0:
+            if abs(hint - integ_factor * n) > 1e-5:
+                print 'hint', hint, 'n', n
+                raise ValueError('duh?')
+            h.Draw('hist')
+        else:
+            h.Scale(b/hint)
+            hsig[i-1].Add(h, -1)
+            h.Draw('hist same')
+    ps.save(hname + '_cmp')
+
+    for i,h in enumerate(hsig):
+        h.Draw('hist e' if i == 0 else 'hist e same')
+    ps.save(hname + '_sig')
+
+# copy over normalization hist
+
+h = in_f.Get('mfvWeight/h_sums').Clone('h_sums')
+h.SetDirectory(out_f.mkdir('mfvWeight'))
+
+out_f.Write()
+out_f.Close()
