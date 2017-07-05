@@ -58,9 +58,10 @@ if 0:
     process.p *= process.v0effonloose
 
 if 0:
-    for i in xrange(20):
-        min_eta = -2.4 + 4.8/20 * i
-        max_eta = -2.4 + 4.8/20 * (i+1)
+    n = 5
+    for i in xrange(n):
+        min_eta = -2.4 + 4.8/n * i
+        max_eta = -2.4 + 4.8/n * (i+1)
         al = process.v0eff      .clone(min_eta = min_eta, max_eta = max_eta)
         lo = process.v0effbkglo.clone(min_eta = min_eta, max_eta = max_eta)
         hi = process.v0effbkghi.clone(min_eta = min_eta, max_eta = max_eta)
