@@ -161,6 +161,16 @@ def cmd_trackmover():
     cmd_hadd_data()
     cmd_hadd_qcd_sum()
 
+def cmd_v0eff():
+    cmd_hadd_data()
+    cmd_hadd_qcd_sum()
+    scale = -AnalysisConstants.int_lumi_2015p6 * AnalysisConstants.scale_factor_2015p6
+    for fn,xx in ('qcd.root', [500, 700, 1000, 1500, 2000]), ('qcdht1000and1500.root', [1000, 1500]):
+        files = ['qcdht%04isum.root' % x for x in xx]
+        cmd = 'python ' + os.environ['CMSSW_BASE'] + '/src/JMTucker/Tools/python/Samples.py merge %f %s %s' % (scale, fn, ' '.join(files))
+        print cmd
+        os.system(cmd)
+
 def cmd_trigeff():
     cmd_report_data()
 
