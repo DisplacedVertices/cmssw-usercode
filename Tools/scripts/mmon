@@ -3,6 +3,7 @@
 import datetime, optparse, os, sys, time
 from collections import defaultdict
 from JMTucker.Tools.CRAB3Tools import *
+from JMTucker.Tools.CondorTools import *
 from JMTucker.Tools import colors
 
 parser = optparse.OptionParser(usage='%prog [options] <space-separated list of crab dirs>')
@@ -17,7 +18,7 @@ parser.add_option('-d', '--delay', action='store_true', default=False,
 parser.add_option('--max-processes', type='int', default=5,
                   help='Max number of status-checking processes to run at once.')
 parser.add_option('-r', '--resub', action='store_true', default=False,
-                  help='Send resubmit request to any batch that has failed jobs, obeying the white and black lists below.')
+                  help='Send resubmit request to any batch that has failed jobs, obeying the white and black lists below. (Only crab dirs for now.)')
 #parser.add_option('--resub-white-list', default='',
 #                  help='Comma-separated list (no spaces!) of sites to whitelist when resubmitting.')
 #parser.add_option('--resub-black-list', default='',
@@ -68,7 +69,7 @@ def timestamp():
 backdoor_time = timestamp()
 
 def backdoor_file(filename):
-    fn = '/tmp/%s/crmon_%s_%s' % (os.environ['USER'], backdoor_time, filename)
+    fn = '/tmp/%s/mmon_%s_%s' % (os.environ['USER'], backdoor_time, filename)
     return fn, open(fn, 'wt')
 
 def backdoor_print(filename, l):
@@ -89,17 +90,22 @@ def make_script(filename, cmd):
     f.write(cmd)
     return fn
 
-dirs = crab_dirs_from_argv()
+crab_dirs = crab_dirs_from_argv()
+condor_dirs = cs_dirs_from_argv()
 
-if not dirs and not options.fake_results:
-    sys.exit('space-separated list of existing crab dirs required in argv (see --help)')
+if not crab_dirs and not condor_dirs and not options.fake_results:
+    sys.exit('space-separated list of existing crab or condor dirs required in argv (see --help)')
 
 if options.dir_sort:
-    dirs.sort()
+    crab_dirs.sort()
+    condor_dirs.sort()
+
+dirs = crab_dirs + condor_dirs
+
 dirs_done = []
 
 ndirs = len(dirs)
-print 'crmon: checking %i dir%s, be patient' % (ndirs, 's' if ndirs > 1 else '')
+print 'mmon: checking %i dir%s, be patient' % (ndirs, 's' if ndirs > 1 else '')
 
 def check_proxies():
     if options.renew_proxies:
@@ -130,21 +136,28 @@ while 1:
         # Fake statuses for debugging the table printing below.
         print 'fake_results dict:'
         results = open(options.fake_results).read().strip()
-        #print results
+        pprint(results)
         results = eval(results)
         dirs = sorted(results.keys())
     else:
         # Get the statuses of all the dirs. 
-        results = crab_process_statuses_with_redo(dirs, options.max_processes)
-        crab_cleanup()
+        results = {}
+        if crab_dirs:
+            results.update(crab_process_statuses_with_redo(crab_dirs, options.max_processes))
+            crab_cleanup()
+        if condor_dirs:
+            results.update(cs_analyze_mmon(condor_dirs))
+
         os.system('mkdir -p /tmp/%s' % os.environ['USER'])
-        open('/tmp/%s/crmontmp' % os.environ['USER'], 'wt').write(repr(results))
+        open('/tmp/%s/mmontmp' % os.environ['USER'], 'wt').write(repr(results))
         #pprint(results)
 
         # Resubmit those allowed.
         if options.resub:
             to_resub = defaultdict(list)
             for d, res in results.iteritems():
+                if d not in crab_dirs:
+                    continue
                 for job_num in res['jobListByStatus'].get('failed', []):
                     to_resub[d].append(job_num)
 # 'Error' not present in job json since 5/14/2017
@@ -154,7 +167,6 @@ while 1:
 #                            options.resub_white_list and err_code in options.resub_white_list,
 #                            options.resub_black_list and err_code not in options.resub_black_list)):
 #                        to_resub[d].append(job_num)
-
             for d, jobs in to_resub.iteritems():
                 jobs = ','.join(str(j) for j in jobs)
                 print 'resubmit', d, jobs
@@ -253,7 +265,7 @@ while 1:
             entry = statuses.get(status_columns_xlate.get(status, status), 0)
             if status.startswith('fin'):
                 nfin += entry
-            elif status.startswith('fail'):
+            elif status.startswith('fail') or status.startswith('kill') or status.startswith('prob'):
                 nfail += entry
             else:
                 nrun += entry
@@ -279,7 +291,7 @@ while 1:
     print
 
     # Figure out which directories are done, and remove them from the
-    # list of dirs to check next time. Also print out a new crmon
+    # list of dirs to check next time. Also print out a new mmon
     # command for pasting that just resumes with the not-done dirs.
 
     done_stats = set(''.split())
@@ -297,7 +309,7 @@ while 1:
     done.sort(key=dirs.index)
     notdone.sort(key=dirs.index)
 
-    done_msg = '\nThese are done as far as crmon is concerned (all jobs are "finished" or one of %s):' % done_stats_info_text 
+    done_msg = '\nThese are done as far as mmon is concerned (all jobs are "finished" or one of %s):' % done_stats_info_text 
     if done:
         if options.verbose:
             print_header(done_msg)
@@ -324,7 +336,7 @@ while 1:
 
     if notdone:
         print colors.bold('Resume not-done:')
-        print '.', make_script('resume', 'crmon ' + ' '.join(notdone))
+        print '.', make_script('resume', 'mmon ' + ' '.join(notdone))
 
     if fail:
         print colors.bold('Resubmit failed:')
@@ -341,7 +353,7 @@ while 1:
     # terminal when a very long iteration finishes. Look for a special
     # file in /tmp/$USER that signals we should break.
 
-    break_fn =  '/tmp/%s/break_crmon' % os.environ['USER']
+    break_fn =  '/tmp/%s/break_mmon' % os.environ['USER']
     if os.path.isfile(break_fn):
         os.remove(break_fn)
         print_header('break file spotted, quitting.')
