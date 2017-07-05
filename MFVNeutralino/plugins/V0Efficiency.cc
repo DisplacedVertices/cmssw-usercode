@@ -29,6 +29,7 @@ private:
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertex_token;
   const edm::EDGetTokenT<int> n_good_primary_vertices_token;
   const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
+  const bool limit_set;
   const double min_track_pt;
   const double min_track_nsigmadxybs;
   const double max_chi2ndf;
@@ -42,6 +43,8 @@ private:
   const double min_costh3;
   const double max_geo2ddist;
   const bool debug;
+
+  double w;
 
   TH1D* h_npu;
   TH1D* h_bsx;
@@ -102,6 +105,22 @@ private:
   TH1D* h_vtx_costh3[nhyp];
   TH1D* h_vtx_costh2[nhyp];
   TH1D* h_vtx_mass[nhyp];
+
+  void fill(TH1* h, double x) {
+    if (h == 0) {
+      assert(limit_set);
+      return;
+    }
+    h->Fill(x, w);
+  }
+
+  void fill(TH2* h, double x, double y) {
+    if (h == 0) {
+      assert(limit_set);
+      return;
+    }
+    h->Fill(x, y, w);
+  }
 };
 
 MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
@@ -112,6 +131,7 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
     primary_vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertex_src"))),
     n_good_primary_vertices_token(consumes<int>(edm::InputTag(cfg.getParameter<edm::InputTag>("primary_vertex_src").label(), "nGood"))),
     tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("tracks_src"))),
+    limit_set(cfg.getParameter<bool>("limit_set")),
     min_track_pt(cfg.getParameter<double>("min_track_pt")),
     min_track_nsigmadxybs(cfg.getParameter<double>("min_track_nsigmadxybs")),
     max_chi2ndf(cfg.getParameter<double>("max_chi2ndf")),
@@ -129,23 +149,37 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
   edm::Service<TFileService> fs;
   TH1::SetDefaultSumw2();
 
-  h_npu = fs->make<TH1D>("h_npu", ";true npu", 100, 0, 100);
-  h_bsx = fs->make<TH1D>("h_bsx", ";beamspot x", 4000, -2, 2);
-  h_bsy = fs->make<TH1D>("h_bsy", ";beamspot y", 4000, -2, 2);
-  h_bsz = fs->make<TH1D>("h_bsz", ";beamspot z", 4000, -20, 20);
-  h_npv = fs->make<TH1D>("h_npv", ";number of primary vertices", 100, 0, 100);
-  h_pvx = fs->make<TH1D>("h_pvx", ";primary vertex x (cm)", 4000, -2, 2);
-  h_pvy = fs->make<TH1D>("h_pvy", ";primary vertex y (cm)", 4000, -2, 2);
-  h_pvz = fs->make<TH1D>("h_pvz", ";primary vertex z (cm)", 4000, -20, 20);
-  h_pvbsx = fs->make<TH1D>("h_pvbsx", ";primary vertex x - beam spot x (cm)", 4000, -2, 2);
-  h_pvbsy = fs->make<TH1D>("h_pvbsy", ";primary vertex y - beam spot y (cm)", 4000, -2, 2);
-  h_pvbsz = fs->make<TH1D>("h_pvbsz", ";primary vertex z - beam spot z (cm)", 4000, -20, 20);
-  h_pvntracks = fs->make<TH1D>("h_pvntracks", ";# tracks in primary vertex;events/5", 100, 0, 500);
+  h_npu = h_bsx = h_bsy = h_bsz = h_npv = h_pvx = h_pvy = h_pvz = h_pvbsx = h_pvbsy = h_pvbsz = h_pvntracks = h_nvtx = 0;
+  for (size_t i = 0; i < nhyp+1; ++i)
+    h_ntracks[i] = h_max_track_multiplicity[i] = h_track_charge[i] = h_track_pt[i] = h_track_eta[i] = h_track_phi[i] = h_track_npxhits[i] = h_track_nsthits[i] = h_track_npxlayers[i] = h_track_nstlayers[i] = h_track_dxybs[i] = h_track_dxypv[i] = h_track_dzbs[i] = h_track_dzpv[i] = h_track_sigmadxy[i] = h_track_nsigmadxybs[i] = h_track_nsigmadxypv[i] = 0;
+  for (size_t i = 0; i < nhyp; ++i) {
+    h_prefit_p[i] = h_prefit_mass[i] = h_vtx_chi2ndf[i] = h_vtx_x[i] = h_vtx_y[i] = h_vtx_z[i] = h_vtx_r[i] = h_vtx_rho[i] = h_vtx_nsigrho[i] = h_vtx_angle[i] = h_vtx_p[i] = h_vtx_costh3[i] = h_vtx_costh2[i] = h_vtx_mass[i] = 0;
+    h_vtx_2d[i] = h_vtx_rho_vs_p[i] = h_vtx_rho_vs_mass[i] = h_vtx_angle_vs_p[i] = h_vtx_angle_vs_mass[i] = h_vtx_track_pt_0v1[i] = h_vtx_track_eta_0v1[i] = h_vtx_track_phi_0v1[i] = h_vtx_track_dxybs_0v1[i] = h_vtx_track_dxybs_0v1_zoom[i] = 0;
+  }
+
+  if (!limit_set) {
+    h_npu = fs->make<TH1D>("h_npu", ";true npu", 100, 0, 100);
+    h_bsx = fs->make<TH1D>("h_bsx", ";beamspot x", 4000, -2, 2);
+    h_bsy = fs->make<TH1D>("h_bsy", ";beamspot y", 4000, -2, 2);
+    h_bsz = fs->make<TH1D>("h_bsz", ";beamspot z", 4000, -20, 20);
+    h_npv = fs->make<TH1D>("h_npv", ";number of primary vertices", 100, 0, 100);
+    h_pvx = fs->make<TH1D>("h_pvx", ";primary vertex x (cm)", 4000, -2, 2);
+    h_pvy = fs->make<TH1D>("h_pvy", ";primary vertex y (cm)", 4000, -2, 2);
+    h_pvz = fs->make<TH1D>("h_pvz", ";primary vertex z (cm)", 4000, -20, 20);
+    h_pvbsx = fs->make<TH1D>("h_pvbsx", ";primary vertex x - beam spot x (cm)", 4000, -2, 2);
+    h_pvbsy = fs->make<TH1D>("h_pvbsy", ";primary vertex y - beam spot y (cm)", 4000, -2, 2);
+    h_pvbsz = fs->make<TH1D>("h_pvbsz", ";primary vertex z - beam spot z (cm)", 4000, -20, 20);
+    h_pvntracks = fs->make<TH1D>("h_pvntracks", ";# tracks in primary vertex;events/5", 100, 0, 500);
+  }
 
   auto booktracks = [&](TFileDirectory& d, int i) {
-    h_ntracks[i] = d.make<TH1D>("h_ntracks", ";# of selected tracks;events/1", 500, 0, 500);
-    h_max_track_multiplicity[i] = d.make<TH1D>("h_max_track_multiplicity", ";max multiplicity of any track in vertices;events/1", 10, 0, 10);
-    h_track_charge[i] = d.make<TH1D>("h_track_charge", ";track charge;tracks/1", 3, -1, 2);
+    if (limit_set && i == nhyp)
+      return;
+    if (!limit_set) {
+      h_ntracks[i] = d.make<TH1D>("h_ntracks", ";# of selected tracks;events/1", 500, 0, 500);
+      h_max_track_multiplicity[i] = d.make<TH1D>("h_max_track_multiplicity", ";max multiplicity of any track in vertices;events/1", 10, 0, 10);
+      h_track_charge[i] = d.make<TH1D>("h_track_charge", ";track charge;tracks/1", 3, -1, 2);
+    }
     h_track_pt[i] = d.make<TH1D>("h_track_pt", ";track p_{T} (GeV);tracks/100 MeV", 1000, 0, 100);
     h_track_eta[i] = d.make<TH1D>("h_track_eta", ";track #eta;tracks/0.01", 540, -2.7, 2.7);
     h_track_phi[i] = d.make<TH1D>("h_track_phi", ";track #eta;tracks/0.01", 628, -M_PI, M_PI);
@@ -164,60 +198,65 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
 
   booktracks(fs->tFileDirectory(), nhyp);
 
-  h_nvtx = fs->make<TH1D>("h_nvtx", ";# of vertices;events/1", 50, 0, 50);
+  if (!limit_set) h_nvtx = fs->make<TH1D>("h_nvtx", ";# of vertices;events/1", 50, 0, 50);
 
   for (int ihyp = 0; ihyp < nhyp; ++ihyp) {
     TFileDirectory d = fs->mkdir(mfv::V0_hypotheses[ihyp].name);
 
     booktracks(d, ihyp);
 
-    h_prefit_p[ihyp] = d.make<TH1D>("h_prefit_p", ";pre-fit candidate momentum (GeV);candidates/100 MeV", 5000, 0, 500);
-    h_prefit_mass[ihyp] = d.make<TH1D>("h_prefit_mass", ";pre-fit candidate invariant mass (GeV);candidates/1 MeV", 5000, 0, 5);
+    if (!limit_set) {
+      h_prefit_p[ihyp] = d.make<TH1D>("h_prefit_p", ";pre-fit candidate momentum (GeV);candidates/100 MeV", 5000, 0, 500);
+      h_prefit_mass[ihyp] = d.make<TH1D>("h_prefit_mass", ";pre-fit candidate invariant mass (GeV);candidates/1 MeV", 5000, 0, 5);
 
-    h_vtx_chi2ndf[ihyp] = d.make<TH1D>("h_vtx_chi2ndf", ";candidate vertex #chi^{2}/ndf;candidates/0.05", 200, 0, 10);
-    h_vtx_2d[ihyp] = d.make<TH2D>("h_vtx_2d", ";candidate vertex x (cm);candidate veretx y (cm)", 800, -4,4, 800, -4, 4);
-    h_vtx_x[ihyp] = d.make<TH1D>("h_vtx_x", ";candidate vertex x - pv x (cm);candidates/40 #mum", 2000, -4,4);
-    h_vtx_y[ihyp] = d.make<TH1D>("h_vtx_y", ";candidate vertex y - pv y (cm);candidates/40 #mum", 2000, -4,4);
-    h_vtx_z[ihyp] = d.make<TH1D>("h_vtx_z", ";candidate vertex z - pv z (cm);candidates/40 #mum", 2000, -4,4);
-    h_vtx_r[ihyp] = d.make<TH1D>("h_vtx_r", ";candidate vertex - pv (cm);candidates/40 #mum", 2000, 0, 8);
+      h_vtx_chi2ndf[ihyp] = d.make<TH1D>("h_vtx_chi2ndf", ";candidate vertex #chi^{2}/ndf;candidates/0.05", 200, 0, 10);
+      h_vtx_2d[ihyp] = d.make<TH2D>("h_vtx_2d", ";candidate vertex x (cm);candidate veretx y (cm)", 800, -4,4, 800, -4, 4);
+      h_vtx_x[ihyp] = d.make<TH1D>("h_vtx_x", ";candidate vertex x - pv x (cm);candidates/40 #mum", 2000, -4,4);
+      h_vtx_y[ihyp] = d.make<TH1D>("h_vtx_y", ";candidate vertex y - pv y (cm);candidates/40 #mum", 2000, -4,4);
+      h_vtx_z[ihyp] = d.make<TH1D>("h_vtx_z", ";candidate vertex z - pv z (cm);candidates/40 #mum", 2000, -4,4);
+      h_vtx_r[ihyp] = d.make<TH1D>("h_vtx_r", ";candidate vertex - pv (cm);candidates/40 #mum", 2000, 0, 8);
+    }
 
     h_vtx_rho[ihyp] = d.make<TH1D>("h_vtx_rho", ";candidate vertex - pv (2D) (cm);candidates/10 #mum", 2000, 0, 8);
-    h_vtx_nsigrho[ihyp] = d.make<TH1D>("h_vtx_nsigrho", ";N#sigma(candidate vertex - pv (2D));candidates/0.01", 10000, 0, 100);
-    h_vtx_rho_vs_p[ihyp] = d.make<TH2D>("h_vtx_rho_vs_p", ";candidate p (GeV);candidate vertex - pv (2D) (cm)", 400,0,100, 400, 0, 4);
-    h_vtx_rho_vs_mass[ihyp] = d.make<TH2D>("h_vtx_rho_vs_mass", ";candidate mass (GeV);candidate vertex - pv (2D) (cm)", 220, 0.380,0.600, 400, 0, 4);
 
-    h_vtx_angle[ihyp] = d.make<TH1D>("h_vtx_angle", ";candidate vertex opening angle (rad);candidates/0.0315", 100, 0, M_PI);
-    h_vtx_angle_vs_p[ihyp] = d.make<TH2D>("h_vtx_angle_vs_p", ";candidate vertex momentum (GeV);candidate vertex opening angle (rad)", 400,0,100, 100, 0, M_PI);
-    h_vtx_angle_vs_mass[ihyp] = d.make<TH2D>("h_vtx_angle_vs_mass", ";candidate vertex mass (GeV);candidate vertex opening angle (rad)", 220, 0.380,0.600, 100, 0, M_PI);
+    if (!limit_set) {
+      h_vtx_nsigrho[ihyp] = d.make<TH1D>("h_vtx_nsigrho", ";N#sigma(candidate vertex - pv (2D));candidates/0.01", 10000, 0, 100);
+      h_vtx_rho_vs_p[ihyp] = d.make<TH2D>("h_vtx_rho_vs_p", ";candidate p (GeV);candidate vertex - pv (2D) (cm)", 400,0,100, 400, 0, 4);
+      h_vtx_rho_vs_mass[ihyp] = d.make<TH2D>("h_vtx_rho_vs_mass", ";candidate mass (GeV);candidate vertex - pv (2D) (cm)", 220, 0.380,0.600, 400, 0, 4);
 
-    h_vtx_track_pt_0v1[ihyp] = d.make<TH2D>("h_vtx_track_pt_0v1", ";+ve track p_{T} (GeV);-ve track p_{T} (GeV)", 200, 0, 20, 200, 0, 20);
-    h_vtx_track_eta_0v1[ihyp] = d.make<TH2D>("h_vtx_track_eta_0v1", ";+ve track #eta;-ve track #eta", 200, -3, 3, 200, -3, 3);
-    h_vtx_track_phi_0v1[ihyp] = d.make<TH2D>("h_vtx_track_phi_0v1", ";+ve track #phi;-ve track #phi", 200, -M_PI, M_PI, 200, -M_PI, M_PI);
-    h_vtx_track_dxybs_0v1[ihyp] = d.make<TH2D>("h_vtx_track_dxybs_0v1", ";+ve track dxy(BS) (cm);-ve track dxy(BS) (cm)", 400, -0.1, 0.1, 400, -0.1, 0.1);
-    h_vtx_track_dxybs_0v1_zoom[ihyp] = d.make<TH2D>("h_vtx_track_dxybs_0v1_zoom", ";+ve track dxy(BS) (cm);-ve track dxy(BS) (cm)", 400, -2, 2, 400, -2, 2);
+      h_vtx_angle[ihyp] = d.make<TH1D>("h_vtx_angle", ";candidate vertex opening angle (rad);candidates/0.0315", 100, 0, M_PI);
+      h_vtx_angle_vs_p[ihyp] = d.make<TH2D>("h_vtx_angle_vs_p", ";candidate vertex momentum (GeV);candidate vertex opening angle (rad)", 400,0,100, 100, 0, M_PI);
+      h_vtx_angle_vs_mass[ihyp] = d.make<TH2D>("h_vtx_angle_vs_mass", ";candidate vertex mass (GeV);candidate vertex opening angle (rad)", 220, 0.380,0.600, 100, 0, M_PI);
 
+      h_vtx_track_pt_0v1[ihyp] = d.make<TH2D>("h_vtx_track_pt_0v1", ";+ve track p_{T} (GeV);-ve track p_{T} (GeV)", 200, 0, 20, 200, 0, 20);
+      h_vtx_track_eta_0v1[ihyp] = d.make<TH2D>("h_vtx_track_eta_0v1", ";+ve track #eta;-ve track #eta", 200, -3, 3, 200, -3, 3);
+      h_vtx_track_phi_0v1[ihyp] = d.make<TH2D>("h_vtx_track_phi_0v1", ";+ve track #phi;-ve track #phi", 200, -M_PI, M_PI, 200, -M_PI, M_PI);
+      h_vtx_track_dxybs_0v1[ihyp] = d.make<TH2D>("h_vtx_track_dxybs_0v1", ";+ve track dxy(BS) (cm);-ve track dxy(BS) (cm)", 400, -0.1, 0.1, 400, -0.1, 0.1);
+      h_vtx_track_dxybs_0v1_zoom[ihyp] = d.make<TH2D>("h_vtx_track_dxybs_0v1_zoom", ";+ve track dxy(BS) (cm);-ve track dxy(BS) (cm)", 400, -2, 2, 400, -2, 2);
+
+      h_vtx_costh3[ihyp] = d.make<TH1D>("h_vtx_costh3", ";post-fit candidate cos(angle between displacement and flight dir);candidates/0.001", 2001, -1, 1.01);
+      h_vtx_costh2[ihyp] = d.make<TH1D>("h_vtx_costh2", ";post-fit candidate cos(angle between displacement and flight dir (2D));candidates/0.001", 2001, -1, 1.01);
+    }
     h_vtx_p[ihyp] = d.make<TH1D>("h_vtx_p", ";post-fit candidate momentum (GeV);candidates/1 GeV", 400, 0, 100);
-    h_vtx_costh3[ihyp] = d.make<TH1D>("h_vtx_costh3", ";post-fit candidate cos(angle between displacement and flight dir);candidates/0.001", 2001, -1, 1.01);
-    h_vtx_costh2[ihyp] = d.make<TH1D>("h_vtx_costh2", ";post-fit candidate cos(angle between displacement and flight dir (2D));candidates/0.001", 2001, -1, 1.01);
     h_vtx_mass[ihyp] = d.make<TH1D>("h_vtx_mass", ";post-fit candidate invariant mass (GeV);candidates/1 MeV", 5000, 0, 5);
   }
 }
 
 void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& setup) {
   const bool is_mc = !event.isRealData();
-  int npu = -1;
-  double w = 1;
+  w = 1;
 
   if (is_mc) {
     edm::Handle<std::vector<PileupSummaryInfo> > pileup;
     event.getByToken(pileup_token, pileup);
 
+    int npu = -1;
     for (std::vector<PileupSummaryInfo>::const_iterator psi = pileup->begin(), end = pileup->end(); psi != end; ++psi)
       if (psi->getBunchCrossing() == 0)
         npu = psi->getTrueNumInteractions();
 
     assert(npu >= 0);
-    h_npu->Fill(npu);
+    fill(h_npu, npu); // w is still 1
     if (npu >= int(pileup_weights.size()))
       w *= pileup_weights.back();
     else
@@ -231,9 +270,9 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
   const double bsy = beamspot->y0();
   const double bsz = beamspot->z0();
 
-  h_bsx->Fill(bsx, w);
-  h_bsy->Fill(bsy, w);
-  h_bsz->Fill(bsz, w);
+  fill(h_bsx, bsx);
+  fill(h_bsy, bsy);
+  fill(h_bsz, bsz);
 
   edm::Handle<reco::VertexCollection> primary_vertex;
   event.getByToken(primary_vertex_token, primary_vertex);
@@ -242,44 +281,44 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
 
   const reco::Vertex& pv = (*primary_vertex)[0];
   const int npv = *n_good_primary_vertices;
-  h_npv->Fill(npv, w);
+  fill(h_npv, npv);
 
   const double pvx = pv.x();
   const double pvy = pv.y();
   const double pvz = pv.z();
   const int pvntracks = pv.nTracks();
 
-  h_pvx->Fill(pvx, w);
-  h_pvy->Fill(pvy, w);
-  h_pvz->Fill(pvz, w);
-  h_pvbsx->Fill(pvx - bsx, w);
-  h_pvbsy->Fill(pvy - bsy, w);
-  h_pvbsz->Fill(pvz - bsz, w);
-  h_pvntracks->Fill(pvntracks, w);
+  fill(h_pvx, pvx);
+  fill(h_pvy, pvy);
+  fill(h_pvz, pvz);
+  fill(h_pvbsx, pvx - bsx);
+  fill(h_pvbsy, pvy - bsy);
+  fill(h_pvbsz, pvz - bsz);
+  fill(h_pvntracks, pvntracks);
   
-  if (debug) printf("\nEVENT (%u, %u, %llu) npu %i npv %i weight %f\n", event.id().run(), event.luminosityBlock(), event.id().event(), npu, npv, w);
+  if (debug) printf("\nEVENT (%u, %u, %llu) npv %i weight %f\n", event.id().run(), event.luminosityBlock(), event.id().event(), npv, w);
 
   edm::Handle<reco::TrackCollection> tracks;
   event.getByToken(tracks_token, tracks);
   const size_t ntracks = tracks->size();
-  h_ntracks[nhyp]->Fill(ntracks, w);
+  fill(h_ntracks[nhyp], ntracks);
 
   auto filltrack = [&](const int i, const reco::Track& tk) {
-    h_track_charge[i]->Fill(tk.charge(), w);
-    h_track_pt[i]->Fill(tk.pt(), w);
-    h_track_eta[i]->Fill(tk.eta(), w);
-    h_track_phi[i]->Fill(tk.phi(), w);
-    h_track_npxhits[i]->Fill(tk.hitPattern().numberOfValidPixelHits(), w);
-    h_track_nsthits[i]->Fill(tk.hitPattern().numberOfValidStripHits(), w);
-    h_track_npxlayers[i]->Fill(tk.hitPattern().pixelLayersWithMeasurement(), w);
-    h_track_nstlayers[i]->Fill(tk.hitPattern().stripLayersWithMeasurement(), w);
-    h_track_dxybs[i]->Fill(tk.dxy(*beamspot), w);
-    h_track_dxypv[i]->Fill(tk.dxy(pv.position()), w);
-    h_track_dzbs[i]->Fill(tk.dz(beamspot->position()), w);
-    h_track_dzpv[i]->Fill(tk.dz(pv.position()), w);
-    h_track_sigmadxy[i]->Fill(tk.dxyError(), w);
-    h_track_nsigmadxybs[i]->Fill(tk.dxy(*beamspot) / tk.dxyError(), w);
-    h_track_nsigmadxypv[i]->Fill(tk.dxy(pv.position()) / tk.dxyError(), w);
+    fill(h_track_charge[i], tk.charge());
+    fill(h_track_pt[i], tk.pt());
+    fill(h_track_eta[i], tk.eta());
+    fill(h_track_phi[i], tk.phi());
+    fill(h_track_npxhits[i], tk.hitPattern().numberOfValidPixelHits());
+    fill(h_track_nsthits[i], tk.hitPattern().numberOfValidStripHits());
+    fill(h_track_npxlayers[i], tk.hitPattern().pixelLayersWithMeasurement());
+    fill(h_track_nstlayers[i], tk.hitPattern().stripLayersWithMeasurement());
+    fill(h_track_dxybs[i], tk.dxy(*beamspot));
+    fill(h_track_dxypv[i], tk.dxy(pv.position()));
+    fill(h_track_dzbs[i], tk.dz(beamspot->position()));
+    fill(h_track_dzpv[i], tk.dz(pv.position()));
+    fill(h_track_sigmadxy[i], tk.dxyError());
+    fill(h_track_nsigmadxybs[i], tk.dxy(*beamspot) / tk.dxyError());
+    fill(h_track_nsigmadxypv[i], tk.dxy(pv.position()) / tk.dxyError());
   };
 
   for (size_t itk = 0; itk < ntracks; ++itk)
@@ -288,7 +327,7 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
   edm::Handle<reco::VertexCollection> vertices;
   event.getByToken(vertices_token, vertices);
   const size_t nvtx = vertices->size();
-  h_nvtx->Fill(nvtx, w);
+  fill(h_nvtx, nvtx);
 
   std::vector<std::multiset<reco::TrackRef>> tracks_used(nhyp);
 
@@ -408,38 +447,38 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
 
         tracks_used[ihyp].insert(refs.begin(), refs.end());
 
-        h_vtx_chi2ndf[ihyp]->Fill(chi2ndf, w);
-        h_vtx_2d[ihyp]->Fill(x, y, w);
-        h_vtx_x[ihyp]->Fill(flight.X(), w);
-        h_vtx_y[ihyp]->Fill(flight.Y(), w);
-        h_vtx_z[ihyp]->Fill(flight.Z(), w);
-        h_vtx_r[ihyp]->Fill(flight.Mag(), w);
-        h_vtx_rho[ihyp]->Fill(flight.Perp(), w);
-        h_vtx_rho_vs_p[ihyp]->Fill(sum.P(), flight.Perp(), w);
-        h_vtx_rho_vs_mass[ihyp]->Fill(mass, flight.Perp(), w);
-        h_vtx_nsigrho[ihyp]->Fill(nsigrho, w);
+        fill(h_vtx_chi2ndf[ihyp], chi2ndf);
+        fill(h_vtx_2d[ihyp], x, y);
+        fill(h_vtx_x[ihyp], flight.X());
+        fill(h_vtx_y[ihyp], flight.Y());
+        fill(h_vtx_z[ihyp], flight.Z());
+        fill(h_vtx_r[ihyp], flight.Mag());
+        fill(h_vtx_rho[ihyp], flight.Perp());
+        fill(h_vtx_rho_vs_p[ihyp], sum.P(), flight.Perp());
+        fill(h_vtx_rho_vs_mass[ihyp], mass, flight.Perp());
+        fill(h_vtx_nsigrho[ihyp], nsigrho);
 
-        h_vtx_angle[ihyp]->Fill(angle, w);
-        h_vtx_angle_vs_p[ihyp]->Fill(p, angle, w);
-        h_vtx_angle_vs_mass[ihyp]->Fill(mass, angle, w);
+        fill(h_vtx_angle[ihyp], angle);
+        fill(h_vtx_angle_vs_p[ihyp], p, angle);
+        fill(h_vtx_angle_vs_mass[ihyp], mass, angle);
 
-        h_vtx_p[ihyp]->Fill(p, w);
-        h_vtx_costh3[ihyp]->Fill(costh3, w);
-        h_vtx_costh2[ihyp]->Fill(costh2, w);
-        h_vtx_mass[ihyp]->Fill(mass, w);
+        fill(h_vtx_p[ihyp], p);
+        fill(h_vtx_costh3[ihyp], costh3);
+        fill(h_vtx_costh2[ihyp], costh2);
+        fill(h_vtx_mass[ihyp], mass);
 
-        h_prefit_p[ihyp]->Fill(sum_prefit.P(), w);
-        h_prefit_mass[ihyp]->Fill(sum_prefit.M(), w);
+        fill(h_prefit_p[ihyp], sum_prefit.P());
+        fill(h_prefit_mass[ihyp], sum_prefit.M());
 
         if (ndaughters == 2) {
           const bool neg_first = v.refittedTrack(refs[0]).charge() < 0;
           const reco::Track& tkpos = v.refittedTrack(refs[ neg_first]);
           const reco::Track& tkneg = v.refittedTrack(refs[!neg_first]);
-          h_vtx_track_pt_0v1[ihyp]->Fill(tkpos.pt(), tkneg.pt());
-          h_vtx_track_eta_0v1[ihyp]->Fill(tkpos.eta(), tkneg.eta());
-          h_vtx_track_phi_0v1[ihyp]->Fill(tkpos.phi(), tkneg.phi());
-          h_vtx_track_dxybs_0v1[ihyp]->Fill(tkpos.dxy(*beamspot), tkneg.dxy(*beamspot));
-          h_vtx_track_dxybs_0v1_zoom[ihyp]->Fill(tkpos.dxy(*beamspot), tkneg.dxy(*beamspot));
+          fill(h_vtx_track_pt_0v1[ihyp], tkpos.pt(), tkneg.pt());
+          fill(h_vtx_track_eta_0v1[ihyp], tkpos.eta(), tkneg.eta());
+          fill(h_vtx_track_phi_0v1[ihyp], tkpos.phi(), tkneg.phi());
+          fill(h_vtx_track_dxybs_0v1[ihyp], tkpos.dxy(*beamspot), tkneg.dxy(*beamspot));
+          fill(h_vtx_track_dxybs_0v1_zoom[ihyp], tkpos.dxy(*beamspot), tkneg.dxy(*beamspot));
         }
       }
       while (std::next_permutation(test.begin(), test.end()));
@@ -453,7 +492,7 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
       if (mult > max_mult)
         max_mult = mult;
     }
-    h_max_track_multiplicity[ihyp]->Fill(max_mult, w);
+    fill(h_max_track_multiplicity[ihyp], max_mult);
 
     for (auto tkref : tracks_used[ihyp])
       filltrack(ihyp, *tkref);
