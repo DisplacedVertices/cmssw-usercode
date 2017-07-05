@@ -90,17 +90,13 @@ def make_script(filename, cmd):
     f.write(cmd)
     return fn
 
-crab_dirs = crab_dirs_from_argv()
-condor_dirs = cs_dirs_from_argv()
+dirs = crab_dirs_from_argv() + cs_dirs_from_argv()
 
-if not crab_dirs and not condor_dirs and not options.fake_results:
+if not dirs and not options.fake_results:
     sys.exit('space-separated list of existing crab or condor dirs required in argv (see --help)')
 
 if options.dir_sort:
-    crab_dirs.sort()
-    condor_dirs.sort()
-
-dirs = crab_dirs + condor_dirs
+    dirs.sort()
 
 dirs_done = []
 
@@ -142,6 +138,8 @@ while 1:
     else:
         # Get the statuses of all the dirs. 
         results = {}
+        crab_dirs = [d for d in dirs if is_crab_working_dir(d)]
+        condor_dirs = [d for d in dirs if is_cs_dir(d)]
         if crab_dirs:
             results.update(crab_process_statuses_with_redo(crab_dirs, options.max_processes))
             crab_cleanup()
@@ -156,7 +154,7 @@ while 1:
         if options.resub:
             to_resub = defaultdict(list)
             for d, res in results.iteritems():
-                if d not in crab_dirs:
+                if not is_crab_working_dir(d):
                     continue
                 for job_num in res['jobListByStatus'].get('failed', []):
                     to_resub[d].append(job_num)
