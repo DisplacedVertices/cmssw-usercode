@@ -61,13 +61,15 @@ if 0:
     for i in xrange(20):
         min_eta = -2.4 + 4.8/20 * i
         max_eta = -2.4 + 4.8/20 * (i+1)
+        al = process.v0eff      .clone(min_eta = min_eta, max_eta = max_eta)
         lo = process.v0effbkglo.clone(min_eta = min_eta, max_eta = max_eta)
         hi = process.v0effbkghi.clone(min_eta = min_eta, max_eta = max_eta)
         on = process.v0effon   .clone(min_eta = min_eta, max_eta = max_eta)
+        setattr(process, 'v0effeta%i' % i, al)
         setattr(process, 'v0effbkgloeta%i' % i, lo)
         setattr(process, 'v0effbkghieta%i' % i, hi)
         setattr(process, 'v0effoneta%i' % i, on)
-        process.p *= lo * hi * on
+        process.p *= al * lo * hi * on
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
@@ -85,7 +87,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         else:
             return [], []
 
-    cs = CondorSubmitter('V0EfficiencyV1_v11',
+    cs = CondorSubmitter('V0EfficiencyV1_v12_etaslices',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, zerobias_modifier),
