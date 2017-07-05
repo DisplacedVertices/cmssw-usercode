@@ -5,10 +5,21 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.MFVNeutralino.PerSignal import PerSignal
 
-set_style()
-ps = plot_saver(plot_dir('sigeff_v15'), size=(600,600), log=False)
+pileup = '2016'
 
-root_file_dir = '/uscms_data/d2/tucker/crab_dirs/HistosV15'
+set_style()
+if os.environ['USER'] == 'tucker':
+    ps = plot_saver(plot_dir('sigeff_v15'), size=(600,600), log=False)
+else:
+    ps = plot_saver('plots/sigeff/v15/%s' % pileup, size=(700,700), log=False, root=False)
+
+if pileup == '2016':
+    root_file_dir = '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_0'
+elif pileup == '2016mbxsecm5pc':
+    root_file_dir = '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_1'
+elif pileup == '2016mbxsecp5pc':
+    root_file_dir = '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_2'
+
 num_path = 'mfvEventHistosFullSel/h_bsx'
 
 multijet = [s for s in Samples.mfv_signal_samples if not s.name.startswith('my_')]
@@ -24,6 +35,7 @@ for sample in multijet + dijet:
     num = hnum.Integral(0, hnum.GetNbinsX() + 2)
     den = hden.GetBinContent(1)
     sample.y, sample.yl, sample.yh = clopper_pearson(num, den)
+    print '%26s: efficiency = %.3f (%.3f, %.3f)' % (sample.name, sample.y, sample.yl, sample.yh)
     
 per = PerSignal('efficiency', y_range=(0.,1.05))
 per.add(multijet, title='#tilde{N} #rightarrow tbs')
