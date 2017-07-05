@@ -6,15 +6,20 @@ from JMTucker.Tools import Samples
 from JMTucker.MFVNeutralino.PerSignal import PerSignal
 
 mode = 'vary_pileup'
+#mode = 'vary_jes'
 
 set_style()
 ps = plot_saver('plots/sigeff/v15/compare_sigeff_%s' % mode, size=(700,700), log=False, root=False)
 
 if mode == 'vary_pileup':
     root_file_dirs = ['/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_0', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_1', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_2']
+    num_paths = ['mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx']
     ls = ['2016', '2016mbxsecm5pc', '2016mbxsecp5pc']
 
-num_path = 'mfvEventHistosFullSel/h_bsx'
+if mode == 'vary_jes':
+    root_file_dirs = ['/uscms_data/d3/dquach/crab3dirs/JetEnergyHistosV15', '/uscms_data/d3/dquach/crab3dirs/JetEnergyHistosV15', '/uscms_data/d3/dquach/crab3dirs/JetEnergyHistosV15']
+    num_paths = ['mfvJetEnergyHistos/h_jet_ht_40_1000cut', 'mfvJetEnergyHistos/h_jet_ht_40_down_1000cut', 'mfvJetEnergyHistos/h_jet_ht_40_up_1000cut']
+    ls = ['2016', '2016jesdown', '2016jesup']
 
 nevs = []
 for i,root_file_dir in enumerate(root_file_dirs):
@@ -29,7 +34,7 @@ for i,root_file_dir in enumerate(root_file_dirs):
         if not os.path.exists(fn):
             continue
         f = ROOT.TFile(fn)
-        hnum = f.Get(num_path)
+        hnum = f.Get(num_paths[i])
         hden = f.Get('mfvWeight/h_sums')
         num = hnum.Integral(0, hnum.GetNbinsX() + 2)
         den = hden.GetBinContent(1)
