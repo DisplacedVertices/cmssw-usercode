@@ -5,21 +5,13 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.MFVNeutralino.PerSignal import PerSignal
 
-pileup = '2016'
-
 set_style()
 if os.environ['USER'] == 'tucker':
     ps = plot_saver(plot_dir('sigeff_v15'), size=(600,600), log=False)
 else:
-    ps = plot_saver('plots/sigeff/v15/%s' % pileup, size=(700,700), log=False, root=False)
+    ps = plot_saver('plots/sigeff/v15/2016', size=(700,700), log=False, root=False)
 
-if pileup == '2016':
-    root_file_dir = '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_0'
-elif pileup == '2016mbxsecm5pc':
-    root_file_dir = '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_1'
-elif pileup == '2016mbxsecp5pc':
-    root_file_dir = '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_2'
-
+root_file_dir = '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_0'
 num_path = 'mfvEventHistosFullSel/h_bsx'
 
 multijet = [s for s in Samples.mfv_signal_samples if not s.name.startswith('my_')]
