@@ -3,6 +3,7 @@ from JMTucker.Tools.ROOTTools import *
 set_style()
 
 in_fn = sys.argv[1]
+ex = sys.argv[2] if len(sys.argv) >= 3 else ''
 out_fn = os.path.basename(in_fn)
 if in_fn == out_fn or os.path.exists(out_fn):
     raise IOError('refusing to clobber existing file %s' % out_fn)
@@ -14,7 +15,7 @@ ps = plot_saver(plot_dir('v0bkgsub/' + sample), size=(600,600))
 # fit for s and b using sidebands
 
 in_f = ROOT.TFile(in_fn)
-h = in_f.Get('v0eff/K0_2pi/h_vtx_mass')
+h = in_f.Get('v0eff%s/K0_2pi/h_vtx_mass' % ex)
 
 # must keep these numbers in sync with histos!
 fit_range = 0.38, 0.6 
@@ -132,9 +133,9 @@ variables = [
     ]
 
 for hname, integ_factor, rebin, x_range in variables:
-    hon = in_f.Get('v0effon/K0_2pi/' + hname)
-    hbkglo = in_f.Get('v0effbkglo/K0_2pi/' + hname)
-    hbkghi = in_f.Get('v0effbkghi/K0_2pi/' + hname)
+    hon = in_f.Get('v0effon%s/K0_2pi/' % ex + hname)
+    hbkglo = in_f.Get('v0effbkglo%s/K0_2pi/' % ex + hname)
+    hbkghi = in_f.Get('v0effbkghi%s/K0_2pi/' % ex + hname)
 
     d = out_f.mkdir(hname)
     d.cd()
