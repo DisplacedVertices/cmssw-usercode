@@ -60,8 +60,8 @@ if 0:
 if 0:
     n = 5
     for i in xrange(n):
-        min_eta = -2.4 + 4.8/n * i
-        max_eta = -2.4 + 4.8/n * (i+1)
+        min_eta = -2.5 + 5.0/n * i
+        max_eta = -2.5 + 5.0/n * (i+1)
         al = process.v0eff      .clone(min_eta = min_eta, max_eta = max_eta)
         lo = process.v0effbkglo.clone(min_eta = min_eta, max_eta = max_eta)
         hi = process.v0effbkghi.clone(min_eta = min_eta, max_eta = max_eta)
