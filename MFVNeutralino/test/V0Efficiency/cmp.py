@@ -9,6 +9,7 @@ integ = lambda h: h.Integral(0,h.GetNbinsX()+2)
 ilumi_d = { # in /pb
 'qcd': 38529.0,
 'qcdht1000and1500': 38529.0,
+'qcdht1000and1500_hip1p0_mit': 38529.0,
 
 'JetHT2016B3': 5746.3,
 'JetHT2016C':  2572.8,
