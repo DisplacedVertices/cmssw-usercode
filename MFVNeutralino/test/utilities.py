@@ -165,8 +165,11 @@ def cmd_v0eff():
     cmd_hadd_data()
     cmd_hadd_qcd_sum()
     scale = -AnalysisConstants.int_lumi_2015p6 * AnalysisConstants.scale_factor_2015p6
-    for fn,xx in ('qcd.root', [500, 700, 1000, 1500, 2000]), ('qcdht1000and1500.root', [1000, 1500]):
-        files = ['qcdht%04isum.root' % x for x in xx]
+    for fn,files in [
+        ('qcd.root', ['qcdht%04isum.root' % x for x in (500, 700, 1000, 1500, 2000)]),
+        ('qcdht1000and1500.root', ['qcdht%04isum.root' % x for x in (1000, 1500)]),
+        ('qcdht1000and1500_hip1p0_mit.root', ['qcdht%04i_hip1p0_mit.root' % x for x in (1000, 1500)]),
+        ]:
         cmd = 'python ' + os.environ['CMSSW_BASE'] + '/src/JMTucker/Tools/python/Samples.py merge %f %s %s' % (scale, fn, ' '.join(files))
         print cmd
         os.system(cmd)
