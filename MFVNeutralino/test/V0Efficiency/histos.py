@@ -33,6 +33,8 @@ process.v0eff = cms.EDAnalyzer('MFVV0Efficiency',
                                max_chi2ndf = cms.double(5),
                                min_p = cms.double(0),
                                max_p = cms.double(1e9),
+                               min_eta = cms.double(-1e9),
+                               max_eta = cms.double(1e9),
                                mass_window_lo = cms.double(1e9),
                                mass_window_hi = cms.double(1e9),
                                min_costh2 = cms.double(0.995),
@@ -50,8 +52,21 @@ process.v0effbkghi = process.v0eff.clone(mass_window_lo = -0.550, mass_window_hi
 process.v0effon = process.v0eff.clone(mass_window_lo = -0.490, mass_window_hi = -0.505)
 process.p *= process.v0effbkglo * process.v0effbkghi * process.v0effon
 
-process.v0effonloose = process.v0effon.clone(min_track_nsigmadxybs = 3, min_track_pt = 0.)
-process.p *= process.v0effonloose
+if 0:
+    process.v0effonloose = process.v0effon.clone(min_track_nsigmadxybs = 3, min_track_pt = 0.)
+    process.p *= process.v0effonloose
+
+if 0:
+    for i in xrange(20):
+        min_eta = -2.4 + 4.8/20 * i
+        max_eta = -2.4 + 4.8/20 * (i+1)
+        lo = process.v0effbkglo.clone(min_eta = min_eta, max_eta = max_eta)
+        hi = process.v0effbkghi.clone(min_eta = min_eta, max_eta = max_eta)
+        on = process.v0effon   .clone(min_eta = min_eta, max_eta = max_eta)
+        setattr(process, 'v0effbkgloeta%i' % i, lo)
+        setattr(process, 'v0effbkghieta%i' % i, hi)
+        setattr(process, 'v0effoneta%i' % i, on)
+        process.p *= lo * hi * on
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
