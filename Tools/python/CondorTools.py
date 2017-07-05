@@ -187,11 +187,15 @@ def cs_analyze_mmon(wds):
         s = results[wd]['jobListByStatus'] = {}
         s2 = results[wd]['jobsPerStatus'] = {}
         s3 = results[wd]['jobsPerStatusEx'] = {}
-        for x in 'idle', 'running', 'killed', 'probs', 'done':
+        for x in 'idle', 'running', 'killed', 'probs', ('done', 'finished'):
+            if type(x) != tuple:
+                y = x
+            else:
+                x,y = x
             l = getattr(ana, x)()
             if l:
-                s[x] = l
-                s2[x] = s3[x] = len(l)
+                s[y] = l
+                s2[y] = s3[y] = len(l)
     return results
 
 def cs_timestamp():
@@ -270,5 +274,30 @@ def cs_report(wd):
     ll_all.writeJSON(os.path.join(wd, 'processedLumis.json'))
     return ll_all
 
+__all__ = [
+    'is_cs_dir',
+    'cs_dirs_from_argv',
+    'cs_fjrs',
+    'cs_eventsread',
+    'cs_eventswritten',
+    'cs_njobs',
+    'cs_jobmap',
+    'cs_realjob',
+    'cs_resubs',
+    'cs_clusters',
+    'cs_kill',
+    'cs_logs',
+    'cs_job_from_log',
+    'cs_jobs_running',
+    'cs_primaryds',
+    'cs_published',
+    'cs_rootfiles',
+    'cs_analyze',
+    'cs_analyze_mmon',
+    'cs_timestamp',
+    'cs_hadd',
+    'cs_report',
+    ]
+
 if __name__ == '__main__':
-    cs_eventsread('/uscms_data/d2/tucker/crab_dirs/NtupleV12/2015/condor_JetHT2015C')
+    pass
