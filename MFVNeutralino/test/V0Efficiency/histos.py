@@ -6,6 +6,7 @@ from JMTucker.MFVNeutralino.Year import year
 is_mc = True
 H = False
 zerobias = False
+meatloverssupreme = True
 
 global_tag(process, which_global_tag(is_mc, year, H))
 process.TFileService.fileName = 'v0histos.root'
@@ -28,9 +29,13 @@ process.v0eff = cms.EDAnalyzer('MFVV0Efficiency',
                                beamspot_src = cms.InputTag('offlineBeamSpot'),
                                primary_vertex_src = cms.InputTag('firstGoodPrimaryVertex'),
                                tracks_src = cms.InputTag('mfvSkimmedTracks'),
-                               limit_set = cms.bool(True),
+                               limit_set = cms.bool(meatloverssupreme),
                                min_track_pt = cms.double(1),
                                min_track_nsigmadxybs = cms.double(4),
+                               min_track_npxlayers = cms.int32(0),
+                               max_track_npxlayers = cms.int32(1000000),
+                               min_track_nstlayers = cms.int32(0),
+                               max_track_nstlayers = cms.int32(1000000),
                                max_chi2ndf = cms.double(5),
                                min_p = cms.double(0),
                                max_p = cms.double(1e9),
@@ -53,24 +58,29 @@ process.v0effbkghi = process.v0eff.clone(mass_window_lo = -0.550, mass_window_hi
 process.v0effon = process.v0eff.clone(mass_window_lo = -0.490, mass_window_hi = -0.505)
 process.p *= process.v0effbkglo * process.v0effbkghi * process.v0effon
 
-if 0:
-    process.v0effonloose = process.v0effon.clone(min_track_nsigmadxybs = 3, min_track_pt = 0.)
-    process.p *= process.v0effonloose
+if meatloverssupreme:
+    def addmodified(tag, code):
+        al = eval('process.v0eff     .clone(%s)' % code)
+        lo = eval('process.v0effbkglo.clone(%s)' % code)
+        hi = eval('process.v0effbkghi.clone(%s)' % code)
+        on = eval('process.v0effon   .clone(%s)' % code)
+        setattr(process, 'v0eff' + tag, al)
+        setattr(process, 'v0effbkglo' + tag, lo)
+        setattr(process, 'v0effbkghi' + tag, hi)
+        setattr(process, 'v0effon' + tag, on)
+        process.p *= al * lo * hi * on
 
-if 0:
+    addmodified('nsigdxy3', 'min_track_nsigmadxybs = 3')
+    addmodified('nsigdxy5', 'min_track_nsigmadxybs = 5')
+
     n = 5
     for i in xrange(n):
         min_eta = -2.5 + 5.0/n * i
         max_eta = -2.5 + 5.0/n * (i+1)
-        al = process.v0eff      .clone(min_eta = min_eta, max_eta = max_eta)
-        lo = process.v0effbkglo.clone(min_eta = min_eta, max_eta = max_eta)
-        hi = process.v0effbkghi.clone(min_eta = min_eta, max_eta = max_eta)
-        on = process.v0effon   .clone(min_eta = min_eta, max_eta = max_eta)
-        setattr(process, 'v0effeta%i' % i, al)
-        setattr(process, 'v0effbkgloeta%i' % i, lo)
-        setattr(process, 'v0effbkghieta%i' % i, hi)
-        setattr(process, 'v0effoneta%i' % i, on)
-        process.p *= al * lo * hi * on
+        addmodified('eta%i' % i, 'min_eta = %.1f, max_eta = %.1f' % min_eta, max_eta)
+
+    addmodified('npxlay2', 'max_track_npxlayers = 2')
+    addmodified('npxlay3', 'min_track_npxlayers = 3, max_track_npxlayers = 3')
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
@@ -88,7 +98,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         else:
             return [], []
 
-    cs = CondorSubmitter('V0EfficiencyV1_v12_etaslices',
+    cs = CondorSubmitter('V0EfficiencyV1_v13',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, zerobias_modifier),
