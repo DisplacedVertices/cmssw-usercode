@@ -32,6 +32,10 @@ private:
   const bool limit_set;
   const double min_track_pt;
   const double min_track_nsigmadxybs;
+  const int min_track_npxlayers;
+  const int max_track_npxlayers;
+  const int min_track_nstlayers;
+  const int max_track_nstlayers;
   const double max_chi2ndf;
   const double min_p;
   const double max_p;
@@ -134,6 +138,10 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
     limit_set(cfg.getParameter<bool>("limit_set")),
     min_track_pt(cfg.getParameter<double>("min_track_pt")),
     min_track_nsigmadxybs(cfg.getParameter<double>("min_track_nsigmadxybs")),
+    min_track_npxlayers(cfg.getParameter<int>("min_track_npxlayers")),
+    max_track_npxlayers(cfg.getParameter<int>("max_track_npxlayers")),
+    min_track_nstlayers(cfg.getParameter<int>("min_track_nstlayers")),
+    max_track_nstlayers(cfg.getParameter<int>("max_track_nstlayers")),
     max_chi2ndf(cfg.getParameter<double>("max_chi2ndf")),
     min_p(cfg.getParameter<double>("min_p")),
     max_p(cfg.getParameter<double>("max_p")),
@@ -345,8 +353,16 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
     int itk = 0;
     for (auto it = v.tracks_begin(), ite = v.tracks_end(); it != ite; ++it, ++itk) {
       const reco::Track& tk = **it;
+      const double nsigmadxybs = fabs(tk.dxy(*beamspot) / tk.dxyError());
+      const int npxlayers = tk.hitPattern().pixelLayersWithMeasurement();
+      const int nstlayers = tk.hitPattern().stripLayersWithMeasurement();
       if (tk.pt() < min_track_pt ||
-          fabs(tk.dxy(*beamspot) / tk.dxyError()) < min_track_nsigmadxybs) {
+          nsigmadxybs < min_track_nsigmadxybs ||
+          npxlayers < min_track_npxlayers ||
+          npxlayers > max_track_npxlayers ||
+          nstlayers < min_track_nstlayers ||
+          nstlayers > max_track_nstlayers
+          ) {
         tracks_ok = false;
         break;
       }
