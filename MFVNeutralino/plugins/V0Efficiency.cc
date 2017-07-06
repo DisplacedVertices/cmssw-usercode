@@ -175,11 +175,9 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
   auto booktracks = [&](TFileDirectory& d, int i) {
     if (limit_set && i == nhyp)
       return;
-    if (!limit_set) {
-      h_ntracks[i] = d.make<TH1D>("h_ntracks", ";# of selected tracks;events/1", 500, 0, 500);
-      h_max_track_multiplicity[i] = d.make<TH1D>("h_max_track_multiplicity", ";max multiplicity of any track in vertices;events/1", 10, 0, 10);
-      h_track_charge[i] = d.make<TH1D>("h_track_charge", ";track charge;tracks/1", 3, -1, 2);
-    }
+    h_ntracks[i] = d.make<TH1D>("h_ntracks", ";# of selected tracks;events/1", 100, 0, 100);
+    h_max_track_multiplicity[i] = d.make<TH1D>("h_max_track_multiplicity", ";max multiplicity of any track in vertices;events/1", 10, 0, 10);
+    h_track_charge[i] = d.make<TH1D>("h_track_charge", ";track charge;tracks/1", 3, -1, 2);
     h_track_pt[i] = d.make<TH1D>("h_track_pt", ";track p_{T} (GeV);tracks/100 MeV", 1000, 0, 100);
     h_track_eta[i] = d.make<TH1D>("h_track_eta", ";track #eta;tracks/0.01", 540, -2.7, 2.7);
     h_track_phi[i] = d.make<TH1D>("h_track_phi", ";track #eta;tracks/0.01", 628, -M_PI, M_PI);
@@ -494,8 +492,12 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
     }
     fill(h_max_track_multiplicity[ihyp], max_mult);
 
-    for (auto tkref : tracks_used[ihyp])
+    int ntracks = 0;
+    for (auto tkref : tracks_used[ihyp]) {
+      ++ntracks;
       filltrack(ihyp, *tkref);
+    }
+    fill(h_ntracks[ihyp], ntracks);
   }
 }
 
