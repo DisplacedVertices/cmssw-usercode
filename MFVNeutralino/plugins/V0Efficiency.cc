@@ -351,22 +351,8 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
     NumExtents pixel = tracker_extents.numExtentInRAndZ(tk.hitPattern(), TrackerSpaceExtents::PixelOnly);
     NumExtents strip = tracker_extents.numExtentInRAndZ(tk.hitPattern(), TrackerSpaceExtents::StripOnly);
 
-    std::bitset<128> stlayers_mono;
-    std::bitset<128> stlayers_stereo;
-    for (int j = 0; j < p.numberOfHits(reco::HitPattern::TRACK_HITS); ++j) {
-      const uint32_t hit = p.getHitPattern(reco::HitPattern::TRACK_HITS, j);
-      const bool is_stereo = p.getSide(hit);
-      const uint32_t layer = p.getLayer(hit);
-
-      if (p.validHitFilter(hit)) {
-        if (p.stripHitFilter(hit)) {
-          (is_stereo ? stlayers_stereo : stlayers_mono).set(layer);
-        }
-      }
-    }
-
-    fill(h_track_nstlayersmono[i], stlayers_mono.count());
-    fill(h_track_nstlayersstereo[i], stlayers_stereo.count());
+    fill(h_track_nstlayersmono[i], p.stripLayersWithMeasurement() - p.numberOfValidStripLayersWithMonoAndStereo());
+    fill(h_track_nstlayersstereo[i], p.numberOfValidStripLayersWithMonoAndStereo());
     fill(h_track_maxpxlayer[i], pixel.max_r);
     fill(h_track_minstlayer[i], strip.min_r);
     fill(h_track_deltapxlayers[i], pixel.max_r - pixel.min_r);
