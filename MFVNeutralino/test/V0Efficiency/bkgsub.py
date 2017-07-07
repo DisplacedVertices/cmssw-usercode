@@ -10,7 +10,7 @@ if in_fn == out_fn or os.path.exists(out_fn):
 
 sample = out_fn.replace('.root', '')
 
-ps = plot_saver(plot_dir('v0bkgsub/' + sample), size=(600,600))
+ps = plot_saver(plot_dir('v0bkgsub/!%s/' % ('default' if not ex else ex)  + sample), size=(600,600))
 
 # fit for s and b using sidebands
 
@@ -18,37 +18,30 @@ in_f = ROOT.TFile(in_fn)
 h = in_f.Get('v0eff%s/K0_2pi/h_vtx_mass' % ex)
 
 # must keep these numbers in sync with histos!
-fit_range = 0.38, 0.6 
-fit_exclude = 0.44, 0.55
+fit_range = 0.42, 0.6 
+fit_exclude = 0.46, 0.54
 
+npars = 3
 def fitfunc(x, p):
     x = x[0]
     if x >= fit_exclude[0] and x <= fit_exclude[1]:
         ROOT.TF1.RejectPoint()
         return 0.
-    return p[0] + p[1] * x
+    return p[0] + p[1] * x + p[2] * x**2 # + p[3] * x**3 + p[4] * x**4
 
-fcn = ROOT.TF1('fcn', fitfunc, fit_range[0], fit_range[1], 2)
+fcn = ROOT.TF1('fcn', fitfunc, fit_range[0], fit_range[1], npars)
 
 res = h.Fit(fcn, 'WL R N S Q')
 res.Print()
 print 'Chi2 Prob:', res.Prob()
 
-fit_pars = fcn.GetParameter(0), fcn.GetParameter(1)
-fit_errs = fcn.GetParError(0), fcn.GetParError(1)
+fit_pars = [fcn.GetParameter(i) for i in xrange(npars)]
+fit_errs = [fcn.GetParError(i) for i in xrange(npars)]
 
-fdraw = ROOT.TF1('fdraw', 'pol2', *fit_range)
+fdraw = ROOT.TF1('fdraw', 'pol%i' % (npars-1), *fit_range)
 fdraw.SetParameters(*fit_pars)
 
-h.Draw('hist e')
-h.SetStats(0)
-h.GetXaxis().SetRangeUser(0.28,0.9)
-h.GetYaxis().SetLabelSize(0.025)
-h.GetYaxis().SetTitleOffset(1.5)
-fdraw.Draw('same')
-ps.save('mass_fit')
-
-# draw the fit residuals
+# calc fit residuals
 
 xax = h.GetXaxis()
 hbkg = ROOT.TH1F('hbkg', h.GetTitle(), h.GetNbinsX(), xax.GetXmin(), xax.GetXmax())
@@ -63,28 +56,47 @@ for ibin in xrange(xax.FindBin(fit_range[0]), xax.FindBin(fit_range[1])):
     c  = hres.GetBinContent(ibin)
     ce = hres.GetBinError(ibin)
     i  = fdraw.Integral(xlo, xhi) / w
-    ie = (fit_errs[0]**2 + fit_errs[1]**2 * xmd**2)**0.5
+    ie = fdraw.IntegralError(xlo, xhi) / w
     r = (i - c) / i
     re = (ie**2 + ce**2)**0.5 / i
     #print i, ie, c, ce, r
     hbkg.SetBinContent(ibin, i)
     hbkg.SetBinError(ibin, ie)
+
     if fit_exclude[0] <= xmd <= fit_exclude[1]:
         r, re = 0, 0
     hres.SetBinContent(ibin, r)
     hres.SetBinError(ibin, re)
 
+h.Draw('hist e')
+h.SetStats(0)
+h.GetXaxis().SetRangeUser(0.28,1.3)
+h.GetYaxis().SetLabelSize(0.025)
+h.GetYaxis().SetTitleOffset(1.5)
+fdraw.Draw('same')
+
+insert = ROOT.TPad("insert","insert",0.431, 0.671, 0.863, 0.869)
+insert.SetRightMargin(0.01)
+insert.SetLeftMargin(0.01)
+insert.SetTopMargin(0.01)
+insert.SetBottomMargin(0.01)
+insert.Draw()
+insert.cd()
 hres.GetYaxis().SetTitle('fit residual')
+hres.GetYaxis().SetLabelSize(0.065)
+hres.GetXaxis().SetLabelSize(0.065)
+hres.GetYaxis().SetTitleSize(0.08)
+hres.GetXaxis().SetTitleSize(0.08)
+hres.GetYaxis().SetTitleOffset(0.75)
+hres.SetStats(0)
+
 hres.Fit('pol1')
-ps.save('res', log=False)
+ps.c.cd()
+ps.save('mass_fit')
+del insert
 
 # scan mass window for best yield, purity, and significance z = s/sqrt(b + sigb^2)
 # -- but mass window is fixed in histos to 490-505 MeV, so if you want to change it you have to do it there and rerun histos
-
-h.Draw('hist e')
-hbkg.SetLineColor(ROOT.kOrange+2)
-hbkg.Draw('hist same')
-ps.save('wbkg')
 
 xax = h.GetXaxis()
 ibinc = xax.FindBin(0.4976)
@@ -108,7 +120,7 @@ def do(lo,hi,prnt=False):
 for lo in xrange(50):
     for hi in xrange(50):
         xlo,xhi,n,ne,b,be,s,se,p,z = do(lo,hi)
-        if (s > max_s or p > max_p or z > max_z) and p > 0.85:
+        if (s > max_s or p > max_p or z > max_z) and p >= 0.85:
             do(lo,hi,True)
         if s > max_s:
             max_s = s
@@ -129,7 +141,17 @@ integ = lambda h: h.Integral(0,h.GetNbinsX()+2)
 colors = (2,3,4,6)
 variables = [
     ('h_vtx_rho', 1, 10, (0,2)),
+#    ('h_track_charge', 2, 1, None),
+    ('h_track_pt', 2, 10, (0,100)),
+    ('h_track_eta', 2, 4, None),
+    ('h_track_phi', 2, 4, None),
+    ('h_track_npxhits', 2, 1, None),
+    ('h_track_nsthits', 2, 1, None),
+    ('h_track_npxlayers', 2, 1, None),
+    ('h_track_nstlayers', 2, 1, None),
     ('h_track_dxybs', 2, 10, (-0.5,0.5)),
+    ('h_track_dzbs', 2, 10, None),
+    ('h_track_sigmadxy', 2, 1, (0,0.03)),
     ]
 
 for hname, integ_factor, rebin, x_range in variables:
@@ -152,7 +174,8 @@ for hname, integ_factor, rebin, x_range in variables:
         h.SetLineWidth(2)
         h.SetLineColor(colors[i-len(hoth) if h in hsig else i])
         h.SetStats(0)
-        h.GetXaxis().SetRangeUser(*x_range)
+        if x_range:
+            h.GetXaxis().SetRangeUser(*x_range)
 
     for i,h in enumerate(reversed(hoth)):
         hint = integ(h)
@@ -160,16 +183,15 @@ for hname, integ_factor, rebin, x_range in variables:
             if abs(hint - integ_factor * n) > 1e-5:
                 print 'hint', hint, 'n', n
                 raise ValueError('duh?')
-            h.Draw('hist')
+            h.Draw('hist e')
         else:
             h.Scale(b/hint)
             hsig[i-1].Add(h, -1)
-            h.Draw('hist same')
-    ps.save(hname + '_cmp')
+            h.Draw('hist e same')
 
     for i,h in enumerate(hsig):
-        h.Draw('hist e' if i == 0 else 'hist e same')
-    ps.save(hname + '_sig')
+        h.Draw('hist e same')
+    ps.save(hname)
 
 # copy over normalization hist
 
