@@ -6,6 +6,22 @@ set_style()
 
 integ = lambda h: h.Integral(0,h.GetNbinsX()+2)
 
+fit_range = {
+    'h_vtx_rho': (0.2, 2),
+    'h_track_dxybs': (-0.4, 0.4),
+    'h_track_sigmadxy': (0, 0.025),
+    }
+
+y_range = {
+    'h_vtx_rho': (0, 2),
+    'h_track_dxybs': (0, 2),
+    'h_track_sigmadxy': (0, 9),
+    'h_track_eta': (0, 3),
+    'h_track_phi': (0, 2),
+    'h_track_npxlayers': (0, 1),
+    'h_track_nstlayers': (0, 2),
+    }
+
 ilumi_d = { # in /pb
 'qcd': 38529.0,
 'qcdht1000and1500': 38529.0,
@@ -30,7 +46,7 @@ ilumi_d = { # in /pb
 'ZeroBias2016H3':   181.0*1e-6,
 }
 
-for x,l in ('BCD', ('B3', 'C', 'D')), ('EF', 'EF'), ('BCDEF', ('B3',) + tuple('CDEF')), ('H', ('H2', 'H3')), ('GH', ('G', 'H2', 'H3')):
+for x,l in ('', ('B3', 'C', 'D', 'E', 'F', 'G', 'H2', 'H3')), ('BCD', ('B3', 'C', 'D')), ('EF', 'EF'), ('BCDEF', ('B3',) + tuple('CDEF')), ('H', ('H2', 'H3')), ('GH', ('G', 'H2', 'H3')):
     for y in 'ZeroBias', 'JetHT':
         ilumi_d[y + '2016' + x] = sum(ilumi_d[y + '2016' + z] for z in l)
 
@@ -45,30 +61,45 @@ def getit(path, fn):
     f = ROOT.TFile(fn)
     h = f.Get('%s/hsig' % path).Clone(sname)
     h.SetDirectory(0)
-    print integ(h), ilumi
+    #print integ(h), ilumi
     h.Scale(1./ilumi)
+    h.GetYaxis().SetTitle(h.GetYaxis().GetTitle() + '/pb^{-1}')
+    h.GetYaxis().SetTitleOffset(1.25)
     return fn, sname, f, h
 
 path = sys.argv[1]
 fn1, name1, f1, h1 = getit(path, sys.argv[2])
 fn2, name2, f2, h2 = getit(path, sys.argv[3])
+#i1, i2 = integ(h1), integ(h2)
 
 h1.SetLineColor(2)
 h2.SetLineColor(4)
 
-ps = plot_saver(plot_dir('v0bkgsub/!cmp/%s_%s_%s' % (path, name1, name2)), size=(600,600))
+ps = plot_saver(plot_dir('v0bkgsub/!!cmp/%s_%s_%s' % (path, name1, name2)), size=(600,600))
 
-i1, i2 = integ(h1), integ(h2)
-
-h1.Draw('hist e')
-h2.Draw('hist e same')
+draw_in_order(((h1,h2), 'hist e'), True)
+ps.c.Update()
+differentiate_stat_box(h1, 0, new_size=(0.2,0.2))
+differentiate_stat_box(h2, 1, new_size=(0.2,0.2))
 ps.save('cmp')
 
-g = ROOT.TGraphAsymmErrors(h1, h2, 'pois midp')
+g = ROOT.TGraphAsymmErrors(h1, h2, 'pois')
 g.Draw('AP')
-g.GetYaxis().SetRangeUser(0, i1/i2 * 3)
 g.SetLineColor(ROOT.kBlue)
-fit_range = {'h_vtx_rho': (0.2, 2), 'h_track_dxybs': (-0.4, 0.4)}[path]
-fcn = ROOT.TF1('fcn', 'pol1', *fit_range)
-g.Fit(fcn, 'R')
+if 0:
+    if fit_range.has_key(path):
+        fcn = ROOT.TF1('fcn', 'pol1', *fit_range[path])
+        res = g.Fit(fcn, 'RNSQ')
+    else:
+        fcn = ROOT.TF1('fcn', 'pol1')
+        res = g.Fit(fcn, 'NSQ')
+    if res.Prob() > 1e-3:
+        fcn.Draw('same')
+g.GetXaxis().SetRangeUser(h1.GetXaxis().GetXmin(), h1.GetXaxis().GetXmax())
+g.GetXaxis().SetTitle(h1.GetXaxis().GetTitle())
+g.GetYaxis().SetTitle('%s ratio %s/%s' % (h1.GetYaxis().GetTitle(), name1, name2))
+g.GetYaxis().SetTitleOffset(1.25)
+#g.GetYaxis().SetRangeUser(0, i1/i2 * 3)
+if y_range.has_key(path):
+    g.GetYaxis().SetRangeUser(*y_range[path])
 ps.save('ratio')
