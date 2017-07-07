@@ -98,7 +98,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         else:
             return [], []
 
-    cs = CondorSubmitter('V0EfficiencyV1_v13',
+    cs = CondorSubmitter('V0EfficiencyV1_v14',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, zerobias_modifier),
