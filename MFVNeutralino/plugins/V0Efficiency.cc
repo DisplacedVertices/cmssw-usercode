@@ -14,6 +14,7 @@
 #include "RecoVertex/VertexTools/interface/VertexDistance3D.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "JMTucker/MFVNeutralino/interface/V0Hypotheses.h"
+#include "JMTucker/Tools/interface/TrackerSpaceExtent.h"
 
 class MFVV0Efficiency : public edm::EDAnalyzer {
 public:
@@ -75,6 +76,14 @@ private:
   TH1D* h_track_nsthits[nhyp+1];
   TH1D* h_track_npxlayers[nhyp+1];
   TH1D* h_track_nstlayers[nhyp+1];
+  TH1D* h_track_nstlayersmono[nhyp+1];
+  TH1D* h_track_nstlayersstereo[nhyp+1];
+  TH1D* h_track_maxpxlayer[nhyp+1];
+  TH1D* h_track_minstlayer[nhyp+1];
+  TH1D* h_track_deltapxlayers[nhyp+1];
+  TH1D* h_track_deltastlayers[nhyp+1];
+  TH1D* h_track_deltastlayers1stereo[nhyp+1];
+  TH1D* h_track_deltastlayers2stereo[nhyp+1];
   TH1D* h_track_dxybs[nhyp+1];
   TH1D* h_track_dxypv[nhyp+1];
   TH1D* h_track_dzbs[nhyp+1];
@@ -193,6 +202,14 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
     h_track_nsthits[i] = d.make<TH1D>("h_track_nsthits", ";track # strip hits;tracks/1", 40, 0, 40);
     h_track_npxlayers[i] = d.make<TH1D>("h_track_npxlayers", ";track # pixel layers;tracks/1", 7, 0, 7);
     h_track_nstlayers[i] = d.make<TH1D>("h_track_nstlayers", ";track # strip layers;tracks/1", 20, 0, 20);
+    h_track_nstlayersmono[i] = d.make<TH1D>("h_track_nstlayersmono", ";track # mono strip layers;tracks/1", 20, 0, 20);
+    h_track_nstlayersstereo[i] = d.make<TH1D>("h_track_nstlayersmono", ";track # mono strip layers;tracks/1", 20, 0, 20);
+    h_track_maxpxlayer[i] = d.make<TH1D>("h_track_maxpxlayer", ";track max pixel layer;tracks/1", 7, 0, 7);
+    h_track_minstlayer[i] = d.make<TH1D>("h_track_minstlayer", ";track min strip layer;tracks/1", 20, 0, 20);
+    h_track_deltapxlayers[i] = d.make<TH1D>("h_track_deltapxlayers", ";track delta pixel layers;tracks/1", 7, 0, 7);
+    h_track_deltastlayers[i] = d.make<TH1D>("h_track_deltastlayers", ";track delta strip layers;tracks/1", 20, 0, 20);
+    h_track_deltastlayers1stereo[i] = d.make<TH1D>("h_track_deltastlayers1stereo", ";track delta strip layers (one stereo);tracks/1", 20, 0, 20);
+    h_track_deltastlayers2stereo[i] = d.make<TH1D>("h_track_deltastlayers2stereo", ";track delta strip layers (both stereo);tracks/1", 20, 0, 20);
     h_track_dxybs[i] = d.make<TH1D>("h_track_dxybs", ";track dxy to BS (cm);tracks/10 #mum", 4000, -2, 2);
     h_track_dxypv[i] = d.make<TH1D>("h_track_dxypv", ";track dxy to PV (cm);tracks/10 #mum", 4000, -2, 2);
     h_track_dzbs[i] = d.make<TH1D>("h_track_dzbs", ";track dz to BS (cm);tracks/100 #mum", 4000, -20, 20);
@@ -280,6 +297,9 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
   fill(h_bsy, bsy);
   fill(h_bsz, bsz);
 
+  TrackerSpaceExtents tracker_extents;
+  tracker_extents.fill(setup, GlobalPoint(bsx, bsy, bsz));
+
   edm::Handle<reco::VertexCollection> primary_vertex;
   event.getByToken(primary_vertex_token, primary_vertex);
   edm::Handle<int> n_good_primary_vertices;
@@ -310,14 +330,16 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
   fill(h_ntracks[nhyp], ntracks);
 
   auto filltrack = [&](const int i, const reco::Track& tk) {
+    const reco::HitPattern& p = tk.hitPattern();
+
     fill(h_track_charge[i], tk.charge());
     fill(h_track_pt[i], tk.pt());
     fill(h_track_eta[i], tk.eta());
     fill(h_track_phi[i], tk.phi());
-    fill(h_track_npxhits[i], tk.hitPattern().numberOfValidPixelHits());
-    fill(h_track_nsthits[i], tk.hitPattern().numberOfValidStripHits());
-    fill(h_track_npxlayers[i], tk.hitPattern().pixelLayersWithMeasurement());
-    fill(h_track_nstlayers[i], tk.hitPattern().stripLayersWithMeasurement());
+    fill(h_track_npxhits[i], p.numberOfValidPixelHits());
+    fill(h_track_nsthits[i], p.numberOfValidStripHits());
+    fill(h_track_npxlayers[i], p.pixelLayersWithMeasurement());
+    fill(h_track_nstlayers[i], p.stripLayersWithMeasurement());
     fill(h_track_dxybs[i], tk.dxy(*beamspot));
     fill(h_track_dxypv[i], tk.dxy(pv.position()));
     fill(h_track_dzbs[i], tk.dz(beamspot->position()));
@@ -325,6 +347,30 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
     fill(h_track_sigmadxy[i], tk.dxyError());
     fill(h_track_nsigmadxybs[i], tk.dxy(*beamspot) / tk.dxyError());
     fill(h_track_nsigmadxypv[i], tk.dxy(pv.position()) / tk.dxyError());
+
+    NumExtents pixel = tracker_extents.numExtentInRAndZ(tk.hitPattern(), TrackerSpaceExtents::PixelOnly);
+    NumExtents strip = tracker_extents.numExtentInRAndZ(tk.hitPattern(), TrackerSpaceExtents::StripOnly);
+
+    std::bitset<128> stlayers_mono;
+    std::bitset<128> stlayers_stereo;
+    for (int j = 0; j < p.numberOfHits(reco::HitPattern::TRACK_HITS); ++j) {
+      const uint32_t hit = p.getHitPattern(reco::HitPattern::TRACK_HITS, j);
+      const bool is_stereo = p.getSide(hit);
+      const uint32_t layer = p.getLayer(hit);
+
+      if (p.validHitFilter(hit)) {
+        if (p.stripHitFilter(hit)) {
+          (is_stereo ? stlayers_stereo : stlayers_mono).set(layer);
+        }
+      }
+    }
+
+    fill(h_track_nstlayersmono[i], stlayers_mono.count());
+    fill(h_track_nstlayersstereo[i], stlayers_stereo.count());
+    fill(h_track_maxpxlayer[i], pixel.max_r);
+    fill(h_track_minstlayer[i], strip.min_r);
+    fill(h_track_deltapxlayers[i], pixel.max_r - pixel.min_r);
+    fill(h_track_deltastlayers[i], strip.max_r - strip.min_r);
   };
 
   for (size_t itk = 0; itk < ntracks; ++itk)
