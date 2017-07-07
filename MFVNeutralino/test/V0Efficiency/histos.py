@@ -77,7 +77,7 @@ if meatloverssupreme:
     for i in xrange(n):
         min_eta = -2.5 + 5.0/n * i
         max_eta = -2.5 + 5.0/n * (i+1)
-        addmodified('eta%i' % i, 'min_eta = %.1f, max_eta = %.1f' % min_eta, max_eta)
+        addmodified('eta%i' % i, 'min_eta = %.1f, max_eta = %.1f' % (min_eta, max_eta))
 
     addmodified('npxlay2', 'max_track_npxlayers = 2')
     addmodified('npxlay3', 'min_track_npxlayers = 3, max_track_npxlayers = 3')
