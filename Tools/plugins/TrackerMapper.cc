@@ -269,7 +269,7 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
 
     TrackerSpaceExtents tracker_extents;
     const double pt = tk.pt();
-    const double min_r = tracker_extents.numExtentInRAndZ(tk.hitPattern(), false).min_r;
+    const double min_r = tracker_extents.numExtentInRAndZ(tk.hitPattern(), TrackerSpaceExtents::AllowAll).min_r;
     const double npxlayers = tk.hitPattern().pixelLayersWithMeasurement();
     const double nstlayers = tk.hitPattern().stripLayersWithMeasurement();
     const double abseta = fabs(tk.eta());

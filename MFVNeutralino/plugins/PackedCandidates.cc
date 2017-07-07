@@ -97,7 +97,7 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
   if (prints) printf("generalTracks that pass our cuts (all # = %lu):\n", tracks->size());
   for (size_t itk = 0, itke = tracks->size(); itk < itke; ++itk) {
     const reco::Track& tk = (*tracks)[itk];
-    const NumExtents ne = tracker_extents.numExtentInRAndZ(tk.hitPattern(), false);
+    const NumExtents ne = tracker_extents.numExtentInRAndZ(tk.hitPattern(), TrackerSpaceExtents::AllowAll);
     const double dxybs = tk.dxy(*beamspot);
     const double sigmadxybs = dxybs / tk.dxyError();
     const bool pass = tk.pt() > 1 && ne.min_r <= 1 && tk.hitPattern().pixelLayersWithMeasurement() >= 2 && tk.hitPattern().stripLayersWithMeasurement() >= 3 && fabs(sigmadxybs) > 4;
@@ -133,7 +133,7 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
       if (closest_cd) {
         ++nmatch;
         const reco::Track& cd_tk = closest_cd->pseudoTrack();
-        const NumExtents cd_ne = tracker_extents.numExtentInRAndZ(cd_tk.hitPattern(), false);
+        const NumExtents cd_ne = tracker_extents.numExtentInRAndZ(cd_tk.hitPattern(), TrackerSpaceExtents::AllowAll);
         const double cd_dxybs = cd_tk.dxy(*beamspot);
         const double cd_sigmadxybs = cd_dxybs / cd_tk.dxyError();
         const bool cd_passes = cd_tk.pt() > 1 && cd_ne.min_r <= 1 && cd_tk.hitPattern().pixelLayersWithMeasurement() >= 2 && cd_tk.hitPattern().stripLayersWithMeasurement() >= 3 && fabs(cd_sigmadxybs) > 4;

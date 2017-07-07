@@ -148,8 +148,8 @@ void TrackingTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.tk_nstlay.push_back(tk.hitPattern().stripLayersWithMeasurement());
     nt.tk_npxlay.push_back(tk.hitPattern().pixelLayersWithMeasurement());
 
-    NumExtents ex    = tracker_extents.numExtentInRAndZ(tk.hitPattern(), false);
-    NumExtents ex_px = tracker_extents.numExtentInRAndZ(tk.hitPattern(), true);
+    NumExtents ex    = tracker_extents.numExtentInRAndZ(tk.hitPattern(), TrackerSpaceExtents::AllowAll);
+    NumExtents ex_px = tracker_extents.numExtentInRAndZ(tk.hitPattern(), TrackerSpaceExtents::PixelOnly);
     nt.tk_minhit(ex.min_r < 2e9 ? ex.min_r : 0,
                  ex.min_z < 2e9 ? ex.min_z : 0);
     nt.tk_maxhit(ex.max_r > -2e9 ? ex.max_r : 0,

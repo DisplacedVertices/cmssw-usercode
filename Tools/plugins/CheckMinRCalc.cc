@@ -42,7 +42,7 @@ void CheckMinRCalc::analyze(const edm::Event& event, const edm::EventSetup& setu
   edm::Handle<reco::TrackCollection> tracks;
   event.getByToken(tracks_token, tracks);
   for (const reco::Track& tk : *tracks) {
-    NumExtents ne = tracker_extents.numExtentInRAndZ(tk.hitPattern(), false);
+    NumExtents ne = tracker_extents.numExtentInRAndZ(tk.hitPattern(), TrackerSpaceExtents::AllowAll);
     ok->Fill(ne.min_r == 1, tk.hitPattern().hasValidHitInFirstPixelBarrel());
   }
 }
