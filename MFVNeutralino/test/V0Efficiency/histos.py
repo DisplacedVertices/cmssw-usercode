@@ -53,8 +53,8 @@ process.p = cms.Path(process.mfvWeight * process.v0eff)
 if not zerobias:
     process.p.insert(0, process.mfvTriggerFloatsFilter)
 
-process.v0effbkglo = process.v0eff.clone(mass_window_lo = -0.380, mass_window_hi = -0.440)
-process.v0effbkghi = process.v0eff.clone(mass_window_lo = -0.550, mass_window_hi = -0.600)
+process.v0effbkglo = process.v0eff.clone(mass_window_lo = -0.420, mass_window_hi = -0.460)
+process.v0effbkghi = process.v0eff.clone(mass_window_lo = -0.540, mass_window_hi = -0.600)
 process.v0effon = process.v0eff.clone(mass_window_lo = -0.490, mass_window_hi = -0.505)
 process.p *= process.v0effbkglo * process.v0effbkghi * process.v0effon
 
