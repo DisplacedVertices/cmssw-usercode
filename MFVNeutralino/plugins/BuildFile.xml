@@ -22,5 +22,4 @@
   <use name="TrackingTools/TransientTrack"/>
   <use name="JMTucker/MFVNeutralino"/>
   <use name="JMTucker/Tools"/>
-  <use name="CondFormats/JetMETObjects"/>
 </library>
