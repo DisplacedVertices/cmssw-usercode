@@ -1877,7 +1877,7 @@ def real_hist_min(h, return_bin=False, user_range=None):
 
 def set_style(date_pages=False):
     ROOT.TH1.SetDefaultSumw2() # when would we ever not want to?
-#    ROOT.gROOT.SetStyle('Plain')
+    ROOT.gStyle.SetHistMinimumZero(1)
     ROOT.gStyle.SetPadTickX(1)
     ROOT.gStyle.SetPadTickY(1)
     ROOT.gStyle.SetOptStat(1222222)
