@@ -187,8 +187,8 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
     h_max_track_multiplicity[i] = d.make<TH1D>("h_max_track_multiplicity", ";max multiplicity of any track in vertices;events/1", 10, 0, 10);
     h_track_charge[i] = d.make<TH1D>("h_track_charge", ";track charge;tracks/1", 3, -1, 2);
     h_track_pt[i] = d.make<TH1D>("h_track_pt", ";track p_{T} (GeV);tracks/100 MeV", 1000, 0, 100);
-    h_track_eta[i] = d.make<TH1D>("h_track_eta", ";track #eta;tracks/0.01", 540, -2.7, 2.7);
-    h_track_phi[i] = d.make<TH1D>("h_track_phi", ";track #eta;tracks/0.01", 628, -M_PI, M_PI);
+    h_track_eta[i] = d.make<TH1D>("h_track_eta", ";track #eta;tracks/0.01", 520, -2.6, 2.6);
+    h_track_phi[i] = d.make<TH1D>("h_track_phi", ";track #eta;tracks/0.01", 630, -M_PI, M_PI);
     h_track_npxhits[i] = d.make<TH1D>("h_track_npxhits", ";track # pixel hits;tracks/1", 15, 0, 15);
     h_track_nsthits[i] = d.make<TH1D>("h_track_nsthits", ";track # strip hits;tracks/1", 40, 0, 40);
     h_track_npxlayers[i] = d.make<TH1D>("h_track_npxlayers", ";track # pixel layers;tracks/1", 7, 0, 7);
