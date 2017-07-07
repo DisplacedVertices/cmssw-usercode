@@ -8,7 +8,7 @@ H = False
 zerobias = False
 meatloverssupreme = True
 
-global_tag(process, which_global_tag(is_mc, year, H))
+geometry_etc(process, which_global_tag(is_mc, year, H))
 process.TFileService.fileName = 'v0histos.root'
 
 process.source.fileNames = ['file:v0ntuple.root']
