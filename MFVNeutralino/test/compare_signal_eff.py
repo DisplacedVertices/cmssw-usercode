@@ -56,7 +56,19 @@ for i,nev in enumerate(nevs):
     dijet = Samples.mfv_ddbar_samples
 
     for j,sample in enumerate(multijet + dijet):
-        sample.y, sample.yl, sample.yh = clopper_pearson_poisson_means(nev[j], nevs[0][j])
+        v = nev[j]
+        c = nevs[0][j]
+
+        ev = v**0.5
+        ec = c**0.5
+
+        r = v/c
+        er = (v/c) * ((ev/v)**2 + (ec/c)**2)**0.5
+        er *= (abs(r-1))**0.5 / (1+r)**0.5
+
+        sample.y = r
+        sample.yl = r-er
+        sample.yh = r+er
         print '%26s: ratio = %.3f (%.3f, %.3f)' % (sample.name, sample.y, sample.yl, sample.yh)
 
     per = PerSignal('ratio of efficiencies', y_range=(0.9,1.1))
@@ -64,3 +76,35 @@ for i,nev in enumerate(nevs):
     per.add(dijet, title='X #rightarrow d#bar{d}', color=ROOT.kBlue)
     per.draw(canvas=ps.c)
     ps.save('sigeff_ratio_%s' % ls[i])
+
+multijet = [s for s in Samples.mfv_signal_samples if not s.name.startswith('my_')]
+dijet = Samples.mfv_ddbar_samples
+
+for j,sample in enumerate(multijet + dijet):
+    c = nevs[0][j]
+    v1 = nevs[1][j]
+    v2 = nevs[2][j]
+
+    ec = c**0.5
+    ev1 = v1**0.5
+    ev2 = v2**0.5
+
+    r1 = v1/c
+    er1 = (v1/c) * ((ev1/v1)**2 + (ec/c)**2)**0.5 * (abs(r1-1))**0.5 / (1+r1)**0.5
+
+    r2 = v2/c
+    er2 = (v2/c) * ((ev2/v2)**2 + (ec/c)**2)**0.5 * (abs(r2-1))**0.5 / (1+r2)**0.5
+
+    r = (abs(r1-1) + abs(r2-1)) / 2
+    er = (er1**2 + er2**2)**0.5 / 2
+
+    sample.y = r
+    sample.yl = r-er
+    sample.yh = r+er
+    print '%26s: uncertainty = %.3f (%.3f, %.3f)' % (sample.name, sample.y, sample.yl, sample.yh)
+
+per = PerSignal('uncertainty in signal efficiency', y_range=(0.,0.1))
+per.add(multijet, title='#tilde{N} #rightarrow tbs')
+per.add(dijet, title='X #rightarrow d#bar{d}', color=ROOT.kBlue)
+per.draw(canvas=ps.c)
+ps.save('sigeff_uncertainty_%s' % mode)
