@@ -36,6 +36,8 @@ process.v0eff = cms.EDAnalyzer('MFVV0Efficiency',
                                max_track_npxlayers = cms.int32(1000000),
                                min_track_nstlayers = cms.int32(0),
                                max_track_nstlayers = cms.int32(1000000),
+                               min_track_nstlayersstereo = cms.int32(0),
+                               max_track_nstlayersstereo = cms.int32(1000000),
                                max_chi2ndf = cms.double(5),
                                min_p = cms.double(0),
                                max_p = cms.double(1e9),
@@ -81,6 +83,17 @@ if meatloverssupreme:
 
     addmodified('npxlay2', 'max_track_npxlayers = 2')
     addmodified('npxlay3', 'min_track_npxlayers = 3, max_track_npxlayers = 3')
+    addmodified('npxlaymin3', 'min_track_npxlayers = 3')
+
+    for i in xrange(6, 14):
+        addmodified('nstlay%i' % i, 'min_track_nstlayers = %i, max_track_nstlayers = %i' % (i,i))
+        if i > 6:
+            addmodified('nstlaymin%i' % i, 'min_track_nstlayers = %i' % i)
+
+    for i in xrange(0, 8):
+        addmodified('nstlaystereo%i' % i, 'min_track_nstlayersstereo = %i, max_track_nstlayersstereo = %i' % (i,i))
+        if i > 0:
+            addmodified('nstlaystereomin%i' % i, 'min_track_nstlayersstereo = %i' % i)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
@@ -98,7 +111,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         else:
             return [], []
 
-    cs = CondorSubmitter('V0EfficiencyV1_v14',
+    cs = CondorSubmitter('V0EfficiencyV1_v15',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, zerobias_modifier),

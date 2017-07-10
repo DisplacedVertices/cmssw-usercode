@@ -37,6 +37,8 @@ private:
   const int max_track_npxlayers;
   const int min_track_nstlayers;
   const int max_track_nstlayers;
+  const int min_track_nstlayersstereo;
+  const int max_track_nstlayersstereo;
   const double max_chi2ndf;
   const double min_p;
   const double max_p;
@@ -151,6 +153,8 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
     max_track_npxlayers(cfg.getParameter<int>("max_track_npxlayers")),
     min_track_nstlayers(cfg.getParameter<int>("min_track_nstlayers")),
     max_track_nstlayers(cfg.getParameter<int>("max_track_nstlayers")),
+    min_track_nstlayersstereo(cfg.getParameter<int>("min_track_nstlayersstereo")),
+    max_track_nstlayersstereo(cfg.getParameter<int>("max_track_nstlayersstereo")),
     max_chi2ndf(cfg.getParameter<double>("max_chi2ndf")),
     min_p(cfg.getParameter<double>("min_p")),
     max_p(cfg.getParameter<double>("max_p")),
@@ -388,12 +392,15 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
       const double nsigmadxybs = fabs(tk.dxy(*beamspot) / tk.dxyError());
       const int npxlayers = tk.hitPattern().pixelLayersWithMeasurement();
       const int nstlayers = tk.hitPattern().stripLayersWithMeasurement();
+      const int nstlayersstereo = tk.hitPattern().numberOfValidStripLayersWithMonoAndStereo();
       if (tk.pt() < min_track_pt ||
           nsigmadxybs < min_track_nsigmadxybs ||
           npxlayers < min_track_npxlayers ||
           npxlayers > max_track_npxlayers ||
           nstlayers < min_track_nstlayers ||
-          nstlayers > max_track_nstlayers
+          nstlayers > max_track_nstlayers ||
+          nstlayersstereo < min_track_nstlayersstereo ||
+          nstlayersstereo > max_track_nstlayersstereo
           ) {
         tracks_ok = false;
         break;
