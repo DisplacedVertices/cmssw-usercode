@@ -1,11 +1,13 @@
 import sys, os
 from JMTucker.Tools.ROOTTools import *
+from JMTucker.Tools.general import bool_from_argv
 set_style()
 
+clobber = bool_from_argv('clobber')
 in_fn = sys.argv[1]
 ex = sys.argv[2] if len(sys.argv) >= 3 else ''
 out_fn = os.path.basename(in_fn)
-if in_fn == out_fn or os.path.exists(out_fn):
+if in_fn == out_fn or (os.path.exists(out_fn) and not clobber):
     raise IOError('refusing to clobber existing file %s' % out_fn)
 
 sample = out_fn.replace('.root', '')
@@ -21,13 +23,14 @@ h = in_f.Get('v0eff%s/K0_2pi/h_vtx_mass' % ex)
 fit_range = 0.42, 0.6 
 fit_exclude = 0.46, 0.54
 
-npars = 3
+npars = 2 if sample.startswith('ZeroBias') else 3
+print 'npars', npars
 def fitfunc(x, p):
     x = x[0]
     if x >= fit_exclude[0] and x <= fit_exclude[1]:
         ROOT.TF1.RejectPoint()
         return 0.
-    return p[0] + p[1] * x + p[2] * x**2 # + p[3] * x**3 + p[4] * x**4
+    return sum(p[i] * x**i for i in xrange(npars))
 
 fcn = ROOT.TF1('fcn', fitfunc, fit_range[0], fit_range[1], npars)
 
@@ -143,8 +146,8 @@ variables = [
     ('h_vtx_rho', 1, 10, (0,2)),
 #    ('h_track_charge', 2, 1, None),
     ('h_track_pt', 2, 10, (0,100)),
-    ('h_track_eta', 2, 4, None),
-    ('h_track_phi', 2, 4, None),
+    ('h_track_eta', 2, 10, None),
+    ('h_track_phi', 2, 10, None),
     ('h_track_npxhits', 2, 1, None),
     ('h_track_nsthits', 2, 1, None),
     ('h_track_npxlayers', 2, 1, None),
