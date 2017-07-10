@@ -6,6 +6,8 @@ set_style()
 clobber = bool_from_argv('clobber')
 in_fn = sys.argv[1]
 ex = sys.argv[2] if len(sys.argv) >= 3 else ''
+if ex == 'default':
+    ex = ''
 out_fn = os.path.basename(in_fn)
 if in_fn == out_fn or (os.path.exists(out_fn) and not clobber):
     raise IOError('refusing to clobber existing file %s' % out_fn)
@@ -152,6 +154,12 @@ variables = [
     ('h_track_nsthits', 2, 1, None),
     ('h_track_npxlayers', 2, 1, None),
     ('h_track_nstlayers', 2, 1, None),
+    ('h_track_nstlayersmono', 2, 1, None),
+    ('h_track_nstlayersstereo', 2, 1, None),
+    ('h_track_maxpxlayer', 2, 1, None),
+    ('h_track_minstlayer', 2, 1, None),
+    ('h_track_deltapxlayers', 2, 1, None),
+    ('h_track_deltastlayers', 2, 1, None),
     ('h_track_dxybs', 2, 10, (-0.5,0.5)),
     ('h_track_dzbs', 2, 10, None),
     ('h_track_sigmadxy', 2, 1, (0,0.03)),
@@ -171,7 +179,7 @@ for hname, integ_factor, rebin, x_range in variables:
     hbkg.Add(hbkghi)
     hsig = [hon.Clone(name) for name in 'hsiglo', 'hsighi', 'hsig']
     hoth = [hbkglo, hbkghi, hbkg, hon]
-
+ 
     for i,h in enumerate(hoth + hsig):
         h.Rebin(rebin)
         h.SetLineWidth(2)
@@ -196,10 +204,13 @@ for hname, integ_factor, rebin, x_range in variables:
         h.Draw('hist e same')
     ps.save(hname)
 
+    for h in hoth + hsig:
+        h.Write()
+
 # copy over normalization hist
 
 h = in_f.Get('mfvWeight/h_sums').Clone('h_sums')
 h.SetDirectory(out_f.mkdir('mfvWeight'))
 
-out_f.Write()
+#out_f.Write()
 out_f.Close()
