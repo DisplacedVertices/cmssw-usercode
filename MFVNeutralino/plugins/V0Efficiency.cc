@@ -51,6 +51,8 @@ private:
   const double max_geo2ddist;
   const bool debug;
 
+  TrackerSpaceExtents tracker_extents;
+
   double w;
 
   TH1D* h_npu;
@@ -302,9 +304,6 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
   fill(h_bsy, bsy);
   fill(h_bsz, bsz);
 
-  TrackerSpaceExtents tracker_extents;
-  tracker_extents.fill(setup, GlobalPoint(bsx, bsy, bsz));
-
   edm::Handle<reco::VertexCollection> primary_vertex;
   event.getByToken(primary_vertex_token, primary_vertex);
   edm::Handle<int> n_good_primary_vertices;
@@ -317,7 +316,7 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
   const double pvx = pv.x();
   const double pvy = pv.y();
   const double pvz = pv.z();
-  const int pvntracks = pv.nTracks();
+  const int pvntracks = -1; // pv.nTracks();
 
   fill(h_pvx, pvx);
   fill(h_pvy, pvy);
@@ -379,8 +378,8 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
     if (chi2ndf > max_chi2ndf)
       continue;
 
-    const size_t ndaughters = v.nTracks();
-    if (debug) std::cout << "ivtx " << ivtx << " chi2 " << chi2ndf << " ntracks " << v.nTracks() << " has refits? " << v.hasRefittedTracks() << std::endl;
+    const size_t ndaughters = v.tracksSize();
+    if (debug) std::cout << "ivtx " << ivtx << " chi2 " << chi2ndf << " ntracks " << ndaughters << " has refits? " << v.hasRefittedTracks() << std::endl;
     std::vector<int> charges(ndaughters, 0);
     std::vector<TVector3> v3s(ndaughters);
     std::vector<reco::TrackRef> refs(ndaughters);
