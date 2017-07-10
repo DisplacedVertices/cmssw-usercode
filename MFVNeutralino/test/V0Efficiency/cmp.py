@@ -20,6 +20,8 @@ y_range = {
     'h_track_phi': (0, 2),
     'h_track_npxlayers': (0, 1),
     'h_track_nstlayers': (0, 2),
+    'h_track_npxhits': (0, 2),
+    'h_track_nsthits': (0, 2),
     }
 
 ilumi_d = { # in /pb
@@ -67,15 +69,16 @@ def getit(path, fn):
     h.GetYaxis().SetTitleOffset(1.25)
     return fn, sname, f, h
 
-path = sys.argv[1]
-fn1, name1, f1, h1 = getit(path, sys.argv[2])
-fn2, name2, f2, h2 = getit(path, sys.argv[3])
+cuts = sys.argv[1]
+path = sys.argv[2]
+fn1, name1, f1, h1 = getit(path, sys.argv[3])
+fn2, name2, f2, h2 = getit(path, sys.argv[4])
 #i1, i2 = integ(h1), integ(h2)
 
 h1.SetLineColor(2)
 h2.SetLineColor(4)
 
-ps = plot_saver(plot_dir('v0bkgsub/!!cmp/%s_%s_%s' % (path, name1, name2)), size=(600,600))
+ps = plot_saver(plot_dir('v0bkgsub/!!cmp/%s_%s_%s_%s' % (cuts, path, name1, name2)), size=(600,600))
 
 draw_in_order(((h1,h2), 'hist e'), True)
 ps.c.Update()
