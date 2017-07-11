@@ -44,6 +44,7 @@ private:
   const double max_p;
   const double min_eta;
   const double max_eta;
+  const bool abs_eta_cut;
   const double mass_window_lo;
   const double mass_window_hi;
   const double min_costh2;
@@ -162,6 +163,7 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
     max_p(cfg.getParameter<double>("max_p")),
     min_eta(cfg.getParameter<double>("min_eta")),
     max_eta(cfg.getParameter<double>("max_eta")),
+    abs_eta_cut(cfg.getParameter<bool>("abs_eta_cut")),
     mass_window_lo(cfg.getParameter<double>("mass_window_lo")),
     mass_window_hi(cfg.getParameter<double>("mass_window_hi")),
     min_costh2(cfg.getParameter<double>("min_costh2")),
@@ -471,6 +473,7 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
         const double mass = sum.M();
         const double p = sum.P();
         const double eta = sum.Eta();
+        const double eta_cut = abs_eta_cut ? fabs(eta) : eta;
         const double costh3 = sum.Vect().Unit().Dot(flight_dir);
         const double costh2 = cos(sum.Vect().Unit().XYvector().DeltaPhi(flight_dir_2)); // wtf
         const double geo2ddist = hypot(x, y);
@@ -479,8 +482,8 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
         const bool use =
           p >= min_p &&
           p < max_p && // < and not <= for disjoint bins
-          eta >= min_eta &&
-          eta < max_eta &&
+          eta_cut >= min_eta &&
+          eta_cut < max_eta &&
           mass >= mass_lo &&
           mass <= mass_hi &&
           costh2 >= min_costh2 &&
