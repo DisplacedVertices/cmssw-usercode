@@ -87,8 +87,6 @@ private:
   TH1D* h_track_minstlayer[nhyp+1];
   TH1D* h_track_deltapxlayers[nhyp+1];
   TH1D* h_track_deltastlayers[nhyp+1];
-  TH1D* h_track_deltastlayers1stereo[nhyp+1];
-  TH1D* h_track_deltastlayers2stereo[nhyp+1];
   TH1D* h_track_dxybs[nhyp+1];
   TH1D* h_track_dxypv[nhyp+1];
   TH1D* h_track_dzbs[nhyp+1];
@@ -176,7 +174,7 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
 
   h_npu = h_bsx = h_bsy = h_bsz = h_npv = h_pvx = h_pvy = h_pvz = h_pvbsx = h_pvbsy = h_pvbsz = h_pvntracks = h_nvtx = 0;
   for (size_t i = 0; i < nhyp+1; ++i)
-    h_ntracks[i] = h_max_track_multiplicity[i] = h_track_charge[i] = h_track_pt[i] = h_track_eta[i] = h_track_phi[i] = h_track_npxhits[i] = h_track_nsthits[i] = h_track_npxlayers[i] = h_track_nstlayers[i] =  h_track_nstlayersmono[i] = h_track_nstlayersstereo[i] = h_track_maxpxlayer[i] = h_track_minstlayer[i] = h_track_deltapxlayers[i] = h_track_deltastlayers[i] = h_track_deltastlayers1stereo[i] = h_track_deltastlayers2stereo[i] = h_track_dxybs[i] = h_track_dxypv[i] = h_track_dzbs[i] = h_track_dzpv[i] = h_track_sigmadxy[i] = h_track_nsigmadxybs[i] = h_track_nsigmadxypv[i] = 0;
+    h_ntracks[i] = h_max_track_multiplicity[i] = h_track_charge[i] = h_track_pt[i] = h_track_eta[i] = h_track_phi[i] = h_track_npxhits[i] = h_track_nsthits[i] = h_track_npxlayers[i] = h_track_nstlayers[i] =  h_track_nstlayersmono[i] = h_track_nstlayersstereo[i] = h_track_maxpxlayer[i] = h_track_minstlayer[i] = h_track_deltapxlayers[i] = h_track_deltastlayers[i] = h_track_dxybs[i] = h_track_dxypv[i] = h_track_dzbs[i] = h_track_dzpv[i] = h_track_sigmadxy[i] = h_track_nsigmadxybs[i] = h_track_nsigmadxypv[i] = 0;
 
   for (size_t i = 0; i < nhyp; ++i) {
     h_prefit_p[i] = h_prefit_mass[i] = h_vtx_chi2ndf[i] = h_vtx_x[i] = h_vtx_y[i] = h_vtx_z[i] = h_vtx_r[i] = h_vtx_rho[i] = h_vtx_nsigrho[i] = h_vtx_angle[i] = h_vtx_p[i] = h_vtx_costh3[i] = h_vtx_costh2[i] = h_vtx_mass[i] = 0;
@@ -199,8 +197,8 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
   }
 
   auto booktracks = [&](TFileDirectory& d, int i) {
-    if (limit_set && i == nhyp)
-      return;
+    //if (limit_set && i == nhyp)
+    //  return;
     h_ntracks[i] = d.make<TH1D>("h_ntracks", ";# of selected tracks;events/1", 100, 0, 100);
     h_max_track_multiplicity[i] = d.make<TH1D>("h_max_track_multiplicity", ";max multiplicity of any track in vertices;events/1", 10, 0, 10);
     h_track_charge[i] = d.make<TH1D>("h_track_charge", ";track charge;tracks/1", 3, -1, 2);
@@ -217,8 +215,6 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
     h_track_minstlayer[i] = d.make<TH1D>("h_track_minstlayer", ";track min strip layer;tracks/1", 20, 0, 20);
     h_track_deltapxlayers[i] = d.make<TH1D>("h_track_deltapxlayers", ";track delta pixel layers;tracks/1", 7, 0, 7);
     h_track_deltastlayers[i] = d.make<TH1D>("h_track_deltastlayers", ";track delta strip layers;tracks/1", 20, 0, 20);
-    h_track_deltastlayers1stereo[i] = d.make<TH1D>("h_track_deltastlayers1stereo", ";track delta strip layers (one stereo);tracks/1", 20, 0, 20);
-    h_track_deltastlayers2stereo[i] = d.make<TH1D>("h_track_deltastlayers2stereo", ";track delta strip layers (both stereo);tracks/1", 20, 0, 20);
     h_track_dxybs[i] = d.make<TH1D>("h_track_dxybs", ";track dxy to BS (cm);tracks/10 #mum", 4000, -2, 2);
     h_track_dxypv[i] = d.make<TH1D>("h_track_dxypv", ";track dxy to PV (cm);tracks/10 #mum", 4000, -2, 2);
     h_track_dzbs[i] = d.make<TH1D>("h_track_dzbs", ";track dz to BS (cm);tracks/100 #mum", 4000, -20, 20);
