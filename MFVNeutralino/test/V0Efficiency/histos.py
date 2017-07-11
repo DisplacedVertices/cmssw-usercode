@@ -39,6 +39,7 @@ process.v0eff = cms.EDAnalyzer('MFVV0Efficiency',
                                max_track_nstlayers = cms.int32(1000000),
                                min_track_nstlayersstereo = cms.int32(0),
                                max_track_nstlayersstereo = cms.int32(1000000),
+                               track_inpv_req = cms.int32(0),
                                max_chi2ndf = cms.double(5),
                                min_p = cms.double(0),
                                max_p = cms.double(1e9),
@@ -87,6 +88,9 @@ if meatloverssupreme:
     addmodified('nstlaymin10', 'min_track_nstlayers = 10')
 
     addmodified('supertracks', 'min_track_pt = 5, min_track_npxlayers = 3, min_track_nstlayers = 10, abs_eta_cut = True, min_eta = 0, max_eta = 0.833')
+
+    addmodified('inpv1', 'track_inpv_req = 1')
+    addmodified('inpv2', 'track_inpv_req = 2')
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
