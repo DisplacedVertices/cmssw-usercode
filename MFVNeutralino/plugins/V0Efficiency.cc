@@ -30,6 +30,7 @@ private:
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertex_token;
   const edm::EDGetTokenT<int> n_good_primary_vertices_token;
   const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
+  const edm::EDGetTokenT<std::vector<int>> tracks_inpv_token;
   const bool limit_set;
   const double min_track_pt;
   const double min_track_nsigmadxybs;
@@ -39,6 +40,7 @@ private:
   const int max_track_nstlayers;
   const int min_track_nstlayersstereo;
   const int max_track_nstlayersstereo;
+  const int track_inpv_req;
   const double max_chi2ndf;
   const double min_p;
   const double max_p;
@@ -73,6 +75,7 @@ private:
 
   TH1D* h_ntracks[nhyp+1];
   TH1D* h_max_track_multiplicity[nhyp+1];
+  TH1D* h_track_inpv[nhyp+1];
   TH1D* h_track_charge[nhyp+1];
   TH1D* h_track_pt[nhyp+1];
   TH1D* h_track_eta[nhyp+1];
@@ -147,6 +150,7 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
     primary_vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertex_src"))),
     n_good_primary_vertices_token(consumes<int>(edm::InputTag(cfg.getParameter<edm::InputTag>("primary_vertex_src").label(), "nGood"))),
     tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("tracks_src"))),
+    tracks_inpv_token(consumes<std::vector<int>>(cfg.getParameter<edm::InputTag>("tracks_src"))),
     limit_set(cfg.getParameter<bool>("limit_set")),
     min_track_pt(cfg.getParameter<double>("min_track_pt")),
     min_track_nsigmadxybs(cfg.getParameter<double>("min_track_nsigmadxybs")),
@@ -156,6 +160,7 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
     max_track_nstlayers(cfg.getParameter<int>("max_track_nstlayers")),
     min_track_nstlayersstereo(cfg.getParameter<int>("min_track_nstlayersstereo")),
     max_track_nstlayersstereo(cfg.getParameter<int>("max_track_nstlayersstereo")),
+    track_inpv_req(cfg.getParameter<int>("track_inpv_req")),
     max_chi2ndf(cfg.getParameter<double>("max_chi2ndf")),
     min_p(cfg.getParameter<double>("min_p")),
     max_p(cfg.getParameter<double>("max_p")),
@@ -201,6 +206,7 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
     //  return;
     h_ntracks[i] = d.make<TH1D>("h_ntracks", ";# of selected tracks;events/1", 100, 0, 100);
     h_max_track_multiplicity[i] = d.make<TH1D>("h_max_track_multiplicity", ";max multiplicity of any track in vertices;events/1", 10, 0, 10);
+    h_track_inpv[i] = d.make<TH1D>("h_track_inpv", ";track in-pv code;tracks/1", 3, -1, 2);
     h_track_charge[i] = d.make<TH1D>("h_track_charge", ";track charge;tracks/1", 3, -1, 2);
     h_track_pt[i] = d.make<TH1D>("h_track_pt", ";track p_{T} (GeV);tracks/100 MeV", 1000, 0, 100);
     h_track_eta[i] = d.make<TH1D>("h_track_eta", ";track #eta;tracks/0.01", 520, -2.6, 2.6);
@@ -327,13 +333,51 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
   if (debug) printf("\nEVENT (%u, %u, %llu) npv %i weight %f\n", event.id().run(), event.luminosityBlock(), event.id().event(), npv, w);
 
   edm::Handle<reco::TrackCollection> tracks;
+  edm::Handle<std::vector<int>> tracks_inpv;
   event.getByToken(tracks_token, tracks);
+  event.getByToken(tracks_inpv_token, tracks_inpv);
   const size_t ntracks = tracks->size();
+  assert(ntracks == tracks_inpv->size());
   fill(h_ntracks[nhyp], ntracks);
 
-  auto filltrack = [&](const int i, const reco::Track& tk) {
+  auto passtrack = [&](const int itk, const reco::Track& tk) {
+    if (min_track_pt > 0 && tk.pt() < min_track_pt) return false;
+
+    if (track_inpv_req > 0) {
+      const int inpv = (*tracks_inpv)[itk];
+      if (track_inpv_req == 1 && inpv != 0) return false;
+      if (track_inpv_req == 2 && inpv > 0) return false;
+    }
+
+    if (min_track_nsigmadxybs > 0) {
+      const double nsigmadxybs = fabs(tk.dxy(*beamspot) / tk.dxyError());
+      if (nsigmadxybs < min_track_nsigmadxybs) return false;
+    }
+
+    if (min_track_npxlayers > 0 || max_track_npxlayers < 1000) {
+      const int npxlayers = tk.hitPattern().pixelLayersWithMeasurement(); // these hitpattern calls are ~expensive for some reason
+      if (npxlayers < min_track_npxlayers || npxlayers > max_track_npxlayers) return false;
+    }
+
+    if (min_track_nstlayers > 0 || max_track_nstlayers < 1000) {
+      const int nstlayers = tk.hitPattern().stripLayersWithMeasurement();
+      if (nstlayers < min_track_nstlayers || nstlayers > max_track_nstlayers) return false;
+    }
+
+    if (min_track_nstlayersstereo > 0 || max_track_nstlayersstereo < 1000) {
+      const int nstlayersstereo = tk.hitPattern().numberOfValidStripLayersWithMonoAndStereo();
+      if (nstlayersstereo < min_track_nstlayersstereo || nstlayersstereo > max_track_nstlayersstereo) return false;
+    }
+
+    return true;
+  };
+
+  auto filltrack = [&](const int i, const int itk, const reco::Track& tk) {
     const reco::HitPattern& p = tk.hitPattern();
 
+    int inpv = (*tracks_inpv)[itk];
+    if (inpv > 1) inpv = 1;
+    fill(h_track_inpv[i], inpv);
     fill(h_track_charge[i], tk.charge());
     fill(h_track_pt[i], tk.pt());
     fill(h_track_eta[i], tk.eta());
@@ -361,7 +405,8 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
   };
 
   for (size_t itk = 0; itk < ntracks; ++itk)
-    filltrack(nhyp, (*tracks)[itk]);
+    if (passtrack(itk, (*tracks)[itk]))
+      filltrack(nhyp, itk, (*tracks)[itk]);
 
   edm::Handle<reco::VertexCollection> vertices;
   event.getByToken(vertices_token, vertices);
@@ -385,27 +430,16 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
 
     int itk = 0;
     for (auto it = v.tracks_begin(), ite = v.tracks_end(); it != ite; ++it, ++itk) {
+      const reco::TrackRef& ref = it->castTo<reco::TrackRef>();
       const reco::Track& tk = **it;
-      const double nsigmadxybs = fabs(tk.dxy(*beamspot) / tk.dxyError());
-      const int npxlayers = tk.hitPattern().pixelLayersWithMeasurement();
-      const int nstlayers = tk.hitPattern().stripLayersWithMeasurement();
-      const int nstlayersstereo = tk.hitPattern().numberOfValidStripLayersWithMonoAndStereo();
-      if (tk.pt() < min_track_pt ||
-          nsigmadxybs < min_track_nsigmadxybs ||
-          npxlayers < min_track_npxlayers ||
-          npxlayers > max_track_npxlayers ||
-          nstlayers < min_track_nstlayers ||
-          nstlayers > max_track_nstlayers ||
-          nstlayersstereo < min_track_nstlayersstereo ||
-          nstlayersstereo > max_track_nstlayersstereo
-          ) {
+      if (!passtrack(ref.index(), tk)) {
         tracks_ok = false;
         break;
       }
 
       charges[itk] = tk.charge();
       v3s[itk].SetPtEtaPhi(tk.pt(), tk.eta(), tk.phi());
-      refs[itk] = it->castTo<reco::TrackRef>();
+      refs[itk] = ref;
     }
 
     if (!tracks_ok)
@@ -537,20 +571,17 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
   }
 
   for (size_t ihyp = 0; ihyp < nhyp; ++ihyp) {
+    int ntracks = 0;
     int max_mult = 0;
     for (auto r : tracks_used[ihyp]) {
+      ++ntracks;
       const int mult = tracks_used[ihyp].count(r);
       if (mult > max_mult)
         max_mult = mult;
-    }
-    fill(h_max_track_multiplicity[ihyp], max_mult);
-
-    int ntracks = 0;
-    for (auto tkref : tracks_used[ihyp]) {
-      ++ntracks;
-      filltrack(ihyp, *tkref);
+      filltrack(ihyp, r.index(), *r); // don't need to check passtrack here because they already passed in the vtx loop
     }
     fill(h_ntracks[ihyp], ntracks);
+    fill(h_max_track_multiplicity[ihyp], max_mult);
   }
 }
 
