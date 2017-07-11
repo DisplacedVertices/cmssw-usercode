@@ -14,6 +14,7 @@ process.TFileService.fileName = 'v0histos.root'
 process.source.fileNames = ['file:v0ntuple.root']
 process.source.fileNames = ['/store/user/tucker/V0NtupleV1_qcdht1000_hip1p0_mit.root']
 report_every(process, 100)
+process.maxEvents.input = 1000
 
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
 process.mfvWeight.enable = False # just do mcStat
@@ -43,6 +44,7 @@ process.v0eff = cms.EDAnalyzer('MFVV0Efficiency',
                                max_p = cms.double(1e9),
                                min_eta = cms.double(-1e9),
                                max_eta = cms.double(1e9),
+                               abs_eta_cut = cms.bool(False),
                                mass_window_lo = cms.double(1e9),
                                mass_window_hi = cms.double(1e9),
                                min_costh2 = cms.double(0.995),
@@ -75,25 +77,16 @@ if meatloverssupreme:
     addmodified('nsigdxy3', 'min_track_nsigmadxybs = 3')
     addmodified('nsigdxy5', 'min_track_nsigmadxybs = 5')
 
-    n = 5
+    n = 3
     for i in xrange(n):
-        min_eta = -2.5 + 5.0/n * i
-        max_eta = -2.5 + 5.0/n * (i+1)
-        addmodified('eta%i' % i, 'min_eta = %.1f, max_eta = %.1f' % (min_eta, max_eta))
+        min_eta = 0 + 2.5/n * i
+        max_eta = 0 + 2.5/n * (i+1)
+        addmodified('aeta%i' % i, 'abs_eta_cut = True, min_eta = %.1f, max_eta = %.1f' % (min_eta, max_eta))
 
-    addmodified('npxlay2', 'max_track_npxlayers = 2')
-    addmodified('npxlay3', 'min_track_npxlayers = 3, max_track_npxlayers = 3')
     addmodified('npxlaymin3', 'min_track_npxlayers = 3')
+    addmodified('nstlaymin10', 'min_track_nstlayers = 10')
 
-    for i in xrange(6, 14):
-        addmodified('nstlay%i' % i, 'min_track_nstlayers = %i, max_track_nstlayers = %i' % (i,i))
-        if i > 6:
-            addmodified('nstlaymin%i' % i, 'min_track_nstlayers = %i' % i)
-
-    for i in xrange(0, 8):
-        addmodified('nstlaystereo%i' % i, 'min_track_nstlayersstereo = %i, max_track_nstlayersstereo = %i' % (i,i))
-        if i > 0:
-            addmodified('nstlaystereomin%i' % i, 'min_track_nstlayersstereo = %i' % i)
+    addmodified('supertracks', 'min_track_pt = 5, min_track_npxlayers = 3, min_track_nstlayers = 10, abs_eta_cut = True, min_eta = 0, max_eta = 0.833')
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
@@ -111,7 +104,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         else:
             return [], []
 
-    cs = CondorSubmitter('V0EfficiencyV1_v15',
+    cs = CondorSubmitter('V0EfficiencyV1_v16',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, zerobias_modifier),
