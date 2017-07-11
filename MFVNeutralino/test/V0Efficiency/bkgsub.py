@@ -161,6 +161,7 @@ variables = [
     ('h_track_deltapxlayers', 2, 1, None),
     ('h_track_deltastlayers', 2, 1, None),
     ('h_track_dxybs', 2, 10, (-0.5,0.5)),
+    ('h_track_dxypv', 2, 10, (-0.5,0.5)),
     ('h_track_dzbs', 2, 10, None),
     ('h_track_sigmadxy', 2, 1, (0,0.03)),
     ]

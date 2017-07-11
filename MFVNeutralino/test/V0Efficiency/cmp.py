@@ -15,6 +15,7 @@ fit_range = {
 y_range = {
     'h_vtx_rho': (0, 2),
     'h_track_dxybs': (0, 2),
+    'h_track_dxypv': (0, 2),
     'h_track_sigmadxy': (0, 9),
     'h_track_eta': (0, 3),
     'h_track_phi': (0, 2),
