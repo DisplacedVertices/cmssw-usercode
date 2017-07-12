@@ -89,8 +89,8 @@ if meatloverssupreme:
 
     supertracks = 'min_track_pt = 3.5, min_track_npxlayers = 3, min_track_nstlayers = 10'
     addmodified('supertracks',       supertracks)
-    addmodified('supertracksbarrel', supertracks + 'abs_eta_cut = True, min_eta = 0, max_eta = 0.833')
-    addmodified('supertracksendcap', supertracks + 'abs_eta_cut = True, min_eta = 1.666, max_eta = 2.5')
+    addmodified('supertracksbarrel', supertracks + ', abs_eta_cut = True, min_eta = 0, max_eta = 0.833')
+    addmodified('supertracksendcap', supertracks + ', abs_eta_cut = True, min_eta = 1.666, max_eta = 2.5')
 
     addmodified('inpv1', 'track_inpv_req = 1')
     addmodified('inpv2', 'track_inpv_req = 2')
