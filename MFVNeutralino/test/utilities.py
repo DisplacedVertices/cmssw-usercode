@@ -173,6 +173,9 @@ def cmd_v0eff():
         cmd = 'python ' + os.environ['CMSSW_BASE'] + '/src/JMTucker/Tools/python/Samples.py merge %f %s %s' % (scale, fn, ' '.join(files))
         print cmd
         os.system(cmd)
+    os.mkdir('no')
+    for fn in ['qcdht%04i%s.root' % (x,y) for x in [500, 700, 1000, 1500, 2000] for y in ['', 'ext', 'sum']] + ['qcdht1000_hip1p0_mit.root', 'qcdht1500_hip1p0_mit.root']:
+        os.rename(fn, 'no/' + fn)
 
 def cmd_trigeff():
     cmd_report_data()
