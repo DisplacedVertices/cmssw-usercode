@@ -55,13 +55,14 @@ if zerobias:
     process.triggerFilter.HLTPaths.append('HLT_ZeroBias_v*') # what are the ZeroBias_part* paths?
 
 process.maxEvents.input = 100
-report_every(process, 1)
+#report_every(process, 1)
 #want_summary(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples 
     samples = Samples.data_samples + [s for s in Samples.auxiliary_data_samples if s.name.startswith('ZeroBias')]
-    samples += Samples.qcd_samples + Samples.qcd_samples_ext + Samples.qcd_hip_samples[-2:]
+    samples += [s for s in Samples.qcd_samples + Samples.qcd_samples_ext if '1000' in s.name or '1500' in s.name]
+    samples += Samples.qcd_hip_samples[-2:]
 
     for s in samples:
         s.files_per = 20
