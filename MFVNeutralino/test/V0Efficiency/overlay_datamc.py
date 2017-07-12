@@ -2,7 +2,7 @@ import sys
 from JMTucker.Tools.ROOTTools import *
 set_style()
 
-ps = plot_saver(plot_dir('v0bkgsub_datavmc'), size=(600,600))
+ps = plot_saver(plot_dir('v0bkgsub_overlay'), size=(600,600))
 
 def getit(fn):
     f = ROOT.TFile(fn)
@@ -11,8 +11,8 @@ def getit(fn):
     assert g.Class().GetName() == 'TGraphAsymmErrors'
     return f,c,g
 
-fdata, cdata, gdata = getit('data.root')
-fmc, cmc, gmc = getit('mc.root')
+fdata, cdata, gdata = getit(sys.argv[1])
+fmc, cmc, gmc = getit(sys.argv[2])
 
 ps.c.cd()
 
