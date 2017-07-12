@@ -25,20 +25,27 @@ h = in_f.Get('v0eff%s/K0_2pi/h_vtx_mass' % ex)
 fit_range = 0.42, 0.6 
 fit_exclude = 0.46, 0.54
 
-npars = 2 if sample.startswith('ZeroBias') else 3
-print 'npars', npars
-def fitfunc(x, p):
-    x = x[0]
-    if x >= fit_exclude[0] and x <= fit_exclude[1]:
-        ROOT.TF1.RejectPoint()
-        return 0.
-    return sum(p[i] * x**i for i in xrange(npars))
+npars = 3 # 2 if sample.startswith('ZeroBias') else 3
+while 1:
+    print 'npars', npars
+    def fitfunc(x, p):
+        x = x[0]
+        if x >= fit_exclude[0] and x <= fit_exclude[1]:
+            ROOT.TF1.RejectPoint()
+            return 0.
+        return sum(p[i] * x**i for i in xrange(npars))
 
-fcn = ROOT.TF1('fcn', fitfunc, fit_range[0], fit_range[1], npars)
+    fcn = ROOT.TF1('fcn', fitfunc, fit_range[0], fit_range[1], npars)
 
-res = h.Fit(fcn, 'WL R N S Q')
-res.Print()
-print 'Chi2 Prob:', res.Prob()
+    res = h.Fit(fcn, 'WL R N S Q')
+    res.Print()
+    print 'Chi2 Prob                 =', res.Prob()
+
+    if npars == 3 and fcn.GetParameter(2) > 0:
+        print 'fit wants positive quadratic term, trying again with linear fit'
+        npars = 2
+    else:
+        break
 
 fit_pars = [fcn.GetParameter(i) for i in xrange(npars)]
 fit_errs = [fcn.GetParError(i) for i in xrange(npars)]
@@ -63,11 +70,10 @@ for ibin in xrange(xax.FindBin(fit_range[0]), xax.FindBin(fit_range[1])):
     i  = fdraw.Integral(xlo, xhi) / w
     ie = fdraw.IntegralError(xlo, xhi) / w
     r = (i - c) / i
-    re = (ie**2 + ce**2)**0.5 / i
+    re = ce / i # (ie**2 + ce**2)**0.5 / i
     #print i, ie, c, ce, r
     hbkg.SetBinContent(ibin, i)
     hbkg.SetBinError(ibin, ie)
-
     if fit_exclude[0] <= xmd <= fit_exclude[1]:
         r, re = 0, 0
     hres.SetBinContent(ibin, r)
