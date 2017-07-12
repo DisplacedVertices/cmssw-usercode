@@ -45,7 +45,6 @@ output_commands = [
     'keep *_slimmedAddPileupInfo_*_*',
     'keep *_firstGoodPrimaryVertex_*_*',
     'keep *_TriggerResults_*_HLT', # for ZeroBias since I don't wanna mess with MFVTriggerFloats for it
-    'keep recoVertexCompositeCandidates_generalV0Candidates_Kshort_*'
     ]
 output_file(process, 'ntuple.root', output_commands)
 
