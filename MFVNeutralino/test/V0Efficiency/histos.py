@@ -87,7 +87,10 @@ if meatloverssupreme:
     addmodified('npxlaymin3', 'min_track_npxlayers = 3')
     addmodified('nstlaymin10', 'min_track_nstlayers = 10')
 
-    addmodified('supertracks', 'min_track_pt = 5, min_track_npxlayers = 3, min_track_nstlayers = 10, abs_eta_cut = True, min_eta = 0, max_eta = 0.833')
+    supertracks = 'min_track_pt = 3.5, min_track_npxlayers = 3, min_track_nstlayers = 10'
+    addmodified('supertracks',       supertracks)
+    addmodified('supertracksbarrel', supertracks + 'abs_eta_cut = True, min_eta = 0, max_eta = 0.833')
+    addmodified('supertracksendcap', supertracks + 'abs_eta_cut = True, min_eta = 1.666, max_eta = 2.5')
 
     addmodified('inpv1', 'track_inpv_req = 1')
     addmodified('inpv2', 'track_inpv_req = 2')
@@ -104,7 +107,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     #samples = [Samples.qcdht1000, Samples.qcdht1000_hip1p0_mit, Samples.JetHT2016G, Samples.ZeroBias2016G]
     set_splitting(samples, dataset, 'default', '../ana_2015p6.json', 2)
 
-    cs = CondorSubmitter('V0EfficiencyV1_v17',
+    cs = CondorSubmitter('V0EfficiencyV1_v18',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, zerobias_modifier),
