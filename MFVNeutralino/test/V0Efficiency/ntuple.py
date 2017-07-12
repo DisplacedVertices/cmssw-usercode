@@ -5,20 +5,23 @@ from JMTucker.MFVNeutralino.Year import year
 
 is_mc = True
 H = False
+zerobias = False
 
 process = pat_tuple_process(None, is_mc, year, H)
 jets_only(process)
 
-process.source.fileNames = ['/store/user/wsun/croncopyeos/qcdht1000/RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170606_165644/0000/reco_%i.root' % i for i in xrange(1,11)]
-if not is_mc:
+if is_mc:
+    process.source.fileNames = ['/store/user/wsun/croncopyeos/qcdht1000/RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170606_165644/0000/reco_%i.root' % i for i in xrange(1,11)]
+else:
     process.source.fileNames = ['/store/data/Run2016E/ZeroBias/AOD/23Sep2016-v1/100000/18151C77-4486-E611-84FD-0CC47A7C357A.root']
 
 process.load('JMTucker.Tools.FirstGoodPrimaryVertex_cfi')
 process.firstGoodPrimaryVertex.cut = True
 
 process.load('JMTucker.MFVNeutralino.SkimmedTracks_cfi')
-process.mfvSkimmedTracks.min_pt = 0.9
-process.mfvSkimmedTracks.min_nsigmadxybs = 3
+process.mfvSkimmedTracks.min_pt = 1.0
+process.mfvSkimmedTracks.min_dxybs = 0.01
+process.mfvSkimmedTracks.min_nsigmadxybs = 1
 process.mfvSkimmedTracks.cut = True
 
 process.load('JMTucker.MFVNeutralino.V0Vertexer_cff')
@@ -42,18 +45,19 @@ output_commands = [
     'keep *_slimmedAddPileupInfo_*_*',
     'keep *_firstGoodPrimaryVertex_*_*',
     'keep *_TriggerResults_*_HLT', # for ZeroBias since I don't wanna mess with MFVTriggerFloats for it
+    'keep recoVertexCompositeCandidates_generalV0Candidates_Kshort_*'
     ]
 output_file(process, 'ntuple.root', output_commands)
 
 import JMTucker.MFVNeutralino.EventFilter as ef
 ef.setup_event_filter(process, path_name='p')
-process.triggerFilter.HLTPaths.append('HLT_ZeroBias_v*') # what are the ZeroBias_part* paths?
-print 'fix zerobias vs ht trigger'
-raise 1
 
-process.maxEvents.input = -1
-#report_every(process, 1)
-want_summary(process)
+if zerobias:
+    process.triggerFilter.HLTPaths.append('HLT_ZeroBias_v*') # what are the ZeroBias_part* paths?
+
+process.maxEvents.input = 100
+report_every(process, 1)
+#want_summary(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples 
@@ -64,10 +68,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         s.files_per = 20
 
     from JMTucker.Tools.MetaSubmitter import *
-    batch_name = 'V0NtupleV1'
+    batch_name = 'V0NtupleV2'
     ms = MetaSubmitter(batch_name)
     ms.common.ex = year
-    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, H_modifier)
+    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, zerobias_modifier)
     ms.common.publish_name = batch_name + '_' + str(year)
     ms.crab.job_control_from_sample = True
     ms.condor.stageout_files = 'all'
