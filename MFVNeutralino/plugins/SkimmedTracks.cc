@@ -17,6 +17,7 @@ private:
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
   const double min_pt;
+  const double min_dxybs;
   const double min_nsigmadxybs;
   const bool cut;
   const bool debug;
@@ -27,6 +28,7 @@ MFVSkimmedTracks::MFVSkimmedTracks(const edm::ParameterSet& cfg)
     beamspot_token(consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"))),
     primary_vertices_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertices_src"))),
     min_pt(cfg.getParameter<double>("min_pt")),
+    min_dxybs(cfg.getParameter<double>("min_dxybs")),
     min_nsigmadxybs(cfg.getParameter<double>("min_nsigmadxybs")),
     cut(cfg.getParameter<bool>("cut")),
     debug(cfg.getUntrackedParameter<bool>("debug", false))
@@ -40,7 +42,7 @@ bool MFVSkimmedTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
   event.getByToken(tracks_token, tracks);
 
   edm::Handle<reco::BeamSpot> beamspot;
-  if (min_nsigmadxybs > 0)
+  if (min_dxybs > 0 || min_nsigmadxybs > 0)
     event.getByToken(beamspot_token, beamspot);
 
   edm::Handle<reco::VertexCollection> primary_vertices;
@@ -72,11 +74,12 @@ bool MFVSkimmedTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
 
     if (debug) std::cout << "track #" << itk << " pt " << pt << " |eta| " << abs_eta << " min_r " << min_r << " npxlayers " << npxlayers << " nstlayers " << nstlayers << " stlayerspass? " << stlayers_pass << " pass so far? " << pass;
 
-    if (min_nsigmadxybs > 0) {
+    if (pass && (min_dxybs > 0 || min_nsigmadxybs > 0)) {
       const double dxybs = tk.dxy(*beamspot);
       const double dxyerr = tk.dxyError();
       const double nsigmadxybs = dxybs / dxyerr;
-      pass = pass && fabs(nsigmadxybs) > min_nsigmadxybs;
+      if (fabs(dxybs) < min_dxybs || fabs(nsigmadxybs) < min_nsigmadxybs)
+        pass = false;
       if (debug) std::cout << " dxybs " << dxybs << " dxyerr " << dxyerr << " sigmadxybs " << nsigmadxybs;
     }
 
