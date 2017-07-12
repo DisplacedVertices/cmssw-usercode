@@ -92,6 +92,8 @@ if meatloverssupreme:
     addmodified('inpv1', 'track_inpv_req = 1')
     addmodified('inpv2', 'track_inpv_req = 2')
 
+    addmodified('costh2tight', 'min_costh2 = 0.9998')
+
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
     from JMTucker.Tools.MetaSubmitter import *
@@ -102,7 +104,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     #samples = [Samples.qcdht1000, Samples.qcdht1000_hip1p0_mit, Samples.JetHT2016G, Samples.ZeroBias2016G]
     set_splitting(samples, dataset, 'default', '../ana_2015p6.json', 2)
 
-    cs = CondorSubmitter('V0EfficiencyV1_v16',
+    cs = CondorSubmitter('V0EfficiencyV1_v17',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, zerobias_modifier),
