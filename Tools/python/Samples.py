@@ -467,6 +467,14 @@ auxiliary_data_samples = [
     DataSample('ZeroBias2016G', '/ZeroBias/Run2016G-23Sep2016-v1/AOD'),
     DataSample('ZeroBias2016H2', '/ZeroBias/Run2016H-PromptReco-v2/AOD'),
     DataSample('ZeroBias2016H3', '/ZeroBias/Run2016H-PromptReco-v3/AOD'),
+
+    DataSample('ReproJetHT2016B', '/JetHT/Run2016B-18Apr2017_ver2-v1/AOD'),
+    DataSample('ReproJetHT2016C', '/JetHT/Run2016C-18Apr2017-v1/AOD'),
+    DataSample('ReproJetHT2016D', '/JetHT/Run2016D-18Apr2017-v1/AOD'),
+    DataSample('ReproJetHT2016E', '/JetHT/Run2016E-18Apr2017-v1/AOD'),
+    DataSample('ReproJetHT2016F', '/JetHT/Run2016F-18Apr2017-v1/AOD'),
+    DataSample('ReproJetHT2016G', '/JetHT/Run2016G-18Apr2017-v1/AOD'),
+    DataSample('ReproJetHT2016H', '/JetHT/Run2016H-18Apr2017-v1/AOD'),
     ]
 
 for s in data_samples + auxiliary_data_samples:
