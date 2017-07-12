@@ -102,12 +102,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     #samples = [Samples.qcdht1000, Samples.qcdht1000_hip1p0_mit, Samples.JetHT2016G, Samples.ZeroBias2016G]
     set_splitting(samples, dataset, 'default', '../ana_2015p6.json', 2)
 
-    def zerobias_modifier(sample):
-        if sample.name.startswith('ZeroBias'):
-            return [], [('zerobias =XFalse'.replace('X', ' '), 'zerobias = True', 'no magic zerobias?')]
-        else:
-            return [], []
-
     cs = CondorSubmitter('V0EfficiencyV1_v16',
                          ex = year,
                          dataset = dataset,
