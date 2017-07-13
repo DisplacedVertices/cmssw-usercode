@@ -518,14 +518,15 @@ void MFVOfficialK0s::analyze(const edm::Event& event, const edm::EventSetup& set
     fill(h_prefit_mass[ihyp], sum_prefit.M());
 
     if (ndaughters == 2) {
-      const bool neg_first = v.refittedTrack(refs[0]).charge() < 0;
-      const reco::Track& tkpos = v.refittedTrack(refs[ neg_first]);
-      const reco::Track& tkneg = v.refittedTrack(refs[!neg_first]);
-      fill(h_vtx_track_pt_0v1[ihyp], tkpos.pt(), tkneg.pt());
-      fill(h_vtx_track_eta_0v1[ihyp], tkpos.eta(), tkneg.eta());
-      fill(h_vtx_track_phi_0v1[ihyp], tkpos.phi(), tkneg.phi());
-      fill(h_vtx_track_dxybs_0v1[ihyp], tkpos.dxy(*beamspot), tkneg.dxy(*beamspot));
-      fill(h_vtx_track_dxybs_0v1_zoom[ihyp], tkpos.dxy(*beamspot), tkneg.dxy(*beamspot));
+      const bool neg_first = rcc[0]->charge() < 0;
+      const reco::RecoChargedCandidate* tkpos = rcc[ neg_first];
+      const reco::RecoChargedCandidate* tkneg = rcc[!neg_first];
+      fill(h_vtx_track_pt_0v1[ihyp], tkpos->pt(), tkneg->pt());
+      fill(h_vtx_track_eta_0v1[ihyp], tkpos->eta(), tkneg->eta());
+      fill(h_vtx_track_phi_0v1[ihyp], tkpos->phi(), tkneg->phi());
+      // JMTBAD refitted tracks aren't stored so can't do dxy this easily
+//      fill(h_vtx_track_dxybs_0v1[ihyp], tkpos->track()->dxy(*beamspot), tkneg->dxy(*beamspot));
+//      fill(h_vtx_track_dxybs_0v1_zoom[ihyp], tkpos->track()->dxy(*beamspot), tkneg->dxy(*beamspot));
     }
   }
 
