@@ -19,6 +19,7 @@ else:
 
 tfileservice(process, 'officialK0s.root')
 
+process.goodOfflinePrimaryVertices.filter = True
 process.p = cms.Path(process.goodOfflinePrimaryVertices)
 
 if not zerobias:
