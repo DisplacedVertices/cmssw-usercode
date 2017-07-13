@@ -174,7 +174,7 @@ def cmd_v0eff():
         print cmd
         os.system(cmd)
     os.mkdir('no')
-    for fn in ['qcdht%04i%s.root' % (x,y) for x in [500, 700, 1000, 1500, 2000] for y in ['', 'ext', 'sum']] + ['qcdht1000_hip1p0_mit.root', 'qcdht1500_hip1p0_mit.root'] + ['%s2016H%i.root' for x in ['JetHT', 'ZeroBias'] for y in [2,3]]:
+    for fn in ['qcdht%04i%s.root' % (x,y) for x in [500, 700, 1000, 1500, 2000] for y in ['', 'ext', 'sum']] + ['qcdht1000_hip1p0_mit.root', 'qcdht1500_hip1p0_mit.root'] + ['%s2016H%i.root' % (x,y) for x in ['JetHT', 'ZeroBias'] for y in [2,3]]:
         os.rename(fn, 'no/' + fn)
 
 def cmd_trigeff():
