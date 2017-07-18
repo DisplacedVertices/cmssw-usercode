@@ -690,6 +690,33 @@ _add_ds('v0ntuplev1', {
 
 })
 
+_add_ds("v0ntuplev2", {
+
+'JetHT2016B3': _fromnum1("/store/user/dquach/JetHT/V0NtupleV2_2016/170713_152719", 396),
+'JetHT2016C': _fromnum1("/store/user/dquach/JetHT/V0NtupleV2_2016/170713_152749", 161),
+'JetHT2016D': _fromnum1("/store/user/dquach/JetHT/V0NtupleV2_2016/170713_152819", 252),
+'JetHT2016E': _fromnum1("/store/user/dquach/JetHT/V0NtupleV2_2016/170713_152910", 256),
+'JetHT2016F': _fromnum1("/store/user/dquach/JetHT/V0NtupleV2_2016/170713_152952", 202),
+'JetHT2016G': _fromnum1("/store/user/dquach/JetHT/V0NtupleV2_2016/170713_153020", 492),
+'JetHT2016H2': _fromnum1("/store/user/dquach/JetHT/V0NtupleV2_2016/170713_153048", 468),
+'JetHT2016H3': _fromnum1("/store/user/dquach/JetHT/V0NtupleV2_2016/170713_153116", 12),
+
+'ZeroBias2016B3': _fromnum1("/store/user/dquach/ZeroBias/V0NtupleV2_2016/170713_153150", 113),
+'ZeroBias2016C': _fromnum1("/store/user/dquach/ZeroBias/V0NtupleV2_2016/170713_153218", 20),
+'ZeroBias2016D': _fromnum1("/store/user/dquach/ZeroBias/V0NtupleV2_2016/170713_153245", 32),
+'ZeroBias2016E': _fromnum1("/store/user/dquach/ZeroBias/V0NtupleV2_2016/170713_153313", 38),
+'ZeroBias2016F': _fromnum1("/store/user/dquach/ZeroBias/V0NtupleV2_2016/170713_153341", 31),
+'ZeroBias2016G': _fromnum1("/store/user/dquach/ZeroBias/V0NtupleV2_2016/170713_153409", 60),
+'ZeroBias2016H2': _fromnum1("/store/user/dquach/ZeroBias/V0NtupleV2_2016/170713_153440", 86),
+'ZeroBias2016H3': _fromnum1("/store/user/dquach/ZeroBias/V0NtupleV2_2016/170713_153508", 3),
+
+'qcdht1000': _fromnum1("/store/user/dquach/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/V0NtupleV2_2016/170713_153636", 39),
+'qcdht1000ext': _fromnum1("/store/user/dquach/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/V0NtupleV2_2016/170713_153913", 73),
+'qcdht1500': _fromnum1("/store/user/dquach/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/V0NtupleV2_2016/170713_153708", 34),
+'qcdht1500ext': _fromnum1("/store/user/dquach/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/V0NtupleV2_2016/170713_153944", 64),
+
+})
+
 __all__ = [
     'dump',
     'get',
