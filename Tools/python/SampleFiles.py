@@ -688,6 +688,13 @@ _add_ds('v0ntuplev1', {
 'ZeroBias2016H2': _fromnum1('/store/user/tucker/ZeroBias/crab_V0NtupleV1_ZeroBias2016H2/170629_191830', 86, fnbase='v0ntuple'),
 'ZeroBias2016H3': _fromnum1('/store/user/tucker/ZeroBias/crab_V0NtupleV1_ZeroBias2016H3/170629_191901', 3, fnbase='v0ntuple'),
 
+'ReproJetHT2016B': _fromnum1("/store/user/tucker/JetHT/V0NtupleV1_repro_2016/170713_181432", 397),
+'ReproJetHT2016C': _fromnum1("/store/user/tucker/JetHT/V0NtupleV1_repro_2016/170713_181503", 149),
+'ReproJetHT2016D': _fromnum1("/store/user/tucker/JetHT/V0NtupleV1_repro_2016/170713_181545", 235),
+'ReproJetHT2016E': _fromnum1("/store/user/tucker/JetHT/V0NtupleV1_repro_2016/170713_181651", 233),
+'ReproJetHT2016F': _fromnum1("/store/user/tucker/JetHT/V0NtupleV1_repro_2016/170713_181727", 179),
+'ReproJetHT2016H': _fromnum1("/store/user/tucker/JetHT/V0NtupleV1_repro_2016/170713_181833", 464),
+
 })
 
 _add_ds("v0ntuplev2", {
