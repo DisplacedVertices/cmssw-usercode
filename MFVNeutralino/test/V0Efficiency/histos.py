@@ -75,6 +75,9 @@ if meatloverssupreme:
         setattr(process, 'v0effon' + tag, on)
         process.p *= al * lo * hi * on
 
+    addmodified('loose', 'min_track_nsigmadxybs = 1')
+    addmodified('loosenocos', 'min_track_nsigmadxybs = 1, min_costh2 = -2')
+
     addmodified('nsigdxy3', 'min_track_nsigmadxybs = 3')
     addmodified('nsigdxy5', 'min_track_nsigmadxybs = 5')
 
@@ -102,12 +105,12 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
     import JMTucker.Tools.Samples as Samples 
 
-    dataset = 'v0ntuplev1'
+    dataset = 'v0ntuplev2'
     samples = [s for s in Samples.registry.all() if s.has_dataset(dataset)]
     #samples = [Samples.qcdht1000, Samples.qcdht1000_hip1p0_mit, Samples.JetHT2016G, Samples.ZeroBias2016G]
     set_splitting(samples, dataset, 'default', '../ana_2015p6.json', 2)
 
-    cs = CondorSubmitter('V0EfficiencyV1_v18',
+    cs = CondorSubmitter('V0EfficiencyV2_v1',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, zerobias_modifier),
