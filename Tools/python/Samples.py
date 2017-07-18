@@ -637,7 +637,7 @@ for x in ttbar_samples + ttbar_samples_2015 + qcd_samples + qcd_samples_ext + qc
     if x.name != 'qcdht0700':
         x.add_dataset('pick1vtxv14')
 
-for x in data_samples + [s for s in auxiliary_data_samples if s.name.startswith('ZeroBias') or s.name.startswith('ReproJetHT')] + qcd_samples + qcd_samples_ext + qcd_hip_samples[-2:]:
+for x in data_samples + [s for s in auxiliary_data_samples if s.name.startswith('ZeroBias') or (s.name.startswith('ReproJetHT') and s.name != 'ReproJetHT2016G')] + qcd_samples + qcd_samples_ext + qcd_hip_samples[-2:]:
     x.add_dataset('v0ntuplev1')
 for x in data_samples + [s for s in auxiliary_data_samples if s.name.startswith('ZeroBias')] + qcd_samples[2:4] + qcd_samples_ext[2:4]:
     x.add_dataset('v0ntuplev2')
