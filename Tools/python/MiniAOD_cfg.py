@@ -1,7 +1,9 @@
 import FWCore.ParameterSet.Config as cms
 from JMTucker.Tools.CMSSWTools import output_file, registration_warnings, report_every, silence_messages
 
-def which_global_tag(is_mc, year, H):
+def which_global_tag(is_mc, year, H, repro):
+    if repro:
+        assert year != 2015
     if H:
         assert not is_mc and year != 2015
     if year == 2015:
@@ -10,11 +12,14 @@ def which_global_tag(is_mc, year, H):
         if is_mc:
             return '80X_mcRun2_asymptotic_2016_TrancheIV_v8'
         else:
-            return '80X_dataRun2_Prompt_v16' if H else '80X_dataRun2_2016SeptRepro_v7'
+            if repro:
+                return '80X_dataRun2_2016LegacyRepro_v3'
+            else:
+                return '80X_dataRun2_Prompt_v16' if H else '80X_dataRun2_2016SeptRepro_v7'
     else:
         raise ValueError('what year is it')
 
-def pat_tuple_process(customize_before_unscheduled, is_mc, year, H):
+def pat_tuple_process(customize_before_unscheduled, is_mc, year, H, repro):
     if year not in (2015,2016):
         raise ValueError('what year is it')
 

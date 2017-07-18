@@ -29,6 +29,13 @@ def zerobias_modifier(sample):
     else:
         return [], []
 
+def repro_modifier(sample):
+    if sample.name.startswith('Repro'):
+        magic = 'repro = False'
+        return [], [(magic, 'repro = True', 'trying to submit on reprocessed dataset and no magic string "%s"' % magic)]
+    else:
+        return [], []
+
 class event_veto_modifier:
     def __init__(self, d, filter_path):
         self.d = d
