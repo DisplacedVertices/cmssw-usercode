@@ -7,6 +7,8 @@ is_mc = True
 H = False
 zerobias = False
 meatloverssupreme = True
+dataset_version = 1
+dataset = 'v0ntuplev%i' % dataset_version
 
 geometry_etc(process, which_global_tag(is_mc, year, H))
 process.TFileService.fileName = 'v0histos.root'
@@ -75,8 +77,9 @@ if meatloverssupreme:
         setattr(process, 'v0effon' + tag, on)
         process.p *= al * lo * hi * on
 
-    addmodified('loose', 'min_track_nsigmadxybs = 1')
-    addmodified('loosenocos', 'min_track_nsigmadxybs = 1, min_costh2 = -2')
+    if dataset_version >= 2:
+        addmodified('loose', 'min_track_nsigmadxybs = 1')
+        addmodified('loosenocos', 'min_track_nsigmadxybs = 1, min_costh2 = -2')
 
     addmodified('nsigdxy3', 'min_track_nsigmadxybs = 3')
     addmodified('nsigdxy5', 'min_track_nsigmadxybs = 5')
@@ -105,7 +108,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
     import JMTucker.Tools.Samples as Samples 
 
-    dataset = 'v0ntuplev2'
     samples = [s for s in Samples.registry.all() if s.has_dataset(dataset)]
     #samples = [Samples.qcdht1000, Samples.qcdht1000_hip1p0_mit, Samples.JetHT2016G, Samples.ZeroBias2016G]
     set_splitting(samples, dataset, 'default', '../ana_2015p6.json', 2)
