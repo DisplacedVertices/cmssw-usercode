@@ -50,7 +50,7 @@ def pat_tuple_process(customize_before_unscheduled, is_mc, year, H, repro):
 
     process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
     from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
-    process.GlobalTag = GlobalTag(process.GlobalTag, which_global_tag(is_mc, year, H), '')
+    process.GlobalTag = GlobalTag(process.GlobalTag, which_global_tag(is_mc, year, H, repro), '')
 
     process.options = cms.untracked.PSet(allowUnscheduled = cms.untracked.bool(True),
                                          wantSummary = cms.untracked.bool(False),
