@@ -6,11 +6,12 @@ from JMTucker.MFVNeutralino.Year import year
 is_mc = True
 H = False
 zerobias = False
+repro = False
 meatloverssupreme = True
 dataset_version = 1
 dataset = 'v0ntuplev%i' % dataset_version
 
-geometry_etc(process, which_global_tag(is_mc, year, H))
+geometry_etc(process, which_global_tag(is_mc, year, H, repro))
 process.TFileService.fileName = 'v0histos.root'
 
 process.source.fileNames = ['file:v0ntuple.root']
@@ -112,9 +113,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     #samples = [Samples.qcdht1000, Samples.qcdht1000_hip1p0_mit, Samples.JetHT2016G, Samples.ZeroBias2016G]
     set_splitting(samples, dataset, 'default', '../ana_2015p6.json', 2)
 
-    cs = CondorSubmitter('V0EfficiencyV2_v1',
+    cs = CondorSubmitter('V0EfficiencyV%i_v1' % dataset_version,
                          ex = year,
                          dataset = dataset,
-                         pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, zerobias_modifier),
+                         pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, zerobias_modifier, repro_modifier),
                          )
     cs.submit_all(samples)
