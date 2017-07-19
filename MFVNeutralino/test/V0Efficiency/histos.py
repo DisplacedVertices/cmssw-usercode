@@ -117,7 +117,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     samples = [Samples.JetHT2016D, Samples.JetHT2016G, Samples.qcdht1000, Samples.qcdht1500, Samples.qcdht1000_hip1p0_mit, Samples.qcdht1500_hip1p0_mit]
     set_splitting(samples, dataset, 'default', '../ana_2015p6.json', 2)
 
-    cs = CondorSubmitter('V0EfficiencyV%i_v19' % dataset_version,
+    cs = CondorSubmitter('V0EfficiencyV%i_v20' % dataset_version,
                          ex = year,
                          dataset = dataset,
                          pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, zerobias_modifier, repro_modifier),
