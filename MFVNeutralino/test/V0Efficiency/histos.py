@@ -14,8 +14,7 @@ dataset = 'v0ntuplev%i' % dataset_version
 geometry_etc(process, which_global_tag(is_mc, year, H, repro))
 process.TFileService.fileName = 'v0histos.root'
 
-process.source.fileNames = ['file:v0ntuple.root']
-process.source.fileNames = ['/store/user/tucker/V0NtupleV1_qcdht1000_hip1p0_mit.root']
+sample_files(process, 'qcdht1000' if is_mc else 'JetHT2016D', dataset)
 report_every(process, 100)
 process.maxEvents.input = 10000
 
