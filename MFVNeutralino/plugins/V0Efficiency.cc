@@ -33,6 +33,8 @@ private:
   const edm::EDGetTokenT<std::vector<int>> tracks_inpv_token;
   const bool limit_set;
   const double min_track_pt;
+  const double min_track_dxybs;
+  const double max_track_dxybs;
   const double min_track_nsigmadxybs;
   const int min_track_npxlayers;
   const int max_track_npxlayers;
@@ -153,6 +155,8 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
     tracks_inpv_token(consumes<std::vector<int>>(cfg.getParameter<edm::InputTag>("tracks_src"))),
     limit_set(cfg.getParameter<bool>("limit_set")),
     min_track_pt(cfg.getParameter<double>("min_track_pt")),
+    min_track_dxybs(cfg.getParameter<double>("min_track_dxybs")),
+    max_track_dxybs(cfg.getParameter<double>("max_track_dxybs")),
     min_track_nsigmadxybs(cfg.getParameter<double>("min_track_nsigmadxybs")),
     min_track_npxlayers(cfg.getParameter<int>("min_track_npxlayers")),
     max_track_npxlayers(cfg.getParameter<int>("max_track_npxlayers")),
@@ -347,6 +351,16 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
       const int inpv = (*tracks_inpv)[itk];
       if (track_inpv_req == 1 && inpv != 0) return false;
       if (track_inpv_req == 2 && inpv > 0) return false;
+    }
+
+    if (min_track_dxybs > 0) {
+      const double dxybs = fabs(tk.dxy(*beamspot));
+      if (dxybs < min_track_dxybs) return false;
+    }
+
+    if (max_track_dxybs > 0) {
+      const double dxybs = fabs(tk.dxy(*beamspot));
+      if (dxybs > max_track_dxybs) return false;
     }
 
     if (min_track_nsigmadxybs > 0) {

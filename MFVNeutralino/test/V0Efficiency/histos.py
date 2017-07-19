@@ -35,6 +35,8 @@ process.v0eff = cms.EDAnalyzer('MFVV0Efficiency',
                                tracks_src = cms.InputTag('mfvSkimmedTracks'),
                                limit_set = cms.bool(meatloverssupreme),
                                min_track_pt = cms.double(1),
+                               min_track_dxybs = cms.double(-1),
+                               max_track_dxybs = cms.double(-1),
                                min_track_nsigmadxybs = cms.double(4),
                                min_track_npxlayers = cms.int32(0),
                                max_track_npxlayers = cms.int32(1000000),
@@ -84,6 +86,10 @@ if meatloverssupreme:
 
     addmodified('nsigdxy3', 'min_track_nsigmadxybs = 3')
     addmodified('nsigdxy5', 'min_track_nsigmadxybs = 5')
+
+    addmodified('dxybslt500um', 'max_track_dxybs = 0.05')
+    addmodified('dxybsgt500umlt1mm', 'min_track_dxybs = 0.05, max_track_dxybs = 0.1')
+    addmodified('dxybsgt1mm', 'min_track_dxybs = 0.1')
 
     n = 3
     for i in xrange(n):
