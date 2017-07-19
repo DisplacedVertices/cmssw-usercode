@@ -114,8 +114,7 @@ private:
   TH1D* h_track_nsigmadxybs[nhyp+1];
   TH1D* h_track_nsigmadxypv[nhyp+1];
 
-  TH1D* h_nvtx;
-
+  TH1D* h_nvtx_pass[nhyp];
   TH1D* h_prefit_p[nhyp];
   TH1D* h_prefit_mass[nhyp];
   TH1D* h_vtx_chi2ndf[nhyp];
@@ -241,13 +240,12 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
 
   booktracks(fs->tFileDirectory(), nhyp);
 
-  h_nvtx = fs->make<TH1D>("h_nvtx", ";# of vertices;events/1", 50, 0, 50);
-
   for (int ihyp = 0; ihyp < nhyp; ++ihyp) {
     TFileDirectory d = fs->mkdir(mfv::V0_hypotheses[ihyp].name);
 
     booktracks(d, ihyp);
 
+    h_nvtx_pass[ihyp] = fs->make<TH1D>("h_nvtx_pass", ";# of vertices passing;events/1", 50, 0, 50);
     h_prefit_p[ihyp] = d.make<TH1D>("h_prefit_p", ";pre-fit candidate momentum (GeV);candidates/1 GeV", 100, 0, 100);
     h_prefit_mass[ihyp] = d.make<TH1D>("h_prefit_mass", ";pre-fit candidate invariant mass (GeV);candidates/10 MeV", 500, 0, 5);
     h_vtx_mass[ihyp] = d.make<TH1D>("h_vtx_mass", ";post-fit candidate invariant mass (GeV);candidates/1 MeV", 5000, 0, 5);
@@ -328,7 +326,10 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
   assert(ntracks == tracks_inpv->size());
   fill(h_ntracks[nhyp], ntracks); // don't put in fillother because it's special to calculate at the end
 
-  auto fillother = [&](const int i) {
+  auto fillother = [&](const int i, const double w2) {
+    const double wtemp = w;
+    w *= w2;
+
     fill(h_npu[i], npu);
     fill(h_bsx[i], bsx);
     fill(h_bsy[i], bsy);
@@ -356,9 +357,11 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
     fill(h_pvbsy[i], pvy - beamspot->y(pvz));
     fill(h_pvbsz[i], pvz - bsz);
     fill(h_pvntracks[i], pv.nTracks());
+
+    w = wtemp;
   };
 
-  fillother(nhyp);
+  fillother(nhyp, 1);
 
   auto passtrack = [&](const int itk, const reco::Track& tk) {
     if (min_track_pt > 0 && tk.pt() < min_track_pt) return false;
@@ -440,12 +443,11 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
 
   edm::Handle<reco::VertexCollection> vertices;
   event.getByToken(vertices_token, vertices);
-  const size_t nvtx = vertices->size();
-  fill(h_nvtx, nvtx);
 
+  std::vector<int> nvtx_pass(nhyp, 0);
   std::vector<std::multiset<reco::TrackRef>> tracks_used(nhyp);
 
-  for (size_t ivtx = 0; ivtx < nvtx; ++ivtx) {
+  for (size_t ivtx = 0, ivtxe = vertices->size(); ivtx < ivtxe; ++ivtx) {
     const reco::Vertex& v = (*vertices)[ivtx];
     const double chi2ndf = v.normalizedChi2();
     if (chi2ndf > max_chi2ndf)
@@ -562,6 +564,7 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
         if (!use)
           continue;
 
+        ++nvtx_pass[ihyp];
         tracks_used[ihyp].insert(refs.begin(), refs.end());
 
         fill(h_vtx_chi2ndf[ihyp], chi2ndf);
@@ -620,8 +623,9 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
     fill(h_ntracks[ihyp], ntracks);
     fill(h_max_track_multiplicity[ihyp], max_mult);
 
-    if (ntracks) // i.e. there was a vertex that passed cuts
-      fillother(ihyp);
+    fill(h_nvtx_pass[ihyp], nvtx_pass[ihyp]);
+    if (nvtx_pass[ihyp])
+      fillother(ihyp, nvtx_pass[ihyp]);
   }
 }
 
