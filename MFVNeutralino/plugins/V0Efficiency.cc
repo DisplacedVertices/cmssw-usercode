@@ -136,8 +136,6 @@ private:
   TH2D* h_vtx_rho_vs_p[nhyp];
   TH2D* h_vtx_rho_vs_mass[nhyp];
   TH1D* h_vtx_angle[nhyp];
-  TH2D* h_vtx_angle_vs_p[nhyp];
-  TH2D* h_vtx_angle_vs_mass[nhyp];
   TH2D* h_vtx_track_pt_0v1[nhyp];
   TH2D* h_vtx_track_eta_0v1[nhyp];
   TH2D* h_vtx_track_phi_0v1[nhyp];
@@ -256,6 +254,7 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
     h_vtx_mass[ihyp] = d.make<TH1D>("h_vtx_mass", ";post-fit candidate invariant mass (GeV);candidates/1 MeV", 5000, 0, 5);
     h_vtx_p[ihyp] = d.make<TH1D>("h_vtx_p", ";post-fit candidate momentum (GeV);candidates/1 GeV", 100, 0, 100);
     h_vtx_chi2ndf[ihyp] = d.make<TH1D>("h_vtx_chi2ndf", ";candidate vertex #chi^{2}/ndf;candidates/0.05", 200, 0, 10);
+    h_vtx_2d[ihyp] = d.make<TH2D>("h_vtx_2d", ";candidate vertex x (cm);candidate vertex y (cm)", 800, -4,4, 800, -4, 4);
     h_vtx_x[ihyp] = d.make<TH1D>("h_vtx_x", ";candidate vertex x - pv x (cm);candidates/40 #mum", 2000, -4,4);
     h_vtx_y[ihyp] = d.make<TH1D>("h_vtx_y", ";candidate vertex y - pv y (cm);candidates/40 #mum", 2000, -4,4);
     h_vtx_z[ihyp] = d.make<TH1D>("h_vtx_z", ";candidate vertex z - pv z (cm);candidates/40 #mum", 2000, -4,4);
@@ -277,15 +276,8 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
     h_vtx_track_dxybs_0v1[ihyp] = d.make<TH2D>("h_vtx_track_dxybs_0v1", ";+ve track dxy(BS) (cm);-ve track dxy(BS) (cm)", 200, -0.1, 0.1, 200, -0.1, 0.1);
     h_vtx_track_dxybs_0v1_zoom[ihyp] = d.make<TH2D>("h_vtx_track_dxybs_0v1_zoom", ";+ve track dxy(BS) (cm);-ve track dxy(BS) (cm)", 50, -2, 2, 50, -2, 2);
 
-#if 0
-    h_vtx_2d[ihyp] = d.make<TH2D>("h_vtx_2d", ";candidate vertex x (cm);candidate vertex y (cm)", 800, -4,4, 800, -4, 4);
-    h_vtx_rho_vs_p[ihyp] = d.make<TH2D>("h_vtx_rho_vs_p", ";candidate p (GeV);candidate vertex - pv (2D) (cm)", 400,0,100, 400, 0, 4);
-    h_vtx_rho_vs_mass[ihyp] = d.make<TH2D>("h_vtx_rho_vs_mass", ";candidate mass (GeV);candidate vertex - pv (2D) (cm)", 220, 0.380,0.600, 400, 0, 4);
-    h_vtx_angle_vs_p[ihyp] = d.make<TH2D>("h_vtx_angle_vs_p", ";candidate vertex momentum (GeV);candidate vertex opening angle (rad)", 400,0,100, 100, 0, M_PI);
-    h_vtx_angle_vs_mass[ihyp] = d.make<TH2D>("h_vtx_angle_vs_mass", ";candidate vertex mass (GeV);candidate vertex opening angle (rad)", 220, 0.380,0.600, 100, 0, M_PI);
-    h_vtx_costh3[ihyp] = d.make<TH1D>("h_vtx_costh3", ";post-fit candidate cos(angle between displacement and flight dir);candidates/0.001", 2001, -1, 1.01);
-    h_vtx_costh2[ihyp] = d.make<TH1D>("h_vtx_costh2", ";post-fit candidate cos(angle between displacement and flight dir (2D));candidates/0.001", 2001, -1, 1.01);
-#endif
+    h_vtx_costh3[ihyp] = d.make<TH1D>("h_vtx_costh3", ";post-fit candidate cos(angle between displacement and flight dir);candidates/0.001", 201, -1, 1.01);
+    h_vtx_costh2[ihyp] = d.make<TH1D>("h_vtx_costh2", ";post-fit candidate cos(angle between displacement and flight dir (2D));candidates/0.001", 201, -1, 1.01);
   }
 }
 
@@ -583,8 +575,6 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
         fill(h_vtx_z[ihyp], flight.Z());
         fill(h_vtx_r[ihyp], flight.Mag());
         fill(h_vtx_rho[ihyp], flight.Perp());
-        fill(h_vtx_rho_vs_p[ihyp], sum.P(), flight.Perp());
-        fill(h_vtx_rho_vs_mass[ihyp], mass, flight.Perp());
         fill(h_vtx_nsigrho[ihyp], nsigrho);
 
         fill(h_vtx_x_bs[ihyp], flight_bs.X());
@@ -595,8 +585,6 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
         fill(h_vtx_nsigrho_bs[ihyp], nsigrhobs);
 
         fill(h_vtx_angle[ihyp], angle);
-        fill(h_vtx_angle_vs_p[ihyp], p, angle);
-        fill(h_vtx_angle_vs_mass[ihyp], mass, angle);
 
         fill(h_vtx_p[ihyp], p);
         fill(h_vtx_costh3[ihyp], costh3);
