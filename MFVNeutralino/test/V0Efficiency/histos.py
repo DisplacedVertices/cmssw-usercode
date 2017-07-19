@@ -17,7 +17,7 @@ process.TFileService.fileName = 'v0histos.root'
 process.source.fileNames = ['file:v0ntuple.root']
 process.source.fileNames = ['/store/user/tucker/V0NtupleV1_qcdht1000_hip1p0_mit.root']
 report_every(process, 100)
-process.maxEvents.input = 1000
+process.maxEvents.input = 10000
 
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
 process.mfvWeight.enable = False # just do mcStat
@@ -33,7 +33,6 @@ process.v0eff = cms.EDAnalyzer('MFVV0Efficiency',
                                beamspot_src = cms.InputTag('offlineBeamSpot'),
                                primary_vertex_src = cms.InputTag('firstGoodPrimaryVertex'),
                                tracks_src = cms.InputTag('mfvSkimmedTracks'),
-                               limit_set = cms.bool(meatloverssupreme),
                                min_track_pt = cms.double(1),
                                min_track_dxybs = cms.double(-1),
                                max_track_dxybs = cms.double(-1),
@@ -87,9 +86,9 @@ if meatloverssupreme:
     addmodified('nsigdxy3', 'min_track_nsigmadxybs = 3')
     addmodified('nsigdxy5', 'min_track_nsigmadxybs = 5')
 
-    addmodified('dxybslt500um', 'max_track_dxybs = 0.05')
+    addmodified('dxybslt500um',      'max_track_dxybs = 0.05')
     addmodified('dxybsgt500umlt1mm', 'min_track_dxybs = 0.05, max_track_dxybs = 0.1')
-    addmodified('dxybsgt1mm', 'min_track_dxybs = 0.1')
+    addmodified('dxybsgt1mm',        'min_track_dxybs = 0.1')
 
     n = 3
     for i in xrange(n):
@@ -116,10 +115,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples 
 
     samples = [s for s in Samples.registry.all() if s.has_dataset(dataset)]
-    #samples = [Samples.qcdht1000, Samples.qcdht1000_hip1p0_mit, Samples.JetHT2016G, Samples.ZeroBias2016G]
+    samples = [Samples.JetHT2016D, Samples.JetHT2016G, Samples.JetHT2016G, Samples.qcdht1000, Samples.qcdht1500, Samples.qcdht1000_hip1p0_mit, Samples.qcdht1500_hip1p0_mit]
     set_splitting(samples, dataset, 'default', '../ana_2015p6.json', 2)
 
-    cs = CondorSubmitter('V0EfficiencyV%i_v1' % dataset_version,
+    cs = CondorSubmitter('V0EfficiencyV%i_v19' % dataset_version,
                          ex = year,
                          dataset = dataset,
                          pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, zerobias_modifier, repro_modifier),
