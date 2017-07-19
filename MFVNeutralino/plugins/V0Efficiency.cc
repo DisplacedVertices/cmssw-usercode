@@ -119,7 +119,6 @@ private:
   TH1D* h_prefit_p[nhyp];
   TH1D* h_prefit_mass[nhyp];
   TH1D* h_vtx_chi2ndf[nhyp];
-  TH2D* h_vtx_2d[nhyp];
   TH1D* h_vtx_x[nhyp];
   TH1D* h_vtx_y[nhyp];
   TH1D* h_vtx_z[nhyp];
@@ -198,7 +197,7 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
     h_bsdydz[i] = d.make<TH1D>("h_bsdydz", ";beamspot dy/dz", 1000, -5e-3, 5e-3);
     h_bsxerror[i] = d.make<TH1D>("h_bsxerror", ";beamspot x error (cm)", 4000, 0, 1e-2);
     h_bsyerror[i] = d.make<TH1D>("h_bsyerror", ";beamspot y error (cm)", 4000, 0, 1e-2);
-    h_bszerror[i] = d.make<TH1D>("h_bsyerror", ";beamspot y error (cm)", 4000, 0, 1);
+    h_bszerror[i] = d.make<TH1D>("h_bszerror", ";beamspot y error (cm)", 4000, 0, 1);
     h_bswidtherror[i] = d.make<TH1D>("h_bswidtherror", ";beamspot width error (cm)", 4000, 0, 1e-2);
     h_bssigmazerror[i] = d.make<TH1D>("h_bssigmazerror", ";beamspot sigma z error (cm)", 4000, 0, 1);
     h_bsdxdzerror[i] = d.make<TH1D>("h_bsdxdzerror", ";beamspot dx/dz error", 4000, 0, 1e-2);
@@ -210,12 +209,12 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
     h_pvxerror[i] = d.make<TH1D>("h_pvxerror", ";primary vertex x error (cm)", 4000, 0, 0.1);
     h_pvyerror[i] = d.make<TH1D>("h_pvyerror", ";primary vertex y error (cm)", 4000, 0, 0.1);
     h_pvzerror[i] = d.make<TH1D>("h_pvzerror", ";primary vertex z error (cm)", 4000, 0, 0.5);
-    h_pvbsx[i] = d.make<TH1D>("h_pvbsx", ";primary vertex x - beam spot x (cm)", 4000, -2, 2);
-    h_pvbsy[i] = d.make<TH1D>("h_pvbsy", ";primary vertex y - beam spot y (cm)", 4000, -2, 2);
+    h_pvbsx[i] = d.make<TH1D>("h_pvbsx", ";primary vertex x - beam spot x (cm)", 4000, -0.2, 0.2);
+    h_pvbsy[i] = d.make<TH1D>("h_pvbsy", ";primary vertex y - beam spot y (cm)", 4000, -0.2, 0.2);
     h_pvbsz[i] = d.make<TH1D>("h_pvbsz", ";primary vertex z - beam spot z (cm)", 4000, -20, 20);
     h_pvntracks[i] = d.make<TH1D>("h_pvntracks", ";# tracks in primary vertex;events/5", 100, 0, 500);
     h_ntracks[i] = d.make<TH1D>("h_ntracks", ";# of selected tracks;events/1", 100, 0, 100);
-    h_max_track_multiplicity[i] = d.make<TH1D>("h_max_track_multiplicity", ";max multiplicity of any track in vertices;events/1", 10, 0, 10);
+    if (i != nhyp) h_max_track_multiplicity[i] = d.make<TH1D>("h_max_track_multiplicity", ";max multiplicity of any track in vertices;events/1", 10, 0, 10);
     h_track_inpv[i] = d.make<TH1D>("h_track_inpv", ";track in-pv code;tracks/1", 3, -1, 2);
     h_track_charge[i] = d.make<TH1D>("h_track_charge", ";track charge;tracks/1", 3, -1, 2);
     h_track_pt[i] = d.make<TH1D>("h_track_pt", ";track p_{T} (GeV);tracks/100 MeV", 1000, 0, 100);
@@ -254,7 +253,6 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
     h_vtx_mass[ihyp] = d.make<TH1D>("h_vtx_mass", ";post-fit candidate invariant mass (GeV);candidates/1 MeV", 5000, 0, 5);
     h_vtx_p[ihyp] = d.make<TH1D>("h_vtx_p", ";post-fit candidate momentum (GeV);candidates/1 GeV", 100, 0, 100);
     h_vtx_chi2ndf[ihyp] = d.make<TH1D>("h_vtx_chi2ndf", ";candidate vertex #chi^{2}/ndf;candidates/0.05", 200, 0, 10);
-    h_vtx_2d[ihyp] = d.make<TH2D>("h_vtx_2d", ";candidate vertex x (cm);candidate vertex y (cm)", 800, -4,4, 800, -4, 4);
     h_vtx_x[ihyp] = d.make<TH1D>("h_vtx_x", ";candidate vertex x - pv x (cm);candidates/40 #mum", 2000, -4,4);
     h_vtx_y[ihyp] = d.make<TH1D>("h_vtx_y", ";candidate vertex y - pv y (cm);candidates/40 #mum", 2000, -4,4);
     h_vtx_z[ihyp] = d.make<TH1D>("h_vtx_z", ";candidate vertex z - pv z (cm);candidates/40 #mum", 2000, -4,4);
@@ -268,7 +266,6 @@ MFVV0Efficiency::MFVV0Efficiency(const edm::ParameterSet& cfg)
     h_vtx_rho_bs[ihyp] = d.make<TH1D>("h_vtx_rho_bs", ";candidate vertex - bs (2D) (cm);candidates/10 #mum", 2000, 0, 8);
     h_vtx_nsigrho[ihyp] = d.make<TH1D>("h_vtx_nsigrho", ";N#sigma(candidate vertex - pv (2D));candidates/0.1", 1000, 0, 100);
     h_vtx_nsigrho_bs[ihyp] = d.make<TH1D>("h_vtx_nsigrho_bs", ";N#sigma(candidate vertex - bs (2D));candidates/0.1", 1000, 0, 100);
-    h_vtx_track_dxybs_0v1[ihyp] = d.make<TH2D>("h_vtx_track_dxybs_0v1", ";+ve track dxy(BS) (cm);-ve track dxy(BS) (cm)", 400, -0.1, 0.1, 400, -0.1, 0.1);
     h_vtx_angle[ihyp] = d.make<TH1D>("h_vtx_angle", ";candidate vertex opening angle (rad);candidates/0.0315", 100, 0, M_PI);
     h_vtx_track_pt_0v1[ihyp] = d.make<TH2D>("h_vtx_track_pt_0v1", ";+ve track p_{T} (GeV);-ve track p_{T} (GeV)", 100, 0, 20, 100, 0, 20);
     h_vtx_track_eta_0v1[ihyp] = d.make<TH2D>("h_vtx_track_eta_0v1", ";+ve track #eta;-ve track #eta", 100, -2.5, 2.5, 100, -2.5, 2.5);
@@ -332,33 +329,33 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
   fill(h_ntracks[nhyp], ntracks); // don't put in fillother because it's special to calculate at the end
 
   auto fillother = [&](const int i) {
-    fill(h_npu[nhyp], npu);
-    fill(h_bsx[nhyp], bsx);
-    fill(h_bsy[nhyp], bsy);
-    fill(h_bsz[nhyp], bsz);
-    fill(h_bswidthx[nhyp], beamspot->BeamWidthX());
-    fill(h_bswidthy[nhyp], beamspot->BeamWidthY());
-    fill(h_bssigmaz[nhyp], beamspot->sigmaZ());
-    fill(h_bsdxdz[nhyp], beamspot->dxdz());
-    fill(h_bsdydz[nhyp], beamspot->dydz());
-    fill(h_bsxerror[nhyp], beamspot->x0Error());
-    fill(h_bsyerror[nhyp], beamspot->y0Error());
-    fill(h_bszerror[nhyp], beamspot->z0Error());
-    fill(h_bswidtherror[nhyp], beamspot->BeamWidthXError());
-    fill(h_bssigmazerror[nhyp], beamspot->sigmaZ0Error());
-    fill(h_bsdxdzerror[nhyp], beamspot->dxdzError());
-    fill(h_bsdydzerror[nhyp], beamspot->dydzError());
-    fill(h_npv[nhyp], npv);
-    fill(h_pvx[nhyp], pvx);
-    fill(h_pvy[nhyp], pvy);
-    fill(h_pvz[nhyp], pvz);
-    fill(h_pvxerror[nhyp], pv.xError());
-    fill(h_pvyerror[nhyp], pv.yError());
-    fill(h_pvzerror[nhyp], pv.zError());
-    fill(h_pvbsx[nhyp], pvx - beamspot->x(pvz));
-    fill(h_pvbsy[nhyp], pvy - beamspot->y(pvz));
-    fill(h_pvbsz[nhyp], pvz - bsz);
-    fill(h_pvntracks[nhyp], pv.nTracks());
+    fill(h_npu[i], npu);
+    fill(h_bsx[i], bsx);
+    fill(h_bsy[i], bsy);
+    fill(h_bsz[i], bsz);
+    fill(h_bswidthx[i], beamspot->BeamWidthX());
+    fill(h_bswidthy[i], beamspot->BeamWidthY());
+    fill(h_bssigmaz[i], beamspot->sigmaZ());
+    fill(h_bsdxdz[i], beamspot->dxdz());
+    fill(h_bsdydz[i], beamspot->dydz());
+    fill(h_bsxerror[i], beamspot->x0Error());
+    fill(h_bsyerror[i], beamspot->y0Error());
+    fill(h_bszerror[i], beamspot->z0Error());
+    fill(h_bswidtherror[i], beamspot->BeamWidthXError());
+    fill(h_bssigmazerror[i], beamspot->sigmaZ0Error());
+    fill(h_bsdxdzerror[i], beamspot->dxdzError());
+    fill(h_bsdydzerror[i], beamspot->dydzError());
+    fill(h_npv[i], npv);
+    fill(h_pvx[i], pvx);
+    fill(h_pvy[i], pvy);
+    fill(h_pvz[i], pvz);
+    fill(h_pvxerror[i], pv.xError());
+    fill(h_pvyerror[i], pv.yError());
+    fill(h_pvzerror[i], pv.zError());
+    fill(h_pvbsx[i], pvx - beamspot->x(pvz));
+    fill(h_pvbsy[i], pvy - beamspot->y(pvz));
+    fill(h_pvbsz[i], pvz - bsz);
+    fill(h_pvntracks[i], pv.nTracks());
   };
 
   fillother(nhyp);
@@ -568,7 +565,6 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
         tracks_used[ihyp].insert(refs.begin(), refs.end());
 
         fill(h_vtx_chi2ndf[ihyp], chi2ndf);
-        fill(h_vtx_2d[ihyp], x, y);
         fill(h_vtx_x[ihyp], flight.X());
         fill(h_vtx_y[ihyp], flight.Y());
         fill(h_vtx_phi[ihyp], flight.Phi());
@@ -581,7 +577,7 @@ void MFVV0Efficiency::analyze(const edm::Event& event, const edm::EventSetup& se
         fill(h_vtx_y_bs[ihyp], flight_bs.Y());
         fill(h_vtx_z_bs[ihyp], flight_bs.Z());
         fill(h_vtx_phi_bs[ihyp], flight_bs.Phi());
-        fill(h_vtx_phi_bs[ihyp], flight_bs.Perp());
+        fill(h_vtx_rho_bs[ihyp], flight_bs.Perp());
         fill(h_vtx_nsigrho_bs[ihyp], nsigrhobs);
 
         fill(h_vtx_angle[ihyp], angle);
