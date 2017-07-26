@@ -642,6 +642,9 @@ for x in data_samples + [s for s in auxiliary_data_samples if s.name.startswith(
 for x in data_samples + [s for s in auxiliary_data_samples if s.name.startswith('ZeroBias')] + qcd_samples[2:4] + qcd_samples_ext[2:4]:
     x.add_dataset('v0ntuplev2')
 
+for x in mfv_signal_samples + mfv_ddbar_samples:
+    x.add_dataset('ntuplev15_sigmadxy3p9')
+
 ########
 # other condor declarations
 ########
