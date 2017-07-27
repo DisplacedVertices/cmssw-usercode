@@ -19,6 +19,11 @@ ps = plot_saver(plot_dir('v0bkgsub/!%s/' % ('default' if not ex else ex)  + samp
 # fit for s and b using sidebands
 
 in_f = ROOT.TFile(in_fn)
+
+h = in_f.Get('v0eff%s/h_nvtx' % ex)
+h.Draw()
+ps.save('nvtx')
+
 h = in_f.Get('v0eff%s/K0_2pi/h_vtx_mass' % ex)
 
 # must keep these numbers in sync with histos!
@@ -170,6 +175,7 @@ variables = [
     ('h_track_dxypv', 2, 10, (-0.5,0.5)),
     ('h_track_dzbs', 2, 10, None),
     ('h_track_sigmadxy', 2, 1, (0,0.03)),
+#    ('h_npv', 1, 1, (0, 60)),
     ]
 
 for hname, integ_factor, rebin, x_range in variables:
