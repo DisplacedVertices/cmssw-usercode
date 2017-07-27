@@ -7,6 +7,7 @@ from JMTucker.MFVNeutralino.PerSignal import PerSignal
 
 mode = 'vary_pileup'
 #mode = 'vary_jes'
+#mode = 'vary_sigmadxy'
 
 set_style()
 ps = plot_saver('plots/sigeff/v15/compare_sigeff_%s' % mode, size=(700,700), log=False, root=False)
@@ -20,6 +21,11 @@ if mode == 'vary_jes':
     root_file_dirs = ['/uscms_data/d3/dquach/crab3dirs/JetEnergyHistosV15', '/uscms_data/d3/dquach/crab3dirs/JetEnergyHistosV15', '/uscms_data/d3/dquach/crab3dirs/JetEnergyHistosV15']
     num_paths = ['mfvJetEnergyHistos/h_jet_ht_40_1000cut', 'mfvJetEnergyHistos/h_jet_ht_40_down_1000cut', 'mfvJetEnergyHistos/h_jet_ht_40_up_1000cut']
     ls = ['2016', '2016jesdown', '2016jesup']
+
+if mode == 'vary_sigmadxy':
+    root_file_dirs = ['/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_0', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_sigmadxy3p9']
+    num_paths = ['mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx']
+    ls = ['sigmadxy4p0', 'sigmadxy3p9']
 
 nevs = []
 for i,root_file_dir in enumerate(root_file_dirs):
@@ -71,7 +77,7 @@ for i,nev in enumerate(nevs):
         sample.yh = r+er
         print '%26s: ratio = %.3f (%.3f, %.3f)' % (sample.name, sample.y, sample.yl, sample.yh)
 
-    per = PerSignal('ratio of efficiencies', y_range=(0.9,1.1))
+    per = PerSignal('ratio of efficiencies', y_range=(0.9,1.1) if mode != 'vary_sigmadxy' else (0.7,1.3))
     per.add(multijet, title='#tilde{N} #rightarrow tbs')
     per.add(dijet, title='X #rightarrow d#bar{d}', color=ROOT.kBlue)
     per.draw(canvas=ps.c)
@@ -82,28 +88,33 @@ dijet = Samples.mfv_ddbar_samples
 
 for j,sample in enumerate(multijet + dijet):
     c = nevs[0][j]
-    v1 = nevs[1][j]
-    v2 = nevs[2][j]
-
     ec = c**0.5
+
+    v1 = nevs[1][j]
     ev1 = v1**0.5
-    ev2 = v2**0.5
 
     r1 = v1/c
     er1 = (v1/c) * ((ev1/v1)**2 + (ec/c)**2)**0.5 * (abs(r1-1))**0.5 / (1+r1)**0.5
 
-    r2 = v2/c
-    er2 = (v2/c) * ((ev2/v2)**2 + (ec/c)**2)**0.5 * (abs(r2-1))**0.5 / (1+r2)**0.5
+    r = abs(r1-1)
+    er = er1
 
-    r = (abs(r1-1) + abs(r2-1)) / 2
-    er = (er1**2 + er2**2)**0.5 / 2
+    if len(nevs) > 2:
+        v2 = nevs[2][j]
+        ev2 = v2**0.5
+
+        r2 = v2/c
+        er2 = (v2/c) * ((ev2/v2)**2 + (ec/c)**2)**0.5 * (abs(r2-1))**0.5 / (1+r2)**0.5
+
+        r = (abs(r1-1) + abs(r2-1)) / 2
+        er = (er1**2 + er2**2)**0.5 / 2
 
     sample.y = r
     sample.yl = r-er
     sample.yh = r+er
     print '%26s: uncertainty = %.3f (%.3f, %.3f)' % (sample.name, sample.y, sample.yl, sample.yh)
 
-per = PerSignal('uncertainty in signal efficiency', y_range=(0.,0.1))
+per = PerSignal('uncertainty in signal efficiency', y_range=(0.,0.1) if mode != 'vary_sigmadxy' else (0.,0.3))
 per.add(multijet, title='#tilde{N} #rightarrow tbs')
 per.add(dijet, title='X #rightarrow d#bar{d}', color=ROOT.kBlue)
 per.draw(canvas=ps.c)
