@@ -6,6 +6,7 @@ from JMTucker.MFVNeutralino.Year import year
 
 is_mc = True
 H = False
+repro = False
 run_n_tk_seeds = True
 minitree_only = False
 prepare_vis = False
@@ -19,7 +20,7 @@ if minitree_only:
 
 ####
 
-process = pat_tuple_process(None, is_mc, year, H)
+process = pat_tuple_process(None, is_mc, year, H, repro)
 remove_met_filters(process)
 
 # speed up by 15%
@@ -173,7 +174,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             to_replace.append((magic, 'run_n_tk_seeds = False', 'ntuple template does not contain the magic string "%s"' % magic))
         return [], to_replace
 
-    modify = chain_modifiers(is_mc_modifier, H_modifier, n_tk_seeds_modifier, event_veto_modifier(skips, 'p'))
+    modify = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier, n_tk_seeds_modifier, event_veto_modifier(skips, 'p'))
     ms = MetaSubmitter(batch_name)
     if 'validation' in sys.argv:
         modify.append(max_output_modifier(500))

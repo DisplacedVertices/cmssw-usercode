@@ -4,6 +4,8 @@ from JMTucker.Tools.MiniAOD_cfg import which_global_tag
 from JMTucker.MFVNeutralino.Year import year
 
 is_mc = True
+H = False
+repro = False
 
 process.source.fileNames = ['/store/mc/RunIIFall15MiniAODv2/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/40000/E4574C7F-EACB-E511-817A-001E67DDC119.root']
 process.source.fileNames = ['/store/data/Run2015C_25ns/JetHT/MINIAOD/16Dec2015-v1/20000/1C42421A-49B5-E511-B76E-0CC47A4D7666.root']
@@ -16,7 +18,7 @@ sample_files(process, 'SingleMuon2016H2', 'trigskimv1', 4)
 process.maxEvents.input = -1
 process.TFileService.fileName = 'triggerfloats.root'
 
-global_tag(process, which_global_tag(is_mc, year))
+global_tag(process, which_global_tag(is_mc, year, H, repro))
 want_summary(process, True)
 
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
@@ -59,20 +61,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         sample.lumis_per = 50
         sample.json = '../ana_2015p6.json'
 
-    def pset_modifier(sample):
-        to_add = []
-        to_replace = []
-
-        if not sample.is_mc:
-            magic = 'is_mcX=XTrue'.replace('X', ' ')
-            err = 'trying to submit on data, and tuple template does not contain the magic string "%s"' % magic
-            to_replace.append((magic, 'is_mc = False', err))
-
-        return to_add, to_replace
-
+    from JMTucker.Tools.MetaSubmitter import *
     from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
     cs = CRABSubmitter('TriggerFloats_16_trigfilt',
-                       pset_modifier = pset_modifier,
+                       pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier),
                        job_control_from_sample = True,
                        dataset = 'miniaod',
                        )

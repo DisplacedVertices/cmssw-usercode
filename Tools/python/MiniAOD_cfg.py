@@ -157,4 +157,4 @@ def jets_only(process):
     streamline_jets(process)
 
 if __name__ == '__main__':
-    process = pat_tuple_process(None, True, 2016)
+    process = pat_tuple_process(None, True, 2016, False, False)

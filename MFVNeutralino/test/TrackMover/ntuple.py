@@ -12,6 +12,7 @@ from JMTucker.MFVNeutralino.Year import year
 # 4 magic lines
 is_mc = True
 H = False
+repro = False
 njets = 2
 nbjets = 0
 
@@ -22,7 +23,7 @@ if len(ints) > 0:
     njets, nbjets = ints
 
 
-process = pat_tuple_process(None, is_mc, year, H)
+process = pat_tuple_process(None, is_mc, year, H, repro)
 remove_met_filters(process)
 remove_output_module(process)
 
@@ -97,7 +98,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     set_splitting(samples, 'main', 'trackmover', data_json='../ana_2015p6.json')
 
     skips = { 'qcdht0700ext_2015': {'lumis': '135728', 'events': '401297681'}, 'qcdht1000ext_2015': {'lumis': '32328',  'events': '108237235'}, }
-    modify = chain_modifiers(njets_modifier, is_mc_modifier, H_modifier, event_veto_modifier(skips, 'p'))
+    modify = chain_modifiers(njets_modifier, is_mc_modifier, H_modifier, repro_modifier, event_veto_modifier(skips, 'p'))
 
     batch_name = 'TrackMoverV1_%i%i' % (njets, nbjets)
     ms = MetaSubmitter(batch_name)

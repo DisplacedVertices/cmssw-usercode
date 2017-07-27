@@ -3,7 +3,10 @@ from JMTucker.Tools.CMSSWTools import global_tag
 from JMTucker.Tools.Merge_cfg import cms, process
 from JMTucker.Tools.MiniAOD_cfg import which_global_tag
 
-global_tag(process, which_global_tag(False, 2016))
+H = False
+repro = False
+
+global_tag(process, which_global_tag(False, 2016, H, repro))
 process.options.wantSummary = True
 process.source.fileNames = ['/store/data/Run2016H/SingleMuon/MINIAOD/PromptReco-v2/000/283/283/00000/780D7FAA-FF95-E611-AC56-02163E011B49.root' if True else '/store/data/Run2016G/SingleMuon/MINIAOD/23Sep2016-v1/90000/94F15529-0694-E611-9B67-848F69FD4FC1.root']
 
@@ -40,8 +43,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         sample.json = '../ana_2015p6.json'
 
     from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
+    from JMTucker.Tools.MetaSubmitter import *
     batch_name = 'TrigSkimV1'
     cs = CRABSubmitter(batch_name,
+                       pset_modifier = chain_modifiers(H_modifier, repro_modifier),
                        splitting = 'FileBased',
                        units_per_job = 10,
                        total_units = -1,

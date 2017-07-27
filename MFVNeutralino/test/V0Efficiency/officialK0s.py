@@ -5,9 +5,10 @@ from JMTucker.MFVNeutralino.Year import year
 
 is_mc = True
 H = False
+repro = False
 zerobias = False
 
-process = pat_tuple_process(None, is_mc, year, H)
+process = pat_tuple_process(None, is_mc, year, H, repro)
 jets_only(process)
 
 #report_every(process, 100)
@@ -91,6 +92,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     batch_name = 'V0OfficialK0sV1'
     ms = MetaSubmitter(batch_name)
     ms.common.ex = year
-    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, zerobias_modifier)
+    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier, zerobias_modifier)
     ms.crab.job_control_from_sample = True
     ms.submit(samples)

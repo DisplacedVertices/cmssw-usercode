@@ -9,7 +9,7 @@ process.source.fileNames = ['file:ntuple.root']
 process.source.noEventSort = cms.untracked.bool(True)
 file_event_from_argv(process)
 
-geometry_etc(process, which_global_tag(True, year, H=False))
+geometry_etc(process, which_global_tag(True, year, H=False, repro=False))
 del process.TFileService
 process.MessageLogger.cerr.FwkReport.reportEvery = 1
 

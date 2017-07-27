@@ -6,8 +6,9 @@ from JMTucker.MFVNeutralino.Year import year
 from_miniaod = False
 is_mc = True
 H = False
+repro = False
 
-process = pat_tuple_process(None, is_mc, year, H)
+process = pat_tuple_process(None, is_mc, year, H, repro)
 jets_only(process)
 
 process.maxEvents.input = -1
@@ -111,6 +112,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     ms = MetaSubmitter('PileupDistV3')
     ms.common.ex = year
-    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, H_modifier)
+    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier)
     ms.crab.job_control_from_sample = True
     ms.submit(samples)

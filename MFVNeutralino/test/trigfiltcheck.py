@@ -6,10 +6,11 @@ from JMTucker.MFVNeutralino.Year import year
 
 is_mc = True
 H = False
+repro = False
 test_event_filter = False
 
 if test_event_filter:
-    process = pat_tuple_process(None, is_mc, year, H)
+    process = pat_tuple_process(None, is_mc, year, H, repro)
     jets_only(process)
 
 file_event_from_argv(process)
@@ -49,6 +50,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     samples = Samples.ttbar_samples + Samples.qcd_samples
     samples = Samples.mfv_signal_samples + Samples.mfv_ddbar_samples
 
+    raise NotImplementedError('is_mc, H, repro modifiers?')
+ 
     for s in samples:
         s.split_by = 'files'
         s.files_per = 20

@@ -6,9 +6,9 @@ from JMTucker.Tools.MiniAOD_cfg import *
 from JMTucker.Tools.PATTupleSelection_cfi import jtupleParams
 from JMTucker.MFVNeutralino.Year import year
 
-# 1st two magic
 is_mc = True
 H = False
+repro = False
 input_is_aod = False
 to_do = (800, 900)
 if year == 2015:
@@ -30,13 +30,13 @@ elif year == 2016:
     mu_thresh_offline = 27
 
 if input_is_aod:
-    process = pat_tuple_process(None, is_mc, year, H)
+    process = pat_tuple_process(None, is_mc, year, H, repro)
     remove_met_filters(process)
     remove_output_module(process)
     tfileservice(process, 'eff.root')
 
 process.TFileService.fileName = 'eff.root'
-global_tag(process, which_global_tag(is_mc, year, H))
+global_tag(process, which_global_tag(is_mc, year, H, repro))
 #process.options.wantSummary = True
 process.maxEvents.input = 1000
 process.source.fileNames = {
@@ -138,6 +138,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     def pset_modifier(sample):
         to_add = []
         to_replace = []
+
+        if sample.name.startswith('Repro'):
+            raise NotImplementedError('reprocessing?')
 
         if not sample.is_mc:
             magic = 'is_mcX=XTrue'.replace('X', ' ')

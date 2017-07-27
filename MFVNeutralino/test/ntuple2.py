@@ -13,7 +13,7 @@ batch_name = 'Ntuple' + version.upper()
 process = basic_process('Ntuple')
 report_every(process, 1000000)
 registration_warnings(process)
-geometry_etc(process, which_global_tag(is_mc, year))
+geometry_etc(process, which_global_tag(is_mc, year, H=False, repro=False))
 random_service(process, {'mfvVertices': 1222})
 tfileservice(process, 'vertex_histos.root')
 output_file(process, 'ntuple.root', [
