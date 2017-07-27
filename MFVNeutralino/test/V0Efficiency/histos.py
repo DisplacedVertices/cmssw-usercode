@@ -16,7 +16,7 @@ process.TFileService.fileName = 'v0histos.root'
 
 sample_files(process, 'qcdht1000' if is_mc else 'JetHT2016D', dataset)
 report_every(process, 100)
-process.maxEvents.input = 10000
+process.maxEvents.input = -1
 
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
 process.mfvWeight.enable = False # just do mcStat
@@ -82,12 +82,12 @@ if meatloverssupreme:
         addmodified('loose', 'min_track_nsigmadxybs = 1')
         addmodified('loosenocos', 'min_track_nsigmadxybs = 1, min_costh2 = -2')
 
+        addmodified('dxybslt500um',      'min_track_nsigmadxybs = 1, max_track_dxybs = 0.05')
+        addmodified('dxybsgt500umlt1mm', 'min_track_nsigmadxybs = 1, min_track_dxybs = 0.05, max_track_dxybs = 0.1')
+        addmodified('dxybsgt1mm',        'min_track_nsigmadxybs = 1, min_track_dxybs = 0.1')
+
     addmodified('nsigdxy3', 'min_track_nsigmadxybs = 3')
     addmodified('nsigdxy5', 'min_track_nsigmadxybs = 5')
-
-    addmodified('dxybslt500um',      'max_track_dxybs = 0.05')
-    addmodified('dxybsgt500umlt1mm', 'min_track_dxybs = 0.05, max_track_dxybs = 0.1')
-    addmodified('dxybsgt1mm',        'min_track_dxybs = 0.1')
 
     n = 3
     for i in xrange(n):
@@ -114,10 +114,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples 
 
     samples = [s for s in Samples.registry.all() if s.has_dataset(dataset)]
-    samples = [Samples.JetHT2016D, Samples.JetHT2016G, Samples.qcdht1000, Samples.qcdht1500, Samples.qcdht1000_hip1p0_mit, Samples.qcdht1500_hip1p0_mit]
+    #samples = [Samples.JetHT2016D, Samples.JetHT2016G, Samples.qcdht1000, Samples.qcdht1500] #, Samples.qcdht1000_hip1p0_mit, Samples.qcdht1500_hip1p0_mit]
     set_splitting(samples, dataset, 'default', '../ana_2015p6.json', 2)
 
-    cs = CondorSubmitter('V0EfficiencyV%i_v20' % dataset_version,
+    cs = CondorSubmitter('V0EfficiencyV%i_v22' % dataset_version,
                          ex = year,
                          dataset = dataset,
                          pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, zerobias_modifier, repro_modifier),
