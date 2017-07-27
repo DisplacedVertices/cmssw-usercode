@@ -12,6 +12,10 @@ fit_range = {
     'h_track_sigmadxy': (0, 0.025),
     }
 
+x_range = {
+    'h_track_dxybs': (-2, 2),
+}
+
 y_range = {
     'h_vtx_rho': (0, 2),
     'h_track_dxybs': (0, 2),
@@ -104,6 +108,8 @@ g.GetXaxis().SetTitle(h1.GetXaxis().GetTitle())
 g.GetYaxis().SetTitle('%s ratio %s/%s' % (h1.GetYaxis().GetTitle(), name1, name2))
 g.GetYaxis().SetTitleOffset(1.25)
 #g.GetYaxis().SetRangeUser(0, i1/i2 * 3)
+if x_range.has_key(path):
+    g.GetXaxis().SetRangeUser(*x_range[path])
 if y_range.has_key(path):
     g.GetYaxis().SetRangeUser(*y_range[path])
 ps.save('ratio')
