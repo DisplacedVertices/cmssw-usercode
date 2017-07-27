@@ -116,6 +116,8 @@ def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=2
             'qcdht2000ext_2015':  (  49705,     5),
             'ttbar':              ( 399372,    46),
             'ttbar_2015':         ( 919380,    66),
+            'qcdht1000_hip1p0_mit':( 55762,    25),
+            'qcdht1500_hip1p0_mit':( 52785,     9),
             }
         for sample in samples:
             # prefer to split by file with CondorSubmitter  for these jobs to not overload xrootd aaa
