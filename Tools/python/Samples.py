@@ -644,6 +644,7 @@ for x in data_samples + [s for s in auxiliary_data_samples if s.name.startswith(
 
 for x in mfv_signal_samples + mfv_ddbar_samples:
     x.add_dataset('ntuplev15_sigmadxy3p9')
+    x.add_dataset('ntuplev15_sigmadxy3p7')
 
 ########
 # other condor declarations
