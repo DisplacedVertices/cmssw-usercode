@@ -648,6 +648,7 @@ for x in mfv_signal_samples + mfv_ddbar_samples:
     x.add_dataset('ntuplev15_sigmadxy4p3')
     x.add_dataset('ntuplev15_sigmadxy4p1')
     x.add_dataset('ntuplev15_sigmadxy3p8')
+    x.add_dataset('ntuplev15_sigmadxy4p2')
 
 ########
 # other condor declarations
