@@ -650,6 +650,12 @@ for x in mfv_signal_samples + mfv_ddbar_samples:
     x.add_dataset('ntuplev15_sigmadxy3p8')
     x.add_dataset('ntuplev15_sigmadxy4p2')
 
+for x in ['ntuplev15lep', 'ntuplev15lep_IsoMu24', 'ntuplev15lep_IsoTkMu24', 'ntuplev15lep_VVVL350', 'ntuplev15lep_VVVL400', 'ntuplev15lep_Mu50']:
+    mfv_neu_tau01000um_M0300.add_dataset(x)
+
+mfv_neu_tau00100um_M0300.add_dataset('ntuplev15_leptrigs')
+mfv_neu_tau01000um_M0300.add_dataset('ntuplev15_leptrigs')
+
 ########
 # other condor declarations
 ########

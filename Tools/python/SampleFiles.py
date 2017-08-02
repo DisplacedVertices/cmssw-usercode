@@ -319,6 +319,38 @@ _add_ds("main", {
 'qcdht1500_hip1p0_mit': (1928, ['/store/user/wsun/croncopyeos/qcdht1500/RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170610_031249' + '/%04i/reco_%i.root' % (i/1000,i) for i in chain(xrange(1,7), xrange(8,22), xrange(23,26), xrange(28,35), xrange(36,50), xrange(51,72), xrange(73,142), xrange(145,155), xrange(156,216), xrange(217,276), xrange(277,312), xrange(313,356), xrange(357,370), xrange(371,388), xrange(389,407), xrange(408,441), xrange(442,475), xrange(476,507), xrange(508,516), xrange(517,524), xrange(525,563), xrange(569,595), xrange(596,628), xrange(629,659), xrange(660,663), xrange(664,669), xrange(670,678), xrange(681,687), xrange(688,761), xrange(762,821), xrange(822,836), xrange(837,849), xrange(850,867), xrange(868,887), xrange(888,894), xrange(895,1059), xrange(1060,1128), xrange(1129,1132), xrange(1133,1156), xrange(1157,1169), xrange(1170,1291), xrange(1293,1397), xrange(1398,1528), xrange(1529,1581), xrange(1582,1601), xrange(1602,1676), xrange(1677,1748), xrange(1749,1762), xrange(1763,1768), xrange(1769,1778), xrange(1780,1784), xrange(1785,1788), xrange(1789,1800), xrange(1801,1803), xrange(1804,1811), xrange(1812,1855), xrange(1856,1862), xrange(1863,1877), xrange(1878,1885), xrange(1886,1892), xrange(1893,1896), xrange(1897,1901), xrange(1902,1920), xrange(1921,1928), xrange(1929,2001), [143, 565, 567, 679])]),
 })
 
+_add_ds('ntuplev15lep', {
+'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_originalCuts_300GeV_evFiltOff_2016/170721_185423", 241)
+})
+
+_add_ds('ntuplev15lep_IsoMu24', {
+'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_IsoMu24_300GeV_evFiltOff_2016/170721_193308", 241)
+})
+
+_add_ds('ntuplev15lep_IsoTkMu24', {
+'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_IsoTkMu24_300GeV_evFiltOff_2016/170721_193419", 241)
+})
+
+_add_ds('ntuplev15lep_VVVL350', {
+'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_Mu15_IsoVVVL_PFHT350_300GeV_evFiltOff_2016/170721_192845", 241)
+})
+
+_add_ds('ntuplev15lep_VVVL400', {
+'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_Mu15_IsoVVVL_PFHT400_300GeV_evFiltOff_2016/170721_185557", 241)
+})
+
+_add_ds('ntuplev15lep_Mu50', {
+'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_Mu50_300GeV_evFiltOff_2016/170721_193035", 241)
+})
+
+_add_ds("ntuplev15_leptrigs", {
+'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_evFilterOff_actual_ver2_withLeptonTriggers_2016/170727_153833", 241)
+})
+
+_add_ds("ntuplev15_leptrigs", {
+'mfv_neu_tau00100um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV15_evFilterOff_actual_ver2_withLeptonTriggers_2016/170727_153631", 294)
+})
+
 _add_ds('validation', {
 'qcdht0700':   (15, _d[('qcdht0700', 'main')][1][:15]),
 'qcdht2000':   (5, _d[('qcdht2000', 'main')][1][:5]),
