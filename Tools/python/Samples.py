@@ -656,6 +656,11 @@ for x in ['ntuplev15lep', 'ntuplev15lep_IsoMu24', 'ntuplev15lep_IsoTkMu24', 'ntu
 mfv_neu_tau00100um_M0300.add_dataset('ntuplev15_leptrigs')
 mfv_neu_tau01000um_M0300.add_dataset('ntuplev15_leptrigs')
 
+##### Shaun Hogan
+mfv_neu_tau00100um_M0300.add_dataset('ntuplev15_evFilterOff_lowPrescaleLeptonTriggers')
+mfv_neu_tau01000um_M0300.add_dataset('ntuplev15_evFilterOff_lowPrescaleLeptonTriggers')
+mfv_neu_tau00300um_M0300.add_dataset('ntuple_v15_evFilterOff_lowPrescaleLeptonTriggers')
+
 ########
 # other condor declarations
 ########

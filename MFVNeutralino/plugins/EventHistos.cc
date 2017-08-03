@@ -22,6 +22,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   const edm::EDGetTokenT<MFVEvent> mevent_token;
   const edm::EDGetTokenT<double> weight_token;
   const std::vector<double> force_bs;
+  const std::vector<int> triggerSel; //SH
 
   TH1F* h_w;
 
@@ -144,7 +145,10 @@ class MFVEventHistos : public edm::EDAnalyzer {
 MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   : mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
     weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
-    force_bs(cfg.getParameter<std::vector<double> >("force_bs"))
+    force_bs(cfg.getParameter<std::vector<double> >("force_bs")),
+    triggerSel(cfg.getParameter<std::vector<int> >("triggerSel"))//SH
+    
+    
 {
   if (force_bs.size() && force_bs.size() != 3)
     throw cms::Exception("Misconfiguration", "force_bs must be empty or size 3");
@@ -306,6 +310,20 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   event.getByToken(weight_token, weight);
   const double w = *weight;
   h_w->Fill(w);
+
+  //SH is adding this
+  if (triggerSel.size() != 0) {
+    if ((mevent->pass_hlt(1) || mevent->pass_hlt(2) || mevent->pass_hlt(3) || mevent->pass_hlt(4) || mevent->pass_hlt(triggerSel[0])) == 0) { 
+      return;
+    }
+  }
+
+//    for (unsigned int k=0; k<triggerSel.size();k++) {
+//      if (mevent->pass_hlt(triggerSel[k]) == 0) {
+//        return;
+//      }
+//    }
+//  }
 
   const double bsx = force_bs.size() ? force_bs[0] : mevent->bsx;
   const double bsy = force_bs.size() ? force_bs[1] : mevent->bsy;

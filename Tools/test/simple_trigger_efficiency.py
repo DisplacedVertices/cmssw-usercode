@@ -1,8 +1,9 @@
 import sys
-from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, file_event_from_argv
+from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, file_event_from_argv, files_from_file
 
-file_event_from_argv(process)
-process.TFileService.fileName = 'simple_trigger_efficiency.root'
+#file_event_from_argv(process)
+files_from_file(process, "1600GeV_1mm_files.txt")
+process.TFileService.fileName = 'simple_trigEff_1600GeV_1mm.root'
 
 process.RandomNumberGeneratorService = cms.Service('RandomNumberGeneratorService')
 process.RandomNumberGeneratorService.SimpleTriggerEfficiency = cms.PSet(initialSeed = cms.untracked.uint32(1219))

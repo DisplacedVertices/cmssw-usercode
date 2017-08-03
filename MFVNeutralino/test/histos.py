@@ -1,11 +1,12 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-dataset = 'ntuplev15'
-sample_files(process, 'qcdht2000', dataset, 1)
-process.TFileService.fileName = 'histos.root'
+dataset = 'ntuplev15_evFilterOff_lowPrescaleLeptonTriggers'
+sample_files(process, 'mfv_neu_tau01000um_M0300', dataset, 300)
+process.TFileService.fileName = 'histos_1mm_M300.root'
 process.maxEvents.input = -1
 file_event_from_argv(process)
+#process.source.fileNames=['file:ntuple.root']
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
@@ -19,9 +20,16 @@ SimpleTriggerResults.setup_endpath(process, weight_src='mfvWeight')
 common = cms.Sequence(process.mfvSelectedVerticesSeq * process.mfvWeight)
 
 process.mfvEventHistosNoCuts = process.mfvEventHistos.clone()
-process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts) # just trigger for now
+process.mfvEventHistosOrigCuts = process.mfvEventHistos.clone(triggerSel=cms.vint32(1)) ##SH
+process.mfvEventHistosMu15PFHT600 = process.mfvEventHistos.clone(triggerSel=cms.vint32(5)) ##SH
+process.mfvEventHistosEle15PFHT600 = process.mfvEventHistos.clone(triggerSel=cms.vint32(6)) ##SH
+process.mfvEventHistosMu50 = process.mfvEventHistos.clone(triggerSel=cms.vint32(7)) ##SH
+process.mfvEventHistosEle27WPTight = process.mfvEventHistos.clone(triggerSel=cms.vint32(10)) ##SH
+process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts * process.mfvEventHistosOrigCuts * process.mfvEventHistosMu15PFHT600 * process.mfvEventHistosEle15PFHT600 * process.mfvEventHistosMu50 * process.mfvEventHistosEle27WPTight) ##SH 
+#process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts) # just trigger for now
 
 process.mfvEventHistosPreSel = process.mfvEventHistos.clone()
+
 process.mfvAnalysisCutsPreSel = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)
 process.pEventPreSel = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvEventHistosPreSel)
 

@@ -1200,6 +1200,18 @@ _add_ds("ntuplev15_sigmadxy4p2", {
 'my_mfv_neu_tau00300um_M0800': _fromnum0("/store/user/jchu/mfv_neu_tau00300um_M0800/NtupleV15_sigmadxy4p2_2016/170726_215519", 17),
 })
 
+_add_ds("ntuplev15_evFilterOff_lowPrescaleLeptonTriggers", {
+'mfv_neu_tau00100um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV15_evFilterOff_actual_lowPrescaleLeptonTriggers_2016/170731_194418", 294)
+})
+
+_add_ds("ntuplev15_evFilterOff_lowPrescaleLeptonTriggers", {
+'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_evFilterOff_actual_lowPrescaleLeptonTriggers_2016/170801_125613", 241),
+})
+
+_add_ds("ntuple_v15_evFilterOff_lowPrescaleLeptonTriggers", {
+'mfv_neu_tau00300um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV15_evFilterOff_actual_lowPrescaleLeptonTriggers_2016/170801_125729", 266),
+})
+
 __all__ = [
     'dump',
     'get',

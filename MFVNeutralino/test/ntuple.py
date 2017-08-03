@@ -16,7 +16,7 @@ version = 'V15'
 batch_name = 'Ntuple' + version
 if minitree_only:
     batch_name = 'MiniNtuple'  + version
-#batch_name += '_ChangeMeIfSettingsNotDefault'
+batch_name += '_evFilterOff_actual_lowPrescaleLeptonTriggers'
 
 ####
 
@@ -72,7 +72,7 @@ process.p *= process.mfvTriggerFloats * process.mfvEvent
 
 if event_filter:
     import JMTucker.MFVNeutralino.EventFilter
-    JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process, path_name='p', event_filter=True)
+    JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process, path_name='p', event_filter=False) # Changed from T to F
 
 if prepare_vis:
     for x in process.mfvSelectedVerticesTight, process.mfvSelectedVerticesTightNtk3, process.mfvSelectedVerticesTightNtk4:
@@ -184,4 +184,4 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     ms.common.publish_name = batch_name + '_' + str(year)
     ms.crab.job_control_from_sample = True
     ms.condor.stageout_files = 'all'
-    ms.submit(samples)
+    ms.submit([Samples.mfv_neu_tau00300um_M0300])

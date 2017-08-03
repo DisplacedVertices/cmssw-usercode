@@ -6,7 +6,14 @@ namespace mfv {
     "HLT_PFHT800_v",
     "HLT_PFHT900_v",
     "HLT_PFJet450_v",
-    "HLT_AK8PFJet450_v"
+    "HLT_AK8PFJet450_v",
+    "HLT_Mu15_IsoVVVL_PFHT600_v",
+    "HLT_Ele15_IsoVVVL_PFHT600_v",
+    "HLT_Mu50_v",
+    "HLT_Mu55_v",
+    "HLT_Ele32_eta2p1_WPTight_Gsf_v",
+    "HLT_Ele27_WPTight_Gsf_v",
+    "HLT_Ele25_eta2p1_WPTight_Gsf_v"
   };
 
   const char* l1_paths[mfv::n_l1_paths] = {

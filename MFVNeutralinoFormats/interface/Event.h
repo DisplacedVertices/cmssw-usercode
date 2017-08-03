@@ -9,7 +9,7 @@ namespace mfv {
   // JMTBAD hope you keep these in sync with Event.cc
   static const int n_clean_paths = 7;
   enum {
-    b_HLT_PFHT350, b_HLT_PFHT800, b_HLT_PFHT900, b_HLT_PFJet450, b_HLT_AK8PFJet450, n_hlt_paths,
+    b_HLT_PFHT350, b_HLT_PFHT800, b_HLT_PFHT900, b_HLT_PFJet450, b_HLT_AK8PFJet450, b_HLT_Mu15_IsoVVVL_PFHT600, b_HLT_Ele15_IsoVVVL_PFHT600, b_HLT_Mu50, b_HLT_Mu55, b_HLT_Ele32_eta2p1_WPTight_Gsf, b_HLT_Ele27_WPTight_Gsf, HLT_Ele25_eta2p1_WPTight_Gsf, n_hlt_paths,
     b_L1_HTT100=0, b_L1_HTT125, b_L1_HTT150, b_L1_HTT175, b_L1_HTT160, b_L1_HTT200, b_L1_HTT220, b_L1_HTT240, b_L1_HTT255, b_L1_HTT270, b_L1_HTT280, b_L1_HTT300, b_L1_HTT320, b_L1_SingleJet128, b_L1_SingleJet170, b_L1_SingleJet180, b_L1_SingleJet200, n_l1_paths
   };
 
