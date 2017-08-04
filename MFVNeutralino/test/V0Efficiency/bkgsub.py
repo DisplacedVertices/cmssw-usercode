@@ -20,7 +20,7 @@ ps = plot_saver(plot_dir('v0bkgsub/!%s/' % ('default' if not ex else ex)  + samp
 
 in_f = ROOT.TFile(in_fn)
 
-h = in_f.Get('v0eff%s/h_nvtx' % ex)
+h = in_f.Get('v0eff%s/h_nvtx_pass' % ex)
 h.Draw()
 ps.save('nvtx')
 
