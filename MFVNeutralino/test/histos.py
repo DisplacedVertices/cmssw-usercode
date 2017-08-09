@@ -2,8 +2,8 @@ import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 dataset = 'ntuplev15_evFilterOff_lowPrescaleLeptonTriggers'
-sample_files(process, 'mfv_neu_tau01000um_M0300', dataset, 300)
-process.TFileService.fileName = 'histos_1mm_M300.root'
+sample_files(process, 'mfv_neu_tau00100um_M1200', dataset, 300)
+process.TFileService.fileName = 'histos.root'
 process.maxEvents.input = -1
 file_event_from_argv(process)
 #process.source.fileNames=['file:ntuple.root']
@@ -141,7 +141,7 @@ for p in process.paths.keys():
         return to_add, to_replace
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('HistosV15',
+    cs = CondorSubmitter('HistosV15_lowPrescaleLeptonTriggers',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = modify,

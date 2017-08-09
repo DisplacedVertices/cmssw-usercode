@@ -11,8 +11,8 @@ if os.environ['USER'] == 'tucker':
 else:
     ps = plot_saver('plots/sigeff/v15/2016', size=(700,700), log=False, root=False)
 
-root_file_dir = '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_0'
-num_path = 'mfvEventHistosFullSel/h_bsx'
+root_file_dir = '/uscms_data/d3/shogan/crab_dirs/HistosV15_lowPrescaleLeptonTriggers'
+num_path = 'mfvEventHistosEle27WPTight/h_nbquarks' #Changed from h_bsx to h_w
 
 multijet = [s for s in Samples.mfv_signal_samples if not s.name.startswith('my_')]
 dijet = Samples.mfv_ddbar_samples

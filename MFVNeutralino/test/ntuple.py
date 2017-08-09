@@ -184,4 +184,4 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     ms.common.publish_name = batch_name + '_' + str(year)
     ms.crab.job_control_from_sample = True
     ms.condor.stageout_files = 'all'
-    ms.submit([Samples.mfv_neu_tau00300um_M0300])
+    ms.submit([Samples.mfv_neu_tau10000um_M1600])
