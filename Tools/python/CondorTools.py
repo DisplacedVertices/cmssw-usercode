@@ -201,7 +201,7 @@ def cs_analyze_mmon(wds):
 def cs_timestamp():
     return datetime.now().strftime('%y%m%d_%H%M%S')
 
-def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None):
+def cs_hadd_args(working_dir, new_name=None, new_dir=None):
     if working_dir.endswith('/'):
         working_dir = working_dir[:-1]
     if new_name is None:
@@ -210,6 +210,10 @@ def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chun
         new_name += '.root'
     if new_dir is not None:
         new_name = os.path.join(new_dir, new_name)
+    return working_dir, new_name, new_dir
+
+def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None):
+    working_dir, new_name, new_dir = cs_hadd_args(working_dir, new_name, new_dir)
 
     expected = cs_njobs(working_dir)
     print '%s: expecting %i files if all jobs succeeded' % (working_dir, expected)
@@ -295,6 +299,7 @@ __all__ = [
     'cs_analyze',
     'cs_analyze_mmon',
     'cs_timestamp',
+    'cs_hadd_args',
     'cs_hadd',
     'cs_report',
     ]
