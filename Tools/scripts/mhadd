@@ -67,12 +67,12 @@ def hadd_(is_crab, *args, **kwargs):
 
     working_dir, new_name, new_dir = hadd_args(working_dir, kwargs.get('new_name', None), new_dir)
 
-    if '/store/' in new_dir:
+    if new_dir and '/store/' in new_dir:
         exists, mkdir, rm = eos.exists, eos.mkdir, eos.rm
     else:
         exists, mkdir, rm = os.path.exists, os.mkdir, os.remove
 
-    if not exists(new_dir):
+    if new_dir and not exists(new_dir):
         mkdir(new_dir)
 
     if exists(new_name):
