@@ -1,0 +1,24 @@
+#!/usr/bin/env python
+
+import os, sys, shutil
+from JMTucker.Tools.CondorTools import is_cs_dir
+from JMTucker.Tools.CRAB3ToolsBase import is_crab_working_dir
+
+if len(sys.argv) < 2:
+    print 'usage: mexclean dir_of_wds [dir_of_wds2 ...]'
+    sys.exit(1)
+
+for dir_of_wds in sys.argv[1:]:
+    wds = []
+    exs, good_exs = set(), set()
+    for x in os.listdir(dir_of_wds):
+        fx = os.path.join(dir_of_wds, x)
+        if is_cs_dir(fx) or is_crab_working_dir(fx):
+            wds.append(fx)
+            good_exs.add(open(os.path.join(fx,'cs_ex')).read())
+        if x.startswith('ex_') and os.path.isdir(fx):
+            exs.add(x)
+    assert good_exs.issubset(exs)
+    for x in exs - good_exs:
+        shutil.rmtree(os.path.join(dir_of_wds, x))
+
