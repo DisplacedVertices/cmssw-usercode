@@ -103,6 +103,8 @@ if not options.override_done:
     marked_done = [d for d in dirs if has_done_marker(d)]
     print_if_nonempty(marked_done, 'skipping these already marked done dirs', indent='  ')
     dirs = [d for d in dirs if not has_done_marker(d)]
+    if not dirs:
+        sys.exit('no dirs left!')
 
 if not dirs and not options.fake_results:
     sys.exit('space-separated list of existing crab or condor dirs required in argv (see --help)')
