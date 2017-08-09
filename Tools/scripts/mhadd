@@ -6,6 +6,7 @@ import sys
 import JMTucker.Tools.argparse as argparse
 from JMTucker.Tools.CRAB3ToolsSh import is_crab_working_dir, crab_hadd_args, crab_hadd
 from JMTucker.Tools.CondorTools import is_cs_dir, cs_hadd_args, cs_hadd
+from JMTucker.Tools import eos
 
 parser = argparse.ArgumentParser(description = 'mhadd: hadd the files from condor/crab directories',
                                  usage = '%(prog)s [options] condor_or_crab_dirs')
@@ -22,6 +23,8 @@ parser.add_argument('--ignore-done', action='store_true', default=False,
                     help='Ignore the done marker files and try to hadd whatever specified.')
 parser.add_argument('-f', '--overwrite', action='store_true', default=False,
                     help='If the output file exists, overwrite it (really, delete it before hadd ever sees it).')
+parser.add_argument('-o', '--output-dir',
+                    help='Path for the output files. (Can be an xrootd url, e.g. root://cmseos.fnal.gov//store/user/tucker/outputdir.) If doing dirs of dirs, directories are created under the output dir corresponding to the basenames of the toplevel dirs. If the toplevel dirs are not unique, you will have a bad time.')
 
 options = parser.parse_args()
 
@@ -39,8 +42,9 @@ def hadd_(is_crab, *args, **kwargs):
     global found_one
     found_one = True
 
-    if not os.path.isfile(os.path.join(args[0], 'mmon_done')) and not options.ignore_done:
-        print 'skipping', args[0], 'since it is not marked done (--ignore-done to skip this check)'
+    working_dir = args[0]
+    if not os.path.isfile(os.path.join(working_dir, 'mmon_done')) and not options.ignore_done:
+        print 'skipping', working_dir, 'since it is not marked done (--ignore-done to skip this check)'
         return
 
     kwargs['chunk_size'] = options.chunk_size
@@ -52,11 +56,29 @@ def hadd_(is_crab, *args, **kwargs):
     else:
         hadd_args, hadd = cs_hadd_args, cs_hadd
 
-    _, new_name, _ = hadd_args(args[0], kwargs.get('new_name', None), kwargs.get('new_dir', None))
-    if os.path.isfile(new_name):
+    new_dir = kwargs.get('new_dir', None)
+    if options.output_dir:
+        if new_dir:
+            base_new_dir = os.path.basename(new_dir)
+            new_dir = os.path.join(options.output_dir, base_new_dir)
+        else:
+            new_dir = options.output_dir
+    kwargs['new_dir'] = new_dir
+
+    working_dir, new_name, new_dir = hadd_args(working_dir, kwargs.get('new_name', None), new_dir)
+
+    if '/store/' in new_dir:
+        exists, mkdir, rm = eos.exists, eos.mkdir, eos.rm
+    else:
+        exists, mkdir, rm = os.path.exists, os.mkdir, os.remove
+
+    if not exists(new_dir):
+        mkdir(new_dir)
+
+    if exists(new_name):
         if options.overwrite:
             print 'overwriting existing file', new_name
-            os.remove(new_name)
+            rm(new_name)
         else:
             print 'skipping existing file', new_name
             return
