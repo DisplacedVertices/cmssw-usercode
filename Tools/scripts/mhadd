@@ -6,7 +6,7 @@ import sys
 import JMTucker.Tools.argparse as argparse
 from JMTucker.Tools.CRAB3ToolsSh import is_crab_working_dir, crab_hadd_args, crab_hadd
 from JMTucker.Tools.CondorTools import is_cs_dir, cs_hadd_args, cs_hadd
-from JMTucker.Tools import eos
+from JMTucker.Tools import eos, colors
 
 parser = argparse.ArgumentParser(description = 'mhadd: hadd the files from condor/crab directories',
                                  usage = '%(prog)s [options] condor_or_crab_dirs')
@@ -44,7 +44,7 @@ def hadd_(is_crab, *args, **kwargs):
 
     working_dir = args[0]
     if not os.path.isfile(os.path.join(working_dir, 'mmon_done')) and not options.ignore_done:
-        print 'skipping', working_dir, 'since it is not marked done (--ignore-done to skip this check)'
+        print colors.yellow('skipping %s since it is not marked done (--ignore-done to skip this check)' % working_dir)
         return
 
     kwargs['chunk_size'] = options.chunk_size
@@ -77,10 +77,10 @@ def hadd_(is_crab, *args, **kwargs):
 
     if exists(new_name):
         if options.overwrite:
-            print 'overwriting existing file', new_name
+            print colors.yellow('overwriting existing file %s' % new_name)
             rm(new_name)
         else:
-            print 'skipping existing file', new_name
+            print colors.yellow('skipping existing file %s' % new_name)
             return
 
     hadd(*args, **kwargs)
