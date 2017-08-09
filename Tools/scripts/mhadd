@@ -4,8 +4,8 @@ import os
 import glob
 import sys
 import JMTucker.Tools.argparse as argparse
-from JMTucker.Tools.CRAB3ToolsSh import is_crab_working_dir, crab_hadd
-from JMTucker.Tools.CondorTools import is_cs_dir, cs_hadd
+from JMTucker.Tools.CRAB3ToolsSh import is_crab_working_dir, crab_hadd_args, crab_hadd
+from JMTucker.Tools.CondorTools import is_cs_dir, cs_hadd_args, cs_hadd
 
 parser = argparse.ArgumentParser(description = 'mhadd: hadd the files from condor/crab directories',
                                  usage = '%(prog)s [options] condor_or_crab_dirs')
@@ -18,6 +18,10 @@ parser.add_argument('--pattern',
                     help='Glob-style pattern to filter the files, useful if there are multiple files output per job.')
 parser.add_argument('--no-lpc-shortcut', action='store_false', dest='lpc_shortcut', default=True,
                     help='(Only for crab dirs) Most of the time files went to FNAL LPC EOS, this is used to bypass talking to the crab server--turn off if needed.')
+parser.add_argument('--ignore-done', action='store_true', default=False,
+                    help='Ignore the done marker files and try to hadd whatever specified.')
+parser.add_argument('-f', '--overwrite', action='store_true', default=False,
+                    help='If the output file exists, overwrite it (really, delete it before hadd ever sees it).')
 
 options = parser.parse_args()
 
@@ -25,9 +29,6 @@ if len(options.positional) == 0:
     print 'Required positional args missing: at least one crab directory\n'
     parser.print_help()
     sys.exit(1)
-
-if options.lpc_shortcut:
-    print 'using LPC shortcut'
 
 ########################################################################
 
@@ -37,13 +38,31 @@ found_one = False
 def hadd_(is_crab, *args, **kwargs):
     global found_one
     found_one = True
+
+    if not os.path.isfile(os.path.join(args[0], 'mmon_done')) and not options.ignore_done:
+        print 'skipping', args[0], 'since it is not marked done (--ignore-done to skip this check)'
+        return
+
     kwargs['chunk_size'] = options.chunk_size
     kwargs['pattern'] = options.pattern
+
     if is_crab:
         kwargs['lpc_shortcut'] = options.lpc_shortcut
-        return crab_hadd(*args, **kwargs)
+        hadd_args, hadd = crab_hadd_args, crab_hadd
     else:
-        return cs_hadd(*args, **kwargs)
+        hadd_args, hadd = cs_hadd_args, cs_hadd
+
+    _, new_name, _ = hadd_args(args[0], kwargs.get('new_name', None), kwargs.get('new_dir', None))
+    if os.path.isfile(new_name):
+        if options.overwrite:
+            print 'overwriting existing file', new_name
+            os.remove(new_name)
+        else:
+            print 'skipping existing file', new_name
+            return
+
+    hadd(*args, **kwargs)
+
 
 for x in wds:
     is_crab = is_crab_working_dir(x)
