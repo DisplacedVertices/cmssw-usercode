@@ -1,0 +1,104 @@
+#!/bin/bash
+#
+#  eosdu
+#
+#  Created by Jesus Orduna and Kevin Pedro
+#  modified by tucker
+#
+
+# This will sum the size of all content inside the LFN and return the number in B
+# or an empty string for empty directories
+function getSizeOf {
+	eos root://cmseos.fnal.gov find $1 | grep "/$" | xargs -d '\n' -n1 -P4 eos root://cmseos.fnal.gov ls -l | awk '{sum+=$5} END {print sum}'
+}
+
+# This does the same, but counts number of files
+function getFilesOf {
+	eos root://cmseos.fnal.gov find $1 | grep "/$" | xargs -d '\n' -n1 -P4 eos root://cmseos.fnal.gov ls | wc -l
+}
+
+function normalizeDir {
+    DIR="$1"
+    if [[ $DIR != /store/* ]]; then
+        DIR=$(readlink -f $DIR)
+    fi
+    if [[ $DIR == /eos/uscms/* ]]; then
+        DIR=${DIR//\/eos\/uscms/}
+    fi
+    echo $DIR
+}
+
+function human {
+    b=${1:-0};
+    d=''; s=0; S=(B {K,M,G,T,E,P,Y,Z}iB)
+    while ((b >= 1024)); do
+        d="$(printf ".%01d" $((b % 1024 * 100 / 1024)))"
+        b=$((b / 1024))
+        let s++
+    done
+    echo "$b$d ${S[$s]}"
+}
+
+function printSizeOf {
+	DIR=$1
+
+	# Get the size of the LFN
+	if [ -z "$FILES" ]; then
+		theSize=$(getSizeOf $DIR)
+	else
+		theSize=$(getFilesOf $DIR)
+	fi
+
+	# Empty directories will evaluate true
+	if [ "a$theSize" = "a" ] ; then
+		echo "Empty"
+	else
+            printf "%14s %7.1f %s\n" $theSize $(human $theSize)
+	fi
+}
+
+FILES=""
+RECURSE=""
+
+#check arguments
+while getopts "fhr" opt; do
+	case "$opt" in
+	f) FILES=yes
+	;;
+	r) RECURSE=yes
+	;;
+	esac
+done
+
+shift $(($OPTIND - 1))
+
+if [[ $# -eq 0 ]]; then
+    set $(pwd)
+fi
+
+#"recursive" option
+if [[ -n "$RECURSE" ]]; then
+    DIR=$(normalizeDir $1)
+
+    for i in $(eos root://cmseos.fnal.gov find --maxdepth 1 $DIR | grep "/$"); do
+	if [[ "$i" == "$DIR" || "$i" == /eos/uscms"$DIR" || "$i" == "$DIR"/ || "$i" == /eos/uscms"$DIR"/ ]]; then
+	    continue
+	fi
+	theSize=$(printSizeOf $i)
+	echo "`basename $i` $theSize"
+    done
+else
+    MAXLEN=0
+    for DIR in "$@"; do
+        DIR=$(normalizeDir $DIR)
+        if [[ ${#DIR} -gt $MAXLEN ]]; then
+            MAXLEN=${#DIR}
+        fi
+    done
+    
+    for DIR in "$@"; do
+        DIR=$(normalizeDir $DIR)
+        printf "%-${MAXLEN}s  " $DIR 
+        printSizeOf $DIR
+    done | sort -rn -k2 | awk '{ n += 1; s += $2; print } END { if (n > 1) { printf "%'${MAXLEN}'s  %14s %7.1f GiB\n", "Total:", s, s / 1024**3 } }'
+fi

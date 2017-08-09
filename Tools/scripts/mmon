@@ -4,6 +4,7 @@ import datetime, optparse, os, sys, time
 from collections import defaultdict
 from JMTucker.Tools.CRAB3Tools import *
 from JMTucker.Tools.CondorTools import *
+from JMTucker.Tools.general import print_if_nonempty, touch
 from JMTucker.Tools import colors
 
 parser = optparse.OptionParser(usage='%prog [options] <space-separated list of crab dirs>')
@@ -17,6 +18,8 @@ parser.add_option('-d', '--delay', action='store_true', default=False,
                   help='Wait once before starting passes.')
 parser.add_option('--max-processes', type='int', default=5,
                   help='Max number of status-checking processes to run at once.')
+parser.add_option('--override-done', action='store_true', default=False,
+                  help='Ignore already-done marker files.')
 parser.add_option('-r', '--resub', action='store_true', default=False,
                   help='Send resubmit request to any batch that has failed jobs, obeying the white and black lists below. (Only crab dirs for now.)')
 #parser.add_option('--resub-white-list', default='',
@@ -92,13 +95,22 @@ def make_script(filename, cmd):
 
 dirs = crab_dirs_from_argv() + cs_dirs_from_argv()
 
+dirs_done = []
+done_fn = lambda d: os.path.join(d, 'mmon_done')
+has_done_marker = lambda d: os.path.isfile(done_fn(d))
+
+if not options.override_done:
+    marked_done = [d for d in dirs if has_done_marker(d)]
+    print_if_nonempty(marked_done, 'skipping these already marked done dirs', indent='  ')
+    dirs = [d for d in dirs if not has_done_marker(d)]
+    if not dirs:
+        sys.exit('no dirs left!')
+
 if not dirs and not options.fake_results:
     sys.exit('space-separated list of existing crab or condor dirs required in argv (see --help)')
 
 if options.dir_sort:
     dirs.sort()
-
-dirs_done = []
 
 ndirs = len(dirs)
 print 'mmon: checking %i dir%s, be patient' % (ndirs, 's' if ndirs > 1 else '')
@@ -306,6 +318,9 @@ while 1:
     fail.sort(key=dirs.index)
     done.sort(key=dirs.index)
     notdone.sort(key=dirs.index)
+
+    for d in done:
+        touch(done_fn(d))
 
     done_msg = '\nThese are done as far as mmon is concerned (all jobs are "finished" or one of %s):' % done_stats_info_text 
     if done:

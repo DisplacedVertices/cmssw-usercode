@@ -7,6 +7,7 @@ import time
 from copy import deepcopy
 from datetime import datetime
 from pprint import pprint
+from shutil import rmtree
 from StringIO import StringIO
 from CRAB3Tools import Config, crab_global_options, crab_dirs_root, crab_renew_proxy_if_needed, crab_command
 from general import mkdirs_if_needed, popen, save_git_status
@@ -278,8 +279,19 @@ class CRABSubmitter:
             working_dir = os.path.join(cfg.General.workArea, 'crab_' + cfg.General.requestName)
 
             if not os.path.isdir(working_dir):
-                result = crab_command('submit', config = cfg)
-                open(os.path.join(working_dir, 'cs_ex'), 'wt').write(self.ex_str)
+                success, nretries = False, 10
+                while not success and nretries:
+                    result = crab_command('submit', config = cfg)
+                    should_retry = result.get('status', '') == 'HTTPException' and result.has_key('HTTPException')
+                    if should_retry:
+                        nretries -= 1
+                        print sample.name, 'crapped out with HTTPException,', nretries, 'tries left'
+                        rmtree(working_dir)
+                    else:
+                        open(os.path.join(working_dir, 'cs_ex'), 'wt').write(self.ex_str)
+                        success = True
+                if not success:
+                    print '\033[1m warning: \033[0m sample %s not submitted, nretries exceeded' % (sample.name)
             else:
                 print '\033[1m warning: \033[0m sample %s not submitted, directory %s already exists' % (sample.name, working_dir)
 

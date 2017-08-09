@@ -1,7 +1,7 @@
 #!/bin/bash
 
 clobber=clobber
-exs="default supertracks inpv1 inpv2 nsigdxy3 nsigdxy5 npxlaymin3 nstlaymin10 aeta0 aeta1 aeta2"
+exs="default" # supertracks inpv1 inpv2 nsigdxy3 nsigdxy5 npxlaymin3 nstlaymin10 aeta0 aeta1 aeta2"
 
 if true; then
     wd=$(pwd)
@@ -15,7 +15,7 @@ if true; then
             continue
         fi
         mkdir $z ; cd $z
-        for x in $crd/V0EfficiencyV1_v16/*.root; do
+        for x in $crd/V0EfficiencyV1_v22/*.root; do
             echo $x
             python $wd/bkgsub.py $x $ex $clobber >$(basename $x .root).log 2>&1
         done

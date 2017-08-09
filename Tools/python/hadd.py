@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-import os, subprocess
+import os, subprocess, tempfile
+from JMTucker.Tools import eos
 
 def hadd_ex(new_name, files):
     """Use ROOT's hadd tool to merge files into a new file with path
@@ -19,8 +20,16 @@ def hadd_ex(new_name, files):
 
     p = subprocess.Popen(args=args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, stderr = p.communicate()
-    open(new_name + '.haddlog', 'wt').write(stdout)
     assert stderr is None
+
+    log_fn = new_name + '.haddlog'
+    if '/store/' in new_name: # ugh
+        fd, tmp_fn = tempfile.mkstemp()
+        os.fdopen(fd, 'wt').write(stdout)
+        eos.cp(tmp_fn, log_fn) # if the haddlog already exists the new one will silently go into the ether...
+        os.remove(tmp_fn)
+    else:
+        open(log_fn, 'wt').write(stdout)
 
     if p.returncode != 0:
         print '\033[36;7m PROBLEM hadding \033[m', new_name

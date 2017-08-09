@@ -299,6 +299,16 @@ D('10pc_presel_npv',
   y_range = (1, 1e6),
   )
 
+if year == '2016':
+     D('10pc_presel_ntracks',
+      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV2', '%(name)s.root'),
+      histogram_path = 'TrackerMapper/h_all_ntracks',
+      rebin = 10,
+      x_title = 'Number of tracks',
+      y_title = 'Events',
+      y_range = (1, 1e6),
+      )
+
 D('10pc_presel_nseedtracks',
   histogram_path = 'mfvEventHistosPreSel/h_n_vertex_seed_tracks',
   x_title = 'Number of seed tracks',

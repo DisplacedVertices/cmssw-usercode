@@ -174,6 +174,13 @@ def popen(cmd, return_exit_code=False, print_output=False):
     else:
         return output
 
+def print_if_nonempty(l, header='', indent=''):
+    if l:
+        if header:
+            print header
+        for x in l:
+            print indent + x
+
 def save_git_status(path):
     existed = os.path.isdir(path)
     if existed:

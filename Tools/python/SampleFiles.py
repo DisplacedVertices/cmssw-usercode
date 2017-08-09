@@ -344,11 +344,8 @@ _add_ds('ntuplev15lep_Mu50', {
 })
 
 _add_ds("ntuplev15_leptrigs", {
+'mfv_neu_tau00100um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV15_evFilterOff_actual_ver2_withLeptonTriggers_2016/170727_153631", 294),
 'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_evFilterOff_actual_ver2_withLeptonTriggers_2016/170727_153833", 241)
-})
-
-_add_ds("ntuplev15_leptrigs", {
-'mfv_neu_tau00100um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV15_evFilterOff_actual_ver2_withLeptonTriggers_2016/170727_153631", 294)
 })
 
 _add_ds('validation', {

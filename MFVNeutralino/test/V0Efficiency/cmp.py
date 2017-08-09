@@ -13,8 +13,14 @@ fit_range = {
     }
 
 x_range = {
+    'h_vtx_rho': (0, 2.2),
     'h_track_dxybs': (-2, 2),
 }
+
+orig_y_range = {
+    'h_vtx_rho': (0., 0.45),
+    'h_track_dxybs': (0., 4.2),
+    }
 
 y_range = {
     'h_vtx_rho': (0, 2),
@@ -82,6 +88,9 @@ fn2, name2, f2, h2 = getit(path, sys.argv[4])
 
 h1.SetLineColor(2)
 h2.SetLineColor(4)
+if orig_y_range.has_key(path):
+    for h in h1, h2:
+        h.GetYaxis().SetRangeUser(*orig_y_range[path])
 
 ps = plot_saver(plot_dir('v0bkgsub/!!cmp/%s_%s_%s_%s' % (cuts, path, name1, name2)), size=(600,600))
 
@@ -105,7 +114,7 @@ if 0:
         fcn.Draw('same')
 g.GetXaxis().SetRangeUser(h1.GetXaxis().GetXmin(), h1.GetXaxis().GetXmax())
 g.GetXaxis().SetTitle(h1.GetXaxis().GetTitle())
-g.GetYaxis().SetTitle('%s ratio %s/%s' % (h1.GetYaxis().GetTitle(), name1, name2))
+g.GetYaxis().SetTitle('ratio %s/%s' % (name1, name2))
 g.GetYaxis().SetTitleOffset(1.25)
 #g.GetYaxis().SetRangeUser(0, i1/i2 * 3)
 if x_range.has_key(path):
