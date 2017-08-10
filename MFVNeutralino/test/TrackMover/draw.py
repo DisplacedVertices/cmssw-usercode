@@ -1,5 +1,13 @@
 #!/usr/bin/env python
 
+'''
+example:
+
+for x in 20 21 22 30 31 32; do
+  py draw.py hipplusno_$x $x/JetHT2016.root $x/qcdht1000and1500_hipplusno.root
+done
+'''
+
 extra_factor = 1. #17600/3629.809
 use_effective = True
 
@@ -105,13 +113,11 @@ def get_em(fn, alpha=1-0.6827):
 
     return f, l, d, c, integ
 
-def comp(ex, fn1='data.root', fn2='mc.root', is_data_mc=True):
-    print ex
-    if ex:
-        ex = '_' + ex
-    ps = plot_saver(plot_dir('trackmover_tmp' + ex), size=(600,600), log=False)
+def comp(ex, fn1='data.root', fn2='mc.root'):
+    assert ex
+    ps = plot_saver(plot_dir('trackmover_' + ex), size=(600,600), log=False)
 
-    print 'is_data_mc:', is_data_mc
+    print ex
     print 'fn1:', fn1
     f_1, l_1, d_1, c_1, integ_1 = get_em(fn1)
     print 'fn2:', fn2
@@ -168,7 +174,12 @@ def comp(ex, fn1='data.root', fn2='mc.root', is_data_mc=True):
                         statbox_size=statbox_size,
                         )
 
-import sys
-x = sys.argv[1]
-comp(x, '%s/JetHT2016.root'%x, '%s/background.root'%x)
-#comp('mctruth', 'mfv_neu_tau01000um_M0800.root', 'mfv_neu_tau01000um_M0800.root')
+if __name__ == '__main__':
+    import sys
+    if len(sys.argv) < 4:
+        sys.exit('usage: python draw.py tag_for_plots fn1 fn2')
+
+    ex = sys.argv[1]
+    fn1 = sys.argv[2]
+    fn2 = sys.argv[3]
+    comp(ex, fn1, fn2)
