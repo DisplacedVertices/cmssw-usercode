@@ -3,27 +3,26 @@
 import os, subprocess, tempfile
 from JMTucker.Tools import colors, eos
 
-def hadd(new_name, files):
-    """Use ROOT's hadd tool to merge files into a new file with path
-    new_name. This is a simple wrapper that suppresses the stdout from
-    hadd, only reporting a summary line of how many files were
-    merged. We check that the number of files reported merged by hadd
-    is the same as the number in the input list, or if there were any
-    other problems reported by hadd. If so, we print an error to
-    stdout (with reverse video to make it stand out) and return
-    False. On success, return True.
+def hadd(output_fn, input_fns):
+    """This is a simple wrapper around hadd that suppresses the stdout
+    from hadd, only reporting a summary line of how many files were
+    merged. Output to eos is supported, including for the log file for
+    stdout. Checks that the number of files reported merged by hadd is
+    the same as the number in the input list, or if there were any
+    other problems reported by hadd. If so, prints an error to
+    stdout. Returns true if success.
     """
     
-    l = len(files)
-    print 'hadding %i files to %s' % (l, new_name)
-    args = ['hadd', new_name] + files
+    l = len(input_fns)
+    print 'hadding %i files to %s' % (l, output_fn)
+    args = ['hadd', output_fn] + input_fns
 
     p = subprocess.Popen(args=args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, stderr = p.communicate()
     assert stderr is None
 
-    log_fn = new_name + '.haddlog'
-    is_eos = '/store/' in new_name # ugh
+    log_fn = output_fn + '.haddlog'
+    is_eos = '/store/' in output_fn # ugh
     while eos.exists(log_fn) if is_eos else os.path.exists(log_fn):
         log_fn += '.2'
 
@@ -36,14 +35,14 @@ def hadd(new_name, files):
         open(log_fn, 'wt').write(stdout)
 
     if p.returncode != 0:
-        print colors.boldred('PROBLEM hadding %s' % new_name)
+        print colors.boldred('PROBLEM hadding %s' % output_fn)
         #print p.stdout.read()
         return False
 
     max_file_num = max(int(line.split(':')[0].split(' ')[-1]) for line in stdout.split('\n') if 'Source file' in line)
     print '-> %i files merged' % max_file_num
     if max_file_num != l:
-        print colors.boldred('PROBLEM hadding %s' % new_name)
+        print colors.boldred('PROBLEM hadding %s' % output_fn)
         return False
 
     return True
