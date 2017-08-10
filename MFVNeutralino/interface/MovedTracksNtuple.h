@@ -8,7 +8,7 @@ class TTree;
 namespace mfv {
   struct MovedTracksNtuple {
     typedef unsigned short uchar;
-    typedef unsigned short ushort;
+    typedef unsigned short ushort; // JMTBAD but with compression it doesn't really matter, I think
 
     unsigned run;
     unsigned lumi;

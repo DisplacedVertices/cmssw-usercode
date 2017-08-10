@@ -54,9 +54,6 @@ MFVMovedTracksTreer::MFVMovedTracksTreer(const edm::ParameterSet& cfg)
     for_mctruth(cfg.getParameter<bool>("for_mctruth"))
 {
   edm::Service<TFileService> fs;
-
-  throw cms::Exception("zzz", "Fix the bug with typedef uchar in the tree format before running this again, including in the Branch call for gen_decay_type[2]/s");
-
   tree = fs->make<TTree>("t", "");
   nt.write_to_tree(tree);
 }
