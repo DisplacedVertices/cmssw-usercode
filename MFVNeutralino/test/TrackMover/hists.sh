@@ -1,7 +1,11 @@
 #!/bin/bash
 
 job=$1
-
+test=0
+if [[ $job < 0 ]]; then
+    job=$((-job))
+    test=1
+fi
 inpath=root://cmseos.fnal.gov//store/user/tucker/TrackMoverV1
 
 fns=(
@@ -25,21 +29,16 @@ qcdht1000_hip1p0_mit.root
 qcdht1500.root
 qcdht1500_hip1p0_mit.root
 )
-nfns=${#fns[@]}
 
 nls=( 2 3 )
 nbs=( 0 1 2 )
 
+nfns=${#fns[@]}
 nnls=${#nls[@]}
 nnbs=${#nbs[@]}
 njobs=$((nfns * nnls * nnbs))
 echo inpath is $inpath
 echo \#fns $nfns \#nls $nnls \#nbs $nnbs max jobs $njobs
-if [[ $job == "test" ]]; then
-    echo test only, possibly modifying hists.jdl
-    sed -i -e "s/Queue.*/Queue $njobs/" hists.jdl
-    exit 1
-fi
 
 nmax=$((nfns * nnls * nnbs))
 echo job $job, nmax is $nmax
@@ -59,6 +58,13 @@ z=$nl$nb
 outfn=${z}_$fn
 echo fn $fn iz $iz inl $inl nl $nl inb $inb nb $nb z $z outfn $outfn
 
+if [[ $test == 1 ]]; then
+    echo test only, possibly modifying hists.jdl and hists_finish.sh
+    sed -i -e "s/Queue.*/Queue ${njobs}/" hists.jdl
+    sed -i -e "s/^njobstot=.*/njobstot=${njobs}/" hists_finish.sh
+    exit 1
+fi
+
 export SCRAM_ARCH=slc6_amd64_gcc530
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 scram project CMSSW CMSSW_8_0_25 2>&1
@@ -67,17 +73,3 @@ eval $(scram ru -sh)
 cd ../..
 
 ./hists.exe $inpath/$z/$fn $outfn $nl $nb 2>&1
-
-# check with:
-#   grep 'return value' hists.log.* | grep -v 'value 0'
-# when done:
-#   tar --remove-files -czf lastlogs.tgz hists.{stdout,stderr,log}.*
-#   for x in 20 21 22 30 31 32 ; do mkdir $x ; for y in ${x}*root; do mv $y $x/${y/${x}_/} ; done ; cd $x ; py $CMSSW_BASE/src/JMTucker/MFVNeutralino/test/utilities.py merge_background ; cd - ; done
-
-# hip and not hip merge:
-# for x in ??; do
-#   cd $x
-#   samples merge qcdht1000and1500_hip1p0_mit.root -22300 qcdht*_hip1p0_mit.root
-#   samples merge qcdht1000and1500.root -16200 qcdht{1000,1500}sum.root
-#   cd -
-# done
