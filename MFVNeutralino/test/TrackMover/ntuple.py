@@ -1,20 +1,23 @@
 #!/usr/bin/env python
 
-# btag wp changed for rereco https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco
-raise ValueError('change the btag working points before rerunning')
-
 import sys
 from JMTucker.Tools.general import typed_from_argv
 from JMTucker.Tools.MiniAOD_cfg import *
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.MFVNeutralino.Year import year
 
-# 4 magic lines
+tau = 1.
+version = 1
+# rest are magic lines for the submitter
 is_mc = True
 H = False
 repro = False
 njets = 2
 nbjets = 0
+
+if version >= 2:
+    # btag wp changed for rereco https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco
+    raise ValueError('change the btag working points before running next version')
 
 ints = typed_from_argv(int, default_value=[], return_multiple=True)
 if len(ints) > 0:
@@ -56,7 +59,7 @@ process.mfvMovedTracks = cms.EDProducer('MFVTrackMover',
                                         b_discriminator_tag = cms.double(0.935), #   "     " 0.9535
                                         njets = cms.uint32(njets),
                                         nbjets = cms.uint32(nbjets),
-                                        tau = cms.double(1),
+                                        tau = cms.double(tau),
                                         sig_theta = cms.double(0.2),
                                         sig_phi = cms.double(0.2),
                                         )
@@ -88,6 +91,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     elif year == 2016:
         samples = Samples.data_samples + Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext
 
+    samples = Samples.data_samples + [Samples.qcdht1000, Samples.qcdht1500] + Samples.qcd_hip_samples[-2:]
+
     def njets_modifier(sample):
         to_add = []
         to_replace = [('njetsX= 2\nnbjets = 0'.replace('X', ' '),
@@ -100,7 +105,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     skips = { 'qcdht0700ext_2015': {'lumis': '135728', 'events': '401297681'}, 'qcdht1000ext_2015': {'lumis': '32328',  'events': '108237235'}, }
     modify = chain_modifiers(njets_modifier, is_mc_modifier, H_modifier, repro_modifier, event_veto_modifier(skips, 'p'))
 
-    batch_name = 'TrackMoverV1_%i%i' % (njets, nbjets)
+    ex = {1.: '', 0.1: '1mm_', 0.03: '300um_'}[tau]
+    batch_name = 'TrackMoverV%i_%s%i%i' % (version, ex, njets, nbjets)
     ms = MetaSubmitter(batch_name)
     ms.common.ex = year
     ms.common.pset_modifier = modify
