@@ -252,7 +252,7 @@ def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chun
         os.system(cmd)
         os.chmod(new_name, 0644)
     else:
-        hadd(new_name, files, chunk_size)
+        hadd(new_name, files)
 
     return new_name
 
