@@ -101,8 +101,8 @@ has_done_marker = lambda d: os.path.isfile(done_fn(d))
 
 if not options.override_done:
     marked_done = [d for d in dirs if has_done_marker(d)]
-    print_if_nonempty(marked_done, 'skipping these already marked done dirs', indent='  ')
-    dirs = [d for d in dirs if not has_done_marker(d)]
+    dirs        = [d for d in dirs if not has_done_marker(d)]
+    print 'skipping %i already marked done dirs' % len(marked_done)
     if not dirs:
         sys.exit('no dirs left!')
 
