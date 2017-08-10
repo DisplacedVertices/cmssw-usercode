@@ -660,11 +660,11 @@ for x in [mfv_neu_tau00100um_M0300, mfv_neu_tau01000um_M0300]:
 # other condor declarations
 ########
 
-JetHT2015C.condor = True
-JetHT2015D.condor = True
+for x in data_samples_2015 + qcd_samples + qcd_samples_ext + [ttbar, mfv_neu_tau00300um_M1600]:
+    x.condor = True
 JetHT2015D.xrootd_url = 'root://dcache-cms-xrootd.desy.de/'
-#qcdht0700ext.condor = True
-mfv_neu_tau00300um_M1600.condor = True
+for x in qcdht2000ext, ttbar:
+    x.xrootd_url = 'root://cmseos.fnal.gov/'
 
 for x in (qcdht0500_2015, qcdht0700_2015, qcdht1000_2015, qcdht2000_2015, qcdht0500ext_2015, qcdht1500ext_2015, qcdht2000ext_2015, ttbar_2015):
     x.condor = True
@@ -675,7 +675,6 @@ for x in qcd_samples_2015:
     x.datasets['miniaod'].xrootd_url = 'root://cmseos.fnal.gov/'
 
 for x in (JetHT2016B3,
-
           qcdht0700, qcdht1000, qcdht1500, qcdht0700ext, qcdht1500ext, qcdht2000ext, ttbar,
           mfv_neu_tau10000um_M0300, mfv_neu_tau01000um_M0400, mfv_neu_tau00100um_M0800,
           mfv_neu_tau00300um_M0800, mfv_neu_tau01000um_M1200, mfv_neu_tau00100um_M1600, mfv_neu_tau10000um_M1600):
