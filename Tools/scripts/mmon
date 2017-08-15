@@ -100,10 +100,9 @@ done_fn = lambda d: os.path.join(d, 'mmon_done')
 has_done_marker = lambda d: os.path.isfile(done_fn(d))
 
 if not options.override_done:
-    marked_done = [d for d in dirs if has_done_marker(d)]
-    dirs        = [d for d in dirs if not has_done_marker(d)]
-    print 'skipping %i already marked done dirs' % len(marked_done)
-    if not dirs:
+    dirs_done = [d for d in dirs if has_done_marker(d)]
+    dirs      = [d for d in dirs if not has_done_marker(d)]
+    if dirs_done and not dirs:
         sys.exit('no dirs left!')
 
 if not dirs and not options.fake_results:
@@ -113,7 +112,10 @@ if options.dir_sort:
     dirs.sort()
 
 ndirs = len(dirs)
-print 'mmon: checking %i dir%s, be patient' % (ndirs, 's' if ndirs > 1 else '')
+nskipped = len(dirs_done)
+print 'mmon: checking %i dir%s%s, be patient' % (ndirs,
+                                                 's' if ndirs > 1 else '',
+                                                 ' (%i skipped)' % nskipped if nskipped else '')
 
 def check_proxies():
     if options.renew_proxies:
