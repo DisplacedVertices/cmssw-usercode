@@ -7,7 +7,7 @@ from JMTucker.Tools.CMSSWTools import *
 from JMTucker.MFVNeutralino.Year import year
 
 tau = 1.
-version = 1
+version = 2
 # rest are magic lines for the submitter
 is_mc = True
 H = False
@@ -15,7 +15,7 @@ repro = False
 njets = 2
 nbjets = 0
 
-if version >= 2:
+if version >= 3:
     # btag wp changed for rereco https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco
     raise ValueError('change the btag working points before running next version')
 

@@ -96,10 +96,9 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
   nt.pvntracks = mevent->pv_ntracks;
   nt.pvsumpt2 = mevent->pv_sumpt2;
   nt.jetht = mevent->jet_ht(40);
-  nt.jetpt4 = mevent->jetpt4();
-  nt.met = mevent->met();
-  nt.nlep = mevent->nlep(2);
   nt.nalljets = mevent->njets();
+
+  TVector3 move_vector;
 
   if (!for_mctruth) {
     edm::Handle<reco::TrackCollection> tracks, moved_tracks;
@@ -140,6 +139,9 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
     nt.move_z = move_vertex->at(2);
     nt.move_x = move_vertex->at(0) - mevent->bsx_at_z(nt.move_z);
     nt.move_y = move_vertex->at(1) - mevent->bsy_at_z(nt.move_z);
+    move_vector.SetXYZ(nt.move_x - nt.pvx,
+                       nt.move_y - nt.pvy,
+                       nt.move_z - nt.pvz);
   }
 
   edm::Handle<MFVVertexAuxCollection> vertices;
@@ -161,13 +163,25 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
     nt.vtxs_x.push_back(vx);
     nt.vtxs_y.push_back(vy);
     nt.vtxs_z.push_back(vz);
+    nt.vtxs_pt.push_back(v.pt[mfv::PTracksPlusJetsByNtracks]);
     nt.vtxs_theta.push_back(2*atan(exp(-v.eta[mfv::PTracksPlusJetsByNtracks])));
     nt.vtxs_phi.push_back(v.phi[mfv::PTracksPlusJetsByNtracks]);
+    nt.vtxs_mass.push_back(v.mass[mfv::PTracksPlusJetsByNtracks]);
+    nt.vtxs_tkonlymass.push_back(v.mass[mfv::PTracksOnly]);
     nt.vtxs_ntracks.push_back(v.ntracks());
-    nt.vtxs_ntracksptgt3.push_back(v.ntracksptgt(3));
-    nt.vtxs_drmin.push_back(v.drmin());
-    nt.vtxs_drmax.push_back(v.drmax());
     nt.vtxs_bs2derr.push_back(v.bs2derr);
+
+    double anglemin = 1e99;
+    double anglemax = -1e99;
+    for (size_t itk = 0, itke = v.ntracks(); itk < itke; ++itk) {
+      const TVector3 ptk(v.track_px[itk], v.track_py[itk], v.track_pz[itk]);
+      const double angle = ptk.Angle(move_vector);
+      if (angle < anglemin) anglemin = angle;
+      if (angle > anglemax) anglemax = angle;
+    }
+
+    nt.vtxs_anglemin.push_back(anglemin);
+    nt.vtxs_anglemax.push_back(anglemax);
   }
 
   if (apply_presel) {
