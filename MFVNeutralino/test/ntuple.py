@@ -51,15 +51,6 @@ output_commands = [
     'keep MFVVertexAuxs_mfvVerticesAux_*_*',
     ]
 
-if run_n_tk_seeds:
-    for n_tk_seed in 3,4,5:
-        output_commands += [
-            'keep VertexerPairEffs_mfvVertices%iTkSeed_*_*' % n_tk_seed,
-            'keep MFVVertexAuxs_mfvVerticesAux%iTkSeed_*_*' % n_tk_seed,
-            ]
-
-process.out.outputCommands = output_commands
-
 tfileservice(process, 'vertex_histos.root')
 random_service(process, {'mfvVertices': 1222})
 
@@ -67,8 +58,18 @@ process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
 process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 
-process.p = cms.Path(process.mfvVertexSequenceEx if run_n_tk_seeds else process.mfvVertexSequence)
+process.p = cms.Path(process.mfvVertexSequence)
 process.p *= process.mfvTriggerFloats * process.mfvEvent
+
+if run_n_tk_seeds:
+    from JMTucker.MFVNeutralino.Vertexer_cff import modifiedVertexSequence
+    for n_tk_seed in 3,4,5:
+        ex = '%iTkSeed' % n_tk_seed
+        process.p *= modifiedVertexSequence(process, ex, n_tracks_per_seed_vertex = n_tk_seed)
+        output_commands += [
+            'keep VertexerPairEffs_mfvVertices%s_*_*' % ex,
+            'keep MFVVertexAuxs_mfvVerticesAux%s_*_*' % ex,
+            ]
 
 if event_filter:
     import JMTucker.MFVNeutralino.EventFilter
@@ -124,6 +125,8 @@ if keep_all:
 # If the embedding is on for these, then we can't match leptons by track to vertices.
 process.patMuons.embedTrack = False
 process.patElectrons.embedTrack = False
+
+process.out.outputCommands = output_commands
 
 #process.options.wantSummary = True
 process.maxEvents.input = 100

@@ -21,23 +21,30 @@ x = (mfvGenParticles *
      mfvVerticesAuxPresel *
      mfvVerticesAux)
 
-mfvVertexSequence   = cms.Sequence(x)
-mfvVertexSequenceEx = cms.Sequence(x) # no clone for sequences?
+mfvVertexSequence = cms.Sequence(x)
 
-for n_tk_seed in 3,4,5:
-    exec '''
-mfvVerticesNTKTkSeed = mfvVertices.clone(n_tracks_per_seed_vertex = n_tk_seed)
-mfvVerticesAuxTmpNTKTkSeed = mfvVerticesAuxTmp.clone(vertex_src = 'mfvVerticesNTKTkSeed')
-mfvSelectedVerticesTmpNTKTkSeed = mfvSelectedVerticesTmp.clone(vertex_src = 'mfvVerticesNTKTkSeed',
-                                                               vertex_aux_src = 'mfvVerticesAuxTmpNTKTkSeed')
-mfvVerticesToJetsNTKTkSeed = mfvVerticesToJets.clone(vertex_src = 'mfvSelectedVerticesTmpNTKTkSeed')
-mfvVerticesAuxPreselNTKTkSeed = mfvVerticesAuxPresel.clone(vertex_src = 'mfvVerticesNTKTkSeed',
-                                                           sv_to_jets_src = 'mfvVerticesToJetsNTKTkSeed')
-mfvVerticesAuxNTKTkSeed = mfvVerticesAux.clone(vertex_aux_src = 'mfvVerticesAuxPreselNTKTkSeed')
-mfvVertexSequenceEx *= (mfvVerticesNTKTkSeed *
-                        mfvVerticesAuxTmpNTKTkSeed *
-                        mfvSelectedVerticesTmpNTKTkSeed *
-                        mfvVerticesToJetsNTKTkSeed *
-                        mfvVerticesAuxPreselNTKTkSeed *
-                        mfvVerticesAuxNTKTkSeed)
-'''.replace('NTK', str(n_tk_seed))
+def modifiedVertexSequence(process, name, **kwargs):
+    mfvVerticesNew = process.mfvVertices.clone(**kwargs)
+    mfvVerticesAuxTmpNew = process.mfvVerticesAuxTmp.clone(vertex_src = 'mfvVertices%s' % name)
+    mfvSelectedVerticesTmpNew = process.mfvSelectedVerticesTmp.clone(vertex_src = 'mfvVertices%s' % name,
+                                                                     vertex_aux_src = 'mfvVerticesAuxTmp%s' % name)
+    mfvVerticesToJetsNew = process.mfvVerticesToJets.clone(vertex_src = 'mfvSelectedVerticesTmp%s' % name)
+    mfvVerticesAuxPreselNew = process.mfvVerticesAuxPresel.clone(vertex_src = 'mfvVertices%s' % name,
+                                                                 sv_to_jets_src = 'mfvVerticesToJets%s' % name)
+    mfvVerticesAuxNew = process.mfvVerticesAux.clone(vertex_aux_src = 'mfvVerticesAuxPresel%s' % name)
+
+    setattr(process, 'mfvVertices%s'            % name, mfvVerticesNew)
+    setattr(process, 'mfvVerticesAuxTmp%s'      % name, mfvVerticesAuxTmpNew)
+    setattr(process, 'mfvSelectedVerticesTmp%s' % name, mfvSelectedVerticesTmpNew)
+    setattr(process, 'mfvVerticesToJets%s'      % name, mfvVerticesToJetsNew)
+    setattr(process, 'mfvVerticesAuxPresel%s'   % name, mfvVerticesAuxPreselNew)
+    setattr(process, 'mfvVerticesAux%s'         % name, mfvVerticesAuxNew)
+
+    seq = cms.Sequence(
+        mfvVerticesNew *
+        mfvVerticesAuxTmpNew *
+        mfvSelectedVerticesTmpNew *
+        mfvVerticesToJetsNew *
+        mfvVerticesAuxPreselNew *
+        mfvVerticesAuxNew)
+    return seq
