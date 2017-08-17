@@ -50,14 +50,16 @@ void root_setup() {
   gROOT->ProcessLine("gErrorIgnoreLevel = 1001;");
 }
 
-file_and_tree::file_and_tree(const char* in_fn, const char* out_fn) {
+file_and_tree::file_and_tree(const char* in_fn, const char* out_fn, int njets, int nbjets) {
   f = TFile::Open(in_fn);
   if (!f || !f->IsOpen()) {
     fprintf(stderr, "could not open %s\n", in_fn);
     exit(1);
   }
 
-  const char* tree_path = "mfvMovedTree/t";
+  char tree_path[128] = "mfvMovedTree/t";
+  if (njets != -1)
+    snprintf(tree_path, 128, "mfvMovedTree%i%i/t", njets, nbjets);
   t = (TTree*)f->Get(tree_path);
   if (!t) {
     fprintf(stderr, "could not get tree %s from %s\n", tree_path, in_fn);

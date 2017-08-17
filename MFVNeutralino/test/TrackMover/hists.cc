@@ -23,7 +23,7 @@ int main(int argc, char** argv) {
 
   root_setup();
 
-  file_and_tree fat(in_fn, out_fn);
+  file_and_tree fat(in_fn, out_fn, njets_req, nbjets_req);
   TTree* t = fat.t;
   mfv::MovedTracksNtuple& nt = fat.nt;
   t->GetEntry(0);

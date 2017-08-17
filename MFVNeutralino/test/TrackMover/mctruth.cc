@@ -22,7 +22,7 @@ int main(int argc, char** argv) {
 
   root_setup();
 
-  file_and_tree fat(in_fn, out_fn);
+  file_and_tree fat(in_fn, out_fn, -1, -1);
   TTree* t = fat.t;
   mfv::MovedTracksNtuple& nt = fat.nt;
 
