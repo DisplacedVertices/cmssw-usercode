@@ -22,6 +22,10 @@ parser.add_option('--override-done', action='store_true', default=False,
                   help='Ignore already-done marker files.')
 parser.add_option('-r', '--resub', action='store_true', default=False,
                   help='Send resubmit request to any batch that has failed jobs, obeying the white and black lists below. (Only crab dirs for now.)')
+parser.add_option('--resub-force', action='store_true', default=False,
+                  help='Use the --force option on resubmit (implies --resub).')
+parser.add_option('--resub-xferring', action='store_true', default=False,
+                  help='Resubmit jobs that claim to be xferring (implies --resub-force and --resub).')
 #parser.add_option('--resub-white-list', default='',
 #                  help='Comma-separated list (no spaces!) of sites to whitelist when resubmitting.')
 #parser.add_option('--resub-black-list', default='',
@@ -56,6 +60,18 @@ def print_subheader(s):
 #
 #options.resub_white_codes = options.resub_white_codes.split(',')
 #options.resub_black_codes = options.resub_black_codes.split(',')
+
+if options.resub_xferring and not options.resub_force:
+    print '--resub-xferring implies --resub-force, setting it.'
+    options.resub_force = True
+
+if options.resub_force:
+    if not options.resub:
+        print '--resub-force implies resub, setting it.'
+        options.resub = True
+    if options.continuous:
+        print 'refusing to force resubmits in continuous mode, only running once'
+        options.continuous = False
 
 if options.continuous and options.fake_results:
     print '--fake-results implies not continuous, setting it.'
@@ -170,9 +186,11 @@ while 1:
             for d, res in results.iteritems():
                 if not is_crab_working_dir(d):
                     continue
-                for job_num in res['jobListByStatus'].get('failed', []):
-                    to_resub[d].append(job_num)
+                to_resub[d].extend(res['jobListByStatus'].get('failed', []))
+                if options.resub_xferring:
+                    to_resub[d].extend(res['jobListByStatus'].get('transferring', []))
 # 'Error' not present in job json since 5/14/2017
+#               for something in something else:
 #                    job = res['jobs'][str(job_num)]
 #                    err_code = job['Error'][0]
 #                    if any((not options.resub_white_list and not options.resub_black_list,
@@ -183,7 +201,7 @@ while 1:
                 jobs = ','.join(str(j) for j in jobs)
                 print 'resubmit', d, jobs
                 #crab_command('resubmit', dir=d, jobids=jobs, sitewhitelist=options.resub_white_list, siteblacklist=options.resub_black_list, suppress_stdout=False)
-                crab_command('resubmit', dir=d, jobids=jobs, suppress_stdout=True)
+                crab_command('resubmit', dir=d, jobids=jobs, force=options.resub_force) #, suppress_stdout=False)
 
     if options.verbose:
         # Print a recap of all the status summaries.
