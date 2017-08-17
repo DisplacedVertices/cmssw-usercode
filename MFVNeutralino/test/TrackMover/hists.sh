@@ -6,7 +6,12 @@ if [[ $job < 0 ]]; then
     job=$((-job))
     test=1
 fi
-inpath=root://cmseos.fnal.gov//store/user/tucker/TrackMoverV1
+
+inpathbase=root://cmseos.fnal.gov//store/user/tucker/TrackMoverV2
+
+paths=(
+${inpathbase}
+)
 
 fns=(
 JetHT2016.root
@@ -33,30 +38,34 @@ qcdht1500_hip1p0_mit.root
 nls=( 2 3 )
 nbs=( 0 1 2 )
 
+npaths=${#paths[@]}
 nfns=${#fns[@]}
 nnls=${#nls[@]}
 nnbs=${#nbs[@]}
-njobs=$((nfns * nnls * nnbs))
+njobs=$((npaths * nfns * nnls * nnbs))
 echo inpath is $inpath
-echo \#fns $nfns \#nls $nnls \#nbs $nnbs max jobs $njobs
+echo \#paths $npaths \#fns $nfns \#nls $nnls \#nbs $nnbs max jobs $njobs
 
-nmax=$((nfns * nnls * nnbs))
+nmax=$((npaths * nfns * nnls * nnbs))
 echo job $job, nmax is $nmax
 if [[ $job -ge $nmax ]]; then
     echo problem
     exit 1
 fi
 
-ifn=$((job % nfns))
+ipath=$((job % npaths))
+path=${paths[$ipath]}
+job2=$((job / npaths))
+ifn=$((job2 % nfns))
 fn=${fns[$ifn]}
-iz=$((job / nfns))
+iz=$((job2 / nfns))
 inl=$((iz / nnbs))
 inb=$((iz % nnbs))
 nl=${nls[$inl]}
 nb=${nbs[$inb]}
 z=$nl$nb
-outfn=${z}_$fn
-echo fn $fn iz $iz inl $inl nl $nl inb $inb nb $nb z $z outfn $outfn
+outfn=$(basename $path)_${z}_$fn
+echo path $path fn $fn iz $iz inl $inl nl $nl inb $inb nb $nb z $z outfn $outfn
 
 if [[ $test == 1 ]]; then
     echo test only, possibly modifying hists.jdl and hists_finish.sh
@@ -72,4 +81,4 @@ cd CMSSW_8_0_25/src
 eval $(scram ru -sh)
 cd ../..
 
-./hists.exe $inpath/$z/$fn $outfn $nl $nb 2>&1
+./hists.exe $path/$z/$fn $outfn $nl $nb 2>&1
