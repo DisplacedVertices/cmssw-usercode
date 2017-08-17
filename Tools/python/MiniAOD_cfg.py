@@ -60,7 +60,7 @@ def pat_tuple_process(customize_before_unscheduled, is_mc, year, H, repro):
     process.source.fileNames = [{
         (2015, True):  '/store/mc/RunIIFall15DR76/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/AODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/00000/0039E642-58BD-E511-B773-002590DE7230.root',
         (2015, False): '/store/data/Run2015D/JetHT/AOD/16Dec2015-v1/00000/0A2C6696-AEAF-E511-8551-0026189438EB.root',
-        (2016, True):  'root://cmsxrootd.fnal.gov//store/mc/RunIISummer16DR80Premix/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/AODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/70000/1E575201-1EB8-E611-A523-549F3525C4EC.root',
+        (2016, True):  '/store/mc/RunIISummer16DR80Premix/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/AODSIM/PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/110000/2A6D6695-3BB2-E611-BA91-24BE05C626B1.root',
         (2016, False): '/store/data/Run2016G/JetHT/AOD/23Sep2016-v1/100000/0006CE1E-9986-E611-8DFB-6C3BE5B5C0B0.root',
         }[(year, is_mc)]]
 
