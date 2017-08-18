@@ -276,8 +276,9 @@ class CRABSubmitter:
 
         if not self.testing:
             working_dir = os.path.join(cfg.General.workArea, 'crab_' + cfg.General.requestName)
+            new_working_dir = os.path.join(cfg.General.workArea, 'crab_' + sample.name)
 
-            if not os.path.isdir(working_dir):
+            if not os.path.isdir(working_dir) and not os.path.isdir(new_working_dir):
                 success, nretries = False, 10
                 while not success and nretries:
                     result = crab_command('submit', config = cfg)
@@ -294,7 +295,6 @@ class CRABSubmitter:
                     # The requestName contains the full batch_name so the entries in dashboard
                     # are distinguishable, but once the job is submitted the local directory
                     # name can be changed back to just having the sample name.
-                    new_working_dir = os.path.join(cfg.General.workArea, 'crab_' + sample.name)
                     shutil.move(working_dir, new_working_dir)
                 else:
                     print '\033[1m warning: \033[0m sample %s not submitted, nretries exceeded' % (sample.name)
