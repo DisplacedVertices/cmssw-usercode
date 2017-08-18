@@ -102,8 +102,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     modify = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier)
 
-    ex = {1.: '', 0.1: '1mm_', 0.03: '300um_'}[tau]
-    batch_name = 'TrackMoverV%i_%s' % (version, ex)
+    ex = {1.: '', 0.1: '_1mm', 0.03: '_300um'}[tau]
+    batch_name = 'TrackMoverV%i%s' % (version, ex)
     ms = MetaSubmitter(batch_name)
     ms.common.ex = year
     ms.common.pset_modifier = modify
