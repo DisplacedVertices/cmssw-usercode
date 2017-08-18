@@ -62,7 +62,7 @@ def crab_hadd_args(working_dir, new_name=None, new_dir=None):
     if working_dir.endswith('/'):
         working_dir = working_dir[:-1]
     if new_name is None:
-        new_name = '_'.join(os.path.basename(working_dir).split('_')[2:])
+        new_name = '_'.join(os.path.basename(working_dir).split('_')[1:])
     if not new_name.endswith('.root'):
         new_name += '.root'
     if new_dir is not None:
