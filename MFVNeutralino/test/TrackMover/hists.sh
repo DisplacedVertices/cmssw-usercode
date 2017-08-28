@@ -7,7 +7,7 @@ if [[ $job < 0 ]]; then
     test=1
 fi
 
-inpathbase=root://cmseos.fnal.gov//store/user/tucker/TrackMoverV2
+inpathbase=root://cmseos.fnal.gov//store/user/tucker/TrackMoverV2/10mm
 
 paths=(
 ${inpathbase}
@@ -43,7 +43,7 @@ nfns=${#fns[@]}
 nnls=${#nls[@]}
 nnbs=${#nbs[@]}
 njobs=$((npaths * nfns * nnls * nnbs))
-echo inpath is $inpath
+echo inpathbase is $inpathbase
 echo \#paths $npaths \#fns $nfns \#nls $nnls \#nbs $nnbs max jobs $njobs
 
 nmax=$((npaths * nfns * nnls * nnbs))
@@ -81,4 +81,4 @@ cd CMSSW_8_0_25/src
 eval $(scram ru -sh)
 cd ../..
 
-./hists.exe $path/$z/$fn $outfn $nl $nb 2>&1
+./hists.exe $path/$fn $outfn $nl $nb 2>&1
