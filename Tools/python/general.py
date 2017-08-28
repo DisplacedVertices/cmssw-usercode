@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import os, sys, gzip, cPickle, subprocess, glob, time
-from itertools import chain
+from itertools import chain, product, starmap
+from collections import namedtuple
 from pprint import pprint
 
 def big_warn(s):
@@ -157,6 +158,11 @@ def mkdirs_if_needed(path):
     dn = os.path.dirname(path)
     if dn:
         os.system('mkdir -p %s' % dn)
+
+def named_product(**items):
+    # https://stackoverflow.com/questions/9098194/name-parts-of-iterables-in-itertools-products
+    Product = namedtuple('Product', items.keys())
+    return starmap(Product, product(*items.values()))
 
 def sub_popen(cmd):
     return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
