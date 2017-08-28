@@ -58,7 +58,8 @@ file_and_tree::file_and_tree(const char* in_fn, const char* out_fn, int njets, i
   }
 
   char tree_path[128] = "mfvMovedTree/t";
-  if (njets != -1)
+  const bool newfmt = true; // true for V2 and later
+  if (newfmt && njets != -1)
     snprintf(tree_path, 128, "mfvMovedTree%i%i/t", njets, nbjets);
   t = (TTree*)f->Get(tree_path);
   if (!t) {
