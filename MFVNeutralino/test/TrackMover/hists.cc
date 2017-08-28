@@ -7,7 +7,7 @@
 #include <cassert>
 #include <iostream>
 
-// #error need to support picking hlt bit and final ht cut
+// to read V1: change the uchar typedef to ushort in the Ntuple.h, set newfmt = false in utils.cc, and remove use of nt.p_vtxs_anglemax/tkonlymass below
 
 int main(int argc, char** argv) {
   if (argc < 5) {
@@ -279,7 +279,7 @@ int main(int argc, char** argv) {
 
   printf("\r                                \n");
   printf("%f events in denominator\n", den);
-  printf("%30s  %12s  %12s   %10s [%10s, %10s] +%10s -%10s\n", "name", "num", "den", "eff", "lo", "hi", "+", "-");
+  printf("%30s  %12s  %12s  %10s [%10s, %10s] +%10s -%10s\n", "name", "num", "den", "eff", "lo", "hi", "+", "-");
   for (const auto& p : nums) {
     const interval i = clopper_pearson_binom(p.second, den);
     printf("%30s  %12f  %12f  %10f [%10f, %10f] +%10f -%10f\n", p.first.c_str(), p.second, den, i.value, i.lower, i.upper, i.upper - i.value, i.value - i.lower);
