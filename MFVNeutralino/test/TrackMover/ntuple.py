@@ -98,11 +98,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples 
 
     if year == 2015:
-        samples = Samples.data_samples_2015 + Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015
+        samples = Samples.data_samples_2015 + [Samples.qcdht1000_2015, Samples.qcdht1500_2015]
     elif year == 2016:
-        samples = Samples.data_samples + Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext
-
-    samples = Samples.data_samples + [Samples.qcdht1000, Samples.qcdht1500] + Samples.qcd_hip_samples[-2:]
+        samples = Samples.data_samples + [Samples.qcdht1000, Samples.qcdht1500] + Samples.qcd_hip_samples[-2:]
 
     set_splitting(samples, 'main', 'trackmover', data_json='../ana_2015p6.json')
 
