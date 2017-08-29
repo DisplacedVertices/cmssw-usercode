@@ -2,6 +2,7 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TVector2.h"
+#include "TVector3.h"
 #include "JMTucker/MFVNeutralino/interface/MovedTracksNtuple.h"
 #include "utils.h"
 #include <cassert>
@@ -139,11 +140,10 @@ int main(int argc, char** argv) {
       }
     }
 
-    const double movedist2 = mag(nt.move_x - nt.pvx,
-                                 nt.move_y - nt.pvy);
-    const double movedist3 = mag(nt.move_x - nt.pvx,
-                                 nt.move_y - nt.pvy,
-                                 nt.move_z - nt.pvz);
+    // weight with tau here? nt.move_tau()
+    const TVector3 move_vector = nt.move_vector();
+    const double movedist2 = move_vector.Perp();
+    const double movedist3 = move_vector.Mag();
 
     const size_t n_raw_vtx = nt.p_vtxs_x->size();
 
