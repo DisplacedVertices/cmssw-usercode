@@ -1,8 +1,17 @@
 #include "JMTucker/MFVNeutralino/interface/MovedTracksNtuple.h"
 
 #include "TTree.h"
+#include "TVector3.h"
 
 namespace mfv {
+  TVector3 MovedTracksNtuple::move_vector() const {
+    return TVector3(move_x + bsx_at_z(move_z) - (pvx + bsx_at_z(pvz)),
+                    move_y + bsy_at_z(move_z) - (pvy + bsy_at_z(pvz)),
+                    move_z - pvz);
+  }
+
+  double MovedTracksNtuple::move_tau() const { return move_vector().Mag(); }
+
   MovedTracksNtuple::MovedTracksNtuple() {
     clear();
     p_jets_pt = p_jets_eta = p_jets_phi = p_jets_energy = p_vtxs_x = p_vtxs_y = p_vtxs_z = p_vtxs_pt = p_vtxs_theta = p_vtxs_phi = p_vtxs_mass = p_vtxs_tkonlymass = p_vtxs_anglemin = p_vtxs_anglemax = p_vtxs_bs2derr = 0;
@@ -12,7 +21,7 @@ namespace mfv {
   void MovedTracksNtuple::clear() {
     run = lumi = 0;
     event = 0;
-    weight = pvx = pvy = pvz = pvsumpt2 = jetht = move_x = move_y = move_z = 0;
+    weight = bsx = bsy = bsz = bsdxdz = bsdydz = pvx = pvy = pvz = pvsumpt2 = jetht = move_x = move_y = move_z = 0;
     for (int i = 0; i < 2; ++i) {
       gen_lsp_pt[i] = gen_lsp_eta[i] = gen_lsp_phi[i] = gen_lsp_mass[i] = 0;
       gen_decay_type[i] = 0;
@@ -57,6 +66,11 @@ namespace mfv {
     tree->Branch("gen_decay_type", gen_decay_type, "gen_decay_type[2]/b");
     tree->Branch("gen_partons_in_acc", &gen_partons_in_acc);
     tree->Branch("pass_hlt", &pass_hlt);
+    tree->Branch("bsx", &bsx);
+    tree->Branch("bsy", &bsy);
+    tree->Branch("bsz", &bsz);
+    tree->Branch("bsdxdz", &bsdxdz);
+    tree->Branch("bsdydz", &bsdydz);
     tree->Branch("npu", &npu);
     tree->Branch("npv", &npv);
     tree->Branch("pvx", &pvx);
@@ -107,6 +121,11 @@ namespace mfv {
     tree->SetBranchAddress("gen_decay_type", gen_decay_type);
     tree->SetBranchAddress("gen_partons_in_acc", &gen_partons_in_acc);
     tree->SetBranchAddress("pass_hlt", &pass_hlt);
+    tree->SetBranchAddress("bsx", &bsx);
+    tree->SetBranchAddress("bsy", &bsy);
+    tree->SetBranchAddress("bsz", &bsz);
+    tree->SetBranchAddress("bsdxdz", &bsdxdz);
+    tree->SetBranchAddress("bsdydz", &bsdydz);
     tree->SetBranchAddress("npu", &npu);
     tree->SetBranchAddress("npv", &npv);
     tree->SetBranchAddress("pvx", &pvx);

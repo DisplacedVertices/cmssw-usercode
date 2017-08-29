@@ -4,6 +4,7 @@
 #include <vector>
 
 class TTree;
+class TVector3;
 
 namespace mfv {
   struct MovedTracksNtuple {
@@ -26,6 +27,13 @@ namespace mfv {
     uchar gen_partons_in_acc;
 
     uchar pass_hlt;
+    float bsx;
+    float bsy;
+    float bsz;
+    float bsdxdz;
+    float bsdydz;
+    float bsx_at_z(float z) const { return bsx + bsdxdz * (z - bsz); }
+    float bsy_at_z(float z) const { return bsy + bsdydz * (z - bsz); }
     uchar npu;
     uchar npv;
     float pvx;
@@ -52,6 +60,8 @@ namespace mfv {
     float move_x;
     float move_y;
     float move_z;
+    TVector3 move_vector() const;
+    double move_tau() const;
 
     std::vector<float> vtxs_x;
     std::vector<float> vtxs_y;

@@ -88,6 +88,11 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
   }
 
   nt.pass_hlt = mevent->pass_ & 0x1F;
+  nt.bsx = mevent->bsx;
+  nt.bsy = mevent->bsy;
+  nt.bsz = mevent->bsz;
+  nt.bsdxdz = mevent->bsdxdz;
+  nt.bsdydz = mevent->bsdydz;
   nt.npu = int(mevent->npu);
   nt.npv = mevent->npv;
   nt.pvx = mevent->pvx - mevent->bsx_at_z(mevent->pvz);
@@ -139,9 +144,10 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
     nt.move_z = move_vertex->at(2);
     nt.move_x = move_vertex->at(0) - mevent->bsx_at_z(nt.move_z);
     nt.move_y = move_vertex->at(1) - mevent->bsy_at_z(nt.move_z);
-    move_vector.SetXYZ(nt.move_x - nt.pvx,
-                       nt.move_y - nt.pvy,
-                       nt.move_z - nt.pvz);
+
+    move_vector.SetXYZ(move_vertex->at(0) - mevent->pvx,
+                       move_vertex->at(1) - mevent->pvy,
+                       move_vertex->at(2) - mevent->pvz);
   }
 
   edm::Handle<MFVVertexAuxCollection> vertices;
