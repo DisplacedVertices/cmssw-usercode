@@ -82,6 +82,9 @@ class chain_modifiers:
 ####
 
 def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=20):
+    def intround(x,y):
+        return int(round(float(x)/y))
+
     if jobtype == 'trackmover':
         d = {
             'JetHT2015C':         ( 200000,    33),
@@ -124,7 +127,8 @@ def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=2
             sample.set_curr_dataset(dataset)
             sample.split_by = 'files' if sample.condor else 'events'
             assert d.has_key(sample.name)
-            sample.events_per, sample.files_per = d[sample.name]
+            sample.events_per = intround(d[sample.name][0], 4)
+            sample.files_per  = intround(d[sample.name][1], 4)
 
     elif jobtype == 'histos' or jobtype == 'minitree':
         d = {
