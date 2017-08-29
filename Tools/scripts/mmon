@@ -322,7 +322,7 @@ while 1:
 
     # Figure out which directories are done, and remove them from the
     # list of dirs to check next time. Also print out a new mmon
-    # command for pasting that just resumes with the not-done dirs.
+    # command for pasting that just resubmits dirs that are able.
 
     done_stats = set(''.split())
     done_stats_info_text = repr(tuple(sorted(done_stats)))
@@ -366,10 +366,6 @@ while 1:
         print_header(done_msg)
         for d in dirs_done:
             print d
-
-    if notdone:
-        print colors.bold('Resume not-done:')
-        print '.', make_script('resume', 'mmon ' + ' '.join(notdone))
 
     if fail:
         print colors.bold('Resubmit failed:')
