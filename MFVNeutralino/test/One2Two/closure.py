@@ -157,3 +157,36 @@ for i in range(4):
     print '     dVV normalized: %7.3f +/- %5.3f, 0-400 um: %7.3f +/- %5.3f, 400-700 um: %6.3f +/- %5.3f, 700-40000 um: %6.3f +/- %5.3f' % (s/s, es/s, s1/s, es1/s, s2/s, es2/s, s3/s, es3/s)
     print '    dVVC normalized: %7.3f +/- %5.3f, 0-400 um: %7.3f +/- %5.3f, 400-700 um: %6.3f +/- %5.3f, 700-40000 um: %6.3f +/- %5.3f' % (c/c, ec/c, c1/c, ec1/c, c2/c, ec2/c, c3/c, ec3/c)
     print '   ratio dVVC / dVV: %7.2f +/- %5.2f, 0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (r, er, r1, er1, r2, er2, r3, er3)
+
+    hh = ROOT.TFile(fns[i]).Get('h_2v_absdphivv')
+    hh.SetTitle(';|#Delta#phi_{VV}|;Events')
+    hh.SetStats(0)
+    hh.SetLineColor(ROOT.kBlue)
+    hh.SetLineWidth(2)
+    if is_mc:
+        if hh.Integral() > 0:
+            hh.Scale(n2v[i]/hh.Integral())
+        else:
+            hh.SetMaximum(0.4)
+    hh.SetMinimum(0)
+    hh.Draw()
+
+    h = ROOT.TFile(fns[i]).Get('h_c1v_absdphivv')
+    h.SetStats(0)
+    h.SetLineColor(ROOT.kRed)
+    h.SetLineWidth(2)
+    if is_mc:
+        h.Scale(n2v[i]/h.Integral())
+    else:
+        if hh.Integral() > 0:
+            h.Scale(hh.Integral()/h.Integral())
+        else:
+            h.Scale(1./h.Integral())
+    h.Draw('hist e sames')
+
+    l1 = ROOT.TLegend(0.15, 0.75, 0.65, 0.85)
+    l1.AddEntry(hh, 'Simulated events' if is_mc else 'Data')
+    l1.AddEntry(h, 'Construction')
+    l1.SetFillColor(0)
+    l1.Draw()
+    ps.save('%s_dphi' % ntk[i])
