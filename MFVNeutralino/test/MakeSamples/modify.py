@@ -1,5 +1,12 @@
 import FWCore.ParameterSet.Config as cms
 
+def set_minbias(process):
+    process.generator.PythiaParameters.processParameters = cms.vstring(
+        'SoftQCD:nonDiffractive = on', 
+        'SoftQCD:singleDiffractive = on', 
+        'SoftQCD:doubleDiffractive = on'
+        )
+
 def set_qcdht(process, which):
     process.externalLHEProducer.args = [{
             # yes octal
