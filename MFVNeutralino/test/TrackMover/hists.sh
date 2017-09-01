@@ -7,65 +7,65 @@ if [[ $job < 0 ]]; then
     test=1
 fi
 
-inpathbase=root://cmseos.fnal.gov//store/user/tucker/TrackMoverV2/10mm
+inpathbase=root://cmseos.fnal.gov//store/user/tucker/TrackMoverV3
 
 paths=(
 ${inpathbase}
 )
 
 fns=(
-JetHT2016.root
 JetHT2016B3.root
-JetHT2016BCD.root
-JetHT2016BCDEF.root
-JetHT2016BthruG.root
 JetHT2016C.root
 JetHT2016D.root
 JetHT2016E.root
-JetHT2016EF.root
 JetHT2016F.root
 JetHT2016G.root
-JetHT2016GH.root
 JetHT2016H.root
-JetHT2016H2.root
-JetHT2016H3.root
 qcdht1000.root
 qcdht1000_hip1p0_mit.root
 qcdht1500.root
 qcdht1500_hip1p0_mit.root
 )
 
+nsigs=( 3p7 3p8 3p9 4p0 4p1 4p2 4p3 )
+taus=( 100 300 1000 10000 30000 )
 nls=( 2 3 )
 nbs=( 0 1 2 )
 
+####
+
 npaths=${#paths[@]}
 nfns=${#fns[@]}
+nnsigs=${#nsigs[@]}
+ntaus=${#taus[@]}
 nnls=${#nls[@]}
 nnbs=${#nbs[@]}
-njobs=$((npaths * nfns * nnls * nnbs))
-echo inpathbase is $inpathbase
-echo \#paths $npaths \#fns $nfns \#nls $nnls \#nbs $nnbs max jobs $njobs
-
-nmax=$((npaths * nfns * nnls * nnbs))
-echo job $job, nmax is $nmax
-if [[ $job -ge $nmax ]]; then
+njobs=$((npaths * nfns * nnsigs * ntaus * nnls * nnbs))
+echo job $job inpathbase $inpathbase \#paths $npaths \#fns $nfns \#nsigs $nnsigs \#taus $ntaus \#nls $nnls \#nbs $nnbs max jobs $njobs
+if [[ $job -ge $njobs ]]; then
     echo problem
     exit 1
 fi
 
-ipath=$((job % npaths))
-path=${paths[$ipath]}
-job2=$((job / npaths))
-ifn=$((job2 % nfns))
-fn=${fns[$ifn]}
-iz=$((job2 / nfns))
-inl=$((iz / nnbs))
-inb=$((iz % nnbs))
-nl=${nls[$inl]}
-nb=${nbs[$inb]}
-z=$nl$nb
-outfn=$(basename $path)_${z}_$fn
-echo path $path fn $fn iz $iz inl $inl nl $nl inb $inb nb $nb z $z outfn $outfn
+ii=$job
+
+path=${paths[$((ii % npaths))]}
+ii=$((ii / npaths))
+fn=${fns[$((ii % nfns))]}
+ii=$((ii / nfns))
+nsig=${nsigs[$((ii % nnsigs))]}
+ii=$((ii / nnsigs))
+tau=${taus[$((ii % ntaus))]}
+ii=$((ii / ntaus))
+nl=${nls[$((ii % nnls))]}
+ii=$((ii / nnls))
+nb=${nbs[$((ii % nnbs))]}
+ii=$((ii / nnbs))
+
+outfn=$(basename $path)_nsig${nsig}_tau$(printf %05i $tau)um_${nl}_${nb}_$(basename $fn .root).root
+treepath=mfvMovedTree${nl}${nb}nsig${nsig}
+
+echo path $path fn $fn nl $nl nb $nb outfn $outfn treepath $treepath
 
 if [[ $test == 1 ]]; then
     echo test only, possibly modifying hists.jdl and hists_finish.sh
@@ -81,4 +81,4 @@ cd CMSSW_8_0_25/src
 eval $(scram ru -sh)
 cd ../..
 
-./hists.exe $path/$fn $outfn $nl $nb 2>&1
+./hists.exe $path/$fn $outfn $treepath $tau 2>&1

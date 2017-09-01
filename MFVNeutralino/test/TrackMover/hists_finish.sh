@@ -1,6 +1,6 @@
 #!/bin/bash
 
-njobstot=48
+njobstot=2310
 
 function mergeqcd {
     allthere=1
