@@ -12,19 +12,21 @@
 
 int main(int argc, char** argv) {
   if (argc < 5) {
-    fprintf(stderr, "usage: hists.exe in.root out.root njets_req nbjets_req\n");
+    fprintf(stderr, "usage: hists.exe in.root out.root tree_path tau[int:microns]\n");
     return 1;
   }
 
   const char* in_fn  = argv[1];
   const char* out_fn = argv[2];
-  const int njets_req = atoi(argv[3]);
-  const int nbjets_req = atoi(argv[4]);
+  const char* tree_path = argv[3];
+  const int itau = atoi(argv[4]);
   const bool apply_weight = true;
+
+  assert(itau == 10000);
 
   root_setup();
 
-  file_and_tree fat(in_fn, out_fn, njets_req, nbjets_req);
+  file_and_tree fat(in_fn, out_fn, tree_path);
   TTree* t = fat.t;
   mfv::MovedTracksNtuple& nt = fat.nt;
   t->GetEntry(0);
@@ -140,7 +142,6 @@ int main(int argc, char** argv) {
       }
     }
 
-    // weight with tau here? nt.move_tau()
     const TVector3 move_vector = nt.move_vector();
     const double movedist2 = move_vector.Perp();
     const double movedist3 = move_vector.Mag();
@@ -170,9 +171,7 @@ int main(int argc, char** argv) {
       }
     }
     jet_dravg /= n_jets * (n_jets - 1) / 2.;
-    if (nt.npreseljets < njets_req || 
-        nt.npreselbjets < nbjets_req ||
-        nt.jetht < 1000 ||
+    if (nt.jetht < 1000 ||
         nt.nalljets < 4 ||
 	!pass_trig || 
         movedist2 < 0.03 ||
