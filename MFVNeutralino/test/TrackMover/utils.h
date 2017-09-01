@@ -52,7 +52,7 @@ struct file_and_tree {
   mfv::MovedTracksNtuple nt;
   TFile* f_out;
 
-  file_and_tree(const char* in_fn, const char* out_fn, int njets, int nbjets);
+  file_and_tree(const char* in_fn, const char* out_fn, const char* tree_path);
   ~file_and_tree();
 };
 
