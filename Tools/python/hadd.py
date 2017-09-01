@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os, subprocess, tempfile
+from datetime import datetime
 from JMTucker.Tools import colors, eos
 
 def hadd(output_fn, input_fns):
@@ -14,7 +15,7 @@ def hadd(output_fn, input_fns):
     """
     
     l = len(input_fns)
-    print 'hadding %i files to %s' % (l, output_fn)
+    print 'hadding %i files to %s at %s' % (l, output_fn, datetime.now())
     args = ['hadd', output_fn] + input_fns
 
     p = subprocess.Popen(args=args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
