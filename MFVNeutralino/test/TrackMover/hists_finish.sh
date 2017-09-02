@@ -32,14 +32,15 @@ elif [[ $1 == "cleanup" ]]; then
     tar --remove-files -czf lastlogs.tgz hists.{stdout,stderr,log}.*
 
 elif [[ $1 == "finish" ]]; then
-    for x in $2 $3 $4 $5 $6 $7 $8 $9; do # e.g. specify ./hists_finish finish 20 21 22
-        echo $x
-        mkdir $x
-        for y in ${x}_*root; do
-            mv $y ${x}/${y/${x}_/}
-        done
-        cd $x
-        #py $CMSSW_BASE/src/JMTucker/MFVNeutralino/test/utilities.py merge_background # not using full bkg samples anymore
+    rename TrackMoverV3_ '' *.root
+    for x in *.root ; do
+        y=$(echo $x | sed 's@_@XXX@g4' | sed 's@_@/@g' | sed 's/XXX/_/g')
+        mkdir -p $(dirname $y)
+        mv $x $y
+    done
+    for d in $(find . -type d -links 2) ; do
+        echo $d
+        cd $d
         mergeqcd
         cd - >/dev/null
         echo
@@ -47,4 +48,19 @@ elif [[ $1 == "finish" ]]; then
 
 elif [[ $1 == "mergeqcd" ]]; then
     mergeqcd
+
+elif [[ $1 == "allthere" ]]; then
+    for d in $(find . -type d -links 2) ; do
+        for x in qcdht1000.root qcdht1500.root qcdht1000_hip1p0_mit.root qcdht1500_hip1p0_mit.root JetHT2016{B3,C,D,E,F,G,H}.root ; do
+            if [[ ! -e $d/$x ]]; then
+                echo $d no $x
+            fi
+        done
+        for x in qcdht1000and1500_hip1p0_mit.root qcdht1000and1500.root qcdht1000and1500_hipplusno.root ; do
+            if [[ ! -e $d/$x ]]; then
+                echo $d needs mergeqcd
+            fi
+        done
+    done
+
 fi
