@@ -22,7 +22,11 @@ int main(int argc, char** argv) {
   const int itau = atoi(argv[4]);
   const bool apply_weight = true;
 
-  assert(itau == 10000);
+  const int itau_original = 10000; // JMTBAD if you change this in ntuple.py, change it here
+  if (itau != itau_original)
+    printf("reweighting tau distribution from 10000 um to %i um\n", itau);
+  const double o_tau_from = 10000./itau_original;
+  const double o_tau_to = 10000./itau;
 
   root_setup();
 
@@ -43,6 +47,7 @@ int main(int argc, char** argv) {
     h_norm->Fill(0.5, h_sums->GetBinContent(1));
 
   TH1D* h_weight = new TH1D("h_weight", ";weight;events/0.01", 200, 0, 2);
+  TH1D* h_tau = new TH1D("h_tau", ";tau (cm);events/10 #mum", 10000, 0,10);
   TH1D* h_npu = new TH1D("h_npu", ";# PU;events/1", 100, 0, 100);
 
   const int num_numdens = 3;
@@ -116,6 +121,13 @@ int main(int argc, char** argv) {
     }
 
     double w = 1;
+
+    if (itau != 10000) {
+      const double tau = nt.move_tau();
+      const double tau_weight = o_tau_to/o_tau_from * exp((o_tau_from - o_tau_to) * tau);
+      h_tau->Fill(tau, tau_weight);
+      w *= tau_weight;
+    }
 
     if (is_mc && apply_weight) {
       w *= nt.weight;
