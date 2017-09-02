@@ -63,7 +63,7 @@ nb=${nbs[$((ii % nnbs))]}
 ii=$((ii / nnbs))
 
 outfn=$(basename $path)_nsig${nsig}_tau$(printf %05i $tau)um_${nl}_${nb}_$(basename $fn .root).root
-treepath=mfvMovedTree${nl}${nb}nsig${nsig}
+treepath=mfvMovedTree${nl}${nb}nsig${nsig}/t
 
 echo path $path fn $fn nl $nl nb $nb outfn $outfn treepath $treepath
 
@@ -81,4 +81,6 @@ cd CMSSW_8_0_25/src
 eval $(scram ru -sh)
 cd ../..
 
-./hists.exe $path/$fn $outfn $treepath $tau 2>&1
+cmd="./hists.exe $path/$fn $outfn $treepath $tau"
+echo $cmd
+eval $cmd
