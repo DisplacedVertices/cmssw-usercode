@@ -1875,6 +1875,9 @@ def real_hist_min(h, return_bin=False, user_range=None):
     else:
         return m
 
+def root_fns_from_argv():
+    return [x for x in sys.argv[1:] if os.path.isfile(x) and x.endswith('.root')]
+
 def set_style(date_pages=False):
     ROOT.TH1.SetDefaultSumw2() # when would we ever not want to?
     ROOT.gStyle.SetHistMinimumZero(1)
@@ -2134,6 +2137,7 @@ __all__ = [
     'ratios_plot',
     'real_hist_max',
     'real_hist_min',
+    'root_fns_from_argv',
     'set_style',
     'sort_histogram_pair',
     'tdirectory_walk',
