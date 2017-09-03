@@ -2013,6 +2013,75 @@ def tdr_style():
 
     s.cd()
     return s
+    
+def tgraph(vals):
+    '''Make a TGraphAsymmErrors with the appropriate sets of numbers
+    from vals according to their dimension. (All elements of vals must
+    have the same dimension.)
+    dimension = 1: vals are the y-coordinates, and the x-coordinates are range(n).
+    dimension = 2: vals are (x,y).
+    dimension = 3: vals are (x,y,ey).
+    dimension = 4: vals are (x,ex,y,ey).
+    dimension = 6: vals are (x,exl,exh,y,eyl,eyh).
+    Other dimensions are not allowed.
+    '''
+
+    n = len(vals)
+    vals2 = []
+    for v in vals:
+        try:
+            iter(v)
+        except TypeError:
+            v = [v]
+        vals2.append(v)
+    vals = vals2
+    dim = set(len(v) for v in vals)
+    if len(dim) != 1:
+        raise ValueError('everything in vals passed to tgraph* must be same dimension')
+    dim = dim.pop()
+    
+    def _t(x,y, **kwargs):
+        if kwargs.has_key('ex'):
+            exl = exh = kwargs['ex']
+        else:
+            exl = kwargs.get('exl', [])
+            exh = kwargs.get('exh', [])
+            assert all((exl,exh)) or not any((exl,exh))
+        if kwargs.has_key('ey'):
+            eyl = eyh = kwargs['ey']
+        else:
+            eyl = kwargs.get('eyl', [])
+            eyh = kwargs.get('eyh', [])
+            assert all((eyl,eyh)) or not any((eyl,eyh))
+        if not exl: exl = [0.]*n
+        if not exh: exh = [0.]*n
+        if not eyl: eyl = [0.]*n
+        if not eyh: eyh = [0.]*n
+        x = to_array(x)
+        y = to_array(y)
+        exl = to_array(exl)
+        exh = to_array(exh)
+        eyl = to_array(eyl)
+        eyh = to_array(eyh)
+        return ROOT.TGraphAsymmErrors(n, x, y, exl, exh, eyl, eyh)
+
+    if dim == 1:
+        x = range(n)
+        return _t([float(i) for i in xrange(n)], [v[0] for v in vals])
+    elif dim == 2:
+        x,y = zip(*vals)
+        return _t(x,y)
+    elif dim == 3:
+        x,y,ey = zip(*vals)
+        return _t(x,y, ey=ey)
+    elif dim == 4:
+        x,ex,y,ey = zip(*vals)
+        return _t(x,y, ex=ex, ey=ey)
+    elif dim == 6:
+        x,exl,exh,y,eyl,eyh = zip(*vals)
+        return _t(x,y, exl=exl, exh=exh, eyl=eyl, eyh=eyh)
+    else:
+        raise ValueError('dimension %i not supported' % dim)
 
 def tgraph_getpoint(g, i):
     x,y = ROOT.Double(), ROOT.Double()
@@ -2142,6 +2211,7 @@ __all__ = [
     'sort_histogram_pair',
     'tdirectory_walk',
     'tdr_style',
+    'tgraph',
     'tgraph_getpoint',
     'to_array',
     'to_TH1D',
