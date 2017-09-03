@@ -57,7 +57,7 @@ def cmd_hadd_data():
             continue
         files.sort()
 
-        Halready = len(x for x in files if x.endswith('H.root')) > 0
+        Halready = len([x for x in files if x.endswith('H.root')]) > 0
         f2015 = [ds + '2015%s.root' % x for x in 'CD']
         f2016 = [ds + '2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G', 'H2', 'H3')]
         f2016Halready = [ds + '2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G', 'H')]
