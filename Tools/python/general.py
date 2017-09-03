@@ -160,8 +160,11 @@ def mkdirs_if_needed(path):
         os.system('mkdir -p %s' % dn)
 
 def named_product(**items):
+    name = items.get('_name', 'Product')
+    if name != 'Product':
+        del items['_name']
     # https://stackoverflow.com/questions/9098194/name-parts-of-iterables-in-itertools-products
-    Product = namedtuple('Product', items.keys())
+    Product = namedtuple(name, items.keys())
     return starmap(Product, product(*items.values()))
 
 def sub_popen(cmd):
