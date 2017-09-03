@@ -15,7 +15,22 @@ function mergeqcd {
     done
     samples merge qcdht1000and1500_hip1p0_mit.root -22300 qcdht{1000,1500}_hip1p0_mit.root
     samples merge qcdht1000and1500.root -16200 qcdht{1000,1500}.root
-    hadd qcdht1000and1500_hipplusno.root qcdht1000and1500_hip1p0_mit.root qcdht1000and1500.root
+    hadd.py qcdht1000and1500_hipplusno.root qcdht1000and1500_hip1p0_mit.root qcdht1000and1500.root
+}
+
+function mergedata {
+    allthere=1
+    for x in JetHT2016{B3,C,D,E,F,G,H}.root ; do
+        if [[ ! -e $x ]]; then
+            echo mergedata: $x does not exist
+            allthere=0
+        fi
+        if [[ allthere -ne 1 ]]; then
+            return 1
+        fi
+    done
+    #python $t16/utilities.py hadd_data
+    hadd.py JetHT2016.root JetHT2016{B3,C,D,E,F,G,H}.root # just need it all in one for now
 }
 
 if [[ $1 == "check" ]]; then
@@ -42,12 +57,16 @@ elif [[ $1 == "finish" ]]; then
         echo $d
         cd $d
         mergeqcd
+        mergedata
         cd - >/dev/null
         echo
     done
 
 elif [[ $1 == "mergeqcd" ]]; then
     mergeqcd
+
+elif [[ $1 == "mergedata" ]]; then
+    mergedata
 
 elif [[ $1 == "allthere" ]]; then
     for d in $(find . -type d -links 2) ; do
