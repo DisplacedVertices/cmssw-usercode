@@ -1,7 +1,7 @@
 import sys, os
 from JMTucker.Tools.ROOTTools import *
 
-fns = [fn for fn in sys.argv[1:] if os.path.isfile(fn) and fn.endswith('.root')]
+fns = root_fns_from_argv()
 width = max(len(fn) for fn in fns) + 2
 
 cutsets = ['nocuts', 'ntracks', 'all']
