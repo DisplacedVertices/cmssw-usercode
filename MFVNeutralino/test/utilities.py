@@ -57,14 +57,16 @@ def cmd_hadd_data():
             continue
         files.sort()
 
+        Halready = len(x for x in files if x.endswith('H.root')) > 0
         f2015 = [ds + '2015%s.root' % x for x in 'CD']
         f2016 = [ds + '2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G', 'H2', 'H3')]
+        f2016Halready = [ds + '2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G', 'H')]
         ok = True
         no2015 = False
-        if files == f2016:
+        if files == f2016 or files == f2016Halready:
             print 'only 2016 files here, right?'
             no2015 = True
-        elif files != f2015 + f2016:
+        elif files != f2015 + f2016 and files != f2015 + f2016Halready:
             print 'some files missing for', ds
             pprint(files)
             if not permissive:
@@ -72,13 +74,15 @@ def cmd_hadd_data():
         if ok:
             if not no2015:
                 hadd_or_merge(ds + '2015.root', [ds + '2015%s.root' % x for x in 'CD'])
-            hadd_or_merge(ds + '2016.root', [ds + '2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G', 'H2', 'H3')])
+            H =  ('H',) if Halready else ('H2', 'H3')
+            hadd_or_merge(ds + '2016.root', [ds + '2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G') + H])
             hadd_or_merge(ds + '2016BthruG.root', [ds + '2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G')])
             hadd_or_merge(ds + '2016BCD.root', [ds + '2016%s.root' % x for x in ('B3', 'C', 'D')])
             hadd_or_merge(ds + '2016EF.root', [ds + '2016%s.root' % x for x in ('E', 'F')])
             hadd_or_merge(ds + '2016BCDEF.root', [ds + '2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F')])
-            hadd_or_merge(ds + '2016H.root', [ds + '2016%s.root' % x for x in ('H2', 'H3')])
-            hadd_or_merge(ds + '2016GH.root', [ds + '2016%s.root' % x for x in ('G', 'H2', 'H3')])
+            if not Halready:
+                hadd_or_merge(ds + '2016H.root', [ds + '2016%s.root' % x for x in ('H2', 'H3')])
+            hadd_or_merge(ds + '2016GH.root', [ds + '2016%s.root' % x for x in ('G',) + H])
 
 cmd_merge_data = cmd_hadd_data
 
