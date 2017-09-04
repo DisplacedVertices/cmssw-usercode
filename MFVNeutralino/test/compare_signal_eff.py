@@ -8,6 +8,7 @@ from JMTucker.MFVNeutralino.PerSignal import PerSignal
 mode = 'vary_pileup'
 #mode = 'vary_jes'
 #mode = 'vary_sigmadxy'
+#mode = 'vary_sigmadxy_dbv300um'
 
 set_style()
 ps = plot_saver('plots/sigeff/v15/compare_sigeff_%s' % mode, size=(700,700), log=False, root=False)
@@ -26,6 +27,11 @@ if mode == 'vary_sigmadxy':
     root_file_dirs = ['/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_0', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_sigmadxy3p7', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_sigmadxy3p8', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_sigmadxy3p9', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_sigmadxy4p1', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_sigmadxy4p2', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_sigmadxy4p3']
     num_paths = ['mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx']
     ls = ['sigmadxy4p0', 'sigmadxy3p7', 'sigmadxy3p8', 'sigmadxy3p9', 'sigmadxy4p1', 'sigmadxy4p2', 'sigmadxy4p3']
+
+if mode == 'vary_sigmadxy_dbv300um':
+    root_file_dirs = ['/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_3', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_3_sigmadxy3p7', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_3_sigmadxy3p8', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_3_sigmadxy3p9', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_3_sigmadxy4p1', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_3_sigmadxy4p2', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_3_sigmadxy4p3']
+    num_paths = ['mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx']
+    ls = ['sigmadxy4p0_dbv300um', 'sigmadxy3p7_dbv300um', 'sigmadxy3p8_dbv300um', 'sigmadxy3p9_dbv300um', 'sigmadxy4p1_dbv300um', 'sigmadxy4p2_dbv300um', 'sigmadxy4p3_dbv300um']
 
 nevs = []
 for i,root_file_dir in enumerate(root_file_dirs):
@@ -77,7 +83,7 @@ for i,nev in enumerate(nevs):
         sample.yh = r+er
         print '%26s: ratio = %.3f (%.3f, %.3f)' % (sample.name, sample.y, sample.yl, sample.yh)
 
-    per = PerSignal('ratio of efficiencies', y_range=(0.9,1.1) if mode != 'vary_sigmadxy' else (0.,2.))
+    per = PerSignal('ratio of efficiencies', y_range=(0.9,1.1) if 'vary_sigmadxy' not in mode else (0.,2.))
     per.add(multijet, title='#tilde{N} #rightarrow tbs')
     per.add(dijet, title='X #rightarrow d#bar{d}', color=ROOT.kBlue)
     per.draw(canvas=ps.c)
@@ -107,7 +113,7 @@ for j,sample in enumerate(multijet + dijet):
         r = (abs(r1-1) + abs(r2-1)) / 2
         er = (er1**2 + er2**2)**0.5 / 2
 
-    if mode == 'vary_sigmadxy':
+    if 'vary_sigmadxy' in mode:
         v3 = nevs[3][j]
         ev3 = v3**0.5
         r3 = v3/c
@@ -131,7 +137,7 @@ for j,sample in enumerate(multijet + dijet):
     sample.yh = r+er
     print '%26s: uncertainty = %.3f (%.3f, %.3f)' % (sample.name, sample.y, sample.yl, sample.yh)
 
-per = PerSignal('uncertainty in signal efficiency', y_range=(0.,0.1) if mode != 'vary_sigmadxy' else (0.,1.))
+per = PerSignal('uncertainty in signal efficiency', y_range=(0.,0.1) if 'vary_sigmadxy' not in mode else (0.,1.))
 per.add(multijet, title='#tilde{N} #rightarrow tbs')
 per.add(dijet, title='X #rightarrow d#bar{d}', color=ROOT.kBlue)
 per.draw(canvas=ps.c)
