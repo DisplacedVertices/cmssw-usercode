@@ -51,7 +51,7 @@ for i,root_file_dir in enumerate(root_file_dirs):
         num = hnum.Integral(0, hnum.GetNbinsX() + 2)
         den = hden.GetBinContent(1)
         sample.y, sample.yl, sample.yh = clopper_pearson(num, den)
-        print '%26s: efficiency = %.3f (%.3f, %.3f)' % (sample.name, sample.y, sample.yl, sample.yh)
+        print '%26s: numerator = %8.1f, denominator = %8.1f, efficiency = %.3f (%.3f, %.3f)' % (sample.name, num, den, sample.y, sample.yl, sample.yh)
         nev.append(num)
     
     per = PerSignal('efficiency', y_range=(0.,1.05))
@@ -60,6 +60,11 @@ for i,root_file_dir in enumerate(root_file_dirs):
     per.draw(canvas=ps.c)
     ps.save('sigeff_%s' % ls[i])
     nevs.append(nev)
+
+print
+for i,nev in enumerate(nevs):
+    print '%s: numerators = [%s]' % (ls[i], ', '.join('%.1f' % n for n in nev))
+print
 
 for i,nev in enumerate(nevs):
     print ls[i]
@@ -81,7 +86,7 @@ for i,nev in enumerate(nevs):
         sample.y = r
         sample.yl = r-er
         sample.yh = r+er
-        print '%26s: ratio = %.3f (%.3f, %.3f)' % (sample.name, sample.y, sample.yl, sample.yh)
+        print '%26s: variation = %8.1f, default = %8.1f, ratio = %.3f (%.3f, %.3f)' % (sample.name, v, c, sample.y, sample.yl, sample.yh)
 
     per = PerSignal('ratio of efficiencies', y_range=(0.9,1.1) if 'vary_sigmadxy' not in mode else (0.,2.))
     per.add(multijet, title='#tilde{N} #rightarrow tbs')
