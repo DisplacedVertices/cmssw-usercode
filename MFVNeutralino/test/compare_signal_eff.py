@@ -10,8 +10,10 @@ mode = 'vary_pileup'
 #mode = 'vary_sigmadxy'
 #mode = 'vary_sigmadxy_dbv300um'
 
+combine_masses = False
+
 set_style()
-ps = plot_saver('plots/sigeff/v15/compare_sigeff_%s' % mode, size=(700,700), log=False, root=False)
+ps = plot_saver('plots/sigeff/v15/compare_sigeff_%s%s' % (mode, '_combine_masses' if combine_masses else ''), size=(700,700), log=False, root=False)
 
 if mode == 'vary_pileup':
     root_file_dirs = ['/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_0', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_1', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_2']
@@ -41,7 +43,7 @@ for i,root_file_dir in enumerate(root_file_dirs):
     dijet = Samples.mfv_ddbar_samples
 
     nev = []
-    for sample in multijet + dijet:
+    for sample in sorted(multijet, key=lambda x: x.name) + sorted(dijet, key=lambda x: x.name):
         fn = os.path.join(root_file_dir, sample.name + '.root')
         if not os.path.exists(fn):
             continue
@@ -62,17 +64,33 @@ for i,root_file_dir in enumerate(root_file_dirs):
     nevs.append(nev)
 
 print
+multijet = [s for s in Samples.mfv_signal_samples if not s.name.startswith('my_')]
+dijet = Samples.mfv_ddbar_samples
+samples = sorted(multijet, key=lambda x: x.name) + sorted(dijet, key=lambda x: x.name)
+print 'samples = [%s]' % (', '.join('%d: %s' % (i,s.name) for i,s in enumerate(samples)))
+
+print
 for i,nev in enumerate(nevs):
     print '%s: numerators = [%s]' % (ls[i], ', '.join('%.1f' % n for n in nev))
-print
 
+if combine_masses:
+    print
+    print 'combine masses'
+    for i,nev in enumerate(nevs):
+        nev[0] = nev[1] = nev[2] = nev[0] + nev[1] + nev[2] # mfv_neu_tau00100um: M0300 + M0400 + M0600
+        nev[3] = nev[4] = nev[5] = nev[3] + nev[4] + nev[5] # mfv_neu_tau00100um: M0800 + M1200 + M1600
+        nev[35] = nev[36] = nev[37] = nev[38] = nev[35] + nev[36] + nev[37] + nev[38] # mfv_ddbar_tau00100um: M0300 + M0400 + M0500 + M0600
+        nev[39] = nev[40] = nev[41] = nev[39] + nev[40] + nev[41] # mfv_ddbar_tau00100um: M0800 + M1200 + M1600
+        print '%s: numerators = [%s]' % (ls[i], ', '.join('%.1f' % n for n in nev))
+
+print
 for i,nev in enumerate(nevs):
     print ls[i]
 
     multijet = [s for s in Samples.mfv_signal_samples if not s.name.startswith('my_')]
     dijet = Samples.mfv_ddbar_samples
 
-    for j,sample in enumerate(multijet + dijet):
+    for j,sample in enumerate(sorted(multijet, key=lambda x: x.name) + sorted(dijet, key=lambda x: x.name)):
         v = nev[j]
         c = nevs[0][j]
 
@@ -97,7 +115,7 @@ for i,nev in enumerate(nevs):
 multijet = [s for s in Samples.mfv_signal_samples if not s.name.startswith('my_')]
 dijet = Samples.mfv_ddbar_samples
 
-for j,sample in enumerate(multijet + dijet):
+for j,sample in enumerate(sorted(multijet, key=lambda x: x.name) + sorted(dijet, key=lambda x: x.name)):
     c = nevs[0][j]
     ec = c**0.5
 
