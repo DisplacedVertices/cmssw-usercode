@@ -43,7 +43,7 @@ for i,root_file_dir in enumerate(root_file_dirs):
     dijet = Samples.mfv_ddbar_samples
 
     nev = []
-    for sample in sorted(multijet, key=lambda x: x.name) + sorted(dijet, key=lambda x: x.name):
+    for sample in sorted(multijet, key=lambda s: s.name) + sorted(dijet, key=lambda s: s.name):
         fn = os.path.join(root_file_dir, sample.name + '.root')
         if not os.path.exists(fn):
             continue
@@ -66,7 +66,7 @@ for i,root_file_dir in enumerate(root_file_dirs):
 print
 multijet = [s for s in Samples.mfv_signal_samples if not s.name.startswith('my_')]
 dijet = Samples.mfv_ddbar_samples
-samples = sorted(multijet, key=lambda x: x.name) + sorted(dijet, key=lambda x: x.name)
+samples = sorted(multijet, key=lambda s: s.name) + sorted(dijet, key=lambda s: s.name)
 print 'samples = [%s]' % (', '.join('%d: %s' % (i,s.name) for i,s in enumerate(samples)))
 
 print
@@ -108,15 +108,15 @@ for i,nev in enumerate(nevs):
     multijet = [s for s in Samples.mfv_signal_samples if not s.name.startswith('my_')]
     dijet = Samples.mfv_ddbar_samples
 
-    for j,sample in enumerate(sorted(multijet, key=lambda x: x.name) + sorted(dijet, key=lambda x: x.name)):
+    for j,sample in enumerate(sorted(multijet, key=lambda s: s.name) + sorted(dijet, key=lambda s: s.name)):
         v = nev[j]
-        c = nevs[0][j]
-        r, er = ratio_of_numerators(v, c)
+        d = nevs[0][j]
+        r, er = ratio_of_numerators(v, d)
 
         sample.y = r
         sample.yl = r-er
         sample.yh = r+er
-        print '%26s: variation = %8.1f, default = %8.1f, ratio = %.3f (%.3f, %.3f)' % (sample.name, v, c, sample.y, sample.yl, sample.yh)
+        print '%26s: variation = %8.1f, default = %8.1f, ratio = %.3f (%.3f, %.3f)' % (sample.name, v, d, sample.y, sample.yl, sample.yh)
 
     per = PerSignal('ratio of efficiencies', y_range=(0.9,1.1) if 'vary_sigmadxy' not in mode else (0.,2.))
     per.add(multijet, title='#tilde{N} #rightarrow tbs')
@@ -127,31 +127,31 @@ for i,nev in enumerate(nevs):
 multijet = [s for s in Samples.mfv_signal_samples if not s.name.startswith('my_')]
 dijet = Samples.mfv_ddbar_samples
 
-for j,sample in enumerate(sorted(multijet, key=lambda x: x.name) + sorted(dijet, key=lambda x: x.name)):
-    c = nevs[0][j]
+for j,sample in enumerate(sorted(multijet, key=lambda s: s.name) + sorted(dijet, key=lambda s: s.name)):
+    d = nevs[0][j]
 
     v1 = nevs[1][j]
-    r1, er1 = ratio_of_numerators(v1, c)
+    r1, er1 = ratio_of_numerators(v1, d)
 
     r = abs(r1-1)
     er = er1
 
     if len(nevs) > 2:
         v2 = nevs[2][j]
-        r2, er2 = ratio_of_numerators(v2, c)
+        r2, er2 = ratio_of_numerators(v2, d)
 
         r = (abs(r1-1) + abs(r2-1)) / 2
         er = (er1**2 + er2**2)**0.5 / 2
 
     if 'vary_sigmadxy' in mode:
         v3 = nevs[3][j]
-        r3, er3 = ratio_of_numerators(v3, c)
+        r3, er3 = ratio_of_numerators(v3, d)
 
         v4 = nevs[4][j]
-        r4, er4 = ratio_of_numerators(v4, c)
+        r4, er4 = ratio_of_numerators(v4, d)
 
         v5 = nevs[5][j]
-        r5, er5 = ratio_of_numerators(v5, c)
+        r5, er5 = ratio_of_numerators(v5, d)
 
         r = abs(((8.65/35.93)*r1 + (7.58/35.93)*r2 + (3.11/35.93)*r3 + (4.03/35.93) + (6.81/35.93)*r4 + (5.75/35.93)*r5) - 1)
         er = (((8.65/35.93)*er1)**2 + ((7.58/35.93)*er2)**2 + ((3.11/35.93)*er3)**2 + ((6.81/35.93)*er4)**2 + ((5.75/35.93)*er5)**2)**0.5
