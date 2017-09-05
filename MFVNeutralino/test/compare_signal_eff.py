@@ -76,12 +76,30 @@ for i,nev in enumerate(nevs):
 if combine_masses:
     print
     print 'combine masses'
+
+    def add(nev, isamples):
+        ntot = 0
+        for i in isamples:
+            ntot += nev[i]
+        for i in isamples:
+            nev[i] = ntot
+
     for i,nev in enumerate(nevs):
-        nev[0] = nev[1] = nev[2] = nev[0] + nev[1] + nev[2] # mfv_neu_tau00100um: M0300 + M0400 + M0600
-        nev[3] = nev[4] = nev[5] = nev[3] + nev[4] + nev[5] # mfv_neu_tau00100um: M0800 + M1200 + M1600
-        nev[35] = nev[36] = nev[37] = nev[38] = nev[35] + nev[36] + nev[37] + nev[38] # mfv_ddbar_tau00100um: M0300 + M0400 + M0500 + M0600
-        nev[39] = nev[40] = nev[41] = nev[39] + nev[40] + nev[41] # mfv_ddbar_tau00100um: M0800 + M1200 + M1600
+        add(nev, [0, 1, 2]) # mfv_neu_tau00100um: M0300 + M0400 + M0600
+        add(nev, [3, 4, 5]) # mfv_neu_tau00100um: M0800 + M1200 + M1600
+        add(nev, [35, 36, 37, 38]) # mfv_ddbar_tau00100um: M0300 + M0400 + M0500 + M0600
+        add(nev, [39, 40, 41]) # mfv_ddbar_tau00100um: M0800 + M1200 + M1600
         print '%s: numerators = [%s]' % (ls[i], ', '.join('%.1f' % n for n in nev))
+
+def ratio_of_numerators(v, d):
+    ev = v**0.5
+    ed = d**0.5
+
+    r = v/d
+    er = r * ((ev/v)**2 + (ed/d)**2)**0.5
+    er *= (abs(r-1))**0.5 / (1+r)**0.5
+
+    return r, er
 
 print
 for i,nev in enumerate(nevs):
@@ -93,13 +111,7 @@ for i,nev in enumerate(nevs):
     for j,sample in enumerate(sorted(multijet, key=lambda x: x.name) + sorted(dijet, key=lambda x: x.name)):
         v = nev[j]
         c = nevs[0][j]
-
-        ev = v**0.5
-        ec = c**0.5
-
-        r = v/c
-        er = (v/c) * ((ev/v)**2 + (ec/c)**2)**0.5
-        er *= (abs(r-1))**0.5 / (1+r)**0.5
+        r, er = ratio_of_numerators(v, c)
 
         sample.y = r
         sample.yl = r-er
@@ -117,40 +129,29 @@ dijet = Samples.mfv_ddbar_samples
 
 for j,sample in enumerate(sorted(multijet, key=lambda x: x.name) + sorted(dijet, key=lambda x: x.name)):
     c = nevs[0][j]
-    ec = c**0.5
 
     v1 = nevs[1][j]
-    ev1 = v1**0.5
-    r1 = v1/c
-    er1 = (v1/c) * ((ev1/v1)**2 + (ec/c)**2)**0.5 * (abs(r1-1))**0.5 / (1+r1)**0.5
+    r1, er1 = ratio_of_numerators(v1, c)
 
     r = abs(r1-1)
     er = er1
 
     if len(nevs) > 2:
         v2 = nevs[2][j]
-        ev2 = v2**0.5
-        r2 = v2/c
-        er2 = (v2/c) * ((ev2/v2)**2 + (ec/c)**2)**0.5 * (abs(r2-1))**0.5 / (1+r2)**0.5
+        r2, er2 = ratio_of_numerators(v2, c)
 
         r = (abs(r1-1) + abs(r2-1)) / 2
         er = (er1**2 + er2**2)**0.5 / 2
 
     if 'vary_sigmadxy' in mode:
         v3 = nevs[3][j]
-        ev3 = v3**0.5
-        r3 = v3/c
-        er3 = (v3/c) * ((ev3/v3)**2 + (ec/c)**2)**0.5 * (abs(r3-1))**0.5 / (1+r3)**0.5
+        r3, er3 = ratio_of_numerators(v3, c)
 
         v4 = nevs[4][j]
-        ev4 = v4**0.5
-        r4 = v4/c
-        er4 = (v4/c) * ((ev4/v4)**2 + (ec/c)**2)**0.5 * (abs(r4-1))**0.5 / (1+r4)**0.5
+        r4, er4 = ratio_of_numerators(v4, c)
 
         v5 = nevs[5][j]
-        ev5 = v5**0.5
-        r5 = v5/c
-        er5 = (v5/c) * ((ev5/v5)**2 + (ec/c)**2)**0.5 * (abs(r5-1))**0.5 / (1+r5)**0.5
+        r5, er5 = ratio_of_numerators(v5, c)
 
         r = abs(((8.65/35.93)*r1 + (7.58/35.93)*r2 + (3.11/35.93)*r3 + (4.03/35.93) + (6.81/35.93)*r4 + (5.75/35.93)*r5) - 1)
         er = (((8.65/35.93)*er1)**2 + ((7.58/35.93)*er2)**2 + ((3.11/35.93)*er3)**2 + ((6.81/35.93)*er4)**2 + ((5.75/35.93)*er5)**2)**0.5
