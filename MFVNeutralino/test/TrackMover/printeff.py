@@ -4,7 +4,7 @@ from JMTucker.Tools.ROOTTools import *
 fns = root_fns_from_argv()
 width = max(len(fn) for fn in fns) + 2
 
-cutsets = ['nocuts', 'ntracks', 'all']
+cutsets = ['all', 'nocuts', 'ntracks']
 print 'fn'.ljust(width), ' '.join('%19s' % x for x in cutsets)
 
 z = []
