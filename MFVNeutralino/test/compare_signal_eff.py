@@ -153,8 +153,19 @@ for j,sample in enumerate(sorted(multijet, key=lambda s: s.name) + sorted(dijet,
         v5 = nevs[5][j]
         r5, er5 = ratio_of_numerators(v5, d)
 
+        v6 = nevs[6][j]
+        r6, er6 = ratio_of_numerators(v6, d)
+
         r = abs(((8.65/35.93)*r1 + (7.58/35.93)*r2 + (3.11/35.93)*r3 + (4.03/35.93) + (6.81/35.93)*r4 + (5.75/35.93)*r5) - 1)
         er = (((8.65/35.93)*er1)**2 + ((7.58/35.93)*er2)**2 + ((3.11/35.93)*er3)**2 + ((6.81/35.93)*er4)**2 + ((5.75/35.93)*er5)**2)**0.5
+
+        g = tgraph([(3.7, r1, er1), (3.8, r2, er2), (3.9, r3, er3), (4.0, 1.0, 0.0), (4.1, r4, er4), (4.2, r5, er5), (4.3, r6, er6)])
+        g.SetTitle('%s;nsigmadxy requirement;efficiency ratio to nsigmadxy > 4' % sample.name)
+        g.GetYaxis().SetRangeUser(0,2)
+        g.SetMarkerStyle(20)
+        g.Fit('pol1')
+        g.Draw('AP')
+        ps.save(sample.name)
 
     sample.y = r
     sample.yl = r-er
