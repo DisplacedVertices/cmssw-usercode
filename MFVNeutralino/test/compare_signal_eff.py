@@ -9,6 +9,7 @@ mode = 'vary_pileup'
 #mode = 'vary_jes'
 #mode = 'vary_sigmadxy'
 #mode = 'vary_sigmadxy_dbv300um'
+#mode = 'vary_sigmadxy4p1_dbv300um'
 
 combine_masses = False
 
@@ -30,10 +31,10 @@ if mode == 'vary_sigmadxy':
     num_paths = ['mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx']
     ls = ['sigmadxy4p0', 'sigmadxy3p7', 'sigmadxy3p8', 'sigmadxy3p9', 'sigmadxy4p1', 'sigmadxy4p2', 'sigmadxy4p3']
 
-if mode == 'vary_sigmadxy_dbv300um':
-    root_file_dirs = ['/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_3', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_3_sigmadxy3p7', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_3_sigmadxy3p8', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_3_sigmadxy3p9', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_3_sigmadxy4p1', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_3_sigmadxy4p2', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_3_sigmadxy4p3']
-    num_paths = ['mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx']
-    ls = ['sigmadxy4p0_dbv300um', 'sigmadxy3p7_dbv300um', 'sigmadxy3p8_dbv300um', 'sigmadxy3p9_dbv300um', 'sigmadxy4p1_dbv300um', 'sigmadxy4p2_dbv300um', 'sigmadxy4p3_dbv300um']
+if mode == 'vary_sigmadxy4p1_dbv300um':
+    root_file_dirs = ['/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_3', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_3_sigmadxy4p1']
+    num_paths = ['mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx']
+    ls = ['sigmadxy4p0_dbv300um', 'sigmadxy4p1_dbv300um']
 
 nevs = []
 for i,root_file_dir in enumerate(root_file_dirs):
@@ -143,7 +144,7 @@ for j,sample in enumerate(sorted(multijet, key=lambda s: s.name) + sorted(dijet,
         r = (abs(r1-1) + abs(r2-1)) / 2
         er = (er1**2 + er2**2)**0.5 / 2
 
-    if 'vary_sigmadxy' in mode:
+    if 'vary_sigmadxy' in mode and len(nevs) == 7:
         v3 = nevs[3][j]
         r3, er3 = ratio_of_numerators(v3, d)
 
@@ -153,8 +154,19 @@ for j,sample in enumerate(sorted(multijet, key=lambda s: s.name) + sorted(dijet,
         v5 = nevs[5][j]
         r5, er5 = ratio_of_numerators(v5, d)
 
+        v6 = nevs[6][j]
+        r6, er6 = ratio_of_numerators(v6, d)
+
         r = abs(((8.65/35.93)*r1 + (7.58/35.93)*r2 + (3.11/35.93)*r3 + (4.03/35.93) + (6.81/35.93)*r4 + (5.75/35.93)*r5) - 1)
         er = (((8.65/35.93)*er1)**2 + ((7.58/35.93)*er2)**2 + ((3.11/35.93)*er3)**2 + ((6.81/35.93)*er4)**2 + ((5.75/35.93)*er5)**2)**0.5
+
+        g = tgraph([(3.7, r1, er1), (3.8, r2, er2), (3.9, r3, er3), (4.0, 1.0, 0.0), (4.1, r4, er4), (4.2, r5, er5), (4.3, r6, er6)])
+        g.SetTitle('%s;nsigmadxy requirement;efficiency ratio to nsigmadxy > 4' % sample.name)
+        g.GetYaxis().SetRangeUser(0,2)
+        g.SetMarkerStyle(20)
+        g.Fit('pol1')
+        g.Draw('AP')
+        ps.save(sample.name)
 
     sample.y = r
     sample.yl = r-er
