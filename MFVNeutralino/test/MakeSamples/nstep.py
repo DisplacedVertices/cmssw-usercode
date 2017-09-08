@@ -28,7 +28,7 @@ elif 0:
     output_level = 'minitree'
 elif 1:
     meta = 'minbias'
-    nevents, events_per = 30000, 2000
+    nevents, events_per = 999000, 3000
     output_level = 'gensim'
     output_dataset_tag = 'RunIISummer15GS-MCRUN2_71_V1'
 elif 0:
@@ -54,7 +54,7 @@ elif 0:
     hip_simulation = 1.0
     hip_mitigation = True
     ex = ''
-elif 1:
+elif 0:
     meta, taus, masses = 'neu', [100, 300, 1000, 10000, 30000], [300, 400, 600, 800, 1200, 1600]
     already = [] # [(t,m) for t in [300, 1000, 10000] for m in [400, 800]]
     hip_simulation = 1.0
@@ -142,7 +142,7 @@ config.Data.outputDatasetTag = output_dataset_tag
 config.Site.storageSite = 'T3_US_FNALLPC'
 config.Site.whitelist = ['T1_US_FNAL', 'T2_CH_CERN', 'T2_DE_DESY', 'T2_DE_RWTH', 'T2_FR_CCIN2P3', 'T2_US_Caltech', 'T2_US_Florida', 'T2_US_MIT', 'T2_US_Nebraska', 'T2_US_Purdue', 'T2_US_UCSD', 'T2_US_Vanderbilt', 'T2_US_Wisconsin']
 if output_level == 'gensim':
-    config.Site.whitelist = ['*']
+    config.Site.whitelist += ['T3_US_*']
 
 outputs = {}
 
