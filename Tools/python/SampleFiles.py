@@ -94,6 +94,8 @@ _add({('testqcdht2000', 'gensim') : (60 + 263,
                                      ['/store/user/wsun/croncopyeos/qcdht2000_gensim_ext1/RunIISummer15GS-MCRUN2_71_V1/170224_210305/0000/gensim_%i.root' % i for i in chain(xrange(1,255), xrange(256,265))]
                                      )})
 
+_add({('private_minbias', 'main'): (331, ['/store/user/tucker/minbias/RunIISummer15GS-MCRUN2_71_V1/170908_221416/0000/gensim_%i.root' % i for i in chain(xrange(1,225), xrange(226,244), xrange(245,334))])})
+
 # moved to Werner's space--overwrite those in "2015 main" above
 _add_ds('main', {
 'mfv_neu_tau00100um_M0300_2015': _fromnum1('/store/user/wsun/croncopyeos/mfv_neu_tau00100um_M0300/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12/160312_071342', 50, fnbase='reco'),
