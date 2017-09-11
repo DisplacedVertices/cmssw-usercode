@@ -103,18 +103,18 @@ def draw():
 
     whiches = [
         ('multijet', [
-            (-39, ROOT.kRed,      'multijet M = 800 GeV, #tau = 100 #mum'),
-            (-46, ROOT.kGreen+2,  'multijet M = 800 GeV, #tau = 300 #mum'),
-            (-53, ROOT.kBlue,     'multijet M = 800 GeV, #tau = 1 mm'),
-            (-60, ROOT.kMagenta,  'multijet M = 800 GeV, #tau = 10 mm'),
-            (-67, ROOT.kOrange+2, 'multijet M = 800 GeV, #tau = 30 mm'),
+            (-105, ROOT.kRed,      'multijet M = 800 GeV, #tau = 100 #mum'),
+            (-124, ROOT.kGreen+2,  'multijet M = 800 GeV, #tau = 300 #mum'),
+            (-143, ROOT.kBlue,     'multijet M = 800 GeV, #tau = 1 mm'),
+            (-162, ROOT.kMagenta,  'multijet M = 800 GeV, #tau = 10 mm'),
+            (-181, ROOT.kOrange+2, 'multijet M = 800 GeV, #tau = 30 mm'),
             ]),
         ('dijet', [
-            ( -5, ROOT.kRed,      'dijet M = 800 GeV, #tau = 100 #mum'),
-            (-12, ROOT.kGreen+2,  'dijet M = 800 GeV, #tau = 300 #mum'),
-            (-19, ROOT.kBlue,     'dijet M = 800 GeV, #tau = 1 mm'),
-            (-26, ROOT.kMagenta,  'dijet M = 800 GeV, #tau = 10 mm'),
-            (-33, ROOT.kOrange+2, 'dijet M = 800 GeV, #tau = 30 mm'),
+            (-11, ROOT.kRed,      'dijet M = 800 GeV, #tau = 100 #mum'),
+            (-30, ROOT.kGreen+2,  'dijet M = 800 GeV, #tau = 300 #mum'),
+            (-49, ROOT.kBlue,     'dijet M = 800 GeV, #tau = 1 mm'),
+            (-68, ROOT.kMagenta,  'dijet M = 800 GeV, #tau = 10 mm'),
+            (-87, ROOT.kOrange+2, 'dijet M = 800 GeV, #tau = 30 mm'),
             ]),
         ]
 
