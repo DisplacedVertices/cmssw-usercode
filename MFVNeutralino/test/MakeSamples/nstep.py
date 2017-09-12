@@ -14,14 +14,18 @@ hip_mitigation = False
 ex = ''
 already = []
 
-if 0:
-    meta, taus, masses = 'neu', [100, 300, 1000, 10000, 30000], [300, 400, 600, 800, 1200, 1600]
+taus   = [100, 300, 1000, 10000, 30000]
+masses = [300, 400, 500, 600, 800, 1200, 1600]
+hip_right = False
+
+if 1:
+    meta = 'neu'
+elif 1:
+    meta = 'ddbar'
 elif 0:
-    meta, taus, masses = 'lq2', [100, 300, 1000, 10000], [300, 400, 600, 800, 1200, 1600]
+    meta = 'lq2'
 elif 0:
-    meta, taus, masses = 'glu', [100, 300, 1000, 10000], [300, 400, 600, 800, 1200, 1600]
-elif 0:
-    meta, taus, masses = 'ddbar', [100, 300, 1000, 10000, 30000], [300, 400, 500, 600, 800, 1200, 1600]
+    meta = 'glu'
 elif 0:
     meta = 'ttbar'
     nevents, events_per
@@ -32,13 +36,7 @@ elif 0:
     output_level = 'gensim'
     output_dataset_tag = 'RunIISummer15GS-MCRUN2_71_V1'
 elif 0:
-    meta = 'qcdht2000_gensim_ext1'
-    nevents, events_per = 396000, 1500
-    from_lhe = True
-    output_level = 'gensim'
-    output_dataset_tag = 'RunIISummer15GS-MCRUN2_71_V1'
-elif 0:
-    meta = 'qcdht2000_80'
+    meta = 'qcdht2000'
     nevents, events_per = 396000, 1500
     from_lhe = True
     output_level = 'gensim'
@@ -54,12 +52,12 @@ elif 0:
     hip_simulation = 1.0
     hip_mitigation = True
     ex = ''
-elif 0:
-    meta, taus, masses = 'neu', [100, 300, 1000, 10000, 30000], [300, 400, 600, 800, 1200, 1600]
-    already = [] # [(t,m) for t in [300, 1000, 10000] for m in [400, 800]]
+
+####
+
+if hip_right:
     hip_simulation = 1.0
     hip_mitigation = True
-    ex = ''
 
 if hip_simulation:
     use_this_cmssw = True
@@ -68,6 +66,8 @@ if hip_simulation:
     ex += '_hip' + exx.replace('.','p')
     if hip_mitigation:
         ex += '_mit'
+else:
+    hip_mitigation = False
 
 if not premix:
     output_dataset_tag = output_dataset_tag.replace('Premix', '')
