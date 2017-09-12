@@ -186,7 +186,7 @@ leptonic_background_samples = [
     ]
 
 minbias_samples = [
-    MCSample('private_minbias', '/minbias/tucker-RunIISummer15GS-MCRUN2_71_V1-79473ee9dd0d24ba1969f21e10b4fae5/USER', 990000 - 2*3000),
+    MCSample('private_minbias', '/minbias/tucker-RunIISummer15GS-MCRUN2_71_V1-79473ee9dd0d24ba1969f21e10b4fae5/USER', 996000),
     ]
 
 mfv_ddbar_samples = [
