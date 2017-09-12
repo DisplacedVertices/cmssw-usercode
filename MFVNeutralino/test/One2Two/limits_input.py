@@ -16,7 +16,7 @@ bkg_uncert = [0.13, 0.29, 0.52]
 in_fn = '2v_from_jets_2015p6_5track_default_v15.root'
 in_trees = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV15_v3/mfv*root'
 
-out_fn = 'limits_input.root'
+limits_input_fn = 'limits_input.root'
 
 assert len(observed) == nbins
 assert len(sig_uncert) == nbins
@@ -27,10 +27,26 @@ def ndx2isample(ndx):
 def isample2ndx(isample):
     return -isample-1
 
+def name2isample(f, name):
+    h = f.Get('name_list')
+    ax = h.GetXaxis()
+    for ibin in xrange(1, h.GetNbinsX()+1):
+        if name == ax.GetBinLabel(ibin):
+            return -ibin
+    raise ValueError('no name %s found in %r' % (name, f))
+
+def isample2name(f, isample):
+    h = f.Get('name_list')
+    nbins = h.GetNbinsX()
+    ibin = -isample
+    if ibin < 1 or ibin > nbins:
+        raise ValueError('isample %i wrong for name list in %r (nbins = %i)' % (isample, f, nbins))
+    return h.GetXaxis().GetBinLabel(ibin)
+
 def make():
     ROOT.TH1.AddDirectory(1)
     in_f = ROOT.TFile(in_fn)
-    f = ROOT.TFile(out_fn, 'recreate')
+    f = ROOT.TFile(limits_input_fn, 'recreate')
 
     h_int_lumi = ROOT.TH1D('h_int_lumi', '', 1, 0, 1)
     h_int_lumi.SetBinContent(1, int_lumi)
@@ -115,24 +131,24 @@ def make():
 def draw():
     ps = plot_saver(plot_dir('o2t_templates_run2'), size=(600,600))
 
+    f = ROOT.TFile(limits_input_fn)
+
     whiches = [
         ('multijet', [
-            (-105, ROOT.kRed,      'multijet M = 800 GeV, #tau = 100 #mum'),
-            (-124, ROOT.kGreen+2,  'multijet M = 800 GeV, #tau = 300 #mum'),
-            (-143, ROOT.kBlue,     'multijet M = 800 GeV, #tau = 1 mm'),
-            (-162, ROOT.kMagenta,  'multijet M = 800 GeV, #tau = 10 mm'),
-            (-181, ROOT.kOrange+2, 'multijet M = 800 GeV, #tau = 30 mm'),
+            (name2isample(f, 'mfv_neu_tau00100um_M0800'), ROOT.kRed,      'multijet M = 800 GeV, #tau = 100 #mum'),
+            (name2isample(f, 'mfv_neu_tau00300um_M0800'), ROOT.kGreen+2,  'multijet M = 800 GeV, #tau = 300 #mum'),
+            (name2isample(f, 'mfv_neu_tau01000um_M0800'), ROOT.kBlue,     'multijet M = 800 GeV, #tau = 1 mm'),
+            (name2isample(f, 'mfv_neu_tau10000um_M0800'), ROOT.kMagenta,  'multijet M = 800 GeV, #tau = 10 mm'),
+            (name2isample(f, 'mfv_neu_tau30000um_M0800'), ROOT.kOrange+2, 'multijet M = 800 GeV, #tau = 30 mm'),
             ]),
         ('dijet', [
-            (-11, ROOT.kRed,      'dijet M = 800 GeV, #tau = 100 #mum'),
-            (-30, ROOT.kGreen+2,  'dijet M = 800 GeV, #tau = 300 #mum'),
-            (-49, ROOT.kBlue,     'dijet M = 800 GeV, #tau = 1 mm'),
-            (-68, ROOT.kMagenta,  'dijet M = 800 GeV, #tau = 10 mm'),
-            (-87, ROOT.kOrange+2, 'dijet M = 800 GeV, #tau = 30 mm'),
+            (name2isample(f, 'mfv_ddbar_tau00100um_M0800'), ROOT.kRed,      'dijet M = 800 GeV, #tau = 100 #mum'),
+            (name2isample(f, 'mfv_ddbar_tau00300um_M0800'), ROOT.kGreen+2,  'dijet M = 800 GeV, #tau = 300 #mum'),
+            (name2isample(f, 'mfv_ddbar_tau01000um_M0800'), ROOT.kBlue,     'dijet M = 800 GeV, #tau = 1 mm'),
+            (name2isample(f, 'mfv_ddbar_tau10000um_M0800'), ROOT.kMagenta,  'dijet M = 800 GeV, #tau = 10 mm'),
+            (name2isample(f, 'mfv_ddbar_tau30000um_M0800'), ROOT.kOrange+2, 'dijet M = 800 GeV, #tau = 30 mm'),
             ]),
         ]
-
-    f = ROOT.TFile(out_fn)
 
     def fmt(h, name, color, save=[]):
         binning = to_array(0., 0.04, 0.07, 0.15)
