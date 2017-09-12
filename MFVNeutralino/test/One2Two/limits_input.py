@@ -22,6 +22,11 @@ assert len(observed) == nbins
 assert len(sig_uncert) == nbins
 assert len(bkg_uncert) == nbins
 
+def ndx2isample(ndx):
+    return -(ndx+1)
+def isample2ndx(isample):
+    return -isample-1
+
 def make():
     ROOT.TH1.AddDirectory(1)
     in_f = ROOT.TFile(in_fn)
@@ -58,12 +63,21 @@ def make():
 
     # now signals. grab the printout and put in signals.h for the fitting code to pick up
     fns = glob(in_trees)
-    fns = sorted(x for x in fns if '_2015' not in x) + sorted(x for x in fns if '_2015' in x)
+    fns = [fn for fn in fns if not fn.endswith('hip1p0.root')]
+    fns = \
+        sorted(x for x in fns if '_2015' not in x and '_hip' not in x) + \
+        sorted(x for x in fns if '_2015' not in x and '_hip' in x) + \
+        sorted(x for x in fns if '_2015' in x)
+    nfns = len(fns)
     hs_sig = []
+    name_list = ROOT.TH1C('name_list', in_trees, nfns, 0, nfns) # I'm too stupid to get TList of TStrings to work in python
+
     for ifn, fn in enumerate(fns):
-        isample = -(ifn+1)
+        isample = ndx2isample(ifn)
         name = os.path.basename(fn).replace('.root', '')
+        name_list.GetXaxis().SetBinLabel(-isample, name)
         print 'samples.push_back({%i, "%s", 0, 0});' % (isample, name)
+
         sig_f = ROOT.TFile(fn)
         sig_t = sig_f.Get('mfvMiniTree/t')
 
