@@ -65,6 +65,14 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   event.getByToken(event_token, mevent);
 
   nt.gen_flavor_code = mevent->gen_flavor_code;
+
+  nt.pass_hlt = mevent->pass_ & 0x1F;
+  nt.l1_htt = mevent->l1_htt;
+  nt.l1_myhtt = mevent->l1_myhtt;
+  nt.l1_myhttwbug = mevent->l1_myhttwbug;
+  nt.hlt_ht = mevent->hlt_ht;
+  nt.hlt_ht4mc = mevent->hlt_ht4mc;
+
   nt.npv = int2uchar(mevent->npv);
   nt.pvx = mevent->pvx - mevent->bsx_at_z(mevent->pvz);
   nt.pvy = mevent->pvy - mevent->bsy_at_z(mevent->pvz);

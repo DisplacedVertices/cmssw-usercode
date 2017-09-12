@@ -13,8 +13,8 @@ namespace mfv {
   void MiniNtuple::clear() {
     run = lumi = 0;
     event = 0;
-    gen_flavor_code = npv = npu = njets = nvtx = ntk0 = ntracksptgt30 = njetsntks0 = ntk1 = ntracksptgt31 = njetsntks1 = 0;
-    pvx = pvy = pvz = weight = x0 = y0 = z0 = drmin0 = drmax0 = bs2derr0 = geo2ddist0 = x1 = y1 = z1 = drmin1 = drmax1 = bs2derr1 = geo2ddist1 = 0;
+    gen_flavor_code = pass_hlt = npv = npu = njets = nvtx = ntk0 = ntracksptgt30 = njetsntks0 = ntk1 = ntracksptgt31 = njetsntks1 = 0;
+    l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = hlt_ht4mc = pvx = pvy = pvz = weight = x0 = y0 = z0 = drmin0 = drmax0 = bs2derr0 = geo2ddist0 = x1 = y1 = z1 = drmin1 = drmax1 = bs2derr1 = geo2ddist1 = 0;
     genmatch0 = genmatch1 = 0;
     gen_x[0] = gen_y[0] = gen_z[0] = gen_x[1] = gen_y[1] = gen_z[1] = 0;
     for (int i = 0; i < 50; ++i) {
@@ -48,6 +48,14 @@ namespace mfv {
     tree->Branch("lumi", &nt.lumi);
     tree->Branch("event", &nt.event);
     tree->Branch("gen_flavor_code", &nt.gen_flavor_code);
+
+    tree->Branch("pass_hlt", &nt.pass_hlt);
+    tree->Branch("l1_htt", &nt.l1_htt);
+    tree->Branch("l1_myhtt", &nt.l1_myhtt);
+    tree->Branch("l1_myhttwbug", &nt.l1_myhttwbug);
+    tree->Branch("hlt_ht", &nt.hlt_ht);
+    tree->Branch("hlt_ht4mc", &nt.hlt_ht4mc);
+
     tree->Branch("npv", &nt.npv);
     tree->Branch("pvx", &nt.pvx);
     tree->Branch("pvy", &nt.pvy);
@@ -125,6 +133,12 @@ namespace mfv {
     tree->SetBranchAddress("lumi", &nt.lumi);
     tree->SetBranchAddress("event", &nt.event);
     tree->SetBranchAddress("gen_flavor_code", &nt.gen_flavor_code);
+    tree->SetBranchAddress("pass_hlt", &nt.pass_hlt);
+    tree->SetBranchAddress("l1_htt", &nt.l1_htt);
+    tree->SetBranchAddress("l1_myhtt", &nt.l1_myhtt);
+    tree->SetBranchAddress("l1_myhttwbug", &nt.l1_myhttwbug);
+    tree->SetBranchAddress("hlt_ht", &nt.hlt_ht);
+    tree->SetBranchAddress("hlt_ht4mc", &nt.hlt_ht4mc);
     tree->SetBranchAddress("npv", &nt.npv);
     tree->SetBranchAddress("pvx", &nt.pvx);
     tree->SetBranchAddress("pvy", &nt.pvy);

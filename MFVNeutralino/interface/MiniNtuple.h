@@ -15,6 +15,12 @@ namespace mfv {
     unsigned lumi;
     unsigned long long event;
     unsigned char gen_flavor_code;
+    unsigned char pass_hlt;
+    float l1_htt;
+    float l1_myhtt;
+    float l1_myhttwbug;
+    float hlt_ht;
+    float hlt_ht4mc;
     unsigned char npv;
     float pvx;
     float pvy;
