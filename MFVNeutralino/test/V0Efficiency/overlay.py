@@ -31,10 +31,12 @@ gmc.SetMarkerColor(2)
 gmc.SetLineColor(2)
 gmc.SetFillColor(2)
 
-gmc.GetYaxis().SetTitle('ratio of ratios')
+gmc.GetYaxis().SetTitle('ratio of yields: HIP / non-HIP')
 
 gmc.Draw('APE2')
 gdata.Draw('P')
+gmc.GetXaxis().SetRangeUser(-0.55,0.55)
+
 ps.save('rrr')
 
 
