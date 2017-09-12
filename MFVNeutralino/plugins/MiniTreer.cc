@@ -73,6 +73,12 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   nt.hlt_ht = mevent->hlt_ht;
   nt.hlt_ht4mc = mevent->hlt_ht4mc;
 
+  nt.bsx = mevent->bsx;
+  nt.bsy = mevent->bsy;
+  nt.bsz = mevent->bsz;
+  nt.bsdxdz = mevent->bsdxdz;
+  nt.bsdydz = mevent->bsdydz;
+
   nt.npv = int2uchar(mevent->npv);
   nt.pvx = mevent->pvx - mevent->bsx_at_z(mevent->pvz);
   nt.pvy = mevent->pvy - mevent->bsy_at_z(mevent->pvz);
@@ -140,14 +146,9 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.x0 = v0.x;
     nt.y0 = v0.y;
     nt.z0 = v0.z;
-    nt.ntracksptgt30 = int2uchar(v0.ntracksptgt(3));
-    nt.drmin0 = v0.drmin();
-    nt.drmax0 = v0.drmax();
-    nt.njetsntks0 = int2uchar(v0.njets[mfv::JByNtracks]);
     nt.bs2derr0 = v0.bs2derr;
     nt.geo2ddist0 = v0.geo2ddist();
-    nt.x1 = nt.y1 = nt.z1 = nt.drmin1 = nt.drmax1 = nt.bs2derr1 = nt.geo2ddist1 = 0;
-    nt.ntracksptgt31 = nt.njetsntks1 = 0;
+    nt.x1 = nt.y1 = nt.z1 = nt.bs2derr1 = nt.geo2ddist1 = 0;
   }
   else if (vertices.size() >= 2) {
     const MFVVertexAux& v0 = vertices[0];
@@ -185,16 +186,8 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.genmatch1 = gen_matches(v1);
     nt.x0 = v0.x; nt.y0 = v0.y; nt.z0 = v0.z;
     nt.x1 = v1.x; nt.y1 = v1.y; nt.z1 = v1.z;
-    nt.ntracksptgt30 = int2uchar(v0.ntracksptgt(3));
-    nt.drmin0 = v0.drmin();
-    nt.drmax0 = v0.drmax();
-    nt.njetsntks0 = int2uchar(v0.njets[mfv::JByNtracks]);
     nt.bs2derr0 = v0.bs2derr;
     nt.geo2ddist0 = v0.geo2ddist();
-    nt.ntracksptgt31 = int2uchar(v1.ntracksptgt(3));
-    nt.drmin1 = v1.drmin();
-    nt.drmax1 = v1.drmax();
-    nt.njetsntks1 = int2uchar(v1.njets[mfv::JByNtracks]);
     nt.bs2derr1 = v1.bs2derr;
     nt.geo2ddist1 = v1.geo2ddist();
   }

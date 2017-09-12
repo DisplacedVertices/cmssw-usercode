@@ -21,6 +21,13 @@ namespace mfv {
     float l1_myhttwbug;
     float hlt_ht;
     float hlt_ht4mc;
+    float bsx;
+    float bsy;
+    float bsz;
+    float bsdxdz;
+    float bsdydz;
+    float bsx_at_z(float z) const { return bsx + bsdxdz * (z - bsz); }
+    float bsy_at_z(float z) const { return bsy + bsdydz * (z - bsz); }
     unsigned char npv;
     float pvx;
     float pvy;
@@ -63,10 +70,6 @@ namespace mfv {
     float x0;
     float y0;
     float z0;
-    unsigned char ntracksptgt30;
-    float drmin0;
-    float drmax0;
-    unsigned char njetsntks0;
     float bs2derr0;
     float geo2ddist0;
 
@@ -95,10 +98,6 @@ namespace mfv {
     float x1;
     float y1;
     float z1;
-    unsigned char ntracksptgt31;
-    float drmin1;
-    float drmax1;
-    unsigned char njetsntks1;
     float bs2derr1;
     float geo2ddist1;
   };

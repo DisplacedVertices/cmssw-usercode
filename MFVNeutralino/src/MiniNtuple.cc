@@ -13,8 +13,8 @@ namespace mfv {
   void MiniNtuple::clear() {
     run = lumi = 0;
     event = 0;
-    gen_flavor_code = pass_hlt = npv = npu = njets = nvtx = ntk0 = ntracksptgt30 = njetsntks0 = ntk1 = ntracksptgt31 = njetsntks1 = 0;
-    l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = hlt_ht4mc = pvx = pvy = pvz = weight = x0 = y0 = z0 = drmin0 = drmax0 = bs2derr0 = geo2ddist0 = x1 = y1 = z1 = drmin1 = drmax1 = bs2derr1 = geo2ddist1 = 0;
+    gen_flavor_code = pass_hlt = npv = npu = njets = nvtx = ntk0 = ntk1 = 0;
+    l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = hlt_ht4mc = bsx = bsy = bsz = bsdxdz = bsdydz = pvx = pvy = pvz = weight = x0 = y0 = z0 = bs2derr0 = geo2ddist0 = x1 = y1 = z1 = bs2derr1 = geo2ddist1 = 0;
     genmatch0 = genmatch1 = 0;
     gen_x[0] = gen_y[0] = gen_z[0] = gen_x[1] = gen_y[1] = gen_z[1] = 0;
     for (int i = 0; i < 50; ++i) {
@@ -89,10 +89,6 @@ namespace mfv {
     tree->Branch("x0", &nt.x0);
     tree->Branch("y0", &nt.y0);
     tree->Branch("z0", &nt.z0);
-    tree->Branch("ntracksptgt30", &nt.ntracksptgt30);
-    tree->Branch("drmin0", &nt.drmin0);
-    tree->Branch("drmax0", &nt.drmax0);
-    tree->Branch("njetsntks0", &nt.njetsntks0);
     tree->Branch("bs2derr0", &nt.bs2derr0);
     tree->Branch("geo2ddist0", &nt.geo2ddist0);
 
@@ -111,10 +107,6 @@ namespace mfv {
     tree->Branch("x1", &nt.x1);
     tree->Branch("y1", &nt.y1);
     tree->Branch("z1", &nt.z1);
-    tree->Branch("ntracksptgt31", &nt.ntracksptgt31);
-    tree->Branch("drmin1", &nt.drmin1);
-    tree->Branch("drmax1", &nt.drmax1);
-    tree->Branch("njetsntks1", &nt.njetsntks1);
     tree->Branch("bs2derr1", &nt.bs2derr1);
     tree->Branch("geo2ddist1", &nt.geo2ddist1);
 
@@ -170,10 +162,6 @@ namespace mfv {
     tree->SetBranchAddress("x0", &nt.x0);
     tree->SetBranchAddress("y0", &nt.y0);
     tree->SetBranchAddress("z0", &nt.z0);
-    tree->SetBranchAddress("ntracksptgt30", &nt.ntracksptgt30);
-    tree->SetBranchAddress("drmin0", &nt.drmin0);
-    tree->SetBranchAddress("drmax0", &nt.drmax0);
-    tree->SetBranchAddress("njetsntks0", &nt.njetsntks0);
     tree->SetBranchAddress("bs2derr0", &nt.bs2derr0);
     tree->SetBranchAddress("geo2ddist0", &nt.geo2ddist0);
     tree->SetBranchAddress("ntk1", &nt.ntk1);
@@ -191,10 +179,6 @@ namespace mfv {
     tree->SetBranchAddress("x1", &nt.x1);
     tree->SetBranchAddress("y1", &nt.y1);
     tree->SetBranchAddress("z1", &nt.z1);
-    tree->SetBranchAddress("ntracksptgt31", &nt.ntracksptgt31);
-    tree->SetBranchAddress("drmin1", &nt.drmin1);
-    tree->SetBranchAddress("drmax1", &nt.drmax1);
-    tree->SetBranchAddress("njetsntks1", &nt.njetsntks1);
     tree->SetBranchAddress("bs2derr1", &nt.bs2derr1);
     tree->SetBranchAddress("geo2ddist1", &nt.geo2ddist1);
   }
