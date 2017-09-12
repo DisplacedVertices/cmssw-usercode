@@ -170,6 +170,14 @@ if year == '2015' or year == '2016' or year == '2015p6':
       y_range = (1e-2, 10),
       )
 
+    C('dvv_nm1_ntracks',
+      histogram_path = 'vtxHst2VNoNtracks/h_svdist2d',
+      rebin = 10,
+      x_title = 'd_{VV} (cm)',
+      y_title = 'Events/200 #mum',
+      y_range = (1e-2, 1e3),
+      )
+
 if year == '2016':
     C('track_pt',
       file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV2', '%(name)s.root'),
