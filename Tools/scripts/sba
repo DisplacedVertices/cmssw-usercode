@@ -1,1 +1,1 @@
-sbpush $CMSSW_BASE/src
+sbpush $CMSSW_BASE/src "$@"

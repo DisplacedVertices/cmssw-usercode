@@ -127,13 +127,13 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         if not sample.is_mc:
             to_add.append('''
 for p in process.paths.keys():
-    if not (p == 'pSkimSel' or p == 'pEventPreSel' or p == 'Ntk3pOnlyOneVtx' or p.startswith('p0V') or p.startswith('Ntk3p1V')):
+    if not (p == 'pSkimSel' or p == 'pEventPreSel' or p == 'pOnlyOneVtx' or p.startswith('Ntk3') or p.startswith('Ntk4') or p.startswith('p0V') or p.startswith('p1V')):
         delattr(process, p)
 ''')
         return to_add, to_replace
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('HistosV15',
+    cs = CondorSubmitter('HistosV15_v2',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = modify,
