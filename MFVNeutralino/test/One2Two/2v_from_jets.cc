@@ -26,8 +26,65 @@ float ht(int njets, float* jet_pt) {
   return sum;
 }
 
-void construct_dvvc(bool is_mc, bool inject_signal, std::string year, int ntracks, bool correct_bquarks, int bquarks, bool vary_dphi, bool clearing_from_eff, bool vary_eff, int min_npu, int max_npu, const char* out_fn) {
-  printf("is_mc = %d, inject_signal = %d, year = %s, ntracks = %d, correct_bquarks = %d, bquarks = %d, vary_dphi = %d, clearing_from_eff = %d, vary_eff = %d, out_fn = %s\n", is_mc, inject_signal, year.c_str(), ntracks, correct_bquarks, bquarks, vary_dphi, clearing_from_eff, vary_eff, out_fn);
+struct ConstructDvvcParameters {
+  bool is_mc_;
+  bool inject_signal_;
+  std::string year_;
+  int ntracks_;
+  bool correct_bquarks_;
+  int bquarks_;
+  bool vary_dphi_;
+  bool clearing_from_eff_;
+  bool vary_eff_;
+  int min_npu_;
+  int max_npu_;
+
+  ConstructDvvcParameters()
+    : is_mc_(true),
+      inject_signal_(false),
+      year_("2015p6"),
+      ntracks_(5),
+      correct_bquarks_(true),
+      bquarks_(-1),
+      vary_dphi_(false),
+      clearing_from_eff_(true),
+      vary_eff_(false),
+      min_npu_(0),
+      max_npu_(255)
+  {
+  }
+
+  bool is_mc() const { return is_mc_; }
+  bool inject_signal() const { return inject_signal_; }
+  std::string year() const { return year_; }
+  int ntracks() const { return ntracks_; }
+  bool correct_bquarks() const { return correct_bquarks_; }
+  int bquarks() const { return bquarks_; }
+  bool vary_dphi() const { return vary_dphi_; }
+  bool clearing_from_eff() const { return clearing_from_eff_; }
+  bool vary_eff() const { return vary_eff_; }
+  int min_npu() const { return min_npu_; }
+  int max_npu() const { return max_npu_; }
+
+  ConstructDvvcParameters is_mc(bool x)             { ConstructDvvcParameters y; y.is_mc_             = x; return y; }
+  ConstructDvvcParameters inject_signal(bool x)     { ConstructDvvcParameters y; y.inject_signal_     = x; return y; }
+  ConstructDvvcParameters year(std::string x)       { ConstructDvvcParameters y; y.year_              = x; return y; }
+  ConstructDvvcParameters ntracks(int x)            { ConstructDvvcParameters y; y.ntracks_           = x; return y; }
+  ConstructDvvcParameters correct_bquarks(bool x)   { ConstructDvvcParameters y; y.correct_bquarks_   = x; return y; }
+  ConstructDvvcParameters bquarks(int x)            { ConstructDvvcParameters y; y.bquarks_           = x; return y; }
+  ConstructDvvcParameters vary_dphi(bool x)         { ConstructDvvcParameters y; y.vary_dphi_         = x; return y; }
+  ConstructDvvcParameters clearing_from_eff(bool x) { ConstructDvvcParameters y; y.clearing_from_eff_ = x; return y; }
+  ConstructDvvcParameters vary_eff(bool x)          { ConstructDvvcParameters y; y.vary_eff_          = x; return y; }
+  ConstructDvvcParameters min_npu(int x)            { ConstructDvvcParameters y; y.min_npu_           = x; return y; }
+  ConstructDvvcParameters max_npu(int x)            { ConstructDvvcParameters y; y.max_npu_           = x; return y; }
+
+  void print() const {
+    printf("is_mc = %d, inject_signal = %d, year = %s, ntracks = %d, correct_bquarks = %d, bquarks = %d, vary_dphi = %d, clearing_from_eff = %d, vary_eff = %d", is_mc(), inject_signal(), year_.c_str(), ntracks(), correct_bquarks(), bquarks(), vary_dphi(), clearing_from_eff(), vary_eff());
+  }
+};
+
+void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
+  p.print(); printf(", out_fn = %s\n", out_fn);
 
   const int nbkg = 20;
   const char* samples[nbkg];
@@ -57,31 +114,31 @@ void construct_dvvc(bool is_mc, bool inject_signal, std::string year, int ntrack
   int ibkg_begin;
   int ibkg_end;
   double dphi_pdf_c;
-  double dphi_pdf_e = 2;
+  double dphi_pdf_e = 2; // JMTBAD could be moved into params
   double dphi_pdf_a;
   const char* eff_file;
   const char* eff_hist = "maxtk3";
 
-  if (is_mc) {
-    if (year == "2015") {
+  if (p.is_mc()) {
+    if (p.year() == "2015") {
       ibkg_begin = 1;
-      if (inject_signal) ibkg_begin = 0;
+      if (p.inject_signal()) ibkg_begin = 0;
       ibkg_end = 4;
       dphi_pdf_c = 1.31;
       dphi_pdf_a = 4.04;
       eff_file = "vpeffs_2015_v15.root";
-    } else if (year == "2016") {
+    } else if (p.year() == "2016") {
       ibkg_begin = 5;
       ibkg_end = 8;
-      if (inject_signal) ibkg_end = 9;
+      if (p.inject_signal()) ibkg_end = 9;
       dphi_pdf_c = 1.34;
       dphi_pdf_a = 3.86;
       eff_file = "vpeffs_2016_v15.root";
-    } else if (year == "2015p6") {
+    } else if (p.year() == "2015p6") {
       ibkg_begin = 1;
-      if (inject_signal) ibkg_begin = 0;
+      if (p.inject_signal()) ibkg_begin = 0;
       ibkg_end = 8;
-      if (inject_signal) ibkg_end = 9;
+      if (p.inject_signal()) ibkg_end = 9;
       dphi_pdf_c = 1.34;
       dphi_pdf_a = 3.87;
       eff_file = "vpeffs_2015p6_v15.root";
@@ -89,43 +146,43 @@ void construct_dvvc(bool is_mc, bool inject_signal, std::string year, int ntrack
       fprintf(stderr, "bad year"); exit(1);
     }
   } else {
-    if (year == "2015") {
+    if (p.year() == "2015") {
       ibkg_begin = 10;
       ibkg_end = 11;
       dphi_pdf_c = 1.33;
       dphi_pdf_a = 4.35;
       eff_file = "vpeffs_data_2015_v15.root";
-    } else if (year == "2016") {
+    } else if (p.year() == "2016") {
       ibkg_begin = 12;
       ibkg_end = 19;
       dphi_pdf_c = 1.32;
       dphi_pdf_a = 4.65;
       eff_file = "vpeffs_data_2016_v15.root";
-    } else if (year == "2015p6") {
+    } else if (p.year() == "2015p6") {
       ibkg_begin = 10;
       ibkg_end = 19;
       dphi_pdf_c = 1.32;
       dphi_pdf_a = 4.64;
       eff_file = "vpeffs_data_2015p6_v15.root";
-    } else if (year == "2016BCD") {
+    } else if (p.year() == "2016BCD") {
       ibkg_begin = 12;
       ibkg_end = 14;
       dphi_pdf_c = 1.36;
       dphi_pdf_a = 4.59;
       eff_file = "vpeffs_data_2016BCD_v15.root";
-    } else if (year == "2016EF") {
+    } else if (p.year() == "2016EF") {
       ibkg_begin = 15;
       ibkg_end = 16;
       dphi_pdf_c = 1.21;
       dphi_pdf_a = 4.83;
       eff_file = "vpeffs_data_2016EF_v15.root";
-    } else if (year == "2016G") {
+    } else if (p.year() == "2016G") {
       ibkg_begin = 17;
       ibkg_end = 17;
       dphi_pdf_c = 1.38;
       dphi_pdf_a = 4.38;
       eff_file = "vpeffs_data_2016G_v15.root";
-    } else if (year == "2016H") {
+    } else if (p.year() == "2016H") {
       ibkg_begin = 18;
       ibkg_end = 19;
       dphi_pdf_c = 1.24;
@@ -137,32 +194,32 @@ void construct_dvvc(bool is_mc, bool inject_signal, std::string year, int ntrack
   }
 
   const char* tree_path;
-  double bquark_correction[3];
+  double bquark_correction[3] = {1,1,1};
   int min_ntracks0 = 0;
   int max_ntracks0 = 1000000;
   int min_ntracks1 = 0;
   int max_ntracks1 = 1000000;
 
-  if (ntracks == 3) {
+  if (p.ntracks() == 3) {
     tree_path = "mfvMiniTreeNtk3/t";
-    if (year == "2015")        { bquark_correction[0] = 0.93; bquark_correction[1] = 1.06; bquark_correction[2] = 1.09; }
-    else if (year == "2015p6") { bquark_correction[0] = 0.93; bquark_correction[1] = 1.07; bquark_correction[2] = 1.10; }
-    else                       { bquark_correction[0] = 0.94; bquark_correction[1] = 1.07; bquark_correction[2] = 1.11; }
-  } else if (ntracks == 4) {
+    if (p.year() == "2015")        { bquark_correction[0] = 0.93; bquark_correction[1] = 1.06; bquark_correction[2] = 1.09; }
+    else if (p.year() == "2015p6") { bquark_correction[0] = 0.93; bquark_correction[1] = 1.07; bquark_correction[2] = 1.10; }
+    else                           { bquark_correction[0] = 0.94; bquark_correction[1] = 1.07; bquark_correction[2] = 1.11; }
+  } else if (p.ntracks() == 4) {
     tree_path = "mfvMiniTreeNtk4/t";
-    if (year == "2015")        { bquark_correction[0] = 0.93; bquark_correction[1] = 1.10; bquark_correction[2] = 1.12; }
-    else if (year == "2015p6") { bquark_correction[0] = 0.93; bquark_correction[1] = 1.11; bquark_correction[2] = 1.20; }
-    else                       { bquark_correction[0] = 0.93; bquark_correction[1] = 1.11; bquark_correction[2] = 1.19; }
-  } else if (ntracks == 5) {
+    if (p.year() == "2015")        { bquark_correction[0] = 0.93; bquark_correction[1] = 1.10; bquark_correction[2] = 1.12; }
+    else if (p.year() == "2015p6") { bquark_correction[0] = 0.93; bquark_correction[1] = 1.11; bquark_correction[2] = 1.20; }
+    else                           { bquark_correction[0] = 0.93; bquark_correction[1] = 1.11; bquark_correction[2] = 1.19; }
+  } else if (p.ntracks() == 5) {
     tree_path = "mfvMiniTree/t";
-    if (year == "2015")        { bquark_correction[0] = 0.90; bquark_correction[1] = 1.31; bquark_correction[2] = 1.26; }
-    else if (year == "2015p6") { bquark_correction[0] = 0.92; bquark_correction[1] = 1.25; bquark_correction[2] = 1.57; }
-    else                       { bquark_correction[0] = 0.92; bquark_correction[1] = 1.25; bquark_correction[2] = 1.54; }
-  } else if (ntracks == 7) {
+    if (p.year() == "2015")        { bquark_correction[0] = 0.90; bquark_correction[1] = 1.31; bquark_correction[2] = 1.26; }
+    else if (p.year() == "2015p6") { bquark_correction[0] = 0.92; bquark_correction[1] = 1.25; bquark_correction[2] = 1.57; }
+    else                           { bquark_correction[0] = 0.92; bquark_correction[1] = 1.25; bquark_correction[2] = 1.54; }
+  } else if (p.ntracks() == 7) {
     tree_path = "mfvMiniTreeNtk3or4/t";
-    if (year == "2015")        { bquark_correction[0] = 0.93; bquark_correction[1] = 1.07; bquark_correction[2] = 1.11; }
-    else if (year == "2015p6") { bquark_correction[0] = 0.93; bquark_correction[1] = 1.09; bquark_correction[2] = 1.14; }
-    else                       { bquark_correction[0] = 0.93; bquark_correction[1] = 1.09; bquark_correction[2] = 1.14; }
+    if (p.year() == "2015")        { bquark_correction[0] = 0.93; bquark_correction[1] = 1.07; bquark_correction[2] = 1.11; }
+    else if (p.year() == "2015p6") { bquark_correction[0] = 0.93; bquark_correction[1] = 1.09; bquark_correction[2] = 1.14; }
+    else                           { bquark_correction[0] = 0.93; bquark_correction[1] = 1.09; bquark_correction[2] = 1.14; }
     min_ntracks0 = 4;
     max_ntracks0 = 4;
     min_ntracks1 = 3;
@@ -171,44 +228,44 @@ void construct_dvvc(bool is_mc, bool inject_signal, std::string year, int ntrack
     fprintf(stderr, "bad ntracks"); exit(1);
   }
 
-  if (!correct_bquarks) {
+  if (!p.correct_bquarks()) {
     bquark_correction[0] = 1; bquark_correction[1] = 1; bquark_correction[2] = 1;
   }
 
-  if (vary_eff) {
-    if (is_mc) {
-      if (year == "2015") {
+  if (p.vary_eff()) {
+    if (p.is_mc()) {
+      if (p.year() == "2015") {
         eff_file = "vpeffs_2015_v15_ntkseeds.root";
-      } else if (year == "2016") {
+      } else if (p.year() == "2016") {
         eff_file = "vpeffs_2016_v15_ntkseeds.root";
-      } else if (year == "2015p6") {
+      } else if (p.year() == "2015p6") {
         eff_file = "vpeffs_2015p6_v15_ntkseeds.root";
       }
     } else {
-      if (year == "2015") {
+      if (p.year() == "2015") {
         eff_file = "vpeffs_data_2015_v15_ntkseeds.root";
-      } else if (year == "2016") {
+      } else if (p.year() == "2016") {
         eff_file = "vpeffs_data_2016_v15_ntkseeds.root";
-      } else if (year == "2015p6") {
+      } else if (p.year() == "2015p6") {
         eff_file = "vpeffs_data_2015p6_v15_ntkseeds.root";
-      } else if (year == "2016BCD") {
+      } else if (p.year() == "2016BCD") {
         eff_file = "vpeffs_data_2016BCD_v15_ntkseeds.root";
-      } else if (year == "2016EF") {
+      } else if (p.year() == "2016EF") {
         eff_file = "vpeffs_data_2016EF_v15_ntkseeds.root";
-      } else if (year == "2016G") {
+      } else if (p.year() == "2016G") {
         eff_file = "vpeffs_data_2016G_v15_ntkseeds.root";
-      } else if (year == "2016H") {
+      } else if (p.year() == "2016H") {
         eff_file = "vpeffs_data_2016H_v15_ntkseeds.root";
       }
     }
 
-    if (ntracks == 3) {
+    if (p.ntracks() == 3) {
       eff_hist = "maxtk3";
-    } else if (ntracks == 4) {
+    } else if (p.ntracks() == 4) {
       eff_hist = "maxtk4";
-    } else if (ntracks == 5) {
+    } else if (p.ntracks() == 5) {
       eff_hist = "maxtk5";
-    } else if (ntracks == 7) {
+    } else if (p.ntracks() == 7) {
       eff_hist = "maxtk3";
     }
   }
@@ -251,8 +308,8 @@ void construct_dvvc(bool is_mc, bool inject_signal, std::string year, int ntrack
       if (t->LoadTree(j) < 0) break;
       if (t->GetEntry(j) <= 0) continue;
 
-      if ((bquarks == 0 && nt.gen_flavor_code == 2) || (bquarks == 1 && nt.gen_flavor_code != 2)) continue;
-      if (nt.npu < min_npu || nt.npu > max_npu) continue;
+      if ((p.bquarks() == 0 && nt.gen_flavor_code == 2) || (p.bquarks() == 1 && nt.gen_flavor_code != 2)) continue;
+      if (nt.npu < p.min_npu() || nt.npu > p.max_npu()) continue;
 
       const float w = weights[i] * nt.weight;
       if (nt.nvtx == 1) {
@@ -309,14 +366,14 @@ void construct_dvvc(bool is_mc, bool inject_signal, std::string year, int ntrack
 
   TF1* i_dphi = 0;
   TF1* i_dphi2 = 0;
-  if (vary_dphi) {
+  if (p.vary_dphi()) {
     i_dphi = new TF1("i_dphi", "((1/([1]+1))*(x-[0])**([1]+1) + [2]*x - (1/([1]+1))*(-[0])**([1]+1)) / ((1/([1]+1))*(3.14159-[0])**([1]+1) + [2]*3.14159 - (1/([1]+1))*(-[0])**([1]+1))", 0, M_PI);
     i_dphi->SetParameters(dphi_pdf_c, dphi_pdf_e, dphi_pdf_a);
     i_dphi2 = new TF1("i_dphi2", "x/3.14159", 0, M_PI);
   }
 
   TH1F* h_eff = 0;
-  if (clearing_from_eff) {
+  if (p.clearing_from_eff()) {
     h_eff = (TH1F*)TFile::Open(eff_file)->Get(eff_hist);
     h_eff->SetBinContent(h_eff->GetNbinsX()+1, h_eff->GetBinContent(h_eff->GetNbinsX()));
   }
@@ -342,7 +399,7 @@ void construct_dvvc(bool is_mc, bool inject_signal, std::string year, int ntrack
 
       double dvvc = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(dphi));
 
-      if (vary_dphi) {
+      if (p.vary_dphi()) {
         double dphi2 = i_dphi2->GetX(i_dphi->Eval(dphi), 0, M_PI);
         double dvvc2 = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(dphi2));
         if (dvvc < 0.04) ++bin1;
@@ -358,17 +415,17 @@ void construct_dvvc(bool is_mc, bool inject_signal, std::string year, int ntrack
         dvvc = dvvc2;
       }
 
-      double p = 1;
-      if (clearing_from_eff) {
-        p = h_eff->GetBinContent(h_eff->FindBin(dvvc));
+      double prob = 1;
+      if (p.clearing_from_eff()) {
+        prob = h_eff->GetBinContent(h_eff->FindBin(dvvc));
       }
 
       if (dvvc > dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width) dvvc = dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width;
-      h_c1v_dvv->Fill(dvvc, p);
-      h_c1v_absdphivv->Fill(fabs(dphi), p);
-      h_c1v_dbv0->Fill(dbv0, p);
-      h_c1v_dbv1->Fill(dbv1, p);
-      h_c1v_dbv1_dbv0->Fill(dbv0, dbv1, p);
+      h_c1v_dvv->Fill(dvvc, prob);
+      h_c1v_absdphivv->Fill(fabs(dphi), prob);
+      h_c1v_dbv0->Fill(dbv0, prob);
+      h_c1v_dbv1->Fill(dbv1, prob);
+      h_c1v_dbv1_dbv0->Fill(dbv0, dbv1, prob);
     }
   }
 
@@ -382,7 +439,7 @@ void construct_dvvc(bool is_mc, bool inject_signal, std::string year, int ntrack
     }
   }
 
-  if (vary_dphi) {
+  if (p.vary_dphi()) {
     printf("bin1 = %d, bin2 = %d, bin3 = %d, intobin1 = %d, intobin2 = %d, intobin3 = %d, outofbin1 = %d, outofbin2 = %d, outofbin3 = %d\n", bin1, bin2, bin3, intobin1, intobin2, intobin3, outofbin1, outofbin2, outofbin3);
     printf("uncorrelated variation / default (bin 1): %f +/- %f\n", 1 + (intobin1 - outofbin1) / (1.*bin1), sqrt(bin1 + bin1 + intobin1 - outofbin1) / bin1);
     printf("  correlated variation / default (bin 1): %f +/- %f\n", 1 + (intobin1 - outofbin1) / (1.*bin1), sqrt(intobin1 + outofbin1) / bin1);
@@ -467,11 +524,11 @@ void construct_dvvc(bool is_mc, bool inject_signal, std::string year, int ntrack
   c_absdphivv->Write();
 
   f_dphi->Write();
-  if (clearing_from_eff) {
+  if (p.clearing_from_eff()) {
     h_eff->SetName("h_eff");
     h_eff->Write();
   }
-  if (vary_dphi) {
+  if (p.vary_dphi()) {
     i_dphi->Write();
     i_dphi2->Write();
   }
@@ -507,29 +564,32 @@ void construct_dvvc(bool is_mc, bool inject_signal, std::string year, int ntrack
 }
 
 int main(int argc, const char* argv[]) {
-  const bool only_default = strcmp(getenv("USER"), "tucker") == 0;
+  const bool only_default = strcmp(getenv("USER"), "tucker") == 0 || (argc >= 2 && strcmp(argv[1], "only_default"));
+  ConstructDvvcParameters pars;
   if (only_default) {
-    construct_dvvc(true, false, "2015p6", 5,  true, -1, false,  true, false, 0, 255, "2v_from_jets_2015p6_5track_default_v15.root");
+    construct_dvvc(pars, "2v_from_jets_2015p6_5track_default_v15.root");
     return 0;
   }
 
   for (const char* year : {"2015", "2016", "2015p6"}) {
     for (int ntracks : {3, 4, 5, 7}) {
-      construct_dvvc(true, false, year, ntracks, false, -1, false,  true, false, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_bquark_uncorrected_v15.root", year, ntracks));
-      construct_dvvc(true, false, year, ntracks, false,  1, false,  true, false, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_bquarks_v15.root", year, ntracks));
-      construct_dvvc(true, false, year, ntracks, false,  0, false,  true, false, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_nobquarks_v15.root", year, ntracks));
-      construct_dvvc(true, false, year, ntracks,  true, -1, false,  true, false, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_default_v15.root", year, ntracks));
-      construct_dvvc(true, false, year, ntracks,  true, -1,  true,  true, false, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_vary_dphi_v15.root", year, ntracks));
-      construct_dvvc(true, false, year, ntracks,  true, -1, false, false, false, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_noclearing_v15.root", year, ntracks));
-      construct_dvvc(true, false, year, ntracks,  true, -1, false,  true,  true, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_vary_eff_v15.root", year, ntracks));
-      construct_dvvc(true,  true, year, ntracks,  true, -1, false,  true, false, 0, 255, TString::Format("2v_from_jets_%s_%dtrack_inject_signal_v15.root", year, ntracks));
+      ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks);
+      construct_dvvc(pars2.correct_bquarks(false),              TString::Format("2v_from_jets_%s_%dtrack_bquark_uncorrected_v15.root", year, ntracks));
+      construct_dvvc(pars2.correct_bquarks(false).bquarks(1),   TString::Format("2v_from_jets_%s_%dtrack_bquarks_v15.root", year, ntracks));
+      construct_dvvc(pars2.correct_bquarks(false).bquarks(0),   TString::Format("2v_from_jets_%s_%dtrack_nobquarks_v15.root", year, ntracks));
+      construct_dvvc(pars2,                                     TString::Format("2v_from_jets_%s_%dtrack_default_v15.root", year, ntracks));
+      construct_dvvc(pars2.vary_dphi(true),                     TString::Format("2v_from_jets_%s_%dtrack_vary_dphi_v15.root", year, ntracks));
+      construct_dvvc(pars2.clearing_from_eff(false),            TString::Format("2v_from_jets_%s_%dtrack_noclearing_v15.root", year, ntracks));
+      construct_dvvc(pars2.vary_eff(true),                      TString::Format("2v_from_jets_%s_%dtrack_vary_eff_v15.root", year, ntracks));
+      construct_dvvc(pars2.inject_signal(true),                 TString::Format("2v_from_jets_%s_%dtrack_inject_signal_v15.root", year, ntracks));
     }
   }
   for (const char* year : {"2015", "2016", "2015p6", "2016BCD", "2016EF", "2016G", "2016H"}) {
     for (int ntracks : {3, 4, 5, 7}) {
-      construct_dvvc(false, false, year, ntracks,  true, -1, false,  true, false, 0, 255, TString::Format("2v_from_jets_data_%s_%dtrack_default_v15.root", year, ntracks));
-      //construct_dvvc(false, false, year, ntracks,  true, -1,  true,  true, false, 0, 255, TString::Format("2v_from_jets_data_%s_%dtrack_vary_dphi_v15.root", year, ntracks));
-      //construct_dvvc(false, false, year, ntracks,  true, -1, false,  true,  true, 0, 255, TString::Format("2v_from_jets_data_%s_%dtrack_vary_eff_v15.root", year, ntracks));
+      ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks).is_mc(false);
+      construct_dvvc(pars2,                 TString::Format("2v_from_jets_data_%s_%dtrack_default_v15.root", year, ntracks));
+      //construct_dvvc(pars2.vary_dphi(true), TString::Format("2v_from_jets_data_%s_%dtrack_vary_dphi_v15.root", year, ntracks));
+      //construct_dvvc(pars2.vary_eff (true), TString::Format("2v_from_jets_data_%s_%dtrack_vary_eff_v15.root", year, ntracks));
     }
   }
 }
