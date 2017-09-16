@@ -2,7 +2,7 @@ from JMTucker.Tools.ROOTTools import *
 from array import array
 ROOT.TH1.AddDirectory(0)
 
-year = '2016'
+year = '2015p6'
 
 mode = ''
 #mode = 'ratio1'

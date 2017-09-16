@@ -3,7 +3,7 @@ from array import array
 ROOT.TH1.AddDirectory(0)
 
 is_mc = True
-year = '2016'
+year = '2015p6'
 
 mode = 'vary_eff'
 #mode = 'vary_dphi'

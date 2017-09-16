@@ -2,7 +2,7 @@ from JMTucker.Tools.ROOTTools import *
 ROOT.TH1.AddDirectory(0)
 
 is_mc = True
-year = '2016'
+year = '2015p6'
 
 rebin = False
 
