@@ -566,11 +566,6 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 int main(int argc, const char* argv[]) {
   const bool only_default = strcmp(getenv("USER"), "tucker") == 0 || (argc >= 2 && strcmp(argv[1], "only_default"));
   ConstructDvvcParameters pars;
-  pars.print(); printf("\n");
-  ConstructDvvcParameters pars2 = pars.year("ekjafdskjds").ntracks(1359);
-  pars2.print(); printf("\n");
-  return 0;
-
   if (only_default) {
     construct_dvvc(pars, "2v_from_jets_2015p6_5track_default_v15.root");
     return 0;
