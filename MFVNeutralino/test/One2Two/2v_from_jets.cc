@@ -66,17 +66,17 @@ struct ConstructDvvcParameters {
   int min_npu() const { return min_npu_; }
   int max_npu() const { return max_npu_; }
 
-  ConstructDvvcParameters is_mc(bool x)             { ConstructDvvcParameters y; y.is_mc_             = x; return y; }
-  ConstructDvvcParameters inject_signal(bool x)     { ConstructDvvcParameters y; y.inject_signal_     = x; return y; }
-  ConstructDvvcParameters year(std::string x)       { ConstructDvvcParameters y; y.year_              = x; return y; }
-  ConstructDvvcParameters ntracks(int x)            { ConstructDvvcParameters y; y.ntracks_           = x; return y; }
-  ConstructDvvcParameters correct_bquarks(bool x)   { ConstructDvvcParameters y; y.correct_bquarks_   = x; return y; }
-  ConstructDvvcParameters bquarks(int x)            { ConstructDvvcParameters y; y.bquarks_           = x; return y; }
-  ConstructDvvcParameters vary_dphi(bool x)         { ConstructDvvcParameters y; y.vary_dphi_         = x; return y; }
-  ConstructDvvcParameters clearing_from_eff(bool x) { ConstructDvvcParameters y; y.clearing_from_eff_ = x; return y; }
-  ConstructDvvcParameters vary_eff(bool x)          { ConstructDvvcParameters y; y.vary_eff_          = x; return y; }
-  ConstructDvvcParameters min_npu(int x)            { ConstructDvvcParameters y; y.min_npu_           = x; return y; }
-  ConstructDvvcParameters max_npu(int x)            { ConstructDvvcParameters y; y.max_npu_           = x; return y; }
+  ConstructDvvcParameters is_mc(bool x)             { ConstructDvvcParameters y(*this); y.is_mc_             = x; return y; }
+  ConstructDvvcParameters inject_signal(bool x)     { ConstructDvvcParameters y(*this); y.inject_signal_     = x; return y; }
+  ConstructDvvcParameters year(std::string x)       { ConstructDvvcParameters y(*this); y.year_              = x; return y; }
+  ConstructDvvcParameters ntracks(int x)            { ConstructDvvcParameters y(*this); y.ntracks_           = x; return y; }
+  ConstructDvvcParameters correct_bquarks(bool x)   { ConstructDvvcParameters y(*this); y.correct_bquarks_   = x; return y; }
+  ConstructDvvcParameters bquarks(int x)            { ConstructDvvcParameters y(*this); y.bquarks_           = x; return y; }
+  ConstructDvvcParameters vary_dphi(bool x)         { ConstructDvvcParameters y(*this); y.vary_dphi_         = x; return y; }
+  ConstructDvvcParameters clearing_from_eff(bool x) { ConstructDvvcParameters y(*this); y.clearing_from_eff_ = x; return y; }
+  ConstructDvvcParameters vary_eff(bool x)          { ConstructDvvcParameters y(*this); y.vary_eff_          = x; return y; }
+  ConstructDvvcParameters min_npu(int x)            { ConstructDvvcParameters y(*this); y.min_npu_           = x; return y; }
+  ConstructDvvcParameters max_npu(int x)            { ConstructDvvcParameters y(*this); y.max_npu_           = x; return y; }
 
   void print() const {
     printf("is_mc = %d, inject_signal = %d, year = %s, ntracks = %d, correct_bquarks = %d, bquarks = %d, vary_dphi = %d, clearing_from_eff = %d, vary_eff = %d", is_mc(), inject_signal(), year_.c_str(), ntracks(), correct_bquarks(), bquarks(), vary_dphi(), clearing_from_eff(), vary_eff());
@@ -566,6 +566,11 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 int main(int argc, const char* argv[]) {
   const bool only_default = strcmp(getenv("USER"), "tucker") == 0 || (argc >= 2 && strcmp(argv[1], "only_default"));
   ConstructDvvcParameters pars;
+  pars.print(); printf("\n");
+  ConstructDvvcParameters pars2 = pars.year("ekjafdskjds").ntracks(1359);
+  pars2.print(); printf("\n");
+  return 0;
+
   if (only_default) {
     construct_dvvc(pars, "2v_from_jets_2015p6_5track_default_v15.root");
     return 0;
