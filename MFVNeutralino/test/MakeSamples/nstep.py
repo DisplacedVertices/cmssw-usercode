@@ -20,7 +20,7 @@ hip_right = False
 
 if 1:
     meta = 'neu'
-elif 1:
+elif 0:
     meta = 'ddbar'
 elif 0:
     meta = 'lq2'
@@ -101,9 +101,16 @@ config = Config()
 to_rm = []
 
 if output_level in ('minitree', 'ntuple'):
-    for x in ['ntuple.py', 'minitree.py']:
-        to_rm.append(x)
-        os.system('cmsDumpPython.py ../%s > %s' % (x,x))
+    to_rm += ['ntuple.py', 'ntuple_temp.py']
+    py = open('../ntuple.py').read()
+    assert py.count('\nrun_n_tk_seeds = True\n') == 1
+    py = py.replace('\nrun_n_tk_seeds = True\n', '\nrun_n_tk_seeds = False\n')
+    open('ntuple_temp.py','wt').write(py)
+    os.system('cmsDumpPython.py ntuple_temp.py > ntuple.py')
+
+if output_level == 'minitree':
+    to_rm.append('minitree.py')
+    os.system('cmsDumpPython.py ../minitree.py > minitree.py')
 
 config.General.transferLogs = True
 config.General.transferOutputs = True
