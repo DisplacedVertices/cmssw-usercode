@@ -1,7 +1,7 @@
 from JMTucker.Tools.ROOTTools import *
 
 is_mc = True
-year = '2016'
+year = '2015p6'
 ntkseeds = False
 
 set_style()

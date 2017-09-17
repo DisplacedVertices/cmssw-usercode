@@ -3,7 +3,7 @@
 from JMTucker.Tools.ROOTTools import *
 
 is_mc = True
-year = '2016'
+year = '2015p6'
 
 set_style()
 ps = plot_saver('../plots/bkgest/v15/fit_jetpairdphi%s_%s' % ('' if is_mc else '_data', year), size=(700,700), log=False, root=False)

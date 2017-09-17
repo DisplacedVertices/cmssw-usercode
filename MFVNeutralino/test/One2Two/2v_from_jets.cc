@@ -36,6 +36,7 @@ struct ConstructDvvcParameters {
   bool vary_dphi_;
   bool clearing_from_eff_;
   bool vary_eff_;
+  bool vary_bquarks_;
   int min_npu_;
   int max_npu_;
 
@@ -49,6 +50,7 @@ struct ConstructDvvcParameters {
       vary_dphi_(false),
       clearing_from_eff_(true),
       vary_eff_(false),
+      vary_bquarks_(false),
       min_npu_(0),
       max_npu_(255)
   {
@@ -63,23 +65,25 @@ struct ConstructDvvcParameters {
   bool vary_dphi() const { return vary_dphi_; }
   bool clearing_from_eff() const { return clearing_from_eff_; }
   bool vary_eff() const { return vary_eff_; }
+  bool vary_bquarks() const { return vary_bquarks_; }
   int min_npu() const { return min_npu_; }
   int max_npu() const { return max_npu_; }
 
-  ConstructDvvcParameters is_mc(bool x)             { ConstructDvvcParameters y; y.is_mc_             = x; return y; }
-  ConstructDvvcParameters inject_signal(bool x)     { ConstructDvvcParameters y; y.inject_signal_     = x; return y; }
-  ConstructDvvcParameters year(std::string x)       { ConstructDvvcParameters y; y.year_              = x; return y; }
-  ConstructDvvcParameters ntracks(int x)            { ConstructDvvcParameters y; y.ntracks_           = x; return y; }
-  ConstructDvvcParameters correct_bquarks(bool x)   { ConstructDvvcParameters y; y.correct_bquarks_   = x; return y; }
-  ConstructDvvcParameters bquarks(int x)            { ConstructDvvcParameters y; y.bquarks_           = x; return y; }
-  ConstructDvvcParameters vary_dphi(bool x)         { ConstructDvvcParameters y; y.vary_dphi_         = x; return y; }
-  ConstructDvvcParameters clearing_from_eff(bool x) { ConstructDvvcParameters y; y.clearing_from_eff_ = x; return y; }
-  ConstructDvvcParameters vary_eff(bool x)          { ConstructDvvcParameters y; y.vary_eff_          = x; return y; }
-  ConstructDvvcParameters min_npu(int x)            { ConstructDvvcParameters y; y.min_npu_           = x; return y; }
-  ConstructDvvcParameters max_npu(int x)            { ConstructDvvcParameters y; y.max_npu_           = x; return y; }
+  ConstructDvvcParameters is_mc(bool x)             { ConstructDvvcParameters y(*this); y.is_mc_             = x; return y; }
+  ConstructDvvcParameters inject_signal(bool x)     { ConstructDvvcParameters y(*this); y.inject_signal_     = x; return y; }
+  ConstructDvvcParameters year(std::string x)       { ConstructDvvcParameters y(*this); y.year_              = x; return y; }
+  ConstructDvvcParameters ntracks(int x)            { ConstructDvvcParameters y(*this); y.ntracks_           = x; return y; }
+  ConstructDvvcParameters correct_bquarks(bool x)   { ConstructDvvcParameters y(*this); y.correct_bquarks_   = x; return y; }
+  ConstructDvvcParameters bquarks(int x)            { ConstructDvvcParameters y(*this); y.bquarks_           = x; return y; }
+  ConstructDvvcParameters vary_dphi(bool x)         { ConstructDvvcParameters y(*this); y.vary_dphi_         = x; return y; }
+  ConstructDvvcParameters clearing_from_eff(bool x) { ConstructDvvcParameters y(*this); y.clearing_from_eff_ = x; return y; }
+  ConstructDvvcParameters vary_eff(bool x)          { ConstructDvvcParameters y(*this); y.vary_eff_          = x; return y; }
+  ConstructDvvcParameters vary_bquarks(bool x)      { ConstructDvvcParameters y(*this); y.vary_bquarks_      = x; return y; }
+  ConstructDvvcParameters min_npu(int x)            { ConstructDvvcParameters y(*this); y.min_npu_           = x; return y; }
+  ConstructDvvcParameters max_npu(int x)            { ConstructDvvcParameters y(*this); y.max_npu_           = x; return y; }
 
   void print() const {
-    printf("is_mc = %d, inject_signal = %d, year = %s, ntracks = %d, correct_bquarks = %d, bquarks = %d, vary_dphi = %d, clearing_from_eff = %d, vary_eff = %d", is_mc(), inject_signal(), year_.c_str(), ntracks(), correct_bquarks(), bquarks(), vary_dphi(), clearing_from_eff(), vary_eff());
+    printf("is_mc = %d, inject_signal = %d, year = %s, ntracks = %d, correct_bquarks = %d, bquarks = %d, vary_dphi = %d, clearing_from_eff = %d, vary_eff = %d, vary_bquarks = %d", is_mc(), inject_signal(), year_.c_str(), ntracks(), correct_bquarks(), bquarks(), vary_dphi(), clearing_from_eff(), vary_eff(), vary_bquarks());
   }
 };
 
@@ -226,6 +230,28 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
     max_ntracks1 = 3;
   } else {
     fprintf(stderr, "bad ntracks"); exit(1);
+  }
+
+  if (p.vary_bquarks()) {
+    if (p.ntracks() == 3) {
+      if (p.year() == "2015")        { bquark_correction[0] = 0.89; bquark_correction[1] = 1.09; bquark_correction[2] = 1.14; }
+      else if (p.year() == "2015p6") { bquark_correction[0] = 0.87; bquark_correction[1] = 1.14; bquark_correction[2] = 1.18; }
+      else                           { bquark_correction[0] = 0.88; bquark_correction[1] = 1.14; bquark_correction[2] = 1.18; }
+    } else if (p.ntracks() == 4) {
+      if (p.year() == "2015")        { bquark_correction[0] = 0.88; bquark_correction[1] = 1.17; bquark_correction[2] = 1.18; }
+      else if (p.year() == "2015p6") { bquark_correction[0] = 0.87; bquark_correction[1] = 1.21; bquark_correction[2] = 1.35; }
+      else                           { bquark_correction[0] = 0.87; bquark_correction[1] = 1.21; bquark_correction[2] = 1.35; }
+    } else if (p.ntracks() == 5) {
+      if (p.year() == "2015")        { bquark_correction[0] = 0.86; bquark_correction[1] = 1.45; bquark_correction[2] = 1.36; }
+      else if (p.year() == "2015p6") { bquark_correction[0] = 0.86; bquark_correction[1] = 1.43; bquark_correction[2] = 1.95; }
+      else                           { bquark_correction[0] = 0.87; bquark_correction[1] = 1.44; bquark_correction[2] = 1.92; }
+    } else if (p.ntracks() == 7) {
+      if (p.year() == "2015")        { bquark_correction[0] = 0.88; bquark_correction[1] = 1.12; bquark_correction[2] = 1.16; }
+      else if (p.year() == "2015p6") { bquark_correction[0] = 0.87; bquark_correction[1] = 1.17; bquark_correction[2] = 1.24; }
+      else                           { bquark_correction[0] = 0.87; bquark_correction[1] = 1.17; bquark_correction[2] = 1.24; }
+    } else {
+      fprintf(stderr, "bad ntracks"); exit(1);
+    }
   }
 
   if (!p.correct_bquarks()) {
@@ -581,6 +607,7 @@ int main(int argc, const char* argv[]) {
       construct_dvvc(pars2.vary_dphi(true),                     TString::Format("2v_from_jets_%s_%dtrack_vary_dphi_v15.root", year, ntracks));
       construct_dvvc(pars2.clearing_from_eff(false),            TString::Format("2v_from_jets_%s_%dtrack_noclearing_v15.root", year, ntracks));
       construct_dvvc(pars2.vary_eff(true),                      TString::Format("2v_from_jets_%s_%dtrack_vary_eff_v15.root", year, ntracks));
+      construct_dvvc(pars2.vary_bquarks(true),                  TString::Format("2v_from_jets_%s_%dtrack_vary_bquarks_v15.root", year, ntracks));
       construct_dvvc(pars2.inject_signal(true),                 TString::Format("2v_from_jets_%s_%dtrack_inject_signal_v15.root", year, ntracks));
     }
   }
@@ -590,6 +617,7 @@ int main(int argc, const char* argv[]) {
       construct_dvvc(pars2,                 TString::Format("2v_from_jets_data_%s_%dtrack_default_v15.root", year, ntracks));
       //construct_dvvc(pars2.vary_dphi(true), TString::Format("2v_from_jets_data_%s_%dtrack_vary_dphi_v15.root", year, ntracks));
       //construct_dvvc(pars2.vary_eff (true), TString::Format("2v_from_jets_data_%s_%dtrack_vary_eff_v15.root", year, ntracks));
+      //construct_dvvc(pars2.vary_bquarks(true), TString::Format("2v_from_jets_data_%s_%dtrack_vary_bquarks_v15.root", year, ntracks));
     }
   }
 }
