@@ -7,6 +7,7 @@ year = '2015p6'
 
 mode = 'vary_eff'
 #mode = 'vary_dphi'
+#mode = 'vary_bquarks'
 
 set_style()
 ROOT.gStyle.SetOptFit(0)
@@ -21,6 +22,9 @@ if mode == 'vary_eff':
 
 if mode == 'vary_dphi':
     ls = ['|#Delta#phi| from 3-track #Delta#phi_{JJ}', 'uniform |#Delta#phi|']
+
+if mode == 'vary_bquarks':
+    ls = ['3-track two-vertex ratio', '5-track two-vertex ratio']
 
 fns = [fn1, fn2, fn3]
 ntk = ['3-track', '4-track', '5-track']
@@ -161,7 +165,7 @@ for i in range(3):
                     er1 *= 0.071913
                     er2 *= 0.215773
                     er3 *= 0.157685
-        if mode == 'vary_eff':
+        else:
             er1 *= (abs(r1-1))**0.5 / (1+r1)**0.5
             er2 *= (abs(r2-1))**0.5 / (1+r2)**0.5
             er3 *= (abs(r3-1))**0.5 / (1+r3)**0.5
@@ -355,7 +359,7 @@ for i in range(3):
                     er1 *= 0.071913
                     er2 *= 0.215773
                     er3 *= 0.157685
-        if mode == 'vary_eff':
+        else:
             er1 *= (abs(r1-1))**0.5 / (1+r1)**0.5
             er2 *= (abs(r2-1))**0.5 / (1+r2)**0.5
             er3 *= (abs(r3-1))**0.5 / (1+r3)**0.5
