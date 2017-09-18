@@ -16,7 +16,7 @@ parser = argparse.ArgumentParser(description = 'mpublish: get the staged-out fil
 
 parser.add_argument('condor_or_crab_dirs', nargs='*', help='The condor/crab directories.')
 
-parser.add_argument('--dataset', required=True,
+parser.add_argument('--dataset', default='ChangeMe',
                     help='The dataset name to use.')
 parser.add_argument('--blacklist', nargs='*', default=['vertex_histos*root'],
                     help="Don't include files that match these patterns (default %(default)s).")
