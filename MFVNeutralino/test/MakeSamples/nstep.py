@@ -2,6 +2,7 @@
 
 nevents = 10000
 events_per = 100
+scanpack = None
 from_lhe = False
 output_level = 'reco'
 output_dataset_tag = 'RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6'
@@ -19,6 +20,11 @@ masses = [300, 400, 500, 600, 800, 1200, 1600]
 hip_right = False
 
 if 1:
+    meta = 'scan'
+    output_level = 'minitree'
+    hip_right = False
+    scanpack = 'scanpack1'
+elif 0:
     meta = 'neu'
 elif 0:
     meta = 'ddbar'
@@ -71,6 +77,11 @@ else:
 
 if not premix:
     output_dataset_tag = output_dataset_tag.replace('Premix', '')
+
+if scanpack:
+    ex += '_' + scanpack
+    from modify import get_scanpack, scanpackbase
+    scanpack = get_scanpack(scanpack)
 
 #ex = '_test'
 #nevents, events_per = 10,10
@@ -155,9 +166,18 @@ if output_level == 'gensim':
 
 outputs = {}
 
-def submit(config, name, todo, todo_rawhlt=[], todo_reco=[], todo_ntuple=[]):
+def submit(config, name, scanpack_or_todo, todo_rawhlt=[], todo_reco=[], todo_ntuple=[]):
     config.General.requestName = name
     config.Data.outputPrimaryDataset = name
+
+    if isinstance(scanpack_or_todo, scanpackbase):
+        scanpack, todo = scanpack_or_todo, None
+    else:
+        scanpack, todo = None, scanpack_or_todo
+
+    if scanpack:
+        nevents = config.Data.totalUnits = scanpack.nevents
+        events_per = config.Data.unitsPerJob = scanpack.events_per_job
 
     dummy_for_hash = int(time()*1e6)
     steering = [
@@ -169,12 +189,19 @@ def submit(config, name, todo, todo_rawhlt=[], todo_reco=[], todo_ntuple=[]):
         'PREMIX=%i' % premix,
         'export DUMMYFORHASH=%i' % dummy_for_hash,  # exported so the python script executed in cmsRun can just get it from os.environ instead of parsing argv like we do the rest
         'OUTPUTLEVEL=%s' % output_level,
-        'TODO=todo=' + todo,
         ]
+
+    if todo:
+        steering.append('TODO=todo=' + todo)
+
+    if scanpack:
+        steering.append('SCANPACK=scanpack=%s,%s' % (scanpack.name, scanpack.ibatch))
 
     salt = fixed_salt
     if not fixed_salt:
         salt = '%s %s' % (name, todo)
+        if scanpack:
+            salt += ' ' + scanpack.batch_name
 
     if hip_simulation:
         assert type(hip_simulation) in (float,int)
@@ -220,7 +247,11 @@ def taus_masses():
                 continue
             yield tm
 
-if meta == 'neu':
+if meta == 'scan':
+    for _ in scanpack:
+        submit(config, scanpack.batch_name, scanpack)
+
+elif meta == 'neu':
     for tau, mass in taus_masses():
         name = 'mfv_neu_tau%05ium_M%04i' % (tau, mass)
         todo = 'mfv_neutralino,%.1f,%i' % (tau/1000., mass)

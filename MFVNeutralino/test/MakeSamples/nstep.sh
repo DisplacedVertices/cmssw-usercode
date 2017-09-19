@@ -28,6 +28,7 @@ echo TODO: ${TODO}
 echo TODORAWHLT: ${TODORAWHLT}
 echo TODORECO: ${TODORECO}
 echo TODONTUPLE: ${TODONTUPLE}
+echo SCANPACK: ${SCANPACK}
 
 ################################################################################
 
@@ -76,7 +77,7 @@ function lhe {
 }
 
 function gensim {
-    cmd="cmsRun -j tempfjr.xml gensim.py fromlhe=${FROMLHE} salt=${SALT} jobnum=${JOBNUM} maxevents=${MAXEVENTS} ${TODO}"
+    cmd="cmsRun -j tempfjr.xml gensim.py fromlhe=${FROMLHE} salt=${SALT} jobnum=${JOBNUM} maxevents=${MAXEVENTS} ${TODO} ${SCANPACK}"
     echo $cmd at $(date) ; eval $cmd 2>&1
 }
 
