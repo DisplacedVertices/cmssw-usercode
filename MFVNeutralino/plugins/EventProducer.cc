@@ -35,6 +35,7 @@ private:
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertex_token;
   const edm::EDGetTokenT<GenEventInfoProduct> gen_info_token;
+  const edm::EDGetTokenT<reco::GenJetCollection> gen_jets_token;
   const edm::EDGetTokenT<reco::GenParticleCollection> gen_particles_token;
   const edm::EDGetTokenT<mfv::MCInteraction> mci_token;
   const edm::EDGetTokenT<std::vector<PileupSummaryInfo> > pileup_summary_token;
@@ -60,6 +61,7 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     primary_vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertex_src"))),
     gen_info_token(consumes<GenEventInfoProduct>(cfg.getParameter<edm::InputTag>("gen_info_src"))),
+    gen_jets_token(consumes<reco::GenJetCollection>(cfg.getParameter<edm::InputTag>("gen_jets_src"))),
     gen_particles_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("gen_particles_src"))),
     mci_token(consumes<mfv::MCInteraction>(cfg.getParameter<edm::InputTag>("mci_src"))),
     pileup_summary_token(consumes<std::vector<PileupSummaryInfo> >(cfg.getParameter<edm::InputTag>("pileup_info_src"))),
@@ -111,6 +113,24 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
     mevent->gen_weight = gen_info->weight();
     mevent->gen_weightprod = gen_info->weightProduct();
+
+    edm::Handle<reco::GenJetCollection> gen_jets;
+    event.getByToken(gen_jets_token, gen_jets);
+
+    for (const reco::GenJet& jet : *gen_jets) {
+      if (fabs(jet.eta()) < 2.5) {
+        double mue = 0;
+        for (auto c : jet.getJetConstituents())
+          if (abs(c->pdgId()) == 13)
+            mue += c->energy();
+        if (mue / jet.energy() < 0.8) {
+          mevent->gen_jet_pt.push_back(jet.pt());
+          mevent->gen_jet_eta.push_back(jet.eta());
+          mevent->gen_jet_phi.push_back(jet.phi());
+          mevent->gen_jet_energy.push_back(jet.energy());
+        }
+      }
+    }
 
     edm::Handle<reco::GenParticleCollection> gen_particles;
     event.getByToken(gen_particles_token, gen_particles);

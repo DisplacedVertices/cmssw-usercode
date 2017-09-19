@@ -67,6 +67,13 @@ struct MFVEvent {
   float gen_weight;
   float gen_weightprod;
 
+  std::vector<float> gen_jet_pt;
+  std::vector<float> gen_jet_eta;
+  std::vector<float> gen_jet_phi;
+  std::vector<float> gen_jet_energy;
+  float gen_jet_ht(float min_jet_pt=0.f) const { return std::accumulate(gen_jet_pt.begin(), gen_jet_pt.end(), 0.f,
+                                                                        [min_jet_pt](float init, float b) { if (b > min_jet_pt) init += b; return init; }); } 
+
   bool gen_valid; // only refers to the next block, not the weights above
   float gen_lsp_pt[2];
   float gen_lsp_eta[2];
