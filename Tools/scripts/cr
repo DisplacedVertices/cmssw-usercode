@@ -37,5 +37,7 @@ elif 'hl' in argv:
     os.system('mkdir haddlogs ; mv -i *.haddlog haddlogs/')
 elif 'ds' in argv:
     simple_cmd('grep "Output dataset:" %s/crab.log | tail -1')
+elif 'web' in argv:
+    simple_cmd("grep 'Task URL to use for HELP' %s/crab.log | tail -n 1 | sed 's/.*http/http/'")
 else:
     raise ValueError("didn't understand command, argv was %r", argv)
