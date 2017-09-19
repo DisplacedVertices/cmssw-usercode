@@ -71,6 +71,7 @@ struct MFVEvent {
   std::vector<float> gen_jet_eta;
   std::vector<float> gen_jet_phi;
   std::vector<float> gen_jet_energy;
+  size_t n_gen_jets() const { return gen_jet_pt.size(); }
   float gen_jet_ht(float min_jet_pt=0.f) const { return std::accumulate(gen_jet_pt.begin(), gen_jet_pt.end(), 0.f,
                                                                         [min_jet_pt](float init, float b) { if (b > min_jet_pt) init += b; return init; }); } 
 
@@ -85,6 +86,7 @@ struct MFVEvent {
   uchar gen_flavor_code;
   std::vector<TLorentzVector> gen_daughter_p4[2];
   std::vector<int> gen_daughter_id[2];
+  size_t n_gen_daughters(int which) const { return gen_daughter_id[which].size(); }
 
   float gen_pv[3];
   std::vector<float> gen_bquark_pt;
