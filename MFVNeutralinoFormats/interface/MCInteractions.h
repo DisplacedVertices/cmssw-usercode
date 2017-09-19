@@ -62,7 +62,7 @@ namespace mfv {
     double d3d() const;
 
     GenRefs primaries() const { return primaries_; }
-    GenRefs secondaries() const { return secondaries_; }
+    GenRefs secondaries(int=-1) const;
     GenRefs visible(int=-1) const;
     GenRefs light_leptons(int=-1) const;
 

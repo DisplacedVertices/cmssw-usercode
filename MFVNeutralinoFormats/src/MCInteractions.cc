@@ -116,6 +116,16 @@ namespace mfv {
 
   ////
 
+  MCInteraction::GenRefs MCInteraction::secondaries(int which) const {
+    if (which == -1 || which >= int(primaries_.size()))
+      return secondaries_;
+
+    MCInteraction::GenRefs v;
+    for (size_t i = indices_[which]; i < indices_[which+1]; ++i)
+      v.push_back(secondaries_[i]);
+    return v;
+  }
+
   MCInteraction::GenRefs MCInteraction::visible(int which) const {
     MCInteraction::GenRefs v;
     int b, e;
