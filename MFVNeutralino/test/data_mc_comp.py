@@ -6,10 +6,10 @@ import JMTucker.Tools.Samples as Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 from JMTucker.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, plot_saver
 
-year = '2016'
+year = '2015p6'
 
 root_file_dir = '/uscms_data/d2/tucker/crab_dirs/HistosV15'
-plot_dir = 'plots/data_mc_comp/HistosV15_%s' % year
+plot_dir = 'plots/data_mc_comp/HistosV15_v2_%s' % year
 
 set_style()
 ps = plot_saver(plot_dir)
@@ -527,7 +527,7 @@ E = partial(data_mc_comparison,
             signal_samples = signal_samples,
             data_samples = data_samples,
             plot_saver = ps,
-            file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15', '%(name)s.root'),
+            file_path = os.path.join('/uscms_data/d2/tucker/crab_dirs/HistosV15_v2', '%(name)s.root'),
             int_lumi = int_lumi,
             int_lumi_2015 = int_lumi_2015 if year == '2015p6' else None,
             int_lumi_2016 = int_lumi_2016 if year == '2015p6' else None,
@@ -634,4 +634,13 @@ E('100pc_3t1v_onevtx_dbv_unzoom',
   x_title = 'd_{BV} (cm)',
   y_title = 'Vertices/50 #mum',
   y_range = (1, 1e6),
+  )
+
+E('100pc_3t2v_dvv',
+  histogram_path = 'Ntk3mfvVertexHistosFullSel/h_svdist2d',
+  rebin = 5,
+  x_title = 'd_{VV} (cm)',
+  y_title = 'Events/100 #mum',
+  x_range = (0, 0.4),
+  y_range = (1e-1, 1e3),
   )
