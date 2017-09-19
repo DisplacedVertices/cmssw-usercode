@@ -26,10 +26,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     from JMTucker.Tools.MetaSubmitter import set_splitting
     dataset = 'ntuplev15'
-    set_splitting(samples, dataset, 'histos', data_json='ana_2015p6_10pc.json')
+    set_splitting(samples, dataset, 'histos', data_json='ana_2015p6.json')
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('VertexerPairEffsV15',
+    cs = CondorSubmitter('VertexerPairEffsV15_v2',
                          ex = year,
                          dataset = dataset,
                          )
