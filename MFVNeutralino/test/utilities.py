@@ -83,6 +83,8 @@ def cmd_hadd_data():
             if not Halready:
                 hadd_or_merge(ds + '2016H.root', [ds + '2016%s.root' % x for x in ('H2', 'H3')])
             hadd_or_merge(ds + '2016GH.root', [ds + '2016%s.root' % x for x in ('G',) + H])
+        if not no2015:
+            hadd_or_merge(ds + '2015p6.root', [ds + '2015.root', ds + '2016.root'])
 
 cmd_merge_data = cmd_hadd_data
 
