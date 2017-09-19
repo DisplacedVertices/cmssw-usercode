@@ -5,14 +5,14 @@ year = '2015p6'
 ntkseeds = False
 
 set_style()
-ps = plot_saver('../plots/bkgest/v15/vertexer_pair_effs%s_%s%s' % ('' if is_mc else '_data', year, '_ntkseeds' if ntkseeds else ''), size=(700,700), log=False, root=False)
+ps = plot_saver('../plots/bkgest/v15_v2/vertexer_pair_effs%s_%s%s' % ('' if is_mc else '_data', year, '_ntkseeds' if ntkseeds else ''), size=(700,700), log=False, root=False)
 
 if is_mc:
-    f = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_8025/VertexerPairEffsV15/background%s.root' % ('' if year=='2016' else '_%s'%year))
+    f = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_8025/VertexerPairEffsV15_v2/background%s.root' % ('' if year=='2016' else '_%s'%year))
 else:
-    f = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_8025/VertexerPairEffsV15/JetHT%s.root' % year)
+    f = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_8025/VertexerPairEffsV15_v2/JetHT%s.root' % year)
 
-fh = ROOT.TFile('vpeffs%s_%s_v15%s.root' % ('' if is_mc else '_data', year, '_ntkseeds' if ntkseeds else ''), 'recreate')
+fh = ROOT.TFile('vpeffs%s_%s_v15_v2%s.root' % ('' if is_mc else '_data', year, '_ntkseeds' if ntkseeds else ''), 'recreate')
 
 for itk in [3,4,5]:
     h_merge = f.Get('mfvVertexerPairEffs%s/h_merge_d2d_mintk0_maxtk%i' % ('%iTkSeed' % itk if ntkseeds else '', itk))
@@ -59,7 +59,7 @@ for itk in [3,4,5]:
 
 fh.Close()
 
-f = ROOT.TFile('vpeffs%s_%s_v15%s.root' % ('' if is_mc else '_data', year, '_ntkseeds' if ntkseeds else ''))
+f = ROOT.TFile('vpeffs%s_%s_v15_v2%s.root' % ('' if is_mc else '_data', year, '_ntkseeds' if ntkseeds else ''))
 
 colors = [0, 0, 0, ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2]
 l = ROOT.TLegend(0.50,0.15,0.85,0.30)
@@ -86,7 +86,7 @@ if not ntkseeds:
 
     ROOT.TH1.AddDirectory(0)
 
-    h2 = ROOT.TFile('vpeffs%s_%s_v15_ntkseeds.root' % ('' if is_mc else '_data', year)).Get('maxtk5')
+    h2 = ROOT.TFile('vpeffs%s_%s_v15_v2_ntkseeds.root' % ('' if is_mc else '_data', year)).Get('maxtk5')
     h2.SetLineWidth(3)
     h.Draw('hist')
     h2.Draw('hist sames')
@@ -97,9 +97,9 @@ if not ntkseeds:
     ps.save('compare_efficiency')
 
 if is_mc and not ntkseeds:
-    fn1 = ['2v_from_jets_%s_3track_default_v15.root' % year, '2v_from_jets_%s_3track_noclearing_v15.root' % year]
-    fn2 = ['2v_from_jets_%s_4track_default_v15.root' % year, '2v_from_jets_%s_4track_noclearing_v15.root' % year]
-    fn3 = ['2v_from_jets_%s_5track_default_v15.root' % year, '2v_from_jets_%s_5track_noclearing_v15.root' % year]
+    fn1 = ['2v_from_jets_%s_3track_default_v15_v4.root' % year, '2v_from_jets_%s_3track_noclearing_v15_v4.root' % year]
+    fn2 = ['2v_from_jets_%s_4track_default_v15_v4.root' % year, '2v_from_jets_%s_4track_noclearing_v15_v4.root' % year]
+    fn3 = ['2v_from_jets_%s_5track_default_v15_v4.root' % year, '2v_from_jets_%s_5track_noclearing_v15_v4.root' % year]
 
     fns = [fn1, fn2, fn3]
     ntk = ['3-track', '4-track', '5-track']

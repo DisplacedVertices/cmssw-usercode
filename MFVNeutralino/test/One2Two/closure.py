@@ -2,14 +2,15 @@ from JMTucker.Tools.ROOTTools import *
 ROOT.TH1.AddDirectory(0)
 
 is_mc = True
+only_10pc = False
 year = '2015p6'
 
 rebin = False
 
 set_style()
-ps = plot_saver('../plots/bkgest/v15/closure%s_%s' % ('' if is_mc else '_data', year), size=(700,700), root=False, log=False)
+ps = plot_saver('../plots/bkgest/v15_v2/closure%s%s_%s' % ('' if is_mc else '_data', '_10pc' if only_10pc else '', year), size=(700,700), root=False, log=False)
 
-fns = ['2v_from_jets%s_%s_3track_default_v15.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_7track_default_v15.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_4track_default_v15.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_5track_default_v15.root' % ('' if is_mc else '_data', year)]
+fns = ['2v_from_jets%s_%s_3track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v4'), '2v_from_jets%s_%s_7track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v4'), '2v_from_jets%s_%s_4track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v4'), '2v_from_jets%s_%s_5track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v4')]
 ntk = ['3-track', '4-track-3-track', '4-track', '5-track']
 
 n2v = [946., 204., 8., 1.]
@@ -42,6 +43,9 @@ ebins = [ebins_3track, ebins_4track, ebins_4track, ebins_5track]
 #ebins = [ebins_3track, ebins_4track, ebins_4track, ebins_5track]
 
 for i in range(4):
+    if not is_mc and not only_10pc and i > 0:
+        continue
+
     if not is_mc and i > 2:
         h = ROOT.TFile(fns[i]).Get('h_c1v_dvv')
         h.SetTitle(';d_{VV}^{C} (cm);')
