@@ -11,7 +11,7 @@ bkg_n1v = 3637.
 bkg_n2v = 1.
 
 sig_uncert = [0.20, 0.20, 0.20]
-bkg_uncert = [0.13, 0.29, 0.52]
+bkg_uncert = [0.13, 0.29, 0.52]  # JMTBAD update this with stat uncert too but gammaN???
 
 in_fn = '2v_from_jets_2015p6_5track_default_v15.root'
 in_trees = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV15_v3/mfv*root'
@@ -27,8 +27,14 @@ def ndx2isample(ndx):
 def isample2ndx(isample):
     return -isample-1
 
+def name_list(f):
+    return f.Get('name_list')
+
+def nsamples(f):
+    return name_list(f).GetNbinsX()
+
 def name2isample(f, name):
-    h = f.Get('name_list')
+    h = name_list(f)
     ax = h.GetXaxis()
     for ibin in xrange(1, h.GetNbinsX()+1):
         if name == ax.GetBinLabel(ibin):
@@ -36,12 +42,25 @@ def name2isample(f, name):
     raise ValueError('no name %s found in %r' % (name, f))
 
 def isample2name(f, isample):
-    h = f.Get('name_list')
+    h = name_list(f)
     nbins = h.GetNbinsX()
     ibin = -isample
     if ibin < 1 or ibin > nbins:
         raise ValueError('isample %i wrong for name list in %r (nbins = %i)' % (isample, f, nbins))
     return h.GetXaxis().GetBinLabel(ibin)
+
+def isample_iterator(f):
+    f = ROOT.TFile(limits_input_fn)
+    h = name_list(f)
+    for ibin in xrange(1, h.GetNbinsX()+1):
+        yield -ibin
+
+def sample_iterator(f):
+    f = ROOT.TFile(limits_input_fn)
+    h = name_list(f)
+    ax = h.GetXaxis()
+    for ibin in xrange(1, h.GetNbinsX()+1):
+        yield -ibin, ax.GetBinLabel(ibin)
 
 def make():
     ROOT.TH1.AddDirectory(1)
@@ -127,6 +146,10 @@ def make():
 
     f.Write()
     f.Close()
+
+def nevents(f, isample):
+    h = f.Get('h_signal_%i_norm' % isample)
+    return 1e-3 / h.GetBinContent(2)
 
 def draw():
     ps = plot_saver(plot_dir('o2t_templates_run2'), size=(600,600))
