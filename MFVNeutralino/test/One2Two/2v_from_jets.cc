@@ -583,7 +583,7 @@ int main(int argc, const char* argv[]) {
     }
   }
   for (const char* year : {"2015p6"}) {
-    for (int ntracks : {3}) {
+    for (int ntracks : {3, 4, 7}) {
       ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks).is_mc(false);
       construct_dvvc(pars2, TString::Format("2v_from_jets_data_%s_%dtrack_default_v15_v4.root", year, ntracks));
     }
