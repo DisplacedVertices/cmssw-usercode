@@ -12,7 +12,7 @@ minitree_only = False
 prepare_vis = False
 keep_all = prepare_vis
 event_filter = not keep_all
-version = 'V15'
+version = 'V16'
 batch_name = 'Ntuple' + version
 if minitree_only:
     batch_name = 'MiniNtuple'  + version
