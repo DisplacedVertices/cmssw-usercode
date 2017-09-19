@@ -118,7 +118,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     event.getByToken(gen_jets_token, gen_jets);
 
     for (const reco::GenJet& jet : *gen_jets) {
-      if (fabs(jet.eta()) < 2.5) {
+      if (jet.pt() > 20 && fabs(jet.eta()) < 2.5) {
         double mue = 0;
         for (auto c : jet.getJetConstituents())
           if (abs(c->pdgId()) == 13)
