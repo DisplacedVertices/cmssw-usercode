@@ -583,9 +583,12 @@ int main(int argc, const char* argv[]) {
     }
   }
   for (const char* year : {"2015p6"}) {
-    for (int ntracks : {3, 4, 7}) {
+    for (int ntracks : {3, 4, 5, 7}) {
       ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks).is_mc(false);
-      construct_dvvc(pars2, TString::Format("2v_from_jets_data_%s_%dtrack_default_v15_v4.root", year, ntracks));
+      construct_dvvc(pars2,                    TString::Format("2v_from_jets_data_%s_%dtrack_default_v15_v4.root", year, ntracks));
+      construct_dvvc(pars2.vary_dphi(true),    TString::Format("2v_from_jets_data_%s_%dtrack_vary_dphi_v15_v4.root", year, ntracks));
+      construct_dvvc(pars2.vary_eff(true),     TString::Format("2v_from_jets_data_%s_%dtrack_vary_eff_v15_v4.root", year, ntracks));
+      construct_dvvc(pars2.vary_bquarks(true), TString::Format("2v_from_jets_data_%s_%dtrack_vary_bquarks_v15_v4.root", year, ntracks));
     }
   }
 }

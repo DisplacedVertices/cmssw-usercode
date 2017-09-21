@@ -3,6 +3,7 @@ from array import array
 ROOT.TH1.AddDirectory(0)
 
 is_mc = True
+only_10pc = False
 year = '2015p6'
 
 mode = 'vary_eff'
@@ -11,11 +12,11 @@ mode = 'vary_eff'
 
 set_style()
 ROOT.gStyle.SetOptFit(0)
-ps = plot_saver('../plots/bkgest/v15/compare_dvvc_%s%s_%s' % (mode, '' if is_mc else '_data', year), size=(700,700), root=False, log=False)
+ps = plot_saver('../plots/bkgest/v15_v2/compare_dvvc_%s%s%s_%s' % (mode, '' if is_mc else '_data', '_10pc' if only_10pc else '', year), size=(700,700), root=False, log=False)
 
-fn1 = ['2v_from_jets%s_%s_3track_default_v15.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_3track_%s_v15.root' % ('' if is_mc else '_data', year, mode)]
-fn2 = ['2v_from_jets%s_%s_4track_default_v15.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_4track_%s_v15.root' % ('' if is_mc else '_data', year, mode)]
-fn3 = ['2v_from_jets%s_%s_5track_default_v15.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_5track_%s_v15.root' % ('' if is_mc else '_data', year, mode)]
+fn1 = ['2v_from_jets%s_%s_3track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v4'), '2v_from_jets%s_%s_3track_%s_v15%s.root' % ('' if is_mc else '_data', year, mode, '' if only_10pc else '_v4')]
+fn2 = ['2v_from_jets%s_%s_4track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v4'), '2v_from_jets%s_%s_4track_%s_v15%s.root' % ('' if is_mc else '_data', year, mode, '' if only_10pc else '_v4')]
+fn3 = ['2v_from_jets%s_%s_5track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v4'), '2v_from_jets%s_%s_5track_%s_v15%s.root' % ('' if is_mc else '_data', year, mode, '' if only_10pc else '_v4')]
 
 if mode == 'vary_eff':
     ls = ['vertexer efficiency', 'ntkseeds efficiency']

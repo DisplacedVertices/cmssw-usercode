@@ -43,9 +43,6 @@ ebins = [ebins_3track, ebins_4track, ebins_4track, ebins_5track]
 #ebins = [ebins_3track, ebins_4track, ebins_4track, ebins_5track]
 
 for i in range(4):
-    if not is_mc and not only_10pc and i > 2:
-        continue
-
     if not is_mc and i > 2:
         h = ROOT.TFile(fns[i]).Get('h_c1v_dvv')
         h.SetTitle(';d_{VV}^{C} (cm);')
