@@ -745,7 +745,7 @@ def data_mc_comparison(name,
             data_sample.hist.Add(ds.hist)
             print 'integ', get_integral(data_sample.hist)[0]
 
-    if normalize_to_data: # JMTBAD only equal area for now
+    if normalize_to_data and data_sample: # JMTBAD only equal area for now
         data_integ = get_integral(data_sample.hist)[0]
         bkg_integ = sum(get_integral(sample.hist)[0] for sample in background_samples)
         print 'normalize_to_data scaling to equal area: data %f bkg %f sf %f' % (data_integ, bkg_integ, data_integ / bkg_integ)
