@@ -41,10 +41,10 @@ void MFVBQuarkCount::analyze(const edm::Event& event, const edm::EventSetup& set
   event.getByToken(vertex_token, vertices);
   const size_t nsv = vertices->size();
 
-  const size_t n_gen_bquark = mevent->gen_bquark_pt.size();
+  const size_t n_gen_bquark = mevent->gen_bquarks.size();
   size_t n_gen_bquark_accept = 0;
   for (size_t i = 0; i < n_gen_bquark; ++i)
-    if (mevent->gen_bquark_pt[i] > 5 && fabs(mevent->gen_bquark_eta[i]) < 2.5)
+    if (mevent->gen_bquarks[i].Pt() > 5 && fabs(mevent->gen_bquarks[i].Eta()) < 2.5)
       ++n_gen_bquark_accept;
 
   if (1)        h->Fill(1);

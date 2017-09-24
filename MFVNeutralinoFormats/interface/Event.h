@@ -28,7 +28,7 @@ struct MFVEvent {
 
   MFVEvent() {
     gen_valid = 0;
-    gen_partons_in_acc = npv = pv_ntracks = 0;
+    npv = pv_ntracks = 0;
     gen_flavor_code = 0;
     gen_weight = gen_weightprod = l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = hlt_ht4mc = npu = bsx = bsy = bsz = bsdxdz = bsdydz = bswidthx = bswidthy = pvx = pvy = pvz = pvcxx = pvcxy = pvcxz = pvcyy = pvcyz = pvczz = pv_sumpt2 = metx = mety = 0;
     for (int i = 0; i < 2; ++i) {
@@ -66,14 +66,29 @@ struct MFVEvent {
 
   float gen_weight;
   float gen_weightprod;
+  uchar gen_flavor_code;
+  float gen_pv[3];
+  std::vector<TLorentzVector> gen_bquarks;
+  std::vector<TLorentzVector> gen_leptons;
+  std::vector<TLorentzVector> gen_jets;
 
-  std::vector<float> gen_jet_pt;
-  std::vector<float> gen_jet_eta;
-  std::vector<float> gen_jet_phi;
-  std::vector<float> gen_jet_energy;
-  size_t n_gen_jets() const { return gen_jet_pt.size(); }
-  float gen_jet_ht(float min_jet_pt=0.f) const { return std::accumulate(gen_jet_pt.begin(), gen_jet_pt.end(), 0.f,
-                                                                        [min_jet_pt](float init, float b) { if (b > min_jet_pt) init += b; return init; }); } 
+  int gen_lepton_id(int which) { // same convention as reco lep_id below, el=1, mu=0
+    double mass = gen_leptons[which].M();
+    if (fabs(mass - 0.000511) < 1e-4)
+      return 1; 
+    else if (fabs(mass - 0.1057) < 1e-2)
+      return 0;
+    else
+      assert(0);
+  }
+
+  double gen_jet_ht(double min_jet_pt=0.) const {
+    double r(0);
+    for (auto j : gen_jets)
+      if (j.Pt() > min_jet_pt)
+        r += j.Pt();
+    return r;
+  }
 
   bool gen_valid; // only refers to the next block, not the weights above
   float gen_lsp_pt[2];
@@ -82,21 +97,8 @@ struct MFVEvent {
   float gen_lsp_mass[2];
   float gen_lsp_decay[2*3];
   uchar gen_decay_type[2];
-  uchar gen_partons_in_acc;
-  uchar gen_flavor_code;
-  std::vector<TLorentzVector> gen_daughter_p4[2];
-  std::vector<int> gen_daughter_id[2];
-  size_t n_gen_daughters(int which) const { return gen_daughter_id[which].size(); }
-
-  float gen_pv[3];
-  std::vector<float> gen_bquark_pt;
-  std::vector<float> gen_bquark_eta;
-  std::vector<float> gen_bquark_phi;
-  std::vector<float> gen_bquark_energy;
-  std::vector<uchar> gen_lepton_id;
-  std::vector<float> gen_lepton_pt;
-  std::vector<float> gen_lepton_eta;
-  std::vector<float> gen_lepton_phi;
+  std::vector<TLorentzVector> gen_daughters;
+  std::vector<int> gen_daughter_id;
 
   TLorentzVector gen_lsp_p4(int w) const {
     return p4(gen_lsp_pt[w], gen_lsp_eta[w], gen_lsp_phi[w], gen_lsp_mass[w]);

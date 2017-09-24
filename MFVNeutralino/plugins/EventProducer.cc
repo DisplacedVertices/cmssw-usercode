@@ -123,12 +123,8 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
         for (auto c : jet.getJetConstituents())
           if (abs(c->pdgId()) == 13)
             mue += c->energy();
-        if (mue / jet.energy() < 0.8) {
-          mevent->gen_jet_pt.push_back(jet.pt());
-          mevent->gen_jet_eta.push_back(jet.eta());
-          mevent->gen_jet_phi.push_back(jet.phi());
-          mevent->gen_jet_energy.push_back(jet.energy());
-        }
+        if (mue / jet.energy() < 0.8)
+          mevent->gen_jets.push_back(TLorentzVector(jet.px(), jet.py(), jet.pz(), jet.energy()));
       }
     }
 
@@ -180,20 +176,18 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
         mevent->gen_decay_type[i] = mci->decay_type()[i];
 
         for (const reco::GenParticleRef& s : mci->secondaries(i)) {
-          mevent->gen_daughter_p4[i].push_back(MFVEvent::p4(s->pt(), s->eta(), s->phi(), s->mass()));
-          mevent->gen_daughter_id[i].push_back(s->pdgId());
+          mevent->gen_daughters.push_back(MFVEvent::p4(s->pt(), s->eta(), s->phi(), s->mass()));
+          mevent->gen_daughter_id.push_back(s->pdgId());
         }
       }
-
-      mevent->gen_partons_in_acc = 0;
-      for (auto p : mci->visible())
-        if (p->pt() > jet_pt_min && fabs(p->eta()) < 2.5)
-          inc_uchar(mevent->gen_partons_in_acc);
 
       mci_lep = mci->light_leptons();
     }
 
     for (const reco::GenParticle& gen : *gen_particles) {
+      if (gen.pt() < 1)
+        continue;
+
       const int id = abs(gen.pdgId());
 
       if (id == 5) {
@@ -204,29 +198,11 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
             break;
           }
         }
-
-        if (!has_b_dau) {
-          mevent->gen_bquark_pt.push_back(gen.pt());
-          mevent->gen_bquark_eta.push_back(gen.eta());
-          mevent->gen_bquark_phi.push_back(gen.phi());
-          mevent->gen_bquark_energy.push_back(gen.energy());
-        }
+        if (!has_b_dau)
+          mevent->gen_bquarks.push_back(TLorentzVector(gen.px(), gen.py(), gen.pz(), gen.energy()));
       }
-      else if (gen.pt() > 1 &&
-               (id == 11 || id == 13) &&
-               (gen.status() == 1 || (gen.status() >= 21 && gen.status() <= 29))) {
-        uchar gen_lep_id = id == 11; // same convention as on reco lep_id below el = 1 mu = 0
-        for (auto p : mci_lep)
-          if (reco::deltaR(*p, gen) < 0.05) {
-            gen_lep_id |= 0x80;
-            break;
-          }
-
-        mevent->gen_lepton_id.push_back(gen_lep_id);
-        mevent->gen_lepton_pt.push_back(gen.pt());
-	mevent->gen_lepton_eta.push_back(gen.eta());
-	mevent->gen_lepton_phi.push_back(gen.phi());
-      }
+      else if ((id == 11 || id == 13) && (gen.status() == 1 || (gen.status() >= 21 && gen.status() <= 29)))
+        mevent->gen_leptons.push_back(MFVEvent::p4(gen.pt(), gen.eta(), gen.phi(), gen.mass()));
     }
   }
 
