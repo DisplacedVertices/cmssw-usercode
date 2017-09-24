@@ -3,6 +3,7 @@ from array import array
 ROOT.TH1.AddDirectory(0)
 
 is_mc = True
+only_10pc = False
 year = '2015p6'
 
 mode = 'vary_eff'
@@ -11,11 +12,11 @@ mode = 'vary_eff'
 
 set_style()
 ROOT.gStyle.SetOptFit(0)
-ps = plot_saver('../plots/bkgest/v15/compare_dvvc_%s%s_%s' % (mode, '' if is_mc else '_data', year), size=(700,700), root=False, log=False)
+ps = plot_saver('../plots/bkgest/v15_v2/compare_dvvc_%s%s%s_%s' % (mode, '' if is_mc else '_data', '_10pc' if only_10pc else '', year), size=(700,700), root=False, log=False)
 
-fn1 = ['2v_from_jets%s_%s_3track_default_v15.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_3track_%s_v15.root' % ('' if is_mc else '_data', year, mode)]
-fn2 = ['2v_from_jets%s_%s_4track_default_v15.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_4track_%s_v15.root' % ('' if is_mc else '_data', year, mode)]
-fn3 = ['2v_from_jets%s_%s_5track_default_v15.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_5track_%s_v15.root' % ('' if is_mc else '_data', year, mode)]
+fn1 = ['2v_from_jets%s_%s_3track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v4'), '2v_from_jets%s_%s_3track_%s_v15%s.root' % ('' if is_mc else '_data', year, mode, '' if only_10pc else '_v4')]
+fn2 = ['2v_from_jets%s_%s_4track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v4'), '2v_from_jets%s_%s_4track_%s_v15%s.root' % ('' if is_mc else '_data', year, mode, '' if only_10pc else '_v4')]
+fn3 = ['2v_from_jets%s_%s_5track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v4'), '2v_from_jets%s_%s_5track_%s_v15%s.root' % ('' if is_mc else '_data', year, mode, '' if only_10pc else '_v4')]
 
 if mode == 'vary_eff':
     ls = ['vertexer efficiency', 'ntkseeds efficiency']
@@ -29,23 +30,20 @@ if mode == 'vary_bquarks':
 fns = [fn1, fn2, fn3]
 ntk = ['3-track', '4-track', '5-track']
 
-n2v = [946., 8., 1.]
-ebin1 = [0.0026, 0.0063, 0.0124]
-ebin2 = [0.0023, 0.0078, 0.0318]
-ebin3 = [0.0060, 0.0231, 0.1028]
+n2v = [44., 1., 1.] if year == '2015' else [946., 8., 1.] if year == '2016' else [991., 8., 1.]
 
-if year == '2015':
-    n2v = [44., 1., 1.]
-    ebin1 = [0.0120, 0.0300, 0.0590]
-    ebin2 = [0.0106, 0.0368, 0.1498]
-    ebin3 = [0.0277, 0.1098, 0.4845]
-
-if year == '2015p6':
-    n2v = [991., 8., 1.]
-    ebin1 = [0.0025, 0.0062, 0.0120]
-    ebin2 = [0.0023, 0.0077, 0.0308]
-    ebin3 = [0.0059, 0.0227, 0.1011]
-
+if is_mc:
+    ebin1 = [0.0118, 0.0297, 0.0595] if year == '2015' else [0.0026, 0.0064, 0.0125] if year == '2016' else [0.0025, 0.0062, 0.0122]
+    ebin2 = [0.0107, 0.0364, 0.1501] if year == '2015' else [0.0023, 0.0078, 0.0317] if year == '2016' else [0.0023, 0.0077, 0.0312]
+    ebin3 = [0.0272, 0.1092, 0.4846] if year == '2015' else [0.0060, 0.0230, 0.1021] if year == '2016' else [0.0059, 0.0229, 0.1005]
+elif only_10pc:
+    ebin1 = [0.0468, 0.1188, 0.2101] if year == '2015' else [0.0105, 0.0281, 0.0714] if year == '2016' else [0.0103, 0.0274, 0.0682]
+    ebin2 = [0.0422, 0.1449, 0.5482] if year == '2015' else [0.0096, 0.0341, 0.1837] if year == '2016' else [0.0092, 0.0334, 0.1731]
+    ebin3 = [0.1083, 0.4314, 1.5721] if year == '2015' else [0.0243, 0.1030, 0.5818] if year == '2016' else [0.0239, 0.0999, 0.5494]
+else:
+    ebin1 = [0.0148, 0.0375, 0.0687] if year == '2015' else [0.0034, 0.0088, 0.0225] if year == '2016' else [0.0033, 0.0086, 0.0212]
+    ebin2 = [0.0132, 0.0459, 0.1731] if year == '2015' else [0.0030, 0.0108, 0.0566] if year == '2016' else [0.0030, 0.0104, 0.0542]
+    ebin3 = [0.0341, 0.1363, 0.5575] if year == '2015' else [0.0077, 0.0324, 0.1848] if year == '2016' else [0.0076, 0.0314, 0.1750]
 
 colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kOrange, ROOT.kViolet, ROOT.kPink+1]
 

@@ -268,6 +268,7 @@ D = partial(data_mc_comparison,
             int_lumi_2015 = int_lumi_2015 if year == '2015p6' else None,
             int_lumi_2016 = int_lumi_2016 if year == '2015p6' else None,
             int_lumi_nice = int_lumi_nice,
+            normalize_to_data = True,
             canvas_top_margin = 0.08,
             overflow_in_last = True,
             poisson_intervals = True,
@@ -532,6 +533,7 @@ E = partial(data_mc_comparison,
             int_lumi_2015 = int_lumi_2015 if year == '2015p6' else None,
             int_lumi_2016 = int_lumi_2016 if year == '2015p6' else None,
             int_lumi_nice = int_lumi_nice,
+            normalize_to_data = True,
             canvas_top_margin = 0.08,
             overflow_in_last = True,
             poisson_intervals = True,
@@ -643,4 +645,93 @@ E('100pc_3t2v_dvv',
   y_title = 'Events/100 #mum',
   x_range = (0, 0.4),
   y_range = (1e-1, 1e3),
+  )
+
+E('100pc_4t1v_ntracks',
+  histogram_path = 'Ntk4vtxHst1VNoNtracks/h_sv_all_ntracks',
+  x_title = 'Number of tracks per vertex',
+  y_title = 'Vertices',
+  y_range = (1, 1e6),
+  cut_line = ((5, 0, 5, 2.1e6), 2, 5, 1),
+  )
+
+E('100pc_4t1v_bs2derr',
+  histogram_path = 'Ntk4vtxHst1VNoBs2derr/h_sv_all_bs2derr',
+  x_title = 'Uncertainty in d_{BV} (cm)',
+  y_title = 'Vertices/5 #mum',
+  y_range = (1, 1e6),
+  cut_line = ((0.0025, 0, 0.0025, 2.1e6), 2, 5, 1),
+  )
+
+E('100pc_4t1v_dbv',
+  histogram_path = 'Ntk4vtxHst1VNoBsbs2ddist/h_sv_all_bsbs2ddist',
+  x_title = 'd_{BV} (cm)',
+  y_title = 'Vertices/50 #mum',
+  x_range = (0, 0.4),
+  y_range = (1, 1e6),
+  cut_line = ((0.01, 0, 0.01, 2.1e6), 2, 5, 1),
+  )
+
+E('100pc_4t1v_onevtx_dbv',
+  histogram_path = 'Ntk4mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist',
+  x_title = 'd_{BV} (cm)',
+  y_title = 'Vertices/50 #mum',
+  x_range = (0, 0.4),
+  y_range = (1, 1e6),
+  )
+
+E('100pc_4t1v_onevtx_dbv_unzoom',
+  histogram_path = 'Ntk4mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist',
+  x_title = 'd_{BV} (cm)',
+  y_title = 'Vertices/50 #mum',
+  y_range = (1, 1e6),
+  )
+
+E('100pc_4t2v_dvv',
+  histogram_path = 'Ntk4mfvVertexHistosFullSel/h_svdist2d',
+  rebin = 5,
+  x_title = 'd_{VV} (cm)',
+  y_title = 'Events/100 #mum',
+  x_range = (0, 0.4),
+  y_range = (1e-1, 1e3),
+  )
+
+E('100pc_5t1v_ntracks',
+  histogram_path = 'vtxHst1VNoNtracks/h_sv_all_ntracks',
+  x_title = 'Number of tracks per vertex',
+  y_title = 'Vertices',
+  y_range = (1, 1e6),
+  cut_line = ((5, 0, 5, 2.1e6), 2, 5, 1),
+  )
+
+E('100pc_5t1v_bs2derr',
+  histogram_path = 'vtxHst1VNoBs2derr/h_sv_all_bs2derr',
+  x_title = 'Uncertainty in d_{BV} (cm)',
+  y_title = 'Vertices/5 #mum',
+  y_range = (1, 1e6),
+  cut_line = ((0.0025, 0, 0.0025, 2.1e6), 2, 5, 1),
+  )
+
+E('100pc_5t1v_dbv',
+  histogram_path = 'vtxHst1VNoBsbs2ddist/h_sv_all_bsbs2ddist',
+  x_title = 'd_{BV} (cm)',
+  y_title = 'Vertices/50 #mum',
+  x_range = (0, 0.4),
+  y_range = (1, 1e6),
+  cut_line = ((0.01, 0, 0.01, 2.1e6), 2, 5, 1),
+  )
+
+E('100pc_5t1v_onevtx_dbv',
+  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist',
+  x_title = 'd_{BV} (cm)',
+  y_title = 'Vertices/50 #mum',
+  x_range = (0, 0.4),
+  y_range = (1, 1e6),
+  )
+
+E('100pc_5t1v_onevtx_dbv_unzoom',
+  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist',
+  x_title = 'd_{BV} (cm)',
+  y_title = 'Vertices/50 #mum',
+  y_range = (1, 1e6),
   )

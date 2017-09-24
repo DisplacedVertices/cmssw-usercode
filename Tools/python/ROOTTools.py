@@ -535,6 +535,7 @@ def data_mc_comparison(name,
                        int_lumi_2016 = None,
                        int_lumi_bkg_scale = None,
                        int_lumi_nice = None,
+                       normalize_to_data = None,
                        canvas_title = '',
                        canvas_size = (700, 840),
                        canvas_top_margin = 0.01,
@@ -743,6 +744,15 @@ def data_mc_comparison(name,
         for ds in data_samples[1:]:
             data_sample.hist.Add(ds.hist)
             print 'integ', get_integral(data_sample.hist)[0]
+
+        if normalize_to_data:
+            data_integ = get_integral(data_sample.hist)[0]
+            if data_integ == 0:
+                data_integ = 1
+                bkg_integ = sum(get_integral(sample.hist)[0] for sample in background_samples)
+                print 'normalize_to_data scaling to equal area: data %f bkg %f sf %f' % (data_integ, bkg_integ, data_integ / bkg_integ)
+                for sample in background_samples:
+                    sample.hist.Scale(data_integ / bkg_integ)
 
     #####################
 
