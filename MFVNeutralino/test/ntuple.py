@@ -94,11 +94,7 @@ if prepare_vis:
         ]
 
     if is_mc:
-        process.mfvGenParticles = cms.EDProducer('MFVGenParticles',
-                                                 gen_particles_src = cms.InputTag('genParticles'),
-                                                 print_info = cms.bool(True),
-                                                 )
-        process.p *= process.mfvGenParticles
+        process.load('JMTucker.MFVNeutralino.GenParticles_cff')
         output_commands += ['keep *_mfvGenParticles_*_*']
 
 if keep_all:
