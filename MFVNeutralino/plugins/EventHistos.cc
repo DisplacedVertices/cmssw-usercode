@@ -26,7 +26,6 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_w;
 
   TH2F* h_gen_decay;
-  TH1F* h_gen_partons_in_acc;
   TH1F* h_gen_flavor_code;
 
   TH1F* h_nbquarks;
@@ -154,7 +153,6 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_w = fs->make<TH1F>("h_w", ";event weight;events/0.1", 100, 0, 10);
 
   h_gen_decay = fs->make<TH2F>("h_gen_decay", "0-2=e,mu,tau, 3=h;decay code #0;decay code #1", 4, 0, 4, 4, 0, 4);
-  h_gen_partons_in_acc = fs->make<TH1F>("h_gen_partons_in_acc", ";# partons from LSP in acceptance;events", 11, 0, 11);
   h_gen_flavor_code = fs->make<TH1F>("h_gen_flavor_code", ";quark flavor composition;events", 3, 0, 3);
 
   h_nbquarks = fs->make<TH1F>("h_nbquarks", ";# of bquarks;events", 20, 0, 20);
@@ -314,7 +312,6 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   //////////////////////////////////////////////////////////////////////////////
 
   h_gen_decay->Fill(mevent->gen_decay_type[0], mevent->gen_decay_type[1], w);
-  h_gen_partons_in_acc->Fill(mevent->gen_partons_in_acc, w);
   h_gen_flavor_code->Fill(mevent->gen_flavor_code, w);
 
   h_nbquarks->Fill(mevent->gen_bquark_pt.size());

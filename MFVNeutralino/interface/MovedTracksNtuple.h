@@ -24,7 +24,6 @@ namespace mfv {
     float gen_lsp_mass[2];
     float gen_lsp_decay[2*3];
     uchar gen_decay_type[2];
-    uchar gen_partons_in_acc;
 
     uchar pass_hlt;
     float bsx;

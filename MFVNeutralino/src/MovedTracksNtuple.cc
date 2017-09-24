@@ -28,7 +28,7 @@ namespace mfv {
       for (int j = 0; j < 3; ++j)
         gen_lsp_decay[i*3+j] = 0;
     }
-    gen_partons_in_acc = pass_hlt = npu = npv = nseltracks = nalljets = npreseljets = npreselbjets = nlightjets = 0;
+    pass_hlt = npu = npv = nseltracks = nalljets = npreseljets = npreselbjets = nlightjets = 0;
     pvntracks = ntracks = 0;
     jets_pt.clear();
     jets_eta.clear();
@@ -64,7 +64,6 @@ namespace mfv {
     tree->Branch("gen_lsp_mass", gen_lsp_mass, "gen_lsp_mass[2]/F");
     tree->Branch("gen_lsp_decay", gen_lsp_decay, "gen_lsp_decay[6]/F");
     tree->Branch("gen_decay_type", gen_decay_type, "gen_decay_type[2]/b");
-    tree->Branch("gen_partons_in_acc", &gen_partons_in_acc);
     tree->Branch("pass_hlt", &pass_hlt);
     tree->Branch("bsx", &bsx);
     tree->Branch("bsy", &bsy);
@@ -119,7 +118,6 @@ namespace mfv {
     tree->SetBranchAddress("gen_lsp_mass", gen_lsp_mass);
     tree->SetBranchAddress("gen_lsp_decay", gen_lsp_decay);
     tree->SetBranchAddress("gen_decay_type", gen_decay_type);
-    tree->SetBranchAddress("gen_partons_in_acc", &gen_partons_in_acc);
     tree->SetBranchAddress("pass_hlt", &pass_hlt);
     tree->SetBranchAddress("bsx", &bsx);
     tree->SetBranchAddress("bsy", &bsy);
