@@ -69,9 +69,7 @@ def crab_hadd_args(working_dir, new_name=None, new_dir=None):
         new_name = os.path.join(new_dir, new_name)
     return working_dir, new_name, new_dir
 
-def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None, lpc_shortcut=False):
-    working_dir, new_name, new_dir = crab_hadd_args(working_dir, new_name, new_dir)
-
+def crab_hadd_files(working_dir, lpc_shortcut=False):
     if lpc_shortcut:
         expected = crab_get_njobs_from_log(working_dir)
         path = '/eos/uscms' + crab_get_output_dir(working_dir)
@@ -89,6 +87,11 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
         else:
             files = [x.strip() for x in res.split('\n') if x.strip() and '.root' in x]
 
+    return expected, files
+
+def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None, lpc_shortcut=False):
+    working_dir, new_name, new_dir = crab_hadd_args(working_dir, new_name, new_dir)
+    expected, files = crab_hadd_files(working_dir, lpc_shortcut)
     print '%s: expecting %i files if all jobs succeeded' % (working_dir, expected)
 
     if pattern:
