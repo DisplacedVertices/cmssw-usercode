@@ -1,3 +1,4 @@
+from pprint import pprint
 from JMTucker.MFVNeutralino.MiniTreeBase import *
 
 bins = to_array(0., 0.04, 0.07, 4)
@@ -234,11 +235,51 @@ def draw():
 
         ps.save(which_name, log=False)
 
-    
+def compare(fn1, fn2, outbase):
+    f1, f2 = fs = ROOT.TFile.Open(fn1), ROOT.TFile.Open(fn2)
+    samples_1 = dict((name, isample) for isample, name in sample_iterator(f1))
+    samples_2 = dict((name, isample) for isample, name in sample_iterator(f2))
+    names_1 = set(samples_1)
+    names_2 = set(samples_2)
+
+    names = sorted(names_1 & names_2)
+    if not names:
+        print 'no samples in common between %s and %s' % (fn1, fn2)
+        return
+
+    if names_1 != names_2:
+        print 'samples only in %s:' % fn1
+        pprint(sorted(names_1 - names_2))
+        print 'samples only in %s:' % fn2
+        pprint(sorted(names_2 - names_1))
+
+    nnames = len(names)
+    h_eff2v = ROOT.TH1D('h_eff2d_compare', '%s - %s' % (fn1, fn2), nnames, 0, nnames)
+
+    for iname, name in enumerate(names):
+        isamples = samples_1[name], samples_2[name]
+
+        ngens = [nevents(f, isample) for f,isample in zip(fs, isamples)]
+        i2vs  = [i2v    (f, isample) for f,isample in zip(fs, isamples)]
+
+        effs = [wilson_score(i, ngen) for i, ngen in zip(i2vs, ngens)]
+        eff_1, eff_2 = [(e, (u-l)/2) for e,l,u in effs]
+
+        h_eff2v.GetXaxis().SetBinLabel(iname+1, name)
+        h_eff2v.SetBinContent(iname+1, eff_1[0] - eff_2[0])
+        h_eff2v.SetBinError  (iname+1, (eff_1[1]**2 + eff_2[1]**2)**0.5)
+
+    c = ROOT.TCanvas('c', '', 1000, 800)
+    h_eff2v.Draw('e')
+    c.SaveAs(outbase + '/eff2v.root')
+    c.SaveAs(outbase + '/eff2v.png')
+
 if __name__ == '__main__':
     if 'make' in sys.argv:
         make()
     elif 'draw' in sys.argv:
         draw()
+    elif 'compare' in sys.argv:
+        compare(*sys.argv[2:5])
     else:
         print 'dunno'
