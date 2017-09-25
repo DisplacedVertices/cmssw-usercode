@@ -11,8 +11,10 @@ int_lumi = ac.int_lumi_2015p6 * ac.scale_factor_2015p6
 bkg_n1v = 3637.
 bkg_n2v = 1.
 
-sig_uncert = [0.20, 0.20, 0.20]
-bkg_uncert = [0.13, 0.29, 0.52]  # JMTBAD update this with stat uncert too but gammaN???
+sig_uncert = [0.24, 0.24, 0.24]
+bkg_uncert = [0.25, 0.25, 0.69]
+bkg_uncert_stat = [0.02, 0.05, 0.17]
+bkg_uncert = [(a**2 + b**2)**0.5 for a,b in zip(bkg_uncert, bkg_uncert_stat)] # JMTBAD use proper gmN?
 
 in_fn = '2v_from_jets_2015p6_5track_default_v15.root'
 #in_trees, in_scanpack_list = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV15_v3/mfv*root', None
