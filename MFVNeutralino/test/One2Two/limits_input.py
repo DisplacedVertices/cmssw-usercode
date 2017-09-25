@@ -184,6 +184,17 @@ def n2v(f, isample):
     h = h_dvv(f, isample)
     return h.Integral(0, h.GetNbinsX()+2)
 
+def _eff(fcn, f, isample):
+    i = fcn(f, isample)
+    n = nevents(f, isample)
+    e,l,u = wilson_score(i,n)
+    return e, (u-l)/2
+def eff1v(f, isample):
+    return _eff(i1v, f, isample)
+def eff2v(f, isample):
+    return _eff(i2v, f, isample)
+
+
 def draw():
     ps = plot_saver(plot_dir('o2t_templates_run2'), size=(600,600))
 
@@ -245,6 +256,7 @@ def compare(fn1, fn2, outbase):
     names_2 = set(samples_2)
 
     names = sorted(names_1 & names_2)
+    nnames = len(names)
     if not names:
         print 'no samples in common between %s and %s' % (fn1, fn2)
         return
@@ -255,26 +267,39 @@ def compare(fn1, fn2, outbase):
         print 'samples only in %s:' % fn2
         pprint(sorted(names_2 - names_1))
 
-    nnames = len(names)
-    h_eff2v = ROOT.TH1D('h_eff2d_compare', '%s - %s' % (fn1, fn2), nnames, 0, nnames)
+    h_fcns = []
+    def make_h_fcn(nm, fcn):
+        h = ROOT.TH1D(nm, '%s - %s' % (fn1, fn2), nnames, 0, nnames)
+        h_fcns.append((h, fcn))
+        return h
+
+    h_eff1v = make_h_fcn('eff1v', eff1v)
+    h_eff2v = make_h_fcn('eff2v', eff2v)
+    h_dbvmean = make_h_fcn('dbvmean', lambda f,isample: (h_dbv(f,isample).GetMean(), h_dbv(f,isample).GetMeanError()))
+    h_dbvrms  = make_h_fcn('dbvrms',  lambda f,isample: (h_dbv(f,isample).GetRMS(),  h_dbv(f,isample).GetRMSError() ))
+    h_dvvmean = make_h_fcn('dvvmean', lambda f,isample: (h_dvv(f,isample).GetMean(), h_dvv(f,isample).GetMeanError()))
+    h_dvvrms  = make_h_fcn('dvvrms',  lambda f,isample: (h_dvv(f,isample).GetRMS(),  h_dvv(f,isample).GetRMSError() ))
 
     for iname, name in enumerate(names):
         isamples = samples_1[name], samples_2[name]
-
-        ngens = [nevents(f, isample) for f,isample in zip(fs, isamples)]
-        i2vs  = [i2v    (f, isample) for f,isample in zip(fs, isamples)]
-
-        effs = [wilson_score(i, ngen) for i, ngen in zip(i2vs, ngens)]
-        eff_1, eff_2 = [(e, (u-l)/2) for e,l,u in effs]
-
-        h_eff2v.GetXaxis().SetBinLabel(iname+1, name)
-        h_eff2v.SetBinContent(iname+1, eff_1[0] - eff_2[0])
-        h_eff2v.SetBinError  (iname+1, (eff_1[1]**2 + eff_2[1]**2)**0.5)
+        for h, fcn in h_fcns:
+            (v1,e1), (v2, e2) = [fcn(f, isample) for f,isample in zip(fs, isamples)]
+            h.GetXaxis().SetBinLabel(iname+1, name)
+            h.SetBinContent(iname+1, v1-v2)
+            h.SetBinError  (iname+1, (e1**2 + e2**2)**0.5)
 
     c = ROOT.TCanvas('c', '', 1000, 800)
-    h_eff2v.Draw('e')
-    c.SaveAs(outbase + '/eff2v.root')
-    c.SaveAs(outbase + '/eff2v.png')
+    line = ROOT.TLine(0, 0, nnames, 0)
+    line.SetLineStyle(2)
+    line.SetLineWidth(2)
+
+    for i,(h,_) in enumerate(h_fcns):
+        h.SetStats(0)
+        h.SetLineWidth(2)
+        h.Draw('e')
+        line.Draw()
+        for ext in 'root', 'png':
+            c.SaveAs(outbase + '/%i_%s.%s' % (i, h.GetName(), ext))
 
 if __name__ == '__main__':
     if 'make' in sys.argv:
