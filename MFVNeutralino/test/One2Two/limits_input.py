@@ -50,17 +50,18 @@ def isample2name(f, isample):
     return h.GetXaxis().GetBinLabel(ibin)
 
 def isample_iterator(f):
-    f = ROOT.TFile(limits_input_fn)
     h = name_list(f)
     for ibin in xrange(1, h.GetNbinsX()+1):
         yield -ibin
 
 def sample_iterator(f):
-    f = ROOT.TFile(limits_input_fn)
     h = name_list(f)
     ax = h.GetXaxis()
     for ibin in xrange(1, h.GetNbinsX()+1):
         yield -ibin, ax.GetBinLabel(ibin)
+
+def names(f):
+    return sorted(name for _, name in sample_iterator(f))
 
 def make():
     ROOT.TH1.AddDirectory(1)
@@ -150,6 +151,23 @@ def make():
 def nevents(f, isample):
     h = f.Get('h_signal_%i_norm' % isample)
     return 1e-3 / h.GetBinContent(2)
+
+def h_dbv(f, isample):
+    return f.Get('h_signal_%i_dbv' % isample)
+def h_dvv(f, isample):
+    return f.Get('h_signal_%i_dvv_rebin' % isample)
+
+def i1v(f, isample):
+    return h_dbv(f, isample).GetEntries()
+def i2v(f, isample):
+    return h_dvv(f, isample).GetEntries()
+
+def n1v(f, isample):
+    h = h_dbv(f, isample)
+    return h.Integral(0, h.GetNbinsX()+2)
+def n2v(f, isample):
+    h = h_dvv(f, isample)
+    return h.Integral(0, h.GetNbinsX()+2)
 
 def draw():
     ps = plot_saver(plot_dir('o2t_templates_run2'), size=(600,600))
