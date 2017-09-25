@@ -14,7 +14,8 @@ sig_uncert = [0.20, 0.20, 0.20]
 bkg_uncert = [0.13, 0.29, 0.52]  # JMTBAD update this with stat uncert too but gammaN???
 
 in_fn = '2v_from_jets_2015p6_5track_default_v15.root'
-in_trees = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV15_v3/mfv*root'
+#in_trees, in_scanpack_list = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV15_v3/mfv*root', None
+in_trees, in_scanpack_list = None, '/uscms/home/tucker/work/hip_8025/src/JMTucker/MFVNeutralino/test/MakeSamples/scanpack1.list.temp'
 
 limits_input_fn = 'limits_input.root'
 
@@ -98,24 +99,35 @@ def make():
         h_bkg_uncert.SetBinContent(i+1, v)
 
     # now signals. grab the printout and put in signals.h for the fitting code to pick up
-    fns = glob(in_trees)
-    fns = [fn for fn in fns if not fn.endswith('hip1p0.root')]
-    fns = \
-        sorted(x for x in fns if '_2015' not in x and '_hip' not in x) + \
-        sorted(x for x in fns if '_2015' not in x and '_hip' in x) + \
-        sorted(x for x in fns if '_2015' in x)
-    nfns = len(fns)
-    hs_sig = []
-    name_list = ROOT.TH1C('name_list', in_trees, nfns, 0, nfns) # I'm too stupid to get TList of TStrings to work in python
+    if in_trees:
+        title = in_trees
+        sigs = glob(in_trees)
+        sigs = [fn for fn in sigs if not fn.endswith('hip1p0.root')]
+        sigs = \
+            sorted(x for x in sigs if '_2015' not in x and '_hip' not in x) + \
+            sorted(x for x in sigs if '_2015' not in x and '_hip' in x) + \
+            sorted(x for x in sigs if '_2015' in x)
+        sigs = [(os.path.basename(fn).replace('.root', ''), [fn]) for fn in sigs]
+    elif in_scanpack_list:
+        title = in_scanpack_list
+        sigs = sorted(eval(open(in_scanpack_list).read()).items())
 
-    for ifn, fn in enumerate(fns):
-        isample = ndx2isample(ifn)
-        name = os.path.basename(fn).replace('.root', '')
+    nsigs = len(sigs)
+    hs_sig = []
+    name_list = ROOT.TH1C('name_list', title, nsigs, 0, nsigs) # I'm too stupid to get TList of TStrings to work in python
+
+    for isig, (name, fns) in enumerate(sigs):
+        isample = ndx2isample(isig)
         name_list.GetXaxis().SetBinLabel(-isample, name)
         print 'samples.push_back({%i, "%s", 0, 0});' % (isample, name)
 
-        sig_f = ROOT.TFile(fn)
-        sig_t = sig_f.Get('mfvMiniTree/t')
+        sig_t = ROOT.TChain('mfvMiniTree/t')
+        ngen = 0.
+        for fn in fns:
+            sig_f = ROOT.TFile.Open(fn)
+            ngen += sig_f.Get('mfvWeight/h_sums').GetBinContent(1)
+            sig_f.Close()
+            sig_t.Add(fn)
 
         f.cd()
 
@@ -132,7 +144,7 @@ def make():
         sig_t.Draw('svdphi>>%s' % h_dphi_name, 'weight*(nvtx>=2)')
 
         h_norm = ROOT.TH1D('h_signal_%i_norm' % isample, name, 2, 0, 2)
-        norm = 1e-3 / sig_f.Get('mfvWeight/h_sums').GetBinContent(1)  # 1 fb xsec in pb / number of events read, int lumi will be added in ToyThrower
+        norm = 1e-3 / ngen  # 1 fb xsec in pb / number of events read, int lumi will be added in ToyThrower
         h_norm.SetBinContent(1, norm)
         h_norm.SetBinContent(2, norm)
 
