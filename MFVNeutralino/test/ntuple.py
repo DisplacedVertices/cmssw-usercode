@@ -124,12 +124,12 @@ if keep_all:
         xl = x.lower()
         if 'tau' in xl or 'MET' in x:
             delattr(process, x)
+else:
+    process.out.outputCommands = output_commands
 
 # If the embedding is on for these, then we can't match leptons by track to vertices.
 process.patMuons.embedTrack = False
 process.patElectrons.embedTrack = False
-
-process.out.outputCommands = output_commands
 
 #process.options.wantSummary = True
 process.maxEvents.input = 100
