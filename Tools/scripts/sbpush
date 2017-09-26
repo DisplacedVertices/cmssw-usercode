@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [[ -n $NUM_SCRAM_JOBS ]]; then
+if [[ -z ${NUM_SCRAM_JOBS+x} ]]; then
     export NUM_SCRAM_JOBS=4
 fi
 
