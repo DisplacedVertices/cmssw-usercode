@@ -18,7 +18,7 @@ bkg_uncert = [(a**2 + b**2)**0.5 for a,b in zip(bkg_uncert, bkg_uncert_stat)] # 
 
 in_fn = '2v_from_jets_2015p6_5track_default_v15.root'
 #in_trees, in_scanpack_list = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV15_v3/mfv*root', None
-in_trees, in_scanpack_list = None, '/uscms/home/tucker/work/hip_8025/src/JMTucker/MFVNeutralino/test/MakeSamples/scanpack1.list.temp'
+in_trees, in_scanpack_list = None, '/uscms/home/tucker/work/hip_8025/src/JMTucker/MFVNeutralino/test/MakeSamples/scanpack1.list.temp3'
 
 limits_input_fn = 'limits_input.root'
 
@@ -260,12 +260,14 @@ def compare(fn1, fn2, outbase):
     if not names:
         print 'no samples in common between %s and %s' % (fn1, fn2)
         return
+    else:
+        print '%i samples in common' % nnames
 
     if names_1 != names_2:
-        print 'samples only in %s:' % fn1
-        pprint(sorted(names_1 - names_2))
-        print 'samples only in %s:' % fn2
-        pprint(sorted(names_2 - names_1))
+        print '# samples only in %s: %i' % (fn1, len(names_1 - names_2))
+        #pprint(sorted(names_1 - names_2))
+        print '# samples only in %s: %i' % (fn2, len(names_2 - names_1))
+        #pprint(sorted(names_2 - names_1))
 
     h_fcns = []
     def make_h_fcn(nm, fcn):
