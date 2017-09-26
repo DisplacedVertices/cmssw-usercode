@@ -122,20 +122,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import set_splitting
     set_splitting(samples, dataset, 'histos', data_json='ana_2015p6.json')
 
-    def modify(sample):
-        to_add, to_replace = [], []
-        if not sample.is_mc:
-            to_add.append('''
-for p in process.paths.keys():
-    if not (p == 'pSkimSel' or p == 'pEventPreSel' or p == 'pOnlyOneVtx' or p.startswith('Ntk3') or p.startswith('Ntk4') or p.startswith('p0V') or p.startswith('p1V')):
-        delattr(process, p)
-''')
-        return to_add, to_replace
-
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('HistosV15_v2',
+    cs = CondorSubmitter('HistosV15_v3',
                          ex = year,
                          dataset = dataset,
-                         pset_modifier = modify,
                          )
     cs.submit_all(samples)
