@@ -76,6 +76,9 @@ if event_filter:
     JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process, path_name='p', event_filter=True)
 
 if prepare_vis:
+    process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
+    process.p *= process.mfvSelectedVerticesSeq
+
     for x in process.mfvSelectedVerticesTight, process.mfvSelectedVerticesTightNtk3, process.mfvSelectedVerticesTightNtk4:
         x.produce_vertices = True
         x.produce_tracks = True
@@ -117,12 +120,12 @@ if keep_all:
         xl = x.lower()
         if 'tau' in xl or 'MET' in x:
             delattr(process, x)
+else:
+    process.out.outputCommands = output_commands
 
 # If the embedding is on for these, then we can't match leptons by track to vertices.
 process.patMuons.embedTrack = False
 process.patElectrons.embedTrack = False
-
-process.out.outputCommands = output_commands
 
 #process.options.wantSummary = True
 process.maxEvents.input = 100
