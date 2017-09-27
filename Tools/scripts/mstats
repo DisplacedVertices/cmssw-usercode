@@ -1,0 +1,158 @@
+#!/usr/bin/env python
+
+import argparse, re
+from collections import defaultdict
+from pprint import pprint
+from JMTucker.Tools.CondorTools import cs_dirs_from_argv
+from JMTucker.Tools.CRAB3Tools import crab_dirs_from_argv, crab_status
+from JMTucker.Tools.general import from_pickle
+from JMTucker.Tools import colors
+
+parser = argparse.ArgumentParser(description = 'mstats: print out run times and number of retries statistics for condor and crab dirs',
+                                 usage = '%(prog)s [options] mjson.gzpickle')
+
+parser.add_argument('input_fn', nargs='?', default='mjson.gzpickle', help='The status file to be analyzed (create it with mjson).')
+
+parser.add_argument('--njobs', default=-1, type=int, help='Only include this many first jobs matching the rest of the criteria (for debugging).')
+parser.add_argument('--dir', help='Only include dirs matching this regex.')
+parser.add_argument('--job', help='Only include jobs in this list (only really makes sense when there is just one dir).')
+parser.add_argument('--state', help='Only include jobs with state matching this regex. Example: (?!idle|finished) matches any state that is not "idle" and not "finished". Put it in single quotes to escape the special characters in most shells.')
+parser.add_argument('--code', help='Only include jobs with these exit codes.')
+parser.add_argument('--site', help='Only include jobs from this site (irrelevant for condor).')
+
+parser.add_argument('--include-unusable', action='store_true', help='By default we require RecordedSite = True and state not idle, unsubmitted, or running--this disables that.')
+
+parser.add_argument('--dump', action='store_true', help="Print the jobs' statuses.")
+
+options = parser.parse_args()
+
+skip_default = lambda *x: False
+
+if options.dir:
+    options.dir = re.compile(options.dir)
+    options.skip_dir = lambda d: not options.dir.match(d)
+else:
+    options.skip_dir = skip_default
+
+if options.job:
+    options.job = options.job.split(',')
+    options.skip_job = lambda j: j not in options.job
+else:
+    options.skip_job = skip_default
+
+if options.state:
+    options.state = re.compile(options.state)
+    options.skip_state = lambda s: not options.state.match(s)
+else:
+    options.skip_state = skip_default
+
+if options.code:
+    options.code = options.code.split(',')
+    options.skip_code = lambda c: c not in options.code
+else:
+    options.skip_code = skip_default
+
+if options.site:
+    options.site = re.compile(options.site)
+    options.skip_site = lambda s: not options.site.match(s)
+else:
+    options.skip_site = skip_default
+
+########################################################################
+
+info = from_pickle(options.input_fn)
+ndirs_total = len(info)
+njobs_total = sum(len(b) for _, (_, b) in info.iteritems())
+
+print colors.bold('%i jobs total in %i dirs, stats for jobs matching requirements:' % (njobs_total, ndirs_total))
+print
+
+done = False
+
+ndirs = 0
+njobs = 0
+states = defaultdict(int)
+codes = defaultdict(int)
+sites = defaultdict(int)
+ntries = []
+rsses = []
+cpus = []
+walls = []
+
+for wd, (is_crab, batch) in info.iteritems():
+    if done:
+        break
+
+    if options.skip_dir(wd):
+        continue
+
+    if options.dump:
+        print colors.bold(wd)
+
+    ndirs += 1
+
+    for job, status in batch.iteritems():
+        if not options.include_unusable and not status.get('RecordedSite', False):
+            continue
+
+        state = status['State']
+
+        if not options.include_unusable and state in ('unsubmitted', 'idle', 'running'):
+            continue
+
+        ntry = status.get('Retries', -1) + 1
+
+        # there is a history for these but just get the last one 
+        code = str(status.get('Error', [0])[0])
+        site = status.get('SiteHistory', ['Unknown'])[-1]
+        rss = status.get('ResidentSetSize', [0])[-1] / 1024.
+        cpu = status.get('TotalUserCpuTimeHistory', [0])[-1] / 3600.
+        wall = status.get('WallDurations', [0])[-1] / 3600.
+
+        if options.skip_job(job) or \
+                options.skip_state(state) or \
+                options.skip_code(code) or \
+                options.skip_site(site):
+            continue
+
+        if options.dump:
+            print job, ': ',
+            pprint(status)
+
+        njobs += 1
+        states[state] += 1
+        codes[code] += 1
+        sites[site] += 1
+        ntries.append(ntry)
+        rsses.append(rss)
+        cpus.append(cpu)
+        walls.append(wall)
+
+        if njobs == options.njobs:
+            done = True
+            break
+
+print '%i jobs included in stats from %i dirs' % (njobs, ndirs)
+print
+
+states = sorted(states.iteritems(), key=lambda x: x[1], reverse=True)
+codes = sorted(codes.iteritems(), key=lambda x: x[1], reverse=True)
+sites = sorted(sites.iteritems())
+
+for name, d in ('states', states), ('codes (may include previous failures prior to success with 0)', codes), ('sites', sites):
+    print colors.bold('%s:' % name)
+    ml = max(len(str(k)) for k,_ in d)
+    for k,v in d:
+        print str(k).ljust(ml+2), '%6i' % v, '(%2.0f%%)' % (100. * v / njobs)
+    print
+
+print colors.bold('%10s %10s %10s %10s %10s %10s %10s %10s %10s %10s %10s' % ('stat', 'min', 'q05', 'q10', 'q25', 'median', 'q75', 'q90', 'q95', 'max', 'iqr'))
+for name, l in ('ntries', ntries), ('rsses', rsses), ('cpus', cpus), ('walls', walls):
+    n = len(l)
+    l.sort()
+    q05, q10, q25, median, q75, q90, q95 = l[n/20], l[n/10], l[n/4], l[n/2], l[3*n/4], l[9*n/10], l[19*n/20]
+    iqr = q75 - q25
+    mn, mx = min(l), max(l)
+    print '%10s %10.1f %10.1f %10.1f %10.1f %10.1f %10.1f %10.1f %10.1f %10.1f %10.1f' % (name, mn, q05, q10, q25, median, q75, q90, q95, mx, iqr)
+
+#egrep 'executing|terminated' log.* | paste - - | awk 'function parseit(x) { gsub(/\/|:/, " ", x); x = strftime("%Y")" "x; return mktime(x); }   { n += 1; nsec = parseit($12" "$13) - parseit($3" "$4); if (nsec > m) m = nsec; nsecs += nsec } END { print nsecs / n, m }'
