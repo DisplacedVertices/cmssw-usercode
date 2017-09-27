@@ -103,11 +103,11 @@ for wd, (is_crab, batch) in info.iteritems():
         ntry = status.get('Retries', -1) + 1
 
         # there is a history for these but just get the last one 
-        code = str(status.get('Error', [0])[0])
+        code = str(status.get('Error', [-1])[0])
         site = status.get('SiteHistory', ['Unknown'])[-1]
-        rss = status.get('ResidentSetSize', [0])[-1] / 1024.
-        cpu = status.get('TotalUserCpuTimeHistory', [0])[-1] / 3600.
-        wall = status.get('WallDurations', [0])[-1] / 3600.
+        rss = status.get('ResidentSetSize', [-1])[-1] / 1024.
+        cpu = status.get('TotalUserCpuTimeHistory', [-1])[-1] / 3600.
+        wall = status.get('WallDurations', [-1])[-1] / 3600.
 
         if options.skip_job(job) or \
                 options.skip_state(state) or \
