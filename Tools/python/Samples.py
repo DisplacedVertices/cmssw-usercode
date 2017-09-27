@@ -340,13 +340,10 @@ for s in mfv_ddbar_samples + mfv_signal_samples + mfv_hip_samples:
 
 qcd_hip_samples = [
     MCSample('qcdht0700_retest',     '/qcdht0700/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-8dfca419742c7a8461180d5c47913166/USER', 26434, xsec=6.802e3),
-    MCSample('qcdht0700_hip1p0',     '/qcdht0700/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-1941e1504f1c4b0fdfc3f73cf2e530f1/USER', 25411, xsec=6.802e3),
-    MCSample('qcdht0700_hip1p0_mit', '/qcdht0700/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-de9e9f9c2951885a85d93dfb6395e7a7/USER', 25257, xsec=6.802e3),
     MCSample('qcdht1000_retest',     '/qcdht1000/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-7a425b8b8a432c226f185cf5f63c4c07/USER', 13172, xsec=1.206e3),
-    MCSample('qcdht1000_hip1p0',     '/qcdht1000/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-0736ec5973f30890a5611f7bf83fdf93/USER', 13165, xsec=1.206e3),
     MCSample('qcdht1500_retest',     '/qcdht1500/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-57b8172a07d94b03fac9c39db7e976db/USER', 13191, xsec=120),
-    MCSample('qcdht1500_hip1p0',     '/qcdht1500/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-df145f431123addbda1013d14f17e10d/USER', 13191, xsec=120), # dbs was screwed up for this, may be OK now
 
+    MCSample('qcdht0700_hip1p0_mit', '/qcdht0700/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-de9e9f9c2951885a85d93dfb6395e7a7/USER', 25257, xsec=6.802e3),
     MCSample('qcdht1000_hip1p0_mit', '/qcdht1000/None/USER', 511738 + 447284 + 435441, xsec=1.206e3),
     MCSample('qcdht1500_hip1p0_mit', '/qcdht1500/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-88f7eac3ad6536b10bb56426728dc593/USER', 446881, xsec=120),
     ]
