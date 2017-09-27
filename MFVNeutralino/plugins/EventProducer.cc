@@ -45,7 +45,6 @@ private:
   const edm::EDGetTokenT<pat::MuonCollection> muons_token;
   const edm::EDGetTokenT<pat::ElectronCollection> electrons_token;
   const edm::EDGetTokenT<reco::TrackCollection> vertex_seed_tracks_token;
-  
   const double jet_pt_min;
   const std::string b_discriminator;
   const std::vector<double> b_discriminator_mins;
@@ -53,7 +52,7 @@ private:
   const StringCutObjectSelector<pat::Muon> muon_dilep_selector;
   const StringCutObjectSelector<pat::Electron> electron_semilep_selector;
   const StringCutObjectSelector<pat::Electron> electron_dilep_selector;
-  bool warned_non_mfv;
+  const bool lightweight;
 };
 
 MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
@@ -78,8 +77,7 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     muon_dilep_selector(cfg.getParameter<std::string>("muon_dilep_cut")),
     electron_semilep_selector(cfg.getParameter<std::string>("electron_semilep_cut")),
     electron_dilep_selector(cfg.getParameter<std::string>("electron_dilep_cut")),
-
-    warned_non_mfv(false)
+    lightweight(cfg.getParameter<bool>("lightweight"))
 {
   produces<MFVEvent>();
 }
@@ -448,6 +446,60 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   }
 
   //////////////////////////////////////////////////////////////////////
+
+  if (lightweight) {
+    mevent->gen_bquarks.clear();
+    mevent->gen_leptons.clear();
+    mevent->gen_jets.clear();
+    mevent->gen_daughters.clear();
+    mevent->gen_daughter_id.clear();
+    mevent->jet_pudisc.clear();
+    mevent->jet_raw_pt.clear();
+    mevent->jet_calo_pt.clear();
+    mevent->jet_eta.clear();
+    mevent->jet_phi.clear();
+    mevent->jet_energy.clear();
+    mevent->jet_svnvertices.clear();
+    mevent->jet_svntracks.clear();
+    mevent->jet_svsumpt2.clear();
+    mevent->jet_svx.clear();
+    mevent->jet_svy.clear();
+    mevent->jet_svz.clear();
+    mevent->jet_svcxx.clear();
+    mevent->jet_svcxy.clear();
+    mevent->jet_svcxz.clear();
+    mevent->jet_svcyy.clear();
+    mevent->jet_svcyz.clear();
+    mevent->jet_svczz.clear();
+    mevent->lep_id.clear();
+    mevent->lep_pt.clear();
+    mevent->lep_eta.clear();
+    mevent->lep_phi.clear();
+    mevent->lep_dxy.clear();
+    mevent->lep_dxybs.clear();
+    mevent->lep_dz.clear();
+    mevent->lep_iso.clear();
+    mevent->vertex_seed_track_chi2dof.clear();
+    mevent->vertex_seed_track_qpt.clear();
+    mevent->vertex_seed_track_eta.clear();
+    mevent->vertex_seed_track_phi.clear();
+    mevent->vertex_seed_track_dxy.clear();
+    mevent->vertex_seed_track_dz.clear();
+    mevent->vertex_seed_track_hp_.clear();
+    mevent->jet_track_which_jet.clear();
+    mevent->jet_track_chi2dof.clear();
+    mevent->jet_track_qpt.clear();
+    mevent->jet_track_eta.clear();
+    mevent->jet_track_phi.clear();
+    mevent->jet_track_dxy.clear();
+    mevent->jet_track_dz.clear();
+    mevent->jet_track_pt_err.clear();
+    mevent->jet_track_eta_err.clear();
+    mevent->jet_track_phi_err.clear();
+    mevent->jet_track_dxy_err.clear();
+    mevent->jet_track_dz_err.clear();
+    mevent->jet_track_hp_.clear();
+  }
 
   event.put(mevent);
 }
