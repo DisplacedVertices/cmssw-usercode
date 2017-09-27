@@ -8,9 +8,9 @@ year = '2015p6'
 rebin = False
 
 set_style()
-ps = plot_saver('../plots/bkgest/v15_v2/closure%s%s_%s' % ('' if is_mc else '_data', '_10pc' if only_10pc else '', year), size=(700,700), root=False, log=False)
+ps = plot_saver('../plots/bkgest/v15_v5/closure%s%s_%s' % ('' if is_mc else '_data', '_10pc' if only_10pc else '', year), size=(700,700), root=False, log=False)
 
-fns = ['2v_from_jets%s_%s_3track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v4'), '2v_from_jets%s_%s_7track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v4'), '2v_from_jets%s_%s_4track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v4'), '2v_from_jets%s_%s_5track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v4')]
+fns = ['2v_from_jets%s_%s_3track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v5'), '2v_from_jets%s_%s_7track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v5'), '2v_from_jets%s_%s_4track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v5'), '2v_from_jets%s_%s_5track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v5')]
 ntk = ['3-track', '4-track-3-track', '4-track', '5-track']
 
 n2v = [44., 9., 1., 1.] if year == '2015' else [946., 204., 8., 1.] if year == '2016' else [991., 213., 8., 1.]
@@ -55,7 +55,7 @@ for i in range(4):
             hr.Draw('hist e')
         else:
             h.Draw('hist e')
-        ps.save(ntk[i])
+        ps.save('%s_dvvc' % ntk[i])
 
         ec = ROOT.Double(0)
         c = h.IntegralAndError(1,40,ec)
@@ -69,8 +69,6 @@ for i in range(4):
         print ntk[i]
         print ' constructed events: %7.2f +/- %5.2f, 0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (c, ec, c1, ec1, c2, ec2, c3, ec3)
         print '    dVVC normalized: %7.3f +/- %5.3f, 0-400 um: %7.3f +/- %5.3f, 400-700 um: %6.3f +/- %5.3f, 700-40000 um: %6.3f +/- %5.3f' % (c/c, ec/c, c1/c, ec1/c, c2/c, ec2/c, c3/c, ec3/c)
-
-        continue
 
     hh = ROOT.TFile(fns[i]).Get('h_2v_dvv')
     hh.SetTitle(';d_{VV} (cm);Events')
