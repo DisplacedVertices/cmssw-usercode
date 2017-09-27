@@ -735,3 +735,13 @@ E('100pc_5t1v_onevtx_dbv_unzoom',
   y_title = 'Vertices/50 #mum',
   y_range = (1, 1e6),
   )
+
+E('100pc_5t2v_dvv',
+  file_path = os.path.join('/uscms_data/d2/tucker/crab_dirs/HistosV15_v3', '%(name)s.root'),
+  histogram_path = 'mfvVertexHistosFullSel/h_svdist2d',
+  rebin = 5,
+  x_title = 'd_{VV} (cm)',
+  y_title = 'Events/100 #mum',
+  x_range = (0, 0.4),
+  y_range = (1e-1, 1e3),
+  )
