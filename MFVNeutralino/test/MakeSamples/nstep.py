@@ -158,9 +158,9 @@ config.Data.outputPrimaryDataset = 'SETME'
 config.Data.outputDatasetTag = output_dataset_tag
 
 config.Site.storageSite = 'T3_US_FNALLPC'
-config.Site.whitelist = ['T1_US_FNAL', 'T2_US_Caltech', 'T2_US_MIT', 'T2_US_Nebraska', 'T2_US_Purdue', 'T2_US_UCSD', 'T2_US_Wisconsin'] # , 'T2_US_Florida', 'T2_US_Vanderbilt'
+config.Site.whitelist = ['T1_US_FNAL', 'T2_US_Florida', 'T2_US_MIT', 'T2_US_Nebraska', 'T2_US_Purdue', 'T2_US_UCSD', 'T2_US_Wisconsin'] # T2_US_Vanderbilt all fail with 10040, T2_US_Caltech fails 0.19 with 50660 with scanpack
 if premix:
-    config.Site.whitelist += ['T2_CH_CERN', 'T2_DE_DESY', 'T2_DE_RWTH', 'T2_FR_CCIN2P3']
+    config.Site.whitelist += ['T2_DE_DESY'] # T2_FR_CCIN2P3 0.56, T2_DE_RWTH 0.51, T2_CH_CERN 0.34 fail 50660 too much with scanpack
 if output_level == 'gensim':
     config.Site.whitelist += ['T3_US_*']
 
