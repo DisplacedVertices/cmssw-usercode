@@ -174,7 +174,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         batch_name += '_NTkSeeds'
         samples = [s for s in samples if not s.is_signal]
 
-    modify = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier, n_tk_seeds_modifier, event_veto_modifier(skips, 'p'))
+    modify = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier, event_veto_modifier(skips, 'p'))
     ms = MetaSubmitter(batch_name)
     if 'validation' in sys.argv:
         modify.append(max_output_modifier(500))
