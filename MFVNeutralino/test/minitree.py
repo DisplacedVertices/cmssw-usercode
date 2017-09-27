@@ -3,8 +3,8 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 dataset = 'ntuplev15'
 sample_files(process, 'qcdht2000', dataset, 1)
-#process.source.fileNames = ['file:ntuple.root']
 process.TFileService.fileName = 'minitree.root'
+file_event_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.MiniTree_cff')
 
