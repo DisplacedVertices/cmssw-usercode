@@ -122,11 +122,14 @@ def crab_process_simple_cmd(cmd, dirs, max_processes):
             pprint(res)
     return results
 
-def crab_status(working_dir, verbose=False):
+def crab_status(working_dir, verbose=False, long=False):
     if verbose:
         print 'checking', working_dir
 
-    result = crab_command('status', dir=working_dir)
+    if long:
+        result = crab_command('status', '--long', dir=working_dir)
+    else:
+        result = crab_command('status', dir=working_dir)
 
     jl = crab_job_lists_by_status(result)
     if not jl:
