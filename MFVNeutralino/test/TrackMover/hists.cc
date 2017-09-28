@@ -184,7 +184,7 @@ int main(int argc, char** argv) {
     }
     jet_dravg /= n_jets * (n_jets - 1) / 2.;
     if (nt.jetht < 1000 ||
-        nt.nalljets < 4 ||
+        nt.nalljets() < 4 ||
 	!pass_trig || 
         movedist2 < 0.03 ||
         movedist2 > 2.0) {
