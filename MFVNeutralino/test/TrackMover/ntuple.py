@@ -6,18 +6,19 @@ from JMTucker.Tools.MiniAOD_cfg import *
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.MFVNeutralino.Year import year
 
-version = 3
+version = 4
 cfgs = named_product(njets = [2,3],
                      nbjets = [0,1,2],
-                     nsigmadxy = [3.7 + i*0.1 for i in xrange(7)])
+                     nsigmadxy = [4.0, 4.1],
+                     btagwp = [0,1],  # old, new
+                     )
 # rest are magic lines for the submitter
 is_mc = True
 H = False
 repro = False
 
-if version >= 4:
-    # btag wp changed for rereco https://twiki.cern.ch/twiki/bin/viewauth/CMS/BtagRecommendation80XReReco
-    raise ValueError('change the btag working points before running next version')
+if version >= 5:
+    raise ValueError('get rid of the two btag working points before running next version')
 
 process = pat_tuple_process(None, is_mc, year, H, repro)
 remove_met_filters(process)
@@ -42,13 +43,21 @@ process.mfvWeight.throw_if_no_mcstat = False
 
 for icfg, cfg in enumerate(cfgs):
     nsigmadxy_name = ('nsig%.1f' % cfg.nsigmadxy).replace('.', 'p')
-    ex = '%i%i%s' % (cfg.njets, cfg.nbjets, nsigmadxy_name)
+    btagwp_name = 'btagold' if cfg.btagwp == 0 else 'btagnew'
+    ex = '%i%i%s%s' % (cfg.njets, cfg.nbjets, nsigmadxy_name, btagwp_name)
 
     tracks_name = 'mfvMovedTracks' + ex
     auxes_name = 'mfvVerticesAux' + ex
     tree_name = 'mfvMovedTree' + ex
 
     random_dict[tracks_name] = 13068 + icfg
+
+    if cfg.btagwp == 0:
+        b_discriminator_veto = 0.46
+        b_discriminator_tag = 0.935
+    else:
+        b_discriminator_veto = 0.5426
+        b_discriminator_tag = 0.9535
 
     tracks = cms.EDProducer('MFVTrackMover',
                             tracks_src = cms.InputTag('generalTracks'),
@@ -57,8 +66,8 @@ for icfg, cfg in enumerate(cfgs):
                             min_jet_pt = cms.double(50),
                             min_jet_ntracks = cms.uint32(4),
                             b_discriminator = cms.string('pfCombinedInclusiveSecondaryVertexV2BJetTags'),
-                            b_discriminator_veto = cms.double(0.46), # change to 0.5426
-                            b_discriminator_tag = cms.double(0.935), #   "     " 0.9535
+                            b_discriminator_veto = cms.double(b_discriminator_veto),
+                            b_discriminator_tag = cms.double(b_discriminator_tag),
                             njets = cms.uint32(cfg.njets),
                             nbjets = cms.uint32(cfg.nbjets),
                             tau = cms.double(1.),
