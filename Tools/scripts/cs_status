@@ -12,12 +12,14 @@ if len(sys.argv) < 2 or '-h' in sys.argv or '--help' in sys.argv:
     print '   -a   resubmit: resubmit any jobs that failed (no check on exit code)'
     print '   -r   resubmit: resubmit jobs that failed because of xrdcp problems'
     print '   -k   resubmit killed: resubmit all killed jobs (with no check on reason)'
+    print '   -d   include done: do not skip dirs with mmon_done marker file'
     sys.exit(1)
 
 resubmit_all = '-a' in sys.argv
 resubmit = resubmit_all or '-r' in sys.argv
 resubmit_killed = '-k' in sys.argv
 list_done = '-l' in sys.argv
+ignore_done = '-d' not in sys.argv
 verbose = True #'-v' in sys.argv
 wds = cs_dirs_from_argv()
 ml = max(len(wd) for wd in wds) + 3
@@ -44,6 +46,9 @@ sums = [0]*6
 done = []
 
 for wd in wds:
+    if ignore_done and os.path.isfile(os.path.join(wd, 'mmon_done')):
+        continue
+
     ana = cs_analyze(wd)
 
     for i in xrange(6):
