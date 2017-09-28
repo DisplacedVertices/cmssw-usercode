@@ -14,8 +14,7 @@ namespace mfv {
 
   MovedTracksNtuple::MovedTracksNtuple() {
     clear();
-    p_alljets = 0;
-    p_alljets_bdisc = p_jets_pt = p_jets_eta = p_jets_phi = p_jets_energy = p_vtxs_x = p_vtxs_y = p_vtxs_z = p_vtxs_pt = p_vtxs_theta = p_vtxs_phi = p_vtxs_mass = p_vtxs_tkonlymass = p_vtxs_anglemin = p_vtxs_anglemax = p_vtxs_bs2derr = 0;
+    p_alljets_pt = p_alljets_eta = p_alljets_phi = p_alljets_energy = p_alljets_bdisc = p_jets_pt = p_jets_eta = p_jets_phi = p_jets_energy = p_vtxs_x = p_vtxs_y = p_vtxs_z = p_vtxs_pt = p_vtxs_theta = p_vtxs_phi = p_vtxs_mass = p_vtxs_tkonlymass = p_vtxs_anglemin = p_vtxs_anglemax = p_vtxs_bs2derr = 0;
     p_jets_ntracks = p_vtxs_ntracks = 0;
   }
 
@@ -31,7 +30,10 @@ namespace mfv {
     }
     pass_hlt = npu = npv = nseltracks = npreseljets = npreselbjets = nlightjets = 0;
     pvntracks = ntracks = 0;
-    alljets.clear();
+    alljets_pt.clear();
+    alljets_eta.clear();
+    alljets_phi.clear();
+    alljets_energy.clear();
     alljets_bdisc.clear();
     jets_pt.clear();
     jets_eta.clear();
@@ -86,7 +88,10 @@ namespace mfv {
     tree->Branch("npreseljets", &npreseljets);
     tree->Branch("npreselbjets", &npreselbjets);
     tree->Branch("nlightjets", &nlightjets);
-    tree->Branch("alljets", &alljets, 32000, 0);
+    tree->Branch("alljets_pt", &alljets_pt);
+    tree->Branch("alljets_eta", &alljets_eta);
+    tree->Branch("alljets_phi", &alljets_phi);
+    tree->Branch("alljets_energy", &alljets_energy);
     tree->Branch("alljets_bdisc", &alljets_bdisc);
     tree->Branch("jets_pt", &jets_pt);
     tree->Branch("jets_eta", &jets_eta);
@@ -141,7 +146,10 @@ namespace mfv {
     tree->SetBranchAddress("npreseljets", &npreseljets);
     tree->SetBranchAddress("npreselbjets", &npreselbjets);
     tree->SetBranchAddress("nlightjets", &nlightjets);
-    tree->SetBranchAddress("alljets", &p_alljets);
+    tree->SetBranchAddress("alljets_pt", &p_alljets_pt);
+    tree->SetBranchAddress("alljets_eta", &p_alljets_eta);
+    tree->SetBranchAddress("alljets_phi", &p_alljets_phi);
+    tree->SetBranchAddress("alljets_energy", &p_alljets_energy);
     tree->SetBranchAddress("alljets_bdisc", &p_alljets_bdisc);
     tree->SetBranchAddress("jets_pt", &p_jets_pt);
     tree->SetBranchAddress("jets_eta", &p_jets_eta);
