@@ -100,7 +100,11 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
   nt.pvntracks = mevent->pv_ntracks;
   nt.pvsumpt2 = mevent->pv_sumpt2;
   nt.jetht = mevent->jet_ht(40);
-  nt.nalljets = mevent->njets();
+
+  for (size_t i = 0, ie = mevent->njets(); i < ie; ++i) {
+    nt.alljets.push_back(mevent->jet_p4(i));
+    nt.alljets_bdisc.push_back(mevent->jet_calo_pt[i]); // JMTEVIL
+  }
 
   TVector3 move_vector;
 

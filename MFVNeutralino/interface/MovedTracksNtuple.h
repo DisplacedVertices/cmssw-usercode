@@ -2,6 +2,7 @@
 #define JMTucker_MFVNeutralino_interface_MovedTracksNtuple_h
 
 #include <vector>
+#include "TLorentzVector.h"
 
 class TTree;
 class TVector3;
@@ -43,12 +44,14 @@ namespace mfv {
     float jetht;
     ushort ntracks;
     uchar nseltracks;
-    uchar nalljets;
+    std::vector<TLorentzVector> alljets;
+    std::vector<float> alljets_bdisc;
+    size_t nalljets() const { return alljets.size(); }
 
     uchar npreseljets;
     uchar npreselbjets;
     uchar nlightjets;
-    std::vector<float> jets_pt;
+    std::vector<float> jets_pt; // these are the moved jets
     std::vector<float> jets_eta;
     std::vector<float> jets_phi;
     std::vector<float> jets_energy;
@@ -81,6 +84,8 @@ namespace mfv {
     void read_from_tree(TTree* tree);
 
     // ugh
+    std::vector<TLorentzVector>* p_alljets;
+    std::vector<float>* p_alljets_bdisc;
     std::vector<float>* p_jets_pt;
     std::vector<float>* p_jets_eta;
     std::vector<float>* p_jets_phi;
