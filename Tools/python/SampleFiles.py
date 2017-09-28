@@ -566,14 +566,7 @@ _add_ds("ntuplev15", {
 'mfv_neu_tau30000um_M1200_hip1p0_mit': (20, ['/store/user/tucker/mfv_neu_tau30000um_M1200/NtupleV15_2016/170603_220214/0000/ntuple_3.root'] + ['/store/user/tucker/mfv_neu_tau30000um_M1200/NtupleV15_2016/170603_172445/0000/ntuple_%i.root' % i for i in chain(xrange(3), xrange(4,20))]),
 'mfv_neu_tau30000um_M1600_hip1p0_mit': _fromnum0("/store/user/tucker/mfv_neu_tau30000um_M1600/NtupleV15_2016/170603_172446", 20),
 
-'qcdht0700_hip1p0': _fromnum0("/store/user/tucker/qcdht0700/NtupleV15_2016/170603_172448", 84),
 'qcdht0700_hip1p0_mit': _fromnum0("/store/user/tucker/qcdht0700/NtupleV15_2016/170603_172449", 84),
-'qcdht0700_retest': _fromnum0("/store/user/tucker/qcdht0700/NtupleV15_2016/170603_172447", 84),
-'qcdht1000_hip1p0': _fromnum0("/store/user/tucker/qcdht1000/NtupleV15_2016/170603_172451", 17),
-'qcdht1000_retest': _fromnum0("/store/user/tucker/qcdht1000/NtupleV15_2016/170603_172450", 17),
-'qcdht1500_hip1p0': _fromnum0("/store/user/tucker/qcdht1500/NtupleV15_2016/170603_172454", 17),
-'qcdht1500_retest': _fromnum0("/store/user/tucker/qcdht1500/NtupleV15_2016/170603_172453", 17),
-
 'qcdht1000_hip1p0_mit': _fromnum0("/store/user/tucker/qcdht1000/NtupleV15_2016/170612_202718", 385),
 'qcdht1500_hip1p0_mit': _fromnum0("/store/user/tucker/qcdht1500/NtupleV15_2016/170612_205808", 129),
 
