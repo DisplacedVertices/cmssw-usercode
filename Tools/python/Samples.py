@@ -596,7 +596,8 @@ for x in [mfv_neu_tau00100um_M0300, mfv_neu_tau01000um_M0300]:
 ########
 
 for x in data_samples_2015 + qcd_samples + qcd_samples_ext + [ttbar, mfv_neu_tau00300um_M1600]:
-    x.condor = True
+    if x != qcdht0700:
+        x.condor = True
 JetHT2015D.xrootd_url = 'root://dcache-cms-xrootd.desy.de/'
 qcdht1000ext.xrootd_url = 'root://dcache-cms-xrootd.desy.de/'
 qcdht0500.xrootd_url = 'root://cmsxrootd.hep.wisc.edu/'
