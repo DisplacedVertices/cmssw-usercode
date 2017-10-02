@@ -22,18 +22,8 @@ for wd in crab_dirs_from_argv():
             continue
 
         job = int(bn.rsplit('_',1)[-1].replace('.root', '')) - 1
-
         kind, tau, mass = scanpack.sample(batch, job)
-        kind = kind.__name__
-        if kind == 'set_mfv_neutralino':
-            kind = 'mfv_neu'
-        elif kind == 'set_gluino_ddbar':
-            kind = 'mfv_ddbar'
-        else:
-            raise ValueError('dunno %s' % kind)
-        tau = int(tau*1000)
-        sample = '%s_tau%05ium_M%04i' % (kind, tau, mass)
-
+        sample_name = scanpack.sample_name(kind, tau, mass)
         sample_files[sample].append(fn)
 
 pprint(dict(sample_files))
