@@ -4,7 +4,14 @@ from itertools import product
 from pprint import pprint
 from modify import set_mfv_neutralino, set_gluino_ddbar
 
-# tau convention when in float is in mm like pythia and modify.py
+# !!! DO NOT CHANGE ANYTHING THAT CHANGES WHICH JOB IS WHICH SAMPLE ONCE BATCHES ARE RUN WITH THAT SCANPACK !!!
+# unless you delete all the output from that scanpack.
+# Make a new subclass and go from there. E.g. scanpackbase100epj exists to just change events_per_job going forward.
+# Adding helper functions or anything that has no side effects to scanpackbase is fine.
+
+# conventions:
+# kind are one of the set_* functions from modify
+# tau are float, in mm like pythia and modify
 # mass are int, GeV
 
 class scanpackbase(object):
