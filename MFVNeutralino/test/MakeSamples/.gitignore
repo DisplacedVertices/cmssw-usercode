@@ -2,3 +2,4 @@
 *.root
 out.*.gz
 inputfns.txt
+scanpacks/
