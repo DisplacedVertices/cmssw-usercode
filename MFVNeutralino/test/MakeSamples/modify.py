@@ -218,6 +218,39 @@ class scanpackbase(object):
             assert job < self.jobs_in_last_batch
         return self.samples[self.job2isample[batch * self.jobs_per_batch + job]]
 
+    def sample_name(self, kind, tau, mass):
+        '''Samples-style naming'''
+        kind = kind.__name__
+        if kind == 'set_mfv_neutralino':
+            kind = 'mfv_neu'
+        elif kind == 'set_gluino_ddbar':
+            kind = 'mfv_ddbar'
+        else:
+            raise ValueError('dunno %s' % kind)
+        tau = int(tau*1000)
+        return '%s_tau%05ium_M%04i' % (kind, tau, mass)
+
+    def sample_details(self, name):
+        '''inverse of sample_name'''
+        kind, tau, mass = name.rsplit('_',2)
+        if kind == 'mfv_neu':
+            kind = set_mfv_neutralino
+        elif kind == 'mfv_ddbar':
+            kind = set_gluino_ddbar
+        else:
+            raise NameError('dunno %s' % kind)
+        assert tau.startswith('tau') and tau.endswith('um')
+        tau = int(tau[3:].replace('um','')) / 1000.
+        assert mass.startswith('M')
+        mass = int(mass[1:])
+        return kind, tau, mass
+
+    def isample(self, kind, tau, mass):
+        target = kind, tau, mass
+        for i,x in enumerate(self.samples):
+            if x == target:
+                return i
+
     def __iter__(self):
         for self.ibatch in xrange(self.nbatches):
             yield self
