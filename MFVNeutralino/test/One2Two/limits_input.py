@@ -1,30 +1,40 @@
 from pprint import pprint
 from JMTucker.MFVNeutralino.MiniTreeBase import *
 
+nbins = 3
 bins = to_array(0., 0.04, 0.07, 4)
-nbins = len(bins) - 1
 
 observed = [1,0,0]
 
 int_lumi = ac.int_lumi_2015p6 * ac.scale_factor_2015p6
 
-bkg_n1v = 3637.
+bkg_n1v = 1183.
 bkg_n2v = 1.
 
+bkg_frac_check = [0.51, 0.37, 0.12]
 sig_uncert = [0.24, 0.24, 0.24]
 bkg_uncert = [0.25, 0.25, 0.69]
-bkg_uncert_stat = [0.02, 0.05, 0.17]
+bkg_uncert_stat = [0.02, 0.05, 0.18]
 bkg_uncert = [(a**2 + b**2)**0.5 for a,b in zip(bkg_uncert, bkg_uncert_stat)] # JMTBAD use proper gmN?
 
-in_fn = '2v_from_jets_2015p6_5track_default_v15.root'
+in_fn = '/uscms/home/jchu/public/2v_from_jets_data_2015p6_5track_default_v15_v4.root'
 #in_trees, in_scanpack_list = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV15_v3/mfv*root', None
-in_trees, in_scanpack_list = None, '/uscms/home/tucker/work/hip_8025/src/JMTucker/MFVNeutralino/test/MakeSamples/scanpack1.list.temp3'
+in_trees, in_scanpack_list = None, '/uscms/home/tucker/work/hip_8025/src/JMTucker/MFVNeutralino/test/MakeSamples/scanpacks/scanpack1.list'
 
 limits_input_fn = 'limits_input.root'
 
-assert len(observed) == nbins
-assert len(sig_uncert) == nbins
-assert len(bkg_uncert) == nbins
+####
+
+assert nbins == len(bins) - 1
+for l in observed, bkg_frac_check, sig_uncert, bkg_uncert, bkg_uncert_stat:
+    assert len(l) == nbins
+
+assert abs(sum(bkg_frac_check) - 1) < 0.01
+
+if '_data_' in in_fn:
+    assert abs(sum(observed) - bkg_n2v) < 0.01
+
+####
 
 def ndx2isample(ndx):
     return -(ndx+1)
