@@ -22,8 +22,8 @@ hip_right = False
 if 1:
     meta = 'scan'
     output_level = 'minitree'
-    hip_right = False
-    scanpack = 'scanpack1'
+    hip_right = True
+    scanpack = 'scanpack1_100epj'
 elif 0:
     meta = 'neu'
 elif 0:
