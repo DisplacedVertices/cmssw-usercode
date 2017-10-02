@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, base64, cPickle as pickle
 from collections import defaultdict
 from itertools import product
 from pprint import pprint
@@ -41,7 +41,21 @@ class scanpackbase(object):
         self.ibatch = 0
 
     def build_samples(self):
-        self.samples = list(product(self.kinds, self.taus, self.masses))
+        if hasattr(self, 'samples_string'):
+            details = pickle.loads(base64.b64decode(self.samples_string))
+            details = sorted(details.items())
+            self.samples = []
+            self.__eps = {}
+            for (kind_name, tau, mass), events in details:
+                d = eval(kind_name), tau, mass
+                self.samples.append(d)
+                self.__eps[d] = events
+        else:
+            self.samples = list(product(self.kinds, self.taus, self.masses))
+
+    def events_per_sample(self, kind, tau, mass):
+        assert hasattr(self, 'samples_string')
+        return self.__eps[(kind,tau,mass)]
 
     def sample(self, batch, job):
         assert 0 <= batch < self.nbatches
@@ -167,16 +181,17 @@ def export_scanpack(crab_dirs):
     return dict(sample_files)
 
 if __name__ == '__main__':
-    todo = sys.argv[1]
+    cmd = sys.argv[1]
 
-    if todo == 'export':
+    if cmd == 'export':
         from JMTucker.Tools.CRAB3ToolsSh import crab_dirs_from_argv
         pprint(export_scanpack(crab_dirs_from_argv()))
 
-    elif todo == 'missing':
+    elif cmd == 'missing':
         fn = sys.argv[2]
         lst = eval(open(fn).read())
         scanpack = get_scanpack(os.path.basename(fn).replace('.list', ''))
+        todo = {}
 
         for kind, tau, mass in scanpack.samples:
             name = scanpack.sample_name(kind, tau, mass)
@@ -186,13 +201,18 @@ if __name__ == '__main__':
             if not files:
                 print 'empty', name
             elif expected > nevents:
-                print 'incomplete', name, nevents, expected
+                missing = todo[(kind.__name__,tau,mass)] = expected - nevents
+                print 'incomplete', name, nevents, expected, missing
             elif expected == nevents:
                 print 'done', name, expected
             else:
                 assert 0
 
-    elif todo == 'test':
+        pprint(todo)
+        ps = pickle.dumps(todo, -1)
+        print repr(base64.b64encode(ps))
+
+    elif cmd == 'test':
         from gensim import process
         for batch in 0,1,2,3: #,4
             for job in xrange(39):
