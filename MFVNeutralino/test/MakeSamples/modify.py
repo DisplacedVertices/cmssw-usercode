@@ -191,7 +191,7 @@ class scanpackbase(object):
 
     def __init__(self):
         self.name = self.__class__.__name__
-        self.samples = list(product(self.kinds, self.taus, self.masses))
+        self.build_samples()
         self.njobs = 0
         self.job2isample = []
         for isample, (kind,tau,mass) in enumerate(self.samples):
@@ -210,6 +210,9 @@ class scanpackbase(object):
         int_ceil = lambda x,y: (x+y-1)/y
         self.nbatches = int_ceil(self.njobs, self.jobs_per_batch)
         self.ibatch = 0
+
+    def build_samples(self):
+        self.samples = list(product(self.kinds, self.taus, self.masses))
 
     def sample(self, batch, job):
         assert 0 <= batch < self.nbatches
