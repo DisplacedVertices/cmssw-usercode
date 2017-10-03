@@ -132,7 +132,6 @@ def make():
     for isig, (name, fns) in enumerate(sigs):
         isample = ndx2isample(isig)
         name_list.GetXaxis().SetBinLabel(-isample, name)
-        print 'samples.push_back({%i, "%s", 0, 0});' % (isample, name)
 
         sig_t = ROOT.TChain('mfvMiniTree/t')
         ngen = 0.
@@ -204,6 +203,11 @@ def eff1v(f, isample):
 def eff2v(f, isample):
     return _eff(i2v, f, isample)
 
+
+def signals_h():
+    f = ROOT.TFile(limits_input_fn)
+    for isample, name in sample_iterator(f):
+        print 'samples.push_back({%i, "%s", 0, 0});' % (isample, name)
 
 def draw():
     ps = plot_saver(plot_dir('o2t_templates_run2'), size=(600,600))
@@ -316,6 +320,8 @@ def compare(fn1, fn2, outbase):
 if __name__ == '__main__':
     if 'make' in sys.argv:
         make()
+    elif 'signals_h' in sys.argv:
+        signals_h()
     elif 'draw' in sys.argv:
         draw()
     elif 'compare' in sys.argv:
