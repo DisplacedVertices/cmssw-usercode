@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
-import ROOT
+import sys, ROOT
 ROOT.gROOT.SetBatch()
+
+bkg_fully_correlated = 'bkg_fully_correlated' in sys.argv
 
 def make(which):
     print '# which = %i' % which
@@ -36,26 +38,39 @@ def make(which):
     nsig = int(h_sig.GetEntries())
     sig_mc = ' '.join('%.9g' % (float(x)/nsig) for x in sig_rate.split())
 
+    nsyst = 3 if bkg_fully_correlated else 5
+
     print '''
 imax 3
 jmax 1
-kmax 3
+kmax %(nsyst)s
 ------------
-bin             0  1  2
+bin             b0  b1  b2
 observation     %(observed)s
 ------------
-bin 0 1 2 0 1 2
+bin b0 b1 b2 b0 b1 b2
 process sig sig sig bkg bkg bkg
 process 0 0 0 1 1 1
 rate %(sig_rate)s %(bkg_rate)s
 ------------
 sig lnN %(sig_uncert)s - - -
 sigMC gmN %(nsig)s %(sig_mc)s - - -
-bkg lnN - - - %(bkg_uncert)s
 ''' % locals()
 
+    if bkg_fully_correlated:
+        print '''
+bkg lnN - - - %(bkg_uncert)s
+''' % locals()
+    else:
+        bkg_uncert_1, bkg_uncert_2, bkg_uncert_3 = bkg_uncert.split()
+        print '''
+bkg1 lnN - - - %(bkg_uncert_1)s - -
+bkg2 lnN - - - - %(bkg_uncert_2)s -
+bkg3 lnN - - - - - %(bkg_uncert_3)s
+''' % locals()
+
+
 if __name__ == '__main__':
-    import sys
     try:
         which = int(sys.argv[1])
     except ValueError:
