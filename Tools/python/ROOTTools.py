@@ -1399,15 +1399,22 @@ def move_stat_box(s, ndc_coords):
 def poisson_means_divide(h1, h2, no_zeroes=False):
     return histogram_divide(h1, h2, confint=clopper_pearson_poisson_means, force_lt_1=False, no_zeroes=no_zeroes)
 
-def plot_dir(x=''):
+def plot_dir(x='', make=False):
     hostname = os.environ['HOSTNAME']
     username = os.environ['USER']
     d = None
     if 'fnal.gov' in hostname and username == 'tucker':
         d = '/publicweb/t/tucker/asdf/plots'
     if d:
-        return os.path.join(d,x)
-    raise NotImplementedError("can't handle host %s and user %s" % (hostname, username))
+        x = os.path.join(d,x)
+    else:
+        raise NotImplementedError("can't handle host %s and user %s" % (hostname, username))
+    if make:
+        try:
+            os.makedirs(x)
+        except OSError:
+            pass
+    return x
 
 class plot_saver:
     i = 0
