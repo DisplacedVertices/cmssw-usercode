@@ -1,7 +1,7 @@
 import os, sys, glob
 from JMTucker.Tools.ROOTTools import *
 
-def stats(fn_or_f, obs, obs_nosyst, l, header='sigma_sig_limit'):
+def stats(fn_or_f, obs, l, header='sigma_sig_limit'):
     if type(fn_or_f) == file:
         f = fn_or_f
     else:
@@ -22,7 +22,6 @@ def stats(fn_or_f, obs, obs_nosyst, l, header='sigma_sig_limit'):
     f.write(header + ':Expected 84.0%: r < ' + '%f\n' % hi68)
     f.write(header + ':Expected 97.5%: r < ' + '%f\n' % hi95)
     f.write(header + ':Observed Limit: r < ' + '%f\n' % obs)
-    f.write(header + ':NoSystObserved Limit: r < ' + '%f\n' % obs_nosyst)
     f.close()
     return median, lo68, hi68, lo95, hi95
 
@@ -36,15 +35,11 @@ def doit(path, out_fn):
     assert len(x) == 1
     obs = x[0]
 
-    x = fromtree(os.path.join(path, 'observed_nosyst.root'))
-    assert len(x) == 1
-    obs_nosyst = x[0]
-
     x = fromtree(os.path.join(path, 'expected.root'))
     assert len(x) == 100
-    expected = x
+    exp = x
 
-    stats(out_fn, obs, obs_nosyst, expected)
+    stats(out_fn, obs, exp)
 
 if __name__ == '__main__':
     import sys
