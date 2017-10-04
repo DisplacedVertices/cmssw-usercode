@@ -3,6 +3,10 @@ from JMTucker.Tools.general import save_git_status
 from JMTucker.Tools.CondorSubmitter import CondorSubmitter
 import smallsigscan
 
+# the combine tarball is made in a locally checked-out combine environment so the worker nodes don't have to git clone, etc.
+# take JMTucker/Tools/scripts/cmsMakeTarball.py, insert make_tarball in it so it can run standalone, then *in the combine environment* do
+#   ./cmsMakeTarball.py --include-bin combine.tz
+
 script_template = '''#!/bin/bash
 echo combine script starting at $(date) with args $*
 
@@ -11,12 +15,12 @@ export WHICH=$2
 export WD=$(pwd)
 
 source /cvmfs/cms.cern.ch/cmsset_default.sh
-scram project CMSSW CMSSW_7_4_7 2>&1 >/dev/null
-cd CMSSW_7_4_7/src
+scram project CMSSW CMSSW_8_1_0 2>&1 >/dev/null
+cd CMSSW_8_1_0/src
 eval `scram runtime -sh`
 
 cd ..
-xrdcp -s root://cmseos.fnal.gov//store/user/tucker/combine.tgz .
+xrdcp -s root://cmseos.fnal.gov//store/user/tucker/combine_810.tgz .
 tar xf combine.tgz
 scram b 2>&1 >/dev/null
 hash -r
@@ -25,23 +29,68 @@ which combine
 cd $WD
 
 echo "========================================================================="
-echo datacard for which = ${WHICH}:
+echo datacard:
 python datacard.py $WHICH | tee datacard.txt
 
 echo "========================================================================="
-echo Observed
+echo GoodnessOfFit observed
+combine -M GoodnessOfFit datacard.txt --algo=saturated
+mv higgsCombine*root gof_observed.root
+
+echo "========================================================================="
+echo GoodnessOfFit expected
+combine -M GoodnessOfFit datacard.txt --algo=saturated --toys 100
+mv higgsCombine*root gof_expected.root
+
+echo "========================================================================="
+echo GoodnessOfFit observed, no systematics
+combine -S0 -M GoodnessOfFit datacard.txt --algo=saturated
+mv higgsCombine*root gof_S0_observed.root
+
+echo "========================================================================="
+echo GoodnessOfFit expected, no systematics
+combine -S0 -M GoodnessOfFit datacard.txt --algo=saturated --toys 100
+mv higgsCombine*root gof_S0_expected.root
+
+echo "========================================================================="
+echo Observed limit
 combine -M BayesianToyMC -H ProfileLikelihood datacard.txt
 mv higgsCombine*root observed.root
 
 echo "========================================================================="
-echo No systematics
-combine -M BayesianToyMC -H ProfileLikelihood datacard.txt -S0
-mv higgsCombine*root observed_nosyst.root
-
-echo "========================================================================="
-echo Expected
+echo Expected limits
 combine -M BayesianToyMC -H ProfileLikelihood datacard.txt --toys 100
 mv higgsCombine*root expected.root
+
+echo "========================================================================="
+echo Observed limit, no systematics
+combine -S0 -M BayesianToyMC -H ProfileLikelihood datacard.txt
+mv higgsCombine*root observed_S0.root
+
+echo "========================================================================="
+echo Expected limits, no systematics
+combine -S0 -M BayesianToyMC -H ProfileLikelihood datacard.txt --toys 100
+mv higgsCombine*root expected_S0.root
+
+echo "========================================================================="
+echo Observed significance
+combine -M Significance datacard.txt
+mv higgsCombine*root signif_observed.root
+
+echo "========================================================================="
+echo Expected limits
+combine -M Significance datacard.txt --toys 100
+mv higgsCombine*root signif_expected.root
+
+echo "========================================================================="
+echo Observed limit, no systematics
+combine -S0 -M Significance datacard.txt
+mv higgsCombine*root signif_observed_S0.root
+
+echo "========================================================================="
+echo Expected limits, no systematics
+combine -S0 -M Significance datacard.txt --toys 100
+mv higgsCombine*root signif_expected_S0.root
 '''
 
 jdl_template = '''universe = vanilla
@@ -59,7 +108,7 @@ transfer_input_files = %(input_files)s
 Queue 1
 '''
 
-batch_root = 'combine_output_%i' % time.time()
+batch_root = '/uscms_data/d2/tucker/crab_dirs/combine_output_%i' % time.time()
 if os.path.isdir(batch_root):
     raise IOError('%s exists' % batch_root)
 os.mkdir(batch_root)
