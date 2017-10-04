@@ -1355,7 +1355,7 @@ namespace mfv {
     fit::set_sig(Template::finalize_template(sig_template));
     fit::calc_lnL_offset();
 
-    const std::vector<double> ebkg = { -1, 0.13, 0.29, 0.51, -1 };
+    const std::vector<double> ebkg = { -1, 0.25, 0.25, 0.71, -1 };
 
     if (bkg_gaussians_all)
       fit::eta_bkg = ebkg;

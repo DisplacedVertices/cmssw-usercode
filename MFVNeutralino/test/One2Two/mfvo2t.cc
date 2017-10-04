@@ -32,7 +32,6 @@ int main() {
   const std::string sig_from_file_fn = env.get_string("sig_from_file_fn", "bigsigscan.root");
   const bool run_templater = env.get_bool("run_templater", true);
   const bool run_fit = env.get_bool("run_fit", true);
-  const std::string data_fn = env.get_string("data_fn", "MultiJetPk2012.root");
   const bool process_data = env.get_bool("process_data", false);
   const int restore_state_num = env.get_int("restore_state_num", -1);
   const std::string restore_state_fn = env.get_string("restore_state_fn", "none");
@@ -48,7 +47,7 @@ int main() {
   printf("save plots in templater: %i\n", templates_save_plots);
   printf("template kind: %s (phishift? %i clearedjets? %i simpleclear? %i run2? %i)\n", templates_kind.c_str(), templates_phishift, templates_clearedjets, templates_simpleclear, templates_run2);
   printf("template binning: (%i, %f, %f)\n", mfv::Template::nbins, mfv::Template::min_val, mfv::Template::max_val);
-  printf("process data from %s? %s\n", data_fn.c_str(), (process_data ? "YES!" : "no"));
+  printf("process data? %s\n", (process_data ? "YES!" : "no"));
 
   TFile* out_f = new TFile(out_fn.c_str(), "recreate");
   TDirectory* rand_dir = out_f->mkdir("RandomStates");
