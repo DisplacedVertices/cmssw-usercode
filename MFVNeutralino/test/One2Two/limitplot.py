@@ -4,7 +4,7 @@ from array import array
 from collections import defaultdict
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.general import from_pickle
-import smallsigscan, bigsigscan as bss
+import smallsigscan #, bigsigscan as bss
 
 def fmt(t, title, xtitle, color):
     t.SetFillColor(color)
@@ -169,7 +169,7 @@ def old_plots():
 
     xxx = [
         (lambda s: 'neu' in sample.name and sample.mass == 800,  'multijetM800',   '', (0.01, 50), 'tau0'),
-        (lambda s: 'neu' in sample.name and sample.tau  == 1000 and sample.mass != 3000, 'multijettau1mm', '', (0.01, 50), 'mass'),
+        (lambda s: 'neu' in sample.name and sample.tau  == 1000, 'multijettau1mm', '', (0.01, 50), 'mass'),
         (lambda s: 'ddbar' in sample.name and sample.mass == 800,  'ddbarM800',   '', (0.01, 50), 'tau0'),
         (lambda s: 'ddbar' in sample.name and sample.tau  == 1000, 'ddbartau1mm', '', (0.01, 50), 'mass'),
         ]
@@ -178,7 +178,7 @@ def old_plots():
         d = defaultdict(list)
         for sample in smallsigscan.samples:
             if use(sample):
-                fn = 'combine_output/signal_%i/results' % sample.sample_num
+                fn = 'combine_output/signal_%05i/results' % sample.isample
                 parse(d, sample.tau, sample.mass, fn, fn)
         make_plot(d, name, nice, y_range, xkey)
 
@@ -536,7 +536,7 @@ def from_r():
 
 if __name__ == '__main__':
     set_style()
-    ps = plot_saver(plot_dir('o2t_limitplot_run2_tmp'), size=(600,600))
+    ps = plot_saver(plot_dir('o2t_limitplot_run2_tmp2'), size=(600,600))
     g_gluglu = make_gluglu()
     g_gluglu.Draw('A3')
     ps.save('gluglu', log=True)
