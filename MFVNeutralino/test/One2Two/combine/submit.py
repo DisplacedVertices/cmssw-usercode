@@ -130,7 +130,7 @@ for sample_num in smallsigscan.sample_nums:
     nice = smallsigscan.num2name[sample_num]
     print sample_num, nice,
 
-    batch_dir = os.path.join(batch_root, 'signal_%03i' % sample_num)
+    batch_dir = os.path.join(batch_root, 'signal_%05i' % sample_num)
     os.mkdir(batch_dir)
     open(os.path.join(batch_dir, 'nice_name'), 'wt').write(nice)
 
