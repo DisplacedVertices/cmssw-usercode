@@ -21,7 +21,7 @@ cd CMSSW_8_1_0/src
 eval `scram runtime -sh`
 
 cd ..
-xrdcp -s root://cmseos.fnal.gov//store/user/tucker/combine_810.tgz .
+xrdcp -s root://cmseos.fnal.gov//store/user/tucker/combine_810.tgz combine.tgz
 tar xf combine.tgz
 scram b 2>&1 >/dev/null
 hash -r
