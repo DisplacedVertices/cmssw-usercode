@@ -107,6 +107,7 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
     nt.alljets_phi.push_back(mevent->jet_phi[i]);
     nt.alljets_energy.push_back(mevent->jet_energy[i]);
     nt.alljets_bdisc.push_back(mevent->jet_calo_pt[i]); // JMTEVIL
+    nt.alljets_hadronflavor.push_back(mevent->jet_hadron_flavor(i)); // JMTEVIL
   }
 
   TVector3 move_vector;

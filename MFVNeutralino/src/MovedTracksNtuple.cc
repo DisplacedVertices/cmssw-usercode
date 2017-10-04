@@ -15,7 +15,7 @@ namespace mfv {
   MovedTracksNtuple::MovedTracksNtuple() {
     clear();
     p_alljets_pt = p_alljets_eta = p_alljets_phi = p_alljets_energy = p_alljets_bdisc = p_jets_pt = p_jets_eta = p_jets_phi = p_jets_energy = p_vtxs_x = p_vtxs_y = p_vtxs_z = p_vtxs_pt = p_vtxs_theta = p_vtxs_phi = p_vtxs_mass = p_vtxs_tkonlymass = p_vtxs_anglemin = p_vtxs_anglemax = p_vtxs_bs2derr = 0;
-    p_jets_ntracks = p_vtxs_ntracks = 0;
+    p_alljets_hadronflavor = p_jets_ntracks = p_vtxs_ntracks = 0;
   }
 
   void MovedTracksNtuple::clear() {
@@ -35,6 +35,7 @@ namespace mfv {
     alljets_phi.clear();
     alljets_energy.clear();
     alljets_bdisc.clear();
+    alljets_hadronflavor.clear();
     jets_pt.clear();
     jets_eta.clear();
     jets_phi.clear();
@@ -93,6 +94,7 @@ namespace mfv {
     tree->Branch("alljets_phi", &alljets_phi);
     tree->Branch("alljets_energy", &alljets_energy);
     tree->Branch("alljets_bdisc", &alljets_bdisc);
+    tree->Branch("alljets_hadronflavor", &alljets_hadronflavor);
     tree->Branch("jets_pt", &jets_pt);
     tree->Branch("jets_eta", &jets_eta);
     tree->Branch("jets_phi", &jets_phi);
@@ -151,6 +153,7 @@ namespace mfv {
     tree->SetBranchAddress("alljets_phi", &p_alljets_phi);
     tree->SetBranchAddress("alljets_energy", &p_alljets_energy);
     tree->SetBranchAddress("alljets_bdisc", &p_alljets_bdisc);
+    tree->SetBranchAddress("alljets_hadronflavor", &p_alljets_hadronflavor);
     tree->SetBranchAddress("jets_pt", &p_jets_pt);
     tree->SetBranchAddress("jets_eta", &p_jets_eta);
     tree->SetBranchAddress("jets_phi", &p_jets_phi);

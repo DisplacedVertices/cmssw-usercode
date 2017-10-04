@@ -6,7 +6,7 @@ from JMTucker.Tools.MiniAOD_cfg import *
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.MFVNeutralino.Year import year
 
-version = 4
+version = 5
 cfgs = named_product(njets = [2,3],
                      nbjets = [0,1,2],
                      nsigmadxy = [4.0, 4.1],
@@ -17,7 +17,7 @@ is_mc = True
 H = False
 repro = False
 
-if version >= 5:
+if version >= 6:
     raise ValueError('get rid of the two btag working points before running next version')
 
 process = pat_tuple_process(None, is_mc, year, H, repro)
