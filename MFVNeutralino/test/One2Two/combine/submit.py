@@ -15,6 +15,7 @@ export WHICH=$2
 export WD=$(pwd)
 
 source /cvmfs/cms.cern.ch/cmsset_default.sh
+export SCRAM_ARCH=slc6_amd64_gcc530
 scram project CMSSW CMSSW_8_1_0 2>&1 >/dev/null
 cd CMSSW_8_1_0/src
 eval `scram runtime -sh`
