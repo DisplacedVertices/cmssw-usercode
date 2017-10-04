@@ -218,13 +218,15 @@ struct MFVEvent {
     return 1 - sqrt(1 - 4 * jet_ST_sum() / pow(jet_ht(), 2));
   }
 
-  static uchar encode_jet_id(int pu_level, int bdisc_level) {
-    assert(pu_level == 0);
-    uchar id = 0;
-    assert(pu_level >= 0 && pu_level <= 3);
+  static uchar encode_jet_id(int pu_level, int bdisc_level, int hadron_flavor) {
+    assert(pu_level == 0); assert(pu_level >= 0 && pu_level <= 3);
+    assert(hadron_flavor == 0 || hadron_flavor == 4 || hadron_flavor == 5);
     assert(bdisc_level >= 0 && bdisc_level <= 3);
-    id = (bdisc_level << 2) | pu_level;
-    return id;
+
+    if      (hadron_flavor == 4) hadron_flavor = 1;
+    else if (hadron_flavor == 5) hadron_flavor = 2;
+
+    return (hadron_flavor << 4) | (bdisc_level << 2) | pu_level;
   }
 
   bool pass_nopu(int w, int level) const {
@@ -239,6 +241,13 @@ struct MFVEvent {
       if (pass_nopu(i, level))
         ++c;
     return c;
+  }
+
+  int jet_hadron_flavor(int w) const {
+    const int f = (jet_id[w] >> 4) & 3;
+    if (f == 1) return 4;
+    if (f == 2) return 5;
+    return 0;
   }
 
   bool is_btagged(int w, int level) const {

@@ -302,7 +302,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       if (jet.bDiscriminator(b_discriminator) > b_discriminator_mins[i])
         bdisc_level = i+1;
 
-    mevent->jet_id.push_back(MFVEvent::encode_jet_id(0, bdisc_level));
+    mevent->jet_id.push_back(MFVEvent::encode_jet_id(0, bdisc_level, jet.hadronFlavour()));
     const size_t ijet = mevent->njets() - 1; // will stay in track with jjet as long as jets are pt ordered...
 
     const reco::SecondaryVertexTagInfo* svtag = jet.tagInfoSecondaryVertex("secondaryVertex");
