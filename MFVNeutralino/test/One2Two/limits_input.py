@@ -47,6 +47,11 @@ def name_list(f):
 def nsamples(f):
     return name_list(f).GetNbinsX()
 
+def name2tau(name):
+    return int(name.split('tau')[1].split('um')[0])
+def name2mass(name):
+    return int(name.split('M')[1])
+
 def name2isample(f, name):
     h = name_list(f)
     ax = h.GetXaxis()
