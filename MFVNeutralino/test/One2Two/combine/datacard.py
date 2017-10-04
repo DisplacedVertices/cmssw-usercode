@@ -4,6 +4,8 @@ import ROOT
 ROOT.gROOT.SetBatch()
 
 def make(which):
+    print '# which = %i' % which
+
     out_fn = 'limits_input.root'
     f = ROOT.TFile(out_fn)
 
@@ -54,5 +56,10 @@ bkg lnN - - - %(bkg_uncert)s
 
 if __name__ == '__main__':
     import sys
-    which = int(sys.argv[1])
+    try:
+        which = int(sys.argv[1])
+    except ValueError:
+        from limits_input import name2isample
+        print '# name = %s' % sys.argv[1]
+        which = name2isample(ROOT.TFile('limits_input.root'), sys.argv[1])
     make(which)
