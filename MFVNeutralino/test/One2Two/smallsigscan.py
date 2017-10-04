@@ -1,5 +1,6 @@
 import re
 from JMTucker.Tools import Samples
+from limits_input import ROOT, name2isample
 
 num2name = {}
 name2num = {}
@@ -14,19 +15,27 @@ for line in open('signals.h'):
         num2name[num] = name
         name2num[name] = num
 
-sample_nums = [-11,-30,-49,-68,-87,-39,-42,-46,-52,-55] + [-105,-124,-134,-137,-140,-143,-146,-149,-152,-162,-181]
-sample_nums.sort(reverse=True)
+kinds = 'mfv_neu', 'mfv_ddbar'
+taus = [100, 400, 1000, 10000, 31000]
+masses = [300,400,500,600, 800, 1200, 1800, 3000]
 
-samples = []
-for i in sample_nums:
-    s = getattr(Samples, num2name[i])
-    s.sample_num = i
-    samples.append(s)
+kinds = ['mfv_neu']
+taus = [1000]
+masses = [800]
+
+f = ROOT.TFile('limits_input.root')
+sample_nums = [name2isample(f, name) for name in ['%s_tau%05ium_M%04i' % (k,t,m) for k in kinds for t in taus for m in masses]]
+
+#samples = []
+#for i in sample_nums:
+#    s = getattr(Samples, num2name[i])
+#    s.sample_num = i
+#    samples.append(s)
 
 __all__ = [
     'num2name',
     'name2num',
     'sample_nums'
-    'samples',
+#    'samples',
     'Samples'
     ]
