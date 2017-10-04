@@ -55,22 +55,22 @@ mv higgsCombine*root gof_S0_expected.root
 
 echo "========================================================================="
 echo Observed limit
-combine -M BayesianToyMC -H ProfileLikelihood datacard.txt
+combine -M BayesianToyMC datacard.txt
 mv higgsCombine*root observed.root
 
 echo "========================================================================="
 echo Expected limits
-combine -M BayesianToyMC -H ProfileLikelihood datacard.txt --toys 100
+combine -M BayesianToyMC datacard.txt --toys 100
 mv higgsCombine*root expected.root
 
 echo "========================================================================="
 echo Observed limit, no systematics
-combine -S0 -M BayesianToyMC -H ProfileLikelihood datacard.txt
+combine -S0 -M BayesianToyMC datacard.txt
 mv higgsCombine*root observed_S0.root
 
 echo "========================================================================="
 echo Expected limits, no systematics
-combine -S0 -M BayesianToyMC -H ProfileLikelihood datacard.txt --toys 100
+combine -S0 -M BayesianToyMC datacard.txt --toys 100
 mv higgsCombine*root expected_S0.root
 
 echo "========================================================================="
