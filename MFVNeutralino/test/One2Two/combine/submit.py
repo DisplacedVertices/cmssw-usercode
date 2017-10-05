@@ -1,7 +1,7 @@
 import sys, os, shutil, time
 from JMTucker.Tools.general import save_git_status
 from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-import smallsigscan
+from limits_input import ROOT, sample_iterator, test_sample_iterator
 
 # the combine tarball is made in a locally checked-out combine environment so the worker nodes don't have to git clone, etc.
 # take JMTucker/Tools/scripts/cmsMakeTarball.py, insert make_tarball in it so it can run standalone, then *in the combine environment* do
@@ -96,9 +96,12 @@ cd $WD
 } 2>&1 | gzip -c > combine_output.txt.gz
 '''
 
+if 'bkg_fully_correlated' in sys.argv:
+    script_template = script_template.replace('python datacard.py $WHICH', 'python datacard.py $WHICH bkg_fully_correlated')
+
 jdl_template = '''universe = vanilla
 Executable = run.sh
-arguments = $(Process) %(sample_num)s
+arguments = $(Process) %(isample)s
 Output = stdout.$(Process)
 Error = stderr.$(Process)
 Log = log.$(Process)
@@ -126,13 +129,15 @@ for x in ['combine/datacard.py', 'limits_input.root']:
     input_files.append(nx)
 input_files = ','.join(input_files)
 
-for sample_num in smallsigscan.sample_nums:
-    nice = smallsigscan.num2name[sample_num]
-    print sample_num, nice,
+f = ROOT.TFile('limits_input.root')
+test_batch = 'test_batch' in sys.argv
+for sample in (test_sample_iterator if test_batch else sample_iterator)(f):
+    print sample.isample, sample.name,
+    isample = sample.isample # for locals use below
 
-    batch_dir = os.path.join(batch_root, 'signal_%05i' % sample_num)
+    batch_dir = os.path.join(batch_root, 'signal_%05i' % sample.isample)
     os.mkdir(batch_dir)
-    open(os.path.join(batch_dir, 'nice_name'), 'wt').write(nice)
+    open(os.path.join(batch_dir, 'nice_name'), 'wt').write(sample.name)
 
     run_fn = os.path.join(batch_dir, 'run.sh')
     open(run_fn, 'wt').write(script_template % locals())
