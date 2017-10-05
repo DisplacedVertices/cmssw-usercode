@@ -47,10 +47,19 @@ def name_list(f):
 def nsamples(f):
     return name_list(f).GetNbinsX()
 
+def details2name(kind, tau, mass):
+    # same convention as scanpack: tau float:mm, mass int:GeV
+    return '%s_tau%05ium_M%04i' % (kind, int(tau*1000), mass)
+def name2kind(name):
+    return name.split('_tau')[0]
 def name2tau(name):
-    return int(name.split('tau')[1].split('um')[0])
+    return int(name.split('tau')[1].split('um')[0]) / 1000.
 def name2mass(name):
     return int(name.split('M')[1])
+def name2details(name):
+    return name2kind(name), name2tau(name), name2mass(name)
+def name2taumass(name):
+    return name2tau(name), name2mass(name)
 
 def name2isample(f, name):
     h = name_list(f)
@@ -73,14 +82,43 @@ def isample_iterator(f):
     for ibin in xrange(1, h.GetNbinsX()+1):
         yield -ibin
 
-def sample_iterator(f):
+def isamplename_iterator(f):
     h = name_list(f)
     ax = h.GetXaxis()
     for ibin in xrange(1, h.GetNbinsX()+1):
         yield -ibin, ax.GetBinLabel(ibin)
 
-def names(f):
-    return sorted(name for _, name in sample_iterator(f))
+def name_iterator(f):
+    for _, name in isamplename_iterator(f):
+        yield name
+
+class sample(object):
+    pass
+
+def sample_iterator(f):
+    for isample, name in isamplename_iterator(f):
+        s = sample()
+        s.isample = isample
+        s.name = name
+        s.kind, s.tau, s.mass = name2details(name)
+        yield s
+
+def test_sample_iterator(f):
+    kinds = 'mfv_neu', 'mfv_ddbar'
+    taus = [t/1000. for t in 100, 400, 1000, 10000, 31000]
+    masses = [300, 400, 500, 600, 800, 1200, 1800, 3000]
+
+    allowed = {name:isample for isample,name in isamplename_iterator(f)}
+    for k in kinds:
+        for t in taus:
+            for m in masses:
+                name = details2name(k,t,m)
+                if name in allowed:
+                    s = sample()
+                    s.name = name
+                    s.isample = allowed[name]
+                    s.kind, s.tau, s.mass = k, t, m
+                    yield s
 
 def make():
     ROOT.TH1.AddDirectory(1)
@@ -211,7 +249,7 @@ def eff2v(f, isample):
 
 def signals_h():
     f = ROOT.TFile(limits_input_fn)
-    for isample, name in sample_iterator(f):
+    for isample, name in isamplename_iterator(f):
         print 'samples.push_back({%i, "%s", 0, 0});' % (isample, name)
 
 def draw():
@@ -269,8 +307,8 @@ def draw():
 
 def compare(fn1, fn2, outbase):
     f1, f2 = fs = ROOT.TFile.Open(fn1), ROOT.TFile.Open(fn2)
-    samples_1 = dict((name, isample) for isample, name in sample_iterator(f1))
-    samples_2 = dict((name, isample) for isample, name in sample_iterator(f2))
+    samples_1 = dict((name, isample) for isample, name in isamplename_iterator(f1))
+    samples_2 = dict((name, isample) for isample, name in isamplename_iterator(f2))
     names_1 = set(samples_1)
     names_2 = set(samples_2)
 
