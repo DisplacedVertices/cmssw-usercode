@@ -866,7 +866,11 @@ def data_mc_comparison(name,
         if background_uncertainty is not None:
             legend.AddEntry(sum_background_uncert, bkg_uncert_label, 'F')
         for sample in signal_samples:
-            entry = legend.AddEntry(sample.hist, sample.nice_name, 'L')
+            if '\\' in sample.nice_name:
+                legend.AddEntry(sample.hist, sample.nice_name.split('\\')[0], 'L')
+                legend.AddEntry(sample.hist, sample.nice_name.split('\\')[1], '')
+            else:
+                legend.AddEntry(sample.hist, sample.nice_name, 'L')
         legend.Draw()
     else:
         legend = None
