@@ -20,7 +20,7 @@ def tge(xye, title, xtitle, color):
     return fmt(t, title, xtitle, color)
 
 def tgae(x, y, exl, exh, eyl, eyh, title, xtitle, color):
-    print 'tgae', len(x), len(y)
+    #print 'tgae', len(x), len(y)
     x = array('f', x)
     y = array('f', y)
     l = len(x)
@@ -57,7 +57,7 @@ def make_gluglu_hist():
     return gluglu, hgluxsec
     
 def parse(d, tau0, mass, observed_fn, expected_fn):
-    print d, tau0, mass, observed_fn, expected_fn
+    #print d, tau0, mass, observed_fn, expected_fn
     watches = [
         'sigma_sig_limit:Observed Limit: r < ',
         'sigma_sig_limit:Expected  2.5%: r < ',
@@ -84,7 +84,7 @@ def parse(d, tau0, mass, observed_fn, expected_fn):
                 vals[0] = float(line.replace(watch, ''))
     else:
         vals[0] = None # in case it was found in exp above
-    print vals
+    #print vals
     if (do_obs and vals[0] is None) or (do_exp and any(v is None for v in vals[1:])):
         raise ValueError('crap')
 
@@ -108,16 +108,7 @@ def parse(d, tau0, mass, observed_fn, expected_fn):
         d['expect95lo'].append(exp95 - exp2p5)
         d['expect95hi'].append(exp97p5 - exp95)
 
-def quantiles(root_fn):
-    f = ROOT.TFile(root_fn)
-    t = f.Get('Fitter/t_fit_info')
-    for jentry in ttree_iterator(t):
-        print t.seed, t.sig_limit, t.true_pars[1]
-        #for a,b,c in zip(t.sig_limits, t.pval_limits, t.pval_limit_errs):
-        #    print a,b,c
-        #print
-
-def make_plot(d, name, title, y_range, xkey='mass'):
+def make_1d_plot(d, name, title, y_range, xkey='mass'):
     if xkey == 'mass':
         xtitle = 'mass (GeV)'
     else:
@@ -157,16 +148,7 @@ def make_plot(d, name, title, y_range, xkey='mass'):
     
     ps.save(name)
 
-####
-
-def old_plots():
-    tau0s = [
-        ('0100um', '#tau = 100 #mum'),
-        ('0300um', '#tau = 300 #mum'),
-        ('1000um', '#tau = 1 mm'),
-        ('9900um', '#tau = 10 mm'),
-        ]
-
+def do_1d_plots():
     xxx = [
         (lambda s: 'neu' in sample.name and sample.mass == 800,  'multijetM800',   '', (0.01, 50), 'tau0'),
         (lambda s: 'neu' in sample.name and sample.tau  == 1000, 'multijettau1mm', '', (0.01, 50), 'mass'),
@@ -180,106 +162,9 @@ def old_plots():
             if use(sample):
                 fn = 'combine_output/signal_%05i/results' % sample.isample
                 parse(d, sample.tau, sample.mass, fn, fn)
-        make_plot(d, name, nice, y_range, xkey)
+        make_1d_plot(d, name, nice, y_range, xkey)
 
-def get_outs():
-    outs = {-1: {}, -2: {}}
-    for line in open('crab3/One2Two/allouts'):
-        line = line.strip()
-        if line:
-            x = line.split('SigSamn')[1].split('_Sam')[0].split('x')
-            num, kind = int(x[0]), int(x[1])
-            outs[kind][num] = 'crab3/One2Two/' + line
-    return outs
-
-def plot_em(z):
-    for name, title, y_range, parse_args in z:
-        print name
-        d = defaultdict(list)
-        for x in parse_args:
-            parse(d, *x)
-        make_plot(d, name, title, y_range)
-
-def test_new_1ds():
-    z = [
-        ('00300um', '#tau = 300 #mum', 60, 
-         [
-          ('00300um', m,
-           'crab3/One2Two/tau00300um/lsts/tau00300um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.limits.out' % (i,i),
-           'crab3/One2Two/tau00300um/lsts/tau00300um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.limits.out' % (i,i)
-           ) for m,i in zip(bss.masses, bss.tau2range[300])
-          ]
-         ),
-     
-        ('tau01000um', '#tau = 1 mm', 6,
-         [
-          ('01000um', m,
-           'crab3/One2Two/tau01000um/lsts/tau01000um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.limits.out' % (i,i),
-           'crab3/One2Two/tau01000um/lsts/tau01000um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.limits.out' % (i,i)
-           ) for m,i in zip(bss.masses, bss.tau2range[1000])
-          ]
-         ),
-
-        ('tau10000um', '#tau = 10 mm', 3,
-         [
-          ('10000um', m,
-           'crab3/One2Two/tau10000um/lsts/tau10000um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.limits.out' % (i,i),
-           'crab3/One2Two/tau10000um/lsts/tau10000um_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.limits.out' % (i,i)
-           ) for m,i in zip(bss.masses, bss.tau2range[10000])
-          ]
-         ),
-        ]
-    plot_em(z)
-
-def new_1ds():
-    z = []
-    outs = get_outs()
-    for tau0 in sorted(bss.tau2range.keys()):
-        rng = bss.tau2range[tau0]
-        name = 'tau%05ium' % tau0
-        if tau0 / 1000 >= 1:
-            title = '#tau = %i mm' % (tau0 / 1000)
-        else:
-            title = '#tau = %i #mum' % tau0
-        y_range = None
-        outs_m1 = outs[-1].get(i, None)
-        outs_m2 = outs[-2].get(i, None)
-        these_outs = [(i, outs[-1].get(i, None), outs[-2].get(i, None)) for i in bss.tau2range[tau0]]
-        nones = [(i,x,y) for i,x,y in these_outs if x is None or y is None]
-        if nones:
-            print 'skipping %s, missing %r' % (name, nones)
-        else:
-            parse_args = [(name.replace('tau', ''), m, x, y) for m,(i,x,y) in zip(bss.masses, these_outs)]
-            z.append((name, title, y_range, parse_args))
-    plot_em(z)
-
-def new_2ds():
-    hs = []
-    outs = get_outs()
-    for ikind, kind in enumerate(['observed', 'expect2p5', 'expect16', 'expect50', 'expect68', 'expect84', 'expect95', 'expect97p5']):
-        h = bss.book('hlim_%s' % kind, kind)
-        hs.append(h)
-
-        x = -2 if ikind > 0 else -1
-
-        for num, out in outs[x].iteritems():
-            tau0 = bss.num2tau[num]
-            mass = bss.num2mass[num]
-            d = defaultdict(list)
-            parse(d, tau0, mass,
-                  out if x == -1 else None, 
-                  out if x == -2 else None)
-            val = d[kind][0]
-            h.SetBinContent(h.FindBin(mass, tau0), val)
-    return hs
-    
-def get_2d_plot(fn = '/uscms/home/tucker/asdf/plots/mfvlimits_test/hm1.root'):
-    f = ROOT.TFile(fn)
-    h = f.Get('c0').FindObject('hm1').Clone()
-    h.SetDirectory(0)
-    f.Close()
-    ps.c.cd()
-    return h
+####
 
 def book_interp(name):
     hint = ROOT.TH2F(name, '', 1200, 300, 1500, 319, 100, 32000)
@@ -541,7 +426,7 @@ if __name__ == '__main__':
     g_gluglu.Draw('A3')
     ps.save('gluglu', log=True)
 
-    old_plots()
+    do_1d_plots()
 
 #    rainbow_palette()
 #
