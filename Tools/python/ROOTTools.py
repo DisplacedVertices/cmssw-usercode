@@ -717,7 +717,7 @@ def data_mc_comparison(name,
             
             if overflow_in_last:
                 if x_range is not None:
-                    move_above_into_bin(sample.hist, x_range[1])
+                    move_above_into_bin(sample.hist, x_range[1]-1e-6)
                 else:
                     move_overflow_into_last_bin(sample.hist)
 
