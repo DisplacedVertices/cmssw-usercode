@@ -2,9 +2,10 @@
 
 from array import array
 from collections import defaultdict
+from itertools import izip
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.general import from_pickle
-import limits_input
+from limits_input import sample_iterator
 
 def fmt(t, title, xtitle, color):
     t.SetFillColor(color)
@@ -46,6 +47,10 @@ def parse_gluglu():
 
 def make_gluglu():
     return tge(parse_gluglu(), '13 TeV glu-glu production', 'mass (GeV)', 9)
+
+def draw_gluglu():
+    g_gluglu = make_gluglu()
+    g_gluglu.Draw('A3')
 
 def make_gluglu_hist():
     gluglu = parse_gluglu()
@@ -108,7 +113,7 @@ def parse(d, tau0, mass, observed_fn, expected_fn):
         d['expect95lo'].append(exp95 - exp2p5)
         d['expect95hi'].append(exp97p5 - exp95)
 
-def make_1d_plot(d, name, title, y_range, xkey='mass'):
+def draw_1d_plot(d, name, title, y_range, xkey='mass'):
     if xkey == 'mass':
         xtitle = 'mass (GeV)'
     else:
@@ -159,21 +164,44 @@ def do_1d_plots():
     f = ROOT.TFile('limits_input.root')
     for use, name, nice, y_range, xkey in xxx:
         d = defaultdict(list)
-        for sample in limits_input.test_sample_iterator(f):
+        for sample in sample_iterator(f):
             if use(sample):
                 fn = 'combine_output/signal_%05i/results' % sample.isample
                 parse(d, sample.tau, sample.mass, fn, fn)
-        make_1d_plot(d, name, nice, y_range, xkey)
+        draw_1d_plot(d, name, nice, y_range, xkey)
 
-####
+def make_2d_plots():
+    f = ROOT.TFile('limits_input.root')
+    d = defaultdict(list)
 
-def book_interp(name):
-    hint = ROOT.TH2F(name, '', 1200, 300, 1500, 319, 100, 32000)
-    hint.SetStats(0)
-    return hint
+    for sample in sample_iterator(f):
+        fn = 'combine_output/signal_%05i/results' % sample.isample
+        try:
+            parse(d, sample.tau, sample.mass, fn, fn)
+        except ValueError:
+            print "can't parse", sample.name, sample.isample
+
+    def axisize(l):
+        l = sorted(set(l))
+        delta = l[-1] - l[-2]
+        l.append(l[-1] + delta)
+        return to_array(l)
+
+    taus, masses = axisize(d['tau0']), axisize(d['mass'])
+
+    hs = {}
+    for x in d:
+        if x == 'tau0' or x == 'mass':
+            continue
+        h = hs[x] = ROOT.TH2D(x, '', len(masses)-1, masses, len(taus)-1, taus)
+        h.SetStats(0)
+        for t,m,v in izip(d['tau0'], d['mass'], d[x]):
+            h.SetBinContent(h.FindBin(m,t), v)
+    return hs
 
 def interpolate(h):
-    hint = book_interp(h.GetName() + '_interp')
+    hint = ROOT.TH2D(h.GetName() + '_interp', '', 2900, 300, 3200, 399, 0.1, 40)
+    hint.SetStats(0)
     xax = hint.GetXaxis()
     yax = hint.GetYaxis()
     for ix in xrange(1, hint.GetNbinsX()+1):
@@ -182,6 +210,28 @@ def interpolate(h):
             y = yax.GetBinLowEdge(iy)
             hint.SetBinContent(ix, iy, h.Interpolate(x,y))
     return hint
+
+def save_2d_plots():
+    f = ROOT.TFile('limits.root', 'create')
+    hs = make_2d_plots()
+    for h in hs.values():
+        f.cd()
+        h.Write()
+        hint = interpolate(h)
+        hs[hint.GetName()] = hint
+        hint.Write()
+
+    for x in 'observed', 'observed_interp':
+        c = ROOT.TCanvas('c', '', 800, 800)
+        h = hs[x]
+        h.Draw('colz')
+        h.GetYaxis().SetRangeUser(0.1, 40)
+        c.SetLogz()
+        c.SaveAs('$asdf/a_%s.png'  % x)
+        c.SaveAs('$asdf/a_%s.root' % x)
+        del c
+
+####
 
 def gluglu_exclude(h, opt):
     gluglu, hgluglu = make_gluglu_hist()
@@ -421,13 +471,19 @@ def from_r():
     f.Close()
 
 if __name__ == '__main__':
-    set_style()
-    ps = plot_saver(plot_dir('o2t_limitplot_run2_tmp4'), size=(600,600))
-    g_gluglu = make_gluglu()
-    g_gluglu.Draw('A3')
-    ps.save('gluglu', log=True)
+    import sys
+    if len(sys.argv) > 1:
+        cmd = sys.argv[1]
 
-    do_1d_plots()
+        if cmd == '1dplots':
+            set_style()
+            ps = plot_saver(plot_dir('o2t_limitplot_run2_tmp4'), size=(600,600))
+            draw_gluglu()
+            ps.save('gluglu')
+            do_1d_plots()
+
+        elif cmd == '2dplots':
+            save_2d_plots()
 
 #    rainbow_palette()
 #
