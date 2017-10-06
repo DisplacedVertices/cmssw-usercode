@@ -44,15 +44,15 @@ cd $WD
     combine -M GoodnessOfFit datacard.txt --algo=saturated --toys 100
     mv higgsCombine*root gof_expected.root
 
-    echo "========================================================================="
-    echo GoodnessOfFit observed, no systematics
-    combine -S0 -M GoodnessOfFit datacard.txt --algo=saturated
-    mv higgsCombine*root gof_S0_observed.root
-
-    echo "========================================================================="
-    echo GoodnessOfFit expected, no systematics
-    combine -S0 -M GoodnessOfFit datacard.txt --algo=saturated --toys 100
-    mv higgsCombine*root gof_S0_expected.root
+#    echo "========================================================================="
+#    echo GoodnessOfFit observed, no systematics
+#    combine -S0 -M GoodnessOfFit datacard.txt --algo=saturated
+#    mv higgsCombine*root gof_S0_observed.root
+#
+#    echo "========================================================================="
+#    echo GoodnessOfFit expected, no systematics
+#    combine -S0 -M GoodnessOfFit datacard.txt --algo=saturated --toys 100
+#    mv higgsCombine*root gof_S0_expected.root
 
     echo "========================================================================="
     echo Observed limit
@@ -64,15 +64,15 @@ cd $WD
     combine -M BayesianToyMC datacard.txt --toys 100
     mv higgsCombine*root expected.root
 
-    echo "========================================================================="
-    echo Observed limit, no systematics
-    combine -S0 -M BayesianToyMC datacard.txt
-    mv higgsCombine*root observed_S0.root
-
-    echo "========================================================================="
-    echo Expected limits, no systematics
-    combine -S0 -M BayesianToyMC datacard.txt --toys 100
-    mv higgsCombine*root expected_S0.root
+#    echo "========================================================================="
+#    echo Observed limit, no systematics
+#    combine -S0 -M BayesianToyMC datacard.txt
+#    mv higgsCombine*root observed_S0.root
+#
+#    echo "========================================================================="
+#    echo Expected limits, no systematics
+#    combine -S0 -M BayesianToyMC datacard.txt --toys 100
+#    mv higgsCombine*root expected_S0.root
 
     echo "========================================================================="
     echo Observed significance
@@ -80,20 +80,23 @@ cd $WD
     mv higgsCombine*root signif_observed.root
 
     echo "========================================================================="
-    echo Expected limits
+    echo Expected significance
     combine -M Significance datacard.txt --toys 100
     mv higgsCombine*root signif_expected.root
 
-    echo "========================================================================="
-    echo Observed limit, no systematics
-    combine -S0 -M Significance datacard.txt
-    mv higgsCombine*root signif_observed_S0.root
-
-    echo "========================================================================="
-    echo Expected limits, no systematics
-    combine -S0 -M Significance datacard.txt --toys 100
-    mv higgsCombine*root signif_expected_S0.root
+#    echo "========================================================================="
+#    echo Observed significance, no systematics
+#    combine -S0 -M Significance datacard.txt
+#    mv higgsCombine*root signif_observed_S0.root
+#
+#    echo "========================================================================="
+#    echo Expected significances, no systematics
+#    combine -S0 -M Significance datacard.txt --toys 100
+#    mv higgsCombine*root signif_expected_S0.root
 } 2>&1 | gzip -c > combine_output.txt.gz
+
+echo run process.py
+python process.py . 2>&1 >results
 '''
 
 if 'bkg_fully_correlated' in sys.argv:
@@ -123,7 +126,7 @@ os.mkdir(os.path.join(batch_root, 'inputs'))
 save_git_status(os.path.join(batch_root, 'gitstatus'))
 
 input_files = []
-for x in ['combine/datacard.py', 'limits_input.root']:
+for x in ['combine/datacard.py', 'combine/process.py', 'limits_input.root']:
     nx = os.path.abspath(os.path.join(batch_root, 'inputs', os.path.basename(x)))
     shutil.copy2(x, nx)
     input_files.append(nx)
