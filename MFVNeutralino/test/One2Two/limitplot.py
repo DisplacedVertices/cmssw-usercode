@@ -54,7 +54,7 @@ def draw_gluglu():
 
 def make_gluglu_hist():
     gluglu = parse_gluglu()
-    hgluxsec = ROOT.TH1F('hgluxsec', '', 361, 200, 2005)
+    hgluxsec = ROOT.TH1F('hgluxsec', '', 561, 200, 3005)
     for m,s,se in gluglu:
         bin = hgluxsec.FindBin(m)
         hgluxsec.SetBinContent(bin, s)
@@ -242,13 +242,15 @@ def gluglu_exclude(h, opt):
 
     for ix in xrange(1, h.GetNbinsX()+1):
         mass = h.GetXaxis().GetBinLowEdge(ix)
+        if mass > 2995:
+            continue
         for iy in xrange(1, h.GetNbinsY()+1):
             tau0 = h.GetYaxis().GetBinLowEdge(iy)
 
             lim = h.GetBinContent(ix, iy)
 
             bin = hgluglu.FindBin(mass)
-            assert bin < hgluglu.GetNbinsX()
+            assert bin <= hgluglu.GetNbinsX()
             ma = hgluglu.GetBinLowEdge(bin)
             mb = hgluglu.GetBinLowEdge(bin+1)
             sa, esa = gluglu[ma]
@@ -272,38 +274,17 @@ def gluglu_exclude(h, opt):
                 hexc.SetBinContent(bin, 0)
     return hexc
 
-def export_plots(fn='newplots.root'):
-    fout = ROOT.TFile(fn, 'recreate')
-    hs = []
-    def sdw(h):
-        hs.append(h)
-        h.SetDirectory(fout)
-        h.Write()
-        return h
-
-    for k in (0, 600, 800):
-        heff = sdw(bss.make_h_eff(k))
-        heffint = sdw(interpolate(heff))
-    
-    hlims = new_2ds()
-
-    for hlim in hlims:
-        sdw(hlim)
-        sdw(gluglu_exclude(hlim))
-        hint = sdw(interpolate(hlim))
-        sdw(gluglu_exclude(hint))
-
-    fout.Close()
-
-def dbg_exclude():
-    f = ROOT.TFile('newplots.root')
-    h = f.Get('hlim_observed')
-    hi = gluglu_exclude(h)
-    c = ROOT.TCanvas('c', '', 800, 600)
+def simple_exclude():
+    f = ROOT.TFile('limits.root')
+    h = f.Get('observed_interp')
+    hi = gluglu_exclude(h, 'central')
+    c = ROOT.TCanvas('c', '', 800, 800)
     hi.SetMarkerStyle(20)
     hi.SetMarkerSize(1.5)
-    hi.Draw('colz text00')
-    c.SaveAs('/uscms/home/tucker/asdf/a.png')
+    hi.Draw('colz')
+    c.SaveAs('$asdf/a.png')
+    hi.GetYaxis().SetRangeUser(0.1,40)
+    c.SaveAs('$asdf/asml.png')
 
 def exc_graph(h, color, style, duh):
     xax = h.GetXaxis()
@@ -484,6 +465,9 @@ if __name__ == '__main__':
 
         elif cmd == '2dplots':
             save_2d_plots()
+
+        elif cmd == 'simpleexclude':
+            simple_exclude()
 
 #    rainbow_palette()
 #
