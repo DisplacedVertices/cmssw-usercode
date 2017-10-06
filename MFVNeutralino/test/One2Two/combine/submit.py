@@ -1,7 +1,7 @@
 import sys, os, shutil, time
 from JMTucker.Tools.general import save_git_status
 from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-from limits_input import ROOT, sample_iterator, test_sample_iterator
+from limits_input import ROOT, name_iterator, sample_iterator, test_sample_iterator
 
 # the combine tarball is made in a locally checked-out combine environment so the worker nodes don't have to git clone, etc.
 # take JMTucker/Tools/scripts/cmsMakeTarball.py, insert make_tarball in it so it can run standalone, then *in the combine environment* do
@@ -133,8 +133,14 @@ for x in ['combine/datacard.py', 'combine/process.py', 'limits_input.root']:
 input_files = ','.join(input_files)
 
 f = ROOT.TFile('limits_input.root')
-test_batch = 'test_batch' in sys.argv
-for sample in (test_sample_iterator if test_batch else sample_iterator)(f):
+names = list(name_iterator(f))
+samples = test_sample_iterator if 'test_batch' in sys.argv else test_sample_iterator
+allowed = [arg for arg in sys.argv if arg in names]
+
+for sample in samples(f):
+    if allowed and sample.name not in allowed:
+        continue
+
     print sample.isample, sample.name,
     isample = sample.isample # for locals use below
 
