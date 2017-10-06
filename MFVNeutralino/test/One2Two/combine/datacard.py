@@ -6,10 +6,8 @@ ROOT.gROOT.SetBatch()
 bkg_fully_correlated = 'bkg_fully_correlated' in sys.argv
 
 def make(which):
-    print '# which = %i' % which
-
-    out_fn = 'limits_input.root'
-    f = ROOT.TFile(out_fn)
+    fn = 'limits_input.root'
+    f = ROOT.TFile(fn)
 
     def _strit(fmt,typ,n,offset=0,mult=1):
         h = f.Get(n)
@@ -25,7 +23,9 @@ def make(which):
     ndata = f.Get('h_observed').Integral(0,nbins+2)
     observed = intstrit('h_observed')
 
-    sig_norm = int_lumi * f.Get('h_signal_%i_norm' % which).GetBinContent(2)
+    h_norm = f.Get('h_signal_%i_norm' % which)
+    nice_name = h_norm.GetTitle()
+    sig_norm = int_lumi * h_norm.GetBinContent(2)
 
     sig_name = 'h_signal_%i_dvv_rebin' % which
     sig_rate = floatstrit(sig_name, mult=sig_norm)
@@ -41,6 +41,9 @@ def make(which):
     nsyst = 3 if bkg_fully_correlated else 5
 
     print '''
+# which = %(which)s
+# nice name = %(nice_name)s
+
 imax 3
 jmax 1
 kmax %(nsyst)s
