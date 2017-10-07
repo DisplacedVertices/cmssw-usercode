@@ -4,8 +4,8 @@ from JMTucker.Tools.ROOTTools import *
 path = plot_dir('pretty_efficiency', make=True)
 
 ts = tdr_style()
-#rainbow_palette()
 ROOT.gStyle.SetPalette(ROOT.kBird) #kColorPrintableOnGrey
+ROOT.gStyle.SetNumberContours(20) #500 for smooth gradation
 
 def write(font, size, x, y, text):
     w = ROOT.TLatex()
@@ -15,8 +15,6 @@ def write(font, size, x, y, text):
     w.DrawLatex(x, y, text)
     return w
 
-#ROOT.gStyle.SetPalette(53)
-ROOT.gStyle.SetNumberContours(20) #500 for smooth gradation
 
 f = ROOT.TFile('figures.root')
 
