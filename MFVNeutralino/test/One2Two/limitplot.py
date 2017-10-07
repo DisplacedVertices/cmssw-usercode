@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os, sys
 from array import array
 from collections import defaultdict
 from itertools import izip
@@ -370,14 +371,19 @@ def dbg_exclude():
 def to_r():
     f = ROOT.TFile('limits.root')
     print 'library(akima)'
-    for x in 'observed', 'expect2p5', 'expect16', 'expect50', 'expect68', 'expect84', 'expect95', 'expect97p5':
-        h = f.Get(x)
-        to_ascii(h, open(h.GetName() + '.csv', 'wt'), sep=',')
-        print 'h<-read.table("c:/users/tucker/desktop/%s.csv", header=TRUE, sep=",")' % x
-        print 'i<-interp(x=h$x, y=h$y, z=h$z, xo=seq(300, 3000, by=1), yo=seq(0.1,40,by=0.1))'
-        for a in 'xyz':
-            print 'write.csv(i$%s, "c:/users/tucker/desktop/%s_%s.csv")' % (a,x,a)
-        
+    for k in 'mfv_ddbar', 'mfv_neu':
+        for y in 'observed', 'expect2p5', 'expect16', 'expect50', 'expect68', 'expect84', 'expect95', 'expect97p5':
+            x = '%s_%s' % (k,y)
+            h = f.Get('%s/%s' % (k,y))
+            to_ascii(h, open('to_r_%s.csv' % x, 'wt'), sep=',')
+            print 'h<-read.table("c:/users/tucker/desktop/to_r_%s.csv", header=TRUE, sep=",")' % x
+            print 'i<-interp(x=h$x, y=h$y, z=h$z, xo=seq(300, 3000, by=1), yo=seq(0.1,40,by=0.1))'
+            for a in 'xyz':
+                print 'write.csv(i$%s, "c:/users/tucker/desktop/from_r_%s_%s.csv")' % (a,x,a)
+    os.system('rm -f to_r.zip')
+    os.system('zip -m to_r.zip to_r_*.csv 2>&1 >/dev/null')
+    os.system('mv to_r.zip $asdf/')
+
 def one_from_r(ex, name, csvs=True):
     if csvs:
         def read_csv(fn):
@@ -430,7 +436,6 @@ def from_r():
     f.Close()
 
 if __name__ == '__main__':
-    import sys
     if len(sys.argv) > 1:
         cmd = sys.argv[1]
 
