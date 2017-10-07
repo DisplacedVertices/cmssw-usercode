@@ -50,7 +50,7 @@ namespace mfv {
     std::vector<float> alljets_energy;
     std::vector<float> alljets_bdisc;
     std::vector<uchar> alljets_hadronflavor;
-    size_t nalljets() const { return alljets_pt.size(); }
+    size_t nalljets() const { return p_alljets_pt ? p_alljets_pt->size() : alljets_pt.size(); }
 
     uchar npreseljets;
     uchar npreselbjets;
