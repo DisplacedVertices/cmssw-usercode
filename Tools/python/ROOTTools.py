@@ -2117,6 +2117,40 @@ def to_array(*l):
     else:
         return array('d', l)
 
+def to_ascii(o, fn_or_f, fmt='%.6g', sep='\t'):
+    '''Dump object o to file. Supported right now are TH1 and TH2, but
+    TH3, TGraph and TTree are easy.
+    Gotchas:
+    TH[12]: currently we don't write overflow.'''
+    if type(fn_or_f) == str:
+        fn = fn_or_f
+        if os.path.exists(fn):
+            raise OSError('refusing to clobber %s' % fn)
+        f = open(fn)
+    else:
+        f = fn_or_f
+
+    def write(*l, **d):
+        f.write(sep.join([d.get('fmt', fmt)] * len(l)) % l)
+        f.write('\n')
+
+    if isinstance(o, ROOT.TH2):
+        write('x','y','z','ez', fmt='%s')
+        for ix in xrange(1, o.GetNbinsX()+1):
+            for iy in xrange(1, o.GetNbinsY()+1):
+                write(o.GetXaxis().GetBinLowEdge(ix),
+                      o.GetYaxis().GetBinLowEdge(iy),
+                      o.GetBinContent(ix, iy),
+                      o.GetBinError  (ix, iy),
+                      )
+
+    elif isinstance(o, ROOT.TH1):
+        write('x','y','ey', fmt='%s')
+        for ix in xrange(1, o.GetNbinsX()+1):
+            write(o.GetXaxis().GetBinLowEdge(ix),
+                  o.GetBinContent(ix),
+                  o.GetBinError  (ix))
+
 def to_TH1D(h, name):
     hh = ROOT.TH1D(name, h.GetTitle(), h.GetNbinsX(), h.GetXaxis().GetXmin(), h.GetXaxis().GetXmax())
     hh.Sumw2()
@@ -2235,6 +2269,7 @@ __all__ = [
     'tgraph',
     'tgraph_getpoint',
     'to_array',
+    'to_ascii',
     'to_TH1D',
     'ttree_iterator',
     'zbi',
