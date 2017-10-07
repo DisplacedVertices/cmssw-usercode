@@ -61,8 +61,8 @@ def make_gluglu_hist():
         hgluxsec.SetBinError(bin, se)
     return gluglu, hgluxsec
     
-def parse(d, tau0, mass, observed_fn, expected_fn):
-    #print d, tau0, mass, observed_fn, expected_fn
+def parse(d, tau, mass, observed_fn, expected_fn):
+    #print d, tau, mass, observed_fn, expected_fn
     watches = [
         'sigma_sig_limit:Observed Limit: r < ',
         'sigma_sig_limit:Expected  2.5%: r < ',
@@ -94,7 +94,7 @@ def parse(d, tau0, mass, observed_fn, expected_fn):
         raise ValueError('crap')
 
     obs, exp2p5, exp16, exp50, exp84, exp97p5 = vals
-    d['tau0'].append(tau0)
+    d['tau'].append(tau)
     d['mass'].append(mass)
     if do_obs:
         d['observed'].append(obs)
@@ -155,9 +155,9 @@ def draw_1d_plot(d, name, title, y_range, xkey='mass'):
 
 def do_1d_plots():
     xxx = [
-        (lambda s: 'neu' in sample.name and sample.mass == 800,  'multijetM800',   '', (0.01, 50), 'tau0'),
+        (lambda s: 'neu' in sample.name and sample.mass == 800,  'multijetM800',   '', (0.01, 50), 'tau'),
         (lambda s: 'neu' in sample.name and sample.tau  == 1., 'multijettau1mm', '', (0.01, 50), 'mass'),
-        (lambda s: 'ddbar' in sample.name and sample.mass == 800,  'ddbarM800',   '', (0.01, 50), 'tau0'),
+        (lambda s: 'ddbar' in sample.name and sample.mass == 800,  'ddbarM800',   '', (0.01, 50), 'tau'),
         (lambda s: 'ddbar' in sample.name and sample.tau  == 1., 'ddbartau1mm', '', (0.01, 50), 'mass'),
         ]
     
@@ -170,36 +170,8 @@ def do_1d_plots():
                 parse(d, sample.tau, sample.mass, fn, fn)
         draw_1d_plot(d, name, nice, y_range, xkey)
 
-def make_2d_plots():
-    f = ROOT.TFile('limits_input.root')
-    d = defaultdict(list)
-
-    for sample in sample_iterator(f):
-        fn = 'combine_output/signal_%05i/results' % sample.isample
-        try:
-            parse(d, sample.tau, sample.mass, fn, fn)
-        except ValueError:
-            print "can't parse", sample.name, sample.isample
-
-    def axisize(l):
-        l = sorted(set(l))
-        delta = l[-1] - l[-2]
-        l.append(l[-1] + delta)
-        return to_array(l)
-
-    taus, masses = axisize(d['tau0']), axisize(d['mass'])
-
-    hs = {}
-    for x in d:
-        if x == 'tau0' or x == 'mass':
-            continue
-        h = hs[x] = ROOT.TH2D(x, '', len(masses)-1, masses, len(taus)-1, taus)
-        h.SetStats(0)
-        for t,m,v in izip(d['tau0'], d['mass'], d[x]):
-            h.SetBinContent(h.FindBin(m,t), v)
-    return hs
-
 def interpolate(h):
+    # R + akima does a better job so don't use this
     hint = ROOT.TH2D(h.GetName() + '_interp', '', 2900, 300, 3200, 399, 0.1, 40)
     hint.SetStats(0)
     xax = hint.GetXaxis()
@@ -212,15 +184,41 @@ def interpolate(h):
     return hint
 
 def save_2d_plots():
-    f = ROOT.TFile('limits.root', 'create')
-    hs = make_2d_plots()
-    for h in hs.values():
-        f.cd()
-        h.Write()
-        if 'interp' in sys.argv:
-            hint = interpolate(h)
-            hs[hint.GetName()] = hint
-            hint.Write()
+    in_f = ROOT.TFile('limits_input.root')
+    out_f = ROOT.TFile('limits.root', 'recreate')
+
+    for kind in 'mfv_ddbar', 'mfv_neu':
+        d = defaultdict(list)
+        for sample in sample_iterator(in_f):
+            if sample.kind != kind:
+                continue
+
+            fn = 'combine_output/signal_%05i/results' % sample.isample
+            try:
+                parse(d, sample.tau, sample.mass, fn, fn)
+            except ValueError:
+                print "can't parse", sample.name, sample.isample
+
+        def axisize(l):
+            l = sorted(set(l))
+            delta = l[-1] - l[-2]
+            l.append(l[-1] + delta)
+            return to_array(l)
+
+        taus, masses = axisize(d['tau']), axisize(d['mass'])
+
+        out_f.mkdir(kind).cd()
+
+        for x in d:
+            if x == 'tau' or x == 'mass':
+                continue
+
+            h = ROOT.TH2D(x, '', len(masses)-1, masses, len(taus)-1, taus)
+            h.SetStats(0)
+            for t,m,v in izip(d['tau'], d['mass'], d[x]):
+                h.SetBinContent(h.FindBin(m,t), v)
+
+            h.Write()
 
 ####
 
@@ -240,7 +238,7 @@ def gluglu_exclude(h, opt):
             continue
 
         for iy in xrange(1, h.GetNbinsY()+1):
-            tau0 = h.GetYaxis().GetBinLowEdge(iy)
+            tau = h.GetYaxis().GetBinLowEdge(iy)
 
             lim = h.GetBinContent(ix, iy)
 
@@ -255,7 +253,7 @@ def gluglu_exclude(h, opt):
             s = sa + (sb - sa) * z
             es = (z**2 * esb**2 + (1 - z)**2 * esa**2)**0.5
 
-            bin = hexc.FindBin(mass, tau0)
+            bin = hexc.FindBin(mass, tau)
             s2 = s
             if opt.lower() == 'up':
                 s2 += es
