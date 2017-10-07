@@ -217,50 +217,43 @@ def save_2d_plots():
     for h in hs.values():
         f.cd()
         h.Write()
-        hint = interpolate(h)
-        hs[hint.GetName()] = hint
-        hint.Write()
-
-    for x in 'observed', 'observed_interp':
-        c = ROOT.TCanvas('c', '', 800, 800)
-        h = hs[x]
-        h.Draw('colz')
-        h.GetYaxis().SetRangeUser(0.1, 40)
-        c.SetLogz()
-        c.SaveAs('$asdf/a_%s.png'  % x)
-        c.SaveAs('$asdf/a_%s.root' % x)
-        del c
+        if 'interp' in sys.argv:
+            hint = interpolate(h)
+            hs[hint.GetName()] = hint
+            hint.Write()
 
 ####
 
 def gluglu_exclude(h, opt):
     gluglu, hgluglu = make_gluglu_hist()
     gluglu = dict((m, (s, es)) for m, s, es in gluglu)
+    max_mass = max(gluglu.keys())
 
     hexc = h.Clone(h.GetName() +'_exc_%s' % opt)
     hexc.SetStats(0)
 
     for ix in xrange(1, h.GetNbinsX()+1):
         mass = h.GetXaxis().GetBinLowEdge(ix)
-        if mass > 2995:
+        if mass >= max_mass:
+            for iy in xrange(1, h.GetNbinsY()+1):
+                hexc.SetBinContent(ix,iy, 0)
             continue
+
         for iy in xrange(1, h.GetNbinsY()+1):
             tau0 = h.GetYaxis().GetBinLowEdge(iy)
 
             lim = h.GetBinContent(ix, iy)
 
             bin = hgluglu.FindBin(mass)
-            assert bin <= hgluglu.GetNbinsX()
+            assert bin < hgluglu.GetNbinsX()
             ma = hgluglu.GetBinLowEdge(bin)
             mb = hgluglu.GetBinLowEdge(bin+1)
             sa, esa = gluglu[ma]
             sb, esb = gluglu[mb]
 
             z = (mass - ma) / (mb - ma)
-            
             s = sa + (sb - sa) * z
             es = (z**2 * esb**2 + (1 - z)**2 * esa**2)**0.5
-            #print tau0, mass, lim, ma, sa, esa, mb, sb, esb, s, es
 
             bin = hexc.FindBin(mass, tau0)
             s2 = s
@@ -276,8 +269,8 @@ def gluglu_exclude(h, opt):
 
 def simple_exclude():
     f = ROOT.TFile('limits.root')
-    h = f.Get('observed_interp')
-    hi = gluglu_exclude(h, 'central')
+    h = f.Get('observed')
+    hi = gluglu_exclude(h, 'nm')
     c = ROOT.TCanvas('c', '', 800, 800)
     hi.SetMarkerStyle(20)
     hi.SetMarkerSize(1.5)
@@ -286,7 +279,7 @@ def simple_exclude():
     hi.GetYaxis().SetRangeUser(0.1,40)
     c.SaveAs('$asdf/asml.png')
 
-def exc_graph(h, color, style, duh):
+def exc_graph(h, color, style):
     xax = h.GetXaxis()
     yax = h.GetYaxis()
     xs,ys = array('d'), array('d')
@@ -300,17 +293,11 @@ def exc_graph(h, color, style, duh):
                 ys.append(y)
                 #print x, y, l
                 break
-    if duh:
-        assert ys[-1] == 30000
-        ys.append(32000)
-        xs.append(xs[-1])
     g = ROOT.TGraph(len(xs), xs, ys)
     g.SetTitle(';neutralino mass (GeV);neutralino lifetime (mm)')
     g.SetLineWidth(2)
     g.SetLineColor(color)
     g.SetLineStyle(style)
-    g.GetHistogram().SetMaximum(30)
-    g.GetHistogram().SetMinimum(0.3)
     return g
 
 def exc_graph_dumb(h, width, color, style, break_at):
@@ -355,12 +342,13 @@ def exc_graph_dumb(h, width, color, style, break_at):
     return gs
 
 def dbg_exclude():
-    f = ROOT.TFile('newplots.root')
+    f = ROOT.TFile('limits.root')
 
     for interp in ('', '_interp'):
         c = ROOT.TCanvas('c', '', 1000, 800)
 
-        hlim = f.Get('hlim_observed%s' % interp)
+        hlim = f.Get('observed%s' % interp)
+
         for ix in xrange(0, hlim.GetNbinsX()+2):
             for iy in xrange(0, hlim.GetNbinsY()+2):
                 hlim.SetBinContent(ix, iy, 0)
@@ -370,10 +358,10 @@ def dbg_exclude():
         #hexc = 
         #hexc.Draw('colz')
 
-        gs = exc_graph_dumb(f.Get('hlim_observed%s_exc' % interp), 2, ROOT.kBlack, 1, -1) + \
-             exc_graph_dumb(f.Get('hlim_expect50%s_exc' % interp), 2, ROOT.kBlue, 1, -1) + \
-             exc_graph_dumb(f.Get('hlim_expect16%s_exc' % interp), 2, ROOT.kRed, 1, -1) + \
-             exc_graph_dumb(f.Get('hlim_expect84%s_exc' % interp), 2, ROOT.kMagenta, 1, -1)
+        gs = exc_graph_dumb(f.Get('observed%s_exc' % interp), 2, ROOT.kBlack, 1, -1) + \
+             exc_graph_dumb(f.Get('expect50%s_exc' % interp), 2, ROOT.kBlue, 1, -1) + \
+             exc_graph_dumb(f.Get('expect16%s_exc' % interp), 2, ROOT.kRed, 1, -1) + \
+             exc_graph_dumb(f.Get('expect84%s_exc' % interp), 2, ROOT.kMagenta, 1, -1)
 
         for g in gs:
             g.Draw('L')
@@ -381,24 +369,16 @@ def dbg_exclude():
         c.SaveAs('/uscms/home/tucker/asdf/a%s.png' % interp)
         c.SaveAs('/uscms/home/tucker/asdf/a%s.root' % interp)
 
-def dump_csv(h):
-    f = open(h.GetName() + '.csv', 'wt')
-    f.write('x,y,z\n')
-    for ix in xrange(1, h.GetNbinsX()+1):
-        for iy in xrange(1, h.GetNbinsY()+1):
-            f.write('%.1f,%.1f,%.6f\n' % (h.GetXaxis().GetBinLowEdge(ix), h.GetYaxis().GetBinLowEdge(iy), h.GetBinContent(ix, iy)))
-    f.close()
-
 def to_r():
-    f = ROOT.TFile('newplots.root')
+    f = ROOT.TFile('limits.root')
     print 'library(akima)'
-    for x in 'observed expect2p5 expect16 expect50 expect68 expect84 expect95 expect97p5'.split():
-        dump_csv(f.Get('hlim_%s' % x))
-        print 'h<-read.table("c:/users/tucker/desktop/hlim_%s.csv", header=TRUE, sep=",")' % x
-        print 'i<-interp(x=h$x, y=h$y, z=h$z, xo=seq(300, 1500, by=1), yo=seq(100,30000,by=100))'
-        print 'write.csv(i$x, "c:/users/tucker/desktop/%s_x.csv")' % x
-        print 'write.csv(i$y, "c:/users/tucker/desktop/%s_y.csv")' % x
-        print 'write.csv(i$z, "c:/users/tucker/desktop/%s_z.csv")' % x
+    for x in 'observed', 'expect2p5', 'expect16', 'expect50', 'expect68', 'expect84', 'expect95', 'expect97p5':
+        h = f.Get(x)
+        to_ascii(h, open(h.GetName() + '.csv', 'wt'), sep=',')
+        print 'h<-read.table("c:/users/tucker/desktop/%s.csv", header=TRUE, sep=",")' % x
+        print 'i<-interp(x=h$x, y=h$y, z=h$z, xo=seq(300, 3000, by=1), yo=seq(0.1,40,by=0.1))'
+        for a in 'xyz':
+            print 'write.csv(i$%s, "c:/users/tucker/desktop/%s_%s.csv")' % (a,x,a)
         
 def one_from_r(ex, name, csvs=True):
     if csvs:
@@ -437,11 +417,11 @@ def one_from_r(ex, name, csvs=True):
     return h
 
 def from_r():
-    f = ROOT.TFile('newplots_fromr.root', 'recreate')
+    f = ROOT.TFile('limits_fromr.root', 'create')
     for opt in ('nm', 'up', 'dn'):
         #for ex in 'observed expect2p5 expect16 expect50 expect68 expect84 expect95 expect97p5'.split():
         for ex in 'observed expect50'.split():
-            n = 'hlim_%s_fromrinterp' % ex
+            n = '%s_fromrinterp' % ex
             h = one_from_r(ex, n)
             hexc = gluglu_exclude(h, opt)
             g = exc_graph(hexc, 1, 1, duh=True)
@@ -456,26 +436,24 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         cmd = sys.argv[1]
 
-        if cmd == '1dplots':
+        if cmd == 'save_1d_plots':
             set_style()
             ps = plot_saver(plot_dir('o2t_limitplot_run2_tmp4'), size=(600,600))
             draw_gluglu()
             ps.save('gluglu')
             do_1d_plots()
 
-        elif cmd == '2dplots':
+        elif cmd == 'save_2d_plots':
             save_2d_plots()
 
-        elif cmd == 'simpleexclude':
+        elif cmd == 'simple_exclude':
             simple_exclude()
 
-#    rainbow_palette()
-#
-#    if 0:
-#        ps = plot_saver('/uscms/home/tucker/asdf/plots/mfvlimits_test_3', log=False, size=(600,600))
-#
-#    #export_plots()
-#
-#    #dbg_exclude()
-#
-#    from_r()
+        elif cmd == 'to_r':
+            to_r()
+
+        elif cmd == 'from_r':
+            from_r()
+
+        else:
+            print 'huh?'
