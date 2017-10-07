@@ -421,18 +421,20 @@ def one_from_r(ex, name, csvs=True):
     return h
 
 def from_r():
-    f = ROOT.TFile('limits_fromr.root', 'create')
-    for opt in ('nm', 'up', 'dn'):
-        #for ex in 'observed expect2p5 expect16 expect50 expect68 expect84 expect95 expect97p5'.split():
-        for ex in 'observed expect50'.split():
-            n = '%s_fromrinterp' % ex
-            h = one_from_r(ex, n)
-            hexc = gluglu_exclude(h, opt)
-            g = exc_graph(hexc, 1, 1, duh=True)
-            g.SetName(n + '_%s_exc_g' % opt)
-            h.Write()
-            hexc.Write()
-            g.Write()
+    f = ROOT.TFile('limits_fromr.root', 'recreate')
+    for k in 'mfv_ddbar', 'mfv_neu':
+        for opt in ('nm', 'up', 'dn'):
+            #for ex in 'observed expect2p5 expect16 expect50 expect68 expect84 expect95 expect97p5'.split():
+            for ex in 'observed expect50'.split():
+                ex = k + '_' + ex
+                n = '%s_fromrinterp' % ex
+                h = one_from_r(ex, n)
+                hexc = gluglu_exclude(h, opt)
+                g = exc_graph(hexc, 1, 1)
+                g.SetName(n + '_%s_exc_g' % opt)
+                h.Write()
+                hexc.Write()
+                g.Write()
     f.Close()
 
 if __name__ == '__main__':
