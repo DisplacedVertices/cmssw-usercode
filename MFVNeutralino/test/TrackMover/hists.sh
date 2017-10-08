@@ -7,7 +7,7 @@ if [[ $job < 0 ]]; then
     test=1
 fi
 
-inpathbase=root://cmseos.fnal.gov//store/user/tucker/TrackMoverV3
+inpathbase=root://cmseos.fnal.gov//store/user/tucker/TrackMoverV5
 
 paths=(
 ${inpathbase}
@@ -63,7 +63,7 @@ nb=${nbs[$((ii % nnbs))]}
 ii=$((ii / nnbs))
 
 outfn=$(basename $path)_nsig${nsig}_tau$(printf %05i $tau)um_${nl}${nb}_$(basename $fn .root).root
-treepath=mfvMovedTree${nl}${nb}nsig${nsig}/t
+treepath=mfvMovedTree${nl}${nb}nsig${nsig}btagold/t
 
 echo path $path fn $fn nl $nl nb $nb outfn $outfn treepath $treepath
 
