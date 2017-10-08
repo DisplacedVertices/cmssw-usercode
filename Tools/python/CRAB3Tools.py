@@ -36,6 +36,8 @@ def crab_command(*args, **kwargs):
 
     ok = True
 
+    result = {}
+
     try:
         result = crabCommand(*args, **kwargs)
 
@@ -64,6 +66,12 @@ def crab_command(*args, **kwargs):
         result['jobList'] = []
         result['pycurlError'] = e
         result['status'] = 'pycurlError'
+    finally:
+        if suppress_stdout:
+            result['stdout'] = buf.getvalue()
+            sys.stdout = old_stdout
+        os.remove(cache_file)
+        os.environ['CRAB3_CACHE_FILE'] = old_cache_file
 
     for k,v in result.get('shortResult', {}).iteritems():
         if not result.has_key(k):
@@ -75,18 +83,11 @@ def crab_command(*args, **kwargs):
 
     #pprint(result)
 
-    if suppress_stdout:
-        result['stdout'] = buf.getvalue()
-        sys.stdout = old_stdout
-
     if not ok or type(result) != dict:
         print 'problem with crabCommand return value'
         print type(result)
         pprint(result)
         raise CRABToolsException('problem')
-
-    os.remove(cache_file)
-    os.environ['CRAB3_CACHE_FILE'] = old_cache_file
 
     return result
 
