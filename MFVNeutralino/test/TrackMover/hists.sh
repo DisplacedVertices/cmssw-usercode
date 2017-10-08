@@ -27,7 +27,7 @@ qcdht1500.root
 qcdht1500_hip1p0_mit.root
 )
 
-nsigs=( 3p7 3p8 3p9 4p0 4p1 4p2 4p3 )
+nsigs=( 4p0 4p1 )
 taus=( 100 300 1000 10000 30000 )
 nls=( 2 3 )
 nbs=( 0 1 2 )
