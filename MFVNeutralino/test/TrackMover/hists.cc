@@ -1,18 +1,18 @@
+#include <cassert>
+#include <iostream>
 #include "TH1.h"
+#include "TH2.h"
 #include "TFile.h"
 #include "TTree.h"
 #include "TVector2.h"
 #include "TVector3.h"
 #include "JMTucker/MFVNeutralino/interface/MovedTracksNtuple.h"
+#include "BTagSFHelper.h"
 #include "utils.h"
-#include <cassert>
-#include <iostream>
-
-// to read V1: change the uchar typedef to ushort in the Ntuple.h, set newfmt = false in utils.cc, and remove use of nt.p_vtxs_anglemax/tkonlymass below
 
 int main(int argc, char** argv) {
   if (argc < 5) {
-    fprintf(stderr, "usage: hists.exe in.root out.root tree_path tau[int:microns]\n");
+    fprintf(stderr, "usage: hists.exe in.root out.root tree_path tau[int:microns] [btagsf_weights]-\n");
     return 1;
   }
 
@@ -20,13 +20,22 @@ int main(int argc, char** argv) {
   const char* out_fn = argv[2];
   const char* tree_path = argv[3];
   const int itau = atoi(argv[4]);
-  const bool apply_weight = true;
 
   const int itau_original = 10000; // JMTBAD if you change this in ntuple.py, change it here
   if (itau != itau_original)
     printf("reweighting tau distribution from 10000 um to %i um\n", itau);
   const double o_tau_from = 10000./itau_original;
   const double o_tau_to = 10000./itau;
+
+  bool apply_weights = true;
+  bool btagsf_weights = false;
+  for (int argi = 5; argi < argc; ++argi) {
+    if      (strcmp(argv[argi], "btagsf_weights") == 0) { btagsf_weights = true; printf("btagsf_weights -> true\n"); }
+    else if (strcmp(argv[argi], "no_weights"    ) == 0) { apply_weights = false; printf("apply_weights -> false\n"); }
+  }
+
+  std::unique_ptr<BTagSFHelper> btagsfhelper;
+  if (btagsf_weights) btagsfhelper.reset(new BTagSFHelper);
 
   root_setup();
 
@@ -47,6 +56,7 @@ int main(int argc, char** argv) {
     h_norm->Fill(0.5, h_sums->GetBinContent(1));
 
   TH1D* h_weight = new TH1D("h_weight", ";weight;events/0.01", 200, 0, 2);
+  TH1D* h_btagsfweight = new TH1D("h_btagsfweight", ";weight;events/0.01", 200, 0, 2);
   TH1D* h_tau = new TH1D("h_tau", ";tau (cm);events/10 #mum", 10000, 0,10);
   TH1D* h_npu = new TH1D("h_npu", ";# PU;events/1", 100, 0, 100);
 
@@ -129,8 +139,36 @@ int main(int argc, char** argv) {
       w *= tau_weight;
     }
 
-    if (is_mc && apply_weight) {
+    if (is_mc && apply_weights) {
       w *= nt.weight;
+
+      if (btagsf_weights) {
+        double p_mc = 1, p_data = 1;
+
+        for (size_t i = 0, ie = nt.nalljets(); i < ie; ++i) {
+          const double pt = (*nt.p_alljets_pt)[i];
+          const double eta = (*nt.p_alljets_eta)[i];
+          const bool is_tagged = (*nt.p_alljets_bdisc)[i] > 0.935; // what ever
+          const int hf = (*nt.p_alljets_hadronflavor)[i];
+
+          const double sf = btagsfhelper->scale_factor(BTagSFHelper::BH, BTagSFHelper::tight, hf, eta, pt).v;
+          const double e = btagsfhelper->efficiency(hf, eta, pt).v;
+          assert(e > 0 && e <= 1);
+
+          if (is_tagged) {
+            p_mc   *= e;
+            p_data *= e*sf;
+          }
+          else {
+            p_mc   *= 1-e;
+            p_data *= 1-e*sf;
+          }
+        }
+
+        const double btagsfw = p_data / p_mc;
+        h_btagsfweight->Fill(btagsfw);
+        w *= btagsfw;
+      }
 
       if (use_extra_weights) {
         for (const auto& name : extra_weights_hists) {
@@ -183,6 +221,7 @@ int main(int argc, char** argv) {
       }
     }
     jet_dravg /= n_jets * (n_jets - 1) / 2.;
+
     if (nt.jetht < 1000 ||
         nt.nalljets() < 4 ||
 	!pass_trig || 
