@@ -48,15 +48,33 @@ elif __name__ == '__main__' and hasattr(sys, 'argv') and 'ana' in sys.argv:
     d.cd()
     for kind in 'light', 'charm', 'bottom':
         den = d.Get('den_%s' % kind)
+        nx, ny = den.GetNbinsX(), den.GetNbinsY()
+
         for wp in xrange(nwp):
             num = d.Get('num_%s_%i' % (kind, wp))
+
+            # check there are no eta overflows
+            for ibin in [0, nx+1]:
+                for jbin in xrange(1, ny+1):
+                    assert num.GetBinContent(ibin,jbin) == 0 and den.GetBinContent(ibin,jbin) == 0
+
             eff = num.Clone('eff_%s_%i' % (kind, wp))
-            for ibin in xrange(1, eff.GetNbinsX()+1):
-                for jbin in xrange(1, eff.GetNbinsY()+1):
-                    a = (num.GetBinContent(ibin,jbin) / num.GetBinError(ibin,jbin))**2
-                    b = (den.GetBinContent(ibin,jbin) / den.GetBinError(ibin,jbin))**2
-                    e,l,u = clopper_pearson(a,b)
-                    ee = (u-l)/2
-                    eff.SetBinContent(ibin,jbin, e)
-                    eff.SetBinError  (ibin,jbin, ee)
+            for ibin in xrange(1, nx+1):
+                for jbin in xrange(1, ny+2):
+                    a = num.GetBinContent(ibin,jbin)
+                    b = den.GetBinContent(ibin,jbin)
+                    ea = num.GetBinError(ibin,jbin)
+                    eb = den.GetBinError(ibin,jbin)
+                    if b == 0 or ea == 0 or eb == 0:
+                        # set pt overflow eff to the same-eta previous pt bin if empty
+                        assert jbin == ny+1
+                        eff.SetBinContent(ibin,jbin, eff.GetBinContent(ibin,ny))
+                        eff.SetBinError  (ibin,jbin, eff.GetBinError  (ibin,ny))
+                    else:
+                        a = (a/ea)**2
+                        b = (b/eb)**2
+                        e,l,u = clopper_pearson(a,b)
+                        ee = (u-l)/2
+                        eff.SetBinContent(ibin,jbin, e)
+                        eff.SetBinError  (ibin,jbin, ee)
             eff.Write()
