@@ -2,6 +2,7 @@
 
 import datetime, optparse, os, sys, time
 from collections import defaultdict
+from CRABClient.ClientExceptions import ConfigurationException as CRABConfigurationException
 from JMTucker.Tools.CRAB3Tools import *
 from JMTucker.Tools.CondorTools import *
 from JMTucker.Tools.general import print_if_nonempty, touch
@@ -201,7 +202,10 @@ while 1:
                 jobs = ','.join(str(j) for j in jobs)
                 print 'resubmit', d, jobs
                 #crab_command('resubmit', dir=d, jobids=jobs, sitewhitelist=options.resub_white_list, siteblacklist=options.resub_black_list, suppress_stdout=False)
-                crab_command('resubmit', dir=d, jobids=jobs, force=options.resub_force) #, suppress_stdout=False)
+                try:
+                    crab_command('resubmit', dir=d, jobids=jobs, force=options.resub_force) #, suppress_stdout=False)
+                except CRABConfigurationException:
+                    print 'CRABConfigurationException when resubmitting, skip this time'
 
     if options.verbose:
         # Print a recap of all the status summaries.
