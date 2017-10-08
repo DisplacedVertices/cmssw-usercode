@@ -47,19 +47,21 @@ elif [[ $1 == "cleanup" ]]; then
     tar --remove-files -czf lastlogs.tgz hists.{stdout,stderr,log}.*
 
 elif [[ $1 == "finish" ]]; then
-    rename TrackMoverV3_ '' *.root
+    rename TrackMoverV5_ '' *.root
     for x in *.root ; do
         y=$(echo $x | sed 's@_@XXX@g4' | sed 's@_@/@g' | sed 's/XXX/_/g')
         mkdir -p $(dirname $y)
         mv $x $y
     done
     for d in $(find . -type d -links 2) ; do
-        echo $d
-        cd $d
-        mergeqcd
-        mergedata
-        cd - >/dev/null
-        echo
+        if [[ $(basename $d) != bin ]]; then
+            echo $d
+            cd $d
+            mergeqcd
+            mergedata
+            cd - >/dev/null
+            echo
+        fi
     done
 
 elif [[ $1 == "mergeqcd" ]]; then
