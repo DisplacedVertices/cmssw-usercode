@@ -370,39 +370,47 @@ def dbg_exclude():
 
 def to_r():
     f = ROOT.TFile('limits.root')
+    print '''
+# if you didn't set up already, do this
+. /cvmfs/sft.cern.ch/lcg/views/LCG_89/x86_64-slc6-gcc62-opt/setup.sh
+mkdir ~/.R
+R --no-save <<EOF
+install.packages("akima", repos="http://cran.r-project.org", lib="~/.R/")
+EOF
+
+# cmds
+env R_LIBS=~/.R R --no-save <<EOF
+'''
     print 'library(akima)'
     for k in 'mfv_ddbar', 'mfv_neu':
         for y in 'observed', 'expect2p5', 'expect16', 'expect50', 'expect68', 'expect84', 'expect95', 'expect97p5':
             x = '%s_%s' % (k,y)
             h = f.Get('%s/%s' % (k,y))
             to_ascii(h, open('to_r_%s.csv' % x, 'wt'), sep=',')
-            print 'h<-read.table("c:/users/tucker/desktop/to_r_%s.csv", header=TRUE, sep=",")' % x
-            print 'i<-interp(x=h$x, y=h$y, z=h$z, xo=seq(300, 3000, by=1), yo=seq(0.1,40,by=0.1))'
+            print 'h<-read.table("to_r_%s.csv", header=TRUE, sep=",")' % x
+            print 'i<-interp(x=h\\$x, y=h\\$y, z=h\\$z, xo=seq(300, 3000, by=1), yo=seq(0.1,40,by=0.1))'
             for a in 'xyz':
-                print 'write.csv(i$%s, "c:/users/tucker/desktop/from_r_%s_%s.csv")' % (a,x,a)
+                print 'write.csv(i\\$%s, "from_r_%s_%s.csv")' % (a,x,a)
+    print 'EOF'
     os.system('rm -f to_r.zip')
     os.system('zip -m to_r.zip to_r_*.csv 2>&1 >/dev/null')
-    os.system('mv to_r.zip $asdf/')
 
-def one_from_r(ex, name, csvs=True):
-    if csvs:
-        def read_csv(fn):
-            lines = [x.strip() for x in open(fn).read().replace('"', '').split('\n') if x.strip()]
-            lines.pop(0)
-            vs = []
-            for line in lines:
-                ws = [float(x) for x in line.split(',')]
-                ws.pop(0)
-                if len(ws) == 1:
-                    ws = ws[0]
-                vs.append(ws)
-            return vs
+def one_from_r(ex, name):
+    def read_csv(fn):
+        lines = [x.strip() for x in open(fn).read().replace('"', '').split('\n') if x.strip()]
+        lines.pop(0)
+        vs = []
+        for line in lines:
+            ws = [float(x) for x in line.split(',')]
+            ws.pop(0)
+            if len(ws) == 1:
+                ws = ws[0]
+            vs.append(ws)
+        return vs
 
-        x = read_csv('%s_x.csv' % ex)
-        y = read_csv('%s_y.csv' % ex)
-        z = read_csv('%s_z.csv' % ex)
-    else:
-        x,y,z = from_pickle('/uscms/home/tucker/afshome/%sxyz.gzpickle' % ex)
+    x = read_csv('from_r_%s_x.csv' % ex)
+    y = read_csv('from_r_%s_y.csv' % ex)
+    z = read_csv('from_r_%s_z.csv' % ex)
 
     assert sorted(x) == x
     assert sorted(y) == y
