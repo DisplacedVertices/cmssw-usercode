@@ -584,42 +584,6 @@ _add_ds("ntuplev15", {
 
 })
 
-_add_ds("pick1vtxv14", {
-'JetHT2015C': (1, ['/store/user/tucker/JetHT/Pick1VtxV14_2015_JetHT2015C/170421_233005/0000/skimpick_0.root']),
-'JetHT2015D': (61, ['/store/user/tucker/JetHT/Pick1VtxV14_2015_JetHT2015D/170422_002037/0000/skimpick_34.root'] + ['/store/user/tucker/JetHT/Pick1VtxV14_2015_JetHT2015D/170421_233005/0000/skimpick_%i.root' % i for i in chain(xrange(34), xrange(35,61))]),
-'JetHT2016B3': _fromnum1("/store/user/tucker/JetHT/Pick1VtxV14_2016/170422_042645", 196, fnbase="skimpick"),
-'JetHT2016C': _fromnum1("/store/user/tucker/JetHT/Pick1VtxV14_2016/170422_042702", 89, fnbase="skimpick"),
-'JetHT2016D': _fromnum1("/store/user/tucker/JetHT/Pick1VtxV14_2016/170422_042727", 154, fnbase="skimpick"),
-'JetHT2016E': _fromnum1("/store/user/tucker/JetHT/Pick1VtxV14_2016/170422_042745", 72, fnbase="skimpick"),
-'JetHT2016F': _fromnum1("/store/user/tucker/JetHT/Pick1VtxV14_2016/170422_042801", 59, fnbase="skimpick"),
-'JetHT2016G': (247, ['/store/user/tucker/JetHT/Pick1VtxV14_2016_JetHT2016G/170422_102956/0000/skimpick_155.root'] + ['/store/user/tucker/JetHT/Pick1VtxV14_2016_JetHT2016G/170421_232900/0000/skimpick_%i.root' % i for i in chain(xrange(155), xrange(156,247))]),
-'JetHT2016H2': _fromnum1("/store/user/tucker/JetHT/Pick1VtxV14_2016/170422_042824", 232, fnbase="skimpick"),
-'JetHT2016H3': _fromnum1("/store/user/tucker/JetHT/Pick1VtxV14_2016/170422_042840", 7, fnbase="skimpick"),
-'qcdht0500': _fromnum0("/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV14_2016_qcdht0500/170421_232900", 23, fnbase="skimpick"),
-'qcdht0500_2015': _fromnum0("/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV14_2015_qcdht0500_2015/170421_233005", 14, fnbase="skimpick"),
-'qcdht0500ext': _fromnum0("/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV14_2016_qcdht0500ext/170421_232900", 54, fnbase="skimpick"),
-'qcdht0500ext_2015': _fromnum0("/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV14_2015_qcdht0500ext_2015/170421_233005", 33, fnbase="skimpick"),
-'qcdht0700': _fromnum1("/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV14_2016/170422_141254", 11, fnbase="skimpick"),
-'qcdht0700_2015': _fromnum0("/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV14_2015_qcdht0700_2015/170421_233005", 14, fnbase="skimpick"),
-'qcdht0700ext': _fromnum0("/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV14_2016_qcdht0700ext/170421_232900", 36, fnbase="skimpick"),
-'qcdht0700ext_2015': _fromnum0("/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV14_2015_qcdht0700ext_2015/170421_233005", 24, fnbase="skimpick"),
-'qcdht1000': _fromnum1("/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV14_2016/170422_042859", 126, fnbase="skimpick"),
-'qcdht1000_2015': _fromnum0("/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV14_2015_qcdht1000_2015/170421_233005", 83, fnbase="skimpick"),
-'qcdht1000ext': _fromnum0("/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV14_2016_qcdht1000ext/170421_232900", 292, fnbase="skimpick"),
-'qcdht1000ext_2015': (169, ['/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV14_2015_qcdht1000ext_2015/170422_002247/0000/skimpick_6.root'] + ['/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV14_2015_qcdht1000ext_2015/170421_233005/0000/skimpick_%i.root' % i for i in chain(xrange(6), xrange(7,169))]),
-'qcdht1500': _fromnum0("/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV14_2016_qcdht1500/170421_232900", 226, fnbase="skimpick"),
-'qcdht1500_2015': _fromnum0("/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV14_2015_qcdht1500_2015/170421_233005", 133, fnbase="skimpick"),
-'qcdht1500ext': _fromnum0("/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV14_2016_qcdht1500ext/170421_232900", 424, fnbase="skimpick"),
-'qcdht1500ext_2015': _fromnum0("/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV14_2015_qcdht1500ext_2015/170421_233005", 213, fnbase="skimpick"),
-'qcdht2000': _fromnum0("/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV14_2016_qcdht2000/170421_232900", 133, fnbase="skimpick"),
-'qcdht2000_2015': _fromnum0("/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV14_2015_qcdht2000_2015/170421_233005", 75, fnbase="skimpick"),
-'qcdht2000ext': _fromnum0("/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV14_2016_qcdht2000ext/170421_232900", 301, fnbase="skimpick"),
-'qcdht2000ext_2015': _fromnum0("/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/Pick1VtxV14_2015_qcdht2000ext_2015/170421_233005", 202, fnbase="skimpick"),
-'ttbar': _fromnum0("/store/user/tucker/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/Pick1VtxV14_2016_ttbar/170421_232900", 140, fnbase="skimpick"),
-'ttbar_2015': _fromnum0("/store/user/tucker/TTJets_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/Pick1VtxV14_2015_ttbar_2015/170421_233005", 107, fnbase="skimpick"),
-})
-
-
 _add_ds('v0ntuplev1', {
 
 'qcdht1000_hip1p0_mit': _fromnum0("/store/user/tucker/qcdht1000/V0NtupleV1_2016", 289, fnbase='v0ntuple', numbereddirs=False),

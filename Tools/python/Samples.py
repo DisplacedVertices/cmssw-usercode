@@ -571,10 +571,6 @@ for x in (data_samples_2015 +
           mfv_signal_samples + mfv_ddbar_samples + mfv_hip_samples + qcd_hip_samples):
     x.add_dataset('ntuplev15')
 
-for x in ttbar_samples + ttbar_samples_2015 + qcd_samples + qcd_samples_ext + qcd_samples_2015 + qcd_samples_ext_2015 + data_samples + data_samples_2015:
-    if x.name != 'qcdht0700':
-        x.add_dataset('pick1vtxv14')
-
 for x in data_samples + qcd_samples + qcd_samples_ext + qcd_hip_samples[-2:]:
     x.add_dataset('v0ntuplev1')
 for x in data_samples + [s for s in auxiliary_data_samples if s.name.startswith('ZeroBias')] + qcd_samples[2:4] + qcd_samples_ext[2:4]:
