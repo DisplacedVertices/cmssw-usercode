@@ -479,14 +479,7 @@ for x in __all__:
 # Extra datasets and other overrides go here.
 ########
 
-SingleMuon2016B3.add_dataset('trigskimv1', '/SingleMuon/tucker-TrigSkimV1-6ba5dd8c9a33aab8a6e2472789317878/USER', 35241)
-SingleMuon2016C.add_dataset('trigskimv1', '/SingleMuon/tucker-TrigSkimV1-82edc478e1c389712ac7b0eb3d3b0434/USER', 18229)
-SingleMuon2016D.add_dataset('trigskimv1', '/SingleMuon/tucker-TrigSkimV1-1ed6f4ab317ce7bb7309546437e1421b/USER', 31034)
-SingleMuon2016E.add_dataset('trigskimv1', '/SingleMuon/tucker-TrigSkimV1-5cf9154b23f7eea54d7241d0e9a81907/USER', 29185)
-SingleMuon2016F.add_dataset('trigskimv1', '/SingleMuon/tucker-TrigSkimV1-eb2acd8cc58caef922ab0468b30922df/USER', 21755)
-SingleMuon2016G.add_dataset('trigskimv1', '/SingleMuon/tucker-TrigSkimV1-10a79bb3ddc729731322877ecdf5fef6/USER', 51891)
-SingleMuon2016H2.add_dataset('trigskimv1', '/SingleMuon/tucker-TrigSkimV1-04ce4943aa061593fed4ddb8c85f283c/USER', 139374)
-SingleMuon2016H3.add_dataset('trigskimv1', '/SingleMuon/tucker-TrigSkimV1-42f42c38f8f1c9713ac6dac6d8fe4da2/USER', 3706)
+# none
 
 ########
 # gensims
@@ -582,7 +575,7 @@ for x in ttbar_samples + ttbar_samples_2015 + qcd_samples + qcd_samples_ext + qc
     if x.name != 'qcdht0700':
         x.add_dataset('pick1vtxv14')
 
-for x in data_samples + [s for s in auxiliary_data_samples if s.name.startswith('ZeroBias') or (s.name.startswith('ReproJetHT') and s.name != 'ReproJetHT2016G')] + qcd_samples + qcd_samples_ext + qcd_hip_samples[-2:]:
+for x in data_samples + qcd_samples + qcd_samples_ext + qcd_hip_samples[-2:]:
     x.add_dataset('v0ntuplev1')
 for x in data_samples + [s for s in auxiliary_data_samples if s.name.startswith('ZeroBias')] + qcd_samples[2:4] + qcd_samples_ext[2:4]:
     x.add_dataset('v0ntuplev2')

@@ -324,17 +324,6 @@ _add_ds('validation', {
 'JetHT2016H2': (3, ['/store/data/Run2016H/JetHT/AOD/PromptReco-v2/000/283/408/00000/BAAECA7C-8E97-E611-A5D1-FA163EF54263.root', '/store/data/Run2016H/JetHT/AOD/PromptReco-v2/000/283/408/00000/EE7D84AF-CB97-E611-9D55-02163E014234.root', '/store/data/Run2016H/JetHT/AOD/PromptReco-v2/000/283/408/00000/D69C211F-7B98-E611-A91F-FA163E13C2C9.root']),
 })
 
-_add_ds("trigskimv1", {
-'SingleMuon2016B3': _fromnum1("/store/user/wsun/croncopyeos/SingleMuon/TrigSkimV1/170330_203857", 129, fnbase="trigskim"),
-'SingleMuon2016C': _fromnum1("/store/user/wsun/croncopyeos/SingleMuon/TrigSkimV1/170330_203911", 72, fnbase="trigskim"),
-'SingleMuon2016D': _fromnum1("/store/user/wsun/croncopyeos/SingleMuon/TrigSkimV1/170330_203927", 106, fnbase="trigskim"),
-'SingleMuon2016E': _fromnum1("/store/user/wsun/croncopyeos/SingleMuon/TrigSkimV1/170330_203941", 89, fnbase="trigskim"),
-'SingleMuon2016F': _fromnum1("/store/user/wsun/croncopyeos/SingleMuon/TrigSkimV1/170330_203958", 77, fnbase="trigskim"),
-'SingleMuon2016G': _fromnum1("/store/user/wsun/croncopyeos/SingleMuon/TrigSkimV1/170330_204012", 143, fnbase="trigskim"),
-'SingleMuon2016H2': (188, ['/store/user/wsun/croncopyeos/SingleMuon/TrigSkimV1/170330_204027/0000/trigskim_%i.root' % i for i in chain(xrange(1,26), xrange(27,38), xrange(39,75), xrange(76,89), xrange(90,101), xrange(102,194))]),
-'SingleMuon2016H3': _fromnum1("/store/user/wsun/croncopyeos/SingleMuon/TrigSkimV1/170330_204041", 6, fnbase="trigskim"),
-})
-
 _add_ds("ntuplev15", {
 'JetHT2015C': _fromnum0("/store/user/tucker/JetHT/NtupleV15_2015/170522_152137", 2),
 'JetHT2015D': (834, ['/store/user/tucker/JetHT/NtupleV15_2015/170531_154731/0000/ntuple_%i.root' % i for i in [65, 219, 464, 506]] + ['/store/user/tucker/JetHT/NtupleV15_2015/170531_154359/0000/ntuple_%i.root' % i for i in chain(xrange(65), xrange(66,210), xrange(211,219), xrange(220,254), xrange(255,464), xrange(465,506), xrange(507,575), xrange(576,781), xrange(782,834))] + ['/store/user/tucker/JetHT/NtupleV15_2015/170601_211414/0000/ntuple_%i.root' % i for i in [210, 254, 575, 781]]),
@@ -656,22 +645,6 @@ _add_ds('v0ntuplev1', {
 'JetHT2016G': _fromnum1('/store/user/tucker/JetHT/crab_V0NtupleV1_JetHT2016G/170629_191304',  492, fnbase='v0ntuple'),
 'JetHT2016H2': _fromnum1('/store/user/tucker/JetHT/crab_V0NtupleV1_JetHT2016H2/170629_191339', 468, fnbase='v0ntuple'),
 'JetHT2016H3': _fromnum1('/store/user/tucker/JetHT/crab_V0NtupleV1_JetHT2016H3/170629_191411', 12, fnbase='v0ntuple'),
-
-'ZeroBias2016B3': _fromnum1('/store/user/tucker/ZeroBias/crab_V0NtupleV1_ZeroBias2016B3/170629_191450', 113, fnbase='v0ntuple'),
-'ZeroBias2016C': _fromnum1('/store/user/tucker/ZeroBias/crab_V0NtupleV1_ZeroBias2016C/170629_191520', 20, fnbase='v0ntuple'),
-'ZeroBias2016D': _fromnum1('/store/user/tucker/ZeroBias/crab_V0NtupleV1_ZeroBias2016D/170629_191552', 32, fnbase='v0ntuple'),
-'ZeroBias2016E': _fromnum1('/store/user/tucker/ZeroBias/crab_V0NtupleV1_ZeroBias2016E/170629_191624', 38, fnbase='v0ntuple'),
-'ZeroBias2016F': _fromnum1('/store/user/tucker/ZeroBias/crab_V0NtupleV1_ZeroBias2016F/170629_191715', 31, fnbase='v0ntuple'),
-'ZeroBias2016G': _fromnum1('/store/user/tucker/ZeroBias/crab_V0NtupleV1_ZeroBias2016G/170629_191757', 60, fnbase='v0ntuple'),
-'ZeroBias2016H2': _fromnum1('/store/user/tucker/ZeroBias/crab_V0NtupleV1_ZeroBias2016H2/170629_191830', 86, fnbase='v0ntuple'),
-'ZeroBias2016H3': _fromnum1('/store/user/tucker/ZeroBias/crab_V0NtupleV1_ZeroBias2016H3/170629_191901', 3, fnbase='v0ntuple'),
-
-'ReproJetHT2016B': _fromnum1("/store/user/tucker/JetHT/V0NtupleV1_repro_2016/170713_181432", 397),
-'ReproJetHT2016C': _fromnum1("/store/user/tucker/JetHT/V0NtupleV1_repro_2016/170713_181503", 149),
-'ReproJetHT2016D': _fromnum1("/store/user/tucker/JetHT/V0NtupleV1_repro_2016/170713_181545", 235),
-'ReproJetHT2016E': _fromnum1("/store/user/tucker/JetHT/V0NtupleV1_repro_2016/170713_181651", 233),
-'ReproJetHT2016F': _fromnum1("/store/user/tucker/JetHT/V0NtupleV1_repro_2016/170713_181727", 179),
-'ReproJetHT2016H': _fromnum1("/store/user/tucker/JetHT/V0NtupleV1_repro_2016/170713_181833", 464),
 
 })
 
