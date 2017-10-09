@@ -96,6 +96,20 @@ _add({('testqcdht2000', 'gensim') : (60 + 263,
 
 _add({('private_minbias', 'main'): (332, ['/store/user/tucker/minbias/RunIISummer15GS-MCRUN2_71_V1/170908_221416/0000/gensim_%i.root' % i for i in chain(xrange(1,225), xrange(226,334))])})
 
+# two signal clusters I forgot to add
+_add_ds("main", {
+'mfv_ddbar_tau00100um_M3000': (96, ['/store/user/tucker/mfv_ddbar_tau00100um_M3000/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170605_150224/0000/reco_%i.root' % i for i in chain(xrange(1,50), xrange(51,74), xrange(76,96), xrange(97,101))]),
+'mfv_ddbar_tau00300um_M3000': (95, ['/store/user/tucker/mfv_ddbar_tau00300um_M3000/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170605_150239/0000/reco_%i.root' % i for i in chain(xrange(1,45), xrange(47,77), xrange(78,90), xrange(91,94), xrange(95,101))]),
+'mfv_ddbar_tau01000um_M3000': (98, ['/store/user/tucker/mfv_ddbar_tau01000um_M3000/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170605_150254/0000/reco_%i.root' % i for i in chain(xrange(1,5), xrange(6,36), xrange(37,101))]),
+'mfv_ddbar_tau10000um_M3000': (96, ['/store/user/tucker/mfv_ddbar_tau10000um_M3000/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170605_150309/0000/reco_%i.root' % i for i in chain(xrange(3,66), xrange(67,71), xrange(72,77), xrange(78,101), [1])]),
+'mfv_ddbar_tau30000um_M3000': _fromnum1("/store/user/tucker/mfv_ddbar_tau30000um_M3000/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170605_150323", 100, fnbase="reco"),
+'mfv_neu_tau00100um_M0500': (98, ['/store/user/tucker/mfv_neu_tau00100um_M0500/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170605_152354/0000/reco_%i.root' % i for i in chain(xrange(1,53), xrange(54,77), xrange(78,101))]),
+'mfv_neu_tau00300um_M0500': _fromnum1("/store/user/tucker/mfv_neu_tau00300um_M0500/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170605_152409", 100, fnbase="reco"),
+'mfv_neu_tau01000um_M0500': (96, ['/store/user/tucker/mfv_neu_tau01000um_M0500/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170605_152423/0000/reco_%i.root' % i for i in chain(xrange(1,9), xrange(10,48), xrange(49,57), xrange(58,62), xrange(63,101))]),
+'mfv_neu_tau10000um_M0500': (98, ['/store/user/tucker/mfv_neu_tau10000um_M0500/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170605_152439/0000/reco_%i.root' % i for i in chain(xrange(1,63), xrange(64,99), [100])]),
+'mfv_neu_tau30000um_M0500': (99, ['/store/user/tucker/mfv_neu_tau30000um_M0500/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170605_152455/0000/reco_%i.root' % i for i in chain(xrange(1,59), xrange(60,101))]),
+})
+
 # moved to Werner's space--overwrite those in "2015 main" above
 _add_ds('main', {
 'mfv_neu_tau00100um_M0300_2015': _fromnum1('/store/user/wsun/croncopyeos/mfv_neu_tau00100um_M0300/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12/160312_071342', 50, fnbase='reco'),
