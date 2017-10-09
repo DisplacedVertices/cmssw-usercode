@@ -31,7 +31,7 @@ def _canon(fn):
         return os.path.realpath(fn)
 
 def quota():
-    x = _popen('eos root://cmseos.fnal.gov quota').communicate()[0].split('\n')
+    x = _popen('eos root://cmseos.fnal.gov quota /eos/uscms/store/user/').communicate()[0].split('\n')
     for i, line in enumerate(x):
         if user in line:
             return x[i-1] + '\n' + line
