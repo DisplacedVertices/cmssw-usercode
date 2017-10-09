@@ -70,6 +70,15 @@ def set_process(process, name, ds, num=-1):
         fns = fns[:num]
     process.source.fileNames = fns
 
+def who(name, ds):
+    nfns, fns = _d[(name,ds)]
+    users = set()
+    for fn in fns:
+        assert fn.startswith('/store')
+        if fn.startswith('/store/user'):
+            users.add(fn.split('/')[3])
+    return tuple(sorted(users))
+
 ################################################################################
 
 # 2015 main
@@ -1193,3 +1202,21 @@ if __name__ == '__main__':
 
     elif 'summary' in sys.argv:
         summary()
+
+    elif 'whosummary' in sys.argv:
+        who = defaultdict(list)
+        for k in _d:
+            users = who(*k)
+            if users:
+                who[users].append(k)
+        print 'sorted by users:'
+        for users, dses in who.iteritems():
+            dses.sort()
+            print ' + '.join(users)
+            for ds in dses:
+                print '    ', ds
+
+    elif 'who' in sys.argv:
+        name = sys.argv[sys.argv.index('who')+1]
+        ds   = sys.argv[sys.argv.index('who')+2]
+        print ' + '.join(who(name,ds))
