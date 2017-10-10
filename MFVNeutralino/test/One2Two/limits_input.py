@@ -253,7 +253,10 @@ def signals_h():
         print 'samples.push_back({%i, "%s", 0, 0});' % (isample, name)
 
 def draw():
-    ps = plot_saver(plot_dir('o2t_templates_run2'), size=(600,600))
+    if os.environ['USER'] == 'tucker':
+        ps = plot_saver(plot_dir('o2t_templates_run2'), size=(600,600))
+    else:
+        ps = plot_saver('../plots/templates', size=(700,700), root=False, log=False)
 
     f = ROOT.TFile(limits_input_fn)
 
@@ -294,7 +297,7 @@ def draw():
 
         leg = ROOT.TLegend(0.142, 0.657, 0.702, 0.857)
         leg.SetBorderSize(0)
-        leg.AddEntry(hbkg, 'Simulated d_{VV}^{C}', 'LE')
+        leg.AddEntry(hbkg, 'Background template d_{VV}^{C}', 'LE')
 
         for isample, color, title in which:
             h = fmt(f.Get('h_signal_%i_dvv' % isample), title, color)
