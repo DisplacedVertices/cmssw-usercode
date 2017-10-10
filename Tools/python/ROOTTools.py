@@ -717,7 +717,15 @@ def data_mc_comparison(name,
             
             if overflow_in_last:
                 if x_range is not None:
-                    move_above_into_bin(sample.hist, x_range[1]-1e-6)
+                    # if not some decent fraction of the bin visible, use the last wholly visible bin
+                    # for now "decent" = half the bin width
+                    ibin = sample.hist.FindBin(x_range[1])
+                    a = sample.hist.GetBinLowEdge(ibin)
+                    b = sample.hist.GetBinLowEdge(ibin+1)
+                    w = b - a
+                    x_range_w = x_range[1] - x_range[0]
+                    minus_one = x_range[1] - a < w * 0.5
+                    move_above_into_bin(sample.hist, x_range[1], minus_one)
                 else:
                     move_overflow_into_last_bin(sample.hist)
 
