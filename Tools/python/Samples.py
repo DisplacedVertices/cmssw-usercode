@@ -571,23 +571,24 @@ for x in (data_samples_2015 +
           mfv_signal_samples + mfv_ddbar_samples + mfv_hip_samples + qcd_hip_samples):
     x.add_dataset('ntuplev15')
 
+for x in (ttbar_samples_2015 + qcd_samples_2015 + qcd_samples_ext_2015 +
+          ttbar_samples + qcd_samples + qcd_samples_ext +
+          qcd_hip_samples):
+    x.add_dataset('ntuplev16')
+
 for x in data_samples + qcd_samples + qcd_samples_ext + qcd_hip_samples[-2:]:
     x.add_dataset('v0ntuplev1')
 for x in data_samples + [s for s in auxiliary_data_samples if s.name.startswith('ZeroBias')] + qcd_samples[2:4] + qcd_samples_ext[2:4]:
     x.add_dataset('v0ntuplev2')
 
 for x in mfv_signal_samples + mfv_ddbar_samples:
-    x.add_dataset('ntuplev15_sigmadxy3p9')
-    x.add_dataset('ntuplev15_sigmadxy3p7')
-    x.add_dataset('ntuplev15_sigmadxy4p3')
-    x.add_dataset('ntuplev15_sigmadxy4p1')
-    x.add_dataset('ntuplev15_sigmadxy3p8')
-    x.add_dataset('ntuplev15_sigmadxy4p2')
+    for y in '3p7', '3p8', '3p9', '4p1', '4p2', '4p3':
+        x.add_dataset('ntuplev15_sigmadxy%s' % y)
 
-for x in ['ntuplev15lep', 'ntuplev15lep_IsoMu24', 'ntuplev15lep_IsoTkMu24', 'ntuplev15lep_VVVL350', 'ntuplev15lep_VVVL400', 'ntuplev15lep_Mu50']:
+for x in 'ntuplev15lep', 'ntuplev15lep_IsoMu24', 'ntuplev15lep_IsoTkMu24', 'ntuplev15lep_VVVL350', 'ntuplev15lep_VVVL400', 'ntuplev15lep_Mu50':
     mfv_neu_tau01000um_M0300.add_dataset(x)
 
-for x in [mfv_neu_tau00100um_M0300, mfv_neu_tau01000um_M0300]:
+for x in mfv_neu_tau00100um_M0300, mfv_neu_tau01000um_M0300:
     x.add_dataset('ntuplev15_leptrigs')
 
 ########
