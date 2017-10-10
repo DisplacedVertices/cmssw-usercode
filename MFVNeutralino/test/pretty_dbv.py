@@ -29,7 +29,7 @@ for s in ttbar_samples:
     s.join_info = True, 't#bar{t}', ROOT.kBlue-7
 
 signal_samples = [signal_sample]
-signal_sample.nice_name = 'Signal: #sigma = 1 fb,\\c#tau = 1 mm, M = 800 GeV'
+signal_sample.nice_name = 'Multijet signal: #sigma = 1 fb,\\c#tau = 1 mm, M = 800 GeV'
 signal_sample.color = 8
 
 C = partial(data_mc_comparison,
