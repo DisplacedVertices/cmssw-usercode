@@ -29,7 +29,7 @@ for kind in 'mfv_ddbar', 'mfv_neu':
     if 'neu' in kind:
         xax.SetTitle('M_{#tilde{#chi}^{0} / #tilde{g}} (GeV)')
     else:
-        xax.SetTitle('M_{X} (GeV)')
+        xax.SetTitle('M_{#tilde{g}} (GeV)')
 #    xax.CenterLabels()
 #    xax.SetNdivisions(1300, 0)
 #    xax.SetBinLabel(xax.FindBin(400), '400')
@@ -61,6 +61,10 @@ for kind in 'mfv_ddbar', 'mfv_neu':
     zax.SetTitleSize(0.05)
     zax.SetTitleOffset(1.22)
     #zax.SetTitleSize()
+#    ROOT.gStyle.SetPaintTextFormat(".1g")
+#    c.SetLogy()
+#    h.SetMarkerColor(ROOT.kWhite)
+#    h.Draw('colz text')
     h.Draw('colz')
     cms = write(61, 0.050, 0.109, 0.913, 'CMS')
     sim = write(52, 0.040, 0.222, 0.912, 'Simulation')
