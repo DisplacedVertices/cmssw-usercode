@@ -300,6 +300,12 @@ def silence_messages(process, categories):
 def simple_memory_check(process):
     process.add_(cms.Service('SimpleMemoryCheck'))
 
+def remove_tfileservice(process):
+    try:
+        del process.TFileService
+    except KeyError:
+        pass
+
 def tfileservice(process, filename='tfileservice.root'):
     process.TFileService = cms.Service('TFileService', fileName = cms.string(filename))
 
