@@ -8,6 +8,7 @@ set_style()
 
 output_dir = sys.argv[1]
 fns = [fn for fn in sys.argv[2:] if os.path.isfile(fn)]
+ls = [l for l in sys.argv[2:] if not os.path.isfile(l)]
 
 if not os.path.isdir(os.path.dirname(output_dir)):
     output_dir = plot_dir(output_dir)
@@ -20,6 +21,9 @@ colors = [ROOT.kBlack, ROOT.kRed, ROOT.kGreen+2, ROOT.kBlue, ROOT.kMagenta]
 while len(colors) < len(fns):
     colors.append(colors[-1]+1)
 
+legend = (len(ls) == len(fns))
+l1 = ROOT.TLegend(0.50,0.70,0.85,0.85)
+
 for i,h in enumerate(hs):
     h.SetLineColor(colors[i])
     h.Scale(1/h.Integral(0,100000000))
@@ -30,6 +34,12 @@ for i,h in enumerate(hs):
         h.Draw('hist e')
     else:
         h.Draw('hist e same')
+
+    if legend:
+        l1.AddEntry(h, ls[i])
+
+if legend:
+    l1.Draw()
 
 print ' '*40, '%18s' % '0-400 um', '%18s' % '400-700 um', '%18s' % '>700um'
 for fn, h in zip(fns, hs):
