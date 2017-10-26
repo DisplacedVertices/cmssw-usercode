@@ -116,7 +116,7 @@ if output_level in ('minitree', 'ntuple'):
         to_rm.append(x)
         os.system('cmsDumpPython.py ../%s > %s' % (x,x))
 
-config.General.transferLogs = True
+config.General.transferLogs = False
 config.General.transferOutputs = True
 config.General.workArea = work_area
 config.General.requestName = 'SETME'
