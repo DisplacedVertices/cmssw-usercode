@@ -1,0 +1,86 @@
+#!/bin/bash
+
+if [[ $# -eq 0 ]] ; then
+    echo 'usage: crtarlogs datedir1 [datedir2 ...]'
+    echo '   where a datedir is a path on eos like /store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV15_2016/170522_203412'
+    exit 1
+fi
+
+url=root://cmseos.fnal.gov/
+tarfn=cmsRun.logs.tar.xz
+twostep=0
+# twostep=1 means leave the tarballs in the tmpdirs instead of moving (= xrdcp + rm -r $tmpdir), useful if eos overquota
+
+function storeonly {
+    echo $1 | sed 's@.*/store@/store@'
+}
+
+for arg in $@; do
+    #echo arg $arg
+    lpath=$(storeonly $(readlink -m $arg))
+
+    if [[ -z $lpath ]]; then
+        echo not a store fn
+    elif [[ ! $(basename $lpath) =~ [0-9]{6}_[0-9]{6} ]]; then
+        echo not a date dir
+    else
+        # first get rid of all failed dirs
+        faileds=($(eos $url find $lpath | egrep '/failed/$') )
+        if [[ ${#failed[@]} -gt 0 ]]; then
+            for fn in ${faileds[@]}; do
+                echo failed $fn
+            done
+            read -p 'ok?'
+            for fn in ${faileds[@]}; do
+                echo eos $url rm -r $(storeonly $fn)
+            done
+        fi
+
+        # now retar cmsRun logs
+        if [[ $(hostname) =~ fnal.gov ]]; then
+            tmpdir=$(mktemp -d /uscmst1b_scratch/lpc1/3DayLifetime/$USER/XXXXXXXX)
+        else
+            tmpdir=$(mktemp -d)
+        fi
+        logfns=($(eos $url find $lpath | grep -v /failed/ | egrep 'log.tar.gz$') )
+
+        if [[ ${#logfns[@]} -eq 0 ]]; then
+            echo no log dirs in $lpath
+        else
+            echo extracting logs for $arg to $tmpdir
+            for fn in ${logfns[@]}; do
+                lfn=$(storeonly $fn)
+                #echo $lfn
+                xrdcp -s $url$fn - | tar -C $tmpdir -zxf -
+            done
+    
+            # why doesn't -C in tar cmd work here
+            cd $tmpdir
+            echo retarring
+            tar --remove-files -cJf $tarfn cmsRun*.log FrameworkJobReport-*.xml
+            xrdcpcmd="xrdcp -s $tmpdir/$tarfn $url$lpath/"
+            echo $xrdcpcmd
+            cd - >/dev/null
+    
+            if [[ $twostep -eq 0 ]]; then
+                eval $xrdcpcmd
+                if [[ $? -eq 0 ]]; then
+                    rm $tmpdir/$tarfn
+                    rmdir $tmpdir
+                fi
+            fi
+    
+            # rm the tarballs and the log dirs
+            echo rm logs from eos
+            declare -A logdirs
+            for fn in ${logfns[@]}; do
+                eos $url rm $fn
+                logdirs[$(dirname $fn)]=1
+            done
+            for dir in ${!logdirs[@]}; do
+                eos $url rmdir $dir
+            done
+            unset logdirs
+        fi
+    fi
+done
