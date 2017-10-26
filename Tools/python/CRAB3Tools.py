@@ -318,3 +318,7 @@ if __name__ == '__main__':
            ds.sort()
            for d in ds:
                print d
+
+   elif 'output_dir' in sys.argv:
+       for d in dirs:
+           print d, crab_get_output_dir(d)
