@@ -127,7 +127,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   if (p.is_mc()) {
     if (p.year() == "2015")         { ibkg_begin =  1; ibkg_end =  4; if (p.inject_signal()) ibkg_begin = 0; }
     else if (p.year() == "2016")    { ibkg_begin =  5; ibkg_end =  8; if (p.inject_signal()) ibkg_end = 9; }
-    else if (p.year() == "2015p6")  { ibkg_begin =  1; ibkg_end =  8; if (p.inject_signal()) ibkg_begin = 0; }
+    else if (p.year() == "2015p6")  { ibkg_begin =  1; ibkg_end =  8; if (p.inject_signal()) {ibkg_begin = 0; ibkg_end = 9;} }
     else { fprintf(stderr, "bad year"); exit(1); }
   } else {
     if (p.year() == "2015")         { ibkg_begin = 10; ibkg_end = 11; }
