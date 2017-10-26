@@ -1,4 +1,4 @@
-import os, sys, base64, cPickle as pickle
+import os, sys, base64, re, cPickle as pickle
 from collections import defaultdict
 from itertools import product
 from pprint import pprint
@@ -202,12 +202,44 @@ def export_scanpack(crab_dirs):
 
     return dict(sample_files)
 
+def hadd_scanpack(lst_fn):
+    from JMTucker.Tools import colors, eos
+    from JMTucker.Tools.hadd import hadd
+
+    lst = eval(open(lst_fn).read())
+    new_lst = {}
+    hadds = []
+    for name, fns in lst.iteritems():
+        fns = [str(s) for s in fns]
+        out_fn = None
+        for fn in fns:
+            sfn = fn.split('/')
+            assert re.match(r'\d{4}', sfn[-2])
+            assert re.match(r'\d{6}_\d{6}', sfn[-3])
+            new_out_fn = '/'.join(sfn[:-2]) + '/' + name + '.root'
+            if out_fn is None:
+                out_fn = new_out_fn
+            else:
+                assert new_out_fn == out_fn
+
+        new_lst[name] = [out_fn]
+        if eos.exists(out_fn):
+            print colors.yellow('%s already exists' % out_fn)
+        else:
+            hadd(out_fn, fns)
+
+    print '\nnew list:'
+    pprint(new_lst)
+
 if __name__ == '__main__' and len(sys.argv) > 1:
     cmd = sys.argv[1]
 
     if cmd == 'export':
         from JMTucker.Tools.CRAB3ToolsSh import crab_dirs_from_argv
         pprint(export_scanpack(crab_dirs_from_argv()))
+
+    elif cmd == 'hadd':
+        hadd_scanpack(sys.argv[2])
 
     elif cmd == 'missing':
         fn = sys.argv[2]
