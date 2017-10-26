@@ -154,6 +154,9 @@ class scanpack2(scanpackbase100epj):
     taus = [tau/1000. for tau in range(100, 1000, 100) + range(1000, 4000, 1000) + range(40000, 100001, 3000)]
     masses = range(300, 600, 100) + range(600, 2601, 200)
 
+    def events_per_sample(self, kind, tau, mass):
+        return 10000
+
 ####
 
 def get_scanpack(x):
@@ -163,6 +166,7 @@ def get_scanpack(x):
         'scanpack1': scanpack1,
         'scanpack1_100epj': scanpack1_100epj,
         'scanpack1p5': scanpack1p5,
+        'scanpack2': scanpack2,
         }[x]()
 
 def do_scanpack(process, x, batch, job):
