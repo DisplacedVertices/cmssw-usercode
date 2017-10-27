@@ -46,7 +46,7 @@ class CRABSubmitter:
                  script_exe = None,
                  output_files = None,
                  extra_output_files = None,
-                 transfer_logs = True,
+                 transfer_logs = False,
                  transfer_outputs = True,
                  dataset = 'main',
                  lumi_mask = None,
