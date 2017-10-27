@@ -124,6 +124,7 @@ config.General.requestName = 'SETME'
 config.JobType.pluginName = 'PrivateMC'
 config.JobType.psetName = 'dummy.py'
 config.JobType.scriptExe = 'nstep.sh'
+config.JobType.scriptArgs = []
 config.JobType.sendPythonFolder = True
 
 steering_fn = 'steering.sh'
@@ -137,11 +138,12 @@ if output_level == 'reco':
 elif output_level == 'gensim':
     config.JobType.outputFiles = ['gensim.root']
 elif output_level == 'ntuple':
-    config.JobType.outputFiles = ['ntuple.root', 'vertex_histos.root']
+    config.JobType.outputFiles = ['ntuple.root']
 elif output_level == 'minitree':
-    config.JobType.outputFiles = ['minitree.root', 'vertex_histos.root']
-
-config.JobType.scriptArgs = [] # steering file will take care of what we did before
+    config.JobType.outputFiles = ['minitree.root']
+# uncomment to get vertex histos
+#if output_level in ('minitree', 'ntuple'):
+#    config.JobType.outputFiles += ['vertex_histos.root']
 
 config.Data.splitting = 'EventBased'
 config.Data.unitsPerJob = events_per
