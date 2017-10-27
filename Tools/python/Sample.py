@@ -64,6 +64,8 @@ class Sample(object):
     IS_FASTSIM = False
     GENERATOR = 'pythia8'
 
+    NSAMPLES = 0
+
     def __init__(self, name, dataset, nevents_orig, **kwargs):
         self.name = name
         self.curr_dataset = 'main'
@@ -75,6 +77,9 @@ class Sample(object):
         self.generator  = kwargs.get('generator',  self.GENERATOR)
 
         self.ready = True
+
+        self.isample = Sample.NSAMPLES
+        Sample.NSAMPLES += 1
 
     def has_dataset(self, c):
         return self.datasets.has_key(c)
