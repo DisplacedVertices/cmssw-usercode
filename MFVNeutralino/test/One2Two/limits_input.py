@@ -342,13 +342,21 @@ def compare(fn1, fn2, outbase):
     h_dvvmean = make_h_fcn('dvvmean', lambda f,isample: (h_dvv(f,isample).GetMean(), h_dvv(f,isample).GetMeanError()))
     h_dvvrms  = make_h_fcn('dvvrms',  lambda f,isample: (h_dvv(f,isample).GetRMS(),  h_dvv(f,isample).GetRMSError() ))
 
+    all_stat_same, all_same = True, True
+
     for iname, name in enumerate(names):
         isamples = samples_1[name], samples_2[name]
         for h, fcn in h_fcns:
             (v1,e1), (v2, e2) = [fcn(f, isample) for f,isample in zip(fs, isamples)]
             h.GetXaxis().SetBinLabel(iname+1, name)
-            h.SetBinContent(iname+1, v1-v2)
-            h.SetBinError  (iname+1, (e1**2 + e2**2)**0.5)
+            d = v1 - v2
+            e = (e1**2 + e2**2)**0.5
+            h.SetBinContent(iname+1, d)
+            h.SetBinError  (iname+1, e)
+            if abs(d) > 1e-5:
+                all_same = False
+            if abs(d) > e:
+                all_stat_same = False
 
     c = ROOT.TCanvas('c', '', 1000, 800)
     line = ROOT.TLine(0, 0, nnames, 0)
@@ -362,6 +370,8 @@ def compare(fn1, fn2, outbase):
         line.Draw()
         for ext in 'root', 'png':
             c.SaveAs(outbase + '/%i_%s.%s' % (i, h.GetName(), ext))
+
+    print 'all same? %r statistically? %r' % (all_same, all_stat_same)
 
 if __name__ == '__main__':
     if 'make' in sys.argv:
