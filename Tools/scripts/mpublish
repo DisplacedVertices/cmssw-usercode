@@ -121,13 +121,24 @@ for wd in wds:
     code = coderep_files(files)
     publish[sample] = (len(files), code if code is not None else files)
 
-samples.sort()
-samples_lump.sort()
+def _key(x):
+    if type(x) == tuple:
+        sample_name, _, _ = x
+    else:
+        assert type(x) == str
+        sample_name = x
+    if hasattr(Samples, sample_name):
+        return getattr(Samples, sample_name).isample
+    else:
+        return -1
+
+samples.sort(key=_key)
+samples_lump.sort(key=_key)
 
 print
 print colors.bold('new entries:')
 print '_add_ds("%s", {' % options.dataset
-for k in sorted(publish.keys()):
+for k in sorted(publish.keys(), key=_key):
     n,c = publish[k]
     if type(c) == unicode:
         c = str(c)
