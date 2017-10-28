@@ -104,6 +104,12 @@ struct MFVEvent {
     return p4(gen_lsp_pt[w], gen_lsp_eta[w], gen_lsp_phi[w], gen_lsp_mass[w]);
   }
 
+  TVector3 gen_lsp_flight(int w) const {
+    return TVector3(gen_lsp_decay[w*3+0] - gen_pv[0],
+                    gen_lsp_decay[w*3+1] - gen_pv[1],
+                    gen_lsp_decay[w*3+2] - gen_pv[2]);
+  }
+
   float minlspdist2d() const {
     return min(mag(gen_lsp_decay[0*3+0] - bsx, gen_lsp_decay[0*3+1] - bsy),
                mag(gen_lsp_decay[1*3+0] - bsx, gen_lsp_decay[1*3+1] - bsy));
