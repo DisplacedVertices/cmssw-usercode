@@ -6,18 +6,19 @@ from JMTucker.Tools.MiniAOD_cfg import *
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.MFVNeutralino.Year import year
 
-version = 5
+version = 6
 cfgs = named_product(njets = [2,3],
                      nbjets = [0,1,2],
                      nsigmadxy = [4.0, 4.1],
-                     btagwp = [0,1],  # old, new
+                     btagwp = [0], #,1],  # old, new
+                     angle = [0.2, 0.1, 0.3],
                      )
 # rest are magic lines for the submitter
 is_mc = True
 H = False
 repro = False
 
-if version >= 6:
+if version >= 7:
     raise ValueError('get rid of the two btag working points before running next version')
 
 process = pat_tuple_process(None, is_mc, year, H, repro)
@@ -44,7 +45,8 @@ process.mfvWeight.throw_if_no_mcstat = False
 for icfg, cfg in enumerate(cfgs):
     nsigmadxy_name = ('nsig%.1f' % cfg.nsigmadxy).replace('.', 'p')
     btagwp_name = 'btagold' if cfg.btagwp == 0 else 'btagnew'
-    ex = '%i%i%s%s' % (cfg.njets, cfg.nbjets, nsigmadxy_name, btagwp_name)
+    angle_name = ('angle%.1f' % cfg.angle).replace('.', 'p')
+    ex = '%i%i%s%s%s' % (cfg.njets, cfg.nbjets, nsigmadxy_name, btagwp_name, angle_name)
 
     tracks_name = 'mfvMovedTracks' + ex
     auxes_name = 'mfvVerticesAux' + ex
@@ -71,8 +73,8 @@ for icfg, cfg in enumerate(cfgs):
                             njets = cms.uint32(cfg.njets),
                             nbjets = cms.uint32(cfg.nbjets),
                             tau = cms.double(1.),
-                            sig_theta = cms.double(0.2),
-                            sig_phi = cms.double(0.2),
+                            sig_theta = cms.double(cfg.angle),
+                            sig_phi = cms.double(cfg.angle),
                             )
 
     modifiedVertexSequence(process, ex,
