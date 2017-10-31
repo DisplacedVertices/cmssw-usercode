@@ -1,5 +1,4 @@
-#include "TH1F.h"
-#include "TH2F.h"
+#include "TH2.h"
 #include "TLorentzVector.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/Math/interface/deltaR.h"
@@ -93,6 +92,11 @@ class MFVResolutions : public edm::EDAnalyzer {
   TH2F* h_s_betagamma;
   TH2F* h_s_avgbetagammalab;
   TH2F* h_s_avgbetagammacmz;
+
+  TH1F* h_flight_visdaus_theta;
+  TH1F* h_flight_visdaus_phi;
+  TH1F* h_flight_rec_theta;
+  TH1F* h_flight_rec_phi;
 };
 
 MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
@@ -177,6 +181,11 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   h_s_betagamma = fs->make<TH2F>("h_s_betagamma", ";generated betagamma;reconstructed betagamma", 100, 0, 10, 100, 0, 10);
   h_s_avgbetagammalab = fs->make<TH2F>("h_s_avgbetagammalab", ";generated avgbetagammalab;reconstructed avgbetagammalab", 100, 0, 10, 100, 0, 10);
   h_s_avgbetagammacmz = fs->make<TH2F>("h_s_avgbetagammacmz", ";generated avgbetagammacmz;reconstructed avgbetagammacmz", 100, 0, 10, 100, 0, 10);
+
+  h_flight_visdaus_theta = fs->make<TH1F>("h_flight_visdaus_theta", ";#Delta #theta between true flight dir and generated visible-daughter momentum; events/0.04", 100, -2, 2);
+  h_flight_visdaus_phi = fs->make<TH1F>("h_flight_visdaus_phi", ";#Delta #phi between true flight dir and generated visible-daughter momentum; events/0.04", 100, -2, 2);
+  h_flight_rec_theta = fs->make<TH1F>("h_flight_rec_theta", ";#Delta #theta between true flight dir and reconstructed momentum;events/0.04", 100, -2, 2);
+  h_flight_rec_phi = fs->make<TH1F>("h_flight_rec_phi", ";#Delta #phi between true flight dir and reconstructed momentum;events/0.04", 100, -2, 2);
 }
 
 namespace {
@@ -187,12 +196,6 @@ namespace {
   float mag(float x, float y, float z) {
     return sqrt(x*x + y*y + z*z);
   }
-  
-  //  float signed_mag(float x, float y) {
-  //    float m = mag(x,y);
-  //    if (y < 0) return -m;
-  //    return m;
-  //}
 }
 
 void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
@@ -204,7 +207,9 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
   edm::Handle<MFVVertexAuxCollection> vertices;
   event.getByToken(vertices_token, vertices);
 
-  TLorentzVector lsp_p4s[2] = { mevent->gen_lsp_p4(0), mevent->gen_lsp_p4(1) };
+  const TLorentzVector lsp_p4s[2] = { mevent->gen_lsp_p4(0), mevent->gen_lsp_p4(1) };
+  const TLorentzVector lsp_p4s_vis[2] = { mevent->gen_lsp_p4_vis(0), mevent->gen_lsp_p4_vis(1) };
+  const TVector3 lsp_flights[2] = { mevent->gen_lsp_flight(0), mevent->gen_lsp_flight(1) };
   int lsp_nmatch[2] = {0,0};
   int nvtx_match = 0;
 
@@ -272,6 +277,8 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
 
     ++nvtx_match;
     const TLorentzVector& lsp_p4 = lsp_p4s[ilsp];
+    const TLorentzVector& lsp_p4_vis = lsp_p4s_vis[ilsp];
+    const TVector3& lsp_flight = lsp_flights[ilsp];
     const TLorentzVector& vtx_p4 = vtx.p4(which_mom);
 
     // histogram dr, dist
@@ -344,6 +351,11 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_s_rapidity->Fill(lsp_p4.Rapidity(), vtx_p4.Rapidity());
     h_s_theta->Fill(lsp_p4.Theta(), vtx_p4.Theta());
     h_s_betagamma->Fill(lsp_p4.Beta()*lsp_p4.Gamma(), vtx_p4.Beta()*vtx_p4.Gamma());
+
+    h_flight_visdaus_theta->Fill(lsp_p4_vis.Vect().Theta() - lsp_flight.Theta());
+    h_flight_visdaus_phi->Fill(lsp_p4_vis.Vect().DeltaPhi(lsp_flight));
+    h_flight_rec_theta->Fill(vtx_p4.Vect().Theta() - lsp_flight.Theta());
+    h_flight_rec_phi->Fill(vtx_p4.Vect().DeltaPhi(lsp_flight));
   }
 
   // histogram lsp_nmatch
