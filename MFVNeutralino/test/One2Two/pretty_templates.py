@@ -56,7 +56,7 @@ hbkg = fmt(f.Get('h_bkg_dvv'), 'bkg', ROOT.kBlack)
 hbkg.SetFillColor(ROOT.kGray)
 hbkg.SetFillStyle(3001)
 
-leg = ROOT.TLegend(0.45, 0.65, 0.85, 0.85)
+leg = ROOT.TLegend(0.30, 0.65, 0.85, 0.85)
 leg.SetBorderSize(0)
 leg.AddEntry(hbkg, 'Background template', 'LF')
 leg.AddEntry(0, '#kern[-0.22]{Multijet signals, M = 800 GeV, #sigma = 1 fb:}', '')
@@ -68,7 +68,7 @@ for zzz, (isample, color, title) in enumerate(which):
     else:
         h.Draw('hist same')
     h.GetXaxis().SetRangeUser(0,0.4)
-    h.GetYaxis().SetRangeUser(0,0.75)
+    h.GetYaxis().SetRangeUser(0,1)
     leg.AddEntry(h, title, 'L')
 
 hbkg.Draw('hist same')
