@@ -110,6 +110,19 @@ struct MFVEvent {
                     gen_lsp_decay[w*3+2] - gen_pv[2]);
   }
 
+  TLorentzVector gen_lsp_p4_vis(int w) const {
+    const size_t n = gen_daughters.size();
+    assert(n % 2 == 0);
+    assert(w == 0 || w == 1);
+    TLorentzVector r;
+    for (size_t i = n/2 * w; i < n/2*(w+1); ++i) {
+      int id = gen_daughter_id[i];
+      if (id == 11 || id == 13 || id == 15 || (id >= 1 && id <= 5))
+        r += gen_daughters[i];
+    }
+    return r;
+  }
+
   float minlspdist2d() const {
     return min(mag(gen_lsp_decay[0*3+0] - bsx, gen_lsp_decay[0*3+1] - bsy),
                mag(gen_lsp_decay[1*3+0] - bsx, gen_lsp_decay[1*3+1] - bsy));
