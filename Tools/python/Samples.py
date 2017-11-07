@@ -763,3 +763,10 @@ if __name__ == '__main__':
                 code += bn + '\n'
             code += "'''.split('\n')]"
             f.write('(%r, %r): (%i, %s),\n' % (s.name, y, len(fns), code))
+
+    if 0:
+        dses = set(s.dataset for s in registry.all())
+        for line in open('todel.txt'):
+            line = line.strip()
+            if line in dses:
+                print line
