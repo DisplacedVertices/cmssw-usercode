@@ -64,16 +64,20 @@ for kind in 'multijetM800', 'multijettau1mm', 'ddbarM800', 'ddbartau1mm':
     observed.Draw('LP')
     if draw_gluglu:
         gluglu.Draw('3')
+        leg = ROOT.TLegend(0.583, 0.566, 0.866, 0.851)
+    else:
+        leg = ROOT.TLegend(0.583, 0.632, 0.866, 0.851)
 
-    leg = ROOT.TLegend(0.583, 0.632, 0.866, 0.851)
     leg.SetTextFont(42)
     leg.SetFillColor(ROOT.kWhite)
     leg.SetBorderSize(0)
+    leg.AddEntry(0, '#kern[-0.22]{95% CL upper limits:}', '')
     leg.AddEntry(observed, 'Observed', 'LP')
     leg.AddEntry(expect50, 'Expected', 'L')
     leg.AddEntry(expect68, '#pm 1 #sigma', 'F')
     leg.AddEntry(expect95, '#pm 2 #sigma', 'F')
     if draw_gluglu:
+        leg.AddEntry(0, '', '')
         leg.AddEntry(gluglu, '#tilde{g}#tilde{g} production', 'F')
     leg.Draw()
 
