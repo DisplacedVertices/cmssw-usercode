@@ -42,6 +42,8 @@ def getit(fn, ntk):
     t = f.Get('%s/t' % ntk)
     hr = draw_hist_register(t, True)
     def c(cut):
+        #cut = '(%s) && njets >= 4 && jetht > 700 && jetht < 1000' % cut
+        #cut = '(%s) && njets >= 4 && jetht > 700' % cut
         h,n = hr.draw('weight', cut, binning='1,0,1', get_n=True, goff=True)
         return (n,) + get_integral(h)
     n1v = c('nvtx==1')
