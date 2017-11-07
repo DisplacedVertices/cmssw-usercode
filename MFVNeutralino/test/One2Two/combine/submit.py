@@ -1,7 +1,7 @@
 import sys, os, shutil, time
 from JMTucker.Tools.general import save_git_status
 from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-from limits_input import ROOT, name_iterator, sample_iterator, test_sample_iterator
+from limits_input import ROOT, name_iterator, sample_iterator, test_sample_iterator, sample_iterator_1d_plots
 
 # the combine tarball is made in a locally checked-out combine environment so the worker nodes don't have to git clone, etc.
 # take JMTucker/Tools/scripts/cmsMakeTarball.py, insert make_tarball in it so it can run standalone, then *in the combine environment* do
@@ -34,15 +34,15 @@ cd $WD
     echo datacard:
     python datacard.py $WHICH | tee datacard.txt
 
-    echo "========================================================================="
-    echo GoodnessOfFit observed
-    combine -M GoodnessOfFit datacard.txt --algo=saturated
-    mv higgsCombine*root gof_observed.root
-
-    echo "========================================================================="
-    echo GoodnessOfFit expected
-    combine -M GoodnessOfFit datacard.txt --algo=saturated --toys 100
-    mv higgsCombine*root gof_expected.root
+#    echo "========================================================================="
+#    echo GoodnessOfFit observed
+#    combine -M GoodnessOfFit datacard.txt --algo=saturated
+#    mv higgsCombine*root gof_observed.root
+#
+#    echo "========================================================================="
+#    echo GoodnessOfFit expected
+#    combine -M GoodnessOfFit datacard.txt --algo=saturated --toys 100
+#    mv higgsCombine*root gof_expected.root
 
 #    echo "========================================================================="
 #    echo GoodnessOfFit observed, no systematics
@@ -61,7 +61,7 @@ cd $WD
 
     echo "========================================================================="
     echo Expected limits
-    combine -M BayesianToyMC datacard.txt --toys 100
+    combine -M BayesianToyMC datacard.txt --toys 1000
     mv higgsCombine*root expected.root
 
 #    echo "========================================================================="
@@ -74,15 +74,15 @@ cd $WD
 #    combine -S0 -M BayesianToyMC datacard.txt --toys 100
 #    mv higgsCombine*root expected_S0.root
 
-    echo "========================================================================="
-    echo Observed significance
-    combine -M Significance datacard.txt
-    mv higgsCombine*root signif_observed.root
-
-    echo "========================================================================="
-    echo Expected significance
-    combine -M Significance datacard.txt --toys 100
-    mv higgsCombine*root signif_expected.root
+#    echo "========================================================================="
+#    echo Observed significance
+#    combine -M Significance datacard.txt
+#    mv higgsCombine*root signif_observed.root
+#
+#    echo "========================================================================="
+#    echo Expected significance
+#    combine -M Significance datacard.txt --toys 100
+#    mv higgsCombine*root signif_expected.root
 
 #    echo "========================================================================="
 #    echo Observed significance, no systematics
@@ -134,7 +134,14 @@ input_files = ','.join(input_files)
 
 f = ROOT.TFile('limits_input.root')
 names = list(name_iterator(f))
-samples = test_sample_iterator if 'test_batch' in sys.argv else test_sample_iterator
+
+if 'test_batch' in sys.argv:
+    samples = test_sample_iterator
+elif '1d_plots' in sys.argv:
+    samples = sample_iterator_1d_plots
+else:
+    samples = sample_iterator
+
 allowed = [arg for arg in sys.argv if arg in names]
 
 for sample in samples(f):
