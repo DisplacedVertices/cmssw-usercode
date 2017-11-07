@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
-import os, sys
+import os, sys, re
 from array import array
 from collections import defaultdict
 from itertools import izip
+from pprint import pprint
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.general import from_pickle
 from limits_input import sample_iterator
@@ -13,13 +14,12 @@ def fmt(t, title, xtitle, color):
     t.SetTitle('%s;%s;#sigma #times BR^{2} (fb)' % (title, xtitle))
     return t
 
-def tge(xye, title, xtitle, color):
+def tge(xye):
     x = array('f', [z[0] for z in xye])
     y = array('f', [z[1] for z in xye])
     ey = array('f', [z[2] for z in xye])
-    ex = array('f', [2.5]*len(x))
-    t = ROOT.TGraphErrors(len(x), x, y, ex, ey)
-    return fmt(t, title, xtitle, color)
+    ex = array('f', [0.001]*len(x))
+    return ROOT.TGraphErrors(len(x), x, y, ex, ey)
 
 def tgae(x, y, exl, exh, eyl, eyh, title, xtitle, color):
     #print 'tgae', len(x), len(y)
@@ -41,13 +41,20 @@ def tgae(x, y, exl, exh, eyl, eyh, title, xtitle, color):
     t = ROOT.TGraphAsymmErrors(l, x, y, exl, exh, eyl, eyh)
     return fmt(t, title, xtitle, color)
 
-def parse_gluglu():
-    gluglu = [eval(x.strip()) for x in open('gluglu.csv') if x.strip()]
-    gluglu = [(z[0], z[1]*1000, z[2]/100*z[1]*1000) for z in gluglu] # convert pb to fb and percent to absolute
+def parse_gluglu(gluglu=[]):
+    if not gluglu:
+        gluglu = [eval(x.strip()) for x in open('gluglu.csv') if x.strip()]
+        gluglu = [(z[0], z[1]*1000, z[2]/100*z[1]*1000) for z in gluglu] # convert pb to fb and percent to absolute
     return gluglu
 
+def fmt_gluglu(g, xtitle):
+    fmt(g, '', xtitle, 9)
+    g.SetFillStyle(3001)
+
 def make_gluglu():
-    return tge(parse_gluglu(), '13 TeV glu-glu production', 'mass (GeV)', 9)
+    g = tge(parse_gluglu())
+    fmt_gluglu(g, 'mass (GeV)')
+    return g
 
 def draw_gluglu():
     g_gluglu = make_gluglu()
@@ -61,114 +68,143 @@ def make_gluglu_hist():
         hgluxsec.SetBinContent(bin, s)
         hgluxsec.SetBinError(bin, se)
     return gluglu, hgluxsec
-    
-def parse(d, tau, mass, observed_fn, expected_fn):
-    #print d, tau, mass, observed_fn, expected_fn
-    watches = [
-        'sigma_sig_limit:Observed Limit: r < ',
-        'sigma_sig_limit:Expected  2.5%: r < ',
-        'sigma_sig_limit:Expected 16.0%: r < ',
-        'sigma_sig_limit:Expected 50.0%: r < ',
-        'sigma_sig_limit:Expected 84.0%: r < ',
-        'sigma_sig_limit:Expected 97.5%: r < ',
-        ]
 
-    vals = [None]*6
+class limits:
+    class point:
+        res = (
+            ('observed'  , re.compile('Observed Limit: r < (.*)')),
+            ('expect2p5' , re.compile('Expected  2.5%: r < (.*)')),
+            ('expect16'  , re.compile('Expected 16.0%: r < (.*)')),
+            ('expect50'  , re.compile('Expected 50.0%: r < (.*)')),
+            ('expect84'  , re.compile('Expected 84.0%: r < (.*)')),
+            ('expect97p5', re.compile('Expected 97.5%: r < (.*)')),
+            )
 
-    do_obs = observed_fn is not None
-    do_exp = expected_fn is not None
+        def __init__(self, sample):
+            self.sample = sample
+            self.observed = self.expect2p5 = self.expect16 = self.expect50 = self.expect84 = self.expect97p5 = None
 
-    if do_exp:
-        for line in open(expected_fn):
-            for i, watch in enumerate(watches):
-                if line.startswith(watch):
-                    vals[i] = float(line.replace(watch, ''))
-    if do_obs:
-        for line in open(observed_fn):
-            watch = watches[0]
-            if line.startswith(watch):
-                vals[0] = float(line.replace(watch, ''))
-    else:
-        vals[0] = None # in case it was found in exp above
-    #print vals
-    if (do_obs and vals[0] is None) or (do_exp and any(v is None for v in vals[1:])):
-        raise ValueError('crap')
+        @property
+        def valid(self):
+            return all(x is not None for x in (self.observed,self.expect2p5,self.expect16,self.expect50,self.expect84,self.expect97p5))
 
-    obs, exp2p5, exp16, exp50, exp84, exp97p5 = vals
-    d['tau'].append(tau)
-    d['mass'].append(mass)
-    if do_obs:
-        d['observed'].append(obs)
-    if do_exp:
-        exp68 = (exp84 + exp16)/2
-        exp95 = (exp97p5 + exp2p5)/2
-        d['expect2p5'].append(exp2p5)
-        d['expect16'].append(exp16)
-        d['expect50'].append(exp50)
-        d['expect68'].append(exp68)
-        d['expect84'].append(exp84)
-        d['expect95'].append(exp95)
-        d['expect97p5'].append(exp97p5)
-        d['expect68lo'].append(exp68 - exp16)
-        d['expect68hi'].append(exp84 - exp68)
-        d['expect95lo'].append(exp95 - exp2p5)
-        d['expect95hi'].append(exp97p5 - exp95)
+        @property
+        def expect_valid(self):
+            return all(x is not None for x in (self.expect2p5,self.expect16,self.expect50,self.expect84,self.expect97p5))
 
-def draw_1d_plot(d, name, title, y_range, xkey='mass'):
+        @property
+        def expect68(self):
+            return (self.expect16 + self.expect84) / 2
+        @property
+        def expect95(self):
+            return (self.expect2p5 + self.expect97p5) / 2
+        @property
+        def expect68lo(self):
+            return self.expect68 - self.expect16
+        @property
+        def expect68hi(self):
+            return self.expect84 - self.expect68
+        @property
+        def expect95lo(self):
+            return self.expect95 - self.expect2p5
+        @property
+        def expect95hi(self):
+            return self.expect97p5 - self.expect95
+
+        def tryset(self, line):
+            for a,r in self.res:
+                mo = r.search(line)
+                if mo:
+                    x = float(mo.group(1))
+                    setattr(self, a, x)
+
+    def __init__(self):
+        self.points = []
+
+    def parse(self, sample, fn):
+        p = limits.point(sample)
+        for line in open(fn):
+            p.tryset(line)
+        assert p.valid
+        self.points.append(p)
+
+    def __getitem__(self, key):
+        if key == 'tau':
+            return [p.sample.tau for p in self.points]
+        elif key == 'mass':
+            return [p.sample.mass for p in self.points]
+        else:
+            return [getattr(p,key) for p in self.points]
+
+def make_1d_plot(d, name, title, xkey='mass'):
     if xkey == 'mass':
+        which_mass = None
         xtitle = 'mass (GeV)'
     else:
+        assert type(xkey) == tuple
+        xkey, which_mass = xkey
         xtitle = 'lifetime (#mum)'
 
-    g_observed = tgae(d[xkey], d['observed'], None, None, None, None, title, xtitle, 1)
-    g_observed.SetMarkerStyle(20)
-    g_observed.SetMarkerSize(1.2)
-    g_observed.Draw('ALP')
-    g_observed.GetYaxis().SetRangeUser(*y_range)
+    class G: pass
+    g = G()
 
-    g_expect95 = tgae(d[xkey], d['expect95'], None, None, d['expect95lo'], d['expect95hi'], title, xtitle, 5)
-    g_expect95.Draw('3')
+    g.observed = tgae(d[xkey], d['observed'], None, None, None, None, title, xtitle, 1)
+    g.expect95 = tgae(d[xkey], d['expect95'], None, None, d['expect95lo'], d['expect95hi'], title, xtitle, 5)
+    g.expect68 = tgae(d[xkey], d['expect68'], None, None, d['expect68lo'], d['expect68hi'], title, xtitle, 3)
+    g.expect50 = tgae(d[xkey], d['expect50'], None, None, None, None, title, xtitle, 1)
 
-    g_expect68 = tgae(d[xkey], d['expect68'], None, None, d['expect68lo'], d['expect68hi'], title, xtitle, 3)
-    g_expect68.Draw('3')
+    g.observed.SetMarkerStyle(20)
+    g.observed.SetMarkerSize(1.2)
+    g.expect50.SetLineStyle(2)
 
-    g_expect50 = tgae(d[xkey], d['expect50'], None, None, None, None, title, xtitle, 1)
-    g_expect50.SetLineStyle(2)
-    g_expect50.Draw('L')
+    if xkey == 'mass':
+        g.gluglu = make_gluglu()
+    else:
+        xsec, unc = [(xsec,unc) for mass, xsec, unc in parse_gluglu() if mass == which_mass][0]
+        x = d[xkey]
+        y = [xsec]*len(x)
+        ey = [unc]*len(x)
+        g.gluglu = tge(zip(x,y,ey))
+        fmt_gluglu(g.gluglu, xtitle)
+        
+    return g
 
-    g_observed.Draw('LP')
+def draw_1d_plot(d, name, title, y_range, xkey='mass'):
+    g = make_1d_plot(d, name, title, xkey)
 
-    draw_gluglu = xkey == 'mass'
-    if draw_gluglu:
-        g_gluglu.SetFillStyle(3001)
-        g_gluglu.Draw('3')
+    g.observed.Draw('ALP')
+    g.observed.GetYaxis().SetRangeUser(*y_range)
+    g.expect95.Draw('3')
+    g.expect68.Draw('3')
+    g.expect50.Draw('L')
+    g.observed.Draw('LP')
+    g.gluglu.Draw('3')
 
     leg = ROOT.TLegend(0.734, 0.716, 0.990, 0.988)
-    leg.AddEntry(g_observed, 'Obs. limit', 'L')
-    leg.AddEntry(g_expect50, 'Exp. limit', 'L')
-    leg.AddEntry(g_expect68, 'Exp. #pm 1 #sigma', 'F')
-    leg.AddEntry(g_expect95, 'Exp. #pm 2 #sigma', 'F')
-    if draw_gluglu:
-        leg.AddEntry(g_gluglu, 'NLO + NLL #tilde{g} #tilde{g} production', 'F')
+    leg.AddEntry(g.observed, 'Obs. limit', 'L')
+    leg.AddEntry(g.expect50, 'Exp. limit', 'L')
+    leg.AddEntry(g.expect68, 'Exp. #pm 1 #sigma', 'F')
+    leg.AddEntry(g.expect95, 'Exp. #pm 2 #sigma', 'F')
+    leg.AddEntry(g.gluglu, 'NLO + NLL #tilde{g} #tilde{g} production', 'F')
     leg.Draw()
     
     ps.save(name)
 
 def do_1d_plots():
     xxx = [
-        (lambda s: 'neu' in sample.name and sample.mass == 800,  'multijetM800',   '', (0.01, 50), 'tau'),
-        (lambda s: 'neu' in sample.name and sample.tau  == 1., 'multijettau1mm', '', (0.01, 50), 'mass'),
-        (lambda s: 'ddbar' in sample.name and sample.mass == 800,  'ddbarM800',   '', (0.01, 50), 'tau'),
-        (lambda s: 'ddbar' in sample.name and sample.tau  == 1., 'ddbartau1mm', '', (0.01, 50), 'mass'),
+        (lambda s: 'neu'   in sample.name and sample.mass == 800 and sample.tau <= 40.,  'multijetM800',   '', (0.01, 50), lambda s: s.sample.tau,  ('tau', 800.)),
+        (lambda s: 'neu'   in sample.name and sample.tau  == 1.,                         'multijettau1mm', '', (0.01, 50), lambda s: s.sample.mass, 'mass'),
+        (lambda s: 'ddbar' in sample.name and sample.mass == 800 and sample.tau <= 40.,  'ddbarM800',      '', (0.01, 50), lambda s: s.sample.tau,  ('tau', 800.)),
+        (lambda s: 'ddbar' in sample.name and sample.tau  == 1.,                         'ddbartau1mm',    '', (0.01, 50), lambda s: s.sample.mass, 'mass'),
         ]
     
     f = ROOT.TFile('limits_input.root')
-    for use, name, nice, y_range, xkey in xxx:
-        d = defaultdict(list)
+    for use, name, nice, y_range, sorter, xkey in xxx:
+        d = limits()
         for sample in sample_iterator(f):
             if use(sample):
-                fn = 'combine_output/signal_%05i/results' % sample.isample
-                parse(d, sample.tau, sample.mass, fn, fn)
+                d.parse(sample, 'combine_output/signal_%05i/results' % sample.isample)
+        d.points.sort(key=sorter)
         draw_1d_plot(d, name, nice, y_range, xkey)
 
 def interpolate(h):
@@ -189,16 +225,11 @@ def save_2d_plots():
     out_f = ROOT.TFile('limits.root', 'recreate')
 
     for kind in 'mfv_ddbar', 'mfv_neu':
-        d = defaultdict(list)
+        d = limits()
         for sample in sample_iterator(in_f):
             if sample.kind != kind:
                 continue
-
-            fn = 'combine_output/signal_%05i/results' % sample.isample
-            try:
-                parse(d, sample.tau, sample.mass, fn, fn)
-            except ValueError:
-                print "can't parse", sample.name, sample.isample
+            d.parse(sample, 'combine_output/signal_%05i/results' % sample.isample)
 
         def axisize(l):
             l = sorted(set(l))
@@ -210,15 +241,11 @@ def save_2d_plots():
 
         out_f.mkdir(kind).cd()
 
-        for x in d:
-            if x == 'tau' or x == 'mass':
-                continue
-
+        for x in 'observed expect2p5 expect16 expect50 expect68 expect84 expect95 expect97p5'.split():
             h = ROOT.TH2D(x, '', len(masses)-1, masses, len(taus)-1, taus)
             h.SetStats(0)
-            for t,m,v in izip(d['tau'], d['mass'], d[x]):
-                h.SetBinContent(h.FindBin(m,t), v)
-
+            for p in d.points:
+                h.SetBinContent(h.FindBin(p.sample.mass, p.sample.tau), getattr(p, x))
             h.Write()
 
 ####
@@ -449,11 +476,15 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         cmd = sys.argv[1]
 
-        if cmd == 'save_1d_plots':
+        if cmd == 'draw_gluglu':
             set_style()
-            ps = plot_saver(plot_dir('o2t_limitplot_run2_tmp4'), size=(600,600))
+            ps = plot_saver(plot_dir('o2t_limitplot_gluglu'), size=(600,600))
             draw_gluglu()
             ps.save('gluglu')
+
+        if cmd == 'draw_1d_plots':
+            set_style()
+            ps = plot_saver(plot_dir('o2t_limitplot_run2_tmp5'), size=(600,600))
             do_1d_plots()
 
         elif cmd == 'save_2d_plots':
