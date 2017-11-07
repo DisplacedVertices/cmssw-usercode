@@ -1,7 +1,6 @@
 import sys, os
 from array import array
 from JMTucker.Tools.ROOTTools import *
-from limitplot import exc_graph_dumb
 
 path = plot_dir('pretty_limits', make=True)
 
