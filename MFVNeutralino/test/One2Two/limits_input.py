@@ -122,6 +122,11 @@ def test_sample_iterator(f):
                     s.kind, s.tau, s.mass = k, t, m
                     yield s
 
+def sample_iterator_1d_plots(f):
+    for s in sample_iterator(f):
+        if (s.mass == 800 and s.tau <= 40.) or s.tau == 1.:
+            yield s
+    
 def make():
     ROOT.TH1.AddDirectory(1)
     in_f = ROOT.TFile(in_fn)
