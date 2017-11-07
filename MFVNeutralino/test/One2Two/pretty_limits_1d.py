@@ -16,6 +16,13 @@ def write(font, size, x, y, text):
 
 f = ROOT.TFile('limits_1d.root')
 
+nice = {
+    'multijetM800': '#tilde{#chi}^{0}/#tilde{g} #rightarrow tbs, M_{#tilde{#chi}^{0}/#tilde{g}} = 800 GeV',
+    'ddbarM800':    '#tilde{g} #rightarrow q#bar{q}, M_{#tilde{g}} = 800 GeV',
+    'multijettau1mm': '#tilde{#chi}^{0}/#tilde{g} #rightarrow tbs, c#tau_{#tilde{#chi}^{0}/#tilde{g}} = 1 mm',
+    'ddbartau1mm':    '#tilde{g} #rightarrow q#bar{q}, c#tau_{#tilde{g}} = 1 mm',
+}
+
 for kind in 'multijetM800', 'multijettau1mm', 'ddbarM800', 'ddbartau1mm':
     c = ROOT.TCanvas('c', '', 800, 800)
     c.SetLogy()
@@ -39,7 +46,7 @@ for kind in 'multijetM800', 'multijettau1mm', 'ddbarM800', 'ddbartau1mm':
         xtitle = 'c#tau (mm)'
         
     g = expect95
-    g.SetTitle(';%s;#sigma #times BR^{2} (fb)' % xtitle)
+    g.SetTitle(';%s;#sigma B^{2} (fb)' % xtitle)
     g.Draw('A3')
 
     draw_gluglu = 'tau' in kind
@@ -71,6 +78,7 @@ for kind in 'multijetM800', 'multijettau1mm', 'ddbarM800', 'ddbartau1mm':
     leg.SetTextFont(42)
     leg.SetFillColor(ROOT.kWhite)
     leg.SetBorderSize(0)
+    leg.AddEntry(0, '#kern[-0.22]{%s}' % nice[kind], '')
     leg.AddEntry(0, '#kern[-0.22]{95% CL upper limits:}', '')
     leg.AddEntry(observed, 'Observed', 'LP')
     leg.AddEntry(expect50, 'Expected', 'L')
