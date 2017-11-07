@@ -1,7 +1,7 @@
 from JMTucker.Tools.ROOTTools import *
 
 set_style()
-ps = plot_saver('../plots/EXO-17-018/templates', size=(700,700), log=False, pdf=True)
+ps = plot_saver('../plots/EXO-17-018/dbv', size=(700,700), pdf_log=True)
 
 f = ROOT.TFile('limits_input.root')
 
@@ -31,20 +31,16 @@ def fmt(h, name, color, save=[]):
     if type(name) == tuple:
         name, signum = name
 
-    if '#tau' in name:
-        h.Rebin(10)
     h.Sumw2()
     h.SetStats(0)
-    h.SetLineWidth(3)
+    h.SetLineWidth(2)
     h.SetLineColor(color)
-    h.SetTitle(';d_{VV} (cm);Events/100 #mum')
+    h.SetTitle(';d_{BV} (cm);Events/20 #mum')
     h.GetXaxis().SetTitleSize(0.04)
     h.GetYaxis().SetTitleSize(0.04)
     h.GetYaxis().SetTitleOffset(1.3)
     move_above_into_bin(h, 0.3999)
-    if name == 'bkg': 
-        h.Scale(1./h.Integral(0,h.GetNbinsX()+2))
-    else:
+    if '#tau' in name:
         norm = f.Get('h_signal_%i_norm' % signum).GetBinContent(2)
         print norm * 38500 * h.Integral(0,h.GetNbinsX()+2)
         h.Scale(norm * 38500.)
@@ -52,26 +48,27 @@ def fmt(h, name, color, save=[]):
     save.append(h)
     return h
 
-hbkg = fmt(f.Get('h_bkg_dvv'), 'bkg', ROOT.kBlack)
-hbkg.SetFillColor(ROOT.kGray)
-hbkg.SetFillStyle(3001)
+hbkg = fmt(f.Get('h_bkg_dbv'), 'bkg', ROOT.kBlack)
+hbkg = poisson_intervalize(hbkg)
+hbkg.SetMarkerStyle(20)
+hbkg.SetLineWidth(2)
 
 leg = ROOT.TLegend(0.30, 0.65, 0.85, 0.85)
 leg.SetBorderSize(0)
-leg.AddEntry(hbkg, 'Background template', 'LF')
+leg.AddEntry(hbkg, 'Data', 'LPE')
 leg.AddEntry(0, '#kern[-0.22]{Multijet signals, M = 800 GeV, #sigma = 1 fb:}', '')
 
 for zzz, (isample, color, title) in enumerate(which):
-    h = fmt(f.Get('h_signal_%i_dvv' % isample), (title,isample), color)
+    h = fmt(f.Get('h_signal_%i_dbv' % isample), (title,isample), color)
     if zzz == 0:
         h.Draw('hist')
     else:
         h.Draw('hist same')
     h.GetXaxis().SetRangeUser(0,0.4)
-    h.GetYaxis().SetRangeUser(0,1)
+    h.GetYaxis().SetRangeUser(1e-2,400)
     leg.AddEntry(h, title, 'L')
 
-hbkg.Draw('hist same')
+hbkg.Draw('PE')
 
 leg.Draw()
 
@@ -79,4 +76,4 @@ write(61, 0.040, 0.098, 0.91, 'CMS')
 write(52, 0.035, 0.185, 0.91, 'Preliminary')
 write(42, 0.040, 0.625, 0.91, '38.5 fb^{-1} (13 TeV)')
 
-ps.save('templates')
+ps.save('dbv')
