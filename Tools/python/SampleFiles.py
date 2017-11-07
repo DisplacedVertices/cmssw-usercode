@@ -607,6 +607,11 @@ _add_ds("ntuplev16", {
 'mfv_ddbar_tau30000um_M0800': _fromnum0("/store/user/tucker/mfv_ddbar_tau30000um_M0800/NtupleV16_2016/170927_164303", 20),
 'mfv_ddbar_tau30000um_M1200': _fromnum0("/store/user/tucker/mfv_ddbar_tau30000um_M1200/NtupleV16_2016/170927_164304", 20),
 'mfv_ddbar_tau30000um_M1600': _fromnum0("/store/user/tucker/mfv_ddbar_tau30000um_M1600/NtupleV16_2016/170927_164305", 20),
+'mfv_ddbar_tau00100um_M3000': _fromnum0("/store/user/tucker/mfv_ddbar_tau00100um_M3000/NtupleV16_2016/171106_162952", 20),
+'mfv_ddbar_tau00300um_M3000': _fromnum0("/store/user/tucker/mfv_ddbar_tau00300um_M3000/NtupleV16_2016/171106_162953", 19),
+'mfv_ddbar_tau01000um_M3000': _fromnum0("/store/user/tucker/mfv_ddbar_tau01000um_M3000/NtupleV16_2016/171106_162954", 20),
+'mfv_ddbar_tau10000um_M3000': _fromnum0("/store/user/tucker/mfv_ddbar_tau10000um_M3000/NtupleV16_2016/171106_162955", 20),
+'mfv_ddbar_tau30000um_M3000': _fromnum0("/store/user/tucker/mfv_ddbar_tau30000um_M3000/NtupleV16_2016/171106_162956", 20),
 'mfv_neu_tau00100um_M0300': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV16_2016/170927_213206", 294),
 'mfv_neu_tau00300um_M0300': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV16_2016/170927_213240", 266),
 'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV16_2016/170927_213312", 241),
@@ -617,6 +622,11 @@ _add_ds("ntuplev16", {
 'mfv_neu_tau01000um_M0400': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV16_2016/170927_213522", 233),
 'mfv_neu_tau10000um_M0400': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV16_2016/170927_213555", 251),
 'mfv_neu_tau30000um_M0400': _fromnum0("/store/user/tucker/mfv_neu_tau30000um_M0400/NtupleV16_2016/170927_164215", 20),
+'mfv_neu_tau00100um_M0500': _fromnum0("/store/user/tucker/mfv_neu_tau00100um_M0500/NtupleV16_2016/171106_162947", 20),
+'mfv_neu_tau00300um_M0500': _fromnum0("/store/user/tucker/mfv_neu_tau00300um_M0500/NtupleV16_2016/171106_162948", 20),
+'mfv_neu_tau01000um_M0500': _fromnum0("/store/user/tucker/mfv_neu_tau01000um_M0500/NtupleV16_2016/171106_162949", 20),
+'mfv_neu_tau10000um_M0500': _fromnum0("/store/user/tucker/mfv_neu_tau10000um_M0500/NtupleV16_2016/171106_162950", 20),
+'mfv_neu_tau30000um_M0500': _fromnum0("/store/user/tucker/mfv_neu_tau30000um_M0500/NtupleV16_2016/171106_162951", 20),
 'mfv_neu_tau00100um_M0600': _fromnum0("/store/user/tucker/mfv_neu_tau00100um_M0600/NtupleV16_2016/170927_164216", 20),
 'mfv_neu_tau00300um_M0600': _fromnum0("/store/user/tucker/mfv_neu_tau00300um_M0600/NtupleV16_2016/170927_164217", 40),
 'mfv_neu_tau01000um_M0600': _fromnum0("/store/user/tucker/mfv_neu_tau01000um_M0600/NtupleV16_2016/170927_164218", 40),
@@ -636,7 +646,7 @@ _add_ds("ntuplev16", {
 'mfv_neu_tau00100um_M1600': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV16_2016/170927_214058", 250),
 'mfv_neu_tau00300um_M1600': _fromnum0("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV16_2016/170927_164224", 35),
 'mfv_neu_tau01000um_M1600': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV16_2016/170927_214130", 211),
-'mfv_neu_tau10000um_M1600': (139, ['/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV16_2016/170927_214202/0000/ntuple_%i.root' % i for i in chain(xrange(6,27), xrange(28,68), xrange(69,123), xrange(124,148))]),
+'mfv_neu_tau10000um_M1600': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV16_2016/171027_183329", 202),
 'mfv_neu_tau30000um_M1600': _fromnum0("/store/user/tucker/mfv_neu_tau30000um_M1600/NtupleV16_2016/170927_164225", 20),
 'mfv_neu_tau00100um_M3000': _fromnum0("/store/user/tucker/mfv_neu_tau00100um_M3000/NtupleV16_2016/170927_164226", 20),
 'mfv_neu_tau00300um_M3000': _fromnum0("/store/user/tucker/mfv_neu_tau00300um_M3000/NtupleV16_2016/170927_164227", 20),
@@ -706,17 +716,19 @@ _add_ds("ntuplev16", {
 
 'JetHT2015C': _fromnum0("/store/user/tucker/JetHT/NtupleV16_2015/170927_165227", 2),
 'JetHT2015D': (834, ['/store/user/tucker/JetHT/NtupleV16_2015/170927_165228/0000/ntuple_%i.root' % i for i in chain(xrange(73), xrange(74,160), xrange(161,180), xrange(181,326), xrange(327,361), xrange(362,593), xrange(594,722), xrange(723,834))] + ['/store/user/tucker/JetHT/NtupleV16_2015/170928_062205/0000/ntuple_%i.root' % i for i in [73, 160, 180, 326, 361, 593, 722]]),
-'JetHT2016B3': (562, ['/store/user/tucker/JetHT/NtupleV16_2016/171004_141442/0000/ntuple_%i.root' % i for i in chain(xrange(1,24), xrange(25,85), xrange(86,205), xrange(206,281), xrange(282,369), xrange(370,439), xrange(440,477), xrange(478,554), xrange(555,560), xrange(561,572))]),
+
+'JetHT2016B3': (562 + 9, ['/store/user/tucker/JetHT/NtupleV16_2016/171004_141442/0000/ntuple_%i.root' % i for i in chain(xrange(1,24), xrange(25,85), xrange(86,205), xrange(206,281), xrange(282,369), xrange(370,439), xrange(440,477), xrange(478,554), xrange(555,560), xrange(561,572))]
+                       + ['/store/user/tucker/JetHT/NtupleV16_2016/171027_183401/0000/ntuple_%i.root' % i for i in xrange(1,10)]),
 'JetHT2016C': _fromnum1("/store/user/tucker/JetHT/NtupleV16_2016/170927_212846", 222),
 'JetHT2016D': _fromnum1("/store/user/tucker/JetHT/NtupleV16_2016/170927_212916", 313),
 'JetHT2016E': _fromnum1("/store/user/tucker/JetHT/NtupleV16_2016/171004_141515", 318),
-'JetHT2016F': (242, ['/store/user/tucker/JetHT/NtupleV16_2016/170927_213012/0000/ntuple_%i.root' % i for i in chain(xrange(1,16), xrange(17,36), xrange(37,45), xrange(46,55), xrange(57,64), xrange(65,109), xrange(110,122), xrange(123,132), xrange(133,148), xrange(149,168), xrange(169,171), xrange(173,181), xrange(182,185), xrange(186,202), xrange(203,259))]),
+'JetHT2016F': (242 + 16, ['/store/user/tucker/JetHT/NtupleV16_2016/170927_213012/0000/ntuple_%i.root' % i for i in chain(xrange(1,16), xrange(17,36), xrange(37,45), xrange(46,55), xrange(57,64), xrange(65,109), xrange(110,122), xrange(123,132), xrange(133,148), xrange(149,168), xrange(169,171), xrange(173,181), xrange(182,185), xrange(186,202), xrange(203,259))]
+                       + ['/store/user/tucker/JetHT/NtupleV16_2016/171027_183437/0000/ntuple_%i.root' % i for i in xrange(1,17)]),
 'JetHT2016G': _fromnum1("/store/user/tucker/JetHT/NtupleV16_2016/170927_213040", 860),
 'JetHT2016H2': _fromnum1("/store/user/tucker/JetHT/NtupleV16_2016/170927_213109", 853),
 'JetHT2016H3': _fromnum1("/store/user/tucker/JetHT/NtupleV16_2016/170927_213137", 23),
 
 })
-
 
 _add_ds('v0ntuplev1', {
 
