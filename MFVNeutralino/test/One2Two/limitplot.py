@@ -136,7 +136,7 @@ class limits:
         else:
             return [getattr(p,key) for p in self.points]
 
-def make_1d_plot(d, name, title, xkey='mass'):
+def make_1d_plot(d, name, xkey='mass'):
     if xkey == 'mass':
         which_mass = None
         xtitle = 'mass (GeV)'
@@ -148,10 +148,10 @@ def make_1d_plot(d, name, title, xkey='mass'):
     class G: pass
     g = G()
 
-    g.observed = tgae(d[xkey], d['observed'], None, None, None, None, title, xtitle, 1)
-    g.expect95 = tgae(d[xkey], d['expect95'], None, None, d['expect95lo'], d['expect95hi'], title, xtitle, 5)
-    g.expect68 = tgae(d[xkey], d['expect68'], None, None, d['expect68lo'], d['expect68hi'], title, xtitle, 3)
-    g.expect50 = tgae(d[xkey], d['expect50'], None, None, None, None, title, xtitle, 1)
+    g.observed = tgae(d[xkey], d['observed'], None, None, None, None, '', xtitle, 1)
+    g.expect95 = tgae(d[xkey], d['expect95'], None, None, d['expect95lo'], d['expect95hi'], '', xtitle, 5)
+    g.expect68 = tgae(d[xkey], d['expect68'], None, None, d['expect68lo'], d['expect68hi'], '', xtitle, 3)
+    g.expect50 = tgae(d[xkey], d['expect50'], None, None, None, None, '', xtitle, 1)
 
     g.observed.SetMarkerStyle(20)
     g.observed.SetMarkerSize(1.2)
@@ -169,43 +169,28 @@ def make_1d_plot(d, name, title, xkey='mass'):
         
     return g
 
-def draw_1d_plot(d, name, title, y_range, xkey='mass'):
-    g = make_1d_plot(d, name, title, xkey)
-
-    g.observed.Draw('ALP')
-    g.observed.GetYaxis().SetRangeUser(*y_range)
-    g.expect95.Draw('3')
-    g.expect68.Draw('3')
-    g.expect50.Draw('L')
-    g.observed.Draw('LP')
-    g.gluglu.Draw('3')
-
-    leg = ROOT.TLegend(0.734, 0.716, 0.990, 0.988)
-    leg.AddEntry(g.observed, 'Obs. limit', 'L')
-    leg.AddEntry(g.expect50, 'Exp. limit', 'L')
-    leg.AddEntry(g.expect68, 'Exp. #pm 1 #sigma', 'F')
-    leg.AddEntry(g.expect95, 'Exp. #pm 2 #sigma', 'F')
-    leg.AddEntry(g.gluglu, 'NLO + NLL #tilde{g} #tilde{g} production', 'F')
-    leg.Draw()
-    
-    ps.save(name)
-
-def do_1d_plots():
+def save_1d_plots():
     xxx = [
-        (lambda s: 'neu'   in sample.name and sample.mass == 800 and sample.tau <= 40.,  'multijetM800',   '', (0.01, 50), lambda s: s.sample.tau,  ('tau', 800.)),
-        (lambda s: 'neu'   in sample.name and sample.tau  == 1.,                         'multijettau1mm', '', (0.01, 50), lambda s: s.sample.mass, 'mass'),
-        (lambda s: 'ddbar' in sample.name and sample.mass == 800 and sample.tau <= 40.,  'ddbarM800',      '', (0.01, 50), lambda s: s.sample.tau,  ('tau', 800.)),
-        (lambda s: 'ddbar' in sample.name and sample.tau  == 1.,                         'ddbartau1mm',    '', (0.01, 50), lambda s: s.sample.mass, 'mass'),
+        (lambda s: 'neu'   in sample.name and sample.mass == 800 and sample.tau <= 40.,  'multijetM800',   lambda s: s.sample.tau,  ('tau', 800.)),
+        (lambda s: 'neu'   in sample.name and sample.tau  == 1.,                         'multijettau1mm', lambda s: s.sample.mass, 'mass'),
+        (lambda s: 'ddbar' in sample.name and sample.mass == 800 and sample.tau <= 40.,  'ddbarM800',      lambda s: s.sample.tau,  ('tau', 800.)),
+        (lambda s: 'ddbar' in sample.name and sample.tau  == 1.,                         'ddbartau1mm',    lambda s: s.sample.mass, 'mass'),
         ]
     
-    f = ROOT.TFile('limits_input.root')
-    for use, name, nice, y_range, sorter, xkey in xxx:
+    in_f = ROOT.TFile('limits_input.root')
+    out_f = ROOT.TFile('limits_1d.root', 'recreate')
+
+    for use, name, sorter, xkey in xxx:
         d = limits()
-        for sample in sample_iterator(f):
+        for sample in sample_iterator(in_f):
             if use(sample):
                 d.parse(sample, 'combine_output/signal_%05i/results' % sample.isample)
         d.points.sort(key=sorter)
-        draw_1d_plot(d, name, nice, y_range, xkey)
+
+        out_f.mkdir(name).cd()
+        g = make_1d_plot(d, name, xkey)
+        for gg in 'observed expect50 expect68 expect95 gluglu'.split():
+            getattr(g,gg).Write(gg)
 
 def interpolate(h):
     # R + akima does a better job so don't use this
@@ -478,14 +463,12 @@ if __name__ == '__main__':
 
         if cmd == 'draw_gluglu':
             set_style()
-            ps = plot_saver(plot_dir('o2t_limitplot_gluglu'), size=(600,600))
+            ps = plot_saver(plot_dir('limitplot_gluglu'), size=(600,600))
             draw_gluglu()
             ps.save('gluglu')
 
-        if cmd == 'draw_1d_plots':
-            set_style()
-            ps = plot_saver(plot_dir('o2t_limitplot_run2_tmp5'), size=(600,600))
-            do_1d_plots()
+        if cmd == 'save_1d_plots':
+            save_1d_plots()
 
         elif cmd == 'save_2d_plots':
             save_2d_plots()
