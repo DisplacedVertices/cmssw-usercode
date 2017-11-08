@@ -45,9 +45,8 @@ for i in range(4):
     l1.Draw()
 
     write(42, 0.040, 0.500, 0.80, names[i])
-    write(61, 0.040, 0.098, 0.91, 'CMS')
-    write(52, 0.035, 0.185, 0.91, 'Preliminary')
-    write(42, 0.040, 0.625, 0.91, '38.5 fb^{-1} (13 TeV)')
+    write(61, 0.050, 0.098, 0.913, 'CMS')
+    write(42, 0.050, 0.560, 0.913, '38.5 fb^{-1} (13 TeV)')
 
     lines = [
         ROOT.TLine(0.04, 0, 0.04, ymax[i]),
