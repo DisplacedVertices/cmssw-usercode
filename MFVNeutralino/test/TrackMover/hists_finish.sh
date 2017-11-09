@@ -47,9 +47,8 @@ elif [[ $1 == "cleanup" ]]; then
     tar --remove-files -czf lastlogs.tgz hists.{stdout,stderr,log}.*
 
 elif [[ $1 == "finish" ]]; then
-    rename TrackMoverV5_ '' *.root
-    for x in *.root ; do
-        y=$(echo $x | sed 's@_@XXX@g4' | sed 's@_@/@g' | sed 's/XXX/_/g')
+    for x in TrackMoverV*.root ; do
+        y=$(echo $x | sed 's/TrackMoverV._//' | sed 's@_@XXX@g4' | sed 's@_@/@g' | sed 's/XXX/_/g')
         mkdir -p $(dirname $y)
         mv $x $y
     done
