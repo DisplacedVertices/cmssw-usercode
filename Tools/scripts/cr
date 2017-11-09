@@ -34,7 +34,7 @@ elif 'respub' in argv:
 elif 'rep' in argv:
     simple_cmd('crab report -d %s')
 elif 'hl' in argv:
-    os.system('mkdir haddlogs ; mv -i *.haddlog haddlogs/')
+    os.system('tar --remove-files -czf haddlogs.tgz *.haddlog')
 elif 'ds' in argv:
     simple_cmd('grep "Output dataset:" %s/crab.log | tail -1')
 elif 'web' in argv:
