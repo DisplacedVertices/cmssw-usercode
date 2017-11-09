@@ -199,13 +199,14 @@ while 1:
 #                            options.resub_black_list and err_code not in options.resub_black_list)):
 #                        to_resub[d].append(job_num)
             for d, jobs in to_resub.iteritems():
-                jobs = ','.join(str(j) for j in jobs)
-                print 'resubmit', d, jobs
-                #crab_command('resubmit', dir=d, jobids=jobs, sitewhitelist=options.resub_white_list, siteblacklist=options.resub_black_list, suppress_stdout=False)
-                try:
-                    crab_command('resubmit', dir=d, jobids=jobs, force=options.resub_force) #, suppress_stdout=False)
-                except CRABConfigurationException:
-                    print 'CRABConfigurationException when resubmitting, skip this time'
+                if jobs:
+                    jobs = ','.join(str(j) for j in jobs)
+                    print 'resubmit', d, jobs
+                    #crab_command('resubmit', dir=d, jobids=jobs, sitewhitelist=options.resub_white_list, siteblacklist=options.resub_black_list, suppress_stdout=False)
+                    try:
+                        crab_command('resubmit', dir=d, jobids=jobs, force=options.resub_force) #, suppress_stdout=False)
+                    except CRABConfigurationException:
+                        print 'CRABConfigurationException when resubmitting, skip this time'
 
     if options.verbose:
         # Print a recap of all the status summaries.
