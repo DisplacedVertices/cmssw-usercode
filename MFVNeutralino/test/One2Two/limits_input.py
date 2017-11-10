@@ -23,7 +23,7 @@ in_fn = '/uscms/home/jchu/public/2v_from_jets_data_2015p6_5track_default_v15_v5.
 #in_trees, in_scanpack_list = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV15_v5/mfv*root', None
 in_trees, in_scanpack_list = None, '/uscms/home/tucker/work/hip_8025/src/JMTucker/MFVNeutralino/test/MakeSamples/scanpacks/scanpack_merge_1_1p5_2.list'
 
-limits_input_fn = 'limits_input.root'
+limitsinput_fn = 'limits_input.root'
 
 ####
 
@@ -128,10 +128,10 @@ def sample_iterator_1d_plots(f):
             yield s
     
 def make():
-    assert not os.path.exists(limits_input_fn)
+    assert not os.path.exists(limitsinput_fn)
     ROOT.TH1.AddDirectory(1)
     in_f = ROOT.TFile(in_fn)
-    f = ROOT.TFile(limits_input_fn, 'recreate')
+    f = ROOT.TFile(limitsinput_fn, 'recreate')
 
     h_int_lumi = ROOT.TH1D('h_int_lumi', '', 1, 0, 1)
     h_int_lumi.SetBinContent(1, int_lumi)
@@ -256,13 +256,13 @@ def eff2v(f, isample):
 
 
 def signals_h():
-    f = ROOT.TFile(limits_input_fn)
+    f = ROOT.TFile(limitsinput_fn)
     for isample, name in isamplename_iterator(f):
         print 'samples.push_back({%i, "%s", 0, 0});' % (isample, name)
 
 def draw():
     ps = plot_saver(plot_dir('o2t_templates_run2'), size=(600,600))
-    f = ROOT.TFile(limits_input_fn)
+    f = ROOT.TFile(limitsinput_fn)
 
     whiches = [
         ('multijet', [
@@ -378,7 +378,7 @@ def compare(fn1, fn2, outbase):
     print 'all same? %r statistically? %r' % (all_same, all_stat_same)
 
 def points():
-    f = ROOT.TFile(limits_input_fn)
+    f = ROOT.TFile(limitsinput_fn)
     kinds  = sorted(set(s.kind for s in sample_iterator(f)))
     masses = sorted(set(s.mass for s in sample_iterator(f)))
     taus   = sorted(set(s.tau  for s in sample_iterator(f)))
@@ -397,7 +397,7 @@ def axes():
     return kinds, masses, taus
 
 def signal_efficiency():
-    in_f = ROOT.TFile(limits_input_fn)
+    in_f = ROOT.TFile(limitsinput_fn)
     out_f = ROOT.TFile('signal_efficiency.root', 'recreate')
 
     kinds, masses, taus = axes()
@@ -445,7 +445,7 @@ if __name__ == '__main__':
     elif 'compare' in sys.argv:
         compare(*sys.argv[2:5])
     elif 'nevents' in sys.argv:
-        for s in sample_iterator(ROOT.TFile(limits_input_fn)):
+        for s in sample_iterator(ROOT.TFile(limitsinput_fn)):
             print s.name.ljust(30), '%6i' % int(nevents(f, s.isample))
     elif 'points' in sys.argv:
         print 'kinds = %r\nmasses = %r\ntaus = %r' % points()

@@ -1,7 +1,7 @@
 import sys, os, shutil, time
 from JMTucker.Tools.general import save_git_status
 from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-from limits_input import ROOT, name_iterator, sample_iterator, test_sample_iterator, sample_iterator_1d_plots
+from limitsinput import ROOT, name_iterator, sample_iterator, test_sample_iterator, sample_iterator_1d_plots
 
 # the combine tarball is made in a locally checked-out combine environment so the worker nodes don't have to git clone, etc.
 # take JMTucker/Tools/scripts/cmsMakeTarball.py, insert make_tarball in it so it can run standalone, then *in the combine environment* do
@@ -126,13 +126,13 @@ os.mkdir(os.path.join(batch_root, 'inputs'))
 save_git_status(os.path.join(batch_root, 'gitstatus'))
 
 input_files = []
-for x in ['combine/datacard.py', 'combine/process.py', 'limits_input.root']:
+for x in ['combine/datacard.py', 'combine/process.py', 'limitsinput.root']:
     nx = os.path.abspath(os.path.join(batch_root, 'inputs', os.path.basename(x)))
     shutil.copy2(x, nx)
     input_files.append(nx)
 input_files = ','.join(input_files)
 
-f = ROOT.TFile('limits_input.root')
+f = ROOT.TFile('limitsinput.root')
 names = list(name_iterator(f))
 
 if 'test_batch' in sys.argv:

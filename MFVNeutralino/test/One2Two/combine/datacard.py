@@ -6,7 +6,7 @@ ROOT.gROOT.SetBatch()
 bkg_fully_correlated = 'bkg_fully_correlated' in sys.argv
 
 def make(which):
-    fn = 'limits_input.root'
+    fn = 'limitsinput.root'
     f = ROOT.TFile(fn)
 
     def _strit(fmt,typ,n,offset=0,mult=1):
@@ -77,7 +77,7 @@ if __name__ == '__main__':
     try:
         which = int(sys.argv[1])
     except ValueError:
-        from limits_input import name2isample
+        from limitsinput import name2isample
         print '# name = %s' % sys.argv[1]
-        which = name2isample(ROOT.TFile('limits_input.root'), sys.argv[1])
+        which = name2isample(ROOT.TFile('limitsinput.root'), sys.argv[1])
     make(which)

@@ -7,7 +7,7 @@ from itertools import izip
 from pprint import pprint
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.general import from_pickle
-from limits_input import sample_iterator, axisize
+from limitsinput import sample_iterator, axisize
 
 def fmt(t, title, xtitle, color):
     t.SetFillColor(color)
@@ -177,7 +177,7 @@ def save_1d_plots():
         (lambda s: 'ddbar' in sample.name and sample.tau  == 1.,                         'ddbartau1mm',    lambda s: s.sample.mass, 'mass'),
         ]
     
-    in_f = ROOT.TFile('limits_input.root')
+    in_f = ROOT.TFile('limitsinput.root')
     out_f = ROOT.TFile('limits_1d.root', 'recreate')
 
     for use, name, sorter, xkey in xxx:
@@ -206,7 +206,7 @@ def interpolate(h):
     return hint
 
 def save_2d_plots():
-    in_f = ROOT.TFile('limits_input.root')
+    in_f = ROOT.TFile('limitsinput.root')
     out_f = ROOT.TFile('limits.root', 'recreate')
 
     for kind in 'mfv_ddbar', 'mfv_neu':

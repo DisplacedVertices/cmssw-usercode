@@ -60,7 +60,7 @@ def do_detree():
 
 #               1       2       3       4       5       6       7       8       9       10      11      12      13      14      15      16      17      18      19      20      21      22       23       24
 xsec2nevt = ac.int_lumi / 1000 * ac.scale_factor
-sys.exit('need to fix the rest to use limits_input')
+sys.exit('need to fix the rest to use limitsinput')
 if sig_tmpl_num > 100:
     import bigsigscan
     sig_eff = bigsigscan.num2eff(-sig_tmpl_num)

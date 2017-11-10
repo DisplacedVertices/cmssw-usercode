@@ -3,7 +3,7 @@ from JMTucker.Tools.ROOTTools import *
 set_style()
 ps = plot_saver('../plots/EXO-17-018/templates', size=(700,700), log=False, pdf=True)
 
-f = ROOT.TFile('limits_input.root')
+f = ROOT.TFile('limitsinput.root')
 
 def name2isample(f, name):
     h = f.Get('name_list')
