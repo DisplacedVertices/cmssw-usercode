@@ -1,7 +1,8 @@
 from pprint import pprint
 from JMTucker.MFVNeutralino.MiniTreeBase import *
 
-raise 'put in the 0.998 scale factor or whatever it is, and figure out how to do hip and 2015'
+for i in xrange(10):
+    print 'put in the 0.998 scale factor or whatever it is, and figure out how to do hip and 2015'
 
 nbins = 3
 bins = to_array(0., 0.04, 0.07, 4)
@@ -21,7 +22,7 @@ bkg_uncert = [(a**2 + b**2)**0.5 for a,b in zip(bkg_uncert, bkg_uncert_stat)] # 
 
 in_fn = '/uscms/home/jchu/public/2v_from_jets_data_2015p6_5track_default_v15_v5.root'
 #in_trees, in_scanpack_list = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV15_v5/mfv*root', None
-in_trees, in_scanpack_list = None, '/uscms/home/tucker/work/hip_8025/src/JMTucker/MFVNeutralino/test/MakeSamples/scanpacks/scanpack1.list.hadded'
+in_trees, in_scanpack_list = None, '/uscms/home/tucker/work/hip_8025/src/JMTucker/MFVNeutralino/test/MakeSamples/scanpacks/scanpack_merge_1_1p5_2.list'
 
 limits_input_fn = 'limits_input.root'
 
@@ -128,6 +129,7 @@ def sample_iterator_1d_plots(f):
             yield s
     
 def make():
+    assert not os.path.exists(limits_input_fn)
     ROOT.TH1.AddDirectory(1)
     in_f = ROOT.TFile(in_fn)
     f = ROOT.TFile(limits_input_fn, 'recreate')
