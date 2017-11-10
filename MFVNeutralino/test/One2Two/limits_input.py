@@ -262,11 +262,7 @@ def signals_h():
         print 'samples.push_back({%i, "%s", 0, 0});' % (isample, name)
 
 def draw():
-    if os.environ['USER'] == 'tucker':
-        ps = plot_saver(plot_dir('o2t_templates_run2'), size=(600,600))
-    else:
-        ps = plot_saver('../plots/templates', size=(700,700), root=False, log=False)
-
+    ps = plot_saver(plot_dir('o2t_templates_run2'), size=(600,600))
     f = ROOT.TFile(limits_input_fn)
 
     whiches = [
