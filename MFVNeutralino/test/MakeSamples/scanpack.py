@@ -25,7 +25,7 @@ class scanpackbase(object):
         self.job2isample = []
         for isample, (kind,tau,mass) in enumerate(self.samples):
             eps, epj = self.events_per_sample(kind,tau,mass), self.events_per_job
-            assert eps > epj and eps % epj == 0
+            assert eps >= epj and eps % epj == 0
             njobs = eps / epj
 
             self.njobs += njobs
@@ -300,4 +300,4 @@ if __name__ == '__main__' and len(sys.argv) > 1:
         for batch in 0,1: #,2,3: #,4
             for job in xrange(5000):
                 print batch, job,
-                do_scanpack(process, 'scanpack1p5', batch, job)
+                do_scanpack(process, 'scanpack2p5', batch, job)
