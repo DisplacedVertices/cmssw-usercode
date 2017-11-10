@@ -1,4 +1,3 @@
-from pprint import pprint
 from JMTucker.MFVNeutralino.MiniTreeBase import *
 
 for i in xrange(10):
@@ -378,6 +377,64 @@ def compare(fn1, fn2, outbase):
 
     print 'all same? %r statistically? %r' % (all_same, all_stat_same)
 
+def points():
+    f = ROOT.TFile(limits_input_fn)
+    kinds  = sorted(set(s.kind for s in sample_iterator(f)))
+    masses = sorted(set(s.mass for s in sample_iterator(f)))
+    taus   = sorted(set(s.tau  for s in sample_iterator(f)))
+    return kinds, masses, taus
+
+def axisize(l):
+    l = sorted(set(l))
+    delta = l[-1] - l[-2]
+    l.append(l[-1] + delta)
+    return to_array(l)
+
+def axes():
+    kinds, masses, taus = points()
+    masses = axisize(masses)
+    taus   = axisize(taus)
+    return kinds, masses, taus
+
+def signal_efficiency():
+    in_f = ROOT.TFile(limits_input_fn)
+    out_f = ROOT.TFile('signal_efficiency.root', 'recreate')
+
+    kinds, masses, taus = axes()
+    nmasses = len(masses) - 1
+    ntaus = len(taus) - 1
+
+    for kind in kinds:
+        h = ROOT.TH2D('signal_efficiency_%s' % kind, ';mass (GeV);#tau (mm)', nmasses, masses, ntaus, taus)
+
+        for ibin in xrange(1, nmasses+1):
+            mass = h.GetXaxis().GetBinLowEdge(ibin)
+            for jbin in xrange(1, ntaus+1):
+                tau = h.GetYaxis().GetBinLowEdge(jbin)
+
+                name = '%s_tau%05ium_M%04i' % (kind, int(tau*1000), mass)
+                try:
+                    isample = name2isample(in_f, name)
+                except ValueError:
+                    continue
+
+                dvv = h_dvv(in_f, isample)
+
+                n2v = int(dvv.Integral(2, 1000000)) # 2 for >=400 um, 3 for >=700um
+                ngen = nevents(in_f, isample)
+
+                e,l,u = wilson_score(n2v, ngen)
+                ee = (u-l)/2
+
+                h.SetBinContent(ibin, jbin, e)
+                h.SetBinError  (ibin, jbin, ee)
+
+        out_f.cd()
+        h.Write()
+
+    out_f.Write()
+    out_f.Close()
+
 if __name__ == '__main__':
     if 'make' in sys.argv:
         make()
@@ -387,5 +444,12 @@ if __name__ == '__main__':
         draw()
     elif 'compare' in sys.argv:
         compare(*sys.argv[2:5])
+    elif 'nevents' in sys.argv:
+        for s in sample_iterator(ROOT.TFile(limits_input_fn)):
+            print s.name.ljust(30), '%6i' % int(nevents(f, s.isample))
+    elif 'points' in sys.argv:
+        print 'kinds = %r\nmasses = %r\ntaus = %r' % points()
+    elif 'signal_efficiency' in sys.argv:
+        signal_efficiency()
     else:
         print 'dunno'
