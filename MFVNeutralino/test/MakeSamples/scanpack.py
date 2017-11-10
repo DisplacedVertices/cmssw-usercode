@@ -203,11 +203,14 @@ def export_scanpack(crab_dirs):
 
     return dict(sample_files)
 
+def read_scanpack_list(fn):
+    return eval(open(fn).read())
+
 def hadd_scanpack(lst_fn):
     from JMTucker.Tools import colors, eos
     from JMTucker.Tools.hadd import hadd
 
-    lst = eval(open(lst_fn).read())
+    lst = read_scanpack_list(lst_fn)
     new_lst = {}
     hadds = []
     for name, fns in lst.iteritems():
@@ -232,6 +235,18 @@ def hadd_scanpack(lst_fn):
     print '\nnew list:'
     pprint(new_lst)
 
+def merge_scanpack_lists(fns):
+    lsts = [read_scanpack_list(fn) for fn in fns]
+    lst = lsts.pop(0)
+    for l in lsts:
+        for k in l:
+            if lst.has_key(k):
+                assert not (set(lst[k]) & set(l[k]))
+                lst[k].extend(l[k])
+            else:
+                lst[k] = l[k]
+    return lst
+
 if __name__ == '__main__' and len(sys.argv) > 1:
     cmd = sys.argv[1]
 
@@ -241,6 +256,10 @@ if __name__ == '__main__' and len(sys.argv) > 1:
 
     elif cmd == 'hadd':
         hadd_scanpack(sys.argv[2])
+
+    elif cmd == 'merge':
+        x = merge_scanpack_lists(sys.argv[2:])
+        pprint(x)
 
     elif cmd == 'missing':
         fn = sys.argv[2]
