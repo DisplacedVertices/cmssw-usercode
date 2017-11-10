@@ -23,7 +23,7 @@ if 1:
     meta = 'scan'
     output_level = 'minitree'
     hip_right = False
-    scanpack = 'scanpack2'
+    scanpack = 'scanpack2p5'
 elif 0:
     meta = 'neu'
 elif 0:
