@@ -7,7 +7,7 @@ from itertools import izip
 from pprint import pprint
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.general import from_pickle
-from limits_input import sample_iterator
+from limits_input import sample_iterator, axisize
 
 def fmt(t, title, xtitle, color):
     t.SetFillColor(color)
@@ -215,12 +215,6 @@ def save_2d_plots():
             if sample.kind != kind:
                 continue
             d.parse(sample, 'combine_output/signal_%05i/results' % sample.isample)
-
-        def axisize(l):
-            l = sorted(set(l))
-            delta = l[-1] - l[-2]
-            l.append(l[-1] + delta)
-            return to_array(l)
 
         taus, masses = axisize(d['tau']), axisize(d['mass'])
 
