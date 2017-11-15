@@ -1,5 +1,6 @@
 import os, sys, base64, re, cPickle as pickle
 from collections import defaultdict
+from gzip import GzipFile
 from itertools import product
 from pprint import pprint
 from modify import set_mfv_neutralino, set_gluino_ddbar
@@ -209,7 +210,11 @@ def export_scanpack(crab_dirs):
     return dict(sample_files)
 
 def read_scanpack_list(fn):
-    return eval(open(fn).read())
+    if fn.endswith('.gz'):
+        f = GzipFile(fn)
+    else:
+        f = open(fn)
+    return eval(f.read())
 
 def hadd_scanpack(lst_fn):
     from JMTucker.Tools import colors, eos
@@ -258,6 +263,13 @@ if __name__ == '__main__' and len(sys.argv) > 1:
     if cmd == 'export':
         from JMTucker.Tools.CRAB3ToolsSh import crab_dirs_from_argv
         pprint(export_scanpack(crab_dirs_from_argv()))
+
+    elif cmd == 'read':
+        x = read_scanpack_list(sys.argv[2])
+        for k in sorted(x):
+            print k
+            for fn in sorted(x[k]):
+                print fn
 
     elif cmd == 'hadd':
         hadd_scanpack(sys.argv[2])
