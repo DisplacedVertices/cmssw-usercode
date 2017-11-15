@@ -2,15 +2,15 @@
 
 import os
 from sys import argv
-from JMTucker.Tools.CRAB3ToolsBase import crab_dirs_from_argv
+from JMTucker.Tools.CRAB3ToolsBase import crab_dirs_from_argv, crab_get_output_dir, crab_print_requestcache
 from JMTucker.Tools import colors
 
 dirs = crab_dirs_from_argv()
+verbose = True
 
 def simple_cmd(cmd_fmt):
     for d in dirs:
         cmd = cmd_fmt % d
-        verbose = True
         if verbose:
             print colors.bold(cmd)
         code = os.system(cmd)
@@ -19,10 +19,24 @@ def simple_cmd(cmd_fmt):
             print color('exit code: %s' % code)
             print
 
+def simple_fcn(fcn):
+    for d in dirs:
+        if verbose:
+            print colors.bold(d)
+        x = fcn(d)
+        if x is not None:
+            print x
+        if verbose:
+            print
+
 if 'st' in argv or 'stat' in argv:
     simple_cmd('crab status -d %s')
+elif 'rq' in argv or 'cfg' in argv:
+    simple_fcn(crab_print_requestcache)
 elif 'kl' in argv or 'kill' in argv:
     simple_cmd('crab kill -d %s')
+elif 'outdir' in argv:
+    simple_fcn(crab_get_output_dir)
 elif 'out' in argv:
     simple_cmd('crab out -d %s --xrootd')
 elif 'get' in argv:
