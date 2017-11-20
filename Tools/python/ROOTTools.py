@@ -1408,6 +1408,11 @@ def move_stat_box(s, ndc_coords):
 
     return s
 
+def p4(pt,eta,phi,mass):
+    v = ROOT.TLorentzVector()
+    v.SetPtEtaPhiM(pt,eta,phi,mass)
+    return v
+
 def poisson_means_divide(h1, h2, no_zeroes=False):
     return histogram_divide(h1, h2, confint=clopper_pearson_poisson_means, force_lt_1=False, no_zeroes=no_zeroes)
 
@@ -2260,6 +2265,7 @@ __all__ = [
     'move_above_into_bin',
     'move_overflow_into_last_bin',
     'move_stat_box',
+    'p4',
     'plot_dir',
     'plot_saver',
     'poisson_interval',
