@@ -15,11 +15,11 @@
 #include "JMTucker/Tools/interface/Utilities.h"
 
 class MFVTheoristRecipe : public edm::EDAnalyzer {
- public:
+public:
   explicit MFVTheoristRecipe(const edm::ParameterSet&);
   void analyze(const edm::Event&, const edm::EventSetup&);
 
- private:
+private:
   const std::string mode;
   const bool doing_h2xqq;
   const bool doing_mfv2j;
@@ -141,7 +141,6 @@ MFVTheoristRecipe::MFVTheoristRecipe(const edm::ParameterSet& cfg)
 }
 
 void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&) {
-#if 0
   edm::Handle<MFVEvent> mevent;
   event.getByLabel(mevent_src, mevent);
 
@@ -204,17 +203,17 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
     }
   }
 
-if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
-  die_if_not(mevent->gen_valid, "not running on signal sample");
+  if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
+    die_if_not(mevent->gen_valid, "not running on signal sample");
 
-  MCInteractionMFV3j mci;
-  mci.Init(*gen_particles);
+    MCInteractionMFV3j mci;
+    mci.Init(*gen_particles);
 
-  if (!mci.Valid()) {
-    if (!mci_warned)
-      edm::LogWarning("Resolutions") << "MCInteractionMFV3j invalid; no further warnings!";
-    mci_warned = true;
-  }
+    if (!mci.Valid()) {
+      if (!mci_warned)
+        edm::LogWarning("Resolutions") << "MCInteractionMFV3j invalid; no further warnings!";
+      mci_warned = true;
+    }
 
     for (int i = 0; i < 2; ++i) {
       partons[i].push_back(mci.stranges[i]);
@@ -239,11 +238,12 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
       lsp_p4s[i] = v;
     }
 
-}
+  }
 
-   for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
-     h_rec_jet_pt->Fill(mevent->jet_pt[ijet]);
-   }
+
+  for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+    h_rec_jet_pt->Fill(mevent->jet_pt[ijet]);
+  }
 
   const double dbv[2] = {
     mag(v[0][0], v[0][1]),
@@ -419,7 +419,6 @@ if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
       }
     }
   }
-#endif
 }
 
 DEFINE_FWK_MODULE(MFVTheoristRecipe);
