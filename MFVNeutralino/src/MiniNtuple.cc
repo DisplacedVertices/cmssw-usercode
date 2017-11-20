@@ -164,6 +164,10 @@ namespace mfv {
     tree->SetBranchAddress("gen_x", nt.gen_x);
     tree->SetBranchAddress("gen_y", nt.gen_y);
     tree->SetBranchAddress("gen_z", nt.gen_z);
+    tree->SetBranchAddress("gen_lsp_pt", nt.gen_lsp_pt);
+    tree->SetBranchAddress("gen_lsp_eta", nt.gen_lsp_eta);
+    tree->SetBranchAddress("gen_lsp_phi", nt.gen_lsp_phi);
+    tree->SetBranchAddress("gen_lsp_mass", nt.gen_lsp_mass);
     tree->SetBranchAddress("gen_daughters", &nt.p_gen_daughters);
     tree->SetBranchAddress("gen_daughter_id", &nt.p_gen_daughter_id);
     tree->SetBranchAddress("gen_bquarks", &nt.p_gen_bquarks);
