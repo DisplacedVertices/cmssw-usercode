@@ -1,10 +1,8 @@
-#include "TH1F.h"
-#include "TH2F.h"
+#include "TH2.h"
 #include "TLorentzVector.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
-#include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -20,23 +18,13 @@ public:
   void analyze(const edm::Event&, const edm::EventSetup&);
 
 private:
-  const std::string mode;
-  const bool doing_h2xqq;
-  const bool doing_mfv2j;
-  const bool doing_mfv3j;
-  const bool doing_mfv4j;
-  const bool doing_mfv5j;
+  const edm::EDGetTokenT<mfv::MCInteraction> mci_token;
+  const edm::EDGetTokenT<MFVEvent> mevent_token;
+  const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_token;
 
-  const edm::InputTag vertex_src;
-  const edm::InputTag mevent_src;
   const int which_mom;
   const double max_dr;
   const double max_dist;
-
-  const edm::InputTag gen_src;
-  bool mci_warned;
-  const edm::InputTag gen_jet_src;
-
   const double min_dbv;
   const double max_dbv;
 
@@ -78,28 +66,17 @@ private:
 };
 
 MFVTheoristRecipe::MFVTheoristRecipe(const edm::ParameterSet& cfg)
-  : mode(cfg.getParameter<std::string>("mode")),
-    doing_h2xqq(mode == "h2xqq"),
-    doing_mfv2j(mode == "mfv2j"),
-    doing_mfv3j(mode == "mfv3j"),
-    doing_mfv4j(mode == "mfv4j"),
-    doing_mfv5j(mode == "mfv5j"),
-    vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
-    mevent_src(cfg.getParameter<edm::InputTag>("mevent_src")),
+  : mci_token(consumes<mfv::MCInteraction>(cfg.getParameter<edm::InputTag>("mci_src"))),
+    mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
+    vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     which_mom(cfg.getParameter<int>("which_mom")),
     max_dr(cfg.getParameter<double>("max_dr")),
     max_dist(cfg.getParameter<double>("max_dist")),
-    gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
-    gen_jet_src(cfg.getParameter<edm::InputTag>("gen_jet_src")),
     min_dbv(cfg.getParameter<double>("min_dbv")),
     max_dbv(cfg.getParameter<double>("max_dbv"))
 {
-  throw cms::Exception("NotImplemented", "update to new MCInteractions format");
-
-  if (!(doing_h2xqq || doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j))
-    throw cms::Exception("Configuration") << "mode must be h2xqq, mfv2j, mfv3j, mfv4j, or mfv5j, got " << mode;
-
-  die_if_not(which_mom >= 0 && which_mom < mfv::NMomenta, "invalid which_mom");
+  if (which_mom < 0 || which_mom >= mfv::NMomenta)
+    throw cms::Exception("BadConfiguration", "invalid which_mom = ") << which_mom;
 
   edm::Service<TFileService> fs;
 
@@ -141,120 +118,50 @@ MFVTheoristRecipe::MFVTheoristRecipe(const edm::ParameterSet& cfg)
 }
 
 void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&) {
+  edm::Handle<mfv::MCInteraction> mci;
+  event.getByToken(mci_token, mci);
+
   edm::Handle<MFVEvent> mevent;
-  event.getByLabel(mevent_src, mevent);
+  event.getByToken(mevent_token, mevent);
+
+  // JMTBAD generated PV versus beamspot--should be able to get the latter from provenance?
+  const double x0 = mevent->gen_pv[0];
+  const double y0 = mevent->gen_pv[1];
+  const double z0 = mevent->gen_pv[2];
 
   edm::Handle<MFVVertexAuxCollection> vertices;
-  event.getByLabel(vertex_src, vertices);
-
-  edm::Handle<reco::GenParticleCollection> gen_particles;
-  event.getByLabel(gen_src, gen_particles);
-  const size_t ngen = gen_particles->size();
-
-  const reco::GenParticle& for_vtx = gen_particles->at(2);
-  float x0 = for_vtx.vx(), y0 = for_vtx.vy(), z0 = for_vtx.vz();
+  event.getByToken(vertex_token, vertices);
 
   std::vector<const reco::GenParticle*> partons[2];
   double v[2][3] = {{0}};
+  double dbv[2] = {0};
   TLorentzVector lsp_p4s[2];
 
-  if (doing_h2xqq) {
-    for (size_t igen = 0; igen < ngen; ++igen) {
-      const reco::GenParticle& gen = gen_particles->at(igen);
-      if (gen.status() == 3 && abs(gen.pdgId()) == 35) {
-        assert(gen.numberOfDaughters() >= 2);
-        for (size_t idau = 0; idau < 2; ++idau) {
-          const reco::Candidate* dau = gen.daughter(idau);
-          int dauid = dau->pdgId();
-          // https://espace.cern.ch/cms-exotica/long-lived/selection/MC2012.aspx
-          // 600N114 = quarks where N is 1 2 or 3 for the lifetime selection
-          assert(dauid/6000000 == 1);
-          dauid %= 6000000;
-          const int h2x = dauid / 1000;
-          assert(h2x == 1 || h2x == 2 || h2x == 3);
-          dauid %= h2x*1000;
-          assert(dauid/100 == 1);
-          dauid %= 100;
-          assert(dauid/10 == 1);
-          dauid %= 10;
-          assert(dauid == 3 || dauid == 4);
+  if (!mci->valid())
+    throw cms::Exception("BadAssumption", "MCInteraction not valid for this event--model not implemented?");
 
-          TLorentzVector v;
-          v.SetPtEtaPhiM(dau->pt(), dau->eta(), dau->phi(), dau->mass());
-          lsp_p4s[idau] = v;
-          const size_t ngdau = dau->numberOfDaughters();
-          assert(ngdau >= 2);
-          for (size_t igdau = 0; igdau < 2; ++igdau) {
-            const reco::Candidate* gdau = dau->daughter(igdau);
-            const int id = gdau->pdgId();
-            assert(abs(id) >= 1 && abs(id) <= 5);
-            partons[idau].push_back(dynamic_cast<const reco::GenParticle*>(gdau));
-          }
-        }
-      }
-    }
-
-    for (int i = 0; i < 2; ++i) {
-      assert(partons[i].size() == 2);
-      assert(partons[i][0]->numberOfDaughters() > 0);
-      v[i][0] = partons[i][0]->daughter(0)->vx() - x0;
-      v[i][1] = partons[i][0]->daughter(0)->vy() - y0;
-      v[i][2] = partons[i][0]->daughter(0)->vz() - z0;
-    }
+  for (int i : {0,1}) {
+    for (auto ref : mci->visible(i))
+      partons[i].push_back(&*ref);
+    auto x = mci->decay_point(i);
+    v[i][0] = x.x;
+    v[i][1] = x.y;
+    v[i][2] = x.z;
+    dbv[i] = x.dbv();
+    lsp_p4s[i] = make_tlv(mci->primaries()[i]);
   }
 
-  if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
-    die_if_not(mevent->gen_valid, "not running on signal sample");
+  const double dvv = mci->dvv();
 
-    MCInteractionMFV3j mci;
-    mci.Init(*gen_particles);
-
-    if (!mci.Valid()) {
-      if (!mci_warned)
-        edm::LogWarning("Resolutions") << "MCInteractionMFV3j invalid; no further warnings!";
-      mci_warned = true;
-    }
-
-    for (int i = 0; i < 2; ++i) {
-      partons[i].push_back(mci.stranges[i]);
-      partons[i].push_back(mci.bottoms[i]);
-      if (doing_mfv3j) {
-        partons[i].push_back(mci.tops[i]);
-      }
-      if (doing_mfv4j) {
-        partons[i].push_back(mci.tops[i]);
-        partons[i].push_back(mci.bottoms_from_tops[i]);
-      }
-      if (doing_mfv5j) {
-        partons[i].push_back(mci.bottoms_from_tops[i]);
-        partons[i].push_back(mci.W_daughters[i][0]);
-        partons[i].push_back(mci.W_daughters[i][1]);
-      }
-      v[i][0] = mci.stranges[i]->vx() - x0;
-      v[i][1] = mci.stranges[i]->vy() - y0;
-      v[i][2] = mci.stranges[i]->vz() - z0;
-      TLorentzVector v;
-      v.SetPtEtaPhiM(mci.lsps[i]->pt(), mci.lsps[i]->eta(), mci.lsps[i]->phi(), mci.lsps[i]->mass());
-      lsp_p4s[i] = v;
-    }
-
-  }
-
+  //////////////////////////////////////////////////////////////////////////////
 
   for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
     h_rec_jet_pt->Fill(mevent->jet_pt[ijet]);
   }
 
-  const double dbv[2] = {
-    mag(v[0][0], v[0][1]),
-    mag(v[1][0], v[1][1])
-  };
-
-  const double dvv = mag(v[0][0] - v[1][0],
-                         v[0][1] - v[1][1]);
   if (dbv[0] > min_dbv && dbv[0] < max_dbv && dbv[1] > min_dbv && dbv[1] < max_dbv) h_gen_dvv->Fill(dvv);
 
-  if (int(vertices->size()) >= 2) {
+  if (vertices->size() >= 2) {
     h_rec_dvv->Fill(mag(vertices->at(0).x - vertices->at(1).x, vertices->at(0).y - vertices->at(1).y));
   }
 
