@@ -43,7 +43,7 @@ namespace mfv {
   public:
     MCInteraction() : type_(mci_invalid) {}
 
-    struct Point { double x; double y; double z; };
+    struct Point { double x; double y; double z; double dbv() const; };
 
     typedef reco::GenParticleRef GenRef;
     typedef std::vector<GenRef> GenRefs;
