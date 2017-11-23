@@ -134,7 +134,6 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
 
   std::vector<const reco::GenParticle*> partons[2];
   double v[2][3] = {{0}};
-  double dbv[2] = {0};
   TLorentzVector lsp_p4s[2];
 
   if (!mci->valid())
@@ -144,13 +143,13 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
     for (auto ref : mci->visible(i))
       partons[i].push_back(&*ref);
     auto x = mci->decay_point(i);
-    v[i][0] = x.x;
-    v[i][1] = x.y;
-    v[i][2] = x.z;
-    dbv[i] = x.dbv();
+    v[i][0] = x.x - x0;
+    v[i][1] = x.y - y0;
+    v[i][2] = x.z - z0;
     lsp_p4s[i] = make_tlv(mci->primaries()[i]);
   }
 
+  const double dbv[2] = { mag(v[0][0], v[0][1]), mag(v[1][0], v[1][1]) };
   const double dvv = mci->dvv();
 
   //////////////////////////////////////////////////////////////////////////////
