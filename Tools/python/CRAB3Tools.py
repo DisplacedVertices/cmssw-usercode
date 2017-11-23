@@ -64,7 +64,7 @@ def crab_command(*args, **kwargs):
     except pycurl.error, e:
         result = {}
         result['jobList'] = []
-        result['pycurlError'] = e
+        result['pycurlError'] = repr(e)
         result['status'] = 'pycurlError'
     finally:
         if suppress_stdout:
