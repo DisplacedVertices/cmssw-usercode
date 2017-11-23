@@ -167,11 +167,7 @@ namespace mfv {
     }
     return v;
   }
-
-  double MCInteraction::Point::dbv() const {
-    return hypot(x,y);
-  }
-
+  
   MCInteraction::Point MCInteraction::decay_point(size_t i) const {
     MCInteraction::Point p;
     p.x = secondaries_[indices_[i]]->vx();
