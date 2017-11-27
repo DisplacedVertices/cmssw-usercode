@@ -11,6 +11,7 @@ run_n_tk_seeds = False
 minitree_only = False
 prepare_vis = not run_n_tk_seeds and False
 keep_all = prepare_vis
+keep_gen = False
 event_filter = not keep_all
 version = 'V16'
 batch_name = 'Ntuple' + version
@@ -49,6 +50,9 @@ output_commands = [
     'keep MFVEvent_mfvEvent__*',
     'keep MFVVertexAuxs_mfvVerticesAux_*_*',
     ]
+
+if keep_gen:
+    output_commands += ['keep *_genParticles_*_*SIM', 'keep *_ak4GenJetsNoNu_*_*SIM']
 
 tfileservice(process, 'vertex_histos.root')
 random_service(process, {'mfvVertices': 1222})
