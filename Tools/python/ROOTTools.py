@@ -1060,6 +1060,9 @@ def differentiate_stat_box(hist, movement=1, new_color=None, new_size=None, colo
 
     return s
 
+def resize_stat_box(hist, new_size):
+    differentiate_stat_box(hist, movement=0, new_size=new_size, color_from_hist=False)
+
 def draw_in_order(hists_and_cmds, sames=False):
     if type(hists_and_cmds[1]) == str:
         cmd = hists_and_cmds[1]
@@ -2275,6 +2278,7 @@ __all__ = [
     'ratios_plot',
     'real_hist_max',
     'real_hist_min',
+    'resize_stat_box',
     'root_fns_from_argv',
     'set_style',
     'sort_histogram_pair',
