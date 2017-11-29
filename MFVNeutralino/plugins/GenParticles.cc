@@ -19,6 +19,7 @@ private:
 
   const edm::EDGetTokenT<reco::GenParticleCollection> gen_particles_token;
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
+  const bool last_flag_check;
   const bool debug;
   int lsp_id;
 
@@ -34,6 +35,7 @@ private:
 MFVGenParticles::MFVGenParticles(const edm::ParameterSet& cfg) 
   : gen_particles_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("gen_particles_src"))),
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
+    last_flag_check(cfg.getParameter<bool>("last_flag_check")),
     debug(cfg.getUntrackedParameter<bool>("debug", false)),
     lsp_id(-1)
 {
@@ -126,12 +128,13 @@ void MFVGenParticles::set_Ttbar_decay(mfv::MCInteractionHolderTtbar& mc, const e
     }  
     mc.decay_type[which] = lepton_code(mc.W_daughters[which][0]);
 
-    // testing
-    assert(mc.tops[which]->statusFlags().isLastCopy());
-    assert(mc.Ws[which]->statusFlags().isLastCopy());
-    assert(mc.bottoms[which]->statusFlags().isLastCopy());
-    assert(mc.W_daughters[which][0]->statusFlags().isLastCopy());
-    assert(mc.W_daughters[which][1]->statusFlags().isLastCopy());
+    if (last_flag_check) {
+      assert(mc.tops[which]->statusFlags().isLastCopy());
+      assert(mc.Ws[which]->statusFlags().isLastCopy());
+      assert(mc.bottoms[which]->statusFlags().isLastCopy());
+      assert(mc.W_daughters[which][0]->statusFlags().isLastCopy());
+      assert(mc.W_daughters[which][1]->statusFlags().isLastCopy());
+    }
   }
 }
 
@@ -183,10 +186,12 @@ bool MFVGenParticles::try_MFVtbs(mfv::MCInteraction& mc, const edm::Handle<reco:
     //gpp.Print(&*h.stranges[which], "strange");
     //gpp.Print(&*h.primary_bottoms[which], "bottom");
     //gpp.Print(&*h.tops[which], "top");
-    assert(lsp                     ->statusFlags().isLastCopy());
-    assert(h.stranges       [which]->statusFlags().isLastCopy());
-    assert(h.primary_bottoms[which]->statusFlags().isLastCopy());
-    assert(h.tops           [which]->statusFlags().isLastCopy());
+    if (last_flag_check) {
+      assert(lsp                     ->statusFlags().isLastCopy());
+      assert(h.stranges       [which]->statusFlags().isLastCopy());
+      assert(h.primary_bottoms[which]->statusFlags().isLastCopy());
+      assert(h.tops           [which]->statusFlags().isLastCopy());
+    }
   }
 
   if (h.lsps[0].isNull() || h.stranges[0].isNull() || h.primary_bottoms[0].isNull() || h.tops[0].isNull() ||
@@ -219,8 +224,10 @@ bool MFVGenParticles::try_Ttbar(mfv::MCInteraction& mc, const edm::Handle<reco::
     h.tops[0] = gen_ref(final_candidate(h.tops[0], -1), gen_particles);
     h.tops[1] = gen_ref(final_candidate(h.tops[1], -1), gen_particles);
 
-    assert(h.tops[0]->statusFlags().isLastCopy());
-    assert(h.tops[1]->statusFlags().isLastCopy());
+    if (last_flag_check) {
+      assert(h.tops[0]->statusFlags().isLastCopy());
+      assert(h.tops[1]->statusFlags().isLastCopy());
+    }
 
     set_Ttbar_decay(h, gen_particles);
   }
@@ -264,9 +271,11 @@ bool MFVGenParticles::try_XX4j(mfv::MCInteraction& mc, const edm::Handle<reco::G
     h.s[which][1] = gen_ref(final_candidate(h.p[which]->daughter( which2), 3), gen_particles);
 
     // testing
-    assert(h.p[which]   ->statusFlags().isLastCopy());
-    assert(h.s[which][0]->statusFlags().isLastCopy());
-    assert(h.s[which][1]->statusFlags().isLastCopy());
+    if (last_flag_check) {
+      assert(h.p[which]   ->statusFlags().isLastCopy());
+      assert(h.s[which][0]->statusFlags().isLastCopy());
+      assert(h.s[which][1]->statusFlags().isLastCopy());
+    }
   }
 
   if (h.valid()) {
@@ -314,9 +323,11 @@ bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<rec
     h.s[which][0] = gen_ref(final_candidate(h.s[which][0], 3), gen_particles);
     h.s[which][1] = gen_ref(final_candidate(h.s[which][1], 3), gen_particles);
 
-    assert(h.p[which]   ->statusFlags().isLastCopy());
-    assert(h.s[which][0]->statusFlags().isLastCopy());
-    assert(h.s[which][1]->statusFlags().isLastCopy());
+    if (last_flag_check) {
+      assert(h.p[which]   ->statusFlags().isLastCopy());
+      assert(h.s[which][0]->statusFlags().isLastCopy());
+      assert(h.s[which][1]->statusFlags().isLastCopy());
+    }
   }
 
   if (h.valid()) {
@@ -363,9 +374,11 @@ bool MFVGenParticles::try_MFVlq(mfv::MCInteraction& mc, const edm::Handle<reco::
     h.s[which][0] = gen_ref(final_candidate(lq.daughter( whichq), 3), gen_particles);
     h.s[which][1] = gen_ref(final_candidate(lq.daughter(!whichq), 3), gen_particles);
 
-    assert(h.p[which]   ->statusFlags().isLastCopy());
-    assert(h.s[which][0]->statusFlags().isLastCopy());
-    assert(h.s[which][1]->statusFlags().isLastCopy());
+    if (last_flag_check) {
+      assert(h.p[which]   ->statusFlags().isLastCopy());
+      assert(h.s[which][0]->statusFlags().isLastCopy());
+      assert(h.s[which][1]->statusFlags().isLastCopy());
+    }
   }
 
   if (h.valid()) {
