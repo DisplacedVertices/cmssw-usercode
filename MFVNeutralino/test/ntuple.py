@@ -52,7 +52,7 @@ output_commands = [
     ]
 
 if keep_gen:
-    output_commands += ['keep *_genParticles_*_*SIM', 'keep *_ak4GenJetsNoNu_*_*SIM']
+    output_commands += ['keep *_genParticles_*_HLT', 'keep *_ak4GenJetsNoNu_*_HLT']
 
 tfileservice(process, 'vertex_histos.root')
 random_service(process, {'mfvVertices': 1222})
