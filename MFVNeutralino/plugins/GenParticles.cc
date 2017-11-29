@@ -140,6 +140,9 @@ bool MFVGenParticles::try_MFVtbs(mfv::MCInteraction& mc, const edm::Handle<reco:
 
   mfv::MCInteractionHolderMFVtbs h;
 
+  //GenParticlePrinter gpp(*gen_particles);
+  //gpp.PrintHeader();
+
   // Find the LSPs (e.g. gluinos or neutralinos). Since this is
   // PYTHIA8 there are lots of copies -- try to get the ones that
   // decay to the three quarks.
@@ -174,6 +177,12 @@ bool MFVGenParticles::try_MFVtbs(mfv::MCInteraction& mc, const edm::Handle<reco:
     h.tops           [which] = gen_ref(final_candidate(h.tops           [which], -1), gen_particles);
 
     // testing
+    //char lspname[16];
+    //snprintf(lspname, 16, "lsp #%lu", which);
+    //gpp.Print(&*lsp, lspname);
+    //gpp.Print(&*h.stranges[which], "strange");
+    //gpp.Print(&*h.primary_bottoms[which], "bottom");
+    //gpp.Print(&*h.tops[which], "top");
     assert(lsp                     ->statusFlags().isLastCopy());
     assert(h.stranges       [which]->statusFlags().isLastCopy());
     assert(h.primary_bottoms[which]->statusFlags().isLastCopy());
