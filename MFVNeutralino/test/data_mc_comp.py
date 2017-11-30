@@ -8,8 +8,8 @@ from JMTucker.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, plot_s
 
 year = '2015p6'
 
-root_file_dir = '/uscms_data/d2/tucker/crab_dirs/HistosV15'
-plot_dir = 'plots/data_mc_comp/HistosV15_v2_%s' % year
+root_file_dir = '/uscms_data/d2/tucker/crab_dirs/HistosV15_v3'
+plot_dir = 'plots/data_mc_comp/HistosV15_v3_%s' % year
 
 set_style()
 ps = plot_saver(plot_dir)
@@ -85,7 +85,6 @@ C = partial(data_mc_comparison,
 
 if year == '2015' or year == '2016' or year == '2015p6':
     C('presel_njets',
-      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV12_2', '%(name)s.root'),
       histogram_path = 'evtHst0VNoNjets/h_njets',
       x_title = 'Number of jets',
       y_title = 'Events',
@@ -94,7 +93,6 @@ if year == '2015' or year == '2016' or year == '2015p6':
       )
 
     C('presel_ht40',
-      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV12_2', '%(name)s.root'),
       histogram_path = 'evtHst0VNoHt/h_jet_ht_40',
       rebin = 4,
       x_title = 'Jet H_{T} (GeV)',
@@ -168,14 +166,6 @@ if year == '2015' or year == '2016' or year == '2015p6':
       x_title = 'd_{VV} (cm)',
       y_title = 'Events/200 #mum',
       y_range = (1e-2, 10),
-      )
-
-    C('dvv_nm1_ntracks',
-      histogram_path = 'vtxHst2VNoNtracks/h_svdist2d',
-      rebin = 10,
-      x_title = 'd_{VV} (cm)',
-      y_title = 'Events/200 #mum',
-      y_range = (1e-2, 1e3),
       )
 
 if year == '2016':
@@ -260,19 +250,17 @@ elif year == '2016H':
 
 D = partial(data_mc_comparison,
             background_samples = background_samples,
-            signal_samples = signal_samples,
             data_samples = data_samples,
             plot_saver = ps,
-            file_path = os.path.join(root_file_dir, '%(name)s.root'),
+            file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV3', '%(name)s.root'),
             int_lumi = int_lumi,
             int_lumi_2015 = int_lumi_2015 if year == '2015p6' else None,
             int_lumi_2016 = int_lumi_2016 if year == '2015p6' else None,
             int_lumi_nice = int_lumi_nice,
-            normalize_to_data = True,
             canvas_top_margin = 0.08,
             overflow_in_last = True,
             poisson_intervals = True,
-            legend_pos = (0.50, 0.80, 0.90, 0.90),
+            legend_pos = (0.60, 0.80, 0.90, 0.90),
             enable_legend = True,
             res_fit = True,
             verbose = True,
@@ -281,36 +269,11 @@ D = partial(data_mc_comparison,
             simulation = False,
             )
 
-D('10pc_presel_njets',
-  file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV12_2', '%(name)s.root'),
-  histogram_path = 'evtHst0VNoNjets/h_njets',
-  x_title = 'Number of jets',
-  y_title = 'Events',
-  y_range = (1, 1e7),
-  cut_line = ((4, 0, 4, 2.4e7), 2, 5, 1),
-  )
-
-D('10pc_presel_ht40',
-  file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV12_2', '%(name)s.root'),
-  histogram_path = 'evtHst0VNoHt/h_jet_ht_40',
-  rebin = 4,
-  x_title = 'Jet H_{T} (GeV)',
-  y_title = 'Events/100 GeV',
-  x_range = (800, 5000),
-  y_range = (1, 1e7),
-  cut_line = ((1000, 0, 1000, 2.4e7), 2, 5, 1),
-  )
-
-D('10pc_presel_npv',
-  histogram_path = 'mfvEventHistosPreSel/h_npv',
-  x_title = 'Number of primary vertices',
-  y_title = 'Events',
-  y_range = (1, 1e6),
-  )
-
-if year == '2016':
+if '2016' in year:
      D('10pc_presel_ntracks',
       file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV2', '%(name)s.root'),
+      signal_samples = signal_samples,
+      legend_pos = (0.50, 0.80, 0.90, 0.90),
       histogram_path = 'TrackerMapper/h_all_ntracks',
       rebin = 10,
       x_title = 'Number of tracks',
@@ -318,168 +281,25 @@ if year == '2016':
       y_range = (1, 1e6),
       )
 
-D('10pc_presel_nseedtracks',
-  histogram_path = 'mfvEventHistosPreSel/h_n_vertex_seed_tracks',
-  x_title = 'Number of seed tracks',
-  y_title = 'Events',
-  )
+     D('10pc_presel_seedtrack_nstlayers',
+      histogram_path = 'TrackerMapperOldStCut/h_seed_tracks_nstlayers',
+      x_title = 'Seed track number of strip layers',
+      y_title = 'Tracks',
+      )
 
-D('10pc_presel_seedtrack_pt',
-  histogram_path = 'mfvEventHistosPreSel/h_vertex_seed_track_pt',
-  x_title = 'Seed track p_{T} (GeV)',
-  y_title = 'Tracks/GeV',
-  )
+     D('10pc_presel_seedtrack_nstlayers_etalt2',
+      histogram_path = 'TrackerMapperOldStCut/h_seed_tracks_nstlayers_etalt2',
+      x_title = 'Seed track number of strip layers (|#eta| < 2)',
+      y_title = 'Tracks',
+      cut_line = ((6, 0, 6, 2.8e10), 2, 5, 1),
+      )
 
-D('10pc_presel_seedtrack_npxlayers',
-  histogram_path = 'mfvEventHistosPreSel/h_vertex_seed_track_npxlayers',
-  x_title = 'Seed track number of pixel layers',
-  y_title = 'Tracks',
-  )
-
-D('10pc_presel_seedtrack_nstlayers',
-  histogram_path = 'mfvEventHistosPreSel/h_vertex_seed_track_nstlayers',
-  x_title = 'Seed track number of strip layers',
-  y_title = 'Tracks',
-  )
-
-D('10pc_3t1v_ntracks',
-  histogram_path = 'Ntk3vtxHst1VNoNtracks/h_sv_all_ntracks',
-  x_title = 'Number of tracks per vertex',
-  y_title = 'Vertices',
-  y_range = (1, 1e6),
-  cut_line = ((5, 0, 5, 2.1e6), 2, 5, 1),
-  )
-
-D('10pc_3t1v_bs2derr',
-  histogram_path = 'Ntk3vtxHst1VNoBs2derr/h_sv_all_bs2derr',
-  x_title = 'Uncertainty in d_{BV} (cm)',
-  y_title = 'Vertices/5 #mum',
-  y_range = (1, 1e4),
-  cut_line = ((0.0025, 0, 0.0025, 1.8e4), 2, 5, 1),
-  )
-
-D('10pc_3t1v_dbv',
-  histogram_path = 'Ntk3vtxHst1VNoBsbs2ddist/h_sv_all_bsbs2ddist',
-  x_title = 'd_{BV} (cm)',
-  y_title = 'Vertices/50 #mum',
-  x_range = (0, 0.4),
-  y_range = (1, 1e4),
-  cut_line = ((0.01, 0, 0.01, 1.8e4), 2, 5, 1),
-  )
-
-D('10pc_3t1v_onevtx_dbv',
-  histogram_path = 'Ntk3mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist',
-  x_title = 'd_{BV} (cm)',
-  y_title = 'Vertices/50 #mum',
-  x_range = (0, 0.4),
-  y_range = (1, 1e4),
-  )
-
-D('10pc_3t1v_onevtx_dbv_unzoom',
-  histogram_path = 'Ntk3mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist',
-  x_title = 'd_{BV} (cm)',
-  y_title = 'Vertices/50 #mum',
-  y_range = (1, 1e4),
-  )
-
-D('10pc_3t2v_dvv',
-  histogram_path = 'Ntk3mfvVertexHistosFullSel/h_svdist2d',
-  rebin = 5,
-  x_title = 'd_{VV} (cm)',
-  y_title = 'Events/100 #mum',
-  x_range = (0, 0.4),
-  y_range = (1e-2, 1e2),
-  )
-
-D('10pc_4t1v_ntracks',
-  histogram_path = 'Ntk4vtxHst1VNoNtracks/h_sv_all_ntracks',
-  x_title = 'Number of tracks per vertex',
-  y_title = 'Vertices',
-  y_range = (1, 1e6),
-  cut_line = ((5, 0, 5, 2.1e6), 2, 5, 1),
-  )
-
-D('10pc_4t1v_bs2derr',
-  histogram_path = 'Ntk4vtxHst1VNoBs2derr/h_sv_all_bs2derr',
-  x_title = 'Uncertainty in d_{BV} (cm)',
-  y_title = 'Vertices/5 #mum',
-  y_range = (1, 1e4),
-  cut_line = ((0.0025, 0, 0.0025, 1.8e4), 2, 5, 1),
-  )
-
-D('10pc_4t1v_dbv',
-  histogram_path = 'Ntk4vtxHst1VNoBsbs2ddist/h_sv_all_bsbs2ddist',
-  x_title = 'd_{BV} (cm)',
-  y_title = 'Vertices/50 #mum',
-  x_range = (0, 0.4),
-  y_range = (1, 1e4),
-  cut_line = ((0.01, 0, 0.01, 1.8e4), 2, 5, 1),
-  )
-
-D('10pc_4t1v_onevtx_dbv',
-  histogram_path = 'Ntk4mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist',
-  x_title = 'd_{BV} (cm)',
-  y_title = 'Vertices/50 #mum',
-  x_range = (0, 0.4),
-  y_range = (1, 1e4),
-  )
-
-D('10pc_4t1v_onevtx_dbv_unzoom',
-  histogram_path = 'Ntk4mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist',
-  x_title = 'd_{BV} (cm)',
-  y_title = 'Vertices/50 #mum',
-  y_range = (1, 1e4),
-  )
-
-D('10pc_4t2v_dvv',
-  histogram_path = 'Ntk4mfvVertexHistosFullSel/h_svdist2d',
-  rebin = 5,
-  x_title = 'd_{VV} (cm)',
-  y_title = 'Events/100 #mum',
-  x_range = (0, 0.4),
-  y_range = (1e-2, 1e2),
-  res_fit = False,
-  )
-
-D('10pc_5t1v_ntracks',
-  histogram_path = 'vtxHst1VNoNtracks/h_sv_all_ntracks',
-  x_title = 'Number of tracks per vertex',
-  y_title = 'Vertices',
-  y_range = (1, 1e6),
-  cut_line = ((5, 0, 5, 2.1e6), 2, 5, 1),
-  )
-
-D('10pc_5t1v_bs2derr',
-  histogram_path = 'vtxHst1VNoBs2derr/h_sv_all_bs2derr',
-  x_title = 'Uncertainty in d_{BV} (cm)',
-  y_title = 'Vertices/5 #mum',
-  y_range = (1, 1e4),
-  cut_line = ((0.0025, 0, 0.0025, 1.8e4), 2, 5, 1),
-  )
-
-D('10pc_5t1v_dbv',
-  histogram_path = 'vtxHst1VNoBsbs2ddist/h_sv_all_bsbs2ddist',
-  x_title = 'd_{BV} (cm)',
-  y_title = 'Vertices/50 #mum',
-  x_range = (0, 0.4),
-  y_range = (1, 1e4),
-  cut_line = ((0.01, 0, 0.01, 1.8e4), 2, 5, 1),
-  )
-
-D('10pc_5t1v_onevtx_dbv',
-  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist',
-  x_title = 'd_{BV} (cm)',
-  y_title = 'Vertices/50 #mum',
-  x_range = (0, 0.4),
-  y_range = (1, 1e4),
-  )
-
-D('10pc_5t1v_onevtx_dbv_unzoom',
-  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist',
-  x_title = 'd_{BV} (cm)',
-  y_title = 'Vertices/50 #mum',
-  y_range = (1, 1e4),
-  )
+     D('10pc_presel_seedtrack_nstlayers_etagt2',
+      histogram_path = 'TrackerMapperOldStCut/h_seed_tracks_nstlayers_etagt2',
+      x_title = 'Seed track number of strip layers (|#eta| #geq 2)',
+      y_title = 'Tracks',
+      cut_line = ((7, 0, 7, 2.8e10), 2, 5, 1),
+      )
 
 int_lumi_2015 = 2613. * (2482166.0 / 2660705.41664)
 int_lumi_2016 = 35916. * (30206710.0 / 34709587.7891)
@@ -510,7 +330,7 @@ E = partial(data_mc_comparison,
             signal_samples = signal_samples,
             data_samples = data_samples,
             plot_saver = ps,
-            file_path = os.path.join('/uscms_data/d2/tucker/crab_dirs/HistosV15_v2', '%(name)s.root'),
+            file_path = os.path.join(root_file_dir, '%(name)s.root'),
             int_lumi = int_lumi,
             int_lumi_2015 = int_lumi_2015 if year == '2015p6' else None,
             int_lumi_2016 = int_lumi_2016 if year == '2015p6' else None,
@@ -670,6 +490,7 @@ E('100pc_4t2v_dvv',
   y_title = 'Events/100 #mum',
   x_range = (0, 0.4),
   y_range = (1e-1, 1e3),
+  res_fit = False,
   )
 
 E('100pc_5t1v_ntracks',
@@ -713,11 +534,11 @@ E('100pc_5t1v_onevtx_dbv_unzoom',
   )
 
 E('100pc_5t2v_dvv',
-  file_path = os.path.join('/uscms_data/d2/tucker/crab_dirs/HistosV15_v3', '%(name)s.root'),
   histogram_path = 'mfvVertexHistosFullSel/h_svdist2d',
   rebin = 5,
   x_title = 'd_{VV} (cm)',
   y_title = 'Events/100 #mum',
   x_range = (0, 0.4),
   y_range = (1e-1, 1e3),
+  res_fit = False,
   )
