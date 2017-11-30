@@ -14,9 +14,9 @@ def name2isample(f, name):
     raise ValueError('no name %s found in %r' % (name, f))
 
 which = [
-    (name2isample(f, 'mfv_neu_tau00300um_M0800'), ROOT.kRed, 'c#tau = 300 #mum'),
-    (name2isample(f, 'mfv_neu_tau01000um_M0800'), ROOT.kGreen+2, 'c#tau = 1 mm'),
-    (name2isample(f, 'mfv_neu_tau10000um_M0800'), ROOT.kBlue, 'c#tau = 10 mm'),
+    (name2isample(f, 'mfv_neu_tau00300um_M0800'), 2, ROOT.kRed, 'c#tau = 300 #mum'),
+    (name2isample(f, 'mfv_neu_tau01000um_M0800'), 5, ROOT.kGreen+2, 'c#tau = 1 mm'),
+    (name2isample(f, 'mfv_neu_tau10000um_M0800'), 7, ROOT.kBlue, 'c#tau = 10 mm'),
     ]
 
 def write(font, size, x, y, text):
@@ -33,9 +33,10 @@ def fmt(h, name, color, save=[]):
 
     h.Sumw2()
     h.SetStats(0)
-    h.SetLineWidth(2)
+    h.SetLineWidth(3)
     h.SetLineColor(color)
-    h.SetTitle(';d_{BV} (cm);Events/20 #mum')
+    h.Rebin(5)
+    h.SetTitle(';d_{BV} (cm);Events/100 #mum')
     h.GetXaxis().SetTitleSize(0.04)
     h.GetYaxis().SetTitleSize(0.04)
     h.GetYaxis().SetTitleOffset(1.3)
@@ -51,21 +52,23 @@ def fmt(h, name, color, save=[]):
 hbkg = fmt(f.Get('h_bkg_dbv'), 'bkg', ROOT.kBlack)
 hbkg = poisson_intervalize(hbkg)
 hbkg.SetMarkerStyle(20)
-hbkg.SetLineWidth(2)
+hbkg.SetMarkerSize(1.3)
+hbkg.SetLineWidth(3)
 
 leg = ROOT.TLegend(0.30, 0.65, 0.85, 0.85)
 leg.SetBorderSize(0)
 leg.AddEntry(hbkg, 'Data', 'LPE')
 leg.AddEntry(0, '#kern[-0.22]{Multijet signals, M = 800 GeV, #sigma = 1 fb:}', '')
 
-for zzz, (isample, color, title) in enumerate(which):
+for zzz, (isample, style, color, title) in enumerate(which):
     h = fmt(f.Get('h_signal_%i_dbv' % isample), (title,isample), color)
+    h.SetLineStyle(style)
     if zzz == 0:
         h.Draw('hist')
     else:
         h.Draw('hist same')
     h.GetXaxis().SetRangeUser(0,0.4)
-    h.GetYaxis().SetRangeUser(1e-2,400)
+    h.GetYaxis().SetRangeUser(6e-2,2e3)
     leg.AddEntry(h, title, 'L')
 
 hbkg.Draw('PE')
