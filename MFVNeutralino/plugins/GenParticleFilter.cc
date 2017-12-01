@@ -4,6 +4,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/MCInteractions.h"
 #include "JMTucker/Tools/interface/GenUtilities.h"
 
 class MFVGenParticleFilter : public edm::EDFilter {
@@ -13,21 +14,14 @@ public:
 private:
   virtual bool filter(edm::Event&, const edm::EventSetup&);
 
-  const std::string mode;
-  const bool doing_h2xqq;
-  const bool doing_mfv2j;
-  const bool doing_mfv3j;
-  const bool doing_mfv4j;
-  const bool doing_mfv5j;
+  const edm::EDGetTokenT<reco::GenJetCollection> gen_jets_token;
+  const edm::EDGetTokenT<std::vector<double>> gen_vertex_token;
+  const edm::EDGetTokenT<mfv::MCInteraction> mci_token;
 
-  const edm::InputTag gen_jet_src;
   const int min_njets;
   const double min_jet_pt;
   const double min_jet_ht;
 
-  const edm::InputTag gen_src;
-  const bool print_info;
-  const bool cut_invalid;
   const int required_num_leptonic;
   const std::vector<int> allowed_decay_types;
   const double min_lepton_pt;
@@ -49,10 +43,9 @@ private:
   const double max_rbigger;
   const double min_rsmaller;
   const double max_rsmaller;
-  bool mci_warned;
 
-  bool cut_lepton(const reco::Candidate* lep) const {
-    return lep->pt() < min_lepton_pt || fabs(lep->eta()) > max_lepton_eta;
+  bool pass_lepton(const reco::Candidate* lep) const {
+    return lep->pt() >= min_lepton_pt || fabs(lep->eta()) < max_lepton_eta;
   }
 
   const int min_npartons;
@@ -67,19 +60,12 @@ private:
 };
 
 MFVGenParticleFilter::MFVGenParticleFilter(const edm::ParameterSet& cfg) 
-  : mode(cfg.getParameter<std::string>("mode")),
-    doing_h2xqq(mode == "h2xqq"),
-    doing_mfv2j(mode == "mfv2j"),
-    doing_mfv3j(mode == "mfv3j"),
-    doing_mfv4j(mode == "mfv4j"),
-    doing_mfv5j(mode == "mfv5j"),
-    gen_jet_src(cfg.getParameter<edm::InputTag>("gen_jet_src")),
+  : gen_jets_token(consumes<reco::GenJetCollection>(cfg.getParameter<edm::InputTag>("gen_jets_src"))),
+    gen_vertex_token(consumes<std::vector<double>>(cfg.getParameter<edm::InputTag>("gen_vertex_src"))),
+    mci_token(consumes<mfv::MCInteraction>(cfg.getParameter<edm::InputTag>("mci_src"))),
     min_njets(cfg.getParameter<int>("min_njets")),
     min_jet_pt(cfg.getParameter<double>("min_jet_pt")),
     min_jet_ht(cfg.getParameter<double>("min_jet_ht")),
-    gen_src(cfg.getParameter<edm::InputTag>("gen_src")),
-    print_info(cfg.getParameter<bool>("print_info")),
-    cut_invalid(cfg.getParameter<bool>("cut_invalid")),
     required_num_leptonic(cfg.getParameter<int>("required_num_leptonic")),
     allowed_decay_types(cfg.getParameter<std::vector<int> >("allowed_decay_types")),
     min_lepton_pt(cfg.getParameter<double>("min_lepton_pt")),
@@ -101,7 +87,6 @@ MFVGenParticleFilter::MFVGenParticleFilter(const edm::ParameterSet& cfg)
     max_rbigger(cfg.getParameter<double>("max_rbigger")),
     min_rsmaller(cfg.getParameter<double>("min_rsmaller")),
     max_rsmaller(cfg.getParameter<double>("max_rsmaller")),
-    mci_warned(false),
     min_npartons(cfg.getParameter<int>("min_npartons")),
     min_parton_pt(cfg.getParameter<double>("min_parton_pt")),
     min_parton_ht(cfg.getParameter<double>("min_parton_ht")),
@@ -112,10 +97,6 @@ MFVGenParticleFilter::MFVGenParticleFilter(const edm::ParameterSet& cfg)
     min_drmax(cfg.getParameter<double>("min_drmax")),
     max_drmax(cfg.getParameter<double>("max_drmax"))
 {
-  throw cms::Exception("NotImplemented", "update to new MCInteractions format");
-
-  if (!(doing_h2xqq || doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j))
-    throw cms::Exception("Configuration") << "mode must be h2xqq, mfv2j, mfv3j, mfv4j, or mfv5j, got " << mode;
 }
 
 namespace {
@@ -131,134 +112,64 @@ namespace {
 }
 
 bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
-#if 0
-  edm::Handle<reco::GenParticleCollection> gen_particles;
-  event.getByLabel(gen_src, gen_particles);
-  const size_t ngen = gen_particles->size();
-
-  const reco::GenParticle& for_vtx = gen_particles->at(2);
-  float x0 = for_vtx.vx(), y0 = for_vtx.vy(), z0 = for_vtx.vz();
+  edm::Handle<std::vector<double>> gen_vertex;
+  event.getByToken(gen_vertex_token, gen_vertex);
+    
+  const double x0 = (*gen_vertex)[0];
+  const double y0 = (*gen_vertex)[1];
+  const double z0 = (*gen_vertex)[2];
 
   std::vector<const reco::GenParticle*> partons[2];
   double v[2][3] = {{0}};
 
-  if (doing_h2xqq) {
-    for (size_t igen = 0; igen < ngen; ++igen) {
-      const reco::GenParticle& gen = gen_particles->at(igen);
-      if (gen.status() == 3 && abs(gen.pdgId()) == 35) {
-        assert(gen.numberOfDaughters() >= 2);
-        for (size_t idau = 0; idau < 2; ++idau) {
-          const reco::Candidate* dau = gen.daughter(idau);
-          int dauid = dau->pdgId();
-          // https://espace.cern.ch/cms-exotica/long-lived/selection/MC2012.aspx
-          // 600N114 = quarks where N is 1 2 or 3 for the lifetime selection
-          assert(dauid/6000000 == 1);
-          dauid %= 6000000;
-          const int h2x = dauid / 1000;
-          assert(h2x == 1 || h2x == 2 || h2x == 3);
-          dauid %= h2x*1000;
-          assert(dauid/100 == 1);
-          dauid %= 100;
-          assert(dauid/10 == 1);
-          dauid %= 10;
-          assert(dauid == 3 || dauid == 4);
+  edm::Handle<mfv::MCInteraction> mci;
+  event.getByToken(mci_token, mci);
 
-          const size_t ngdau = dau->numberOfDaughters();
-          assert(ngdau >= 2);
-          for (size_t igdau = 0; igdau < 2; ++igdau) {
-            const reco::Candidate* gdau = dau->daughter(igdau);
-            const int id = gdau->pdgId();
-            assert(abs(id) >= 1 && abs(id) <= 5);
-            partons[idau].push_back(dynamic_cast<const reco::GenParticle*>(gdau));
-          }
-        }
-      }
-    }
+  if (!mci->valid())
+    throw cms::Exception("BadAssumption", "MCInteraction not valid for this event--model not implemented?");
 
-    for (int i = 0; i < 2; ++i) {
-      assert(partons[i].size() == 2);
-      assert(partons[i][0]->numberOfDaughters() > 0);
-      v[i][0] = partons[i][0]->daughter(0)->vx() - x0;
-      v[i][1] = partons[i][0]->daughter(0)->vy() - y0;
-      v[i][2] = partons[i][0]->daughter(0)->vz() - z0;
-    }
+  for (int i : {0,1}) {
+    for (auto ref : mci->visible(i))
+      partons[i].push_back(&*ref);
+    auto x = mci->decay_point(i);
+    v[i][0] = x.x - x0;
+    v[i][1] = x.y - y0;
+    v[i][2] = x.z - z0;
   }
 
-  if (doing_mfv2j || doing_mfv3j || doing_mfv4j || doing_mfv5j) {
-    MCInteractionMFV3j mci;
-    mci.Init(*gen_particles);
+  const double dbv[2] = { mag(v[0][0], v[0][1]), mag(v[1][0], v[1][1]) };
+  const double dvv = mci->dvv();
 
-    if (print_info)
-      mci.Print(std::cout);
+  edm::Handle<reco::GenJetCollection> gen_jets;
+  event.getByToken(gen_jets_token, gen_jets);
 
-    if (!mci.Valid()) {
-      if (!mci_warned)
-        edm::LogWarning("GenHistos") << "MCInteractionMFV3j invalid; no further warnings!";
-      mci_warned = true;
-      return !cut_invalid;
-    }
+  int njets_min_pt = 0;
+  double jet_ht = 0;
+  for (const reco::GenJet& jet : *gen_jets) {
+    if (jet.pt() > min_jet_pt && fabs(jet.eta()) < 2.5)
+      ++njets_min_pt;
+    if (jet.pt() > 20 && fabs(jet.eta()) < 2.5)
+      jet_ht += jet.pt();
+  }
+  if (njets_min_pt < min_njets)
+    return false;
+  if (jet_ht < min_jet_ht)
+    return false;
 
-    for (int i = 0; i < 2; ++i) {
-      partons[i].push_back(mci.stranges[i]);
-      partons[i].push_back(mci.bottoms[i]);
-      if (doing_mfv3j) {
-        partons[i].push_back(mci.tops[i]);
-      }
-      if (doing_mfv4j) {
-        partons[i].push_back(mci.tops[i]);
-        partons[i].push_back(mci.bottoms_from_tops[i]);
-      }
-      if (doing_mfv5j) {
-        partons[i].push_back(mci.bottoms_from_tops[i]);
-        partons[i].push_back(mci.W_daughters[i][0]);
-        partons[i].push_back(mci.W_daughters[i][1]);
-      }
-      v[i][0] = mci.stranges[i]->vx() - x0;
-      v[i][1] = mci.stranges[i]->vy() - y0;
-      v[i][2] = mci.stranges[i]->vz() - z0;
-    }
-
-    edm::Handle<reco::GenJetCollection> gen_jets;
-    event.getByLabel(gen_jet_src, gen_jets);
-
-    int njets_min_pt = 0;
-    double jet_ht = 0;
-    for (const reco::GenJet& jet : *gen_jets) {
-      if (jet.pt() > min_jet_pt && fabs(jet.eta()) < 2.5)
-        ++njets_min_pt;
-      if (jet.pt() > 20 && fabs(jet.eta()) < 2.5)
-        jet_ht += jet.pt();
-    }
-    if (njets_min_pt < min_njets)
+  if (required_num_leptonic >= 0) {
+    int nlep = 0;
+    for (const auto& r : mci->light_leptons())
+      if (pass_lepton(&*r))
+        ++nlep;
+    if (nlep < required_num_leptonic)
       return false;
-    if (jet_ht < min_jet_ht)
-      return false;
+  }
 
-    if (required_num_leptonic >= 0 && mci.num_leptonic != required_num_leptonic)
-      return false;
-
-    if (mci.num_leptonic == 1) {
-      if (cut_lepton(mci.W_daughters[mci.which_is_lepton][0]))
+  if (allowed_decay_types.size())
+    for (int i = 0; i < 2; ++i)
+      if (std::find(allowed_decay_types.begin(), allowed_decay_types.end(), mci->decay_type()[i]) == allowed_decay_types.end())
         return false;
-    }
-    else if (mci.num_leptonic == 2) {
-      for (int i = 0; i < 2; ++i)
-        if (cut_lepton(mci.W_daughters[i][0]))
-          return false;
-    }
 
-    if (allowed_decay_types.size())
-      for (int i = 0; i < 2; ++i)
-        if (std::find(allowed_decay_types.begin(), allowed_decay_types.end(), mci.decay_type[i]) == allowed_decay_types.end())
-          return false;
-  }
-
-  const double dbv[2] = {
-    mag(v[0][0], v[0][1]),
-    mag(v[1][0], v[1][1])
-  };
-  const double dvv = mag(v[0][0] - v[1][0],
-                         v[0][1] - v[1][1]);
   const double rho0 = dbv[0];
   const double rho1 = dbv[1];
 
@@ -351,7 +262,7 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
     if (drmax > max_drmax)
       return false;
   }
-#endif
+
   return true;
 }
 
