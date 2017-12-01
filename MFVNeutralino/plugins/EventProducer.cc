@@ -35,6 +35,7 @@ private:
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertex_token;
   const edm::EDGetTokenT<GenEventInfoProduct> gen_info_token;
+  const edm::EDGetTokenT<std::vector<double>> gen_vertex_token;
   const edm::EDGetTokenT<reco::GenJetCollection> gen_jets_token;
   const edm::EDGetTokenT<reco::GenParticleCollection> gen_particles_token;
   const edm::EDGetTokenT<mfv::MCInteraction> mci_token;
@@ -60,6 +61,7 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     primary_vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertex_src"))),
     gen_info_token(consumes<GenEventInfoProduct>(cfg.getParameter<edm::InputTag>("gen_info_src"))),
+    gen_vertex_token(consumes<std::vector<double>>(cfg.getParameter<edm::InputTag>("gen_vertex_src"))),
     gen_jets_token(consumes<reco::GenJetCollection>(cfg.getParameter<edm::InputTag>("gen_jets_src"))),
     gen_particles_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("gen_particles_src"))),
     mci_token(consumes<mfv::MCInteraction>(cfg.getParameter<edm::InputTag>("mci_src"))),
@@ -126,17 +128,15 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       }
     }
 
+    edm::Handle<std::vector<double>> gen_vertex;
+    event.getByToken(gen_vertex_token, gen_vertex);
+
+    mevent->gen_pv[0] = (*gen_vertex)[0];
+    mevent->gen_pv[1] = (*gen_vertex)[1];
+    mevent->gen_pv[2] = (*gen_vertex)[2];
+
     edm::Handle<reco::GenParticleCollection> gen_particles;
     event.getByToken(gen_particles_token, gen_particles);
-    
-    const reco::GenParticle& for_vtx = gen_particles->at(2);
-    const int for_vtx_id = abs(for_vtx.pdgId());
-    die_if_not(for_vtx_id == 21 || (for_vtx_id >= 1 && for_vtx_id <= 5), "gen_particles[2] is not a gluon or udscb: id=%i", for_vtx_id);
-    float x0 = for_vtx.vx(), y0 = for_vtx.vy(), z0 = for_vtx.vz();
-
-    mevent->gen_pv[0] = x0;
-    mevent->gen_pv[1] = y0;
-    mevent->gen_pv[2] = z0;
     
     mevent->gen_flavor_code = 0;
     bool saw_c = false;

@@ -24,6 +24,7 @@ public:
 private:
   const edm::EDGetTokenT<reco::GenParticleCollection> gen_token;
   const edm::EDGetTokenT<reco::GenJetCollection> gen_jet_token;
+  const edm::EDGetTokenT<std::vector<double>> gen_vertex_token;
   const edm::EDGetTokenT<mfv::MCInteraction> mci_token;
   bool mci_warned;
 
@@ -133,7 +134,9 @@ private:
 MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   : gen_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("gen_src"))),
     gen_jet_token(consumes<reco::GenJetCollection>(cfg.getParameter<edm::InputTag>("gen_jet_src"))),
+    gen_vertex_token(consumes<std::vector<double>>(cfg.getParameter<edm::InputTag>("gen_vertex_src"))),
     mci_token(consumes<mfv::MCInteraction>(cfg.getParameter<edm::InputTag>("mci_src"))),
+
     mci_warned(false)
 {
   edm::Service<TFileService> fs;
@@ -436,10 +439,12 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   edm::Handle<mfv::MCInteraction> mci;
   event.getByToken(mci_token, mci);
 
-  const reco::GenParticle& for_vtx = gen_particles->at(2);
-  const int for_vtx_id = abs(for_vtx.pdgId());
-  die_if_not(for_vtx_id == 21 || (for_vtx_id >= 1 && for_vtx_id <= 5), "gen_particles[2] is not a gluon or udscb: id=%i", for_vtx_id);
-  float x0 = for_vtx.vx(), y0 = for_vtx.vy(), z0 = for_vtx.vz();
+  edm::Handle<std::vector<double>> gen_vertex;
+  event.getByToken(gen_vertex_token, gen_vertex);
+  const double x0 = (*gen_vertex)[0];
+  const double y0 = (*gen_vertex)[1];
+  const double z0 = (*gen_vertex)[2];
+
   auto fill = [x0,y0,z0](BasicKinematicHists* bkh, const reco::Candidate* c) {
     bkh->Fill(c);
     bkh->FillEx(signed_mag(c->vx() - x0, c->vy() - y0), c->vz() - z0, c->charge());

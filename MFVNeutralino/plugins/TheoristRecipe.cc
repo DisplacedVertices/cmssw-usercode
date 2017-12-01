@@ -18,6 +18,7 @@ public:
   void analyze(const edm::Event&, const edm::EventSetup&);
 
 private:
+  const edm::EDGetTokenT<std::vector<double>> gen_vertex_token;
   const edm::EDGetTokenT<mfv::MCInteraction> mci_token;
   const edm::EDGetTokenT<MFVEvent> mevent_token;
   const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_token;
@@ -124,10 +125,12 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
   edm::Handle<MFVEvent> mevent;
   event.getByToken(mevent_token, mevent);
 
-  // JMTBAD generated PV versus beamspot--should be able to get the latter from provenance?
-  const double x0 = mevent->gen_pv[0];
-  const double y0 = mevent->gen_pv[1];
-  const double z0 = mevent->gen_pv[2];
+  edm::Handle<std::vector<double>> gen_vertex;
+  event.getByToken(gen_vertex_token, gen_vertex);
+    
+  const double x0 = (*gen_vertex)[0];
+  const double y0 = (*gen_vertex)[1];
+  const double z0 = (*gen_vertex)[2];
 
   edm::Handle<MFVVertexAuxCollection> vertices;
   event.getByToken(vertex_token, vertices);

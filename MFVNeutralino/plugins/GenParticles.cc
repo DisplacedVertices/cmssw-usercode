@@ -40,7 +40,8 @@ MFVGenParticles::MFVGenParticles(const edm::ParameterSet& cfg)
     lsp_id(-1)
 {
   produces<mfv::MCInteraction>();
-  produces<std::vector<double>>(); // decay positions
+  produces<std::vector<double>>("genVertex"); // generated primary vertex
+  produces<std::vector<double>>("decays"); // decay positions
 
   // these for event display
   produces<reco::GenParticleCollection>("primaries");
@@ -391,6 +392,7 @@ bool MFVGenParticles::try_MFVlq(mfv::MCInteraction& mc, const edm::Handle<reco::
 
 void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
   std::auto_ptr<mfv::MCInteraction> mc(new mfv::MCInteraction);
+  std::auto_ptr<std::vector<double> > primary_vertex(new std::vector<double>(3,0.));
   std::auto_ptr<std::vector<double> > decay_vertices(new std::vector<double>);
   std::auto_ptr<reco::GenParticleCollection> primaries  (new reco::GenParticleCollection);
   std::auto_ptr<reco::GenParticleCollection> secondaries(new reco::GenParticleCollection);
@@ -399,6 +401,15 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
   if (!event.isRealData()) {
     edm::Handle<reco::GenParticleCollection> gen_particles;
     event.getByToken(gen_particles_token, gen_particles);
+
+    const reco::GenParticle& for_vtx = gen_particles->at(2);
+    const int for_vtx_id = abs(for_vtx.pdgId());
+    if (for_vtx_id != 21 && !(for_vtx_id >= 1 && for_vtx_id <= 5))
+      throw cms::Exception("BadAssumption", "gen_particles[2] is not a gluon or udscb: id=") << for_vtx_id;
+
+    (*primary_vertex)[0] = for_vtx.vx();
+    (*primary_vertex)[1] = for_vtx.vy();
+    (*primary_vertex)[2] = for_vtx.vz();
 
     if (lsp_id == -1) {
       // If there is a neutralino in the first event, assume that's the
@@ -459,7 +470,8 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
   }
 
   event.put(mc);
-  event.put(decay_vertices);
+  event.put(primary_vertex, "genVertex");
+  event.put(decay_vertices, "decays");
   event.put(primaries,   "primaries");
   event.put(secondaries, "secondaries");
   event.put(visible,     "visible");
