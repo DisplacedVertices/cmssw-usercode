@@ -97,7 +97,7 @@ for wd in wds:
             publish_fn = os.path.join(wd, 'publish_%i.txt' % job)
             if not os.path.isfile(publish_fn):
                 if options.partial:
-                    print colors.yellow('warning: missing', fn)
+                    print colors.yellow('warning: missing %s' % fn)
                 else:
                     raise IOError('no publish file %s' % publish_fn)
             else:
