@@ -87,30 +87,37 @@ for ntk in ['mfvMiniTree', 'mfvMiniTreeNtk3', 'mfvMiniTreeNtk3or4', 'mfvMiniTree
 
             if hasattr(Samples, sname):
                 sample = getattr(Samples, sname)
-                if sample.name.endswith('_2015'):
-                    int_lumi = ac.int_lumi_2015 * ac.scale_factor_2015
+                if not sample.is_mc:
+                    w = 1.
+                    print fmt % (sample.name, '', '', '', '',
+                                 r1v, '%9.0f' % r1v**0.5, '', '', 
+                                 r2v, '%9.0f' % r2v**0.5, '', '')
                 else:
-                    int_lumi = ac.int_lumi_2016 * ac.scale_factor_2016
-                w = int_lumi * sample.partial_weight(fn)
-                if sample.is_signal:
-                    xsec = '%9.3f' % sample.xsec
-                else:
-                    xsec = '%9.0f' % (sample.xsec if sample.is_mc else -1)
-                x = seen[sname] = (r1v, r1v**0.5, w*n1v, w*en1v), (r2v, r2v**0.5, w*n2v, w*en2v)
-                print fmt % (sample.name,
-                             '%.0f' % int_lumi,
-                             xsec,
-                             '%.0f' % sample.nevents(fn),
-                             '%9.3g' % w,
-                             x[0][0],
-                             '%9.2f' % x[0][1],
-                             '%9.2f' % x[0][2],
-                             '%9.2f' % x[0][3],
-                             x[1][0],
-                             '%9.2f' % x[1][1],
-                             '%9.2f' % x[1][2],
-                             '%9.2f' % x[1][3],
-                             )
+                    if sample.name.endswith('_2015'):
+                        int_lumi = ac.int_lumi_2015 * ac.scale_factor_2015
+                    else:
+                        int_lumi = ac.int_lumi_2016 * ac.scale_factor_2016
+                    w = int_lumi * sample.partial_weight(fn)
+                    if sample.is_signal:
+                        xsec = '%9.3f' % sample.xsec
+                    else:
+                        xsec = '%9.0f' % sample.xsec
+
+                    x = seen[sname] = (r1v, r1v**0.5, w*n1v, w*en1v), (r2v, r2v**0.5, w*n2v, w*en2v)
+                    print fmt % (sample.name,
+                                 '%.0f' % int_lumi,
+                                 xsec,
+                                 '%.0f' % sample.nevents(fn),
+                                 '%9.3g' % w,
+                                 x[0][0],
+                                 '%9.2f' % x[0][1],
+                                 '%9.2f' % x[0][2],
+                                 '%9.2f' % x[0][3],
+                                 x[1][0],
+                                 '%9.2f' % x[1][1],
+                                 '%9.2f' % x[1][2],
+                                 '%9.2f' % x[1][3],
+                                 )
             else:
                 print '%36s  n1v = %9.2f  n2v = %9.2f' % (sname, n1v, n2v)
 
