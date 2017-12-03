@@ -721,7 +721,7 @@ _add_ds("ntuplev16", {
                        + ['/store/user/tucker/JetHT/NtupleV16_2016/171027_183401/0000/ntuple_%i.root' % i for i in xrange(1,10)]),
 'JetHT2016C': _fromnum1("/store/user/tucker/JetHT/NtupleV16_2016/170927_212846", 222),
 'JetHT2016D': _fromnum1("/store/user/tucker/JetHT/NtupleV16_2016/170927_212916", 313),
-'JetHT2016E': _fromnum1("/store/user/tucker/JetHT/NtupleV16_2016/171004_141515", 318),
+'JetHT2016E': _fromnum1("/store/user/tucker/JetHT/NtupleV16_2016/171202_064634", 387),
 'JetHT2016F': (242 + 16, ['/store/user/tucker/JetHT/NtupleV16_2016/170927_213012/0000/ntuple_%i.root' % i for i in chain(xrange(1,16), xrange(17,36), xrange(37,45), xrange(46,55), xrange(57,64), xrange(65,109), xrange(110,122), xrange(123,132), xrange(133,148), xrange(149,168), xrange(169,171), xrange(173,181), xrange(182,185), xrange(186,202), xrange(203,259))]
                        + ['/store/user/tucker/JetHT/NtupleV16_2016/171027_183437/0000/ntuple_%i.root' % i for i in xrange(1,17)]),
 'JetHT2016G': _fromnum1("/store/user/tucker/JetHT/NtupleV16_2016/170927_213040", 860),
