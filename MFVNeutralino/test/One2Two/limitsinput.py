@@ -23,7 +23,7 @@ in_fn = '/uscms/home/jchu/public/2v_from_jets_data_2015p6_5track_default_v15_v5.
 #in_trees, in_scanpack_list = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV15_v5/mfv*root', None
 in_trees, in_scanpack_list = None, '/uscms/home/tucker/work/hip_8025/src/JMTucker/MFVNeutralino/test/MakeSamples/scanpacks/scanpack_merge_1_1p5_2.list'
 
-limitsinput_fn = 'limits_input.root'
+limitsinput_fn = 'limitsinput.root'
 
 ####
 
