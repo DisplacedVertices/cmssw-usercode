@@ -124,7 +124,7 @@ def test_sample_iterator(f):
 
 def sample_iterator_1d_plots(f):
     for s in sample_iterator(f):
-        if (s.mass == 800 and s.tau <= 40.) or s.tau == 1.:
+        if s.mass in (800., 1600., 2300.) or s.tau in (0.4, 1., 10.):
             yield s
     
 def make():
