@@ -30,14 +30,9 @@ common = process.mfvSelectedVerticesTight * process.mfvGenParticles
 process.mfvTheoristRecipeNoCuts = mfvTheoristRecipe.clone()
 process.pNoCuts = cms.Path(common * process.mfvTheoristRecipeNoCuts)
 
-'''
-process.mfvAnalysisCutsTrigSel = process.mfvAnalysisCuts.clone(apply_cleaning_filters = False, min_njets = 0, min_ht = 0, apply_vertex_cuts = False)
+process.mfvAnalysisCutsTrigSel = process.mfvAnalysisCuts.clone(min_njets = 0, min_ht = 0, apply_vertex_cuts = False)
 process.mfvTheoristRecipeTrigSel = mfvTheoristRecipe.clone()
 process.pTrigSel = cms.Path(common * process.mfvAnalysisCutsTrigSel * process.mfvTheoristRecipeTrigSel)
-
-process.mfvAnalysisCutsCleaningFilters = process.mfvAnalysisCuts.clone(apply_cleaning_filters = True, min_njets = 0, min_ht = 0, apply_vertex_cuts = False)
-process.mfvTheoristRecipeCleaningFilters = mfvTheoristRecipe.clone()
-process.pCleaningFilters = cms.Path(common * process.mfvAnalysisCutsCleaningFilters * process.mfvTheoristRecipeCleaningFilters)
 
 process.mfvAnalysisCutsOfflineJets = process.mfvAnalysisCuts.clone(min_ht = 0, apply_vertex_cuts = False)
 process.mfvTheoristRecipeOfflineJets = mfvTheoristRecipe.clone()
@@ -51,121 +46,74 @@ process.mfvAnalysisCutsTwoVtxNoCuts = process.mfvAnalysisCuts.clone(vertex_src =
 process.mfvTheoristRecipeTwoVtxNoCuts = mfvTheoristRecipe.clone()
 process.pTwoVtxNoCuts = cms.Path(common * process.mfvSelectedVertices * process.mfvAnalysisCutsTwoVtxNoCuts * process.mfvTheoristRecipeTwoVtxNoCuts)
 
-process.mfvSelectedVerticesGeo2ddist = process.mfvSelectedVertices.clone(max_geo2ddist = 2.5, max_sumnhitsbehind = 0)
+process.mfvSelectedVerticesGeo2ddist = process.mfvSelectedVertices.clone(mevent_src = 'mfvEvent', max_geo2ddist = 2.0)
 process.mfvAnalysisCutsTwoVtxGeo2ddist = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesGeo2ddist')
 process.mfvTheoristRecipeTwoVtxGeo2ddist = mfvTheoristRecipe.clone()
 process.pTwoVtxGeo2ddist = cms.Path(common * process.mfvSelectedVerticesGeo2ddist * process.mfvAnalysisCutsTwoVtxGeo2ddist * process.mfvTheoristRecipeTwoVtxGeo2ddist)
 
-process.mfvSelectedVerticesNtracks = process.mfvSelectedVertices.clone(max_geo2ddist = 2.5, max_sumnhitsbehind = 0, min_ntracks = 5)
+process.mfvSelectedVerticesBsbs2ddist = process.mfvSelectedVertices.clone(mevent_src = 'mfvEvent', max_geo2ddist = 2.0, min_bsbs2ddist = 0.01)
+process.mfvAnalysisCutsTwoVtxBsbs2ddist = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesBsbs2ddist')
+process.mfvTheoristRecipeTwoVtxBsbs2ddist = mfvTheoristRecipe.clone()
+process.pTwoVtxBsbs2ddist = cms.Path(common * process.mfvSelectedVerticesBsbs2ddist * process.mfvAnalysisCutsTwoVtxBsbs2ddist * process.mfvTheoristRecipeTwoVtxBsbs2ddist)
+
+process.mfvSelectedVerticesNtracks = process.mfvSelectedVertices.clone(mevent_src = 'mfvEvent', max_geo2ddist = 2.0, min_bsbs2ddist = 0.01, min_ntracks = 5)
 process.mfvAnalysisCutsTwoVtxNtracks = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesNtracks')
 process.mfvTheoristRecipeTwoVtxNtracks = mfvTheoristRecipe.clone()
 process.pTwoVtxNtracks = cms.Path(common * process.mfvSelectedVerticesNtracks * process.mfvAnalysisCutsTwoVtxNtracks * process.mfvTheoristRecipeTwoVtxNtracks)
 
-process.mfvSelectedVerticesBs2derr = process.mfvSelectedVertices.clone(max_geo2ddist = 2.5, max_sumnhitsbehind = 0, min_ntracks = 5, max_bs2derr = 0.0025)
+process.mfvSelectedVerticesBs2derr = process.mfvSelectedVertices.clone(mevent_src = 'mfvEvent', max_geo2ddist = 2.0, min_bsbs2ddist = 0.01, min_ntracks = 5, max_bs2derr = 0.0025)
 process.mfvAnalysisCutsTwoVtxBs2derr = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesBs2derr')
 process.mfvTheoristRecipeTwoVtxBs2derr = mfvTheoristRecipe.clone()
 process.pTwoVtxBs2derr = cms.Path(common * process.mfvSelectedVerticesBs2derr * process.mfvAnalysisCutsTwoVtxBs2derr * process.mfvTheoristRecipeTwoVtxBs2derr)
 
-process.mfvSelectedVerticesMindrmax = process.mfvSelectedVertices.clone(max_geo2ddist = 2.5, max_sumnhitsbehind = 0, min_ntracks = 5, max_bs2derr = 0.0025, min_drmax = 1.2)
-process.mfvAnalysisCutsTwoVtxMindrmax = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesMindrmax')
-process.mfvTheoristRecipeTwoVtxMindrmax = mfvTheoristRecipe.clone()
-process.pTwoVtxMindrmax = cms.Path(common * process.mfvSelectedVerticesMindrmax * process.mfvAnalysisCutsTwoVtxMindrmax * process.mfvTheoristRecipeTwoVtxMindrmax)
+process.mfvAnalysisCutsDvv400um = process.mfvAnalysisCuts.clone(min_svdist2d = 0.04)
+process.mfvTheoristRecipeTwoVtxDvv400um = mfvTheoristRecipe.clone()
+process.pTwoVtxDvv400um = cms.Path(common * process.mfvSelectedVerticesTight * process.mfvAnalysisCutsDvv400um * process.mfvTheoristRecipeTwoVtxDvv400um)
 
-process.mfvSelectedVerticesMaxdrmax = process.mfvSelectedVertices.clone(max_geo2ddist = 2.5, max_sumnhitsbehind = 0, min_ntracks = 5, max_bs2derr = 0.0025, min_drmax = 1.2, max_drmax = 4)
-process.mfvAnalysisCutsTwoVtxMaxdrmax = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesMaxdrmax')
-process.mfvTheoristRecipeTwoVtxMaxdrmax = mfvTheoristRecipe.clone()
-process.pTwoVtxMaxdrmax = cms.Path(common * process.mfvSelectedVerticesMaxdrmax * process.mfvAnalysisCutsTwoVtxMaxdrmax * process.mfvTheoristRecipeTwoVtxMaxdrmax)
-
-process.mfvSelectedVerticesDrmin = process.mfvSelectedVertices.clone(max_geo2ddist = 2.5, max_sumnhitsbehind = 0, min_ntracks = 5, max_bs2derr = 0.0025, min_drmax = 1.2, max_drmax = 4, max_drmin = 0.4)
-process.mfvAnalysisCutsTwoVtxDrmin = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesDrmin')
-process.mfvTheoristRecipeTwoVtxDrmin = mfvTheoristRecipe.clone()
-process.pTwoVtxDrmin = cms.Path(common * process.mfvSelectedVerticesDrmin * process.mfvAnalysisCutsTwoVtxDrmin * process.mfvTheoristRecipeTwoVtxDrmin)
-
-process.mfvSelectedVerticesNjetsntks = process.mfvSelectedVertices.clone(max_geo2ddist = 2.5, max_sumnhitsbehind = 0, min_ntracks = 5, max_bs2derr = 0.0025, min_drmax = 1.2, max_drmax = 4, max_drmin = 0.4, min_njetsntks = 1)
-process.mfvAnalysisCutsTwoVtxNjetsntks = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesNjetsntks')
-process.mfvTheoristRecipeTwoVtxNjetsntks = mfvTheoristRecipe.clone()
-process.pTwoVtxNjetsntks = cms.Path(common * process.mfvSelectedVerticesNjetsntks * process.mfvAnalysisCutsTwoVtxNjetsntks * process.mfvTheoristRecipeTwoVtxNjetsntks)
-
-process.mfvSelectedVerticesNtracksptgt3 = process.mfvSelectedVertices.clone(max_geo2ddist = 2.5, max_sumnhitsbehind = 0, min_ntracks = 5, max_bs2derr = 0.0025, min_drmax = 1.2, max_drmax = 4, max_drmin = 0.4, min_njetsntks = 1, min_ntracksptgt3 = 3)
-process.mfvAnalysisCutsTwoVtxNtracksptgt3 = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesNtracksptgt3')
-process.mfvTheoristRecipeTwoVtxNtracksptgt3 = mfvTheoristRecipe.clone()
-process.pTwoVtxNtracksptgt3 = cms.Path(common * process.mfvSelectedVerticesNtracksptgt3 * process.mfvAnalysisCutsTwoVtxNtracksptgt3 * process.mfvTheoristRecipeTwoVtxNtracksptgt3)
-
-process.mfvAnalysisCutsDvv600um = process.mfvAnalysisCuts.clone(min_svdist2d = 0.06)
-process.mfvTheoristRecipeTwoVtxDvv600um = mfvTheoristRecipe.clone()
-process.pTwoVtxDvv600um = cms.Path(common * process.mfvSelectedVerticesTight * process.mfvAnalysisCutsDvv600um * process.mfvTheoristRecipeTwoVtxDvv600um)
-
+'''
 process.mfvTheoristRecipeVertices = mfvTheoristRecipe.clone(vertex_src = 'mfvSelectedVertices')
 process.pVertices = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvSelectedVertices * process.mfvTheoristRecipeVertices)
 
 process.mfvTheoristRecipeGeo2ddist = mfvTheoristRecipe.clone(vertex_src = 'mfvSelectedVerticesGeo2ddist')
 process.pGeo2ddist = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesGeo2ddist * process.mfvTheoristRecipeGeo2ddist)
 
+process.mfvTheoristRecipeBsbs2ddist = mfvTheoristRecipe.clone(vertex_src = 'mfvSelectedVerticesBsbs2ddist')
+process.pBsbs2ddist = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesBsbs2ddist * process.mfvTheoristRecipeBsbs2ddist)
+
 process.mfvTheoristRecipeNtracks = mfvTheoristRecipe.clone(vertex_src = 'mfvSelectedVerticesNtracks')
 process.pNtracks = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesNtracks * process.mfvTheoristRecipeNtracks)
 
 process.mfvTheoristRecipeBs2derr = mfvTheoristRecipe.clone(vertex_src = 'mfvSelectedVerticesBs2derr')
 process.pBs2derr = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesBs2derr * process.mfvTheoristRecipeBs2derr)
-
-process.mfvTheoristRecipeMindrmax = mfvTheoristRecipe.clone(vertex_src = 'mfvSelectedVerticesMindrmax')
-process.pMindrmax = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesMindrmax * process.mfvTheoristRecipeMindrmax)
-
-process.mfvTheoristRecipeMaxdrmax = mfvTheoristRecipe.clone(vertex_src = 'mfvSelectedVerticesMaxdrmax')
-process.pMaxdrmax = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesMaxdrmax * process.mfvTheoristRecipeMaxdrmax)
-
-process.mfvTheoristRecipeDrmin = mfvTheoristRecipe.clone(vertex_src = 'mfvSelectedVerticesDrmin')
-process.pDrmin = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesDrmin * process.mfvTheoristRecipeDrmin)
-
-process.mfvTheoristRecipeNjetsntks = mfvTheoristRecipe.clone(vertex_src = 'mfvSelectedVerticesNjetsntks')
-process.pNjetsntks = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesNjetsntks * process.mfvTheoristRecipeNjetsntks)
-
-process.mfvTheoristRecipeNtracksptgt3 = mfvTheoristRecipe.clone(vertex_src = 'mfvSelectedVerticesNtracksptgt3')
-process.pNtracksptgt3 = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesNtracksptgt3 * process.mfvTheoristRecipeNtracksptgt3)
-
-process.mfvSelectedVerticesNoNtracksBs2derrNtracksptgt3 = process.mfvSelectedVertices.clone(max_geo2ddist = 2.5, max_sumnhitsbehind = 0, min_drmax = 1.2, max_drmax = 4, max_drmin = 0.4, min_njetsntks = 1)
-process.mfvTheoristRecipeNoNtracksBs2derrNtracksptgt3 = mfvTheoristRecipe.clone(vertex_src = 'mfvSelectedVerticesNoNtracksBs2derrNtracksptgt3')
-process.pNoNtracksBs2derrNtracksptgt3 = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesNoNtracksBs2derrNtracksptgt3 * process.mfvTheoristRecipeNoNtracksBs2derrNtracksptgt3)
 '''
 
 #generated cutflow
 process.mfvGenNoCuts = mfvTheoristRecipe.clone()
 process.pGenNoCuts = cms.Path(common * process.mfvGenParticleFilter * process.mfvGenNoCuts)
 
-process.mfvGenParticleFilterFourJets = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60)
+process.mfvGenParticleFilterFourJets = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 20)
 process.mfvGenFourJets = mfvTheoristRecipe.clone()
 process.pGenFourJets = cms.Path(common * process.mfvGenParticleFilterFourJets * process.mfvGenFourJets)
 
-process.mfvGenParticleFilterSumHT = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_ht = 500)
+process.mfvGenParticleFilterSumHT = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 20, min_parton_ht = 1000)
 process.mfvGenSumHT = mfvTheoristRecipe.clone()
 process.pGenSumHT = cms.Path(common * process.mfvGenParticleFilterSumHT * process.mfvGenSumHT)
 
-process.mfvGenParticleFilterGeo2ddist = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_ht = 500, max_rho0 = 2.5, max_rho1 = 2.5)
+process.mfvGenParticleFilterGeo2ddist = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 20, min_parton_ht = 1000, max_rho0 = 2.0, max_rho1 = 2.0)
 process.mfvGenGeo2ddist = mfvTheoristRecipe.clone()
 process.pGenGeo2ddist = cms.Path(common * process.mfvGenParticleFilterGeo2ddist * process.mfvGenGeo2ddist)
 
-process.mfvGenParticleFilterNtracks2 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_ht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_ntracks = 2)
-process.mfvGenNtracks2 = mfvTheoristRecipe.clone()
-process.pGenNtracks2 = cms.Path(common * process.mfvGenParticleFilterNtracks2 * process.mfvGenNtracks2)
+process.mfvGenParticleFilterBsbs2ddist = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 20, min_parton_ht = 1000, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01)
+process.mfvGenBsbs2ddist = mfvTheoristRecipe.clone()
+process.pGenBsbs2ddist = cms.Path(common * process.mfvGenParticleFilterBsbs2ddist * process.mfvGenBsbs2ddist)
 
-process.mfvGenParticleFilterMindrmax = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_ht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_ntracks = 2, min_drmax = 1.2)
-process.mfvGenMindrmax = mfvTheoristRecipe.clone()
-process.pGenMindrmax = cms.Path(common * process.mfvGenParticleFilterMindrmax * process.mfvGenMindrmax)
-
-process.mfvGenParticleFilterMaxdrmax = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_ht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_ntracks = 2, min_drmax = 1.2, max_drmax = 4)
-process.mfvGenMaxdrmax = mfvTheoristRecipe.clone()
-process.pGenMaxdrmax = cms.Path(common * process.mfvGenParticleFilterMaxdrmax * process.mfvGenMaxdrmax)
-
-process.mfvGenParticleFilterNquarks1 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_ht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_ntracks = 2, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1)
-process.mfvGenNquarks1 = mfvTheoristRecipe.clone()
-process.pGenNquarks1 = cms.Path(common * process.mfvGenParticleFilterNquarks1 * process.mfvGenNquarks1)
-
-process.mfvGenParticleFilterSumpt200 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_ht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_ntracks = 2, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 200)
+process.mfvGenParticleFilterSumpt200 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 20, min_parton_ht = 1000, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_sumpt = 200)
 process.mfvGenSumpt200 = mfvTheoristRecipe.clone()
 process.pGenSumpt200 = cms.Path(common * process.mfvGenParticleFilterSumpt200 * process.mfvGenSumpt200)
 
-process.mfvGenParticleFilterDvv600um = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 60, min_parton_ht = 500, max_rho0 = 2.5, max_rho1 = 2.5, min_ntracks = 2, min_drmax = 1.2, max_drmax = 4, min_nquarks = 1, min_sumpt = 200, min_dvv = 0.06)
-process.mfvGenDvv600um = mfvTheoristRecipe.clone()
-process.pGenDvv600um = cms.Path(common * process.mfvGenParticleFilterDvv600um * process.mfvGenDvv600um)
+process.mfvGenParticleFilterDvv400um = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 20, min_parton_ht = 1000, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_sumpt = 200, min_dvv = 0.04)
+process.mfvGenDvv400um = mfvTheoristRecipe.clone()
+process.pGenDvv400um = cms.Path(common * process.mfvGenParticleFilterDvv400um * process.mfvGenDvv400um)
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
