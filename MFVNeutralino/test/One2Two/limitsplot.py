@@ -10,6 +10,7 @@ from JMTucker.Tools.general import from_pickle
 from limitsinput import sample_iterator, axisize
 
 def fmt(t, title, xtitle, color):
+    t.SetLineColor(color)
     t.SetFillColor(color)
     t.SetTitle('%s;%s;#sigma #times BR^{2} (fb)' % (title, xtitle))
     return t
@@ -45,11 +46,11 @@ def parse_gluglu(gluglu=[]):
     if not gluglu:
         gluglu = [eval(x.strip()) for x in open('gluglu.csv') if x.strip()]
         gluglu = [(z[0], z[1]*1000, z[2]/100*z[1]*1000) for z in gluglu] # convert pb to fb and percent to absolute
+        gluglu = [(a,b,0.) for a,b,_ in gluglu]
     return gluglu
 
 def fmt_gluglu(g, xtitle):
     fmt(g, '', xtitle, 9)
-    g.SetFillStyle(3001)
 
 def make_gluglu():
     g = tge(parse_gluglu())
@@ -149,12 +150,12 @@ def make_1d_plot(d, name, xkey='mass'):
     g = G()
 
     g.observed = tgae(d[xkey], d['observed'], None, None, None, None, '', xtitle, 1)
+    g.expect50 = tgae(d[xkey], d['expect50'], None, None, None, None, '', xtitle, 1)
     g.expect95 = tgae(d[xkey], d['expect95'], None, None, d['expect95lo'], d['expect95hi'], '', xtitle, 5)
     g.expect68 = tgae(d[xkey], d['expect68'], None, None, d['expect68lo'], d['expect68hi'], '', xtitle, 3)
-    g.expect50 = tgae(d[xkey], d['expect50'], None, None, None, None, '', xtitle, 1)
 
-    g.observed.SetMarkerStyle(20)
-    g.observed.SetMarkerSize(1.2)
+    g.observed.SetLineWidth(2)
+    g.expect50.SetLineWidth(2)
     g.expect50.SetLineStyle(2)
 
     if xkey == 'mass':
@@ -166,21 +167,23 @@ def make_1d_plot(d, name, xkey='mass'):
         ey = [unc]*len(x)
         g.gluglu = tge(zip(x,y,ey))
         fmt_gluglu(g.gluglu, xtitle)
-        
+
+    g.gluglu.SetLineWidth(2)
+
     return g
 
 def save_1d_plots():
     xxx = [
-        (lambda s: 'neu'   in sample.name and sample.mass == 800 and sample.tau <= 40.,  'multijetM800',   lambda s: s.sample.tau,  ('tau', 800.)),
-        (lambda s: 'neu'   in sample.name and sample.tau  == 1.,                         'multijettau1mm', lambda s: s.sample.mass, 'mass'),
-        (lambda s: 'ddbar' in sample.name and sample.mass == 800 and sample.tau <= 40.,  'ddbarM800',      lambda s: s.sample.tau,  ('tau', 800.)),
-        (lambda s: 'ddbar' in sample.name and sample.tau  == 1.,                         'ddbartau1mm',    lambda s: s.sample.mass, 'mass'),
+        ('multijetM800',   lambda s: 'neu'   in sample.name and sample.mass == 800 and sample.tau <= 40.,  lambda s: s.sample.tau,  ('tau', 800.)),
+        ('multijettau1mm', lambda s: 'neu'   in sample.name and sample.tau  == 1.,                         lambda s: s.sample.mass, 'mass'),
+        ('ddbarM800',      lambda s: 'ddbar' in sample.name and sample.mass == 800 and sample.tau <= 40.,  lambda s: s.sample.tau,  ('tau', 800.)),
+        ('ddbartau1mm',    lambda s: 'ddbar' in sample.name and sample.tau  == 1.,                         lambda s: s.sample.mass, 'mass'),
         ]
     
     in_f = ROOT.TFile('limitsinput.root')
     out_f = ROOT.TFile('limits_1d.root', 'recreate')
 
-    for use, name, sorter, xkey in xxx:
+    for name, use, sorter, xkey in xxx:
         d = limits()
         for sample in sample_iterator(in_f):
             if use(sample):

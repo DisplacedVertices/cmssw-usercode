@@ -65,12 +65,17 @@ for kind in 'multijetM800', 'multijettau1mm', 'ddbarM800', 'ddbartau1mm':
     elif 'tau' in kind:
         yax.SetRangeUser(0.1, 30)
 
+    observed.SetLineWidth(2)
+    expect50.SetLineWidth(2)
+    expect50.SetLineStyle(2)
+    gluglu.SetLineWidth(2)
+
     expect95.Draw('3')
     expect68.Draw('3')
     expect50.Draw('L')
-    observed.Draw('LP')
+    observed.Draw('L')
     if draw_gluglu:
-        gluglu.Draw('3')
+        gluglu.Draw('L')
         leg = ROOT.TLegend(0.583, 0.566, 0.866, 0.851)
     else:
         leg = ROOT.TLegend(0.583, 0.632, 0.866, 0.851)
@@ -80,13 +85,13 @@ for kind in 'multijetM800', 'multijettau1mm', 'ddbarM800', 'ddbartau1mm':
     leg.SetBorderSize(0)
     leg.AddEntry(0, '#kern[-0.22]{%s}' % nice[kind], '')
     leg.AddEntry(0, '#kern[-0.22]{95% CL upper limits:}', '')
-    leg.AddEntry(observed, 'Observed', 'LP')
+    leg.AddEntry(observed, 'Observed', 'L')
     leg.AddEntry(expect50, 'Expected', 'L')
-    leg.AddEntry(expect68, '#pm 1 #sigma', 'F')
-    leg.AddEntry(expect95, '#pm 2 #sigma', 'F')
+    leg.AddEntry(expect68, '#pm 1 std. deviation', 'F')
+    leg.AddEntry(expect95, '#pm 2 std. deviation', 'F')
     if draw_gluglu:
         leg.AddEntry(0, '', '')
-        leg.AddEntry(gluglu, '#tilde{g}#tilde{g} production', 'F')
+        leg.AddEntry(gluglu, 'M. Kr#ddot{a}mer et al.', 'L')
     leg.Draw()
 
     cms = write(61, 0.050, 0.109, 0.913, 'CMS')
