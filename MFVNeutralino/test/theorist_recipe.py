@@ -1,7 +1,7 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 dataset = 'ntuplev16_wgenv2'
-sample_files(process, 'mfv_neu_tau01000um_M0800', 'ntuplev16_wgenv2', 1)
+sample_files(process, 'mfv_ddbar_tau10000um_M1200', dataset, 10)
 process.TFileService.fileName = 'theorist_recipe.root'
 file_event_from_argv(process)
 
@@ -25,6 +25,13 @@ mfvTheoristRecipe = cms.EDAnalyzer('MFVTheoristRecipe',
                                    )
 
 common = process.mfvSelectedVerticesTight * process.mfvGenParticles
+
+if False:
+    #set_events_to_process(process, [(1,5,65)])
+    report_every(process, 1)
+    process.load('JMTucker.Tools.ParticleListDrawer_cff')
+    process.ParticleListDrawer.maxEventsToPrint = 10000
+    common = process.ParticleListDrawer * common
 
 #reconstructed cutflow
 process.mfvTheoristRecipeNoCuts = mfvTheoristRecipe.clone()
