@@ -29,6 +29,8 @@ private:
   const double min_dbv;
   const double max_dbv;
 
+  TH1F* h_gen_valid;
+
   TH1F* h_dist;
 
   TH1F* h_lspsnmatch;
@@ -82,6 +84,8 @@ MFVTheoristRecipe::MFVTheoristRecipe(const edm::ParameterSet& cfg)
 
   edm::Service<TFileService> fs;
 
+  h_gen_valid = fs->make<TH1F>("h_gen_valid", "", 2, 0, 2);
+
   h_dist = fs->make<TH1F>("h_dist", ";distance to closest lsp;number of vertices", 100, 0, 0.02);
 
   h_lspsnmatch = fs->make<TH1F>("h_lspsnmatch", ";number of vertices that match LSP;LSPs", 15, 0, 15);
@@ -123,6 +127,12 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
   edm::Handle<mfv::MCInteraction> mci;
   event.getByToken(mci_token, mci);
 
+  h_gen_valid->Fill(mci->valid());
+  if (!mci->valid()) {
+    std::cout << "MCInteraction not valid--model not implemented? skipping event" << std::endl;
+    return;
+  }
+
   edm::Handle<MFVEvent> mevent;
   event.getByToken(mevent_token, mevent);
 
@@ -139,10 +149,7 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
   std::vector<const reco::GenParticle*> partons[2];
   double v[2][3] = {{0}};
   TLorentzVector lsp_p4s[2];
-
-  if (!mci->valid())
-    throw cms::Exception("BadAssumption", "MCInteraction not valid for this event--model not implemented?");
-
+ 
   for (int i : {0,1}) {
     for (auto ref : mci->visible(i))
       partons[i].push_back(&*ref);
