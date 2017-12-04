@@ -292,6 +292,9 @@ bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<rec
 
   mfv::MCInteractionHolderMFVdijet h;
 
+  //GenParticlePrinter gpp(*gen_particles);
+  //gpp.PrintHeader();
+
   // Find the LSPs (e.g. gluinos or neutralinos). Since this is
   // PYTHIA8 there are lots of copies -- try to get the ones that
   // decay to the three quarks.
@@ -313,10 +316,14 @@ bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<rec
       h.p[1] = ref;
     }
 
+    //char lspname[16];
+    //snprintf(lspname, 16, "dijet primary #%lu", which);
+    //gpp.Print(&*h.p[which], lspname);
+
     // Get the immediate daughters. 
     if ((h.s[which][0] = gen_ref(daughter_with_id(&gen,  1, false), gen_particles)).isNull() ||
         (h.s[which][1] = gen_ref(daughter_with_id(&gen, -1, false), gen_particles)).isNull()) {
-      printf("WEIRD GLUBALL CRAP???\n");
+      printf("WEIRD GLUBALL CRAP??? %i %i\n", h.s[which][0].isNull(), h.s[which][1].isNull());
       return false;
     }
 
@@ -450,15 +457,21 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
   }
 
   if (decay_vertices->empty()) {
-    if (debug) printf("MFVGenParticles: using beamspot for decay position\n");
+    if (debug) printf("MFVGenParticles: trying to use beamspot for decay position\n");
 
     edm::Handle<reco::BeamSpot> beamspot;
     event.getByToken(beamspot_token, beamspot);
 
-    for (int i = 0; i < 2; ++i) {
-      decay_vertices->push_back(beamspot->x0());
-      decay_vertices->push_back(beamspot->y0());
-      decay_vertices->push_back(beamspot->z0());
+    if (beamspot.isValid()) {
+      for (int i = 0; i < 2; ++i) {
+        decay_vertices->push_back(beamspot->x0());
+        decay_vertices->push_back(beamspot->y0());
+        decay_vertices->push_back(beamspot->z0());
+      }
+    }
+    else {
+      if (debug) printf("MFVGenParticles: no beamspot in Event, falling back to 0,0,0\n");
+      decay_vertices->resize(6,0.);
     }
   }
 
