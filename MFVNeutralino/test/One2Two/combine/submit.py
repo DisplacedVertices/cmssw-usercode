@@ -1,3 +1,5 @@
+# this script must be run from One2Two/
+
 import sys, os, shutil, time
 from JMTucker.Tools.general import save_git_status
 from JMTucker.Tools.CondorSubmitter import CondorSubmitter
@@ -61,7 +63,7 @@ cd $WD
 
     echo "========================================================================="
     echo Expected limits
-    combine -M BayesianToyMC datacard.txt --toys 1000
+    combine -M BayesianToyMC datacard.txt --toys 1000 --saveToys
     mv higgsCombine*root expected.root
 
 #    echo "========================================================================="
