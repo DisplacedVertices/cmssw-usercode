@@ -12,6 +12,7 @@ from limitsinput import sample_iterator, axisize
 def fmt(t, title, xtitle, color):
     t.SetLineColor(color)
     t.SetFillColor(color)
+    t.SetLineWidth(2)
     t.SetTitle('%s;%s;#sigma #times BR^{2} (fb)' % (title, xtitle))
     return t
 
@@ -146,7 +147,13 @@ def make_1d_plot(d, name, xkey='mass'):
         xkey, which_mass = xkey
         xtitle = 'lifetime (#mum)'
 
-    class G: pass
+    class G:
+        def __iter__(self):
+            for x in 'observed expect50 expect68 expect95 expect68lo expect68hi expect95lo expect95hi gluglu'.split():
+                if hasattr(self, x):
+                    y = getattr(self, x)
+                    y.SetName(x)
+                    yield y
     g = G()
 
     g.observed = tgae(d[xkey], d['observed'], None, None, None, None, '', xtitle, 1)
@@ -154,9 +161,10 @@ def make_1d_plot(d, name, xkey='mass'):
     g.expect95 = tgae(d[xkey], d['expect95'], None, None, d['expect95lo'], d['expect95hi'], '', xtitle, 5)
     g.expect68 = tgae(d[xkey], d['expect68'], None, None, d['expect68lo'], d['expect68hi'], '', xtitle, 3)
 
-    g.observed.SetLineWidth(2)
-    g.expect50.SetLineWidth(2)
-    g.expect50.SetLineStyle(2)
+    g.expect68lo = tgae(d[xkey], d['expect68lo'], None, None, None, None, '', xtitle, 1)
+    g.expect68hi = tgae(d[xkey], d['expect68hi'], None, None, None, None, '', xtitle, 1)
+    g.expect95lo = tgae(d[xkey], d['expect95lo'], None, None, None, None, '', xtitle, 1)
+    g.expect95hi = tgae(d[xkey], d['expect95hi'], None, None, None, None, '', xtitle, 1)
 
     if xkey == 'mass':
         g.gluglu = make_gluglu()
@@ -168,16 +176,22 @@ def make_1d_plot(d, name, xkey='mass'):
         g.gluglu = tge(zip(x,y,ey))
         fmt_gluglu(g.gluglu, xtitle)
 
-    g.gluglu.SetLineWidth(2)
-
     return g
 
 def save_1d_plots():
     xxx = [
-        ('multijetM800',   lambda s: 'neu'   in sample.name and sample.mass == 800 and sample.tau <= 40.,  lambda s: s.sample.tau,  ('tau', 800.)),
-        ('multijettau1mm', lambda s: 'neu'   in sample.name and sample.tau  == 1.,                         lambda s: s.sample.mass, 'mass'),
-        ('ddbarM800',      lambda s: 'ddbar' in sample.name and sample.mass == 800 and sample.tau <= 40.,  lambda s: s.sample.tau,  ('tau', 800.)),
-        ('ddbartau1mm',    lambda s: 'ddbar' in sample.name and sample.tau  == 1.,                         lambda s: s.sample.mass, 'mass'),
+        ('multijetM800',    lambda s: 'neu'   in sample.name and sample.mass == 800 and sample.tau <= 40.,  lambda s: s.sample.tau,  ('tau',  800.)),
+        ('multijetM1600',   lambda s: 'neu'   in sample.name and sample.mass ==1600 and sample.tau <= 40.,  lambda s: s.sample.tau,  ('tau', 1600.)),
+        ('multijetM2400',   lambda s: 'neu'   in sample.name and sample.mass ==2400 and sample.tau <= 40.,  lambda s: s.sample.tau,  ('tau', 2400.)),
+        ('multijettau400um',lambda s: 'neu'   in sample.name and sample.tau  == 0.4,                        lambda s: s.sample.mass, 'mass'),
+        ('multijettau1mm',  lambda s: 'neu'   in sample.name and sample.tau  == 1.,                         lambda s: s.sample.mass, 'mass'),
+        ('multijettau10mm', lambda s: 'neu'   in sample.name and sample.tau  == 10.,                        lambda s: s.sample.mass, 'mass'),
+        ('ddbarM800',       lambda s: 'ddbar' in sample.name and sample.mass == 800 and sample.tau <= 40.,  lambda s: s.sample.tau,  ('tau',  800.)),
+        ('ddbarM1600',      lambda s: 'ddbar' in sample.name and sample.mass ==1600 and sample.tau <= 40.,  lambda s: s.sample.tau,  ('tau', 1600.)),
+        ('ddbarM2400',      lambda s: 'ddbar' in sample.name and sample.mass ==2400 and sample.tau <= 40.,  lambda s: s.sample.tau,  ('tau', 2400.)),
+        ('ddbartau400um',   lambda s: 'ddbar' in sample.name and sample.tau  == 0.4,                        lambda s: s.sample.mass, 'mass'),
+        ('ddbartau1mm',     lambda s: 'ddbar' in sample.name and sample.tau  == 1.,                         lambda s: s.sample.mass, 'mass'),
+        ('ddbartau10mm',    lambda s: 'ddbar' in sample.name and sample.tau  == 10.,                        lambda s: s.sample.mass, 'mass'),
         ]
     
     in_f = ROOT.TFile('limitsinput.root')
@@ -192,8 +206,8 @@ def save_1d_plots():
 
         out_f.mkdir(name).cd()
         g = make_1d_plot(d, name, xkey)
-        for gg in 'observed expect50 expect68 expect95 gluglu'.split():
-            getattr(g,gg).Write(gg)
+        for gg in g:
+            gg.Write(gg.GetName())
 
 def interpolate(h):
     # R + akima does a better job so don't use this
