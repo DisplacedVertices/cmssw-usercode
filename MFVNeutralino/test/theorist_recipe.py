@@ -20,8 +20,8 @@ mfvTheoristRecipe = cms.EDAnalyzer('MFVTheoristRecipe',
                                    which_mom = cms.int32(0),
                                    max_dr = cms.double(-1),
                                    max_dist = cms.double(0.0084),
-                                   min_dbv = cms.double(0.2),
-                                   max_dbv = cms.double(0.3),
+                                   min_dbv = cms.double(0),
+                                   max_dbv = cms.double(1e9),
                                    )
 
 common = process.mfvSelectedVerticesTight * process.mfvGenParticles
