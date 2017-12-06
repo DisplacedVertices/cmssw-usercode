@@ -51,6 +51,10 @@ Current status:
 - scanpack2p7 gets the empty points from scanpack2 that weren't in
   scanpack2p5.
 
+- scanpack2p5 and 2p7 are done and hadding. scanpack2p6_hip had three
+  batches crap out that i reran named *try3, but some stats did finish and
+  so can use both. there is a .temp file to look at while try3 finishes.
+
 '''
 
 import os, sys, base64, re, cPickle as pickle
@@ -290,16 +294,21 @@ def hadd_scanpack(lst_fn):
     hadds = []
     for name, fns in lst.iteritems():
         fns = [str(s) for s in fns]
-        out_fn = None
+        out_fns = set()
         for fn in fns:
             sfn = fn.split('/')
             assert re.match(r'\d{4}', sfn[-2])
             assert re.match(r'\d{6}_\d{6}', sfn[-3])
             new_out_fn = '/'.join(sfn[:-2]) + '/' + name + '.root'
-            if out_fn is None:
-                out_fn = new_out_fn
-            else:
-                assert new_out_fn == out_fn
+            out_fns.add(new_out_fn)
+
+        assert len(out_fns)
+        out_fns = sorted(out_fns)
+        if len(out_fns) > 1:
+            print colors.magenta('ATTENTION: more than one out_fn generated')
+            pprint(fns)
+            pprint(out_fns)
+        out_fn = out_fns[-1]
 
         new_lst[name] = [out_fn]
         if eos.exists(out_fn):
