@@ -1,7 +1,7 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 dataset = 'ntuplev16_wgenv2'
-sample_files(process, 'mfv_ddbar_tau10000um_M1200', dataset, 10)
+sample_files(process, 'mfv_neu_tau01000um_M0800', dataset, 10)
 process.TFileService.fileName = 'theorist_recipe.root'
 file_event_from_argv(process)
 
@@ -17,11 +17,7 @@ mfvTheoristRecipe = cms.EDAnalyzer('MFVTheoristRecipe',
                                    mci_src = cms.InputTag('mfvGenParticles'),
                                    mevent_src = cms.InputTag('mfvEvent'),
                                    vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
-                                   which_mom = cms.int32(0),
-                                   max_dr = cms.double(-1),
                                    max_dist = cms.double(0.0084),
-                                   min_dbv = cms.double(0),
-                                   max_dbv = cms.double(1e9),
                                    )
 
 common = process.mfvSelectedVerticesTight * process.mfvGenParticles
@@ -76,23 +72,6 @@ process.pTwoVtxBs2derr = cms.Path(common * process.mfvSelectedVerticesBs2derr * 
 process.mfvAnalysisCutsDvv400um = process.mfvAnalysisCuts.clone(min_svdist2d = 0.04)
 process.mfvTheoristRecipeTwoVtxDvv400um = mfvTheoristRecipe.clone()
 process.pTwoVtxDvv400um = cms.Path(common * process.mfvSelectedVerticesTight * process.mfvAnalysisCutsDvv400um * process.mfvTheoristRecipeTwoVtxDvv400um)
-
-'''
-process.mfvTheoristRecipeVertices = mfvTheoristRecipe.clone(vertex_src = 'mfvSelectedVertices')
-process.pVertices = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvSelectedVertices * process.mfvTheoristRecipeVertices)
-
-process.mfvTheoristRecipeGeo2ddist = mfvTheoristRecipe.clone(vertex_src = 'mfvSelectedVerticesGeo2ddist')
-process.pGeo2ddist = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesGeo2ddist * process.mfvTheoristRecipeGeo2ddist)
-
-process.mfvTheoristRecipeBsbs2ddist = mfvTheoristRecipe.clone(vertex_src = 'mfvSelectedVerticesBsbs2ddist')
-process.pBsbs2ddist = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesBsbs2ddist * process.mfvTheoristRecipeBsbs2ddist)
-
-process.mfvTheoristRecipeNtracks = mfvTheoristRecipe.clone(vertex_src = 'mfvSelectedVerticesNtracks')
-process.pNtracks = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesNtracks * process.mfvTheoristRecipeNtracks)
-
-process.mfvTheoristRecipeBs2derr = mfvTheoristRecipe.clone(vertex_src = 'mfvSelectedVerticesBs2derr')
-process.pBs2derr = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesBs2derr * process.mfvTheoristRecipeBs2derr)
-'''
 
 #generated cutflow
 process.mfvGenNoCuts = mfvTheoristRecipe.clone()
