@@ -1,7 +1,6 @@
 #include "TH2.h"
 #include "TLorentzVector.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
-#include "DataFormats/Math/interface/deltaR.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -23,49 +22,38 @@ private:
   const edm::EDGetTokenT<MFVEvent> mevent_token;
   const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_token;
 
-  const int which_mom;
-  const double max_dr;
   const double max_dist;
-  const double min_dbv;
-  const double max_dbv;
 
   TH1F* h_gen_valid;
 
-  TH1F* h_dist;
-
-  TH1F* h_lspsnmatch;
-
-  TH1F* h_rec_jet_pt;
-  TH1F* h_rec_dxy;
-  TH1F* h_rec_ntracks;
-  TH1F* h_rec_bs2derr;
-  TH1F* h_rec_drmin;
-  TH1F* h_rec_drmax;
-  TH1F* h_rec_njetsntks;
-  TH1F* h_rec_ntracksptgt3;
-  TH1F* h_rec_dbv;
-  TH1F* h_rec_dvv;
-
-  TH1F* h_vtx_dbv;
-  TH1F* h_vtx_ntracks;
-  TH1F* h_vtx_nquarks;
-  TH1F* h_vtx_sumpt;
-  TH1F* h_vtx_drmin;
-  TH1F* h_vtx_drmax;
-
-  TH1F* h_gen_jetpt4;
-  TH1F* h_gen_ht;
+  TH1F* h_gen_njets;
+  TH1F* h_gen_ht40;
   TH1F* h_gen_dxy;
   TH1F* h_gen_ntracks;
-  TH1F* h_gen_nquarks;
   TH1F* h_gen_sumpt;
-  TH1F* h_gen_drmin;
-  TH1F* h_gen_drmax;
-
   TH1F* h_gen_dbv;
   TH1F* h_gen_dvv;
 
-  TH2F* h_lsp_ntracks0_ntracks1;
+  TH1F* h_rec_njets;
+  TH1F* h_rec_ht40;
+  TH1F* h_rec_dxy;
+  TH1F* h_rec_ntracks;
+  TH1F* h_rec_bs2derr;
+  TH1F* h_rec_dbv;
+  TH1F* h_rec_dvv;
+
+  TH1F* h_gen_match_dxy;
+  TH1F* h_gen_match_ntracks;
+  TH1F* h_gen_match_sumpt;
+  TH1F* h_gen_match_dbv;
+
+  TH1F* h_rec_match_dxy;
+  TH1F* h_rec_match_ntracks;
+  TH1F* h_rec_match_bs2derr;
+  TH1F* h_rec_match_dbv;
+
+  TH1F* h_dist;
+  TH1F* h_lspsnmatch;
 };
 
 MFVTheoristRecipe::MFVTheoristRecipe(const edm::ParameterSet& cfg)
@@ -73,54 +61,40 @@ MFVTheoristRecipe::MFVTheoristRecipe(const edm::ParameterSet& cfg)
     mci_token(consumes<mfv::MCInteraction>(cfg.getParameter<edm::InputTag>("mci_src"))),
     mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
     vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
-    which_mom(cfg.getParameter<int>("which_mom")),
-    max_dr(cfg.getParameter<double>("max_dr")),
-    max_dist(cfg.getParameter<double>("max_dist")),
-    min_dbv(cfg.getParameter<double>("min_dbv")),
-    max_dbv(cfg.getParameter<double>("max_dbv"))
+    max_dist(cfg.getParameter<double>("max_dist"))
 {
-  if (which_mom < 0 || which_mom >= mfv::NMomenta)
-    throw cms::Exception("BadConfiguration", "invalid which_mom = ") << which_mom;
-
   edm::Service<TFileService> fs;
 
   h_gen_valid = fs->make<TH1F>("h_gen_valid", "", 2, 0, 2);
 
-  h_dist = fs->make<TH1F>("h_dist", ";distance to closest lsp;number of vertices", 100, 0, 0.02);
-
-  h_lspsnmatch = fs->make<TH1F>("h_lspsnmatch", ";number of vertices that match LSP;LSPs", 15, 0, 15);
-
-  h_rec_jet_pt = fs->make<TH1F>("h_rec_jet_pt", ";reconstructed jet p_{T} (GeV);jets", 100, 0, 500);
-  h_rec_dxy = fs->make<TH1F>("h_rec_dxy", ";reconstructed d_{xy} (cm);tracks", 100, 0, 1);
-  h_rec_ntracks = fs->make<TH1F>("h_rec_ntracks", ";number of tracks/vertex;vertices", 40, 0, 40);
-  h_rec_bs2derr = fs->make<TH1F>("h_rec_bs2derr", ";#sigma(d_{BV}) (cm);vertices", 25, 0, 0.0025);
-  h_rec_drmin = fs->make<TH1F>("h_rec_drmin", ";min{#Delta R{track i,j}};vertices", 50, 0, 0.5);
-  h_rec_drmax = fs->make<TH1F>("h_rec_drmax", ";max{#Delta R{track i,j}};vertices", 50, 0, 5);
-  h_rec_njetsntks = fs->make<TH1F>("h_rec_njetsntks", ";number of associated jets;vertices", 10, 0, 10);
-  h_rec_ntracksptgt3 = fs->make<TH1F>("h_rec_ntracksptgt3", ";number of tracks with p_{T} > 3 GeV/vertex;vertices", 40, 0, 40);
-  h_rec_dbv = fs->make<TH1F>("h_rec_dbv", ";reconstructed d_{BV} (cm);vertices", 250, 0, 2.5);
-  h_rec_dvv = fs->make<TH1F>("h_rec_dvv", ";reconstructed d_{VV} (cm);events", 500, 0, 5);
-
-  h_vtx_dbv = fs->make<TH1F>("h_vtx_dbv", ";generated d_{BV} (cm);vertices", 250, 0, 2.5);
-  h_vtx_ntracks = fs->make<TH1F>("h_vtx_ntracks", ";number of accepted displaced daughter particles;vertices", 10, 0, 10);
-  h_vtx_nquarks = fs->make<TH1F>("h_vtx_nquarks", ";number of accepted displaced quarks;vertices", 10, 0, 10);
-  h_vtx_sumpt = fs->make<TH1F>("h_vtx_sumpt", ";#Sigmap_{T} of accepted displaced daughter particles (GeV);vertices", 100, 0, 1000);
-  h_vtx_drmin = fs->make<TH1F>("h_vtx_drmin", ";min #DeltaR between accepted displaced daughter particles;vertices", 100, 0, 5);
-  h_vtx_drmax = fs->make<TH1F>("h_vtx_drmax", ";max #DeltaR between accepted displaced daughter particles;vertices", 100, 0, 5);
-
-  h_gen_jetpt4 = fs->make<TH1F>("h_gen_jetpt4", ";p_{T} of 4th accepted quark (GeV);events", 200, 0, 200);
-  h_gen_ht = fs->make<TH1F>("h_gen_ht", ";#SigmaH_{T} of accepted quarks (GeV);events", 200, 0, 2000);
+  h_gen_njets = fs->make<TH1F>("h_gen_njets", ";number of accepted quarks;events", 20, 0, 20);
+  h_gen_ht40 = fs->make<TH1F>("h_gen_ht40", ";H_{T} of accepted quarks with p_{T} > 40 GeV;events", 500, 0, 5000);
   h_gen_dxy = fs->make<TH1F>("h_gen_dxy", ";generated d_{xy} (cm);LSP daughter particles", 100, 0, 1);
-  h_gen_ntracks = fs->make<TH1F>("h_gen_ntracks", ";number of accepted displaced daughter particles;LSPs", 10, 0, 10);
-  h_gen_nquarks = fs->make<TH1F>("h_gen_nquarks", ";number of accepted displaced quarks;LSPs", 10, 0, 10);
+  h_gen_ntracks = fs->make<TH1F>("h_gen_ntracks", ";number of accepted displaced daughter particles;LSPs", 40, 0, 40);
   h_gen_sumpt = fs->make<TH1F>("h_gen_sumpt", ";#Sigmap_{T} of accepted displaced daughter particles (GeV);LSPs", 100, 0, 1000);
-  h_gen_drmin = fs->make<TH1F>("h_gen_drmin", ";min #DeltaR between accepted displaced daughter particles;LSPs", 100, 0, 5);
-  h_gen_drmax = fs->make<TH1F>("h_gen_drmax", ";max #DeltaR between accepted displaced daughter particles;LSPs", 100, 0, 5);
-
   h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV} (cm);LSPs", 250, 0, 2.5);
   h_gen_dvv = fs->make<TH1F>("h_gen_dvv", ";generated d_{VV} (cm);events", 500, 0, 5);
 
-  h_lsp_ntracks0_ntracks1 = fs->make<TH2F>("h_lsp_ntracks0_ntracks1", ";ntracks of vtx0 matched to LSP;ntracks of vtx1 matched to LSP", 40, 0, 40, 40, 0, 40);
+  h_rec_njets = fs->make<TH1F>("h_rec_njets", ";reconstructed number of jets;events", 20, 0, 20);
+  h_rec_ht40 = fs->make<TH1F>("h_rec_ht40", ";reconstructed H_{T} of jets with p_{T} > 40 GeV;events", 500, 0, 5000);
+  h_rec_dxy = fs->make<TH1F>("h_rec_dxy", ";reconstructed d_{xy} (cm);tracks", 100, 0, 1);
+  h_rec_ntracks = fs->make<TH1F>("h_rec_ntracks", ";number of tracks;vertices", 40, 0, 40);
+  h_rec_bs2derr = fs->make<TH1F>("h_rec_bs2derr", ";#sigma(d_{BV}) (cm);vertices", 25, 0, 0.0025);
+  h_rec_dbv = fs->make<TH1F>("h_rec_dbv", ";reconstructed d_{BV} (cm);vertices", 250, 0, 2.5);
+  h_rec_dvv = fs->make<TH1F>("h_rec_dvv", ";reconstructed d_{VV} (cm);events", 500, 0, 5);
+
+  h_dist = fs->make<TH1F>("h_dist", ";distance to closest LSP;vertices", 100, 0, 0.01);
+  h_lspsnmatch = fs->make<TH1F>("h_lspsnmatch", ";number of vertices that match LSP;LSPs", 15, 0, 15);
+
+  h_gen_match_dxy = fs->make<TH1F>("h_gen_match_dxy", ";generated d_{xy} (cm);LSP daughter particles", 100, 0, 1);
+  h_gen_match_ntracks = fs->make<TH1F>("h_gen_match_ntracks", ";number of accepted displaced daughter particles;LSPs", 40, 0, 40);
+  h_gen_match_sumpt = fs->make<TH1F>("h_gen_match_sumpt", ";#Sigmap_{T} of accepted displaced daughter particles (GeV);LSPs", 100, 0, 1000);
+  h_gen_match_dbv = fs->make<TH1F>("h_gen_match_dbv", ";generated d_{BV} (cm);LSPs", 250, 0, 2.5);
+
+  h_rec_match_dxy = fs->make<TH1F>("h_rec_match_dxy", ";reconstructed d_{xy} (cm);tracks", 100, 0, 1);
+  h_rec_match_ntracks = fs->make<TH1F>("h_rec_match_ntracks", ";number of tracks;vertices", 40, 0, 40);
+  h_rec_match_bs2derr = fs->make<TH1F>("h_rec_match_bs2derr", ";#sigma(d_{BV}) (cm);vertices", 25, 0, 0.0025);
+  h_rec_match_dbv = fs->make<TH1F>("h_rec_match_dbv", ";reconstructed d_{BV} (cm);vertices", 250, 0, 2.5);
 }
 
 void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&) {
@@ -165,176 +139,106 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
 
   //////////////////////////////////////////////////////////////////////////////
 
-  for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
-    h_rec_jet_pt->Fill(mevent->jet_pt[ijet]);
+  //plot generator-level variables
+  int nquarks = 0;
+  float ht40 = 0;
+  for (int i = 0; i < 2; ++i) {
+    int ntracks = 0;
+    float sumpt = 0;
+    for (const reco::GenParticle* p : partons[i]) {
+      float dxy = fabs(dbv[i] * sin(p->phi() - atan2(v[i][1], v[i][0])));
+      if (p->pt() > 20 && fabs(p->eta()) < 2.5) {
+        if (is_quark(p)) {
+          ++nquarks;
+          if (p->pt() > 40) ht40 += p->pt();
+        }
+        if (dxy >= 0.01) {
+          ++ntracks;
+          sumpt += p->pt();
+        }
+      }
+      h_gen_dxy->Fill(dxy);
+    }
+    h_gen_ntracks->Fill(ntracks);
+    h_gen_sumpt->Fill(sumpt);
+    h_gen_dbv->Fill(dbv[i]);
   }
+  h_gen_njets->Fill(nquarks);
+  h_gen_ht40->Fill(ht40);
+  h_gen_dvv->Fill(dvv);
 
-  if (dbv[0] > min_dbv && dbv[0] < max_dbv && dbv[1] > min_dbv && dbv[1] < max_dbv) h_gen_dvv->Fill(dvv);
-
+  //plot reconstructed-level variables
+  h_rec_njets->Fill(mevent->njets());
+  h_rec_ht40->Fill(mevent->jet_ht(40));
+  for (const MFVVertexAux& vtx : *vertices) {
+    for (size_t i = 0, n = vtx.ntracks(); i < n; ++i) {
+      h_rec_dxy->Fill(vtx.track_dxy[i]);
+    }
+    h_rec_ntracks->Fill(vtx.ntracks());
+    h_rec_bs2derr->Fill(vtx.bs2derr);
+    h_rec_dbv->Fill(mevent->bs2ddist(vtx));
+  }
   if (vertices->size() >= 2) {
     h_rec_dvv->Fill(mag(vertices->at(0).x - vertices->at(1).x, vertices->at(0).y - vertices->at(1).y));
   }
 
-  std::vector<float> parton_pt;
-  for (int i = 0; i < 2; ++i) {
-    for (const reco::GenParticle* p : partons[i]) {
-      if (p->pt() > 20 && fabs(p->eta()) < 2.5 && is_quark(p)) {
-        parton_pt.push_back(p->pt());
-      }
-    }
-  }
-  std::sort(parton_pt.begin(), parton_pt.end(), [](float p1, float p2) { return p1 > p2; } );
-  h_gen_jetpt4->Fill(int(parton_pt.size()) >= 4 ? parton_pt.at(3) : 0.f);
-  h_gen_ht->Fill(std::accumulate(parton_pt.begin(), parton_pt.end(), 0.f));
-
-  for (int i = 0; i < 2; ++i) {
-    const int ndau = int(partons[i].size());
-
-    int ntracks = 0;
-    int nquarks = 0;
-    float sumpt = 0;
-    float drmin = 1e6;
-    float drmax = -1e6;
-    for (int j = 0; j < ndau; ++j) {
-      const reco::GenParticle* p1 = partons[i][j];
-      if (is_neutrino(p1) || p1->pt() < 20 || fabs(p1->eta()) > 2.5 || fabs(dbv[i] * sin(p1->phi() - atan2(v[i][1], v[i][0]))) < 0.01) continue;
-      ++ntracks;
-      if (!is_lepton(p1)) ++nquarks;
-      sumpt += p1->pt();
-      for (int k = j+1; k < ndau; ++k) {
-        const reco::GenParticle* p2 = partons[i][k];
-        if (is_neutrino(p2) || p2->pt() < 20 || fabs(p2->eta()) > 2.5 || fabs(dbv[i] * sin(p2->phi() - atan2(v[i][1], v[i][0]))) < 0.01) continue;
-        float dr = reco::deltaR(*p1, *p2);
-        if (dr < drmin)
-          drmin = dr;
-        if (dr > drmax)
-          drmax = dr;
-      }
-    }
-
-    if (dbv[i] > min_dbv && dbv[i] < max_dbv) {
-      for (int j = 0; j < ndau; ++j)
-        h_gen_dxy->Fill(fabs(mag(v[i][0], v[i][1]) * sin(partons[i][j]->phi() - atan2(v[i][1], v[i][0]))));
-      h_gen_dbv->Fill(dbv[i]);
-      h_gen_ntracks->Fill(ntracks);
-      h_gen_drmin->Fill(drmin);
-      h_gen_drmax->Fill(drmax);
-      h_gen_nquarks->Fill(nquarks);
-      h_gen_sumpt->Fill(sumpt);
-    }
-  }
-
-
+  //match vertices to LSPs
   int lsp_nmatch[2] = {0,0};
-  int nvtx_match = 0;
-  std::vector<int> lsp0_ntracks;
-  std::vector<int> lsp1_ntracks;
-
   for (const MFVVertexAux& vtx : *vertices) {
-    double dr = 1e99, dist = 1e99;
+    double dist = 1e99;
     int ilsp = -1;
 
-    if (max_dr > 0) {
-      double drs[2] = {
-        reco::deltaR(lsp_p4s[0].Eta(), lsp_p4s[0].Phi(), vtx.eta[which_mom], vtx.phi[which_mom]),
-        reco::deltaR(lsp_p4s[1].Eta(), lsp_p4s[1].Phi(), vtx.eta[which_mom], vtx.phi[which_mom])
-      };
+    double dists[2] = {
+      mag(v[0][0] - (vtx.x - x0),
+          v[0][1] - (vtx.y - y0),
+          v[0][2] - (vtx.z - z0)),
+      mag(v[1][0] - (vtx.x - x0),
+          v[1][1] - (vtx.y - y0),
+          v[1][2] - (vtx.z - z0)),
+    };
 
-      for (int i = 0; i < 2; ++i) {
-        if (drs[i] < max_dr) {
-          ++lsp_nmatch[i];
-          if (drs[i] < dr) {
-            dr = drs[i];
-            ilsp = i;
-          }
-        }
-      }
-    }
-    else if (max_dist > 0) {
-      double dists[2] = {
-        mag(v[0][0] - (vtx.x - x0),
-            v[0][1] - (vtx.y - y0),
-            v[0][2] - (vtx.z - z0)),
-        mag(v[1][0] - (vtx.x - x0),
-            v[1][1] - (vtx.y - y0),
-            v[1][2] - (vtx.z - z0)),
-      };
-
-      for (int i = 0; i < 2; ++i) {
-        if (dists[i] < max_dist) {
-          ++lsp_nmatch[i];
-          if (i == 0) lsp0_ntracks.push_back(vtx.ntracks());
-          if (i == 1) lsp1_ntracks.push_back(vtx.ntracks());
-          if (dists[i] < dist) {
-            dist = dists[i];
-            ilsp = i;
-          }
-        }
+    for (int i = 0; i < 2; ++i) {
+      if (dists[i] < dist) {
+        dist = dists[i];
+        ilsp = i;
       }
     }
 
-    if (ilsp < 0) {
+    if (ilsp < 0 || dist > max_dist) {
       continue;
     }
 
-    ++nvtx_match;
+    ++lsp_nmatch[ilsp];
 
-    int ntracks = 0;
-    int nquarks = 0;
-    float sumpt = 0;
-    float drmin = 1e6;
-    float drmax = -1e6;
-    const int ndau = int(partons[ilsp].size());
-    for (int j = 0; j < ndau; ++j) {
-      const reco::GenParticle* p1 = partons[ilsp][j];
-      if (is_neutrino(p1) || p1->pt() < 20 || fabs(p1->eta()) > 2.5 || fabs(dbv[ilsp] * sin(p1->phi() - atan2(v[ilsp][1], v[ilsp][0]))) < 0.01) continue;
-      ++ntracks;
-      if (!is_lepton(p1)) ++nquarks;
-      sumpt += p1->pt();
-      for (int k = j+1; k < ndau; ++k) {
-        const reco::GenParticle* p2 = partons[ilsp][k];
-        if (is_neutrino(p2) || p2->pt() < 20 || fabs(p2->eta()) > 2.5 || fabs(dbv[ilsp] * sin(p2->phi() - atan2(v[ilsp][1], v[ilsp][0]))) < 0.01) continue;
-        float dr = reco::deltaR(*p1, *p2);
-        if (dr < drmin)
-          drmin = dr;
-        if (dr > drmax)
-          drmax = dr;
-      }
-    }
-
-    h_vtx_dbv->Fill(dbv[ilsp]);
-    h_vtx_ntracks->Fill(ntracks);
-    h_vtx_drmin->Fill(drmin);
-    h_vtx_drmax->Fill(drmax);
-    h_vtx_nquarks->Fill(nquarks);
-    h_vtx_sumpt->Fill(sumpt);
-
-    if (lsp_nmatch[ilsp] == 1 && dbv[ilsp] > min_dbv && dbv[ilsp] < max_dbv) {
+    //plot variables for first matched vertex
+    if (lsp_nmatch[ilsp] == 1) {
       h_dist->Fill(dist);
 
-      for (size_t i = 0, n = vtx.ntracks(); i < n; ++i)
-        h_rec_dxy->Fill(vtx.track_dxy[i]);
+      int ntracks = 0;
+      float sumpt = 0;
+      for (const reco::GenParticle* p : partons[ilsp]) {
+        float dxy = fabs(dbv[ilsp] * sin(p->phi() - atan2(v[ilsp][1], v[ilsp][0])));
+        if (p->pt() > 20 && fabs(p->eta()) < 2.5 && dxy >= 0.01) {
+          ++ntracks;
+          sumpt += p->pt();
+        }
+        h_gen_match_dxy->Fill(dxy);
+      }
+      h_gen_match_ntracks->Fill(ntracks);
+      h_gen_match_sumpt->Fill(sumpt);
+      h_gen_match_dbv->Fill(dbv[ilsp]);
 
-      h_rec_ntracks->Fill(vtx.ntracks());
-      h_rec_bs2derr->Fill(vtx.bs2derr);
-      h_rec_drmin->Fill(vtx.drmin());
-      h_rec_drmax->Fill(vtx.drmax());
-      h_rec_njetsntks->Fill(vtx.njets[mfv::JByNtracks]);
-      h_rec_ntracksptgt3->Fill(vtx.ntracksptgt(3));
-      h_rec_dbv->Fill(vtx.bs2ddist);
+      for (size_t i = 0, n = vtx.ntracks(); i < n; ++i) {
+        h_rec_match_dxy->Fill(vtx.track_dxy[i]);
+      }
+      h_rec_match_ntracks->Fill(vtx.ntracks());
+      h_rec_match_bs2derr->Fill(vtx.bs2derr);
+      h_rec_match_dbv->Fill(mevent->bs2ddist(vtx));
     }
-
   }
 
-  // histogram lsp_nmatch
   for (int i = 0; i < 2; ++i) {
-    if (dbv[i] > min_dbv && dbv[i] < max_dbv) {
-      h_lspsnmatch->Fill(lsp_nmatch[i]);
-      if (lsp_nmatch[i] > 1) {
-        if (i == 0) h_lsp_ntracks0_ntracks1->Fill(lsp0_ntracks.at(0), lsp0_ntracks.at(1));
-        if (i == 1) h_lsp_ntracks0_ntracks1->Fill(lsp1_ntracks.at(0), lsp1_ntracks.at(1));
-      }
-    }
+    h_lspsnmatch->Fill(lsp_nmatch[i]);
   }
 }
 
