@@ -59,7 +59,7 @@ def crab_command(*args, **kwargs):
     except httplib.HTTPException, e:
         result = {}
         result['jobList'] = []
-        result['HTTPException'] = e
+        result['HTTPException'] = repr(e)
         result['status'] = 'HTTPException'
     except pycurl.error, e:
         result = {}
