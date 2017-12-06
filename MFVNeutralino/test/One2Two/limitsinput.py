@@ -1,3 +1,4 @@
+import gzip
 from JMTucker.MFVNeutralino.MiniTreeBase import *
 
 for i in xrange(10):
@@ -21,7 +22,7 @@ bkg_uncert = [(a**2 + b**2)**0.5 for a,b in zip(bkg_uncert, bkg_uncert_stat)] # 
 
 in_fn = '/uscms/home/jchu/public/2v_from_jets_data_2015p6_5track_default_v15_v5.root'
 #in_trees, in_scanpack_list = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV15_v5/mfv*root', None
-in_trees, in_scanpack_list = None, '/uscms/home/tucker/work/hip_8025/src/JMTucker/MFVNeutralino/test/MakeSamples/scanpacks/scanpack_merge_1_1p5_2.list'
+in_trees, in_scanpack_list = None, '/uscms/home/tucker/work/hip_8025/src/JMTucker/MFVNeutralino/test/MakeSamples/scanpacks/scanpack_merge_1_1p5_2_2p5_2p7.list.gz'
 
 limitsinput_fn = 'limitsinput.root'
 
@@ -174,7 +175,11 @@ def make():
         sigs = [(os.path.basename(fn).replace('.root', ''), [fn]) for fn in sigs]
     elif in_scanpack_list:
         title = in_scanpack_list
-        sigs = sorted(eval(open(in_scanpack_list).read()).items())
+        if in_scanpack_list.endswith('.gz'):
+            f_scanpack_list = gzip.GzipFile(in_scanpack_list)
+        else:
+            f_scanpack_list = open(in_scanpack_list)
+        sigs = sorted(eval(f_scanpack_list.read()).items())
 
     nsigs = len(sigs)
     hs_sig = []
