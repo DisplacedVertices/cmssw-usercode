@@ -16,7 +16,7 @@ def write(font, size, x, y, text):
     return w
 
 
-f = ROOT.TFile('figures.root')
+f = ROOT.TFile('signal_efficiency.root')
 
 for kind in 'mfv_ddbar', 'mfv_neu':
     c = ROOT.TCanvas('c', '', 800, 800)
@@ -38,6 +38,7 @@ for kind in 'mfv_ddbar', 'mfv_neu':
 #    xax.SetBinLabel(xax.FindBin(1000), '1000')
 #    xax.SetBinLabel(xax.FindBin(1200), '1200')
 #    xax.SetBinLabel(xax.FindBin(1400), '1400')
+    xax.SetRangeUser(300,2800)
     xax.SetLabelSize(0.045)
     xax.SetTitleSize(0.05)
     xax.SetTitleOffset(1.05)
