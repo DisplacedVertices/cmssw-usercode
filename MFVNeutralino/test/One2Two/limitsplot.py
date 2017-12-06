@@ -149,7 +149,7 @@ def make_1d_plot(d, name, xkey='mass'):
 
     class G:
         def __iter__(self):
-            for x in 'observed expect50 expect68 expect95 expect68lo expect68hi expect95lo expect95hi gluglu'.split():
+            for x in 'observed expect50 expect68 expect95 expect2p5 expect16 expect84 expect97p5 gluglu'.split():
                 if hasattr(self, x):
                     y = getattr(self, x)
                     y.SetName(x)
@@ -161,10 +161,10 @@ def make_1d_plot(d, name, xkey='mass'):
     g.expect95 = tgae(d[xkey], d['expect95'], None, None, d['expect95lo'], d['expect95hi'], '', xtitle, 5)
     g.expect68 = tgae(d[xkey], d['expect68'], None, None, d['expect68lo'], d['expect68hi'], '', xtitle, 3)
 
-    g.expect68lo = tgae(d[xkey], d['expect68lo'], None, None, None, None, '', xtitle, 1)
-    g.expect68hi = tgae(d[xkey], d['expect68hi'], None, None, None, None, '', xtitle, 1)
-    g.expect95lo = tgae(d[xkey], d['expect95lo'], None, None, None, None, '', xtitle, 1)
-    g.expect95hi = tgae(d[xkey], d['expect95hi'], None, None, None, None, '', xtitle, 1)
+    g.expect2p5 =  tgae(d[xkey], d['expect2p5'], None, None, None, None, '', xtitle, 1)
+    g.expect16  =  tgae(d[xkey], d['expect16'],  None, None, None, None, '', xtitle, 1)
+    g.expect84  =  tgae(d[xkey], d['expect84'],  None, None, None, None, '', xtitle, 1)
+    g.expect97p5 = tgae(d[xkey], d['expect97p5'], None, None, None, None, '', xtitle, 1)
 
     if xkey == 'mass':
         g.gluglu = make_gluglu()
