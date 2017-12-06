@@ -450,7 +450,8 @@ if __name__ == '__main__':
     elif 'compare' in sys.argv:
         compare(*sys.argv[2:5])
     elif 'nevents' in sys.argv:
-        for s in sample_iterator(ROOT.TFile(limitsinput_fn)):
+        f = ROOT.TFile(limitsinput_fn)
+        for s in sample_iterator(f):
             print s.name.ljust(30), '%6i' % int(nevents(f, s.isample))
     elif 'points' in sys.argv:
         print 'kinds = %r\nmasses = %r\ntaus = %r' % points()
