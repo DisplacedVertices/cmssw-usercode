@@ -582,7 +582,8 @@ for x in mfv_signal_samples + mfv_ddbar_samples:
         x.add_dataset('ntuplev15_sigmadxy%s' % y)
 
 for x in mfv_signal_samples_2015 + mfv_signal_samples + mfv_ddbar_samples + mfv_hip_samples:
-    x.add_dataset('ntuplev16_wgenv2')
+    if x != mfv_neu_tau10000um_M1600:
+        x.add_dataset('ntuplev16_wgenv2')
 
 for x in 'ntuplev15lep', 'ntuplev15lep_IsoMu24', 'ntuplev15lep_IsoTkMu24', 'ntuplev15lep_VVVL350', 'ntuplev15lep_VVVL400', 'ntuplev15lep_Mu50':
     mfv_neu_tau01000um_M0300.add_dataset(x)
