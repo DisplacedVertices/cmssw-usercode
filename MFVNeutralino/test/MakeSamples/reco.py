@@ -4,6 +4,7 @@
 
 import os, sys, FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
+import dynamicconf
 
 premix = True
 
@@ -11,7 +12,7 @@ for arg in sys.argv:
     if arg.startswith('premix='):
         premix = arg.replace('premix=','') == '1'
 
-process = cms.Process('RECO', eras.Run2_2016)
+process = cms.Process('RECO', eras.Run2_25ns if dynamicconf.doing_2015 else eras.Run2_2016)
 
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
@@ -21,7 +22,9 @@ process.load('SimGeneral.MixingModule.mixNoPU_cfi')
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.RawToDigi_cff')
-if not premix:
+if premix:
+    assert not dynamicconf.doing_2015
+else:
     process.load('Configuration.StandardSequences.L1Reco_cff')
 process.load('Configuration.StandardSequences.Reconstruction_cff')
 process.load('CommonTools.ParticleFlow.EITopPAG_cff')
@@ -47,8 +50,7 @@ process.AODSIMoutput = cms.OutputModule("PoolOutputModule",
                                         )
 
 from Configuration.AlCa.GlobalTag import GlobalTag
-from dynamicconf import globaltag
-process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
+process.GlobalTag = GlobalTag(process.GlobalTag, dynamicconf.globaltag, '')
 
 process.raw2digi_step = cms.Path(process.RawToDigi)
 if not premix:

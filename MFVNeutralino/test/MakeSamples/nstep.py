@@ -5,7 +5,7 @@ events_per = 100
 scanpack = None
 from_lhe = False
 output_level = 'reco'
-output_dataset_tag = 'RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6'
+output_dataset_tag = ''
 fixed_salt = ''
 use_this_cmssw = False
 premix = True
@@ -61,6 +61,9 @@ elif 0:
 
 ####
 
+if year == 2015 and premix:
+    raise ValueError("can't premix in 2015")
+
 if hip_right:
     hip_simulation = 1.0
     hip_mitigation = True
@@ -74,9 +77,6 @@ if hip_simulation:
         ex += '_mit'
 else:
     hip_mitigation = False
-
-if not premix:
-    output_dataset_tag = output_dataset_tag.replace('Premix', '')
 
 if scanpack:
     ex += '_' + scanpack
@@ -99,6 +99,7 @@ from time import time
 from JMTucker.Tools.CRAB3Tools import Config, crab_dirs_root, crab_command
 from JMTucker.Tools.general import index_startswith, save_git_status
 import JMTucker.Tools.colors as colors
+from JMTucker.MFVNeutralino.Year import year
 
 testing = 'testing' in sys.argv
 work_area = crab_dirs_root('nstep_%s%s' % (meta, ex))
@@ -150,6 +151,14 @@ config.Data.unitsPerJob = events_per
 config.Data.totalUnits = nevents
 config.Data.publication = output_level not in ('minitree', 'ntuple')
 config.Data.outputPrimaryDataset = 'SETME'
+if output_dataset_tag == '':
+    if year == 2015:
+        output_dataset_tag = 'RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12'
+    else:
+        if premix:
+            output_dataset_tag = 'RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6'
+        else:
+            output_dataset_tag = 'RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6'
 config.Data.outputDatasetTag = output_dataset_tag
 
 config.Site.storageSite = 'T3_US_FNALLPC'

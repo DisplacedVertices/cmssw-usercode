@@ -64,7 +64,7 @@ else:
 process.genstepfilter.triggerConditions = cms.vstring('generation_step')
 
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, dynamicconf.globaltag, '')
+process.GlobalTag = GlobalTag(process.GlobalTag, dynamicconf.globaltag_gensim, '')
 
 process.generator = cms.EDFilter('Pythia8HadronizerFilter' if fromlhe else 'Pythia8GeneratorFilter',
     comEnergy = cms.double(13000.0),
