@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+from JMTucker.MFVNeutralino.Year import year
+
 nevents = 10000
 events_per = 100
 scanpack = None
@@ -8,7 +10,7 @@ output_level = 'reco'
 output_dataset_tag = ''
 fixed_salt = ''
 use_this_cmssw = False
-premix = True
+premix = year != 2015
 trig_filter = False
 hip_simulation = False
 hip_mitigation = False
@@ -23,7 +25,7 @@ if 1:
     meta = 'scan'
     output_level = 'minitree'
     hip_right = False
-    scanpack = 'scanpack2p5'
+    scanpack = 'scanpacktest'
 elif 0:
     meta = 'neu'
 elif 0:
@@ -61,8 +63,10 @@ elif 0:
 
 ####
 
-if year == 2015 and premix:
-    raise ValueError("can't premix in 2015")
+if year == 2015:
+    ex += '_2015'
+    if premix:
+        raise ValueError("can't premix in 2015")
 
 if hip_right:
     hip_simulation = 1.0
@@ -99,7 +103,6 @@ from time import time
 from JMTucker.Tools.CRAB3Tools import Config, crab_dirs_root, crab_command
 from JMTucker.Tools.general import index_startswith, save_git_status
 import JMTucker.Tools.colors as colors
-from JMTucker.MFVNeutralino.Year import year
 
 testing = 'testing' in sys.argv
 work_area = crab_dirs_root('nstep_%s%s' % (meta, ex))
@@ -110,7 +113,9 @@ save_git_status(os.path.join(work_area, 'gitstatus'))
 
 config = Config()
 
-to_rm = []
+open('year.txt', 'wt').write(str(year))
+
+to_rm = ['year.txt']
 
 if output_level in ('minitree', 'ntuple'):
     for x in 'ntuple.py', 'minitree.py':
@@ -130,7 +135,7 @@ config.JobType.sendPythonFolder = True
 
 steering_fn = 'steering.sh'
 
-config.JobType.inputFiles = ['todoify.sh', steering_fn, 'lhe.py', 'gensim.py', 'dynamicconf.py', 'modify.py', 'scanpack.py', 'rawhlt.py', 'minbias.py', 'private_minbias.txt.gz', 'minbias_premix.txt.gz', 'reco.py', 'fixfjr.py']
+config.JobType.inputFiles = ['todoify.sh', steering_fn, 'lhe.py', 'gensim.py', 'dynamicconf.py', 'modify.py', 'scanpack.py', 'rawhlt.py', 'minbias.py', 'private_minbias.txt.gz', 'minbias_premix.txt.gz', 'reco.py', 'fixfjr.py', 'year.txt']
 if output_level in ('minitree', 'ntuple'):
     config.JobType.inputFiles += ['ntuple.py', 'minitree.py']
 
