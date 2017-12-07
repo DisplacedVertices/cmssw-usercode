@@ -170,6 +170,17 @@ exitbanner $? RECO
 ################################################################################
 
 if [[ $OUTPUTLEVEL == "ntuple" || $OUTPUTLEVEL == "minitree" ]]; then
+    if [[ $(ls -1d CMSSW* | wc -l) != 1 ]]; then
+        echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        echo @@@@ more than one CMSSW dir found:
+        ls -l | sed 's/^/@@@@ /'
+        echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        exit 1
+    fi
+    cd CMSSW*/src
+    eval $(scram runtime -sh)
+    cd ../..
+    
     echo START NTUPLE\|MINITREE at $(date)
 
     function doit {
