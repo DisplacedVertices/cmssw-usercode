@@ -2,7 +2,7 @@
 
 import os
 
-year = open('year.txt').read()
+year = open('year.txt').read().strip()
 doing_2015 = year == '2015'
 
 cmssw_version = os.environ['CMSSW_VERSION'].replace('patch', '').replace('pre', '-')
