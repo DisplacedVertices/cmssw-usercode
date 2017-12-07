@@ -4,11 +4,11 @@ from JMTucker.Tools.ROOTTools import *
 set_style()
 import JMTucker.Tools.Samples as Samples
 samples = [Samples.mfv_neu_tau01000um_M0800]
-histNames = ['njets', 'ht40', 'dxy', 'match_dxy', 'ntracks', 'match_ntracks', 'dbv', 'match_dbv', 'dvv']
+histNames = ['njets', 'jet_pt', 'jet_pt40', 'ht40', 'dxy', 'match_dxy', 'ntracks', 'match_ntracks', 'dbv', 'match_dbv', 'dvv']
 
 for sample in samples:
     ps = plot_saver('plots/theorist_recipe/mfvTheoristRecipeNoCuts/%s' % sample.name, size=(700,700), root=False)
-    f = ROOT.TFile('~/crabdirs/TheoristRecipeV3/%s.root' % sample.name)
+    f = ROOT.TFile('~/crabdirs/TheoristRecipeV4/%s.root' % sample.name)
     print sample.name
     for name in histNames:
         rec = f.Get('mfvTheoristRecipeNoCuts/h_rec_%s' % name)
