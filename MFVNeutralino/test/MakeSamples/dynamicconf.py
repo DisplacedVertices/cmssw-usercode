@@ -2,8 +2,8 @@
 
 import os
 
-from JMTucker.MFVNeutralino.Year import year
-doing_2015 = year == 2015
+year = open('year.txt').read()
+doing_2015 = year == '2015'
 
 cmssw_version = os.environ['CMSSW_VERSION'].replace('patch', '').replace('pre', '-')
 cmssw_version = tuple(int(x) for x in cmssw_version.split('_')[1:])

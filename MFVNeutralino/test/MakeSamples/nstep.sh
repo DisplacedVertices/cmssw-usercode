@@ -11,7 +11,7 @@ JOBNUM=$1
 
 source steering.sh
 
-YEAR=$(mfvyear.sh)
+YEAR=$(<year.txt)
 
 INDIR=$(pwd)
 OUTDIR=$(pwd)
