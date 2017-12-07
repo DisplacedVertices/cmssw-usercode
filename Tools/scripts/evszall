@@ -7,5 +7,6 @@ fi
 
 ls -l $1
 for x in MetaData ParameterSets LuminosityBlocks Runs Events; do
+    echo $x
     edmEventSize -vn $x $1
 done
