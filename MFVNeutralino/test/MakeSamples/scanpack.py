@@ -80,7 +80,8 @@ class scanpackbase(object):
 
     def __init__(self):
         self.name = self.__class__.__name__
-        self.build_samples()
+        if not hasattr(self, 'samples'):
+            self.build_samples()
         self.njobs = 0
         self.job2isample = []
         for isample, (kind,tau,mass) in enumerate(self.samples):
@@ -230,6 +231,20 @@ class scanpack2p7(scanpackbase100epj):
     # empty points from scanpack2 run
     samples_string ='gAJ9cQEoVRBzZXRfZ2x1aW5vX2RkYmFycQJHQEcAAAAAAABNWAKHTRAnaAJHP+ZmZmZmZmZNCAeHTRAnaAJHP+zMzMzMzM1N9AGHTRAnaAJHP+ZmZmZmZmZN0AeHTRAnaAJHP+zMzMzMzM1NYAmHTRAnVRJzZXRfbWZ2X25ldXRyYWxpbm9xA0dAUwAAAAAAAE1ABodNECdoAkc/7MzMzMzMzU3QB4dNECdoAkc/5mZmZmZmZk2wBIdNECdoAkdARwAAAAAAAE0oCodNECdoAkdARYAAAAAAAE2YCIdNECdoAkc/5mZmZmZmZk14BYdNECdoAkc/6ZmZmZmZmk2YCIdNECdoAkdASgAAAAAAAE30AYdNECdoAkc/8AAAAAAAAE2YCIdNECdoAkdARwAAAAAAAE2YCIdNECdoAkc/6ZmZmZmZmk0sAYdNECdoAkdARYAAAAAAAE0IB4dNECdoAkc/8AAAAAAAAE0sAYdNECdoAkc/7MzMzMzMzU0oCodNECdoAkdARwAAAAAAAE0IB4dNECdoA0dAS4AAAAAAAE2YCIdNECdoAkc/5mZmZmZmZk1YAodNECdoAkc/6ZmZmZmZmk14BYdNECdoAkc/8AAAAAAAAE14BYdNECdoAkdARYAAAAAAAE0oCodNECdoA0dAS4AAAAAAAE3oA4dNECdoAkdARYAAAAAAAE1ABodNECdoAkc/6ZmZmZmZmk3oA4dNECdoAkdASIAAAAAAAE30AYdNECdoAkc/6ZmZmZmZmk1YAodNECdoA0dAUwAAAAAAAE2YCIdNECdoAkdASgAAAAAAAE0oCodNECdoAkdARYAAAAAAAE14BYdNECdoAkdASIAAAAAAAE0IB4dNECdoAkdASgAAAAAAAE0IB4dNECdoAkdASIAAAAAAAE2YCIdNECdoAkdARwAAAAAAAE30AYdNECdoAkdASgAAAAAAAE2YCIdNECdoAkdASIAAAAAAAE0oCodNECdoAkc/6ZmZmZmZmk3QB4dNECdoAkc/7MzMzMzMzU2QAYdNECdoAkc/8AAAAAAAAE3QB4dNECdoAkdASgAAAAAAAE3oA4dNECdoAkc/7MzMzMzMzU3oA4dNECdoAkdASgAAAAAAAE14BYdNECdoA0dAS4AAAAAAAE3QB4dNECdoAkc/5mZmZmZmZk1gCYdNECdoAkc/6ZmZmZmZmk2wBIdNECdoAkc/7MzMzMzMzU2wBIdNECdoAkc/8AAAAAAAAE2wBIdNECdoAkdASIAAAAAAAE1ABodNECdoAkc/7MzMzMzMzU0IB4dNECdoAkdASIAAAAAAAE1YAodNECdoAkdASgAAAAAAAE1YAodNECdoAkc/8AAAAAAAAE1YAodNECdoA0dAS4AAAAAAAE2wBIdNECdoAkc/5mZmZmZmZk1ABodNECdoAkc/6ZmZmZmZmk2QAYdNECdoA0dAUwAAAAAAAE0oCodNECdoAkc/8AAAAAAAAE2QAYdNECdoAkc/5mZmZmZmZk30AYdNECdoA0dAUwAAAAAAAE3QB4dNECdoAkdASIAAAAAAAE14BYdNECdoAkdASgAAAAAAAE1gCYdNECdoAkc/5mZmZmZmZk2YCIdNECdoAkc/5mZmZmZmZk0gA4dNECdoA0dAUwAAAAAAAE0IB4dNECdoAkc/5mZmZmZmZk3oA4dNECdoAkc/6ZmZmZmZmk0oCodNECdoAkdARYAAAAAAAE1gCYdNECdoAkdASgAAAAAAAE1ABodNECdoAkdASIAAAAAAAE3QB4dNECdoA0dAUwAAAAAAAE14BYdNECdoAkdASgAAAAAAAE3QB4dNECdoA0dAS4AAAAAAAE0IB4dNECdoAkdASIAAAAAAAE1gCYdNECdoAkc/6ZmZmZmZmk0IB4dNECdoAkdARwAAAAAAAE0sAYdNECdoAkc/8AAAAAAAAE0IB4dNECdoAkdASgAAAAAAAE0gA4dNECdoAkdARwAAAAAAAE2wBIdNECdoAkdASgAAAAAAAE2wBIdNECdoAkdARwAAAAAAAE0gA4dNECdoAkc/8AAAAAAAAE3oA4dNECdoA0dAS4AAAAAAAE14BYdNECdoAkdASIAAAAAAAE2QAYdNECdoAkdARwAAAAAAAE2QAYdNECdoAkdASgAAAAAAAE2QAYdNECdoAkdASIAAAAAAAE0gA4dNECdoAkdASIAAAAAAAE2wBIdNECdoAkc/6ZmZmZmZmk0gA4dNECdoAkdASgAAAAAAAE0sAYdNECdoAkdARwAAAAAAAE1gCYdNECdoAkdARYAAAAAAAE3QB4dNECdoAkc/6ZmZmZmZmk1gCYdNECdoAkdARwAAAAAAAE3QB4dNECdoAkc/6ZmZmZmZmk30AYdNECdoAkc/7MzMzMzMzU1YAodNECdoAkc/8AAAAAAAAE30AYdNECdoAkdARwAAAAAAAE1ABodNECdoA0dAS4AAAAAAAE1ABodNECdoAkc/6ZmZmZmZmk1ABodNECdoAkc/7MzMzMzMzU0gA4dNECdoAkc/8AAAAAAAAE1ABodNECdoAkdASIAAAAAAAE0sAYdNECdoAkc/7MzMzMzMzU14BYdNECdoAkdARwAAAAAAAE14BYdNECdoAkc/5mZmZmZmZk0oCodNECdoA0dAUwAAAAAAAE1gCYdNECdoAkdARwAAAAAAAE3oA4dNECdoAkc/7MzMzMzMzU0sAYdNECdoAkc/7MzMzMzMzU1ABodNECdoAkc/8AAAAAAAAE0gA4dNECdoAkdASIAAAAAAAE3oA4dNECdoAkc/7MzMzMzMzU2YCIdNECd1Lg=='
 
+class scanpack2015supplement(scanpackbase100epj):
+    kinds = [set_mfv_neutralino, set_gluino_ddbar]
+    taus = [tau/1000. for tau in [100,300,1000,10000,30000]]
+    masses = range(300, 601, 100) + range(800, 1601, 400) + [3000]
+
+    #samples = [(set_gluino_ddbar,t,m) for t in taus for m in masses]
+    #samples += [(set_mfv_neutralino,t,m) for t in taus for m in (500,600,3000)]
+    #samples += [(set_mfv_neutralino,30.,m) for m in masses]
+    #samples += [(set_mfv_neutralino,1.,800),(set_mfv_neutralino,0.3,800),(set_mfv_neutralino,1.,400)] # duplicate points for check
+
+    jobs_per_batch = 1000
+    def events_per_sample(self, kind, tau, mass):
+        return 10000
+
 ####
 
 def get_scanpack(x):
@@ -243,6 +258,7 @@ def get_scanpack(x):
         'scanpack2p5': scanpack2p5,
         'scanpack2p6': scanpack2p6,
         'scanpack2p7': scanpack2p7,
+        'scanpack2015supplement': scanpack2015supplement,
         }[x]()
 
 def do_scanpack(process, x, batch, job):
