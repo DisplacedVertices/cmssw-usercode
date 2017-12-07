@@ -448,11 +448,45 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   //////////////////////////////////////////////////////////////////////
 
   if (lightweight) {
+    // keep
+    // for weight: gen_weight, npv, ngoodpv, , npu
+    // for trigger: pass_
+    // for njets and ht40: jet_pt vector
+    // jet_id vector
+    // beamspot and slopes, pvx,y,z
+
+    mevent->gen_valid = 0;
+    mevent->gen_weightprod = 0;
+    mevent->gen_flavor_code = 0;
+    for (int i = 0; i < 2; ++i) {
+      mevent->gen_lsp_pt[i] = mevent->gen_lsp_eta[i] = mevent->gen_lsp_phi[i] = mevent->gen_lsp_mass[i] = 0;
+      mevent->gen_decay_type[i] = 0;
+      for (int j = 0; j < 3; ++j)
+        mevent->gen_lsp_decay[i*3+j] = 0;
+    }
+    for (int i = 0; i < 3; ++i) {
+      mevent->gen_pv[i] = 0;
+    }
     mevent->gen_bquarks.clear();
     mevent->gen_leptons.clear();
     mevent->gen_jets.clear();
     mevent->gen_daughters.clear();
     mevent->gen_daughter_id.clear();
+    mevent->l1_htt = 0;
+    mevent->l1_myhtt = 0;
+    mevent->l1_myhttwbug = 0;
+    mevent->hlt_ht = 0;
+    mevent->hlt_ht4mc = 0;
+    mevent->bswidthx = 0;
+    mevent->bswidthy = 0;
+    mevent->pvcxx = 0;
+    mevent->pvcxy = 0;
+    mevent->pvcxz = 0;
+    mevent->pvcyy = 0;
+    mevent->pvcyz = 0;
+    mevent->pvczz = 0;
+    mevent->pv_ntracks = 0;
+    mevent->pv_sumpt2 = 0; 
     mevent->jet_pudisc.clear();
     mevent->jet_raw_pt.clear();
     mevent->jet_calo_pt.clear();
@@ -471,6 +505,8 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->jet_svcyy.clear();
     mevent->jet_svcyz.clear();
     mevent->jet_svczz.clear();
+    mevent->metx = 0;
+    mevent->mety = 0;
     mevent->lep_id.clear();
     mevent->lep_pt.clear();
     mevent->lep_eta.clear();
