@@ -66,15 +66,17 @@ process.p *= process.mfvTriggerFloats * process.mfvEvent
 
 if run_n_tk_seeds:
     process.mfvEvent.lightweight = True
+    process.out.fileName = 'ntkseeds.root'
+    if run_n_tk_seeds != 'full':
+        output_commands.remove('keep MFVVertexAuxs_mfvVerticesAux_*_*')
     from JMTucker.MFVNeutralino.Vertexer_cff import modifiedVertexSequence
     output_commands += ['keep VertexerPairEffs_mfvVertices_*_*']
     for n_tk_seed in 3,4,5:
         ex = '%iTkSeed' % n_tk_seed
         process.p *= modifiedVertexSequence(process, ex, n_tracks_per_seed_vertex = n_tk_seed)
-        output_commands += [
-            'keep VertexerPairEffs_mfvVertices%s_*_*' % ex,
-            'keep MFVVertexAuxs_mfvVerticesAux%s_*_*' % ex,
-            ]
+        output_commands += ['keep VertexerPairEffs_mfvVertices%s_*_*' % ex]
+        if run_n_tk_seeds == 'full':
+            output_commands += ['keep MFVVertexAuxs_mfvVerticesAux%s_*_*' % ex]
 
 if event_filter:
     import JMTucker.MFVNeutralino.EventFilter
