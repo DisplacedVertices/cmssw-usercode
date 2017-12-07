@@ -77,27 +77,27 @@ process.pTwoVtxDvv400um = cms.Path(common * process.mfvSelectedVerticesTight * p
 process.mfvGenNoCuts = mfvTheoristRecipe.clone()
 process.pGenNoCuts = cms.Path(common * process.mfvGenParticleFilter * process.mfvGenNoCuts)
 
-process.mfvGenParticleFilterFourJets = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 20)
+process.mfvGenParticleFilterFourJets = process.mfvGenParticleFilter.clone(min_npartons = 4)
 process.mfvGenFourJets = mfvTheoristRecipe.clone()
 process.pGenFourJets = cms.Path(common * process.mfvGenParticleFilterFourJets * process.mfvGenFourJets)
 
-process.mfvGenParticleFilterSumHT = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 20, min_parton_ht = 1000)
-process.mfvGenSumHT = mfvTheoristRecipe.clone()
-process.pGenSumHT = cms.Path(common * process.mfvGenParticleFilterSumHT * process.mfvGenSumHT)
+process.mfvGenParticleFilterHT40 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_ht40 = 1000)
+process.mfvGenHT40 = mfvTheoristRecipe.clone()
+process.pGenHT40 = cms.Path(common * process.mfvGenParticleFilterHT40 * process.mfvGenHT40)
 
-process.mfvGenParticleFilterGeo2ddist = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 20, min_parton_ht = 1000, max_rho0 = 2.0, max_rho1 = 2.0)
+process.mfvGenParticleFilterGeo2ddist = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_ht40 = 1000, max_rho0 = 2.0, max_rho1 = 2.0)
 process.mfvGenGeo2ddist = mfvTheoristRecipe.clone()
 process.pGenGeo2ddist = cms.Path(common * process.mfvGenParticleFilterGeo2ddist * process.mfvGenGeo2ddist)
 
-process.mfvGenParticleFilterBsbs2ddist = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 20, min_parton_ht = 1000, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01)
+process.mfvGenParticleFilterBsbs2ddist = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_ht40 = 1000, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01)
 process.mfvGenBsbs2ddist = mfvTheoristRecipe.clone()
 process.pGenBsbs2ddist = cms.Path(common * process.mfvGenParticleFilterBsbs2ddist * process.mfvGenBsbs2ddist)
 
-process.mfvGenParticleFilterSumpt200 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 20, min_parton_ht = 1000, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_sumpt = 200)
+process.mfvGenParticleFilterSumpt200 = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_ht40 = 1000, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_sumpt = 200)
 process.mfvGenSumpt200 = mfvTheoristRecipe.clone()
 process.pGenSumpt200 = cms.Path(common * process.mfvGenParticleFilterSumpt200 * process.mfvGenSumpt200)
 
-process.mfvGenParticleFilterDvv400um = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_pt = 20, min_parton_ht = 1000, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_sumpt = 200, min_dvv = 0.04)
+process.mfvGenParticleFilterDvv400um = process.mfvGenParticleFilter.clone(min_npartons = 4, min_parton_ht40 = 1000, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_sumpt = 200, min_dvv = 0.04)
 process.mfvGenDvv400um = mfvTheoristRecipe.clone()
 process.pGenDvv400um = cms.Path(common * process.mfvGenParticleFilterDvv400um * process.mfvGenDvv400um)
 

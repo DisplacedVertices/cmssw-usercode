@@ -10,7 +10,7 @@ gen_den = 'NoCuts'
 iden = 0
 
 #rec_den = 'PreSel'
-#gen_den = 'SumHT'
+#gen_den = 'HT40'
 #iden = 3
 
 #rec_den = 'TwoVtxBsbs2ddist'
@@ -18,7 +18,7 @@ iden = 0
 #iden = 6
 
 reconstructed = ['NoCuts', 'TrigSel', 'OfflineJets', 'PreSel', 'TwoVtxNoCuts', 'TwoVtxGeo2ddist', 'TwoVtxBsbs2ddist', 'TwoVtxNtracks', 'TwoVtxBs2derr', 'TwoVtxDvv400um']
-generated = ['NoCuts', '', 'FourJets', 'SumHT', '', 'Geo2ddist', 'Bsbs2ddist', '', 'Sumpt200', 'Dvv400um']
+generated = ['NoCuts', '', 'FourJets', 'HT40', '', 'Geo2ddist', 'Bsbs2ddist', '', 'Sumpt200', 'Dvv400um']
 
 samples = '''mfv_neu_tau00100um_M0300
 mfv_neu_tau00300um_M0300
@@ -343,7 +343,7 @@ l1 = ROOT.TLegend(0.75,0.1,0.95,0.5)
 l2 = ROOT.TLegend(0.75,0.5,0.95,0.9)
 for j,sample in enumerate(samples):
     print sample
-    file = ROOT.TFile('~/crabdirs/TheoristRecipeV2/%s.root'%sample)
+    file = ROOT.TFile('~/crabdirs/TheoristRecipeV5/%s.root'%sample)
     nrec = file.Get('mfvTheoristRecipe%s/h_gen_dvv'%rec_den).GetEntries()
     ngen = file.Get('mfvGen%s/h_gen_dvv'%gen_den).GetEntries()
     print '%26s%26s%20s%20s%20s' % ('reconstructed', 'generated', 'reco eff +/- error', 'gen eff +/- error', 'gen/reco +/- error')

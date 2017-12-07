@@ -51,6 +51,7 @@ private:
   const int min_npartons;
   const double min_parton_pt;
   const double min_parton_ht;
+  const double min_parton_ht40;
   const int min_ntracks;
   const int min_nquarks;
   const double min_sumpt;
@@ -90,6 +91,7 @@ MFVGenParticleFilter::MFVGenParticleFilter(const edm::ParameterSet& cfg)
     min_npartons(cfg.getParameter<int>("min_npartons")),
     min_parton_pt(cfg.getParameter<double>("min_parton_pt")),
     min_parton_ht(cfg.getParameter<double>("min_parton_ht")),
+    min_parton_ht40(cfg.getParameter<double>("min_parton_ht40")),
     min_ntracks(cfg.getParameter<int>("min_ntracks")),
     min_nquarks(cfg.getParameter<int>("min_nquarks")),
     min_sumpt(cfg.getParameter<double>("min_sumpt")),
@@ -222,6 +224,8 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
   if (min_npartons > 0 && (int(parton_pt.size()) >= min_npartons ? parton_pt.at(min_npartons-1) : 0.f) < min_parton_pt)
     return false;
   if (std::accumulate(parton_pt.begin(), parton_pt.end(), 0.f) < min_parton_ht)
+    return false;
+  if (std::accumulate(parton_pt.begin(), parton_pt.end(), 0.f, [](float init, float b) { if (b > 40) init += b; return init; }) < min_parton_ht40)
     return false;
 
   for (int i = 0; i < 2; ++i) {
