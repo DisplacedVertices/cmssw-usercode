@@ -111,7 +111,7 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
 
   h_gen_valid->Fill(mci->valid());
   if (!mci->valid()) {
-    std::cout << "MCInteraction not valid--model not implemented? skipping event" << std::endl;
+    std::cout << "MFVTheoristRecipe: MCInteraction not valid--model not implemented? skipping event" << std::endl;
     return;
   }
 
