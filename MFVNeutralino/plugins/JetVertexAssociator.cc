@@ -26,7 +26,11 @@ private:
   const edm::EDGetTokenT<pat::JetCollection> jet_token;
   const edm::EDGetTokenT<reco::VertexRefVector> vertex_ref_token;
   const edm::EDGetTokenT<reco::VertexCollection> vertex_token;
-  
+
+  const bool input_is_miniaod;
+  const edm::EDGetTokenT<reco::TrackCollection> unpacked_tracks_token;
+  const edm::EDGetTokenT<std::vector<size_t>> unpacking_map_token;
+
   const bool input_is_refs;
   const std::string tag_info_name;
   const double min_vertex_track_weight;
@@ -80,6 +84,9 @@ MFVJetVertexAssociator::MFVJetVertexAssociator(const edm::ParameterSet& cfg)
     jet_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jet_src"))),
     vertex_ref_token(consumes<reco::VertexRefVector>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
+    input_is_miniaod(cfg.getParameter<bool>("input_is_miniaod")),
+    unpacked_tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("unpacked_tracks_src"))),
+    unpacking_map_token(consumes<std::vector<size_t>>(cfg.getParameter<edm::InputTag>("unpacking_map_src"))),
     input_is_refs(cfg.getParameter<bool>("input_is_refs")),
     tag_info_name(cfg.getParameter<std::string>("tag_info_name")),
     min_vertex_track_weight(cfg.getParameter<double>("min_vertex_track_weight")),
@@ -142,6 +149,18 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
   event.getByToken(jet_token, jets);
 
   std::vector<reco::VertexRef> vertices;
+
+  edm::Handle<reco::TrackCollection> unpacked_tracks;
+  edm::Handle<std::vector<size_t>> unpacking_map;
+  std::map<size_t, size_t> inverse_unpacking_map;
+  if (input_is_miniaod) {
+    event.getByToken(unpacked_tracks_token, unpacked_tracks);
+    event.getByToken(unpacking_map_token, unpacking_map);
+    for (size_t itrk = 0, itrke = unpacking_map->size(); itrk < itrke; ++itrk) {
+      const size_t ipack = (*unpacking_map)[itrk];
+      inverse_unpacking_map[ipack] = itrk;
+    }
+  }
 
   if (input_is_refs) {
     edm::Handle<reco::VertexRefVector> h;
@@ -215,10 +234,21 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
     for (size_t ijet = 0; ijet < n_jets; ++ijet) {
       const pat::Jet& jet = jets->at(ijet);
       std::set<reco::TrackRef> jet_tracks;
-      for (const reco::PFCandidatePtr& pfcand : jet.getPFConstituents()) {
-        const reco::TrackRef& tk = pfcand->trackRef();
-        if (tk.isNonnull())
-          jet_tracks.insert(tk);
+
+      if (input_is_miniaod) {
+        for (const reco::CandidatePtr& p : jet.daughterPtrVector()) {
+          const size_t ipack = p.key();
+          auto it = inverse_unpacking_map.find(ipack);
+          if (it != inverse_unpacking_map.end())
+            jet_tracks.insert(reco::TrackRef(unpacked_tracks, it->second));
+        }
+      }
+      else {
+        for (const reco::PFCandidatePtr& pfcand : jet.getPFConstituents()) {
+          const reco::TrackRef& tk = pfcand->trackRef();
+          if (tk.isNonnull())
+            jet_tracks.insert(tk);
+        }
       }
 
       const size_t n_jet_tracks = jet_tracks.size();
