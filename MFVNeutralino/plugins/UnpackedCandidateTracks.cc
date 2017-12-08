@@ -15,22 +15,29 @@ private:
 };
 
 MFVUnpackedCandidateTracks::MFVUnpackedCandidateTracks(const edm::ParameterSet& cfg)
-  : packed_candidates_token(consumes<pat::PackedCandidateCollection>(edm::InputTag("packedPFCandidates")))
+  : packed_candidates_token(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("packed_candidates_src")))
 {
   produces<reco::TrackCollection>();
+  produces<std::vector<size_t>>(); // map back to which packed candidate
 }
 
 void MFVUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetup& setup) {
   edm::Handle<pat::PackedCandidateCollection> packed_candidates;
   event.getByToken(packed_candidates_token, packed_candidates);
 
-  std::auto_ptr<reco::TrackCollection> output_tracks(new reco::TrackCollection);
+  std::unique_ptr<reco::TrackCollection> tracks(new reco::TrackCollection);
+  std::unique_ptr<std::vector<size_t>> which(new std::vector<size_t>);
 
-  for (const pat::PackedCandidate& cand : *packed_candidates)
-    if (cand.charge())
-      output_tracks->push_back(cand.pseudoTrack());
+  for (size_t i = 0, ie = packed_candidates->size(); i < ie; ++i) {
+    const pat::PackedCandidate& cand = (*packed_candidates)[i];
+    if (cand.charge()) {
+      tracks->push_back(cand.pseudoTrack());
+      which->push_back(i);
+    }
+  }
 
-  event.put(output_tracks);
+  event.put(std::move(tracks));
+  event.put(std::move(which));
 }
 
 DEFINE_FWK_MODULE(MFVUnpackedCandidateTracks);
