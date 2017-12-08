@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 mfvVerticesToJets = cms.EDProducer('MFVJetVertexAssociator',
+                                   enable = cms.bool(True),
                                    jet_src = cms.InputTag('selectedPatJets'),
                                    vertex_src = cms.InputTag('mfvSelectedVerticesTmp'),
                                    input_is_refs = cms.bool(True),

@@ -22,6 +22,7 @@ public:
 private:
   typedef mfv::JetVertexAssociation Association;
 
+  const bool enable;
   const edm::EDGetTokenT<pat::JetCollection> jet_token;
   const edm::EDGetTokenT<reco::VertexRefVector> vertex_ref_token;
   const edm::EDGetTokenT<reco::VertexCollection> vertex_token;
@@ -75,7 +76,8 @@ private:
 };
 
 MFVJetVertexAssociator::MFVJetVertexAssociator(const edm::ParameterSet& cfg)
-  : jet_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jet_src"))),
+  : enable(cfg.getParameter<bool>("enable")),
+    jet_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jet_src"))),
     vertex_ref_token(consumes<reco::VertexRefVector>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     input_is_refs(cfg.getParameter<bool>("input_is_refs")),
@@ -209,137 +211,138 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
   std::vector<Measurement1D> best_miss_dist(n_jets, Measurement1D(1e9, 1));
   std::vector<Measurement1D> second_best_miss_dist(n_jets, Measurement1D(1e9, 1));
 
-  for (size_t ijet = 0; ijet < n_jets; ++ijet) {
-    const pat::Jet& jet = jets->at(ijet);
-    std::set<reco::TrackRef> jet_tracks;
-    for (const reco::PFCandidatePtr& pfcand : jet.getPFConstituents()) {
-      const reco::TrackRef& tk = pfcand->trackRef();
-      if (tk.isNonnull())
-        jet_tracks.insert(tk);
-    }
+  if (enable) {
+    for (size_t ijet = 0; ijet < n_jets; ++ijet) {
+      const pat::Jet& jet = jets->at(ijet);
+      std::set<reco::TrackRef> jet_tracks;
+      for (const reco::PFCandidatePtr& pfcand : jet.getPFConstituents()) {
+        const reco::TrackRef& tk = pfcand->trackRef();
+        if (tk.isNonnull())
+          jet_tracks.insert(tk);
+      }
 
-    const size_t n_jet_tracks = jet_tracks.size();
-    if (histos)
-      h_n_jet_tracks->Fill(n_jet_tracks);
+      const size_t n_jet_tracks = jet_tracks.size();
+      if (histos)
+        h_n_jet_tracks->Fill(n_jet_tracks);
 
-    const reco::SecondaryVertexTagInfo* jet_tag = jet.tagInfoSecondaryVertex(tag_info_name);
-    const reco::Vertex* jet_tag_vtx = 0;
-    TVector3 jet_tag_vtx_pos;
-    if (jet_tag && jet_tag->nVertices() > 0) {
-      jet_tag_vtx = &jet_tag->secondaryVertex(0);
-      jet_tag_vtx_pos.SetXYZ(jet_tag_vtx->x(), jet_tag_vtx->y(), jet_tag_vtx->z());
-    }
-    const TVector3 jet_mom_dir = TVector3(jet.px(), jet.py(), jet.pz()).Unit();
+      const reco::SecondaryVertexTagInfo* jet_tag = jet.tagInfoSecondaryVertex(tag_info_name);
+      const reco::Vertex* jet_tag_vtx = 0;
+      TVector3 jet_tag_vtx_pos;
+      if (jet_tag && jet_tag->nVertices() > 0) {
+        jet_tag_vtx = &jet_tag->secondaryVertex(0);
+        jet_tag_vtx_pos.SetXYZ(jet_tag_vtx->x(), jet_tag_vtx->y(), jet_tag_vtx->z());
+      }
+      const TVector3 jet_mom_dir = TVector3(jet.px(), jet.py(), jet.pz()).Unit();
 
-    for (size_t ivtx = 0; ivtx < n_vertices; ++ivtx) {
-      const reco::Vertex& vtx = *vertices.at(ivtx);
-      int ntracks = 0;
-      int ntracks_ptmin = 0;
-      int sum_nhits = 0;
-      double cos_angle = 1e9;
-      Measurement1D miss_dist(1e9, 1);
+      for (size_t ivtx = 0; ivtx < n_vertices; ++ivtx) {
+        const reco::Vertex& vtx = *vertices.at(ivtx);
+        int ntracks = 0;
+        int ntracks_ptmin = 0;
+        int sum_nhits = 0;
+        double cos_angle = 1e9;
+        Measurement1D miss_dist(1e9, 1);
 
-      for (auto itk = vtx.tracks_begin(), itke = vtx.tracks_end(); itk != itke; ++itk) {
-        if (vtx.trackWeight(*itk) >= min_vertex_track_weight) {
-          reco::TrackRef tk = itk->castTo<reco::TrackRef>();
-          if (jet_tracks.count(tk) > 0) {
-            ++ntracks;
-            if (tk->pt() > min_track_pt)
-              ++ntracks_ptmin;
-            sum_nhits += tk->hitPattern().numberOfValidHits();
+        for (auto itk = vtx.tracks_begin(), itke = vtx.tracks_end(); itk != itke; ++itk) {
+          if (vtx.trackWeight(*itk) >= min_vertex_track_weight) {
+            reco::TrackRef tk = itk->castTo<reco::TrackRef>();
+            if (jet_tracks.count(tk) > 0) {
+              ++ntracks;
+              if (tk->pt() > min_track_pt)
+                ++ntracks_ptmin;
+              sum_nhits += tk->hitPattern().numberOfValidHits();
+            }
           }
         }
-      }
 
-      if (jet_tag_vtx) {
-        const TVector3 sv_to_tv = jet_tag_vtx_pos - TVector3(vtx.x(), vtx.y(), vtx.z());
-        cos_angle = sv_to_tv.Dot(jet_mom_dir) / sv_to_tv.Mag();
+        if (jet_tag_vtx) {
+          const TVector3 sv_to_tv = jet_tag_vtx_pos - TVector3(vtx.x(), vtx.y(), vtx.z());
+          cos_angle = sv_to_tv.Dot(jet_mom_dir) / sv_to_tv.Mag();
 
-        // JMTBAD use mfv::miss_dist()
-        // miss distance is magnitude of (jet direction cross (tv - sv))
-        // to calculate uncertainty, use |n X d|^2 = (|n||d|)^2 - (n . d)^2
-        const TVector3& n = jet_mom_dir;
-        const TVector3& d = sv_to_tv;
-        const double n_dot_d = n.Dot(d);
-        const TVector3 n_cross_d = n.Cross(d);
-        typedef math::VectorD<3>::type vec_t;
-        typedef math::ErrorD<3>::type mat_t;
-        vec_t jacobian(2*d.x() - 2*n_dot_d*n.x(),
-                       2*d.y() - 2*n_dot_d*n.y(),
-                       2*d.z() - 2*n_dot_d*n.z());
-        mat_t sv_to_tv_cov_matrix = vtx.covariance() + jet_tag_vtx->covariance();
-        double sigma_f2 = sqrt(ROOT::Math::Similarity(jacobian, sv_to_tv_cov_matrix));
-        double miss_dist_value = n_cross_d.Mag();
-        double miss_dist_err = sigma_f2 / 2 / miss_dist_value;
-        miss_dist = Measurement1D(miss_dist_value, miss_dist_err);
-      }
+          // JMTBAD use mfv::miss_dist()
+          // miss distance is magnitude of (jet direction cross (tv - sv))
+          // to calculate uncertainty, use |n X d|^2 = (|n||d|)^2 - (n . d)^2
+          const TVector3& n = jet_mom_dir;
+          const TVector3& d = sv_to_tv;
+          const double n_dot_d = n.Dot(d);
+          const TVector3 n_cross_d = n.Cross(d);
+          typedef math::VectorD<3>::type vec_t;
+          typedef math::ErrorD<3>::type mat_t;
+          vec_t jacobian(2*d.x() - 2*n_dot_d*n.x(),
+                         2*d.y() - 2*n_dot_d*n.y(),
+                         2*d.z() - 2*n_dot_d*n.z());
+          mat_t sv_to_tv_cov_matrix = vtx.covariance() + jet_tag_vtx->covariance();
+          double sigma_f2 = sqrt(ROOT::Math::Similarity(jacobian, sv_to_tv_cov_matrix));
+          double miss_dist_value = n_cross_d.Mag();
+          double miss_dist_err = sigma_f2 / 2 / miss_dist_value;
+          miss_dist = Measurement1D(miss_dist_value, miss_dist_err);
+        }
 
-      if (ntracks >= min_tracks_shared && ntracks > best_ntracks[ijet]) {
-        second_best_ntracks[ijet] = best_ntracks[ijet];
-        best_ntracks[ijet] = ntracks;
-        index_by_ntracks[ijet] = ivtx;
-      }
+        if (ntracks >= min_tracks_shared && ntracks > best_ntracks[ijet]) {
+          second_best_ntracks[ijet] = best_ntracks[ijet];
+          best_ntracks[ijet] = ntracks;
+          index_by_ntracks[ijet] = ivtx;
+        }
 
-      if (ntracks_ptmin >= min_tracks_shared && ntracks_ptmin > best_ntracks_ptmin[ijet]) {
-        second_best_ntracks_ptmin[ijet] = best_ntracks_ptmin[ijet];
-        best_ntracks_ptmin[ijet] = ntracks_ptmin;
-        index_by_ntracks_ptmin[ijet] = ivtx;
-      }
+        if (ntracks_ptmin >= min_tracks_shared && ntracks_ptmin > best_ntracks_ptmin[ijet]) {
+          second_best_ntracks_ptmin[ijet] = best_ntracks_ptmin[ijet];
+          best_ntracks_ptmin[ijet] = ntracks_ptmin;
+          index_by_ntracks_ptmin[ijet] = ivtx;
+        }
 
-      if (sum_nhits >= min_hits_shared && sum_nhits > best_sum_nhits[ijet]) {
-        second_best_sum_nhits[ijet] = best_sum_nhits[ijet];
-        best_sum_nhits[ijet] = sum_nhits;
-        index_by_sum_nhits[ijet] = ivtx;
-      }
+        if (sum_nhits >= min_hits_shared && sum_nhits > best_sum_nhits[ijet]) {
+          second_best_sum_nhits[ijet] = best_sum_nhits[ijet];
+          best_sum_nhits[ijet] = sum_nhits;
+          index_by_sum_nhits[ijet] = ivtx;
+        }
       
       
-      if (fabs(cos_angle - 1) <= max_cos_angle_diff && fabs(cos_angle - 1) < fabs(best_cos_angle[ijet] - 1)) {
-        second_best_cos_angle[ijet] = best_cos_angle[ijet];
-        best_cos_angle[ijet] = cos_angle;
-        index_by_cos_angle[ijet] = ivtx;
-      }
+        if (fabs(cos_angle - 1) <= max_cos_angle_diff && fabs(cos_angle - 1) < fabs(best_cos_angle[ijet] - 1)) {
+          second_best_cos_angle[ijet] = best_cos_angle[ijet];
+          best_cos_angle[ijet] = cos_angle;
+          index_by_cos_angle[ijet] = ivtx;
+        }
 
-      if (miss_dist.value() <= max_miss_dist && miss_dist.significance() <= max_miss_sig && miss_dist.value() < best_miss_dist[ijet].value()) {
-        second_best_miss_dist[ijet] = best_miss_dist[ijet];
-        best_miss_dist[ijet] = miss_dist;
-        index_by_miss_dist[ijet] = ivtx;
-      }
+        if (miss_dist.value() <= max_miss_dist && miss_dist.significance() <= max_miss_sig && miss_dist.value() < best_miss_dist[ijet].value()) {
+          second_best_miss_dist[ijet] = best_miss_dist[ijet];
+          best_miss_dist[ijet] = miss_dist;
+          index_by_miss_dist[ijet] = ivtx;
+        }
+
+        if (histos) {
+          h_ntracks->Fill(ntracks);
+          h_ntracks_ptmin->Fill(ntracks_ptmin);
+          h_sum_nhits->Fill(sum_nhits);
+          h_cos_angle->Fill(cos_angle);
+          h_miss_dist->Fill(miss_dist.value());
+          h_miss_dist_err->Fill(miss_dist.error());
+          h_miss_dist_sig->Fill(miss_dist.significance());
+          h_miss_dist_err_v->Fill(miss_dist.value(), miss_dist.error());
+        }        
+      }        
 
       if (histos) {
-        h_ntracks->Fill(ntracks);
-        h_ntracks_ptmin->Fill(ntracks_ptmin);
-        h_sum_nhits->Fill(sum_nhits);
-        h_cos_angle->Fill(cos_angle);
-        h_miss_dist->Fill(miss_dist.value());
-        h_miss_dist_err->Fill(miss_dist.error());
-        h_miss_dist_sig->Fill(miss_dist.significance());
-        h_miss_dist_err_v->Fill(miss_dist.value(), miss_dist.error());
+        h_best_ntracks->Fill(best_ntracks[ijet]);
+        h_best_ntracks_ptmin->Fill(best_ntracks_ptmin[ijet]);
+        h_best_sum_nhits->Fill(best_sum_nhits[ijet]);
+        h_best_cos_angle->Fill(best_cos_angle[ijet]);
+        h_best_miss_dist->Fill(best_miss_dist[ijet].value());
+        h_best_miss_dist_err->Fill(best_miss_dist[ijet].error());
+        h_best_miss_dist_sig->Fill(best_miss_dist[ijet].significance());
+        h_best_miss_dist_err_v->Fill(best_miss_dist[ijet].value(), best_miss_dist[ijet].error());
+
+        h_best_ntracks_v_second->Fill(second_best_ntracks[ijet], best_ntracks[ijet]);
+        h_best_ntracks_ptmin_v_second->Fill(second_best_ntracks_ptmin[ijet], best_ntracks_ptmin[ijet]);
+        h_best_sum_nhits_v_second->Fill(second_best_sum_nhits[ijet], best_sum_nhits[ijet]);
+        h_best_cos_angle_v_second->Fill(second_best_cos_angle[ijet], best_cos_angle[ijet]);
+        h_best_miss_dist_v_second->Fill(second_best_miss_dist[ijet].value(), best_miss_dist[ijet].value());
+        h_best_miss_dist_err_v_second->Fill(second_best_miss_dist[ijet].error(), best_miss_dist[ijet].error());
+        h_best_miss_dist_sig_v_second->Fill(second_best_miss_dist[ijet].significance(), best_miss_dist[ijet].significance());
       }        
-    }        
 
-    if (histos) {
-      h_best_ntracks->Fill(best_ntracks[ijet]);
-      h_best_ntracks_ptmin->Fill(best_ntracks_ptmin[ijet]);
-      h_best_sum_nhits->Fill(best_sum_nhits[ijet]);
-      h_best_cos_angle->Fill(best_cos_angle[ijet]);
-      h_best_miss_dist->Fill(best_miss_dist[ijet].value());
-      h_best_miss_dist_err->Fill(best_miss_dist[ijet].error());
-      h_best_miss_dist_sig->Fill(best_miss_dist[ijet].significance());
-      h_best_miss_dist_err_v->Fill(best_miss_dist[ijet].value(), best_miss_dist[ijet].error());
-
-      h_best_ntracks_v_second->Fill(second_best_ntracks[ijet], best_ntracks[ijet]);
-      h_best_ntracks_ptmin_v_second->Fill(second_best_ntracks_ptmin[ijet], best_ntracks_ptmin[ijet]);
-      h_best_sum_nhits_v_second->Fill(second_best_sum_nhits[ijet], best_sum_nhits[ijet]);
-      h_best_cos_angle_v_second->Fill(second_best_cos_angle[ijet], best_cos_angle[ijet]);
-      h_best_miss_dist_v_second->Fill(second_best_miss_dist[ijet].value(), best_miss_dist[ijet].value());
-      h_best_miss_dist_err_v_second->Fill(second_best_miss_dist[ijet].error(), best_miss_dist[ijet].error());
-      h_best_miss_dist_sig_v_second->Fill(second_best_miss_dist[ijet].significance(), best_miss_dist[ijet].significance());
-    }        
-
-    //if (verbose)
-    //  printf("ijet %lu pt %f eta %f phi %f  assoc ivtx %i\n", ijet, jet.pt(), jet.eta(), jet.phi(), indices[ijet]);
+      //if (verbose)
+      //  printf("ijet %lu pt %f eta %f phi %f  assoc ivtx %i\n", ijet, jet.pt(), jet.eta(), jet.phi(), indices[ijet]);
+    }
   }
-
 
   std::auto_ptr<Association> assoc[mfv::NJetsBy];
   for (int i = 0; i < mfv::NJetsBy; ++i)
@@ -348,43 +351,45 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
   int n_matchedvertices[mfv::NJetsBy] = {0};
   int n_matchedjets[mfv::NJetsBy] = {0};
 
-  for (size_t ivtx = 0; ivtx < n_vertices; ++ivtx) {
-    reco::VertexRef vtxref = vertices.at(ivtx);
-    int these_n_matchedjets[mfv::NJetsBy] = {0};
+  if (enable) {
+    for (size_t ivtx = 0; ivtx < n_vertices; ++ivtx) {
+      reco::VertexRef vtxref = vertices.at(ivtx);
+      int these_n_matchedjets[mfv::NJetsBy] = {0};
 
-    for (size_t ijet = 0; ijet < n_jets; ++ijet) {
-      pat::JetRef jetref(jets, ijet);
+      for (size_t ijet = 0; ijet < n_jets; ++ijet) {
+        pat::JetRef jetref(jets, ijet);
       
-      if (index_by_ntracks[ijet] == int(ivtx)) {
-        assoc[mfv::JByNtracks]->insert(vtxref, jetref);
-        ++these_n_matchedjets[mfv::JByNtracks];
+        if (index_by_ntracks[ijet] == int(ivtx)) {
+          assoc[mfv::JByNtracks]->insert(vtxref, jetref);
+          ++these_n_matchedjets[mfv::JByNtracks];
+        }
+
+        if (index_by_ntracks_ptmin[ijet] == int(ivtx)) {
+          assoc[mfv::JByNtracksPtmin]->insert(vtxref, jetref);
+          ++these_n_matchedjets[mfv::JByNtracksPtmin];
+        }
+
+        if (index_by_miss_dist[ijet] == int(ivtx)) {
+          assoc[mfv::JByMissDist]->insert(vtxref, jetref);
+          ++these_n_matchedjets[mfv::JByMissDist];
+        }
+
+        if (index_by_ntracks[ijet] == int(ivtx) || index_by_miss_dist[ijet] == int(ivtx)) {
+          assoc[mfv::JByCombination]->insert(vtxref, jetref);
+          ++these_n_matchedjets[mfv::JByCombination];
+        }
+
+        if (index_by_ntracks_ptmin[ijet] == int(ivtx) || index_by_miss_dist[ijet] == int(ivtx)) {
+          assoc[mfv::JByCombinationPtmin]->insert(vtxref, jetref);
+          ++these_n_matchedjets[mfv::JByCombinationPtmin];
+        }
       }
 
-      if (index_by_ntracks_ptmin[ijet] == int(ivtx)) {
-        assoc[mfv::JByNtracksPtmin]->insert(vtxref, jetref);
-        ++these_n_matchedjets[mfv::JByNtracksPtmin];
+      for (int i = 0; i < mfv::NJetsBy; ++i) {
+        n_matchedjets[i] += these_n_matchedjets[i];
+        if (these_n_matchedjets[i] > 0)
+          ++n_matchedvertices[i];
       }
-
-      if (index_by_miss_dist[ijet] == int(ivtx)) {
-        assoc[mfv::JByMissDist]->insert(vtxref, jetref);
-        ++these_n_matchedjets[mfv::JByMissDist];
-      }
-
-      if (index_by_ntracks[ijet] == int(ivtx) || index_by_miss_dist[ijet] == int(ivtx)) {
-        assoc[mfv::JByCombination]->insert(vtxref, jetref);
-        ++these_n_matchedjets[mfv::JByCombination];
-      }
-
-      if (index_by_ntracks_ptmin[ijet] == int(ivtx) || index_by_miss_dist[ijet] == int(ivtx)) {
-        assoc[mfv::JByCombinationPtmin]->insert(vtxref, jetref);
-        ++these_n_matchedjets[mfv::JByCombinationPtmin];
-      }
-    }
-
-    for (int i = 0; i < mfv::NJetsBy; ++i) {
-      n_matchedjets[i] += these_n_matchedjets[i];
-      if (these_n_matchedjets[i] > 0)
-        ++n_matchedvertices[i];
     }
   }
 
