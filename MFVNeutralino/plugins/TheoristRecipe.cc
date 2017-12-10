@@ -27,6 +27,17 @@ private:
 
   TH1F* h_gen_valid;
 
+  TH1F* h_gen_lsp_sump;
+  TH1F* h_gen_lsp_netp;
+  TH1F* h_gen_lsp_sumpt;
+  TH1F* h_gen_lsp_netpt;
+  TH1F* h_gen_lsp_sumpz;
+  TH1F* h_gen_lsp_netpz;
+  TH1F* h_gen_lsp_sumE;
+  TH1F* h_gen_lsp_netE;
+  TH1F* h_gen_lsp_sumEt;
+  TH1F* h_gen_lsp_netEt;
+
   TH1F* h_gen_njets;
   TH1F* h_gen_jet_pt;
   TH1F* h_gen_jet_pt40;
@@ -77,6 +88,17 @@ MFVTheoristRecipe::MFVTheoristRecipe(const edm::ParameterSet& cfg)
   edm::Service<TFileService> fs;
 
   h_gen_valid = fs->make<TH1F>("h_gen_valid", "", 2, 0, 2);
+
+  h_gen_lsp_sump = fs->make<TH1F>("h_gen_lsp_sump", ";#Sigma|#vec{p}| of LSPs;events", 500, 0, 5000);
+  h_gen_lsp_netp = fs->make<TH1F>("h_gen_lsp_netp", ";net |#vec{p}| of LSPs;events", 500, 0, 5000);
+  h_gen_lsp_sumpt = fs->make<TH1F>("h_gen_lsp_sumpt", ";#Sigmap_{T} of LSPs;events", 500, 0, 5000);
+  h_gen_lsp_netpt = fs->make<TH1F>("h_gen_lsp_netpt", ";net p_{T} of LSPs;events", 500, 0, 5000);
+  h_gen_lsp_sumpz = fs->make<TH1F>("h_gen_lsp_sumpz", ";#Sigmap_{z} of LSPs;events", 500, 0, 5000);
+  h_gen_lsp_netpz = fs->make<TH1F>("h_gen_lsp_netpz", ";net p_{z} of LSPs;events", 500, 0, 5000);
+  h_gen_lsp_sumE = fs->make<TH1F>("h_gen_lsp_sumE", ";#SigmaE of LSPs;events", 500, 0, 5000);
+  h_gen_lsp_netE = fs->make<TH1F>("h_gen_lsp_netE", ";net E of LSPs;events", 500, 0, 5000);
+  h_gen_lsp_sumEt = fs->make<TH1F>("h_gen_lsp_sumEt", ";#SigmaE_{T} of LSPs;events", 500, 0, 5000);
+  h_gen_lsp_netEt = fs->make<TH1F>("h_gen_lsp_netEt", ";net E_{T} of LSPs;events", 500, 0, 5000);
 
   h_gen_njets = fs->make<TH1F>("h_gen_njets", ";number of accepted quarks;events", 20, 0, 20);
   h_gen_jet_pt = fs->make<TH1F>("h_gen_jet_pt", ";p_{T} of accepted quarks;quarks", 500, 0, 500);
@@ -158,6 +180,17 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
   const double dvv = mci->dvv();
 
   //////////////////////////////////////////////////////////////////////////////
+
+  h_gen_lsp_sump->Fill(lsp_p4s[0].P() + lsp_p4s[1].P());
+  h_gen_lsp_netp->Fill((lsp_p4s[0] + lsp_p4s[1]).P());
+  h_gen_lsp_sumpt->Fill(lsp_p4s[0].Pt() + lsp_p4s[1].Pt());
+  h_gen_lsp_netpt->Fill((lsp_p4s[0] + lsp_p4s[1]).Pt());
+  h_gen_lsp_sumpz->Fill(lsp_p4s[0].Pz() + lsp_p4s[1].Pz());
+  h_gen_lsp_netpz->Fill((lsp_p4s[0] + lsp_p4s[1]).Pz());
+  h_gen_lsp_sumE->Fill(lsp_p4s[0].E() + lsp_p4s[1].E());
+  h_gen_lsp_netE->Fill((lsp_p4s[0] + lsp_p4s[1]).E());
+  h_gen_lsp_sumEt->Fill(lsp_p4s[0].Et() + lsp_p4s[1].Et());
+  h_gen_lsp_netEt->Fill((lsp_p4s[0] + lsp_p4s[1]).Et());
 
   //plot generator-level variables
   int nquarks = 0;
