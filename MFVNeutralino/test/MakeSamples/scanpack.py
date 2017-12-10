@@ -62,6 +62,7 @@ from collections import defaultdict
 from gzip import GzipFile
 from itertools import product
 from pprint import pprint
+from JMTucker.Tools import colors
 from modify import set_mfv_neutralino, set_gluino_ddbar
 
 # !!! DO NOT CHANGE ANYTHING THAT CHANGES WHICH JOB IS WHICH SAMPLE ONCE BATCHES ARE RUN WITH THAT SCANPACK !!!
@@ -281,6 +282,8 @@ def export_scanpack(crab_dirs):
 
         expected, files = crab_files(wd, True)
         assert expected == scanpack.jobs_per_batch or expected == scanpack.jobs_in_last_batch
+        if len(files) != expected:
+            print colors.yellow('problem: expected %i, got %i files from %s' % (expected, len(files), wd))
 
         for fn in files:
             bn = os.path.basename(fn)
@@ -400,7 +403,7 @@ if __name__ == '__main__' and len(sys.argv) > 1:
 
     elif cmd == 'test':
         from gensim import process
-        for batch in 0,1: #,2,3: #,4
-            for job in xrange(5000):
+        for batch in 0,1,2,3,4,5,6,7,8:
+            for job in xrange(1000):
                 print batch, job,
-                do_scanpack(process, 'scanpack2p5', batch, job)
+                do_scanpack(process, 'scanpack2015supplement', batch, job)
