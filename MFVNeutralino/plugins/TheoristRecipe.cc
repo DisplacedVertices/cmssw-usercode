@@ -40,6 +40,8 @@ private:
 
   TH1F* h_gen_njets;
   TH1F* h_gen_jet_pt;
+  TH1F* h_gen_jet_eta;
+  TH1F* h_gen_jet_phi;
   TH1F* h_gen_jet_pt40;
   TH1F* h_gen_ht40;
   TH1F* h_gen_dxy;
@@ -50,6 +52,8 @@ private:
 
   TH1F* h_rec_njets;
   TH1F* h_rec_jet_pt;
+  TH1F* h_rec_jet_eta;
+  TH1F* h_rec_jet_phi;
   TH1F* h_rec_jet_pt40;
   TH1F* h_rec_ht40;
   TH1F* h_rec_dxy;
@@ -102,6 +106,8 @@ MFVTheoristRecipe::MFVTheoristRecipe(const edm::ParameterSet& cfg)
 
   h_gen_njets = fs->make<TH1F>("h_gen_njets", ";number of accepted quarks;events", 20, 0, 20);
   h_gen_jet_pt = fs->make<TH1F>("h_gen_jet_pt", ";p_{T} of accepted quarks;quarks", 500, 0, 500);
+  h_gen_jet_eta = fs->make<TH1F>("h_gen_jet_eta", ";#eta of accepted quarks;quarks", 100, -4, 4);
+  h_gen_jet_phi = fs->make<TH1F>("h_gen_jet_phi", ";#phi of accepted quarks;quarks", 100, -3.1416, 3.1416);
   h_gen_jet_pt40 = fs->make<TH1F>("h_gen_jet_pt40", ";p_{T} of accepted quarks with p_{T} > 40 GeV;quarks", 500, 0, 500);
   h_gen_ht40 = fs->make<TH1F>("h_gen_ht40", ";H_{T} of accepted quarks with p_{T} > 40 GeV;events", 500, 0, 5000);
   h_gen_dxy = fs->make<TH1F>("h_gen_dxy", ";generated d_{xy} (cm);LSP daughter particles", 100, 0, 1);
@@ -112,6 +118,8 @@ MFVTheoristRecipe::MFVTheoristRecipe(const edm::ParameterSet& cfg)
 
   h_rec_njets = fs->make<TH1F>("h_rec_njets", ";reconstructed number of jets;events", 20, 0, 20);
   h_rec_jet_pt = fs->make<TH1F>("h_rec_jet_pt", ";reconstructed p_{T} of jets;jets", 500, 0, 500);
+  h_rec_jet_eta = fs->make<TH1F>("h_rec_jet_eta", ";reconstructed #eta of jets;jets", 100, -4, 4);
+  h_rec_jet_phi = fs->make<TH1F>("h_rec_jet_phi", ";reconstructed #phi of jets;jets", 100, -3.1416, 3.1416);
   h_rec_jet_pt40 = fs->make<TH1F>("h_rec_jet_pt40", ";reconstructed p_{T} of jets with p_{T} > 40 GeV;jets", 500, 0, 500);
   h_rec_ht40 = fs->make<TH1F>("h_rec_ht40", ";reconstructed H_{T} of jets with p_{T} > 40 GeV;events", 500, 0, 5000);
   h_rec_dxy = fs->make<TH1F>("h_rec_dxy", ";reconstructed d_{xy} (cm);tracks", 100, 0, 1);
@@ -204,6 +212,8 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
         if (is_quark(p)) {
           ++nquarks;
           h_gen_jet_pt->Fill(p->pt());
+          h_gen_jet_eta->Fill(p->eta());
+          h_gen_jet_phi->Fill(p->phi());
           if (p->pt() > 40) {
             ht40 += p->pt();
             h_gen_jet_pt40->Fill(p->pt());
@@ -229,6 +239,8 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
   h_rec_ht40->Fill(mevent->jet_ht(40));
   for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
     h_rec_jet_pt->Fill(mevent->jet_pt[ijet]);
+    h_rec_jet_eta->Fill(mevent->jet_eta[ijet]);
+    h_rec_jet_phi->Fill(mevent->jet_phi[ijet]);
     if (mevent->jet_pt[ijet] > 40) h_rec_jet_pt40->Fill(mevent->jet_pt[ijet]);
   }
   for (const MFVVertexAux& vtx : *vertices) {
