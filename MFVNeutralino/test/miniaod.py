@@ -30,7 +30,7 @@ process.out.outputCommands += [
     'keep *_addPileupInfo_*_*',
     ]
 
-process.skimmedGeneralTracks = cms.EDProducer('MFVSkimmedTracks')
+process.skimmedGeneralTracks = cms.EDFilter('MFVSkimmedTracks')
 
 process.patJets.embedPFCandidates = True
 
