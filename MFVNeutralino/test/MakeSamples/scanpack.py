@@ -57,12 +57,14 @@ Current status:
 
 '''
 
+# do not import anything that is not in the stdlib since we 
+# will run in clean environment for gensim step
+
 import os, sys, base64, re, cPickle as pickle
 from collections import defaultdict
 from gzip import GzipFile
 from itertools import product
 from pprint import pprint
-from JMTucker.Tools import colors
 from modify import set_mfv_neutralino, set_gluino_ddbar
 
 # !!! DO NOT CHANGE ANYTHING THAT CHANGES WHICH JOB IS WHICH SAMPLE ONCE BATCHES ARE RUN WITH THAT SCANPACK !!!
@@ -283,7 +285,7 @@ def export_scanpack(crab_dirs):
         expected, files = crab_files(wd, True)
         assert expected == scanpack.jobs_per_batch or expected == scanpack.jobs_in_last_batch
         if len(files) != expected:
-            print colors.yellow('problem: expected %i, got %i files from %s' % (expected, len(files), wd))
+            print '\x1b[33mproblem: expected %i, got %i files from %s\x1b[0m' % (expected, len(files), wd)
 
         for fn in files:
             bn = os.path.basename(fn)
