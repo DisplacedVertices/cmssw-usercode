@@ -127,8 +127,10 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
   edm::Handle<mfv::MCInteraction> mci;
   event.getByToken(mci_token, mci);
 
-  if (!mci->valid())
-    throw cms::Exception("BadAssumption", "MCInteraction not valid for this event--model not implemented?");
+  if (!mci->valid()) {
+    std::cout << "MFVGenParticleFilter: MCInteraction not valid--model not implemented? skipping event" << std::endl;
+    return false;
+  }
 
   for (int i : {0,1}) {
     for (auto ref : mci->visible(i))
@@ -221,7 +223,9 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
   }
   std::sort(parton_pt.begin(), parton_pt.end(), [](float p1, float p2) { return p1 > p2; } );
 
-  if (min_npartons > 0 && (int(parton_pt.size()) >= min_npartons ? parton_pt.at(min_npartons-1) : 0.f) < min_parton_pt)
+  if (int(parton_pt.size()) < min_npartons)
+    return false;
+  if (min_npartons > 0 && parton_pt.at(min_npartons-1) < min_parton_pt)
     return false;
   if (std::accumulate(parton_pt.begin(), parton_pt.end(), 0.f) < min_parton_ht)
     return false;

@@ -19,6 +19,7 @@ mfvTheoristRecipe = cms.EDAnalyzer('MFVTheoristRecipe',
                                    mevent_src = cms.InputTag('mfvEvent'),
                                    vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
                                    max_dist = cms.double(0.0084),
+                                   verbose = cms.untracked.bool(False),
                                    )
 
 process.common = cms.Sequence(process.mfvSelectedVerticesTight * process.mfvGenParticles)
