@@ -342,9 +342,30 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     }
 
     assert(ijet <= 255);
-    for (const reco::PFCandidatePtr& pfcand : jet.getPFConstituents()) {
-      const reco::TrackRef& tk = pfcand->trackRef();
-      if (tk.isNonnull()) {
+    for (size_t idau = 0, idaue = jet.numberOfDaughters(); idau < idaue; ++idau) {
+      // handle both regular aod and miniaod: in the latter
+      // getPFConstituents() doesn't work because the daughters are
+      // pat::PackedCandidates. Since we don't care about track
+      // identities e.g. to compare with vertices we don't use
+      // JetTrackRefGetter here, but could
+      const reco::Candidate* dau = jet.daughter(idau);
+      if (dau->charge() == 0)
+        continue;
+        
+      const reco::Track* tk = 0;
+      const reco::PFCandidate* pf = dynamic_cast<const reco::PFCandidate*>(dau);
+      if (pf) {
+        const reco::TrackRef& r = pf->trackRef();
+        if (r.isNonnull())
+          tk = &*r;
+      }
+      else {
+        const pat::PackedCandidate* pk = dynamic_cast<const pat::PackedCandidate*>(dau);
+        if (pk)
+          tk = &pk->pseudoTrack();
+      }
+
+      if (tk) {
         assert(abs(tk->charge()) == 1);
         mevent->jet_track_which_jet.push_back(ijet);
         mevent->jet_track_chi2dof.push_back(tk->normalizedChi2());

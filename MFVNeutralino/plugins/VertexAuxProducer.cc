@@ -14,6 +14,7 @@
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
+#include "JMTucker/MFVNeutralino/interface/JetTrackRefGetter.h"
 #include "JMTucker/MFVNeutralino/interface/VertexTools.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
@@ -43,6 +44,7 @@ class MFVVertexAuxProducer : public edm::EDProducer {
   const edm::EDGetTokenT<reco::VertexCollection> vertex_token;
   const std::string sv_to_jets_src;
   edm::EDGetTokenT<mfv::JetVertexAssociation> sv_to_jets_token[mfv::NJetsByUse];
+  mfv::JetTrackRefGetter jet_track_ref_getter;
   const MFVVertexAuxSorter sorter;
 };
 
@@ -55,6 +57,7 @@ MFVVertexAuxProducer::MFVVertexAuxProducer(const edm::ParameterSet& cfg)
     vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     sv_to_jets_src(cfg.getParameter<std::string>("sv_to_jets_src")),
     //sv_to_jets_token(consumes<mfv::JetVertexAssociation>(edm::InputTag("sv_to_jets_src"))),
+    jet_track_ref_getter(cfg, consumesCollector()),
     sorter(cfg.getParameter<std::string>("sort_by"))
 {
   for (int i = 0; i < mfv::NJetsByUse; ++i)
@@ -170,11 +173,8 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
           for (int ijet = 0; ijet < njets; ++ijet) {
             p4s[1+i] += jets[ijet]->p4();
 
-            for (const reco::PFCandidatePtr& pfcand : jets[ijet]->getPFConstituents()) {
-              const reco::TrackRef& tk = pfcand->trackRef();
-              if (tk.isNonnull())
-                jets_tracks[i].insert(tk);
-            }
+            for (auto r : jet_track_ref_getter.tracks(event, *jets[ijet]))
+              jets_tracks[i].insert(r);
 
             if (primary_vertex)
               costhjetmomvtxdisps[i].push_back(costh3(jets[ijet]->p4(), pv2sv));
