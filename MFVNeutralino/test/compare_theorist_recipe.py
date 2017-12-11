@@ -8,9 +8,9 @@ histNames = ['njets', 'jet_pt', 'jet_pt40', 'ht40', 'dxy', 'match_dxy', 'ntracks
 
 for sample in samples:
     ps = plot_saver('plots/theorist_recipe/mfvTheoristRecipeNoCuts/%s' % sample.name, size=(700,700), root=False)
-    f = ROOT.TFile('~/crabdirs/TheoristRecipeV4/%s.root' % sample.name)
+    f = ROOT.TFile('~/crabdirs/TheoristRecipeV8/%s.root' % sample.name)
     print sample.name
-    for name in histNames:
+    for j,name in enumerate(histNames):
         rec = f.Get('mfvTheoristRecipeNoCuts/h_rec_%s' % name)
         gen = f.Get('mfvTheoristRecipeNoCuts/h_gen_%s' % name)
         hists = [rec, gen]
@@ -26,3 +26,18 @@ for sample in samples:
             hist.SetTitle(title)
             differentiate_stat_box(hist, movement=i, new_size=(0.25,0.25))
         ps.save(name)
+
+        if j < 4:
+            rec_v_gen = f.Get('mfvTheoristRecipeNoCuts/h_rec_v_gen_%s' % name)
+            rec_v_gen.Draw('colz')
+            ps.c.Update()
+            differentiate_stat_box(rec_v_gen, new_size=(0.25,0.25))
+            ps.save('rec_v_gen_%s' % name)
+
+            rec_v_gen_pfx = rec_v_gen.ProfileX()
+            rec_v_gen_pfx.GetYaxis().SetTitle('mean %s' % rec_v_gen.GetYaxis().GetTitle())
+            rec_v_gen_pfx.Draw()
+            rec_v_gen_pfx.Fit('pol1')
+            ps.c.Update()
+            differentiate_stat_box(rec_v_gen_pfx, new_size=(0.25,0.25))
+            ps.save('rec_v_gen_pfx_%s' % name)

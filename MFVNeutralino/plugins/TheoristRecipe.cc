@@ -23,6 +23,7 @@ private:
   const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_token;
 
   const double max_dist;
+  const bool verbose;
 
   TH1F* h_gen_valid;
 
@@ -46,6 +47,14 @@ private:
   TH1F* h_rec_dbv;
   TH1F* h_rec_dvv;
 
+  TH2F* h_rec_v_gen_njets;
+  TH2F* h_rec_v_gen_jet_pt;
+  TH2F* h_rec_v_gen_jet_pt40;
+  TH2F* h_rec_v_gen_ht40;
+
+  TH1F* h_dist;
+  TH1F* h_lspsnmatch;
+
   TH1F* h_gen_match_dxy;
   TH1F* h_gen_match_ntracks;
   TH1F* h_gen_match_sumpt;
@@ -55,9 +64,6 @@ private:
   TH1F* h_rec_match_ntracks;
   TH1F* h_rec_match_bs2derr;
   TH1F* h_rec_match_dbv;
-
-  TH1F* h_dist;
-  TH1F* h_lspsnmatch;
 };
 
 MFVTheoristRecipe::MFVTheoristRecipe(const edm::ParameterSet& cfg)
@@ -65,7 +71,8 @@ MFVTheoristRecipe::MFVTheoristRecipe(const edm::ParameterSet& cfg)
     mci_token(consumes<mfv::MCInteraction>(cfg.getParameter<edm::InputTag>("mci_src"))),
     mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
     vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
-    max_dist(cfg.getParameter<double>("max_dist"))
+    max_dist(cfg.getParameter<double>("max_dist")),
+    verbose(cfg.getUntrackedParameter<bool>("verbose", false))
 {
   edm::Service<TFileService> fs;
 
@@ -91,6 +98,11 @@ MFVTheoristRecipe::MFVTheoristRecipe(const edm::ParameterSet& cfg)
   h_rec_dbv = fs->make<TH1F>("h_rec_dbv", ";reconstructed d_{BV} (cm);vertices", 250, 0, 2.5);
   h_rec_dvv = fs->make<TH1F>("h_rec_dvv", ";reconstructed d_{VV} (cm);events", 500, 0, 5);
 
+  h_rec_v_gen_njets = fs->make<TH2F>("h_rec_v_gen_njets", ";number of accepted quarks;reconstructed number of jets", 20, 0, 20, 20, 0, 20);
+  h_rec_v_gen_jet_pt = fs->make<TH2F>("h_rec_v_gen_jet_pt", "#DeltaR(quark, jet) < 0.4;p_{T} of accepted quarks;reconstructed p_{T} of jets", 500, 0, 500, 500, 0, 500);
+  h_rec_v_gen_jet_pt40 = fs->make<TH2F>("h_rec_v_gen_jet_pt40", "#DeltaR(quark, jet) < 0.4;p_{T} of accepted quarks with p_{T} > 40 GeV;reconstructed p_{T} of jets with p_{T} > 40 GeV", 500, 0, 500, 500, 0, 500);
+  h_rec_v_gen_ht40 = fs->make<TH2F>("h_rec_v_gen_ht40", ";H_{T} of accepted quarks with p_{T} > 40 GeV;reconstructed H_{T} of jets with p_{T} > 40 GeV", 500, 0, 5000, 500, 0, 5000);
+
   h_dist = fs->make<TH1F>("h_dist", ";distance to closest LSP;vertices", 100, 0, 0.01);
   h_lspsnmatch = fs->make<TH1F>("h_lspsnmatch", ";number of vertices that match LSP;LSPs", 15, 0, 15);
 
@@ -111,7 +123,7 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
 
   h_gen_valid->Fill(mci->valid());
   if (!mci->valid()) {
-    std::cout << "MCInteraction not valid--model not implemented? skipping event" << std::endl;
+    std::cout << "MFVTheoristRecipe: MCInteraction not valid--model not implemented? skipping event" << std::endl;
     return;
   }
 
@@ -198,22 +210,28 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
     h_rec_dvv->Fill(mag(vertices->at(0).x - vertices->at(1).x, vertices->at(0).y - vertices->at(1).y));
   }
 
-/*
+  //plot reconstructed-level vs. generator-level variables
+  h_rec_v_gen_njets->Fill(nquarks, mevent->njets());
+  h_rec_v_gen_ht40->Fill(ht40, mevent->jet_ht(40));
+
   //match jets to partons
-  printf("\nrun = %u, lumi = %u, event = %llu: number of accepted quarks = %d, number of jets = %d, generated HT(40) = %.2f GeV, reconstructed HT(40) = %.2f GeV\n", event.id().run(), event.luminosityBlock(), event.id().event(), nquarks, mevent->njets(), ht40, mevent->jet_ht(40));
+  if (verbose) printf("\nrun = %u, lumi = %u, event = %llu: number of accepted quarks = %d, number of jets = %d, generated HT(40) = %.2f GeV, reconstructed HT(40) = %.2f GeV\n", event.id().run(), event.luminosityBlock(), event.id().event(), nquarks, mevent->njets(), ht40, mevent->jet_ht(40));
   for (int i = 0; i < 2; ++i) {
     for (const reco::GenParticle* p : partons[i]) {
-      printf("\tparton pdgId %3d: pT = %6.2f GeV, eta = %5.2f, phi = %5.2f", p->pdgId(), p->pt(), p->eta(), p->phi());
+      if (verbose) printf("\tparton pdgId %3d: pT = %6.2f GeV, eta = %5.2f, phi = %5.2f", p->pdgId(), p->pt(), p->eta(), p->phi());
       for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
         float deltaR = reco::deltaR(p->eta(), p->phi(), mevent->jet_eta[ijet], mevent->jet_phi[ijet]);
         if (deltaR < 0.4) {
-          printf("\tjet %2d: pT = %6.2f GeV, eta = %5.2f, phi = %5.2f, deltaR(parton, jet) = %4.2f", int(ijet), mevent->jet_pt[ijet], mevent->jet_eta[ijet], mevent->jet_phi[ijet], deltaR);
+          if (verbose) printf("\tjet %2d: pT = %6.2f GeV, eta = %5.2f, phi = %5.2f, deltaR(parton, jet) = %4.2f", int(ijet), mevent->jet_pt[ijet], mevent->jet_eta[ijet], mevent->jet_phi[ijet], deltaR);
+          if (p->pt() > 20 && fabs(p->eta()) < 2.5 && is_quark(p)) {
+            h_rec_v_gen_jet_pt->Fill(p->pt(), mevent->jet_pt[ijet]);
+            if (p->pt() > 40 && mevent->jet_pt[ijet] > 40) h_rec_v_gen_jet_pt40->Fill(p->pt(), mevent->jet_pt[ijet]);
+          }
         }
       }
-      printf("\n");
+      if (verbose) printf("\n");
     }
   }
-*/
 
   //match vertices to LSPs
   int lsp_nmatch[2] = {0,0};

@@ -343,7 +343,7 @@ l1 = ROOT.TLegend(0.75,0.1,0.95,0.5)
 l2 = ROOT.TLegend(0.75,0.5,0.95,0.9)
 for j,sample in enumerate(samples):
     print sample
-    file = ROOT.TFile('~/crabdirs/TheoristRecipeV5/%s.root'%sample)
+    file = ROOT.TFile('~/crabdirs/TheoristRecipeV7/%s.root'%sample)
     nrec = file.Get('mfvTheoristRecipe%s/h_gen_dvv'%rec_den).GetEntries()
     ngen = file.Get('mfvGen%s/h_gen_dvv'%gen_den).GetEntries()
     print '%26s%26s%20s%20s%20s' % ('reconstructed', 'generated', 'reco eff +/- error', 'gen eff +/- error', 'gen/reco +/- error')
