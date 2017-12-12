@@ -2,7 +2,7 @@ import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 dataset = 'ntuplev15_evFilterOff_lowPrescaleLeptonTriggers'
-sample_files(process, 'mfv_neu_tau00100um_M1200', dataset, 300)
+sample_files(process, 'mfv_neu_tau00100um_M0300', dataset, 300)
 process.TFileService.fileName = 'histos.root'
 process.maxEvents.input = -1
 file_event_from_argv(process)
@@ -20,18 +20,26 @@ SimpleTriggerResults.setup_endpath(process, weight_src='mfvWeight')
 common = cms.Sequence(process.mfvSelectedVerticesSeq * process.mfvWeight)
 
 process.mfvEventHistosNoCuts = process.mfvEventHistos.clone()
-process.mfvEventHistosOrigCuts = process.mfvEventHistos.clone(triggerSel=cms.vint32(1)) ##SH
-process.mfvEventHistosMu15PFHT600 = process.mfvEventHistos.clone(triggerSel=cms.vint32(5)) ##SH
-process.mfvEventHistosEle15PFHT600 = process.mfvEventHistos.clone(triggerSel=cms.vint32(6)) ##SH
-process.mfvEventHistosMu50 = process.mfvEventHistos.clone(triggerSel=cms.vint32(7)) ##SH
-process.mfvEventHistosEle27WPTight = process.mfvEventHistos.clone(triggerSel=cms.vint32(10)) ##SH
-process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts * process.mfvEventHistosOrigCuts * process.mfvEventHistosMu15PFHT600 * process.mfvEventHistosEle15PFHT600 * process.mfvEventHistosMu50 * process.mfvEventHistosEle27WPTight) ##SH 
-#process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts) # just trigger for now
+
+process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts) # just trigger for now
 
 process.mfvEventHistosPreSel = process.mfvEventHistos.clone()
 
-process.mfvAnalysisCutsPreSel = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)
+process.mfvAnalysisCutsPreSel = process.mfvAnalysisCuts.clone(min_njets = 0, min_ht = 0, apply_vertex_cuts = False)
 process.pEventPreSel = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvEventHistosPreSel)
+
+# Make histograms containing lepton triggers
+process.mfvEventHistMu15PFHT600 = process.mfvEventHistos.clone()
+process.mfvMu15PFHT600Cuts = process.mfvAnalysisCuts.clone(trigger_bit=cms.vint32(1, 2, 3, 4, 5), min_njets = 0, min_ht = 0, apply_vertex_cuts = False)
+process.pMu15PFHT600TriggerSel = cms.Path(common * process.mfvMu15PFHT600Cuts * process.mfvEventHistMu15PFHT600)
+
+process.mfvEventHistEle15PFHT600 = process.mfvEventHistos.clone()
+process.mfvEle15PFHT600Cuts = process.mfvAnalysisCuts.clone(trigger_bit=cms.vint32(1, 2, 3, 4, 6), min_njets = 0, min_ht = 0, apply_vertex_cuts = False)
+process.pEle15PFHT600TriggerSel = cms.Path(common * process.mfvEle15PFHT600Cuts * process.mfvEventHistEle15PFHT600)
+
+process.mfvEventHistMu50 = process.mfvEventHistos.clone()
+process.mfvMu50Cuts = process.mfvAnalysisCuts.clone(trigger_bit=cms.vint32(1, 2, 3, 4, 7), min_njets = 0, min_ht = 0, apply_vertex_cuts = False)
+process.pMu50TriggerSel = cms.Path(common * (process.mfvMu50Cuts * process.mfvEventHistMu50))
 
 nm1s = [
     ('Njets',      ('', 'min_njets = 0')),
@@ -123,9 +131,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015 + \
             Samples.mfv_signal_samples_2015
     elif year == 2016:
-        samples = Samples.data_samples + \
-            Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
-            Samples.mfv_signal_samples + Samples.mfv_ddbar_samples + Samples.mfv_hip_samples + Samples.qcd_hip_samples
+	samples = Samples.mfv_signal_samples
 
     from JMTucker.Tools.MetaSubmitter import set_splitting
     set_splitting(samples, dataset, 'histos', data_json='ana_2015p6.json')
@@ -141,7 +147,7 @@ for p in process.paths.keys():
         return to_add, to_replace
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('HistosV15_lowPrescaleLeptonTriggers',
+    cs = CondorSubmitter('HistosV15_leptonTriggers',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = modify,

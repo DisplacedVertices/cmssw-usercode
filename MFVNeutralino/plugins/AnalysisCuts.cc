@@ -23,7 +23,7 @@ private:
   const bool require_bquarks;
 
   const int l1_bit;
-  const int trigger_bit;
+  const std::vector<int> trigger_bit;
   const bool apply_cleaning_filters;
 
   const int min_npv;
@@ -80,7 +80,7 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     use_mevent(mevent_src.label() != ""),
     require_bquarks(cfg.getParameter<bool>("require_bquarks")),
     l1_bit(cfg.getParameter<int>("l1_bit")),
-    trigger_bit(cfg.getParameter<int>("trigger_bit")),
+    trigger_bit(cfg.getParameter<std::vector<int> >("trigger_bit")),
     apply_cleaning_filters(cfg.getParameter<bool>("apply_cleaning_filters")),
     min_npv(cfg.getParameter<int>("min_npv")),
     max_npv(cfg.getParameter<int>("max_npv")),
@@ -156,8 +156,18 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (l1_bit >= 0 && !mevent->pass_l1(l1_bit))
       return false;
 
-    if (trigger_bit >= 0 && !mevent->pass_hlt(trigger_bit))
-      return false;
+    // See if the event satisfies any of the specified triggers.
+    if (trigger_bit.size() > 0) { 
+      bool passTriggers = false;
+        for (int i = 0; i < int(trigger_bit.size()); ++i) {
+          if (mevent->pass_hlt(trigger_bit[i])) {
+            passTriggers = true;
+          }
+        }
+      if (!passTriggers) {
+        return false;
+      }
+    }
 
     if (mevent->npv < min_npv || mevent->npv > max_npv)
       return false;
