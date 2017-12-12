@@ -657,6 +657,19 @@ for x in ['ntuplev15lep', 'ntuplev15lep_IsoMu24', 'ntuplev15lep_IsoTkMu24', 'ntu
 for x in [mfv_neu_tau00100um_M0300, mfv_neu_tau01000um_M0300]:
     x.add_dataset('ntuplev15_leptrigs')
 
+qcdht0500.add_dataset('ntuplev15_evFilterOff_lowPrescaleLeptonTriggers')
+qcdht0500ext.add_dataset('ntuplev15_evFilterOff_lowPrescaleLeptonTriggers')
+qcdht0700.add_dataset('ntuplev15_evFilterOff_lowPrescaleLeptonTriggers')
+qcdht0700ext.add_dataset('ntuplev15_evFilterOff_lowPrescaleLeptonTriggers')
+qcdht1000.add_dataset('ntuplev15_evFilterOff_lowPrescaleLeptonTriggers')
+qcdht1000ext.add_dataset('ntuplev15_evFilterOff_lowPrescaleLeptonTriggers')
+qcdht1500.add_dataset('ntuplev15_evFilterOff_lowPrescaleLeptonTriggers')
+qcdht1500ext.add_dataset('ntuplev15_evFilterOff_lowPrescaleLeptonTriggers')
+qcdht2000.add_dataset('ntuplev15_evFilterOff_lowPrescaleLeptonTriggers')
+qcdht2000ext.add_dataset('ntuplev15_evFilterOff_lowPrescaleLeptonTriggers')
+ttbar.add_dataset('ntuplev15_evFilterOff_lowPrescaleLeptonTriggers')
+
+
 ########
 # other condor declarations
 ########

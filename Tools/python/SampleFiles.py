@@ -1258,6 +1258,7 @@ _add_ds("ntuplev15_evFilterOff_lowPrescaleLeptonTriggers", {
 'mfv_neu_tau10000um_M0600': _fromnum0("/store/user/shogan/mfv_neu_tau10000um_M0600/NtupleV15_evFilterOff_actual_lowPrescaleLeptonTriggers_2016/170807_140148", 20),
 'mfv_neu_tau10000um_M0800': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_evFilterOff_actual_lowPrescaleLeptonTriggers_2016/170807_185552", 217),
 'mfv_neu_tau10000um_M1200': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_evFilterOff_actual_lowPrescaleLeptonTriggers_2016/170807_131551", 227),
+'mfv_neu_tau00100um_M0800': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV15_evFilterOff_actual_lowPrescaleLeptonTriggers_2016/170809_141308", 283),
 'mfv_neu_tau10000um_M3000': _fromnum0("/store/user/shogan/mfv_neu_tau10000um_M3000/NtupleV15_evFilterOff_actual_lowPrescaleLeptonTriggers_2016/170807_140158", 19),
 'mfv_neu_tau30000um_M0300': _fromnum0("/store/user/shogan/mfv_neu_tau30000um_M0300/NtupleV15_evFilterOff_actual_lowPrescaleLeptonTriggers_2016/170804_090315", 20),
 'mfv_neu_tau30000um_M0400': _fromnum0("/store/user/shogan/mfv_neu_tau30000um_M0400/NtupleV15_evFilterOff_actual_lowPrescaleLeptonTriggers_2016/170807_140144", 20),
@@ -1267,6 +1268,17 @@ _add_ds("ntuplev15_evFilterOff_lowPrescaleLeptonTriggers", {
 'mfv_neu_tau30000um_M1600': _fromnum0("/store/user/shogan/mfv_neu_tau30000um_M1600/NtupleV15_evFilterOff_actual_lowPrescaleLeptonTriggers_2016/170807_140154", 20),
 'mfv_neu_tau30000um_M3000': _fromnum0("/store/user/shogan/mfv_neu_tau30000um_M3000/NtupleV15_evFilterOff_actual_lowPrescaleLeptonTriggers_2016/170807_140159", 20),
 'my_mfv_neu_tau00300um_M0800': _fromnum0("/store/user/shogan/mfv_neu_tau00300um_M0800/NtupleV15_evFilterOff_actual_lowPrescaleLeptonTriggers_2016/170807_140150", 17),
+'qcdht0500': _fromnum1("/store/user/shogan/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_evFilterOff_actual_lowPrescaleLeptonTriggers_2016/170808_030136", 38),
+'qcdht0500ext': _fromnum1("/store/user/shogan/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_evFilterOff_actual_lowPrescaleLeptonTriggers_2016/170808_024637", 89),
+'qcdht0700': (7, ['/store/user/shogan/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_evFilterOff_actual_lowPrescaleLeptonTriggers_2016/170808_024429/0000/ntuple_%i.root' % i for i in [3, 11, 15, 19, 23, 31, 33]]),
+'qcdht0700ext': (12, ['/store/user/shogan/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_evFilterOff_actual_lowPrescaleLeptonTriggers_2016/170808_024710/0000/ntuple_%i.root' % i for i in chain(xrange(29,31), xrange(35,37), [10, 12, 15, 23, 26, 38, 45, 58])]),
+'qcdht1000': _fromnum1("/store/user/shogan/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_evFilterOff_actual_lowPrescaleLeptonTriggers_2016/170808_025753", 254),
+'qcdht1000ext': _fromnum1("/store/user/shogan/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_evFilterOff_actual_lowPrescaleLeptonTriggers_2016/170808_030207", 542),
+'qcdht1500': _fromnum1("/store/user/shogan/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_evFilterOff_actual_lowPrescaleLeptonTriggers_2016/170808_025827", 270),
+'qcdht1500ext': _fromnum1("/store/user/shogan/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_evFilterOff_actual_lowPrescaleLeptonTriggers_2016/170808_024815", 533),
+'qcdht2000': _fromnum1("/store/user/shogan/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_evFilterOff_actual_lowPrescaleLeptonTriggers_2016/170808_024604", 131),
+'qcdht2000ext': _fromnum1("/store/user/shogan/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_evFilterOff_actual_lowPrescaleLeptonTriggers_2016/170808_030241", 265),
+'ttbar': (62, ['/store/user/shogan/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/NtupleV15_evFilterOff_actual_lowPrescaleLeptonTriggers_2016/170808_024323/0000/ntuple_%i.root' % i for i in chain(xrange(5,9), xrange(10,17), xrange(20,25), xrange(26,29), xrange(32,36), xrange(37,44), xrange(49,51), xrange(63,79), xrange(80,83), xrange(87,89), [1, 3, 18, 30, 52, 54, 56, 58, 84])]),
 })
 
 
