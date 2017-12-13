@@ -144,8 +144,9 @@ bool MFVGenParticles::try_MFVtbs(mfv::MCInteraction& mc, const edm::Handle<reco:
 
   mfv::MCInteractionHolderMFVtbs h;
 
-  //GenParticlePrinter gpp(*gen_particles);
-  //gpp.PrintHeader();
+  GenParticlePrinter gpp(*gen_particles);
+  gpp.print_mothers = gpp.print_vertex = true;
+  if (debug) gpp.PrintHeader();
 
   // Find the LSPs (e.g. gluinos or neutralinos). Since this is
   // PYTHIA8 there are lots of copies -- try to get the ones that
@@ -181,12 +182,15 @@ bool MFVGenParticles::try_MFVtbs(mfv::MCInteraction& mc, const edm::Handle<reco:
     h.tops           [which] = gen_ref(final_candidate(h.tops           [which], -1), gen_particles);
 
     // testing
-    //char lspname[16];
-    //snprintf(lspname, 16, "lsp #%lu", which);
-    //gpp.Print(&*lsp, lspname);
-    //gpp.Print(&*h.stranges[which], "strange");
-    //gpp.Print(&*h.primary_bottoms[which], "bottom");
-    //gpp.Print(&*h.tops[which], "top");
+    if (debug) {
+      char lspname[16];
+      snprintf(lspname, 16, "lsp #%lu", which);
+      gpp.Print(&*lsp, lspname);
+      gpp.Print(&*h.stranges[which], "strange");
+      gpp.Print(&*h.primary_bottoms[which], "bottom");
+      gpp.Print(&*h.tops[which], "top");
+    }
+
     if (last_flag_check) {
       assert(lsp                     ->statusFlags().isLastCopy());
       assert(h.stranges       [which]->statusFlags().isLastCopy());
@@ -443,6 +447,16 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
       for (auto r : mc->primaries())   primaries  ->push_back(*r);
       for (auto r : mc->secondaries()) secondaries->push_back(*r);
       for (auto r : mc->visible())     visible    ->push_back(*r);
+
+      GenParticlePrinter gpp(*gen_particles);
+      gpp.print_mothers = gpp.print_vertex = true;
+      if (debug) {
+        printf("print primaries, secondaries, visible last and first copies:\n");
+        gpp.PrintHeader();
+        for (auto r : mc->primaries())   { gpp.Print(r, "pri last"); gpp.Print(first_candidate(r), "pri first"); }
+        for (auto r : mc->secondaries()) { gpp.Print(r, "sec last"); gpp.Print(first_candidate(r), "sec first"); }
+        for (auto r : mc->visible())     { gpp.Print(r, "vis last"); gpp.Print(first_candidate(r), "vis first"); }
+      }
 
       for (int i = 0; i < 2; ++i) {
         auto p = mc->decay_point(i);
