@@ -595,12 +595,12 @@ for x in mfv_neu_tau00100um_M0300, mfv_neu_tau01000um_M0300:
 # other condor declarations
 ########
 
-for x in data_samples_2015 + qcd_samples + qcd_samples_ext + [ttbar, mfv_neu_tau00300um_M1600]:
+for x in data_samples_2015 + qcd_samples + qcd_samples_ext + [ttbar, mfv_neu_tau00300um_M1600, mfv_neu_tau10000um_M1600]:
     if x not in (qcdht0500, qcdht0700):
         x.condor = True
 JetHT2015D.xrootd_url = 'root://dcache-cms-xrootd.desy.de/'
 qcdht1000ext.xrootd_url = 'root://dcache-cms-xrootd.desy.de/'
-for x in qcdht2000ext, ttbar:
+for x in qcdht2000ext, ttbar, mfv_neu_tau10000um_M1600:
     x.xrootd_url = 'root://cmseos.fnal.gov/'
 
 for x in (qcdht0500_2015, qcdht0700_2015, qcdht1000_2015, qcdht2000_2015, qcdht0500ext_2015, qcdht1500ext_2015, qcdht2000ext_2015, ttbar_2015):
