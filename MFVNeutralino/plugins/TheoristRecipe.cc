@@ -17,6 +17,7 @@ public:
   void analyze(const edm::Event&, const edm::EventSetup&);
 
 private:
+  const edm::EDGetTokenT<reco::GenJetCollection> gen_jets_token;
   const edm::EDGetTokenT<std::vector<double>> gen_vertex_token;
   const edm::EDGetTokenT<mfv::MCInteraction> mci_token;
   const edm::EDGetTokenT<MFVEvent> mevent_token;
@@ -37,6 +38,14 @@ private:
   TH1F* h_gen_lsp_netE;
   TH1F* h_gen_lsp_sumEt;
   TH1F* h_gen_lsp_netEt;
+
+  TH1F* h_genJet_njets;
+  TH1F* h_genJet_jet_pt;
+  TH1F* h_genJet_jet_eta;
+  TH1F* h_genJet_jet_phi;
+  TH1F* h_genJet_jet_pt40;
+  TH1F* h_genJet_ht;
+  TH1F* h_genJet_ht40;
 
   TH1F* h_gen_parton_njets;
   TH1F* h_gen_parton_ht;
@@ -93,7 +102,8 @@ private:
 };
 
 MFVTheoristRecipe::MFVTheoristRecipe(const edm::ParameterSet& cfg)
-  : gen_vertex_token(consumes<std::vector<double>>(cfg.getParameter<edm::InputTag>("gen_vertex_src"))),
+  : gen_jets_token(consumes<reco::GenJetCollection>(cfg.getParameter<edm::InputTag>("gen_jets_src"))),
+    gen_vertex_token(consumes<std::vector<double>>(cfg.getParameter<edm::InputTag>("gen_vertex_src"))),
     mci_token(consumes<mfv::MCInteraction>(cfg.getParameter<edm::InputTag>("mci_src"))),
     mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
     vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
@@ -114,6 +124,14 @@ MFVTheoristRecipe::MFVTheoristRecipe(const edm::ParameterSet& cfg)
   h_gen_lsp_netE = fs->make<TH1F>("h_gen_lsp_netE", ";net E of LSPs;events", 500, 0, 5000);
   h_gen_lsp_sumEt = fs->make<TH1F>("h_gen_lsp_sumEt", ";#SigmaE_{T} of LSPs;events", 500, 0, 5000);
   h_gen_lsp_netEt = fs->make<TH1F>("h_gen_lsp_netEt", ";net E_{T} of LSPs;events", 500, 0, 5000);
+
+  h_genJet_njets = fs->make<TH1F>("h_genJet_njets", ";number of genJets;events", 20, 0, 20);
+  h_genJet_jet_pt = fs->make<TH1F>("h_genJet_jet_pt", ";p_{T} of genJets;quarks", 500, 0, 500);
+  h_genJet_jet_eta = fs->make<TH1F>("h_genJet_jet_eta", ";#eta of genJets;quarks", 100, -4, 4);
+  h_genJet_jet_phi = fs->make<TH1F>("h_genJet_jet_phi", ";#phi of genJets;quarks", 100, -3.1416, 3.1416);
+  h_genJet_jet_pt40 = fs->make<TH1F>("h_genJet_jet_pt40", ";p_{T} of genJets with p_{T} > 40 GeV;quarks", 500, 0, 500);
+  h_genJet_ht = fs->make<TH1F>("h_genJet_ht", ";H_{T} of genJets;events", 500, 0, 5000);
+  h_genJet_ht40 = fs->make<TH1F>("h_genJet_ht40", ";H_{T} of genJets with p_{T} > 40 GeV;events", 500, 0, 5000);
 
   h_gen_parton_njets = fs->make<TH1F>("h_gen_parton_njets", ";number of partons;events", 20, 0, 20);
   h_gen_parton_ht = fs->make<TH1F>("h_gen_parton_ht", ";H_{T} of partons;events", 500, 0, 5000);
@@ -182,6 +200,9 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
   edm::Handle<MFVEvent> mevent;
   event.getByToken(mevent_token, mevent);
 
+  edm::Handle<reco::GenJetCollection> gen_jets;
+  event.getByToken(gen_jets_token, gen_jets);
+
   edm::Handle<std::vector<double>> gen_vertex;
   event.getByToken(gen_vertex_token, gen_vertex);
     
@@ -221,6 +242,22 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
   h_gen_lsp_netE->Fill((lsp_p4s[0] + lsp_p4s[1]).E());
   h_gen_lsp_sumEt->Fill(lsp_p4s[0].Et() + lsp_p4s[1].Et());
   h_gen_lsp_netEt->Fill((lsp_p4s[0] + lsp_p4s[1]).Et());
+
+  int ngenJets = 0; float genJet_ht = 0; float genJet_ht40 = 0;
+  for (const reco::GenJet& jet : *gen_jets) {
+    if (jet.pt() > 20 && fabs(jet.eta()) < 2.5) {
+      ++ngenJets; genJet_ht += jet.pt(); if (jet.pt() > 40) genJet_ht40 += jet.pt();
+      h_genJet_jet_pt->Fill(jet.pt());
+      h_genJet_jet_eta->Fill(jet.eta());
+      h_genJet_jet_phi->Fill(jet.phi());
+      if (jet.pt() > 40) {
+        h_genJet_jet_pt40->Fill(jet.pt());
+      }
+    }
+  }
+  h_genJet_njets->Fill(ngenJets);
+  h_genJet_ht->Fill(genJet_ht);
+  h_genJet_ht40->Fill(genJet_ht40);
 
   //plot generator-level variables
   int npartons = 0; float parton_ht = 0; float parton_ht40 = 0;

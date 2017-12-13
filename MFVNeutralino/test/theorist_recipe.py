@@ -14,6 +14,7 @@ process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
 process.mfvGenParticles.last_flag_check = False # JMTBAD need this until wgenv2
 
 mfvTheoristRecipe = cms.EDAnalyzer('MFVTheoristRecipe',
+                                   gen_jets_src = cms.InputTag('ak4GenJetsNoNu'),
                                    gen_vertex_src = cms.InputTag('mfvGenParticles', 'genVertex'),
                                    mci_src = cms.InputTag('mfvGenParticles'),
                                    mevent_src = cms.InputTag('mfvEvent'),
