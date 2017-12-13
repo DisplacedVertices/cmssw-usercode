@@ -29,6 +29,12 @@ def _remove_file(sample, ds, fn):
     fns.remove(fn)
     _d[(sample,ds)] = (n-1, fns)
 
+def _replace_file(sample, ds, fn, fn2):
+    n, fns = _d[(sample,ds)]
+    fns.remove(fn)
+    fns.append(fn2)
+    _d[(sample,ds)] = (n, fns)
+
 def _add_ds(ds, d, allow_overwrite=False):
     d2 = {}
     for k in d:
