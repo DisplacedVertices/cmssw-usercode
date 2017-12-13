@@ -239,7 +239,7 @@ const reco::Candidate* first_candidate(const reco::Candidate* c)                
 const reco::Candidate* final_candidate(const reco::Candidate* c, int allowed_others) { return final_candidate_with_copies(c, allowed_others).first; }
 
 void GenParticlePrinter::PrintHeader() {
-  printf("%25s %4s %8s %4s %7s %7s %7s %7s %7s %7s", "particle", "ndx", "pdgId", "stat", "energy", "mass", "pT", "rap", "eta", "phi");
+  printf("%25s %4s %8s %8s %4s %7s %7s %7s %7s %7s %7s", "particle", "ndx", "pdgId", "flags", "stat", "energy", "mass", "pT", "rap", "eta", "phi");
   if (print_vertex)
     printf(" %7s %7s %7s", "vx", "vy", "vz");
   if (print_mothers)
@@ -255,7 +255,18 @@ void GenParticlePrinter::Print(const reco::Candidate* c, const char* name) {
   else if (c == 0)
     printf("%25s    pointer nil (not in event?)\n", name);
   else {
-    printf("%25s %4i %8i %4i %7.2f %7.2f %7.2f %7.3f %7.3f %7.3f", name, original_index(c, gen_particles), c->pdgId(), c->status(), c->energy(), c->mass(), c->pt(), c->rapidity(), c->eta(), c->phi());
+    const reco::GenParticle* gen = dynamic_cast<const reco::GenParticle*>(c);
+    assert(gen);
+    const reco::GenStatusFlags& f = gen->statusFlags();
+    char flags[9] = {0};
+    flags[0] = f.isFirstCopy()     ? '1' : '0';
+    flags[1] = f.isLastCopy()      ? '1' : '0';
+    flags[2] = f.isHardProcess()   ? '1' : '0';
+    flags[3] = f.fromHardProcess() ? '1' : '0';
+    flags[4] = f.isPrompt()        ? '1' : '0';
+    flags[5] = '\0';
+
+    printf("%25s %4i %8i %8s %4i %7.2f %7.2f %7.2f %7.3f %7.3f %7.3f", name, original_index(c, gen_particles), c->pdgId(), flags, c->status(), c->energy(), c->mass(), c->pt(), c->rapidity(), c->eta(), c->phi());
     if (print_vertex)
       printf(" %7.3f %7.3f %7.3f", c->vx(), c->vy(), c->vz());
 
@@ -310,4 +321,3 @@ int gen_jet_id(const reco::GenJet& jet) {
   }
   return id;
 }
-
