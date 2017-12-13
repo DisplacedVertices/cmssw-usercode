@@ -27,9 +27,32 @@ private:
 
   TH1F* h_gen_valid;
 
+  TH1F* h_gen_lsp_sump;
+  TH1F* h_gen_lsp_netp;
+  TH1F* h_gen_lsp_sumpt;
+  TH1F* h_gen_lsp_netpt;
+  TH1F* h_gen_lsp_sumpz;
+  TH1F* h_gen_lsp_netpz;
+  TH1F* h_gen_lsp_sumE;
+  TH1F* h_gen_lsp_netE;
+  TH1F* h_gen_lsp_sumEt;
+  TH1F* h_gen_lsp_netEt;
+
+  TH1F* h_gen_parton_njets;
+  TH1F* h_gen_parton_ht;
+  TH1F* h_gen_parton_ht40;
+  TH1F* h_gen_parton_accepted_njets;
+  TH1F* h_gen_parton_accepted_ht;
+  TH1F* h_gen_parton_accepted_ht40;
+  TH1F* h_gen_quark_njets;
+  TH1F* h_gen_quark_ht;
+  TH1F* h_gen_quark_ht40;
   TH1F* h_gen_njets;
   TH1F* h_gen_jet_pt;
+  TH1F* h_gen_jet_eta;
+  TH1F* h_gen_jet_phi;
   TH1F* h_gen_jet_pt40;
+  TH1F* h_gen_ht;
   TH1F* h_gen_ht40;
   TH1F* h_gen_dxy;
   TH1F* h_gen_ntracks;
@@ -39,7 +62,10 @@ private:
 
   TH1F* h_rec_njets;
   TH1F* h_rec_jet_pt;
+  TH1F* h_rec_jet_eta;
+  TH1F* h_rec_jet_phi;
   TH1F* h_rec_jet_pt40;
+  TH1F* h_rec_ht;
   TH1F* h_rec_ht40;
   TH1F* h_rec_dxy;
   TH1F* h_rec_ntracks;
@@ -78,9 +104,32 @@ MFVTheoristRecipe::MFVTheoristRecipe(const edm::ParameterSet& cfg)
 
   h_gen_valid = fs->make<TH1F>("h_gen_valid", "", 2, 0, 2);
 
+  h_gen_lsp_sump = fs->make<TH1F>("h_gen_lsp_sump", ";#Sigma|#vec{p}| of LSPs;events", 500, 0, 5000);
+  h_gen_lsp_netp = fs->make<TH1F>("h_gen_lsp_netp", ";net |#vec{p}| of LSPs;events", 500, 0, 5000);
+  h_gen_lsp_sumpt = fs->make<TH1F>("h_gen_lsp_sumpt", ";#Sigmap_{T} of LSPs;events", 500, 0, 5000);
+  h_gen_lsp_netpt = fs->make<TH1F>("h_gen_lsp_netpt", ";net p_{T} of LSPs;events", 500, 0, 5000);
+  h_gen_lsp_sumpz = fs->make<TH1F>("h_gen_lsp_sumpz", ";#Sigmap_{z} of LSPs;events", 500, 0, 5000);
+  h_gen_lsp_netpz = fs->make<TH1F>("h_gen_lsp_netpz", ";net p_{z} of LSPs;events", 500, 0, 5000);
+  h_gen_lsp_sumE = fs->make<TH1F>("h_gen_lsp_sumE", ";#SigmaE of LSPs;events", 500, 0, 5000);
+  h_gen_lsp_netE = fs->make<TH1F>("h_gen_lsp_netE", ";net E of LSPs;events", 500, 0, 5000);
+  h_gen_lsp_sumEt = fs->make<TH1F>("h_gen_lsp_sumEt", ";#SigmaE_{T} of LSPs;events", 500, 0, 5000);
+  h_gen_lsp_netEt = fs->make<TH1F>("h_gen_lsp_netEt", ";net E_{T} of LSPs;events", 500, 0, 5000);
+
+  h_gen_parton_njets = fs->make<TH1F>("h_gen_parton_njets", ";number of partons;events", 20, 0, 20);
+  h_gen_parton_ht = fs->make<TH1F>("h_gen_parton_ht", ";H_{T} of partons;events", 500, 0, 5000);
+  h_gen_parton_ht40 = fs->make<TH1F>("h_gen_parton_ht40", ";H_{T} of partons with p_{T} > 40 GeV", 500, 0, 5000);
+  h_gen_parton_accepted_njets = fs->make<TH1F>("h_gen_parton_accepted_njets", ";number of accepted partons;events", 20, 0, 20);
+  h_gen_parton_accepted_ht = fs->make<TH1F>("h_gen_parton_accepted_ht", ";H_{T} of accepted partons;events", 500, 0, 5000);
+  h_gen_parton_accepted_ht40 = fs->make<TH1F>("h_gen_parton_accepted_ht40", ";H_{T} of accepted partons with p_{T} > 40 GeV", 500, 0, 5000);
+  h_gen_quark_njets = fs->make<TH1F>("h_gen_quark_njets", ";number of quarks;events", 20, 0, 20);
+  h_gen_quark_ht = fs->make<TH1F>("h_gen_quark_ht", ";H_{T} of quarks;events", 500, 0, 5000);
+  h_gen_quark_ht40 = fs->make<TH1F>("h_gen_quark_ht40", ";H_{T} of quarks with p_{T} > 40 GeV", 500, 0, 5000);
   h_gen_njets = fs->make<TH1F>("h_gen_njets", ";number of accepted quarks;events", 20, 0, 20);
   h_gen_jet_pt = fs->make<TH1F>("h_gen_jet_pt", ";p_{T} of accepted quarks;quarks", 500, 0, 500);
+  h_gen_jet_eta = fs->make<TH1F>("h_gen_jet_eta", ";#eta of accepted quarks;quarks", 100, -4, 4);
+  h_gen_jet_phi = fs->make<TH1F>("h_gen_jet_phi", ";#phi of accepted quarks;quarks", 100, -3.1416, 3.1416);
   h_gen_jet_pt40 = fs->make<TH1F>("h_gen_jet_pt40", ";p_{T} of accepted quarks with p_{T} > 40 GeV;quarks", 500, 0, 500);
+  h_gen_ht = fs->make<TH1F>("h_gen_ht", ";H_{T} of accepted quarks;events", 500, 0, 5000);
   h_gen_ht40 = fs->make<TH1F>("h_gen_ht40", ";H_{T} of accepted quarks with p_{T} > 40 GeV;events", 500, 0, 5000);
   h_gen_dxy = fs->make<TH1F>("h_gen_dxy", ";generated d_{xy} (cm);LSP daughter particles", 100, 0, 1);
   h_gen_ntracks = fs->make<TH1F>("h_gen_ntracks", ";number of accepted displaced daughter particles;LSPs", 40, 0, 40);
@@ -90,7 +139,10 @@ MFVTheoristRecipe::MFVTheoristRecipe(const edm::ParameterSet& cfg)
 
   h_rec_njets = fs->make<TH1F>("h_rec_njets", ";reconstructed number of jets;events", 20, 0, 20);
   h_rec_jet_pt = fs->make<TH1F>("h_rec_jet_pt", ";reconstructed p_{T} of jets;jets", 500, 0, 500);
+  h_rec_jet_eta = fs->make<TH1F>("h_rec_jet_eta", ";reconstructed #eta of jets;jets", 100, -4, 4);
+  h_rec_jet_phi = fs->make<TH1F>("h_rec_jet_phi", ";reconstructed #phi of jets;jets", 100, -3.1416, 3.1416);
   h_rec_jet_pt40 = fs->make<TH1F>("h_rec_jet_pt40", ";reconstructed p_{T} of jets with p_{T} > 40 GeV;jets", 500, 0, 500);
+  h_rec_ht = fs->make<TH1F>("h_rec_ht", ";reconstructed H_{T} of jets;events", 500, 0, 5000);
   h_rec_ht40 = fs->make<TH1F>("h_rec_ht40", ";reconstructed H_{T} of jets with p_{T} > 40 GeV;events", 500, 0, 5000);
   h_rec_dxy = fs->make<TH1F>("h_rec_dxy", ";reconstructed d_{xy} (cm);tracks", 100, 0, 1);
   h_rec_ntracks = fs->make<TH1F>("h_rec_ntracks", ";number of tracks;vertices", 40, 0, 40);
@@ -159,20 +211,38 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
 
   //////////////////////////////////////////////////////////////////////////////
 
+  h_gen_lsp_sump->Fill(lsp_p4s[0].P() + lsp_p4s[1].P());
+  h_gen_lsp_netp->Fill((lsp_p4s[0] + lsp_p4s[1]).P());
+  h_gen_lsp_sumpt->Fill(lsp_p4s[0].Pt() + lsp_p4s[1].Pt());
+  h_gen_lsp_netpt->Fill((lsp_p4s[0] + lsp_p4s[1]).Pt());
+  h_gen_lsp_sumpz->Fill(lsp_p4s[0].Pz() + lsp_p4s[1].Pz());
+  h_gen_lsp_netpz->Fill((lsp_p4s[0] + lsp_p4s[1]).Pz());
+  h_gen_lsp_sumE->Fill(lsp_p4s[0].E() + lsp_p4s[1].E());
+  h_gen_lsp_netE->Fill((lsp_p4s[0] + lsp_p4s[1]).E());
+  h_gen_lsp_sumEt->Fill(lsp_p4s[0].Et() + lsp_p4s[1].Et());
+  h_gen_lsp_netEt->Fill((lsp_p4s[0] + lsp_p4s[1]).Et());
+
   //plot generator-level variables
-  int nquarks = 0;
-  float ht40 = 0;
+  int npartons = 0; float parton_ht = 0; float parton_ht40 = 0;
+  int npartons_accepted = 0; float parton_ht_accepted = 0; float parton_ht40_accepted = 0;
+  int nquarks = 0; float quark_ht = 0; float quark_ht40 = 0;
+  int nquarks_accepted = 0; float quark_ht_accepted = 0; float quark_ht40_accepted = 0;
   for (int i = 0; i < 2; ++i) {
     int ntracks = 0;
     float sumpt = 0;
     for (const reco::GenParticle* p : partons[i]) {
+      ++npartons; parton_ht += p->pt(); if (p->pt() > 40) parton_ht40 += p->pt();
+      if (is_quark(p)) {++nquarks; quark_ht += p->pt(); if (p->pt() > 40) quark_ht40 += p->pt();}
+
       float dxy = fabs(dbv[i] * sin(p->phi() - atan2(v[i][1], v[i][0])));
       if (p->pt() > 20 && fabs(p->eta()) < 2.5) {
+        ++npartons_accepted; parton_ht_accepted += p->pt(); if (p->pt() > 40) parton_ht40_accepted += p->pt();
         if (is_quark(p)) {
-          ++nquarks;
+          ++nquarks_accepted; quark_ht_accepted += p->pt(); if (p->pt() > 40) quark_ht40_accepted += p->pt();
           h_gen_jet_pt->Fill(p->pt());
+          h_gen_jet_eta->Fill(p->eta());
+          h_gen_jet_phi->Fill(p->phi());
           if (p->pt() > 40) {
-            ht40 += p->pt();
             h_gen_jet_pt40->Fill(p->pt());
           }
         }
@@ -187,15 +257,28 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
     h_gen_sumpt->Fill(sumpt);
     h_gen_dbv->Fill(dbv[i]);
   }
-  h_gen_njets->Fill(nquarks);
-  h_gen_ht40->Fill(ht40);
+  h_gen_parton_njets->Fill(npartons);
+  h_gen_parton_ht->Fill(parton_ht);
+  h_gen_parton_ht40->Fill(parton_ht40);
+  h_gen_parton_accepted_njets->Fill(npartons_accepted);
+  h_gen_parton_accepted_ht->Fill(parton_ht_accepted);
+  h_gen_parton_accepted_ht40->Fill(parton_ht40_accepted);
+  h_gen_quark_njets->Fill(nquarks);
+  h_gen_quark_ht->Fill(quark_ht);
+  h_gen_quark_ht40->Fill(quark_ht40);
+  h_gen_njets->Fill(nquarks_accepted);
+  h_gen_ht->Fill(quark_ht_accepted);
+  h_gen_ht40->Fill(quark_ht40_accepted);
   h_gen_dvv->Fill(dvv);
 
   //plot reconstructed-level variables
   h_rec_njets->Fill(mevent->njets());
+  h_rec_ht->Fill(mevent->jet_ht());
   h_rec_ht40->Fill(mevent->jet_ht(40));
   for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
     h_rec_jet_pt->Fill(mevent->jet_pt[ijet]);
+    h_rec_jet_eta->Fill(mevent->jet_eta[ijet]);
+    h_rec_jet_phi->Fill(mevent->jet_phi[ijet]);
     if (mevent->jet_pt[ijet] > 40) h_rec_jet_pt40->Fill(mevent->jet_pt[ijet]);
   }
   for (const MFVVertexAux& vtx : *vertices) {
@@ -211,11 +294,11 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
   }
 
   //plot reconstructed-level vs. generator-level variables
-  h_rec_v_gen_njets->Fill(nquarks, mevent->njets());
-  h_rec_v_gen_ht40->Fill(ht40, mevent->jet_ht(40));
+  h_rec_v_gen_njets->Fill(nquarks_accepted, mevent->njets());
+  h_rec_v_gen_ht40->Fill(quark_ht40_accepted, mevent->jet_ht(40));
 
   //match jets to partons
-  if (verbose) printf("\nrun = %u, lumi = %u, event = %llu: number of accepted quarks = %d, number of jets = %d, generated HT(40) = %.2f GeV, reconstructed HT(40) = %.2f GeV\n", event.id().run(), event.luminosityBlock(), event.id().event(), nquarks, mevent->njets(), ht40, mevent->jet_ht(40));
+  if (verbose) printf("\nrun = %u, lumi = %u, event = %llu: number of accepted quarks = %d, number of jets = %d, generated HT(40) = %.2f GeV, reconstructed HT(40) = %.2f GeV\n", event.id().run(), event.luminosityBlock(), event.id().event(), nquarks_accepted, mevent->njets(), quark_ht40_accepted, mevent->jet_ht(40));
   for (int i = 0; i < 2; ++i) {
     for (const reco::GenParticle* p : partons[i]) {
       if (verbose) printf("\tparton pdgId %3d: pT = %6.2f GeV, eta = %5.2f, phi = %5.2f", p->pdgId(), p->pt(), p->eta(), p->phi());
