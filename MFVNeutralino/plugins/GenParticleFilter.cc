@@ -134,7 +134,7 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
 
   for (int i : {0,1}) {
     for (auto ref : mci->visible(i))
-      partons[i].push_back(&*ref);
+      partons[i].push_back((reco::GenParticle*)first_candidate(&*ref));
     auto x = mci->decay_point(i);
     v[i][0] = x.x - x0;
     v[i][1] = x.y - y0;

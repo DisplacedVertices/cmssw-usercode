@@ -7,7 +7,7 @@ samples = [Samples.mfv_neu_tau01000um_M0800]
 
 for sample in samples:
     ps = plot_saver('plots/theorist_recipe/mfvTheoristRecipeNoCuts/%s' % sample.name, size=(700,700), root=False)
-    f = ROOT.TFile('~/crabdirs/TheoristRecipeV10/%s.root' % sample.name)
+    f = ROOT.TFile('~/crabdirs/TheoristRecipeV11/%s.root' % sample.name)
     print sample.name
 
     for name in ['p', 'pt', 'pz', 'E', 'Et']:
