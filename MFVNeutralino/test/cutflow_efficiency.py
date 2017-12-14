@@ -5,6 +5,8 @@ from array import array
 
 gen_rec_cut = 20
 
+gen_num = 'Dvv400um'
+
 rec_den = 'NoCuts'
 gen_den = 'NoCuts'
 iden = 0
@@ -359,7 +361,7 @@ for j,sample in enumerate(samples):
             gen_err = (gen_eff * (1-gen_eff) / ngen)**0.5
             gen_rec_div = gen_eff/rec_eff if rec_eff != 0 else 9999
             gen_rec_err = (gen_rec_div * ((rec_err/rec_eff)**2 + (gen_err/gen_eff)**2))**0.5 if rec_eff != 0 and gen_eff != 0 else 9999
-            if generated[i] == 'Dvv400um':
+            if generated[i] == gen_num:
                 print '%20s%6d%20s%6d%10.3f%10.3f%10.3f%10.3f%10.3f%10.3f\n' % (rec, rec_hist.GetEntries(), generated[i], gen_hist.GetEntries(), rec_eff, rec_err, gen_eff, gen_err, gen_rec_div, gen_rec_err)
                 print r'%s & $%4.3f \pm %4.3f$ & $%4.3f \pm %4.3f$ & $%4.3f \pm %4.3f$ \\' % (sampleNames[j], rec_eff, rec_err, gen_eff, gen_err, gen_rec_div, gen_rec_err)
                 x.append(rec_eff)
@@ -381,6 +383,7 @@ for j,sample in enumerate(samples):
                     matched.append(sample)
                 else:
                     not_matched.append(sample)
+                break
             else:
                 print '%20s%6d%20s%6d%10.3f%10.3f%10.3f%10.3f%10.3f%10.3f' % (rec, rec_hist.GetEntries(), generated[i], gen_hist.GetEntries(), rec_eff, rec_err, gen_eff, gen_err, gen_rec_div, gen_rec_err)
         else:
@@ -416,4 +419,4 @@ line2 = ROOT.TLine(0,0,1-0.01*gen_rec_cut,1)
 line0.Draw()
 line1.Draw()
 line2.Draw()
-#c.SaveAs('plots/theorist_recipe/gen_vs_reco_eff_wrt_%s.pdf'%rec_den)
+#c.SaveAs('plots/theorist_recipe/gen_vs_reco_eff_%s_divide_%s.pdf' % (gen_num, gen_den))
