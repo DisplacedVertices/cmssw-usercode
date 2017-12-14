@@ -3,6 +3,8 @@
 from JMTucker.Tools.ROOTTools import ROOT
 from array import array
 
+file_path = '~/crabdirs/TheoristRecipeV11'
+
 gen_rec_cut = 20
 
 gen_num = 'Dvv400um'
@@ -345,18 +347,18 @@ l1 = ROOT.TLegend(0.75,0.1,0.95,0.5)
 l2 = ROOT.TLegend(0.75,0.5,0.95,0.9)
 for j,sample in enumerate(samples):
     print sample
-    file = ROOT.TFile('~/crabdirs/TheoristRecipeV11/%s.root'%sample)
-    nrec = file.Get('mfvTheoristRecipe%s/h_gen_dvv'%rec_den).GetEntries()
-    ngen = file.Get('mfvGen%s/h_gen_dvv'%gen_den).GetEntries()
+    f = ROOT.TFile('%s/%s.root' % (file_path, sample))
+    nrec = f.Get('mfvTheoristRecipe%s/h_gen_dvv'%rec_den).GetEntries()
+    ngen = f.Get('mfvGen%s/h_gen_dvv'%gen_den).GetEntries()
     print '%26s%26s%20s%20s%20s' % ('reconstructed', 'generated', 'reco eff +/- error', 'gen eff +/- error', 'gen/reco +/- error')
     for i, rec in enumerate(reconstructed):
         if i < iden:
             continue
-        rec_hist = file.Get('mfvTheoristRecipe%s/h_gen_dvv'%rec)
+        rec_hist = f.Get('mfvTheoristRecipe%s/h_gen_dvv'%rec)
         rec_eff = rec_hist.GetEntries()/nrec
         rec_err = (rec_eff * (1-rec_eff) / nrec)**0.5
         if generated[i] != '':
-            gen_hist = file.Get('mfvGen%s/h_gen_dvv'%generated[i])
+            gen_hist = f.Get('mfvGen%s/h_gen_dvv'%generated[i])
             gen_eff = gen_hist.GetEntries()/ngen
             gen_err = (gen_eff * (1-gen_eff) / ngen)**0.5
             gen_rec_div = gen_eff/rec_eff if rec_eff != 0 else 9999
