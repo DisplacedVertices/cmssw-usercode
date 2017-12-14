@@ -36,13 +36,13 @@ if False:
 process.mfvTheoristRecipeNoCuts = mfvTheoristRecipe.clone()
 process.pNoCuts = cms.Path(process.common * process.mfvTheoristRecipeNoCuts)
 
-process.mfvAnalysisCutsTrigSel = process.mfvAnalysisCuts.clone(min_njets = 0, min_ht = 0, apply_vertex_cuts = False)
-process.mfvTheoristRecipeTrigSel = mfvTheoristRecipe.clone()
-process.pTrigSel = cms.Path(process.common * process.mfvAnalysisCutsTrigSel * process.mfvTheoristRecipeTrigSel)
-
-process.mfvAnalysisCutsOfflineJets = process.mfvAnalysisCuts.clone(min_ht = 0, apply_vertex_cuts = False)
+process.mfvAnalysisCutsOfflineJets = process.mfvAnalysisCuts.clone(apply_trigger = False, min_ht = 0, apply_vertex_cuts = False)
 process.mfvTheoristRecipeOfflineJets = mfvTheoristRecipe.clone()
 process.pOfflineJets = cms.Path(process.common * process.mfvAnalysisCutsOfflineJets * process.mfvTheoristRecipeOfflineJets)
+
+process.mfvAnalysisCutsTrigSel = process.mfvAnalysisCuts.clone(min_ht = 0, apply_vertex_cuts = False)
+process.mfvTheoristRecipeTrigSel = mfvTheoristRecipe.clone()
+process.pTrigSel = cms.Path(process.common * process.mfvAnalysisCutsTrigSel * process.mfvTheoristRecipeTrigSel)
 
 process.mfvAnalysisCutsPreSel = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)
 process.mfvTheoristRecipePreSel = mfvTheoristRecipe.clone()

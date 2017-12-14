@@ -3,26 +3,43 @@
 from JMTucker.Tools.ROOTTools import ROOT
 from array import array
 
-file_path = '~/crabdirs/TheoristRecipeV11'
+file_path = '~/crabdirs/TheoristRecipeV12'
 
 gen_rec_cut = 20
 
+#gen_num = 'FourJets'
+#gen_num = 'HT40'
+#gen_num = 'Geo2ddist'
+#gen_num = 'Bsbs2ddist'
+#gen_num = 'Sumpt200'
 gen_num = 'Dvv400um'
 
 rec_den = 'NoCuts'
 gen_den = 'NoCuts'
 iden = 0
 
+#rec_den = 'OfflineJets'
+#gen_den = 'FourJets'
+#iden = 1
+
 #rec_den = 'PreSel'
 #gen_den = 'HT40'
 #iden = 3
+
+#rec_den = 'TwoVtxGeo2ddist'
+#gen_den = 'Geo2ddist'
+#iden = 5
 
 #rec_den = 'TwoVtxBsbs2ddist'
 #gen_den = 'Bsbs2ddist'
 #iden = 6
 
-reconstructed = ['NoCuts', 'TrigSel', 'OfflineJets', 'PreSel', 'TwoVtxNoCuts', 'TwoVtxGeo2ddist', 'TwoVtxBsbs2ddist', 'TwoVtxNtracks', 'TwoVtxBs2derr', 'TwoVtxDvv400um']
-generated = ['NoCuts', '', 'FourJets', 'HT40', '', 'Geo2ddist', 'Bsbs2ddist', '', 'Sumpt200', 'Dvv400um']
+#rec_den = 'TwoVtxBs2derr'
+#gen_den = 'Sumpt200'
+#iden = 8
+
+reconstructed = ['NoCuts', 'OfflineJets', 'TrigSel', 'PreSel', 'TwoVtxNoCuts', 'TwoVtxGeo2ddist', 'TwoVtxBsbs2ddist', 'TwoVtxNtracks', 'TwoVtxBs2derr', 'TwoVtxDvv400um']
+generated = ['NoCuts', 'FourJets', '', 'HT40', '', 'Geo2ddist', 'Bsbs2ddist', '', 'Sumpt200', 'Dvv400um']
 
 samples = '''mfv_neu_tau00100um_M0300
 mfv_neu_tau00300um_M0300
