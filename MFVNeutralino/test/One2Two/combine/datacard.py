@@ -47,7 +47,7 @@ def make(which):
     bkg_uncert = floatstrit('h_bkg_uncert', offset=1.)
     f = None
 
-    total_ngen = 0
+    total_nsig = 0
     sig_rate = [0.]*nbins
     sig_uncert = None
     for inp in inputs:
@@ -62,7 +62,7 @@ def make(which):
         ngen = 1e-3 / h_norm.GetBinContent(2)
 
         if inp.include_stat:
-            total_ngen += ngen
+            total_nsig += int(sum(nsig))
 
         for i in xrange(nbins):
             sig_rate[i] += nsig[i] / ngen * inp.int_lumi * inp.sf(mass)
@@ -72,8 +72,8 @@ def make(which):
             assert su == sig_uncert
         sig_uncert = su
 
-    total_ngen = int(total_ngen)
-    sig_mc = ' '.join('%.9g' % (x/total_ngen) for x in sig_rate)
+    total_nsig = total_nsig
+    sig_mc = ' '.join('%.9g' % (x/total_nsig) for x in sig_rate)
     sig_rate = ' '.join('%.9g' % x for x in sig_rate)
 
     nsyst = 3 if bkg_fully_correlated else 5
@@ -95,7 +95,7 @@ process 0 0 0 1 1 1
 rate %(sig_rate)s %(bkg_rate)s
 ------------
 sig lnN %(sig_uncert)s - - -
-sigMC gmN %(total_ngen)s %(sig_mc)s - - -
+sigMC gmN %(total_nsig)s %(sig_mc)s - - -
 ''' % locals()
 
     if bkg_fully_correlated:
