@@ -36,6 +36,10 @@ def make(which):
         return _strit('%i',int,n,offset,mult)
     def floatstrit(n, offset=0, mult=1):
         return _strit('%.9g',float,n,offset,mult)
+    def checkedset(x,y):
+        if x is not None:
+            assert x==y
+        return y
 
     f = inputs[0].f # for background/etc. all same
     nbins = f.Get('h_observed').GetNbinsX()
@@ -49,12 +53,14 @@ def make(which):
 
     total_nsig = 0
     sig_rate = [0.]*nbins
+    nice_name = None
     sig_uncert = None
+
     for inp in inputs:
         f = inp.f
 
         h_norm = f.Get('h_signal_%i_norm' % which)
-        nice_name = h_norm.GetTitle()
+        nice_name = checkedset(nice_name, h_norm.GetTitle())
         mass = int(nice_name.split('_M')[-1])
 
         h_dvv = f.Get('h_signal_%i_dvv_rebin' % which)
@@ -67,10 +73,7 @@ def make(which):
         for i in xrange(nbins):
             sig_rate[i] += nsig[i] / ngen * inp.int_lumi * inp.sf(mass)
 
-        su = floatstrit('h_signal_%i_uncert' % which, offset=1.)
-        if sig_uncert is not None:
-            assert su == sig_uncert
-        sig_uncert = su
+        sig_uncert = checkedset(sig_uncert, floatstrit('h_signal_%i_uncert' % which, offset=1.))
 
     total_nsig = total_nsig
     sig_mc = ' '.join('%.9g' % (x/total_nsig) for x in sig_rate)
