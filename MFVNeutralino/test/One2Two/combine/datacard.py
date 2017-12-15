@@ -72,6 +72,7 @@ def make(which):
             assert su == sig_uncert
         sig_uncert = su
 
+    total_ngen = int(total_ngen)
     sig_mc = ' '.join('%.9g' % (x/total_ngen) for x in sig_rate)
     sig_rate = ' '.join('%.9g' % x for x in sig_rate)
 
