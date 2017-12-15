@@ -1,9 +1,6 @@
 import gzip
 from JMTucker.MFVNeutralino.MiniTreeBase import *
 
-for i in xrange(10):
-    print 'put in the 0.998 scale factor or whatever it is, and figure out how to do hip and 2015'
-
 nbins = 3
 bins = to_array(0., 0.04, 0.07, 4)
 
