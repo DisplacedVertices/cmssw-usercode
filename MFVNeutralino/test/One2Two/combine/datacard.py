@@ -2,7 +2,7 @@
 
 import sys
 import ROOT; ROOT.gROOT.SetBatch()
-from signal_efficiency import SignalEfficiencyCombiner, checkedset
+from signal_efficiency import SignalEfficiencyCombiner
 
 bkg_fully_correlated = 'bkg_fully_correlated' in sys.argv
 
