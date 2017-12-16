@@ -180,18 +180,18 @@ def make_1d_plot(d, name, xkey='mass'):
 
 def save_1d_plots():
     xxx = [
-        ('multijetM800',    lambda s: 'neu'   in sample.name and sample.mass == 800 and sample.tau <= 40.,  lambda s: s.sample.tau,  ('tau',  800.)),
-        ('multijetM1600',   lambda s: 'neu'   in sample.name and sample.mass ==1600 and sample.tau <= 40.,  lambda s: s.sample.tau,  ('tau', 1600.)),
-        ('multijetM2400',   lambda s: 'neu'   in sample.name and sample.mass ==2400 and sample.tau <= 40.,  lambda s: s.sample.tau,  ('tau', 2400.)),
-        ('multijettau400um',lambda s: 'neu'   in sample.name and sample.tau  == 0.4,                        lambda s: s.sample.mass, 'mass'),
-        ('multijettau1mm',  lambda s: 'neu'   in sample.name and sample.tau  == 1.,                         lambda s: s.sample.mass, 'mass'),
-        ('multijettau10mm', lambda s: 'neu'   in sample.name and sample.tau  == 10.,                        lambda s: s.sample.mass, 'mass'),
-        ('ddbarM800',       lambda s: 'ddbar' in sample.name and sample.mass == 800 and sample.tau <= 40.,  lambda s: s.sample.tau,  ('tau',  800.)),
-        ('ddbarM1600',      lambda s: 'ddbar' in sample.name and sample.mass ==1600 and sample.tau <= 40.,  lambda s: s.sample.tau,  ('tau', 1600.)),
-        ('ddbarM2400',      lambda s: 'ddbar' in sample.name and sample.mass ==2400 and sample.tau <= 40.,  lambda s: s.sample.tau,  ('tau', 2400.)),
-        ('ddbartau400um',   lambda s: 'ddbar' in sample.name and sample.tau  == 0.4,                        lambda s: s.sample.mass, 'mass'),
-        ('ddbartau1mm',     lambda s: 'ddbar' in sample.name and sample.tau  == 1.,                         lambda s: s.sample.mass, 'mass'),
-        ('ddbartau10mm',    lambda s: 'ddbar' in sample.name and sample.tau  == 10.,                        lambda s: s.sample.mass, 'mass'),
+        ('multijet_M0800',   lambda s: 'neu'   in sample.name and sample.mass == 800 and sample.tau <= 1000., lambda s: s.sample.tau,  ('tau',  800.)),
+        ('multijet_M1600',   lambda s: 'neu'   in sample.name and sample.mass ==1600 and sample.tau <= 1000., lambda s: s.sample.tau,  ('tau', 1600.)),
+        ('multijet_M2400',   lambda s: 'neu'   in sample.name and sample.mass ==2400 and sample.tau <= 1000., lambda s: s.sample.tau,  ('tau', 2400.)),
+        ('multijet_tau300um',lambda s: 'neu'   in sample.name and sample.tau  == 0.3 and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
+        ('multijet_tau1mm',  lambda s: 'neu'   in sample.name and sample.tau  == 1.  and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
+        ('multijet_tau10mm', lambda s: 'neu'   in sample.name and sample.tau  == 10. and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
+        ('ddbar_M0800',      lambda s: 'ddbar' in sample.name and sample.mass == 800 and sample.tau <= 1000., lambda s: s.sample.tau,  ('tau',  800.)),
+        ('ddbar_M1600',      lambda s: 'ddbar' in sample.name and sample.mass ==1600 and sample.tau <= 1000., lambda s: s.sample.tau,  ('tau', 1600.)),
+        ('ddbar_M2400',      lambda s: 'ddbar' in sample.name and sample.mass ==2400 and sample.tau <= 1000., lambda s: s.sample.tau,  ('tau', 2400.)),
+        ('ddbar_tau300um',   lambda s: 'ddbar' in sample.name and sample.tau  == 0.3 and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
+        ('ddbar_tau1mm',     lambda s: 'ddbar' in sample.name and sample.tau  == 1.  and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
+        ('ddbar_tau10mm',    lambda s: 'ddbar' in sample.name and sample.tau  == 10. and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
         ]
     
     in_f = ROOT.TFile('limitsinput.root')

@@ -2,7 +2,7 @@ import sys, os
 from array import array
 from JMTucker.Tools.ROOTTools import *
 
-path = plot_dir('pretty_limits_1d', make=True)
+path = plot_dir('pretty_limits_1d_final', make=True)
 
 ts = tdr_style()
 
@@ -16,17 +16,44 @@ def write(font, size, x, y, text):
 
 f = ROOT.TFile('limits_1d.root')
 
-nice = {
-    'multijetM800': '#tilde{#chi}^{0}/#tilde{g} #rightarrow tbs, M_{#tilde{#chi}^{0}/#tilde{g}} = 800 GeV',
-    'ddbarM800':    '#tilde{g} #rightarrow q#bar{q}, M_{#tilde{g}} = 800 GeV',
-    'multijettau1mm': '#tilde{#chi}^{0}/#tilde{g} #rightarrow tbs, c#tau_{#tilde{#chi}^{0}/#tilde{g}} = 1 mm',
-    'ddbartau1mm':    '#tilde{g} #rightarrow q#bar{q}, c#tau_{#tilde{g}} = 1 mm',
-}
+kinds = [
+    'multijet_M0800',
+    'multijet_M1600',
+    'multijet_M2400',
+    'multijet_tau300um',
+    'multijet_tau1mm',
+    'multijet_tau10mm',
+    'ddbar_M0800',
+    'ddbar_M1600',
+    'ddbar_M2400',
+    'ddbar_tau300um',
+    'ddbar_tau1mm',
+    'ddbar_tau10mm',
+    ]
 
-for kind in 'multijetM800', 'multijettau1mm', 'ddbarM800', 'ddbartau1mm':
+def tau(tau):
+    if tau.endswith('um'):
+        tau = int(tau.replace('um',''))/1000.
+        return '%.1f mm' % tau
+    else:
+        assert tau.endswith('mm')
+        tau = float(tau.replace('mm',''))
+        return '%.0f mm' % tau
+
+def nice(kind):
+    if kind.startswith('multijet_M'):
+        return '#tilde{#chi}^{0} #rightarrow tbs, M_{#tilde{#chi}^{0}} = %i GeV' % int(kind.replace('multijet_M', ''))
+    elif kind.startswith('ddbar_M'):
+        return '#tilde{g} #rightarrow d#bar{d}, M_{#tilde{g}} = %i GeV' % int(kind.replace('ddbar_M', ''))
+    elif kind.startswith('multijet_tau'):
+        return '#tilde{#chi}^{0} #rightarrow tbs, c#tau_{#tilde{#chi}^{0}} = ' + tau(kind.replace('multijet_tau', ''))
+    elif kind.startswith('ddbar_tau'):
+        return '#tilde{g} #rightarrow d#bar{d}, c#tau_{#tilde{g}} = ' + tau(kind.replace('ddbar_tau', ''))
+        
+for kind in kinds:
     c = ROOT.TCanvas('c', '', 800, 800)
     c.SetLogy()
-    if 'M800' in kind:
+    if kind[-5] == 'M':
         c.SetLogx()
     c.SetTopMargin(0.1)
     c.SetBottomMargin(0.12)
@@ -39,11 +66,11 @@ for kind in 'multijetM800', 'multijettau1mm', 'ddbarM800', 'ddbartau1mm':
     expect95 = f.Get('%s/expect95' % kind)
     gluglu = f.Get('%s/gluglu' % kind)
 
+    particle = '#tilde{g}' if 'ddbar' in kind else '#tilde{#chi}^{0} / #tilde{g}'
     if 'tau' in kind:
-        particle = '#tilde{g}' if 'ddbar' in kind else '#tilde{#chi}^{0} / #tilde{g}'
         xtitle = 'M_{%s} (GeV)' % particle
-    elif 'M800' in kind:
-        xtitle = 'c#tau (mm)'
+    elif kind[-5] == 'M':
+        xtitle = 'c#tau_{%s} (mm)' % particle
         
     g = expect95
     g.SetTitle(';%s;#sigma B^{2} (fb)' % xtitle)
@@ -60,10 +87,11 @@ for kind in 'multijetM800', 'multijettau1mm', 'ddbarM800', 'ddbartau1mm':
     yax.SetTitleSize(0.05)
     yax.SetLabelSize(0.045)
 
-    if 'M800' in kind:
-        yax.SetRangeUser(0.1, 30)
-    elif 'tau' in kind:
-        yax.SetRangeUser(0.1, 30)
+    if 'tau' in kind:
+        xax.SetRangeUser(150, 2750)
+    elif kind[-5] == 'M':
+        xax.SetRangeUser(0.005, 10000)
+    yax.SetRangeUser(0.08, 100)
 
     observed.SetLineWidth(2)
     expect50.SetLineWidth(2)
@@ -74,16 +102,21 @@ for kind in 'multijetM800', 'multijettau1mm', 'ddbarM800', 'ddbartau1mm':
     expect68.Draw('3')
     expect50.Draw('L')
     observed.Draw('L')
+    if 'tau' in kind:
+        legx = 0.583, 0.866
+    elif kind[-5] == 'M':
+        d = 0.07
+        legx = 0.583-d, 0.866-d
     if draw_gluglu:
         gluglu.Draw('L')
-        leg = ROOT.TLegend(0.583, 0.566, 0.866, 0.851)
+        leg = ROOT.TLegend(legx[0], 0.566, legx[1], 0.851)
     else:
-        leg = ROOT.TLegend(0.583, 0.632, 0.866, 0.851)
+        leg = ROOT.TLegend(legx[0], 0.632, legx[1], 0.851)
 
     leg.SetTextFont(42)
     leg.SetFillColor(ROOT.kWhite)
     leg.SetBorderSize(0)
-    leg.AddEntry(0, '#kern[-0.22]{%s}' % nice[kind], '')
+    leg.AddEntry(0, '#kern[-0.22]{%s}' % nice(kind), '')
     leg.AddEntry(0, '#kern[-0.22]{95% CL upper limits:}', '')
     leg.AddEntry(observed, 'Observed', 'L')
     leg.AddEntry(expect50, 'Expected', 'L')
@@ -95,8 +128,8 @@ for kind in 'multijetM800', 'multijettau1mm', 'ddbarM800', 'ddbartau1mm':
     leg.Draw()
 
     cms = write(61, 0.050, 0.109, 0.913, 'CMS')
-    lum = write(42, 0.050, 0.528, 0.913, '38.5 fb^{-1} (13 TeV)')
-    fn = os.path.join(path, kind)
+    lum = write(42, 0.050, 0.548, 0.913, '38.5 fb^{-1} (13 TeV)')
+    fn = os.path.join(path, 'limit1d_' + kind)
     c.SaveAs(fn + '.pdf')
     c.SaveAs(fn + '.png')
     c.SaveAs(fn + '.root')
