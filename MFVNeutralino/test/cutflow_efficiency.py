@@ -3,12 +3,13 @@
 from JMTucker.Tools.ROOTTools import ROOT
 from array import array
 
-file_path = '~/crabdirs/TheoristRecipeV12'
+file_path = '~/crabdirs/TheoristRecipeV13'
 
 gen_rec_cut = 20
 
 #gen_num = 'FourJets'
 #gen_num = 'HT40'
+#gen_num = 'Ntracks1'
 #gen_num = 'Geo2ddist'
 #gen_num = 'Bsbs2ddist'
 #gen_num = 'Sumpt200'
@@ -26,6 +27,10 @@ iden = 0
 #gen_den = 'HT40'
 #iden = 3
 
+#rec_den = 'TwoVtxNoCuts'
+#gen_den = 'Ntracks1'
+#iden = 4
+
 #rec_den = 'TwoVtxGeo2ddist'
 #gen_den = 'Geo2ddist'
 #iden = 5
@@ -39,7 +44,7 @@ iden = 0
 #iden = 8
 
 reconstructed = ['NoCuts', 'OfflineJets', 'TrigSel', 'PreSel', 'TwoVtxNoCuts', 'TwoVtxGeo2ddist', 'TwoVtxBsbs2ddist', 'TwoVtxNtracks', 'TwoVtxBs2derr', 'TwoVtxDvv400um']
-generated = ['NoCuts', 'FourJets', '', 'HT40', '', 'Geo2ddist', 'Bsbs2ddist', '', 'Sumpt200', 'Dvv400um']
+generated = ['NoCuts', 'FourJets', '', 'HT40', 'Ntracks1', 'Geo2ddist', 'Bsbs2ddist', '', 'Sumpt200', 'Dvv400um']
 
 samples = '''mfv_neu_tau00100um_M0300
 mfv_neu_tau00300um_M0300
