@@ -229,6 +229,8 @@ def save_2d_plots():
     for kind in 'mfv_ddbar', 'mfv_neu':
         d = limits()
         for sample in sample_iterator(in_f):
+            if -sample.isample in (209,210,211,399,489,589,590,675,676,969,970,971,1063,1159,1249,1349,1350,1435,1436):
+                continue
             if sample.kind != kind:
                 continue
             d.parse(sample, 'combine_output/signal_%05i/results' % sample.isample)
@@ -411,7 +413,7 @@ env R_LIBS=~/.R R --no-save <<EOF
             h = f.Get('%s/%s' % (k,y))
             to_ascii(h, open('to_r_%s.csv' % x, 'wt'), sep=',')
             print 'h<-read.table("to_r_%s.csv", header=TRUE, sep=",")' % x
-            print 'i<-interp(x=h\\$x, y=h\\$y, z=h\\$z, xo=seq(300, 3000, by=1), yo=seq(0.1,40,by=0.1))'
+            print 'i<-interp(x=h\\$x, y=h\\$y, z=h\\$z, xo=seq(300, 2600, by=1), yo=seq(0.1,100,by=0.05))'
             for a in 'xyz':
                 print 'write.csv(i\\$%s, "from_r_%s_%s.csv")' % (a,x,a)
     print 'EOF'
@@ -420,7 +422,7 @@ env R_LIBS=~/.R R --no-save <<EOF
 
 def one_from_r(ex, name):
     def read_csv(fn):
-        lines = [x.strip() for x in open(fn).read().replace('"', '').split('\n') if x.strip()]
+        lines = [x.strip() for x in open(os.path.join('/uscmst1b_scratch/lpc1/3DayLifetime/tucker/to_from_r',fn)).read().replace('"', '').split('\n') if x.strip()]
         lines.pop(0)
         vs = []
         for line in lines:
