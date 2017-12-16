@@ -2,7 +2,7 @@ import sys, os
 from array import array
 from JMTucker.Tools.ROOTTools import *
 
-path = plot_dir('pretty_limits', make=True)
+path = plot_dir('pretty_limits_final', make=True)
 
 ts = tdr_style()
 ROOT.gStyle.SetPalette(ROOT.kBird)
@@ -55,12 +55,13 @@ for kind in 'mfv_ddbar', 'mfv_neu':
         xax.SetLabelSize(0.045)
         xax.SetTitleSize(0.05)
         xax.SetTitleOffset(1.05)
+        xax.SetRangeUser(300, 2800)
 #        xax.LabelsOption('h')
         yax = h.GetYaxis()
         if xxx == 'small':
             yax.SetRangeUser(0.1, 1)
         else:
-            yax.SetRangeUser(1, 40)
+            yax.SetRangeUser(1, 100)
 #        if xxx == 'small':
 #            for tau in range(400, 801, 200):
 #                yax.SetBinLabel(yax.FindBin(tau), '%.1f' % (tau/1000.))
@@ -86,13 +87,13 @@ for kind in 'mfv_ddbar', 'mfv_neu':
         h.Draw('colz')
         print kind, xxx, h.GetMinimum(), h.GetMaximum()
         if xxx == 'big':
-            h.SetMinimum(0.15)
+            h.SetMinimum(0.1)
             h.SetMaximum(37)
         else:
-            h.SetMinimum(0.3)
+            h.SetMinimum(0.1)
             h.SetMaximum(240)
         if xxx == 'big':
-            tt = ROOT.TText(213.5,0.039,'1')
+            tt = ROOT.TText(213.5,-0.6,'1')
             tt.SetNDC(0)
             tt.SetTextColor(ROOT.kBlack)
             tt.SetTextFont(43)
