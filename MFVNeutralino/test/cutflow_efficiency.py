@@ -3,7 +3,7 @@
 from JMTucker.Tools.ROOTTools import ROOT
 from array import array
 
-file_path = '~/crabdirs/TheoristRecipeV13'
+file_path = '~/crabdirs/TheoristRecipeV14'
 
 gen_rec_cut = 20
 
@@ -27,24 +27,24 @@ iden = 0
 #gen_den = 'HT40'
 #iden = 3
 
-#rec_den = 'TwoVtxNoCuts'
+#rec_den = 'TwoVtxNtracks'
 #gen_den = 'Ntracks1'
-#iden = 4
+#iden = 5
 
 #rec_den = 'TwoVtxGeo2ddist'
 #gen_den = 'Geo2ddist'
-#iden = 5
+#iden = 6
 
 #rec_den = 'TwoVtxBsbs2ddist'
 #gen_den = 'Bsbs2ddist'
-#iden = 6
+#iden = 7
 
 #rec_den = 'TwoVtxBs2derr'
 #gen_den = 'Sumpt200'
 #iden = 8
 
-reconstructed = ['NoCuts', 'OfflineJets', 'TrigSel', 'PreSel', 'TwoVtxNoCuts', 'TwoVtxGeo2ddist', 'TwoVtxBsbs2ddist', 'TwoVtxNtracks', 'TwoVtxBs2derr', 'TwoVtxDvv400um']
-generated = ['NoCuts', 'FourJets', '', 'HT40', 'Ntracks1', 'Geo2ddist', 'Bsbs2ddist', '', 'Sumpt200', 'Dvv400um']
+reconstructed = ['NoCuts', 'OfflineJets', 'TrigSel', 'PreSel', 'TwoVtxNoCuts', 'TwoVtxNtracks', 'TwoVtxGeo2ddist', 'TwoVtxBsbs2ddist', 'TwoVtxBs2derr', 'TwoVtxDvv400um']
+generated = ['NoCuts', 'FourJets', '', 'HT40', '', 'Ntracks1', 'Geo2ddist', 'Bsbs2ddist', 'Sumpt200', 'Dvv400um']
 
 samples = '''mfv_neu_tau00100um_M0300
 mfv_neu_tau00300um_M0300
