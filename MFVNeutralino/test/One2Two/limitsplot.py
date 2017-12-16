@@ -413,7 +413,7 @@ env R_LIBS=~/.R R --no-save <<EOF
             h = f.Get('%s/%s' % (k,y))
             to_ascii(h, open('to_r_%s.csv' % x, 'wt'), sep=',')
             print 'h<-read.table("to_r_%s.csv", header=TRUE, sep=",")' % x
-            print 'i<-interp(x=h\\$x, y=h\\$y, z=h\\$z, xo=seq(300, 2600, by=1), yo=seq(0.1,100,by=0.05))'
+            print 'i<-interp(x=h\\$x, y=h\\$y, z=h\\$z, xo=seq(300, 2600, by=1), yo=c(seq(0.1,0.9,by=0.1), seq(1,100,by=1)))'
             for a in 'xyz':
                 print 'write.csv(i\\$%s, "from_r_%s_%s.csv")' % (a,x,a)
     print 'EOF'
