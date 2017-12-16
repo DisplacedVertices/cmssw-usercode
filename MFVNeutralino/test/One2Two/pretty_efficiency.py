@@ -1,7 +1,7 @@
 import sys, os
 from JMTucker.Tools.ROOTTools import *
 
-path = plot_dir('pretty_efficiency', make=True)
+path = plot_dir('pretty_efficiency_final', make=True)
 
 ts = tdr_style()
 ROOT.gStyle.SetPalette(ROOT.kBird) #kColorPrintableOnGrey
@@ -48,7 +48,7 @@ for kind in 'mfv_ddbar', 'mfv_neu':
     yax.SetTitleOffset(1.0)
     yax.SetTitleSize(0.05)
     yax.SetLabelSize(0.045)
-    yax.SetRangeUser(0.1, 40.)
+    yax.SetRangeUser(0.1, 100.)
 #    yax.SetBinLabel(yax.FindBin(300), '0.3')
 #    yax.SetBinLabel(yax.FindBin(1000), '1')
 #    yax.SetBinLabel(yax.FindBin(5000), '5')
