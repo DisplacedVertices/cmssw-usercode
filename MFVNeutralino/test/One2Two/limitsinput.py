@@ -380,8 +380,9 @@ def compare(fn1, fn2, outbase):
 
     print 'all same? %r statistically? %r' % (all_same, all_stat_same)
 
-def points():
-    f = ROOT.TFile(limitsinput_fn)
+def points(f=None):
+    if f is None:
+        f = ROOT.TFile(limitsinput_fn)
     kinds  = sorted(set(s.kind for s in sample_iterator(f)))
     masses = sorted(set(s.mass for s in sample_iterator(f)))
     taus   = sorted(set(s.tau  for s in sample_iterator(f)))
@@ -393,17 +394,19 @@ def axisize(l):
     l.append(l[-1] + delta)
     return to_array(l)
 
-def axes():
-    kinds, masses, taus = points()
+def axes(f=None):
+    kinds, masses, taus = points(f)
     masses = axisize(masses)
     taus   = axisize(taus)
     return kinds, masses, taus
 
 def signal_efficiency():
-    in_f = ROOT.TFile(limitsinput_fn)
+    from signal_efficiency import SignalEfficiencyCombiner
+    combiner = SignalEfficiencyCombiner()
+    in_f = combiner.inputs[0].f
     out_f = ROOT.TFile('signal_efficiency.root', 'recreate')
 
-    kinds, masses, taus = axes()
+    kinds, masses, taus = axes(in_f)
     nmasses = len(masses) - 1
     ntaus = len(taus) - 1
 
@@ -415,19 +418,14 @@ def signal_efficiency():
             for jbin in xrange(1, ntaus+1):
                 tau = h.GetYaxis().GetBinLowEdge(jbin)
 
-                name = '%s_tau%05ium_M%04i' % (kind, int(tau*1000), mass)
                 try:
-                    isample = name2isample(in_f, name)
+                    isample = name2isample(in_f, details2name(kind, tau, mass))
                 except ValueError:
                     continue
 
-                dvv = h_dvv(in_f, isample)
-
-                n2v = int(dvv.Integral(2, 1000000)) # 2 for >=400 um, 3 for >=700um
-                ngen = nevents(in_f, isample)
-
-                e,l,u = wilson_score(n2v, ngen)
-                ee = (u-l)/2
+                r = combiner.combine(isample)
+                e = sum(x for x in r.sig_rate[1:]) / combiner.int_lumi # 1 for >=400 um, 2 for >=700um
+                ee = 0. # JMTBAD
 
                 h.SetBinContent(ibin, jbin, e)
                 h.SetBinError  (ibin, jbin, ee)
