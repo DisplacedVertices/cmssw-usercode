@@ -79,6 +79,7 @@ mfv_neu_tau30000um_M1200
 mfv_neu_tau00100um_M1600
 mfv_neu_tau00300um_M1600
 mfv_neu_tau01000um_M1600
+mfv_neu_tau10000um_M1600
 mfv_neu_tau30000um_M1600
 mfv_neu_tau00100um_M3000
 mfv_neu_tau00300um_M3000
@@ -219,6 +220,7 @@ $\tilde{N} \rightarrow tbs$,            $\tau =   30~\mm$, $M = 1200~\GeV$
 $\tilde{N} \rightarrow tbs$,            $\tau = 100~\mum$, $M = 1600~\GeV$
 $\tilde{N} \rightarrow tbs$,            $\tau = 300~\mum$, $M = 1600~\GeV$
 $\tilde{N} \rightarrow tbs$,            $\tau =    1~\mm$, $M = 1600~\GeV$
+$\tilde{N} \rightarrow tbs$,            $\tau =   10~\mm$, $M = 1600~\GeV$
 $\tilde{N} \rightarrow tbs$,            $\tau =   30~\mm$, $M = 1600~\GeV$
 $\tilde{N} \rightarrow tbs$,            $\tau = 100~\mum$, $M = 3000~\GeV$
 $\tilde{N} \rightarrow tbs$,            $\tau = 300~\mum$, $M = 3000~\GeV$
