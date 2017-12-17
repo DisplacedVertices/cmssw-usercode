@@ -161,7 +161,7 @@ def set_gluino(process, tau0, slha):
     set_gluino_pair_production(process)
     set_gluino_tau0(process, tau0)
     set_rhadrons_on(process)
-    set_slha(slha)
+    set_slha(process,slha)
 
 def set_mfv_gluino(process, tau0, m_gluino):
     set_gluino(process, tau0, slha_mfv_gluino(tau0, m_gluino))
