@@ -171,6 +171,8 @@ def set_gluino_ccbar(process, tau0, m_gluino):
     set_gluino(process, tau0, slha(tau0, m_gluino, None, [(1., (4,-4))]))
 def set_gluino_bbbar(process, tau0, m_gluino):
     set_gluino(process, tau0, slha(tau0, m_gluino, None, [(1., (5,-5))]))
+def set_gluino_uds(process, tau0, m_gluino):
+    set_gluino(process, tau0, slha(tau0, m_gluino, None, [(0.5, (1,2,3)), (0.5, (-1,-2,-3))]))
 def set_gluino_udmu(process, tau0, m_gluino):
     set_gluino(process, tau0, slha(tau0, m_gluino, None, [(0.5, (-1,2,13)), (0.5, (1,-2,-13))]))
 
