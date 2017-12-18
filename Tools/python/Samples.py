@@ -571,6 +571,8 @@ for x in (data_samples_2015 +
           mfv_signal_samples + mfv_ddbar_samples + mfv_hip_samples + qcd_hip_samples):
     x.add_dataset('ntuplev15')
     x.add_dataset('ntuplev16')
+    if not x.is_signal:
+        x.add_dataset('ntuplev16_ntkseeds')
 
 for x in data_samples + qcd_samples + qcd_samples_ext + qcd_hip_samples[-2:]:
     x.add_dataset('v0ntuplev1')
