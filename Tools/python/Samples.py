@@ -276,6 +276,9 @@ mfv_signal_samples = [
     MCSample('mfv_neu_tau30000um_M3000', '/mfv_neu_tau30000um_M3000/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-799254d98714d4bddcfc4dddd0b67e7b/USER', 9699),
     ]
 
+mfv_bbbar_samples = [ MCSample('mfv_bbbar_tau10000um_M1200', '/None/None/USER', 10000), ]
+mfv_uds_samples = [ MCSample('mfv_uds_tau10000um_M1200', '/None/None/USER', 10000), ]
+
 mfv_hip_samples = [ # dbs may be screwed up for these, and the ones that say "Premix" weren't really premixed, I just forgot to change the output name
     MCSample('mfv_ddbar_tau00100um_M0300_hip1p0_mit', '/mfv_ddbar_tau00100um_M0300/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-90bd64cf19795b03775f4010661fcc0d/USER', 9899),
     MCSample('mfv_ddbar_tau00100um_M0400_hip1p0_mit', '/mfv_ddbar_tau00100um_M0400/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-28ff807dea20cd8e63c6a95816485dda/USER', 9900),
@@ -340,7 +343,7 @@ mfv_hip_samples = [ # dbs may be screwed up for these, and the ones that say "Pr
     MCSample('mfv_neu_tau30000um_M1600_hip1p0_mit', '/mfv_neu_tau30000um_M1600/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-c5e763a88dabdb717409c32ce672b20d/USER', 10000),
     ]
 
-for s in mfv_ddbar_samples + mfv_signal_samples + mfv_hip_samples:
+for s in mfv_ddbar_samples + mfv_signal_samples + mfv_bbbar_samples + mfv_uds_samples + mfv_hip_samples:
     _set_tau_mass(s)
     s.xsec = 1e-3
     s.is_private = s.dataset.startswith('/mfv_')
@@ -446,6 +449,8 @@ __all__ = [
     'minbias_samples',
     'mfv_ddbar_samples',
     'mfv_signal_samples',
+    'mfv_bbbar_samples',
+    'mfv_uds_samples',
     'mfv_hip_samples',
     'data_samples',
     'auxiliary_data_samples',
@@ -558,6 +563,9 @@ _adbp('miniaod', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-10mm_T
 ########
 # ntuples
 ########
+
+for x in mfv_bbbar_samples + mfv_uds_samples:
+    x.add_dataset('maintemp')
 
 for x in data_samples + [qcdht0700, qcdht2000, ttbar, mfv_neu_tau01000um_M0600, mfv_neu_tau30000um_M0800, mfv_ddbar_tau00300um_M0400, mfv_ddbar_tau00300um_M0800, mfv_ddbar_tau01000um_M0400, mfv_ddbar_tau01000um_M0800]:
     x.add_dataset('validation')
