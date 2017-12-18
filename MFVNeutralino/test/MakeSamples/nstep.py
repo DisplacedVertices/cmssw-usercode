@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from JMTucker.MFVNeutralino.Year import year
+from scanpack import get_scanpack, scanpackbase
 
 nevents = 10000
 events_per = 100
@@ -84,7 +85,6 @@ else:
 
 if scanpack:
     ex += '_' + scanpack
-    from scanpack import get_scanpack, scanpackbase
     scanpack = get_scanpack(scanpack)
 
 #ex = '_test'
@@ -176,6 +176,9 @@ if output_level == 'gensim':
 outputs = {}
 
 def submit(config, name, scanpack_or_todo, todo_rawhlt=[], todo_reco=[], todo_ntuple=[]):
+    global nevents
+    global events_per
+
     config.General.requestName = name
     config.Data.outputPrimaryDataset = name
 
