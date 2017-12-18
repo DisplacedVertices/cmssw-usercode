@@ -51,6 +51,9 @@ private:
   BasicKinematicHists* LightLeptons;
   BasicKinematicHists* Leptons;
 
+  BasicKinematicHists* Ups[2];
+  BasicKinematicHists* Downs[2];
+
   TH1F* h_lsp_dist2d;
   TH1F* h_lsp_dist3d;
   TH1F* h_lsp_angle2;
@@ -191,6 +194,28 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
     Stranges[i]->BookDxy(200, -2, 2, "0.02");
     Stranges[i]->BookDz (200, -2, 2, "0.02");
     Stranges[i]->BookQ();
+
+    Ups[i] = bkh_factory->make(TString::Format("Ups#%i", i), TString::Format("up #%i", i));
+    Ups[i]->BookE (200, 0, 2000, "10");
+    Ups[i]->BookP (200, 0, 2000, "10");
+    Ups[i]->BookPt(200, 0, 2000, "10");
+    Ups[i]->BookM (200, 0, 2000, "10");
+    Ups[i]->BookRapEta(200, "0.1");
+    Ups[i]->BookPhi(50, "0.125");
+    Ups[i]->BookDxy(200, -2, 2, "0.02");
+    Ups[i]->BookDz (200, -2, 2, "0.02");
+    Ups[i]->BookQ();
+
+    Downs[i] = bkh_factory->make(TString::Format("Downs#%i", i), TString::Format("down #%i", i));
+    Downs[i]->BookE (200, 0, 2000, "10");
+    Downs[i]->BookP (200, 0, 2000, "10");
+    Downs[i]->BookPt(200, 0, 2000, "10");
+    Downs[i]->BookM (200, 0, 2000, "10");
+    Downs[i]->BookRapEta(200, "0.1");
+    Downs[i]->BookPhi(50, "0.125");
+    Downs[i]->BookDxy(200, -2, 2, "0.02");
+    Downs[i]->BookDz (200, -2, 2, "0.02");
+    Downs[i]->BookQ();
 
     Bottoms[i] = bkh_factory->make(TString::Format("Bottoms#%i", i), TString::Format("bottom #%i", i));
     Bottoms[i]->BookE (200, 0, 2000, "10");
@@ -603,7 +628,15 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 
 
     }
-    else if (mci->type() == mfv::mci_XX4j || mci->type() == mfv::mci_MFVddbar || mci->type() == mfv::mci_MFVlq) {
+    if (mci->type() == mfv::mci_MFVuds) {
+      for (int i = 0; i < 2; ++i) {
+        fill(Lsps           [i], &*mci->lsp(i));
+        fill(Stranges       [i], &*mci->strange(i));
+        fill(Ups            [i], &*mci->up(i));
+        fill(Downs          [i], &*mci->down(i));
+      }
+    }
+    else if (mci->type() == mfv::mci_XX4j || mci->type() == mfv::mci_MFVddbar || mci->type() == mfv::mci_MFVbbbar || mci->type() == mfv::mci_MFVlq) {
       for (int i = 0; i < 2; ++i) {
         fill(Hs[i], &*mci->primaries()[i]);
         for (int j = 0; j < 2; ++j)
