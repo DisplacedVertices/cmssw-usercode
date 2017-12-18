@@ -89,6 +89,10 @@ namespace mfv {
     GenRef W             (size_t i) const;
     GenRef W_daughter    (size_t i, size_t j) const;
 
+    // MFVuds extra, lsp and strange above also valid
+    GenRef down(size_t i) const;
+    GenRef up  (size_t i) const;
+
   private:
     void check_empty_() const;
 

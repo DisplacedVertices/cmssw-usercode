@@ -94,6 +94,9 @@ namespace mfv {
     decay_type_ = { 0, 0 };
   }
 
+  MCInteraction::GenRef MCInteraction::up  (size_t i) const { return secondaries_.at(indices_[i] + 1 ); }
+  MCInteraction::GenRef MCInteraction::down(size_t i) const { return secondaries_.at(indices_[i] + 2 ); }
+
   void MCInteraction::set(const MCInteractionHolderPair& h, int type) {
     check_empty_();
 
