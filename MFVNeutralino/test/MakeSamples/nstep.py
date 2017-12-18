@@ -19,10 +19,10 @@ ex = ''
 already = []
 
 taus   = [100, 300, 1000, 10000, 30000]
-masses = [300, 400, 500, 600, 800, 1200, 1600]
+masses = [300, 400, 500, 600, 800, 1200, 1600, 3000]
 hip_right = False
 
-if 1:
+if 0:
     meta = 'scan'
     output_level = 'minitree'
     hip_right = False
@@ -279,6 +279,30 @@ elif meta == 'ddbar':
     for tau, mass in taus_masses():
         name = 'mfv_ddbar_tau%05ium_M%04i' % (tau, mass)
         todo = 'gluino_ddbar,%.1f,%i' % (tau/1000., mass)
+        submit(config, name, todo)
+
+elif meta == 'ccbar':
+    for tau, mass in taus_masses():
+        name = 'mfv_ccbar_tau%05ium_M%04i' % (tau, mass)
+        todo = 'gluino_ccbar,%.1f,%i' % (tau/1000., mass)
+        submit(config, name, todo)
+
+elif meta == 'bbbar':
+    for tau, mass in taus_masses():
+        name = 'mfv_bbbar_tau%05ium_M%04i' % (tau, mass)
+        todo = 'gluino_bbbar,%.1f,%i' % (tau/1000., mass)
+        submit(config, name, todo)
+
+elif meta == 'uds':
+    for tau, mass in taus_masses():
+        name = 'mfv_uds_tau%05ium_M%04i' % (tau, mass)
+        todo = 'gluino_uds,%.1f,%i' % (tau/1000., mass)
+        submit(config, name, todo)
+
+elif meta == 'udmu':
+    for tau, mass in taus_masses():
+        name = 'mfv_udmu_tau%05ium_M%04i' % (tau, mass)
+        todo = 'gluino_udmu,%.1f,%i' % (tau/1000., mass)
         submit(config, name, todo)
 
 elif meta == 'lq2':
