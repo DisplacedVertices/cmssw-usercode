@@ -22,7 +22,10 @@ for i in range(4):
     h = ROOT.TFile(fns[i]).Get('h_c1v_dvv')
     h.Scale(hh.Integral()/h.Integral())
 
-    h.SetTitle(';d_{VV} (cm);Events/100 #mum')
+    hh = cm2mm(hh)
+    h = cm2mm(h)
+
+    h.SetTitle(';d_{VV} (mm);Events/100 #mum')
     h.GetXaxis().SetTitleSize(0.04)
     h.GetYaxis().SetTitleSize(0.04)
     h.GetYaxis().SetTitleOffset(1.3)
@@ -49,8 +52,8 @@ for i in range(4):
     write(42, 0.050, 0.560, 0.913, '38.5 fb^{-1} (13 TeV)')
 
     lines = [
-        ROOT.TLine(0.04, 0, 0.04, ymax[i]),
-        ROOT.TLine(0.07, 0, 0.07, ymax[i]),
+        ROOT.TLine(0.4, 0, 0.4, ymax[i]),
+        ROOT.TLine(0.7, 0, 0.7, ymax[i]),
         ]
 
     for ll in lines:
