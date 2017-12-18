@@ -276,6 +276,13 @@ bool MFVGenParticles::try_MFVuds(mfv::MCInteraction& mc, const edm::Handle<reco:
       h.lsps[1] = lsp;
     }
 
+   // testing
+    if (debug) {
+      char lspname[16];
+      snprintf(lspname, 16, "lsp #%lu", which);
+      gpp.Print(&*lsp, lspname);
+    }
+
     // Get the daughters. 
     // The last true param of daughter_with_id means take absolute value, so that e.g. strange or antistrange is OK.
     // If any are bad, let the mc object be half-formed/invalid.
@@ -292,9 +299,6 @@ bool MFVGenParticles::try_MFVuds(mfv::MCInteraction& mc, const edm::Handle<reco:
 
     // testing
     if (debug) {
-      char lspname[16];
-      snprintf(lspname, 16, "lsp #%lu", which);
-      gpp.Print(&*lsp, lspname);
       gpp.Print(&*h.stranges[which], "strange");
       gpp.Print(&*h.ups[which], "up");
       gpp.Print(&*h.downs[which], "down");
