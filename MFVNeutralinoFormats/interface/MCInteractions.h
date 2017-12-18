@@ -4,7 +4,7 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 
 namespace mfv {
-  enum MCInteractions_t { mci_invalid, mci_Ttbar, mci_MFVtbs, mci_XX4j, mci_MFVdijet, mci_MFVlq };
+  enum MCInteractions_t { mci_invalid, mci_Ttbar, mci_MFVtbs, mci_XX4j, mci_MFVlq, mci_MFVddbar, mci_MFVbbbar };
 
   struct MCInteractionHolderTtbar {
     virtual bool valid() const;
@@ -36,8 +36,8 @@ namespace mfv {
   };
 
   struct MCInteractionHolderXX4j     : public MCInteractionHolderPair {};
-  struct MCInteractionHolderMFVdijet : public MCInteractionHolderPair {};
   struct MCInteractionHolderMFVlq    : public MCInteractionHolderPair {};
+  struct MCInteractionHolderMFVddbar : public MCInteractionHolderPair {};
 
   class MCInteraction {
   public:
@@ -50,9 +50,10 @@ namespace mfv {
 
     void set(const MCInteractionHolderTtbar&);
     void set(const MCInteractionHolderMFVtbs&);
+    void set(const MCInteractionHolderPair&, int type);
     void set(const MCInteractionHolderXX4j&);
-    void set(const MCInteractionHolderMFVdijet&);
     void set(const MCInteractionHolderMFVlq&);
+    void set(const MCInteractionHolderMFVddbar&);
 
     int type() const { return type_; }
     bool valid() const { return type_ != mci_invalid; }

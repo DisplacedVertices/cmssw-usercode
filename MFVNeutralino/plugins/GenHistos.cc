@@ -603,7 +603,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 
 
     }
-    else if (mci->type() == mfv::mci_XX4j || mci->type() == mfv::mci_MFVdijet || mci->type() == mfv::mci_MFVlq) {
+    else if (mci->type() == mfv::mci_XX4j || mci->type() == mfv::mci_MFVddbar || mci->type() == mfv::mci_MFVlq) {
       for (int i = 0; i < 2; ++i) {
         fill(Hs[i], &*mci->primaries()[i]);
         for (int j = 0; j < 2; ++j)

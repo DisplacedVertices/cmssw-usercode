@@ -75,10 +75,11 @@ namespace mfv {
   MCInteraction::GenRef MCInteraction::W         (size_t i)           const { return secondaries_.at(indices_[i] + (type_ == mci_MFVtbs) * 3 + 1); }
   MCInteraction::GenRef MCInteraction::W_daughter(size_t i, size_t j) const { return secondaries_.at(indices_[i] + (type_ == mci_MFVtbs) * 3 + 2 + j); }
 
-  void MCInteraction::set(const MCInteractionHolderXX4j& h) {
+  void MCInteraction::set(const MCInteractionHolderPair& h, int type) {
     check_empty_();
 
-    type_ = mci_XX4j;
+    type_ = type;
+
     primaries_ = { h.p[0], h.p[1] };
     secondaries_ = { h.s[0][0], h.s[0][1],
                      h.s[1][0], h.s[1][1] };
@@ -88,31 +89,9 @@ namespace mfv {
     decay_type_ = { h.decay_id[0], h.decay_id[1] };
   }
 
-  void MCInteraction::set(const MCInteractionHolderMFVdijet& h) {
-    check_empty_();
-
-    type_ = mci_MFVdijet;
-    primaries_ = { h.p[0], h.p[1] };
-    secondaries_ = { h.s[0][0], h.s[0][1],
-                     h.s[1][0], h.s[1][1] };
-    indices_ = { 0, 2, 4 };
-
-    num_leptonic_ = -1;
-    decay_type_ = { h.decay_id[0], h.decay_id[1] };
-  }
-
-  void MCInteraction::set(const MCInteractionHolderMFVlq& h) {
-    check_empty_();
-
-    type_ = mci_MFVlq;
-    primaries_ = { h.p[0], h.p[1] };
-    secondaries_ = { h.s[0][0], h.s[0][1],
-                     h.s[1][0], h.s[1][1] };
-    indices_ = { 0, 2, 4 };
-
-    num_leptonic_ = -1;
-    decay_type_ = { h.decay_id[0], h.decay_id[1] };
-  }
+  void MCInteraction::set(const MCInteractionHolderXX4j& h)     { set(h, mci_XX4j);     }
+  void MCInteraction::set(const MCInteractionHolderMFVddbar& h) { set(h, mci_MFVddbar); }
+  void MCInteraction::set(const MCInteractionHolderMFVlq& h)    { set(h, mci_MFVlq);    }
 
   ////
 

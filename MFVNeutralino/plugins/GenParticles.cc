@@ -28,7 +28,7 @@ private:
   bool try_MFVtbs  (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
   bool try_Ttbar   (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
   bool try_XX4j    (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
-  bool try_MFVdijet(mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
+  bool try_MFVddbar(mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
   bool try_MFVlq   (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
 };
 
@@ -245,7 +245,7 @@ bool MFVGenParticles::try_Ttbar(mfv::MCInteraction& mc, const edm::Handle<reco::
     return false;
 }
 
-// JMTBAD unify try_XX4j/MFVdijet/MFVlq
+// JMTBAD unify try_XX4j/MFVddbar/MFVlq
 
 bool MFVGenParticles::try_XX4j(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles) const {
   if (debug) printf("MFVGenParticles::try_XX4j\n");
@@ -291,10 +291,10 @@ bool MFVGenParticles::try_XX4j(mfv::MCInteraction& mc, const edm::Handle<reco::G
     return false;
 }
 
-bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles) const {
-  if (debug) printf("MFVGenParticles::try_MFVdijet\n");
+bool MFVGenParticles::try_MFVddbar(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles) const {
+  if (debug) printf("MFVGenParticles::try_MFVddbar\n");
 
-  mfv::MCInteractionHolderMFVdijet h;
+  mfv::MCInteractionHolderMFVddbar h;
 
   //GenParticlePrinter gpp(*gen_particles);
   //gpp.PrintHeader();
@@ -440,7 +440,7 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
     try_MFVtbs  (*mc, gen_particles) ||
     try_Ttbar   (*mc, gen_particles) || 
     try_XX4j    (*mc, gen_particles) ||
-    try_MFVdijet(*mc, gen_particles) ||
+    try_MFVddbar(*mc, gen_particles) ||
     try_MFVlq   (*mc, gen_particles);
 
     if (mc->valid()) {
