@@ -28,7 +28,7 @@ private:
   bool try_MFVtbs  (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
   bool try_Ttbar   (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
   bool try_XX4j    (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
-  bool try_MFVddbar(mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
+  bool try_MFVdijet(mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&, int quark) const;
   bool try_MFVlq   (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
 };
 
@@ -291,10 +291,11 @@ bool MFVGenParticles::try_XX4j(mfv::MCInteraction& mc, const edm::Handle<reco::G
     return false;
 }
 
-bool MFVGenParticles::try_MFVddbar(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles) const {
-  if (debug) printf("MFVGenParticles::try_MFVddbar\n");
+bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles, int quark) const {
+  if (debug) printf("MFVGenParticles::try_MFVdijet quark=%i\n", quark);
+  assert(quark == 1 || quark == 5);
 
-  mfv::MCInteractionHolderMFVddbar h;
+  mfv::MCInteractionHolderPair h;
 
   //GenParticlePrinter gpp(*gen_particles);
   //gpp.PrintHeader();
@@ -325,8 +326,8 @@ bool MFVGenParticles::try_MFVddbar(mfv::MCInteraction& mc, const edm::Handle<rec
     //gpp.Print(&*h.p[which], lspname);
 
     // Get the immediate daughters. 
-    if ((h.s[which][0] = gen_ref(daughter_with_id(&gen,  1, false), gen_particles)).isNull() ||
-        (h.s[which][1] = gen_ref(daughter_with_id(&gen, -1, false), gen_particles)).isNull()) {
+    if ((h.s[which][0] = gen_ref(daughter_with_id(&gen,  quark, false), gen_particles)).isNull() ||
+        (h.s[which][1] = gen_ref(daughter_with_id(&gen, -quark, false), gen_particles)).isNull()) {
       printf("WEIRD GLUBALL CRAP??? %i %i\n", h.s[which][0].isNull(), h.s[which][1].isNull());
       return false;
     }
@@ -343,7 +344,7 @@ bool MFVGenParticles::try_MFVddbar(mfv::MCInteraction& mc, const edm::Handle<rec
   }
 
   if (h.valid()) {
-    mc.set(h);
+    mc.set(h, quark == 1 ? mfv::mci_MFVddbar : mfv::mci_MFVbbbar );
     return true;
   }
   else
@@ -440,7 +441,8 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
     try_MFVtbs  (*mc, gen_particles) ||
     try_Ttbar   (*mc, gen_particles) || 
     try_XX4j    (*mc, gen_particles) ||
-    try_MFVddbar(*mc, gen_particles) ||
+    try_MFVdijet(*mc, gen_particles, 1) || //ddbar
+    try_MFVdijet(*mc, gen_particles, 5) || //bbbar
     try_MFVlq   (*mc, gen_particles);
 
     if (mc->valid()) {
