@@ -15,6 +15,12 @@ namespace mfv {
       lsps[1].isNonnull() && stranges[1].isNonnull() && primary_bottoms[1].isNonnull();
   }
 
+  bool MCInteractionHolderMFVuds::valid() const {
+    return
+      lsps[0].isNonnull() && ups[0].isNonnull() && downs[0].isNonnull() && stranges[0].isNonnull() &&
+      lsps[1].isNonnull() && ups[1].isNonnull() && downs[1].isNonnull() && stranges[1].isNonnull();
+  }
+
   bool MCInteractionHolderPair::valid() const {
     return
       p[0].isNonnull() &&
@@ -74,6 +80,19 @@ namespace mfv {
   MCInteraction::GenRef MCInteraction::bottom    (size_t i)           const { return secondaries_.at(indices_[i] + (type_ == mci_MFVtbs) * 3); }
   MCInteraction::GenRef MCInteraction::W         (size_t i)           const { return secondaries_.at(indices_[i] + (type_ == mci_MFVtbs) * 3 + 1); }
   MCInteraction::GenRef MCInteraction::W_daughter(size_t i, size_t j) const { return secondaries_.at(indices_[i] + (type_ == mci_MFVtbs) * 3 + 2 + j); }
+
+  void MCInteraction::set(const MCInteractionHolderMFVuds& h) {
+    check_empty_();
+
+    type_ = mci_MFVuds;
+    primaries_ = { h.lsps[0], h.lsps[1] };
+    secondaries_ = { h.stranges[0], h.ups[0], h.downs[0], // keep stranges first so that the strange() method isn't completely stupid
+                     h.stranges[1], h.ups[1], h.downs[1]  };
+    indices_ = { 0, 3, 6 };
+
+    num_leptonic_ = -1;
+    decay_type_ = { 0, 0 };
+  }
 
   void MCInteraction::set(const MCInteractionHolderPair& h, int type) {
     check_empty_();
