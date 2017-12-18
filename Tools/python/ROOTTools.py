@@ -197,13 +197,14 @@ def cm2mm(h):
     nbins = xax.GetNbins()
     mn = xax.GetXmin() * 10
     mx = xax.GetXmax() * 10
-    h2 = h.Class()(name, title, nbins, mn, mx)
+    h2 = getattr(ROOT, h.Class().GetName())(name, title, nbins, mn, mx)
     for ibin in xrange(0,nbins+2):
         h2.SetBinContent(ibin, h.GetBinContent(ibin))
         h2.SetBinError  (ibin, h.GetBinError  (ibin))
+    h2.SetEntries(h.GetEntries())
     h2.SetLineColor(h.GetLineColor())
     h2.SetLineStyle(h.GetLineStyle())
-    h2.SetLineSize(h.GetLineSize())
+    h2.SetLineWidth(h.GetLineWidth())
     h2.SetMarkerColor(h.GetMarkerColor())
     h2.SetMarkerStyle(h.GetMarkerStyle())
     h2.SetMarkerSize(h.GetMarkerSize())
