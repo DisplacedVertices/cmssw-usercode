@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from CRABClient.ClientExceptions import ConfigException as CRABConfigException
 from JMTucker.MFVNeutralino.Year import year
 from scanpack import get_scanpack, scanpackbase
 
@@ -18,6 +19,7 @@ hip_mitigation = False
 ex = ''
 already = []
 
+meta = 'neu'
 taus   = [100, 300, 1000, 10000, 30000]
 masses = [300, 400, 500, 600, 800, 1200, 1600, 3000]
 hip_right = False
@@ -27,14 +29,6 @@ if 0:
     output_level = 'minitree'
     hip_right = False
     scanpack = 'scanpack2015supplement'
-elif 0:
-    meta = 'neu'
-elif 0:
-    meta = 'ddbar'
-elif 0:
-    meta = 'lq2'
-elif 0:
-    meta = 'glu'
 elif 0:
     meta = 'ttbar'
     nevents, events_per
@@ -239,7 +233,10 @@ def submit(config, name, scanpack_or_todo, todo_rawhlt=[], todo_reco=[], todo_nt
     open(steering_fn, 'wt').write('\n'.join(steering) + '\n')
     
     if not testing:
-        output = crab_command('submit', config=config)
+        try:
+            output = crab_command('submit', config=config)
+        except CRABConfigException:
+            output = 'problem'
         print colors.boldwhite(name)
         pprint(output)
         print
