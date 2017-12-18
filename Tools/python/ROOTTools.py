@@ -187,13 +187,13 @@ def propagate_ratio(x, y, ex, ey):
 
 def cm2mm(h):
     name = h.GetName() + '_mm'
-    t, xt, yt = h.GetTitle().split(';')
+    xax = h.GetXaxis()
+    xt = xax.GetTitle()
     if '(cm)' in xt:
         xt = xt.replace('(cm)', '(mm)')
     else:
         xt += ' (mm)'
-    title = ';'.join((t,xt,yt))
-    xax = h.GetXaxis()
+    title = ';'.join((h.GetTitle(),xt,h.GetYaxis().GetTitle()))
     nbins = xax.GetNbins()
     mn = xax.GetXmin() * 10
     mx = xax.GetXmax() * 10
