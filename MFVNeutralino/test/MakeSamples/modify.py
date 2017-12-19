@@ -155,7 +155,7 @@ def set_slha(process, slha):
 def set_neutralino(process, tau0, m_neutralino, slha):
     set_gluino_pair_production(process)
     set_neutralino_tau0(process, tau0)
-    set_slha(slha)
+    set_slha(process, slha)
 
 def set_mfv_neutralino(process, tau0, m_neutralino):
     set_neutralino(process, tau0, m_neutralino, slha_mfv_neutralino(tau0, m_neutralino))
