@@ -34,14 +34,15 @@ def fmt(h, name, color, save=[]):
     if '#tau' in name:
         h.Rebin(10)
     h.Sumw2()
+    h = cm2mm(h)
     h.SetStats(0)
     h.SetLineWidth(3)
     h.SetLineColor(color)
-    h.SetTitle(';d_{VV} (cm);Events/100 #mum')
+    h.SetTitle(';d_{VV} (mm);Events/100 #mum')
     h.GetXaxis().SetTitleSize(0.04)
     h.GetYaxis().SetTitleSize(0.04)
     h.GetYaxis().SetTitleOffset(1.3)
-    move_above_into_bin(h, 0.3999)
+    move_above_into_bin(h, 3.999)
     if name == 'bkg': 
         h.Scale(1./h.Integral(0,h.GetNbinsX()+2))
     else:
@@ -68,7 +69,7 @@ for zzz, (isample, style, color, title) in enumerate(which):
         h.Draw('hist')
     else:
         h.Draw('hist same')
-    h.GetXaxis().SetRangeUser(0,0.4)
+    h.GetXaxis().SetRangeUser(0,4)
     h.GetYaxis().SetRangeUser(0,1)
     leg.AddEntry(h, title, 'L')
 
