@@ -55,6 +55,7 @@ def coderep_compactify_list(l):
 def coderep_files(files):
     if len(files) == 1:
         return repr(files)
+    files = [str(x) for x in files]
     bn = os.path.basename(files[0]).split('_')[0]
     bases = set(fn.rsplit('/', 2)[0] for fn in files)
     codes = []
@@ -62,7 +63,7 @@ def coderep_files(files):
     if len(bases) == 1:
         nums = [int(fn.rsplit('_',1)[1].split('.root')[0]) for fn in files]
         cnums = coderep_compactify_list(nums)
-        if cnums.count('xrange') == 1:
+        if 'chain' not in cnums and cnums.count('xrange') == 1:
             assert cnums.startswith('xrange(')
             base = bases.pop()
             from1 = cnums.startswith('xrange(1,')
