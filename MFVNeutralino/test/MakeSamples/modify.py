@@ -161,6 +161,8 @@ def set_mfv_neutralino(process, tau0, m_neutralino):
     set_neutralino(process, tau0, m_neutralino, slha_mfv_neutralino(tau0, m_neutralino))
 def set_neutralino_uds(process, tau0, m_neutralino):
     set_neutralino(process, tau0, m_neutralino, slha(tau0, m_neutralino+5, m_neutralino, [(0.5, (1,2,3)), (0.5, (-1,-2,-3))]))
+def set_neutralino_udmu(process, tau0, m_gluino):
+    set_neutralino(process, tau0, slha(tau0, m_neutralino+5, m_neutralino, [(0.5, (-1,2,13)), (0.5, (1,-2,-13))]))
 
 def set_gluino(process, tau0, slha):
     set_gluino_pair_production(process)

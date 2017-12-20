@@ -19,7 +19,7 @@ hip_mitigation = False
 ex = ''
 already = []
 
-meta = 'neu'
+meta = 'neuudmu'
 taus   = [100, 300, 1000, 10000, 30000]
 masses = [300, 400, 500, 600, 800, 1200, 1600, 3000]
 hip_right = False
@@ -270,6 +270,12 @@ elif meta == 'neuuds':
     for tau, mass in taus_masses():
         name = 'mfv_neuuds_tau%05ium_M%04i' % (tau, mass)
         todo = 'neutralino_uds,%.1f,%i' % (tau/1000., mass)
+        submit(config, name, todo)
+
+elif meta == 'neuudmu':
+    for tau, mass in taus_masses():
+        name = 'mfv_neuudmu_tau%05ium_M%04i' % (tau, mass)
+        todo = 'neutralino_udmu,%.1f,%i' % (tau/1000., mass)
         submit(config, name, todo)
 
 elif meta == 'glu':
