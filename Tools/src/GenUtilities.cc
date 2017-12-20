@@ -89,6 +89,7 @@ bool is_lepton(const reco::GenParticleRef& c) { return is_lepton(&*c); }
 bool is_neutrino(const reco::GenParticleRef& c) { return is_neutrino(&*c); }
 int lepton_code(const reco::GenParticleRef& c) { return lepton_code(&*c); }
 const reco::Candidate* daughter_with_id(const reco::GenParticleRef& c, int id, bool take_abs) { return daughter_with_id(&*c, id, take_abs); }
+const reco::Candidate* first_candidate(const reco::GenParticleRef& c)                     { return first_candidate(&*c); }
 const reco::Candidate* final_candidate(const reco::GenParticleRef& c, int allowed_others) { return final_candidate(&*c, allowed_others); }
 
 bool is_ancestor_of(const reco::Candidate* c, const reco::Candidate* possible_ancestor) {
@@ -177,9 +178,10 @@ void daughters_with_id(const reco::Candidate* c, int id, std::vector<const reco:
       d.push_back(c->daughter(i));
 }
 
-std::pair<const reco::Candidate*, std::vector<const reco::Candidate*> > final_candidate_with_copies(const reco::Candidate* c, int allowed_others) {
-  // Handle PYTHIA8 particle record copying. allowed_others can be -1
-  // for don't care if there are other daughters as long as the same
+std::pair<const reco::Candidate*, std::vector<const reco::Candidate*> > terminal_candidate_with_copies(const reco::Candidate* c, int allowed_others, int direction) {
+  // Handle PYTHIA8 particle record copying through ISR/FSR/whatever: find
+  // first (direction<0) or last (direction>0) copy of c. allowed_others can be -1
+  // for don't care if there are other mothers/daughters as long as the same
   // particle is there, 1 means allow gluons, 2 means allow photons, 3
   // for allow both photons and gluons, or 0 to be strict and allow no
   // other particles. JMTBAD magic numbers
@@ -189,22 +191,27 @@ std::pair<const reco::Candidate*, std::vector<const reco::Candidate*> > final_ca
   if (c == 0)
     return result;
 
+  const bool down = direction > 0;
+  auto nrelatives = [&down] (const reco::Candidate* c)                                     { return down ? c->numberOfDaughters() : c->numberOfMothers(); };
+  auto relative   = [&down] (const reco::Candidate* c, const reco::Candidate::size_type i) { return down ? c->daughter(i)         : c->mother(i); };
+
   while (1) {
     result.second.push_back(c);
 
-    if (c == 0 || c->numberOfDaughters() == 0)
+    if (c == 0 || nrelatives(c) == 0)
       break;
-    if (c->numberOfDaughters() == 1) {
-      if (c->daughter(0)->pdgId() == c->pdgId())
-	c = c->daughter(0);
+
+    if (nrelatives(c) == 1) {
+      if (relative(c,0)->pdgId() == c->pdgId())
+	c = relative(c,0);
       else
-	break;
+	break; // JMTBAD this should never get hit but I don't wanna assert
     }
-    else if (allowed_others != 0) {
+    else if (down && allowed_others != 0) { // if going up, don't allow others, since this could actually take us through a hard scatter e.g. qg->qg
       int the = -1;
       bool wrong_others = false;
-      for (int i = 0, ie = int(c->numberOfDaughters()); i < ie; ++i) {
-	int id = c->daughter(i)->pdgId();
+      for (int i = 0, ie = int(nrelatives(c)); i < ie; ++i) {
+        int id = relative(c,i)->pdgId();
 	if (id == c->pdgId())
 	  the = i;
 	else if (allowed_others != -1 && ((id != 21 && id != 22) || (id == 21 && !(allowed_others & 1)) || (id == 22 && !(allowed_others & 2)))) {
@@ -215,7 +222,7 @@ std::pair<const reco::Candidate*, std::vector<const reco::Candidate*> > final_ca
       if (wrong_others || the < 0)
 	break;
       else
-	c = c->daughter(the);
+	c = relative(c,the);
     }
     else
       break;
@@ -225,12 +232,14 @@ std::pair<const reco::Candidate*, std::vector<const reco::Candidate*> > final_ca
   return result;
 }
 
-const reco::Candidate* final_candidate(const reco::Candidate* c, int allowed_others) {
-  return final_candidate_with_copies(c, allowed_others).first;
-}
+std::pair<const reco::Candidate*, std::vector<const reco::Candidate*> > first_candidate_with_copies(const reco::Candidate* c)                     { return terminal_candidate_with_copies(c, 0, -1); }
+std::pair<const reco::Candidate*, std::vector<const reco::Candidate*> > final_candidate_with_copies(const reco::Candidate* c, int allowed_others) { return terminal_candidate_with_copies(c, allowed_others,  1); }
+
+const reco::Candidate* first_candidate(const reco::Candidate* c)                     { return first_candidate_with_copies(c)                .first; }
+const reco::Candidate* final_candidate(const reco::Candidate* c, int allowed_others) { return final_candidate_with_copies(c, allowed_others).first; }
 
 void GenParticlePrinter::PrintHeader() {
-  printf("%25s %4s %8s %4s %7s %7s %7s %7s %7s %7s", "particle", "ndx", "pdgId", "stat", "energy", "mass", "pT", "rap", "eta", "phi");
+  printf("%25s %4s %8s %8s %4s %7s %7s %7s %7s %7s %7s", "particle", "ndx", "pdgId", "flags", "stat", "energy", "mass", "pT", "rap", "eta", "phi");
   if (print_vertex)
     printf(" %7s %7s %7s", "vx", "vy", "vz");
   if (print_mothers)
@@ -246,7 +255,18 @@ void GenParticlePrinter::Print(const reco::Candidate* c, const char* name) {
   else if (c == 0)
     printf("%25s    pointer nil (not in event?)\n", name);
   else {
-    printf("%25s %4i %8i %4i %7.2f %7.2f %7.2f %7.3f %7.3f %7.3f", name, original_index(c, gen_particles), c->pdgId(), c->status(), c->energy(), c->mass(), c->pt(), c->rapidity(), c->eta(), c->phi());
+    const reco::GenParticle* gen = dynamic_cast<const reco::GenParticle*>(c);
+    assert(gen);
+    const reco::GenStatusFlags& f = gen->statusFlags();
+    char flags[9] = {0};
+    flags[0] = f.isFirstCopy()     ? '1' : '0';
+    flags[1] = f.isLastCopy()      ? '1' : '0';
+    flags[2] = f.isHardProcess()   ? '1' : '0';
+    flags[3] = f.fromHardProcess() ? '1' : '0';
+    flags[4] = f.isPrompt()        ? '1' : '0';
+    flags[5] = '\0';
+
+    printf("%25s %4i %8i %8s %4i %7.2f %7.2f %7.2f %7.3f %7.3f %7.3f", name, original_index(c, gen_particles), c->pdgId(), flags, c->status(), c->energy(), c->mass(), c->pt(), c->rapidity(), c->eta(), c->phi());
     if (print_vertex)
       printf(" %7.3f %7.3f %7.3f", c->vx(), c->vy(), c->vz());
 
@@ -301,4 +321,3 @@ int gen_jet_id(const reco::GenJet& jet) {
   }
   return id;
 }
-

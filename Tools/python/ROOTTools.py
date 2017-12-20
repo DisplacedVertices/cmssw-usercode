@@ -185,6 +185,33 @@ def propagate_ratio(x, y, ex, ey):
         e = r*((ex/x)**2 + (ey/y)**2)**0.5
     return r, r-e, r+e
 
+def cm2mm(h):
+    name = h.GetName() + '_mm'
+    xax = h.GetXaxis()
+    xt = xax.GetTitle()
+    if '(cm)' in xt:
+        xt = xt.replace('(cm)', '(mm)')
+    else:
+        xt += ' (mm)'
+    title = ';'.join((h.GetTitle(),xt,h.GetYaxis().GetTitle()))
+    nbins = xax.GetNbins()
+    mn = xax.GetXmin() * 10
+    mx = xax.GetXmax() * 10
+    h2 = getattr(ROOT, h.Class().GetName())(name, title, nbins, mn, mx)
+    for ibin in xrange(0,nbins+2):
+        h2.SetBinContent(ibin, h.GetBinContent(ibin))
+        h2.SetBinError  (ibin, h.GetBinError  (ibin))
+    h2.SetEntries(h.GetEntries())
+    h2.SetLineColor(h.GetLineColor())
+    h2.SetLineStyle(h.GetLineStyle())
+    h2.SetLineWidth(h.GetLineWidth())
+    h2.SetMarkerColor(h.GetMarkerColor())
+    h2.SetMarkerStyle(h.GetMarkerStyle())
+    h2.SetMarkerSize(h.GetMarkerSize())
+    h2.SetFillColor(h.GetFillColor())
+    h2.SetFillStyle(h.GetFillStyle())
+    return h2
+
 def cmssw_setup():
     ROOT.gSystem.Load('libFWCoreFWLite')
     ROOT.FWLiteEnabler.enable()
@@ -2245,6 +2272,7 @@ __all__ = [
     'clopper_pearson',
     'clopper_pearson_poisson_means',
     'propagate_ratio',
+    'cm2mm',
     'cmssw_setup',
     'compare_all_hists',
     'core_gaussian',

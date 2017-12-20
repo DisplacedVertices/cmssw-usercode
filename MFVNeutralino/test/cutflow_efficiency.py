@@ -3,22 +3,48 @@
 from JMTucker.Tools.ROOTTools import ROOT
 from array import array
 
+file_path = '~/crabdirs/TheoristRecipeV15'
+
 gen_rec_cut = 20
+
+#gen_num = 'FourJets'
+#gen_num = 'HT40'
+#gen_num = 'Ntracks1'
+#gen_num = 'Geo2ddist'
+#gen_num = 'Bsbs2ddist'
+#gen_num = 'Dvv400um'
+gen_num = 'Sumpt200'
 
 rec_den = 'NoCuts'
 gen_den = 'NoCuts'
 iden = 0
 
+#rec_den = 'OfflineJets'
+#gen_den = 'FourJets'
+#iden = 1
+
 #rec_den = 'PreSel'
 #gen_den = 'HT40'
 #iden = 3
 
-#rec_den = 'TwoVtxBsbs2ddist'
-#gen_den = 'Bsbs2ddist'
+#rec_den = 'TwoVtxNtracks'
+#gen_den = 'Ntracks1'
+#iden = 5
+
+#rec_den = 'TwoVtxGeo2ddist'
+#gen_den = 'Geo2ddist'
 #iden = 6
 
-reconstructed = ['NoCuts', 'TrigSel', 'OfflineJets', 'PreSel', 'TwoVtxNoCuts', 'TwoVtxGeo2ddist', 'TwoVtxBsbs2ddist', 'TwoVtxNtracks', 'TwoVtxBs2derr', 'TwoVtxDvv400um']
-generated = ['NoCuts', '', 'FourJets', 'HT40', '', 'Geo2ddist', 'Bsbs2ddist', '', 'Sumpt200', 'Dvv400um']
+#rec_den = 'TwoVtxBsbs2ddist'
+#gen_den = 'Bsbs2ddist'
+#iden = 7
+
+#rec_den = 'TwoVtxDvv400um'
+#gen_den = 'Dvv400um'
+#iden = 8
+
+reconstructed = ['NoCuts', 'OfflineJets', 'TrigSel', 'PreSel', 'TwoVtxNoCuts', 'TwoVtxNtracks', 'TwoVtxGeo2ddist', 'TwoVtxBsbs2ddist', 'TwoVtxDvv400um', 'TwoVtxBs2derr']
+generated = ['NoCuts', 'FourJets', '', 'HT40', '', 'Ntracks1', 'Geo2ddist', 'Bsbs2ddist', 'Dvv400um', 'Sumpt200']
 
 samples = '''mfv_neu_tau00100um_M0300
 mfv_neu_tau00300um_M0300
@@ -53,6 +79,7 @@ mfv_neu_tau30000um_M1200
 mfv_neu_tau00100um_M1600
 mfv_neu_tau00300um_M1600
 mfv_neu_tau01000um_M1600
+mfv_neu_tau10000um_M1600
 mfv_neu_tau30000um_M1600
 mfv_neu_tau00100um_M3000
 mfv_neu_tau00300um_M3000
@@ -193,6 +220,7 @@ $\tilde{N} \rightarrow tbs$,            $\tau =   30~\mm$, $M = 1200~\GeV$
 $\tilde{N} \rightarrow tbs$,            $\tau = 100~\mum$, $M = 1600~\GeV$
 $\tilde{N} \rightarrow tbs$,            $\tau = 300~\mum$, $M = 1600~\GeV$
 $\tilde{N} \rightarrow tbs$,            $\tau =    1~\mm$, $M = 1600~\GeV$
+$\tilde{N} \rightarrow tbs$,            $\tau =   10~\mm$, $M = 1600~\GeV$
 $\tilde{N} \rightarrow tbs$,            $\tau =   30~\mm$, $M = 1600~\GeV$
 $\tilde{N} \rightarrow tbs$,            $\tau = 100~\mum$, $M = 3000~\GeV$
 $\tilde{N} \rightarrow tbs$,            $\tau = 300~\mum$, $M = 3000~\GeV$
@@ -343,23 +371,23 @@ l1 = ROOT.TLegend(0.75,0.1,0.95,0.5)
 l2 = ROOT.TLegend(0.75,0.5,0.95,0.9)
 for j,sample in enumerate(samples):
     print sample
-    file = ROOT.TFile('~/crabdirs/TheoristRecipeV5/%s.root'%sample)
-    nrec = file.Get('mfvTheoristRecipe%s/h_gen_dvv'%rec_den).GetEntries()
-    ngen = file.Get('mfvGen%s/h_gen_dvv'%gen_den).GetEntries()
+    f = ROOT.TFile('%s/%s.root' % (file_path, sample))
+    nrec = f.Get('mfvTheoristRecipe%s/h_gen_dvv'%rec_den).GetEntries()
+    ngen = f.Get('mfvGen%s/h_gen_dvv'%gen_den).GetEntries()
     print '%26s%26s%20s%20s%20s' % ('reconstructed', 'generated', 'reco eff +/- error', 'gen eff +/- error', 'gen/reco +/- error')
     for i, rec in enumerate(reconstructed):
         if i < iden:
             continue
-        rec_hist = file.Get('mfvTheoristRecipe%s/h_gen_dvv'%rec)
+        rec_hist = f.Get('mfvTheoristRecipe%s/h_gen_dvv'%rec)
         rec_eff = rec_hist.GetEntries()/nrec
         rec_err = (rec_eff * (1-rec_eff) / nrec)**0.5
         if generated[i] != '':
-            gen_hist = file.Get('mfvGen%s/h_gen_dvv'%generated[i])
+            gen_hist = f.Get('mfvGen%s/h_gen_dvv'%generated[i])
             gen_eff = gen_hist.GetEntries()/ngen
             gen_err = (gen_eff * (1-gen_eff) / ngen)**0.5
             gen_rec_div = gen_eff/rec_eff if rec_eff != 0 else 9999
             gen_rec_err = (gen_rec_div * ((rec_err/rec_eff)**2 + (gen_err/gen_eff)**2))**0.5 if rec_eff != 0 and gen_eff != 0 else 9999
-            if generated[i] == 'Dvv400um':
+            if generated[i] == gen_num:
                 print '%20s%6d%20s%6d%10.3f%10.3f%10.3f%10.3f%10.3f%10.3f\n' % (rec, rec_hist.GetEntries(), generated[i], gen_hist.GetEntries(), rec_eff, rec_err, gen_eff, gen_err, gen_rec_div, gen_rec_err)
                 print r'%s & $%4.3f \pm %4.3f$ & $%4.3f \pm %4.3f$ & $%4.3f \pm %4.3f$ \\' % (sampleNames[j], rec_eff, rec_err, gen_eff, gen_err, gen_rec_div, gen_rec_err)
                 x.append(rec_eff)
@@ -381,6 +409,7 @@ for j,sample in enumerate(samples):
                     matched.append(sample)
                 else:
                     not_matched.append(sample)
+                break
             else:
                 print '%20s%6d%20s%6d%10.3f%10.3f%10.3f%10.3f%10.3f%10.3f' % (rec, rec_hist.GetEntries(), generated[i], gen_hist.GetEntries(), rec_eff, rec_err, gen_eff, gen_err, gen_rec_div, gen_rec_err)
         else:
@@ -395,6 +424,8 @@ for i in not_matched:
     print '\t', i
 
 c = ROOT.TCanvas()
+c.SetTickx()
+c.SetTicky()
 c.SetRightMargin(0.3)
 g_all = ROOT.TGraphErrors(len(x), array('d', x), array('d', y), array('d', ex), array('d', ey))
 g_all.SetTitle(';reconstructed-level efficiency;generator-level efficiency')
@@ -407,8 +438,11 @@ l1.SetFillColor(0)
 l1.Draw()
 l2.SetFillColor(0)
 l2.Draw()
+line0 = ROOT.TLine(0,0,1,1)
+line0.SetLineStyle(7)
 line1 = ROOT.TLine(0,0,1,1-0.01*gen_rec_cut)
 line2 = ROOT.TLine(0,0,1-0.01*gen_rec_cut,1)
+line0.Draw()
 line1.Draw()
 line2.Draw()
-#c.SaveAs('plots/theorist_recipe/gen_vs_reco_eff_wrt_%s.pdf'%rec_den)
+#c.SaveAs('plots/theorist_recipe/gen_vs_reco_eff_%s_divide_%s.pdf' % (gen_num, gen_den))

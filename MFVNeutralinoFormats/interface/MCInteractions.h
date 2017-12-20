@@ -4,7 +4,7 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 
 namespace mfv {
-  enum MCInteractions_t { mci_invalid, mci_Ttbar, mci_MFVtbs, mci_XX4j, mci_MFVdijet, mci_MFVlq };
+  enum MCInteractions_t { mci_invalid, mci_Ttbar, mci_MFVtbs, mci_MFVuds, mci_XX4j, mci_MFVlq, mci_MFVddbar, mci_MFVbbbar };
 
   struct MCInteractionHolderTtbar {
     virtual bool valid() const;
@@ -27,6 +27,15 @@ namespace mfv {
     reco::GenParticleRef primary_bottoms[2]; // bottoms are those from ttbar decay: rest of particles in MCInteractionTtbar
   };
 
+  struct MCInteractionHolderMFVuds {
+    bool valid() const;
+
+    reco::GenParticleRef lsps[2];
+    reco::GenParticleRef ups[2];
+    reco::GenParticleRef downs[2];
+    reco::GenParticleRef stranges[2];
+  };
+
   struct MCInteractionHolderPair {
     bool valid() const;
 
@@ -36,8 +45,8 @@ namespace mfv {
   };
 
   struct MCInteractionHolderXX4j     : public MCInteractionHolderPair {};
-  struct MCInteractionHolderMFVdijet : public MCInteractionHolderPair {};
   struct MCInteractionHolderMFVlq    : public MCInteractionHolderPair {};
+  struct MCInteractionHolderMFVddbar : public MCInteractionHolderPair {};
 
   class MCInteraction {
   public:
@@ -50,9 +59,11 @@ namespace mfv {
 
     void set(const MCInteractionHolderTtbar&);
     void set(const MCInteractionHolderMFVtbs&);
+    void set(const MCInteractionHolderMFVuds&);
+    void set(const MCInteractionHolderPair&, int type);
     void set(const MCInteractionHolderXX4j&);
-    void set(const MCInteractionHolderMFVdijet&);
     void set(const MCInteractionHolderMFVlq&);
+    void set(const MCInteractionHolderMFVddbar&);
 
     int type() const { return type_; }
     bool valid() const { return type_ != mci_invalid; }
@@ -77,6 +88,10 @@ namespace mfv {
     GenRef bottom        (size_t i) const;
     GenRef W             (size_t i) const;
     GenRef W_daughter    (size_t i, size_t j) const;
+
+    // MFVuds extra, lsp and strange above also valid
+    GenRef down(size_t i) const;
+    GenRef up  (size_t i) const;
 
   private:
     void check_empty_() const;

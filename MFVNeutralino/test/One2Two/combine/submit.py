@@ -101,6 +101,8 @@ echo run process.py
 python process.py . 2>&1 >results
 '''
 
+if 'save_toys' not in sys.argv:
+    script_template = script_template.replace(' --saveToys', '')
 if 'bkg_fully_correlated' in sys.argv:
     script_template = script_template.replace('python datacard.py $WHICH', 'python datacard.py $WHICH bkg_fully_correlated')
 
@@ -128,7 +130,7 @@ os.mkdir(os.path.join(batch_root, 'inputs'))
 save_git_status(os.path.join(batch_root, 'gitstatus'))
 
 input_files = []
-for x in ['combine/datacard.py', 'combine/process.py', 'limitsinput.root']:
+for x in ['signal_efficiency.py', 'combine/datacard.py', 'combine/process.py', 'limitsinput_hip.root', 'limitsinput_nonhip.root']:
     nx = os.path.abspath(os.path.join(batch_root, 'inputs', os.path.basename(x)))
     shutil.copy2(x, nx)
     input_files.append(nx)

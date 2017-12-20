@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
+from CRABClient.ClientExceptions import ConfigException as CRABConfigException
 from JMTucker.MFVNeutralino.Year import year
+from scanpack import get_scanpack, scanpackbase
 
 nevents = 10000
 events_per = 100
@@ -17,23 +19,16 @@ hip_mitigation = False
 ex = ''
 already = []
 
+meta = 'neuudmu'
 taus   = [100, 300, 1000, 10000, 30000]
-masses = [300, 400, 500, 600, 800, 1200, 1600]
+masses = [300, 400, 500, 600, 800, 1200, 1600, 3000]
 hip_right = False
 
-if 1:
+if 0:
     meta = 'scan'
     output_level = 'minitree'
     hip_right = False
     scanpack = 'scanpack2015supplement'
-elif 0:
-    meta = 'neu'
-elif 0:
-    meta = 'ddbar'
-elif 0:
-    meta = 'lq2'
-elif 0:
-    meta = 'glu'
 elif 0:
     meta = 'ttbar'
     nevents, events_per
@@ -84,7 +79,6 @@ else:
 
 if scanpack:
     ex += '_' + scanpack
-    from scanpack import get_scanpack, scanpackbase
     scanpack = get_scanpack(scanpack)
 
 #ex = '_test'
@@ -176,6 +170,9 @@ if output_level == 'gensim':
 outputs = {}
 
 def submit(config, name, scanpack_or_todo, todo_rawhlt=[], todo_reco=[], todo_ntuple=[]):
+    global nevents
+    global events_per
+
     config.General.requestName = name
     config.Data.outputPrimaryDataset = name
 
@@ -236,7 +233,10 @@ def submit(config, name, scanpack_or_todo, todo_rawhlt=[], todo_reco=[], todo_nt
     open(steering_fn, 'wt').write('\n'.join(steering) + '\n')
     
     if not testing:
-        output = crab_command('submit', config=config)
+        try:
+            output = crab_command('submit', config=config)
+        except CRABConfigException:
+            output = 'problem'
         print colors.boldwhite(name)
         pprint(output)
         print
@@ -266,6 +266,18 @@ elif meta == 'neu':
         todo = 'mfv_neutralino,%.1f,%i' % (tau/1000., mass)
         submit(config, name, todo)
 
+elif meta == 'neuuds':
+    for tau, mass in taus_masses():
+        name = 'mfv_neuuds_tau%05ium_M%04i' % (tau, mass)
+        todo = 'neutralino_uds,%.1f,%i' % (tau/1000., mass)
+        submit(config, name, todo)
+
+elif meta == 'neuudmu':
+    for tau, mass in taus_masses():
+        name = 'mfv_neuudmu_tau%05ium_M%04i' % (tau, mass)
+        todo = 'neutralino_udmu,%.1f,%i' % (tau/1000., mass)
+        submit(config, name, todo)
+
 elif meta == 'glu':
     for tau, mass in taus_masses():
         name = 'mfv_glu_tau%05ium_M%04i' % (tau, mass)
@@ -276,6 +288,30 @@ elif meta == 'ddbar':
     for tau, mass in taus_masses():
         name = 'mfv_ddbar_tau%05ium_M%04i' % (tau, mass)
         todo = 'gluino_ddbar,%.1f,%i' % (tau/1000., mass)
+        submit(config, name, todo)
+
+elif meta == 'ccbar':
+    for tau, mass in taus_masses():
+        name = 'mfv_ccbar_tau%05ium_M%04i' % (tau, mass)
+        todo = 'gluino_ccbar,%.1f,%i' % (tau/1000., mass)
+        submit(config, name, todo)
+
+elif meta == 'bbbar':
+    for tau, mass in taus_masses():
+        name = 'mfv_bbbar_tau%05ium_M%04i' % (tau, mass)
+        todo = 'gluino_bbbar,%.1f,%i' % (tau/1000., mass)
+        submit(config, name, todo)
+
+elif meta == 'uds':
+    for tau, mass in taus_masses():
+        name = 'mfv_uds_tau%05ium_M%04i' % (tau, mass)
+        todo = 'gluino_uds,%.1f,%i' % (tau/1000., mass)
+        submit(config, name, todo)
+
+elif meta == 'udmu':
+    for tau, mass in taus_masses():
+        name = 'mfv_udmu_tau%05ium_M%04i' % (tau, mass)
+        todo = 'gluino_udmu,%.1f,%i' % (tau/1000., mass)
         submit(config, name, todo)
 
 elif meta == 'lq2':

@@ -44,7 +44,7 @@ def doit(path, out_fn):
     obs = x[0]
 
     x = fromtree(os.path.join(path, 'expected.root'))
-    assert len(x) >= 99 # maybe one toy crashes, who is zoidberg to judge
+    assert len(x) >= 999 # maybe one toy crashes, who is zoidberg to judge
     exp = x
 
     stats(out_fn, obs, exp)

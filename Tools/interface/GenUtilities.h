@@ -37,7 +37,14 @@ const reco::Candidate* daughter_with_id(const reco::Candidate* c, int id, bool t
 const reco::Candidate* daughter_with_id(const reco::GenParticleRef& c, int id, bool take_abs=false);
 const reco::Candidate* daughter_with_status(const reco::Candidate* c, int status, bool take_abs=false);
 void daughters_with_id(const reco::Candidate* c, int id, std::vector<const reco::Candidate*>& d);
-std::pair<const reco::Candidate*, std::vector<const reco::Candidate*> > final_candidate_with_copies(const reco::Candidate* c, int allowed_others);
+std::pair<const reco::Candidate*, std::vector<const reco::Candidate*> > terminal_candidate_with_copies(const reco::Candidate* c,     int allowed_others, int direction);
+std::pair<const reco::Candidate*, std::vector<const reco::Candidate*> > terminal_candidate_with_copies(const reco::GenParticleRef c, int allowed_others, int direction);
+std::pair<const reco::Candidate*, std::vector<const reco::Candidate*> > first_candidate_with_copies(const reco::Candidate* c);
+std::pair<const reco::Candidate*, std::vector<const reco::Candidate*> > first_candidate_with_copies(const reco::GenParticleRef c);
+std::pair<const reco::Candidate*, std::vector<const reco::Candidate*> > final_candidate_with_copies(const reco::Candidate* c,     int allowed_others);
+std::pair<const reco::Candidate*, std::vector<const reco::Candidate*> > final_candidate_with_copies(const reco::GenParticleRef c, int allowed_others);
+const reco::Candidate* first_candidate(const reco::Candidate* c);
+const reco::Candidate* first_candidate(const reco::GenParticleRef& c);
 const reco::Candidate* final_candidate(const reco::Candidate* c, int allowed_others);
 const reco::Candidate* final_candidate(const reco::GenParticleRef& c, int allowed_others);
 void print_gen_and_daus(const reco::Candidate* c, const char* name, const reco::GenParticleCollection& gens, const bool print_daus=true, const bool print_vtx=false);
@@ -68,6 +75,7 @@ struct GenParticlePrinter {
 
   void PrintHeader();
   void Print(const reco::Candidate* c, const char* name);
+  void Print(const reco::GenParticleRef r, const char* name) { Print(&*r, name); }
 };
 
 #endif

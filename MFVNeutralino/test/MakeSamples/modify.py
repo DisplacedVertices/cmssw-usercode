@@ -141,7 +141,7 @@ def slha_mfv_neutralino(tau0, m_neutralino, fn=None):
 def slha_mfv_gluino(tau0, m_gluino, fn=None):
     return slha_mfv(tau0, m_gluino, None, fn)
 
-def set_mfv_neutralino(process, tau0, m_neutralino):
+def set_gluino_pair_production(process):
     process.generator.PythiaParameters.processParameters = cms.vstring(
         'SUSY:gg2gluinogluino = on',
         'SUSY:qqbar2gluinogluino = on',
@@ -149,38 +149,39 @@ def set_mfv_neutralino(process, tau0, m_neutralino):
         'SUSY:idB = 1000021',
         )
 
-    set_neutralino_tau0(process, tau0)
-
-    slha = slha_mfv_neutralino(tau0, m_neutralino)
-    process.generator.SLHATableForPythia8 = cms.string(slha)
-
-def set_mfv_gluino(process, tau0, m_gluino):
-    process.generator.PythiaParameters.processParameters = cms.vstring(
-        'SUSY:gg2gluinogluino = on',
-        'SUSY:qqbar2gluinogluino = on',
-        'SUSY:idA = 1000021',
-        'SUSY:idB = 1000021',
-        )
-
-    set_gluino_tau0(process, tau0)
-    set_rhadrons_on(process)
-
-    slha = slha_mfv_gluino(tau0, m_gluino)
+def set_slha(process, slha):
     process.generator.SLHATableForPythia8 = cms.string(slha)
     
-def set_gluino_ddbar(process, tau0, m_gluino):
-    process.generator.PythiaParameters.processParameters = cms.vstring(
-        'SUSY:gg2gluinogluino = on',
-        'SUSY:qqbar2gluinogluino = on',
-        'SUSY:idA = 1000021',
-        'SUSY:idB = 1000021',
-        )
+def set_neutralino(process, tau0, m_neutralino, slha):
+    set_gluino_pair_production(process)
+    set_neutralino_tau0(process, tau0)
+    set_slha(process, slha)
 
+def set_mfv_neutralino(process, tau0, m_neutralino):
+    set_neutralino(process, tau0, m_neutralino, slha_mfv_neutralino(tau0, m_neutralino))
+def set_neutralino_uds(process, tau0, m_neutralino):
+    set_neutralino(process, tau0, m_neutralino, slha(tau0, m_neutralino+5, m_neutralino, [(0.5, (1,2,3)), (0.5, (-1,-2,-3))]))
+def set_neutralino_udmu(process, tau0, m_neutralino):
+    set_neutralino(process, tau0, m_neutralino, slha(tau0, m_neutralino+5, m_neutralino, [(0.5, (-1,2,13)), (0.5, (1,-2,-13))]))
+
+def set_gluino(process, tau0, slha):
+    set_gluino_pair_production(process)
     set_gluino_tau0(process, tau0)
     set_rhadrons_on(process)
+    set_slha(process,slha)
 
-    slhaf = slha(tau0, m_gluino, None, [(1., (1,-1))])
-    process.generator.SLHATableForPythia8 = cms.string(slhaf)
+def set_mfv_gluino(process, tau0, m_gluino):
+    set_gluino(process, tau0, slha_mfv_gluino(tau0, m_gluino))
+def set_gluino_ddbar(process, tau0, m_gluino):
+    set_gluino(process, tau0, slha(tau0, m_gluino, None, [(1., (1,-1))]))
+def set_gluino_ccbar(process, tau0, m_gluino):
+    set_gluino(process, tau0, slha(tau0, m_gluino, None, [(1., (4,-4))]))
+def set_gluino_bbbar(process, tau0, m_gluino):
+    set_gluino(process, tau0, slha(tau0, m_gluino, None, [(1., (5,-5))]))
+def set_gluino_uds(process, tau0, m_gluino):
+    set_gluino(process, tau0, slha(tau0, m_gluino, None, [(0.5, (1,2,3)), (0.5, (-1,-2,-3))]))
+def set_gluino_udmu(process, tau0, m_gluino):
+    set_gluino(process, tau0, slha(tau0, m_gluino, None, [(0.5, (-1,2,13)), (0.5, (1,-2,-13))]))
 
 ########################################################################
 

@@ -180,18 +180,18 @@ def make_1d_plot(d, name, xkey='mass'):
 
 def save_1d_plots():
     xxx = [
-        ('multijetM800',    lambda s: 'neu'   in sample.name and sample.mass == 800 and sample.tau <= 40.,  lambda s: s.sample.tau,  ('tau',  800.)),
-        ('multijetM1600',   lambda s: 'neu'   in sample.name and sample.mass ==1600 and sample.tau <= 40.,  lambda s: s.sample.tau,  ('tau', 1600.)),
-        ('multijetM2400',   lambda s: 'neu'   in sample.name and sample.mass ==2400 and sample.tau <= 40.,  lambda s: s.sample.tau,  ('tau', 2400.)),
-        ('multijettau400um',lambda s: 'neu'   in sample.name and sample.tau  == 0.4,                        lambda s: s.sample.mass, 'mass'),
-        ('multijettau1mm',  lambda s: 'neu'   in sample.name and sample.tau  == 1.,                         lambda s: s.sample.mass, 'mass'),
-        ('multijettau10mm', lambda s: 'neu'   in sample.name and sample.tau  == 10.,                        lambda s: s.sample.mass, 'mass'),
-        ('ddbarM800',       lambda s: 'ddbar' in sample.name and sample.mass == 800 and sample.tau <= 40.,  lambda s: s.sample.tau,  ('tau',  800.)),
-        ('ddbarM1600',      lambda s: 'ddbar' in sample.name and sample.mass ==1600 and sample.tau <= 40.,  lambda s: s.sample.tau,  ('tau', 1600.)),
-        ('ddbarM2400',      lambda s: 'ddbar' in sample.name and sample.mass ==2400 and sample.tau <= 40.,  lambda s: s.sample.tau,  ('tau', 2400.)),
-        ('ddbartau400um',   lambda s: 'ddbar' in sample.name and sample.tau  == 0.4,                        lambda s: s.sample.mass, 'mass'),
-        ('ddbartau1mm',     lambda s: 'ddbar' in sample.name and sample.tau  == 1.,                         lambda s: s.sample.mass, 'mass'),
-        ('ddbartau10mm',    lambda s: 'ddbar' in sample.name and sample.tau  == 10.,                        lambda s: s.sample.mass, 'mass'),
+        ('multijet_M0800',   lambda s: 'neu'   in sample.name and sample.mass == 800 and sample.tau <= 1000., lambda s: s.sample.tau,  ('tau',  800.)),
+        ('multijet_M1600',   lambda s: 'neu'   in sample.name and sample.mass ==1600 and sample.tau <= 1000., lambda s: s.sample.tau,  ('tau', 1600.)),
+        ('multijet_M2400',   lambda s: 'neu'   in sample.name and sample.mass ==2400 and sample.tau <= 1000., lambda s: s.sample.tau,  ('tau', 2400.)),
+        ('multijet_tau300um',lambda s: 'neu'   in sample.name and sample.tau  == 0.3 and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
+        ('multijet_tau1mm',  lambda s: 'neu'   in sample.name and sample.tau  == 1.  and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
+        ('multijet_tau10mm', lambda s: 'neu'   in sample.name and sample.tau  == 10. and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
+        ('ddbar_M0800',      lambda s: 'ddbar' in sample.name and sample.mass == 800 and sample.tau <= 1000., lambda s: s.sample.tau,  ('tau',  800.)),
+        ('ddbar_M1600',      lambda s: 'ddbar' in sample.name and sample.mass ==1600 and sample.tau <= 1000., lambda s: s.sample.tau,  ('tau', 1600.)),
+        ('ddbar_M2400',      lambda s: 'ddbar' in sample.name and sample.mass ==2400 and sample.tau <= 1000., lambda s: s.sample.tau,  ('tau', 2400.)),
+        ('ddbar_tau300um',   lambda s: 'ddbar' in sample.name and sample.tau  == 0.3 and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
+        ('ddbar_tau1mm',     lambda s: 'ddbar' in sample.name and sample.tau  == 1.  and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
+        ('ddbar_tau10mm',    lambda s: 'ddbar' in sample.name and sample.tau  == 10. and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
         ]
     
     in_f = ROOT.TFile('limitsinput.root')
@@ -229,6 +229,8 @@ def save_2d_plots():
     for kind in 'mfv_ddbar', 'mfv_neu':
         d = limits()
         for sample in sample_iterator(in_f):
+            if -sample.isample in (209,210,211,399,489,589,590,675,676,969,970,971,1063,1159,1249,1349,1350,1435,1436):
+                continue
             if sample.kind != kind:
                 continue
             d.parse(sample, 'combine_output/signal_%05i/results' % sample.isample)
@@ -411,7 +413,7 @@ env R_LIBS=~/.R R --no-save <<EOF
             h = f.Get('%s/%s' % (k,y))
             to_ascii(h, open('to_r_%s.csv' % x, 'wt'), sep=',')
             print 'h<-read.table("to_r_%s.csv", header=TRUE, sep=",")' % x
-            print 'i<-interp(x=h\\$x, y=h\\$y, z=h\\$z, xo=seq(300, 3000, by=1), yo=seq(0.1,40,by=0.1))'
+            print 'i<-interp(x=h\\$x, y=h\\$y, z=h\\$z, xo=seq(300, 2600, by=1), yo=c(seq(0.1,0.9,by=0.1), seq(1,100,by=1)))'
             for a in 'xyz':
                 print 'write.csv(i\\$%s, "from_r_%s_%s.csv")' % (a,x,a)
     print 'EOF'
@@ -420,7 +422,7 @@ env R_LIBS=~/.R R --no-save <<EOF
 
 def one_from_r(ex, name):
     def read_csv(fn):
-        lines = [x.strip() for x in open(fn).read().replace('"', '').split('\n') if x.strip()]
+        lines = [x.strip() for x in open(os.path.join('/uscmst1b_scratch/lpc1/3DayLifetime/tucker/to_from_r',fn)).read().replace('"', '').split('\n') if x.strip()]
         lines.pop(0)
         vs = []
         for line in lines:
