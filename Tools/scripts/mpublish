@@ -25,6 +25,7 @@ parser.add_argument('--pattern',
 parser.add_argument('--partial', action='store_true',
                     help='If set, partial publishing is allowed.')
 parser.add_argument('--no-lpc-shortcut', action='store_false', dest='lpc_shortcut', help='whether to use the lpc shortcut on crab dirs')
+parser.add_argument('--no-dbs', action='store_false', dest='dbs', help='whether to use information from dbs')
 parser.add_argument('--include-condor-nevents', action='store_true',
                     help='If set, parse xmls to get nevents from condor wds.')
 
@@ -59,7 +60,7 @@ for wd in wds:
     assert is_crab or bd.startswith('condor_')
     first_str = 'crab_' if is_crab else 'condor_'
     if options.dataset == 'main':
-        sample = wd.replace(first_str, '')
+        sample = os.path.basename(wd).replace(first_str, '')
     else:
         sample = Samples.sample_from_end_string(Samples, wd).name
     assert not publish.has_key(sample)
@@ -70,9 +71,14 @@ for wd in wds:
         ds = crab_get_output_dataset_from_log(wd)
         if ds is None and not options.partial:
             raise ValueError('no dataset in log for ' + wd)
-        dbs_files = files_in_dataset(ds, 3)
-        nevents = numevents_in_dataset(ds, 3)
-
+        dbs_files = []
+        nevents = -1
+        if options.dbs:
+            try:
+                dbs_files = files_in_dataset(ds, 3)
+                nevents = numevents_in_dataset(ds, 3)
+            except RuntimeError:
+                print colors.yellow('problem with dbs for %s, len(dbs_files) = %i and nevents is %r' % (ds, len(dbs_files), nevents))
         files = []
         if options.lpc_shortcut:
             path = crab_get_output_dir(wd)
@@ -81,13 +87,14 @@ for wd in wds:
                 d = os.path.join(path, zd) + '/'
                 files += [d + x.strip() for x in popen('eos root://cmseos.fnal.gov ls /eos/uscms%s/%s' % (path, zd)).split() if x.strip() and fn_ok(x.strip())]
 
-            if set(files) != set(dbs_files):
+            if options.dbs and set(files) != set(dbs_files):
                 msg = '%i files from lpc shortcut != %i files from dbs' % (len(files), len(dbs_files))
                 if options.partial:
                     print colors.yellow(msg)
                 else:
                     raise ValueError(msg)
         else:
+            assert options.dbs
             files = dbs_files
     else:
         njobs = cs_njobs(wd)
