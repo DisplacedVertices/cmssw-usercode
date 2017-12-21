@@ -82,6 +82,10 @@ process.mfvGenParticleFilterThreeJets = process.mfvGenParticleFilter.clone(min_n
 process.mfvGenThreeJets = mfvTheoristRecipe.clone()
 process.pGenThreeJets = cms.Path(process.common * process.mfvGenParticleFilterThreeJets * process.mfvGenThreeJets)
 
+process.mfvGenParticleFilterHT900 = process.mfvGenParticleFilter.clone(min_npartons = 3, min_parton_pt = 20, min_parton_ht40 = 900)
+process.mfvGenHT900 = mfvTheoristRecipe.clone()
+process.pGenHT900 = cms.Path(process.common * process.mfvGenParticleFilterHT900 * process.mfvGenHT900)
+
 process.mfvGenParticleFilterHT40 = process.mfvGenParticleFilter.clone(min_npartons = 3, min_parton_pt = 20, min_parton_ht40 = 1000)
 process.mfvGenHT40 = mfvTheoristRecipe.clone()
 process.pGenHT40 = cms.Path(process.common * process.mfvGenParticleFilterHT40 * process.mfvGenHT40)
