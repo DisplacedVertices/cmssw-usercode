@@ -41,6 +41,23 @@ def get_f_t(x, min_ntracks=5, tree_path='trees'):
         t.SetAlias('min_ntracks_ok', 'ntk0 == %i && ntk1 == %i' % (min_ntracks, min_ntracks))
     return f, t
 
+def duplicate_check(fn):
+    branches = 'nvtx:ntk0:ntk1:x0:y0:z0:x1:y1:z1'
+    #branches = 'run:lumi:event:nvtx:ntk0:ntk1:x0:y0:z0:x1:y1:z1'
+    def xform(x):
+        assert len(x) == 9
+        return tuple([int(y) for y in x[:3]] + [int(float(y)*1000) for y in x[3:]]) # vertex positions rounded to 10 um
+    for ntk in 3,4,7,5:
+        f,t = get_f_t(fn, ntk)
+        c = Counter(detree(t, branches, xform=xform))
+        dups = [(k,v) for k,v in c.iteritems() if v > 1]
+        dups_2vtx = [(k,v) for k,v in c.iteritems() if v > 1 and k[0] > 1]
+        if dups_2vtx:
+            print 'TWO-VERTEX DUPLICATES!', fn
+        if dups:
+            print 'DUPLICATES!', fn
+            pprint(dups)
+
 bkg_samples = Samples.ttbar_samples + Samples.qcd_samples_sum
 data_samples = Samples.data_samples
 #sig_samples = [] #Samples.mfv_neu_tau00100um_M0400, Samples.mfv_neu_tau00300um_M0400, Samples.mfv_neu_tau01000um_M0400, Samples.mfv_neu_tau10000um_M0400]

@@ -1,3 +1,5 @@
+// JMTBAD unify try_XX4j/MFVdijet/MFVlq and try_MFVtbs/uds
+
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
@@ -27,8 +29,9 @@ private:
 
   bool try_MFVtbs  (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
   bool try_Ttbar   (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
+  bool try_MFVuds  (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
   bool try_XX4j    (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
-  bool try_MFVdijet(mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
+  bool try_MFVdijet(mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&, int quark) const;
   bool try_MFVlq   (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
 };
 
@@ -245,7 +248,81 @@ bool MFVGenParticles::try_Ttbar(mfv::MCInteraction& mc, const edm::Handle<reco::
     return false;
 }
 
-// JMTBAD unify try_XX4j/MFVdijet/MFVlq
+bool MFVGenParticles::try_MFVuds(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles) const {
+  if (debug) printf("MFVGenParticles::try_MFVuds\n");
+
+  mfv::MCInteractionHolderMFVuds h;
+
+  GenParticlePrinter gpp(*gen_particles);
+  gpp.print_mothers = gpp.print_vertex = true;
+  if (debug) gpp.PrintHeader();
+
+  // Find the LSPs (e.g. gluinos or neutralinos). Since this is
+  // PYTHIA8 there are lots of copies -- try to get the ones that
+  // decay to the three quarks.
+  for (int i = 0, ie = int(gen_particles->size()); i < ie; ++i) {
+    const reco::GenParticle& gen = gen_particles->at(i);
+    if (gen.pdgId() != lsp_id || gen.numberOfDaughters() != 3)
+      continue;
+    reco::GenParticleRef lsp(gen_particles, i);
+
+    size_t which = 0;
+    if (h.lsps[0].isNull())
+      h.lsps[0] = lsp;
+    else {
+      if (reco::deltaR(*h.lsps[0], gen) < 0.001)
+	throw cms::Exception("BadAssumption", "may have found same LSP twice based on deltaR < 0.001");
+      which = 1;
+      h.lsps[1] = lsp;
+    }
+
+   // testing
+    if (debug) {
+      char lspname[16];
+      snprintf(lspname, 16, "lsp #%lu", which);
+      gpp.Print(&*lsp, lspname);
+    }
+
+    // Get the daughters. 
+    // The last true param of daughter_with_id means take absolute value, so that e.g. strange or antistrange is OK.
+    // If any are bad, let the mc object be half-formed/invalid.
+    if ((h.stranges[which] = gen_ref(daughter_with_id(&*lsp, 3, true), gen_particles)).isNull()) return false;
+    if ((h.ups     [which] = gen_ref(daughter_with_id(&*lsp, 2, true), gen_particles)).isNull()) return false;
+    if ((h.downs   [which] = gen_ref(daughter_with_id(&*lsp, 1, true), gen_particles)).isNull()) return false;
+
+    // The -1 in final_candidate for the tops used to be 3 for
+    // allowing radiated gluons or photons but with official sample
+    // pythia got a top that had protons and pions and kaons oh my 42/-6 111/21 112/21 113/21 121/2212 122/2212 123/2212 124/2212 157/310 158/310
+    h.stranges[which] = gen_ref(final_candidate(h.stranges[which], -1), gen_particles);
+    h.ups     [which] = gen_ref(final_candidate(h.ups     [which], -1), gen_particles);
+    h.downs   [which] = gen_ref(final_candidate(h.downs   [which], -1), gen_particles);
+
+    // testing
+    if (debug) {
+      gpp.Print(&*h.stranges[which], "strange");
+      gpp.Print(&*h.ups[which], "up");
+      gpp.Print(&*h.downs[which], "down");
+    }
+
+    if (last_flag_check) {
+      assert(lsp              ->statusFlags().isLastCopy());
+      assert(h.stranges[which]->statusFlags().isLastCopy());
+      assert(h.ups     [which]->statusFlags().isLastCopy());
+      assert(h.downs   [which]->statusFlags().isLastCopy());
+    }
+  }
+
+  if (h.lsps[0].isNull() || h.stranges[0].isNull() || h.ups[0].isNull() || h.downs[0].isNull() ||
+      h.lsps[1].isNull() || h.stranges[1].isNull() || h.ups[1].isNull() || h.downs[1].isNull())
+    return false;
+
+  if (h.valid()) {
+    mc.set(h);
+    return true;
+  }
+  else
+    return false;
+}
 
 bool MFVGenParticles::try_XX4j(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles) const {
   if (debug) printf("MFVGenParticles::try_XX4j\n");
@@ -291,10 +368,11 @@ bool MFVGenParticles::try_XX4j(mfv::MCInteraction& mc, const edm::Handle<reco::G
     return false;
 }
 
-bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles) const {
-  if (debug) printf("MFVGenParticles::try_MFVdijet\n");
+bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles, int quark) const {
+  if (debug) printf("MFVGenParticles::try_MFVdijet quark=%i\n", quark);
+  assert(quark == 1 || quark == 5);
 
-  mfv::MCInteractionHolderMFVdijet h;
+  mfv::MCInteractionHolderPair h;
 
   //GenParticlePrinter gpp(*gen_particles);
   //gpp.PrintHeader();
@@ -325,8 +403,8 @@ bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<rec
     //gpp.Print(&*h.p[which], lspname);
 
     // Get the immediate daughters. 
-    if ((h.s[which][0] = gen_ref(daughter_with_id(&gen,  1, false), gen_particles)).isNull() ||
-        (h.s[which][1] = gen_ref(daughter_with_id(&gen, -1, false), gen_particles)).isNull()) {
+    if ((h.s[which][0] = gen_ref(daughter_with_id(&gen,  quark, false), gen_particles)).isNull() ||
+        (h.s[which][1] = gen_ref(daughter_with_id(&gen, -quark, false), gen_particles)).isNull()) {
       printf("WEIRD GLUBALL CRAP??? %i %i\n", h.s[which][0].isNull(), h.s[which][1].isNull());
       return false;
     }
@@ -343,7 +421,7 @@ bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<rec
   }
 
   if (h.valid()) {
-    mc.set(h);
+    mc.set(h, quark == 1 ? mfv::mci_MFVddbar : mfv::mci_MFVbbbar );
     return true;
   }
   else
@@ -439,8 +517,10 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
     // the order of these tries is important, at least that MFVtbs comes before Ttbar
     try_MFVtbs  (*mc, gen_particles) ||
     try_Ttbar   (*mc, gen_particles) || 
+    try_MFVuds  (*mc, gen_particles) ||
     try_XX4j    (*mc, gen_particles) ||
-    try_MFVdijet(*mc, gen_particles) ||
+    try_MFVdijet(*mc, gen_particles, 1) || //ddbar
+    try_MFVdijet(*mc, gen_particles, 5) || //bbbar
     try_MFVlq   (*mc, gen_particles);
 
     if (mc->valid()) {
