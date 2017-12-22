@@ -26,6 +26,7 @@ parser.add_argument('--partial', action='store_true',
                     help='If set, partial publishing is allowed.')
 parser.add_argument('--no-lpc-shortcut', action='store_false', dest='lpc_shortcut', help='whether to use the lpc shortcut on crab dirs')
 parser.add_argument('--no-dbs', action='store_false', dest='dbs', help='whether to use information from dbs')
+parser.add_argument('--nevents-per-job', type=int, default=-1, help='nevents to use if reading dbs fails')
 parser.add_argument('--include-condor-nevents', action='store_true',
                     help='If set, parse xmls to get nevents from condor wds.')
 
@@ -96,6 +97,8 @@ for wd in wds:
         else:
             assert options.dbs
             files = dbs_files
+        if nevents == -1 and options.nevents_per_job > 0:
+            nevents = len(files) * options.nevents_per_job
     else:
         njobs = cs_njobs(wd)
         ds = '/%s/None/None' % cs_primaryds(wd)
