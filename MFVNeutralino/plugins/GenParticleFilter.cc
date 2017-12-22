@@ -216,7 +216,7 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
   std::vector<float> parton_pt;
   for (int i = 0; i < 2; ++i) {
     for (const reco::GenParticle* p : partons[i]) {
-      if (p->pt() > 20 && fabs(p->eta()) < 2.5 && is_quark(p)) {
+      if (fabs(p->eta()) < 2.5 && is_quark(p)) {
         parton_pt.push_back(p->pt());
       }
     }
@@ -227,7 +227,7 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
     return false;
   if (min_npartons > 0 && parton_pt.at(min_npartons-1) < min_parton_pt)
     return false;
-  if (std::accumulate(parton_pt.begin(), parton_pt.end(), 0.f) < min_parton_ht)
+  if (std::accumulate(parton_pt.begin(), parton_pt.end(), 0.f, [](float init, float b) { if (b > 20) init += b; return init; }) < min_parton_ht)
     return false;
   if (std::accumulate(parton_pt.begin(), parton_pt.end(), 0.f, [](float init, float b) { if (b > 40) init += b; return init; }) < min_parton_ht40)
     return false;
