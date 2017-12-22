@@ -145,6 +145,10 @@ void flatten_descendants(const reco::Candidate* c, std::vector<const reco::Candi
 
 const reco::Candidate* daughter_with_id_and_status(const reco::Candidate* c, int id, int status, bool take_abs) {
   const reco::Candidate* d = 0;
+  if (take_abs) {
+    id = abs(id);
+    status = abs(status);
+  }
   for (size_t i = 0; i < c->numberOfDaughters(); ++i) {
     int this_id     = c->daughter(i)->pdgId();
     int this_status = c->daughter(i)->status();

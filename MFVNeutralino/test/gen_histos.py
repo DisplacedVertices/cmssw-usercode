@@ -2,7 +2,7 @@ import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 debug = 'debug' in sys.argv
 
-sample_files(process, 'mfv_uds_tau10000um_M1200', 'maintemp', 1)
+sample_files(process, 'mfv_neuudmu_tau10000um_M1200', 'main', 1)
 process.TFileService.fileName = 'gen_histos.root'
 file_event_from_argv(process)
 
