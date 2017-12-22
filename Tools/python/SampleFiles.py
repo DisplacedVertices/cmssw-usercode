@@ -451,34 +451,15 @@ _add_ds("main", {
 })
 
 
-_add_ds('ntuplev15lep', {
-'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_originalCuts_300GeV_evFiltOff_2016/170721_185423", 241)
-})
+_add_ds('ntuplev15lep', {'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_originalCuts_300GeV_evFiltOff_2016/170721_185423", 241)})
+_add_ds('ntuplev15lep_IsoMu24', {'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_IsoMu24_300GeV_evFiltOff_2016/170721_193308", 241)})
+_add_ds('ntuplev15lep_IsoTkMu24', {'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_IsoTkMu24_300GeV_evFiltOff_2016/170721_193419", 241)})
+_add_ds('ntuplev15lep_VVVL350', {'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_Mu15_IsoVVVL_PFHT350_300GeV_evFiltOff_2016/170721_192845", 241)})
+_add_ds('ntuplev15lep_VVVL400', {'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_Mu15_IsoVVVL_PFHT400_300GeV_evFiltOff_2016/170721_185557", 241)})
+_add_ds('ntuplev15lep_Mu50', {'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_Mu50_300GeV_evFiltOff_2016/170721_193035", 241)})
+_add_ds("ntuplev15_leptrigs", {'mfv_neu_tau00100um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV15_evFilterOff_actual_ver2_withLeptonTriggers_2016/170727_153631", 294),
+                               'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_evFilterOff_actual_ver2_withLeptonTriggers_2016/170727_153833", 241)})
 
-_add_ds('ntuplev15lep_IsoMu24', {
-'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_IsoMu24_300GeV_evFiltOff_2016/170721_193308", 241)
-})
-
-_add_ds('ntuplev15lep_IsoTkMu24', {
-'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_IsoTkMu24_300GeV_evFiltOff_2016/170721_193419", 241)
-})
-
-_add_ds('ntuplev15lep_VVVL350', {
-'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_Mu15_IsoVVVL_PFHT350_300GeV_evFiltOff_2016/170721_192845", 241)
-})
-
-_add_ds('ntuplev15lep_VVVL400', {
-'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_Mu15_IsoVVVL_PFHT400_300GeV_evFiltOff_2016/170721_185557", 241)
-})
-
-_add_ds('ntuplev15lep_Mu50', {
-'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_Mu50_300GeV_evFiltOff_2016/170721_193035", 241)
-})
-
-_add_ds("ntuplev15_leptrigs", {
-'mfv_neu_tau00100um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV15_evFilterOff_actual_ver2_withLeptonTriggers_2016/170727_153631", 294),
-'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_evFilterOff_actual_ver2_withLeptonTriggers_2016/170727_153833", 241)
-})
 
 _add_ds('validation', {
 'qcdht0700':   (15, _d[('qcdht0700', 'main')][1][:15]),
@@ -499,6 +480,7 @@ _add_ds('validation', {
 'JetHT2016G' : (3, ['/store/data/Run2016G/JetHT/AOD/23Sep2016-v1/70000/70B64A42-5C85-E611-88B0-848F69FD4E98.root', '/store/data/Run2016G/JetHT/AOD/23Sep2016-v1/70000/825F68A9-8A85-E611-8BAF-7845C4FC3A07.root', '/store/data/Run2016G/JetHT/AOD/23Sep2016-v1/70000/04A529BD-9885-E611-BDA3-008CFAFBFEBE.root']),
 'JetHT2016H2': (3, ['/store/data/Run2016H/JetHT/AOD/PromptReco-v2/000/283/408/00000/BAAECA7C-8E97-E611-A5D1-FA163EF54263.root', '/store/data/Run2016H/JetHT/AOD/PromptReco-v2/000/283/408/00000/EE7D84AF-CB97-E611-9D55-02163E014234.root', '/store/data/Run2016H/JetHT/AOD/PromptReco-v2/000/283/408/00000/D69C211F-7B98-E611-A91F-FA163E13C2C9.root']),
 })
+
 
 _add_ds("ntuplev15", {
 'JetHT2015C': _fromnum0("/store/user/jchu/croncopyeos/JetHT/NtupleV15_2015/170522_152137", 2),
@@ -697,6 +679,7 @@ _add_ds("ntuplev15", {
 'qcdht1500_hip1p0_mit': _fromnum0("/store/user/jchu/croncopyeos/qcdht1500/NtupleV15_2016/170612_205808", 129),
 
 })
+
 
 _add_ds("ntuplev16", {
 
