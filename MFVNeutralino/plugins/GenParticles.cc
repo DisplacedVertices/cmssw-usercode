@@ -29,7 +29,7 @@ private:
 
   bool try_MFVtbs  (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
   bool try_Ttbar   (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
-  bool try_MFVuds  (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
+  bool try_MFVthree(mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&, int t1, int t2, int t3) const;
   bool try_XX4j    (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
   bool try_MFVdijet(mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&, int quark) const;
   bool try_MFVlq   (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
@@ -248,8 +248,11 @@ bool MFVGenParticles::try_Ttbar(mfv::MCInteraction& mc, const edm::Handle<reco::
     return false;
 }
 
-bool MFVGenParticles::try_MFVuds(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles) const {
-  if (debug) printf("MFVGenParticles::try_MFVuds\n");
+bool MFVGenParticles::try_MFVthree(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles, int t1, int t2, int t3) const {
+  if (debug) printf("MFVGenParticles::try_MFVthree %i %i %i\n", t1, t2, t3);
+  assert(t1 == 3 || t1 == 13);
+  assert(t2 == 2);
+  assert(t3 == 1 || t3 == -1);
 
   mfv::MCInteractionHolderMFVuds h;
 
@@ -267,13 +270,13 @@ bool MFVGenParticles::try_MFVuds(mfv::MCInteraction& mc, const edm::Handle<reco:
     reco::GenParticleRef lsp(gen_particles, i);
 
     size_t which = 0;
-    if (h.lsps[0].isNull())
-      h.lsps[0] = lsp;
+    if (h.p[0].isNull())
+      h.p[0] = lsp;
     else {
-      if (reco::deltaR(*h.lsps[0], gen) < 0.001)
+      if (reco::deltaR(*h.p[0], gen) < 0.001)
 	throw cms::Exception("BadAssumption", "may have found same LSP twice based on deltaR < 0.001");
       which = 1;
-      h.lsps[1] = lsp;
+      h.p[1] = lsp;
     }
 
    // testing
@@ -286,38 +289,32 @@ bool MFVGenParticles::try_MFVuds(mfv::MCInteraction& mc, const edm::Handle<reco:
     // Get the daughters. 
     // The last true param of daughter_with_id means take absolute value, so that e.g. strange or antistrange is OK.
     // If any are bad, let the mc object be half-formed/invalid.
-    if ((h.stranges[which] = gen_ref(daughter_with_id(&*lsp, 3, true), gen_particles)).isNull()) return false;
-    if ((h.ups     [which] = gen_ref(daughter_with_id(&*lsp, 2, true), gen_particles)).isNull()) return false;
-    if ((h.downs   [which] = gen_ref(daughter_with_id(&*lsp, 1, true), gen_particles)).isNull()) return false;
+    if ((h.s[which][0] = gen_ref(daughter_with_id(&*lsp, t1, true), gen_particles)).isNull()) return false;
+    if ((h.s[which][1] = gen_ref(daughter_with_id(&*lsp, t2, true), gen_particles)).isNull()) return false;
+    if ((h.s[which][2] = gen_ref(daughter_with_id(&*lsp, t3, true), gen_particles)).isNull()) return false;
 
     // The -1 in final_candidate for the tops used to be 3 for
     // allowing radiated gluons or photons but with official sample
     // pythia got a top that had protons and pions and kaons oh my 42/-6 111/21 112/21 113/21 121/2212 122/2212 123/2212 124/2212 157/310 158/310
-    h.stranges[which] = gen_ref(final_candidate(h.stranges[which], -1), gen_particles);
-    h.ups     [which] = gen_ref(final_candidate(h.ups     [which], -1), gen_particles);
-    h.downs   [which] = gen_ref(final_candidate(h.downs   [which], -1), gen_particles);
+    for (int j = 0; j < 3; ++j)
+      h.s[which][j] = gen_ref(final_candidate(h.s[which][j], -1), gen_particles);
 
     // testing
     if (debug) {
-      gpp.Print(&*h.stranges[which], "strange");
-      gpp.Print(&*h.ups[which], "up");
-      gpp.Print(&*h.downs[which], "down");
+      gpp.Print(&*h.s[which][0], "s0");
+      gpp.Print(&*h.s[which][1], "s1");
+      gpp.Print(&*h.s[which][2], "s2");
     }
 
     if (last_flag_check) {
-      assert(lsp              ->statusFlags().isLastCopy());
-      assert(h.stranges[which]->statusFlags().isLastCopy());
-      assert(h.ups     [which]->statusFlags().isLastCopy());
-      assert(h.downs   [which]->statusFlags().isLastCopy());
+      assert(lsp->statusFlags().isLastCopy());
+      for (int j = 0; j < 3; ++j)
+        assert(h.s[which][j]->statusFlags().isLastCopy());
     }
   }
 
-  if (h.lsps[0].isNull() || h.stranges[0].isNull() || h.ups[0].isNull() || h.downs[0].isNull() ||
-      h.lsps[1].isNull() || h.stranges[1].isNull() || h.ups[1].isNull() || h.downs[1].isNull())
-    return false;
-
   if (h.valid()) {
-    mc.set(h);
+    mc.set(h, t1 == 3 ? mfv::mci_MFVuds : mfv::mci_MFVudmu);
     return true;
   }
   else
@@ -517,7 +514,8 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
     // the order of these tries is important, at least that MFVtbs comes before Ttbar
     try_MFVtbs  (*mc, gen_particles) ||
     try_Ttbar   (*mc, gen_particles) || 
-    try_MFVuds  (*mc, gen_particles) ||
+    try_MFVthree(*mc, gen_particles,  3, 2,  1) ||
+    try_MFVthree(*mc, gen_particles, 13, 2, -1) ||
     try_XX4j    (*mc, gen_particles) ||
     try_MFVdijet(*mc, gen_particles, 1) || //ddbar
     try_MFVdijet(*mc, gen_particles, 5) || //bbbar

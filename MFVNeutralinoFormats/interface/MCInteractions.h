@@ -4,7 +4,7 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 
 namespace mfv {
-  enum MCInteractions_t { mci_invalid, mci_Ttbar, mci_MFVtbs, mci_MFVuds, mci_XX4j, mci_MFVlq, mci_MFVddbar, mci_MFVbbbar };
+  enum MCInteractions_t { mci_invalid, mci_Ttbar, mci_MFVtbs, mci_MFVuds, mci_MFVudmu, mci_XX4j, mci_MFVlq, mci_MFVddbar, mci_MFVbbbar };
 
   struct MCInteractionHolderTtbar {
     virtual bool valid() const;
@@ -27,14 +27,15 @@ namespace mfv {
     reco::GenParticleRef primary_bottoms[2]; // bottoms are those from ttbar decay: rest of particles in MCInteractionTtbar
   };
 
-  struct MCInteractionHolderMFVuds {
+  struct MCInteractionHolderThruple {
     bool valid() const;
 
-    reco::GenParticleRef lsps[2];
-    reco::GenParticleRef ups[2];
-    reco::GenParticleRef downs[2];
-    reco::GenParticleRef stranges[2];
+    reco::GenParticleRef p[2];
+    reco::GenParticleRef s[2][3];
   };
+
+  struct MCInteractionHolderMFVuds  : public MCInteractionHolderThruple {};
+  struct MCInteractionHolderMFVudmu : public MCInteractionHolderThruple {};
 
   struct MCInteractionHolderPair {
     bool valid() const;
@@ -59,6 +60,7 @@ namespace mfv {
 
     void set(const MCInteractionHolderTtbar&);
     void set(const MCInteractionHolderMFVtbs&);
+    void set(const MCInteractionHolderThruple&, int type);
     void set(const MCInteractionHolderMFVuds&);
     void set(const MCInteractionHolderPair&, int type);
     void set(const MCInteractionHolderXX4j&);
@@ -89,9 +91,10 @@ namespace mfv {
     GenRef W             (size_t i) const;
     GenRef W_daughter    (size_t i, size_t j) const;
 
-    // MFVuds extra, lsp and strange above also valid
+    // MFVuds/MFVudmu extra, lsp above also valid; strange valid for uds
     GenRef down(size_t i) const;
     GenRef up  (size_t i) const;
+    GenRef mu  (size_t i) const;
 
   private:
     void check_empty_() const;
