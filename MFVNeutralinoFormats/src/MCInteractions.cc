@@ -17,8 +17,8 @@ namespace mfv {
 
   bool MCInteractionHolderThruple::valid() const {
     return
-      p[0].isNonnull() && s[0][2].isNonnull() && s[0][2].isNonnull() && s[0][2].isNonnull() &&
-      p[1].isNonnull() && s[1][2].isNonnull() && s[1][2].isNonnull() && s[1][2].isNonnull();
+      p[0].isNonnull() && s[0][0].isNonnull() && s[0][1].isNonnull() && s[0][2].isNonnull() &&
+      p[1].isNonnull() && s[1][0].isNonnull() && s[1][1].isNonnull() && s[1][2].isNonnull();
   }
 
   bool MCInteractionHolderPair::valid() const {
