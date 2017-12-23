@@ -761,9 +761,7 @@ for x in mfv_signal_samples + mfv_ddbar_samples:
     for y in '3p7', '3p8', '3p9', '4p1', '4p2', '4p3':
         x.add_dataset('ntuplev15_sigmadxy%s' % y)
 
-for x in mfv_signal_samples_2015 + mfv_signal_samples + mfv_ddbar_samples + mfv_hip_samples + [
-    mfv_bbbar_tau00100um_M0300, mfv_bbbar_tau00100um_M0400, mfv_bbbar_tau00100um_M0500, mfv_bbbar_tau00100um_M0600, mfv_bbbar_tau00100um_M0800, mfv_bbbar_tau00300um_M0300, mfv_bbbar_tau00300um_M0400, mfv_bbbar_tau00300um_M0500, mfv_bbbar_tau00300um_M0600, mfv_bbbar_tau00300um_M0800, mfv_bbbar_tau00300um_M1600, mfv_bbbar_tau01000um_M0300, mfv_bbbar_tau01000um_M0400, mfv_bbbar_tau01000um_M0500, mfv_bbbar_tau01000um_M0600, mfv_bbbar_tau10000um_M0300, mfv_bbbar_tau10000um_M0500, mfv_bbbar_tau10000um_M0600, mfv_bbbar_tau10000um_M0800, mfv_bbbar_tau10000um_M1200, mfv_bbbar_tau10000um_M1600, mfv_bbbar_tau30000um_M0300, mfv_bbbar_tau30000um_M0400, mfv_bbbar_tau30000um_M0500, mfv_bbbar_tau30000um_M0600, mfv_bbbar_tau30000um_M0800, mfv_bbbar_tau30000um_M1200, mfv_uds_tau00100um_M0300, mfv_uds_tau00100um_M0400, mfv_uds_tau00100um_M0500, mfv_uds_tau00100um_M0600, mfv_uds_tau00300um_M0300, mfv_uds_tau00300um_M0400, mfv_uds_tau00300um_M0500, mfv_uds_tau00300um_M0600, mfv_uds_tau01000um_M0300, mfv_uds_tau01000um_M0400, mfv_uds_tau01000um_M0500, mfv_uds_tau01000um_M0600, mfv_uds_tau01000um_M0800, mfv_uds_tau01000um_M1600, mfv_uds_tau10000um_M0300, mfv_uds_tau10000um_M0400, mfv_uds_tau10000um_M0500, mfv_uds_tau10000um_M0600, mfv_uds_tau10000um_M0800, mfv_uds_tau30000um_M0300, mfv_uds_tau30000um_M0400, mfv_uds_tau30000um_M0500, mfv_uds_tau30000um_M0600, mfv_uds_tau30000um_M0800, mfv_uds_tau30000um_M1200
-    ]:
+for x in mfv_signal_samples_2015 + mfv_signal_samples + mfv_ddbar_samples + mfv_hip_samples + mfv_bbbar_samples + mfv_uds_samples + mfv_neuuds_samples + mfv_neuudmu_samples:
     x.add_dataset('ntuplev16_wgenv2')
 
 for x in 'ntuplev15lep', 'ntuplev15lep_IsoMu24', 'ntuplev15lep_IsoTkMu24', 'ntuplev15lep_VVVL350', 'ntuplev15lep_VVVL400', 'ntuplev15lep_Mu50':
