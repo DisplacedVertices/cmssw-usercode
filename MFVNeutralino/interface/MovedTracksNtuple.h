@@ -2,6 +2,7 @@
 #define JMTucker_MFVNeutralino_interface_MovedTracksNtuple_h
 
 #include <vector>
+#include "TLorentzVector.h"
 
 class TTree;
 class TVector3;
@@ -24,7 +25,6 @@ namespace mfv {
     float gen_lsp_mass[2];
     float gen_lsp_decay[2*3];
     uchar gen_decay_type[2];
-    uchar gen_partons_in_acc;
 
     uchar pass_hlt;
     float bsx;
@@ -44,12 +44,18 @@ namespace mfv {
     float jetht;
     ushort ntracks;
     uchar nseltracks;
-    uchar nalljets;
+    std::vector<float> alljets_pt;
+    std::vector<float> alljets_eta;
+    std::vector<float> alljets_phi;
+    std::vector<float> alljets_energy;
+    std::vector<float> alljets_bdisc;
+    std::vector<uchar> alljets_hadronflavor;
+    size_t nalljets() const { return p_alljets_pt ? p_alljets_pt->size() : alljets_pt.size(); }
 
     uchar npreseljets;
     uchar npreselbjets;
     uchar nlightjets;
-    std::vector<float> jets_pt;
+    std::vector<float> jets_pt; // these are the moved jets
     std::vector<float> jets_eta;
     std::vector<float> jets_phi;
     std::vector<float> jets_energy;
@@ -82,6 +88,12 @@ namespace mfv {
     void read_from_tree(TTree* tree);
 
     // ugh
+    std::vector<float>* p_alljets_pt;
+    std::vector<float>* p_alljets_eta;
+    std::vector<float>* p_alljets_phi;
+    std::vector<float>* p_alljets_energy;
+    std::vector<float>* p_alljets_bdisc;
+    std::vector<uchar>* p_alljets_hadronflavor;
     std::vector<float>* p_jets_pt;
     std::vector<float>* p_jets_eta;
     std::vector<float>* p_jets_phi;

@@ -26,7 +26,6 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_w;
 
   TH2F* h_gen_decay;
-  TH1F* h_gen_partons_in_acc;
   TH1F* h_gen_flavor_code;
 
   TH1F* h_nbquarks;
@@ -154,7 +153,6 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_w = fs->make<TH1F>("h_w", ";event weight;events/0.1", 100, 0, 10);
 
   h_gen_decay = fs->make<TH2F>("h_gen_decay", "0-2=e,mu,tau, 3=h;decay code #0;decay code #1", 4, 0, 4, 4, 0, 4);
-  h_gen_partons_in_acc = fs->make<TH1F>("h_gen_partons_in_acc", ";# partons from LSP in acceptance;events", 11, 0, 11);
   h_gen_flavor_code = fs->make<TH1F>("h_gen_flavor_code", ";quark flavor composition;events", 3, 0, 3);
 
   h_nbquarks = fs->make<TH1F>("h_nbquarks", ";# of bquarks;events", 20, 0, 20);
@@ -314,33 +312,33 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   //////////////////////////////////////////////////////////////////////////////
 
   h_gen_decay->Fill(mevent->gen_decay_type[0], mevent->gen_decay_type[1], w);
-  h_gen_partons_in_acc->Fill(mevent->gen_partons_in_acc, w);
   h_gen_flavor_code->Fill(mevent->gen_flavor_code, w);
 
-  h_nbquarks->Fill(mevent->gen_bquark_pt.size());
-  for (size_t ibquark = 0; ibquark < mevent->gen_bquark_pt.size(); ++ibquark) {
-    h_bquark_pt->Fill(mevent->gen_bquark_pt[ibquark]);
-    h_bquark_eta->Fill(mevent->gen_bquark_eta[ibquark]);
-    h_bquark_phi->Fill(mevent->gen_bquark_phi[ibquark]);
-    h_bquark_energy->Fill(mevent->gen_bquark_energy[ibquark]);
-    for (size_t jbquark = ibquark+1; jbquark < mevent->gen_bquark_pt.size(); ++jbquark) {
-      h_bquark_pairdphi->Fill(reco::deltaPhi(mevent->gen_bquark_phi[ibquark], mevent->gen_bquark_phi[jbquark]));
-      h_bquark_pairdr->Fill(reco::deltaR(mevent->gen_bquark_eta[ibquark], mevent->gen_bquark_phi[ibquark], mevent->gen_bquark_eta[jbquark], mevent->gen_bquark_phi[jbquark]));
+  const size_t nbquarks = mevent->gen_bquarks.size();
+  h_nbquarks->Fill(nbquarks);
+  for (size_t i = 0; i < nbquarks; ++i) {
+    h_bquark_pt->Fill(mevent->gen_bquarks[i].Pt());
+    h_bquark_eta->Fill(mevent->gen_bquarks[i].Eta());
+    h_bquark_phi->Fill(mevent->gen_bquarks[i].Phi());
+    h_bquark_energy->Fill(mevent->gen_bquarks[i].E());
+    for (size_t j = i+1; j < nbquarks; ++j) {
+      const double dphi = reco::deltaPhi(mevent->gen_bquarks[i].Phi(), mevent->gen_bquarks[j].Phi());
+      const double deta = mevent->gen_bquarks[i].Eta() - mevent->gen_bquarks[j].Eta(); // JMTBAD why not fabs
+      const double avgeta = (mevent->gen_bquarks[i].Eta() + mevent->gen_bquarks[j].Eta()) / 2;
+      const double dR = reco::deltaR(mevent->gen_bquarks[i].Eta(), mevent->gen_bquarks[i].Phi(), mevent->gen_bquarks[j].Eta(), mevent->gen_bquarks[j].Phi());
+      h_bquark_pairdphi->Fill(dphi);
+      h_bquark_pairdr->Fill(dR);
+      if (nbquarks == 2) {
+        h_bquarks_absdphi->Fill(fabs(dphi));
+        h_bquarks_dphi->Fill(dphi);
+        h_bquarks_deta->Fill(deta);
+        h_bquarks_deta_dphi->Fill(dphi, deta);
+        h_bquarks_avgeta->Fill(avgeta);
+        h_bquarks_avgeta_dphi->Fill(dphi, avgeta);
+        h_bquarks_dR->Fill(dR);
+        h_bquarks_dR_dphi->Fill(dphi, dR);
+      }
     }
-  }
-  if (mevent->gen_bquark_pt.size() == 2) {
-    double dphi = reco::deltaPhi(mevent->gen_bquark_phi[0], mevent->gen_bquark_phi[1]);
-    double deta = mevent->gen_bquark_eta[0] - mevent->gen_bquark_eta[1];
-    double avgeta = (mevent->gen_bquark_eta[0] + mevent->gen_bquark_eta[1]) / 2;
-    double dR = reco::deltaR(mevent->gen_bquark_eta[0], mevent->gen_bquark_phi[0], mevent->gen_bquark_eta[1], mevent->gen_bquark_phi[1]);
-    h_bquarks_absdphi->Fill(fabs(dphi));
-    h_bquarks_dphi->Fill(dphi);
-    h_bquarks_deta->Fill(deta);
-    h_bquarks_deta_dphi->Fill(dphi, deta);
-    h_bquarks_avgeta->Fill(avgeta);
-    h_bquarks_avgeta_dphi->Fill(dphi, avgeta);
-    h_bquarks_dR->Fill(dR);
-    h_bquarks_dR_dphi->Fill(dphi, dR);
   }
 
   h_minlspdist2d->Fill(mevent->minlspdist2d(), w);

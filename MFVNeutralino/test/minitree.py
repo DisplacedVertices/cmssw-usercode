@@ -1,10 +1,10 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-dataset = 'ntuplev15'
+dataset = 'ntuplev16'
 sample_files(process, 'qcdht2000', dataset, 1)
-#process.source.fileNames = ['file:ntuple.root']
 process.TFileService.fileName = 'minitree.root'
+file_event_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.MiniTree_cff')
 
@@ -24,7 +24,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     set_splitting(samples, dataset, 'minitree', data_json='ana_2015p6.json')
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('MiniTreeV15_v5',
+    cs = CondorSubmitter('MiniTreeV16',
                          ex = year,
                          dataset = dataset,
                          )

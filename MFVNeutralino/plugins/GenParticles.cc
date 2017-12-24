@@ -1,3 +1,5 @@
+// JMTBAD unify try_XX4j/MFVdijet/MFVlq and try_MFVtbs/uds
+
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
@@ -19,6 +21,7 @@ private:
 
   const edm::EDGetTokenT<reco::GenParticleCollection> gen_particles_token;
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
+  const bool last_flag_check;
   const bool debug;
   int lsp_id;
 
@@ -26,19 +29,22 @@ private:
 
   bool try_MFVtbs  (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
   bool try_Ttbar   (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
+  bool try_MFVthree(mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&, int t1, int t2, int t3) const;
   bool try_XX4j    (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
-  bool try_MFVdijet(mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
+  bool try_MFVdijet(mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&, int quark) const;
   bool try_MFVlq   (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
 };
 
 MFVGenParticles::MFVGenParticles(const edm::ParameterSet& cfg) 
   : gen_particles_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("gen_particles_src"))),
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
+    last_flag_check(cfg.getParameter<bool>("last_flag_check")),
     debug(cfg.getUntrackedParameter<bool>("debug", false)),
     lsp_id(-1)
 {
   produces<mfv::MCInteraction>();
-  produces<std::vector<double>>(); // decay positions
+  produces<std::vector<double>>("genVertex"); // generated primary vertex
+  produces<std::vector<double>>("decays"); // decay positions
 
   // these for event display
   produces<reco::GenParticleCollection>("primaries");
@@ -126,12 +132,13 @@ void MFVGenParticles::set_Ttbar_decay(mfv::MCInteractionHolderTtbar& mc, const e
     }  
     mc.decay_type[which] = lepton_code(mc.W_daughters[which][0]);
 
-    // testing
-    assert(mc.tops[which]->statusFlags().isLastCopy());
-    assert(mc.Ws[which]->statusFlags().isLastCopy());
-    assert(mc.bottoms[which]->statusFlags().isLastCopy());
-    assert(mc.W_daughters[which][0]->statusFlags().isLastCopy());
-    assert(mc.W_daughters[which][1]->statusFlags().isLastCopy());
+    if (last_flag_check) {
+      assert(mc.tops[which]->statusFlags().isLastCopy());
+      assert(mc.Ws[which]->statusFlags().isLastCopy());
+      assert(mc.bottoms[which]->statusFlags().isLastCopy());
+      assert(mc.W_daughters[which][0]->statusFlags().isLastCopy());
+      assert(mc.W_daughters[which][1]->statusFlags().isLastCopy());
+    }
   }
 }
 
@@ -139,6 +146,10 @@ bool MFVGenParticles::try_MFVtbs(mfv::MCInteraction& mc, const edm::Handle<reco:
   if (debug) printf("MFVGenParticles::try_MFVtbs\n");
 
   mfv::MCInteractionHolderMFVtbs h;
+
+  GenParticlePrinter gpp(*gen_particles);
+  gpp.print_mothers = gpp.print_vertex = true;
+  if (debug) gpp.PrintHeader();
 
   // Find the LSPs (e.g. gluinos or neutralinos). Since this is
   // PYTHIA8 there are lots of copies -- try to get the ones that
@@ -174,10 +185,21 @@ bool MFVGenParticles::try_MFVtbs(mfv::MCInteraction& mc, const edm::Handle<reco:
     h.tops           [which] = gen_ref(final_candidate(h.tops           [which], -1), gen_particles);
 
     // testing
-    assert(lsp                     ->statusFlags().isLastCopy());
-    assert(h.stranges       [which]->statusFlags().isLastCopy());
-    assert(h.primary_bottoms[which]->statusFlags().isLastCopy());
-    assert(h.tops           [which]->statusFlags().isLastCopy());
+    if (debug) {
+      char lspname[16];
+      snprintf(lspname, 16, "lsp #%lu", which);
+      gpp.Print(&*lsp, lspname);
+      gpp.Print(&*h.stranges[which], "strange");
+      gpp.Print(&*h.primary_bottoms[which], "bottom");
+      gpp.Print(&*h.tops[which], "top");
+    }
+
+    if (last_flag_check) {
+      assert(lsp                     ->statusFlags().isLastCopy());
+      assert(h.stranges       [which]->statusFlags().isLastCopy());
+      assert(h.primary_bottoms[which]->statusFlags().isLastCopy());
+      assert(h.tops           [which]->statusFlags().isLastCopy());
+    }
   }
 
   if (h.lsps[0].isNull() || h.stranges[0].isNull() || h.primary_bottoms[0].isNull() || h.tops[0].isNull() ||
@@ -210,8 +232,10 @@ bool MFVGenParticles::try_Ttbar(mfv::MCInteraction& mc, const edm::Handle<reco::
     h.tops[0] = gen_ref(final_candidate(h.tops[0], -1), gen_particles);
     h.tops[1] = gen_ref(final_candidate(h.tops[1], -1), gen_particles);
 
-    assert(h.tops[0]->statusFlags().isLastCopy());
-    assert(h.tops[1]->statusFlags().isLastCopy());
+    if (last_flag_check) {
+      assert(h.tops[0]->statusFlags().isLastCopy());
+      assert(h.tops[1]->statusFlags().isLastCopy());
+    }
 
     set_Ttbar_decay(h, gen_particles);
   }
@@ -224,7 +248,78 @@ bool MFVGenParticles::try_Ttbar(mfv::MCInteraction& mc, const edm::Handle<reco::
     return false;
 }
 
-// JMTBAD unify try_XX4j/MFVdijet/MFVlq
+bool MFVGenParticles::try_MFVthree(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles, int t1, int t2, int t3) const {
+  if (debug) printf("MFVGenParticles::try_MFVthree %i %i %i\n", t1, t2, t3);
+  assert(t1 == 3 || t1 == 13);
+  assert(t2 == 2);
+  assert(t3 == 1 || t3 == -1);
+
+  mfv::MCInteractionHolderMFVuds h;
+
+  GenParticlePrinter gpp(*gen_particles);
+  gpp.print_mothers = gpp.print_vertex = true;
+  if (debug) gpp.PrintHeader();
+
+  // Find the LSPs (e.g. gluinos or neutralinos). Since this is
+  // PYTHIA8 there are lots of copies -- try to get the ones that
+  // decay to the three quarks.
+  for (int i = 0, ie = int(gen_particles->size()); i < ie; ++i) {
+    const reco::GenParticle& gen = gen_particles->at(i);
+    if (gen.pdgId() != lsp_id || gen.numberOfDaughters() != 3)
+      continue;
+    reco::GenParticleRef lsp(gen_particles, i);
+
+    size_t which = 0;
+    if (h.p[0].isNull())
+      h.p[0] = lsp;
+    else {
+      if (reco::deltaR(*h.p[0], gen) < 0.001)
+	throw cms::Exception("BadAssumption", "may have found same LSP twice based on deltaR < 0.001");
+      which = 1;
+      h.p[1] = lsp;
+    }
+
+   // testing
+    if (debug) {
+      char lspname[16];
+      snprintf(lspname, 16, "lsp #%lu", which);
+      gpp.Print(&*lsp, lspname);
+    }
+
+    // Get the daughters. 
+    // The last true param of daughter_with_id means take absolute value, so that e.g. strange or antistrange is OK.
+    // If any are bad, let the mc object be half-formed/invalid.
+    if ((h.s[which][0] = gen_ref(daughter_with_id(&*lsp, t1, true), gen_particles)).isNull()) return false;
+    if ((h.s[which][1] = gen_ref(daughter_with_id(&*lsp, t2, true), gen_particles)).isNull()) return false;
+    if ((h.s[which][2] = gen_ref(daughter_with_id(&*lsp, t3, true), gen_particles)).isNull()) return false;
+
+    // The -1 in final_candidate for the tops used to be 3 for
+    // allowing radiated gluons or photons but with official sample
+    // pythia got a top that had protons and pions and kaons oh my 42/-6 111/21 112/21 113/21 121/2212 122/2212 123/2212 124/2212 157/310 158/310
+    for (int j = 0; j < 3; ++j)
+      h.s[which][j] = gen_ref(final_candidate(h.s[which][j], -1), gen_particles);
+
+    // testing
+    if (debug) {
+      gpp.Print(&*h.s[which][0], "s0");
+      gpp.Print(&*h.s[which][1], "s1");
+      gpp.Print(&*h.s[which][2], "s2");
+    }
+
+    if (last_flag_check) {
+      assert(lsp->statusFlags().isLastCopy());
+      for (int j = 0; j < 3; ++j)
+        assert(h.s[which][j]->statusFlags().isLastCopy());
+    }
+  }
+
+  if (h.valid()) {
+    mc.set(h, t1 == 3 ? mfv::mci_MFVuds : mfv::mci_MFVudmu);
+    return true;
+  }
+  else
+    return false;
+}
 
 bool MFVGenParticles::try_XX4j(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles) const {
   if (debug) printf("MFVGenParticles::try_XX4j\n");
@@ -255,9 +350,11 @@ bool MFVGenParticles::try_XX4j(mfv::MCInteraction& mc, const edm::Handle<reco::G
     h.s[which][1] = gen_ref(final_candidate(h.p[which]->daughter( which2), 3), gen_particles);
 
     // testing
-    assert(h.p[which]   ->statusFlags().isLastCopy());
-    assert(h.s[which][0]->statusFlags().isLastCopy());
-    assert(h.s[which][1]->statusFlags().isLastCopy());
+    if (last_flag_check) {
+      assert(h.p[which]   ->statusFlags().isLastCopy());
+      assert(h.s[which][0]->statusFlags().isLastCopy());
+      assert(h.s[which][1]->statusFlags().isLastCopy());
+    }
   }
 
   if (h.valid()) {
@@ -268,10 +365,14 @@ bool MFVGenParticles::try_XX4j(mfv::MCInteraction& mc, const edm::Handle<reco::G
     return false;
 }
 
-bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles) const {
-  if (debug) printf("MFVGenParticles::try_MFVdijet\n");
+bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles, int quark) const {
+  if (debug) printf("MFVGenParticles::try_MFVdijet quark=%i\n", quark);
+  assert(quark == 1 || quark == 5);
 
-  mfv::MCInteractionHolderMFVdijet h;
+  mfv::MCInteractionHolderPair h;
+
+  //GenParticlePrinter gpp(*gen_particles);
+  //gpp.PrintHeader();
 
   // Find the LSPs (e.g. gluinos or neutralinos). Since this is
   // PYTHIA8 there are lots of copies -- try to get the ones that
@@ -294,10 +395,14 @@ bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<rec
       h.p[1] = ref;
     }
 
+    //char lspname[16];
+    //snprintf(lspname, 16, "dijet primary #%lu", which);
+    //gpp.Print(&*h.p[which], lspname);
+
     // Get the immediate daughters. 
-    if ((h.s[which][0] = gen_ref(daughter_with_id(&gen,  1, false), gen_particles)).isNull() ||
-        (h.s[which][1] = gen_ref(daughter_with_id(&gen, -1, false), gen_particles)).isNull()) {
-      printf("WEIRD GLUBALL CRAP???\n");
+    if ((h.s[which][0] = gen_ref(daughter_with_id(&gen,  quark, false), gen_particles)).isNull() ||
+        (h.s[which][1] = gen_ref(daughter_with_id(&gen, -quark, false), gen_particles)).isNull()) {
+      printf("WEIRD GLUBALL CRAP??? %i %i\n", h.s[which][0].isNull(), h.s[which][1].isNull());
       return false;
     }
 
@@ -305,13 +410,15 @@ bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<rec
     h.s[which][0] = gen_ref(final_candidate(h.s[which][0], 3), gen_particles);
     h.s[which][1] = gen_ref(final_candidate(h.s[which][1], 3), gen_particles);
 
-    assert(h.p[which]   ->statusFlags().isLastCopy());
-    assert(h.s[which][0]->statusFlags().isLastCopy());
-    assert(h.s[which][1]->statusFlags().isLastCopy());
+    if (last_flag_check) {
+      assert(h.p[which]   ->statusFlags().isLastCopy());
+      assert(h.s[which][0]->statusFlags().isLastCopy());
+      assert(h.s[which][1]->statusFlags().isLastCopy());
+    }
   }
 
   if (h.valid()) {
-    mc.set(h);
+    mc.set(h, quark == 1 ? mfv::mci_MFVddbar : mfv::mci_MFVbbbar );
     return true;
   }
   else
@@ -354,9 +461,11 @@ bool MFVGenParticles::try_MFVlq(mfv::MCInteraction& mc, const edm::Handle<reco::
     h.s[which][0] = gen_ref(final_candidate(lq.daughter( whichq), 3), gen_particles);
     h.s[which][1] = gen_ref(final_candidate(lq.daughter(!whichq), 3), gen_particles);
 
-    assert(h.p[which]   ->statusFlags().isLastCopy());
-    assert(h.s[which][0]->statusFlags().isLastCopy());
-    assert(h.s[which][1]->statusFlags().isLastCopy());
+    if (last_flag_check) {
+      assert(h.p[which]   ->statusFlags().isLastCopy());
+      assert(h.s[which][0]->statusFlags().isLastCopy());
+      assert(h.s[which][1]->statusFlags().isLastCopy());
+    }
   }
 
   if (h.valid()) {
@@ -369,6 +478,7 @@ bool MFVGenParticles::try_MFVlq(mfv::MCInteraction& mc, const edm::Handle<reco::
 
 void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
   std::auto_ptr<mfv::MCInteraction> mc(new mfv::MCInteraction);
+  std::auto_ptr<std::vector<double> > primary_vertex(new std::vector<double>(3,0.));
   std::auto_ptr<std::vector<double> > decay_vertices(new std::vector<double>);
   std::auto_ptr<reco::GenParticleCollection> primaries  (new reco::GenParticleCollection);
   std::auto_ptr<reco::GenParticleCollection> secondaries(new reco::GenParticleCollection);
@@ -377,6 +487,15 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
   if (!event.isRealData()) {
     edm::Handle<reco::GenParticleCollection> gen_particles;
     event.getByToken(gen_particles_token, gen_particles);
+
+    const reco::GenParticle& for_vtx = gen_particles->at(2);
+    const int for_vtx_id = abs(for_vtx.pdgId());
+    if (for_vtx_id != 21 && !(for_vtx_id >= 1 && for_vtx_id <= 5))
+      throw cms::Exception("BadAssumption", "gen_particles[2] is not a gluon or udscb: id=") << for_vtx_id;
+
+    (*primary_vertex)[0] = for_vtx.vx();
+    (*primary_vertex)[1] = for_vtx.vy();
+    (*primary_vertex)[2] = for_vtx.vz();
 
     if (lsp_id == -1) {
       // If there is a neutralino in the first event, assume that's the
@@ -395,14 +514,27 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
     // the order of these tries is important, at least that MFVtbs comes before Ttbar
     try_MFVtbs  (*mc, gen_particles) ||
     try_Ttbar   (*mc, gen_particles) || 
+    try_MFVthree(*mc, gen_particles,  3, 2,  1) ||
+    try_MFVthree(*mc, gen_particles, 13, 2, -1) ||
     try_XX4j    (*mc, gen_particles) ||
-    try_MFVdijet(*mc, gen_particles) ||
+    try_MFVdijet(*mc, gen_particles, 1) || //ddbar
+    try_MFVdijet(*mc, gen_particles, 5) || //bbbar
     try_MFVlq   (*mc, gen_particles);
 
     if (mc->valid()) {
       for (auto r : mc->primaries())   primaries  ->push_back(*r);
       for (auto r : mc->secondaries()) secondaries->push_back(*r);
       for (auto r : mc->visible())     visible    ->push_back(*r);
+
+      GenParticlePrinter gpp(*gen_particles);
+      gpp.print_mothers = gpp.print_vertex = true;
+      if (debug) {
+        printf("print primaries, secondaries, visible last and first copies:\n");
+        gpp.PrintHeader();
+        for (auto r : mc->primaries())   { gpp.Print(r, "pri last"); gpp.Print(first_candidate(r), "pri first"); }
+        for (auto r : mc->secondaries()) { gpp.Print(r, "sec last"); gpp.Print(first_candidate(r), "sec first"); }
+        for (auto r : mc->visible())     { gpp.Print(r, "vis last"); gpp.Print(first_candidate(r), "vis first"); }
+      }
 
       for (int i = 0; i < 2; ++i) {
         auto p = mc->decay_point(i);
@@ -417,15 +549,21 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
   }
 
   if (decay_vertices->empty()) {
-    if (debug) printf("MFVGenParticles: using beamspot for decay position\n");
+    if (debug) printf("MFVGenParticles: trying to use beamspot for decay position\n");
 
     edm::Handle<reco::BeamSpot> beamspot;
     event.getByToken(beamspot_token, beamspot);
 
-    for (int i = 0; i < 2; ++i) {
-      decay_vertices->push_back(beamspot->x0());
-      decay_vertices->push_back(beamspot->y0());
-      decay_vertices->push_back(beamspot->z0());
+    if (beamspot.isValid()) {
+      for (int i = 0; i < 2; ++i) {
+        decay_vertices->push_back(beamspot->x0());
+        decay_vertices->push_back(beamspot->y0());
+        decay_vertices->push_back(beamspot->z0());
+      }
+    }
+    else {
+      if (debug) printf("MFVGenParticles: no beamspot in Event, falling back to 0,0,0\n");
+      decay_vertices->resize(6,0.);
     }
   }
 
@@ -437,7 +575,8 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
   }
 
   event.put(mc);
-  event.put(decay_vertices);
+  event.put(primary_vertex, "genVertex");
+  event.put(decay_vertices, "decays");
   event.put(primaries,   "primaries");
   event.put(secondaries, "secondaries");
   event.put(visible,     "visible");

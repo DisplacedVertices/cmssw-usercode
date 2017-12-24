@@ -64,6 +64,8 @@ class Sample(object):
     IS_FASTSIM = False
     GENERATOR = 'pythia8'
 
+    NSAMPLES = 0
+
     def __init__(self, name, dataset, nevents_orig, **kwargs):
         self.name = name
         self.curr_dataset = 'main'
@@ -75,6 +77,9 @@ class Sample(object):
         self.generator  = kwargs.get('generator',  self.GENERATOR)
 
         self.ready = True
+
+        self.isample = Sample.NSAMPLES
+        Sample.NSAMPLES += 1
 
     def has_dataset(self, c):
         return self.datasets.has_key(c)
@@ -554,8 +559,10 @@ def main(samples_registry):
                 name = site['name']
                 if name.endswith('_Buffer') or name.endswith('_MSS'):
                     continue
-                is_complete = all(site[x] == '100.00%' for x in ('block_completion', 'block_fraction', 'dataset_fraction', 'replica_fraction'))
-                print (colors.green if is_complete else colors.yellow)(name),
+                completions = [site[x] for x in ('block_completion', 'block_fraction', 'dataset_fraction', 'replica_fraction')]
+                is_complete = all(c == '100.00%' for c in completions)
+                x = (name,) + tuple([float(c.replace('%',''))/100 for c in completions])
+                print (colors.green if is_complete else colors.yellow)('%s (%.4f %.4f %.4f %.4f)' % x),
 
     elif 'samplefiles' in argv:
         samples = samples_registry.from_argv(raise_if_none=True)

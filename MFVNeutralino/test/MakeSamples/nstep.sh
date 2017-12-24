@@ -11,9 +11,12 @@ JOBNUM=$1
 
 source steering.sh
 
+YEAR=$(<year.txt)
+
 INDIR=$(pwd)
 OUTDIR=$(pwd)
 
+echo YEAR: ${YEAR}
 echo JOBNUM: ${JOBNUM}
 echo MAXEVENTS: ${MAXEVENTS}
 echo EXPECTEDEVENTS: ${EXPECTEDEVENTS}
@@ -141,7 +144,11 @@ echo START RAWHLT at $(date)
 if [[ $USETHISCMSSW -eq 1 ]]; then
     rawhlt
 else
-    ( scramproj RAWHLT 8_0_21 && rawhlt )
+    if [[ $YEAR == 2015 ]]; then
+        ( scramproj RAWHLT 7_6_1 && rawhlt )
+    else
+        ( scramproj RAWHLT 8_0_21 && rawhlt )
+    fi
 fi
 exitbanner $? RAWHLT
 
@@ -149,19 +156,31 @@ exitbanner $? RAWHLT
 
 echo
 echo START RECO at $(date)
-
-if [[ $USETHISCMSSW -ne 1 ]]; then
-    cd CMSSW_8_0_25/src
-    eval $(scram runtime -sh)
-    cd ../..
+if [[ $USETHISCMSSW -eq 1 ]]; then
+    reco
+else
+    if [[ $YEAR == 2015 ]]; then
+        ( scramproj RECO 7_6_1 && reco )
+    else
+        ( scramproj RECO 8_0_25 && reco )
+    fi
 fi
-
-reco
 exitbanner $? RECO
 
 ################################################################################
 
 if [[ $OUTPUTLEVEL == "ntuple" || $OUTPUTLEVEL == "minitree" ]]; then
+    if [[ $(ls -1d CMSSW* | wc -l) != 1 ]]; then
+        echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        echo @@@@ more than one CMSSW dir found:
+        ls -l | sed 's/^/@@@@ /'
+        echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+        exit 1
+    fi
+    cd CMSSW*/src
+    eval $(scram runtime -sh)
+    cd ../..
+    
     echo START NTUPLE\|MINITREE at $(date)
 
     function doit {

@@ -14,8 +14,8 @@ namespace mfv {
 
   MovedTracksNtuple::MovedTracksNtuple() {
     clear();
-    p_jets_pt = p_jets_eta = p_jets_phi = p_jets_energy = p_vtxs_x = p_vtxs_y = p_vtxs_z = p_vtxs_pt = p_vtxs_theta = p_vtxs_phi = p_vtxs_mass = p_vtxs_tkonlymass = p_vtxs_anglemin = p_vtxs_anglemax = p_vtxs_bs2derr = 0;
-    p_jets_ntracks = p_vtxs_ntracks = 0;
+    p_alljets_pt = p_alljets_eta = p_alljets_phi = p_alljets_energy = p_alljets_bdisc = p_jets_pt = p_jets_eta = p_jets_phi = p_jets_energy = p_vtxs_x = p_vtxs_y = p_vtxs_z = p_vtxs_pt = p_vtxs_theta = p_vtxs_phi = p_vtxs_mass = p_vtxs_tkonlymass = p_vtxs_anglemin = p_vtxs_anglemax = p_vtxs_bs2derr = 0;
+    p_alljets_hadronflavor = p_jets_ntracks = p_vtxs_ntracks = 0;
   }
 
   void MovedTracksNtuple::clear() {
@@ -28,8 +28,14 @@ namespace mfv {
       for (int j = 0; j < 3; ++j)
         gen_lsp_decay[i*3+j] = 0;
     }
-    gen_partons_in_acc = pass_hlt = npu = npv = nseltracks = nalljets = npreseljets = npreselbjets = nlightjets = 0;
+    pass_hlt = npu = npv = nseltracks = npreseljets = npreselbjets = nlightjets = 0;
     pvntracks = ntracks = 0;
+    alljets_pt.clear();
+    alljets_eta.clear();
+    alljets_phi.clear();
+    alljets_energy.clear();
+    alljets_bdisc.clear();
+    alljets_hadronflavor.clear();
     jets_pt.clear();
     jets_eta.clear();
     jets_phi.clear();
@@ -64,7 +70,6 @@ namespace mfv {
     tree->Branch("gen_lsp_mass", gen_lsp_mass, "gen_lsp_mass[2]/F");
     tree->Branch("gen_lsp_decay", gen_lsp_decay, "gen_lsp_decay[6]/F");
     tree->Branch("gen_decay_type", gen_decay_type, "gen_decay_type[2]/b");
-    tree->Branch("gen_partons_in_acc", &gen_partons_in_acc);
     tree->Branch("pass_hlt", &pass_hlt);
     tree->Branch("bsx", &bsx);
     tree->Branch("bsy", &bsy);
@@ -81,10 +86,15 @@ namespace mfv {
     tree->Branch("jetht", &jetht);
     tree->Branch("ntracks", &ntracks);
     tree->Branch("nseltracks", &nseltracks);
-    tree->Branch("nalljets", &nalljets);
     tree->Branch("npreseljets", &npreseljets);
     tree->Branch("npreselbjets", &npreselbjets);
     tree->Branch("nlightjets", &nlightjets);
+    tree->Branch("alljets_pt", &alljets_pt);
+    tree->Branch("alljets_eta", &alljets_eta);
+    tree->Branch("alljets_phi", &alljets_phi);
+    tree->Branch("alljets_energy", &alljets_energy);
+    tree->Branch("alljets_bdisc", &alljets_bdisc);
+    tree->Branch("alljets_hadronflavor", &alljets_hadronflavor);
     tree->Branch("jets_pt", &jets_pt);
     tree->Branch("jets_eta", &jets_eta);
     tree->Branch("jets_phi", &jets_phi);
@@ -119,7 +129,6 @@ namespace mfv {
     tree->SetBranchAddress("gen_lsp_mass", gen_lsp_mass);
     tree->SetBranchAddress("gen_lsp_decay", gen_lsp_decay);
     tree->SetBranchAddress("gen_decay_type", gen_decay_type);
-    tree->SetBranchAddress("gen_partons_in_acc", &gen_partons_in_acc);
     tree->SetBranchAddress("pass_hlt", &pass_hlt);
     tree->SetBranchAddress("bsx", &bsx);
     tree->SetBranchAddress("bsy", &bsy);
@@ -136,10 +145,15 @@ namespace mfv {
     tree->SetBranchAddress("jetht", &jetht);
     tree->SetBranchAddress("ntracks", &ntracks);
     tree->SetBranchAddress("nseltracks", &nseltracks);
-    tree->SetBranchAddress("nalljets", &nalljets);
     tree->SetBranchAddress("npreseljets", &npreseljets);
     tree->SetBranchAddress("npreselbjets", &npreselbjets);
     tree->SetBranchAddress("nlightjets", &nlightjets);
+    tree->SetBranchAddress("alljets_pt", &p_alljets_pt);
+    tree->SetBranchAddress("alljets_eta", &p_alljets_eta);
+    tree->SetBranchAddress("alljets_phi", &p_alljets_phi);
+    tree->SetBranchAddress("alljets_energy", &p_alljets_energy);
+    tree->SetBranchAddress("alljets_bdisc", &p_alljets_bdisc);
+    tree->SetBranchAddress("alljets_hadronflavor", &p_alljets_hadronflavor);
     tree->SetBranchAddress("jets_pt", &p_jets_pt);
     tree->SetBranchAddress("jets_eta", &p_jets_eta);
     tree->SetBranchAddress("jets_phi", &p_jets_phi);

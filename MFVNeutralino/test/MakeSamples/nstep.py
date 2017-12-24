@@ -1,37 +1,34 @@
 #!/usr/bin/env python
 
+from CRABClient.ClientExceptions import ConfigException as CRABConfigException
+from JMTucker.MFVNeutralino.Year import year
+from scanpack import get_scanpack, scanpackbase
+
 nevents = 10000
 events_per = 100
 scanpack = None
 from_lhe = False
 output_level = 'reco'
-output_dataset_tag = 'RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6'
+output_dataset_tag = ''
 fixed_salt = ''
 use_this_cmssw = False
-premix = True
+premix = year != 2015
 trig_filter = False
 hip_simulation = False
 hip_mitigation = False
 ex = ''
 already = []
 
+meta = 'neuudmu'
 taus   = [100, 300, 1000, 10000, 30000]
-masses = [300, 400, 500, 600, 800, 1200, 1600]
+masses = [300, 400, 500, 600, 800, 1200, 1600, 3000]
 hip_right = False
 
-if 1:
+if 0:
     meta = 'scan'
     output_level = 'minitree'
     hip_right = False
-    scanpack = 'scanpack1'
-elif 0:
-    meta = 'neu'
-elif 0:
-    meta = 'ddbar'
-elif 0:
-    meta = 'lq2'
-elif 0:
-    meta = 'glu'
+    scanpack = 'scanpack2015supplement'
 elif 0:
     meta = 'ttbar'
     nevents, events_per
@@ -61,6 +58,11 @@ elif 0:
 
 ####
 
+if year == 2015:
+    ex += '_2015'
+    if premix:
+        raise ValueError("can't premix in 2015")
+
 if hip_right:
     hip_simulation = 1.0
     hip_mitigation = True
@@ -75,12 +77,8 @@ if hip_simulation:
 else:
     hip_mitigation = False
 
-if not premix:
-    output_dataset_tag = output_dataset_tag.replace('Premix', '')
-
 if scanpack:
     ex += '_' + scanpack
-    from modify import get_scanpack, scanpackbase
     scanpack = get_scanpack(scanpack)
 
 #ex = '_test'
@@ -109,21 +107,16 @@ save_git_status(os.path.join(work_area, 'gitstatus'))
 
 config = Config()
 
-to_rm = []
+open('year.txt', 'wt').write(str(year))
+
+to_rm = ['year.txt']
 
 if output_level in ('minitree', 'ntuple'):
-    to_rm += ['ntuple.py', 'ntuple_temp.py']
-    py = open('../ntuple.py').read()
-    assert py.count('\nrun_n_tk_seeds = True\n') == 1
-    py = py.replace('\nrun_n_tk_seeds = True\n', '\nrun_n_tk_seeds = False\n')
-    open('ntuple_temp.py','wt').write(py)
-    os.system('cmsDumpPython.py ntuple_temp.py > ntuple.py')
+    for x in 'ntuple.py', 'minitree.py':
+        to_rm.append(x)
+        os.system('cmsDumpPython.py ../%s > %s' % (x,x))
 
-if output_level == 'minitree':
-    to_rm.append('minitree.py')
-    os.system('cmsDumpPython.py ../minitree.py > minitree.py')
-
-config.General.transferLogs = True
+config.General.transferLogs = False
 config.General.transferOutputs = True
 config.General.workArea = work_area
 config.General.requestName = 'SETME'
@@ -131,11 +124,12 @@ config.General.requestName = 'SETME'
 config.JobType.pluginName = 'PrivateMC'
 config.JobType.psetName = 'dummy.py'
 config.JobType.scriptExe = 'nstep.sh'
+config.JobType.scriptArgs = []
 config.JobType.sendPythonFolder = True
 
 steering_fn = 'steering.sh'
 
-config.JobType.inputFiles = ['todoify.sh', steering_fn, 'lhe.py', 'gensim.py', 'dynamicconf.py', 'modify.py', 'rawhlt.py', 'minbias.py', 'private_minbias.txt.gz', 'winter_minbias.txt.gz', 'minbias_premix.txt.gz', 'reco.py', 'fixfjr.py']
+config.JobType.inputFiles = ['todoify.sh', steering_fn, 'lhe.py', 'gensim.py', 'dynamicconf.py', 'modify.py', 'scanpack.py', 'rawhlt.py', 'minbias.py', 'private_minbias.txt.gz', 'minbias_premix.txt.gz', 'reco.py', 'fixfjr.py', 'year.txt']
 if output_level in ('minitree', 'ntuple'):
     config.JobType.inputFiles += ['ntuple.py', 'minitree.py']
 
@@ -144,29 +138,41 @@ if output_level == 'reco':
 elif output_level == 'gensim':
     config.JobType.outputFiles = ['gensim.root']
 elif output_level == 'ntuple':
-    config.JobType.outputFiles = ['ntuple.root', 'vertex_histos.root']
+    config.JobType.outputFiles = ['ntuple.root']
 elif output_level == 'minitree':
-    config.JobType.outputFiles = ['minitree.root', 'vertex_histos.root']
-
-config.JobType.scriptArgs = [] # steering file will take care of what we did before
+    config.JobType.outputFiles = ['minitree.root']
+# uncomment to get vertex histos
+#if output_level in ('minitree', 'ntuple'):
+#    config.JobType.outputFiles += ['vertex_histos.root']
 
 config.Data.splitting = 'EventBased'
 config.Data.unitsPerJob = events_per
 config.Data.totalUnits = nevents
 config.Data.publication = output_level not in ('minitree', 'ntuple')
 config.Data.outputPrimaryDataset = 'SETME'
+if output_dataset_tag == '':
+    if year == 2015:
+        output_dataset_tag = 'RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12'
+    else:
+        if premix:
+            output_dataset_tag = 'RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6'
+        else:
+            output_dataset_tag = 'RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6'
 config.Data.outputDatasetTag = output_dataset_tag
 
 config.Site.storageSite = 'T3_US_FNALLPC'
-config.Site.whitelist = ['T1_US_FNAL', 'T2_US_Caltech', 'T2_US_MIT', 'T2_US_Nebraska', 'T2_US_Purdue', 'T2_US_UCSD', 'T2_US_Wisconsin'] # , 'T2_US_Florida', 'T2_US_Vanderbilt'
+config.Site.whitelist = ['T1_US_FNAL', 'T2_US_MIT', 'T2_US_Nebraska', 'T2_US_Purdue', 'T2_US_UCSD', 'T2_US_Wisconsin'] # T2_US_Vanderbilt all fail with 10040, T2_US_Caltech fails 0.19 with 50660 with scanpack
 if premix:
-    config.Site.whitelist += ['T2_CH_CERN', 'T2_DE_DESY', 'T2_DE_RWTH', 'T2_FR_CCIN2P3']
+    config.Site.whitelist += ['T2_DE_DESY'] # T2_FR_CCIN2P3 0.56, T2_DE_RWTH 0.51, T2_CH_CERN 0.34 fail 50660 too much with scanpack
 if output_level == 'gensim':
     config.Site.whitelist += ['T3_US_*']
 
 outputs = {}
 
 def submit(config, name, scanpack_or_todo, todo_rawhlt=[], todo_reco=[], todo_ntuple=[]):
+    global nevents
+    global events_per
+
     config.General.requestName = name
     config.Data.outputPrimaryDataset = name
 
@@ -227,7 +233,10 @@ def submit(config, name, scanpack_or_todo, todo_rawhlt=[], todo_reco=[], todo_nt
     open(steering_fn, 'wt').write('\n'.join(steering) + '\n')
     
     if not testing:
-        output = crab_command('submit', config=config)
+        try:
+            output = crab_command('submit', config=config)
+        except CRABConfigException:
+            output = 'problem'
         print colors.boldwhite(name)
         pprint(output)
         print
@@ -257,6 +266,18 @@ elif meta == 'neu':
         todo = 'mfv_neutralino,%.1f,%i' % (tau/1000., mass)
         submit(config, name, todo)
 
+elif meta == 'neuuds':
+    for tau, mass in taus_masses():
+        name = 'mfv_neuuds_tau%05ium_M%04i' % (tau, mass)
+        todo = 'neutralino_uds,%.1f,%i' % (tau/1000., mass)
+        submit(config, name, todo)
+
+elif meta == 'neuudmu':
+    for tau, mass in taus_masses():
+        name = 'mfv_neuudmu_tau%05ium_M%04i' % (tau, mass)
+        todo = 'neutralino_udmu,%.1f,%i' % (tau/1000., mass)
+        submit(config, name, todo)
+
 elif meta == 'glu':
     for tau, mass in taus_masses():
         name = 'mfv_glu_tau%05ium_M%04i' % (tau, mass)
@@ -267,6 +288,30 @@ elif meta == 'ddbar':
     for tau, mass in taus_masses():
         name = 'mfv_ddbar_tau%05ium_M%04i' % (tau, mass)
         todo = 'gluino_ddbar,%.1f,%i' % (tau/1000., mass)
+        submit(config, name, todo)
+
+elif meta == 'ccbar':
+    for tau, mass in taus_masses():
+        name = 'mfv_ccbar_tau%05ium_M%04i' % (tau, mass)
+        todo = 'gluino_ccbar,%.1f,%i' % (tau/1000., mass)
+        submit(config, name, todo)
+
+elif meta == 'bbbar':
+    for tau, mass in taus_masses():
+        name = 'mfv_bbbar_tau%05ium_M%04i' % (tau, mass)
+        todo = 'gluino_bbbar,%.1f,%i' % (tau/1000., mass)
+        submit(config, name, todo)
+
+elif meta == 'uds':
+    for tau, mass in taus_masses():
+        name = 'mfv_uds_tau%05ium_M%04i' % (tau, mass)
+        todo = 'gluino_uds,%.1f,%i' % (tau/1000., mass)
+        submit(config, name, todo)
+
+elif meta == 'udmu':
+    for tau, mass in taus_masses():
+        name = 'mfv_udmu_tau%05ium_M%04i' % (tau, mass)
+        todo = 'gluino_udmu,%.1f,%i' % (tau/1000., mass)
         submit(config, name, todo)
 
 elif meta == 'lq2':

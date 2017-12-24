@@ -1,7 +1,7 @@
-import os, sys, glob
-from JMTucker.Tools.ROOTTools import *
+import os, sys, glob, ROOT
+ROOT.gROOT.SetBatch()
 
-def stats(fn_or_f, obs, obs_nosyst, l, header='sigma_sig_limit'):
+def stats(fn_or_f, obs, l, header='sigma_sig_limit'):
     if type(fn_or_f) == file:
         f = fn_or_f
     else:
@@ -22,30 +22,45 @@ def stats(fn_or_f, obs, obs_nosyst, l, header='sigma_sig_limit'):
     f.write(header + ':Expected 84.0%: r < ' + '%f\n' % hi68)
     f.write(header + ':Expected 97.5%: r < ' + '%f\n' % hi95)
     f.write(header + ':Observed Limit: r < ' + '%f\n' % obs)
-    f.write(header + ':NoSystObserved Limit: r < ' + '%f\n' % obs_nosyst)
     f.close()
     return median, lo68, hi68, lo95, hi95
 
 def fromtree(fn):
+    l = []
     f = ROOT.TFile(fn)
     t = f.Get('limit')
-    return [x[0] for x in detree(t, 'limit', '', float)]
+    for jentry in xrange(t.GetEntriesFast()):
+        if t.LoadTree(jentry) < 0: break
+        if t.GetEntry(jentry) <= 0: continue
+        l.append(t.limit)
+    return l
 
 def doit(path, out_fn):
     x = fromtree(os.path.join(path, 'observed.root'))
-    assert len(x) == 1
+    assert len(x) <= 1
+    if len(x) != 1:
+        print 'using observed_byhand for this!'
+        x = fromtree(os.path.join(path, 'observed_byhand.root'))
     obs = x[0]
 
-    x = fromtree(os.path.join(path, 'observed_nosyst.root'))
-    assert len(x) == 1
-    obs_nosyst = x[0]
-
     x = fromtree(os.path.join(path, 'expected.root'))
-    assert len(x) == 100
-    expected = x
+    assert len(x) >= 999 # maybe one toy crashes, who is zoidberg to judge
+    exp = x
 
-    stats(out_fn, obs, obs_nosyst, expected)
+    stats(out_fn, obs, exp)
+
+def rrange(path):
+    l = fromtree(os.path.join(path, 'expected.root'))
+    minl, maxl = min(l), max(l)
+    print 'rm *.root %(path)s/observed_byhand.root ; combine -M BayesianToyMC %(path)s/datacard.txt --rMin %(minl)f --rMax %(maxl)f | tee %(path)s/byhand ; mv higgsCombineTest.BayesianToyMC.mH120.root %(path)s/observed_byhand.root' % locals()
+
 
 if __name__ == '__main__':
     import sys
-    doit(sys.argv[1], sys.stdout)
+    path = os.path.abspath(sys.argv[1])
+
+    cmd = '' if len(sys.argv) < 3 else sys.argv[2]
+    if cmd == 'rrange':
+        rrange(path)
+    else:
+        doit(path, sys.stdout)

@@ -4,6 +4,7 @@
 
 import sys, FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
+import dynamicconf
 
 randomize = 'norandomize' not in sys.argv
 expectedevents = 100
@@ -25,7 +26,7 @@ for arg in sys.argv:
     elif arg.startswith('trigfilter='):
         trigfilter = arg.replace('trigfilter=','') == '1'
 
-process = cms.Process('HLT', eras.Run2_2016)
+process = cms.Process('HLT', eras.Run2_25ns if dynamicconf.doing_2015 else eras.Run2_2016)
 
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
@@ -35,6 +36,7 @@ process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 if premix:
+    assert not dynamicconf.doing_2015
     process.load('SimGeneral.MixingModule.mixNoPU_cfi')
     process.load('Configuration.StandardSequences.DigiDMPreMix_cff')
     process.load('SimGeneral.MixingModule.digi_MixPreMix_cfi')
@@ -42,11 +44,18 @@ if premix:
     process.load('Configuration.StandardSequences.SimL1EmulatorDM_cff')
     process.load('Configuration.StandardSequences.DigiToRawDM_cff')
 else:
-    process.load('SimGeneral.MixingModule.mix_2016_25ns_Moriond17MC_PoissonOOTPU_cfi')
+    if dynamicconf.doing_2015:
+        process.load('SimGeneral.MixingModule.mix_2015_25ns_FallMC_matchData_PoissonOOTPU_cfi')
+    else:
+        process.load('SimGeneral.MixingModule.mix_2016_25ns_Moriond17MC_PoissonOOTPU_cfi')
     process.load('Configuration.StandardSequences.Digi_cff')
     process.load('Configuration.StandardSequences.SimL1Emulator_cff')
     process.load('Configuration.StandardSequences.DigiToRaw_cff')
-process.load('HLTrigger.Configuration.HLT_25ns15e33_v4_cff')
+
+if dynamicconf.doing_2015:
+    process.load('HLTrigger.Configuration.HLT_25ns14e33_v4_cff')
+else:
+    process.load('HLTrigger.Configuration.HLT_25ns15e33_v4_cff')
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 process.MessageLogger.cerr.FwkReport.reportEvery = 1000000
@@ -84,8 +93,7 @@ if not randomize or salt.startswith('fixed'):
     minbias_input.skipEvents = cms.untracked.uint32(skip)
 
 from Configuration.AlCa.GlobalTag import GlobalTag
-from dynamicconf import globaltag
-process.GlobalTag = GlobalTag(process.GlobalTag, globaltag, '')
+process.GlobalTag = GlobalTag(process.GlobalTag, dynamicconf.globaltag, '')
 
 process.digitisation_step = cms.Path(process.pdigi)
 if premix:

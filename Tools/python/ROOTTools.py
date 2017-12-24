@@ -185,6 +185,33 @@ def propagate_ratio(x, y, ex, ey):
         e = r*((ex/x)**2 + (ey/y)**2)**0.5
     return r, r-e, r+e
 
+def cm2mm(h):
+    name = h.GetName() + '_mm'
+    xax = h.GetXaxis()
+    xt = xax.GetTitle()
+    if '(cm)' in xt:
+        xt = xt.replace('(cm)', '(mm)')
+    else:
+        xt += ' (mm)'
+    title = ';'.join((h.GetTitle(),xt,h.GetYaxis().GetTitle()))
+    nbins = xax.GetNbins()
+    mn = xax.GetXmin() * 10
+    mx = xax.GetXmax() * 10
+    h2 = getattr(ROOT, h.Class().GetName())(name, title, nbins, mn, mx)
+    for ibin in xrange(0,nbins+2):
+        h2.SetBinContent(ibin, h.GetBinContent(ibin))
+        h2.SetBinError  (ibin, h.GetBinError  (ibin))
+    h2.SetEntries(h.GetEntries())
+    h2.SetLineColor(h.GetLineColor())
+    h2.SetLineStyle(h.GetLineStyle())
+    h2.SetLineWidth(h.GetLineWidth())
+    h2.SetMarkerColor(h.GetMarkerColor())
+    h2.SetMarkerStyle(h.GetMarkerStyle())
+    h2.SetMarkerSize(h.GetMarkerSize())
+    h2.SetFillColor(h.GetFillColor())
+    h2.SetFillStyle(h.GetFillStyle())
+    return h2
+
 def cmssw_setup():
     ROOT.gSystem.Load('libFWCoreFWLite')
     ROOT.FWLiteEnabler.enable()
@@ -717,7 +744,15 @@ def data_mc_comparison(name,
             
             if overflow_in_last:
                 if x_range is not None:
-                    move_above_into_bin(sample.hist, x_range[1])
+                    # if not some decent fraction of the bin visible, use the last wholly visible bin
+                    # for now "decent" = half the bin width
+                    ibin = sample.hist.FindBin(x_range[1])
+                    a = sample.hist.GetBinLowEdge(ibin)
+                    b = sample.hist.GetBinLowEdge(ibin+1)
+                    w = b - a
+                    x_range_w = x_range[1] - x_range[0]
+                    minus_one = x_range[1] - a < w * 0.5
+                    move_above_into_bin(sample.hist, x_range[1], minus_one)
                 else:
                     move_overflow_into_last_bin(sample.hist)
 
@@ -866,7 +901,11 @@ def data_mc_comparison(name,
         if background_uncertainty is not None:
             legend.AddEntry(sum_background_uncert, bkg_uncert_label, 'F')
         for sample in signal_samples:
-            entry = legend.AddEntry(sample.hist, sample.nice_name, 'L')
+            if '\\' in sample.nice_name:
+                legend.AddEntry(sample.hist, sample.nice_name.split('\\')[0], 'L')
+                legend.AddEntry(sample.hist, sample.nice_name.split('\\')[1], '')
+            else:
+                legend.AddEntry(sample.hist, sample.nice_name, 'L')
         legend.Draw()
     else:
         legend = None
@@ -1047,6 +1086,9 @@ def differentiate_stat_box(hist, movement=1, new_color=None, new_size=None, colo
     s.SetY2NDC(y2 - (y2-y1)*n + oy)
 
     return s
+
+def resize_stat_box(hist, new_size):
+    differentiate_stat_box(hist, movement=0, new_size=new_size, color_from_hist=False)
 
 def draw_in_order(hists_and_cmds, sames=False):
     if type(hists_and_cmds[1]) == str:
@@ -1396,18 +1438,30 @@ def move_stat_box(s, ndc_coords):
 
     return s
 
+def p4(pt,eta,phi,mass):
+    v = ROOT.TLorentzVector()
+    v.SetPtEtaPhiM(pt,eta,phi,mass)
+    return v
+
 def poisson_means_divide(h1, h2, no_zeroes=False):
     return histogram_divide(h1, h2, confint=clopper_pearson_poisson_means, force_lt_1=False, no_zeroes=no_zeroes)
 
-def plot_dir(x=''):
+def plot_dir(x='', make=False):
     hostname = os.environ['HOSTNAME']
     username = os.environ['USER']
     d = None
     if 'fnal.gov' in hostname and username == 'tucker':
         d = '/publicweb/t/tucker/asdf/plots'
     if d:
-        return os.path.join(d,x)
-    raise NotImplementedError("can't handle host %s and user %s" % (hostname, username))
+        x = os.path.join(d,x)
+    else:
+        raise NotImplementedError("can't handle host %s and user %s" % (hostname, username))
+    if make:
+        try:
+            os.makedirs(x)
+        except OSError:
+            pass
+    return x
 
 class plot_saver:
     i = 0
@@ -2106,6 +2160,40 @@ def to_array(*l):
     else:
         return array('d', l)
 
+def to_ascii(o, fn_or_f, fmt='%.6g', sep='\t'):
+    '''Dump object o to file. Supported right now are TH1 and TH2, but
+    TH3, TGraph and TTree are easy.
+    Gotchas:
+    TH[12]: currently we don't write overflow.'''
+    if type(fn_or_f) == str:
+        fn = fn_or_f
+        if os.path.exists(fn):
+            raise OSError('refusing to clobber %s' % fn)
+        f = open(fn)
+    else:
+        f = fn_or_f
+
+    def write(*l, **d):
+        f.write(sep.join([d.get('fmt', fmt)] * len(l)) % l)
+        f.write('\n')
+
+    if isinstance(o, ROOT.TH2):
+        write('x','y','z','ez', fmt='%s')
+        for ix in xrange(1, o.GetNbinsX()+1):
+            for iy in xrange(1, o.GetNbinsY()+1):
+                write(o.GetXaxis().GetBinLowEdge(ix),
+                      o.GetYaxis().GetBinLowEdge(iy),
+                      o.GetBinContent(ix, iy),
+                      o.GetBinError  (ix, iy),
+                      )
+
+    elif isinstance(o, ROOT.TH1):
+        write('x','y','ey', fmt='%s')
+        for ix in xrange(1, o.GetNbinsX()+1):
+            write(o.GetXaxis().GetBinLowEdge(ix),
+                  o.GetBinContent(ix),
+                  o.GetBinError  (ix))
+
 def to_TH1D(h, name):
     hh = ROOT.TH1D(name, h.GetTitle(), h.GetNbinsX(), h.GetXaxis().GetXmin(), h.GetXaxis().GetXmax())
     hh.Sumw2()
@@ -2184,6 +2272,7 @@ __all__ = [
     'clopper_pearson',
     'clopper_pearson_poisson_means',
     'propagate_ratio',
+    'cm2mm',
     'cmssw_setup',
     'compare_all_hists',
     'core_gaussian',
@@ -2207,6 +2296,7 @@ __all__ = [
     'move_above_into_bin',
     'move_overflow_into_last_bin',
     'move_stat_box',
+    'p4',
     'plot_dir',
     'plot_saver',
     'poisson_interval',
@@ -2216,6 +2306,7 @@ __all__ = [
     'ratios_plot',
     'real_hist_max',
     'real_hist_min',
+    'resize_stat_box',
     'root_fns_from_argv',
     'set_style',
     'sort_histogram_pair',
@@ -2224,6 +2315,7 @@ __all__ = [
     'tgraph',
     'tgraph_getpoint',
     'to_array',
+    'to_ascii',
     'to_TH1D',
     'ttree_iterator',
     'zbi',

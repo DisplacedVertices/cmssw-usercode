@@ -35,6 +35,8 @@ private:
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertex_token;
   const edm::EDGetTokenT<GenEventInfoProduct> gen_info_token;
+  const edm::EDGetTokenT<std::vector<double>> gen_vertex_token;
+  const edm::EDGetTokenT<reco::GenJetCollection> gen_jets_token;
   const edm::EDGetTokenT<reco::GenParticleCollection> gen_particles_token;
   const edm::EDGetTokenT<mfv::MCInteraction> mci_token;
   const edm::EDGetTokenT<std::vector<PileupSummaryInfo> > pileup_summary_token;
@@ -44,7 +46,6 @@ private:
   const edm::EDGetTokenT<pat::MuonCollection> muons_token;
   const edm::EDGetTokenT<pat::ElectronCollection> electrons_token;
   const edm::EDGetTokenT<reco::TrackCollection> vertex_seed_tracks_token;
-  
   const double jet_pt_min;
   const std::string b_discriminator;
   const std::vector<double> b_discriminator_mins;
@@ -52,7 +53,7 @@ private:
   const StringCutObjectSelector<pat::Muon> muon_dilep_selector;
   const StringCutObjectSelector<pat::Electron> electron_semilep_selector;
   const StringCutObjectSelector<pat::Electron> electron_dilep_selector;
-  bool warned_non_mfv;
+  const bool lightweight;
 };
 
 MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
@@ -60,6 +61,8 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     primary_vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertex_src"))),
     gen_info_token(consumes<GenEventInfoProduct>(cfg.getParameter<edm::InputTag>("gen_info_src"))),
+    gen_vertex_token(consumes<std::vector<double>>(cfg.getParameter<edm::InputTag>("gen_vertex_src"))),
+    gen_jets_token(consumes<reco::GenJetCollection>(cfg.getParameter<edm::InputTag>("gen_jets_src"))),
     gen_particles_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("gen_particles_src"))),
     mci_token(consumes<mfv::MCInteraction>(cfg.getParameter<edm::InputTag>("mci_src"))),
     pileup_summary_token(consumes<std::vector<PileupSummaryInfo> >(cfg.getParameter<edm::InputTag>("pileup_info_src"))),
@@ -76,8 +79,7 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     muon_dilep_selector(cfg.getParameter<std::string>("muon_dilep_cut")),
     electron_semilep_selector(cfg.getParameter<std::string>("electron_semilep_cut")),
     electron_dilep_selector(cfg.getParameter<std::string>("electron_dilep_cut")),
-
-    warned_non_mfv(false)
+    lightweight(cfg.getParameter<bool>("lightweight"))
 {
   produces<MFVEvent>();
 }
@@ -112,17 +114,29 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->gen_weight = gen_info->weight();
     mevent->gen_weightprod = gen_info->weightProduct();
 
+    edm::Handle<reco::GenJetCollection> gen_jets;
+    event.getByToken(gen_jets_token, gen_jets);
+
+    for (const reco::GenJet& jet : *gen_jets) {
+      if (jet.pt() > 20 && fabs(jet.eta()) < 2.5) {
+        double mue = 0;
+        for (auto c : jet.getJetConstituents())
+          if (abs(c->pdgId()) == 13)
+            mue += c->energy();
+        if (mue / jet.energy() < 0.8)
+          mevent->gen_jets.push_back(TLorentzVector(jet.px(), jet.py(), jet.pz(), jet.energy()));
+      }
+    }
+
+    edm::Handle<std::vector<double>> gen_vertex;
+    event.getByToken(gen_vertex_token, gen_vertex);
+
+    mevent->gen_pv[0] = (*gen_vertex)[0];
+    mevent->gen_pv[1] = (*gen_vertex)[1];
+    mevent->gen_pv[2] = (*gen_vertex)[2];
+
     edm::Handle<reco::GenParticleCollection> gen_particles;
     event.getByToken(gen_particles_token, gen_particles);
-    
-    const reco::GenParticle& for_vtx = gen_particles->at(2);
-    const int for_vtx_id = abs(for_vtx.pdgId());
-    die_if_not(for_vtx_id == 21 || (for_vtx_id >= 1 && for_vtx_id <= 5), "gen_particles[2] is not a gluon or udscb: id=%i", for_vtx_id);
-    float x0 = for_vtx.vx(), y0 = for_vtx.vy(), z0 = for_vtx.vz();
-
-    mevent->gen_pv[0] = x0;
-    mevent->gen_pv[1] = y0;
-    mevent->gen_pv[2] = z0;
     
     mevent->gen_flavor_code = 0;
     bool saw_c = false;
@@ -158,17 +172,20 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
         mevent->gen_lsp_decay[i*3+2] = p.z;
 
         mevent->gen_decay_type[i] = mci->decay_type()[i];
-      }
 
-      mevent->gen_partons_in_acc = 0;
-      for (auto p : mci->visible())
-        if (p->pt() > jet_pt_min && fabs(p->eta()) < 2.5)
-          inc_uchar(mevent->gen_partons_in_acc);
+        for (const reco::GenParticleRef& s : mci->secondaries(i)) {
+          mevent->gen_daughters.push_back(MFVEvent::p4(s->pt(), s->eta(), s->phi(), s->mass()));
+          mevent->gen_daughter_id.push_back(s->pdgId());
+        }
+      }
 
       mci_lep = mci->light_leptons();
     }
 
     for (const reco::GenParticle& gen : *gen_particles) {
+      if (gen.pt() < 1)
+        continue;
+
       const int id = abs(gen.pdgId());
 
       if (id == 5) {
@@ -179,29 +196,11 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
             break;
           }
         }
-
-        if (!has_b_dau) {
-          mevent->gen_bquark_pt.push_back(gen.pt());
-          mevent->gen_bquark_eta.push_back(gen.eta());
-          mevent->gen_bquark_phi.push_back(gen.phi());
-          mevent->gen_bquark_energy.push_back(gen.energy());
-        }
+        if (!has_b_dau)
+          mevent->gen_bquarks.push_back(TLorentzVector(gen.px(), gen.py(), gen.pz(), gen.energy()));
       }
-      else if (gen.pt() > 1 &&
-               (id == 11 || id == 13) &&
-               (gen.status() == 1 || (gen.status() >= 21 && gen.status() <= 29))) {
-        uchar gen_lep_id = id == 11; // same convention as on reco lep_id below el = 1 mu = 0
-        for (auto p : mci_lep)
-          if (reco::deltaR(*p, gen) < 0.05) {
-            gen_lep_id |= 0x80;
-            break;
-          }
-
-        mevent->gen_lepton_id.push_back(gen_lep_id);
-        mevent->gen_lepton_pt.push_back(gen.pt());
-	mevent->gen_lepton_eta.push_back(gen.eta());
-	mevent->gen_lepton_phi.push_back(gen.phi());
-      }
+      else if ((id == 11 || id == 13) && (gen.status() == 1 || (gen.status() >= 21 && gen.status() <= 29)))
+        mevent->gen_leptons.push_back(MFVEvent::p4(gen.pt(), gen.eta(), gen.phi(), gen.mass()));
     }
   }
 
@@ -293,7 +292,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->jet_pudisc.push_back(jet.userFloat("pileupJetId:fullDiscriminant")); // to be removed and put into _id when working points defined
     mevent->jet_pt.push_back(jet.pt());
     mevent->jet_raw_pt.push_back(jet.pt()*jet.jecFactor("Uncorrected"));
-    mevent->jet_calo_pt.push_back(jet.userFloat("caloJetMap:pt"));
+    mevent->jet_calo_pt.push_back(jet.bDiscriminator(b_discriminator)); // JMTEVIL
     mevent->jet_eta.push_back(jet.eta());
     mevent->jet_phi.push_back(jet.phi());
     mevent->jet_energy.push_back(jet.energy());
@@ -303,7 +302,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       if (jet.bDiscriminator(b_discriminator) > b_discriminator_mins[i])
         bdisc_level = i+1;
 
-    mevent->jet_id.push_back(MFVEvent::encode_jet_id(0, bdisc_level));
+    mevent->jet_id.push_back(MFVEvent::encode_jet_id(0, bdisc_level, jet.hadronFlavour()));
     const size_t ijet = mevent->njets() - 1; // will stay in track with jjet as long as jets are pt ordered...
 
     const reco::SecondaryVertexTagInfo* svtag = jet.tagInfoSecondaryVertex("secondaryVertex");
@@ -447,6 +446,96 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   }
 
   //////////////////////////////////////////////////////////////////////
+
+  if (lightweight) {
+    // keep
+    // for weight: gen_weight, npv, ngoodpv, , npu
+    // for trigger: pass_
+    // for njets and ht40: jet_pt vector
+    // jet_id vector
+    // beamspot and slopes, pvx,y,z
+
+    mevent->gen_valid = 0;
+    mevent->gen_weightprod = 0;
+    mevent->gen_flavor_code = 0;
+    for (int i = 0; i < 2; ++i) {
+      mevent->gen_lsp_pt[i] = mevent->gen_lsp_eta[i] = mevent->gen_lsp_phi[i] = mevent->gen_lsp_mass[i] = 0;
+      mevent->gen_decay_type[i] = 0;
+      for (int j = 0; j < 3; ++j)
+        mevent->gen_lsp_decay[i*3+j] = 0;
+    }
+    for (int i = 0; i < 3; ++i) {
+      mevent->gen_pv[i] = 0;
+    }
+    mevent->gen_bquarks.clear();
+    mevent->gen_leptons.clear();
+    mevent->gen_jets.clear();
+    mevent->gen_daughters.clear();
+    mevent->gen_daughter_id.clear();
+    mevent->l1_htt = 0;
+    mevent->l1_myhtt = 0;
+    mevent->l1_myhttwbug = 0;
+    mevent->hlt_ht = 0;
+    mevent->hlt_ht4mc = 0;
+    mevent->bswidthx = 0;
+    mevent->bswidthy = 0;
+    mevent->pvcxx = 0;
+    mevent->pvcxy = 0;
+    mevent->pvcxz = 0;
+    mevent->pvcyy = 0;
+    mevent->pvcyz = 0;
+    mevent->pvczz = 0;
+    mevent->pv_ntracks = 0;
+    mevent->pv_sumpt2 = 0; 
+    mevent->jet_pudisc.clear();
+    mevent->jet_raw_pt.clear();
+    mevent->jet_calo_pt.clear();
+    mevent->jet_eta.clear();
+    mevent->jet_phi.clear();
+    mevent->jet_energy.clear();
+    mevent->jet_svnvertices.clear();
+    mevent->jet_svntracks.clear();
+    mevent->jet_svsumpt2.clear();
+    mevent->jet_svx.clear();
+    mevent->jet_svy.clear();
+    mevent->jet_svz.clear();
+    mevent->jet_svcxx.clear();
+    mevent->jet_svcxy.clear();
+    mevent->jet_svcxz.clear();
+    mevent->jet_svcyy.clear();
+    mevent->jet_svcyz.clear();
+    mevent->jet_svczz.clear();
+    mevent->metx = 0;
+    mevent->mety = 0;
+    mevent->lep_id.clear();
+    mevent->lep_pt.clear();
+    mevent->lep_eta.clear();
+    mevent->lep_phi.clear();
+    mevent->lep_dxy.clear();
+    mevent->lep_dxybs.clear();
+    mevent->lep_dz.clear();
+    mevent->lep_iso.clear();
+    mevent->vertex_seed_track_chi2dof.clear();
+    mevent->vertex_seed_track_qpt.clear();
+    mevent->vertex_seed_track_eta.clear();
+    mevent->vertex_seed_track_phi.clear();
+    mevent->vertex_seed_track_dxy.clear();
+    mevent->vertex_seed_track_dz.clear();
+    mevent->vertex_seed_track_hp_.clear();
+    mevent->jet_track_which_jet.clear();
+    mevent->jet_track_chi2dof.clear();
+    mevent->jet_track_qpt.clear();
+    mevent->jet_track_eta.clear();
+    mevent->jet_track_phi.clear();
+    mevent->jet_track_dxy.clear();
+    mevent->jet_track_dz.clear();
+    mevent->jet_track_pt_err.clear();
+    mevent->jet_track_eta_err.clear();
+    mevent->jet_track_phi_err.clear();
+    mevent->jet_track_dxy_err.clear();
+    mevent->jet_track_dz_err.clear();
+    mevent->jet_track_hp_.clear();
+  }
 
   event.put(mevent);
 }

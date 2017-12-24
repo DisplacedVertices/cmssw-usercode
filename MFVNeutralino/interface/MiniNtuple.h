@@ -2,6 +2,7 @@
 #define JMTucker_MFVNeutralino_interface_MiniNtuple_h
 
 #include "Math/SMatrix.h"
+#include "TLorentzVector.h"
 #include "TTree.h"
 
 namespace mfv {
@@ -43,6 +44,20 @@ namespace mfv {
     float gen_x[2];
     float gen_y[2];
     float gen_z[2];
+    float gen_lsp_pt[2];
+    float gen_lsp_eta[2];
+    float gen_lsp_phi[2];
+    float gen_lsp_mass[2];
+    std::vector<TLorentzVector> gen_daughters;
+    std::vector<int> gen_daughter_id;
+    std::vector<TLorentzVector> gen_bquarks;
+    std::vector<TLorentzVector> gen_leptons;
+    float gen_jet_ht;
+    float gen_jet_ht40;
+    std::vector<TLorentzVector>* p_gen_daughters;
+    std::vector<int>* p_gen_daughter_id;
+    std::vector<TLorentzVector>* p_gen_bquarks;
+    std::vector<TLorentzVector>* p_gen_leptons;
 
     unsigned char nvtx;
     unsigned char ntk0;

@@ -25,6 +25,8 @@ parser.add_argument('--pattern',
 parser.add_argument('--partial', action='store_true',
                     help='If set, partial publishing is allowed.')
 parser.add_argument('--no-lpc-shortcut', action='store_false', dest='lpc_shortcut', help='whether to use the lpc shortcut on crab dirs')
+parser.add_argument('--no-dbs', action='store_false', dest='dbs', help='whether to use information from dbs')
+parser.add_argument('--nevents-per-job', type=int, default=-1, help='nevents to use if reading dbs fails')
 parser.add_argument('--include-condor-nevents', action='store_true',
                     help='If set, parse xmls to get nevents from condor wds.')
 
@@ -59,7 +61,7 @@ for wd in wds:
     assert is_crab or bd.startswith('condor_')
     first_str = 'crab_' if is_crab else 'condor_'
     if options.dataset == 'main':
-        sample = wd.replace(first_str, '')
+        sample = os.path.basename(wd).replace(first_str, '')
     else:
         sample = Samples.sample_from_end_string(Samples, wd).name
     assert not publish.has_key(sample)
@@ -70,9 +72,14 @@ for wd in wds:
         ds = crab_get_output_dataset_from_log(wd)
         if ds is None and not options.partial:
             raise ValueError('no dataset in log for ' + wd)
-        dbs_files = files_in_dataset(ds, 3)
-        nevents = numevents_in_dataset(ds, 3)
-
+        dbs_files = []
+        nevents = -1
+        if options.dbs:
+            try:
+                dbs_files = files_in_dataset(ds, 3)
+                nevents = numevents_in_dataset(ds, 3)
+            except RuntimeError:
+                print colors.yellow('problem with dbs for %s, len(dbs_files) = %i and nevents is %r' % (ds, len(dbs_files), nevents))
         files = []
         if options.lpc_shortcut:
             path = crab_get_output_dir(wd)
@@ -81,14 +88,17 @@ for wd in wds:
                 d = os.path.join(path, zd) + '/'
                 files += [d + x.strip() for x in popen('eos root://cmseos.fnal.gov ls /eos/uscms%s/%s' % (path, zd)).split() if x.strip() and fn_ok(x.strip())]
 
-            if set(files) != set(dbs_files):
+            if options.dbs and set(files) != set(dbs_files):
                 msg = '%i files from lpc shortcut != %i files from dbs' % (len(files), len(dbs_files))
                 if options.partial:
                     print colors.yellow(msg)
                 else:
                     raise ValueError(msg)
         else:
+            assert options.dbs
             files = dbs_files
+        if nevents == -1 and options.nevents_per_job > 0:
+            nevents = len(files) * options.nevents_per_job
     else:
         njobs = cs_njobs(wd)
         ds = '/%s/None/None' % cs_primaryds(wd)
@@ -97,7 +107,7 @@ for wd in wds:
             publish_fn = os.path.join(wd, 'publish_%i.txt' % job)
             if not os.path.isfile(publish_fn):
                 if options.partial:
-                    print colors.yellow('warning: missing', fn)
+                    print colors.yellow('warning: missing %s' % fn)
                 else:
                     raise IOError('no publish file %s' % publish_fn)
             else:
@@ -121,13 +131,24 @@ for wd in wds:
     code = coderep_files(files)
     publish[sample] = (len(files), code if code is not None else files)
 
-samples.sort()
-samples_lump.sort()
+def _key(x):
+    if type(x) == tuple:
+        sample_name, _, _ = x
+    else:
+        assert type(x) == str
+        sample_name = x
+    if hasattr(Samples, sample_name):
+        return getattr(Samples, sample_name).isample
+    else:
+        return -1
+
+samples.sort(key=_key)
+samples_lump.sort(key=_key)
 
 print
 print colors.bold('new entries:')
 print '_add_ds("%s", {' % options.dataset
-for k in sorted(publish.keys()):
+for k in sorted(publish.keys(), key=_key):
     n,c = publish[k]
     if type(c) == unicode:
         c = str(c)

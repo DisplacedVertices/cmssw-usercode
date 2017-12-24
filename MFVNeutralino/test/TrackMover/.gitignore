@@ -2,3 +2,8 @@ MovedTracksNtuple.cc
 hists.std*.*
 hists.log.*
 mctruths.txt
+BTagCalibrationStandalone.h
+BTagCalibrationStandalone.cc
+CSVv2_Moriond17_B_F.csv
+CSVv2_Moriond17_B_H.csv
+CSVv2_Moriond17_G_H.csv

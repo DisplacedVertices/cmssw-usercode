@@ -163,6 +163,6 @@ if randomize:
     deterministic_seeds(process, 8675309, salt, jobnum)
 
 if scanpack:
-    from modify import do_scanpack
+    from scanpack import do_scanpack
     scanpack_x, scanpack_batch = scanpack
     do_scanpack(process, scanpack_x, int(scanpack_batch), jobnum-1)

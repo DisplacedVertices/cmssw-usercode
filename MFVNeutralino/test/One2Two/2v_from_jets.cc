@@ -127,7 +127,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   if (p.is_mc()) {
     if (p.year() == "2015")         { ibkg_begin =  1; ibkg_end =  4; if (p.inject_signal()) ibkg_begin = 0; }
     else if (p.year() == "2016")    { ibkg_begin =  5; ibkg_end =  8; if (p.inject_signal()) ibkg_end = 9; }
-    else if (p.year() == "2015p6")  { ibkg_begin =  1; ibkg_end =  8; if (p.inject_signal()) ibkg_begin = 0; }
+    else if (p.year() == "2015p6")  { ibkg_begin =  1; ibkg_end =  8; if (p.inject_signal()) {ibkg_begin = 0; ibkg_end = 9;} }
     else { fprintf(stderr, "bad year"); exit(1); }
   } else {
     if (p.year() == "2015")         { ibkg_begin = 10; ibkg_end = 11; }
@@ -587,6 +587,7 @@ int main(int argc, const char* argv[]) {
       ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks).is_mc(false);
       construct_dvvc(pars2,                    TString::Format("2v_from_jets_data_%s_%dtrack_default_v15_v5.root", year, ntracks));
       construct_dvvc(pars2.vary_dphi(true),    TString::Format("2v_from_jets_data_%s_%dtrack_vary_dphi_v15_v5.root", year, ntracks));
+      //construct_dvvc(pars2.clearing_from_eff(false), TString::Format("2v_from_jets_data_%s_%dtrack_noclearing_v15_v5.root", year, ntracks));
       construct_dvvc(pars2.vary_eff(true),     TString::Format("2v_from_jets_data_%s_%dtrack_vary_eff_v15_v5.root", year, ntracks));
       construct_dvvc(pars2.vary_bquarks(true), TString::Format("2v_from_jets_data_%s_%dtrack_vary_bquarks_v15_v5.root", year, ntracks));
     }

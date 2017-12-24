@@ -105,6 +105,23 @@ def cmd_hadd_qcd_sum():
 
 cmd_merge_qcd_sum = cmd_hadd_qcd_sum
 
+def cmd_rm_qcd_parts():
+    for is2015_s in '_2015', '':
+        for x in 500, 700, 1000, 1500, 2000:
+            base = 'qcdht%04i' % x
+            if is2015_s:
+                a = base + '_2015.root'
+                b = base + 'ext_2015.root'
+                c = base + 'sum_2015.root'
+            else:
+                a = base + '.root'
+                b = base + 'ext.root'
+                c = base + 'sum.root'
+            if os.path.isfile(c):
+                for y in a,b:
+                    if os.path.isfile(y):
+                        os.remove(y)
+
 def cmd_merge_background():
     permissive = bool_from_argv('permissive')
     for is2015_s, scale in ('', -AnalysisConstants.int_lumi_2016 * AnalysisConstants.scale_factor_2016), ('_2015', -AnalysisConstants.int_lumi_2015 * AnalysisConstants.scale_factor_2015):

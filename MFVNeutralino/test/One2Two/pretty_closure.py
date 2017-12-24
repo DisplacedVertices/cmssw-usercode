@@ -1,15 +1,13 @@
-import sys
-from array import array
 from JMTucker.Tools.ROOTTools import *
-import JMTucker.MFVNeutralino.AnalysisConstants as ac
-
-prelim = False
+ROOT.TH1.AddDirectory(0)
 
 set_style()
-rainbow_palette()
+ps = plot_saver('../plots/EXO-17-018/closure', size=(700,700), log=False, pdf=True)
 
-def arr(l):
-    return array('d', l)
+fns = ['2v_from_jets_data_2015p6_3track_default_v15_v5.root', '2v_from_jets_data_2015p6_7track_default_v15_v5.root', '2v_from_jets_data_2015p6_4track_default_v15_v5.root', '2v_from_jets_data_2015p6_5track_default_v15_v5.root']
+ntk = ['3track3track', '4track3track', '4track4track', '5track5track']
+names = ['3-track x 3-track', '4-track x 3-track', '4-track x 4-track', '#geq 5-track x #geq 5-track']
+ymax = [140, 40, 5, 4]
 
 def write(font, size, x, y, text):
     w = ROOT.TLatex()
@@ -19,175 +17,49 @@ def write(font, size, x, y, text):
     w.DrawLatex(x, y, text)
     return w
 
-hs = []
+for i in range(4):
+    hh = ROOT.TFile(fns[i]).Get('h_2v_dvv')
+    h = ROOT.TFile(fns[i]).Get('h_c1v_dvv')
+    h.Scale(hh.Integral()/h.Integral())
 
-def rebin(in_h):
-    bins = arr([0, 0.02, 0.04, 0.06, 0.08, 0.1, 5])
-    h = in_h.Rebin(len(bins) - 1, in_h.GetName() + '_rebin', bins)
-    hs.append(h)
-    return h
+    hh = cm2mm(hh)
+    h = cm2mm(h)
 
-def rebook(in_h):
-    assert type(in_h) == ROOT.TH1D
-    nbins = in_h.GetNbinsX()
-    assert nbins == 6
-    asses = [None, 0, 0.02, 0.04, 0.06, 0.08, 0.1, 5]
-    for ibin in xrange(1, nbins+2):
-        assert abs(in_h.GetBinLowEdge(ibin) - asses[ibin]) < 1e-6
-
-    bins = [j*0.2 for j in range(6)] + [2.]
-    bins = arr(bins)
-    h = ROOT.TH1D(in_h.GetName() + '_rebook', ';d_{VV} (mm);Events', len(bins)-1, bins)
-    hs.append(h)
-    h.Sumw2()
+    h.SetTitle(';d_{VV} (mm);Events/100 #mum')
+    h.GetXaxis().SetTitleSize(0.04)
+    h.GetYaxis().SetTitleSize(0.04)
+    h.GetYaxis().SetTitleOffset(1.3)
+    h.GetYaxis().SetRangeUser(0,ymax[i])
     h.SetStats(0)
-    h.SetLineWidth(2)
-    print h.GetName()
-    for ibin in xrange(0, nbins+2):
-        c = in_h.GetBinContent(ibin)
-        e = in_h.GetBinError  (ibin)
-        print ibin, c, e
-        h.SetBinContent(ibin, c)
-        h.SetBinError  (ibin, e)
+    h.SetLineColor(ROOT.kBlue)
+    h.SetLineWidth(3)
+    h.Draw('hist')
 
-    xax = h.GetXaxis()
-    xax.SetTitleSize(0.05)
-    xax.SetLabelSize(0.04)
-    xax.SetTitleOffset(0.91)
+    hh = poisson_intervalize(hh)
+    hh.SetLineWidth(3)
+    hh.SetMarkerStyle(20)
+    hh.SetMarkerSize(1.3)
+    hh.Draw('PE')
 
-    yax = h.GetYaxis()
-    yax.SetTitleOffset(1.)
-    yax.SetTitleSize(0.05)
-    yax.SetLabelSize(0.04)
-    yax.SetRangeUser(0.1, 300)
+    l1 = ROOT.TLegend(0.50, 0.65, 0.85, 0.78)
+    l1.AddEntry(hh, 'Data', 'LPE')
+    l1.AddEntry(h, 'Construction')
+    l1.SetBorderSize(0)
+    l1.Draw()
 
-    return h
+    write(42, 0.040, 0.500, 0.80, names[i])
+    write(61, 0.050, 0.098, 0.913, 'CMS')
+    write(42, 0.050, 0.560, 0.913, '38.5 fb^{-1} (13 TeV)')
 
-f = ROOT.TFile('mfvo2t_forclosure.root')
+    lines = [
+        ROOT.TLine(0.4, 0, 0.4, ymax[i]),
+        ROOT.TLine(0.7, 0, 0.7, ymax[i]),
+        ]
 
-def up_down(x, s):
-    return (round((x + s)/5.)*5,
-            round((x - s)/5.)*5)
-def imu_isig(mu, sig):
-    assert mu  % 5 == 0 and sig % 5 == 0
-    imu, isig = mu/5, sig/5
-    return 'ClearedJetsTemplater/seed0000_toy0000/templates/imu_%02i/h_template_imu%03i_isig%03i' % (imu, imu, isig)
+    for ll in lines:
+        ll.SetLineColor(ROOT.kRed)
+        ll.SetLineWidth(2)
+        ll.SetLineStyle(2)
+        ll.Draw()
 
-mu_clear_up,  mu_clear_down  = up_down(293, 36)
-sig_clear_up, sig_clear_down = up_down(115, 28)
-
-h_mctoy   = rebook(rebin(f.Get('Fitter/seed00_toy00/fit_results/h_data_b_fit_nobb_nodiv')))
-h_central = rebook(rebin(f.Get('Fitter/seed00_toy00/fit_results/h_bkg_b_fit_nobb_nodiv')))
-h_up      = rebook(rebin(f.Get(imu_isig(mu_clear_up,   sig_clear_up))))
-h_down    = rebook(rebin(f.Get(imu_isig(mu_clear_down, sig_clear_down))))
-
-scale_to = 251.
-for h in (h_mctoy, h_central, h_up, h_down):
-    h.Scale(scale_to/h.Integral())
-
-x, y, exl, exh, eyl, eyh = [], [], [], [], [], []
-xax = h_central.GetXaxis()
-def quad(*l):
-    return sum(x**2 for x in l)**0.5
-nbins = h_central.GetNbinsX()
-for ibin in xrange(1, nbins+1):
-    ct = xax.GetBinCenter(ibin) + 0.01
-    x.append(ct)
-    exl.append(ct - xax.GetBinLowEdge(ibin))
-    exh.append(xax.GetBinUpEdge(ibin) - ct)
-    
-    c, e = h_central.GetBinContent(ibin), h_central.GetBinError(ibin)
-    y.append(c)
-    eyl.append(quad(h_down.GetBinContent(ibin) - c, e/2))
-    eyh.append(quad(h_up  .GetBinContent(ibin) - c, e/2))
-
-    h_central.SetBinError(ibin, 0.00001) # for drawing later
-
-for l in 'x y exl exh eyl eyh'.split():
-    print l, eval(l)
-
-g_cons = ROOT.TGraphAsymmErrors(nbins, arr(x), arr(y), arr(exl), arr(exh), arr(eyl), arr(eyh))
-g_cons.SetTitle(';d_{VV} (mm);Events')
-
-h_mctoy.SetLineColor(ROOT.kBlue)
-h_mctoy.SetLineWidth(2)
-h_central.SetLineColor(ROOT.kRed)
-h_central.SetLineWidth(2)
-g_cons.SetLineColor(ROOT.kRed)
-g_cons.SetFillColor(ROOT.kRed)
-g_cons.SetFillStyle(3444)
-g_cons.SetLineWidth(1)
-
-c = ROOT.TCanvas('c', '', 800, 800)
-c.SetBottomMargin(0.12)
-c.SetLogy()
-
-h_mctoy.Draw()
-h_central.Draw('hist same')
-g_cons.Draw('e2')
-#g_cons.Draw('p')
-h_mctoy.GetYaxis().SetRangeUser(0.1, 300)
-h_mctoy.Draw('same')
-
-leg = ROOT.TLegend(0.461, 0.669, 0.871, 0.882)
-leg.SetTextFont(43)
-leg.SetTextSize(29)
-leg.SetBorderSize(0)
-print leg.AddEntry(h_mctoy, 'Simulated events', 'LPE').GetTextSize()
-g_cons.SetLineWidth(0)
-g_cons.SetLineColor(ROOT.kWhite)
-leg.AddEntry(g_cons, 'd_{VV}^{C}', 'F')
-#leg.AddEntry(g_cons, 'Range', 'F')
-leg.Draw()
-
-lin = ROOT.TLine(0.943609, 48.3743, 1.11905, 48.3743)
-lin.SetLineColor(ROOT.kRed)
-lin.SetLineWidth(3)
-lin.Draw()
-
-cms = write(61, 0.050, 0.099, 0.913, 'CMS')
-sim = write(52, 0.040, 0.212, 0.912, 'Simulation')
-lum = write(42, 0.050, 0.586, 0.913, '17.6 fb^{-1} (8 TeV)')
-
-# do a broken x axis. thanks root (throot)
-
-boxcenter = 1.8
-boxwidth = 0.02
-boxy1 = 0.065
-boxy2 = 0.14
-box1 = ROOT.TBox(boxcenter-boxwidth, boxy1, boxcenter+boxwidth, 2)
-box1.SetLineColor(ROOT.kWhite)
-box1.SetFillColor(ROOT.kWhite)
-box1.Draw()
-
-box2 = ROOT.TBox(1.74, 0.065, 2.1, 0.095)
-box2.SetLineColor(ROOT.kWhite)
-box2.SetFillColor(ROOT.kWhite)
-box2.Draw()
-
-#lab1 = ROOT.TText(1.714, 0.06989, '49.8')
-#lab1.SetTextFont(xax.GetLabelFont())
-#lab1.SetTextSize(xax.GetLabelSize())
-#lab1.Draw()
-
-lab2 = ROOT.TText(1.914, 0.06989, '50.0')
-lab2.SetTextFont(xax.GetLabelFont())
-lab2.SetTextSize(xax.GetLabelSize())
-lab2.Draw()
-
-lineslantdx = 0.009
-lineybackoff = 0.01
-
-line1 = ROOT.TLine(boxcenter-boxwidth-lineslantdx, boxy1+lineybackoff, boxcenter-boxwidth+lineslantdx, boxy2-lineybackoff)
-line1.SetLineWidth(2)
-line1.Draw()
-
-line2 = ROOT.TLine(boxcenter+boxwidth-lineslantdx, boxy1+lineybackoff, boxcenter+boxwidth+lineslantdx, boxy2-lineybackoff)
-line2.SetLineWidth(2)
-line2.Draw()
-
-name = 'plots/after_referee/closure'
-c.SaveAs(name + '.pdf')
-c.SaveAs(name + '.png')
-c.SaveAs(name + '.root')
-del c
+    ps.save('closure_%s' % ntk[i])

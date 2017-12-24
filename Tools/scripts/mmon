@@ -2,6 +2,7 @@
 
 import datetime, optparse, os, sys, time
 from collections import defaultdict
+from CRABClient.ClientExceptions import ConfigurationException as CRABConfigurationException
 from JMTucker.Tools.CRAB3Tools import *
 from JMTucker.Tools.CondorTools import *
 from JMTucker.Tools.general import print_if_nonempty, touch
@@ -180,6 +181,17 @@ while 1:
         open('/tmp/%s/mmontmp' % os.environ['USER'], 'wt').write(repr(results))
         #pprint(results)
 
+        # get last status from our special file and save this one
+        last_status_fn = lambda d: os.path.join(d, 'mmon_last')
+        for d,res in results.iteritems():
+            fn = last_status_fn(d)
+            r_this = repr(res)
+            if os.path.isfile(fn):
+                res['last'] = eval(open(fn).read())
+            else:
+                res['last'] = None
+            open(fn, 'wt').write(r_this)
+
         # Resubmit those allowed.
         if options.resub:
             to_resub = defaultdict(list)
@@ -198,10 +210,14 @@ while 1:
 #                            options.resub_black_list and err_code not in options.resub_black_list)):
 #                        to_resub[d].append(job_num)
             for d, jobs in to_resub.iteritems():
-                jobs = ','.join(str(j) for j in jobs)
-                print 'resubmit', d, jobs
-                #crab_command('resubmit', dir=d, jobids=jobs, sitewhitelist=options.resub_white_list, siteblacklist=options.resub_black_list, suppress_stdout=False)
-                crab_command('resubmit', dir=d, jobids=jobs, force=options.resub_force) #, suppress_stdout=False)
+                if jobs:
+                    jobs = ','.join(str(j) for j in jobs)
+                    print 'resubmit', d, jobs
+                    #crab_command('resubmit', dir=d, jobids=jobs, sitewhitelist=options.resub_white_list, siteblacklist=options.resub_black_list, suppress_stdout=False)
+                    try:
+                        crab_command('resubmit', dir=d, jobids=jobs, force=options.resub_force) #, suppress_stdout=False)
+                    except CRABConfigurationException:
+                        print 'CRABConfigurationException when resubmitting, skip this time'
 
     if options.verbose:
         # Print a recap of all the status summaries.
@@ -273,32 +289,40 @@ while 1:
     status_column_format = ''.join('%' + str(max(len(status_column) + 2, 6)) + 's' for status_column in status_columns)
 
     # The table format string: a left-justified column for the
-    # directory names, followed by columns for all of the statuses
+    # directory names, then a column showing whether the
+    # output has changed, then followed by columns for all of the statuses
     # seen, with the width found above.
     dir_column_width = max(len(d) for d in results.keys())
     table_format = '%-' + str(dir_column_width) + 's'
+    table_format += '%3s' # for the stale-status column
     table_format += '%8s' # for the totals column
     table_format += status_column_format
     #print repr(table_format)
 
     # Header.
-    header = ['directory', 'total |'] + status_columns
+    header = ['directory', 'S?', 'total |'] + status_columns
     print_header(table_format % tuple(header))
+
+    class StatusCounter:
+        def __init__(self, statuses):
+            self.nfail, self.nrun, self.nfin = -1, -1, -1
+            if statuses:
+                self.nfail, self.nrun, self.nfin = 0, 0, 0
+                for status, entry in statuses.iteritems():
+                    if status.startswith('fin'):
+                        self.nfin += entry
+                    elif status.startswith('fail') or status.startswith('kill') or status.startswith('prob'):
+                        self.nfail += entry
+                    else:
+                        self.nrun += entry
 
     # Print out all the rows. Column order is as above.
     sums = (len(status_columns)+1)*[0]
     for d in dirs:
         statuses = results[d]['jobsPerStatusEx']
         row = []
-        nfail, nrun, nfin = 0, 0, 0
         for status in status_columns:
             entry = statuses.get(status_columns_xlate.get(status, status), 0)
-            if status.startswith('fin'):
-                nfin += entry
-            elif status.startswith('fail') or status.startswith('kill') or status.startswith('prob'):
-                nfail += entry
-            else:
-                nrun += entry
             row.append((status, entry))
         sub_row = tuple(x[1] for x in row)
         row_total = sum(sub_row)
@@ -306,16 +330,29 @@ while 1:
         for i, x in enumerate(sub_row):
             sums[i+1] += x
         sub_row = tuple('-' if x == 0 else x for x in sub_row) # suppress zeroes to make table easier to read
-        row = (d, '%s |' % row_total) + sub_row
-        if nfin == row_total:
+
+        counts = StatusCounter(statuses)
+        stale = 'X'
+        if results[d]['last'] is not None:
+            counts_last = StatusCounter(results[d]['last']['jobsPerStatusEx'])
+            if counts.nfin != counts_last.nfin:
+                stale = ' '
+            else:
+                stale = '!'
+
+        row = (d, stale, '%s |' % row_total) + sub_row
+
+        if counts.nfin == row_total:
             color = colors.green
-        elif nfail:
+        elif counts.nfail:
             color = colors.magenta
-        elif nrun:
+        elif counts.nrun:
             color = colors.cyan
+
         print color(table_format % row)
+
     sums[0] = '%s |' % sums[0]
-    sums = tuple(['totals'] + sums)
+    sums = tuple(['totals', ''] + sums)
     sum_row = table_format % sums
     print colors.bold(sum_row)
     print

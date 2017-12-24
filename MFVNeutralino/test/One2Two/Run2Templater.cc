@@ -17,10 +17,10 @@ namespace mfv {
 
       env("mfvo2t_run2templater" + uname),
       d2d_cut(env.get_double("d2d_cut", 0.04)),
-      dphi_c(env.get_double("dphi_c", 1.34)),
+      dphi_c(env.get_double("dphi_c", 1.29)),
       dphi_e(env.get_double("dphi_e", 2)),
-      dphi_a(env.get_double("dphi_a", 3.87)),
-      eff_fn(env.get_string("eff_fn", "vpeffs_2016_v15.root")),
+      dphi_a(env.get_double("dphi_a", 4.84)),
+      eff_fn(env.get_string("eff_fn", "vpeffs_data_2015p6_v15_v2.root")),
       eff_path(env.get_string("eff_path", "maxtk3")),
       noversamples(env.get_int("noversamples", 20)),
       sample_count(env.get_int("sample_count", -1)),

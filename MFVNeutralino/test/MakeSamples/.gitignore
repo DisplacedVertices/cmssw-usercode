@@ -2,3 +2,5 @@
 *.root
 out.*.gz
 inputfns.txt
+scanpacks/
+year.txt

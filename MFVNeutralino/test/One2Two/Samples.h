@@ -23,7 +23,7 @@ namespace mfv {
 
     Samples()
       : samples({
-          //{0, "JetHT", -1, -1},
+          {0, "JetHT2015p6", -1, -1},
 
           //{4, "qcdht0500sum", , },
           //{5, "qcdht0700sum", , },

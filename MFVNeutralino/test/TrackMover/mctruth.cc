@@ -74,7 +74,7 @@ int main(int argc, char** argv) {
     const bool pass_trig = pass_800 || (is_H && pass_900_450_AK450);
 
     if (nt.jetht < 1000 ||
-        nt.nalljets < 4 ||
+        nt.nalljets() < 4 ||
         !pass_trig)
       continue;
 

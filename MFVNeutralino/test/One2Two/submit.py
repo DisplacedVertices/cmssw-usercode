@@ -5,7 +5,7 @@ from JMTucker.Tools.general import save_git_status
 
 class submitter:
     batch_root = '/uscms_data/d2/tucker/crab_dirs/One2TwoV1p1'
-    files_needed = ['mfvo2t.exe', 'filtertee.py', 'vpeffs_2016_v15.root', 'limits_input.root']
+    files_needed = ['mfvo2t.exe', 'filtertee.py', 'vpeffs_2016_v15.root', 'limitsinput.root']
     script_template = '''#!/bin/bash
 echo mfvo2t script starting at $(date) with args $*
 export JOB=$1

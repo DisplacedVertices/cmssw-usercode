@@ -37,7 +37,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if year == 2015:
         samples = Samples.data_samples_2015 + Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015
     elif year == 2016:
-        samples = Samples.data_samples + Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext
+        samples = Samples.data_samples + Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + Samples.mfv_signal_samples + Samples.mfv_ddbar_samples
 
     #samples = Samples.qcd_hip_samples + [Samples.qcdht0700ext, Samples.qcdht1000ext, Samples.qcdht1500ext] + Samples.data_samples
 
@@ -49,7 +49,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
                 if s.name.startswith(k):
                     s.events_per = min(int(25000/v), 400000)
         else:
-            s.json = 'ana_2015p6_10pc.json'
+            s.json = 'ana_2015p6.json'
 
     from JMTucker.Tools.MetaSubmitter import *
     ms = MetaSubmitter('TrackerMapper_qcd_hip_v2')

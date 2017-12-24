@@ -36,6 +36,8 @@ def crab_command(*args, **kwargs):
 
     ok = True
 
+    result = {}
+
     try:
         result = crabCommand(*args, **kwargs)
 
@@ -57,13 +59,19 @@ def crab_command(*args, **kwargs):
     except httplib.HTTPException, e:
         result = {}
         result['jobList'] = []
-        result['HTTPException'] = e
+        result['HTTPException'] = repr(e)
         result['status'] = 'HTTPException'
     except pycurl.error, e:
         result = {}
         result['jobList'] = []
-        result['pycurlError'] = e
+        result['pycurlError'] = repr(e)
         result['status'] = 'pycurlError'
+    finally:
+        if suppress_stdout:
+            result['stdout'] = buf.getvalue()
+            sys.stdout = old_stdout
+        os.remove(cache_file)
+        os.environ['CRAB3_CACHE_FILE'] = old_cache_file
 
     for k,v in result.get('shortResult', {}).iteritems():
         if not result.has_key(k):
@@ -75,18 +83,11 @@ def crab_command(*args, **kwargs):
 
     #pprint(result)
 
-    if suppress_stdout:
-        result['stdout'] = buf.getvalue()
-        sys.stdout = old_stdout
-
     if not ok or type(result) != dict:
         print 'problem with crabCommand return value'
         print type(result)
         pprint(result)
         raise CRABToolsException('problem')
-
-    os.remove(cache_file)
-    os.environ['CRAB3_CACHE_FILE'] = old_cache_file
 
     return result
 
@@ -122,11 +123,14 @@ def crab_process_simple_cmd(cmd, dirs, max_processes):
             pprint(res)
     return results
 
-def crab_status(working_dir, verbose=False):
+def crab_status(working_dir, verbose=False, long=False):
     if verbose:
         print 'checking', working_dir
 
-    result = crab_command('status', dir=working_dir)
+    if long:
+        result = crab_command('status', '--long', dir=working_dir)
+    else:
+        result = crab_command('status', dir=working_dir)
 
     jl = crab_job_lists_by_status(result)
     if not jl:
@@ -314,3 +318,7 @@ if __name__ == '__main__':
            ds.sort()
            for d in ds:
                print d
+
+   elif 'output_dir' in sys.argv:
+       for d in dirs:
+           print d, crab_get_output_dir(d)

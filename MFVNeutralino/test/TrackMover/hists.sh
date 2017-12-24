@@ -7,7 +7,7 @@ if [[ $job < 0 ]]; then
     test=1
 fi
 
-inpathbase=root://cmseos.fnal.gov//store/user/tucker/TrackMoverV3
+inpathbase=root://cmseos.fnal.gov//store/user/tucker/TrackMoverV6
 
 paths=(
 ${inpathbase}
@@ -27,7 +27,7 @@ qcdht1500.root
 qcdht1500_hip1p0_mit.root
 )
 
-nsigs=( 3p7 3p8 3p9 4p0 4p1 4p2 4p3 )
+nsigs=( 4p0 4p1 )
 taus=( 100 300 1000 10000 30000 )
 nls=( 2 3 )
 nbs=( 0 1 2 )
@@ -63,7 +63,7 @@ nb=${nbs[$((ii % nnbs))]}
 ii=$((ii / nnbs))
 
 outfn=$(basename $path)_nsig${nsig}_tau$(printf %05i $tau)um_${nl}${nb}_$(basename $fn .root).root
-treepath=mfvMovedTree${nl}${nb}nsig${nsig}/t
+treepath=mfvMovedTree${nl}${nb}nsig${nsig}btagoldangle0p2/t
 
 echo path $path fn $fn nl $nl nb $nb outfn $outfn treepath $treepath
 

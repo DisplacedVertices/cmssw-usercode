@@ -28,7 +28,7 @@ struct MFVEvent {
 
   MFVEvent() {
     gen_valid = 0;
-    gen_partons_in_acc = npv = pv_ntracks = 0;
+    npv = pv_ntracks = 0;
     gen_flavor_code = 0;
     gen_weight = gen_weightprod = l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = hlt_ht4mc = npu = bsx = bsy = bsz = bsdxdz = bsdydz = bswidthx = bswidthy = pvx = pvy = pvz = pvcxx = pvcxy = pvcxz = pvcyy = pvcyz = pvczz = pv_sumpt2 = metx = mety = 0;
     for (int i = 0; i < 2; ++i) {
@@ -66,6 +66,29 @@ struct MFVEvent {
 
   float gen_weight;
   float gen_weightprod;
+  uchar gen_flavor_code;
+  float gen_pv[3];
+  std::vector<TLorentzVector> gen_bquarks;
+  std::vector<TLorentzVector> gen_leptons;
+  std::vector<TLorentzVector> gen_jets;
+
+  int gen_lepton_id(int which) { // same convention as reco lep_id below, el=1, mu=0
+    double mass = gen_leptons[which].M();
+    if (fabs(mass - 0.000511) < 1e-4)
+      return 1; 
+    else if (fabs(mass - 0.1057) < 1e-2)
+      return 0;
+    else
+      assert(0);
+  }
+
+  double gen_jet_ht(double min_jet_pt=0.) const {
+    double r(0);
+    for (auto j : gen_jets)
+      if (j.Pt() > min_jet_pt)
+        r += j.Pt();
+    return r;
+  }
 
   bool gen_valid; // only refers to the next block, not the weights above
   float gen_lsp_pt[2];
@@ -74,21 +97,30 @@ struct MFVEvent {
   float gen_lsp_mass[2];
   float gen_lsp_decay[2*3];
   uchar gen_decay_type[2];
-  uchar gen_partons_in_acc;
-  uchar gen_flavor_code;
-
-  float gen_pv[3];
-  std::vector<float> gen_bquark_pt;
-  std::vector<float> gen_bquark_eta;
-  std::vector<float> gen_bquark_phi;
-  std::vector<float> gen_bquark_energy;
-  std::vector<uchar> gen_lepton_id;
-  std::vector<float> gen_lepton_pt;
-  std::vector<float> gen_lepton_eta;
-  std::vector<float> gen_lepton_phi;
+  std::vector<TLorentzVector> gen_daughters;
+  std::vector<int> gen_daughter_id;
 
   TLorentzVector gen_lsp_p4(int w) const {
     return p4(gen_lsp_pt[w], gen_lsp_eta[w], gen_lsp_phi[w], gen_lsp_mass[w]);
+  }
+
+  TVector3 gen_lsp_flight(int w) const {
+    return TVector3(gen_lsp_decay[w*3+0] - gen_pv[0],
+                    gen_lsp_decay[w*3+1] - gen_pv[1],
+                    gen_lsp_decay[w*3+2] - gen_pv[2]);
+  }
+
+  TLorentzVector gen_lsp_p4_vis(int w) const {
+    const size_t n = gen_daughters.size();
+    assert(n % 2 == 0);
+    assert(w == 0 || w == 1);
+    TLorentzVector r;
+    for (size_t i = n/2 * w; i < n/2*(w+1); ++i) {
+      int id = gen_daughter_id[i];
+      if (id == 11 || id == 13 || id == 15 || (id >= 1 && id <= 5))
+        r += gen_daughters[i];
+    }
+    return r;
   }
 
   float minlspdist2d() const {
@@ -157,7 +189,7 @@ struct MFVEvent {
   std::vector<float> jet_pudisc; // to be removed and put into _id when working points defined
   std::vector<float> jet_pt;
   std::vector<float> jet_raw_pt;
-  std::vector<float> jet_calo_pt;
+  std::vector<float> jet_calo_pt; // JMTEVIL !!! STARTING AFTER ACTUAL NTUPLEV16 BUT CHANGED FOR TRACKMOVERV4: THIS IS ACTUALLY THE B-TAG DISCRIMINANT--CHECK GITSTATUS IF IN DOUBT !!!
   std::vector<float> jet_eta;
   std::vector<float> jet_phi;
   std::vector<float> jet_energy;
@@ -205,13 +237,15 @@ struct MFVEvent {
     return 1 - sqrt(1 - 4 * jet_ST_sum() / pow(jet_ht(), 2));
   }
 
-  static uchar encode_jet_id(int pu_level, int bdisc_level) {
-    assert(pu_level == 0);
-    uchar id = 0;
-    assert(pu_level >= 0 && pu_level <= 3);
+  static uchar encode_jet_id(int pu_level, int bdisc_level, int hadron_flavor) {
+    assert(pu_level == 0); assert(pu_level >= 0 && pu_level <= 3);
+    assert(hadron_flavor == 0 || hadron_flavor == 4 || hadron_flavor == 5);
     assert(bdisc_level >= 0 && bdisc_level <= 3);
-    id = (bdisc_level << 2) | pu_level;
-    return id;
+
+    if      (hadron_flavor == 4) hadron_flavor = 1;
+    else if (hadron_flavor == 5) hadron_flavor = 2;
+
+    return (hadron_flavor << 4) | (bdisc_level << 2) | pu_level;
   }
 
   bool pass_nopu(int w, int level) const {
@@ -226,6 +260,13 @@ struct MFVEvent {
       if (pass_nopu(i, level))
         ++c;
     return c;
+  }
+
+  int jet_hadron_flavor(int w) const {
+    const int f = (jet_id[w] >> 4) & 3;
+    if (f == 1) return 4;
+    if (f == 2) return 5;
+    return 0;
   }
 
   bool is_btagged(int w, int level) const {

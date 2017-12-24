@@ -8,6 +8,8 @@ namespace mfv {
     p_tk0_qchi2 = p_tk0_ndof = p_tk0_vx = p_tk0_vy = p_tk0_vz = p_tk0_px = p_tk0_py = p_tk0_pz = p_tk1_qchi2 = p_tk1_ndof = p_tk1_vx = p_tk1_vy = p_tk1_vz = p_tk1_px = p_tk1_py = p_tk1_pz = 0;
     p_tk0_inpv = p_tk1_inpv = 0;
     p_tk0_cov = p_tk1_cov = 0;
+    p_gen_daughters = p_gen_bquarks = p_gen_leptons = 0;
+    p_gen_daughter_id = 0;
   }
 
   void MiniNtuple::clear() {
@@ -16,7 +18,13 @@ namespace mfv {
     gen_flavor_code = pass_hlt = npv = npu = njets = nvtx = ntk0 = ntk1 = 0;
     l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = hlt_ht4mc = bsx = bsy = bsz = bsdxdz = bsdydz = pvx = pvy = pvz = weight = x0 = y0 = z0 = bs2derr0 = geo2ddist0 = x1 = y1 = z1 = bs2derr1 = geo2ddist1 = 0;
     genmatch0 = genmatch1 = 0;
-    gen_x[0] = gen_y[0] = gen_z[0] = gen_x[1] = gen_y[1] = gen_z[1] = 0;
+    for (int i = 0; i < 2; ++i)
+      gen_x[i] = gen_y[i] = gen_z[i] = gen_lsp_pt[i] = gen_lsp_eta[i] = gen_lsp_phi[i] = gen_lsp_mass[i] = 0;
+    gen_daughters.clear();
+    gen_daughter_id.clear();
+    gen_bquarks.clear();
+    gen_leptons.clear();
+    gen_jet_ht = gen_jet_ht40 = 0;
     for (int i = 0; i < 50; ++i) {
       jet_pt[i] = jet_eta[i] = jet_phi[i] = jet_energy[i] = 0;
       jet_id[i] = 0;
@@ -72,6 +80,16 @@ namespace mfv {
     tree->Branch("gen_x", nt.gen_x, "gen_x[2]/F");
     tree->Branch("gen_y", nt.gen_y, "gen_y[2]/F");
     tree->Branch("gen_z", nt.gen_z, "gen_z[2]/F");
+    tree->Branch("gen_lsp_pt", nt.gen_lsp_pt, "gen_lsp_pt[2]/F");
+    tree->Branch("gen_lsp_eta", nt.gen_lsp_eta, "gen_lsp_eta[2]/F");
+    tree->Branch("gen_lsp_phi", nt.gen_lsp_phi, "gen_lsp_phi[2]/F");
+    tree->Branch("gen_lsp_mass", nt.gen_lsp_mass, "gen_lsp_mass[2]/F");
+    tree->Branch("gen_daughters", &nt.gen_daughters, 32000, 0);
+    tree->Branch("gen_daughter_id", &nt.gen_daughter_id);
+    tree->Branch("gen_bquarks", &nt.gen_bquarks, 32000, 0);
+    tree->Branch("gen_leptons", &nt.gen_leptons, 32000, 0);
+    tree->Branch("gen_jet_ht", &nt.gen_jet_ht);
+    tree->Branch("gen_jet_ht40", &nt.gen_jet_ht40);
 
     tree->Branch("nvtx", &nt.nvtx);
     tree->Branch("ntk0", &nt.ntk0);
@@ -146,6 +164,16 @@ namespace mfv {
     tree->SetBranchAddress("gen_x", nt.gen_x);
     tree->SetBranchAddress("gen_y", nt.gen_y);
     tree->SetBranchAddress("gen_z", nt.gen_z);
+    tree->SetBranchAddress("gen_lsp_pt", nt.gen_lsp_pt);
+    tree->SetBranchAddress("gen_lsp_eta", nt.gen_lsp_eta);
+    tree->SetBranchAddress("gen_lsp_phi", nt.gen_lsp_phi);
+    tree->SetBranchAddress("gen_lsp_mass", nt.gen_lsp_mass);
+    tree->SetBranchAddress("gen_daughters", &nt.p_gen_daughters);
+    tree->SetBranchAddress("gen_daughter_id", &nt.p_gen_daughter_id);
+    tree->SetBranchAddress("gen_bquarks", &nt.p_gen_bquarks);
+    tree->SetBranchAddress("gen_leptons", &nt.p_gen_leptons);
+    tree->SetBranchAddress("gen_jet_ht", &nt.gen_jet_ht);
+    tree->SetBranchAddress("gen_jet_ht40", &nt.gen_jet_ht40);
     tree->SetBranchAddress("nvtx", &nt.nvtx);
     tree->SetBranchAddress("ntk0", &nt.ntk0);
     tree->SetBranchAddress("tk0_qchi2", &nt.p_tk0_qchi2);
@@ -186,6 +214,11 @@ namespace mfv {
   MiniNtuple* clone(const MiniNtuple& nt) {
     MiniNtuple* nnt = new MiniNtuple(nt);
 
+    if (nt.p_gen_daughters) nnt->gen_daughters = *nt.p_gen_daughters;
+    if (nt.p_gen_daughter_id) nnt->gen_daughter_id = *nt.p_gen_daughter_id;
+    if (nt.p_gen_bquarks) nnt->gen_bquarks = *nt.p_gen_bquarks;
+    if (nt.p_gen_leptons) nnt->gen_leptons = *nt.p_gen_leptons;
+    
     if (nt.p_tk0_qchi2) nnt->tk0_qchi2 = *nt.p_tk0_qchi2;
     if (nt.p_tk0_ndof ) nnt->tk0_ndof  = *nt.p_tk0_ndof;
     if (nt.p_tk0_vx   ) nnt->tk0_vx    = *nt.p_tk0_vx;
@@ -208,6 +241,9 @@ namespace mfv {
     if (nt.p_tk1_inpv ) nnt->tk1_inpv  = *nt.p_tk1_inpv;
     if (nt.p_tk1_cov  ) nnt->tk1_cov   = *nt.p_tk1_cov;
 
+    nnt->p_gen_daughters = nnt->p_gen_bquarks = nnt->p_gen_leptons = 0;
+    nnt->p_gen_daughter_id = 0;
+    
     nnt->p_tk0_qchi2 = nnt->p_tk0_ndof = nnt->p_tk0_vx = nnt->p_tk0_vy = nnt->p_tk0_vz = nnt->p_tk0_px = nnt->p_tk0_py = nnt->p_tk0_pz = nnt->p_tk1_qchi2 = nnt->p_tk1_ndof = nnt->p_tk1_vx = nnt->p_tk1_vy = nnt->p_tk1_vz = nnt->p_tk1_px = nnt->p_tk1_py = nnt->p_tk1_pz = 0;
     nnt->p_tk0_inpv = nnt->p_tk1_inpv = 0;
     nnt->p_tk0_cov = nnt->p_tk1_cov = 0;

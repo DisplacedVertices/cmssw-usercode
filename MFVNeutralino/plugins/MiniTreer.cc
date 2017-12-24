@@ -106,7 +106,21 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.gen_x[i] = mevent->gen_lsp_decay[i*3+0] - mevent->bsx_at_z(z);
     nt.gen_y[i] = mevent->gen_lsp_decay[i*3+1] - mevent->bsy_at_z(z);
     nt.gen_z[i] = z - mevent->bsz;
+
+    nt.gen_lsp_pt[i] = mevent->gen_lsp_pt[i];
+    nt.gen_lsp_eta[i] = mevent->gen_lsp_eta[i];
+    nt.gen_lsp_phi[i] = mevent->gen_lsp_phi[i];
+    nt.gen_lsp_mass[i] = mevent->gen_lsp_mass[i];
   }
+
+  nt.gen_daughters = mevent->gen_daughters;
+  nt.gen_daughter_id = mevent->gen_daughter_id;
+
+  nt.gen_bquarks = mevent->gen_bquarks;
+  nt.gen_leptons = mevent->gen_leptons;
+
+  nt.gen_jet_ht = mevent->gen_jet_ht();
+  nt.gen_jet_ht40 = mevent->gen_jet_ht(40);
 
   auto gen_matches = [&](const MFVVertexAux& v) { // already xformed
     return

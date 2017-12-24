@@ -24,6 +24,7 @@ public:
 private:
   const edm::EDGetTokenT<reco::GenParticleCollection> gen_token;
   const edm::EDGetTokenT<reco::GenJetCollection> gen_jet_token;
+  const edm::EDGetTokenT<std::vector<double>> gen_vertex_token;
   const edm::EDGetTokenT<mfv::MCInteraction> mci_token;
   bool mci_warned;
 
@@ -49,6 +50,9 @@ private:
   BasicKinematicHists* Taus;
   BasicKinematicHists* LightLeptons;
   BasicKinematicHists* Leptons;
+
+  BasicKinematicHists* Ups[2];
+  BasicKinematicHists* Downs[2];
 
   TH1F* h_lsp_dist2d;
   TH1F* h_lsp_dist3d;
@@ -133,7 +137,9 @@ private:
 MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   : gen_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("gen_src"))),
     gen_jet_token(consumes<reco::GenJetCollection>(cfg.getParameter<edm::InputTag>("gen_jet_src"))),
+    gen_vertex_token(consumes<std::vector<double>>(cfg.getParameter<edm::InputTag>("gen_vertex_src"))),
     mci_token(consumes<mfv::MCInteraction>(cfg.getParameter<edm::InputTag>("mci_src"))),
+
     mci_warned(false)
 {
   edm::Service<TFileService> fs;
@@ -188,6 +194,28 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
     Stranges[i]->BookDxy(200, -2, 2, "0.02");
     Stranges[i]->BookDz (200, -2, 2, "0.02");
     Stranges[i]->BookQ();
+
+    Ups[i] = bkh_factory->make(TString::Format("Ups#%i", i), TString::Format("up #%i", i));
+    Ups[i]->BookE (200, 0, 2000, "10");
+    Ups[i]->BookP (200, 0, 2000, "10");
+    Ups[i]->BookPt(200, 0, 2000, "10");
+    Ups[i]->BookM (200, 0, 2000, "10");
+    Ups[i]->BookRapEta(200, "0.1");
+    Ups[i]->BookPhi(50, "0.125");
+    Ups[i]->BookDxy(200, -2, 2, "0.02");
+    Ups[i]->BookDz (200, -2, 2, "0.02");
+    Ups[i]->BookQ();
+
+    Downs[i] = bkh_factory->make(TString::Format("Downs#%i", i), TString::Format("down #%i", i));
+    Downs[i]->BookE (200, 0, 2000, "10");
+    Downs[i]->BookP (200, 0, 2000, "10");
+    Downs[i]->BookPt(200, 0, 2000, "10");
+    Downs[i]->BookM (200, 0, 2000, "10");
+    Downs[i]->BookRapEta(200, "0.1");
+    Downs[i]->BookPhi(50, "0.125");
+    Downs[i]->BookDxy(200, -2, 2, "0.02");
+    Downs[i]->BookDz (200, -2, 2, "0.02");
+    Downs[i]->BookQ();
 
     Bottoms[i] = bkh_factory->make(TString::Format("Bottoms#%i", i), TString::Format("bottom #%i", i));
     Bottoms[i]->BookE (200, 0, 2000, "10");
@@ -436,10 +464,12 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   edm::Handle<mfv::MCInteraction> mci;
   event.getByToken(mci_token, mci);
 
-  const reco::GenParticle& for_vtx = gen_particles->at(2);
-  const int for_vtx_id = abs(for_vtx.pdgId());
-  die_if_not(for_vtx_id == 21 || (for_vtx_id >= 1 && for_vtx_id <= 5), "gen_particles[2] is not a gluon or udscb: id=%i", for_vtx_id);
-  float x0 = for_vtx.vx(), y0 = for_vtx.vy(), z0 = for_vtx.vz();
+  edm::Handle<std::vector<double>> gen_vertex;
+  event.getByToken(gen_vertex_token, gen_vertex);
+  const double x0 = (*gen_vertex)[0];
+  const double y0 = (*gen_vertex)[1];
+  const double z0 = (*gen_vertex)[2];
+
   auto fill = [x0,y0,z0](BasicKinematicHists* bkh, const reco::Candidate* c) {
     bkh->Fill(c);
     bkh->FillEx(signed_mag(c->vx() - x0, c->vy() - y0), c->vz() - z0, c->charge());
@@ -598,7 +628,15 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 
 
     }
-    else if (mci->type() == mfv::mci_XX4j || mci->type() == mfv::mci_MFVdijet || mci->type() == mfv::mci_MFVlq) {
+    if (mci->type() == mfv::mci_MFVuds) {
+      for (int i = 0; i < 2; ++i) {
+        fill(Lsps           [i], &*mci->lsp(i));
+        fill(Stranges       [i], &*mci->strange(i));
+        fill(Ups            [i], &*mci->up(i));
+        fill(Downs          [i], &*mci->down(i));
+      }
+    }
+    else if (mci->type() == mfv::mci_XX4j || mci->type() == mfv::mci_MFVddbar || mci->type() == mfv::mci_MFVbbbar || mci->type() == mfv::mci_MFVlq) {
       for (int i = 0; i < 2; ++i) {
         fill(Hs[i], &*mci->primaries()[i]);
         for (int j = 0; j < 2; ++j)

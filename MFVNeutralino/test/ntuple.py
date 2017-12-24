@@ -7,12 +7,13 @@ from JMTucker.MFVNeutralino.Year import year
 is_mc = True
 H = False
 repro = False
-run_n_tk_seeds = True
+run_n_tk_seeds = False
 minitree_only = False
-prepare_vis = False
+prepare_vis = not run_n_tk_seeds and False
 keep_all = prepare_vis
+keep_gen = False
 event_filter = not keep_all
-version = 'V15'
+version = 'V16'
 batch_name = 'Ntuple' + version
 if minitree_only:
     batch_name = 'MiniNtuple'  + version
@@ -47,9 +48,11 @@ output_commands = [
     'drop *',
     'keep *_mcStat_*_*',
     'keep MFVEvent_mfvEvent__*',
-    'keep VertexerPairEffs_mfvVertices_*_*',
     'keep MFVVertexAuxs_mfvVerticesAux_*_*',
     ]
+
+if keep_gen:
+    output_commands += ['keep *_genParticles_*_HLT', 'keep *_ak4GenJetsNoNu_*_HLT']
 
 tfileservice(process, 'vertex_histos.root')
 random_service(process, {'mfvVertices': 1222})
@@ -62,14 +65,18 @@ process.p = cms.Path(process.mfvVertexSequence)
 process.p *= process.mfvTriggerFloats * process.mfvEvent
 
 if run_n_tk_seeds:
+    process.mfvEvent.lightweight = True
+    process.out.fileName = 'ntkseeds.root'
+    if run_n_tk_seeds != 'full':
+        output_commands.remove('keep MFVVertexAuxs_mfvVerticesAux_*_*')
     from JMTucker.MFVNeutralino.Vertexer_cff import modifiedVertexSequence
+    output_commands += ['keep VertexerPairEffs_mfvVertices_*_*']
     for n_tk_seed in 3,4,5:
         ex = '%iTkSeed' % n_tk_seed
         process.p *= modifiedVertexSequence(process, ex, n_tracks_per_seed_vertex = n_tk_seed)
-        output_commands += [
-            'keep VertexerPairEffs_mfvVertices%s_*_*' % ex,
-            'keep MFVVertexAuxs_mfvVerticesAux%s_*_*' % ex,
-            ]
+        output_commands += ['keep VertexerPairEffs_mfvVertices%s_*_*' % ex]
+        if run_n_tk_seeds == 'full':
+            output_commands += ['keep MFVVertexAuxs_mfvVerticesAux%s_*_*' % ex]
 
 if event_filter:
     import JMTucker.MFVNeutralino.EventFilter
@@ -97,11 +104,7 @@ if prepare_vis:
         ]
 
     if is_mc:
-        process.mfvGenParticles = cms.EDProducer('MFVGenParticles',
-                                                 gen_particles_src = cms.InputTag('genParticles'),
-                                                 print_info = cms.bool(True),
-                                                 )
-        process.p *= process.mfvGenParticles
+        process.load('JMTucker.MFVNeutralino.GenParticles_cff')
         output_commands += ['keep *_mfvGenParticles_*_*']
 
 if keep_all:
@@ -131,7 +134,7 @@ else:
 process.patMuons.embedTrack = False
 process.patElectrons.embedTrack = False
 
-#process.options.wantSummary = True
+want_summary(process, False)
 process.maxEvents.input = 100
 file_event_from_argv(process)
 
@@ -173,14 +176,11 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         'qcdht1000ext_2015': {'lumis': '32328',  'events': '108237235'},
         }
 
-    def n_tk_seeds_modifier(sample):
-        to_replace = []
-        if sample.is_signal:
-            magic = 'run_n_tk_seeds = True'
-            to_replace.append((magic, 'run_n_tk_seeds = False', 'ntuple template does not contain the magic string "%s"' % magic))
-        return [], to_replace
+    if run_n_tk_seeds:
+        batch_name += '_NTkSeeds'
+        samples = [s for s in samples if not s.is_signal]
 
-    modify = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier, n_tk_seeds_modifier, event_veto_modifier(skips, 'p'))
+    modify = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier, event_veto_modifier(skips, 'p'))
     ms = MetaSubmitter(batch_name)
     if 'validation' in sys.argv:
         modify.append(max_output_modifier(500))

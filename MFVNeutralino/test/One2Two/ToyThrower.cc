@@ -17,7 +17,7 @@ namespace mfv {
 
       env("mfvo2t_toythrower" + uname),
       from_histograms(env.get_bool("from_histograms", true)),
-      from_histograms_fn(env.get_string("from_histograms_fn", "limits_input.root")),
+      from_histograms_fn(env.get_string("from_histograms_fn", "limitsinput.root")),
       min_ntracks(env.get_int("min_ntracks", 5)),
       min_ntracks0(env.get_int("min_ntracks0", 0)),
       max_ntracks0(env.get_int("max_ntracks0", 1000000)),

@@ -24,6 +24,7 @@ private:
 
   const int l1_bit;
   const int trigger_bit;
+  const bool apply_trigger;
   const bool apply_cleaning_filters;
 
   const int min_npv;
@@ -81,6 +82,7 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     require_bquarks(cfg.getParameter<bool>("require_bquarks")),
     l1_bit(cfg.getParameter<int>("l1_bit")),
     trigger_bit(cfg.getParameter<int>("trigger_bit")),
+    apply_trigger(cfg.getParameter<bool>("apply_trigger")),
     apply_cleaning_filters(cfg.getParameter<bool>("apply_cleaning_filters")),
     min_npv(cfg.getParameter<int>("min_npv")),
     max_npv(cfg.getParameter<int>("max_npv")),
@@ -158,6 +160,12 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
 
     if (trigger_bit >= 0 && !mevent->pass_hlt(trigger_bit))
       return false;
+
+    if (apply_trigger && !(mevent->pass_hlt(mfv::b_HLT_PFHT800) ||
+                           mevent->pass_hlt(mfv::b_HLT_PFHT900) ||
+                           mevent->pass_hlt(mfv::b_HLT_PFJet450) ||
+                           mevent->pass_hlt(mfv::b_HLT_AK8PFJet450)))
+        return false;
 
     if (mevent->npv < min_npv || mevent->npv > max_npv)
       return false;

@@ -1,4 +1,4 @@
-SOURCES       = MovedTracksNtuple.cc utils.cc
+SOURCES       = BTagCalibrationStandalone.cc MovedTracksNtuple.cc utils.cc
 INCLUDES      = $(patsubst %.cc, %.h, $(SOURCES))
 OBJECTS       = $(patsubst %.cc, bin/%.o, $(SOURCES))
 ROOTCFLAGS    = $(shell root-config --cflags)
@@ -9,6 +9,7 @@ LIBS          = $(ROOTLIBS)
 all: hists.exe mctruth.exe tests.exe
 
 %.exe: bin/%.o $(OBJECTS)
+	@mkdir -p bin
 	g++ -o $@ $(OBJECTS) $< $(LIBS) $(CFLAGS)
 
 bin/%.o : %.cc
@@ -32,4 +33,6 @@ clean:
 	-rm -rf bin/
 
 setup:
-	ln -s ../../src/MovedTracksNtuple.cc
+	ln -sf ../../src/MovedTracksNtuple.cc
+	ln -sf $(CMSSW_RELEASE_BASE)/src/CondTools/BTau/test/BTagCalibrationStandalone.cpp BTagCalibrationStandalone.cc
+	ln -sf $(CMSSW_RELEASE_BASE)/src/CondTools/BTau/test/BTagCalibrationStandalone.h BTagCalibrationStandalone.h

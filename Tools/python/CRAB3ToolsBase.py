@@ -109,8 +109,20 @@ def crab_jobs_from_list(from_list):
 def crab_jobs_from_argv():
     return crab_jobs_from_list(sys.argv)
 
+def crab_print_config(c):
+    for line in c.pythonise_().split('\n'):
+        if line == 'from WMCore.Configuration import Configuration' or line == 'config = Configuration()' or line.startswith('config.section_'):
+            continue
+        print line
+
 def crab_requestcache(working_dir):
     return cPickle.load(open(os.path.join(working_dir, '.requestcache'), 'rb'))
+
+def crab_print_requestcache(working_dir):
+    rq = crab_requestcache(working_dir)
+    #pprint(rq)
+    print rq['RequestName']
+    crab_print_config(rq['OriginalConfig'])
 
 def is_crab_working_dir(path):
     return os.path.isdir(path) and os.path.isfile(os.path.join(path, '.requestcache'))
@@ -252,3 +264,4 @@ def crab_get_output_dir(working_dir):
 
 if __name__ == '__main__':
     rq = crab_requestcache(sys.argv[1])
+    cfg = rq['OriginalConfig']
