@@ -2,28 +2,35 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "TVector2.h"
+#include "TVector3.h"
 #include "JMTucker/MFVNeutralino/interface/MovedTracksNtuple.h"
 #include "utils.h"
 #include <cassert>
 #include <iostream>
 
-// #error need to support picking hlt bit and final ht cut
+// to read V1: change the uchar typedef to ushort in the Ntuple.h, set newfmt = false in utils.cc, and remove use of nt.p_vtxs_anglemax/tkonlymass below
 
 int main(int argc, char** argv) {
   if (argc < 5) {
-    fprintf(stderr, "usage: hists.exe in.root out.root njets_req nbjets_req\n");
+    fprintf(stderr, "usage: hists.exe in.root out.root tree_path tau[int:microns]\n");
     return 1;
   }
 
   const char* in_fn  = argv[1];
   const char* out_fn = argv[2];
-  const int njets_req = atoi(argv[3]);
-  const int nbjets_req = atoi(argv[4]);
+  const char* tree_path = argv[3];
+  const int itau = atoi(argv[4]);
   const bool apply_weight = true;
+
+  const int itau_original = 10000; // JMTBAD if you change this in ntuple.py, change it here
+  if (itau != itau_original)
+    printf("reweighting tau distribution from 10000 um to %i um\n", itau);
+  const double o_tau_from = 10000./itau_original;
+  const double o_tau_to = 10000./itau;
 
   root_setup();
 
-  file_and_tree fat(in_fn, out_fn);
+  file_and_tree fat(in_fn, out_fn, tree_path);
   TTree* t = fat.t;
   mfv::MovedTracksNtuple& nt = fat.nt;
   t->GetEntry(0);
@@ -40,6 +47,7 @@ int main(int argc, char** argv) {
     h_norm->Fill(0.5, h_sums->GetBinContent(1));
 
   TH1D* h_weight = new TH1D("h_weight", ";weight;events/0.01", 200, 0, 2);
+  TH1D* h_tau = new TH1D("h_tau", ";tau (cm);events/10 #mum", 10000, 0,10);
   TH1D* h_npu = new TH1D("h_npu", ";# PU;events/1", 100, 0, 100);
 
   const int num_numdens = 3;
@@ -50,7 +58,7 @@ int main(int argc, char** argv) {
     numdens("all")
   };
 
-  enum { k_movedist2, k_movedist3, k_npv, k_pvx, k_pvy, k_pvz, k_pvrho, k_pvntracks, k_pvsumpt2, k_ht, k_met, k_nlep, k_ntracks, k_nseltracks, k_npreseljets, k_npreselbjets, k_jetsume, k_jetdrmax, k_jetdravg, k_jetsumntracks };
+  enum { k_movedist2, k_movedist3, k_npv, k_pvx, k_pvy, k_pvz, k_pvrho, k_pvntracks, k_pvsumpt2, k_ht, k_ntracks, k_nseltracks, k_npreseljets, k_npreselbjets, k_jetsume, k_jetdrmax, k_jetdravg, k_jetsumntracks };
   for (numdens& nd : nds) {
     nd.book(k_movedist2, "movedist2", ";movement 2-dist;events/0.01 cm", 200, 0, 2);
     nd.book(k_movedist3, "movedist3", ";movement 3-dist;events/0.01 cm", 200, 0, 2);
@@ -61,9 +69,7 @@ int main(int argc, char** argv) {
     nd.book(k_pvrho, "pvrho", ";PV #rho (cm);events/1 #mum", 200, 0, 0.02);
     nd.book(k_pvntracks, "pvntracks", ";PV # tracks;events/2", 200, 0, 400);
     nd.book(k_pvsumpt2, "pvsumpt2", ";PV #Sigma p_{T}^{2} (GeV^{2});events/200 GeV^{2}", 200, 0, 40000);
-    nd.book(k_ht, "ht", ";#Sigma H_{T} (GeV);events/50 GeV", 50, 0, 2500);
-    nd.book(k_met, "met", ";MET (GeV);events/20 GeV", 25, 0, 500);
-    nd.book(k_nlep, "nlep", ";# leptons;events", 5, 0, 5);
+    nd.book(k_ht, "ht", ";H_{T} (GeV);events/50 GeV", 50, 0, 2500);
     nd.book(k_ntracks, "ntracks", ";# tracks;events/10", 200, 0, 2000);
     nd.book(k_nseltracks, "nseltracks", ";# selected tracks;events/2", 200, 0, 400);
     nd.book(k_npreseljets, "npreseljets", ";# preselected jets;events/1", 20, 0, 20);
@@ -74,12 +80,18 @@ int main(int argc, char** argv) {
     nd.book(k_jetsumntracks, "jetsumntracks", ";#Sigma jet # tracks;events/5", 200, 0, 1000);
   }
 
+  TH1D* h_vtxdbv[num_numdens] = {0};
   TH1D* h_vtxntracks[num_numdens] = {0};
   TH1D* h_vtxbs2derr[num_numdens] = {0};
+  TH1D* h_vtxtkonlymass[num_numdens] = {0};
+  TH1D* h_vtxanglemax[num_numdens] = {0};
 
   for (int i = 0; i < num_numdens; ++i) {
-    h_vtxntracks[i] = new TH1D(TString::Format("h_%i_vtxntracks",      i), ";# tracks in largest vertex;events/1", 40, 0, 40);
-    h_vtxbs2derr[i] = new TH1D(TString::Format("h_%i_vtxbs2derr",      i), ";#sigma(d_{BV}) of largest vertex (cm);events/2 #mum", 50, 0, 0.01);
+    h_vtxdbv[i] = new TH1D(TString::Format("h_%i_vtxdbv", i), ";d_{BV} of largest vertex (cm);events/50 #mum", 400, 0, 2);
+    h_vtxntracks[i] = new TH1D(TString::Format("h_%i_vtxntracks", i), ";# tracks in largest vertex;events/1", 60, 0, 60);
+    h_vtxbs2derr[i] = new TH1D(TString::Format("h_%i_vtxbs2derr", i), ";#sigma(d_{BV}) of largest vertex (cm);events/1 #mum", 500, 0, 0.05);
+    h_vtxtkonlymass[i] = new TH1D(TString::Format("h_%i_vtxtkonlymass", i), ";track-only mass of largest vertex (GeV);events/1 GeV", 500, 0, 500);
+    h_vtxanglemax[i] = new TH1D(TString::Format("h_%i_vtxanglemax", i), ";biggest angle between track in vertex and move vector;events/0.03", 100, 0, M_PI);
   }
 
   double den = 0;
@@ -110,6 +122,13 @@ int main(int argc, char** argv) {
 
     double w = 1;
 
+    if (itau != 10000) {
+      const double tau = nt.move_tau();
+      const double tau_weight = o_tau_to/o_tau_from * exp((o_tau_from - o_tau_to) * tau);
+      h_tau->Fill(tau, tau_weight);
+      w *= tau_weight;
+    }
+
     if (is_mc && apply_weight) {
       w *= nt.weight;
 
@@ -135,17 +154,16 @@ int main(int argc, char** argv) {
       }
     }
 
-    const double movedist2 = mag(nt.move_x - nt.pvx,
-                                 nt.move_y - nt.pvy);
-    const double movedist3 = mag(nt.move_x - nt.pvx,
-                                 nt.move_y - nt.pvy,
-                                 nt.move_z - nt.pvz);
+    const TVector3 move_vector = nt.move_vector();
+    const double movedist2 = move_vector.Perp();
+    const double movedist3 = move_vector.Mag();
 
     const size_t n_raw_vtx = nt.p_vtxs_x->size();
 
     const bool pass_800 = bool(nt.pass_hlt & 0x2);
     const bool pass_900_450_AK450 = bool(nt.pass_hlt & 0x1C);
-    const bool H_data = nt.run > 281000;
+    const bool is_H = nt.run > 281000;
+    const bool pass_trig = pass_800 || (is_H && pass_900_450_AK450);
 
     double jet_sume = 0;
     double jet_drmax = 0;
@@ -165,12 +183,11 @@ int main(int argc, char** argv) {
       }
     }
     jet_dravg /= n_jets * (n_jets - 1) / 2.;
-    if (nt.npreseljets < njets_req || 
-        nt.npreselbjets < nbjets_req ||
-        nt.jetht < 1000 ||
+    if (nt.jetht < 1000 ||
+        nt.nalljets < 4 ||
+	!pass_trig || 
         movedist2 < 0.03 ||
-	!(pass_800 || (H_data && pass_900_450_AK450)) ||
-        movedist2 > 2.5) {
+        movedist2 > 2.0) {
       continue;
     }
 
@@ -190,8 +207,6 @@ int main(int argc, char** argv) {
       Fill(nd(k_pvntracks)    .den, nt.pvntracks);
       Fill(nd(k_pvsumpt2)     .den, nt.pvsumpt2);
       Fill(nd(k_ht)           .den, nt.jetht);
-      Fill(nd(k_met)          .den, nt.met);
-      Fill(nd(k_nlep)         .den, nt.nlep);
       Fill(nd(k_ntracks)      .den, nt.ntracks);
       Fill(nd(k_nseltracks)   .den, nt.nseltracks);
       Fill(nd(k_npreseljets)  .den, nt.npreseljets);
@@ -215,7 +230,7 @@ int main(int argc, char** argv) {
       const double dist2move = mag(nt.move_x - nt.p_vtxs_x->at(ivtx),
                                    nt.move_y - nt.p_vtxs_y->at(ivtx),
                                    nt.move_z - nt.p_vtxs_z->at(ivtx));
-      if (dist2move > 0.005)
+      if (dist2move > 0.0084)
         continue;
 
       const bool pass_ntracks = nt.p_vtxs_ntracks->at(ivtx) >= 5;
@@ -229,8 +244,12 @@ int main(int argc, char** argv) {
     for (int i = 0; i < num_numdens; ++i) {
       int ivtx = first_vtx_to_pass[i];
       if (ivtx != -1) {
+        h_vtxdbv[i]->Fill(mag(nt.p_vtxs_x->at(ivtx),
+                              nt.p_vtxs_y->at(ivtx)));
         h_vtxntracks[i]->Fill(nt.p_vtxs_ntracks->at(ivtx), w);
         h_vtxbs2derr[i]->Fill(nt.p_vtxs_bs2derr->at(ivtx), w);
+        h_vtxanglemax[i]->Fill(nt.p_vtxs_anglemax->at(ivtx), w);
+        h_vtxtkonlymass[i]->Fill(nt.p_vtxs_tkonlymass->at(ivtx), w);
       }
     }
 
@@ -257,8 +276,6 @@ int main(int argc, char** argv) {
         Fill(nd(k_pvntracks)    .num, nt.pvntracks);
         Fill(nd(k_pvsumpt2)     .num, nt.pvsumpt2);
         Fill(nd(k_ht)           .num, nt.jetht);
-        Fill(nd(k_met)          .num, nt.met);
-        Fill(nd(k_nlep)         .num, nt.nlep);
         Fill(nd(k_ntracks)      .num, nt.ntracks);
         Fill(nd(k_nseltracks)   .num, nt.nseltracks);
         Fill(nd(k_npreseljets)  .num, nt.npreseljets);
@@ -273,7 +290,7 @@ int main(int argc, char** argv) {
 
   printf("\r                                \n");
   printf("%f events in denominator\n", den);
-  printf("%30s  %12s  %12s   %10s [%10s, %10s] +%10s -%10s\n", "name", "num", "den", "eff", "lo", "hi", "+", "-");
+  printf("%30s  %12s  %12s  %10s [%10s, %10s] +%10s -%10s\n", "name", "num", "den", "eff", "lo", "hi", "+", "-");
   for (const auto& p : nums) {
     const interval i = clopper_pearson_binom(p.second, den);
     printf("%30s  %12f  %12f  %10f [%10f, %10f] +%10f -%10f\n", p.first.c_str(), p.second, den, i.value, i.lower, i.upper, i.upper - i.value, i.value - i.lower);

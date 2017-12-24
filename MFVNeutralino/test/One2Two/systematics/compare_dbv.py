@@ -22,17 +22,27 @@ if ntk == 3:
 if ntk == 4:
     tree_path = 'mfvMiniTreeNtk4/t'
 
-path = 'MiniTreeV14'
+bquarkpt = False
+
+path = 'MiniTreeV15'
+if bquarkpt:
+    path = 'MiniTreeV15_v4_bquarkpt'
 ps = plot_saver('../../plots/bkgest/%s/%s_ntk%i' % (path, year, ntk), size=(700,700), root=False)
 trees = '/uscms_data/d2/tucker/crab_dirs/%s' % path
 
 def book_dbv(n):
     return ROOT.TH1F(n, '', 40, 0, 0.2)
+def book_pt(n):
+    return ROOT.TH1F(n, '', 50, 0, 500)
+def book_dbv_pt(n):
+    return ROOT.TH2F(n, '', 50, 0, 500, 40, 0, 0.2)
 
 h_dbv_sum = book_dbv('dbv_sum')
 h_dbv_nob = book_dbv('dbv_nob')
 h_dbv_b = book_dbv('dbv_b')
 h_dbv_qcdb = book_dbv('dbv_qcdb')
+h_bquarkpt = book_pt('bquarkpt')
+h_dbv_bquarkpt = book_dbv_pt('dbv_bquarkpt')
 
 hs_nob = []
 for sn in sns:
@@ -72,6 +82,31 @@ for sn in sns:
     h = h_dbv.Clone()
     h.SetDirectory(0)
     hs_b.append(h)
+
+    if bquarkpt:
+        h_pt = book_pt('pt')
+        t.Draw('gen_bquark_pt>>pt', 'nvtx == 1')
+        h_bquarkpt.Add(h_pt, sc * s.partial_weight_orig)
+
+        h_dbv_pt = book_dbv_pt('dbv_pt')
+        t.Draw('dist0:gen_bquark_pt>>dbv_pt', 'nvtx == 1 && gen_flavor_code == 2')
+        h_dbv_bquarkpt.Add(h_dbv_pt, sc * s.partial_weight_orig)
+
+if bquarkpt:
+    h_bquarkpt.Draw()
+    ps.save('bquarkpt')
+
+    h_dbv_bquarkpt.Draw('colz')
+    ps.save('dbv_bquarkpt')
+
+    pfx = h_dbv_bquarkpt.ProfileX()
+    pfx.SetTitle('%s-track one-vertex events;b quark p_{T} (GeV);mean d_{BV} (cm)' % ntk)
+    pfx.SetMaximum(0.05)
+    pfx.SetLineColor(ROOT.kPink)
+    pfx.Draw()
+    ps.c.Update()
+    differentiate_stat_box(pfx, movement=0, new_size=(0.2,0.2))
+    ps.save('dbv_bquarkpt_pfx')
 
 h_dbv_sum.Draw()
 ps.save('dbv_sum')

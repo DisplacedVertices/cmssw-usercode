@@ -16,8 +16,11 @@ def _system(cmd):
     return subprocess.call(cmd, stdout=open(os.devnull, 'w'), stderr=subprocess.STDOUT) == 0
 
 def _storeonly(fn):
-    if not fn.startswith('/store'):
-        raise ValueError('fn passed %r does not start with /store' % fn)
+    if fn.startswith('/store'):
+        return fn
+    if '/store/' not in fn:
+        raise ValueError('fn passed %r does not contain "/store/"' % fn)
+    return '/store/' + fn.split('/store/')[1]
     
 def _canon(fn):
     if fn.startswith('root:'):
@@ -35,18 +38,18 @@ def quota():
     return "eos quota command didn't work or didn't find user %s" % user
 
 def exists(fn):
-    _storeonly(fn)
+    fn = _storeonly(fn)
     return _system('eos %s ls %s' % (url, fn))
 
 def mkdir(fn):
-    _storeonly(fn)
+    fn = _storeonly(fn)
     dn = os.path.dirname(fn)
     if exists(dn):
         return True
     return _system('eos %s mkdir -p %s' % (url, dn))
 
 def ls(path):
-    _storeonly(path)
+    fn = _storeonly(path)
     fns = _popen(str('eos %s ls %s' % (url, path))).communicate()[0].strip().split()
     return [os.path.join(path, fn) for fn in fns]
 
@@ -62,11 +65,11 @@ def cp(src, dst):
     return _system('xrdcp -s %s %s' % (src, dst))
 
 def rm(fn):
-    _storeonly(fn)
+    fn = _storeonly(fn)
     return _system('eos %s rm %s' % (url, fn))
 
 def md5sum(fn):
-    _storeonly(fn)
+    fn = _storeonly(fn)
     cmd = 'xrdcp -s %s%s -' % (url, fn)
     p  = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     p2 = subprocess.Popen(('md5sum',), stdin=p.stdout, stdout=subprocess.PIPE)

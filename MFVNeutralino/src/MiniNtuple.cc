@@ -6,14 +6,17 @@ namespace mfv {
   MiniNtuple::MiniNtuple() {
     clear();
     p_tk0_qchi2 = p_tk0_ndof = p_tk0_vx = p_tk0_vy = p_tk0_vz = p_tk0_px = p_tk0_py = p_tk0_pz = p_tk1_qchi2 = p_tk1_ndof = p_tk1_vx = p_tk1_vy = p_tk1_vz = p_tk1_px = p_tk1_py = p_tk1_pz = 0;
+    p_tk0_inpv = p_tk1_inpv = 0;
     p_tk0_cov = p_tk1_cov = 0;
   }
 
   void MiniNtuple::clear() {
     run = lumi = 0;
     event = 0;
-    gen_flavor_code = npv = npu = njets = nvtx = ntk0 = ntracksptgt30 = njetsntks0 = ntk1 = ntracksptgt31 = njetsntks1 = 0;
-    pvx = pvy = pvz = weight = x0 = y0 = z0 = drmin0 = drmax0 = bs2derr0 = geo2ddist0 = x1 = y1 = z1 = drmin1 = drmax1 = bs2derr1 = geo2ddist1 = 0;
+    gen_flavor_code = pass_hlt = npv = npu = njets = nvtx = ntk0 = ntk1 = 0;
+    l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = hlt_ht4mc = bsx = bsy = bsz = bsdxdz = bsdydz = pvx = pvy = pvz = weight = x0 = y0 = z0 = bs2derr0 = geo2ddist0 = x1 = y1 = z1 = bs2derr1 = geo2ddist1 = 0;
+    genmatch0 = genmatch1 = 0;
+    gen_x[0] = gen_y[0] = gen_z[0] = gen_x[1] = gen_y[1] = gen_z[1] = 0;
     for (int i = 0; i < 50; ++i) {
       jet_pt[i] = jet_eta[i] = jet_phi[i] = jet_energy[i] = 0;
       jet_id[i] = 0;
@@ -26,6 +29,7 @@ namespace mfv {
     tk0_px.clear();
     tk0_py.clear();
     tk0_pz.clear();
+    tk0_inpv.clear();
     tk0_cov.clear();
     tk1_qchi2.clear();
     tk1_ndof.clear();
@@ -35,6 +39,7 @@ namespace mfv {
     tk1_px.clear();
     tk1_py.clear();
     tk1_pz.clear();
+    tk1_inpv.clear();
     tk1_cov.clear();
   }
 
@@ -43,6 +48,14 @@ namespace mfv {
     tree->Branch("lumi", &nt.lumi);
     tree->Branch("event", &nt.event);
     tree->Branch("gen_flavor_code", &nt.gen_flavor_code);
+
+    tree->Branch("pass_hlt", &nt.pass_hlt);
+    tree->Branch("l1_htt", &nt.l1_htt);
+    tree->Branch("l1_myhtt", &nt.l1_myhtt);
+    tree->Branch("l1_myhttwbug", &nt.l1_myhttwbug);
+    tree->Branch("hlt_ht", &nt.hlt_ht);
+    tree->Branch("hlt_ht4mc", &nt.hlt_ht4mc);
+
     tree->Branch("npv", &nt.npv);
     tree->Branch("pvx", &nt.pvx);
     tree->Branch("pvy", &nt.pvy);
@@ -56,6 +69,9 @@ namespace mfv {
     tree->Branch("jet_phi", nt.jet_phi, "jet_phi[njets]/F");
     tree->Branch("jet_energy", nt.jet_energy, "jet_energy[njets]/F");
     tree->Branch("jet_id", nt.jet_id, "jet_id[njets]/b");
+    tree->Branch("gen_x", nt.gen_x, "gen_x[2]/F");
+    tree->Branch("gen_y", nt.gen_y, "gen_y[2]/F");
+    tree->Branch("gen_z", nt.gen_z, "gen_z[2]/F");
 
     tree->Branch("nvtx", &nt.nvtx);
     tree->Branch("ntk0", &nt.ntk0);
@@ -67,14 +83,12 @@ namespace mfv {
     tree->Branch("tk0_px", &nt.tk0_px);
     tree->Branch("tk0_py", &nt.tk0_py);
     tree->Branch("tk0_pz", &nt.tk0_pz);
+    tree->Branch("tk0_inpv", &nt.tk0_inpv);
     tree->Branch("tk0_cov", &nt.tk0_cov);
+    tree->Branch("genmatch0", &nt.genmatch0);
     tree->Branch("x0", &nt.x0);
     tree->Branch("y0", &nt.y0);
     tree->Branch("z0", &nt.z0);
-    tree->Branch("ntracksptgt30", &nt.ntracksptgt30);
-    tree->Branch("drmin0", &nt.drmin0);
-    tree->Branch("drmax0", &nt.drmax0);
-    tree->Branch("njetsntks0", &nt.njetsntks0);
     tree->Branch("bs2derr0", &nt.bs2derr0);
     tree->Branch("geo2ddist0", &nt.geo2ddist0);
 
@@ -87,17 +101,16 @@ namespace mfv {
     tree->Branch("tk1_px", &nt.tk1_px);
     tree->Branch("tk1_py", &nt.tk1_py);
     tree->Branch("tk1_pz", &nt.tk1_pz);
+    tree->Branch("tk1_inpv", &nt.tk1_inpv);
     tree->Branch("tk1_cov", &nt.tk1_cov);
+    tree->Branch("genmatch1", &nt.genmatch1);
     tree->Branch("x1", &nt.x1);
     tree->Branch("y1", &nt.y1);
     tree->Branch("z1", &nt.z1);
-    tree->Branch("ntracksptgt31", &nt.ntracksptgt31);
-    tree->Branch("drmin1", &nt.drmin1);
-    tree->Branch("drmax1", &nt.drmax1);
-    tree->Branch("njetsntks1", &nt.njetsntks1);
     tree->Branch("bs2derr1", &nt.bs2derr1);
     tree->Branch("geo2ddist1", &nt.geo2ddist1);
 
+    tree->SetAlias("jetht", "Sum$((jet_pt>40)*jet_pt)");
     tree->SetAlias("dist0", "sqrt(x0**2 + y0**2)");
     tree->SetAlias("dist1", "sqrt(x1**2 + y1**2)");
     tree->SetAlias("phi0",  "atan2(y0,x0)");
@@ -112,6 +125,12 @@ namespace mfv {
     tree->SetBranchAddress("lumi", &nt.lumi);
     tree->SetBranchAddress("event", &nt.event);
     tree->SetBranchAddress("gen_flavor_code", &nt.gen_flavor_code);
+    tree->SetBranchAddress("pass_hlt", &nt.pass_hlt);
+    tree->SetBranchAddress("l1_htt", &nt.l1_htt);
+    tree->SetBranchAddress("l1_myhtt", &nt.l1_myhtt);
+    tree->SetBranchAddress("l1_myhttwbug", &nt.l1_myhttwbug);
+    tree->SetBranchAddress("hlt_ht", &nt.hlt_ht);
+    tree->SetBranchAddress("hlt_ht4mc", &nt.hlt_ht4mc);
     tree->SetBranchAddress("npv", &nt.npv);
     tree->SetBranchAddress("pvx", &nt.pvx);
     tree->SetBranchAddress("pvy", &nt.pvy);
@@ -124,6 +143,9 @@ namespace mfv {
     tree->SetBranchAddress("jet_phi", nt.jet_phi);
     tree->SetBranchAddress("jet_energy", nt.jet_energy);
     tree->SetBranchAddress("jet_id", nt.jet_id);
+    tree->SetBranchAddress("gen_x", nt.gen_x);
+    tree->SetBranchAddress("gen_y", nt.gen_y);
+    tree->SetBranchAddress("gen_z", nt.gen_z);
     tree->SetBranchAddress("nvtx", &nt.nvtx);
     tree->SetBranchAddress("ntk0", &nt.ntk0);
     tree->SetBranchAddress("tk0_qchi2", &nt.p_tk0_qchi2);
@@ -134,14 +156,12 @@ namespace mfv {
     tree->SetBranchAddress("tk0_px", &nt.p_tk0_px);
     tree->SetBranchAddress("tk0_py", &nt.p_tk0_py);
     tree->SetBranchAddress("tk0_pz", &nt.p_tk0_pz);
+    tree->SetBranchAddress("tk0_inpv", &nt.p_tk0_inpv);
     tree->SetBranchAddress("tk0_cov", &nt.p_tk0_cov);
+    tree->SetBranchAddress("genmatch0", &nt.genmatch0);
     tree->SetBranchAddress("x0", &nt.x0);
     tree->SetBranchAddress("y0", &nt.y0);
     tree->SetBranchAddress("z0", &nt.z0);
-    tree->SetBranchAddress("ntracksptgt30", &nt.ntracksptgt30);
-    tree->SetBranchAddress("drmin0", &nt.drmin0);
-    tree->SetBranchAddress("drmax0", &nt.drmax0);
-    tree->SetBranchAddress("njetsntks0", &nt.njetsntks0);
     tree->SetBranchAddress("bs2derr0", &nt.bs2derr0);
     tree->SetBranchAddress("geo2ddist0", &nt.geo2ddist0);
     tree->SetBranchAddress("ntk1", &nt.ntk1);
@@ -153,14 +173,12 @@ namespace mfv {
     tree->SetBranchAddress("tk1_px", &nt.p_tk1_px);
     tree->SetBranchAddress("tk1_py", &nt.p_tk1_py);
     tree->SetBranchAddress("tk1_pz", &nt.p_tk1_pz);
+    tree->SetBranchAddress("tk1_inpv", &nt.p_tk1_inpv);
     tree->SetBranchAddress("tk1_cov", &nt.p_tk1_cov);
+    tree->SetBranchAddress("genmatch1", &nt.genmatch1);
     tree->SetBranchAddress("x1", &nt.x1);
     tree->SetBranchAddress("y1", &nt.y1);
     tree->SetBranchAddress("z1", &nt.z1);
-    tree->SetBranchAddress("ntracksptgt31", &nt.ntracksptgt31);
-    tree->SetBranchAddress("drmin1", &nt.drmin1);
-    tree->SetBranchAddress("drmax1", &nt.drmax1);
-    tree->SetBranchAddress("njetsntks1", &nt.njetsntks1);
     tree->SetBranchAddress("bs2derr1", &nt.bs2derr1);
     tree->SetBranchAddress("geo2ddist1", &nt.geo2ddist1);
   }
@@ -176,6 +194,7 @@ namespace mfv {
     if (nt.p_tk0_px   ) nnt->tk0_px    = *nt.p_tk0_px;
     if (nt.p_tk0_py   ) nnt->tk0_py    = *nt.p_tk0_py;
     if (nt.p_tk0_pz   ) nnt->tk0_pz    = *nt.p_tk0_pz;
+    if (nt.p_tk0_inpv ) nnt->tk0_inpv  = *nt.p_tk0_inpv;
     if (nt.p_tk0_cov  ) nnt->tk0_cov   = *nt.p_tk0_cov;
 
     if (nt.p_tk1_qchi2) nnt->tk1_qchi2 = *nt.p_tk1_qchi2;
@@ -186,9 +205,11 @@ namespace mfv {
     if (nt.p_tk1_px   ) nnt->tk1_px    = *nt.p_tk1_px;
     if (nt.p_tk1_py   ) nnt->tk1_py    = *nt.p_tk1_py;
     if (nt.p_tk1_pz   ) nnt->tk1_pz    = *nt.p_tk1_pz;
+    if (nt.p_tk1_inpv ) nnt->tk1_inpv  = *nt.p_tk1_inpv;
     if (nt.p_tk1_cov  ) nnt->tk1_cov   = *nt.p_tk1_cov;
 
     nnt->p_tk0_qchi2 = nnt->p_tk0_ndof = nnt->p_tk0_vx = nnt->p_tk0_vy = nnt->p_tk0_vz = nnt->p_tk0_px = nnt->p_tk0_py = nnt->p_tk0_pz = nnt->p_tk1_qchi2 = nnt->p_tk1_ndof = nnt->p_tk1_vx = nnt->p_tk1_vy = nnt->p_tk1_vz = nnt->p_tk1_px = nnt->p_tk1_py = nnt->p_tk1_pz = 0;
+    nnt->p_tk0_inpv = nnt->p_tk1_inpv = 0;
     nnt->p_tk0_cov = nnt->p_tk1_cov = 0;
 
     return nnt;

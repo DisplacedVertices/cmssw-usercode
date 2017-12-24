@@ -125,8 +125,8 @@ void TrackingTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.tk_qpt.push_back(tk.charge() * tk.pt());
     nt.tk_eta.push_back(tk.eta());
     nt.tk_phi.push_back(tk.phi());
-    nt.tk_dxy.push_back(tk.dxy());
     nt.tk_dxybs.push_back(tk.dxy(*beamspot));
+    nt.tk_dzbs.push_back(tk.dz(beamspot->position()));
     if (the_pv) {
       nt.tk_dxypv.push_back(tk.dxy(the_pv->position()));
       nt.tk_dzpv.push_back(tk.dz(the_pv->position()));
@@ -135,7 +135,6 @@ void TrackingTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
       nt.tk_dxypv.push_back(1e99);
       nt.tk_dzpv.push_back(1e99);
     }
-    nt.tk_dz.push_back(tk.dz());
     nt.tk_vx.push_back(tk.vx());
     nt.tk_vy.push_back(tk.vy());
     nt.tk_vz.push_back(tk.vz());
@@ -149,8 +148,8 @@ void TrackingTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.tk_nstlay.push_back(tk.hitPattern().stripLayersWithMeasurement());
     nt.tk_npxlay.push_back(tk.hitPattern().pixelLayersWithMeasurement());
 
-    NumExtents ex    = tracker_extents.numExtentInRAndZ(tk.hitPattern(), false);
-    NumExtents ex_px = tracker_extents.numExtentInRAndZ(tk.hitPattern(), true);
+    NumExtents ex    = tracker_extents.numExtentInRAndZ(tk.hitPattern(), TrackerSpaceExtents::AllowAll);
+    NumExtents ex_px = tracker_extents.numExtentInRAndZ(tk.hitPattern(), TrackerSpaceExtents::PixelOnly);
     nt.tk_minhit(ex.min_r < 2e9 ? ex.min_r : 0,
                  ex.min_z < 2e9 ? ex.min_z : 0);
     nt.tk_maxhit(ex.max_r > -2e9 ? ex.max_r : 0,

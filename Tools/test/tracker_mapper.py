@@ -5,8 +5,9 @@ from JMTucker.MFVNeutralino.Year import year
 
 is_mc = True
 H = False
+repro = False
 
-process = pat_tuple_process(None, is_mc, year, H)
+process = pat_tuple_process(None, is_mc, year, H, repro)
 jets_only(process)
 
 sample_files(process, 'qcdht2000ext', 'main', 5)
@@ -23,12 +24,22 @@ process.load('JMTucker.Tools.TrackerMapper_cfi')
 process.TrackerMapperOldStCut = process.TrackerMapper.clone(old_stlayers_cut = True)
 process.p = cms.Path(process.triggerFilter * process.jmtJetFilter * process.TrackerMapper * process.TrackerMapperOldStCut)
 
+if False:
+    from JMTucker.Tools.PileupWeights import pileup_weights
+    for k,v in pileup_weights.iteritems():
+        if type(k) == str and k.startswith('2016'):
+            tm = process.TrackerMapper.clone(pileup_weights = v)
+            setattr(process, 'tm%s' % k, tm)
+            process.p *= tm
+
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
     if year == 2015:
         samples = Samples.data_samples_2015 + Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015
     elif year == 2016:
         samples = Samples.data_samples + Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext
+
+    #samples = Samples.qcd_hip_samples + [Samples.qcdht0700ext, Samples.qcdht1000ext, Samples.qcdht1500ext] + Samples.data_samples
 
     filter_eff = { 'qcdht0500': 2.9065e-03, 'qcdht0700': 3.2294e-01, 'ttbar': 3.6064e-02}
     for s in samples:
@@ -41,8 +52,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             s.json = 'ana_2015p6_10pc.json'
 
     from JMTucker.Tools.MetaSubmitter import *
-    ms = MetaSubmitter('TrackerMapperV0')
+    ms = MetaSubmitter('TrackerMapper_qcd_hip_v2')
     ms.common.ex = year
-    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, H_modifier)
+    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier)
     ms.crab.job_control_from_sample = True
     ms.submit(samples)

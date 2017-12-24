@@ -3,14 +3,14 @@
 from JMTucker.Tools.ROOTTools import *
 
 is_mc = True
-year = '2016'
+year = '2015p6'
 
 set_style()
-ps = plot_saver('../plots/bkgest/v14/fit_jetpairdphi%s_%s' % ('' if is_mc else '_data', year), size=(700,700), log=False, root=False)
+ps = plot_saver('../plots/bkgest/v15_v2/fit_jetpairdphi%s_%s' % ('' if is_mc else '_data', year), size=(700,700), log=False, root=False)
 
-fn = '/uscms_data/d2/tucker/crab_dirs/HistosV14/background%s.root' % ('' if year=='2016' else '_%s'%year)
+fn = '/uscms_data/d2/tucker/crab_dirs/HistosV15_v2/background%s.root' % ('' if year=='2016' else '_%s'%year)
 if not is_mc:
-  fn = '/uscms_data/d2/tucker/crab_dirs/HistosV14/JetHT%s.root' % year
+  fn = '/uscms_data/d2/tucker/crab_dirs/HistosV15_v2/JetHT%s.root' % year
 
 ntk = ['Ntk3', 'Ntk3or4', 'Ntk4', '']
 ntracks = ['3-track', '3-or-4-track', '4-track', '5-or-more-track']

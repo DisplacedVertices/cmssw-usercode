@@ -17,10 +17,24 @@ def is_mc_modifier(sample):
 
 def H_modifier(sample):
     to_replace = []
-    if sample.name.startswith('JetHT2016H'):
+    if '2016H' in sample.name:
         magic = 'H = False'
         to_replace.append((magic, 'H = True', 'trying to submit on 2016H and no magic string "%s"' % magic))
     return [], to_replace
+
+def zerobias_modifier(sample):
+    if sample.name.startswith('ZeroBias'):
+        magic = 'zerobias = False'
+        return [], [(magic, 'zerobias = True', 'trying to submit on ZeroBias and no magic string "%s"' % magic)]
+    else:
+        return [], []
+
+def repro_modifier(sample):
+    if sample.name.startswith('Repro'):
+        magic = 'repro = False'
+        return [], [(magic, 'repro = True', 'trying to submit on reprocessed dataset and no magic string "%s"' % magic)]
+    else:
+        return [], []
 
 class event_veto_modifier:
     def __init__(self, d, filter_path):
@@ -67,7 +81,10 @@ class chain_modifiers:
 
 ####
 
-def set_splitting(samples, dataset, jobtype, data_json=None):
+def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=20):
+    def intround(x,y):
+        return int(round(float(x)/y))
+
     if jobtype == 'trackmover':
         d = {
             'JetHT2015C':         ( 200000,    33),
@@ -102,13 +119,16 @@ def set_splitting(samples, dataset, jobtype, data_json=None):
             'qcdht2000ext_2015':  (  49705,     5),
             'ttbar':              ( 399372,    46),
             'ttbar_2015':         ( 919380,    66),
+            'qcdht1000_hip1p0_mit':( 55762,    25),
+            'qcdht1500_hip1p0_mit':( 52785,     9),
             }
         for sample in samples:
             # prefer to split by file with CondorSubmitter  for these jobs to not overload xrootd aaa
             sample.set_curr_dataset(dataset)
             sample.split_by = 'files' if sample.condor else 'events'
             assert d.has_key(sample.name)
-            sample.events_per, sample.files_per = d[sample.name]
+            sample.events_per = intround(d[sample.name][0], 4)
+            sample.files_per  = intround(d[sample.name][1], 4)
 
     elif jobtype == 'histos' or jobtype == 'minitree':
         d = {
@@ -239,7 +259,8 @@ def set_splitting(samples, dataset, jobtype, data_json=None):
         for sample in samples:
             sample.set_curr_dataset(dataset)
             sample.split_by = 'files'
-            sample.files_per = d.get(sample.name, 20)
+            n = sample.name.replace('_hip1p0_mit', '').replace('_hip1p0', '').replace('_retest', '')
+            sample.files_per = d.get(n, 20)
 
     elif jobtype == 'ntuple':
         target = 5000
@@ -271,20 +292,31 @@ def set_splitting(samples, dataset, jobtype, data_json=None):
             # prefer to split by file with CondorSubmitter  for these jobs to not overload xrootd aaa
             sample.set_curr_dataset(dataset)
             sample.split_by = 'files' if sample.condor else 'events'
-            if not d.has_key(sample.name):
-                if 'mfv' in sample.name:
-                    sample.events_per = 1000
-                    sample.files_per = 1 if 'official' in sample.name else 10
+            name = sample.name.replace('_2015', '')
+            name = name.replace('_hip1p0_mit', '').replace('_hip1p0', '').replace('_retest', '')
+            if not d.has_key(name):
+                if sample.is_signal:
+                    sample.events_per = 500
+                    sample.files_per = 5 if sample.is_private else 1
                 else:
                     sample.events_per = 50000
                     sample.files_per = 5
             else:
-                erate, frate = d[sample.name]
+                erate, frate = d[name]
                 sample.events_per = min(int(target * erate + 1), 200000)
                 sample.files_per = int(frate * sample.events_per / erate + 1)
             # from analysis on first try of v15, 4x maybe OK but there's a tail due to file opening problems
-            sample.events_per = int(2.5 * sample.events_per)
-            sample.files_per  = int(2.5 * sample.files_per)
+            if sample.name != 'JetHT2015D' and not sample.name.startswith('mfv_'):
+                sample.events_per = int(2.5 * sample.events_per)
+                sample.files_per  = int(2.5 * sample.files_per)
+            if sample.name in ('qcdht1000_hip1p0_mit', 'qcdht1500_hip1p0_mit'):
+                sample.files_per *= 3
+
+    elif jobtype == 'default':
+        for sample in samples:
+            sample.set_curr_dataset(dataset)
+            sample.split_by = 'files'
+            sample.files_per = default_files_per 
 
     else:
         raise ValueError("don't know anything about jobtype %s" % jobtype)

@@ -117,27 +117,14 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     elif year == 2016:
         samples = Samples.data_samples + \
             Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
-            Samples.mfv_signal_samples + Samples.mfv_ddbar_samples + Samples.mfv_hip_samples
-
-    samples = [s for s in samples if s.has_dataset(dataset)]
+            Samples.mfv_signal_samples + Samples.mfv_ddbar_samples + Samples.mfv_hip_samples + Samples.qcd_hip_samples
 
     from JMTucker.Tools.MetaSubmitter import set_splitting
-    set_splitting(samples, dataset, 'histos', data_json='ana_2015p6_10pc.json')
-
-    def modify(sample):
-        to_add, to_replace = [], []
-        if not sample.is_mc:
-            to_add.append('''
-for p in process.paths.keys():
-    if not (p == 'pSkimSel' or p == 'pEventPreSel' or p == 'pOnlyOneVtx' or p.startswith('Ntk3') or p.startswith('Ntk4') or p.startswith('p0V') or p.startswith('p1V')):
-        delattr(process, p)
-''')
-        return to_add, to_replace
+    set_splitting(samples, dataset, 'histos', data_json='ana_2015p6.json')
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('HistosV15',
+    cs = CondorSubmitter('HistosV15_v3',
                          ex = year,
                          dataset = dataset,
-                         pset_modifier = modify,
                          )
     cs.submit_all(samples)

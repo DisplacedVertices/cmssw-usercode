@@ -1,15 +1,25 @@
 #!/usr/bin/env python
 
+import sys
 from JMTucker.Tools.ROOTTools import *
 set_style()
 
-fn = '~/scratch/mfvo2t.root'
-plot_dir = '../plots/o2t_fit/h0_istat/3or4track'
-mu_sig_true_mean = 0
-mu_bkg_true_mean = 89.97
+fn = sys.argv[1]
+plot_dir = sys.argv[2]
 
 f = ROOT.TFile(fn)
 t = f.Get('Fitter/t_fit_info')
+
+skip = ''
+t.Draw('true_pars[0]>>htruesig(1000,0,1000)', skip, 'goff')
+t.Draw('true_pars[1]>>htruebkg(1000,0,1000)', skip, 'goff')
+t.Draw('true_pars[2]>>htruenuis0(1000,0,10)', skip, 'goff')
+t.Draw('true_pars[3]>>htruenuis1(1000,0,10)', skip, 'goff')
+mu_sig_true_mean = ROOT.htruesig.GetMean()
+mu_bkg_true_mean = ROOT.htruebkg.GetMean()
+nuis0_true_mean = ROOT.htruenuis0.GetMean()
+nuis1_true_mean = ROOT.htruenuis1.GetMean()
+print '<true sig> = %f, <true bkg> = %f' % (mu_sig_true_mean, mu_bkg_true_mean)
 
 t.SetMarkerStyle(20)
 t.SetMarkerSize(1.)
@@ -34,9 +44,8 @@ def tree_xform(x):
 def do_detree():
     return list(detree(t, tree_vars.replace(' ', ':'), xform=tree_xform))
 
-sig_scale = 0
 def skip(h0_istat, h1_istat, sig_limit_fit_n):
-    return h0_istat <= 1
+    return False #h0_istat <= 1
 
 d = do_detree()
 
@@ -118,20 +127,8 @@ h_sig_limit_fit_a_err = h('h_sig_limit_fit_a_err', '', 50, 0, 5)
 h_sig_limit_fit_b_err = h('h_sig_limit_fit_b_err', '', 50, 0, 1)
 h_sig_limit_fit_prob = h('h_sig_limit_fit_prob', '', 50, 0, 1)
 
-nuis0_true_mean = 0
-nuis1_true_mean = 0
-for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwolnL,h1_mu_sig,h1_err_mu_sig,h1_eplus_mu_sig,h1_eminus_mu_sig,h1_mu_bkg,h1_err_mu_bkg,h1_eplus_mu_bkg,h1_eminus_mu_bkg,h1_nuis0,h1_err_nuis0,h1_eplus_nuis0,h1_eminus_nuis0,h1_nuis1,h1_err_nuis1,h1_eplus_nuis1,h1_eminus_nuis1,h1_correlation_nuis,h0_istat,h0_maxtwolnL,h0_mu_sig,h0_err_mu_sig,h0_eplus_mu_sig,h0_eminus_mu_sig,h0_mu_bkg,h0_err_mu_bkg,h0_eplus_mu_bkg,h0_eminus_mu_bkg,h0_nuis0,h0_err_nuis0,h0_eplus_nuis0,h0_eminus_nuis0,h0_nuis1,h0_err_nuis1,h0_eplus_nuis1,h0_eminus_nuis1,h0_correlation_nuis,chi2,ndof,prob,pval_signif,pval_cls,sig_limit,sig_limit_err,sig_limit_fit_n,sig_limit_fit_a,sig_limit_fit_b,sig_limit_fit_a_err,sig_limit_fit_b_err,sig_limit_fit_prob in d:
-    if skip(h0_istat, h1_istat, sig_limit_fit_n):
-        continue
-    nuis0_true_mean += true_pars_2
-    nuis1_true_mean += true_pars_3
-n = len(d)
-nuis0_true_mean /= n
-nuis1_true_mean /= n
-
 pval_signifs = []
 sig_limits = []
-sig_limits_scaled = []
 for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwolnL,h1_mu_sig,h1_err_mu_sig,h1_eplus_mu_sig,h1_eminus_mu_sig,h1_mu_bkg,h1_err_mu_bkg,h1_eplus_mu_bkg,h1_eminus_mu_bkg,h1_nuis0,h1_err_nuis0,h1_eplus_nuis0,h1_eminus_nuis0,h1_nuis1,h1_err_nuis1,h1_eplus_nuis1,h1_eminus_nuis1,h1_correlation_nuis,h0_istat,h0_maxtwolnL,h0_mu_sig,h0_err_mu_sig,h0_eplus_mu_sig,h0_eminus_mu_sig,h0_mu_bkg,h0_err_mu_bkg,h0_eplus_mu_bkg,h0_eminus_mu_bkg,h0_nuis0,h0_err_nuis0,h0_eplus_nuis0,h0_eminus_nuis0,h0_nuis1,h0_err_nuis1,h0_eplus_nuis1,h0_eminus_nuis1,h0_correlation_nuis,chi2,ndof,prob,pval_signif,pval_cls,sig_limit,sig_limit_err,sig_limit_fit_n,sig_limit_fit_a,sig_limit_fit_b,sig_limit_fit_a_err,sig_limit_fit_b_err,sig_limit_fit_prob in d:
     if skip(h0_istat, h1_istat, sig_limit_fit_n):
         continue
@@ -160,22 +157,22 @@ for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwol
     h_h1_mu_bkg_err_v_bkg.Fill(h1_mu_bkg, h1_err_mu_bkg)
     h_h1_mu_bkg_v_true.Fill(true_pars_1, h1_mu_bkg)
     h_h1_mu_bkg_pull.Fill((h1_mu_bkg - mu_bkg_true_mean)/h1_err_mu_bkg)
-    h_h1_nuis0.Fill(h1_nuis0)
-    h_h1_nuis0_err.Fill(h1_err_nuis0)
-    if h1_eplus_nuis0 != 0:
-        h_h1_nuis0_eplus.Fill(h1_eplus_nuis0)
-    if h1_eminus_nuis0 != 0:
-        h_h1_nuis0_eminus.Fill(h1_eminus_nuis0)
-    h_h1_nuis0_pull.Fill((h1_nuis0 - nuis0_true_mean)/h1_err_nuis0)
-    h_h1_nuis_correlation.Fill(h1_correlation_nuis)
-    h_h1_nuis1.Fill(h1_nuis1)
-    h_h1_nuis1_err.Fill(h1_err_nuis1)
-    if h1_eplus_nuis1 != 0:
-        h_h1_nuis1_eplus.Fill(h1_eplus_nuis1)
-    if h1_eminus_nuis1 != 0:
-        h_h1_nuis1_eminus.Fill(h1_eminus_nuis1)
-    h_h1_nuis1_pull.Fill((h1_nuis1 - nuis1_true_mean)/h1_err_nuis1)
-    h_h1_nuis1_nuis0.Fill(h1_nuis0, h1_nuis1)
+    #h_h1_nuis0.Fill(h1_nuis0)
+    #h_h1_nuis0_err.Fill(h1_err_nuis0)
+    #if h1_eplus_nuis0 != 0:
+    #    h_h1_nuis0_eplus.Fill(h1_eplus_nuis0)
+    #if h1_eminus_nuis0 != 0:
+    #    h_h1_nuis0_eminus.Fill(h1_eminus_nuis0)
+    #h_h1_nuis0_pull.Fill((h1_nuis0 - nuis0_true_mean)/h1_err_nuis0)
+    #h_h1_nuis_correlation.Fill(h1_correlation_nuis)
+    #h_h1_nuis1.Fill(h1_nuis1)
+    #h_h1_nuis1_err.Fill(h1_err_nuis1)
+    #if h1_eplus_nuis1 != 0:
+    #    h_h1_nuis1_eplus.Fill(h1_eplus_nuis1)
+    #if h1_eminus_nuis1 != 0:
+    #    h_h1_nuis1_eminus.Fill(h1_eminus_nuis1)
+    #h_h1_nuis1_pull.Fill((h1_nuis1 - nuis1_true_mean)/h1_err_nuis1)
+    #h_h1_nuis1_nuis0.Fill(h1_nuis0, h1_nuis1)
     h_h0_maxtwolnL.Fill(h0_maxtwolnL)
     h_h0_mu_bkg.Fill(h0_mu_bkg)
     h_h0_mu_bkg_err.Fill(h0_err_mu_bkg)
@@ -186,22 +183,22 @@ for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwol
     h_h0_mu_bkg_err_v_bkg.Fill(h0_mu_bkg, h0_err_mu_bkg)
     h_h0_mu_bkg_v_true.Fill(true_pars_1, h0_mu_bkg)
     h_h0_mu_bkg_pull.Fill((h0_mu_bkg - mu_bkg_true_mean)/h0_err_mu_bkg)
-    h_h0_nuis0.Fill(h0_nuis0)
-    h_h0_nuis0_err.Fill(h0_err_nuis0)
-    if h0_eplus_nuis0 != 0:
-        h_h0_nuis0_eplus.Fill(h0_eplus_nuis0)
-    if h0_eminus_nuis0 != 0:
-        h_h0_nuis0_eminus.Fill(h0_eminus_nuis0)
-    h_h0_nuis0_pull.Fill((h0_nuis0 - nuis0_true_mean)/h0_err_nuis0)
-    h_h0_nuis1.Fill(h0_nuis1)
-    h_h0_nuis1_err.Fill(h0_err_nuis1)
-    if h0_eplus_nuis1 != 0:
-        h_h0_nuis1_eplus.Fill(h0_eplus_nuis1)
-    if h0_eminus_nuis1 != 0:
-        h_h0_nuis1_eminus.Fill(h0_eminus_nuis1)
-    h_h0_nuis1_pull.Fill((h0_nuis1 - nuis1_true_mean)/h0_err_nuis1)
-    h_h0_nuis1_nuis0.Fill(h0_nuis0, h0_nuis1)
-    h_h0_nuis_correlation.Fill(h0_correlation_nuis)
+    #h_h0_nuis0.Fill(h0_nuis0)
+    #h_h0_nuis0_err.Fill(h0_err_nuis0)
+    #if h0_eplus_nuis0 != 0:
+    #    h_h0_nuis0_eplus.Fill(h0_eplus_nuis0)
+    #if h0_eminus_nuis0 != 0:
+    #    h_h0_nuis0_eminus.Fill(h0_eminus_nuis0)
+    #h_h0_nuis0_pull.Fill((h0_nuis0 - nuis0_true_mean)/h0_err_nuis0)
+    #h_h0_nuis1.Fill(h0_nuis1)
+    #h_h0_nuis1_err.Fill(h0_err_nuis1)
+    #if h0_eplus_nuis1 != 0:
+    #    h_h0_nuis1_eplus.Fill(h0_eplus_nuis1)
+    #if h0_eminus_nuis1 != 0:
+    #    h_h0_nuis1_eminus.Fill(h0_eminus_nuis1)
+    #h_h0_nuis1_pull.Fill((h0_nuis1 - nuis1_true_mean)/h0_err_nuis1)
+    #h_h0_nuis1_nuis0.Fill(h0_nuis0, h0_nuis1)
+    #h_h0_nuis_correlation.Fill(h0_correlation_nuis)
     h_t.Fill(h1_maxtwolnL - h0_maxtwolnL)
     h_chi2.Fill(chi2)
     h_ndof.Fill(ndof)
@@ -217,9 +214,6 @@ for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwol
     h_pval_cls.Fill(pval_cls)
     sig_limits.append(sig_limit)
     h_sig_limit.Fill(sig_limit)
-    #sig_limit_scaled = sig_limit / (sig_eff * xsec2nevt)
-    #h_sig_limit_scaled.Fill(sig_limit_scaled)
-    #sig_limits_scaled.append(sig_limit_scaled)
     h_sig_limit_err.Fill(sig_limit_err)
     h_sig_limit_fit_n.Fill(sig_limit_fit_n)
     h_sig_limit_fit_a.Fill(sig_limit_fit_a)
@@ -229,15 +223,15 @@ for seed,toy,true_pars_0,true_pars_1,true_pars_2,true_pars_3,h1_istat,h1_maxtwol
     h_sig_limit_fit_prob.Fill(sig_limit_fit_prob)
 
 for x in 'h_seed h_toy h_mu_sig_true h_mu_bkg_true h_istat h_istatsum_v_seed h_h1_maxtwolnL h_h1_mu_sig h_h1_mu_sig_err h_h1_mu_sig_eplus h_h1_mu_sig_eminus h_h1_mu_sig_err_v_sig h_h1_mu_sig_v_true h_h1_mu_sig_pull h_h1_mu_bkg h_h1_mu_bkg_err h_h1_mu_bkg_eplus h_h1_mu_bkg_eminus h_h1_mu_bkg_err_v_bkg h_h1_mu_bkg_v_true h_h1_mu_bkg_pull h_h1_nuis0 h_h1_nuis0_err h_h1_nuis0_eplus h_h1_nuis0_eminus h_h1_nuis0_pull h_h1_nuis1 h_h1_nuis1_err h_h1_nuis1_eplus h_h1_nuis1_eminus h_h1_nuis1_pull h_h1_nuis1_nuis0 h_h1_nuis_correlation h_h0_maxtwolnL h_h0_mu_bkg h_h0_mu_bkg_err h_h0_mu_bkg_eplus h_h0_mu_bkg_eminus h_h0_mu_bkg_err_v_bkg h_h0_mu_bkg_v_true h_h0_mu_bkg_pull h_h0_nuis0 h_h0_nuis0_err h_h0_nuis0_eplus h_h0_nuis0_eminus h_h0_nuis0_pull h_h0_nuis1 h_h0_nuis1_err h_h0_nuis1_eplus h_h0_nuis1_eminus h_h0_nuis1_pull h_h0_nuis1_nuis0 h_h0_nuis_correlation h_t h_chi2 h_ndof h_chi2ndof h_prob h_pval_signif h_zval_signif h_zval2_wilks h_zvals h_pval_cls h_sig_limit h_sig_limit_scaled h_sig_limit_err h_sig_limit_fit_n h_sig_limit_fit_a h_sig_limit_fit_b h_sig_limit_fit_a_err h_sig_limit_fit_b_err h_sig_limit_fit_prob'.split():
-    print x
+    if 'nuis' in x:
+        continue
+    #print x
     h = eval(x)
     log = False
     if type(h) == ROOT.TH1D:
         log = True
         if 'pull' in x:
-            if sig_scale < 0:
-                continue
-            h.Fit('gaus')
+            h.Fit('gaus', 'q')
         else:
             h.Draw()
         ps.c.Update()
@@ -263,12 +257,12 @@ for n in ns:
     dr = f.Get('Fitter/seed%02i_toy%02i/fit_results' % (seed, toy))
     for t in 'sb b'.split():
         leg = ROOT.TLegend(0.502, 0.620, 0.848, 0.861)
-        s = dr.Get('h_sig_%s_fit_bb_nodiv_shortened' % t)
-        b = dr.Get('h_bkg_%s_fit_bb_nodiv_shortened' % t)
-        sb = dr.Get('h_sum_%s_fit_bb_nodiv_shortened' % t)
-        dt = dr.Get('h_data_%s_fit_bb_nodiv_shortened' % t)
+        s = dr.Get('h_sig_%s_fit_bb_nodiv' % t)
+        b = dr.Get('h_bkg_%s_fit_bb_nodiv' % t)
+        dt = dr.Get('h_data_%s_fit_bb_nodiv' % t)
+        sb = b.Clone('sb')
+        sb.Add(s)
         for h in (s,b,sb,dt):
-            h.SetStats(0)
             h.SetTitle(';d_{VV} (cm)')
             h.GetYaxis().SetRangeUser(1e-2, 50)
         if dt.GetMaximum() > sb.GetMaximum():
@@ -291,61 +285,62 @@ for n in ns:
         ps.save(nm)
 
         h = dr.Get('h_likelihood_%s_scannuis' % t)
-        h.Draw('colz')
-        h.SetStats(0)
-        h.GetXaxis().SetLabelSize(0.02)
-        h.GetYaxis().SetLabelSize(0.02)
-        ti = h.GetTitle().split(';')[0]
-        nums = []
-        for v in ti.replace(',', ' ').split():
-            try:
-                nums.append(float(v))
-            except ValueError:
-                pass
-        assert len(nums) == 8
-        best_mu_sig = nums[0]
-        best_mu_bkg = nums[2]
-        best_nuis0 = nums[4]
-        best_nuis1 = nums[6]
-        h.SetTitle('%s;#mu_{clear} (cm);#sigma_{clear} (cm)' % ti)
-        m = ROOT.TMarker(best_nuis0, best_nuis1, 5)
-        m.SetMarkerColor(ROOT.kWhite)
-        m.SetMarkerSize(1)
-        m.Draw()
-        ps.save(nm + '_scannuis')
-
-        h.SetMinimum(h.GetMaximum() - 4)
-        h.Draw('colz')
-        m.Draw()
-        ps.save(nm + '_scannuis_2sg')
-
-        if t == 'sb':
-            h = dr.Get('h_likelihood_%s_scanmus' % t)
+        if h:
             h.Draw('colz')
             h.SetStats(0)
-            assert ti == h.GetTitle().split(';')[0]
-            h.SetTitle('%s;s;b' % ti)
-            m = ROOT.TMarker(best_mu_sig, best_mu_bkg, 5)
+            h.GetXaxis().SetLabelSize(0.02)
+            h.GetYaxis().SetLabelSize(0.02)
+            ti = h.GetTitle().split(';')[0]
+            nums = []
+            for v in ti.replace(',', ' ').split():
+                try:
+                    nums.append(float(v))
+                except ValueError:
+                    pass
+            assert len(nums) == 8
+            best_mu_sig = nums[0]
+            best_mu_bkg = nums[2]
+            best_nuis0 = nums[4]
+            best_nuis1 = nums[6]
+            h.SetTitle('%s;#mu_{clear} (cm);#sigma_{clear} (cm)' % ti)
+            m = ROOT.TMarker(best_nuis0, best_nuis1, 5)
             m.SetMarkerColor(ROOT.kWhite)
             m.SetMarkerSize(1)
             m.Draw()
-            h.GetYaxis().SetTitleOffset(1.25)
-            ps.save(nm + '_scanmus')
-
+            ps.save(nm + '_scannuis')
             h.SetMinimum(h.GetMaximum() - 4)
             h.Draw('colz')
             m.Draw()
-            ps.save(nm + '_scanmus_2sg')
+            ps.save(nm + '_scannuis_2sg')
 
-        for par in ['mubkg_nuis0', 'mubkg_nuis1', 'musig_nuis0', 'musig_nuis1', 'mubkg', 'musig', 'nuis0', 'nuis1']:
+        if t == 'sb':
+            h = dr.Get('h_likelihood_%s_scanmus' % t)
+            if h:
+                h.Draw('colz')
+                h.SetStats(0)
+                assert ti == h.GetTitle().split(';')[0]
+                h.SetTitle('%s;s;b' % ti)
+                m = ROOT.TMarker(best_mu_sig, best_mu_bkg, 5)
+                m.SetMarkerColor(ROOT.kWhite)
+                m.SetMarkerSize(1)
+                m.Draw()
+                h.GetYaxis().SetTitleOffset(1.25)
+                ps.save(nm + '_scanmus')
+                h.SetMinimum(h.GetMaximum() - 4)
+                h.Draw('colz')
+                m.Draw()
+                ps.save(nm + '_scanmus_2sg')
+
+        #for par in ['mubkg_nuis0', 'mubkg_nuis1', 'musig_nuis0', 'musig_nuis1', 'mubkg', 'musig', 'nuis0', 'nuis1']:
+        for par in 'mubkg', 'musig':
             h = dr.Get('h_likelihood_%s_scan_%s' % (t,par))
-            h.Draw('colz')
-            h.SetStats(0)
-            ps.save(nm + '_scan_%s'%par)
-
-            h.SetMinimum(h.GetMaximum() - 4)
-            h.Draw('colz')
-            ps.save(nm + '_scan_%s_2sg'%par)
+            if h:
+                h.Draw('colz')
+                h.SetStats(0)
+                ps.save(nm + '_scan_%s'%par)
+                h.SetMinimum(h.GetMaximum() - 4)
+                h.Draw('colz')
+                ps.save(nm + '_scan_%s_2sg'%par)
 
     g = dr.Get('g_limit_bracket_fit')
     if g:
@@ -374,12 +369,4 @@ def stats(l, header=''):
     return median, lo68, hi68, lo95, hi95
 
 stats(pval_signifs, 'pval_signif')
-if sig_scale < 0:
-    stats(sig_limits, 'mu_sig_limit')
-    stats(sig_limits_scaled, 'sigma_sig_limit')
-
-'''
-foreach x (lsts/*lst)
-  echo $x; py draw_fit.py $x >& `echo $x | sed -e s/.lst/.out/`
-end
-'''
+stats(sig_limits, 'mu_sig_limit')

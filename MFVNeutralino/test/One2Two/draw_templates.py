@@ -13,7 +13,7 @@ min_ntracks = 5
 
 ps = plot_saver(plot_dir, size=(600,600))
 
-fns = glob.glob(fn_pattern)
+fns = glob(fn_pattern)
 fns.sort()
 
 hs = []

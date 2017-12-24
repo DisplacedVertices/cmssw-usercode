@@ -1,64 +1,78 @@
 #!/bin/bash
 
 job=$1
+test=0
+if [[ $job < 0 ]]; then
+    job=$((-job))
+    test=1
+fi
+
+inpathbase=root://cmseos.fnal.gov//store/user/tucker/TrackMoverV3
+
+paths=(
+${inpathbase}
+)
 
 fns=(
- JetHT2015.root 
- JetHT2015C.root 
- JetHT2015D.root 
- JetHT2016.root 
- JetHT2016B3.root 
- JetHT2016BCD.root 
- JetHT2016BthruG.root 
- JetHT2016C.root 
- JetHT2016D.root 
- JetHT2016E.root 
- JetHT2016EF.root 
- JetHT2016F.root 
- JetHT2016G.root 
- JetHT2016H.root 
- JetHT2016H2.root 
- JetHT2016H3.root 
- qcdht0500sum.root 
- qcdht0500sum_2015.root 
- qcdht0700sum.root 
- qcdht0700sum_2015.root 
- qcdht1000sum.root 
- qcdht1000sum_2015.root 
- qcdht1500sum.root 
- qcdht1500sum_2015.root 
- qcdht2000sum.root 
- qcdht2000sum_2015.root 
- ttbar.root 
- ttbar_2015.root
- )
-nfns=${#fns[@]}
+JetHT2016B3.root
+JetHT2016C.root
+JetHT2016D.root
+JetHT2016E.root
+JetHT2016F.root
+JetHT2016G.root
+JetHT2016H.root
+qcdht1000.root
+qcdht1000_hip1p0_mit.root
+qcdht1500.root
+qcdht1500_hip1p0_mit.root
+)
 
+nsigs=( 3p7 3p8 3p9 4p0 4p1 4p2 4p3 )
+taus=( 100 300 1000 10000 30000 )
 nls=( 2 3 )
 nbs=( 0 1 2 )
 
+####
+
+npaths=${#paths[@]}
+nfns=${#fns[@]}
+nnsigs=${#nsigs[@]}
+ntaus=${#taus[@]}
 nnls=${#nls[@]}
 nnbs=${#nbs[@]}
-
-echo \#fns $nfns \#nls $nnls \#nbs $nnbs
-
-nmax=$((nfns * nnls * nnbs))
-echo job $job, nmax is $nmax
-if [[ $job -ge $nmax ]]; then
+njobs=$((npaths * nfns * nnsigs * ntaus * nnls * nnbs))
+echo job $job inpathbase $inpathbase \#paths $npaths \#fns $nfns \#nsigs $nnsigs \#taus $ntaus \#nls $nnls \#nbs $nnbs max jobs $njobs
+if [[ $job -ge $njobs ]]; then
     echo problem
     exit 1
 fi
 
-ifn=$((job % nfns))
-fn=${fns[$ifn]}
-iz=$((job / nfns))
-inl=$((iz / nnbs))
-inb=$((iz % nnbs))
-nl=${nls[$inl]}
-nb=${nbs[$inb]}
-z=$nl$nb
-outfn=${z}_$fn
-echo fn $fn iz $iz inl $inl nl $nl inb $inb nb $nb z $z outfn $outfn
+ii=$job
+
+path=${paths[$((ii % npaths))]}
+ii=$((ii / npaths))
+fn=${fns[$((ii % nfns))]}
+ii=$((ii / nfns))
+nsig=${nsigs[$((ii % nnsigs))]}
+ii=$((ii / nnsigs))
+tau=${taus[$((ii % ntaus))]}
+ii=$((ii / ntaus))
+nl=${nls[$((ii % nnls))]}
+ii=$((ii / nnls))
+nb=${nbs[$((ii % nnbs))]}
+ii=$((ii / nnbs))
+
+outfn=$(basename $path)_nsig${nsig}_tau$(printf %05i $tau)um_${nl}${nb}_$(basename $fn .root).root
+treepath=mfvMovedTree${nl}${nb}nsig${nsig}/t
+
+echo path $path fn $fn nl $nl nb $nb outfn $outfn treepath $treepath
+
+if [[ $test == 1 ]]; then
+    echo test only, possibly modifying hists.jdl and hists_finish.sh
+    sed -i -e "s/Queue.*/Queue ${njobs}/" hists.jdl
+    sed -i -e "s/^njobstot=.*/njobstot=${njobs}/" hists_finish.sh
+    exit 1
+fi
 
 export SCRAM_ARCH=slc6_amd64_gcc530
 source /cvmfs/cms.cern.ch/cmsset_default.sh
@@ -67,7 +81,6 @@ cd CMSSW_8_0_25/src
 eval $(scram ru -sh)
 cd ../..
 
-./hists.exe root://cmseos.fnal.gov//store/user/tucker/TrackMoverV1/$z/$fn $outfn $nl $nb 2>&1
-
-# when done:
-# for x in 20 21 22 30 31 32 ; do mkdir $x ; for y in ${x}*root; do mv $y $x/${y/${x}_/} ; done ; cd $x ; py $CMSSW_BASE/src/JMTucker/MFVNeutralino/test/utilities.py merge_background ; cd - ; done
+cmd="./hists.exe $path/$fn $outfn $treepath $tau"
+echo $cmd
+eval $cmd 2>&1

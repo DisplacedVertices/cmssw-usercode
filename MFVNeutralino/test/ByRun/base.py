@@ -178,7 +178,8 @@ class ByRunPlotter:
             t.DrawLatexNDC(0.12, 0.82, '#color[802]{%i / %i = %.2f points miss fit}' % (len(miss), r.g.GetN(), float(len(miss))/r.g.GetN()))
 
         r.g.GetXaxis().SetRangeUser(-2, r.nruns+2)
-        r.g.GetYaxis().SetRangeUser(0, 7 * r.fcns[0].GetParameter(0))
+        if do_fits:
+            r.g.GetYaxis().SetRangeUser(0, 7 * r.fcns[0].GetParameter(0))
 
         hh = r.g.GetHistogram()
         ymin, ymax = hh.GetMinimum(), hh.GetMaximum()

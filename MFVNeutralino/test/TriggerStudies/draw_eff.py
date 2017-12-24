@@ -5,12 +5,14 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.Tools.Samples import *
 
-version = 'v6'
+version = 'v8'
 zoom = False #(0.98,1.005)
 save_more = True
 data_only = False
 use_qcd = False
-num_dir = 'num900450ak'
+num_dir, den_dir = 'num900450ak', 'den'
+num_dir, den_dir = 'num800', 'den'
+num_dir, den_dir = 'num900450akjet6pt75', 'denjet6pt75'
 year = 2016
 which = typed_from_argv(int, 3)
 data_period, int_lumi = [
@@ -57,7 +59,8 @@ else:
         sig_samples = [] #mfv_signal_samples_2015  no miniaod
     elif year == 2016:
         bkg_samples = [ttbar, wjetstolnu, dyjetstollM50, dyjetstollM10]
-        sig_samples = [getattr(Samples, 'official_mfv_neu_tau01000um_M%04i' % m) for m in (300, 400, 800, 1200, 1600)] + [Samples.official_mfv_neu_tau10000um_M0800]
+        sig_samples  = [getattr(Samples, 'mfv_neu_tau01000um_M%04i' % m) for m in (300, 400, 800, 1200, 1600)] + [Samples.mfv_neu_tau10000um_M0800]
+        sig_samples += [getattr(Samples, 'mfv_ddbar_tau01000um_M%04i' % m) for m in (300, 400, 800, 1200, 1600)] + [Samples.mfv_ddbar_tau10000um_M0800]
     if use_qcd:
         bkg_samples.append(qcdmupt15_2015 if year == 2015 else qcdmupt15)
 
@@ -127,7 +130,7 @@ def get(f, kind, n):
         rebin = rebin_pt
     elif 'ht' in n:
         rebin = rebin_ht
-    return rebin(f.Get(kind + '%s/%s' % (num_dir, n))), rebin(f.Get(kind + 'den/%s' % n))
+    return rebin(f.Get(kind + '%s/%s' % (num_dir, n))), rebin(f.Get(kind + '%s/%s' % (den_dir, n)))
 
 ########################################################################
 

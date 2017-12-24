@@ -9,8 +9,9 @@ mctruths_fn = sys.argv[1]
 plot_path = sys.argv[2]
 
 set_style()
-ps = plot_saver(plot_path, size=(800,500), log=False)
+ps = plot_saver(plot_path, size=(600,600), log=False)
 
+# ( for x in $crd/TrackMoverMCTruthV14/*.root; echo $(basename $x .root) $(./mctruth.exe $x $(basename x) 0.0084) ) | tee mctruths.txt
 for line in open(mctruths_fn):
     line = line.strip().replace('+- ', '')
     if line and 'nan' not in line:
@@ -23,55 +24,70 @@ for line in open(mctruths_fn):
         else:
             print 'no sample', sname
 
-multijet = [s for s in Samples.mfv_signal_samples if not s.name.startswith('my_')]
-dijet = Samples.mfv_ddbar_samples
+def filter(ss):
+    return [s for s in ss if not s.name.startswith('my_') and s.tau == 10000 and s.mass not in (500,3000)]
+multijet = filter(Samples.mfv_signal_samples)
+dijet    = filter(Samples.mfv_ddbar_samples)
 
+# for x in nocuts ntracks all; do printf "# $x\n["; cat effs_* | grep -A4 background | grep $x | tr '-' ' ' | awk '{printf "(%.2f, %.2f),\n", $2, $NF}'; echo \],; done
 trackmover_data = [
-    [(89.07, 0.01),
-     (92.73, 0.02),
-     (93.99, 0.05),
-     (97.68, 0.00),
-     (97.74, 0.01),
-     (97.91, 0.04),
+    # nocuts
+    [(88.89, 0.01),
+     (92.64, 0.02),
+     (93.95, 0.05),
+     (97.67, 0.00),
+     (97.72, 0.01),
+     (97.90, 0.04),
      ],
-    [(87.14, 0.01),
-     (91.34, 0.02),
-     (92.71, 0.05),
-     (97.17, 0.00),
-     (97.29, 0.01),
-     (97.51, 0.04),
+    # ntracks
+    [(86.87, 0.01),
+     (91.23, 0.02),
+     (92.67, 0.06),
+     (97.15, 0.00),
+     (97.27, 0.01),
+     (97.39, 0.05),
      ],
-    [(71.92, 0.01),
-     (85.92, 0.02),
-     (89.76, 0.06),
-     (94.68, 0.00),
-     (96.28, 0.02),
-     (96.81, 0.05),
-     ]
+    # all
+    [(71.94, 0.01),
+     (85.83, 0.02),
+     (89.74, 0.06),
+     (94.71, 0.01),
+     (96.25, 0.02),
+     (96.79, 0.05),
+     ],
     ]
+trackmover_nice = ['n_{l} = %i, n_{b} = %i' % (l,b) for l in 2,3 for b in 0,1,2]
+g,m = ROOT.kGreen, ROOT.kMagenta
+trackmover_colors = [g+3,g+2,g+1,m+3,m+2,m+1]
 
 for icuts, cuts in enumerate(('none', 'ntracks', 'full')):
     for s in multijet + dijet:
         if hasattr(s, 'ys'):
             s.y, s.ye = s.ys[icuts*2:icuts*2+2]
 
-    per = PerSignal('efficiency with cuts=%s' % cuts, y_range=(0.,1.05))
+    per = PerSignal('efficiency with cuts=%s' % cuts, y_range=(0.,1.02))
     per.add(multijet, title='#tilde{N} #rightarrow tbs')
     per.add(dijet, title='X #rightarrow d#bar{d}', color=ROOT.kBlue)
-    per.draw(canvas=ps.c)
-    for p in per.decay_paves:
-        p.SetY1(p.GetY1() - 0.7)
-        p.SetY2(p.GetY2() - 0.7)
+    per.draw(canvas=ps.c, do_tau_paves=False, do_decay_paves=False)
+
+    leg = ROOT.TLegend(0.495,0.149,0.870,0.604)
+    leg.SetTextFont(42)
+    leg.SetBorderSize(0)
+    for curve in per.curves:
+        leg.AddEntry(curve.g, curve.title, 'LPE')
 
     lines = []
-    for y, ye in trackmover_data[icuts]:
+    for iy, (y, ye) in enumerate(trackmover_data[icuts]):
         y  /= 100
         ye /= 100
         ye = max(ye, 0.01)
-        l = ROOT.TBox(per.nmasses * 3, y-ye, per.nmasses * 4, y+ye)
+        l = ROOT.TBox(0, y-ye, per.nmasses, y+ye)
         l.SetFillStyle(3002)
-        l.SetFillColor(ROOT.kGreen+2)
+        l.SetFillColor(trackmover_colors[iy])
         l.Draw()
         lines.append(l)
+        leg.AddEntry(l, trackmover_nice[iy], 'F')
+
+    leg.Draw()
 
     ps.save(cuts)

@@ -1,81 +1,55 @@
 #!/usr/bin/env python
 
-import os, subprocess
+import os, subprocess, tempfile
+from datetime import datetime
+from JMTucker.Tools import colors, eos
 
-def hadd_ex(new_name, files):
-    """Use ROOT's hadd tool to merge files into a new file with path
-    new_name. This is a simple wrapper that suppresses the stdout from
-    hadd, only reporting a summary line of how many files were
-    merged. We check that the number of files reported merged by hadd
-    is the same as the number in the input list, or if there were any
-    other problems reported by hadd. If so, we print an error to
-    stdout (with reverse video to make it stand out) and return
-    False. On success, return True.
+def hadd(output_fn, input_fns):
+    """This is a simple wrapper around hadd that suppresses the stdout
+    from hadd, only reporting a summary line of how many files were
+    merged. Output to eos is supported, including for the log file for
+    stdout. Checks that the number of files reported merged by hadd is
+    the same as the number in the input list, or if there were any
+    other problems reported by hadd. If so, prints an error to
+    stdout. Returns true if success.
     """
     
-    l = len(files)
-    print 'hadding %i files to %s' % (l, new_name)
-    args = ['hadd', new_name] + files
+    l = len(input_fns)
+    print 'hadding %i files to %s at %s' % (l, output_fn, datetime.now())
+    args = ['hadd', output_fn] + input_fns
 
     p = subprocess.Popen(args=args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, stderr = p.communicate()
-    open(new_name + '.haddlog', 'wt').write(stdout)
     assert stderr is None
 
+    log_fn = output_fn + '.haddlog'
+    is_eos = '/store/' in output_fn # ugh
+    while eos.exists(log_fn) if is_eos else os.path.exists(log_fn):
+        log_fn += '.2'
+
+    if is_eos:
+        fd, tmp_fn = tempfile.mkstemp()
+        os.fdopen(fd, 'wt').write(stdout)
+        eos.cp(tmp_fn, log_fn) # if the haddlog already exists the new one will silently go into the ether...
+        os.remove(tmp_fn)
+    else:
+        open(log_fn, 'wt').write(stdout)
+
     if p.returncode != 0:
-        print '\033[36;7m PROBLEM hadding \033[m', new_name
+        print colors.boldred('PROBLEM hadding %s' % output_fn)
         #print p.stdout.read()
         return False
 
-    max_file_num = 0
-    for line in stdout.split('\n'):
-        if 'Source file' in line:
-            max_file_num = max(max_file_num, int(line.split(':')[0].split(' ')[-1]))
-    print max_file_num, 'files merged to', new_name
+    max_file_num = max(int(line.split(':')[0].split(' ')[-1]) for line in stdout.split('\n') if 'Source file' in line)
+    print '-> %i files merged' % max_file_num
     if max_file_num != l:
-        print '\033[36;7m PROBLEM hadding \033[m', new_name
+        print colors.boldred('PROBLEM hadding %s' % output_fn)
         return False
-
-    return True
-
-def hadd(new_name, files, chunk_size=900):
-    """Use hadd_ex above to merge files into new_name, but in chunks
-    to get around hadd's limit of 999 input files. Returns whether
-    operation was a success.
-    """
-    
-    if len(files) <= chunk_size:
-        return hadd_ex(new_name, files)
-
-    if len(files)/chunk_size >= 998:
-        raise ValueError('number of chunks greater than hadd can handle')
-
-    files = files[:]
-    new_files = []
-    while files:
-        these = files[:chunk_size]
-        files = files[chunk_size:]
-
-        this_fn = new_name + '_%i' % len(new_files)
-        new_files.append(this_fn)
-
-        if not hadd_ex(this_fn, these):
-            print '\033[36;7m PROBLEM hadding \033[m', new_name, 'in chunks of', chunk_size, 'on', this_fn
-            return False
-
-    ok = hadd_ex(new_name, new_files)
-    if not ok:
-        print '\033[36;7m PROBLEM hadding', new_name, 'in chunks of', chunk_size, 'assembling final file'
-        return False
-
-    for fn in new_files:
-        os.remove(fn)
 
     return True
 
 __all__ = [
     'hadd',
-    'hadd_ex',
     ]
 
 if __name__ == '__main__':

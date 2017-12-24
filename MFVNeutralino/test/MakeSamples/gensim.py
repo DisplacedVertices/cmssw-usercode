@@ -7,12 +7,17 @@ salt = ''
 fromlhe = False
 maxevents = 1
 jobnum = 1
+scanpack = None
 
 for arg in sys.argv:
     if arg == 'fromlhe=1':
         print 'fromlhe: wiping out todos'
-        todos = [] 
+        todos = []
         fromlhe = True
+    elif arg.startswith('scanpack='):
+        print 'scanpack: wiping out todos'
+        todos = []
+        scanpack = arg.replace('scanpack=','').split(',')
     elif arg.startswith('salt='):
         salt = arg.replace('salt=','')
     elif arg.startswith('maxevents='):
@@ -156,3 +161,8 @@ if dynamicconf.cmssw_version[0] == 7:
 if randomize:
     from modify import deterministic_seeds
     deterministic_seeds(process, 8675309, salt, jobnum)
+
+if scanpack:
+    from modify import do_scanpack
+    scanpack_x, scanpack_batch = scanpack
+    do_scanpack(process, scanpack_x, int(scanpack_batch), jobnum-1)

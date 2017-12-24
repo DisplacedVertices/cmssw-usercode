@@ -80,42 +80,68 @@ struct weight_fill {
 };
 
 struct distrib_calculator {
-  double min, max, sum, wsum, avg, rms, sumw, avgw, rmsw;
+  // ith value of these are the corresponding stat with the ith value
+  // of the n-length input removed, value n is the stat with no input
+  // values removed
+  std::vector<double> min; 
+  std::vector<double> max;
+  std::vector<double> med;
+  std::vector<double> sum;
+  std::vector<double> avg;
+  std::vector<double> rms;
+  std::vector<double> mad;
 
-  distrib_calculator(const std::vector<double>& v, const std::vector<double>& w)
-    : min(1e99), max(-1e99), sum(0), wsum(0), avg(0), rms(0), sumw(0), avgw(0), rmsw(0)
-  {
-    int n;
-    if ((n = int(v.size())) == 0)
+  void calc(std::vector<double> v, double& min, double& max, double& med, double& sum, double& avg, double& rms, double& mad) {
+    const size_t m = v.size();
+    if (m == 0) return;
+
+    std::sort(v.begin(), v.end());
+    min = v.front();
+    max = v.back();
+ 
+    if (m % 2 == 0)
+      med = (v[m/2] + v[m/2-1])/2;
+    else
+      med = v[m/2];
+
+    sum = avg = rms = 0;
+    std::vector<double> v2(m);
+    for (size_t i = 0; i < m; ++i) {
+      sum += v[i];
+      v2[i] = fabs(v[i] - med);
+    }
+    avg = sum/m;
+
+    std::sort(v2.begin(), v2.end());
+    if (m % 2 == 0)
+      mad = (v2[m/2] + v2[m/2-1])/2;
+    else
+      mad = v2[m/2];
+
+    for (auto a : v)
+      rms += pow(a - avg, 2);
+    rms = sqrt(rms/m); //m-1
+  }
+
+  distrib_calculator(const std::vector<double>& v) {
+    const size_t n = v.size();
+    min.assign(n+1, 0);
+    max.assign(n+1, 0);
+    med.assign(n+1, 0);
+    sum.assign(n+1, 0);
+    avg.assign(n+1, 0);
+    rms.assign(n+1, 0);
+    mad.assign(n+1, 0);
+    if (n == 0)
       return;
 
-    bool usew = w.size() > 0;
-    if (usew && int(w.size()) != n)
-      throw cms::Exception("distrib_calculator") << "v.size = " << n << " != w.size = " << w.size();
+    calc(v, min[n], max[n], med[n], sum[n], avg[n], rms[n], mad[n]);
 
-    for (int i = 0; i < n; ++i) {
-      if (v[i] < min) min = v[i];
-      if (v[i] > max) max = v[i];
-      sum += v[i];
-      if (usew) {
-        sumw += w[i];
-        wsum += v[i] * w[i];
-      }
+    for (size_t i = 0; i < n; ++i) {
+      std::vector<double> v2(v);
+      v2.erase(v2.begin()+i);
+      calc(v2, min[i], max[i], med[i], sum[i], avg[i], rms[i], mad[i]);
     }
-
-    avg = sum / n;
-    if (usew)
-      avgw = wsum / sumw;
-
-    for (int i = 0; i < n; ++i) {
-      rms += pow(v[i] - avg, 2);
-      if (usew)
-        rmsw += pow(v[i] - avg, 2) * w[i];
-    }
-
-    rms = sqrt(rms/n);
-    if (usew)
-      rmsw = sqrt(rmsw/sumw);
   }
 };
 

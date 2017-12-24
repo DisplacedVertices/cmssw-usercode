@@ -4,10 +4,11 @@
 #include <vector>
 
 class TTree;
+class TVector3;
 
 namespace mfv {
   struct MovedTracksNtuple {
-    typedef unsigned short uchar;
+    typedef unsigned char uchar;
     typedef unsigned short ushort;
 
     unsigned run;
@@ -26,6 +27,13 @@ namespace mfv {
     uchar gen_partons_in_acc;
 
     uchar pass_hlt;
+    float bsx;
+    float bsy;
+    float bsz;
+    float bsdxdz;
+    float bsdydz;
+    float bsx_at_z(float z) const { return bsx + bsdxdz * (z - bsz); }
+    float bsy_at_z(float z) const { return bsy + bsdydz * (z - bsz); }
     uchar npu;
     uchar npv;
     float pvx;
@@ -34,9 +42,6 @@ namespace mfv {
     ushort pvntracks;
     float pvsumpt2;
     float jetht;
-    float jetpt4;
-    float met;
-    uchar nlep;
     ushort ntracks;
     uchar nseltracks;
     uchar nalljets;
@@ -49,20 +54,26 @@ namespace mfv {
     std::vector<float> jets_phi;
     std::vector<float> jets_energy;
     std::vector<uchar> jets_ntracks;
+    uchar njets() const { return uchar(jets_pt.size()); }
+    uchar nbjets() const { return njets() - nlightjets; }
 
     float move_x;
     float move_y;
     float move_z;
+    TVector3 move_vector() const;
+    double move_tau() const;
 
     std::vector<float> vtxs_x;
     std::vector<float> vtxs_y;
     std::vector<float> vtxs_z;
-    std::vector<float> vtxs_theta; // tracksplusjets
+    std::vector<float> vtxs_pt; // this and next three are from tracksplusjets momentum
+    std::vector<float> vtxs_theta;
     std::vector<float> vtxs_phi;
+    std::vector<float> vtxs_mass;
+    std::vector<float> vtxs_tkonlymass;
     std::vector<uchar> vtxs_ntracks;
-    std::vector<uchar> vtxs_ntracksptgt3;
-    std::vector<float> vtxs_drmin;
-    std::vector<float> vtxs_drmax;
+    std::vector<float> vtxs_anglemin; // tracks' angles are between momentum and the move vector
+    std::vector<float> vtxs_anglemax;
     std::vector<float> vtxs_bs2derr;
 
     MovedTracksNtuple();
@@ -79,12 +90,14 @@ namespace mfv {
     std::vector<float>* p_vtxs_x;
     std::vector<float>* p_vtxs_y;
     std::vector<float>* p_vtxs_z;
+    std::vector<float>* p_vtxs_pt;
     std::vector<float>* p_vtxs_theta;
     std::vector<float>* p_vtxs_phi;
+    std::vector<float>* p_vtxs_mass;
+    std::vector<float>* p_vtxs_tkonlymass;
     std::vector<uchar>* p_vtxs_ntracks;
-    std::vector<uchar>* p_vtxs_ntracksptgt3;
-    std::vector<float>* p_vtxs_drmin;
-    std::vector<float>* p_vtxs_drmax;
+    std::vector<float>* p_vtxs_anglemin;
+    std::vector<float>* p_vtxs_anglemax;
     std::vector<float>* p_vtxs_bs2derr;
   };
 }

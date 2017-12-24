@@ -25,6 +25,7 @@ parser.add_argument('+rotate-x', action='store_true', help='azimuthally rotate x
 parser.add_argument('+rotate-p', action='store_true', help='azimuthally rotate p of tracks')
 parser.add_argument('+is-data', action='store_true', help='whether input is data / MC')
 parser.add_argument('+is-H', action='store_true', help='if data, whether input is the H dataset')
+parser.add_argument('+is-repro', action='store_true', help='if data, whether input is from reprocessing dataset')
 parser.add_argument('+debug', action='store_true', help='turn on debug prints')
 parser.add_argument('+debug-timing', action='store_true', help='turn on want summary to see the time report')
 parser.add_argument('+in-path', help='override input path', default='root://cmsxrootd.fnal.gov//store/user/tucker/skimpickv14')
@@ -69,7 +70,7 @@ process.maxEvents.input = args.max_events
 want_summary(process, args.debug or args.debug_timing)
 silence_messages(process, ['TwoTrackMinimumDistanceHelixLine'])
 report_every(process, 1 if args.debug else 1000 if args.debug_timing else 1000000)
-geometry_etc(process, which_global_tag(not args.is_data, year, args.is_H))
+geometry_etc(process, which_global_tag(not args.is_data, year, args.is_H, args.is_repro))
 tfileservice(process, args.out_fn)
 random_service(process, {'mfvVertices':      12179 + args.which_event,
                          'mfvOverlayTracks': 12180 + args.which_event})

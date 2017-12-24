@@ -183,7 +183,7 @@ def make_tarball(fn, include_bin=True, include_python=False, include_interface=F
                 print abs_d, rel_d
             tar.add(abs_d, arcname=rel_d)
 
-def output_file(process, filename, output_commands):
+def output_file(process, filename, output_commands, select_events=[]):
     process.out = cms.OutputModule('PoolOutputModule',
                                    fileName = cms.untracked.string(filename),
                                    compressionLevel = cms.untracked.int32(4),
@@ -194,6 +194,8 @@ def output_file(process, filename, output_commands):
                                    fastCloning = cms.untracked.bool(False),
                                    overrideInputFileSplitLevels = cms.untracked.bool(True)
                                    )
+    if select_events:
+        process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring(*select_events))
     process.outp = cms.EndPath(process.out)
 
 def random_service(process, seeds):
@@ -297,6 +299,12 @@ def silence_messages(process, categories):
 
 def simple_memory_check(process):
     process.add_(cms.Service('SimpleMemoryCheck'))
+
+def remove_tfileservice(process):
+    try:
+        del process.TFileService
+    except KeyError:
+        pass
 
 def tfileservice(process, filename='tfileservice.root'):
     process.TFileService = cms.Service('TFileService', fileName = cms.string(filename))

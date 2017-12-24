@@ -7,10 +7,10 @@ batch_fn_lst = [x for x in sys.argv if x.endswith('.lst')][0]
 batch_name = os.path.basename(batch_fn_lst).replace('.lst','')
 print 'batch name', batch_name
 fudge = 1. # 0.5 if 'fullhadded' not in batch_name else 1.
-#batch_root = glob.glob('/store/user/tucker/mfvo2t_%s/mfvo2t_%s/*/' % (batch_name, batch_name))
+#batch_root = glob('/store/user/tucker/mfvo2t_%s/mfvo2t_%s/*/' % (batch_name, batch_name))
 #assert len(batch_root) == 1
 #batch_root = batch_root[0]
-#batch_fns = glob.glob(os.path.join(batch_root, '*.root'))
+#batch_fns = glob(os.path.join(batch_root, '*.root'))
 batch_fns = [x.strip() for x in open(batch_fn_lst).readlines() if x.strip()]
 #batch_fns = [x.replace('/store/user', '/mnt/xrootd/user') for x in batch_fns]
 batch_fns = [('root://cmsxrootd.fnal.gov/' + x if x.startswith('/store') else x) for x in batch_fns]

@@ -37,6 +37,7 @@ namespace mfv {
         })
     {
       int i = -1;
+#if 0
       const std::vector<int> masses = { 400, 800, 1200, 1600 };
       const std::vector<int> taus = { 100, 300, 1000, 10000 };
       char buf[128];
@@ -45,6 +46,9 @@ namespace mfv {
           snprintf(buf, 128, "mfv_neu_tau%05ium_M%04i", t, m);
           samples.push_back({i--, std::string(buf), 1e-3, 10000});
         }
+#else
+#include "signals.h"
+#endif
       i = -99;
       samples.push_back({i, "sigsyst", 1e-3, 10000});
 

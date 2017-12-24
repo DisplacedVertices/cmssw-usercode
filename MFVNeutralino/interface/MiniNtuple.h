@@ -15,6 +15,19 @@ namespace mfv {
     unsigned lumi;
     unsigned long long event;
     unsigned char gen_flavor_code;
+    unsigned char pass_hlt;
+    float l1_htt;
+    float l1_myhtt;
+    float l1_myhttwbug;
+    float hlt_ht;
+    float hlt_ht4mc;
+    float bsx;
+    float bsy;
+    float bsz;
+    float bsdxdz;
+    float bsdydz;
+    float bsx_at_z(float z) const { return bsx + bsdxdz * (z - bsz); }
+    float bsy_at_z(float z) const { return bsy + bsdydz * (z - bsz); }
     unsigned char npv;
     float pvx;
     float pvy;
@@ -27,6 +40,9 @@ namespace mfv {
     float jet_phi[50];
     float jet_energy[50];
     unsigned char jet_id[50];
+    float gen_x[2];
+    float gen_y[2];
+    float gen_z[2];
 
     unsigned char nvtx;
     unsigned char ntk0;
@@ -38,6 +54,7 @@ namespace mfv {
     std::vector<double> tk0_px;
     std::vector<double> tk0_py;
     std::vector<double> tk0_pz;
+    std::vector<short>  tk0_inpv;
     std::vector<TrackCovarianceMatrix> tk0_cov;
     std::vector<double>* p_tk0_qchi2;
     std::vector<double>* p_tk0_ndof;
@@ -47,14 +64,12 @@ namespace mfv {
     std::vector<double>* p_tk0_px;
     std::vector<double>* p_tk0_py;
     std::vector<double>* p_tk0_pz;
+    std::vector<short>*  p_tk0_inpv;
     std::vector<TrackCovarianceMatrix>* p_tk0_cov;
+    bool genmatch0;
     float x0;
     float y0;
     float z0;
-    unsigned char ntracksptgt30;
-    float drmin0;
-    float drmax0;
-    unsigned char njetsntks0;
     float bs2derr0;
     float geo2ddist0;
 
@@ -67,6 +82,7 @@ namespace mfv {
     std::vector<double> tk1_px;
     std::vector<double> tk1_py;
     std::vector<double> tk1_pz;
+    std::vector<short>  tk1_inpv;
     std::vector<TrackCovarianceMatrix> tk1_cov;
     std::vector<double>* p_tk1_qchi2;
     std::vector<double>* p_tk1_ndof;
@@ -76,14 +92,12 @@ namespace mfv {
     std::vector<double>* p_tk1_px;
     std::vector<double>* p_tk1_py;
     std::vector<double>* p_tk1_pz;
+    std::vector<short>*  p_tk1_inpv;
     std::vector<TrackCovarianceMatrix>* p_tk1_cov;
+    bool genmatch1;
     float x1;
     float y1;
     float z1;
-    unsigned char ntracksptgt31;
-    float drmin1;
-    float drmax1;
-    unsigned char njetsntks1;
     float bs2derr1;
     float geo2ddist1;
   };

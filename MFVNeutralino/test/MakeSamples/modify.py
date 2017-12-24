@@ -1,4 +1,12 @@
+from itertools import product
 import FWCore.ParameterSet.Config as cms
+
+def set_minbias(process):
+    process.generator.PythiaParameters.processParameters = cms.vstring(
+        'SoftQCD:nonDiffractive = on', 
+        'SoftQCD:singleDiffractive = on', 
+        'SoftQCD:doubleDiffractive = on'
+        )
 
 def set_qcdht(process, which):
     process.externalLHEProducer.args = [{
@@ -174,7 +182,98 @@ def set_gluino_ddbar(process, tau0, m_gluino):
 
     slhaf = slha(tau0, m_gluino, None, [(1., (1,-1))])
     process.generator.SLHATableForPythia8 = cms.string(slhaf)
-    
+
+########################################################################
+
+class scanpackbase(object):
+    jobs_per_batch = 5000
+    events_per_job = 200
+
+    def __init__(self):
+        self.name = self.__class__.__name__
+        self.samples = list(product(self.kinds, self.taus, self.masses))
+        self.njobs = 0
+        self.job2isample = []
+        for isample, (kind,tau,mass) in enumerate(self.samples):
+            eps, epj = self.events_per_sample(kind,tau,mass), self.events_per_job
+            assert eps > epj and eps % epj == 0
+            njobs = eps / epj
+
+            self.njobs += njobs
+            self.job2isample += [isample]*njobs
+        assert self.njobs > 0
+
+        self.jobs_in_last_batch = self.njobs % self.jobs_per_batch
+        if self.jobs_in_last_batch == 0:
+            self.jobs_in_last_batch = self.jobs_per_batch
+
+        int_ceil = lambda x,y: (x+y-1)/y
+        self.nbatches = int_ceil(self.njobs, self.jobs_per_batch)
+        self.ibatch = 0
+
+    def sample(self, batch, job):
+        assert 0 <= batch < self.nbatches
+        assert 0 <= job < self.jobs_per_batch
+        if batch == self.nbatches - 1:
+            assert job < self.jobs_in_last_batch
+        return self.samples[self.job2isample[batch * self.jobs_per_batch + job]]
+
+    def __iter__(self):
+        for self.ibatch in xrange(self.nbatches):
+            yield self
+
+    @property
+    def nevents(self):
+        if self.ibatch < self.nbatches - 1:
+            njobs = self.jobs_per_batch
+        else:
+            njobs = self.jobs_in_last_batch
+        return self.events_per_job * njobs
+
+    @property
+    def batch_name(self):
+        return '%s_%s' % (self.name, self.ibatch)
+
+class scanpacktest(scanpackbase):
+    kinds = [set_mfv_neutralino, set_gluino_ddbar]
+    taus = [tau/1000. for tau in [100,10000]]
+    masses = [400, 800]
+
+    jobs_per_batch = 50
+    events_per_job = 10
+    def events_per_sample(self, kind, tau, mass):
+        return 100
+
+class scanpacktest2(scanpackbase):
+    kinds = [set_mfv_neutralino, set_gluino_ddbar]
+    taus = [tau/1000. for tau in [300,10000]]
+    masses = [600, 800]
+
+    jobs_per_batch = 39
+    def events_per_sample(self, kind, tau, mass):
+        return 1000
+
+class scanpack1(scanpackbase):
+    kinds = [set_mfv_neutralino, set_gluino_ddbar]
+    taus = [tau/1000. for tau in range(100, 1000, 300) + range(1000, 40000, 3000) + range(40000, 1000001, 160000)]
+    masses = range(300, 600, 100) + range(600, 3001, 200)
+
+    def events_per_sample(self, kind, tau, mass):
+        return 10000
+
+def get_scanpack(x):
+    return {
+        'scanpacktest': scanpacktest,
+        'scanpacktest2': scanpacktest2,
+        'scanpack1': scanpack1,
+        }[x]()
+
+def do_scanpack(process, x, batch, job):
+    sp = get_scanpack(x)
+    set_kind, tau, mass = sp.sample(batch, job)
+    print 'do_scanpack: %s nbatches %s njobs %s lastjobs %s batch %s job %s kind %s tau %s mass %s' % (x, sp.nbatches, sp.njobs, sp.jobs_in_last_batch, batch, job, set_kind.__name__, tau, mass)
+    set_kind(process, tau, mass)
+
 ########################################################################
 
 def set_fns(process, list_fn, jobnum):
@@ -478,3 +577,11 @@ def set_hip_simulation(process, scale=1.0): # scale relative to 6e33
 def set_hip_mitigation(process):
     from RecoTracker.Configuration.customizeMinPtForHitRecoveryInGluedDet import customizeHitRecoveryInGluedDetOn
     customizeHitRecoveryInGluedDetOn(process)
+
+if __name__ == '__main__':
+    if 0:
+        from gensim import process
+        for batch in 0,1,2,3: #,4
+            for job in xrange(39):
+                print batch, job,
+                do_scanpack(process, 'scanpack1', batch, job)

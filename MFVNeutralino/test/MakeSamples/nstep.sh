@@ -20,6 +20,7 @@ echo EXPECTEDEVENTS: ${EXPECTEDEVENTS}
 echo SALT: ${SALT}
 echo USETHISCMSSW: ${USETHISCMSSW}
 echo FROMLHE: ${FROMLHE}
+echo PREMIX: ${PREMIX}
 echo TRIGFILTER: ${TRIGFILTER}
 echo DUMMYFORHASH: ${DUMMYFORHASH}
 echo OUTPUTLEVEL: ${OUTPUTLEVEL}
@@ -27,6 +28,7 @@ echo TODO: ${TODO}
 echo TODORAWHLT: ${TODORAWHLT}
 echo TODORECO: ${TODORECO}
 echo TODONTUPLE: ${TODONTUPLE}
+echo SCANPACK: ${SCANPACK}
 
 ################################################################################
 
@@ -49,7 +51,11 @@ function fixfjr {
 }
 
 function nevents {
-    echo $(edmEventSize -v $1 | grep Events)
+    if [[ -x $(which edmEventSize 2>/dev/null) ]]; then
+        echo $(edmEventSize -v $1 | grep Events)
+    else
+        echo no edmEventSize in path
+    fi
 }
 
 function exitbanner {
@@ -62,7 +68,7 @@ function exitbanner {
       exit $1
     fi
 
-    echo END $2 at $(date) nevents $(nevents ${2,,}.root)
+    echo END $2 at $(date) filesize $(stat -c %s ${2,,}.root) nevents $(nevents ${2,,}.root)
 }
 
 function lhe {
@@ -71,7 +77,7 @@ function lhe {
 }
 
 function gensim {
-    cmd="cmsRun -j tempfjr.xml gensim.py fromlhe=${FROMLHE} salt=${SALT} jobnum=${JOBNUM} maxevents=${MAXEVENTS} ${TODO}"
+    cmd="cmsRun -j tempfjr.xml gensim.py fromlhe=${FROMLHE} salt=${SALT} jobnum=${JOBNUM} maxevents=${MAXEVENTS} ${TODO} ${SCANPACK}"
     echo $cmd at $(date) ; eval $cmd 2>&1
 }
 
@@ -123,7 +129,8 @@ fi
 exitbanner $? GENSIM
 
 if [[ $OUTPUTLEVEL == "gensim" ]]; then
-    echo OUTPUTLEVEL told me to exit
+    echo OUTPUTLEVEL told me to exit, and turning tempfjr.xml into FrameworkJobReport.xml
+    mv tempfjr.xml FrameworkJobReport.xml
     exit 0
 fi
 

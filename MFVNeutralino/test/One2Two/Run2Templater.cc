@@ -17,11 +17,11 @@ namespace mfv {
 
       env("mfvo2t_run2templater" + uname),
       d2d_cut(env.get_double("d2d_cut", 0.04)),
-      dphi_c(env.get_double("dphi_c", 1.37)),
+      dphi_c(env.get_double("dphi_c", 1.34)),
       dphi_e(env.get_double("dphi_e", 2)),
-      dphi_a(env.get_double("dphi_a", 3.50)),
-      eff_fn(env.get_string("eff_fn", "eff_avg.root")),
-      eff_path(env.get_string("eff_path", "average5")),
+      dphi_a(env.get_double("dphi_a", 3.87)),
+      eff_fn(env.get_string("eff_fn", "vpeffs_2016_v15.root")),
+      eff_path(env.get_string("eff_path", "maxtk3")),
       noversamples(env.get_int("noversamples", 20)),
       sample_count(env.get_int("sample_count", -1)),
 
@@ -113,12 +113,12 @@ namespace mfv {
       }
     }
 
+    printf("\nRun2Templater values:");
     for (Template* t : templates) {
       Template::finalize_template_in_place(t->h);
       for (int ibin = 0; ibin <= t->h->GetNbinsX()+1; ++ibin)
-        printf("ZZZ template ibin %i = %f\n", ibin, t->h->GetBinContent(ibin));
+        printf(" %.4f", t->h->GetBinContent(ibin));
     }
-
     printf("\n");
   }
 

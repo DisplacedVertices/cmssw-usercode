@@ -6,7 +6,7 @@ ROOTLIBS      = $(shell root-config --nonew --glibs)
 CFLAGS        = $(ROOTCFLAGS) -I$(CMSSW_BASE)/src -std=c++0x -pedantic -Werror -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-qual -O3
 LIBS          = $(ROOTLIBS)
 
-all: hists.exe mctruth.exe
+all: hists.exe mctruth.exe tests.exe
 
 %.exe: bin/%.o $(OBJECTS)
 	g++ -o $@ $(OBJECTS) $< $(LIBS) $(CFLAGS)
@@ -28,7 +28,7 @@ test:
 .PRECIOUS: bin/%.o
 
 clean:	
-	-rm -f hists.exe
+	-rm -f *.exe 
 	-rm -rf bin/
 
 setup:

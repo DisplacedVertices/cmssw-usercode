@@ -210,23 +210,28 @@ int main(int, char**) {
 
   jmt::ConfigFromEnv env("sm", true);
 
-  const double default_n1v[3][6] = {{ -1, -1, -1,  8338, 1003, 160 }, { -1, -1, -1, 175485, 22427, 3532 }, { -1, -1, -1, 183823, 23430, 3692 }};
-  const double default_n2v[3][6] = {{ -1, -1, -1,    44,    1,   1 }, { -1, -1, -1,    934,     7,    1 }, { -1, -1, -1,    978,     7,    1 }};
+  const double default_n1v[4][3][6] = {{{ -1, -1, -1,  8136,  976, 157 }, { -1, -1, -1, 173518, 22039, 3480 }, { -1, -1, -1, 181654, 23015, 3637 }},  //MC scaled to int. lumi.
+                                       {{ -1, -1, -1, 36945, 4591, 811 }, { -1, -1, -1,  59830,  7863, 1296 }, { -1, -1, -1,  65340,  8546, 1412 }},  //MC effective
+                                       {{ -1, -1, -1,   527,   64,  12 }, { -1, -1, -1,  10361,  1129,  104 }, { -1, -1, -1,  10888,  1193,  116 }},  //data 10%
+                                       {{ -1, -1, -1,  5422,  623, 115 }, { -1, -1, -1, 103668, 11300, 1068 }, { -1, -1, -1, 109090, 11923, 1183 }}}; //data 100%
 
-  const double  mc_eff_n1v[3][6] = {{ -1, -1, -1, 41481, 5150, 902 }, { -1, -1, -1,  65121,  8597, 1412 }, { -1, -1, -1,  71203,  9103, 1538 }};
-  const double  mc_eff_n2v[3][6] = {{ -1, -1, -1,   237,    3,   1 }, { -1, -1, -1,    390,     5,    1 }, { -1, -1, -1,    426,     6,    1 }};
+  const double default_n2v[4][3][6] = {{{ -1, -1, -1,    44,    1,   1 }, { -1, -1, -1,    946,     8,    1 }, { -1, -1, -1,    991,     8,    1 }},
+                                       {{ -1, -1, -1,   218,    4,   1 }, { -1, -1, -1,    368,     5,    1 }, { -1, -1, -1,    402,     6,    1 }},
+                                       {{ -1, -1, -1,     3,    1,   1 }, { -1, -1, -1,     61,     1,    1 }, { -1, -1, -1,     64,     1,    1 }},
+                                       {{ -1, -1, -1,    16,    1,   1 }, { -1, -1, -1,    462,     7,    1 }, { -1, -1, -1,    478,     7,    1 }}};
 
   const int inst = env.get_int("inst", 0);
   const int seed = env.get_int("seed", 12919135 + inst);
   const int ntoys = env.get_int("ntoys", 10000);
   const std::string out_fn = env.get_string("out_fn", "statmodel");
-  const int year_index = env.get_int("year_index", 1);
+  const int samples_index = env.get_int("samples_index", 0);
+  assert(samples_index >= 0 && samples_index <= 3);
+  const int year_index = env.get_int("year_index", 2);
   assert(year_index >= 0 && year_index <= 2);
-  ntracks = env.get_int("ntracks", 3);
+  ntracks = env.get_int("ntracks", 5);
   assert(ntracks >= 3 && ntracks <= 5);
-  const bool use_mc_eff = env.get_bool("use_mc_eff", false);
-  const double n1v = env.get_double("n1v", use_mc_eff ? mc_eff_n1v[year_index][ntracks] : default_n1v[year_index][ntracks]);
-  const double n2v = env.get_double("n2v", use_mc_eff ? mc_eff_n2v[year_index][ntracks] : default_n2v[year_index][ntracks]);
+  const double n1v = env.get_double("n1v", default_n1v[samples_index][year_index][ntracks]);
+  const double n2v = env.get_double("n2v", default_n2v[samples_index][year_index][ntracks]);
   const std::string true_fn = env.get_string("true_fn", "");
   const bool true_from_file = true_fn != "";
   const long ntrue_1v = env.get_long("ntrue_1v", 10000000L);
@@ -236,9 +241,9 @@ int main(int, char**) {
   rho_tail_slope = env.get_long_double("rho_tail_slope", 1L);
   phi_c = env.get_double("phi_c", 1.34);
   phi_e = env.get_double("phi_e", 2);
-  phi_a = env.get_double("phi_a", 3.86);
-  const std::string eff_fn = env.get_string("eff_fn", "eff_2016_v14.root");
-  const std::string eff_path = env.get_string("eff_path", TString::Format("maxtk%i", ntracks).Data());
+  phi_a = env.get_double("phi_a", 3.87);
+  const std::string eff_fn = env.get_string("eff_fn", "vpeffs_2015p6_v15.root");
+  const std::string eff_path = env.get_string("eff_path", "maxtk3");
 
   /////////////////////////////////////////////
 

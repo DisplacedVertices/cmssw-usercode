@@ -1,24 +1,19 @@
 #!/usr/bin/env python
 
 '''
-bash -c 'for x in /store/user/tucker/TrackMover21/*root; do ../hists.exe ${fnalxrootd}${x} `basename $x` 2 1 2>&1 | tee $(basename $x .root).log; done'
-hadd.py data.root MultiJetPk2012*root
-py ~/cmswork/Tools/python/Samples.py merge qcdht0500.root qcdht1000.root ttbar*root -3629.809 ; mv merge.root mc.root
+example:
+
+for x in 20 21 22 30 31 32; do
+  py draw.py hipplusno_$x $x/JetHT2016.root $x/qcdht1000and1500_hipplusno.root
+done
 '''
 
 extra_factor = 1. #17600/3629.809
+use_effective = True
 
-from array import array
 from JMTucker.Tools.ROOTTools import *
 set_style()
 ROOT.TH1.AddDirectory(0)
-
-def arr(*l):
-    return array('d', l)
-
-def rebin(obj, binning):
-    b = arr(binning)
-    return obj.Rebin(len(b)-1, obj.GetName(), b)
 
 def get_em(fn, alpha=1-0.6827):
     f = ROOT.TFile(fn)
@@ -28,12 +23,10 @@ def get_em(fn, alpha=1-0.6827):
     ltmp = []
 
     def skip(name, obj):
-        if 'jetsumntracks' == name:
-            return True
-        return False
+        return obj.GetName() in ('h_norm', 'h_weight', 'h_npu') #or name in ('nlep')
 
     def rebin(name, obj):
-        #print name
+        return obj
         if 'jetdravg' == name or \
            'jetdrmax' == name or \
            'npv' == name or \
@@ -53,8 +46,13 @@ def get_em(fn, alpha=1-0.6827):
             obj.Rebin(4)
         return obj
 
+    integ = f.Get('h_weight').Integral(0,100000)
+    print 'integral:', integ
+
     for key in f.GetListOfKeys():
         name = key.GetName()
+        if '_' not in name:
+            continue
         obj = f.Get(name)
         sub = name.split('_')[1]
 
@@ -64,9 +62,6 @@ def get_em(fn, alpha=1-0.6827):
         obj = rebin(sub, obj)
 
         if name.startswith('h_'):
-            if name == 'h_weight':
-                integ = obj.Integral(0,100000)
-                print 'integral:', integ
             l.append(name)
         else:
             ltmp.append(name)
@@ -81,7 +76,7 @@ def get_em(fn, alpha=1-0.6827):
         if name.endswith('_num'):
             num = d[name]
             den = d[name.replace('_num', '_den')]
-            g = histogram_divide(num, den, confint_params=(alpha,))
+            g = histogram_divide(num, den, confint_params=(alpha,), use_effective=use_effective)
             g.SetTitle('')
             g.GetXaxis().SetTitle(num.GetXaxis().GetTitle())
             g.GetYaxis().SetTitle('efficiency')
@@ -90,12 +85,13 @@ def get_em(fn, alpha=1-0.6827):
             d[rat_name] = g
             l.append(rat_name)
 
-            if 'nlep' in name:
+            if 'nlep' in name: # nlep is just a convenient one to take the integral of, can be any
                 cutset = name.split('nlep')[0]
                 num_err, den_err = ROOT.Double(), ROOT.Double()
                 num_int = num.IntegralAndError(0, 100, num_err)
                 den_int = den.IntegralAndError(0, 100, den_err)
                 cutsets.append((cutset, num_int, num_err, den_int, den_err))
+
 
     cutsets.sort()
     c = []
@@ -110,34 +106,18 @@ def get_em(fn, alpha=1-0.6827):
         ef, lo, hi = 100*ef, 100*lo, 100*hi
         print '%40s %.2f [%.2f, %.2f] +%.2f -%.2f' % (cutset, ef, lo, hi, hi-ef, ef-lo)
         c.append((cutset, ef, (hi-lo)/2))
-        g = histogram_divide(num, den, confint_params=(alpha,))
+        g = histogram_divide(num, den, confint_params=(alpha,), use_effective=use_effective)
         rat_name = cutset + '_rat'
         d[rat_name] = g
         l.append(rat_name)
 
     return f, l, d, c, integ
 
-def test():
-    ps = plot_saver('plots/trackmover_tmp', log=False)
+def comp(ex, fn1='data.root', fn2='mc.root'):
+    assert ex
+    ps = plot_saver(plot_dir('trackmover_' + ex), size=(600,600), log=False)
 
-    f,l,d = get_em('qcdht0250.root')
-    for name in l:
-        if name.endswith('_rat'):
-            g = d[name]
-            g.SetLineWidth(2)
-            g.SetMarkerStyle(20)
-            g.SetMarkerSize(0.8)
-            g.Draw('AP')
-            g.GetYaxis().SetRangeUser(0., 1.05)
-            ps.save(name)
-        
-def comp(ex, fn1='data.root', fn2='mc.root', is_data_mc=True):
     print ex
-    if ex:
-        ex = '_' + ex
-    ps = plot_saver('/publicweb/d/dquach/plots/TrackMover/V6p1_76x' + ex, size=(600,600), log=False)
-
-    print 'is_data_mc:', is_data_mc
     print 'fn1:', fn1
     f_1, l_1, d_1, c_1, integ_1 = get_em(fn1)
     print 'fn2:', fn2
@@ -156,92 +136,50 @@ def comp(ex, fn1='data.root', fn2='mc.root', is_data_mc=True):
 
     for name in l:
         data = d_1[name]
-        mc   = d_2  [name]
+        mc   = d_2[name]
         both = (data, mc)
 
-        if name.endswith('_rat'):
+        if name.endswith('_rat') or (not name.endswith('_num') and not name.endswith('_den')):
             data.SetLineWidth(2)
             data.SetMarkerStyle(20)
             data.SetMarkerSize(0.8)
-            data.Draw('AP')
+            data.SetLineColor(ROOT.kBlack)
 
             mc.SetFillStyle(3001)
+            mc.SetMarkerStyle(24)
+            mc.SetMarkerSize(0.8)
+            mc.SetMarkerColor(2)
+            mc.SetLineColor(2)
             mc.SetFillColor(2)
-            mc.Draw('PE2 same')
 
-            for g in both:
-                g.GetYaxis().SetRangeUser(0., 1.05)
-
-            ps.save(name)
-
-            x = []
-            y = []
-            exl = []
-            exh = []
-            eyl = []
-            eyh = []
-            for i in xrange(0, data.GetN()):
-                xdat = ROOT.Double(0)
-                ydat = ROOT.Double(0)
-                xmc  = ROOT.Double(0)
-                ymc  = ROOT.Double(0)
-                data.GetPoint(i, xdat, ydat)
-                mc.GetPoint(i, xmc, ymc)
-                if ymc == 0 or xmc == 0 or xdat == 0 or ydat == 0:
-                    continue
-                else:
-                    y.append(ydat / ymc)
-                    x.append(xdat)
-                    errxlow = ((xdat / xmc)**2 * ((data.GetErrorXlow(i)/xdat)**2 + (mc.GetErrorXlow(i)/xmc)**2))**0.5
-                    errxhigh = ((xdat / xmc)**2 * ((data.GetErrorXhigh(i)/xdat)**2 + (mc.GetErrorXhigh(i)/xmc)**2))**0.5
-                    errylow = ((ydat / ymc)**2 * ((data.GetErrorYlow(i)/ydat)**2 + (mc.GetErrorYlow(i)/ymc)**2))**0.5
-                    erryhigh = ((ydat / ymc)**2 * ((data.GetErrorYhigh(i)/ydat)**2 + (mc.GetErrorYhigh(i)/ymc)**2))**0.5
-                    exl.append(errxlow)
-                    exh.append(errxhigh)
-                    eyl.append(errylow)
-                    eyh.append(erryhigh)
-            h_ratio = ROOT.TGraphAsymmErrors(len(x), *[array('d', obj) for obj in (x, y, exl, exh, eyl, eyh)])
-            h_ratio.SetTitle()
-            h_ratio.GetXaxis().SetTitle('%s' % data.GetXaxis().GetTitle())
-            h_ratio.SetLineWidth(2)
-            h_ratio.SetLineColor(ROOT.kGreen+2)
-            h_ratio.Draw('AP')
-            h_ratio.GetYaxis().SetRangeUser(0, 1.2)
-            ps.save(name + '_hratio')
-
-        elif not name.endswith('_num') and not name.endswith('_den'):
-            mc.SetLineColor(ROOT.kRed)
-            mc.Scale(scale)
-
-            if data.GetMaximum() > mc.GetMaximum():
-                data.Draw()
-                mc.Draw('sames')
+            if name.endswith('_rat'):
+                for g in both:
+                    g.GetYaxis().SetTitle('efficiency')
+                objs = [(mc, 'PE2'), (data, 'P')]
+                y_range = (0, 1.05)
+                statbox_size = None
             else:
-                mc.Draw()
-                data.Draw('sames')
+                objs = [mc, data]
+                y_range = None
+                statbox_size = (0.2,0.2)
 
-            ps.c.Update()
-            for i,h in enumerate((data, mc)):
-                h.SetLineWidth(2)
-                differentiate_stat_box(h, i, new_size=(0.2,0.2))
+            ratios_plot(name, 
+                        objs,
+                        plot_saver=ps,
+                        y_range=y_range,
+                        res_y_range=0.05,
+                        res_y_title='data/MC',
+                        res_fit=False,
+                        res_divide_opt={'confint': propagate_ratio, 'force_le_1': False, 'allow_subset': True}, #name in ('all_jetsumntracks_rat', )},
+                        statbox_size=statbox_size,
+                        )
 
-            ps.save(name)
+if __name__ == '__main__':
+    import sys
+    if len(sys.argv) < 4:
+        sys.exit('usage: python draw.py tag_for_plots fn1 fn2')
 
-            ratio = data.Clone(data.GetName() + '_ratio')
-            ratio.Divide(mc)
-            ratio.SetLineColor(ROOT.kGreen+2)
-            ratio.SetLineWidth(2)
-            #ratio.Scale(max(data.GetMaximum(), mc.GetMaximum())/2.)
-            ratio.Draw()
-            ratio.GetYaxis().SetRangeUser(0, 3)
-            #ratio.Fit('pol1', 'Q')
-            ps.save(name + '_ratio')
-
-#comp('32_all', 'merge_all.root')
-#comp('32_gt500', 'merge_gt500.root')
-#comp('21_gt250_leadweight1', 'merge_gt250_leadweight1.root')
-#comp('21_gt500_leadweight1_ttbup20pc', 'merge_gt500_leadweight1_ttbup20pc.root')
-#comp('21_gt500_leadweight1_ttbup100pc', 'merge_gt500_leadweight1_ttbup100pc.root')
-
-#comp('21', 'TrackMoverV6p1_76x_21/data.root', 'TrackMoverV6p1_76x_21/merge.root')
-comp('mctruth', 'mfv_neu_tau01000um_M0800.root', 'mfv_neu_tau01000um_M0800.root')
+    ex = sys.argv[1]
+    fn1 = sys.argv[2]
+    fn2 = sys.argv[3]
+    comp(ex, fn1, fn2)

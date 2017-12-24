@@ -16,8 +16,8 @@ namespace mfv {
       path(path_),
 
       env("mfvo2t_toythrower" + uname),
-      from_histograms(env.get_bool("from_histograms", false)),
-      from_histograms_fn(env.get_string("from_histograms_fn", "throwhists.root")),
+      from_histograms(env.get_bool("from_histograms", true)),
+      from_histograms_fn(env.get_string("from_histograms_fn", "limits_input.root")),
       min_ntracks(env.get_int("min_ntracks", 5)),
       min_ntracks0(env.get_int("min_ntracks0", 0)),
       max_ntracks0(env.get_int("max_ntracks0", 1000000)),
@@ -33,7 +33,7 @@ namespace mfv {
       sample_only(env.get_int("sample_only", 0)),
       injected_signal(env.get_int("injected_signal", 0)),
       injected_signal_scale(env.get_double("injected_signal_scale", 1.)),
-      template_signal(env.get_int("template_signal", -10)),
+      template_signal(env.get_int("template_signal", -53)),
 
       ntoys(-1),
 
@@ -79,18 +79,18 @@ namespace mfv {
     toy_dataset.one_vertices = &toy_1v;
     toy_dataset.two_vertices = &toy_2v;
 
-    book_hists();
-    if (from_histograms)
-      read_histograms();
-    else
-      read_samples();
-
     const TString directory_name = TString::Format("ToyThrower%s", uname.c_str());
     dout = (TDirectory*)fout->Get(directory_name);
     if (!dout)
       dout = f->mkdir(directory_name);
     else
       jmt::vthrow("only one ToyThrower per file allowed");
+
+    book_hists();
+    if (from_histograms)
+      read_histograms();
+    else
+      read_samples();
 
     book_and_fill_some_trees();
   }
@@ -111,6 +111,7 @@ namespace mfv {
 
     auto checkedget = [&](const char* nm, const char* new_nm) {
       TH1D* h = (TH1D*)f->Get(nm);
+      //printf("zzz %s -> %s  ptr %p\n", nm, new_nm, (void*)h);
       if (!h) jmt::vthrow("file %s didn't have hist %s", from_histograms_fn.c_str(), name);
       TH1D* hnew = (TH1D*)h->Clone(new_nm == 0 ? nm : new_nm);
       hnew->SetDirectory(dout);
@@ -131,17 +132,19 @@ namespace mfv {
     if (fabs(lambda_2v[1] - integral(h_bkg_dphi)) > 1e-6)
       jmt::vthrow("2v bkg histograms have different normalizations dvv %f dphi %f", lambda_2v[1], integral(h_bkg_dphi));
 
-    h_injected_signal_dbv  = checkedget(TString::Format("h_signal_%i_dbv",  injected_signal), "h_injected_signal_dbv");
-    h_injected_signal_dvv  = checkedget(TString::Format("h_signal_%i_dvv",  injected_signal), "h_injected_signal_dvv");
-    h_injected_signal_dphi = checkedget(TString::Format("h_signal_%i_dphi", injected_signal), "h_injected_signal_dphi");
-    if (fabs(integral(h_injected_signal_dvv) - integral(h_injected_signal_dphi)) > 1e-6)
-      jmt::vthrow("2v injected signal histograms have different normalizations dvv %f dphi %f", integral(h_injected_signal_dvv), integral(h_injected_signal_dphi));
+    if (injected_signal != 0) {
+      h_injected_signal_dbv  = checkedget(TString::Format("h_signal_%i_dbv",  injected_signal), "h_injected_signal_dbv");
+      h_injected_signal_dvv  = checkedget(TString::Format("h_signal_%i_dvv",  injected_signal), "h_injected_signal_dvv");
+      h_injected_signal_dphi = checkedget(TString::Format("h_signal_%i_dphi", injected_signal), "h_injected_signal_dphi");
+      if (fabs(integral(h_injected_signal_dvv) - integral(h_injected_signal_dphi)) > 1e-6)
+        jmt::vthrow("2v injected signal histograms have different normalizations dvv %f dphi %f", integral(h_injected_signal_dvv), integral(h_injected_signal_dphi));
 
-    // signal hists have just the raw MC events to do the stats right -- normalization comes separately
-    h_injected_signal_norm = checkedget(TString::Format("h_signal_%i_norm", injected_signal), "h_injected_signal_norm");
+      // signal hists have just the raw MC events to do the stats right -- normalization comes separately
+      h_injected_signal_norm = checkedget(TString::Format("h_signal_%i_norm", injected_signal), "h_injected_signal_norm");
 
-    lambda_1v[injected_signal] = h_injected_signal_norm->GetBinContent(1);
-    lambda_2v[injected_signal] = h_injected_signal_norm->GetBinContent(2);
+      lambda_1v[injected_signal] = h_injected_signal_norm->GetBinContent(1) * int_lumi;
+      lambda_2v[injected_signal] = h_injected_signal_norm->GetBinContent(2) * int_lumi;
+    }
 
     h_template_signal_dvv  = checkedget(TString::Format("h_signal_%i_dvv",  template_signal), "h_template_signal_dvv");
 

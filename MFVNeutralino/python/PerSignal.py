@@ -19,7 +19,7 @@ class PerSignal:
         self.y_span = y_range[1] - y_range[0]
         self.curves = []
 
-    def add(self, samples, title='', color=ROOT.kRed):
+    def add(self, samples, title='', color=ROOT.kRed, style=1, in_legend=True):
         # samples already has members y, ye or yl,yh for the ordinate
         # values, or will be marked absent on plot. This is why add
         # separate from TGraph creation in draw, have to know all the
@@ -33,24 +33,28 @@ class PerSignal:
         c = PerSignal.curve()
         c.title = title
         c.color = color
+        c.style = style
+        c.in_legend = in_legend
         self.curves.append(c)
         for s in samples:
             self.taus.add(s.tau)
             self.masses.add(s.mass)
-            if hasattr(s, 'y'):
-                if hasattr(s, 'yl') and hasattr(s, 'yh'):
+            if hasattr(s, 'y') and s.y is not None:
+                if hasattr(s, 'yl') and hasattr(s, 'yh') and s.yl is not None and s.yh is not None:
                     eyl = s.y - s.yl
                     eyh = s.yh - s.y
-                elif hasattr(s, 'ye'):
+                elif hasattr(s, 'ye') and s.ye is not None:
                     eyl = eyh = s.ye
                 else:
                     eyl = eyh = 0.
                 c.set(s.tau, s.mass, s.y, eyl, eyh)
 
-    def draw(self, draw_missing=True, canvas='c_per_signal', size=(600,600)):
+    def draw(self, draw_missing=True, canvas='c_per_signal', size=(600,600),
+             do_tau_paves=True, do_decay_paves=True):
         if type(canvas) == str:
             canvas = ROOT.TCanvas(canvas, '', *size)
         self.canvas = canvas
+        self.canvas.cd()
 
         taus   = sorted(self.taus)
         masses = sorted(self.masses)
@@ -92,6 +96,7 @@ class PerSignal:
             g.SetTitle('')
             g.SetLineWidth(2)
             g.SetLineColor(curve.color)
+            g.SetLineStyle(curve.style)
             g.Draw('APZ' if ic == 0 else 'PZ')
             # these must come after the draw because a TGraph* doesn't have an axis until it is drawn (when will I remember this the first time?)
             xax, yax = g.GetXaxis(), g.GetYaxis()
@@ -109,19 +114,21 @@ class PerSignal:
         nmasses = self.nmasses = len(masses)
         self.tau_paves = []
         self.tau_lines = []
+        y_tau = self.y_range[1] + 0.025 * self.y_span
         for i, tau in enumerate(taus):
-            tau_name = PerSignal.tau_names[tau]
-            ymin = self.y_range[1]
-            if '#mu' not in tau_name:
-                ymin += 0.006
-            p = ROOT.TPaveText(i*nmasses+1, ymin, (i+1)*nmasses-1, ymin+0.07)
-            p.SetTextFont(42)
-            p.SetFillColor(ROOT.kWhite)
-            p.AddText(tau_name)
-            p.SetTextSize(0.042)
-            p.SetBorderSize(0)
-            p.Draw()
-            self.tau_paves.append(p)
+            if do_tau_paves:
+                tau_name = PerSignal.tau_names[tau]
+                ymin = y_tau
+                if '#mu' not in tau_name:
+                    ymin += 0.006 * self.y_span
+                p = ROOT.TPaveText(i*nmasses+1, ymin, (i+1)*nmasses-1, ymin+0.07)
+                p.SetTextFont(42)
+                p.SetFillColor(ROOT.kWhite)
+                p.AddText(tau_name)
+                p.SetTextSize(0.042)
+                p.SetBorderSize(0)
+                p.Draw()
+                self.tau_paves.append(p)
 
             if i > 0:
                 for z in xrange(2):
@@ -136,8 +143,8 @@ class PerSignal:
 
         self.mass_paves = []
         for i, (_, mass) in enumerate(points):
-            ymax = self.y_range[0]-0.001
-            p = ROOT.TPaveText(i, ymax-0.1, i+1, ymax)
+            ymax = self.y_range[0]-0.04*self.y_span
+            p = ROOT.TPaveText(i, ymax-0.02*self.y_span, i+1, ymax)
             p.SetFillColor(ROOT.kWhite)
             t = p.AddText(str(mass))
             t.SetTextAngle(90)
@@ -148,18 +155,18 @@ class PerSignal:
             self.mass_paves.append(p)
 
         self.decay_paves = []
-        for ic, curve in enumerate(self.curves):
-            p = ROOT.TPaveText(0.5, 0.97-(ic+1)*self.y_span*0.05, nmasses, 0.97-ic*self.y_span*0.05)
-            p.AddText(curve.title)
-            p.SetTextFont(42)
-            p.SetTextColor(curve.color) #if len(self.curves) > 1 else ROOT.kBlack)
-            p.SetFillColor(ROOT.kWhite)
-            p.SetBorderSize(0)
-            p.Draw()
-            self.decay_paves.append(p)
+        if do_decay_paves:
+            for ic, curve in enumerate([c for c in self.curves if c.in_legend]):
+                p = ROOT.TPaveText(0.5, 0.97*self.y_span-(ic+1)*self.y_span*0.05, nmasses, 0.97*self.y_span-ic*self.y_span*0.05)
+                p.AddText(curve.title)
+                p.SetTextFont(42)
+                p.SetTextColor(curve.color) #if len(self.curves) > 1 else ROOT.kBlack)
+                p.SetFillColor(ROOT.kWhite)
+                p.SetBorderSize(0)
+                p.Draw()
+                self.decay_paves.append(p)
 
-        ymin = self.y_range[1] + 0.001
-        self.lifetime_pave = ROOT.TPaveText(-3, ymin, -0.01, ymin + 0.07)
+        self.lifetime_pave = ROOT.TPaveText(-3, y_tau, -0.01, y_tau + 0.07)
         self.lifetime_pave.SetTextFont(42)
         self.lifetime_pave.SetTextSize(0.048)
         self.lifetime_pave.AddText('#tau')
@@ -167,8 +174,7 @@ class PerSignal:
         self.lifetime_pave.SetBorderSize(0)
         self.lifetime_pave.Draw()
 
-        ymax = self.y_range[0] - 0.02
-        self.mass_pave = ROOT.TPaveText(-3.537, ymax-0.07,-0.535, ymax)
+        self.mass_pave = ROOT.TPaveText(0.013, 0.007, 0.119, 0.080, 'NDC')
         self.mass_pave.SetFillColor(ROOT.kWhite)
         self.mass_pave.SetTextFont(42)
         self.mass_pave.SetTextSize(0.03)

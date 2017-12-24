@@ -7,7 +7,7 @@ is_mc = True
 process.TFileService.fileName = 'checkminrcalc.root'
 file_event_from_argv(process)
 
-geometry_etc(process, which_global_tag(is_mc, 2016))
+geometry_etc(process, which_global_tag(is_mc, 2016, H=False, repro=False))
 add_analyzer(process, 'CheckMinRCalc')
 
 import JMTucker.Tools.SampleFiles as sf

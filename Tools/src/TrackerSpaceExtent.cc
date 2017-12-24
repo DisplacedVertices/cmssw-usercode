@@ -42,12 +42,11 @@ void TrackerSpaceExtents::print() const {
 
 // JMTBAD reduce code duplication
 
-NumExtents TrackerSpaceExtents::numExtentInRAndZ(const reco::HitPattern& hp, bool pixel_only) const {
+NumExtents TrackerSpaceExtents::numExtentInRAndZ(const reco::HitPattern& hp, int code) const {
   NumExtents ret;
-
   for (int ihit = 0, ie = hp.numberOfHits(reco::HitPattern::TRACK_HITS); ihit < ie; ++ihit) {
     uint32_t hit = hp.getHitPattern(reco::HitPattern::TRACK_HITS, ihit);
-        
+
     bool is_valid = hp.getHitType(hit) == 0;
     if (!is_valid)
       continue;
@@ -62,11 +61,13 @@ NumExtents TrackerSpaceExtents::numExtentInRAndZ(const reco::HitPattern& hp, boo
     if (sub != PixelSubdetector::PixelBarrel && sub != PixelSubdetector::PixelEndcap && sub != StripSubdetector::TIB && sub != StripSubdetector::TOB && sub != StripSubdetector::TID && sub != StripSubdetector::TEC)
       throw cms::Exception("TrackerSpaceExtents") << "unknown sub " << sub << " with subsub " << subsub;
 
-    if (sub == PixelSubdetector::PixelBarrel)
-      ret.update_r(subsub);
-    else if (sub == PixelSubdetector::PixelEndcap)
-      ret.update_z(subsub);
-    else if (!pixel_only) {
+    if (code != StripOnly) {
+      if (sub == PixelSubdetector::PixelBarrel)
+        ret.update_r(subsub);
+      else if (sub == PixelSubdetector::PixelEndcap)
+        ret.update_z(subsub);
+    }
+    if (code != PixelOnly) {
       if (sub == StripSubdetector::TIB)
         ret.update_r(3 + subsub);
       else if (sub == StripSubdetector::TOB)
@@ -81,7 +82,7 @@ NumExtents TrackerSpaceExtents::numExtentInRAndZ(const reco::HitPattern& hp, boo
   return ret;
 }
 
-SpatialExtents TrackerSpaceExtents::extentInRAndZ(const reco::HitPattern& hp, bool pixel_only) const {
+SpatialExtents TrackerSpaceExtents::extentInRAndZ(const reco::HitPattern& hp, int code) const {
   if (!filled_) throw cms::Exception("CantEven", "must set up map with fill() before calling extentInRAndZ");
 
   SpatialExtents ret;
@@ -106,12 +107,10 @@ SpatialExtents TrackerSpaceExtents::extentInRAndZ(const reco::HitPattern& hp, bo
       assert(0);
     }
     const TrackerSpaceExtent& extent = it->second;
-    if (sub == PixelSubdetector::PixelBarrel || (!pixel_only && (sub == StripSubdetector::TIB || sub == StripSubdetector::TOB))) {
+    if ((code != StripOnly && sub == PixelSubdetector::PixelBarrel) || (code != PixelOnly && (sub == StripSubdetector::TIB || sub == StripSubdetector::TOB)))
       ret.update_r(extent.avg_r);
-    }
-    else if (sub == PixelSubdetector::PixelEndcap || (!pixel_only && (sub == StripSubdetector::TID || sub == StripSubdetector::TEC))) {
+    else if ((code != StripOnly && sub == PixelSubdetector::PixelEndcap) || (code != PixelOnly && (sub == StripSubdetector::TID || sub == StripSubdetector::TEC)))
       ret.update_z(extent.avg_z);
-    }
   }
 
   return ret;

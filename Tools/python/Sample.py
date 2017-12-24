@@ -3,7 +3,6 @@
 import os, sys
 from collections import defaultdict
 from fnmatch import fnmatch
-from pprint import pprint
 import JMTucker.Tools.DBS as DBS
 from JMTucker.Tools.general import big_warn, typed_from_argv
 
@@ -426,12 +425,12 @@ def norm_from_file(f_or_fn, path=None):
     if path:
         h = f.Get(path)
     else:
-        if hasattr(f, 'mfvWeight'):
-            h = f.Get('mfvWeight/h_sums')
-        elif hasattr(f, 'mcStat'):
+        if hasattr(f, 'mcStat'):
             h = f.Get('mcStat/h_sums')
+        elif hasattr(f, 'mfvWeight'):
+            h = f.Get('mfvWeight/h_sums')
         else:
-            raise ValueError('duh')
+            raise ValueError("don't know where to get norm from %r" % f_or_fn)
         assert h.GetXaxis().GetBinLabel(1) == 'sum_nevents_total'
     return h.GetBinContent(1)
 
@@ -470,51 +469,72 @@ def sample_from_end_string(namespace, d):
             return x
 
 def main(samples_registry):
-    import sys
+    from glob import glob
+    from sys import argv
+    from pprint import pprint
     from JMTucker.Tools import colors
 
-    if 'merge' in sys.argv:
+    if 'merge' in argv:
         samples = samples_registry.from_argv(from_root_fns=True, raise_if_none=True)
-        out_fn = [x for x in sys.argv if x.endswith('.root') and not os.path.isfile(x)]
+        out_fn = [x for x in argv if x.endswith('.root') and not os.path.isfile(x)]
         out_fn = out_fn[0] if out_fn else 'merge.root'
         norm_to = typed_from_argv(float, default_value=1.)
         norm_path = typed_from_argv(str, default_value='', name='norm_path')
         merge(samples, output=out_fn, norm_to=norm_to, norm_path=norm_path)
 
-    elif 'ds' in sys.argv:
+    elif 'printmissing' in argv:
+        samples = [s.name for s in samples_registry.from_argv(raise_if_none=True)]
+        samples.sort()
+        look_for_root_files = 'no_root' not in sys.argv
+        no_batch_dir, no_root_file = [], []
+        for s in samples:
+            if not os.path.isdir('condor_' + s) and not glob('crab_*_' + s):
+                no_batch_dir.append(s)
+            if not os.path.isfile('%s.root' % s):
+                no_root_file.append(s)
+        if no_batch_dir:
+            print colors.yellow('no batch dir for these:')
+            for s in no_batch_dir:
+                print s
+        if look_for_root_files and no_root_file:
+            print colors.yellow('no root file for these:')
+            for s in no_root_file:
+                print s
+
+    elif 'ds' in argv:
         samples = samples_registry.from_argv(raise_if_none=True)
         if len(samples) != 1:
             raise ValueError('must have exactly one sample in argv')
         sample = samples[0]
-        dataset = sys.argv[sys.argv.index(sample.name)+1]
+        dataset = argv[argv.index(sample.name)+1]
         if not sample.has_dataset(dataset):
             raise KeyError('no dataset %s in %s' % (dataset, sample))
         print sample.datasets[dataset].dataset
 
-    elif 'file' in sys.argv:
+    elif 'file' in argv:
         samples = samples_registry.from_argv(raise_if_none=True)
         if len(samples) != 1:
             raise ValueError('must have exactly one sample in argv')
         sample = samples[0]
-        dataset = sys.argv[sys.argv.index(sample.name)+1]
+        dataset = argv[argv.index(sample.name)+1]
         if not sample.has_dataset(dataset):
             raise KeyError('no dataset %s in %s' % (dataset, sample))
         sample.set_curr_dataset(dataset)
         for x in sample.filenames[:typed_from_argv(int, 5)]:
             print x
 
-    elif 'nevents' in sys.argv:
+    elif 'nevents' in argv:
         samples = samples_registry.from_argv(raise_if_none=True)
         if len(samples) != 1:
             raise ValueError('must have exactly one sample in argv')
         sample = samples[0]
-        dataset = sys.argv[sys.argv.index(sample.name)+1]
+        dataset = argv[argv.index(sample.name)+1]
         if not sample.has_dataset(dataset):
             raise KeyError('no dataset %s in %s' % (dataset, sample))
         sample.set_curr_dataset(dataset)
         print DBS.numevents_in_dataset(sample.dataset)
 
-    elif 'site' in sys.argv:
+    elif 'site' in argv:
         samples = samples_registry.from_argv(raise_if_none=True)
         dataset = samples_registry.datasets_from_argv()
         if len(dataset) > 1:
@@ -537,10 +557,10 @@ def main(samples_registry):
                 is_complete = all(site[x] == '100.00%' for x in ('block_completion', 'block_fraction', 'dataset_fraction', 'replica_fraction'))
                 print (colors.green if is_complete else colors.yellow)(name),
 
-    elif 'samplefiles' in sys.argv:
+    elif 'samplefiles' in argv:
         samples = samples_registry.from_argv(raise_if_none=True)
         dataset = 'main'
-        for arg in sys.argv[1:]:
+        for arg in argv[1:]:
             if arg == 'miniaod' or arg.startswith('ntuple'):
                 dataset = arg
                 break

@@ -1,18 +1,29 @@
 import sys, os
 from JMTucker.Tools.ROOTTools import *
 
-fns = [fn for fn in sys.argv[1:] if os.path.isfile(fn) and fn.endswith('.root')]
-ml = max(len(fn) for fn in fns)
+fns = root_fns_from_argv()
+width = max(len(fn) for fn in fns) + 2
 
-for fn in sys.argv[1:]:
-    if os.path.isfile(fn) and fn.endswith('.root'):
-        f = ROOT.TFile(fn)
-        print fn.ljust(ml+2),
-        for x in 'nocuts', 'ntracks', 'all':
-            num = get_integral(f.Get('%s_npv_num'%x))[0]
-            den = get_integral(f.Get('%s_npv_den'%x))[0]
-            r,l,h = wilson_score(num, den)
-            print '   %6.4f +- %6.4f' % (r, (h-l)/2),
-        print
+cutsets = ['all', 'nocuts', 'ntracks']
+print 'fn'.ljust(width), ' '.join('%19s' % x for x in cutsets)
 
-               
+z = []
+for fn in fns:
+    f = ROOT.TFile(fn)
+    print fn.ljust(width),
+    zz = []
+    for cutset in cutsets:
+        num = get_integral(f.Get('%s_npv_num' % cutset))[0]
+        den = get_integral(f.Get('%s_npv_den' % cutset))[0]
+        r,l,h = wilson_score(num, den)
+        e = (h-l)/2
+        print '   %6.4f +- %6.4f' % (r, e),
+        zz.append((r,e))
+    z.append(zz)
+    print
+
+if len(z) == 2:
+    print 'difference'.ljust(width),
+    a,b = z
+    for (aa,ea),(bb,eb) in zip(a,b):
+        print '   %6.4f +- %6.4f' % (bb-aa, (ea**2 + eb**2)**0.5),

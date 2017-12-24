@@ -65,6 +65,20 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   event.getByToken(event_token, mevent);
 
   nt.gen_flavor_code = mevent->gen_flavor_code;
+
+  nt.pass_hlt = mevent->pass_ & 0x1F;
+  nt.l1_htt = mevent->l1_htt;
+  nt.l1_myhtt = mevent->l1_myhtt;
+  nt.l1_myhttwbug = mevent->l1_myhttwbug;
+  nt.hlt_ht = mevent->hlt_ht;
+  nt.hlt_ht4mc = mevent->hlt_ht4mc;
+
+  nt.bsx = mevent->bsx;
+  nt.bsy = mevent->bsy;
+  nt.bsz = mevent->bsz;
+  nt.bsdxdz = mevent->bsdxdz;
+  nt.bsdydz = mevent->bsdydz;
+
   nt.npv = int2uchar(mevent->npv);
   nt.pvx = mevent->pvx - mevent->bsx_at_z(mevent->pvz);
   nt.pvy = mevent->pvy - mevent->bsy_at_z(mevent->pvz);
@@ -86,6 +100,19 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.jet_energy[i] = mevent->jet_energy[i];
     nt.jet_id[i] = mevent->jet_id[i];
   }
+
+  for (int i = 0; i < 2; ++i) {
+    const double z = mevent->gen_lsp_decay[i*3+2];
+    nt.gen_x[i] = mevent->gen_lsp_decay[i*3+0] - mevent->bsx_at_z(z);
+    nt.gen_y[i] = mevent->gen_lsp_decay[i*3+1] - mevent->bsy_at_z(z);
+    nt.gen_z[i] = z - mevent->bsz;
+  }
+
+  auto gen_matches = [&](const MFVVertexAux& v) { // already xformed
+    return
+      mag(v.x - nt.gen_x[0], v.y - nt.gen_y[0], v.z - nt.gen_z[0]) < 0.0084 ||
+      mag(v.x - nt.gen_x[1], v.y - nt.gen_y[1], v.z - nt.gen_z[1]) < 0.0084;
+  };
 
   edm::Handle<MFVVertexAuxCollection> input_vertices;
   event.getByToken(vertex_token, input_vertices);
@@ -112,19 +139,16 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
         nt.tk0_px.push_back(v0.track_px[i]);
         nt.tk0_py.push_back(v0.track_py[i]);
         nt.tk0_pz.push_back(v0.track_pz[i]);
+        nt.tk0_inpv.push_back(v0.track_inpv[i]);
         nt.tk0_cov.push_back(v0.track_cov[i]);
       }      
+    nt.genmatch0 = gen_matches(v0);
     nt.x0 = v0.x;
     nt.y0 = v0.y;
     nt.z0 = v0.z;
-    nt.ntracksptgt30 = int2uchar(v0.ntracksptgt(3));
-    nt.drmin0 = v0.drmin();
-    nt.drmax0 = v0.drmax();
-    nt.njetsntks0 = int2uchar(v0.njets[mfv::JByNtracks]);
     nt.bs2derr0 = v0.bs2derr;
     nt.geo2ddist0 = v0.geo2ddist();
-    nt.x1 = nt.y1 = nt.z1 = nt.drmin1 = nt.drmax1 = nt.bs2derr1 = nt.geo2ddist1 = 0;
-    nt.ntracksptgt31 = nt.njetsntks1 = 0;
+    nt.x1 = nt.y1 = nt.z1 = nt.bs2derr1 = nt.geo2ddist1 = 0;
   }
   else if (vertices.size() >= 2) {
     const MFVVertexAux& v0 = vertices[0];
@@ -142,6 +166,7 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
         nt.tk0_px.push_back(v0.track_px[i]);
         nt.tk0_py.push_back(v0.track_py[i]);
         nt.tk0_pz.push_back(v0.track_pz[i]);
+        nt.tk0_inpv.push_back(v0.track_inpv[i]);
         nt.tk0_cov.push_back(v0.track_cov[i]);
       }      
       for (int i = 0, ie = v1.ntracks(); i < ie; ++i) {
@@ -153,21 +178,16 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
         nt.tk1_px.push_back(v1.track_px[i]);
         nt.tk1_py.push_back(v1.track_py[i]);
         nt.tk1_pz.push_back(v1.track_pz[i]);
+        nt.tk1_inpv.push_back(v1.track_inpv[i]);
         nt.tk1_cov.push_back(v1.track_cov[i]);
       }      
     }
+    nt.genmatch0 = gen_matches(v0);
+    nt.genmatch1 = gen_matches(v1);
     nt.x0 = v0.x; nt.y0 = v0.y; nt.z0 = v0.z;
     nt.x1 = v1.x; nt.y1 = v1.y; nt.z1 = v1.z;
-    nt.ntracksptgt30 = int2uchar(v0.ntracksptgt(3));
-    nt.drmin0 = v0.drmin();
-    nt.drmax0 = v0.drmax();
-    nt.njetsntks0 = int2uchar(v0.njets[mfv::JByNtracks]);
     nt.bs2derr0 = v0.bs2derr;
     nt.geo2ddist0 = v0.geo2ddist();
-    nt.ntracksptgt31 = int2uchar(v1.ntracksptgt(3));
-    nt.drmin1 = v1.drmin();
-    nt.drmax1 = v1.drmax();
-    nt.njetsntks1 = int2uchar(v1.njets[mfv::JByNtracks]);
     nt.bs2derr1 = v1.bs2derr;
     nt.geo2ddist1 = v1.geo2ddist();
   }

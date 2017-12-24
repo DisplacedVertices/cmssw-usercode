@@ -2,26 +2,29 @@ from JMTucker.Tools.ROOTTools import *
 from array import array
 ROOT.TH1.AddDirectory(0)
 
-year = '2016'
+year = '2015p6'
+
+mode = ''
+#mode = 'ratio1'
 
 set_style()
-ps = plot_saver('../plots/bkgest/v14p2/bquark_correction_%s' % year, size=(700,700), root=False, log=False)
+ps = plot_saver('../plots/bkgest/v15/bquark_correction_%s%s' % (year, '' if mode == '' else '_%s'%mode), size=(700,700), root=False, log=False)
 
 ntk = ['3-track', '4-track', '5-track', '4-track-3-track']
 
-ebin1 = [0.0043, 0.0100, 0.0198, 0.0100]
-ebin2 = [0.0038, 0.0126, 0.0519, 0.0126]
-ebin3 = [0.0098, 0.0372, 0.1640, 0.0372]
+ebin1 = [0.0044, 0.0107, 0.0205, 0.0107]
+ebin2 = [0.0039, 0.0129, 0.0525, 0.0129]
+ebin3 = [0.0102, 0.0393, 0.1697, 0.0393]
 
 if year == '2015':
-    ebin1 = [0.0052, 0.0130, 0.0242, 0.0130]
-    ebin2 = [0.0047, 0.0162, 0.0651, 0.0162]
-    ebin3 = [0.0119, 0.0484, 0.2054, 0.0484]
+    ebin1 = [0.0056, 0.0141, 0.0259, 0.0141]
+    ebin2 = [0.0050, 0.0171, 0.0660, 0.0171]
+    ebin3 = [0.0129, 0.0518, 0.2137, 0.0518]
 
 if year == '2015p6':
-    ebin1 = [0.0040, 0.0097, 0.0188, 0.0097]
-    ebin2 = [0.0036, 0.0124, 0.0494, 0.0124]
-    ebin3 = [0.0093, 0.0365, 0.1576, 0.0365]
+    ebin1 = [0.0042, 0.0100, 0.0194, 0.0100]
+    ebin2 = [0.0038, 0.0124, 0.0501, 0.0124]
+    ebin3 = [0.0098, 0.0373, 0.1615, 0.0373]
 
 x = []
 ex = []
@@ -34,7 +37,7 @@ ey3 = []
 for i,ntracks in enumerate([3,4,5,7]):
     print ntk[i]
 
-    h1 = ROOT.TFile('2v_from_jets_%s_%itrack_bquark_uncorrected_v14p2.root' % (year, ntracks)).Get('h_c1v_dvv')
+    h1 = ROOT.TFile('2v_from_jets_%s_%itrack_bquark_uncorrected_v15.root' % (year, ntracks)).Get('h_c1v_dvv')
     h1.SetStats(0)
     h1.SetLineColor(ROOT.kBlack)
     h1.SetLineWidth(2)
@@ -44,7 +47,9 @@ for i,ntracks in enumerate([3,4,5,7]):
         h1.GetYaxis().SetRangeUser(0,0.4)
     h1.Draw('hist e')
 
-    h2 = ROOT.TFile('2v_from_jets_%s_%itrack_bquark_corrected_v14p2.root' % (year, ntracks)).Get('h_c1v_dvv')
+    h2 = ROOT.TFile('2v_from_jets_%s_%itrack_bquark_corrected_v15.root' % (year, ntracks)).Get('h_c1v_dvv')
+    if mode == 'ratio1':
+        h2 = ROOT.TFile('2v_from_jets_%s_%itrack_bquarks_v15.root' % (year, ntracks)).Get('h_c1v_dvv')
     h2.SetStats(0)
     h2.SetLineColor(ROOT.kRed)
     h2.SetLineWidth(2)
@@ -109,7 +114,7 @@ for i in range(3):
     g.GetXaxis().SetLimits(-3,2)
     g.GetXaxis().SetLabelSize(0)
     g.GetXaxis().SetTitleOffset(0.5)
-    g.GetYaxis().SetRangeUser(0,2)
+    g.GetYaxis().SetRangeUser(0,3)
     g.Draw('AP')
 
     line = ROOT.TLine(-3,1,2,1)

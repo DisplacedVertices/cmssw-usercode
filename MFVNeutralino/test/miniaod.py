@@ -5,10 +5,12 @@ from JMTucker.Tools.CMSSWTools import *
 from JMTucker.MFVNeutralino.Year import year
 
 is_mc = True
+H = False
+repro = False
 
 ####
 
-process = pat_tuple_process(None, is_mc, year)
+process = pat_tuple_process(None, is_mc, year, H, repro)
 
 process.out.fileName = 'miniaod.root'
 process.out.outputCommands += [

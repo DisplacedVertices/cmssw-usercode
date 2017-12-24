@@ -7,6 +7,7 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/MFVNeutralino/interface/VertexTools.h"
+#include "JMTucker/Tools/interface/Utilities.h"
 //#include "JMTucker/MFVNeutralino/plugins/VertexMVAWrap.h"
 
 class MFVVertexSelector : public edm::EDProducer {
@@ -100,10 +101,11 @@ private:
   const double min_geo2ddist;
   const double max_geo2ddist;
   const int max_sumnhitsbehind;
-  const int bs_hemisphere;
   const int max_ntrackssharedwpv;
   const int max_ntrackssharedwpvs;
   const int max_npvswtracksshared;
+  const double min_thetaoutlier;
+  const double max_thetaoutlier;
 
   const bool use_cluster_cuts;
   const int min_nclusters;
@@ -194,10 +196,11 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     min_geo2ddist(cfg.getParameter<double>("min_geo2ddist")),
     max_geo2ddist(cfg.getParameter<double>("max_geo2ddist")),
     max_sumnhitsbehind(cfg.getParameter<int>("max_sumnhitsbehind")),
-    bs_hemisphere(cfg.getParameter<int>("bs_hemisphere")),
     max_ntrackssharedwpv(cfg.getParameter<int>("max_ntrackssharedwpv")),
     max_ntrackssharedwpvs(cfg.getParameter<int>("max_ntrackssharedwpvs")),
     max_npvswtracksshared(cfg.getParameter<int>("max_npvswtracksshared")),
+    min_thetaoutlier(cfg.getParameter<double>("min_thetaoutlier")),
+    max_thetaoutlier(cfg.getParameter<double>("max_thetaoutlier")),
     use_cluster_cuts(cfg.getParameter<bool>("use_cluster_cuts")),
     min_nclusters(cfg.getParameter<int>("min_nclusters")),
     max_nsingleclusters(cfg.getParameter<int>("max_nsingleclusters")),
@@ -223,13 +226,6 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
   }
 
   produces<MFVVertexAuxCollection>();
-}
-
-namespace {
-  template <typename T>
-  T mag(T x, T y, T z) {
-    return sqrt(x*x + y*y + z*z);
-  }
 }
 
 bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx, const MFVEvent* mevent) const {
@@ -326,6 +322,21 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx, const MFVEvent* meve
       return false;
   }
 
+  if (min_thetaoutlier > 0 || max_thetaoutlier < 1e9) {
+    double mx = 0;
+    const size_t n = vtx.ntracks();
+    std::vector<double> thetas(n);
+    for (size_t i = 0; i < n; ++i)
+      thetas[i] = atan2(vtx.track_pt(i), vtx.track_pz[i]);
+    distrib_calculator s(thetas);
+    for (size_t i = 0; i < n; ++i) {
+      const double v = fabs(thetas[i] - s.med[i]) / s.mad[i];
+      if (v > mx) mx = v;
+    }
+    if (mx < min_thetaoutlier || mx > max_thetaoutlier)
+      return false;
+  }
+
   return 
     (vtx.ntracks() - ntracks_sub) >= min_ntracks &&
     (vtx.ntracks() - ntracks_sub) <= max_ntracks &&
@@ -379,9 +390,6 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx, const MFVEvent* meve
     vtx.geo2ddist() >= min_geo2ddist &&
     vtx.geo2ddist() < max_geo2ddist &&
     vtx.sumnhitsbehind() <= max_sumnhitsbehind &&
-    ((bs_hemisphere == 0) ||
-     (bs_hemisphere == 1 && (atan2(vtx.y - 0.3928, vtx.x - 0.244) >=  2.5857  || atan2(vtx.y - 0.3928, vtx.x - 0.244) < -0.5558)) ||
-     (bs_hemisphere == 2 && (atan2(vtx.y - 0.3928, vtx.x - 0.244) >= -0.5558  && atan2(vtx.y - 0.3928, vtx.x - 0.244) <  2.5857))) &&
     vtx.ntrackssharedwpv() <= max_ntrackssharedwpv &&
     vtx.ntrackssharedwpvs() <= max_ntrackssharedwpvs &&
     vtx.npvswtracksshared() <= max_npvswtracksshared;

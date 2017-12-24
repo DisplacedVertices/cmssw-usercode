@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import os
+import shutil
 import string
 import sys
 import time
@@ -158,7 +159,6 @@ class CRABSubmitter:
         self.cfg_template.Data.inputDataset = 'SETLATER'
         self.cfg_template.Data.inputDBS = 'SETLATER'
 
-        self.working_dir_pattern = '%(name)s'
         self.cfg_template.General.requestName = 'SETLATER'
 
         self.cfg_fn_pattern = os.path.join(self.psets_dir, 'crabConfig.%(name)s.py')
@@ -205,7 +205,7 @@ class CRABSubmitter:
     def cfg(self, sample):
         cfg = deepcopy(self.cfg_template) # JMTBAD needed?
         
-        cfg.General.requestName = self.batch_name.replace('/', '_') + '_' + self.working_dir_pattern % sample
+        cfg.General.requestName = self.batch_name.replace('/', '_') + '_' + sample.name # verbose for dashboard, we'll rename the crab directory back to just crab_samplename after submission
         cfg.JobType.psetName = self.pset_fn_pattern % sample
         cfg.Data.inputDataset = sample.dataset
         cfg.Data.inputDBS = sample.dbs_inst
@@ -276,10 +276,28 @@ class CRABSubmitter:
 
         if not self.testing:
             working_dir = os.path.join(cfg.General.workArea, 'crab_' + cfg.General.requestName)
+            new_working_dir = os.path.join(cfg.General.workArea, 'crab_' + sample.name)
 
-            if not os.path.isdir(working_dir):
-                result = crab_command('submit', config = cfg)
-                open(os.path.join(working_dir, 'cs_ex'), 'wt').write(self.ex_str)
+            if not os.path.isdir(working_dir) and not os.path.isdir(new_working_dir):
+                success, nretries = False, 10
+                while not success and nretries:
+                    result = crab_command('submit', config = cfg)
+                    should_retry = result.get('status', '') == 'HTTPException' and result.has_key('HTTPException')
+                    if should_retry:
+                        nretries -= 1
+                        print sample.name, 'crapped out with HTTPException,', nretries, 'tries left'
+                        shutil.rmtree(working_dir)
+                    else:
+                        open(os.path.join(working_dir, 'cs_ex'), 'wt').write(self.ex_str)
+                        success = True
+
+                if success:
+                    # The requestName contains the full batch_name so the entries in dashboard
+                    # are distinguishable, but once the job is submitted the local directory
+                    # name can be changed back to just having the sample name.
+                    shutil.move(working_dir, new_working_dir)
+                else:
+                    print '\033[1m warning: \033[0m sample %s not submitted, nretries exceeded' % (sample.name)
             else:
                 print '\033[1m warning: \033[0m sample %s not submitted, directory %s already exists' % (sample.name, working_dir)
 

@@ -1,1 +1,4 @@
 MovedTracksNtuple.cc
+hists.std*.*
+hists.log.*
+mctruths.txt

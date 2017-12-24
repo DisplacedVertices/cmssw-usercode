@@ -6,6 +6,7 @@ from JMTucker.MFVNeutralino.Year import year
 
 is_mc = True
 H = False
+repro = False
 run_n_tk_seeds = True
 minitree_only = False
 prepare_vis = False
@@ -19,7 +20,7 @@ if minitree_only:
 
 ####
 
-process = pat_tuple_process(None, is_mc, year, H)
+process = pat_tuple_process(None, is_mc, year, H, repro)
 remove_met_filters(process)
 
 # speed up by 15%
@@ -50,15 +51,6 @@ output_commands = [
     'keep MFVVertexAuxs_mfvVerticesAux_*_*',
     ]
 
-if run_n_tk_seeds:
-    for n_tk_seed in 3,4,5:
-        output_commands += [
-            'keep VertexerPairEffs_mfvVertices%iTkSeed_*_*' % n_tk_seed,
-            'keep MFVVertexAuxs_mfvVerticesAux%iTkSeed_*_*' % n_tk_seed,
-            ]
-
-process.out.outputCommands = output_commands
-
 tfileservice(process, 'vertex_histos.root')
 random_service(process, {'mfvVertices': 1222})
 
@@ -66,14 +58,27 @@ process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
 process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 
-process.p = cms.Path(process.mfvVertexSequenceEx if run_n_tk_seeds else process.mfvVertexSequence)
+process.p = cms.Path(process.mfvVertexSequence)
 process.p *= process.mfvTriggerFloats * process.mfvEvent
+
+if run_n_tk_seeds:
+    from JMTucker.MFVNeutralino.Vertexer_cff import modifiedVertexSequence
+    for n_tk_seed in 3,4,5:
+        ex = '%iTkSeed' % n_tk_seed
+        process.p *= modifiedVertexSequence(process, ex, n_tracks_per_seed_vertex = n_tk_seed)
+        output_commands += [
+            'keep VertexerPairEffs_mfvVertices%s_*_*' % ex,
+            'keep MFVVertexAuxs_mfvVerticesAux%s_*_*' % ex,
+            ]
 
 if event_filter:
     import JMTucker.MFVNeutralino.EventFilter
     JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process, path_name='p', event_filter=True)
 
 if prepare_vis:
+    process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
+    process.p *= process.mfvSelectedVerticesSeq
+
     for x in process.mfvSelectedVerticesTight, process.mfvSelectedVerticesTightNtk3, process.mfvSelectedVerticesTightNtk4:
         x.produce_vertices = True
         x.produce_tracks = True
@@ -119,6 +124,8 @@ if keep_all:
         xl = x.lower()
         if 'tau' in xl or 'MET' in x:
             delattr(process, x)
+else:
+    process.out.outputCommands = output_commands
 
 # If the embedding is on for these, then we can't match leptons by track to vertices.
 process.patMuons.embedTrack = False
@@ -150,7 +157,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = \
             Samples.data_samples + \
             Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
-            Samples.mfv_signal_samples + Samples.mfv_ddbar_samples
+            Samples.mfv_signal_samples + Samples.mfv_ddbar_samples + Samples.mfv_hip_samples + Samples.qcd_hip_samples
 
     if 'validation' in sys.argv:
         batch_name += '_validation'
@@ -173,7 +180,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             to_replace.append((magic, 'run_n_tk_seeds = False', 'ntuple template does not contain the magic string "%s"' % magic))
         return [], to_replace
 
-    modify = chain_modifiers(is_mc_modifier, H_modifier, n_tk_seeds_modifier, event_veto_modifier(skips, 'p'))
+    modify = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier, n_tk_seeds_modifier, event_veto_modifier(skips, 'p'))
     ms = MetaSubmitter(batch_name)
     if 'validation' in sys.argv:
         modify.append(max_output_modifier(500))

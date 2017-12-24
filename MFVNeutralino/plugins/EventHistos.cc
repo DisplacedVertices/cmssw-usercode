@@ -125,15 +125,6 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_leptons_dz[2][3];
   TH1F* h_leptons_iso[2][3];
 
-  TH1F* h_muons_absdphi[3];
-  TH1F* h_muons_dphi[3];
-  TH1F* h_muons_deta[3];
-  TH2F* h_muons_deta_dphi[3];
-  TH1F* h_muons_avgeta[3];
-  TH2F* h_muons_avgeta_dphi[3];
-  TH1F* h_muons_dR[3];
-  TH2F* h_muons_dR_dphi[3];
-
   TH1F* h_n_vertex_seed_tracks;
   TH1F* h_vertex_seed_track_chi2dof;
   TH1F* h_vertex_seed_track_q;
@@ -289,15 +280,6 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
       h_leptons_dz   [j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_dz",   lep_kind[j], lep_ex[i]), TString::Format(";%s %ss dz (cm);%ss/50 #mum",       lep_ex[i], lep_kind[j], lep_kind[j]), 200, -0.5, 0.5);
       h_leptons_iso  [j][i] = fs->make<TH1F>(TString::Format("h_%s_%s_iso",   lep_kind[j], lep_ex[i]), TString::Format(";%s %ss #iso (rad);%ss/.04",       lep_ex[i], lep_kind[j], lep_kind[j]), 50, 0, 2);
     }
-
-    h_muons_absdphi[i] = fs->make<TH1F>(TString::Format("h_muons_%s_absdphi", lep_ex[i]), TString::Format("events with two %s muons;|#Delta#phi| (rad);events/0.126", lep_ex[i]), 25, 0, 3.15);
-    h_muons_dphi[i] = fs->make<TH1F>(TString::Format("h_muons_%s_dphi", lep_ex[i]), TString::Format("events with two %s muons;#Delta#phi (rad);events/0.126", lep_ex[i]), 50, -3.15, 3.15);
-    h_muons_deta[i] = fs->make<TH1F>(TString::Format("h_muons_%s_deta", lep_ex[i]), TString::Format("events with two %s muons;#Delta#eta (rad);events/0.16", lep_ex[i]), 50, -4, 4);
-    h_muons_deta_dphi[i] = fs->make<TH2F>(TString::Format("h_muons_%s_deta_dphi", lep_ex[i]), TString::Format("events with two %s muons;#Delta#phi (rad);#Delta#eta (rad)", lep_ex[i]), 50, -3.15, 3.15, 50, -4, 4);
-    h_muons_avgeta[i] = fs->make<TH1F>(TString::Format("h_muons_%s_avgeta", lep_ex[i]), TString::Format("events with two %s muons;avg #eta (rad);events/0.16", lep_ex[i]), 50, -4, 4);
-    h_muons_avgeta_dphi[i] = fs->make<TH2F>(TString::Format("h_muons_%s_avgeta_dphi", lep_ex[i]), TString::Format("events with two %s muons;#Delta#phi (rad);avg #eta (rad)", lep_ex[i]), 50, -3.15, 3.15, 50, -4, 4);
-    h_muons_dR[i] = fs->make<TH1F>(TString::Format("h_muons_%s_dR", lep_ex[i]), TString::Format("events with two %s muons;#Delta R (rad);events/0.14", lep_ex[i]), 50, 0, 7);
-    h_muons_dR_dphi[i] = fs->make<TH2F>(TString::Format("h_muons_%s_dR_dphi", lep_ex[i]), TString::Format("events with two %s muons;#Delta#phi (rad);#Delta R (rad)", lep_ex[i]), 50, -3.15, 3.15, 50, 0, 7);
   }
 
   h_n_vertex_seed_tracks = fs->make<TH1F>("h_n_vertex_seed_tracks", ";# vertex seed tracks;events", 100, 0, 100);
@@ -459,9 +441,9 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   std::vector<double> bjets_phi[3][2];
   for (int i = 0; i < 3; ++i) {
     h_nbtags[i]->Fill(mevent->nbtags(i), w);
-    h_nmuons[i]->Fill(mevent->nmu(i), w);
-    h_nelectrons[i]->Fill(mevent->nel(i), w);
-    h_nleptons[i]->Fill(mevent->nlep(i), w);
+    h_nmuons[i]->Fill(mevent->nmu(1<<i), w);
+    h_nelectrons[i]->Fill(mevent->nel(1<<i), w);
+    h_nleptons[i]->Fill(mevent->nlep(1<<i), w);
 
     for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
       if (((mevent->jet_id[ijet] >> 2) & 3) >= i + 1) {

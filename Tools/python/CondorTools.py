@@ -103,19 +103,17 @@ def cs_analyze(d,
             _exception_re=re.compile(r"An exception of category '(.*)' occurred while")):
     class cs_analyze_result:
         def _list(self, ret):
-            if type(ret) == int:
-                ret = lambda r: ret
             return [i for i,r in enumerate(self.returns) if ret(r)]
         def idle(self):
-            return self._list(-1)
+            return self._list(lambda r: r == -1)
         def running(self):
-            return self._list(-2)
+            return self._list(lambda r: r == -2)
         def killed(self):
             return self._list(lambda r: r == -3 or r == -4)
         def probs(self):
             return self._list(lambda r: r > 0)
         def done(self):
-            return self._list(0)
+            return self._list(lambda r: r == 0)
     result = cs_analyze_result()
     result.working_dir = d
     result.njobs = cs_njobs(d)
@@ -181,10 +179,29 @@ def cs_analyze(d,
 
     return result
 
+def cs_analyze_mmon(wds):
+    results = {}
+    for wd in wds:
+        ana = cs_analyze(wd)
+        results[wd] = {}
+        s = results[wd]['jobListByStatus'] = {}
+        s2 = results[wd]['jobsPerStatus'] = {}
+        s3 = results[wd]['jobsPerStatusEx'] = {}
+        for x in 'idle', 'running', 'killed', 'probs', ('done', 'finished'):
+            if type(x) != tuple:
+                y = x
+            else:
+                x,y = x
+            l = getattr(ana, x)()
+            if l:
+                s[y] = l
+                s2[y] = s3[y] = len(l)
+    return results
+
 def cs_timestamp():
     return datetime.now().strftime('%y%m%d_%H%M%S')
 
-def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None):
+def cs_hadd_args(working_dir, new_name=None, new_dir=None):
     if working_dir.endswith('/'):
         working_dir = working_dir[:-1]
     if new_name is None:
@@ -193,6 +210,10 @@ def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chun
         new_name += '.root'
     if new_dir is not None:
         new_name = os.path.join(new_dir, new_name)
+    return working_dir, new_name, new_dir
+
+def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None):
+    working_dir, new_name, new_dir = cs_hadd_args(working_dir, new_name, new_dir)
 
     expected = cs_njobs(working_dir)
     print '%s: expecting %i files if all jobs succeeded' % (working_dir, expected)
@@ -231,7 +252,7 @@ def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chun
         os.system(cmd)
         os.chmod(new_name, 0644)
     else:
-        hadd(new_name, files, chunk_size)
+        hadd(new_name, files)
 
     return new_name
 
@@ -257,5 +278,31 @@ def cs_report(wd):
     ll_all.writeJSON(os.path.join(wd, 'processedLumis.json'))
     return ll_all
 
+__all__ = [
+    'is_cs_dir',
+    'cs_dirs_from_argv',
+    'cs_fjrs',
+    'cs_eventsread',
+    'cs_eventswritten',
+    'cs_njobs',
+    'cs_jobmap',
+    'cs_realjob',
+    'cs_resubs',
+    'cs_clusters',
+    'cs_kill',
+    'cs_logs',
+    'cs_job_from_log',
+    'cs_jobs_running',
+    'cs_primaryds',
+    'cs_published',
+    'cs_rootfiles',
+    'cs_analyze',
+    'cs_analyze_mmon',
+    'cs_timestamp',
+    'cs_hadd_args',
+    'cs_hadd',
+    'cs_report',
+    ]
+
 if __name__ == '__main__':
-    cs_eventsread('/uscms_data/d2/tucker/crab_dirs/NtupleV12/2015/condor_JetHT2015C')
+    pass

@@ -87,6 +87,7 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH2D* h_tracks_nsigmadxy_v_nstlayers[3];
   TH2D* h_tracks_nsigmadxy_v_dxy[3];
   TH2D* h_tracks_nsigmadxy_v_dxyerr[3];
+  TH2D* h_tracks_dxyerr_v_dxy_ptslices[3][6];
 
   TH1D* h_nm1_tracks_pt;
   TH1D* h_nm1_tracks_min_r;
@@ -179,6 +180,9 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
     h_tracks_nsigmadxy_v_nstlayers[i] = fs->make<TH2D>(TString::Format("h_%s_tracks_nsigmadxy_v_nstlayers", ex[i]), TString::Format("%s tracks;tracks nstlayers;tracks nsigmadxy", ex[i]), 20, 0, 20, 200, 0, 20);
     h_tracks_nsigmadxy_v_dxy[i] = fs->make<TH2D>(TString::Format("h_%s_tracks_nsigmadxy_v_dxy", ex[i]), TString::Format("%s tracks;tracks dxy to beamspot;tracks nsigmadxy", ex[i]), 400, -0.2, 0.2, 200, 0, 20);
     h_tracks_nsigmadxy_v_dxyerr[i] = fs->make<TH2D>(TString::Format("h_%s_tracks_nsigmadxy_v_dxyerr", ex[i]), TString::Format("%s tracks;tracks dxyerr;tracks nsigmadxy", ex[i]), 200, 0, 0.2, 200, 0, 20);
+    for (int j = 0; j < 6; ++j) {
+      h_tracks_dxyerr_v_dxy_ptslices[i][j] = fs->make<TH2D>(TString::Format("h_%s_tracks_dxyerr_v_dxy_pt%d", ex[i], j), TString::Format("%s tracks pt%d;tracks dxy to beamspot;tracks dxyerr", ex[i], j), 400, -0.2, 0.2, 200, 0, 0.2);
+    }
   }
 
   h_nm1_tracks_pt = fs->make<TH1D>("h_nm1_tracks_pt", "nm1 tracks;tracks pt;arb. units", 200, 0, 20);
@@ -269,7 +273,7 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
 
     TrackerSpaceExtents tracker_extents;
     const double pt = tk.pt();
-    const double min_r = tracker_extents.numExtentInRAndZ(tk.hitPattern(), false).min_r;
+    const double min_r = tracker_extents.numExtentInRAndZ(tk.hitPattern(), TrackerSpaceExtents::AllowAll).min_r;
     const double npxlayers = tk.hitPattern().pixelLayersWithMeasurement();
     const double nstlayers = tk.hitPattern().stripLayersWithMeasurement();
     const double abseta = fabs(tk.eta());
@@ -373,6 +377,9 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
       h_tracks_nsigmadxy_v_nstlayers[i]->Fill(nstlayers, nsigmadxy, w);
       h_tracks_nsigmadxy_v_dxy[i]->Fill(dxy, nsigmadxy, w);
       h_tracks_nsigmadxy_v_dxyerr[i]->Fill(tk.dxyError(), nsigmadxy, w);
+
+      int ipt = pt > 5 ? 5 : int(pt);
+      h_tracks_dxyerr_v_dxy_ptslices[i][ipt]->Fill(dxy, tk.dxyError(), w);
     }
   }
 

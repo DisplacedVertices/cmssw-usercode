@@ -1,25 +1,25 @@
 #!/usr/bin/env python
 
-import bigsigscan as bss
 from array import array
 from collections import defaultdict
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.general import from_pickle
+import smallsigscan, bigsigscan as bss
 
-def fmt(t, title, color):
+def fmt(t, title, xtitle, color):
     t.SetFillColor(color)
-    t.SetTitle('%s;neutralino mass (GeV);#sigma #times BR (fb)' % title)
+    t.SetTitle('%s;%s;#sigma #times BR^{2} (fb)' % (title, xtitle))
     return t
 
-def tge(xye, title, color):
+def tge(xye, title, xtitle, color):
     x = array('f', [z[0] for z in xye])
     y = array('f', [z[1] for z in xye])
     ey = array('f', [z[2] for z in xye])
     ex = array('f', [2.5]*len(x))
     t = ROOT.TGraphErrors(len(x), x, y, ex, ey)
-    return fmt(t, title, color)
+    return fmt(t, title, xtitle, color)
 
-def tgae(x, y, exl, exh, eyl, eyh, title, color):
+def tgae(x, y, exl, exh, eyl, eyh, title, xtitle, color):
     print 'tgae', len(x), len(y)
     x = array('f', x)
     y = array('f', y)
@@ -37,15 +37,15 @@ def tgae(x, y, exl, exh, eyl, eyh, title, color):
         eyh = [0]*l
     eyh = array('f', eyh)
     t = ROOT.TGraphAsymmErrors(l, x, y, exl, exh, eyl, eyh)
-    return fmt(t, title, color)
+    return fmt(t, title, xtitle, color)
 
 def parse_gluglu():
-    gluglu = [eval(x.strip()) for x in open('/afs/fnal.gov/files/home/room3/tucker/gluglu.csv').readlines() if x.strip()]
+    gluglu = [eval(x.strip()) for x in open('gluglu.csv') if x.strip()]
     gluglu = [(z[0], z[1]*1000, z[2]/100*z[1]*1000) for z in gluglu] # convert pb to fb and percent to absolute
     return gluglu
 
 def make_gluglu():
-    return tge(parse_gluglu(), 'hi', 9)
+    return tge(parse_gluglu(), '13 TeV glu-glu production', 'mass (GeV)', 9)
 
 def make_gluglu_hist():
     gluglu = parse_gluglu()
@@ -108,34 +108,40 @@ def parse(d, tau0, mass, observed_fn, expected_fn):
         d['expect95lo'].append(exp95 - exp2p5)
         d['expect95hi'].append(exp97p5 - exp95)
 
-def make_plot(d, name, title, y_range):
-    if y_range is None:
-        m = 0
-        for k,vs in d.iteritems():
-            if k == 'tau0' or k == 'mass':
-                continue
-            for v in vs:
-                m = max(m, v)
-        y_range = m * 2
+def quantiles(root_fn):
+    f = ROOT.TFile(root_fn)
+    t = f.Get('Fitter/t_fit_info')
+    for jentry in ttree_iterator(t):
+        print t.seed, t.sig_limit, t.true_pars[1]
+        #for a,b,c in zip(t.sig_limits, t.pval_limits, t.pval_limit_errs):
+        #    print a,b,c
+        #print
 
-    g_observed = tgae(d['mass'], d['observed'], None, None, None, None, title, 1)
+def make_plot(d, name, title, y_range, xkey='mass'):
+    if xkey == 'mass':
+        xtitle = 'mass (GeV)'
+    else:
+        xtitle = 'lifetime (#mum)'
+
+    g_observed = tgae(d[xkey], d['observed'], None, None, None, None, title, xtitle, 1)
     g_observed.SetMarkerStyle(20)
     g_observed.SetMarkerSize(1.2)
     g_observed.Draw('ALP')
-    g_observed.GetYaxis().SetRangeUser(0, y_range)
+    g_observed.GetYaxis().SetRangeUser(*y_range)
 
-    g_expect95 = tgae(d['mass'], d['expect95'], None, None, d['expect95lo'], d['expect95hi'], title, 5)
+    g_expect95 = tgae(d[xkey], d['expect95'], None, None, d['expect95lo'], d['expect95hi'], title, xtitle, 5)
     g_expect95.Draw('3')
 
-    g_expect68 = tgae(d['mass'], d['expect68'], None, None, d['expect68lo'], d['expect68hi'], title, 3)
+    g_expect68 = tgae(d[xkey], d['expect68'], None, None, d['expect68lo'], d['expect68hi'], title, xtitle, 3)
     g_expect68.Draw('3')
 
-    g_expect50 = tgae(d['mass'], d['expect50'], None, None, None, None, title, 1)
+    g_expect50 = tgae(d[xkey], d['expect50'], None, None, None, None, title, xtitle, 1)
     g_expect50.SetLineStyle(2)
     g_expect50.Draw('L')
 
     g_observed.Draw('LP')
 
+    draw_gluglu = xkey == 'mass'
     if draw_gluglu:
         g_gluglu.SetFillStyle(3001)
         g_gluglu.Draw('3')
@@ -161,33 +167,20 @@ def old_plots():
         ('9900um', '#tau = 10 mm'),
         ]
 
-    masses = [200, 300, 400, 600, 800, 1000]
-
-    nn = -1
-    for tau0, tau0_nice in tau0s:
-        if tau0 == '0100um': # or tau0 == '0300um':
-            print 'skip', tau0
-            nn -= len(masses)
-            continue
-
+    xxx = [
+        (lambda s: 'neu' in sample.name and sample.mass == 800,  'multijetM800',   '', (0.01, 50), 'tau0'),
+        (lambda s: 'neu' in sample.name and sample.tau  == 1000 and sample.mass != 3000, 'multijettau1mm', '', (0.01, 50), 'mass'),
+        (lambda s: 'ddbar' in sample.name and sample.mass == 800,  'ddbarM800',   '', (0.01, 50), 'tau0'),
+        (lambda s: 'ddbar' in sample.name and sample.tau  == 1000, 'ddbartau1mm', '', (0.01, 50), 'mass'),
+        ]
+    
+    for use, name, nice, y_range, xkey in xxx:
         d = defaultdict(list)
-
-        for mass in masses:
-            if mass == 200:
-                print 'skip', tau0, mass
-                nn -= 1
-                continue
-            which = 'v10p1'
-            observed_fn = 'crab/One2Two_v10p1/lsts/%s_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-1_Sam.out' % (which, nn, nn)
-            expected_fn = 'crab/One2Two_v10p1/lsts/%s_TmpCJ_Ntk5_SigTmp%i_SigSamn%ix-2_Sam.out' % (which, nn, nn)
-            #observed_fn = 'combine/combine_n%ix-1.out' % nn
-            #expected_fn = 'combine/combine_n%ix-2.out' % nn
-            print nn, tau0, mass, observed_fn, expected_fn
-            nn -= 1
-
-            parse(d, tau0, mass, observed_fn, expected_fn)
-
-        make_plot(d, tau0, tau0_nice, 50 if tau0 == '0300um' else (9 if tau0 == '1000um' else 4))
+        for sample in smallsigscan.samples:
+            if use(sample):
+                fn = 'combine_output/signal_%i/results' % sample.sample_num
+                parse(d, sample.tau, sample.mass, fn, fn)
+        make_plot(d, name, nice, y_range, xkey)
 
 def get_outs():
     outs = {-1: {}, -2: {}}
@@ -543,16 +536,20 @@ def from_r():
 
 if __name__ == '__main__':
     set_style()
-    rainbow_palette()
+    ps = plot_saver(plot_dir('o2t_limitplot_run2_tmp'), size=(600,600))
+    g_gluglu = make_gluglu()
+    g_gluglu.Draw('A3')
+    ps.save('gluglu', log=True)
 
-    if 0:
-        ps = plot_saver('/uscms/home/tucker/asdf/plots/mfvlimits_test_3', log=False, size=(600,600))
-        g_gluglu = make_gluglu()
-        g_gluglu.Draw('A3')
-        ps.save('gluglu', log=True)
+    old_plots()
 
-    #export_plots()
-
-    #dbg_exclude()
-
-    from_r()
+#    rainbow_palette()
+#
+#    if 0:
+#        ps = plot_saver('/uscms/home/tucker/asdf/plots/mfvlimits_test_3', log=False, size=(600,600))
+#
+#    #export_plots()
+#
+#    #dbg_exclude()
+#
+#    from_r()

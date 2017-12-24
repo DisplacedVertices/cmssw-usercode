@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 import os, sys, gzip, cPickle, subprocess, glob, time
-from itertools import chain
+from itertools import chain, product, starmap
+from collections import namedtuple
 from pprint import pprint
 
 def big_warn(s):
@@ -158,6 +159,14 @@ def mkdirs_if_needed(path):
     if dn:
         os.system('mkdir -p %s' % dn)
 
+def named_product(**items):
+    name = items.get('_name', 'Product')
+    if name != 'Product':
+        del items['_name']
+    # https://stackoverflow.com/questions/9098194/name-parts-of-iterables-in-itertools-products
+    Product = namedtuple(name, items.keys())
+    return starmap(Product, product(*items.values()))
+
 def sub_popen(cmd):
     return subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
 
@@ -173,6 +182,13 @@ def popen(cmd, return_exit_code=False, print_output=False):
         return output, child.returncode
     else:
         return output
+
+def print_if_nonempty(l, header='', indent=''):
+    if l:
+        if header:
+            print header
+        for x in l:
+            print indent + x
 
 def save_git_status(path):
     existed = os.path.isdir(path)

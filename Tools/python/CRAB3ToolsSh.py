@@ -58,15 +58,19 @@ def crab_get_output_dataset_from_log(working_dir):
     assert len(datasets) <= 1
     return datasets.pop() if datasets else None
 
-def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None, lpc_shortcut=False):
+def crab_hadd_args(working_dir, new_name=None, new_dir=None):
     if working_dir.endswith('/'):
         working_dir = working_dir[:-1]
     if new_name is None:
-        new_name = '_'.join(os.path.basename(working_dir).split('_')[2:])
+        new_name = '_'.join(os.path.basename(working_dir).split('_')[1:])
     if not new_name.endswith('.root'):
         new_name += '.root'
     if new_dir is not None:
         new_name = os.path.join(new_dir, new_name)
+    return working_dir, new_name, new_dir
+
+def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None, lpc_shortcut=False):
+    working_dir, new_name, new_dir = crab_hadd_args(working_dir, new_name, new_dir)
 
     if lpc_shortcut:
         expected = crab_get_njobs_from_log(working_dir)
@@ -114,6 +118,6 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
         os.system(cmd)
         os.chmod(new_name, 0644)
     else:
-        hadd(new_name, files, chunk_size)
+        hadd(new_name, files)
 
     return new_name

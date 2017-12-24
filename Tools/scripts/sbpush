@@ -1,12 +1,29 @@
-#!/bin/tcsh
+#!/bin/bash
 
-if ! $?NUM_SCRAM_JOBS then
-    set NUM_SCRAM_JOBS=4
-endif
+if [[ -z ${NUM_SCRAM_JOBS+x} ]]; then
+    export NUM_SCRAM_JOBS=4
+fi
 
-pushd $1
-echo scramv1 b -j $NUM_SCRAM_JOBS $2 $3 $4 $5 $6
-scramv1 b -j $NUM_SCRAM_JOBS $2 $3 $4 $5 $6
-set ECODE=$?
+if [[ ! -d $1 ]]; then
+    echo first argument must be a path
+    exit 1
+fi
+
+path=$1
+shift
+
+if [[ $1 == "touch" ]]; then
+    shift
+    for x in $(find $path -name BuildFile.xml); do
+        echo touch $x
+        touch $x
+    done
+fi
+
+pushd $path
+cmd="scramv1 b -j $NUM_SCRAM_JOBS $@"
+echo $cmd
+eval $cmd
+ECODE=$?
 popd
 exit $ECODE

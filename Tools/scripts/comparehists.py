@@ -15,6 +15,8 @@ parser.add_argument('--per-page', type=int, default=100,
                     help='Put PER_PAGE histograms per html page (default: 100 per page).')
 parser.add_argument('--only-n-first', type=int, default=-1,
                     help='Only do the first ONLY_N_FIRST histograms (default: do all).')
+parser.add_argument('--opt-stat', type=int, default=1112211,
+                    help='The value for SetOptStat (default: %(default)s).')
 parser.add_argument('--size', nargs=2, type=int, default=(600,600), metavar='SIZE',
                     help='Set the plot size to SIZEX x SIZEY (default %(default)s.')
 parser.add_argument('--nice', nargs='+', default=[],
@@ -25,6 +27,8 @@ parser.add_argument('--colors', nargs='+', default=['ROOT.kRed', 'ROOT.kBlue', '
 group = parser.add_argument_group('Callback function snippets: will be of the form lambda name, hists, curr: <snippet here>')
 group.add_argument('--no-stats', default='False',
                     help='Snippet for no_stats lambda (default: %(default)s).')
+group.add_argument('--stat-size', default='(0.2,0.2)',
+                    help='Snippet for stat_size lambda (default: %(default)s).')
 group.add_argument('--apply-commands', default='None',
                   help='Snippet for apply_commands (default: %(default)s).')
 group.add_argument('--separate-plots', default='None',
@@ -78,12 +82,14 @@ while len(options.colors) < nfiles:
 
 _lambda = 'lambda name, hists, curr: '
 options.no_stats       = _lambda + options.no_stats
+options.stat_size      = _lambda + options.stat_size
 options.apply_commands = _lambda + options.apply_commands
 options.separate_plots = _lambda + options.separate_plots
 options.skip           = _lambda + options.skip
 options.draw_command   = _lambda + options.draw_command
 options.scaling        = _lambda + options.scaling
 options.lambda_no_stats       = eval(options.no_stats)
+options.lambda_stat_size      = eval(options.stat_size)
 options.lambda_apply_commands = eval(options.apply_commands)
 options.lambda_separate_plots = eval(options.separate_plots)
 options.lambda_skip           = eval(options.skip)
@@ -98,6 +104,7 @@ pprint(vars(options))
 ########################################################################
 
 set_style()
+ROOT.gStyle.SetOptStat(options.opt_stat)
 ps = plot_saver(options.plot_path, size=options.size, per_page=options.per_page)
 
 if options.file_dirs:
@@ -131,6 +138,7 @@ compare_all_hists(ps,
                   recurse = options.recurse,
                   only_n_first = options.only_n_first,
                   no_stats = options.lambda_no_stats,
+                  stat_size = options.lambda_stat_size,
                   apply_commands = options.lambda_apply_commands,
                   separate_plots = options.lambda_separate_plots,
                   skip = options.lambda_skip,

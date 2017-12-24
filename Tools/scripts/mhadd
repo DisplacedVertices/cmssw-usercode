@@ -4,8 +4,9 @@ import os
 import glob
 import sys
 import JMTucker.Tools.argparse as argparse
-from JMTucker.Tools.CRAB3ToolsSh import is_crab_working_dir, crab_hadd
-from JMTucker.Tools.CondorTools import is_cs_dir, cs_hadd
+from JMTucker.Tools.CRAB3ToolsSh import is_crab_working_dir, crab_hadd_args, crab_hadd
+from JMTucker.Tools.CondorTools import is_cs_dir, cs_hadd_args, cs_hadd
+from JMTucker.Tools import eos, colors
 
 parser = argparse.ArgumentParser(description = 'mhadd: hadd the files from condor/crab directories',
                                  usage = '%(prog)s [options] condor_or_crab_dirs')
@@ -18,6 +19,12 @@ parser.add_argument('--pattern',
                     help='Glob-style pattern to filter the files, useful if there are multiple files output per job.')
 parser.add_argument('--no-lpc-shortcut', action='store_false', dest='lpc_shortcut', default=True,
                     help='(Only for crab dirs) Most of the time files went to FNAL LPC EOS, this is used to bypass talking to the crab server--turn off if needed.')
+parser.add_argument('--ignore-done', action='store_true', default=False,
+                    help='Ignore the done marker files and try to hadd whatever specified.')
+parser.add_argument('-f', '--overwrite', action='store_true', default=False,
+                    help='If the output file exists, overwrite it (really, delete it before hadd ever sees it).')
+parser.add_argument('-o', '--output-dir',
+                    help='Path for the output files. (Can be an xrootd url, e.g. root://cmseos.fnal.gov//store/user/tucker/outputdir.) If doing dirs of dirs, directories are created under the output dir corresponding to the basenames of the toplevel dirs. If the toplevel dirs are not unique, you will have a bad time.')
 
 options = parser.parse_args()
 
@@ -25,9 +32,6 @@ if len(options.positional) == 0:
     print 'Required positional args missing: at least one crab directory\n'
     parser.print_help()
     sys.exit(1)
-
-if options.lpc_shortcut:
-    print 'using LPC shortcut'
 
 ########################################################################
 
@@ -37,13 +41,50 @@ found_one = False
 def hadd_(is_crab, *args, **kwargs):
     global found_one
     found_one = True
+
+    working_dir = args[0]
+    if not os.path.isfile(os.path.join(working_dir, 'mmon_done')) and not options.ignore_done:
+        print colors.yellow('skipping %s since it is not marked done (--ignore-done to skip this check)' % working_dir)
+        return
+
     kwargs['chunk_size'] = options.chunk_size
     kwargs['pattern'] = options.pattern
+
     if is_crab:
         kwargs['lpc_shortcut'] = options.lpc_shortcut
-        return crab_hadd(*args, **kwargs)
+        hadd_args, hadd = crab_hadd_args, crab_hadd
     else:
-        return cs_hadd(*args, **kwargs)
+        hadd_args, hadd = cs_hadd_args, cs_hadd
+
+    new_dir = kwargs.get('new_dir', None)
+    if options.output_dir:
+        if new_dir:
+            base_new_dir = os.path.basename(new_dir)
+            new_dir = os.path.join(options.output_dir, base_new_dir)
+        else:
+            new_dir = options.output_dir
+    kwargs['new_dir'] = new_dir
+
+    working_dir, new_name, new_dir = hadd_args(working_dir, kwargs.get('new_name', None), new_dir)
+
+    if new_dir and '/store/' in new_dir:
+        exists, mkdir, rm = eos.exists, eos.mkdir, eos.rm
+    else:
+        exists, mkdir, rm = os.path.exists, os.mkdir, os.remove
+
+    if new_dir and not exists(new_dir):
+        mkdir(new_dir)
+
+    if exists(new_name):
+        if options.overwrite:
+            print colors.yellow('overwriting existing file %s' % new_name)
+            rm(new_name)
+        else:
+            print colors.yellow('skipping existing file %s' % new_name)
+            return
+
+    hadd(*args, **kwargs)
+
 
 for x in wds:
     is_crab = is_crab_working_dir(x)

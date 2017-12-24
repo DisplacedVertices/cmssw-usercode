@@ -435,8 +435,8 @@ namespace mfv {
       run_mnseek(env.get_bool("run_mnseek", false)),
       run_minos(env.get_bool("run_minos", true)),
       draw_bkg_templates(env.get_bool("draw_bkg_templates", 0)),
-      fix_nuis0(env.get_bool("fix_nuis0", 0)),
-      fix_nuis1(env.get_bool("fix_nuis1", 0)),
+      fix_nuis0(env.get_bool("fix_nuis0", 1)),
+      fix_nuis1(env.get_bool("fix_nuis1", 1)),
       start_nuis0(env.get_double("start_nuis0", 0.025)),
       start_nuis1(env.get_double("start_nuis1", 0.008)),
       fluctuate_toys_shapes(env.get_bool("fluctuate_toys_shapes", true)),
@@ -577,7 +577,7 @@ namespace mfv {
     t_fit_info->Branch("fs_prob", &fit_stat.prob);
     t_fit_info->Branch("fs_ks", &fit_stat.ks);
     t_fit_info->Branch("pval_signif", &pval_signif);
-    t_fit_info->Branch("pval_cls", &pval_signif);
+    t_fit_info->Branch("pval_cls", &pval_cls);
     t_fit_info->Branch("sig_limits", &sig_limits);
     t_fit_info->Branch("pval_limits", &pval_limits);
     t_fit_info->Branch("pval_limit_errs", &pval_limit_errs);
@@ -610,7 +610,9 @@ namespace mfv {
       { 400, 0, 400 }
     };
 
+    scan_t nuis_scan[2];
     const size_t npars = bkg_templates->at(0)->npars();
+    assert(npars <= 2);
     std::vector<double> mins(npars,  1e99);
     std::vector<double> maxs(npars, -1e99);
     for (Template* tp : *bkg_templates)
@@ -621,16 +623,19 @@ namespace mfv {
         if (t_par < mins[ipar])
           mins[ipar] = t_par;
       }
-    int n_nuis[2] = {200, 200};
-    if (maxs[1] <= mins[1]) {
-      maxs[1] = mins[1] + 1;
-      n_nuis[1] = 3;
-    }
 
-    scan_t nuis_scan[2] = {
-      { n_nuis[0], mins[0], maxs[0] },
-      { n_nuis[1], mins[1], maxs[1] }
-    };
+    for (size_t ipar = 0; ipar < 2; ++ipar) {
+      if (ipar >= npars) {
+        nuis_scan[ipar].n = 1;
+        nuis_scan[ipar].min = 0;
+        nuis_scan[ipar].max = 1;
+      }
+      else {
+        nuis_scan[ipar].n = 200;
+        nuis_scan[ipar].min = mins[ipar];
+        nuis_scan[ipar].max = maxs[ipar];
+      }
+    }
 
     TDirectory* cwd = gDirectory;
 
@@ -651,30 +656,32 @@ namespace mfv {
       if (draw_bkg_templates)
         cwd->cd();
 
-      TH2F* h1 = new TH2F(TString::Format("h_likelihood_%s%s_scannuis", ex_.Data(), sb_or_b),
-                          TString::Format("Best %s fit: %s;nuis. par 0;nuis. par 1", sb_or_b_nice, ml.title().c_str()),
-                          nuis_scan[0].n, nuis_scan[0].min, nuis_scan[0].max,
-                          nuis_scan[1].n, nuis_scan[1].min, nuis_scan[1].max
-                          );
+      if (npars >= 2) {
+        TH2F* h1 = new TH2F(TString::Format("h_likelihood_%s%s_scannuis", ex_.Data(), sb_or_b),
+                            TString::Format("Best %s fit: %s;nuis. par 0;nuis. par 1", sb_or_b_nice, ml.title().c_str()),
+                            nuis_scan[0].n, nuis_scan[0].min, nuis_scan[0].max,
+                            nuis_scan[1].n, nuis_scan[1].min, nuis_scan[1].max
+                            );
 
-      for (int i0 = 1; i0 <= nuis_scan[0].n; ++i0) {
-        const double nuispar0 = nuis_scan[0].v(i0);
-
-        if (draw_bkg_templates)
-          subdir->mkdir(TString::Format("nuis0_%03i", i0))->cd();
-
-        for (int i1 = 1; i1 <= nuis_scan[1].n; ++i1) {
-          //fit::extra_prints = i0 == 186 && i1 == 1;
-          //fit::interp->extra_prints = i0 == 186 && i1 == 1;
-
-          const double nuispar1 = nuis_scan[1].v(i1);
-          const double twolnL = fit::twolnL(ml.mu_sig, ml.mu_bkg, nuispar0, nuispar1);
+        for (int i0 = 1; i0 <= nuis_scan[0].n; ++i0) {
+          const double nuispar0 = nuis_scan[0].v(i0);
 
           if (draw_bkg_templates)
-            make_h_bkg(TString::Format("h_bkg_template_scan_%s_nuis0_%03i_nuis1_%03i", sb_or_b, i0, i1), std::vector<double>({nuispar0, nuispar1}), std::vector<double>());
+            subdir->mkdir(TString::Format("nuis0_%03i", i0))->cd();
 
-          //printf("i0: %i %f  i1: %i %f  %f\n", i0, nuispar0, i1, nuispar1, twolnL);
-          h1->SetBinContent(i0, i1, twolnL);
+          for (int i1 = 1; i1 <= nuis_scan[1].n; ++i1) {
+            //fit::extra_prints = i0 == 186 && i1 == 1;
+            //fit::interp->extra_prints = i0 == 186 && i1 == 1;
+
+            const double nuispar1 = nuis_scan[1].v(i1);
+            const double twolnL = fit::twolnL(ml.mu_sig, ml.mu_bkg, nuispar0, nuispar1);
+
+            if (draw_bkg_templates)
+              make_h_bkg(TString::Format("h_bkg_template_scan_%s_nuis0_%03i_nuis1_%03i", sb_or_b, i0, i1), std::vector<double>({nuispar0, nuispar1}), std::vector<double>());
+
+            //printf("i0: %i %f  i1: %i %f  %f\n", i0, nuispar0, i1, nuispar1, twolnL);
+            h1->SetBinContent(i0, i1, twolnL);
+          }
         }
       }
 
@@ -695,59 +702,83 @@ namespace mfv {
         }
       }
 
-      TH2F* h3 = new TH2F(TString::Format("h_likelihood_%s%s_scan_mubkg_nuis0", ex_.Data(), sb_or_b),
-                          TString::Format("Best %s fit: %s;nuis. par 0;#mu_{bkg}", sb_or_b_nice, ml.title().c_str()),
-                          nuis_scan[0].n, nuis_scan[0].min, nuis_scan[0].max,
-                          mu_scan[1].n, mu_scan[1].min, mu_scan[1].max
-                          );
+      if (npars >= 1) {
+        TH2F* h3 = new TH2F(TString::Format("h_likelihood_%s%s_scan_mubkg_nuis0", ex_.Data(), sb_or_b),
+                            TString::Format("Best %s fit: %s;nuis. par 0;#mu_{bkg}", sb_or_b_nice, ml.title().c_str()),
+                            nuis_scan[0].n, nuis_scan[0].min, nuis_scan[0].max,
+                            mu_scan[1].n, mu_scan[1].min, mu_scan[1].max
+                            );
 
-      for (int i0 = 1; i0 <= nuis_scan[0].n; ++i0) {
-        const double nuispar0 = nuis_scan[0].v(i0);
-        for (int i1 = 1; i1 <= mu_scan[1].n; ++i1) {
-          const double mu_bkg = mu_scan[1].v(i1);
-          h3->SetBinContent(i0, i1, fit::twolnL(ml.mu_sig, mu_bkg, nuispar0, ml.nuis1));
+        for (int i0 = 1; i0 <= nuis_scan[0].n; ++i0) {
+          const double nuispar0 = nuis_scan[0].v(i0);
+          for (int i1 = 1; i1 <= mu_scan[1].n; ++i1) {
+            const double mu_bkg = mu_scan[1].v(i1);
+            h3->SetBinContent(i0, i1, fit::twolnL(ml.mu_sig, mu_bkg, nuispar0, ml.nuis1));
+          }
+        }
+
+        TH2F* h5 = new TH2F(TString::Format("h_likelihood_%s%s_scan_musig_nuis0", ex_.Data(), sb_or_b),
+                            TString::Format("Best %s fit: %s;nuis. par 0;#mu_{sig}", sb_or_b_nice, ml.title().c_str()),
+                            nuis_scan[0].n, nuis_scan[0].min, nuis_scan[0].max,
+                            mu_scan[0].n, mu_scan[0].min, mu_scan[0].max
+                            );
+
+        for (int i0 = 1; i0 <= nuis_scan[0].n; ++i0) {
+          const double nuispar0 = nuis_scan[0].v(i0);
+          for (int i1 = 1; i1 <= mu_scan[0].n; ++i1) {
+            const double mu_sig = mu_scan[0].v(i1);
+            h5->SetBinContent(i0, i1, fit::twolnL(mu_sig, ml.mu_bkg, nuispar0, ml.nuis1));
+          }
+        }
+
+        TH1F* h9 = new TH1F(TString::Format("h_likelihood_%s%s_scan_nuis0", ex_.Data(), sb_or_b),
+                            TString::Format("Best %s fit: %s;nuis. par 0;twolnL", sb_or_b_nice, ml.title().c_str()),
+                            nuis_scan[0].n, nuis_scan[0].min, nuis_scan[0].max
+                            );
+
+        for (int i0 = 1; i0 <= nuis_scan[0].n; ++i0) {
+          const double nuispar0 = nuis_scan[0].v(i0);
+          h9->SetBinContent(i0, fit::twolnL(ml.mu_sig, ml.mu_bkg, nuispar0, ml.nuis1));
         }
       }
 
-      TH2F* h4 = new TH2F(TString::Format("h_likelihood_%s%s_scan_mubkg_nuis1", ex_.Data(), sb_or_b),
-                          TString::Format("Best %s fit: %s;nuis. par 1;#mu_{bkg}", sb_or_b_nice, ml.title().c_str()),
-                          nuis_scan[1].n, nuis_scan[1].min, nuis_scan[1].max,
-                          mu_scan[1].n, mu_scan[1].min, mu_scan[1].max
-                          );
+      if (npars >= 2) {
+        TH2F* h4 = new TH2F(TString::Format("h_likelihood_%s%s_scan_mubkg_nuis1", ex_.Data(), sb_or_b),
+                            TString::Format("Best %s fit: %s;nuis. par 1;#mu_{bkg}", sb_or_b_nice, ml.title().c_str()),
+                            nuis_scan[1].n, nuis_scan[1].min, nuis_scan[1].max,
+                            mu_scan[1].n, mu_scan[1].min, mu_scan[1].max
+                            );
 
-      for (int i0 = 1; i0 <= nuis_scan[1].n; ++i0) {
-        const double nuispar1 = nuis_scan[1].v(i0);
-        for (int i1 = 1; i1 <= mu_scan[1].n; ++i1) {
-          const double mu_bkg = mu_scan[1].v(i1);
-          h4->SetBinContent(i0, i1, fit::twolnL(ml.mu_sig, mu_bkg, ml.nuis0, nuispar1));
+        for (int i0 = 1; i0 <= nuis_scan[1].n; ++i0) {
+          const double nuispar1 = nuis_scan[1].v(i0);
+          for (int i1 = 1; i1 <= mu_scan[1].n; ++i1) {
+            const double mu_bkg = mu_scan[1].v(i1);
+            h4->SetBinContent(i0, i1, fit::twolnL(ml.mu_sig, mu_bkg, ml.nuis0, nuispar1));
+          }
         }
-      }
 
-      TH2F* h5 = new TH2F(TString::Format("h_likelihood_%s%s_scan_musig_nuis0", ex_.Data(), sb_or_b),
-                          TString::Format("Best %s fit: %s;nuis. par 0;#mu_{sig}", sb_or_b_nice, ml.title().c_str()),
-                          nuis_scan[0].n, nuis_scan[0].min, nuis_scan[0].max,
-                          mu_scan[0].n, mu_scan[0].min, mu_scan[0].max
-                          );
+        TH2F* h6 = new TH2F(TString::Format("h_likelihood_%s%s_scan_musig_nuis1", ex_.Data(), sb_or_b),
+                            TString::Format("Best %s fit: %s;nuis. par 1;#mu_{sig}", sb_or_b_nice, ml.title().c_str()),
+                            nuis_scan[1].n, nuis_scan[1].min, nuis_scan[1].max,
+                            mu_scan[0].n, mu_scan[0].min, mu_scan[0].max
+                            );
 
-      for (int i0 = 1; i0 <= nuis_scan[0].n; ++i0) {
-        const double nuispar0 = nuis_scan[0].v(i0);
-        for (int i1 = 1; i1 <= mu_scan[0].n; ++i1) {
-          const double mu_sig = mu_scan[0].v(i1);
-          h5->SetBinContent(i0, i1, fit::twolnL(mu_sig, ml.mu_bkg, nuispar0, ml.nuis1));
+        for (int i0 = 1; i0 <= nuis_scan[1].n; ++i0) {
+          const double nuispar1 = nuis_scan[1].v(i0);
+          for (int i1 = 1; i1 <= mu_scan[0].n; ++i1) {
+            const double mu_sig = mu_scan[0].v(i1);
+            h6->SetBinContent(i0, i1, fit::twolnL(mu_sig, ml.mu_bkg, ml.nuis0, nuispar1));
+          }
         }
-      }
 
-      TH2F* h6 = new TH2F(TString::Format("h_likelihood_%s%s_scan_musig_nuis1", ex_.Data(), sb_or_b),
-                          TString::Format("Best %s fit: %s;nuis. par 1;#mu_{sig}", sb_or_b_nice, ml.title().c_str()),
-                          nuis_scan[1].n, nuis_scan[1].min, nuis_scan[1].max,
-                          mu_scan[0].n, mu_scan[0].min, mu_scan[0].max
-                          );
+        TH1F* h10 = new TH1F(TString::Format("h_likelihood_%s%s_scan_nuis1", ex_.Data(), sb_or_b),
+                             TString::Format("Best %s fit: %s;nuis. par 1;twolnL", sb_or_b_nice, ml.title().c_str()),
+                             nuis_scan[1].n, nuis_scan[1].min, nuis_scan[1].max
+                             );
 
-      for (int i0 = 1; i0 <= nuis_scan[1].n; ++i0) {
-        const double nuispar1 = nuis_scan[1].v(i0);
-        for (int i1 = 1; i1 <= mu_scan[0].n; ++i1) {
-          const double mu_sig = mu_scan[0].v(i1);
-          h6->SetBinContent(i0, i1, fit::twolnL(mu_sig, ml.mu_bkg, ml.nuis0, nuispar1));
+        for (int i0 = 1; i0 <= nuis_scan[1].n; ++i0) {
+          const double nuispar1 = nuis_scan[1].v(i0);
+          h10->SetBinContent(i0, fit::twolnL(ml.mu_sig, ml.mu_bkg, ml.nuis0, nuispar1));
         }
       }
 
@@ -769,26 +800,6 @@ namespace mfv {
       for (int i0 = 1; i0 <= mu_scan[0].n; ++i0) {
         const double mu_sig = mu_scan[0].v(i0);
         h8->SetBinContent(i0, fit::twolnL(mu_sig, ml.mu_bkg, ml.nuis0, ml.nuis1));
-      }
-
-      TH1F* h9 = new TH1F(TString::Format("h_likelihood_%s%s_scan_nuis0", ex_.Data(), sb_or_b),
-                          TString::Format("Best %s fit: %s;nuis. par 0;twolnL", sb_or_b_nice, ml.title().c_str()),
-                          nuis_scan[0].n, nuis_scan[0].min, nuis_scan[0].max
-                          );
-
-      for (int i0 = 1; i0 <= nuis_scan[0].n; ++i0) {
-        const double nuispar0 = nuis_scan[0].v(i0);
-        h9->SetBinContent(i0, fit::twolnL(ml.mu_sig, ml.mu_bkg, nuispar0, ml.nuis1));
-      }
-
-      TH1F* h10 = new TH1F(TString::Format("h_likelihood_%s%s_scan_nuis1", ex_.Data(), sb_or_b),
-                          TString::Format("Best %s fit: %s;nuis. par 1;twolnL", sb_or_b_nice, ml.title().c_str()),
-                          nuis_scan[1].n, nuis_scan[1].min, nuis_scan[1].max
-                          );
-
-      for (int i0 = 1; i0 <= nuis_scan[1].n; ++i0) {
-        const double nuispar1 = nuis_scan[1].v(i0);
-        h10->SetBinContent(i0, fit::twolnL(ml.mu_sig, ml.mu_bkg, ml.nuis0, nuispar1));
       }
 
       printf("\n");
@@ -1344,10 +1355,12 @@ namespace mfv {
     fit::set_sig(Template::finalize_template(sig_template));
     fit::calc_lnL_offset();
 
+    const std::vector<double> ebkg = { -1, 0.13, 0.29, 0.51, -1 };
+
     if (bkg_gaussians_all)
-      fit::eta_bkg = { -1, 0.09, 0.15, 0.19, -1 };
+      fit::eta_bkg = ebkg;
     else if (bkg_gaussians) 
-      fit::eta_bkg = { -1, 0.09, 0.15, 0.19, -1 };
+      fit::eta_bkg = ebkg;
       //fit::eta_bkg = { -1, 1, 3.9, 3.8, 1.4, 0.1, 0.1, -1 };
       //fit::eta_bkg = { -1, 1, 1, 1, 3, 1, 1, -1 };
     else {
@@ -1464,7 +1477,7 @@ namespace mfv {
     print_level = -1;
     fit::extra_prints = 0;
 
-    //    if (save_plots) draw_likelihood(t_obs_0);
+    if (save_plots) draw_likelihood(t_obs_0);
     //scan_template_chi2(t_obs_0);
     fit_stat = draw_fit(t_obs_0);
 
@@ -1648,7 +1661,7 @@ namespace mfv {
         const test_stat_t t_obs_limit_ = calc_test_stat(mu_sig_limit);
 
         if (print_toys) {
-          printf("sig_limit: %f  mu_sig_limit: %f data: [ ", sig_limit_scan, mu_sig_limit);
+          printf("\nsig_limit: %f  mu_sig_limit: %f data: [ ", sig_limit_scan, mu_sig_limit);
           for (int i = 1; i <= fit::n_bins; ++i)
             printf("%i ", int(fit::h_data->GetBinContent(i)));
           printf("] ");
@@ -1669,12 +1682,13 @@ namespace mfv {
 
         for (int i_toy_limit = 0; i_toy_limit < n_toy_limit; ++i_toy_limit) {
           const double mu_sig_limit_toy = mu_sig_limit * (sig_eff_uncert > 0 ? jmt::lognormal(rand, 0, sig_eff_uncert) : 1);
-          if (mu_sig_limit_toy >= n_data) {
-            --i_toy_limit;
-            continue;
-          }
+          //if (mu_sig_limit_toy >= n_data) {
+          //  printf("burned: %f >= %i\n", mu_sig_limit_toy, n_data);
+          //  --i_toy_limit;
+          //  continue;
+          //}
           const int n_sig_limit = rand->Poisson(mu_sig_limit_toy);
-          const int n_bkg_limit = rand->Poisson(n_data - mu_sig_limit_toy);
+          const int n_bkg_limit = mu_sig_limit_toy >= n_data ? 0 : rand->Poisson(n_data - mu_sig_limit_toy);
 
           make_toy_data(-1, i_toy_limit, -1, n_sig_limit, n_bkg_limit, h_bkg_obs_0);
       

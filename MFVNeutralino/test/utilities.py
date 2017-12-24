@@ -49,25 +49,42 @@ def cmd_report_data():
 
 def cmd_hadd_data():
     permissive = bool_from_argv('permissive')
-    for ds in 'SingleMuon', 'JetHT':
+    for ds in 'SingleMuon', 'JetHT', 'ZeroBias':
+        print ds
         files = glob(ds + '*.root')
         if not files:
+            print 'no files for this ds'
             continue
         files.sort()
 
+        Halready = len([x for x in files if x.endswith('H.root')]) > 0
+        f2015 = [ds + '2015%s.root' % x for x in 'CD']
+        f2016 = [ds + '2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G', 'H2', 'H3')]
+        f2016Halready = [ds + '2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G', 'H')]
         ok = True
-        if files != [ds + '2015%s.root' % x for  x in 'CD'] + [ds + '2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G', 'H2', 'H3')]:
+        no2015 = False
+        if files == f2016 or files == f2016Halready:
+            print 'only 2016 files here, right?'
+            no2015 = True
+        elif files != f2015 + f2016 and files != f2015 + f2016Halready:
             print 'some files missing for', ds
             pprint(files)
             if not permissive:
                 ok = False
         if ok:
-            hadd_or_merge(ds + '2015.root', [ds + '2015%s.root' % x for x in 'CD'])
-            hadd_or_merge(ds + '2016.root', [ds + '2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G', 'H2', 'H3')])
+            if not no2015:
+                hadd_or_merge(ds + '2015.root', [ds + '2015%s.root' % x for x in 'CD'])
+            H =  ('H',) if Halready else ('H2', 'H3')
+            hadd_or_merge(ds + '2016.root', [ds + '2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G') + H])
             hadd_or_merge(ds + '2016BthruG.root', [ds + '2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G')])
             hadd_or_merge(ds + '2016BCD.root', [ds + '2016%s.root' % x for x in ('B3', 'C', 'D')])
             hadd_or_merge(ds + '2016EF.root', [ds + '2016%s.root' % x for x in ('E', 'F')])
-            hadd_or_merge(ds + '2016H.root', [ds + '2016%s.root' % x for x in ('H2', 'H3')])
+            hadd_or_merge(ds + '2016BCDEF.root', [ds + '2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F')])
+            if not Halready:
+                hadd_or_merge(ds + '2016H.root', [ds + '2016%s.root' % x for x in ('H2', 'H3')])
+            hadd_or_merge(ds + '2016GH.root', [ds + '2016%s.root' % x for x in ('G',) + H])
+        if not no2015:
+            hadd_or_merge(ds + '2015p6.root', [ds + '2015.root', ds + '2016.root'])
 
 cmd_merge_data = cmd_hadd_data
 
@@ -138,6 +155,7 @@ def cmd_histos():
     cmd_hadd_data()
     cmd_hadd_qcd_sum()
     cmd_merge_background()
+    hadd('background_2015p6.root', ['background.root', 'background_2015.root'])
     cmd_effsprint()
 
 def cmd_minitree():
@@ -148,6 +166,22 @@ def cmd_trackmover():
     cmd_report_data()
     cmd_hadd_data()
     cmd_hadd_qcd_sum()
+
+def cmd_v0eff():
+    cmd_hadd_data()
+    cmd_hadd_qcd_sum()
+    scale = -AnalysisConstants.int_lumi_2015p6 * AnalysisConstants.scale_factor_2015p6
+    for fn,files in [
+        ('qcd.root', ['qcdht%04isum.root' % x for x in (500, 700, 1000, 1500, 2000)]),
+        ('qcdht1000and1500.root', ['qcdht%04isum.root' % x for x in (1000, 1500)]),
+        ('qcdht1000and1500_hip1p0_mit.root', ['qcdht%04i_hip1p0_mit.root' % x for x in (1000, 1500)]),
+        ]:
+        cmd = 'python ' + os.environ['CMSSW_BASE'] + '/src/JMTucker/Tools/python/Samples.py merge %f %s %s' % (scale, fn, ' '.join(files))
+        print cmd
+        os.system(cmd)
+    os.mkdir('no')
+    for fn in ['qcdht%04i%s.root' % (x,y) for x in [500, 700, 1000, 1500, 2000] for y in ['', 'ext', 'sum']] + ['qcdht1000_hip1p0_mit.root', 'qcdht1500_hip1p0_mit.root'] + ['%s2016H%i.root' % (x,y) for x in ['JetHT', 'ZeroBias'] for y in [2,3]]:
+        os.rename(fn, 'no/' + fn)
 
 def cmd_trigeff():
     cmd_report_data()
@@ -177,13 +211,13 @@ def cmd_trigeff():
 
 def cmd_merge_bquarks_nobquarks():
     for year in ['2015', '2016', '2015p6']:
-        weights = '0.86,0.14' if year=='2015' else '0.77,0.23' if year=='2016' else '0.78,0.22'
+        weights = '0.86,0.14' if year=='2015' else '0.78,0.22'
         for ntracks in [3,4,5,7]:
-            files = ['One2Two/2v_from_jets_%s_%dtrack_bquarks_v14p2.root' % (year, ntracks), 'One2Two/2v_from_jets_%s_%dtrack_nobquarks_v14p2.root' % (year, ntracks)]
+            files = ['One2Two/2v_from_jets_%s_%dtrack_bquarks_v15.root' % (year, ntracks), 'One2Two/2v_from_jets_%s_%dtrack_nobquarks_v15.root' % (year, ntracks)]
             for fn in files:
                 if not os.path.isfile(fn):
                     raise RuntimeError('%s not found' % fn)
-            cmd = 'mergeTFileServiceHistograms -w %s -i %s -o One2Two/2v_from_jets_%s_%dtrack_bquark_corrected_v14p2.root' % (weights, ' '.join(files), year, ntracks)
+            cmd = 'mergeTFileServiceHistograms -w %s -i %s -o One2Two/2v_from_jets_%s_%dtrack_bquark_corrected_v15.root' % (weights, ' '.join(files), year, ntracks)
             print cmd
             os.system(cmd)
 
