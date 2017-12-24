@@ -296,8 +296,12 @@ def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=2
             name = name.replace('_hip1p0_mit', '').replace('_hip1p0', '').replace('_retest', '')
             if not d.has_key(name):
                 if sample.is_signal:
-                    sample.events_per = 500
-                    sample.files_per = 5 if sample.is_private else 1
+                    if sample.mass >= 600 or sample.tau >= 1000:
+                        sample.events_per = 200
+                        sample.files_per = 2 if sample.is_private else 1
+                    else:
+                        sample.events_per = 500
+                        sample.files_per = 5 if sample.is_private else 1
                 else:
                     sample.events_per = 50000
                     sample.files_per = 5
