@@ -29,17 +29,20 @@ private:
   TH2F* h_nmatch_v_nseed;
   TH2F* h_nmatchpass_v_nseed;
   TH1F* h_matchdist;
-  TH1F* h_fracdelta_par[5];
-  TH1F* h_fracdelta_cov[5][5]; // only the upper 5*4/2 = 10 are filled
-  TH1F* h_fracdelta_sigmadxybs;
-  TH1F* h_delta_pxl;
-  TH1F* h_delta_stl;
-  TH1F* h_delta_minr;
-  TH1F* h_nomatch_par[5];
+  TH1F* h_nomatch_pt;
+  TH1F* h_nomatch_eta;
+  TH1F* h_nomatch_phi;
+  TH1F* h_nomatch_dxy;
+  TH1F* h_nomatch_dz;
+  TH1F* h_nomatch_dxybs;
+  TH1F* h_nomatch_dxypv;
+  TH1F* h_nomatch_dzbs;
+  TH1F* h_nomatch_dzpv;
   TH1F* h_nomatch_sigmadxybs;
+  TH1F* h_nomatch_pxh;
   TH1F* h_nomatch_pxl;
+  TH1F* h_nomatch_sth;
   TH1F* h_nomatch_stl;
-  TH1F* h_nomatch_minr;
   TH1F* h_nomatch_highpurity;
   TH1F* h_nomatch_losthits;
   TH1F* h_nomatch_lostlayers;
@@ -47,28 +50,51 @@ private:
   TH1F* h_nomatch_dptopt;
   TH1F* h_nomatch_goodptrel;
 
+  TH1F* h_delta_pt;
+  TH1F* h_delta_eta;
+  TH1F* h_delta_phi;
+  TH1F* h_delta_dxy;
+  TH1F* h_delta_dz;
+  TH1F* h_delta_dxybs;
+  TH1F* h_delta_dxypv;
+  TH1F* h_delta_dzbs;
+  TH1F* h_delta_dzpv;
+  TH1F* h_delta_sigmadxybs;
+  TH1F* h_delta_pxh;
+  TH1F* h_delta_pxl;
+  TH1F* h_delta_sth;
+  TH1F* h_delta_stl;
+
   struct track_ex {
-    const reco::BeamSpot& beamspot;
-    const reco::Track& track;
+    const reco::BeamSpot& bs;
+    const reco::Vertex* pv;
+    const reco::Track& tk;
     int npxhits;
     int nsthits;
     int npxlayers;
     int nstlayers;
     double aeta;
     double dxybs;
+    double dxypv;
+    double dzbs;
+    double dzpv;
     double sigmadxybs;
     bool pass;
 
-    track_ex(const reco::BeamSpot& bs, const reco::Track& tk)
-      : beamspot(bs), track(tk)
+    track_ex(const reco::BeamSpot& bs_, const reco::Vertex* pv_, const reco::Track& tk_)
+      : bs(bs_), pv(pv_), tk(tk_)
     {
       npxhits = tk.hitPattern().numberOfValidPixelHits();
       nsthits = tk.hitPattern().numberOfValidStripHits();
       npxlayers = tk.hitPattern().pixelLayersWithMeasurement();
       nstlayers = tk.hitPattern().stripLayersWithMeasurement();
       aeta = fabs(tk.eta());
-      dxybs = tk.dxy(beamspot);
+      dxybs = tk.dxy(bs);
+      dxypv = pv ? tk.dxy(pv->position()) : 1e99;
+      dzbs = tk.dz(bs.position());
+      dzpv = pv ? tk.dz(pv->position()) : 1e99;
       sigmadxybs = dxybs / tk.dxyError();
+
       pass =
         tk.pt() > 1 &&
         tk.hitPattern().hasValidHitInFirstPixelBarrel() &&
@@ -132,6 +158,7 @@ bool MFVPackedCandidates::goodPtResolution(const reco::Track& tk) const {
 
 MFVPackedCandidates::MFVPackedCandidates(const edm::ParameterSet& cfg)
   : beamspot_token(consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"))),
+    primary_vertices_token(consumes<reco::VertexCollection>(edm::InputTag("goodOfflinePrimaryVertices"))),
     tracks_token(consumes<reco::TrackCollection>(edm::InputTag("generalTracks"))),
     packed_candidate_token(consumes<pat::PackedCandidateCollection>(edm::InputTag("packedPFCandidates"))),
     max_closest_cd_dist(cfg.getParameter<double>("max_closest_cd_dist")),
@@ -141,27 +168,39 @@ MFVPackedCandidates::MFVPackedCandidates(const edm::ParameterSet& cfg)
   h_nmatch_v_nseed = fs->make<TH2F>("h_nmatch_v_nseed", "", 50, 0, 50, 50, 0, 50);
   h_nmatchpass_v_nseed = fs->make<TH2F>("h_nmatchpass_v_nseed", "", 50, 0, 50, 50, 0, 50);
   h_matchdist = fs->make<TH1F>("h_matchdist", "", 1000, 0, 0.01);
-  h_nomatch_par[0] = fs->make<TH1F>("h_nomatch_par_0", "", 100, 0, 1000);
-  h_nomatch_par[1] = fs->make<TH1F>("h_nomatch_par_1", "", 100, -3, 3);
-  h_nomatch_par[2] = fs->make<TH1F>("h_nomatch_par_2", "", 100, -3.15, 3.15);
-  h_nomatch_par[3] = fs->make<TH1F>("h_nomatch_par_3", "", 10000, -1, 1);
-  h_nomatch_par[4] = fs->make<TH1F>("h_nomatch_par_4", "", 10000, -1, 1);
-  h_nomatch_sigmadxybs = fs->make<TH1F>("h_nomatch_sigmadxybs", "", 10000, -1, 1);
+  h_nomatch_pt = fs->make<TH1F>("h_nomatch_par_pt", "", 100, 0, 100);
+  h_nomatch_eta = fs->make<TH1F>("h_nomatch_par_eta", "", 100, -3, 3);
+  h_nomatch_phi = fs->make<TH1F>("h_nomatch_par_phi", "", 100, -3.15, 3.15);
+  h_nomatch_dxy = fs->make<TH1F>("h_nomatch_par_dxy", "", 1000, -1, 1);
+  h_nomatch_dz = fs->make<TH1F>("h_nomatch_par_dz", "", 1000, -20, 20);
+  h_nomatch_dxybs = fs->make<TH1F>("h_nomatch_par_dxybs", "", 1000, -1, 1);
+  h_nomatch_dxypv = fs->make<TH1F>("h_nomatch_par_dxypv", "", 1000, -1, 1);
+  h_nomatch_dzbs = fs->make<TH1F>("h_nomatch_par_dzbs", "", 1000, -20, 20);
+  h_nomatch_dzpv = fs->make<TH1F>("h_nomatch_par_dzpv", "", 1000, -1, 1);
+  h_nomatch_sigmadxybs = fs->make<TH1F>("h_nomatch_sigmadxybs", "", 1000, -100, 100);
+  h_nomatch_pxh = fs->make<TH1F>("h_nomatch_pxh", "", 10, 0, 10);
   h_nomatch_pxl = fs->make<TH1F>("h_nomatch_pxl", "", 10, 0, 10);
+  h_nomatch_sth = fs->make<TH1F>("h_nomatch_sth", "", 60, 0, 60);
   h_nomatch_stl = fs->make<TH1F>("h_nomatch_stl", "", 20, 0, 20);
   h_nomatch_highpurity = fs->make<TH1F>("h_nomatch_highpurity", "", 2, 0, 2);
   h_nomatch_losthits = fs->make<TH1F>("h_nomatch_losthits", "", 50, 0, 50);
   h_nomatch_lostlayers = fs->make<TH1F>("h_nomatch_lostlayers", "", 50, 0, 50);
-  h_nomatch_p = fs->make<TH1F>("h_nomatch_p", "", 20, 0, 1);
+  h_nomatch_p = fs->make<TH1F>("h_nomatch_p", "", 100, 0, 100);
   h_nomatch_dptopt = fs->make<TH1F>("h_nomatch_dptopt", "", 100, 0, 5);
   h_nomatch_goodptrel = fs->make<TH1F>("h_nomatch_goodptrel", "", 2, 0, 2);
-  for (int i = 0; i < 5; ++i) {
-    h_fracdelta_par[i] = fs->make<TH1F>(TString::Format("h_fracdelta_par_%i", i), "", 10000, -1, 1);
-    for (int j = i; j < 5; ++j)
-      h_fracdelta_cov[i][j] = fs->make<TH1F>(TString::Format("h_fracdelta_cov_%i_%i", i, j), "", 10000, -1e-2, 1e-2);
-  }
-  h_fracdelta_sigmadxybs = fs->make<TH1F>("h_fracdelta_sigmadxybs", "", 10000, -1, 1);
-  h_delta_pxl = fs->make<TH1F>("h_delta_pxl", "", 100, -50, 50);
+  h_delta_pt = fs->make<TH1F>("h_delta_par_pt", "", 1000, -50, 50);
+  h_delta_eta = fs->make<TH1F>("h_delta_par_eta", "", 1000, -3, 3);
+  h_delta_phi = fs->make<TH1F>("h_delta_par_phi", "", 1000, -3.15, 3.15);
+  h_delta_dxy = fs->make<TH1F>("h_delta_par_dxy", "", 1000, -1, 1);
+  h_delta_dz = fs->make<TH1F>("h_delta_par_dz", "", 1000, -1, 1);
+  h_delta_dxybs = fs->make<TH1F>("h_delta_par_dxybs", "", 1000, -1, 1);
+  h_delta_dxypv = fs->make<TH1F>("h_delta_par_dxypv", "", 1000, -1, 1);
+  h_delta_dzbs = fs->make<TH1F>("h_delta_par_dzbs", "", 1000, -1, 1);
+  h_delta_dzpv = fs->make<TH1F>("h_delta_par_dzpv", "", 1000, -1, 1);
+  h_delta_sigmadxybs = fs->make<TH1F>("h_delta_sigmadxybs", "", 1000, -1, 1);
+  h_delta_pxh = fs->make<TH1F>("h_delta_pxh", "", 40, -20, 20);
+  h_delta_pxl = fs->make<TH1F>("h_delta_pxl", "", 40, -20, 20);
+  h_delta_sth = fs->make<TH1F>("h_delta_sth", "", 100, -50, 50);
   h_delta_stl = fs->make<TH1F>("h_delta_stl", "", 100, -50, 50);
 }
 
@@ -169,11 +208,11 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
   edm::Handle<reco::BeamSpot> beamspot;
   event.getByToken(beamspot_token, beamspot);
   
-  //edm::Handle<reco::VertexCollection> primary_vertices;
-  //event.getByToken(primary_vertices_token, primary_vertices);
-  //const reco::Vertex* primary_vertex = 0;
-  //if (primary_vertices->size())
-  //  primary_vertex = &primary_vertices->at(0);
+  edm::Handle<reco::VertexCollection> primary_vertices;
+  event.getByToken(primary_vertices_token, primary_vertices);
+  const reco::Vertex* pv = 0;
+  if (primary_vertices->size())
+    pv = &primary_vertices->at(0);
 
   edm::Handle<reco::TrackCollection> tracks;
   event.getByToken(tracks_token, tracks);
@@ -188,7 +227,7 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
   if (prints) printf("generalTracks that pass our cuts (all # = %lu):\n", tracks->size());
   for (size_t itk = 0, itke = tracks->size(); itk < itke; ++itk) {
     const reco::Track& tk = (*tracks)[itk];
-    const track_ex te(*beamspot, tk);
+    const track_ex te(*beamspot, pv, tk);
 
     if (te.pass) {
       ++npass;
@@ -221,22 +260,24 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
       if (closest_cd) {
         ++nmatch;
         const reco::Track& cd_tk = closest_cd->pseudoTrack();
-        const track_ex cd_te(*beamspot, cd_tk);
+        const track_ex cd_te(*beamspot, pv, cd_tk);
 
         if (cd_te.pass)
           ++nmatchpass;
 
-        h_fracdelta_par[0]->Fill(cd_tk.pt()  / tk.pt()  - 1);
-        h_fracdelta_par[1]->Fill(cd_tk.eta() / tk.eta() - 1);
-        h_fracdelta_par[2]->Fill(cd_tk.phi() / tk.phi() - 1);
-        h_fracdelta_par[3]->Fill(cd_tk.dxy() / tk.dxy() - 1);
-        h_fracdelta_par[4]->Fill(cd_tk.dz()  / tk.dz()  - 1);
-        for (int i = 0; i < 5; ++i)
-          for (int j = i; j < 5; ++j)
-            if (fabs(tk.covariance(i,j)) > 0)
-              h_fracdelta_cov[i][j]->Fill(cd_tk.covariance(i,j) / tk.covariance(i,j) - 1);
-        h_fracdelta_sigmadxybs->Fill(cd_te.sigmadxybs / te.sigmadxybs - 1);
+        h_delta_pt->Fill(cd_tk.pt() - tk.pt());
+        h_delta_eta->Fill(cd_tk.eta() - tk.eta());
+        h_delta_phi->Fill(cd_tk.phi() - tk.phi());
+        h_delta_dxy->Fill(cd_tk.dxy() - tk.dxy());
+        h_delta_dz->Fill(cd_tk.dz() - tk.dz());
+        h_delta_dxybs->Fill(cd_te.dxybs - te.dxybs);
+        h_delta_dxypv->Fill(cd_te.dxypv - te.dxypv);
+        h_delta_dzbs->Fill(cd_te.dzbs - te.dzbs);
+        h_delta_dzpv->Fill(cd_te.dzpv - te.dzpv);
+        h_delta_sigmadxybs->Fill(cd_te.sigmadxybs / te.sigmadxybs - 1);
+        h_delta_pxh->Fill(cd_te.npxhits - te.npxhits);
         h_delta_pxl->Fill(cd_te.npxlayers - te.npxlayers);
+        h_delta_sth->Fill(cd_te.nsthits - te.nsthits);
         h_delta_stl->Fill(cd_te.nstlayers - te.nstlayers);
         if (prints) {
           printf("  the closest CD with dist %f:\n", closest_cd_dist);
@@ -248,13 +289,19 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
         }
       }
       else {
-        h_nomatch_par[0]->Fill(tk.pt() );
-        h_nomatch_par[1]->Fill(tk.eta());
-        h_nomatch_par[2]->Fill(tk.phi());
-        h_nomatch_par[3]->Fill(tk.dxy());
-        h_nomatch_par[4]->Fill(tk.dz() );
+        h_nomatch_pt->Fill(tk.pt());
+        h_nomatch_eta->Fill(tk.eta());
+        h_nomatch_phi->Fill(tk.phi());
+        h_nomatch_dxy->Fill(tk.dxy());
+        h_nomatch_dz->Fill(tk.dz());
+        h_nomatch_dxybs->Fill(te.dxybs);
+        h_nomatch_dxypv->Fill(te.dxypv);
+        h_nomatch_dzbs->Fill(te.dzbs);
+        h_nomatch_dzpv->Fill(te.dzpv);
         h_nomatch_sigmadxybs->Fill(te.sigmadxybs);
+        h_nomatch_pxh->Fill(te.npxhits);
         h_nomatch_pxl->Fill(te.npxlayers);
+        h_nomatch_sth->Fill(te.nsthits);
         h_nomatch_stl->Fill(te.nstlayers);
         const bool highpurity = tk.quality(reco::TrackBase::highPurity);
         const bool goodptrel = goodPtResolution(tk);

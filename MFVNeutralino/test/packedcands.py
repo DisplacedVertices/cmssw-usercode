@@ -16,11 +16,15 @@ process.TFileService.fileName = 'packedcands.root'
 geometry_etc(process, which_global_tag(is_mc, year, H, repro))
 report_every(process, 1 if prints else 1000000)
 
+process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
+process.goodOfflinePrimaryVertices.src = 'offlineSlimmedPrimaryVertices'
+process.goodOfflinePrimaryVertices.filter = True
+
 process.mfvPackedCands = cms.EDAnalyzer('MFVPackedCandidates',
                                         max_closest_cd_dist = cms.double(0.111e-3),
                                         prints = cms.bool(prints),
                                         )
-process.p = cms.Path(process.mfvPackedCands)
+process.p = cms.Path(process.goodOfflinePrimaryVertices * process.mfvPackedCands)
 
 import JMTucker.MFVNeutralino.EventFilter
 JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process, 'p')
