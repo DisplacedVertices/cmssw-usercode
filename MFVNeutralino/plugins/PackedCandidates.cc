@@ -17,8 +17,6 @@ public:
   explicit MFVPackedCandidates(const edm::ParameterSet&);
   void analyze(const edm::Event&, const edm::EventSetup&);
 private:
-  bool goodPtResolution(const reco::Track&) const;
-
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
   const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
@@ -34,6 +32,8 @@ private:
   TH1F* h_matchdist;
   TH1F* h_matchdist_notk;
 
+  TH1F* h_nomatch_highpurity;
+  TH1F* h_nomatch_p;
   TH1F* h_nomatch_pt;
   TH1F* h_nomatch_eta;
   TH1F* h_nomatch_phi;
@@ -48,10 +48,8 @@ private:
   TH1F* h_nomatch_pxl;
   TH1F* h_nomatch_sth;
   TH1F* h_nomatch_stl;
-  TH1F* h_nomatch_highpurity;
   TH1F* h_nomatch_losthits;
   TH1F* h_nomatch_lostlayers;
-  TH1F* h_nomatch_p;
   TH1F* h_nomatch_dptopt;
   TH1F* h_nomatch_goodptres;
 
@@ -74,92 +72,106 @@ private:
     const reco::BeamSpot& bs;
     const reco::Vertex* pv;
     const reco::Track& tk;
-    int npxhits;
-    int nsthits;
-    int npxlayers;
-    int nstlayers;
-    double aeta;
-    double dxybs;
-    double dxypv;
-    double dzbs;
-    double dzpv;
-    double sigmadxybs;
-    bool pass;
 
-    track_ex(const reco::BeamSpot& bs_, const reco::Vertex* pv_, const reco::Track& tk_)
-      : bs(bs_), pv(pv_), tk(tk_)
-    {
-      npxhits = tk.hitPattern().numberOfValidPixelHits();
-      nsthits = tk.hitPattern().numberOfValidStripHits();
-      npxlayers = tk.hitPattern().pixelLayersWithMeasurement();
-      nstlayers = tk.hitPattern().stripLayersWithMeasurement();
-      aeta = fabs(tk.eta());
-      dxybs = tk.dxy(bs);
-      dxypv = pv ? tk.dxy(pv->position()) : 1e99;
-      dzbs = tk.dz(bs.position());
-      dzpv = pv ? tk.dz(pv->position()) : 1e99;
-      sigmadxybs = dxybs / tk.dxyError();
+    const bool highpurity;
+    const bool goodptres;
+    const int npxhits;
+    const int nsthits;
+    const int npxlayers;
+    const int nstlayers;
+    const int nlosthits;
+    const int nlostlayers;
+    const double aeta;
+    const double dxybs;
+    const double dxypv;
+    const double dzbs;
+    const double dzpv;
+    const double sigmadxybs;
+    const double dptopt;
+    const bool pass;
 
-      pass =
-        tk.pt() > 1 &&
-        tk.hitPattern().hasValidHitInFirstPixelBarrel() &&
-        npxlayers >= 2 &&
-        ((aeta < 2 && nstlayers >= 6) || (aeta >= 2 && nstlayers >= 7)) &&
-        fabs(sigmadxybs) > 4;
-    }
+    track_ex(const reco::BeamSpot& bs_, const reco::Vertex* pv_, const reco::Track& tk_);
   };
 };
 
-// from RecoParticleFlow/PFProducer/plugins/importers/GeneralTracksImporter.cc
-bool MFVPackedCandidates::goodPtResolution(const reco::Track& tk) const {
-  //recheck that the track is high purity!
-  if (!tk.quality(reco::TrackBase::highPurity))
-    return false;
+namespace {
+  // from RecoParticleFlow/PFProducer/plugins/importers/GeneralTracksImporter.cc
+  bool goodPtResolution(const reco::Track& tk) {
+    //recheck that the track is high purity!
+    if (!tk.quality(reco::TrackBase::highPurity))
+      return false;
  
-  const std::vector<double> _DPtovPtCut = {10.0, 10.0, 10.0, 10.0, 10.0, 5.0};
-  const std::vector<unsigned> _NHitCut = { 3, 3, 3, 3, 3, 3 };
-  const bool _useIterTracking = true;
+    const std::vector<double> _DPtovPtCut = {10.0, 10.0, 10.0, 10.0, 10.0, 5.0};
+    const std::vector<unsigned> _NHitCut = { 3, 3, 3, 3, 3, 3 };
+    const bool _useIterTracking = true;
 
 
-  const bool _debug = false;
+    const bool _debug = false;
 
-  const double P = tk.p();
-  const double Pt = tk.pt();
-  const double DPt = tk.ptError();
-  const unsigned int NHit = 
-    tk.hitPattern().trackerLayersWithMeasurement();
-  const unsigned int NLostHit = 
-    tk.hitPattern().trackerLayersWithoutMeasurement(reco::HitPattern::TRACK_HITS);
-  const unsigned int LostHits = tk.numberOfLostHits();
-  const double sigmaHad = sqrt(1.20*1.20/P+0.06*0.06) / (1.+LostHits);
+    const double P = tk.p();
+    const double Pt = tk.pt();
+    const double DPt = tk.ptError();
+    const unsigned int NHit = 
+      tk.hitPattern().trackerLayersWithMeasurement();
+    const unsigned int NLostHit = 
+      tk.hitPattern().trackerLayersWithoutMeasurement(reco::HitPattern::TRACK_HITS);
+    const unsigned int LostHits = tk.numberOfLostHits();
+    const double sigmaHad = sqrt(1.20*1.20/P+0.06*0.06) / (1.+LostHits);
 
-  // Protection against 0 momentum tracks
-  if ( P < 0.05 ) return false;
+    // Protection against 0 momentum tracks
+    if ( P < 0.05 ) return false;
  
-  if (_debug) std::cout << " PFBlockAlgo: PFrecTrack->Track Pt= "
-		   << Pt << " DPt = " << DPt << std::endl;
+    if (_debug) std::cout << " PFBlockAlgo: PFrecTrack->Track Pt= "
+                          << Pt << " DPt = " << DPt << std::endl;
 
 
-  double dptCut = PFTrackAlgoTools::dPtCut(tk.algo(),_DPtovPtCut,_useIterTracking);
-  unsigned int nhitCut    = PFTrackAlgoTools::nHitCut(tk.algo(),_NHitCut,_useIterTracking);
+    double dptCut = PFTrackAlgoTools::dPtCut(tk.algo(),_DPtovPtCut,_useIterTracking);
+    unsigned int nhitCut    = PFTrackAlgoTools::nHitCut(tk.algo(),_NHitCut,_useIterTracking);
 
-  if ( ( dptCut > 0. && 
-	 DPt/Pt > dptCut*sigmaHad ) || 
-       NHit < nhitCut ) { 
-    if (_debug) std::cout << " PFBlockAlgo: skip badly measured track"
-		     << ", P = " << P 
-		     << ", Pt = " << Pt 
-		     << " DPt = " << DPt 
-		     << ", N(hits) = " << NHit << " (Lost : " << LostHits << "/" << NLostHit << ")"
-			  << ", Algo = " << tk.algo()
-		     << std::endl;
-    if (_debug) std::cout << " cut is DPt/Pt < " << dptCut * sigmaHad << std::endl;
-    if (_debug) std::cout << " cut is NHit >= " << nhitCut << std::endl;
-    return false;
+    if ( ( dptCut > 0. && 
+           DPt/Pt > dptCut*sigmaHad ) || 
+         NHit < nhitCut ) { 
+      if (_debug) std::cout << " PFBlockAlgo: skip badly measured track"
+                            << ", P = " << P 
+                            << ", Pt = " << Pt 
+                            << " DPt = " << DPt 
+                            << ", N(hits) = " << NHit << " (Lost : " << LostHits << "/" << NLostHit << ")"
+                            << ", Algo = " << tk.algo()
+                            << std::endl;
+      if (_debug) std::cout << " cut is DPt/Pt < " << dptCut * sigmaHad << std::endl;
+      if (_debug) std::cout << " cut is NHit >= " << nhitCut << std::endl;
+      return false;
+    }
+
+    return true;
   }
-
-  return true;
 }
+
+MFVPackedCandidates::track_ex::track_ex(const reco::BeamSpot& bs_, const reco::Vertex* pv_, const reco::Track& tk_)
+  : bs(bs_), pv(pv_), tk(tk_),
+
+    highpurity(tk.quality(reco::TrackBase::highPurity)),
+    goodptres(goodPtResolution(tk)),
+    npxhits(tk.hitPattern().numberOfValidPixelHits()),
+    nsthits(tk.hitPattern().numberOfValidStripHits()),
+    npxlayers(tk.hitPattern().pixelLayersWithMeasurement()),
+    nstlayers(tk.hitPattern().stripLayersWithMeasurement()),
+    nlosthits(tk.numberOfLostHits()),
+    nlostlayers(tk.hitPattern().trackerLayersWithoutMeasurement(reco::HitPattern::TRACK_HITS)),
+    aeta(fabs(tk.eta())),
+    dxybs(tk.dxy(bs)),
+    dxypv(pv ? tk.dxy(pv->position()) : 1e99),
+    dzbs(tk.dz(bs.position())),
+    dzpv(pv ? tk.dz(pv->position()) : 1e99),
+    sigmadxybs(dxybs / tk.dxyError()),
+    dptopt(tk.pt() > 0 ? tk.ptError() / tk.pt() : -999),
+
+    pass(tk.pt() > 1 &&
+         tk.hitPattern().hasValidHitInFirstPixelBarrel() &&
+         npxlayers >= 2 &&
+         ((aeta < 2 && nstlayers >= 6) || (aeta >= 2 && nstlayers >= 7)) &&
+         fabs(sigmadxybs) > 4)
+{}
 
 MFVPackedCandidates::MFVPackedCandidates(const edm::ParameterSet& cfg)
   : beamspot_token(consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"))),
@@ -309,10 +321,10 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
         }
       }
       else {
-        const bool highpurity = tk.quality(reco::TrackBase::highPurity);
-        const bool goodptres = goodPtResolution(tk);
-        if (prints) printf("  NO CD MATCH highpurity %i goodptres %i\n", highpurity, goodptres);
+        if (prints) printf("  NO CD MATCH highpurity %i goodptres %i\n", te.highpurity, te.goodptres);
 
+        h_nomatch_highpurity->Fill(te.highpurity);
+        h_nomatch_p->Fill(tk.p());
         h_nomatch_pt->Fill(tk.pt());
         h_nomatch_eta->Fill(tk.eta());
         h_nomatch_phi->Fill(tk.phi());
@@ -327,14 +339,10 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
         h_nomatch_pxl->Fill(te.npxlayers);
         h_nomatch_sth->Fill(te.nsthits);
         h_nomatch_stl->Fill(te.nstlayers);
-        h_nomatch_highpurity->Fill(highpurity);
-        if (highpurity) {
-          h_nomatch_losthits->Fill(tk.numberOfLostHits());
-          h_nomatch_lostlayers->Fill(tk.hitPattern().trackerLayersWithoutMeasurement(reco::HitPattern::TRACK_HITS));
-          h_nomatch_p->Fill(tk.p());
-          h_nomatch_dptopt->Fill(tk.pt() > 0 ? tk.ptError()/tk.pt() : 999);
-          h_nomatch_goodptres->Fill(goodptres);
-        }
+        h_nomatch_losthits->Fill(te.nlosthits);
+        h_nomatch_lostlayers->Fill(te.nlostlayers);
+        h_nomatch_dptopt->Fill(te.dptopt);
+        h_nomatch_goodptres->Fill(te.goodptres);
       }
     }
   }
