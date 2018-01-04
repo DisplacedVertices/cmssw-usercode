@@ -26,9 +26,13 @@ private:
   const double max_closest_cd_dist;
   const bool prints;
 
+  TH1F* h_nseed;
+  TH1F* h_nmatch;
+  TH1F* h_nmatchpass;
   TH2F* h_nmatch_v_nseed;
   TH2F* h_nmatchpass_v_nseed;
   TH1F* h_matchdist;
+  TH1F* h_matchdist_notk;
   TH1F* h_nomatch_pt;
   TH1F* h_nomatch_eta;
   TH1F* h_nomatch_phi;
@@ -165,9 +169,13 @@ MFVPackedCandidates::MFVPackedCandidates(const edm::ParameterSet& cfg)
     prints(cfg.getParameter<bool>("prints"))
 {
   edm::Service<TFileService> fs;
+  h_nseed = fs->make<TH1F>("h_nseed", "", 50, 0, 50);
+  h_nmatch = fs->make<TH1F>("h_nmatch", "", 50, 0, 50);
+  h_nmatchpass = fs->make<TH1F>("h_nmatchpass", "", 50, 0, 50);
   h_nmatch_v_nseed = fs->make<TH2F>("h_nmatch_v_nseed", "", 50, 0, 50, 50, 0, 50);
   h_nmatchpass_v_nseed = fs->make<TH2F>("h_nmatchpass_v_nseed", "", 50, 0, 50, 50, 0, 50);
-  h_matchdist = fs->make<TH1F>("h_matchdist", "", 1000, 0, 0.01);
+  h_matchdist = fs->make<TH1F>("h_matchdist", "", 10000, 0, 0.1);
+  h_matchdist_notk = fs->make<TH1F>("h_matchdist_notk", "", 10000, 0, 0.1);
   h_nomatch_pt = fs->make<TH1F>("h_nomatch_par_pt", "", 100, 0, 100);
   h_nomatch_eta = fs->make<TH1F>("h_nomatch_par_eta", "", 100, -3, 3);
   h_nomatch_phi = fs->make<TH1F>("h_nomatch_par_phi", "", 100, -3.15, 3.15);
@@ -220,7 +228,7 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
   edm::Handle<pat::PackedCandidateCollection> packed_candidates;
   event.getByToken(packed_candidate_token, packed_candidates);
 
-  int npass = 0;
+  int nseed = 0;
   int nmatch = 0;
   int nmatchpass = 0;
 
@@ -230,7 +238,7 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
     const track_ex te(*beamspot, pv, tk);
 
     if (te.pass) {
-      ++npass;
+      ++nseed;
 
       if (prints) {
         printf("tk #%4lu: pt %10.4g +- %10.4g eta %10.4g +- %10.4g phi %10.4g +- %10.4g dxy %10.4g +- %10.4g dz %10.4g +- %10.4g\n",
@@ -240,7 +248,9 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
       }
 
       const pat::PackedCandidate* closest_cd = 0;
+      //const pat::PackedCandidate* closest_cd_notk = 0;
       double closest_cd_dist = 100;
+      double closest_cd_notk_dist = 100;
       for (size_t icd = 0, icde = packed_candidates->size(); icd < icde; ++icd) {
         const pat::PackedCandidate& cd = (*packed_candidates)[icd];
         if (cd.charge()) {
@@ -251,9 +261,18 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
             closest_cd_dist = dist;
           }
         }
+        else {
+          const double dist = reco::deltaR(tk, cd);
+          if (dist < closest_cd_notk_dist) {
+            //closest_cd_notk = &cd;
+            closest_cd_notk_dist = dist;
+          }
+        }
       }
 
       h_matchdist->Fill(closest_cd_dist);
+      h_matchdist_notk->Fill(closest_cd_notk_dist);
+
       if (closest_cd_dist > max_closest_cd_dist)
         closest_cd = 0;
 
@@ -318,9 +337,12 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
     }
   }
 
-  h_nmatch_v_nseed->Fill(npass, nmatch);
-  h_nmatchpass_v_nseed->Fill(npass, nmatchpass);
-  if (prints) printf("# general passing: %i  # with match: %i that pass: %i\n", npass, nmatch, nmatchpass);
+  h_nseed->Fill(nseed);
+  h_nmatch->Fill(nmatch);
+  h_nmatchpass->Fill(nmatchpass);
+  h_nmatch_v_nseed->Fill(nseed, nmatch);
+  h_nmatchpass_v_nseed->Fill(nseed, nmatchpass);
+  if (prints) printf("# general passing: %i  # with match: %i that pass: %i\n", nseed, nmatch, nmatchpass);
 }
 
 DEFINE_FWK_MODULE(MFVPackedCandidates);
