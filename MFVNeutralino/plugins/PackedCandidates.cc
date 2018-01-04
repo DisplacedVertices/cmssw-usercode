@@ -134,7 +134,7 @@ MFVPackedCandidates::MFVPackedCandidates(const edm::ParameterSet& cfg)
   : beamspot_token(consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"))),
     tracks_token(consumes<reco::TrackCollection>(edm::InputTag("generalTracks"))),
     packed_candidate_token(consumes<pat::PackedCandidateCollection>(edm::InputTag("packedPFCandidates"))),
-    max_closest_cd_dist(cfg.getParameter<bool>("max_closest_cd_dist")),
+    max_closest_cd_dist(cfg.getParameter<double>("max_closest_cd_dist")),
     prints(cfg.getParameter<bool>("prints"))
 {
   edm::Service<TFileService> fs;
