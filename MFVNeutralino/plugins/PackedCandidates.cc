@@ -33,6 +33,7 @@ private:
   TH2F* h_nmatchpass_v_nseed;
   TH1F* h_matchdist;
   TH1F* h_matchdist_notk;
+
   TH1F* h_nomatch_pt;
   TH1F* h_nomatch_eta;
   TH1F* h_nomatch_phi;
@@ -52,7 +53,7 @@ private:
   TH1F* h_nomatch_lostlayers;
   TH1F* h_nomatch_p;
   TH1F* h_nomatch_dptopt;
-  TH1F* h_nomatch_goodptrel;
+  TH1F* h_nomatch_goodptres;
 
   TH1F* h_delta_pt;
   TH1F* h_delta_eta;
@@ -195,7 +196,7 @@ MFVPackedCandidates::MFVPackedCandidates(const edm::ParameterSet& cfg)
   h_nomatch_lostlayers = fs->make<TH1F>("h_nomatch_lostlayers", "", 50, 0, 50);
   h_nomatch_p = fs->make<TH1F>("h_nomatch_p", "", 100, 0, 100);
   h_nomatch_dptopt = fs->make<TH1F>("h_nomatch_dptopt", "", 100, 0, 5);
-  h_nomatch_goodptrel = fs->make<TH1F>("h_nomatch_goodptrel", "", 2, 0, 2);
+  h_nomatch_goodptres = fs->make<TH1F>("h_nomatch_goodptres", "", 2, 0, 2);
   h_delta_pt = fs->make<TH1F>("h_delta_par_pt", "", 1000, -50, 50);
   h_delta_eta = fs->make<TH1F>("h_delta_par_eta", "", 1000, -3, 3);
   h_delta_phi = fs->make<TH1F>("h_delta_par_phi", "", 1000, -3.15, 3.15);
@@ -308,6 +309,10 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
         }
       }
       else {
+        const bool highpurity = tk.quality(reco::TrackBase::highPurity);
+        const bool goodptres = goodPtResolution(tk);
+        if (prints) printf("  NO CD MATCH highpurity %i goodptres %i\n", highpurity, goodptres);
+
         h_nomatch_pt->Fill(tk.pt());
         h_nomatch_eta->Fill(tk.eta());
         h_nomatch_phi->Fill(tk.phi());
@@ -322,16 +327,13 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
         h_nomatch_pxl->Fill(te.npxlayers);
         h_nomatch_sth->Fill(te.nsthits);
         h_nomatch_stl->Fill(te.nstlayers);
-        const bool highpurity = tk.quality(reco::TrackBase::highPurity);
-        const bool goodptrel = goodPtResolution(tk);
         h_nomatch_highpurity->Fill(highpurity);
-        if (prints) printf("  NO CD MATCH highpurity %i goodptrel %i\n", highpurity, goodptrel);
         if (highpurity) {
           h_nomatch_losthits->Fill(tk.numberOfLostHits());
           h_nomatch_lostlayers->Fill(tk.hitPattern().trackerLayersWithoutMeasurement(reco::HitPattern::TRACK_HITS));
           h_nomatch_p->Fill(tk.p());
           h_nomatch_dptopt->Fill(tk.pt() > 0 ? tk.ptError()/tk.pt() : 999);
-          h_nomatch_goodptrel->Fill(goodptrel);
+          h_nomatch_goodptres->Fill(goodptres);
         }
       }
     }
