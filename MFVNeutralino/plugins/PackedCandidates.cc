@@ -36,10 +36,10 @@ private:
   jmt::TrackHistos h_all;
   jmt::TrackHistos h_highpurity;
   jmt::TrackHistos h_seed;
+  jmt::TrackHistos h_seed_highpurity;
   jmt::TrackHistos h_nomatch;
   jmt::TrackHistos h_nomatch_highpurity;
-
-  TH1F* h_nomatch_goodptres;
+  jmt::TrackHistos h_nomatch_highpurity_goodptres;
 
   TH1F* h_delta_pt;
   TH1F* h_delta_eta;
@@ -171,8 +171,10 @@ MFVPackedCandidates::MFVPackedCandidates(const edm::ParameterSet& cfg)
     h_all("all"),
     h_highpurity("highpurity"),
     h_seed("seed"),
+    h_seed_highpurity("seed_highpurity"),
     h_nomatch("nomatch"),
-    h_nomatch_highpurity("nomatch_highpurity")
+    h_nomatch_highpurity("nomatch_highpurity"),
+    h_nomatch_highpurity_goodptres("nomatch_highpurity_goodptres")
 {
   edm::Service<TFileService> fs;
   h_nseed = fs->make<TH1F>("h_nseed", "", 50, 0, 50);
@@ -183,7 +185,6 @@ MFVPackedCandidates::MFVPackedCandidates(const edm::ParameterSet& cfg)
   h_matchdist = fs->make<TH1F>("h_matchdist", "", 10000, 0, 0.1);
   h_matchdist_notk = fs->make<TH1F>("h_matchdist_notk", "", 10000, 0, 0.1);
 
-  h_nomatch_goodptres = fs->make<TH1F>("h_nomatch_goodptres", "", 2, 0, 2);
   h_delta_pt = fs->make<TH1F>("h_delta_par_pt", "", 1000, -50, 50);
   h_delta_eta = fs->make<TH1F>("h_delta_par_eta", "", 1000, -3, 3);
   h_delta_phi = fs->make<TH1F>("h_delta_par_phi", "", 1000, -3.15, 3.15);
@@ -233,6 +234,8 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
       ++nseed;
 
       h_seed.Fill(tk, &*beamspot, pv);
+      if (te.highpurity)
+        h_seed_highpurity.Fill(tk, &*beamspot, pv);
 
       if (prints) {
         printf("tk #%4lu: pt %10.4g +- %10.4g eta %10.4g +- %10.4g phi %10.4g +- %10.4g dxy %10.4g +- %10.4g dz %10.4g +- %10.4g\n",
@@ -305,9 +308,11 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
         if (prints) printf("  NO CD MATCH highpurity %i goodptres %i\n", te.highpurity, te.goodptres);
 
         h_nomatch.Fill(tk, &*beamspot, pv);
-        h_nomatch_goodptres->Fill(te.goodptres);
-        if (te.highpurity)
+        if (te.highpurity) {
           h_nomatch_highpurity.Fill(tk, &*beamspot, pv);
+          if (te.goodptres)
+            h_nomatch_highpurity_goodptres.Fill(tk, &*beamspot, pv);
+        }
       }
     }
   }
