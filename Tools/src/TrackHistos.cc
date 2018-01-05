@@ -54,8 +54,8 @@ namespace jmt {
     h_chi2    = d.make<TH1D>("chi2", "", 50,  0, 100);
     h_dof     = d.make<TH1D>("dof", "", 50,  0, 100);
     h_chi2dof = d.make<TH1D>("chi2dof", "", 50,  0,  10);
-    h_algo    = d.make<TH1D>("algo", "", 30,  0,  30);
-    h_quality = d.make<TH1D>("quality", "",  7,  0,   7);
+    h_algo    = d.make<TH1D>("algo", "", reco::TrackBase::algoSize,  0,  reco::TrackBase::algoSize);
+    h_quality = d.make<TH1D>("quality", "",  reco::TrackBase::qualitySize,  0,   reco::TrackBase::qualitySize);
     h_highpurity = d.make<TH1D>("highpurity", "",  2,0,2);
     h_nloops  = d.make<TH1D>("nloops", "", 10,  0,  10);
 
