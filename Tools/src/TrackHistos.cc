@@ -15,13 +15,14 @@ namespace jmt {
   TrackHistos::TrackHistos(const char* name, const bool do_2d_, const bool use_rechits_)
     : do_2d(do_2d_), use_rechits(use_rechits_)
   {
+    TH1::SetDefaultSumw2();
     edm::Service<TFileService> fs;
     TFileDirectory d(fs->mkdir(name));
 
     const char* par_names[9] = {"p", "pt", "eta", "phi", "dxy", "dz", "dxybs", "dxypv", "dzpv"};
     const int par_nbins[9] = {  200, 200,  100,   100, 1000, 1000, 1000, 1000, 1000 };
-    const double par_lo[9] = {    0,   0, -2.6, -3.15,   -2,  -20,   -2,   -2,   -2 };
-    const double par_hi[9] = {  100, 100,  2.6,  3.15,    2,   20,    2,    2,   -2 };
+    const double par_lo[9] = {    0,   0, -2.6, -3.15,   -2,  -20,   -2,   -2,  -20 };
+    const double par_hi[9] = {  100, 100,  2.6,  3.15,    2,   20,    2,    2,   20 };
     const int err_nbins[9] = { 100, 100, 100, 100, 100, 100, 100, 100, 100 };
     const double err_lo[6] = { 0 };
     const double err_hi[6] = { 0.15, 0.15, 0.01, 0.01, 0.2, 0.4 };
