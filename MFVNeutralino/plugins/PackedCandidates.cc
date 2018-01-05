@@ -11,6 +11,7 @@
 #include "RecoParticleFlow/PFTracking/interface/PFTrackAlgoTools.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
+#include "JMTucker/Tools/interface/TrackHistos.h"
 
 class MFVPackedCandidates : public edm::EDAnalyzer {
 public:
@@ -32,25 +33,12 @@ private:
   TH1F* h_matchdist;
   TH1F* h_matchdist_notk;
 
-  TH1F* h_nomatch_highpurity;
-  TH1F* h_nomatch_p;
-  TH1F* h_nomatch_pt;
-  TH1F* h_nomatch_eta;
-  TH1F* h_nomatch_phi;
-  TH1F* h_nomatch_dxy;
-  TH1F* h_nomatch_dz;
-  TH1F* h_nomatch_dxybs;
-  TH1F* h_nomatch_dxypv;
-  TH1F* h_nomatch_dzbs;
-  TH1F* h_nomatch_dzpv;
-  TH1F* h_nomatch_sigmadxybs;
-  TH1F* h_nomatch_pxh;
-  TH1F* h_nomatch_pxl;
-  TH1F* h_nomatch_sth;
-  TH1F* h_nomatch_stl;
-  TH1F* h_nomatch_losthits;
-  TH1F* h_nomatch_lostlayers;
-  TH1F* h_nomatch_dptopt;
+  jmt::TrackHistos h_all;
+  jmt::TrackHistos h_highpurity;
+  jmt::TrackHistos h_seed;
+  jmt::TrackHistos h_nomatch;
+  jmt::TrackHistos h_nomatch_highpurity;
+
   TH1F* h_nomatch_goodptres;
 
   TH1F* h_delta_pt;
@@ -179,7 +167,12 @@ MFVPackedCandidates::MFVPackedCandidates(const edm::ParameterSet& cfg)
     tracks_token(consumes<reco::TrackCollection>(edm::InputTag("generalTracks"))),
     packed_candidate_token(consumes<pat::PackedCandidateCollection>(edm::InputTag("packedPFCandidates"))),
     max_closest_cd_dist(cfg.getParameter<double>("max_closest_cd_dist")),
-    prints(cfg.getParameter<bool>("prints"))
+    prints(cfg.getParameter<bool>("prints")),
+    h_all("all"),
+    h_highpurity("highpurity"),
+    h_seed("seed"),
+    h_nomatch("nomatch"),
+    h_nomatch_highpurity("nomatch_highpurity")
 {
   edm::Service<TFileService> fs;
   h_nseed = fs->make<TH1F>("h_nseed", "", 50, 0, 50);
@@ -189,25 +182,7 @@ MFVPackedCandidates::MFVPackedCandidates(const edm::ParameterSet& cfg)
   h_nmatchpass_v_nseed = fs->make<TH2F>("h_nmatchpass_v_nseed", "", 50, 0, 50, 50, 0, 50);
   h_matchdist = fs->make<TH1F>("h_matchdist", "", 10000, 0, 0.1);
   h_matchdist_notk = fs->make<TH1F>("h_matchdist_notk", "", 10000, 0, 0.1);
-  h_nomatch_pt = fs->make<TH1F>("h_nomatch_par_pt", "", 100, 0, 100);
-  h_nomatch_eta = fs->make<TH1F>("h_nomatch_par_eta", "", 100, -3, 3);
-  h_nomatch_phi = fs->make<TH1F>("h_nomatch_par_phi", "", 100, -3.15, 3.15);
-  h_nomatch_dxy = fs->make<TH1F>("h_nomatch_par_dxy", "", 1000, -1, 1);
-  h_nomatch_dz = fs->make<TH1F>("h_nomatch_par_dz", "", 1000, -20, 20);
-  h_nomatch_dxybs = fs->make<TH1F>("h_nomatch_par_dxybs", "", 1000, -1, 1);
-  h_nomatch_dxypv = fs->make<TH1F>("h_nomatch_par_dxypv", "", 1000, -1, 1);
-  h_nomatch_dzbs = fs->make<TH1F>("h_nomatch_par_dzbs", "", 1000, -20, 20);
-  h_nomatch_dzpv = fs->make<TH1F>("h_nomatch_par_dzpv", "", 1000, -1, 1);
-  h_nomatch_sigmadxybs = fs->make<TH1F>("h_nomatch_sigmadxybs", "", 1000, -100, 100);
-  h_nomatch_pxh = fs->make<TH1F>("h_nomatch_pxh", "", 10, 0, 10);
-  h_nomatch_pxl = fs->make<TH1F>("h_nomatch_pxl", "", 10, 0, 10);
-  h_nomatch_sth = fs->make<TH1F>("h_nomatch_sth", "", 60, 0, 60);
-  h_nomatch_stl = fs->make<TH1F>("h_nomatch_stl", "", 20, 0, 20);
-  h_nomatch_highpurity = fs->make<TH1F>("h_nomatch_highpurity", "", 2, 0, 2);
-  h_nomatch_losthits = fs->make<TH1F>("h_nomatch_losthits", "", 50, 0, 50);
-  h_nomatch_lostlayers = fs->make<TH1F>("h_nomatch_lostlayers", "", 50, 0, 50);
-  h_nomatch_p = fs->make<TH1F>("h_nomatch_p", "", 100, 0, 100);
-  h_nomatch_dptopt = fs->make<TH1F>("h_nomatch_dptopt", "", 100, 0, 5);
+
   h_nomatch_goodptres = fs->make<TH1F>("h_nomatch_goodptres", "", 2, 0, 2);
   h_delta_pt = fs->make<TH1F>("h_delta_par_pt", "", 1000, -50, 50);
   h_delta_eta = fs->make<TH1F>("h_delta_par_eta", "", 1000, -3, 3);
@@ -250,8 +225,14 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
     const reco::Track& tk = (*tracks)[itk];
     const track_ex te(*beamspot, pv, tk);
 
+    h_all.Fill(tk);
+    if (te.highpurity)
+      h_highpurity.Fill(tk);
+
     if (te.pass) {
       ++nseed;
+
+      h_seed.Fill(tk, &*beamspot, pv);
 
       if (prints) {
         printf("tk #%4lu: pt %10.4g +- %10.4g eta %10.4g +- %10.4g phi %10.4g +- %10.4g dxy %10.4g +- %10.4g dz %10.4g +- %10.4g\n",
@@ -323,26 +304,10 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
       else {
         if (prints) printf("  NO CD MATCH highpurity %i goodptres %i\n", te.highpurity, te.goodptres);
 
-        h_nomatch_highpurity->Fill(te.highpurity);
-        h_nomatch_p->Fill(tk.p());
-        h_nomatch_pt->Fill(tk.pt());
-        h_nomatch_eta->Fill(tk.eta());
-        h_nomatch_phi->Fill(tk.phi());
-        h_nomatch_dxy->Fill(tk.dxy());
-        h_nomatch_dz->Fill(tk.dz());
-        h_nomatch_dxybs->Fill(te.dxybs);
-        h_nomatch_dxypv->Fill(te.dxypv);
-        h_nomatch_dzbs->Fill(te.dzbs);
-        h_nomatch_dzpv->Fill(te.dzpv);
-        h_nomatch_sigmadxybs->Fill(te.sigmadxybs);
-        h_nomatch_pxh->Fill(te.npxhits);
-        h_nomatch_pxl->Fill(te.npxlayers);
-        h_nomatch_sth->Fill(te.nsthits);
-        h_nomatch_stl->Fill(te.nstlayers);
-        h_nomatch_losthits->Fill(te.nlosthits);
-        h_nomatch_lostlayers->Fill(te.nlostlayers);
-        h_nomatch_dptopt->Fill(te.dptopt);
+        h_nomatch.Fill(tk, &*beamspot, pv);
         h_nomatch_goodptres->Fill(te.goodptres);
+        if (te.highpurity)
+          h_nomatch_highpurity.Fill(tk, &*beamspot, pv);
       }
     }
   }
