@@ -37,6 +37,8 @@ private:
   jmt::TrackHistos h_highpurity;
   jmt::TrackHistos h_seed;
   jmt::TrackHistos h_seed_highpurity;
+  jmt::TrackHistos h_match;
+  jmt::TrackHistos h_match_pass;
   jmt::TrackHistos h_nomatch;
   jmt::TrackHistos h_nomatch_highpurity;
   jmt::TrackHistos h_nomatch_highpurity_goodptres;
@@ -172,6 +174,8 @@ MFVPackedCandidates::MFVPackedCandidates(const edm::ParameterSet& cfg)
     h_highpurity("highpurity"),
     h_seed("seed"),
     h_seed_highpurity("seed_highpurity"),
+    h_match("match"),
+    h_match_pass("match_pass"),
     h_nomatch("nomatch"),
     h_nomatch_highpurity("nomatch_highpurity"),
     h_nomatch_highpurity_goodptres("nomatch_highpurity_goodptres")
@@ -278,8 +282,12 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
         const reco::Track& cd_tk = closest_cd->pseudoTrack();
         const track_ex cd_te(*beamspot, pv, cd_tk);
 
-        if (cd_te.pass)
+        h_match.Fill(tk, &*beamspot, pv);
+
+        if (cd_te.pass) {
+          h_match_pass.Fill(tk, &*beamspot, pv);
           ++nmatchpass;
+        }
 
         h_delta_pt->Fill(cd_tk.pt() - tk.pt());
         h_delta_eta->Fill(cd_tk.eta() - tk.eta());
