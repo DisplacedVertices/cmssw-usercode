@@ -12,11 +12,11 @@
 #include "JMTucker/Tools/interface/TrackHistos.h"
 
 namespace jmt {
-  TrackHistos::TrackHistos(const char* name, const bool use_rechits_)
-    : use_rechits(use_rechits_)
+  TrackHistos::TrackHistos(const char* name, const bool do_2d_, const bool use_rechits_)
+    : do_2d(do_2d_), use_rechits(use_rechits_)
   {
     edm::Service<TFileService> fs;
-    TFileDirectory d = fs->mkdir(name);
+    TFileDirectory d(fs->mkdir(name));
 
     const char* par_names[9] = {"p", "pt", "eta", "phi", "dxy", "dz", "dxybs", "dxypv", "dzpv"};
     const int par_nbins[9] = {  200, 200,  100,   100, 1000, 1000, 1000, 1000, 1000 };
@@ -30,12 +30,14 @@ namespace jmt {
       h_pars[i] = d.make<TH1D>(par_names[i], "", par_nbins[i], par_lo[i], par_hi[i]);
     for (int i = 0; i < 6; ++i)
       h_errs[i] = d.make<TH1D>(TString::Format("err%s", par_names[i]), "", err_nbins[i], err_lo[i], err_hi[i]);
-    for (int i = 0; i < 9; ++i)
-      for (int j = i+1; j < 9; ++j)
-        h_pars_v_pars[i][j] = d.make<TH2D>(TString::Format("%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], par_nbins[j], par_lo[j], par_hi[j]);
-    for (int i = 0; i < 9; ++i)
-      for (int j = 0; j < 6; ++j)
-        h_errs_v_pars[i][j] = d.make<TH2D>(TString::Format("err%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], err_nbins[j], err_lo[j], err_hi[j]);
+    if (do_2d) {
+      for (int i = 0; i < 9; ++i)
+        for (int j = i+1; j < 9; ++j)
+          h_pars_v_pars[i][j] = d.make<TH2D>(TString::Format("%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], par_nbins[j], par_lo[j], par_hi[j]);
+      for (int i = 0; i < 9; ++i)
+        for (int j = 0; j < 6; ++j)
+          h_errs_v_pars[i][j] = d.make<TH2D>(TString::Format("err%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], err_nbins[j], err_lo[j], err_hi[j]);
+    }
 
     h_dptopt = d.make<TH1D>("dptopt", "", 200, 0, 2);
     h_sigmadxybs = d.make<TH1D>("sigmadxybs", "", 200, -100, 100);
@@ -107,12 +109,14 @@ namespace jmt {
       h_pars[i]->Fill(pars[i]);
     for (int i = 0; i < 6; ++i)
       h_errs[i]->Fill(errs[i]);
-    for (int i = 0; i < 9; ++i)
-      for (int j = i+1; j < 9; ++j)
-        h_pars_v_pars[i][j]->Fill(pars[i], pars[j]);
-    for (int i = 0; i < 9; ++i)
-      for (int j = 0; j < 6; ++j)
-        h_errs_v_pars[i][j]->Fill(pars[i], errs[j]);
+    if (do_2d) {
+      for (int i = 0; i < 9; ++i)
+        for (int j = i+1; j < 9; ++j)
+          h_pars_v_pars[i][j]->Fill(pars[i], pars[j]);
+      for (int i = 0; i < 9; ++i)
+        for (int j = 0; j < 6; ++j)
+          h_errs_v_pars[i][j]->Fill(pars[i], errs[j]);
+    }
 
     h_dptopt->Fill(tk.pt() > 0 ? tk.ptError() / tk.pt() : -999);
     h_sigmadxybs->Fill(dxybs / tk.dxyError());

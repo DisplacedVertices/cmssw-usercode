@@ -12,8 +12,11 @@ class TH2D;
 
 namespace jmt {
   struct TrackHistos {
-    TrackHistos(const char* name, const bool use_rechits_=false);
+    TrackHistos(const char* name, const bool do_2d_=false, const bool use_rechits_=false);
     bool Fill(const reco::Track& tk, const reco::BeamSpot* bs=0, const reco::Vertex* pv=0);
+
+    const bool do_2d;
+    const bool use_rechits;
 
     TH1D* h_pars[9];
     TH1D* h_errs[6];
@@ -37,7 +40,6 @@ namespace jmt {
     TH1D* h_highpurity;
     TH1D* h_nloops;
 
-    const bool use_rechits;
     TH1D* h_unknown_detid;
     TH2D* h_pxb_ladder_module[3];
     TH2D* h_pxf_panel_module[3][3][5];
