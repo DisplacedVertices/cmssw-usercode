@@ -1701,6 +1701,9 @@ def ratios_plot(name,
     '''With n hists/graphs, draw them and the n-1 ratios to hists[0].
     hists can be a list of just the hists/graphs, or it can be a list
     of tuples (object, draw_cmd).
+
+    NB: for some reason, hists without Sumw2 called on them don't play
+    nice (aren't drawn? disappear?) with something in this...
     '''
 
     _hists, draw_cmds = [], []
