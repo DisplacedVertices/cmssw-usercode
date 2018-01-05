@@ -79,6 +79,27 @@ class chain_modifiers:
             to_replace.extend(b)
         return to_add, to_replace
 
+class secondary_files_modifier:
+    def __init__(self, dataset=None, fns=None):
+        if not dataset and not fns:
+            raise ValueError('dataset_or_fns must be a string with dataset name or a list with filenames')
+        self.dataset, self.fns = dataset, fns
+
+    def __call__(self, sample):
+        if self.dataset:
+            save_ds = sample.curr_dataset
+            sample.set_curr_dataset(self.dataset)
+            fns = sample.filenames
+            sample.set_curr_dataset(save_ds)
+        elif self.fns:
+            fns = self.fns
+
+        to_add = [
+            'jmt_secondary_files_modifier_secondaryFileNames = %r' % fns,
+            'process.source.secondaryFileNames = cms.untracked.vstring(*jmt_secondary_files_modifier_secondaryFileNames)'
+            ]
+        return to_add, []
+
 ####
 
 def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=20):
