@@ -225,9 +225,9 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
     const reco::Track& tk = (*tracks)[itk];
     const track_ex te(*beamspot, pv, tk);
 
-    h_all.Fill(tk);
+    h_all.Fill(tk, &*beamspot, pv);
     if (te.highpurity)
-      h_highpurity.Fill(tk);
+      h_highpurity.Fill(tk, &*beamspot, pv);
 
     if (te.pass) {
       ++nseed;
