@@ -799,6 +799,9 @@ for x in (JetHT2016B3,
 ttbar_2015.datasets['miniaod'].condor = True
 ttbar_2015.datasets['miniaod'].xrootd_url = 'root://dcache-cms-xrootd.desy.de/'
 
+mfv_neu_tau10000um_M1600.datasets['miniaod'].condor = True
+mfv_neu_tau10000um_M1600.datasets['miniaod'].xrootd_url = 'root://dcache-cms-xrootd.desy.de/'
+
 ds4condor = ['ntuple', 'v0ntuple', 'pick1vtx']
 for s in registry.all():
     for ds in s.datasets.keys():
