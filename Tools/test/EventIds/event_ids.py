@@ -17,7 +17,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     for sample in samples:
         sample.files_per = 20
         #if not sample.is_mc:
-        #    sample.json = 'ana_2015p6.json'
+        #    sample.json = 'jsons/ana_2015p6.json'
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
     cs = CondorSubmitter('EventIds_NtupleV11_16', dataset='ntuplev11')

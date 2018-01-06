@@ -113,7 +113,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     elif year == 2016:
         samples = Samples.data_samples + [Samples.qcdht1000, Samples.qcdht1500] + Samples.qcd_hip_samples[-2:]
 
-    set_splitting(samples, 'main', 'trackmover', data_json='../ana_2015p6.json')
+    set_splitting(samples, 'main', 'trackmover', data_json='../jsons/ana_2015p6.json')
 
     modify = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier)
 

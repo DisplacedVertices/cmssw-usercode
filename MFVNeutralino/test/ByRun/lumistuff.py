@@ -6,7 +6,7 @@ mode, nice = 'maxinst', 'max inst. luminosity (10^{34} cm^{-2} sec^{-1})'
 mode, nice = 'nls', '# LS'
 
 year = 2016
-mask_fn = '../ana_avail_%s.json' % year
+mask_fn = '../jsons/ana_avail_%s.json' % year
 
 ps = plot_saver(plot_dir('%s_%s' % (mode, year)), size=(2000,600), log=False, pdf=True)
 
