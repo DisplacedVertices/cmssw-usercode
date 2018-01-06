@@ -43,7 +43,7 @@ def cmd_report_data():
                 continue
             os.system('mreport c*_%s%i*' % (ds, year))
             print 'jsondiff'
-            os.system('compareJSON.py --diff processedLumis.json $CMSSW_BASE/src/JMTucker/MFVNeutralino/test/ana_avail_%i%s.json' % (year, ex))
+            os.system('compareJSON.py --diff processedLumis.json $CMSSW_BASE/src/JMTucker/MFVNeutralino/test/jsons/ana_avail_%i%s.json' % (year, ex))
             raw_input('ok?')
             os.rename('processedLumis.json', 'dataok_%i.json' % year)
 

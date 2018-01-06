@@ -24,7 +24,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext
 
     from JMTucker.Tools.MetaSubmitter import set_splitting
-    set_splitting(samples, dataset, 'histos', data_json='ana_2015p6.json')
+    set_splitting(samples, dataset, 'histos', data_json='jsons/ana_2015p6.json')
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
     cs = CondorSubmitter('VertexerPairEffsV15_v2',

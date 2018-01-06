@@ -59,7 +59,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     samples = Samples.data_samples
     for sample in samples:
         sample.lumis_per = 50
-        sample.json = '../ana_2015p6.json'
+        sample.json = '../jsons/ana_2015p6.json'
 
     from JMTucker.Tools.MetaSubmitter import *
     from JMTucker.Tools.CRAB3Submitter import CRABSubmitter

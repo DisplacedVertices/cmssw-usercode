@@ -120,7 +120,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             Samples.mfv_signal_samples + Samples.mfv_ddbar_samples + Samples.mfv_hip_samples + Samples.qcd_hip_samples
 
     from JMTucker.Tools.MetaSubmitter import set_splitting
-    set_splitting(samples, dataset, 'histos', data_json='ana_2015p6.json')
+    set_splitting(samples, dataset, 'histos', data_json='jsons/ana_2015p6.json')
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
     cs = CondorSubmitter('HistosV15_v3',

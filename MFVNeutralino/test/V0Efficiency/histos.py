@@ -115,7 +115,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     samples = [s for s in Samples.registry.all() if s.has_dataset(dataset)]
     #samples = [Samples.JetHT2016D, Samples.JetHT2016G, Samples.qcdht1000, Samples.qcdht1500] #, Samples.qcdht1000_hip1p0_mit, Samples.qcdht1500_hip1p0_mit]
-    set_splitting(samples, dataset, 'default', '../ana_2015p6.json', 2)
+    set_splitting(samples, dataset, 'default', '../jsons/ana_2015p6.json', 2)
 
     cs = CondorSubmitter('V0EfficiencyV%i_v22' % dataset_version,
                          ex = year,

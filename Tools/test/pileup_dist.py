@@ -106,7 +106,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     for s in samples:
         s.condor = False
         if not s.is_mc:
-            s.json = 'ana_2015p6.json'
+            s.json = 'jsons/ana_2015p6.json'
         s.split_by = 'files'
         s.files_per = 30
 

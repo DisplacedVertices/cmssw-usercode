@@ -29,7 +29,7 @@ def doit(*x):
     print 'tot = %f, picked %i lumis' % (tot, len(out_ll))
     LumiList(lumis=out_ll).writeJSON(out_fn)
 
-doit('ana_2015.json', 'TriggerStudies/2015.byls.csv.gz',  2.691e9, 0.1,  'ana_2015_10pc.json')  # 1e9 because csv in /ub
-doit('ana_2015.json', 'TriggerStudies/2015.byls.csv.gz',  2.691e9, 0.01, 'ana_2015_1pc.json')
-doit('ana_2016.json', 'TriggerStudies/2016.byls.csv.gz', 36.814e9, 0.1,  'ana_2016_10pc.json')
-doit('ana_2016.json', 'TriggerStudies/2016.byls.csv.gz', 36.814e9, 0.01, 'ana_2016_1pc.json')
+doit('jsons/ana_2015.json', 'TriggerStudies/2015.byls.csv.gz',  2.691e9, 0.1,  'jsons/ana_2015_10pc.json')  # 1e9 because csv in /ub
+doit('jsons/ana_2015.json', 'TriggerStudies/2015.byls.csv.gz',  2.691e9, 0.01, 'jsons/ana_2015_1pc.json')
+doit('jsons/ana_2016.json', 'TriggerStudies/2016.byls.csv.gz', 36.814e9, 0.1,  'jsons/ana_2016_10pc.json')
+doit('jsons/ana_2016.json', 'TriggerStudies/2016.byls.csv.gz', 36.814e9, 0.01, 'jsons/ana_2016_1pc.json')
