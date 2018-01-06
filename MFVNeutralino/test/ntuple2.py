@@ -1,21 +1,37 @@
 #!/usr/bin/env python
 
-from JMTucker.Tools.MiniAOD_cfg import cms, which_global_tag
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.MFVNeutralino.Year import year
 
+if year == 2015:
+    raise NotImplementedError("won't bother to understand 2015 miniaod")
+
 is_mc = True
-version = 'v16maod'
-batch_name = 'Ntuple' + version.upper()
+H = False
+repro = False
+# JMTBAD implement these
+#run_n_tk_seeds = False
+#minitree_only = False
+#prepare_vis = not run_n_tk_seeds and False
+#keep_all = prepare_vis
+#keep_gen = False
+#event_filter = not keep_all
+version = 'v16m'
+batch_name = 'Ntuple' + version.capitalize()
+#if run_n_tk_seeds:
+#    batch_name += '_NTkSeeds'
 
 ####
 
 process = basic_process('Ntuple')
 report_every(process, 1000000)
+#want_summary(process)
 registration_warnings(process)
 geometry_etc(process, which_global_tag(is_mc, year, H=False, repro=False))
 random_service(process, {'mfvVertices': 1222})
 tfileservice(process, 'vertex_histos.root')
+input_files(process, '/uscmst1b_scratch/lpc1/3DayLifetime/tucker/A00610B3-00B7-E611-8546-A0000420FE80.root')
+file_event_from_argv(process)
 output_file(process, 'ntuple.root', [
         'drop *',
         'keep *_mcStat_*_*',
@@ -68,7 +84,27 @@ process.p = cms.Path(process.goodOfflinePrimaryVertices *
                      process.mfvVertexSequence *
                      process.mfvEvent)
 
-process.options.wantSummary = True
-process.maxEvents.input = -1
-process.source.fileNames = ['file:/uscmst1b_scratch/lpc1/3DayLifetime/tucker/A00610B3-00B7-E611-8546-A0000420FE80.root']
-file_event_from_argv(process)
+
+if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
+    from JMTucker.Tools.MetaSubmitter import *
+    import JMTucker.Tools.Samples as Samples
+
+    samples = [s for s in
+               #Samples.data_samples +
+               Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext +
+               Samples.mfv_signal_samples
+               if s.has_dataset('miniaod')]
+
+    set_splitting(samples, 'miniaod', 'ntuple')
+
+#    if run_n_tk_seeds:
+#        samples = [s for s in samples if not s.is_signal]
+
+    modify = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier)
+    ms = MetaSubmitter(batch_name, dataset='miniaod')
+    ms.common.ex = year
+    ms.common.pset_modifier = modify
+    ms.common.publish_name = batch_name + '_' + str(year)
+    ms.crab.job_control_from_sample = True
+    ms.condor.stageout_files = 'all'
+    ms.submit(samples)
