@@ -5,7 +5,8 @@ def setup_event_filter(process,
                        trig_filt_name = 'triggerFilter',
                        event_filter = False,
                        event_filter_jes_mult = 2,
-                       event_filt_name = 'jetFilter'
+                       event_filt_name = 'jetFilter',
+                       input_is_miniaod = False,
                        ):
 
     from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
@@ -23,20 +24,24 @@ def setup_event_filter(process,
     overall = triggerFilter
 
     if event_filter:
-        if not hasattr(process, 'patJets'):
+        if not input_is_miniaod and not hasattr(process, 'patJets'):
             raise NotImplementedError('need to understand how to include pat_tuple jets_only here')
 
         from JMTucker.Tools.JetFilter_cfi import jmtJetFilter as jetFilter
+        if input_is_miniaod:
+            jetFilter.jets_src = 'slimmedJets'
         setattr(process, event_filt_name, jetFilter)
 
         if event_filter_jes_mult > 0:
-            from JMTucker.Tools.JetShifter_cfi import jmtJetShifter as shifter
-            shifter.mult = event_filter_jes_mult
-            shifter_name = event_filt_name + 'JESUncUp%i' % event_filter_jes_mult
-            jetFilter.jets_src = shifter_name
-            setattr(process, shifter_name, shifter)
+            from JMTucker.Tools.JetShifter_cfi import jmtJetShifter as jetShifter
+            if input_is_miniaod:
+                jetShifter.jets_src = 'slimmedJets'
+            jetShifter.mult = event_filter_jes_mult
+            jetShifter_name = event_filt_name + 'JESUncUp%i' % event_filter_jes_mult
+            jetFilter.jets_src = jetShifter_name
+            setattr(process, jetShifter_name, jetShifter)
 
-            overall *= shifter * jetFilter
+            overall *= jetShifter * jetFilter
         else:
             overall *= jetFilter
             
