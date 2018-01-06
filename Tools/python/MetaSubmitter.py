@@ -81,8 +81,8 @@ class chain_modifiers:
 
 class secondary_files_modifier:
     def __init__(self, dataset=None, fns=None):
-        if not dataset and not fns:
-            raise ValueError('dataset_or_fns must be a string with dataset name or a list with filenames')
+        if (not dataset and not fns) or (dataset and fns):
+            raise ValueError('must specify exactly one of dataset (string with dataset name) or fns (list with filenames)')
         self.dataset, self.fns = dataset, fns
 
     def __call__(self, sample):
