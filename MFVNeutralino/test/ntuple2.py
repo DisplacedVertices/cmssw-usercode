@@ -15,7 +15,7 @@ repro = False
 #prepare_vis = not run_n_tk_seeds and False
 #keep_all = prepare_vis
 #keep_gen = False
-#event_filter = not keep_all
+event_filter = True #not keep_all
 version = 'v16m'
 batch_name = 'Ntuple' + version.capitalize()
 #if run_n_tk_seeds:
@@ -30,7 +30,7 @@ registration_warnings(process)
 geometry_etc(process, which_global_tag(is_mc, year, H=False, repro=False))
 random_service(process, {'mfvVertices': 1222})
 tfileservice(process, 'vertex_histos.root')
-input_files(process, '/uscmst1b_scratch/lpc1/3DayLifetime/tucker/A00610B3-00B7-E611-8546-A0000420FE80.root')
+input_files(process, '/uscmst1b_scratch/lpc1/3DayLifetime/tucker/itch/A00610B3-00B7-E611-8546-A0000420FE80.root')
 file_event_from_argv(process)
 output_file(process, 'ntuple.root', [
         'drop *',
@@ -83,6 +83,10 @@ process.p = cms.Path(process.goodOfflinePrimaryVertices *
                      process.mfvUnpackedCandidateTracks *
                      process.mfvVertexSequence *
                      process.mfvEvent)
+
+if event_filter:
+    import JMTucker.MFVNeutralino.EventFilter
+    JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process, path_name='p', event_filter=True, input_is_miniaod=True)
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
