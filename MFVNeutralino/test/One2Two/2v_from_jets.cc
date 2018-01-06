@@ -1,5 +1,3 @@
-// g++ -I $CMSSW_BASE/src -g -Wall `root-config --cflags --libs --glibs` ../../src/MiniNtuple.cc 2v_from_jets.cc -o 2v_from_jets.exe && ./2v_from_jets.exe
-
 #include <cstdlib>
 #include <math.h>
 #include "TCanvas.h"
