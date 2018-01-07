@@ -336,6 +336,9 @@ def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=2
                 sample.files_per  = int(2.5 * sample.files_per)
             if sample.name in ('qcdht1000_hip1p0_mit', 'qcdht1500_hip1p0_mit'):
                 sample.files_per *= 3
+            if sample.name == 'ttbar' or sample.name.startswith('qcdht0700') or sample.name in ('qcdht1000', 'qcdht1500'): # somehow these came out too much
+                sample.events_per /= 2
+                sample.files_per /= 2
 
     elif jobtype == 'default':
         for sample in samples:
