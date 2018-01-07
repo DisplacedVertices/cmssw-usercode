@@ -74,6 +74,7 @@ def set_process(process, name, ds, num=-1):
     fns = _d[(name, ds)][1]
     if num > 0:
         fns = fns[:num]
+    fns = [('root://cmseos.fnal.gov/' + fn) if fn.startswith('/store/user') else fn for fn in fns]
     process.source.fileNames = fns
 
 def who(name, ds):
