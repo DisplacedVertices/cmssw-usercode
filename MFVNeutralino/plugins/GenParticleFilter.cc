@@ -21,6 +21,7 @@ private:
   const int min_njets;
   const double min_jet_pt;
   const double min_jet_ht;
+  const double min_jet_ht40;
 
   const int required_num_leptonic;
   const std::vector<int> allowed_decay_types;
@@ -67,6 +68,7 @@ MFVGenParticleFilter::MFVGenParticleFilter(const edm::ParameterSet& cfg)
     min_njets(cfg.getParameter<int>("min_njets")),
     min_jet_pt(cfg.getParameter<double>("min_jet_pt")),
     min_jet_ht(cfg.getParameter<double>("min_jet_ht")),
+    min_jet_ht40(cfg.getParameter<double>("min_jet_ht40")),
     required_num_leptonic(cfg.getParameter<int>("required_num_leptonic")),
     allowed_decay_types(cfg.getParameter<std::vector<int> >("allowed_decay_types")),
     min_lepton_pt(cfg.getParameter<double>("min_lepton_pt")),
@@ -149,15 +151,20 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
 
   int njets_min_pt = 0;
   double jet_ht = 0;
+  double jet_ht40 = 0;
   for (const reco::GenJet& jet : *gen_jets) {
     if (jet.pt() > min_jet_pt && fabs(jet.eta()) < 2.5)
       ++njets_min_pt;
     if (jet.pt() > 20 && fabs(jet.eta()) < 2.5)
       jet_ht += jet.pt();
+    if (jet.pt() > 40 && fabs(jet.eta()) < 2.5)
+      jet_ht40 += jet.pt();
   }
   if (njets_min_pt < min_njets)
     return false;
   if (jet_ht < min_jet_ht)
+    return false;
+  if (jet_ht40 < min_jet_ht40)
     return false;
 
   if (required_num_leptonic >= 0) {
