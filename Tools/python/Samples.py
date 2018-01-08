@@ -803,7 +803,6 @@ for x in [JetHT2016C, JetHT2016D, JetHT2016E, JetHT2016F, JetHT2016G, #JetHT2016
           mfv_neu_tau00100um_M0800, mfv_neu_tau00100um_M1200, 
           mfv_neu_tau00300um_M0400, 
           mfv_neu_tau01000um_M0300, mfv_neu_tau01000um_M1200, 
-          mfv_neu_tau10000um_M1600,
           qcdht2000_2015, ttbar_2015]:
     x.datasets['miniaod'].xrootd_url = 'root://dcache-cms-xrootd.desy.de/'
 
