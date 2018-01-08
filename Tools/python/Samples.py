@@ -770,6 +770,13 @@ for x in 'ntuplev15lep', 'ntuplev15lep_IsoMu24', 'ntuplev15lep_IsoTkMu24', 'ntup
 for x in mfv_neu_tau00100um_M0300, mfv_neu_tau01000um_M0300:
     x.add_dataset('ntuplev15_leptrigs')
 
+for x in qcd_samples + qcd_samples_ext + ttbar_samples + mfv_signal_samples:
+    if x in (qcdht0700, qcdht0700ext, mfv_neu_tau10000um_M1600):
+        continue
+    if x.is_signal and x.is_private:
+        continue
+    x.add_dataset('ntuplev16m')
+
 ########
 # other condor declarations
 ########
