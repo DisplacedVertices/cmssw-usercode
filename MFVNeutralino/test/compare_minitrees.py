@@ -1,9 +1,9 @@
-from base import *
+from JMTucker.MFVNeutralino.MiniTreeBase import *
 
 ps = plot_saver(plot_dir('compare_minitrees'), size=(600,600))
 
-fn1 = '/uscms_data/d2/tucker/crab_dirs/MinitreeV10_oneofficialsignal/official_mfv_neu_tau10000um_M0800.root'
-fn2 = '/uscms_data/d2/tucker/crab_dirs/MinitreeV10_ntuplev10fromminiaodtestv2_signal/official_mfv_neu_tau10000um_M0800.root'
+fn1 = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV16/mfv_neu_tau10000um_M0800.root'
+fn2 = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV16m/mfv_neu_tau10000um_M0800.root'
 
 f1, t1 = get_f_t(fn1)
 f2, t2 = get_f_t(fn2)
@@ -68,9 +68,20 @@ for rle in rles:
     if set([nvtx1, nvtx2]) == set([2,3]):
         h_svdistneq.Fill(svdist1, svdist2)
 
+h1 = h_nvtx.ProjectionX()
+h2 = h_nvtx.ProjectionY()
+h1.SetLineColor(ROOT.kRed)
+h2.SetLineColor(ROOT.kBlue)
+h1.Draw()
+h2.Draw('sames')
+ps.c.Update()
+differentiate_stat_box(h1, (1,0), new_size=(0.3,0.3))
+differentiate_stat_box(h2, (0,0), new_size=(0.3,0.3))
+ps.save('h_nvtx')
+
 h_nvtx.Draw('colz text00')
 h_nvtx.SetStats(0)
-ps.save('h_nvtx', logz=True)
+ps.save('h_nvtx_scatter', logz=True)
 
 h_svdist.Draw('colz')
 h_svdist.SetStats(0)
