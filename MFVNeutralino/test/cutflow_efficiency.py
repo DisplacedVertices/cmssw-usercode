@@ -3,7 +3,7 @@
 from JMTucker.Tools.ROOTTools import ROOT
 from array import array
 
-file_path = '~/crabdirs/TheoristRecipeV22'
+file_path = '~/crabdirs/TheoristRecipeV23'
 
 gen_rec_cut = 20
 
