@@ -1,4 +1,4 @@
-import sys, subprocess, os, fnmatch
+import sys, subprocess, os, fnmatch, re
 
 url = 'root://cmseos.fnal.gov/'
 global_url = 'root://cms-xrd-global.cern.ch/'
@@ -40,6 +40,22 @@ def quota():
 def exists(fn):
     fn = storeonly(fn)
     return _system('eos %s ls %s' % (url, fn))
+
+def isdir(fn):
+    fn = storeonly(fn)
+    return _system('eos %s stat -d %s' % (url, fn))
+
+def isfile(fn):
+    fn = storeonly(fn)
+    return _system('eos %s stat -f %s' % (url, fn))
+
+def size(fn, _re=re.compile(r'Size: (\d+)\s+')):
+    fn = storeonly(fn)
+    x = _popen('eos %s stat %s' % (url, fn)).communicate()[0].strip()
+    mo = _re.search(x)
+    if not mo:
+        raise ValueError('could not parse eos stat output: %r' % x)
+    return int(mo.group(1))
 
 def mkdir(fn):
     fn = storeonly(fn)
