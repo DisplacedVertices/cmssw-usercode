@@ -4,15 +4,17 @@ ps = plot_saver(plot_dir('compare_minitrees'), size=(600,600))
 
 fn1 = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV16/mfv_neu_tau10000um_M0800.root'
 fn2 = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV16m/mfv_neu_tau10000um_M0800.root'
+nice1 = 'aod'
+nice2 = 'miniaod'
 
 f1, t1 = get_f_t(fn1)
 f2, t2 = get_f_t(fn2)
 n1, n2 = float(t1.GetEntries()), float(t2.GetEntries())
 print 'entries %6i %6i' % (n1, n2)
 
-def foo(which, var_name, draw_str, cut):
-    nm1 = var_name + '1'
-    nm2 = var_name + '2'
+def foo(which, var_name, title, draw_str, cut):
+    nm1 = '%s_%s' % (var_name, nice1)
+    nm2 = '%s_%s' % (var_name, nice2)
     x1 = t1.Draw(draw_str % nm1, cut) 
     h1 = getattr(ROOT, nm1).Clone(nm1)
     x2 = t2.Draw(draw_str % nm2, cut) 
@@ -21,12 +23,17 @@ def foo(which, var_name, draw_str, cut):
     #h2.Scale(1/h2.Integral())
     h1.SetLineColor(ROOT.kRed)
     h2.SetLineColor(ROOT.kBlue)
-    h1.Draw()
-    h2.Draw('sames')
-    ps.c.Update()
-    differentiate_stat_box(h1, (1,0), new_size=(0.3,0.3))
-    differentiate_stat_box(h2, (0,0), new_size=(0.3,0.3))
-    ps.save(which)
+    for h in h1,h2:
+        h.SetTitle(title)
+        h.SetLineWidth(2)
+    ratios_plot(var_name,
+                (h1,h2),
+                plot_saver=ps,
+                res_divide_opt={'confint': clopper_pearson_poisson_means, 'force_le_1': False},
+                statbox_size=(0.2,0.2),
+                res_y_range=0.05,
+                res_lines = [(1.0, 1, 1, 2)],
+                )
     ef1, ef1l, ef1h = clopper_pearson(x1, n1)
     ef2, ef2l, ef2h = clopper_pearson(x2, n2)
     ef1e = (ef1h - ef1l) / 2
@@ -43,18 +50,20 @@ def foo(which, var_name, draw_str, cut):
     fmt = '%10s: n1 %5i (%.3f +- %.3f) n2 %5i (%.3f +- %.3f)  means (%.3f +- %.3f) - (%.3f +- %.3f) = %.3f +- %.3f  rmses (%.3f +- %.3f) - (%.3f +- %.3f) = %.3f +- %.3f'
     print fmt % to_print
 
-foo('1vtx',   'dbv', 'dist0>>%s(400,0,2)',  'nvtx==1')
-foo('2vtx',   'dvv2', 'svdist>>%s(400,0,4)', 'nvtx==2')
-foo('ge3vtx', 'dvv3', 'svdist>>%s(400,0,4)', 'nvtx>=3')
+foo('dbv1vtx',   '1dbv', 'nvtx==1;d_{BV} (cm);events/200 #mum', 'dist0>>%s(100,0,2)',  'nvtx==1')
+foo('dbvge2vtx', '2dbv', 'nvtx>=2;d_{BV} (cm);events/200 #mum', 'dist0>>%s(100,0,2)',  'nvtx>=2')
+foo('ge2vtx', 'dvv',  'nvtx>=2;d_{VV} (cm);events/200 #mum', 'svdist>>%s(200,0,4)', 'nvtx>=2')
+foo('2vtx',   'dvv2', 'nvtx==2;d_{VV} (cm);events/200 #mum', 'svdist>>%s(200,0,4)', 'nvtx==2')
+foo('ge3vtx', 'dvv3', 'nvtx>=3;d_{VV} (cm);events/400 #mum', 'svdist>>%s(100,0,4)', 'nvtx>=3')
 
 xform = lambda x: tuple(int(y) for y in x[:-1]) + (float(x[-1]),)
 d1, d2 = [dict(((a,b,c),(d,e)) for a,b,c,d,e in detree(t, 'run:lumi:event:nvtx:svdist*(nvtx>=2)', xform=xform)) for t in (t1,t2)]
 rles = list(set(d1.keys()) | set(d2.keys()))
-h_nvtx = ROOT.TH2F('h_nvtx', ';nvtx 1;nvtx 2', 10, 0, 10, 10, 0, 10)
-h_svdist = ROOT.TH2F('h_svdist', ';svdist 1;svdist 2', 100, 0, 4, 100, 0, 4)
-h_svdistzoom = ROOT.TH2F('h_svdistzoom', ';svdist 1;svdist 2', 100, 0, 0.4, 100, 0, 0.4)
-h_svdisteq = ROOT.TH2F('h_svdisteq', ';svdist 1;svdist 2', 100, 0, 4, 100, 0, 4)
-h_svdistneq = ROOT.TH2F('h_svdistneq', ';svdist 1;svdist 2', 100, 0, 4, 100, 0, 4)
+h_nvtx = ROOT.TH2F('h_nvtx', ';nvtx %s;nvtx %s' % (nice1, nice2), 10, 0, 10, 10, 0, 10)
+h_svdist = ROOT.TH2F('h_svdist', ';svdist %s;svdist %s' % (nice1, nice2), 100, 0, 4, 100, 0, 4)
+h_svdistzoom = ROOT.TH2F('h_svdistzoom', ';svdist %s;svdist %s' % (nice1, nice2), 100, 0, 0.4, 100, 0, 0.4)
+h_svdisteq = ROOT.TH2F('h_svdisteq', ';svdist %s;svdist %s' % (nice1, nice2), 100, 0, 4, 100, 0, 4)
+h_svdistneq = ROOT.TH2F('h_svdistneq', ';svdist %s;svdist %s' % (nice1, nice2), 100, 0, 4, 100, 0, 4)
 
 
 for rle in rles:
@@ -70,10 +79,14 @@ for rle in rles:
 
 h1 = h_nvtx.ProjectionX()
 h2 = h_nvtx.ProjectionY()
+h1.SetName(nice1)
+h2.SetName(nice2)
 h1.SetLineColor(ROOT.kRed)
 h2.SetLineColor(ROOT.kBlue)
-h1.Draw()
-h2.Draw('sames')
+for h in h1,h2:
+    h.SetLineWidth(2)
+h1.Draw('hist')
+h2.Draw('hist sames')
 ps.c.Update()
 differentiate_stat_box(h1, (1,0), new_size=(0.3,0.3))
 differentiate_stat_box(h2, (0,0), new_size=(0.3,0.3))
