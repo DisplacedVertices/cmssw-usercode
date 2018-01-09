@@ -52,6 +52,9 @@ def _fromnum0(path, n, but=[], fnbase='ntuple', add=[], numbereddirs=True): # co
     l = _fromnumlist(path, xrange(n), but, fnbase, add, numbereddirs)
     return (len(l), l)
 
+def keys():
+    return _d.keys()
+
 def dump():
     pprint(_d)
 
@@ -1842,6 +1845,9 @@ if __name__ == '__main__':
         for (sample, ds), (n, fns) in _d.iteritems():
             for fn in fns:
                 print fn
+
+    elif 'dump' in sys.argv:
+        dump()
 
     elif 'summary' in sys.argv:
         summary()
