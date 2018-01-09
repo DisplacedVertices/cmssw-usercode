@@ -3,14 +3,14 @@
 from JMTucker.Tools.ROOTTools import ROOT
 from array import array
 
-file_path = '~/crabdirs/TheoristRecipeV26'
+file_path = '~/crabdirs/TheoristRecipeV27'
 
 gen_rec_cut = 20
 
 #gen_num = 'FourJets'
 #gen_num = 'HT40'
-#gen_num = 'Geo2ddist'
 #gen_num = 'Bsbs2ddist'
+#gen_num = 'Geo2ddist'
 #gen_num = 'Ntracks1'
 #gen_num = 'Sumpt400'
 gen_num = 'Dvv400um'
@@ -27,12 +27,12 @@ iden = 0
 #gen_den = 'HT40'
 #iden = 3
 
-#rec_den = 'TwoVtxGeo2ddist'
-#gen_den = 'Geo2ddist'
-#iden = 5
-
 #rec_den = 'TwoVtxBsbs2ddist'
 #gen_den = 'Bsbs2ddist'
+#iden = 5
+
+#rec_den = 'TwoVtxGeo2ddist'
+#gen_den = 'Geo2ddist'
 #iden = 6
 
 #rec_den = 'TwoVtxNtracks'
@@ -43,8 +43,8 @@ iden = 0
 #gen_den = 'Sumpt400'
 #iden = 8
 
-reconstructed = ['NoCuts', 'OfflineJets', 'TrigSel', 'PreSel', 'TwoVtxNoCuts', 'TwoVtxGeo2ddist', 'TwoVtxBsbs2ddist', 'TwoVtxNtracks', 'TwoVtxBs2derr', 'TwoVtxDvv400um']
-generated = ['NoCuts', 'FourJets', '', 'HT40', '', 'Geo2ddist', 'Bsbs2ddist', 'Ntracks1', 'Sumpt400', 'Dvv400um']
+reconstructed = ['NoCuts', 'OfflineJets', 'TrigSel', 'PreSel', 'TwoVtxNoCuts', 'TwoVtxBsbs2ddist', 'TwoVtxGeo2ddist', 'TwoVtxNtracks', 'TwoVtxBs2derr', 'TwoVtxDvv400um']
+generated = ['NoCuts', 'FourJets', '', 'HT40', '', 'Bsbs2ddist', 'Geo2ddist', 'Ntracks1', 'Sumpt400', 'Dvv400um']
 
 samples = [
     ('mfv_neu_tau00100um_M0300',              r'$\tilde{N} \rightarrow tbs$,      $c\tau = 100\mum$, $M =  300\GeV$'),
@@ -127,64 +127,6 @@ samples = [
     ('mfv_ddbar_tau30000um_M1200',            r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau =   30\mm$, $M = 1200\GeV$'),
     ('mfv_ddbar_tau30000um_M1600',            r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau =   30\mm$, $M = 1600\GeV$'),
     ('mfv_ddbar_tau30000um_M3000',            r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau =   30\mm$, $M = 3000\GeV$'),
-    ('mfv_neu_tau00100um_M0300_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau = 100\mum$, $M =  300\GeV$'),
-    ('mfv_neu_tau00100um_M0400_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau = 100\mum$, $M =  400\GeV$'),
-    ('mfv_neu_tau00100um_M0600_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau = 100\mum$, $M =  600\GeV$'),
-    ('mfv_neu_tau00100um_M0800_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau = 100\mum$, $M =  800\GeV$'),
-    ('mfv_neu_tau00100um_M1200_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau = 100\mum$, $M = 1200\GeV$'),
-    ('mfv_neu_tau00100um_M1600_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau = 100\mum$, $M = 1600\GeV$'),
-    ('mfv_neu_tau00300um_M0300_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau = 300\mum$, $M =  300\GeV$'),
-    ('mfv_neu_tau00300um_M0400_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau = 300\mum$, $M =  400\GeV$'),
-    ('mfv_neu_tau00300um_M0600_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau = 300\mum$, $M =  600\GeV$'),
-    ('mfv_neu_tau00300um_M0800_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau = 300\mum$, $M =  800\GeV$'),
-    ('mfv_neu_tau00300um_M1200_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau = 300\mum$, $M = 1200\GeV$'),
-    ('mfv_neu_tau00300um_M1600_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau = 300\mum$, $M = 1600\GeV$'),
-    ('mfv_neu_tau01000um_M0300_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau =    1\mm$, $M =  300\GeV$'),
-    ('mfv_neu_tau01000um_M0400_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau =    1\mm$, $M =  400\GeV$'),
-    ('mfv_neu_tau01000um_M0600_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau =    1\mm$, $M =  600\GeV$'),
-    ('mfv_neu_tau01000um_M0800_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau =    1\mm$, $M =  800\GeV$'),
-    ('mfv_neu_tau01000um_M1200_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau =    1\mm$, $M = 1200\GeV$'),
-    ('mfv_neu_tau01000um_M1600_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau =    1\mm$, $M = 1600\GeV$'),
-    ('mfv_neu_tau10000um_M0600_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau =   10\mm$, $M =  600\GeV$'),
-    ('mfv_neu_tau10000um_M0800_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau =   10\mm$, $M =  800\GeV$'),
-    ('mfv_neu_tau10000um_M1200_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau =   10\mm$, $M = 1200\GeV$'),
-    ('mfv_neu_tau10000um_M1600_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau =   10\mm$, $M = 1600\GeV$'),
-    ('mfv_neu_tau30000um_M0300_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau =   30\mm$, $M =  300\GeV$'),
-    ('mfv_neu_tau30000um_M0400_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau =   30\mm$, $M =  400\GeV$'),
-    ('mfv_neu_tau30000um_M0600_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau =   30\mm$, $M =  600\GeV$'),
-    ('mfv_neu_tau30000um_M0800_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau =   30\mm$, $M =  800\GeV$'),
-    ('mfv_neu_tau30000um_M1200_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau =   30\mm$, $M = 1200\GeV$'),
-    ('mfv_neu_tau30000um_M1600_hip1p0_mit',   r'$\tilde{N} \rightarrow tbs$,      $c\tau =   30\mm$, $M = 1600\GeV$'),
-    ('mfv_ddbar_tau00100um_M0300_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau = 100\mum$, $M =  300\GeV$'),
-    ('mfv_ddbar_tau00100um_M0400_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau = 100\mum$, $M =  400\GeV$'),
-    ('mfv_ddbar_tau00100um_M0600_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau = 100\mum$, $M =  600\GeV$'),
-    ('mfv_ddbar_tau00100um_M0800_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau = 100\mum$, $M =  800\GeV$'),
-    ('mfv_ddbar_tau00100um_M1200_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau = 100\mum$, $M = 1200\GeV$'),
-    ('mfv_ddbar_tau00100um_M1600_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau = 100\mum$, $M = 1600\GeV$'),
-    ('mfv_ddbar_tau00300um_M0300_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau = 300\mum$, $M =  300\GeV$'),
-    ('mfv_ddbar_tau00300um_M0400_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau = 300\mum$, $M =  400\GeV$'),
-    ('mfv_ddbar_tau00300um_M0600_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau = 300\mum$, $M =  600\GeV$'),
-    ('mfv_ddbar_tau00300um_M0800_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau = 300\mum$, $M =  800\GeV$'),
-    ('mfv_ddbar_tau00300um_M1200_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau = 300\mum$, $M = 1200\GeV$'),
-    ('mfv_ddbar_tau00300um_M1600_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau = 300\mum$, $M = 1600\GeV$'),
-    ('mfv_ddbar_tau01000um_M0300_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau =    1\mm$, $M =  300\GeV$'),
-    ('mfv_ddbar_tau01000um_M0400_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau =    1\mm$, $M =  400\GeV$'),
-    ('mfv_ddbar_tau01000um_M0600_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau =    1\mm$, $M =  600\GeV$'),
-    ('mfv_ddbar_tau01000um_M0800_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau =    1\mm$, $M =  800\GeV$'),
-    ('mfv_ddbar_tau01000um_M1200_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau =    1\mm$, $M = 1200\GeV$'),
-    ('mfv_ddbar_tau01000um_M1600_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau =    1\mm$, $M = 1600\GeV$'),
-    ('mfv_ddbar_tau10000um_M0300_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau =   10\mm$, $M =  300\GeV$'),
-    ('mfv_ddbar_tau10000um_M0400_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau =   10\mm$, $M =  400\GeV$'),
-    ('mfv_ddbar_tau10000um_M0600_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau =   10\mm$, $M =  600\GeV$'),
-    ('mfv_ddbar_tau10000um_M0800_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau =   10\mm$, $M =  800\GeV$'),
-    ('mfv_ddbar_tau10000um_M1200_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau =   10\mm$, $M = 1200\GeV$'),
-    ('mfv_ddbar_tau10000um_M1600_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau =   10\mm$, $M = 1600\GeV$'),
-    ('mfv_ddbar_tau30000um_M0300_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau =   30\mm$, $M =  300\GeV$'),
-    ('mfv_ddbar_tau30000um_M0400_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau =   30\mm$, $M =  400\GeV$'),
-    ('mfv_ddbar_tau30000um_M0600_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau =   30\mm$, $M =  600\GeV$'),
-    ('mfv_ddbar_tau30000um_M0800_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau =   30\mm$, $M =  800\GeV$'),
-    ('mfv_ddbar_tau30000um_M1200_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau =   30\mm$, $M = 1200\GeV$'),
-    ('mfv_ddbar_tau30000um_M1600_hip1p0_mit', r'$\tilde{g} \rightarrow d\bar{d}$, $c\tau =   30\mm$, $M = 1600\GeV$'),
     ('mfv_bbbar_tau00100um_M0300',            r'$\tilde{g} \rightarrow b\bar{b}$, $c\tau = 100\mum$, $M =  300\GeV$'),
     ('mfv_bbbar_tau00100um_M0400',            r'$\tilde{g} \rightarrow b\bar{b}$, $c\tau = 100\mum$, $M =  400\GeV$'),
     ('mfv_bbbar_tau00100um_M0500',            r'$\tilde{g} \rightarrow b\bar{b}$, $c\tau = 100\mum$, $M =  500\GeV$'),
@@ -225,46 +167,6 @@ samples = [
     ('mfv_bbbar_tau30000um_M1200',            r'$\tilde{g} \rightarrow b\bar{b}$, $c\tau =   30\mm$, $M = 1200\GeV$'),
     ('mfv_bbbar_tau30000um_M1600',            r'$\tilde{g} \rightarrow b\bar{b}$, $c\tau =   30\mm$, $M = 1600\GeV$'),
     ('mfv_bbbar_tau30000um_M3000',            r'$\tilde{g} \rightarrow b\bar{b}$, $c\tau =   30\mm$, $M = 3000\GeV$'),
-    ('mfv_uds_tau00100um_M0300',              r'$\tilde{g} \rightarrow uds$,      $c\tau = 100\mum$, $M =  300\GeV$'),
-    ('mfv_uds_tau00100um_M0400',              r'$\tilde{g} \rightarrow uds$,      $c\tau = 100\mum$, $M =  400\GeV$'),
-    ('mfv_uds_tau00100um_M0500',              r'$\tilde{g} \rightarrow uds$,      $c\tau = 100\mum$, $M =  500\GeV$'),
-    ('mfv_uds_tau00100um_M0600',              r'$\tilde{g} \rightarrow uds$,      $c\tau = 100\mum$, $M =  600\GeV$'),
-    ('mfv_uds_tau00100um_M0800',              r'$\tilde{g} \rightarrow uds$,      $c\tau = 100\mum$, $M =  800\GeV$'),
-    ('mfv_uds_tau00100um_M1200',              r'$\tilde{g} \rightarrow uds$,      $c\tau = 100\mum$, $M = 1200\GeV$'),
-    ('mfv_uds_tau00100um_M1600',              r'$\tilde{g} \rightarrow uds$,      $c\tau = 100\mum$, $M = 1600\GeV$'),
-    ('mfv_uds_tau00100um_M3000',              r'$\tilde{g} \rightarrow uds$,      $c\tau = 100\mum$, $M = 3000\GeV$'),
-    ('mfv_uds_tau00300um_M0300',              r'$\tilde{g} \rightarrow uds$,      $c\tau = 300\mum$, $M =  300\GeV$'),
-    ('mfv_uds_tau00300um_M0400',              r'$\tilde{g} \rightarrow uds$,      $c\tau = 300\mum$, $M =  400\GeV$'),
-    ('mfv_uds_tau00300um_M0500',              r'$\tilde{g} \rightarrow uds$,      $c\tau = 300\mum$, $M =  500\GeV$'),
-    ('mfv_uds_tau00300um_M0600',              r'$\tilde{g} \rightarrow uds$,      $c\tau = 300\mum$, $M =  600\GeV$'),
-    ('mfv_uds_tau00300um_M0800',              r'$\tilde{g} \rightarrow uds$,      $c\tau = 300\mum$, $M =  800\GeV$'),
-    ('mfv_uds_tau00300um_M1200',              r'$\tilde{g} \rightarrow uds$,      $c\tau = 300\mum$, $M = 1200\GeV$'),
-    ('mfv_uds_tau00300um_M1600',              r'$\tilde{g} \rightarrow uds$,      $c\tau = 300\mum$, $M = 1600\GeV$'),
-    ('mfv_uds_tau00300um_M3000',              r'$\tilde{g} \rightarrow uds$,      $c\tau = 300\mum$, $M = 3000\GeV$'),
-    ('mfv_uds_tau01000um_M0300',              r'$\tilde{g} \rightarrow uds$,      $c\tau =    1\mm$, $M =  300\GeV$'),
-    ('mfv_uds_tau01000um_M0400',              r'$\tilde{g} \rightarrow uds$,      $c\tau =    1\mm$, $M =  400\GeV$'),
-    ('mfv_uds_tau01000um_M0500',              r'$\tilde{g} \rightarrow uds$,      $c\tau =    1\mm$, $M =  500\GeV$'),
-    ('mfv_uds_tau01000um_M0600',              r'$\tilde{g} \rightarrow uds$,      $c\tau =    1\mm$, $M =  600\GeV$'),
-    ('mfv_uds_tau01000um_M0800',              r'$\tilde{g} \rightarrow uds$,      $c\tau =    1\mm$, $M =  800\GeV$'),
-    ('mfv_uds_tau01000um_M1200',              r'$\tilde{g} \rightarrow uds$,      $c\tau =    1\mm$, $M = 1200\GeV$'),
-    ('mfv_uds_tau01000um_M1600',              r'$\tilde{g} \rightarrow uds$,      $c\tau =    1\mm$, $M = 1600\GeV$'),
-    ('mfv_uds_tau01000um_M3000',              r'$\tilde{g} \rightarrow uds$,      $c\tau =    1\mm$, $M = 3000\GeV$'),
-    ('mfv_uds_tau10000um_M0300',              r'$\tilde{g} \rightarrow uds$,      $c\tau =   10\mm$, $M =  300\GeV$'),
-    ('mfv_uds_tau10000um_M0400',              r'$\tilde{g} \rightarrow uds$,      $c\tau =   10\mm$, $M =  400\GeV$'),
-    ('mfv_uds_tau10000um_M0500',              r'$\tilde{g} \rightarrow uds$,      $c\tau =   10\mm$, $M =  500\GeV$'),
-    ('mfv_uds_tau10000um_M0600',              r'$\tilde{g} \rightarrow uds$,      $c\tau =   10\mm$, $M =  600\GeV$'),
-    ('mfv_uds_tau10000um_M0800',              r'$\tilde{g} \rightarrow uds$,      $c\tau =   10\mm$, $M =  800\GeV$'),
-    ('mfv_uds_tau10000um_M1200',              r'$\tilde{g} \rightarrow uds$,      $c\tau =   10\mm$, $M = 1200\GeV$'),
-    ('mfv_uds_tau10000um_M1600',              r'$\tilde{g} \rightarrow uds$,      $c\tau =   10\mm$, $M = 1600\GeV$'),
-    ('mfv_uds_tau10000um_M3000',              r'$\tilde{g} \rightarrow uds$,      $c\tau =   10\mm$, $M = 3000\GeV$'),
-    ('mfv_uds_tau30000um_M0300',              r'$\tilde{g} \rightarrow uds$,      $c\tau =   30\mm$, $M =  300\GeV$'),
-    ('mfv_uds_tau30000um_M0400',              r'$\tilde{g} \rightarrow uds$,      $c\tau =   30\mm$, $M =  400\GeV$'),
-    ('mfv_uds_tau30000um_M0500',              r'$\tilde{g} \rightarrow uds$,      $c\tau =   30\mm$, $M =  500\GeV$'),
-    ('mfv_uds_tau30000um_M0600',              r'$\tilde{g} \rightarrow uds$,      $c\tau =   30\mm$, $M =  600\GeV$'),
-    ('mfv_uds_tau30000um_M0800',              r'$\tilde{g} \rightarrow uds$,      $c\tau =   30\mm$, $M =  800\GeV$'),
-    ('mfv_uds_tau30000um_M1200',              r'$\tilde{g} \rightarrow uds$,      $c\tau =   30\mm$, $M = 1200\GeV$'),
-    ('mfv_uds_tau30000um_M1600',              r'$\tilde{g} \rightarrow uds$,      $c\tau =   30\mm$, $M = 1600\GeV$'),
-    ('mfv_uds_tau30000um_M3000',              r'$\tilde{g} \rightarrow uds$,      $c\tau =   30\mm$, $M = 3000\GeV$'),
     ('mfv_neuuds_tau00100um_M0300',           r'$\tilde{N} \rightarrow uds$,      $c\tau = 100\mum$, $M =  300\GeV$'),
     ('mfv_neuuds_tau00100um_M0400',           r'$\tilde{N} \rightarrow uds$,      $c\tau = 100\mum$, $M =  400\GeV$'),
     ('mfv_neuuds_tau00100um_M0500',           r'$\tilde{N} \rightarrow uds$,      $c\tau = 100\mum$, $M =  500\GeV$'),
@@ -355,18 +257,12 @@ def style(sample):
         return 20
     if model == 'mfv_ddbar':
         return 22
-    if model == 'mfv_neu_hip1p0_mit':
-        return 24
-    if model == 'mfv_ddbar_hip1p0_mit':
-        return 26
     if model == 'mfv_bbbar':
         return 23
-    if model == 'mfv_uds':
-        return 21
     if model == 'mfv_neuuds':
-        return 34
+        return 21
     if model == 'mfv_neuudmu':
-        return 33
+        return 34
 
 def color(sample):
     mass = sample.split('M')[1].split('_')[0]
