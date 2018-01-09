@@ -1800,18 +1800,29 @@ __all__ = [
 
 if __name__ == '__main__':
     import sys
+
+    def _printlist(l):
+        for x in l:
+            print x
+
+    def _args(x, *names):
+        n = len(names)
+        i = sys.argv.index(x)
+        if len(sys.argv) < i+n+1 or sys.argv[i+1] in ('-h','--help','help'):
+            sys.exit('usage: %s %s %s' % (sys.argv[0], x, ' '.join(names)))
+        return tuple(sys.argv[i+j] for j in xrange(1,n+1))
+    def _arg(x,name):
+        return _args(x,name)[0]
+
     if 'enc' in sys.argv:
-        sample = sys.argv[sys.argv.index('enc')+1]
-        dataset = sys.argv[sys.argv.index('enc')+2]
-        listfn = sys.argv[sys.argv.index('enc')+3]
+        dataset, sample, listfn = _args('enc', 'dataset','sample','listfn')
         fns = [x.strip() for x in open(listfn).read().split('\n') if x.strip()]
         n = len(fns)
         print '# %s, %s, %i files' % (sample, dataset, n)
         print '_add(%r)' % _enc({(sample,dataset):(n,fns)})
 
     elif 'testfiles' in sys.argv:
-        sample = sys.argv[sys.argv.index('testfiles')+1]
-        dataset = sys.argv[sys.argv.index('testfiles')+2]
+        dataset, sample = _args('testfiles', 'dataset','sample')
         from JMTucker.Tools.ROOTTools import ROOT
         print sample, dataset
         def n(f,p):
@@ -1825,8 +1836,7 @@ if __name__ == '__main__':
                 n(ROOT.TFile.Open('root://cmseos.fnal.gov/' + fn.replace('ntuple', 'vertex_histos')), 'mfvVertices/h_n_all_tracks')
 
     elif 'forcopy' in sys.argv:
-        sample = sys.argv[sys.argv.index('forcopy')+1]
-        dataset = sys.argv[sys.argv.index('forcopy')+2]
+        dataset, sample = _args('forcopy', 'dataset','sample')
         if not has(sample, dataset):
             raise KeyError('no key sample = %s dataset = %s' % (sample, dataset))
         print sample, dataset
@@ -1841,31 +1851,38 @@ if __name__ == '__main__':
             print x,
         out_f.close()
 
-    elif 'allfiles' in sys.argv:
-        for (sample, ds), (n, fns) in _d.iteritems():
-            for fn in fns:
-                print fn
-
     elif 'dump' in sys.argv:
         dump()
 
     elif 'summary' in sys.argv:
         summary()
 
+    elif 'datasets' in sys.argv:
+        _printlist(sorted(set(ds for _, ds in _d.keys())))
+
+    elif 'samples' in sys.argv:
+        _printlist(sorted(set(name for name, ds in _d.keys() if ds == _arg('samples', 'dataset'))))
+
+    elif 'files' in sys.argv:
+        dataset, sample = _args('files', 'dataset','sample')
+        _printlist(sorted(get(sample, dataset)[1]))
+
+    elif 'allfiles' in sys.argv:
+        _printlist(sorted(fn for (sample, ds), (n, fns) in _d.iteritems() for fn in fns))
+
     elif 'whosummary' in sys.argv:
-        who = defaultdict(list)
+        whosummary = defaultdict(list)
         for k in _d:
             users = who(*k)
             if users:
-                who[users].append(k)
-        print 'sorted by users:'
-        for users, dses in who.iteritems():
+                whosummary[users].append(k)
+        print 'by user(s):'
+        for users, dses in whosummary.iteritems():
             dses.sort()
             print ' + '.join(users)
             for ds in dses:
                 print '    ', ds
 
     elif 'who' in sys.argv:
-        name = sys.argv[sys.argv.index('who')+1]
-        ds   = sys.argv[sys.argv.index('who')+2]
-        print ' + '.join(who(name,ds))
+        dataset, sample = _args('who', 'dataset','sample')
+        print ' + '.join(who(sample, dataset))
