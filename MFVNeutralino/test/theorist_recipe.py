@@ -67,13 +67,12 @@ process.mfvAnalysisCutsTwoVtxBsbs2ddist = process.mfvAnalysisCuts.clone(vertex_s
 process.mfvTheoristRecipeTwoVtxBsbs2ddist = mfvTheoristRecipe.clone()
 process.pTwoVtxBsbs2ddist = cms.Path(process.common * process.mfvSelectedVerticesBsbs2ddist * process.mfvAnalysisCutsTwoVtxBsbs2ddist * process.mfvTheoristRecipeTwoVtxBsbs2ddist)
 
-process.mfvAnalysisCutsDvv400um = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesBsbs2ddist', min_svdist2d = 0.04)
+process.mfvTheoristRecipeTwoVtxBs2derr = mfvTheoristRecipe.clone()
+process.pTwoVtxBs2derr = cms.Path(process.common * process.mfvAnalysisCuts * process.mfvTheoristRecipeTwoVtxBs2derr)
+
+process.mfvAnalysisCutsDvv400um = process.mfvAnalysisCuts.clone(min_svdist2d = 0.04)
 process.mfvTheoristRecipeTwoVtxDvv400um = mfvTheoristRecipe.clone()
 process.pTwoVtxDvv400um = cms.Path(process.common * process.mfvAnalysisCutsDvv400um * process.mfvTheoristRecipeTwoVtxDvv400um)
-
-process.mfvAnalysisCutsTwoVtxBs2derr = process.mfvAnalysisCuts.clone(min_svdist2d = 0.04)
-process.mfvTheoristRecipeTwoVtxBs2derr = mfvTheoristRecipe.clone()
-process.pTwoVtxBs2derr = cms.Path(process.common * process.mfvAnalysisCutsTwoVtxBs2derr * process.mfvTheoristRecipeTwoVtxBs2derr)
 
 #generated cutflow
 process.mfvGenNoCuts = mfvTheoristRecipe.clone()
@@ -99,89 +98,13 @@ process.mfvGenParticleFilterBsbs2ddist = process.mfvGenParticleFilter.clone(min_
 process.mfvGenBsbs2ddist = mfvTheoristRecipe.clone()
 process.pGenBsbs2ddist = cms.Path(process.common * process.mfvGenParticleFilterBsbs2ddist * process.mfvGenBsbs2ddist)
 
-process.mfvGenParticleFilterDvv400um = process.mfvGenParticleFilter.clone(min_njets = 4, min_jet_pt = 20, min_jet_ht40 = 1000, min_ntracks = 1, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_dvv = 0.04)
-process.mfvGenDvv400um = mfvTheoristRecipe.clone()
-process.pGenDvv400um = cms.Path(process.common * process.mfvGenParticleFilterDvv400um * process.mfvGenDvv400um)
-
-process.mfvGenParticleFilterSumpt50 = process.mfvGenParticleFilter.clone(min_njets = 4, min_jet_pt = 20, min_jet_ht40 = 1000, min_ntracks = 1, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_dvv = 0.04, min_sumpt = 50)
-process.mfvGenSumpt50 = mfvTheoristRecipe.clone()
-process.pGenSumpt50 = cms.Path(process.common * process.mfvGenParticleFilterSumpt50 * process.mfvGenSumpt50)
-
-process.mfvGenParticleFilterSumpt100 = process.mfvGenParticleFilter.clone(min_njets = 4, min_jet_pt = 20, min_jet_ht40 = 1000, min_ntracks = 1, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_dvv = 0.04, min_sumpt = 100)
-process.mfvGenSumpt100 = mfvTheoristRecipe.clone()
-process.pGenSumpt100 = cms.Path(process.common * process.mfvGenParticleFilterSumpt100 * process.mfvGenSumpt100)
-
-process.mfvGenParticleFilterSumpt150 = process.mfvGenParticleFilter.clone(min_njets = 4, min_jet_pt = 20, min_jet_ht40 = 1000, min_ntracks = 1, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_dvv = 0.04, min_sumpt = 150)
-process.mfvGenSumpt150 = mfvTheoristRecipe.clone()
-process.pGenSumpt150 = cms.Path(process.common * process.mfvGenParticleFilterSumpt150 * process.mfvGenSumpt150)
-
-process.mfvGenParticleFilterSumpt200 = process.mfvGenParticleFilter.clone(min_njets = 4, min_jet_pt = 20, min_jet_ht40 = 1000, min_ntracks = 1, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_dvv = 0.04, min_sumpt = 200)
-process.mfvGenSumpt200 = mfvTheoristRecipe.clone()
-process.pGenSumpt200 = cms.Path(process.common * process.mfvGenParticleFilterSumpt200 * process.mfvGenSumpt200)
-
-process.mfvGenParticleFilterSumpt250 = process.mfvGenParticleFilter.clone(min_njets = 4, min_jet_pt = 20, min_jet_ht40 = 1000, min_ntracks = 1, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_dvv = 0.04, min_sumpt = 250)
-process.mfvGenSumpt250 = mfvTheoristRecipe.clone()
-process.pGenSumpt250 = cms.Path(process.common * process.mfvGenParticleFilterSumpt250 * process.mfvGenSumpt250)
-
-process.mfvGenParticleFilterSumpt300 = process.mfvGenParticleFilter.clone(min_njets = 4, min_jet_pt = 20, min_jet_ht40 = 1000, min_ntracks = 1, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_dvv = 0.04, min_sumpt = 300)
-process.mfvGenSumpt300 = mfvTheoristRecipe.clone()
-process.pGenSumpt300 = cms.Path(process.common * process.mfvGenParticleFilterSumpt300 * process.mfvGenSumpt300)
-
-process.mfvGenParticleFilterSumpt350 = process.mfvGenParticleFilter.clone(min_njets = 4, min_jet_pt = 20, min_jet_ht40 = 1000, min_ntracks = 1, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_dvv = 0.04, min_sumpt = 350)
-process.mfvGenSumpt350 = mfvTheoristRecipe.clone()
-process.pGenSumpt350 = cms.Path(process.common * process.mfvGenParticleFilterSumpt350 * process.mfvGenSumpt350)
-
-process.mfvGenParticleFilterSumpt400 = process.mfvGenParticleFilter.clone(min_njets = 4, min_jet_pt = 20, min_jet_ht40 = 1000, min_ntracks = 1, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_dvv = 0.04, min_sumpt = 400)
+process.mfvGenParticleFilterSumpt400 = process.mfvGenParticleFilter.clone(min_njets = 4, min_jet_pt = 20, min_jet_ht40 = 1000, min_ntracks = 1, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_sumpt = 400)
 process.mfvGenSumpt400 = mfvTheoristRecipe.clone()
 process.pGenSumpt400 = cms.Path(process.common * process.mfvGenParticleFilterSumpt400 * process.mfvGenSumpt400)
 
-process.mfvGenParticleFilterSumpt450 = process.mfvGenParticleFilter.clone(min_njets = 4, min_jet_pt = 20, min_jet_ht40 = 1000, min_ntracks = 1, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_dvv = 0.04, min_sumpt = 450)
-process.mfvGenSumpt450 = mfvTheoristRecipe.clone()
-process.pGenSumpt450 = cms.Path(process.common * process.mfvGenParticleFilterSumpt450 * process.mfvGenSumpt450)
-
-process.mfvGenParticleFilterSumpt500 = process.mfvGenParticleFilter.clone(min_njets = 4, min_jet_pt = 20, min_jet_ht40 = 1000, min_ntracks = 1, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_dvv = 0.04, min_sumpt = 500)
-process.mfvGenSumpt500 = mfvTheoristRecipe.clone()
-process.pGenSumpt500 = cms.Path(process.common * process.mfvGenParticleFilterSumpt500 * process.mfvGenSumpt500)
-
-process.mfvGenParticleFilterSumpt550 = process.mfvGenParticleFilter.clone(min_njets = 4, min_jet_pt = 20, min_jet_ht40 = 1000, min_ntracks = 1, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_dvv = 0.04, min_sumpt = 550)
-process.mfvGenSumpt550 = mfvTheoristRecipe.clone()
-process.pGenSumpt550 = cms.Path(process.common * process.mfvGenParticleFilterSumpt550 * process.mfvGenSumpt550)
-
-process.mfvGenParticleFilterSumpt600 = process.mfvGenParticleFilter.clone(min_njets = 4, min_jet_pt = 20, min_jet_ht40 = 1000, min_ntracks = 1, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_dvv = 0.04, min_sumpt = 600)
-process.mfvGenSumpt600 = mfvTheoristRecipe.clone()
-process.pGenSumpt600 = cms.Path(process.common * process.mfvGenParticleFilterSumpt600 * process.mfvGenSumpt600)
-
-process.mfvGenParticleFilterSumpt650 = process.mfvGenParticleFilter.clone(min_njets = 4, min_jet_pt = 20, min_jet_ht40 = 1000, min_ntracks = 1, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_dvv = 0.04, min_sumpt = 650)
-process.mfvGenSumpt650 = mfvTheoristRecipe.clone()
-process.pGenSumpt650 = cms.Path(process.common * process.mfvGenParticleFilterSumpt650 * process.mfvGenSumpt650)
-
-process.mfvGenParticleFilterSumpt700 = process.mfvGenParticleFilter.clone(min_njets = 4, min_jet_pt = 20, min_jet_ht40 = 1000, min_ntracks = 1, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_dvv = 0.04, min_sumpt = 700)
-process.mfvGenSumpt700 = mfvTheoristRecipe.clone()
-process.pGenSumpt700 = cms.Path(process.common * process.mfvGenParticleFilterSumpt700 * process.mfvGenSumpt700)
-
-process.mfvGenParticleFilterSumpt750 = process.mfvGenParticleFilter.clone(min_njets = 4, min_jet_pt = 20, min_jet_ht40 = 1000, min_ntracks = 1, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_dvv = 0.04, min_sumpt = 750)
-process.mfvGenSumpt750 = mfvTheoristRecipe.clone()
-process.pGenSumpt750 = cms.Path(process.common * process.mfvGenParticleFilterSumpt750 * process.mfvGenSumpt750)
-
-process.mfvGenParticleFilterSumpt800 = process.mfvGenParticleFilter.clone(min_njets = 4, min_jet_pt = 20, min_jet_ht40 = 1000, min_ntracks = 1, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_dvv = 0.04, min_sumpt = 800)
-process.mfvGenSumpt800 = mfvTheoristRecipe.clone()
-process.pGenSumpt800 = cms.Path(process.common * process.mfvGenParticleFilterSumpt800 * process.mfvGenSumpt800)
-
-process.mfvGenParticleFilterSumpt850 = process.mfvGenParticleFilter.clone(min_njets = 4, min_jet_pt = 20, min_jet_ht40 = 1000, min_ntracks = 1, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_dvv = 0.04, min_sumpt = 850)
-process.mfvGenSumpt850 = mfvTheoristRecipe.clone()
-process.pGenSumpt850 = cms.Path(process.common * process.mfvGenParticleFilterSumpt850 * process.mfvGenSumpt850)
-
-process.mfvGenParticleFilterSumpt900 = process.mfvGenParticleFilter.clone(min_njets = 4, min_jet_pt = 20, min_jet_ht40 = 1000, min_ntracks = 1, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_dvv = 0.04, min_sumpt = 900)
-process.mfvGenSumpt900 = mfvTheoristRecipe.clone()
-process.pGenSumpt900 = cms.Path(process.common * process.mfvGenParticleFilterSumpt900 * process.mfvGenSumpt900)
-
-process.mfvGenParticleFilterSumpt950 = process.mfvGenParticleFilter.clone(min_njets = 4, min_jet_pt = 20, min_jet_ht40 = 1000, min_ntracks = 1, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_dvv = 0.04, min_sumpt = 950)
-process.mfvGenSumpt950 = mfvTheoristRecipe.clone()
-process.pGenSumpt950 = cms.Path(process.common * process.mfvGenParticleFilterSumpt950 * process.mfvGenSumpt950)
-
-process.mfvGenParticleFilterSumpt1000 = process.mfvGenParticleFilter.clone(min_njets = 4, min_jet_pt = 20, min_jet_ht40 = 1000, min_ntracks = 1, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_dvv = 0.04, min_sumpt = 1000)
-process.mfvGenSumpt1000 = mfvTheoristRecipe.clone()
-process.pGenSumpt1000 = cms.Path(process.common * process.mfvGenParticleFilterSumpt1000 * process.mfvGenSumpt1000)
+process.mfvGenParticleFilterDvv400um = process.mfvGenParticleFilter.clone(min_njets = 4, min_jet_pt = 20, min_jet_ht40 = 1000, min_ntracks = 1, max_rho0 = 2.0, max_rho1 = 2.0, min_rho0 = 0.01, min_rho1 = 0.01, min_sumpt = 400, min_dvv = 0.04)
+process.mfvGenDvv400um = mfvTheoristRecipe.clone()
+process.pGenDvv400um = cms.Path(process.common * process.mfvGenParticleFilterDvv400um * process.mfvGenDvv400um)
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
