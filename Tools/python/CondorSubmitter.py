@@ -308,6 +308,7 @@ def get(i): return _l[i]
 
         if sample.split_by == 'events':
             per = sample.events_per
+            assert sample.nevents_orig > 0
             njobs = int_ceil(sample.nevents_orig, per)
             fn_groups = [sample.filenames]
         else:
