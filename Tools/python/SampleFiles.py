@@ -1,5 +1,6 @@
 import os, base64, zlib, cPickle as pickle
 from collections import defaultdict
+from fnmatch import fnmatch
 from itertools import chain
 from pprint import pprint
 from JMTucker.Tools.CRAB3ToolsBase import decrabify_list
@@ -57,6 +58,9 @@ def keys():
 
 def dump():
     pprint(_d)
+
+def allfiles():
+    return (fn for (sample, ds), (n, fns) in _d.iteritems() for fn in fns)
 
 def summary():
     d = defaultdict(list)
@@ -1872,7 +1876,28 @@ if __name__ == '__main__':
         _printlist(sorted(get(sample, dataset)[1]))
 
     elif 'allfiles' in sys.argv:
-        _printlist(sorted(fn for (sample, ds), (n, fns) in _d.iteritems() for fn in fns))
+        _printlist(sorted(allfiles()))
+
+    elif 'otherfiles' in sys.argv:
+        list_fn = _arg('otherfiles', 'list_fn')
+        other_fns = set()
+        for line in open(list_fn):
+            line = line.strip()
+            if line.endswith('.root'):
+                assert '/store' in line
+                other_fns.add(line.replace('/eos/uscms', ''))
+        all_fns = set(allfiles())
+        print 'root files in %s not in SampleFiles:' % list_fn
+        _printlist(sorted(other_fns - all_fns))
+        print 'root files in SampleFiles not in %s:' % list_fn
+        _printlist(sorted(all_fns - other_fns))
+
+    elif 'filematch' in sys.argv:
+        pattern = _arg('filematch', 'pattern')
+        for (sample, dataset), (_, fns) in _d.iteritems():
+            for fn in fns:
+                if fnmatch(fn, pattern):
+                    print sample, dataset, fn
 
     elif 'whosummary' in sys.argv:
         whosummary = defaultdict(list)
