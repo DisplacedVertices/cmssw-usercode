@@ -1265,6 +1265,7 @@ _add_ds("ntuplev16_wgenv2", {
 
 _add_ds("ntuplev16m", {
 'qcdht0500': _fromnum1("/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180106_232420", 38),
+'qcdht0700': (7, ['/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180107_155050/0000/ntuple_%i.root' % i for i in xrange(6)] + ['/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180109_095212/0000/ntuple_6.root']),
 'qcdht1000': _fromnum1("/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180106_232447", 18),
 'qcdht1500': _fromnum0("/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180107_131426", 40),
 'qcdht2000': _fromnum1("/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180106_232514", 131),
