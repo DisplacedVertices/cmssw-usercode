@@ -3,18 +3,19 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include "JMTucker/Formats/interface/MergeablePOD.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 
 class MFVWeightProducer : public edm::EDProducer {
 public:
   explicit MFVWeightProducer(const edm::ParameterSet&);
-  virtual void beginLuminosityBlock(const edm::LuminosityBlock&, const edm::EventSetup&) override;
+  virtual void endLuminosityBlock(const edm::LuminosityBlock&, const edm::EventSetup&) override;
   virtual void produce(edm::Event&, const edm::EventSetup&) override;
 
 private:
-  const edm::EDGetTokenT<int> nevents_token;
-  const edm::EDGetTokenT<float> sumweight_token;
-  const edm::EDGetTokenT<float> sumweightprod_token;
+  const edm::EDGetTokenT<jmt::MergeableInt> nevents_token;
+  const edm::EDGetTokenT<jmt::MergeableFloat> sumweight_token;
+  const edm::EDGetTokenT<jmt::MergeableFloat> sumweightprod_token;
   const bool throw_if_no_mcstat;
   const edm::EDGetTokenT<MFVEvent> mevent_token;
   const bool enable;
@@ -35,9 +36,9 @@ private:
 };
 
 MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
-  : nevents_token(consumes<int, edm::InLumi>(edm::InputTag("mcStat", "nEvents"))),
-    sumweight_token(consumes<float, edm::InLumi>(edm::InputTag("mcStat", "sumWeight"))),
-    sumweightprod_token(consumes<float, edm::InLumi>(edm::InputTag("mcStat", "sumWeightProd"))),
+  : nevents_token(consumes<jmt::MergeableInt, edm::InLumi>(edm::InputTag("mcStat", "nEvents"))),
+    sumweight_token(consumes<jmt::MergeableFloat, edm::InLumi>(edm::InputTag("mcStat", "sumWeight"))),
+    sumweightprod_token(consumes<jmt::MergeableFloat, edm::InLumi>(edm::InputTag("mcStat", "sumWeightProd"))),
     throw_if_no_mcstat(cfg.getParameter<bool>("throw_if_no_mcstat")),
     mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
     enable(cfg.getParameter<bool>("enable")),
@@ -62,22 +63,22 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
   }
 }
 
-void MFVWeightProducer::beginLuminosityBlock(const edm::LuminosityBlock& lumi, const edm::EventSetup&) {
+void MFVWeightProducer::endLuminosityBlock(const edm::LuminosityBlock& lumi, const edm::EventSetup&) {
   if (lumi.run() == 1) { // no lumi.isRealData()
-    edm::Handle<int> nEvents;
-    edm::Handle<float> sumWeight, sumWeightProd;
+    edm::Handle<jmt::MergeableInt> nEvents;
+    edm::Handle<jmt::MergeableFloat> sumWeight, sumWeightProd;
     lumi.getByToken(nevents_token, nEvents);
     lumi.getByToken(sumweight_token, sumWeight);
     lumi.getByToken(sumweightprod_token, sumWeightProd);
 
     if (nEvents.isValid() && sumWeight.isValid() && sumWeightProd.isValid()) {
       if (prints)
-        printf("MFVWeight::beginLuminosityBlock r: %u l: %u nEvents: %i  sumWeight: %f  sumWeightProd: %f\n", lumi.run(), lumi.luminosityBlock(), *nEvents, *sumWeight, *sumWeightProd);
+        printf("MFVWeight::beginLuminosityBlock r: %u l: %u nEvents: %i  sumWeight: %f  sumWeightProd: %f\n", lumi.run(), lumi.luminosityBlock(), nEvents->get(), sumWeight->get(), sumWeightProd->get());
       
       if (histos) {
-        h_sums->Fill(sum_nevents_total, *nEvents);
-        h_sums->Fill(sum_gen_weight_total, *sumWeight);
-        h_sums->Fill(sum_gen_weightprod_total, *sumWeightProd);
+        h_sums->Fill(sum_nevents_total, nEvents->get());
+        h_sums->Fill(sum_gen_weight_total, sumWeight->get());
+        h_sums->Fill(sum_gen_weightprod_total, sumWeightProd->get());
       }
     }
     else if (throw_if_no_mcstat)
