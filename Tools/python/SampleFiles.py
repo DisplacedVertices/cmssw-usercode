@@ -1298,7 +1298,6 @@ _add_ds("ntuplev16m", {
 'mfv_neu_tau00100um_M1600': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_233009", 10),
 'mfv_neu_tau00300um_M1600': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_233022", 532),
 'mfv_neu_tau01000um_M1600': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_233035", 629),
-'mfv_neu_tau10000um_M1600': _fromnum0("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180110_141838", 100),
 })
 
 
