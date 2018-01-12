@@ -1,0 +1,6 @@
+<lcgdict>
+  <class name="jmt::MergeablePOD<int>"/>
+  <class name="jmt::MergeablePOD<float>"/>
+  <class name="edm::Wrapper<jmt::MergeablePOD<int> >"/>
+  <class name="edm::Wrapper<jmt::MergeablePOD<float> >"/>
+</lcgdict>
