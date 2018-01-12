@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from JMTucker.Tools.MiniAOD_cfg import which_global_tag
+from JMTucker.Tools.CMSSWTools import which_global_tag
 from JMTucker.Tools.CMSSWTools import *
 import JMTucker.Tools.SampleFiles as SampleFiles
 import JMTucker.Tools.Samples as Samples

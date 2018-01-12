@@ -26,8 +26,11 @@ def basic_process(name, filenames=['file:input.root']):
     process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring(*filenames))
     return process
 
-def set_files(process, fns):
+def input_files(process, fns):
     if type(fns) == str:
+        if not fns.endswith('.root'):
+            files_from_file(process, fns)
+            return
         fns = [fns]
     files = []
     for fn in fns:
@@ -317,3 +320,21 @@ def want_summary(process, val=True):
         process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(val))
     else:
         process.options.wantSummary = cms.untracked.bool(val)
+
+def which_global_tag(is_mc, year, H, repro):
+    if repro:
+        assert year != 2015
+    if H:
+        assert not is_mc and year != 2015
+    if year == 2015:
+        return '76X_mcRun2_asymptotic_v12' if is_mc else '76X_dataRun2_v15'
+    elif year == 2016:
+        if is_mc:
+            return '80X_mcRun2_asymptotic_2016_TrancheIV_v8'
+        else:
+            if repro:
+                return '80X_dataRun2_2016LegacyRepro_v3'
+            else:
+                return '80X_dataRun2_Prompt_v16' if H else '80X_dataRun2_2016SeptRepro_v7'
+    else:
+        raise ValueError('what year is it')

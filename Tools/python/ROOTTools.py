@@ -1694,6 +1694,7 @@ def ratios_plot(name,
                 res_y_range = (0., 2.),
                 res_draw_cmd = 'pez',
                 res_fit = True,
+                res_lines = None,
                 legend = None,
                 draw_normalized = False,
                 statbox_size = None,
@@ -1701,6 +1702,9 @@ def ratios_plot(name,
     '''With n hists/graphs, draw them and the n-1 ratios to hists[0].
     hists can be a list of just the hists/graphs, or it can be a list
     of tuples (object, draw_cmd).
+
+    NB: for some reason, hists without Sumw2 called on them don't play
+    nice (aren't drawn? disappear?) with something in this...
     '''
 
     _hists, draw_cmds = [], []
@@ -1876,6 +1880,16 @@ def ratios_plot(name,
             txt = fit_tpt.AddText('p0 = %.2f #pm %.2f  #chi^{2}/ndf = %.2f/%i  p = %.3f' % (fit_res.Parameter(0), fit_res.ParError(0), fit_res.Chi2(), fit_res.Ndf(), fit_res.Prob()))
             txt.SetTextAlign(12)
             txt.SetTextColor(h.GetLineColor())
+
+    if res_lines:
+        res_ls = []
+        for res_line_y, res_line_color, res_line_width, res_line_style in res_lines:
+            res_l = ROOT.TLine(x_range[0], res_line_y, x_range[1], res_line_y)
+            res_ls.append(res_l)
+            res_l.SetLineColor(res_line_color)
+            res_l.SetLineWidth(res_line_width)
+            res_l.SetLineStyle(res_line_style)
+            res_l.Draw()
 
     if fit_tpt:
         fit_tpt.Draw()

@@ -12,8 +12,6 @@ ROOT.gErrorIgnoreLevel = 6000
 fns = [x for x in sys.argv[1:] if x.endswith('.root') and os.path.isfile(x)]
 include = [1 if 'sum' in sys.argv else 0]*len(fns)
 
-year = typed_from_argv(int, 2016)
-
 if not fns:
     doing_default = True
     file_path = None

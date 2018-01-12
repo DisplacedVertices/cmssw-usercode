@@ -12,7 +12,9 @@ process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
-    samples = Samples.data_samples + Samples.qcd_samples + Samples.qcd_samples_ext + Samples.ttbar_samples
+    samples = Samples.data_samples + Samples.qcd_samples + Samples.qcd_samples_ext + Samples.ttbar_samples + Samples.mfv_signal_samples
+
+    samples = [s for s in samples if s.has_dataset('ntuplev16m')]
 
     for sample in samples:
         sample.files_per = 20
@@ -20,5 +22,5 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         #    sample.json = 'jsons/ana_2015p6.json'
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('EventIds_NtupleV11_16', dataset='ntuplev11')
+    cs = CondorSubmitter('EventIdsNtupleV16m', dataset='ntuplev16m')
     cs.submit_all(samples)

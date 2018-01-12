@@ -1,5 +1,6 @@
 import os, base64, zlib, cPickle as pickle
 from collections import defaultdict
+from fnmatch import fnmatch
 from itertools import chain
 from pprint import pprint
 from JMTucker.Tools.CRAB3ToolsBase import decrabify_list
@@ -52,8 +53,14 @@ def _fromnum0(path, n, but=[], fnbase='ntuple', add=[], numbereddirs=True): # co
     l = _fromnumlist(path, xrange(n), but, fnbase, add, numbereddirs)
     return (len(l), l)
 
+def keys():
+    return _d.keys()
+
 def dump():
     pprint(_d)
+
+def allfiles():
+    return (fn for (sample, ds), (n, fns) in _d.iteritems() for fn in fns)
 
 def summary():
     d = defaultdict(list)
@@ -70,10 +77,14 @@ def has(name, ds):
 def get(name, ds):
     return _d.get((name, ds), None)
 
+def get_fns(name, ds):
+    return _d[(name,ds)][1]
+
 def set_process(process, name, ds, num=-1):
     fns = _d[(name, ds)][1]
     if num > 0:
         fns = fns[:num]
+    fns = [('root://cmseos.fnal.gov/' + fn) if fn.startswith('/store/user') else fn for fn in fns]
     process.source.fileNames = fns
 
 def who(name, ds):
@@ -1256,6 +1267,40 @@ _add_ds("ntuplev16_wgenv2", {
 })
 
 
+_add_ds("ntuplev16m", {
+'qcdht0500': _fromnum1("/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180106_232420", 38),
+'qcdht0700': (7, ['/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180107_155050/0000/ntuple_%i.root' % i for i in xrange(6)] + ['/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180109_095212/0000/ntuple_6.root']),
+'qcdht1000': _fromnum1("/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180106_232447", 18),
+'qcdht1500': _fromnum0("/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180107_131426", 40),
+'qcdht2000': _fromnum1("/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180106_232514", 131),
+'qcdht0500ext': _fromnum1("/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180106_232528", 87),
+'qcdht0700ext': _fromnum0("/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180107_155051", 13),
+'qcdht1000ext': _fromnum1("/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180106_232554", 541),
+'qcdht1500ext': _fromnum1("/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180106_232607", 68),
+'qcdht2000ext': _fromnum1("/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180106_232620", 43),
+'ttbar': _fromnum0("/store/user/tucker/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/NtupleV16m_2016/180107_155052", 30),
+'mfv_neu_tau00100um_M0300': _fromnum1('/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232635', 300, but=[16]),
+'mfv_neu_tau00300um_M0300': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232648", 266),
+'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232701", 605),
+'mfv_neu_tau10000um_M0300': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232717", 13),
+'mfv_neu_tau00100um_M0400': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232731", 216),
+'mfv_neu_tau00300um_M0400': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232745", 250),
+'mfv_neu_tau01000um_M0400': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232758", 27),
+'mfv_neu_tau10000um_M0400': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180107_042813", 502),
+'mfv_neu_tau00100um_M0800': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232824", 7),
+'mfv_neu_tau00300um_M0800': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232837", 11),
+'mfv_neu_tau01000um_M0800': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232850", 608),
+'mfv_neu_tau10000um_M0800': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232903", 650),
+'mfv_neu_tau00100um_M1200': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232917", 632),
+'mfv_neu_tau00300um_M1200': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232929", 698),
+'mfv_neu_tau01000um_M1200': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232942", 15),
+'mfv_neu_tau10000um_M1200': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232955", 681),
+'mfv_neu_tau00100um_M1600': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_233009", 10),
+'mfv_neu_tau00300um_M1600': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_233022", 532),
+'mfv_neu_tau01000um_M1600': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_233035", 629),
+})
+
+
 _add_ds('v0ntuplev1', {
 
 'qcdht1000_hip1p0_mit': _fromnum0("/store/user/jchu/croncopyeos/qcdht1000/V0NtupleV1_2016", 289, fnbase='v0ntuple', numbereddirs=False),
@@ -1763,18 +1808,29 @@ __all__ = [
 
 if __name__ == '__main__':
     import sys
+
+    def _printlist(l):
+        for x in l:
+            print x
+
+    def _args(x, *names):
+        n = len(names)
+        i = sys.argv.index(x)
+        if len(sys.argv) < i+n+1 or sys.argv[i+1] in ('-h','--help','help'):
+            sys.exit('usage: %s %s %s' % (sys.argv[0], x, ' '.join(names)))
+        return tuple(sys.argv[i+j] for j in xrange(1,n+1))
+    def _arg(x,name):
+        return _args(x,name)[0]
+
     if 'enc' in sys.argv:
-        sample = sys.argv[sys.argv.index('enc')+1]
-        dataset = sys.argv[sys.argv.index('enc')+2]
-        listfn = sys.argv[sys.argv.index('enc')+3]
+        dataset, sample, listfn = _args('enc', 'dataset','sample','listfn')
         fns = [x.strip() for x in open(listfn).read().split('\n') if x.strip()]
         n = len(fns)
         print '# %s, %s, %i files' % (sample, dataset, n)
         print '_add(%r)' % _enc({(sample,dataset):(n,fns)})
 
     elif 'testfiles' in sys.argv:
-        sample = sys.argv[sys.argv.index('testfiles')+1]
-        dataset = sys.argv[sys.argv.index('testfiles')+2]
+        dataset, sample = _args('testfiles', 'dataset','sample')
         from JMTucker.Tools.ROOTTools import ROOT
         print sample, dataset
         def n(f,p):
@@ -1788,8 +1844,7 @@ if __name__ == '__main__':
                 n(ROOT.TFile.Open('root://cmseos.fnal.gov/' + fn.replace('ntuple', 'vertex_histos')), 'mfvVertices/h_n_all_tracks')
 
     elif 'forcopy' in sys.argv:
-        sample = sys.argv[sys.argv.index('forcopy')+1]
-        dataset = sys.argv[sys.argv.index('forcopy')+2]
+        dataset, sample = _args('forcopy', 'dataset','sample')
         if not has(sample, dataset):
             raise KeyError('no key sample = %s dataset = %s' % (sample, dataset))
         print sample, dataset
@@ -1804,28 +1859,62 @@ if __name__ == '__main__':
             print x,
         out_f.close()
 
-    elif 'allfiles' in sys.argv:
-        for (sample, ds), (n, fns) in _d.iteritems():
-            for fn in fns:
-                print fn
+    elif 'dump' in sys.argv:
+        dump()
 
     elif 'summary' in sys.argv:
         summary()
 
+    elif 'datasets' in sys.argv:
+        _printlist(sorted(set(ds for _, ds in _d.keys())))
+
+    elif 'samples' in sys.argv:
+        _printlist(sorted(set(name for name, ds in _d.keys() if ds == _arg('samples', 'dataset'))))
+
+    elif 'files' in sys.argv:
+        dataset, sample = _args('files', 'dataset','sample')
+        _printlist(sorted(get(sample, dataset)[1]))
+
+    elif 'allfiles' in sys.argv:
+        _printlist(sorted(allfiles()))
+
+    elif 'otherfiles' in sys.argv:
+        list_fn = _arg('otherfiles', 'list_fn')
+        other_fns = set()
+        for line in open(list_fn):
+            line = line.strip()
+            if line.endswith('.root'):
+                assert '/store' in line
+                other_fns.add(line.replace('/eos/uscms', ''))
+        all_fns = set(allfiles())
+        print 'root files in %s not in SampleFiles:' % list_fn
+        _printlist(sorted(other_fns - all_fns))
+        print 'root files in SampleFiles not in %s:' % list_fn
+        _printlist(sorted(all_fns - other_fns))
+
+    elif 'filematch' in sys.argv:
+        pattern = _arg('filematch', 'pattern')
+        for (sample, dataset), (_, fns) in _d.iteritems():
+            for fn in fns:
+                if fnmatch(fn, pattern):
+                    print sample, dataset, fn
+
     elif 'whosummary' in sys.argv:
-        who = defaultdict(list)
+        whosummary = defaultdict(list)
         for k in _d:
             users = who(*k)
             if users:
-                who[users].append(k)
-        print 'sorted by users:'
-        for users, dses in who.iteritems():
+                whosummary[users].append(k)
+        print 'by user(s):'
+        for users, dses in whosummary.iteritems():
             dses.sort()
             print ' + '.join(users)
             for ds in dses:
                 print '    ', ds
 
     elif 'who' in sys.argv:
-        name = sys.argv[sys.argv.index('who')+1]
-        ds   = sys.argv[sys.argv.index('who')+2]
-        print ' + '.join(who(name,ds))
+        dataset, sample = _args('who', 'dataset','sample')
+        print ' + '.join(who(sample, dataset))
+
+    else:
+        sys.exit('did not understand argv %r' % sys.argv)

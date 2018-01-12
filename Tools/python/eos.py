@@ -1,4 +1,4 @@
-import sys, subprocess, os, fnmatch
+import sys, subprocess, os, fnmatch, re
 
 url = 'root://cmseos.fnal.gov/'
 global_url = 'root://cms-xrd-global.cern.ch/'
@@ -15,14 +15,14 @@ def _system(cmd):
     #print cmd
     return subprocess.call(cmd, stdout=open(os.devnull, 'w'), stderr=subprocess.STDOUT) == 0
 
-def _storeonly(fn):
+def storeonly(fn):
     if fn.startswith('/store'):
         return fn
     if '/store/' not in fn:
         raise ValueError('fn passed %r does not contain "/store/"' % fn)
     return '/store/' + fn.split('/store/')[1]
     
-def _canon(fn):
+def canon(fn):
     if fn.startswith('root:'):
         return fn
     elif fn.startswith('/store'):
@@ -38,18 +38,34 @@ def quota():
     return "eos quota command didn't work or didn't find user %s" % user
 
 def exists(fn):
-    fn = _storeonly(fn)
+    fn = storeonly(fn)
     return _system('eos %s ls %s' % (url, fn))
 
+def isdir(fn):
+    fn = storeonly(fn)
+    return _system('eos %s stat -d %s' % (url, fn))
+
+def isfile(fn):
+    fn = storeonly(fn)
+    return _system('eos %s stat -f %s' % (url, fn))
+
+def size(fn, _re=re.compile(r'Size: (\d+)\s+')):
+    fn = storeonly(fn)
+    x = _popen('eos %s stat %s' % (url, fn)).communicate()[0].strip()
+    mo = _re.search(x)
+    if not mo:
+        raise ValueError('could not parse eos stat output: %r' % x)
+    return int(mo.group(1))
+
 def mkdir(fn):
-    fn = _storeonly(fn)
+    fn = storeonly(fn)
     dn = os.path.dirname(fn)
     if exists(dn):
         return True
     return _system('eos %s mkdir -p %s' % (url, dn))
 
 def ls(path):
-    fn = _storeonly(path)
+    fn = storeonly(path)
     fns = _popen(str('eos %s ls %s' % (url, path))).communicate()[0].strip().split()
     return [os.path.join(path, fn) for fn in fns]
 
@@ -58,18 +74,18 @@ def glob(path, pattern):
     return [fn for fn in fns if fnmatch.fnmatch(os.path.basename(fn), pattern)]
 
 def cp(src, dst):
-    src = _canon(src)
-    dst = _canon(dst)
+    src = canon(src)
+    dst = canon(dst)
     if not src.startswith(url) and not dst.startswith(url):
         raise ValueError('refusing to use xrdcp for non eos copy: %r -> %r' % (src, dst))
     return _system('xrdcp -s %s %s' % (src, dst))
 
 def rm(fn):
-    fn = _storeonly(fn)
+    fn = storeonly(fn)
     return _system('eos %s rm %s' % (url, fn))
 
 def md5sum(fn):
-    fn = _storeonly(fn)
+    fn = storeonly(fn)
     cmd = 'xrdcp -s %s%s -' % (url, fn)
     p  = subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     p2 = subprocess.Popen(('md5sum',), stdin=p.stdout, stdout=subprocess.PIPE)

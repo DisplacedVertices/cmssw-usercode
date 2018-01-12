@@ -6,10 +6,7 @@ from JMTucker.Tools import Samples
 from JMTucker.MFVNeutralino.PerSignal import PerSignal
 
 set_style()
-if os.environ['USER'] == 'tucker':
-    ps = plot_saver(plot_dir('sigeff_v15'), size=(600,600), log=False)
-else:
-    ps = plot_saver('plots/sigeff/v15/2016', size=(700,700), log=False, root=False)
+ps = plot_saver(plot_dir('sigeff_v15'), size=(600,600), log=False)
 
 root_file_dir = '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_0'
 num_path = 'mfvEventHistosFullSel/h_bsx'
@@ -28,7 +25,7 @@ for sample in multijet + dijet:
     den = hden.GetBinContent(1)
     sample.y, sample.yl, sample.yh = clopper_pearson(num, den)
     print '%26s: efficiency = %.3f (%.3f, %.3f)' % (sample.name, sample.y, sample.yl, sample.yh)
-    
+
 per = PerSignal('efficiency', y_range=(0.,1.05))
 per.add(multijet, title='#tilde{N} #rightarrow tbs')
 per.add(dijet, title='X #rightarrow d#bar{d}', color=ROOT.kBlue)

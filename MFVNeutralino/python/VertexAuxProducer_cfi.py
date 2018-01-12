@@ -1,6 +1,9 @@
 import FWCore.ParameterSet.Config as cms
 
+from JMTucker.MFVNeutralino.JetTrackRefGetter_cff import *
+
 mfvVerticesAuxTmp = cms.EDProducer('MFVVertexAuxProducer',
+                                   mfvJetTrackRefGetter,
                                    beamspot_src = cms.InputTag('offlineBeamSpot'),
                                    primary_vertex_src = cms.InputTag('goodOfflinePrimaryVertices'),
                                    muons_src = cms.InputTag('selectedPatMuons'),

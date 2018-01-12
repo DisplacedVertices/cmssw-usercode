@@ -1,7 +1,7 @@
 import sys
 from JMTucker.Tools.CMSSWTools import global_tag
 from JMTucker.Tools.Merge_cfg import cms, process
-from JMTucker.Tools.MiniAOD_cfg import which_global_tag
+from JMTucker.Tools.CMSSWTools import which_global_tag
 
 H = False
 repro = False

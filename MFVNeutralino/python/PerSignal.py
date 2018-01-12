@@ -3,6 +3,14 @@ from JMTucker.Tools.ROOTTools import *
 class PerSignal:
     tau_names = {100: '100 #mum', 300: '300 #mum', 1000: '1 mm', 10000: '10 mm', 30000: '30 mm'}
 
+    @classmethod
+    def clear_samples(_, samples):
+        for s in samples:
+            if hasattr(s, 'y' ): del s.y
+            if hasattr(s, 'yl'): del s.yl
+            if hasattr(s, 'yh'): del s.yh
+            if hasattr(s, 'ye'): del s.ye
+
     class curve:
         def __init__(self):
             self.v = {}
@@ -40,6 +48,10 @@ class PerSignal:
             self.taus.add(s.tau)
             self.masses.add(s.mass)
             if hasattr(s, 'y') and s.y is not None:
+                if any((hasattr(s, 'yl') and not hasattr(s, 'yh'),
+                        hasattr(s, 'yh') and not hasattr(s, 'yl'),
+                        hasattr(s, 'ye') and (hasattr(s, 'yh') or hasattr(s, 'yl')))):
+                    raise ValueError('may only specify y,yl,yh or y,ye')
                 if hasattr(s, 'yl') and hasattr(s, 'yh') and s.yl is not None and s.yh is not None:
                     eyl = s.y - s.yl
                     eyh = s.yh - s.y

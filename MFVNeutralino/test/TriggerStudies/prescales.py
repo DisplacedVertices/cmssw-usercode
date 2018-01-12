@@ -2,7 +2,7 @@
 
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
-from JMTucker.Tools.MiniAOD_cfg import which_global_tag
+from JMTucker.Tools.CMSSWTools import which_global_tag
 from JMTucker.MFVNeutralino.Year import year
 
 H = False

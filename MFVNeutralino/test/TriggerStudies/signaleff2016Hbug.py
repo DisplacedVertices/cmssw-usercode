@@ -2,7 +2,7 @@
 
 import sys, os
 from JMTucker.Tools.BasicAnalyzer_cfg import *
-from JMTucker.Tools.MiniAOD_cfg import which_global_tag
+from JMTucker.Tools.CMSSWTools import which_global_tag
 from JMTucker.MFVNeutralino.Year import year
 
 global_tag(process, which_global_tag(True, year, H=False, repro=False))

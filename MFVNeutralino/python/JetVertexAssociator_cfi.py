@@ -1,6 +1,10 @@
 import FWCore.ParameterSet.Config as cms
 
+from JMTucker.MFVNeutralino.JetTrackRefGetter_cff import *
+
 mfvVerticesToJets = cms.EDProducer('MFVJetVertexAssociator',
+                                   mfvJetTrackRefGetter,
+                                   enable = cms.bool(True),
                                    jet_src = cms.InputTag('selectedPatJets'),
                                    vertex_src = cms.InputTag('mfvSelectedVerticesTmp'),
                                    input_is_refs = cms.bool(True),

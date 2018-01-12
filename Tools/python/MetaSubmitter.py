@@ -79,6 +79,27 @@ class chain_modifiers:
             to_replace.extend(b)
         return to_add, to_replace
 
+class secondary_files_modifier:
+    def __init__(self, dataset=None, fns=None):
+        if (not dataset and not fns) or (dataset and fns):
+            raise ValueError('must specify exactly one of dataset (string with dataset name) or fns (list with filenames)')
+        self.dataset, self.fns = dataset, fns
+
+    def __call__(self, sample):
+        if self.dataset:
+            save_ds = sample.curr_dataset
+            sample.set_curr_dataset(self.dataset)
+            fns = sample.filenames
+            sample.set_curr_dataset(save_ds)
+        elif self.fns:
+            fns = self.fns
+
+        to_add = [
+            'jmt_secondary_files_modifier_secondaryFileNames = %r' % fns,
+            'process.source.secondaryFileNames = cms.untracked.vstring(*jmt_secondary_files_modifier_secondaryFileNames)'
+            ]
+        return to_add, []
+
 ####
 
 def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=20):
@@ -315,6 +336,9 @@ def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=2
                 sample.files_per  = int(2.5 * sample.files_per)
             if sample.name in ('qcdht1000_hip1p0_mit', 'qcdht1500_hip1p0_mit'):
                 sample.files_per *= 3
+            if sample.name == 'ttbar' or sample.name.startswith('qcdht0700') or sample.name in ('qcdht1000', 'qcdht1500'): # somehow these came out too much
+                sample.events_per /= 2
+                sample.files_per /= 2
 
     elif jobtype == 'default':
         for sample in samples:

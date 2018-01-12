@@ -107,7 +107,7 @@ for wd in wds:
             publish_fn = os.path.join(wd, 'publish_%i.txt' % job)
             if not os.path.isfile(publish_fn):
                 if options.partial:
-                    print colors.yellow('warning: missing %s' % fn)
+                    print colors.yellow('warning: missing %s' % publish_fn)
                 else:
                     raise IOError('no publish file %s' % publish_fn)
             else:
@@ -116,6 +116,13 @@ for wd in wds:
         nevents = cs_eventswritten(wd) if options.include_condor_nevents else 0
 
     files = [fn for fn in files if fn_ok(fn)]
+    if not files:
+        msg = 'warning: no files found for %s' % wd
+        if options.partial:
+            print colors.yellow(msg)
+            continue
+        else:
+            raise ValueError(msg)
 
     if len(files) != njobs:
         msg = '# files %i != njobs %i' % (len(files), njobs)
