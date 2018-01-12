@@ -1916,3 +1916,6 @@ if __name__ == '__main__':
     elif 'who' in sys.argv:
         dataset, sample = _args('who', 'dataset','sample')
         print ' + '.join(who(sample, dataset))
+
+    else:
+        sys.exit('did not understand argv %r' % sys.argv)
