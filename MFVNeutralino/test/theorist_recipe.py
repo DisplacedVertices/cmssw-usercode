@@ -74,6 +74,21 @@ process.mfvAnalysisCutsDvv400um = process.mfvAnalysisCuts.clone(min_svdist2d = 0
 process.mfvTheoristRecipeTwoVtxDvv400um = mfvTheoristRecipe.clone()
 process.pTwoVtxDvv400um = cms.Path(process.common * process.mfvAnalysisCutsDvv400um * process.mfvTheoristRecipeTwoVtxDvv400um)
 
+process.mfvTheoristRecipeVertices = mfvTheoristRecipe.clone(vertex_src = 'mfvSelectedVertices')
+process.pVertices = cms.Path(process.common * process.mfvAnalysisCutsPreSel * process.mfvSelectedVertices * process.mfvTheoristRecipeVertices)
+
+process.mfvTheoristRecipeBsbs2ddist = mfvTheoristRecipe.clone(vertex_src = 'mfvSelectedVerticesBsbs2ddist')
+process.pBsbs2ddist = cms.Path(process.common * process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesBsbs2ddist * process.mfvTheoristRecipeBsbs2ddist)
+
+process.mfvTheoristRecipeGeo2ddist = mfvTheoristRecipe.clone(vertex_src = 'mfvSelectedVerticesGeo2ddist')
+process.pGeo2ddist = cms.Path(process.common * process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesGeo2ddist * process.mfvTheoristRecipeGeo2ddist)
+
+process.mfvTheoristRecipeNtracks = mfvTheoristRecipe.clone(vertex_src = 'mfvSelectedVerticesNtracks')
+process.pNtracks = cms.Path(process.common * process.mfvAnalysisCutsPreSel * process.mfvSelectedVerticesNtracks * process.mfvTheoristRecipeNtracks)
+
+process.mfvTheoristRecipeBs2derr = mfvTheoristRecipe.clone()
+process.pBs2derr = cms.Path(process.common * process.mfvAnalysisCutsPreSel * process.mfvTheoristRecipeBs2derr)
+
 #generated cutflow
 process.mfvGenNoCuts = mfvTheoristRecipe.clone()
 process.pGenNoCuts = cms.Path(process.common * process.mfvGenParticleFilter * process.mfvGenNoCuts)
