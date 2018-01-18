@@ -14,7 +14,7 @@ def name2isample(f, name):
     raise ValueError('no name %s found in %r' % (name, f))
 
 which = [
-    (name2isample(f, 'mfv_neu_tau00300um_M0800'), 2, ROOT.kRed, 'c#tau = 300 #mum'),
+    (name2isample(f, 'mfv_neu_tau00300um_M0800'), 2, ROOT.kRed, 'c#tau = 0.3 mm'),
     (name2isample(f, 'mfv_neu_tau01000um_M0800'), 5, ROOT.kGreen+2, 'c#tau = 1 mm'),
     (name2isample(f, 'mfv_neu_tau10000um_M0800'), 7, ROOT.kBlue, 'c#tau = 10 mm'),
     ]
@@ -38,10 +38,12 @@ def fmt(h, name, color, save=[]):
     h.SetStats(0)
     h.SetLineWidth(3)
     h.SetLineColor(color)
-    h.SetTitle(';d_{VV} (mm);Events/100 #mum')
-    h.GetXaxis().SetTitleSize(0.04)
-    h.GetYaxis().SetTitleSize(0.04)
-    h.GetYaxis().SetTitleOffset(1.3)
+    h.SetTitle(';d_{VV} (mm);Events/0.1 mm')
+    h.GetXaxis().SetTitleSize(0.05)
+    h.GetXaxis().SetLabelSize(0.045)
+    h.GetYaxis().SetTitleSize(0.05)
+    h.GetYaxis().SetLabelSize(0.045)
+    h.GetYaxis().SetTitleOffset(1.1)
     move_above_into_bin(h, 3.999)
     if name == 'bkg': 
         h.Scale(1./h.Integral(0,h.GetNbinsX()+2))
@@ -77,7 +79,10 @@ hbkg.Draw('hist same')
 
 leg.Draw()
 
-write(61, 0.050, 0.098, 0.913, 'CMS')
+write(61, 0.050, 0.109, 0.913, 'CMS')
 write(42, 0.050, 0.560, 0.913, '38.5 fb^{-1} (13 TeV)')
+
+ps.c.SetBottomMargin(0.11)
+ps.c.SetLeftMargin(0.11)
 
 ps.save('templates')
