@@ -25,10 +25,12 @@ for i in range(4):
     hh = cm2mm(hh)
     h = cm2mm(h)
 
-    h.SetTitle(';d_{VV} (mm);Events/100 #mum')
-    h.GetXaxis().SetTitleSize(0.04)
-    h.GetYaxis().SetTitleSize(0.04)
-    h.GetYaxis().SetTitleOffset(1.3)
+    h.SetTitle(';d_{VV} (mm);Events/0.1 mm')
+    h.GetXaxis().SetTitleSize(0.05)
+    h.GetXaxis().SetLabelSize(0.045)
+    h.GetYaxis().SetTitleSize(0.05)
+    h.GetYaxis().SetLabelSize(0.045)
+    h.GetYaxis().SetTitleOffset(1.1)
     h.GetYaxis().SetRangeUser(0,ymax[i])
     h.SetStats(0)
     h.SetLineColor(ROOT.kBlue)
@@ -47,9 +49,12 @@ for i in range(4):
     l1.SetBorderSize(0)
     l1.Draw()
 
-    write(42, 0.040, 0.500, 0.80, names[i])
-    write(61, 0.050, 0.098, 0.913, 'CMS')
+    write(42, 0.040, 0.505, 0.80, names[i])
+    write(61, 0.050, 0.109, 0.913, 'CMS')
     write(42, 0.050, 0.560, 0.913, '38.5 fb^{-1} (13 TeV)')
+
+    ps.c.SetBottomMargin(0.11)
+    ps.c.SetLeftMargin(0.11)
 
     lines = [
         ROOT.TLine(0.4, 0, 0.4, ymax[i]),
