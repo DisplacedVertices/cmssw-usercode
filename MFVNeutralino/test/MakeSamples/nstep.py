@@ -122,7 +122,9 @@ config.General.workArea = work_area
 config.General.requestName = 'SETME'
 
 config.JobType.pluginName = 'PrivateMC'
-config.JobType.psetName = 'dummy.py'
+dummy_pset_fn_orig = 'dummy.py'
+dummy_pset_fn_temp = config.JobType.psetName = 'tmpdummy.py'
+to_rm.append(dummy_pset_fn_temp)
 config.JobType.scriptExe = 'nstep.sh'
 config.JobType.scriptArgs = []
 config.JobType.sendPythonFolder = True
@@ -133,14 +135,26 @@ config.JobType.inputFiles = ['todoify.sh', steering_fn, 'lhe.py', 'gensim.py', '
 if output_level in ('minitree', 'ntuple'):
     config.JobType.inputFiles += ['ntuple.py', 'minitree.py']
 
+output_is_edm = True
 if output_level == 'reco':
-    config.JobType.outputFiles = ['reco.root']
+    output_fn = 'reco.root'
 elif output_level == 'gensim':
-    config.JobType.outputFiles = ['gensim.root']
+    output_fn = 'gensim.root'
 elif output_level == 'ntuple':
-    config.JobType.outputFiles = ['ntuple.root']
+    output_fn = 'ntuple.root'
 elif output_level == 'minitree':
-    config.JobType.outputFiles = ['minitree.root']
+    output_fn = 'minitree.root'
+    output_is_edm = False
+config.JobType.outputFiles = [output_fn]
+
+dummy_pset = open(dummy_pset_fn_orig).read()
+if output_is_edm:
+    to_rep = 'reco.root', output_fn
+else:
+    to_rep = 'if True: # EDM output hack', 'if False:'
+assert to_rep[0] in dummy_pset
+open(dummy_pset_fn_temp, 'wt').write(dummy_pset.replace(*to_rep))
+
 # uncomment to get vertex histos
 #if output_level in ('minitree', 'ntuple'):
 #    config.JobType.outputFiles += ['vertex_histos.root']
