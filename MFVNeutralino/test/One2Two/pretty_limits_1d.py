@@ -42,15 +42,19 @@ def tau(tau):
 
 def nice(kind):
     if kind.startswith('multijet_M'):
-        return '#tilde{#chi}^{0} #rightarrow tbs, M_{#tilde{#chi}^{0}} = %i GeV' % int(kind.replace('multijet_M', ''))
+        return '#tilde{#chi}^{0}/#tilde{g} #rightarrow tbs, M_{#tilde{#chi}^{0}} = %i GeV' % int(kind.replace('multijet_M', ''))
     elif kind.startswith('ddbar_M'):
         return '#tilde{g} #rightarrow d#bar{d}, M_{#tilde{g}} = %i GeV' % int(kind.replace('ddbar_M', ''))
     elif kind.startswith('multijet_tau'):
-        return '#tilde{#chi}^{0} #rightarrow tbs, c#tau_{#tilde{#chi}^{0}} = ' + tau(kind.replace('multijet_tau', ''))
+        return '#tilde{#chi}^{0}/#tilde{g} #rightarrow tbs, c#tau_{#tilde{#chi}^{0}} = ' + tau(kind.replace('multijet_tau', ''))
     elif kind.startswith('ddbar_tau'):
         return '#tilde{g} #rightarrow d#bar{d}, c#tau_{#tilde{g}} = ' + tau(kind.replace('ddbar_tau', ''))
         
 for kind in kinds:
+    versus_tau = kind[-5] == 'M'
+    versus_mass = 'tau' in kind
+    assert int(versus_tau) + int(versus_mass) == 1
+
     c = ROOT.TCanvas('c', '', 800, 800)
     c.SetLogy()
     if kind[-5] == 'M':
@@ -67,13 +71,13 @@ for kind in kinds:
     gluglu = f.Get('%s/gluglu' % kind)
 
     particle = '#tilde{g}' if 'ddbar' in kind else '#tilde{#chi}^{0} / #tilde{g}'
-    if 'tau' in kind:
+    if versus_mass:
         xtitle = 'M_{%s} (GeV)' % particle
-    elif kind[-5] == 'M':
+    elif versus_tau:
         xtitle = 'c#tau_{%s} (mm)' % particle
         
     g = expect95
-    g.SetTitle(';%s;#sigma B^{2} (fb)' % xtitle)
+    g.SetTitle(';%s;#sigma B^{2} (fb)  ' % xtitle)
     g.Draw('A3')
 
     draw_gluglu = 'tau' in kind
@@ -81,16 +85,18 @@ for kind in kinds:
     xax = g.GetXaxis()
     xax.SetLabelSize(0.045)
     xax.SetTitleSize(0.05)
-    xax.SetTitleOffset(1.05)
+    if versus_tau:
+        xax.SetLabelOffset(0.002)
+    xax.SetTitleOffset(1.1)
     yax = g.GetYaxis()
     yax.SetTitleOffset(1.05)
     yax.SetTitleSize(0.05)
     yax.SetLabelSize(0.045)
 
-    if 'tau' in kind:
-        xax.SetRangeUser(150, 2750)
-    elif kind[-5] == 'M':
-        xax.SetRangeUser(0.005, 10000)
+    if versus_mass:
+        xax.SetLimits(175, 3000)
+    elif versus_tau:
+        xax.SetLimits(0.06, 1300)
     yax.SetRangeUser(0.08, 100)
 
     observed.SetLineWidth(2)
@@ -102,11 +108,10 @@ for kind in kinds:
     expect68.Draw('3')
     expect50.Draw('L')
     observed.Draw('L')
-    if 'tau' in kind:
-        legx = 0.583, 0.866
-    elif kind[-5] == 'M':
-        d = 0.07
-        legx = 0.583-d, 0.866-d
+    if versus_mass:
+        legx = 0.563, 0.866
+    elif versus_tau:
+        legx = 0.443, 0.786
     if draw_gluglu:
         gluglu.Draw('L')
         leg = ROOT.TLegend(legx[0], 0.566, legx[1], 0.851)
@@ -124,7 +129,7 @@ for kind in kinds:
     leg.AddEntry(expect95, '#pm 2 std. deviation', 'F')
     if draw_gluglu:
         leg.AddEntry(0, '', '')
-        leg.AddEntry(gluglu, 'M. Kr#ddot{a}mer et al.', 'L')
+        leg.AddEntry(gluglu, '#splitline{#tilde{g}#tilde{g} production}{M. Kr#ddot{a}mer et al.}', 'L')
     leg.Draw()
 
     cms = write(61, 0.050, 0.109, 0.913, 'CMS')
