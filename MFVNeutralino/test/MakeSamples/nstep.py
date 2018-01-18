@@ -19,7 +19,7 @@ hip_mitigation = False
 ex = ''
 already = []
 
-meta = 'neuudmu'
+meta = 'neu'
 taus   = [100, 300, 1000, 10000, 30000]
 masses = [300, 400, 500, 600, 800, 1200, 1600, 3000]
 hip_right = False
@@ -82,8 +82,8 @@ if scanpack:
     scanpack = get_scanpack(scanpack)
 
 #ex = '_test'
-#nevents, events_per = 10,10
-#meta, taus, masses = 'neu', [1000, 10000], [800]
+#nevents, events_per = 5,5
+#meta, taus, masses = 'neu', [10000], [1600]
 
 ################################################################################
 
