@@ -1267,40 +1267,6 @@ _add_ds("ntuplev16_wgenv2", {
 })
 
 
-_add_ds("ntuplev16m", {
-'qcdht0500': _fromnum1("/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180106_232420", 38),
-'qcdht0700': (7, ['/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180107_155050/0000/ntuple_%i.root' % i for i in xrange(6)] + ['/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180109_095212/0000/ntuple_6.root']),
-'qcdht1000': _fromnum1("/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180106_232447", 18),
-'qcdht1500': _fromnum0("/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180107_131426", 40),
-'qcdht2000': _fromnum1("/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180106_232514", 131),
-'qcdht0500ext': _fromnum1("/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180106_232528", 87),
-'qcdht0700ext': _fromnum0("/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180107_155051", 13),
-'qcdht1000ext': _fromnum1("/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180106_232554", 541),
-'qcdht1500ext': _fromnum1("/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180106_232607", 68),
-'qcdht2000ext': _fromnum1("/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV16m_2016/180106_232620", 43),
-'ttbar': _fromnum0("/store/user/tucker/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/NtupleV16m_2016/180107_155052", 30),
-'mfv_neu_tau00100um_M0300': _fromnum1('/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232635', 300, but=[16]),
-'mfv_neu_tau00300um_M0300': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232648", 266),
-'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232701", 605),
-'mfv_neu_tau10000um_M0300': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232717", 13),
-'mfv_neu_tau00100um_M0400': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232731", 216),
-'mfv_neu_tau00300um_M0400': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232745", 250),
-'mfv_neu_tau01000um_M0400': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232758", 27),
-'mfv_neu_tau10000um_M0400': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180107_042813", 502),
-'mfv_neu_tau00100um_M0800': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232824", 7),
-'mfv_neu_tau00300um_M0800': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232837", 11),
-'mfv_neu_tau01000um_M0800': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232850", 608),
-'mfv_neu_tau10000um_M0800': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232903", 650),
-'mfv_neu_tau00100um_M1200': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232917", 632),
-'mfv_neu_tau00300um_M1200': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232929", 698),
-'mfv_neu_tau01000um_M1200': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232942", 15),
-'mfv_neu_tau10000um_M1200': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_232955", 681),
-'mfv_neu_tau00100um_M1600': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_233009", 10),
-'mfv_neu_tau00300um_M1600': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_233022", 532),
-'mfv_neu_tau01000um_M1600': _fromnum1("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV16m_2016/180106_233035", 629),
-})
-
-
 _add_ds('v0ntuplev1', {
 
 'qcdht1000_hip1p0_mit': _fromnum0("/store/user/jchu/croncopyeos/qcdht1000/V0NtupleV1_2016", 289, fnbase='v0ntuple', numbereddirs=False),
