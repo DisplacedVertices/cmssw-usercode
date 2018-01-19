@@ -305,42 +305,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->jet_id.push_back(MFVEvent::encode_jet_id(0, bdisc_level, jet.hadronFlavour()));
     const size_t ijet = mevent->njets() - 1; // will stay in track with jjet as long as jets are pt ordered...
 
-    const reco::SecondaryVertexTagInfo* svtag = jet.tagInfoSecondaryVertex("secondaryVertex");
-    mevent->jet_svnvertices.push_back(svtag ? svtag->nVertices() : -1);
-
-    if (svtag && svtag->nVertices() > 0) {
-      const reco::Vertex &sv = svtag->secondaryVertex(0);
-      mevent->jet_svntracks.push_back(sv.nTracks());
-      double svsumpt2 = 0;
-      for (auto trki = sv.tracks_begin(), trke = sv.tracks_end(); trki != trke; ++trki) {
-        double trkpt = (*trki)->pt();
-        svsumpt2 += trkpt * trkpt;
-      }
-      mevent->jet_svsumpt2.push_back(svsumpt2);
-      mevent->jet_svx.push_back(sv.x());
-      mevent->jet_svy.push_back(sv.y());
-      mevent->jet_svz.push_back(sv.z());
-      mevent->jet_svcxx.push_back(sv.covariance(0,0));
-      mevent->jet_svcxy.push_back(sv.covariance(0,1));
-      mevent->jet_svcxz.push_back(sv.covariance(0,2));
-      mevent->jet_svcyy.push_back(sv.covariance(1,1));
-      mevent->jet_svcyz.push_back(sv.covariance(1,2));
-      mevent->jet_svczz.push_back(sv.covariance(2,2));
-    }
-    else {
-      mevent->jet_svntracks.push_back(0);
-      mevent->jet_svsumpt2.push_back(0);
-      mevent->jet_svx.push_back(0);
-      mevent->jet_svy.push_back(0);
-      mevent->jet_svz.push_back(0);
-      mevent->jet_svcxx.push_back(0);
-      mevent->jet_svcxy.push_back(0);
-      mevent->jet_svcxz.push_back(0);
-      mevent->jet_svcyy.push_back(0);
-      mevent->jet_svcyz.push_back(0);
-      mevent->jet_svczz.push_back(0);
-    }
-
     assert(ijet <= 255);
     for (size_t idau = 0, idaue = jet.numberOfDaughters(); idau < idaue; ++idau) {
       // handle both regular aod and miniaod: in the latter
@@ -514,18 +478,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->jet_eta.clear();
     mevent->jet_phi.clear();
     mevent->jet_energy.clear();
-    mevent->jet_svnvertices.clear();
-    mevent->jet_svntracks.clear();
-    mevent->jet_svsumpt2.clear();
-    mevent->jet_svx.clear();
-    mevent->jet_svy.clear();
-    mevent->jet_svz.clear();
-    mevent->jet_svcxx.clear();
-    mevent->jet_svcxy.clear();
-    mevent->jet_svcxz.clear();
-    mevent->jet_svcyy.clear();
-    mevent->jet_svcyz.clear();
-    mevent->jet_svczz.clear();
     mevent->metx = 0;
     mevent->mety = 0;
     mevent->lep_id.clear();

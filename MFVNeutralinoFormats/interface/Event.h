@@ -186,25 +186,13 @@ struct MFVEvent {
   float pv_rho() const { return mag(pvx - bsx_at_z(pvz), pvy - bsy_at_z(pvz)); }
 
   std::vector<uchar> jet_id;
+  std::vector<float> jet_bdisc; // JMTBAD jet_id currently redundant with this
   std::vector<float> jet_pudisc; // to be removed and put into _id when working points defined
   std::vector<float> jet_pt;
   std::vector<float> jet_raw_pt;
-  std::vector<float> jet_bdisc;
   std::vector<float> jet_eta;
   std::vector<float> jet_phi;
   std::vector<float> jet_energy;
-  std::vector<char> jet_svnvertices;
-  std::vector<uchar> jet_svntracks;
-  std::vector<float> jet_svsumpt2;
-  std::vector<float> jet_svx;
-  std::vector<float> jet_svy;
-  std::vector<float> jet_svz;
-  std::vector<float> jet_svcxx;
-  std::vector<float> jet_svcxy;
-  std::vector<float> jet_svcxz;
-  std::vector<float> jet_svcyy;
-  std::vector<float> jet_svcyz;
-  std::vector<float> jet_svczz;
 
   TLorentzVector jet_p4(int w) const {
     TLorentzVector v;
@@ -279,24 +267,6 @@ struct MFVEvent {
       if (is_btagged(i, level))
         ++c;
     return c;
-  }
-
-  float jet_svpv2ddist(int w) const {
-    return mag(jet_svx[w] - pvx,
-               jet_svy[w] - pvy);
-  }
-
-  float jet_svpv2derr(int w) const {
-    const float d = jet_svpv2ddist(w);
-    const float dx = (jet_svx[w] - pvx)/d;
-    const float dy = (jet_svy[w] - pvy)/d;
-    return sqrt((pvcxx + jet_svcxx[w])*dx*dx +
-                (pvcyy + jet_svcyy[w])*dy*dy +
-                2*(pvcxy + jet_svcxy[w])*dx*dy);
-  }
-
-  float jet_svpv2dsig(int w) const {
-    return jet_svpv2ddist(w) / jet_svpv2derr(w);
   }
 
   float metx;
