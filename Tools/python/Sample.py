@@ -44,11 +44,12 @@ class Dataset(object):
         self.filenames = kwargs.get('filenames', [])
 
     def job_control(self, conf_obj):
+        assert self.split_by in ('events', 'files')
         if self.split_by == 'events':
             conf_obj.splitting = 'EventAwareLumiBased'
             conf_obj.unitsPerJob = self.events_per
             conf_obj.totalUnits = self.total_events
-        else:
+        elif self.split_by == 'files':
             conf_obj.splitting = 'FileBased'
             conf_obj.unitsPerJob = self.files_per
             conf_obj.totalUnits = self.total_files
