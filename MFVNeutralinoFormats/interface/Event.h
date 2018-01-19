@@ -189,7 +189,7 @@ struct MFVEvent {
   std::vector<float> jet_pudisc; // to be removed and put into _id when working points defined
   std::vector<float> jet_pt;
   std::vector<float> jet_raw_pt;
-  std::vector<float> jet_calo_pt; // JMTEVIL !!! STARTING AFTER ACTUAL NTUPLEV16 BUT CHANGED FOR TRACKMOVERV4: THIS IS ACTUALLY THE B-TAG DISCRIMINANT--CHECK GITSTATUS IF IN DOUBT !!!
+  std::vector<float> jet_bdisc;
   std::vector<float> jet_eta;
   std::vector<float> jet_phi;
   std::vector<float> jet_energy;

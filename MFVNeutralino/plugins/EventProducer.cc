@@ -292,7 +292,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->jet_pudisc.push_back(jet.userFloat("pileupJetId:fullDiscriminant")); // to be removed and put into _id when working points defined
     mevent->jet_pt.push_back(jet.pt());
     mevent->jet_raw_pt.push_back(jet.pt()*jet.jecFactor("Uncorrected"));
-    mevent->jet_calo_pt.push_back(jet.bDiscriminator(b_discriminator)); // JMTEVIL
+    mevent->jet_bdisc.push_back(jet.bDiscriminator(b_discriminator));
     mevent->jet_eta.push_back(jet.eta());
     mevent->jet_phi.push_back(jet.phi());
     mevent->jet_energy.push_back(jet.energy());
@@ -510,7 +510,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->pv_sumpt2 = 0; 
     mevent->jet_pudisc.clear();
     mevent->jet_raw_pt.clear();
-    mevent->jet_calo_pt.clear();
+    mevent->jet_bdisc.clear();
     mevent->jet_eta.clear();
     mevent->jet_phi.clear();
     mevent->jet_energy.clear();
