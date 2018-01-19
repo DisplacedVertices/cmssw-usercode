@@ -312,20 +312,16 @@ def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=2
         for sample in samples:
             # prefer to split by file with CondorSubmitter  for these jobs to not overload xrootd aaa
             sample.set_curr_dataset(dataset)
-            if dataset == 'miniaod' and sample.is_signal:
-                sample.split_by = 'events' # except for miniaod, where signal
+            if sample.is_signal:
+                sample.split_by = 'events'
             else:
                 sample.split_by = 'files' if sample.condor else 'events'
             name = sample.name.replace('_2015', '')
             name = name.replace('_hip1p0_mit', '').replace('_hip1p0', '').replace('_retest', '')
             if not d.has_key(name):
                 if sample.is_signal:
-                    if sample.mass >= 600 or sample.tau >= 1000:
-                        sample.events_per = 200
-                        sample.files_per = 2 if sample.is_private else 1
-                    else:
-                        sample.events_per = 500
-                        sample.files_per = 5 if sample.is_private else 1
+                    sample.events_per = 200
+                    sample.files_per = 1
                 else:
                     sample.events_per = 50000
                     sample.files_per = 5
@@ -337,7 +333,7 @@ def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=2
             if sample.name != 'JetHT2015D' and not sample.name.startswith('mfv_'):
                 sample.events_per = int(2.5 * sample.events_per)
                 sample.files_per  = int(2.5 * sample.files_per)
-            if sample.name in ('qcdht1000_hip1p0_mit', 'qcdht1500_hip1p0_mit'):
+            if sample.name in ('qcdht0700_hip1p0_mit', 'qcdht1000_hip1p0_mit', 'qcdht1500_hip1p0_mit'):
                 sample.files_per *= 3
             if sample.name == 'ttbar' or sample.name.startswith('qcdht0700') or sample.name in ('qcdht1000', 'qcdht1500'): # somehow these came out too much
                 sample.events_per /= 2
