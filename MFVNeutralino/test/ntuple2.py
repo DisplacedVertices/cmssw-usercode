@@ -16,7 +16,7 @@ repro = False
 #keep_all = prepare_vis
 #keep_gen = False
 event_filter = True #not keep_all
-version = 'v16m'
+version = 'v17m'
 batch_name = 'Ntuple' + version.capitalize()
 #if run_n_tk_seeds:
 #    batch_name += '_NTkSeeds'
