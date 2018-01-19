@@ -312,7 +312,10 @@ def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=2
         for sample in samples:
             # prefer to split by file with CondorSubmitter  for these jobs to not overload xrootd aaa
             sample.set_curr_dataset(dataset)
-            sample.split_by = 'files' if sample.condor else 'events'
+            if dataset == 'miniaod' and sample.is_signal:
+                sample.split_by = 'events' # except for miniaod, where signal
+            else:
+                sample.split_by = 'files' if sample.condor else 'events'
             name = sample.name.replace('_2015', '')
             name = name.replace('_hip1p0_mit', '').replace('_hip1p0', '').replace('_retest', '')
             if not d.has_key(name):
