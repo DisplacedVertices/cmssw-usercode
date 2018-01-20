@@ -1,5 +1,6 @@
 // JMTBAD unify try_XX4j/MFVdijet/MFVlq and try_MFVtbs/uds
 
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
@@ -8,6 +9,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
 #include "JMTucker/Tools/interface/GenUtilities.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/MCInteractions.h"
@@ -23,6 +25,7 @@ private:
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const bool last_flag_check;
   const bool debug;
+  const bool histos;
   int lsp_id;
 
   void set_Ttbar_decay(mfv::MCInteractionHolderTtbar&, const edm::Handle<reco::GenParticleCollection>&) const;
@@ -33,6 +36,9 @@ private:
   bool try_XX4j    (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
   bool try_MFVdijet(mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&, int quark) const;
   bool try_MFVlq   (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
+
+  TH1F* h_valid;
+  TH1F* h_pos_check;
 };
 
 MFVGenParticles::MFVGenParticles(const edm::ParameterSet& cfg) 
@@ -40,6 +46,7 @@ MFVGenParticles::MFVGenParticles(const edm::ParameterSet& cfg)
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     last_flag_check(cfg.getParameter<bool>("last_flag_check")),
     debug(cfg.getUntrackedParameter<bool>("debug", false)),
+    histos(cfg.getUntrackedParameter<bool>("histos", false)),
     lsp_id(-1)
 {
   produces<mfv::MCInteraction>();
@@ -50,6 +57,12 @@ MFVGenParticles::MFVGenParticles(const edm::ParameterSet& cfg)
   produces<reco::GenParticleCollection>("primaries");
   produces<reco::GenParticleCollection>("secondaries");
   produces<reco::GenParticleCollection>("visible");
+
+  if (histos) {
+    edm::Service<TFileService> fs;
+    h_valid = fs->make<TH1F>("h_valid", "", 2, 0, 2);
+    h_pos_check = fs->make<TH1F>("h_pos_check", "", 100, 0, 0.01);
+  }
 }
 
 void MFVGenParticles::set_Ttbar_decay(mfv::MCInteractionHolderTtbar& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles) const {
@@ -572,6 +585,23 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
     for (double d : *decay_vertices)
       printf(" %6.3f", d);
     printf("\n");
+  }
+
+  if (histos) {
+    h_valid->Fill(mc->valid());
+    if (mc->valid()) {
+      double pos_check = 0;
+      for (int i = 0; i < 2; ++i) {
+        const auto& refs = mc->secondaries(i);
+        for (size_t j = 0; j < refs.size(); ++j)
+          for (size_t k = j+1; k < refs.size(); ++k)
+            pos_check +=
+              fabs(refs[j]->vx() - refs[k]->vx()) +
+              fabs(refs[j]->vy() - refs[k]->vy()) +
+              fabs(refs[j]->vz() - refs[k]->vz());
+      }
+      h_pos_check->Fill(pos_check);
+    }
   }
 
   event.put(mc);
