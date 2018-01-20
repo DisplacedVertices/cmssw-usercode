@@ -274,6 +274,7 @@ mfv_signal_samples = [
     MCSample('mfv_neu_tau01000um_M3000', '/mfv_neu_tau01000um_M3000/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-799254d98714d4bddcfc4dddd0b67e7b/USER', 9300),
     MCSample('mfv_neu_tau10000um_M3000', '/mfv_neu_tau10000um_M3000/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-799254d98714d4bddcfc4dddd0b67e7b/USER', 9500),
     MCSample('mfv_neu_tau30000um_M3000', '/mfv_neu_tau30000um_M3000/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-799254d98714d4bddcfc4dddd0b67e7b/USER', 9699),
+    MCSample('my_mfv_neu_tau10000um_M1600', '/MY-GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/AODSIM',   99751),
     ]
 
 # dbs is broken for neuuds, neuudmu, bbbar, uds
@@ -733,6 +734,10 @@ _adbp('miniaod', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-300um_
 _adbp('miniaod', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM',   100000)
 _adbp('miniaod', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM',   99004)
 
+for x in mfv_ddbar_samples + [my_mfv_neu_tau10000um_M1600]:
+    x.add_dataset('miniaod', '/None/None/USER', x.nevents_orig)
+    x.datasets['miniaod'].condor = True
+
 ########
 # ntuples
 ########
@@ -791,8 +796,7 @@ for x in qcd_samples_2015:
 
 for x in data_samples + qcd_samples + qcd_samples_ext + ttbar_samples + \
         [mfv_neu_tau00100um_M0800, mfv_neu_tau00100um_M1200, mfv_neu_tau00100um_M1600, 
-         mfv_neu_tau00300um_M0400,
-         mfv_neu_tau01000um_M0300, mfv_neu_tau01000um_M1200, mfv_neu_tau01000um_M1600,
+         mfv_neu_tau01000um_M1200, mfv_neu_tau01000um_M1600,
          mfv_neu_tau10000um_M0400, mfv_neu_tau10000um_M1200, mfv_neu_tau10000um_M1600,
          qcdht2000_2015, ttbar_2015]:
     x.datasets['miniaod'].condor = True
@@ -801,8 +805,7 @@ for x in [JetHT2016C, JetHT2016D, JetHT2016E, JetHT2016F, JetHT2016G, #JetHT2016
           qcdht0500, qcdht1000, qcdht2000,
           qcdht0500ext, qcdht1000ext, qcdht1500ext, qcdht2000ext,
           mfv_neu_tau00100um_M0800, mfv_neu_tau00100um_M1200, 
-          mfv_neu_tau00300um_M0400, 
-          mfv_neu_tau01000um_M0300, mfv_neu_tau01000um_M1200, 
+          mfv_neu_tau01000um_M1200, 
           qcdht2000_2015, ttbar_2015]:
     x.datasets['miniaod'].xrootd_url = 'root://dcache-cms-xrootd.desy.de/'
 
