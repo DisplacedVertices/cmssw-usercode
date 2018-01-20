@@ -186,6 +186,12 @@ def make_tarball(fn, include_bin=True, include_python=False, include_interface=F
                 print abs_d, rel_d
             tar.add(abs_d, arcname=rel_d)
 
+def max_events(process, n):
+    if not hasattr(process, 'maxEvents'):
+        process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(n))
+    else:
+        process.maxEvents.input = n
+
 def output_file(process, filename, output_commands, select_events=[]):
     process.out = cms.OutputModule('PoolOutputModule',
                                    fileName = cms.untracked.string(filename),
