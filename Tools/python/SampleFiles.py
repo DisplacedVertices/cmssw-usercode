@@ -421,6 +421,51 @@ _add_ds("main", {
 })
 
 
+_add_ds("miniaod", {
+'mfv_ddbar_tau00100um_M0300': _fromnum0("/store/user/tucker/mfv_ddbar_tau00100um_M0300/SignalMiniAOD/180119_125006", 2, fnbase="miniaod"),
+'mfv_ddbar_tau00100um_M0400': _fromnum0("/store/user/tucker/mfv_ddbar_tau00100um_M0400/SignalMiniAOD/180119_125007", 2, fnbase="miniaod"),
+'mfv_ddbar_tau00100um_M0500': _fromnum0("/store/user/tucker/mfv_ddbar_tau00100um_M0500/SignalMiniAOD/180119_125008", 2, fnbase="miniaod"),
+'mfv_ddbar_tau00100um_M0600': _fromnum0("/store/user/tucker/mfv_ddbar_tau00100um_M0600/SignalMiniAOD/180119_125009", 2, fnbase="miniaod"),
+'mfv_ddbar_tau00100um_M0800': _fromnum0("/store/user/tucker/mfv_ddbar_tau00100um_M0800/SignalMiniAOD/180119_125010", 2, fnbase="miniaod"),
+'mfv_ddbar_tau00100um_M1200': _fromnum0("/store/user/tucker/mfv_ddbar_tau00100um_M1200/SignalMiniAOD/180119_125011", 2, fnbase="miniaod"),
+'mfv_ddbar_tau00100um_M1600': _fromnum0("/store/user/tucker/mfv_ddbar_tau00100um_M1600/SignalMiniAOD/180119_125012", 2, fnbase="miniaod"),
+'mfv_ddbar_tau00300um_M0300': _fromnum0("/store/user/tucker/mfv_ddbar_tau00300um_M0300/SignalMiniAOD/180119_125013", 2, fnbase="miniaod"),
+'mfv_ddbar_tau00300um_M0400': _fromnum0("/store/user/tucker/mfv_ddbar_tau00300um_M0400/SignalMiniAOD/180119_125014", 2, fnbase="miniaod"),
+'mfv_ddbar_tau00300um_M0500': _fromnum0("/store/user/tucker/mfv_ddbar_tau00300um_M0500/SignalMiniAOD/180119_125015", 2, fnbase="miniaod"),
+'mfv_ddbar_tau00300um_M0600': _fromnum0("/store/user/tucker/mfv_ddbar_tau00300um_M0600/SignalMiniAOD/180119_125016", 2, fnbase="miniaod"),
+'mfv_ddbar_tau00300um_M0800': _fromnum0("/store/user/tucker/mfv_ddbar_tau00300um_M0800/SignalMiniAOD/180119_125017", 2, fnbase="miniaod"),
+'mfv_ddbar_tau00300um_M1200': _fromnum0("/store/user/tucker/mfv_ddbar_tau00300um_M1200/SignalMiniAOD/180119_125018", 2, fnbase="miniaod"),
+'mfv_ddbar_tau00300um_M1600': _fromnum0("/store/user/tucker/mfv_ddbar_tau00300um_M1600/SignalMiniAOD/180119_125019", 2, fnbase="miniaod"),
+'mfv_ddbar_tau01000um_M0300': _fromnum0("/store/user/tucker/mfv_ddbar_tau01000um_M0300/SignalMiniAOD/180119_125020", 2, fnbase="miniaod"),
+'mfv_ddbar_tau01000um_M0400': _fromnum0("/store/user/tucker/mfv_ddbar_tau01000um_M0400/SignalMiniAOD/180119_125021", 2, fnbase="miniaod"),
+'mfv_ddbar_tau01000um_M0500': _fromnum0("/store/user/tucker/mfv_ddbar_tau01000um_M0500/SignalMiniAOD/180119_125022", 2, fnbase="miniaod"),
+'mfv_ddbar_tau01000um_M0600': _fromnum0("/store/user/tucker/mfv_ddbar_tau01000um_M0600/SignalMiniAOD/180119_125023", 2, fnbase="miniaod"),
+'mfv_ddbar_tau01000um_M0800': _fromnum0("/store/user/tucker/mfv_ddbar_tau01000um_M0800/SignalMiniAOD/180119_125024", 2, fnbase="miniaod"),
+'mfv_ddbar_tau01000um_M1200': _fromnum0("/store/user/tucker/mfv_ddbar_tau01000um_M1200/SignalMiniAOD/180119_125025", 2, fnbase="miniaod"),
+'mfv_ddbar_tau01000um_M1600': _fromnum0("/store/user/tucker/mfv_ddbar_tau01000um_M1600/SignalMiniAOD/180119_125026", 2, fnbase="miniaod"),
+'mfv_ddbar_tau10000um_M0300': _fromnum0("/store/user/tucker/mfv_ddbar_tau10000um_M0300/SignalMiniAOD/180119_125027", 2, fnbase="miniaod"),
+'mfv_ddbar_tau10000um_M0400': _fromnum0("/store/user/tucker/mfv_ddbar_tau10000um_M0400/SignalMiniAOD/180119_125028", 2, fnbase="miniaod"),
+'mfv_ddbar_tau10000um_M0500': _fromnum0("/store/user/tucker/mfv_ddbar_tau10000um_M0500/SignalMiniAOD/180119_125029", 2, fnbase="miniaod"),
+'mfv_ddbar_tau10000um_M0600': _fromnum0("/store/user/tucker/mfv_ddbar_tau10000um_M0600/SignalMiniAOD/180119_125030", 2, fnbase="miniaod"),
+'mfv_ddbar_tau10000um_M0800': _fromnum0("/store/user/tucker/mfv_ddbar_tau10000um_M0800/SignalMiniAOD/180119_125031", 2, fnbase="miniaod"),
+'mfv_ddbar_tau10000um_M1200': _fromnum0("/store/user/tucker/mfv_ddbar_tau10000um_M1200/SignalMiniAOD/180119_125032", 2, fnbase="miniaod"),
+'mfv_ddbar_tau10000um_M1600': _fromnum0("/store/user/tucker/mfv_ddbar_tau10000um_M1600/SignalMiniAOD/180119_125033", 2, fnbase="miniaod"),
+'mfv_ddbar_tau30000um_M0300': _fromnum0("/store/user/tucker/mfv_ddbar_tau30000um_M0300/SignalMiniAOD/180119_125034", 2, fnbase="miniaod"),
+'mfv_ddbar_tau30000um_M0400': _fromnum0("/store/user/tucker/mfv_ddbar_tau30000um_M0400/SignalMiniAOD/180119_125035", 2, fnbase="miniaod"),
+'mfv_ddbar_tau30000um_M0500': _fromnum0("/store/user/tucker/mfv_ddbar_tau30000um_M0500/SignalMiniAOD/180119_125036", 2, fnbase="miniaod"),
+'mfv_ddbar_tau30000um_M0600': _fromnum0("/store/user/tucker/mfv_ddbar_tau30000um_M0600/SignalMiniAOD/180119_125037", 2, fnbase="miniaod"),
+'mfv_ddbar_tau30000um_M0800': _fromnum0("/store/user/tucker/mfv_ddbar_tau30000um_M0800/SignalMiniAOD/180119_125038", 2, fnbase="miniaod"),
+'mfv_ddbar_tau30000um_M1200': _fromnum0("/store/user/tucker/mfv_ddbar_tau30000um_M1200/SignalMiniAOD/180119_125039", 2, fnbase="miniaod"),
+'mfv_ddbar_tau30000um_M1600': _fromnum0("/store/user/tucker/mfv_ddbar_tau30000um_M1600/SignalMiniAOD/180119_125040", 2, fnbase="miniaod"),
+'mfv_ddbar_tau00100um_M3000': _fromnum0("/store/user/tucker/mfv_ddbar_tau00100um_M3000/SignalMiniAOD/180119_125041", 2, fnbase="miniaod"),
+'mfv_ddbar_tau00300um_M3000': _fromnum0("/store/user/tucker/mfv_ddbar_tau00300um_M3000/SignalMiniAOD/180119_125042", 2, fnbase="miniaod"),
+'mfv_ddbar_tau01000um_M3000': _fromnum0("/store/user/tucker/mfv_ddbar_tau01000um_M3000/SignalMiniAOD/180119_125043", 2, fnbase="miniaod"),
+'mfv_ddbar_tau10000um_M3000': _fromnum0("/store/user/tucker/mfv_ddbar_tau10000um_M3000/SignalMiniAOD/180119_125044", 2, fnbase="miniaod"),
+'mfv_ddbar_tau30000um_M3000': _fromnum0("/store/user/tucker/mfv_ddbar_tau30000um_M3000/SignalMiniAOD/180119_125045", 2, fnbase="miniaod"),
+'my_mfv_neu_tau10000um_M1600': _fromnum0("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/SignalMiniAOD/180119_125046", 20, fnbase="miniaod"),
+})
+
+
 _add_ds('ntuplev15lep', {'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_originalCuts_300GeV_evFiltOff_2016/170721_185423", 241)})
 _add_ds('ntuplev15lep_IsoMu24', {'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_IsoMu24_300GeV_evFiltOff_2016/170721_193308", 241)})
 _add_ds('ntuplev15lep_IsoTkMu24', {'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_IsoTkMu24_300GeV_evFiltOff_2016/170721_193419", 241)})
