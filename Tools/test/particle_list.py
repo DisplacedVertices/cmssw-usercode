@@ -9,6 +9,8 @@ process.load('JMTucker.Tools.ParticleListDrawer_cff')
 process.ParticleListDrawer.maxEventsToPrint = -1
 process.p = cms.Path(process.ParticleListDrawer)
 
+#process.ParticleListDrawer.src = 'prunedGenParticles'
+
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.Samples import background_samples
     from JMTucker.Tools.CRABSubmitter import CRABSubmitter
