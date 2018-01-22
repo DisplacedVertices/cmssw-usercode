@@ -462,7 +462,6 @@ _add_ds("miniaod", {
 'mfv_ddbar_tau01000um_M3000': _fromnum0("/store/user/tucker/mfv_ddbar_tau01000um_M3000/SignalMiniAOD/180119_125043", 2, fnbase="miniaod"),
 'mfv_ddbar_tau10000um_M3000': _fromnum0("/store/user/tucker/mfv_ddbar_tau10000um_M3000/SignalMiniAOD/180119_125044", 2, fnbase="miniaod"),
 'mfv_ddbar_tau30000um_M3000': _fromnum0("/store/user/tucker/mfv_ddbar_tau30000um_M3000/SignalMiniAOD/180119_125045", 2, fnbase="miniaod"),
-'my_mfv_neu_tau10000um_M1600': _fromnum0("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/SignalMiniAOD/180119_125046", 20, fnbase="miniaod"),
 })
 
 
