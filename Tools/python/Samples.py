@@ -756,6 +756,11 @@ for x in (data_samples_2015 +
     if not x.is_signal:
         x.add_dataset('ntuplev16_ntkseeds')
 
+for x in ttbar_samples + qcd_samples + qcd_samples_ext + mfv_signal_samples:
+    if x.is_signal and x.is_private:
+        continue
+    x.add_dataset('ntuplev17m')
+
 for x in data_samples + qcd_samples + qcd_samples_ext + qcd_hip_samples[-2:]:
     x.add_dataset('v0ntuplev1')
 for x in data_samples + [s for s in auxiliary_data_samples if s.name.startswith('ZeroBias')] + qcd_samples[2:4] + qcd_samples_ext[2:4]:
