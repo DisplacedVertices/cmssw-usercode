@@ -689,8 +689,8 @@ _adbp('miniaod', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-300um_
 _adbp('miniaod', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM',   100000)
 _adbp('miniaod', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/RunIISummer16MiniAODv2-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/MINIAODSIM',   99004)
 
-for x in mfv_ddbar_samples + [my_mfv_neu_tau10000um_M1600]:
-    x.add_dataset('miniaod', '/None/None/USER', x.nevents_orig)
+for x in mfv_ddbar_samples:
+    x.add_dataset('miniaod', '/%s/None/USER' % x.primary_dataset, x.nevents_orig)
     x.datasets['miniaod'].condor = True
 
 ########
