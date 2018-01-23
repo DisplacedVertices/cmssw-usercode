@@ -95,6 +95,19 @@ def sites_for_dataset(dataset, instance='global', json=False):
     else:
         return sorted(set(l)) # dasgo gives same lines to you many times
 
+def site_is_tape(site_json):
+    return site_json['name'].endswith('_Buffer') or site_json['name'].endswith('_MSS')
+
+def site_completions(site_json):
+    return [str(site_json[x]) for x in ('block_completion', 'block_fraction', 'dataset_fraction', 'replica_fraction')]
+
+def site_completions_string(site_json):
+    x = (site_json['name'],) + tuple([float(c.replace('%',''))/100 for c in site_completions(site_json)])
+    return '%s (%.4f %.4f %.4f %.4f)' % x
+
+def complete_at_site(site_json):
+    return all(c == '100.00%' for c in site_completions(site_json))
+
 def file_details_run_lumis(dataset, instance='global'):
     objs = das_query(instance, json=True)('file,run,lumi dataset=%s' % dataset)
     raw = defaultdict(lambda: defaultdict(list))
