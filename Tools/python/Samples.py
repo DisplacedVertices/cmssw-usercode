@@ -831,58 +831,11 @@ if __name__ == '__main__':
     from JMTucker.Tools.general import popen
 
     if 0:
-        from JMTucker.Tools.SampleFiles import _d
-        for y,l in [(2015, sum([eval(l) for l in __all__ if type(eval(l)) == list and l.endswith('2015')], [])),
-                    (2016, sum([eval(l) for l in __all__ if type(eval(l)) == list and not l.endswith('2015')], []))]:
-            print y
-            for s in l:
-                if s.name.startswith('mfv_') or s.name.startswith('xx4j') or s.name.startswith('mfv_'): #'sum' not in s.name:
-                    for ds in ('ntuplev11',): #'miniaod', 'ntuplev11':
-                        if (s.name.startswith('mfv_') or s.name.startswith('xx4j')) and ds == 'miniaod':
-                            continue
-                        if not s.has_dataset(ds):
-                            print s.name, 'no', ds
-                        else:
-                            if not _d.has_key((s.name, 'ntuplev11')):
-                                print s.name, 'no files'
-
-    if 0:
-        for x in registry.all():
-            if x.condor:
-                if x.is_signal and x.is_private:
-                    continue
-                print x.name
-        # for x in $(<curr_condor.txt); samples site $x main
-
-    if 0:
-        for l in [mfv_signal_samples]:
-            for s in l:
-                #s.set_curr_dataset('miniaod')
-                try:
-                    sites = DBS.sites_for_dataset(s.dataset)
-                    #files = DBS.files_in_dataset(s.dataset)
-                except RuntimeError:
-                    print s.name, 'PROBLEM'
-                    continue
-                sites = [x for x in sites if not x.endswith('_Buffer') and not x.endswith('_MSS')]
-                #print s.name.ljust(30), str(len(files)).ljust(10), ' '.join(sites)
-                print s.name.ljust(50), ' '.join(sites)
-
-    if 0:
-        for s in mfv_signal_samples:
+        from DBS import *
+        for s in data_samples + mfv_signal_samples:
             n1, n2 = s.datasets['main'].nevents_orig, s.datasets['miniaod'].nevents_orig
             if n1 != n2:
                 print s.name, n1, n2
-
-    if 0:
-        from DBS import *
-        for s in data_samples:
-            print s.name.ljust(15), '%20i %20i' % (numevents_in_dataset(s.datasets['main'].dataset), numevents_in_dataset(s.datasets['miniaod'].dataset))
-
-    if 0:
-        from JMTucker.Tools.general import popen
-        for s in qcd_samples + qcd_samples_17 + qcd_samples_ext + qcd_samples_ext_17 + ttbar_samples + leptonic_background_samples:
-            print s.name, popen('dasgoclient_linux -query "site dataset=%s" | sort | uniq' % s.dataset).replace('\n', ' ')
 
     if 0:
         aod_strings = ['RunIIFall15DR76-PU25nsData2015v1', 'RunIISummer16DR80Premix-PUMoriond17']
@@ -911,24 +864,6 @@ if __name__ == '__main__':
                                 pass
                         assert nevents is not None and nevents > 0
                         print '"%s", %i' % (x, nevents)
-
-    if 0:
-        from DBS import *
-        for x in qcd_samples + ttbar_samples + smaller_background_samples:
-            ds = x.datasets['miniaod'].dataset
-            print ds
-            print numevents_in_dataset(ds)
-
-    if 0:
-        for sample in qcd_samples + ttbar_samples:
-            print "'%s': %.4e," % (sample.name, sample.datasets['ntuplev6p1'].nevents_orig / float(sample.nevents_orig))
-
-    if 0:
-        from DBS import *
-        for x in qcd_samples_ext:
-            ds = x.dataset
-            print ds
-            print x.name, numevents_in_dataset(ds)
 
     if 0:
         for x,y in zip(qcd_samples, qcd_samples_ext):
