@@ -98,11 +98,15 @@ def sites_for_dataset(dataset, instance='global', json=False):
 def site_is_tape(site_json):
     return site_json['name'].endswith('_Buffer') or site_json['name'].endswith('_MSS')
 
-def site_completions(site_json):
-    return [str(site_json[x]) for x in ('block_completion', 'block_fraction', 'dataset_fraction', 'replica_fraction')]
+def site_completions(site_json, as_float=False):
+    z = [str(site_json[x]) for x in ('block_completion', 'block_fraction', 'dataset_fraction', 'replica_fraction')]
+    if as_float:
+        return [float(c.replace('%',''))/100. for c in z]
+    else:
+        return z
 
 def site_completions_string(site_json):
-    x = (site_json['name'],) + tuple([float(c.replace('%',''))/100 for c in site_completions(site_json)])
+    x = (site_json['name'],) + tuple(site_completions(site_json, True))
     return '%s (%.4f %.4f %.4f %.4f)' % x
 
 def complete_at_site(site_json):
