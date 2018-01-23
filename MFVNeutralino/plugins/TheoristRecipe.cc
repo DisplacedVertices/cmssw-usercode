@@ -60,6 +60,8 @@ private:
   TH2F* h_rec_v_gen_ht40;
 
   TH1F* h_dist;
+  TH1F* h_ddbv;
+  TH1F* h_dphi;
   TH1F* h_lspsnmatch;
 
   TH1F* h_gen_match_dxy;
@@ -118,6 +120,8 @@ MFVTheoristRecipe::MFVTheoristRecipe(const edm::ParameterSet& cfg)
   h_rec_v_gen_ht40 = fs->make<TH2F>("h_rec_v_gen_ht40", ";H_{T} of accepted quarks with p_{T} > 40 GeV;reconstructed H_{T} of jets with p_{T} > 40 GeV", 500, 0, 5000, 500, 0, 5000);
 
   h_dist = fs->make<TH1F>("h_dist", ";distance to closest LSP;vertices", 100, 0, 0.01);
+  h_ddbv = fs->make<TH1F>("h_ddbv", ";d_{BV}(vertex) - d_{BV}(LSP);vertices", 200, -0.01, 0.01);
+  h_dphi = fs->make<TH1F>("h_dphi", ";#phi(vertex) - #phi(LSP);vertices", 200, -1, 1);
   h_lspsnmatch = fs->make<TH1F>("h_lspsnmatch", ";number of vertices that match LSP;LSPs", 15, 0, 15);
 
   h_gen_match_dxy = fs->make<TH1F>("h_gen_match_dxy", ";d_{xy} of accepted daughter particles (cm);LSP daughter particles", 100, 0, 1);
@@ -293,6 +297,8 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
     }
 
     h_dist->Fill(dist);
+    h_ddbv->Fill(mevent->bs2ddist(vtx) - dbv[ilsp]);
+    h_dphi->Fill(reco::deltaPhi(atan2(vtx.y - mevent->bsy, vtx.x - mevent->bsx), atan2(v[ilsp][1], v[ilsp][0])));
     ++lsp_nmatch[ilsp];
 
     int ntracks = 0;
