@@ -425,7 +425,7 @@ def anon_samples(txt, **kwargs):
 def norm_from_file(f_or_fn, path=None):
     if type(f_or_fn) == str:
         from JMTucker.Tools.ROOTTools import ROOT
-        f = ROOT.TFile(f_or_fn)
+        f = ROOT.TFile.Open(f_or_fn)
     else:
         f = f_or_fn
     if path:
