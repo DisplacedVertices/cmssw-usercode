@@ -9,7 +9,7 @@ import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
 ROOT.gErrorIgnoreLevel = 6000
 
-fns = [x for x in sys.argv[1:] if x.endswith('.root') and os.path.isfile(x)]
+fns = [x for x in sys.argv[1:] if x.endswith('.root') and (os.path.isfile(x) or x.startswith('root://'))]
 include = [1 if 'sum' in sys.argv else 0]*len(fns)
 
 if not fns:
@@ -36,7 +36,7 @@ else:
     default_bkg_samples = []
 
 def getit(fn, ntk):
-    f = ROOT.TFile(fn)
+    f = ROOT.TFile.Open(fn)
     t = f.Get('%s/t' % ntk)
     hr = draw_hist_register(t, True)
     def c(cut):
