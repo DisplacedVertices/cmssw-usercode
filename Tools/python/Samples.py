@@ -796,38 +796,8 @@ for x in mfv_neu_tau00100um_M0300, mfv_neu_tau01000um_M0300:
     x.add_dataset('ntuplev15_leptrigs')
 
 ########
-# other condor declarations
+# automatic condor declarations for ntuples
 ########
-
-for x in data_samples_2015 + qcd_samples + qcd_samples_ext + [ttbar, mfv_neu_tau00300um_M1600, mfv_neu_tau10000um_M1600]:
-    if x not in (qcdht0500, qcdht0700):
-        x.condor = True
-JetHT2015D.xrootd_url = 'root://dcache-cms-xrootd.desy.de/'
-for x in qcdht2000ext, ttbar, mfv_neu_tau10000um_M1600:
-    x.xrootd_url = 'root://cmseos.fnal.gov/'
-
-for x in (qcdht0500_2015, qcdht0700_2015, qcdht1000_2015, qcdht2000_2015, qcdht0500ext_2015, qcdht1500ext_2015, qcdht2000ext_2015, ttbar_2015):
-    x.condor = True
-    x.xrootd_url = 'root://cmseos.fnal.gov/'
-
-for x in qcd_samples_2015:
-    x.datasets['miniaod'].condor = True
-    x.datasets['miniaod'].xrootd_url = 'root://cmseos.fnal.gov/'
-
-for x in data_samples + qcd_samples + qcd_samples_ext + ttbar_samples + \
-        [mfv_neu_tau00100um_M0800, mfv_neu_tau00100um_M1200, mfv_neu_tau00100um_M1600, 
-         mfv_neu_tau01000um_M1200, mfv_neu_tau01000um_M1600,
-         mfv_neu_tau10000um_M0400, mfv_neu_tau10000um_M1200, mfv_neu_tau10000um_M1600,
-         qcdht2000_2015, ttbar_2015]:
-    x.datasets['miniaod'].condor = True
-
-for x in [JetHT2016C, JetHT2016D, JetHT2016E, JetHT2016F, JetHT2016G, #JetHT2016H3,
-          qcdht0500, qcdht1000, qcdht2000,
-          qcdht0500ext, qcdht1000ext, qcdht1500ext, qcdht2000ext,
-          mfv_neu_tau00100um_M0800, mfv_neu_tau00100um_M1200, 
-          mfv_neu_tau01000um_M1200, 
-          qcdht2000_2015, ttbar_2015]:
-    x.datasets['miniaod'].xrootd_url = 'root://dcache-cms-xrootd.desy.de/'
 
 ds4condor = ['ntuple', 'v0ntuple', 'pick1vtx']
 for s in registry.all():
@@ -836,6 +806,39 @@ for s in registry.all():
             if ds.startswith(ds4):
                 s.datasets[ds].condor = True
 
+########
+# other condor declarations, generate _at dict with Shed/condor_list.py
+########
+
+# 2018-01-23 15:45:00.239927
+condorable = {
+    "T3_US_FNALLPC": {
+        "main": [JetHT2015C, mfv_neu_tau00100um_M0300, mfv_neu_tau00300um_M0300, mfv_neu_tau10000um_M0300, mfv_neu_tau00100um_M0400, mfv_neu_tau00300um_M0400, mfv_neu_tau10000um_M0400, mfv_neu_tau00100um_M0800, mfv_neu_tau00300um_M0800, mfv_neu_tau01000um_M0800, mfv_neu_tau00100um_M1200, mfv_neu_tau00300um_M1200, mfv_neu_tau01000um_M1200, mfv_neu_tau10000um_M1200, mfv_neu_tau00100um_M1600, mfv_neu_tau00300um_M1600, mfv_neu_tau10000um_M1600, qcdht0500_2015, qcdht0700_2015, qcdht1000_2015, qcdht1500_2015, qcdht2000_2015, qcdht0500ext_2015, qcdht0700ext_2015, qcdht1000ext_2015, qcdht1500ext_2015, qcdht2000ext_2015, ttbar_2015, qcdht2000ext, ttbar],
+        "miniaod": [SingleMuon2016B3, SingleMuon2016D, SingleMuon2016F, SingleMuon2016G, SingleMuon2016H2, SingleMuon2016H3, mfv_neu_tau10000um_M1600],
+        },
+    "T1_US_FNAL_Disk": {
+        "main": [JetHT2016G, SingleMuon2016G, qcdht0500ext, qcdht0700ext, qcdht1500ext],
+        "miniaod": [JetHT2016B3, SingleMuon2016C, SingleMuon2016E, ZeroBias2016B3, ZeroBias2016H3, ReproJetHT2016B, ReproJetHT2016C, ReproJetHT2016F, mfv_neu_tau00100um_M0300, mfv_neu_tau00300um_M0300, mfv_neu_tau10000um_M0300, mfv_neu_tau00100um_M0400, mfv_neu_tau10000um_M0400, mfv_neu_tau01000um_M0800, mfv_neu_tau00300um_M1200, mfv_neu_tau00300um_M1600, qcdht0700ext, ttbar, dyjetstollM10],
+        },
+    "T2_DE_DESY": {
+        "main": [JetHT2015D, SingleMuon2016D, mfv_neu_tau01000um_M0300, wjetstolnu1_2015, qcdht2000],
+        "miniaod": [JetHT2015C, JetHT2015D, SingleMuon2015D, JetHT2016C, JetHT2016D, JetHT2016E, JetHT2016F, JetHT2016G, JetHT2016H2, JetHT2016H3, ZeroBias2016C, ReproJetHT2016D, ReproJetHT2016E, ReproJetHT2016G, ReproJetHT2016H, mfv_neu_tau00100um_M0800, mfv_neu_tau00100um_M1200, mfv_neu_tau01000um_M1200, qcdht0500_2015, qcdht1500_2015, qcdht2000_2015, wjetstolnu1_2015, dyjetstollM101_2015, dyjetstollM102_2015, qcdht0500, qcdht0700, qcdht1000, qcdht1500, qcdht2000, qcdht0500ext, qcdht1000ext, qcdht1500ext, qcdht2000ext, wjetstolnu],
+        },
+    }
+
+sites = {
+    'T3_US_FNALLPC': 'root://cmseos.fnal.gov/',
+    'T1_US_FNAL_Disk': 'root://cmsxrootd-site.fnal.gov/',
+    'T2_DE_DESY': 'root://dcache-cms-xrootd.desy.de/'
+    }
+
+for site, d in condorable.iteritems():
+    if sites.has_key(site):
+        for ds, samples in d.iteritems():
+            for s in samples:
+                s.datasets[ds].condor = True
+                s.datasets[ds].xrootd_url = sites[site]
+                
 ########################################################################
 
 if __name__ == '__main__':
@@ -982,3 +985,10 @@ if __name__ == '__main__':
             line = line.strip()
             if line in dses:
                 print line
+
+    if 0:
+        for ds in 'main', 'miniaod':
+            for s in registry.all():
+                if s.has_dataset(ds):
+                    s.set_curr_dataset(ds)
+                    print '%s %s %s %s' % (s.name, ds, s.condor, s.xrootd_url)
