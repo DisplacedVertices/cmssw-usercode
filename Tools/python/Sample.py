@@ -557,13 +557,10 @@ def main(samples_registry):
             print sample.name.ljust(mlen+5),
             sites.sort(key=lambda x: x['name'])
             for site in sites:
-                name = site['name']
-                if name.endswith('_Buffer') or name.endswith('_MSS'):
+                if DBS.site_is_tape(site):
                     continue
-                completions = [site[x] for x in ('block_completion', 'block_fraction', 'dataset_fraction', 'replica_fraction')]
-                is_complete = all(c == '100.00%' for c in completions)
-                x = (name,) + tuple([float(c.replace('%',''))/100 for c in completions])
-                print (colors.green if is_complete else colors.yellow)('%s (%.4f %.4f %.4f %.4f)' % x),
+                is_complete = DBS.complete_at_site(site)
+                print (colors.green if is_complete else colors.yellow)(DBS.site_completions_string(site)),
 
     elif 'samplefiles' in argv:
         samples = samples_registry.from_argv(raise_if_none=True)
