@@ -62,6 +62,7 @@ process.selectedPatElectrons.src = 'slimmedElectrons'
 process.selectedPatElectrons.cut = process.jtupleParams.electronCut
 
 process.mfvGenParticles.gen_particles_src = 'prunedGenParticles'
+process.mfvGenParticles.last_flag_check = False
 
 process.mfvVertices.track_src = 'mfvUnpackedCandidateTracks'
 
