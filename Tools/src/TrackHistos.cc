@@ -19,6 +19,25 @@ namespace jmt {
     edm::Service<TFileService> fs;
     TFileDirectory d(fs->mkdir(name));
 
+    const char* par_titles[9] = {
+      ";p (GeV);tracks/%.3f GeV",
+      ";p_{T} (GeV);tracks/%.3f GeV",
+      ";#eta;tracks/%.3f",
+      ";#phi;tracks/%.3f",
+      ";d_{xy} to geometric center (cm);tracks/%.3f cm",
+      ";d_{z} to geometric center (cm);tracks/%.3f cm",
+      ";d_{xy} to beamspot (cm);tracks/%.3f cm",
+      ";d_{xy} to PV (cm);tracks/%.3f cm",
+      ";d_{z} to PV (cm);tracks/%.3f cm",
+    };
+    const char* err_titles[9] = {
+      ";#sigma(p) (GeV);tracks/%.4f GeV",
+      ";#sigma(p_{T}) (GeV);tracks/%.4f GeV",
+      ";#sigma(#eta);tracks/%.4f",
+      ";#sigma(#phi);tracks/%.4f",
+      ";#sigma(d_{xy}) (cm);tracks/%.4f cm",
+      ";#sigma(d_{z}) (cm);tracks/%.4f cm",
+    };
     const char* par_names[9] = {"p", "pt", "eta", "phi", "dxy", "dz", "dxybs", "dxypv", "dzpv"};
     const int par_nbins[9] = {  200, 200,  100,   100, 1000, 1000, 1000, 1000, 1000 };
     const double par_lo[9] = {    0,   0, -2.6, -3.15,   -2,  -20,   -2,   -2,  -20 };
@@ -27,10 +46,14 @@ namespace jmt {
     const double err_lo[6] = { 0 };
     const double err_hi[6] = { 0.15, 0.15, 0.01, 0.01, 0.2, 0.4 };
 
-    for (int i = 0; i < 9; ++i)
-      h_pars[i] = d.make<TH1D>(par_names[i], "", par_nbins[i], par_lo[i], par_hi[i]);
-    for (int i = 0; i < 6; ++i)
-      h_errs[i] = d.make<TH1D>(TString::Format("err%s", par_names[i]), "", err_nbins[i], err_lo[i], err_hi[i]);
+    for (int i = 0; i < 9; ++i) {
+      const double per = (par_hi[i] - par_lo[i]) / par_nbins[i];
+      h_pars[i] = d.make<TH1D>(par_names[i], TString::Format(par_titles[i], per), par_nbins[i], par_lo[i], par_hi[i]);
+    }
+    for (int i = 0; i < 6; ++i) {
+      const double per = (err_hi[i] - err_lo[i]) / err_nbins[i];
+      h_errs[i] = d.make<TH1D>(TString::Format("err%s", par_names[i]), TString::Format(err_titles[i], per), err_nbins[i], err_lo[i], err_hi[i]);
+    }
     if (do_2d) {
       for (int i = 0; i < 9; ++i)
         for (int j = i+1; j < 9; ++j)
@@ -40,24 +63,27 @@ namespace jmt {
           h_errs_v_pars[i][j] = d.make<TH2D>(TString::Format("err%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], err_nbins[j], err_lo[j], err_hi[j]);
     }
 
-    h_dptopt = d.make<TH1D>("dptopt", "", 200, 0, 2);
-    h_sigmadxybs = d.make<TH1D>("sigmadxybs", "", 200, -100, 100);
+    h_dptopt = d.make<TH1D>("dptopt", ";#sigma(p_{T})/p_{T};tracks/0.01", 200, 0, 2);
+    h_sigmadxybs = d.make<TH1D>("sigmadxybs", ";#sigma(d_{xy})/d_{xy} to beamspot;tracks/1", 200, -100, 100);
 
-    h_q       = d.make<TH1D>("q", "",  3, -1,   2);
-    h_nhits   = d.make<TH1D>("nhits", "", 40,  0,  40);
-    h_npxhits = d.make<TH1D>("npxhits", "", 12,  0,  12);
-    h_nsthits = d.make<TH1D>("nsthits", "", 28,  0,  28);
-    h_npxlayers = d.make<TH1D>("npxlayers", "", 12,  0,  12);
-    h_nstlayers = d.make<TH1D>("nstlayers", "", 28,  0,  28);
-    h_nlosthits = d.make<TH1D>("nlosthits", "", 10, 0, 10);
-    h_nlostlayers = d.make<TH1D>("nlostlayers", "", 10, 0, 10);
-    h_chi2    = d.make<TH1D>("chi2", "", 50,  0, 100);
-    h_dof     = d.make<TH1D>("dof", "", 50,  0, 100);
-    h_chi2dof = d.make<TH1D>("chi2dof", "", 50,  0,  10);
-    h_algo    = d.make<TH1D>("algo", "", reco::TrackBase::algoSize,  0,  reco::TrackBase::algoSize);
-    h_quality = d.make<TH1D>("quality", "",  reco::TrackBase::qualitySize,  0,   reco::TrackBase::qualitySize);
-    h_highpurity = d.make<TH1D>("highpurity", "",  2,0,2);
-    h_nloops  = d.make<TH1D>("nloops", "", 10,  0,  10);
+    h_q       = d.make<TH1D>("q", ";charge;tracks",  3, -1,   2);
+    h_nhits   = d.make<TH1D>("nhits", ";number of hits on track;tracks", 40,  0,  40);
+    h_npxhits = d.make<TH1D>("npxhits", ";number of pixel hits on track;tracks", 12,  0,  12);
+    h_nsthits = d.make<TH1D>("nsthits", ";number of strip hits on track;tracks", 28,  0,  28);
+    h_npxlayers = d.make<TH1D>("npxlayers", ";number of pixel layers with hits on track;tracks", 12,  0,  12);
+    h_nstlayers = d.make<TH1D>("nstlayers", ";number of strip layers with hits on track;tracks", 28,  0,  28);
+    h_nlosthits = d.make<TH1D>("nlosthits", ";number of lost hits per track;tracks", 10, 0, 10);
+    h_nlostlayers = d.make<TH1D>("nlostlayers", ";number of lost pixel+strip layers per track;tracks", 10, 0, 10);
+    h_chi2dof = d.make<TH1D>("chi2dof", ";#chi^{2}/dof;tracks/0.2", 50,  0,  10);
+    h_algo    = d.make<TH1D>("algo", ";algorithm;tracks", reco::TrackBase::algoSize,  0,  reco::TrackBase::algoSize);
+    h_quality = d.make<TH1D>("quality", ";quality;tracks",  reco::TrackBase::qualitySize,  0,   reco::TrackBase::qualitySize);
+    h_highpurity = d.make<TH1D>("highpurity", ";is high purity?;tracks",  2,0,2);
+    h_nloops  = d.make<TH1D>("nloops", ";number of loops;tracks", 10,  0,  10);
+
+    for (int i = 0; i < reco::TrackBase::algoSize; ++i)
+      h_algo->GetXaxis()->SetBinLabel(i+1, reco::TrackBase::algoName(reco::TrackBase::TrackAlgorithm(i)).c_str());
+    for (int i = 0; i < reco::TrackBase::qualitySize; ++i)
+      h_quality->GetXaxis()->SetBinLabel(i+1, reco::TrackBase::qualityName(reco::TrackBase::TrackQuality(i)).c_str());
 
     if (use_rechits) {
       h_unknown_detid = d.make<TH1D>("unknown_detid", "", 1, 0, 1);
@@ -130,9 +156,7 @@ namespace jmt {
     h_nstlayers->Fill(tk.hitPattern().stripLayersWithMeasurement());
     h_nlosthits->Fill(tk.numberOfLostHits());
     h_nlostlayers->Fill(tk.hitPattern().trackerLayersWithoutMeasurement(reco::HitPattern::TRACK_HITS));
-    h_chi2->Fill(tk.chi2());
-    h_dof->Fill(tk.ndof());
-    h_chi2dof->Fill(tk.chi2()/tk.ndof());
+    h_chi2dof->Fill(tk.normalizedChi2());
     h_algo->Fill(int(tk.algo()));
     for (int i = 0; i < reco::TrackBase::qualitySize; ++i)
       if (tk.quality(reco::Track::TrackQuality(i)))
