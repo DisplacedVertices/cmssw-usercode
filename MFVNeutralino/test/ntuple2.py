@@ -9,8 +9,8 @@ if year == 2015:
 is_mc = True
 H = False
 repro = False
+run_n_tk_seeds = False
 # JMTBAD implement these
-#run_n_tk_seeds = False
 #minitree_only = False
 #prepare_vis = not run_n_tk_seeds and False
 #keep_all = prepare_vis
@@ -18,8 +18,8 @@ repro = False
 event_filter = True #not keep_all
 version = 'v16m'
 batch_name = 'Ntuple' + version.capitalize()
-#if run_n_tk_seeds:
-#    batch_name += '_NTkSeeds'
+if run_n_tk_seeds:
+    batch_name += '_NTkSeeds'
 
 ####
 
@@ -85,6 +85,22 @@ process.p = cms.Path(process.goodOfflinePrimaryVertices *
                      process.mfvVertexSequence *
                      process.mfvEvent)
 
+if run_n_tk_seeds:
+    output_commands = process.out.outputCommands.value()
+    process.mfvEvent.lightweight = True
+    process.out.fileName = 'ntkseeds.root'
+    if run_n_tk_seeds != 'full':
+        output_commands.remove('keep MFVVertexAuxs_mfvVerticesAux_*_*')
+    from JMTucker.MFVNeutralino.Vertexer_cff import modifiedVertexSequence
+    output_commands += ['keep VertexerPairEffs_mfvVertices_*_*']
+    for n_tk_seed in 3,4,5:
+        ex = '%iTkSeed' % n_tk_seed
+        process.p *= modifiedVertexSequence(process, ex, n_tracks_per_seed_vertex = n_tk_seed)
+        output_commands += ['keep VertexerPairEffs_mfvVertices%s_*_*' % ex]
+        if run_n_tk_seeds == 'full':
+            output_commands += ['keep MFVVertexAuxs_mfvVerticesAux%s_*_*' % ex]
+    process.out.outputCommands = output_commands
+
 if event_filter:
     import JMTucker.MFVNeutralino.EventFilter
     JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process, path_name='p', event_filter=True, input_is_miniaod=True)
@@ -102,8 +118,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, 'miniaod', 'ntuple')
 
-#    if run_n_tk_seeds:
-#        samples = [s for s in samples if not s.is_signal]
+    if run_n_tk_seeds:
+        samples = [s for s in samples if not s.is_signal]
 
     modify = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier)
     ms = MetaSubmitter(batch_name, dataset='miniaod')
