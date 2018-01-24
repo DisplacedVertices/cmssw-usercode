@@ -3,9 +3,12 @@
 from JMTucker.Tools.ROOTTools import ROOT
 from array import array
 
-file_path = '~/crabdirs/TheoristRecipeV28'
+file_path = '~/crabdirs/TheoristRecipeV31'
 
 gen_rec_cut = 20
+
+correct_bquarks = False
+bquark_correction = 0.75
 
 #gen_num = 'FourJets'
 #gen_num = 'HT40'
@@ -303,6 +306,10 @@ for sample,sampleName in samples:
             gen_hist = f.Get('mfvGen%s/h_gen_dvv'%generated[i])
             gen_eff = gen_hist.GetEntries()/ngen
             gen_err = (gen_eff * (1-gen_eff) / ngen)**0.5
+            if correct_bquarks:
+                nbquarks = f.Get('mfvGen%s/h_gen_nbquarks'%generated[i]).GetMean()
+                gen_eff *= bquark_correction**nbquarks
+                gen_err *= bquark_correction**nbquarks
             gen_rec_div = gen_eff/rec_eff if rec_eff != 0 else 9999
             gen_rec_err = (gen_rec_div * ((rec_err/rec_eff)**2 + (gen_err/gen_eff)**2))**0.5 if rec_eff != 0 and gen_eff != 0 else 9999
             if generated[i] == gen_num:
