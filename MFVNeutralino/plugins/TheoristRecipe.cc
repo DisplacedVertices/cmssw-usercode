@@ -43,6 +43,7 @@ private:
   TH1F* h_gen_dxy;
   TH1F* h_gen_ntracks;
   TH1F* h_gen_sumpt;
+  TH1F* h_gen_nbquarks;
   TH1F* h_gen_dbv;
   TH1F* h_gen_dvv;
 
@@ -103,6 +104,7 @@ MFVTheoristRecipe::MFVTheoristRecipe(const edm::ParameterSet& cfg)
   h_gen_dxy = fs->make<TH1F>("h_gen_dxy", ";d_{xy} of accepted daughter particles (cm);LSP daughter particles", 100, 0, 1);
   h_gen_ntracks = fs->make<TH1F>("h_gen_ntracks", ";number of accepted displaced daughter particles;LSPs", 40, 0, 40);
   h_gen_sumpt = fs->make<TH1F>("h_gen_sumpt", ";#Sigmap_{T} of accepted displaced daughter particles (GeV);LSPs", 500, 0, 5000);
+  h_gen_nbquarks = fs->make<TH1F>("h_gen_nbquarks", ";number of accepted displaced b quarks;events", 40, 0, 40);
   h_gen_dbv = fs->make<TH1F>("h_gen_dbv", ";generated d_{BV} (cm);LSPs", 250, 0, 2.5);
   h_gen_dvv = fs->make<TH1F>("h_gen_dvv", ";generated d_{VV} (cm);events", 500, 0, 5);
 
@@ -199,6 +201,7 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
   int npartons_accepted = 0; float parton_accepted_ht40 = 0;
   int nquarks = 0; float quark_ht40 = 0;
   int nquarks_accepted = 0; float quark_accepted_ht40 = 0;
+  int nbquarks = 0;
   for (int i = 0; i < 2; ++i) {
     int ntracks = 0;
     float sumpt = 0;
@@ -215,6 +218,7 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
         if (dxy >= 0.01) {
           ++ntracks;
           sumpt += p->pt();
+          if (abs(p->pdgId()) == 5) ++nbquarks;
         }
       }
     }
@@ -230,6 +234,7 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
   h_gen_quark_ht40->Fill(quark_ht40);
   h_gen_quark_accepted_njets->Fill(nquarks_accepted);
   h_gen_quark_accepted_ht40->Fill(quark_accepted_ht40);
+  h_gen_nbquarks->Fill(nbquarks);
   h_gen_dvv->Fill(dvv);
 
   //plot reconstructed-level variables
