@@ -42,7 +42,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         sample.events_per = 3000
 
     from JMTucker.Tools.MetaSubmitter import *
-    ms = MetaSubmitter('PackedCandsV0')
+    ms = MetaSubmitter('PackedCandsV1')
     ms.common.ex = year
     ms.common.dataset = 'miniaod'
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier, secondary_files_modifier('main'))
