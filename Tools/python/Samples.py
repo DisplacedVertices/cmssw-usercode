@@ -807,7 +807,7 @@ for s in registry.all():
                 s.datasets[ds].condor = True
 
 ########
-# other condor declarations, generate _at dict with Shed/condor_list.py
+# other condor declarations, generate condorable dict with Shed/condor_list.py
 ########
 
 # 2018-01-23 15:45:00.239927
