@@ -42,9 +42,9 @@ namespace jmt {
     const int par_nbins[9] = {  200, 200,  100,   100, 1000, 1000, 1000, 1000, 1000 };
     const double par_lo[9] = {    0,   0, -2.6, -3.15,   -2,  -20,   -2,   -2,  -20 };
     const double par_hi[9] = {  100, 100,  2.6,  3.15,    2,   20,    2,    2,   20 };
-    const int err_nbins[9] = { 100, 100, 100, 100, 100, 100, 100, 100, 100 };
+    const int err_nbins[9] = { 50, 50, 50, 50, 50, 50, 50, 50, 50 };
     const double err_lo[6] = { 0 };
-    const double err_hi[6] = { 0.15, 0.15, 0.01, 0.01, 0.2, 0.4 };
+    const double err_hi[6] = { 0.15, 0.15, 0.005, 0.005, 0.02, 0.05 };
 
     for (int i = 0; i < 9; ++i) {
       const double per = (par_hi[i] - par_lo[i]) / par_nbins[i];
@@ -63,8 +63,8 @@ namespace jmt {
           h_errs_v_pars[i][j] = d.make<TH2D>(TString::Format("err%s_v_%s", par_names[j], par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i], err_nbins[j], err_lo[j], err_hi[j]);
     }
 
-    h_dptopt = d.make<TH1D>("dptopt", ";#sigma(p_{T})/p_{T};tracks/0.01", 200, 0, 2);
-    h_sigmadxybs = d.make<TH1D>("sigmadxybs", ";#sigma(d_{xy})/d_{xy} to beamspot;tracks/1", 200, -100, 100);
+    h_dptopt = d.make<TH1D>("dptopt", ";#sigma(p_{T})/p_{T};tracks/0.01", 100, 0, 1.);
+    h_sigmadxybs = d.make<TH1D>("sigmadxybs", ";#sigma(d_{xy})/d_{xy} to beamspot;tracks/1", 400, -200, 200);
 
     h_q       = d.make<TH1D>("q", ";charge;tracks",  3, -1,   2);
     h_nhits   = d.make<TH1D>("nhits", ";number of hits on track;tracks", 40,  0,  40);
