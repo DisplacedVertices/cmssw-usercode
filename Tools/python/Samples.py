@@ -712,8 +712,8 @@ for x in (data_samples_2015 +
     if not x.is_signal:
         x.add_dataset('ntuplev16_ntkseeds')
 
-for x in ttbar_samples + qcd_samples + qcd_samples_ext + mfv_signal_samples:
-    if x.is_signal and x.is_private:
+for x in ttbar_samples + qcd_samples + qcd_samples_ext + mfv_signal_samples + mfv_ddbar_samples:
+    if x in mfv_signal_samples and x.is_private:
         continue
     x.add_dataset('ntuplev17m')
 
