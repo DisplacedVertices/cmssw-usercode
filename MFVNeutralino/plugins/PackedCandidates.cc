@@ -181,28 +181,28 @@ MFVPackedCandidates::MFVPackedCandidates(const edm::ParameterSet& cfg)
     h_nomatch_highpurity_goodptres("nomatch_highpurity_goodptres")
 {
   edm::Service<TFileService> fs;
-  h_nseed = fs->make<TH1F>("h_nseed", "", 50, 0, 50);
-  h_nmatch = fs->make<TH1F>("h_nmatch", "", 50, 0, 50);
-  h_nmatchpass = fs->make<TH1F>("h_nmatchpass", "", 50, 0, 50);
-  h_nmatch_v_nseed = fs->make<TH2F>("h_nmatch_v_nseed", "", 50, 0, 50, 50, 0, 50);
-  h_nmatchpass_v_nseed = fs->make<TH2F>("h_nmatchpass_v_nseed", "", 50, 0, 50, 50, 0, 50);
-  h_matchdist = fs->make<TH1F>("h_matchdist", "", 10000, 0, 0.1);
+  h_nseed = fs->make<TH1F>("h_nseed", ";# of seed tracks;events", 100, 0, 100);
+  h_nmatch = fs->make<TH1F>("h_nmatch", ";# of seed tracks matched to PF packed candidate;events", 100, 0, 100);
+  h_nmatchpass = fs->make<TH1F>("h_nmatchpass", ";# of seed tracks matched to PF packed candidate that also passes cuts;events", 100, 0, 100);
+  h_nmatch_v_nseed = fs->make<TH2F>("h_nmatch_v_nseed", "# of seed tracks;# of matches", 100, 0, 100, 100, 0, 100);
+  h_nmatchpass_v_nseed = fs->make<TH2F>("h_nmatchpass_v_nseed", "# of seed tracks;# of passing matches", 100, 0, 100, 100, 0, 100);
+  h_matchdist = fs->make<TH1F>("h_matchdist", ";distance to closest match;tracks/1e-5", 10000, 0, 0.1);
   h_matchdist_notk = fs->make<TH1F>("h_matchdist_notk", "", 10000, 0, 0.1);
 
-  h_delta_pt = fs->make<TH1F>("h_delta_par_pt", "", 1000, -50, 50);
-  h_delta_eta = fs->make<TH1F>("h_delta_par_eta", "", 1000, -3, 3);
-  h_delta_phi = fs->make<TH1F>("h_delta_par_phi", "", 1000, -3.15, 3.15);
-  h_delta_dxy = fs->make<TH1F>("h_delta_par_dxy", "", 1000, -1, 1);
-  h_delta_dz = fs->make<TH1F>("h_delta_par_dz", "", 1000, -1, 1);
-  h_delta_dxybs = fs->make<TH1F>("h_delta_par_dxybs", "", 1000, -1, 1);
-  h_delta_dxypv = fs->make<TH1F>("h_delta_par_dxypv", "", 1000, -1, 1);
-  h_delta_dzbs = fs->make<TH1F>("h_delta_par_dzbs", "", 1000, -1, 1);
-  h_delta_dzpv = fs->make<TH1F>("h_delta_par_dzpv", "", 1000, -1, 1);
-  h_delta_sigmadxybs = fs->make<TH1F>("h_delta_sigmadxybs", "", 1000, -1, 1);
-  h_delta_pxh = fs->make<TH1F>("h_delta_pxh", "", 40, -20, 20);
-  h_delta_pxl = fs->make<TH1F>("h_delta_pxl", "", 40, -20, 20);
-  h_delta_sth = fs->make<TH1F>("h_delta_sth", "", 100, -50, 50);
-  h_delta_stl = fs->make<TH1F>("h_delta_stl", "", 100, -50, 50);
+  h_delta_pt = fs->make<TH1F>("h_delta_par_pt", ";match - seed p_{T} (GeV);tracks/0.1 GeV", 1000, -50, 50);
+  h_delta_eta = fs->make<TH1F>("h_delta_par_eta", ";match - seed #eta;tracks/0.006", 1000, -3, 3);
+  h_delta_phi = fs->make<TH1F>("h_delta_par_phi", ";match - seed #phi;tracks/0.006", 1000, -3.15, 3.15);
+  h_delta_dxy = fs->make<TH1F>("h_delta_par_dxy", ";match - seed d_{xy} (cm);tracks/0.002 cm", 1000, -1, 1);
+  h_delta_dz = fs->make<TH1F>("h_delta_par_dz", ";match - seed d_{z} (cm);tracks/0.002 cm", 1000, -1, 1);
+  h_delta_dxybs = fs->make<TH1F>("h_delta_par_dxybs", ";match - seed d_{xy} to beamspot (cm);tracks/0.002 cm", 1000, -1, 1);
+  h_delta_dxypv = fs->make<TH1F>("h_delta_par_dxypv", ";match - seed d_{xy} to PV (cm);tracks/0.002 cm", 1000, -1, 1);
+  h_delta_dzbs = fs->make<TH1F>("h_delta_par_dzbs", ";match - seed d_{z} to beamspot (cm);tracks/0.002 cm", 1000, -1, 1);
+  h_delta_dzpv = fs->make<TH1F>("h_delta_par_dzpv", ";match - seed d_{z} to PV (cm);tracks/0.002 cm", 1000, -1, 1);
+  h_delta_sigmadxybs = fs->make<TH1F>("h_delta_sigmadxybs", ";match - seed #sigma(d_{xy})/d_{xy} to beamspot;tracks/0.002", 1000, -1, 1);
+  h_delta_pxh = fs->make<TH1F>("h_delta_pxh", ";match - seed number of pixel hits;tracks", 40, -20, 20);
+  h_delta_pxl = fs->make<TH1F>("h_delta_pxl", ";match - seed number of strip hits;tracks", 40, -20, 20);
+  h_delta_sth = fs->make<TH1F>("h_delta_sth", ";match - seed number of pixel layers;tracks", 100, -50, 50);
+  h_delta_stl = fs->make<TH1F>("h_delta_stl", ";match - seed number of strip layers;tracks", 100, -50, 50);
 }
 
 void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup& setup) {
@@ -298,7 +298,7 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
         h_delta_dxypv->Fill(cd_te.dxypv - te.dxypv);
         h_delta_dzbs->Fill(cd_te.dzbs - te.dzbs);
         h_delta_dzpv->Fill(cd_te.dzpv - te.dzpv);
-        h_delta_sigmadxybs->Fill(cd_te.sigmadxybs / te.sigmadxybs - 1);
+        h_delta_sigmadxybs->Fill(cd_te.sigmadxybs - te.sigmadxybs);
         h_delta_pxh->Fill(cd_te.npxhits - te.npxhits);
         h_delta_pxl->Fill(cd_te.npxlayers - te.npxlayers);
         h_delta_sth->Fill(cd_te.nsthits - te.nsthits);
