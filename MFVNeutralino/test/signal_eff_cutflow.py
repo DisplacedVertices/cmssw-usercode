@@ -28,6 +28,7 @@ paths = [('TwoVtxDvv400um',   'NoCuts'),
          ('TwoVtxDvv400um',   'TwoVtxBs2derr'),
          ('PreSel',           'NoCuts'),
          ('TwoVtxDvv400um',   'PreSel'),
+         ('TwoVtxBs2derr',    'TwoVtxGeo2ddist'),
          ]
 
 for samples, samples_name in samples_list:
