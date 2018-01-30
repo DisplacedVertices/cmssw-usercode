@@ -55,6 +55,7 @@ private:
   const double min_parton_ht40;
   const int min_ntracks;
   const int min_nquarks;
+  const double bquarkpt_fraction;
   const double min_sumpt;
   const double max_drmin;
   const double min_drmax;
@@ -96,6 +97,7 @@ MFVGenParticleFilter::MFVGenParticleFilter(const edm::ParameterSet& cfg)
     min_parton_ht40(cfg.getParameter<double>("min_parton_ht40")),
     min_ntracks(cfg.getParameter<int>("min_ntracks")),
     min_nquarks(cfg.getParameter<int>("min_nquarks")),
+    bquarkpt_fraction(cfg.getParameter<double>("bquarkpt_fraction")),
     min_sumpt(cfg.getParameter<double>("min_sumpt")),
     max_drmin(cfg.getParameter<double>("max_drmin")),
     min_drmax(cfg.getParameter<double>("min_drmax")),
@@ -259,7 +261,11 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
       if (is_neutrino(p1) || p1->pt() < 20 || fabs(p1->eta()) > 2.5 || fabs(dbv[i] * sin(p1->phi() - atan2(v[i][1], v[i][0]))) < 0.01) continue;
       ++ntracks;
       if (!is_lepton(p1)) ++nquarks;
-      sumpt += p1->pt();
+      if (abs(p1->pdgId()) == 5) {
+        sumpt += bquarkpt_fraction * p1->pt();
+      } else {
+        sumpt += p1->pt();
+      }
       for (int k = j+1; k < ndau; ++k) {
         const reco::GenParticle* p2 = partons[i][k];
         if (is_neutrino(p2) || p2->pt() < 20 || fabs(p2->eta()) > 2.5 || fabs(dbv[i] * sin(p2->phi() - atan2(v[i][1], v[i][0]))) < 0.01) continue;
