@@ -292,6 +292,12 @@ elif meta == 'neuudmu':
         todo = 'neutralino_udmu,%.1f,%i' % (tau/1000., mass)
         submit(config, name, todo)
 
+elif meta == 'neuude':
+    for tau, mass in taus_masses():
+        name = 'mfv_neuude_tau%05ium_M%04i' % (tau, mass)
+        todo = 'neutralino_ude,%.1f,%i' % (tau/1000., mass)
+        submit(config, name, todo)
+
 elif meta == 'glu':
     for tau, mass in taus_masses():
         name = 'mfv_glu_tau%05ium_M%04i' % (tau, mass)
