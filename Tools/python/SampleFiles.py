@@ -1308,21 +1308,6 @@ _add_ds("ntuplev17m", {
 })
 
 
-_add_ds("ntuplev17m_ntkseeds", {
-'qcdht0500': (13, ['/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV17m_NTkSeeds_2016/180124_151406/0000/ntkseeds_%i.root' % i for i in chain(xrange(2,10), xrange(11,13), [0])] + ['/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV17m_NTkSeeds_2016/180125_105510/0000/ntkseeds_1.root'] + ['/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV17m_NTkSeeds_2016/180124_193835/0000/ntkseeds_10.root']),
-'qcdht0700': (27, ['/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV17m_NTkSeeds_2016/180125_184311/0000/ntkseeds_12.root'] + ['/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV17m_NTkSeeds_2016/180124_151407/0000/ntkseeds_%i.root' % i for i in chain(xrange(12), xrange(13,17), xrange(18,24), xrange(25,27))] + ['/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV17m_NTkSeeds_2016/180126_174615/0000/ntkseeds_%i.root' % i for i in [17, 24]]),
-'qcdht1000': _fromnum0("/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV17m_NTkSeeds_2016/180124_151408", 90, fnbase="ntkseeds"),
-'qcdht1500': _fromnum0("/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV17m_NTkSeeds_2016/180124_151409", 80, fnbase="ntkseeds"),
-'qcdht2000': (18, ['/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV17m_NTkSeeds_2016/180124_151410/0000/ntkseeds_%i.root' % i for i in chain(xrange(9), xrange(10,18))] + ['/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV17m_NTkSeeds_2016/180124_174003/0000/ntkseeds_9.root']),
-'qcdht0500ext': (48, ['/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV17m_NTkSeeds_2016/180124_151411/0000/ntkseeds_%i.root' % i for i in chain(xrange(38), xrange(39,48))] + ['/store/user/tucker/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV17m_NTkSeeds_2016/180124_205537/0000/ntkseeds_38.root']),
-'qcdht0700ext': _fromnum0("/store/user/tucker/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV17m_NTkSeeds_2016/180124_151412", 52, fnbase="ntkseeds"),
-'qcdht1000ext': _fromnum0("/store/user/tucker/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV17m_NTkSeeds_2016/180124_151413", 85, fnbase="ntkseeds"),
-'qcdht1500ext': _fromnum0("/store/user/tucker/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV17m_NTkSeeds_2016/180124_151414", 68, fnbase="ntkseeds"),
-'qcdht2000ext': _fromnum0("/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV17m_NTkSeeds_2016/180124_151415", 43, fnbase="ntkseeds"),
-'ttbar': _fromnum0("/store/user/tucker/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/NtupleV17m_NTkSeeds_2016/180124_151405", 127, fnbase="ntkseeds"),
-})
-
-
 _add_ds('v0ntuplev1', {
 
 'qcdht1000_hip1p0_mit': _fromnum0("/store/user/jchu/croncopyeos/qcdht1000/V0NtupleV1_2016", 289, fnbase='v0ntuple', numbereddirs=False),
