@@ -716,6 +716,8 @@ for x in ttbar_samples + qcd_samples + qcd_samples_ext + mfv_signal_samples + mf
     if x in mfv_signal_samples and x.is_private:
         continue
     x.add_dataset('ntuplev17m')
+for x in ttbar_samples + qcd_samples + qcd_samples_ext:
+    x.add_dataset('ntuplev17m_ntkseeds')
 
 for x in data_samples + qcd_samples + qcd_samples_ext + qcd_hip_samples[-2:]:
     x.add_dataset('v0ntuplev1')
