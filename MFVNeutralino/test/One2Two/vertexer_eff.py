@@ -1,18 +1,22 @@
+import os
 from JMTucker.Tools.ROOTTools import *
 
 is_mc = True
+version = 'v15_v2'
+path = '/uscms_data/d1/jchu/crab_dirs/mfv_8025/VertexerPairEffs' + version.capitalize()
 year = '2015p6'
 ntkseeds = False
 
 set_style()
-ps = plot_saver('../plots/bkgest/v15_v2/vertexer_pair_effs%s_%s%s' % ('' if is_mc else '_data', year, '_ntkseeds' if ntkseeds else ''), size=(700,700), log=False, root=False)
+ps = plot_saver(plot_dir('VertexerPairEffs%s/vertexer_pair_effs%s_%s%s' % (version.capitalize(), '' if is_mc else '_data', year, '_ntkseeds' if ntkseeds else '')), size=(700,700), log=False)
 
 if is_mc:
-    f = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_8025/VertexerPairEffsV15_v2/background%s.root' % ('' if year=='2016' else '_%s'%year))
+    in_fn = os.path.join(path, 'background%s.root' % ('' if year=='2016' else '_%s'%year))
 else:
-    f = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_8025/VertexerPairEffsV15_v2/JetHT%s.root' % year)
+    in_fn = os.path.join(path, 'JetHT%s.root' % year)
 
-fh = ROOT.TFile('vpeffs%s_%s_v15_v2%s.root' % ('' if is_mc else '_data', year, '_ntkseeds' if ntkseeds else ''), 'recreate')
+f = ROOT.TFile(in_fn)
+fh = ROOT.TFile('vpeffs%s_%s_%s%s.root' % ('' if is_mc else '_data', year, version, '_ntkseeds' if ntkseeds else ''), 'recreate')
 
 for itk in [3,4,5]:
     h_merge = f.Get('mfvVertexerPairEffs%s/h_merge_d2d_mintk0_maxtk%i' % ('%iTkSeed' % itk if ntkseeds else '', itk))
@@ -59,7 +63,7 @@ for itk in [3,4,5]:
 
 fh.Close()
 
-f = ROOT.TFile('vpeffs%s_%s_v15_v2%s.root' % ('' if is_mc else '_data', year, '_ntkseeds' if ntkseeds else ''))
+f = ROOT.TFile('vpeffs%s_%s_%s%s.root' % ('' if is_mc else '_data', year, version, '_ntkseeds' if ntkseeds else ''))
 
 colors = [0, 0, 0, ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2]
 l = ROOT.TLegend(0.50,0.15,0.85,0.30)
@@ -86,7 +90,7 @@ if not ntkseeds:
 
     ROOT.TH1.AddDirectory(0)
 
-    h2 = ROOT.TFile('vpeffs%s_%s_v15_v2_ntkseeds.root' % ('' if is_mc else '_data', year)).Get('maxtk5')
+    h2 = ROOT.TFile('vpeffs%s_%s_%s_ntkseeds.root' % ('' if is_mc else '_data', year, version)).Get('maxtk5')
     h2.SetLineWidth(3)
     h.Draw('hist')
     h2.Draw('hist sames')
