@@ -9,13 +9,16 @@ if year == 2015:
 is_mc = True
 H = False
 repro = False
+
 run_n_tk_seeds = False
 minitree_only = False
+prepare_vis = False
+keep_all = prepare_vis or False
 keep_gen = False
-# JMTBAD implement these
-#prepare_vis = not run_n_tk_seeds and False
-#keep_all = prepare_vis
-event_filter = True #not keep_all
+event_filter = not keep_all and True
+if len(filter(None, (run_n_tk_seeds, minitree_only, prepare_vis))) > 1:
+    raise ValueError('only one of run_n_tk_seeds, minitree_only, prepare_vis allowed')
+
 version = 'V16m'
 batch_name = 'Ntuple' + version
 if run_n_tk_seeds:
@@ -33,20 +36,8 @@ geometry_etc(process, which_global_tag(is_mc, year, H=False, repro=False))
 random_service(process, {'mfvVertices': 1222})
 tfileservice(process, 'vertex_histos.root')
 input_files(process, '/uscmst1b_scratch/lpc1/3DayLifetime/tucker/itch/A00610B3-00B7-E611-8546-A0000420FE80.root')
+output_file(process, 'ntuple.root', [])
 file_event_from_argv(process)
-
-output_commands = [
-    'drop *',
-    'keep *_mcStat_*_*',
-    'keep MFVVertexAuxs_mfvVerticesAux_*_*',
-    'keep MFVEvent_mfvEvent__*',
-    ]
-if keep_gen:
-    output_commands += [
-        'keep *_prunedGenParticles_*_*',
-        'keep *_slimmedGenJets_*_*'
-        ]
-output_file(process, 'ntuple.root', output_commands)
 
 process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
 process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
@@ -94,8 +85,52 @@ process.p = cms.Path(process.goodOfflinePrimaryVertices *
                      process.mfvVertexSequence *
                      process.mfvEvent)
 
+output_commands = [
+    'drop *',
+    'keep *_mcStat_*_*',
+    'keep MFVVertexAuxs_mfvVerticesAux_*_*',
+    'keep MFVEvent_mfvEvent__*',
+    ]
+
+if keep_gen:
+    output_commands += [
+        'keep *_prunedGenParticles_*_*',
+        'keep *_slimmedGenJets_*_*'
+        ]
+
+if keep_all:
+    output_commands_nodrop = [x for x in output_commands if not x.strip().startswith('drop')]
+    import Configuration.EventContent.EventContent_cff as EventContent
+    if is_mc:
+        output_commands = EventContent.MINIAODSIMEventContent.outputCommands + output_commands_nodrop
+    else:
+        output_commands = EventContent.MINIAODEventContent.outputCommands + output_commands_nodrop
+
+if prepare_vis:
+    process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
+    process.p *= process.mfvSelectedVerticesSeq
+
+    for x in process.mfvSelectedVerticesTight, process.mfvSelectedVerticesTightNtk3, process.mfvSelectedVerticesTightNtk4:
+        x.produce_vertices = True
+        x.produce_tracks = True
+
+    process.load('JMTucker.MFVNeutralino.VertexRefitter_cfi')
+    process.mfvVertexRefitsDrop0 = process.mfvVertexRefits.clone(n_tracks_to_drop = 0)
+    process.mfvVertexRefitsDrop2 = process.mfvVertexRefits.clone(n_tracks_to_drop = 2)
+    process.p *= process.mfvVertexRefits * process.mfvVertexRefitsDrop2 *  process.mfvVertexRefitsDrop0
+
+    output_commands += [
+        'keep *_mfvVertices_*_*',
+        'keep *_mfvSelectedVerticesTight*_*_*',
+        'keep *_mfvVertexRefits_*_*',
+        'keep *_mfvVertexRefitsDrop2_*_*',
+        'keep *_mfvVertexRefitsDrop0_*_*',
+        ]
+
+    if is_mc:
+        output_commands += ['keep *_mfvGenParticles_*_*']
+
 if run_n_tk_seeds:
-    output_commands = process.out.outputCommands.value()
     process.mfvEvent.lightweight = True
     process.out.fileName = 'ntkseeds.root'
     if run_n_tk_seeds != 'full':
@@ -108,7 +143,8 @@ if run_n_tk_seeds:
         output_commands += ['keep VertexerPairEffs_mfvVertices%s_*_*' % ex]
         if run_n_tk_seeds == 'full':
             output_commands += ['keep MFVVertexAuxs_mfvVerticesAux%s_*_*' % ex]
-    process.out.outputCommands = output_commands
+
+process.out.outputCommands = output_commands
 
 if event_filter:
     import JMTucker.MFVNeutralino.EventFilter
