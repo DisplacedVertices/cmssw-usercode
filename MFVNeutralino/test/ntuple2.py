@@ -10,16 +10,18 @@ is_mc = True
 H = False
 repro = False
 run_n_tk_seeds = False
+minitree_only = False
 # JMTBAD implement these
-#minitree_only = False
 #prepare_vis = not run_n_tk_seeds and False
 #keep_all = prepare_vis
 #keep_gen = False
 event_filter = True #not keep_all
-version = 'v17m'
-batch_name = 'Ntuple' + version.capitalize()
+version = 'V17m'
+batch_name = 'Ntuple' + version
 if run_n_tk_seeds:
     batch_name += '_NTkSeeds'
+if minitree_only:
+    batch_name = 'MiniNtuple'  + version
 
 ####
 
@@ -104,6 +106,16 @@ if run_n_tk_seeds:
 if event_filter:
     import JMTucker.MFVNeutralino.EventFilter
     JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process, path_name='p', event_filter=True, input_is_miniaod=True)
+
+if minitree_only:
+    del process.out
+    del process.outp
+    process.TFileService.fileName = 'minintuple.root'
+    process.load('JMTucker.MFVNeutralino.MiniTree_cff')
+    process.mfvWeight.throw_if_no_mcstat = False
+    for p in process.pMiniTree, process.pMiniTreeNtk3, process.pMiniTreeNtk4, process.pMiniTreeNtk3or4:
+        p.insert(0, process.pmcStat._seq)
+        p.insert(0, process.p._seq)
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
