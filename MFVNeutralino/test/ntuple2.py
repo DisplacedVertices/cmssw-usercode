@@ -11,10 +11,10 @@ H = False
 repro = False
 run_n_tk_seeds = False
 minitree_only = False
+keep_gen = False
 # JMTBAD implement these
 #prepare_vis = not run_n_tk_seeds and False
 #keep_all = prepare_vis
-#keep_gen = False
 event_filter = True #not keep_all
 version = 'V17m'
 batch_name = 'Ntuple' + version
@@ -34,12 +34,19 @@ random_service(process, {'mfvVertices': 1222})
 tfileservice(process, 'vertex_histos.root')
 input_files(process, '/uscmst1b_scratch/lpc1/3DayLifetime/tucker/itch/A00610B3-00B7-E611-8546-A0000420FE80.root')
 file_event_from_argv(process)
-output_file(process, 'ntuple.root', [
-        'drop *',
-        'keep *_mcStat_*_*',
-        'keep MFVVertexAuxs_mfvVerticesAux_*_*',
-        'keep MFVEvent_mfvEvent__*',
-        ])
+
+output_commands = [
+    'drop *',
+    'keep *_mcStat_*_*',
+    'keep MFVVertexAuxs_mfvVerticesAux_*_*',
+    'keep MFVEvent_mfvEvent__*',
+    ]
+if keep_gen:
+    output_commands += [
+        'keep *_prunedGenParticles_*_*',
+        'keep *_slimmedGenJets_*_*'
+        ]
+output_file(process, 'ntuple.root', output_commands)
 
 process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
 process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
