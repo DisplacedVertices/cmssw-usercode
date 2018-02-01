@@ -19,7 +19,7 @@ hip_mitigation = False
 ex = ''
 already = []
 
-meta = 'neuudmu'
+meta = 'neu'
 taus   = [100, 300, 1000, 10000, 30000]
 masses = [300, 400, 500, 600, 800, 1200, 1600, 3000]
 hip_right = False
@@ -82,8 +82,8 @@ if scanpack:
     scanpack = get_scanpack(scanpack)
 
 #ex = '_test'
-#nevents, events_per = 10,10
-#meta, taus, masses = 'neu', [1000, 10000], [800]
+#nevents, events_per = 5,5
+#meta, taus, masses = 'neu', [10000], [1600]
 
 ################################################################################
 
@@ -122,7 +122,9 @@ config.General.workArea = work_area
 config.General.requestName = 'SETME'
 
 config.JobType.pluginName = 'PrivateMC'
-config.JobType.psetName = 'dummy.py'
+dummy_pset_fn_orig = 'dummy.py'
+dummy_pset_fn_temp = config.JobType.psetName = 'tmpdummy.py'
+to_rm.append(dummy_pset_fn_temp)
 config.JobType.scriptExe = 'nstep.sh'
 config.JobType.scriptArgs = []
 config.JobType.sendPythonFolder = True
@@ -133,14 +135,26 @@ config.JobType.inputFiles = ['todoify.sh', steering_fn, 'lhe.py', 'gensim.py', '
 if output_level in ('minitree', 'ntuple'):
     config.JobType.inputFiles += ['ntuple.py', 'minitree.py']
 
+output_is_edm = True
 if output_level == 'reco':
-    config.JobType.outputFiles = ['reco.root']
+    output_fn = 'reco.root'
 elif output_level == 'gensim':
-    config.JobType.outputFiles = ['gensim.root']
+    output_fn = 'gensim.root'
 elif output_level == 'ntuple':
-    config.JobType.outputFiles = ['ntuple.root']
+    output_fn = 'ntuple.root'
 elif output_level == 'minitree':
-    config.JobType.outputFiles = ['minitree.root']
+    output_fn = 'minitree.root'
+    output_is_edm = False
+config.JobType.outputFiles = [output_fn]
+
+dummy_pset = open(dummy_pset_fn_orig).read()
+if output_is_edm:
+    to_rep = 'reco.root', output_fn
+else:
+    to_rep = 'if True: # EDM output hack', 'if False:'
+assert to_rep[0] in dummy_pset
+open(dummy_pset_fn_temp, 'wt').write(dummy_pset.replace(*to_rep))
+
 # uncomment to get vertex histos
 #if output_level in ('minitree', 'ntuple'):
 #    config.JobType.outputFiles += ['vertex_histos.root']
@@ -276,6 +290,12 @@ elif meta == 'neuudmu':
     for tau, mass in taus_masses():
         name = 'mfv_neuudmu_tau%05ium_M%04i' % (tau, mass)
         todo = 'neutralino_udmu,%.1f,%i' % (tau/1000., mass)
+        submit(config, name, todo)
+
+elif meta == 'neuude':
+    for tau, mass in taus_masses():
+        name = 'mfv_neuude_tau%05ium_M%04i' % (tau, mass)
+        todo = 'neutralino_ude,%.1f,%i' % (tau/1000., mass)
         submit(config, name, todo)
 
 elif meta == 'glu':
