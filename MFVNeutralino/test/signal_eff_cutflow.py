@@ -28,6 +28,7 @@ paths = [('TwoVtxDvv400um',   'NoCuts'),
          ('TwoVtxDvv400um',   'TwoVtxBs2derr'),
          ('PreSel',           'NoCuts'),
          ('TwoVtxDvv400um',   'PreSel'),
+         ('TwoVtxGeo2ddist',  'PreSel'),
          ('TwoVtxBs2derr',    'TwoVtxGeo2ddist'),
          ]
 
