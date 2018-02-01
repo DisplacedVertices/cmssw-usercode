@@ -7,6 +7,13 @@ file_path = '~/crabdirs/TheoristRecipeV34'
 
 gen_rec_cut = 20
 
+ctau = ''
+#ctau = 'tau00100um'
+#ctau = 'tau00300um'
+#ctau = 'tau01000um'
+#ctau = 'tau10000um'
+#ctau = 'tau30000um'
+
 #gen_num = 'FourJets'
 #gen_num = 'HT40'
 #gen_num = 'Bsbs2ddist'
@@ -288,6 +295,9 @@ gs = []
 l1 = ROOT.TLegend(0.75,0.1,0.95,0.5)
 l2 = ROOT.TLegend(0.75,0.5,0.95,0.9)
 for sample,sampleName in samples:
+    if ctau not in sample:
+        continue
+
     print sample
     f = ROOT.TFile('%s/%s.root' % (file_path, sample))
     nrec = f.Get('mfvTheoristRecipe%s/h_gen_dvv'%rec_den).GetEntries()
@@ -318,7 +328,7 @@ for sample,sampleName in samples:
                 gs.append(g)
                 label = sampleName.split(',')[0] + sampleName.split(',')[2]
                 label = label.replace('\\','#').replace('#GeV',' GeV').replace('$','').replace(' M',', M')
-                if int(sample.split('tau')[1].split('um')[0]) == 1000:
+                if int(sample.split('tau')[1].split('um')[0]) == 1000 or ctau != '':
                     if style(sample) == 20:
                         l1.AddEntry(g, label.split(', ')[1], 'P')
                     if color(sample) == 6:
@@ -363,4 +373,4 @@ line2 = ROOT.TLine(0,0,1-0.01*gen_rec_cut,1)
 line0.Draw()
 line1.Draw()
 line2.Draw()
-#c.SaveAs('plots/theorist_recipe/gen_vs_reco_eff_%s_divide_%s.pdf' % (gen_num, gen_den))
+#c.SaveAs('plots/theorist_recipe/gen_vs_reco_eff_%s_divide_%s%s.pdf' % (gen_num, gen_den, '' if ctau == '' else '_%s'%ctau))
