@@ -59,13 +59,16 @@ function printSizeOf {
 
 FILES=""
 RECURSE=""
+TOTALALWAYS="0"
 
 #check arguments
-while getopts "fhr" opt; do
+while getopts "fhrt" opt; do
 	case "$opt" in
 	f) FILES=yes
 	;;
 	r) RECURSE=yes
+	;;
+	t) TOTALALWAYS=1
 	;;
 	esac
 done
@@ -100,5 +103,8 @@ else
         DIR=$(normalizeDir $DIR)
         printf "%-${MAXLEN}s  " $DIR 
         printSizeOf $DIR
-    done | sort -rn -k2 | awk '{ n += 1; s += $2; print } END { if (n > 1) { printf "%'${MAXLEN}'s  %14s %7.1f GiB\n", "Total:", s, s / 1024**3 } }'
+    done | sort -rn -k2 | awk '{ n += 1; s += $2; print } END { if (n > 1 || '$TOTALALWAYS') { printf "%'${MAXLEN}'s  %14s %7.1f GiB\n", "Total:", s, s / 1024**3 } }'
 fi
+
+# cd /eos/uscms/store/user/$USER
+# for x in $(find . -mindepth 2 -maxdepth 2 -type d  | cut -d / -f 3 | sort | uniq) ; do echo $x $(eosdu -t */$x | grep Total); done | sort -nk 3
