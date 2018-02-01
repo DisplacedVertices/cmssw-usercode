@@ -13,8 +13,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     batch_name = 'NtupleV17m_merge'
 
     samples = [s for s in
-               Samples.data_samples +
-               Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext +
+               # not worth it to merge ttbar and qcd, haven't tried data
+               #Samples.data_samples +
+               #Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext +
                Samples.mfv_signal_samples + Samples.mfv_ddbar_samples
                if s.has_dataset(dataset)]
 
