@@ -24,6 +24,7 @@ parser.add_argument('--pattern',
                     help='Glob-style pattern to filter the files, useful if there are multiple files output per job.')
 parser.add_argument('--partial', action='store_true',
                     help='If set, partial publishing is allowed.')
+parser.add_argument('--no-coderep', action='store_false', dest='coderep', help='whether to disable coderep output')
 parser.add_argument('--no-lpc-shortcut', action='store_false', dest='lpc_shortcut', help='whether to use the lpc shortcut on crab dirs')
 parser.add_argument('--no-dbs', action='store_false', dest='dbs', help='whether to use information from dbs')
 parser.add_argument('--nevents-per-job', type=int, default=-1, help='nevents to use if reading dbs fails')
@@ -135,7 +136,7 @@ for wd in wds:
         samples_lump.append(sample)
     else:
         samples.append((sample, ds, nevents))
-    code = coderep_files(files)
+    code = coderep_files(files) if options.coderep else None
     publish[sample] = (len(files), code if code is not None else files)
 
 def _key(x):
