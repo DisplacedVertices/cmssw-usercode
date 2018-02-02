@@ -156,7 +156,7 @@ class Sample(object):
     def split_by(self, val):
         allowed = ('events', 'files')
         if val not in allowed:
-            raise ValueError('split_by may only be one of %r' % allowed)
+            raise ValueError('split_by may only be one of %r' % (allowed,))
         self.datasets[self.curr_dataset].split_by = val
 
     @property

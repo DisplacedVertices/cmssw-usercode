@@ -312,10 +312,15 @@ def get(i): return _l[i]
             njobs = int_ceil(sample.nevents_orig, per)
             fn_groups = [sample.filenames]
         else:
-            per = sample.files_per
-            njobs = sample.njobs if hasattr(sample, 'njobs') else int_ceil(len(sample.filenames), per)
-            fn_groups = [x for x in (sample.filenames[i*per:(i+1)*per] for i in xrange(njobs)) if x]
-            njobs = len(fn_groups) # let it fail downward
+            if sample.files_per < 0:
+                per = len(sample.filenames)
+                njobs = 1
+                fn_groups = [sample.filenames]
+            else:
+                per = sample.files_per
+                njobs = sample.njobs if hasattr(sample, 'njobs') else int_ceil(len(sample.filenames), per)
+                fn_groups = [x for x in (sample.filenames[i*per:(i+1)*per] for i in xrange(njobs)) if x]
+                njobs = len(fn_groups) # let it fail downward
             if self._njobs is not None:
                 assert self._njobs <= njobs
                 njobs = self._njobs
