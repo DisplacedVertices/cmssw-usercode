@@ -262,83 +262,28 @@ def submit(config, name, scanpack_or_todo, todo_rawhlt=[], todo_reco=[], todo_nt
     os.remove(steering_fn)
 
 
-def taus_masses():
-    for tau in taus:
-        for mass in masses:
-            tm = tau, mass
-            if tm in already:
-                continue
-            yield tm
+metamap = {
+    'neu': ('mfv_neu', 'mfv_neutralino'),
+    'glu': ('mfv_glu', 'mfv_gluino'),
+    'neuuds': ('mfv_neuuds', 'neutralino_uds'),
+    'neuudb': ('mfv_neuudb', 'neutralino_udb'),
+    'neutds': ('mfv_neutds', 'neutralino_tds'),
+    'neutbb': ('mfv_neutbb', 'neutralino_tbb'),
+    'neuubb': ('mfv_neuubb', 'neutralino_ubb'),
+    'neucds': ('mfv_neucds', 'neutralino_cds'),
+    'neucdb': ('mfv_neucdb', 'neutralino_cdb'),
+    'neuudmu': ('mfv_neuudmu', 'neutralino_udmu'),
+    'neuude': ('mfv_neuude', 'neutralino_ude'),
+    'neuudtau': ('mfv_neuudtau', 'neutralino_udtau'),
+    'ddbar': ('mfv_ddbar', 'gluino_ddbar'),
+    'ccbar': ('mfv_ccbar', 'gluino_ccbar'),
+    'bbbar': ('mfv_bbbar', 'gluino_bbbar'),
+    'lq2': ('mfv_lq2', 'leptoquark'),
+}
 
 if meta == 'scan':
     for _ in scanpack:
         submit(config, scanpack.batch_name, scanpack)
-
-elif meta == 'neu':
-    for tau, mass in taus_masses():
-        name = 'mfv_neu_tau%05ium_M%04i' % (tau, mass)
-        todo = 'mfv_neutralino,%.1f,%i' % (tau/1000., mass)
-        submit(config, name, todo)
-
-elif meta == 'neuuds':
-    for tau, mass in taus_masses():
-        name = 'mfv_neuuds_tau%05ium_M%04i' % (tau, mass)
-        todo = 'neutralino_uds,%.1f,%i' % (tau/1000., mass)
-        submit(config, name, todo)
-
-elif meta == 'neuudmu':
-    for tau, mass in taus_masses():
-        name = 'mfv_neuudmu_tau%05ium_M%04i' % (tau, mass)
-        todo = 'neutralino_udmu,%.1f,%i' % (tau/1000., mass)
-        submit(config, name, todo)
-
-elif meta == 'neuude':
-    for tau, mass in taus_masses():
-        name = 'mfv_neuude_tau%05ium_M%04i' % (tau, mass)
-        todo = 'neutralino_ude,%.1f,%i' % (tau/1000., mass)
-        submit(config, name, todo)
-
-elif meta == 'glu':
-    for tau, mass in taus_masses():
-        name = 'mfv_glu_tau%05ium_M%04i' % (tau, mass)
-        todo = 'mfv_gluino,%.1f,%i' % (tau/1000., mass)
-        submit(config, name, todo)
-
-elif meta == 'ddbar':
-    for tau, mass in taus_masses():
-        name = 'mfv_ddbar_tau%05ium_M%04i' % (tau, mass)
-        todo = 'gluino_ddbar,%.1f,%i' % (tau/1000., mass)
-        submit(config, name, todo)
-
-elif meta == 'ccbar':
-    for tau, mass in taus_masses():
-        name = 'mfv_ccbar_tau%05ium_M%04i' % (tau, mass)
-        todo = 'gluino_ccbar,%.1f,%i' % (tau/1000., mass)
-        submit(config, name, todo)
-
-elif meta == 'bbbar':
-    for tau, mass in taus_masses():
-        name = 'mfv_bbbar_tau%05ium_M%04i' % (tau, mass)
-        todo = 'gluino_bbbar,%.1f,%i' % (tau/1000., mass)
-        submit(config, name, todo)
-
-elif meta == 'uds':
-    for tau, mass in taus_masses():
-        name = 'mfv_uds_tau%05ium_M%04i' % (tau, mass)
-        todo = 'gluino_uds,%.1f,%i' % (tau/1000., mass)
-        submit(config, name, todo)
-
-elif meta == 'udmu':
-    for tau, mass in taus_masses():
-        name = 'mfv_udmu_tau%05ium_M%04i' % (tau, mass)
-        todo = 'gluino_udmu,%.1f,%i' % (tau/1000., mass)
-        submit(config, name, todo)
-
-elif meta == 'lq2':
-    for tau, mass in taus_masses():
-        name = 'mfv_lq2_tau%05ium_M%04i' % (tau, mass)
-        todo = 'leptoquark,%.1f,%i,2' % (tau/1000., mass)
-        submit(config, name, todo)
 
 elif meta == 'ttbar':
     from modify import DummyBeamSpots
@@ -369,6 +314,24 @@ elif meta.startswith('qcdht'):
     name = meta
     todo = meta.replace('qcdht', 'qcdht,')
     submit(config, name, todo)
+
+elif meta in metamap:
+    def taus_masses():
+        for tau in taus:
+            for mass in masses:
+                tm = tau, mass
+                if tm in already:
+                    continue
+                yield tm
+
+    name_prefix, todo_fcn = metamap[meta]
+    for tau, mass in taus_masses():
+        name = '%s_tau%05ium_M%04i' % (name_prefix, tau, mass)
+        todo = '%s,%.1f,%i' % (todo_fcn, tau/1000., mass)
+        submit(config, name, todo)
+
+else:
+    raise ValueError('invalid meta %r' % meta)
 
 
 if not testing:
