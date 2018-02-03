@@ -17,11 +17,12 @@ trig_filter = False
 hip_simulation = False
 hip_mitigation = False
 ex = ''
-already = []
 
 meta = 'neu'
 taus   = [100, 300, 1000, 10000, 30000]
 masses = [300, 400, 500, 600, 800, 1200, 1600, 3000]
+tau_masses = [] # [(1000,800),(10000,1600)]
+already = []
 hip_right = False
 
 if 0:
@@ -316,16 +317,20 @@ elif meta.startswith('qcdht'):
     submit(config, name, todo)
 
 elif meta in metamap:
-    def taus_masses():
-        for tau in taus:
-            for mass in masses:
-                tm = tau, mass
-                if tm in already:
-                    continue
+    def signal_point_iterator():
+        if tau_masses:
+            for tm in tau_masses:
                 yield tm
+        else:
+            for tau in taus:
+                for mass in masses:
+                    tm = tau, mass
+                    if tm in already:
+                        continue
+                    yield tm
 
     name_prefix, todo_fcn = metamap[meta]
-    for tau, mass in taus_masses():
+    for tau, mass in signal_point_iterator():
         name = '%s_tau%05ium_M%04i' % (name_prefix, tau, mass)
         todo = '%s,%.1f,%i' % (todo_fcn, tau/1000., mass)
         submit(config, name, todo)
