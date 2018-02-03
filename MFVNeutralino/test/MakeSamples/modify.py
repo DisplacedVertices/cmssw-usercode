@@ -161,10 +161,24 @@ def set_mfv_neutralino(process, tau0, m_neutralino):
     set_neutralino(process, tau0, m_neutralino, slha_mfv_neutralino(tau0, m_neutralino))
 def set_neutralino_uds(process, tau0, m_neutralino):
     set_neutralino(process, tau0, m_neutralino, slha(tau0, m_neutralino+5, m_neutralino, [(0.5, (1,2,3)), (0.5, (-1,-2,-3))]))
+def set_neutralino_udb(process, tau0, m_neutralino):
+    set_neutralino(process, tau0, m_neutralino, slha(tau0, m_neutralino+5, m_neutralino, [(0.5, (1,2,5)), (0.5, (-1,-2,-5))]))
+def set_neutralino_tds(process, tau0, m_neutralino):
+    set_neutralino(process, tau0, m_neutralino, slha(tau0, m_neutralino+5, m_neutralino, [(0.5, (1,6,3)), (0.5, (-1,-6,-3))]))
+def set_neutralino_tbb(process, tau0, m_neutralino):
+    set_neutralino(process, tau0, m_neutralino, slha(tau0, m_neutralino+5, m_neutralino, [(0.5, (6,5,5)), (0.5, (-6,-5,-5))]))
+def set_neutralino_ubb(process, tau0, m_neutralino):
+    set_neutralino(process, tau0, m_neutralino, slha(tau0, m_neutralino+5, m_neutralino, [(0.5, (2,5,5)), (0.5, (-2,-5,-5))]))
+def set_neutralino_cds(process, tau0, m_neutralino):
+    set_neutralino(process, tau0, m_neutralino, slha(tau0, m_neutralino+5, m_neutralino, [(0.5, (1,4,3)), (0.5, (-1,-4,-3))]))
+def set_neutralino_cdb(process, tau0, m_neutralino):
+    set_neutralino(process, tau0, m_neutralino, slha(tau0, m_neutralino+5, m_neutralino, [(0.5, (1,4,5)), (0.5, (-1,-4,-5))]))
 def set_neutralino_udmu(process, tau0, m_neutralino):
     set_neutralino(process, tau0, m_neutralino, slha(tau0, m_neutralino+5, m_neutralino, [(0.5, (-1,2,13)), (0.5, (1,-2,-13))]))
 def set_neutralino_ude(process, tau0, m_neutralino):
     set_neutralino(process, tau0, m_neutralino, slha(tau0, m_neutralino+5, m_neutralino, [(0.5, (-1,2,11)), (0.5, (1,-2,-11))]))
+def set_neutralino_udtau(process, tau0, m_neutralino):
+    set_neutralino(process, tau0, m_neutralino, slha(tau0, m_neutralino+5, m_neutralino, [(0.5, (-1,2,15)), (0.5, (1,-2,-15))]))
 
 def set_gluino(process, tau0, slha):
     set_gluino_pair_production(process)
