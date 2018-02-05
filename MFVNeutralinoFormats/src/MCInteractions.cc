@@ -53,10 +53,10 @@ namespace mfv {
     decay_type_ = { h.decay_type[0], h.decay_type[1] };
   }
 
-  void MCInteraction::set(const MCInteractionHolderMFVtbs& h) {
+  void MCInteraction::set(const MCInteractionHolderMFVtbs& h, int type) {
     check_empty_();
 
-    type_ = mci_MFVtbs;
+    type_ = type;
     primaries_ = { h.lsps[0], h.lsps[1] };
     secondaries_ = { h.stranges[0], h.primary_bottoms[0], h.tops[0], h.bottoms[0], h.Ws[0], h.W_daughters[0][0], h.W_daughters[0][1],
                      h.stranges[1], h.primary_bottoms[1], h.tops[1], h.bottoms[1], h.Ws[1], h.W_daughters[1][0], h.W_daughters[1][1] };
