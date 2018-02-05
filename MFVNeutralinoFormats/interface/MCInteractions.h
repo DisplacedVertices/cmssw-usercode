@@ -5,7 +5,7 @@
 
 namespace mfv {
   // "tu" == tau but tau is a reserved string in our sample names
-  enum MCInteractions_t { mci_invalid, mci_Ttbar, mci_MFVtbs, mci_MFVuds, mci_MFVude, mci_MFVudmu, mci_MFVudtu, mci_XX4j, mci_MFVlq, mci_MFVddbar, mci_MFVbbbar };
+  enum MCInteractions_t { mci_invalid, mci_Ttbar, mci_MFVtbs, mci_MFVuds, mci_MFVude, mci_MFVudmu, mci_MFVudtu, mci_XX4j, mci_MFVlq, mci_MFVddbar, mci_MFVccbar, mci_MFVbbbar };
 
   struct MCInteractionHolderTtbar {
     virtual bool valid() const;

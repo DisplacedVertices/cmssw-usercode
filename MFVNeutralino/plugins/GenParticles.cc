@@ -384,7 +384,7 @@ bool MFVGenParticles::try_XX4j(mfv::MCInteraction& mc, const edm::Handle<reco::G
 
 bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles, int quark) const {
   if (debug) printf("MFVGenParticles::try_MFVdijet quark=%i\n", quark);
-  assert(quark == 1 || quark == 5);
+  assert(quark == 1 || quark == 4 || quark == 5);
 
   mfv::MCInteractionHolderPair h;
 
@@ -435,7 +435,10 @@ bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<rec
   }
 
   if (h.valid()) {
-    mc.set(h, quark == 1 ? mfv::mci_MFVddbar : mfv::mci_MFVbbbar );
+    mfv::MCInteractions_t type = mfv::mci_MFVddbar;
+    if      (quark == 4) type = mfv::mci_MFVccbar;
+    else if (quark == 5) type = mfv::mci_MFVbbbar;
+    mc.set(h, type);
     return true;
   }
   else
@@ -537,6 +540,7 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
     try_MFVthree(*mc, gen_particles, 15, 2, -1) ||
     try_XX4j    (*mc, gen_particles) ||
     try_MFVdijet(*mc, gen_particles, 1) || //ddbar
+    try_MFVdijet(*mc, gen_particles, 4) || //ccbar
     try_MFVdijet(*mc, gen_particles, 5) || //bbbar
     try_MFVlq   (*mc, gen_particles);
 
