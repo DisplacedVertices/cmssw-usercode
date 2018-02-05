@@ -263,7 +263,7 @@ bool MFVGenParticles::try_Ttbar(mfv::MCInteraction& mc, const edm::Handle<reco::
 
 bool MFVGenParticles::try_MFVthree(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles, int t1, int t2, int t3) const {
   if (debug) printf("MFVGenParticles::try_MFVthree %i %i %i\n", t1, t2, t3);
-  assert(t1 == 3 || t1 == 13);
+  assert(t1 == 3 || t1 == 13 || t1 == 11);
   assert(t2 == 2);
   assert(t3 == 1 || t3 == -1);
 
@@ -327,7 +327,10 @@ bool MFVGenParticles::try_MFVthree(mfv::MCInteraction& mc, const edm::Handle<rec
   }
 
   if (h.valid()) {
-    mc.set(h, t1 == 3 ? mfv::mci_MFVuds : mfv::mci_MFVudmu);
+    mfv::MCInteractions_t type = mfv::mci_MFVuds;
+    if      (t1 == 13) type = mfv::mci_MFVudmu;
+    else if (t1 == 11) type = mfv::mci_MFVude;
+    mc.set(h, type);
     return true;
   }
   else
@@ -529,6 +532,7 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
     try_Ttbar   (*mc, gen_particles) || 
     try_MFVthree(*mc, gen_particles,  3, 2,  1) ||
     try_MFVthree(*mc, gen_particles, 13, 2, -1) ||
+    try_MFVthree(*mc, gen_particles, 11, 2, -1) ||
     try_XX4j    (*mc, gen_particles) ||
     try_MFVdijet(*mc, gen_particles, 1) || //ddbar
     try_MFVdijet(*mc, gen_particles, 5) || //bbbar
