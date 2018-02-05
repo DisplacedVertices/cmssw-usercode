@@ -459,6 +459,23 @@ _add_ds("main", {
 'mfv_bbbar_tau30000um_M1200': _fromnum1("/store/user/shogan/croncopyeos/mfv_bbbar_tau30000um_M1200/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/171218_055002", 100, fnbase="reco"),
 'mfv_bbbar_tau30000um_M1600': _fromnum1("/store/user/shogan/croncopyeos/mfv_bbbar_tau30000um_M1600/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/171218_055018", 100, fnbase="reco"),
 'mfv_bbbar_tau30000um_M3000': _fromnum1("/store/user/shogan/croncopyeos/mfv_bbbar_tau30000um_M3000/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/171218_055034", 100, fnbase="reco"),
+
+'mfv_ccbar_tau01000um_M0800': _fromnum1("/store/user/tucker/mfv_ccbar_tau01000um_M0800/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/180203_013425", 100, fnbase="reco"),
+'mfv_ccbar_tau10000um_M1600': (99, ['/store/user/tucker/mfv_ccbar_tau10000um_M1600/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/180203_013439/0000/reco_%i.root' % i for i in chain(xrange(1,33), xrange(34,101))]),
+'mfv_neucdb_tau01000um_M0800': _fromnum1("/store/user/tucker/mfv_neucdb_tau01000um_M0800/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/180203_020551", 100, fnbase="reco"),
+'mfv_neucdb_tau10000um_M1600': (99, ['/store/user/tucker/mfv_neucdb_tau10000um_M1600/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/180203_020604/0000/reco_%i.root' % i for i in chain(xrange(1,80), xrange(81,101))]),
+'mfv_neucds_tau01000um_M0800': _fromnum1("/store/user/tucker/mfv_neucds_tau01000um_M0800/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/180203_013536", 100, fnbase="reco"),
+'mfv_neucds_tau10000um_M1600': (99, ['/store/user/tucker/mfv_neucds_tau10000um_M1600/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/180203_013551/0000/reco_%i.root' % i for i in chain(xrange(1,67), xrange(68,101))]),
+'mfv_neutbb_tau01000um_M0800': (99, ['/store/user/tucker/mfv_neutbb_tau01000um_M0800/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/180203_020301/0000/reco_%i.root' % i for i in chain(xrange(1,48), xrange(49,101))]),
+'mfv_neutbb_tau10000um_M1600': (97, ['/store/user/tucker/mfv_neutbb_tau10000um_M1600/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/180203_020316/0000/reco_%i.root' % i for i in chain(xrange(1,31), xrange(32,62), xrange(63,68), xrange(69,101))]),
+'mfv_neutds_tau01000um_M0800': _fromnum1("/store/user/tucker/mfv_neutds_tau01000um_M0800/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/180203_015753", 100, fnbase="reco"),
+'mfv_neutds_tau10000um_M1600': (96, ['/store/user/tucker/mfv_neutds_tau10000um_M1600/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/180203_015807/0000/reco_%i.root' % i for i in chain(xrange(1,4), xrange(5,28), xrange(29,84), xrange(87,101), [85])]),
+'mfv_neuubb_tau01000um_M0800': _fromnum1("/store/user/tucker/mfv_neuubb_tau01000um_M0800/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/180203_020431", 100, fnbase="reco"),
+'mfv_neuubb_tau10000um_M1600': (98, ['/store/user/tucker/mfv_neuubb_tau10000um_M1600/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/180203_020445/0000/reco_%i.root' % i for i in chain(xrange(1,59), xrange(60,97), xrange(98,101))]),
+'mfv_neuudb_tau01000um_M0800': (99, ['/store/user/tucker/mfv_neuudb_tau01000um_M0800/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/180203_014648/0000/reco_%i.root' % i for i in chain(xrange(1,71), xrange(72,101))]),
+'mfv_neuudb_tau10000um_M1600': _fromnum1("/store/user/tucker/mfv_neuudb_tau10000um_M1600/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/180203_014701", 100, fnbase="reco"),
+'mfv_neuudtu_tau01000um_M0800': _fromnum1("/store/user/tucker/mfv_neuudtau_tau01000um_M0800/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/180203_020654", 100, fnbase="reco"),
+'mfv_neuudtu_tau10000um_M1600': _fromnum1("/store/user/tucker/mfv_neuudtau_tau10000um_M1600/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/180203_020710", 100, fnbase="reco"),
 })
 
 

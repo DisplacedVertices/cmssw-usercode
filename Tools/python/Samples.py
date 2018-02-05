@@ -450,6 +450,25 @@ mfv_bbbar_samples = [
     MCSample('mfv_bbbar_tau30000um_M3000', '/mfv_bbbar_tau30000um_M3000/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-4e49501f099cd99476d94589e7f17a71/USER', 10000),
     ]
 
+mfv_misc_samples = [
+    MCSample('mfv_ccbar_tau01000um_M0800', '/mfv_ccbar_tau01000um_M0800/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-04f7fdeabc542013ea7b262788866056/USER', 9999),
+    MCSample('mfv_ccbar_tau10000um_M1600', '/mfv_ccbar_tau10000um_M1600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-f7e5127494499950405604b82f0f6cf9/USER', 9900),
+    MCSample('mfv_neucdb_tau01000um_M0800', '/mfv_neucdb_tau01000um_M0800/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-5e8bbbfd9a85c6633a03d9b65f3d35df/USER', 10000),
+    MCSample('mfv_neucdb_tau10000um_M1600', '/mfv_neucdb_tau10000um_M1600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-6bb197af22348da8d9f9b411540e61df/USER', 9900),
+    MCSample('mfv_neucds_tau01000um_M0800', '/mfv_neucds_tau01000um_M0800/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-51ea4166693bfdc26862f96fbd7ec158/USER', 10000),
+    MCSample('mfv_neucds_tau10000um_M1600', '/mfv_neucds_tau10000um_M1600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-1e307f99474f2a97292ca79ee65fd464/USER', 9900),
+    MCSample('mfv_neutbb_tau01000um_M0800', '/mfv_neutbb_tau01000um_M0800/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-0d493cea93a430e7edbb1e567eaea25a/USER', 9900),
+    MCSample('mfv_neutbb_tau10000um_M1600', '/mfv_neutbb_tau10000um_M1600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-f5195637e3c78f8327132f9f2f9cfa50/USER', 9700),
+    MCSample('mfv_neutds_tau01000um_M0800', '/mfv_neutds_tau01000um_M0800/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-a8de20ac33902302c0f0aa90d286a33f/USER', 10000),
+    MCSample('mfv_neutds_tau10000um_M1600', '/mfv_neutds_tau10000um_M1600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-2e8d32f5e910a3c93aa01281063c9ba9/USER', 9600),
+    MCSample('mfv_neuubb_tau01000um_M0800', '/mfv_neuubb_tau01000um_M0800/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-910f21636fac69895f5d16a6d8c46f90/USER', 10000),
+    MCSample('mfv_neuubb_tau10000um_M1600', '/mfv_neuubb_tau10000um_M1600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-a125894d2383dc32f0a3dfec12438cb5/USER', 9800),
+    MCSample('mfv_neuudb_tau01000um_M0800', '/mfv_neuudb_tau01000um_M0800/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-71c928bf558e1132c0df375c33a21202/USER', 9900),
+    MCSample('mfv_neuudb_tau10000um_M1600', '/mfv_neuudb_tau10000um_M1600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-0bac255a70a0a3afedbcb28f36c7205e/USER', 10000),
+    MCSample('mfv_neuudtu_tau01000um_M0800', '/mfv_neuudtau_tau01000um_M0800/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-2d69f57508d44050ac2268e7a3c1c4f5/USER', 10000),
+    MCSample('mfv_neuudtu_tau10000um_M1600', '/mfv_neuudtau_tau10000um_M1600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-ae17070838abfc249976d0f5220ce40e/USER', 10000),
+    ]
+
 mfv_hip_samples = [ # dbs may be screwed up for these, and the ones that say "Premix" weren't really premixed, I just forgot to change the output name
     MCSample('mfv_ddbar_tau00100um_M0300_hip1p0_mit', '/mfv_ddbar_tau00100um_M0300/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-90bd64cf19795b03775f4010661fcc0d/USER', 9899),
     MCSample('mfv_ddbar_tau00100um_M0400_hip1p0_mit', '/mfv_ddbar_tau00100um_M0400/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-28ff807dea20cd8e63c6a95816485dda/USER', 9900),
@@ -514,7 +533,7 @@ mfv_hip_samples = [ # dbs may be screwed up for these, and the ones that say "Pr
     MCSample('mfv_neu_tau30000um_M1600_hip1p0_mit', '/mfv_neu_tau30000um_M1600/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-c5e763a88dabdb717409c32ce672b20d/USER', 10000),
     ]
 
-for s in mfv_ddbar_samples + mfv_signal_samples + mfv_neuuds_samples + mfv_neuudmu_samples + mfv_neuude_samples + mfv_bbbar_samples + mfv_hip_samples:
+for s in mfv_ddbar_samples + mfv_signal_samples + mfv_neuuds_samples + mfv_neuudmu_samples + mfv_neuude_samples + mfv_bbbar_samples + mfv_misc_samples + mfv_hip_samples:
     _set_tau_mass(s)
     s.xsec = 1e-3
     s.is_private = s.dataset.startswith('/mfv_')
@@ -624,6 +643,7 @@ __all__ = [
     'mfv_neuudmu_samples',
     'mfv_neuude_samples',
     'mfv_bbbar_samples',
+    'mfv_misc_samples',
     'mfv_hip_samples',
     'data_samples',
     'auxiliary_data_samples',
