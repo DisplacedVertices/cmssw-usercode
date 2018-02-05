@@ -465,6 +465,7 @@ mfv_misc_samples = [
     MCSample('mfv_neuubb_tau10000um_M1600', '/mfv_neuubb_tau10000um_M1600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-a125894d2383dc32f0a3dfec12438cb5/USER', 9800),
     MCSample('mfv_neuudb_tau01000um_M0800', '/mfv_neuudb_tau01000um_M0800/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-71c928bf558e1132c0df375c33a21202/USER', 9900),
     MCSample('mfv_neuudb_tau10000um_M1600', '/mfv_neuudb_tau10000um_M1600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-0bac255a70a0a3afedbcb28f36c7205e/USER', 10000),
+    # "tu" = tau but "tau" is a reserved string in our sample names
     MCSample('mfv_neuudtu_tau01000um_M0800', '/mfv_neuudtau_tau01000um_M0800/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-2d69f57508d44050ac2268e7a3c1c4f5/USER', 10000),
     MCSample('mfv_neuudtu_tau10000um_M1600', '/mfv_neuudtau_tau10000um_M1600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-ae17070838abfc249976d0f5220ce40e/USER', 10000),
     ]

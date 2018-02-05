@@ -4,7 +4,8 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 
 namespace mfv {
-  enum MCInteractions_t { mci_invalid, mci_Ttbar, mci_MFVtbs, mci_MFVuds, mci_MFVudmu, mci_MFVude, mci_XX4j, mci_MFVlq, mci_MFVddbar, mci_MFVbbbar };
+  // "tu" == tau but tau is a reserved string in our sample names
+  enum MCInteractions_t { mci_invalid, mci_Ttbar, mci_MFVtbs, mci_MFVuds, mci_MFVude, mci_MFVudmu, mci_MFVudtu, mci_XX4j, mci_MFVlq, mci_MFVddbar, mci_MFVbbbar };
 
   struct MCInteractionHolderTtbar {
     virtual bool valid() const;
