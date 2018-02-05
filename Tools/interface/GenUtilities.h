@@ -75,7 +75,7 @@ struct GenParticlePrinter {
 
   void PrintHeader();
   void Print(const reco::Candidate* c, const char* name);
-  void Print(const reco::GenParticleRef r, const char* name) { Print(&*r, name); }
+  void Print(const reco::GenParticleRef r, const char* name) { Print(r.isNull() ? 0 : &*r, name); }
 };
 
 #endif

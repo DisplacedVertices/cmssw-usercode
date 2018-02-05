@@ -30,7 +30,7 @@ private:
 
   void set_Ttbar_decay(mfv::MCInteractionHolderTtbar&, const edm::Handle<reco::GenParticleCollection>&) const;
 
-  bool try_MFVtbs  (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
+  bool try_MFVtbs  (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&, int t1, int t2) const;
   bool try_Ttbar   (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
   bool try_MFVthree(mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&, int t1, int t2, int t3) const;
   bool try_XX4j    (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
@@ -155,8 +155,14 @@ void MFVGenParticles::set_Ttbar_decay(mfv::MCInteractionHolderTtbar& mc, const e
   }
 }
 
-bool MFVGenParticles::try_MFVtbs(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles) const {
+bool MFVGenParticles::try_MFVtbs(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles, int t1, int t2) const {
   if (debug) printf("MFVGenParticles::try_MFVtbs\n");
+
+  assert(t1 == 5 || t1 == 1);
+  assert(t2 == 3 || t2 == 5);
+  mfv::MCInteractions_t type = mfv::mci_MFVtbs;
+  if      (t1 == 1) type = mfv::mci_MFVtds;
+  else if (t2 == 5) type = mfv::mci_MFVtbb;
 
   mfv::MCInteractionHolderMFVtbs h;
 
@@ -184,11 +190,47 @@ bool MFVGenParticles::try_MFVtbs(mfv::MCInteraction& mc, const edm::Handle<reco:
     }
 
     // Get the daughters. 
-    // The last true param of daughter_with_id means take absolute value, so that e.g. strange or antistrange is OK.
+
+    if (type == mfv::mci_MFVtbb) {
+      // JMTBAD ugh merge with MFVthree
+      const int doubled_id = 5;
+      const std::set<int> req_ids = { 5,5,6 };
+      const size_t n = 3;
+      if (lsp->numberOfDaughters() == n) {
+        std::vector<const reco::Candidate*> daus = { lsp->daughter(0), lsp->daughter(1), lsp->daughter(2) };
+        const std::vector<int> ids = { abs(daus[0]->pdgId()), abs(daus[1]->pdgId()), abs(daus[2]->pdgId()) };
+        const std::set<int> sids(ids.begin(), ids.end());
+        if (sids == req_ids)
+          for (size_t i = 0; i < n; ++i)
+            for (size_t j = i+1; j < n; ++j)
+              if (ids[i] == doubled_id && ids[j] == doubled_id) {
+                h.stranges       [which] = gen_ref(daus[i], gen_particles);
+                h.primary_bottoms[which] = gen_ref(daus[j], gen_particles);
+              }
+      }
+
+      h.tops           [which] = gen_ref(daughter_with_id(&*lsp, 6,  true), gen_particles);
+    }
+    else {
+      // The last true param of daughter_with_id means take absolute value, so that e.g. strange or antistrange is OK.
+      h.stranges       [which] = gen_ref(daughter_with_id(&*lsp, t1, true), gen_particles);
+      h.primary_bottoms[which] = gen_ref(daughter_with_id(&*lsp, t2, true), gen_particles);
+      h.tops           [which] = gen_ref(daughter_with_id(&*lsp, 6,  true), gen_particles);
+    }
+
+    if (debug) {
+      char lspname[16];
+      snprintf(lspname, 16, "lsp #%lu", which);
+      gpp.Print(lsp, lspname);
+      gpp.Print(h.stranges[which], "strangetemp");
+      gpp.Print(h.primary_bottoms[which], "bottomtemp");
+      gpp.Print(h.tops[which], "toptemp");
+    }
+
     // If any are bad, let the mc object be half-formed/invalid.
-    if ((h.stranges       [which] = gen_ref(daughter_with_id(&*lsp, 3, true), gen_particles)).isNull()) return false;
-    if ((h.primary_bottoms[which] = gen_ref(daughter_with_id(&*lsp, 5, true), gen_particles)).isNull()) return false;
-    if ((h.tops           [which] = gen_ref(daughter_with_id(&*lsp, 6, true), gen_particles)).isNull()) return false;
+    if (h.stranges       [which].isNull()) return false;
+    if (h.primary_bottoms[which].isNull()) return false;
+    if (h.tops           [which].isNull()) return false;
 
     // The -1 in final_candidate for the tops used to be 3 for
     // allowing radiated gluons or photons but with official sample
@@ -197,14 +239,10 @@ bool MFVGenParticles::try_MFVtbs(mfv::MCInteraction& mc, const edm::Handle<reco:
     h.primary_bottoms[which] = gen_ref(final_candidate(h.primary_bottoms[which], -1), gen_particles);
     h.tops           [which] = gen_ref(final_candidate(h.tops           [which], -1), gen_particles);
 
-    // testing
     if (debug) {
-      char lspname[16];
-      snprintf(lspname, 16, "lsp #%lu", which);
-      gpp.Print(&*lsp, lspname);
-      gpp.Print(&*h.stranges[which], "strange");
-      gpp.Print(&*h.primary_bottoms[which], "bottom");
-      gpp.Print(&*h.tops[which], "top");
+      gpp.Print(h.stranges[which], "strange");
+      gpp.Print(h.primary_bottoms[which], "bottom");
+      gpp.Print(h.tops[which], "top");
     }
 
     if (last_flag_check) {
@@ -222,7 +260,7 @@ bool MFVGenParticles::try_MFVtbs(mfv::MCInteraction& mc, const edm::Handle<reco:
   set_Ttbar_decay(h, gen_particles);
   
   if (h.valid()) {
-    mc.set(h);
+    mc.set(h, type);
     return true;
   }
   else
@@ -263,11 +301,46 @@ bool MFVGenParticles::try_Ttbar(mfv::MCInteraction& mc, const edm::Handle<reco::
 
 bool MFVGenParticles::try_MFVthree(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles, int t1, int t2, int t3) const {
   if (debug) printf("MFVGenParticles::try_MFVthree %i %i %i\n", t1, t2, t3);
-  assert(t1 == 3 || t1 == 13);
-  assert(t2 == 2);
-  assert(t3 == 1 || t3 == -1);
 
-  mfv::MCInteractionHolderMFVuds h;
+  mfv::MCInteractions_t type = mfv::mci_invalid;
+  int doubled_id = 0;
+  {
+    static const std::vector<std::vector<int>> allowed = {
+      {3,2,1},
+      {11,2,-1},
+      {13,2,-1},
+      {15,2,-1},
+      {5,2,1},
+      {3,1,4},
+      {5,1,4},
+      {5,5,2}, // if doubled the doubled ids have to be first
+    };
+    static const std::vector<mfv::MCInteractions_t> allowed_types = {
+      mfv::mci_MFVuds,
+      mfv::mci_MFVude,
+      mfv::mci_MFVudmu,
+      mfv::mci_MFVudtu,
+      mfv::mci_MFVudb,
+      mfv::mci_MFVcds,
+      mfv::mci_MFVcdb,
+      mfv::mci_MFVubb,
+    };
+    static const std::vector<int> doubleds = { 0,0,0,0,0,0,0,5 };
+    static const size_t n = allowed.size();
+    assert(n == allowed_types.size());
+    for (size_t i = 0; i < n; ++i) {
+      if (t1 == allowed[i][0] &&
+          t2 == allowed[i][1] &&
+          t3 == allowed[i][2]) {
+        type = allowed_types[i];
+        doubled_id = doubleds[i];
+        break;
+      }
+    }
+    assert(type != mfv::mci_invalid);
+  }
+
+  mfv::MCInteractionHolderThruple h;
 
   GenParticlePrinter gpp(*gen_particles);
   gpp.print_mothers = gpp.print_vertex = true;
@@ -300,11 +373,44 @@ bool MFVGenParticles::try_MFVthree(mfv::MCInteraction& mc, const edm::Handle<rec
     }
 
     // Get the daughters. 
-    // The last true param of daughter_with_id means take absolute value, so that e.g. strange or antistrange is OK.
+    if (doubled_id) {
+      const std::set<int> req_ids = { abs(t1), abs(t2), abs(t3) };
+      const size_t n = 3;
+      if (lsp->numberOfDaughters() == n) {
+        std::vector<const reco::Candidate*> daus = { lsp->daughter(0), lsp->daughter(1), lsp->daughter(2) };
+        const std::vector<int> ids = { abs(daus[0]->pdgId()), abs(daus[1]->pdgId()), abs(daus[2]->pdgId()) };
+        const std::set<int> sids(ids.begin(), ids.end());
+        if (sids == req_ids) {
+          for (size_t i = 0; i < n; ++i) {
+            if (ids[i] != doubled_id) {
+              h.s[which][n-1] = gen_ref(daus[i], gen_particles);
+              daus.erase(daus.begin() + i);
+              break;
+            }
+          }
+          assert(daus.size() == n-1);
+          for (size_t i = 0; i < n-1; ++i)
+            h.s[which][i] = gen_ref(daus[i], gen_particles);
+        }
+      }
+    }
+    else {
+      // The last true param of daughter_with_id means take absolute value, so that e.g. strange or antistrange is OK.
+      h.s[which][0] = gen_ref(daughter_with_id(&*lsp, t1, true), gen_particles);
+      h.s[which][1] = gen_ref(daughter_with_id(&*lsp, t2, true), gen_particles);
+      h.s[which][2] = gen_ref(daughter_with_id(&*lsp, t3, true), gen_particles);
+    }
+
+    if (debug) {
+      gpp.Print(h.s[which][0], "s0temp");
+      gpp.Print(h.s[which][1], "s1temp");
+      gpp.Print(h.s[which][2], "s2temp");
+    }
+
     // If any are bad, let the mc object be half-formed/invalid.
-    if ((h.s[which][0] = gen_ref(daughter_with_id(&*lsp, t1, true), gen_particles)).isNull()) return false;
-    if ((h.s[which][1] = gen_ref(daughter_with_id(&*lsp, t2, true), gen_particles)).isNull()) return false;
-    if ((h.s[which][2] = gen_ref(daughter_with_id(&*lsp, t3, true), gen_particles)).isNull()) return false;
+    if (h.s[which][0].isNull()) return false;
+    if (h.s[which][1].isNull()) return false;
+    if (h.s[which][2].isNull()) return false;
 
     // The -1 in final_candidate for the tops used to be 3 for
     // allowing radiated gluons or photons but with official sample
@@ -312,7 +418,6 @@ bool MFVGenParticles::try_MFVthree(mfv::MCInteraction& mc, const edm::Handle<rec
     for (int j = 0; j < 3; ++j)
       h.s[which][j] = gen_ref(final_candidate(h.s[which][j], -1), gen_particles);
 
-    // testing
     if (debug) {
       gpp.Print(&*h.s[which][0], "s0");
       gpp.Print(&*h.s[which][1], "s1");
@@ -327,7 +432,7 @@ bool MFVGenParticles::try_MFVthree(mfv::MCInteraction& mc, const edm::Handle<rec
   }
 
   if (h.valid()) {
-    mc.set(h, t1 == 3 ? mfv::mci_MFVuds : mfv::mci_MFVudmu);
+    mc.set(h, type);
     return true;
   }
   else
@@ -380,7 +485,7 @@ bool MFVGenParticles::try_XX4j(mfv::MCInteraction& mc, const edm::Handle<reco::G
 
 bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles, int quark) const {
   if (debug) printf("MFVGenParticles::try_MFVdijet quark=%i\n", quark);
-  assert(quark == 1 || quark == 5);
+  assert(quark == 1 || quark == 4 || quark == 5);
 
   mfv::MCInteractionHolderPair h;
 
@@ -431,7 +536,10 @@ bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<rec
   }
 
   if (h.valid()) {
-    mc.set(h, quark == 1 ? mfv::mci_MFVddbar : mfv::mci_MFVbbbar );
+    mfv::MCInteractions_t type = mfv::mci_MFVddbar;
+    if      (quark == 4) type = mfv::mci_MFVccbar;
+    else if (quark == 5) type = mfv::mci_MFVbbbar;
+    mc.set(h, type);
     return true;
   }
   else
@@ -524,13 +632,22 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
 
     if (debug) printf("MFVGenParticles::analyze: lsp_id %i\n", lsp_id);
 
-    // the order of these tries is important, at least that MFVtbs comes before Ttbar
-    try_MFVtbs  (*mc, gen_particles) ||
+    // the order of these tries is important, at least that MFVtbses come before Ttbar
+    try_MFVtbs  (*mc, gen_particles, 5, 3) || // tbs
+    try_MFVtbs  (*mc, gen_particles, 1, 3) || // tds
+    try_MFVtbs  (*mc, gen_particles, 5, 5) || // tbb
     try_Ttbar   (*mc, gen_particles) || 
     try_MFVthree(*mc, gen_particles,  3, 2,  1) ||
+    try_MFVthree(*mc, gen_particles, 11, 2, -1) ||
     try_MFVthree(*mc, gen_particles, 13, 2, -1) ||
+    try_MFVthree(*mc, gen_particles, 15, 2, -1) ||
+    try_MFVthree(*mc, gen_particles,  5, 2,  1) || // udb
+    try_MFVthree(*mc, gen_particles,  3, 1,  4) || // cds
+    try_MFVthree(*mc, gen_particles,  5, 1,  4) || // cdb
+    try_MFVthree(*mc, gen_particles,  5, 5,  2) || // ubb
     try_XX4j    (*mc, gen_particles) ||
     try_MFVdijet(*mc, gen_particles, 1) || //ddbar
+    try_MFVdijet(*mc, gen_particles, 4) || //ccbar
     try_MFVdijet(*mc, gen_particles, 5) || //bbbar
     try_MFVlq   (*mc, gen_particles);
 

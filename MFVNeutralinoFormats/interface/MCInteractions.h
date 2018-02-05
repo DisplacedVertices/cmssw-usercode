@@ -4,7 +4,8 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 
 namespace mfv {
-  enum MCInteractions_t { mci_invalid, mci_Ttbar, mci_MFVtbs, mci_MFVuds, mci_MFVudmu, mci_XX4j, mci_MFVlq, mci_MFVddbar, mci_MFVbbbar };
+  // "tu" == tau but tau is a reserved string in our sample names
+  enum MCInteractions_t { mci_invalid, mci_Ttbar, mci_MFVtbs, mci_MFVtds, mci_MFVtbb, mci_MFVuds, mci_MFVude, mci_MFVudmu, mci_MFVudtu,  mci_MFVudb, mci_MFVcds, mci_MFVcdb, mci_MFVubb, mci_XX4j, mci_MFVlq, mci_MFVddbar, mci_MFVccbar, mci_MFVbbbar };
 
   struct MCInteractionHolderTtbar {
     virtual bool valid() const;
@@ -59,9 +60,8 @@ namespace mfv {
     typedef std::vector<GenRef> GenRefs;
 
     void set(const MCInteractionHolderTtbar&);
-    void set(const MCInteractionHolderMFVtbs&);
+    void set(const MCInteractionHolderMFVtbs&, int type);
     void set(const MCInteractionHolderThruple&, int type);
-    void set(const MCInteractionHolderMFVuds&);
     void set(const MCInteractionHolderPair&, int type);
     void set(const MCInteractionHolderXX4j&);
     void set(const MCInteractionHolderMFVlq&);
