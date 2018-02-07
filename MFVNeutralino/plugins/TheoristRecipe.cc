@@ -69,11 +69,13 @@ private:
   TH1F* h_gen_match_ntracks;
   TH1F* h_gen_match_sumpt;
   TH1F* h_gen_match_dbv;
+  TH1F* h_gen_match_dvv;
 
   TH1F* h_rec_match_dxy;
   TH1F* h_rec_match_ntracks;
   TH1F* h_rec_match_bs2derr;
   TH1F* h_rec_match_dbv;
+  TH1F* h_rec_match_dvv;
 };
 
 MFVTheoristRecipe::MFVTheoristRecipe(const edm::ParameterSet& cfg)
@@ -130,11 +132,13 @@ MFVTheoristRecipe::MFVTheoristRecipe(const edm::ParameterSet& cfg)
   h_gen_match_ntracks = fs->make<TH1F>("h_gen_match_ntracks", ";number of accepted displaced daughter particles;LSPs", 40, 0, 40);
   h_gen_match_sumpt = fs->make<TH1F>("h_gen_match_sumpt", ";#Sigmap_{T} of accepted displaced daughter particles (GeV);LSPs", 500, 0, 5000);
   h_gen_match_dbv = fs->make<TH1F>("h_gen_match_dbv", ";generated d_{BV} (cm);LSPs", 250, 0, 2.5);
+  h_gen_match_dvv = fs->make<TH1F>("h_gen_match_dvv", ";generated d_{VV} (cm);events", 500, 0, 5);
 
   h_rec_match_dxy = fs->make<TH1F>("h_rec_match_dxy", ";reconstructed d_{xy} (cm);tracks", 100, 0, 1);
   h_rec_match_ntracks = fs->make<TH1F>("h_rec_match_ntracks", ";number of tracks;vertices", 40, 0, 40);
   h_rec_match_bs2derr = fs->make<TH1F>("h_rec_match_bs2derr", ";#sigma(d_{BV}) (cm);vertices", 25, 0, 0.0025);
   h_rec_match_dbv = fs->make<TH1F>("h_rec_match_dbv", ";reconstructed d_{BV} (cm);vertices", 250, 0, 2.5);
+  h_rec_match_dvv = fs->make<TH1F>("h_rec_match_dvv", ";reconstructed d_{VV} (cm);events", 500, 0, 5);
 }
 
 void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&) {
@@ -332,6 +336,11 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
 
   for (int i = 0; i < 2; ++i) {
     h_lspsnmatch->Fill(lsp_nmatch[i]);
+  }
+
+  if (lsp_nmatch[0] + lsp_nmatch[1] >= 2) {
+    h_gen_match_dvv->Fill(dvv);
+    h_rec_match_dvv->Fill(mag(vertices->at(0).x - vertices->at(1).x, vertices->at(0).y - vertices->at(1).y));
   }
 }
 
