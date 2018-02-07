@@ -3,7 +3,7 @@
 from JMTucker.Tools.ROOTTools import ROOT
 from array import array
 
-file_path = '~/crabdirs/TheoristRecipeV36'
+file_path = '~/crabdirs/TheoristRecipeV37'
 
 gen_rec_cut = 20
 
@@ -21,7 +21,7 @@ ctau = ''
 #gen_num = 'HT40'
 #gen_num = 'Bsbs2ddist'
 #gen_num = 'Geo2ddist'
-#gen_num = 'Sumpt400'
+#gen_num = 'Sumpt200'
 gen_num = 'Dvv400um'
 
 rec_den = 'NoCuts'
@@ -45,11 +45,11 @@ iden = 0
 #iden = 6
 
 #rec_den = 'TwoVtxBs2derr'
-#gen_den = 'Sumpt400'
+#gen_den = 'Sumpt200'
 #iden = 8
 
 reconstructed = ['NoCuts', 'OfflineJets', 'TrigSel', 'PreSel', 'TwoVtxNoCuts', 'TwoVtxBsbs2ddist', 'TwoVtxGeo2ddist', 'TwoVtxNtracks', 'TwoVtxBs2derr', 'TwoVtxDvv400um']
-generated = ['NoCuts', 'FourJets', '', 'HT40', '', 'Bsbs2ddist', 'Geo2ddist', '', 'Sumpt400', 'Dvv400um']
+generated = ['NoCuts', 'FourJets', '', 'HT40', '', 'Bsbs2ddist', 'Geo2ddist', '', 'Sumpt200', 'Dvv400um']
 
 samples = [
     ('mfv_neu_tau00100um_M0300',              r'$\tilde{N} \rightarrow tbs$,      $c\tau = 100\mum$, $M =  300\GeV$'),
