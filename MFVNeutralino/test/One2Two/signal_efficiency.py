@@ -54,9 +54,12 @@ class SignalEfficiencyCombiner:
         total_nsig = 0
         sig_rate = [0.] * self.nbins
         sig_uncert = None
+        int_lumi_sum = 0.
 
         for inp in self.inputs:
             f = inp.f
+
+            int_lumi_sum += inp.int_lumi
 
             h_norm = f.Get('h_signal_%i_norm' % which)
             ngen = 1e-3 / h_norm.GetBinContent(2)
@@ -81,7 +84,11 @@ class SignalEfficiencyCombiner:
                       nice_name = nice_name,
                       total_nsig = total_nsig,
                       sig_rate = sig_rate,
-                      sig_uncert = sig_uncert)
+                      total_sig_rate = sum(sig_rate),
+                      sig_rate_norm = [x / sum(sig_rate) for x in sig_rate],
+                      total_efficiency = sum(sig_rate) / int_lumi_sum,
+                      sig_uncert = sig_uncert,
+                      sig_uncert_rate = [x*(y-1) for x,y in zip(sig_rate, sig_uncert)])
 
 if __name__ == '__main__':
     which = -1
