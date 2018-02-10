@@ -3,9 +3,12 @@
 from JMTucker.Tools.ROOTTools import ROOT
 from array import array
 
-file_path = '~/crabdirs/TheoristRecipeV34'
+file_path = '~/crabdirs/TheoristRecipeV40'
 
 gen_rec_cut = 20
+
+match = ''
+#match = '_match'
 
 ctau = ''
 #ctau = 'tau00100um'
@@ -18,7 +21,7 @@ ctau = ''
 #gen_num = 'HT40'
 #gen_num = 'Bsbs2ddist'
 #gen_num = 'Geo2ddist'
-#gen_num = 'Sumpt400'
+#gen_num = 'Sumpt350'
 gen_num = 'Dvv400um'
 
 rec_den = 'NoCuts'
@@ -42,11 +45,11 @@ iden = 0
 #iden = 6
 
 #rec_den = 'TwoVtxBs2derr'
-#gen_den = 'Sumpt400'
+#gen_den = 'Sumpt350'
 #iden = 8
 
 reconstructed = ['NoCuts', 'OfflineJets', 'TrigSel', 'PreSel', 'TwoVtxNoCuts', 'TwoVtxBsbs2ddist', 'TwoVtxGeo2ddist', 'TwoVtxNtracks', 'TwoVtxBs2derr', 'TwoVtxDvv400um']
-generated = ['NoCuts', 'FourJets', '', 'HT40', '', 'Bsbs2ddist', 'Geo2ddist', '', 'Sumpt400', 'Dvv400um']
+generated = ['NoCuts', 'FourJets', '', 'HT40', '', 'Bsbs2ddist', 'Geo2ddist', '', 'Sumpt350', 'Dvv400um']
 
 samples = [
     ('mfv_neu_tau00100um_M0300',              r'$\tilde{N} \rightarrow tbs$,      $c\tau = 100\mum$, $M =  300\GeV$'),
@@ -300,17 +303,17 @@ for sample,sampleName in samples:
 
     print sample
     f = ROOT.TFile('%s/%s.root' % (file_path, sample))
-    nrec = f.Get('mfvTheoristRecipe%s/h_gen_dvv'%rec_den).GetEntries()
-    ngen = f.Get('mfvGen%s/h_gen_dvv'%gen_den).GetEntries()
+    nrec = f.Get('mfvTheoristRecipe%s/h_gen%s_dvv' % (rec_den, match)).GetEntries()
+    ngen = f.Get('mfvGen%s/h_gen%s_dvv' % (gen_den, match)).GetEntries()
     print '%26s%26s%20s%20s%20s' % ('reconstructed', 'generated', 'reco eff +/- error', 'gen eff +/- error', 'gen/reco +/- error')
     for i, rec in enumerate(reconstructed):
         if i < iden:
             continue
-        rec_hist = f.Get('mfvTheoristRecipe%s/h_gen_dvv'%rec)
+        rec_hist = f.Get('mfvTheoristRecipe%s/h_gen%s_dvv' % (rec, match))
         rec_eff = rec_hist.GetEntries()/nrec
         rec_err = (rec_eff * (1-rec_eff) / nrec)**0.5
         if generated[i] != '':
-            gen_hist = f.Get('mfvGen%s/h_gen_dvv'%generated[i])
+            gen_hist = f.Get('mfvGen%s/h_gen%s_dvv' % (generated[i], match))
             gen_eff = gen_hist.GetEntries()/ngen
             gen_err = (gen_eff * (1-gen_eff) / ngen)**0.5
             gen_rec_div = gen_eff/rec_eff if rec_eff != 0 else 9999
@@ -373,4 +376,4 @@ line2 = ROOT.TLine(0,0,1-0.01*gen_rec_cut,1)
 line0.Draw()
 line1.Draw()
 line2.Draw()
-#c.SaveAs('plots/theorist_recipe/gen_vs_reco_eff_%s_divide_%s%s.pdf' % (gen_num, gen_den, '' if ctau == '' else '_%s'%ctau))
+#c.SaveAs('plots/theorist_recipe/gen_vs_reco_eff_%s_divide_%s%s%s.pdf' % (gen_num, gen_den, '' if ctau == '' else '_%s'%ctau, match))
