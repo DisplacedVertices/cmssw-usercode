@@ -3,7 +3,7 @@
 from JMTucker.Tools.ROOTTools import ROOT
 from array import array
 
-file_path = '~/crabdirs/TheoristRecipeV40'
+file_path = '~/crabdirs/TheoristRecipeV41'
 
 gen_rec_cut = 20
 
@@ -252,6 +252,62 @@ samples = [
     ('mfv_neuudmu_tau30000um_M1200',          r'$\tilde{N} \rightarrow ud\mu$,    $c\tau =   30\mm$, $M = 1200\GeV$'),
     ('mfv_neuudmu_tau30000um_M1600',          r'$\tilde{N} \rightarrow ud\mu$,    $c\tau =   30\mm$, $M = 1600\GeV$'),
     ('mfv_neuudmu_tau30000um_M3000',          r'$\tilde{N} \rightarrow ud\mu$,    $c\tau =   30\mm$, $M = 3000\GeV$'),
+    ('mfv_neuude_tau00100um_M0300',           r'$\tilde{N} \rightarrow ude$,      $c\tau = 100\mum$, $M =  300\GeV$'),
+    ('mfv_neuude_tau00100um_M0400',           r'$\tilde{N} \rightarrow ude$,      $c\tau = 100\mum$, $M =  400\GeV$'),
+    ('mfv_neuude_tau00100um_M0500',           r'$\tilde{N} \rightarrow ude$,      $c\tau = 100\mum$, $M =  500\GeV$'),
+    ('mfv_neuude_tau00100um_M0600',           r'$\tilde{N} \rightarrow ude$,      $c\tau = 100\mum$, $M =  600\GeV$'),
+    ('mfv_neuude_tau00100um_M0800',           r'$\tilde{N} \rightarrow ude$,      $c\tau = 100\mum$, $M =  800\GeV$'),
+    ('mfv_neuude_tau00100um_M1200',           r'$\tilde{N} \rightarrow ude$,      $c\tau = 100\mum$, $M = 1200\GeV$'),
+    ('mfv_neuude_tau00100um_M1600',           r'$\tilde{N} \rightarrow ude$,      $c\tau = 100\mum$, $M = 1600\GeV$'),
+    ('mfv_neuude_tau00100um_M3000',           r'$\tilde{N} \rightarrow ude$,      $c\tau = 100\mum$, $M = 3000\GeV$'),
+    ('mfv_neuude_tau00300um_M0300',           r'$\tilde{N} \rightarrow ude$,      $c\tau = 300\mum$, $M =  300\GeV$'),
+    ('mfv_neuude_tau00300um_M0400',           r'$\tilde{N} \rightarrow ude$,      $c\tau = 300\mum$, $M =  400\GeV$'),
+    ('mfv_neuude_tau00300um_M0500',           r'$\tilde{N} \rightarrow ude$,      $c\tau = 300\mum$, $M =  500\GeV$'),
+    ('mfv_neuude_tau00300um_M0600',           r'$\tilde{N} \rightarrow ude$,      $c\tau = 300\mum$, $M =  600\GeV$'),
+    ('mfv_neuude_tau00300um_M0800',           r'$\tilde{N} \rightarrow ude$,      $c\tau = 300\mum$, $M =  800\GeV$'),
+    ('mfv_neuude_tau00300um_M1200',           r'$\tilde{N} \rightarrow ude$,      $c\tau = 300\mum$, $M = 1200\GeV$'),
+    ('mfv_neuude_tau00300um_M1600',           r'$\tilde{N} \rightarrow ude$,      $c\tau = 300\mum$, $M = 1600\GeV$'),
+    ('mfv_neuude_tau00300um_M3000',           r'$\tilde{N} \rightarrow ude$,      $c\tau = 300\mum$, $M = 3000\GeV$'),
+    ('mfv_neuude_tau01000um_M0300',           r'$\tilde{N} \rightarrow ude$,      $c\tau =    1\mm$, $M =  300\GeV$'),
+    ('mfv_neuude_tau01000um_M0400',           r'$\tilde{N} \rightarrow ude$,      $c\tau =    1\mm$, $M =  400\GeV$'),
+    ('mfv_neuude_tau01000um_M0500',           r'$\tilde{N} \rightarrow ude$,      $c\tau =    1\mm$, $M =  500\GeV$'),
+    ('mfv_neuude_tau01000um_M0600',           r'$\tilde{N} \rightarrow ude$,      $c\tau =    1\mm$, $M =  600\GeV$'),
+    ('mfv_neuude_tau01000um_M0800',           r'$\tilde{N} \rightarrow ude$,      $c\tau =    1\mm$, $M =  800\GeV$'),
+    ('mfv_neuude_tau01000um_M1200',           r'$\tilde{N} \rightarrow ude$,      $c\tau =    1\mm$, $M = 1200\GeV$'),
+    ('mfv_neuude_tau01000um_M1600',           r'$\tilde{N} \rightarrow ude$,      $c\tau =    1\mm$, $M = 1600\GeV$'),
+    ('mfv_neuude_tau01000um_M3000',           r'$\tilde{N} \rightarrow ude$,      $c\tau =    1\mm$, $M = 3000\GeV$'),
+    ('mfv_neuude_tau10000um_M0300',           r'$\tilde{N} \rightarrow ude$,      $c\tau =   10\mm$, $M =  300\GeV$'),
+    ('mfv_neuude_tau10000um_M0400',           r'$\tilde{N} \rightarrow ude$,      $c\tau =   10\mm$, $M =  400\GeV$'),
+    ('mfv_neuude_tau10000um_M0500',           r'$\tilde{N} \rightarrow ude$,      $c\tau =   10\mm$, $M =  500\GeV$'),
+    ('mfv_neuude_tau10000um_M0600',           r'$\tilde{N} \rightarrow ude$,      $c\tau =   10\mm$, $M =  600\GeV$'),
+    ('mfv_neuude_tau10000um_M0800',           r'$\tilde{N} \rightarrow ude$,      $c\tau =   10\mm$, $M =  800\GeV$'),
+    ('mfv_neuude_tau10000um_M1200',           r'$\tilde{N} \rightarrow ude$,      $c\tau =   10\mm$, $M = 1200\GeV$'),
+    ('mfv_neuude_tau10000um_M1600',           r'$\tilde{N} \rightarrow ude$,      $c\tau =   10\mm$, $M = 1600\GeV$'),
+    ('mfv_neuude_tau10000um_M3000',           r'$\tilde{N} \rightarrow ude$,      $c\tau =   10\mm$, $M = 3000\GeV$'),
+    ('mfv_neuude_tau30000um_M0300',           r'$\tilde{N} \rightarrow ude$,      $c\tau =   30\mm$, $M =  300\GeV$'),
+    ('mfv_neuude_tau30000um_M0400',           r'$\tilde{N} \rightarrow ude$,      $c\tau =   30\mm$, $M =  400\GeV$'),
+    ('mfv_neuude_tau30000um_M0500',           r'$\tilde{N} \rightarrow ude$,      $c\tau =   30\mm$, $M =  500\GeV$'),
+    ('mfv_neuude_tau30000um_M0600',           r'$\tilde{N} \rightarrow ude$,      $c\tau =   30\mm$, $M =  600\GeV$'),
+    ('mfv_neuude_tau30000um_M0800',           r'$\tilde{N} \rightarrow ude$,      $c\tau =   30\mm$, $M =  800\GeV$'),
+    ('mfv_neuude_tau30000um_M1200',           r'$\tilde{N} \rightarrow ude$,      $c\tau =   30\mm$, $M = 1200\GeV$'),
+    ('mfv_neuude_tau30000um_M1600',           r'$\tilde{N} \rightarrow ude$,      $c\tau =   30\mm$, $M = 1600\GeV$'),
+    ('mfv_neuude_tau30000um_M3000',           r'$\tilde{N} \rightarrow ude$,      $c\tau =   30\mm$, $M = 3000\GeV$'),
+    ('mfv_ccbar_tau01000um_M0800',            r'$\tilde{g} \rightarrow c\bar{c}$, $c\tau =    1\mm$, $M =  800\GeV$'),
+    ('mfv_ccbar_tau10000um_M1600',            r'$\tilde{g} \rightarrow c\bar{c}$, $c\tau =   10\mm$, $M = 1600\GeV$'),
+    ('mfv_neucdb_tau01000um_M0800',           r'$\tilde{N} \rightarrow cdb$,      $c\tau =    1\mm$, $M =  800\GeV$'),
+    ('mfv_neucdb_tau10000um_M1600',           r'$\tilde{N} \rightarrow cdb$,      $c\tau =   10\mm$, $M = 1600\GeV$'),
+    ('mfv_neucds_tau01000um_M0800',           r'$\tilde{N} \rightarrow cds$,      $c\tau =    1\mm$, $M =  800\GeV$'),
+    ('mfv_neucds_tau10000um_M1600',           r'$\tilde{N} \rightarrow cds$,      $c\tau =   10\mm$, $M = 1600\GeV$'),
+    ('mfv_neutbb_tau01000um_M0800',           r'$\tilde{N} \rightarrow tbb$,      $c\tau =    1\mm$, $M =  800\GeV$'),
+    ('mfv_neutbb_tau10000um_M1600',           r'$\tilde{N} \rightarrow tbb$,      $c\tau =   10\mm$, $M = 1600\GeV$'),
+    ('mfv_neutds_tau01000um_M0800',           r'$\tilde{N} \rightarrow tds$,      $c\tau =    1\mm$, $M =  800\GeV$'),
+    ('mfv_neutds_tau10000um_M1600',           r'$\tilde{N} \rightarrow tds$,      $c\tau =   10\mm$, $M = 1600\GeV$'),
+    ('mfv_neuubb_tau01000um_M0800',           r'$\tilde{N} \rightarrow ubb$,      $c\tau =    1\mm$, $M =  800\GeV$'),
+    ('mfv_neuubb_tau10000um_M1600',           r'$\tilde{N} \rightarrow ubb$,      $c\tau =   10\mm$, $M = 1600\GeV$'),
+    ('mfv_neuudb_tau01000um_M0800',           r'$\tilde{N} \rightarrow udb$,      $c\tau =    1\mm$, $M =  800\GeV$'),
+    ('mfv_neuudb_tau10000um_M1600',           r'$\tilde{N} \rightarrow udb$,      $c\tau =   10\mm$, $M = 1600\GeV$'),
+    ('mfv_neuudtu_tau01000um_M0800',          r'$\tilde{N} \rightarrow ud\tau$,   $c\tau =    1\mm$, $M =  800\GeV$'),
+    ('mfv_neuudtu_tau10000um_M1600',          r'$\tilde{N} \rightarrow ud\tau$,   $c\tau =   10\mm$, $M = 1600\GeV$'),
     ]
 
 def style(sample):
@@ -268,6 +324,24 @@ def style(sample):
         return 21
     if model == 'mfv_neuudmu':
         return 34
+    if model == 'mfv_neuude':
+        return 29
+    if model == 'mfv_ccbar':
+        return 33
+    if model == 'mfv_neucdb':
+        return 27
+    if model == 'mfv_neucds':
+        return 26
+    if model == 'mfv_neutbb':
+        return 32
+    if model == 'mfv_neutds':
+        return 24
+    if model == 'mfv_neuubb':
+        return 25
+    if model == 'mfv_neuudb':
+        return 30
+    if model == 'mfv_neuudtu':
+        return 28
 
 def color(sample):
     mass = sample.split('M')[1].split('_')[0]
