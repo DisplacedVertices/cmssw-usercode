@@ -883,18 +883,23 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
   // ha
   for (size_t itk = 0; itk < ntk; ++itk) {
-    if (!seed_use[itk]) continue; itks[0] = itk;
+    if (!seed_use[itk]) continue;
+    itks[0] = itk;
     for (size_t jtk = itk+1; jtk < ntk; ++jtk) {
-      if (!seed_use[jtk]) continue; itks[1] = jtk;
+      if (!seed_use[jtk]) continue;
+      itks[1] = jtk;
       if (n_tracks_per_seed_vertex == 2) { try_seed_vertex(); continue; }
       for (size_t ktk = jtk+1; ktk < ntk; ++ktk) {
-        if (!seed_use[ktk]) continue; itks[2] = ktk;
+        if (!seed_use[ktk]) continue;
+        itks[2] = ktk;
         if (n_tracks_per_seed_vertex == 3) { try_seed_vertex(); continue; }
         for (size_t ltk = ktk+1; ltk < ntk; ++ltk) {
-          if (!seed_use[ltk]) continue; itks[3] = ltk;
+          if (!seed_use[ltk]) continue;
+          itks[3] = ltk;
           if (n_tracks_per_seed_vertex == 4) { try_seed_vertex(); continue; }
           for (size_t mtk = ltk+1; mtk < ntk; ++mtk) {
-            if (!seed_use[mtk]) continue; itks[4] = mtk;
+            if (!seed_use[mtk]) continue;
+            itks[4] = mtk;
             try_seed_vertex();
           }
         }
