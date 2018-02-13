@@ -414,7 +414,7 @@ void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
       throw cms::Exception("bad length of match_to_vertices");
   }
 
-  std::auto_ptr<MFVVertexAuxCollection> selected(new MFVVertexAuxCollection);
+  std::unique_ptr<MFVVertexAuxCollection> selected(new MFVVertexAuxCollection);
 
   for (const MFVVertexAux& aux : *auxes)
     if (use_vertex(aux, use_mevent ? &*mevent : 0))
@@ -424,13 +424,13 @@ void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
 
 
   if (produce_vertices || produce_refs) {
-    std::auto_ptr<reco::VertexRefVector> selected_vertex_refs(new reco::VertexRefVector);
+    std::unique_ptr<reco::VertexRefVector> selected_vertex_refs(new reco::VertexRefVector);
     for (const MFVVertexAux& aux : *selected)
       selected_vertex_refs->push_back(reco::VertexRef(vertices, aux.which));
 
     if (produce_vertices) {
-      std::auto_ptr<reco::VertexCollection> selected_vertices(new reco::VertexCollection);
-      std::auto_ptr<reco::TrackCollection> selected_tracks(new reco::TrackCollection);
+      std::unique_ptr<reco::VertexCollection> selected_vertices(new reco::VertexCollection);
+      std::unique_ptr<reco::TrackCollection> selected_tracks(new reco::TrackCollection);
 
       for (const reco::VertexRef& v : *selected_vertex_refs) {
         selected_vertices->push_back(*v);
@@ -442,15 +442,15 @@ void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
         }
       }
 
-      event.put(selected_vertices);
+      event.put(std::move(selected_vertices));
       if (produce_tracks)
-        event.put(selected_tracks);
+        event.put(std::move(selected_tracks));
     }
     else
-      event.put(selected_vertex_refs);
+      event.put(std::move(selected_vertex_refs));
   }
 
-  event.put(selected);
+  event.put(std::move(selected));
 }
 
 DEFINE_FWK_MODULE(MFVVertexSelector);

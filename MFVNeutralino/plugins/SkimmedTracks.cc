@@ -57,8 +57,8 @@ bool MFVSkimmedTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
       tracks_in_pvs[it->castTo<reco::TrackRef>()].push_back(i);
   }
   
-  std::auto_ptr<reco::TrackCollection> output_tracks(new reco::TrackCollection);
-  std::auto_ptr<std::vector<int>> output_pvindex(new std::vector<int>);
+  std::unique_ptr<reco::TrackCollection> output_tracks(new reco::TrackCollection);
+  std::unique_ptr<std::vector<int>> output_pvindex(new std::vector<int>);
 
   int itk = -1;
   for (const reco::Track& tk : *tracks) {
@@ -99,8 +99,8 @@ bool MFVSkimmedTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
   }
 
   const size_t n_out = output_tracks->size();
-  event.put(output_tracks);
-  event.put(output_pvindex);
+  event.put(std::move(output_tracks));
+  event.put(std::move(output_pvindex));
 
   return !cut || n_out;
 }

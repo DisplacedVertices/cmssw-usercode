@@ -55,7 +55,7 @@ DummyBeamSpotProducer::DummyBeamSpotProducer(const edm::ParameterSet& cfg)
 }
 
 void DummyBeamSpotProducer::produce(edm::Event& event, const edm::EventSetup&) {
-  event.put(std::auto_ptr<reco::BeamSpot>(new reco::BeamSpot(spot)));
+  event.put(std::unique_ptr<reco::BeamSpot>(new reco::BeamSpot(spot)));
 }
 
 DEFINE_FWK_MODULE(DummyBeamSpotProducer);

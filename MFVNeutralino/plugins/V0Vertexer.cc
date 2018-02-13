@@ -19,7 +19,7 @@ public:
 private:
   virtual bool filter(edm::Event&, const edm::EventSetup&) override;
 
-  std::auto_ptr<KalmanVertexFitter> kv_reco;
+  std::unique_ptr<KalmanVertexFitter> kv_reco;
   const TransientTrackBuilder* tt_builder;
   const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
   const double max_chi2ndf;

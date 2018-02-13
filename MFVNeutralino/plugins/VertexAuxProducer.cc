@@ -123,7 +123,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
   //////////////////////////////////////////////////////////////////////
 
-  std::auto_ptr<std::vector<MFVVertexAux> > auxes(new std::vector<MFVVertexAux>(nsv));
+  std::unique_ptr<std::vector<MFVVertexAux> > auxes(new std::vector<MFVVertexAux>(nsv));
   std::set<int> trackicity;
 
   for (int isv = 0; isv < nsv; ++isv) {
@@ -335,7 +335,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
   sorter.sort(*auxes);
 
-  event.put(auxes);
+  event.put(std::move(auxes));
 }
 
 DEFINE_FWK_MODULE(MFVVertexAuxProducer);

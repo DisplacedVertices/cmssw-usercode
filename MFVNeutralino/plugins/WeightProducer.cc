@@ -109,7 +109,7 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
   if (prints)
     printf("MFVWeight: r,l,e: %u, %u, %llu  ", event.id().run(), event.luminosityBlock(), event.id().event());
 
-  std::auto_ptr<double> weight(new double(1.));
+  std::unique_ptr<double> weight(new double(1.));
 
   if (enable) {
     edm::Handle<MFVEvent> mevent;
@@ -156,7 +156,7 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
   if (prints)
     printf("total weight: %g\n", *weight);
 
-  event.put(weight);
+  event.put(std::move(weight));
 }
 
 DEFINE_FWK_MODULE(MFVWeightProducer);
