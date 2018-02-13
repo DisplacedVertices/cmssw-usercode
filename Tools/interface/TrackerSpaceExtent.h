@@ -1,7 +1,7 @@
 #ifndef JMTucker_Tools_TrackerSpaceExtent_h
 #define JMTucker_Tools_TrackerSpaceExtent_h
 
-//#include <map>
+#include <map>
 #include "Geometry/CommonDetUnit/interface/GeomDet.h"
 #include "Geometry/TrackerGeometryBuilder/interface/TrackerGeometry.h"
 

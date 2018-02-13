@@ -1,3 +1,4 @@
+#include <numeric>
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "FWCore/Framework/interface/EDFilter.h"
