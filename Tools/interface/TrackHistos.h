@@ -32,8 +32,6 @@ namespace jmt {
     TH1D* h_nstlayers;
     TH1D* h_nlosthits;
     TH1D* h_nlostlayers;
-    TH1D* h_chi2;
-    TH1D* h_dof;
     TH1D* h_chi2dof;
     TH1D* h_algo;
     TH1D* h_quality;

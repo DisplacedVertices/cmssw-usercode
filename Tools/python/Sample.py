@@ -573,6 +573,10 @@ def main(samples_registry):
         import SampleFiles as sf
         d = {}
         for s in samples:
+            if not s.has_dataset(dataset):
+                print colors.yellow('no dataset %s for %s' % (dataset, s.name))
+                continue
+            s.set_curr_dataset(dataset)
             if sf.has(s.name, dataset):
                 raise KeyError('SampleFiles already has an entry for %s' % s.name)
             else:

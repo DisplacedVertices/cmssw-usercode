@@ -49,12 +49,22 @@ class SignalEfficiencyCombiner:
         assert self.nbins == nbins
         assert abs(self.int_lumi - int_lumi) < 0.25 # grr
 
+    def __add_h(self, h, h2, c):
+        if h is None:
+            h = h2.Clone()
+            h.Scale(c)
+        else:
+            h.Add(h2, c)
+        return h
+
     def combine(self, which):
         nice_name = None
+        int_lumi_sum = 0.
         total_nsig = 0
         sig_rate = [0.] * self.nbins
         sig_uncert = None
-        int_lumi_sum = 0.
+        h_dbv_sum = None
+        h_dvv_sum = None
 
         for inp in self.inputs:
             f = inp.f
@@ -66,29 +76,42 @@ class SignalEfficiencyCombiner:
             nice_name = checkedset(nice_name, h_norm.GetTitle())
             mass = int(nice_name.split('_M')[-1])
 
-            h_dvv = f.Get('h_signal_%i_dvv_rebin' % which)
+            scale = inp.int_lumi / ngen * inp.sf(mass)
+
+            h_dbv = f.Get('h_signal_%i_dbv' % which)
+            h_dvv = f.Get('h_signal_%i_dvv' % which)
+            h_dvv_rebin = f.Get('h_signal_%i_dvv_rebin' % which)
+            assert h_dbv.GetTitle() == nice_name
             assert h_dvv.GetTitle() == nice_name
-            assert h_dvv.GetNbinsX() == self.nbins
-            nsig = self._get(h_dvv)
+            assert h_dvv_rebin.GetTitle() == nice_name
+            assert h_dvv_rebin.GetNbinsX() == self.nbins
+
+            h_dbv_sum = self.__add_h(h_dbv_sum, h_dbv, scale)
+            h_dvv_sum = self.__add_h(h_dvv_sum, h_dvv, scale)
+
+            nsig = self._get(h_dvv_rebin)
 
             if inp.include_stat:
                 total_nsig += int(sum(nsig))
 
             for i in xrange(self.nbins):
-                sig_rate[i] += nsig[i] / ngen * inp.int_lumi * inp.sf(mass)
+                sig_rate[i] += nsig[i] * scale
 
             h_uncert = f.Get('h_signal_%i_uncert' % which)
             sig_uncert = checkedset(sig_uncert, self._get(h_uncert, offset=1))
 
         return Result(which = which,
                       nice_name = nice_name,
+                      int_lumi_sum = int_lumi_sum,
                       total_nsig = total_nsig,
                       sig_rate = sig_rate,
                       total_sig_rate = sum(sig_rate),
                       sig_rate_norm = [x / sum(sig_rate) for x in sig_rate],
                       total_efficiency = sum(sig_rate) / int_lumi_sum,
                       sig_uncert = sig_uncert,
-                      sig_uncert_rate = [x*(y-1) for x,y in zip(sig_rate, sig_uncert)])
+                      sig_uncert_rate = [x*(y-1) for x,y in zip(sig_rate, sig_uncert)],
+                      h_dbv = h_dbv_sum,
+                      h_dvv = h_dvv_sum)
 
 if __name__ == '__main__':
     which = -1
