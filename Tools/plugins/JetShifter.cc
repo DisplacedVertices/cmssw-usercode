@@ -40,7 +40,7 @@ void JMTJetShifter::produce(edm::Event& event, const edm::EventSetup& setup) {
   edm::Handle<pat::JetCollection> jets;
   event.getByToken(jets_token, jets);
   
-  std::auto_ptr<pat::JetCollection> new_jets(new pat::JetCollection);
+  std::unique_ptr<pat::JetCollection> new_jets(new pat::JetCollection);
 
   edm::ESHandle<JetCorrectorParametersCollection> jet_corr;
   setup.get<JetCorrectionsRecord>().get("AK4PF", jet_corr);
@@ -136,7 +136,7 @@ void JMTJetShifter::produce(edm::Event& event, const edm::EventSetup& setup) {
     new_jets->push_back(new_jet);
   }
 
-  event.put(new_jets);
+  event.put(std::move(new_jets));
 }
 
 DEFINE_FWK_MODULE(JMTJetShifter);

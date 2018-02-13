@@ -43,7 +43,7 @@ public:
 private:
   typedef std::set<reco::TrackRef> track_set;
 
-  void finish(edm::Event&, const std::vector<reco::TransientTrack>&, std::auto_ptr<reco::VertexCollection>, std::auto_ptr<VertexerPairEffs>, const std::vector<std::pair<track_set, track_set>>&);
+  void finish(edm::Event&, const std::vector<reco::TransientTrack>&, std::unique_ptr<reco::VertexCollection>, std::unique_ptr<VertexerPairEffs>, const std::vector<std::pair<track_set, track_set>>&);
 
   template <typename T>
   void print_track_set(const T& ts) const {
@@ -107,8 +107,8 @@ private:
 
   VertexDistanceXY vertex_dist_2d;
   VertexDistance3D vertex_dist_3d;
-  std::auto_ptr<KalmanVertexFitter> kv_reco;
-  std::auto_ptr<VertexReconstructor> av_reco;
+  std::unique_ptr<KalmanVertexFitter> kv_reco;
+  std::unique_ptr<VertexReconstructor> av_reco;
 
   std::vector<TransientVertex> kv_reco_dropin(std::vector<reco::TransientTrack>& ttks) {
     if (ttks.size() < 2)
@@ -536,9 +536,9 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
   }
 }
 
-void MFVVertexer::finish(edm::Event& event, const std::vector<reco::TransientTrack>& seed_tracks, std::auto_ptr<reco::VertexCollection> vertices, std::auto_ptr<VertexerPairEffs> vpeffs, const std::vector<std::pair<track_set, track_set>>& vpeffs_tracks) {
-  std::auto_ptr<reco::TrackCollection> tracks_seed      (new reco::TrackCollection);
-  std::auto_ptr<reco::TrackCollection> tracks_inVertices(new reco::TrackCollection);
+void MFVVertexer::finish(edm::Event& event, const std::vector<reco::TransientTrack>& seed_tracks, std::unique_ptr<reco::VertexCollection> vertices, std::unique_ptr<VertexerPairEffs> vpeffs, const std::vector<std::pair<track_set, track_set>>& vpeffs_tracks) {
+  std::unique_ptr<reco::TrackCollection> tracks_seed      (new reco::TrackCollection);
+  std::unique_ptr<reco::TrackCollection> tracks_inVertices(new reco::TrackCollection);
 
   if (verbose) printf("finish:\nseed tracks:\n");
 
@@ -575,10 +575,10 @@ void MFVVertexer::finish(edm::Event& event, const std::vector<reco::TransientTra
   if (histos)
     h_n_output_vertices->Fill(vertices->size());
 
-  event.put(vertices);
-  event.put(vpeffs);
-  event.put(tracks_seed,       "seed");
-  event.put(tracks_inVertices, "inVertices");
+  event.put(std::move(vertices));
+  event.put(std::move(vpeffs));
+  event.put(std::move(tracks_seed),       "seed");
+  event.put(std::move(tracks_inVertices), "inVertices");
 }
 
 void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
@@ -807,8 +807,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   // passes cuts.
   //////////////////////////////////////////////////////////////////////
 
-  std::auto_ptr<reco::VertexCollection> vertices(new reco::VertexCollection);
-  std::auto_ptr<VertexerPairEffs> vpeffs(new VertexerPairEffs);
+  std::unique_ptr<reco::VertexCollection> vertices(new reco::VertexCollection);
+  std::unique_ptr<VertexerPairEffs> vpeffs(new VertexerPairEffs);
   std::vector<std::pair<track_set, track_set>> vpeffs_tracks;
 
   if (ntk == 0 || track_histos_only) {
@@ -819,7 +819,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         printf("track histos only");
       printf(" -> putting empty vertex collection into event\n");
     }
-    finish(event, seed_tracks, vertices, vpeffs, vpeffs_tracks);
+    finish(event, seed_tracks, std::move(vertices), std::move(vpeffs), vpeffs_tracks);
     return;
   }
 
@@ -1343,7 +1343,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   // Put the output.
   //////////////////////////////////////////////////////////////////////
 
-  finish(event, seed_tracks, vertices, vpeffs, vpeffs_tracks);
+  finish(event, seed_tracks, std::move(vertices), std::move(vpeffs), vpeffs_tracks);
 }
 
 DEFINE_FWK_MODULE(MFVVertexer);

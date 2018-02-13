@@ -598,12 +598,12 @@ bool MFVGenParticles::try_MFVlq(mfv::MCInteraction& mc, const edm::Handle<reco::
 }
 
 void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
-  std::auto_ptr<mfv::MCInteraction> mc(new mfv::MCInteraction);
-  std::auto_ptr<std::vector<double> > primary_vertex(new std::vector<double>(3,0.));
-  std::auto_ptr<std::vector<double> > decay_vertices(new std::vector<double>);
-  std::auto_ptr<reco::GenParticleCollection> primaries  (new reco::GenParticleCollection);
-  std::auto_ptr<reco::GenParticleCollection> secondaries(new reco::GenParticleCollection);
-  std::auto_ptr<reco::GenParticleCollection> visible    (new reco::GenParticleCollection);
+  std::unique_ptr<mfv::MCInteraction> mc(new mfv::MCInteraction);
+  std::unique_ptr<std::vector<double> > primary_vertex(new std::vector<double>(3,0.));
+  std::unique_ptr<std::vector<double> > decay_vertices(new std::vector<double>);
+  std::unique_ptr<reco::GenParticleCollection> primaries  (new reco::GenParticleCollection);
+  std::unique_ptr<reco::GenParticleCollection> secondaries(new reco::GenParticleCollection);
+  std::unique_ptr<reco::GenParticleCollection> visible    (new reco::GenParticleCollection);
 
   if (!event.isRealData()) {
     edm::Handle<reco::GenParticleCollection> gen_particles;
@@ -721,12 +721,12 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
     }
   }
 
-  event.put(mc);
-  event.put(primary_vertex, "genVertex");
-  event.put(decay_vertices, "decays");
-  event.put(primaries,   "primaries");
-  event.put(secondaries, "secondaries");
-  event.put(visible,     "visible");
+  event.put(std::move(mc));
+  event.put(std::move(primary_vertex), "genVertex");
+  event.put(std::move(decay_vertices), "decays");
+  event.put(std::move(primaries),   "primaries");
+  event.put(std::move(secondaries), "secondaries");
+  event.put(std::move(visible),     "visible");
 }
 
 DEFINE_FWK_MODULE(MFVGenParticles);

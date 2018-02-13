@@ -30,6 +30,8 @@ private:
 
   TH1F* h_genJet_njets;
   TH1F* h_genJet_ht40;
+  TH1F* h_genJet_electron_energy_fraction;
+  TH1F* h_genJet_muon_energy_fraction;
 
   TH1F* h_gen_parton_njets;
   TH1F* h_gen_parton_ht40;
@@ -93,6 +95,8 @@ MFVTheoristRecipe::MFVTheoristRecipe(const edm::ParameterSet& cfg)
 
   h_genJet_njets = fs->make<TH1F>("h_genJet_njets", ";number of genJets;events", 20, 0, 20);
   h_genJet_ht40 = fs->make<TH1F>("h_genJet_ht40", ";H_{T} of genJets with p_{T} > 40 GeV;events", 500, 0, 5000);
+  h_genJet_electron_energy_fraction = fs->make<TH1F>("h_genJet_electron_energy_fraction", ";electron energy fraction;genJets", 100, 0, 1);
+  h_genJet_muon_energy_fraction = fs->make<TH1F>("h_genJet_muon_energy_fraction", ";muon energy fraction;genJets", 100, 0, 1);
 
   h_gen_parton_njets = fs->make<TH1F>("h_gen_parton_njets", ";number of partons;events", 20, 0, 20);
   h_gen_parton_ht40 = fs->make<TH1F>("h_gen_parton_ht40", ";H_{T} of partons with p_{T} > 40 GeV", 500, 0, 5000);
@@ -188,12 +192,18 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
 
   int ngenJets = 0; float genJet_ht40 = 0;
   for (const reco::GenJet& jet : *gen_jets) {
+    double ee = 0;
     double mue = 0;
-    for (auto c : jet.getJetConstituents())
+    for (auto c : jet.getJetConstituents()) {
+      if (abs(c->pdgId()) == 11)
+        ee += c->energy();
       if (abs(c->pdgId()) == 13)
         mue += c->energy();
+    }
+    h_genJet_electron_energy_fraction->Fill(ee / jet.energy());
+    h_genJet_muon_energy_fraction->Fill(mue / jet.energy());
 
-    if (jet.pt() > 20 && fabs(jet.eta()) < 2.5 && mue / jet.energy() < 0.8) {
+    if (jet.pt() > 20 && fabs(jet.eta()) < 2.5 && ee / jet.energy() < 0.9 && mue / jet.energy() < 0.8) {
       ++ngenJets; if (jet.pt() > 40) genJet_ht40 += jet.pt();
     }
   }

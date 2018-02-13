@@ -346,7 +346,7 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
     }
   }
 
-  std::auto_ptr<Association> assoc[mfv::NJetsBy];
+  std::unique_ptr<Association> assoc[mfv::NJetsBy];
   for (int i = 0; i < mfv::NJetsBy; ++i)
     assoc[i].reset(new Association(&event.productGetter()));
 
@@ -405,7 +405,7 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
   }
 
   for (int i = 0; i < mfv::NJetsBy; ++i)
-    event.put(assoc[i], mfv::jetsby_names[i]);
+    event.put(std::move(assoc[i]), mfv::jetsby_names[i]);
 }
 
 DEFINE_FWK_MODULE(MFVJetVertexAssociator);

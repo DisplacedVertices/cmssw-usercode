@@ -25,7 +25,7 @@ MFVCleaningBits::MFVCleaningBits(const edm::ParameterSet& cfg)
 void MFVCleaningBits::produce(edm::Event& event, const edm::EventSetup& setup) {
   static const bool debug = false;
 
-  std::auto_ptr<cleaning_word_t> cleaning_word(new cleaning_word_t(0));
+  std::unique_ptr<cleaning_word_t> cleaning_word(new cleaning_word_t(0));
 
   TriggerHelper trig_helper_cleaning(event, cleaning_results_token);
   for (size_t i = 0; i < mfv::n_clean_paths; ++i) {
@@ -37,7 +37,7 @@ void MFVCleaningBits::produce(edm::Event& event, const edm::EventSetup& setup) {
     if (debug) printf("clean path: %40s found? %i pass? %i   word -> %x \n", mfv::clean_paths[i], paf.second, paf.first, *cleaning_word);
   }
 
-  event.put(cleaning_word);
+  event.put(std::move(cleaning_word));
 }
 
 DEFINE_FWK_MODULE(MFVCleaningBits);

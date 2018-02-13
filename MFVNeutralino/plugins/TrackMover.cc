@@ -84,14 +84,14 @@ void MFVTrackMover::produce(edm::Event& event, const edm::EventSetup&) {
     return ts;
   };
 
-  std::auto_ptr<reco::TrackCollection> output_tracks(new reco::TrackCollection);
-  std::auto_ptr<reco::TrackCollection> moved_tracks(new reco::TrackCollection);
-  std::auto_ptr<int> npreseljets(new int);
-  std::auto_ptr<int> npreselbjets(new int);
-  std::auto_ptr<pat::JetCollection> jets_used(new pat::JetCollection);
-  std::auto_ptr<pat::JetCollection> bjets_used(new pat::JetCollection);
-  std::auto_ptr<std::vector<double> > flight_vect(new std::vector<double>(3, 0.));
-  std::auto_ptr<std::vector<double> > move_vertex(new std::vector<double>(3, 0.));
+  std::unique_ptr<reco::TrackCollection> output_tracks(new reco::TrackCollection);
+  std::unique_ptr<reco::TrackCollection> moved_tracks(new reco::TrackCollection);
+  std::unique_ptr<int> npreseljets(new int);
+  std::unique_ptr<int> npreselbjets(new int);
+  std::unique_ptr<pat::JetCollection> jets_used(new pat::JetCollection);
+  std::unique_ptr<pat::JetCollection> bjets_used(new pat::JetCollection);
+  std::unique_ptr<std::vector<double> > flight_vect(new std::vector<double>(3, 0.));
+  std::unique_ptr<std::vector<double> > move_vertex(new std::vector<double>(3, 0.));
 
   edm::Handle<reco::VertexCollection> primary_vertices;
   event.getByToken(primary_vertices_token, primary_vertices);
@@ -203,14 +203,14 @@ void MFVTrackMover::produce(edm::Event& event, const edm::EventSetup&) {
     }
   }
 
-  event.put(output_tracks);
-  event.put(moved_tracks, "moved");
-  event.put(npreseljets, "npreseljets");
-  event.put(npreselbjets, "npreselbjets");
-  event.put(jets_used, "jetsUsed");
-  event.put(bjets_used, "bjetsUsed");
-  event.put(flight_vect, "flightAxis");
-  event.put(move_vertex, "moveVertex");
+  event.put(std::move(output_tracks));
+  event.put(std::move(moved_tracks), "moved");
+  event.put(std::move(npreseljets), "npreseljets");
+  event.put(std::move(npreselbjets), "npreselbjets");
+  event.put(std::move(jets_used), "jetsUsed");
+  event.put(std::move(bjets_used), "bjetsUsed");
+  event.put(std::move(flight_vect), "flightAxis");
+  event.put(std::move(move_vertex), "moveVertex");
 }
 
 DEFINE_FWK_MODULE(MFVTrackMover);

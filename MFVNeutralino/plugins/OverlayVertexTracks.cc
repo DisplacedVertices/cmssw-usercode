@@ -215,7 +215,7 @@ bool MFVOverlayVertexTracks::filter(edm::Event& event, const edm::EventSetup& se
     
   mfv::MiniNtuple* nt0 = minitree_events[index];
   mfv::MiniNtuple* nt1 = minitree_events[which_event];
-  std::auto_ptr<mfv::MiniNtuple> nt1_0(mfv::clone(*nt1)); // nt1 transformed into the "frame" of nt0
+  std::unique_ptr<mfv::MiniNtuple> nt1_0(mfv::clone(*nt1)); // nt1 transformed into the "frame" of nt0
 
   double deltaz = 0;
   if (z_model == z_deltapv)
@@ -299,7 +299,7 @@ bool MFVOverlayVertexTracks::filter(edm::Event& event, const edm::EventSetup& se
     }
   }
 
-  std::auto_ptr<std::vector<double>> truth(new std::vector<double>(13)); // ntk0, x0, y0, z0, ntk1, x1, y1, z1, x1_0, y1_0, z1_0, min_track_vertex_dist, min_track_vertex_sig
+  std::unique_ptr<std::vector<double>> truth(new std::vector<double>(13)); // ntk0, x0, y0, z0, ntk1, x1, y1, z1, x1_0, y1_0, z1_0, min_track_vertex_dist, min_track_vertex_sig
   // rest of truth is (ntk0 + ntk1) * 3 : px, py, pz, ... tracks for v1_0
 
   (*truth)[0]  = nt0->ntk0;
@@ -337,7 +337,7 @@ bool MFVOverlayVertexTracks::filter(edm::Event& event, const edm::EventSetup& se
 
   Measurement1D min_d(1e9, 1e-9), min_d_sig(1e9, 1e-9);
 
-  std::auto_ptr<reco::TrackCollection> output_tracks(new reco::TrackCollection);
+  std::unique_ptr<reco::TrackCollection> output_tracks(new reco::TrackCollection);
 
   if (!only_other_tracks)
     for (int i = 0; i < nt0->ntk0; ++i) {
@@ -353,8 +353,8 @@ bool MFVOverlayVertexTracks::filter(edm::Event& event, const edm::EventSetup& se
   (*truth)[11] = min_d.value();
   (*truth)[12] = min_d_sig.significance();
 
-  event.put(output_tracks);
-  event.put(truth);
+  event.put(std::move(output_tracks));
+  event.put(std::move(truth));
 
   return true;
 }

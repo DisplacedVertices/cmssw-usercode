@@ -20,7 +20,7 @@ public:
   virtual void produce(edm::Event&, const edm::EventSetup&);
 
 private:
-  std::auto_ptr<KalmanVertexFitter> kv_reco;
+  std::unique_ptr<KalmanVertexFitter> kv_reco;
 
   static const int max_n_input_vertices;
 
@@ -129,7 +129,7 @@ void MFVVertexRefitter::produce(edm::Event& event, const edm::EventSetup& setup)
     if (++iiv >= max_n_input_vertices)
       break;
 
-    std::auto_ptr<reco::VertexCollection> vertices(new reco::VertexCollection);
+    std::unique_ptr<reco::VertexCollection> vertices(new reco::VertexCollection);
 
     std::vector<reco::TrackRef> input_tracks;
     for (auto tk = iv.tracks_begin(), tke = iv.tracks_end(); tk != tke; ++tk)
@@ -159,7 +159,7 @@ void MFVVertexRefitter::produce(edm::Event& event, const edm::EventSetup& setup)
       while (std::next_permutation(drop.begin(), drop.end()));
     }
 
-    event.put(vertices, vertex_collection_name(iiv));
+    event.put(std::move(vertices), vertex_collection_name(iiv));
   }
 
 #if 0

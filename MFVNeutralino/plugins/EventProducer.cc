@@ -85,7 +85,7 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
 }
 
 void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
-  std::auto_ptr<MFVEvent> mevent(new MFVEvent);
+  std::unique_ptr<MFVEvent> mevent(new MFVEvent);
 
   edm::Handle<reco::BeamSpot> beamspot;
   event.getByToken(beamspot_token, beamspot);
@@ -510,7 +510,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->jet_track_hp_.clear();
   }
 
-  event.put(mevent);
+  event.put(std::move(mevent));
 }
 
 DEFINE_FWK_MODULE(MFVEventProducer);

@@ -282,7 +282,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   }
 #endif
 
-  std::auto_ptr<mfv::TriggerFloats> floats(new mfv::TriggerFloats);
+  std::unique_ptr<mfv::TriggerFloats> floats(new mfv::TriggerFloats);
 
   for (pat::TriggerObjectStandAlone obj : *trigger_objects) {
     if (obj.filterIds().size() == 1 && obj.filterIds()[0] == 89) {
@@ -380,7 +380,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   if (prints)
     printf("# all jets: %lu  selected: %i  jetpt1: %f  2: %f  ht: %f\n", jets->size(), floats->njets(), floats->jetpt1(), floats->jetpt2(), floats->ht);
 
-  event.put(floats);
+  event.put(std::move(floats));
 }
 
 DEFINE_FWK_MODULE(MFVTriggerFloats);
