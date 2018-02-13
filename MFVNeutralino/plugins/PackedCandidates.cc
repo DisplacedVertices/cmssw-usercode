@@ -1,5 +1,5 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/Year.h"
-#if defined(MFVNEUTRALINO_2016) // PFTrackAlgoTools.h not in CMSSW_763
+#if !defined(MFVNEUTRALINO_2015) // PFTrackAlgoTools.h not in CMSSW_763
 #include "TH2.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"

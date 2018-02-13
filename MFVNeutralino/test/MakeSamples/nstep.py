@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from CRABClient.ClientExceptions import ConfigException as CRABConfigException
-from JMTucker.MFVNeutralino.Year import year
+from JMTucker.MFVNeutralino.Year import year; assert year in (2015,2016) # fix later
 from scanpack import get_scanpack, scanpackbase
 
 nevents = 10000

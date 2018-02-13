@@ -4,7 +4,7 @@ import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 from JMTucker.Tools.MiniAOD_cfg import *
 from JMTucker.Tools.PATTupleSelection_cfi import jtupleParams
-from JMTucker.MFVNeutralino.Year import year
+from JMTucker.MFVNeutralino.Year import year; assert year in (2015,2016) # fix later
 
 is_mc = True
 H = False
