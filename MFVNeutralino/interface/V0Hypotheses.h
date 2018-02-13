@@ -1,6 +1,8 @@
 #ifndef JMTucker_MFVNeutralino_V0Hypotheses_h
 #define JMTucker_MFVNeutralino_V0Hypotheses_h
 
+#include <numeric>
+
 namespace mfv {
   enum { V0_K0_2pi, V0_Lambda_p_pi, V0_X_2e, V0_Kp_3pi, n_V0_hyp };
 
