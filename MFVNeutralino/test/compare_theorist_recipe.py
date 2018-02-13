@@ -6,7 +6,7 @@ import JMTucker.Tools.Samples as Samples
 set_style()
 ps = plot_saver('plots/theorist_recipe/compare_theorist_recipe', size=(700,700), root=False)
 
-samples = [Samples.mfv_neu_tau01000um_M0800]
+samples = [Samples.mfv_neu_tau01000um_M0800, Samples.mfv_ddbar_tau01000um_M0800, Samples.mfv_bbbar_tau01000um_M0800, Samples.mfv_neuuds_tau01000um_M0800, Samples.mfv_neuudmu_tau01000um_M0800, Samples.mfv_neuude_tau01000um_M0800]
 
 histNames = [('genJet_njets',          'mfvTheoristRecipeNoCuts/h_rec_njets',         'mfvTheoristRecipeNoCuts/h_genJet_njets'),
              ('genJet_ht40',           'mfvTheoristRecipeNoCuts/h_rec_ht40',          'mfvTheoristRecipeNoCuts/h_genJet_ht40'),
@@ -28,7 +28,7 @@ histNames = [('genJet_njets',          'mfvTheoristRecipeNoCuts/h_rec_njets',   
              ]
 
 for sample in samples:
-    f = ROOT.TFile('~/crabdirs/TheoristRecipeV29/%s.root' % sample.name)
+    f = ROOT.TFile('~/crabdirs/TheoristRecipeV41/%s.root' % sample.name)
     print sample.name
 
     for name,h1,h2 in histNames:
