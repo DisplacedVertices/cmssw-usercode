@@ -203,7 +203,7 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
     h_genJet_electron_energy_fraction->Fill(ee / jet.energy());
     h_genJet_muon_energy_fraction->Fill(mue / jet.energy());
 
-    if (jet.pt() > 20 && fabs(jet.eta()) < 2.5 && mue / jet.energy() < 0.8) {
+    if (jet.pt() > 20 && fabs(jet.eta()) < 2.5 && ee / jet.energy() < 0.9 && mue / jet.energy() < 0.8) {
       ++ngenJets; if (jet.pt() > 40) genJet_ht40 += jet.pt();
     }
   }

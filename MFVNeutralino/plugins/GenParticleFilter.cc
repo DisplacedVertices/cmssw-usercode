@@ -155,10 +155,16 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
   double jet_ht = 0;
   double jet_ht40 = 0;
   for (const reco::GenJet& jet : *gen_jets) {
+    double ee = 0;
     double mue = 0;
-    for (auto c : jet.getJetConstituents())
+    for (auto c : jet.getJetConstituents()) {
+      if (abs(c->pdgId()) == 11)
+        ee += c->energy();
       if (abs(c->pdgId()) == 13)
         mue += c->energy();
+    }
+    if (ee / jet.energy() >= 0.9)
+      continue;
     if (mue / jet.energy() >= 0.8)
       continue;
 

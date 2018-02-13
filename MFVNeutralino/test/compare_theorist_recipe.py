@@ -28,7 +28,7 @@ histNames = [('genJet_njets',          'mfvTheoristRecipeNoCuts/h_rec_njets',   
              ]
 
 for sample in samples:
-    f = ROOT.TFile('~/crabdirs/TheoristRecipeV41/%s.root' % sample.name)
+    f = ROOT.TFile('~/crabdirs/TheoristRecipeV42/%s.root' % sample.name)
     print sample.name
 
     for name,h1,h2 in histNames:
