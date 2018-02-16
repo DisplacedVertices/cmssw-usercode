@@ -2,7 +2,7 @@ import sys, os
 from array import array
 from JMTucker.Tools.ROOTTools import *
 
-path = plot_dir('pretty_limits_1d_final', make=True)
+path = plot_dir('pretty_limits_1d_final_2', make=True)
 
 ts = tdr_style()
 
@@ -96,7 +96,7 @@ for kind in kinds:
     if versus_mass:
         xax.SetLimits(175, 3000)
     elif versus_tau:
-        xax.SetLimits(0.06, 1300)
+        xax.SetLimits(0.068, 130)
     yax.SetRangeUser(0.08, 100)
 
     observed.SetLineWidth(2)
