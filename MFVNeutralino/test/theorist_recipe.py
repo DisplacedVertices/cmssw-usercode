@@ -26,7 +26,7 @@ mfvTheoristRecipe = cms.EDAnalyzer('MFVTheoristRecipe',
 process.common = cms.Sequence(process.mfvSelectedVertices * process.mfvGenParticles)
 
 if False:
-    #set_events_to_process(process, [(1,5,65)])
+    #set_events(process, [(1,5,65)])
     report_every(process, 1)
     process.load('JMTucker.Tools.ParticleListDrawer_cff')
     process.ParticleListDrawer.maxEventsToPrint = 10000

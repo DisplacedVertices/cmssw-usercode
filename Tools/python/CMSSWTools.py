@@ -77,8 +77,8 @@ def file_event_from_argv(process, warn=True):
         process.maxEvents.input = nums[0]
     elif l == 2 or l == 3:
         nums = tuple(nums)
-        print 'set_events_to_process from argv:', nums
-        set_events_to_process(process, [nums])
+        print 'set_events from argv:', nums
+        set_events(process, [nums])
     elif warn:
         print 'file_event_from_argv warning: did not understand event number'
 
@@ -240,7 +240,7 @@ def replay_event(process, filename, rle, new_process_name='REPLAY'):
         file_event_from_argv(process)
     else:
         process.source.fileNames = cms.untracked.vstring(filename)
-        set_events_to_process(process, [rle])
+        set_events(process, [rle])
     process.RandomNumberGeneratorService.restoreStateLabel = cms.untracked.string('randomEngineStateProducer')
     process.setName_(new_process_name)
 
@@ -253,7 +253,12 @@ def sample_files(process, sample, dataset, n=-1):
     import JMTucker.Tools.SampleFiles as sf
     sf.set_process(process, sample, dataset, n)
 
-def set_events_to_process_ex(events, run=None):
+def set_events(process, events, run=None):
+    '''Set the PoolSource parameter eventsToProcess appropriately,
+    given the desired runs/event numbers passed in. If run is None,
+    run_events must be a list of 3-tuples, each entry being (run, lumi,
+    event). If run is a number, list must be of 2-tuples (lumi, event).
+    '''
     if type(run) == int:
         for event in events:
             if type(event) != tuple or len(event) != 2:
@@ -262,19 +267,7 @@ def set_events_to_process_ex(events, run=None):
     lengths = list(set(len(x) for x in events))
     if len(lengths) != 1 or lengths[0] != 3:
         raise ValueError('expected either list of (lumi,event) or (run,lumi,event) in events')
-    return events
-
-def set_events_to_process(process, events, run=None):
-    '''Set the PoolSource parameter eventsToProcess appropriately,
-    given the desired runs/event numbers passed in. If run is None,
-    run_events must be a list of 3-tuples, each entry being (run, lumi,
-    event). If run is a number, list must be of 2-tuples (lumi, event).
-    '''
-    events = set_events_to_process_ex(events, run)
     process.source.eventsToProcess = cms.untracked.VEventRange(*[cms.untracked.EventRange(x[0],x[1],x[2], x[0],x[1],x[2]) for x in events])
-
-def set_events_to_process_by_filter(process, run_events=None, run=None, run_events_fn='set_events_to_process_by_filter.txt', path_name=None):
-    raise NotImplemented('the other one should work now')
 
 def set_lumis_to_process_from_json(process, json):
     '''What CRAB does when you use lumi_mask.'''
