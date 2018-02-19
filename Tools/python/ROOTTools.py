@@ -6,9 +6,20 @@ from array import array
 if os.environ.has_key('JMT_ROOTTOOLS_NOBATCHMODE'):
     import ROOT
 else:
+    # keep ROOT from parsing out -h/--help
+    _saved = []
+    for _x in '-h', '--help':
+        _i = -1
+        if _x in sys.argv:
+            _i = sys.argv.index(_x)
+        if _i >= 0:
+            _saved.append((_i,_x))
+            sys.argv.remove(_x)
     sys.argv.append('-b')     # Start ROOT in batch mode;
     import ROOT; ROOT.TCanvas # make sure libGui gets initialized while '-b' is specified;
     sys.argv.remove('-b')     # and don't mess up sys.argv.
+    for _off, (_i, _x) in enumerate(_saved):
+        sys.argv.insert(_i+_off, _x)
 
 def apply_hist_commands(hist, hist_cmds=None):
     """With hist_cmds a list of n-tuples, where the first entry of the
