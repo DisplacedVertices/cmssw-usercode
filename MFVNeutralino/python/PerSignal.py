@@ -196,23 +196,70 @@ class PerSignal:
         self.mass_pave.Draw()
 
 if __name__ == '__main__':
+    import argparse, os, sys
+    parser = argparse.ArgumentParser(description = 'PerSignal: given a dir of root files, plot a specified statistic for each signal point')
+                                  #   usage = '%(prog)s [statistic options] dir histogram plotdir')
+    parser.add_argument('rootdir', help='Path to root files.')
+    parser.add_argument('hist', help='Path to histogram in the root files.')
+    parser.add_argument('plotpath', help='Where to save plots.')
+    parser.add_argument('--ytitle', default='changeme', help='Title for y-axis.')
+    parser.add_argument('--yrange', nargs=2, type=float, metavar=('YMIN', 'YMAX'), default=None, help='Range for y-axis.')
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument('-i', '--integral', nargs=2, type=float, metavar=('A','B'), help='Statistic plotted is the integral with the specified range (A and B are floats that will be converted to inclusive bin indices), with Poisson uncertainty from #entries.')
+    group.add_argument('-j', '--integral-ratio', nargs=4, type=float, metavar=('A','B', 'C', 'D'), help='Statistic plotted is the ratio of the integrals with the specified ranges AB / CD (A,B,C,D are floats that will be converted to inclusive bin indices), with Poisson uncertainty from #entries.')
+    group.add_argument('-m', '--mean', action='store_true', help='Statistic plotted is the mean.')
+    group.add_argument('-r', '--rms', action='store_true', help='Statistic plotted is the rms.')
+    options = parser.parse_args()
+
     set_style()
-    ps = plot_saver(plot_dir('testpersignal'), size=(600,600))
+    ps = plot_saver(options.plotpath, size=(600,600))
     
-    from JMTucker.Tools.Samples import *
+    from JMTucker.Tools import Samples
 
-    z = [s for s in mfv_signal_samples if not s.name.startswith('my_')]
-    z.sort(key=lambda s: s.name)
-    for i,s in enumerate(z):
-        s.y, s.yl, s.yh = clopper_pearson(i, len(z))
+    multijet = [s for s in Samples.mfv_signal_samples]
+    dijet = Samples.mfv_ddbar_samples
+    samples = multijet + dijet
 
-    z2 = mfv_ddbar_samples
-    z2.sort(key=lambda s: s.name)
-    for i,s in enumerate(z2):
-        s.y, s.yl, s.yh = clopper_pearson(max(i-5,0), len(z2))
+    for sample in samples:
+        fn = os.path.join(options.rootdir, sample.name + '.root')
+        if not os.path.exists(fn):
+            continue
+        f = ROOT.TFile(fn)
+        h = f.Get(options.hist)
+        if options.integral:
+            sample.y, sample.ye = get_integral(h, *options.integral)
+        if options.integral_ratio:
+            n, en = get_integral(h, *options.integral_ratio[:2])
+            d, ed = get_integral(h, *options.integral_ratio[2:])
+            neff = (n/en)**2 if en > 0 else 0
+            deff = (d/ed)**2 if ed > 0 else 0
+            sample.y, sample.yl, sample.yh = clopper_pearson_poisson_means(neff,deff)
+        elif options.mean:
+            sample.y = h.GetMean()
+            sample.ye = h.GetMeanError()
+            sample.ye = h.GetMeanError()
+        elif options.rms:
+            sample.y = h.GetRMS()
+            sample.ye = h.GetRMSError()
 
-    per = PerSignal('efficiency', y_range=(0.,1.01))
-    per.add(z,  title='#tilde{N} #rightarrow tbs')
-    per.add(z2, title='X #rightarrow d#bar{d}', color=ROOT.kBlue)
+        if hasattr(sample, 'ye'):
+            print '%26s: %12.6f +- %12.6f' % (sample.name, sample.y, sample.ye)
+        else:
+            print '%26s: %12.6f [%12.6f, %12.6f]' % (sample.name, sample.y, sample.yl, sample.yh)
+
+    def _g(s,l):
+        if hasattr(s, 'ye'):
+            return s.y - l*s.ye
+        else:
+            return s.yl if l else s.yh
+
+    if not options.yrange:
+        l = [_g(s, 1) for s in samples]; l = min(l) - max(abs(x) for x in l)*0.05
+        h = [_g(s,-1) for s in samples]; h = max(h) + max(abs(x) for x in h)*0.05
+        options.yrange = l,h
+
+    per = PerSignal(options.ytitle, options.yrange)
+    per.add(multijet,  title='#tilde{N} #rightarrow tbs')
+    per.add(dijet, title='X #rightarrow d#bar{d}', color=ROOT.kBlue)
     per.draw(canvas=ps.c)
-    ps.save('test')
+    ps.save('plot')
