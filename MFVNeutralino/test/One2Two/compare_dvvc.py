@@ -12,11 +12,11 @@ mode = 'vary_eff'
 
 set_style()
 ROOT.gStyle.SetOptFit(0)
-ps = plot_saver('../plots/bkgest/v15_v2/compare_dvvc_%s%s%s_%s' % (mode, '' if is_mc else '_data', '_10pc' if only_10pc else '', year), size=(700,700), root=False, log=False)
+ps = plot_saver('../plots/bkgest/v15_v5/compare_dvvc_%s%s%s_%s' % (mode, '' if is_mc else '_data', '_10pc' if only_10pc else '', year), size=(700,700), root=False, log=False)
 
-fn1 = ['2v_from_jets%s_%s_3track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v4'), '2v_from_jets%s_%s_3track_%s_v15%s.root' % ('' if is_mc else '_data', year, mode, '' if only_10pc else '_v4')]
-fn2 = ['2v_from_jets%s_%s_4track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v4'), '2v_from_jets%s_%s_4track_%s_v15%s.root' % ('' if is_mc else '_data', year, mode, '' if only_10pc else '_v4')]
-fn3 = ['2v_from_jets%s_%s_5track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v4'), '2v_from_jets%s_%s_5track_%s_v15%s.root' % ('' if is_mc else '_data', year, mode, '' if only_10pc else '_v4')]
+fn1 = ['2v_from_jets%s_%s_3track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v5'), '2v_from_jets%s_%s_3track_%s_v15%s.root' % ('' if is_mc else '_data', year, mode, '' if only_10pc else '_v5')]
+fn2 = ['2v_from_jets%s_%s_4track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v5'), '2v_from_jets%s_%s_4track_%s_v15%s.root' % ('' if is_mc else '_data', year, mode, '' if only_10pc else '_v5')]
+fn3 = ['2v_from_jets%s_%s_5track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v5'), '2v_from_jets%s_%s_5track_%s_v15%s.root' % ('' if is_mc else '_data', year, mode, '' if only_10pc else '_v5')]
 
 if mode == 'vary_eff':
     ls = ['vertexer efficiency', 'ntkseeds efficiency']
@@ -29,6 +29,7 @@ if mode == 'vary_bquarks':
 
 fns = [fn1, fn2, fn3]
 ntk = ['3-track', '4-track', '5-track']
+names = ['3-track x 3-track', '4-track x 4-track', '#geq 5-track x #geq 5-track']
 
 n2v = [44., 1., 1.] if year == '2015' else [946., 8., 1.] if year == '2016' else [991., 8., 1.]
 
@@ -46,6 +47,14 @@ else:
     ebin3 = [0.0341, 0.1363, 0.5575] if year == '2015' else [0.0077, 0.0324, 0.1848] if year == '2016' else [0.0076, 0.0314, 0.1750]
 
 colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kOrange, ROOT.kViolet, ROOT.kPink+1]
+
+def write(font, size, x, y, text):
+    w = ROOT.TLatex()
+    w.SetNDC()
+    w.SetTextFont(font)
+    w.SetTextSize(size)
+    w.DrawLatex(x, y, text)
+    return w
 
 x = []
 ex = []
@@ -100,6 +109,11 @@ for i in range(3):
             l2.AddEntry(h, ls[j])
         l2.SetFillColor(0)
         l2.Draw()
+        if not only_10pc and year == '2015p6':
+            write(42, 0.040, 0.150, 0.700, names[i])
+            write(61, 0.050, 0.098, 0.913, 'CMS')
+            write(52, 0.035, 0.200, 0.913, 'Preliminary')
+            write(42, 0.050, 0.560, 0.913, '38.5 fb^{-1} (13 TeV)')
         ps.save('compare_dphi_%s_%s' % (mode, ntk[i]))
 
         c1 = hs[0].Integral(1,4)

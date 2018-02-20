@@ -18,6 +18,14 @@ else:
 f = ROOT.TFile(in_fn)
 fh = ROOT.TFile('vpeffs%s_%s_%s%s.root' % ('' if is_mc else '_data', year, version, '_ntkseeds' if ntkseeds else ''), 'recreate')
 
+def write(font, size, x, y, text):
+    w = ROOT.TLatex()
+    w.SetNDC()
+    w.SetTextFont(font)
+    w.SetTextSize(size)
+    w.DrawLatex(x, y, text)
+    return w
+
 for itk in [3,4,5]:
     h_merge = f.Get('mfvVertexerPairEffs%s/h_merge_d2d_mintk0_maxtk%i' % ('%iTkSeed' % itk if ntkseeds else '', itk))
     h_pairs = f.Get('mfvVertexerPairEffs%s/h_pairs_d2d_mintk0_maxtk%i' % ('%iTkSeed' % itk if ntkseeds else '', itk))
@@ -86,11 +94,17 @@ ps.save('efficiency')
 if not ntkseeds:
     h = f.Get('maxtk3')
     h.Draw('hist')
+    if not is_mc and year == '2015p6':
+        write(61, 0.050, 0.098, 0.913, 'CMS')
+        write(52, 0.035, 0.200, 0.913, 'Preliminary')
+        write(42, 0.050, 0.560, 0.913, '38.5 fb^{-1} (13 TeV)')
     ps.save('efficiency3')
 
     ROOT.TH1.AddDirectory(0)
 
     h2 = ROOT.TFile('vpeffs%s_%s_%s_ntkseeds.root' % ('' if is_mc else '_data', year, version)).Get('maxtk5')
+    if not is_mc and year == '2015p6':
+        h2.Scale(1./h2.GetMaximum())
     h2.SetLineWidth(3)
     h.Draw('hist')
     h2.Draw('hist sames')
@@ -98,12 +112,16 @@ if not ntkseeds:
     l.AddEntry(h, 'default')
     l.AddEntry(h2, 'variation')
     l.Draw()
+    if not is_mc and year == '2015p6':
+        write(61, 0.050, 0.098, 0.913, 'CMS')
+        write(52, 0.035, 0.200, 0.913, 'Preliminary')
+        write(42, 0.050, 0.560, 0.913, '38.5 fb^{-1} (13 TeV)')
     ps.save('compare_efficiency')
 
 if is_mc and not ntkseeds:
-    fn1 = ['2v_from_jets_%s_3track_default_v15_v4.root' % year, '2v_from_jets_%s_3track_noclearing_v15_v4.root' % year]
-    fn2 = ['2v_from_jets_%s_4track_default_v15_v4.root' % year, '2v_from_jets_%s_4track_noclearing_v15_v4.root' % year]
-    fn3 = ['2v_from_jets_%s_5track_default_v15_v4.root' % year, '2v_from_jets_%s_5track_noclearing_v15_v4.root' % year]
+    fn1 = ['2v_from_jets_%s_3track_default_v15_v5.root' % year, '2v_from_jets_%s_3track_noclearing_v15_v5.root' % year]
+    fn2 = ['2v_from_jets_%s_4track_default_v15_v5.root' % year, '2v_from_jets_%s_4track_noclearing_v15_v5.root' % year]
+    fn3 = ['2v_from_jets_%s_5track_default_v15_v5.root' % year, '2v_from_jets_%s_5track_noclearing_v15_v5.root' % year]
 
     fns = [fn1, fn2, fn3]
     ntk = ['3-track', '4-track', '5-track']
