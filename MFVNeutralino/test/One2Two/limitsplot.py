@@ -43,11 +43,12 @@ def tgae(x, y, exl, exh, eyl, eyh, title, xtitle, color):
     t = ROOT.TGraphAsymmErrors(l, x, y, exl, exh, eyl, eyh)
     return fmt(t, title, xtitle, color)
 
-def parse_gluglu(gluglu=[]):
+def parse_gluglu(gluglu=[], include_errors=True):
     if not gluglu:
         gluglu = [eval(x.strip()) for x in open('gluglu.csv') if x.strip()]
         gluglu = [(z[0], z[1]*1000, z[2]/100*z[1]*1000) for z in gluglu] # convert pb to fb and percent to absolute
-        gluglu = [(a,b,0.) for a,b,_ in gluglu]
+        if not include_errors:
+            gluglu = [(a,b,0.) for a,b,_ in gluglu]
     return gluglu
 
 def fmt_gluglu(g, xtitle):
