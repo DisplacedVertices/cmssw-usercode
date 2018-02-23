@@ -42,13 +42,13 @@ def tau(tau):
 
 def nice(kind):
     if kind.startswith('multijet_M'):
-        return '#tilde{#chi}^{0}/#tilde{g} #rightarrow tbs, M_{#tilde{#chi}^{0}} = %i GeV' % int(kind.replace('multijet_M', ''))
+        return '#tilde{#chi}^{0}/#tilde{g} #rightarrow tbs, M = %i GeV' % int(kind.replace('multijet_M', ''))
     elif kind.startswith('ddbar_M'):
-        return '#tilde{g} #rightarrow d#bar{d}, M_{#tilde{g}} = %i GeV' % int(kind.replace('ddbar_M', ''))
+        return '#tilde{g} #rightarrow d#bar{d}, M = %i GeV' % int(kind.replace('ddbar_M', ''))
     elif kind.startswith('multijet_tau'):
-        return '#tilde{#chi}^{0}/#tilde{g} #rightarrow tbs, c#tau_{#tilde{#chi}^{0}} = ' + tau(kind.replace('multijet_tau', ''))
+        return '#tilde{#chi}^{0}/#tilde{g} #rightarrow tbs, c#tau = ' + tau(kind.replace('multijet_tau', ''))
     elif kind.startswith('ddbar_tau'):
-        return '#tilde{g} #rightarrow d#bar{d}, c#tau_{#tilde{g}} = ' + tau(kind.replace('ddbar_tau', ''))
+        return '#tilde{g} #rightarrow d#bar{d}, c#tau = ' + tau(kind.replace('ddbar_tau', ''))
         
 for kind in kinds:
     versus_tau = kind[-5] == 'M'
@@ -103,11 +103,12 @@ for kind in kinds:
     expect50.SetLineWidth(2)
     expect50.SetLineStyle(2)
     gluglu.SetLineWidth(2)
+    gluglu.SetFillColorAlpha(9, 0.5)
 
     expect95.Draw('3')
     expect68.Draw('3')
     if draw_gluglu:
-        gluglu.Draw('3')
+        gluglu.Draw('L3')
     expect50.Draw('L')
     observed.Draw('L')
 
@@ -130,8 +131,7 @@ for kind in kinds:
     leg.AddEntry(expect68, '#pm 1 std. deviation', 'F')
     leg.AddEntry(expect95, '#pm 2 std. deviation', 'F')
     if draw_gluglu:
-#        leg.AddEntry(0, '', '')
-        leg.AddEntry(gluglu, '#tilde{g}#tilde{g} production', 'LEF')
+        leg.AddEntry(gluglu, '#tilde{g}#tilde{g} production', 'LF')
     leg.Draw()
 
     cms = write(61, 0.050, 0.109, 0.913, 'CMS')
