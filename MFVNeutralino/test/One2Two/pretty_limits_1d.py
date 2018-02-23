@@ -2,7 +2,7 @@ import sys, os
 from array import array
 from JMTucker.Tools.ROOTTools import *
 
-path = plot_dir('pretty_limits_1d_final_2', make=True)
+path = plot_dir('pretty_limits_1d_final_5', make=True)
 
 ts = tdr_style()
 
@@ -97,7 +97,7 @@ for kind in kinds:
         xax.SetLimits(175, 3000)
     elif versus_tau:
         xax.SetLimits(0.068, 130)
-    yax.SetRangeUser(0.08, 100)
+    yax.SetRangeUser(0.08, 100000 if (versus_tau and draw_gluglu) else 100)
 
     observed.SetLineWidth(2)
     expect50.SetLineWidth(2)
@@ -106,14 +106,16 @@ for kind in kinds:
 
     expect95.Draw('3')
     expect68.Draw('3')
+    if draw_gluglu:
+        gluglu.Draw('3')
     expect50.Draw('L')
     observed.Draw('L')
+
     if versus_mass:
         legx = 0.563, 0.866
     elif versus_tau:
         legx = 0.443, 0.786
     if draw_gluglu:
-        gluglu.Draw('L')
         leg = ROOT.TLegend(legx[0], 0.566, legx[1], 0.851)
     else:
         leg = ROOT.TLegend(legx[0], 0.632, legx[1], 0.851)
@@ -128,8 +130,8 @@ for kind in kinds:
     leg.AddEntry(expect68, '#pm 1 std. deviation', 'F')
     leg.AddEntry(expect95, '#pm 2 std. deviation', 'F')
     if draw_gluglu:
-        leg.AddEntry(0, '', '')
-        leg.AddEntry(gluglu, '#splitline{#tilde{g}#tilde{g} production}{M. Kr#ddot{a}mer et al.}', 'L')
+#        leg.AddEntry(0, '', '')
+        leg.AddEntry(gluglu, '#tilde{g}#tilde{g} production', 'LEF')
     leg.Draw()
 
     cms = write(61, 0.050, 0.109, 0.913, 'CMS')
