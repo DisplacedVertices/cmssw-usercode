@@ -467,12 +467,11 @@ bool MFVGenParticles::try_XX4j(mfv::MCInteraction& mc, const edm::Handle<reco::G
     h.s[which][0] = gen_ref(final_candidate(h.p[which]->daughter(!which2), 3), gen_particles);
     h.s[which][1] = gen_ref(final_candidate(h.p[which]->daughter( which2), 3), gen_particles);
 
-    // testing
-    if (last_flag_check) {
-      assert(h.p[which]   ->statusFlags().isLastCopy());
-      assert(h.s[which][0]->statusFlags().isLastCopy());
-      assert(h.s[which][1]->statusFlags().isLastCopy());
-    }
+//    if (last_flag_check) {
+//      assert(h.p[which]   ->statusFlags().isLastCopy());
+//      assert(h.s[which][0]->statusFlags().isLastCopy());
+//      assert(h.s[which][1]->statusFlags().isLastCopy());
+//    }
   }
 
   if (h.valid()) {
