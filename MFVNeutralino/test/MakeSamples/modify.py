@@ -29,7 +29,6 @@ def set_ttbar(process):
         )
 
 def set_xxddbar(process, tau0, mass):
-    process.generator.PythiaParameters.processParameters = cms.vstring(*params)
     params = [
         'Higgs:useBSM = on',
         'HiggsBSM:all = off',
