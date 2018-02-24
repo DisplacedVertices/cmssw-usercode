@@ -82,9 +82,9 @@ if scanpack:
     ex += '_' + scanpack
     scanpack = get_scanpack(scanpack)
 
-ex = '_test'
-nevents, events_per = 5,5
-meta, taus, masses = 'xxddbar', [10000], [1600]
+#ex = '_test'
+#nevents, events_per = 5,5
+#meta, taus, masses = 'neu', [10000], [1600]
 
 ################################################################################
 
