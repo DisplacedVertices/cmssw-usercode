@@ -1,7 +1,7 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-debug = False
-dataset = 'main' # 'miniaod'
+debug = 'debug' in sys.argv
+dataset = 'miniaod' if 'miniaod' in sys.argv else 'main'
 
 tfileservice(process, 'gen_particles.root')
 sample_files(process, 'mfv_ddbar_tau01000um_M1600', dataset)
