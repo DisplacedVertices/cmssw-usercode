@@ -82,9 +82,9 @@ if scanpack:
     ex += '_' + scanpack
     scanpack = get_scanpack(scanpack)
 
-#ex = '_test'
-#nevents, events_per = 5,5
-#meta, taus, masses = 'neu', [10000], [1600]
+ex = '_test'
+nevents, events_per = 5,5
+meta, taus, masses = 'xxddbar', [10000], [1600]
 
 ################################################################################
 
@@ -280,6 +280,7 @@ metamap = {
     'ccbar': ('mfv_ccbar', 'gluino_ccbar'),
     'bbbar': ('mfv_bbbar', 'gluino_bbbar'),
     'lq2': ('mfv_lq2', 'leptoquark'),
+    'xxddbar': ('mfv_xxddbar', 'xxddbar'),
 }
 
 if meta == 'scan':
