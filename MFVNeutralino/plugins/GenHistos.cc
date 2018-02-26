@@ -107,7 +107,8 @@ private:
 
   TH1F* h_npartons_60;
   TH1F* h_njets_60;
-  TH1F* h_ht_20;
+  TH1F* h_ht;
+  TH1F* h_ht40;
 
   TH1F* NJets;
   BasicKinematicHists* Jets;
@@ -407,7 +408,8 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   h_npartons_in_acc = fs->make<TH1F>("h_npartons_in_acc", ";number of LSP daughters in acceptance;Events", 40, 0, 40);
   h_npartons_60 = fs->make<TH1F>("h_npartons_60", ";number of partons with E_{T} > 60 GeV;Events", 40, 0, 40);
   h_njets_60 = fs->make<TH1F>("h_njets_60", ";number of jets with E_{T} > 60 GeV;Events", 40, 0, 40);
-  h_ht_20 = fs->make<TH1F>("h_ht_20", ";#SigmaH_{T} of jets with E_{T} > 20 GeV;Events/100 GeV", 100, 0, 10000);
+  h_ht = fs->make<TH1F>("h_ht", ";#SigmaH_{T} of jets with E_{T} > 20 GeV;Events/100 GeV", 100, 0, 10000);
+  h_ht40 = fs->make<TH1F>("h_ht", ";#SigmaH_{T} of jets with E_{T} > 40 GeV;Events/100 GeV", 100, 0, 10000);
 
   NJets = fs->make<TH1F>("NJets", ";number of jets;Events", 40, 0, 40);
   Jets = bkh_factory->make("Jets", "gen jets");
@@ -722,10 +724,17 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   int njets = 0;
   int nbjets = 0;
   int njets60 = 0;
-  float ht = 0.0;
+  float ht = 0, ht40 = 0;
   for (const reco::GenJet& jet : *gen_jets) {
-    if (jet.pt() > 20)
-      ++njets;
+    if (jet.pt() < 20 || fabs(jet.eta()) > 2.5)
+      continue;
+
+    ++njets;
+    ht += jet.pt();
+    if (jet.pt() > 40)
+      ht40 += jet.pt();
+    if (jet.pt() > 60)
+      ++njets60;
 
     int nchg = 0;
     int id = gen_jet_id(jet);
@@ -738,11 +747,6 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     }
 
     float fchg = float(nchg)/jet.nConstituents();
-
-    if (jet.pt() > 60 && fabs(jet.eta()) < 2.5)
-      ++njets60;
-    if (jet.pt() > 20 && fabs(jet.eta()) < 2.5)
-      ht += jet.pt();
 
     Jets->Fill(&jet);
     JetAuxE->Fill(jet.auxiliaryEnergy());
@@ -770,10 +774,11 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
       BJetFChargedConst->Fill(fchg);
     }      
   }
-  NJets->Fill(gen_jets->size());
+  NJets->Fill(njets);
   NBJets->Fill(nbjets);
   h_njets_60->Fill(njets60);
-  h_ht_20->Fill(ht);
+  h_ht->Fill(ht);
+  h_ht40->Fill(ht40);
 }
 
 DEFINE_FWK_MODULE(MFVGenHistos);
