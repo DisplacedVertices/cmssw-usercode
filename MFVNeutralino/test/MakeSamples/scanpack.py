@@ -139,6 +139,8 @@ class scanpackbase(object):
             kind = 'mfv_neu'
         elif kind == 'set_gluino_ddbar':
             kind = 'mfv_ddbar'
+        elif kind == 'set_stop_dbardbar':
+            kind = 'mfv_stopdbardbar'
         else:
             raise ValueError('dunno %s' % kind)
         tau = int(tau*1000)
@@ -151,6 +153,8 @@ class scanpackbase(object):
             kind = set_mfv_neutralino
         elif kind == 'mfv_ddbar':
             kind = set_gluino_ddbar
+        elif kind == 'mfv_stopdbardbar':
+            kind = set_stop_dbardbar
         else:
             raise NameError('dunno %s' % kind)
         assert tau.startswith('tau') and tau.endswith('um')
