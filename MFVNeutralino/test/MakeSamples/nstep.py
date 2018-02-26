@@ -4,7 +4,7 @@ from CRABClient.ClientExceptions import ConfigException as CRABConfigException
 from JMTucker.MFVNeutralino.Year import year; assert year in (2015,2016) # fix later
 from scanpack import get_scanpack, scanpackbase
 
-nevents = 10000
+nevents = 15000
 events_per = 100
 scanpack = None
 from_lhe = False
@@ -18,10 +18,10 @@ hip_simulation = False
 hip_mitigation = False
 ex = ''
 
-meta = 'neu'
+meta = 'stopdbardbar'
 taus   = [100, 300, 1000, 10000, 30000]
 masses = [300, 400, 500, 600, 800, 1200, 1600, 3000]
-tau_masses = [] # [(1000,800),(10000,1600)]
+tau_masses = [(1000,1200),(10000,1200),(1000,800),(1000,1600)]
 already = []
 hip_right = False
 
@@ -84,7 +84,7 @@ if scanpack:
 
 #ex = '_test'
 #nevents, events_per = 5,5
-#meta, taus, masses = 'neu', [10000], [1600]
+#meta, taus, masses = 'stopdbardbar', [1000], [1200]
 
 ################################################################################
 
@@ -281,6 +281,7 @@ metamap = {
     'bbbar': ('mfv_bbbar', 'gluino_bbbar'),
     'lq2': ('mfv_lq2', 'leptoquark'),
     'xxddbar': ('mfv_xxddbar', 'xxddbar'),
+    'stopdbardbar': ('mfv_stopdbardbar', 'stop_dbardbar'),
 }
 
 if meta == 'scan':
