@@ -404,12 +404,12 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   h_bquarks_dR = fs->make<TH1F>("h_bquarks_dR", "events with two bquarks;#Delta R;Events/0.14", 50, 0, 7);
   h_bquarks_dR_dphi = fs->make<TH2F>("h_bquarks_dR_dphi", "events with two bquarks;#Delta#phi;#Delta R", 50, -3.15, 3.15, 50, 0, 7);
 
-  h_npartons_in_acc = fs->make<TH1F>("h_npartons_in_acc", ";number of LSP daughters in acceptance;Events", 11, 0, 11);
-  h_npartons_60 = fs->make<TH1F>("h_npartons_60", ";number of partons with E_{T} > 60 GeV;Events", 11, 0, 11);
-  h_njets_60 = fs->make<TH1F>("h_njets_60", ";number of jets with E_{T} > 60 GeV;Events", 11, 0, 11);
-  h_ht_20 = fs->make<TH1F>("h_ht_20", ";#SigmaH_{T} of jets with E_{T} > 20 GeV;Events", 100, 0, 2000);
+  h_npartons_in_acc = fs->make<TH1F>("h_npartons_in_acc", ";number of LSP daughters in acceptance;Events", 40, 0, 40);
+  h_npartons_60 = fs->make<TH1F>("h_npartons_60", ";number of partons with E_{T} > 60 GeV;Events", 40, 0, 40);
+  h_njets_60 = fs->make<TH1F>("h_njets_60", ";number of jets with E_{T} > 60 GeV;Events", 40, 0, 40);
+  h_ht_20 = fs->make<TH1F>("h_ht_20", ";#SigmaH_{T} of jets with E_{T} > 20 GeV;Events/100 GeV", 100, 0, 10000);
 
-  NJets = fs->make<TH1F>("NJets", ";number of jets;Events", 30, 0, 30);
+  NJets = fs->make<TH1F>("NJets", ";number of jets;Events", 40, 0, 40);
   Jets = bkh_factory->make("Jets", "gen jets");
   Jets->BookE (200, 0, 2000, "10");
   Jets->BookP (200, 0, 2000, "10");
@@ -719,11 +719,14 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   }
 
 
-  NJets->Fill(gen_jets->size());
+  int njets = 0;
   int nbjets = 0;
   int njets60 = 0;
   float ht = 0.0;
   for (const reco::GenJet& jet : *gen_jets) {
+    if (jet.pt() > 20)
+      ++njets;
+
     int nchg = 0;
     int id = gen_jet_id(jet);
     int ntracksptgt3 = 0;
@@ -767,6 +770,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
       BJetFChargedConst->Fill(fchg);
     }      
   }
+  NJets->Fill(gen_jets->size());
   NBJets->Fill(nbjets);
   h_njets_60->Fill(njets60);
   h_ht_20->Fill(ht);
