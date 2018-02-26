@@ -153,10 +153,10 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
 
   for (int i = 0; i < 2; ++i) {
     Hs[i] = bkh_factory->make(TString::Format("Hs#%i", i), TString::Format("H #%i", i));
-    Hs[i]->BookE (200, 0, 2000, "10");
-    Hs[i]->BookP (200, 0, 2000, "10");
-    Hs[i]->BookPt(200, 0, 2000, "10");
-    Hs[i]->BookPz(200, 0, 2000, "10");
+    Hs[i]->BookE (200, 0, 4000, "20");
+    Hs[i]->BookP (200, 0, 4000, "20");
+    Hs[i]->BookPt(200, 0, 4000, "20");
+    Hs[i]->BookPz(200, 0, 4000, "20");
     Hs[i]->BookM (200, 0, 2000, "10");
     Hs[i]->BookRapEta(200, "0.1");
     Hs[i]->BookPhi(50, "0.125");
