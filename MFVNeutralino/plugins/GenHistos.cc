@@ -739,7 +739,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     if (jet.pt() > 60 && fabs(jet.eta()) < 2.5)
       ++njets60;
     if (jet.pt() > 20 && fabs(jet.eta()) < 2.5)
-      ht = ht + jet.pt();;
+      ht += jet.pt();
 
     Jets->Fill(&jet);
     JetAuxE->Fill(jet.auxiliaryEnergy());
