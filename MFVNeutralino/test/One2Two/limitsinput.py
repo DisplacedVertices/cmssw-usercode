@@ -400,6 +400,38 @@ def axes(f=None):
     taus   = axisize(taus)
     return kinds, masses, taus
 
+def nevents_plot():
+    in_f = ROOT.TFile(limitsinput_fn)
+    out_f = ROOT.TFile('nevents.root', 'recreate')
+
+    kinds, masses, taus = axes(in_f)
+    nmasses = len(masses) - 1
+    ntaus = len(taus) - 1
+
+    for kind in kinds:
+        h = ROOT.TH2D('nevents_%s' % kind, ';mass (GeV);#tau (mm)', nmasses, masses, ntaus, taus)
+
+        for ibin in xrange(1, nmasses+1):
+            mass = h.GetXaxis().GetBinLowEdge(ibin)
+            for jbin in xrange(1, ntaus+1):
+                tau = h.GetYaxis().GetBinLowEdge(jbin)
+
+                try:
+                    isample = name2isample(in_f, details2name(kind, tau, mass))
+                except ValueError:
+                    continue
+
+                nev = nevents(in_f, isample)
+
+                h.SetBinContent(ibin, jbin, nev)
+                h.SetBinError  (ibin, jbin, nev**0.5)
+
+        out_f.cd()
+        h.Write()
+
+    out_f.Write()
+    out_f.Close()
+
 def signal_efficiency():
     from signal_efficiency import SignalEfficiencyCombiner
     combiner = SignalEfficiencyCombiner()
@@ -449,6 +481,7 @@ if __name__ == '__main__':
         f = ROOT.TFile(limitsinput_fn)
         for s in sample_iterator(f):
             print s.name.ljust(30), '%6i' % int(nevents(f, s.isample))
+        nevents_plot()
     elif 'points' in sys.argv:
         print 'kinds = %r\nmasses = %r\ntaus = %r' % points()
     elif 'signal_efficiency' in sys.argv:
