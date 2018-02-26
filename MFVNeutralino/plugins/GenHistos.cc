@@ -30,6 +30,8 @@ private:
 
   edm::ESHandle<ParticleDataTable> pdt;
 
+  TH1F* h_valid;
+
   TH1F* NumLeptons;
   TH2F* DecayType;
 
@@ -144,6 +146,8 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
     mci_warned(false)
 {
   edm::Service<TFileService> fs;
+
+  h_valid = fs->make<TH1F>("h_valid", "", 2, 0, 2);
 
   NumLeptons = fs->make<TH1F>("NumLeptons", "", 3, 0, 3);
   NumLeptons->SetTitle(";number of leptons from top decays;events");
@@ -409,7 +413,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   h_npartons_60 = fs->make<TH1F>("h_npartons_60", ";number of partons with E_{T} > 60 GeV;Events", 40, 0, 40);
   h_njets_60 = fs->make<TH1F>("h_njets_60", ";number of jets with E_{T} > 60 GeV;Events", 40, 0, 40);
   h_ht = fs->make<TH1F>("h_ht", ";#SigmaH_{T} of jets with E_{T} > 20 GeV;Events/100 GeV", 100, 0, 10000);
-  h_ht40 = fs->make<TH1F>("h_ht", ";#SigmaH_{T} of jets with E_{T} > 40 GeV;Events/100 GeV", 100, 0, 10000);
+  h_ht40 = fs->make<TH1F>("h_ht40", ";#SigmaH_{T} of jets with E_{T} > 40 GeV;Events/100 GeV", 100, 0, 10000);
 
   NJets = fs->make<TH1F>("NJets", ";number of jets;Events", 40, 0, 40);
   Jets = bkh_factory->make("Jets", "gen jets");
@@ -476,6 +480,8 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     bkh->Fill(c);
     bkh->FillEx(signed_mag(c->vx() - x0, c->vy() - y0), c->vz() - z0, c->charge());
   };
+
+  h_valid->Fill(mci->valid());
 
   if (!mci->valid()) {
     if (!mci_warned)
@@ -638,7 +644,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
         fill(Downs          [i], &*mci->down(i));
       }
     }
-    else if (mci->type() == mfv::mci_XX4j || mci->type() == mfv::mci_MFVddbar || mci->type() == mfv::mci_MFVbbbar || mci->type() == mfv::mci_MFVlq) {
+    else if (mci->type() == mfv::mci_XX4j || mci->type() == mfv::mci_MFVddbar || mci->type() == mfv::mci_MFVbbbar || mci->type() == mfv::mci_MFVlq || mci->type() == mfv::mci_stopdbardbar) {
       for (int i = 0; i < 2; ++i) {
         fill(Hs[i], &*mci->primaries()[i]);
         for (int j = 0; j < 2; ++j)
