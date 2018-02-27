@@ -258,7 +258,7 @@ class scanpack2015supplement(scanpackbase100epj):
 
 class scanpack3(scanpackbase100epj):
     kinds = [set_stop_dbardbar]
-    taus = [tau/1000. for tau in range(100, 1000, 100) + range(1000, 4000, 1000) + range(40000, 100001, 3000)]
+    taus = [tau/1000. for tau in range(100, 1000, 100) + range(1000, 4000, 1000) + range(4000, 40000, 3000) + range(40000, 100001, 3000)]
     masses = range(300, 600, 100) + range(600, 2601, 200)
 
     def events_per_sample(self, kind, tau, mass):
