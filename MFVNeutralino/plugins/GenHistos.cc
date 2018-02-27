@@ -158,11 +158,11 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
 
   for (int i = 0; i < 2; ++i) {
     Hs[i] = bkh_factory->make(TString::Format("Hs#%i", i), TString::Format("H #%i", i));
-    Hs[i]->BookE (200, 0, 4000, "20");
-    Hs[i]->BookP (200, 0, 4000, "20");
-    Hs[i]->BookPt(200, 0, 4000, "20");
-    Hs[i]->BookPz(200, 0, 4000, "20");
-    Hs[i]->BookM (200, 0, 2000, "10");
+    Hs[i]->BookE (300, 0, 6000, "20");
+    Hs[i]->BookP (300, 0, 6000, "20");
+    Hs[i]->BookPt(300, 0, 6000, "20");
+    Hs[i]->BookPz(300, 0, 6000, "20");
+    Hs[i]->BookM (300, 0, 6000, "20");
     Hs[i]->BookRapEta(200, "0.1");
     Hs[i]->BookPhi(50, "0.125");
 
@@ -181,11 +181,11 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
     }
 
     Lsps[i] = bkh_factory->make(TString::Format("Lsps#%i", i), TString::Format("lsp #%i", i));
-    Lsps[i]->BookE (200, 0, 2000, "10");
-    Lsps[i]->BookP (200, 0, 2000, "10");
-    Lsps[i]->BookPt(200, 0, 2000, "10");
-    Lsps[i]->BookPz(200, 0, 2000, "10");
-    Lsps[i]->BookM (200, 0, 2000, "10");
+    Lsps[i]->BookE (300, 0, 6000, "20");
+    Lsps[i]->BookP (300, 0, 6000, "20");
+    Lsps[i]->BookPt(300, 0, 6000, "20");
+    Lsps[i]->BookPz(300, 0, 6000, "20");
+    Lsps[i]->BookM (300, 0, 6000, "20");
     Lsps[i]->BookRapEta(200, "0.1");
     Lsps[i]->BookPhi(50, "0.125");
 
