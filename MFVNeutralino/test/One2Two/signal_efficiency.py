@@ -100,14 +100,16 @@ class SignalEfficiencyCombiner:
             h_uncert = f.Get('h_signal_%i_uncert' % which)
             sig_uncert = checkedset(sig_uncert, self._get(h_uncert, offset=1))
 
+        total_sig_rate = sum(sig_rate)
+
         return Result(which = which,
                       nice_name = nice_name,
                       int_lumi_sum = int_lumi_sum,
                       total_nsig = total_nsig,
                       sig_rate = sig_rate,
-                      total_sig_rate = sum(sig_rate),
-                      sig_rate_norm = [x / sum(sig_rate) for x in sig_rate],
-                      total_efficiency = sum(sig_rate) / int_lumi_sum,
+                      total_sig_rate = total_sig_rate,
+                      sig_rate_norm = [x / total_sig_rate if total_sig_rate > 0 else 0. for x in sig_rate],
+                      total_efficiency = total_sig_rate / int_lumi_sum,
                       sig_uncert = sig_uncert,
                       sig_uncert_rate = [x*(y-1) for x,y in zip(sig_rate, sig_uncert)],
                       h_dbv = h_dbv_sum,
