@@ -2,7 +2,7 @@ import sys, os
 from array import array
 from JMTucker.Tools.ROOTTools import *
 
-path = plot_dir('pretty_limits_1d_final_5', make=True)
+path = plot_dir('pretty_limits_1d_abomination', make=True)
 
 ts = tdr_style()
 
@@ -23,12 +23,12 @@ kinds = [
     'multijet_tau300um',
     'multijet_tau1mm',
     'multijet_tau10mm',
-    'ddbar_M0800',
-    'ddbar_M1600',
-    'ddbar_M2400',
-    'ddbar_tau300um',
-    'ddbar_tau1mm',
-    'ddbar_tau10mm',
+    'dijet_M0800',
+    'dijet_M1600',
+    'dijet_M2400',
+    'dijet_tau300um',
+    'dijet_tau1mm',
+    'dijet_tau10mm',
     ]
 
 def tau(tau):
@@ -40,16 +40,22 @@ def tau(tau):
         tau = float(tau.replace('mm',''))
         return '%.0f mm' % tau
 
-def nice(kind):
+def nice_leg(kind):
     if kind.startswith('multijet_M'):
         return '#tilde{#chi}^{0}/#tilde{g} #rightarrow tbs, M = %i GeV' % int(kind.replace('multijet_M', ''))
-    elif kind.startswith('ddbar_M'):
-        return '#tilde{g} #rightarrow d#bar{d}, M = %i GeV' % int(kind.replace('ddbar_M', ''))
+    elif kind.startswith('dijet_M'):
+        return '#tilde{t} #rightarrow #bar{d}#kern[0.1]{#bar{d}}, M = %i GeV' % int(kind.replace('dijet_M', ''))
     elif kind.startswith('multijet_tau'):
         return '#tilde{#chi}^{0}/#tilde{g} #rightarrow tbs, c#tau = ' + tau(kind.replace('multijet_tau', ''))
-    elif kind.startswith('ddbar_tau'):
-        return '#tilde{g} #rightarrow d#bar{d}, c#tau = ' + tau(kind.replace('ddbar_tau', ''))
-        
+    elif kind.startswith('dijet_tau'):
+        return '#tilde{t} #rightarrow #bar{d}#kern[0.1]{#bar{d}}, c#tau = ' + tau(kind.replace('dijet_tau', ''))
+
+def nice_theory(kind):
+    if kind.startswith('multijet'):
+        return '#tilde{g}#tilde{g} production'
+    elif kind.startswith('dijet'):
+        return '#tilde{t}#kern[0.9]{#tilde{t}}* production'
+
 for kind in kinds:
     versus_tau = kind[-5] == 'M'
     versus_mass = 'tau' in kind
@@ -68,9 +74,9 @@ for kind in kinds:
     expect50 = f.Get('%s/expect50' % kind)
     expect68 = f.Get('%s/expect68' % kind)
     expect95 = f.Get('%s/expect95' % kind)
-    gluglu = f.Get('%s/gluglu' % kind)
+    theory = f.Get('%s/theory' % kind)
 
-    particle = '#tilde{g}' if 'ddbar' in kind else '#tilde{#chi}^{0} / #tilde{g}'
+    particle = '#tilde{t}' if 'dijet' in kind else '#tilde{#chi}^{0} / #tilde{g}'
     if versus_mass:
         xtitle = 'M_{%s} (GeV)' % particle
     elif versus_tau:
@@ -80,7 +86,7 @@ for kind in kinds:
     g.SetTitle(';%s;#sigma B^{2} (fb)  ' % xtitle)
     g.Draw('A3')
 
-    draw_gluglu = 'tau' in kind
+    draw_theory = 'tau' in kind
 
     xax = g.GetXaxis()
     xax.SetLabelSize(0.045)
@@ -97,18 +103,23 @@ for kind in kinds:
         xax.SetLimits(175, 3000)
     elif versus_tau:
         xax.SetLimits(0.068, 130)
-    yax.SetRangeUser(0.08, 100000 if (versus_tau and draw_gluglu) else 100)
+    yax.SetRangeUser(0.08, 100000 if (versus_tau and draw_theory) else 100)
 
     observed.SetLineWidth(2)
     expect50.SetLineWidth(2)
     expect50.SetLineStyle(2)
-    gluglu.SetLineWidth(2)
-    gluglu.SetFillColorAlpha(9, 0.5)
+    theory.SetLineWidth(2)
+    if kind.startswith('multijet'):
+        theory_color = 9
+    elif kind.startswith('dijet'):
+        theory_color = 46
+    theory.SetLineColor(theory_color)
+    theory.SetFillColorAlpha(theory_color, 0.5)
 
     expect95.Draw('3')
     expect68.Draw('3')
-    if draw_gluglu:
-        gluglu.Draw('L3')
+    if draw_theory:
+        theory.Draw('L3')
     expect50.Draw('L')
     observed.Draw('L')
 
@@ -116,7 +127,7 @@ for kind in kinds:
         legx = 0.563, 0.866
     elif versus_tau:
         legx = 0.443, 0.786
-    if draw_gluglu:
+    if draw_theory:
         leg = ROOT.TLegend(legx[0], 0.566, legx[1], 0.851)
     else:
         leg = ROOT.TLegend(legx[0], 0.632, legx[1], 0.851)
@@ -124,14 +135,14 @@ for kind in kinds:
     leg.SetTextFont(42)
     leg.SetFillColor(ROOT.kWhite)
     leg.SetBorderSize(0)
-    leg.AddEntry(0, '#kern[-0.22]{%s}' % nice(kind), '')
+    leg.AddEntry(0, '#kern[-0.22]{%s}' % nice_leg(kind), '')
     leg.AddEntry(0, '#kern[-0.22]{95% CL upper limits:}', '')
     leg.AddEntry(observed, 'Observed', 'L')
     leg.AddEntry(expect50, 'Expected', 'L')
     leg.AddEntry(expect68, '#pm 1 std. deviation', 'F')
     leg.AddEntry(expect95, '#pm 2 std. deviation', 'F')
-    if draw_gluglu:
-        leg.AddEntry(gluglu, '#tilde{g}#tilde{g} production', 'LF')
+    if draw_theory:
+        leg.AddEntry(theory, nice_theory(kind), 'LF')
     leg.Draw()
 
     cms = write(61, 0.050, 0.109, 0.913, 'CMS')

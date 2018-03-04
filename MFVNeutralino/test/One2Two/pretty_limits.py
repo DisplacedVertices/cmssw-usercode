@@ -2,7 +2,7 @@ import sys, os
 from array import array
 from JMTucker.Tools.ROOTTools import *
 
-path = plot_dir('pretty_limits_final', make=True)
+path = plot_dir('pretty_limits_abomination', make=True)
 
 ts = tdr_style()
 ROOT.gStyle.SetPalette(ROOT.kBird)
@@ -44,7 +44,7 @@ for kind in 'mfv_ddbar', 'mfv_neu':
         if kind == 'mfv_neu':
             xax.SetTitle('M_{#tilde{#chi}^{0} / #tilde{g}} (GeV)')
         else:
-            xax.SetTitle('M_{#tilde{g}} (GeV)')
+            xax.SetTitle('M_{#tilde{t}} (GeV)')
 #        xax.CenterLabels()
 #        xax.SetNdivisions(1300, 0)
 #        xax.SetBinLabel(xax.FindBin(400), '400')
@@ -145,7 +145,7 @@ for kind in 'mfv_ddbar', 'mfv_neu':
         if kind == 'mfv_neu':
             model = '#kern[-0.22]{#tilde{g} #rightarrow tbs}'
         else:
-            model = '#kern[-0.22]{#tilde{g} #rightarrow d#bar{d}}'
+            model = '#kern[-0.22]{#tilde{t} #rightarrow #bar{d}#kern[0.1]{#bar{d}}}'
         leg.AddEntry(0, model, '')
         leg.AddEntry(g_obs, '#kern[-0.22]{Observed}', 'L')
         leg.AddEntry(g_exp, '#kern[-0.22]{Expected}', 'L')
