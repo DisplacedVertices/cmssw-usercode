@@ -63,7 +63,7 @@ cd $WD
 
     echo "========================================================================="
     echo Expected limits
-    combine -M BayesianToyMC datacard.txt --toys 1000 --saveToys
+    combine -M BayesianToyMC datacard.txt --toys 5000 --saveToys
     mv higgsCombine*root expected.root
 
 #    echo "========================================================================="
