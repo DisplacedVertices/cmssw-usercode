@@ -55,21 +55,17 @@ def parse_theory(which, include_errors=True, cache={}):
         cache[fn] = xsecs
     return cache[fn]
 
-def fmt_theory(g, xtitle):
-    fmt(g, '', xtitle, 9)
+def fmt_theory(which, g, xtitle):
+    fmt(g, '', xtitle, 9 if which == 'gluglu' else 46)
 
 def make_theory(which, include_errors=True, return_list=False):
     xsecs = parse_theory(which, include_errors)
     g = tge(xsecs)
-    fmt_theory(g, 'mass (GeV)')
+    fmt_theory(which, g, 'mass (GeV)')
     if return_list:
         return g, xsecs
     else:
         return g
-
-def draw_theory(which):
-    g = make_theory(which)
-    g.Draw('A3')
 
 def make_theory_hist(which):
     xsecs = parse_theory(which)
@@ -193,7 +189,7 @@ def make_1d_plot(d, name, xkey='mass'):
         y = [xsec]*len(x)
         ey = [unc]*len(x)
         g.theory = tge(zip(x,y,ey))
-        fmt_theory(g.theory, xtitle)
+        fmt_theory(which_theory, g.theory, xtitle)
 
     return g
 
