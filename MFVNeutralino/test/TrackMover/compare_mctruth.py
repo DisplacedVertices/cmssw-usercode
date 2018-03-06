@@ -1,20 +1,18 @@
-# for x in $crd/TrackMoverMCTruthV14/*.root ; do echo $(printf "%-50s" $(basename $x .root)) $(./mctruth.exe $x $(basename $x) 0.0252 ); done | tee mctruths.txt
+# for x in $crd/TrackMoverMCTruthV16/*.root ; do echo $(printf "%-50s" $(basename $x .root)) $(./mctruth.exe $x $(basename $x) 0.0252 ); done | tee mctruths.txt
 
 import sys
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.MFVNeutralino.PerSignal import PerSignal
 
-mctruths_fn = sys.argv[1]
-plot_path = sys.argv[2]
+mctruths_fn = 'mctruths.txt'
 
 set_style()
-ps = plot_saver(plot_path, size=(600,600), log=False)
+ps = plot_saver(plot_dir('compare_mctruth_v16'), size=(600,600), log=False)
 
-# ( for x in $crd/TrackMoverMCTruthV14/*.root; echo $(basename $x .root) $(./mctruth.exe $x $(basename x) 0.0084) ) | tee mctruths.txt
 for line in open(mctruths_fn):
     line = line.strip().replace('+- ', '')
-    if line and 'nan' not in line:
+    if line and not line.startswith('#') and 'nan' not in line:
         line = line.split()
         sname = line.pop(0)
         den = float(line.pop(0))
@@ -25,9 +23,9 @@ for line in open(mctruths_fn):
             print 'no sample', sname
 
 def filter(ss):
-    return [s for s in ss if not s.name.startswith('my_') and s.tau == 10000 and s.mass not in (500,3000)]
+    return [s for s in ss if s.tau == 10000 and s.mass not in (500,3000)]
 multijet = filter(Samples.mfv_signal_samples)
-dijet    = filter(Samples.mfv_ddbar_samples)
+dijet    = filter(Samples.mfv_stopdbardbar_samples)
 
 # for x in nocuts ntracks all; do printf "# $x\n["; cat effs_* | grep -A4 background | grep $x | tr '-' ' ' | awk '{printf "(%.2f, %.2f),\n", $2, $NF}'; echo \],; done
 trackmover_data = [
@@ -67,7 +65,7 @@ for icuts, cuts in enumerate(('none', 'ntracks', 'full')):
 
     per = PerSignal('efficiency with cuts=%s' % cuts, y_range=(0.,1.02))
     per.add(multijet, title='#tilde{N} #rightarrow tbs')
-    per.add(dijet, title='X #rightarrow d#bar{d}', color=ROOT.kBlue)
+    per.add(dijet, title='#tilde{t} #rightarrow #bar{d}#bar{d}', color=ROOT.kBlue)
     per.draw(canvas=ps.c, do_tau_paves=False, do_decay_paves=False)
 
     leg = ROOT.TLegend(0.495,0.149,0.870,0.604)
