@@ -64,7 +64,6 @@ MFVJetEnergyHistos::MFVJetEnergyHistos(const edm::ParameterSet& cfg)
   h_w = fs->make<TH1F>("h_w", ";event weight;events/0.1", 100, 0, 10);
 
   h_njets = fs->make<TH1F>("h_njets", ";# of jets;events", 20, 0, 20);
-  for (int i = 0; i < 3; ++i)
   h_jet_ht = fs->make<TH1F>("h_jet_ht", ";H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
   h_jet_ht_40 = fs->make<TH1F>("h_jet_ht_40", ";H_{T} of jets with p_{T} > 40 GeV;events/25 GeV", 200, 0, 5000);
 
