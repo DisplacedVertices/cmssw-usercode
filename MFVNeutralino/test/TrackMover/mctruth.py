@@ -31,14 +31,14 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if year == 2015:
         samples = Samples.mfv_signal_samples_2015
     elif year == 2016:
-        samples = Samples.mfv_signal_samples + Samples.mfv_ddbar_samples
+        samples = Samples.mfv_signal_samples + Samples.mfv_stopdbardbar_samples
 
-    dataset = 'ntuplev14'
+    dataset = 'ntuplev16'
     for sample in samples:
         sample.datasets[dataset].files_per = 2
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('TrackMoverMCTruthV14',
+    cs = CondorSubmitter('TrackMoverMCTruthV16',
                          ex = year,
                          dataset = dataset,
                          )
