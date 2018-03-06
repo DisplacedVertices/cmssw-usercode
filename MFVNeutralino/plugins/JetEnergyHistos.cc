@@ -26,7 +26,6 @@ class MFVJetEnergyHistos : public edm::EDAnalyzer {
  private:
   const edm::EDGetTokenT<MFVEvent> mevent_token;
   const edm::EDGetTokenT<double> weight_token;
-  const std::vector<double> force_bs;
   const bool jes;
 
   TH1F* h_w;
@@ -58,12 +57,8 @@ class MFVJetEnergyHistos : public edm::EDAnalyzer {
 MFVJetEnergyHistos::MFVJetEnergyHistos(const edm::ParameterSet& cfg)
   : mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
     weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
-    force_bs(cfg.getParameter<std::vector<double> >("force_bs")),
     jes(cfg.getParameter<bool>("jes")) // true jes, false jer
 {
-  if (force_bs.size() && force_bs.size() != 3)
-    throw cms::Exception("Misconfiguration", "force_bs must be empty or size 3");
-
   edm::Service<TFileService> fs;
 
   h_w = fs->make<TH1F>("h_w", ";event weight;events/0.1", 100, 0, 10);
