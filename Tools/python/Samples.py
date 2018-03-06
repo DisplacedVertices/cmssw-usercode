@@ -470,6 +470,92 @@ mfv_misc_samples = [
     MCSample('mfv_neuudtu_tau10000um_M1600', '/mfv_neuudtau_tau10000um_M1600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-ae17070838abfc249976d0f5220ce40e/USER', 10000),
     ]
 
+mfv_xxddbar_samples = [
+    MCSample("mfv_xxddbar_tau00100um_M0300", "/mfv_xxddbar_tau00100um_M0300/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-eef48cb5e07a9d98f25b10b0052a2c0a/USER", 26900),
+    MCSample("mfv_xxddbar_tau00100um_M0400", "/mfv_xxddbar_tau00100um_M0400/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-f403d4c2df44ed929e4bed765c344c86/USER", 28000),
+    MCSample("mfv_xxddbar_tau00100um_M0500", "/mfv_xxddbar_tau00100um_M0500/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-c9ee9f35bd55d31127bbab500eacec06/USER", 24100),
+    MCSample("mfv_xxddbar_tau00100um_M0600", "/mfv_xxddbar_tau00100um_M0600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-d03da199c09d375fca46dc31216ed7ab/USER", 25500),
+    MCSample("mfv_xxddbar_tau00100um_M0800", "/mfv_xxddbar_tau00100um_M0800/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-90fd2c51208418faea5a046b766d72a3/USER", 24800),
+    MCSample("mfv_xxddbar_tau00100um_M1200", "/mfv_xxddbar_tau00100um_M1200/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-0739a18ffdb1e32c0f7f5833148b985e/USER", 10500),
+    MCSample("mfv_xxddbar_tau00100um_M1600", "/mfv_xxddbar_tau00100um_M1600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-1634a766c0f3f83c725ed06b4da9aecb/USER", 11100),  # inc /mfv_xxddbar_tau00100um_M1600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-e2bea9000081855f3205e44ef19f9af1/USER
+    MCSample("mfv_xxddbar_tau00100um_M3000", "/mfv_xxddbar_tau00100um_M3000/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-4596791259f0ff7ef6fa7383d95c0c77/USER", 10200),
+    MCSample("mfv_xxddbar_tau00300um_M0300", "/mfv_xxddbar_tau00300um_M0300/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-df8d45ffe4e823a5ad6c3094c88c00e3/USER", 22200),
+    MCSample("mfv_xxddbar_tau00300um_M0400", "/mfv_xxddbar_tau00300um_M0400/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-386151ff1ef88d689b44015ea7f03083/USER", 27700),
+    MCSample("mfv_xxddbar_tau00300um_M0500", "/mfv_xxddbar_tau00300um_M0500/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-dd404c2ce09ac70ba64a55215d556030/USER", 25400),
+    MCSample("mfv_xxddbar_tau00300um_M0600", "/mfv_xxddbar_tau00300um_M0600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-83099075458fa3068c5422378cecbedd/USER", 22700),
+    MCSample("mfv_xxddbar_tau00300um_M0800", "/mfv_xxddbar_tau00300um_M0800/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-bf69218f4fc4a6505c366e053c92c38e/USER", 10400),
+    MCSample("mfv_xxddbar_tau00300um_M1200", "/mfv_xxddbar_tau00300um_M1200/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-58ed24e72acf3a7f124f7f5fb9e8d5a5/USER", 10100),
+    MCSample("mfv_xxddbar_tau00300um_M1600", "/mfv_xxddbar_tau00300um_M1600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-a03f6bd22fa91583d6bc77acf5437270/USER", 23600),
+    MCSample("mfv_xxddbar_tau00300um_M3000", "/mfv_xxddbar_tau00300um_M3000/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-096d935dae651efb025e2d1bef08022e/USER", 7600),
+    MCSample("mfv_xxddbar_tau01000um_M0300", "/mfv_xxddbar_tau01000um_M0300/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-7d4446734d2dd96ac3c619192708444f/USER", 20300),
+    MCSample("mfv_xxddbar_tau01000um_M0400", "/mfv_xxddbar_tau01000um_M0400/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-59c0293874a4735637e3c571ca0c4849/USER", 13300),
+    MCSample("mfv_xxddbar_tau01000um_M0500", "/mfv_xxddbar_tau01000um_M0500/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-e78a9aecde814dda4a53e39a7f1a1d3b/USER", 13400),
+    MCSample("mfv_xxddbar_tau01000um_M0600", "/mfv_xxddbar_tau01000um_M0600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-2fc079b8fe254f1cbc67494566b562ca/USER", 13500),
+    MCSample("mfv_xxddbar_tau01000um_M0800", "/mfv_xxddbar_tau01000um_M0800/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-667fb5ecafc03cacccb5f4fb59dddf57/USER", 13000),
+    MCSample("mfv_xxddbar_tau01000um_M1200", "/mfv_xxddbar_tau01000um_M1200/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-1c23ce47d5c028cc724eddb78642578a/USER", 18300),
+    MCSample("mfv_xxddbar_tau01000um_M1600", "/mfv_xxddbar_tau01000um_M1600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-372064da7f1ab4a1213331ac1a00b886/USER", 14600),  # inc /mfv_xxddbar_tau01000um_M1600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-66fb61193f6a52cd5fe2bb5df7f285c8/USER
+    MCSample("mfv_xxddbar_tau01000um_M3000", "/mfv_xxddbar_tau01000um_M3000/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-396a2816e0b7e5e938640b07e01bc924/USER", 19200),
+    MCSample("mfv_xxddbar_tau10000um_M0300", "/mfv_xxddbar_tau10000um_M0300/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-32a8f4e1b118730572707882a271f9ba/USER", 14400),
+    MCSample("mfv_xxddbar_tau10000um_M0400", "/mfv_xxddbar_tau10000um_M0400/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-66b413af075cc9e4180b279f2f0575df/USER", 27700),
+    MCSample("mfv_xxddbar_tau10000um_M0500", "/mfv_xxddbar_tau10000um_M0500/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-e42b679506b54ced003473f5c5f8311d/USER", 27400),
+    MCSample("mfv_xxddbar_tau10000um_M0600", "/mfv_xxddbar_tau10000um_M0600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-b4a865cfb0629f8ed98cbc4a611f9cb8/USER", 3400),
+    MCSample("mfv_xxddbar_tau10000um_M0800", "/mfv_xxddbar_tau10000um_M0800/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-f92992b14ec383062827dc3878689d32/USER", 11600),
+    MCSample("mfv_xxddbar_tau10000um_M1200", "/mfv_xxddbar_tau10000um_M1200/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-3014d9d383ea55237f7ebe6c49d4fd20/USER", 11900),
+    MCSample("mfv_xxddbar_tau10000um_M1600", "/mfv_xxddbar_tau10000um_M1600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-d83e124ccaa75c1461b12a074b0e3cc6/USER", 26100),
+    MCSample("mfv_xxddbar_tau10000um_M3000", "/mfv_xxddbar_tau10000um_M3000/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-2d54bebfd5fa871345280dcdefa916d8/USER", 9300),
+    MCSample("mfv_xxddbar_tau30000um_M0300", "/mfv_xxddbar_tau30000um_M0300/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-530c7ad95a572496ca765e0c804a5274/USER", 19000),  # inc /mfv_xxddbar_tau30000um_M0300/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-58aa0608eae6a175b44053663258edd8/USER
+    MCSample("mfv_xxddbar_tau30000um_M0400", "/mfv_xxddbar_tau30000um_M0400/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-43fda0b9e5d40198527306c680540bfc/USER", 13500),
+    MCSample("mfv_xxddbar_tau30000um_M0500", "/mfv_xxddbar_tau30000um_M0500/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-1acb5b1563767e4798ce671400e05235/USER", 12900),
+    MCSample("mfv_xxddbar_tau30000um_M0600", "/mfv_xxddbar_tau30000um_M0600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-8f8d1730405164fe0d413d85b3b9413c/USER", 11800),
+    MCSample("mfv_xxddbar_tau30000um_M0800", "/mfv_xxddbar_tau30000um_M0800/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-8834db5ef6b902ab46c21b29b1ffa1b3/USER", 17900),
+    MCSample("mfv_xxddbar_tau30000um_M1200", "/mfv_xxddbar_tau30000um_M1200/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-5431b3029dc9cc7418d6d42bbc48200d/USER", 8700),
+    MCSample("mfv_xxddbar_tau30000um_M1600", "/mfv_xxddbar_tau30000um_M1600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-90f9ec53aea36b2df5ad81f434af14db/USER", 11100),
+    MCSample("mfv_xxddbar_tau30000um_M3000", "/mfv_xxddbar_tau30000um_M3000/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-ed4704e7ef306fce954cbe4ca16fe9a8/USER", 9600),
+    ]
+
+mfv_stopdbardbar_samples = [
+    MCSample('mfv_stopdbardbar_tau00100um_M0300', '/mfv_stopdbardbar_tau00100um_M0300/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-98f50e22f4a548ea9b384da8c5c08d55/USER', 13100),
+    MCSample('mfv_stopdbardbar_tau00100um_M0400', '/mfv_stopdbardbar_tau00100um_M0400/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-863c210ddc03c09f684102e00ffd1a47/USER', 14100),
+    MCSample('mfv_stopdbardbar_tau00100um_M0500', '/mfv_stopdbardbar_tau00100um_M0500/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-34d053c251cab1c70c9d7742b033998c/USER', 10200),
+    MCSample('mfv_stopdbardbar_tau00100um_M0600', '/mfv_stopdbardbar_tau00100um_M0600/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-cd02b976ff3549b968e8ea333fd16fa0/USER', 12900),
+    MCSample('mfv_stopdbardbar_tau00100um_M0800', '/mfv_stopdbardbar_tau00100um_M0800/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-319b9667dd30baea99e84b7b11665182/USER', 13300),
+    MCSample('mfv_stopdbardbar_tau00100um_M1200', '/mfv_stopdbardbar_tau00100um_M1200/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-b57febe42c6b4a2f207ed82e0bc8595a/USER', 8500),
+    MCSample('mfv_stopdbardbar_tau00100um_M1600', '/mfv_stopdbardbar_tau00100um_M1600/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-1a14b13a9efef52e898f08aebde5818a/USER', 8700),
+    MCSample('mfv_stopdbardbar_tau00100um_M3000', '/mfv_stopdbardbar_tau00100um_M3000/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-ad59b8e4fe0c18b2c96ad845292cf408/USER', 7100),
+    MCSample('mfv_stopdbardbar_tau00300um_M0300', '/mfv_stopdbardbar_tau00300um_M0300/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-e8e31dacd94096b956850d782329714e/USER', 13100),
+    MCSample('mfv_stopdbardbar_tau00300um_M0400', '/mfv_stopdbardbar_tau00300um_M0400/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-db446d5aa34a9cd5279dc7ab4c3b797c/USER', 13900),
+    MCSample('mfv_stopdbardbar_tau00300um_M0500', '/mfv_stopdbardbar_tau00300um_M0500/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-35f15d36157eb57072c8cb9faab2a279/USER', 7400),
+    MCSample('mfv_stopdbardbar_tau00300um_M0600', '/mfv_stopdbardbar_tau00300um_M0600/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-8e584bdcc0499c9a99d7dd897752085a/USER', 7700),
+    MCSample('mfv_stopdbardbar_tau00300um_M0800', '/mfv_stopdbardbar_tau00300um_M0800/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-6726475daac032497262dfddf13b6e9a/USER', 12500),
+    MCSample('mfv_stopdbardbar_tau00300um_M1200', '/mfv_stopdbardbar_tau00300um_M1200/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-31742a2ce229bfc165b05361a0120bd3/USER', 8400),
+    MCSample('mfv_stopdbardbar_tau00300um_M1600', '/mfv_stopdbardbar_tau00300um_M1600/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-f20d4f2a2cbb33baceaa0e2de74c19ea/USER', 8500),
+    MCSample('mfv_stopdbardbar_tau00300um_M3000', '/mfv_stopdbardbar_tau00300um_M3000/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-2bf57502a78d4ddc919cd6ccbf4e81d7/USER', 6800),
+    MCSample('mfv_stopdbardbar_tau01000um_M0300', '/mfv_stopdbardbar_tau01000um_M0300/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-aedf737601f56da7292fd98b6a798e45/USER', 14100),
+    MCSample('mfv_stopdbardbar_tau01000um_M0400', '/mfv_stopdbardbar_tau01000um_M0400/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-f69d59cbab67eee455cc5c171bf66f98/USER', 12800),
+    MCSample('mfv_stopdbardbar_tau01000um_M0500', '/mfv_stopdbardbar_tau01000um_M0500/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-7b305d0f35951d3ac89a6d0676915332/USER', 13400),
+    MCSample('mfv_stopdbardbar_tau01000um_M0600', '/mfv_stopdbardbar_tau01000um_M0600/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-858de389bfea64b55467b12cf3620d53/USER', 11900),
+    MCSample('mfv_stopdbardbar_tau01000um_M0800', '/mfv_stopdbardbar_tau01000um_M0800/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-604057663224b360e8ceec3be3d2de92/USER', 11800),
+    MCSample('mfv_stopdbardbar_tau01000um_M1200', '/mfv_stopdbardbar_tau01000um_M1200/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-bb16eccdf29f6c1bbde3dccf32e21261/USER', 11300),
+    MCSample('mfv_stopdbardbar_tau01000um_M1600', '/mfv_stopdbardbar_tau01000um_M1600/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-a22e0fde13ccd0d7aa4aa478da776f21/USER', 8600),
+    MCSample('mfv_stopdbardbar_tau01000um_M3000', '/mfv_stopdbardbar_tau01000um_M3000/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-0d015404911c29202ea44ff433b0f347/USER', 7100),
+    MCSample('mfv_stopdbardbar_tau10000um_M0300', '/mfv_stopdbardbar_tau10000um_M0300/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-375b18896f6bb9be7c88ac7eb850d6d3/USER', 13800),
+    MCSample('mfv_stopdbardbar_tau10000um_M0400', '/mfv_stopdbardbar_tau10000um_M0400/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-6b9ef935279531bbdfdcb1851edda26a/USER', 13000),
+    MCSample('mfv_stopdbardbar_tau10000um_M0500', '/mfv_stopdbardbar_tau10000um_M0500/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-a83304e6183caad7d3953ad53cd8a027/USER', 10500),
+    MCSample('mfv_stopdbardbar_tau10000um_M0600', '/mfv_stopdbardbar_tau10000um_M0600/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-c7f00ba311307466cec294cf12e89fd5/USER', 12100),
+    MCSample('mfv_stopdbardbar_tau10000um_M0800', '/mfv_stopdbardbar_tau10000um_M0800/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-9da4cdc084b8f41dc096dc04c9fbc655/USER', 11800),
+    MCSample('mfv_stopdbardbar_tau10000um_M1200', '/mfv_stopdbardbar_tau10000um_M1200/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-86d95b83295efef812d81d728e11cab1/USER', 10900),
+    MCSample('mfv_stopdbardbar_tau10000um_M1600', '/mfv_stopdbardbar_tau10000um_M1600/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-9c847f7143748108d3e0a79ed7649642/USER', 10000),
+    MCSample('mfv_stopdbardbar_tau10000um_M3000', '/mfv_stopdbardbar_tau10000um_M3000/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-d6f5d5249e10f3714aee71416714dc7c/USER', 9200),
+    MCSample('mfv_stopdbardbar_tau30000um_M0300', '/mfv_stopdbardbar_tau30000um_M0300/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-f7f10eba7c32bc0c406da6948a667085/USER', 8300),
+    MCSample('mfv_stopdbardbar_tau30000um_M0400', '/mfv_stopdbardbar_tau30000um_M0400/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-9bf8cf68f755b971960d56084e42d10e/USER', 14500),
+    MCSample('mfv_stopdbardbar_tau30000um_M0500', '/mfv_stopdbardbar_tau30000um_M0500/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-c3f376a0402cf7ba114f24da0c7dab17/USER', 12100),
+    MCSample('mfv_stopdbardbar_tau30000um_M0600', '/mfv_stopdbardbar_tau30000um_M0600/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-7332f13395b7a5652b9dcae3ff188c80/USER', 13300),
+    MCSample('mfv_stopdbardbar_tau30000um_M0800', '/mfv_stopdbardbar_tau30000um_M0800/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-764857cab3683640ac214bd1aa6a85fd/USER', 13300),
+    MCSample('mfv_stopdbardbar_tau30000um_M1200', '/mfv_stopdbardbar_tau30000um_M1200/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-d9727effb7d467e51035002a850ea916/USER', 11000),
+    MCSample('mfv_stopdbardbar_tau30000um_M1600', '/mfv_stopdbardbar_tau30000um_M1600/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-ec6e6b7a74a00749df770640cebfed6f/USER', 11700),
+    MCSample('mfv_stopdbardbar_tau30000um_M3000', '/mfv_stopdbardbar_tau30000um_M3000/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-f72fed6cac8a8dbdd0dd1e72ce3e6c2e/USER', 10100),
+    ]
+
 mfv_hip_samples = [ # dbs may be screwed up for these, and the ones that say "Premix" weren't really premixed, I just forgot to change the output name
     MCSample('mfv_ddbar_tau00100um_M0300_hip1p0_mit', '/mfv_ddbar_tau00100um_M0300/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-90bd64cf19795b03775f4010661fcc0d/USER', 9899),
     MCSample('mfv_ddbar_tau00100um_M0400_hip1p0_mit', '/mfv_ddbar_tau00100um_M0400/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-28ff807dea20cd8e63c6a95816485dda/USER', 9900),
@@ -534,7 +620,7 @@ mfv_hip_samples = [ # dbs may be screwed up for these, and the ones that say "Pr
     MCSample('mfv_neu_tau30000um_M1600_hip1p0_mit', '/mfv_neu_tau30000um_M1600/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-c5e763a88dabdb717409c32ce672b20d/USER', 10000),
     ]
 
-for s in mfv_ddbar_samples + mfv_signal_samples + mfv_neuuds_samples + mfv_neuudmu_samples + mfv_neuude_samples + mfv_bbbar_samples + mfv_misc_samples + mfv_hip_samples:
+for s in mfv_ddbar_samples + mfv_signal_samples + mfv_neuuds_samples + mfv_neuudmu_samples + mfv_neuude_samples + mfv_bbbar_samples + mfv_misc_samples + mfv_xxddbar_samples + mfv_stopdbardbar_samples + mfv_hip_samples:
     _set_tau_mass(s)
     s.xsec = 1e-3
     s.is_private = s.dataset.startswith('/mfv_')
@@ -645,6 +731,8 @@ __all__ = [
     'mfv_neuude_samples',
     'mfv_bbbar_samples',
     'mfv_misc_samples',
+    'mfv_xxddbar_samples',
+    'mfv_stopdbardbar_samples',
     'mfv_hip_samples',
     'data_samples',
     'auxiliary_data_samples',
