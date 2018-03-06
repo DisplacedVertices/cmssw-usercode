@@ -493,7 +493,7 @@ mfv_xxddbar_samples = [
     MCSample("mfv_xxddbar_tau01000um_M0600", "/mfv_xxddbar_tau01000um_M0600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-2fc079b8fe254f1cbc67494566b562ca/USER", 13500),
     MCSample("mfv_xxddbar_tau01000um_M0800", "/mfv_xxddbar_tau01000um_M0800/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-667fb5ecafc03cacccb5f4fb59dddf57/USER", 13000),
     MCSample("mfv_xxddbar_tau01000um_M1200", "/mfv_xxddbar_tau01000um_M1200/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-1c23ce47d5c028cc724eddb78642578a/USER", 18300),
-    MCSample("mfv_xxddbar_tau01000um_M1600", "/mfv_xxddbar_tau01000um_M1600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-372064da7f1ab4a1213331ac1a00b886/USER", 14600),  # inc /mfv_xxddbar_tau01000um_M1600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-66fb61193f6a52cd5fe2bb5df7f285c8/USER
+    MCSample("mfv_xxddbar_tau01000um_M1600", "/mfv_xxddbar_tau01000um_M1600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-66fb61193f6a52cd5fe2bb5df7f285c8/USER",  9900),
     MCSample("mfv_xxddbar_tau01000um_M3000", "/mfv_xxddbar_tau01000um_M3000/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-396a2816e0b7e5e938640b07e01bc924/USER", 19200),
     MCSample("mfv_xxddbar_tau10000um_M0300", "/mfv_xxddbar_tau10000um_M0300/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-32a8f4e1b118730572707882a271f9ba/USER", 14400),
     MCSample("mfv_xxddbar_tau10000um_M0400", "/mfv_xxddbar_tau10000um_M0400/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-66b413af075cc9e4180b279f2f0575df/USER", 27700),
@@ -503,7 +503,7 @@ mfv_xxddbar_samples = [
     MCSample("mfv_xxddbar_tau10000um_M1200", "/mfv_xxddbar_tau10000um_M1200/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-3014d9d383ea55237f7ebe6c49d4fd20/USER", 11900),
     MCSample("mfv_xxddbar_tau10000um_M1600", "/mfv_xxddbar_tau10000um_M1600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-d83e124ccaa75c1461b12a074b0e3cc6/USER", 26100),
     MCSample("mfv_xxddbar_tau10000um_M3000", "/mfv_xxddbar_tau10000um_M3000/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-2d54bebfd5fa871345280dcdefa916d8/USER", 9300),
-    MCSample("mfv_xxddbar_tau30000um_M0300", "/mfv_xxddbar_tau30000um_M0300/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-530c7ad95a572496ca765e0c804a5274/USER", 19000),  # inc /mfv_xxddbar_tau30000um_M0300/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-58aa0608eae6a175b44053663258edd8/USER
+    MCSample("mfv_xxddbar_tau30000um_M0300", "/mfv_xxddbar_tau30000um_M0300/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-530c7ad95a572496ca765e0c804a5274/USER", 9100),
     MCSample("mfv_xxddbar_tau30000um_M0400", "/mfv_xxddbar_tau30000um_M0400/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-43fda0b9e5d40198527306c680540bfc/USER", 13500),
     MCSample("mfv_xxddbar_tau30000um_M0500", "/mfv_xxddbar_tau30000um_M0500/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-1acb5b1563767e4798ce671400e05235/USER", 12900),
     MCSample("mfv_xxddbar_tau30000um_M0600", "/mfv_xxddbar_tau30000um_M0600/tucker-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-8f8d1730405164fe0d413d85b3b9413c/USER", 11800),
@@ -864,6 +864,9 @@ for x in (data_samples_2015 +
     x.add_dataset('ntuplev16')
     if not x.is_signal:
         x.add_dataset('ntuplev16_ntkseeds')
+
+#for x in mfv_stopdbardbar_samples:
+#    x.add_dataset('ntuplev16')
 
 for x in data_samples + qcd_samples + qcd_samples_ext + qcd_hip_samples[-2:]:
     x.add_dataset('v0ntuplev1')
