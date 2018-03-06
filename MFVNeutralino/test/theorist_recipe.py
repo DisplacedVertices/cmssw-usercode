@@ -121,7 +121,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if year == 2015:
         samples = Samples.mfv_signal_samples_2015
     elif year == 2016:
-        samples = Samples.mfv_signal_samples + Samples.mfv_ddbar_samples + Samples.mfv_bbbar_samples + Samples.mfv_neuuds_samples + Samples.mfv_neuudmu_samples + Samples.mfv_neuude_samples + Samples.mfv_misc_samples
+        samples = Samples.mfv_signal_samples + Samples.mfv_neuuds_samples + Samples.mfv_neuudmu_samples + Samples.mfv_neuude_samples + Samples.mfv_misc_samples + Samples.mfv_xxddbar_samples + Samples.mfv_stopdbardbar_samples
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
     cs = CondorSubmitter('TheoristRecipeV1', ex = year, dataset = dataset)
