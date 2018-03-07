@@ -5,7 +5,7 @@ from CRABClient.ClientExceptions import ConfigException as CRABConfigException
 from JMTucker.MFVNeutralino.Year import year; assert year in (2015,2016) # fix later
 from scanpack import get_scanpack, scanpackbase
 
-nevents = 15000
+nevents = 10000
 events_per = 100
 scanpack = None
 from_lhe = False
@@ -26,7 +26,7 @@ tau_masses = [] # [(1000,1200),(10000,1200),(1000,800),(1000,1600)]
 already = []
 hip_right = False
 
-if 1:
+if 0:
     meta = 'scan'
     output_level = 'minitree'
     hip_right = False
