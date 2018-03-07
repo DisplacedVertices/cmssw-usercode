@@ -2160,6 +2160,17 @@ if __name__ == '__main__':
             print x,
         out_f.close()
 
+    elif 'fordelete' in sys.argv:
+        dataset, sample = _args('fordelete', 'dataset','sample')
+        if not has(sample, dataset):
+            raise KeyError('no key sample = %s dataset = %s' % (sample, dataset))
+        print sample, dataset
+        from JMTucker.Tools import eos
+        out_fn = '%s_%s' % (sample, dataset)
+        out_f = open(out_fn, 'wt')
+        out_f.write('delete\n%s\n' % '\n'.join(get(sample, dataset)[1]))
+        out_f.close()
+
     elif 'dump' in sys.argv:
         dump()
 
