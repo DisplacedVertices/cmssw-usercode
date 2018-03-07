@@ -1,7 +1,7 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-dataset = 'ntuplev15'
+dataset = 'ntuplev16'
 sample_files(process, 'qcdht2000', dataset, 1)
 process.TFileService.fileName = 'histos.root'
 process.maxEvents.input = -1
@@ -123,7 +123,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     set_splitting(samples, dataset, 'histos', data_json='jsons/ana_2015p6.json')
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('HistosV15_v3',
+    cs = CondorSubmitter('HistosV16',
                          ex = year,
                          dataset = dataset,
                          )
