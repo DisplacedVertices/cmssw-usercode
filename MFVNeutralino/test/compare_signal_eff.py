@@ -32,7 +32,7 @@ if mode == 'vary_sigmadxy':
     ls = ['sigmadxy4p0', 'sigmadxy3p7', 'sigmadxy3p8', 'sigmadxy3p9', 'sigmadxy4p1', 'sigmadxy4p2', 'sigmadxy4p3']
 
 if mode == 'vary_sigmadxy4p1_dbv300um':
-    root_file_dirs = ['/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_3', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_3_sigmadxy4p1']
+    root_file_dirs = ['/uscms_data/d2/tucker/crab_dirs/HistosV16_minbsbs2ddist300um', '/uscms_data/d2/tucker/crab_dirs/HistosV16_sigmadxy4p1_minbsbs2ddist300um']
     num_paths = ['mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx']
     ls = ['sigmadxy4p0_dbv300um', 'sigmadxy4p1_dbv300um']
 
