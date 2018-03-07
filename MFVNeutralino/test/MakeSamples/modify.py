@@ -289,6 +289,8 @@ def set_stop(process, tau0, slha):
 
 def set_stop_dbardbar(process, tau0, m_stop):
     set_stop(process, tau0, slha(1000006, None, tau0, m_stop, None, [(1., (-1, -1))]))
+def set_stop_bbarbbar(process, tau0, m_stop):
+    set_stop(process, tau0, slha(1000006, None, tau0, m_stop, None, [(1., (-5, -5))]))
 
 ########################################################################
 

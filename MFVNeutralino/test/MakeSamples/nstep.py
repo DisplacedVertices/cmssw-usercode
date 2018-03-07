@@ -283,6 +283,7 @@ metamap = {
     'lq2': ('mfv_lq2', 'leptoquark'),
     'xxddbar': ('mfv_xxddbar', 'xxddbar'),
     'stopdbardbar': ('mfv_stopdbardbar', 'stop_dbardbar'),
+    'stopbbarbbar': ('mfv_stopbbarbbar', 'stop_bbarbbar'),
 }
 
 if meta == 'scan':
