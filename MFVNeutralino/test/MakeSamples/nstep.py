@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 from CRABClient.ClientExceptions import ConfigException as CRABConfigException
 from JMTucker.MFVNeutralino.Year import year; assert year in (2015,2016) # fix later
 from scanpack import get_scanpack, scanpackbase
@@ -18,18 +19,18 @@ hip_simulation = False
 hip_mitigation = False
 ex = ''
 
-meta = 'stopdbardbar'
+meta = 'neu'
 taus   = [100, 300, 1000, 10000, 30000]
 masses = [300, 400, 500, 600, 800, 1200, 1600, 3000]
-tau_masses = [(1000,1200),(10000,1200),(1000,800),(1000,1600)]
+tau_masses = [] # [(1000,1200),(10000,1200),(1000,800),(1000,1600)]
 already = []
 hip_right = False
 
-if 0:
+if 1:
     meta = 'scan'
     output_level = 'minitree'
     hip_right = False
-    scanpack = 'scanpack2015supplement'
+    scanpack = 'scanpack3_' + os.environ['USER']
 elif 0:
     meta = 'ttbar'
     nevents, events_per

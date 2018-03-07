@@ -55,6 +55,10 @@ Current status:
   batches crap out that i reran named *try3, but some stats did finish and
   so can use both. there is a .temp file to look at while try3 finishes.
 
+- scanpack3 is to run stop_dbardbar on same points that ended up in
+  paper as of approval: scanpack1+2 merger, 0.1-100 mm, 300-2600 GeV;
+  at least 20k event for low tau and 10k for high tau.
+
 '''
 
 # do not import anything that is not in the stdlib since we 
@@ -65,7 +69,7 @@ from collections import defaultdict
 from gzip import GzipFile
 from itertools import product
 from pprint import pprint
-from modify import set_mfv_neutralino, set_gluino_ddbar
+from modify import set_mfv_neutralino, set_gluino_ddbar, set_stop_dbardbar
 
 # !!! DO NOT CHANGE ANYTHING THAT CHANGES WHICH JOB IS WHICH SAMPLE ONCE BATCHES ARE RUN WITH THAT SCANPACK !!!
 # unless you delete all the output from that scanpack.
@@ -135,6 +139,8 @@ class scanpackbase(object):
             kind = 'mfv_neu'
         elif kind == 'set_gluino_ddbar':
             kind = 'mfv_ddbar'
+        elif kind == 'set_stop_dbardbar':
+            kind = 'mfv_stopdbardbar'
         else:
             raise ValueError('dunno %s' % kind)
         tau = int(tau*1000)
@@ -147,6 +153,8 @@ class scanpackbase(object):
             kind = set_mfv_neutralino
         elif kind == 'mfv_ddbar':
             kind = set_gluino_ddbar
+        elif kind == 'mfv_stopdbardbar':
+            kind = set_stop_dbardbar
         else:
             raise NameError('dunno %s' % kind)
         assert tau.startswith('tau') and tau.endswith('um')
@@ -248,6 +256,23 @@ class scanpack2015supplement(scanpackbase100epj):
     def events_per_sample(self, kind, tau, mass):
         return 10000
 
+class scanpack3(scanpackbase100epj):
+    kinds = [set_stop_dbardbar]
+    taus = [tau/1000. for tau in range(100, 1000, 100) + range(1000, 4000, 1000) + range(4000, 40000, 3000) + range(40000, 100001, 3000)]
+    masses = range(300, 600, 100) + range(600, 2601, 200)
+
+    def events_per_sample(self, kind, tau, mass):
+        return 20000 if tau <= 400 else 10000  # oops, this hits all taus, but 20k events everywhere is fine
+
+class scanpack3_tucker(scanpack3):
+    masses = scanpack3.masses[::4]
+class scanpack3_jchu(scanpack3):
+    masses = scanpack3.masses[1::4]
+class scanpack3_dquach(scanpack3):
+    masses = scanpack3.masses[2::4]
+class scanpack3_shogan(scanpack3):
+    masses = scanpack3.masses[3::4]
+
 ####
 
 def get_scanpack(x):
@@ -262,6 +287,11 @@ def get_scanpack(x):
         'scanpack2p6': scanpack2p6,
         'scanpack2p7': scanpack2p7,
         'scanpack2015supplement': scanpack2015supplement,
+        'scanpack3': scanpack3,
+        'scanpack3_tucker': scanpack3_tucker,
+        'scanpack3_jchu': scanpack3_jchu,
+        'scanpack3_dquach': scanpack3_dquach,
+        'scanpack3_shogan': scanpack3_shogan,
         }[x]()
 
 def do_scanpack(process, x, batch, job):
