@@ -262,7 +262,7 @@ class scanpack3(scanpackbase100epj):
     masses = range(300, 600, 100) + range(600, 2601, 200)
 
     def events_per_sample(self, kind, tau, mass):
-        return 20000 if tau <= 400 else 10000
+        return 20000 if tau <= 400 else 10000  # oops, this hits all taus, but 20k events everywhere is fine
 
 class scanpack3_tucker(scanpack3):
     masses = scanpack3.masses[::4]
