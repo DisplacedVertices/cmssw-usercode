@@ -14,10 +14,10 @@ mode = 'vary_pileup'
 combine_masses = False
 
 set_style()
-ps = plot_saver('plots/sigeff/v15/compare_sigeff_%s%s' % (mode, '_combine_masses' if combine_masses else ''), size=(700,700), log=False, root=False)
+ps = plot_saver('plots/sigeff/v16/compare_sigeff_%s%s' % (mode, '_combine_masses' if combine_masses else ''), size=(700,700), log=False, root=False)
 
 if mode == 'vary_pileup':
-    root_file_dirs = ['/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_0', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_1', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_2']
+    root_file_dirs = ['/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV16_0', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV16_1', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV16_2']
     num_paths = ['mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx', 'mfvEventHistosFullSel/h_bsx']
     ls = ['2016', '2016mbxsecm5pc', '2016mbxsecp5pc']
 
@@ -41,7 +41,7 @@ for i,root_file_dir in enumerate(root_file_dirs):
     print ls[i]
 
     multijet = [s for s in Samples.mfv_signal_samples if not s.name.startswith('my_')]
-    dijet = Samples.mfv_ddbar_samples
+    dijet = Samples.mfv_stopdbardbar_samples
 
     nev = []
     for sample in sorted(multijet, key=lambda s: s.name) + sorted(dijet, key=lambda s: s.name):
@@ -59,14 +59,14 @@ for i,root_file_dir in enumerate(root_file_dirs):
     
     per = PerSignal('efficiency', y_range=(0.,1.05))
     per.add(multijet, title='#tilde{N} #rightarrow tbs')
-    per.add(dijet, title='X #rightarrow d#bar{d}', color=ROOT.kBlue)
+    per.add(dijet, title='#tilde{t} #rightarrow #bar{d}#bar{d}', color=ROOT.kBlue)
     per.draw(canvas=ps.c)
     ps.save('sigeff_%s' % ls[i])
     nevs.append(nev)
 
 print
 multijet = [s for s in Samples.mfv_signal_samples if not s.name.startswith('my_')]
-dijet = Samples.mfv_ddbar_samples
+dijet = Samples.mfv_stopdbardbar_samples
 samples = sorted(multijet, key=lambda s: s.name) + sorted(dijet, key=lambda s: s.name)
 print 'samples = [%s]' % (', '.join('%d: %s' % (i,s.name) for i,s in enumerate(samples)))
 
@@ -107,7 +107,7 @@ for i,nev in enumerate(nevs):
     print ls[i]
 
     multijet = [s for s in Samples.mfv_signal_samples if not s.name.startswith('my_')]
-    dijet = Samples.mfv_ddbar_samples
+    dijet = Samples.mfv_stopdbardbar_samples
 
     for j,sample in enumerate(sorted(multijet, key=lambda s: s.name) + sorted(dijet, key=lambda s: s.name)):
         v = nev[j]
@@ -121,12 +121,12 @@ for i,nev in enumerate(nevs):
 
     per = PerSignal('ratio of efficiencies', y_range=(0.9,1.1) if 'vary_sigmadxy' not in mode else (0.,2.))
     per.add(multijet, title='#tilde{N} #rightarrow tbs')
-    per.add(dijet, title='X #rightarrow d#bar{d}', color=ROOT.kBlue)
+    per.add(dijet, title='#tilde{t} #rightarrow #bar{d}#bar{d}', color=ROOT.kBlue)
     per.draw(canvas=ps.c)
     ps.save('sigeff_ratio_%s' % ls[i])
 
 multijet = [s for s in Samples.mfv_signal_samples if not s.name.startswith('my_')]
-dijet = Samples.mfv_ddbar_samples
+dijet = Samples.mfv_stopdbardbar_samples
 
 for j,sample in enumerate(sorted(multijet, key=lambda s: s.name) + sorted(dijet, key=lambda s: s.name)):
     d = nevs[0][j]
@@ -175,6 +175,6 @@ for j,sample in enumerate(sorted(multijet, key=lambda s: s.name) + sorted(dijet,
 
 per = PerSignal('uncertainty in signal efficiency', y_range=(0.,0.1) if 'vary_sigmadxy' not in mode else (0.,1.))
 per.add(multijet, title='#tilde{N} #rightarrow tbs')
-per.add(dijet, title='X #rightarrow d#bar{d}', color=ROOT.kBlue)
+per.add(dijet, title='#tilde{t} #rightarrow #bar{d}#bar{d}', color=ROOT.kBlue)
 per.draw(canvas=ps.c)
 ps.save('sigeff_uncertainty_%s' % mode)
