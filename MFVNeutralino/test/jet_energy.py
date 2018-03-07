@@ -18,11 +18,15 @@ process.load('JMTucker.MFVNeutralino.JetEnergyHistos_cfi')
 import JMTucker.Tools.SimpleTriggerResults_cfi as SimpleTriggerResults
 SimpleTriggerResults.setup_endpath(process, weight_src='mfvWeight')
 
-common = cms.Sequence(process.mfvSelectedVerticesSeq * process.mfvWeight)
+process.mfvAnalysisCuts.min_ht = 0
 
-process.mfvAnalysisCutsFullSel = process.mfvAnalysisCuts.clone(min_ht = 0)
+process.mfvJetEnergyHistos = cms.EDAnalyzer('MFVJetEnergyHistos',
+                                            mevent_src = cms.InputTag('mfvEvent'),
+                                            weight_src = cms.InputTag('mfvWeight'),
+                                            jes = cms.bool(False),
+                                            )
 
-process.p = cms.Path(common * process.mfvAnalysisCutsFullSel * process.mfvJetEnergyHistos)
+process.p = cms.Path(process.mfvSelectedVerticesSeq * process.mfvWeight * process.mfvAnalysisCuts * process.mfvJetEnergyHistos)
 
 def force_bs(process, bs):
     for ana in process.analyzers:
@@ -35,7 +39,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     samples = Samples.mfv_signal_samples + Samples.mfv_stopdbardbar_samples
 
     from JMTucker.Tools.MetaSubmitter import set_splitting
-    set_splitting(samples, dataset, 'histos', data_json='jsons/ana_2015p6.json')
+    set_splitting(samples, dataset, 'histos')
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
     cs = CondorSubmitter('JetEnergyHistosV16',
