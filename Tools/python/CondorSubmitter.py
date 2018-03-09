@@ -36,7 +36,9 @@ cd src
 eval `scram ru -sh`
 scram b -j 2 2>&1 > /dev/null
 
-echo cmsRun start at $(date)
+mkdir $workdir/subworkdir
+cd $workdir/subworkdir
+
 cp $workdir/{cs.json,cs_filelist.py,cs_cmsrun_args,cs_primaryds,cs_samplename,cs_timestamp__INPUT_BNS__} .
 echo $job > cs_job
 
