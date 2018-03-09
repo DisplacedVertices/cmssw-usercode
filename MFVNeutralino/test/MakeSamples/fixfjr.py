@@ -5,7 +5,8 @@ x = ET.parse('tempfjr.xml')
 
 inputs = x.findall('InputFile')
 if len(inputs) != 1:
-    sys.exit("fixfjr.py: tempfjr.xml is weird, len(inputs) is %i--this may be OK if we're not at the last step" % len(inputs))
+    print "fixfjr.py: tempfjr.xml is weird, len(inputs) is %i--this may be OK if we're not at the last step" % len(inputs)
+    sys.exit(1)
 
 x.getroot().remove(inputs[0])
 
