@@ -254,7 +254,7 @@ def get(i): return _l[i]
                 stageout_files = [x for x in module_output_files['PoolOutputModule'] if x not in skip_output_files]
             else:
                 raise ValueError("don't understand stageout_files = %s" % stageout_which)
-            output_files = [x for x in output_files if x not in stageout_files]
+        output_files = [x for x in output_files if x not in stageout_files]
 
         assert all(os.path.basename(x) == x for x in output_files + stageout_files)
         self.output_files   = output_files   = ' '.join(output_files)
