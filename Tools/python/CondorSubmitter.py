@@ -39,18 +39,24 @@ scram b -j 2 2>&1 > /dev/null
 echo cmsRun start at $(date)
 cp $workdir/{cs.json,cs_filelist.py,cs_cmsrun_args,cs_primaryds,cs_samplename,cs_timestamp__INPUT_BNS__} .
 echo $job > cs_job
-cmsRun -j ${workdir}/fjr_${job}.xml ${workdir}/cs_pset.py $(<cs_cmsrun_args) 2>&1
-cmsexit=$?
-echo cmsRun end at $(date)
-echo cmsRun exited with code $cmsexit
-if [[ $cmsexit -ne 0 ]]; then
-    exit $cmsexit
+
+echo meat start at $(date)
+__MEAT__
+meatexit=$?
+echo meat end at $(date)
+echo meat exited with code $meatexit
+if [[ $meatexit -ne 0 ]]; then
+    exit $meatexit
 fi
 
 __OUTPUT_SNIPPET__
 ''' \
 .replace('__SCRAM_ARCH__',    os.environ['SCRAM_ARCH']) \
 .replace('__CMSSW_VERSION__', os.environ['CMSSW_VERSION'])
+
+    cmsRun_meat = '''
+cmsRun -j ${workdir}/fjr_${job}.xml ${workdir}/cs_pset.py $(<cs_cmsrun_args) 2>&1
+'''
 
     output_template = '''
 for x in __OUTPUT_BNS__; do
@@ -142,6 +148,7 @@ def get(i): return _l[i]
                  batch_name,
                  ex = '',
                  testing = 'testing' in sys.argv or 'cs_testing' in sys.argv,
+                 meat = cmsRun_meat,
                  pset_template_fn = sys.argv[0],
                  pset_modifier = None,
                  input_files = [],
@@ -159,6 +166,13 @@ def get(i): return _l[i]
         self.nsubmits = -1
 
         self.testing = testing
+
+        if type(meat) == file:
+            meat = meat.read()
+        elif type(meat) == str and os.path.isfile(meat):
+            meat = open(meat).read()
+        self.meat = meat
+
         if '$' in pset_template_fn:
             pset_template_fn =  os.path.expandvars(pset_template_fn)
         if '~' in pset_template_fn:
@@ -293,6 +307,7 @@ def get(i): return _l[i]
 
         self.sh_template = self.sh_template \
             .replace('__INPUT_BNS__',  input_bns) \
+            .replace('__MEAT__', self.meat) \
             .replace('__OUTPUT_SNIPPET__', output_snippet)
 
         self.jdl_template = self.jdl_template \
