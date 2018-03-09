@@ -99,7 +99,7 @@ def cs_rootfiles(d):
 
 def cs_analyze(d, 
             _re=re.compile(r'return value (\d+)'),
-            _cmsRun_re=re.compile(r"cmsRun exited with code (\d+)"),
+            _cmsRun_re=re.compile(r"(?:cmsRun|meat) exited with code (\d+)"),
             _exception_re=re.compile(r"An exception of category '(.*)' occurred while")):
     class cs_analyze_result:
         def _list(self, ret):
