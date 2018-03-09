@@ -231,8 +231,16 @@ def get(i): return _l[i]
         sh_fn = os.path.join(self.inputs_dir, 'run.sh')
 
         if input_files:
-            input_bns = ',' + ','.join([os.path.basename(x) for x in input_files])
-            input_fns = ',' + ','.join([os.path.abspath(x) for x in input_files])
+            input_bns = []
+            input_fns = []
+            for x in input_files:
+                bn = os.path.basename(x)
+                fn = os.path.abspath(os.path.join(self.inputs_dir, bn))
+                input_bns.append(bn)
+                input_fns.append(fn)
+                shutil.copy(x, fn)
+            input_bns = ',' + ','.join(input_bns)
+            input_fns = ',' + ','.join(input_fns)
         else:
             input_bns = ''
             input_fns = ''
