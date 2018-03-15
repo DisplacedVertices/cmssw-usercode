@@ -1471,6 +1471,8 @@ _add_ds("ntuplev16_wgenv2", {
 'mfv_stopdbardbar_tau30000um_M1200': _fromnum0("/store/user/tucker/mfv_stopdbardbar_tau30000um_M1200/NtupleV16_WGenV2_2016/180305_181744", 55),
 'mfv_stopdbardbar_tau30000um_M1600': _fromnum0("/store/user/tucker/mfv_stopdbardbar_tau30000um_M1600/NtupleV16_WGenV2_2016/180305_181745", 59),
 'mfv_stopdbardbar_tau30000um_M3000': (50, ['/store/user/tucker/mfv_stopdbardbar_tau30000um_M3000/NtupleV16_WGenV2_2016/180305_181746/0000/ntuple_%i.root' % i for i in chain(xrange(40), xrange(41,51))]),
+
+'mfv_stopbbarbbar_tau01000um_M0800': _fromnum0("/store/user/tucker/mfv_stopbbarbbar_tau01000um_M0800/NtupleV16_WGenV2_2016/180314_212522", 50),
 })
 
 
