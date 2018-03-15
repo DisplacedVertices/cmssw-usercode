@@ -263,7 +263,8 @@ def submit(config, name, scanpack_or_todo, todo_rawhlt=[], todo_reco=[], todo_nt
                              pset_template_fn = config.JobType.psetName,
                              input_files = ['nstep.sh'] + config.JobType.inputFiles,
                              stageout_files = config.JobType.outputFiles,
-                             publish_name = config.Data.outputDatasetTag
+                             publish_name = config.Data.outputDatasetTag,
+                             jdl_extras = 'request_memory = 3000',
                              )
         sample = MCSample(config.General.requestName,
                           '/%s/None/None' % config.General.requestName,
