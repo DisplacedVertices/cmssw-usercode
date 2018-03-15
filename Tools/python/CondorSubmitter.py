@@ -44,7 +44,6 @@ echo $job > cs_job
 
 echo meat start at $(date)
 __MEAT__
-meatexit=$?
 echo meat end at $(date)
 echo meat exited with code $meatexit
 if [[ $meatexit -ne 0 ]]; then
@@ -58,6 +57,7 @@ __OUTPUT_SNIPPET__
 
     cmsRun_meat = '''
 cmsRun -j ${workdir}/fjr_${job}.xml ${workdir}/cs_pset.py $(<cs_cmsrun_args) 2>&1
+meatexit=$?
 '''
 
     output_template = '''
@@ -173,6 +173,8 @@ def get(i): return _l[i]
             meat = meat.read()
         elif type(meat) == str and os.path.isfile(meat):
             meat = open(meat).read()
+        if 'meatexit=' not in meat:
+            raise ValueError('meatexit not set in meat?')
         self.meat = meat
 
         if '$' in pset_template_fn:
