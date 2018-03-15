@@ -95,6 +95,7 @@ if output_level not in ('reco', 'ntuple', 'minitree', 'gensim'):
 import sys, os
 from math import ceil
 from pprint import pprint
+from textwrap import dedent
 from time import time
 from CRABClient.ClientExceptions import ConfigException as CRABConfigException
 from JMTucker.Tools.CRAB3Tools import Config, crab_dirs_root, crab_command
@@ -254,7 +255,11 @@ def submit(config, name, scanpack_or_todo, todo_rawhlt=[], todo_reco=[], todo_nt
 
     if condor:
         cs = CondorSubmitter(batch_name = os.path.basename(config.General.workArea),
-                             meat = './nstep.sh $((job+1)) 2>&1',
+                             meat = dedent('''
+                                           ./nstep.sh $((job+1)) 2>&1
+                                           meatexit=$?
+                                           mv FrameworkJobReport.xml ${workdir}/fjr_${job}.xml
+                                           '''),
                              pset_template_fn = config.JobType.psetName,
                              input_files = ['nstep.sh'] + config.JobType.inputFiles,
                              stageout_files = config.JobType.outputFiles,
