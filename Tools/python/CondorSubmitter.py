@@ -106,6 +106,7 @@ should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 transfer_input_files = __TARBALL_FN__,cs_jobmap,cs_pset.py,cs_filelist.py,cs.json,cs_cmsrun_args,cs_primaryds,cs_samplename,cs_timestamp__INPUT_FNS__
 x509userproxy = $ENV(X509_USER_PROXY)
+__EXTRAS__
 Queue __NJOBS__
 '''
 
@@ -160,6 +161,7 @@ def get(i): return _l[i]
                  stageout_path = '', # if / in it, does not try to generate
                  publish_name = '',
                  dataset = 'main',
+                 jdl_extras = '',
                  _events = -1,
                  _njobs = None,
                  _fail = [],
@@ -317,7 +319,8 @@ def get(i): return _l[i]
         self.jdl_template = self.jdl_template \
             .replace('__SH_FN__',      sh_fn) \
             .replace('__TARBALL_FN__', tarball_fn) \
-            .replace('__INPUT_FNS__',  input_fns)
+            .replace('__INPUT_FNS__',  input_fns) \
+            .replace('__EXTRAS__',     jdl_extras)
 
         self.pset_end_template = self.pset_end_template \
             .replace('__MAX_EVENTS__', str(_events)) \
