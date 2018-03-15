@@ -511,6 +511,10 @@ mfv_stopdbardbar_samples = [
     MCSample('mfv_stopdbardbar_tau30000um_M3000', '/mfv_stopdbardbar_tau30000um_M3000/jchu-RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-f72fed6cac8a8dbdd0dd1e72ce3e6c2e/USER', 10100),
     ]
 
+mfv_stopbbarbbar_samples = [
+    MCSample('mfv_stopbbarbbar_tau01000um_M0800', '/mfv_stopbbarbbar_tau01000um_M0800/None/None', 10000),
+    ]
+
 mfv_hip_samples = [ # dbs may be screwed up for these, and the ones that say "Premix" weren't really premixed, I just forgot to change the output name
     MCSample('mfv_ddbar_tau00100um_M0300_hip1p0_mit', '/mfv_ddbar_tau00100um_M0300/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-90bd64cf19795b03775f4010661fcc0d/USER', 9899),
     MCSample('mfv_ddbar_tau00100um_M0400_hip1p0_mit', '/mfv_ddbar_tau00100um_M0400/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-28ff807dea20cd8e63c6a95816485dda/USER', 9900),
@@ -575,7 +579,7 @@ mfv_hip_samples = [ # dbs may be screwed up for these, and the ones that say "Pr
     MCSample('mfv_neu_tau30000um_M1600_hip1p0_mit', '/mfv_neu_tau30000um_M1600/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-c5e763a88dabdb717409c32ce672b20d/USER', 10000),
     ]
 
-for s in mfv_ddbar_samples + mfv_signal_samples + mfv_neuuds_samples + mfv_neuudmu_samples + mfv_neuude_samples + mfv_misc_samples + mfv_xxddbar_samples + mfv_stopdbardbar_samples + mfv_hip_samples:
+for s in mfv_ddbar_samples + mfv_signal_samples + mfv_neuuds_samples + mfv_neuudmu_samples + mfv_neuude_samples + mfv_misc_samples + mfv_xxddbar_samples + mfv_stopdbardbar_samples + mfv_stopbbarbbar_samples + mfv_hip_samples:
     _set_tau_mass(s)
     s.xsec = 1e-3
     s.is_private = s.dataset.startswith('/mfv_')
@@ -687,6 +691,7 @@ __all__ = [
     'mfv_misc_samples',
     'mfv_xxddbar_samples',
     'mfv_stopdbardbar_samples',
+    'mfv_stopbbarbbar_samples',
     'mfv_hip_samples',
     'data_samples',
     'auxiliary_data_samples',
