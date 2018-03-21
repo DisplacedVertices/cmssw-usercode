@@ -26,7 +26,7 @@ tau_masses = [] # [(1000,1200),(10000,1200),(1000,800),(1000,1600)]
 already = []
 hip_right = False
 
-if 1:
+if 0:
     meta = 'scan'
     output_level = 'minitree'
     hip_right = False
@@ -83,9 +83,9 @@ if scanpack:
     ex += '_' + scanpack
     scanpack = get_scanpack(scanpack)
 
-#ex = '_test'
-#nevents, events_per = 5,5
-#meta, taus, masses = 'stopdbardbar', [1000], [1200]
+ex = '_test'
+nevents, events_per = 5,5
+meta, taus, masses = 'neu', [1000], [1200]
 
 ################################################################################
 
