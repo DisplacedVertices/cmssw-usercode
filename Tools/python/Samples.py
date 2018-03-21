@@ -512,7 +512,11 @@ mfv_stopdbardbar_samples = [
     ]
 
 mfv_stopbbarbbar_samples = [
+    MCSample('mfv_stopbbarbbar_tau00300um_M0600', '/mfv_stopbbarbbar_tau00300um_M0600/None/None', 10000),
+    MCSample('mfv_stopbbarbbar_tau00300um_M1200', '/mfv_stopbbarbbar_tau00300um_M1200/None/None',  9900),
     MCSample('mfv_stopbbarbbar_tau01000um_M0800', '/mfv_stopbbarbbar_tau01000um_M0800/None/None', 10000),
+    MCSample('mfv_stopbbarbbar_tau10000um_M0600', '/mfv_stopbbarbbar_tau10000um_M0600/None/None', 10000),
+    MCSample('mfv_stopbbarbbar_tau10000um_M1200', '/mfv_stopbbarbbar_tau10000um_M1200/None/None', 10000),
     ]
 
 mfv_hip_samples = [ # dbs may be screwed up for these, and the ones that say "Premix" weren't really premixed, I just forgot to change the output name
