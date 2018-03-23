@@ -434,7 +434,7 @@ def nevents_plot():
 
 def signal_efficiency():
     from signal_efficiency import SignalEfficiencyCombiner
-    combiner = SignalEfficiencyCombiner()
+    combiner = SignalEfficiencyCombiner() #simple=limitsinput_fn)
     in_f = combiner.inputs[0].f
     out_f = ROOT.TFile('signal_efficiency.root', 'recreate')
 

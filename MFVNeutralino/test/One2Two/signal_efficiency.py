@@ -32,7 +32,8 @@ class SignalEfficiencyCombiner:
 
     def __init__(self, simple=False):
         if simple:
-            self.inputs = [Input(fn='limitsinput.root', int_lumi=38.529, sf=one, include_stat=True)]
+            fn = simple if type(simple) == str else 'limitsinput.root'
+            self.inputs = [Input(fn=fn, int_lumi=38.529, sf=one, include_stat=True)]
         else:
             self.inputs = [
                 Input(fn='limitsinput_nonhip.root', int_lumi= 2.62, sf=sf20156,  include_stat=False),
