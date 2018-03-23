@@ -831,6 +831,9 @@ for x in (data_samples_2015 +
 for x in mfv_stopdbardbar_samples:
     x.add_dataset('ntuplev16')
 
+for x in mfv_neu_tau01000um_M0600, mfv_neu_tau01000um_M0800, mfv_neu_tau10000um_M0800, mfv_neu_tau01000um_M1600:
+    x.add_dataset('ntuplev16_noef')
+
 for x in data_samples + qcd_samples + qcd_samples_ext + qcd_hip_samples[-2:]:
     x.add_dataset('v0ntuplev1')
 for x in data_samples + [s for s in auxiliary_data_samples if s.name.startswith('ZeroBias')] + qcd_samples[2:4] + qcd_samples_ext[2:4]:
