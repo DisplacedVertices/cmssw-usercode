@@ -108,13 +108,17 @@ class scanpackbase(object):
         self.nbatches = int_ceil(self.njobs, self.jobs_per_batch)
         self.ibatch = 0
 
+    @classmethod
+    def decode_samples_string(_, samples_string):
+        details = pickle.loads(base64.b64decode(self.samples_string)).items()
+        details.sort()
+        return details
+
     def build_samples(self):
         if hasattr(self, 'samples_string'):
-            details = pickle.loads(base64.b64decode(self.samples_string))
-            details = sorted(details.items())
             self.samples = []
             self.__eps = {}
-            for (kind_name, tau, mass), events in details:
+            for (kind_name, tau, mass), events in self.decode_samples_string(self.samples_string):
                 d = eval(kind_name), tau, mass
                 self.samples.append(d)
                 self.__eps[d] = events
