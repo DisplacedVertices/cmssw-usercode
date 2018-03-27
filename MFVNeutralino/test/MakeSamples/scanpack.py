@@ -411,10 +411,10 @@ if __name__ == '__main__' and len(sys.argv) > 1:
         fn = sys.argv[2]
         lst = read_scanpack_list(fn)
         if len(sys.argv) >= 4:
-            scanpack = sys.argv[3]
+            scanpack_name = sys.argv[3]
         else:
-            scanpack = os.path.basename(fn).replace('.list', '').replace('.gz', '')
-        scanpack = get_scanpack(scanpack)
+            scanpack_name = os.path.basename(fn).replace('.list', '').replace('.gz', '')
+        scanpack = get_scanpack(scanpack_name)
         todo = {}
 
         for kind, tau, mass in scanpack.samples:
@@ -433,9 +433,22 @@ if __name__ == '__main__' and len(sys.argv) > 1:
             else:
                 assert 0
 
-        pprint(todo)
-        ps = pickle.dumps(todo, -1)
-        print repr(base64.b64encode(ps))
+        nways = 5
+        split = [{} for _ in xrange(nways)]
+        nevents_total = sum(todo.itervalues())
+        nevents_each = nevents_total / nways
+        print '\n\n\n# splitting %i total %i ways >= %i each' % (nevents_total, nways, nevents_each)
+        curr = 0
+        for sample, nevents in todo.iteritems():
+            which = curr / nevents_each
+            split[which][sample] = nevents
+            curr += nevents
+        for isp, sp in enumerate(split):
+            print 'class %sXXX_split%i(YYY):' % (scanpack_name, isp)
+            print '    """user %i gets %i events:' % (isp, sum(sp.itervalues()))
+            pprint(sp)
+            print '"""'
+            print '    samples_string = %r' % base64.b64encode(pickle.dumps(sp, -1))
 
     elif cmd == 'test':
         from gensim import process
