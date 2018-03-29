@@ -433,7 +433,8 @@ if __name__ == '__main__' and len(sys.argv) > 1:
             else:
                 assert 0
 
-        nways = 5
+        users = 'dquach jchu shogan tucker wsun'.split()
+        nways = len(users)
         split = [{} for _ in xrange(nways)]
         nevents_total = sum(todo.itervalues())
         nevents_each = nevents_total / nways
@@ -441,10 +442,11 @@ if __name__ == '__main__' and len(sys.argv) > 1:
         curr = 0
         for sample, nevents in todo.iteritems():
             which = curr / nevents_each
+            assert which < nways
             split[which][sample] = nevents
             curr += nevents
         for isp, sp in enumerate(split):
-            print 'class %sXXX_split%i(YYY):' % (scanpack_name, isp)
+            print 'class %sXXX_%s(scanpackbase100epj):' % (scanpack_name, users[isp])
             print '    """user %i gets %i events:' % (isp, sum(sp.itervalues()))
             pprint(sp)
             print '"""'
