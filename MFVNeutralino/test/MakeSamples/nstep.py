@@ -32,7 +32,7 @@ if 1:
     meta = 'scan'
     output_level = 'minitree'
     hip_right = hip_scan
-    scanpack = 'scanpack%s_' % ('p6' if hip_scan else 'p5') + os.environ['USER']
+    scanpack = 'scanpack3%s_' % ('p6' if hip_scan else 'p5') + os.environ['USER']
 elif 0:
     meta = 'ttbar'
     nevents, events_per
