@@ -3,7 +3,7 @@
 from JMTucker.Tools.ROOTTools import ROOT
 from array import array
 
-file_path = '~/crabdirs/TheoristRecipeV43'
+file_path = '~/crabdirs/TheoristRecipeV44'
 
 gen_rec_cut = 20
 
@@ -132,6 +132,7 @@ samples = [
     ('mfv_stopdbardbar_tau30000um_M1200',     r'$\tilde{t} \rightarrow \bar{d}\bar{d}$, $c\tau =   30\mm$, $M = 1200\GeV$'),
     ('mfv_stopdbardbar_tau30000um_M1600',     r'$\tilde{t} \rightarrow \bar{d}\bar{d}$, $c\tau =   30\mm$, $M = 1600\GeV$'),
     ('mfv_stopdbardbar_tau30000um_M3000',     r'$\tilde{t} \rightarrow \bar{d}\bar{d}$, $c\tau =   30\mm$, $M = 3000\GeV$'),
+    ('mfv_stopbbarbbar_tau01000um_M0800',     r'$\tilde{t} \rightarrow \bar{b}\bar{b}$, $c\tau =    1\mm$, $M =  800\GeV$'),
     ('mfv_xxddbar_tau00100um_M0300',          r'$X \rightarrow d\bar{d}$,         $c\tau = 100\mum$, $M =  300\GeV$'),
     ('mfv_xxddbar_tau00100um_M0400',          r'$X \rightarrow d\bar{d}$,         $c\tau = 100\mum$, $M =  400\GeV$'),
     ('mfv_xxddbar_tau00100um_M0500',          r'$X \rightarrow d\bar{d}$,         $c\tau = 100\mum$, $M =  500\GeV$'),
@@ -316,8 +317,10 @@ def style(sample):
         return 20
     if model == 'mfv_stopdbardbar':
         return 22
-    if model == 'mfv_xxddbar':
+    if model == 'mfv_stopbbarbbar':
         return 23
+    if model == 'mfv_xxddbar':
+        return 33
     if model == 'mfv_neuuds':
         return 21
     if model == 'mfv_neuudmu':
