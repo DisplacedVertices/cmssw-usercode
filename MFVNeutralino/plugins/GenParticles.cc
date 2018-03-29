@@ -548,7 +548,7 @@ bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<rec
 
 bool MFVGenParticles::try_stopdbardbar(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles, int quark) const {
   if (debug) printf("MFVGenParticles::try_stopdbardbar quark=%i\n", quark);
-  assert(quark == -1);
+  assert(quark == -1 || quark == -5);
 
   mfv::MCInteractionHolderPair h;
 
@@ -619,7 +619,7 @@ bool MFVGenParticles::try_stopdbardbar(mfv::MCInteraction& mc, const edm::Handle
 
   if (h.valid()) {
     mfv::MCInteractions_t type = mfv::mci_stopdbardbar;
-    //    if      (quark == -1) type = mfv::mci_stopdbardbar;
+    if (quark == -5) type = mfv::mci_stopbbarbbar;
     mc.set(h, type);
     return true;
   }
@@ -726,6 +726,7 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
     try_MFVthree(*mc, gen_particles,  5, 5,  2) || // ubb
     try_XX4j    (*mc, gen_particles) ||
     try_stopdbardbar(*mc, gen_particles, -1) || // stop -> dbar dbar + c.c.
+    try_stopdbardbar(*mc, gen_particles, -5) || // stop -> bbar bbar + c.c.
     try_MFVdijet(*mc, gen_particles, 1) || //ddbar
     try_MFVdijet(*mc, gen_particles, 4) || //ccbar
     try_MFVdijet(*mc, gen_particles, 5) || //bbbar
