@@ -110,7 +110,7 @@ class scanpackbase(object):
 
     @classmethod
     def decode_samples_string(_, samples_string):
-        details = pickle.loads(base64.b64decode(self.samples_string)).items()
+        details = pickle.loads(base64.b64decode(samples_string)).items()
         details.sort()
         return details
 
