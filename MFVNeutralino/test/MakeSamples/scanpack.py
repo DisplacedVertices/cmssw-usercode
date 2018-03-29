@@ -64,7 +64,7 @@ Current status:
 # do not import anything that is not in the stdlib since we 
 # will run in clean environment for gensim step
 
-import os, sys, base64, re, cPickle as pickle
+import os, sys, base64, random, re, cPickle as pickle
 from collections import defaultdict
 from gzip import GzipFile
 from itertools import product
@@ -386,6 +386,7 @@ def merge_scanpack_lists(fns):
                 lst[k] = l[k]
     return lst
 
+
 if __name__ == '__main__' and len(sys.argv) > 1:
     cmd = sys.argv[1]
 
@@ -436,13 +437,20 @@ if __name__ == '__main__' and len(sys.argv) > 1:
         users = 'dquach jchu shogan tucker wsun'.split()
         nways = len(users)
         split = [{} for _ in xrange(nways)]
-        nevents_total = sum(todo.itervalues())
-        nevents_each = nevents_total / nways
-        print '\n\n\n# splitting %i total %i ways >= %i each' % (nevents_total, nways, nevents_each)
+        print '\n\n\n# splitting %i total %i ways' % (sum(todo.itervalues()), nways)
         curr = 0
-        for sample, nevents in todo.iteritems():
-            which = curr / nevents_each
-            assert which < nways
+        todo = todo.items()
+        for which in xrange(nways):
+            sample,nevents = todo.pop(0)
+            split[which][sample] = nevents
+        for sample, nevents in todo:
+            invweights = [sum(sp.itervalues()) for sp in split]
+            mw = max(invweights)
+            whichs = []
+            for i,iw in enumerate(invweights):
+                w = mw - iw + 1
+                whichs += [i] * w
+            which = random.choice(whichs)
             split[which][sample] = nevents
             curr += nevents
         for isp, sp in enumerate(split):
