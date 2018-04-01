@@ -60,11 +60,13 @@ class SignalEfficiencyCombiner:
 
     def combine(self, which):
         nice_name = None
+        ngens = []
         int_lumi_sum = 0.
         total_nsig = 0
         sig_rate = [0.] * self.nbins
         sig_uncert = None
         h_dbv_sum = None
+        h_dvvs = []
         h_dvv_sum = None
 
         for inp in self.inputs:
@@ -74,6 +76,7 @@ class SignalEfficiencyCombiner:
 
             h_norm = f.Get('h_signal_%i_norm' % which)
             ngen = 1e-3 / h_norm.GetBinContent(2)
+            ngens.append(ngen)
             nice_name = checkedset(nice_name, h_norm.GetTitle())
             mass = int(nice_name.split('_M')[-1])
 
@@ -81,6 +84,7 @@ class SignalEfficiencyCombiner:
 
             h_dbv = f.Get('h_signal_%i_dbv' % which)
             h_dvv = f.Get('h_signal_%i_dvv' % which)
+            h_dvvs.append(h_dvv)
             h_dvv_rebin = f.Get('h_signal_%i_dvv_rebin' % which)
             assert h_dbv.GetTitle() == nice_name
             assert h_dvv.GetTitle() == nice_name
@@ -105,6 +109,7 @@ class SignalEfficiencyCombiner:
 
         return Result(which = which,
                       nice_name = nice_name,
+                      ngens = ngens,
                       int_lumi_sum = int_lumi_sum,
                       total_nsig = total_nsig,
                       sig_rate = sig_rate,
@@ -114,6 +119,7 @@ class SignalEfficiencyCombiner:
                       sig_uncert = sig_uncert,
                       sig_uncert_rate = [x*(y-1) for x,y in zip(sig_rate, sig_uncert)],
                       h_dbv = h_dbv_sum,
+                      h_dvvs = h_dvvs,
                       h_dvv = h_dvv_sum)
 
 if __name__ == '__main__':
