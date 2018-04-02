@@ -1,7 +1,7 @@
 import sys, os
 from JMTucker.Tools.ROOTTools import *
 
-path = plot_dir('pretty_efficiency_final', make=True)
+path = plot_dir('pretty_efficiency_final_really', make=True)
 
 ts = tdr_style()
 ROOT.gStyle.SetPalette(ROOT.kBird) #kColorPrintableOnGrey
@@ -18,7 +18,7 @@ def write(font, size, x, y, text):
 
 f = ROOT.TFile('signal_efficiency.root')
 
-for kind in 'mfv_ddbar', 'mfv_neu':
+for kind in 'mfv_stopdbardbar', 'mfv_neu':
     c = ROOT.TCanvas('c', '', 800, 800)
     c.SetTopMargin(0.1)
     c.SetBottomMargin(0.12)
@@ -29,7 +29,7 @@ for kind in 'mfv_ddbar', 'mfv_neu':
     if 'neu' in kind:
         xax.SetTitle('M_{#tilde{#chi}^{0} / #tilde{g}} (GeV)')
     else:
-        xax.SetTitle('M_{#tilde{g}} (GeV)')
+        xax.SetTitle('M_{#tilde{t}} (GeV)')
 #    xax.CenterLabels()
 #    xax.SetNdivisions(1300, 0)
 #    xax.SetBinLabel(xax.FindBin(400), '400')
