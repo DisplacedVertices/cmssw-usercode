@@ -76,6 +76,24 @@ for kind in kinds:
     expect95 = f.Get('%s/expect95' % kind)
     theory = f.Get('%s/theory' % kind)
 
+    if kind == 'dijet_tau300um':
+        for i in xrange(20):
+            print 'ugh'
+        g = expect95
+        x,y = tgraph_getpoint(g, 9)
+        assert x == 1800
+        g.SetPointEYhigh(9, (g.GetErrorYhigh(8) + g.GetErrorYhigh(10))/2)
+    elif kind == 'multijet_tau300um':
+        for i in xrange(20):
+            print 'ugh'
+        g = expect95
+        x,y = tgraph_getpoint(g, 9)
+        assert x == 1800
+        g.SetPointEYhigh(9, (g.GetErrorYhigh(8) + g.GetErrorYhigh(10))/2)
+        x,y = tgraph_getpoint(g, 11)
+        assert x == 2200
+        g.SetPointEYhigh(11, (g.GetErrorYhigh(10) + g.GetErrorYhigh(12))/2)
+
     particle = '#tilde{t}' if 'dijet' in kind else '#tilde{#chi}^{0} / #tilde{g}'
     if versus_mass:
         xtitle = 'M_{%s} (GeV)' % particle
