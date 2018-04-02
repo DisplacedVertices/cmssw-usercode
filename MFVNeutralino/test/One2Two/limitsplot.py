@@ -194,20 +194,19 @@ def make_1d_plot(d, name, xkey='mass'):
     return g
 
 def save_1d_plots():
-    print 'abomination: glu->ddbar values used for dijet with stop theory'
     xxx = [
-        ('multijet_M0800',   lambda s: 'neu'   in sample.name and sample.mass == 800 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau',  800.)),
-        ('multijet_M1600',   lambda s: 'neu'   in sample.name and sample.mass ==1600 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 1600.)),
-        ('multijet_M2400',   lambda s: 'neu'   in sample.name and sample.mass ==2400 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 2400.)),
-        ('multijet_tau300um',lambda s: 'neu'   in sample.name and sample.tau  == 0.3 and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
-        ('multijet_tau1mm',  lambda s: 'neu'   in sample.name and sample.tau  == 1.  and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
-        ('multijet_tau10mm', lambda s: 'neu'   in sample.name and sample.tau  == 10. and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
-        ('dijet_M0800',      lambda s: 'ddbar' in sample.name and sample.mass == 800 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau',  800.)),
-        ('dijet_M1600',      lambda s: 'ddbar' in sample.name and sample.mass ==1600 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 1600.)),
-        ('dijet_M2400',      lambda s: 'ddbar' in sample.name and sample.mass ==2400 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 2400.)),
-        ('dijet_tau300um',   lambda s: 'ddbar' in sample.name and sample.tau  == 0.3 and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
-        ('dijet_tau1mm',     lambda s: 'ddbar' in sample.name and sample.tau  == 1.  and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
-        ('dijet_tau10mm',    lambda s: 'ddbar' in sample.name and sample.tau  == 10. and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
+        ('multijet_M0800',   lambda s: 'neu'          in sample.name and sample.mass == 800 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau',  800.)),
+        ('multijet_M1600',   lambda s: 'neu'          in sample.name and sample.mass ==1600 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 1600.)),
+        ('multijet_M2400',   lambda s: 'neu'          in sample.name and sample.mass ==2400 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 2400.)),
+        ('multijet_tau300um',lambda s: 'neu'          in sample.name and sample.tau  == 0.3 and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
+        ('multijet_tau1mm',  lambda s: 'neu'          in sample.name and sample.tau  == 1.  and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
+        ('multijet_tau10mm', lambda s: 'neu'          in sample.name and sample.tau  == 10. and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
+        ('dijet_M0800',      lambda s: 'stopdbardbar' in sample.name and sample.mass == 800 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau',  800.)),
+        ('dijet_M1600',      lambda s: 'stopdbardbar' in sample.name and sample.mass ==1600 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 1600.)),
+        ('dijet_M2400',      lambda s: 'stopdbardbar' in sample.name and sample.mass ==2400 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 2400.)),
+        ('dijet_tau300um',   lambda s: 'stopdbardbar' in sample.name and sample.tau  == 0.3 and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
+        ('dijet_tau1mm',     lambda s: 'stopdbardbar' in sample.name and sample.tau  == 1.  and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
+        ('dijet_tau10mm',    lambda s: 'stopdbardbar' in sample.name and sample.tau  == 10. and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
         ]
     
     in_f = ROOT.TFile('limitsinput.root')
@@ -242,10 +241,10 @@ def save_2d_plots():
     in_f = ROOT.TFile('limitsinput.root')
     out_f = ROOT.TFile('limits.root', 'recreate')
 
-    for kind in 'mfv_ddbar', 'mfv_neu':
+    for kind in 'mfv_stopdbardbar', 'mfv_neu':
         d = limits()
         for sample in sample_iterator(in_f):
-            if -sample.isample in (209,210,211,399,489,589,590,675,676,969,970,971,1063,1159,1249,1349,1350,1435,1436):
+            if -sample.isample in (209,210,211,303,399,489,589,590,675,676):
                 continue
             if sample.kind != kind:
                 continue
@@ -423,7 +422,7 @@ EOF
 env R_LIBS=~/.R R --no-save <<EOF
 '''
     print 'library(akima)'
-    for k in 'mfv_ddbar', 'mfv_neu':
+    for k in 'mfv_stopdbardbar', 'mfv_neu':
         for y in 'observed', 'expect2p5', 'expect16', 'expect50', 'expect68', 'expect84', 'expect95', 'expect97p5':
             x = '%s_%s' % (k,y)
             h = f.Get('%s/%s' % (k,y))
@@ -471,15 +470,14 @@ def one_from_r(ex, name):
 
 def from_r():
     f = ROOT.TFile('limits_fromr.root', 'recreate')
-    for k in 'mfv_ddbar', 'mfv_neu':
+    for k in 'mfv_stopdbardbar', 'mfv_neu':
         for opt in ('nm', 'up', 'dn'):
             #for ex in 'observed expect2p5 expect16 expect50 expect68 expect84 expect95 expect97p5'.split():
             for ex in 'observed expect50'.split():
                 ex = k + '_' + ex
                 n = '%s_fromrinterp' % ex
                 h = one_from_r(ex, n)
-                if k == 'mfv_ddbar':
-                    print 'ABOMINATION'
+                if k == 'mfv_stopdbardbar':
                     which = 'stopstop' 
                 elif k == 'mfv_neu':
                     which = 'gluglu'
