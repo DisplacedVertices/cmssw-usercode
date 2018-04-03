@@ -170,7 +170,10 @@ def cs_analyze(d,
     result.by_exit = defaultdict(list)
     for i, r in enumerate(result.returns):
         if r > 0:
-            assert result.cmsRun_returns[i] == (0 if r == 147 else r)
+            if result.cmsRun_returns.has_key(i):
+                assert result.cmsRun_returns[i] == (0 if r == 147 else r)
+            else:
+                assert len(result.cmsRun_returns) == 0
             result.by_exit[r].append(i)
 
     result.by_exception = defaultdict(list)
