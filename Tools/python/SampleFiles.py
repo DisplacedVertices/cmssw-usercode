@@ -1484,7 +1484,11 @@ _add_ds("ntuplev16_wgenv2", {
 'mfv_stopdbardbar_tau30000um_M1600': _fromnum0("/store/user/tucker/mfv_stopdbardbar_tau30000um_M1600/NtupleV16_WGenV2_2016/180305_181745", 59),
 'mfv_stopdbardbar_tau30000um_M3000': (50, ['/store/user/tucker/mfv_stopdbardbar_tau30000um_M3000/NtupleV16_WGenV2_2016/180305_181746/0000/ntuple_%i.root' % i for i in chain(xrange(40), xrange(41,51))]),
 
+'mfv_stopbbarbbar_tau00300um_M0600': (50, ['/store/user/tucker/mfv_stopbbarbbar_tau00300um_M0600/NtupleV16_WGenV2_2016/180404_100840/0000/ntuple_%i.root' % i for i in chain(xrange(2,4), xrange(11,15), xrange(17,20), xrange(30,32), xrange(39,41), xrange(46,49), [6, 8, 21, 23, 34, 37, 43])] + ['/store/user/tucker/mfv_stopbbarbbar_tau00300um_M0600/NtupleV16_WGenV2_2016/180403_174004/0000/ntuple_%i.root' % i for i in chain(xrange(2), xrange(4,6), xrange(9,11), xrange(15,17), xrange(24,30), xrange(32,34), xrange(35,37), xrange(41,43), xrange(44,46), [7, 20, 22, 38, 49])]),
+'mfv_stopbbarbbar_tau00300um_M1200': _fromnum0("/store/user/tucker/mfv_stopbbarbbar_tau00300um_M1200/NtupleV16_WGenV2_2016/180403_174005", 50),
 'mfv_stopbbarbbar_tau01000um_M0800': _fromnum0("/store/user/tucker/mfv_stopbbarbbar_tau01000um_M0800/NtupleV16_WGenV2_2016/180314_212522", 50),
+'mfv_stopbbarbbar_tau10000um_M0600': _fromnum0("/store/user/tucker/mfv_stopbbarbbar_tau10000um_M0600/NtupleV16_WGenV2_2016/180403_174006", 50),
+'mfv_stopbbarbbar_tau10000um_M1200': (50, ['/store/user/tucker/mfv_stopbbarbbar_tau10000um_M1200/NtupleV16_WGenV2_2016/180404_100857/0000/ntuple_12.root'] + ['/store/user/tucker/mfv_stopbbarbbar_tau10000um_M1200/NtupleV16_WGenV2_2016/180403_174008/0000/ntuple_%i.root' % i for i in chain(xrange(12), xrange(13,50))]),
 })
 
 
