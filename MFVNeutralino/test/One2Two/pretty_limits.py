@@ -2,7 +2,7 @@ import sys, os
 from array import array
 from JMTucker.Tools.ROOTTools import *
 
-path = plot_dir('pretty_limits_final_really', make=True)
+path = plot_dir('pretty_limits_ugh', make=True)
 
 ts = tdr_style()
 ROOT.gStyle.SetPalette(ROOT.kBird)
@@ -80,7 +80,7 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
 #        zax.SetTitleOffset(1.2)
         #zax.SetBinLabel(zax.FindBin(30), '30')
 #     zax.SetRangeUser(0., 0.85)
-        zax.SetTitle('95% CL upper limit on #sigma B^{2} (fb)')
+        zax.SetTitle('95% CL upper limit on #sigmaB^{2} (fb)')
         zax.SetLabelSize(0.045)
         zax.SetLabelOffset(0.00005)
         zax.SetTitleSize(0.05)

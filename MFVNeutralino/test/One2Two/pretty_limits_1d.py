@@ -2,7 +2,7 @@ import sys, os
 from array import array
 from JMTucker.Tools.ROOTTools import *
 
-path = plot_dir('pretty_limits_1d_final_really', make=True)
+path = plot_dir('pretty_limits_1d_ugh', make=True)
 
 ts = tdr_style()
 
@@ -101,7 +101,7 @@ for kind in kinds:
         xtitle = 'c#tau_{%s} (mm)' % particle
         
     g = expect95
-    g.SetTitle(';%s;#sigma B^{2} (fb)  ' % xtitle)
+    g.SetTitle(';%s;#sigmaB^{2} (fb)  ' % xtitle)
     g.Draw('A3')
 
     draw_theory = 'tau' in kind
