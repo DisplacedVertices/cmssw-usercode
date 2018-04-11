@@ -2015,17 +2015,28 @@ if __name__ == '__main__':
 
     elif 'testfiles' in sys.argv:
         dataset, sample = _args('testfiles', 'dataset','sample')
+        is_ntuple = dataset.startswith('ntuple')
         from JMTucker.Tools.ROOTTools import ROOT
         print sample, dataset
-        def n(f,p):
+        nev, nev2 = 0, 0
+        def get_n(f,p):
             try:
-                n = f.Get(p).GetEntries()
+                return f.Get(p).GetEntries()
             except ReferenceError:
-                pass
+                return 1e99
         for fn in get(sample, dataset)[1]:
-            n(ROOT.TFile.Open('root://cmseos.fnal.gov/' + fn), 'Events')
-            if dataset.startswith('ntuple'):
-                n(ROOT.TFile.Open('root://cmseos.fnal.gov/' + fn.replace('ntuple', 'vertex_histos')), 'mfvVertices/h_n_all_tracks')
+            n = get_n(ROOT.TFile.Open('root://cmseos.fnal.gov/' + fn), 'Events')
+            nev += n
+            if is_ntuple:
+                n2 = get_n(ROOT.TFile.Open('root://cmseos.fnal.gov/' + fn.replace('ntuple', 'vertex_histos')), 'mfvVertices/h_n_all_tracks')
+                nev2 += n2
+                print fn, n, n2
+            else:
+                print fn, n
+        print 'total:', nev, 'events',
+        if is_ntuple:
+            print nev2, 'in vertex_histos h_n_all_tracks',
+        print
 
     elif 'forcopy' in sys.argv:
         dataset, sample = _args('forcopy', 'dataset','sample')
