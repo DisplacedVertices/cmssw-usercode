@@ -6,7 +6,7 @@ class max_output_modifier:
     def __init__(self, n):
         self.n = n
     def __call__(self, sample):
-        return ['process.maxEvents.output = cms.untracked.int32(500)'], []
+        return ['process.maxEvents.output = cms.untracked.int32(%i)' % self.n], []
 
 def is_mc_modifier(sample):
     to_replace = []
