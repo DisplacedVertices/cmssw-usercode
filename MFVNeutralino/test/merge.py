@@ -10,6 +10,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools import Samples
 
     dataset = 'ntuplev17m'
+    import re; mo = re.search(r'.*?(\d+).*?', dataset); assert mo; assert int(mo.group(1)) >= 17
     batch_name = 'NtupleV17m_merge'
 
     samples = [s for s in
