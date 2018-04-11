@@ -151,6 +151,8 @@ for s in xx4j_samples_2015:
     s.is_private = False
     s.xsec = 1e-3
 
+all_signal_samples_2015 = mfv_signal_samples_2015 # don't use xx4j
+
 ########
 # 2016 MC = main, so no _2016 in names
 ########
@@ -590,6 +592,8 @@ for s in mfv_ddbar_samples + mfv_signal_samples + mfv_neuuds_samples + mfv_neuud
         s.dbs_inst = 'phys03'
         s.condor = True
 
+all_signal_samples = mfv_ddbar_samples + mfv_signal_samples + mfv_neuuds_samples + mfv_neuudmu_samples + mfv_neuude_samples + mfv_misc_samples + mfv_xxddbar_samples + mfv_stopdbardbar_samples + mfv_stopbbarbbar_samples + mfv_hip_samples
+
 qcd_hip_samples = [
     MCSample('qcdht0700_hip1p0_mit', '/qcdht0700/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-de9e9f9c2951885a85d93dfb6395e7a7/USER', 25257, xsec=6.802e3),
     MCSample('qcdht1000_hip1p0_mit', '/qcdht1000/None/USER', 511738 + 447284 + 435441, xsec=1.206e3),
@@ -678,11 +682,12 @@ from functools import partial
 _adbp = registry.add_dataset_by_primary
 _adbp3 = partial(_adbp, dbs_inst='phys03')
 
+all_signal_samples = mfv_ddbar_samples + mfv_signal_samples + mfv_neuuds_samples + mfv_neuudmu_samples + mfv_neuude_samples + mfv_misc_samples + mfv_xxddbar_samples + mfv_stopdbardbar_samples + mfv_stopbbarbbar_samples + mfv_hip_samples
+
 __all__ = [
     'qcd_samples',
     'qcd_samples_ext',
     'qcd_samples_sum',
-    'qcd_hip_samples',
     'ttbar_samples',
     'leptonic_background_samples',
     'minbias_samples',
@@ -696,6 +701,7 @@ __all__ = [
     'mfv_stopdbardbar_samples',
     'mfv_stopbbarbbar_samples',
     'mfv_hip_samples',
+    'qcd_hip_samples',
     'data_samples',
     'auxiliary_data_samples',
 
@@ -721,6 +727,11 @@ for x in __all__:
             registry.add(sample)
             exec '%s = sample' % sample.name
             __all__.append(sample.name)
+
+__all__ += [
+    'all_signal_samples',
+    'all_signal_samples_2015',
+    ]
 
 ########################################################################
 
