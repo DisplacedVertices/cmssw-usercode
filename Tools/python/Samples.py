@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-from itertools import chain
 from JMTucker.Tools.Sample import *
 
 ########################################################################
