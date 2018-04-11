@@ -59,6 +59,9 @@ Current status:
   paper as of approval: scanpack1+2 merger, 0.1-100 mm, 300-2600 GeV;
   at least 20k event for low tau and 10k for high tau.
 
+- scanpack3p5 and 3p6_hip are for missing points from scanpack3, while
+  fixing bug in "low tau" check.
+
 '''
 
 # do not import anything that is not in the stdlib since we 
@@ -80,6 +83,8 @@ from modify import set_mfv_neutralino, set_gluino_ddbar, set_stop_dbardbar
 # kind are one of the set_* functions from modify
 # tau are float, in mm like pythia and modify
 # mass are int, GeV
+
+scanpack_users = 'dquach jchu shogan tucker wsun'.split()
 
 class scanpackbase(object):
     jobs_per_batch = 5000
@@ -376,6 +381,10 @@ def hadd_scanpack(lst_fn):
     from JMTucker.Tools import colors, eos
     from JMTucker.Tools.hadd import hadd
 
+    me = os.environ['USER']
+    others = scanpack_users
+    others.remove(me)
+
     lst = read_scanpack_list(lst_fn)
     new_lst = {}
     hadds = []
@@ -387,6 +396,10 @@ def hadd_scanpack(lst_fn):
             assert re.match(r'\d{4}', sfn[-2])
             assert re.match(r'\d{6}_\d{6}', sfn[-3])
             new_out_fn = '/'.join(sfn[:-2]) + '/' + name + '.root'
+            for user in others:
+                p = '/store/user/%s/' % user
+                if p in new_out_fn:
+                    new_out_fn = new_out_fn.replace(p, '/store/user/%s/' % me)
             out_fns.add(new_out_fn)
 
         assert len(out_fns)
@@ -396,11 +409,12 @@ def hadd_scanpack(lst_fn):
             pprint(fns)
             pprint(out_fns)
         out_fn = out_fns[-1]
-
         new_lst[name] = [out_fn]
+
         if eos.exists(out_fn):
             print colors.yellow('%s already exists' % out_fn)
         else:
+            eos.mkdir(os.path.dirname(out_fn))
             hadd(out_fn, fns)
 
     print '\nnew list:'
@@ -466,8 +480,7 @@ if __name__ == '__main__' and len(sys.argv) > 1:
             else:
                 assert 0
 
-        users = 'dquach jchu shogan tucker wsun'.split()
-        nways = len(users)
+        nways = len(scanpack_users)
         split = [{} for _ in xrange(nways)]
         print '\n\n\n# splitting %i total %i ways' % (sum(todo.itervalues()), nways)
         curr = 0
@@ -486,7 +499,7 @@ if __name__ == '__main__' and len(sys.argv) > 1:
             split[which][sample] = nevents
             curr += nevents
         for isp, sp in enumerate(split):
-            print 'class %sXXX_%s(scanpackbase100epj):' % (scanpack_name, users[isp])
+            print 'class %sXXX_%s(scanpackbase100epj):' % (scanpack_name, scanpack_users[isp])
             print '    """user %i gets %i events:' % (isp, sum(sp.itervalues()))
             pprint(sp)
             print '"""'
