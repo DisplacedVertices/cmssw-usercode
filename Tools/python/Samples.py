@@ -682,8 +682,6 @@ from functools import partial
 _adbp = registry.add_dataset_by_primary
 _adbp3 = partial(_adbp, dbs_inst='phys03')
 
-all_signal_samples = mfv_ddbar_samples + mfv_signal_samples + mfv_neuuds_samples + mfv_neuudmu_samples + mfv_neuude_samples + mfv_misc_samples + mfv_xxddbar_samples + mfv_stopdbardbar_samples + mfv_stopbbarbbar_samples + mfv_hip_samples
-
 __all__ = [
     'qcd_samples',
     'qcd_samples_ext',
