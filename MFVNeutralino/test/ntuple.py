@@ -17,6 +17,10 @@ version = 'V16'
 batch_name = 'Ntuple' + version
 if minitree_only:
     batch_name = 'MiniNtuple'  + version
+elif keep_gen:
+    batch_name += '_WGenV2'
+elif not event_filter:
+    batch_name += '_NoEF'
 #batch_name += '_ChangeMeIfSettingsNotDefault'
 
 ####
