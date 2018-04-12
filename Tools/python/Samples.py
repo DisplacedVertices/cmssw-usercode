@@ -145,6 +145,7 @@ for s in mfv_signal_samples_2015:
     s.dbs_inst = 'phys03'
     s.xsec = 1e-3
     s.condor = True
+    s.xrootd_url = xrootd_sites['T3_US_FNALLPC']
 
 for s in xx4j_samples_2015:
     _set_tau_mass(s)
@@ -591,6 +592,7 @@ for s in mfv_ddbar_samples + mfv_signal_samples + mfv_neuuds_samples + mfv_neuud
     if s.is_private:
         s.dbs_inst = 'phys03'
         s.condor = True
+        s.xrootd_url = xrootd_sites['T3_US_FNALLPC']
 
 all_signal_samples = mfv_ddbar_samples + mfv_signal_samples + mfv_neuuds_samples + mfv_neuudmu_samples + mfv_neuude_samples + mfv_misc_samples + mfv_xxddbar_samples + mfv_stopdbardbar_samples + mfv_stopbbarbbar_samples + mfv_hip_samples
 
@@ -604,6 +606,7 @@ for s in qcd_hip_samples:
     s.is_private = True
     s.dbs_inst = 'phys03'
     s.condor = True
+    s.xrootd_url = xrootd_sites['T3_US_FNALLPC']
 
 ########################################################################
 
@@ -816,6 +819,7 @@ _adbp('miniaod', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-10mm_T
 for x in mfv_ddbar_samples:
     x.add_dataset('miniaod', '/%s/None/USER' % x.primary_dataset, x.nevents_orig)
     x.datasets['miniaod'].condor = True
+    x.datasets['miniaod'].xrootd_url = xrootd_sites['T3_US_FNALLPC']
 
 ########
 # ntuples
@@ -867,6 +871,7 @@ for s in registry.all():
         for ds4 in ds4condor:
             if ds.startswith(ds4):
                 s.datasets[ds].condor = True
+                s.datasets[ds].xrootd_url = xrootd_sites['T3_US_FNALLPC']
 
 ########
 # other condor declarations, generate condorable dict with Shed/condor_list.py
@@ -888,19 +893,14 @@ condorable = {
         },
     }
 
-sites = {
-    'T3_US_FNALLPC': 'root://cmseos.fnal.gov/',
-    'T1_US_FNAL_Disk': 'root://cmsxrootd-site.fnal.gov/',
-    'T2_DE_DESY': 'root://dcache-cms-xrootd.desy.de/'
-    }
-
 for site, d in condorable.iteritems():
-    if sites.has_key(site):
-        for ds, samples in d.iteritems():
-            for s in samples:
-                s.datasets[ds].condor = True
-                s.datasets[ds].xrootd_url = sites[site]
-                
+    if not xrootd_sites.has_key(site):
+        raise ValueError('need entry in xrootd_sites for %s' % site)
+    for ds, samples in d.iteritems():
+        for s in samples:
+            s.datasets[ds].condor = True
+            s.datasets[ds].xrootd_url = xrootd_sites[site]
+
 ########################################################################
 
 if __name__ == '__main__':
