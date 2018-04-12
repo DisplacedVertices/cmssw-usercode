@@ -880,7 +880,7 @@ for s in registry.all():
 # 2018-01-23 15:45:00.239927
 condorable = {
     "T3_US_FNALLPC": {
-        "main": [JetHT2015C, mfv_neu_tau00100um_M0300, mfv_neu_tau00300um_M0300, mfv_neu_tau10000um_M0300, mfv_neu_tau00100um_M0400, mfv_neu_tau00300um_M0400, mfv_neu_tau10000um_M0400, mfv_neu_tau00100um_M0800, mfv_neu_tau00300um_M0800, mfv_neu_tau01000um_M0800, mfv_neu_tau00100um_M1200, mfv_neu_tau00300um_M1200, mfv_neu_tau01000um_M1200, mfv_neu_tau10000um_M1200, mfv_neu_tau00100um_M1600, mfv_neu_tau00300um_M1600, mfv_neu_tau10000um_M1600, qcdht0500_2015, qcdht0700_2015, qcdht1000_2015, qcdht1500_2015, qcdht2000_2015, qcdht0500ext_2015, qcdht0700ext_2015, qcdht1000ext_2015, qcdht1500ext_2015, qcdht2000ext_2015, ttbar_2015, qcdht2000ext, ttbar],
+        "main": [JetHT2015C, mfv_neu_tau10000um_M0800, mfv_neu_tau01000um_M1600, mfv_neu_tau01000um_M0400, mfv_neu_tau00100um_M0300, mfv_neu_tau00300um_M0300, mfv_neu_tau10000um_M0300, mfv_neu_tau00100um_M0400, mfv_neu_tau00300um_M0400, mfv_neu_tau10000um_M0400, mfv_neu_tau00100um_M0800, mfv_neu_tau00300um_M0800, mfv_neu_tau01000um_M0800, mfv_neu_tau00100um_M1200, mfv_neu_tau00300um_M1200, mfv_neu_tau01000um_M1200, mfv_neu_tau10000um_M1200, mfv_neu_tau00100um_M1600, mfv_neu_tau00300um_M1600, mfv_neu_tau10000um_M1600, qcdht0500_2015, qcdht0700_2015, qcdht1000_2015, qcdht1500_2015, qcdht2000_2015, qcdht0500ext_2015, qcdht0700ext_2015, qcdht1000ext_2015, qcdht1500ext_2015, qcdht2000ext_2015, ttbar_2015, qcdht2000ext, ttbar],
         "miniaod": [SingleMuon2016B3, SingleMuon2016D, SingleMuon2016F, SingleMuon2016G, SingleMuon2016H2, SingleMuon2016H3, mfv_neu_tau10000um_M1600],
         },
     "T1_US_FNAL_Disk": {
