@@ -9,18 +9,18 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.MFVNeutralino.Year import year
     from JMTucker.Tools import Samples
 
-    dataset = 'ntuplev17m'
+    dataset = 'ntuplev16_noef'
     import re; mo = re.search(r'.*?(\d+).*?', dataset); assert mo
     if int(mo.group(1)) < 17:
         for i in xrange(20):
             print 'be sure all processing in chain was done by file'
-    batch_name = 'NtupleV17m_merge'
+    batch_name = 'NtupleV16_NoEF_merge'
 
     samples = [s for s in
                # not worth it to merge ttbar and qcd, haven't tried data
                #Samples.data_samples +
                #Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext +
-               Samples.mfv_signal_samples + Samples.mfv_ddbar_samples
+               Samples.all_signal_samples
                if s.has_dataset(dataset)]
 
     for sample in samples:
