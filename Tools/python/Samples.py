@@ -989,3 +989,10 @@ if __name__ == '__main__':
                 if s.has_dataset(ds):
                     s.set_curr_dataset(ds)
                     print '%s %s %s %s' % (s.name, ds, s.condor, s.xrootd_url)
+
+    if 0:
+        have = ()
+        print len(have)
+        for s in all_signal_samples:
+            if s not in have:
+                print s.name + ',',
