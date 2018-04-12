@@ -17,6 +17,7 @@ private:
   edm::EDGetTokenT<reco::GenParticleCollection> gen_particles_token;
 
   const bool check_gen_particles;
+  const bool prints;
   unsigned run;
   unsigned lumi;
   unsigned long long evt;
@@ -25,7 +26,9 @@ private:
 };
 
 EventIdRecorder::EventIdRecorder(const edm::ParameterSet& cfg) 
-  : check_gen_particles(cfg.existsAs<bool>("check_gen_particles") && cfg.getParameter<bool>("check_gen_particles"))
+  : check_gen_particles(cfg.existsAs<bool>("check_gen_particles") && cfg.getParameter<bool>("check_gen_particles")),
+    prints(cfg.getUntrackedParameter<bool>("prints", false)),
+    run(0), lumi(0), evt(0), first_parton_pz(0)
 {
   if (check_gen_particles)
     gen_particles_token = consumes<reco::GenParticleCollection>(edm::InputTag("genParticles"));
@@ -56,6 +59,11 @@ void EventIdRecorder::analyze(const edm::Event& event, const edm::EventSetup&) {
   }
 
   tree->Fill();
+
+  if (prints) {
+    const edm::EventAuxiliary& a = event.eventAuxiliary();
+    std::cout << "run " << run << " lumi " << lumi << " event " << evt << " 1stpartonpz " << first_parton_pz << " id " << a.id() << " guid " << a.processGUID() << " time " << a.time().value() << " isreal " << a.isRealData() << " expt type " << a.experimentType() << " bx " << a.bunchCrossing() << " store " << a.storeNumber() << std::endl;
+  }
 }
 
 DEFINE_FWK_MODULE(EventIdRecorder);
