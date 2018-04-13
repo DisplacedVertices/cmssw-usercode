@@ -4,8 +4,12 @@ from JMTucker.Tools.Sample import *
 
 ########################################################################
 
+def _model(sample):
+    s = sample if type(sample) == str else sample.name
+    return s.split('_tau')[0]
+
 def _tau(sample):
-    s = sample.name
+    s = sample if type(sample) == str else sample.name
     is_um = '0um_' in s
     x = int(s[s.index('tau')+3:s.index('um_' if is_um else 'mm_')])
     if not is_um:
@@ -13,17 +17,55 @@ def _tau(sample):
     return x
 
 def _mass(sample):
-    s = sample.name
+    s = sample if type(sample) == str else sample.name
     x = s.index('_M')
     y = s.find('_',x+1)
     if y == -1:
         y = len(s)
     return int(s[x+2:y])
 
-def _set_tau_mass(sample):
+def _decay(sample):
+    s = sample if type(sample) == str else sample.name
+    decay = {
+        'mfv_neu': r'\tilde{N} \rightarrow tbs',
+        'xx4j': r'X \rightarrow q\bar{q}',
+        'mfv_ddbar': r'\tilde{g} \rightarrow d\bar{d}',
+        'mfv_neuuds': r'\tilde{N} \rightarrow uds',
+        'mfv_neuudmu': r'\tilde{N} \rightarrow u\bar{d}\mu^{\minus}',
+        'mfv_neuude': r'\tilde{N} \rightarrow u\bar{d}e^{\minus}',
+        'mfv_neucdb': r'\tilde{N} \rightarrow cdb',
+        'mfv_neucds': r'\tilde{N} \rightarrow cds',
+        'mfv_neutbb': r'\tilde{N} \rightarrow tbb',
+        'mfv_neutds': r'\tilde{N} \rightarrow tds',
+        'mfv_neuubb': r'\tilde{N} \rightarrow ubb',
+        'mfv_neuudb': r'\tilde{N} \rightarrow udb',
+        'mfv_neuudtu': r'\tilde{N} \rightarrow u\bar{d}\tau^{\minus}',
+        'mfv_xxddbar': r'X \rightarrow d\bar{d}',
+        'mfv_stopdbardbar': r'\tilde{t} \rightarrow \bar{d}\bar{d}',
+        'mfv_stopbbarbbar': r'\tilde{t} \rightarrow \bar{b}\bar{b}',
+        }[_model(sample)]
+    if s.endswith('_2015'):
+        decay += ' (2015)'
+    if 'hip1p0_mit' in s:
+        decay += ' (HIP)'
+    return decay
+
+def _latex(sample):
+    tau = _tau(sample)
+    if tau < 1000:
+        tau = '%3i\mum' % tau
+    else:
+        assert tau % 1000 == 0
+        tau = '%4i\mm' % (tau/1000)
+    return r'$%s$,   $c\tau = %s$, $M = %4s\GeV$' % (_decay(sample), tau, _mass(sample))
+
+def _set_signal_stuff(sample):
     sample.is_signal = True
-    sample.tau  = _tau (sample)
+    sample.model = _model(sample)
+    sample.decay = _decay(sample)
+    sample.tau  = _tau(sample)
     sample.mass = _mass(sample)
+    sample.latex = _latex(sample)
 
 ########################################################################
 
@@ -140,7 +182,7 @@ xx4j_samples_2015 = [    # M = 50, 100 GeV also exist
     ]
 
 for s in mfv_signal_samples_2015:
-    _set_tau_mass(s)
+    _set_signal_stuff(s)
     s.is_private = True
     s.dbs_inst = 'phys03'
     s.xsec = 1e-3
@@ -148,7 +190,7 @@ for s in mfv_signal_samples_2015:
     s.xrootd_url = xrootd_sites['T3_US_FNALLPC']
 
 for s in xx4j_samples_2015:
-    _set_tau_mass(s)
+    _set_signal_stuff(s)
     s.is_private = False
     s.xsec = 1e-3
 
@@ -584,8 +626,12 @@ mfv_hip_samples = [ # dbs may be screwed up for these, and the ones that say "Pr
     MCSample('mfv_neu_tau30000um_M1600_hip1p0_mit', '/mfv_neu_tau30000um_M1600/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-c5e763a88dabdb717409c32ce672b20d/USER', 10000),
     ]
 
-for s in mfv_ddbar_samples + mfv_signal_samples + mfv_neuuds_samples + mfv_neuudmu_samples + mfv_neuude_samples + mfv_misc_samples + mfv_xxddbar_samples + mfv_stopdbardbar_samples + mfv_stopbbarbbar_samples + mfv_hip_samples:
-    _set_tau_mass(s)
+########################################################################
+
+all_signal_samples = mfv_ddbar_samples + mfv_signal_samples + mfv_neuuds_samples + mfv_neuudmu_samples + mfv_neuude_samples + mfv_misc_samples + mfv_xxddbar_samples + mfv_stopdbardbar_samples + mfv_stopbbarbbar_samples + mfv_hip_samples
+
+for s in all_signal_samples:
+    _set_signal_stuff(s)
     s.xsec = 1e-3
     s.is_private = s.dataset.startswith('/mfv_')
     if s.is_private:
@@ -593,7 +639,7 @@ for s in mfv_ddbar_samples + mfv_signal_samples + mfv_neuuds_samples + mfv_neuud
         s.condor = True
         s.xrootd_url = xrootd_sites['T3_US_FNALLPC']
 
-all_signal_samples = mfv_ddbar_samples + mfv_signal_samples + mfv_neuuds_samples + mfv_neuudmu_samples + mfv_neuude_samples + mfv_misc_samples + mfv_xxddbar_samples + mfv_stopdbardbar_samples + mfv_stopbbarbbar_samples + mfv_hip_samples
+########################################################################
 
 qcd_hip_samples = [
     MCSample('qcdht0700_hip1p0_mit', '/qcdht0700/tucker-RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-de9e9f9c2951885a85d93dfb6395e7a7/USER', 25257, xsec=6.802e3),
