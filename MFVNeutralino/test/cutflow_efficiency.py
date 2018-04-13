@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from JMTucker.Tools.ROOTTools import ROOT, to_array
+from JMTucker.Tools.ROOTTools import ROOT, to_array, clopper_pearson
 from JMTucker.Tools import Samples, colors
 
 file_path = '/uscms_data/d3/jchu/crab_dirs/mfv_8025/TheoristRecipeV44'
@@ -135,12 +135,12 @@ for sample in samples:
         if i < iden:
             continue
         rec_hist = f.Get('mfvTheoristRecipe%s/h_gen%s_dvv' % (rec, match))
-        rec_eff = rec_hist.GetEntries()/nrec
-        rec_err = (rec_eff * (1-rec_eff) / nrec)**0.5
+        rec_eff,l,u = clopper_pearson(rec_hist.GetEntries(), nrec)
+        rec_err = (u-l)/2
         if generated[i] != '':
             gen_hist = f.Get('mfvGen%s/h_gen%s_dvv' % (generated[i], match))
-            gen_eff = gen_hist.GetEntries()/ngen
-            gen_err = (gen_eff * (1-gen_eff) / ngen)**0.5
+            gen_eff,l,u = clopper_pearson(gen_hist.GetEntries(), ngen)
+            gen_err = (u-l)/2
             gen_rec_div = gen_eff/rec_eff if rec_eff != 0 else 9999
             gen_rec_err = (gen_rec_div * ((rec_err/rec_eff)**2 + (gen_err/gen_eff)**2))**0.5 if rec_eff != 0 and gen_eff != 0 else 9999
             if generated[i] == gen_num:
