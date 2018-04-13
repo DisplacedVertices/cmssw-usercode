@@ -17,7 +17,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             Samples.all_signal_samples_2015
     elif year == 2016:
         samples = Samples.data_samples + \
-            Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + Samples.qcd_hip_samples \
+            Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + Samples.qcd_hip_samples + \
             Samples.all_signal_samples
 
     from JMTucker.Tools.MetaSubmitter import set_splitting
