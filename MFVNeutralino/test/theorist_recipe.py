@@ -1,6 +1,6 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-dataset = 'ntuplev16_noef'
+dataset = 'ntuplev16p1'
 sample_files(process, 'mfv_neu_tau01000um_M0800', dataset, 10)
 process.TFileService.fileName = 'theorist_recipe.root'
 file_event_from_argv(process)
