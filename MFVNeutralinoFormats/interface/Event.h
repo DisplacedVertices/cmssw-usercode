@@ -78,8 +78,10 @@ struct MFVEvent {
       return 1; 
     else if (fabs(mass - 0.1057) < 1e-2)
       return 0;
-    else
+    else {
       assert(0);
+      return 999;
+    }
   }
 
   double gen_jet_ht(double min_jet_pt=0.) const {
