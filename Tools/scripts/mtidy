@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+# for x in $(find $crd -type d -name crab\* -o -name condor\* ) ; do if [[ ! -f $x/mtidied ]]; then echo $x; fi; done
+
 import os, sys
 from glob import glob
 from JMTucker.Tools.general import bool_from_argv, touch
