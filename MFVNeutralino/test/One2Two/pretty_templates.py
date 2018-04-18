@@ -49,9 +49,7 @@ def fmt(h, name, color, save=[]):
         h.Scale(1./h.Integral(0,h.GetNbinsX()+2))
     else:
         norm = f.Get('h_signal_%i_norm' % signum).GetBinContent(2)
-        print norm * 38500 * h.Integral(0,h.GetNbinsX()+2)
         h.Scale(norm * 38500.)
-    print h.Integral()
     save.append(h)
     return h
 
@@ -75,6 +73,7 @@ for zzz, (isample, norm, style, color, title) in enumerate(which):
     h.GetXaxis().SetRangeUser(0,4)
     h.GetYaxis().SetRangeUser(0,1)
     leg.AddEntry(h, title, 'L')
+    print isample, h.Integral(0,h.GetNbinsX()+2)
 
 hbkg.Draw('hist same')
 
