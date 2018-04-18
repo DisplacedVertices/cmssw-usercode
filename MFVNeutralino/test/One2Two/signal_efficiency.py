@@ -106,6 +106,7 @@ class SignalEfficiencyCombiner:
             sig_uncert = checkedset(sig_uncert, self._get(h_uncert, offset=1))
 
         total_sig_rate = sum(sig_rate)
+        total_sig_1v = h_dbv_sum.Integral(0,h_dbv_sum.GetNbinsX()+2)
 
         return Result(which = which,
                       nice_name = nice_name,
@@ -118,6 +119,7 @@ class SignalEfficiencyCombiner:
                       total_efficiency = total_sig_rate / int_lumi_sum,
                       sig_uncert = sig_uncert,
                       sig_uncert_rate = [x*(y-1) for x,y in zip(sig_rate, sig_uncert)],
+                      total_sig_1v = total_sig_1v,
                       h_dbv = h_dbv_sum,
                       h_dvvs = h_dvvs,
                       h_dvv = h_dvv_sum)
