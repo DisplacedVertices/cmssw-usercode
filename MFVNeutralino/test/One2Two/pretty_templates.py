@@ -14,9 +14,9 @@ def name2isample(f, name):
     raise ValueError('no name %s found in %r' % (name, f))
 
 which = [
-    (name2isample(f, 'mfv_neu_tau00300um_M0800'), 2, ROOT.kRed, 'c#tau = 0.3 mm'),
-    (name2isample(f, 'mfv_neu_tau01000um_M0800'), 5, ROOT.kGreen+2, 'c#tau = 1 mm'),
-    (name2isample(f, 'mfv_neu_tau10000um_M0800'), 7, ROOT.kBlue, 'c#tau = 10 mm'),
+    (name2isample(f, 'mfv_neu_tau00300um_M0800'), 3.82, 2, ROOT.kRed, 'c#tau = 0.3 mm'),
+    (name2isample(f, 'mfv_neu_tau01000um_M0800'), 13.0, 5, ROOT.kGreen+2, 'c#tau = 1 mm'),
+    (name2isample(f, 'mfv_neu_tau10000um_M0800'), 24.2, 7, ROOT.kBlue, 'c#tau = 10 mm'),
     ]
 
 def write(font, size, x, y, text):
@@ -64,9 +64,10 @@ leg.SetBorderSize(0)
 leg.AddEntry(hbkg, 'Background template', 'LF')
 leg.AddEntry(0, '#kern[-0.22]{Multijet signals, M = 800 GeV, #sigma = 1 fb:}', '')
 
-for zzz, (isample, style, color, title) in enumerate(which):
+for zzz, (isample, norm, style, color, title) in enumerate(which):
     h = fmt(f.Get('h_signal_%i_dvv' % isample), (title,isample), color)
     h.SetLineStyle(style)
+    h.Scale(norm/h.Integral(0,10000000))
     if zzz == 0:
         h.Draw('hist')
     else:
