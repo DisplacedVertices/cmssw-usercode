@@ -1,8 +1,10 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-sample_files(process, 'mfv_neu_tau01000um_M0800', 'ntuplev14', -1)
+dataset = 'ntuplev16'
+sample_files(process, 'mfv_neu_tau01000um_M0800', dataset, -1)
 process.TFileService.fileName = 'resolutions.root'
+file_event_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
@@ -42,14 +44,13 @@ process.p *= process.mfvResolutionsFullSelByDistCutTrksJets
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
-    samples = Samples.registry.from_argv([Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800, Samples.mfv_neu_tau01000um_M0400, Samples.mfv_neu_tau01000um_M1600])
+    samples = Samples.mfv_signal_samples + Samples.mfv_ddbar_samples
 
-    dataset = 'ntuplev14'
     for sample in samples:
-        sample.datasets[dataset].files_per = 100
+        sample.datasets[dataset].files_per = 1000
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('ResolutionsV14p1', dataset = dataset)
+    cs = CondorSubmitter('ResolutionsV16', dataset = dataset)
     cs.submit_all(samples)
 
 elif __name__ == '__main__' and hasattr(sys, 'argv') and 'derivecut' in sys.argv:

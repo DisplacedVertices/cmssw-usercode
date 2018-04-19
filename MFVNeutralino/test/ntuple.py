@@ -13,10 +13,14 @@ prepare_vis = not run_n_tk_seeds and False
 keep_all = prepare_vis
 keep_gen = False
 event_filter = not keep_all
-version = 'V16'
+version = 'V16p1'
 batch_name = 'Ntuple' + version
 if minitree_only:
     batch_name = 'MiniNtuple'  + version
+elif keep_gen:
+    batch_name += '_WGenV2'
+elif not event_filter:
+    batch_name += '_NoEF'
 #batch_name += '_ChangeMeIfSettingsNotDefault'
 
 ####
@@ -155,12 +159,12 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = \
             Samples.data_samples_2015 + \
             Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015 + \
-            Samples.mfv_signal_samples_2015
+            Samples.all_signal_samples_2015
     elif year == 2016:
         samples = \
             Samples.data_samples + \
-            Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
-            Samples.mfv_signal_samples + Samples.mfv_ddbar_samples + Samples.mfv_hip_samples + Samples.qcd_hip_samples
+            Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + Samples.qcd_hip_samples + \
+            Samples.all_signal_samples
 
     if 'validation' in sys.argv:
         batch_name += '_validation'
@@ -180,7 +184,14 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         batch_name += '_NTkSeeds'
         samples = [s for s in samples if not s.is_signal]
 
-    modify = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier, event_veto_modifier(skips, 'p'))
+    def signals_no_event_filter_modifier(sample):
+        to_replace = []
+        if sample.is_signal:
+            magic = '\x65vent_filter = not keep_all'
+            to_replace.append((magic, 'event_filter = False', 'tuple template does not contain the magic string "%s"' % magic))
+        return [], to_replace
+
+    modify = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier, event_veto_modifier(skips, 'p'), signals_no_event_filter_modifier)
     ms = MetaSubmitter(batch_name)
     if 'validation' in sys.argv:
         modify.append(max_output_modifier(500))

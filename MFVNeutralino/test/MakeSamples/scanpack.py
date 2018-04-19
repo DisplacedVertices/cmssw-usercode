@@ -55,17 +55,24 @@ Current status:
   batches crap out that i reran named *try3, but some stats did finish and
   so can use both. there is a .temp file to look at while try3 finishes.
 
+- scanpack3 is to run stop_dbardbar on same points that ended up in
+  paper as of approval: scanpack1+2 merger, 0.1-100 mm, 300-2600 GeV;
+  at least 20k event for low tau and 10k for high tau.
+
+- scanpack3p5 and 3p6_hip are for missing points from scanpack3, while
+  fixing bug in "low tau" check.
+
 '''
 
 # do not import anything that is not in the stdlib since we 
 # will run in clean environment for gensim step
 
-import os, sys, base64, re, cPickle as pickle
+import os, sys, base64, random, re, cPickle as pickle
 from collections import defaultdict
 from gzip import GzipFile
 from itertools import product
 from pprint import pprint
-from modify import set_mfv_neutralino, set_gluino_ddbar
+from modify import set_mfv_neutralino, set_gluino_ddbar, set_stop_dbardbar
 
 # !!! DO NOT CHANGE ANYTHING THAT CHANGES WHICH JOB IS WHICH SAMPLE ONCE BATCHES ARE RUN WITH THAT SCANPACK !!!
 # unless you delete all the output from that scanpack.
@@ -76,6 +83,8 @@ from modify import set_mfv_neutralino, set_gluino_ddbar
 # kind are one of the set_* functions from modify
 # tau are float, in mm like pythia and modify
 # mass are int, GeV
+
+scanpack_users = 'dquach jchu shogan tucker wsun'.split()
 
 class scanpackbase(object):
     jobs_per_batch = 5000
@@ -104,13 +113,17 @@ class scanpackbase(object):
         self.nbatches = int_ceil(self.njobs, self.jobs_per_batch)
         self.ibatch = 0
 
+    @classmethod
+    def decode_samples_string(_, samples_string):
+        details = pickle.loads(base64.b64decode(samples_string)).items()
+        details.sort()
+        return details
+
     def build_samples(self):
         if hasattr(self, 'samples_string'):
-            details = pickle.loads(base64.b64decode(self.samples_string))
-            details = sorted(details.items())
             self.samples = []
             self.__eps = {}
-            for (kind_name, tau, mass), events in details:
+            for (kind_name, tau, mass), events in self.decode_samples_string(self.samples_string):
                 d = eval(kind_name), tau, mass
                 self.samples.append(d)
                 self.__eps[d] = events
@@ -135,6 +148,8 @@ class scanpackbase(object):
             kind = 'mfv_neu'
         elif kind == 'set_gluino_ddbar':
             kind = 'mfv_ddbar'
+        elif kind == 'set_stop_dbardbar':
+            kind = 'mfv_stopdbardbar'
         else:
             raise ValueError('dunno %s' % kind)
         tau = int(tau*1000)
@@ -147,6 +162,8 @@ class scanpackbase(object):
             kind = set_mfv_neutralino
         elif kind == 'mfv_ddbar':
             kind = set_gluino_ddbar
+        elif kind == 'mfv_stopdbardbar':
+            kind = set_stop_dbardbar
         else:
             raise NameError('dunno %s' % kind)
         assert tau.startswith('tau') and tau.endswith('um')
@@ -248,6 +265,45 @@ class scanpack2015supplement(scanpackbase100epj):
     def events_per_sample(self, kind, tau, mass):
         return 10000
 
+class scanpack3(scanpackbase100epj):
+    kinds = [set_stop_dbardbar]
+    taus = [tau/1000. for tau in range(100, 1000, 100) + range(1000, 4000, 1000) + range(4000, 40000, 3000) + range(40000, 100001, 3000)]
+    masses = range(300, 600, 100) + range(600, 2601, 200)
+
+    def events_per_sample(self, kind, tau, mass):
+        return 20000 if tau <= 400 else 10000  # oops, this hits all taus, but 20k events everywhere is fine
+
+class scanpack3_tucker(scanpack3):
+    masses = scanpack3.masses[::4]
+class scanpack3_jchu(scanpack3):
+    masses = scanpack3.masses[1::4]
+class scanpack3_dquach(scanpack3):
+    masses = scanpack3.masses[2::4]
+class scanpack3_shogan(scanpack3):
+    masses = scanpack3.masses[3::4]
+
+class scanpack3p5_dquach(scanpackbase100epj):
+    samples_string = 'gAJ9cQEoVRFzZXRfc3RvcF9kYmFyZGJhcnECRz/ZmZmZmZmaTSADh3EDTXgeaAJHP8mZmZmZmZpNCAeHcQRNyEtoAkdAS4AAAAAAAE1gCYdxBU3kDGgCRz/szMzMzMzNTSwBh3EGTSwBaAJHQDAAAAAAAABN9AGHcQdNNAhoAkc/6ZmZmZmZmk30AYdxCE0cDGgCR0AwAAAAAAAATZABh3EJTSADaAJHQFeAAAAAAABNIAOHcQpNvAJoAkdAWQAAAAAAAE0IB4dxC01IDWgCRz/ZmZmZmZmaTZgIh3EMTaAPaAJHP9MzMzMzMzNNkAGHcQ1NOEpoAkdARAAAAAAAAE2QAYdxDk3cBWgCR0BRgAAAAAAATZABh3EPTdAHaAJHQEEAAAAAAABNkAGHcRBLZGgCR0BTwAAAAAAATegDh3ERTRAnaAJHP+MzMzMzMzNNCAeHcRJNECdoAkdAWEAAAAAAAE0IB4dxE00QJ2gCRz+5mZmZmZmaTSgKh3EUTZwxaAJHQFbAAAAAAABNKAqHcRVNNAhoAkdAAAAAAAAAAE30AYdxFk2MCmgCRz/TMzMzMzMzTegDh02QTGgCR0BWwAAAAAAATWAJh3EXTbwbaAJHP7mZmZmZmZpNmAiHcRhNVAtoAkdARYAAAAAAAE0sAYdxGUtkaAJHQE6AAAAAAABNCAeHcRpNmAhoAkc/2ZmZmZmZmk1ABodxG03EImgCRz+5mZmZmZmaTXgFh3EcTZABaAJHQFYAAAAAAABNKAqHcR1NIANoAkdAWEAAAAAAAE0oCodxHk1sB2gCR0AAAAAAAAAATSwBh3EfS2RoAkdARAAAAAAAAE30AYdxIE2QAWgCR0BTAAAAAAAATfQBh3EhS2RoAkdAQoAAAAAAAE0sAYdxIk3oA2gCR0AzAAAAAAAATSwBh3EjTYQDaAJHQFMAAAAAAABNCAeHcSRNECdoAkdAVIAAAAAAAE1gCYdxJU0QJ2gCRz/TMzMzMzMzTSwBh3EmTYQDaAJHP8mZmZmZmZpNeAWHcSdN+BFoAkdAVUAAAAAAAE1ABodxKE0QJ3Uu'
+class scanpack3p5_jchu(scanpackbase100epj):
+    samples_string = 'gAJ9cQEoVRFzZXRfc3RvcF9kYmFyZGJhcnECRz/gAAAAAAAATSgKh3EDTRAnaAJHQAgAAAAAAABNLAGHcQRNKApoAkdAVgAAAAAAAE0sAYdNrCZoAkc/2ZmZmZmZmk3oA4dxBU3UF2gCR0BNAAAAAAAATZABh3EGTZgIaAJHQD8AAAAAAABNLAGHcQdLyGgCRz/JmZmZmZmaTZABh3EITZgIaAJHP+zMzMzMzM1N9AGHcQlNjApoAkc/4AAAAAAAAE0sAYdxCk3cBWgCR0BNAAAAAAAATWAJh3ELTRAOaAJHQFYAAAAAAABNkAGHcQxNOBhoAkdASIAAAAAAAE1gCYdxDU1EFmgCR0AQAAAAAAAATZABh3EOTXgFaAJHQFSAAAAAAABNkAGHcQ9NZEtoAkdACAAAAAAAAE2QAYdxEE0sAWgCR0BXgAAAAAAATQgHh3ERTRAnaAJHQDYAAAAAAABNLAGHcRJNkAFoAkdAMwAAAAAAAE2QAYdxE0tkaAJHP9mZmZmZmZpNYAmHcRRN5CVoAkdAUMAAAAAAAE0sAYdxFUtkaAJHP9MzMzMzMzNNeAWHcRZN3AVoAkdAWEAAAAAAAE30AYdxF02EA2gCR0BFgAAAAAAATWAJh3EYTRgVaAJHP9mZmZmZmZpNKAqHcRlNLExoAkdAVgAAAAAAAE1ABodxGk1IDWgCR0BYQAAAAAAATUAGh3EbTRAnaAJHQEcAAAAAAABNYAmHcRxNpB9oAkdAQoAAAAAAAE2QAYdxHU1sB2gCR0BTwAAAAAAATSwBh3EeS8hoAkc/8AAAAAAAAE30AYdxH00oCmgCRz/ZmZmZmZmaTQgHh3EgTeAuaAJHQAgAAAAAAABN9AGHcSFNvAJoAkc/8AAAAAAAAE0sAYdxIk0wKmgCR0BWAAAAAAAATWAJh3EjTXAXaAJHQFkAAAAAAABNKAqHcSRNNAhoAkdARAAAAAAAAE0sAYdxJU0IB2gCRz/jMzMzMzMzTSwBh3EmTRQFaAJHP9mZmZmZmZpNeAWHcSdNBBBoAkc/4zMzMzMzM01ABodxKE0QJ2gCR0BIgAAAAAAATSwBh3EpS2R1Lg=='
+class scanpack3p5_shogan(scanpackbase100epj):
+    samples_string = 'gAJ9cQEoVRFzZXRfc3RvcF9kYmFyZGJhcnECR0AqAAAAAAAATfQBh3EDTWwHaAJHP7mZmZmZmZpNIAOHcQRN0AdoAkc/4zMzMzMzM00oCodxBU0QJ2gCRz/gAAAAAAAATZABh3EGTSBOaAJHQFJAAAAAAABNkAGHcQdN5AxoAkdAQQAAAAAAAE0sAYdLyGgCR0BUgAAAAAAATUAGh3EITRAnaAJHP9mZmZmZmZpNkAGHcQlNYAloAkdAUwAAAAAAAE2QAYdxCk3wCmgCR0BTAAAAAAAATSgKh3ELTRAnaAJHP7mZmZmZmZpN9AGHcQxLyGgCRz/JmZmZmZmaTSADh3ENTRwMaAJHP8mZmZmZmZpNWAKHcQ5NeAVoAkc/0zMzMzMzM01gCYdxD01IJmgCR0BVQAAAAAAATSADh3EQTRAnaAJHQFPAAAAAAABNQAaHcRFNECdoAkdASgAAAAAAAE1gCYdxEk0QDmgCRz/jMzMzMzMzTZABh3ETTSBOaAJHP8mZmZmZmZpNLAGHcRRNeAVoAkdAWEAAAAAAAE0gA4dxFU0QJ2gCRz/mZmZmZmZmTSwBh3EWTQgHaAJHQFSAAAAAAABN6AOHcRdNHCVoAkc/uZmZmZmZmk2QAYdxGE24C2gCRz/gAAAAAAAATegDh3EZTRAnaAJHP7mZmZmZmZpN6AOHcRpNGBVoAkdAHAAAAAAAAE30AYdxG02YCGgCR0BTAAAAAAAATegDh3EcTVAUaAJHQAAAAAAAAABNkAGHcR1LyGgCR0BXgAAAAAAATWAJh3EeTRAnaAJHP+AAAAAAAABNCAeHcR9NECdoAkdAVUAAAAAAAE0oCodxIEvIaAJHQFbAAAAAAABNLAGHcSFNFAVoAkc/0zMzMzMzM03QB4dxIk0sAWgCR0BWwAAAAAAATUAGh3EjTRwMaAJHP+AAAAAAAABNYAmHcSRNSCZoAkdAToAAAAAAAE0oCodxJU3YDnUu'
+class scanpack3p5_tucker(scanpackbase100epj):
+    samples_string = 'gAJ9cQEoVRFzZXRfc3RvcF9kYmFyZGJhcnECR0BQAAAAAAAATegDh0vIaAJHQEiAAAAAAABNQAaHcQNNxAloAkdANgAAAAAAAE2QAYdxBE2EA2gCR0BTwAAAAAAATWAJh3EFTRAnaAJHP8mZmZmZmZpN6AOHcQZNjDxoAkdAWEAAAAAAAE2QAYdxB00gTmgCR0AkAAAAAAAATfQBh3EITUwEaAJHP7mZmZmZmZpNWAKHcQlLyGgCRz/jMzMzMzMzTWAJh3EKTRAnaAJHP+zMzMzMzM1NkAGHcQtLZGgCR0A/AAAAAAAATZABh3EMS2RoAkc/2ZmZmZmZmk1YAodxDU0gA2gCR0BQwAAAAAAATfQBh3EOTWgQaAJHP7mZmZmZmZpNLAGHcQ9NLAFoAkdAVIAAAAAAAE0gA4dxEE0QJ2gCR0BZAAAAAAAATfQBh3ERTUAGaAJHP7mZmZmZmZpNYAmHcRJNPChoAkdAV4AAAAAAAE2QAYdxE01sB2gCR0BQAAAAAAAATZABh3EUTXQnaAJHP9MzMzMzMzNNsASHcRVLZGgCR0BVQAAAAAAATZABh3EWTUAGaAJHQFeAAAAAAABN9AGHcRdNkAFoAkdAV4AAAAAAAE0oCodxGE0QJ2gCR0BTwAAAAAAATZABh3EZTSBOaAJHP+AAAAAAAABNQAaHcRpNECdoAkdAWEAAAAAAAE0sAYdxG00gTmgCR0BZAAAAAAAATSwBh3EcTRQFaAJHP8mZmZmZmZpNQAaHcR1NbCBoAkc/0zMzMzMzM02YCIdxHk0IB2gCR0AQAAAAAAAATfQBh3EfTZgIaAJHP7mZmZmZmZpNCAeHcSBN0CBoAkdAUMAAAAAAAE2QAYdxIU0cDGgCR0BLgAAAAAAATSwBh3EiS2RoAkdAUwAAAAAAAE0sAYdxI01ABmgCRz/ZmZmZmZmaTSwBh3EkTTQIaAJHQFPAAAAAAABNKAqHcSVNSCZ1Lg=='
+class scanpack3p5_wsun(scanpackbase100epj):
+    samples_string = 'gAJ9cQEoVRFzZXRfc3RvcF9kYmFyZGJhcnECR0AQAAAAAAAATSwBh3EDTVgCaAJHQFVAAAAAAABNLAGHcQRNIE5oAkdAKgAAAAAAAE0sAYdxBUtkaAJHQFGAAAAAAABNLAGHTSwBaAJHQEoAAAAAAABNLAGHcQZLyGgCRz/TMzMzMzMzTSgKh3EHTcwpaAJHP+ZmZmZmZmZNkAGHcQhNIE5oAkdAVIAAAAAAAE0sAYdxCU0gTmgCR0BTwAAAAAAATQgHh3EKTVQkaAJHQFYAAAAAAABN9AGHcQtLZGgCRz/TMzMzMzMzTVgCh3EMTUwEaAJHQFhAAAAAAABN6AOHcQ1NECdoAkc/4zMzMzMzM00gA4dxDk1sB2gCR0BOgAAAAAAATZABh3EPTaQGaAJHQFeAAAAAAABNLAGHcRBN3AVoAkdAV4AAAAAAAE1ABodxEU0QJ2gCRz/JmZmZmZmaTWAJh3ESTVQkaAJHQFJAAAAAAABNLAGHcRNLZGgCR0BWwAAAAAAATZABh3EUTVQLaAJHP8mZmZmZmZpNKAqHcRVNkExoAkc/4zMzMzMzM03oA4dxFk0QJ2gCR0BFgAAAAAAATZABh3EXTZABaAJHP8mZmZmZmZpNmAiHcRhNXBJoAkc/0zMzMzMzM00gA4dxGU00CGgCR0BVQAAAAAAATWAJh3EaTRAnaAJHQFSAAAAAAABNCAeHcRtNgCVoAkc/uZmZmZmZmk1ABodxHE28G2gCRz/TMzMzMzMzTQgHh3EdTXAwaAJHP9MzMzMzMzNNQAaHcR5NqBZ1Lg=='
+
+class scanpack3p6_dquach(scanpackbase100epj):
+    samples_string = 'gAJ9cQEoVRFzZXRfc3RvcF9kYmFyZGJhcnECR0BOgAAAAAAATWAJh3EDTRAnaAJHP+mZmZmZmZpNkAGHcQRNAEtoAkc/yZmZmZmZmk1gCYdxBUtkaAJHP8mZmZmZmZpNWAKHcQZNkAFoAkc/7MzMzMzMzU30AYdxB00gA2gCR0BWAAAAAAAATfQBh3EITZABaAJHQE0AAAAAAABNYAmHcQlNECdoAkdAEAAAAAAAAE2QAYdxCk0gTmgCR0BQwAAAAAAATfQBh3ELS2RoAkc/0zMzMzMzM01gCYdxDE1IDWgCR0BXgAAAAAAATSwBh3ENS2RoAkdAS4AAAAAAAE2QAYdxDk2QAWgCRz/ZmZmZmZmaTWAJh3EPTSwBaAJHQFAAAAAAAABN9AGHcRBLZGgCR0BOgAAAAAAATSADh3ERTRAnaAJHQEcAAAAAAABNYAmHcRJNECdoAkc/uZmZmZmZmk2YCIdxE00sAWgCRz/jMzMzMzMzTSwBh3EUS8hoAkdAUwAAAAAAAE0gA4dxFU0QJ2gCR0BNAAAAAAAATSADh3EWTRAnaAJHQE6AAAAAAABNQAaHcRdNECdoAkdACAAAAAAAAE0oCodxGE0QJ2gCR0AzAAAAAAAATSwBh3EZTWwHaAJHQFAAAAAAAABNIAOHTRAnaAJHP8mZmZmZmZpNeAWHcRpLyHUu'
+class scanpack3p6_jchu(scanpackbase100epj):
+    samples_string = 'gAJ9cQEoVRFzZXRfc3RvcF9kYmFyZGJhcnECR0BNAAAAAAAATUAGh3EDTRAnaAJHQAAAAAAAAABNKAqHcQRNECdoAkdAEAAAAAAAAE0sAYdxBU0sAWgCR0BSQAAAAAAATUAGh3EGTRAnaAJHQDYAAAAAAABNkAGHcQdNLAFoAkc/5mZmZmZmZk0sAYdxCEvIaAJHQFYAAAAAAABNLAGHS2RoAkc/7MzMzMzMzU2QAYdxCU3cBWgCR0BVQAAAAAAATfQBh3EKS8hoAkc/2ZmZmZmZmk0IB4dxC0vIaAJHQEuAAAAAAABNQAaHcQxNECdoAkc/4zMzMzMzM02QAYdxDUvIaAJHQEuAAAAAAABNYAmHcQ5NECdoAkdAAAAAAAAAAE0IB4dxD03EImgCR0BKAAAAAAAATSwBh3EQTSBOaAJHQEiAAAAAAABNYAmHcRFNECdoAkdAUkAAAAAAAE1gCYdxEk0QJ2gCRz/mZmZmZmZmTQgHh3ETTfAjaAJHQE0AAAAAAABNkAGHcRRN9AFoAkdAToAAAAAAAE0sAYdxFU0gTmgCR0BTAAAAAAAATUAGh3EWTRAndS4='
+class scanpack3p6_shogan(scanpackbase100epj):
+    samples_string = 'gAJ9cQEoVRFzZXRfc3RvcF9kYmFyZGJhcnECR0AIAAAAAAAATSwBh3EDS8hoAkdARwAAAAAAAE0gA4dxBE2wHWgCR0BRgAAAAAAATSwBh030AWgCRz+5mZmZmZmaTZABh3EFTfQBaAJHQEoAAAAAAABN9AGHcQZNLAFoAkc/uZmZmZmZmk1YAodxB0vIaAJHQFAAAAAAAABNQAaHcQhNECdoAkdARYAAAAAAAE1ABodxCUvIaAJHQAgAAAAAAABNkAGHcQpNIE5oAkdAU8AAAAAAAE0gA4dxC00QJ2gCR0BQwAAAAAAATSADh3EMTRAnaAJHQFJAAAAAAABN9AGHcQ1NLAFoAkc/5mZmZmZmZk0oCodxDk24JGgCR0BYQAAAAAAATSwBh3EPS8hoAkc/yZmZmZmZmk2YCIdxEEvIaAJHQEWAAAAAAABNLAGHcRFNEA5oAkdAU8AAAAAAAE0sAYdxEk0gTmgCR0BWwAAAAAAATSwBh3ETS2RoAkdAUwAAAAAAAE30AYdxFEtkaAJHQFGAAAAAAABN9AGHcRVNWAJoAkdAUwAAAAAAAE0sAYdxFk0gTmgCR0BIgAAAAAAATSwBh3EXTbxNdS4='
+class scanpack3p6_tucker(scanpackbase100epj):
+    samples_string = 'gAJ9cQEoVRFzZXRfc3RvcF9kYmFyZGJhcnECR0BIgAAAAAAATUAGh3EDTRAnaAJHQDAAAAAAAABN9AGHcQRLyGgCR0AIAAAAAAAATQgHh3EFTRAnaAJHP+mZmZmZmZpN6AOHcQZNVCRoAkc/2ZmZmZmZmk2QAYdLZGgCR0BKAAAAAAAATZABh3EHTRQFaAJHP+ZmZmZmZmZNkAGHcQhLyGgCRz/ZmZmZmZmaTVgCh3EJS2RoAkc/4AAAAAAAAE0sAYdxCktkaAJHP9mZmZmZmZpNLAGHcQtNIANoAkdAUkAAAAAAAE0gA4dxDE0QJ2gCR0BKAAAAAAAATWAJh3ENTRAnaAJHQEcAAAAAAABNLAGHcQ5NGBVoAkdACAAAAAAAAE3oA4dxD00QJ2gCRz/pmZmZmZmaTSwBh3EQTSwBaAJHQEQAAAAAAABNkAGHcRFLZGgCR0BHAAAAAAAATSgKh3ESTXAXaAJHQFDAAAAAAABNLAGHcRNNIE5oAkc/0zMzMzMzM014BYdxFE0sAWgCR0BSQAAAAAAATSwBh3EVTegcaAJHQEWAAAAAAABNYAmHcRZNxAloAkdASIAAAAAAAE2QAYdxF028AmgCRz/JmZmZmZmaTdAHh3EYS2RoAkdAAAAAAAAAAE2QAYdxGU28AmgCR0BQAAAAAAAATSwBh3EaTSBOaAJHQEoAAAAAAABNIAOHcRtNECdoAkc/0zMzMzMzM02YCIdxHE1YAmgCRz+5mZmZmZmaTXgFh3EdTSwBaAJHP/AAAAAAAABNLAGHcR5NWAJoAkc/0zMzMzMzM030AYdxH0tkaAJHQEKAAAAAAABNLAGHcSBNFAVoAkc/2ZmZmZmZmk14BYdxIU2QAXUu'
+class scanpack3p6_wsun(scanpackbase100epj):
+    samples_string = 'gAJ9cQEoVRFzZXRfc3RvcF9kYmFyZGJhcnECR0A/AAAAAAAATSwBh3EDS2RoAkc/5mZmZmZmZk3oA4dxBE3wI2gCR0BIgAAAAAAATfQBh3EFS2RoAkdATQAAAAAAAE0oCodxBk0EEGgCR0BTAAAAAAAATWAJh3EHTRAnaAJHQDwAAAAAAABNLAGHcQhLZGgCRz+5mZmZmZmaTSwBh3EJTSwBaAJHQE6AAAAAAABN9AGHcQpLyGgCR0BNAAAAAAAATSwBh3ELTSBOaAJHQFAAAAAAAABNYAmHcQxNECdoAkdAUMAAAAAAAE1ABodxDU0QJ2gCR0BKAAAAAAAATUAGh3EOTRAnaAJHQFbAAAAAAABNkAGHcQ9LZGgCR0BLgAAAAAAATSADh3EQTRAnaAJHP/AAAAAAAABNkAGHcRFNhANoAkdAU8AAAAAAAE30AYdNLAFoAkc/2ZmZmZmZmk2YCIdxEk2QAWgCR0AQAAAAAAAATegDh3ETTRAnaAJHQEiAAAAAAABNIAOHcRRNECdoAkdAEAAAAAAAAE30AYdxFUtkaAJHQEcAAAAAAABNQAaHcRZNECdoAkdAS4AAAAAAAE0sAYdxF00gTmgCRz/TMzMzMzMzTUAGh3EYTRwMdS4='
+
 ####
 
 def get_scanpack(x):
@@ -262,6 +318,21 @@ def get_scanpack(x):
         'scanpack2p6': scanpack2p6,
         'scanpack2p7': scanpack2p7,
         'scanpack2015supplement': scanpack2015supplement,
+        'scanpack3': scanpack3,
+        'scanpack3_tucker': scanpack3_tucker,
+        'scanpack3_jchu': scanpack3_jchu,
+        'scanpack3_dquach': scanpack3_dquach,
+        'scanpack3_shogan': scanpack3_shogan,
+        'scanpack3p5_dquach': scanpack3p5_dquach,
+        'scanpack3p5_jchu': scanpack3p5_jchu,
+        'scanpack3p5_shogan': scanpack3p5_shogan,
+        'scanpack3p5_tucker': scanpack3p5_tucker,
+        'scanpack3p5_wsun': scanpack3p5_wsun,
+        'scanpack3p6_dquach': scanpack3p6_dquach,
+        'scanpack3p6_jchu': scanpack3p6_jchu,
+        'scanpack3p6_shogan': scanpack3p6_shogan,
+        'scanpack3p6_tucker': scanpack3p6_tucker,
+        'scanpack3p6_wsun': scanpack3p6_wsun,
         }[x]()
 
 def do_scanpack(process, x, batch, job):
@@ -310,6 +381,10 @@ def hadd_scanpack(lst_fn):
     from JMTucker.Tools import colors, eos
     from JMTucker.Tools.hadd import hadd
 
+    me = os.environ['USER']
+    others = scanpack_users
+    others.remove(me)
+
     lst = read_scanpack_list(lst_fn)
     new_lst = {}
     hadds = []
@@ -321,6 +396,10 @@ def hadd_scanpack(lst_fn):
             assert re.match(r'\d{4}', sfn[-2])
             assert re.match(r'\d{6}_\d{6}', sfn[-3])
             new_out_fn = '/'.join(sfn[:-2]) + '/' + name + '.root'
+            for user in others:
+                p = '/store/user/%s/' % user
+                if p in new_out_fn:
+                    new_out_fn = new_out_fn.replace(p, '/store/user/%s/' % me)
             out_fns.add(new_out_fn)
 
         assert len(out_fns)
@@ -330,11 +409,12 @@ def hadd_scanpack(lst_fn):
             pprint(fns)
             pprint(out_fns)
         out_fn = out_fns[-1]
-
         new_lst[name] = [out_fn]
+
         if eos.exists(out_fn):
             print colors.yellow('%s already exists' % out_fn)
         else:
+            eos.mkdir(os.path.dirname(out_fn))
             hadd(out_fn, fns)
 
     print '\nnew list:'
@@ -351,6 +431,7 @@ def merge_scanpack_lists(fns):
             else:
                 lst[k] = l[k]
     return lst
+
 
 if __name__ == '__main__' and len(sys.argv) > 1:
     cmd = sys.argv[1]
@@ -377,10 +458,10 @@ if __name__ == '__main__' and len(sys.argv) > 1:
         fn = sys.argv[2]
         lst = read_scanpack_list(fn)
         if len(sys.argv) >= 4:
-            scanpack = sys.argv[3]
+            scanpack_name = sys.argv[3]
         else:
-            scanpack = os.path.basename(fn).replace('.list', '').replace('.gz', '')
-        scanpack = get_scanpack(scanpack)
+            scanpack_name = os.path.basename(fn).replace('.list', '').replace('.gz', '')
+        scanpack = get_scanpack(scanpack_name)
         todo = {}
 
         for kind, tau, mass in scanpack.samples:
@@ -399,9 +480,30 @@ if __name__ == '__main__' and len(sys.argv) > 1:
             else:
                 assert 0
 
-        pprint(todo)
-        ps = pickle.dumps(todo, -1)
-        print repr(base64.b64encode(ps))
+        nways = len(scanpack_users)
+        split = [{} for _ in xrange(nways)]
+        print '\n\n\n# splitting %i total %i ways' % (sum(todo.itervalues()), nways)
+        curr = 0
+        todo = todo.items()
+        for which in xrange(nways):
+            sample,nevents = todo.pop(0)
+            split[which][sample] = nevents
+        for sample, nevents in todo:
+            invweights = [sum(sp.itervalues()) for sp in split]
+            mw = max(invweights)
+            whichs = []
+            for i,iw in enumerate(invweights):
+                w = mw - iw + 1
+                whichs += [i] * w
+            which = random.choice(whichs)
+            split[which][sample] = nevents
+            curr += nevents
+        for isp, sp in enumerate(split):
+            print 'class %sXXX_%s(scanpackbase100epj):' % (scanpack_name, scanpack_users[isp])
+            print '    """user %i gets %i events:' % (isp, sum(sp.itervalues()))
+            pprint(sp)
+            print '"""'
+            print '    samples_string = %r' % base64.b64encode(pickle.dumps(sp, -1))
 
     elif cmd == 'test':
         from gensim import process

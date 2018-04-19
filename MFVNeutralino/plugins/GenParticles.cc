@@ -30,12 +30,13 @@ private:
 
   void set_Ttbar_decay(mfv::MCInteractionHolderTtbar&, const edm::Handle<reco::GenParticleCollection>&) const;
 
-  bool try_MFVtbs  (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&, int t1, int t2) const;
-  bool try_Ttbar   (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
-  bool try_MFVthree(mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&, int t1, int t2, int t3) const;
-  bool try_XX4j    (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
-  bool try_MFVdijet(mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&, int quark) const;
-  bool try_MFVlq   (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
+  bool try_MFVtbs      (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&, int t1, int t2) const;
+  bool try_Ttbar       (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
+  bool try_MFVthree    (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&, int t1, int t2, int t3) const;
+  bool try_XX4j        (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
+  bool try_MFVdijet    (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&, int quark) const;
+  bool try_stopdbardbar(mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&, int quark) const;
+  bool try_MFVlq       (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
 
   TH1F* h_valid;
   TH1F* h_pos_check;
@@ -467,12 +468,11 @@ bool MFVGenParticles::try_XX4j(mfv::MCInteraction& mc, const edm::Handle<reco::G
     h.s[which][0] = gen_ref(final_candidate(h.p[which]->daughter(!which2), 3), gen_particles);
     h.s[which][1] = gen_ref(final_candidate(h.p[which]->daughter( which2), 3), gen_particles);
 
-    // testing
-    if (last_flag_check) {
-      assert(h.p[which]   ->statusFlags().isLastCopy());
-      assert(h.s[which][0]->statusFlags().isLastCopy());
-      assert(h.s[which][1]->statusFlags().isLastCopy());
-    }
+//    if (last_flag_check) {
+//      assert(h.p[which]   ->statusFlags().isLastCopy());
+//      assert(h.s[which][0]->statusFlags().isLastCopy());
+//      assert(h.s[which][1]->statusFlags().isLastCopy());
+//    }
   }
 
   if (h.valid()) {
@@ -539,6 +539,87 @@ bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<rec
     mfv::MCInteractions_t type = mfv::mci_MFVddbar;
     if      (quark == 4) type = mfv::mci_MFVccbar;
     else if (quark == 5) type = mfv::mci_MFVbbbar;
+    mc.set(h, type);
+    return true;
+  }
+  else
+    return false;
+}
+
+bool MFVGenParticles::try_stopdbardbar(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles, int quark) const {
+  if (debug) printf("MFVGenParticles::try_stopdbardbar quark=%i\n", quark);
+  assert(quark == -1 || quark == -5);
+
+  mfv::MCInteractionHolderPair h;
+
+  GenParticlePrinter gpp(*gen_particles);
+  if (debug)
+    gpp.PrintHeader();
+
+  int found = 0;
+  for (int i = int(gen_particles->size()) - 1; i >= 0 && found < 2; --i) {
+    const reco::GenParticle& gen = gen_particles->at(i);
+    reco::GenParticleRef ref(gen_particles, i);
+    if (abs(gen.pdgId()) == lsp_id && gen.numberOfDaughters() == 2) {
+      const int anti = lsp_id * gen.pdgId() > 0 ? -1 : 1;
+      if (gen.daughter(0)->pdgId() == anti * quark &&
+          gen.daughter(1)->pdgId() == anti * quark) {
+
+        ++found;
+
+        size_t which = 0;
+        if (h.p[0].isNull())
+          h.p[0] = ref;
+        else {
+          if (reco::deltaR(*h.p[0], gen) < 0.001)
+            throw cms::Exception("BadAssumption", "may have found same LSP twice based on deltaR < 0.001");
+          which = 1;
+          h.p[1] = ref;
+        }
+
+        if (debug) {
+          char lspname[16];
+          snprintf(lspname, 16, "primary #%lu", which);
+          gpp.Print(&*h.p[which], lspname);
+        }
+
+        if ((h.s[which][0] = gen_ref(gen.daughter(0), gen_particles)).isNull() ||
+            (h.s[which][1] = gen_ref(gen.daughter(1), gen_particles)).isNull()) {
+          printf("HUH??? %i %i\n", h.s[which][0].isNull(), h.s[which][1].isNull());
+          return false;
+        }
+
+        if (debug) {
+          gpp.Print(h.s[which][0], "s0temp");
+          gpp.Print(h.s[which][1], "s1temp");
+        }
+
+        h.decay_id[which] = 1;
+        h.s[which][0] = gen_ref(final_candidate(h.s[which][0], 3), gen_particles);
+        h.s[which][1] = gen_ref(final_candidate(h.s[which][1], 3), gen_particles);
+
+        if (debug) {
+          gpp.Print(h.s[which][0], "s0");
+          gpp.Print(h.s[which][1], "s1");
+        }
+
+//        if (last_flag_check) {
+//          assert(h.p[which]   ->statusFlags().isLastCopy());
+//          assert(h.s[which][0]->statusFlags().isLastCopy());
+//          assert(h.s[which][1]->statusFlags().isLastCopy());
+//        }
+      }
+    }
+  }
+
+//  printf("h valid?? %i why? %i %i %i %i %i %i\n", h.valid(),
+//         h.p[0].isNonnull(), h.p[1].isNonnull(),
+//         h.s[0][0].isNonnull(), h.s[0][1].isNonnull(),
+//         h.s[1][0].isNonnull(), h.s[1][1].isNonnull());
+
+  if (h.valid()) {
+    mfv::MCInteractions_t type = mfv::mci_stopdbardbar;
+    if (quark == -5) type = mfv::mci_stopbbarbbar;
     mc.set(h, type);
     return true;
   }
@@ -619,15 +700,13 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
     (*primary_vertex)[2] = for_vtx.vz();
 
     if (lsp_id == -1) {
-      // If there is a neutralino in the first event, assume that's the
+      // If there is a neutralino or stop in the first event, assume that's the
       // LSP id wanted. Otherwise, default to looking for gluino. This
       // isn't relevant for some signals.
       lsp_id = 1000021;
       for (int i = 0, ie = int(gen_particles->size()); i < ie; ++i)
-        if (gen_particles->at(i).pdgId() == 1000022) {
-          lsp_id = 1000022;
-          break;
-        }
+        if      (gen_particles->at(i).pdgId() == 1000022) { lsp_id = 1000022; break; }
+        else if (gen_particles->at(i).pdgId() == 1000006) { lsp_id = 1000006; break; }
     }
 
     if (debug) printf("MFVGenParticles::analyze: lsp_id %i\n", lsp_id);
@@ -646,6 +725,8 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
     try_MFVthree(*mc, gen_particles,  5, 1,  4) || // cdb
     try_MFVthree(*mc, gen_particles,  5, 5,  2) || // ubb
     try_XX4j    (*mc, gen_particles) ||
+    try_stopdbardbar(*mc, gen_particles, -1) || // stop -> dbar dbar + c.c.
+    try_stopdbardbar(*mc, gen_particles, -5) || // stop -> bbar bbar + c.c.
     try_MFVdijet(*mc, gen_particles, 1) || //ddbar
     try_MFVdijet(*mc, gen_particles, 4) || //ccbar
     try_MFVdijet(*mc, gen_particles, 5) || //bbbar

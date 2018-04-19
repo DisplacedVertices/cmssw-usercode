@@ -6,28 +6,28 @@ from JMTucker.Tools import Samples
 from JMTucker.MFVNeutralino.PerSignal import PerSignal
 
 set_style()
-ps = plot_saver(plot_dir('sigeff_v15'), size=(600,600), log=False)
+ps = plot_saver(plot_dir('sigeff_v16'), size=(600,600), pdf=True, log=False)
 
-root_file_dir = '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_0'
-num_path = 'mfvEventHistosFullSel/h_bsx'
-
-multijet = [s for s in Samples.mfv_signal_samples if not s.name.startswith('my_')]
-dijet = Samples.mfv_ddbar_samples
+multijet = Samples.mfv_signal_samples
+dijet = Samples.mfv_stopdbardbar_samples
 
 for sample in multijet + dijet:
-    fn = os.path.join(root_file_dir, sample.name + '.root')
+    fn = os.path.join('/uscms_data/d2/tucker/crab_dirs/MiniTreeV16', sample.name + '.root')
     if not os.path.exists(fn):
+        print 'no', sample.name
         continue
     f = ROOT.TFile(fn)
-    hnum = f.Get(num_path)
-    hden = f.Get('mfvWeight/h_sums')
-    num = hnum.Integral(0, hnum.GetNbinsX() + 2)
-    den = hden.GetBinContent(1)
-    sample.y, sample.yl, sample.yh = clopper_pearson(num, den)
+    t = f.Get('mfvMiniTree/t')
+    hr = draw_hist_register(t, True)
+    cut = 'nvtx>=2' # && svdist > 0.04'
+    h = hr.draw('weight', cut, binning='1,0,1', goff=True)
+    num, _ = get_integral(h)
+    den = Samples.norm_from_file(f)
+    sample.y, sample.yl, sample.yh = clopper_pearson(num, den) # ignore integral != entries, just get central value right
     print '%26s: efficiency = %.3f (%.3f, %.3f)' % (sample.name, sample.y, sample.yl, sample.yh)
 
 per = PerSignal('efficiency', y_range=(0.,1.05))
 per.add(multijet, title='#tilde{N} #rightarrow tbs')
-per.add(dijet, title='X #rightarrow d#bar{d}', color=ROOT.kBlue)
+per.add(dijet, title='#tilde{t} #rightarrow #bar{d}#bar{d}', color=ROOT.kBlue)
 per.draw(canvas=ps.c)
 ps.save('sigeff')

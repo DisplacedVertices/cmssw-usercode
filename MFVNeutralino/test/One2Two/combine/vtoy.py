@@ -91,7 +91,7 @@ for ih, h in enumerate(hs):
     t.SetTextAngle(30)
     t.Draw()
 
-y0,y1=0.3, 600
+y0,y1=0.3, 3500
 hs[0].GetYaxis().SetRangeUser(y0,y1)
 h = ROOT.TH1D('hhh', '', 1000, 0, mv)
 h.SetLineColor(1)

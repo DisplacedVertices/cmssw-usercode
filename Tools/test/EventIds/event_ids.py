@@ -6,6 +6,8 @@ file_event_from_argv(process)
 process.TFileService.fileName = cms.string('evids.root')
 
 process.evids = cms.EDAnalyzer('EventIdRecorder')
+process.evids.prints = cms.untracked.bool('prints' in sys.argv)
+
 process.p = cms.Path(process.evids)
 
 process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')

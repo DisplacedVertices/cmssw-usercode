@@ -39,7 +39,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     def pset_modifier(sample):
         l = gzip.GzipFile(eventlist_fn(sample)).read().replace('\n', ' ')
         r = ', run=1' if sample.is_mc else ''
-        to_add = ['set_events_to_process(process, [%s]%s)' % (l, r)]
+        to_add = ['set_events(process, [%s]%s)' % (l, r)]
         return to_add, []
 
     from JMTucker.Tools.MetaSubmitter import *

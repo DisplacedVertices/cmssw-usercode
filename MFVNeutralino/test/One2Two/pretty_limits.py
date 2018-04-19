@@ -2,7 +2,7 @@ import sys, os
 from array import array
 from JMTucker.Tools.ROOTTools import *
 
-path = plot_dir('pretty_limits_final', make=True)
+path = plot_dir('pretty_limits_final_i_really_mean_it', make=True)
 
 ts = tdr_style()
 ROOT.gStyle.SetPalette(ROOT.kBird)
@@ -20,7 +20,7 @@ def write(font, size, x, y, text):
 f = ROOT.TFile('limits.root')
 f2 = ROOT.TFile('limits_fromr.root')
 
-for kind in 'mfv_ddbar', 'mfv_neu':
+for kind in 'mfv_stopdbardbar', 'mfv_neu':
     for xxx in 'big', 'small':
         if 0:
             n = 2
@@ -44,7 +44,7 @@ for kind in 'mfv_ddbar', 'mfv_neu':
         if kind == 'mfv_neu':
             xax.SetTitle('M_{#tilde{#chi}^{0} / #tilde{g}} (GeV)')
         else:
-            xax.SetTitle('M_{#tilde{g}} (GeV)')
+            xax.SetTitle('M_{#tilde{t}} (GeV)')
 #        xax.CenterLabels()
 #        xax.SetNdivisions(1300, 0)
 #        xax.SetBinLabel(xax.FindBin(400), '400')
@@ -80,7 +80,7 @@ for kind in 'mfv_ddbar', 'mfv_neu':
 #        zax.SetTitleOffset(1.2)
         #zax.SetBinLabel(zax.FindBin(30), '30')
 #     zax.SetRangeUser(0., 0.85)
-        zax.SetTitle('95% CL upper limit on #sigma B^{2} (fb)')
+        zax.SetTitle('95% CL upper limit on #sigmaB^{2} (fb)')
         zax.SetLabelSize(0.045)
         zax.SetLabelOffset(0.00005)
         zax.SetTitleSize(0.05)
@@ -114,7 +114,20 @@ for kind in 'mfv_ddbar', 'mfv_neu':
 #        g_exp.SetMarkerStyle(20)
  #       g_exp.SetMarkerSize(2)
 
-        if kind == 'mfv_neu':
+        if kind == 'mfv_stopdbardbar':
+            for i in xrange(20):
+                print 'ugh'
+            assert h.FindBin(1600,82) == 633
+            assert h.FindBin(1800,82) == 634
+            assert h.FindBin(2000,82) == 635
+            h.SetBinContent(634, (h.GetBinContent(633) + h.GetBinContent(635))/2)
+
+            assert h.FindBin(2000,0.2) == 43
+            assert h.FindBin(2200,0.2) == 44
+            assert h.FindBin(2400,0.2) == 45
+            h.SetBinContent(44, (h.GetBinContent(43) + h.GetBinContent(45))/2)
+            
+        if False and kind == 'mfv_neu':
             for i in xrange(20):
                 print 'ugh'
             g_exp.SetPoint(85,2273.164179,77.03205233);
@@ -145,7 +158,7 @@ for kind in 'mfv_ddbar', 'mfv_neu':
         if kind == 'mfv_neu':
             model = '#kern[-0.22]{#tilde{g} #rightarrow tbs}'
         else:
-            model = '#kern[-0.22]{#tilde{g} #rightarrow d#bar{d}}'
+            model = '#kern[-0.22]{#tilde{t} #rightarrow #bar{d}#kern[0.1]{#bar{d}}}'
         leg.AddEntry(0, model, '')
         leg.AddEntry(g_obs, '#kern[-0.22]{Observed}', 'L')
         leg.AddEntry(g_exp, '#kern[-0.22]{Expected}', 'L')

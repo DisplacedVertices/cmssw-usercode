@@ -36,21 +36,29 @@ cd src
 eval `scram ru -sh`
 scram b -j 2 2>&1 > /dev/null
 
-echo cmsRun start at $(date)
+mkdir $workdir/subworkdir
+cd $workdir/subworkdir
+
 cp $workdir/{cs.json,cs_filelist.py,cs_cmsrun_args,cs_primaryds,cs_samplename,cs_timestamp__INPUT_BNS__} .
 echo $job > cs_job
-cmsRun -j ${workdir}/fjr_${job}.xml ${workdir}/cs_pset.py $(<cs_cmsrun_args) 2>&1
-cmsexit=$?
-echo cmsRun end at $(date)
-echo cmsRun exited with code $cmsexit
-if [[ $cmsexit -ne 0 ]]; then
-    exit $cmsexit
+
+echo meat start at $(date)
+__MEAT__
+echo meat end at $(date)
+echo meat exited with code $meatexit
+if [[ $meatexit -ne 0 ]]; then
+    exit $meatexit
 fi
 
 __OUTPUT_SNIPPET__
 ''' \
 .replace('__SCRAM_ARCH__',    os.environ['SCRAM_ARCH']) \
 .replace('__CMSSW_VERSION__', os.environ['CMSSW_VERSION'])
+
+    cmsRun_meat = '''
+cmsRun -j ${workdir}/fjr_${job}.xml ${workdir}/cs_pset.py $(<cs_cmsrun_args) 2>&1
+meatexit=$?
+'''
 
     output_template = '''
 for x in __OUTPUT_BNS__; do
@@ -98,6 +106,7 @@ should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 transfer_input_files = __TARBALL_FN__,cs_jobmap,cs_pset.py,cs_filelist.py,cs.json,cs_cmsrun_args,cs_primaryds,cs_samplename,cs_timestamp__INPUT_FNS__
 x509userproxy = $ENV(X509_USER_PROXY)
+__EXTRAS__
 Queue __NJOBS__
 '''
 
@@ -142,6 +151,7 @@ def get(i): return _l[i]
                  batch_name,
                  ex = '',
                  testing = 'testing' in sys.argv or 'cs_testing' in sys.argv,
+                 meat = cmsRun_meat,
                  pset_template_fn = sys.argv[0],
                  pset_modifier = None,
                  input_files = [],
@@ -151,6 +161,7 @@ def get(i): return _l[i]
                  stageout_path = '', # if / in it, does not try to generate
                  publish_name = '',
                  dataset = 'main',
+                 jdl_extras = '',
                  _events = -1,
                  _njobs = None,
                  _fail = [],
@@ -159,6 +170,15 @@ def get(i): return _l[i]
         self.nsubmits = -1
 
         self.testing = testing
+
+        if type(meat) == file:
+            meat = meat.read()
+        elif type(meat) == str and os.path.isfile(meat):
+            meat = open(meat).read()
+        if 'meatexit=' not in meat:
+            raise ValueError('meatexit not set in meat?')
+        self.meat = meat
+
         if '$' in pset_template_fn:
             pset_template_fn =  os.path.expandvars(pset_template_fn)
         if '~' in pset_template_fn:
@@ -231,8 +251,16 @@ def get(i): return _l[i]
         sh_fn = os.path.join(self.inputs_dir, 'run.sh')
 
         if input_files:
-            input_bns = ',' + ','.join([os.path.basename(x) for x in input_files])
-            input_fns = ',' + ','.join([os.path.abspath(x) for x in input_files])
+            input_bns = []
+            input_fns = []
+            for x in input_files:
+                bn = os.path.basename(x)
+                fn = os.path.abspath(os.path.join(self.inputs_dir, bn))
+                input_bns.append(bn)
+                input_fns.append(fn)
+                shutil.copy(x, fn)
+            input_bns = ',' + ','.join(input_bns)
+            input_fns = ',' + ','.join(input_fns)
         else:
             input_bns = ''
             input_fns = ''
@@ -254,7 +282,7 @@ def get(i): return _l[i]
                 stageout_files = [x for x in module_output_files['PoolOutputModule'] if x not in skip_output_files]
             else:
                 raise ValueError("don't understand stageout_files = %s" % stageout_which)
-            output_files = [x for x in output_files if x not in stageout_files]
+        output_files = [x for x in output_files if x not in stageout_files]
 
         assert all(os.path.basename(x) == x for x in output_files + stageout_files)
         self.output_files   = output_files   = ' '.join(output_files)
@@ -285,12 +313,14 @@ def get(i): return _l[i]
 
         self.sh_template = self.sh_template \
             .replace('__INPUT_BNS__',  input_bns) \
+            .replace('__MEAT__', self.meat) \
             .replace('__OUTPUT_SNIPPET__', output_snippet)
 
         self.jdl_template = self.jdl_template \
             .replace('__SH_FN__',      sh_fn) \
             .replace('__TARBALL_FN__', tarball_fn) \
-            .replace('__INPUT_FNS__',  input_fns)
+            .replace('__INPUT_FNS__',  input_fns) \
+            .replace('__EXTRAS__',     jdl_extras)
 
         self.pset_end_template = self.pset_end_template \
             .replace('__MAX_EVENTS__', str(_events)) \

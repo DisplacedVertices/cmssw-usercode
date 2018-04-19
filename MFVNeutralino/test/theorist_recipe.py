@@ -1,6 +1,6 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-dataset = 'ntuplev16_wgenv2'
+dataset = 'ntuplev16p1'
 sample_files(process, 'mfv_neu_tau01000um_M0800', dataset, 10)
 process.TFileService.fileName = 'theorist_recipe.root'
 file_event_from_argv(process)
@@ -11,7 +11,7 @@ process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 
 process.load('JMTucker.MFVNeutralino.GenParticles_cff')
 process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
-process.mfvGenParticles.last_flag_check = False # JMTBAD need this until wgenv2
+#process.mfvGenParticles.last_flag_check = False # JMTBAD need this until wgenv2
 
 mfvTheoristRecipe = cms.EDAnalyzer('MFVTheoristRecipe',
                                    gen_jets_src = cms.InputTag('ak4GenJetsNoNu'),
@@ -26,7 +26,7 @@ mfvTheoristRecipe = cms.EDAnalyzer('MFVTheoristRecipe',
 process.common = cms.Sequence(process.mfvSelectedVertices * process.mfvGenParticles)
 
 if False:
-    #set_events_to_process(process, [(1,5,65)])
+    #set_events(process, [(1,5,65)])
     report_every(process, 1)
     process.load('JMTucker.Tools.ParticleListDrawer_cff')
     process.ParticleListDrawer.maxEventsToPrint = 10000
@@ -119,10 +119,16 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.MFVNeutralino.Year import year
     from JMTucker.Tools import Samples
     if year == 2015:
-        samples = Samples.mfv_signal_samples_2015
+        raise NotImplementedError("samples don't have dataset")
+        samples = Samples.all_signal_samples_2015
     elif year == 2016:
-        samples = Samples.mfv_signal_samples + Samples.mfv_ddbar_samples + Samples.mfv_bbbar_samples + Samples.mfv_neuuds_samples + Samples.mfv_neuudmu_samples + Samples.mfv_neuude_samples + Samples.mfv_misc_samples
+        samples = Samples.all_signal_samples
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('TheoristRecipeV1', ex = year, dataset = dataset)
+    from JMTucker.Tools.MetaSubmitter import secondary_files_modifier
+    cs = CondorSubmitter('TheoristRecipeV44',
+                         ex = year,
+                         dataset = dataset,
+                         pset_modifier = secondary_files_modifier('main')
+                         )
     cs.submit_all(samples)

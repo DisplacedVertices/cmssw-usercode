@@ -6,17 +6,17 @@ from JMTucker.Tools import Samples
 from JMTucker.MFVNeutralino.PerSignal import PerSignal
 
 set_style()
-ps = plot_saver(plot_dir('sigeff_trig_v15'), size=(600,600), log=False)
+ps = plot_saver(plot_dir('sigeff_trig_stopdbardbar'), size=(600,600), log=False)
 
-root_file_dir = '/uscms_data/d2/tucker/crab_dirs/TrigFiltCheckV1'
+root_file_dir = '/uscms_data/d2/tucker/crab_dirs/TrigFiltCheckV2'
 trigs = ['PFHT800', 'AK8PFJet450', 'Hcombination']
 nice = ['PFHT800', 'AK8PFJet450', 'H combination']
 colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kBlack]
 
 def sample_ok(s):
-    return s.mass not in (500,3000) and not s.name.startswith('my_')
+    return s.mass not in (500,3000)
 multijet = [s for s in Samples.mfv_signal_samples if sample_ok(s)]
-dijet = [s for s in Samples.mfv_ddbar_samples if sample_ok(s)]
+dijet = [s for s in Samples.mfv_stopdbardbar_samples if sample_ok(s)]
 
 def getit(f, n):
     hnum = f.Get('SimpleTriggerEfficiency/triggers_pass_num')

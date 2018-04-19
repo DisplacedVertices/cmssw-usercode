@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
-from CRABClient.ClientExceptions import ConfigException as CRABConfigException
+import os
 from JMTucker.MFVNeutralino.Year import year; assert year in (2015,2016) # fix later
 from scanpack import get_scanpack, scanpackbase
 
+condor = False
 nevents = 10000
 events_per = 100
 scanpack = None
@@ -21,7 +22,7 @@ ex = ''
 meta = 'neu'
 taus   = [100, 300, 1000, 10000, 30000]
 masses = [300, 400, 500, 600, 800, 1200, 1600, 3000]
-tau_masses = [] # [(1000,800),(10000,1600)]
+tau_masses = [] # [(1000,1200),(10000,1200),(1000,800),(1000,1600)]
 already = []
 hip_right = False
 
@@ -29,7 +30,7 @@ if 0:
     meta = 'scan'
     output_level = 'minitree'
     hip_right = False
-    scanpack = 'scanpack2015supplement'
+    scanpack = 'scanpack3_' + os.environ['USER']
 elif 0:
     meta = 'ttbar'
     nevents, events_per
@@ -84,7 +85,7 @@ if scanpack:
 
 #ex = '_test'
 #nevents, events_per = 5,5
-#meta, taus, masses = 'neu', [10000], [1600]
+#meta, taus, masses = 'stopdbardbar', [1000], [1200]
 
 ################################################################################
 
@@ -94,17 +95,22 @@ if output_level not in ('reco', 'ntuple', 'minitree', 'gensim'):
 import sys, os
 from math import ceil
 from pprint import pprint
+from textwrap import dedent
 from time import time
+from CRABClient.ClientExceptions import ConfigException as CRABConfigException
 from JMTucker.Tools.CRAB3Tools import Config, crab_dirs_root, crab_command
 from JMTucker.Tools.general import index_startswith, save_git_status
-import JMTucker.Tools.colors as colors
+from JMTucker.Tools.CondorSubmitter import CondorSubmitter
+from JMTucker.Tools.Sample import MCSample
+from JMTucker.Tools import colors
 
 testing = 'testing' in sys.argv
 work_area = crab_dirs_root('nstep_%s%s' % (meta, ex))
 if os.path.isdir(work_area):
     sys.exit('work_area %s exists' % work_area)
 os.makedirs(work_area)
-save_git_status(os.path.join(work_area, 'gitstatus'))
+if not condor:
+    save_git_status(os.path.join(work_area, 'gitstatus'))
 
 config = Config()
 
@@ -246,22 +252,46 @@ def submit(config, name, scanpack_or_todo, todo_rawhlt=[], todo_reco=[], todo_nt
     steering.append('SALT="%s"' % salt)
 
     open(steering_fn, 'wt').write('\n'.join(steering) + '\n')
-    
-    if not testing:
-        try:
-            output = crab_command('submit', config=config)
-        except CRABConfigException:
-            output = 'problem'
-        print colors.boldwhite(name)
-        pprint(output)
-        print
+
+    if condor:
+        cs = CondorSubmitter(batch_name = os.path.basename(config.General.workArea),
+                             meat = dedent('''
+                                           ./nstep.sh $((job+1)) 2>&1
+                                           meatexit=$?
+                                           mv FrameworkJobReport.xml ${workdir}/fjr_${job}.xml
+                                           '''),
+                             pset_template_fn = config.JobType.psetName,
+                             input_files = ['nstep.sh'] + config.JobType.inputFiles,
+                             stageout_files = config.JobType.outputFiles,
+                             publish_name = config.Data.outputDatasetTag,
+                             jdl_extras = 'request_memory = 3000',
+                             )
+        sample = MCSample(config.General.requestName,
+                          '/%s/None/None' % config.General.requestName,
+                          config.Data.totalUnits,
+                          filenames = ['dummy'],
+                          split_by = 'events',
+                          events_per = config.Data.unitsPerJob
+                          )
+        cs.submit(sample)
+
     else:
-        print 'crab config:'
-        print config
-        print 'steering.sh:'
-        os.system('cat ' + steering_fn)
+        if not testing:
+            try:
+                output = crab_command('submit', config=config)
+            except CRABConfigException:
+                output = 'problem'
+            print colors.boldwhite(name)
+            pprint(output)
+            print
+        else:
+            print 'crab config:'
+            print config
+            print 'steering.sh:'
+            os.system('cat ' + steering_fn)
     os.remove(steering_fn)
 
+####
 
 metamap = {
     'neu': ('mfv_neu', 'mfv_neutralino'),
@@ -280,6 +310,9 @@ metamap = {
     'ccbar': ('mfv_ccbar', 'gluino_ccbar'),
     'bbbar': ('mfv_bbbar', 'gluino_bbbar'),
     'lq2': ('mfv_lq2', 'leptoquark'),
+    'xxddbar': ('mfv_xxddbar', 'xxddbar'),
+    'stopdbardbar': ('mfv_stopdbardbar', 'stop_dbardbar'),
+    'stopbbarbbar': ('mfv_stopbbarbbar', 'stop_bbarbbar'),
 }
 
 if meta == 'scan':

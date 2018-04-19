@@ -28,6 +28,67 @@ def set_ttbar(process):
         'Tune:pp 5',
         )
 
+def set_xxddbar(process, tau0, mass):
+    params = [
+        'Higgs:useBSM = on',
+        'HiggsBSM:all = off',
+        'HiggsBSM:ffbar2A3H2 = on',
+        '35:m0 = %s' % mass,
+        '36:m0 = %s' % mass,
+        '35:tau0 = %s' % tau0,
+        '36:tau0 = %s' % tau0,
+        '35:0:bRatio = 1',
+        '35:1:bRatio = 0',
+        '35:2:bRatio = 0',
+        '35:3:bRatio = 0',
+        '35:4:bRatio = 0',
+        '35:5:bRatio = 0',
+        '35:9:bRatio = 0',
+        '35:10:bRatio= 0',
+        '36:0:bRatio = 1',
+        '36:1:bRatio = 0',
+        '36:2:bRatio = 0',
+        '36:3:bRatio = 0',
+        '36:4:bRatio = 0',
+        '36:5:bRatio = 0',
+        '36:9:bRatio = 0',
+        '36:10:bRatio= 0',
+        '35:0:meMode = 100',
+        '35:1:meMode = 100',
+        '35:2:meMode = 100',
+        '35:3:meMode = 100',
+        '35:4:meMode = 100',
+        '35:5:meMode = 100',
+        '35:9:meMode = 100',
+        '35:10:meMode = 100',
+        '36:0:meMode = 100',
+        '36:1:meMode = 100',
+        '36:2:meMode = 100',
+        '36:3:meMode = 100',
+        '36:4:meMode = 100',
+        '36:5:meMode = 100',
+        '36:9:meMode = 100',
+        '36:10:meMode = 100',
+        'HiggsA3:coup2d = 1',
+        'HiggsA3:coup2u = 1',
+        'HiggsA3:coup2H1Z = 0',
+        'HiggsA3:coup2H2Z = 1',
+        'HiggsA3:coup2l = 0',
+        'HiggsA3:coup2HchgW = 0',
+        'HiggsH2:coup2d = 1',
+        'HiggsH2:coup2u = 1',
+        'HiggsH2:coup2l = 0',
+        'HiggsH2:coup2Z = 0',
+        'HiggsH2:coup2W = 0',
+        'HiggsH2:coup2H1H1 = 0',
+        'HiggsH2:coup2A3A3 = 0',
+        '35:onMode = off',
+        '35:onIfAny = 1',
+        '36:onMode = off',
+        '36:onIfAny = 1',
+        ]
+    process.generator.PythiaParameters.processParameters = cms.vstring(*params)
+
 def set_leptoquark(process, lifetime, mass, generation):
     params = [
         'LeptoQuark:gg2LQLQbar = on',
@@ -60,10 +121,19 @@ def set_gluino_tau0(process, tau0):
 def set_neutralino_tau0(process, tau0):
     set_particle_tau0(process, 1000022, tau0)
 
+def set_stop_tau0(process, tau0):
+    set_particle_tau0(process, 1000006, tau0)
+
 def set_rhadrons_on(process):
     process.generator.PythiaParameters.processParameters.append('RHadrons:allow = on')
 
-def slha(tau0, m_gluino, m_neutralino, decay_idses, fn=None):
+def slha(id_one, id_two, tau0, m_one, m_two, decay_idses, fn=None):
+    if (id_two and not m_two) or (m_two and not id_two):
+        raise ValueError('must specify id_two and m_two if one of them')
+
+    if id_two and (id_one != 1000021 or id_two != 1000022):
+        raise ValueError('two-step decay only implemented for gluino+neutralino')
+
     width = 0.0197e-11 / tau0 # tau0 in mm
 
     n_decay_idses = len(decay_idses)
@@ -77,6 +147,7 @@ def slha(tau0, m_gluino, m_neutralino, decay_idses, fn=None):
         sum_br += br
 
         n_decay_ids = len(decay_ids)
+
         if n_decay_ids not in (2,3,4):
             raise ValueError('decay_ids must have len 2 or 3: %r' % decay_ids)
 
@@ -85,7 +156,7 @@ def slha(tau0, m_gluino, m_neutralino, decay_idses, fn=None):
     if abs(sum_br - 1) > 1e-4:
         raise ValueError('brs did not sum to 1')
 
-    if m_neutralino is None:
+    if m_two is None:
         slha = '''
 BLOCK SPINFO  # Spectrum calculator information
      1   Minimal    # spectrum calculator
@@ -97,9 +168,9 @@ BLOCK MODSEL  # Model selection
 
 BLOCK MASS  # Mass Spectrum
 # PDG code           mass       particle
-  1000021     %(m_gluino)E       # ~g
+  %(id_one)i     %(m_one)E       # whatever
 
-DECAY   1000021     %(width)E   # gluino decays
+DECAY   %(id_one)i     %(width)E   # decays
 #          BR         NDA      ID1       ID2
 '''
     else:
@@ -113,15 +184,15 @@ BLOCK MODSEL  # Model selection
 #
 
 BLOCK MASS  # Mass Spectrum
-# PDG code           mass       particle
-  1000021     %(m_gluino)E       # ~g
-  1000022     %(m_neutralino)E   # ~chi_10
+# PDG code           mass
+  %(id_one)i     %(m_one)E
+  %(id_two)i     %(m_two)E
 
-DECAY   1000021     0.01E+00   # gluino decays
+DECAY   %(id_one)i     0.01E+00
 #          BR         NDA      ID1       ID2
-    1.0E00            2      1000022    21   # BR(~g -> ~chi_10  g)
+    1.0E00            2      %(id_two)i    21
 
-DECAY   1000022     %(width)E   # neutralino decays
+DECAY   %(id_two)i     %(width)E
 #           BR         NDA      ID1       ID2       ID3
 '''
 
@@ -133,7 +204,9 @@ DECAY   1000022     %(width)E   # neutralino decays
     return slha
 
 def slha_mfv(tau0, m_gluino, m_neutralino, fn=None):
-    return slha(tau0, m_gluino, m_neutralino, [(0.5, (3,5,6)), (0.5, (-3,-5,-6))], fn)
+    id_one = 1000021
+    id_two = None if m_neutralino is None else 1000022
+    return slha(id_one, id_two, tau0, m_gluino, m_neutralino, [(0.5, (3,5,6)), (0.5, (-3,-5,-6))], fn)
 
 def slha_mfv_neutralino(tau0, m_neutralino, fn=None):
     return slha_mfv(tau0, m_neutralino+5, m_neutralino, fn)
@@ -149,6 +222,15 @@ def set_gluino_pair_production(process):
         'SUSY:idB = 1000021',
         )
 
+def set_stop_pair_production(process):
+    process.generator.PythiaParameters.processParameters = cms.vstring(
+        'SUSY:all = off',
+        'SUSY:gg2squarkantisquark = on',
+        'SUSY:qqbar2squarkantisquark = on',
+        'SUSY:idA = 1000006',
+        'SUSY:idB = 1000006',
+        )
+
 def set_slha(process, slha):
     process.generator.SLHATableForPythia8 = cms.string(slha)
     
@@ -160,25 +242,25 @@ def set_neutralino(process, tau0, m_neutralino, slha):
 def set_mfv_neutralino(process, tau0, m_neutralino):
     set_neutralino(process, tau0, m_neutralino, slha_mfv_neutralino(tau0, m_neutralino))
 def set_neutralino_uds(process, tau0, m_neutralino):
-    set_neutralino(process, tau0, m_neutralino, slha(tau0, m_neutralino+5, m_neutralino, [(0.5, (1,2,3)), (0.5, (-1,-2,-3))]))
+    set_neutralino(process, tau0, m_neutralino, slha(1000021, 1000022, tau0, m_neutralino+5, m_neutralino, [(0.5, (1,2,3)), (0.5, (-1,-2,-3))]))
 def set_neutralino_udb(process, tau0, m_neutralino):
-    set_neutralino(process, tau0, m_neutralino, slha(tau0, m_neutralino+5, m_neutralino, [(0.5, (1,2,5)), (0.5, (-1,-2,-5))]))
+    set_neutralino(process, tau0, m_neutralino, slha(1000021, 1000022, tau0, m_neutralino+5, m_neutralino, [(0.5, (1,2,5)), (0.5, (-1,-2,-5))]))
 def set_neutralino_tds(process, tau0, m_neutralino):
-    set_neutralino(process, tau0, m_neutralino, slha(tau0, m_neutralino+5, m_neutralino, [(0.5, (1,6,3)), (0.5, (-1,-6,-3))]))
+    set_neutralino(process, tau0, m_neutralino, slha(1000021, 1000022, tau0, m_neutralino+5, m_neutralino, [(0.5, (1,6,3)), (0.5, (-1,-6,-3))]))
 def set_neutralino_tbb(process, tau0, m_neutralino):
-    set_neutralino(process, tau0, m_neutralino, slha(tau0, m_neutralino+5, m_neutralino, [(0.5, (6,5,5)), (0.5, (-6,-5,-5))]))
+    set_neutralino(process, tau0, m_neutralino, slha(1000021, 1000022, tau0, m_neutralino+5, m_neutralino, [(0.5, (6,5,5)), (0.5, (-6,-5,-5))]))
 def set_neutralino_ubb(process, tau0, m_neutralino):
-    set_neutralino(process, tau0, m_neutralino, slha(tau0, m_neutralino+5, m_neutralino, [(0.5, (2,5,5)), (0.5, (-2,-5,-5))]))
+    set_neutralino(process, tau0, m_neutralino, slha(1000021, 1000022, tau0, m_neutralino+5, m_neutralino, [(0.5, (2,5,5)), (0.5, (-2,-5,-5))]))
 def set_neutralino_cds(process, tau0, m_neutralino):
-    set_neutralino(process, tau0, m_neutralino, slha(tau0, m_neutralino+5, m_neutralino, [(0.5, (1,4,3)), (0.5, (-1,-4,-3))]))
+    set_neutralino(process, tau0, m_neutralino, slha(1000021, 1000022, tau0, m_neutralino+5, m_neutralino, [(0.5, (1,4,3)), (0.5, (-1,-4,-3))]))
 def set_neutralino_cdb(process, tau0, m_neutralino):
-    set_neutralino(process, tau0, m_neutralino, slha(tau0, m_neutralino+5, m_neutralino, [(0.5, (1,4,5)), (0.5, (-1,-4,-5))]))
+    set_neutralino(process, tau0, m_neutralino, slha(1000021, 1000022, tau0, m_neutralino+5, m_neutralino, [(0.5, (1,4,5)), (0.5, (-1,-4,-5))]))
 def set_neutralino_udmu(process, tau0, m_neutralino):
-    set_neutralino(process, tau0, m_neutralino, slha(tau0, m_neutralino+5, m_neutralino, [(0.5, (-1,2,13)), (0.5, (1,-2,-13))]))
+    set_neutralino(process, tau0, m_neutralino, slha(1000021, 1000022, tau0, m_neutralino+5, m_neutralino, [(0.5, (-1,2,13)), (0.5, (1,-2,-13))]))
 def set_neutralino_ude(process, tau0, m_neutralino):
-    set_neutralino(process, tau0, m_neutralino, slha(tau0, m_neutralino+5, m_neutralino, [(0.5, (-1,2,11)), (0.5, (1,-2,-11))]))
+    set_neutralino(process, tau0, m_neutralino, slha(1000021, 1000022, tau0, m_neutralino+5, m_neutralino, [(0.5, (-1,2,11)), (0.5, (1,-2,-11))]))
 def set_neutralino_udtau(process, tau0, m_neutralino):
-    set_neutralino(process, tau0, m_neutralino, slha(tau0, m_neutralino+5, m_neutralino, [(0.5, (-1,2,15)), (0.5, (1,-2,-15))]))
+    set_neutralino(process, tau0, m_neutralino, slha(1000021, 1000022, tau0, m_neutralino+5, m_neutralino, [(0.5, (-1,2,15)), (0.5, (1,-2,-15))]))
 
 def set_gluino(process, tau0, slha):
     set_gluino_pair_production(process)
@@ -189,15 +271,26 @@ def set_gluino(process, tau0, slha):
 def set_mfv_gluino(process, tau0, m_gluino):
     set_gluino(process, tau0, slha_mfv_gluino(tau0, m_gluino))
 def set_gluino_ddbar(process, tau0, m_gluino):
-    set_gluino(process, tau0, slha(tau0, m_gluino, None, [(1., (1,-1))]))
+    set_gluino(process, tau0, slha(1000021, None, tau0, m_gluino, None, [(1., (1,-1))]))
 def set_gluino_ccbar(process, tau0, m_gluino):
-    set_gluino(process, tau0, slha(tau0, m_gluino, None, [(1., (4,-4))]))
+    set_gluino(process, tau0, slha(1000021, None, tau0, m_gluino, None, [(1., (4,-4))]))
 def set_gluino_bbbar(process, tau0, m_gluino):
-    set_gluino(process, tau0, slha(tau0, m_gluino, None, [(1., (5,-5))]))
+    set_gluino(process, tau0, slha(1000021, None, tau0, m_gluino, None, [(1., (5,-5))]))
 def set_gluino_uds(process, tau0, m_gluino):
-    set_gluino(process, tau0, slha(tau0, m_gluino, None, [(0.5, (1,2,3)), (0.5, (-1,-2,-3))]))
+    set_gluino(process, tau0, slha(1000021, None, tau0, m_gluino, None, [(0.5, (1,2,3)), (0.5, (-1,-2,-3))]))
 def set_gluino_udmu(process, tau0, m_gluino):
-    set_gluino(process, tau0, slha(tau0, m_gluino, None, [(0.5, (-1,2,13)), (0.5, (1,-2,-13))]))
+    set_gluino(process, tau0, slha(1000021, None, tau0, m_gluino, None, [(0.5, (-1,2,13)), (0.5, (1,-2,-13))]))
+
+def set_stop(process, tau0, slha):
+    set_stop_pair_production(process)
+    set_stop_tau0(process, tau0)
+    set_rhadrons_on(process)
+    set_slha(process, slha)
+
+def set_stop_dbardbar(process, tau0, m_stop):
+    set_stop(process, tau0, slha(1000006, None, tau0, m_stop, None, [(1., (-1, -1))]))
+def set_stop_bbarbbar(process, tau0, m_stop):
+    set_stop(process, tau0, slha(1000006, None, tau0, m_stop, None, [(1., (-5, -5))]))
 
 ########################################################################
 

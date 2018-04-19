@@ -31,8 +31,8 @@ for job in jobs:
         raise ValueError('supplied job number %i >= norigjobs %i' % (job, norigjobs))
     if job in running_jobs:
         raise RuntimeError('refuse to resubmit job %i, still running' % job)
-    if not all(os.path.isfile(join(wd, '%s.%i' % (x,job))) for x in ('log', 'stdout', 'stderr')):
-        raise RuntimeError("was job %i ever run? one of stdout, stderr, log file doesn't exist for it" % job)
+    #if not all(os.path.isfile(join(wd, '%s.%i' % (x,job))) for x in ('log', 'stdout', 'stderr')):
+    #    raise RuntimeError("was job %i ever run? one of stdout, stderr, log file doesn't exist for it" % job)
 
 i, rd = 1, None
 while 1:

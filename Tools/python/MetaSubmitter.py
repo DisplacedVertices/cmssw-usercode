@@ -6,7 +6,7 @@ class max_output_modifier:
     def __init__(self, n):
         self.n = n
     def __call__(self, sample):
-        return ['process.maxEvents.output = cms.untracked.int32(500)'], []
+        return ['process.maxEvents.output = cms.untracked.int32(%i)' % self.n], []
 
 def is_mc_modifier(sample):
     to_replace = []
@@ -80,16 +80,21 @@ class chain_modifiers:
         return to_add, to_replace
 
 class secondary_files_modifier:
-    def __init__(self, dataset=None, fns=None):
+    def __init__(self, dataset=None, fns=None, use_sample_xrootd_url=True):
         if (not dataset and not fns) or (dataset and fns):
             raise ValueError('must specify exactly one of dataset (string with dataset name) or fns (list with filenames)')
+        if use_sample_xrootd_url and not dataset:
+            raise ValueError('if use_sample_xrootd_url, must specify dataset and not fns')
         self.dataset, self.fns = dataset, fns
+        self.use_sample_xrootd_url = use_sample_xrootd_url
 
     def __call__(self, sample):
         if self.dataset:
             save_ds = sample.curr_dataset
             sample.set_curr_dataset(self.dataset)
             fns = sample.filenames
+            if self.use_sample_xrootd_url and sample.xrootd_url:
+                fns = [sample.xrootd_url + fn for fn in fns]
             sample.set_curr_dataset(save_ds)
         elif self.fns:
             fns = self.fns

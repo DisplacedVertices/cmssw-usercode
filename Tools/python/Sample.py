@@ -8,8 +8,11 @@ from JMTucker.Tools.general import big_warn, typed_from_argv
 
 ########################################################################
 
-us_aaa = [ 'T2_US_Caltech', 'T2_US_MIT', 'T2_US_Nebraska', 'T2_US_UCSD', 'T2_US_Vanderbilt', 'T2_US_Wisconsin' ]  # T2_US_Purdue,T2_US_Florida,T3_US_Brown,T3_US_Colorado,T3_US_NotreDame,T3_US_UMiss
-eu_aaa = ['T2_AT_Vienna', 'T2_CH_CERN', 'T2_CH_CSCS', 'T2_DE_DESY', 'T2_EE_Estonia', 'T2_ES_CIEMAT', 'T2_ES_IFCA', 'T2_FR_CCIN2P3']
+xrootd_sites = {
+    'T3_US_FNALLPC': 'root://cmseos.fnal.gov/',
+    'T1_US_FNAL_Disk': 'root://cmsxrootd-site.fnal.gov/',
+    'T2_DE_DESY': 'root://dcache-cms-xrootd.desy.de/'
+    }
 
 ########################################################################
 
@@ -22,7 +25,6 @@ class Dataset(object):
     JSON = ''
     HLT_NAME = 'HLT'
     DBS_INST = 'global'
-    AAA = []
 
     def __init__(self, dataset, nevents_orig, **kwargs):
         self.dataset = dataset
@@ -38,7 +40,6 @@ class Dataset(object):
 
         self.hlt_name = kwargs.get('hlt_name', self.HLT_NAME)
         self.dbs_inst = kwargs.get('dbs_inst', self.DBS_INST)
-        self.aaa = kwargs.get('aaa', self.AAA)
         self.condor = kwargs.get('condor', False)
         self.xrootd_url = kwargs.get('xrootd_url', '')
         self.filenames = kwargs.get('filenames', [])
@@ -190,14 +191,6 @@ class Sample(object):
     @dbs_inst.setter
     def dbs_inst(self, val):
         self.datasets[self.curr_dataset].dbs_inst = val
-
-    @property
-    def aaa(self):
-        return self.datasets[self.curr_dataset].aaa
-
-    @aaa.setter
-    def aaa(self, val):
-        self.datasets[self.curr_dataset].aaa = val
 
     @property
     def condor(self):
@@ -587,8 +580,7 @@ def main(samples_registry):
         print "_add('%s')" % sf._enc(d)
 
 __all__ = [
-    'us_aaa',
-    'eu_aaa',
+    'xrootd_sites',
     'Dataset',
     'Sample',
     'MCSample',

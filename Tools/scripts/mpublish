@@ -24,6 +24,8 @@ parser.add_argument('--pattern',
                     help='Glob-style pattern to filter the files, useful if there are multiple files output per job.')
 parser.add_argument('--partial', action='store_true',
                     help='If set, partial publishing is allowed.')
+parser.add_argument('--only-done', action='store_true',
+                    help='If set, only look at dirs with the mmon_done marker file.')
 parser.add_argument('--no-coderep', action='store_false', dest='coderep', help='whether to disable coderep output')
 parser.add_argument('--no-lpc-shortcut', action='store_false', dest='lpc_shortcut', help='whether to use the lpc shortcut on crab dirs')
 parser.add_argument('--no-dbs', action='store_false', dest='dbs', help='whether to use information from dbs')
@@ -57,6 +59,11 @@ samples = []
 samples_lump = []
 for wd in wds:
     print colors.bold(wd)
+    if options.only_done:
+        if not os.path.isfile(os.path.join(wd, 'mmon_done')):
+            print colors.yellow('not done, skipping')
+            continue
+
     bd = os.path.basename(wd)
     is_crab = bd.startswith('crab_')
     assert is_crab or bd.startswith('condor_')

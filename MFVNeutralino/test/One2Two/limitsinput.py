@@ -19,8 +19,8 @@ bkg_uncert = [(a**2 + b**2)**0.5 for a,b in zip(bkg_uncert, bkg_uncert_stat)] # 
 
 in_fn = '/uscms/home/jchu/public/2v_from_jets_data_2015p6_5track_default_v15_v5.root'
 #in_trees, in_scanpack_list = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV15_v5/mfv*root', None
-in_trees, in_scanpack_list = None, '/uscms/home/tucker/public/mfv/scanpacks/scanpack_merge_1_1p5_2_2p5_2p7.list.gz'
-#in_trees, in_scanpack_list = None, '/uscms/home/tucker/public/mfv/scanpacks/scanpack_merge_hip_1_2_2p6.list.gz'
+in_trees, in_scanpack_list = None, '/uscms/home/tucker/public/mfv/scanpacks/scanpack_merge_1_1p5_2_2p5_2p7_3_3p5_removeddbar.list.gz'
+#in_trees, in_scanpack_list = None, '/uscms/home/tucker/public/mfv/scanpacks/scanpack_merge_hip_1_2_2p6_3_3p6_removeddbar.list.gz'
 
 limitsinput_fn = 'limitsinput.root'
 
@@ -400,9 +400,41 @@ def axes(f=None):
     taus   = axisize(taus)
     return kinds, masses, taus
 
+def nevents_plot():
+    in_f = ROOT.TFile(limitsinput_fn)
+    out_f = ROOT.TFile('nevents.root', 'recreate')
+
+    kinds, masses, taus = axes(in_f)
+    nmasses = len(masses) - 1
+    ntaus = len(taus) - 1
+
+    for kind in kinds:
+        h = ROOT.TH2D('nevents_%s' % kind, ';mass (GeV);#tau (mm)', nmasses, masses, ntaus, taus)
+
+        for ibin in xrange(1, nmasses+1):
+            mass = h.GetXaxis().GetBinLowEdge(ibin)
+            for jbin in xrange(1, ntaus+1):
+                tau = h.GetYaxis().GetBinLowEdge(jbin)
+
+                try:
+                    isample = name2isample(in_f, details2name(kind, tau, mass))
+                except ValueError:
+                    continue
+
+                nev = nevents(in_f, isample)
+
+                h.SetBinContent(ibin, jbin, nev)
+                h.SetBinError  (ibin, jbin, nev**0.5)
+
+        out_f.cd()
+        h.Write()
+
+    out_f.Write()
+    out_f.Close()
+
 def signal_efficiency():
     from signal_efficiency import SignalEfficiencyCombiner
-    combiner = SignalEfficiencyCombiner()
+    combiner = SignalEfficiencyCombiner() #simple=limitsinput_fn)
     in_f = combiner.inputs[0].f
     out_f = ROOT.TFile('signal_efficiency.root', 'recreate')
 
@@ -449,6 +481,7 @@ if __name__ == '__main__':
         f = ROOT.TFile(limitsinput_fn)
         for s in sample_iterator(f):
             print s.name.ljust(30), '%6i' % int(nevents(f, s.isample))
+        nevents_plot()
     elif 'points' in sys.argv:
         print 'kinds = %r\nmasses = %r\ntaus = %r' % points()
     elif 'signal_efficiency' in sys.argv:

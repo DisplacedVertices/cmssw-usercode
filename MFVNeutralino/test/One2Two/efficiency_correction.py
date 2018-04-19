@@ -19,6 +19,14 @@ else:
     ebin2 = [0.0132, 0.0459, 0.1731, 0.0459] if year == '2015' else [0.0030, 0.0108, 0.0566, 0.0108] if year == '2016' else [0.0030, 0.0104, 0.0542, 0.0104]
     ebin3 = [0.0341, 0.1363, 0.5575, 0.1363] if year == '2015' else [0.0077, 0.0324, 0.1848, 0.0324] if year == '2016' else [0.0076, 0.0314, 0.1750, 0.0314]
 
+def write(font, size, x, y, text):
+    w = ROOT.TLatex()
+    w.SetNDC()
+    w.SetTextFont(font)
+    w.SetTextSize(size)
+    w.DrawLatex(x, y, text)
+    return w
+
 x = []
 ex = []
 y1 = []
@@ -51,6 +59,10 @@ for i,ntracks in enumerate([3,4,5,7]):
     l.AddEntry(h1, 'without efficiency correction')
     l.AddEntry(h2, 'with efficiency correction')
     l.Draw()
+    if not is_mc and year == '2015p6':
+        write(61, 0.050, 0.098, 0.913, 'CMS')
+        write(52, 0.035, 0.200, 0.913, 'Preliminary')
+        write(42, 0.050, 0.560, 0.913, '38.5 fb^{-1} (13 TeV)')
     ps.save('compare_dvvc_%s' % ntk[i])
 
     h = h2.Clone('%s' % ntk[i])

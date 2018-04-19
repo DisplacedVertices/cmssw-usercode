@@ -93,7 +93,7 @@ locally, submit, babysit, gather jobs".
   script at the end of skimpick to help figure out the splitting.
 
   Be paranoid that you get the right number of events in the end,
-  set_events_to_process didn't work at some point.
+  set_events didn't work at some point.
 
 - While that's running, run prescales.cc/exe (there's a
   Makefile). Only edit the stuff at the top of main(), not the globals

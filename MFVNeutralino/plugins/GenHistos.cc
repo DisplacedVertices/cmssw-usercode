@@ -30,6 +30,8 @@ private:
 
   edm::ESHandle<ParticleDataTable> pdt;
 
+  TH1F* h_valid;
+
   TH1F* NumLeptons;
   TH2F* DecayType;
 
@@ -107,7 +109,8 @@ private:
 
   TH1F* h_npartons_60;
   TH1F* h_njets_60;
-  TH1F* h_ht_20;
+  TH1F* h_ht;
+  TH1F* h_ht40;
 
   TH1F* NJets;
   BasicKinematicHists* Jets;
@@ -144,6 +147,8 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
 {
   edm::Service<TFileService> fs;
 
+  h_valid = fs->make<TH1F>("h_valid", "", 2, 0, 2);
+
   NumLeptons = fs->make<TH1F>("NumLeptons", "", 3, 0, 3);
   NumLeptons->SetTitle(";number of leptons from top decays;events");
   DecayType = fs->make<TH2F>("DecayType", "", 6, 0, 6, 6, 0, 6);
@@ -153,11 +158,11 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
 
   for (int i = 0; i < 2; ++i) {
     Hs[i] = bkh_factory->make(TString::Format("Hs#%i", i), TString::Format("H #%i", i));
-    Hs[i]->BookE (200, 0, 2000, "10");
-    Hs[i]->BookP (200, 0, 2000, "10");
-    Hs[i]->BookPt(200, 0, 2000, "10");
-    Hs[i]->BookPz(200, 0, 2000, "10");
-    Hs[i]->BookM (200, 0, 2000, "10");
+    Hs[i]->BookE (300, 0, 6000, "20");
+    Hs[i]->BookP (300, 0, 6000, "20");
+    Hs[i]->BookPt(300, 0, 6000, "20");
+    Hs[i]->BookPz(300, 0, 6000, "20");
+    Hs[i]->BookM (300, 0, 6000, "20");
     Hs[i]->BookRapEta(200, "0.1");
     Hs[i]->BookPhi(50, "0.125");
 
@@ -176,11 +181,11 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
     }
 
     Lsps[i] = bkh_factory->make(TString::Format("Lsps#%i", i), TString::Format("lsp #%i", i));
-    Lsps[i]->BookE (200, 0, 2000, "10");
-    Lsps[i]->BookP (200, 0, 2000, "10");
-    Lsps[i]->BookPt(200, 0, 2000, "10");
-    Lsps[i]->BookPz(200, 0, 2000, "10");
-    Lsps[i]->BookM (200, 0, 2000, "10");
+    Lsps[i]->BookE (300, 0, 6000, "20");
+    Lsps[i]->BookP (300, 0, 6000, "20");
+    Lsps[i]->BookPt(300, 0, 6000, "20");
+    Lsps[i]->BookPz(300, 0, 6000, "20");
+    Lsps[i]->BookM (300, 0, 6000, "20");
     Lsps[i]->BookRapEta(200, "0.1");
     Lsps[i]->BookPhi(50, "0.125");
 
@@ -404,12 +409,13 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   h_bquarks_dR = fs->make<TH1F>("h_bquarks_dR", "events with two bquarks;#Delta R;Events/0.14", 50, 0, 7);
   h_bquarks_dR_dphi = fs->make<TH2F>("h_bquarks_dR_dphi", "events with two bquarks;#Delta#phi;#Delta R", 50, -3.15, 3.15, 50, 0, 7);
 
-  h_npartons_in_acc = fs->make<TH1F>("h_npartons_in_acc", ";number of LSP daughters in acceptance;Events", 11, 0, 11);
-  h_npartons_60 = fs->make<TH1F>("h_npartons_60", ";number of partons with E_{T} > 60 GeV;Events", 11, 0, 11);
-  h_njets_60 = fs->make<TH1F>("h_njets_60", ";number of jets with E_{T} > 60 GeV;Events", 11, 0, 11);
-  h_ht_20 = fs->make<TH1F>("h_ht_20", ";#SigmaH_{T} of jets with E_{T} > 20 GeV;Events", 100, 0, 2000);
+  h_npartons_in_acc = fs->make<TH1F>("h_npartons_in_acc", ";number of LSP daughters in acceptance;Events", 40, 0, 40);
+  h_npartons_60 = fs->make<TH1F>("h_npartons_60", ";number of partons with E_{T} > 60 GeV;Events", 40, 0, 40);
+  h_njets_60 = fs->make<TH1F>("h_njets_60", ";number of jets with E_{T} > 60 GeV;Events", 40, 0, 40);
+  h_ht = fs->make<TH1F>("h_ht", ";#SigmaH_{T} of jets with E_{T} > 20 GeV;Events/100 GeV", 100, 0, 10000);
+  h_ht40 = fs->make<TH1F>("h_ht40", ";#SigmaH_{T} of jets with E_{T} > 40 GeV;Events/100 GeV", 100, 0, 10000);
 
-  NJets = fs->make<TH1F>("NJets", ";number of jets;Events", 30, 0, 30);
+  NJets = fs->make<TH1F>("NJets", ";number of jets;Events", 40, 0, 40);
   Jets = bkh_factory->make("Jets", "gen jets");
   Jets->BookE (200, 0, 2000, "10");
   Jets->BookP (200, 0, 2000, "10");
@@ -474,6 +480,8 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     bkh->Fill(c);
     bkh->FillEx(signed_mag(c->vx() - x0, c->vy() - y0), c->vz() - z0, c->charge());
   };
+
+  h_valid->Fill(mci->valid());
 
   if (!mci->valid()) {
     if (!mci_warned)
@@ -636,7 +644,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
         fill(Downs          [i], &*mci->down(i));
       }
     }
-    else if (mci->type() == mfv::mci_XX4j || mci->type() == mfv::mci_MFVddbar || mci->type() == mfv::mci_MFVbbbar || mci->type() == mfv::mci_MFVlq) {
+    else if (mci->type() == mfv::mci_XX4j || mci->type() == mfv::mci_MFVddbar || mci->type() == mfv::mci_MFVbbbar || mci->type() == mfv::mci_MFVlq || mci->type() == mfv::mci_stopdbardbar) {
       for (int i = 0; i < 2; ++i) {
         fill(Hs[i], &*mci->primaries()[i]);
         for (int j = 0; j < 2; ++j)
@@ -719,11 +727,21 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   }
 
 
-  NJets->Fill(gen_jets->size());
+  int njets = 0;
   int nbjets = 0;
   int njets60 = 0;
-  float ht = 0.0;
+  float ht = 0, ht40 = 0;
   for (const reco::GenJet& jet : *gen_jets) {
+    if (jet.pt() < 20 || fabs(jet.eta()) > 2.5)
+      continue;
+
+    ++njets;
+    ht += jet.pt();
+    if (jet.pt() > 40)
+      ht40 += jet.pt();
+    if (jet.pt() > 60)
+      ++njets60;
+
     int nchg = 0;
     int id = gen_jet_id(jet);
     int ntracksptgt3 = 0;
@@ -735,11 +753,6 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     }
 
     float fchg = float(nchg)/jet.nConstituents();
-
-    if (jet.pt() > 60 && fabs(jet.eta()) < 2.5)
-      ++njets60;
-    if (jet.pt() > 20 && fabs(jet.eta()) < 2.5)
-      ht = ht + jet.pt();;
 
     Jets->Fill(&jet);
     JetAuxE->Fill(jet.auxiliaryEnergy());
@@ -767,9 +780,11 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
       BJetFChargedConst->Fill(fchg);
     }      
   }
+  NJets->Fill(njets);
   NBJets->Fill(nbjets);
   h_njets_60->Fill(njets60);
-  h_ht_20->Fill(ht);
+  h_ht->Fill(ht);
+  h_ht40->Fill(ht40);
 }
 
 DEFINE_FWK_MODULE(MFVGenHistos);

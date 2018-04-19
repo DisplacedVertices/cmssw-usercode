@@ -25,6 +25,8 @@ class MFVResolutions : public edm::EDAnalyzer {
   const double max_dist_2d;
   const double max_dist_2d_square; // half length of side
 
+  TH1F* h_valid;
+
   TH1F* h_dr;
   TH1F* h_dist;
 
@@ -111,6 +113,8 @@ MFVResolutions::MFVResolutions(const edm::ParameterSet& cfg)
   die_if_not(which_mom >= 0 && which_mom < mfv::NMomenta, "invalid which_mom");
 
   edm::Service<TFileService> fs;
+
+  h_valid = fs->make<TH1F>("h_valid", "", 2, 0, 2);
 
   h_dr = fs->make<TH1F>("h_dr", ";deltaR to closest lsp;number of vertices", 150, 0, 7);
   h_dist = fs->make<TH1F>("h_dist", ";distance to closest lsp;number of vertices", 100, 0, 0.02);
@@ -202,7 +206,9 @@ void MFVResolutions::analyze(const edm::Event& event, const edm::EventSetup&) {
   edm::Handle<MFVEvent> mevent;
   event.getByToken(event_token, mevent);
 
-  die_if_not(mevent->gen_valid, "not running on signal sample");
+  h_valid->Fill(mevent->gen_valid);
+  if (!mevent->gen_valid)
+    return;
 
   edm::Handle<MFVVertexAuxCollection> vertices;
   event.getByToken(vertices_token, vertices);

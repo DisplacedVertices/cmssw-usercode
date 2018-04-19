@@ -43,33 +43,38 @@ def tgae(x, y, exl, exh, eyl, eyh, title, xtitle, color):
     t = ROOT.TGraphAsymmErrors(l, x, y, exl, exh, eyl, eyh)
     return fmt(t, title, xtitle, color)
 
-def parse_gluglu(gluglu=[]):
-    if not gluglu:
-        gluglu = [eval(x.strip()) for x in open('gluglu.csv') if x.strip()]
-        gluglu = [(z[0], z[1]*1000, z[2]/100*z[1]*1000) for z in gluglu] # convert pb to fb and percent to absolute
-        gluglu = [(a,b,0.) for a,b,_ in gluglu]
-    return gluglu
+def parse_theory(which, include_errors=True, cache={}):
+    if which not in ('gluglu', 'stopstop'):
+        raise ValueError('bad which %r' % which)
+    fn = which + '.csv'
+    if not cache.has_key(fn):
+        xsecs = [eval(x.strip()) for x in open(fn) if x.strip()]
+        xsecs = [(z[0], z[1]*1000, z[2]/100*z[1]*1000) for z in xsecs] # convert pb to fb and percent to absolute
+        if not include_errors:
+            xsecs = [(a,b,0.) for a,b,_ in xsecs]
+        cache[fn] = xsecs
+    return cache[fn]
 
-def fmt_gluglu(g, xtitle):
-    fmt(g, '', xtitle, 9)
+def fmt_theory(which, g, xtitle):
+    fmt(g, '', xtitle, 9 if which == 'gluglu' else 46)
 
-def make_gluglu():
-    g = tge(parse_gluglu())
-    fmt_gluglu(g, 'mass (GeV)')
-    return g
+def make_theory(which, include_errors=True, return_list=False):
+    xsecs = parse_theory(which, include_errors)
+    g = tge(xsecs)
+    fmt_theory(which, g, 'mass (GeV)')
+    if return_list:
+        return g, xsecs
+    else:
+        return g
 
-def draw_gluglu():
-    g_gluglu = make_gluglu()
-    g_gluglu.Draw('A3')
-
-def make_gluglu_hist():
-    gluglu = parse_gluglu()
-    hgluxsec = ROOT.TH1F('hgluxsec', '', 561, 200, 3005)
-    for m,s,se in gluglu:
-        bin = hgluxsec.FindBin(m)
-        hgluxsec.SetBinContent(bin, s)
-        hgluxsec.SetBinError(bin, se)
-    return gluglu, hgluxsec
+def make_theory_hist(which):
+    xsecs = parse_theory(which)
+    h = ROOT.TH1F('h_xsecs_%s' % which, '', 561, 200, 3005)
+    for m,s,se in xsecs:
+        bin = h.FindBin(m)
+        h.SetBinContent(bin, s)
+        h.SetBinError  (bin, se)
+    return xsecs, h
 
 class limits:
     class point:
@@ -149,7 +154,7 @@ def make_1d_plot(d, name, xkey='mass'):
 
     class G:
         def __iter__(self):
-            for x in 'observed expect50 expect68 expect95 expect2p5 expect16 expect84 expect97p5 gluglu'.split():
+            for x in 'observed expect50 expect68 expect95 expect2p5 expect16 expect84 expect97p5 theory'.split():
                 if hasattr(self, x):
                     y = getattr(self, x)
                     y.SetName(x)
@@ -166,32 +171,42 @@ def make_1d_plot(d, name, xkey='mass'):
     g.expect84  =  tgae(d[xkey], d['expect84'],  None, None, None, None, '', xtitle, 1)
     g.expect97p5 = tgae(d[xkey], d['expect97p5'], None, None, None, None, '', xtitle, 1)
 
+    if name.startswith('multijet'):
+        which_theory = 'gluglu'
+    elif name.startswith('dijet'):
+        which_theory = 'stopstop'
+
     if xkey == 'mass':
-        g.gluglu = make_gluglu()
+        g.theory = make_theory(which_theory)
     else:
-        xsec, unc = [(xsec,unc) for mass, xsec, unc in parse_gluglu() if mass == which_mass][0]
+        xsecs = parse_theory(which_theory)
+        zz = [(xsec,unc) for mass, xsec, unc in xsecs if mass == which_mass]
+        if zz:
+            xsec, unc = zz[0]
+        else:
+            xsec, unc = 1e-99, 1e-99
         x = d[xkey]
         y = [xsec]*len(x)
         ey = [unc]*len(x)
-        g.gluglu = tge(zip(x,y,ey))
-        fmt_gluglu(g.gluglu, xtitle)
+        g.theory = tge(zip(x,y,ey))
+        fmt_theory(which_theory, g.theory, xtitle)
 
     return g
 
 def save_1d_plots():
     xxx = [
-        ('multijet_M0800',   lambda s: 'neu'   in sample.name and sample.mass == 800 and sample.tau <= 1000., lambda s: s.sample.tau,  ('tau',  800.)),
-        ('multijet_M1600',   lambda s: 'neu'   in sample.name and sample.mass ==1600 and sample.tau <= 1000., lambda s: s.sample.tau,  ('tau', 1600.)),
-        ('multijet_M2400',   lambda s: 'neu'   in sample.name and sample.mass ==2400 and sample.tau <= 1000., lambda s: s.sample.tau,  ('tau', 2400.)),
-        ('multijet_tau300um',lambda s: 'neu'   in sample.name and sample.tau  == 0.3 and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
-        ('multijet_tau1mm',  lambda s: 'neu'   in sample.name and sample.tau  == 1.  and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
-        ('multijet_tau10mm', lambda s: 'neu'   in sample.name and sample.tau  == 10. and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
-        ('ddbar_M0800',      lambda s: 'ddbar' in sample.name and sample.mass == 800 and sample.tau <= 1000., lambda s: s.sample.tau,  ('tau',  800.)),
-        ('ddbar_M1600',      lambda s: 'ddbar' in sample.name and sample.mass ==1600 and sample.tau <= 1000., lambda s: s.sample.tau,  ('tau', 1600.)),
-        ('ddbar_M2400',      lambda s: 'ddbar' in sample.name and sample.mass ==2400 and sample.tau <= 1000., lambda s: s.sample.tau,  ('tau', 2400.)),
-        ('ddbar_tau300um',   lambda s: 'ddbar' in sample.name and sample.tau  == 0.3 and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
-        ('ddbar_tau1mm',     lambda s: 'ddbar' in sample.name and sample.tau  == 1.  and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
-        ('ddbar_tau10mm',    lambda s: 'ddbar' in sample.name and sample.tau  == 10. and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
+        ('multijet_M0800',   lambda s: 'neu'          in sample.name and sample.mass == 800 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau',  800.)),
+        ('multijet_M1600',   lambda s: 'neu'          in sample.name and sample.mass ==1600 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 1600.)),
+        ('multijet_M2400',   lambda s: 'neu'          in sample.name and sample.mass ==2400 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 2400.)),
+        ('multijet_tau300um',lambda s: 'neu'          in sample.name and sample.tau  == 0.3 and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
+        ('multijet_tau1mm',  lambda s: 'neu'          in sample.name and sample.tau  == 1.  and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
+        ('multijet_tau10mm', lambda s: 'neu'          in sample.name and sample.tau  == 10. and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
+        ('dijet_M0800',      lambda s: 'stopdbardbar' in sample.name and sample.mass == 800 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau',  800.)),
+        ('dijet_M1600',      lambda s: 'stopdbardbar' in sample.name and sample.mass ==1600 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 1600.)),
+        ('dijet_M2400',      lambda s: 'stopdbardbar' in sample.name and sample.mass ==2400 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 2400.)),
+        ('dijet_tau300um',   lambda s: 'stopdbardbar' in sample.name and sample.tau  == 0.3 and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
+        ('dijet_tau1mm',     lambda s: 'stopdbardbar' in sample.name and sample.tau  == 1.  and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
+        ('dijet_tau10mm',    lambda s: 'stopdbardbar' in sample.name and sample.tau  == 10. and sample.mass <= 2600, lambda s: s.sample.mass, 'mass'),
         ]
     
     in_f = ROOT.TFile('limitsinput.root')
@@ -226,10 +241,10 @@ def save_2d_plots():
     in_f = ROOT.TFile('limitsinput.root')
     out_f = ROOT.TFile('limits.root', 'recreate')
 
-    for kind in 'mfv_ddbar', 'mfv_neu':
+    for kind in 'mfv_stopdbardbar', 'mfv_neu':
         d = limits()
         for sample in sample_iterator(in_f):
-            if -sample.isample in (209,210,211,399,489,589,590,675,676,969,970,971,1063,1159,1249,1349,1350,1435,1436):
+            if -sample.isample in (209,210,211,303,399,489,589,590,675,676):
                 continue
             if sample.kind != kind:
                 continue
@@ -248,10 +263,10 @@ def save_2d_plots():
 
 ####
 
-def gluglu_exclude(h, opt):
-    gluglu, hgluglu = make_gluglu_hist()
-    gluglu = dict((m, (s, es)) for m, s, es in gluglu)
-    max_mass = max(gluglu.keys())
+def theory_exclude(which, h, opt):
+    theory, htheory = make_theory_hist(which)
+    theory = dict((m, (s, es)) for m, s, es in theory)
+    max_mass = max(theory.keys())
 
     hexc = h.Clone(h.GetName() +'_exc_%s' % opt)
     hexc.SetStats(0)
@@ -268,12 +283,12 @@ def gluglu_exclude(h, opt):
 
             lim = h.GetBinContent(ix, iy)
 
-            bin = hgluglu.FindBin(mass)
-            assert bin < hgluglu.GetNbinsX()
-            ma = hgluglu.GetBinLowEdge(bin)
-            mb = hgluglu.GetBinLowEdge(bin+1)
-            sa, esa = gluglu[ma]
-            sb, esb = gluglu[mb]
+            bin = htheory.FindBin(mass)
+            assert bin < htheory.GetNbinsX()
+            ma = htheory.GetBinLowEdge(bin)
+            mb = htheory.GetBinLowEdge(bin+1)
+            sa, esa = theory[ma]
+            sb, esb = theory[mb]
 
             z = (mass - ma) / (mb - ma)
             s = sa + (sb - sa) * z
@@ -318,7 +333,7 @@ def exc_graph(h, color, style):
                 #print x, y, l
                 break
     g = ROOT.TGraph(len(xs), xs, ys)
-    g.SetTitle(';neutralino mass (GeV);neutralino lifetime (mm)')
+    g.SetTitle(';mass (GeV);lifetime (mm)')
     g.SetLineWidth(2)
     g.SetLineColor(color)
     g.SetLineStyle(style)
@@ -407,7 +422,7 @@ EOF
 env R_LIBS=~/.R R --no-save <<EOF
 '''
     print 'library(akima)'
-    for k in 'mfv_ddbar', 'mfv_neu':
+    for k in 'mfv_stopdbardbar', 'mfv_neu':
         for y in 'observed', 'expect2p5', 'expect16', 'expect50', 'expect68', 'expect84', 'expect95', 'expect97p5':
             x = '%s_%s' % (k,y)
             h = f.Get('%s/%s' % (k,y))
@@ -422,7 +437,7 @@ env R_LIBS=~/.R R --no-save <<EOF
 
 def one_from_r(ex, name):
     def read_csv(fn):
-        lines = [x.strip() for x in open(os.path.join('/uscmst1b_scratch/lpc1/3DayLifetime/tucker/to_from_r',fn)).read().replace('"', '').split('\n') if x.strip()]
+        lines = [x.strip() for x in open(os.path.join('/uscms_data/d2/tucker/limits_temp',fn)).read().replace('"', '').split('\n') if x.strip()]
         lines.pop(0)
         vs = []
         for line in lines:
@@ -455,14 +470,18 @@ def one_from_r(ex, name):
 
 def from_r():
     f = ROOT.TFile('limits_fromr.root', 'recreate')
-    for k in 'mfv_ddbar', 'mfv_neu':
+    for k in 'mfv_stopdbardbar', 'mfv_neu':
         for opt in ('nm', 'up', 'dn'):
             #for ex in 'observed expect2p5 expect16 expect50 expect68 expect84 expect95 expect97p5'.split():
             for ex in 'observed expect50'.split():
                 ex = k + '_' + ex
                 n = '%s_fromrinterp' % ex
                 h = one_from_r(ex, n)
-                hexc = gluglu_exclude(h, opt)
+                if k == 'mfv_stopdbardbar':
+                    which = 'stopstop' 
+                elif k == 'mfv_neu':
+                    which = 'gluglu'
+                hexc = theory_exclude(which, h, opt)
                 g = exc_graph(hexc, 1, 1)
                 g.SetName(n + '_%s_exc_g' % opt)
                 h.Write()
@@ -474,13 +493,16 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         cmd = sys.argv[1]
 
-        if cmd == 'draw_gluglu':
+        if cmd == 'draw_theory':
             set_style()
-            ps = plot_saver(plot_dir('limitplot_gluglu'), size=(600,600))
-            draw_gluglu()
-            ps.save('gluglu')
+            ps = plot_saver(plot_dir('limitsplot_theory'), size=(600,600))
+            g1 = make_theory('gluglu')
+            g2 = make_theory('stopstop')
+            g1.Draw('A3')
+            g2.Draw('3')
+            ps.save('theory')
 
-        if cmd == 'save_1d_plots':
+        elif cmd == 'save_1d_plots':
             save_1d_plots()
 
         elif cmd == 'save_2d_plots':
@@ -496,4 +518,4 @@ if __name__ == '__main__':
             from_r()
 
         else:
-            print 'huh?'
+            print '%r: huh?' % cmd
