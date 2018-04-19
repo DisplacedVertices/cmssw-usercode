@@ -4,6 +4,9 @@ from JMTucker.Tools.MiniAOD_cfg import *
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
+if year >= 2017:
+    raise NotImplementedError('have not tried ntuple from aod on >=2017 cmssw/samples, use ntuple2.py')
+
 is_mc = True
 H = False
 repro = False
