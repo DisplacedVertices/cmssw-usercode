@@ -4,7 +4,7 @@ from signal_efficiency import SignalEfficiencyCombiner
 set_style()
 ps = plot_saver(plot_dir('pretty_templates'), size=(700,700), log=False, pdf=True)
 
-f = ROOT.TFile('/uscms/home/tucker/public/mfv/limitsinput_100kevent_samples_used_for_Figs_1+3.pdf')
+f = ROOT.TFile('/uscms/home/tucker/public/mfv/limitsinput_100kevent_samples_used_for_Figs_1+3.root')
 combiner = SignalEfficiencyCombiner()
 
 which = [
