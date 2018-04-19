@@ -9,7 +9,7 @@ file_event_from_argv(process)
 process.load('JMTucker.MFVNeutralino.MiniTree_cff')
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.MFVNeutralino.Year import year
+    from JMTucker.Tools.Year import year
     from JMTucker.Tools import Samples
     if year == 2015:
         samples = Samples.data_samples_2015 + \

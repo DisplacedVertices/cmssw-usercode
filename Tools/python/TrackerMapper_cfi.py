@@ -1,5 +1,5 @@
 import FWCore.ParameterSet.Config as cms
-from JMTucker.MFVNeutralino.Year import year
+from JMTucker.Tools.Year import year
 from PileupWeights import pileup_weights
 
 TrackerMapper = cms.EDAnalyzer('TrackerMapper',

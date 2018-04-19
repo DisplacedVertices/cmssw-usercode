@@ -6,7 +6,7 @@ from JMTucker.Tools.Merge_cfg import cms, process
 process.out.maxSize = cms.untracked.int32(2**21) # in kB, i.e. 2 GB
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.MFVNeutralino.Year import year
+    from JMTucker.Tools.Year import year
     from JMTucker.Tools import Samples
 
     dataset = 'ntuplev16_noef'

@@ -1,7 +1,7 @@
 import sys
 from JMTucker.Tools.MiniAOD_cfg import *
 from JMTucker.Tools.CMSSWTools import *
-from JMTucker.MFVNeutralino.Year import year
+from JMTucker.Tools.Year import year
 
 from_miniaod = False
 is_mc = True

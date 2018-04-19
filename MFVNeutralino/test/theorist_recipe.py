@@ -116,7 +116,7 @@ process.pGenDvv400um = cms.Path(process.common * process.mfvGenParticleFilterDvv
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.MFVNeutralino.Year import year
+    from JMTucker.Tools.Year import year
     from JMTucker.Tools import Samples
     if year == 2015:
         raise NotImplementedError("samples don't have dataset")

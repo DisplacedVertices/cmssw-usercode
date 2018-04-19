@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 from JMTucker.Tools.PileupWeights import pileup_weights
-from Year import year
+from JMTucker.Tools.Year import year
 
 mfvWeight = cms.EDProducer('MFVWeightProducer',
                            throw_if_no_mcstat = cms.bool(True),

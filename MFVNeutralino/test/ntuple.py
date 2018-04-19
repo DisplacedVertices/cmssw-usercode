@@ -2,7 +2,7 @@
 
 from JMTucker.Tools.MiniAOD_cfg import *
 from JMTucker.Tools.CMSSWTools import *
-from JMTucker.MFVNeutralino.Year import year
+from JMTucker.Tools.Year import year
 
 is_mc = True
 H = False

@@ -115,7 +115,7 @@ SimpleTriggerEfficiency.setup_endpath(process, weight_src='mfvWeight' if use_wei
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.MFVNeutralino.Year import year
+    from JMTucker.Tools.Year import year
     from JMTucker.Tools import Samples
     if year == 2015:
         samples = Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015 + \

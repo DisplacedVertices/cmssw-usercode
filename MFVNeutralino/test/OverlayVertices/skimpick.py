@@ -18,7 +18,7 @@ output_file(process, 'skimpick.root', [
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.MFVNeutralino.Year import year
+    from JMTucker.Tools.Year import year
     import JMTucker.Tools.Samples as Samples 
     if year == 2015:
         samples = Samples.data_samples_2015 + Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015
@@ -53,7 +53,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     ms.submit(samples)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submitmerge' in sys.argv:
-    from JMTucker.MFVNeutralino.Year import year
+    from JMTucker.Tools.Year import year
     import JMTucker.Tools.Samples as Samples 
     if year == 2015:
         samples = Samples.data_samples_2015 + Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015

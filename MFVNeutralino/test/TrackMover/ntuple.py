@@ -4,7 +4,7 @@ import sys
 from JMTucker.Tools.general import named_product, typed_from_argv
 from JMTucker.Tools.MiniAOD_cfg import *
 from JMTucker.Tools.CMSSWTools import *
-from JMTucker.MFVNeutralino.Year import year
+from JMTucker.Tools.Year import year
 
 version = 6
 cfgs = named_product(njets = [2,3],

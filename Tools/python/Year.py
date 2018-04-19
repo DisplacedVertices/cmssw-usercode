@@ -5,7 +5,7 @@ import os
 year = None
 magic = '#define MFVNEUTRALINO_'
 
-for line in open(os.path.join(os.environ['CMSSW_BASE'], 'src/JMTucker/MFVNeutralinoFormats/interface/Year.h')):
+for line in open(os.path.join(os.environ['CMSSW_BASE'], 'src/JMTucker/Tools/interface/Year.h')):
     line = line.strip()
     if line.startswith(magic):
         assert year is None

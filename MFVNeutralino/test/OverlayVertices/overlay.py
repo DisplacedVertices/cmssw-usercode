@@ -4,7 +4,7 @@ from JMTucker.Tools.CMSSWTools import which_global_tag
 from JMTucker.Tools.CMSSWTools import *
 import JMTucker.Tools.SampleFiles as SampleFiles
 import JMTucker.Tools.Samples as Samples
-from JMTucker.MFVNeutralino.Year import year
+from JMTucker.Tools.Year import year
 
 allowed_samples = Samples.ttbar_samples + Samples.qcd_samples_sum + Samples.ttbar_samples_2015 + Samples.qcd_samples_sum_2015
 

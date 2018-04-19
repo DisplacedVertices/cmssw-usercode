@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from JMTucker.MFVNeutralino.Year import year; assert year in (2015,2016) # fix later
+from JMTucker.Tools.Year import year; assert year in (2015,2016) # fix later
 from scanpack import get_scanpack, scanpackbase
 
 condor = False

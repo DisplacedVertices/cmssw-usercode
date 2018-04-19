@@ -10,7 +10,7 @@ from pprint import pprint
 from JMTucker.Tools.CRAB3Tools import Config, crab_command
 from JMTucker.Tools.general import int_ceil, save_git_status, popen, touch
 from JMTucker.Tools import colors
-from JMTucker.MFVNeutralino.Year import year
+from JMTucker.Tools.Year import year
 
 max_njobs = dict([(x, (int_ceil(y, per), per if y%per == 0 else y%per)) for x,y in [
             (('JetHT2016B3', 3), 19521),

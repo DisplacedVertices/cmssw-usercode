@@ -37,7 +37,7 @@ for mn,mx in (3,3), (3,4), (4,4):
     setattr(process, pth_name + 'noana', pth_noana)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.MFVNeutralino.Year import year
+    from JMTucker.Tools.Year import year
     import JMTucker.Tools.Samples as Samples 
     if year == 2015:
         samples = Samples.data_samples_2015

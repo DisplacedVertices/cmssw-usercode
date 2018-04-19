@@ -1,7 +1,7 @@
 import sys, os
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 from JMTucker.Tools.CMSSWTools import which_global_tag
-from JMTucker.MFVNeutralino.Year import year
+from JMTucker.Tools.Year import year
 
 simple = False
 

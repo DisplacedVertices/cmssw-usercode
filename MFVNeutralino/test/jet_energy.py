@@ -1,7 +1,7 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 from JMTucker.Tools.CMSSWTools import which_global_tag
-from JMTucker.MFVNeutralino.Year import year
+from JMTucker.Tools.Year import year
 
 dataset = 'ntuplev16'
 sample_files(process, 'mfv_neu_tau01000um_M0800', dataset, 1)
@@ -34,7 +34,7 @@ def force_bs(process, bs):
             ana.force_bs = bs
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.MFVNeutralino.Year import year
+    from JMTucker.Tools.Year import year
     from JMTucker.Tools import Samples 
     samples = Samples.mfv_signal_samples + Samples.mfv_stopdbardbar_samples
 

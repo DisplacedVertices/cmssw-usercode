@@ -14,7 +14,7 @@ process.mfvAnalysisCutsPreSel = process.mfvAnalysisCuts.clone(apply_vertex_cuts 
 process.p = cms.Path(process.mfvWeight * process.mfvAnalysisCutsPreSel * process.mfvVertexerPairEffsSeq)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.MFVNeutralino.Year import year
+    from JMTucker.Tools.Year import year
     from JMTucker.Tools import Samples 
     if year == 2015:
         samples = Samples.data_samples_2015 + \

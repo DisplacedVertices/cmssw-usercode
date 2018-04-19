@@ -26,7 +26,7 @@ process.p = cms.Path(process.mfvWeight * process.mfvMovedTree)
 file_event_from_argv(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.MFVNeutralino.Year import year
+    from JMTucker.Tools.Year import year
     import JMTucker.Tools.Samples as Samples
     if year == 2015:
         samples = Samples.mfv_signal_samples_2015

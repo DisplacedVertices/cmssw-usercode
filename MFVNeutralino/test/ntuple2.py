@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from JMTucker.Tools.CMSSWTools import *
-from JMTucker.MFVNeutralino.Year import year
+from JMTucker.Tools.Year import year
 
 if year == 2015:
     raise NotImplementedError("won't bother to understand 2015 miniaod")

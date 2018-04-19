@@ -1,6 +1,6 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 from JMTucker.Tools.CMSSWTools import which_global_tag
-from JMTucker.MFVNeutralino.Year import year
+from JMTucker.Tools.Year import year
 
 if year == 2015:
     raise ValueError("PackedCandidates doesn't work in 2015 CMSSW")
