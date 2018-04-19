@@ -1,3 +1,5 @@
+# NB: this module should not depend on any local imports, except in __main__, unless you ship them with combine/submit.py
+
 import ROOT; ROOT.gROOT.SetBatch()
 
 def trigmult(x):
@@ -42,9 +44,19 @@ class SignalEfficiencyCombiner:
                 ]
 
         self.int_lumi = 0
+        def check_names(f, last_names=[]):
+            h = f.Get('name_list')
+            names = [h.GetXaxis().GetBinLabel(ibin) for ibin in xrange(1,h.GetNbinsX()+1)]
+            if last_names:
+                if names != last_names:
+                    raise ValueError('names are different between files')
+            else:
+                last_names.extend(names)
+
         for inp in self.inputs:
             self.int_lumi += inp.int_lumi
             inp.f = ROOT.TFile(inp.fn)
+            check_names(inp.f)
 
     def check(self, nbins, int_lumi):
         assert self.nbins == nbins
@@ -125,15 +137,17 @@ class SignalEfficiencyCombiner:
                       h_dvv = h_dvv_sum)
 
 if __name__ == '__main__':
-    which = -1
+    which = None
+    combiner = SignalEfficiencyCombiner()
     try:
         import sys
         which = int(sys.argv[1])
-    except IndexError:
-        pass
     except ValueError:
         from limitsinput import name2isample
-        which = name2isample(ROOT.TFile('limitsinput.root'), sys.argv[1])
-    r = SignalEfficiencyCombiner().combine(which)
-    print r
+        which = name2isample(combiner.inputs[0].f, sys.argv[1])
+    except IndexError:
+        pass
+    if which is not None:
+        r = combiner.combine(which)
+        print r
 
