@@ -12,6 +12,7 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "RecoParticleFlow/PFTracking/interface/PFTrackAlgoTools.h"
+#include "JMTucker/Tools/interface/Bridges.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/Tools/interface/TrackHistos.h"
@@ -160,7 +161,7 @@ MFVPackedCandidates::track_ex::track_ex(const reco::BeamSpot& bs_, const reco::V
     dptopt(tk.pt() > 0 ? tk.ptError() / tk.pt() : -999),
 
     pass(tk.pt() > 1 &&
-         tk.hitPattern().hasValidHitInFirstPixelBarrel() &&
+         jmt::hasValidHitInFirstPixelBarrel(tk) &&
          npxlayers >= 2 &&
          ((aeta < 2 && nstlayers >= 6) || (aeta >= 2 && nstlayers >= 7)) &&
          fabs(sigmadxybs) > 4)

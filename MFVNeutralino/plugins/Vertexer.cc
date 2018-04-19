@@ -21,6 +21,7 @@
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
+#include "JMTucker/Tools/interface/Bridges.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexerPairEff.h"
 
 namespace {
@@ -280,7 +281,7 @@ private:
       npxhits = tk.hitPattern().numberOfValidPixelHits();
       npxlayers = tk.hitPattern().pixelLayersWithMeasurement();
       nstlayers = tk.hitPattern().stripLayersWithMeasurement();
-      min_r = tk.hitPattern().hasValidHitInFirstPixelBarrel() ? 1 : 2000000000;
+      min_r = jmt::hasValidHitInFirstPixelBarrel(tk) ? 1 : 2000000000;
     }
 
     // these are cheap
