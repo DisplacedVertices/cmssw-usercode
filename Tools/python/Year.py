@@ -12,3 +12,5 @@ for line in open(os.path.join(os.environ['CMSSW_BASE'], 'src/JMTucker/Tools/inte
         year = int(line.replace(magic, ''))
 
 assert year in (2015, 2016, 2017)
+
+__all__ = ['year']
