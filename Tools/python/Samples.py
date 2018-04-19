@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+# JMTBAD rename the 2016 samples to have _2016 suffix (in SampleFiles too)
+# and 2017 samples' main are are miniaod while 2015/6 are not...
+
 from JMTucker.Tools.Sample import *
 
 ########################################################################
@@ -197,7 +200,7 @@ for s in xx4j_samples_2015:
 all_signal_samples_2015 = mfv_signal_samples_2015 # don't use xx4j
 
 ########
-# 2016 MC = main, so no _2016 in names
+# 2016 MC
 ########
 
 qcd_samples = [
@@ -656,6 +659,24 @@ for s in qcd_hip_samples:
 ########################################################################
 
 ########
+# 2017 MC
+########
+
+qcd_samples_2017 = [
+    MCSample('qcdht0500_2017', '/QCD_HT500to700_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1/MINIAODSIM' ,  54624037, nice='QCD, 500 < H_{T} < 700 GeV',   color=804, syst_frac=0.20, xsec=3.163e4),
+    MCSample('qcdht0700_2017', '/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1/MINIAODSIM',  47620074, nice='QCD, 700 < H_{T} < 1000 GeV',  color=805, syst_frac=0.20, xsec=6.802e3),
+    MCSample('qcdht1000_2017', '/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1/MINIAODSIM', 16606018, nice='QCD, 1000 < H_{T} < 1500 GeV', color=806, syst_frac=0.20, xsec=1.206e3),
+    MCSample('qcdht1500_2017', '/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1/MINIAODSIM', 11323084, nice='QCD, 1500 < H_{T} < 2000 GeV', color=807, syst_frac=0.20, xsec=120),
+    MCSample('qcdht2000_2017', '/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1/MINIAODSIM',   5468913, nice='QCD, H_{T} > 2000',            color=808, syst_frac=0.20, xsec=25.3),
+    ]
+
+ttbar_samples_2017 = [
+    MCSample('ttbar_2017', '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1/MINIAODSIM', 153531390, nice='t#bar{t}', color=4, syst_frac=0.15, xsec=832.),
+    ]
+
+########################################################################
+
+########
 # 2015 data
 ########
 
@@ -673,7 +694,7 @@ for s in data_samples_2015 + auxiliary_data_samples_2015:
     s.json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Reprocessing/Cert_13TeV_16Dec2015ReReco_Collisions15_25ns_JSON_Silver_v2.txt'
 
 ########
-# 2016 data = main so no _2016 in list names
+# 2016 data
 ########
 
 data_samples = [
@@ -761,6 +782,9 @@ __all__ = [
     'leptonic_background_samples_sum_2015',
     'data_samples_2015',
     'auxiliary_data_samples_2015',
+
+    'qcd_samples_2017',
+    'ttbar_samples_2017',
 
     'registry',
     ]
