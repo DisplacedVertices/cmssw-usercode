@@ -4,7 +4,8 @@
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 
 namespace jmt {
-  bool hasValidHitInFirstPixelBarrel(const reco::Track& tk);
+  bool hasValidHitInFirstPixelBarrel(const reco::Track&);
+  int numberOfAllHits(const reco::HitPattern&, const reco::HitPattern::HitCategory);
 }
 
 #endif

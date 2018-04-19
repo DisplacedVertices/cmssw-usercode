@@ -9,4 +9,13 @@ namespace jmt {
     return tk.hitPattern().hasValidHitInFirstPixelBarrel();
 #endif
   }
+
+  int numberOfAllHits(const reco::HitPattern& hp, const reco::HitPattern::HitCategory category) {
+#if defined(MFVNEUTRALINO_2017)
+    return hp.numberOfAllHits(category);
+#else
+    return hp.numberOfHits(category);
+#endif
+  }
+
 }
