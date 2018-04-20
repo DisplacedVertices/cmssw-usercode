@@ -1,5 +1,9 @@
 from textwrap import dedent
 import FWCore.ParameterSet.Config as cms
+from JMTucker.Tools.Year import year
+
+# JMTBAD these need to be checked
+# JMTBAD get rid of semilep/dilep
 
 # Cuts for muons and electrons, including relative isolation with
 # delta beta corrections. First set (no "signal" or "semilep"/"dilep")
@@ -18,6 +22,10 @@ electronIso = iso + '/et'
 def denewline(s):
     return dedent(s).replace('\n', ' ')
 
+electron_missing_inner_hits = 'gsfTrack.hitPattern.numberOfAllHits("MISSING_INNER_HITS")'
+if year < 2017:
+    electron_missing_inner_hits = electron_missing_inner_hits.replace('All','')
+
 electronId = denewline('''
 (
  isEB &&
@@ -26,7 +34,7 @@ electronId = denewline('''
  abs(deltaPhiSuperClusterTrackAtVtx) < 0.228 &&
  hadronicOverEm < 0.356 &&
  abs(1/ecalEnergy - eSuperClusterOverP/ecalEnergy) < 0.299 &&
- gsfTrack.hitPattern.numberOfHits("MISSING_INNER_HITS") <= 2 &&
+ %(electron_missing_inner_hits)s <= 2 &&
  passConversionVeto
  ) ||
 (
@@ -36,10 +44,10 @@ electronId = denewline('''
  abs(deltaPhiSuperClusterTrackAtVtx) < 0.213 &&
  hadronicOverEm < 0.211 &&
  abs(1/ecalEnergy - eSuperClusterOverP/ecalEnergy) < 0.15 &&
- gsfTrack.hitPattern.numberOfHits("MISSING_INNER_HITS") <= 3 &&
+ %(electron_missing_inner_hits)s <= 3 &&
  passConversionVeto
  )
-''')
+''' % locals())
 
 jetPresel = denewline('''
 (
