@@ -21,6 +21,7 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/MCInteractions.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/TriggerFloats.h"
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
+#include "JMTucker/Tools/interface/Bridges.h"
 #include "JMTucker/Tools/interface/GenUtilities.h"
 #include "JMTucker/Tools/interface/TriggerHelper.h"
 #include "JMTucker/Tools/interface/Utilities.h"
@@ -325,7 +326,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       }
       else {
         const pat::PackedCandidate* pk = dynamic_cast<const pat::PackedCandidate*>(dau);
-        if (pk)
+        if (pk && jmt::packedCandidateHasTrackDetails(*pk))
           tk = &pk->pseudoTrack();
       }
 

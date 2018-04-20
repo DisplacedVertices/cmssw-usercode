@@ -1,3 +1,4 @@
+#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "JMTucker/Tools/interface/Year.h"
 
@@ -18,4 +19,11 @@ namespace jmt {
 #endif
   }
 
+  bool packedCandidateHasTrackDetails(const pat::PackedCandidate& cand) {
+#if defined(MFVNEUTRALINO_2017)
+    return cand.charge() && cand.hasTrackDetails(); //cand.charge() && cand.pt() > 0.5 && fabs(cand.eta()) < 2.5;
+#else
+    return cand.charge(); // JMTBAD why didn't we need to do the rest of the above with 2016 miniaod packed candidates?
+#endif
+  }
 }

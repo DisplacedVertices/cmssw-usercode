@@ -5,6 +5,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "JMTucker/Tools/interface/Bridges.h"
 
 class MFVUnpackedCandidateTracks : public edm::EDProducer {
 public:
@@ -30,7 +31,7 @@ void MFVUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetu
 
   for (size_t i = 0, ie = packed_candidates->size(); i < ie; ++i) {
     const pat::PackedCandidate& cand = (*packed_candidates)[i];
-    if (cand.charge()) {
+    if (jmt::packedCandidateHasTrackDetails(cand)) {
       tracks->push_back(cand.pseudoTrack());
       which->push_back(i);
     }
