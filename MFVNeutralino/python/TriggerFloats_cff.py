@@ -7,7 +7,7 @@ mfvTriggerFloats = cms.EDProducer('MFVTriggerFloats',
                                   l1GtUtilsTags, # will be ignored with 2016
                                   l1_results_src = cms.InputTag('gtStage2Digis'), # ditto 2015
                                   trigger_results_src = cms.InputTag('TriggerResults', '', 'HLT'),
-                                  trigger_objects_src = cms.InputTag('selectedPatTrigger'),
+                                  trigger_objects_src = cms.InputTag('slimmedPatTrigger'),
                                   jets_src = cms.InputTag('selectedPatJets'), # slimmedJets for miniaod
                                   jet_cut = jtupleParams.jetCut,
                                   prints = cms.untracked.int32(0),
