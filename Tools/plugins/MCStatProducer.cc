@@ -39,9 +39,9 @@ MCStatProducer::MCStatProducer(const edm::ParameterSet& cfg)
     sumweightprod(0),
     h_sums(0)
 {
-  produces<jmt::MergeableInt,   edm::InLumi>("nEvents");
-  produces<jmt::MergeableFloat, edm::InLumi>("sumWeight");
-  produces<jmt::MergeableFloat, edm::InLumi>("sumWeightProd");
+  produces<jmt::MergeableInt,   edm::Transition::EndLuminosityBlock>("nEvents");
+  produces<jmt::MergeableFloat, edm::Transition::EndLuminosityBlock>("sumWeight");
+  produces<jmt::MergeableFloat, edm::Transition::EndLuminosityBlock>("sumWeightProd");
 
   edm::Service<TFileService> fs;
   if (fs) {
