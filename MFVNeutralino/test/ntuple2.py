@@ -15,7 +15,7 @@ minitree_only = False
 prepare_vis = False
 keep_all = prepare_vis or False
 keep_gen = False
-event_filter = not keep_all and True
+event_filter = not keep_all
 if len(filter(None, (run_n_tk_seeds, minitree_only, prepare_vis))) > 1:
     raise ValueError('only one of run_n_tk_seeds, minitree_only, prepare_vis allowed')
 
@@ -35,7 +35,7 @@ registration_warnings(process)
 geometry_etc(process, which_global_tag(is_mc, year, H=False, repro=False))
 random_service(process, {'mfvVertices': 1222})
 tfileservice(process, 'vertex_histos.root')
-input_files(process, '/uscmst1b_scratch/lpc1/3DayLifetime/tucker/itch/A00610B3-00B7-E611-8546-A0000420FE80.root')
+input_files(process, 'root://cmsxrootd-site.fnal.gov//store/mc/RunIIFall17MiniAOD/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/50000/7EF2B30C-37EA-E711-B605-0026B92785F6.root')
 output_file(process, 'ntuple.root', [])
 file_event_from_argv(process)
 
@@ -176,7 +176,14 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if run_n_tk_seeds:
         samples = [s for s in samples if not s.is_signal]
 
-    modify = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier)
+    def signals_no_event_filter_modifier(sample):
+        to_replace = []
+        if sample.is_signal:
+            magic = '\x65vent_filter = not keep_all'
+            to_replace.append((magic, 'event_filter = False', 'tuple template does not contain the magic string "%s"' % magic))
+        return [], to_replace
+
+    modify = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier, signals_no_event_filter_modifier)
     ms = MetaSubmitter(batch_name, dataset='miniaod')
     ms.common.ex = year
     ms.common.pset_modifier = modify
