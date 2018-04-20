@@ -213,7 +213,7 @@ class CRABSubmitter:
         if self.job_control_from_sample:
             sample.job_control(cfg.Data)
 
-        if sample.aaa:
+        if getattr(sample, 'aaa', False):
             cfg.Data.ignoreLocality = True
             cfg.Site.whitelist = sample.aaa
 
