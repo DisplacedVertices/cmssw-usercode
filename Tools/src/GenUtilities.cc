@@ -184,11 +184,13 @@ void daughters_with_id(const reco::Candidate* c, int id, std::vector<const reco:
 
 std::pair<const reco::Candidate*, std::vector<const reco::Candidate*> > terminal_candidate_with_copies(const reco::Candidate* c, int allowed_others, int direction) {
   // Handle PYTHIA8 particle record copying through ISR/FSR/whatever: find
-  // first (direction<0) or last (direction>0) copy of c. allowed_others can be -1
+  // first (direction<0) or last (direction>0) copy of c. allowed_others is can be -1
   // for don't care if there are other mothers/daughters as long as the same
-  // particle is there, 1 means allow gluons, 2 means allow photons, 3
-  // for allow both photons and gluons, or 0 to be strict and allow no
-  // other particles. JMTBAD magic numbers
+  // particle is there. Otherwise allowed_others is interpreted by its bits: 1 means allow gluons, 2 means allow photons, 4 means allow electrons (e.g. W+ -> W+ gamma e+ e-)
+
+  const bool allow_gluons = allowed_others & 1;
+  const bool allow_photons = allowed_others & 2;
+  const bool allow_electrons = allowed_others & 4;
 
   std::pair<const reco::Candidate*, std::vector<const reco::Candidate*> > result;
   result.first = 0;
@@ -216,9 +218,10 @@ std::pair<const reco::Candidate*, std::vector<const reco::Candidate*> > terminal
       bool wrong_others = false;
       for (int i = 0, ie = int(nrelatives(c)); i < ie; ++i) {
         int id = relative(c,i)->pdgId();
+        int aid = abs(id);
 	if (id == c->pdgId())
 	  the = i;
-	else if (allowed_others != -1 && ((id != 21 && id != 22) || (id == 21 && !(allowed_others & 1)) || (id == 22 && !(allowed_others & 2)))) {
+	else if (allowed_others != -1 && ((aid != 11 && id != 21 && id != 22) || (id == 21 && !allow_gluons) || (id == 22 && !allow_photons) || (aid == 11 && !allow_electrons))) {
 	  wrong_others = true;
 	  break;
 	}
