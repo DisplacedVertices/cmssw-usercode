@@ -98,3 +98,8 @@ uchar int2uchar_clamp(int x) {
     return 255;
   else return (uchar)x;
 }
+
+void inc_uchar_clamp(uchar& x) {
+  if (x < 255)
+    ++x;
+}
