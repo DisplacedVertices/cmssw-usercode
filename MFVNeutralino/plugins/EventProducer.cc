@@ -244,12 +244,12 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   }
 
   //////////////////////////////////////////////////////////////////////
-  
-  mevent->npv = int2uchar(primary_vertices->size());
+
+  mevent->npv = int2uchar_clamp(primary_vertices->size());
   mevent->ngoodpv = 0;
   for (auto v : *primary_vertices)
     if (!v.isFake() && v.ndof() > 4 && fabs(v.z()) <= 24 && v.position().rho() < 2)
-      inc_uchar(mevent->ngoodpv);
+      inc_uchar_clamp(mevent->ngoodpv);
 
   if (primary_vertex != 0) {
     mevent->pvx = primary_vertex->x();
