@@ -32,9 +32,11 @@ public:
   void produce(edm::Event&, const edm::EventSetup&);
 
 private:
+  const bool input_is_miniaod;
   const edm::EDGetTokenT<mfv::TriggerFloats> triggerfloats_token;
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertex_token;
+  const edm::EDGetTokenT<pat::PackedCandidateCollection> packed_candidates_token;
   const edm::EDGetTokenT<GenEventInfoProduct> gen_info_token;
   const edm::EDGetTokenT<std::vector<double>> gen_vertex_token;
   const edm::EDGetTokenT<reco::GenJetCollection> gen_jets_token;
@@ -58,9 +60,11 @@ private:
 };
 
 MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
-  : triggerfloats_token(consumes<mfv::TriggerFloats>(cfg.getParameter<edm::InputTag>("triggerfloats_src"))),
+  : input_is_miniaod(cfg.getParameter<bool>("input_is_miniaod")),
+    triggerfloats_token(consumes<mfv::TriggerFloats>(cfg.getParameter<edm::InputTag>("triggerfloats_src"))),
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     primary_vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertex_src"))),
+    packed_candidates_token(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("packed_candidates_src"))),
     gen_info_token(consumes<GenEventInfoProduct>(cfg.getParameter<edm::InputTag>("gen_info_src"))),
     gen_vertex_token(consumes<std::vector<double>>(cfg.getParameter<edm::InputTag>("gen_vertex_src"))),
     gen_jets_token(consumes<reco::GenJetCollection>(cfg.getParameter<edm::InputTag>("gen_jets_src"))),
@@ -103,6 +107,10 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   const reco::Vertex* primary_vertex = 0;
   if (primary_vertices->size())
     primary_vertex = &primary_vertices->at(0);
+
+  edm::Handle<pat::PackedCandidateCollection> packed_candidates;
+  if (input_is_miniaod)
+    event.getByToken(packed_candidates_token, packed_candidates);
 
   //////////////////////////////////////////////////////////////////////
 
@@ -262,11 +270,21 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->pvcyz = primary_vertex->covariance(1,2);
     mevent->pvczz = primary_vertex->covariance(2,2);
 
-    mevent->pv_ntracks = int2uchar_clamp(primary_vertex->nTracks());
+    mevent->pv_ntracks = 0;
     mevent->pv_sumpt2 = 0;
-    for (auto trki = primary_vertex->tracks_begin(), trke = primary_vertex->tracks_end(); trki != trke; ++trki) {
-      double trkpt = (*trki)->pt();
-      mevent->pv_sumpt2 += trkpt * trkpt;
+    if (input_is_miniaod) {
+      for (const pat::PackedCandidate& cand : *packed_candidates)
+        if (cand.vertexRef().key() == 0 && jmt::packedCandidateHasTrackDetails(cand)) {
+          inc_uchar_clamp(mevent->pv_ntracks);
+          mevent->pv_sumpt2 += cand.pt() * cand.pt(); // JMTBAD just use the stored score
+        }
+    }
+    else {
+      mevent->pv_ntracks = int2uchar_clamp(primary_vertex->nTracks());
+      for (auto trki = primary_vertex->tracks_begin(), trke = primary_vertex->tracks_end(); trki != trke; ++trki) {
+        double trkpt = (*trki)->pt();
+        mevent->pv_sumpt2 += trkpt * trkpt;
+      }
     }
   }
 

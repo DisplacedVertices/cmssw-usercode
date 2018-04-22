@@ -66,10 +66,10 @@ process.mfvGenParticles.last_flag_check = False
 
 process.mfvVertices.track_src = 'mfvUnpackedCandidateTracks'
 
-#process.mfvVerticesToJets.enable = False # have to figure out how to use daughters of slimmed jets and the map we make in UnpackedCandidateTracks
 process.mfvVerticesToJets.input_is_miniaod = True
 process.mfvVerticesAuxTmp.input_is_miniaod = True
 process.mfvVerticesAuxPresel.input_is_miniaod = True
+process.mfvEvent.input_is_miniaod = True
 
 process.mfvEvent.gen_particles_src = 'prunedGenParticles' # no idea if this lets gen_flavor_code, gen_bquarks, gen_leptons work. I think for the latter you'd want the packed ones that have status 1 particles
 process.mfvEvent.gen_jets_src = 'slimmedGenJets'

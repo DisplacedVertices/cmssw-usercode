@@ -3,6 +3,8 @@ import FWCore.ParameterSet.Config as cms
 from JMTucker.Tools.PATTupleSelection_cfi import jtupleParams
 
 mfvEvent = cms.EDProducer('MFVEventProducer',
+                          input_is_miniaod = cms.bool(False),
+                          packed_candidates_src = cms.InputTag('packedPFCandidates'),
                           triggerfloats_src = cms.InputTag('mfvTriggerFloats'),
                           jet_pt_min = cms.double(20),
                           beamspot_src = cms.InputTag('offlineBeamSpot'),
