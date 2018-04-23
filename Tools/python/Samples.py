@@ -909,9 +909,7 @@ for x in (data_samples_2015 +
         x.add_dataset('ntuplev15')
         x.add_dataset('ntuplev16_ntkseeds')
 
-for x in ttbar_samples + qcd_samples + qcd_samples_ext + mfv_signal_samples + mfv_ddbar_samples:
-    if x in mfv_signal_samples and x.is_private:
-        continue
+for x in ttbar_samples_2017 + qcd_samples_2017:
     x.add_dataset('ntuplev17m')
 
 for x in data_samples + qcd_samples + qcd_samples_ext + qcd_hip_samples[-2:]:
