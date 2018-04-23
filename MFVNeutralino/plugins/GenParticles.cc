@@ -91,9 +91,8 @@ void MFVGenParticles::set_Ttbar_decay(mfv::MCInteractionHolderTtbar& mc, const e
 
     // The W may have a lot of copies, but the copies should always
     // have just one daughter until we reach the actual W decay (qq'
-    // or lnu). Find the last one. ("6" means photons/electrons allowed
-    // besides the W copies.)
-    mc.Ws[which] = gen_ref(final_candidate(mc.Ws[which], 6), gen_particles);
+    // or lnu). Find the last one.
+    mc.Ws[which] = gen_ref(final_candidate(mc.Ws[which], -1), gen_particles);
     if (mc.Ws[which]->numberOfDaughters() < 2)
       throw cms::Exception("BadAssumption") << "W #" << which << " did not have at least two daughters: id " << mc.Ws[which]->pdgId() << " numDau " << mc.Ws[which]->numberOfDaughters();
 
