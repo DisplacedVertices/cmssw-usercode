@@ -29,6 +29,7 @@ if minitree_only:
 ####
 
 process = basic_process('Ntuple')
+max_events(process, 100)
 report_every(process, 1000000)
 #want_summary(process)
 registration_warnings(process)
@@ -165,13 +166,19 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
     import JMTucker.Tools.Samples as Samples
 
-    samples = [s for s in
-               #Samples.data_samples +
-               Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext +
-               Samples.mfv_signal_samples + Samples.mfv_ddbar_samples
-               if s.has_dataset('miniaod')]
+    if year == 2016:
+        samples = \
+            Samples.data_samples + \
+            Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + Samples.qcd_hip_samples + \
+            Samples.all_signal_samples
+    elif year == 2017:
+        samples = \
+            Samples.ttbar_samples_2017 + Samples.qcd_samples_2017
 
-    set_splitting(samples, 'miniaod', 'ntuple')
+    dataset = 'miniaod' if year < 2017 else 'main' # JMTBAD just define dataset miniaod the same as main for 2017 samples? or go back and still define main = aod samples?
+    samples = [s for s in samples if s.has_dataset(dataset)]
+
+    set_splitting(samples, dataset, 'ntuple')
 
     if run_n_tk_seeds:
         samples = [s for s in samples if not s.is_signal]
@@ -184,7 +191,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         return [], to_replace
 
     modify = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier, signals_no_event_filter_modifier)
-    ms = MetaSubmitter(batch_name, dataset='miniaod')
+    ms = MetaSubmitter(batch_name, dataset=dataset)
     ms.common.ex = year
     ms.common.pset_modifier = modify
     ms.common.publish_name = batch_name + '_' + str(year)
