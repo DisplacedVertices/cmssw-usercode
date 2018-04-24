@@ -1,17 +1,7 @@
-# import ROOT in batch mode
-import sys
-oldargv = sys.argv[:]
-sys.argv = [ '-b-' ]
-import ROOT
-ROOT.gROOT.SetBatch(True)
-sys.argv = oldargv
+from collections import defaultdict
+from JMTucker.Tools.ROOTTools import ROOT, cmssw_setup
+cmssw_setup()
 
-# load FWLite C++ libraries
-ROOT.gSystem.Load("libFWCoreFWLite.so");
-ROOT.gSystem.Load("libDataFormatsFWLite.so");
-ROOT.FWLiteEnabler.enable()
-
-# load FWlite python libraries
 from DataFormats.FWLite import Handle, Events
 
 muons, muonLabel = Handle("std::vector<pat::Muon>"), "slimmedMuons"
@@ -24,6 +14,7 @@ fatjets, fatjetLabel = Handle("std::vector<pat::Jet>"), "slimmedJetsAK8"
 mets, metLabel = Handle("std::vector<pat::MET>"), "slimmedMETs"
 vertices, vertexLabel = Handle("std::vector<reco::Vertex>"), "offlineSlimmedPrimaryVertices"
 verticesScore = Handle("edm::ValueMap<float>")
+pfcands, pfcandsLabel = Handle("std::vector<pat::PackedCandidate>"), "packedPFCandidates"
 seenIt = {} # list of things we've seen (so that we dump them in full only once)
 
 # open file (you can use 'edmFileUtil -d /store/whatever.root' to get the physical file name)
@@ -31,15 +22,16 @@ events = Events('/uscmst1b_scratch/lpc1/3DayLifetime/tucker/itch/103B0265-F4F1-E
 
 for iev,event in enumerate(events):
     run,lumi,evt = event.eventAuxiliary().run(), event.eventAuxiliary().luminosityBlock(),event.eventAuxiliary().event()
-    if (lumi != 93520 or evt != 164641843) and iev >= 10: continue
-    event.getByLabel(muonLabel, muons)
-    event.getByLabel(electronLabel, electrons)
-    event.getByLabel(photonLabel, photons)
-    event.getByLabel(tauLabel, taus)
-    event.getByLabel(fatjetLabel, fatjets)
-    event.getByLabel(metLabel, mets)
+    #if (lumi != 93520 or evt != 164641843) and iev >= 2: continue
+    #event.getByLabel(muonLabel, muons)
+    #event.getByLabel(electronLabel, electrons)
+    #event.getByLabel(photonLabel, photons)
+    #event.getByLabel(tauLabel, taus)
+    #event.getByLabel(fatjetLabel, fatjets)
+    #event.getByLabel(metLabel, mets)
     event.getByLabel(vertexLabel, vertices)
     event.getByLabel(vertexLabel, verticesScore)
+    event.getByLabel(pfcandsLabel, pfcands)
 
     print "\nEvent %d: run %6d, lumi %4d, event %12d" % (iev,event.eventAuxiliary().run(), event.eventAuxiliary().luminosityBlock(),event.eventAuxiliary().event())
 
@@ -50,6 +42,17 @@ for iev,event in enumerate(events):
     else:
         for i,PV in enumerate(vertices.product()):
             print "PV %i at x,y,z = %+5.3f, %+5.3f, %+6.3f, ndof: %.1f, score: (pt2 of clustered objects) %.1f" % (i, PV.x(), PV.y(), PV.z(), PV.ndof(),verticesScore.product().get(i))
+
+    # packed PF candidates
+    pfcands_by_vtx = defaultdict(list)
+    for c in pfcands.product():
+        pfcands_by_vtx[c.vertexRef().key()].append(c)
+    for ivtx in sorted(pfcands_by_vtx.keys()):
+        print 'PF cands (%i, %i charged in tk acc, %i w. tk) for vtx %i:' % (len(pfcands_by_vtx[ivtx]), len([x for x in pfcands_by_vtx[ivtx] if abs(x.eta()) < 2.5 and x.charge()]), len([x for x in pfcands_by_vtx[ivtx] if x.hasTrackDetails()]), ivtx)
+        for i,c in enumerate(pfcands_by_vtx[ivtx]):
+            print '%4i id %4i pt %4.1f eta %5.2f phi %5.2f dxy %5.2f dz %5.2f' % (i, c.pdgId(), c.pt(), c.eta(), c.phi(), c.dxy(), c.dz())
+
+    continue
 
     # Muons
     for i,mu in enumerate(muons.product()):
