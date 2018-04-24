@@ -322,6 +322,7 @@ def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=2
             else:
                 sample.split_by = 'files' if sample.condor else 'events'
             name = sample.name.replace('_2015', '')
+            name = sample.name.replace('_2017', '')
             name = name.replace('_hip1p0_mit', '').replace('_hip1p0', '').replace('_retest', '')
             if not d.has_key(name):
                 if sample.is_signal:
@@ -332,7 +333,7 @@ def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=2
                     sample.files_per = 5
             else:
                 erate, frate = d[name]
-                if dataset == 'miniaod':
+                if dataset == 'miniaod' or '_2017' in sample.name:
                     frate /= 4 # more events per file here
                 sample.events_per = min(int(target * erate + 1), 200000)
                 sample.files_per = int(frate * sample.events_per / erate + 1)
