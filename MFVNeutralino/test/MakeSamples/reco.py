@@ -1,6 +1,5 @@
-# from configs in dbs for /QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/AODSIM
-# and /QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6-v1/AODSIM
-# and https://twiki.cern.ch/twiki/bin/viewauth/CMS/PdmVMCcampaignRunIISummer16DR80Premix
+# https://twiki.cern.ch/twiki/bin/view/CMS/PdmVMCcampaignRunIIFall17DRPremix
+# 9_4_0_patch1 cmsDriver.py step2 --mc --eventcontent AODSIM runUnscheduled --datatier AODSIM --conditions 94X_mc2017_realistic_v10 --step RAW2DIGI,RECO,EI --nThreads 8 --era Run2_2017  --fileout file:step1.root --no_exec
 
 import os, sys, FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
@@ -12,7 +11,7 @@ for arg in sys.argv:
     if arg.startswith('premix='):
         premix = arg.replace('premix=','') == '1'
 
-process = cms.Process('RECO', eras.Run2_25ns if dynamicconf.doing_2015 else eras.Run2_2016)
+process = cms.Process('RECO', eras.Run2_2017)
 
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
@@ -23,8 +22,9 @@ process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.RawToDigi_cff')
 if premix:
-    assert not dynamicconf.doing_2015
+    pass
 else:
+    raise NotImplementedError('need to set up non-premix')
     process.load('Configuration.StandardSequences.L1Reco_cff')
 process.load('Configuration.StandardSequences.Reconstruction_cff')
 process.load('CommonTools.ParticleFlow.EITopPAG_cff')
@@ -44,7 +44,7 @@ if not 'debug' in sys.argv:
 process.AODSIMoutput = cms.OutputModule("PoolOutputModule",
                                         compressionAlgorithm = cms.untracked.string('LZMA'),
                                         compressionLevel = cms.untracked.int32(4),
-                                        eventAutoFlushCompressedSize = cms.untracked.int32(15728640),
+                                        eventAutoFlushCompressedSize = cms.untracked.int32(31457280),
                                         fileName = cms.untracked.string('reco.root'),
                                         outputCommands = process.AODSIMEventContent.outputCommands,
                                         )
@@ -54,6 +54,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, dynamicconf.globaltag, '')
 
 process.raw2digi_step = cms.Path(process.RawToDigi)
 if not premix:
+    raise NotImplementedError('need to set up non-premix')
     process.L1Reco_step = cms.Path(process.L1Reco)
 process.reconstruction_step = cms.Path(process.reconstruction)
 process.eventinterpretaion_step = cms.Path(process.EIsequence)
@@ -61,10 +62,15 @@ process.AODSIMoutput_step = cms.EndPath(process.AODSIMoutput)
 
 process.schedule = cms.Schedule(process.raw2digi_step)
 if not premix:
+    raise NotImplementedError('need to set up non-premix')
     process.schedule.append(process.L1Reco_step)
 process.schedule.extend([process.reconstruction_step,process.eventinterpretaion_step,process.AODSIMoutput_step])
+# task?
 
-from FWCore.ParameterSet.Utilities import convertToUnscheduled, cleanUnscheduled
-process = cleanUnscheduled(convertToUnscheduled(process))
+from FWCore.Modules.logErrorHarvester_cff import customiseLogErrorHarvesterUsingOutputCommands
+process = customiseLogErrorHarvesterUsingOutputCommands(process)
+
+from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
+process = customiseEarlyDelete(process)
 
 process.dummyForPsetHash = cms.PSet(dummy = cms.string(os.environ.get('DUMMYFORHASH', '')))

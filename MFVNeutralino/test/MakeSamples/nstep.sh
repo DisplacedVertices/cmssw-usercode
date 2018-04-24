@@ -127,7 +127,7 @@ echo START GENSIM at $(date)
 if [[ $USETHISCMSSW -eq 1 ]]; then
     gensim
 else
-    ( scramproj GENSIM 7_1_21_patch2 && gensim )
+    ( scramproj GENSIM 9_3_6_patch2 && gensim )
 fi
 exitbanner $? GENSIM
 
@@ -144,11 +144,7 @@ echo START RAWHLT at $(date)
 if [[ $USETHISCMSSW -eq 1 ]]; then
     rawhlt
 else
-    if [[ $YEAR == 2015 ]]; then
-        ( scramproj RAWHLT 7_6_1 && rawhlt )
-    else
-        ( scramproj RAWHLT 8_0_21 && rawhlt )
-    fi
+    ( scramproj RAWHLT 9_4_0_patch1 && rawhlt )
 fi
 exitbanner $? RAWHLT
 
@@ -159,17 +155,15 @@ echo START RECO at $(date)
 if [[ $USETHISCMSSW -eq 1 ]]; then
     reco
 else
-    if [[ $YEAR == 2015 ]]; then
-        ( scramproj RECO 7_6_1 && reco )
-    else
-        ( scramproj RECO 8_0_25 && reco )
-    fi
+    ( scramproj RECO 9_4_0_patch1 && reco )
 fi
 exitbanner $? RECO
 
 ################################################################################
 
 if [[ $OUTPUTLEVEL == "ntuple" || $OUTPUTLEVEL == "minitree" ]]; then
+    exitbanner 1 ntuple\|minitree not set up yet
+
     if [[ $(ls -1d CMSSW* | wc -l) != 1 ]]; then
         echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
         echo @@@@ more than one CMSSW dir found:

@@ -1,4 +1,8 @@
+# https://twiki.cern.ch/twiki/bin/view/CMS/PdmVMCcampaignRunIIFall17GS and a later request in McM
+# 9_3_6_patch2 cmsDriver.py Configuration/GenProduction/python/ThirteenTeV/MC17_DYTo2Mu_M800to1300_CP5_Pythia8_v1.py --fileout file:EXO-RunIIFall17GS-00423.root --mc --eventcontent RAWSIM --datatier GEN-SIM --conditions 93X_mc2017_realistic_v3 --beamspot Realistic25ns13TeVEarly2017Collision --step GEN,SIM --nThreads 8 --geometry DB:Extended --era Run2_2017 --python_filename EXO-RunIIFall17GS-00423_1_cfg.py --no_exec --customise Configuration/DataProcessing/Utils.addMonitoring -n 1300 --no_exec
+
 import sys, FWCore.ParameterSet.Config as cms, dynamicconf
+from Configuration.StandardSequences.Eras import eras
 
 genonly = 'genonly' in sys.argv
 debug = 'debug' in sys.argv
@@ -27,11 +31,7 @@ for arg in sys.argv:
 
 ################################################################################
 
-if dynamicconf.cmssw_version[0] == 8: 
-    from Configuration.StandardSequences.Eras import eras
-    process = cms.Process('GENSIM', eras.Run2_25ns)
-else:
-    process = cms.Process('GENSIM')
+process = cms.Process('GENSIM', eras.Run2_2017)
 
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
@@ -39,10 +39,10 @@ process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('SimGeneral.MixingModule.mixNoPU_cfi')
 process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
-process.load('Configuration.Geometry.GeometrySimDB_cff')
-process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
+process.load('Configuration.StandardSequences.GeometrySimDB_cff')
+process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.Generator_cff')
-process.load('IOMC.EventVertexGenerators.VtxSmearedRealistic50ns13TeVCollision_cfi')
+process.load('IOMC.EventVertexGenerators.VtxSmearedRealistic25ns13TeVEarly2017Collision_cfi')
 process.load('GeneratorInterface.Core.genFilterSummary_cff')
 process.load('Configuration.StandardSequences.SimIdeal_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -61,6 +61,7 @@ else:
     process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(maxevents))
     process.source = cms.Source('EmptySource', firstLuminosityBlock = cms.untracked.uint32(jobnum))
 
+process.XMLFromDBSource.label = cms.string("Extended")
 process.genstepfilter.triggerConditions = cms.vstring('generation_step')
 
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -80,12 +81,25 @@ process.generator = cms.EDFilter('Pythia8HadronizerFilter' if fromlhe else 'Pyth
             ),
         processParameters = cms.vstring(),
         tuneSettings = cms.vstring(
-            # CUEP8M1
+            # CP5
             'Tune:pp 14',
             'Tune:ee 7',
-            'MultipartonInteractions:pT0Ref=2.4024',
-            'MultipartonInteractions:ecmPow=0.25208',
-            'MultipartonInteractions:expPow=1.6'
+            'MultipartonInteractions:ecmPow=0.03344',
+            'PDF:pSet=20',
+            'MultipartonInteractions:bProfile=2',
+            'MultipartonInteractions:pT0Ref=1.41',
+            'MultipartonInteractions:coreRadius=0.7634',
+            'MultipartonInteractions:coreFraction=0.63',
+            'ColourReconnection:range=5.176',
+            'SigmaTotal:zeroAXB=off',
+            'SpaceShower:alphaSorder=2',
+            'SpaceShower:alphaSvalue=0.118',
+            'SigmaProcess:alphaSvalue=0.118',
+            'SigmaProcess:alphaSorder=2',
+            'MultipartonInteractions:alphaSvalue=0.118',
+            'MultipartonInteractions:alphaSorder=2',
+            'TimeShower:alphaSorder=2',
+            'TimeShower:alphaSvalue=0.118',
             ),
         pythia8CommonSettings = cms.vstring(
             'Tune:preferLHAPDF = 2',
@@ -124,7 +138,9 @@ process.RAWSIMoutput = cms.OutputModule('PoolOutputModule',
     SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('generation_step')),
     fileName = cms.untracked.string('gensim.root'),
     outputCommands = process.RAWSIMEventContent.outputCommands,
-    eventAutoFlushCompressedSize = cms.untracked.int32(5242880),
+    compressionAlgorithm = cms.untracked.string('LZMA'),
+    compressionLevel = cms.untracked.int32(9),
+    eventAutoFlushCompressedSize = cms.untracked.int32(20971520),
     splitLevel = cms.untracked.int32(0),
 )
 
@@ -149,14 +165,11 @@ if debug:
     sched.insert(-1, process.pp)
 
 process.schedule = cms.Schedule(*sched)
+#task?
 
 process.ProductionFilterSequence = cms.Sequence(process.generator)
 for path in process.paths:
     getattr(process,path)._seq = process.ProductionFilterSequence * getattr(process,path)._seq
-
-if dynamicconf.cmssw_version[0] == 7: 
-    from SLHCUpgradeSimulations.Configuration.postLS1Customs import customisePostLS1
-    process = customisePostLS1(process)
 
 if randomize:
     from modify import deterministic_seeds
@@ -166,3 +179,6 @@ if scanpack:
     from scanpack import do_scanpack
     scanpack_x, scanpack_batch = scanpack
     do_scanpack(process, scanpack_x, int(scanpack_batch), jobnum-1)
+
+from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
+process = customiseEarlyDelete(process)

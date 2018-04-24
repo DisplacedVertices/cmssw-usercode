@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from JMTucker.Tools.Year import year; assert year in (2015,2016) # fix later
+from JMTucker.Tools.Year import year; assert year == 2017
 from scanpack import get_scanpack, scanpackbase
 
 condor = False
@@ -13,16 +13,16 @@ output_level = 'reco'
 output_dataset_tag = ''
 fixed_salt = ''
 use_this_cmssw = False
-premix = year != 2015
+premix = True
 trig_filter = False
 hip_simulation = False
 hip_mitigation = False
 ex = ''
 
 meta = 'neu'
-taus   = [100, 300, 1000, 10000, 30000]
-masses = [300, 400, 500, 600, 800, 1200, 1600, 3000]
-tau_masses = [] # [(1000,1200),(10000,1200),(1000,800),(1000,1600)]
+taus   = [100, 300, 1000, 10000, 30000, 100000]
+masses = [300, 600, 800, 1200, 1600, 3000]
+tau_masses = [(1000,800)] # [(1000,1200),(10000,1200),(1000,800),(1000,1600)]
 already = []
 hip_right = False
 
@@ -59,11 +59,6 @@ elif 0:
     ex = ''
 
 ####
-
-if year == 2015:
-    ex += '_2015'
-    if premix:
-        raise ValueError("can't premix in 2015")
 
 if hip_right:
     hip_simulation = 1.0
@@ -172,19 +167,15 @@ config.Data.totalUnits = nevents
 config.Data.publication = output_level not in ('minitree', 'ntuple')
 config.Data.outputPrimaryDataset = 'SETME'
 if output_dataset_tag == '':
-    if year == 2015:
-        output_dataset_tag = 'RunIIFall15DR76-PU25nsData2015v1_76X_mcRun2_asymptotic_v12'
+    if premix:
+        output_dataset_tag = 'RunIIFall17DRPremix-94X_mc2017_realistic_v10-v1'
     else:
-        if premix:
-            output_dataset_tag = 'RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6'
-        else:
-            output_dataset_tag = 'RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6'
+        raise NotImplementedError('premix')
+        output_dataset_tag = ''
 config.Data.outputDatasetTag = output_dataset_tag
 
 config.Site.storageSite = 'T3_US_FNALLPC'
-config.Site.whitelist = ['T1_US_FNAL', 'T2_US_MIT', 'T2_US_Nebraska', 'T2_US_Purdue', 'T2_US_UCSD', 'T2_US_Wisconsin'] # T2_US_Vanderbilt all fail with 10040, T2_US_Caltech fails 0.19 with 50660 with scanpack
-if premix:
-    config.Site.whitelist += ['T2_DE_DESY'] # T2_FR_CCIN2P3 0.56, T2_DE_RWTH 0.51, T2_CH_CERN 0.34 fail 50660 too much with scanpack
+config.Site.whitelist = ['T1_US_FNAL', 'T2_US_MIT', 'T2_US_Nebraska', 'T2_US_Purdue', 'T2_US_UCSD', 'T2_US_Wisconsin', 'T2_US_Vanderbilt', 'T2_US_Caltech', 'T2_US_Florida', 'T2_CH_CERN', 'T2_DE_DESY']
 if output_level == 'gensim':
     config.Site.whitelist += ['T3_US_*']
 

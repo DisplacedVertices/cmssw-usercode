@@ -1,3 +1,5 @@
+raise NotImplementedError('LHE step not updated for 2017 yet')
+
 import sys, FWCore.ParameterSet.Config as cms
 
 debug = 'debug' in sys.argv
