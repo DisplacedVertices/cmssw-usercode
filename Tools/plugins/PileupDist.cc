@@ -34,7 +34,8 @@ PileupDist::PileupDist(const edm::ParameterSet& cfg)
     pileup_weights(cfg.getParameter<std::vector<double>>("pileup_weights"))
 {
   edm::Service<TFileService> fs;
-  const int nmax = 100;
+  TH1::SetDefaultSumw2();
+  const int nmax = 1000;
   h_npv = fs->make<TH1D>("h_npv", "", nmax, 0, nmax);
   h_ngoodpv = fs->make<TH1D>("h_ngoodpv", "", nmax, 0, nmax);
   h_npu = fs->make<TH1D>("h_npu", "", nmax, 0, nmax);
