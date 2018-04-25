@@ -130,6 +130,7 @@ to_rm.append(dummy_pset_fn_temp)
 config.JobType.scriptExe = 'nstep.sh'
 config.JobType.scriptArgs = []
 config.JobType.sendPythonFolder = True
+config.JobType.maxMemoryMB = 3000
 
 steering_fn = 'steering.sh'
 
