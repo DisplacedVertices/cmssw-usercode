@@ -12,7 +12,8 @@ process = pat_tuple_process(None, is_mc, year, H, repro)
 jets_only(process)
 
 process.maxEvents.input = -1
-sample_files(process, 'qcdht2000_2017', 'main', 1)
+dataset = 'miniaod' if from_miniaod else 'main'
+sample_files(process, 'qcdht2000_2017', dataset, 1)
 tfileservice(process, 'pileup.root')
 
 process.load('JMTucker.Tools.MCStatProducer_cff')
@@ -35,7 +36,7 @@ process.load('JMTucker.Tools.JetFilter_cfi')
 
 process.p = cms.Path(process.PileupDist * process.hltHighLevel * process.PileupDistHLT * process.jmtJetFilter * process.PileupDistPreSel)
 
-associate_paths_to_task(process, process.p)
+associate_paths_to_task(process)
 
 pileup_weights = [
     ]
@@ -57,15 +58,13 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = Samples.data_samples_2015 + Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015
     elif year == 2016:
         samples = Samples.data_samples + Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext
+    elif year == 2017:
+        samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017
 
-    for s in samples:
-        s.condor = False
-        if not s.is_mc:
-            s.json = 'jsons/ana_2015p6.json'
-        s.split_by = 'files'
-        s.files_per = 30
+    from JMTucker.Tools.MetaSubmitter import set_splitting
+    set_splitting(samples, dataset, 'default', data_json='jsons/ana_2015p6.json')
 
-    ms = MetaSubmitter('PileupDistV3')
+    ms = MetaSubmitter('PileupDistV1_2017', dataset=dataset)
     ms.common.ex = year
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier)
     ms.crab.job_control_from_sample = True
