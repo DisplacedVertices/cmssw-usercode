@@ -153,6 +153,8 @@ def jets_only(process):
     streamline_jets(process)
 
 def associate_paths_to_task(process, *paths):
+    if not paths:
+        paths = process.paths_().itervalues()
     for p in paths:
         p.associate(process.patTask)
 
