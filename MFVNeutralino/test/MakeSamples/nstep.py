@@ -133,7 +133,7 @@ config.JobType.sendPythonFolder = True
 
 steering_fn = 'steering.sh'
 
-config.JobType.inputFiles = ['todoify.sh', steering_fn, 'lhe.py', 'gensim.py', 'dynamicconf.py', 'modify.py', 'scanpack.py', 'rawhlt.py', 'minbias.py', 'private_minbias.txt.gz', 'minbias_premix.txt.gz', 'reco.py', 'fixfjr.py', 'year.txt']
+config.JobType.inputFiles = ['todoify.sh', steering_fn, 'lhe.py', 'gensim.py', 'dynamicconf.py', 'modify.py', 'scanpack.py', 'rawhlt.py', 'minbias.py', 'minbias_premix.txt.gz', 'reco.py', 'fixfjr.py', 'year.txt']
 if output_level in ('minitree', 'ntuple'):
     config.JobType.inputFiles += ['ntuple.py', 'minitree.py']
 
