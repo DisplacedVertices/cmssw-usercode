@@ -1,17 +1,24 @@
 import sys
+from JMTucker.Tools.BasicAnalyzer_cfg import *
 from JMTucker.Tools.MiniAOD_cfg import *
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-from_miniaod = False
+from_miniaod = True
 is_mc = True
 H = False
 repro = False
 
-process = pat_tuple_process(None, is_mc, year, H, repro)
-jets_only(process)
+if not from_miniaod:
+    process = pat_tuple_process(None, is_mc, year, H, repro)
+    jets_only(process)
+else:
+    process.load('JMTucker.Tools.PATTupleSelection_cfi')
+    process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
+    process.selectedPatJets.src = 'slimmedJets'
+    process.selectedPatJets.cut = process.jtupleParams.jetCut
 
-process.maxEvents.input = -1
+max_events(process, -1)
 dataset = 'miniaod' if from_miniaod else 'main'
 sample_files(process, 'qcdht2000_2017', dataset, 1)
 tfileservice(process, 'pileup.root')
@@ -34,9 +41,14 @@ process.hltHighLevel.throw = False
 
 process.load('JMTucker.Tools.JetFilter_cfi')
 
-process.p = cms.Path(process.PileupDist * process.hltHighLevel * process.PileupDistHLT * process.jmtJetFilter * process.PileupDistPreSel)
+if from_miniaod:
+    jetFilter = process.selectedPatJets * process.jmtJetFilter
+else:
+    jetFilter = process.jmtJetFilter
+process.p = cms.Path(process.PileupDist * process.hltHighLevel * process.PileupDistHLT * jetFilter * process.PileupDistPreSel)
 
-associate_paths_to_task(process)
+if not from_miniaod:
+    associate_paths_to_task(process)
 
 pileup_weights = [
     ]
@@ -62,9 +74,12 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017
 
     from JMTucker.Tools.MetaSubmitter import set_splitting
-    set_splitting(samples, dataset, 'default', data_json='jsons/ana_2015p6.json')
+    set_splitting(samples, dataset, 'default', data_json='jsons/ana_2015p6.json', default_files_per=50)
 
-    ms = MetaSubmitter('PileupDistV1_2017', dataset=dataset)
+    batch_name = 'PileupDistV1_2017'
+    if from_miniaod:
+        batch_name += '_miniaod'
+    ms = MetaSubmitter(batch_name, dataset=dataset)
     ms.common.ex = year
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier)
     ms.crab.job_control_from_sample = True
