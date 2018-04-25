@@ -175,7 +175,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = \
             Samples.ttbar_samples_2017 + Samples.qcd_samples_2017
 
-    dataset = 'miniaod' if year < 2017 else 'main' # JMTBAD just define dataset miniaod the same as main for 2017 samples? or go back and still define main = aod samples?
+    dataset = 'miniaod'
     samples = [s for s in samples if s.has_dataset(dataset)]
 
     set_splitting(samples, dataset, 'ntuple')
