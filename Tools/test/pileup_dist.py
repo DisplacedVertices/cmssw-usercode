@@ -12,7 +12,7 @@ process = pat_tuple_process(None, is_mc, year, H, repro)
 jets_only(process)
 
 process.maxEvents.input = -1
-sample_files(process, 'qcdht1500', 'main', 1)
+sample_files(process, 'qcdht2000_2017', 'main', 1)
 tfileservice(process, 'pileup.root')
 
 process.load('JMTucker.Tools.MCStatProducer_cff')
@@ -27,13 +27,15 @@ process.PileupDistHLT    = process.PileupDist.clone()
 process.PileupDistPreSel = process.PileupDist.clone()
 
 process.load('HLTrigger.HLTfilters.hltHighLevel_cfi')
-process.hltHighLevel.HLTPaths = ['HLT_PFHT800_v*', 'HLT_PFHT900_v*', 'HLT_PFJet450_v*', 'HLT_AK8PFJet450_v*']
+process.hltHighLevel.HLTPaths = ['HLT_PFHT1050_v*']
 process.hltHighLevel.andOr = True
 process.hltHighLevel.throw = False
 
 process.load('JMTucker.Tools.JetFilter_cfi')
 
 process.p = cms.Path(process.PileupDist * process.hltHighLevel * process.PileupDistHLT * process.jmtJetFilter * process.PileupDistPreSel)
+
+associate_paths_to_task(process, process.p)
 
 pileup_weights = [
     ]
