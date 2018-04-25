@@ -2,18 +2,22 @@ import FWCore.ParameterSet.Config as cms
 from JMTucker.Tools.CMSSWTools import output_file, registration_warnings, report_every, silence_messages, which_global_tag
 
 def pat_tuple_process(customize_before_unscheduled, is_mc, year, H, repro):
-    if year not in (2015,2016):
+    '''2017 clients need to call associate_paths_to_task'''
+
+    if year not in (2015,2016,2017):
         raise ValueError('what year is it')
 
     from Configuration.StandardSequences.Eras import eras
     if year == 2015:
         if is_mc:
-            from Configuration.StandardSequences.Eras import eras
             process = cms.Process('PAT', eras.Run2_25ns)
         else:
             process = cms.Process('PAT')
     elif year == 2016:
         process = cms.Process('PAT', eras.Run2_25ns if is_mc else eras.Run2_2016)
+    elif year == 2017:
+        assert is_mc
+        process = cms.Process('PAT', eras.Run2_2017)
 
     report_every(process, 1000000)
     registration_warnings(process)
@@ -44,6 +48,7 @@ def pat_tuple_process(customize_before_unscheduled, is_mc, year, H, repro):
         (2015, False): '/store/data/Run2015D/JetHT/AOD/16Dec2015-v1/00000/0A2C6696-AEAF-E511-8551-0026189438EB.root',
         (2016, True):  'file:/uscmst1b_scratch/lpc1/3DayLifetime/tucker/2A6D6695-3BB2-E611-BA91-24BE05C626B1.root',
         (2016, False): '/store/data/Run2016G/JetHT/AOD/23Sep2016-v1/100000/0006CE1E-9986-E611-8DFB-6C3BE5B5C0B0.root',
+        (2017, True):  'file:/uscmst1b_scratch/lpc1/3DayLifetime/tucker/itch/B60ECF80-38F1-E711-BE32-02163E01A564.root',
         }[(year, is_mc)]]
 
     output_file(process, 'pat.root', process.MINIAODSIMEventContent.outputCommands)
@@ -91,6 +96,10 @@ def pat_tuple_process(customize_before_unscheduled, is_mc, year, H, repro):
     process = cleanUnscheduled(process)
     process = customize(process)
 
+    if year == 2017:
+        from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
+        process = customiseEarlyDelete(process)
+
     process.load('JMTucker.Tools.MCStatProducer_cff')
 
     process.load('JMTucker.Tools.PATTupleSelection_cfi')
@@ -100,6 +109,11 @@ def pat_tuple_process(customize_before_unscheduled, is_mc, year, H, repro):
 
     if hasattr(process, 'ptau'):
         del process.ptau
+
+    if year == 2017:
+        process.patTask.add(process.caloJetMap)
+        #process.globalTask = cms.Task(*[p for p in process.producers_().itervalues()])
+
     return process
 
 def keep_random_state(process):
@@ -137,6 +151,10 @@ def jets_only(process):
     remove_met_filters(process)
     remove_output_module(process)
     streamline_jets(process)
+
+def associate_paths_to_task(process, *paths):
+    for p in paths:
+        p.associate(process.patTask)
 
 if __name__ == '__main__':
     process = pat_tuple_process(None, True, 2016, False, False)
