@@ -31,7 +31,7 @@ for arg in sys.argv:
 
 ################################################################################
 
-process = cms.Process('GENSIM', eras.Run2_2017)
+process = cms.Process('SIM', eras.Run2_2017)
 
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
