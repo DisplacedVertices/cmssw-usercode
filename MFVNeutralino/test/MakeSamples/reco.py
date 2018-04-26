@@ -32,10 +32,7 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('file:rawhlt.root'))
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
-process.options = cms.untracked.PSet(
-    wantSummary = cms.untracked.bool(True),
-    allowUnscheduled = cms.untracked.bool(True),
-    )
+process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
 if not 'debug' in sys.argv:
     process.options.wantSummary = False
