@@ -269,8 +269,8 @@ def intlumi_from_brilcalc_csv(fn, has_hlt):
             if line.startswith('#'):
                 if intlumi_column is None and line.startswith('#run:fill'):
                     if has_hlt:
-                        assert line == '#run:fill,ls,time,hltpath,delivered(/ub),recorded(/ub),source'
-                        intlumi_column = -2
+                        assert line == '#run:fill,ls,time,hltpath,delivered(/ub),recorded(/ub),avgpu,source'
+                        intlumi_column = -3
                     else:
                         assert line == '#run:fill,ls,time,beamstatus,E(GeV),delivered(/ub),recorded(/ub),avgpu,source'
                         intlumi_column = -3
