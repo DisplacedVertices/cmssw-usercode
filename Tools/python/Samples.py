@@ -674,6 +674,21 @@ ttbar_samples_2017 = [
     MCSample('ttbar_2017', '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17DRPremix-94X_mc2017_realistic_v10-v1/AODSIM', 153674394, nice='t#bar{t}', color=4, syst_frac=0.15, xsec=832.),
     ]
 
+mfv_signal_samples_2017 = [
+    MCSample('mfv_neu_tau01000um_M0800_2017', '/mfv_neu_tau01000um_M0800/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v10-v1-8c72d00e7be0fff6ae525dc8a072859d/USER', 10000)
+    ]
+
+all_signal_samples_2017 = mfv_signal_samples_2017
+
+for s in all_signal_samples_2017:
+    _set_signal_stuff(s)
+    s.xsec = 1e-3
+    s.is_private = s.dataset.startswith('/mfv_')
+    if s.is_private:
+        s.dbs_inst = 'phys03'
+        s.condor = True
+        s.xrootd_url = xrootd_sites['T3_US_FNALLPC']
+
 ########################################################################
 
 ########
@@ -785,6 +800,7 @@ __all__ = [
 
     'qcd_samples_2017',
     'ttbar_samples_2017',
+    'mfv_signal_samples_2017',
 
     'registry',
     ]
@@ -801,6 +817,7 @@ for x in __all__:
 __all__ += [
     'all_signal_samples',
     'all_signal_samples_2015',
+    'all_signal_samples_2017',
     ]
 
 ########################################################################

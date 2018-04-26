@@ -537,6 +537,11 @@ _add_ds("main", {
 })
 
 
+_add_ds("main", {
+'mfv_neu_tau01000um_M0800_2017': _fromnum1("/store/user/tucker/mfv_neu_tau01000um_M0800/RunIIFall17DRPremix-94X_mc2017_realistic_v10-v1/180425_114726", 100, fnbase="reco"),
+})
+
+
 _add_ds("miniaod", {
 'mfv_ddbar_tau00100um_M0300': _fromnum0("/store/user/tucker/mfv_ddbar_tau00100um_M0300/SignalMiniAOD/180119_125006", 2, fnbase="miniaod"),
 'mfv_ddbar_tau00100um_M0400': _fromnum0("/store/user/tucker/mfv_ddbar_tau00100um_M0400/SignalMiniAOD/180119_125007", 2, fnbase="miniaod"),
