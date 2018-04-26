@@ -103,6 +103,7 @@ fi
 ################################################################################
 
 if [[ $FROMLHE -eq 1 ]]; then
+    exitbanner 1 LHE2017
     echo
     echo START LHE at $(date)
 
@@ -162,7 +163,7 @@ exitbanner $? RECO
 ################################################################################
 
 if [[ $OUTPUTLEVEL == "ntuple" || $OUTPUTLEVEL == "minitree" ]]; then
-    exitbanner 1 ntuple\|minitree not set up yet
+    exitbanner 1 ntuple\|minitree2017
 
     if [[ $(ls -1d CMSSW* | wc -l) != 1 ]]; then
         echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
