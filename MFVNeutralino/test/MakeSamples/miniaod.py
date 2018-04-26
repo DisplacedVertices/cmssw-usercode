@@ -21,12 +21,7 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring('root://cmseos.fnal.gov//store/user/tucker/mfv_neu_tau01000um_M0800/RunIIFall17DRPremix-94X_mc2017_realistic_v10-v1/180425_114726/0000/reco_1.root'))
-process.options = cms.untracked.PSet(
-    wantSummary = cms.untracked.bool(True),
-    allowUnscheduled = cms.untracked.bool(True),
-    numberOfThreads = cms.untracked.uint32(4),
-    numberOfStreams = cms.untracked.uint32(0),
-    )
+process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(True))
 
 if not 'debug' in sys.argv:
     process.options.wantSummary = False
