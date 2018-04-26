@@ -8,10 +8,8 @@ from JMTucker.Tools.general import intlumi_from_brilcalc_csv as parse
 # 2422  brilcalc lumi -i 2016.json -o 2016.byls.HLT_PFHT900.csv --byls --normtag=normtag_2016.json --hltpath=HLT_PFHT900_v\*
 
 ils = [
-    (2015, (parse('2015.byls.csv.gz',            False),
-            parse('2015.byls.HLT_PFHT800.csv.gz', True))),
-    (2016, (parse('2016.byls.csv.gz',            False),
-            parse('2016.byls.HLT_PFHT900.csv.gz', True))),
+    (2017, (parse('2017.byls.csv.gz',          False),
+            parse('2017.byls.PFHT1050.csv.gz', True))),
     ]
 
 for year, ((wohlt, wohlt_sum), (whlt, whlt_sum)) in ils:
