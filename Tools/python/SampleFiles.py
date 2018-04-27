@@ -6,6 +6,7 @@ from pprint import pprint
 from JMTucker.Tools.CRAB3ToolsBase import decrabify_list
 
 _d = {}
+_added_from_enc = {}
 
 def _enc(d):
     return base64.b64encode(zlib.compress(pickle.dumps(d)))
@@ -13,10 +14,12 @@ def _enc(d):
 def _denc(encd):
     return pickle.loads(zlib.decompress(base64.b64decode(encd)))
 
-def _add(d, allow_overwrite=False):
+def _add(d, allow_overwrite=False, _enced_call=[0]):
     global _d
-    if type(d) == str:
+    enced = type(d) == str
+    if enced:
         d = _denc(d)
+        _enced_call[0] += 1
     if not allow_overwrite:
         for k in d:
             if _d.has_key(k):
@@ -24,6 +27,9 @@ def _add(d, allow_overwrite=False):
             if len(d[k][1]) != d[k][0]:
                 raise ValueError('length check problem: %s %s supposed to be %i but is %i' % (k[0], k[1], d[k][0], len(d[k][1])))
     _d.update(d)
+    if enced:
+        for k in d.keys():
+            _added_from_enc[k] = _enced_call[0]
 
 def _remove_file(sample, ds, fn):
     n, fns = _d[(sample,ds)]
@@ -1772,6 +1778,31 @@ if __name__ == '__main__':
     elif 'who' in sys.argv:
         dataset, sample = _args('who', 'dataset','sample')
         print ' + '.join(who(sample, dataset))
+
+    elif 'sync' in sys.argv:
+        from JMTucker.Tools import Samples
+        in_sf_not_s = []
+        in_s_not_sf = []
+
+        for k in _d.iterkeys():
+            name, ds = k
+            if not hasattr(Samples, name) or not getattr(Samples, name).has_dataset(ds):
+                in_sf_not_s.append(k)
+
+        for s in Samples.registry.all():
+            for ds in s.datasets:
+                k = s.name, ds
+                if not _d.has_key(k):
+                    in_s_not_sf.append(k)
+
+        print '%-45s %25s %10s' % ('in SampleFiles but not Samples:', '', 'enced?')
+        for k in sorted(in_sf_not_s):
+            name, ds = k
+            print '%-45s %25s %10i' % (name, ds, _added_from_enc.get(k, -1))
+        print
+        print '%-45s %25s' % ('in Samples but not SampleFiles:', '')
+        for k in sorted(in_s_not_sf):
+            print '%-45s %25s' % k
 
     else:
         sys.exit('did not understand argv %r' % sys.argv)
