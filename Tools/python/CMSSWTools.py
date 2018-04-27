@@ -26,6 +26,10 @@ def basic_process(name, filenames=['file:input.root']):
     process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring(*filenames))
     return process
 
+def cmssw_base(extra=''):
+    b = os.environ['CMSSW_BASE']
+    return os.path.join(b, extra) if extra else b
+
 def input_files(process, fns):
     if type(fns) == str:
         if not fns.endswith('.root'):
