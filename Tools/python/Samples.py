@@ -115,7 +115,7 @@ for s in all_signal_samples_2017:
 ########
 
 data_samples_2017 = [
-    DataSample('JetHT2017B', '/JetHT/Run2017B-17Nov2017-v3/AOD'),  # 297047 299329
+    DataSample('JetHT2017B', '/JetHT/Run2017B-17Nov2017-v1/AOD'),  # 297047 299329
     DataSample('JetHT2017C', '/JetHT/Run2017C-17Nov2017-v1/AOD'),  # 299368 302029
     DataSample('JetHT2017D', '/JetHT/Run2017D-17Nov2017-v1/AOD'),  # 302031 302663
     DataSample('JetHT2017E', '/JetHT/Run2017E-17Nov2017-v1/AOD'),  # 303824 304797
