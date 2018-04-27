@@ -117,4 +117,5 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     ms = MetaSubmitter('SignalMiniAOD')
     ms.common.publish_name = 'RunIIFall17MiniAODv2-94X_mc2017_realistic_v14'
     ms.condor.stageout_files = 'all'
+    ms.condor.jdl_extras = 'request_memory = 3000'
     ms.submit(samples)
