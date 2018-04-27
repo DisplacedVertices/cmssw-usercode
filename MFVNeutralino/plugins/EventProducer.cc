@@ -254,10 +254,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   //////////////////////////////////////////////////////////////////////
 
   mevent->npv = int2uchar_clamp(primary_vertices->size());
-  mevent->ngoodpv = 0;
-  for (auto v : *primary_vertices)
-    if (!v.isFake() && v.ndof() > 4 && fabs(v.z()) <= 24 && v.position().rho() < 2)
-      inc_uchar_clamp(mevent->ngoodpv);
 
   if (primary_vertex != 0) {
     mevent->pvx = primary_vertex->x();
@@ -453,7 +449,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   if (lightweight) {
     // keep
-    // for weight: gen_weight, npv, ngoodpv, , npu
+    // for weight: gen_weight, npv, , npu
     // for trigger: pass_
     // for njets and ht40: jet_pt vector
     // jet_id vector

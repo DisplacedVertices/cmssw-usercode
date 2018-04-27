@@ -173,7 +173,6 @@ struct MFVEvent {
   template <typename T> float bs2ddist(const T& t) const { return bs2ddist(t.x, t.y, t.z); }
 
   uchar npv;
-  uchar ngoodpv;
   float pvx;
   float pvy;
   float pvz;
