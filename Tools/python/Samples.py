@@ -3,6 +3,7 @@
 # JMTBAD rename the 2016 samples to have _2016 suffix (in SampleFiles too)
 # and 2017 samples' main are are miniaod while 2015/6 are not...
 
+from JMTucker.Tools.CMSSWTools import cmssw_base
 from JMTucker.Tools.Sample import *
 
 ########################################################################
@@ -754,6 +755,29 @@ auxiliary_data_samples = [
 for s in data_samples + auxiliary_data_samples:
     s.json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/ReReco/Final/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt' # includes PromptReco for H
 
+########
+# 2017 data
+########
+
+data_samples_2017 = [
+    DataSample('JetHT2017B', '/JetHT/Run2017B-17Nov2017-v3/AOD'),  # 297047 299329
+    DataSample('JetHT2017C', '/JetHT/Run2017C-17Nov2017-v1/AOD'),  # 299368 302029
+    DataSample('JetHT2017D', '/JetHT/Run2017D-17Nov2017-v1/AOD'),  # 302031 302663
+    DataSample('JetHT2017E', '/JetHT/Run2017E-17Nov2017-v1/AOD'),  # 303824 304797
+    DataSample('JetHT2017F', '/JetHT/Run2017F-17Nov2017-v1/AOD'),  # 305040 306460
+    ]
+
+auxiliary_data_samples_2017 = [
+    DataSample('SingleMuon2017B', '/SingleMuon/Run2017B-17Nov2017-v1/AOD'),
+    DataSample('SingleMuon2017C', '/SingleMuon/Run2017C-17Nov2017-v1/AOD'),
+    DataSample('SingleMuon2017D', '/SingleMuon/Run2017D-17Nov2017-v1/AOD'),
+    DataSample('SingleMuon2017E', '/SingleMuon/Run2017E-17Nov2017-v1/AOD'),
+    DataSample('SingleMuon2017F', '/SingleMuon/Run2017F-17Nov2017-v1/AOD'),
+    ]
+
+for s in data_samples_2017 + auxiliary_data_samples_2017:
+    s.json = cmssw_base('src/JMTucker/MFVNeutralino/test/jsons/2017.json')
+
 ########################################################################
 
 registry = SamplesRegistry()
@@ -801,6 +825,8 @@ __all__ = [
     'qcd_samples_2017',
     'ttbar_samples_2017',
     'mfv_signal_samples_2017',
+    'data_samples_2017',
+    'auxiliary_data_samples_2017',
 
     'registry',
     ]
@@ -840,7 +866,7 @@ __all__ += [
 # miniaod
 ########
 
-for sample in data_samples + auxiliary_data_samples + data_samples_2015 + auxiliary_data_samples_2015:
+for sample in data_samples + auxiliary_data_samples + data_samples_2015 + auxiliary_data_samples_2015 + data_samples_2017 + auxiliary_data_samples_2017:
     sample.add_dataset('miniaod', sample.dataset.replace('AOD', 'MINIAOD'))
 
 qcdht0500_2015.add_dataset('miniaod', '/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIIFall15MiniAODv2-PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/MINIAODSIM',  19665695)
