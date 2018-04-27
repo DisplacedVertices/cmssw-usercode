@@ -14,3 +14,5 @@ since /afs was unmounted @ lpc, symlinks replaced with copies:
 This is made after the first time condor/crab ntuple is run on the default set of datasets (currently JetHT) and the report is scrutinized.
 Then you compare subsequent runs' reports to this file. (See utilities.py.)
 For a different set of datasets, e.g. /SingleMu, use "ana_avail_*_mu".
+
+To produce the split-by-era jsons, prepare ds.txt with list of datasets. Then see split_by_era.sh.
