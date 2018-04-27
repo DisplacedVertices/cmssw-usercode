@@ -21,11 +21,11 @@ private:
   const std::vector<double> pileup_weights;
   double pileup_weight(double) const;
 
+  TH1D* h_nallpv;
   TH1D* h_npv;
-  TH1D* h_ngoodpv;
   TH1D* h_npu;
+  TH2D* h_nallpv_v_npu;
   TH2D* h_npv_v_npu;
-  TH2D* h_ngoodpv_v_npu;
 };
 
 PileupDist::PileupDist(const edm::ParameterSet& cfg)
@@ -36,11 +36,12 @@ PileupDist::PileupDist(const edm::ParameterSet& cfg)
   edm::Service<TFileService> fs;
   TH1::SetDefaultSumw2();
   const int nmax = 1000;
+  const int nmax2 = 100;
+  h_nallpv = fs->make<TH1D>("h_nallpv", "", nmax, 0, nmax);
   h_npv = fs->make<TH1D>("h_npv", "", nmax, 0, nmax);
-  h_ngoodpv = fs->make<TH1D>("h_ngoodpv", "", nmax, 0, nmax);
   h_npu = fs->make<TH1D>("h_npu", "", nmax, 0, nmax);
-  h_npv_v_npu = fs->make<TH2D>("h_npv_v_npu", "", nmax, 0, nmax, nmax, 0, nmax);
-  h_ngoodpv_v_npu = fs->make<TH2D>("h_ngoodpv_v_npu", "", nmax, 0, nmax, nmax, 0, nmax);
+  h_nallpv_v_npu = fs->make<TH2D>("h_nallpv_v_npu", "", nmax2, 0, nmax2, nmax2, 0, nmax2);
+  h_npv_v_npu = fs->make<TH2D>("h_npv_v_npu", "", nmax2, 0, nmax2, nmax2, 0, nmax2);
 }
 
 
@@ -56,13 +57,13 @@ void PileupDist::analyze(const edm::Event& event, const edm::EventSetup&) {
   edm::Handle<reco::VertexCollection> primary_vertices;
   event.getByToken(primary_vertex_token, primary_vertices);
 
-  const int npv = int(primary_vertices->size());
-  const int ngoodpv = count_if(primary_vertices->begin(), primary_vertices->end(), [](const reco::Vertex& v) { return !v.isFake() && v.ndof() > 4 && fabs(v.z()) <= 24 && v.position().rho() < 2; });
+  const int nallpv = int(primary_vertices->size());
+  const int npv = count_if(primary_vertices->begin(), primary_vertices->end(), [](const reco::Vertex& v) { return !v.isFake() && v.ndof() > 4 && fabs(v.z()) <= 24 && v.position().rho() < 2; });
 
   double weight = 1;
 
+  h_nallpv->Fill(nallpv);
   h_npv->Fill(npv);
-  h_ngoodpv->Fill(ngoodpv);
 
   if (!event.isRealData()) {
     edm::Handle<std::vector<PileupSummaryInfo> > pileup_info;
@@ -80,12 +81,12 @@ void PileupDist::analyze(const edm::Event& event, const edm::EventSetup&) {
       weight = pileup_weight(npu);
 
     h_npu->Fill(npu, weight);
+    h_nallpv_v_npu->Fill(npu, nallpv, weight);
     h_npv_v_npu->Fill(npu, npv, weight);
-    h_ngoodpv_v_npu->Fill(npu, ngoodpv, weight);
   }
 
+  h_nallpv->Fill(nallpv, weight);
   h_npv->Fill(npv, weight);
-  h_ngoodpv->Fill(ngoodpv, weight);
 }
 
 DEFINE_FWK_MODULE(PileupDist);
