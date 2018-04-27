@@ -10,8 +10,7 @@ since /afs was unmounted @ lpc, symlinks replaced with copies:
 
 "_10pc" or "_1pc" are 10% or 1% slices.
 
-"ana_avail_*" are what condor/crab report say they were able to run on.
+"ana_avail_" are what condor/crab report say they were able to run on.
 This is made after the first time condor/crab ntuple is run on the default set of datasets (currently JetHT) and the report is scrutinized.
 Then you compare subsequent runs' reports to this file. (See utilities.py.)
-
-
+For a different set of datasets, e.g. /SingleMu, use "ana_avail_*_mu".
