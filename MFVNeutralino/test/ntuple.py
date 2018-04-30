@@ -1,54 +1,31 @@
 #!/usr/bin/env python
 
-from JMTucker.Tools.MiniAOD_cfg import *
 from JMTucker.Tools.CMSSWTools import *
-from JMTucker.Tools.Year import year
+from JMTucker.Tools.MiniAOD_cfg import *
 
-if year >= 2017:
-    raise NotImplementedError('have not tried ntuple from aod on >=2017 cmssw/samples, use ntuple2.py')
+cmssw_settings = CMSSWSettings()
+cmssw_settings.is_mc = True
 
-is_mc = True
-H = False
-repro = False
 run_n_tk_seeds = False
 minitree_only = False
 prepare_vis = not run_n_tk_seeds and False
 keep_all = prepare_vis
 keep_gen = False
 event_filter = not keep_all
-version = 'V16p1'
+version = 'V18'
 batch_name = 'Ntuple' + version
 if minitree_only:
     batch_name = 'MiniNtuple'  + version
 elif keep_gen:
-    batch_name += '_WGenV2'
+    batch_name += '_WGen'
 elif not event_filter:
     batch_name += '_NoEF'
 #batch_name += '_ChangeMeIfSettingsNotDefault'
 
 ####
 
-process = pat_tuple_process(None, is_mc, year, H, repro)
+process = pat_tuple_process(cmssw_settings)
 remove_met_filters(process)
-
-# speed up by 15%
-#del process.packedGenParticles
-#del process.prunedGenParticles
-#del process.prunedGenParticlesWithStatusOne
-#del process.primaryVertexAssociation
-#process.patMuons.addGenMatch = False
-#process.patElectrons.addGenMatch = False
-#process.patJets.addGenJetMatch    = False
-#process.patJets.addGenPartonMatch = False
-#process.patJets.addTagInfos = False
-#process.patJets.addJetCharge = False
-#process.patJets.addJetFlavourInfo = False
-#process.patJets.getJetMCFlavour = False
-#process.patJets.discriminatorSources = ['pfCombinedInclusiveSecondaryVertexV2BJetTags']
-#process.patJets.userData.userFloats.src = []
-#process.patJets.userData.userFunctionLabels = []
-#process.patJets.userData.userFunctions = []
-#process.patJets.userData.userInts.src = []
 
 process.out.fileName = 'ntuple.root'
 output_commands = [
@@ -142,7 +119,7 @@ process.patMuons.embedTrack = False
 process.patElectrons.embedTrack = False
 
 want_summary(process, False)
-process.maxEvents.input = 100
+max_events(process, 100)
 file_event_from_argv(process)
 
 if minitree_only:
@@ -154,9 +131,16 @@ if minitree_only:
         p.insert(0, process.pmcStat._seq)
         p.insert(0, process.p._seq)
 
+associate_paths_to_task(process)
+
+#bef, aft, diff = ReferencedTagsTaskAdder().modules_to_add('patJets', 'patMuons', 'patElectrons', 'mfvEvent')
+#print 'may need to add:', ' '.join(diff)
+# but remove things already in AOD
+
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
-    import JMTucker.Tools.Samples as Samples 
+    from JMTucker.Tools import Samples
+    from JMTucker.Tools.Year import year
 
     if year == 2015:
         samples = \
