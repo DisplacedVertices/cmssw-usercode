@@ -8,6 +8,64 @@ class CMSSWSettings(object):
         #self.is_miniaod
         #self.repro
 
+# following FWCore.ParameterSet.MassReplace.MassSearchReplaceAnyInputTagVisitor
+class InputTagCollector(object):
+    @staticmethod
+    def input_tag(x):
+       return x if isinstance(x, cms.InputTag) else cms.InputTag(x)
+
+    def __init__(self):
+        self._result = []
+    def result(self):
+        return self._result
+
+    def doit(self, pizable, base):
+        if isinstance(pizable, cms._Parameterizable):
+            for name, value in pizable.parameters_().items():
+                pytype = value.pythonTypeName()
+                based_name = '%s.%s' % (base, name)
+                if pytype == 'cms.PSet':
+                    self.doit(value, based_name)
+                elif pytype == 'cms.VPSet':
+                    for i, x in enumerate(value):
+                        self.doit(x, "%s[%d]" % (based_name, i))
+                elif pytype == 'cms.VInputTag':
+                    for i, x in enumerate(value):
+                         self._result.append(('%s[%i]' % (based_name, i), self.input_tag(x)))
+                elif pytype.endswith('.InputTag'):
+                    self._result.append((based_name, self.input_tag(value)))
+
+    def enter(self,visitee):
+        self.doit(visitee, '')
+    def leave(self,visitee):
+        pass
+
+class ReferencedTagsTaskAdder(object):
+    # for some reason the patTask doesn't have everything in it, or I don't understand something
+
+    def __init__(self, process, task=None):
+        self.process = process
+        self.task = process.patTask if task is None else task
+        self.seen = set()
+
+    def doit(self, name, obj, seen=set()):
+        self.seen.add(name)
+        for _, tag in input_tags_referenced(obj):
+            if hasattr(self.process, tag.moduleLabel):
+                obj2 = getattr(process, tag.moduleLabel)
+                if tag.moduleLabel not in self.task.moduleNames():
+                    self.task.add(obj2)
+                if tag.moduleLabel not in self.seen:
+                    self.doit(tag.moduleLabel, obj2)
+
+    def modules_to_add(self, *finals):
+        before = set(self.task.moduleNames())
+        for f in finals:
+            if type(f) == str:
+                f = getattr(process, f)
+            self.doit(name, f)
+        after = set(self.task.moduleNames())
+        return before, after, sorted(after - before)
 
 def add_analyzer(process, name, *args, **kwargs):
     '''Add a simple EDAnalyzer with its own separate path.'''
@@ -139,6 +197,16 @@ def glob_store(pattern):
     if not os.path.isdir(magic):
         raise ValueError('not at fermilab?')
     return [x.replace(magic, '/store') for x in glob.glob(pattern.replace('/store', magic))]
+
+def input_tags_referenced(thing):
+    '''Get all the InputTags referenced under thing.
+    thing can be a single module or a sequence/path.'''
+    coll = InputTagCollector()
+    if isinstance(thing, cms._ModuleSequenceType):
+        thing.visit(coll)
+    elif isinstance(thing, cms._Module):
+        thing.visitNode(coll)
+    return coll.result()
 
 def is_edm_file(fn):
     return os.system('edmFileUtil %s >/dev/null 2>&1' % fn) == 0
