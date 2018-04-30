@@ -1,6 +1,13 @@
 import os, sys, glob, FWCore.ParameterSet.Config as cms
 
-#process.source.firstLuminosityBlock = cms.untracked.uint32(2)
+class CMSSWSettings(object):
+    def __init__(self):
+        from JMTucker.Tools.Year import year
+        self.year = year
+        self.is_mc = True
+        #self.is_miniaod
+        #self.repro
+
 
 def add_analyzer(process, name, *args, **kwargs):
     '''Add a simple EDAnalyzer with its own separate path.'''
@@ -324,25 +331,11 @@ def want_summary(process, val=True):
     else:
         process.options.wantSummary = cms.untracked.bool(val)
 
-def which_global_tag(is_mc, year, H, repro):
-    if repro:
-        assert year == 2016
-    if H:
-        assert not is_mc and year == 2016
-    if year == 2015:
-        return '76X_mcRun2_asymptotic_v12' if is_mc else '76X_dataRun2_v15'
-    elif year == 2016:
-        if is_mc:
-            return '80X_mcRun2_asymptotic_2016_TrancheIV_v8'
-        else:
-            if repro:
-                return '80X_dataRun2_2016LegacyRepro_v3'
-            else:
-                return '80X_dataRun2_Prompt_v16' if H else '80X_dataRun2_2016SeptRepro_v7'
-    elif year == 2017:
-        if is_mc:
+def which_global_tag(settings):
+    if settings.year == 2017:
+        if settings.is_mc:
             return '94X_mc2017_realistic_v10'
         else:
-            raise NotImplementedError('data gt 2017')
+            return '94X_dataRun2_ReReco_EOY17_v6'
     else:
         raise ValueError('what year is it')
