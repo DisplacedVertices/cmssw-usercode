@@ -253,6 +253,12 @@ class CRABSubmitter:
         open(pset_orig_fn, 'wt').write(pset + extra)
 
         out = popen('python %s' % pset_orig_fn)
+
+        # handle problem with crap done by RecoEgamma.ElectronIdentification.Identification/mvaElectronID_Fall17_iso_V1_cff
+        # fixed in dumpPython in 10_2_X
+        pset_new = open(pset_fn).read()
+        open(pset_fn, 'wt').write('inf, nan = float("inf"), float("nan")\n' + pset_new)
+
         open(pset_orig_fn, 'wt').write(pset)
 
         return pset_orig_fn, pset_fn, pset
