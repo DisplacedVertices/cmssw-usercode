@@ -3,12 +3,8 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-if year == 2015:
-    raise NotImplementedError("won't bother to understand 2015 miniaod")
-
-is_mc = True
-H = False
-repro = False
+cmssw_settings = CMSSWSettings()
+cmssw_settings.is_mc = True
 
 run_n_tk_seeds = False
 minitree_only = False
@@ -25,6 +21,8 @@ if run_n_tk_seeds:
     batch_name += '_NTkSeeds'
 if minitree_only:
     batch_name = 'MiniNtuple'  + version
+elif not event_filter:
+    batch_name += '_NoEF'
 
 ####
 
@@ -33,7 +31,7 @@ max_events(process, 100)
 report_every(process, 1000000)
 #want_summary(process)
 registration_warnings(process)
-geometry_etc(process, which_global_tag(is_mc, year, H=False, repro=False))
+geometry_etc(process, which_global_tag(cmssw_settings))
 random_service(process, {'mfvVertices': 1222})
 tfileservice(process, 'vertex_histos.root')
 input_files(process, 'root://cmsxrootd-site.fnal.gov//store/mc/RunIIFall17MiniAOD/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/50000/7EF2B30C-37EA-E711-B605-0026B92785F6.root')
@@ -166,14 +164,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
     import JMTucker.Tools.Samples as Samples
 
-    if year == 2016:
+    if year == 2017:
         samples = \
-            Samples.data_samples + \
-            Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + Samples.qcd_hip_samples + \
-            Samples.all_signal_samples
-    elif year == 2017:
-        samples = \
-            Samples.ttbar_samples_2017 + Samples.qcd_samples_2017
+            Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + \
+            Samples.all_signal_samples_2017
 
     dataset = 'miniaod'
     samples = [s for s in samples if s.has_dataset(dataset)]
@@ -190,7 +184,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             to_replace.append((magic, 'event_filter = False', 'tuple template does not contain the magic string "%s"' % magic))
         return [], to_replace
 
-    modify = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier, signals_no_event_filter_modifier)
+    modify = chain_modifiers(is_mc_modifier, signals_no_event_filter_modifier)
     ms = MetaSubmitter(batch_name, dataset=dataset)
     ms.common.ex = year
     ms.common.pset_modifier = modify
