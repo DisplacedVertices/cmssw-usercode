@@ -142,30 +142,12 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools import Samples
     from JMTucker.Tools.Year import year
 
-    if year == 2015:
+    if year == 2017:
         samples = \
-            Samples.data_samples_2015 + \
-            Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015 + \
-            Samples.all_signal_samples_2015
-    elif year == 2016:
-        samples = \
-            Samples.data_samples + \
-            Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + Samples.qcd_hip_samples + \
-            Samples.all_signal_samples
+            Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + \
+            Samples.all_signal_samples_2017
 
-    if 'validation' in sys.argv:
-        batch_name += '_validation'
-        import JMTucker.Tools.SampleFiles as SampleFiles
-        samples = [s for s in samples if SampleFiles.has(s.name, 'validation')]
-        for s in samples:
-            s.files_per = 100000 # let max_output_modifier handle it
-    else:
-        set_splitting(samples, 'main', 'ntuple')
-
-    skips = {
-        'qcdht0700ext_2015': {'lumis': '135728', 'events': '401297681'},
-        'qcdht1000ext_2015': {'lumis': '32328',  'events': '108237235'},
-        }
+    set_splitting(samples, 'main', 'ntuple')
 
     if run_n_tk_seeds:
         batch_name += '_NTkSeeds'
@@ -178,11 +160,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             to_replace.append((magic, 'event_filter = False', 'tuple template does not contain the magic string "%s"' % magic))
         return [], to_replace
 
-    modify = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier, event_veto_modifier(skips, 'p'), signals_no_event_filter_modifier)
+    modify = chain_modifiers(is_mc_modifier, signals_no_event_filter_modifier)
     ms = MetaSubmitter(batch_name)
-    if 'validation' in sys.argv:
-        modify.append(max_output_modifier(500))
-        ms.common.dataset = 'validation'
     ms.common.ex = year
     ms.common.pset_modifier = modify
     ms.common.publish_name = batch_name + '_' + str(year)
