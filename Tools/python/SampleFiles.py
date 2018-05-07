@@ -156,15 +156,6 @@ _add_ds("miniaod", {
 'mfv_neu_tau01000um_M0800_2017': _fromnum0("/store/user/tucker/mfv_neu_tau01000um_M0800/RunIIFall17MiniAODv2-94X_mc2017_realistic_v14/180426_134902", 5, fnbase="miniaod"),
 })
 
-_add_ds("ntuplev17m", {
-'qcdht0500_2017': _fromnum1("/store/user/tucker/QCD_HT500to700_TuneCP5_13TeV-madgraph-pythia8/NtupleV17m_2017/180422_020118", 110),
-'qcdht0700_2017': _fromnum1("/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/NtupleV17m_2017/180422_020139", 199),
-'qcdht1000_2017': _fromnum1("/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/NtupleV17m_2017/180422_020158", 883),
-'qcdht1500_2017': _fromnum1("/store/user/tucker/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/NtupleV17m_2017/180422_020215", 780),
-'qcdht2000_2017': _fromnum1("/store/user/tucker/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/NtupleV17m_2017/180422_020233", 361),
-'ttbar_2017': (297, ['/store/user/tucker/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleV17m_2017/180422_020100/0000/ntuple_%i.root' % i for i in chain(xrange(1,22), xrange(23,26), xrange(27,48), xrange(49,94), xrange(95,102), xrange(103,131), xrange(132,227), xrange(228,250), xrange(251,253), xrange(254,261), xrange(262,285), xrange(286,309))]),
-})
-
 ################################################################################
 
 if __name__ == '__main__':

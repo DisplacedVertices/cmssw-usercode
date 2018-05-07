@@ -226,8 +226,8 @@ ttbar_2017.add_dataset('miniaod', '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/Ru
 # ntuples
 ########
 
-for x in ttbar_samples_2017 + qcd_samples_2017:
-    x.add_dataset('ntuplev17m')
+#for x in ttbar_samples_2017 + qcd_samples_2017:
+#    x.add_dataset('ntuplev18m')
 
 ########
 # automatic condor declarations for ntuples
