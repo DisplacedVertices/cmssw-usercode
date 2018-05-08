@@ -223,7 +223,7 @@ qcdht2000_2017.add_dataset('miniaod', '/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-p
 ttbar_2017.add_dataset('miniaod', '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1/MINIAODSIM', 153531390)
 
 for sample in mfv_signal_samples_2017:
-    sample.add_dataset('miniaod', '/%s/None/USER' % sample.primary_dataset)
+    sample.add_dataset('miniaod', '/%s/None/USER' % sample.primary_dataset, sample.nevents_orig)
 
 ########
 # ntuples
