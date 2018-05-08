@@ -40,20 +40,10 @@ MFVTriggerFloatsFilter::MFVTriggerFloatsFilter(const edm::ParameterSet& cfg)
     myhttwbug_m_l1htt_cut(cfg.getParameter<double>("myhttwbug_m_l1htt_cut"))
 {
   // require_bits:
-  // -1 = don't care, ORs or other combinations represented by negative numbers other than -1
-  // HLT:
-  // -2 = HLT_PFHT800 || PFJet450
-  // -3 = HLT_PFHT800 || PFJet450 || AK8PFJet450
-  // -4 = HLT_PFHT900 || PFJet450
-  // -5 = HLT_PFHT900 || PFJet450 || AK8PFJet450
-  // L1:
-  // -2 = L1 HTT calculation bugged as in 2016H, threshold 240 GeV
-  // -3 = ditto, 255 GeV
-  // -4 = ditto, 280 GeV
-  // -5 = ditto, 300 GeV
-  // -6 = ditto, 320 GeV -- probably don't need to do every single one separately but just in case
-  assert(require_bits[0] >= -5 && require_bits[0] < mfv::n_hlt_paths);
-  assert(require_bits[1] >= -6 && require_bits[1] < mfv::n_l1_paths);
+  // HLT in [0], L1 in [1]
+  // -1 = don't care, ORs or other combinations represented by negative numbers other than -1 (but none defined yet)
+  assert(require_bits[0] >= -1 && require_bits[0] < mfv::n_hlt_paths);
+  assert(require_bits[1] >= -1 && require_bits[1] < mfv::n_l1_paths);
 }
 
 bool MFVTriggerFloatsFilter::filter(edm::Event& event, const edm::EventSetup&) {
@@ -67,7 +57,7 @@ bool MFVTriggerFloatsFilter::filter(edm::Event& event, const edm::EventSetup&) {
 
     const std::vector<int>& decisions = i == 0 ? triggerfloats->HLTdecisions : triggerfloats->L1decisions;
 
-    if (i == 0 && r < 0) {
+/*  if (i == 0 && r < 0) {
       if ((r == -2 && !orem(decisions, {mfv::b_HLT_PFHT800, mfv::b_HLT_PFJet450})) ||
           (r == -3 && !orem(decisions, {mfv::b_HLT_PFHT800, mfv::b_HLT_PFJet450, mfv::b_HLT_AK8PFJet450})) ||
           (r == -4 && !orem(decisions, {mfv::b_HLT_PFHT900, mfv::b_HLT_PFJet450})) ||
@@ -79,7 +69,7 @@ bool MFVTriggerFloatsFilter::filter(edm::Event& event, const edm::EventSetup&) {
       if (triggerfloats->myhttwbug < thresholds[-r-2])
         return false;
     }
-    else {
+    else */ {
       const int decision = decisions[r];
       if (decision == -1)
         throw cms::Exception("TriggerNotFound") << (i == 0 ? "HLT" : "L1") << " bit " << r << " wasn't found";

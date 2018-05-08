@@ -161,11 +161,8 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (trigger_bit >= 0 && !mevent->pass_hlt(trigger_bit))
       return false;
 
-    if (apply_trigger && !(mevent->pass_hlt(mfv::b_HLT_PFHT800) ||
-                           mevent->pass_hlt(mfv::b_HLT_PFHT900) ||
-                           mevent->pass_hlt(mfv::b_HLT_PFJet450) ||
-                           mevent->pass_hlt(mfv::b_HLT_AK8PFJet450)))
-        return false;
+    if (apply_trigger && !mevent->pass_hlt(mfv::b_HLT_PFHT1050))
+      return false;
 
     if (mevent->npv < min_npv || mevent->npv > max_npv)
       return false;

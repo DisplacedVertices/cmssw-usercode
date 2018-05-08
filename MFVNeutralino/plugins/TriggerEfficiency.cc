@@ -83,22 +83,10 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
   assert(use_weight >= 0 && use_weight <= 2);
 
   // JMTBAD the bits checking is now duplicated in TriggerFloatsFilter, should understand how to clean that up
-  //
   // require_bits:
   // -1 = don't care, ORs or other combinations represented by negative numbers other than -1
-  // HLT:
-  // -2 = HLT_PFHT800 || PFJet450
-  // -3 = HLT_PFHT800 || PFJet450 || AK8PFJet450
-  // -4 = HLT_PFHT900 || PFJet450
-  // -5 = HLT_PFHT900 || PFJet450 || AK8PFJet450
-  // L1:
-  // -2 = L1 HTT calculation bugged as in 2016H, threshold 240 GeV
-  // -3 = ditto, 255 GeV
-  // -4 = ditto, 280 GeV
-  // -5 = ditto, 300 GeV
-  // -6 = ditto, 320 GeV -- probably don't need to do every single one separately but just in case
-  assert(require_bits[0] >= -5 && require_bits[0] < mfv::n_hlt_paths);
-  assert(require_bits[1] >= -6 && require_bits[1] < mfv::n_l1_paths);
+  assert(require_bits[0] >= -1 && require_bits[0] < mfv::n_hlt_paths);
+  assert(require_bits[1] >= -1 && require_bits[1] < mfv::n_l1_paths);
 
   edm::Service<TFileService> fs;
   TH1::SetDefaultSumw2();
@@ -169,14 +157,14 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
 }
 
 namespace {
-  bool orem(const std::vector<int>& decisions, std::vector<int> which) {
-    for (int w : which) {
-      const int decision = decisions[w];
-      if (decision == -1) throw cms::Exception("TriggerNotFound") << mfv::hlt_paths[w] << " wasn't found";
-      else if (decision == 1) return true;
-    }
-    return false;
-  }
+//  bool orem(const std::vector<int>& decisions, std::vector<int> which) {
+//    for (int w : which) {
+//      const int decision = decisions[w];
+//      if (decision == -1) throw cms::Exception("TriggerNotFound") << mfv::hlt_paths[w] << " wasn't found";
+//      else if (decision == 1) return true;
+//    }
+//    return false;
+//  }
 
   double jetpt12_weight_mfvM300(double jetpt1, double jetpt2) {
     if      (jetpt1 >=   0 && jetpt1 < 250 && jetpt2 >=   0 && jetpt2 < 150) return 2.969734e+01;
@@ -256,7 +244,7 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
 
     const std::vector<int>& decisions = i == 0 ? triggerfloats->HLTdecisions : triggerfloats->L1decisions;
 
-    if (i == 0 && r < 0) {
+/*  if (i == 0 && r < 0) {
       if ((r == -2 && !orem(decisions, {mfv::b_HLT_PFHT800, mfv::b_HLT_PFJet450})) ||
           (r == -3 && !orem(decisions, {mfv::b_HLT_PFHT800, mfv::b_HLT_PFJet450, mfv::b_HLT_AK8PFJet450})) ||
           (r == -4 && !orem(decisions, {mfv::b_HLT_PFHT900, mfv::b_HLT_PFJet450})) ||
@@ -268,7 +256,7 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
       if (triggerfloats->myhttwbug < thresholds[-r-2])
         return;
     }
-    else {
+    else */ {
       const int decision = decisions[r];
       if (decision == -1)
         throw cms::Exception("TriggerNotFound") << (i == 0 ? "HLT" : "L1") << " bit " << r << " wasn't found";

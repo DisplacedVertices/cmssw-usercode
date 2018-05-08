@@ -9,8 +9,8 @@ namespace mfv {
   // JMTBAD hope you keep these in sync with Event.cc
   static const int n_clean_paths = 7;
   enum {
-    b_HLT_PFHT350, b_HLT_PFHT800, b_HLT_PFHT900, b_HLT_PFJet450, b_HLT_AK8PFJet450, n_hlt_paths,
-    b_L1_HTT100=0, b_L1_HTT125, b_L1_HTT150, b_L1_HTT175, b_L1_HTT160, b_L1_HTT200, b_L1_HTT220, b_L1_HTT240, b_L1_HTT255, b_L1_HTT270, b_L1_HTT280, b_L1_HTT300, b_L1_HTT320, b_L1_SingleJet128, b_L1_SingleJet170, b_L1_SingleJet180, b_L1_SingleJet200, n_l1_paths
+    b_HLT_PFHT1050, n_hlt_paths,
+    b_L1_HTT120er=0, b_L1_HTT160er, b_L1_HTT200er, b_L1_HTT220er, b_L1_HTT240er, b_L1_HTT255er, b_L1_HTT270er, b_L1_HTT280er, b_L1_HTT300er, b_L1_HTT320er, b_L1_HTT340er, b_L1_HTT380er, b_L1_HTT400er, b_L1_HTT450er, b_L1_HTT500er, b_L1_HTT250er_QuadJet_70_55_40_35_er2p5, b_L1_HTT280er_QuadJet_70_55_40_35_er2p5, b_L1_HTT300er_QuadJet_70_55_40_35_er2p5, n_l1_paths
   };
 
   extern const char* hlt_paths[n_hlt_paths];
