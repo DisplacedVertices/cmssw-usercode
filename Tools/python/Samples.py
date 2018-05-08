@@ -222,6 +222,9 @@ qcdht1500_2017.add_dataset('miniaod', '/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-
 qcdht2000_2017.add_dataset('miniaod', '/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1/MINIAODSIM',   5468913)
 ttbar_2017.add_dataset('miniaod', '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1/MINIAODSIM', 153531390)
 
+for sample in mfv_signal_samples_2017:
+    sample.add_dataset('miniaod', '/%s/None/USER' % sample.primary_dataset)
+
 ########
 # ntuples
 ########
