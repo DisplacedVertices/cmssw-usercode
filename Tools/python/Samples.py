@@ -224,6 +224,8 @@ ttbar_2017.add_dataset('miniaod', '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/Ru
 
 for sample in mfv_signal_samples_2017:
     sample.add_dataset('miniaod', '/%s/None/USER' % sample.primary_dataset, sample.nevents_orig)
+    sample.datasets['miniaod'].condor = True
+    sample.datasets['miniaod'].xrootd_url = xrootd_sites['T3_US_FNALLPC']
 
 ########
 # ntuples
