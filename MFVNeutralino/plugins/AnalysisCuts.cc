@@ -26,6 +26,7 @@ private:
   const int trigger_bit;
   const bool apply_trigger;
   const bool apply_cleaning_filters;
+  const double min_hlt_ht4mc;
 
   const int min_npv;
   const int max_npv;
@@ -84,6 +85,7 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     trigger_bit(cfg.getParameter<int>("trigger_bit")),
     apply_trigger(cfg.getParameter<bool>("apply_trigger")),
     apply_cleaning_filters(cfg.getParameter<bool>("apply_cleaning_filters")),
+    min_hlt_ht4mc(cfg.getParameter<double>("min_hlt_ht4mc")),
     min_npv(cfg.getParameter<int>("min_npv")),
     max_npv(cfg.getParameter<int>("max_npv")),
     min_npu(cfg.getParameter<double>("min_npu")),
@@ -162,6 +164,9 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       return false;
 
     if (apply_trigger && !mevent->pass_hlt(mfv::b_HLT_PFHT1050))
+      return false;
+
+    if (mevent->hlt_ht4mc < min_hlt_ht4mc)  // JMTBAD should handle hlt_ht4mc versus hlt_ht
       return false;
 
     if (mevent->npv < min_npv || mevent->npv > max_npv)
