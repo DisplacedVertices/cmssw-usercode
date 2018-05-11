@@ -364,6 +364,8 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   edm::Handle<pat::JetCollection> jets;
   event.getByToken(jets_token, jets);
 
+  floats->nalljets = jets->size();
+
   for (const pat::Jet& jet : *jets)
     if (jet_selector(jet)) {
       const double pt = jet.pt();
