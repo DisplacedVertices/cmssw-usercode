@@ -49,7 +49,6 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_lspdist3d;
 
   TH1F* h_hlt_bits;
-  TH1F* h_hlt_cross;
   TH1F* h_l1_bits;
 
   TH1F* h_npu;
@@ -176,7 +175,6 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_lspdist3d = fs->make<TH1F>("h_lspdist3d", ";dist3d(gen vtx #0, #1) (cm);events/0.1 mm", 200, 0, 2);
 
   h_hlt_bits = fs->make<TH1F>("h_hlt_bits", ";;events", 2*mfv::n_hlt_paths+1, 0, 2*mfv::n_hlt_paths+1);
-  h_hlt_cross = fs->make<TH1F>("h_hlt_cross", ";;events", 6, 0, 6);
   h_l1_bits  = fs->make<TH1F>("h_l1_bits",  ";;events", 2*mfv::n_l1_paths +1, 0, 2*mfv::n_l1_paths +1);
 
   h_hlt_bits->GetXaxis()->SetBinLabel(1, "nevents");
@@ -189,13 +187,6 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
     h_l1_bits->GetXaxis()->SetBinLabel(1+2*i+1, TString::Format("found %s", mfv::l1_paths[i]));
     h_l1_bits->GetXaxis()->SetBinLabel(1+2*i+2, TString::Format(" pass %s", mfv::l1_paths[i]));
   }
-
-  h_hlt_cross->GetXaxis()->SetBinLabel(1, "nevents");
-  h_hlt_cross->GetXaxis()->SetBinLabel(2, "HT800 && !HT900");
-  h_hlt_cross->GetXaxis()->SetBinLabel(3, "Jet450 && !HT800");
-  h_hlt_cross->GetXaxis()->SetBinLabel(4, "Jet450 && !HT900");
-  h_hlt_cross->GetXaxis()->SetBinLabel(5, "AK8Jet450 && !HT800");
-  h_hlt_cross->GetXaxis()->SetBinLabel(6, "AK8Jet450 && !HT900");
 
   h_npu = fs->make<TH1F>("h_npu", ";true nPU;events", 65, 0, 65);
 
@@ -356,19 +347,6 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   for (int i = 0; i < mfv::n_l1_paths; ++i) {
     if (mevent->found_l1(i)) h_l1_bits->Fill(1+2*i,   w);
     if (mevent->pass_l1 (i)) h_l1_bits->Fill(1+2*i+1, w);
-  }
-
-  {
-    const bool pass_800  = mevent->pass_hlt(1);
-    const bool pass_900  = mevent->pass_hlt(2);
-    const bool pass_450  = mevent->pass_hlt(3);
-    const bool pass_8450 = mevent->pass_hlt(4);
-    h_hlt_cross->Fill(0., w);
-    if (pass_800  && !pass_900) h_hlt_cross->Fill(1., w);
-    if (pass_450  && !pass_800) h_hlt_cross->Fill(2., w);
-    if (pass_450  && !pass_900) h_hlt_cross->Fill(3., w);
-    if (pass_8450 && !pass_800) h_hlt_cross->Fill(4., w);
-    if (pass_8450 && !pass_900) h_hlt_cross->Fill(5., w);
   }
 
   //////////////////////////////////////////////////////////////////////////////
