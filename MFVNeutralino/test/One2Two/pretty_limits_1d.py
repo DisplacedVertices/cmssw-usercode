@@ -134,6 +134,8 @@ for kind in kinds:
     theory.SetLineColor(theory_color)
     theory.SetFillColorAlpha(theory_color, 0.5)
 
+    expect95.SetLineColor(ROOT.kOrange)
+    expect68.SetLineColor(ROOT.kGreen+1)
     expect95.SetFillColor(ROOT.kOrange)
     expect68.SetFillColor(ROOT.kGreen+1)
 
