@@ -211,6 +211,9 @@ def input_tags_referenced(thing):
 def is_edm_file(fn):
     return os.system('edmFileUtil %s >/dev/null 2>&1' % fn) == 0
 
+def json_path(bn):
+    return os.path.join(os.environ['CMSSW_BASE'], 'src/JMTucker/MFVNeutralino/test/jsons', bn)
+
 def merge_edm_files(out_fn, fns):
     print 'merging %i edm files to %s' % (len(fns), out_fn)
     cmd = 'cmsRun $CMSSW_BASE/src/JMTucker/Tools/python/Merge_cfg.py argv %s out=%s >%s.mergelog 2>&1' % (' '.join(fns), out_fn, out_fn)
