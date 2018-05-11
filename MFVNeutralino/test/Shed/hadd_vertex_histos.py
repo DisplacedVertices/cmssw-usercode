@@ -69,7 +69,7 @@ for sample in samples:
             raise IOError('no %r for %r' % vh_fn, fn)
         vh_fns.append(eos.canon(vh_fn))
 
-    new_vh_path = new_vh_paths.most_common(1)[0]
+    new_vh_path = new_vh_paths.most_common(1)[0][0]
     new_vh_fn = eos.canon(os.path.join(new_vh_path, 'vertex_histos.root'))
     if verbosity >= 3:
         print new_vh_fn
