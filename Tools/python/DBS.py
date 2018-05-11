@@ -19,7 +19,7 @@ class das_query:
                 raise ValueError('instance must be one of: %r' % allowed)
         self.instance = instance
         self.instance_cmd = 'instance=prod/%s' % self.instance
-        self.cmd = "dasgoclient_linux -query '%s'"
+        self.cmd = "dasgoclient -query '%s'"
         self.json = json
         if json:
             self.cmd = self.cmd.replace('-query', '-json -query')
