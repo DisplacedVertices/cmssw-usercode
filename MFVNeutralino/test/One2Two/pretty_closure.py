@@ -6,7 +6,7 @@ ps = plot_saver('../plots/EXO-17-018/closure', size=(700,700), log=False, pdf=Tr
 
 fns = ['2v_from_jets_data_2015p6_3track_default_v15_v5.root', '2v_from_jets_data_2015p6_7track_default_v15_v5.root', '2v_from_jets_data_2015p6_4track_default_v15_v5.root', '2v_from_jets_data_2015p6_5track_default_v15_v5.root']
 ntk = ['3track3track', '4track3track', '4track4track', '5track5track']
-names = ['3-track x 3-track', '4-track x 3-track', '4-track x 4-track', '#geq 5-track x #geq 5-track']
+names = ['3-track x 3-track', '4-track x 3-track', '4-track x 4-track', '#geq5-track x #geq5-track']
 ymax = [140, 40, 5, 4]
 
 def write(font, size, x, y, text):
@@ -43,13 +43,13 @@ for i in range(4):
     hh.SetMarkerSize(1.3)
     hh.Draw('PE')
 
-    l1 = ROOT.TLegend(0.50, 0.65, 0.85, 0.78)
+    l1 = ROOT.TLegend(0.35, 0.65, 0.85, 0.78)
     l1.AddEntry(hh, 'Data', 'LPE')
-    l1.AddEntry(h, 'Construction')
+    l1.AddEntry(h, 'Background template')
     l1.SetBorderSize(0)
     l1.Draw()
 
-    write(42, 0.040, 0.505, 0.80, names[i])
+    write(42, 0.040, 0.370 , 0.80, names[i])
     write(61, 0.050, 0.109, 0.913, 'CMS')
     write(42, 0.050, 0.560, 0.913, '38.5 fb^{-1} (13 TeV)')
 
