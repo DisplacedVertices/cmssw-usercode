@@ -20,16 +20,16 @@ cmsMakeTarball.py input.tgz
 tar xf input.tgz
 echo 2016 > $tmpdir/year.txt
 cat > $tmpdir/steering.sh <<EOF
-MAXEVENTS=10
-EXPECTEDEVENTS=10
+MAXEVENTS=100
+EXPECTEDEVENTS=100
 USETHISCMSSW=0
 FROMLHE=0
 TRIGFILTER=0
-PREMIX=0
-export DUMMYFORHASH=1512629531475509
+PREMIX=1
+export DUMMYFORHASH=1526164939315868
 OUTPUTLEVEL=minitree
-SCANPACK=scanpack=scanpacktest,1
-SALT="scanpacktest_1_None_scanpacktest_1"
+TODO="todo=pdf,LHAPDF6:NNPDF23_lo_as_0130_qed/0000 todo=stop_dbardbar,1.0,800"
+SALT="mfv_stopdbardbar_tau01000um_M0800_stop_dbardbar,1.0,800"
 EOF
 echo in new shell, issue e.g.
 echo "cd $tmpdir/$input_version/src ; source /cvmfs/cms.cern.ch/cmsset_default.sh ; eval \$(scramv1 runtime -sh) ; cd ../.. ; ./nstep.sh 1"
