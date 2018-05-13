@@ -18,7 +18,7 @@ for arg in sys.argv:
             for x in todo_args_ex.split(','):
                 try:
                     x = eval(x)
-                except NameError:
+                except (NameError, SyntaxError):
                     pass
                 todo_args.append(x)
         todos.append((todo, todo_args))
