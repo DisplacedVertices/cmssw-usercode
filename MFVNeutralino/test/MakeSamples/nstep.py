@@ -109,8 +109,9 @@ work_area = crab_dirs_root('nstep_%s%s' % (meta, ex))
 if os.path.isdir(work_area):
     sys.exit('work_area %s exists' % work_area)
 os.makedirs(work_area)
+gitstatus_dir = 'gitstatus_%s' % int(time()*1000)
 if not condor:
-    save_git_status(os.path.join(work_area, 'gitstatus'))
+    save_git_status(os.path.join(work_area, gitstatus_dir))
 
 config = Config()
 
@@ -282,6 +283,7 @@ def submit(config, name, scanpack_or_todo, todo_rawhlt=[], todo_reco=[], todo_nt
                 output = crab_command('submit', config=config)
             except CRABConfigException:
                 output = 'problem'
+            open(os.path.join(config.General.workArea, 'crab_%s' % config.General.requestName, 'cs_ex'), 'wt').write(gitstatus_dir)
             print colors.boldwhite(name)
             pprint(output)
             print
