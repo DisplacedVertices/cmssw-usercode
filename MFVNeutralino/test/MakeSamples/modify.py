@@ -1,5 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 
+def set_pdf(process, pdf):
+    process.generator.PythiaParameters.tuneSettings.append('PDF:pSet = %s' % pdf)
+
 def set_minbias(process):
     process.generator.PythiaParameters.processParameters = cms.vstring(
         'SoftQCD:nonDiffractive = on', 
