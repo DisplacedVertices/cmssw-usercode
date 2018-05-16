@@ -3,6 +3,14 @@ import FWCore.ParameterSet.Config as cms
 def set_pdf(process, pdf):
     process.generator.PythiaParameters.tuneSettings.append('PDF:pSet = %s' % pdf)
 
+def set_scales(process, which):
+    combinations = [(1,1), (1,2), (1,0.5), (2,1), (2,2), (0.5,1), (0.5,0.5)]
+    if which < 0 or which >= len(combinations):
+        raise ValueError('bad which %i' % which)
+    renorm, factor = combinations[which]
+    process.generator.PythiaParameters.tuneSettings.append('SigmaProcess:renormMultFac = %.1f' % renorm)
+    process.generator.PythiaParameters.tuneSettings.append('SigmaProcess:factorMultFac = %.1f' % factor)
+
 def set_minbias(process):
     process.generator.PythiaParameters.processParameters = cms.vstring(
         'SoftQCD:nonDiffractive = on', 
