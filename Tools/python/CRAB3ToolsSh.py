@@ -124,3 +124,11 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
         hadd(new_name, files)
 
     return new_name
+
+if __name__ == '__main__':
+    dirs = crab_dirs_from_argv()
+
+    if 'hadd_files' in sys.argv:
+        for d in dirs:
+            for fn in crab_hadd_files(d, True)[1]:
+                print fn
