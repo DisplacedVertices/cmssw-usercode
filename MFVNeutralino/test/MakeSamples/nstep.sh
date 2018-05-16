@@ -170,17 +170,23 @@ exitbanner $? RECO
 ################################################################################
 
 if [[ $OUTPUTLEVEL == "ntuple" || $OUTPUTLEVEL == "minitree" ]]; then
-    if [[ $(ls -1d CMSSW* | wc -l) != 1 ]]; then
+    if [[ $(basename $(pwd)) == "subworkdir" ]]; then
+        # if we're run via condor, handle the way CondorSubmitter sets up the working directory
+        NSTEP_CMSSW_DIR=(../CMSSW*)
+    else
+        NSTEP_CMSSW_DIR=(CMSSW*)
+    fi
+
+    if [[ ${#NSTEP_CMSSW_DIR[@]} -ne 1 ]]; then
         echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-        echo @@@@ more than one CMSSW dir found:
-        ls -l | sed 's/^/@@@@ /'
+        echo @@@@ not exactly one CMSSW dir found: ${NSTEP_CMSSW_DIR[@]}
         echo @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
         exit 1
     fi
-    cd CMSSW*/src
+    cd $NSTEP_CMSSW_DIR/src
     eval $(scram runtime -sh)
-    cd ../..
-    
+    cd -
+
     echo START NTUPLE\|MINITREE at $(date)
 
     function doit {
