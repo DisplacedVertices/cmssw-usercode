@@ -2,7 +2,7 @@ import sys, os
 from array import array
 from JMTucker.Tools.ROOTTools import *
 
-path = plot_dir('pretty_limits_final_i_really_mean_it', make=True)
+path = plot_dir('pretty_limits_updn', make=True)
 
 ts = tdr_style()
 ROOT.gStyle.SetPalette(ROOT.kBird)
@@ -101,18 +101,21 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
             tt.SetTextSize(38)
             tt.Draw()
 
-        g_obs = f2.Get('%s_observed_fromrinterp_nm_exc_g' % kind)
-        g_exp = f2.Get('%s_expect50_fromrinterp_nm_exc_g' % kind)
-#        g_thup = f2.Get('%s_observed_fromrinterp_up_exc_g' % kind)
- #       g_thdn = f2.Get('%s_observed_fromrinterp_dn_exc_g' % kind)
-        g_exp.SetLineStyle(7)
-        g_obs.SetLineWidth(3)
-    #    for g in (g_thup, g_thdn):
-            #g.SetLineColor(ROOT.kBlue)
-     #       g.SetLineWidth(2)
-        g_obs.Draw('L')
-#        g_exp.SetMarkerStyle(20)
- #       g_exp.SetMarkerSize(2)
+        g_obs   = f2.Get('%s_observed_fromrinterp_nm_exc_g' % kind)
+        g_obsup = f2.Get('%s_observed_fromrinterp_up_exc_g' % kind)
+        g_obsdn = f2.Get('%s_observed_fromrinterp_dn_exc_g' % kind)
+        g_exp   = f2.Get('%s_expect50_fromrinterp_nm_exc_g' % kind)
+        g_expup = f2.Get('%s_expect50_fromrinterp_up_exc_g' % kind)
+        g_expdn = f2.Get('%s_expect50_fromrinterp_dn_exc_g' % kind)
+        for g in g_obs, g_exp:
+            g.SetLineWidth(4)
+        for g in g_obs, g_obsup, g_obsdn:
+            g.SetLineColor(ROOT.kBlack)
+        for g in g_exp, g_expup, g_expdn:
+            g.SetLineStyle(2)
+            g.SetLineColor(ROOT.kRed)
+        for g in (g_obsup, g_obsdn, g_expup, g_expdn):
+            g.SetLineWidth(2)
 
         if kind == 'mfv_stopdbardbar':
             for i in xrange(20):
@@ -140,15 +143,14 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
             g_exp.SetPoint(104,2230.032336,95.94497903);
             g_exp.SetPoint(105,2226.111259,96.99275073);
 
-        g_exp.Draw('L')
-  #      g_thup.Draw('L')
-   #     g_thdn.Draw('L')
+        for g in g_exp, g_expup, g_expdn, g_obs, g_obsup, g_obsdn:
+            g.Draw('L')
 
         c.Update()
         palette = h.GetListOfFunctions().FindObject("palette")
         palette.SetY2NDC(0.932)
 
-        leg = ROOT.TLegend(0.110, 0.877, 0.820, 0.932)
+        leg = ROOT.TLegend(0.1095, 0.877, 0.820, 0.932)
         leg.SetTextFont(42)
         leg.SetTextSize(0.0362)
         leg.SetTextAlign(22)
@@ -156,23 +158,35 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
         leg.SetFillColor(ROOT.kWhite)
         leg.SetBorderSize(1)
         if kind == 'mfv_neu':
-            model = '#kern[-0.22]{#tilde{g} #rightarrow tbs}'
+            model = '#kern[-0.42]{#tilde{g} #rightarrow tbs}'
         else:
-            model = '#kern[-0.22]{#tilde{t} #rightarrow #bar{d}#kern[0.1]{#bar{d}}}'
+            model = '#kern[-0.52]{#tilde{t} #rightarrow #bar{d}#kern[0.1]{#bar{d}}}'
         leg.AddEntry(0, model, '')
-        leg.AddEntry(g_obs, '#kern[-0.22]{Observed}', 'L')
-        leg.AddEntry(g_exp, '#kern[-0.22]{Expected}', 'L')
+        leg.AddEntry(g_obs, 'Observed #pm 1 #sigma_{th}', 'L')
+        leg.AddEntry(g_exp, 'Expected #pm 1 #sigma_{exp}', 'L')
         leg.Draw()
-#        # these lines make the bands for the observed line in the legend, sigh
-#        x1, x2 = 950, 1145
-#        if xxx == 'big':
-#            y1, y2 = 20.1, 20.969
-#        else:
-#            y1, y2 = .54, .56
-#        l1 = ROOT.TLine(x1, y1, x2, y1)
-#        l2 = ROOT.TLine(x1, y2, x2, y2)
-#        l1.Draw()
-#        l2.Draw()
+
+        # these lines make the bands for the lines in the legend, sigh
+        if kind == 'mfv_neu':
+            x00, x01 = 0.239, 0.280
+            x10, x11 = 0.529, 0.570
+        else:
+            x00, x01 = 0.224, 0.265
+            x10, x11 = 0.520, 0.561
+        y0, y1 = 0.894, 0.914
+        ll = [
+            ROOT.TLine(x00, y0, x01, y0),
+            ROOT.TLine(x10, y0, x11, y0),
+            ROOT.TLine(x00, y1, x01, y1),
+            ROOT.TLine(x10, y1, x11, y1),
+            ]
+        for l in ll[1], ll[3]:
+            l.SetLineStyle(2)
+            l.SetLineColor(ROOT.kRed)
+        for l in ll:
+            l.SetLineWidth(2)
+            l.SetNDC(1)
+            l.Draw()
 
         cms = write(61, 0.050, 0.109, 0.950, 'CMS')
         lum = write(42, 0.050, 0.515, 0.950, '38.5 fb^{-1} (13 TeV)')
