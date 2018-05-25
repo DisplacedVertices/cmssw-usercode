@@ -5,37 +5,27 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.Tools.Samples import *
 
-version = 'v8'
+version = '2017v1'
 zoom = False #(0.98,1.005)
 save_more = True
 data_only = False
 use_qcd = False
-num_dir, den_dir = 'num900450ak', 'den'
-num_dir, den_dir = 'num800', 'den'
-num_dir, den_dir = 'num900450akjet6pt75', 'denjet6pt75'
-year = 2016
-which = typed_from_argv(int, 3)
+num_dir, den_dir = 'num', 'den'
+#num_dir, den_dir = 'numjet6pt75', 'denjet6pt75'
+year = 2017
+which = typed_from_argv(int, 0)
 data_period, int_lumi = [
-    ('',  35861. if year == 2016 else 2689.),
-    ('BthruG', 27255.),
-    ('CthruG', 21472.),
-    ('H', 8606.),
-    ('B3', 5783.),
-    ('C',  2573.),
+    ('',  41530.),
+    ('B',  4794.),
+    ('C',  9631.),
     ('D',  4248.),
-    ('E',  4009.),
-    ('F',  3102.),
-    ('G',  7540.),
-    ('H2', 8391.),
-    ('H3',  215.),
+    ('E',  9315.),
+    ('F', 13540.),
     ][which]
 
 ########################################################################
 
-if any((year not in (2015, 2016),
-        year == 2015 and which > 0,
-        year == 2015 and num_dir == 'num900',
-        num_dir == 'num800' and (data_period.startswith('H') or year == 2016 and data_period == ''))):
+if 0:
     raise ValueError('invalid combo: %s %s %s' % (num_dir, year, data_period))
 
 root_dir = '/uscms_data/d2/tucker/crab_dirs/TrigEff%s' % version
@@ -54,15 +44,12 @@ data_f = ROOT.TFile(data_fn)
 if data_only:
     bkg_samples, sig_samples = [], []
 else:
-    if year == 2015:
-        bkg_samples = [ttbar_2015, wjetstolnusum_2015, dyjetstollM50sum_2015, dyjetstollM10sum_2015]
-        sig_samples = [] #mfv_signal_samples_2015  no miniaod
-    elif year == 2016:
-        bkg_samples = [ttbar, wjetstolnu, dyjetstollM50, dyjetstollM10]
-        sig_samples  = [getattr(Samples, 'mfv_neu_tau01000um_M%04i' % m) for m in (300, 400, 800, 1200, 1600)] + [Samples.mfv_neu_tau10000um_M0800]
-        sig_samples += [getattr(Samples, 'mfv_ddbar_tau01000um_M%04i' % m) for m in (300, 400, 800, 1200, 1600)] + [Samples.mfv_ddbar_tau10000um_M0800]
+    if year == 2017:
+        bkg_samples = [ttbar_2017, wjetstolnu_2017, dyjetstollM50_2017, dyjetstollM10_2017]
+        sig_samples  = [getattr(Samples, 'mfv_neu_tau01000um_M%04i_2017' % m) for m in (400, 800, 1200, 1600)] + [Samples.mfv_neu_tau10000um_M0800_2017]
+        #sig_samples += [getattr(Samples, 'mfv_ddbar_tau01000um_M%04i' % m) for m in (300, 400, 800, 1200, 1600)] + [Samples.mfv_ddbar_tau10000um_M0800]
     if use_qcd:
-        bkg_samples.append(qcdmupt15_2015 if year == 2015 else qcdmupt15)
+        bkg_samples.append(qcdmupt15_2017)
 
 n_bkg_samples = len(bkg_samples)
 for sample in bkg_samples:
@@ -75,6 +62,8 @@ for sample in sig_samples:
 
 kinds = ['']
 ns = ['h_jet_ht']
+
+lump_lower = 1200.
 
 def fit_limits(kind, n):
     if 'ht' in n:
@@ -176,8 +165,7 @@ for kind in kinds:
             scale = sample.partial_weight(sample.f) * int_lumi
 
             print '%s (%f)' % (sample.name, scale)
-            ll = 1000. #limits(kind, n)[0]
-            ib = num.FindBin(ll)
+            ib = num.FindBin(lump_lower)
             ni = num.Integral(ib, 10000)
             di = den.Integral(ib, 10000)
             sum_scaled_nums += ni*scale
@@ -238,8 +226,7 @@ for kind in kinds:
 
         print 'data' #, data_num.GetEntries(), data_den.GetEntries()
         data_num, data_den = get(data_f, kind, n)
-        ll = 1000. #limits(kind, n)[0]
-        ib = data_num.FindBin(ll)
+        ib = data_num.FindBin(lump_lower)
         ni = data_num.Integral(ib, 10000)
         di = data_den.Integral(ib, 10000)
         print '   %10i %10i %10s %10s  %.6f [%.6f, %.6f]' % ((ni, di, '', '') + clopper_pearson(ni, di))
@@ -302,8 +289,7 @@ for kind in kinds:
         print '\nsignals'
         for sample in sig_samples:
             sig_num, sig_den = get(sample.f, kind, n)
-            ll = 1000. # fit_limits(kind, n)[0]
-            ib = sig_num.FindBin(ll)
+            ib = sig_num.FindBin(lump_lower)
             ni = sig_num.Integral(ib, 10000)
             di = sig_den.Integral(ib, 10000)
             print '   %10i %10i %10s %10s  %.6f [%.6f, %.6f]' % ((ni, di, '', '') + clopper_pearson(ni, di))
