@@ -7,7 +7,7 @@ from JMTucker.Tools import Samples
 from JMTucker.Tools import SampleFiles
 from JMTucker.Tools.general import bool_from_argv
 from JMTucker.Tools.hadd import hadd
-from JMTucker.Tools.CMSSWTools import is_edm_file, merge_edm_files
+from JMTucker.Tools.CMSSWTools import is_edm_file, merge_edm_files, cmssw_base
 from JMTucker.MFVNeutralino import AnalysisConstants
 
 def hadd_or_merge(out_fn, files):
@@ -38,7 +38,7 @@ def cmd_report_data():
     for ds, ex in ('SingleMuon', '_mu'), ('JetHT', ''):
         if '10pc' in sys.argv:
             ex += '_10pc'
-        for year in 2015, 2016:
+        for year in 2017,:
             if not glob('*%s%i*' % (ds, year)):
                 continue
             os.system('mreport c*_%s%i*' % (ds, year))
@@ -203,22 +203,15 @@ def cmd_v0eff():
 def cmd_trigeff():
     cmd_report_data()
 
-    hadd('SingleMuon2015.root', ['SingleMuon2015%s.root' % x for x in 'CD'])
-    hadd('SingleMuon2016BthruG.root', ['SingleMuon2016%s.root' % x for x in ('B3', 'C', 'D', 'E', 'F', 'G')])
-    hadd('SingleMuon2016H.root', ['SingleMuon2016%s.root' % x for x in ('H2', 'H3')])
-    hadd('dyjetstollM10sum_2015.root', ['dyjetstollM10%s_2015.root' % x for x in '123'])
-    hadd('dyjetstollM50sum_2015.root', ['dyjetstollM50%s_2015.root' % x for x in '123'])
-    hadd('wjetstolnusum_2015.root', ['wjetstolnu%s_2015.root' % x for x in '123'])
+    hadd('SingleMuon2017.root', ['SingleMuon2017%s.root' % x for x in 'BCDEF'])
 
-    for is2015_s, scale in ('', -AnalysisConstants.int_lumi_2016), ('_2015', -AnalysisConstants.int_lumi_2015):
+    for year_s, scale in ('_2017', -AnalysisConstants.int_lumi_2017),:
         for wqcd_s in '', '_wqcd':
-            cmd = 'python ' + os.environ['CMSSW_BASE'] + '/src/JMTucker/Tools/python/Samples.py merge %f background%s%s.root ' % (scale, wqcd_s, is2015_s)
-            if is2015_s:
-                files = 'ttbar_2015.root wjetstolnusum_2015.root dyjetstollM10sum_2015.root dyjetstollM50sum_2015.root'.split()
-            else:
-                files = 'ttbar.root wjetstolnu.root dyjetstollM10.root dyjetstollM50.root'.split()
+            cmd = 'samples merge %f background%s%s.root ' % (scale, wqcd_s, year_s)
+            files = 'ttbar.root wjetstolnu.root dyjetstollM10.root dyjetstollM50.root'
             if wqcd_s:
-                files.append('qcdmupt15_2015.root' if is2015_s else 'qcdmupt15.root')
+                files += ' qcdmupt15.root'
+            files = files.replace('.root', year_s + '.root').split()
             for fn in files:
                 if not os.path.isfile(fn):
                     raise RuntimeError('%s not found' % fn)
