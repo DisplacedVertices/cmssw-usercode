@@ -180,7 +180,7 @@ for kind in kinds:
         g.SetTitle('%s, #tau = %i #mum;M (GeV);efficiency ratio 2015/2016' % (kind, tau))
         g.GetYaxis().SetRangeUser(0.5, 2.2)
 
-        name = '%s_tau%05ium' % (kind, tau)
+        name = '%s_tau%06ium' % (kind, tau)
         fcn, res = fitit(g, name)
         print '@300:', fcn.Eval(300)
     

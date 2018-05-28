@@ -9,7 +9,7 @@ class Efficiencies:
             self.cfg = cfg
             self.fn = os.path.join(self.pathbase,
                                    ('nsig%.1f' % cfg.nsigmadxy).replace('.', 'p'),
-                                   'tau%05ium' % cfg.tau,
+                                   'tau%06ium' % cfg.tau,
                                    '%i%i' % (cfg.njets, cfg.nbjets),
                                    'qcdht1000and1500_hipplusno.root' if cfg.mc else 'JetHT2016.root'
                                    )

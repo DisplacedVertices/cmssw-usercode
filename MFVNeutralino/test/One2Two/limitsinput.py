@@ -50,7 +50,7 @@ def nsamples(f):
 
 def details2name(kind, tau, mass):
     # same convention as scanpack: tau float:mm, mass int:GeV
-    return '%s_tau%05ium_M%04i' % (kind, int(tau*1000), mass)
+    return '%s_tau%06ium_M%04i' % (kind, int(tau*1000), mass)
 def name2kind(name):
     return name.split('_tau')[0]
 def name2tau(name):

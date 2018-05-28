@@ -43,7 +43,7 @@ namespace mfv {
       char buf[128];
       for (int t : taus)
         for (int m : masses) {
-          snprintf(buf, 128, "mfv_neu_tau%05ium_M%04i", t, m);
+          snprintf(buf, 128, "mfv_neu_tau%06ium_M%04i", t, m);
           samples.push_back({i--, std::string(buf), 1e-3, 10000});
         }
 #else

@@ -358,7 +358,7 @@ elif meta in metamap:
 
     name_prefix, todo_fcn = metamap[meta]
     for tau, mass in signal_point_iterator():
-        name = '%s_tau%05ium_M%04i' % (name_prefix, tau, mass)
+        name = '%s_tau%06ium_M%04i' % (name_prefix, tau, mass)
         todo = '%s,%.1f,%i' % (todo_fcn, tau/1000., mass)
         submit(config, name, todo)
 

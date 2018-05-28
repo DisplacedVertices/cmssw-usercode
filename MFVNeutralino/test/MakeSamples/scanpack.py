@@ -153,7 +153,7 @@ class scanpackbase(object):
         else:
             raise ValueError('dunno %s' % kind)
         tau = int(tau*1000)
-        return '%s_tau%05ium_M%04i' % (kind, tau, mass)
+        return '%s_tau%06ium_M%04i' % (kind, tau, mass)
 
     def sample_details(self, name):
         '''inverse of sample_name'''

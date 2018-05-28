@@ -30,7 +30,7 @@ for cutset in 'nocuts', 'ntracks', 'all':
     for tau in 100,300,1000,10000,30000:
         for njets in 2,3:
             for nbjets in 0,1,2:
-                name = '%s_tau%05ium_%i%i' % (cutset, tau, njets, nbjets)
+                name = '%s_tau%06ium_%i%i' % (cutset, tau, njets, nbjets)
                 title = '%s, #tau = %s, n_{l} = %i, n_{b} = %i;nsigmadxy cut;efficiency' % (cutset, {100:'100 #mum', 300:'300 #mum', 1000:'1 mm', 10000:'10 mm', 30000:'30 mm'}[tau], njets, nbjets)
                 p(name, title,
                   [(nsig,) + effs(cutset=cutset, nsigmadxy=nsig, tau=tau, njets=njets, nbjets=nbjets, mc=False).eff for nsig in [3.7 + i*0.1 for i in xrange(7)]],
