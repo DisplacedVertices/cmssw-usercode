@@ -1,7 +1,7 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-dataset = 'ntuplev16p1'
+dataset = 'ntuplev18m'
 sample_files(process, 'qcdht2000', dataset, 1)
 process.TFileService.fileName = 'histos.root'
 process.maxEvents.input = -1
@@ -110,20 +110,16 @@ def force_bs(process, bs):
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.Year import year
     from JMTucker.Tools import Samples 
-    if year == 2015:
-        samples = Samples.data_samples_2015 + \
-            Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015 + \
-            Samples.all_signal_samples_2015
-    elif year == 2016:
-        samples = Samples.data_samples + \
-            Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext +  + Samples.qcd_hip_samples + \
-            Samples.all_signal_samples
+    if year == 2017:
+        samples = \
+            Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + \
+            Samples.all_signal_samples_2017
 
     from JMTucker.Tools.MetaSubmitter import set_splitting
-    set_splitting(samples, dataset, 'histos', data_json='jsons/ana_2015p6.json')
+    set_splitting(samples, dataset, 'histos', data_json='jsons/ana_2017.json')
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('HistosV16p1',
+    cs = CondorSubmitter('HistosV18m',
                          ex = year,
                          dataset = dataset,
                          )
