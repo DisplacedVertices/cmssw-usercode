@@ -1,7 +1,7 @@
 import sys, os
 from JMTucker.Tools.ROOTTools import *
 
-path = plot_dir('pretty_efficiency_final_really', make=True)
+path = plot_dir('pretty_efficiency_final_omg', make=True)
 
 ts = tdr_style()
 ROOT.gStyle.SetPalette(ROOT.kBird) #kColorPrintableOnGrey
@@ -57,7 +57,7 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
 #    yax.SetBinLabel(yax.FindBin(30000), '30')
     zax = h.GetZaxis()
     zax.SetRangeUser(0., 0.85)
-    zax.SetTitle('Efficiency for d_{VV} > 0.4 mm')
+    zax.SetTitle('Efficiency (full selection + d_{VV} > 0.4 mm)')
     zax.SetLabelSize(0.045)
     zax.SetTitleSize(0.05)
     zax.SetTitleOffset(1.22)

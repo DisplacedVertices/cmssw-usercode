@@ -163,8 +163,8 @@ def make_1d_plot(d, name, xkey='mass'):
 
     g.observed = tgae(d[xkey], d['observed'], None, None, None, None, '', xtitle, 1)
     g.expect50 = tgae(d[xkey], d['expect50'], None, None, None, None, '', xtitle, 1)
-    g.expect95 = tgae(d[xkey], d['expect95'], None, None, d['expect95lo'], d['expect95hi'], '', xtitle, 5)
-    g.expect68 = tgae(d[xkey], d['expect68'], None, None, d['expect68lo'], d['expect68hi'], '', xtitle, 3)
+    g.expect95 = tgae(d[xkey], d['expect95'], None, None, d['expect95lo'], d['expect95hi'], '', xtitle, ROOT.kOrange)
+    g.expect68 = tgae(d[xkey], d['expect68'], None, None, d['expect68lo'], d['expect68hi'], '', xtitle, ROOT.kGreen+1)
 
     g.expect2p5 =  tgae(d[xkey], d['expect2p5'], None, None, None, None, '', xtitle, 1)
     g.expect16  =  tgae(d[xkey], d['expect16'],  None, None, None, None, '', xtitle, 1)

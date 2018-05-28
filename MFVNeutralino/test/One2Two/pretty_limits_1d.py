@@ -2,7 +2,7 @@ import sys, os
 from array import array
 from JMTucker.Tools.ROOTTools import *
 
-path = plot_dir('pretty_limits_1d_final_i_really_mean_it', make=True)
+path = plot_dir('pretty_limits_1d_gaslit', make=True)
 
 ts = tdr_style()
 
@@ -134,6 +134,11 @@ for kind in kinds:
     theory.SetLineColor(theory_color)
     theory.SetFillColorAlpha(theory_color, 0.5)
 
+    expect95.SetLineColor(ROOT.kOrange)
+    expect68.SetLineColor(ROOT.kGreen+1)
+    expect95.SetFillColor(ROOT.kOrange)
+    expect68.SetFillColor(ROOT.kGreen+1)
+
     expect95.Draw('3')
     expect68.Draw('3')
     if draw_theory:
@@ -156,9 +161,9 @@ for kind in kinds:
     leg.AddEntry(0, '#kern[-0.22]{%s}' % nice_leg(kind), '')
     leg.AddEntry(0, '#kern[-0.22]{95% CL upper limits:}', '')
     leg.AddEntry(observed, 'Observed', 'L')
-    leg.AddEntry(expect50, 'Expected', 'L')
-    leg.AddEntry(expect68, '#pm 1 std. deviation', 'F')
-    leg.AddEntry(expect95, '#pm 2 std. deviation', 'F')
+    leg.AddEntry(expect50, 'Median expected', 'L')
+    leg.AddEntry(expect68, '68% expected', 'F')
+    leg.AddEntry(expect95, '95% expected', 'F')
     if draw_theory:
         leg.AddEntry(theory, nice_theory(kind), 'LF')
     leg.Draw()
