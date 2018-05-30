@@ -83,3 +83,7 @@ ps.c.SetBottomMargin(0.11)
 ps.c.SetLeftMargin(0.11)
 
 ps.save('templates')
+
+write(52, 0.047, 0.219, 0.913, 'Preliminary')
+
+ps.save('templates_prelim')
