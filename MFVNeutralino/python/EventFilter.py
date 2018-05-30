@@ -14,6 +14,13 @@ def setup_event_filter(process,
     setattr(process, trig_filt_name, triggerFilter)
     triggerFilter.HLTPaths = [
         "HLT_PFHT1050_v*",
+        "HLT_Ele35_WPTight_Gsf_v*",
+        "HLT_Ele115_CaloIdVT_GsfTrkIdT_v*",
+        "HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165_v*",
+        "HLT_IsoMu27_v*",
+        "HLT_Mu50_v*",
+        "HLT_Ele15_IsoVVVL_PFHT450_v*",
+        "HLT_Mu15_IsoVVVL_PFHT450_v*",
         ]
     triggerFilter.andOr = True # = OR
     triggerFilter.throw = False
