@@ -13,13 +13,6 @@ def setup_event_filter(process,
     triggerFilter = hltHighLevel.clone()
     setattr(process, trig_filt_name, triggerFilter)
     triggerFilter.HLTPaths = [
-        # 2015+6B-G
-        "HLT_PFHT800_v*",
-        # 2016H
-        "HLT_PFHT900_v*",
-        "HLT_PFJet450_v*",
-        "HLT_AK8PFJet450_v*",
-        # 2017
         "HLT_PFHT1050_v*",
         ]
     triggerFilter.andOr = True # = OR
