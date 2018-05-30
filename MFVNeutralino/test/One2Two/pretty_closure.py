@@ -1,10 +1,11 @@
+import os
 from JMTucker.Tools.ROOTTools import *
 ROOT.TH1.AddDirectory(0)
 
 set_style()
-ps = plot_saver('../plots/EXO-17-018/closure', size=(700,700), log=False, pdf=True)
+ps = plot_saver(plot_dir('pretty_closure'), size=(700,700), log=False, pdf=True)
 
-fns = ['2v_from_jets_data_2015p6_3track_default_v15_v5.root', '2v_from_jets_data_2015p6_7track_default_v15_v5.root', '2v_from_jets_data_2015p6_4track_default_v15_v5.root', '2v_from_jets_data_2015p6_5track_default_v15_v5.root']
+fns = [os.path.join('/uscms/home/jchu/public/EXO-17-018', fn) for fn in ['2v_from_jets_data_2015p6_3track_default_v15_v5.root', '2v_from_jets_data_2015p6_7track_default_v15_v5.root', '2v_from_jets_data_2015p6_4track_default_v15_v5.root', '2v_from_jets_data_2015p6_5track_default_v15_v5.root']]
 ntk = ['3track3track', '4track3track', '4track4track', '5track5track']
 names = ['3-track x 3-track', '4-track x 3-track', '4-track x 4-track', '#geq5-track x #geq5-track']
 ymax = [140, 40, 5, 4]
@@ -67,4 +68,8 @@ for i in range(4):
         ll.SetLineStyle(2)
         ll.Draw()
 
-    ps.save('closure_%s' % ntk[i])
+    outfn = 'closure_%s' % ntk[i]
+    ps.save(outfn)
+
+    write(52, 0.047, 0.219, 0.913, 'Preliminary')
+    ps.save(outfn + '_prelim')
