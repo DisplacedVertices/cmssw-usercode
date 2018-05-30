@@ -2,7 +2,7 @@ import sys, os
 from array import array
 from JMTucker.Tools.ROOTTools import *
 
-path = plot_dir('pretty_limits_updn', make=True)
+path = plot_dir('pretty_limits_updn_correct', make=True)
 
 ts = tdr_style()
 ROOT.gStyle.SetPalette(ROOT.kBird)
@@ -105,8 +105,8 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
         g_obsup = f2.Get('%s_observed_fromrinterp_up_exc_g' % kind)
         g_obsdn = f2.Get('%s_observed_fromrinterp_dn_exc_g' % kind)
         g_exp   = f2.Get('%s_expect50_fromrinterp_nm_exc_g' % kind)
-        g_expup = f2.Get('%s_expect50_fromrinterp_up_exc_g' % kind)
-        g_expdn = f2.Get('%s_expect50_fromrinterp_dn_exc_g' % kind)
+        g_expup = f2.Get('%s_expect84_fromrinterp_nm_exc_g' % kind)
+        g_expdn = f2.Get('%s_expect16_fromrinterp_nm_exc_g' % kind)
         for g in g_obs, g_exp:
             g.SetLineWidth(4)
         for g in g_obs, g_obsup, g_obsdn:
