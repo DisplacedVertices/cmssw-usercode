@@ -174,4 +174,10 @@ for kind in kinds:
     c.SaveAs(fn + '.pdf')
     c.SaveAs(fn + '.png')
     c.SaveAs(fn + '.root')
+
+    pre = write(52, 0.047, 0.219, 0.913, 'Preliminary')
+    c.SaveAs(fn + '_prelim.pdf')
+    c.SaveAs(fn + '_prelim.png')
+    c.SaveAs(fn + '_prelim.root')
+
     del c

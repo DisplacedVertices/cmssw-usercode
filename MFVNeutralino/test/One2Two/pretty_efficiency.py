@@ -72,4 +72,7 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
     lum = write(42, 0.050, 0.676, 0.913, '(13 TeV)')
     for ext in 'pdf', 'png', 'root':
         c.SaveAs(os.path.join(path, 'scan_eff_%s.%s' % (kind, ext)))
+    pre = write(52, 0.040, 0.406, 0.912, 'Preliminary')
+    for ext in 'pdf', 'png', 'root':
+        c.SaveAs(os.path.join(path, 'scan_eff_%s_prelim.%s' % (kind, ext)))
     del c
