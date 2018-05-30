@@ -51,7 +51,7 @@ electronId = denewline('''
 
 jtupleParams = cms.PSet(
     jetCut = cms.string(denewline('''
-                        pt > 20. && abs(eta) < 2.5 &&
+                        abs(eta) < 2.7 &&
                         numberOfDaughters > 1 &&
                         neutralHadronEnergyFraction < 0.90 &&
                         neutralEmEnergyFraction < 0.90 &&
