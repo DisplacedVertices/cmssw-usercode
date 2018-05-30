@@ -156,7 +156,7 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
         palette = h.GetListOfFunctions().FindObject("palette")
         palette.SetY2NDC(0.932)
 
-        leg = ROOT.TLegend(0.1095, 0.877, 0.820, 0.932)
+        leg = ROOT.TLegend(0.10985, 0.877, 0.820, 0.932)
         leg.SetTextFont(42)
         leg.SetTextSize(0.0362)
         leg.SetTextAlign(22)
