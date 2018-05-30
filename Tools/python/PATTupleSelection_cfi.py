@@ -49,37 +49,14 @@ electronId = denewline('''
  )
 ''' % locals())
 
-jetPresel = denewline('''
-(
- abs(eta) <= 2.7 &&
- numberOfDaughters > 1 &&
- neutralHadronEnergyFraction < 0.90 &&
- neutralEmEnergyFraction < 0.90 &&
- muonEnergyFraction < 0.8 &&
- (abs(eta) >= 2.4 || (chargedEmEnergyFraction < 0.90 && chargedHadronEnergyFraction > 0. && chargedMultiplicity > 0))
- ) ||
-(
- abs(eta) > 2.7 && abs(eta) <= 3.0 &&
- neutralEmEnergyFraction < 0.90 &&
- neutralMultiplicity > 2
- ) ||
-(
- abs(eta) > 3.0 &&
- neutralEmEnergyFraction < 0.90 &&
- neutralMultiplicity > 10
- )
-''')
-
 jtupleParams = cms.PSet(
-    jetPresel = cms.string(jetPresel),
-    #jetCut = cms.string('pt > 20. && abs(eta) < 2.5 && (%s)' % jetPresel),
     jetCut = cms.string(denewline('''
                         pt > 20. && abs(eta) < 2.5 &&
                         numberOfDaughters > 1 &&
                         neutralHadronEnergyFraction < 0.90 &&
                         neutralEmEnergyFraction < 0.90 &&
                         muonEnergyFraction < 0.8 &&
-                        (abs(eta) >= 2.4 || (chargedEmEnergyFraction < 0.90 && chargedHadronEnergyFraction > 0. && chargedMultiplicity > 0))
+                        (abs(eta) >= 2.4 || (chargedEmEnergyFraction < 0.80 && chargedHadronEnergyFraction > 0. && chargedMultiplicity > 0))
                         ''')),
 
     muonCut      = cms.string('isPFMuon && (isGlobalMuon || isTrackerMuon) && abs(eta) < 2.4'),
