@@ -132,7 +132,10 @@ mfv_signal_samples_2017 = [
     MCSample('mfv_neu_tau100000um_M3000_2017', '/mfv_neu_tau100000um_M3000/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v10-v1-518a667c1a87b8ebee83b6b0f9151326/USER', 10000),
     ]
 
-all_signal_samples_2017 = mfv_signal_samples_2017
+mfv_stopdbardbar_samples_2017 = ['mfv_stopdbardbar_tau%06ium_M%04i' % (tau, mass) for tau in [100,300,1000,10000,30000,100000] for mass in [400,600,800,1200,1600,3000]]
+mfv_stopdbardbar_samples_2017 = [MCSample(name + '_2017', '/%s/None/None' % name, 10000) for name in mfv_stopdbardbar_samples_2017]
+
+all_signal_samples_2017 = mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017
 
 for s in all_signal_samples_2017:
     _set_signal_stuff(s)
@@ -183,6 +186,7 @@ __all__ = [
     'ttbar_samples_2017',
     'leptonic_samples_2017',
     'mfv_signal_samples_2017',
+    'mfv_stopdbardbar_samples_2017',
     'data_samples_2017',
     'auxiliary_data_samples_2017',
 
