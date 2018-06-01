@@ -133,7 +133,7 @@ mfv_signal_samples_2017 = [
     ]
 
 mfv_stopdbardbar_samples_2017 = ['mfv_stopdbardbar_tau%06ium_M%04i' % (tau, mass) for tau in [100,300,1000,10000,30000,100000] for mass in [400,600,800,1200,1600,3000]]
-mfv_stopdbardbar_samples_2017 = [MCSample(name + '_2017', '/%s/None/None' % name, 10000) for name in mfv_stopdbardbar_samples_2017]
+mfv_stopdbardbar_samples_2017 = [MCSample(name + '_2017', '/%s/None/USER' % name, 10000) for name in mfv_stopdbardbar_samples_2017]
 
 all_signal_samples_2017 = mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017
 
@@ -230,7 +230,7 @@ _adbp('miniaod', '/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFa
 _adbp('miniaod', '/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17MiniAOD-94X_mc2017_realistic_v10-v1/MINIAODSIM',              26923935)
 _adbp('miniaod', '/QCD_Pt-20toInf_MuEnrichedPt15_TuneCP5_13TeV_pythia8/RunIIFall17MiniAOD-RECOSIMstep_94X_mc2017_realistic_v10-v1/MINIAODSIM', 16404691)
 
-for sample in mfv_signal_samples_2017:
+for sample in mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017:
     sample.add_dataset('miniaod', '/%s/None/USER' % sample.primary_dataset, sample.nevents_orig)
     sample.datasets['miniaod'].condor = True
     sample.datasets['miniaod'].xrootd_url = xrootd_sites['T3_US_FNALLPC']

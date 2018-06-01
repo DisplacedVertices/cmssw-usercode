@@ -109,7 +109,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
     import JMTucker.Tools.Samples as Samples
 
-    samples = Samples.mfv_signal_samples_2017
+    samples = Samples.all_signal_samples_2017
     for s in samples:
         s.split_by = 'events'
         s.events_per = 2000
