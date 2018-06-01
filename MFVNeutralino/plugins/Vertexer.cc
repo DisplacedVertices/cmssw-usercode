@@ -421,8 +421,8 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     verbose(cfg.getUntrackedParameter<bool>("verbose", false)),
     module_label(cfg.getParameter<std::string>("@module_label"))
 {
-  if ((min_all_track_hit_r != 1 && min_all_track_hit_r != 999) || (min_seed_track_hit_r != 1 && min_seed_track_hit_r != 999))
-    throw cms::Exception("MFVVertexer") << "hit_r cuts may only be 1";
+  if (min_all_track_hit_r < 1 || min_all_track_hit_r > 4 || min_seed_track_hit_r < 1 || min_seed_track_hit_r > 4)
+    throw cms::Exception("MFVVertexer") << "hit_r cuts may only be 1-4";
 
   if (use_tracks + use_non_pv_tracks + use_non_pvs_tracks + use_pf_candidates + use_pf_jets + use_pat_jets != 1)
     throw cms::Exception("MFVVertexer") << "must enable exactly one of use_tracks/use_non_pv_tracks/use_non_pvs_tracks/pf_candidates/pf_jets/pat_jets";
