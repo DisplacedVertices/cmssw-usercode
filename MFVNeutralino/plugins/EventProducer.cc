@@ -21,7 +21,6 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/MCInteractions.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/TriggerFloats.h"
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
-#include "JMTucker/Tools/interface/Bridges.h"
 #include "JMTucker/Tools/interface/GenUtilities.h"
 #include "JMTucker/Tools/interface/TriggerHelper.h"
 #include "JMTucker/Tools/interface/Utilities.h"
@@ -266,7 +265,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->pv_sumpt2 = 0;
     if (input_is_miniaod) {
       for (const pat::PackedCandidate& cand : *packed_candidates)
-        if (cand.vertexRef().key() == 0 && jmt::packedCandidateHasTrackDetails(cand)) {
+        if (cand.vertexRef().key() == 0 && cand.charge() && cand.hasTrackDetails()) {
           inc_uchar_clamp(mevent->pv_ntracks);
           mevent->pv_sumpt2 += cand.pt() * cand.pt(); // JMTBAD just use the stored score
         }
@@ -336,7 +335,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       }
       else {
         const pat::PackedCandidate* pk = dynamic_cast<const pat::PackedCandidate*>(dau);
-        if (pk && jmt::packedCandidateHasTrackDetails(*pk))
+        if (pk && pk->charge() && pk->hasTrackDetails())
           tk = &pk->pseudoTrack();
       }
 

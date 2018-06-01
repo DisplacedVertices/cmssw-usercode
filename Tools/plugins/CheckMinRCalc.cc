@@ -8,7 +8,6 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "JMTucker/Tools/interface/Bridges.h"
 #include "JMTucker/Tools/interface/TrackerSpaceExtent.h"
 
 class CheckMinRCalc : public edm::EDAnalyzer {
@@ -44,7 +43,7 @@ void CheckMinRCalc::analyze(const edm::Event& event, const edm::EventSetup& setu
   event.getByToken(tracks_token, tracks);
   for (const reco::Track& tk : *tracks) {
     NumExtents ne = tracker_extents.numExtentInRAndZ(tk.hitPattern(), TrackerSpaceExtents::AllowAll);
-    ok->Fill(ne.min_r == 1, jmt::hasValidHitInFirstPixelBarrel(tk));
+    ok->Fill(ne.min_r == 1, tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1));
   }
 }
 

@@ -11,7 +11,6 @@
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "Geometry/CommonDetUnit/interface/GlobalTrackingGeometry.h"
 #include "Geometry/Records/interface/GlobalTrackingGeometryRecord.h"
-#include "JMTucker/Tools/interface/Bridges.h"
 
 
 void TrackerSpaceExtents::fill(const edm::EventSetup& setup, const GlobalPoint& origin) {
@@ -45,7 +44,7 @@ void TrackerSpaceExtents::print() const {
 
 NumExtents TrackerSpaceExtents::numExtentInRAndZ(const reco::HitPattern& hp, int code) const {
   NumExtents ret;
-  for (int ihit = 0, ie = jmt::numberOfAllHits(hp, reco::HitPattern::TRACK_HITS); ihit < ie; ++ihit) {
+  for (int ihit = 0, ie = hp.numberOfAllHits(reco::HitPattern::TRACK_HITS); ihit < ie; ++ihit) {
     uint32_t hit = hp.getHitPattern(reco::HitPattern::TRACK_HITS, ihit);
 
     bool is_valid = hp.getHitType(hit) == 0;
@@ -88,7 +87,7 @@ SpatialExtents TrackerSpaceExtents::extentInRAndZ(const reco::HitPattern& hp, in
 
   SpatialExtents ret;
 
-  for (int ihit = 0, ie = jmt::numberOfAllHits(hp, reco::HitPattern::TRACK_HITS); ihit < ie; ++ihit) {
+  for (int ihit = 0, ie = hp.numberOfAllHits(reco::HitPattern::TRACK_HITS); ihit < ie; ++ihit) {
     uint32_t hit = hp.getHitPattern(reco::HitPattern::TRACK_HITS, ihit);
         
     bool is_valid = hp.getHitType(hit) == 0;
@@ -122,7 +121,7 @@ int TrackerSpaceExtents::numHitsBehind(const reco::HitPattern& hp, const double 
 
   int nhitsbehind = 0;
 
-  for (int ihit = 0, ie = jmt::numberOfAllHits(hp, reco::HitPattern::TRACK_HITS); ihit < ie; ++ihit) {
+  for (int ihit = 0, ie = hp.numberOfAllHits(reco::HitPattern::TRACK_HITS); ihit < ie; ++ihit) {
     uint32_t hit = hp.getHitPattern(reco::HitPattern::TRACK_HITS, ihit);
         
     bool is_valid = hp.getHitType(hit) == 0;

@@ -6,7 +6,6 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
-#include "JMTucker/Tools/interface/Bridges.h"
 
 class MFVSkimmedTracks : public edm::EDFilter {
 public:
@@ -66,7 +65,7 @@ bool MFVSkimmedTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
     ++itk;
     const double pt = tk.pt();
     const double abs_eta = fabs(tk.eta());
-    const bool min_r = jmt::hasValidHitInFirstPixelBarrel(tk);
+    const bool min_r = tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1);
     const int npxlayers = tk.hitPattern().pixelLayersWithMeasurement();
     const int nstlayers = tk.hitPattern().stripLayersWithMeasurement();
     const bool stlayers_pass = (abs_eta < 2.0 && nstlayers >= 6) || (abs_eta >= 2.0 && nstlayers >= 7);
