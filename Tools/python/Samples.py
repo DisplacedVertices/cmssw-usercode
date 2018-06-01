@@ -235,6 +235,11 @@ for sample in mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017:
     sample.datasets['miniaod'].condor = True
     sample.datasets['miniaod'].xrootd_url = xrootd_sites['T3_US_FNALLPC']
 
+# these stuck at status=PRODUCTION for some reason
+for x in 'main', 'miniaod':
+    for s in wjetstolnu_2017, qcdmupt15_2017:
+        s.datasets[x].ignore_invalid = True
+
 ########
 # ntuples
 ########
