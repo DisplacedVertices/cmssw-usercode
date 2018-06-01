@@ -217,6 +217,9 @@ class CRABSubmitter:
             cfg.Data.ignoreLocality = True
             cfg.Site.whitelist = sample.aaa
 
+        if getattr(sample, 'ignore_invalid', False):
+            cfg.Data.allowNonValidInputDataset = True
+
         if self.cfg_modifier is not None:
             self.cfg_modifier(cfg, sample)
 

@@ -25,6 +25,7 @@ class Dataset(object):
     JSON = ''
     HLT_NAME = 'HLT'
     DBS_INST = 'global'
+    IGNORE_INVALID = False
 
     def __init__(self, dataset, nevents_orig, **kwargs):
         self.dataset = dataset
@@ -40,6 +41,7 @@ class Dataset(object):
 
         self.hlt_name = kwargs.get('hlt_name', self.HLT_NAME)
         self.dbs_inst = kwargs.get('dbs_inst', self.DBS_INST)
+        self.ignore_invalid = kwargs.get('ignore_invalid', self.IGNORE_INVALID)
         self.condor = kwargs.get('condor', False)
         self.xrootd_url = kwargs.get('xrootd_url', '')
         self.filenames = kwargs.get('filenames', [])
@@ -191,6 +193,14 @@ class Sample(object):
     @dbs_inst.setter
     def dbs_inst(self, val):
         self.datasets[self.curr_dataset].dbs_inst = val
+
+    @property
+    def ignore_invalid(self):
+        return self.datasets[self.curr_dataset].ignore_invalid
+
+    @ignore_invalid.setter
+    def ignore_invalid(self, val):
+        self.datasets[self.curr_dataset].ignore_invalid = val
 
     @property
     def condor(self):
