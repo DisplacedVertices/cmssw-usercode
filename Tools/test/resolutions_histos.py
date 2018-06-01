@@ -1,83 +1,38 @@
 import os, sys
-from JMTucker.Tools.BasicAnalyzer_cfg import cms, process, add_analyzer
+from JMTucker.Tools.BasicAnalyzer_cfg import *
+from JMTucker.Tools.PATTupleSelection_cfi import jtupleParams
 
-#process.MessageLogger.cerr.FwkReport.reportEvery = 1
-process.maxEvents.input = 100
-process.source.fileNames = ['file:pat.root']
-process.TFileService.fileName = 'resolutions_histos.root'
+input_files(process, '/store/mc/RunIIFall17MiniAOD/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/20000/32C049AF-E201-E811-AA77-34E6D7BEAF01.root')
+max_events(process, 100)
+tfileservice(process, 'resolutions_histos.root')
 
-########################################################################
+process.load('JMTucker.Tools.MCStatProducer_cff')
+process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
+process.load('HLTrigger.HLTfilters.hltHighLevel_cfi')
 
-from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
-process.goodDataFilter = hltHighLevel.clone()
-process.goodDataFilter.TriggerResultsTag = cms.InputTag('TriggerResults', '', 'PAT')
-process.goodDataFilter.HLTPaths = ['eventCleaningAll'] # can set to just 'goodOfflinePrimaryVertices', for example
-process.goodDataFilter.andOr = False # = AND
+process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
 
-process.triggerFilter = hltHighLevel.clone()
-process.triggerFilter.HLTPaths = ['HLT_QuadJet50_v*']
-process.triggerFilter.andOr = True # = OR
+process.goodOfflinePrimaryVertices.src = 'offlineSlimmedPrimaryVertices'
+process.hltHighLevel.HLTPaths = ['HLT_IsoMu27_v*', 'HLT_Ele35_WPTight_Gsf_v*']
 
-########################################################################
+process.histos = cms.EDAnalyzer('ResolutionsHistogrammer',
+                                vertex_src = cms.InputTag('goodOfflinePrimaryVertices'),
+                                jets_src = cms.InputTag('slimmedJets'),
+                                muons_src = cms.InputTag('slimmedMuons'),
+                                electrons_src = cms.InputTag('slimmedElectrons'),
+                                met_src = cms.InputTag('patMETsNoHF'),
+                                jet_cut = jtupleParams.jetCut,
+                                muon_cut = jtupleParams.muonCut,
+                                electron_cut = jtupleParams.electronCut,
+                                b_discriminators = cms.vstring('pfCombinedInclusiveSecondaryVertexV2BJetTags', 'pfCombinedInclusiveSecondaryVertexV2BJetTags', 'pfCombinedInclusiveSecondaryVertexV2BJetTags'),
+                                b_discriminator_mins = cms.vdouble(0.46, 0.8, 0.935),
+                                max_muon_dxy = cms.double(1e99),
+                                max_muon_dz = cms.double(1e99),
+                                max_electron_dxy = cms.double(1e99),
+                                max_electron_dz = cms.double(1e99),
+                                )
 
-process.load('JMTucker.Tools.ResolutionsHistogrammer_cfi')
+process.histosWithTrigger = process.histos.clone()
 
-for x in ['WithTrigger']:
-    setattr(process, 'histos' + x, process.histos.clone())
-
-########################################################################
-
-process.p0 = cms.Path(                        process.histos)
-process.p1 = cms.Path(process.triggerFilter * process.histosWithTrigger)
-
-if 'debug' in sys.argv:
-    from JMTucker.Tools.CMSSWTools import file_event_from_argv
-    file_event_from_argv(process)
-    process.MessageLogger.cerr.FwkReport.reportEvery = 1
-    process.histos.print_info = True
-    process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
-    process.printList = cms.EDAnalyzer('ParticleListDrawer',
-                                       maxEventsToPrint = cms.untracked.int32(100),
-                                       src = cms.InputTag('genParticles'),
-                                       printOnlyHardInteraction = cms.untracked.bool(False),
-                                       useMessageLogger = cms.untracked.bool(False)
-                                       )
-    process.p0.insert(0, process.printList)
-
-def run_on_data(dataset=None, datasets=None):
-    if 'debug' in sys.argv:
-        process.p.remove(process.printList)
-
-    add_analyzer('EventIdRecorder')
-
-    if dataset and datasets:
-        veto_filter = cms.EDFilter('VetoOtherDatasets', datasets_to_veto = cms.vstring(*[d for d in datasets if d != dataset]))
-        setattr(process, 'dataset%sOnly' % dataset, veto_filter)
-        for path_name, path in process.paths_().iteritems():
-            path.insert(0, veto_filter)
-
-#run_on_data('MultiJet', ['MultiJet', 'JetHT', 'MuHad', 'ElectronHad'])
-
-if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    if 'debug' in sys.argv:
-        raise RuntimeError('refusing to submit jobs in debug (verbose print out) mode')
-
-    from JMTucker.Tools.Samples import background_samples, smaller_background_samples, mfv_signal_samples, data_samples
-    from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-
-    def pset_adder(sample):
-        to_add = []
-        if not sample.is_mc:
-            to_add.append('run_on_data()')
-        return to_add
-
-    cs = CRABSubmitter('ResolutionsHistos',
-                       total_number_of_events = -1,
-                       events_per_job = 10000,
-                       use_ana_dataset = True,
-                       CMSSW_use_parent = 1,
-                       pset_modifier = pset_adder
-                       )
-
-    samples = mfv_signal_samples + background_samples + [s for s in smaller_background_samples if name not in 'ttgjets ttwjets ttzjets']
-    cs.submit_all(samples)
+process.p0 = cms.Path(                       process.goodOfflinePrimaryVertices * process.histos)
+process.p1 = cms.Path(process.hltHighLevel * process.goodOfflinePrimaryVertices * process.histosWithTrigger)

@@ -52,10 +52,8 @@ private:
   const double jet_pt_min;
   const std::string b_discriminator;
   const std::vector<double> b_discriminator_mins;
-  const StringCutObjectSelector<pat::Muon> muon_semilep_selector;
-  const StringCutObjectSelector<pat::Muon> muon_dilep_selector;
-  const StringCutObjectSelector<pat::Electron> electron_semilep_selector;
-  const StringCutObjectSelector<pat::Electron> electron_dilep_selector;
+  const StringCutObjectSelector<pat::Muon> muon_selector;
+  const StringCutObjectSelector<pat::Electron> electron_selector;
   const bool lightweight;
 };
 
@@ -80,10 +78,8 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     jet_pt_min(cfg.getParameter<double>("jet_pt_min")),
     b_discriminator(cfg.getParameter<std::string>("b_discriminator")),
     b_discriminator_mins(cfg.getParameter<std::vector<double> >("b_discriminator_mins")),
-    muon_semilep_selector(cfg.getParameter<std::string>("muon_semilep_cut")),
-    muon_dilep_selector(cfg.getParameter<std::string>("muon_dilep_cut")),
-    electron_semilep_selector(cfg.getParameter<std::string>("electron_semilep_cut")),
-    electron_dilep_selector(cfg.getParameter<std::string>("electron_dilep_cut")),
+    muon_selector(cfg.getParameter<std::string>("muon_cut")),
+    electron_selector(cfg.getParameter<std::string>("electron_cut")),
     lightweight(cfg.getParameter<bool>("lightweight"))
 {
   produces<MFVEvent>();
@@ -377,14 +373,13 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   event.getByToken(muons_token, muons);
 
   for (const pat::Muon& muon : *muons) {
-    uchar sel = 0;
-    if (1)                           sel |= MFVEvent::mu_veto;
-    if (muon_semilep_selector(muon)) sel |= MFVEvent::mu_semilep;
-    if (muon_dilep_selector  (muon)) sel |= MFVEvent::mu_dilep;
+    uchar id = 0;
+    if (muon_selector(muon))
+      id |= 1 << MFVEvent::lep_sel;
 
     const float iso = (muon.chargedHadronIso() + std::max(0.f,muon.neutralHadronIso()) + muon.photonIso() - 0.5*muon.puChargedHadronIso())/muon.pt(); // JMTBAD keep in sync with .py
 
-    mevent->lep_id.push_back(MFVEvent::encode_mu_id(sel));
+    mevent->lep_id.push_back(MFVEvent::encode_mu_id(id));
     mevent->lep_pt.push_back(muon.pt());
     mevent->lep_eta.push_back(muon.eta());
     mevent->lep_phi.push_back(muon.phi());
@@ -405,15 +400,17 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   event.getByToken(electrons_token, electrons);
   
   for (const pat::Electron& electron : *electrons) {
-    uchar sel = 0;
-    if (1)                                         sel |= MFVEvent::el_veto;
-    if (electron_semilep_selector(electron))       sel |= MFVEvent::el_semilep;
-    if (electron_dilep_selector  (electron))       sel |= MFVEvent::el_dilep;
-    if (electron.closestCtfTrackRef().isNonnull()) sel |= MFVEvent::el_ctf;
+    uchar id = 0;
+    if (electron_selector(electron))
+      id |= 1 << MFVEvent::lep_sel;
+    if (electron.passConversionVeto())
+      id |= 1 << MFVEvent::lep_el_conversionveto;
+    if (electron.closestCtfTrackRef().isNonnull())
+      id |= 1 << MFVEvent::lep_el_ctf;
 
     const float iso = (electron.chargedHadronIso() + std::max(0.f,electron.neutralHadronIso()) + electron.photonIso() - 0.5*electron.puChargedHadronIso())/electron.et();
 
-    mevent->lep_id.push_back(MFVEvent::encode_el_id(sel));
+    mevent->lep_id.push_back(MFVEvent::encode_el_id(id));
     mevent->lep_pt.push_back(electron.pt());
     mevent->lep_eta.push_back(electron.eta());
     mevent->lep_phi.push_back(electron.phi());

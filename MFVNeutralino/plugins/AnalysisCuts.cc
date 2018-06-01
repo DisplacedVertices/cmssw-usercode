@@ -43,10 +43,8 @@ private:
   const double max_ht;
   const double min_sum_other_pv_sumpt2;
   const double max_sum_other_pv_sumpt2;
-  const int min_nmuons;
-  const int min_nsemilepmuons;
   const int min_nleptons;
-  const int min_nsemileptons;
+  const int min_nselleptons;
 
   const bool apply_vertex_cuts;
   const int min_nvertex;
@@ -101,10 +99,8 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     max_ht(cfg.getParameter<double>("max_ht")),
     min_sum_other_pv_sumpt2(cfg.getParameter<double>("min_sum_other_pv_sumpt2")),
     max_sum_other_pv_sumpt2(cfg.getParameter<double>("max_sum_other_pv_sumpt2")),
-    min_nmuons(cfg.getParameter<int>("min_nmuons")),
-    min_nsemilepmuons(cfg.getParameter<int>("min_nsemilepmuons")),
     min_nleptons(cfg.getParameter<int>("min_nleptons")),
-    min_nsemileptons(cfg.getParameter<int>("min_nsemileptons")),
+    min_nselleptons(cfg.getParameter<int>("min_nselleptons")),
     apply_vertex_cuts(cfg.getParameter<bool>("apply_vertex_cuts")),
     min_nvertex(cfg.getParameter<int>("min_nvertex")),
     max_nvertex(cfg.getParameter<int>("max_nvertex")),
@@ -178,16 +174,10 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (mevent->pv_ntracks > max_pv_ntracks)
       return false;
 
-    if (mevent->nmu(0) < min_nmuons)
+    if (mevent->nlep(false) < min_nleptons)
       return false;
 
-    if (mevent->nmu(1) < min_nsemilepmuons)
-      return false;
-
-    if (mevent->nlep(0) < min_nleptons)
-      return false;
-
-    if (mevent->nlep(1) < min_nsemileptons)
+    if (mevent->nlep(true) < min_nselleptons)
       return false;
 
     if (mevent->njets() < min_njets || mevent->njets() > max_njets)

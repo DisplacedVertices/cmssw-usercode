@@ -285,10 +285,10 @@ struct MFVEvent {
   float met() const { return mag(metx, mety); }
   float metphi() const { return atan2(mety, metx); }
 
-  enum { lep_mu, lep_el };
-  enum { mu_veto = 1, mu_semilep = 2, mu_dilep = 4, max_mu_sel = 8 };
-  enum { el_veto = 1, el_semilep = 2, el_dilep = 4, el_ctf = 8, max_el_sel = 16 };
-  std::vector<uchar> lep_id; // bit field: bit 7 (msb): 0 = mu, 1 = el, remaining seven bits are el or mu id in order from lsb to msb according to the enums above
+  enum { lep_sel, lep_el_conversionveto, lep_el_ctf, n_lep_id_bits };
+  static_assert(n_lep_id_bits < 8, "too many lep_id bits");
+
+  std::vector<uchar> lep_id; // bit field: bit 7 (msb): 0 = mu, 1 = el, remaining seven bits are according to the enum above
   std::vector<float> lep_pt;
   std::vector<float> lep_eta;
   std::vector<float> lep_phi;
@@ -299,62 +299,30 @@ struct MFVEvent {
 
   size_t nlep() const { return lep_id.size(); }
 
-  static uchar encode_mu_id(uchar sel) {
-    assert(sel < max_mu_sel);
-    return sel;
-  }
-
-  static uchar encode_el_id(uchar sel) {
-    assert(sel < max_el_sel);
-    return sel | 0x80;
-  }
-
-  bool is_electron(size_t w) const { return lep_id[w] & 0x80; }
-  bool is_muon    (size_t w) const { return !is_electron(w); }
-  bool pass_lep_sel_bit(size_t w, uchar sel) const { return lep_id[w] & sel; }
-  bool pass_lep_sel(size_t w, uchar el_sel, uchar mu_sel) const { 
-    return
-      (is_electron(w) && (lep_id[w] & el_sel)) || 
-      (is_muon    (w) && (lep_id[w] & mu_sel));
-  }
+  static uchar encode_el_id(uchar id) { return id |= 0x80; }
+  static uchar encode_mu_id(uchar id) { return id; }
+  bool is_electron (size_t w) const { return lep_id[w] & 0x80; }
+  bool is_muon     (size_t w) const { return !is_electron(w); }
+  bool pass_lep_sel(size_t w) const { return lep_id[w] & lep_sel; }
 
   TLorentzVector lep_p4(size_t w) const {
     const float mass = is_electron(w) ? 0.000511 : 0.106;
     return p4(lep_pt[w], lep_eta[w], lep_phi[w], mass);
   }
 
-  int nlep(int type, uchar sel) const {
+  enum { lep_mu, lep_el };
+
+  int nlep(int type, bool sel) const {
     int n = 0;
     for (size_t i = 0, ie = nlep(); i < ie; ++i)
-      if (((lep_id[i] & 0x80) >> 7) == type && (lep_id[i] & sel))
+      if (((lep_id[i] & 0x80) >> 7) == type && (!sel || (lep_id[i] & lep_sel)))
         ++n;
     return n;
   }
 
-  int nmu (uchar sel) const { return nlep(lep_mu, sel); }
-  int nel (uchar sel) const { return nlep(lep_el, sel); }
-  int nlep(uchar sel) const { return nmu(sel) + nel(sel); }
-
-  float jetlep_ST(uchar el_sel, uchar mu_sel) const {
-    double sum = jet_ST_sum();
-    double sum_lep_pt = 0;
-
-    for (size_t ilep = 0; ilep < nlep(); ++ilep) {
-      if (pass_lep_sel(ilep, el_sel, mu_sel)) {
-        sum_lep_pt += lep_pt[ilep];
-
-        const double px_i = lep_pt[ilep] * cos(lep_phi[ilep]);
-        const double py_i = lep_pt[ilep] * sin(lep_phi[ilep]);
-        for (size_t jlep = 0; jlep < nlep(); ++jlep) {
-          const double px_j = lep_pt[jlep] * cos(lep_phi[jlep]);
-          const double py_j = lep_pt[jlep] * sin(lep_phi[jlep]);
-          sum += (px_i*px_i * py_j*py_j - px_i*py_i * px_j*py_j) / (lep_pt[ilep] * lep_pt[jlep]);
-        }
-      }
-    }
-
-    return 1 - sqrt(1 - 4 * sum / pow(jet_ht() + sum_lep_pt, 2));
-  }
+  int nmu (bool sel) const { return nlep(lep_mu, sel); }
+  int nel (bool sel) const { return nlep(lep_el, sel); }
+  int nlep(bool sel) const { return nmu(sel) + nel(sel); }
 
   static ushort make_track_hitpattern(int npxh, int nsth, int npxl, int nstl) {
     assert(npxh >= 0 && nsth >= 0 && npxl >= 0 && nstl >= 0);

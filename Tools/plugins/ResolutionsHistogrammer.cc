@@ -29,24 +29,20 @@ public:
   ~ResolutionsHistogrammer();
 
 private:
-  const bool reweight_pileup;
-  const double force_weight;
-  const edm::InputTag vertex_src;
-  const edm::InputTag met_src;
-  const edm::InputTag jet_src;
+  const edm::EDGetTokenT<reco::VertexCollection> vertex_token;
+  const edm::EDGetTokenT<pat::JetCollection> jets_token;
+  const edm::EDGetTokenT<pat::MuonCollection> muons_token;
+  const edm::EDGetTokenT<pat::ElectronCollection> electrons_token;
+  const edm::EDGetTokenT<pat::METCollection> met_token;
+  const StringCutObjectSelector<pat::Jet> jet_selector;
+  const StringCutObjectSelector<pat::Muon> muon_selector;
+  const StringCutObjectSelector<pat::Electron> electron_selector;
   const std::vector<std::string> b_discriminators;
   const std::vector<double> b_discriminator_mins;
-  const edm::InputTag muon_src;
   const double max_muon_dxy;
   const double max_muon_dz;
-  const StringCutObjectSelector<pat::Muon> muon_semilep_selector;
-  const StringCutObjectSelector<pat::Muon> muon_dilep_selector;
-  const edm::InputTag electron_src;
-  const double max_semilep_electron_dxy;
-  const double max_dilep_electron_dxy;
-  const StringCutObjectSelector<pat::Electron> electron_semilep_selector;
-  const StringCutObjectSelector<pat::Electron> electron_dilep_selector;
-  const bool print_info;
+  const double max_electron_dxy;
+  const double max_electron_dz;
 
   void Book(edm::Service<TFileService>&);
   double GetWeight(const edm::Event&) const;
@@ -98,15 +94,8 @@ private:
   TH2F* METResVsNPV;
 
   TH1F* NMuons;
-  TH1F* NSemilepMuons;
-  TH1F* NDilepMuons;
   TH1F* NElectrons;
-  TH1F* NSemilepElectrons;
-  TH1F* NDilepElectrons;
-
   TH1F* RecoMuonsIso;
-  TH1F* RecoSemilepMuonsIso;
-  TH1F* RecoDilepMuonsIso;
   TH1F* RecoElectronsIso;
   TH1F* RecoSemilepElectronsIso;
   TH1F* RecoDilepElectronsIso;
@@ -115,14 +104,6 @@ private:
   BasicKinematicHists* RecoMuon[NLEPDISTS];
   BasicKinematicHists* RecoElectrons;
   BasicKinematicHists* RecoElectron[NLEPDISTS];
-  BasicKinematicHists* RecoSemilepMuons;
-  BasicKinematicHists* RecoSemilepMuon[NLEPDISTS];
-  BasicKinematicHists* RecoSemilepElectrons;
-  BasicKinematicHists* RecoSemilepElectron[NLEPDISTS];
-  BasicKinematicHists* RecoDilepMuons;
-  BasicKinematicHists* RecoDilepMuon[NLEPDISTS];
-  BasicKinematicHists* RecoDilepElectrons;
-  BasicKinematicHists* RecoDilepElectron[NLEPDISTS];
 };
 
 namespace {
@@ -148,48 +129,39 @@ namespace {
     std::sort(res.begin(), res.end(), greater_by_pt<T>);
     return res;
   }
-}
 
-ResolutionsHistogrammer::ResolutionsHistogrammer(const edm::ParameterSet& cfg)
-  : reweight_pileup(cfg.getParameter<bool>("reweight_pileup")),
-    force_weight(cfg.existsAs<double>("force_weight") ? cfg.getParameter<double>("force_weight") : -1),
-    vertex_src(cfg.getParameter<edm::InputTag>("vertex_src")),
-    met_src(cfg.getParameter<edm::InputTag>("met_src")),
-    jet_src(cfg.getParameter<edm::InputTag>("jet_src")),
-    b_discriminators(copy_N_elements(cfg.getParameter<std::vector<std::string> >("b_discriminators"), NBDISC)),
-    b_discriminator_mins(copy_N_elements(cfg.getParameter<std::vector<double> >("b_discriminator_mins"), NBDISC)),
-    muon_src(cfg.getParameter<edm::InputTag>("muon_src")),
-    max_muon_dxy(cfg.getParameter<double>("max_muon_dxy")),
-    max_muon_dz(cfg.getParameter<double>("max_muon_dz")),
-    muon_semilep_selector(cfg.getParameter<std::string>("muon_semilep_cut")),
-    muon_dilep_selector(cfg.getParameter<std::string>("muon_dilep_cut")),
-    electron_src(cfg.getParameter<edm::InputTag>("electron_src")),
-    max_semilep_electron_dxy(cfg.getParameter<double>("max_semilep_electron_dxy")),
-    max_dilep_electron_dxy(cfg.getParameter<double>("max_dilep_electron_dxy")),
-    electron_semilep_selector(cfg.getParameter<std::string>("electron_semilep_cut")),
-    electron_dilep_selector(cfg.getParameter<std::string>("electron_dilep_cut")),
-    print_info(cfg.getParameter<bool>("print_info"))
-{
-  die_if_not(b_discriminators.size() == b_discriminator_mins.size(), "b_discriminators size %i != b_discriminator_mins size %i", int(b_discriminators.size()), int(b_discriminator_mins.size()));
-  if (cfg.getParameter<std::vector<std::string> >("b_discriminators").size() > NBDISC)
-    edm::LogWarning("ResolutionsHistogrammer") << "only first " << NBDISC << " b_discriminators will be used";
-  edm::Service<TFileService> fs;
-  bkh_factory = new BasicKinematicHistsFactory(fs);
-  Book(fs);
-}
+  double mag(double x, double y) {
+    return sqrt(x*x + y*y);
+  }
 
-ResolutionsHistogrammer::~ResolutionsHistogrammer() {
-  delete bkh_factory;
-}
-
-namespace {
   TFileDirectory mkdir(edm::Service<TFileService>& fs, const TString& name) {
     return fs->mkdir(name.Data());
   }
 }
 
-void ResolutionsHistogrammer::Book(edm::Service<TFileService>& fs) {
+ResolutionsHistogrammer::ResolutionsHistogrammer(const edm::ParameterSet& cfg)
+  : vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
+    jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
+    muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
+    electrons_token(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("electrons_src"))),
+    met_token(consumes<pat::METCollection>(cfg.getParameter<edm::InputTag>("met_src"))),
+    jet_selector(cfg.getParameter<std::string>("jet_cut")),
+    muon_selector(cfg.getParameter<std::string>("muon_cut")),
+    electron_selector(cfg.getParameter<std::string>("electron_cut")),
+    b_discriminators(copy_N_elements(cfg.getParameter<std::vector<std::string> >("b_discriminators"), NBDISC)),
+    b_discriminator_mins(copy_N_elements(cfg.getParameter<std::vector<double> >("b_discriminator_mins"), NBDISC)),
+    max_muon_dxy(cfg.getParameter<double>("max_muon_dxy")),
+    max_muon_dz(cfg.getParameter<double>("max_muon_dz")),
+    max_electron_dxy(cfg.getParameter<double>("max_electron_dxy")),
+    max_electron_dz(cfg.getParameter<double>("max_electron_dz"))
+{
   TH1::SetDefaultSumw2();
+
+  die_if_not(b_discriminators.size() == b_discriminator_mins.size(), "b_discriminators size %i != b_discriminator_mins size %i", int(b_discriminators.size()), int(b_discriminator_mins.size()));
+  if (cfg.getParameter<std::vector<std::string> >("b_discriminators").size() > NBDISC)
+    edm::LogWarning("ResolutionsHistogrammer") << "only first " << NBDISC << " b_discriminators will be used";
+  edm::Service<TFileService> fs;
+  bkh_factory = new BasicKinematicHistsFactory(fs);
 
   NVertices = fs->make<TH1F>("NVertices", ";number of primary vertices;events", 75, 0, 75);
 
@@ -241,32 +213,15 @@ void ResolutionsHistogrammer::Book(edm::Service<TFileService>& fs) {
     }
   }
 
-  RecoMuons        = bkh_factory->make("RecoMuons",        "all reconstructed muons");
-  RecoSemilepMuons = bkh_factory->make("RecoSemilepMuons", "all reconstructed muons passing semilep cuts");
-  RecoDilepMuons   = bkh_factory->make("RecoDilepMuons",   "all reconstructed muons passing dilep cuts");
+  RecoMuons = bkh_factory->make("RecoMuons", "all reconstructed muons");
+  RecoElectrons = bkh_factory->make("RecoElectrons", "all reconstructed electrons");
+  NMuons = RecoMuons ->dir.make<TH1F>("NMuons", ";number of reconstructed muons;events", 10, 0, 10);
+  NElectrons = RecoElectrons ->dir.make<TH1F>("NElectrons", ";number of reconstructed electrons;events", 10, 0, 10);
+  RecoMuonsIso = RecoMuons ->dir.make<TH1F>("Iso", ";muon isolation;events/0.05", 40, 0, 2);
+  RecoElectronsIso = RecoElectrons->dir.make<TH1F>("Iso", ";electron isolation;events/0.05", 40, 0, 2);
 
-  RecoElectrons        = bkh_factory->make("RecoElectrons",        "all reconstructed electrons");
-  RecoSemilepElectrons = bkh_factory->make("RecoSemilepElectrons", "all reconstructed electrons passing semilep cuts");
-  RecoDilepElectrons   = bkh_factory->make("RecoDilepElectrons",   "all reconstructed electrons passing dilep cuts");
-
-  NMuons        = RecoMuons       ->dir.make<TH1F>("NMuons",        ";number of reconstructed muons;events",         10, 0, 10);
-  NSemilepMuons = RecoSemilepMuons->dir.make<TH1F>("NSemilepMuons", ";number of reconstructed semilep muons;events", 10, 0, 10);
-  NDilepMuons   = RecoDilepMuons  ->dir.make<TH1F>("NDilepMuons",   ";number of reconstructed dilep muons;events",   10, 0, 10);
-
-  NElectrons        = RecoElectrons       ->dir.make<TH1F>("NElectrons",        ";number of reconstructed electrons;events",         10, 0, 10);
-  NSemilepElectrons = RecoSemilepElectrons->dir.make<TH1F>("NSemilepElectrons", ";number of reconstructed semilep electrons;events", 10, 0, 10);
-  NDilepElectrons   = RecoDilepElectrons  ->dir.make<TH1F>("NDilepElectrons",   ";number of reconstructed dilep electrons;events",   10, 0, 10);
-
-  RecoMuonsIso        = RecoMuons       ->dir.make<TH1F>("Iso", ";muon isolation;events/0.05",         40, 0, 2);
-  RecoSemilepMuonsIso = RecoSemilepMuons->dir.make<TH1F>("Iso", ";semilep muon isolation;events/0.05", 40, 0, 2);
-  RecoDilepMuonsIso   = RecoDilepMuons  ->dir.make<TH1F>("Iso", ";dilep muon isolation;events/0.05",   40, 0, 2);
-
-  RecoElectronsIso        = RecoElectrons       ->dir.make<TH1F>("Iso", ";electron isolation;events/0.05",         40, 0, 2);
-  RecoSemilepElectronsIso = RecoSemilepElectrons->dir.make<TH1F>("Iso", ";semilep electron isolation;events/0.05", 40, 0, 2);
-  RecoDilepElectronsIso   = RecoDilepElectrons  ->dir.make<TH1F>("Iso", ";dilep electron isolation;events/0.05",   40, 0, 2);
-
-  BasicKinematicHists* bkhs[6] = { RecoMuons, RecoSemilepMuons, RecoDilepMuons, RecoElectrons, RecoSemilepElectrons, RecoDilepElectrons };
-  for (int i = 0; i < 6; ++i) {
+  BasicKinematicHists* bkhs[2] = { RecoMuons, RecoElectrons };
+  for (int i = 0; i < 2; ++i) {
     bkhs[i]->BookPt(100, 0, 1000, "10");
     bkhs[i]->BookEta(40, -3, 3, "0.15");
     bkhs[i]->BookPhi(40, "0.157");
@@ -283,40 +238,12 @@ void ResolutionsHistogrammer::Book(edm::Service<TFileService>& fs) {
     RecoMuon[i]->BookDxy(100, -2, 2, "0.04");
     RecoMuon[i]->BookDz(100, -20, 20, "0.4");
 
-    RecoSemilepMuon[i] = bkh_factory->make(TString::Format("RecoSemilepMuon/pt#%i", i), TString::Format("reconstructed semilep muon #%i", i));
-    RecoSemilepMuon[i]->BookPt(100, 0, 1000, "10");
-    RecoSemilepMuon[i]->BookEta(40, -3, 3, "0.15");
-    RecoSemilepMuon[i]->BookPhi(40, "0.157");
-    RecoSemilepMuon[i]->BookDxy(100, -2, 2, "0.04");
-    RecoSemilepMuon[i]->BookDz(100, -20, 20, "0.4");
-
-    RecoDilepMuon[i] = bkh_factory->make(TString::Format("RecoDilepMuon/pt#%i", i), TString::Format("reconstructed dilep muon #%i", i));
-    RecoDilepMuon[i]->BookPt(100, 0, 1000, "10");
-    RecoDilepMuon[i]->BookEta(40, -3, 3, "0.15");
-    RecoDilepMuon[i]->BookPhi(40, "0.157");
-    RecoDilepMuon[i]->BookDxy(100, -2, 2, "0.04");
-    RecoDilepMuon[i]->BookDz(100, -20, 20, "0.4");
-
     RecoElectron[i] = bkh_factory->make(TString::Format("RecoElectron/pt#%i", i), TString::Format("reconstructed electron #%i", i));
     RecoElectron[i]->BookPt(100, 0, 1000, "10");
     RecoElectron[i]->BookEta(40, -3, 3, "0.15");
     RecoElectron[i]->BookPhi(40, "0.157");
     RecoElectron[i]->BookDxy(100, -2, 2, "0.04");
     RecoElectron[i]->BookDz(100, -20, 20, "0.4");
-
-    RecoSemilepElectron[i] = bkh_factory->make(TString::Format("RecoSemilepElectron/pt#%i", i), TString::Format("reconstructed semilep electron #%i", i));
-    RecoSemilepElectron[i]->BookPt(100, 0, 1000, "10");
-    RecoSemilepElectron[i]->BookEta(40, -3, 3, "0.15");
-    RecoSemilepElectron[i]->BookPhi(40, "0.157");
-    RecoSemilepElectron[i]->BookDxy(100, -2, 2, "0.04");
-    RecoSemilepElectron[i]->BookDz(100, -20, 20, "0.4");
-
-    RecoDilepElectron[i] = bkh_factory->make(TString::Format("RecoDilepElectron/pt#%i", i), TString::Format("reconstructed dilep electron #%i", i));
-    RecoDilepElectron[i]->BookPt(100, 0, 1000, "10");
-    RecoDilepElectron[i]->BookEta(40, -3, 3, "0.15");
-    RecoDilepElectron[i]->BookPhi(40, "0.157");
-    RecoDilepElectron[i]->BookDxy(100, -2, 2, "0.04");
-    RecoDilepElectron[i]->BookDz(100, -20, 20, "0.4");
   }
 
   TFileDirectory met_dir = fs->mkdir("RecoMET");
@@ -334,16 +261,12 @@ void ResolutionsHistogrammer::Book(edm::Service<TFileService>& fs) {
   METResVsNPV = met_dir.make<TH2F>("METResVsNPV", ";number of primary vertices;MET resolution (GeV)", 25, 0, 75, 20, 0, 200);
 }
 
-namespace {
-  float mag(double x, double y) {
-    return sqrt(x*x + y*y);
-  }
+ResolutionsHistogrammer::~ResolutionsHistogrammer() {
+  delete bkh_factory;
 }
 
 double ResolutionsHistogrammer::GetWeight(const edm::Event& event) const {
   double weight = 1.;
-  if (force_weight > 0)
-    weight *= force_weight;
   // JMTBAD PU reweighting
   //  edm::Handle<std::vector<PileupSummaryInfo> > pileup;
   //  event.getByLabel("addPileupInfo", pileup);
@@ -363,92 +286,92 @@ void ResolutionsHistogrammer::analyze(const edm::Event& event, const edm::EventS
   /////////////////////
 
   edm::Handle<reco::VertexCollection> vertices;
-  event.getByLabel(vertex_src, vertices);
+  event.getByToken(vertex_token, vertices);
   NVertices->Fill(vertices->size(), weight);
 
   /////////////////////
 
   edm::Handle<pat::JetCollection> jets;
-  event.getByLabel(jet_src, jets);
-
-  const int n_jets = int(jets->size());
-  NJets->Fill(n_jets, weight);
+  event.getByToken(jets_token, jets);
 
   double jet_ht = 0;
   int n_btags[NBDISC] = {0};
 
-  for (int i = 0; i < n_jets; ++i) {
-    if (i > 0)
-      die_if_not(jets->at(i).pt() <= jets->at(i-1).pt(), "input jets not sorted by decreasing pT");
-    const pat::Jet& jet = jets->at(i);
-    jet_ht += jet.pt();
+  int ijet = 0;
+  for (const pat::Jet& jet : *jets) {
+    if (jet_selector(jet)) {
+      jet_ht += jet.pt();
 
-    RecoJets->Pt ->Fill(jet.pt(),  weight);
-    RecoJets->Eta->Fill(jet.eta(), weight);
-    RecoJets->Phi->Fill(jet.phi(), weight);
-    JetNConstituents->Fill(jet.nConstituents(), weight);
-    double max_jet_const_pt = 0;
-    for (const reco::PFCandidatePtr& pfcand : jet.getPFConstituents())
-      if (pfcand->pt() > max_jet_const_pt)
-        max_jet_const_pt = pfcand->pt();
-    JetConstituentMaxPt->Fill(max_jet_const_pt);
+      RecoJets->Pt ->Fill(jet.pt(),  weight);
+      RecoJets->Eta->Fill(jet.eta(), weight);
+      RecoJets->Phi->Fill(jet.phi(), weight);
+      JetNConstituents->Fill(jet.nConstituents(), weight);
+      double max_jet_const_pt = 0;
+      for (const reco::PFCandidatePtr& pfcand : jet.getPFConstituents())
+        if (pfcand->pt() > max_jet_const_pt)
+          max_jet_const_pt = pfcand->pt();
+      JetConstituentMaxPt->Fill(max_jet_const_pt);
 
-    if (i < NJETDISTS) {
-      RecoJet[i]->Pt ->Fill(jet.pt(), weight);
-      RecoJet[i]->Eta->Fill(jet.eta(), weight);
-      RecoJet[i]->Phi->Fill(jet.phi(), weight);
-      JetNConstituent[i]->Fill(jet.nConstituents(), weight);
-    }
+      if (ijet < NJETDISTS) {
+        RecoJet[ijet]->Pt ->Fill(jet.pt(), weight);
+        RecoJet[ijet]->Eta->Fill(jet.eta(), weight);
+        RecoJet[ijet]->Phi->Fill(jet.phi(), weight);
+        JetNConstituent[ijet]->Fill(jet.nConstituents(), weight);
+      }
 
-    for (int j = 0; j < int(b_discriminators.size()); ++j) {
-      const double b_disc = jet.bDiscriminator(b_discriminators[j]);
-      const bool b_tagged = b_disc > b_discriminator_mins[j];
-      JetBDiscs[j]->Fill(b_disc, weight);
+      for (int j = 0; j < int(b_discriminators.size()); ++j) {
+        const double b_disc = jet.bDiscriminator(b_discriminators[j]);
+        const bool b_tagged = b_disc > b_discriminator_mins[j];
+        JetBDiscs[j]->Fill(b_disc, weight);
 
-      if (i < NJETDISTS)
-      	JetBDisc[j][i]->Fill(jet.bDiscriminator(b_discriminators[j]), weight);
+        if (ijet < NJETDISTS)
+          JetBDisc[j][ijet]->Fill(jet.bDiscriminator(b_discriminators[j]), weight);
 
-      if (b_tagged) {
-	RecoBJets[j]->Pt ->Fill(jet.pt(), weight);
-	RecoBJets[j]->Eta->Fill(jet.eta(), weight);
-	RecoBJets[j]->Phi->Fill(jet.phi(), weight);
+        if (b_tagged) {
+          RecoBJets[j]->Pt ->Fill(jet.pt(), weight);
+          RecoBJets[j]->Eta->Fill(jet.eta(), weight);
+          RecoBJets[j]->Phi->Fill(jet.phi(), weight);
 	
-	if (n_btags[j] < NBJETDISTS) {
-	  RecoBJet[j][n_btags[j]]->Pt ->Fill(jet.pt(), weight);
-	  RecoBJet[j][n_btags[j]]->Eta->Fill(jet.eta(), weight);
-	  RecoBJet[j][n_btags[j]]->Phi->Fill(jet.phi(), weight);
-	}
+          if (n_btags[j] < NBJETDISTS) {
+            RecoBJet[j][n_btags[j]]->Pt ->Fill(jet.pt(), weight);
+            RecoBJet[j][n_btags[j]]->Eta->Fill(jet.eta(), weight);
+            RecoBJet[j][n_btags[j]]->Phi->Fill(jet.phi(), weight);
+          }
 
-	n_btags[j] += 1;
-      }
-    }
-
-    double jet_pvsv_costheta = -999;
-    const reco::SecondaryVertexTagInfo* svtag = jet.tagInfoSecondaryVertex("secondaryVertex");
-    if (vertices->size() > 0 && svtag && svtag->nVertices() > 0) {
-      const GlobalVector& flight_dir = svtag->flightDirection(0);
-      const GlobalVector jet_mom(jet.momentum().x(), jet.momentum().y(), jet.momentum().z());
-      jet_pvsv_costheta = jet_mom.dot(flight_dir)/jet_mom.mag()/flight_dir.mag();
-    }
-    RecoJetsPVSVCosTheta->Fill(jet_pvsv_costheta, weight);
-
-    if (is_mc) {
-      if (jet.genJet() != 0) {
-	JetPtRes->Fill(jet.pt() - jet.genJet()->pt(), weight);
-	JetPtRelRes->Fill(jet.pt()/jet.genJet()->pt() - 1, weight);
-	if (jet.genJet()->pt() > 70) {
-	  JetPtResPtGt70->Fill(jet.pt() - jet.genJet()->pt(), weight);
-	  JetPtRelResPtGt70->Fill(jet.pt()/jet.genJet()->pt() - 1, weight);
-	}
+          ++n_btags[j];
+        }
       }
 
-      //const int gen_jet_parton_flavor = jet.partonFlavour();
-      //if (jet.genParton() != 0) {
-      //  const int gen_parton_id = jet.genParton()->pdgId();
-      //}
+      double jet_pvsv_costheta = -999;
+      const reco::SecondaryVertexTagInfo* svtag = jet.tagInfoSecondaryVertex("secondaryVertex");
+      if (vertices->size() > 0 && svtag && svtag->nVertices() > 0) {
+        const GlobalVector& flight_dir = svtag->flightDirection(0);
+        const GlobalVector jet_mom(jet.momentum().x(), jet.momentum().y(), jet.momentum().z());
+        jet_pvsv_costheta = jet_mom.dot(flight_dir)/jet_mom.mag()/flight_dir.mag();
+      }
+      RecoJetsPVSVCosTheta->Fill(jet_pvsv_costheta, weight);
+
+      if (is_mc) {
+        if (jet.genJet() != 0) {
+          JetPtRes->Fill(jet.pt() - jet.genJet()->pt(), weight);
+          JetPtRelRes->Fill(jet.pt()/jet.genJet()->pt() - 1, weight);
+          if (jet.genJet()->pt() > 70) {
+            JetPtResPtGt70->Fill(jet.pt() - jet.genJet()->pt(), weight);
+            JetPtRelResPtGt70->Fill(jet.pt()/jet.genJet()->pt() - 1, weight);
+          }
+        }
+
+        //const int gen_jet_parton_flavor = jet.partonFlavour();
+        //if (jet.genParton() != 0) {
+        //  const int gen_parton_id = jet.genParton()->pdgId();
+        //}
+      }
+
+      ++ijet;
     }
   }
 
+  NJets->Fill(ijet);
   RecoJetsHT->Fill(jet_ht);
 
   for (int j = 0; j < int(b_discriminators.size()); ++j)
@@ -457,125 +380,67 @@ void ResolutionsHistogrammer::analyze(const edm::Event& event, const edm::EventS
   /////////////////////
 
   edm::Handle<pat::MuonCollection> orig_muons;
-  event.getByLabel(muon_src, orig_muons);
+  event.getByToken(muons_token, orig_muons);
   const std::vector<const pat::Muon*> muons = sort_pointers(*orig_muons);
-  NMuons->Fill(muons.size(), weight);
 
-  int n_semilep_muons = 0;
-  int n_dilep_muons = 0;
-
-  for (int i = 0; i < int(muons.size()); ++i) {
-    const pat::Muon& muon = *muons.at(i);
-    RecoMuons->Fill(&muon, weight);
-    double dxy = -999, dz = -999;
-    if (vertices->size() > 0) {
-      dxy = muon.innerTrack()->dxy(vertices->at(0).position());
-      dz  = muon.innerTrack()->dz (vertices->at(0).position());
-    }
-    RecoMuons->FillEx(dxy, dz, muon.charge(), weight);
+  int imu = 0;
+  for (const pat::Muon* muon : muons) {
+    if (muon_selector(*muon)) {
+      double dxy = -999, dz = -999;
+      if (vertices->size() > 0) {
+        dxy = muon->innerTrack()->dxy(vertices->at(0).position());
+        dz  = muon->innerTrack()->dz (vertices->at(0).position());
+      }
+      if (fabs(dxy) < max_muon_dxy && fabs(dz) < max_muon_dz) {
+        RecoMuons->Fill(muon, weight);
+        RecoMuons->FillEx(dxy, dz, muon->charge(), weight);
     
-    if (i < NLEPDISTS) {
-      RecoMuon[i]->Fill(&muon, weight);
-      RecoMuon[i]->FillEx(dxy, dz, muon.charge(), weight);
-    }
-      
-    const bool muon_pass_semilep = muon_semilep_selector(muon) && fabs(dxy) < max_muon_dxy && fabs(dz) < max_muon_dz; // impact parameter cuts wrt PV not doable in StringCutSelector
-    const bool muon_pass_dilep   = muon_dilep_selector  (muon);
+        if (imu < NLEPDISTS) {
+          RecoMuon[imu]->Fill(muon, weight);
+          RecoMuon[imu]->FillEx(dxy, dz, muon->charge(), weight);
+        }
 
-    if (muon_pass_semilep) {
-      RecoSemilepMuons->Fill(&muon, weight);
-      RecoSemilepMuons->FillEx(dxy, dz, muon.charge(), weight);
-
-      if (n_semilep_muons < NLEPDISTS) {
-	RecoSemilepMuon[n_semilep_muons]->Fill(&muon, weight);
-	RecoSemilepMuon[n_semilep_muons]->FillEx(dxy, dz, muon.charge(), weight);
+        ++imu;
       }
-
-      n_semilep_muons += 1;
     }
-	
-    if (muon_pass_dilep) {
-      RecoDilepMuons->Fill(&muon, weight);
-      RecoDilepMuons->FillEx(dxy, dz, muon.charge(), weight);
-
-      if (n_dilep_muons < NLEPDISTS) {
-	RecoDilepMuon[n_dilep_muons]->Fill(&muon, weight);
-	RecoDilepMuon[n_dilep_muons]->FillEx(dxy, dz, muon.charge(), weight);
-      }
-
-      n_dilep_muons += 1;
-    }
-
-    //if (muon.genParticle()) {
-    //}
   }
 
-  NSemilepMuons->Fill(n_semilep_muons);
-  NDilepMuons  ->Fill(n_dilep_muons);
+  NMuons->Fill(imu);
 
   /////////////////////
 
   edm::Handle<pat::ElectronCollection> orig_electrons;
-  event.getByLabel(electron_src, orig_electrons);
+  event.getByToken(electrons_token, orig_electrons);
   const std::vector<const pat::Electron*> electrons = sort_pointers(*orig_electrons);
-  NElectrons->Fill(electrons.size(), weight);
 
-  int n_semilep_electrons = 0;
-  int n_dilep_electrons = 0;
-
-  for (int i = 0; i < int(electrons.size()); ++i) {
-    const pat::Electron& electron = *electrons.at(i);
-    RecoElectrons->Fill(&electron, weight);
-    double dxy = -999, dz = -999;
-    if (vertices->size() > 0) {
-      dxy = electron.gsfTrack()->dxy(vertices->at(0).position());
-      dz  = electron.gsfTrack()->dz (vertices->at(0).position());
-    }
-    RecoElectrons->FillEx(dxy, dz, electron.charge(), weight);
+  int iel = 0;
+  for (const pat::Electron* electron : electrons) {
+    if (electron_selector(*electron)) {
+      double dxy = -999, dz = -999;
+      if (vertices->size() > 0) {
+        dxy = electron->gsfTrack()->dxy(vertices->at(0).position());
+        dz  = electron->gsfTrack()->dz (vertices->at(0).position());
+      }
+      if (fabs(dxy) < max_electron_dxy && fabs(dz) < max_electron_dz) {
+        RecoElectrons->Fill(electron, weight);
+        RecoElectrons->FillEx(dxy, dz, electron->charge(), weight);
     
-    if (i < NLEPDISTS) {
-      RecoElectron[i]->Fill(&electron, weight);
-      RecoElectron[i]->FillEx(dxy, dz, electron.charge(), weight);
-    }
+        if (iel < NLEPDISTS) {
+          RecoElectron[iel]->Fill(electron, weight);
+          RecoElectron[iel]->FillEx(dxy, dz, electron->charge(), weight);
+        }
 
-    const bool electron_pass_semilep = electron_semilep_selector(electron) && fabs(dxy) < max_semilep_electron_dxy;
-    const bool electron_pass_dilep   = electron_dilep_selector  (electron) && fabs(dxy) < max_dilep_electron_dxy;
-
-    if (electron_pass_semilep) {
-      RecoSemilepElectrons->Fill(&electron, weight);
-      RecoSemilepElectrons->FillEx(dxy, dz, electron.charge(), weight);
-
-      if (n_semilep_electrons < NLEPDISTS) {
-	RecoSemilepElectron[n_semilep_electrons]->Fill(&electron, weight);
-	RecoSemilepElectron[n_semilep_electrons]->FillEx(dxy, dz, electron.charge(), weight);
+        ++iel;
       }
-
-      n_semilep_electrons += 1;
     }
-	
-    if (electron_pass_dilep) {
-      RecoDilepElectrons->Fill(&electron, weight);
-      RecoDilepElectrons->FillEx(dxy, dz, electron.charge(), weight);
-
-      if (n_dilep_electrons < NLEPDISTS) {
-	RecoDilepElectron[n_dilep_electrons]->Fill(&electron, weight);
-	RecoDilepElectron[n_dilep_electrons]->FillEx(dxy, dz, electron.charge(), weight);
-      }
-
-      n_dilep_electrons += 1;
-    }
-
-    //if (electron.genParticle()) {
-    //}
   }
 
-  NSemilepElectrons->Fill(n_semilep_electrons);
-  NDilepElectrons  ->Fill(n_dilep_electrons);
+  NElectrons->Fill(iel);
 
   /////////////////////
 
   edm::Handle<pat::METCollection> mets;
-  event.getByLabel(met_src, mets);
+  event.getByToken(met_token, mets);
   const pat::MET& met = mets->at(0);
 
   RecoMETx->Fill(met.px(), weight);

@@ -45,7 +45,7 @@ process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
                              require_6thjetpt = cms.double(0.),
                              require_ht = cms.double(-1),
                              muons_src = cms.InputTag('slimmedMuons'),
-                             muon_cut = cms.string(jtupleParams.semilepMuonCut.value() + ' && pt > %i' % mu_thresh_offline),
+                             muon_cut = cms.string(jtupleParams.muonCut.value() + ' && pt > %i' % mu_thresh_offline),
                              genjets_src = cms.InputTag(''), #'ak4GenJets' if is_mc else ''),
                              )
 
