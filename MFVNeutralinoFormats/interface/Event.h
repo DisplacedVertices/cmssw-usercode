@@ -315,7 +315,7 @@ struct MFVEvent {
   int nlep(int type, bool sel) const {
     int n = 0;
     for (size_t i = 0, ie = nlep(); i < ie; ++i)
-      if (((lep_id[i] & 0x80) >> 7) == type && (!sel || (lep_id[i] & lep_sel)))
+      if (((lep_id[i] & 0x80) >> 7) == type && (!sel || (lep_id[i] & (1<<lep_sel))))
         ++n;
     return n;
   }
