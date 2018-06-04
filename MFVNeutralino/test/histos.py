@@ -2,7 +2,7 @@ import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 dataset = 'ntuplev18m'
-sample_files(process, 'qcdht2000', dataset, 1)
+sample_files(process, 'qcdht2000_2017', dataset, 1)
 process.TFileService.fileName = 'histos.root'
 process.maxEvents.input = -1
 file_event_from_argv(process)
@@ -112,8 +112,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools import Samples 
     if year == 2017:
         samples = \
-            Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + \
+            Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.leptonic_samples_2017 + \
             Samples.all_signal_samples_2017
+
+    #samples = [s for s in samples if s.has_dataset(dataset)]
 
     from JMTucker.Tools.MetaSubmitter import set_splitting
     set_splitting(samples, dataset, 'histos', data_json='jsons/ana_2017.json')

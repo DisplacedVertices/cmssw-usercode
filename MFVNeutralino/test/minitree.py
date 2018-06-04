@@ -15,8 +15,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     if year == 2017:
         samples = \
-            Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + \
+            Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.leptonic_samples_2017 + \
             Samples.all_signal_samples_2017
+
+    #samples = [s for s in samples if s.has_dataset(dataset)]
 
     from JMTucker.Tools.MetaSubmitter import set_splitting
     set_splitting(samples, dataset, 'minitree', data_json='jsons/ana_2017.json')
