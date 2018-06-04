@@ -36,6 +36,8 @@ if sigreg and nvtx != 2:
 if not integral:
     print 'using GetEntries(), but "pass vtx only" and all nm1s still use Integral()'
 
+int_lumi = ac.int_lumi_2017 * ac.scale_factor_2017
+
 def effs(fn):
     global tot_sum, tot_var
 
@@ -47,11 +49,11 @@ def effs(fn):
 
     den = norm_from_file(fn)
     sname = os.path.basename(fn).replace('.root','')
-    try:
-        sample = getattr(Samples, sname)
-        weight = sample.xsec * ac.int_lumi / den
+    sample = getattr(Samples, sname, None)
+    if sample:
+        weight = sample.xsec * int_lumi / den
         weighted = True
-    except AttributeError:
+    else:
         weight = 1.
         weighted = False
 
@@ -83,7 +85,7 @@ def effs(fn):
     else:
         print '%s (w = %.3e): # ev: %10.1f  pass evt+vtx: %5.1f -> %5.3e  pass vtx only: %5.1f -> %5.3e' % (sname.ljust(30), weight, den, numall, float(numall)/den, numvtx, float(numvtx)/den)
         if weighted:
-            print '  weighted to %.1f/pb: %5.2f +/- %5.2f' % (ac.int_lumi, numall*weight, numall**0.5 * weight)
+            print '  weighted to %.1f/pb: %5.2f +/- %5.2f' % (int_lumi, numall*weight, numall**0.5 * weight)
         else:
             print '  number of events: %5.2f +/- %5.2f' % (numall*weight, numall**0.5 * weight)
         if cuts:
@@ -117,9 +119,8 @@ fns = [x for x in sys.argv[1:] if os.path.isfile(x) and x.endswith('.root')]
 print_sum = 'sum' in sys.argv
 if not fns:
     dir = os.path.abspath([x for x in sys.argv[1:] if os.path.isdir(x)][0])
-    fns = [os.path.join(dir, fn) for fn in 'qcdht0500sum.root qcdht0700sum.root qcdht1000sum.root qcdht1500sum.root qcdht2000sum.root ttbar.root'.split()]
-    if dir.endswith('/2015'):
-        fns = [fn.replace('.root', '_2015.root') for fn in fns]
+    fns = [os.path.join(dir, sn + '.root') for sn in 'qcdht0500_2017 qcdht0700_2017 qcdht1000_2017 qcdht1500_2017 qcdht2000_2017 ttbar_2017'.split()]
+    fns = [fn for fn in fns if os.path.isfile(fn)]
     nosort = True
     print_sum = True
 if not nosort:
@@ -130,6 +131,6 @@ for fn in fns:
     effs(fn)
 if print_sum:
     if csv:
-        print 'sum for %f/pb,,,,,%f,%f' % (ac.int_lumi, tot_sum, tot_var**0.5)
+        print 'sum for %f/pb,,,,,%f,%f' % (int_lumi, tot_sum, tot_var**0.5)
     else:
-        print 'sum for %.1f/pb: %5.2f +/- %5.2f' % (ac.int_lumi, tot_sum, tot_var**0.5)
+        print 'sum for %.1f/pb: %5.2f +/- %5.2f' % (int_lumi, tot_sum, tot_var**0.5)
