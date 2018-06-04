@@ -100,7 +100,7 @@ process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     
             setattr(process, ana_name, ana)
             setattr(process, evt_hst_name, evt_hst)
             setattr(process, vtx_hst_name, vtx_hst)
-            setattr(process, '%sp%iV' % (EX1, nv) + name, cms.Path(vtx * ana * evt_hst * vtx_hst))
+            setattr(process, '%sp%iV' % (EX1, nv) + name, cms.Path(process.mfvWeight * vtx * ana * evt_hst * vtx_hst))
 
 def force_bs(process, bs):
     for ana in process.analyzers:
