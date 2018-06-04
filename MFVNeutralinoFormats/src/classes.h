@@ -24,6 +24,9 @@ namespace JMTucker_MFVNeutralinoFormats {
 
     edm::Wrapper<edm::RefVector<std::vector<reco::Vertex>,reco::Vertex,edm::refhelper::FindUsingAdvance<std::vector<reco::Vertex>,reco::Vertex> > > wvrv;
 
+    std::vector<TLorentzVector> vtlv;
+    edm::Wrapper<std::vector<TLorentzVector> > wvtlv;
+
     edm::Wrapper<MFVEvent> we;
     edm::Wrapper<std::vector<MFVVertexAux> > wvva;
 
