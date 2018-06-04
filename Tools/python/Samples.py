@@ -244,11 +244,8 @@ for x in 'main', 'miniaod':
 # ntuples
 ########
 
-for x in ttbar_samples_2017 + qcd_samples_2017 + mfv_signal_samples_2017:
-    pass
-    #if x not in (ttbar_2017, qcdht0500_2017, qcdht0700_2017):
-    #    x.add_dataset('ntuplev18_notrig')
-    #x.add_dataset('ntuplev18m_notrig')
+for x in ttbar_samples_2017 + qcd_samples_2017 + leptonic_samples_2017 + mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017:
+    x.add_dataset("ntuplev18m")
 
 ########
 # automatic condor declarations for ntuples
