@@ -398,6 +398,12 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     }
   }
 
+  for (int i = 0; i < 2; ++i) {
+    h_nmuons[i]->Fill(mevent->nmu(i), w);
+    h_nelectrons[i]->Fill(mevent->nel(i), w);
+    h_nleptons[i]->Fill(mevent->nlep(i), w);
+  }
+
   for (size_t ilep = 0; ilep < mevent->lep_id.size(); ++ilep) {
     const size_t j = mevent->is_electron(ilep);
     for (size_t i = 0; i < 2; ++i)
@@ -419,9 +425,6 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   std::vector<double> bjets_phi[3][2];
   for (int i = 0; i < 3; ++i) {
     h_nbtags[i]->Fill(mevent->nbtags(i), w);
-    h_nmuons[i]->Fill(mevent->nmu(1<<i), w);
-    h_nelectrons[i]->Fill(mevent->nel(1<<i), w);
-    h_nleptons[i]->Fill(mevent->nlep(1<<i), w);
 
     for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
       if (((mevent->jet_id[ijet] >> 2) & 3) >= i + 1) {
