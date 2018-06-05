@@ -143,15 +143,15 @@ C('presel_npv',
   )
 
 C('presel_pvntracks',
-  histogram_path = 'mfvEventHistosPreSel/h_pv_ntracks',
+  histogram_path = 'mfvEventHistosPreSel/h_pvntracks',
   )
 
 C('presel_pvsumpt2',
-  histogram_path = 'mfvEventHistosPreSel/h_pv_sumpt2',
+  histogram_path = 'mfvEventHistosPreSel/h_pvsumpt2',
   )
 
 C('presel_pvrho',
-  histogram_path = 'mfvEventHistosPreSel/h_pv_rho',
+  histogram_path = 'mfvEventHistosPreSel/h_pvrho',
   )
 
 C('presel_nseedtracks',
