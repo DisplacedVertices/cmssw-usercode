@@ -8,10 +8,11 @@ from JMTucker.Tools import Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
 ROOT.gErrorIgnoreLevel = 6000
-
 fns = [x for x in sys.argv[1:] if x.endswith('.root') and (os.path.isfile(x) or x.startswith('root://'))]
 if not fns:
-    fns = glob.glob('/uscms_data/d2/tucker/crab_dirs/MiniTreeV18m/*.root')
+    gg = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV18m/*.root'
+    print 'using default', gg
+    fns = glob.glob(gg)
 fns = [x for x in fns if '2015' not in x and not 'hip1p0' in x]
 fns.sort()
 fns.sort(key=lambda fn: not os.path.basename(fn).startswith('mfv_')) # puts signals first, then bkg
