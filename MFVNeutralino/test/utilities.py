@@ -48,6 +48,8 @@ def cmd_report_data():
             os.rename('processedLumis.json', 'dataok_%i.json' % year)
 
 def cmd_hadd_data():
+    print 'skipping hadd_data, not yet implemented'
+    return
     permissive = bool_from_argv('permissive')
     for ds in 'SingleMuon', 'JetHT', 'ZeroBias':
         print ds
@@ -88,47 +90,12 @@ def cmd_hadd_data():
 
 cmd_merge_data = cmd_hadd_data
 
-def cmd_hadd_qcd_sum():
-    for is2015_s in '_2015', '':
-        for x in [500, 700, 1000, 1500, 2000]:
-            base = 'qcdht%04i' % x
-            if is2015_s:
-                a = base + '_2015.root'
-                b = base + 'ext_2015.root'
-            else:
-                a = base + '.root'
-                b = base + 'ext.root'
-            if not os.path.isfile(a) or not os.path.isfile(b):
-                print 'skipping', x, is2015_s, 'because at least one input file missing'
-            else:
-                hadd_or_merge(base + 'sum%s.root' % is2015_s, [a, b])
-
-cmd_merge_qcd_sum = cmd_hadd_qcd_sum
-
-def cmd_rm_qcd_parts():
-    for is2015_s in '_2015', '':
-        for x in 500, 700, 1000, 1500, 2000:
-            base = 'qcdht%04i' % x
-            if is2015_s:
-                a = base + '_2015.root'
-                b = base + 'ext_2015.root'
-                c = base + 'sum_2015.root'
-            else:
-                a = base + '.root'
-                b = base + 'ext.root'
-                c = base + 'sum.root'
-            if os.path.isfile(c):
-                for y in a,b:
-                    if os.path.isfile(y):
-                        os.remove(y)
-
 def cmd_merge_background():
     permissive = bool_from_argv('permissive')
-    for is2015_s, scale in ('', -AnalysisConstants.int_lumi_2016 * AnalysisConstants.scale_factor_2016), ('_2015', -AnalysisConstants.int_lumi_2015 * AnalysisConstants.scale_factor_2015):
-        files = ['ttbar.root']
-        files += ['qcdht%04isum.root' % x for x in [500, 700, 1000, 1500, 2000]]
-        if is2015_s:
-            files = [fn.replace('.root', '_2015.root') for fn in files]
+    for year_s, scale in ('_2017', -AnalysisConstants.int_lumi_2017 * AnalysisConstants.scale_factor_2017),:
+        files = ['ttbar']
+        files += ['qcdht%04i' % x for x in [500, 700, 1000, 1500, 2000]]
+        files = ['%s%s.root' % (x, year_s) for x in files]
         files2 = []
         for fn in files:
             if not os.path.isfile(fn):
@@ -140,7 +107,7 @@ def cmd_merge_background():
             else:
                 files2.append(fn)
         if files2:
-            cmd = 'python ' + os.environ['CMSSW_BASE'] + '/src/JMTucker/Tools/python/Samples.py merge %f background%s.root ' % (scale, is2015_s)
+            cmd = 'samples merge %f background%s.root ' % (scale, year_s)
             cmd += ' '.join(files2)
             print cmd
             os.system(cmd)
@@ -150,11 +117,11 @@ def cmd_effsprint():
         which = 'all'
         which_files = []
         for x in 'qcd', 'ttbar', 'mfv':
-            which_files += [fn for fn in glob(x + '*.root') if '2015' not in fn]
+            which_files += [fn for fn in glob(x + '*.root')]
         which_files = ' '.join(sorted(which_files))
         todo = [(which, which_files)]
     else:
-        todo = [('background', '.'), ('signals', '*mfv*root xx4j*root')]
+        todo = [('background', '.'), ('signals', '*mfv*root')]
     for which, which_files in todo:
         for ntk in (3,4,'3or4',5):
             for vtx in (1,2):
@@ -170,23 +137,18 @@ def cmd_effsprint():
 def cmd_histos():
     cmd_report_data()
     cmd_hadd_data()
-    cmd_hadd_qcd_sum()
     cmd_merge_background()
-    hadd('background_2015p6.root', ['background.root', 'background_2015.root'])
     cmd_effsprint()
 
 def cmd_minitree():
     cmd_report_data()
-    cmd_hadd_qcd_sum()
 
 def cmd_trackmover():
     cmd_report_data()
     cmd_hadd_data()
-    cmd_hadd_qcd_sum()
 
 def cmd_v0eff():
     cmd_hadd_data()
-    cmd_hadd_qcd_sum()
     scale = -AnalysisConstants.int_lumi_2015p6 * AnalysisConstants.scale_factor_2015p6
     for fn,files in [
         ('qcd.root', ['qcdht%04isum.root' % x for x in (500, 700, 1000, 1500, 2000)]),
