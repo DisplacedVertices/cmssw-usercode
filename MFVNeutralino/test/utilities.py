@@ -122,17 +122,22 @@ def cmd_effsprint():
         todo = [(which, which_files)]
     else:
         todo = [('background', '.'), ('signals', '*mfv*root')]
+    def do(cmd, outfn):
+        cmd = 'python %s %s' % (cmssw_base('src/JMTucker/MFVNeutralino/test/effsprint.py'), cmd)
+        print cmd
+        os.system('%s | tee %s' % (cmd, outfn))
+        print
     for which, which_files in todo:
         for ntk in (3,4,'3or4',5):
             for vtx in (1,2):
-                out = 'effsprint_%s_ntk%s_%iv' % (which, ntk, vtx)
-                cmd = 'python ' + os.environ['CMSSW_BASE'] + '/src/JMTucker/MFVNeutralino/test/effsprint.py'
-                cmd += ' ntk%s' % ntk
+                cmd = 'ntk%s' % ntk
                 if vtx == 1:
                     cmd += ' one'
-                print cmd
-                os.system('%s %s | tee %s' % (cmd, which_files, out))
-                print
+                cmd += ' ' + which_files
+                outfn = 'effsprint_%s_ntk%s_%iv' % (which, ntk, vtx)
+                do(cmd, outfn)
+    do('presel .', 'effsprint_presel')
+    do('nocuts .', 'effsprint_nocuts')
 
 def cmd_histos():
     cmd_report_data()

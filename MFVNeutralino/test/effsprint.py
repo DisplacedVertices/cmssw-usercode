@@ -30,8 +30,12 @@ elif 'ntk4' in sys.argv:
 elif 'ntk3or4' in sys.argv:
     ntk = 'Ntk3or4'
 sigreg = 'sigreg' in sys.argv
-if sigreg and nvtx != 2:
-    raise ValueError("can't sigreg and 1vtx at same time")
+presel = 'presel' in sys.argv
+nocuts = 'nocuts' in sys.argv
+if sum([sigreg, nvtx == 1, presel, nocuts]) > 1:
+    raise ValueError("can only do one of onevtx, sigreg, presel, nocuts")
+if any([sigreg,presel,nocuts]):
+    cuts = ()
 
 if not integral:
     print 'using GetEntries(), but "pass vtx only" and all nm1s still use Integral()'
@@ -63,6 +67,12 @@ def effs(fn):
     elif nvtx == 1:
         namenumall = 'mfvEventHistosOnlyOneVtx'
         namenumvtx = 'mfvVertexHistosOnlyOneVtx/h_nsv'
+    elif presel:
+        namenumall = 'mfvEventHistosPreSel'
+        namenumvtx = None
+    elif nocuts:
+        namenumall = 'mfvEventHistosNoCuts'
+        namenumvtx = None
     else:
         namenumall = 'mfvEventHistosFullSel'
         namenumvtx = None
