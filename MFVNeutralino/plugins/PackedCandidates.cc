@@ -1,5 +1,3 @@
-#include "JMTucker/Tools/interface/Year.h"
-#if !defined(MFVNEUTRALINO_2015) // PFTrackAlgoTools.h not in CMSSW_763
 #include "TH2.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
@@ -337,4 +335,3 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
 }
 
 DEFINE_FWK_MODULE(MFVPackedCandidates);
-#endif

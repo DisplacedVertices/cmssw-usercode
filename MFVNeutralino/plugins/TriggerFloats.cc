@@ -1,21 +1,11 @@
-#include "JMTucker/Tools/interface/Year.h"
-#if defined(MFVNEUTRALINO_2015)
-  #include "L1Trigger/GlobalTriggerAnalyzer/interface/L1GtUtils.h"
-  #include "DataFormats/L1Trigger/interface/L1EtMissParticle.h"
-  #include "DataFormats/L1Trigger/interface/L1EtMissParticleFwd.h"
-#elif defined(MFVNEUTRALINO_2016) || defined(MFVNEUTRALINO_2017)
-  #include "CondFormats/DataRecord/interface/L1TUtmTriggerMenuRcd.h"
-  #include "CondFormats/L1TObjects/interface/L1TUtmTriggerMenu.h"
-  #include "DataFormats/L1TGlobal/interface/GlobalAlgBlk.h"
-  #include "DataFormats/L1Trigger/interface/EtSum.h"
-  #include "DataFormats/L1Trigger/interface/EtSumHelper.h"
-  #include "DataFormats/L1Trigger/interface/Jet.h"
-#else
-  #error what year is it
-#endif
-
 #include "TTree.h"
 #include "CommonTools/Utils/interface/StringCutObjectSelector.h"
+#include "CondFormats/DataRecord/interface/L1TUtmTriggerMenuRcd.h"
+#include "CondFormats/L1TObjects/interface/L1TUtmTriggerMenu.h"
+#include "DataFormats/L1TGlobal/interface/GlobalAlgBlk.h"
+#include "DataFormats/L1Trigger/interface/EtSum.h"
+#include "DataFormats/L1Trigger/interface/EtSumHelper.h"
+#include "DataFormats/L1Trigger/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
 #include "FWCore/Common/interface/TriggerNames.h"
@@ -35,14 +25,9 @@ public:
 private:
   virtual void produce(edm::Event&, const edm::EventSetup&) override;
 
-#if defined(MFVNEUTRALINO_2015)
-  L1GtUtils l1_cfg;
-  const edm::EDGetTokenT<l1extra::L1EtMissParticleCollection> l1_htt_token;
-#elif defined(MFVNEUTRALINO_2016) || defined(MFVNEUTRALINO_2017)
   const edm::EDGetTokenT<l1t::JetBxCollection> l1_jets_token;
   const edm::EDGetTokenT<l1t::EtSumBxCollection> l1_etsums_token;
   const edm::EDGetTokenT<GlobalAlgBlkBxCollection> l1_results_token;
-#endif
   const edm::EDGetTokenT<edm::TriggerResults> trigger_results_token;
   const edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> trigger_objects_token;
 
@@ -53,15 +38,9 @@ private:
 };
 
 MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
-  :
-#if defined(MFVNEUTRALINO_2015)
-    l1_cfg(cfg, consumesCollector(), false),
-    l1_htt_token(consumes<l1extra::L1EtMissParticleCollection>(edm::InputTag("l1extraParticles", "MHT"))),
-#elif defined(MFVNEUTRALINO_2016) || defined(MFVNEUTRALINO_2017)
-    l1_jets_token(consumes<l1t::JetBxCollection>(edm::InputTag("caloStage2Digis", "Jet"))),
+  : l1_jets_token(consumes<l1t::JetBxCollection>(edm::InputTag("caloStage2Digis", "Jet"))),
     l1_etsums_token(consumes<l1t::EtSumBxCollection>(edm::InputTag("caloStage2Digis", "EtSum"))),
     l1_results_token(consumes<GlobalAlgBlkBxCollection>(cfg.getParameter<edm::InputTag>("l1_results_src"))),
-#endif
     trigger_results_token(consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("trigger_results_src"))),
     trigger_objects_token(consumes<pat::TriggerObjectStandAloneCollection>(cfg.getParameter<edm::InputTag>("trigger_objects_src"))),
     jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
@@ -82,7 +61,6 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   edm::Handle<pat::TriggerObjectStandAloneCollection> trigger_objects;
   event.getByToken(trigger_objects_token, trigger_objects);
 
-#if defined(MFVNEUTRALINO_2016) || defined(MFVNEUTRALINO_2017)
   edm::Handle<l1t::JetBxCollection> l1_jets;
   event.getByToken(l1_jets_token, l1_jets);
 
@@ -164,7 +142,6 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   edm::Handle<l1t::EtSumBxCollection> l1_etsums;
   event.getByToken(l1_etsums_token, l1_etsums);
   l1t::EtSumHelper etsumhelper(l1_etsums);
-#endif
 
   if (prints > 1) {
     std::cout << "event: (" << event.id().run() << ", " << event.luminosityBlock() << ", " << event.id().event() << ")\n";
@@ -204,7 +181,6 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
     std::cout << std::endl;
   }
 
-#if defined(MFVNEUTRALINO_2016) || defined(MFVNEUTRALINO_2017)
   if (prints) {
     std::cout << "=== L1 CaloStage2 digis ===\n";
 
@@ -280,7 +256,6 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
 
     std::cout << std::endl;
   }
-#endif
 
   std::unique_ptr<mfv::TriggerFloats> floats(new mfv::TriggerFloats);
 
@@ -294,17 +269,6 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
     }
   }
 
-#if defined(MFVNEUTRALINO_2015)
-  edm::Handle<l1extra::L1EtMissParticleCollection> l1_htts;
-  event.getByToken(l1_htt_token, l1_htts);
-  if (l1_htts->size() != 1)
-    throw cms::Exception("BadAssumption", "not exactly one L1 MHT object");
-  const l1extra::L1EtMissParticle& l1_htt = l1_htts->at(0);
-  if (l1_htt.type() != 1)
-    throw cms::Exception("BadAssumption", "L1 MHT object in collection not right type");
-  floats->l1htt = l1_htt.etTotal();
-
-#elif defined(MFVNEUTRALINO_2016) || defined(MFVNEUTRALINO_2017)
   for (size_t i = 0, ie = l1_jets->size(0); i < ie; ++i) {
     const l1t::Jet& jet = l1_jets->at(0, i);
     if (i > 0) assert(jet.pt() <= l1_jets->at(0, i-1).pt());
@@ -318,7 +282,6 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   floats->l1htt = etsumhelper.TotalHt();
   floats->myhtt = my_htt;
   floats->myhttwbug = my_htt_wbug;
-#endif
 
   if (prints)
     printf("TriggerFloats: hltht = %f  hltht4mc = %f\n", floats->hltht, floats->hltht4mc);
@@ -332,28 +295,18 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
       printf("HLT bit %2i %20s: %2i\n", i, mfv::hlt_paths[i], floats->HLTdecisions[i]);
   }
 
-#if defined(MFVNEUTRALINO_2015)
-  l1_cfg.getL1GtRunCache(event, setup, true, false);
-#elif defined(MFVNEUTRALINO_2016) || defined(MFVNEUTRALINO_2017)
   edm::Handle<GlobalAlgBlkBxCollection> l1_results_all;
   event.getByToken(l1_results_token, l1_results_all);
   const std::vector<bool>& l1_results = l1_results_all->at(0, 0).getAlgoDecisionFinal();
 
   edm::ESHandle<L1TUtmTriggerMenu> l1_menu;
   setup.get<L1TUtmTriggerMenuRcd>().get(l1_menu);
-#endif
 
   for (int i = 0; i < mfv::n_l1_paths; ++i) {
-#if defined(MFVNEUTRALINO_2015)
-    int l1err = 0;
-    const bool pass = l1_cfg.decision(event, mfv::l1_paths[i], l1err);
-    const bool found = l1err == 0;
-#elif defined(MFVNEUTRALINO_2016) || defined(MFVNEUTRALINO_2017)
     const auto& m = l1_menu->getAlgorithmMap();
     const auto& e = m.find(mfv::l1_paths[i]);
     const bool found = e != m.end();
     const bool pass = found ? l1_results[e->second.getIndex()] : false;
-#endif
 
     if (found) floats->L1decisions[i] = pass;
 
