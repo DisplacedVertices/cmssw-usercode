@@ -48,7 +48,6 @@ private:
   const edm::EDGetTokenT<pat::MuonCollection> muons_token;
   const edm::EDGetTokenT<pat::ElectronCollection> electrons_token;
   const edm::EDGetTokenT<reco::TrackCollection> vertex_seed_tracks_token;
-  const double jet_pt_min;
   const std::string b_discriminator;
   const std::vector<double> b_discriminator_mins;
   const StringCutObjectSelector<pat::Muon> muon_selector;
@@ -74,7 +73,6 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
     electrons_token(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("electrons_src"))),
     vertex_seed_tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("vertex_seed_tracks_src"))),
-    jet_pt_min(cfg.getParameter<double>("jet_pt_min")),
     b_discriminator(cfg.getParameter<std::string>("b_discriminator")),
     b_discriminator_mins(cfg.getParameter<std::vector<double> >("b_discriminator_mins")),
     muon_selector(cfg.getParameter<std::string>("muon_cut")),
@@ -296,8 +294,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   for (int jjet = 0, jjete = int(jets->size()); jjet < jjete; ++jjet) {
     const pat::Jet& jet = jets->at(jjet);
-    if (jet.pt() < jet_pt_min)
-      continue;
 
     mevent->jet_pudisc.push_back(jet.userFloat("pileupJetId:fullDiscriminant")); // to be removed and put into _id when working points defined
     mevent->jet_pt.push_back(jet.pt());
