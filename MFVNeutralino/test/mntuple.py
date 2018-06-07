@@ -15,7 +15,7 @@ event_filter = not keep_all
 if len(filter(None, (run_n_tk_seeds, minitree_only, prepare_vis))) > 1:
     raise ValueError('only one of run_n_tk_seeds, minitree_only, prepare_vis allowed')
 
-version = 'V18m'
+version = 'V19m'
 batch_name = 'Ntuple' + version
 if run_n_tk_seeds:
     batch_name += '_NTkSeeds'
@@ -53,12 +53,10 @@ process.goodOfflinePrimaryVertices.src = 'offlineSlimmedPrimaryVertices'
 
 process.selectedPatJets.src = 'slimmedJets'
 process.selectedPatJets.cut = process.jtupleParams.jetCut
-
 process.selectedPatMuons.src = 'slimmedMuons'
-process.selectedPatMuons.cut = process.jtupleParams.muonCut
-
+#process.selectedPatMuons.cut = '' # process.jtupleParams.muonCut
 process.selectedPatElectrons.src = 'slimmedElectrons'
-process.selectedPatElectrons.cut = process.jtupleParams.electronCut
+#process.selectedPatElectrons.cut = '' # process.jtupleParams.electronCut
 
 process.mfvGenParticles.gen_particles_src = 'prunedGenParticles'
 process.mfvGenParticles.last_flag_check = False

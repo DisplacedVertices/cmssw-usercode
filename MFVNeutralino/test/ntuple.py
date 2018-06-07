@@ -12,7 +12,7 @@ prepare_vis = not run_n_tk_seeds and False
 keep_all = prepare_vis
 keep_gen = False
 event_filter = not keep_all
-version = 'V18'
+version = 'V19'
 batch_name = 'Ntuple' + version
 if minitree_only:
     batch_name = 'MiniNtuple'  + version

@@ -63,8 +63,8 @@ def pat_tuple_process(settings, customize_before_unscheduled=None): #, paths=[])
 
     process.load('JMTucker.Tools.PATTupleSelection_cfi')
     process.selectedPatJets.cut = process.jtupleParams.jetCut
-    process.selectedPatMuons.cut = process.jtupleParams.muonCut
-    process.selectedPatElectrons.cut = process.jtupleParams.electronCut
+    process.selectedPatMuons.cut = '' #process.jtupleParams.muonCut
+    process.selectedPatElectrons.cut = '' #process.jtupleParams.electronCut
 
     if hasattr(process, 'ptau'):
         del process.ptau
