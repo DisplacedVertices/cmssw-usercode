@@ -1,17 +1,16 @@
 import sys, os
 from JMTucker.Tools.BasicAnalyzer_cfg import *
-from JMTucker.Tools.CMSSWTools import which_global_tag
 from JMTucker.Tools.Year import year
 
 simple = False
 
-process.source.fileNames = ['file:ntuple.root']
-process.source.noEventSort = cms.untracked.bool(True)
+sample_files(process, 'wjetstolnu_2017', 'ntuplev18m', 1)
+no_event_sort(process)
 file_event_from_argv(process)
 
-geometry_etc(process, which_global_tag(True, year, H=False, repro=False))
-del process.TFileService
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+geometry_etc(process)
+remove_tfileservice(process)
+report_every(process, 1)
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
