@@ -117,12 +117,13 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     #samples = [s for s in samples if s.has_dataset(dataset)]
 
-    from JMTucker.Tools.MetaSubmitter import set_splitting
+    from JMTucker.Tools.MetaSubmitter import set_splitting, per_sample_pileup_weights_modifier
     set_splitting(samples, dataset, 'histos', data_json='jsons/ana_2017.json')
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('HistosV18m',
+    cs = CondorSubmitter('HistosV18mp1',
                          ex = year,
                          dataset = dataset,
+                         pset_modifier = per_sample_pileup_weights_modifier,
                          )
     cs.submit_all(samples)

@@ -36,6 +36,17 @@ def repro_modifier(sample):
     else:
         return [], []
 
+def per_sample_pileup_weights_modifier(sample):
+    which = sample.name
+    if sample.is_signal and sample.is_private:
+        which = 'mfv_signals'
+    x = '''
+from JMTucker.Tools.PileupWeights import pileup_weights
+if pileup_weights.has_key(%r):
+    process.mfvWeight.pileup_weights = pileup_weights[%r]
+''' % (which, which)
+    return [x], []
+
 class event_veto_modifier:
     def __init__(self, d, filter_path):
         self.d = d
