@@ -1,48 +1,33 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
-from JMTucker.Tools.CMSSWTools import *
-from JMTucker.Tools.MiniAOD_cfg import *
-from JMTucker.Tools.Year import year
 
-is_mc = True
-H = False
-repro = False
-test_event_filter = False
-
-if test_event_filter:
-    process = pat_tuple_process(None, is_mc, year, H, repro)
-    jets_only(process)
-
+sample_files(process, 'qcdht2000_2017', 'miniaod')
+geometry_etc(process)
+max_events(process, 10000)
 file_event_from_argv(process)
 tfileservice(process, 'trigfiltcheck.root')
 
 from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
+sef = lambda *a,**kwa: setup_event_filter(process, *a, input_is_miniaod=True, **kwa)
+sef('ptrigger')
+sef('pevtsel',        event_filter = True)
+sef('pevtselNoJESUp', event_filter = True, event_filter_jes_mult = 0, event_filt_name = 'jetFilterNoJESUp')
 
-if test_event_filter:
-    setup_event_filter(process, event_filter=True)
-
-setup_event_filter(process, 'ptrigger')
-
-paths = process.triggerFilter.HLTPaths.value()
-
-for x in paths:
-    filt_name = x.split('_')[1]
-    setup_event_filter(process, 'p%s' % filt_name, filt_name)
+for x in process.triggerFilter.HLTPaths.value():
+    filt_name = ''.join(x.split('_')[1:-1])
+    sef('p%s' % filt_name, filt_name)
     getattr(process, filt_name).HLTPaths = [x]
-
-setup_event_filter(process, 'pHcombination', 'Hcombination')
-process.Hcombination.HLTPaths = paths[1:]
 
 import JMTucker.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
 SimpleTriggerEfficiency.setup_endpath(process)
 
 if 'argv' in sys.argv:
     from JMTucker.Tools import Samples
-    sample = [x for x in sys.argv if hasattr(Samples, x)][0]
-    sample_files(process, sample, 'main', 100)
-    tfileservice(process, 'trigfiltcheck_%s.root' % sample)
-    process.maxEvents.input = 1000
+    sample_name = [x for x in sys.argv if hasattr(Samples, x)][0]
+    sample_files(process, sample_name, 'miniaod')
+    tfileservice(process, 'trigfiltcheck_%s.root' % sample_name)
     want_summary(process)
+
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
