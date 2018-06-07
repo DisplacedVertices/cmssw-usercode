@@ -143,9 +143,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.Year import year
 
     if year == 2017:
-        samples = \
-            Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + \
-            Samples.all_signal_samples_2017
+        samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.all_signal_samples_2017
+        #samples += Samples.leptonic_samples_2017
 
     set_splitting(samples, 'main', 'ntuple')
 
