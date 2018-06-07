@@ -276,6 +276,9 @@ def max_events(process, n):
     else:
         process.maxEvents.input = n
 
+def no_event_sort(process):
+    process.source.noEventSort = cms.untracked.bool(True)
+
 def output_file(process, filename, output_commands, select_events=[]):
     process.out = cms.OutputModule('PoolOutputModule',
                                    fileName = cms.untracked.string(filename),
