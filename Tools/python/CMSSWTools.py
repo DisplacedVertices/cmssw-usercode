@@ -179,13 +179,15 @@ def friendly_argparse(**kwargs):
         print name + ' END'
     return parser, printer
 
-def geometry_etc(process, tag):
+def geometry_etc(process, tag=None):
     global_tag(process, tag)
     process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
     process.load('Configuration.StandardSequences.MagneticField_cff')
     process.load('TrackingTools.TransientTrack.TransientTrackBuilder_cfi')
     
-def global_tag(process, tag):
+def global_tag(process, tag=None):
+    if not tag:
+        tag = which_global_tag()
     process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
     from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
     process.GlobalTag = GlobalTag(process.GlobalTag, tag, '')
@@ -402,7 +404,9 @@ def want_summary(process, val=True):
     else:
         process.options.wantSummary = cms.untracked.bool(val)
 
-def which_global_tag(settings):
+def which_global_tag(settings=None):
+    if not settings:
+        settings = CMSSWSettings()
     if settings.year == 2017:
         if settings.is_mc:
             return '94X_mc2017_realistic_v10'
