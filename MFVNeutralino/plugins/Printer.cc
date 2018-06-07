@@ -163,14 +163,14 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
     for (int i = 0; i < 3; ++i)
       printf("%u ", mevent->nbtags(i));
     printf("\n");
-    printf("nmu (l,m,t): ");
-    for (int i = 0; i < 3; ++i)
+    printf("nmu (any,sel): ");
+    for (int i = 0; i < 2; ++i)
       printf("%i ", mevent->nmu(i));
-    printf("  nel (l,m,t): ");
-    for (int i = 0; i < 3; ++i)
+    printf("  nel (any,sel): ");
+    for (int i = 0; i < 2; ++i)
       printf("%i ", mevent->nel(i));
-    printf("  nlep (l,m,t): ");
-    for (int i = 0; i < 3; ++i)
+    printf("  nlep (any,sel): ");
+    for (int i = 0; i < 2; ++i)
       printf("%i ", mevent->nlep(i));
     size_t nl = mevent->nlep();
     die_if_not(nl == mevent->lep_pt.size() && nl == mevent->lep_eta.size() && nl == mevent->lep_phi.size() && nl == mevent->lep_dxy.size() && nl == mevent->lep_dz.size() && nl == mevent->lep_iso.size(), "lep vectors not same size");
