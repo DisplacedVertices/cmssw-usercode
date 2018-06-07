@@ -32,12 +32,14 @@ def setup_event_filter(process,
             raise NotImplementedError('need to understand how to include pat_tuple jets_only here')
 
         from JMTucker.Tools.JetFilter_cfi import jmtJetFilter as jetFilter
+        jetFilter = jetFilter.clone()
         if input_is_miniaod:
             jetFilter.jets_src = 'slimmedJets'
         setattr(process, event_filt_name, jetFilter)
 
         if event_filter_jes_mult > 0:
             from JMTucker.Tools.JetShifter_cfi import jmtJetShifter as jetShifter
+            jetShifter = jetShifter.clone()
             if input_is_miniaod:
                 jetShifter.jets_src = 'slimmedJets'
             jetShifter.mult = event_filter_jes_mult
