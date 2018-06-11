@@ -5,6 +5,6 @@ jmtJetFilter = cms.EDFilter('JMTJetFilter',
                             min_njets = cms.int32(4),
                             min_pt_for_ht = cms.double(40),
                             max_pt_for_ht = cms.double(1e9),
-                            min_ht = cms.double(1000),
+                            min_ht = cms.double(1200),
                             debug = cms.untracked.bool(False),
                             )
