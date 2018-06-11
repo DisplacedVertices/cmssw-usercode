@@ -252,10 +252,14 @@ class CRABSubmitter:
         extra = ''
         if self.modify_pset_hash:
             extra += '\nprocess.dummyForPsetHash = cms.PSet(dummy = cms.string(%r))' % (str(datetime.now()) + sample.dataset)
-        extra += "\nopen(%r, 'wt').write(process.dumpPython())" % pset_fn
+        extra += "\nopen(%r, 'wt').write(process.dumpPython())\n" % pset_fn
         open(pset_orig_fn, 'wt').write(pset + extra)
 
-        out = popen('python %s' % pset_orig_fn)
+        out, ret = popen('python %s' % pset_orig_fn, return_exit_code=True)
+        if ret:
+            print '\nproblem in dumpPython, output:'
+            print out
+            raise RuntimeError('problem evaluating original pset')
 
         # handle problem with crap done by RecoEgamma.ElectronIdentification.Identification/mvaElectronID_Fall17_iso_V1_cff
         # fixed in dumpPython in 10_2_X

@@ -1,59 +1,56 @@
 import sys
-from JMTucker.Tools.MiniAOD_cfg import *
-from JMTucker.Tools.CMSSWTools import *
+from JMTucker.Tools.BasicAnalyzer_cfg import *
+from JMTucker.Tools.PileupWeights import pileup_weights
 from JMTucker.Tools.Year import year
 
-is_mc = True
-H = False
-repro = False
+cmssw_settings = CMSSWSettings()
+cmssw_settings.is_mc = True
 
-process = pat_tuple_process(None, is_mc, year, H, repro)
-jets_only(process)
-
-sample_files(process, 'qcdht2000ext', 'main', 5)
+max_events(process, 1000)
+report_every(process, 1000000)
+geometry_etc(process, which_global_tag(cmssw_settings))
 tfileservice(process, 'tracker_mapper.root')
+sample_files(process, 'qcdht2000_2017', 'miniaod')
+file_event_from_argv(process)
 
 process.load('JMTucker.Tools.MCStatProducer_cff')
+process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
+process.load('JMTucker.MFVNeutralino.UnpackedCandidateTracks_cfi')
 
-import JMTucker.MFVNeutralino.EventFilter
-JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process)
+process.goodOfflinePrimaryVertices.src = 'offlineSlimmedPrimaryVertices'
+process.goodOfflinePrimaryVertices.filter = True
 
-process.load('JMTucker.Tools.JetFilter_cfi')
+process.TrackerMapper = cms.EDAnalyzer('TrackerMapper',
+                                       track_src = cms.InputTag('mfvUnpackedCandidateTracks'),
+                                       beamspot_src = cms.InputTag('offlineBeamSpot'),
+                                       primary_vertex_src = cms.InputTag('goodOfflinePrimaryVertices'),
+                                       pileup_info_src = cms.InputTag('slimmedAddPileupInfo'),
+                                       use_duplicateMerge = cms.int32(-1),
+                                       old_stlayers_cut = cms.bool(False),
+                                       pileup_weights = cms.vdouble(*pileup_weights[year]),
+                                       )
 
-process.load('JMTucker.Tools.TrackerMapper_cfi')
 process.TrackerMapperOldStCut = process.TrackerMapper.clone(old_stlayers_cut = True)
-process.p = cms.Path(process.triggerFilter * process.jmtJetFilter * process.TrackerMapper * process.TrackerMapperOldStCut)
 
-if False:
-    from JMTucker.Tools.PileupWeights import pileup_weights
-    for k,v in pileup_weights.iteritems():
-        if type(k) == str and k.startswith('2016'):
-            tm = process.TrackerMapper.clone(pileup_weights = v)
-            setattr(process, 'tm%s' % k, tm)
-            process.p *= tm
+process.p = cms.Path(process.goodOfflinePrimaryVertices * process.mfvUnpackedCandidateTracks * process.TrackerMapper * process.TrackerMapperOldStCut)
+
+from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
+setup_event_filter(process, path_name='p', event_filter=True, event_filter_jes_mult=0, input_is_miniaod=True)
+
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    import JMTucker.Tools.Samples as Samples
-    if year == 2015:
-        samples = Samples.data_samples_2015 + Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015
-    elif year == 2016:
-        samples = Samples.data_samples + Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + Samples.mfv_signal_samples + Samples.mfv_ddbar_samples
-
-    #samples = Samples.qcd_hip_samples + [Samples.qcdht0700ext, Samples.qcdht1000ext, Samples.qcdht1500ext] + Samples.data_samples
-
-    filter_eff = { 'qcdht0500': 2.9065e-03, 'qcdht0700': 3.2294e-01, 'ttbar': 3.6064e-02}
-    for s in samples:
-        s.files_per = 10
-        if s.is_mc:
-            for k,v in filter_eff.iteritems():
-                if s.name.startswith(k):
-                    s.events_per = min(int(25000/v), 400000)
-        else:
-            s.json = 'jsons/ana_2015p6.json'
-
     from JMTucker.Tools.MetaSubmitter import *
-    ms = MetaSubmitter('TrackerMapper_qcd_hip_v2')
+    import JMTucker.Tools.Samples as Samples
+    from JMTucker.Tools.Year import year
+
+    if year == 2017:
+        samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.all_signal_samples_2017
+
+    set_splitting(samples, 'miniaod', 'default', json_path('ana_2017.json'), 50)
+
+    ms = MetaSubmitter('TrackerMapperV1', dataset='miniaod')
     ms.common.ex = year
-    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier)
+    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(['TrackerMapper', 'TrackerMapperOldStCut']))
     ms.crab.job_control_from_sample = True
+    ms.condor.stageout_files = 'all'
     ms.submit(samples)
