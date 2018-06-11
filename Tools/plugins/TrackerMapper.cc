@@ -385,7 +385,7 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
 
   for (int i = 0; i < 3; ++i) {
     h_ntracks[i]->Fill(ntracks[i], w);
-    for (int j = 1; j <= 4; ++j)
+    for (int j = 0; j < reco::TrackBase::qualitySize; ++j)
       h_ntracks_quality[i][j]->Fill(ntracks_quality[i][j], w);
   }
 }
