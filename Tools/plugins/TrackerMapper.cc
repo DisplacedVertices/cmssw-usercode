@@ -22,7 +22,7 @@ class TrackerMapper : public edm::EDAnalyzer {
   const edm::EDGetTokenT<reco::TrackCollection> track_token;
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertex_token;
-  const edm::EDGetTokenT<std::vector<PileupSummaryInfo> > pileup_token;
+  const edm::EDGetTokenT<std::vector<PileupSummaryInfo> > pileup_info_token;
 
   const std::vector<double> pileup_weights;
   double pileup_weight(int mc_npu) const;
@@ -46,7 +46,7 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH1D* h_pvsumpt2[2];
 
   TH1D* h_ntracks[3];
-  TH1D* h_ntracks_quality[3][5]; // 0th of 2nd is not used
+  TH1D* h_ntracks_quality[3][reco::TrackBase::qualitySize];
   TH1D* h_tracks_algo[3];
   TH1D* h_tracks_original_algo[3];
   TH1D* h_tracks_pt[3];
@@ -107,7 +107,7 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
   : track_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("track_src"))),
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     primary_vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertex_src"))),
-    pileup_token(consumes<std::vector<PileupSummaryInfo> >(edm::InputTag("addPileupInfo"))),
+    pileup_info_token(consumes<std::vector<PileupSummaryInfo> >(cfg.getParameter<edm::InputTag>("pileup_info_src"))),
     pileup_weights(cfg.getParameter<std::vector<double> >("pileup_weights")),
     use_duplicateMerge(cfg.getParameter<int>("use_duplicateMerge")),
     old_stlayers_cut(cfg.getParameter<bool>("old_stlayers_cut"))
@@ -136,8 +136,8 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
   const char* ex[3] = {"all", "sel", "seed"};
   for (int i = 0; i < 3; ++i) {
     h_ntracks[i] = fs->make<TH1D>(TString::Format("h_%s_ntracks", ex[i]), TString::Format(";number of %s tracks;events", ex[i]), 2000, 0, 2000);
-    for (int j = 1; j <= 4; ++j) 
-      h_ntracks_quality[i][j] = fs->make<TH1D>(TString::Format("h_%s_ntracks_quality%i", ex[i], j), TString::Format(";number of %s tracks quality=%i;events", ex[i], j), 2000, 0, 2000);
+    for (int j = 0; j < reco::TrackBase::qualitySize; ++j)
+      h_ntracks_quality[i][j] = fs->make<TH1D>(TString::Format("h_%s_ntracks_quality%i", ex[i], j), TString::Format(";number of %s tracks quality %s;events", ex[i], reco::TrackBase::qualityNames[j].c_str()), 2000, 0, 2000);
     h_tracks_algo[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_algo", ex[i]), TString::Format(";%s tracks algo;events", ex[i]), 50, 0, 50);
     h_tracks_original_algo[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_original_algo", ex[i]), TString::Format(";%s tracks original algo;events", ex[i]), 50, 0, 50);
     h_tracks_pt[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_pt", ex[i]), TString::Format("%s tracks;tracks pt;arb. units", ex[i]), 200, 0, 20);
@@ -168,7 +168,7 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
     h_tracks_nstlayers[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_nstlayers", ex[i]), TString::Format("%s tracks;tracks nstlayers;arb. units", ex[i]), 20, 0, 20);
     h_tracks_nstlayers_etalt2[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_nstlayers_etalt2", ex[i]), TString::Format("%s tracks;|#eta| < 2 tracks nstlayers;arb. units", ex[i]), 20, 0, 20);
     h_tracks_nstlayers_etagt2[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_nstlayers_etagt2", ex[i]), TString::Format("%s tracks;|#eta| #geq 2 tracks nstlayers;arb. units", ex[i]), 20, 0, 20);
-    h_tracks_nsigmadxy[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_nsigmadxy", ex[i]), TString::Format("%s tracks;tracks nsigmadxy;arb. units", ex[i]), 200, 0, 20);
+    h_tracks_nsigmadxy[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_nsigmadxy", ex[i]), TString::Format("%s tracks;tracks nsigmadxy;arb. units", ex[i]), 400, 0, 40);
 
     h_tracks_nstlayers_v_eta[i] = fs->make<TH2D>(TString::Format("h_%s_tracks_nstlayers_v_eta", ex[i]), TString::Format("%s tracks;tracks eta;tracks nstlayers", ex[i]), 80, -4, 4, 20, 0, 20);
     h_tracks_dxy_v_eta[i] = fs->make<TH2D>(TString::Format("h_%s_tracks_dxy_v_eta", ex[i]), TString::Format("%s tracks;tracks eta;tracks dxy to beamspot", ex[i]), 80, -4, 4, 400, -0.2, 0.2);
@@ -214,10 +214,10 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
   int npu = -1;
 
   if (!event.isRealData()) {
-    edm::Handle<std::vector<PileupSummaryInfo> > pileup;
-    event.getByToken(pileup_token, pileup);
+    edm::Handle<std::vector<PileupSummaryInfo> > pileup_info;
+    event.getByToken(pileup_info_token, pileup_info);
 
-    for (std::vector<PileupSummaryInfo>::const_iterator psi = pileup->begin(), end = pileup->end(); psi != end; ++psi)
+    for (std::vector<PileupSummaryInfo>::const_iterator psi = pileup_info->begin(), end = pileup_info->end(); psi != end; ++psi)
       if (psi->getBunchCrossing() == 0)
         npu = psi->getTrueNumInteractions();
 
@@ -266,7 +266,7 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
   event.getByToken(track_token, tracks);
 
   int ntracks[3] = {0};
-  int ntracks_quality[3][5] = {{0}};
+  int ntracks_quality[3][reco::TrackBase::qualitySize] = {{0}};
   for (const reco::Track& tk : *tracks) {
     if (use_duplicateMerge != -1 && (tk.algo() == 2) != use_duplicateMerge) // reco::TrackBase::duplicateMerge
       continue;
@@ -325,7 +325,7 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
 
       ++ntracks[i];
 
-      for (int j = 1; j <= 4; ++j)
+      for (int j = 0; j < reco::TrackBase::qualitySize; ++j)
         if (tk.quality(reco::TrackBase::TrackQuality(j)))
           ++ntracks_quality[i][j];
 
