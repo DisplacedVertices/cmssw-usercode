@@ -124,6 +124,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     cs = CondorSubmitter('HistosV18mp1',
                          ex = year,
                          dataset = dataset,
-                         pset_modifier = per_sample_pileup_weights_modifier,
+                         pset_modifier = per_sample_pileup_weights_modifier(),
                          )
     cs.submit_all(samples)
