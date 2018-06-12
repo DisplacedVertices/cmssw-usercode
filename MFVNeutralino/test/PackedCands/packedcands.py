@@ -30,7 +30,7 @@ process.mfvPackedCands = cms.EDAnalyzer('MFVPackedCandidates',
 process.p = cms.Path(process.goodOfflinePrimaryVertices * process.mfvPackedCands)
 
 import JMTucker.MFVNeutralino.EventFilter
-JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process, 'p')
+JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process, path_name='p')
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:

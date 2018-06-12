@@ -35,7 +35,7 @@ process.TrackerMapperOldStCut = process.TrackerMapper.clone(old_stlayers_cut = T
 process.p = cms.Path(process.goodOfflinePrimaryVertices * process.mfvUnpackedCandidateTracks * process.TrackerMapper * process.TrackerMapperOldStCut)
 
 from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-setup_event_filter(process, path_name='p', event_filter=True, event_filter_jes_mult=0, input_is_miniaod=True)
+setup_event_filter(process, path_name='p', event_filter=True, event_filter_jes_mult=0, event_filter_require_vertex=False, input_is_miniaod=True)
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
