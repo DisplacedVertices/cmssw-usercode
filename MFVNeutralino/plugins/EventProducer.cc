@@ -43,6 +43,7 @@ private:
   const edm::EDGetTokenT<mfv::MCInteraction> mci_token;
   const edm::EDGetTokenT<std::vector<PileupSummaryInfo> > pileup_summary_token;
   const edm::EDGetTokenT<pat::JetCollection> jets_token;
+  const edm::EDGetTokenT<double> rho_token;
   const bool use_met;
   const edm::EDGetTokenT<pat::METCollection> met_token;
   const edm::EDGetTokenT<pat::MuonCollection> muons_token;
@@ -78,6 +79,7 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     mci_token(consumes<mfv::MCInteraction>(cfg.getParameter<edm::InputTag>("mci_src"))),
     pileup_summary_token(consumes<std::vector<PileupSummaryInfo> >(cfg.getParameter<edm::InputTag>("pileup_info_src"))),
     jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
+    rho_token(consumes<double>(cfg.getParameter<edm::InputTag>("rho_src"))),
     use_met(cfg.getParameter<edm::InputTag>("met_src").label() != ""),
     met_token(consumes<pat::METCollection>(cfg.getParameter<edm::InputTag>("met_src"))),
     muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
@@ -307,6 +309,9 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   edm::Handle<pat::JetCollection> jets;
   event.getByToken(jets_token, jets);
 
+  edm::Handle<double> rho;
+  event.getByToken(rho_token, rho);
+
   for (int jjet = 0, jjete = int(jets->size()); jjet < jjete; ++jjet) {
     const pat::Jet& jet = jets->at(jjet);
 
@@ -416,10 +421,14 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     auto electron_selectors = electron.isEB() ? electron_EB_selectors : electron_EE_selectors;
 
     MFVEvent::lep_id_t id = 0;
-    for (int i = 0, ie = electron_selectors.size(); i < ie; ++i)
+    for (int i = 0, ie = electron_selectors.size(); i < ie; ++i) {
+      if (i == MFVEvent::lep_el_hovere) continue; // skip for below code
       if (electron_selectors[i](electron))
         id |= 1 << i;
+    }
 
+    if (electron.hadronicOverEm() < 0.05 + (electron.isEB() ? 1.12 + 0.0368 * *rho : 0.5 + 0.201 * *rho) / electron.superCluster()->energy())
+      id |= 1 << MFVEvent::lep_el_hovere;
     if (electron.passConversionVeto())
       id |= 1 << MFVEvent::lep_el_conversionveto;
     if (electron.closestCtfTrackRef().isNonnull())

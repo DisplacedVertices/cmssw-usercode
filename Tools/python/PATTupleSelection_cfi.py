@@ -4,7 +4,7 @@ import FWCore.ParameterSet.Config as cms
 # https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMuonIdRun2#Tight_Muon
 # https://twiki.cern.ch/twiki/bin/view/CMS/CutBasedElectronIdentificationRun2#Working_points_for_92X_and_later
 # impact parameter cuts not included on leptons, and conversion veto not included on electrons
-# JMTBAD electron H/E cut uses fixed rho number, should do it right in event producer
+# electron H/E cut uses fixed rho number, MFVEventProducer does it right
 
 jet_cuts = (
     'abs(eta) < 2.7',

@@ -15,6 +15,7 @@ mfvEvent = cms.EDProducer('MFVEventProducer',
                           mci_src = cms.InputTag('mfvGenParticles'),
                           pileup_info_src = cms.InputTag('addPileupInfo'),
                           jets_src = cms.InputTag('selectedPatJets'),
+                          rho_src = cms.InputTag('fixedGridRhoFastjetAll'),
                           met_src = cms.InputTag('patMETsNoHF'),
                           b_discriminator = cms.string('pfCombinedInclusiveSecondaryVertexV2BJetTags'),  #pfDeepCSVJetTags:probb + pfDeepCSVJetTags:probbb
                           b_discriminator_mins = cms.vdouble(0.5803, 0.8838, 0.9693),
