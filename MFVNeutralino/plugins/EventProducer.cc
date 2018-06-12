@@ -378,16 +378,17 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->lep_pt.push_back(muon.pt());
     mevent->lep_eta.push_back(muon.eta());
     mevent->lep_phi.push_back(muon.phi());
+    const auto trk = muon.bestTrack();
     if (primary_vertex != 0) {
       const auto& pvpos = primary_vertex->position();
-      mevent->lep_dxy.push_back(muon.track()->dxy(pvpos));
-      mevent->lep_dz.push_back(muon.track()->dz(pvpos));
+      mevent->lep_dxy.push_back(trk->dxy(pvpos));
+      mevent->lep_dz.push_back(trk->dz(pvpos));
     }
     else {
-      mevent->lep_dxy.push_back(muon.track()->dxy());
-      mevent->lep_dz.push_back(muon.track()->dz());
+      mevent->lep_dxy.push_back(trk->dxy());
+      mevent->lep_dz.push_back(trk->dz());
     }
-    mevent->lep_dxybs.push_back(muon.track()->dxy(beamspot->position()));
+    mevent->lep_dxybs.push_back(trk->dxy(beamspot->position()));
     mevent->lep_iso.push_back(iso);
   }
 
@@ -409,16 +410,17 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->lep_pt.push_back(electron.pt());
     mevent->lep_eta.push_back(electron.eta());
     mevent->lep_phi.push_back(electron.phi());
+    const auto trk = electron.gsfTrack();
     if (primary_vertex != 0) {
       const auto& pvpos = primary_vertex->position();
-      mevent->lep_dxy.push_back(electron.gsfTrack()->dxy(pvpos));
-      mevent->lep_dz.push_back(electron.gsfTrack()->dz(pvpos));
+      mevent->lep_dxy.push_back(trk->dxy(pvpos));
+      mevent->lep_dz.push_back(trk->dz(pvpos));
     }
     else {
-      mevent->lep_dxy.push_back(electron.gsfTrack()->dxy());
-      mevent->lep_dz.push_back(electron.gsfTrack()->dz());
+      mevent->lep_dxy.push_back(trk->dxy());
+      mevent->lep_dz.push_back(trk->dz());
     }
-    mevent->lep_dxybs.push_back(electron.gsfTrack()->dxy(beamspot->position()));
+    mevent->lep_dxybs.push_back(trk->dxy(beamspot->position()));
     mevent->lep_iso.push_back(iso);
   }
 
