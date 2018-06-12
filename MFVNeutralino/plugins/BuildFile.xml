@@ -13,6 +13,7 @@
   <use name="PhysicsTools/CandUtils"/>
   <use name="PhysicsTools/SelectorUtils"/>
   <use name="RecoBTag/SecondaryVertex"/>
+  <use name="RecoEgamma/EgammaTools"/>
   <use name="RecoParticleFlow/PFTracking"/>
   <use name="RecoVertex/ConfigurableVertexReco"/>
   <use name="RecoVertex/GhostTrackFitter"/>

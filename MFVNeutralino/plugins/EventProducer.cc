@@ -15,6 +15,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
+#include "RecoEgamma/EgammaTools/interface/EffectiveAreas.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
@@ -54,6 +55,7 @@ private:
   std::vector<StringCutObjectSelector<pat::Muon>> muon_selectors;
   std::vector<StringCutObjectSelector<pat::Electron>> electron_EB_selectors;
   std::vector<StringCutObjectSelector<pat::Electron>> electron_EE_selectors;
+  EffectiveAreas electron_effective_areas;
   const bool lightweight;
 };
 
@@ -90,6 +92,7 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     muon_selectors(cuts2selectors<pat::Muon>(cfg.getParameter<std::vector<std::string>>("muon_cuts"))),
     electron_EB_selectors(cuts2selectors<pat::Electron>(cfg.getParameter<std::vector<std::string>>("electron_EB_cuts"))),
     electron_EE_selectors(cuts2selectors<pat::Electron>(cfg.getParameter<std::vector<std::string>>("electron_EE_cuts"))),
+    electron_effective_areas(cfg.getParameter<edm::FileInPath>("electron_effective_areas").fullPath()),
     lightweight(cfg.getParameter<bool>("lightweight"))
 {
   produces<MFVEvent>();
@@ -393,7 +396,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       if (muon_selectors[i](muon))
         id |= 1 << i;
 
-    const float iso = (muon.chargedHadronIso() + std::max(0.f,muon.neutralHadronIso()) + muon.photonIso() - 0.5*muon.puChargedHadronIso())/muon.pt(); // JMTBAD keep in sync with .py
+    const float iso = (muon.pfIsolationR04().sumChargedHadronPt + std::max(0., muon.pfIsolationR04().sumNeutralHadronEt + muon.pfIsolationR04().sumPhotonEt - 0.5*muon.pfIsolationR04().sumPUPt))/muon.pt();
 
     mevent->lep_id_.push_back(MFVEvent::encode_mu_id(id));
     mevent->lep_pt.push_back(muon.pt());
@@ -434,7 +437,9 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     if (electron.closestCtfTrackRef().isNonnull())
       id |= 1 << MFVEvent::lep_el_ctftrack;
 
-    const float iso = (electron.chargedHadronIso() + std::max(0.f,electron.neutralHadronIso()) + electron.photonIso() - 0.5*electron.puChargedHadronIso())/electron.et();
+    const auto pfIso = electron.pfIsolationVariables();
+    const float eA = electron_effective_areas.getEffectiveArea(fabs(electron.superCluster()->eta()));
+    const float iso = pfIso.sumChargedHadronPt + std::max(0., pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - *rho*eA) / electron.pt();
 
     mevent->lep_id_.push_back(MFVEvent::encode_el_id(id));
     mevent->lep_pt.push_back(electron.pt());

@@ -24,6 +24,7 @@ mfvEvent = cms.EDProducer('MFVEventProducer',
                           electrons_src = cms.InputTag('selectedPatElectrons'),
                           electron_EB_cuts = jtupleParams.electronEBCuts,
                           electron_EE_cuts = jtupleParams.electronEECuts,
+                          electron_effective_areas = cms.FileInPath('RecoEgamma/ElectronIdentification/data/Fall17/effAreaElectrons_cone03_pfNeuHadronsAndPhotons_92X.txt'),
                           vertex_seed_tracks_src = cms.InputTag('mfvVertices', 'seed'),
                           lightweight = cms.bool(False),
                           )
