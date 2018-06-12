@@ -353,7 +353,7 @@ _add_ds("ntuplev18m", {
 ################################################################################
 
 if __name__ == '__main__':
-    import sys
+    import sys, re
 
     def _printlist(l):
         for x in l:
@@ -466,6 +466,13 @@ if __name__ == '__main__':
             for fn in fns:
                 if fnmatch(fn, pattern):
                     print sample, dataset, fn
+
+    elif 'dirs' in sys.argv:
+        dataset, sample = _args('dirs', 'dataset','sample')
+        fns = get(sample, dataset)[1]
+        path_re = re.compile(r'(/store.*/\d{6}_\d{6})/')
+        _printlist(sorted(set(path_re.search(fn).group(1) for fn in fns)))
+        # for x in ttbar qcdht0700 qcdht1000 qcdht1500 qcdht2000 wjetstolnu dyjetstollM10 dyjetstollM50 qcdmupt15 ; echo $x $(eosdu $(samplefiles dirs  ntuplev18m ${x}_2017) )
 
     elif 'whosummary' in sys.argv:
         whosummary = defaultdict(list)
