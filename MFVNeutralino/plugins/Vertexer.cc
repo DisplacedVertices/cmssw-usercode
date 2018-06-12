@@ -22,18 +22,7 @@
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexerPairEff.h"
-
-namespace {
-  template <typename T>
-  T mag(T x, T y) {
-    return sqrt(x*x + y*y);
-  }
-  
-  template <typename T>
-  T mag(T x, T y, T z) {
-    return sqrt(x*x + y*y + z*z);
-  }
-}
+#include "JMTucker/Tools/interface/Utilities.h"
 
 class MFVVertexer : public edm::EDProducer {
 public:
@@ -546,12 +535,11 @@ void MFVVertexer::finish(edm::Event& event, const std::vector<reco::TransientTra
   if (verbose) printf("finish:\nseed tracks:\n");
 
   std::map<std::pair<unsigned, unsigned>, unsigned char> seed_track_ref_map;
-  assert(seed_tracks.size() <= 255);
   unsigned char itk = 0;
   for (const reco::TransientTrack& ttk : seed_tracks) {
     tracks_seed->push_back(ttk.track());
     const reco::TrackBaseRef& tk(ttk.trackBaseRef());
-    seed_track_ref_map[std::make_pair(tk.id().id(), tk.key())] = itk++;
+    seed_track_ref_map[std::make_pair(tk.id().id(), tk.key())] = uint2uchar_clamp(itk++);
 
     if (verbose) printf("id: %i key: %lu pt: %f\n", tk.id().id(), tk.key(), tk->pt());
   }

@@ -48,7 +48,7 @@ class VertexerPairEff {
   reco::Vertex::Point point_[2];
   reco::Vertex::Error error_[2];
   unsigned char kind_;
-  std::vector<unsigned char> tracks_[2];
+  std::vector<unsigned char> tracks_[2]; // these are indices into the seed tracks stored in the mfvEvent. if the value is 255, this means we had more than 255 seed tracks and the index is beyond that (happens in handful of Fall17 events with hundreds of PU and loosened track selection)
 };
 
 typedef std::vector<VertexerPairEff> VertexerPairEffs;
