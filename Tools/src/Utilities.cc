@@ -92,9 +92,15 @@ void inc_uchar(uchar& x) {
 }
 
 uchar int2uchar_clamp(int x) {
-  if (x < 0)
+  if (x <= 0)
     return 0;
-  else if (x > 255)
+  else if (x >= 255)
+    return 255;
+  else return (uchar)x;
+}
+
+uchar uint2uchar_clamp(unsigned x) {
+  if (x >= 255)
     return 255;
   else return (uchar)x;
 }

@@ -66,6 +66,7 @@ double coord(const V& v, const int i) {
 typedef unsigned char uchar;
 uchar int2uchar(int x);
 uchar int2uchar_clamp(int x);
+uchar uint2uchar_clamp(unsigned x);
 void inc_uchar(uchar& x);
 void inc_uchar_clamp(uchar& x);
 
