@@ -176,7 +176,7 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
     die_if_not(nl == mevent->lep_pt.size() && nl == mevent->lep_eta.size() && nl == mevent->lep_phi.size() && nl == mevent->lep_dxy.size() && nl == mevent->lep_dz.size() && nl == mevent->lep_iso.size(), "lep vectors not same size");
     printf("raw lep info (nl: %lu):\n", nl);
     for (size_t i = 0; i < nl; ++i)
-      printf("id: 0x%08x   pt: %11.3g   eta: %11.3g   phi: %11.3g   dxypv: %11.3g   dxybs: %11.3g   dz: %11.3g   iso: %11.3g\n", mevent->lep_id[i], mevent->lep_pt[i], mevent->lep_eta[i], mevent->lep_phi[i], mevent->lep_dxy[i], mevent->lep_dxybs[i], mevent->lep_dz[i], mevent->lep_iso[i]);
+      printf("id: 0x%08x   pt: %11.3g   eta: %11.3g   phi: %11.3g   dxypv: %11.3g   dxybs: %11.3g   dz: %11.3g   iso: %11.3g\n", mevent->lep_id_[i], mevent->lep_pt[i], mevent->lep_eta[i], mevent->lep_phi[i], mevent->lep_dxy[i], mevent->lep_dxybs[i], mevent->lep_dz[i], mevent->lep_iso[i]);
 
     printf("------- MFVEvent done -------\n\n");
   }

@@ -50,10 +50,20 @@ private:
   const edm::EDGetTokenT<reco::TrackCollection> vertex_seed_tracks_token;
   const std::string b_discriminator;
   const std::vector<double> b_discriminator_mins;
-  const StringCutObjectSelector<pat::Muon> muon_selector;
-  const StringCutObjectSelector<pat::Electron> electron_selector;
+  std::vector<StringCutObjectSelector<pat::Muon>> muon_selectors;
+  std::vector<StringCutObjectSelector<pat::Electron>> electron_EB_selectors;
+  std::vector<StringCutObjectSelector<pat::Electron>> electron_EE_selectors;
   const bool lightweight;
 };
+
+namespace {
+  template <typename T>
+  std::vector<StringCutObjectSelector<T>> cuts2selectors(const std::vector<std::string>& cuts) {
+    std::vector<StringCutObjectSelector<T>> ret;
+    for (auto cut : cuts) ret.push_back(StringCutObjectSelector<T>(cut));
+    return ret;
+  }
+}
 
 MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
   : input_is_miniaod(cfg.getParameter<bool>("input_is_miniaod")),
@@ -75,11 +85,16 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     vertex_seed_tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("vertex_seed_tracks_src"))),
     b_discriminator(cfg.getParameter<std::string>("b_discriminator")),
     b_discriminator_mins(cfg.getParameter<std::vector<double> >("b_discriminator_mins")),
-    muon_selector(cfg.getParameter<std::string>("muon_cut")),
-    electron_selector(cfg.getParameter<std::string>("electron_cut")),
+    muon_selectors(cuts2selectors<pat::Muon>(cfg.getParameter<std::vector<std::string>>("muon_cuts"))),
+    electron_EB_selectors(cuts2selectors<pat::Electron>(cfg.getParameter<std::vector<std::string>>("electron_EB_cuts"))),
+    electron_EE_selectors(cuts2selectors<pat::Electron>(cfg.getParameter<std::vector<std::string>>("electron_EE_cuts"))),
     lightweight(cfg.getParameter<bool>("lightweight"))
 {
   produces<MFVEvent>();
+  assert(muon_selectors.size() == MFVEvent::n_lep_mu_idrequired);
+  assert(MFVEvent::n_lep_mu_idrequired == MFVEvent::n_lep_mu_idbits);
+  assert(electron_EB_selectors.size() == electron_EE_selectors.size());
+  assert(electron_EB_selectors.size() == MFVEvent::n_lep_el_idrequired);
 }
 
 void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
@@ -356,7 +371,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   //////////////////////////////////////////////////////////////////////
 
-  mevent->lep_id.clear();
+  mevent->lep_id_.clear();
   mevent->lep_pt.clear();
   mevent->lep_eta.clear();
   mevent->lep_phi.clear();
@@ -368,13 +383,14 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   event.getByToken(muons_token, muons);
 
   for (const pat::Muon& muon : *muons) {
-    uchar id = 0;
-    if (muon_selector(muon))
-      id |= 1 << MFVEvent::lep_sel;
+    MFVEvent::lep_id_t id = 0;
+    for (int i = 0, ie = muon_selectors.size(); i < ie; ++i)
+      if (muon_selectors[i](muon))
+        id |= 1 << i;
 
     const float iso = (muon.chargedHadronIso() + std::max(0.f,muon.neutralHadronIso()) + muon.photonIso() - 0.5*muon.puChargedHadronIso())/muon.pt(); // JMTBAD keep in sync with .py
 
-    mevent->lep_id.push_back(MFVEvent::encode_mu_id(id));
+    mevent->lep_id_.push_back(MFVEvent::encode_mu_id(id));
     mevent->lep_pt.push_back(muon.pt());
     mevent->lep_eta.push_back(muon.eta());
     mevent->lep_phi.push_back(muon.phi());
@@ -396,17 +412,22 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   event.getByToken(electrons_token, electrons);
   
   for (const pat::Electron& electron : *electrons) {
-    uchar id = 0;
-    if (electron_selector(electron))
-      id |= 1 << MFVEvent::lep_sel;
+    if (!electron.isEB() && !electron.isEE()) continue;
+    auto electron_selectors = electron.isEB() ? electron_EB_selectors : electron_EE_selectors;
+
+    MFVEvent::lep_id_t id = 0;
+    for (int i = 0, ie = electron_selectors.size(); i < ie; ++i)
+      if (electron_selectors[i](electron))
+        id |= 1 << i;
+
     if (electron.passConversionVeto())
       id |= 1 << MFVEvent::lep_el_conversionveto;
     if (electron.closestCtfTrackRef().isNonnull())
-      id |= 1 << MFVEvent::lep_el_ctf;
+      id |= 1 << MFVEvent::lep_el_ctftrack;
 
     const float iso = (electron.chargedHadronIso() + std::max(0.f,electron.neutralHadronIso()) + electron.photonIso() - 0.5*electron.puChargedHadronIso())/electron.et();
 
-    mevent->lep_id.push_back(MFVEvent::encode_el_id(id));
+    mevent->lep_id_.push_back(MFVEvent::encode_el_id(id));
     mevent->lep_pt.push_back(electron.pt());
     mevent->lep_eta.push_back(electron.eta());
     mevent->lep_phi.push_back(electron.phi());
@@ -489,7 +510,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->jet_energy.clear();
     mevent->metx = 0;
     mevent->mety = 0;
-    mevent->lep_id.clear();
+    mevent->lep_id_.clear();
     mevent->lep_pt.clear();
     mevent->lep_eta.clear();
     mevent->lep_phi.clear();

@@ -19,9 +19,10 @@ mfvEvent = cms.EDProducer('MFVEventProducer',
                           b_discriminator = cms.string('pfCombinedInclusiveSecondaryVertexV2BJetTags'),  #pfDeepCSVJetTags:probb + pfDeepCSVJetTags:probbb
                           b_discriminator_mins = cms.vdouble(0.5803, 0.8838, 0.9693),
                           muons_src = cms.InputTag('selectedPatMuons'),
-                          muon_cut = jtupleParams.muonCut,
+                          muon_cuts = jtupleParams.muonCuts,
                           electrons_src = cms.InputTag('selectedPatElectrons'),
-                          electron_cut = jtupleParams.electronCut,
+                          electron_EB_cuts = jtupleParams.electronEBCuts,
+                          electron_EE_cuts = jtupleParams.electronEECuts,
                           vertex_seed_tracks_src = cms.InputTag('mfvVertices', 'seed'),
                           lightweight = cms.bool(False),
                           )

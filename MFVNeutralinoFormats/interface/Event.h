@@ -285,10 +285,17 @@ struct MFVEvent {
   float met() const { return mag(metx, mety); }
   float metphi() const { return atan2(mety, metx); }
 
-  enum { lep_sel, lep_el_conversionveto, lep_el_ctf, n_lep_id_bits };
-  static_assert(n_lep_id_bits < 8, "too many lep_id bits");
+  typedef ushort lep_id_t;
+  enum { lep_mu, lep_el };
+  enum { lep_mu_ispf, lep_mu_isglobal, lep_mu_chi2dof, lep_mu_trklayers, lep_mu_muhits, lep_mu_pxhits, lep_mu_stations, n_lep_mu_idrequired, n_lep_mu_idbits=n_lep_mu_idrequired };
+  enum { lep_el_sigmaietaieta, lep_el_deta, lep_el_dphi, lep_el_hovere, lep_el_einvmpinv, lep_el_missinghits, n_lep_el_idrequired, lep_el_conversionveto=n_lep_el_idrequired, lep_el_ctftrack, n_lep_el_idbits };
+  static_assert(n_lep_mu_idbits < sizeof(lep_id_t)*8, "too many lep_mu bits");
+  static_assert(n_lep_el_idbits < sizeof(lep_id_t)*8, "too many lep_el bits");
+  static const lep_id_t lep_el_bit = 1 << (sizeof(lep_id_t)*8 - 1);
+  static lep_id_t encode_el_id(lep_id_t id) { return id |= lep_el_bit; }
+  static lep_id_t encode_mu_id(lep_id_t id) { return id; }
 
-  std::vector<uchar> lep_id; // bit field: bit 7 (msb): 0 = mu, 1 = el, remaining seven bits are according to the enum above
+  std::vector<lep_id_t> lep_id_; // bit field: msb: 0 = mu, 1 = el, remaining bits are according to the enums above
   std::vector<float> lep_pt;
   std::vector<float> lep_eta;
   std::vector<float> lep_phi;
@@ -297,26 +304,29 @@ struct MFVEvent {
   std::vector<float> lep_dz;
   std::vector<float> lep_iso;
 
-  size_t nlep() const { return lep_id.size(); }
+  size_t nlep() const { return lep_id_.size(); }
 
-  static uchar encode_el_id(uchar id) { return id |= 0x80; }
-  static uchar encode_mu_id(uchar id) { return id; }
-  bool is_electron (size_t w) const { return lep_id[w] & 0x80; }
+  bool is_electron (size_t w) const { return lep_id_[w] & lep_el_bit; }
   bool is_muon     (size_t w) const { return !is_electron(w); }
-  bool pass_lep_sel(size_t w) const { return lep_id[w] & lep_sel; }
+  bool pass_lep_sel(size_t w) const {
+    const int nreq = is_electron(w) ? int(n_lep_el_idrequired) : int(n_lep_mu_idrequired);
+    for (int i = 0; i < nreq; ++i)
+      if (!(lep_id_[w] & (1<<i)))
+        return false;
+    return true;
+  }
 
   TLorentzVector lep_p4(size_t w) const {
     const float mass = is_electron(w) ? 0.000511 : 0.106;
     return p4(lep_pt[w], lep_eta[w], lep_phi[w], mass);
   }
 
-  enum { lep_mu, lep_el };
-
   int nlep(int type, bool sel) const {
     int n = 0;
-    for (size_t i = 0, ie = nlep(); i < ie; ++i)
-      if (((lep_id[i] & 0x80) >> 7) == type && (!sel || (lep_id[i] & (1<<lep_sel))))
-        ++n;
+    for (size_t w = 0, we = nlep(); w < we; ++w)
+      if (is_electron(w) == (type == lep_el))
+        if (!sel || pass_lep_sel(w))
+          ++n;
     return n;
   }
 
