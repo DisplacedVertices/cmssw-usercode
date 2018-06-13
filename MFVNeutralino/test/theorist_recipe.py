@@ -36,7 +36,7 @@ if False:
 process.mfvTheoristRecipeNoCuts = mfvTheoristRecipe.clone()
 process.pNoCuts = cms.Path(process.common * process.mfvTheoristRecipeNoCuts)
 
-process.mfvAnalysisCutsOfflineJets = process.mfvAnalysisCuts.clone(apply_trigger = False, min_ht = 0, apply_vertex_cuts = False)
+process.mfvAnalysisCutsOfflineJets = process.mfvAnalysisCuts.clone(apply_trigger = 1, min_ht = 0, apply_vertex_cuts = False)
 process.mfvTheoristRecipeOfflineJets = mfvTheoristRecipe.clone()
 process.pOfflineJets = cms.Path(process.common * process.mfvAnalysisCutsOfflineJets * process.mfvTheoristRecipeOfflineJets)
 

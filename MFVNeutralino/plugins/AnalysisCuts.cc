@@ -24,7 +24,7 @@ private:
 
   const int l1_bit;
   const int trigger_bit;
-  const bool apply_trigger;
+  const int apply_trigger;
   const bool apply_cleaning_filters;
   const double min_hlt_ht4mc;
 
@@ -81,7 +81,7 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     require_bquarks(cfg.getParameter<bool>("require_bquarks")),
     l1_bit(cfg.getParameter<int>("l1_bit")),
     trigger_bit(cfg.getParameter<int>("trigger_bit")),
-    apply_trigger(cfg.getParameter<bool>("apply_trigger")),
+    apply_trigger(cfg.getParameter<int>("apply_trigger")),
     apply_cleaning_filters(cfg.getParameter<bool>("apply_cleaning_filters")),
     min_hlt_ht4mc(cfg.getParameter<double>("min_hlt_ht4mc")),
     min_npv(cfg.getParameter<int>("min_npv")),
@@ -159,7 +159,10 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (trigger_bit >= 0 && !mevent->pass_hlt(trigger_bit))
       return false;
 
-    if (apply_trigger && !mevent->pass_hlt(mfv::b_HLT_PFHT1050))
+    if (apply_trigger == 1 && !mevent->pass_hlt(mfv::b_HLT_PFHT1050))
+      return false;
+
+    if (apply_trigger == 2 && !mevent->pass_hlt(mfv::b_HLT_Ele35_WPTight_Gsf) && !mevent->pass_hlt(mfv::b_HLT_IsoMu27))
       return false;
 
     if (mevent->hlt_ht4mc < min_hlt_ht4mc)  // JMTBAD should handle hlt_ht4mc versus hlt_ht
