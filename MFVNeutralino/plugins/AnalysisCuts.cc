@@ -151,9 +151,8 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
   if (use_mevent) {
     event.getByToken(mevent_token, mevent);
 
-    if (require_bquarks && mevent->gen_flavor_code != 2) {
+    if (require_bquarks && mevent->gen_flavor_code != 2)
       return false;
-    }
 
     if (l1_bit >= 0 && !mevent->pass_l1(l1_bit))
       return false;
@@ -176,7 +175,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (mevent->npv < min_npv || mevent->npv > max_npv)
       return false;
 
-    if (mevent->npu < min_npu || mevent ->npu > max_npu)
+    if (mevent->npu < min_npu || mevent->npu > max_npu)
       return false;
 
     if (mevent->pv_ntracks > max_pv_ntracks)
