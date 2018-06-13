@@ -169,8 +169,21 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (mevent->hlt_ht4mc < min_hlt_ht4mc)  // JMTBAD should handle hlt_ht4mc versus hlt_ht
       return false;
 
-    if (apply_presel == 1 && (mevent->jet_ht(40) < min_ht || mevent->njets() < min_njets))
+    if (apply_presel == 1 && (!mevent->pass_hlt(mfv::b_HLT_PFHT1050) || mevent->jet_ht(40) < 1200 || mevent->njets() < 4))
       return false;
+
+    if (apply_presel == 2) {
+      if (!mevent->pass_hlt(mfv::b_HLT_Ele35_WPTight_Gsf) && !mevent->pass_hlt(mfv::b_HLT_IsoMu27))
+        return false;
+
+      // JMTBAD match to lepton that triggered
+      // JMTBAD real turnon value
+      if (mevent->pass_hlt(mfv::b_HLT_Ele35_WPTight_Gsf) && mevent->first_lep_pass(MFVEvent::lep_el).Pt() < 35)
+        return false;
+
+      if (mevent->pass_hlt(mfv::b_HLT_IsoMu27) && mevent->first_lep_pass(MFVEvent::lep_mu).Pt() < 27)
+        return false;
+    }
 
     if (mevent->npv < min_npv || mevent->npv > max_npv)
       return false;

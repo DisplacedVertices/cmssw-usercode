@@ -321,6 +321,14 @@ struct MFVEvent {
     return p4(lep_pt[w], lep_eta[w], lep_phi[w], mass);
   }
 
+  TLorentzVector first_lep_pass(int type) const {
+    for (size_t w = 0, we = nlep(); w < we; ++w)
+      if (is_electron(w) == (type == lep_el))
+        if (pass_lep_sel(w))
+          return lep_p4(w);
+    return TLorentzVector();
+  }
+
   int nlep(int type, bool sel) const {
     int n = 0;
     for (size_t w = 0, we = nlep(); w < we; ++w)
