@@ -85,11 +85,11 @@ for ntk in 'mfvMiniTreeNtk3', 'mfvMiniTreeNtk4', 'mfvMiniTree':
                              '%.0f' % sample.nevents(fn),
                              '%9.3g' % w,
                              x[0][0],
-                             '%9.2f' % x[0][1],
+                             '%9.0f' % x[0][1],
                              '%9.2f' % x[0][2],
                              '%9.2f' % x[0][3],
                              x[1][0],
-                             '%9.2f' % x[1][1],
+                             '%9.0f' % x[1][1],
                              '%9.2f' % x[1][2],
                              '%9.2f' % x[1][3],
                              )
