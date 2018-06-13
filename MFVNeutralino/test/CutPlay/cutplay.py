@@ -30,9 +30,9 @@ if do_nominal:
     for i in xrange(0,200):
         changes.append(('thetaoutlierX%i' % i, 'max_thetaoutlier = %i' % i, ''))
     for i in xrange(0,10):
-        changes.append(('njetsX%i'%i, '', 'min_njets = %i'%i))
+        changes.append(('njetsX%i'%i, '', 'apply_presel = 0, min_ht = 1200, min_njets = %i'%i))
     for i in xrange(250,1001,50):
-        changes.append(('htX%i'%i, '', 'min_ht = %i'%i))
+        changes.append(('htX%i'%i, '', 'apply_presel = 0, min_njets = 4, min_ht = %i'%i))
     for i in xrange(0,15):
         changes.append(('ntracksX%i'%i, 'min_ntracks = %i, min_njetsntks = 0'%i, ''))
     for i in xrange(0,10):

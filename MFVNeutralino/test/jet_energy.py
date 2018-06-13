@@ -18,6 +18,8 @@ process.load('JMTucker.MFVNeutralino.JetEnergyHistos_cfi')
 import JMTucker.Tools.SimpleTriggerResults_cfi as SimpleTriggerResults
 SimpleTriggerResults.setup_endpath(process, weight_src='mfvWeight')
 
+process.mfvAnalysisCuts.apply_presel = 0
+process.mfvAnalysisCuts.min_njets = 4
 process.mfvAnalysisCuts.min_ht = 0
 
 process.mfvJetEnergyHistos = cms.EDAnalyzer('MFVJetEnergyHistos',

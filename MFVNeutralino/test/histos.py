@@ -26,8 +26,8 @@ process.mfvAnalysisCutsPreSel = process.mfvAnalysisCuts.clone(apply_vertex_cuts 
 process.pEventPreSel = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvEventHistosPreSel)
 
 nm1s = [
-    ('Njets',      ('', 'min_njets = 0')),
-    ('Ht',         ('', 'min_ht = 0')),
+    ('Njets',      ('', 'apply_presel = 0, min_ht = 1200, min_njets = 0')),
+    ('Ht',         ('', 'apply_presel = 0, min_njets = 4, min_ht = 0')),
     ('Ntracks',    'min_ntracks = 0'),
     ('Bsbs2ddist', 'min_bsbs2ddist = 0'),
     ('Geo2ddist',  'max_geo2ddist = 1e9'),
