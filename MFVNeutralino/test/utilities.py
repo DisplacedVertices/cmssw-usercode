@@ -94,7 +94,7 @@ def cmd_merge_background():
     permissive = bool_from_argv('permissive')
     for year_s, scale in ('_2017', -AnalysisConstants.int_lumi_2017 * AnalysisConstants.scale_factor_2017),:
         files = ['ttbar']
-        files += ['qcdht%04i' % x for x in [500, 700, 1000, 1500, 2000]]
+        files += ['qcdht%04i' % x for x in [700, 1000, 1500, 2000]]
         files = ['%s%s.root' % (x, year_s) for x in files]
         files2 = []
         for fn in files:
