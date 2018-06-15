@@ -1456,6 +1456,8 @@ def plot_dir(x='', make=False):
     d = None
     if 'fnal.gov' in hostname and username == 'tucker':
         d = '/publicweb/t/tucker/asdf/plots'
+    if 'fnal.gov' in hostname and username == 'dquach':
+        d = '/publicweb/d/dquach/plots'
     if d:
         x = os.path.join(d,x)
     else:
