@@ -24,7 +24,7 @@ private:
   const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
   const edm::EDGetTokenT<pat::PackedCandidateCollection> packed_candidate_token;
   const double max_closest_cd_dist;
-  const bool prints;
+  const int prints;
 
   TH1F* h_nseed;
   TH1F* h_nmatch;
@@ -167,10 +167,10 @@ MFVPackedCandidates::track_ex::track_ex(const reco::BeamSpot& bs_, const reco::V
 MFVPackedCandidates::MFVPackedCandidates(const edm::ParameterSet& cfg)
   : beamspot_token(consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"))),
     primary_vertices_token(consumes<reco::VertexCollection>(edm::InputTag("goodOfflinePrimaryVertices"))),
-    tracks_token(consumes<reco::TrackCollection>(edm::InputTag("generalTracks"))),
+    tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("tracks_src"))),
     packed_candidate_token(consumes<pat::PackedCandidateCollection>(edm::InputTag("packedPFCandidates"))),
     max_closest_cd_dist(cfg.getParameter<double>("max_closest_cd_dist")),
-    prints(cfg.getParameter<bool>("prints")),
+    prints(cfg.getParameter<int>("prints")),
     h_all("all"),
     h_highpurity("highpurity"),
     h_seed("seed"),
@@ -235,6 +235,13 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
     if (te.highpurity)
       h_highpurity.Fill(tk, &*beamspot, pv);
 
+    if (prints > 1) {
+      printf("all tk #%4lu: pt %10.4g +- %10.4g eta %10.4g +- %10.4g phi %10.4g +- %10.4g dxy %10.4g +- %10.4g dz %10.4g +- %10.4g\n",
+             itk, tk.pt(), tk.ptError(), tk.eta(), tk.etaError(), tk.phi(), tk.phiError(), tk.dxy(), tk.dxyError(), tk.dz(), tk.dzError());
+      printf("  # px hits: %2i layers: %2i st hits: %2i layers: %2i   dxybs: %10.4g  sigmadxybs: %10.4g\n",
+             te.npxhits, te.npxlayers, te.nsthits, te.nstlayers, te.dxybs, te.sigmadxybs);
+    }
+
     if (te.pass) {
       ++nseed;
 
@@ -242,7 +249,9 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
       if (te.highpurity)
         h_seed_highpurity.Fill(tk, &*beamspot, pv);
 
-      if (prints) {
+      if (prints > 1)
+        printf("pass!\n");
+      else {
         printf("tk #%4lu: pt %10.4g +- %10.4g eta %10.4g +- %10.4g phi %10.4g +- %10.4g dxy %10.4g +- %10.4g dz %10.4g +- %10.4g\n",
                itk, tk.pt(), tk.ptError(), tk.eta(), tk.etaError(), tk.phi(), tk.phiError(), tk.dxy(), tk.dxyError(), tk.dz(), tk.dzError());
         printf("  # px hits: %2i layers: %2i st hits: %2i layers: %2i   dxybs: %10.4g  sigmadxybs: %10.4g\n",
@@ -255,7 +264,7 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
       double closest_cd_notk_dist = 100;
       for (size_t icd = 0, icde = packed_candidates->size(); icd < icde; ++icd) {
         const pat::PackedCandidate& cd = (*packed_candidates)[icd];
-        if (cd.charge()) {
+        if (cd.charge() && cd.hasTrackDetails()) {
           const reco::Track& cd_tk = cd.pseudoTrack();
           const double dist = reco::deltaR(tk, cd_tk);
           if (dist < closest_cd_dist) {
