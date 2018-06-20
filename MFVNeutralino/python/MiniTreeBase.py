@@ -58,8 +58,8 @@ def duplicate_check(fn):
             print 'DUPLICATES!', fn
             pprint(dups)
 
-bkg_samples = Samples.ttbar_samples + Samples.qcd_samples_sum
-data_samples = Samples.data_samples
+bkg_samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017
+data_samples = Samples.data_samples_2017
 #sig_samples = [] #Samples.mfv_neu_tau00100um_M0400, Samples.mfv_neu_tau00300um_M0400, Samples.mfv_neu_tau01000um_M0400, Samples.mfv_neu_tau10000um_M0400]
 
 class FitResult:
@@ -89,3 +89,14 @@ def make_h(fn, name):
         h.Fill(d)
     return h
 
+def dump_rle(fn, min_ntracks=5):
+    f,t = get_f_t(fn, min_ntracks)
+    for rle in sorted(detree(t)):
+        print '%i %i %i' % rle
+
+if __name__ == '__main__':
+    cmd = sys.argv[1]
+    if cmd == 'dump_rle':
+        dump_rle(sys.argv[2])
+    else:
+        sys.exit('no cmd %s' % cmd)
