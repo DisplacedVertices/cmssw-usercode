@@ -20,15 +20,14 @@ private:
 
   const bool use_mevent;
 
-  const bool require_bquarks;
+  const int apply_presel;
 
+  const bool require_bquarks;
   const int l1_bit;
   const int trigger_bit;
   const int apply_trigger;
   const bool apply_cleaning_filters;
   const double min_hlt_ht4mc;
-
-  const int apply_presel;
   const int min_npv;
   const int max_npv;
   const double min_npu;
@@ -79,13 +78,13 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     mevent_token(consumes<MFVEvent>(mevent_src)),
     vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     use_mevent(mevent_src.label() != ""),
+    apply_presel(cfg.getParameter<int>("apply_presel")),
     require_bquarks(cfg.getParameter<bool>("require_bquarks")),
-    l1_bit(cfg.getParameter<int>("l1_bit")),
-    trigger_bit(cfg.getParameter<int>("trigger_bit")),
-    apply_trigger(cfg.getParameter<int>("apply_trigger")),
+    l1_bit(apply_presel ? -1 : cfg.getParameter<int>("l1_bit")),
+    trigger_bit(apply_presel ? -1 : cfg.getParameter<int>("trigger_bit")),
+    apply_trigger(apply_presel ? 0 : cfg.getParameter<int>("apply_trigger")),
     apply_cleaning_filters(cfg.getParameter<bool>("apply_cleaning_filters")),
     min_hlt_ht4mc(cfg.getParameter<double>("min_hlt_ht4mc")),
-    apply_presel(cfg.getParameter<int>("apply_presel")),
     min_npv(cfg.getParameter<int>("min_npv")),
     max_npv(cfg.getParameter<int>("max_npv")),
     min_npu(cfg.getParameter<double>("min_npu")),
@@ -151,6 +150,22 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
   if (use_mevent) {
     event.getByToken(mevent_token, mevent);
 
+    if (apply_presel == 1 && (!mevent->pass_hlt(mfv::b_HLT_PFHT1050) || mevent->jet_ht(40) < 1200 || mevent->njets(20) < 4))
+      return false;
+
+    if (apply_presel == 2) {
+      if (!mevent->pass_hlt(mfv::b_HLT_Ele35_WPTight_Gsf) && !mevent->pass_hlt(mfv::b_HLT_IsoMu27))
+        return false;
+
+      // JMTBAD match to lepton that triggered
+      // JMTBAD real turnon value
+      if (mevent->pass_hlt(mfv::b_HLT_Ele35_WPTight_Gsf) && mevent->first_lep_pass(MFVEvent::lep_el).Pt() < 35)
+        return false;
+
+      if (mevent->pass_hlt(mfv::b_HLT_IsoMu27) && mevent->first_lep_pass(MFVEvent::lep_mu).Pt() < 27)
+        return false;
+    }
+
     if (require_bquarks && mevent->gen_flavor_code != 2)
       return false;
 
@@ -168,22 +183,6 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
 
     if (mevent->hlt_ht4mc < min_hlt_ht4mc)  // JMTBAD should handle hlt_ht4mc versus hlt_ht
       return false;
-
-    if (apply_presel == 1 && (!mevent->pass_hlt(mfv::b_HLT_PFHT1050) || mevent->jet_ht(40) < 1200 || mevent->njets(20) < 4))
-      return false;
-
-    if (apply_presel == 2) {
-      if (!mevent->pass_hlt(mfv::b_HLT_Ele35_WPTight_Gsf) && !mevent->pass_hlt(mfv::b_HLT_IsoMu27))
-        return false;
-
-      // JMTBAD match to lepton that triggered
-      // JMTBAD real turnon value
-      if (mevent->pass_hlt(mfv::b_HLT_Ele35_WPTight_Gsf) && mevent->first_lep_pass(MFVEvent::lep_el).Pt() < 35)
-        return false;
-
-      if (mevent->pass_hlt(mfv::b_HLT_IsoMu27) && mevent->first_lep_pass(MFVEvent::lep_mu).Pt() < 27)
-        return false;
-    }
 
     if (mevent->npv < min_npv || mevent->npv > max_npv)
       return false;
