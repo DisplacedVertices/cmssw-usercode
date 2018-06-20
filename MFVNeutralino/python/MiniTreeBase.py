@@ -97,6 +97,7 @@ def dump_rle(fn, min_ntracks=5):
 if __name__ == '__main__':
     cmd = sys.argv[1]
     if cmd == 'dump_rle':
-        dump_rle(sys.argv[2])
+        ntk = 5 if len(sys.argv) == 3 else int(sys.argv[3])
+        dump_rle(sys.argv[2], ntk)
     else:
         sys.exit('no cmd %s' % cmd)
