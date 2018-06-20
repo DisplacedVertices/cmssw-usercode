@@ -74,6 +74,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_pvsumpt2;
 
   TH1F* h_njets;
+  TH1F* h_njets20;
   TH1F* h_njetsnopu[3];
   TH1F* h_jetpt1;
   TH1F* h_jetpt2;
@@ -213,6 +214,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   const char* lmt_ex[3] = {"loose", "medium", "tight"};
 
   h_njets = fs->make<TH1F>("h_njets", ";# of jets;events", 20, 0, 20);
+  h_njets20 = fs->make<TH1F>("h_njets20", ";# of jets w. p_{T} > 20 GeV;events", 20, 0, 20);
   for (int i = 0; i < 3; ++i)
     h_njetsnopu[i] = fs->make<TH1F>(TString::Format("h_njetsnopu_%s", lmt_ex[i]), TString::Format(";# of jets (%s PU id);events", lmt_ex[i]), 20, 0, 20);
   h_jetpt1 = fs->make<TH1F>("h_jetpt1", ";p_{T} of 1st jet (GeV);events/10 GeV", 100, 0, 1000);
@@ -376,6 +378,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_pvrho->Fill(mevent->pv_rho(), w);
 
   h_njets->Fill(mevent->njets(), w);
+  h_njets20->Fill(mevent->njets(20), w);
   for (int i = 0; i < 3; ++i)
     h_njetsnopu[i]->Fill(mevent->njetsnopu(i), w);
   h_jetpt1->Fill(mevent->njets() >= 1 ? mevent->jet_pt[0] : 0.f, w);

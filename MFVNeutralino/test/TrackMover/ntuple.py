@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+raise NotImplementedError("need to update for 2017 + check that jet cut without pt < 20 GeV isn't affecting anything")
+
 import sys
 from JMTucker.Tools.general import named_product, typed_from_argv
 from JMTucker.Tools.MiniAOD_cfg import *

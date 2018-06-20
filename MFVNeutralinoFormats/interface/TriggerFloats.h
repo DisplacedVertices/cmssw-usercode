@@ -21,6 +21,8 @@ namespace mfv {
     std::vector<TLorentzVector> jets;
     std::vector<float> jetmuef;
     int njets() const { return jets.size(); }
+    int njets(float min_jet_pt) const { return std::count_if(jets.begin(), jets.end(),
+                                                             [min_jet_pt](const auto& p4) { return p4.Pt() > min_jet_pt; }); }
     float jetpt1() const { return njets() >= 1 ? jets[0].Pt() : -1; }
     float jetpt2() const { return njets() >= 2 ? jets[1].Pt() : -1; }
     float htall;

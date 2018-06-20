@@ -212,6 +212,9 @@ struct MFVEvent {
   }
     
   int njets() const { return int(jet_id.size()); }
+  int njets(float min_jet_pt) const { return std::count_if(jet_pt.begin(), jet_pt.end(),
+                                                           [min_jet_pt](float b) { return b > min_jet_pt; }); }
+
   float jetpt4() const { return njets() >= 4 ? jet_pt[3] : 0.f; }
   float jetpt5() const { return njets() >= 5 ? jet_pt[4] : 0.f; }
   float jetpt6() const { return njets() >= 6 ? jet_pt[5] : 0.f; }

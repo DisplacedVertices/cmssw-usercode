@@ -289,10 +289,10 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
       return;
   }
 
-  if ((require_4jets && triggerfloats->njets() < 4) ||
-      (require_6jets && triggerfloats->njets() < 6) ||
-      (require_4thjetpt > 0 && (triggerfloats->njets() < 4 || triggerfloats->jets[3].Pt() < require_4thjetpt)) || 
-      (require_6thjetpt > 0 && (triggerfloats->njets() < 6 || triggerfloats->jets[5].Pt() < require_6thjetpt)) ||
+  if ((require_4jets && triggerfloats->njets(20) < 4) ||
+      (require_6jets && triggerfloats->njets(20) < 6) ||
+      (require_4thjetpt > 0 && (triggerfloats->njets(20) < 4 || triggerfloats->jets[3].Pt() < require_4thjetpt)) || 
+      (require_6thjetpt > 0 && (triggerfloats->njets(20) < 6 || triggerfloats->jets[5].Pt() < require_6thjetpt)) ||
       (require_ht > 0 && triggerfloats->ht < require_ht))
     return;
 
@@ -310,10 +310,10 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
     }
   }
 
-  h_njets->Fill(triggerfloats->njets(), w);
+  h_njets->Fill(triggerfloats->njets(20), w);
   h_jet_ht_all->Fill(triggerfloats->htall, w);
   h_jet_ht->Fill(triggerfloats->ht, w);
-  h_njets_v_ht->Fill(triggerfloats->ht, triggerfloats->njets(), w);
+  h_njets_v_ht->Fill(triggerfloats->ht, triggerfloats->njets(20), w);
   h_myhtt_m_l1htt->Fill(triggerfloats->myhtt - triggerfloats->l1htt);
   h_myhttwbug_m_l1htt->Fill(triggerfloats->myhttwbug - triggerfloats->l1htt);
   h_jetpt2v1->Fill(triggerfloats->jetpt1(), triggerfloats->jetpt2(), w);

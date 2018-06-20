@@ -169,7 +169,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (mevent->hlt_ht4mc < min_hlt_ht4mc)  // JMTBAD should handle hlt_ht4mc versus hlt_ht
       return false;
 
-    if (apply_presel == 1 && (!mevent->pass_hlt(mfv::b_HLT_PFHT1050) || mevent->jet_ht(40) < 1200 || mevent->njets() < 4))
+    if (apply_presel == 1 && (!mevent->pass_hlt(mfv::b_HLT_PFHT1050) || mevent->jet_ht(40) < 1200 || mevent->njets(20) < 4))
       return false;
 
     if (apply_presel == 2) {
@@ -200,7 +200,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (mevent->nlep(true) < min_nselleptons)
       return false;
 
-    if (mevent->njets() < min_njets || mevent->njets() > max_njets)
+    if (mevent->njets(20) < min_njets || mevent->njets(20) > max_njets)
       return false;
 
     if ((min_4th_jet_pt > 0 && mevent->jetpt4() < min_4th_jet_pt) ||

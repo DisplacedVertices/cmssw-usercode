@@ -84,7 +84,7 @@ bool MFVTriggerFloatsFilter::filter(edm::Event& event, const edm::EventSetup&) {
   if (ht_cut > 0 && triggerfloats->ht < ht_cut)
     return false;
 
-  if (min_njets > 0 && triggerfloats->njets() < min_njets)
+  if (min_njets > 0 && triggerfloats->njets(20) < min_njets)
     return false;
 
   if (myhtt_m_l1htt_cut > 0 && fabs(triggerfloats->myhtt - triggerfloats->l1htt) < myhtt_m_l1htt_cut)

@@ -31,6 +31,7 @@ class MFVJetEnergyHistos : public edm::EDAnalyzer {
   TH1F* h_w;
 
   TH1F* h_njets;
+  TH1F* h_njets20;
   TH1F* h_jet_ht;
   TH1F* h_jet_ht_40;
 
@@ -64,6 +65,7 @@ MFVJetEnergyHistos::MFVJetEnergyHistos(const edm::ParameterSet& cfg)
   h_w = fs->make<TH1F>("h_w", ";event weight;events/0.1", 100, 0, 10);
 
   h_njets = fs->make<TH1F>("h_njets", ";# of jets;events", 20, 0, 20);
+  h_njets20 = fs->make<TH1F>("h_njets20", ";# of jets with p_{T} > 20 GeV;events", 20, 0, 20);
   h_jet_ht = fs->make<TH1F>("h_jet_ht", ";H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
   h_jet_ht_40 = fs->make<TH1F>("h_jet_ht_40", ";H_{T} of jets with p_{T} > 40 GeV;events/25 GeV", 200, 0, 5000);
 
@@ -105,6 +107,7 @@ void MFVJetEnergyHistos::analyze(const edm::Event& event, const edm::EventSetup&
   h_w->Fill(w);
 
   h_njets->Fill(mevent->njets(), w);
+  h_njets20->Fill(mevent->njets(20), w);
   h_jet_ht->Fill(mevent->jet_ht(), w);
   h_jet_ht_40->Fill(mevent->jet_ht(40), w);
   if (mevent->jet_ht(40) > 1000) h_jet_ht_40_1000cut->Fill(mevent->jet_ht(40), w); 

@@ -1,3 +1,5 @@
+raise NotImplementedError("need to update for 2017 + check that jet cut without pt < 20 GeV isn't affecting anything")
+
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 dataset = 'ntuplev16p1'

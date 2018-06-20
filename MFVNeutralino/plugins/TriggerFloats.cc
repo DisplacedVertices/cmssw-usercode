@@ -333,7 +333,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
     }
 
   if (prints)
-    printf("# all jets: %lu  selected: %i  jetpt1: %f  2: %f  ht: %f\n", jets->size(), floats->njets(), floats->jetpt1(), floats->jetpt2(), floats->ht);
+    printf("# all jets: %lu  selected: %i (>20GeV: %i) jetpt1: %f  2: %f  ht: %f\n", jets->size(), floats->njets(), floats->njets(20), floats->jetpt1(), floats->jetpt2(), floats->ht);
 
   event.put(std::move(floats));
 }
