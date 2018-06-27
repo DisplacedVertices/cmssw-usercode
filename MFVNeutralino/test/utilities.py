@@ -103,7 +103,10 @@ def cmd_merge_background():
     permissive = bool_from_argv('permissive')
     for is2015_s, scale in ('', -AnalysisConstants.int_lumi_2016 * AnalysisConstants.scale_factor_2016), ('_2015', -AnalysisConstants.int_lumi_2015 * AnalysisConstants.scale_factor_2015):
         files = ['ttbar.root']
-        files += ['qcdht%04isum.root' % x for x in [500, 700, 1000, 1500, 2000]]
+        files += ['qcdht%04iext.root' % x for x in [500, 700, 1000, 1500, 2000]]
+	files += ['dyjetstollM%02i.root' % x for x in [10, 50]]
+	files += ['wjetstolnu.root']
+	files += ['qcdmupt15.root']
         if is2015_s:
             files = [fn.replace('.root', '_2015.root') for fn in files]
         files2 = []

@@ -28,18 +28,6 @@ process.mfvEventHistosPreSel = process.mfvEventHistos.clone()
 process.mfvAnalysisCutsPreSel = process.mfvAnalysisCuts.clone(min_njets = 0, min_ht = 0, apply_vertex_cuts = False)
 process.pEventPreSel = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvEventHistosPreSel)
 
-# Make histograms containing lepton triggers
-process.mfvEventHistMu15PFHT600 = process.mfvEventHistos.clone()
-process.mfvMu15PFHT600Cuts = process.mfvAnalysisCuts.clone(trigger_bit=cms.vint32(1, 2, 3, 4, 5), min_njets = 0, min_ht = 0, apply_vertex_cuts = False)
-process.pMu15PFHT600TriggerSel = cms.Path(common * process.mfvMu15PFHT600Cuts * process.mfvEventHistMu15PFHT600)
-
-process.mfvEventHistEle15PFHT600 = process.mfvEventHistos.clone()
-process.mfvEle15PFHT600Cuts = process.mfvAnalysisCuts.clone(trigger_bit=cms.vint32(1, 2, 3, 4, 6), min_njets = 0, min_ht = 0, apply_vertex_cuts = False)
-process.pEle15PFHT600TriggerSel = cms.Path(common * process.mfvEle15PFHT600Cuts * process.mfvEventHistEle15PFHT600)
-
-process.mfvEventHistMu50 = process.mfvEventHistos.clone()
-process.mfvMu50Cuts = process.mfvAnalysisCuts.clone(trigger_bit=cms.vint32(1, 2, 3, 4, 7), min_njets = 0, min_ht = 0, apply_vertex_cuts = False)
-process.pMu50TriggerSel = cms.Path(common * (process.mfvMu50Cuts * process.mfvEventHistMu50))
 
 nm1s = [
     ('Njets',      ('', 'min_njets = 0')),

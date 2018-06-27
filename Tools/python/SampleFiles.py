@@ -1279,7 +1279,73 @@ _add_ds("ntuplev15_evFilterOff_lowPrescaleLeptonTriggers", {
 'qcdht2000': _fromnum1("/store/user/shogan/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_evFilterOff_actual_lowPrescaleLeptonTriggers_2016/170808_024604", 131),
 'qcdht2000ext': _fromnum1("/store/user/shogan/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_evFilterOff_actual_lowPrescaleLeptonTriggers_2016/170808_030241", 265),
 'ttbar': (62, ['/store/user/shogan/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/NtupleV15_evFilterOff_actual_lowPrescaleLeptonTriggers_2016/170808_024323/0000/ntuple_%i.root' % i for i in chain(xrange(5,9), xrange(10,17), xrange(20,25), xrange(26,29), xrange(32,36), xrange(37,44), xrange(49,51), xrange(63,79), xrange(80,83), xrange(87,89), [1, 3, 18, 30, 52, 54, 56, 58, 84])]),
+'dyjetstollM10': (291, ['/store/user/shogan/DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NtupleV15_leptonTrigs_May2018_take2_2016/180530_190419/0000/ntuple_%i.root' % i for i in chain(xrange(1,39), xrange(40,209), xrange(210,227), xrange(228,295))]),
+'dyjetstollM50': (276, ['/store/user/shogan/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NtupleV15_leptonTrigs_May2018_take2_2016/180530_190455/0000/ntuple_%i.root' % i for i in chain(xrange(1,144), xrange(145,278))]),
+'wjetstolnu': (208, ['/store/user/shogan/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NtupleV15_leptonTrigs_May2018_take2_2016/180530_190344/0000/ntuple_%i.root' % i for i in chain(xrange(1,74), xrange(75,118), xrange(119,121), xrange(122,212))]),
 })
+
+_add_ds("ntuplev15_Mu50_Ele27WPTight", {
+'my_mfv_neu_tau00300um_M0800': _fromnum0("/store/user/shogan/mfv_neu_tau00300um_M0800/NtupleV15_leptonTrigs_May2018_take3_2016/180604_092309", 17),
+'mfv_neu_tau00100um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV15_leptonTrigs_May2018_take3_2016/180601_155926", 294),
+'mfv_neu_tau00100um_M0400': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV15_leptonTrigs_May2018_take3_2016/180601_160144", 216),
+'mfv_neu_tau00100um_M0600': _fromnum0("/store/user/shogan/mfv_neu_tau00100um_M0600/NtupleV15_leptonTrigs_May2018_take3_2016/180601_110908", 20),
+'mfv_neu_tau00100um_M0800': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV15_leptonTrigs_May2018_take3_2016/180601_160409", 283),
+'mfv_neu_tau00100um_M1200': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV15_leptonTrigs_May2018_take3_2016/180601_160629", 215),
+'mfv_neu_tau00100um_M1600': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV15_leptonTrigs_May2018_take3_2016/180601_160834", 250),
+'mfv_neu_tau00100um_M3000': _fromnum0("/store/user/shogan/mfv_neu_tau00100um_M3000/NtupleV15_leptonTrigs_May2018_take3_2016/180601_110918", 20),
+'mfv_neu_tau00300um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV15_leptonTrigs_May2018_take3_2016/180601_160000", 266),
+'mfv_neu_tau00300um_M0400': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV15_leptonTrigs_May2018_take3_2016/180601_160215", 250),
+'mfv_neu_tau00300um_M0600': _fromnum0("/store/user/shogan/mfv_neu_tau00300um_M0600/NtupleV15_leptonTrigs_May2018_take3_2016/180601_110909", 40),
+'mfv_neu_tau00300um_M0800': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV15_leptonTrigs_May2018_take3_2016/180601_160448", 277),
+'mfv_neu_tau00300um_M1200': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV15_leptonTrigs_May2018_take3_2016/180601_160701", 233),
+'mfv_neu_tau00300um_M1600': _fromnum0("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV15_leptonTrigs_May2018_take3_2016/180601_110916", 35),
+'mfv_neu_tau00300um_M3000': _fromnum0("/store/user/shogan/mfv_neu_tau00300um_M3000/NtupleV15_leptonTrigs_May2018_take3_2016/180601_110919", 20),
+'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_leptonTrigs_May2018_take3_2016/180601_160035", 241),
+'mfv_neu_tau01000um_M0400': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_leptonTrigs_May2018_take3_2016/180601_160248", 233),
+'mfv_neu_tau01000um_M0600': _fromnum0("/store/user/shogan/mfv_neu_tau01000um_M0600/NtupleV15_leptonTrigs_May2018_take3_2016/180601_110910", 40),
+'mfv_neu_tau01000um_M0800': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_leptonTrigs_May2018_take3_2016/180601_160522", 223),
+'mfv_neu_tau01000um_M1200': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_leptonTrigs_May2018_take3_2016/180601_160732", 216),
+'mfv_neu_tau01000um_M1600': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_leptonTrigs_May2018_take3_2016/180601_160904", 211),
+'mfv_neu_tau01000um_M3000': _fromnum0("/store/user/shogan/mfv_neu_tau01000um_M3000/NtupleV15_leptonTrigs_May2018_take3_2016/180601_110920", 19),
+'mfv_neu_tau10000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_leptonTrigs_May2018_take3_2016/180601_160111", 285),
+'mfv_neu_tau10000um_M0400': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_leptonTrigs_May2018_take3_2016/180601_160323", 251),
+'mfv_neu_tau10000um_M0600': _fromnum0("/store/user/shogan/mfv_neu_tau10000um_M0600/NtupleV15_leptonTrigs_May2018_take3_2016/180601_110911", 20),
+'mfv_neu_tau10000um_M0800': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_leptonTrigs_May2018_take3_2016/180601_160555", 217),
+'mfv_neu_tau10000um_M1200': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_leptonTrigs_May2018_take3_2016/180601_160802", 227),
+'mfv_neu_tau10000um_M3000': _fromnum0("/store/user/shogan/mfv_neu_tau10000um_M3000/NtupleV15_leptonTrigs_May2018_take3_2016/180601_110921", 19),
+'mfv_neu_tau30000um_M0300': _fromnum0("/store/user/shogan/mfv_neu_tau30000um_M0300/NtupleV15_leptonTrigs_May2018_take3_2016/180601_110906", 20),
+'mfv_neu_tau30000um_M0400': _fromnum0("/store/user/shogan/mfv_neu_tau30000um_M0400/NtupleV15_leptonTrigs_May2018_take3_2016/180601_110907", 20),
+'mfv_neu_tau30000um_M0600': _fromnum0("/store/user/shogan/mfv_neu_tau30000um_M0600/NtupleV15_leptonTrigs_May2018_take3_2016/180601_110912", 20),
+'mfv_neu_tau30000um_M0800': _fromnum0("/store/user/shogan/mfv_neu_tau30000um_M0800/NtupleV15_leptonTrigs_May2018_take3_2016/180601_110914", 20),
+'mfv_neu_tau30000um_M1200': _fromnum0("/store/user/shogan/mfv_neu_tau30000um_M1200/NtupleV15_leptonTrigs_May2018_take3_2016/180601_110915", 20),
+'mfv_neu_tau30000um_M3000': _fromnum0("/store/user/shogan/mfv_neu_tau30000um_M3000/NtupleV15_leptonTrigs_May2018_take3_2016/180601_110922", 20),
+
+# Background samples with lepton triggers
+'dyjetstollM10': (323, ['/store/user/shogan/DYJetsToLL_M-10to50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NtupleV15_leptonTrigs_June2018_bg_take3_2016/180613_142953/0000/ntuple_%i.root' % i for i in chain(xrange(1,48), xrange(49,239), xrange(240,326))]),
+'dyjetstollM50': _fromnum1("/store/user/shogan/DYJetsToLL_M-50_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NtupleV15_leptonTrigs_June2018_bg_take3_2016/180613_143022", 233),
+'qcdht0500': (36, ['/store/user/shogan/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_leptonTrigs_June2018_bg_take3_2016/180613_142357/0000/ntuple_%i.root' % i for i in chain(xrange(1,14), xrange(15,31), xrange(32,39))]),
+'qcdht0500ext': _fromnum1("/store/user/shogan/QCD_HT500to700_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_leptonTrigs_June2018_bg_take3_2016/180613_142620", 89),
+'qcdht0700': (1, ['/store/user/shogan/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_leptonTrigs_June2018_bg_take3_2016/180613_142424/0000/ntuple_33.root']),
+'qcdht0700ext': (56, ['/store/user/shogan/QCD_HT700to1000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_leptonTrigs_June2018_bg_take3_2016/180613_142648/0000/ntuple_%i.root' % i for i in chain(xrange(1,4), xrange(6,8), xrange(9,14), xrange(15,46), xrange(47,61), [62])]),
+'qcdht1000': _fromnum1("/store/user/shogan/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_leptonTrigs_June2018_bg_take3_2016/180613_142452", 254),
+'qcdht1000ext': _fromnum1("/store/user/shogan/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_leptonTrigs_June2018_bg_take3_2016/180613_142717", 542),
+'qcdht1500': _fromnum1("/store/user/shogan/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_leptonTrigs_June2018_bg_take3_2016/180613_142520", 269),
+'qcdht1500ext': _fromnum1("/store/user/shogan/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_leptonTrigs_June2018_bg_take3_2016/180613_142746", 533),
+'qcdht2000': _fromnum1("/store/user/shogan/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_leptonTrigs_June2018_bg_take3_2016/180613_142550", 131),
+'qcdht2000ext': _fromnum1("/store/user/shogan/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/NtupleV15_leptonTrigs_June2018_bg_take3_2016/180613_142814", 264),
+'qcdmupt15': _fromnum1("/store/user/shogan/QCD_Pt-20toInf_MuEnrichedPt15_TuneCUETP8M1_13TeV_pythia8/NtupleV15_leptonTrigs_June2018_bg_take3_2016/180613_143051", 177),
+'ttbar': (58, ['/store/user/shogan/TTJets_TuneCUETP8M2T4_13TeV-amcatnloFXFX-pythia8/NtupleV15_leptonTrigs_June2018_bg_take3_2016/180613_142848/0000/ntuple_%i.root' % i for i in chain(xrange(3,6), xrange(7,12), xrange(15,18), xrange(30,32), xrange(33,37), xrange(41,43), xrange(44,47), xrange(48,51), xrange(52,54), xrange(55,62), xrange(63,66), xrange(67,72), xrange(73,76), xrange(82,86), [1, 19, 23, 25, 28, 38, 77, 80, 88])]),
+'wjetstolnu': (193, ['/store/user/shogan/WJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8/NtupleV15_leptonTrigs_June2018_bg_take3_2016/180613_142920/0000/ntuple_%i.root' % i for i in chain(xrange(1,61), xrange(62,195))]),
+})
+
+_add_ds("ntuplev15_ht", {
+'mfv_neu_tau00100um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-100um_TuneCUETP8M1_13TeV-pythia8/NtupleV15_leptonTrigs_May2018_htCuts_M0300_take3_2016/180606_195438", 294),
+'mfv_neu_tau00300um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-300um_TuneCUETP8M1_13TeV-pythia8/NtupleV15_leptonTrigs_May2018_htCuts_M0300_take3_2016/180606_195505", 266),
+'mfv_neu_tau01000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_leptonTrigs_May2018_htCuts_M0300_take3_2016/180606_195537", 241),
+'mfv_neu_tau10000um_M0300': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-10mm_TuneCUETP8M1_13TeV-pythia8/NtupleV15_leptonTrigs_May2018_htCuts_M0300_take3_2016/180606_195609", 285),
+'mfv_neu_tau30000um_M0300': _fromnum0("/store/user/shogan/mfv_neu_tau30000um_M0300/NtupleV15_leptonTrigs_May2018_htCuts_M0300_take3_2016/180606_145611", 20),
+})
+
 
 
 __all__ = [
