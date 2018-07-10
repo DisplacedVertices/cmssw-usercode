@@ -1,7 +1,7 @@
 import sys, os
 from JMTucker.Tools.ROOTTools import *
 
-path = plot_dir('pretty_efficiency_final_omg', make=True)
+path = plot_dir('pretty_efficiency', make=True)
 
 ts = tdr_style()
 ROOT.gStyle.SetPalette(ROOT.kBird) #kColorPrintableOnGrey
@@ -19,11 +19,11 @@ def write(font, size, x, y, text):
 f = ROOT.TFile('signal_efficiency.root')
 
 for kind in 'mfv_stopdbardbar', 'mfv_neu':
-    c = ROOT.TCanvas('c', '', 800, 800)
+    c = ROOT.TCanvas('c', '', 848, 800)
     c.SetTopMargin(0.1)
     c.SetBottomMargin(0.12)
-    c.SetLeftMargin(0.11)
-    c.SetRightMargin(0.18)
+    c.SetLeftMargin(0.13)
+    c.SetRightMargin(0.20)
     h = f.Get('signal_efficiency_%s' % kind)
     xax = h.GetXaxis()
     if 'neu' in kind:
@@ -45,7 +45,7 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
 #    xax.LabelsOption('h')
     yax = h.GetYaxis()
     yax.SetTitle('c#tau (mm)')
-    yax.SetTitleOffset(1.105)
+    yax.SetTitleOffset(1.13)
     yax.SetTitleSize(0.05)
     yax.SetLabelSize(0.045)
     yax.SetRangeUser(0.1, 100.)
@@ -67,9 +67,9 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
 #    h.SetMarkerColor(ROOT.kWhite)
 #    h.Draw('colz text')
     h.Draw('colz')
-    cms = write(61, 0.050, 0.109, 0.913, 'CMS')
-    sim = write(52, 0.040, 0.222, 0.912, 'Simulation')
-    lum = write(42, 0.050, 0.676, 0.913, '(13 TeV)')
+    cms = write(61, 0.050, 0.129, 0.913, 'CMS')
+    sim = write(52, 0.040, 0.234, 0.912, 'Simulation')
+    lum = write(42, 0.050, 0.682, 0.913, '(13 TeV)')
     for ext in 'pdf', 'png', 'root':
         c.SaveAs(os.path.join(path, 'scan_eff_%s.%s' % (kind, ext)))
     pre = write(52, 0.040, 0.406, 0.912, 'Preliminary')
