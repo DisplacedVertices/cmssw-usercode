@@ -69,7 +69,7 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
     h.Draw('colz')
     cms = write(61, 0.050, 0.129, 0.913, 'CMS')
     sim = write(52, 0.040, 0.234, 0.912, 'Simulation')
-    lum = write(42, 0.050, 0.682, 0.913, '(13 TeV)')
+    lum = write(42, 0.050, 0.636, 0.913, '(13 TeV)')
     for ext in 'pdf', 'png', 'root':
         c.SaveAs(os.path.join(path, 'scan_eff_%s.%s' % (kind, ext)))
     pre = write(52, 0.040, 0.406, 0.912, 'Preliminary')
