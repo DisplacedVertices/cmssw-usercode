@@ -34,7 +34,7 @@ def fmt(z, title, color, style, save=[]):
     h.GetXaxis().SetLabelSize(0.045)
     h.GetYaxis().SetTitleSize(0.05)
     h.GetYaxis().SetLabelSize(0.045)
-    h.GetYaxis().SetTitleOffset(1.1)
+    h.GetYaxis().SetTitleOffset(1.15)
     move_above_into_bin(h, 3.999)
     if title != 'bkg':
         norm = combiner.combine(name2isample(combiner.inputs[0].f, name)).total_sig_1v

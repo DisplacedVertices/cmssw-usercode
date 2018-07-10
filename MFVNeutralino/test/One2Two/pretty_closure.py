@@ -31,7 +31,7 @@ for i in range(4):
     h.GetXaxis().SetLabelSize(0.045)
     h.GetYaxis().SetTitleSize(0.05)
     h.GetYaxis().SetLabelSize(0.045)
-    h.GetYaxis().SetTitleOffset(1.1)
+    h.GetYaxis().SetTitleOffset(1.15)
     h.GetYaxis().SetRangeUser(0,ymax[i])
     h.SetStats(0)
     h.SetLineColor(ROOT.kBlue)
