@@ -38,7 +38,7 @@ def fmt(z, title, color, style, save=[]):
     h.GetXaxis().SetLabelSize(0.045)
     h.GetYaxis().SetTitleSize(0.05)
     h.GetYaxis().SetLabelSize(0.045)
-    h.GetYaxis().SetTitleOffset(1.3)
+    h.GetYaxis().SetTitleOffset(1.35)
     move_above_into_bin(h, 3.999)
     if title == 'bkg': 
         norm = 1.
@@ -107,7 +107,7 @@ boxes = [
     ROOT.TBox(boxx1, boxy1, boxx2, boxy2), # this does the break in the left x-axis
     ROOT.TBox(boxx21,boxy1, boxx22,boxy2), # ditto right x-axis
     ROOT.TBox(lastbin-0.02,boxy1,lastbin+0.02,boxy2), # wipes the part of the curve
-    ROOT.TBox(-0.3, 0.95, -0.01, 1.05) # this wipes the end "1" label
+    ROOT.TBox(-0.3, 0.95, -0.018, 1.05) # this wipes the end "1" label
     ]
 for box in boxes:
     box.SetLineColor(ROOT.kWhite)
@@ -115,7 +115,7 @@ for box in boxes:
     box.Draw()
 
 # draw the new end label
-lab2 = ROOT.TText(-0.402, 0.982, '18.2')
+lab2 = ROOT.TText(-0.408, 0.982, '18.2')
 lab2.SetTextFont(yax.GetLabelFont())
 lab2.SetTextSize(yax.GetLabelSize())
 lab2.Draw()
