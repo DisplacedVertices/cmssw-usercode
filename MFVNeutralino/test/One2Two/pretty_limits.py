@@ -4,7 +4,7 @@ from JMTucker.Tools.ROOTTools import *
 
 draw_pm1sigma_excl = False
 
-path = plot_dir('pretty_limits_whereami', make=True)
+path = plot_dir('pretty_limits', make=True)
 
 ts = tdr_style()
 ROOT.gStyle.SetPalette(ROOT.kBird)
@@ -35,11 +35,11 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
             ROOT.TColor.CreateGradientColorTable(n, stops, r, g, b, num_colors)
             ROOT.gStyle.SetNumberContours(num_colors)
 
-        c = ROOT.TCanvas('c', '', 900, 800)
+        c = ROOT.TCanvas('c', '', 954, 800)
         c.SetTopMargin(0.123)
         c.SetBottomMargin(0.12)
-        c.SetLeftMargin(0.11)
-        c.SetRightMargin(0.18)
+        c.SetLeftMargin(0.13)
+        c.SetRightMargin(0.20)
         c.SetLogz()
         h = f.Get('%s/observed' % kind)
         xax = h.GetXaxis()
@@ -156,7 +156,7 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
         palette = h.GetListOfFunctions().FindObject("palette")
         palette.SetY2NDC(0.932)
 
-        leg = ROOT.TLegend(0.10985, 0.877, 0.820, 0.932)
+        leg = ROOT.TLegend(0.13, 0.877, 0.80, 0.931)
         leg.SetTextFont(42)
         leg.SetTextSize(0.0362)
         leg.SetTextAlign(22)
@@ -199,14 +199,14 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
                 l.SetNDC(1)
                 l.Draw()
 
-        cms = write(61, 0.050, 0.109, 0.950, 'CMS')
-        lum = write(42, 0.050, 0.515, 0.950, '38.5 fb^{-1} (13 TeV)')
+        cms = write(61, 0.050, 0.129, 0.945, 'CMS')
+        lum = write(42, 0.050, 0.510, 0.945, '38.5 fb^{-1} (13 TeV)')
         fn = os.path.join(path, '%s_limit_%s' % (kind, xxx))
         c.SaveAs(fn + '.pdf')
         c.SaveAs(fn + '.png')
         c.SaveAs(fn + '.root')
 
-        pre = write(52, 0.047, 0.209, 0.950, 'Preliminary')
+        pre = write(52, 0.047, 0.229, 0.945, 'Preliminary')
         c.SaveAs(fn + '_prelim.pdf')
         c.SaveAs(fn + '_prelim.png')
         c.SaveAs(fn + '_prelim.root')
