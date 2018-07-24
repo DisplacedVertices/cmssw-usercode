@@ -51,7 +51,7 @@ for i in range(4):
     write(42, 0.040, 0.370, 0.750, names[i])
 
     l1 = ROOT.TLegend(0.35, 0.60, 0.85, 0.73)
-    l1.AddEntry(hh, 'Data', 'LPE')
+    l1.AddEntry(hh, 'Data', 'PE')
     l1.AddEntry(h, 'Background template')
     l1.SetBorderSize(0)
     l1.Draw()

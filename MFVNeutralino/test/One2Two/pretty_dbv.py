@@ -50,7 +50,7 @@ hbkg.SetLineWidth(3)
 
 leg = ROOT.TLegend(0.30, 0.60, 0.85, 0.80)
 leg.SetBorderSize(0)
-leg.AddEntry(hbkg, 'Data', 'LPE')
+leg.AddEntry(hbkg, 'Data', 'PE')
 leg.AddEntry(0, '#kern[-0.22]{Multijet signals, M = 800 GeV, #sigma = 1 fb:}', '')
 
 for zzz, (name, title, color, style) in enumerate(which):
