@@ -110,19 +110,30 @@ def check_consistency(h1, h2, log=True):
     return True
 
 def poisson_interval(nobs, alpha=(1-0.6827)/2, beta=(1-0.6827)/2):
-    lower = 0
     if nobs > 0:
-        lower = 0.5 * ROOT.Math.chisquared_quantile_c(1-alpha, 2*nobs)
-    elif nobs == 0:
-        beta *= 2
-    upper = 0.5 * ROOT.Math.chisquared_quantile_c(beta, 2*(nobs+1))
+        lower = ROOT.Math.gamma_quantile(alpha, nobs, 1)
+    else:
+        lower = 0.
+    upper = ROOT.Math.gamma_quantile_c(beta, nobs+1, 1)
     return lower, upper
 
 def poisson_intervalize(h, zero_x=False, include_zero_bins=False, rescales=None):
     bins = []
-    for i in xrange(1, h.GetNbinsX()+1):
+    nbins = h.GetNbinsX()
+    first, last = None, None
+    if include_zero_bins == 'surrounded':
+        for i in xrange(1, nbins+1):
+            has = h.GetBinContent(i) > 0
+            if first is None and has:
+                first = i
+            if has:
+                last = i
+    else:
+        first, last = 1, nbins
+
+    for i in xrange(1, nbins+1):
         y = h.GetBinContent(i)
-        if y > 0 or include_zero_bins:
+        if y > 0 or (include_zero_bins == 'surrounded' and first <= i <= last) or include_zero_bins == True:
             bins.append(i)
 
     h2 = ROOT.TGraphAsymmErrors(len(bins))
