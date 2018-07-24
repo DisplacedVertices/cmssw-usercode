@@ -48,7 +48,7 @@ hbkg.SetMarkerStyle(20)
 hbkg.SetMarkerSize(1.3)
 hbkg.SetLineWidth(3)
 
-leg = ROOT.TLegend(0.30, 0.65, 0.85, 0.85)
+leg = ROOT.TLegend(0.30, 0.60, 0.85, 0.80)
 leg.SetBorderSize(0)
 leg.AddEntry(hbkg, 'Data', 'LPE')
 leg.AddEntry(0, '#kern[-0.22]{Multijet signals, M = 800 GeV, #sigma = 1 fb:}', '')
@@ -76,7 +76,7 @@ def write(font, size, x, y, text):
     w.DrawLatex(x, y, text)
     return w
 
-write(61, 0.050, 0.109, 0.913, 'CMS')
+write(61, 0.050, 0.32, 0.82, 'CMS')
 write(42, 0.050, 0.560, 0.913, '38.5 fb^{-1} (13 TeV)')
 
 ps.c.SetBottomMargin(0.11)
@@ -84,6 +84,6 @@ ps.c.SetLeftMargin(0.11)
 
 ps.save('dbv')
 
-write(52, 0.047, 0.219, 0.913, 'Preliminary')
+write(52, 0.047, 0.43, 0.82, 'Preliminary')
 
 ps.save('dbv_prelim')

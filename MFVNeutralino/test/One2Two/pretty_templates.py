@@ -52,7 +52,7 @@ hbkg = fmt(f.Get('h_bkg_dvv'), 'bkg', ROOT.kBlack, ROOT.kSolid)
 hbkg.SetFillColor(ROOT.kGray)
 hbkg.SetFillStyle(3001)
 
-leg = ROOT.TLegend(0.30, 0.65, 0.85, 0.85)
+leg = ROOT.TLegend(0.35, 0.60, 0.90, 0.80)
 leg.SetBorderSize(0)
 leg.AddEntry(hbkg, 'Background template', 'LF')
 leg.AddEntry(0, '#kern[-0.22]{Multijet signals, M = 800 GeV, #sigma = 1 fb:}', '')
@@ -83,7 +83,7 @@ def write(font, size, x, y, text):
     w.DrawLatex(x, y, text)
     return w
 
-write(61, 0.050, 0.129, 0.913, 'CMS')
+write(61, 0.050, 0.37, 0.82, 'CMS')
 write(42, 0.050, 0.595, 0.913, '38.5 fb^{-1} (13 TeV)')
 
 # do broken y-axis. replace the "1" label with "18.2" and replace the
@@ -129,6 +129,6 @@ for line in lines:
 
 ps.save('templates')
 
-write(52, 0.047, 0.219, 0.913, 'Preliminary')
+write(52, 0.047, 0.48, 0.82, 'Preliminary')
 
 ps.save('templates_prelim')

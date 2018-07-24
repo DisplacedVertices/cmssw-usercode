@@ -44,14 +44,15 @@ for i in range(4):
     hh.SetMarkerSize(1.3)
     hh.Draw('PE')
 
-    l1 = ROOT.TLegend(0.35, 0.65, 0.85, 0.78)
+    write(42, 0.040, 0.370, 0.750, names[i])
+
+    l1 = ROOT.TLegend(0.35, 0.60, 0.85, 0.73)
     l1.AddEntry(hh, 'Data', 'LPE')
     l1.AddEntry(h, 'Background template')
     l1.SetBorderSize(0)
     l1.Draw()
 
-    write(42, 0.040, 0.370 , 0.80, names[i])
-    write(61, 0.050, 0.109, 0.913, 'CMS')
+    write(61, 0.050, 0.37, 0.81, 'CMS')
     write(42, 0.050, 0.560, 0.913, '38.5 fb^{-1} (13 TeV)')
 
     ps.c.SetBottomMargin(0.11)
@@ -71,5 +72,5 @@ for i in range(4):
     outfn = 'closure_%s' % ntk[i]
     ps.save(outfn)
 
-    write(52, 0.047, 0.219, 0.913, 'Preliminary')
+    write(52, 0.047, 0.48, 0.81, 'Preliminary')
     ps.save(outfn + '_prelim')

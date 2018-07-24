@@ -2,7 +2,7 @@ import sys, os
 from array import array
 from JMTucker.Tools.ROOTTools import *
 
-path = plot_dir('pretty_limits_1d_gaslit', make=True)
+path = plot_dir('pretty_limits_1d', make=True)
 
 ts = tdr_style()
 
@@ -147,13 +147,13 @@ for kind in kinds:
     observed.Draw('L')
 
     if versus_mass:
-        legx = 0.563, 0.866
+        legx = 0.564, 0.867
     elif versus_tau:
-        legx = 0.443, 0.786
+        legx = 0.444, 0.787
     if draw_theory:
-        leg = ROOT.TLegend(legx[0], 0.566, legx[1], 0.851)
+        leg = ROOT.TLegend(legx[0], 0.536, legx[1], 0.817)
     else:
-        leg = ROOT.TLegend(legx[0], 0.632, legx[1], 0.851)
+        leg = ROOT.TLegend(legx[0], 0.602, legx[1], 0.817)
 
     leg.SetTextFont(42)
     leg.SetFillColor(ROOT.kWhite)
@@ -168,14 +168,14 @@ for kind in kinds:
         leg.AddEntry(theory, nice_theory(kind), 'LF')
     leg.Draw()
 
-    cms = write(61, 0.050, 0.109, 0.913, 'CMS')
+    cms = write(61, 0.040, legx[0]+0.005, 0.835, 'CMS')
     lum = write(42, 0.050, 0.548, 0.913, '38.5 fb^{-1} (13 TeV)')
     fn = os.path.join(path, 'limit1d_' + kind)
     c.SaveAs(fn + '.pdf')
     c.SaveAs(fn + '.png')
     c.SaveAs(fn + '.root')
 
-    pre = write(52, 0.047, 0.219, 0.913, 'Preliminary')
+    pre = write(52, 0.037, legx[0]+0.095, 0.835, 'Preliminary')
     c.SaveAs(fn + '_prelim.pdf')
     c.SaveAs(fn + '_prelim.png')
     c.SaveAs(fn + '_prelim.root')
