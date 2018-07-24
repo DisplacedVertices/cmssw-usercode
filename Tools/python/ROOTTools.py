@@ -1861,10 +1861,11 @@ def ratios_plot(name,
         r.SetMarkerSize(0)
         r.SetLineWidth(h.GetLineWidth())
         r.SetLineColor(h.GetLineColor())
-        if are_hists:
-            x_range = h.GetXaxis().GetXmin(), h.GetXaxis().GetXmax()
-        elif are_graphs:
-            x_range = gg.GetXaxis().GetXmin(), gg.GetXaxis().GetXmax()
+        if not x_range:
+            if are_hists:
+                x_range = h.GetXaxis().GetXmin(), h.GetXaxis().GetXmax()
+            elif are_graphs:
+                x_range = gg.GetXaxis().GetXmin(), gg.GetXaxis().GetXmax()
         r.GetXaxis().SetLimits(*x_range)
         r.GetXaxis().SetTitleSize(res_x_title_size)
         r.GetXaxis().SetTitleOffset(res_x_title_offset)
