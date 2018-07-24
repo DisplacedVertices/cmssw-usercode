@@ -168,14 +168,14 @@ for kind in kinds:
         leg.AddEntry(theory, nice_theory(kind), 'LF')
     leg.Draw()
 
-    cms = write(61, 0.040, legx[0]+0.005, 0.835, 'CMS')
+    cms = write(61, 0.040, legx[0]+0.0093, 0.835, 'CMS')
     lum = write(42, 0.050, 0.548, 0.913, '38.5 fb^{-1} (13 TeV)')
     fn = os.path.join(path, 'limit1d_' + kind)
     c.SaveAs(fn + '.pdf')
     c.SaveAs(fn + '.png')
     c.SaveAs(fn + '.root')
 
-    pre = write(52, 0.037, legx[0]+0.095, 0.835, 'Preliminary')
+    pre = write(52, 0.037, legx[0]+0.0993, 0.835, 'Preliminary')
     c.SaveAs(fn + '_prelim.pdf')
     c.SaveAs(fn + '_prelim.png')
     c.SaveAs(fn + '_prelim.root')
