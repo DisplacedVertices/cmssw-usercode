@@ -5,6 +5,10 @@ ROOT.TH1.AddDirectory(0)
 set_style()
 ps = plot_saver(plot_dir('pretty_closure'), size=(700,700), log=False, pdf=True)
 
+ps.c.SetBottomMargin(0.11)
+ps.c.SetLeftMargin(0.13)
+ps.c.SetRightMargin(0.06)
+
 fns = [os.path.join('/uscms/home/jchu/public/EXO-17-018', fn) for fn in ['2v_from_jets_data_2015p6_3track_default_v15_v5.root', '2v_from_jets_data_2015p6_7track_default_v15_v5.root', '2v_from_jets_data_2015p6_4track_default_v15_v5.root', '2v_from_jets_data_2015p6_5track_default_v15_v5.root']]
 ntk = ['3track3track', '4track3track', '4track4track', '5track5track']
 names = ['3-track x 3-track', '4-track x 3-track', '4-track x 4-track', '#geq5-track x #geq5-track']
@@ -31,7 +35,7 @@ for i in range(4):
     h.GetXaxis().SetLabelSize(0.045)
     h.GetYaxis().SetTitleSize(0.05)
     h.GetYaxis().SetLabelSize(0.045)
-    h.GetYaxis().SetTitleOffset(1.15)
+    h.GetYaxis().SetTitleOffset(1.2)
     h.GetYaxis().SetRangeUser(0,ymax[i])
     h.SetStats(0)
     h.SetLineColor(ROOT.kBlue)
@@ -53,10 +57,8 @@ for i in range(4):
     l1.Draw()
 
     write(61, 0.050, 0.37, 0.81, 'CMS')
-    write(42, 0.050, 0.560, 0.913, '38.5 fb^{-1} (13 TeV)')
+    write(42, 0.050, 0.595, 0.913, '38.5 fb^{-1} (13 TeV)')
 
-    ps.c.SetBottomMargin(0.11)
-    ps.c.SetLeftMargin(0.11)
 
     lines = [
         ROOT.TLine(0.4, 0, 0.4, ymax[i]),

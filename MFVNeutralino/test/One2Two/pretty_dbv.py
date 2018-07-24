@@ -77,10 +77,11 @@ def write(font, size, x, y, text):
     return w
 
 write(61, 0.050, 0.32, 0.82, 'CMS')
-write(42, 0.050, 0.560, 0.913, '38.5 fb^{-1} (13 TeV)')
+write(42, 0.050, 0.595, 0.913, '38.5 fb^{-1} (13 TeV)')
 
 ps.c.SetBottomMargin(0.11)
-ps.c.SetLeftMargin(0.11)
+ps.c.SetLeftMargin(0.13)
+ps.c.SetRightMargin(0.06)
 
 ps.save('dbv')
 
