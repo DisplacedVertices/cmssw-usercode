@@ -1163,6 +1163,9 @@ _add_ds("v0ntuplev2", {
 'ZeroBias2016H2': _fromnum1("/store/user/dquach/ZeroBias/V0NtupleV2_2016/170713_153440", 86),
 'ZeroBias2016H3': _fromnum1("/store/user/dquach/ZeroBias/V0NtupleV2_2016/170713_153508", 3),
 
+'qcdht1000_hip1p0_mit': _fromnum0("/store/user/dquach/qcdht1000/V0NtupleV2_2016/170713_104021", 289),
+'qcdht1500_hip1p0_mit': _fromnum0("/store/user/dquach/qcdht1500/V0NtupleV2_2016/170713_104022", 97),
+
 'qcdht1000': _fromnum1("/store/user/dquach/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/V0NtupleV2_2016/170713_153636", 39),
 'qcdht1000ext': _fromnum1("/store/user/dquach/QCD_HT1000to1500_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/V0NtupleV2_2016/170713_153913", 73),
 'qcdht1500': _fromnum1("/store/user/dquach/QCD_HT1500to2000_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/V0NtupleV2_2016/170713_153708", 34),
