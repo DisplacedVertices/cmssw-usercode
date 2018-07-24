@@ -38,7 +38,7 @@ for i in range(4):
     h.SetLineWidth(3)
     h.Draw('hist')
 
-    hh = poisson_intervalize(hh)
+    hh = poisson_intervalize(hh, zero_x=True)
     hh.SetLineWidth(3)
     hh.SetMarkerStyle(20)
     hh.SetMarkerSize(1.3)

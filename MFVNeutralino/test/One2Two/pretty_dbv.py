@@ -43,7 +43,7 @@ def fmt(z, title, color, style, save=[]):
     return h
 
 hbkg = fmt(f.Get('h_bkg_dbv'), 'bkg', ROOT.kBlack, ROOT.kSolid)
-hbkg = poisson_intervalize(hbkg)
+hbkg = poisson_intervalize(hbkg, zero_x=True)
 hbkg.SetMarkerStyle(20)
 hbkg.SetMarkerSize(1.3)
 hbkg.SetLineWidth(3)
