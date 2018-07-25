@@ -31,7 +31,7 @@ def fmt(z, title, color, style, save=[]):
     h = cm2mm(h)
     h.SetStats(0)
     h.SetLineStyle(style)
-    h.SetLineWidth(3)
+    h.SetLineWidth(4)
     h.SetLineColor(color)
     h.SetTitle(';d_{VV} (mm);Events/0.1 mm')
     h.GetXaxis().SetTitleSize(0.05)

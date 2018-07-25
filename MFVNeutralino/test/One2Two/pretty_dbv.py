@@ -26,7 +26,7 @@ def fmt(z, title, color, style, save=[]):
     h = cm2mm(h)
     h.SetStats(0)
     h.SetLineStyle(style)
-    h.SetLineWidth(3)
+    h.SetLineWidth(3 if name == 'bkg' else 4)
     h.SetLineColor(color)
     h.Rebin(5)
     h.SetTitle(';d_{BV} (mm);Events/0.1 mm')
