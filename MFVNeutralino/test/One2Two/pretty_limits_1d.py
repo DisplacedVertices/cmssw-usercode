@@ -121,7 +121,7 @@ for kind in kinds:
         xax.SetLimits(175, 3000)
     elif versus_tau:
         xax.SetLimits(0.068, 130)
-    yax.SetRangeUser(0.08, 100000 if (versus_tau and draw_theory) else 100)
+    yax.SetRangeUser(0.08, 100000 if (versus_tau and draw_theory) else 130)
 
     observed.SetLineWidth(2)
     expect50.SetLineWidth(2)
@@ -147,13 +147,13 @@ for kind in kinds:
     observed.Draw('L')
 
     if versus_mass:
-        legx = 0.564, 0.867
+        legx = 0.550, 0.870
     elif versus_tau:
-        legx = 0.444, 0.787
+        legx = 0.550, 0.870 #0.444, 0.787
     if draw_theory:
-        leg = ROOT.TLegend(legx[0], 0.536, legx[1], 0.817)
+        leg = ROOT.TLegend(legx[0], 0.563, legx[1], 0.867)
     else:
-        leg = ROOT.TLegend(legx[0], 0.602, legx[1], 0.817)
+        leg = ROOT.TLegend(legx[0], 0.603, legx[1], 0.867)
 
     leg.SetTextFont(42)
     leg.SetFillColor(ROOT.kWhite)
@@ -168,7 +168,7 @@ for kind in kinds:
         leg.AddEntry(theory, nice_theory(kind), 'LF')
     leg.Draw()
 
-    cms = write(61, 0.040, legx[0]+0.0093, 0.835, 'CMS')
+    cms = write(61, 0.050, 0.142, 0.825, 'CMS')
     lum = write(42, 0.050, 0.548, 0.913, '38.5 fb^{-1} (13 TeV)')
     fn = os.path.join(path, 'limit1d_' + kind)
     c.SaveAs(fn + '.pdf')
