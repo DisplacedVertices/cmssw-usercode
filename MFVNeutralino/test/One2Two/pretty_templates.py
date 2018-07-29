@@ -50,12 +50,18 @@ def fmt(z, title, color, style, save=[]):
 
 hbkg = fmt(f.Get('h_bkg_dvv'), 'bkg', ROOT.kBlack, ROOT.kSolid)
 hbkg.SetFillColor(ROOT.kGray)
-hbkg.SetFillStyle(3001)
+hbkg.SetFillStyle(3002)
 
-leg = ROOT.TLegend(0.35, 0.60, 0.90, 0.80)
-leg.SetBorderSize(0)
-leg.AddEntry(hbkg, 'Background template', 'LF')
-leg.AddEntry(0, '#kern[-0.22]{Multijet signals, M = 800 GeV, #sigma = 1 fb:}', '')
+leg1 = ROOT.TLegend(0.400, 0.810, 0.909, 0.867)
+leg1.AddEntry(hbkg, 'Background template', 'F')
+leg2 = ROOT.TLegend(0.383, 0.698, 0.893, 0.815)
+leg2.AddEntry(0, '#kern[-0.22]{#splitline{Multijet signals,}{M = 800 GeV, #sigma = 1 fb:}}', '')
+leg3 = ROOT.TLegend(0.400, 0.572, 0.909, 0.705)
+legs = leg1, leg2, leg3
+
+for lg in legs:
+    lg.SetBorderSize(0)
+    lg.SetTextSize(0.04)
 
 htobreak = None
 for zzz, (name, title, color, style) in enumerate(which):
@@ -68,12 +74,13 @@ for zzz, (name, title, color, style) in enumerate(which):
         h.Draw('hist same')
     h.GetXaxis().SetRangeUser(0,4)
     h.GetYaxis().SetRangeUser(0,1.05)
-    leg.AddEntry(h, title, 'L')
+    leg3.AddEntry(h, title, 'L')
     print name, h.Integral(0,h.GetNbinsX()+2)
 
 hbkg.Draw('hist same')
 
-leg.Draw()
+for lg in legs:
+    lg.Draw()
 
 def write(font, size, x, y, text):
     w = ROOT.TLatex()
@@ -83,7 +90,7 @@ def write(font, size, x, y, text):
     w.DrawLatex(x, y, text)
     return w
 
-write(61, 0.050, 0.37, 0.82, 'CMS')
+write(61, 0.050, 0.175, 0.825, 'CMS')
 write(42, 0.050, 0.595, 0.913, '38.5 fb^{-1} (13 TeV)')
 
 # do broken y-axis. replace the "1" label with "18.2" and replace the

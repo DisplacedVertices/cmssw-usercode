@@ -48,10 +48,16 @@ hbkg.SetMarkerStyle(20)
 hbkg.SetMarkerSize(1.3)
 hbkg.SetLineWidth(3)
 
-leg = ROOT.TLegend(0.30, 0.60, 0.85, 0.80)
-leg.SetBorderSize(0)
-leg.AddEntry(hbkg, 'Data', 'PE')
-leg.AddEntry(0, '#kern[-0.22]{Multijet signals, M = 800 GeV, #sigma = 1 fb:}', '')
+leg1 = ROOT.TLegend(0.400, 0.810, 0.909, 0.867)
+leg1.AddEntry(hbkg, 'Data', 'PE')
+leg2 = ROOT.TLegend(0.383, 0.698, 0.893, 0.815)
+leg2.AddEntry(0, '#kern[-0.22]{#splitline{Multijet signals,}{M = 800 GeV, #sigma = 1 fb:}}', '')
+leg3 = ROOT.TLegend(0.400, 0.572, 0.909, 0.705)
+legs = leg1, leg2, leg3
+
+for lg in legs:
+    lg.SetBorderSize(0)
+    lg.SetTextSize(0.04)
 
 for zzz, (name, title, color, style) in enumerate(which):
     h = fmt(name, title, color, style)
@@ -60,13 +66,14 @@ for zzz, (name, title, color, style) in enumerate(which):
     else:
         h.Draw('hist same')
     h.GetXaxis().SetRangeUser(0,4)
-    h.GetYaxis().SetRangeUser(6e-2,2e3)
-    leg.AddEntry(h, title, 'L')
+    h.GetYaxis().SetRangeUser(6e-2,3e3)
+    leg3.AddEntry(h, title, 'L')
     print name, h.Integral(0,h.GetNbinsX()+2)
 
 hbkg.Draw('PE')
 
-leg.Draw()
+for lg in legs:
+    lg.Draw()
 
 def write(font, size, x, y, text):
     w = ROOT.TLatex()
@@ -76,7 +83,7 @@ def write(font, size, x, y, text):
     w.DrawLatex(x, y, text)
     return w
 
-write(61, 0.050, 0.32, 0.82, 'CMS')
+write(61, 0.050, 0.175, 0.825, 'CMS')
 write(42, 0.050, 0.595, 0.913, '38.5 fb^{-1} (13 TeV)')
 
 ps.c.SetBottomMargin(0.11)
