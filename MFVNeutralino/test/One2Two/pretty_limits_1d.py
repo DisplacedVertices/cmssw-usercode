@@ -118,7 +118,7 @@ for kind in kinds:
     yax.SetLabelSize(0.045)
 
     if versus_mass:
-        xax.SetLimits(175, 3000)
+        xax.SetLimits(105, 3000)
     elif versus_tau:
         xax.SetLimits(0.068, 130)
     yax.SetRangeUser(0.08, 100000 if (versus_tau and draw_theory) else 130)
@@ -146,14 +146,10 @@ for kind in kinds:
     expect50.Draw('L')
     observed.Draw('L')
 
-    if versus_mass:
-        legx = 0.550, 0.870
-    elif versus_tau:
-        legx = 0.550, 0.870 #0.444, 0.787
     if draw_theory:
-        leg = ROOT.TLegend(legx[0], 0.563, legx[1], 0.867)
+        leg = ROOT.TLegend(0.552, 0.563, 0.870, 0.867)
     else:
-        leg = ROOT.TLegend(legx[0], 0.603, legx[1], 0.867)
+        leg = ROOT.TLegend(0.552, 0.603, 0.870, 0.867)
 
     leg.SetTextFont(42)
     leg.SetFillColor(ROOT.kWhite)
@@ -165,8 +161,10 @@ for kind in kinds:
     leg.AddEntry(expect68, '68% expected', 'F')
     leg.AddEntry(expect95, '95% expected', 'F')
     if draw_theory:
-        leg.AddEntry(theory, nice_theory(kind), 'LF')
+        leg.AddEntry(theory, nice_theory(kind) + ',', 'LF')
     leg.Draw()
+    if draw_theory:
+        write(42, 0.03, 0.675, 0.535, 'B=1')
 
     cms = write(61, 0.050, 0.142, 0.825, 'CMS')
     lum = write(42, 0.050, 0.548, 0.913, '38.5 fb^{-1} (13 TeV)')
@@ -175,7 +173,7 @@ for kind in kinds:
     c.SaveAs(fn + '.png')
     c.SaveAs(fn + '.root')
 
-    pre = write(52, 0.037, legx[0]+0.0993, 0.835, 'Preliminary')
+    pre = write(52, 0.037, 0.155, 0.835, 'Preliminary')
     c.SaveAs(fn + '_prelim.pdf')
     c.SaveAs(fn + '_prelim.png')
     c.SaveAs(fn + '_prelim.root')
