@@ -101,7 +101,7 @@ for kind in kinds:
         xtitle = 'c#tau_{%s} (mm)' % particle
         
     g = expect95
-    g.SetTitle(';%s;#sigmaB^{2} (fb)  ' % xtitle)
+    g.SetTitle(';%s;#sigmaB^{2} (fb)    ' % xtitle)
     g.Draw('A3')
 
     draw_theory = 'tau' in kind
@@ -113,7 +113,7 @@ for kind in kinds:
         xax.SetLabelOffset(0.002)
     xax.SetTitleOffset(1.1)
     yax = g.GetYaxis()
-    yax.SetTitleOffset(1.05)
+    yax.SetTitleOffset(1.03)
     yax.SetTitleSize(0.05)
     yax.SetLabelSize(0.045)
 
@@ -161,10 +161,8 @@ for kind in kinds:
     leg.AddEntry(expect68, '68% expected', 'F')
     leg.AddEntry(expect95, '95% expected', 'F')
     if draw_theory:
-        leg.AddEntry(theory, nice_theory(kind) + ',', 'LF')
+        leg.AddEntry(theory, nice_theory(kind) + ', B=1', 'LF')
     leg.Draw()
-    if draw_theory:
-        write(42, 0.03, 0.675, 0.535, 'B=1')
 
     cms = write(61, 0.050, 0.142, 0.825, 'CMS')
     lum = write(42, 0.050, 0.548, 0.913, '38.5 fb^{-1} (13 TeV)')
