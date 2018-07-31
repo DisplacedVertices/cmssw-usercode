@@ -75,7 +75,7 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
 #            yax.SetBinLabel(yax.FindBin(20000), '20')
 #            yax.SetBinLabel(yax.FindBin(30000), '30')
         yax.SetTitle('c#tau (mm)')
-        yax.SetTitleOffset(1.)
+        yax.SetTitleOffset(1.1)
         yax.SetTitleSize(0.05)
         yax.SetLabelSize(0.045)
         zax = h.GetZaxis()
