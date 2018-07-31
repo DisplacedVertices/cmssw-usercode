@@ -23,6 +23,7 @@ private:
   const bool prints;
   const bool histos;
 
+  const double half_mc_weight;
   const bool weight_gen;
   const bool weight_gen_sign_only;
   const bool weight_pileup;
@@ -45,6 +46,7 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
     enable(cfg.getParameter<bool>("enable")),
     prints(cfg.getUntrackedParameter<bool>("prints", false)),
     histos(cfg.getUntrackedParameter<bool>("histos", true)),
+    half_mc_weight(cfg.getParameter<double>("half_mc_weight")),
     weight_gen(cfg.getParameter<bool>("weight_gen")),
     weight_gen_sign_only(cfg.getParameter<bool>("weight_gen_sign_only")),
     weight_pileup(cfg.getParameter<bool>("weight_pileup")),
@@ -118,6 +120,8 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
     event.getByToken(mevent_token, mevent);
 
     if (!event.isRealData()) {
+      *weight *= half_mc_weight;
+
       if (weight_gen) {
         assert((mevent->gen_weight - mevent->gen_weightprod)/mevent->gen_weightprod < 1e-3); // JMTBAD
         if (prints)
