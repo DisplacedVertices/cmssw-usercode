@@ -20,7 +20,10 @@ def hadd_or_merge(out_fn, files):
         raise ValueError('uh you have a mix of edm and non-edm files?')
     is_edm = is_edm.pop()
     (merge_edm_files if is_edm else hadd)(out_fn, files)
-    
+
+_leptonpresel = bool_from_argv('leptonpresel')
+_presel_s = '_leptonpresel' if _leptonpresel else ''
+
 ####
 
 def cmd_hadd_vertexer_histos():
@@ -90,11 +93,20 @@ def cmd_hadd_data():
 
 cmd_merge_data = cmd_hadd_data
 
+def _background_samples():
+    x = ['ttbar']
+    if _leptonpresel:
+        x += ['wjetstolnu', 'dyjetstollM10', 'dyjetstollM50', 'qcdmupt15']
+        x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]]
+        x += ['qcdbctoept%03i' % x for x in [15,20,30,80,170,250]]
+    else:
+        x += ['qcdht%04i' % x for x in [700, 1000, 1500, 2000]]
+    return x
+
 def cmd_merge_background():
     permissive = bool_from_argv('permissive')
     for year_s, scale in ('_2017', -AnalysisConstants.int_lumi_2017 * AnalysisConstants.scale_factor_2017),:
-        files = ['ttbar']
-        files += ['qcdht%04i' % x for x in [700, 1000, 1500, 2000]]
+        files = _background_samples()
         files = ['%s%s.root' % (x, year_s) for x in files]
         files2 = []
         for fn in files:
@@ -107,21 +119,14 @@ def cmd_merge_background():
             else:
                 files2.append(fn)
         if files2:
-            cmd = 'samples merge %f background%s.root ' % (scale, year_s)
+            cmd = 'samples merge %f background%s%s.root ' % (scale, _presel_s, year_s)
             cmd += ' '.join(files2)
             print cmd
             os.system(cmd)
 
 def cmd_effsprint():
-    if 'allmc' in sys.argv:
-        which = 'all'
-        which_files = []
-        for x in 'qcd', 'ttbar', 'mfv':
-            which_files += [fn for fn in glob(x + '*.root')]
-        which_files = ' '.join(sorted(which_files))
-        todo = [(which, which_files)]
-    else:
-        todo = [('background', '.'), ('signals', '*mfv*root')]
+    background_fns = ' '.join(x + '_2017.root' for x in _background_samples())
+    todo = [('background', background_fns), ('signals', 'mfv*root')]
     def do(cmd, outfn):
         cmd = 'python %s %s' % (cmssw_base('src/JMTucker/MFVNeutralino/test/effsprint.py'), cmd)
         print cmd
@@ -131,13 +136,15 @@ def cmd_effsprint():
         for ntk in (3,4,'3or4',5):
             for vtx in (1,2):
                 cmd = 'ntk%s' % ntk
+                if which == 'background':
+                    cmd += ' sum'
                 if vtx == 1:
                     cmd += ' one'
                 cmd += ' ' + which_files
-                outfn = 'effsprint_%s_ntk%s_%iv' % (which, ntk, vtx)
+                outfn = 'effsprint_%s%s_ntk%s_%iv' % (which, _presel_s, ntk, vtx)
                 do(cmd, outfn)
-    do('presel .', 'effsprint_presel')
-    do('nocuts .', 'effsprint_nocuts')
+    do('presel sum ' + background_fns, 'effsprint_presel')
+    do('nocuts sum ' + background_fns, 'effsprint_nocuts')
 
 def cmd_histos():
     cmd_report_data()
