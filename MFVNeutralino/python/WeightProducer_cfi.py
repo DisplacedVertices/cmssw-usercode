@@ -23,4 +23,4 @@ def half_mc_by_lumi(process, first=True):
     process.HalfMCByLumi.first = first
     for p in process.paths.itervalues():
         p.replace(process.mfvWeight, process.HalfMCByLumi * process.mfvWeight)
-    process.mfvWeight.half_mc_weight = 2
+    process.mfvWeight.half_mc_weight = 0.5 # generally not different by more than 0.1%

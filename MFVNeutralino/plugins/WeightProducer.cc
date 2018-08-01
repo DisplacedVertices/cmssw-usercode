@@ -79,9 +79,9 @@ void MFVWeightProducer::endLuminosityBlock(const edm::LuminosityBlock& lumi, con
         printf("MFVWeight::beginLuminosityBlock r: %u l: %u nEvents: %i  sumWeight: %f  sumWeightProd: %f\n", lumi.run(), lumi.luminosityBlock(), nEvents->get(), sumWeight->get(), sumWeightProd->get());
       
       if (histos) {
-        h_sums->Fill(sum_nevents_total, nEvents->get());
-        h_sums->Fill(sum_gen_weight_total, sumWeight->get());
-        h_sums->Fill(sum_gen_weightprod_total, sumWeightProd->get());
+        h_sums->Fill(sum_nevents_total,        half_mc_weight * nEvents->get());
+        h_sums->Fill(sum_gen_weight_total,     half_mc_weight * sumWeight->get());
+        h_sums->Fill(sum_gen_weightprod_total, half_mc_weight * sumWeightProd->get());
       }
     }
     else if (throw_if_no_mcstat)
@@ -120,8 +120,6 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
     event.getByToken(mevent_token, mevent);
 
     if (!event.isRealData()) {
-      *weight *= half_mc_weight;
-
       if (weight_gen) {
         assert((mevent->gen_weight - mevent->gen_weightprod)/mevent->gen_weightprod < 1e-3); // JMTBAD
         if (prints)
