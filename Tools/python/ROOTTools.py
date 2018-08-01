@@ -1964,6 +1964,7 @@ def root_fns_from_argv():
 
 def set_style(date_pages=False):
     ROOT.TH1.SetDefaultSumw2() # when would we ever not want to?
+    ROOT.gEnv.SetValue('Hist.Precision.1D', 'double') # use TH1D instead of TH1F with TTree::Draw--again, why not do it always
     ROOT.gStyle.SetHistMinimumZero(1)
     ROOT.gStyle.SetPadTickX(1)
     ROOT.gStyle.SetPadTickY(1)

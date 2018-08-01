@@ -10,6 +10,7 @@ process.load('JMTucker.MFVNeutralino.MiniTree_cff')
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
+    from JMTucker.Tools.MetaSubmitter import *
     from JMTucker.Tools.Year import year
     from JMTucker.Tools import Samples
 
@@ -19,13 +20,11 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     #samples = [s for s in samples if s.has_dataset(dataset)]
 
-    from JMTucker.Tools.MetaSubmitter import set_splitting, per_sample_pileup_weights_modifier
     set_splitting(samples, dataset, 'minitree', data_json='jsons/ana_2017.json')
 
-    from JMTucker.Tools.CondorSubmitter import CondorSubmitter
     cs = CondorSubmitter('MiniTreeV19m',
                          ex = year,
                          dataset = dataset,
-                         pset_modifier = per_sample_pileup_weights_modifier(),
+                         pset_modifier = chain_modifiers(half_mc_modifier(), per_sample_pileup_weights_modifier()),
                          )
     cs.submit_all(samples)

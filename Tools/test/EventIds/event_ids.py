@@ -13,18 +13,20 @@ process.p = cms.Path(process.evids)
 process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
+    from JMTucker.Tools.MetaSubmitter import *
+    from JMTucker.Tools.Year import year
     import JMTucker.Tools.Samples as Samples
-    samples = Samples.data_samples + Samples.qcd_samples + Samples.qcd_samples_ext + Samples.ttbar_samples + Samples.mfv_signal_samples
 
-    samples = Samples.mfv_neuude_samples
+    samples = Samples.qcd_samples_2017 + Samples.ttbar_samples_2017 + Samples.leptonic_samples_2017
+    dataset = 'miniaod'
+    #samples = [s for s in samples if s.has_dataset(dataset)]
+    set_splitting(samples, dataset, 'default', default_files_per=50)
 
-    dataset = 'ntuplev16_wgenv2'
-    samples = [s for s in samples if s.has_dataset(dataset)]
-
-    for sample in samples:
-        sample.datasets[dataset].split_by = 'files'
-        sample.datasets[dataset].files_per = 1
-
+    batch_name = 'EventIds2017'
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('EventIds', dataset=dataset)
-    cs.submit_all(samples)
+    ms = MetaSubmitter(batch_name, dataset=dataset)
+    ms.common.ex = year
+    ms.common.publish_name = batch_name + '_' + str(year)
+    ms.crab.job_control_from_sample = True
+    ms.condor.stageout_files = 'all'
+    ms.submit(samples)
