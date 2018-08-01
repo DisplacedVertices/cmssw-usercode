@@ -429,3 +429,22 @@ class MetaSubmitter:
             args.update(self.condor.__dict__)
             cs = CondorSubmitter(self.batch_name, **args)
             cs.submit_all(condor_samples)
+
+####
+
+__all__ = [
+    'CRABSubmitter',
+    'CondorSubmitter',
+    'MetaSubmitter',
+    'set_splitting',
+    'max_output_modifier',
+    'is_mc_modifier',
+    'H_modifier',
+    'zerobias_modifier',
+    'repro_modifier',
+    'half_mc_modifier',
+    'per_sample_pileup_weights_modifier',
+    'event_veto_modifier',
+    'chain_modifiers',
+    'secondary_files_modifier',
+    ]
