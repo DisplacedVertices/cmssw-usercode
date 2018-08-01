@@ -1,23 +1,79 @@
 from JMTucker.Tools.ROOTTools import *
+from limitsinput import name2isample
+from signal_efficiency import SignalEfficiencyCombiner
 
 set_style()
-ps = plot_saver('../plots/EXO-17-018/dbv', size=(700,700), pdf_log=True)
+ps = plot_saver(plot_dir('pretty_dbv'), size=(700,700), pdf_log=True)
 
-f = ROOT.TFile('limitsinput.root')
-
-def name2isample(f, name):
-    h = f.Get('name_list')
-    ax = h.GetXaxis()
-    for ibin in xrange(1, h.GetNbinsX()+1):
-        if name == ax.GetBinLabel(ibin):
-            return -ibin
-    raise ValueError('no name %s found in %r' % (name, f))
+f = ROOT.TFile('/uscms/home/tucker/public/mfv/limitsinput_100kevent_samples_used_for_Figs_1+3.root')
+combiner = SignalEfficiencyCombiner()
 
 which = [
-    (name2isample(f, 'mfv_neu_tau00300um_M0800'), 2, ROOT.kRed, 'c#tau = 0.3 mm'),
-    (name2isample(f, 'mfv_neu_tau01000um_M0800'), 5, ROOT.kGreen+2, 'c#tau = 1 mm'),
-    (name2isample(f, 'mfv_neu_tau10000um_M0800'), 7, ROOT.kBlue, 'c#tau = 10 mm'),
+    ('mfv_neu_tau00300um_M0800', 'c#tau = 0.3 mm', ROOT.kRed,     2), 
+    ('mfv_neu_tau01000um_M0800', 'c#tau = 1 mm',   ROOT.kGreen+2, 5), 
+    ('mfv_neu_tau10000um_M0800', 'c#tau = 10 mm',  ROOT.kBlue,    7), 
     ]
+
+def fmt(z, title, color, style, save=[]):
+    if type(z) == str: # signal name
+        name = z
+        h = f.Get('h_signal_%i_dbv' % name2isample(f, z))
+    else: # background hist
+        name = 'bkg'
+        h = z
+
+    h.Sumw2()
+    h = cm2mm(h)
+    h.SetStats(0)
+    h.SetLineStyle(style)
+    h.SetLineWidth(3 if name == 'bkg' else 4)
+    h.SetLineColor(color)
+    h.Rebin(5)
+    h.SetTitle(';d_{BV} (mm);Events/0.1 mm')
+    h.GetXaxis().SetTitleSize(0.05)
+    h.GetXaxis().SetLabelSize(0.045)
+    h.GetYaxis().SetTitleSize(0.05)
+    h.GetYaxis().SetLabelSize(0.045)
+    h.GetYaxis().SetTitleOffset(1.15)
+    move_above_into_bin(h, 3.999)
+    if title != 'bkg':
+        norm = combiner.combine(name2isample(combiner.inputs[0].f, name)).total_sig_1v
+        h.Scale(norm/h.Integral(0,h.GetNbinsX()+2))
+    save.append(h)
+    return h
+
+hbkg = fmt(f.Get('h_bkg_dbv'), 'bkg', ROOT.kBlack, ROOT.kSolid)
+hbkg = poisson_intervalize(hbkg, zero_x=True) #, include_zero_bins='surrounded')
+hbkg.SetMarkerStyle(20)
+hbkg.SetMarkerSize(1.3)
+hbkg.SetLineWidth(3)
+
+leg1 = ROOT.TLegend(0.400, 0.810, 0.909, 0.867)
+leg1.AddEntry(hbkg, 'Data', 'PE')
+leg2 = ROOT.TLegend(0.383, 0.698, 0.893, 0.815)
+leg2.AddEntry(0, '#kern[-0.22]{#splitline{Multijet signals,}{M = 800 GeV, #sigma = 1 fb:}}', '')
+leg3 = ROOT.TLegend(0.400, 0.572, 0.909, 0.705)
+legs = leg1, leg2, leg3
+
+for lg in legs:
+    lg.SetBorderSize(0)
+    lg.SetTextSize(0.04)
+
+for zzz, (name, title, color, style) in enumerate(which):
+    h = fmt(name, title, color, style)
+    if zzz == 0:
+        h.Draw('hist')
+    else:
+        h.Draw('hist same')
+    h.GetXaxis().SetRangeUser(0,4)
+    h.GetYaxis().SetRangeUser(6e-2,3e3)
+    leg3.AddEntry(h, title, 'L')
+    print name, h.Integral(0,h.GetNbinsX()+2)
+
+hbkg.Draw('PE')
+
+for lg in legs:
+    lg.Draw()
 
 def write(font, size, x, y, text):
     w = ROOT.TLatex()
@@ -27,61 +83,15 @@ def write(font, size, x, y, text):
     w.DrawLatex(x, y, text)
     return w
 
-def fmt(h, name, color, save=[]):
-    if type(name) == tuple:
-        name, signum = name
-
-    h.Sumw2()
-    h = cm2mm(h)
-    h.SetStats(0)
-    h.SetLineWidth(3)
-    h.SetLineColor(color)
-    h.Rebin(5)
-    h.SetTitle(';d_{BV} (mm);Events/0.1 mm')
-    h.GetXaxis().SetTitleSize(0.05)
-    h.GetXaxis().SetLabelSize(0.045)
-    h.GetYaxis().SetTitleSize(0.05)
-    h.GetYaxis().SetLabelSize(0.045)
-    h.GetYaxis().SetTitleOffset(1.1)
-    move_above_into_bin(h, 3.999)
-    if '#tau' in name:
-        norm = f.Get('h_signal_%i_norm' % signum).GetBinContent(2)
-        print norm * 38500 * h.Integral(0,h.GetNbinsX()+2)
-        h.Scale(norm * 38500.)
-    print h.Integral()
-    save.append(h)
-    return h
-
-hbkg = fmt(f.Get('h_bkg_dbv'), 'bkg', ROOT.kBlack)
-hbkg = poisson_intervalize(hbkg)
-hbkg.SetMarkerStyle(20)
-hbkg.SetMarkerSize(1.3)
-hbkg.SetLineWidth(3)
-
-leg = ROOT.TLegend(0.30, 0.65, 0.85, 0.85)
-leg.SetBorderSize(0)
-leg.AddEntry(hbkg, 'Data', 'LPE')
-leg.AddEntry(0, '#kern[-0.22]{Multijet signals, M = 800 GeV, #sigma = 1 fb:}', '')
-
-for zzz, (isample, style, color, title) in enumerate(which):
-    h = fmt(f.Get('h_signal_%i_dbv' % isample), (title,isample), color)
-    h.SetLineStyle(style)
-    if zzz == 0:
-        h.Draw('hist')
-    else:
-        h.Draw('hist same')
-    h.GetXaxis().SetRangeUser(0,4)
-    h.GetYaxis().SetRangeUser(6e-2,2e3)
-    leg.AddEntry(h, title, 'L')
-
-hbkg.Draw('PE')
-
-leg.Draw()
-
-write(61, 0.050, 0.109, 0.913, 'CMS')
-write(42, 0.050, 0.560, 0.913, '38.5 fb^{-1} (13 TeV)')
+write(61, 0.050, 0.175, 0.825, 'CMS')
+write(42, 0.050, 0.595, 0.913, '38.5 fb^{-1} (13 TeV)')
 
 ps.c.SetBottomMargin(0.11)
-ps.c.SetLeftMargin(0.11)
+ps.c.SetLeftMargin(0.13)
+ps.c.SetRightMargin(0.06)
 
 ps.save('dbv')
+
+write(52, 0.047, 0.43, 0.82, 'Preliminary')
+
+ps.save('dbv_prelim')

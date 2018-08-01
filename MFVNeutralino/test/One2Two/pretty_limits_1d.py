@@ -2,7 +2,7 @@ import sys, os
 from array import array
 from JMTucker.Tools.ROOTTools import *
 
-path = plot_dir('pretty_limits_1d_gaslit', make=True)
+path = plot_dir('pretty_limits_1d', make=True)
 
 ts = tdr_style()
 
@@ -101,7 +101,7 @@ for kind in kinds:
         xtitle = 'c#tau_{%s} (mm)' % particle
         
     g = expect95
-    g.SetTitle(';%s;#sigmaB^{2} (fb)  ' % xtitle)
+    g.SetTitle(';%s;#sigmaB^{2} (fb)    ' % xtitle)
     g.Draw('A3')
 
     draw_theory = 'tau' in kind
@@ -113,15 +113,15 @@ for kind in kinds:
         xax.SetLabelOffset(0.002)
     xax.SetTitleOffset(1.1)
     yax = g.GetYaxis()
-    yax.SetTitleOffset(1.05)
+    yax.SetTitleOffset(1.03)
     yax.SetTitleSize(0.05)
     yax.SetLabelSize(0.045)
 
     if versus_mass:
-        xax.SetLimits(175, 3000)
+        xax.SetLimits(105, 3000)
     elif versus_tau:
         xax.SetLimits(0.068, 130)
-    yax.SetRangeUser(0.08, 100000 if (versus_tau and draw_theory) else 100)
+    yax.SetRangeUser(0.08, 100000 if (versus_tau and draw_theory) else 130)
 
     observed.SetLineWidth(2)
     expect50.SetLineWidth(2)
@@ -146,14 +146,10 @@ for kind in kinds:
     expect50.Draw('L')
     observed.Draw('L')
 
-    if versus_mass:
-        legx = 0.563, 0.866
-    elif versus_tau:
-        legx = 0.443, 0.786
     if draw_theory:
-        leg = ROOT.TLegend(legx[0], 0.566, legx[1], 0.851)
+        leg = ROOT.TLegend(0.552, 0.563, 0.870, 0.867)
     else:
-        leg = ROOT.TLegend(legx[0], 0.632, legx[1], 0.851)
+        leg = ROOT.TLegend(0.552, 0.603, 0.870, 0.867)
 
     leg.SetTextFont(42)
     leg.SetFillColor(ROOT.kWhite)
@@ -165,13 +161,19 @@ for kind in kinds:
     leg.AddEntry(expect68, '68% expected', 'F')
     leg.AddEntry(expect95, '95% expected', 'F')
     if draw_theory:
-        leg.AddEntry(theory, nice_theory(kind), 'LF')
+        leg.AddEntry(theory, nice_theory(kind) + ', B=1', 'LF')
     leg.Draw()
 
-    cms = write(61, 0.050, 0.109, 0.913, 'CMS')
+    cms = write(61, 0.050, 0.142, 0.825, 'CMS')
     lum = write(42, 0.050, 0.548, 0.913, '38.5 fb^{-1} (13 TeV)')
     fn = os.path.join(path, 'limit1d_' + kind)
     c.SaveAs(fn + '.pdf')
     c.SaveAs(fn + '.png')
     c.SaveAs(fn + '.root')
+
+    pre = write(52, 0.037, 0.155, 0.835, 'Preliminary')
+    c.SaveAs(fn + '_prelim.pdf')
+    c.SaveAs(fn + '_prelim.png')
+    c.SaveAs(fn + '_prelim.root')
+
     del c
