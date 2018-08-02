@@ -311,10 +311,10 @@ struct MFVEvent {
 
   bool is_electron (size_t w) const { return lep_id_[w] & lep_el_bit; }
   bool is_muon     (size_t w) const { return !is_electron(w); }
-  bool pass_lep_sel(size_t w) const {
+  bool pass_lep_sel(size_t w, lep_id_t skip=0) const {
     const int nreq = is_electron(w) ? int(n_lep_el_idrequired) : int(n_lep_mu_idrequired);
     for (int i = 0; i < nreq; ++i)
-      if (!(lep_id_[w] & (1<<i)))
+      if (!(skip & (1<<i)) && !(lep_id_[w] & (1<<i)))
         return false;
     return true;
   }
