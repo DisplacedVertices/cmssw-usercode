@@ -23,6 +23,7 @@ private:
   const bool prints;
   const bool histos;
 
+  const double half_mc_weight;
   const bool weight_gen;
   const bool weight_gen_sign_only;
   const bool weight_pileup;
@@ -45,6 +46,7 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
     enable(cfg.getParameter<bool>("enable")),
     prints(cfg.getUntrackedParameter<bool>("prints", false)),
     histos(cfg.getUntrackedParameter<bool>("histos", true)),
+    half_mc_weight(cfg.getParameter<double>("half_mc_weight")),
     weight_gen(cfg.getParameter<bool>("weight_gen")),
     weight_gen_sign_only(cfg.getParameter<bool>("weight_gen_sign_only")),
     weight_pileup(cfg.getParameter<bool>("weight_pileup")),
@@ -77,9 +79,9 @@ void MFVWeightProducer::endLuminosityBlock(const edm::LuminosityBlock& lumi, con
         printf("MFVWeight::beginLuminosityBlock r: %u l: %u nEvents: %i  sumWeight: %f  sumWeightProd: %f\n", lumi.run(), lumi.luminosityBlock(), nEvents->get(), sumWeight->get(), sumWeightProd->get());
       
       if (histos) {
-        h_sums->Fill(sum_nevents_total, nEvents->get());
-        h_sums->Fill(sum_gen_weight_total, sumWeight->get());
-        h_sums->Fill(sum_gen_weightprod_total, sumWeightProd->get());
+        h_sums->Fill(sum_nevents_total,        half_mc_weight * nEvents->get());
+        h_sums->Fill(sum_gen_weight_total,     half_mc_weight * sumWeight->get());
+        h_sums->Fill(sum_gen_weightprod_total, half_mc_weight * sumWeightProd->get());
       }
     }
     else if (throw_if_no_mcstat)

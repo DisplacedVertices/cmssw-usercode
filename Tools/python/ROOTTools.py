@@ -110,19 +110,30 @@ def check_consistency(h1, h2, log=True):
     return True
 
 def poisson_interval(nobs, alpha=(1-0.6827)/2, beta=(1-0.6827)/2):
-    lower = 0
     if nobs > 0:
-        lower = 0.5 * ROOT.Math.chisquared_quantile_c(1-alpha, 2*nobs)
-    elif nobs == 0:
-        beta *= 2
-    upper = 0.5 * ROOT.Math.chisquared_quantile_c(beta, 2*(nobs+1))
+        lower = ROOT.Math.gamma_quantile(alpha, nobs, 1)
+    else:
+        lower = 0.
+    upper = ROOT.Math.gamma_quantile_c(beta, nobs+1, 1)
     return lower, upper
 
 def poisson_intervalize(h, zero_x=False, include_zero_bins=False, rescales=None):
     bins = []
-    for i in xrange(1, h.GetNbinsX()+1):
+    nbins = h.GetNbinsX()
+    first, last = None, None
+    if include_zero_bins == 'surrounded':
+        for i in xrange(1, nbins+1):
+            has = h.GetBinContent(i) > 0
+            if first is None and has:
+                first = i
+            if has:
+                last = i
+    else:
+        first, last = 1, nbins
+
+    for i in xrange(1, nbins+1):
         y = h.GetBinContent(i)
-        if y > 0 or include_zero_bins:
+        if y > 0 or (include_zero_bins == 'surrounded' and first <= i <= last) or include_zero_bins == True:
             bins.append(i)
 
     h2 = ROOT.TGraphAsymmErrors(len(bins))
@@ -1847,10 +1858,11 @@ def ratios_plot(name,
         r.SetMarkerSize(0)
         r.SetLineWidth(h.GetLineWidth())
         r.SetLineColor(h.GetLineColor())
-        if are_hists:
-            x_range = h.GetXaxis().GetXmin(), h.GetXaxis().GetXmax()
-        elif are_graphs:
-            x_range = gg.GetXaxis().GetXmin(), gg.GetXaxis().GetXmax()
+        if not x_range:
+            if are_hists:
+                x_range = h.GetXaxis().GetXmin(), h.GetXaxis().GetXmax()
+            elif are_graphs:
+                x_range = gg.GetXaxis().GetXmin(), gg.GetXaxis().GetXmax()
         r.GetXaxis().SetLimits(*x_range)
         r.GetXaxis().SetTitleSize(res_x_title_size)
         r.GetXaxis().SetTitleOffset(res_x_title_offset)
@@ -1966,6 +1978,7 @@ def root_fns_from_argv():
 
 def set_style(date_pages=False):
     ROOT.TH1.SetDefaultSumw2() # when would we ever not want to?
+    ROOT.gEnv.SetValue('Hist.Precision.1D', 'double') # use TH1D instead of TH1F with TTree::Draw--again, why not do it always
     ROOT.gStyle.SetHistMinimumZero(1)
     ROOT.gStyle.SetPadTickX(1)
     ROOT.gStyle.SetPadTickY(1)

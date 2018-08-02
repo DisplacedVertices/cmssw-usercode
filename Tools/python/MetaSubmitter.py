@@ -36,6 +36,17 @@ def repro_modifier(sample):
     else:
         return [], []
 
+class half_mc_modifier:
+    def __init__(self, first=True):
+        self.first = first
+    def __call__(self, sample):
+        if sample.is_mc:
+            x = '''
+from JMTucker.MFVNeutralino.WeightProducer_cfi import half_mc_by_lumi
+half_mc_by_lumi(process, %r)
+''' % self.first
+            return [x], []
+
 class per_sample_pileup_weights_modifier:
     def __init__(self, module_names=['mfvWeight']):
         self.module_names = module_names
@@ -418,3 +429,22 @@ class MetaSubmitter:
             args.update(self.condor.__dict__)
             cs = CondorSubmitter(self.batch_name, **args)
             cs.submit_all(condor_samples)
+
+####
+
+__all__ = [
+    'CRABSubmitter',
+    'CondorSubmitter',
+    'MetaSubmitter',
+    'set_splitting',
+    'max_output_modifier',
+    'is_mc_modifier',
+    'H_modifier',
+    'zerobias_modifier',
+    'repro_modifier',
+    'half_mc_modifier',
+    'per_sample_pileup_weights_modifier',
+    'event_veto_modifier',
+    'chain_modifiers',
+    'secondary_files_modifier',
+    ]

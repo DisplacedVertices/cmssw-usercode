@@ -1,6 +1,7 @@
 #include "TH2.h"
 #include "TMath.h"
 #include "TFitResult.h"
+#include "CLHEP/Random/RandBinomial.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
@@ -705,9 +706,49 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     bool use = no_track_cuts || is_second_track || tc.use(false);
 
     if (use && remove_tracks_frac > 0) {
+      // special values:
+      // remove_tracks_frac < 1: throw out that % of tracks
+      // 1 <= remove_tracks_frac < 50: throw out tracks according to central values of data/mc in cosmics study in AN-15-206
+      // 50 <= remove_tracks_frac < 100: ditto but propagate error bars through and add in quadrature to value (overblown)
+      // 100 <= remove_tracks_frac: throw binomials according to those values
       edm::Service<edm::RandomNumberGenerator> rng;
       CLHEP::HepRandomEngine& rng_engine = rng->getEngine(event.streamID());
-      if (rng_engine.flat() < remove_tracks_frac)
+      double prob = 0;
+      int ieta = 0;
+
+      if (1 <= remove_tracks_frac) {
+        const double ad = fabs(tc.dxybs);
+        if      (0    <= ad && ad < 0.25) ieta = 0;
+        else if (0.25 <= ad && ad < 0.50) ieta = 1;
+        else if (0.50 <= ad && ad < 0.75) ieta = 2;
+        else if (0.75 <= ad && ad < 1.00) ieta = 3;
+        else if (1.00 <= ad && ad < 1.50) ieta = 4;
+        else if (1.50 <= ad && ad < 2.00) ieta = 5;
+        else if (2.00 <= ad)              ieta = 6;
+      }
+
+      if (remove_tracks_frac < 1)
+        prob = remove_tracks_frac;
+      else if (1 <= remove_tracks_frac && remove_tracks_frac < 100) {
+        // digitized Fig. 25 of AN-15-206 (pdf retrieved from tdr svn on 7/24/2018), https://apps.automeris.io/wpd/ is awesome
+        const double probs[2][7] = {
+          { 0.02, 0.04, 0.01, 0.01, 0.07, 0.11, 0.07 }, // without including error bars
+          { 0.04, 0.05, 0.03, 0.03, 0.08, 0.12, 0.09 }  // propagate error bars then add in quad shift and unc
+        };
+        prob = probs[remove_tracks_frac >= 50][ieta];
+      }
+      else if (100 <= remove_tracks_frac) {
+        const double N[2][7] = { { 160, 194, 104, 264, 303, 450, 414 },   // mc
+                                 {  55,  69,  80,  59, 157, 131, 142 } }; // data
+        const double p[2][7] = { { 0.960, 0.957, 0.977, 0.953, 0.928, 0.854, 0.800 },
+                                 { 0.945, 0.922, 0.971, 0.964, 0.861, 0.761, 0.745 } };
+        CLHEP::RandBinomial rr(rng_engine);
+        const double mc   = rr.shoot(N[0][ieta], p[0][ieta]) / N[0][ieta];
+        const double data = rr.shoot(N[1][ieta], p[1][ieta]) / N[1][ieta];
+        prob = mc > data ? mc/data - 1 : 0;
+      }
+
+      if (rng_engine.flat() < prob)
         use = false;
     }
 

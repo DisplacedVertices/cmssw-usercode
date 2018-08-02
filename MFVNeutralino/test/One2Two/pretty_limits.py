@@ -2,7 +2,9 @@ import sys, os
 from array import array
 from JMTucker.Tools.ROOTTools import *
 
-path = plot_dir('pretty_limits_updn', make=True)
+draw_pm1sigma_excl = False
+
+path = plot_dir('pretty_limits', make=True)
 
 ts = tdr_style()
 ROOT.gStyle.SetPalette(ROOT.kBird)
@@ -33,11 +35,11 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
             ROOT.TColor.CreateGradientColorTable(n, stops, r, g, b, num_colors)
             ROOT.gStyle.SetNumberContours(num_colors)
 
-        c = ROOT.TCanvas('c', '', 900, 800)
+        c = ROOT.TCanvas('c', '', 954, 899)
         c.SetTopMargin(0.123)
-        c.SetBottomMargin(0.12)
-        c.SetLeftMargin(0.11)
-        c.SetRightMargin(0.18)
+        c.SetBottomMargin(0.15)
+        c.SetLeftMargin(0.13)
+        c.SetRightMargin(0.20)
         c.SetLogz()
         h = f.Get('%s/observed' % kind)
         xax = h.GetXaxis()
@@ -55,7 +57,7 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
 #        xax.SetBinLabel(xax.FindBin(1400), '1400')
         xax.SetLabelSize(0.045)
         xax.SetTitleSize(0.05)
-        xax.SetTitleOffset(1.05)
+        xax.SetTitleOffset(0.98)
         xax.SetRangeUser(300, 2800)
 #        xax.LabelsOption('h')
         yax = h.GetYaxis()
@@ -84,7 +86,7 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
         zax.SetLabelSize(0.045)
         zax.SetLabelOffset(0.00005)
         zax.SetTitleSize(0.05)
-        zax.SetTitleOffset(1.22)
+        zax.SetTitleOffset(1.12)
         h.Draw('colz')
         print kind, xxx, h.GetMinimum(), h.GetMaximum()
         if xxx == 'big':
@@ -105,15 +107,18 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
         g_obsup = f2.Get('%s_observed_fromrinterp_up_exc_g' % kind)
         g_obsdn = f2.Get('%s_observed_fromrinterp_dn_exc_g' % kind)
         g_exp   = f2.Get('%s_expect50_fromrinterp_nm_exc_g' % kind)
-        g_expup = f2.Get('%s_expect50_fromrinterp_up_exc_g' % kind)
-        g_expdn = f2.Get('%s_expect50_fromrinterp_dn_exc_g' % kind)
-        for g in g_obs, g_exp:
-            g.SetLineWidth(4)
+        g_expup = f2.Get('%s_expect84_fromrinterp_nm_exc_g' % kind)
+        g_expdn = f2.Get('%s_expect16_fromrinterp_nm_exc_g' % kind)
+        if draw_pm1sigma_excl:
+            for g in g_obs, g_exp:
+                g.SetLineWidth(4)
+        else:
+            g_obs.SetLineWidth(3)
         for g in g_obs, g_obsup, g_obsdn:
             g.SetLineColor(ROOT.kBlack)
         for g in g_exp, g_expup, g_expdn:
-            g.SetLineStyle(2)
-            g.SetLineColor(ROOT.kRed)
+            g.SetLineStyle(2 if draw_pm1sigma_excl else 7)
+            g.SetLineColor(ROOT.kRed if draw_pm1sigma_excl else 1)
         for g in (g_obsup, g_obsdn, g_expup, g_expdn):
             g.SetLineWidth(2)
 
@@ -143,14 +148,15 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
             g_exp.SetPoint(104,2230.032336,95.94497903);
             g_exp.SetPoint(105,2226.111259,96.99275073);
 
-        for g in g_exp, g_expup, g_expdn, g_obs, g_obsup, g_obsdn:
+        excl_to_draw = [g_exp, g_expup, g_expdn, g_obs, g_obsup, g_obsdn] if draw_pm1sigma_excl else [g_exp, g_obs]
+        for g in excl_to_draw:
             g.Draw('L')
 
         c.Update()
         palette = h.GetListOfFunctions().FindObject("palette")
         palette.SetY2NDC(0.932)
 
-        leg = ROOT.TLegend(0.1095, 0.877, 0.820, 0.932)
+        leg = ROOT.TLegend(0.13, 0.877, 0.80, 0.931)
         leg.SetTextFont(42)
         leg.SetTextSize(0.0362)
         leg.SetTextAlign(22)
@@ -158,40 +164,51 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
         leg.SetFillColor(ROOT.kWhite)
         leg.SetBorderSize(1)
         if kind == 'mfv_neu':
-            model = '#kern[-0.42]{#tilde{g} #rightarrow tbs}'
+            model = '#kern[-0.%i]{#tilde{g} #rightarrow tbs}' % (42 if draw_pm1sigma_excl else 22)
         else:
-            model = '#kern[-0.52]{#tilde{t} #rightarrow #bar{d}#kern[0.1]{#bar{d}}}'
+            model = '#kern[-0.%i]{#tilde{t} #rightarrow #bar{d}#kern[0.1]{#bar{d}}}' % (52 if draw_pm1sigma_excl else 22)
         leg.AddEntry(0, model, '')
-        leg.AddEntry(g_obs, 'Observed #pm 1 #sigma_{th}', 'L')
-        leg.AddEntry(g_exp, 'Expected #pm 1 #sigma_{exp}', 'L')
+        if draw_pm1sigma_excl:
+            leg.AddEntry(g_obs, 'Observed #pm 1 #sigma_{th}', 'L')
+            leg.AddEntry(g_exp, 'Expected #pm 1 #sigma_{exp}', 'L')
+        else:
+            leg.AddEntry(g_obs, '#kern[-0.22]{Observed}', 'L')
+            leg.AddEntry(g_exp, '#kern[-0.22]{Expected}', 'L')
         leg.Draw()
 
-        # these lines make the bands for the lines in the legend, sigh
-        if kind == 'mfv_neu':
-            x00, x01 = 0.239, 0.280
-            x10, x11 = 0.529, 0.570
-        else:
-            x00, x01 = 0.224, 0.265
-            x10, x11 = 0.520, 0.561
-        y0, y1 = 0.894, 0.914
-        ll = [
-            ROOT.TLine(x00, y0, x01, y0),
-            ROOT.TLine(x10, y0, x11, y0),
-            ROOT.TLine(x00, y1, x01, y1),
-            ROOT.TLine(x10, y1, x11, y1),
-            ]
-        for l in ll[1], ll[3]:
-            l.SetLineStyle(2)
-            l.SetLineColor(ROOT.kRed)
-        for l in ll:
-            l.SetLineWidth(2)
-            l.SetNDC(1)
-            l.Draw()
+        if draw_pm1sigma_excl:
+            # these lines make the bands for the lines in the legend, sigh
+            if kind == 'mfv_neu':
+                x00, x01 = 0.239, 0.280
+                x10, x11 = 0.529, 0.570
+            else:
+                x00, x01 = 0.224, 0.265
+                x10, x11 = 0.520, 0.561
+            y0, y1 = 0.894, 0.914
+            ll = [
+                ROOT.TLine(x00, y0, x01, y0),
+                ROOT.TLine(x10, y0, x11, y0),
+                ROOT.TLine(x00, y1, x01, y1),
+                ROOT.TLine(x10, y1, x11, y1),
+                ]
+            for l in ll[1], ll[3]:
+                l.SetLineStyle(2)
+                l.SetLineColor(ROOT.kRed)
+            for l in ll:
+                l.SetLineWidth(2)
+                l.SetNDC(1)
+                l.Draw()
 
-        cms = write(61, 0.050, 0.109, 0.950, 'CMS')
-        lum = write(42, 0.050, 0.515, 0.950, '38.5 fb^{-1} (13 TeV)')
+        cms = write(61, 0.050, 0.129, 0.945, 'CMS')
+        lum = write(42, 0.050, 0.470, 0.945, '38.5 fb^{-1} (13 TeV)')
         fn = os.path.join(path, '%s_limit_%s' % (kind, xxx))
         c.SaveAs(fn + '.pdf')
         c.SaveAs(fn + '.png')
         c.SaveAs(fn + '.root')
+
+        pre = write(52, 0.047, 0.229, 0.945, 'Preliminary')
+        c.SaveAs(fn + '_prelim.pdf')
+        c.SaveAs(fn + '_prelim.png')
+        c.SaveAs(fn + '_prelim.root')
+
         del c

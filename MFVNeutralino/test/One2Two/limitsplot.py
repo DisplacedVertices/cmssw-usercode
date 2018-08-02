@@ -263,7 +263,7 @@ def save_2d_plots():
 
 ####
 
-def theory_exclude(which, h, opt):
+def theory_exclude(which, h, opt, use_error):
     theory, htheory = make_theory_hist(which)
     theory = dict((m, (s, es)) for m, s, es in theory)
     max_mass = max(theory.keys())
@@ -292,14 +292,15 @@ def theory_exclude(which, h, opt):
 
             z = (mass - ma) / (mb - ma)
             s = sa + (sb - sa) * z
-            es = (z**2 * esb**2 + (1 - z)**2 * esa**2)**0.5
 
             bin = hexc.FindBin(mass, tau)
             s2 = s
-            if opt.lower() == 'up':
-                s2 += es
-            elif opt.lower() == 'dn':
-                s2 -= es
+            if use_error:
+                es = (z**2 * esb**2 + (1 - z)**2 * esa**2)**0.5
+                if opt.lower() == 'up':
+                    s2 += es
+                elif opt.lower() == 'dn':
+                    s2 -= es
             if lim < s2:
                 hexc.SetBinContent(bin, 1)
             else:
@@ -471,9 +472,8 @@ def one_from_r(ex, name):
 def from_r():
     f = ROOT.TFile('limits_fromr.root', 'recreate')
     for k in 'mfv_stopdbardbar', 'mfv_neu':
-        for opt in ('nm', 'up', 'dn'):
-            #for ex in 'observed expect2p5 expect16 expect50 expect68 expect84 expect95 expect97p5'.split():
-            for ex in 'observed expect50'.split():
+        for opt in 'nm', 'up', 'dn':
+            for ex in 'observed', 'expect50', 'expect16', 'expect84': # expect2p5 expect68 expect95 expect97p5
                 ex = k + '_' + ex
                 n = '%s_fromrinterp' % ex
                 h = one_from_r(ex, n)
@@ -481,7 +481,7 @@ def from_r():
                     which = 'stopstop' 
                 elif k == 'mfv_neu':
                     which = 'gluglu'
-                hexc = theory_exclude(which, h, opt)
+                hexc = theory_exclude(which, h, opt, 'expect' not in ex)
                 g = exc_graph(hexc, 1, 1)
                 g.SetName(n + '_%s_exc_g' % opt)
                 h.Write()

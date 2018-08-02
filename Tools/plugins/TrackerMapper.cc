@@ -89,18 +89,32 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH2D* h_tracks_nsigmadxy_v_dxyerr[3];
   TH2D* h_tracks_dxyerr_v_dxy_ptslices[3][6];
 
-  TH1D* h_nm1_tracks_pt;
-  TH1D* h_nm1_tracks_min_r;
-  TH1D* h_nm1_tracks_npxlayers;
-  TH1D* h_nm1_tracks_nstlayers;
-  TH2D* h_nm1_tracks_nstlayers_v_eta;
-  TH1D* h_nm1_tracks_nstlayers_etalt2;
-  TH1D* h_nm1_tracks_nstlayers_etagt2;
-  TH1D* h_nm1_tracks_nsigmadxy;
+  TH1D* h_nm1_tracks_pt[2];
+  TH1D* h_nm1_tracks_min_r[2];
+  TH1D* h_nm1_tracks_npxlayers[2];
+  TH1D* h_nm1_tracks_nstlayers[2];
+  TH2D* h_nm1_tracks_nstlayers_v_eta[2];
+  TH1D* h_nm1_tracks_nstlayers_etalt2[2];
+  TH1D* h_nm1_tracks_nstlayers_etagt2[2];
+  TH1D* h_nm1_tracks_nsigmadxy[2];
+  TH2D* h_nm1_tracks_dxy_v_pt[2];
+  TH2D* h_nm1_tracks_dxy_v_nstlayers[2];
+  TH2D* h_nm1_tracks_dxy_v_npxlayers[2];
+  TH2D* h_nm1_tracks_dxy_v_min_r[2];
+  TH2D* h_nm1_tracks_dxyerr_v_pt[2];
+  TH2D* h_nm1_tracks_dxyerr_v_npxlayers[2];
+  TH2D* h_nm1_tracks_dxyerr_v_nstlayers[2];
+  TH2D* h_nm1_tracks_dxyerr_v_min_r[2];
 
   TH2D* h_dxyerr_v_ptcut[2];
   TH2D* h_dxyerr_v_npxlayerscut[2];
   TH2D* h_dxyerr_v_nstlayerscut[2];
+  TH1D* h_tracks_ptcut[2];
+  TH1D* h_tracks_npxlayerscut[2];
+  TH1D* h_tracks_nstlayerscut[2];
+
+  TH2D* h_dxyerr_v_npxlayerscut_etaslices[2][4];
+  TH2D* h_dxyerr_v_nstlayerscut_etaslices[2][4];
 };
 
 TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
@@ -185,20 +199,38 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
     }
   }
 
-  h_nm1_tracks_pt = fs->make<TH1D>("h_nm1_tracks_pt", "nm1 tracks;tracks pt;arb. units", 200, 0, 20);
-  h_nm1_tracks_min_r = fs->make<TH1D>("h_nm1_tracks_min_r", "nm1 tracks;tracks min_r;arb. units", 20, 0, 20);
-  h_nm1_tracks_npxlayers = fs->make<TH1D>("h_nm1_tracks_npxlayers", "nm1 tracks;tracks npxlayers;arb. units", 20, 0, 20);
-  h_nm1_tracks_nstlayers = fs->make<TH1D>("h_nm1_tracks_nstlayers", "nm1 tracks;tracks nstlayers;arb. units", 20, 0, 20);
-  h_nm1_tracks_nstlayers_v_eta = fs->make<TH2D>("h_nm1_tracks_nstlayers_v_eta", "nm1 tracks;tracks #eta;tracks number of strip layers", 80, -4, 4, 20, 0, 20);
-  h_nm1_tracks_nstlayers_etalt2 = fs->make<TH1D>("h_nm1_tracks_nstlayers_etalt2", "nm1 tracks;|#eta| < 2 tracks nstlayers;arb. units", 20, 0, 20);
-  h_nm1_tracks_nstlayers_etagt2 = fs->make<TH1D>("h_nm1_tracks_nstlayers_etagt2", "nm1 tracks;|#eta| #geq 2 tracks nstlayers;arb. units", 20, 0, 20);
-  h_nm1_tracks_nsigmadxy = fs->make<TH1D>("h_nm1_tracks_nsigmadxy", "nm1 tracks;tracks nsigmadxy;arb. units", 200, 0, 20);
+  const char* ex3[2] = {"sel", "seed"};
+  for (int i = 0; i < 2; ++i) {
+    h_nm1_tracks_pt[i] = fs->make<TH1D>(TString::Format("h_nm1_%s_tracks_pt", ex3[i]), TString::Format("nm1 %s tracks;tracks pt;arb. units", ex3[i]), 200, 0, 20);
+    h_nm1_tracks_min_r[i] = fs->make<TH1D>(TString::Format("h_nm1_%s_tracks_min_r", ex3[i]), TString::Format("nm1 %s tracks;tracks min_r;arb. units", ex3[i]), 20, 0, 20);
+    h_nm1_tracks_npxlayers[i] = fs->make<TH1D>(TString::Format("h_nm1_%s_tracks_npxlayers", ex3[i]), TString::Format("nm1 %s tracks;tracks npxlayers;arb. units", ex3[i]), 20, 0, 20);
+    h_nm1_tracks_nstlayers[i] = fs->make<TH1D>(TString::Format("h_nm1_%s_tracks_nstlayers", ex3[i]), TString::Format("nm1 %s tracks;tracks nstlayers;arb. units", ex3[i]), 20, 0, 20);
+    h_nm1_tracks_nstlayers_v_eta[i] = fs->make<TH2D>(TString::Format("h_nm1_%s_tracks_nstlayers_v_eta", ex3[i]), TString::Format("nm1 %s tracks;tracks #eta;tracks number of strip layers", ex3[i]), 80, -4, 4, 20, 0, 20);
+    h_nm1_tracks_nstlayers_etalt2[i] = fs->make<TH1D>(TString::Format("h_nm1_%s_tracks_nstlayers_etalt2", ex3[i]), TString::Format("nm1 %s tracks;|#eta| < 2 tracks nstlayers;arb. units", ex3[i]), 20, 0, 20);
+    h_nm1_tracks_nstlayers_etagt2[i] = fs->make<TH1D>(TString::Format("h_nm1_%s_tracks_nstlayers_etagt2", ex3[i]), TString::Format("nm1 %s tracks;|#eta| #geq 2 tracks nstlayers;arb. units", ex3[i]), 20, 0, 20);
+    h_nm1_tracks_nsigmadxy[i] = fs->make<TH1D>(TString::Format("h_nm1_%s_tracks_nsigmadxy", ex3[i]), TString::Format("nm1 %s tracks;tracks nsigmadxy;arb. units", ex3[i]), 200, 0, 20);
+    h_nm1_tracks_dxy_v_pt[i] = fs->make<TH2D>(TString::Format("h_nm1_%s_tracks_dxy_v_pt", ex3[i]), TString::Format("nm1 %s tracks;tracks pt;tracks dxyerr", ex3[i]), 200, 0, 20, 400, -0.2, 0.2);
+    h_nm1_tracks_dxy_v_nstlayers[i] = fs->make<TH2D>(TString::Format("h_nm1_%s_tracks_dxy_v_nstlayers", ex3[i]), TString::Format("nm1 %s tracks;tracks nstlayers;tracks dxyerr", ex3[i]), 20, 0, 20, 400, -0.2, 0.2);
+    h_nm1_tracks_dxy_v_npxlayers[i] = fs->make<TH2D>(TString::Format("h_nm1_%s_tracks_dxy_v_npxlayers", ex3[i]), TString::Format("nm1 %s tracks;tracks npxlayers;tracks dxyerr", ex3[i]), 20, 0, 20, 400, -0.2, 0.2);
+    h_nm1_tracks_dxy_v_min_r[i] = fs->make<TH2D>(TString::Format("h_nm1_%s_tracks_dxy_v_min_r", ex3[i]), TString::Format("nm1 %s tracks;tracks min_r;tracks dxyerr", ex3[i]), 20, 0, 20, 400, -0.2, 0.2);
+    h_nm1_tracks_dxyerr_v_pt[i] = fs->make<TH2D>(TString::Format("h_nm1_%s_tracks_dxyerr_v_pt", ex3[i]), TString::Format("nm1 %s tracks;tracks pt;tracks dxyerr", ex3[i]), 200, 0, 20, 200, 0, 0.2);
+    h_nm1_tracks_dxyerr_v_npxlayers[i] = fs->make<TH2D>(TString::Format("h_nm1_%s_tracks_dxyerr_v_npxlayers", ex3[i]), TString::Format("nm1 %s tracks;tracks npxlayers;tracks dxyerr", ex3[i]), 20, 0, 20, 200, 0, 0.2);
+    h_nm1_tracks_dxyerr_v_nstlayers[i] = fs->make<TH2D>(TString::Format("h_nm1_%s_tracks_dxyerr_v_nstlayers", ex3[i]), TString::Format("nm1 %s tracks;tracks nstlayers;tracks dxyerr", ex3[i]), 20, 0, 20, 200, 0, 0.2);
+    h_nm1_tracks_dxyerr_v_min_r[i] = fs->make<TH2D>(TString::Format("h_nm1_%s_tracks_dxyerr_v_min_r", ex3[i]), TString::Format("nm1 %s tracks;tracks min_r;tracks dxyerr", ex3[i]), 20, 0, 20, 200, 0, 0.2);
+  }
 
   const char* ex2[2] = {"all", "nm1"};
   for (int i = 0; i < 2; ++i) {
     h_dxyerr_v_ptcut[i] = fs->make<TH2D>(TString::Format("h_%s_dxyerr_v_ptcut", ex2[i]), "", 40, 0, 20, 100, 0, 0.2);
     h_dxyerr_v_npxlayerscut[i] = fs->make<TH2D>(TString::Format("h_%s_dxyerr_v_npxlayerscut", ex2[i]), "", 5, 0, 5, 100, 0, 0.2);
     h_dxyerr_v_nstlayerscut[i] = fs->make<TH2D>(TString::Format("h_%s_dxyerr_v_nstlayerscut", ex2[i]), "", 15, 0, 15, 100, 0, 0.2);
+    h_tracks_ptcut[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_ptcut", ex2[i]), "", 40, 0, 20);
+    h_tracks_npxlayerscut[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_npxlayerscut", ex2[i]), "", 5, 0, 5);
+    h_tracks_nstlayerscut[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_nstlayerscut", ex2[i]), "", 15, 0, 15);
+    for (int j = 0; j < 4; ++j) {
+      h_dxyerr_v_npxlayerscut_etaslices[i][j] = fs->make<TH2D>(TString::Format("h_%s_dxyerr_v_npxlayerscut_eta%d", ex2[i], j), "", 5, 0, 5, 100, 0, 0.2);
+      h_dxyerr_v_nstlayerscut_etaslices[i][j] = fs->make<TH2D>(TString::Format("h_%s_dxyerr_v_nstlayerscut_eta%d", ex2[i], j), "", 15, 0, 15, 100, 0, 0.2);
+    }
   }
 }
 
@@ -291,31 +323,84 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
     const bool sel = nm1[0] && nm1[1] && nm1[2] && nm1[3];
     const bool seed = sel && nm1[4];
 
-    if (          nm1[1] && nm1[2] && nm1[3] && nm1[4]) h_nm1_tracks_pt->Fill(pt, w);
-    if (nm1[0]           && nm1[2] && nm1[3] && nm1[4]) h_nm1_tracks_min_r->Fill(min_r, w);
-    if (nm1[0] && nm1[1]           && nm1[3] && nm1[4]) h_nm1_tracks_npxlayers->Fill(npxlayers, w);
-    if (nm1[0] && nm1[1] && nm1[2]           && nm1[4]) h_nm1_tracks_nstlayers->Fill(nstlayers, w);
-    if (nm1[0] && nm1[1] && nm1[2]           && nm1[4]) h_nm1_tracks_nstlayers_v_eta->Fill(tk.eta(), nstlayers, w);
-    if (nm1[0] && nm1[1] && nm1[2]           && nm1[4] && abseta <  2.0) h_nm1_tracks_nstlayers_etalt2->Fill(nstlayers, w);
-    if (nm1[0] && nm1[1] && nm1[2]           && nm1[4] && abseta >= 2.0) h_nm1_tracks_nstlayers_etagt2->Fill(nstlayers, w);
-    if (nm1[0] && nm1[1] && nm1[2] && nm1[3]          ) h_nm1_tracks_nsigmadxy->Fill(nsigmadxy, w);
+    const bool pt_nm1_sel = nm1[1] && nm1[2] && nm1[3];
+    const bool min_r_nm1_sel = nm1[0] && nm1[2] && nm1[3];
+    const bool npxlay_nm1_sel = nm1[0] && nm1[1] && nm1[3];
+    const bool nstlay_nm1_sel = nm1[0] && nm1[1] && nm1[2];
+
+    for (int i = 0; i < 2; ++i) {
+      if (i == 1 && !nm1[4]) continue;
+
+      if (pt_nm1_sel) {
+	h_nm1_tracks_pt[i]->Fill(pt, w);
+	h_nm1_tracks_dxy_v_pt[i]->Fill(pt, dxy, w);
+	h_nm1_tracks_dxyerr_v_pt[i]->Fill(pt, tk.dxyError(), w);
+      }
+      if (min_r_nm1_sel) {
+	h_nm1_tracks_min_r[i]->Fill(min_r, w);
+	h_nm1_tracks_dxy_v_min_r[i]->Fill(min_r, dxy, w);
+	h_nm1_tracks_dxyerr_v_min_r[i]->Fill(min_r, tk.dxyError(), w);
+      }
+      if (npxlay_nm1_sel) {
+	h_nm1_tracks_npxlayers[i]->Fill(npxlayers, w);
+	h_nm1_tracks_dxy_v_npxlayers[i]->Fill(npxlayers, dxy, w);
+	h_nm1_tracks_dxyerr_v_npxlayers[i]->Fill(npxlayers, tk.dxyError(), w);
+      }
+      if (nstlay_nm1_sel) {
+	h_nm1_tracks_nstlayers[i]->Fill(nstlayers, w);
+	h_nm1_tracks_nstlayers_v_eta[i]->Fill(tk.eta(), nstlayers, w);
+	h_nm1_tracks_dxy_v_nstlayers[i]->Fill(nstlayers, dxy, w);
+	h_nm1_tracks_dxyerr_v_nstlayers[i]->Fill(nstlayers, tk.dxyError(), w);
+      }
+      if (nstlay_nm1_sel && abseta <  2.0) h_nm1_tracks_nstlayers_etalt2[i]->Fill(nstlayers, w);
+      if (nstlay_nm1_sel && abseta >= 2.0) h_nm1_tracks_nstlayers_etagt2[i]->Fill(nstlayers, w);
+      if (sel) h_nm1_tracks_nsigmadxy[i]->Fill(nsigmadxy, w);
+    }
 
     const bool nm1_sel[3] = {
-      nm1[1] && nm1[2] && nm1[3],
-      nm1[1] && nm1[0] && nm1[3],
-      nm1[1] && nm1[0] && nm1[2]
+      pt_nm1_sel,
+      npxlay_nm1_sel,
+      nstlay_nm1_sel
     };
     const double nm1_v[3] = { pt, npxlayers, nstlayers };
 
     for (int i = 0; i < 2; ++i) {
       TH2D* nm1_h[3] = { h_dxyerr_v_ptcut[i], h_dxyerr_v_npxlayerscut[i], h_dxyerr_v_nstlayerscut[i] };
+      TH1D* nm1_h_tracks[3] = { h_tracks_ptcut[i], h_tracks_npxlayerscut[i], h_tracks_nstlayerscut[i] };
       for (int j = 0; j < 3; ++j) {
-        if (i == 0 || (i == 1 && nm1_sel[j])) {
-          for (int ibin = 1; ibin <= nm1_h[j]->GetNbinsX(); ++ibin) {
-            const double cut = nm1_h[j]->GetXaxis()->GetBinLowEdge(ibin);
-            if (nm1_v[j] >= cut) nm1_h[j]->Fill(cut, tk.dxyError(), w);
-          }
-        }
+	if (i == 0 || (i == 1 && nm1_sel[j])) {
+	  for (int ibin = 1; ibin <= nm1_h[j]->GetNbinsX(); ++ibin) {
+	    const double cut = nm1_h[j]->GetXaxis()->GetBinLowEdge(ibin);
+	    if (nm1_v[j] >= cut) nm1_h[j]->Fill(cut, tk.dxyError(), w);
+	  }
+	  for (int ibin = 1; ibin <= nm1_h_tracks[j]->GetNbinsX(); ++ibin) {
+	    const double cut = nm1_h_tracks[j]->GetXaxis()->GetBinLowEdge(ibin);
+	    if (nm1_v[j] >= cut) nm1_h_tracks[j]->Fill(cut, w);
+	  }
+	}
+      }
+
+      for (int k = 0; k < 4; ++k) {
+	TH2D* nm1_h2[2] = { h_dxyerr_v_npxlayerscut_etaslices[i][k], h_dxyerr_v_nstlayerscut_etaslices[i][k] };
+	for (int j = 0; j < 2; ++j) {
+	  if (i == 0 || (i == 1 && nm1_sel[j+1])) {
+	    for (int ibin = 1; ibin <= nm1_h2[j]->GetNbinsX(); ++ibin) {
+	      const double cut = nm1_h2[j]->GetXaxis()->GetBinLowEdge(ibin);
+	      if (abseta < 1 && k == 0) {
+		if (nm1_v[j+1] >= cut) nm1_h2[j]->Fill(cut, tk.dxyError(), w);
+	      }
+	      if (abseta < 1.5 && abseta > 1 && k == 1) {
+		if (nm1_v[j+1] >= cut) nm1_h2[j]->Fill(cut, tk.dxyError(), w);
+	      }
+	      if (abseta < 2.5 && abseta > 1.5 && k == 2) {
+		if (nm1_v[j+1] >= cut) nm1_h2[j]->Fill(cut, tk.dxyError(), w);
+	      }
+	      if (abseta > 2.5 && k == 3) {
+		if (nm1_v[j+1] >= cut) nm1_h2[j]->Fill(cut, tk.dxyError(), w);
+	      }
+	    }
+	  }
+	}
       }
     }
 
