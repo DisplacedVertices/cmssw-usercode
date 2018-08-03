@@ -101,7 +101,7 @@ for kind in kinds:
         xtitle = 'c#tau_{%s} (mm)' % particle
         
     g = expect95
-    g.SetTitle(';%s;#sigmaB^{2} (fb)    ' % xtitle)
+    g.SetTitle(';%s;#sigma#bf{#it{#Beta}}^{2} (fb)    ' % xtitle)
     g.Draw('A3')
 
     draw_theory = 'tau' in kind
@@ -161,7 +161,7 @@ for kind in kinds:
     leg.AddEntry(expect68, '68% expected', 'F')
     leg.AddEntry(expect95, '95% expected', 'F')
     if draw_theory:
-        leg.AddEntry(theory, nice_theory(kind) + ', B=1', 'LF')
+        leg.AddEntry(theory, nice_theory(kind) + ', #bf{#it{#Beta}}=1', 'LF')
     leg.Draw()
 
     cms = write(61, 0.050, 0.142, 0.825, 'CMS')

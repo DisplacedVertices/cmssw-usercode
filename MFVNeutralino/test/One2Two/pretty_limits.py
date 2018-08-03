@@ -82,7 +82,7 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
 #        zax.SetTitleOffset(1.2)
         #zax.SetBinLabel(zax.FindBin(30), '30')
 #     zax.SetRangeUser(0., 0.85)
-        zax.SetTitle('95% CL upper limit on #sigmaB^{2} (fb)')
+        zax.SetTitle('95% CL upper limit on #sigma#bf{#it{#Beta}}^{2} (fb)')
         zax.SetLabelSize(0.045)
         zax.SetLabelOffset(0.00005)
         zax.SetTitleSize(0.05)
