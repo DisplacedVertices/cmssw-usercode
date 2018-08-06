@@ -4,6 +4,9 @@
 #include <cassert>
 #include <numeric>
 #include "TLorentzVector.h"
+#include "DataFormats/Math/interface/Point3D.h"
+
+namespace reco { class Track; class Candidate; }
 
 namespace mfv {
   // JMTBAD hope you keep these in sync with Event.cc
@@ -314,6 +317,14 @@ struct MFVEvent {
   std::vector<float> lep_hlt_pt;
   std::vector<float> lep_hlt_eta;
   std::vector<float> lep_hlt_phi;
+
+  void lep_push_back(lep_id_t id,
+                     const reco::Candidate& lep,
+                     const reco::Track& trk,
+                     const double iso,
+                     const std::vector<TLorentzVector>& hltleps,
+                     const math::XYZPoint& beamspot,
+                     const math::XYZPoint& primary_vertex);
 
   size_t nlep() const { return lep_id_.size(); }
 

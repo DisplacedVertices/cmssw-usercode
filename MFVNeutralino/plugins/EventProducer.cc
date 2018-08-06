@@ -120,6 +120,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   const reco::Vertex* primary_vertex = 0;
   if (primary_vertices->size())
     primary_vertex = &primary_vertices->at(0);
+  const math::XYZPoint primary_vertex_position = primary_vertex ? primary_vertex->position() : math::XYZPoint(0,0,0);
 
   edm::Handle<pat::PackedCandidateCollection> packed_candidates;
   if (input_is_miniaod)
@@ -390,42 +391,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
     const float iso = (muon.pfIsolationR04().sumChargedHadronPt + std::max(0., muon.pfIsolationR04().sumNeutralHadronEt + muon.pfIsolationR04().sumPhotonEt - 0.5*muon.pfIsolationR04().sumPUPt))/muon.pt();
 
-    mevent->lep_id_.push_back(MFVEvent::encode_mu_id(id));
-    mevent->lep_pt.push_back(muon.pt());
-    mevent->lep_eta.push_back(muon.eta());
-    mevent->lep_phi.push_back(muon.phi());
-    const auto trk = muon.bestTrack();
-    if (primary_vertex != 0) {
-      const auto& pvpos = primary_vertex->position();
-      mevent->lep_dxy.push_back(trk->dxy(pvpos));
-      mevent->lep_dz.push_back(trk->dz(pvpos));
-    }
-    else {
-      mevent->lep_dxy.push_back(trk->dxy());
-      mevent->lep_dz.push_back(trk->dz());
-    }
-    mevent->lep_dxybs.push_back(trk->dxy(beamspot->position()));
-
-    mevent->lep_pt_err.push_back(trk->ptError());
-    mevent->lep_eta_err.push_back(trk->etaError());
-    mevent->lep_phi_err.push_back(trk->phiError());
-    mevent->lep_dxy_err.push_back(trk->dxyError());
-    mevent->lep_dz_err.push_back(trk->dzError());
-
-    mevent->lep_iso.push_back(iso);
-
-    double hltmatchdist2 = 0.1*0.1;
-    TLorentzVector hltmatch;
-    for (auto hlt : triggerfloats->hltmuons) {
-      const double dist2 = reco::deltaR2(muon.eta(), muon.phi(), hlt.Eta(), hlt.Phi());
-      if (dist2 < hltmatchdist2) {
-        hltmatchdist2 = dist2;
-        hltmatch = hlt;
-      }
-    }
-    mevent->lep_hlt_pt.push_back(hltmatch.Pt());
-    mevent->lep_hlt_eta.push_back(hltmatch.Eta());
-    mevent->lep_hlt_phi.push_back(hltmatch.Phi());
+    mevent->lep_push_back(MFVEvent::encode_mu_id(id), muon, *muon.bestTrack(), iso, triggerfloats->hltmuons, beamspot->position(muon.bestTrack()->vz()), primary_vertex_position);
   }
 
   edm::Handle<pat::ElectronCollection> electrons;
@@ -453,42 +419,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     const float eA = electron_effective_areas.getEffectiveArea(fabs(electron.superCluster()->eta()));
     const float iso = pfIso.sumChargedHadronPt + std::max(0., pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - *rho*eA) / electron.pt();
 
-    mevent->lep_id_.push_back(MFVEvent::encode_el_id(id));
-    mevent->lep_pt.push_back(electron.pt());
-    mevent->lep_eta.push_back(electron.eta());
-    mevent->lep_phi.push_back(electron.phi());
-    const auto trk = electron.gsfTrack();
-    if (primary_vertex != 0) {
-      const auto& pvpos = primary_vertex->position();
-      mevent->lep_dxy.push_back(trk->dxy(pvpos));
-      mevent->lep_dz.push_back(trk->dz(pvpos));
-    }
-    else {
-      mevent->lep_dxy.push_back(trk->dxy());
-      mevent->lep_dz.push_back(trk->dz());
-    }
-    mevent->lep_dxybs.push_back(trk->dxy(beamspot->position()));
-
-    mevent->lep_pt_err.push_back(trk->ptError());
-    mevent->lep_eta_err.push_back(trk->etaError());
-    mevent->lep_phi_err.push_back(trk->phiError());
-    mevent->lep_dxy_err.push_back(trk->dxyError());
-    mevent->lep_dz_err.push_back(trk->dzError());
-
-    mevent->lep_iso.push_back(iso);
-
-    double hltmatchdist2 = 0.1*0.1;
-    TLorentzVector hltmatch;
-    for (auto hlt : triggerfloats->hltelectrons) {
-      const double dist2 = reco::deltaR2(electron.eta(), electron.phi(), hlt.Eta(), hlt.Phi());
-      if (dist2 < hltmatchdist2) {
-        hltmatchdist2 = dist2;
-        hltmatch = hlt;
-      }
-    }
-    mevent->lep_hlt_pt.push_back(hltmatch.Pt());
-    mevent->lep_hlt_eta.push_back(hltmatch.Eta());
-    mevent->lep_hlt_phi.push_back(hltmatch.Phi());
+    mevent->lep_push_back(MFVEvent::encode_el_id(id), electron, *electron.gsfTrack(), iso, triggerfloats->hltelectrons, beamspot->position(electron.gsfTrack()->vz()), primary_vertex_position);
   }
 
   //////////////////////////////////////////////////////////////////////
