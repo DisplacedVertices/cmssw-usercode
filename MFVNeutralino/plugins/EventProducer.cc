@@ -413,6 +413,19 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->lep_dz_err.push_back(trk->dzError());
 
     mevent->lep_iso.push_back(iso);
+
+    double hltmatchdist2 = 0.1*0.1;
+    TLorentzVector hltmatch;
+    for (auto hlt : triggerfloats->hltmuons) {
+      const double dist2 = reco::deltaR2(muon.eta(), muon.phi(), hlt.Eta(), hlt.Phi());
+      if (dist2 < hltmatchdist2) {
+        hltmatchdist2 = dist2;
+        hltmatch = hlt;
+      }
+    }
+    mevent->lep_hlt_pt.push_back(hltmatch.Pt());
+    mevent->lep_hlt_eta.push_back(hltmatch.Eta());
+    mevent->lep_hlt_phi.push_back(hltmatch.Phi());
   }
 
   edm::Handle<pat::ElectronCollection> electrons;
@@ -463,6 +476,19 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->lep_dz_err.push_back(trk->dzError());
 
     mevent->lep_iso.push_back(iso);
+
+    double hltmatchdist2 = 0.1*0.1;
+    TLorentzVector hltmatch;
+    for (auto hlt : triggerfloats->hltelectrons) {
+      const double dist2 = reco::deltaR2(electron.eta(), electron.phi(), hlt.Eta(), hlt.Phi());
+      if (dist2 < hltmatchdist2) {
+        hltmatchdist2 = dist2;
+        hltmatch = hlt;
+      }
+    }
+    mevent->lep_hlt_pt.push_back(hltmatch.Pt());
+    mevent->lep_hlt_eta.push_back(hltmatch.Eta());
+    mevent->lep_hlt_phi.push_back(hltmatch.Phi());
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -543,6 +569,9 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->lep_dxy_err.clear();
     mevent->lep_dz_err.clear();
     mevent->lep_iso.clear();
+    mevent->lep_hlt_pt.clear();
+    mevent->lep_hlt_eta.clear();
+    mevent->lep_hlt_phi.clear();
     mevent->vertex_seed_track_chi2dof.clear();
     mevent->vertex_seed_track_qpt.clear();
     mevent->vertex_seed_track_eta.clear();

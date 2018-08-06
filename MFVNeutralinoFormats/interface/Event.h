@@ -311,6 +311,9 @@ struct MFVEvent {
   std::vector<float> lep_dxy_err;
   std::vector<float> lep_dz_err;
   std::vector<float> lep_iso;
+  std::vector<float> lep_hlt_pt;
+  std::vector<float> lep_hlt_eta;
+  std::vector<float> lep_hlt_phi;
 
   size_t nlep() const { return lep_id_.size(); }
 
