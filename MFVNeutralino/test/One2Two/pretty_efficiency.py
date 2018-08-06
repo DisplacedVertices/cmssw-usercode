@@ -27,9 +27,9 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
     h = f.Get('signal_efficiency_%s' % kind)
     xax = h.GetXaxis()
     if 'neu' in kind:
-        xax.SetTitle('M_{#tilde{#chi}^{0} / #tilde{g}} (GeV)')
+        xax.SetTitle('m_{#tilde{#chi}^{0} / #tilde{g}} (GeV)')
     else:
-        xax.SetTitle('M_{#tilde{t}} (GeV)')
+        xax.SetTitle('m_{#tilde{t}} (GeV)')
 #    xax.CenterLabels()
 #    xax.SetNdivisions(1300, 0)
 #    xax.SetBinLabel(xax.FindBin(400), '400')

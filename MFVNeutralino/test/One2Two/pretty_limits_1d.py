@@ -38,13 +38,14 @@ def tau(tau):
     else:
         assert tau.endswith('mm')
         tau = float(tau.replace('mm',''))
-        return '%.0f mm' % tau
+        fmt = '%.1f mm' if tau < 10 else '%.0f mm'
+        return fmt % tau
 
 def nice_leg(kind):
     if kind.startswith('multijet_M'):
-        return '#tilde{#chi}^{0}/#tilde{g} #rightarrow tbs, M = %i GeV' % int(kind.replace('multijet_M', ''))
+        return '#tilde{#chi}^{0}/#tilde{g} #rightarrow tbs, m = %i GeV' % int(kind.replace('multijet_M', ''))
     elif kind.startswith('dijet_M'):
-        return '#tilde{t} #rightarrow #bar{d}#kern[0.1]{#bar{d}}, M = %i GeV' % int(kind.replace('dijet_M', ''))
+        return '#tilde{t} #rightarrow #bar{d}#kern[0.1]{#bar{d}}, m = %i GeV' % int(kind.replace('dijet_M', ''))
     elif kind.startswith('multijet_tau'):
         return '#tilde{#chi}^{0}/#tilde{g} #rightarrow tbs, c#tau = ' + tau(kind.replace('multijet_tau', ''))
     elif kind.startswith('dijet_tau'):
