@@ -334,6 +334,16 @@ struct MFVEvent {
   std::vector<float> lep_phi_err;
   std::vector<float> lep_dxy_err;
   std::vector<float> lep_dz_err;
+  std::vector<float> lep_chi2dof;
+  std::vector<HitPattern::value_t> lep_hp_;
+  HitPattern lep_hp(int i) const { return HitPattern(lep_hp_[i]); }
+  void lep_hp_push_back(int npxh, int nsth, int npxl, int nstl) { lep_hp_.push_back(HitPattern(npxh, nsth, npxl, nstl).value); }
+  int lep_npxhits(int i) const { return lep_hp(i).npxhits(); }
+  int lep_nsthits(int i) const { return lep_hp(i).nsthits(); }
+  int lep_nhits(int i) const { return lep_hp(i).nhits(); }
+  int lep_npxlayers(int i) const { return lep_hp(i).npxlayers(); }
+  int lep_nstlayers(int i) const { return lep_hp(i).nstlayers(); }
+  int lep_nlayers(int i) const { return lep_hp(i).nlayers(); }
   std::vector<float> lep_iso;
   std::vector<float> lep_hlt_pt;
   std::vector<float> lep_hlt_eta;

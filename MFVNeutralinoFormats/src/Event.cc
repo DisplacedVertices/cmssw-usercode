@@ -106,6 +106,12 @@ void MFVEvent::lep_push_back(MFVEvent::lep_id_t id,
   lep_dxy_err.push_back(trk.dxyError());
   lep_dz_err.push_back(trk.dzError());
 
+  lep_chi2dof.push_back(trk.normalizedChi2());
+  lep_hp_push_back(trk.hitPattern().numberOfValidPixelHits(),
+                   trk.hitPattern().numberOfValidStripHits(),
+                   trk.hitPattern().pixelLayersWithMeasurement(),
+                   trk.hitPattern().stripLayersWithMeasurement());
+
   lep_iso.push_back(iso);
 
   double hltmatchdist2 = 0.1*0.1;
