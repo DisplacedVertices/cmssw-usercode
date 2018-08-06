@@ -50,6 +50,14 @@ MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
   produces<mfv::TriggerFloats>();
 }
 
+namespace {
+  TLorentzVector p4(double pt, double eta, double phi, double energy) {
+    TLorentzVector v;
+    v.SetPtEtaPhiE(pt, eta, phi, energy);
+    return v;
+  }
+}
+
 void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) {
   if (prints) std::cout << "TriggerFloats run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
 
@@ -150,7 +158,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
       std::cout << "Trigger " << trigger_names.triggerName(i) << ": " << (trigger_results->accept(i) ? "PASS" : "fail (or not run)") << "\n";
     std::cout << "\n === TRIGGER OBJECTS === " << "\n";
     for (pat::TriggerObjectStandAlone obj : *trigger_objects) {
-      obj.unpackPathNames(trigger_names); // needs above to be non-const
+      obj.unpackNamesAndLabels(event, *trigger_results);
       std::cout << "\tTrigger object:  pt " << obj.pt() << ", eta " << obj.eta() << ", phi " << obj.phi() << "\n";
       std::cout << "\t   Collection: " << obj.collection() << "\n";
       std::cout << "\t   Type IDs:   ";
@@ -163,7 +171,10 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
       std::cout << "\n";
       const std::vector<std::string>& pathNamesAll  = obj.pathNames(false);
       const std::vector<std::string>& pathNamesLast = obj.pathNames(true);
-      std::cout << "\t   Paths (" << pathNamesAll.size()<<"/"<<pathNamesLast.size()<<"):    ";
+      std::cout << "\t   Paths (" << pathNamesAll.size()<<"/"<<pathNamesLast.size();
+      if (pathNamesAll.size() != pathNamesLast.size())
+        std::cout << " paths different";
+      std::cout << "):    ";
       for (unsigned h = 0, n = pathNamesAll.size(); h < n; ++h) {
         const bool isBoth = obj.hasPathName(pathNamesAll[h], true, true);
         const bool isL3   = obj.hasPathName(pathNamesAll[h], false, true);
@@ -260,11 +271,77 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   std::unique_ptr<mfv::TriggerFloats> floats(new mfv::TriggerFloats);
 
   for (pat::TriggerObjectStandAlone obj : *trigger_objects) {
-    if (obj.filterIds().size() == 1 && obj.filterIds()[0] == 89) {
+    const size_t nids = obj.filterIds().size();
+    bool is_l1 = false;
+    bool is_ht = false;
+    bool is_cluster = false;
+    bool is_photon = false;
+    bool is_muon = false;
+
+    for (int id : obj.filterIds()) {
+      if (is_l1)
+        assert(id < 0);
+
+      if (id < 0)
+        is_l1 = true;
+      else if (id == trigger::TriggerTHT)
+        is_ht = true;
+      else if (id == trigger::TriggerCluster)
+        is_cluster = true;
+      else if (id == trigger::TriggerPhoton)
+        is_photon = true;
+      else if (id == trigger::TriggerMuon)
+        is_muon = true;
+    }
+
+    //printf("%s %lu %i%i%i%i%i\n", obj.collection().c_str(), nids, is_l1, is_ht, is_cluster, is_photon, is_muon); fflush(stdout);
+    if (is_l1) assert(nids == 1 && !is_ht && !is_cluster && !is_photon && !is_muon);
+    if (is_ht) assert(nids == 1 && !is_cluster && !is_photon && !is_muon);
+    bool is_electron = is_cluster;
+
+    if (is_ht) {
       if (obj.collection() == "hltPFHT::HLT")
         floats->hltht = obj.pt();
       else if (obj.collection() == "hltHtMhtForMC::HLT") {
         floats->hltht4mc = obj.pt();
+      }
+    }
+    else if (is_electron || is_muon) {
+      // for HT above we didn't check the path, there's always only one
+      // HT object. there can be many trigger electrons/muons, only store
+      // those that were used in the decision, i.e. those that were used
+      // in a path we care about.
+      obj.unpackNamesAndLabels(event, *trigger_results);
+      const std::vector<std::string>& pathNamesAll  = obj.pathNames(false);
+      int ipath = -1;
+      for (const std::string& p : pathNamesAll) {
+        for (int i = 0; i < mfv::n_hlt_paths; ++i)
+          if (helper.path_same_without_version(p, mfv::hlt_paths[i])) {
+            ipath = i;
+            break;
+          }
+        if (ipath != -1) break;
+      }
+
+      if (ipath != -1) {
+
+        if (is_electron) {
+          if (obj.collection() == "hltEgammaCandidates::HLT")
+            floats->hltelectrons.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
+        }
+        else if (is_muon) {
+          if (obj.collection() == "hltIterL3MuonCandidates::HLT")
+            floats->hltmuons.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
+        }
+
+        if (prints) {
+          std::cout << "TriggerFloats object for path " << mfv::hlt_paths[ipath]
+                    << " pt " << obj.pt() << " eta " << obj.eta() << " phi " << obj.phi()
+                    << " collection: " << obj.collection() << " ids (# = " << obj.filterIds().size() << "):";
+          for (auto id : obj.filterIds())
+            std::cout << " " << id;
+          std::cout << "\n";
+        }
       }
     }
   }
@@ -272,11 +349,8 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   for (size_t i = 0, ie = l1_jets->size(0); i < ie; ++i) {
     const l1t::Jet& jet = l1_jets->at(0, i);
     if (i > 0) assert(jet.pt() <= l1_jets->at(0, i-1).pt());
-    if (fabs(jet.eta()) < 3) {
-      TLorentzVector v;
-      v.SetPtEtaPhiE(jet.pt(), jet.eta(), jet.phi(), jet.energy());
-      floats->l1jets.push_back(v);
-    }
+    if (fabs(jet.eta()) < 3)
+      floats->l1jets.push_back(p4(jet.pt(), jet.eta(), jet.phi(), jet.energy()));
   }
 
   floats->l1htt = etsumhelper.TotalHt();
@@ -293,6 +367,14 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
 
     if (prints)
       printf("HLT bit %2i %20s: %2i\n", i, mfv::hlt_paths[i], floats->HLTdecisions[i]);
+  }
+
+  if (prints) {
+    printf("TriggerFloats: event passed HLT for");
+    for (int i = 0; i < mfv::n_hlt_paths; ++i)
+      if (floats->HLTdecisions[i])
+        printf(" %s", mfv::hlt_paths[i]);
+    printf("\n");
   }
 
   edm::Handle<GlobalAlgBlkBxCollection> l1_results_all;
@@ -322,9 +404,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   for (const pat::Jet& jet : *jets)
     if (jet_selector(jet)) {
       const double pt = jet.pt();
-      TLorentzVector v;
-      v.SetPtEtaPhiE(pt, jet.eta(), jet.phi(), jet.energy());
-      floats->jets.push_back(v);
+      floats->jets.push_back(p4(pt, jet.eta(), jet.phi(), jet.energy()));
       floats->jetmuef.push_back(jet.muonEnergyFraction());
 
       floats->htall += pt;
