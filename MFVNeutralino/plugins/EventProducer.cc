@@ -373,7 +373,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
         mevent->jet_track_phi_err.push_back(tk->phiError());
         mevent->jet_track_dxy_err.push_back(tk->dxyError());
         mevent->jet_track_dz_err.push_back(tk->dzError());
-        mevent->jet_track_hp_.push_back(MFVEvent::make_track_hitpattern(tk->hitPattern().numberOfValidPixelHits(), tk->hitPattern().numberOfValidStripHits(), tk->hitPattern().pixelLayersWithMeasurement(), tk->hitPattern().stripLayersWithMeasurement()));
+        mevent->jet_track_hp_push_back(tk->hitPattern().numberOfValidPixelHits(), tk->hitPattern().numberOfValidStripHits(), tk->hitPattern().pixelLayersWithMeasurement(), tk->hitPattern().stripLayersWithMeasurement());
       }
     }
   }
@@ -434,7 +434,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->vertex_seed_track_phi.push_back(tk.phi());
     mevent->vertex_seed_track_dxy.push_back(tk.dxy(beamspot->position()));
     mevent->vertex_seed_track_dz.push_back(primary_vertex ? tk.dz(primary_vertex->position()) : 0);
-    mevent->vertex_seed_track_hp_.push_back(MFVEvent::make_track_hitpattern(tk.hitPattern().numberOfValidPixelHits(), tk.hitPattern().numberOfValidStripHits(), tk.hitPattern().pixelLayersWithMeasurement(), tk.hitPattern().stripLayersWithMeasurement()));
+    mevent->vertex_seed_track_hp_push_back(tk.hitPattern().numberOfValidPixelHits(), tk.hitPattern().numberOfValidStripHits(), tk.hitPattern().pixelLayersWithMeasurement(), tk.hitPattern().stripLayersWithMeasurement());
   }
 
   //////////////////////////////////////////////////////////////////////
