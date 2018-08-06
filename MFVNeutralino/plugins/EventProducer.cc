@@ -384,6 +384,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   mevent->lep_eta.clear();
   mevent->lep_phi.clear();
   mevent->lep_dxy.clear();
+  mevent->lep_dxybs.clear();
   mevent->lep_dz.clear();
   mevent->lep_iso.clear();
 
@@ -413,6 +414,13 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       mevent->lep_dz.push_back(trk->dz());
     }
     mevent->lep_dxybs.push_back(trk->dxy(beamspot->position()));
+
+    mevent->lep_pt_err.push_back(trk->ptError());
+    mevent->lep_eta_err.push_back(trk->etaError());
+    mevent->lep_phi_err.push_back(trk->phiError());
+    mevent->lep_dxy_err.push_back(trk->dxyError());
+    mevent->lep_dz_err.push_back(trk->dzError());
+
     mevent->lep_iso.push_back(iso);
   }
 
@@ -456,6 +464,13 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       mevent->lep_dz.push_back(trk->dz());
     }
     mevent->lep_dxybs.push_back(trk->dxy(beamspot->position()));
+
+    mevent->lep_pt_err.push_back(trk->ptError());
+    mevent->lep_eta_err.push_back(trk->etaError());
+    mevent->lep_phi_err.push_back(trk->phiError());
+    mevent->lep_dxy_err.push_back(trk->dxyError());
+    mevent->lep_dz_err.push_back(trk->dzError());
+
     mevent->lep_iso.push_back(iso);
   }
 
@@ -531,6 +546,11 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->lep_dxy.clear();
     mevent->lep_dxybs.clear();
     mevent->lep_dz.clear();
+    mevent->lep_pt_err.clear();
+    mevent->lep_eta_err.clear();
+    mevent->lep_phi_err.clear();
+    mevent->lep_dxy_err.clear();
+    mevent->lep_dz_err.clear();
     mevent->lep_iso.clear();
     mevent->vertex_seed_track_chi2dof.clear();
     mevent->vertex_seed_track_qpt.clear();
