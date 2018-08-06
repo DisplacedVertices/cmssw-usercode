@@ -13,14 +13,11 @@ want_summary(process)
 
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
 process.mfvTriggerFloats.jets_src = 'slimmedJets'
-#process.mfvTriggerFloats.prints = 2
+#process.mfvTriggerFloats.prints = 1
 
 if 0:
-    process.load('HLTrigger.HLTfilters.hltHighLevel_cfi')
-    process.hltHighLevel.HLTPaths = [ 'HLT_PFHT800_v*', 'HLT_PFHT900_v*' ]
-    process.hltHighLevel.andOr = True # = OR
-    process.hltHighLevel.throw = False
-    process.p = cms.Path(process.hltHighLevel * process.mfvTriggerFloats)
+    process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
+    process.p = cms.Path(process.mfvTriggerFilter * process.mfvTriggerFloats)
 else:
     process.p = cms.Path(process.mfvTriggerFloats)
 
