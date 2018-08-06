@@ -1,6 +1,7 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 
 namespace mfv {
+  // be sure these end in _v
   const char* hlt_paths[mfv::n_hlt_paths] = {
     "HLT_PFHT1050_v",
     "HLT_Ele35_WPTight_Gsf_v",
