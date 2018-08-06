@@ -17,6 +17,12 @@ struct TriggerHelper {
     return *h;
   }
 
+  // path2 must end in _v for this cheap comparison to work
+  static bool path_same_without_version(const std::string& path, const std::string& path2) {
+    //const size_t n = path2.size(); assert(path2[n-1] == 'v' && path2[n-2] == '_');
+    return path.substr(0, path2.size()) == path2;
+  }
+
   TriggerHelper(const edm::TriggerResults& trigger_results_, const edm::TriggerNames& trigger_names_) : trigger_results(trigger_results_), trigger_names(trigger_names_), debug(false) {}
   TriggerHelper(const edm::Event& event, const edm::EDGetTokenT<edm::TriggerResults>& token)
     : trigger_results(_get(event, token)), trigger_names(event.triggerNames(trigger_results)), debug(false) {}
@@ -62,7 +68,7 @@ struct TriggerHelper {
   bool pass_any_version(const std::string& trigger, bool throw_not_found=true) const {
     for (size_t ipath = 0, ipathe = trigger_names.size(); ipath < ipathe; ++ipath) {
       const std::string path = trigger_names.triggerName(ipath);
-      if (path.substr(0, trigger.size()) == trigger)
+      if (path_same_without_version(path, trigger))
         return trigger_results.accept(ipath);
     }
     
@@ -76,7 +82,7 @@ struct TriggerHelper {
     bool found = false;
     for (size_t ipath = 0, ipathe = trigger_names.size(); ipath < ipathe; ++ipath) {
       const std::string path = trigger_names.triggerName(ipath);
-      if (path.substr(0, trigger.size()) == trigger) {
+      if (path_same_without_version(path, trigger)) {
         pass = trigger_results.accept(ipath);
         found = true;
         break;
