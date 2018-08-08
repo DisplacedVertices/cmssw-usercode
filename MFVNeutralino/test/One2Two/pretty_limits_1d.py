@@ -97,7 +97,7 @@ for kind in kinds:
 
     particle = '#tilde{t}' if 'dijet' in kind else '#tilde{#chi}^{0} / #tilde{g}'
     if versus_mass:
-        xtitle = 'M_{%s} (GeV)' % particle
+        xtitle = 'm_{%s} (GeV)' % particle
     elif versus_tau:
         xtitle = 'c#tau_{%s} (mm)' % particle
         
