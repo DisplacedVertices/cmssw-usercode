@@ -488,7 +488,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->metx = 0;
     mevent->mety = 0;
     mevent->lep_id_.clear();
-    mevent->lep_pt.clear();
+    mevent->lep_qpt.clear();
     mevent->lep_eta.clear();
     mevent->lep_phi.clear();
     mevent->lep_dxy.clear();

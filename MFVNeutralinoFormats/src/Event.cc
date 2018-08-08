@@ -93,7 +93,7 @@ void MFVEvent::lep_push_back(MFVEvent::lep_id_t id,
                              const math::XYZPoint& primary_vertex) {
 
   lep_id_.push_back(id); // expects already el/mu encoded
-  lep_pt.push_back(lep.pt());
+  lep_qpt.push_back(lep.charge() * lep.pt());
   lep_eta.push_back(lep.eta());
   lep_phi.push_back(lep.phi());
   lep_dxy.push_back(trk.dxy(primary_vertex));

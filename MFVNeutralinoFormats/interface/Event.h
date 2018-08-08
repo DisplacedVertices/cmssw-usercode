@@ -323,7 +323,9 @@ struct MFVEvent {
   static lep_id_t encode_mu_id(lep_id_t id) { return id; }
 
   std::vector<lep_id_t> lep_id_; // bit field: msb: 0 = mu, 1 = el, remaining bits are according to the enums above
-  std::vector<float> lep_pt;
+  std::vector<float> lep_qpt;
+  int lep_q(int i) const { return lep_qpt[i] > 0 ? 1 : -1; }
+  float lep_pt(int i) const { return fabs(lep_qpt[i]); }
   std::vector<float> lep_eta;
   std::vector<float> lep_phi;
   std::vector<float> lep_dxy;
@@ -371,7 +373,7 @@ struct MFVEvent {
 
   TLorentzVector lep_p4(size_t w) const {
     const float mass = is_electron(w) ? 0.000511 : 0.106;
-    return p4(lep_pt[w], lep_eta[w], lep_phi[w], mass);
+    return p4(lep_pt(w), lep_eta[w], lep_phi[w], mass);
   }
 
   TLorentzVector first_lep_pass(int type) const {
