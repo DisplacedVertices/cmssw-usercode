@@ -60,6 +60,10 @@ def _fromnum0(path, n, but=[], fnbase='ntuple', add=[], numbereddirs=True): # co
     l = _fromnumlist(path, xrange(n), but, fnbase, add, numbereddirs)
     return (len(l), l)
 
+def _frommerge(path, n):
+    assert path.endswith('/merge') and path.count('/merge') == 1
+    return (n, [path.replace('/merge', '/merge%s_0.root') % s for s in [''] + ['%03i' % x for x in xrange(1,n)]])
+
 def keys():
     return _d.keys()
 
