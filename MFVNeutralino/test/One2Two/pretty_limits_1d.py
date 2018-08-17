@@ -38,13 +38,14 @@ def tau(tau):
     else:
         assert tau.endswith('mm')
         tau = float(tau.replace('mm',''))
-        return '%.0f mm' % tau
+        fmt = '%.1f mm' if tau < 10 else '%.0f mm'
+        return fmt % tau
 
 def nice_leg(kind):
     if kind.startswith('multijet_M'):
-        return '#tilde{#chi}^{0}/#tilde{g} #rightarrow tbs, M = %i GeV' % int(kind.replace('multijet_M', ''))
+        return '#tilde{#chi}^{0}/#tilde{g} #rightarrow tbs, m = %i GeV' % int(kind.replace('multijet_M', ''))
     elif kind.startswith('dijet_M'):
-        return '#tilde{t} #rightarrow #bar{d}#kern[0.1]{#bar{d}}, M = %i GeV' % int(kind.replace('dijet_M', ''))
+        return '#tilde{t} #rightarrow #bar{d}#kern[0.1]{#bar{d}}, m = %i GeV' % int(kind.replace('dijet_M', ''))
     elif kind.startswith('multijet_tau'):
         return '#tilde{#chi}^{0}/#tilde{g} #rightarrow tbs, c#tau = ' + tau(kind.replace('multijet_tau', ''))
     elif kind.startswith('dijet_tau'):
@@ -96,12 +97,12 @@ for kind in kinds:
 
     particle = '#tilde{t}' if 'dijet' in kind else '#tilde{#chi}^{0} / #tilde{g}'
     if versus_mass:
-        xtitle = 'M_{%s} (GeV)' % particle
+        xtitle = 'm_{%s} (GeV)' % particle
     elif versus_tau:
         xtitle = 'c#tau_{%s} (mm)' % particle
         
     g = expect95
-    g.SetTitle(';%s;#sigmaB^{2} (fb)    ' % xtitle)
+    g.SetTitle(';%s;#sigma#bf{#it{#Beta}}^{2} (fb)    ' % xtitle)
     g.Draw('A3')
 
     draw_theory = 'tau' in kind
@@ -161,7 +162,7 @@ for kind in kinds:
     leg.AddEntry(expect68, '68% expected', 'F')
     leg.AddEntry(expect95, '95% expected', 'F')
     if draw_theory:
-        leg.AddEntry(theory, nice_theory(kind) + ', B=1', 'LF')
+        leg.AddEntry(theory, nice_theory(kind) + ', #bf{#it{#Beta}}=1', 'LF')
     leg.Draw()
 
     cms = write(61, 0.050, 0.142, 0.825, 'CMS')

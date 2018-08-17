@@ -10,7 +10,7 @@ combiner = SignalEfficiencyCombiner()
 
 which = [
     ('mfv_neu_tau00300um_M0800', 'c#tau = 0.3 mm', ROOT.kRed,     2), 
-    ('mfv_neu_tau01000um_M0800', 'c#tau = 1 mm',   ROOT.kGreen+2, 5), 
+    ('mfv_neu_tau01000um_M0800', 'c#tau = 1.0 mm',   ROOT.kGreen+2, 5), 
     ('mfv_neu_tau10000um_M0800', 'c#tau = 10 mm',  ROOT.kBlue,    7), 
     ]
 
@@ -51,7 +51,7 @@ hbkg.SetLineWidth(3)
 leg1 = ROOT.TLegend(0.400, 0.810, 0.909, 0.867)
 leg1.AddEntry(hbkg, 'Data', 'PE')
 leg2 = ROOT.TLegend(0.383, 0.698, 0.893, 0.815)
-leg2.AddEntry(0, '#kern[-0.22]{#splitline{Multijet signals,}{M = 800 GeV, #sigma = 1 fb:}}', '')
+leg2.AddEntry(0, '#kern[-0.22]{#splitline{Multijet signals,}{m = 800 GeV, #sigma = 1 fb:}}', '')
 leg3 = ROOT.TLegend(0.400, 0.572, 0.909, 0.705)
 legs = leg1, leg2, leg3
 
