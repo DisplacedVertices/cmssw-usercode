@@ -13,6 +13,8 @@ namespace mfv {
     float myhttwbug;
     float hltht;
     float hltht4mc;
+    std::vector<TLorentzVector> hltelectrons;
+    std::vector<TLorentzVector> hltmuons;
     std::vector<int> L1decisions;
     std::vector<int> HLTdecisions;
 

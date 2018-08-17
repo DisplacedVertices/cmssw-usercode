@@ -411,7 +411,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     const size_t j = mevent->is_electron(ilep);
     for (size_t i = 0; i < 2; ++i)
       if (i == 0 || mevent->pass_lep_sel(ilep)) {
-        h_leptons_pt[j][i]->Fill(mevent->lep_pt[ilep]);
+        h_leptons_pt[j][i]->Fill(mevent->lep_pt(ilep));
         h_leptons_eta[j][i]->Fill(mevent->lep_eta[ilep]);
         h_leptons_phi[j][i]->Fill(mevent->lep_phi[ilep]);
         h_leptons_dxy[j][i]->Fill(mevent->lep_dxy[ilep]);

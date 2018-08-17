@@ -120,6 +120,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   const reco::Vertex* primary_vertex = 0;
   if (primary_vertices->size())
     primary_vertex = &primary_vertices->at(0);
+  const math::XYZPoint primary_vertex_position = primary_vertex ? primary_vertex->position() : math::XYZPoint(0,0,0);
 
   edm::Handle<pat::PackedCandidateCollection> packed_candidates;
   if (input_is_miniaod)
@@ -372,20 +373,12 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
         mevent->jet_track_phi_err.push_back(tk->phiError());
         mevent->jet_track_dxy_err.push_back(tk->dxyError());
         mevent->jet_track_dz_err.push_back(tk->dzError());
-        mevent->jet_track_hp_.push_back(MFVEvent::make_track_hitpattern(tk->hitPattern().numberOfValidPixelHits(), tk->hitPattern().numberOfValidStripHits(), tk->hitPattern().pixelLayersWithMeasurement(), tk->hitPattern().stripLayersWithMeasurement()));
+        mevent->jet_track_hp_push_back(tk->hitPattern().numberOfValidPixelHits(), tk->hitPattern().numberOfValidStripHits(), tk->hitPattern().pixelLayersWithMeasurement(), tk->hitPattern().stripLayersWithMeasurement());
       }
     }
   }
 
   //////////////////////////////////////////////////////////////////////
-
-  mevent->lep_id_.clear();
-  mevent->lep_pt.clear();
-  mevent->lep_eta.clear();
-  mevent->lep_phi.clear();
-  mevent->lep_dxy.clear();
-  mevent->lep_dz.clear();
-  mevent->lep_iso.clear();
 
   edm::Handle<pat::MuonCollection> muons;
   event.getByToken(muons_token, muons);
@@ -398,22 +391,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
     const float iso = (muon.pfIsolationR04().sumChargedHadronPt + std::max(0., muon.pfIsolationR04().sumNeutralHadronEt + muon.pfIsolationR04().sumPhotonEt - 0.5*muon.pfIsolationR04().sumPUPt))/muon.pt();
 
-    mevent->lep_id_.push_back(MFVEvent::encode_mu_id(id));
-    mevent->lep_pt.push_back(muon.pt());
-    mevent->lep_eta.push_back(muon.eta());
-    mevent->lep_phi.push_back(muon.phi());
-    const auto trk = muon.bestTrack();
-    if (primary_vertex != 0) {
-      const auto& pvpos = primary_vertex->position();
-      mevent->lep_dxy.push_back(trk->dxy(pvpos));
-      mevent->lep_dz.push_back(trk->dz(pvpos));
-    }
-    else {
-      mevent->lep_dxy.push_back(trk->dxy());
-      mevent->lep_dz.push_back(trk->dz());
-    }
-    mevent->lep_dxybs.push_back(trk->dxy(beamspot->position()));
-    mevent->lep_iso.push_back(iso);
+    mevent->lep_push_back(MFVEvent::encode_mu_id(id), muon, *muon.bestTrack(), iso, triggerfloats->hltmuons, beamspot->position(muon.bestTrack()->vz()), primary_vertex_position);
   }
 
   edm::Handle<pat::ElectronCollection> electrons;
@@ -441,22 +419,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     const float eA = electron_effective_areas.getEffectiveArea(fabs(electron.superCluster()->eta()));
     const float iso = pfIso.sumChargedHadronPt + std::max(0., pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - *rho*eA) / electron.pt();
 
-    mevent->lep_id_.push_back(MFVEvent::encode_el_id(id));
-    mevent->lep_pt.push_back(electron.pt());
-    mevent->lep_eta.push_back(electron.eta());
-    mevent->lep_phi.push_back(electron.phi());
-    const auto trk = electron.gsfTrack();
-    if (primary_vertex != 0) {
-      const auto& pvpos = primary_vertex->position();
-      mevent->lep_dxy.push_back(trk->dxy(pvpos));
-      mevent->lep_dz.push_back(trk->dz(pvpos));
-    }
-    else {
-      mevent->lep_dxy.push_back(trk->dxy());
-      mevent->lep_dz.push_back(trk->dz());
-    }
-    mevent->lep_dxybs.push_back(trk->dxy(beamspot->position()));
-    mevent->lep_iso.push_back(iso);
+    mevent->lep_push_back(MFVEvent::encode_el_id(id), electron, *electron.gsfTrack(), iso, triggerfloats->hltelectrons, beamspot->position(electron.gsfTrack()->vz()), primary_vertex_position);
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -471,7 +434,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->vertex_seed_track_phi.push_back(tk.phi());
     mevent->vertex_seed_track_dxy.push_back(tk.dxy(beamspot->position()));
     mevent->vertex_seed_track_dz.push_back(primary_vertex ? tk.dz(primary_vertex->position()) : 0);
-    mevent->vertex_seed_track_hp_.push_back(MFVEvent::make_track_hitpattern(tk.hitPattern().numberOfValidPixelHits(), tk.hitPattern().numberOfValidStripHits(), tk.hitPattern().pixelLayersWithMeasurement(), tk.hitPattern().stripLayersWithMeasurement()));
+    mevent->vertex_seed_track_hp_push_back(tk.hitPattern().numberOfValidPixelHits(), tk.hitPattern().numberOfValidStripHits(), tk.hitPattern().pixelLayersWithMeasurement(), tk.hitPattern().stripLayersWithMeasurement());
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -525,13 +488,21 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->metx = 0;
     mevent->mety = 0;
     mevent->lep_id_.clear();
-    mevent->lep_pt.clear();
+    mevent->lep_qpt.clear();
     mevent->lep_eta.clear();
     mevent->lep_phi.clear();
     mevent->lep_dxy.clear();
     mevent->lep_dxybs.clear();
     mevent->lep_dz.clear();
+    mevent->lep_pt_err.clear();
+    mevent->lep_eta_err.clear();
+    mevent->lep_phi_err.clear();
+    mevent->lep_dxy_err.clear();
+    mevent->lep_dz_err.clear();
     mevent->lep_iso.clear();
+    mevent->lep_hlt_pt.clear();
+    mevent->lep_hlt_eta.clear();
+    mevent->lep_hlt_phi.clear();
     mevent->vertex_seed_track_chi2dof.clear();
     mevent->vertex_seed_track_qpt.clear();
     mevent->vertex_seed_track_eta.clear();

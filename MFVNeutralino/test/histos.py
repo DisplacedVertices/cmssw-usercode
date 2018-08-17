@@ -1,7 +1,7 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-dataset = 'ntuplev19m'
+dataset = 'ntuplev20m'
 sample_files(process, 'qcdht2000_2017', dataset, 1)
 process.TFileService.fileName = 'histos.root'
 process.maxEvents.input = -1
@@ -115,13 +115,13 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     if year == 2017:
         samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.all_signal_samples_2017
-        #samples += Samples.leptonic_samples_2017
+        #samples = Samples.ttbar_samples_2017 + Samples.leptonic_samples_2017 + Samples.mfv_signal_samples_2017
 
     #samples = [s for s in samples if s.has_dataset(dataset)]
 
     set_splitting(samples, dataset, 'histos', data_json='jsons/ana_2017.json')
 
-    cs = CondorSubmitter('HistosV19m',
+    cs = CondorSubmitter('HistosV20m',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = chain_modifiers(half_mc_modifier(), per_sample_pileup_weights_modifier()),
