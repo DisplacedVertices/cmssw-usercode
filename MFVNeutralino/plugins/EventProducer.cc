@@ -49,6 +49,7 @@ private:
   const edm::EDGetTokenT<pat::METCollection> met_token;
   const edm::EDGetTokenT<pat::MuonCollection> muons_token;
   const edm::EDGetTokenT<pat::ElectronCollection> electrons_token;
+  const bool use_vertex_seed_tracks;
   const edm::EDGetTokenT<reco::TrackCollection> vertex_seed_tracks_token;
   const std::string b_discriminator;
   const std::vector<double> b_discriminator_mins;
@@ -86,6 +87,7 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     met_token(consumes<pat::METCollection>(cfg.getParameter<edm::InputTag>("met_src"))),
     muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
     electrons_token(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("electrons_src"))),
+    use_vertex_seed_tracks(cfg.getParameter<edm::InputTag>("vertex_seed_tracks_src").label() != ""),
     vertex_seed_tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("vertex_seed_tracks_src"))),
     b_discriminator(cfg.getParameter<std::string>("b_discriminator")),
     b_discriminator_mins(cfg.getParameter<std::vector<double> >("b_discriminator_mins")),
@@ -424,17 +426,19 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   //////////////////////////////////////////////////////////////////////
 
-  edm::Handle<reco::TrackCollection> vertex_seed_tracks;
-  event.getByToken(vertex_seed_tracks_token, vertex_seed_tracks);
-  for (const reco::Track& tk : *vertex_seed_tracks) {
-    assert(abs(tk.charge()) == 1);
-    mevent->vertex_seed_track_chi2dof.push_back(tk.normalizedChi2());
-    mevent->vertex_seed_track_qpt.push_back(tk.charge() * tk.pt());
-    mevent->vertex_seed_track_eta.push_back(tk.eta());
-    mevent->vertex_seed_track_phi.push_back(tk.phi());
-    mevent->vertex_seed_track_dxy.push_back(tk.dxy(beamspot->position()));
-    mevent->vertex_seed_track_dz.push_back(primary_vertex ? tk.dz(primary_vertex->position()) : 0);
-    mevent->vertex_seed_track_hp_push_back(tk.hitPattern().numberOfValidPixelHits(), tk.hitPattern().numberOfValidStripHits(), tk.hitPattern().pixelLayersWithMeasurement(), tk.hitPattern().stripLayersWithMeasurement());
+  if (use_vertex_seed_tracks) {
+    edm::Handle<reco::TrackCollection> vertex_seed_tracks;
+    event.getByToken(vertex_seed_tracks_token, vertex_seed_tracks);
+    for (const reco::Track& tk : *vertex_seed_tracks) {
+      assert(abs(tk.charge()) == 1);
+      mevent->vertex_seed_track_chi2dof.push_back(tk.normalizedChi2());
+      mevent->vertex_seed_track_qpt.push_back(tk.charge() * tk.pt());
+      mevent->vertex_seed_track_eta.push_back(tk.eta());
+      mevent->vertex_seed_track_phi.push_back(tk.phi());
+      mevent->vertex_seed_track_dxy.push_back(tk.dxy(beamspot->position()));
+      mevent->vertex_seed_track_dz.push_back(primary_vertex ? tk.dz(primary_vertex->position()) : 0);
+      mevent->vertex_seed_track_hp_push_back(tk.hitPattern().numberOfValidPixelHits(), tk.hitPattern().numberOfValidStripHits(), tk.hitPattern().pixelLayersWithMeasurement(), tk.hitPattern().stripLayersWithMeasurement());
+    }
   }
 
   //////////////////////////////////////////////////////////////////////
