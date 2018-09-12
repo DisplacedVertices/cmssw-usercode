@@ -6,13 +6,17 @@ from JMTucker.Tools.MiniAOD_cfg import *
 cmssw_settings = CMSSWSettings()
 cmssw_settings.is_mc = True
 
-event_histos = True
+event_histos = True # 'only'
 run_n_tk_seeds = False
 minitree_only = False
 prepare_vis = not run_n_tk_seeds and False
 keep_all = prepare_vis
 keep_gen = False
 event_filter = not keep_all
+
+if len(filter(None, (run_n_tk_seeds, minitree_only, prepare_vis, event_histos == 'only'))) > 1:
+    raise ValueError('only one of run_n_tk_seeds, minitree_only, prepare_vis, event_histos="only" allowed')
+
 version = 'V20'
 batch_name = 'Ntuple' + version
 if minitree_only:
@@ -21,7 +25,8 @@ elif keep_gen:
     batch_name += '_WGen'
 elif not event_filter:
     batch_name += '_NoEF'
-#batch_name += '_ChangeMeIfSettingsNotDefault'
+elif event_histos == 'only':
+    batch_name += '_EventHistosOnly'
 
 ####
 
@@ -143,6 +148,11 @@ if event_histos:
 
     process.pEventHistosJetPreSel = cms.Path(process.eventHistosPreSeq * process.mfvAnalysisCutsForJetHistos    * process.mfvEventHistosJetPreSel)
     process.pEventHistosLepPreSel = cms.Path(process.eventHistosPreSeq * process.mfvAnalysisCutsForLeptonHistos * process.mfvEventHistosLeptonPreSel)
+
+    if event_histos == 'only':
+        del process.out
+        del process.outp
+        del process.p
 
 if minitree_only:
     remove_output_module(process)
