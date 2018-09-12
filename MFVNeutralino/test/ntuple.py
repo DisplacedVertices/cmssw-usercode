@@ -6,6 +6,7 @@ from JMTucker.Tools.MiniAOD_cfg import *
 cmssw_settings = CMSSWSettings()
 cmssw_settings.is_mc = True
 
+event_histos = True
 run_n_tk_seeds = False
 minitree_only = False
 prepare_vis = not run_n_tk_seeds and False
@@ -121,6 +122,27 @@ process.patElectrons.embedTrack = False
 want_summary(process, False)
 max_events(process, 100)
 file_event_from_argv(process)
+
+if event_histos:
+    process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
+    process.load('JMTucker.MFVNeutralino.EventHistos_cfi')
+    process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
+
+    process.mfvEventForHistos = process.mfvEvent.clone(vertex_seed_tracks_src = '') # JMTBAD refactor separate module for tracks from mfvVertices
+    process.mfvWeightForHistos = process.mfvWeight.clone(mevent_src = 'mfvEventForHistos', throw_if_no_mcstat = False)
+    process.mfvAnalysisCutsForJetHistos = process.mfvAnalysisCuts.clone(mevent_src = 'mfvEventForHistos', apply_vertex_cuts = False)
+    process.mfvAnalysisCutsForLeptonHistos = process.mfvAnalysisCutsForJetHistos.clone(apply_presel = 2)
+
+    process.mfvEventHistosJetPreSel = process.mfvEventHistos.clone(mevent_src = 'mfvEventForHistos', weight_src = 'mfvWeightForHistos')
+    process.mfvEventHistosLeptonPreSel = process.mfvEventHistosJetPreSel.clone()
+
+    process.eventHistosPreSeq = cms.Sequence(process.triggerFilter * process.goodOfflinePrimaryVertices *
+                                             process.selectedPatJets * process.selectedPatMuons * process.selectedPatElectrons *
+                                             process.mfvTriggerFloats * process.mfvGenParticles *
+                                             process.mfvEventForHistos * process.mfvWeightForHistos)
+
+    process.pEventHistosJetPreSel = cms.Path(process.eventHistosPreSeq * process.mfvAnalysisCutsForJetHistos    * process.mfvEventHistosJetPreSel)
+    process.pEventHistosLepPreSel = cms.Path(process.eventHistosPreSeq * process.mfvAnalysisCutsForLeptonHistos * process.mfvEventHistosLeptonPreSel)
 
 if minitree_only:
     remove_output_module(process)

@@ -6,6 +6,7 @@ from JMTucker.Tools.Year import year
 cmssw_settings = CMSSWSettings()
 cmssw_settings.is_mc = True
 
+event_histos = True
 run_n_tk_seeds = False
 minitree_only = False
 prepare_vis = False
@@ -34,7 +35,7 @@ registration_warnings(process)
 geometry_etc(process, which_global_tag(cmssw_settings))
 random_service(process, {'mfvVertices': 1222})
 tfileservice(process, 'vertex_histos.root')
-input_files(process, 'root://cmsxrootd-site.fnal.gov//store/mc/RunIIFall17MiniAOD/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/50000/7EF2B30C-37EA-E711-B605-0026B92785F6.root')
+sample_files(process, 'qcdht2000_2017', 'miniaod', 1)
 output_file(process, 'ntuple.root', [])
 file_event_from_argv(process)
 
@@ -146,6 +147,27 @@ process.out.outputCommands = output_commands
 if event_filter:
     import JMTucker.MFVNeutralino.EventFilter
     JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process, path_name='p', event_filter=True, input_is_miniaod=True)
+
+if event_histos:
+    process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
+    process.load('JMTucker.MFVNeutralino.EventHistos_cfi')
+    process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
+
+    process.mfvEventForHistos = process.mfvEvent.clone(vertex_seed_tracks_src = '') # JMTBAD refactor separate module for tracks from mfvVertices
+    process.mfvWeightForHistos = process.mfvWeight.clone(mevent_src = 'mfvEventForHistos', throw_if_no_mcstat = False)
+    process.mfvAnalysisCutsForJetHistos = process.mfvAnalysisCuts.clone(mevent_src = 'mfvEventForHistos', apply_vertex_cuts = False)
+    process.mfvAnalysisCutsForLeptonHistos = process.mfvAnalysisCutsForJetHistos.clone(apply_presel = 2)
+
+    process.mfvEventHistosJetPreSel = process.mfvEventHistos.clone(mevent_src = 'mfvEventForHistos', weight_src = 'mfvWeightForHistos')
+    process.mfvEventHistosLeptonPreSel = process.mfvEventHistosJetPreSel.clone()
+
+    process.eventHistosPreSeq = cms.Sequence(process.triggerFilter * process.goodOfflinePrimaryVertices *
+                                             process.selectedPatJets * process.selectedPatMuons * process.selectedPatElectrons *
+                                             process.mfvTriggerFloats * process.mfvGenParticles *
+                                             process.mfvEventForHistos * process.mfvWeightForHistos)
+
+    process.pEventHistosJetPreSel = cms.Path(process.eventHistosPreSeq * process.mfvAnalysisCutsForJetHistos    * process.mfvEventHistosJetPreSel)
+    process.pEventHistosLepPreSel = cms.Path(process.eventHistosPreSeq * process.mfvAnalysisCutsForLeptonHistos * process.mfvEventHistosLeptonPreSel)
 
 if minitree_only:
     del process.out
