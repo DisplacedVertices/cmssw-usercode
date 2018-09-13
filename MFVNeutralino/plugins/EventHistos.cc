@@ -214,10 +214,10 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_pvcyy = fs->make<TH1F>("h_pvcyy", ";primary vertex cyy;events", 100, -1e-6, 1e-6);
   h_pvcyz = fs->make<TH1F>("h_pvcyz", ";primary vertex cyz;events", 100, -1e-6, 1e-6);
   h_pvczz = fs->make<TH1F>("h_pvczz", ";primary vertex czz;events", 100, -1e-6, 1e-6);
-  h_pvrho = fs->make<TH1F>("h_pv_rho", ";PV rho (cm);events/5 #mum", 200, 0, 0.1);
-  h_pvphi = fs->make<TH1F>("h_pv_phi", ";primary vertex #phi (rad);events/.063", 100, -3.1416, 3.1416);
-  h_pvntracks = fs->make<TH1F>("h_pv_ntracks", ";# of tracks in primary vertex;events", 200, 0, 200);
-  h_pvsumpt2 = fs->make<TH1F>("h_pv_sumpt2", ";PV #Sigma p_{T}^{2} (GeV^{2});events/100 GeV^{2}", 200, 0, 20000);
+  h_pvrho = fs->make<TH1F>("h_pvrho", ";PV rho (cm);events/5 #mum", 200, 0, 0.1);
+  h_pvphi = fs->make<TH1F>("h_pvphi", ";primary vertex #phi (rad);events/.063", 100, -3.1416, 3.1416);
+  h_pvntracks = fs->make<TH1F>("h_pvntracks", ";# of tracks in primary vertex;events", 200, 0, 200);
+  h_pvsumpt2 = fs->make<TH1F>("h_pvsumpt2", ";PV #Sigma p_{T}^{2} (GeV^{2});events/100 GeV^{2}", 200, 0, 20000);
   const char* lmt_ex[3] = {"loose", "medium", "tight"};
 
   h_njets = fs->make<TH1F>("h_njets", ";# of jets;events", 20, 0, 20);
