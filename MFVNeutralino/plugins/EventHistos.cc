@@ -217,7 +217,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_pvrho = fs->make<TH1F>("h_pvrho", ";PV rho (cm);events/5 #mum", 200, 0, 0.1);
   h_pvphi = fs->make<TH1F>("h_pvphi", ";primary vertex #phi (rad);events/.063", 100, -3.1416, 3.1416);
   h_pvntracks = fs->make<TH1F>("h_pvntracks", ";# of tracks in primary vertex;events", 200, 0, 200);
-  h_pvsumpt2 = fs->make<TH1F>("h_pvsumpt2", ";PV #Sigma p_{T}^{2} (GeV^{2});events/100 GeV^{2}", 200, 0, 20000);
+  h_pvsumpt2 = fs->make<TH1F>("h_pvsumpt2", ";PV #Sigma p_{T}^{2} (GeV^{2});events/200 GeV^{2}", 200, 0, 40000);
   const char* lmt_ex[3] = {"loose", "medium", "tight"};
 
   h_njets = fs->make<TH1F>("h_njets", ";# of jets;events", 20, 0, 20);
