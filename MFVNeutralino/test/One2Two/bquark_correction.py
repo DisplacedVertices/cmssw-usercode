@@ -62,7 +62,7 @@ for i,ntracks in enumerate([3,4,5,7]):
     h1 = ROOT.TFile('2v_from_jets_%s_%itrack_bquark_uncorrected_v15_v5.root' % (year, ntracks)).Get('h_c1v_dvv')
     h1.SetStats(0)
     h1.SetLineColor(ROOT.kBlack)
-    h1.SetLineWidth(2)
+    h1.SetLineWidth(3)
     h1.Scale(1./h1.Integral())
     h1.SetTitle(';d_{VV}^{C} (cm);Events')
     h1.GetYaxis().SetRangeUser(0,0.5)
@@ -72,8 +72,8 @@ for i,ntracks in enumerate([3,4,5,7]):
     if mode == 'ratio1':
         h2 = ROOT.TFile('2v_from_jets_%s_%itrack_bquarks_v15_v5.root' % (year, ntracks)).Get('h_c1v_dvv')
     h2.SetStats(0)
-    h2.SetLineColor(ROOT.kRed)
-    h2.SetLineWidth(2)
+    h2.SetLineColor(ROOT.kViolet)
+    h2.SetLineWidth(3)
     h2.Scale(1./h2.Integral())
     h2.Draw('hist e sames')
 
