@@ -75,6 +75,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_pvsumpt2;
 
   TH1F* h_njets;
+  TH1F* h_njets20;
   TH1F* h_njetsnopu[3];
   TH1F* h_jetpt1;
   TH1F* h_jetpt2;
@@ -214,13 +215,14 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_pvcyy = fs->make<TH1F>("h_pvcyy", ";primary vertex cyy;events", 100, -1e-6, 1e-6);
   h_pvcyz = fs->make<TH1F>("h_pvcyz", ";primary vertex cyz;events", 100, -1e-6, 1e-6);
   h_pvczz = fs->make<TH1F>("h_pvczz", ";primary vertex czz;events", 100, -1e-6, 1e-6);
-  h_pvrho = fs->make<TH1F>("h_pv_rho", ";PV rho (cm);events/5 #mum", 200, 0, 0.1);
-  h_pvphi = fs->make<TH1F>("h_pv_phi", ";primary vertex #phi (rad);events/.063", 100, -3.1416, 3.1416);
-  h_pvntracks = fs->make<TH1F>("h_pv_ntracks", ";# of tracks in primary vertex;events", 200, 0, 200);
-  h_pvsumpt2 = fs->make<TH1F>("h_pv_sumpt2", ";PV #Sigma p_{T}^{2} (GeV^{2});events/100 GeV^{2}", 200, 0, 20000);
+  h_pvrho = fs->make<TH1F>("h_pvrho", ";PV rho (cm);events/5 #mum", 200, 0, 0.1);
+  h_pvphi = fs->make<TH1F>("h_pvphi", ";primary vertex #phi (rad);events/.063", 100, -3.1416, 3.1416);
+  h_pvntracks = fs->make<TH1F>("h_pvntracks", ";# of tracks in primary vertex;events", 200, 0, 200);
+  h_pvsumpt2 = fs->make<TH1F>("h_pvsumpt2", ";PV #Sigma p_{T}^{2} (GeV^{2});events/200 GeV^{2}", 200, 0, 40000);
   const char* lmt_ex[3] = {"loose", "medium", "tight"};
 
   h_njets = fs->make<TH1F>("h_njets", ";# of jets;events", 20, 0, 20);
+  h_njets20 = fs->make<TH1F>("h_njets20", ";# of jets w. p_{T} > 20 GeV;events", 20, 0, 20);
   for (int i = 0; i < 3; ++i)
     h_njetsnopu[i] = fs->make<TH1F>(TString::Format("h_njetsnopu_%s", lmt_ex[i]), TString::Format(";# of jets (%s PU id);events", lmt_ex[i]), 20, 0, 20);
   h_jetpt1 = fs->make<TH1F>("h_jetpt1", ";p_{T} of 1st jet (GeV);events/10 GeV", 100, 0, 1000);
@@ -407,7 +409,10 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_jet_ht->Fill(mevent->jet_ht(), w);
   h_jet_ht_40->Fill(mevent->jet_ht(40), w);
 
+  int njets20 = 0;
   for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+    if (mevent->jet_pt[ijet] > 20)
+      ++njets20;
     h_jet_pt->Fill(mevent->jet_pt[ijet]);
     h_jet_eta->Fill(mevent->jet_eta[ijet]);
     h_jet_phi->Fill(mevent->jet_phi[ijet]);
@@ -417,6 +422,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       h_jet_pairdr->Fill(reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->jet_eta[jjet], mevent->jet_phi[jjet]));
     }
   }
+  h_njets20->Fill(njets20, w);
 
   for (size_t ilep = 0; ilep < mevent->lep_id.size(); ++ilep) {
     const size_t j = mevent->is_electron(ilep);
