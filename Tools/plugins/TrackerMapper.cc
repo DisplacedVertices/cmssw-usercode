@@ -316,7 +316,7 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
       pt > 1,
       min_r <= 1,
       npxlayers >= 2,
-      old_stlayers_cut ? nstlayers >= 3 : (abseta < 2.0 && nstlayers >= 6) || (abseta >= 2.0 && nstlayers >= 7),
+      nstlayers >= (old_stlayers_cut ? 3 : 6),
       nsigmadxy > 4
     };
 
