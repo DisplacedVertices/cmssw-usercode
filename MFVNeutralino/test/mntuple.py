@@ -102,7 +102,7 @@ if keep_gen:
 if keep_all:
     output_commands_nodrop = [x for x in output_commands if not x.strip().startswith('drop')]
     import Configuration.EventContent.EventContent_cff as EventContent
-    if is_mc:
+    if cmssw_settings.is_mc:
         output_commands = EventContent.MINIAODSIMEventContent.outputCommands + output_commands_nodrop
     else:
         output_commands = EventContent.MINIAODEventContent.outputCommands + output_commands_nodrop
@@ -128,7 +128,7 @@ if prepare_vis:
         'keep *_mfvVertexRefitsDrop0_*_*',
         ]
 
-    if is_mc:
+    if cmssw_settings.is_mc:
         output_commands += ['keep *_mfvGenParticles_*_*']
 
 if run_n_tk_seeds:
