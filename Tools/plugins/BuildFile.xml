@@ -10,5 +10,7 @@
   <use name="DataFormats/VertexReco"/>
   <use name="HLTrigger/HLTcore"/>
   <use name="SimGeneral/HepPDTRecord"/>
+  <use name="TrackingTools/Records"/>
+  <use name="TrackingTools/TransientTrack"/>
   <use name="JMTucker/Tools"/>
 </library>
