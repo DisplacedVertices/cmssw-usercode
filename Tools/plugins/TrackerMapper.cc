@@ -79,6 +79,7 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH1D* h_tracks_nstlayers_etalt2[3];
   TH1D* h_tracks_nstlayers_etagt2[3];
   TH1D* h_tracks_nsigmadxy[3];
+  TH1D* h_tracks_nsigmadxy_acc[3];
   TH1D* h_tracks_nsigmadxy_deltaacc[3];
 
   TH2D* h_tracks_nstlayers_v_eta[3];
@@ -187,6 +188,7 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
     h_tracks_nstlayers_etalt2[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_nstlayers_etalt2", ex[i]), TString::Format("%s tracks;|#eta| < 2 tracks nstlayers;arb. units", ex[i]), 20, 0, 20);
     h_tracks_nstlayers_etagt2[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_nstlayers_etagt2", ex[i]), TString::Format("%s tracks;|#eta| #geq 2 tracks nstlayers;arb. units", ex[i]), 20, 0, 20);
     h_tracks_nsigmadxy[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_nsigmadxy", ex[i]), TString::Format("%s tracks;tracks nsigmadxy;arb. units", ex[i]), 400, 0, 40);
+    h_tracks_nsigmadxy_acc[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_nsigmadxy_acc", ex[i]), TString::Format("%s tracks;tracks nsigmadxy_acc;arb. units", ex[i]), 400, 0, 40);
     h_tracks_nsigmadxy_deltaacc[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_nsigmadxy_deltaacc", ex[i]), TString::Format("%s tracks;tracks nsigmadxy - nsigmadxy_acc;arb. units", ex[i]), 400, -10, 10);
 
     h_tracks_nstlayers_v_eta[i] = fs->make<TH2D>(TString::Format("h_%s_tracks_nstlayers_v_eta", ex[i]), TString::Format("%s tracks;tracks eta;tracks nstlayers", ex[i]), 80, -4, 4, 20, 0, 20);
@@ -321,7 +323,7 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
     const double abseta = fabs(tk.eta());
     const double dxy = tk.dxy(*beamspot);
     const double nsigmadxy = fabs(dxy / tk.dxyError());
-    const double nsigmadxy_acc = ttk.stateAtBeamLine().transverseImpactParameter().significance();
+    const double nsigmadxy_acc = fabs(ttk.stateAtBeamLine().transverseImpactParameter().significance());
 
     const bool nm1[5] = {
       pt > 1,
@@ -460,6 +462,7 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
       if (abseta <  2.0) h_tracks_nstlayers_etalt2[i]->Fill(nstlayers, w);
       if (abseta >= 2.0) h_tracks_nstlayers_etagt2[i]->Fill(nstlayers, w);
       h_tracks_nsigmadxy[i]->Fill(nsigmadxy, w);
+      h_tracks_nsigmadxy_acc[i]->Fill(nsigmadxy_acc, w);
       h_tracks_nsigmadxy_deltaacc[i]->Fill(nsigmadxy - nsigmadxy_acc, w);
 
       h_tracks_absdxy[i]->Fill(fabs(dxy), w);
