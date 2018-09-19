@@ -7,8 +7,12 @@ do_nominal = False
 do_distances = False
 do_clusters = False
 
-dataset = 'ntuplev15'
-sample_files(process, 'qcdht2000', dataset, 1)
+dataset = 'ntuplev20m'
+batch_name = 'CutPlayV20m'
+if single_vertex:
+    batch_name += '_1V'
+
+sample_files(process, 'qcdht2000_2017', dataset, 1)
 process.TFileService.fileName = 'cutplay.root'
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
@@ -115,18 +119,18 @@ SimpleTriggerEfficiency.setup_endpath(process, weight_src='mfvWeight' if use_wei
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
+    from JMTucker.Tools.MetaSubmitter import *
     from JMTucker.Tools.Year import year
     from JMTucker.Tools import Samples
-    if year == 2015:
-        samples = Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015 + \
-            Samples.mfv_signal_samples_2015
-    elif year == 2016:
-        samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext
-#            Samples.mfv_signal_samples + Samples.mfv_ddbar_samples + Samples.mfv_hip_samples + Samples.qcd_hip_samples
 
-    from JMTucker.Tools.MetaSubmitter import set_splitting
-    set_splitting(samples, dataset, 'minitree', data_json='../jsons/ana_2015p6_10pc.json')
+    if year == 2017:
+        samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.all_signal_samples_2017
 
-    from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('CutPlayV15_nvtx1', ex=year, dataset=dataset)
+    set_splitting(samples, dataset, 'minitree', data_json='../jsons/ana_2017.json')
+
+    cs = CondorSubmitter(batch_name,
+                         ex = year,
+                         dataset = dataset,
+                         pset_modifier = chain_modifiers(half_mc_modifier(), per_sample_pileup_weights_modifier()),
+                         )
     cs.submit_all(samples)
