@@ -215,15 +215,17 @@ def cs_hadd_args(working_dir, new_name=None, new_dir=None):
         new_name = os.path.join(new_dir, new_name)
     return working_dir, new_name, new_dir
 
-def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None):
-    working_dir, new_name, new_dir = cs_hadd_args(working_dir, new_name, new_dir)
-
+def cs_hadd_files(working_dir, **kwargs):
     expected = cs_njobs(working_dir)
-    print '%s: expecting %i files if all jobs succeeded' % (working_dir, expected)
-
     files = cs_published(working_dir)
     if not files:
         files = cs_rootfiles(working_dir)
+    return expected, files
+
+def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None):
+    working_dir, new_name, new_dir = cs_hadd_args(working_dir, new_name, new_dir)
+    expected, files = cs_hadd_files(working_dir)
+    print '%s: expecting %i files if all jobs succeeded' % (working_dir, expected)
 
     if pattern:
         if '/' not in pattern:
