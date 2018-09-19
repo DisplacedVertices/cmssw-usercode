@@ -1,8 +1,32 @@
 #!/usr/bin/env python
 
-import os, subprocess, tempfile
+import os, subprocess, tempfile, re
 from datetime import datetime
 from JMTucker.Tools import colors, eos
+
+class HaddlogParser(object):
+    target_re = re.compile(r'hadd Target file: (.*)')
+    source_re = re.compile(r'hadd Source file (\d+): (.*)')
+    def __init__(self, fn):
+        self.target = None
+        self.sources = {}
+        for line in open(fn):
+            line = line.strip()
+            if self.target is None:
+                tmo = self.target_re.search(line)
+                if tmo:
+                    self.target = t = tmo.group(1)
+                    assert t.endswith('.root')
+                    continue
+
+            smo = self.source_re.search(line)
+            if smo:
+                num = int(smo.group(1))
+                fn = smo.group(2)
+                assert fn.endswith('.root')
+                self.sources[num] = fn
+        self.num_sources = len(self.sources)
+        self.files = self.sources.values()
 
 def hadd(output_fn, input_fns):
     """This is a simple wrapper around hadd that suppresses the stdout
@@ -49,9 +73,11 @@ def hadd(output_fn, input_fns):
     return True
 
 __all__ = [
+    'HaddlogParser',
     'hadd',
     ]
 
 if __name__ == '__main__':
+    #x = HaddlogParser('/uscms_data/d2/tucker/crab_dirs/NtupleV20m_EventHistosOnly/qcdht2000_2017.root.haddlog')
     import sys
     hadd(sys.argv[1], sys.argv[2:])
