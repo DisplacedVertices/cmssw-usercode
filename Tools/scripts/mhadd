@@ -81,9 +81,14 @@ def hadd_(is_crab, *args, **kwargs):
             print colors.yellow('overwriting existing file %s' % new_name)
             rm(new_name)
         else:
-            p = HaddlogParser(new_name + '.haddlog')
+            log_fn = new_name + '.haddlog'
             njobs = hadd_files(working_dir, **kwargs)[0]
-            if p.num_sources != njobs:
+            if not os.path.isfile(log_fn):
+                log_njobs = 1 # assume 1 file copied
+            else:
+                p = HaddlogParser(new_name + '.haddlog')
+                log_njobs = p.num_sources
+            if log_njobs != njobs:
                 print colors.red('skipping existing file %s (for which num sources %i != njobs %i' % (new_name, p.num_sources, njobs))
             else:
                 print colors.yellow('skipping existing file %s (which looks complete by njobs and haddlog)' % new_name)
