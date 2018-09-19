@@ -21,6 +21,7 @@ version = 'V20m'
 batch_name = 'Ntuple' + version
 if run_n_tk_seeds:
     batch_name += '_NTkSeeds'
+    event_histos = False
 if minitree_only:
     batch_name = 'MiniNtuple'  + version
 elif not event_filter:
