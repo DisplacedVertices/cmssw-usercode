@@ -4,8 +4,9 @@ import os
 import glob
 import sys
 import JMTucker.Tools.argparse as argparse
-from JMTucker.Tools.CRAB3ToolsSh import is_crab_working_dir, crab_hadd_args, crab_hadd
-from JMTucker.Tools.CondorTools import is_cs_dir, cs_hadd_args, cs_hadd
+from JMTucker.Tools.CRAB3ToolsSh import is_crab_working_dir, crab_hadd_args, crab_hadd_files, crab_hadd
+from JMTucker.Tools.CondorTools import is_cs_dir, cs_hadd_args, cs_hadd_files, cs_hadd
+from JMTucker.Tools.hadd import HaddlogParser
 from JMTucker.Tools import eos, colors
 
 parser = argparse.ArgumentParser(description = 'mhadd: hadd the files from condor/crab directories',
@@ -52,9 +53,9 @@ def hadd_(is_crab, *args, **kwargs):
 
     if is_crab:
         kwargs['lpc_shortcut'] = options.lpc_shortcut
-        hadd_args, hadd = crab_hadd_args, crab_hadd
+        hadd_args, hadd_files, hadd = crab_hadd_args, crab_hadd_files, crab_hadd
     else:
-        hadd_args, hadd = cs_hadd_args, cs_hadd
+        hadd_args, hadd_files, hadd = cs_hadd_args, cs_hadd_files, cs_hadd
 
     new_dir = kwargs.get('new_dir', None)
     if options.output_dir:
@@ -80,7 +81,12 @@ def hadd_(is_crab, *args, **kwargs):
             print colors.yellow('overwriting existing file %s' % new_name)
             rm(new_name)
         else:
-            print colors.yellow('skipping existing file %s' % new_name)
+            p = HaddlogParser(new_name + '.haddlog')
+            njobs = hadd_files(working_dir, **kwargs)[0]
+            if p.num_sources != njobs:
+                print colors.red('skipping existing file %s (for which num sources %i != njobs %i' % (new_name, p.num_sources, njobs))
+            else:
+                print colors.yellow('skipping existing file %s (which looks complete by njobs and haddlog)' % new_name)
             return
 
     hadd(*args, **kwargs)
