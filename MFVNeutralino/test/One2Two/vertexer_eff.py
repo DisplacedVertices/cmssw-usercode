@@ -2,16 +2,16 @@ import os
 from JMTucker.Tools.ROOTTools import *
 
 is_mc = True
-version = 'v15_v2'
-path = '/uscms_data/d1/jchu/crab_dirs/mfv_8025/VertexerPairEffs' + version.capitalize()
-year = '2015p6'
+version = 'v20m'
+path = '/uscms_data/d2/tucker/crab_dirs/VertexerPairEffs' + version.capitalize()
+year = '2017'
 ntkseeds = False
 
 set_style()
 ps = plot_saver(plot_dir('VertexerPairEffs%s/vertexer_pair_effs%s_%s%s' % (version.capitalize(), '' if is_mc else '_data', year, '_ntkseeds' if ntkseeds else '')), size=(700,700), log=False)
 
 if is_mc:
-    in_fn = os.path.join(path, 'background%s.root' % ('' if year=='2016' else '_%s'%year))
+    in_fn = os.path.join(path, 'background_%s.root' % year)
 else:
     in_fn = os.path.join(path, 'JetHT%s.root' % year)
 
@@ -118,7 +118,7 @@ if not ntkseeds:
         write(42, 0.050, 0.560, 0.913, '38.5 fb^{-1} (13 TeV)')
     ps.save('compare_efficiency')
 
-if is_mc and not ntkseeds:
+if False and is_mc and not ntkseeds:
     fn1 = ['2v_from_jets_%s_3track_default_v15_v5.root' % year, '2v_from_jets_%s_3track_noclearing_v15_v5.root' % year]
     fn2 = ['2v_from_jets_%s_4track_default_v15_v5.root' % year, '2v_from_jets_%s_4track_noclearing_v15_v5.root' % year]
     fn3 = ['2v_from_jets_%s_5track_default_v15_v5.root' % year, '2v_from_jets_%s_5track_noclearing_v15_v5.root' % year]
