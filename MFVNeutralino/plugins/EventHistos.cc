@@ -391,11 +391,15 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_jet_ht_40->Fill(mevent->jet_ht(40), w);
 
   for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+    if (mevent->jet_pt[ijet] < mfv::min_jet_pt)
+      continue;
     h_jet_pt->Fill(mevent->jet_pt[ijet]);
     h_jet_eta->Fill(mevent->jet_eta[ijet]);
     h_jet_phi->Fill(mevent->jet_phi[ijet]);
     h_jet_energy->Fill(mevent->jet_energy[ijet]);
     for (size_t jjet = ijet+1; jjet < mevent->jet_id.size(); ++jjet) {
+      if (mevent->jet_pt[jjet] < mfv::min_jet_pt)
+        continue;
       h_jet_pairdphi->Fill(reco::deltaPhi(mevent->jet_phi[ijet], mevent->jet_phi[jjet]));
       h_jet_pairdr->Fill(reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->jet_eta[jjet], mevent->jet_phi[jjet]));
     }
@@ -430,12 +434,16 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_nbtags[i]->Fill(mevent->nbtags(i), w);
 
     for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+      if (mevent->jet_pt[ijet] < mfv::min_jet_pt)
+        continue;
       if (((mevent->jet_id[ijet] >> 2) & 3) >= i + 1) {
         h_bjet_pt[i]->Fill(mevent->jet_pt[ijet]);
         h_bjet_eta[i]->Fill(mevent->jet_eta[ijet]);
         h_bjet_phi[i]->Fill(mevent->jet_phi[ijet]);
         h_bjet_energy[i]->Fill(mevent->jet_energy[ijet]);
         for (size_t jjet = ijet+1; jjet < mevent->jet_id.size(); ++jjet) {
+          if (mevent->jet_pt[jjet] < mfv::min_jet_pt)
+            continue;
           if (((mevent->jet_id[jjet] >> 2) & 3) >= i + 1) {
             h_bjet_pairdphi[i]->Fill(reco::deltaPhi(mevent->jet_phi[ijet], mevent->jet_phi[jjet]));
             h_bjet_pairdr[i]->Fill(reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->jet_eta[jjet], mevent->jet_phi[jjet]));

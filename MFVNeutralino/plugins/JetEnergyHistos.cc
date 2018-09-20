@@ -118,6 +118,8 @@ void MFVJetEnergyHistos::analyze(const edm::Event& event, const edm::EventSetup&
   double ht_40_down = 0;
 
   for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+    if (mevent->jet_pt[ijet] < mfv::min_jet_pt)
+      continue;
     h_jet_pt->Fill(mevent->jet_pt[ijet]);
     h_jet_eta->Fill(mevent->jet_eta[ijet]);
     h_jet_phi->Fill(mevent->jet_phi[ijet]);

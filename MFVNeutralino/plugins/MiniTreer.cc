@@ -94,6 +94,8 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     throw cms::Exception("CheckYourPremises") << "too many jets in event: " << nt.njets;
 
   for (int i = 0; i < mevent->njets(); ++i) {
+    if (mevent->jet_pt[i] < mfv::min_jet_pt)
+      continue;
     nt.jet_pt[i] = mevent->jet_pt[i];
     nt.jet_eta[i] = mevent->jet_eta[i];
     nt.jet_phi[i] = mevent->jet_phi[i];

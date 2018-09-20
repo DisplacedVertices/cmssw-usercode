@@ -102,6 +102,8 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
   nt.jetht = mevent->jet_ht(40);
 
   for (size_t i = 0, ie = mevent->njets(); i < ie; ++i) {
+    if (mevent->jet_pt[i] < mfv::min_jet_pt)
+      continue;
     nt.alljets_pt.push_back(mevent->jet_pt[i]);
     nt.alljets_eta.push_back(mevent->jet_eta[i]);
     nt.alljets_phi.push_back(mevent->jet_phi[i]);

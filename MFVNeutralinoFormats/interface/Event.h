@@ -29,6 +29,8 @@ namespace mfv {
   extern const char* hlt_paths[n_hlt_paths];
   extern const char* l1_paths[n_l1_paths];
   extern const char* clean_paths[n_clean_paths];
+
+  static const float min_jet_pt = 20; // JMTBAD take away once it's back at ntuple level
 }
 
 struct MFVEvent {

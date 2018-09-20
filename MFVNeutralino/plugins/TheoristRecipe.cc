@@ -276,6 +276,8 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
     for (const reco::GenParticle* p : partons[i]) {
       if (verbose) printf("\tparton pdgId %3d: pT = %6.2f GeV, eta = %5.2f, phi = %5.2f", p->pdgId(), p->pt(), p->eta(), p->phi());
       for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+        if (mevent->jet_pt[ijet] < mfv::min_jet_pt)
+          continue;
         float deltaR = reco::deltaR(p->eta(), p->phi(), mevent->jet_eta[ijet], mevent->jet_phi[ijet]);
         if (deltaR < 0.4) {
           if (verbose) printf("\tjet %2d: pT = %6.2f GeV, eta = %5.2f, phi = %5.2f, deltaR(parton, jet) = %4.2f", int(ijet), mevent->jet_pt[ijet], mevent->jet_eta[ijet], mevent->jet_phi[ijet], deltaR);

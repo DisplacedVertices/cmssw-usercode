@@ -601,6 +601,8 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     for (int i = 0; i < 4; ++i) {
       jetdeltaphis.clear();
       for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+        if (mevent->jet_pt[ijet] < mfv::min_jet_pt)
+          continue;
         if (((mevent->jet_id[ijet] >> 2) & 3) >= i) {
           fill_multi(h_sv_jets_deltaphi[i], isv, reco::deltaPhi(atan2(aux.y - bsy, aux.x - bsx), mevent->jet_phi[ijet]), w);
           jetdeltaphis.push_back(fabs(reco::deltaPhi(atan2(aux.y - bsy, aux.x - bsx), mevent->jet_phi[ijet])));
@@ -696,6 +698,8 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
           std::vector<double> jetdeltaphis;
           for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+            if (mevent->jet_pt[ijet] < mfv::min_jet_pt)
+              continue;
             jetdeltaphis.push_back(fabs(reco::deltaPhi(aux.track_phi[itk_pt[i].first], mevent->jet_phi[ijet])));
           }
           std::sort(jetdeltaphis.begin(), jetdeltaphis.end());
