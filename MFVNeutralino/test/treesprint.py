@@ -26,11 +26,12 @@ def getit(fn, ntk):
         #cut = '(%s) && njets >= 4 && jetht > 700' % cut
         h,n = hr.draw('weight', cut, binning='1,0,1', get_n=True, goff=True)
         return (n,) + get_integral(h)
-    n1v = c('nvtx==1')
+    dbvreq = '0.01'
+    n1v = c('nvtx==1 && dist0 >= %s' % dbvreq) # ignores the % of events where two-vertex events become one-vertex events
     if ntk == 'mfvMiniTreeNtk3or4':
         n2v = c('nvtx>=2 && ntk0==4 && ntk1==3')
     else:
-        n2v = c('nvtx>=2')
+        n2v = c('nvtx>=2 && dist0 >= %s && dist1 >= %s' % (dbvreq, dbvreq))
     return n1v, n2v
 
 fmt = '%40s %9s %9s %9s   %9s +- %9s  %9s +- %9s  %9s +- %9s  %9s +- %9s'
