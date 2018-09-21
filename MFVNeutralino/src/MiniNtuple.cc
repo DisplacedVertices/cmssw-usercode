@@ -26,7 +26,7 @@ namespace mfv {
     gen_leptons.clear();
     gen_jet_ht = gen_jet_ht40 = 0;
     for (int i = 0; i < 50; ++i) {
-      jet_pt[i] = jet_eta[i] = jet_phi[i] = jet_energy[i] = 0;
+      jet_pt[i] = jet_eta[i] = jet_phi[i] = jet_energy[i] = jet_bdisc[i] = 0;
       jet_id[i] = 0;
     }
     tk0_qchi2.clear();
@@ -77,6 +77,7 @@ namespace mfv {
     tree->Branch("jet_phi", nt.jet_phi, "jet_phi[njets]/F");
     tree->Branch("jet_energy", nt.jet_energy, "jet_energy[njets]/F");
     tree->Branch("jet_id", nt.jet_id, "jet_id[njets]/b");
+    tree->Branch("jet_bdisc", nt.jet_bdisc, "jet_bdisc[njets]/F");
     tree->Branch("gen_x", nt.gen_x, "gen_x[2]/F");
     tree->Branch("gen_y", nt.gen_y, "gen_y[2]/F");
     tree->Branch("gen_z", nt.gen_z, "gen_z[2]/F");
@@ -161,6 +162,7 @@ namespace mfv {
     tree->SetBranchAddress("jet_phi", nt.jet_phi);
     tree->SetBranchAddress("jet_energy", nt.jet_energy);
     tree->SetBranchAddress("jet_id", nt.jet_id);
+    tree->SetBranchAddress("jet_bdisc", nt.jet_bdisc);
     tree->SetBranchAddress("gen_x", nt.gen_x);
     tree->SetBranchAddress("gen_y", nt.gen_y);
     tree->SetBranchAddress("gen_z", nt.gen_z);

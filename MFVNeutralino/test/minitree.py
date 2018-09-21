@@ -22,7 +22,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, dataset, 'minitree', data_json='jsons/ana_2017.json')
 
-    cs = CondorSubmitter('MiniTreeV20m',
+    cs = CondorSubmitter('MiniTreeV20mp2',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = chain_modifiers(half_mc_modifier(), per_sample_pileup_weights_modifier()),

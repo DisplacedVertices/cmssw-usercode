@@ -101,6 +101,7 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.jet_phi[i] = mevent->jet_phi[i];
     nt.jet_energy[i] = mevent->jet_energy[i];
     nt.jet_id[i] = mevent->jet_id[i];
+    nt.jet_bdisc[i] = mevent->jet_bdisc[i];
   }
 
   for (int i = 0; i < 2; ++i) {
