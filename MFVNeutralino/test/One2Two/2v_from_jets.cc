@@ -1,3 +1,42 @@
+/*
+ * This program constructs the background template from one-vertex events.
+ * Set the input parameters at the top of the method construct_dvvc().
+ * Set which combinations of input parameters to run in main().
+ * To run: compile with the Makefile (make); execute (./2v_from_jets.exe); delete the .exe (make clean).
+ *
+ * Here are details on each of the input parameters:
+ * which filepath?
+ *  - Provide the filepath to the MiniTree directory.
+ *
+ * which samples?
+ *  - The MC and data samples and weights are set in static arrays; edit nbkg if necessary.
+ *  - For the 2017 MC samples the weights calculated assume an integrated luminosity of 41.53 fb^-1 and the original number of events for each sample:
+ *      python -i ../../../Tools/python/Samples.py
+ *      >>> for sample in qcd_samples_2017 + ttbar_samples_2017:
+ *      ...     print '%14s %7.1f %6.1f %9d %7.5f' % (sample.name, 41530., sample.xsec, sample.nevents_orig, 41530.*sample.xsec/sample.nevents_orig)
+ *  - For the background template only the relative weights are relevant because we only construct the shape; the normalization comes from the fit.
+ *  - Todo: MC weights and data samples for 2018.
+ *  - If the sample arrays is modified, ibkg_begin and ibkg_end should also be modified.
+ *
+ * which ntracks?
+ *  - This sets the treepath and shouldn't need to be modified.  (For Ntk3or4 two-vertex event is considered to be 4-track x 3-track if ntk0==4 and ntk1==3.)
+ *
+ * deltaphi input
+ *  - Run fit_jetpairdphi.py to get the values of dphi_pdf_c, dphi_pdf_a.
+ *  - Todo: update for 2017 (the current values are from 2015+2016 data).
+ *
+ * efficiency input
+ *  - Run vertexer_eff.py to get the .root file with the efficiency curve.
+ *
+ * bquark input
+ *  - Derive the b quark corrections; here is the procedure.
+ *  - Run 2v_from_jets.cc with correct_bquarks = false, bquarks = 1 (with b quarks).
+ *  - Run 2v_from_jets.cc with correct_bquarks = false, bquarks = 0 (without b quarks).
+ *  - In MFVNeutralino/test: python utilities.py merge_bquarks_nobquarks
+ *  - Run bquark_correction.py to get the values of the b quark corrections.
+ *  - Todo: update for 2017 (the current values are from 2015+2016 MC).
+ */
+
 #include <cstdlib>
 #include <math.h>
 #include "TCanvas.h"
