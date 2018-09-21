@@ -1467,9 +1467,11 @@ def plot_dir(x='', make=False):
     d = None
     if 'fnal.gov' in hostname and username == 'tucker':
         d = '/publicweb/t/tucker/asdf/plots'
-    if 'fnal.gov' in hostname and username == 'dquach':
+    elif 'fnal.gov' in hostname and username == 'jchu':
+        d = '/publicweb/j/jchu/plots'
+    elif 'fnal.gov' in hostname and username == 'dquach':
         d = '/publicweb/d/dquach/plots'
-    if 'fnal.gov' in hostname and username == 'shogan':
+    elif 'fnal.gov' in hostname and username == 'shogan':
 	d = '/publicweb/s/shogan/images'
     if d:
         x = os.path.join(d,x)
