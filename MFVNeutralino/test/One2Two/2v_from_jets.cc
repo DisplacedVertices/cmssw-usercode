@@ -90,7 +90,14 @@ struct ConstructDvvcParameters {
 void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   p.print(); printf(", out_fn = %s\n", out_fn);
 
-  const int nbkg = 18;
+  const char* file_path; //which filepath?
+  if (p.only_10pc()) {
+    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV20m";
+  } else {
+    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV20m";
+  }
+
+  const int nbkg = 18; //which samples?
   const char* samples[nbkg];
   float       weights[nbkg];
   samples[0]  = "mfv_neu_tau001000um_M0800_2017"; weights[0]  = 0.004153;
@@ -112,14 +119,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   samples[16] = "JetHT2017F";                     weights[16] = 1;
   samples[17] = "JetHT2018";                      weights[17] = 1;
 
-  const char* file_path; //which filepath?
-  if (p.only_10pc()) {
-    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV20m";
-  } else {
-    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV20m";
-  }
-
-  int ibkg_begin; int ibkg_end; //which samples?
+  int ibkg_begin; int ibkg_end;
   if (p.is_mc()) {
     if (p.year() == "2017")         { ibkg_begin =  1; ibkg_end =  5; if (p.inject_signal()) ibkg_begin = 0; }
     else if (p.year() == "2018")    { ibkg_begin =  6; ibkg_end = 10; if (p.inject_signal()) ibkg_end = 11; }
