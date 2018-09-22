@@ -64,6 +64,7 @@ float ht(int njets, float* jet_pt) {
 struct ConstructDvvcParameters {
   bool is_mc_;
   bool only_10pc_;
+  std::string version_;
   bool inject_signal_;
   std::string year_;
   int ntracks_;
@@ -79,6 +80,7 @@ struct ConstructDvvcParameters {
   ConstructDvvcParameters()
     : is_mc_(true),
       only_10pc_(false),
+      version_("v20mp2"),
       inject_signal_(false),
       year_("2017"),
       ntracks_(5),
@@ -95,6 +97,7 @@ struct ConstructDvvcParameters {
 
   bool is_mc() const { return is_mc_; }
   bool only_10pc() const { return only_10pc_; }
+  std::string version() const { return version_; }
   bool inject_signal() const { return inject_signal_; }
   std::string year() const { return year_; }
   int ntracks() const { return ntracks_; }
@@ -109,6 +112,7 @@ struct ConstructDvvcParameters {
 
   ConstructDvvcParameters is_mc(bool x)             { ConstructDvvcParameters y(*this); y.is_mc_             = x; return y; }
   ConstructDvvcParameters only_10pc(bool x)         { ConstructDvvcParameters y(*this); y.only_10pc_         = x; return y; }
+  ConstructDvvcParameters version(std::string x)    { ConstructDvvcParameters y(*this); y.version_           = x; return y; }
   ConstructDvvcParameters inject_signal(bool x)     { ConstructDvvcParameters y(*this); y.inject_signal_     = x; return y; }
   ConstructDvvcParameters year(std::string x)       { ConstructDvvcParameters y(*this); y.year_              = x; return y; }
   ConstructDvvcParameters ntracks(int x)            { ConstructDvvcParameters y(*this); y.ntracks_           = x; return y; }
@@ -122,7 +126,7 @@ struct ConstructDvvcParameters {
   ConstructDvvcParameters max_npu(int x)            { ConstructDvvcParameters y(*this); y.max_npu_           = x; return y; }
 
   void print() const {
-    printf("is_mc = %d, only_10pc = %d, inject_signal = %d, year = %s, ntracks = %d, correct_bquarks = %d, bquarks = %d, vary_dphi = %d, clearing_from_eff = %d, vary_eff = %d, vary_bquarks = %d", is_mc(), only_10pc(), inject_signal(), year_.c_str(), ntracks(), correct_bquarks(), bquarks(), vary_dphi(), clearing_from_eff(), vary_eff(), vary_bquarks());
+    printf("is_mc = %d, only_10pc = %d, version = %s, inject_signal = %d, year = %s, ntracks = %d, correct_bquarks = %d, bquarks = %d, vary_dphi = %d, clearing_from_eff = %d, vary_eff = %d, vary_bquarks = %d", is_mc(), only_10pc(), version_.c_str(), inject_signal(), year_.c_str(), ntracks(), correct_bquarks(), bquarks(), vary_dphi(), clearing_from_eff(), vary_eff(), vary_bquarks());
   }
 };
 
@@ -131,9 +135,9 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   const char* file_path; //which filepath?
   if (p.only_10pc()) {
-    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV20m";
+    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV20mp2";
   } else {
-    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV20m";
+    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV20mp2";
   }
 
   const int nbkg = 18; //which samples?
@@ -595,42 +599,45 @@ int main(int argc, const char* argv[]) {
   const bool only_default = strcmp(getenv("USER"), "tucker") == 0 || (argc >= 2 && strcmp(argv[1], "only_default"));
   ConstructDvvcParameters pars;
   if (only_default) {
-    construct_dvvc(pars, "2v_from_jets_2017_5track_default_v20m.root");
+    construct_dvvc(pars, "2v_from_jets_2017_5track_default_v20mp2.root");
     return 0;
   }
 
-  construct_dvvc(pars, "2v_from_jets_2017_5track_default_v20m.root");
+  construct_dvvc(pars, "2v_from_jets_2017_5track_default_v20mp2.root");
 /*
   for (const char* year : {"2017", "2018", "2017p8"}) {
     for (int ntracks : {3, 4, 5, 7}) {
-      ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks);
-      construct_dvvc(pars2.correct_bquarks(false),              TString::Format("2v_from_jets_%s_%dtrack_bquark_uncorrected_v20m.root", year, ntracks));
-      construct_dvvc(pars2.correct_bquarks(false).bquarks(1),   TString::Format("2v_from_jets_%s_%dtrack_bquarks_v20m.root", year, ntracks));
-      construct_dvvc(pars2.correct_bquarks(false).bquarks(0),   TString::Format("2v_from_jets_%s_%dtrack_nobquarks_v20m.root", year, ntracks));
-      construct_dvvc(pars2,                                     TString::Format("2v_from_jets_%s_%dtrack_default_v20m.root", year, ntracks));
-      construct_dvvc(pars2.vary_dphi(true),                     TString::Format("2v_from_jets_%s_%dtrack_vary_dphi_v20m.root", year, ntracks));
-      construct_dvvc(pars2.clearing_from_eff(false),            TString::Format("2v_from_jets_%s_%dtrack_noclearing_v20m.root", year, ntracks));
-      construct_dvvc(pars2.vary_eff(true),                      TString::Format("2v_from_jets_%s_%dtrack_vary_eff_v20m.root", year, ntracks));
-      construct_dvvc(pars2.vary_bquarks(true),                  TString::Format("2v_from_jets_%s_%dtrack_vary_bquarks_v20m.root", year, ntracks));
+      const char* version = "v20mp2";
+      ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks).version(version);
+      construct_dvvc(pars2.correct_bquarks(false),              TString::Format("2v_from_jets_%s_%dtrack_bquark_uncorrected_%s.root", year, ntracks, version));
+      construct_dvvc(pars2.correct_bquarks(false).bquarks(1),   TString::Format("2v_from_jets_%s_%dtrack_bquarks_%s.root", year, ntracks, version));
+      construct_dvvc(pars2.correct_bquarks(false).bquarks(0),   TString::Format("2v_from_jets_%s_%dtrack_nobquarks_%s.root", year, ntracks, version));
+      construct_dvvc(pars2,                                     TString::Format("2v_from_jets_%s_%dtrack_default_%s.root", year, ntracks, version));
+      construct_dvvc(pars2.vary_dphi(true),                     TString::Format("2v_from_jets_%s_%dtrack_vary_dphi_%s.root", year, ntracks, version));
+      construct_dvvc(pars2.clearing_from_eff(false),            TString::Format("2v_from_jets_%s_%dtrack_noclearing_%s.root", year, ntracks, version));
+      construct_dvvc(pars2.vary_eff(true),                      TString::Format("2v_from_jets_%s_%dtrack_vary_eff_%s.root", year, ntracks, version));
+      construct_dvvc(pars2.vary_bquarks(true),                  TString::Format("2v_from_jets_%s_%dtrack_vary_bquarks_%s.root", year, ntracks, version));
     }
   }
   for (const char* year : {"2017", "2018", "2017p8", "2017B", "2017C", "2017D", "2017E", "2017F"}) {
     for (int ntracks : {3, 4, 5, 7}) {
-      ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks).is_mc(false).only_10pc(true);
-      //construct_dvvc(pars2,                    TString::Format("2v_from_jets_data_%s_%dtrack_default_v20m.root", year, ntracks));
-      //construct_dvvc(pars2.vary_dphi(true),    TString::Format("2v_from_jets_data_%s_%dtrack_vary_dphi_v20m.root", year, ntracks));
-      //construct_dvvc(pars2.vary_eff(true),     TString::Format("2v_from_jets_data_%s_%dtrack_vary_eff_v20m.root", year, ntracks));
-      //construct_dvvc(pars2.vary_bquarks(true), TString::Format("2v_from_jets_data_%s_%dtrack_vary_bquarks_v20m.root", year, ntracks));
+      const char* version = "v20mp2";
+      ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks).is_mc(false).only_10pc(true).version(version);
+      //construct_dvvc(pars2,                    TString::Format("2v_from_jets_data_%s_%dtrack_default_%s.root", year, ntracks, version));
+      //construct_dvvc(pars2.vary_dphi(true),    TString::Format("2v_from_jets_data_%s_%dtrack_vary_dphi_%s.root", year, ntracks, version));
+      //construct_dvvc(pars2.vary_eff(true),     TString::Format("2v_from_jets_data_%s_%dtrack_vary_eff_%s.root", year, ntracks, version));
+      //construct_dvvc(pars2.vary_bquarks(true), TString::Format("2v_from_jets_data_%s_%dtrack_vary_bquarks_%s.root", year, ntracks, version));
     }
   }
   for (const char* year : {"2017p8"}) {
     for (int ntracks : {3, 4, 5, 7}) {
-      ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks).is_mc(false);
-      construct_dvvc(pars2,                    TString::Format("2v_from_jets_data_%s_%dtrack_default_v20m.root", year, ntracks));
-      construct_dvvc(pars2.vary_dphi(true),    TString::Format("2v_from_jets_data_%s_%dtrack_vary_dphi_v20m.root", year, ntracks));
-      //construct_dvvc(pars2.clearing_from_eff(false), TString::Format("2v_from_jets_data_%s_%dtrack_noclearing_v20m.root", year, ntracks));
-      construct_dvvc(pars2.vary_eff(true),     TString::Format("2v_from_jets_data_%s_%dtrack_vary_eff_v20m.root", year, ntracks));
-      construct_dvvc(pars2.vary_bquarks(true), TString::Format("2v_from_jets_data_%s_%dtrack_vary_bquarks_v20m.root", year, ntracks));
+      const char* version = "v20mp2";
+      ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks).is_mc(false).version(version);
+      construct_dvvc(pars2,                    TString::Format("2v_from_jets_data_%s_%dtrack_default_%s.root", year, ntracks, version));
+      construct_dvvc(pars2.vary_dphi(true),    TString::Format("2v_from_jets_data_%s_%dtrack_vary_dphi_%s.root", year, ntracks, version));
+      //construct_dvvc(pars2.clearing_from_eff(false), TString::Format("2v_from_jets_data_%s_%dtrack_noclearing_%s.root", year, ntracks, version));
+      construct_dvvc(pars2.vary_eff(true),     TString::Format("2v_from_jets_data_%s_%dtrack_vary_eff_%s.root", year, ntracks, version));
+      construct_dvvc(pars2.vary_bquarks(true), TString::Format("2v_from_jets_data_%s_%dtrack_vary_bquarks_%s.root", year, ntracks, version));
     }
   }
 */
