@@ -10,7 +10,7 @@ import JMTucker.MFVNeutralino.AnalysisConstants as ac
 ROOT.gErrorIgnoreLevel = 6000
 fns = [x for x in sys.argv[1:] if x.endswith('.root') and (os.path.isfile(x) or x.startswith('root://'))]
 if not fns:
-    gg = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV18m/*.root'
+    gg = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV20mp2/*.root'
     print 'using default', gg
     fns = glob.glob(gg)
 fns = [x for x in fns if '2015' not in x and not 'hip1p0' in x]
@@ -24,6 +24,7 @@ def getit(fn, ntk):
     def c(cut):
         #cut = '(%s) && njets >= 4 && jetht > 700 && jetht < 1000' % cut
         #cut = '(%s) && njets >= 4 && jetht > 700' % cut
+        #cut = '(%s) && gen_flavor_code == 2' % cut
         h,n = hr.draw('weight', cut, binning='1,0,1', get_n=True, goff=True)
         return (n,) + get_integral(h)
     n1v = c('nvtx==1')
