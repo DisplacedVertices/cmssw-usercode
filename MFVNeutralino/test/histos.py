@@ -114,16 +114,27 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools import Samples 
 
     if year == 2017:
-        samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.all_signal_samples_2017
+        samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.all_signal_samples_2017 + Samples.data_samples_2017
         #samples = Samples.ttbar_samples_2017 + Samples.leptonic_samples_2017 + Samples.mfv_signal_samples_2017
 
     #samples = [s for s in samples if s.has_dataset(dataset)]
 
-    set_splitting(samples, dataset, 'histos', data_json='jsons/ana_2017.json')
+    set_splitting(samples, dataset, 'histos', data_json='jsons/ana_2017_1pc.json')
+
+    def modify(sample):
+        to_add, to_replace = [], []
+        if not sample.is_mc:
+            to_add.append('''
+for p in process.paths.keys():
+    if not (p == 'pSkimSel' or p == 'pEventPreSel' or p == 'Ntk3pOnlyOneVtx' or p.startswith('p0V') or p.startswith('Ntk3p1V')):  # everything but skim/presel and 3-track 1-vertex paths blind
+    #if not (p == 'pSkimSel' or p == 'pEventPreSel' or p.startswith('Ntk3') or p.startswith('Ntk4') or p.startswith('p0V')):       # unblinds all 3,4-track sets
+        delattr(process, p)
+''')
+        return to_add, to_replace
 
     cs = CondorSubmitter('HistosV20m',
                          ex = year,
                          dataset = dataset,
-                         pset_modifier = chain_modifiers(half_mc_modifier(), per_sample_pileup_weights_modifier()),
+                         pset_modifier = chain_modifiers(half_mc_modifier(), per_sample_pileup_weights_modifier(), modify),
                          )
     cs.submit_all(samples)
