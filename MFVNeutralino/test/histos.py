@@ -1,6 +1,8 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
+is_mc = True # for blinding
+
 dataset = 'ntuplev20m'
 sample_files(process, 'qcdht2000_2017', dataset, 1)
 process.TFileService.fileName = 'histos.root'
@@ -102,6 +104,11 @@ process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     
             setattr(process, vtx_hst_name, vtx_hst)
             setattr(process, '%sp%iV' % (EX1, nv) + name, cms.Path(process.mfvWeight * vtx * ana * evt_hst * vtx_hst))
 
+if not is_mc:
+    for p in process.paths.keys():
+        if not (p == 'pSkimSel' or p == 'pEventPreSel' or p == 'Ntk3pOnlyOneVtx' or p.startswith('p0V') or p.startswith('Ntk3p1V')):  # everything but skim/presel and 3-track 1-vertex paths blind
+       #if not (p == 'pSkimSel' or p == 'pEventPreSel' or p.startswith('Ntk3') or p.startswith('Ntk4') or p.startswith('p0V')):       # unblinds all 3,4-track sets, keeps 5-track stuff blind
+            delattr(process, p)
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
@@ -117,20 +124,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, dataset, 'histos', data_json='jsons/ana_2017_1pc.json')
 
-    def modify(sample):
-        to_add, to_replace = [], []
-        if not sample.is_mc:
-            to_add.append('''
-for p in process.paths.keys():
-    if not (p == 'pSkimSel' or p == 'pEventPreSel' or p == 'Ntk3pOnlyOneVtx' or p.startswith('p0V') or p.startswith('Ntk3p1V')):  # everything but skim/presel and 3-track 1-vertex paths blind
-    #if not (p == 'pSkimSel' or p == 'pEventPreSel' or p.startswith('Ntk3') or p.startswith('Ntk4') or p.startswith('p0V')):       # unblinds all 3,4-track sets
-        delattr(process, p)
-''')
-        return to_add, to_replace
-
     cs = CondorSubmitter('HistosV20mp1',
                          ex = year,
                          dataset = dataset,
-                         pset_modifier = chain_modifiers(half_mc_modifier(), per_sample_pileup_weights_modifier(), modify),
+                         pset_modifier = chain_modifiers(is_mc_modifier, half_mc_modifier(), per_sample_pileup_weights_modifier()),
                          )
     cs.submit_all(samples)
