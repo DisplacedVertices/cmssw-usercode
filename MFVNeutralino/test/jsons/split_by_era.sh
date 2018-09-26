@@ -6,13 +6,14 @@ if [[ ! -f ds.txt ]]; then
 fi
 
 for x in $(<ds.txt); do
-    era=$(echo $x | sed 's/.*\(Run2017.\).*/\1/')
-    era=${era/Run/}
+    year=$(echo $x | sed 's/.*Run\([[:digit:]]\{4\}\).*/\1/')
+    era=$(echo $x | sed 's/.*Run\('${year}'.\).*/\1/')
     runfn=runs-${era}.txt
-    dasgoclient_linux -query "run dataset=$x" > $runfn
-    runrange=( $(python -c "l = "$(<$runfn)"; print min(l),max(l)") )
-    echo $era ${runrange[@]}
+    dasgoclient -query "run dataset=$x" > $runfn
+    minrun=$(sort -n $runfn | head -1)
+    maxrun=$(sort -n $runfn | tail -1)
+    echo $era $minrun $maxrun
     for xx in '' ana_; do
-        filterJSON.py --min=${runrange[0]} --max=${runrange[1]} ${xx}2017.json > ${xx}${era}.json
+        filterJSON.py --min=$minrun --max=$maxrun ${xx}${year}.json > ${xx}${era}.json
     done
 done
