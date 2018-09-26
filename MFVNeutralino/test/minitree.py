@@ -30,7 +30,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     #samples = [s for s in samples if s.has_dataset(dataset)]
 
-    set_splitting(samples, dataset, 'minitree', data_json='jsons/ana_2017_1pc.json')
+    set_splitting(samples, dataset, 'minitree', data_json=json_path('ana_2017_1pc.json'))
 
     cs = CondorSubmitter('MiniTreeV20mp2',
                          ex = year,

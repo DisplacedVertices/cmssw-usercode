@@ -122,7 +122,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     #samples = [s for s in samples if s.has_dataset(dataset)]
 
-    set_splitting(samples, dataset, 'histos', data_json='jsons/ana_2017_1pc.json')
+    set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017_1pc.json'))
 
     cs = CondorSubmitter('HistosV20mp1',
                          ex = year,
