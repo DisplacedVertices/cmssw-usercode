@@ -20,6 +20,8 @@ fns.sort(key=lambda fn: not os.path.basename(fn).startswith('mfv_')) # puts sign
 def getit(fn, ntk):
     f = ROOT.TFile.Open(fn)
     t = f.Get('%s/t' % ntk)
+    if not t:
+        return (-1,-1,-1), (-1,-1,-1)
     hr = draw_hist_register(t, True)
     def c(cut):
         #cut = '(%s) && njets >= 4 && jetht > 700 && jetht < 1000' % cut
@@ -37,7 +39,7 @@ def getit(fn, ntk):
 fmt = '%40s %9s %9s %9s   %9s +- %9s  %9s +- %9s  %9s +- %9s  %9s +- %9s'
 
 int_lumi = ac.int_lumi_2017 * ac.scale_factor_2017
-print 'scaled to int. lumi. %.3f/fb' % (int_lumi/1000)
+print 'MC scaled to int. lumi. %.3f/fb' % (int_lumi/1000)
 
 for ntk in 'mfvMiniTreeNtk3', 'mfvMiniTreeNtk4', 'mfvMiniTree':
     print
@@ -70,9 +72,9 @@ for ntk in 'mfvMiniTreeNtk3', 'mfvMiniTreeNtk4', 'mfvMiniTree':
             sample = getattr(Samples, sname)
             if not sample.is_mc:
                 w = 1.
-                print fmt % (sample.name, '', '', '', '',
-                             r1v, '%9.0f' % r1v**0.5, '', '', 
-                             r2v, '%9.0f' % r2v**0.5, '', '')
+                print fmt % (sample.name, '', '', '',
+                             r1v, '%9.0f' % abs(r1v)**0.5, '', '',
+                             r2v, '%9.0f' % abs(r2v)**0.5, '', '')
             else:
                 w = int_lumi * sample.partial_weight(fn)
                 if sample.is_signal:
