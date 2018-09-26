@@ -132,7 +132,7 @@ for p in process.paths.keys():
 ''')
         return to_add, to_replace
 
-    cs = CondorSubmitter('HistosV20m',
+    cs = CondorSubmitter('HistosV20mp1',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = chain_modifiers(half_mc_modifier(), per_sample_pileup_weights_modifier(), modify),
