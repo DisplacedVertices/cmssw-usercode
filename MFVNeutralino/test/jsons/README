@@ -1,18 +1,24 @@
-since /afs was unmounted @ lpc, symlinks replaced with copies:
+- since /afs was unmounted @ lpc, symlinks replaced with copies:
 
-2015.json -> /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Reprocessing/Cert_13TeV_16Dec2015ReReco_Collisions15_25ns_JSON_Silver_v2.txt
-2016.json -> /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/ReReco/Final/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt
-2017.json -> /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/ReReco/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1.txt
+  2015.json -> /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Reprocessing/Cert_13TeV_16Dec2015ReReco_Collisions15_25ns_JSON_Silver_v2.txt
+  2016.json -> /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/ReReco/Final/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt
+  2017.json -> /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/ReReco/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1.txt
 
-"2015p6" means add the corresponding 2015 and 2016 jsons.
+- "2015p6" means add the corresponding 2015 and 2016 jsons.
 
-"ana_".json are the hlt-menu-ok and prescale-ne-1 dropped versions.
+- "ana_".json are the hlt-menu-ok and prescale-ne-1 dropped versions.
+  They are produced by XXX
 
-"_10pc" or "_1pc" are 10% or 1% slices.
+- "_10pc" or "_1pc" are 10% or 1% slices.
 
-"ana_avail_" are what condor/crab report say they were able to run on.
-This is made after the first time condor/crab ntuple is run on the default set of datasets (currently JetHT) and the report is scrutinized.
-Then you compare subsequent runs' reports to this file. (See utilities.py.)
-For a different set of datasets, e.g. /SingleMu, use "ana_avail_*_mu".
+- "ana_avail_" are what condor/crab report say they were able to run
+  on.  This is made after the first time condor/crab ntuple is run on
+  the default set of datasets (currently JetHT) and the report is
+  scrutinized.  Thereafter, compare subsequent runs' reports to this
+  file. (See utilities.py.)  For a different set of datasets,
+  e.g. /SingleMu, use "ana_avail_*_mu".
 
-To produce the split-by-era jsons, prepare ds.txt with list of datasets. Then see split_by_era.sh.
+- To produce the split-by-era jsons, prepare ds.txt with one dataset
+  per line.  Then run split_by_era.sh.  It handles one year at a time.
+  Can compare /AOD to /MINIAOD this way to see that all runs made it
+  into miniaod.
