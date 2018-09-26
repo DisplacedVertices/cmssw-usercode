@@ -1,6 +1,6 @@
 # should merge this with general.intlumi_from_brilcalc_csv
 
-import gzip, time
+import gzip, time, sys
 from collections import defaultdict
 from JMTucker.Tools.general import from_pickle, to_pickle
 from FWCore.PythonUtilities.LumiList import LumiList
@@ -16,12 +16,28 @@ class LumiLine:
         'PXL': 1,
         'PLTZERO': 2,
         'HFOC': 3,
+        'HFET': 4,
         }
 
 class LumiLines:
     ls_time = 2**18 / 11245.5
-    run_boundary_15_16 = 260627
-    era_boundaries = [254227, 256630, 272007, 275657, 276315, 276831, 277772, 278820, 280919]
+    # runs for each year, inclusive
+    year_boundaries = {2015: (254227, 260627),
+                       2016: (272007, 284068),
+                       2017: (297047, 306460)}
+    years = sorted(year_boundaries.keys())
+    # starting runs of each era
+    era_boundaries = [254227, 256630,                                         # 2015 C D
+                      272007, 275657, 276315, 276831, 277772, 278820, 280919, # 2016 B3 C D E F G H2
+                      297047, 299368, 302031, 303824, 305040,                 # 2017 B C D E F
+                      ]
+
+    @classmethod
+    def year_from_run(cls, run):
+        for year in cls.years:
+            a,b = cls.year_boundaries[year]
+            if a <= run <= b:
+                return year
 
     @classmethod
     def load_csv(cls, fn):
@@ -103,20 +119,21 @@ class LumiLines:
 
     def runs(self, year=None):
         runs = sorted(self.by_run.keys())
-        rb = self.run_boundary_15_16
-        if year == 2015:
-            runs = [r for r in runs if r <= rb]
-        elif year == 2016:
-            runs = [r for r in runs if r > rb]
+        ra,rb = self.year_boundaries[year]
+        return [r for r in runs if ra <= r <= rb]
+
+    def _sumintlumi(self, run_or_year=None, which=None):
+        if run_or_year is None:
+            return sum(self._sumintlumi(year, which) for year in LumiLines.years)
+        elif run_or_year in LumiLines.years:
+            return sum(self._sumintlumi(run, which) for run in self.runs(run_or_year))
         else:
-            assert year is None
-        return runs
+            return sum(which(ll) for ll in self.by_run[run_or_year])
 
-    def delivered(self, run):
-        return sum(ll.delivered for ll in self.by_run[run])
-
-    def recorded(self, run):
-        return sum(ll.recorded for ll in self.by_run[run])
+    def delivered(self, run_or_year=None):
+        return self._sumintlumi(run_or_year, lambda ll: ll.delivered)
+    def recorded(self, run_or_year=None):
+        return self._sumintlumi(run_or_year, lambda ll: ll.recorded)
 
     def avg_inst(self, run):
         n, s = 0, 0.
@@ -138,19 +155,24 @@ class LumiLines:
         return s/sw
 
 if __name__ == '__main__':
-    #import sys
-    #lls = LumiLines.save(sys.argv[1], sys.argv[1].replace('.csv', '.gzpickle'))
-    #LumiLines.strip('/uscms/home/tucker/public/mfv/2015plus2016.gzpickle', '/uscms/home/tucker/public/mfv/2015plus2016stripped2.gzpickle')
-    lls = LumiLines('/uscms/home/tucker/public/mfv/2015plus2016stripped2.gzpickle')
+    #LumiLines.save('/uscms/home/tucker/public/mfv/lumi/2017.byls.csv.gz', '/uscms/home/tucker/public/mfv/lumi/2017.gzpickle')
+    #LumiLines.strip('/uscms/home/tucker/public/mfv/lumi/2017.gzpickle', '/uscms/home/tucker/public/mfv/lumi/2017stripped.gzpickle')
+    lls = LumiLines('/uscms/home/tucker/public/mfv/lumi/2017stripped.gzpickle')
     eb = lls.era_boundaries[:] + [1000000]
-    bins = [ [x,y,-1,0] for x,y in zip(eb, eb[1:]) ]
+    bins = [ [x,y,-1,0,0] for x,y in zip(eb, eb[1:]) ]
     print bins
-    for run in lls.runs(2016):
+    for run in lls.runs(2017):
         for i in xrange(len(bins)):
-            x,y,r,d = bins[i]
+            x,y,r,m,s = bins[i]
             if x <= run < y:
-                delivered = lls.delivered(run)
-                if delivered > d:
-                    bins[i] = x,y,run,delivered
-    for x,y,r,d in bins:
-        print x,y,r,d
+                recorded = lls.recorded(run)
+                s += recorded
+                if recorded > m:
+                    m = recorded
+                    r = run
+                bins[i] = x,y,r,m,s
+    ss = 0
+    for x,y,r,m,s in bins:
+        ss += s
+        print x,y,r,m,s
+    print ss
