@@ -46,21 +46,26 @@ from JMTucker.MFVNeutralino.WeightProducer_cfi import half_mc_by_lumi
 half_mc_by_lumi(process, %r)
 ''' % self.first
             return [x], []
+        else:
+            return [], []
 
 class per_sample_pileup_weights_modifier:
     def __init__(self, module_names=['mfvWeight']):
         self.module_names = module_names
     def __call__(self, sample):
-        which = sample.name
-        if sample.is_signal and sample.is_private:
-            which = 'mfv_signals'
-        x = '''
+        if sample.is_mc:
+            which = sample.name
+            if sample.is_signal and sample.is_private:
+                which = 'mfv_signals'
+            x = '''
 from JMTucker.Tools.PileupWeights import pileup_weights
 if pileup_weights.has_key(%r):
     for mname in %r:
         getattr(process, mname).pileup_weights = pileup_weights[%r]
-''' % (which, self.module_names, which)
-        return [x], []
+    ''' % (which, self.module_names, which)
+            return [x], []
+        else:
+            return [], []
 
 class event_veto_modifier:
     def __init__(self, d, filter_path):
