@@ -30,10 +30,6 @@ process.mfvJetEnergyHistos = cms.EDAnalyzer('MFVJetEnergyHistos',
 
 process.p = cms.Path(process.mfvSelectedVerticesSeq * process.mfvWeight * process.mfvAnalysisCuts * process.mfvJetEnergyHistos)
 
-def force_bs(process, bs):
-    for ana in process.analyzers:
-        if hasattr(ana, 'force_bs'):
-            ana.force_bs = bs
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.Year import year
