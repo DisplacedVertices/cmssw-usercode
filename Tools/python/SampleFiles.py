@@ -295,6 +295,11 @@ _add_ds("miniaod", {
 
 
 _add_ds("ntuplev20m", {
+'JetHT2017B': _fromnum1("/store/user/tucker/JetHT/NtupleV20m_2017/180925_201903", 513),
+'JetHT2017C': _fromnum1("/store/user/tucker/JetHT/NtupleV20m_2017/180925_201922", 777),
+'JetHT2017D': _fromnum1("/store/user/tucker/JetHT/NtupleV20m_2017/180925_201941", 372),
+'JetHT2017E': _fromnum1("/store/user/tucker/JetHT/NtupleV20m_2017/180925_202003", 724),
+'JetHT2017F': _fromnum1("/store/user/tucker/JetHT/NtupleV20m_2017/180925_202026", 931),
 'qcdht0700_2017': _frommerge("/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/NtupleV20m_merge_2017/180810_090200/0000/merge",  3),
 'qcdht1000_2017': _frommerge("/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/NtupleV20m_merge_2017/180810_090201/0000/merge", 12),
 'qcdht1500_2017': _frommerge("/store/user/tucker/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/NtupleV20m_merge_2017/180810_090202/0000/merge", 25),

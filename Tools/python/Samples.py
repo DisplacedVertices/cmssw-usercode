@@ -282,7 +282,7 @@ for x in 'main', 'miniaod':
 # ntuples
 ########
 
-for x in ttbar_samples_2017 + qcd_samples_2017 + leptonic_samples_2017 + mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017:
+for x in data_samples_2017 + ttbar_samples_2017 + qcd_samples_2017 + leptonic_samples_2017 + mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017:
     x.add_dataset("ntuplev20m")
 for x in ttbar_samples_2017 + qcd_samples_2017 + leptonic_samples_2017:
     x.add_dataset("ntuplev20m_ntkseeds")
