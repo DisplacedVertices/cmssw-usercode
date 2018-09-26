@@ -27,7 +27,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         if not sample.is_mc:
             to_add.append('''
 # set all filters to only keep 1-vertex events and drop 3-or-4, 4, 5-track paths
-for x in process.mfvAnalysisCutsGE1Vtx, process.mfvAnalysisCutsGE1VtxNtk3, process.mfvAnalysisCutsGE1VtxNtk4, process.mfvAnalysisCutsGE1VtxNtk3or4
+for x in process.mfvAnalysisCutsGE1Vtx, process.mfvAnalysisCutsGE1VtxNtk3, process.mfvAnalysisCutsGE1VtxNtk4, process.mfvAnalysisCutsGE1VtxNtk3or4:
     x.max_nvertex = 1
 del process.pMiniTreeNtk3or4
 del process.pMiniTreeNtk4
