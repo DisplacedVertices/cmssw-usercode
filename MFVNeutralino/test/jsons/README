@@ -7,9 +7,18 @@
 - "2015p6" means add the corresponding 2015 and 2016 jsons.
 
 - "ana_".json are the hlt-menu-ok and prescale-ne-1 dropped versions.
-  They are produced by XXX
+  They are produced by first dumping the by-ls int. lumi csvs with
+  brilcalc, with and without the --hltpath argument.
 
-- "_10pc" or "_1pc" are 10% or 1% slices.
+  drop_prescaled.py compares the lumi reported with and without the
+  HLT filter, since brilcalc applies prescales in the former case.
+
+  (The "official" versions of the by-lumi csv files currently live in
+  /uscms/home/tucker/public/mfv/lumi . They can change with new
+  versions of the brilcalc normtag, but this is more stable lately.)
+
+- "_10pc" or "_1pc" are 10% or 1% slices. They are produced with
+  pick10pc.py.
 
 - "ana_avail_" are what condor/crab report say they were able to run
   on.  This is made after the first time condor/crab ntuple is run on
