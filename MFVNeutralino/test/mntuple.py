@@ -194,13 +194,14 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
 
     if year == 2017:
-        samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.all_signal_samples_2017
+        samples =  Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.all_signal_samples_2017
+        samples += Samples.data_samples_2017
         samples += Samples.leptonic_samples_2017
 
     dataset = 'miniaod'
     #samples = [s for s in samples if s.has_dataset(dataset)]
 
-    set_splitting(samples, dataset, 'ntuple')
+    set_splitting(samples, dataset, 'ntuple') # , data_json=json_path('ana_2017_1pc.json')) for e.g. EventHistosOnly_1pc
 
     if run_n_tk_seeds:
         samples = [s for s in samples if not s.is_signal]
