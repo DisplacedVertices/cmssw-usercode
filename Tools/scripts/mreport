@@ -33,7 +33,7 @@ for is_crab, wds in (True, crab_dirs_from_argv()), (False, cs_dirs_from_argv()):
             sample = Samples.sample_from_end_string(Samples, wd)
             goodLumis = LumiList(sample.json)
 
-            if any(not os.path.isfile(os.path.join(wd, 'results', x)) for x in 'inputDatasetLumis.json lumisToProcess.json outputDatasetsLumis.json processedLumis.json'.split()):
+            if any(not os.path.isfile(os.path.join(wd, 'results', x)) for x in 'inputDatasetLumis.json lumisToProcess.json processedLumis.json'.split()):
                 print 'running crab report'
                 report = crab_command('report', dir=wd) 
                 #pprint(report)
