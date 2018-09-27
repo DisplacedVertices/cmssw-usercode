@@ -6,6 +6,7 @@ import sys
 import JMTucker.Tools.argparse as argparse
 from JMTucker.Tools.CRAB3ToolsSh import is_crab_working_dir, crab_hadd_args, crab_hadd_files, crab_hadd
 from JMTucker.Tools.CondorTools import is_cs_dir, cs_hadd_args, cs_hadd_files, cs_hadd
+from JMTucker.Tools.general import touch
 from JMTucker.Tools.hadd import HaddlogParser
 from JMTucker.Tools import eos, colors
 
@@ -43,10 +44,14 @@ def hadd_(is_crab, *args, **kwargs):
     global found_one
     found_one = True
 
+    done = True
     working_dir = args[0]
-    if not os.path.isfile(os.path.join(working_dir, 'mmon_done')) and not options.ignore_done:
-        print colors.yellow('skipping %s since it is not marked done (--ignore-done to skip this check)' % working_dir)
-        return
+    if not os.path.isfile(os.path.join(working_dir, 'mmon_done')):
+        if options.ignore_done:
+            done = False
+        else:
+            print colors.yellow('skipping %s since it is not marked done (--ignore-done to skip this check)' % working_dir)
+            return
 
     kwargs['chunk_size'] = options.chunk_size
     kwargs['pattern'] = options.pattern
@@ -75,6 +80,9 @@ def hadd_(is_crab, *args, **kwargs):
 
     if new_dir and not exists(new_dir):
         mkdir(new_dir)
+
+    if not done:
+        touch(new_name + '.notdone')
 
     if exists(new_name):
         if options.overwrite:
