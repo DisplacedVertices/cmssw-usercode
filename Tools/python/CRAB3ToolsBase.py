@@ -6,6 +6,7 @@ import cPickle
 import fnmatch
 import getpass
 import glob
+import gzip
 import os
 import json
 import sys
@@ -261,6 +262,17 @@ def crab_get_output_dir(working_dir):
         assert not cfg.Data.publication
         publish_name = rq['RequestName'].split(username + '_')[1] # maybe?
     return '/store/user/%s/%s/%s/%s' % (username, primary_dataset, publish_name, timestamp)
+
+def crab_log_open(working_dir):
+    fn = os.path.join(working_dir, 'crab.log')
+    if os.path.isfile(fn):
+        return open(fn)
+    else:
+        fn += '.gz'
+        if os.path.isfile(fn):
+            return gzip.open(fn)
+    return CRABToolsException('no crab.log(.gz) found in %s' % working_dir)
+
 
 if __name__ == '__main__':
     rq = crab_requestcache(sys.argv[1])

@@ -39,7 +39,7 @@ def crab_get_njobs_from_log(working_dir, jobs_re=re.compile(r'\([\d ]+/([\d ]+)\
     # find njobs using a line printed as result of crab status that looks like ( 76/788)
     # check that it's a constant, too
     njobs = set()
-    for line in open(os.path.join(working_dir, 'crab.log')):
+    for line in crab_log_open(working_dir):
         mo = jobs_re.search(line)
         if mo:
             njobs.add(mo.groups())
@@ -49,7 +49,7 @@ def crab_get_njobs_from_log(working_dir, jobs_re=re.compile(r'\([\d ]+/([\d ]+)\
 
 def crab_get_output_dataset_from_log(working_dir):
     datasets = set()
-    for line in open(os.path.join(working_dir, 'crab.log')):
+    for line in crab_log_open(working_dir):
         line = line.strip()
         if line.startswith('Output dataset:'):
             dataset = line.split()[-1]
