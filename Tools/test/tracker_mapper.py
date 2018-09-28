@@ -52,11 +52,15 @@ process.jetsOnly = setup_event_filter(process,
 common = cms.Sequence(process.jetsOnly * process.goodOfflinePrimaryVertices * process.mfvUnpackedCandidateTracks)
 process.p = cms.Path(common * process.TrackerMapper)
 
+module_names = ['TrackerMapper']
+
 for name, filt in ('LightFlavor', process.lightFlavor), ('HeavyFlavor', process.heavyFlavor), ('BFlavor', process.bFlavor), ('DisplacedGenPV', process.displacedGenPV):
     tk = process.TrackerMapper.clone()
     if name == 'HeavyFlavor':
         tk.heavy_flavor_src = cms.InputTag('heavyFlavor', 'heavyFlavor')
-    setattr(process, 'TrackerMapper%s' % name, tk)
+    name = 'TrackerMapper%s' % name
+    module_names.append(name)
+    setattr(process, name, tk)
     setattr(process, 'p%s' % name, cms.Path(common * filt * tk))
 
 
@@ -66,13 +70,13 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.Year import year
 
     if year == 2017:
-        samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.all_signal_samples_2017
+        samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.all_signal_samples_2017 + Samples.data_samples_2017
 
-    set_splitting(samples, 'miniaod', 'default', json_path('ana_2017.json'), 50)
+    set_splitting(samples, 'miniaod', 'default', json_path('ana_2017_1pc.json'), 50)
 
-    ms = MetaSubmitter('TrackerMapperV1', dataset='miniaod')
+    ms = MetaSubmitter('TrackerMapperV3', dataset='miniaod')
     ms.common.ex = year
-    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(['TrackerMapper', 'TrackerMapperOldStCut']))
+    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(module_names))
     ms.crab.job_control_from_sample = True
     ms.condor.stageout_files = 'all'
     ms.submit(samples)
