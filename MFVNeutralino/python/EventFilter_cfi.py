@@ -2,6 +2,7 @@ import FWCore.ParameterSet.Config as cms
 from JMTucker.Tools.PATTupleSelection_cfi import jtupleParams
 
 mfvEventFilter = cms.EDFilter('MFVEventFilter',
+                              mode = cms.string('either'),
                               jets_src = cms.InputTag('selectedPatJets'),
                               jet_cut = jtupleParams.jetCut,
                               min_njets = cms.int32(4),
@@ -16,3 +17,6 @@ mfvEventFilter = cms.EDFilter('MFVEventFilter',
                               min_nleptons = cms.int32(1),
                               debug = cms.untracked.bool(False),
                               )
+
+mfvEventFilterJetsOnly = mfvEventFilter.clone(mode = 'jets only')
+mfvEventFilterLeptonsOnly = mfvEventFilter.clone(mode = 'leptons only')

@@ -2,7 +2,8 @@ import FWCore.ParameterSet.Config as cms
 
 def setup_event_filter(process,
                        path_name='pevtsel',
-                       trig_filt_name = 'triggerFilter',
+                       trigger_filter = True,
+                       trigger_filter_name = 'triggerFilter',
                        event_filter = False,
                        event_filter_jes_mult = 2,
                        event_filter_name = 'mfvEventFilter',
@@ -10,13 +11,29 @@ def setup_event_filter(process,
                        input_is_miniaod = False,
                        ):
 
-    from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilter as triggerFilter
-    setattr(process, trig_filt_name, triggerFilter)
+    if trigger_filter == 'jets only':
+        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterJetsOnly as triggerFilter
+    elif trigger_filter == 'leptons only':
+        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterLeptonsOnly as triggerFilter
+    else:
+        if trigger_filter is not True:
+            raise ValueError('trigger_filter must be one of "jets only", "leptons only", True')
+        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilter as triggerFilter
 
-    overall = triggerFilter
+    triggerFilter = triggerFilter.clone()
+    setattr(process, trigger_filter_name, triggerFilter)
+    overall = cms.Sequence(triggerFilter)
 
     if event_filter:
-        from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilter as eventFilter
+        if event_filter == 'jets only':
+            from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterJetsOnly as eventFilter
+        elif event_filter == 'leptons only':
+            from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterLeptonsOnly as eventFilter
+        else:
+            if event_filter is not True:
+                raise ValueError('event_filter must be one of "jets only", "leptons only", True')
+            from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilter as eventFilter
+
         eventFilter = eventFilter.clone()
         if input_is_miniaod:
             eventFilter.jets_src = 'slimmedJets'
@@ -53,7 +70,9 @@ def setup_event_filter(process,
             else:
                 overall *= process.goodOfflinePrimaryVertices                                      * process.mfvVertices * vertexFilter
 
-    if hasattr(process, path_name):
+    if not path_name:
+        return overall
+    elif hasattr(process, path_name):
         getattr(process, path_name).insert(0, overall)
     else:
         setattr(process, path_name, cms.Path(overall))

@@ -12,6 +12,14 @@ public:
 private:
   bool filter(edm::Event&, const edm::EventSetup&) override;
 
+  struct Mode {
+    enum mode_t { either, jets_only, leptons_only };
+    const mode_t mode;
+    Mode(const std::string& m) : mode(m == "leptons only" ? leptons_only : m == "jets only" ? jets_only : either) {}
+    bool operator==(mode_t m) const { return mode == m; }
+  };
+  const Mode mode;
+
   const edm::EDGetTokenT<pat::JetCollection> jets_token;
   const StringCutObjectSelector<pat::Jet> jet_selector;
   const int min_njets;
@@ -28,7 +36,8 @@ private:
 };
 
 MFVEventFilter::MFVEventFilter(const edm::ParameterSet& cfg)
-  : jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
+  : mode(cfg.getParameter<std::string>("mode")),
+    jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
     jet_selector(cfg.getParameter<std::string>("jet_cut")),
     min_njets(cfg.getParameter<int>("min_njets")),
     min_pt_for_ht(cfg.getParameter<double>("min_pt_for_ht")),
@@ -61,7 +70,9 @@ bool MFVEventFilter::filter(edm::Event& event, const edm::EventSetup&) {
 
   if (debug) printf("MFVEventFilter: njets: %i  ht: %f pass? %i\n", njets, ht, jets_pass);
 
-  if (jets_pass)
+  if (mode == Mode::jets_only)
+    return jets_pass;
+  else if (mode == Mode::either && jets_pass)
     return true;
 
   edm::Handle<pat::MuonCollection> muons;
