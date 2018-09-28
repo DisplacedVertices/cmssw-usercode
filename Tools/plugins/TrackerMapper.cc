@@ -1,20 +1,23 @@
-#include "TH2D.h"
-#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "TH2.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
-#include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
-#include "JMTucker/Tools/interface/TrackerSpaceExtent.h"
+#include "JMTucker/Tools/interface/GenUtilities.h"
 #include "JMTucker/Tools/interface/Utilities.h"
+#include "JMTucker/Tools/interface/TrackerSpaceExtent.h"
 
 class TrackerMapper : public edm::EDAnalyzer {
  public:
@@ -23,6 +26,8 @@ class TrackerMapper : public edm::EDAnalyzer {
  
  private:
   const edm::EDGetTokenT<reco::TrackCollection> track_token;
+  const bool use_heavy_flavor;
+  const edm::EDGetTokenT<reco::GenParticleCollection> heavy_flavor_token;
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertex_token;
   const edm::EDGetTokenT<std::vector<PileupSummaryInfo> > pileup_info_token;
@@ -48,51 +53,52 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH1D* h_pvntracks[2];
   TH1D* h_pvsumpt2[2];
 
-  TH1D* h_ntracks[3];
-  TH1D* h_ntracks_quality[3][reco::TrackBase::qualitySize];
-  TH1D* h_tracks_algo[3];
-  TH1D* h_tracks_original_algo[3];
-  TH1D* h_tracks_pt[3];
-  TH1D* h_tracks_eta[3];
-  TH1D* h_tracks_phi[3];
-  TH1D* h_tracks_vx[3];
-  TH1D* h_tracks_vy[3];
-  TH1D* h_tracks_vz[3];
-  TH1D* h_tracks_vphi[3];
-  TH1D* h_tracks_dxy[3];
-  TH1D* h_tracks_absdxy[3];
-  TH1D* h_tracks_dz[3];
-  TH1D* h_tracks_dzpv[3];
-  TH1D* h_tracks_dxyerr[3];
-  TH1D* h_tracks_dzerr[3];
-  TH1D* h_tracks_nhits[3];
-  TH1D* h_tracks_npxhits[3];
-  TH1D* h_tracks_nsthits[3];
+  enum { tk_all, tk_sel, tk_seed, tk_sel_near_c, tk_sel_near_b, tk_seed_near_c, tk_seed_near_b, max_tk_type };
+  TH1D* h_ntracks[max_tk_type];
+  TH1D* h_ntracks_quality[max_tk_type][reco::TrackBase::qualitySize];
+  TH1D* h_tracks_algo[max_tk_type];
+  TH1D* h_tracks_original_algo[max_tk_type];
+  TH1D* h_tracks_pt[max_tk_type];
+  TH1D* h_tracks_eta[max_tk_type];
+  TH1D* h_tracks_phi[max_tk_type];
+  TH1D* h_tracks_vx[max_tk_type];
+  TH1D* h_tracks_vy[max_tk_type];
+  TH1D* h_tracks_vz[max_tk_type];
+  TH1D* h_tracks_vphi[max_tk_type];
+  TH1D* h_tracks_dxy[max_tk_type];
+  TH1D* h_tracks_absdxy[max_tk_type];
+  TH1D* h_tracks_dz[max_tk_type];
+  TH1D* h_tracks_dzpv[max_tk_type];
+  TH1D* h_tracks_dxyerr[max_tk_type];
+  TH1D* h_tracks_dzerr[max_tk_type];
+  TH1D* h_tracks_nhits[max_tk_type];
+  TH1D* h_tracks_npxhits[max_tk_type];
+  TH1D* h_tracks_nsthits[max_tk_type];
 
-  TH1D* h_tracks_qp_dxy[3];
-  TH1D* h_tracks_qm_dxy[3];
-  TH1D* h_tracks_dxy_zslices[3][6];
+  TH1D* h_tracks_qp_dxy[max_tk_type];
+  TH1D* h_tracks_qm_dxy[max_tk_type];
+  TH1D* h_tracks_dxy_zslices[max_tk_type][6];
 
-  TH1D* h_tracks_min_r[3];
-  TH1D* h_tracks_npxlayers[3];
-  TH1D* h_tracks_nstlayers[3];
-  TH1D* h_tracks_nstlayers_etalt2[3];
-  TH1D* h_tracks_nstlayers_etagt2[3];
-  TH1D* h_tracks_nsigmadxy[3];
-  TH1D* h_tracks_nsigmadxy_acc[3];
-  TH1D* h_tracks_nsigmadxy_deltaacc[3];
+  TH1D* h_tracks_min_r[max_tk_type];
+  TH1D* h_tracks_npxlayers[max_tk_type];
+  TH1D* h_tracks_nstlayers[max_tk_type];
+  TH1D* h_tracks_nstlayers_etalt2[max_tk_type];
+  TH1D* h_tracks_nstlayers_etagt2[max_tk_type];
+  TH1D* h_tracks_nsigmadxy[max_tk_type];
+  TH1D* h_tracks_nsigmadxy_acc[max_tk_type];
+  TH1D* h_tracks_nsigmadxy_deltaacc[max_tk_type];
 
-  TH2D* h_tracks_nstlayers_v_eta[3];
-  TH2D* h_tracks_dxy_v_eta[3];
-  TH2D* h_tracks_dxy_v_nstlayers[3];
-  TH2D* h_tracks_dxyerr_v_eta[3];
-  TH2D* h_tracks_dxyerr_v_nstlayers[3];
-  TH2D* h_tracks_dxyerr_v_dxy[3];
-  TH2D* h_tracks_nsigmadxy_v_eta[3];
-  TH2D* h_tracks_nsigmadxy_v_nstlayers[3];
-  TH2D* h_tracks_nsigmadxy_v_dxy[3];
-  TH2D* h_tracks_nsigmadxy_v_dxyerr[3];
-  TH2D* h_tracks_dxyerr_v_dxy_ptslices[3][6];
+  TH2D* h_tracks_nstlayers_v_eta[max_tk_type];
+  TH2D* h_tracks_dxy_v_eta[max_tk_type];
+  TH2D* h_tracks_dxy_v_nstlayers[max_tk_type];
+  TH2D* h_tracks_dxyerr_v_eta[max_tk_type];
+  TH2D* h_tracks_dxyerr_v_nstlayers[max_tk_type];
+  TH2D* h_tracks_dxyerr_v_dxy[max_tk_type];
+  TH2D* h_tracks_nsigmadxy_v_eta[max_tk_type];
+  TH2D* h_tracks_nsigmadxy_v_nstlayers[max_tk_type];
+  TH2D* h_tracks_nsigmadxy_v_dxy[max_tk_type];
+  TH2D* h_tracks_nsigmadxy_v_dxyerr[max_tk_type];
+  TH2D* h_tracks_dxyerr_v_dxy_ptslices[max_tk_type][6];
 
   TH1D* h_nm1_tracks_pt[2];
   TH1D* h_nm1_tracks_min_r[2];
@@ -124,6 +130,8 @@ class TrackerMapper : public edm::EDAnalyzer {
 
 TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
   : track_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("track_src"))),
+    use_heavy_flavor(cfg.getParameter<edm::InputTag>("heavy_flavor_src").label() != ""),
+    heavy_flavor_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("heavy_flavor_src"))),
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     primary_vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertex_src"))),
     pileup_info_token(consumes<std::vector<PileupSummaryInfo> >(cfg.getParameter<edm::InputTag>("pileup_info_src"))),
@@ -152,11 +160,15 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
     h_pvsumpt2[i] = fs->make<TH1D>(TString::Format("h_pvsumpt2_%i", i), TString::Format(";%s pv #Sigma p_{T}^{2} (GeV^{2});events/200 GeV^{2}", ex), 500, 0, 100000);
   }
 
-  const char* ex[3] = {"all", "sel", "seed"};
-  for (int i = 0; i < 3; ++i) {
+  const char* ex[max_tk_type] = {"all", "sel", "seed", "sel_near_c", "sel_near_b", "seed_near_c", "seed_near_b"};
+  for (int i = 0; i < max_tk_type; ++i) {
     h_ntracks[i] = fs->make<TH1D>(TString::Format("h_%s_ntracks", ex[i]), TString::Format(";number of %s tracks;events", ex[i]), 2000, 0, 2000);
     for (int j = 0; j < reco::TrackBase::qualitySize; ++j)
       h_ntracks_quality[i][j] = fs->make<TH1D>(TString::Format("h_%s_ntracks_quality%i", ex[i], j), TString::Format(";number of %s tracks quality %s;events", ex[i], reco::TrackBase::qualityNames[j].c_str()), 2000, 0, 2000);
+
+    if (!use_heavy_flavor && (i == tk_sel_near_c || i == tk_sel_near_b || i == tk_seed_near_c || i == tk_seed_near_b))
+      continue;
+
     h_tracks_algo[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_algo", ex[i]), TString::Format(";%s tracks algo;events", ex[i]), 50, 0, 50);
     h_tracks_original_algo[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_original_algo", ex[i]), TString::Format(";%s tracks original algo;events", ex[i]), 50, 0, 50);
     h_tracks_pt[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_pt", ex[i]), TString::Format("%s tracks;tracks pt;arb. units", ex[i]), 200, 0, 20);
@@ -251,8 +263,18 @@ double TrackerMapper::pileup_weight(int mc_npu) const {
 void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setup) {
   double w = 1;
   int npu = -1;
+  typedef std::pair<int, reco::Candidate::PolarLorentzVector> heavy_flavor_t;
+  std::vector<heavy_flavor_t> heavy_flavor;
 
   if (!event.isRealData()) {
+    if (use_heavy_flavor) {
+      edm::Handle<reco::GenParticleCollection> hfs;
+      event.getByToken(heavy_flavor_token, hfs);
+
+      for (const reco::GenParticle& hf : *hfs)
+        heavy_flavor.push_back(std::make_pair(is_bhadron(&hf) ? 2 : 1, hf.polarP4()));
+    }
+
     edm::Handle<std::vector<PileupSummaryInfo> > pileup_info;
     event.getByToken(pileup_info_token, pileup_info);
 
@@ -307,8 +329,8 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
   edm::ESHandle<TransientTrackBuilder> tt_builder;
   setup.get<TransientTrackRecord>().get("TransientTrackBuilder", tt_builder);
 
-  int ntracks[3] = {0};
-  int ntracks_quality[3][reco::TrackBase::qualitySize] = {{0}};
+  int ntracks[max_tk_type] = {0};
+  int ntracks_quality[max_tk_type][reco::TrackBase::qualitySize] = {{0}};
   for (const reco::Track& tk : *tracks) {
     if (use_duplicateMerge != -1 && (tk.algo() == 2) != use_duplicateMerge) // reco::TrackBase::duplicateMerge
       continue;
@@ -325,6 +347,17 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
     const double nsigmadxy = fabs(dxy / tk.dxyError());
     const double nsigmadxy_acc = fabs(ttk.stateAtBeamLine().transverseImpactParameter().significance());
 
+    const double max_heavy_flavor_deltaR = 0.4;
+    auto near_hf = [&](int gen_flavor_code_req) {
+      return std::any_of(heavy_flavor.begin(), heavy_flavor.end(),
+                         [&](const heavy_flavor_t& hf) {
+                           return hf.first == gen_flavor_code_req &&
+                           reco::deltaR(tk.eta(), tk.phi(), hf.second.eta(), hf.second.phi()) < max_heavy_flavor_deltaR;
+                         });
+    };
+    const bool near_b = near_hf(2);
+    const bool near_c = near_hf(1);
+
     const bool nm1[5] = {
       pt > 1,
       min_r <= 1,
@@ -335,6 +368,13 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
 
     const bool sel = nm1[0] && nm1[1] && nm1[2] && nm1[3];
     const bool seed = sel && nm1[4];
+
+    const bool sel_near_c = sel && near_c;
+    const bool sel_near_b = sel && near_b;
+    const bool seed_near_c = seed && near_c;
+    const bool seed_near_b = seed && near_b;
+
+    const bool tk_ok[max_tk_type] = { true, sel, seed, sel_near_c, sel_near_b, seed_near_c, seed_near_b };
 
     const bool pt_nm1_sel = nm1[1] && nm1[2] && nm1[3];
     const bool min_r_nm1_sel = nm1[0] && nm1[2] && nm1[3];
@@ -417,9 +457,8 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
       }
     }
 
-    for (int i = 0; i < 3; ++i) {
-      if (i==1 && !sel) continue;
-      if (i==2 && !seed) continue;
+    for (int i = 0; i < max_tk_type; ++i) {
+      if (!tk_ok[i]) continue;
 
       ++ntracks[i];
 
@@ -483,7 +522,7 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
     }
   }
 
-  for (int i = 0; i < 3; ++i) {
+  for (int i = 0; i < max_tk_type; ++i) {
     h_ntracks[i]->Fill(ntracks[i], w);
     for (int j = 0; j < reco::TrackBase::qualitySize; ++j)
       h_ntracks_quality[i][j]->Fill(ntracks_quality[i][j], w);
