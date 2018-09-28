@@ -15,24 +15,27 @@ def setup_event_filter(process,
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterJetsOnly as triggerFilter
     elif trigger_filter == 'leptons only':
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterLeptonsOnly as triggerFilter
-    else:
-        if trigger_filter is not True:
-            raise ValueError('trigger_filter must be one of "jets only", "leptons only", True')
+    elif trigger_filter is True:
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilter as triggerFilter
+    elif trigger_filter is not False:
+        raise ValueError('trigger_filter must be one of ("jets only", "leptons only", True, False)')
 
-    triggerFilter = triggerFilter.clone()
-    setattr(process, trigger_filter_name, triggerFilter)
-    overall = cms.Sequence(triggerFilter)
+    overall = cms.Sequence()
+
+    if trigger_filter:
+        triggerFilter = triggerFilter.clone()
+        setattr(process, trigger_filter_name, triggerFilter)
+        overall *= triggerFilter
 
     if event_filter:
         if event_filter == 'jets only':
             from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterJetsOnly as eventFilter
         elif event_filter == 'leptons only':
             from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterLeptonsOnly as eventFilter
-        else:
-            if event_filter is not True:
-                raise ValueError('event_filter must be one of "jets only", "leptons only", True')
+        elif event_filter is True:
             from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilter as eventFilter
+        elif event_filter is not False:
+            raise ValueError('event_filter must be one of ("jets only", "leptons only", True, False)')
 
         eventFilter = eventFilter.clone()
         if input_is_miniaod:
