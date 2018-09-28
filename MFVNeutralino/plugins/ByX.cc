@@ -39,10 +39,8 @@ class MFVByX : public edm::EDAnalyzer {
   ByRunTH1<TH1F> h_vertex_seed_track_nlayers[2];
 
   ByRunTH1<TH1F> h_njets[2];
-  ByRunTH1<TH1F> h_jetpt1[2];
-  ByRunTH1<TH1F> h_jetpt2[2];
-  ByRunTH1<TH1F> h_jetpt3[2];
-  ByRunTH1<TH1F> h_jetpt4[2];
+  static const int MAX_NJETS = 4;
+  ByRunTH1<TH1F> h_jetpt[MAX_NJETS][2];
   ByRunTH1<TH1F> h_ht40[2];
   ByRunTH1<TH1F> h_ht[2];
 
@@ -90,10 +88,8 @@ MFVByX::MFVByX(const edm::ParameterSet& cfg)
     h_vertex_seed_track_nlayers[i].set(&fs, TString::Format("h_vertex_seed_track_nlayers_%i", i), ";vertex seed track # layers;tracks", 30, 0, 30);
 
     h_njets[i].set(&fs, TString::Format("h_njets_%i", i), ";number of jets;events", 20, 0, 20);
-    h_jetpt1[i].set(&fs, TString::Format("h_jetpt1_%i", i), ";jet #1 p_{T} (GeV);events/2 GeV", 500, 0, 1000);
-    h_jetpt2[i].set(&fs, TString::Format("h_jetpt2_%i", i), ";jet #2 p_{T} (GeV);events/2 GeV", 500, 0, 1000);
-    h_jetpt3[i].set(&fs, TString::Format("h_jetpt3_%i", i), ";jet #3 p_{T} (GeV);events/2 GeV", 500, 0, 1000);
-    h_jetpt4[i].set(&fs, TString::Format("h_jetpt4_%i", i), ";jet #4 p_{T} (GeV);events/2 GeV", 500, 0, 1000);
+    for (int j = 0; i < MAX_NJETS; ++i)
+      h_jetpt[j][i].set(&fs, TString::Format("h_jetpt%i_%i", j, i), TString::Format(";jet #%i p_{T} (GeV);events/2 GeV", j), 500, 0, 1000);
     h_ht40[i].set(&fs, TString::Format("h_ht40_%i", i), ";jet 40 H_{T} (GeV);events/3 GeV", 1000, 0, 3000);
     h_ht[i].set(&fs, TString::Format("h_ht_%i", i), ";jet H_{T} (GeV);events/3 GeV", 1000, 0, 3000);
 
@@ -130,10 +126,8 @@ void MFVByX::analyze(const edm::Event& event, const edm::EventSetup& setup) {
   }
 
   h_njets[nsv][by]->Fill(mevent->njets());
-  h_jetpt1[nsv][by]->Fill(mevent->njets() >= 1 ? mevent->jet_pt[0] : 0.f);
-  h_jetpt2[nsv][by]->Fill(mevent->njets() >= 2 ? mevent->jet_pt[1] : 0.f);
-  h_jetpt3[nsv][by]->Fill(mevent->njets() >= 3 ? mevent->jet_pt[2] : 0.f);
-  h_jetpt4[nsv][by]->Fill(mevent->jetpt4());
+  for (int i = 0; i < MAX_NJETS; ++i)
+    h_jetpt[i][nsv][by]->Fill(mevent->nth_jet_pt(i));
   h_ht40[nsv][by]->Fill(mevent->jet_ht(40));
   h_ht[nsv][by]->Fill(mevent->jet_ht());
 

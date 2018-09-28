@@ -33,8 +33,6 @@ private:
   const double min_npu;
   const double max_npu;
   const int max_pv_ntracks;
-  const double min_4th_jet_pt;
-  const double min_5th_jet_pt;
   const int min_njets;
   const int max_njets;
   const std::vector<int> min_nbtags;
@@ -90,8 +88,6 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     min_npu(cfg.getParameter<double>("min_npu")),
     max_npu(cfg.getParameter<double>("max_npu")),
     max_pv_ntracks(cfg.getParameter<int>("max_pv_ntracks")),
-    min_4th_jet_pt(cfg.getParameter<double>("min_4th_jet_pt")),
-    min_5th_jet_pt(cfg.getParameter<double>("min_5th_jet_pt")),
     min_njets(cfg.getParameter<int>("min_njets")),
     max_njets(cfg.getParameter<int>("max_njets")),
     min_nbtags(cfg.getParameter<std::vector<int> >("min_nbtags")),
@@ -200,10 +196,6 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       return false;
 
     if (mevent->njets(20) < min_njets || mevent->njets(20) > max_njets)
-      return false;
-
-    if ((min_4th_jet_pt > 0 && mevent->jetpt4() < min_4th_jet_pt) ||
-        (min_5th_jet_pt > 0 && mevent->jetpt5() < min_5th_jet_pt))
       return false;
 
     for (int i = 0; i < 3; ++i)
