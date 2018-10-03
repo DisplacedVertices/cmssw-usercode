@@ -1,3 +1,4 @@
+from sys import argv
 from collections import defaultdict
 from datetime import datetime
 from JMTucker.Tools import DBS, colors, Samples
@@ -5,7 +6,12 @@ from JMTucker.Tools import DBS, colors, Samples
 at_sites = ['T3_US_FNALLPC', 'T1_US_FNAL_Disk', 'T2_DE_DESY'] # ordered by priority
 at = { x:defaultdict(list) for x in at_sites }
 
-for ds in 'main', 'miniaod':
+if 'main' in argv:
+    dses = ['main']
+else:
+    dses = ['miniaod']
+
+for ds in dses:
     print colors.bold(ds)
     for sample in Samples.registry.all():
         if not sample.has_dataset(ds):
