@@ -138,7 +138,15 @@ def crab_status(working_dir, verbose=False, long=False):
         result['jobsPerStatus'] = {'crmonerror': 9999}
     result['jobListByStatus'] = jl
 
+    # jobsPerStatus is that calculated by crab; make a copy that we
+    # can modify to have a ~stable interface for downstream
     result['jobsPerStatusEx'] = d = dict(result['jobsPerStatus'])
+
+    if crab_global_options.support_automatic_splitting:
+        for status, jobs in jl.iteritems():
+            probe_count = len([1 for job in jobs if job.startswith('0-')])
+            d[status] -= probe_count
+
     if d.has_key('failed'):
         del d['failed']
         for job_num, job_info in result['jobs'].iteritems():
