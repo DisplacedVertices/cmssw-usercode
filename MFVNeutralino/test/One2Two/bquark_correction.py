@@ -2,13 +2,13 @@ from JMTucker.Tools.ROOTTools import *
 from array import array
 ROOT.TH1.AddDirectory(0)
 
-year = '2015p6'
+year = '2017'
 
 mode = ''
 #mode = 'ratio1'
 
 set_style()
-ps = plot_saver('../plots/bkgest/v15_v5/bquark_correction_%s%s' % (year, '' if mode == '' else '_%s'%mode), size=(700,700), root=False, log=False)
+ps = plot_saver(plot_dir('bquark_correction_%s%s' % (year, '' if mode == '' else '_%s'%mode)), size=(700,700), root=True, log=False)
 
 ntk = ['3-track', '4-track', '5-track', '4-track-3-track']
 
@@ -37,7 +37,7 @@ ey3 = []
 for i,ntracks in enumerate([3,4,5,7]):
     print ntk[i]
 
-    h0 = ROOT.TFile('2v_from_jets_%s_%itrack_nobquarks_v15_v5.root' % (year, ntracks)).Get('h_c1v_dvv')
+    h0 = ROOT.TFile('2v_from_jets_%s_%itrack_nobquarks_v20mp2.root' % (year, ntracks)).Get('h_c1v_dvv')
     h0.SetStats(0)
     h0.SetLineColor(ROOT.kBlue)
     h0.SetLineWidth(2)
@@ -46,7 +46,7 @@ for i,ntracks in enumerate([3,4,5,7]):
     h0.GetYaxis().SetRangeUser(0,0.5)
     h0.Draw('hist e')
 
-    hb = ROOT.TFile('2v_from_jets_%s_%itrack_bquarks_v15_v5.root' % (year, ntracks)).Get('h_c1v_dvv')
+    hb = ROOT.TFile('2v_from_jets_%s_%itrack_bquarks_v20mp2.root' % (year, ntracks)).Get('h_c1v_dvv')
     hb.SetStats(0)
     hb.SetLineColor(ROOT.kRed)
     hb.SetLineWidth(2)
@@ -59,7 +59,7 @@ for i,ntracks in enumerate([3,4,5,7]):
     lb.Draw()
     ps.save('compare_dvvc_bquarks_%s' % ntk[i])
 
-    h1 = ROOT.TFile('2v_from_jets_%s_%itrack_bquark_uncorrected_v15_v5.root' % (year, ntracks)).Get('h_c1v_dvv')
+    h1 = ROOT.TFile('2v_from_jets_%s_%itrack_bquark_uncorrected_v20mp2.root' % (year, ntracks)).Get('h_c1v_dvv')
     h1.SetStats(0)
     h1.SetLineColor(ROOT.kBlack)
     h1.SetLineWidth(3)
@@ -68,9 +68,9 @@ for i,ntracks in enumerate([3,4,5,7]):
     h1.GetYaxis().SetRangeUser(0,0.5)
     h1.Draw('hist e')
 
-    h2 = ROOT.TFile('2v_from_jets_%s_%itrack_bquark_corrected_v15_v5.root' % (year, ntracks)).Get('h_c1v_dvv')
+    h2 = ROOT.TFile('2v_from_jets_%s_%itrack_bquark_corrected_v20mp2.root' % (year, ntracks)).Get('h_c1v_dvv')
     if mode == 'ratio1':
-        h2 = ROOT.TFile('2v_from_jets_%s_%itrack_bquarks_v15_v5.root' % (year, ntracks)).Get('h_c1v_dvv')
+        h2 = ROOT.TFile('2v_from_jets_%s_%itrack_bquarks_v20mp2.root' % (year, ntracks)).Get('h_c1v_dvv')
     h2.SetStats(0)
     h2.SetLineColor(ROOT.kViolet)
     h2.SetLineWidth(3)

@@ -186,9 +186,9 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   double dphi_pdf_c; double dphi_pdf_e = 2; double dphi_pdf_a; //deltaphi input
   if (p.is_mc()) {
-    if (p.year() == "2017")         { dphi_pdf_c = 1.29; dphi_pdf_a = 4.84; }
-    else if (p.year() == "2018")    { dphi_pdf_c = 1.29; dphi_pdf_a = 4.84; }
-    else if (p.year() == "2017p8")  { dphi_pdf_c = 1.29; dphi_pdf_a = 4.84; }
+    if (p.year() == "2017")         { dphi_pdf_c = 1.42; dphi_pdf_a = 3.46; }
+    else if (p.year() == "2018")    { dphi_pdf_c = 1.42; dphi_pdf_a = 3.46; }
+    else if (p.year() == "2017p8")  { dphi_pdf_c = 1.42; dphi_pdf_a = 3.46; }
     else { fprintf(stderr, "bad year"); exit(1); }
   } else if (p.only_10pc()) {
     if (p.year() == "2017")         { dphi_pdf_c = 1.29; dphi_pdf_a = 4.84; }
@@ -225,19 +225,19 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   if (p.ntracks() == 3) {
     if (p.year() == "2018")        { bquark_correction[0] = 0.93; bquark_correction[1] = 1.07; bquark_correction[2] = 1.10; }
     else if (p.year() == "2017p8") { bquark_correction[0] = 0.93; bquark_correction[1] = 1.07; bquark_correction[2] = 1.10; }
-    else                           { bquark_correction[0] = 0.93; bquark_correction[1] = 1.07; bquark_correction[2] = 1.10; }
+    else                           { bquark_correction[0] = 0.93; bquark_correction[1] = 1.09; bquark_correction[2] = 1.07; }
   } else if (p.ntracks() == 4) {
     if (p.year() == "2018")        { bquark_correction[0] = 0.93; bquark_correction[1] = 1.11; bquark_correction[2] = 1.20; }
     else if (p.year() == "2017p8") { bquark_correction[0] = 0.93; bquark_correction[1] = 1.11; bquark_correction[2] = 1.20; }
-    else                           { bquark_correction[0] = 0.93; bquark_correction[1] = 1.11; bquark_correction[2] = 1.20; }
+    else                           { bquark_correction[0] = 0.93; bquark_correction[1] = 1.08; bquark_correction[2] = 1.18; }
   } else if (p.ntracks() == 5) {
     if (p.year() == "2018")        { bquark_correction[0] = 0.92; bquark_correction[1] = 1.25; bquark_correction[2] = 1.57; }
     else if (p.year() == "2017p8") { bquark_correction[0] = 0.92; bquark_correction[1] = 1.25; bquark_correction[2] = 1.57; }
-    else                           { bquark_correction[0] = 0.92; bquark_correction[1] = 1.25; bquark_correction[2] = 1.57; }
+    else                           { bquark_correction[0] = 0.94; bquark_correction[1] = 1.19; bquark_correction[2] = 1.18; }
   } else if (p.ntracks() == 7) {
     if (p.year() == "2018")        { bquark_correction[0] = 0.93; bquark_correction[1] = 1.09; bquark_correction[2] = 1.14; }
     else if (p.year() == "2017p8") { bquark_correction[0] = 0.93; bquark_correction[1] = 1.09; bquark_correction[2] = 1.14; }
-    else                           { bquark_correction[0] = 0.93; bquark_correction[1] = 1.09; bquark_correction[2] = 1.14; }
+    else                           { bquark_correction[0] = 0.93; bquark_correction[1] = 1.08; bquark_correction[2] = 1.12; }
   } else {
     fprintf(stderr, "bad ntracks"); exit(1);
   }
@@ -305,7 +305,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
     for (int j = 0, je = t->GetEntries(); j < je; ++j) {
       if (t->LoadTree(j) < 0) break;
       if (t->GetEntry(j) <= 0) continue;
-
+      //if (i == 2 && nt.run == 1 && nt.lumi == 11522 && nt.event == 132003224) continue;
       if ((p.bquarks() == 0 && nt.gen_flavor_code == 2) || (p.bquarks() == 1 && nt.gen_flavor_code != 2)) continue;
       if (nt.npu < p.min_npu() || nt.npu > p.max_npu()) continue;
 
@@ -572,8 +572,8 @@ int main(int argc, const char* argv[]) {
   }
 
   construct_dvvc(pars, "2v_from_jets_2017_5track_default_v20mp2.root");
-/*
-  for (const char* year : {"2017", "2018", "2017p8"}) {
+
+  for (const char* year : {"2017"}) { //, "2018", "2017p8"}) {
     for (int ntracks : {3, 4, 5, 7}) {
       ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks);
       const char* version = "v20mp2";
@@ -587,6 +587,7 @@ int main(int argc, const char* argv[]) {
       construct_dvvc(pars2.vary_bquarks(true),                  TString::Format("2v_from_jets_%s_%dtrack_vary_bquarks_%s.root", year, ntracks, version));
     }
   }
+  /*
   for (const char* year : {"2017", "2018", "2017p8", "2017B", "2017C", "2017D", "2017E", "2017F"}) {
     for (int ntracks : {3, 4, 5, 7}) {
       ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks).is_mc(false).only_10pc(true);
