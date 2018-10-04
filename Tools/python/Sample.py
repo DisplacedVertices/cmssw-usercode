@@ -425,6 +425,10 @@ def anon_samples(txt, **kwargs):
         samples.append(sample)
     return samples
 
+def fn_to_sample(Samples, fn):
+    sn = os.path.basename(fn).replace('.root', '')
+    return sn, getattr(Samples, sn, None)
+
 def norm_from_file(f_or_fn, path=None):
     if type(f_or_fn) == str:
         from JMTucker.Tools.ROOTTools import ROOT

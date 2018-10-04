@@ -5,6 +5,9 @@
 import re
 from JMTucker.Tools.CRAB3ToolsBase import *
 from JMTucker.Tools.hadd import hadd
+if crab_global_options.support_automatic_splitting:
+    from JMTucker.Tools.Sample import fn_to_sample, norm_from_file
+    from JMTucker.Tools import Samples, colors
 
 def crab_command(*args, **kwargs):
     if kwargs and kwargs.keys() != ['dir']:
@@ -37,15 +40,24 @@ def crab_get_njobs(working_dir):
 
 def crab_get_njobs_from_log(working_dir, jobs_re=re.compile(r'\([\d ]+/([\d ]+)\)')):
     # find njobs using a line printed as result of crab status that looks like ( 76/788)
-    # check that it's a constant, too
-    njobs = set()
+    njobs = []
     for line in crab_log_open(working_dir):
         mo = jobs_re.search(line)
         if mo:
-            njobs.add(mo.groups())
-    if len(njobs) != 1:
-        raise ValueError('problem parsing wd=%s for njobs %r' % (working_dir, njobs))
-    return int(njobs.pop()[0])
+            njobs.append(int(mo.group(1)))
+    if not njobs:
+        raise ValueError('problem parsing crab.log in wd=%s for njobs' % working_dir)
+    if crab_global_options.support_automatic_splitting:
+        # njobs may only increase at later parts of the log
+        # this should handle how crab automatic splitting resubmission jobs work
+        for a, b in zip(njobs, njobs[1:]):
+            if a > b:
+                print colors.red('crab.log wd=%s has decreasing njobs: %r' % (working_dir, njobs))
+        if len(set(njobs)) != 1:
+            print colors.yellow('crab_get_njobs_from_log for %s found more than one value: %r\n\tThis may have happened because of Automatic splitting. Support is still experimental, scrutinize the output well.' % (working_dir, sorted(set(njobs))))
+    elif len(set(njobs)) != 1:
+        raise ValueError('problem parsing crab.log in wd=%s for njobs: %r' % (working_dir, njobs))
+    return njobs[-1]
 
 def crab_get_output_dataset_from_log(working_dir):
     datasets = set()
@@ -99,7 +111,23 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
             pattern = '*/' + pattern
         files = fnmatch.filter(files, pattern)
 
-    jobs = [int(f.split('_')[-1].split('.root')[0]) for f in files]
+    automatic_splitting = False
+    pprinted = False
+    jobs = []
+    for f in files:
+        jobnum = f.split('_')[-1].split('.root')[0]
+        if crab_global_options.support_automatic_splitting and '-' in jobnum:
+            automatic_splitting = True
+            if not pprinted:
+                pprint(files)
+                pprinted = True
+            it, jobnum = jobnum.split('-')
+            it, jobnum = int(it), int(jobnum)
+            assert it >= 1 # probe jobs "0-*" should not show up
+            jobnum = it*10000 + jobnum
+        else:
+            jobnum = int(jobnum)
+        jobs.append(jobnum)
     jobs.sort()
     expected = range(1, expected+1)
 
@@ -122,6 +150,18 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
         os.chmod(new_name, 0644)
     else:
         hadd(new_name, files)
+
+    if automatic_splitting:
+        n = norm_from_file(new_name)
+        sn, s = fn_to_sample(Samples, new_name)
+        if not s:
+            print colors.yellow("\tnorm_from_file returns %r, couldn't get sample %s" % (n, sn))
+        else:
+            no1, no2 = s.datasets['main'].nevents_orig, s.datasets['miniaod'].nevents_orig
+            if n == no1 or n == no2:
+                print '\tnorm_from_file returns nevents_orig = %i' % n
+            else:
+                print colors.yellow('\tnorm_from_file returns %r while %s.nevents_orig is %i (main) %i (miniaod' % (n, sn, no1, no2))
 
     return new_name
 

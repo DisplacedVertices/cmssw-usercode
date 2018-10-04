@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from sys import argv
+from sys import argv, exit
 from JMTucker.Tools.CRAB3ToolsBase import crab_dirs_from_argv, crab_get_output_dir, crab_print_requestcache
 from JMTucker.Tools import colors
 
@@ -29,29 +29,51 @@ def simple_fcn(fcn):
         if verbose:
             print
 
-if 'st' in argv or 'stat' in argv:
-    simple_cmd('crab status -d %s')
-elif 'rq' in argv or 'cfg' in argv:
-    simple_fcn(crab_print_requestcache)
-elif 'kl' in argv or 'kill' in argv:
-    simple_cmd('crab kill -d %s')
-elif 'outdir' in argv:
-    simple_fcn(crab_get_output_dir)
-elif 'out' in argv:
-    simple_cmd('crab out -d %s --xrootd')
-elif 'get' in argv:
-    simple_cmd('crab out -d %s')
-elif 'res' in argv:
-    simple_cmd('crab resubmit -d %s')
-elif 'respub' in argv:
-    simple_cmd('crab resubmit --publication -d %s')
-elif 'rep' in argv:
-    simple_cmd('crab report -d %s')
-elif 'hl' in argv:
-    os.system('tar --remove-files -czf haddlogs.tgz *.haddlog')
-elif 'ds' in argv:
-    simple_cmd('grep "Output dataset:" %s/crab.log | tail -1')
-elif 'web' in argv:
-    simple_cmd("grep 'Task URL to use for HELP' %s/crab.log | tail -n 1 | sed 's/.*http/http/'")
+cmds = {
+    'st':
+        "simple_cmd('crab status -d %s')",
+    'stlong':
+        "simple_cmd('crab status --long -d %s')",
+    'rq':
+        "simple_fcn(crab_print_requestcache)",
+    'kl':
+        "simple_cmd('crab kill -d %s')",
+    'od':
+        "simple_fcn(crab_get_output_dir)",
+    'out':
+        "simple_cmd('crab out -d %s --xrootd')",
+    'get':
+        "simple_cmd('crab out -d %s')",
+    'res':
+        "simple_cmd('crab resubmit -d %s')",
+    'respub':
+        "simple_cmd('crab resubmit --publication -d %s')",
+    'rep':
+        "simple_cmd('crab report -d %s')",
+    'hl':
+        "simple_cmd('tar --remove-files -czf haddlogs.tgz *.haddlog')",
+    'ds':
+        "simple_cmd('grep \"Output dataset:\" %s/crab.log | tail -1')",
+    'web':
+        "simple_cmd('grep \"Task URL to use for HELP\" %s/crab.log | tail -n 1 | sed s/.\*http/http/')",
+    }
+
+def help():
+    print 'available commands:\n'
+    for cmd in sorted(cmds):
+        print '%-10s: %s' % (cmd, cmds[cmd].replace('simple_',''))
+    print '\ncmd (shell command(s)) is executed for each crab working dir in argv. %s is replaced with the working dir.'
+    print 'fcn (part of CRABTools library) is called for each crab working dir in argv. The argument to the fcn is the working dir.'
+
+if 'help' in argv or '-h' in argv or '--help' in argv:
+    help()
 else:
-    raise ValueError("didn't understand command, argv was %r", argv)
+    ok = False
+    for cmd in cmds:
+        if cmd in argv:
+            exec cmds[cmd]
+            ok = True
+    if not ok:
+        help()
+        print "didn't understand command, argv was %r" % argv
+        exit(1)

@@ -54,7 +54,7 @@ process.p = cms.Path(common * process.TrackerMapper)
 
 module_names = ['TrackerMapper']
 
-for name, filt in ('LightFlavor', process.lightFlavor), ('HeavyFlavor', process.heavyFlavor), ('BFlavor', process.bFlavor), ('DisplacedGenPV', process.displacedGenPV):
+for name, filt in ('LightFlavor', process.lightFlavor), ('HeavyFlavor', process.heavyFlavor): #, ('BFlavor', process.bFlavor), ('DisplacedGenPV', process.displacedGenPV):
     tk = process.TrackerMapper.clone()
     if name == 'HeavyFlavor':
         tk.heavy_flavor_src = cms.InputTag('heavyFlavor', 'heavyFlavor')
@@ -72,7 +72,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if year == 2017:
         samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.all_signal_samples_2017 + Samples.data_samples_2017
 
-    set_splitting(samples, 'miniaod', 'default', json_path('ana_2017_1pc.json'), 50)
+    set_splitting(samples, 'miniaod', 'default', json_path('ana_2017_1pc.json'), 16)
 
     ms = MetaSubmitter('TrackerMapperV3', dataset='miniaod')
     ms.common.ex = year

@@ -90,7 +90,9 @@ def sites_for_dataset(dataset, instance='global', json=False):
             assert sorted(x.keys()) == ['das', 'qhash', 'site']
             y = x['site']
             assert type(y) == list and len(y) == 1
-            r.append(y[0])
+            d = y[0]
+            if all(d.has_key(k) for k in ['block_completion', 'dataset_fraction', 'kind', 'name', 'se', 'replica_fraction', 'block_fraction']):
+                r.append(d)
         return r
     else:
         return sorted(set(l)) # dasgo gives same lines to you many times

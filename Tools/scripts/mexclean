@@ -1,24 +1,36 @@
 #!/usr/bin/env python
 
 import os, sys, shutil
+from collections import defaultdict 
 from JMTucker.Tools.CondorTools import is_cs_dir
 from JMTucker.Tools.CRAB3ToolsBase import is_crab_working_dir
+from JMTucker.Tools.general import bool_from_argv
 
 if len(sys.argv) < 2:
-    print 'usage: mexclean dir_of_wds [dir_of_wds2 ...]'
+    print 'usage: mexclean [-d|--dry-run] dir_of_wds [dir_of_wds2 ...]'
     sys.exit(1)
 
+dry_run = bool_from_argv('-d') or bool_from_argv('--dry-run')
+
 for dir_of_wds in sys.argv[1:]:
-    wds = []
-    exs, good_exs = set(), set()
+    exs = set()
+    good_exs = defaultdict(list)
     for x in os.listdir(dir_of_wds):
         fx = os.path.join(dir_of_wds, x)
         if is_cs_dir(fx) or is_crab_working_dir(fx):
-            wds.append(fx)
-            good_exs.add(open(os.path.join(fx,'cs_ex')).read())
+            good_exs[open(os.path.join(fx,'cs_ex')).read()].append(fx)
         if x.startswith('ex_') and os.path.isdir(fx):
             exs.add(x)
-    assert good_exs.issubset(exs)
-    for x in exs - good_exs:
-        shutil.rmtree(os.path.join(dir_of_wds, x))
+    s_good_exs = set(good_exs.keys())
+    assert s_good_exs.issubset(exs)
+    if dry_run:
+        for ex in sorted(exs):
+            print ex
+            if not good_exs.has_key(ex):
+                print '\tempty'
+            for wd in good_exs[ex]:
+                print '\t' + wd
+    else:
+        for x in exs - s_good_exs:
+            shutil.rmtree(os.path.join(dir_of_wds, x))
 

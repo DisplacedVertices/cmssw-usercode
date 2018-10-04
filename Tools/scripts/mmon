@@ -333,7 +333,7 @@ while 1:
 
         counts = StatusCounter(statuses)
         stale = 'X'
-        if results[d]['last'] is not None:
+        if results[d].get('last', None) is not None:
             counts_last = StatusCounter(results[d]['last']['jobsPerStatusEx'])
             if counts.nfin != counts_last.nfin:
                 stale = ' '

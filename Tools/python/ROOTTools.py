@@ -362,7 +362,8 @@ def histogram_divide(h1, h2,
         eyl.append(r - a)
         eyh.append(b - r)
 
-    return ROOT.TGraphAsymmErrors(len(x), *[to_array(z) for z in (x,y,exl,exh,eyl,eyh)])
+    if x:
+        return ROOT.TGraphAsymmErrors(len(x), *[to_array(z) for z in (x,y,exl,exh,eyl,eyh)])
 
 graph_divide = histogram_divide
 
@@ -421,6 +422,7 @@ def compare_all_hists(ps, samples, **kwargs):
     sort_names     = kwargs.get('sort_names',     False)
     show_progress  = kwargs.get('show_progress',  True)
     only_n_first   = kwargs.get('only_n_first',   -1)
+    raise_on_incompatibility = kwargs.get('raise_on_incompatibility', False)
 
     def _get(arg, default):
         return kwargs.get(arg, lambda name, hists, curr: default)
@@ -453,8 +455,12 @@ def compare_all_hists(ps, samples, **kwargs):
 
     def all_same(l, msg):
         if len(set(l)) != 1:
-            raise ValueError(msg)
-        return l[0]
+            if raise_on_incompatibility:
+                raise ValueError(msg)
+            else:
+                print msg + ', skipping'
+        else:
+            return l[0]
 
     nnames = len(names)
     for iname, name in enumerate(names):
@@ -520,23 +526,33 @@ def compare_all_hists(ps, samples, **kwargs):
         if not is2d:
             hists_sorted.sort(key=lambda hist: hist.GetMaximum(), reverse=True)
 
-        for i,hist in enumerate(hists_sorted):
-            if i == 0:
-                hist.Draw(draw_cmd)
-            else:
-                hist.Draw((draw_cmd + ' sames').strip())
+        if False: #not is2d:
+            ratios_plot(name_clean,
+                    hists,
+                    plot_saver=ps,
+                    res_fit=False,
+                    res_divide_opt={'confint': propagate_ratio, 'force_le_1': False},
+                    statbox_size=stat_size(name, hist_list, None),
+                    res_y_range=0.05,
+                    )
+        else:
+            for i,hist in enumerate(hists_sorted):
+                if i == 0:
+                    hist.Draw(draw_cmd)
+                else:
+                    hist.Draw((draw_cmd + ' sames').strip())
 
-        ps.c.Update()
-        if not no_stats(name, hist_list, None):
-            ss = stat_size(name, hist_list, None)
-            for i, hist in enumerate(hists):
-                differentiate_stat_box(hist, i, hist.cah_color, ss)
+            ps.c.Update()
+            if not no_stats(name, hist_list, None):
+                ss = stat_size(name, hist_list, None)
+                for i, hist in enumerate(hists):
+                    differentiate_stat_box(hist, i, hist.cah_color, ss)
 
-        leg = legend(name, hist_list, None)
-        if leg is not None:
-            leg.Draw()
-            
-        ps.save(name_clean, logz=is2d)
+            leg = legend(name, hist_list, None)
+            if leg is not None:
+                leg.Draw()
+
+            ps.save(name_clean, logz=is2d)
 
 def cumulative_histogram(h, type='ge'):
     """Construct the cumulative histogram in which the value of each
@@ -1849,12 +1865,15 @@ def ratios_plot(name,
         for i,h in enumerate(hists):
             v1, v2 = histogram_divide_values(h, h0, True)
             rs = [v1.y[i] / v2.y[i] for i in xrange(v2.n) if v2.y[i] != 0.]
-            min_r = min(min_r, min(rs))
-            max_r = max(max_r, max(rs))
+            if rs:
+                min_r = min(min_r, min(rs))
+                max_r = max(max_r, max(rs))
         res_y_range = min_r-res_y_range, max_r+res_y_range
 
     for i,h in enumerate(hists):
         r = histogram_divide(h, h0, **res_divide_opt)
+        if not r:
+            continue
         ratios.append(r)
         r.SetMarkerStyle(20)
         r.SetMarkerSize(0)

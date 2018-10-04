@@ -26,6 +26,7 @@ class CRABToolsGlobalOptions:
         self.cfg_path = cfg_path
         self.allow_insecure_stupidity = False
         self.crab_dirs_root = '/dev/null'
+        self.support_automatic_splitting = False
 
         if os.path.isfile(self.cfg_path):
             self.cfg = ConfigParser()

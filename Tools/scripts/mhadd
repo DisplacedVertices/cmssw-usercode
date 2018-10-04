@@ -97,7 +97,7 @@ def hadd_(is_crab, *args, **kwargs):
                 p = HaddlogParser(new_name + '.haddlog')
                 log_njobs = p.num_sources
             if log_njobs != njobs:
-                print colors.red('skipping existing file %s (for which num sources %i != njobs %i' % (new_name, log_njobs, njobs))
+                print colors.red('skipping existing file %s (for which num sources %i != njobs %i)' % (new_name, log_njobs, njobs))
             else:
                 print colors.yellow('skipping existing file %s (which looks complete by njobs and haddlog)' % new_name)
             return

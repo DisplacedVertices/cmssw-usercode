@@ -10,12 +10,22 @@ def print_run_cmd(cmd):
 try:
     d = crab_dir_from_argv()
 except CRABToolsException:
-    sys.exit('usage: crlog <crab directory> [list of jobs]\n   if no list of jobs is supplied, will show the crab.log.')
+    sys.exit('usage: crlog [-number] <crab directory> [list of jobs]\n\tif no list of jobs is supplied, will show the crab.log.\n\t-number\tif supplied, will use tail -n number instead of less (works for either crab.log or the cmsRun logs)')
+
+tail = 0
+dirndx = sys.argv.index(d)-1
+argm1 = sys.argv[dirndx]
+if argm1[0] == '-':
+    tail = int(argm1[1:])
+    del sys.argv[dirndx:dirndx+1]
 
 jobs = crab_jobs_from_argv()
 print d
 if len(jobs) == 0 or (len(jobs) == 1 and jobs[0] == 0):
-    print_run_cmd('less %s/crab.log' % d)
+    if tail:
+        print_run_cmd('tail -n %i %s/crab.log' % (abs(tail), d))
+    else:
+        print_run_cmd('less %s/crab.log' % d)
 else:
     for job in jobs:
         if len(jobs) != 1:
@@ -30,4 +40,5 @@ else:
         if not os.path.isfile(tar_fn):
             sys.exit('could not get tarball %s' % tar_fn)
 
-        print_run_cmd('tar -xf %s --to-command=less' % tar_fn)
+        subcmd = 'less' if tail == 0 else 'tail -n %i' % tail
+        print_run_cmd('tar -xf %s --to-command="%s"' % (tar_fn, subcmd))

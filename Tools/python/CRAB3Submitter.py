@@ -213,6 +213,12 @@ class CRABSubmitter:
         if self.job_control_from_sample:
             sample.job_control(cfg.Data)
 
+        if crab_global_options.support_automatic_splitting:
+            # JMTBAD finish or remove
+            cfg.Data.splitting = 'Automatic'
+            cfg.Data.unitsPerJob = 240
+            cfg.Data.totalUnits = -1
+
         if getattr(sample, 'aaa', False):
             cfg.Data.ignoreLocality = True
             cfg.Site.whitelist = sample.aaa
