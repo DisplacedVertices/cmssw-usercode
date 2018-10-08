@@ -1,9 +1,10 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
+
 debug = 'debug' in sys.argv
 
-sample_files(process, 'mfv_neuudmu_tau10000um_M1200', 'main', 1)
-process.TFileService.fileName = 'gen_histos.root'
+sample_files(process, 'mfv_neu_tau010000um_M1200_2017', 'main', 1)
+tfileservice(process, 'gen_histos.root')
 file_event_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.GenParticles_cff')
