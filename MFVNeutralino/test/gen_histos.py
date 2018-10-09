@@ -132,3 +132,47 @@ StopStopTo2Dbar2Dbar_M_800_CTau_30mm /store/user/tucker/cfgtest/StopStopTo2Dbar2
     ms = MetaSubmitter('GenHistos_Test%i'%year)
     ms.common.ex = year
     ms.submit(samples)
+
+elif __name__ == '__main__' and hasattr(sys, 'argv') and 'validate' in sys.argv:
+    import os, re
+    from math import exp
+    from JMTucker.Tools.ROOTTools import ROOT
+    from JMTucker.Tools import colors
+
+    fn_re = re.compile(r'(GluinoGluinoToNeutralinoNeutralinoTo2T2B2S|StopStopTo2Dbar2Dbar)_M_(\d+)_CTau_(\d+[um]m).root')
+
+    for fn in sys.argv:
+        if not fn.endswith('.root') or not os.path.isfile(fn):
+            continue
+
+        bn = os.path.basename(fn)
+        mo = fn_re.match(bn)
+        if not mo:
+            raise ValueError('cannot parse fn %s' % fn)
+
+        model, mass, tau_s = mo.groups()
+        mass = float(mass)
+        tau, tauunit = float(tau_s[:-2]), tau_s[-2:]
+        if tauunit == 'um':
+            tau *= 1e-4
+        elif tauunit == 'mm':
+            tau *= 1e-1
+
+        nevents_expected = 10000
+        if model == 'GluinoGluinoToNeutralinoNeutralinoTo2T2B2S':
+            nevents_missing_allowed = 0
+            folder_name = 'Lsps'
+        elif model == 'StopStopTo2Dbar2Dbar':
+            nevents_missing_allowed = 10
+            folder_name = 'Hs'
+
+        f = ROOT.TFile(fn)
+        hs = [f.Get('mfvGenHistos/%s#%i/M' % (folder_name, i)) for i in 0,1]
+        ok = all(nevents_expected - h.GetEntries() <= nevents_missing_allowed and abs(h.GetMean() - mass) < 0.01 for h in hs)
+
+        h = f.Get('mfvGenHistos/h_ctaubig')
+        xmax = h.GetXaxis().GetXmax()
+        mean_expected = (tau - exp(-xmax/tau) * (xmax + tau)) / (1 - exp(-xmax/tau))
+        ok = ok and nevents_expected - h.GetEntries()/2. <= nevents_missing_allowed and abs(h.GetMean() - mean_expected) < 2*h.GetMeanError()
+
+        print (colors.green if ok else colors.red)('%s (%s %s %s) %s (%s %s) %s (%s)' % (fn, hs[0].GetEntries(), hs[1].GetEntries(), h.GetEntries(), mass, hs[0].GetMean(), hs[1].GetMean(), mean_expected, h.GetMean()))
