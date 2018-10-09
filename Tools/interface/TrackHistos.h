@@ -7,13 +7,15 @@ namespace reco {
   class Vertex;
 }
 
+class TrackerTopology;
+
 class TH1D;
 class TH2D;
 
 namespace jmt {
   struct TrackHistos {
     TrackHistos(const char* name, const bool do_2d_=false, const bool use_rechits_=false);
-    bool Fill(const reco::Track& tk, const reco::BeamSpot* bs=0, const reco::Vertex* pv=0);
+    bool Fill(const reco::Track&, const reco::BeamSpot*, const reco::Vertex*, const TrackerTopology&);
 
     const bool do_2d;
     const bool use_rechits;

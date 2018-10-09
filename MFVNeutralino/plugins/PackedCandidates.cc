@@ -3,12 +3,14 @@
 #include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
+#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include "Geometry/Records/interface/TrackerTopologyRcd.h"
 #include "RecoParticleFlow/PFTracking/interface/PFTrackAlgoTools.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
@@ -207,6 +209,9 @@ MFVPackedCandidates::MFVPackedCandidates(const edm::ParameterSet& cfg)
 }
 
 void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup& setup) {
+  edm::ESHandle<TrackerTopology> topology;
+  setup.get<TrackerTopologyRcd>().get(topology);
+
   edm::Handle<reco::BeamSpot> beamspot;
   event.getByToken(beamspot_token, beamspot);
   
@@ -231,9 +236,9 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
     const reco::Track& tk = (*tracks)[itk];
     const track_ex te(*beamspot, pv, tk);
 
-    h_all.Fill(tk, &*beamspot, pv);
+    h_all.Fill(tk, &*beamspot, pv, *topology);
     if (te.highpurity)
-      h_highpurity.Fill(tk, &*beamspot, pv);
+      h_highpurity.Fill(tk, &*beamspot, pv, *topology);
 
     if (prints > 1) {
       printf("all tk #%4lu: pt %10.4g +- %10.4g eta %10.4g +- %10.4g phi %10.4g +- %10.4g dxy %10.4g +- %10.4g dz %10.4g +- %10.4g\n",
@@ -245,9 +250,9 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
     if (te.pass) {
       ++nseed;
 
-      h_seed.Fill(tk, &*beamspot, pv);
+      h_seed.Fill(tk, &*beamspot, pv, *topology);
       if (te.highpurity)
-        h_seed_highpurity.Fill(tk, &*beamspot, pv);
+        h_seed_highpurity.Fill(tk, &*beamspot, pv, *topology);
 
       if (prints > 1)
         printf("pass!\n");
@@ -292,10 +297,10 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
         const reco::Track& cd_tk = closest_cd->pseudoTrack();
         const track_ex cd_te(*beamspot, pv, cd_tk);
 
-        h_match.Fill(tk, &*beamspot, pv);
+        h_match.Fill(tk, &*beamspot, pv, *topology);
 
         if (cd_te.pass) {
-          h_match_pass.Fill(tk, &*beamspot, pv);
+          h_match_pass.Fill(tk, &*beamspot, pv, *topology);
           ++nmatchpass;
         }
 
@@ -325,11 +330,11 @@ void MFVPackedCandidates::analyze(const edm::Event& event, const edm::EventSetup
       else {
         if (prints) printf("  NO CD MATCH highpurity %i goodptres %i\n", te.highpurity, te.goodptres);
 
-        h_nomatch.Fill(tk, &*beamspot, pv);
+        h_nomatch.Fill(tk, &*beamspot, pv, *topology);
         if (te.highpurity) {
-          h_nomatch_highpurity.Fill(tk, &*beamspot, pv);
+          h_nomatch_highpurity.Fill(tk, &*beamspot, pv, *topology);
           if (te.goodptres)
-            h_nomatch_highpurity_goodptres.Fill(tk, &*beamspot, pv);
+            h_nomatch_highpurity_goodptres.Fill(tk, &*beamspot, pv, *topology);
         }
       }
     }

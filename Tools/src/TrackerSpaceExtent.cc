@@ -2,18 +2,19 @@
 
 #include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
 #include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
-#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
-#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
-#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
-#include "DataFormats/SiStripDetId/interface/TECDetId.h"
+#include "DataFormats/SiStripDetId/interface/SiStripDetId.h"
 #include "DataFormats/TrackReco/interface/HitPattern.h"
+#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "Geometry/CommonDetUnit/interface/GlobalTrackingGeometry.h"
 #include "Geometry/Records/interface/GlobalTrackingGeometryRecord.h"
-
+#include "Geometry/Records/interface/TrackerTopologyRcd.h"
 
 void TrackerSpaceExtents::fill(const edm::EventSetup& setup, const GlobalPoint& origin) {
+  edm::ESHandle<TrackerTopology> topology;
+  setup.get<TrackerTopologyRcd>().get(topology);
+
   edm::ESHandle<GlobalTrackingGeometry> geometry;
   setup.get<GlobalTrackingGeometryRecord>().get(geometry);
   const TrackingGeometry* tg = geometry->slaveGeometry(PXBDetId(1, 1, 1));
@@ -23,12 +24,13 @@ void TrackerSpaceExtents::fill(const edm::EventSetup& setup, const GlobalPoint& 
   if (tktg == 0)
     throw cms::Exception("TrackerSpaceExtents") << "couldn't cast tg to tktg";
 
+  // JMTBAD when do PXB/FDetId go away? ttps://twiki.cern.ch/twiki/bin/view/CMS/SiStripLocalReco_notesSiStripSubDetIdToTrackerTopologyMigration#Remaining_PXBDetId_and_PXFDetId
   fill_subdet<PXBDetId>(map, tktg->detsPXB(), [](const PXBDetId& id) { return id.layer(); }, origin);
   fill_subdet<PXFDetId>(map, tktg->detsPXF(), [](const PXFDetId& id) { return id.disk (); }, origin); 
-  fill_subdet<TIBDetId>(map, tktg->detsTIB(), [](const TIBDetId& id) { return id.layer(); }, origin); 
-  fill_subdet<TIDDetId>(map, tktg->detsTID(), [](const TIDDetId& id) { return id.wheel(); }, origin); 
-  fill_subdet<TOBDetId>(map, tktg->detsTOB(), [](const TOBDetId& id) { return id.layer(); }, origin); 
-  fill_subdet<TECDetId>(map, tktg->detsTEC(), [](const TECDetId& id) { return id.wheel(); }, origin); 
+  fill_subdet<SiStripDetId>(map, tktg->detsTIB(), [&](const SiStripDetId& id) { return topology->tibLayer(id); }, origin);
+  fill_subdet<SiStripDetId>(map, tktg->detsTOB(), [&](const SiStripDetId& id) { return topology->tobLayer(id); }, origin);
+  fill_subdet<SiStripDetId>(map, tktg->detsTID(), [&](const SiStripDetId& id) { return topology->tidWheel(id); }, origin);
+  fill_subdet<SiStripDetId>(map, tktg->detsTEC(), [&](const SiStripDetId& id) { return topology->tecWheel(id); }, origin);
   filled_ = true;
 }
 
@@ -69,13 +71,13 @@ NumExtents TrackerSpaceExtents::numExtentInRAndZ(const reco::HitPattern& hp, int
     }
     if (code != PixelOnly) {
       if (sub == StripSubdetector::TIB)
-        ret.update_r(3 + subsub);
+        ret.update_r(4 + subsub);
       else if (sub == StripSubdetector::TOB)
-        ret.update_r(7 + subsub);
+        ret.update_r(8 + subsub);
       else if (sub == StripSubdetector::TID)
-        ret.update_z(2 + subsub);
+        ret.update_z(3 + subsub);
       else if (sub == StripSubdetector::TEC)
-        ret.update_z(5 + subsub);
+        ret.update_z(6 + subsub);
     }
   }
 

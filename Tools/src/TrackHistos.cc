@@ -1,12 +1,9 @@
 #include "TH2.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
-#include "DataFormats/SiPixelDetId/interface/PXBDetId.h"
-#include "DataFormats/SiPixelDetId/interface/PXFDetId.h"
-#include "DataFormats/SiStripDetId/interface/TIBDetId.h"
-#include "DataFormats/SiStripDetId/interface/TOBDetId.h"
-#include "DataFormats/SiStripDetId/interface/TIDDetId.h"
-#include "DataFormats/SiStripDetId/interface/TECDetId.h"
+#include "DataFormats/SiPixelDetId/interface/PixelSubdetector.h"
+#include "DataFormats/SiStripDetId/interface/StripSubdetector.h"
 #include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackerCommon/interface/TrackerTopology.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "JMTucker/Tools/interface/TrackHistos.h"
@@ -115,7 +112,7 @@ namespace jmt {
     }
   }
 
-  bool TrackHistos::Fill(const reco::Track& tk, const reco::BeamSpot* bs, const reco::Vertex* pv) {
+  bool TrackHistos::Fill(const reco::Track& tk, const reco::BeamSpot* bs, const reco::Vertex* pv, const TrackerTopology& top) {
     bool ok = true;
 
     const double dxybs = bs ? tk.dxy(*bs) : -1e99;
@@ -168,30 +165,18 @@ namespace jmt {
       for (int i = 0, ie = int(tk.recHitsSize()); i < ie; ++i) {
         DetId dd = tk.recHit(i)->geographicalId();
         if (dd.det() == DetId::Tracker) {
-          if (dd.subdetId() == (int) PixelSubdetector::PixelBarrel) {
-            PXBDetId d(dd);
-            h_pxb_ladder_module[d.layer()]->Fill(d.ladder(), d.module());
-          }
-          else if (dd.subdetId() == (int) PixelSubdetector::PixelEndcap) {
-            PXFDetId d(dd);
-            h_pxf_panel_module[d.side()][d.disk()][d.panel()]->Fill(d.blade(), d.module());
-          }
-          else if (dd.subdetId() == StripSubdetector::TIB) {
-            TIBDetId d(dd);
-            h_tib_layer_string[d.side()][d.module()]->Fill(d.layer(), d.stringNumber());
-          }
-          else if (dd.subdetId() == StripSubdetector::TOB) {
-            TOBDetId d(dd);
-            h_tob_rod_module[d.side()][d.layer()]->Fill(d.rodNumber(), d.module());
-          }
-          else if (dd.subdetId() == StripSubdetector::TID) {
-            TIDDetId d(dd);
-            h_tid_ring_module[d.side()][d.wheel()]->Fill(d.ring(), d.moduleNumber());
-          }
-          else if (dd.subdetId() == StripSubdetector::TEC) {
-            TECDetId d(dd);
-            h_tec_petal_module[d.side()][d.wheel()][d.ring()]->Fill(d.petalNumber(), d.module());
-          }
+          if (dd.subdetId() == PixelSubdetector::PixelBarrel)
+            h_pxb_ladder_module[top.pxbLayer(dd)]->Fill(top.pxbLadder(dd), top.pxbModule(dd));
+          else if (dd.subdetId() == PixelSubdetector::PixelEndcap)
+            h_pxf_panel_module[top.pxfSide(dd)][top.pxfDisk(dd)][top.pxfPanel(dd)]->Fill(top.pxfBlade(dd), top.pxfModule(dd));
+          else if (dd.subdetId() == StripSubdetector::TIB)
+            h_tib_layer_string[top.tibSide(dd)][top.tibModule(dd)]->Fill(top.tibLayer(dd), top.tibString(dd));
+          else if (dd.subdetId() == StripSubdetector::TOB)
+            h_tob_rod_module[top.tobSide(dd)][top.tobLayer(dd)]->Fill(top.tobRod(dd), top.tobModule(dd));
+          else if (dd.subdetId() == StripSubdetector::TID)
+            h_tid_ring_module[top.tidSide(dd)][top.tidWheel(dd)]->Fill(top.tidRing(dd), top.tidModule(dd));
+          else if (dd.subdetId() == StripSubdetector::TEC)
+            h_tec_petal_module[top.tecSide(dd)][top.tecWheel(dd)][top.tecRing(dd)]->Fill(top.tecPetalNumber(dd), top.tecModule(dd));
           else {
             ok = false;
             h_unknown_detid->Fill(0);
