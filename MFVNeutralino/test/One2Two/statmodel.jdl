@@ -8,6 +8,6 @@ stream_output = false
 stream_error  = false
 notification  = never
 should_transfer_files   = YES
-transfer_input_files = statmodel.exe,vpeffs_2015p6_v15.root
+transfer_input_files = statmodel.exe,vpeffs_2017_v20m.root
 when_to_transfer_output = ON_EXIT
 Queue 36
