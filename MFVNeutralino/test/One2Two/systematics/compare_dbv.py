@@ -7,9 +7,9 @@ import JMTucker.MFVNeutralino.AnalysisConstants as ac
 set_style()
 ROOT.TH1.SetDefaultSumw2()
 
-year = 2016
-sns = 'qcdht0700sum qcdht1000sum qcdht1500sum qcdht2000sum ttbar'.split()
-sc = ac.int_lumi_2016 * ac.scale_factor_2016
+year = 2017
+sns = 'qcdht0700_2017 qcdht1000_2017 qcdht1500_2017 qcdht2000_2017 ttbar_2017'.split()
+sc = ac.int_lumi_2017 * ac.scale_factor_2017
 
 if year == 2015:
     sns = 'qcdht0700sum_2015 qcdht1000sum_2015 qcdht1500sum_2015 qcdht2000sum_2015 ttbar_2015'.split()
@@ -24,10 +24,10 @@ if ntk == 4:
 
 bquarkpt = False
 
-path = 'MiniTreeV15'
+path = 'MiniTreeV20mp2'
 if bquarkpt:
     path = 'MiniTreeV15_v4_bquarkpt'
-ps = plot_saver('../../plots/bkgest/%s/%s_ntk%i' % (path, year, ntk), size=(700,700), root=False)
+ps = plot_saver(plot_dir('compare_dbv_%s_%s_ntk%i' % (path, year, ntk)), size=(700,700), root=False)
 trees = '/uscms_data/d2/tucker/crab_dirs/%s' % path
 
 def book_dbv(n):

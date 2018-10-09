@@ -3,16 +3,16 @@ ROOT.TH1.AddDirectory(0)
 
 is_mc = True
 only_10pc = False
-year = '2015p6'
+year = '2017'
 
 set_style()
-ps = plot_saver('../plots/bkgest/v15_v5/closure%s%s_%s' % ('' if is_mc else '_data', '_10pc' if only_10pc else '', year), size=(700,700), root=False, log=False)
+ps = plot_saver(plot_dir('closure%s%s_%s' % ('' if is_mc else '_data', '_10pc' if only_10pc else '', year)), size=(700,700), root=False, log=False)
 
-fns = ['2v_from_jets%s_%s_3track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v5'), '2v_from_jets%s_%s_7track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v5'), '2v_from_jets%s_%s_4track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v5'), '2v_from_jets%s_%s_5track_default_v15%s.root' % ('' if is_mc else '_data', year, '' if only_10pc else '_v5')]
+fns = ['2v_from_jets%s_%s_3track_default_v20mp2.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_7track_default_v20mp2.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_4track_default_v20mp2.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_5track_default_v20mp2.root' % ('' if is_mc else '_data', year)]
 ntk = ['3-track', '4-track-3-track', '4-track', '5-track']
 names = ['3-track x 3-track', '4-track x 3-track', '4-track x 4-track', '#geq 5-track x #geq 5-track']
 
-n2v = [44., 9., 1., 1.] if year == '2015' else [946., 204., 8., 1.] if year == '2016' else [991., 213., 8., 1.]
+n2v = [773., 9., 5., 1.] if year == '2017' else [991., 213., 8., 1.]
 
 if is_mc:
     ebin1 = [0.0118, 0.0297, 0.0297, 0.0595] if year == '2015' else [0.0026, 0.0064, 0.0064, 0.0125] if year == '2016' else [0.0025, 0.0062, 0.0062, 0.0122]
