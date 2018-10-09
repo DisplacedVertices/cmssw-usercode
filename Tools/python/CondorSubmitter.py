@@ -123,11 +123,13 @@ assert cs_job not in cs_fail
 
 import cs_filelist
 if __SPLIT_BY_EVENTS__:
-    process.source.fileNames = [__PFN_PREFIX__ + x for x in cs_filelist.get(0)]
-    process.source.skipEvents = cms.untracked.uint32(cs_job * __EVENTS_PER__)
+    if process.source.type_() != 'EmptySource':
+        process.source.fileNames = [__PFN_PREFIX__ + x for x in cs_filelist.get(0)]
+        process.source.skipEvents = cms.untracked.uint32(cs_job * __EVENTS_PER__)
     process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(__MAX_EVENTS__ if __MAX_EVENTS__ != -1 else __EVENTS_PER__))
 else:
-    process.source.fileNames = [__PFN_PREFIX__ + x for x in cs_filelist.get(cs_job)]
+    if process.source.type_() != 'EmptySource':
+        process.source.fileNames = [__PFN_PREFIX__ + x for x in cs_filelist.get(cs_job)]
     process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(__MAX_EVENTS__))
 
 process.maxLuminosityBlocks = cms.untracked.PSet(input = cms.untracked.int32(-1))
