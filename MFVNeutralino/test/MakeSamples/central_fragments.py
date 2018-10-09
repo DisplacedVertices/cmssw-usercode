@@ -125,10 +125,10 @@ for model in neu, stop:
     if model == neu:
         samplebase = 'GluinoGluinoToNeutralinoNeutralinoTo2T2B2S'
     elif model == stop:
-        samplebase = 'StopStopTo2Dbar2Dbar'
+        samplebase = 'StopStopbarTo2Dbar2D'
     for ctau, ctauname in (0.1, '100um'), (0.3, '300um'), (1., '1mm'), (10., '10mm'), (30., '30mm'):
         for m in 200, 300, 400, 600, 800, 1200, 1600, 2400, 3000:
             sample = samplebase + '_M-%i_CTau-%s_TuneCP5_13TeV-pythia8' % (m, ctauname)
-            print sample
             fn = sample.replace('-', '_') + '_cff.py'
+            print '%s,100000,%s,pythia8' % (sample, fn)
             model(fn, m, ctau)
