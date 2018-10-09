@@ -8,6 +8,7 @@ namespace mfv {
   enum MCInteractions_t { mci_invalid, mci_Ttbar, mci_MFVtbs, mci_MFVtds, mci_MFVtbb, mci_MFVuds, mci_MFVude, mci_MFVudmu, mci_MFVudtu,  mci_MFVudb, mci_MFVcds, mci_MFVcdb, mci_MFVubb, mci_XX4j, mci_MFVlq, mci_stopdbardbar, mci_stopbbarbbar, mci_MFVddbar, mci_MFVccbar, mci_MFVbbbar };
 
   struct MCInteractionHolderTtbar {
+    virtual ~MCInteractionHolderTtbar() {}
     virtual bool valid() const;
 
     reco::GenParticleRef tops[2];  // top, topbar
