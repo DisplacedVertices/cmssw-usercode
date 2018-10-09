@@ -39,8 +39,8 @@ namespace jmt {
     TH1D* h_nloops;
 
     TH1D* h_unknown_detid;
-    TH2D* h_pxb_ladder_module[3];
-    TH2D* h_pxf_panel_module[3][3][5];
+    TH2D* h_pxb_ladder_module[5];
+    TH2D* h_pxf_panel_module[3][4][5];
     TH2D* h_tib_layer_string[3][5];
     TH2D* h_tob_rod_module[3][9];
     TH2D* h_tid_ring_module[3][5];

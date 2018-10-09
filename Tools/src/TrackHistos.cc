@@ -88,11 +88,11 @@ namespace jmt {
     if (use_rechits) {
       h_unknown_detid = d.make<TH1D>("unknown_detid", "", 1, 0, 1);
 
-      for (int i = 1; i <= 3; ++i)
+      for (int i = 1; i <= 4; ++i)
         h_pxb_ladder_module[i] = d.make<TH2D>(TString::Format("pxb_layer_%i_ladder_module", i), ";ladder;module", 256, 0, 256, 64, 0, 64);
 
       for (int i = 1; i <= 2; ++i)
-        for (int j = 1; j <= 2; ++j)
+        for (int j = 1; j <= 3; ++j)
           for (int k = 1; k <= 4; ++k)
             h_pxf_panel_module[i][j][k] = d.make<TH2D>(TString::Format("pxf_side_%i_disk_%i_panel_%i_blade_module", i, j, k), ";blade;module", 64, 0, 64, 64, 0, 64);
 
