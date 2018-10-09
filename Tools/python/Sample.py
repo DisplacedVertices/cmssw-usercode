@@ -237,6 +237,10 @@ class Sample(object):
                 fns = self.datasets[self.curr_dataset].filenames = DBS.files_in_dataset(self.dataset, self.dbs_inst)
         return fns
 
+    @filenames.setter
+    def filenames(self, val):
+        self.datasets[self.curr_dataset].filenames = val
+
     @property
     def primary_dataset(self):
         return self.dataset.split('/')[1]
@@ -415,13 +419,21 @@ def anon_samples(txt, **kwargs):
             else:
                 dataset = line[0]
                 nevents_orig = -1
-            name = dataset.split('/')[1]
+            if dataset.endswith('.root'):
+                name = os.path.basename(dataset).replace('.root', '')
+            else:
+                name = dataset.split('/')[1]
             uniq[name] += 1
             if uniq[name] > 1:
                 name += str(uniq[name])
+        filename = None
+        if dataset.endswith('.root'):
+            filename, dataset = dataset, '/%s/None/USER' % os.path.basename(dataset).replace('.root', '')
         sample = MCSample(name, dataset, nevents_orig)
         for k,v in kwargs.iteritems():
             setattr(sample, k, v)
+        if filename:
+            sample.filenames = [filename]
         samples.append(sample)
     return samples
 
