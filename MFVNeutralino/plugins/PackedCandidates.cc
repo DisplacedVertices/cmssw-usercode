@@ -160,7 +160,7 @@ MFVPackedCandidates::track_ex::track_ex(const reco::BeamSpot& bs_, const reco::V
     pass(tk.pt() > 1 &&
          tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1) &&
          npxlayers >= 2 &&
-         ((aeta < 2 && nstlayers >= 6) || (aeta >= 2 && nstlayers >= 7)) &&
+         nstlayers >= 6 &&
          fabs(sigmadxybs) > 4)
 {}
 
