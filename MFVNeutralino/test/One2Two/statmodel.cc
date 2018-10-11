@@ -1,3 +1,50 @@
+/*
+ * This program is used to compute the fractional statistical uncertainty in the yield in each bin of the dVVC template.
+ * To run interactively: compile with the Makefile (make statmodel.exe); execute (./statmodel.exe).
+ * To run all configurations of n1v: submit to condor (condor_submit statmodel.jdl).
+ *
+ * Here is an example of the end of the printout (in the .log files if run by condor):
+ *   2v bins means:
+ *   bin                     bin mean                   scaled true                          diff                           rms
+ *     1       0.7337 +-       0.0002        0.7349 +-       0.0009       -0.0012 +-       0.0009        0.0183 +-       0.0001
+ *     2       0.2063 +-       0.0001        0.2053 +-       0.0005        0.0010 +-       0.0005        0.0133 +-       0.0001
+ *     3       0.0600 +-       0.0001        0.0598 +-       0.0002        0.0002 +-       0.0003        0.0127 +-       0.0001
+ *
+ * The statistical uncertainty is taken as the root-mean-square of yields in an ensemble of simulated pseudo-data sets.
+ * To compute the fractional statistical uncertainty, divide rms/true for each bin.
+ * For example, in this case the fractional statistical uncertainties are: bin1 0.0183/0.7349 = 0.0249; bin2 0.0133/0.2053 = 0.0648; bin3 0.0127/0.0598 = 0.2124.
+ *
+ * The fractional statistical uncertainties depend primarily on the number of entries in the parent dBV distribution (n1v).
+ * So by default, the set of configurations run when submitted to condor are different in n1v but use the same values of phi_c, phi_a, eff_fn, etc.
+ * There is one job for each n1v[samples_index][year_index][ntracks]:
+ *  - samples_index: 0 = n1v in MC scaled to integrated luminosity, 1 = effective n1v in MC, 2 = n1v in 10% data, 3 = n1v in 100% data
+ *  - year_index: 0 = 2017, 1 = 2018, 2 = 2017+2018
+ *  - ntracks: 3, 4, 5
+ *
+ * Run treesprint.py to get the values of n1v in MC scaled to integrated luminosity.
+ * Calculate the effective n1v in MC: "n1v" = (n1v/en1v)^2.
+ * For example, if n1v = 826.11 +/- 61.39, then "n1v" = (826.11 / 61.39)**2 = 181.
+ *
+ *
+ * How statmodel.cc works:
+ *  - Model the dBV distribution with a function:
+ *      f(rho) = p0 + p1 * expl(-p2 * rho) + p3 * expl(-p4 * rho^0.5) + rho_tail_norm * p5 * expl(-p6 * rho_tail_slope * rho^0.15)
+ *      {p0, p1, p2, p3, p4, p5, p6} depends on ntracks
+ *  - Generate the true dVV distribution using the dBV function (and the deltaphi function and efficiency curve).
+ *  - Throw ntoys.  For each toy:
+ *     - Randomly sample i1v from Poisson(n1v)
+ *     - Make a histogram of dBV by randomly sampling from the dBV function i1v times
+ *     - Construct dVVC
+ *  - Calculate the RMS of the dVVC yields in each bin.
+ *
+ * These configurables can be set on the command line (e.g. env sm_ntracks=5 ./statmodel.exe):
+ *   inst, seed, ntoys, out_fn, samples_index, year_index, ntracks, n1v, n2v, true_fn, true_from_file,
+ *   ntrue_1v, ntrue_2v, oversample, rho_tail_norm, rho_tail_slope, phi_c, phi_e, phi_a, eff_fn, eff_path
+ *
+ * These should be modified in the code:
+ *   nbins_1v, bins_1v, nbins_2v, bins_2v, func_rho, rho_min, rho_max, default_n1v, default_n2v
+ */
+
 #include <cassert>
 #include <memory>
 template <typename T> using uptr = std::unique_ptr<T>;
