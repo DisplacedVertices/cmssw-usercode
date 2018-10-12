@@ -436,6 +436,7 @@ def compare_all_hists(ps, samples, **kwargs):
     separate_plots = _get('separate_plots', False)
     draw_command   = _get('draw_command',   '')
     scaling        = _get('scaling',        1.)
+    ratio          = _get('ratio',          True)
 
     ###
 
@@ -526,14 +527,14 @@ def compare_all_hists(ps, samples, **kwargs):
         if not is2d:
             hists_sorted.sort(key=lambda hist: hist.GetMaximum(), reverse=True)
 
-        if False: #not is2d:
+        if ratio and not is2d:
             ratios_plot(name_clean,
                     hists,
                     plot_saver=ps,
                     res_fit=False,
                     res_divide_opt={'confint': propagate_ratio, 'force_le_1': False},
                     statbox_size=stat_size(name, hist_list, None),
-                    res_y_range=0.05,
+                    res_y_range=(0, 3),
                     )
         else:
             for i,hist in enumerate(hists_sorted):
