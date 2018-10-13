@@ -46,6 +46,7 @@
  */
 
 #include <cassert>
+#include <experimental/filesystem>
 #include <memory>
 template <typename T> using uptr = std::unique_ptr<T>;
 #include "TCanvas.h"
@@ -58,6 +59,7 @@ template <typename T> using uptr = std::unique_ptr<T>;
 #include "TLine.h"
 #include "TMath.h"
 #include "TRandom3.h"
+#include "TRatioPlot.h"
 #include "TStyle.h"
 #include "TVector2.h"
 #include "ConfigFromEnv.h"
@@ -203,6 +205,10 @@ double func_rho(double* x, double*) {
   return double(f);
 }
 
+double func_rho_norm(double* x, double* p) {
+  return p[0] * func_rho(x,0);
+}
+
 double func_dphi(double* x, double*) {
   return pow(x[0] - phi_c, phi_e) + phi_a;
 }
@@ -285,6 +291,7 @@ int main(int, char**) {
   const long ntrue_1v = env.get_long("ntrue_1v", 10000000L);
   const long ntrue_2v = env.get_long("ntrue_2v", 1000000L);
   const double oversample = env.get_double("oversample", 20);
+  const std::string rho_compare_fn = env.get_string("rho_compare_fn", "/uscms_data/d2/tucker/crab_dirs/HistosV20mp1/background_2017.root");
   rho_tail_norm = env.get_long_double("rho_tail_norm", 1L);
   rho_tail_slope = env.get_long_double("rho_tail_slope", 1L);
   phi_c = env.get_double("phi_c", 1.42);
@@ -353,6 +360,36 @@ int main(int, char**) {
   p();
   c->Clear();
 
+  // 2nd page: compare rho to MC background distributions.
+
+  if (std::experimental::filesystem::exists(rho_compare_fn)) {
+    TF1* f_func_rho_norm = new TF1("func_rho_norm", func_rho_norm, rho_min, rho_max, 1);
+    f_func_rho_norm->SetNpx(25000);
+    f_func_rho_norm->SetParameter(1,1);
+    uptr<TFile> fin(TFile::Open(rho_compare_fn.c_str()));
+    TH1* h_rho_compare = 0;
+    if      (ntracks == 5) h_rho_compare = (TH1*)fin->Get(    "mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist");
+    else if (ntracks == 3) h_rho_compare = (TH1*)fin->Get("Ntk3mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist");
+    else if (ntracks == 4) h_rho_compare = (TH1*)fin->Get("Ntk4mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist");
+    h_rho_compare->SetStats(0);
+    h_rho_compare->Fit(f_func_rho_norm, "WL Q R");
+    h_rho_compare->GetXaxis()->SetRangeUser(0,0.5);
+    //  h_rho_compare->GetYaxis()->SetRangeUser(3e-2,500);
+    c->SetLogy();
+    uptr<TRatioPlot> rho_compare(new TRatioPlot(h_rho_compare));
+    rho_compare->SetGraphDrawOpt("P");
+    rho_compare->Draw();
+    c->Update();
+    rho_compare->GetLowerRefYaxis()->SetRangeUser(-7,7);
+    p();
+  }
+  else {
+    TText tt(0.1, 0.75, TString::Format("no file %s", rho_compare_fn.c_str()));
+    tt.Draw();
+    p();
+  }
+  c->Clear();
+
   // Generate the true 1v & 2v distributions from func_rho and
   // func_dphi. Takes a while, so if true_fn is set on cmd line, will
   // take these + the rng state from that file.
@@ -415,7 +452,7 @@ int main(int, char**) {
   //jmt::deoverflow(h_true_1v_rho.get());
   jmt::deoverflow(h_true_2v_dvv.get());
 
-  // 2nd-7th pages of output: the true_1v histogram + comparison to
+  // 3rd-8th pages of output: the true_1v histogram + comparison to
   // fcn (for debugging),
 
   uptr<TH1D> h_true_1v_rho_unzoom    ((TH1D*)h_true_1v_rho->Clone("h_true_1v_rho_unzoom"));
@@ -554,7 +591,7 @@ int main(int, char**) {
 
   /////////////////////////////////////////////
 
-  // Output pg 8-XX: distribution in toys of total n1v, n1v in each
+  // Output pg 9-XX: distribution in toys of total n1v, n1v in each
   // dbv bin, and n2v in each dvv bin, each compared to truth from
   // fcn.
 
