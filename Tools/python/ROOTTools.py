@@ -164,14 +164,30 @@ def poisson_intervalize(h, zero_x=False, include_zero_bins=False, rescales=None)
         np += 1
     return h2
 
-def wilson_score(n_on, n_tot, alpha=1-0.6827):
+def wilson_score_vpme(n_on, n_tot, alpha=1-0.6827):
     z = ROOT.Math.normal_quantile(1-alpha/2, 1)
     phat = float(n_on) / n_tot
     dn = 1 + z**2 / n_tot
     c = (phat + z**2/2/n_tot) / dn
     e = z * (phat*(1-phat)/n_tot + z**2/4/n_tot**2)**0.5
+    return c, e
+
+def wilson_score(n_on, n_tot, alpha=1-0.6827):
+    c,e = wilson_score_vpme(n_on, n_tot, alpha)
     return c, c-e, c+e
 
+def effective_n(v, e):
+    return (v/e)**2
+
+def effective_wilson_score_vpme(n_on, e_n_on, n_tot, e_n_tot, alpha=1-0.6827):
+    c = n_on / n_tot
+    _, e = wilson_score_vpme(effective_n(n_on, e_n_on), effective_n(n_tot, e_n_tot))
+    return c, e
+
+def effective_wilson_score(n_on, e_n_on, n_tot, e_n_tot, alpha=1-0.6827):
+    c, e = effective_wilson_score_vpme(n_on, e_n_on, n_tot, e_n_tot, alpha)
+    return c, c-e, c+e
+    _
 def clopper_pearson(n_on, n_tot, alpha=1-0.6827, equal_tailed=True):
     if equal_tailed:
         alpha_min = alpha/2
@@ -206,6 +222,9 @@ def propagate_ratio(x, y, ex, ey):
     else:
         e = r*((ex/x)**2 + (ey/y)**2)**0.5
     return r, r-e, r+e
+
+def interval_to_vpme(v,l,h):
+    return v, (h-l)/2
 
 def cm2mm(h):
     name = h.GetName() + '_mm'
@@ -2325,10 +2344,15 @@ __all__ = [
     'bin_iterator',
     'check_consistency',
     'histogram_divide',
+    'wilson_score_vpme',
     'wilson_score',
+    'effective_wilson_score_vpme',
+    'effective_wilson_score',
     'clopper_pearson',
     'clopper_pearson_poisson_means',
     'propagate_ratio',
+    'effective_n',
+    'interval_to_vpme',
     'cm2mm',
     'cmssw_setup',
     'compare_all_hists',
