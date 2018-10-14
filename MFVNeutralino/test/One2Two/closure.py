@@ -1,4 +1,5 @@
 from JMTucker.Tools.ROOTTools import *
+from statmodel import ebins
 ROOT.TH1.AddDirectory(0)
 
 is_mc = True
@@ -14,19 +15,6 @@ names = ['3-track x 3-track', '4-track x 3-track', '4-track x 4-track', '#geq 5-
 
 n2v = [773., 9., 5., 1.] if year == '2017' else [991., 213., 8., 1.]
 
-if is_mc:
-    ebin1 = [0.0032, 0.0091, 0.0091, 0.0249] if year == '2017' else [1, 1, 1, 1]
-    ebin2 = [0.0030, 0.0113, 0.0113, 0.0648] if year == '2017' else [1, 1, 1, 1]
-    ebin3 = [0.0078, 0.0348, 0.0348, 0.2124] if year == '2017' else [1, 1, 1, 1]
-elif only_10pc:
-    ebin1 = [1, 1, 1, 1] if year == '2017' else [1, 1, 1, 1]
-    ebin2 = [1, 1, 1, 1] if year == '2017' else [1, 1, 1, 1]
-    ebin3 = [1, 1, 1, 1] if year == '2017' else [1, 1, 1, 1]
-else:
-    ebin1 = [1, 1, 1, 1] if year == '2017' else [1, 1, 1, 1]
-    ebin2 = [1, 1, 1, 1] if year == '2017' else [1, 1, 1, 1]
-    ebin3 = [1, 1, 1, 1] if year == '2017' else [1, 1, 1, 1]
-
 def write(font, size, x, y, text):
     w = ROOT.TLatex()
     w.SetNDC()
@@ -35,7 +23,7 @@ def write(font, size, x, y, text):
     w.DrawLatex(x, y, text)
     return w
 
-for i in range(4):
+for i,ntracks in enumerate([3,7,4,5]):
     if not is_mc and i > 2:
         h = ROOT.TFile(fns[i]).Get('h_c1v_dvv')
         h.SetTitle(';d_{VV}^{C} (cm);')
@@ -46,14 +34,16 @@ for i in range(4):
         h.Draw('hist e')
         ps.save('%s_dvvc' % ntk[i])
 
+        ebin = ebins['data%s_%s_5track' % ('10pc' if only_10pc else '100pc', year)]
+
         ec = ROOT.Double(0)
         c = h.IntegralAndError(1,40,ec)
         c1 = h.Integral(1,4)
-        ec1 = ebin1[i] * c1
+        ec1 = ebin[0] * c1
         c2 = h.Integral(5,7)
-        ec2 = ebin2[i] * c2
+        ec2 = ebin[1] * c2
         c3 = h.Integral(8,40)
-        ec3 = ebin3[i] * c3
+        ec3 = ebin[2] * c3
 
         print ntk[i]
         print ' constructed events: %7.2f +/- %5.2f, 0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (c, ec, c1, ec1, c2, ec2, c3, ec3)
@@ -109,14 +99,23 @@ for i in range(4):
     if s3 == 0:
         s3 = 1
 
+    sample = ''
+    if is_mc:
+        sample = 'MCscaled'
+    elif only_10pc:
+        sample = 'data10pc'
+    else:
+        sample = 'data100pc'
+    ebin = ebins['%s_%s_%dtrack' % (sample, year, 4 if ntracks==7 else ntracks)]
+
     ec = ROOT.Double(0)
     c = h.IntegralAndError(1,40,ec)
     c1 = h.Integral(1,4)
-    ec1 = ebin1[i] * c1
+    ec1 = ebin[0] * c1
     c2 = h.Integral(5,7)
-    ec2 = ebin2[i] * c2
+    ec2 = ebin[1] * c2
     c3 = h.Integral(8,40)
-    ec3 = ebin3[i] * c3
+    ec3 = ebin[2] * c3
 
     r = c/s
     er = (c/s) * ((ec/c)**2 + (es/s)**2)**0.5

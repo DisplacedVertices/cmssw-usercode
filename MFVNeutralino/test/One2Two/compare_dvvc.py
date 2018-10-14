@@ -1,4 +1,5 @@
 from JMTucker.Tools.ROOTTools import *
+from statmodel import ebins
 from array import array
 ROOT.TH1.AddDirectory(0)
 
@@ -32,19 +33,6 @@ ntk = ['3-track', '4-track', '5-track']
 names = ['3-track x 3-track', '4-track x 4-track', '#geq 5-track x #geq 5-track']
 
 n2v = [773., 5., 1.] if year == '2017' else [991., 8., 1.]
-
-if is_mc:
-    ebin1 = [0.0032, 0.0091, 0.0249] if year == '2017' else [1, 1, 1]
-    ebin2 = [0.0030, 0.0113, 0.0648] if year == '2017' else [1, 1, 1]
-    ebin3 = [0.0078, 0.0348, 0.2124] if year == '2017' else [1, 1, 1]
-elif only_10pc:
-    ebin1 = [1, 1, 1] if year == '2017' else [1, 1, 1]
-    ebin2 = [1, 1, 1] if year == '2017' else [1, 1, 1]
-    ebin3 = [1, 1, 1] if year == '2017' else [1, 1, 1]
-else:
-    ebin1 = [1, 1, 1] if year == '2017' else [1, 1, 1]
-    ebin2 = [1, 1, 1] if year == '2017' else [1, 1, 1]
-    ebin3 = [1, 1, 1] if year == '2017' else [1, 1, 1]
 
 colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kOrange, ROOT.kViolet, ROOT.kPink+1]
 
@@ -116,19 +104,21 @@ for i in range(3):
             write(42, 0.050, 0.560, 0.913, '38.5 fb^{-1} (13 TeV)')
         ps.save('compare_dphi_%s_%s' % (mode, ntk[i]))
 
+        ebin = ebins['data%s_%s_%strack' % ('10pc' if only_10pc else '100pc', year, ntk[i][0])]
+
         c1 = hs[0].Integral(1,4)
-        ec1 = ebin1[i] * c1
+        ec1 = ebin[0] * c1
         c2 = hs[0].Integral(5,7)
-        ec2 = ebin2[i] * c2
+        ec2 = ebin[1] * c2
         c3 = hs[0].Integral(8,40)
-        ec3 = ebin3[i] * c3
+        ec3 = ebin[2] * c3
 
         v1 = hs[1].Integral(1,4)
-        ev1 = ebin1[i] * v1
+        ev1 = ebin[0] * v1
         v2 = hs[1].Integral(5,7)
-        ev2 = ebin2[i] * v2
+        ev2 = ebin[1] * v2
         v3 = hs[1].Integral(8,40)
-        ev3 = ebin3[i] * v3
+        ev3 = ebin[2] * v3
 
         r1 = v1/c1
         er1 = (v1/c1) * ((ev1/v1)**2 + (ec1/c1)**2)**0.5
@@ -269,19 +259,21 @@ for i in range(3):
         es3 = ROOT.Double(0)
         s3 = hh.IntegralAndError(8,40,es3)
 
+        ebin = ebins['MCscaled_%s_%strack' % (year, ntk[i][0])]
+
         c1 = hs[0].Integral(1,4)
-        ec1 = ebin1[i] * c1
+        ec1 = ebin[0] * c1
         c2 = hs[0].Integral(5,7)
-        ec2 = ebin2[i] * c2
+        ec2 = ebin[1] * c2
         c3 = hs[0].Integral(8,40)
-        ec3 = ebin3[i] * c3
+        ec3 = ebin[2] * c3
 
         v1 = hs[1].Integral(1,4)
-        ev1 = ebin1[i] * v1
+        ev1 = ebin[0] * v1
         v2 = hs[1].Integral(5,7)
-        ev2 = ebin2[i] * v2
+        ev2 = ebin[1] * v2
         v3 = hs[1].Integral(8,40)
-        ev3 = ebin3[i] * v3
+        ev3 = ebin[2] * v3
 
         r1 = v1/c1
         er1 = (v1/c1) * ((ev1/v1)**2 + (ec1/c1)**2)**0.5

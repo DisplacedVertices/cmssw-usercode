@@ -1,4 +1,5 @@
 from JMTucker.Tools.ROOTTools import *
+from statmodel import ebins
 from array import array
 ROOT.TH1.AddDirectory(0)
 
@@ -11,10 +12,6 @@ set_style()
 ps = plot_saver(plot_dir('bquark_correction_%s%s' % (year, '' if mode == '' else '_%s'%mode)), size=(700,700), root=True, log=False)
 
 ntk = ['3-track', '4-track', '5-track', '4-track-3-track']
-
-ebin1 = [0.0070, 0.0193, 0.0527, 0.0193] if year == '2017' else [1, 1, 1, 1]
-ebin2 = [0.0064, 0.0243, 0.1388, 0.0243] if year == '2017' else [1, 1, 1, 1]
-ebin3 = [0.0168, 0.0733, 0.4465, 0.0733] if year == '2017' else [1, 1, 1, 1]
 
 x = []
 ex = []
@@ -79,19 +76,21 @@ for i,ntracks in enumerate([3,4,5,7]):
     h.Draw()
     ps.save('bquark_correction_%s' % ntk[i])
 
+    ebin = ebins['MCeffective_%s_%dtrack' % (year, 4 if ntracks==7 else ntracks)]
+
     c1 = h1.Integral(1,4)
-    ec1 = ebin1[i] * c1
+    ec1 = ebin[0] * c1
     c2 = h1.Integral(5,7)
-    ec2 = ebin2[i] * c2
+    ec2 = ebin[1] * c2
     c3 = h1.Integral(8,40)
-    ec3 = ebin3[i] * c3
+    ec3 = ebin[2] * c3
 
     v1 = h2.Integral(1,4)
-    ev1 = ebin1[i] * v1
+    ev1 = ebin[0] * v1
     v2 = h2.Integral(5,7)
-    ev2 = ebin2[i] * v2
+    ev2 = ebin[1] * v2
     v3 = h2.Integral(8,40)
-    ev3 = ebin3[i] * v3
+    ev3 = ebin[2] * v3
 
     r1 = v1/c1
     er1 = (v1/c1) * ((ev1/v1)**2 + (ec1/c1)**2)**0.5

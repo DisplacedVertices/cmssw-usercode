@@ -1,4 +1,5 @@
 from JMTucker.Tools.ROOTTools import *
+from statmodel import ebins
 from array import array
 ROOT.TH1.AddDirectory(0)
 
@@ -9,15 +10,6 @@ set_style()
 ps = plot_saver('../plots/bkgest/v15_v5/efficiency_correction%s_%s' % ('' if is_mc else '_data', year), size=(700,700), root=False, log=False)
 
 ntk = ['3-track', '4-track', '5-track', '4-track-3-track']
-
-if is_mc:
-    ebin1 = [0.0032, 0.0091, 0.0249, 0.0091] if year == '2017' else [1, 1, 1, 1]
-    ebin2 = [0.0030, 0.0113, 0.0648, 0.0113] if year == '2017' else [1, 1, 1, 1]
-    ebin3 = [0.0078, 0.0348, 0.2124, 0.0348] if year == '2017' else [1, 1, 1, 1]
-else:                                                                                                                                                      
-    ebin1 = [1, 1, 1, 1] if year == '2017' else [1, 1, 1, 1]
-    ebin2 = [1, 1, 1, 1] if year == '2017' else [1, 1, 1, 1]
-    ebin3 = [1, 1, 1, 1] if year == '2017' else [1, 1, 1, 1]
 
 def write(font, size, x, y, text):
     w = ROOT.TLatex()
@@ -71,19 +63,21 @@ for i,ntracks in enumerate([3,4,5,7]):
     h.Draw()
     ps.save('efficiency_correction_%s' % ntk[i])
 
+    ebin = ebins['%s_%s_%dtrack' % ('MCscaled' if is_mc else 'data100pc', year, 4 if ntracks==7 else ntracks)]
+
     c1 = h1.Integral(1,4)
-    ec1 = ebin1[i] * c1
+    ec1 = ebin[0] * c1
     c2 = h1.Integral(5,7)
-    ec2 = ebin2[i] * c2
+    ec2 = ebin[1] * c2
     c3 = h1.Integral(8,40)
-    ec3 = ebin3[i] * c3
+    ec3 = ebin[2] * c3
 
     v1 = h2.Integral(1,4)
-    ev1 = ebin1[i] * v1
+    ev1 = ebin[0] * v1
     v2 = h2.Integral(5,7)
-    ev2 = ebin2[i] * v2
+    ev2 = ebin[1] * v2
     v3 = h2.Integral(8,40)
-    ev3 = ebin3[i] * v3
+    ev3 = ebin[2] * v3
 
     r1 = v1/c1
     er1 = (v1/c1) * ((ev1/v1)**2 + (ec1/c1)**2)**0.5
