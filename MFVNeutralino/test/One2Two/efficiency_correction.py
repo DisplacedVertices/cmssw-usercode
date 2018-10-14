@@ -63,7 +63,7 @@ for i,ntracks in enumerate([3,4,5,7]):
     h.Draw()
     ps.save('efficiency_correction_%s' % ntk[i])
 
-    ebin = ebins['%s_%s_%dtrack' % ('MCscaled' if is_mc else 'data100pc', year, 4 if ntracks==7 else ntracks)]
+    ebin = ebins['%s_%s_%dtrack' % ('MCeffective' if is_mc else 'data100pc', year, 4 if ntracks==7 else ntracks)]
 
     c1 = h1.Integral(1,4)
     ec1 = ebin[0] * c1

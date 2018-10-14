@@ -259,7 +259,7 @@ for i in range(3):
         es3 = ROOT.Double(0)
         s3 = hh.IntegralAndError(8,40,es3)
 
-        ebin = ebins['MCscaled_%s_%strack' % (year, ntk[i][0])]
+        ebin = ebins['MCeffective_%s_%strack' % (year, ntk[i][0])]
 
         c1 = hs[0].Integral(1,4)
         ec1 = ebin[0] * c1

@@ -101,7 +101,7 @@ for i,ntracks in enumerate([3,7,4,5]):
 
     sample = ''
     if is_mc:
-        sample = 'MCscaled'
+        sample = 'MCeffective'
     elif only_10pc:
         sample = 'data10pc'
     else:
