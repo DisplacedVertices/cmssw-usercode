@@ -1,0 +1,8 @@
+Here is the procedure for constructing the background template and estimating the associated statistical and systematic uncertainties.
+1) Determine deltaphi input (fit_jetpairdphi.py).
+2) Determine efficiency input (vertexer_eff.py).  Set ntkseeds=False for default method; set ntkseeds=True for variation.
+3) Determine statistical uncertainties (treesprint.py, statmodel.cc, Makefile, statmodel.sh, statmodel.jdl, statmodel.py).  See statmodel.cc for documentation.
+4) Determine bquark input (2v_from_jets.cc, Makefile, treesprint.py, utilities.py, bquark_correction.py).  Set mode='' for default method; set mode='ratio1' for variation.
+5) Construct background template (2v_from_jets.cc, Makefile).  See 2v_from_jets.cc for documentation.
+6) Test background template construction method (closure.py).
+7) Determine systematic uncertainties (compare_dvvc.py).

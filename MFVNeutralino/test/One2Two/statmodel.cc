@@ -25,6 +25,8 @@
  * Calculate the effective n1v in MC: "n1v" = (n1v/en1v)^2.
  * For example, if n1v = 826.11 +/- 61.39, then "n1v" = (826.11 / 61.39)**2 = 181.
  *
+ * When the jobs are completed, calculate the fractional statistical uncertainties and put the resulting values in statmodel.py.
+ *
  *
  * How statmodel.cc works:
  *  - Model the dBV distribution with a function:
