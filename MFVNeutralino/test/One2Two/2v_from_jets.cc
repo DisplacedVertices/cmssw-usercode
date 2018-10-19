@@ -571,8 +571,6 @@ int main(int argc, const char* argv[]) {
     return 0;
   }
 
-  construct_dvvc(pars, "2v_from_jets_2017_5track_default_v20mp2.root");
-
   for (const char* year : {"2017"}) { //, "2018", "2017p8"}) {
     for (int ntracks : {3, 4, 5, 7}) {
       ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks);
@@ -587,7 +585,7 @@ int main(int argc, const char* argv[]) {
       construct_dvvc(pars2.vary_bquarks(true),                  TString::Format("2v_from_jets_%s_%dtrack_vary_bquarks_%s.root", year, ntracks, version));
     }
   }
-  /*
+/*
   for (const char* year : {"2017", "2018", "2017p8", "2017B", "2017C", "2017D", "2017E", "2017F"}) {
     for (int ntracks : {3, 4, 5, 7}) {
       ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks).is_mc(false).only_10pc(true);

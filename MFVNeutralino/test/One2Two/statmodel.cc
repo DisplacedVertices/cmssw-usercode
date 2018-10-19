@@ -10,7 +10,7 @@
  *     2       0.2063 +-       0.0001        0.2053 +-       0.0005        0.0010 +-       0.0005        0.0133 +-       0.0001
  *     3       0.0600 +-       0.0001        0.0598 +-       0.0002        0.0002 +-       0.0003        0.0127 +-       0.0001
  *
- * The statistical uncertainty is taken as the root-mean-square of yields in an ensemble of simulated pseudo-data sets.
+ * The statistical uncertainty is taken as the root-mean-square of yields in an ensemble of simulated pseudodata sets.
  * To compute the fractional statistical uncertainty, divide rms/true for each bin.
  * For example, in this case the fractional statistical uncertainties are: bin1 0.0183/0.7349 = 0.0249; bin2 0.0133/0.2053 = 0.0648; bin3 0.0127/0.0598 = 0.2124.
  *
