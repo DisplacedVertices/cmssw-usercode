@@ -39,3 +39,7 @@
   per line.  Then run split_by_era.sh.  It handles one year at a time.
   Can compare /AOD to /MINIAOD this way to see that all runs made it
   into miniaod.
+
+  When done, use jsonoverlaps to find out if the datasets have
+  overlaps. (Has happened before, e.g. for 2018A2 and 3 PromptReco
+  https://hypernews.cern.ch/HyperNews/CMS/get/physTools/3610.html .)
