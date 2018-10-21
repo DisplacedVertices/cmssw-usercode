@@ -17,12 +17,12 @@ tfileservice(process, 'eff.root')
 global_tag(process, which_global_tag(cmssw_settings))
 #want_summary(process)
 #report_every(process, 1)
-max_events(process, 10000)
+max_events(process, -1)
 input_files(process, {
     (2017,True): '/uscmst1b_scratch/lpc1/3DayLifetime/tucker/itch/store/mc/RunIIFall17MiniAOD/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/20000/FA596B3F-C303-E811-B69C-20CF3027A6DC.root',
     (2017,False):'/uscmst1b_scratch/lpc1/3DayLifetime/tucker/itch/store/data/Run2017F/SingleMuon/MINIAOD/17Nov2017-v1/70001/DC73F8F1-A5EA-E711-A5F3-141877410B4D.root',
-    (2018,True): '/store/mc/RunIIFall18MiniAOD/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v12-v1/270000/DD8D39DE-C4B3-D241-99CC-79AF11E2EDE9.root',
-    (2018,False):'/store/data/Run2018D/SingleMuon/MINIAOD/PromptReco-v2/000/324/209/00000/750CAC49-8C92-8C44-84E9-D4AEF8F6852E.root',
+    (2018,True): '/uscmst1b_scratch/lpc1/3DayLifetime/tucker/itch/store/mc/RunIIFall18MiniAOD/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v12-v1/270000/DD8D39DE-C4B3-D241-99CC-79AF11E2EDE9.root',
+    (2018,False):'/uscmst1b_scratch/lpc1/3DayLifetime/tucker/itch/store/data/Run2018D/SingleMuon/MINIAOD/PromptReco-v2/000/321/457/00000/4402D66D-E0A5-E811-8A35-FA163EBDCF4F.root',
     }[(year, cmssw_settings.is_mc)])
 
 process.load('JMTucker.Tools.MCStatProducer_cff')
