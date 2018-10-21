@@ -2,6 +2,7 @@
 #include <cassert>
 #include <cmath>
 #include "TColor.h"
+#include "TError.h"
 #include "TGraphAsymmErrors.h"
 #include "TH1.h"
 #include "TPaveStats.h"
@@ -133,7 +134,7 @@ namespace jmt {
     gStyle->SetOptFit(2222);
     gStyle->SetPadTickX(1);
     gStyle->SetPadTickY(1);
-    //gROOT->ProcessLine("gErrorIgnoreLevel = kWarning;"); // this line takes an entire second to run!
+    gErrorIgnoreLevel = kWarning;
   }
 
   TH1D* shift_hist(const TH1D* h, const int shift) {
