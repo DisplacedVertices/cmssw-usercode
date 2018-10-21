@@ -356,11 +356,11 @@ def set_events(process, events, run=None):
         raise ValueError('expected either list of (lumi,event) or (run,lumi,event) in events')
     process.source.eventsToProcess = cms.untracked.VEventRange(*[cms.untracked.EventRange(x[0],x[1],x[2], x[0],x[1],x[2]) for x in events])
 
-def set_lumis_to_process_from_json(process, json):
+def set_lumis(process, *args, **kwargs):
     '''What CRAB does when you use lumi_mask.'''
 
     from FWCore.PythonUtilities.LumiList import LumiList
-    process.source.lumisToProcess = LumiList(json).getVLuminosityBlockRange()
+    process.source.lumisToProcess = LumiList(*args, **kwargs).getVLuminosityBlockRange()
 
 def set_seeds(process, seed=12191982, size=2**24):
     '''Set all the seeds for the RandomNumberGeneratorService in a
