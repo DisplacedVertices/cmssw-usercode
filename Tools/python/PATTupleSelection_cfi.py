@@ -7,7 +7,8 @@ import FWCore.ParameterSet.Config as cms
 # electron H/E cut uses fixed rho number, MFVEventProducer does it right
 
 jet_cuts = (
-    'abs(eta) < 2.7',
+    'pt > 20',
+    'abs(eta) < 2.5',
     'numberOfDaughters > 1',
     'neutralHadronEnergyFraction < 0.90',
     'neutralEmEnergyFraction < 0.90',
