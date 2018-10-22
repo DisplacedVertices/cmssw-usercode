@@ -233,7 +233,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   } else if (p.ntracks() == 5) {
     if (p.year() == "2018")        { bquark_correction[0] = 0.92; bquark_correction[1] = 1.25; bquark_correction[2] = 1.57; }
     else if (p.year() == "2017p8") { bquark_correction[0] = 0.92; bquark_correction[1] = 1.25; bquark_correction[2] = 1.57; }
-    else                           { bquark_correction[0] = 0.94; bquark_correction[1] = 1.19; bquark_correction[2] = 1.18; }
+    else                           { bquark_correction[0] = 0.95; bquark_correction[1] = 1.22; bquark_correction[2] = 0.96; }
   } else if (p.ntracks() == 7) {
     if (p.year() == "2018")        { bquark_correction[0] = 0.93; bquark_correction[1] = 1.09; bquark_correction[2] = 1.14; }
     else if (p.year() == "2017p8") { bquark_correction[0] = 0.93; bquark_correction[1] = 1.09; bquark_correction[2] = 1.14; }
@@ -246,15 +246,15 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
     if (p.ntracks() == 3) {
       if (p.year() == "2018")        { bquark_correction[0] = 0.87; bquark_correction[1] = 1.14; bquark_correction[2] = 1.18; }
       else if (p.year() == "2017p8") { bquark_correction[0] = 0.87; bquark_correction[1] = 1.14; bquark_correction[2] = 1.18; }
-      else                           { bquark_correction[0] = 0.87; bquark_correction[1] = 1.14; bquark_correction[2] = 1.18; }
+      else                           { bquark_correction[0] = 0.89; bquark_correction[1] = 1.13; bquark_correction[2] = 1.10; }
     } else if (p.ntracks() == 4) {
       if (p.year() == "2018")        { bquark_correction[0] = 0.87; bquark_correction[1] = 1.21; bquark_correction[2] = 1.35; }
       else if (p.year() == "2017p8") { bquark_correction[0] = 0.87; bquark_correction[1] = 1.21; bquark_correction[2] = 1.35; }
-      else                           { bquark_correction[0] = 0.87; bquark_correction[1] = 1.21; bquark_correction[2] = 1.35; }
+      else                           { bquark_correction[0] = 0.89; bquark_correction[1] = 1.12; bquark_correction[2] = 1.27; }
     } else if (p.ntracks() == 5) {
       if (p.year() == "2018")        { bquark_correction[0] = 0.86; bquark_correction[1] = 1.43; bquark_correction[2] = 1.95; }
       else if (p.year() == "2017p8") { bquark_correction[0] = 0.86; bquark_correction[1] = 1.43; bquark_correction[2] = 1.95; }
-      else                           { bquark_correction[0] = 0.86; bquark_correction[1] = 1.43; bquark_correction[2] = 1.95; }
+      else                           { bquark_correction[0] = 0.93; bquark_correction[1] = 1.31; bquark_correction[2] = 0.91; }
     } else if (p.ntracks() == 7) {
       if (p.year() == "2018")        { bquark_correction[0] = 0.87; bquark_correction[1] = 1.17; bquark_correction[2] = 1.24; }
       else if (p.year() == "2017p8") { bquark_correction[0] = 0.87; bquark_correction[1] = 1.17; bquark_correction[2] = 1.24; }
