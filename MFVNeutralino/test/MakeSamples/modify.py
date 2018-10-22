@@ -1,15 +1,30 @@
 import FWCore.ParameterSet.Config as cms
 
+class _find_tune_settings(object):
+    def __init__(self, process):
+        l = []
+        for name in process.generator.PythiaParameters.parameterSets:
+            x = getattr(process.generator.PythiaParameters, name)
+            for y in x:
+                if y.strip().startswith('Tune:pp'):
+                    l.append((name, x))
+                    break
+        if len(l) != 1:
+            raise ValueError('%i lists found' % len(l))
+        self.name, self.value = l[0]
+
 def set_pdf(process, pdf):
-    process.generator.PythiaParameters.tuneSettings.append('PDF:pSet = %s' % pdf)
+    _find_tune_settings(process).value.append('PDF:pSet = %s' % pdf)
 
 def set_scales(process, which):
     combinations = [(1,1), (1,2), (1,0.5), (2,1), (2,2), (0.5,1), (0.5,0.5)]
     if which < 0 or which >= len(combinations):
         raise ValueError('bad which %i' % which)
     renorm, factor = combinations[which]
-    process.generator.PythiaParameters.tuneSettings.append('SigmaProcess:renormMultFac = %.1f' % renorm)
-    process.generator.PythiaParameters.tuneSettings.append('SigmaProcess:factorMultFac = %.1f' % factor)
+    _find_tune_settings(process).value += [
+        'SigmaProcess:renormMultFac = %.1f' % renorm,
+        'SigmaProcess:factorMultFac = %.1f' % factor,
+        ]
 
 def set_minbias(process):
     process.generator.PythiaParameters.processParameters = cms.vstring(
@@ -124,7 +139,7 @@ def set_energy(process, energy):
     process.generator.comEnergy = energy # JMTBAD does nothing if LHE gridpacks being used
 
 def set_tune(process, tune):
-    process.generator.PythiaParameters.tuneSettings = cms.vstring('Tune:pp %i' % tune)
+    _find_tune_settings(process).value.append('Tune:pp %i' % tune)
 
 def set_gluino_tau0(process, tau0):
     set_particle_tau0(process, 1000021, tau0)
