@@ -5,7 +5,7 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.Tools.Samples import *
 
-version = '2017v1'
+version = '2017p8v1'
 zoom = False #(0.98,1.005)
 save_more = True
 data_only = False
@@ -44,12 +44,12 @@ data_f = ROOT.TFile(data_fn)
 if data_only:
     bkg_samples, sig_samples = [], []
 else:
-    if year == 2017:
-        bkg_samples = [ttbar_2017, wjetstolnu_2017, dyjetstollM50_2017, dyjetstollM10_2017]
-        sig_samples  = [getattr(Samples, 'mfv_neu_tau01000um_M%04i_2017' % m) for m in (400, 800, 1200, 1600)] + [Samples.mfv_neu_tau10000um_M0800_2017]
+    if year == 2017 or year == 2018:
+        bkg_samples = [ttbar_2017, wjetstolnu_2017, dyjetstollM50_2017] #, dyjetstollM10_2017]
+        sig_samples  = [getattr(Samples, 'mfv_neu_tau001000um_M%04i_2017' % m) for m in (400, 800, 1200, 1600)] + [Samples.mfv_neu_tau010000um_M0800_2017]
         #sig_samples += [getattr(Samples, 'mfv_ddbar_tau01000um_M%04i' % m) for m in (300, 400, 800, 1200, 1600)] + [Samples.mfv_ddbar_tau10000um_M0800]
-    if use_qcd:
-        bkg_samples.append(qcdmupt15_2017)
+        if use_qcd:
+            bkg_samples.append(qcdmupt15_2017)
 
 n_bkg_samples = len(bkg_samples)
 for sample in bkg_samples:
@@ -59,6 +59,8 @@ for sample in bkg_samples:
 for sample in sig_samples:
     sample.fn = os.path.join(root_dir, sample.name + '.root')
     sample.f = ROOT.TFile(sample.fn)
+
+########################################################################
 
 kinds = ['']
 ns = ['h_jet_ht']
@@ -121,6 +123,19 @@ def get(f, kind, n):
         rebin = rebin_ht
     return rebin(f.Get(kind + '%s/%s' % (num_dir, n))), rebin(f.Get(kind + '%s/%s' % (den_dir, n)))
 
+def num_den_draw(num, den):
+    x = []
+    for h in num, den:
+        h2 = h.Clone(num.GetName() + '_drawscaled')
+        h2.Scale(1., 'width')
+        x.append(h2)
+    num, den = x
+    num.SetFillColor(den.GetLineColor())
+    num.SetFillStyle(3004)
+    den.Draw('e')
+    num.Draw('hist same')
+    return num, den
+
 ########################################################################
 
 for kind in kinds:
@@ -142,8 +157,8 @@ for kind in kinds:
             num, den = sample.num, sample.den = get(sample.f, kind, n)
 
             if save_more:
-                den.Draw('hist text00')
-                ps.save(subsubname + '_den',log=True)
+                x = num_den_draw(num, den)
+                ps.save(subsubname + '_num_den',log=True)
 
             if den.Integral():
                 rat = histogram_divide(num, den)
@@ -157,6 +172,9 @@ for kind in kinds:
                 res = rat.Fit(fcn, 'RQS')
                 reses.append(res)
                 if save_more:
+                    rat.SetTitle('')
+                    ps.c.Update()
+                    move_stat_box(rat, 'inf' if zoom else (0.518, 0.133, 0.866, 0.343))
                     ps.save(subsubname)
             else:
                 reses.append(None)
@@ -226,6 +244,10 @@ for kind in kinds:
 
         print 'data' #, data_num.GetEntries(), data_den.GetEntries()
         data_num, data_den = get(data_f, kind, n)
+        if save_more:
+            x = num_den_draw(data_num, data_den)
+            ps.save(subname + '_data_num_den', log=True)
+
         ib = data_num.FindBin(lump_lower)
         ni = data_num.Integral(ib, 10000)
         di = data_den.Integral(ib, 10000)
