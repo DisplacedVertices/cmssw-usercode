@@ -67,6 +67,9 @@ process.genstepfilter.triggerConditions = cms.vstring('generation_step')
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, dynamicconf.globaltag, '')
 
+from Configuration.Generator.Pythia8CommonSettings_cfi import pythia8CommonSettingsBlock
+from Configuration.Generator.MCTunes2017.PythiaCP5Settings_cfi import pythia8CP5SettingsBlock
+
 process.generator = cms.EDFilter('Pythia8HadronizerFilter' if fromlhe else 'Pythia8GeneratorFilter',
     comEnergy = cms.double(13000.0),
     filterEfficiency = cms.untracked.double(1.0),
@@ -74,44 +77,14 @@ process.generator = cms.EDFilter('Pythia8HadronizerFilter' if fromlhe else 'Pyth
     pythiaHepMCVerbosity = cms.untracked.bool(False),
     pythiaPylistVerbosity = cms.untracked.int32(0),
     PythiaParameters = cms.PSet(
+        pythia8CommonSettingsBlock,
+        pythia8CP5SettingsBlock,
         parameterSets = cms.vstring(
             'pythia8CommonSettings',
-            'tuneSettings',
+            'pythia8CP5Settings',
             'processParameters'
             ),
         processParameters = cms.vstring(),
-        tuneSettings = cms.vstring(
-            # CP5
-            'Tune:pp 14',
-            'Tune:ee 7',
-            'MultipartonInteractions:ecmPow=0.03344',
-            'PDF:pSet=20',
-            'MultipartonInteractions:bProfile=2',
-            'MultipartonInteractions:pT0Ref=1.41',
-            'MultipartonInteractions:coreRadius=0.7634',
-            'MultipartonInteractions:coreFraction=0.63',
-            'ColourReconnection:range=5.176',
-            'SigmaTotal:zeroAXB=off',
-            'SpaceShower:alphaSorder=2',
-            'SpaceShower:alphaSvalue=0.118',
-            'SigmaProcess:alphaSvalue=0.118',
-            'SigmaProcess:alphaSorder=2',
-            'MultipartonInteractions:alphaSvalue=0.118',
-            'MultipartonInteractions:alphaSorder=2',
-            'TimeShower:alphaSorder=2',
-            'TimeShower:alphaSvalue=0.118',
-            ),
-        pythia8CommonSettings = cms.vstring(
-            'Tune:preferLHAPDF = 2',
-            'Main:timesAllowErrors = 10000',
-            'Check:epTolErr = 0.01',
-            'Beams:setProductionScalesFromLHEF = off',
-            'SLHA:keepSM = on',
-            'SLHA:minMassSM = 1000.',
-            'ParticleDecays:limitTau0 = on',
-            'ParticleDecays:tau0Max = 10',
-            'ParticleDecays:allowPhotonRadiation = on'
-            ),
         ),
     )
 
