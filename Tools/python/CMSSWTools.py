@@ -356,11 +356,11 @@ def set_events(process, events, run=None):
         raise ValueError('expected either list of (lumi,event) or (run,lumi,event) in events')
     process.source.eventsToProcess = cms.untracked.VEventRange(*[cms.untracked.EventRange(x[0],x[1],x[2], x[0],x[1],x[2]) for x in events])
 
-def set_lumis_to_process_from_json(process, json):
+def set_lumis(process, *args, **kwargs):
     '''What CRAB does when you use lumi_mask.'''
 
     from FWCore.PythonUtilities.LumiList import LumiList
-    process.source.lumisToProcess = LumiList(json).getVLuminosityBlockRange()
+    process.source.lumisToProcess = LumiList(*args, **kwargs).getVLuminosityBlockRange()
 
 def set_seeds(process, seed=12191982, size=2**24):
     '''Set all the seeds for the RandomNumberGeneratorService in a
@@ -412,8 +412,13 @@ def which_global_tag(settings=None):
         settings = CMSSWSettings()
     if settings.year == 2017:
         if settings.is_mc:
-            return '94X_mc2017_realistic_v10'
+            return '94X_mc2017_realistic_v10' # JMTBAD v14 or v16
         else:
-            return '94X_dataRun2_ReReco_EOY17_v6'
+            return '94X_dataRun2_ReReco_EOY17_v6' # JMTBAD maybe should be 94X_dataRun2_v10 from looking in https://cms-conddb.cern.ch/cmsDbBrowser/diff/Prod/gts/94X_dataRun2_ReReco_EOY17_v6/94X_dataRun2_v10
+    elif settings.year == 2018:
+        if settings.is_mc:
+            return '102X_upgrade2018_realistic_v12'
+        else:
+            return '102X_dataRun2_Prompt_v11'
     else:
         raise ValueError('what year is it')

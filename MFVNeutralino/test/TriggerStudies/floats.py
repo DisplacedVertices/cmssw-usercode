@@ -5,55 +5,41 @@ from JMTucker.Tools.Year import year
 cmssw_settings = CMSSWSettings()
 cmssw_settings.is_mc = True
 
-max_events(process, -1)
-sample_files(process, 'wjetstolnu_2017', 'miniaod', 2)
-tfileservice(process, 'triggerfloats.root')
+#tfileservice(process, 'triggerfloats.root')
 global_tag(process, which_global_tag(cmssw_settings))
 want_summary(process)
+max_events(process, -1)
+input_files(process, {
+    (2017,True): '/uscmst1b_scratch/lpc1/3DayLifetime/tucker/itch/store/mc/RunIIFall17MiniAOD/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/20000/FA596B3F-C303-E811-B69C-20CF3027A6DC.root',
+    (2017,False):'/uscmst1b_scratch/lpc1/3DayLifetime/tucker/itch/store/data/Run2017F/SingleMuon/MINIAOD/17Nov2017-v1/70001/DC73F8F1-A5EA-E711-A5F3-141877410B4D.root',
+    (2018,True): '/uscmst1b_scratch/lpc1/3DayLifetime/tucker/itch/store/mc/RunIIFall18MiniAOD/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v12-v1/270000/DD8D39DE-C4B3-D241-99CC-79AF11E2EDE9.root',
+    #(2018,False):'/uscmst1b_scratch/lpc1/3DayLifetime/tucker/itch/store/data/Run2018D/SingleMuon/MINIAOD/PromptReco-v2/000/321/457/00000/4402D66D-E0A5-E811-8A35-FA163EBDCF4F.root',
+    (2018,False):'/uscmst1b_scratch/lpc1/3DayLifetime/tucker/itch/store/data/Run2018A/SingleMuon/MINIAOD/06Jun2018-v1/40000/60A09696-AD76-E811-BA6E-E0071B6CAD20.root',
+    }[(year, cmssw_settings.is_mc)])
 
+process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
+
 process.mfvTriggerFloats.jets_src = 'slimmedJets'
-#process.mfvTriggerFloats.prints = 1
+process.mfvTriggerFloats.prints = 1
 
-if 0:
-    process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
-    process.p = cms.Path(process.mfvTriggerFilter * process.mfvTriggerFloats)
-else:
-    process.p = cms.Path(process.mfvTriggerFloats)
+process.p = cms.Path(process.mfvTriggerFilterJetsOnly * process.mfvTriggerFloats)
 
-if 0:
-    process.load('JMTucker.MFVNeutralino.TriggerFloatsFilter_cfi')
-    #process.mfvTriggerFloatsFilter.ht_cut = 1000
-    process.mfvTriggerFloatsFilter.myhttwbug_m_l1htt_cut = 0.1
-    process.p *= process.mfvTriggerFloatsFilter
-
-    process.mfvTriggerFloatsForPrints = process.mfvTriggerFloats.clone(prints = 1)
-    process.p *= process.mfvTriggerFloatsForPrints
-
-    process.plots = cms.EDAnalyzer('MFVTriggerEfficiency',
-                                   use_weight = cms.int32(0),
-                                   require_hlt = cms.int32(-1),
-                                   require_l1 = cms.int32(-1),
-                                   require_muon = cms.bool(False),
-                                   require_4jets = cms.bool(False),
-                                   require_ht = cms.double(-1),
-                                   muons_src = cms.InputTag('slimmedMuons'),
-                                   muon_cut = cms.string(''),
-                                   genjets_src = cms.InputTag(''),
-                                   )
-    process.p *= process.plots
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples 
-    samples = Samples.data_samples
-    for sample in samples:
-        sample.lumis_per = 50
-        sample.json = '../jsons/ana_2015p6.json'
-
     from JMTucker.Tools.MetaSubmitter import *
-    from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
-    cs = CRABSubmitter('TriggerFloats_16_trigfilt',
-                       pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier),
+
+    if year == 2017:
+        samples = Samples.data_samples_2017
+    elif year == 2018:
+        samples = Samples.data_samples_2018
+
+    dataset = 'miniaod'
+    set_splitting(samples, dataset, 'default', json_path('ana_2017p8.json'), 50)
+
+    cs = CRABSubmitter('TriggerFloats2017p8',
+                       pset_modifier = is_mc_modifier,
                        job_control_from_sample = True,
                        dataset = 'miniaod',
                        )

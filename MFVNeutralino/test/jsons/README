@@ -1,14 +1,23 @@
+- run brilcalc on lxplus. set up with
+  https://cms-service-lumi.web.cern.ch/cms-service-lumi/brilwsdoc.html
+
+  and git for my working dir with scripts:
+  https://github.com/jordantucker/mybrilcalc
+
 - since /afs was unmounted @ lpc, symlinks replaced with copies:
 
   2015.json -> /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Reprocessing/Cert_13TeV_16Dec2015ReReco_Collisions15_25ns_JSON_Silver_v2.txt
   2016.json -> /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/ReReco/Final/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt
   2017.json -> /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/ReReco/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1.txt
+  2018.json -> /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/PromptReco/Cert_314472-324209_13TeV_PromptReco_Collisions18_JSON.txt   # NB prompt reco and not yet for the full year
 
-- "2015p6" means add the corresponding 2015 and 2016 jsons.
+- "2017p8" is the addition of both jsons, e.g.
+  compareJSON.py --or ana_201[78].json > ana_2017p8.json
 
 - "ana_".json are the hlt-menu-ok and prescale-ne-1 dropped versions.
   They are produced by first dumping the by-ls int. lumi csvs with
-  brilcalc, with and without the --hltpath argument.
+  brilcalc, with and without the --hltpath argument. See
+  drop_prescaled.py for example commands.
 
   drop_prescaled.py compares the lumi reported with and without the
   HLT filter, since brilcalc applies prescales in the former case.
@@ -31,3 +40,7 @@
   per line.  Then run split_by_era.sh.  It handles one year at a time.
   Can compare /AOD to /MINIAOD this way to see that all runs made it
   into miniaod.
+
+  When done, use jsonoverlaps to find out if the datasets have
+  overlaps. (Has happened before, e.g. for 2018A2 and 3 PromptReco
+  https://hypernews.cern.ch/HyperNews/CMS/get/physTools/3610.html .)

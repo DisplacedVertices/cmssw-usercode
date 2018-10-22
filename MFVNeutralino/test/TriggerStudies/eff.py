@@ -7,7 +7,7 @@ from JMTucker.Tools.Year import year
 cmssw_settings = CMSSWSettings()
 cmssw_settings.is_mc = True
 
-version = '2017v1'
+version = '2017p8v1'
 batch_name = 'TrigEff%s' % version
 
 mu_thresh_hlt = 27
@@ -17,10 +17,12 @@ tfileservice(process, 'eff.root')
 global_tag(process, which_global_tag(cmssw_settings))
 #want_summary(process)
 #report_every(process, 1)
-max_events(process, 10000)
+max_events(process, -1)
 input_files(process, {
     (2017,True): '/uscmst1b_scratch/lpc1/3DayLifetime/tucker/itch/store/mc/RunIIFall17MiniAOD/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/20000/FA596B3F-C303-E811-B69C-20CF3027A6DC.root',
     (2017,False):'/uscmst1b_scratch/lpc1/3DayLifetime/tucker/itch/store/data/Run2017F/SingleMuon/MINIAOD/17Nov2017-v1/70001/DC73F8F1-A5EA-E711-A5F3-141877410B4D.root',
+    (2018,True): '/uscmst1b_scratch/lpc1/3DayLifetime/tucker/itch/store/mc/RunIIFall18MiniAOD/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v12-v1/270000/DD8D39DE-C4B3-D241-99CC-79AF11E2EDE9.root',
+    (2018,False):'/uscmst1b_scratch/lpc1/3DayLifetime/tucker/itch/store/data/Run2018D/SingleMuon/MINIAOD/PromptReco-v2/000/321/457/00000/4402D66D-E0A5-E811-8A35-FA163EBDCF4F.root',
     }[(year, cmssw_settings.is_mc)])
 
 process.load('JMTucker.Tools.MCStatProducer_cff')
@@ -79,10 +81,12 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if year == 2017:
         samples = Samples.auxiliary_data_samples_2017 + Samples.leptonic_samples_2017 + Samples.ttbar_samples_2017
         masses = (400, 800, 1200, 1600)
-        samples += [getattr(Samples, 'mfv_neu_tau01000um_M%04i_2017' % m) for m in masses] + [Samples.mfv_neu_tau10000um_M0800_2017]
+        samples += [getattr(Samples, 'mfv_neu_tau001000um_M%04i_2017' % m) for m in masses] + [Samples.mfv_neu_tau010000um_M0800_2017]
+    elif year == 2018:
+        samples = Samples.auxiliary_data_samples_2018
     
     dataset = 'miniaod'
-    set_splitting(samples, dataset, 'default', json_path('ana_2017.json'), 50)
+    set_splitting(samples, dataset, 'default', json_path('ana_2017p8.json'), 50)
 
     ms = MetaSubmitter(batch_name)
     ms.common.dataset = dataset

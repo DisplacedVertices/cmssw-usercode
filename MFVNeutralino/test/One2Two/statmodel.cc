@@ -201,15 +201,15 @@ int main(int, char**) {
   jmt::ConfigFromEnv env("sm", true);
 
                                        // 2017                                2018                     2017+2018
-  const double default_n1v[4][3][6] = {{{ -1, -1, -1, 104166, 10097, 826 }, { -1, -1, -1, 1, 1, 1 }, { -1, -1, -1, 104166, 10097,  826 }},  //MC scaled to int. lumi.
-                                       {{ -1, -1, -1,  22501,  2245, 181 }, { -1, -1, -1, 1, 1, 1 }, { -1, -1, -1,  22501,  2245,  181 }},  //MC effective
-                                       {{ -1, -1, -1,      1,     1,   1 }, { -1, -1, -1, 1, 1, 1 }, { -1, -1, -1,      1,     1,    1 }},  //data 10%
-                                       {{ -1, -1, -1,      1,     1,   1 }, { -1, -1, -1, 1, 1, 1 }, { -1, -1, -1,      1,     1,    1 }}}; //data 100%
+  const double default_n1v[4][3][6] = {{{ 104166, 10097, 826 }, { 1, 1, 1 }, { 104166, 10097,  826 }},  //MC scaled to int. lumi.
+                                       {{  22501,  2245, 181 }, { 1, 1, 1 }, {  22501,  2245,  181 }},  //MC effective
+                                       {{      1,     1,   1 }, { 1, 1, 1 }, {      1,     1,    1 }},  //data 10%
+                                       {{      1,     1,   1 }, { 1, 1, 1 }, {      1,     1,    1 }}}; //data 100%
 
-  const double default_n2v[4][3][6] = {{{ -1, -1, -1,    773,     5,   1 }, { -1, -1, -1, 1, 1, 1 }, { -1, -1, -1,    773,     5,    1 }},
-                                       {{ -1, -1, -1,    184,     8,   1 }, { -1, -1, -1, 1, 1, 1 }, { -1, -1, -1,    184,     8,    1 }},
-                                       {{ -1, -1, -1,      1,     1,   1 }, { -1, -1, -1, 1, 1, 1 }, { -1, -1, -1,      1,     1,    1 }},
-                                       {{ -1, -1, -1,      1,     1,   1 }, { -1, -1, -1, 1, 1, 1 }, { -1, -1, -1,      1,     1,    1 }}};
+  const double default_n2v[4][3][6] = {{{    773,     5,   1 }, { 1, 1, 1 }, {    773,     5,    1 }},
+                                       {{    184,     8,   1 }, { 1, 1, 1 }, {    184,     8,    1 }},
+                                       {{      1,     1,   1 }, { 1, 1, 1 }, {      1,     1,    1 }},
+                                       {{      1,     1,   1 }, { 1, 1, 1 }, {      1,     1,    1 }}};
 
   const int inst = env.get_int("inst", 0);
   const int seed = env.get_int("seed", 12919135 + inst);
@@ -221,8 +221,8 @@ int main(int, char**) {
   assert(year_index >= 0 && year_index <= 2);
   ntracks = env.get_int("ntracks", 5);
   assert(ntracks >= 3 && ntracks <= 5);
-  const double n1v = env.get_double("n1v", default_n1v[samples_index][year_index][ntracks]);
-  const double n2v = env.get_double("n2v", default_n2v[samples_index][year_index][ntracks]);
+  const double n1v = env.get_double("n1v", default_n1v[samples_index][year_index][ntracks-3]);
+  const double n2v = env.get_double("n2v", default_n2v[samples_index][year_index][ntracks-3]);
   const std::string true_fn = env.get_string("true_fn", "");
   const bool true_from_file = true_fn != "";
   const long ntrue_1v = env.get_long("ntrue_1v", 10000000L);
@@ -382,6 +382,7 @@ int main(int, char**) {
     }
     printf(" %li\n", ntrue_2v);
 
+    out_f->cd();
     gRandom->Write();
   }
 
@@ -638,8 +639,13 @@ int main(int, char**) {
       const double te = h_true_1v_rho_norm->GetBinError  (i+1);
       const double d  = b - t;
       const double de = sqrt(be*be + te*te);
-      printf("%3i %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f +- %12.4f\n", i+1, b, be, t, te, d, de);
-      if (d > 2*de)
+      const bool twosig = d > 2*de;
+      if (twosig || i % (nbins_1v/10) == 0) {
+        if (twosig) printf("\x1b[31;1m");
+        printf("%3i %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f +- %12.4f\n", i+1, b, be, t, te, d, de);
+        if (twosig) printf("\x1b[0m");
+      }
+      if (twosig)
         tl.SetTextColor(kRed);
       else if (d > de)
         tl.SetTextColor(kOrange+2);

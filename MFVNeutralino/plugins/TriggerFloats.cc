@@ -278,9 +278,13 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
     bool is_photon = false;
     bool is_muon = false;
 
+    if (prints) printf("obj pt %f eta %f phi %f coll %s ids (#=%lu)", obj.pt(), obj.eta(), obj.phi(), obj.collection().c_str(), nids);
+
     for (int id : obj.filterIds()) {
       if (is_l1)
         assert(id < 0);
+
+      if (prints) printf(" %i", id);
 
       if (id < 0)
         is_l1 = true;
@@ -294,13 +298,18 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
         is_muon = true;
     }
 
-    //printf("%s %lu %i%i%i%i%i\n", obj.collection().c_str(), nids, is_l1, is_ht, is_cluster, is_photon, is_muon); fflush(stdout);
+    if (prints) printf(" is_l1 %i is_ht %i is_cluster %i is_photon %i is_muon %i\n", is_l1, is_ht, is_cluster, is_photon, is_muon);
+
     if (is_l1) assert(nids == 1 && !is_ht && !is_cluster && !is_photon && !is_muon);
-    if (is_ht) assert(nids == 1 && !is_cluster && !is_photon && !is_muon);
-    bool is_electron = is_cluster;
+    if (is_ht) {
+      if      (nids == 1) assert(!is_cluster && !is_photon && !is_muon);
+      else if (nids == 2) assert(!is_cluster && !is_photon);
+      else assert(0);
+    }
+    const bool is_electron = is_cluster;
 
     if (is_ht) {
-      if (obj.collection() == "hltPFHT::HLT")
+      if (obj.collection() == "hltPFHTJet30::HLT")
         floats->hltht = obj.pt();
       else if (obj.collection() == "hltHtMhtForMC::HLT") {
         floats->hltht4mc = obj.pt();
