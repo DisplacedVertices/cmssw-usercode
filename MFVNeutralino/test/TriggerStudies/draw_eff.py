@@ -12,21 +12,26 @@ data_only = False
 use_qcd = False
 num_dir, den_dir = 'num', 'den'
 #num_dir, den_dir = 'numjet6pt75', 'denjet6pt75'
-year = 2017
+
 which = typed_from_argv(int, 0)
 data_period, int_lumi = [
+    ('p8',92509.),
     ('',  41530.),
     ('B',  4794.),
     ('C',  9631.),
     ('D',  4248.),
     ('E',  9315.),
     ('F', 13540.),
+    ('',  50979.),
+    ('A', 13482.),
+    ('B',  6785.),
+    ('C',  6609.),
+    ('D', 24103.),
     ][which]
+year = 2017 if which < 7 else 2018
+print year, data_period, int_lumi
 
 ########################################################################
-
-if 0:
-    raise ValueError('invalid combo: %s %s %s' % (num_dir, year, data_period))
 
 root_dir = '/uscms_data/d2/tucker/crab_dirs/TrigEff%s' % version
 plot_path = 'TrigEff%s_%s_%s%s' % (version, num_dir, year, data_period)
@@ -46,19 +51,15 @@ if data_only:
 else:
     if year == 2017 or year == 2018:
         bkg_samples = [ttbar_2017, wjetstolnu_2017, dyjetstollM50_2017] #, dyjetstollM10_2017]
-        sig_samples  = [getattr(Samples, 'mfv_neu_tau001000um_M%04i_2017' % m) for m in (400, 800, 1200, 1600)] + [Samples.mfv_neu_tau010000um_M0800_2017]
-        #sig_samples += [getattr(Samples, 'mfv_ddbar_tau01000um_M%04i' % m) for m in (300, 400, 800, 1200, 1600)] + [Samples.mfv_ddbar_tau10000um_M0800]
         if use_qcd:
             bkg_samples.append(qcdmupt15_2017)
+        sig_samples = [getattr(Samples, 'mfv_neu_tau001000um_M%04i_2017' % m) for m in (400, 800, 1200, 1600)] + [Samples.mfv_neu_tau010000um_M0800_2017]
 
 n_bkg_samples = len(bkg_samples)
-for sample in bkg_samples:
-    sample.fn = os.path.join(root_dir, sample.name + '.root')
-    sample.f = ROOT.TFile(sample.fn)
-
-for sample in sig_samples:
-    sample.fn = os.path.join(root_dir, sample.name + '.root')
-    sample.f = ROOT.TFile(sample.fn)
+for samples in bkg_samples, sig_samples:
+    for sample in samples:
+        sample.fn = os.path.join(root_dir, sample.name + '.root')
+        sample.f = ROOT.TFile(sample.fn)
 
 ########################################################################
 
@@ -127,7 +128,7 @@ def num_den_draw(num, den):
     x = []
     for h in num, den:
         h2 = h.Clone(num.GetName() + '_drawscaled')
-        h2.Scale(1., 'width')
+        #h2.Scale(1., 'width')
         x.append(h2)
     num, den = x
     num.SetFillColor(den.GetLineColor())
