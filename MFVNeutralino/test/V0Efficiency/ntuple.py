@@ -54,10 +54,10 @@ output_commands = [
 output_file(process, 'ntuple.root', output_commands)
 
 import JMTucker.MFVNeutralino.EventFilter as ef
-ef.setup_event_filter(process, path_name='p')
+ef.setup_event_filter(process, path_name='p', trigger_filter='jets only')
 
 if zerobias:
-    process.triggerFilter.HLTPaths.append('HLT_ZeroBias_v*') # what are the ZeroBias_part* paths?
+    process.mfvTriggerFilter.HLTPaths.append('HLT_ZeroBias_v*') # what are the ZeroBias_part* paths?
 
 process.maxEvents.input = 100
 #report_every(process, 1)

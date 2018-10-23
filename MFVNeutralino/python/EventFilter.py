@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 def setup_event_filter(process,
                        path_name='pevtsel',
                        trigger_filter = True,
-                       trigger_filter_name = 'triggerFilter',
+                       trigger_filter_name = 'mfvTriggerFilter',
                        event_filter = False,
                        event_filter_jes_mult = 2,
                        event_filter_name = 'mfvEventFilter',

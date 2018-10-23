@@ -51,6 +51,7 @@ process.load('JMTucker.Tools.MCStatProducer_cff')
 process.load('JMTucker.Tools.PATTupleSelection_cfi')
 process.load('JMTucker.MFVNeutralino.UnpackedCandidateTracks_cfi')
 process.load('JMTucker.MFVNeutralino.Vertexer_cff')
+process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
 process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 
@@ -165,7 +166,7 @@ if event_histos:
     process.mfvEventHistosJetPreSel = process.mfvEventHistos.clone(mevent_src = 'mfvEventForHistos', weight_src = 'mfvWeightForHistos')
     process.mfvEventHistosLeptonPreSel = process.mfvEventHistosJetPreSel.clone()
 
-    process.eventHistosPreSeq = cms.Sequence(process.triggerFilter * process.goodOfflinePrimaryVertices *
+    process.eventHistosPreSeq = cms.Sequence(process.mfvTriggerFilter * process.goodOfflinePrimaryVertices *
                                              process.selectedPatJets * process.selectedPatMuons * process.selectedPatElectrons *
                                              process.mfvTriggerFloats * process.mfvGenParticles *
                                              process.mfvEventForHistos * process.mfvWeightForHistos)

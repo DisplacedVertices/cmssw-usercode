@@ -14,7 +14,7 @@ sef('pevtsel',        event_filter = True)
 sef('pevtselNoJESUp', event_filter = True, event_filter_jes_mult = 0, event_filter_name = 'mfvEventFilterNoJESUp')
 sef('pevtselWoVtx',   event_filter = True, event_filter_require_vertex = False, event_filter_name = 'mfvEventFilterWoVtx')
 
-for x in process.triggerFilter.HLTPaths.value():
+for x in process.mfvTriggerFilter.HLTPaths.value():
     filt_name = ''.join(x.split('_')[1:-1])
     sef('p%s' % filt_name, filt_name)
     getattr(process, filt_name).HLTPaths = [x]
