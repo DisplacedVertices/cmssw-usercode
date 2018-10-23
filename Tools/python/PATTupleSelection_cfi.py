@@ -17,6 +17,8 @@ jet_cuts = (
     )
 
 muon_cuts = (
+    'pt > 5',
+    'abs(eta) < 2.4',
     'isPFMuon',
     'isGlobalMuon',
     'isGlobalMuon && globalTrack.normalizedChi2 < 10.',
@@ -26,9 +28,14 @@ muon_cuts = (
     'numberOfMatchedStations > 1',
     )
 
+electron_cuts = (
+    'pt > 5',
+    'abs(eta) < 2.5',
+    )
+
 electron_rho95 = 43. # this is the 95% point for double_fixedGridRhoFastjetCentral__RECO.obj from one file of QCD HT2000, a wjets file wants 37 but that rho distribution has a peak at 0 (?)
 
-electron_EB_cuts = (
+electron_EB_cuts = electron_cuts + (
     'full5x5_sigmaIetaIeta < 0.0128',
     'abs(deltaEtaSuperClusterTrackAtVtx - superCluster.eta + superCluster.seed.eta) < 0.00523',
     'abs(deltaPhiSuperClusterTrackAtVtx) < 0.159',
@@ -37,7 +44,7 @@ electron_EB_cuts = (
     'gsfTrack.hitPattern.numberOfAllHits("MISSING_INNER_HITS") <= 2',
     )
 
-electron_EE_cuts = (
+electron_EE_cuts = electron_cuts + (
     'full5x5_sigmaIetaIeta < 0.0445',
     'abs(deltaEtaSuperClusterTrackAtVtx - superCluster.eta + superCluster.seed.eta) < 0.00984',
     'abs(deltaPhiSuperClusterTrackAtVtx) < 0.157',
