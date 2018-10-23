@@ -311,9 +311,6 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
     if (is_ht) {
       if (obj.collection() == "hltPFHTJet30::HLT")
         floats->hltht = obj.pt();
-      else if (obj.collection() == "hltHtMhtForMC::HLT") {
-        floats->hltht4mc = obj.pt();
-      }
     }
     else if (is_electron || is_muon) {
       // for HT above we didn't check the path, there's always only one
@@ -367,7 +364,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   floats->myhttwbug = my_htt_wbug;
 
   if (prints)
-    printf("TriggerFloats: hltht = %f  hltht4mc = %f\n", floats->hltht, floats->hltht4mc);
+    printf("TriggerFloats: hltht = %f\n", floats->hltht);
 
   for (int i = 0; i < mfv::n_hlt_paths; ++i) {
     const std::pair<bool, bool> paf = helper.pass_and_found_any_version(mfv::hlt_paths[i]);

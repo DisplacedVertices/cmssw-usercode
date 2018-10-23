@@ -238,7 +238,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   mevent->l1_myhtt = triggerfloats->myhtt;
   mevent->l1_myhttwbug = triggerfloats->myhttwbug;
   mevent->hlt_ht = triggerfloats->hltht;
-  mevent->hlt_ht4mc = triggerfloats->hltht4mc;
 
   assert(triggerfloats->L1decisions.size() == mfv::n_l1_paths);
   for (size_t i = 0; i < mfv::n_l1_paths; ++i) {
@@ -472,7 +471,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->l1_myhtt = 0;
     mevent->l1_myhttwbug = 0;
     mevent->hlt_ht = 0;
-    mevent->hlt_ht4mc = 0;
     mevent->bswidthx = 0;
     mevent->bswidthy = 0;
     mevent->pvcxx = 0;

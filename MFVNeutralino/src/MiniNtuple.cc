@@ -16,7 +16,7 @@ namespace mfv {
     run = lumi = 0;
     event = 0;
     gen_flavor_code = pass_hlt = npv = npu = njets = nvtx = ntk0 = ntk1 = 0;
-    l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = hlt_ht4mc = bsx = bsy = bsz = bsdxdz = bsdydz = pvx = pvy = pvz = weight = x0 = y0 = z0 = bs2derr0 = geo2ddist0 = x1 = y1 = z1 = bs2derr1 = geo2ddist1 = 0;
+    l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = bsx = bsy = bsz = bsdxdz = bsdydz = pvx = pvy = pvz = weight = x0 = y0 = z0 = bs2derr0 = geo2ddist0 = x1 = y1 = z1 = bs2derr1 = geo2ddist1 = 0;
     genmatch0 = genmatch1 = 0;
     for (int i = 0; i < 2; ++i)
       gen_x[i] = gen_y[i] = gen_z[i] = gen_lsp_pt[i] = gen_lsp_eta[i] = gen_lsp_phi[i] = gen_lsp_mass[i] = 0;
@@ -62,7 +62,6 @@ namespace mfv {
     tree->Branch("l1_myhtt", &nt.l1_myhtt);
     tree->Branch("l1_myhttwbug", &nt.l1_myhttwbug);
     tree->Branch("hlt_ht", &nt.hlt_ht);
-    tree->Branch("hlt_ht4mc", &nt.hlt_ht4mc);
 
     tree->Branch("npv", &nt.npv);
     tree->Branch("pvx", &nt.pvx);
@@ -149,7 +148,6 @@ namespace mfv {
     tree->SetBranchAddress("l1_myhtt", &nt.l1_myhtt);
     tree->SetBranchAddress("l1_myhttwbug", &nt.l1_myhttwbug);
     tree->SetBranchAddress("hlt_ht", &nt.hlt_ht);
-    tree->SetBranchAddress("hlt_ht4mc", &nt.hlt_ht4mc);
     tree->SetBranchAddress("npv", &nt.npv);
     tree->SetBranchAddress("pvx", &nt.pvx);
     tree->SetBranchAddress("pvy", &nt.pvy);

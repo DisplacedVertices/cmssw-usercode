@@ -12,7 +12,6 @@ namespace mfv {
     float myhtt;
     float myhttwbug;
     float hltht;
-    float hltht4mc;
     std::vector<TLorentzVector> hltelectrons;
     std::vector<TLorentzVector> hltmuons;
     std::vector<int> L1decisions;
@@ -32,7 +31,7 @@ namespace mfv {
     float htptgt30;
 
     TriggerFloats()
-    : l1htt(-1), myhtt(-1), myhttwbug(-1), hltht(-1), hltht4mc(-1),
+    : l1htt(-1), myhtt(-1), myhttwbug(-1), hltht(-1),
       L1decisions(n_l1_paths, -1),
       HLTdecisions(n_hlt_paths, -1),
       nalljets(0), htall(0), ht(0), htptgt30(0)

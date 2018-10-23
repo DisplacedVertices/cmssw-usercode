@@ -21,7 +21,6 @@ namespace mfv {
     float l1_myhtt;
     float l1_myhttwbug;
     float hlt_ht;
-    float hlt_ht4mc;
     float bsx;
     float bsy;
     float bsz;
