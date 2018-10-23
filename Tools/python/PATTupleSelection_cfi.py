@@ -17,8 +17,6 @@ jet_cuts = (
     )
 
 muon_cuts = (
-    'pt > 5',
-    'abs(eta) < 2.4',
     'isPFMuon',
     'isGlobalMuon',
     'isGlobalMuon && globalTrack.normalizedChi2 < 10.',
@@ -28,14 +26,9 @@ muon_cuts = (
     'numberOfMatchedStations > 1',
     )
 
-electron_cuts = (
-    'pt > 5',
-    'abs(eta) < 2.5',
-    )
-
 electron_rho95 = 43. # this is the 95% point for double_fixedGridRhoFastjetCentral__RECO.obj from one file of QCD HT2000, a wjets file wants 37 but that rho distribution has a peak at 0 (?)
 
-electron_EB_cuts = electron_cuts + (
+electron_EB_cuts = (
     'full5x5_sigmaIetaIeta < 0.0128',
     'abs(deltaEtaSuperClusterTrackAtVtx - superCluster.eta + superCluster.seed.eta) < 0.00523',
     'abs(deltaPhiSuperClusterTrackAtVtx) < 0.159',
@@ -44,7 +37,7 @@ electron_EB_cuts = electron_cuts + (
     'gsfTrack.hitPattern.numberOfAllHits("MISSING_INNER_HITS") <= 2',
     )
 
-electron_EE_cuts = electron_cuts + (
+electron_EE_cuts = (
     'full5x5_sigmaIetaIeta < 0.0445',
     'abs(deltaEtaSuperClusterTrackAtVtx - superCluster.eta + superCluster.seed.eta) < 0.00984',
     'abs(deltaPhiSuperClusterTrackAtVtx) < 0.157',
@@ -56,10 +49,11 @@ electron_EE_cuts = electron_cuts + (
 jtupleParams = cms.PSet(
     jetCuts = cms.vstring(*jet_cuts),
     jetCut = cms.string(' && '.join(jet_cuts)),
+
     muonCuts = cms.vstring(*muon_cuts),
-    muonCut = cms.string(' && '.join(muon_cuts)),
+    muonCut = cms.string('pt > 5 && abs(eta) < 2.4 && ' + ' && '.join(muon_cuts)),
 
     electronEBCuts = cms.vstring(*electron_EB_cuts),
     electronEECuts = cms.vstring(*electron_EE_cuts),
-    electronCut = cms.string('(isEB && %s) || (isEE && %s)' % (' && '.join(electron_EB_cuts), ' && '.join(electron_EE_cuts))),
+    electronCut = cms.string('pt > 5 && abs(eta) < 2.5 && ' + '(isEB && %s) || (isEE && %s)' % (' && '.join(electron_EB_cuts), ' && '.join(electron_EE_cuts))),
     )
