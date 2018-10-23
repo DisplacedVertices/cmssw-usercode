@@ -15,7 +15,6 @@ pileup_weights = {
     'mfv_signals': [ 0.204844, 7.61552, 2.72784, 3.44627, 1.43511, 1.35153, 1.1955, 1.11221, 0.468732, 0.757386, 0.897203, 0.892601, 0.921545, 0.873725, 0.762869, 0.724287, 0.745349, 0.774066, 0.862415, 0.908246, 0.967304, 1.04186, 1.07539, 1.10086, 1.1166, 1.12824, 1.13738, 1.15727, 1.18049, 1.19585, 1.19359, 1.18151, 1.14173, 1.09574, 1.0704, 1.02597, 0.982455, 0.960011, 0.916674, 0.867444, 0.854389, 0.861624, 0.886026, 0.929545, 0.996872, 1.08168, 1.20219, 1.30824, 1.38742, 1.43308, 1.46876, 1.45768, 1.38017, 1.27433, 1.12157, 0.933378, 0.774365, 0.61096, 0.482154, 0.366463, 0.292627, 0.235782, 0.195432, 0.158564, 0.133163, 0.10161, 0.0745418, 0.0653409, 0.0604925, 0.0520199, 0.0485005, 0.0462587, 0.0423882, 0.0476483, 0.0408821, 0.0351915, 0.0294714, 0.0545649, 0.0372684, 0.0462814, 0.0423416, 0.0290524, 0.0341293, 0.040834, 0.111314, 0, 0, 0.0114432, 0, 0, 0.0100715, ],
     }
 
-
 # https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/3007.html
 # bug in npu distribution for official MC samples, advised to check per-sample.
 # few % difference especially wrt peak at 0 and extra at 75-100, so could
@@ -24,3 +23,66 @@ pileup_weights = {
 # for our private signal samples, no bug, so use weights above
 
 pileup_weights[2017] = pileup_weights['ttbar_2017']
+
+########################################################################
+
+class derive_weights(object):
+    def __init__(self, data_fn, mc_fn, data_path='pileup', mc_path='PileupDist/h_npu', tol=1e-9, raise_tol=True):
+        from JMTucker.Tools.ROOTTools import ROOT
+
+        self.data_f = ROOT.TFile(data_fn)
+        self.mc_f   = ROOT.TFile(mc_fn)
+        self.data_h = self.data_f.Get(data_path)
+        self.mc_h   = self.mc_f.Get(mc_path)
+
+        def norm(h):
+            h = h.Clone(h.GetName() + '_norm')
+            h.Sumw2()
+            h.Scale(1/h.Integral(1, h.GetNbinsX()+1))
+            return h
+
+        self.data_h.SetLineColor(ROOT.kBlack)
+        self.data_h.SetLineWidth(2)
+        self.mc_h.SetLineColor(ROOT.kRed)
+        self.mc_h.SetLineWidth(2)
+
+        self.data_h_orig = self.data_h
+        self.mc_h_orig   = self.mc_h
+
+        self.data_h = norm(self.data_h)
+        self.mc_h   = norm(self.mc_h)
+
+        self.ndata = self.data_h.GetNbinsX()
+        assert self.ndata == self.mc_h.GetNbinsX() # JMTBAD
+
+        self.weights = []
+
+        for i in xrange(1, self.ndata+1):
+            d = self.data_h.GetBinContent(i)
+            m = self.mc_h.GetBinContent(i)
+            w = -1
+            if m == 0:
+                if d > tol:
+                    msg = 'm == 0 and d = %g > tol=%g for i = %i' % (d, tol, i)
+                    if raise_tol:
+                        raise ValueError(msg)
+                    else:
+                        print msg
+                w = 0
+            else:
+                w = d/m
+            self.weights.append(w)
+
+        while self.weights[-1] == 0:
+            self.weights.pop()
+
+
+if __name__ == '__main__':
+    import sys
+    if len(sys.argv) < 3:
+        sys.exit('usage: %s data_fn mc_fn [mc_fn2 ...]')
+
+    data_fn = sys.argv[1]
+    for mc_fn in sys.argv[2:]:
+        ww = derive_weights(data_fn, mc_fn, raise_tol=False)
+        print mc_fn, ww.weights

@@ -53,61 +53,20 @@ if options.run_pileupcalc:
     if ret != 0:
         raise ValueError('pileupCalc returned failure (%i)' % ret)
 
-from JMTucker.Tools.ROOTTools import ROOT
+from JMTucker.Tools.PileupWeights import derive_weights
+ww = derive_weights(options.data_fn, options.mc_fn, options.data_path, options.mc_path, options.tol)
 
-data_f = ROOT.TFile(options.data_fn)
-mc_f   = ROOT.TFile(options.mc_fn)
-data_h = data_f.Get(options.data_path)
-mc_h   = mc_f.Get(options.mc_path)
-
-def norm(h):
-    h = h.Clone(h.GetName() + '_norm')
-    h.Sumw2()
-    h.Scale(1/h.Integral(1, h.GetNbinsX()+1))
-    return h
-
-data_h.SetLineColor(ROOT.kBlack)
-data_h.SetLineWidth(2)
-mc_h.SetLineColor(ROOT.kRed)
-mc_h.SetLineWidth(2)
-
-data_h_orig = data_h
-mc_h_orig = mc_h
-
-data_h = norm(data_h)
-mc_h = norm(mc_h)
-
-ndata = data_h.GetNbinsX()
-nmc = mc_h.GetNbinsX()
-assert ndata == nmc # JMTBAD
-
-weights = []
-
-for i in xrange(1, ndata+1):
-    d = data_h.GetBinContent(i)
-    m = mc_h.GetBinContent(i)
-    w = -1
-    if m == 0:
-        if d > options.tol:
-            raise ValueError('m == 0 and d = %g > %g for i = %i (see --tol)' % (d, options.tol, i))
-        w = 0
-    else:
-        w = d/m
-    weights.append(w)
-
-while weights[-1] == 0:
-    weights.pop()
-print 'average weight =', sum(weights)/len(weights)
+print 'average weight =', sum(ww.weights)/len(ww.weights)
 
 print '\npython:'
 print 'weights = [',
-for w in weights:
+for w in ww.weights:
     print '%.6g,' % w,
 print ']'
 print '\nc++:'
-print 'const int max_npu = %i;' % len(weights)
+print 'const int max_npu = %i;' % len(ww.weights)
 print 'const double pileup_weights[max_npu] = {',
-for w in weights:
+for w in ww.weights:
     print '%.6g,' % w,
 print '};'
 
@@ -116,20 +75,20 @@ if options.plots:
     set_style()
     ps = plot_saver(options.plots, size=(600,600))
 
-    draw_in_order([(data_h_orig, 'hist'), (mc_h_orig, 'hist')], sames=True)
+    draw_in_order([(ww.data_h_orig, 'hist'), (ww.mc_h_orig, 'hist')], sames=True)
     ps.c.Update()
-    differentiate_stat_box(data_h_orig, 0, new_size=(0.3, 0.2))
-    differentiate_stat_box(mc_h_orig,   1, new_size=(0.3, 0.2))
+    differentiate_stat_box(ww.data_h_orig, 0, new_size=(0.3, 0.2))
+    differentiate_stat_box(ww.mc_h_orig,   1, new_size=(0.3, 0.2))
     ps.save('dists')
 
-    draw_in_order([(data_h, 'hist'), (mc_h, 'hist')], sames=True)
+    draw_in_order([(ww.data_h, 'hist'), (ww.mc_h, 'hist')], sames=True)
     ps.c.Update()
-    differentiate_stat_box(data_h, 0, new_size=(0.3, 0.2))
-    differentiate_stat_box(mc_h,   1, new_size=(0.3, 0.2))
+    differentiate_stat_box(ww.data_h, 0, new_size=(0.3, 0.2))
+    differentiate_stat_box(ww.mc_h,   1, new_size=(0.3, 0.2))
     ps.save('dists_normalized')
 
-    h_w = ROOT.TH1F('h_w', ';;weight', ndata, data_h.GetXaxis().GetXmin(), data_h.GetXaxis().GetXmax())
-    for i,w in enumerate(weights):
+    h_w = ROOT.TH1F('h_w', ';;weight', ww.ndata, ww.data_h.GetXaxis().GetXmin(), ww.data_h.GetXaxis().GetXmax())
+    for i,w in enumerate(ww.weights):
         h_w.SetBinContent(i+1, w)
 
     h_w.Draw()
