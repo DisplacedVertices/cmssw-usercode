@@ -62,7 +62,19 @@ def cmd_hadd_data():
             continue
 
         have = []
-        for year, eras in ('2017', 'BCDEF'), ('2018', 'ABCD'):
+        year_eras = [
+            ('2017', 'BCDEF'),
+            ('2018A', '03' if ds == 'SingleMuon' else '123'),
+            ('2018B', '12'),
+            ('2018C', '123'),
+            ('2018D', '2'),
+            ('2018', 'ABCD'),
+            ]
+
+        for year, eras in year_eras:
+            if year == '2018A' and ds == 'JetHT':
+                raise NotImplementedError('did you be sure no overlaps yet in JetHT 2018A')
+
             files = [f for x in eras for f in glob('%s%s%s.root' % (ds, year, x))]
             ok = len(files) == len(eras)
             if not ok:
@@ -70,8 +82,9 @@ def cmd_hadd_data():
             if ok or permissive:
                 hadd_or_merge('%s%s.root' % (ds, year), files)
                 have.append(year)
-        if have == ['2017', '2018']:
-            hadd_or_merge(ds + '2017p8'.root, ['%s%s.root' % (ds, year) for year in have])
+
+        if '2017' in have and '2018' in have:
+            hadd_or_merge(ds + '2017p8.root', ['%s%s.root' % (ds, year) for year in '2017', '2018'])
 
 cmd_merge_data = cmd_hadd_data
 
