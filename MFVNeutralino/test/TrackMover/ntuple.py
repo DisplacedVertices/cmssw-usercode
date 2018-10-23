@@ -34,8 +34,7 @@ process.patMuons.embedTrack = False
 process.patElectrons.embedTrack = False
 
 import JMTucker.MFVNeutralino.EventFilter
-JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process, path_name='p')
-process.triggerFilter.HLTPaths = ['HLT_PFHT800_v*', 'HLT_PFHT900_v*']
+JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process, path_name='p', trigger_filter='jets only')
 
 process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 from JMTucker.MFVNeutralino.Vertexer_cff import modifiedVertexSequence
