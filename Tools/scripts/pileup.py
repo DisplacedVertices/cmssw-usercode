@@ -5,7 +5,7 @@ import os, sys, JMTucker.Tools.argparse as argparse
 parser = argparse.ArgumentParser(description = 'pileup.py: use analysis JSONs to get lumi-weighted pileup distribution and derive set of weights for a MC sample.',
                                  usage = '%(prog)s <required options>')
 
-parser.add_argument('--year', type=int, choices=[2017], default=2017,
+parser.add_argument('--year', type=int, choices=[2017,2018], default=2017,
                     help='Which year to use.')
 parser.add_argument('--ana-json',
                     help='The JSON file produced from crab -report (or multiple crab reports, added together with mergeJSON.py).')
@@ -37,7 +37,7 @@ options = parser.parse_args()
 if options.lumi_json == 'default':
     options.lumi_json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions%i/13TeV/PileUp/pileup_latest.txt' % (options.year-2000)
 if options.pileupcalc_mbxsec == -1:
-    options.pileupcalc_mbxsec = 73500 # if options.year == 2017 else 69200
+    options.pileupcalc_mbxsec = 69200
 if options.data_fn == 'default':
     options.data_fn = 'pileup_%i.root' % options.year
 
