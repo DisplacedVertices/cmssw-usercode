@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, sys, JMTucker.Tools.argparse as argparse
+import os, sys, tempfile, argparse
 
 parser = argparse.ArgumentParser(description = 'pileup.py: use analysis JSONs to get lumi-weighted pileup distribution and derive set of weights for a MC sample.',
                                  usage = '%(prog)s <required options>')
@@ -9,8 +9,8 @@ parser.add_argument('--year', type=int, choices=[2017,2018], default=2017,
                     help='Which year to use.')
 parser.add_argument('--ana-json',
                     help='The JSON file produced from crab -report (or multiple crab reports, added together with mergeJSON.py).')
-parser.add_argument('--lumi-json', default='default',
-                    help='The centrally produced lumi-weighted pileup JSON (default /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/CollisionsYY/13TeV/PileUp/pileup_latest.txt).')
+parser.add_argument('--pileup-json', default='default',
+                    help='The centrally produced pileup-weighted pileup JSON (default /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/CollisionsYY/13TeV/PileUp/pileup_latest.txt).')
 parser.add_argument('--max-npu', type=int, default=1000,
                     help='The maximum pileup bin (default %(default)s).')
 parser.add_argument('--pileupcalc-mode', default='true',
@@ -34,8 +34,8 @@ parser.add_argument('--plots', default='',
 
 options = parser.parse_args()
 
-if options.lumi_json == 'default':
-    options.lumi_json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions%i/13TeV/PileUp/pileup_latest.txt' % (options.year-2000)
+if options.pileup_json == 'default':
+    options.pileup_json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions%i/13TeV/PileUp/pileup_latest.txt' % (options.year-2000)
 if options.pileupcalc_mbxsec == -1:
     options.pileupcalc_mbxsec = 69200
 if options.data_fn == 'default':
@@ -47,11 +47,26 @@ if options.ana_json is None and options.run_pileupcalc:
 ################################################################################
 
 if options.run_pileupcalc:
-    cmd = 'pileupCalc.py -i %s --inputLumiJSON %s --calcMode %s --minBiasXsec %s --maxPileupBin=%i --numPileupBins=%i --pileupHistName=%s %s' % (options.ana_json, options.lumi_json, options.pileupcalc_mode, options.pileupcalc_mbxsec, options.max_npu, options.max_npu, options.data_path, options.data_fn)
-    print cmd
-    ret = os.system(cmd)
+    def print_run(cmd):
+        print cmd
+        return os.system(cmd)
+
+    tmp_fn = None
+    if options.pileup_json.startswith('/afs'):
+        tmp_fn = tempfile.mktemp()
+        cmd = 'scp lxplus.cern.ch:%s %s' % (options.pileup_json, tmp_fn)
+        if print_run(cmd) != 0:
+            print 'warning: scp failed, pileupCalc.py will fail next'
+        options.pileup_json = tmp_fn
+
+    cmd = 'pileupCalc.py -i %s --inputLumiJSON %s --calcMode %s --minBiasXsec %s --maxPileupBin=%i --numPileupBins=%i --pileupHistName=%s %s' % (options.ana_json, options.pileup_json, options.pileupcalc_mode, options.pileupcalc_mbxsec, options.max_npu, options.max_npu, options.data_path, options.data_fn)
+    ret = print_run(cmd)
+    if tmp_fn:
+        os.remove(tmp_fn)
     if ret != 0:
         raise ValueError('pileupCalc returned failure (%i)' % ret)
+
+################################################################################
 
 from JMTucker.Tools.PileupWeights import derive_weights
 ww = derive_weights(options.data_fn, options.mc_fn, options.data_path, options.mc_path, options.tol)
