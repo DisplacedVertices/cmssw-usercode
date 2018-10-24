@@ -1923,7 +1923,7 @@ def ratios_plot(name,
             old_opt_fit = ROOT.gStyle.GetOptFit()
             ROOT.gStyle.SetOptFit(0)
             fit_opt = 'sqe'
-            fcn = ROOT.TF1('f_rat_' + h.GetName(), 'pol0')
+            fcn = ROOT.TF1('f_rat_' + h.GetName(), 'pol1' if res_fit == 'pol1' else 'pol0')
             fcn.SetLineColor(h.GetLineColor())
             fit_res = r.Fit(fcn, fit_opt)
             ratio_pad.Update()
@@ -1938,7 +1938,10 @@ def ratios_plot(name,
                 fit_tpt.SetBorderSize(0)
                 fit_tpt.SetFillColor(ROOT.kWhite)
                 fit_tpt.SetTextFont(42)
-            txt = fit_tpt.AddText('p0 = %.2f #pm %.2f  #chi^{2}/ndf = %.2f/%i  p = %.3f' % (fit_res.Parameter(0), fit_res.ParError(0), fit_res.Chi2(), fit_res.Ndf(), fit_res.Prob()))
+            if res_fit == 'pol1':
+                txt = fit_tpt.AddText('p0 = %.2f #pm %.2f  p1 = %.2f #pm %.2f  #chi^{2}/ndf = %.2f/%i  p = %.3f' % (fit_res.Parameter(0), fit_res.ParError(0), fit_res.Parameter(1), fit_res.ParError(1), fit_res.Chi2(), fit_res.Ndf(), fit_res.Prob()))
+            else:
+                txt = fit_tpt.AddText('p0 = %.2f #pm %.2f  #chi^{2}/ndf = %.2f/%i  p = %.3f' % (fit_res.Parameter(0), fit_res.ParError(0), fit_res.Chi2(), fit_res.Ndf(), fit_res.Prob()))
             txt.SetTextAlign(12)
             txt.SetTextColor(h.GetLineColor())
 
