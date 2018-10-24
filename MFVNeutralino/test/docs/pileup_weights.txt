@@ -1,0 +1,63 @@
+- Run PileupDist with Tools/test/pileup_dist.py to get the
+  distribution in MC samples. This gives a histogram PileupDist/h_npu
+  in the output root file. (The other versions with trigger/offline
+  jet selection are for diagnostics/curiosity. PileupDist also gives a
+  histogram of the number of primary vertices that can be used to
+  derive weights.)
+
+  - If pileup distribution is the same among all samples, can use any
+    one sample's output, or hadd outputs of different samples together
+    to get more statistics on the npu distribution.
+
+  - Centrally produced 2017 samples had bug in mixing module so we
+    have to derive pileup weights per sample for these.
+
+- Run pileupCalc.py via Tools/test/pileup.py to get the distribution
+  of pileup in the data as measured by the BRIL group.
+
+  - The output files are kept in /uscms/home/tucker/public/mfv/pileup
+    so you don't have to rerun them unless e.g. the ana or pileup
+    jsons are updated.
+
+  - See the --help, but just need to supply the year and the ana json:
+
+    pileup.py --year 2017 --ana-json MFVNeutralino/test/jsons/ana_2017.json
+    pileup.py --year 2018 --ana-json MFVNeutralino/test/jsons/ana_2018.json
+
+  - If you already have the MC root file as above, can pass it in
+    (--mc-fn/path) and the weights will be printed. Otherwise you can
+    just produce the data root file for now and re-run later with
+    --no-run-pileupcalc to skip the expensive pileupCalc.py run and
+    just print the weights.
+
+  - pileupCalc.py in 10_X has a typo so we have a local copy that
+    needs to be removed when it is fixed upstream.
+
+  - Default minbias xsec in pileupCalc.py is "wrong", one is supposed
+    to use 69200 ub. (This is set correctly by pileup.py.)
+
+  - Need to copy the input pileup jsons from lxplus since they are on
+    afs. (pileup.py will handle this for you.)
+
+  - Since the outputs are already luminosity weighted, produce pileup
+    distribution for 2017p8 data with straight hadd:
+
+    hadd pileup_2017p8.root pileup_2017.root pileup_2018.root
+
+- To get weights for different samples given one data root file, you
+  can use Tools/python/PileupWeights.py's main script, e.g.:
+
+  for x in 2017 2018 2017p8; do
+    py PileupWeights.py /uscms/home/tucker/public/mfv/pileup_${x}.root /uscms_data/d2/tucker/crab_dirs/PileupDistV2p1/*root | grep root > weights_${x}.txt
+  done
+
+  The edit the output and put in the appropriate dict in
+  PileupWeights.py.
+
+- MetaSubmitter's per_sample_pileup_weights_modifier handles setting
+  the weights per sample when jobs are submitted, at least for jobs
+  that use MFVWeightProducer.
+
+  - JMTBAD need to unify code that handles pileup weights when running
+    on e.g. AOD instead of ntuple, since MFVWeightProducer only
+    handles the latter.
