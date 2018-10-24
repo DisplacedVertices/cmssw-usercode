@@ -85,4 +85,7 @@ if __name__ == '__main__':
     data_fn = sys.argv[1]
     for mc_fn in sys.argv[2:]:
         ww = derive_weights(data_fn, mc_fn, raise_tol=False)
-        print mc_fn, ww.weights
+        print mc_fn, '[',
+        for w in ww.weights:
+            print '%.6g,' % w,
+        print ']'
