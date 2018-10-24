@@ -68,7 +68,7 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, dynamicconf.globaltag, '')
 
 from Configuration.Generator.Pythia8CommonSettings_cfi import pythia8CommonSettingsBlock
-from Configuration.Generator.MCTunes2017.PythiaCP5Settings_cfi import pythia8CP5SettingsBlock
+from Configuration.Generator.MCTunes2017.PythiaCP2Settings_cfi import pythia8CP2SettingsBlock
 
 process.generator = cms.EDFilter('Pythia8HadronizerFilter' if fromlhe else 'Pythia8GeneratorFilter',
     comEnergy = cms.double(13000.0),
@@ -78,10 +78,10 @@ process.generator = cms.EDFilter('Pythia8HadronizerFilter' if fromlhe else 'Pyth
     pythiaPylistVerbosity = cms.untracked.int32(0),
     PythiaParameters = cms.PSet(
         pythia8CommonSettingsBlock,
-        pythia8CP5SettingsBlock,
+        pythia8CP2SettingsBlock,
         parameterSets = cms.vstring(
             'pythia8CommonSettings',
-            'pythia8CP5Settings',
+            'pythia8CP2Settings',
             'processParameters'
             ),
         processParameters = cms.vstring(),

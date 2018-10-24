@@ -36,7 +36,7 @@ DECAY    1000022    %E               # neutralino decays
 import FWCore.ParameterSet.Config as cms
 
 from Configuration.Generator.Pythia8CommonSettings_cfi import *
-from Configuration.Generator.MCTunes2017.PythiaCP5Settings_cfi import *
+from Configuration.Generator.MCTunes2017.PythiaCP2Settings_cfi import *
 
 generator = cms.EDFilter('Pythia8GeneratorFilter',
     comEnergy = cms.double(13000.0),
@@ -47,7 +47,7 @@ generator = cms.EDFilter('Pythia8GeneratorFilter',
     SLHATableForPythia8 = cms.string(SLHA_TABLE),
     PythiaParameters = cms.PSet(
         pythia8CommonSettingsBlock,
-        pythia8CP5SettingsBlock,
+        pythia8CP2SettingsBlock,
         processParameters = cms.vstring(
             'SUSY:gg2gluinogluino = on',
             'SUSY:qqbar2gluinogluino = on',
@@ -57,7 +57,7 @@ generator = cms.EDFilter('Pythia8GeneratorFilter',
             ),
         parameterSets = cms.vstring(
             'pythia8CommonSettings',
-            'pythia8CP5Settings',
+            'pythia8CP2Settings',
             'processParameters',
             ),
         ),
@@ -91,7 +91,7 @@ DECAY    1000006    %E               # ~t_1 decays (~t_1bar is automatically han
 import FWCore.ParameterSet.Config as cms
 
 from Configuration.Generator.Pythia8CommonSettings_cfi import *
-from Configuration.Generator.MCTunes2017.PythiaCP5Settings_cfi import *
+from Configuration.Generator.MCTunes2017.PythiaCP2Settings_cfi import *
 
 generator = cms.EDFilter('Pythia8GeneratorFilter',
     comEnergy = cms.double(13000.0),
@@ -102,7 +102,7 @@ generator = cms.EDFilter('Pythia8GeneratorFilter',
     SLHATableForPythia8 = cms.string(SLHA_TABLE),
     PythiaParameters = cms.PSet(
         pythia8CommonSettingsBlock,
-        pythia8CP5SettingsBlock,
+        pythia8CP2SettingsBlock,
         processParameters = cms.vstring(
             'SUSY:all = off',
             'SUSY:gg2squarkantisquark = on',
@@ -114,7 +114,7 @@ generator = cms.EDFilter('Pythia8GeneratorFilter',
             ),
         parameterSets = cms.vstring(
             'pythia8CommonSettings',
-            'pythia8CP5Settings',
+            'pythia8CP2Settings',
             'processParameters',
             ),
         ),
@@ -128,7 +128,7 @@ for model in neu, stop:
         samplebase = 'StopStopbarTo2Dbar2D'
     for ctau, ctauname in (0.1, '100um'), (0.3, '300um'), (1., '1mm'), (10., '10mm'), (30., '30mm'):
         for m in 200, 300, 400, 600, 800, 1200, 1600, 2400, 3000:
-            sample = samplebase + '_M-%i_CTau-%s_TuneCP5_13TeV-pythia8' % (m, ctauname)
+            sample = samplebase + '_M-%i_CTau-%s_TuneCP2_13TeV-pythia8' % (m, ctauname)
             fn = sample.replace('-', '_') + '_cff.py'
             print '%s,100000,%s,pythia8' % (sample, fn)
             model(fn, m, ctau)
