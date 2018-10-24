@@ -7,6 +7,13 @@ from JMTucker.Tools.general import typed_from_argv
 from JMTucker.Tools import Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
+which = typed_from_argv(int, -1)
+ntks = ('mfvMiniTreeNtk3', 'mfvMiniTreeNtk4', 'mfvMiniTree')
+if which != -1:
+    if which < 3 or which > 5:
+        raise ValueError('bad ntks %s' % which)
+    ntks = ntks[which-3:which-2]
+
 ROOT.gErrorIgnoreLevel = 6000
 fns = [x for x in sys.argv[1:] if x.endswith('.root') and (os.path.isfile(x) or x.startswith('root://'))]
 if not fns:
@@ -14,8 +21,9 @@ if not fns:
     print 'using default', gg
     fns = glob.glob(gg)
 fns = [x for x in fns if '2015' not in x and not 'hip1p0' in x]
-fns.sort()
-fns.sort(key=lambda fn: not os.path.basename(fn).startswith('mfv_')) # puts signals first, then bkg
+if len(fns) != 2: # leave in specified order if there are two, user wants to print a ratio
+    fns.sort()
+    fns.sort(key=lambda fn: not os.path.basename(fn).startswith('mfv_')) # puts signals first, then bkg
 
 def getit(fn, ntk):
     f = ROOT.TFile.Open(fn)
@@ -38,12 +46,12 @@ def getit(fn, ntk):
         n2vb = c('nvtx>=2 && gen_flavor_code==2')
     return n1v, n1vb, n2v, n2vb
 
-fmt = '%40s %9s %9s %9s      %7s  %9s +- %9s  %9s +- %9s     %7s  %9s +- %9s  %9s +- %9s'
+fmt = '%50s %9s %9s %9s      %7s  %9s +- %9s  %9s +- %9s     %7s  %9s +- %9s  %9s +- %9s'
 
 int_lumi = ac.int_lumi_2017 * ac.scale_factor_2017
 print 'MC scaled to int. lumi. %.3f/fb' % (int_lumi/1000)
 
-for ntk in 'mfvMiniTreeNtk3', 'mfvMiniTreeNtk4', 'mfvMiniTree':
+for ntk in ntks:
     print
     print ntk
     print fmt % ('sample', 'xsec', 'nevents', 'weight', 'f1vb', 'rn1v', 'unc', 'wn1v', 'unc', 'f2vb', 'rn2v', 'unc', 'wn2v', 'unc')
@@ -51,6 +59,7 @@ for ntk in 'mfvMiniTreeNtk3', 'mfvMiniTreeNtk4', 'mfvMiniTree':
     raw_n1v, sum_n1v, var_n1v, raw_n2v, sum_n2v, var_n2v = 0, 0, 0, 0, 0, 0
     seen_bkg, seen_data = False, False
 
+    weighted = []
     for fn in fns:
         (r1v, n1v, en1v), (r1vb, _, _), (r2v, n2v, en2v), (r2vb, _, _) = getit(fn, ntk)
         f1vb = float(r1vb) / r1v if r1v > 0 else 0.
@@ -87,6 +96,7 @@ for ntk in 'mfvMiniTreeNtk3', 'mfvMiniTreeNtk4', 'mfvMiniTree':
                     xsec = '%9.0f' % sample.xsec
 
                 x = (r1v, r1v**0.5, w*n1v, w*en1v), (r2v, r2v**0.5, w*n2v, w*en2v)
+                weighted.append((w*n1v, w*en1v, w*n2v, w*en2v))
                 print fmt % (sample.name,
                              xsec,
                              '%.0f' % sample.nevents(fn),
@@ -112,6 +122,12 @@ for ntk in 'mfvMiniTreeNtk3', 'mfvMiniTreeNtk4', 'mfvMiniTree':
             raw_n2v += r2v
             sum_n2v += n2v * w
             var_n2v += (en2v * w)**2
+
+    if len(weighted) == 2:
+        (n1v1, en1v1, n2v1, en2v1), (n1v2, en1v2, n2v2, en2v2) = weighted
+        ratn1 = interval_to_vpme(*propagate_ratio(n1v2, n1v1, en1v2, en1v1))
+        ratn2 = interval_to_vpme(*propagate_ratio(n2v2, n2v1, en2v2, en2v1))
+        print 'ratio second/first: n1v %.2f +- %.2f   n2v %.2f +- %.2f' % (ratn1 + ratn2)
 
     if raw_n1v or raw_n2v:
         x = (raw_n1v, raw_n1v**0.5, sum_n1v, var_n1v**0.5), (raw_n2v, raw_n2v**0.5, sum_n2v, var_n2v**0.5)
