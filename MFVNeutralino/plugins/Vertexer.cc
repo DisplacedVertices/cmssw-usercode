@@ -1,6 +1,5 @@
 #include "TH2.h"
 #include "TMath.h"
-#include "TFitResult.h"
 #include "CLHEP/Random/RandBinomial.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
@@ -112,7 +111,6 @@ private:
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const bool use_primary_vertices;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
-  const double min_jet_pt_for_ht;
   const bool disregard_event;
   const bool use_tracks;
   const edm::EDGetTokenT<reco::TrackCollection> track_token;
@@ -309,7 +307,6 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     use_primary_vertices(cfg.getParameter<edm::InputTag>("primary_vertices_src").label() != ""),
     primary_vertices_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertices_src"))),
-    min_jet_pt_for_ht(cfg.getParameter<double>("min_jet_pt_for_ht")),
     disregard_event(cfg.getParameter<bool>("disregard_event")),
     use_tracks(cfg.getParameter<bool>("use_tracks")),
     track_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("track_src"))),
