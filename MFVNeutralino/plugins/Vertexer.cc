@@ -128,31 +128,18 @@ private:
   const edm::EDGetTokenT<reco::TrackCollection> second_track_token;
   const bool no_track_cuts;
   const double min_seed_jet_pt;
-  const bool stlayers_v_eta;
-  const double min_all_track_pt;
-  const double min_all_track_dxy;
-  const double min_all_track_sigmadxy;
-  const double min_all_track_sigmadxypv;
-  const int min_all_track_hit_r;
-  const int min_all_track_nhits;
-  const int min_all_track_npxhits;
-  const int min_all_track_npxlayers;
-  const int min_all_track_nstlayers;
-  const double max_all_track_dxyerr;
-  const double max_all_track_dxyipverr;
-  const double max_all_track_d3dipverr;
-  const double min_seed_track_pt;
-  const double min_seed_track_dxy;
-  const double min_seed_track_sigmadxy;
-  const double min_seed_track_sigmadxypv;
-  const int min_seed_track_hit_r;
-  const int min_seed_track_nhits;
-  const int min_seed_track_npxhits;
-  const int min_seed_track_npxlayers;
-  const int min_seed_track_nstlayers;
-  const double max_seed_track_dxyerr;
-  const double max_seed_track_dxyipverr;
-  const double max_seed_track_d3dipverr;
+  const double min_track_pt;
+  const double min_track_dxy;
+  const double min_track_sigmadxy;
+  const double min_track_sigmadxypv;
+  const int min_track_hit_r;
+  const int min_track_nhits;
+  const int min_track_npxhits;
+  const int min_track_npxlayers;
+  const int min_track_nstlayers;
+  const double max_track_dxyerr;
+  const double max_track_dxyipverr;
+  const double max_track_d3dipverr;
   const int n_tracks_per_seed_vertex;
   const double max_seed_vertex_chi2;
   const bool use_2d_vertex_dist;
@@ -167,7 +154,6 @@ private:
   const bool remove_one_track_at_a_time;
   const bool jumble_tracks;
   const double remove_tracks_frac;
-  const double remove_seed_tracks_frac;
   const bool histos;
   const bool scatterplots;
   const bool track_histos_only;
@@ -259,6 +245,7 @@ private:
     track_cuts(const MFVVertexer* mv_, const reco::Track& tk_, const reco::BeamSpot& bs_, const reco::Vertex* pv_, const TransientTrackBuilder& tt)
       : mv(*mv_), tk(tk_), bs(bs_), pv(pv_), tt_builder(tt)
     {
+      // copy/calculate cheap things, which may be used by caller
       pt = tk.pt();
       abs_eta = fabs(tk.eta());
       dxybs = tk.dxy(bs);
@@ -276,68 +263,41 @@ private:
           min_r = i;
     }
 
-    // these are cheap
-    bool use_ex(bool for_seed) const {
-      if (mv.stlayers_v_eta) {
-        if ((abs_eta < 2.0 && nstlayers < 6) || (abs_eta >= 2.0 && nstlayers < 7))
-          return false;
-      }
-
-      if (for_seed) {
-        return 
-          npxlayers >= mv.min_seed_track_npxlayers && 
-          nstlayers >= mv.min_seed_track_nstlayers && 
-          (mv.min_seed_track_hit_r == 999 || min_r <= mv.min_seed_track_hit_r) &&
-          pt > mv.min_seed_track_pt &&
-          fabs(sigmadxybs) > mv.min_seed_track_sigmadxy &&
-          fabs(dxybs) > mv.min_seed_track_dxy &&
-          fabs(sigmadxypv) > mv.min_seed_track_sigmadxypv &&
-          nhits >= mv.min_seed_track_nhits && 
-          npxhits >= mv.min_seed_track_npxhits && 
-          dxyerr < mv.max_seed_track_dxyerr;
-      }
-      else {
-        return 
-          npxlayers >= mv.min_all_track_npxlayers && 
-          nstlayers >= mv.min_all_track_nstlayers && 
-          (mv.min_all_track_hit_r == 999 || min_r <= mv.min_all_track_hit_r) &&
-          pt > mv.min_all_track_pt &&
-          fabs(sigmadxybs) > mv.min_all_track_sigmadxy &&
-          fabs(dxybs) > mv.min_all_track_dxy &&
-          fabs(sigmadxypv) > mv.min_all_track_sigmadxypv &&
-          nhits >= mv.min_all_track_nhits && 
-          npxhits >= mv.min_all_track_npxhits && 
-          dxyerr < mv.max_all_track_dxyerr;
-      }
+    bool use_cheap() const {
+      return
+        npxlayers >= mv.min_track_npxlayers &&
+        nstlayers >= mv.min_track_nstlayers &&
+        (mv.min_track_hit_r == 999 || min_r <= mv.min_track_hit_r) &&
+        pt > mv.min_track_pt &&
+        fabs(sigmadxybs) > mv.min_track_sigmadxy &&
+        fabs(dxybs) > mv.min_track_dxy &&
+        fabs(sigmadxypv) > mv.min_track_sigmadxypv &&
+        nhits >= mv.min_track_nhits &&
+        npxhits >= mv.min_track_npxhits &&
+        dxyerr < mv.max_track_dxyerr;
     }
 
-    bool use(bool for_seed) const {
-      if (!use_ex(for_seed))
+    bool use() const {
+      if (!use_cheap())
         return false;
 
-      if (!pv)
-        return true;
-
-      const double max_dxyipverr = for_seed ? mv.max_seed_track_dxyipverr : mv.max_all_track_dxyipverr;
-      const double max_d3dipverr = for_seed ? mv.max_seed_track_d3dipverr : mv.max_all_track_d3dipverr;
-
-      if (max_dxyipverr <= 0 && max_d3dipverr <= 0)
+      if (!pv || (mv.max_track_dxyipverr <= 0 && mv.max_track_d3dipverr <= 0))
         return true;
 
       reco::TransientTrack ttk = tt_builder.build(tk);
 
-      if (max_dxyipverr > 0) {
+      if (mv.max_track_dxyipverr > 0) {
         auto dxy_ipv = IPTools::absoluteTransverseImpactParameter(ttk, *pv);
-        if (!dxy_ipv.first || dxy_ipv.second.error() >= max_dxyipverr)
+        if (!dxy_ipv.first || dxy_ipv.second.error() >= mv.max_track_dxyipverr)
           return false;
       }
 
-      if (max_d3dipverr > 0) {
+      if (mv.max_track_d3dipverr > 0) {
         auto d3d_ipv = IPTools::absoluteImpactParameter3D(ttk, *pv);
-        if (!d3d_ipv.first || d3d_ipv.second.error() >= max_d3dipverr)
+        if (!d3d_ipv.first || d3d_ipv.second.error() >= mv.max_track_d3dipverr)
           return false;
       }
-      
+
       return true;
     }
   };
@@ -365,31 +325,18 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     second_track_token(use_second_tracks ? consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("second_track_src")) : edm::EDGetTokenT<reco::TrackCollection>()),
     no_track_cuts(cfg.getParameter<bool>("no_track_cuts")),
     min_seed_jet_pt(cfg.getParameter<double>("min_seed_jet_pt")),
-    stlayers_v_eta(cfg.getParameter<bool>("stlayers_v_eta")),
-    min_all_track_pt(cfg.getParameter<double>("min_all_track_pt")),
-    min_all_track_dxy(cfg.getParameter<double>("min_all_track_dxy")),
-    min_all_track_sigmadxy(cfg.getParameter<double>("min_all_track_sigmadxy")),
-    min_all_track_sigmadxypv(cfg.getParameter<double>("min_all_track_sigmadxypv")),
-    min_all_track_hit_r(cfg.getParameter<int>("min_all_track_hit_r")),
-    min_all_track_nhits(cfg.getParameter<int>("min_all_track_nhits")),
-    min_all_track_npxhits(cfg.getParameter<int>("min_all_track_npxhits")),
-    min_all_track_npxlayers(cfg.getParameter<int>("min_all_track_npxlayers")),
-    min_all_track_nstlayers(cfg.getParameter<int>("min_all_track_nstlayers")),
-    max_all_track_dxyerr(cfg.getParameter<double>("max_all_track_dxyerr")),
-    max_all_track_dxyipverr(cfg.getParameter<double>("max_all_track_dxyipverr")),
-    max_all_track_d3dipverr(cfg.getParameter<double>("max_all_track_d3dipverr")),
-    min_seed_track_pt(cfg.getParameter<double>("min_seed_track_pt")),
-    min_seed_track_dxy(cfg.getParameter<double>("min_seed_track_dxy")),
-    min_seed_track_sigmadxy(cfg.getParameter<double>("min_seed_track_sigmadxy")),
-    min_seed_track_sigmadxypv(cfg.getParameter<double>("min_seed_track_sigmadxypv")),
-    min_seed_track_hit_r(cfg.getParameter<int>("min_seed_track_hit_r")),
-    min_seed_track_nhits(cfg.getParameter<int>("min_seed_track_nhits")),
-    min_seed_track_npxhits(cfg.getParameter<int>("min_seed_track_npxhits")),
-    min_seed_track_npxlayers(cfg.getParameter<int>("min_seed_track_npxlayers")),
-    min_seed_track_nstlayers(cfg.getParameter<int>("min_seed_track_nstlayers")),
-    max_seed_track_dxyerr(cfg.getParameter<double>("max_seed_track_dxyerr")),
-    max_seed_track_dxyipverr(cfg.getParameter<double>("max_seed_track_dxyipverr")),
-    max_seed_track_d3dipverr(cfg.getParameter<double>("max_seed_track_d3dipverr")),
+    min_track_pt(cfg.getParameter<double>("min_track_pt")),
+    min_track_dxy(cfg.getParameter<double>("min_track_dxy")),
+    min_track_sigmadxy(cfg.getParameter<double>("min_track_sigmadxy")),
+    min_track_sigmadxypv(cfg.getParameter<double>("min_track_sigmadxypv")),
+    min_track_hit_r(cfg.getParameter<int>("min_track_hit_r")),
+    min_track_nhits(cfg.getParameter<int>("min_track_nhits")),
+    min_track_npxhits(cfg.getParameter<int>("min_track_npxhits")),
+    min_track_npxlayers(cfg.getParameter<int>("min_track_npxlayers")),
+    min_track_nstlayers(cfg.getParameter<int>("min_track_nstlayers")),
+    max_track_dxyerr(cfg.getParameter<double>("max_track_dxyerr")),
+    max_track_dxyipverr(cfg.getParameter<double>("max_track_dxyipverr")),
+    max_track_d3dipverr(cfg.getParameter<double>("max_track_d3dipverr")),
     n_tracks_per_seed_vertex(cfg.getParameter<int>("n_tracks_per_seed_vertex")),
     max_seed_vertex_chi2(cfg.getParameter<double>("max_seed_vertex_chi2")),
     use_2d_vertex_dist(cfg.getParameter<bool>("use_2d_vertex_dist")),
@@ -404,14 +351,13 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     remove_one_track_at_a_time(cfg.getParameter<bool>("remove_one_track_at_a_time")),
     jumble_tracks(cfg.getParameter<bool>("jumble_tracks")),
     remove_tracks_frac(cfg.getParameter<double>("remove_tracks_frac")),
-    remove_seed_tracks_frac(cfg.getParameter<double>("remove_seed_tracks_frac")),
     histos(cfg.getUntrackedParameter<bool>("histos", false)),
     scatterplots(cfg.getUntrackedParameter<bool>("scatterplots", false)),
     track_histos_only(cfg.getUntrackedParameter<bool>("track_histos_only", false)),
     verbose(cfg.getUntrackedParameter<bool>("verbose", false)),
     module_label(cfg.getParameter<std::string>("@module_label"))
 {
-  if (min_all_track_hit_r < 1 || min_all_track_hit_r > 4 || min_seed_track_hit_r < 1 || min_seed_track_hit_r > 4)
+  if (min_track_hit_r < 1 || min_track_hit_r > 4)
     throw cms::Exception("MFVVertexer") << "hit_r cuts may only be 1-4";
 
   if (use_tracks + use_non_pv_tracks + use_non_pvs_tracks + use_pf_candidates + use_pf_jets + use_pat_jets != 1)
@@ -424,7 +370,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     throw cms::Exception("MFVVertexer", "n_tracks_per_seed_vertex must be one of 2,3,4,5");
 
   edm::Service<edm::RandomNumberGenerator> rng;
-  if ((jumble_tracks || remove_tracks_frac > 0 || remove_seed_tracks_frac > 0) && !rng.isAvailable())
+  if ((jumble_tracks || remove_tracks_frac > 0) && !rng.isAvailable())
     throw cms::Exception("Vertexer") << "RandomNumberGeneratorService not available for jumbling or removing tracks!\n";
 
   produces<reco::VertexCollection>();
@@ -596,7 +542,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
   //////////////////////////////////////////////////////////////////////
   // The tracks to be used. Will be filled from a track collection or
-  // from raw-PF/PF2PAT jet constituents with cuts on pt/nhits/dxy.
+  // from raw-PF/PF2PAT jet constituents with cuts specified in track_cuts.
   //////////////////////////////////////////////////////////////////////
 
   edm::ESHandle<TransientTrackBuilder> tt_builder;
@@ -605,7 +551,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
   std::vector<reco::TrackRef> all_tracks;
   std::vector<reco::TransientTrack> seed_tracks;
-  std::vector<bool> seed_track_is_second;
   std::map<reco::TrackRef, size_t> seed_track_ref_map;
 
   if (!disregard_event) {
@@ -703,7 +648,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     const reco::TrackRef& tk = all_tracks[i];
     const track_cuts tc(this, *tk, *beamspot, primary_vertex, *tt_builder);
     const bool is_second_track = i >= second_tracks_start_at;
-    bool use = no_track_cuts || is_second_track || tc.use(false);
+    bool use = no_track_cuts || is_second_track || tc.use();
 
     if (use && remove_tracks_frac > 0) {
       // special values:
@@ -754,7 +699,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
     if (use) {
       seed_tracks.push_back(tt_builder->build(tk));
-      seed_track_is_second.push_back(is_second_track);
       seed_track_ref_map[tk] = seed_tracks.size() - 1;
     }
 
@@ -790,10 +734,10 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       h_all_track_nstlayers->Fill(tk->hitPattern().stripLayersWithMeasurement());
 
       const bool nm1[4] = {
-        tc.pt > min_all_track_pt,
-        tc.npxlayers >= min_all_track_npxlayers,
-        tc.nstlayers >= min_all_track_nstlayers,
-        fabs(tc.sigmadxybs) > min_seed_track_sigmadxy
+        tc.pt > min_track_pt,
+        tc.npxlayers >= min_track_npxlayers,
+        tc.nstlayers >= min_track_nstlayers,
+        fabs(tc.sigmadxybs) > min_track_sigmadxy
       };
 
       if (nm1[1] && nm1[2] && nm1[3]) h_seed_nm1_pt->Fill(tc.pt);
@@ -855,21 +799,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     return;
   }
 
-  std::vector<bool> seed_use(ntk, 0);
-  if (verbose) printf("seed_use:");
-  for (size_t itk = 0; itk < ntk; ++itk) {
-    const track_cuts itk_tc(this, seed_tracks[itk].track(), *beamspot, primary_vertex, *tt_builder);
-    seed_use[itk] = no_track_cuts || seed_track_is_second[itk] || itk_tc.use(true);
-    if (seed_use[itk] && remove_seed_tracks_frac > 0) {
-      edm::Service<edm::RandomNumberGenerator> rng;
-      CLHEP::HepRandomEngine& rng_engine = rng->getEngine(event.streamID());
-      if (rng_engine.flat() < remove_seed_tracks_frac)
-        seed_use[itk] = false;
-    }
-    if (verbose && seed_use[itk]) printf(" %lu", itk);
-  }
-  if (verbose) printf("\n");
-
   std::vector<size_t> itks(n_tracks_per_seed_vertex, 0);
 
   auto try_seed_vertex = [&]() {
@@ -915,22 +844,17 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
   // ha
   for (size_t itk = 0; itk < ntk; ++itk) {
-    if (!seed_use[itk]) continue;
     itks[0] = itk;
     for (size_t jtk = itk+1; jtk < ntk; ++jtk) {
-      if (!seed_use[jtk]) continue;
       itks[1] = jtk;
       if (n_tracks_per_seed_vertex == 2) { try_seed_vertex(); continue; }
       for (size_t ktk = jtk+1; ktk < ntk; ++ktk) {
-        if (!seed_use[ktk]) continue;
         itks[2] = ktk;
         if (n_tracks_per_seed_vertex == 3) { try_seed_vertex(); continue; }
         for (size_t ltk = ktk+1; ltk < ntk; ++ltk) {
-          if (!seed_use[ltk]) continue;
           itks[3] = ltk;
           if (n_tracks_per_seed_vertex == 4) { try_seed_vertex(); continue; }
           for (size_t mtk = ltk+1; mtk < ntk; ++mtk) {
-            if (!seed_use[mtk]) continue;
             itks[4] = mtk;
             try_seed_vertex();
           }
