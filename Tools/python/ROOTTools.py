@@ -407,7 +407,7 @@ class _hist_list:
         else:
             raise AttributeError("no histogram '%s' found" % name)
 
-def compare_all_hists(ps, samples, **kwargs):
+def compare_hists(ps, samples, **kwargs):
     """For the common subset of histograms found in dir1..N, draw them
     superimposed, normalized to unit area, with different
     colors. samples is a list of [(sample_name, dir_name, color), ...].
@@ -546,7 +546,7 @@ def compare_all_hists(ps, samples, **kwargs):
         if not is2d:
             hists_sorted.sort(key=lambda hist: hist.GetMaximum(), reverse=True)
 
-        if ratio and not is2d:
+        if len(hists) > 1 and ratio and not is2d:
             ratios_plot(name_clean,
                     hists,
                     plot_saver=ps,
@@ -2358,7 +2358,7 @@ __all__ = [
     'interval_to_vpme',
     'cm2mm',
     'cmssw_setup',
-    'compare_all_hists',
+    'compare_hists',
     'core_gaussian',
     'cumulative_histogram',
     'cut',

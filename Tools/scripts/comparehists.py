@@ -136,16 +136,16 @@ else:
                 if not issubclass(type(d), ROOT.TDirectory):
                     raise ValueError('dir %s not found in file %s' % (dir_path, options.files[i]))
 
-compare_all_hists(ps,
-                  samples = zip(options.nice, dirs, options.colors),
-                  recurse = options.recurse,
-                  only_n_first = options.only_n_first,
-                  no_stats = options.lambda_no_stats,
-                  stat_size = options.lambda_stat_size,
-                  apply_commands = options.lambda_apply_commands,
-                  separate_plots = options.lambda_separate_plots,
-                  skip = options.lambda_skip,
-                  draw_command = options.lambda_draw_command,
-                  scaling = options.lambda_scaling,
-                  ratio = options.lambda_ratio,
-                  )
+compare_hists(ps,
+              samples = zip(options.nice, dirs, options.colors),
+              recurse = options.recurse,
+              only_n_first = options.only_n_first,
+              no_stats = options.lambda_no_stats,
+              stat_size = options.lambda_stat_size,
+              apply_commands = options.lambda_apply_commands,
+              separate_plots = options.lambda_separate_plots,
+              skip = options.lambda_skip,
+              draw_command = options.lambda_draw_command,
+              scaling = options.lambda_scaling,
+              ratio = options.lambda_ratio,
+              )
