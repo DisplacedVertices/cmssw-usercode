@@ -45,7 +45,7 @@ if keep_gen:
     output_commands += ['keep *_genParticles_*_HLT', 'keep *_ak4GenJetsNoNu_*_HLT']
 
 tfileservice(process, 'vertex_histos.root')
-random_service(process, {'mfvVertices': 1222})
+random_service(process, {'mfvVertexTracks': 1222})
 
 process.load('JMTucker.MFVNeutralino.Vertexer_cff')
 process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')

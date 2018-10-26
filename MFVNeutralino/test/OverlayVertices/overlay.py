@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
-from JMTucker.Tools.CMSSWTools import which_global_tag
+raise NotImplementedError('needs to be updated to 2017 workflow: miniaod, track/vertexing factorization')
+
 from JMTucker.Tools.CMSSWTools import *
-import JMTucker.Tools.SampleFiles as SampleFiles
-import JMTucker.Tools.Samples as Samples
+from JMTucker.Tools import SampleFiles, Samples
 from JMTucker.Tools.Year import year
 
 allowed_samples = Samples.ttbar_samples + Samples.qcd_samples_sum + Samples.ttbar_samples_2015 + Samples.qcd_samples_sum_2015
