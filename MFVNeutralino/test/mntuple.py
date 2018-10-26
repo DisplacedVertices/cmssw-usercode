@@ -67,7 +67,7 @@ process.selectedPatElectrons.src = 'slimmedElectrons'
 process.mfvGenParticles.gen_particles_src = 'prunedGenParticles'
 process.mfvGenParticles.last_flag_check = False
 
-process.mfvVertices.track_src = 'mfvUnpackedCandidateTracks'
+process.mfvVertexTracks.tracks_src = 'mfvUnpackedCandidateTracks'
 
 process.mfvVerticesToJets.input_is_miniaod = True
 process.mfvVerticesAuxTmp.input_is_miniaod = True

@@ -34,5 +34,7 @@ namespace JMTucker_MFVNeutralinoFormats {
     edm::Wrapper<mfv::TriggerFloats> wtf;
 
     edm::Wrapper<std::vector<VertexerPairEff> > wvvpe;
+
+    edm::Wrapper<std::vector<edm::Ref<std::vector<reco::Track>,reco::Track,edm::refhelper::FindUsingAdvance<std::vector<reco::Track>,reco::Track> > > > wvtr;
   };
 }

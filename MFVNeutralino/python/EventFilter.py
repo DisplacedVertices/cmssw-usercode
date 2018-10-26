@@ -61,17 +61,17 @@ def setup_event_filter(process,
             if not hasattr(process, 'mfvVertices'):
                 # assume if mfvVertices is set up, then the rest of this is too
                 process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
-                process.load('JMTucker.MFVNeutralino.Vertexer_cfi')
+                process.load('JMTucker.MFVNeutralino.Vertexer_cff')
                 if input_is_miniaod:
                     process.goodOfflinePrimaryVertices.src = 'offlineSlimmedPrimaryVertices'
                     process.load('JMTucker.MFVNeutralino.UnpackedCandidateTracks_cfi')
-                    process.mfvVertices.track_src = 'mfvUnpackedCandidateTracks'
+                    process.mfvVertexTracks.tracks_src = 'mfvUnpackedCandidateTracks'
             vertexFilter = cms.EDFilter('VertexSelector', src = cms.InputTag('mfvVertices'), cut = cms.string('nTracks > 2'), filter = cms.bool(True))
             setattr(process, event_filter_name + 'W1Vtx', vertexFilter)
             if input_is_miniaod:
-                overall *= process.goodOfflinePrimaryVertices * process.mfvUnpackedCandidateTracks * process.mfvVertices * vertexFilter
+                overall *= process.goodOfflinePrimaryVertices * process.mfvUnpackedCandidateTracks * process.mfvVertexSequenceBare * vertexFilter
             else:
-                overall *= process.goodOfflinePrimaryVertices                                      * process.mfvVertices * vertexFilter
+                overall *= process.goodOfflinePrimaryVertices                                      * process.mfvVertexSequenceBare * vertexFilter
 
     if not path_name:
         return overall

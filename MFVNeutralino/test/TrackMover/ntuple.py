@@ -79,7 +79,7 @@ for icfg, cfg in enumerate(cfgs):
                             )
 
     modifiedVertexSequence(process, ex,
-                           track_src = tracks_name,
+                           tracks_src = tracks_name,
                            min_all_track_sigmadxy = cfg.nsigmadxy,
                            min_seed_track_sigmadxy = cfg.nsigmadxy)
 

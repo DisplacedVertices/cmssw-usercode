@@ -8,6 +8,7 @@
   <class name="std::map<unsigned int,edm::helpers::KeyVal<edm::Ref<std::vector<reco::Vertex>,reco::Vertex,edm::refhelper::FindUsingAdvance<std::vector<reco::Vertex>,reco::Vertex> >,edm::RefVector<std::vector<pat::Jet>,pat::Jet,edm::refhelper::FindUsingAdvance<std::vector<pat::Jet>,pat::Jet> > > >"/>
   <class name="edm::RefProd<std::vector<pat::Jet> >"/>
   <class name="edm::Wrapper<edm::RefVector<std::vector<reco::Vertex>,reco::Vertex,edm::refhelper::FindUsingAdvance<std::vector<reco::Vertex>,reco::Vertex> > >"/>
+  <class name="edm::Wrapper<std::vector<edm::Ref<std::vector<reco::Track>,reco::Track,edm::refhelper::FindUsingAdvance<std::vector<reco::Track>,reco::Track> > > >"/>
 
   <class name="std::vector<TLorentzVector>"/>
   <class name="edm::Wrapper<std::vector<TLorentzVector> >"/>

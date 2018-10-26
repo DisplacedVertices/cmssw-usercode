@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 from JMTucker.MFVNeutralino.GenParticles_cff import mfvGenParticles
-from JMTucker.MFVNeutralino.Vertexer_cfi import mfvVertices
+from JMTucker.MFVNeutralino.Vertexer_cfi import mfvVertexTracks, mfvVertices
 from JMTucker.MFVNeutralino.VertexAuxProducer_cfi import mfvVerticesAuxTmp, mfvVerticesAux
 from JMTucker.MFVNeutralino.VertexSelector_cfi import mfvSelectedVertices
 from JMTucker.MFVNeutralino.JetVertexAssociator_cfi import mfvVerticesToJets
@@ -13,18 +13,24 @@ mfvSelectedVerticesTmp = mfvSelectedVertices.clone(vertex_aux_src = 'mfvVertices
 mfvVerticesAuxPresel = mfvVerticesAux
 mfvVerticesAux = mfvSelectedVertices.clone(vertex_aux_src = 'mfvVerticesAuxPresel', min_ntracks = 3)
 
-x = (mfvGenParticles *
-     mfvVertices *
-     mfvVerticesAuxTmp *
-     mfvSelectedVerticesTmp *
-     mfvVerticesToJets *
-     mfvVerticesAuxPresel *
-     mfvVerticesAux)
+mfvVertexSequenceBare = cms.Sequence(
+    mfvVertexTracks *
+    mfvVertices
+    )
 
-mfvVertexSequence = cms.Sequence(x)
+mfvVertexSequence = cms.Sequence(
+    mfvVertexSequenceBare *
+    mfvGenParticles *
+    mfvVerticesAuxTmp *
+    mfvSelectedVerticesTmp *
+    mfvVerticesToJets *
+    mfvVerticesAuxPresel *
+    mfvVerticesAux
+    )
 
 def modifiedVertexSequence(process, name, **kwargs):
-    mfvVerticesNew = process.mfvVertices.clone(**kwargs)
+    mfvVertexTracksNew = process.mfvVertexTracks.clone(**kwargs)
+    mfvVerticesNew = process.mfvVertices.clone(seed_tracks_src = 'mfvVertexTracks%s' % name, **kwargs)
     mfvVerticesAuxTmpNew = process.mfvVerticesAuxTmp.clone(vertex_src = 'mfvVertices%s' % name)
     mfvSelectedVerticesTmpNew = process.mfvSelectedVerticesTmp.clone(vertex_src = 'mfvVertices%s' % name,
                                                                      vertex_aux_src = 'mfvVerticesAuxTmp%s' % name)
@@ -33,6 +39,7 @@ def modifiedVertexSequence(process, name, **kwargs):
                                                                  sv_to_jets_src = 'mfvVerticesToJets%s' % name)
     mfvVerticesAuxNew = process.mfvVerticesAux.clone(vertex_aux_src = 'mfvVerticesAuxPresel%s' % name)
 
+    setattr(process, 'mfvVertexTracks%s'        % name, mfvVertexTracksNew)
     setattr(process, 'mfvVertices%s'            % name, mfvVerticesNew)
     setattr(process, 'mfvVerticesAuxTmp%s'      % name, mfvVerticesAuxTmpNew)
     setattr(process, 'mfvSelectedVerticesTmp%s' % name, mfvSelectedVerticesTmpNew)
@@ -41,6 +48,7 @@ def modifiedVertexSequence(process, name, **kwargs):
     setattr(process, 'mfvVerticesAux%s'         % name, mfvVerticesAuxNew)
 
     seq = cms.Sequence(
+        mfvVertexTracksNew *
         mfvVerticesNew *
         mfvVerticesAuxTmpNew *
         mfvSelectedVerticesTmpNew *
