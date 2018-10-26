@@ -777,7 +777,7 @@ def data_mc_comparison(name,
             xax = None
 
             if sample not in data_samples:
-                sample.hist.Scale(sample.partial_weight_orig * int_lumi)
+                sample.hist.Scale(sample.partial_weight(sample._datamccomp_file) * int_lumi)
                 if int_lumi_bkg_scale is not None and sample not in signal_samples:
                     sample.hist.Scale(int_lumi_bkg_scale)
 
