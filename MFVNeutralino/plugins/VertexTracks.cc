@@ -143,8 +143,8 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
   if (histos) {
     edm::Service<TFileService> fs;
 
-    h_n_all_tracks  = fs->make<TH1F>("h_n_all_tracks",  "", 40, 0, 2000);
-    h_n_seed_tracks = fs->make<TH1F>("h_n_seed_tracks", "", 50, 0,  200);
+    h_n_all_tracks  = fs->make<TH1F>("h_n_all_tracks",  "", 200, 0, 2000);
+    h_n_seed_tracks = fs->make<TH1F>("h_n_seed_tracks", "", 200, 0,  200);
 
     const char* par_names[6] = {"pt", "eta", "phi", "dxybs", "dxypv", "dz"};
     const int par_nbins[6] = {  50, 50, 50, 100, 100, 80 };
