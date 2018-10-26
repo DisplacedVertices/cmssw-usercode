@@ -33,7 +33,7 @@ elif event_histos == 'only':
 ####
 
 process = basic_process('Ntuple')
-max_events(process, 1000)
+max_events(process, 10000)
 report_every(process, 1000000)
 #want_summary(process)
 registration_warnings(process)
@@ -110,43 +110,9 @@ if keep_all:
     else:
         output_commands = EventContent.MINIAODEventContent.outputCommands + output_commands_nodrop
 
-if prepare_vis:
-    process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
-    process.p *= process.mfvSelectedVerticesSeq
+common.prepare_vis(process, prepare_vis, output_commands, cmssw_settings)
 
-    for x in process.mfvSelectedVerticesTight, process.mfvSelectedVerticesTightNtk3, process.mfvSelectedVerticesTightNtk4:
-        x.produce_vertices = True
-        x.produce_tracks = True
-
-    process.load('JMTucker.MFVNeutralino.VertexRefitter_cfi')
-    process.mfvVertexRefitsDrop0 = process.mfvVertexRefits.clone(n_tracks_to_drop = 0)
-    process.mfvVertexRefitsDrop2 = process.mfvVertexRefits.clone(n_tracks_to_drop = 2)
-    process.p *= process.mfvVertexRefits * process.mfvVertexRefitsDrop2 *  process.mfvVertexRefitsDrop0
-
-    output_commands += [
-        'keep *_mfvVertices_*_*',
-        'keep *_mfvSelectedVerticesTight*_*_*',
-        'keep *_mfvVertexRefits_*_*',
-        'keep *_mfvVertexRefitsDrop2_*_*',
-        'keep *_mfvVertexRefitsDrop0_*_*',
-        ]
-
-    if cmssw_settings.is_mc:
-        output_commands += ['keep *_mfvGenParticles_*_*']
-
-if run_n_tk_seeds:
-    process.mfvEvent.lightweight = True
-    process.out.fileName = 'ntkseeds.root'
-    if run_n_tk_seeds != 'full':
-        output_commands.remove('keep MFVVertexAuxs_mfvVerticesAux_*_*')
-    from JMTucker.MFVNeutralino.Vertexer_cff import modifiedVertexSequence
-    output_commands += ['keep VertexerPairEffs_mfvVertices_*_*']
-    for n_tk_seed in 3,4,5:
-        ex = '%iTkSeed' % n_tk_seed
-        process.p *= modifiedVertexSequence(process, ex, n_tracks_per_seed_vertex = n_tk_seed)
-        output_commands += ['keep VertexerPairEffs_mfvVertices%s_*_*' % ex]
-        if run_n_tk_seeds == 'full':
-            output_commands += ['keep MFVVertexAuxs_mfvVerticesAux%s_*_*' % ex]
+common.run_n_tk_seeds(process, run_n_tk_seeds, output_commands)
 
 process.out.outputCommands = output_commands
 
@@ -155,17 +121,7 @@ if event_filter:
     JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process, path_name='p', event_filter=True, input_is_miniaod=True)
 
 common.event_histos(process, event_histos)
-
-if minitree_only:
-    del process.out
-    del process.outp
-    process.TFileService.fileName = 'minintuple.root'
-    process.load('JMTucker.MFVNeutralino.MiniTree_cff')
-    process.mfvWeight.throw_if_no_mcstat = False
-    for p in process.pMiniTree, process.pMiniTreeNtk3, process.pMiniTreeNtk4, process.pMiniTreeNtk3or4:
-        p.insert(0, process.pmcStat._seq)
-        p.insert(0, process.p._seq)
-
+common.minitree_only(process, minitree_only)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
