@@ -29,8 +29,15 @@ mfvVertexSequence = cms.Sequence(
     )
 
 def modifiedVertexSequence(process, name, **kwargs):
-    mfvVertexTracksNew = process.mfvVertexTracks.clone(**kwargs)
-    mfvVerticesNew = process.mfvVertices.clone(seed_tracks_src = 'mfvVertexTracks%s' % name, **kwargs)
+    kwargs_tracks, kwargs_vertices = {}, {}
+    for k,v in kwargs.iteritems():
+        if hasattr(process.mfvVertexTracks, k):
+            kwargs_tracks[k] = v
+        if hasattr(process.mfvVertices, k):
+            kwargs_vertices[k] = v
+
+    mfvVertexTracksNew = process.mfvVertexTracks.clone(**kwargs_tracks)
+    mfvVerticesNew = process.mfvVertices.clone(seed_tracks_src = 'mfvVertexTracks%s' % name, **kwargs_vertices)
     mfvVerticesAuxTmpNew = process.mfvVerticesAuxTmp.clone(vertex_src = 'mfvVertices%s' % name)
     mfvSelectedVerticesTmpNew = process.mfvSelectedVerticesTmp.clone(vertex_src = 'mfvVertices%s' % name,
                                                                      vertex_aux_src = 'mfvVerticesAuxTmp%s' % name)
