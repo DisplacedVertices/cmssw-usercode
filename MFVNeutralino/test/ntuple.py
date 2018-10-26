@@ -2,6 +2,7 @@
 
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.MiniAOD_cfg import *
+import JMTucker.MFVNeutralino.NtupleCommon as common
 
 cmssw_settings = CMSSWSettings()
 cmssw_settings.is_mc = True
@@ -126,34 +127,10 @@ process.patMuons.embedTrack = False
 process.patElectrons.embedTrack = False
 
 want_summary(process, False)
-max_events(process, 100)
+max_events(process, 1000)
 file_event_from_argv(process)
 
-if event_histos:
-    process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
-    process.load('JMTucker.MFVNeutralino.EventHistos_cfi')
-    process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
-
-    process.mfvEventForHistos = process.mfvEvent.clone(vertex_seed_tracks_src = '') # JMTBAD refactor separate module for tracks from mfvVertices
-    process.mfvWeightForHistos = process.mfvWeight.clone(mevent_src = 'mfvEventForHistos', throw_if_no_mcstat = False)
-    process.mfvAnalysisCutsForJetHistos = process.mfvAnalysisCuts.clone(mevent_src = 'mfvEventForHistos', apply_vertex_cuts = False)
-    process.mfvAnalysisCutsForLeptonHistos = process.mfvAnalysisCutsForJetHistos.clone(apply_presel = 2)
-
-    process.mfvEventHistosJetPreSel = process.mfvEventHistos.clone(mevent_src = 'mfvEventForHistos', weight_src = 'mfvWeightForHistos')
-    process.mfvEventHistosLeptonPreSel = process.mfvEventHistosJetPreSel.clone()
-
-    process.eventHistosPreSeq = cms.Sequence(process.mfvTriggerFilter * process.goodOfflinePrimaryVertices *
-                                             process.selectedPatJets * process.selectedPatMuons * process.selectedPatElectrons *
-                                             process.mfvTriggerFloats * process.mfvGenParticles *
-                                             process.mfvEventForHistos * process.mfvWeightForHistos)
-
-    process.pEventHistosJetPreSel = cms.Path(process.eventHistosPreSeq * process.mfvAnalysisCutsForJetHistos    * process.mfvEventHistosJetPreSel)
-    process.pEventHistosLepPreSel = cms.Path(process.eventHistosPreSeq * process.mfvAnalysisCutsForLeptonHistos * process.mfvEventHistosLeptonPreSel)
-
-    if event_histos == 'only':
-        del process.out
-        del process.outp
-        del process.p
+common.event_histos(process, event_histos)
 
 if minitree_only:
     remove_output_module(process)

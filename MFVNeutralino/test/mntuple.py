@@ -2,6 +2,7 @@
 
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
+import JMTucker.MFVNeutralino.NtupleCommon as common
 
 cmssw_settings = CMSSWSettings()
 cmssw_settings.is_mc = True
@@ -32,7 +33,7 @@ elif event_histos == 'only':
 ####
 
 process = basic_process('Ntuple')
-max_events(process, 100)
+max_events(process, 1000)
 report_every(process, 1000000)
 #want_summary(process)
 registration_warnings(process)
@@ -153,31 +154,7 @@ if event_filter:
     import JMTucker.MFVNeutralino.EventFilter
     JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process, path_name='p', event_filter=True, input_is_miniaod=True)
 
-if event_histos:
-    process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
-    process.load('JMTucker.MFVNeutralino.EventHistos_cfi')
-    process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
-
-    process.mfvEventForHistos = process.mfvEvent.clone(vertex_seed_tracks_src = '') # JMTBAD refactor separate module for tracks from mfvVertices
-    process.mfvWeightForHistos = process.mfvWeight.clone(mevent_src = 'mfvEventForHistos', throw_if_no_mcstat = False)
-    process.mfvAnalysisCutsForJetHistos = process.mfvAnalysisCuts.clone(mevent_src = 'mfvEventForHistos', apply_vertex_cuts = False)
-    process.mfvAnalysisCutsForLeptonHistos = process.mfvAnalysisCutsForJetHistos.clone(apply_presel = 2)
-
-    process.mfvEventHistosJetPreSel = process.mfvEventHistos.clone(mevent_src = 'mfvEventForHistos', weight_src = 'mfvWeightForHistos')
-    process.mfvEventHistosLeptonPreSel = process.mfvEventHistosJetPreSel.clone()
-
-    process.eventHistosPreSeq = cms.Sequence(process.mfvTriggerFilter * process.goodOfflinePrimaryVertices *
-                                             process.selectedPatJets * process.selectedPatMuons * process.selectedPatElectrons *
-                                             process.mfvTriggerFloats * process.mfvGenParticles *
-                                             process.mfvEventForHistos * process.mfvWeightForHistos)
-
-    process.pEventHistosJetPreSel = cms.Path(process.eventHistosPreSeq * process.mfvAnalysisCutsForJetHistos    * process.mfvEventHistosJetPreSel)
-    process.pEventHistosLepPreSel = cms.Path(process.eventHistosPreSeq * process.mfvAnalysisCutsForLeptonHistos * process.mfvEventHistosLeptonPreSel)
-
-    if event_histos == 'only':
-        del process.out
-        del process.outp
-        del process.p
+common.event_histos(process, event_histos)
 
 if minitree_only:
     del process.out

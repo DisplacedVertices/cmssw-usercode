@@ -138,6 +138,7 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
 
   produces<std::vector<reco::TrackRef>>("all");
   produces<std::vector<reco::TrackRef>>("seed");
+  produces<reco::TrackCollection>("seed");
 
   if (histos) {
     edm::Service<TFileService> fs;
@@ -204,6 +205,7 @@ void MFVVertexTracks::produce(edm::Event& event, const edm::EventSetup& setup) {
 
   std::unique_ptr<std::vector<reco::TrackRef>> all_tracks (new std::vector<reco::TrackRef>);
   std::unique_ptr<std::vector<reco::TrackRef>> seed_tracks(new std::vector<reco::TrackRef>);
+  std::unique_ptr<reco::TrackCollection> seed_tracks_copy(new reco::TrackCollection);
 
   if (!disregard_event) {
     if (use_tracks) {
@@ -397,8 +399,10 @@ void MFVVertexTracks::produce(edm::Event& event, const edm::EventSetup& setup) {
 
     /////////////
 
-    if (use)
+    if (use) {
       seed_tracks->push_back(tk);
+      seed_tracks_copy->push_back(*tk);
+    }
 
     if (verbose) {
       printf("track %5lu: pt: %7.3f dxy: %7.3f nhits %3i ", i, pt, dxybs, nhits);
@@ -462,6 +466,7 @@ void MFVVertexTracks::produce(edm::Event& event, const edm::EventSetup& setup) {
 
   event.put(std::move(all_tracks), "all");
   event.put(std::move(seed_tracks), "seed");
+  event.put(std::move(seed_tracks_copy), "seed");
 }
 
 DEFINE_FWK_MODULE(MFVVertexTracks);
