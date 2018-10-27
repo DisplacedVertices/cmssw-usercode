@@ -81,4 +81,5 @@ def setup_event_filter(process,
         setattr(process, path_name, cms.Path(overall))
 
     if hasattr(process, 'out'):
+        assert not hasattr(process.out, 'SelectEvents')
         process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring(path_name))
