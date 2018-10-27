@@ -5,7 +5,7 @@ class CMSSWSettings(object):
         from JMTucker.Tools.Year import year
         self.year = year
         self.is_mc = True
-        #self.is_miniaod
+        self.is_miniaod = False
         #self.repro
 
 # following FWCore.ParameterSet.MassReplace.MassSearchReplaceAnyInputTagVisitor
