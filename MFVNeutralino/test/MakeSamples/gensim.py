@@ -1,5 +1,6 @@
-# https://twiki.cern.ch/twiki/bin/view/CMS/PdmVMCcampaignRunIIFall17GS and a later request in McM
-# 9_3_6_patch2 cmsDriver.py Configuration/GenProduction/python/ThirteenTeV/MC17_DYTo2Mu_M800to1300_CP5_Pythia8_v1.py --fileout file:EXO-RunIIFall17GS-00423.root --mc --eventcontent RAWSIM --datatier GEN-SIM --conditions 93X_mc2017_realistic_v3 --beamspot Realistic25ns13TeVEarly2017Collision --step GEN,SIM --nThreads 8 --geometry DB:Extended --era Run2_2017 --python_filename EXO-RunIIFall17GS-00423_1_cfg.py --no_exec --customise Configuration/DataProcessing/Utils.addMonitoring -n 1300 --no_exec
+# https://twiki.cern.ch/twiki/bin/view/CMS/PdmVMCcampaignRunIIFall17GS
+# https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/EXO-RunIIFall17GS-00073
+# 9_3_9_patch1 cmsDriver.py Configuration/GenProduction/python/EXO-RunIIFall17GS-00073-fragment.py --fileout file:EXO-RunIIFall17GS-00073.root --mc --eventcontent RAWSIM --datatier GEN-SIM --conditions 93X_mc2017_realistic_v3 --beamspot Realistic25ns13TeVEarly2017Collision --step GEN,SIM --nThreads 8 --geometry DB:Extended --era Run2_2017 --python_filename EXO-RunIIFall17GS-00073_1_cfg.py --no_exec --customise Configuration/DataProcessing/Utils.addMonitoring -n 724 
 
 import sys, FWCore.ParameterSet.Config as cms, dynamicconf
 from Configuration.StandardSequences.Eras import eras

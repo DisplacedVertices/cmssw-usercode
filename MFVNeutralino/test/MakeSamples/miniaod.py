@@ -1,5 +1,5 @@
-# https://twiki.cern.ch/twiki/bin/view/CMS/PdmVMCcampaignRunIIFall17MiniAOD
-# except not updated for v2, so steal from a newer request in McM
+# https://twiki.cern.ch/twiki/bin/view/CMS/PdmVMCcampaignRunIIFall17MiniAODv2
+# https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/EXO-RunIIFall17MiniAODv2-00064
 # CMSSW_9_4_6_patch1 cmsDriver.py step1 --mc --eventcontent MINIAODSIM --runUnscheduled --datatier MINIAODSIM --conditions 94X_mc2017_realistic_v14 --step PAT --nThreads 4 --scenario pp --era Run2_2017,run2_miniAOD_94XFall17 --python_filename BPH-RunIIFall17MiniAODv2-00046_1_cfg.py --no_exec --customise Configuration/DataProcessing/Utils.addMonitoring -n 4800 --no_exec
 
 import sys, FWCore.ParameterSet.Config as cms
