@@ -63,7 +63,7 @@ class NtupleSettings(CMSSWSettings):
     def __init__(self):
         super(NtupleSettings, self).__init__()
 
-        self.version = 'V20'
+        self.ver = 'V20'
 
         self.run_n_tk_seeds = False
         self.minitree_only = False
@@ -71,6 +71,13 @@ class NtupleSettings(CMSSWSettings):
         self.keep_all = False
         self.keep_gen = False
         self.event_filter = True
+
+    @property
+    def verison(self):
+        if self.is_miniaod:
+            return self.ver + 'm'
+        else:
+            return self.ver
 
     def normalize(self):
         if not self.keep_all and self.prepare_vis:
@@ -85,10 +92,7 @@ class NtupleSettings(CMSSWSettings):
             raise ValueError('only one of run_n_tk_seeds, minitree_only, prepare_vis allowed')
 
     def batch_name(self):
-        ver = self.version
-        if self.is_miniaod:
-            ver += 'm'
-        batch_name = 'Ntuple' + ver
+        batch_name = 'Ntuple' + self.version
 
         if self.run_n_tk_seeds:
             batch_name += '_NTkSeeds'
