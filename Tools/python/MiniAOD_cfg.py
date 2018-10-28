@@ -28,7 +28,7 @@ def pat_tuple_process(settings, customize_before_unscheduled=None): #, paths=[])
     process.GlobalTag = GlobalTag(process.GlobalTag, which_global_tag(settings), '')
 
     process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
-    process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
+    process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
     process.source = cms.Source('PoolSource', fileNames = cms.untracked.vstring())
     process.source.fileNames = [{
         (2017, False): 'file:/uscmst1b_scratch/lpc1/3DayLifetime/tucker/itch/3CF97E8C-41DF-E711-9D55-008CFA56D6F4.root',
