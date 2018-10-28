@@ -1,6 +1,7 @@
-import FWCore.ParameterSet.Config as cms
+from JMTucker.Tools.CMSSWTools import *
+from JMTucker.Tools.Year import year
 
-def run_n_tk_seeds(process, mode, output_commands):
+def run_n_tk_seeds(process, mode, settings, output_commands):
     if mode:
         process.mfvEvent.lightweight = True
         process.out.fileName = 'ntkseeds.root'
@@ -15,7 +16,7 @@ def run_n_tk_seeds(process, mode, output_commands):
             if mode == 'full':
                 output_commands += ['keep MFVVertexAuxs_mfvVerticesAux%s_*_*' % ex]
 
-def prepare_vis(process, mode, output_commands, cmssw_settings):
+def prepare_vis(process, mode, settings, output_commands):
     if mode:
         process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
         process.p *= process.mfvSelectedVerticesSeq
@@ -37,38 +38,10 @@ def prepare_vis(process, mode, output_commands, cmssw_settings):
             'keep *_mfvVertexRefitsDrop0_*_*',
             ]
 
-        if cmssw_settings.is_mc:
+        if settings.is_mc:
             output_commands += ['keep *_mfvGenParticles_*_*']
 
-def event_histos(process, mode):
-    if mode:
-        process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
-        process.load('JMTucker.MFVNeutralino.EventHistos_cfi')
-        process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
-
-        process.mfvEventForHistos = process.mfvEvent.clone(vertex_seed_tracks_src = cms.InputTag('mfvVertexTracks', 'seed'))
-        process.mfvWeightForHistos = process.mfvWeight.clone(mevent_src = 'mfvEventForHistos', throw_if_no_mcstat = False)
-        process.mfvAnalysisCutsForJetHistos = process.mfvAnalysisCuts.clone(mevent_src = 'mfvEventForHistos', apply_vertex_cuts = False)
-        process.mfvAnalysisCutsForLeptonHistos = process.mfvAnalysisCutsForJetHistos.clone(apply_presel = 2)
-
-        process.mfvEventHistosJetPreSel = process.mfvEventHistos.clone(mevent_src = 'mfvEventForHistos', weight_src = 'mfvWeightForHistos')
-        process.mfvEventHistosLeptonPreSel = process.mfvEventHistosJetPreSel.clone()
-
-        process.eventHistosPreSeq = cms.Sequence(process.mfvTriggerFilter * process.goodOfflinePrimaryVertices *
-                                                 process.selectedPatJets * process.selectedPatMuons * process.selectedPatElectrons *
-                                                 process.mfvTriggerFloats * process.mfvGenParticles *
-                                                 process.mfvUnpackedCandidateTracks * process.mfvVertexTracks *
-                                                 process.mfvEventForHistos * process.mfvWeightForHistos)
-
-        process.pEventHistosJetPreSel = cms.Path(process.eventHistosPreSeq * process.mfvAnalysisCutsForJetHistos    * process.mfvEventHistosJetPreSel)
-        process.pEventHistosLepPreSel = cms.Path(process.eventHistosPreSeq * process.mfvAnalysisCutsForLeptonHistos * process.mfvEventHistosLeptonPreSel)
-
-        if mode == 'only':
-            del process.out
-            del process.outp
-            del process.p
-
-def minitree_only(process, mode):
+def minitree_only(process, mode, settings, output_commands):
     if mode:
         del process.out
         del process.outp
@@ -78,3 +51,204 @@ def minitree_only(process, mode):
         for p in process.pMiniTree, process.pMiniTreeNtk3, process.pMiniTreeNtk4, process.pMiniTreeNtk3or4:
             p.insert(0, process.pmcStat._seq)
             p.insert(0, process.p._seq)
+
+def event_filter(process, mode, settings, output_commands):
+    if mode:
+        from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
+        setup_event_filter(process, path_name='p', event_filter=True, input_is_miniaod=settings.is_miniaod)
+
+########################################################################
+
+class NtupleSettings(CMSSWSettings):
+    def __init__(self):
+        super(NtupleSettings, self).__init__()
+
+        self.version = 'V20'
+
+        self.run_n_tk_seeds = False
+        self.minitree_only = False
+        self.prepare_vis = False
+        self.keep_all = False
+        self.keep_gen = False
+        self.event_filter = True
+
+    def normalize(self):
+        if not self.keep_all and self.prepare_vis:
+            print 'setting keep_all True because prepare_vis is True'
+            self.keep_all = True
+
+        if self.keep_all and self.event_filter:
+            print 'setting event_filter to False because keep_all is True'
+            self.event_filter = False
+
+        if len(filter(None, (self.run_n_tk_seeds, self.minitree_only, self.prepare_vis))) > 1:
+            raise ValueError('only one of run_n_tk_seeds, minitree_only, prepare_vis allowed')
+
+    def batch_name(self):
+        ver = self.version
+        if self.is_miniaod:
+            ver += 'm'
+        batch_name = 'Ntuple' + ver
+
+        if self.run_n_tk_seeds:
+            batch_name += '_NTkSeeds'
+        elif self.minitree_only:
+            batch_name += '_MiniNtuple'
+        elif self.prepare_vis:
+            batch_name += '_PrepareVis'
+
+        if keep_gen:
+            batch_name += '_WGen'
+
+        if not event_filter:
+            batch_name += '_NoEF'
+
+def make_output_commands(process, settings):
+    output_commands = [
+        'drop *',
+        'keep *_mcStat_*_*',
+        'keep MFVVertexAuxs_mfvVerticesAux_*_*',
+        'keep MFVEvent_mfvEvent__*',
+        ]
+
+    if settings.keep_gen:
+        if settings.is_miniaod:
+            output_commands += ['keep *_prunedGenParticles_*_*', 'keep *_slimmedGenJets_*_*']
+        else:
+            output_commands += ['keep *_genParticles_*_HLT',     'keep *_ak4GenJetsNoNu_*_HLT']
+
+    if settings.keep_all:
+        def dedrop(l):
+            return [x for x in l if not x.strip().startswith('drop')]
+        our_output_commands = output_commands
+        output_commands = process.AODSIMEventContent.outputCommands if settings.is_mc else process.AODEventContent.outputCommands
+        if settings.is_miniaod:
+            output_commands += dedrop(process.MINIAODSIMEventContent.outputCommands if settings.is_mc else process.MINIAODEventContent.outputCommands)
+        output_commands += dedrop(our_output_commands)
+
+    return output_commands
+
+def set_output_commands(process, cmds):
+    if hasattr(process, 'out'):
+        process.out.outputCommands = cmds
+
+def signals_no_event_filter_modifier(sample):
+    if sample.is_signal:
+        magic = 'event_filter = True'
+        to_replace = [(magic, 'event_filter = False', 'tuple template does not contain the magic string "%s"' % magic)]
+    else:
+        to_replace = []
+    return [], to_replace
+
+def ntuple_process(settings):
+    settings.normalize()
+
+    from JMTucker.Tools import MiniAOD_cfg as mcfg
+    process = mcfg.pat_tuple_process(settings)
+    mcfg.remove_met_filters(process)
+    process.out.fileName = 'ntuple.root'
+    # turn off embedding so we can match leptons by track to vertices
+    process.patMuons.embedTrack = False
+    process.patElectrons.embedTrack = False
+
+    random_service(process, {'mfvVertexTracks': 1222})
+    tfileservice(process, 'vertex_histos.root')
+
+    process.load('JMTucker.MFVNeutralino.Vertexer_cff')
+    process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
+    process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
+    process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
+
+    process.p = cms.Path(process.mfvVertexSequence *
+                         process.mfvTriggerFloats *
+                         process.mfvEvent)
+
+    output_commands = make_output_commands(process, settings)
+
+    mods = [
+        (prepare_vis,    settings.prepare_vis),
+        (run_n_tk_seeds, settings.run_n_tk_seeds),
+        (event_filter,   settings.event_filter),
+        (minitree_only,  settings.minitree_only),
+        ]
+    for modifier, mode in mods:
+        modifier(process, mode, settings, output_commands)
+
+    set_output_commands(process, output_commands)
+
+    mcfg.associate_paths_to_task(process)
+
+    #bef, aft, diff = ReferencedTagsTaskAdder().modules_to_add('patJets', 'patMuons', 'patElectrons', 'mfvEvent')
+    #print 'may need to add:', ' '.join(diff)
+    # but remove things already in AOD
+
+    return process
+
+def mntuple_process(settings):
+    settings.normalize()
+    assert settings.is_miniaod
+
+    process = basic_process('Ntuple')
+    registration_warnings(process)
+    report_every(process, 1000000)
+    geometry_etc(process, which_global_tag(settings))
+    random_service(process, {'mfvVertexTracks': 1222})
+    tfileservice(process, 'vertex_histos.root')
+    output_file(process, 'ntuple.root', [])
+
+    process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
+    process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
+    process.load('PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi')
+    process.load('PhysicsTools.PatAlgos.selectionLayer1.electronSelector_cfi')
+    process.load('JMTucker.Tools.MCStatProducer_cff')
+    process.load('JMTucker.Tools.PATTupleSelection_cfi')
+    process.load('JMTucker.MFVNeutralino.UnpackedCandidateTracks_cfi')
+    process.load('JMTucker.MFVNeutralino.Vertexer_cff')
+    process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
+    process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
+    process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
+
+    process.goodOfflinePrimaryVertices.src = 'offlineSlimmedPrimaryVertices'
+    process.selectedPatJets.src = 'slimmedJets'
+    process.selectedPatMuons.src = 'slimmedMuons'
+    process.selectedPatElectrons.src = 'slimmedElectrons'
+    process.selectedPatJets.cut = process.jtupleParams.jetCut
+    #process.selectedPatMuons.cut = '' # process.jtupleParams.muonCut
+    #process.selectedPatElectrons.cut = '' # process.jtupleParams.electronCut
+
+    process.mfvGenParticles.gen_particles_src = 'prunedGenParticles'
+    process.mfvGenParticles.last_flag_check = False
+
+    process.mfvVertexTracks.tracks_src = 'mfvUnpackedCandidateTracks'
+
+    for x in process.mfvVerticesToJets, process.mfvVerticesAuxTmp, process.mfvVerticesAuxPresel, process.mfvEvent:
+        x.input_is_miniaod = True
+
+    process.mfvEvent.gen_particles_src = 'prunedGenParticles' # no idea if this lets gen_bquarks, gen_leptons work--may want the packed ones that have status 1 particles
+    process.mfvEvent.gen_jets_src = 'slimmedGenJets'
+    process.mfvEvent.pileup_info_src = 'slimmedAddPileupInfo'
+    process.mfvEvent.met_src = 'slimmedMETs'
+
+    process.p = cms.Path(process.goodOfflinePrimaryVertices *
+                         process.selectedPatJets *
+                         process.selectedPatMuons *
+                         process.selectedPatElectrons *
+                         process.mfvTriggerFloats *
+                         process.mfvUnpackedCandidateTracks *
+                         process.mfvVertexSequence *
+                         process.mfvEvent)
+
+    output_commands = make_output_commands(process, settings)
+
+    mods = [
+        (prepare_vis,    settings.prepare_vis),
+        (run_n_tk_seeds, settings.run_n_tk_seeds),
+        (event_filter,   settings.event_filter),
+        (minitree_only,  settings.minitree_only),
+        ]
+    for modifier, mode in mods:
+        modifier(process, mode, settings, output_commands)
+
+    set_output_commands(process, output_commands)
+
+    return process
