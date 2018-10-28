@@ -88,7 +88,7 @@ class NtupleSettings(CMSSWSettings):
         self.event_filter = True
 
     @property
-    def verison(self):
+    def version(self):
         if self.is_miniaod:
             return self.ver + 'm'
         else:
