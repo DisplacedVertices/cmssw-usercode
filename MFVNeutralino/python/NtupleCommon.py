@@ -55,7 +55,22 @@ def minitree_only(process, mode, settings, output_commands):
 def event_filter(process, mode, settings, output_commands):
     if mode:
         from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-        setup_event_filter(process, path_name='p', event_filter=True, input_is_miniaod=settings.is_miniaod)
+        def setup(**kwargs):
+            setup_event_filter(process, path_name='p', input_is_miniaod=settings.is_miniaod, **kwargs)
+
+        if mode == 'trigger only':
+            setup()
+        elif mode == 'trigger jets only':
+            setup(trigger_filter='jets only')
+        elif mode == 'trigger leptons only':
+            setup(trigger_filter='leptons only')
+        elif mode == 'jets only':
+            setup(event_filter='jets only')
+        elif mode == 'leptons only':
+            setup(event_filter='leptons only')
+        else:
+            assert mode is True
+            setup(event_filter=True)
 
 ########################################################################
 
@@ -80,6 +95,9 @@ class NtupleSettings(CMSSWSettings):
             return self.ver
 
     def normalize(self):
+        if self.run_n_tk_seeds:
+            self.event_filter = 'trigger jets only' # JMTBAD
+
         if not self.keep_all and self.prepare_vis:
             print 'setting keep_all True because prepare_vis is True'
             self.keep_all = True
