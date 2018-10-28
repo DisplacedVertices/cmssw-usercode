@@ -4,6 +4,7 @@ from JMTucker.MFVNeutralino.NtupleCommon import *
 
 settings = NtupleSettings()
 settings.is_mc = True
+settings.is_miniaod = True
 
 settings.run_n_tk_seeds = False
 settings.minitree_only = False
@@ -16,7 +17,8 @@ process = ntuple_process(settings)
 max_events(process, 10000)
 report_every(process, 1000000)
 #want_summary(process)
-sample_files(process, 'qcdht2000_2017', 'main', 1)
+dataset = 'miniaod' if settings.is_miniaod else 'main'
+sample_files(process, 'qcdht2000_2017', dataset, 1)
 file_event_from_argv(process)
 
 
@@ -32,12 +34,20 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = Samples.data_samples_2018
 
     #samples = [s for s in samples if s.has_dataset(dataset)]
-    set_splitting(samples, 'main', 'ntuple')
+    set_splitting(samples, dataset, 'ntuple')
 
     if settings.run_n_tk_seeds:
         samples = [s for s in samples if not s.is_signal]
 
-    ms = MetaSubmitter(settings.batch_name())
+    def signals_no_event_filter_modifier(sample):
+        if sample.is_signal:
+            magic = 'event_filter = True'
+            to_replace = [(magic, 'event_filter = False', 'tuple template does not contain the magic string "%s"' % magic)]
+        else:
+            to_replace = []
+        return [], to_replace
+
+    ms = MetaSubmitter(settings.batch_name(), dataset=dataset)
     ms.common.ex = year
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, signals_no_event_filter_modifier)
     ms.common.publish_name = batch_name + '_' + str(year)

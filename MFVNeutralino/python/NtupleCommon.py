@@ -132,15 +132,7 @@ def set_output_commands(process, cmds):
     if hasattr(process, 'out'):
         process.out.outputCommands = cmds
 
-def signals_no_event_filter_modifier(sample):
-    if sample.is_signal:
-        magic = 'event_filter = True'
-        to_replace = [(magic, 'event_filter = False', 'tuple template does not contain the magic string "%s"' % magic)]
-    else:
-        to_replace = []
-    return [], to_replace
-
-def ntuple_process(settings):
+def aod_ntuple_process(settings):
     settings.normalize()
 
     from JMTucker.Tools import MiniAOD_cfg as mcfg
@@ -184,7 +176,7 @@ def ntuple_process(settings):
 
     return process
 
-def mntuple_process(settings):
+def miniaod_ntuple_process(settings):
     settings.normalize()
     assert settings.is_miniaod
 
@@ -252,3 +244,9 @@ def mntuple_process(settings):
     set_output_commands(process, output_commands)
 
     return process
+
+def ntuple_process(settings):
+    if settings.is_miniaod:
+        return miniaod_ntuple_process(settings)
+    else:
+        return aod_ntuple_process(settings)
