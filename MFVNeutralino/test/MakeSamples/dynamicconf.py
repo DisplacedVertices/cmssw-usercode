@@ -12,4 +12,4 @@ if cmssw_version[:2] not in [(9,3),(9,4)]:
 if cmssw_version[:2] == (9,3):
     globaltag = '93X_mc2017_realistic_v3'
 elif cmssw_version[:2] == (9,4):
-    globaltag = '94X_mc2017_realistic_v10'
+    globaltag = '94X_mc2017_realistic_v11'

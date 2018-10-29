@@ -103,7 +103,7 @@ fi
 ################################################################################
 
 if [[ $FROMLHE -eq 1 ]]; then
-    exitbanner 1 LHE2017
+    exitbanner 1 LHE 2017 and CMSSW versions below
     echo
     echo START LHE at $(date)
 
@@ -128,7 +128,7 @@ echo START GENSIM at $(date)
 if [[ $USETHISCMSSW -eq 1 ]]; then
     gensim
 else
-    ( scramproj GENSIM 9_3_6_patch2 && gensim )
+    ( scramproj GENSIM 9_3_9_patch1 && gensim )
 fi
 exitbanner $? GENSIM
 
@@ -145,7 +145,7 @@ echo START RAWHLT at $(date)
 if [[ $USETHISCMSSW -eq 1 ]]; then
     rawhlt
 else
-    ( scramproj RAWHLT 9_4_0_patch1 && rawhlt )
+    ( scramproj RAWHLT 9_4_7 && rawhlt )
 fi
 exitbanner $? RAWHLT
 
@@ -156,7 +156,7 @@ echo START RECO at $(date)
 if [[ $USETHISCMSSW -eq 1 ]]; then
     reco
 else
-    ( scramproj RECO 9_4_0_patch1 && reco )
+    ( scramproj RECO 9_4_7 && reco )
 fi
 exitbanner $? RECO
 

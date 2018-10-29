@@ -21,8 +21,8 @@ ex = ''
 
 meta = 'neu'
 taus   = [100, 300, 1000, 10000, 30000, 100000]
-masses = [400, 600, 800, 1200, 1600, 3000]
-tau_masses = [] # [(1000,1200),(10000,1200),(1000,800),(1000,1600)]
+masses = [200, 300, 400, 600, 800, 1200, 1600, 3000] if meta.startswith('neu') else [400, 600, 800, 1200, 1600, 3000]
+tau_masses = [] # [(1000,800),(30000,800),(1000,1600),(30000,1600),(1000,3000),(30000,3000)]
 already = []
 hip_right = False
 
@@ -170,7 +170,7 @@ config.Data.publication = output_level not in ('minitree', 'ntuple')
 config.Data.outputPrimaryDataset = 'SETME'
 if output_dataset_tag == '':
     if premix:
-        output_dataset_tag = 'RunIIFall17DRPremix-94X_mc2017_realistic_v10-v1'
+        output_dataset_tag = 'RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1'
     else:
         raise NotImplementedError('premix')
         output_dataset_tag = ''

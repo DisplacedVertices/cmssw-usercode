@@ -1,5 +1,6 @@
 # https://twiki.cern.ch/twiki/bin/view/CMS/PdmVMCcampaignRunIIFall17DRPremix
-# 9_4_0_patch1 cmsDriver.py step2 --mc --eventcontent AODSIM runUnscheduled --datatier AODSIM --conditions 94X_mc2017_realistic_v10 --step RAW2DIGI,RECO,EI --nThreads 8 --era Run2_2017  --fileout file:step1.root --no_exec
+# https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/EXO-RunIIFall17DRPremix-00334
+# 9_4_7 cmsDriver.py step2 --filein file:EXO-RunIIFall17DRPremix-00334_step1.root --fileout file:EXO-RunIIFall17DRPremix-00334.root --mc --eventcontent AODSIM --runUnscheduled --datatier AODSIM --conditions 94X_mc2017_realistic_v11 --step RAW2DIGI,RECO,RECOSIM,EI --nThreads 8 --era Run2_2017 --python_filename EXO-RunIIFall17DRPremix-00334_2_cfg.py --no_exec --customise Configuration/DataProcessing/Utils.addMonitoring -n 1751
 
 import os, sys, FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
@@ -27,6 +28,7 @@ else:
     raise NotImplementedError('need to set up non-premix')
     process.load('Configuration.StandardSequences.L1Reco_cff')
 process.load('Configuration.StandardSequences.Reconstruction_cff')
+process.load('Configuration.StandardSequences.RecoSim_cff')
 process.load('CommonTools.ParticleFlow.EITopPAG_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
@@ -54,6 +56,7 @@ if not premix:
     raise NotImplementedError('need to set up non-premix')
     process.L1Reco_step = cms.Path(process.L1Reco)
 process.reconstruction_step = cms.Path(process.reconstruction)
+process.recosim_step = cms.Path(process.recosim)
 process.eventinterpretaion_step = cms.Path(process.EIsequence)
 process.AODSIMoutput_step = cms.EndPath(process.AODSIMoutput)
 
@@ -61,7 +64,7 @@ process.schedule = cms.Schedule(process.raw2digi_step)
 if not premix:
     raise NotImplementedError('need to set up non-premix')
     process.schedule.append(process.L1Reco_step)
-process.schedule.extend([process.reconstruction_step,process.eventinterpretaion_step,process.AODSIMoutput_step])
+process.schedule.extend([process.reconstruction_step,process.recosim_step,process.eventinterpretaion_step,process.AODSIMoutput_step])
 # task?
 
 from FWCore.Modules.logErrorHarvester_cff import customiseLogErrorHarvesterUsingOutputCommands
