@@ -51,7 +51,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, 'miniaod', 'default', default_files_per=50)
 
-    ms = MetaSubmitter('PileupDistV2', dataset='miniaod')
+    ms = MetaSubmitter('PileupDistV3', dataset='miniaod')
     ms.common.ex = year
     ms.crab.job_control_from_sample = True
     ms.submit(samples)
