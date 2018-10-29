@@ -1,6 +1,8 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
+ntuple_version = 'V21'
+
 def run_n_tk_seeds(process, mode, settings, output_commands):
     if mode:
         process.mfvEvent.lightweight = True
@@ -78,8 +80,6 @@ class NtupleSettings(CMSSWSettings):
     def __init__(self):
         super(NtupleSettings, self).__init__()
 
-        self.ver = 'V20'
-
         self.run_n_tk_seeds = False
         self.minitree_only = False
         self.prepare_vis = False
@@ -90,9 +90,9 @@ class NtupleSettings(CMSSWSettings):
     @property
     def version(self):
         if self.is_miniaod:
-            return self.ver + 'm'
+            return ntuple_version + 'm'
         else:
-            return self.ver
+            return ntuple_version
 
     def normalize(self):
         if self.run_n_tk_seeds:
