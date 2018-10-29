@@ -30,5 +30,6 @@ def doit(*x):
     print 'tot = %f, picked %i lumis' % (tot, len(out_ll))
     LumiList(lumis=out_ll).writeJSON(out_fn)
 
-doit('ana_2017.json', '/uscms/home/tucker/public/mfv/lumi/2017.byls.csv.gz', 41.529, 0.10, 'ana_2017_10pc.json')
-doit('ana_2017.json', '/uscms/home/tucker/public/mfv/lumi/2017.byls.csv.gz', 41.529, 0.01, 'ana_2017_1pc.json')
+for year, intlumi in (2017, 41.529), (2018, 50.983):
+    for pc in 10, 1:
+        doit('ana_%s.json' % year, '/uscms/home/tucker/public/mfv/lumi/%s.byls.csv.gz' % year, intlumi, pc/100., 'ana_%s_%spc.json' % (year, pc))
