@@ -71,7 +71,10 @@ for wd in wds:
     if options.dataset == 'main':
         sample = os.path.basename(wd).replace(first_str, '')
     else:
-        sample = Samples.sample_from_end_string(Samples, wd).name
+        try:
+            sample = Samples.sample_from_end_string(Samples, wd).name
+        except AttributeError:
+            raise ValueError('cannot find sample name from %s, rerun with --main?' % wd)
     assert not publish.has_key(sample)
 
     if is_crab:
