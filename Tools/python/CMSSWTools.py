@@ -412,9 +412,9 @@ def which_global_tag(settings=None):
         settings = CMSSWSettings()
     if settings.year == 2017:
         if settings.is_mc:
-            return '94X_mc2017_realistic_v10' # JMTBAD v14 or v16
+            return '94X_mc2017_realistic_v16'
         else:
-            return '94X_dataRun2_ReReco_EOY17_v6' # JMTBAD maybe should be 94X_dataRun2_v10 from looking in https://cms-conddb.cern.ch/cmsDbBrowser/diff/Prod/gts/94X_dataRun2_ReReco_EOY17_v6/94X_dataRun2_v10
+            return '94X_dataRun2_v10'
     elif settings.year == 2018:
         if settings.is_mc:
             return '102X_upgrade2018_realistic_v12'
