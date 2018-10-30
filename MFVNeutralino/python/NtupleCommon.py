@@ -67,9 +67,9 @@ def event_filter(process, mode, settings, output_commands):
         elif mode == 'trigger leptons only':
             setup(trigger_filter='leptons only')
         elif mode == 'jets only':
-            setup(event_filter='jets only')
+            setup(trigger_filter='jets only', event_filter='jets only')
         elif mode == 'leptons only':
-            setup(event_filter='leptons only')
+            setup(trigger_filter='leptons only', event_filter='leptons only')
         else:
             assert mode is True
             setup(event_filter=True)
