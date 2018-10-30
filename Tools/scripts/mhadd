@@ -23,6 +23,8 @@ parser.add_argument('--no-lpc-shortcut', action='store_false', dest='lpc_shortcu
                     help='(Only for crab dirs) Most of the time files went to FNAL LPC EOS, this is used to bypass talking to the crab server--turn off if needed.')
 parser.add_argument('--ignore-done', action='store_true', default=False,
                     help='Ignore the done marker files and try to hadd whatever specified.')
+parser.add_argument('--only-notdones', action='store_true', default=False,
+                    help='Only do not-dones (implies --overwrite and --ignore-done).')
 parser.add_argument('-f', '--overwrite', action='store_true', default=False,
                     help='If the output file exists, overwrite it (really, delete it before hadd ever sees it).')
 parser.add_argument('-o', '--output-dir',
@@ -34,6 +36,10 @@ if len(options.positional) == 0:
     print 'Required positional args missing: at least one crab directory\n'
     parser.print_help()
     sys.exit(1)
+
+if options.only_notdones:
+    options.ignore_done = True
+    options.overwrite = True
 
 ########################################################################
 
@@ -81,8 +87,13 @@ def hadd_(is_crab, *args, **kwargs):
     if new_dir and not exists(new_dir):
         mkdir(new_dir)
 
+    notdone_fn = new_name + '.notdone'
+    if options.only_notdones and not os.path.isfile(notdone_fn):
+        print colors.yellow('ignoring %s' % new_name)
+        return
+
     if not done:
-        touch(new_name + '.notdone')
+        touch(notdone_fn)
 
     if exists(new_name):
         if options.overwrite:
