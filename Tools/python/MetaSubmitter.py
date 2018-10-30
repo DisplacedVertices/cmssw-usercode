@@ -320,66 +320,34 @@ def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=2
             sample.files_per = d.get(n, 20)
 
     elif jobtype == 'ntuple':
-        target = 5000
-        d = {
-            # sample       # events to run to get 1 event out   corresponding file frac
-            'ttbar'       :  ( 5.00E+01, 5.76E-03 ),
-            'qcdht0500'   :  ( 5.00E+02, 6.03E-02 ),
-            'qcdht0700'   :  ( 3.85E+01, 4.54E-03 ),
-            'qcdht1000'   :  ( 1.54E+00, 2.42E-04 ),
-            'qcdht1500'   :  ( 1.19E+00, 2.03E-04 ),
-            'qcdht2000'   :  ( 1.23E+00, 1.65E-04 ),
-            'qcdht0500ext':  ( 5.00E+02, 6.10E-02 ),
-            'qcdht0700ext':  ( 3.85E+01, 4.53E-03 ),
-            'qcdht1000ext':  ( 1.54E+00, 2.16E-04 ),
-            'qcdht1500ext':  ( 1.19E+00, 1.92E-04 ),
-            'qcdht2000ext':  ( 1.23E+00, 1.84E-04 ),
-            'JetHT2015C'  :  ( 1.75E+01, 8.30E-04 ),
-            'JetHT2015D'  :  ( 1.75E+01, 7.65E-04 ),
-            'JetHT2016B3' :  ( 1.75E+01, 1.05E-03 ),
-            'JetHT2016C'  :  ( 1.61E+01, 1.12E-03 ),
-            'JetHT2016D'  :  ( 1.85E+01, 1.27E-03 ),
-            'JetHT2016E'  :  ( 1.37E+01, 1.02E-03 ),
-            'JetHT2016F'  :  ( 1.47E+01, 1.23E-03 ),
-            'JetHT2016G'  :  ( 1.10E+01, 8.97E-04 ),
-            'JetHT2016H2' :  ( 1.11E+01, 8.81E-04 ),
-            'JetHT2016H3' :  ( 1.11E+01, 8.83E-04 ),
-            }
+        d = {'miniaod': {
+                'JetHT':          (50, 4500000),
+                'qcdht0700_2017': (50, 2565849),
+                'qcdht1000_2017': (11,  503282),
+                'qcdht1500_2017': ( 4,  170511),
+                'qcdht2000_2017': ( 6,  154008),
+                'ttbar_2017':     (50, 2683909),
+                }
+             }
+        assert dataset == 'miniaod'
+
         for sample in samples:
-            # prefer to split by file with CondorSubmitter  for these jobs to not overload xrootd aaa
+            name = 'JetHT' if sample.name.startswith('JetHT') else sample.name
+
             sample.set_curr_dataset(dataset)
             if sample.is_signal:
                 sample.split_by = 'events'
             else:
-                sample.split_by = 'files' if sample.condor else 'events'
-            name = sample.name.replace('_2015', '')
-            name = sample.name.replace('_2017', '')
-            name = name.replace('_hip1p0_mit', '').replace('_hip1p0', '').replace('_retest', '')
+                sample.split_by = 'files':
             if not d.has_key(name):
                 if sample.is_signal:
                     sample.events_per = 200
                     sample.files_per = 1
                 else:
-                    sample.events_per = 50000
-                    sample.files_per = 5
+                    sample.events_per = 100000
+                    sample.files_per = 50
             else:
-                erate, frate = d[name]
-                if dataset == 'miniaod' or '_2017' in sample.name:
-                    frate /= 4 # more events per file here
-                sample.events_per = min(int(target * erate + 1), 200000)
-                sample.files_per = int(frate * sample.events_per / erate + 1)
-            # from analysis on first try of v15, 4x maybe OK but there's a tail due to file opening problems
-            if sample.name != 'JetHT2015D' and not sample.name.startswith('mfv_'):
-                sample.events_per = int(2.5 * sample.events_per)
-                sample.files_per  = int(2.5 * sample.files_per)
-            if sample.name in ('qcdht0700_hip1p0_mit', 'qcdht1000_hip1p0_mit', 'qcdht1500_hip1p0_mit'):
-                sample.files_per *= 3
-            if sample.name.startswith('qcdht0700') or sample.name in ('qcdht1000', 'qcdht1500'): # somehow these came out too much
-                sample.events_per /= 2
-                sample.files_per /= 2
-            if sample.name == 'ttbar': # really need to clean all this up
-                sample.events_per /= 6
-                sample.files_per /= 6
+                sample.files_per, sample.events_per = d[dataset][name]
 
     elif jobtype == 'default':
         for sample in samples:
