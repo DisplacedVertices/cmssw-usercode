@@ -11,7 +11,7 @@ settings.minitree_only = False
 settings.prepare_vis = False
 settings.keep_all = False
 settings.keep_gen = False
-settings.event_filter = True
+settings.event_filter = 'jets only'
 
 process = ntuple_process(settings)
 max_events(process, 10000)
