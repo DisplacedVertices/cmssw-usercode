@@ -62,9 +62,6 @@ void PileupDist::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   double weight = 1;
 
-  h_nallpv->Fill(nallpv);
-  h_npv->Fill(npv);
-
   if (!event.isRealData()) {
     edm::Handle<std::vector<PileupSummaryInfo> > pileup_info;
     event.getByToken(pileup_info_token, pileup_info);
