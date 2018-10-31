@@ -110,20 +110,22 @@ class NtupleSettings(CMSSWSettings):
             raise ValueError('only one of run_n_tk_seeds, minitree_only, prepare_vis allowed')
 
     def batch_name(self):
-        batch_name = 'Ntuple' + self.version
+        s = 'Ntuple' + self.version
 
         if self.run_n_tk_seeds:
-            batch_name += '_NTkSeeds'
+            s += '_NTkSeeds'
         elif self.minitree_only:
-            batch_name += '_MiniNtuple'
+            s += '_MiniNtuple'
         elif self.prepare_vis:
-            batch_name += '_PrepareVis'
+            s += '_PrepareVis'
 
-        if keep_gen:
-            batch_name += '_WGen'
+        if self.keep_gen:
+            s += '_WGen'
 
-        if not event_filter:
-            batch_name += '_NoEF'
+        if not self.event_filter:
+            s += '_NoEF'
+
+        return s
 
 def make_output_commands(process, settings):
     output_commands = [
