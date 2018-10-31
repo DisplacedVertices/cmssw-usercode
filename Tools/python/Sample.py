@@ -582,6 +582,8 @@ def main(samples_registry):
                 print (colors.green if is_complete else colors.yellow)(DBS.site_completions_string(site)),
 
     elif 'samplefiles' in argv:
+        # rm a; touch a; for ds in '' miniaod; do for x in qcd ttbar leptonic; do ( samples samplefiles ${x}_samples_2017 $ds >> a ) ; done; done
+        # rm a; touch a; for ds in '' miniaod; do for year in 2017 2018; do for x in data auxiliary_data ; do ( samples samplefiles ${x}_samples_${year} $ds >> a ) ; done; done; done
         samples = samples_registry.from_argv(raise_if_none=True)
         dataset = 'main'
         for arg in argv[1:]:
@@ -590,8 +592,8 @@ def main(samples_registry):
                 break
         print 'getting files for dataset %s:' % dataset, ', '.join(s.name for s in samples)
         import SampleFiles as sf
-        d = {}
         for s in samples:
+            d = {}
             if not s.has_dataset(dataset):
                 print colors.yellow('no dataset %s for %s' % (dataset, s.name))
                 continue
@@ -602,8 +604,7 @@ def main(samples_registry):
                 fns = s.filenames
                 print 'DBS has %i files for %s' % (len(fns), s.name)
                 d[(s.name, dataset)] = (len(fns), fns)
-        print 'encoded line:'
-        print "_add('%s')" % sf._enc(d)
+            print "('%s:%s', '%s')," % (s.name, dataset, sf._enc(d))
 
 __all__ = [
     'xrootd_sites',
