@@ -321,33 +321,30 @@ def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=2
 
     elif jobtype == 'ntuple':
         d = {'miniaod': {
-                'JetHT':          (50, 4500000),
-                'qcdht0700_2017': (50, 2565849),
-                'qcdht1000_2017': (11,  503282),
-                'qcdht1500_2017': ( 4,  170511),
-                'qcdht2000_2017': ( 6,  154008),
-                'ttbar_2017':     (50, 2683909),
+                'signal':         ( 1,     200),
+                'JetHT':          (25, 2250000),
+                'qcdht0700_2017': (50, 3130000),
+                'qcdht1000_2017': (11,  551000),
+                'qcdht1500_2017': ( 4,  186000),
+                'qcdht2000_2017': ( 5,  202000),
+                'ttbar_2017':     (50, 3040000),
                 }
              }
         assert dataset == 'miniaod'
 
         for sample in samples:
-            name = 'JetHT' if sample.name.startswith('JetHT') else sample.name
-
             sample.set_curr_dataset(dataset)
-            if sample.is_signal:
+            sample.split_by = 'files'
+
+            name = sample.name
+
+            if name.startswith('JetHT'):
+                name = 'JetHT'
+            elif sample.is_signal:
+                name = 'signal'
                 sample.split_by = 'events'
-            else:
-                sample.split_by = 'files':
-            if not d.has_key(name):
-                if sample.is_signal:
-                    sample.events_per = 200
-                    sample.files_per = 1
-                else:
-                    sample.events_per = 100000
-                    sample.files_per = 50
-            else:
-                sample.files_per, sample.events_per = d[dataset][name]
+
+            sample.files_per, sample.events_per = d[dataset].get(name, (50, 100000))
 
     elif jobtype == 'default':
         for sample in samples:
