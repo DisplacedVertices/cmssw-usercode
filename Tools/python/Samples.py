@@ -362,15 +362,14 @@ for s in registry.all():
 # other condor declarations, generate condorable dict with Shed/condor_list.py
 ########
 
-# 2018-04-27
+# 2018-11-01
 condorable = {
     "T3_US_FNALLPC": {
         "main": [],
         "miniaod": [],
         },
     "T1_US_FNAL_Disk": {
-        "main": [],
-        "miniaod": [],
+        "miniaod": [qcdht1500_2017, qcdht2000_2017, ttbar_2017],
         },
     "T2_DE_DESY": {
         "main": [],
