@@ -346,6 +346,10 @@ for x in data_samples_2017 + ttbar_samples_2017 + qcd_samples_2017 + leptonic_sa
 for x in ttbar_samples_2017 + qcd_samples_2017 + leptonic_samples_2017:
     x.add_dataset("ntuplev20m_ntkseeds")
 
+for x in data_samples_2017 + ttbar_samples_2017 + qcd_samples_2017 + leptonic_samples_2017 + mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017:
+    if x not in (mfv_stopdbardbar_tau001000um_M3000_2017, JetHT2018A3, JetHT2018B1, ttbar_2017):
+        x.add_dataset("ntuplev21m")
+
 ########
 # automatic condor declarations for ntuples
 ########
