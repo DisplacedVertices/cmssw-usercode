@@ -44,6 +44,7 @@ class Dataset(object):
         self.ignore_invalid = kwargs.get('ignore_invalid', self.IGNORE_INVALID)
         self.condor = kwargs.get('condor', False)
         self.xrootd_url = kwargs.get('xrootd_url', '')
+        self.notes = kwargs.get('notes', {})
         self.filenames = kwargs.get('filenames', [])
 
     def job_control(self, conf_obj):
@@ -217,6 +218,14 @@ class Sample(object):
     @xrootd_url.setter
     def xrootd_url(self, val):
         self.datasets[self.curr_dataset].xrootd_url = val
+
+    @property
+    def notes(self):
+        return self.datasets[self.curr_dataset].notes
+
+    @notes.setter
+    def notes(self, val):
+        self.datasets[self.curr_dataset].notes = val
 
     @property
     def filenames(self):
