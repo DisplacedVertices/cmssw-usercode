@@ -37,7 +37,7 @@ def modifiedVertexSequence(process, name, **kwargs):
             kwargs_vertices[k] = v
 
     mfvVertexTracksNew = process.mfvVertexTracks.clone(**kwargs_tracks)
-    mfvVerticesNew = process.mfvVertices.clone(seed_tracks_src = 'mfvVertexTracks%s' % name, **kwargs_vertices)
+    mfvVerticesNew = process.mfvVertices.clone(seed_tracks_src = cms.InputTag('mfvVertexTracks%s' % name, 'seed'), **kwargs_vertices)
     mfvVerticesAuxTmpNew = process.mfvVerticesAuxTmp.clone(vertex_src = 'mfvVertices%s' % name)
     mfvSelectedVerticesTmpNew = process.mfvSelectedVerticesTmp.clone(vertex_src = 'mfvVertices%s' % name,
                                                                      vertex_aux_src = 'mfvVerticesAuxTmp%s' % name)
