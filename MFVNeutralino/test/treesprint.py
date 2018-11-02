@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
-import sys, os, glob
+import sys, os
+from glob import glob
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.Sample import norm_from_file
 from JMTucker.Tools.general import typed_from_argv
@@ -15,11 +16,18 @@ if which != -1:
     ntks = ntks[which-3:which-2]
 
 ROOT.gErrorIgnoreLevel = 6000
-fns = [x for x in sys.argv[1:] if x.endswith('.root') and (os.path.isfile(x) or x.startswith('root://'))]
+fns = []
+for x in sys.argv[1:]:
+    if x.endswith('.root') and (os.path.isfile(x) or x.startswith('root://')):
+        fns.append(x)
+    elif os.path.isdir(x):
+        x2 = os.path.join(x, '*.root')
+        print 'using', x2
+        fns.extend(glob(x2))
 if not fns:
     gg = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV20mp2/*.root'
     print 'using default', gg
-    fns = glob.glob(gg)
+    fns = glob(gg)
 fns = [x for x in fns if '2015' not in x and not 'hip1p0' in x]
 if len(fns) != 2: # leave in specified order if there are two, user wants to print a ratio
     fns.sort()
