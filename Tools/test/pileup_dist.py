@@ -60,6 +60,4 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if not from_miniaod:
         batch_name += '_aod'
     ms = MetaSubmitter(batch_name, dataset=dataset)
-    ms.common.ex = year
-    ms.crab.job_control_from_sample = True
     ms.submit(samples)

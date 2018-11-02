@@ -43,12 +43,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         return to_add, []
 
     from JMTucker.Tools.MetaSubmitter import *
-    batch_name = 'Pick1VtxV14'
-    ms = MetaSubmitter(batch_name)
-    ms.common.ex = year
+    ms = MetaSubmitter('Pick1VtxV14')
     ms.common.pset_modifier = pset_modifier
-    ms.common.publish_name = batch_name + '_' + str(year)
-    ms.crab.job_control_from_sample = True
     ms.condor.stageout_files = 'all'
     ms.submit(samples)
 

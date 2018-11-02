@@ -89,9 +89,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         s.files_per = 20
 
     from JMTucker.Tools.MetaSubmitter import *
-    batch_name = 'V0OfficialK0sV1'
-    ms = MetaSubmitter(batch_name)
-    ms.common.ex = year
+    ms = MetaSubmitter('V0OfficialK0sV1')
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier, zerobias_modifier)
-    ms.crab.job_control_from_sample = True
     ms.submit(samples)

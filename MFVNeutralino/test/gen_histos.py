@@ -130,7 +130,6 @@ StopStopTo2Dbar2Dbar_M_800_CTau_30mm /store/user/tucker/cfgtest/StopStopTo2Dbar2
 ''', condor=True)
 
     ms = MetaSubmitter('GenHistos_Test%i'%year)
-    ms.common.ex = year
     ms.submit(samples)
 
 elif __name__ == '__main__' and hasattr(sys, 'argv') and 'validate' in sys.argv:

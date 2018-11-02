@@ -26,11 +26,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     samples = [s for s in samples if s.has_dataset(dataset)]
     set_splitting(samples, dataset, 'default', default_files_per=50)
 
-    batch_name = 'EventIds2017'
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    ms = MetaSubmitter(batch_name, dataset=dataset)
-    ms.common.ex = year
-    ms.common.publish_name = batch_name + '_' + str(year)
-    ms.crab.job_control_from_sample = True
+    ms = MetaSubmitter('EventIdsV21m', dataset=dataset)
     ms.condor.stageout_files = 'all'
     ms.submit(samples)

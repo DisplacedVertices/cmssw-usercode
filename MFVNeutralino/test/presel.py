@@ -63,11 +63,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     #samples = [s for s in samples if s.has_dataset(dataset)]
     set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2017_1pc.json'))
 
-    batch_name = 'PreselHistos' + settings.version
-    ms = MetaSubmitter(batch_name, dataset=dataset)
-    ms.common.ex = year
+    ms = MetaSubmitter('PreselHistos' + settings.version, dataset=dataset)
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
-    ms.common.publish_name = batch_name + '_' + str(year)
-    ms.crab.job_control_from_sample = True
     ms.condor.stageout_files = 'all'
     ms.submit(samples)

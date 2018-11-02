@@ -48,9 +48,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         return [], to_replace
 
     ms = MetaSubmitter(settings.batch_name(), dataset=dataset)
-    ms.common.ex = year
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, signals_no_event_filter_modifier)
-    ms.common.publish_name = settings.batch_name() + '_' + str(year)
-    ms.crab.job_control_from_sample = True
     ms.condor.stageout_files = 'all'
     ms.submit(samples)

@@ -375,7 +375,18 @@ class MetaSubmitter:
         self.condor = MetaSubmitter.args()
         self.override = override
 
+    def normalize(self):
+        assert not hasattr(self.common, 'ex')
+        from JMTucker.Tools.Year import year
+        self.common.ex = year
+        if not hasattr(self.common, 'publish_name'):
+            self.common.publish_name = '%s_%s' % (self.batch_name, year)
+        if not hasattr(self.crab, 'job_control_from_sample'):
+            self.crab.job_control_from_sample = True
+
     def submit(self, samples):
+        self.normalize()
+
         crab_samples, condor_samples = [], []
         for s in samples:
             s.set_curr_dataset(self.common.dataset)

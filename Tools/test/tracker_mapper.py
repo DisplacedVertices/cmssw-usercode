@@ -75,8 +75,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     set_splitting(samples, 'miniaod', 'default', json_path('ana_2017_1pc.json'), 16)
 
     ms = MetaSubmitter('TrackerMapperV3', dataset='miniaod')
-    ms.common.ex = year
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(module_names))
-    ms.crab.job_control_from_sample = True
     ms.condor.stageout_files = 'all'
     ms.submit(samples)

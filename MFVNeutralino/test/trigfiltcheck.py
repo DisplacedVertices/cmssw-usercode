@@ -44,6 +44,4 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     from JMTucker.Tools.MetaSubmitter import *
     ms = MetaSubmitter('TrigFiltCheckV1')
-    ms.common.ex = 2016
-    ms.crab.job_control_from_sample = True
     ms.submit(samples)

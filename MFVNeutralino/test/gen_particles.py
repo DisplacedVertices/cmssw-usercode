@@ -43,5 +43,4 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if dataset == 'miniaod':
         batch_name += '_MiniAOD'
     ms = MetaSubmitter(batch_name, dataset)
-    ms.crab.job_control_from_sample = True
     ms.submit(samples)

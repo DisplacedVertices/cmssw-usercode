@@ -96,11 +96,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         cfg.Data.lumiMask = 'json.%s' % sample.name
 
     from JMTucker.Tools.MetaSubmitter import *
-    batch_name = 'Pick1VtxV1'
-    ms = MetaSubmitter(batch_name)
-    ms.common.ex = year
+    ms = MetaSubmitter('Pick1VtxV1')
     ms.common.pset_modifier = pset_modifier
-    ms.common.publish_name = batch_name + '_' + str(year)
     ms.crab.cfg_modifier = cfg_modifier
     ms.crab.splitting = 'FileBased'
     ms.crab.units_per_job = 50

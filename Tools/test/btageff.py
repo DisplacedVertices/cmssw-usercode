@@ -36,8 +36,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + Samples.qcd_hip_samples
 
     ms = MetaSubmitter('BTagEffV1')
-    ms.common.ex = year
-    ms.crab.job_control_from_sample = True
     ms.submit(samples)
 
 elif __name__ == '__main__' and hasattr(sys, 'argv') and 'ana' in sys.argv:

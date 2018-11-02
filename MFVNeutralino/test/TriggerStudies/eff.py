@@ -8,7 +8,6 @@ cmssw_settings = CMSSWSettings()
 cmssw_settings.is_mc = True
 
 version = '2017p8v1'
-batch_name = 'TrigEff%s' % version
 
 mu_thresh_hlt = 27
 mu_thresh_offline = 30
@@ -88,10 +87,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     dataset = 'miniaod'
     set_splitting(samples, dataset, 'default', json_path('ana_2017p8.json'), 50)
 
-    ms = MetaSubmitter(batch_name)
-    ms.common.dataset = dataset
-    ms.common.ex = year
+    ms = MetaSubmitter('TrigEff%s' % version, dataset=dataset)
     ms.common.pset_modifier = is_mc_modifier
-    ms.crab.job_control_from_sample = True
     ms.condor.stageout_files = 'all'
     ms.submit(samples)

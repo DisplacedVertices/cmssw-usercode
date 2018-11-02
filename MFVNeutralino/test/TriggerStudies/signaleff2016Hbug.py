@@ -44,7 +44,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     from JMTucker.Tools.MetaSubmitter import *
     ms = MetaSubmitter('SignalEff2016HBug')
-    ms.crab.job_control_from_sample = True
     ms.submit(samples)
 
 elif __name__ == '__main__' and hasattr(sys, 'argv') and 'ana' in sys.argv:
