@@ -3,7 +3,7 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 is_mc = True # for blinding
 
-dataset = 'ntuplev20m'
+dataset = 'ntuplev21m'
 sample_files(process, 'qcdht2000_2017', dataset, 1)
 process.TFileService.fileName = 'minitree.root'
 file_event_from_argv(process)
@@ -27,12 +27,14 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if year == 2017:
         samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.all_signal_samples_2017 + Samples.data_samples_2017
         #samples = Samples.ttbar_samples_2017 + Samples.leptonic_samples_2017 + Samples.mfv_signal_samples_2017
+    elif year == 2018:
+        samples = Samples.data_samples_2018
 
-    #samples = [s for s in samples if s.has_dataset(dataset)]
+    samples = [s for s in samples if s.has_dataset(dataset)]
 
-    set_splitting(samples, dataset, 'minitree', data_json=json_path('ana_2017_1pc.json'))
+    set_splitting(samples, dataset, 'minitree', data_json=json_path('ana_2017p8_1pc.json'))
 
-    cs = CondorSubmitter('MiniTreeV20mp2',
+    cs = CondorSubmitter('MiniTreeV21m',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = chain_modifiers(is_mc_modifier, half_mc_modifier(), per_sample_pileup_weights_modifier()),
