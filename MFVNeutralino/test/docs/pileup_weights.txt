@@ -49,7 +49,7 @@
 
   python Tools/python/PileupWeights.py /uscms/home/tucker/public/mfv/pileup/pileup_2017.root /uscms_data/d2/tucker/crab_dirs/PileupDistV3/*root | grep root
 
-  The edit the output and put in the weights dict in PileupWeights.py.
+  Put the output in the weights dict in PileupWeights.py.
 
 - To enable cross weighting, which reweights weights for a different
   dataset, generate the cross weights with
