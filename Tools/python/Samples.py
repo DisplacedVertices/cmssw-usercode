@@ -352,8 +352,7 @@ for x in ttbar_samples_2017 + qcd_samples_2017 + leptonic_samples_2017:
 
 for x in data_samples_2017 + ttbar_samples_2017 + qcd_samples_2017 + mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + \
          data_samples_2018:
-    if x not in (JetHT2018A3, JetHT2018D2):
-        x.add_dataset("ntuplev21m")
+    x.add_dataset("ntuplev21m")
 
 ########
 # automatic condor declarations for ntuples

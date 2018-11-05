@@ -354,11 +354,13 @@ _add_ds("ntuplev21m", {
 'JetHT2017F': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_2017/181031_190738", 51),
 'JetHT2018A1': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_2018/181031_192223", 58),
 'JetHT2018A2': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_2018/181031_192237", 12),
+'JetHT2018A3': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_2018/181031_192255", 25),
 'JetHT2018B1': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_2018/181031_192315", 43),
 'JetHT2018B2': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_2018/181031_192336", 4),
 'JetHT2018C1': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_2018/181031_192350", 3),
 'JetHT2018C2': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_2018/181031_192406", 18),
 'JetHT2018C3': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_2018/181031_192422", 19),
+'JetHT2018D2': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_2018/181031_192438", 206),
 })
 
 
