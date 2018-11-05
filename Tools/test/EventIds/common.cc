@@ -1,3 +1,4 @@
+#include <algorithm>
 #include "EventIdsReader.h"
 
 int main(int argc, char** argv) {

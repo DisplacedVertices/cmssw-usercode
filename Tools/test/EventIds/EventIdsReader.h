@@ -8,6 +8,11 @@
 #include "TFile.h"
 #include "TTree.h"
 
+const int mc_runmin = 1;
+const int mc_runmax = 1;
+const int data_runmin = 297047;
+const int data_runmax = 325175;
+
 class EventIdsReader {
 public:
   class RLE {
@@ -21,17 +26,17 @@ public:
 
     static void set_type(bool is_mc) {
       if (is_mc) {
-        runmin = 1;
-        runmax = 1;
+        runmin = mc_runmin;
+        runmax = mc_runmax;
       }
       else {
-        runmin = 254231;
-        runmax = 284044;
+        runmin = data_runmin;
+        runmax = data_runmax;
       }
     }
 
     unsigned run() const { return run_ + runmin; }
-    void run(unsigned r) { if (r < runmin || r > runmax) throw std::runtime_error("run outside limits"); run_ = r - runmin; }
+    void run(unsigned r) { if (r < runmin || r > runmax) { printf("run %u\n", r); throw std::runtime_error("run outside limits"); } run_ = r - runmin; }
     unsigned lumi() const { return lumi_; }
     void lumi(unsigned l) {
       //  if (l > 65535) throw std::runtime_error("lumi outside limits"); 
@@ -49,11 +54,12 @@ public:
       extra_ = 0;
     }
 
-    void print(FILE* f) const {
+    void print(FILE* f, bool newln=false) const {
       if (extra())
         fprintf(f, "(%u,%u,%llu, %f)", run(), lumi(), event(), extra());
       else
         fprintf(f, "(%u,%u,%llu)", run(), lumi(), event());
+      if (newln) fprintf(f, "\n");
     }
   };
 
@@ -124,8 +130,8 @@ public:
   }
 };
 
-unsigned EventIdsReader::RLE::runmin = 254231;
-unsigned EventIdsReader::RLE::runmax = 284044;
+unsigned EventIdsReader::RLE::runmin = data_runmin;
+unsigned EventIdsReader::RLE::runmax = data_runmax;
 
 bool operator<(const EventIdsReader::RLE& a, const EventIdsReader::RLE& b) {
   if (a.run() != b.run())

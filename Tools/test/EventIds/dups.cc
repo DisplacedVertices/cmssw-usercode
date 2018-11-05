@@ -33,6 +33,7 @@ int main(int argc, char** argv) {
 
   int dup_count = 0;
   for (auto p : reader.m) {
+    //p.first.print(stdout, true);
     if (p.second.size() > 1) {
       if (dup_count == 0)
         printf("duplicates:\n");
