@@ -64,7 +64,8 @@ class per_sample_pileup_weights_modifier:
 from JMTucker.Tools.PileupWeights import get_pileup_weights
 weights = get_pileup_weights(%r, %r)
 for mname in %r:
-     getattr(process, mname).pileup_weights = weights
+     if hasattr(process, mname):
+         getattr(process, mname).pileup_weights = weights
 ''' % (which, self.cross, self.module_names)
             return [x], []
         else:
