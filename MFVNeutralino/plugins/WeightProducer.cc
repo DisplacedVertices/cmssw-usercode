@@ -33,6 +33,10 @@ private:
   const std::vector<double> npv_weights;
   double npv_weight(int mc_npu) const;
 
+  TH1D* h_gensign;
+  TH1D* h_npu;
+  TH1D* h_npv;
+
   enum { sum_nevents_total, sum_gen_weight_total, sum_gen_weightprod_total, sum_gen_weight, sum_gen_weightprod, sum_pileup_weight, sum_npv_weight, sum_weight, n_sums };
   TH1D* h_sums;
 };
@@ -59,6 +63,11 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
   if (histos) {
     edm::Service<TFileService> fs;
     TH1::SetDefaultSumw2();
+
+    h_gensign = fs->make<TH1D>("h_gensign", ";gen weight sign;events", 2, -1.5, 1.5);
+    h_npu = fs->make<TH1D>("h_npu", ";number of pileup interactions;events", 100, 0, 100);
+    h_npv = fs->make<TH1D>("h_npv", ";number of primary vertices;events", 100, 0, 100);
+
     h_sums = fs->make<TH1D>("h_sums", "", n_sums+1, 0, n_sums+1);
     int ibin = 1;
     for (const char* x : { "sum_nevents_total", "sum_gen_weight_total", "sum_gen_weightprod_total", "sum_gen_weight", "sum_gen_weightprod", "sum_pileup_weight", "sum_npv_weight", "sum_weight", "n_sums" })
@@ -125,6 +134,7 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
         if (prints)
           printf("gen_weight: %g  weightprod: %g  ", mevent->gen_weight, mevent->gen_weightprod);
         if (histos) {
+          h_gensign->Fill(mevent->gen_weight > 0 ? 1 : -1);
           h_sums->Fill(sum_gen_weight, mevent->gen_weight);
           h_sums->Fill(sum_gen_weightprod, mevent->gen_weightprod);
         }
@@ -138,8 +148,10 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
         const double pu_w = pileup_weight(mevent->npu);
         if (prints)
           printf("mc_npu: %g  pu weight: %g  ", mevent->npu, pu_w);
-        if (histos)
+        if (histos) {
+          h_npu->Fill(mevent->npu);
           h_sums->Fill(sum_pileup_weight, pu_w);
+        }
         *weight *= pu_w;
       }
 
@@ -147,8 +159,10 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
         const double npv_w = npv_weight(mevent->npv);
         if (prints)
           printf("mc_npv: %i  npv weight: %g  ", mevent->npv, npv_w);
-        if (histos)
+        if (histos) {
+          h_npv->Fill(mevent->npv);
           h_sums->Fill(sum_npv_weight, npv_w);
+        }
         *weight *= npv_w;
       }
     }

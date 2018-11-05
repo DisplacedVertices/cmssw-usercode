@@ -50,7 +50,9 @@ half_mc_by_lumi(process, %r)
             return [], []
 
 class per_sample_pileup_weights_modifier:
-    def __init__(self, module_names=['mfvWeight'], cross=None):
+    def __init__(self, module_names=['jmtWeight', 'jmtWeightMiniAOD', 'mfvWeight'], cross=None):
+        if type(module_names) == str:
+            module_names = [module_names]
         self.module_names = module_names
         self.cross = cross
     def __call__(self, sample):

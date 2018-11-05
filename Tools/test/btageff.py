@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+raise NotImplementedError('2017 and JMTWeightProducer')
+
 from JMTucker.Tools.MiniAOD_cfg import *
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.PileupWeights import pileup_weights

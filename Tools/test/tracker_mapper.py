@@ -1,20 +1,20 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
-from JMTucker.Tools.PileupWeights import pileup_weights
-from JMTucker.Tools.Year import year
 
-cmssw_settings = CMSSWSettings()
-cmssw_settings.is_mc = True
+settings = CMSSWSettings()
+settings.is_mc = True
+settings.cross = ''
 
 max_events(process, 1000)
 report_every(process, 1000000)
-geometry_etc(process, which_global_tag(cmssw_settings))
+geometry_etc(process, which_global_tag(settings))
 tfileservice(process, 'tracker_mapper.root')
 sample_files(process, 'qcdht2000_2017', 'miniaod')
 file_event_from_argv(process)
 #want_summary(process)
 
 process.load('JMTucker.Tools.MCStatProducer_cff')
+process.load('JMTucker.Tools.WeightProducer_cfi')
 process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
 process.load('JMTucker.MFVNeutralino.UnpackedCandidateTracks_cfi')
 process.load('JMTucker.Tools.GenParticleFilter_cfi')
@@ -34,10 +34,9 @@ process.TrackerMapper = cms.EDAnalyzer('TrackerMapper',
                                        heavy_flavor_src = cms.InputTag(''),
                                        beamspot_src = cms.InputTag('offlineBeamSpot'),
                                        primary_vertex_src = cms.InputTag('goodOfflinePrimaryVertices'),
-                                       pileup_info_src = cms.InputTag('slimmedAddPileupInfo'),
+                                       weight_src = cms.InputTag('jmtWeightMiniAOD'),
                                        use_duplicateMerge = cms.int32(-1),
                                        old_stlayers_cut = cms.bool(False),
-                                       pileup_weights = cms.vdouble(*pileup_weights[year]),
                                        )
 
 from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
@@ -49,18 +48,14 @@ process.jetsOnly = setup_event_filter(process,
                                       event_filter_require_vertex = False,
                                       input_is_miniaod = True)
 
-common = cms.Sequence(process.jetsOnly * process.goodOfflinePrimaryVertices * process.mfvUnpackedCandidateTracks)
+common = cms.Sequence(process.jetsOnly * process.goodOfflinePrimaryVertices * process.mfvUnpackedCandidateTracks * process.jmtWeightMiniAOD)
 process.p = cms.Path(common * process.TrackerMapper)
-
-module_names = ['TrackerMapper']
 
 for name, filt in ('LightFlavor', process.lightFlavor), ('HeavyFlavor', process.heavyFlavor): #, ('BFlavor', process.bFlavor), ('DisplacedGenPV', process.displacedGenPV):
     tk = process.TrackerMapper.clone()
     if name == 'HeavyFlavor':
         tk.heavy_flavor_src = cms.InputTag('heavyFlavor', 'heavyFlavor')
-    name = 'TrackerMapper%s' % name
-    module_names.append(name)
-    setattr(process, name, tk)
+    setattr(process, 'TrackerMapper%s' % name, tk)
     setattr(process, 'p%s' % name, cms.Path(common * filt * tk))
 
 
@@ -75,6 +70,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     set_splitting(samples, 'miniaod', 'default', json_path('ana_2017_1pc.json'), 16)
 
     ms = MetaSubmitter('TrackerMapperV3', dataset='miniaod')
-    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(module_names))
+    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(cross=settings.cross))
     ms.condor.stageout_files = 'all'
     ms.submit(samples)

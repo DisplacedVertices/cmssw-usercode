@@ -1,13 +1,13 @@
 import FWCore.ParameterSet.Config as cms
 from JMTucker.Tools.PileupWeights import get_pileup_weights
 
-mfvWeight = cms.EDProducer('MFVWeightProducer',
-                           throw_if_no_mcstat = cms.bool(True),
-                           mevent_src = cms.InputTag('mfvEvent'),
+jmtWeight = cms.EDProducer('JMTWeightProducer',
                            enable = cms.bool(True),
                            prints = cms.untracked.bool(False),
                            histos = cms.untracked.bool(True),
-                           half_mc_weight = cms.double(1),
+                           gen_info_src = cms.InputTag('generator'),
+                           pileup_info_src = cms.InputTag('addPileupInfo'),
+                           primary_vertex_src = cms.InputTag('offlinePrimaryVertices'),
                            weight_gen = cms.bool(False),
                            weight_gen_sign_only = cms.bool(False),
                            weight_pileup = cms.bool(True),
@@ -16,10 +16,7 @@ mfvWeight = cms.EDProducer('MFVWeightProducer',
                            npv_weights = cms.vdouble(),
                            )
 
-def half_mc_by_lumi(process, first=True):
-    assert hasattr(process, 'mfvWeight')
-    process.load('JMTucker.Tools.HalfMCByLumi_cfi')
-    process.HalfMCByLumi.first = first
-    for p in process.paths.itervalues():
-        p.replace(process.mfvWeight, process.HalfMCByLumi * process.mfvWeight)
-    process.mfvWeight.half_mc_weight = 0.5 # generally not different by more than 0.1%
+jmtWeightMiniAOD = jmtWeight.clone(
+    pileup_info_src = 'slimmedAddPileupInfo',
+    primary_vertex_src = 'offlineSlimmedPrimaryVertices'
+    )

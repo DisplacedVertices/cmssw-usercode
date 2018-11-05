@@ -4,16 +4,17 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 from JMTucker.Tools.PATTupleSelection_cfi import jtupleParams
 from JMTucker.Tools.Year import year
 
-cmssw_settings = CMSSWSettings()
-cmssw_settings.is_mc = True
+settings = CMSSWSettings()
+settings.is_mc = True
+settings.cross = ''
 
-version = '2017p8v1'
+version = '2017p8v3'
 
 mu_thresh_hlt = 27
 mu_thresh_offline = 30
 
 tfileservice(process, 'eff.root')
-global_tag(process, which_global_tag(cmssw_settings))
+global_tag(process, which_global_tag(settings))
 #want_summary(process)
 #report_every(process, 1)
 max_events(process, -1)
@@ -22,9 +23,10 @@ input_files(process, {
     (2017,False):'/uscmst1b_scratch/lpc1/3DayLifetime/tucker/itch/store/data/Run2017F/SingleMuon/MINIAOD/17Nov2017-v1/70001/DC73F8F1-A5EA-E711-A5F3-141877410B4D.root',
     (2018,True): '/uscmst1b_scratch/lpc1/3DayLifetime/tucker/itch/store/mc/RunIIFall18MiniAOD/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v12-v1/270000/DD8D39DE-C4B3-D241-99CC-79AF11E2EDE9.root',
     (2018,False):'/uscmst1b_scratch/lpc1/3DayLifetime/tucker/itch/store/data/Run2018D/SingleMuon/MINIAOD/PromptReco-v2/000/321/457/00000/4402D66D-E0A5-E811-8A35-FA163EBDCF4F.root',
-    }[(year, cmssw_settings.is_mc)])
+    }[(year, settings.is_mc)])
 
 process.load('JMTucker.Tools.MCStatProducer_cff')
+process.load('JMTucker.Tools.WeightProducer_cfi')
 process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
 
@@ -36,7 +38,7 @@ process.mutrig = hltHighLevel.clone()
 process.mutrig.HLTPaths = ['HLT_IsoMu%i_v*' % mu_thresh_hlt]
 
 process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
-                             use_weight = cms.int32(0),
+                             use_jetpt_weights = cms.int32(0),
                              require_hlt = cms.int32(-1),
                              require_l1 = cms.int32(-1),
                              require_muon = cms.bool(True),
@@ -45,6 +47,7 @@ process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
                              require_4thjetpt = cms.double(0.),
                              require_6thjetpt = cms.double(0.),
                              require_ht = cms.double(-1),
+                             weight_src = cms.InputTag('jmtWeightMiniAOD'),
                              muons_src = cms.InputTag('slimmedMuons'),
                              muon_cut = cms.string(jtupleParams.muonCut.value() + ' && pt > %i' % mu_thresh_offline),
                              genjets_src = cms.InputTag(''), #'ak4GenJets' if is_mc else ''),
@@ -53,13 +56,13 @@ process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
 process.denht1000 = process.den.clone(require_ht = 1000)
 process.denjet6pt75 = process.den.clone(require_6thjetpt = 75)
 process.denht1000jet6pt75 = process.den.clone(require_ht = 1000, require_6thjetpt = 75)
-process.p = cms.Path(process.mutrig * process.selectedPatJets * process.mfvTriggerFloats * process.den * process.denht1000 * process.denjet6pt75 * process.denht1000jet6pt75)
+process.p = cms.Path(process.jmtWeightMiniAOD * process.mutrig * process.selectedPatJets * process.mfvTriggerFloats * process.den * process.denht1000 * process.denjet6pt75 * process.denht1000jet6pt75)
 
 process.dennomu = process.den.clone(require_muon = False)
 process.dennomuht1000 = process.den.clone(require_muon = False, require_ht = 1000)
 process.dennomujet6pt75 = process.den.clone(require_muon = False, require_6thjetpt = 75)
 process.dennomuht1000jet6pt75 = process.den.clone(require_muon = False, require_ht = 1000, require_6thjetpt = 75)
-process.pnomu = cms.Path(process.selectedPatJets * process.mfvTriggerFloats * process.dennomu * process.dennomuht1000 * process.dennomujet6pt75 * process.dennomuht1000jet6pt75)
+process.pnomu = cms.Path(process.jmtWeightMiniAOD * process.selectedPatJets * process.mfvTriggerFloats * process.dennomu * process.dennomuht1000 * process.dennomujet6pt75 * process.dennomuht1000jet6pt75)
 
 for x in '', 'ht1000', 'jet6pt75', 'ht1000jet6pt75', 'nomu', 'nomuht1000', 'nomujet6pt75', 'nomuht1000jet6pt75':
     num = getattr(process, 'den%s' % x).clone(require_hlt = 0)
@@ -88,6 +91,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     set_splitting(samples, dataset, 'default', json_path('ana_2017p8.json'), 50)
 
     ms = MetaSubmitter('TrigEff%s' % version, dataset=dataset)
-    ms.common.pset_modifier = is_mc_modifier
+    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(cross=settings.cross))
     ms.condor.stageout_files = 'all'
     ms.submit(samples)

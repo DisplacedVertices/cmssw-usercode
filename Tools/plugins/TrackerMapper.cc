@@ -11,7 +11,6 @@
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
@@ -30,15 +29,11 @@ class TrackerMapper : public edm::EDAnalyzer {
   const edm::EDGetTokenT<reco::GenParticleCollection> heavy_flavor_token;
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertex_token;
-  const edm::EDGetTokenT<std::vector<PileupSummaryInfo> > pileup_info_token;
-
-  const std::vector<double> pileup_weights;
-  double pileup_weight(int mc_npu) const;
+  const edm::EDGetTokenT<double> weight_token;
 
   const int use_duplicateMerge;
   const bool old_stlayers_cut;
 
-  TH1D* h_npu;
   TH1D* h_w;
 
   TH1D* h_bsx;
@@ -135,15 +130,13 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
     heavy_flavor_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("heavy_flavor_src"))),
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     primary_vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertex_src"))),
-    pileup_info_token(consumes<std::vector<PileupSummaryInfo> >(cfg.getParameter<edm::InputTag>("pileup_info_src"))),
-    pileup_weights(cfg.getParameter<std::vector<double> >("pileup_weights")),
+    weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
     use_duplicateMerge(cfg.getParameter<int>("use_duplicateMerge")),
     old_stlayers_cut(cfg.getParameter<bool>("old_stlayers_cut"))
 {
   edm::Service<TFileService> fs;
   TH1::SetDefaultSumw2();
 
-  h_npu = fs->make<TH1D>("h_npu", ";number of pileup interactions;events", 100, 0, 100);
   h_w = fs->make<TH1D>("h_w", ";event weight;events", 20, 0, 10);
 
   h_bsx = fs->make<TH1D>("h_bsx", ";beamspot x (cm);events/100 #mum", 200, -1, 1);
@@ -255,16 +248,12 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
   }
 }
 
-double TrackerMapper::pileup_weight(int mc_npu) const {
-  if (mc_npu < 0 || mc_npu >= int(pileup_weights.size()))
-    return 0;
-  else
-    return pileup_weights[mc_npu];
-}
-
 void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setup) {
-  double w = 1;
-  int npu = -1;
+  edm::Handle<double> weight;
+  event.getByToken(weight_token, weight);
+  const double w = *weight;
+  h_w->Fill(w);
+
   typedef std::pair<int, reco::Candidate::PolarLorentzVector> heavy_flavor_t;
   std::vector<heavy_flavor_t> heavy_flavor;
 
@@ -276,19 +265,7 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
       for (const reco::GenParticle& hf : *hfs)
         heavy_flavor.push_back(std::make_pair(is_bhadron(&hf) ? 2 : 1, hf.polarP4()));
     }
-
-    edm::Handle<std::vector<PileupSummaryInfo> > pileup_info;
-    event.getByToken(pileup_info_token, pileup_info);
-
-    for (std::vector<PileupSummaryInfo>::const_iterator psi = pileup_info->begin(), end = pileup_info->end(); psi != end; ++psi)
-      if (psi->getBunchCrossing() == 0)
-        npu = psi->getTrueNumInteractions();
-
-    h_npu->Fill(npu);
-    w *= pileup_weight(npu);
   }
-
-  h_w->Fill(w);
 
   edm::Handle<reco::BeamSpot> beamspot;
   event.getByToken(beamspot_token, beamspot);

@@ -28,6 +28,7 @@ private:
   const double require_4thjetpt;
   const double require_6thjetpt;
   const double require_ht;
+  const edm::EDGetTokenT<double> weight_token;
   const edm::EDGetTokenT<mfv::TriggerFloats> triggerfloats_token;
   const edm::EDGetTokenT<pat::MuonCollection> muons_token;
   const StringCutObjectSelector<pat::Muon> muon_selector;
@@ -76,6 +77,7 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
     require_4thjetpt(cfg.getParameter<double>("require_4thjetpt")),
     require_6thjetpt(cfg.getParameter<double>("require_6thjetpt")),
     require_ht(cfg.getParameter<double>("require_ht")),
+    weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
     triggerfloats_token(consumes<mfv::TriggerFloats>(edm::InputTag("mfvTriggerFloats"))),
     muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
     muon_selector(cfg.getParameter<std::string>("muon_cut")),
@@ -232,6 +234,10 @@ namespace {
 }
 
 void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetup& setup) {
+  edm::Handle<double> weight;
+  event.getByToken(weight_token, weight);
+  double w = *weight;
+
   edm::Handle<mfv::TriggerFloats> triggerfloats;
   event.getByToken(triggerfloats_token, triggerfloats);
 
