@@ -20,7 +20,7 @@ public:
 private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
 
-  const int use_weight;
+  const int use_jetpt_weights;
   const int require_bits[2]; // HLT then L1
   const bool require_muon;
   const bool require_4jets;
@@ -34,39 +34,41 @@ private:
   const edm::EDGetTokenT<reco::GenJetCollection> genjets_token;
   const bool use_genjets;
 
-  TH1F* h_nnoselmuons;
-  TH1F* h_nmuons;
-  TH1F* h_muon_pt[2];
-  TH1F* h_muon_eta[2];
-  TH1F* h_muon_phi[2];
-  TH1F* h_muon_iso[2];
+  TH1D* h_w;
 
-  TH1F* h_nnoseljets;
-  TH1F* h_njets;
-  TH1F* h_jet_e[11];
-  TH1F* h_jet_pt[11];
-  TH1F* h_jet_eta[11];
-  TH1F* h_jet_phi[11];
-  TH1F* h_jet_muef[11];
-  TH1F* h_jet_ht_all;
-  TH1F* h_jet_ht;
-  TH1F* h_jet_ht_m_hlt_ht;
+  TH1D* h_nnoselmuons;
+  TH1D* h_nmuons;
+  TH1D* h_muon_pt[2];
+  TH1D* h_muon_eta[2];
+  TH1D* h_muon_phi[2];
+  TH1D* h_muon_iso[2];
+
+  TH1D* h_nnoseljets;
+  TH1D* h_njets;
+  TH1D* h_jet_e[11];
+  TH1D* h_jet_pt[11];
+  TH1D* h_jet_eta[11];
+  TH1D* h_jet_phi[11];
+  TH1D* h_jet_muef[11];
+  TH1D* h_jet_ht_all;
+  TH1D* h_jet_ht;
+  TH1D* h_jet_ht_m_hlt_ht;
   TH2F* h_njets_v_ht;
-  TH1F* h_myhtt_m_l1htt;
-  TH1F* h_myhttwbug_m_l1htt;
-  TH1F* h_l1jet_pt[11];
+  TH1D* h_myhtt_m_l1htt;
+  TH1D* h_myhttwbug_m_l1htt;
+  TH1D* h_l1jet_pt[11];
   TH2F* h_jetpt2v1;
 
-  TH1F* h_ngenjets;
-  TH1F* h_genjet_e[11];
-  TH1F* h_genjet_pt[11];
-  TH1F* h_genjet_eta[11];
-  TH1F* h_genjet_phi[11];
-  TH1F* h_genjet_ht;
+  TH1D* h_ngenjets;
+  TH1D* h_genjet_e[11];
+  TH1D* h_genjet_pt[11];
+  TH1D* h_genjet_eta[11];
+  TH1D* h_genjet_phi[11];
+  TH1D* h_genjet_ht;
 };
 
 MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
-  : use_weight(cfg.getParameter<int>("use_weight")),
+  : use_jetpt_weights(cfg.getParameter<int>("use_jetpt_weights")),
     require_bits{cfg.getParameter<int>("require_hlt"), cfg.getParameter<int>("require_l1")},
     require_muon(cfg.getParameter<bool>("require_muon")),
     require_4jets(cfg.getParameter<bool>("require_4jets")),
@@ -80,7 +82,7 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
     genjets_token(consumes<reco::GenJetCollection>(cfg.getParameter<edm::InputTag>("genjets_src"))),
     use_genjets(cfg.getParameter<edm::InputTag>("genjets_src").label() != "")
 {
-  assert(use_weight >= 0 && use_weight <= 2);
+  assert(use_jetpt_weights >= 0 && use_jetpt_weights <= 2);
 
   // JMTBAD the bits checking is now duplicated in TriggerFloatsFilter, should understand how to clean that up
   // require_bits:
@@ -91,45 +93,47 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
   edm::Service<TFileService> fs;
   TH1::SetDefaultSumw2();
 
+  h_w = fs->make<TH1D>("h_w", ";event weight;events", 20, 0, 10);
+
   if (require_muon) {
-    h_nnoselmuons = fs->make<TH1F>("h_nnoselmuons", ";# all muons;events", 5, 0, 5);
-    h_nmuons = fs->make<TH1F>("h_nmuons", ";# selected muons;events", 3, 0, 3);
+    h_nnoselmuons = fs->make<TH1D>("h_nnoselmuons", ";# all muons;events", 5, 0, 5);
+    h_nmuons = fs->make<TH1D>("h_nmuons", ";# selected muons;events", 3, 0, 3);
     const char* ex[2] = {"all", "selected"};
     for (int i = 0; i < 2; ++i) {
-      h_muon_pt [i] = fs->make<TH1F>(TString::Format("h_muon_pt_%i" , i), TString::Format(";%s muon p_{T} (GeV);events/5 GeV", ex[i]), 200, 0, 1000);
-      h_muon_eta[i] = fs->make<TH1F>(TString::Format("h_muon_eta_%i", i), TString::Format(";%s muon #eta;events/0.12", ex[i]), 50, -3, 3);
-      h_muon_phi[i] = fs->make<TH1F>(TString::Format("h_muon_phi_%i", i), TString::Format(";%s muon #phi;events/0.125", ex[i]), 50, -M_PI, M_PI);
-      h_muon_iso[i] = fs->make<TH1F>(TString::Format("h_muon_iso_%i", i), TString::Format(";%s muon isolation;events/0.04", ex[i]), 50, 0, 2);
+      h_muon_pt [i] = fs->make<TH1D>(TString::Format("h_muon_pt_%i" , i), TString::Format(";%s muon p_{T} (GeV);events/5 GeV", ex[i]), 200, 0, 1000);
+      h_muon_eta[i] = fs->make<TH1D>(TString::Format("h_muon_eta_%i", i), TString::Format(";%s muon #eta;events/0.12", ex[i]), 50, -3, 3);
+      h_muon_phi[i] = fs->make<TH1D>(TString::Format("h_muon_phi_%i", i), TString::Format(";%s muon #phi;events/0.125", ex[i]), 50, -M_PI, M_PI);
+      h_muon_iso[i] = fs->make<TH1D>(TString::Format("h_muon_iso_%i", i), TString::Format(";%s muon isolation;events/0.04", ex[i]), 50, 0, 2);
     }
   }
 
-  h_nnoseljets = fs->make<TH1F>("h_nnoseljets", ";# all jets;events", 30, 0, 30);
-  h_njets = fs->make<TH1F>("h_njets", ";# selected jets;events", 30, 0, 30);
+  h_nnoseljets = fs->make<TH1D>("h_nnoseljets", ";# all jets;events", 30, 0, 30);
+  h_njets = fs->make<TH1D>("h_njets", ";# selected jets;events", 30, 0, 30);
   for (int i = 0; i < 11; ++i) {
     char buf[32];
     if (i == 0)
       snprintf(buf, 32, "all jets");
     else
       snprintf(buf, 32, "jet %i", i);
-    h_jet_e[i]    = fs->make<TH1F>(TString::Format("h_jet_e_%i",   i),  TString::Format(";%s energy (GeV);events/5 GeV", buf), 200, 0, 1000);
-    h_jet_pt[i]   = fs->make<TH1F>(TString::Format("h_jet_pt_%i",  i),  TString::Format(";%s p_{T} (GeV);events/5 GeV", buf), 200, 0, 1000);
-    h_jet_eta[i]  = fs->make<TH1F>(TString::Format("h_jet_eta_%i", i),  TString::Format(";%s #eta;events/0.12", buf), 50, -6, 6);
-    h_jet_phi[i]  = fs->make<TH1F>(TString::Format("h_jet_phi_%i", i),  TString::Format(";%s #phi;events/0.125", buf), 50, -M_PI, M_PI);
-    h_jet_muef[i] = fs->make<TH1F>(TString::Format("h_jet_muef_%i", i), TString::Format(";%s #mu energy fraction;events/0.1", buf), 11, 0, 1.1);
+    h_jet_e[i]    = fs->make<TH1D>(TString::Format("h_jet_e_%i",   i),  TString::Format(";%s energy (GeV);events/5 GeV", buf), 200, 0, 1000);
+    h_jet_pt[i]   = fs->make<TH1D>(TString::Format("h_jet_pt_%i",  i),  TString::Format(";%s p_{T} (GeV);events/5 GeV", buf), 200, 0, 1000);
+    h_jet_eta[i]  = fs->make<TH1D>(TString::Format("h_jet_eta_%i", i),  TString::Format(";%s #eta;events/0.12", buf), 50, -6, 6);
+    h_jet_phi[i]  = fs->make<TH1D>(TString::Format("h_jet_phi_%i", i),  TString::Format(";%s #phi;events/0.125", buf), 50, -M_PI, M_PI);
+    h_jet_muef[i] = fs->make<TH1D>(TString::Format("h_jet_muef_%i", i), TString::Format(";%s #mu energy fraction;events/0.1", buf), 11, 0, 1.1);
 
     if (i == 0)
       snprintf(buf, 32, "all L1 jets");
     else
       snprintf(buf, 32, "L1 jet %i", i);
-    h_l1jet_pt[i] = fs->make<TH1F>(TString::Format("h_l1jet_pt_%i",  i),  TString::Format(";%s p_{T} (GeV);events/5 GeV", buf), 200, 0, 1000);
+    h_l1jet_pt[i] = fs->make<TH1D>(TString::Format("h_l1jet_pt_%i",  i),  TString::Format(";%s p_{T} (GeV);events/5 GeV", buf), 200, 0, 1000);
   }
-  h_jet_ht_all = fs->make<TH1F>("h_jet_ht_all", ";jet (p_{T} > 20 GeV) H_{T} (GeV);events/20 GeV", 250, 0, 5000);
-  h_jet_ht = fs->make<TH1F>("h_jet_ht", ";jet (p_{T} > 40 GeV) H_{T} (GeV);events/20 GeV", 250, 0, 5000);
-  h_jet_ht_m_hlt_ht = fs->make<TH1F>("h_jet_ht_m_hlt_ht", ";offline jet (p_{T} > 40 GeV) H_{T} - HLT H_{T} (GeV);events/10 GeV", 100, -500, 500);
+  h_jet_ht_all = fs->make<TH1D>("h_jet_ht_all", ";jet (p_{T} > 20 GeV) H_{T} (GeV);events/20 GeV", 250, 0, 5000);
+  h_jet_ht = fs->make<TH1D>("h_jet_ht", ";jet (p_{T} > 40 GeV) H_{T} (GeV);events/20 GeV", 250, 0, 5000);
+  h_jet_ht_m_hlt_ht = fs->make<TH1D>("h_jet_ht_m_hlt_ht", ";offline jet (p_{T} > 40 GeV) H_{T} - HLT H_{T} (GeV);events/10 GeV", 100, -500, 500);
   h_njets_v_ht = fs->make<TH2F>("h_njets_v_ht", ";jet (p_{T} > 40 GeV) H_{T} (GeV);# selected jets", 20, 0, 2000, 15, 0, 15);
 
-  h_myhtt_m_l1htt = fs->make<TH1F>("h_myhtt_m_l1htt", ";my L1 HTT - L1 HTT in event;events/5 GeV", 100, -250, 250);
-  h_myhttwbug_m_l1htt = fs->make<TH1F>("h_myhttwbug_m_l1htt", ";my L1 HTT with bug - L1 HTT in event;events/5 GeV", 100, -250, 250);
+  h_myhtt_m_l1htt = fs->make<TH1D>("h_myhtt_m_l1htt", ";my L1 HTT - L1 HTT in event;events/5 GeV", 100, -250, 250);
+  h_myhttwbug_m_l1htt = fs->make<TH1D>("h_myhttwbug_m_l1htt", ";my L1 HTT with bug - L1 HTT in event;events/5 GeV", 100, -250, 250);
 
   {
     const int nx = 5;
@@ -140,19 +144,19 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
   }
 
   if (use_genjets) {
-    h_ngenjets = fs->make<TH1F>("h_ngenjets", ";# gen jets;events", 30, 0, 30);
+    h_ngenjets = fs->make<TH1D>("h_ngenjets", ";# gen jets;events", 30, 0, 30);
     for (int i = 0; i < 11; ++i) {
       char buf[32];
       if (i == 0)
         snprintf(buf, 32, "all gen jets");
       else
         snprintf(buf, 32, "gen jet %i", i);
-      h_genjet_e[i]   = fs->make<TH1F>(TString::Format("h_genjet_e_%i",   i), TString::Format(";%s energy (GeV);events/5 GeV", buf), 200, 0, 1000);
-      h_genjet_pt[i]  = fs->make<TH1F>(TString::Format("h_genjet_pt_%i",  i), TString::Format(";%s p_{T} (GeV);events/5 GeV", buf), 200, 0, 1000);
-      h_genjet_eta[i] = fs->make<TH1F>(TString::Format("h_genjet_eta_%i", i), TString::Format(";%s #eta;events/0.12", buf), 50, -6, 6);
-      h_genjet_phi[i] = fs->make<TH1F>(TString::Format("h_genjet_phi_%i", i), TString::Format(";%s #phi;events/0.125", buf), 50, -M_PI, M_PI);
+      h_genjet_e[i]   = fs->make<TH1D>(TString::Format("h_genjet_e_%i",   i), TString::Format(";%s energy (GeV);events/5 GeV", buf), 200, 0, 1000);
+      h_genjet_pt[i]  = fs->make<TH1D>(TString::Format("h_genjet_pt_%i",  i), TString::Format(";%s p_{T} (GeV);events/5 GeV", buf), 200, 0, 1000);
+      h_genjet_eta[i] = fs->make<TH1D>(TString::Format("h_genjet_eta_%i", i), TString::Format(";%s #eta;events/0.12", buf), 50, -6, 6);
+      h_genjet_phi[i] = fs->make<TH1D>(TString::Format("h_genjet_phi_%i", i), TString::Format(";%s #phi;events/0.125", buf), 50, -M_PI, M_PI);
     }
-    h_genjet_ht = fs->make<TH1F>("h_genjet_ht", ";gen jet H_{T} (GeV);events/20 GeV", 250, 0, 5000);
+    h_genjet_ht = fs->make<TH1D>("h_genjet_ht", ";gen jet H_{T} (GeV);events/20 GeV", 250, 0, 5000);
   }
 }
 
@@ -231,11 +235,12 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
   edm::Handle<mfv::TriggerFloats> triggerfloats;
   event.getByToken(triggerfloats_token, triggerfloats);
 
-  double w = 1;
-  if (use_weight) {
-    if      (use_weight == 1) w = jetpt12_weight_mfvM300(triggerfloats->jetpt1(), triggerfloats->jetpt2());
-    else if (use_weight == 2) w = jetpt12_weight_mfvM800(triggerfloats->jetpt1(), triggerfloats->jetpt2());
+  if (use_jetpt_weights) {
+    if      (use_jetpt_weights == 1) w *= jetpt12_weight_mfvM300(triggerfloats->jetpt1(), triggerfloats->jetpt2());
+    else if (use_jetpt_weights == 2) w *= jetpt12_weight_mfvM800(triggerfloats->jetpt1(), triggerfloats->jetpt2());
   }
+
+  h_w->Fill(w);
 
   for (int i = 0; i < 2; ++i) { // HLT then L1
     const int r = require_bits[i];
@@ -315,7 +320,7 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
   h_jet_ht->Fill(triggerfloats->ht, w);
   h_njets_v_ht->Fill(triggerfloats->ht, triggerfloats->njets(20), w);
   h_myhtt_m_l1htt->Fill(triggerfloats->myhtt - triggerfloats->l1htt);
-  h_myhttwbug_m_l1htt->Fill(triggerfloats->myhttwbug - triggerfloats->l1htt);
+  h_myhttwbug_m_l1htt->Fill(triggerfloats->myhttwbug - triggerfloats->l1htt, w);
   h_jetpt2v1->Fill(triggerfloats->jetpt1(), triggerfloats->jetpt2(), w);
   h_jet_ht_m_hlt_ht->Fill(triggerfloats->ht - triggerfloats->hltht, w); 
 
