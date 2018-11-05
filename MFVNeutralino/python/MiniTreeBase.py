@@ -30,7 +30,11 @@ def get_f_t(x, min_ntracks=5, tree_path='trees'):
     elif type(x) == str:
         input_fn = x
     f = ROOT.TFile.Open(input_fn)
+    if not f:
+        raise IOError("couldn't open file %s" % input_fn)
     t = f.Get(t_path(min_ntracks))
+    if not t:
+        raise IOError("couldn't get tree from %s for ntks=%s" % (input_fn, min_ntracks))
     t.SetAlias('jetht', 'Sum$((jet_pt>40)*jet_pt)')
     t.SetAlias('svdist', 'sqrt((x0-x1)**2 + (y0-y1)**2)')
     t.SetAlias('svdphi', 'TVector2::Phi_mpi_pi(atan2(y0,x0)-atan2(y1,x1))')
@@ -44,11 +48,17 @@ def get_f_t(x, min_ntracks=5, tree_path='trees'):
 def duplicate_check(fn):
     branches = 'nvtx:ntk0:ntk1:x0:y0:z0:x1:y1:z1'
     #branches = 'run:lumi:event:nvtx:ntk0:ntk1:x0:y0:z0:x1:y1:z1'
+    #branches = 'run:lumi:event'
     def xform(x):
         assert len(x) == 9
         return tuple([int(y) for y in x[:3]] + [int(float(y)*1000) for y in x[3:]]) # vertex positions rounded to 10 um
+        #return tuple([int(y) for y in x])
     for ntk in 3,4,7,5:
-        f,t = get_f_t(fn, ntk)
+        try:
+            f,t = get_f_t(fn, ntk)
+        except IOError:
+            print "skipping duplicate check for %s ntk=%s" % (fn, ntk)
+            continue
         c = Counter(detree(t, branches, xform=xform))
         dups = [(k,v) for k,v in c.iteritems() if v > 1]
         dups_2vtx = [(k,v) for k,v in c.iteritems() if v > 1 and k[0] > 1]
@@ -94,10 +104,21 @@ def dump_rle(fn, min_ntracks=5):
     for rle in sorted(detree(t)):
         print '%i %i %i' % rle
 
+def dump(fn, min_ntracks=5):
+    f,t = get_f_t(fn, min_ntracks)
+    branches = 'run:lumi:event:nvtx:ntk0:ntk1'
+    fmt = ' '.join(['%s'] * (branches.count(':')+1))
+    for x in sorted(detree(t, branches)):
+        print fmt % x
+
 if __name__ == '__main__':
     cmd = sys.argv[1]
+    ntk = 5 if len(sys.argv) == 3 else int(sys.argv[3])
     if cmd == 'dump_rle':
-        ntk = 5 if len(sys.argv) == 3 else int(sys.argv[3])
         dump_rle(sys.argv[2], ntk)
+    elif cmd == 'dump':
+        dump(sys.argv[2], ntk)
+    elif cmd == 'dups':
+        duplicate_check(sys.argv[2])
     else:
         sys.exit('no cmd %s' % cmd)
