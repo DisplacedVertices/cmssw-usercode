@@ -3,6 +3,7 @@ from JMTucker.MFVNeutralino.NtupleCommon import *
 settings = NtupleSettings()
 settings.is_mc = True
 settings.is_miniaod = True
+settings.cross = '' # 2017to2018 2017to2017p8
 
 process = ntuple_process(settings)
 tfileservice(process, 'presel.root')
@@ -60,10 +61,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     elif year == 2018:
         samples = Samples.data_samples_2018
 
-    #samples = [s for s in samples if s.has_dataset(dataset)]
+    samples = [s for s in samples if s.has_dataset(dataset) and (s.is_mc or not settings.cross)]
     set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2017p8_1pc.json'))
 
-    ms = MetaSubmitter('PreselHistos' + settings.version, dataset=dataset)
-    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
+    ms = MetaSubmitter('PreselHistos%s%s' % (settings.version.capitalize(), '_' + settings.cross if settings.cross else ''), dataset=dataset)
+    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(cross=settings.cross))
     ms.condor.stageout_files = 'all'
     ms.submit(samples)
