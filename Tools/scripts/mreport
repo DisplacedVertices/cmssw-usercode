@@ -4,11 +4,11 @@ import os
 from itertools import combinations
 from pprint import pprint
 from FWCore.PythonUtilities.LumiList import LumiList
-import JMTucker.Tools.Samples as Samples 
 from JMTucker.Tools.CRAB3Tools import crab_command, crab_dirs_from_argv
 from JMTucker.Tools.CondorTools import cs_dirs_from_argv, cs_report
 from JMTucker.Tools.DBS import ll_for_dataset
-import JMTucker.Tools.colors as colors
+from JMTucker.Tools import Samples
+from JMTucker.Tools import colors
 
 def ll2str(ll):
     return str(ll).replace('\n', ' ')
@@ -33,14 +33,15 @@ for is_crab, wds in (True, crab_dirs_from_argv()), (False, cs_dirs_from_argv()):
             sample = Samples.sample_from_end_string(Samples, wd)
             goodLumis = LumiList(sample.json)
 
-            if any(not os.path.isfile(os.path.join(wd, 'results', x)) for x in 'inputDatasetLumis.json lumisToProcess.json processedLumis.json'.split()):
+            expected_files = [os.path.join(wd, 'results', x) for x in ['processedLumis.json']]
+            if any(not os.path.isfile(x) for x in expected_files):
                 print 'running crab report'
                 report = crab_command('report', dir=wd) 
                 #pprint(report)
             else:
                 print 'using already-made crab report jsons'
 
-            # check a bunch of crap since I don't trust crab
+            # check a bunch of crap since I don't trust crab--except now it doesn't write all the crap I used to check
             inputDatasetLumisDBS_fn = os.path.join(wd, 'results/inputDatasetLumisDBS.json')
             if not os.path.isfile(inputDatasetLumisDBS_fn):
                 print 'getting LL from DBS for %s' % sample.dataset
@@ -50,22 +51,12 @@ for is_crab, wds in (True, crab_dirs_from_argv()), (False, cs_dirs_from_argv()):
                 print 'using already-made LL from DBS'
                 inputDatasetLumisDBS = LumiList(inputDatasetLumisDBS_fn)
 
-            inputDatasetLumis = LumiList(os.path.join(wd, 'results/inputDatasetLumis.json'))
-
-            goodInputDatasetLumis    = goodLumis & inputDatasetLumis
             goodInputDatasetLumisDBS = goodLumis & inputDatasetLumisDBS
-
-            check_and_print_diff('goodInputDatasetLumis', 'goodInputDatasetLumisDBS')
 
             processedLumis = LumiList(os.path.join(wd, 'results/processedLumis.json'))
             ll_alls.append((wd, processedLumis))
 
-            check_and_print_diff('goodInputDatasetLumis', 'processedLumis')
-
-            lumisToProcess_fn = os.path.join(wd, 'results/lumisToProcess.json')
-            if os.path.isfile(lumisToProcess_fn):
-                lumisToProcess = LumiList(lumisToProcess_fn)
-                check_and_print_diff('lumisToProcess', 'processedLumis')
+            check_and_print_diff('goodInputDatasetLumisDBS', 'processedLumis')
 
 if len(ll_alls) > 1:
     print colors.bold('check overlaps')
