@@ -364,6 +364,29 @@ _add_ds("ntuplev21m", {
 })
 
 
+_add_ds("ntuplev21m_ntkseeds", {
+'qcdht0700_2017': _fromnum1("/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/NtupleV21m_NTkSeeds_2017/181101_203532", 16, fnbase="ntkseeds"),
+'qcdht1000_2017': _fromnum1("/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/NtupleV21m_NTkSeeds_2017/181101_203559", 31, fnbase="ntkseeds"),
+'qcdht1500_2017': _fromnum0("/store/user/tucker/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/NtupleV21m_NTkSeeds_2017/181101_153818", 63, fnbase="ntkseeds"),
+'qcdht2000_2017': _fromnum0("/store/user/tucker/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/NtupleV21m_NTkSeeds_2017/181101_153819", 30, fnbase="ntkseeds"),
+'ttbar_2017': _fromnum0("/store/user/tucker/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleV21m_NTkSeeds_2017/181101_153817", 51, fnbase="ntkseeds"),
+'JetHT2017B': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2017/181101_203624", 25, fnbase="ntkseeds"),
+'JetHT2017C': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2017/181101_203710", 38, fnbase="ntkseeds"),
+'JetHT2017D': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2017/181101_203730", 18, fnbase="ntkseeds"),
+'JetHT2017E': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2017/181101_203749", 42, fnbase="ntkseeds"),
+'JetHT2017F': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2017/181101_203815", 51, fnbase="ntkseeds"),
+'JetHT2018A1': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2018/181101_204136", 58, fnbase="ntkseeds"),
+'JetHT2018A2': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2018/181101_204154", 12, fnbase="ntkseeds"),
+'JetHT2018A3': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2018/181101_204211", 25, fnbase="ntkseeds"),
+'JetHT2018B1': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2018/181101_204229", 43, fnbase="ntkseeds"),
+'JetHT2018B2': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2018/181101_204244", 4, fnbase="ntkseeds"),
+'JetHT2018C1': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2018/181101_204311", 3, fnbase="ntkseeds"),
+'JetHT2018C2': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2018/181101_204325", 18, fnbase="ntkseeds"),
+'JetHT2018C3': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2018/181101_204342", 19, fnbase="ntkseeds"),
+'JetHT2018D2': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2018/181101_204401", 207, fnbase="ntkseeds"),
+})
+
+
 _add_ds("ntuplev20m", {
 'JetHT2017B': _fromnum1("/store/user/tucker/JetHT/NtupleV20m_2017/180925_201903", 513),
 'JetHT2017C': _fromnum1("/store/user/tucker/JetHT/NtupleV20m_2017/180925_201922", 777),
