@@ -47,12 +47,17 @@
 - To get weights for different samples given one data root file, you
   can use Tools/python/PileupWeights.py's main script, e.g.:
 
-  for x in 2017 2018 2017p8; do
-    py PileupWeights.py /uscms/home/tucker/public/mfv/pileup_${x}.root /uscms_data/d2/tucker/crab_dirs/PileupDistV2p1/*root | grep root > weights_${x}.txt
-  done
+  python Tools/python/PileupWeights.py /uscms/home/tucker/public/mfv/pileup/pileup_2017.root /uscms_data/d2/tucker/crab_dirs/PileupDistV3/*root | grep root
 
-  The edit the output and put in the appropriate dict in
-  PileupWeights.py.
+  The edit the output and put in the weights dict in PileupWeights.py.
+
+- To enable cross weighting, which reweights weights for a different
+  dataset, generate the cross weights with
+
+  python Tools/python/PileupWeights.py cross /uscms/home/tucker/public/mfv/pileup/pileup_{2018,2017}.root
+  python Tools/python/PileupWeights.py cross /uscms/home/tucker/public/mfv/pileup/pileup_{2017p8,2017}.root
+
+  and put in the cross dict in PileupWeights.py.
 
 - MetaSubmitter's per_sample_pileup_weights_modifier handles setting
   the weights per sample when jobs are submitted, at least for jobs

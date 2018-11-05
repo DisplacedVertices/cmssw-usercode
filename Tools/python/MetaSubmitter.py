@@ -50,19 +50,20 @@ half_mc_by_lumi(process, %r)
             return [], []
 
 class per_sample_pileup_weights_modifier:
-    def __init__(self, module_names=['mfvWeight']):
+    def __init__(self, module_names=['mfvWeight'], cross=None):
         self.module_names = module_names
+        self.cross = cross
     def __call__(self, sample):
         if sample.is_mc:
             which = sample.name
             if sample.is_signal and sample.is_private:
                 which = 'mfv_signals'
             x = '''
-from JMTucker.Tools.PileupWeights import pileup_weights
-if pileup_weights.has_key(%r):
-    for mname in %r:
-        getattr(process, mname).pileup_weights = pileup_weights[%r]
-    ''' % (which, self.module_names, which)
+from JMTucker.Tools.PileupWeights import get_pileup_weights
+weights = get_pileup_weights(%r, %r)
+for mname in %r:
+     getattr(process, mname).pileup_weights = weights
+''' % (which, self.cross, self.module_names)
             return [x], []
         else:
             return [], []
