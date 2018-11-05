@@ -83,7 +83,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     elif year == 2018:
         samples = Samples.auxiliary_data_samples_2018
     
-    samples = [s for s in samples if s.has_dataset(dataset) and (s.is_mc or not cross)]
+    samples = [s for s in samples if s.has_dataset(dataset) and (s.is_mc or not settings.cross)]
     set_splitting(samples, dataset, 'default', json_path('ana_2017p8.json'), 50)
 
     ms = MetaSubmitter('TrigEff%s%s' % (version, '_' + settings.cross if settings.cross else ''), dataset=dataset)
