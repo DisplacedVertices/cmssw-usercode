@@ -29,6 +29,8 @@ parser.add_argument('-f', '--overwrite', action='store_true', default=False,
                     help='If the output file exists, overwrite it (really, delete it before hadd ever sees it).')
 parser.add_argument('-o', '--output-dir',
                     help='Path for the output files. (Can be an xrootd url, e.g. root://cmseos.fnal.gov//store/user/tucker/outputdir.) If doing dirs of dirs, directories are created under the output dir corresponding to the basenames of the toplevel dirs. If the toplevel dirs are not unique, you will have a bad time.')
+parser.add_argument('-v', '--verbose', action='store_true', default=False,
+                    help='Print more info.')
 
 options = parser.parse_args()
 
@@ -108,9 +110,10 @@ def hadd_(is_crab, *args, **kwargs):
                 p = HaddlogParser(new_name + '.haddlog')
                 log_njobs = p.num_sources
             if log_njobs != njobs:
-                print colors.red('skipping existing file %s (for which num sources %i != njobs %i)' % (new_name, log_njobs, njobs))
+                print colors.boldred('skipping existing file %s (for which num sources %i != njobs %i)' % (new_name, log_njobs, njobs))
             else:
-                print colors.yellow('skipping existing file %s (which looks complete by njobs and haddlog)' % new_name)
+                if options.verbose:
+                    print colors.yellow('skipping existing file %s (which looks complete by njobs and haddlog)' % new_name)
             return
 
     hadd(*args, **kwargs)
