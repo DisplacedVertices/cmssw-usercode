@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+raise ValueError('understand/backport pythia variations--see central_fragments.py for 2018 and http://home.thep.lu.se/Pythia/pythia82html/Variations.html')
+
 import os
 from JMTucker.Tools.Year import year; assert year == 2017
 from scanpack import get_scanpack, scanpackbase
