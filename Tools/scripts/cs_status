@@ -3,6 +3,7 @@
 import sys, os
 from JMTucker.Tools.CRAB3ToolsBase import crabify_list
 from JMTucker.Tools.CondorTools import *
+from JMTucker.Tools.general import touch
 from JMTucker.Tools import colors
 
 if len(sys.argv) < 2 or '-h' in sys.argv or '--help' in sys.argv:
@@ -25,6 +26,9 @@ wds = cs_dirs_from_argv()
 ml = max(len(wd) for wd in wds) + 3
 fmt = '%' + str(ml) + 's %10s | %10s %10s %10s %10s %10s'
 
+def done_fn(wd):
+    return os.path.join(wd, 'mmon_done') # JMTBAD
+
 def safe_to_resubmit(r):
     return resubmit_all or \
         r in [147,84,92]  # xrdcp problem, file open error, fallback file open error
@@ -46,7 +50,7 @@ sums = [0]*6
 done = []
 
 for wd in wds:
-    if ignore_done and os.path.isfile(os.path.join(wd, 'mmon_done')):
+    if ignore_done and os.path.isfile(done_fn(wd)):
         continue
 
     ana = cs_analyze(wd)
@@ -62,6 +66,7 @@ for wd in wds:
     elif ana.ndone == ana.njobs:
         done.append(wd)
         color = colors.green
+        touch(done_fn(wd))
     
     print color(fmt % (wd.ljust(ml), z(ana.njobs), z(ana.ndone), z(ana.nidle), z(ana.nrun), z(ana.nkilled), z(ana.nprobs))), 
     if ana.nprobs:
