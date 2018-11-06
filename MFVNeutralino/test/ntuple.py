@@ -39,14 +39,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if settings.run_n_tk_seeds:
         samples = [s for s in samples if not s.is_signal]
 
-    def signals_no_event_filter_modifier(sample):
-        if sample.is_signal:
-            magic = 'event_filter = True'
-            to_replace = [(magic, 'event_filter = False', 'tuple template does not contain the magic string "%s"' % magic)]
-        else:
-            to_replace = []
-        return [], to_replace
-
     ms = MetaSubmitter(settings.batch_name(), dataset=dataset)
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, signals_no_event_filter_modifier)
     ms.condor.stageout_files = 'all'

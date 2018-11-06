@@ -274,3 +274,11 @@ def ntuple_process(settings):
         return miniaod_ntuple_process(settings)
     else:
         return aod_ntuple_process(settings)
+
+def signals_no_event_filter_modifier(sample):
+    if sample.is_signal:
+        magic = "event_filter = 'jets only'"
+        to_replace = [(magic, 'event_filter = False', 'tuple template does not contain the magic string "%s"' % magic)]
+    else:
+        to_replace = []
+    return [], to_replace
