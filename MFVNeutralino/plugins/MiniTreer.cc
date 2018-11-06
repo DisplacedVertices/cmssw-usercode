@@ -88,7 +88,7 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   event.getByToken(weight_token, weight);
   nt.weight = *weight;
 
-  nt.njets = int2uchar(mevent->njets());
+  nt.njets = int2uchar(mevent->njets(mfv::min_jet_pt));
   if (nt.njets > 50)
     throw cms::Exception("CheckYourPremises") << "too many jets in event: " << nt.njets;
 
