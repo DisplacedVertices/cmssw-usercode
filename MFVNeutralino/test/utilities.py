@@ -170,6 +170,11 @@ def cmd_histos():
     cmd_merge_background()
     cmd_effsprint()
 
+def cmd_presel():
+    cmd_report_data()
+    cmd_hadd_data()
+    cmd_merge_background()
+
 def cmd_minitree():
     cmd_report_data()
     cmd_hadd_data()
