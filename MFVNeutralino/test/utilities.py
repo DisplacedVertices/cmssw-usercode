@@ -72,9 +72,6 @@ def cmd_hadd_data():
             ]
 
         for year, eras in year_eras:
-            if year == '2018A' and ds == 'JetHT':
-                raise NotImplementedError('did you be sure no overlaps yet in JetHT 2018A')
-
             files = [f for x in eras for f in glob('%s%s%s.root' % (ds, year, x))]
             ok = len(files) == len(eras)
             if not ok:
@@ -149,6 +146,7 @@ def cmd_histos():
 
 def cmd_minitree():
     cmd_report_data()
+    cmd_hadd_data()
 
 def cmd_trackmover():
     cmd_report_data()
