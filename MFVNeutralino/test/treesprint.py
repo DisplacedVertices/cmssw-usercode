@@ -133,8 +133,8 @@ for ntk in ntks:
 
     if len(weighted) == 2:
         (n1v1, en1v1, n2v1, en2v1), (n1v2, en1v2, n2v2, en2v2) = weighted
-        ratn1 = interval_to_vpme(*propagate_ratio(n1v2, n1v1, en1v2, en1v1))
-        ratn2 = interval_to_vpme(*propagate_ratio(n2v2, n2v1, en2v2, en2v1))
+        ratn1 = (-1, -1) if n1v1 == 0 else interval_to_vpme(*propagate_ratio(n1v2, n1v1, en1v2, en1v1))
+        ratn2 = (-1, -1) if n2v1 == 0 else interval_to_vpme(*propagate_ratio(n2v2, n2v1, en2v2, en2v1))
         print 'ratio second/first: n1v %.2f +- %.2f   n2v %.2f +- %.2f' % (ratn1 + ratn2)
 
     if raw_n1v or raw_n2v:
