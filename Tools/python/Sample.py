@@ -288,13 +288,20 @@ class MCSample(Sample):
 
     def int_lumi(self, f_or_fn):
         return 1./self.partial_weight(f_or_fn)
-            
+
 ########################################################################
 
 class DataSample(Sample):
     IS_MC = False
     def __init__(self, name, dataset, **kwargs):
         super(DataSample, self).__init__(name, dataset, -1, **kwargs)
+
+########################################################################
+
+def SumSample(name, samples):
+    for sample in samples:
+        assert sample.is_mc
+    return MCSample(name, '/None/', sum(y.nevents_orig for y in samples), nice=samples[0].nice, color=samples[0].color, syst_frac=samples[0].syst_frac, xsec=samples[0].xsec)
 
 ########################################################################
 
@@ -621,6 +628,7 @@ __all__ = [
     'Sample',
     'MCSample',
     'DataSample',
+    'SumSample',
     'SamplesRegistry',
     'anon_samples',
     'norm_from_file',

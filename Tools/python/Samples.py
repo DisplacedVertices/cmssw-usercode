@@ -108,6 +108,12 @@ leptonic_samples_2017 = [
    #MCSample('qcdbctoept250_2017',    '/QCD_Pt_250toInf_bcToE_TuneCP5_13TeV_pythia8/RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1/AODSIM',                            10115200, nice='QCD, #hat{p}_{T} > 250 GeV, HF electrons',       color=801, syst_frac=0.20, xsec=2.11e4*0.03375),
     ]
 
+leptonic_samples_sum_2017 = [
+    SumSample('wjetstolnusum_2017',    leptonic_samples_2017[ :2]),
+   #SumSample('dyjetstollM10sum_2017', leptonic_samples_2017[2:4]),
+    SumSample('dyjetstollM50sum_2017', leptonic_samples_2017[3:5]),
+    ]
+
 mfv_signal_samples_2017 = [
     MCSample('mfv_neu_tau000100um_M0400_2017', '/mfv_neu_cp2_tau000100um_M0400/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-e19c32c4f9d94e596684928085d1f2f4/USER', 10000),
     MCSample('mfv_neu_tau000100um_M0600_2017', '/mfv_neu_cp2_tau000100um_M0600/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-98a6b130f95e6de782a84e79560989b4/USER', 10000),
@@ -264,6 +270,7 @@ __all__ = [
     'qcd_samples_2017',
     'ttbar_samples_2017',
     'leptonic_samples_2017',
+    'leptonic_samples_sum_2017',
     'mfv_signal_samples_2017',
     'mfv_stopdbardbar_samples_2017',
     'data_samples_2017',
