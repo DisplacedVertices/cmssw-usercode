@@ -120,7 +120,19 @@ def file_event_from_argv(process, warn=True):
     files = []
     nums = []
     for arg in sys.argv[1:]:
-        if arg.endswith('.root'):
+        if arg.startswith('sample='):
+            arg = arg.replace('sample=', '')
+            assert ':' in arg
+            if ',' in arg:
+                arg, nfiles = arg.split(',')
+                nfiles = int(nfiles)
+            else:
+                nfiles = 1
+            sname, dataset = arg.split(':')
+            sample_files(process, sname, dataset, nfiles)
+            files = None
+            print 'sample from argv: %s %s (%i files)' % (sname, dataset, nfiles)
+        elif arg.endswith('.root') and files is not None:
             files.append(arg)
         else:
             try:
@@ -138,7 +150,7 @@ def file_event_from_argv(process, warn=True):
         for file in files:
             print file
         process.source.fileNames = files
-    elif warn:
+    elif files is not None and warn:
         print 'file_event_from_argv warning: no filename found'
     l = len(nums)
     if l == 1:
