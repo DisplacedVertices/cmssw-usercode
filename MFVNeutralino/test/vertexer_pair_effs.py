@@ -1,7 +1,7 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-dataset = 'ntuplev20m_ntkseeds'
+dataset = 'ntuplev21m_ntkseeds'
 sample_files(process, 'qcdht2000_2017', dataset, 1)
 process.TFileService.fileName = 'vertexer_pair_effs.root'
 file_event_from_argv(process)
@@ -20,12 +20,13 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools import Samples 
 
     if year == 2017:
-        samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017
-        #samples += Samples.data_samples_2017
+        samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.data_samples_2017
+    elif year == 2018:
+        samples = Samples.data_samples_2018
 
-    set_splitting(samples, dataset, 'histos', data_json='jsons/ana_2017.json')
+    set_splitting(samples, dataset, 'histos', data_json='jsons/ana_2017p8_1pc.json')
 
-    cs = CondorSubmitter('VertexerPairEffsV20m',
+    cs = CondorSubmitter('VertexerPairEffsV21m',
                          ex = year,
                          dataset = dataset,
                          )
