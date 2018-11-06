@@ -85,6 +85,32 @@ def cmd_hadd_data():
 
 cmd_merge_data = cmd_hadd_data
 
+def _mc_parts():
+    for year in 2017,:
+        for base in 'dyjetstollM50', 'wjetstolnu':
+            a = '%s_%s.root' % (base, year)
+            b = '%sext_%s.root' % (base, year)
+            c = '%ssum_%s.root' % (base, year)
+            yield (year,base), (a,b,c)
+
+def cmd_hadd_mc_sums():
+    for (year,base), (a,b,c) in _mc_parts():
+        if not os.path.isfile(a) or not os.path.isfile(b):
+            print 'skipping', year, base, 'because at least one input file missing'
+        elif os.path.isfile(c):
+            print 'skipping', year, base, 'because', c, 'already exists'
+        else:
+            hadd_or_merge(c, [a, b])
+
+cmd_merge_mc_sums = cmd_hadd_mc_sums
+
+def cmd_rm_mc_parts():
+    for (year,base), (a,b,c) in _mc_parts():
+        if os.path.isfile(c):
+            for y in a,b:
+                if os.path.isfile(y):
+                    os.remove(y)
+
 def _background_samples():
     x = ['ttbar']
     if _leptonpresel:
@@ -168,14 +194,14 @@ def cmd_v0eff():
         os.rename(fn, 'no/' + fn)
 
 def cmd_trigeff():
+    cmd_hadd_mc_sums()
     cmd_report_data()
-
-    hadd('SingleMuon2017.root', ['SingleMuon2017%s.root' % x for x in 'BCDEF'])
+    cmd_hadd_data()
 
     for year_s, scale in ('_2017', -AnalysisConstants.int_lumi_2017),:
         for wqcd_s in '', '_wqcd':
             cmd = 'samples merge %f background%s%s.root ' % (scale, wqcd_s, year_s)
-            files = 'ttbar.root wjetstolnu.root dyjetstollM10.root dyjetstollM50.root'
+            files = 'ttbar.root wjetstolnusum.root dyjetstollM10.root dyjetstollM50sum.root'
             if wqcd_s:
                 files += ' qcdmupt15.root'
             files = files.replace('.root', year_s + '.root').split()
