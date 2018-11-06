@@ -41,6 +41,8 @@ group.add_argument('--scaling', default='1.',
                    help='Snippet for scaling lambda (default: %(default)s).')
 group.add_argument('--ratio', default='True',
                    help='Snippet for ratio lambda (default: %(default)s).')
+group.add_argument('--x-range', default='None',
+                   help='Snippet for x_range lambda (default: %(default)s).')
 
 options = parser.parse_args()
 
@@ -90,6 +92,8 @@ options.separate_plots = _lambda + options.separate_plots
 options.skip           = _lambda + options.skip
 options.draw_command   = _lambda + options.draw_command
 options.scaling        = _lambda + options.scaling
+options.ratio          = _lambda + options.ratio
+options.x_range        = _lambda + options.x_range
 options.lambda_no_stats       = eval(options.no_stats)
 options.lambda_stat_size      = eval(options.stat_size)
 options.lambda_apply_commands = eval(options.apply_commands)
@@ -98,6 +102,7 @@ options.lambda_skip           = eval(options.skip)
 options.lambda_draw_command   = eval(options.draw_command)
 options.lambda_scaling        = eval(options.scaling)
 options.lambda_ratio          = eval(options.ratio)
+options.lambda_x_range        = eval(options.x_range)
 
 print 'comparehists running with these options:'
 pprint(vars(options))
@@ -148,4 +153,5 @@ compare_hists(ps,
               draw_command = options.lambda_draw_command,
               scaling = options.lambda_scaling,
               ratio = options.lambda_ratio,
+              x_range = options.lambda_x_range,
               )

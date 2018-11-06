@@ -456,6 +456,7 @@ def compare_hists(ps, samples, **kwargs):
     draw_command   = _get('draw_command',   '')
     scaling        = _get('scaling',        1.)
     ratio          = _get('ratio',          True)
+    x_range        = _get('x_range',        None)
 
     ###
 
@@ -546,21 +547,26 @@ def compare_hists(ps, samples, **kwargs):
         if not is2d:
             hists_sorted.sort(key=lambda hist: hist.GetMaximum(), reverse=True)
 
-        if len(hists) > 1 and ratio and not is2d:
+        x_r = x_range(name, hist_list, None)
+
+        if len(hists) > 1 and ratio(name, hist_list, None) and not is2d:
             ratios_plot(name_clean,
-                    hists,
-                    plot_saver=ps,
-                    res_fit=False,
-                    res_divide_opt={'confint': propagate_ratio, 'force_le_1': False},
-                    statbox_size=stat_size(name, hist_list, None),
-                    res_y_range=(0, 3),
-                    )
+                        hists,
+                        plot_saver=ps,
+                        res_fit=False,
+                        res_divide_opt={'confint': propagate_ratio, 'force_le_1': False},
+                        statbox_size=stat_size(name, hist_list, None),
+                        res_y_range=(0, 3),
+                        x_range = x_r,
+                        )
         else:
             for i,hist in enumerate(hists_sorted):
                 if i == 0:
                     hist.Draw(draw_cmd)
                 else:
                     hist.Draw((draw_cmd + ' sames').strip())
+                if not is2d and x_r:
+                    hist.GetXaxis().SetRangeUser(*x_r)
 
             ps.c.Update()
             if not no_stats(name, hist_list, None):
