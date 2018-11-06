@@ -13,6 +13,7 @@ class MFVVertexerPairEffs : public edm::EDAnalyzer {
 
  private:
   const edm::EDGetTokenT<VertexerPairEffs> vpeff_token;
+  const edm::EDGetTokenT<double> weight_token;
   const bool allow_duplicate_pairs;
   const bool verbose;
 
@@ -27,6 +28,7 @@ class MFVVertexerPairEffs : public edm::EDAnalyzer {
 
 MFVVertexerPairEffs::MFVVertexerPairEffs(const edm::ParameterSet& cfg)
   : vpeff_token(consumes<VertexerPairEffs>(cfg.getParameter<edm::InputTag>("vpeff_src"))),
+    weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
     allow_duplicate_pairs(cfg.getParameter<bool>("allow_duplicate_pairs")),
     verbose(cfg.getUntrackedParameter<bool>("verbose", false))
 {
@@ -53,6 +55,9 @@ void MFVVertexerPairEffs::analyze(const edm::Event& event, const edm::EventSetup
   edm::Handle<VertexerPairEffs> vpeffs;
   event.getByToken(vpeff_token, vpeffs);
 
+  edm::Handle<double> weight;
+  event.getByToken(weight_token, weight);
+
   const int nvpeffs = int(vpeffs->size());
 
   double n_pairs[6][6] = {{0}};
@@ -61,7 +66,6 @@ void MFVVertexerPairEffs::analyze(const edm::Event& event, const edm::EventSetup
 
   std::vector<float> d2ds;
 
-  const double weight = 1; // PU reweighting?
 
   if (verbose) printf("\nrun = %u, lumi = %u, event = %llu, npveffs = %d\n", event.id().run(), event.luminosityBlock(), event.id().event(), nvpeffs);
 
@@ -73,7 +77,7 @@ void MFVVertexerPairEffs::analyze(const edm::Event& event, const edm::EventSetup
     assert(ntk_min >= 2 && ntk_max <= 5 && ntk_min <= ntk_max);
 
     const double d2d = vpeff.d2d();
-    const double w = weight * vpeff.weight();
+    const double w = *weight * vpeff.weight();
 
     if (!allow_duplicate_pairs) {
       bool seen = false;
