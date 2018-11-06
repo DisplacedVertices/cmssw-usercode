@@ -53,6 +53,9 @@ JMTWeightProducer::JMTWeightProducer(const edm::ParameterSet& cfg)
     weight_npv(cfg.getParameter<bool>("weight_npv")),
     npv_weights(cfg.getParameter<std::vector<double> >("npv_weights"))
 {
+  if (weight_gen + weight_gen_sign_only > 1)
+    throw cms::Exception("Configuration", "can only set one of weight_gen, weight_gen_sign_only");
+
   produces<double>();
 
   if (histos) {
@@ -98,7 +101,7 @@ void JMTWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 
   if (enable) {
     if (!event.isRealData()) {
-      if (weight_gen) {
+      if (weight_gen || weight_gen_sign_only) {
         edm::Handle<GenEventInfoProduct> gen_info;
         event.getByToken(gen_info_token, gen_info);
 
@@ -113,8 +116,10 @@ void JMTWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
           h_sums->Fill(sum_gen_weight, gen_weight);
           h_sums->Fill(sum_gen_weightprod, gen_weightprod);
         }
-        if (weight_gen_sign_only && gen_weight < 0)
-          *weight *= -1;
+        if (weight_gen_sign_only) {
+          if (gen_weight < 0)
+            *weight *= -1;
+        }
         else
           *weight *= gen_weight;
       }

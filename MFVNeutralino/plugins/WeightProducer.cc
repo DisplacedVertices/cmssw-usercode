@@ -58,6 +58,9 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
     weight_npv(cfg.getParameter<bool>("weight_npv")),
     npv_weights(cfg.getParameter<std::vector<double> >("npv_weights"))
 {
+  if (weight_gen + weight_gen_sign_only > 1)
+    throw cms::Exception("Configuration", "can only set one of weight_gen, weight_gen_sign_only");
+
   produces<double>();
 
   if (histos) {
@@ -129,7 +132,7 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
     event.getByToken(mevent_token, mevent);
 
     if (!event.isRealData()) {
-      if (weight_gen) {
+      if (weight_gen || weight_gen_sign_only) {
         assert((mevent->gen_weight - mevent->gen_weightprod)/mevent->gen_weightprod < 1e-3); // JMTBAD
         if (prints)
           printf("gen_weight: %g  weightprod: %g  ", mevent->gen_weight, mevent->gen_weightprod);
@@ -138,8 +141,10 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
           h_sums->Fill(sum_gen_weight, mevent->gen_weight);
           h_sums->Fill(sum_gen_weightprod, mevent->gen_weightprod);
         }
-        if (weight_gen_sign_only && mevent->gen_weight < 0)
-          *weight *= -1;
+        if (weight_gen_sign_only) {
+          if (mevent->gen_weight < 0)
+            *weight *= -1;
+        }
         else
           *weight *= mevent->gen_weight;
       }
