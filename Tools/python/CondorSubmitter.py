@@ -229,7 +229,7 @@ def get(i): return _l[i]
             os.mkdir(self.links_dir)
 
         if not testing and self.get_proxy:
-            print 'CondorSubmitter init: checking proxies, might ask for password twice (but you can skip it with ^C if you know what you are doing).'
+            #print 'CondorSubmitter init: checking proxies, might ask for password twice (but you can skip it with ^C if you know what you are doing).'
             crab_renew_proxy_if_needed()
             self.get_proxy = False
 
@@ -237,7 +237,7 @@ def get(i): return _l[i]
         self.timestamp = datetime.now()
         #os.system('mkdir -p /tmp/%s' % username)
 
-        print 'CondorSubmitter init: saving git status'
+        #print 'CondorSubmitter init: saving git status'
         save_git_status(os.path.join(self.batch_dir, self.ex_str, 'gitstatus'))
 
         os.mkdir(self.inputs_dir)
@@ -247,7 +247,7 @@ def get(i): return _l[i]
         self.pset_fn_pattern = os.path.join(self.inputs_dir, '%(name)s.py')
 
         tarball_fn = os.path.join(self.inputs_dir, 'input.tgz')
-        print 'CondorSubmitter init: making cmssw tarball'
+        #print 'CondorSubmitter init: making cmssw tarball'
         make_tarball(tarball_fn, include_python=True, include_interface=True)
 
         sh_fn = os.path.join(self.inputs_dir, 'run.sh')
@@ -268,7 +268,7 @@ def get(i): return _l[i]
             input_fns = ''
 
         # JMTBAD if pset_modifier or cmsrun_args modifies the output filenames, we won't catch them
-        print 'CondorSubmitter init: importing pset_template fn %s to get output filenames' % pset_template_fn
+        #print 'CondorSubmitter init: importing pset_template fn %s to get output filenames' % pset_template_fn
         module = imp.load_source('dummy', self.pset_template_fn)
         module_output_files = find_output_files(module.process)
         for l in module_output_files.itervalues():
@@ -293,7 +293,7 @@ def get(i): return _l[i]
         output_snippet = ''
 
         if output_files:
-            print 'CondorSubmitter init: output files are', output_files
+            #print 'CondorSubmitter init: output files are', output_files
             output_snippet += self.output_template.replace('__OUTPUT_BNS__', output_files)
 
         if stageout_files:
@@ -306,8 +306,8 @@ def get(i): return _l[i]
                     publish_name = batch_name.replace('/', '_')
                 stageout_path += '/$(<cs_primaryds)/' + publish_name + '/$(<cs_timestamp)/$(printf "%04i" $(($job/1000)) )'
 
-            print 'CondorSubmitter init: stageout files are', stageout_files
-            print 'CondorSubmitter init: stageout path is', stageout_path
+            #print 'CondorSubmitter init: stageout files are', stageout_files
+            #print 'CondorSubmitter init: stageout path is', stageout_path
 
             output_snippet += self.stageout_template \
                 .replace('__STAGEOUT_BNS__',  stageout_files) \
