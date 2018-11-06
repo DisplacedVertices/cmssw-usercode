@@ -69,9 +69,9 @@ for ntk in ntks:
 
     weighted = []
     for fn in fns:
-        (r1v, n1v, en1v), (r1vb, _, _), (r2v, n2v, en2v), (r2vb, _, _) = getit(fn, ntk)
-        f1vb = float(r1vb) / r1v if r1v > 0 else 0.
-        f2vb = float(r2vb) / r2v if r2v > 0 else 0.
+        (r1v, n1v, en1v), (_, n1vb, _), (r2v, n2v, en2v), (_, n2vb, _) = getit(fn, ntk)
+        f1vb = float(n1vb) / n1v if r1v > 0 else 0.
+        f2vb = float(n2vb) / n2v if r2v > 0 else 0.
 
         sname = os.path.basename(fn).replace('.root', '')
         is_sig = sname.startswith('mfv_')
