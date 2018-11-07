@@ -24,7 +24,8 @@ parser.add_argument('--nice', nargs='+', default=[],
 parser.add_argument('--colors', nargs='+', default=['ROOT.kRed', 'ROOT.kBlue', 'ROOT.kGreen+2', 'ROOT.kMagenta'],
                     help='Colors for the files: may be a python snippet, e.g. the default %(default)s.')
 
-group = parser.add_argument_group('Callback function snippets: will be of the form lambda name, hists, curr: <snippet here>')
+lambda_fmt = 'lambda name, hists, curr: (%s)'
+group = parser.add_argument_group('Callback function snippets: will be of the form ' + lambda_fmt % '<snippet here>')
 group.add_argument('--no-stats', default='False',
                     help='Snippet for no_stats lambda (default: %(default)s).')
 group.add_argument('--stat-size', default='(0.2,0.2)',
@@ -84,25 +85,16 @@ ncolors = len(options.colors)
 while len(options.colors) < nfiles:
     options.colors.append(ROOT.kMagenta + 1 + len(options.colors) - ncolors)
 
-_lambda = 'lambda name, hists, curr: '
-options.no_stats       = _lambda + options.no_stats
-options.stat_size      = _lambda + options.stat_size
-options.apply_commands = _lambda + options.apply_commands
-options.separate_plots = _lambda + options.separate_plots
-options.skip           = _lambda + options.skip
-options.draw_command   = _lambda + options.draw_command
-options.scaling        = _lambda + options.scaling
-options.ratio          = _lambda + options.ratio
-options.x_range        = _lambda + options.x_range
-options.lambda_no_stats       = eval(options.no_stats)
-options.lambda_stat_size      = eval(options.stat_size)
-options.lambda_apply_commands = eval(options.apply_commands)
-options.lambda_separate_plots = eval(options.separate_plots)
-options.lambda_skip           = eval(options.skip)
-options.lambda_draw_command   = eval(options.draw_command)
-options.lambda_scaling        = eval(options.scaling)
-options.lambda_ratio          = eval(options.ratio)
-options.lambda_x_range        = eval(options.x_range)
+def lambda_it(options, name):
+    l = lambda_fmt % getattr(options, name)
+    o = eval(l)
+    setattr(options, name, l)
+    setattr(options, 'lambda_' + name, o)
+    return o
+
+lambda_kwargs = {}
+for name in 'no_stats', 'stat_size', 'apply_commands', 'separate_plots', 'skip', 'draw_command', 'scaling', 'ratio', 'x_range':
+    lambda_kwargs[name] = lambda_it(options, name)
 
 print 'comparehists running with these options:'
 pprint(vars(options))
@@ -145,13 +137,4 @@ compare_hists(ps,
               samples = zip(options.nice, dirs, options.colors),
               recurse = options.recurse,
               only_n_first = options.only_n_first,
-              no_stats = options.lambda_no_stats,
-              stat_size = options.lambda_stat_size,
-              apply_commands = options.lambda_apply_commands,
-              separate_plots = options.lambda_separate_plots,
-              skip = options.lambda_skip,
-              draw_command = options.lambda_draw_command,
-              scaling = options.lambda_scaling,
-              ratio = options.lambda_ratio,
-              x_range = options.lambda_x_range,
-              )
+              **lambda_kwargs)
