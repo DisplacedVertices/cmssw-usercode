@@ -88,7 +88,7 @@ MFVByX::MFVByX(const edm::ParameterSet& cfg)
     h_vertex_seed_track_nlayers[i].set(&fs, TString::Format("h_vertex_seed_track_nlayers_%i", i), ";vertex seed track # layers;tracks", 30, 0, 30);
 
     h_njets[i].set(&fs, TString::Format("h_njets_%i", i), ";number of jets;events", 20, 0, 20);
-    for (int j = 0; i < MAX_NJETS; ++i)
+    for (int j = 0; j < MAX_NJETS; ++j)
       h_jetpt[j][i].set(&fs, TString::Format("h_jetpt%i_%i", j, i), TString::Format(";jet #%i p_{T} (GeV);events/2 GeV", j), 500, 0, 1000);
     h_ht40[i].set(&fs, TString::Format("h_ht40_%i", i), ";jet 40 H_{T} (GeV);events/3 GeV", 1000, 0, 3000);
     h_ht[i].set(&fs, TString::Format("h_ht_%i", i), ";jet H_{T} (GeV);events/3 GeV", 1000, 0, 3000);
