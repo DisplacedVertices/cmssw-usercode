@@ -97,7 +97,7 @@ for name in 'no_stats', 'stat_size', 'apply_commands', 'separate_plots', 'skip',
     lambda_kwargs[name] = lambda_it(options, name)
 
 print 'comparehists running with these options:'
-pprint(vars(options))
+pprint({x:y for x,y in vars(options).iteritems() if not x.startswith('lambda_')})
 
 #import sys ; print 'argv:', sys.argv ; raise 1 ; sys.exit(1)
 
