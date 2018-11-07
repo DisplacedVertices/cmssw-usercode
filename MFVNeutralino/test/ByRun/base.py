@@ -2,6 +2,7 @@ import os, sys, math, struct
 from collections import defaultdict
 from JMTucker.Tools.LumiLines import *
 from JMTucker.Tools.ROOTTools import *
+from JMTucker.Tools.CMSSWTools import json_path
 set_style()
 
 class ByRunPlotter:
@@ -17,7 +18,7 @@ class ByRunPlotter:
     @property
     def lls(self):
         if not self._lls:
-            self._lls = LumiLines('/uscms/home/tucker/public/mfv/2015plus2016stripped2.gzpickle', self.mask_fn)
+            self._lls = LumiLines('/uscms/home/tucker/public/mfv/lumi/2017p8.stripped.gzpickle', self.mask_fn)
         return self._lls
 
     def make(self, d, name, title, y_title, year, exclude, verbose=False, scale_by_lumi=False, scale_by_avgpu=False, draw_boundaries=True, use_index=True, do_fits=True):
