@@ -5,7 +5,7 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.Tools.Samples import *
 
-version = '2017p8v1'
+version = '2017p8v3'
 zoom = False #(0.98,1.005)
 save_more = True
 data_only = False
@@ -50,7 +50,7 @@ if data_only:
     bkg_samples, sig_samples = [], []
 else:
     if year == 2017 or year == 2018:
-        bkg_samples = [ttbar_2017, wjetstolnu_2017, dyjetstollM50_2017] #, dyjetstollM10_2017]
+        bkg_samples = [ttbar_2017, wjetstolnusum_2017, dyjetstollM50sum_2017] #, dyjetstollM10_2017]
         if use_qcd:
             bkg_samples.append(qcdmupt15_2017)
         sig_samples = [getattr(Samples, 'mfv_neu_tau001000um_M%04i_2017' % m) for m in (400, 800, 1200, 1600)] + [Samples.mfv_neu_tau010000um_M0800_2017]
