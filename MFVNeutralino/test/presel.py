@@ -13,7 +13,7 @@ del process.p
 
 max_events(process, 10000)
 report_every(process, 1000000)
-want_summary(process)
+#want_summary(process)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
 sample_files(process, 'qcdht2000_2017', dataset, 1)
 file_event_from_argv(process)
