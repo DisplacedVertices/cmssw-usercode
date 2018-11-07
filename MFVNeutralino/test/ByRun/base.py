@@ -3,6 +3,7 @@ from collections import defaultdict
 from JMTucker.Tools.LumiLines import *
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.CMSSWTools import json_path
+from JMTucker.Tools import Samples
 set_style()
 
 class ByRunPlotter:
@@ -11,6 +12,7 @@ class ByRunPlotter:
 
     def __init__(self, plot_saver, mask_fn=None, runs=[]):
         self.ps = plot_saver
+        self.ps.c.SetRightMargin(0.01)
         self.runs = sorted(runs)
         self.mask_fn = mask_fn
         self._lls = None
