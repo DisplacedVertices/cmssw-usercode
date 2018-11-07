@@ -353,7 +353,7 @@ for sample in mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017:
 
 # these stuck at status=PRODUCTION for some reason
 for ds in 'main', 'miniaod':
-    for s in (): #dyjetstollM10ext_2017,:
+    for s in ttbarht0600_2017, ttbarht0800_2017, ttbarht1200_2017: #dyjetstollM10ext_2017,:
         s.datasets[ds].ignore_invalid = True
 
     # 'PU2017' in dataset can be a lie https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/3128.html
