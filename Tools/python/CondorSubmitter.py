@@ -353,9 +353,9 @@ def get(i): return _l[i]
                 njobs = sample.njobs if hasattr(sample, 'njobs') else int_ceil(len(sample.filenames), per)
                 fn_groups = [x for x in (sample.filenames[i*per:(i+1)*per] for i in xrange(njobs)) if x]
                 njobs = len(fn_groups) # let it fail downward
-            if self._njobs is not None:
-                assert self._njobs <= njobs
-                njobs = self._njobs
+        if self._njobs is not None:
+            assert self._njobs <= njobs
+            njobs = self._njobs
 
         encoded_filelist = base64.b64encode(zlib.compress(pickle.dumps(fn_groups, -1)))
 
