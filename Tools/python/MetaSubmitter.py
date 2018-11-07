@@ -332,6 +332,10 @@ def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=2
                 'qcdht1500_2017': ( 4,  186000),
                 'qcdht2000_2017': ( 5,  202000),
                 'ttbar_2017':     (50, 3040000),
+                'ttbarht0600_2017': (50, 3040000),
+                'ttbarht0800_2017': (50, 3040000),
+                'ttbarht1200_2017': (50, 3040000),
+                'ttbarht2500_2017': (50, 3040000),
                 }
              }
         assert dataset == 'miniaod'
