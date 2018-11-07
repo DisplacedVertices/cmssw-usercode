@@ -39,10 +39,9 @@ class MFVByX : public edm::EDAnalyzer {
   ByRunTH1<TH1F> h_vertex_seed_track_nlayers[2];
 
   ByRunTH1<TH1F> h_njets[2];
-  static const int MAX_NJETS = 4;
+  static const int MAX_NJETS = 6;
   ByRunTH1<TH1F> h_jetpt[MAX_NJETS][2];
   ByRunTH1<TH1F> h_ht40[2];
-  ByRunTH1<TH1F> h_ht[2];
 
   ByRunTH1<TH1F> h_trig[2];
   ByRunTH1<TH1F> h_ananjets[2];
@@ -87,11 +86,10 @@ MFVByX::MFVByX(const edm::ParameterSet& cfg)
     h_vertex_seed_track_nstlayers[i].set(&fs, TString::Format("h_vertex_seed_track_nstlayers_%i", i), ";vertex seed track # strip layers;tracks", 20, 0, 20);
     h_vertex_seed_track_nlayers[i].set(&fs, TString::Format("h_vertex_seed_track_nlayers_%i", i), ";vertex seed track # layers;tracks", 30, 0, 30);
 
-    h_njets[i].set(&fs, TString::Format("h_njets_%i", i), ";number of jets;events", 20, 0, 20);
+    h_njets[i].set(&fs, TString::Format("h_njets_%i", i), ";number of jets;events", 30, 0, 30);
     for (int j = 0; j < MAX_NJETS; ++j)
-      h_jetpt[j][i].set(&fs, TString::Format("h_jetpt%i_%i", j, i), TString::Format(";jet #%i p_{T} (GeV);events/2 GeV", j), 500, 0, 1000);
-    h_ht40[i].set(&fs, TString::Format("h_ht40_%i", i), ";jet 40 H_{T} (GeV);events/3 GeV", 1000, 0, 3000);
-    h_ht[i].set(&fs, TString::Format("h_ht_%i", i), ";jet H_{T} (GeV);events/3 GeV", 1000, 0, 3000);
+      h_jetpt[j][i].set(&fs, TString::Format("h_jetpt%i_%i", j, i), TString::Format(";jet #%i p_{T} (GeV);events/10 GeV", j), 200, 0, 2000);
+    h_ht40[i].set(&fs, TString::Format("h_ht40_%i", i), ";jet 40 H_{T} (GeV);events/50 GeV", 200, 0, 10000);
 
     h_trig[i].set(&fs, TString::Format("h_trig_%i", i), "", 1, 0, 1);
     h_ananjets[i].set(&fs, TString::Format("h_ananjets_%i", i), "", 2, 0, 2);
@@ -129,12 +127,11 @@ void MFVByX::analyze(const edm::Event& event, const edm::EventSetup& setup) {
   for (int i = 0; i < MAX_NJETS; ++i)
     h_jetpt[i][nsv][by]->Fill(mevent->nth_jet_pt(i));
   h_ht40[nsv][by]->Fill(mevent->jet_ht(40));
-  h_ht[nsv][by]->Fill(mevent->jet_ht());
 
   h_trig[nsv][by]->Fill(0);
   h_ananjets[nsv][by]->Fill(mevent->njets() >= 4);
-  h_anaht[nsv][by]->Fill(mevent->jet_ht(40) >= 1000);
-  h_ana[nsv][by]->Fill(mevent->njets() >= 4 && mevent->jet_ht(40) >= 1000);
+  h_anaht[nsv][by]->Fill(mevent->jet_ht(40) >= 1200);
+  h_ana[nsv][by]->Fill(mevent->njets() >= 4 && mevent->jet_ht(40) >= 1200);
 
   const size_t n_vertex_seed_tracks = mevent->n_vertex_seed_tracks();
   h_n_vertex_seed_tracks[nsv][by]->Fill(n_vertex_seed_tracks);
