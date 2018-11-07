@@ -111,12 +111,13 @@ def cmd_rm_mc_parts():
                 if os.path.isfile(y):
                     os.remove(y)
 
-def _background_samples():
+def _background_samples(trigeff=False):
     x = ['ttbar']
-    if _leptonpresel:
-        x += ['wjetstolnu', 'dyjetstollM10', 'dyjetstollM50', 'qcdmupt15']
-        x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]]
-        x += ['qcdbctoept%03i' % x for x in [15,20,30,80,170,250]]
+    if _leptonpresel or trigeff:
+        x += ['wjetstolnusum', 'dyjetstollM10', 'dyjetstollM50sum', 'qcdmupt15']
+        if not trigeff:
+            x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]]
+            x += ['qcdbctoept%03i' % x for x in [15,20,30,80,170,250]]
     else:
         x += ['qcdht%04i' % x for x in [700, 1000, 1500, 2000]]
     return x
@@ -203,19 +204,28 @@ def cmd_trigeff():
     cmd_report_data()
     cmd_hadd_data()
 
+    permissive = bool_from_argv('permissive')
     for year_s, scale in ('_2017', -AnalysisConstants.int_lumi_2017),:
         for wqcd_s in '', '_wqcd':
-            cmd = 'samples merge %f background%s%s.root ' % (scale, wqcd_s, year_s)
-            files = 'ttbar.root wjetstolnusum.root dyjetstollM10.root dyjetstollM50sum.root'
-            if wqcd_s:
-                files += ' qcdmupt15.root'
-            files = files.replace('.root', year_s + '.root').split()
+            files = _background_samples(trigeff=True)
+            if not wqcd_s:
+                files.remove('qcdmupt15')
+            files = ['%s%s.root' % (x, year_s) for x in files]
+            files2 = []
             for fn in files:
                 if not os.path.isfile(fn):
-                    raise RuntimeError('%s not found' % fn)
-            cmd += ' '.join(files)
-            print cmd
-            os.system(cmd)
+                    msg = '%s not found' % fn
+                    if permissive:
+                        print msg
+                    else:
+                        raise RuntimeError(msg)
+                else:
+                    files2.append(fn)
+
+            if files2:
+                cmd = 'samples merge %f background%s%s.root %s' % (scale, wqcd_s, year_s, ' '.join(files2))
+                print cmd
+                os.system(cmd)
 
 def cmd_merge_bquarks_nobquarks():
     for year in ['2017']:
