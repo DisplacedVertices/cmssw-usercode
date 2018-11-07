@@ -2,30 +2,27 @@ from base import *
 
 ROOT.gStyle.SetOptFit(0)
 
-year = 2016
+year, eras = 2017, 'BCDEF'
+year, eras = 2018, ('A1','A2','A3','B1','B2','C1','C2','C3','D2')
 excludes = [('all', [])]
 event_filter_fn = None #'/uscms_data/d2/tucker/eventids_temp/HT900_L1300.bin'
-file_path = '/uscms_data/d2/tucker/crab_dirs/!done/MiniTreeV14_forpick'
-plot_path = 'vertex_xsec_v14_%i' % year
+file_path = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV21m'
+plot_path = 'vertex_xsec_v21m_%i' % year
 
 if event_filter_fn:
     plot_path += '_' + os.path.basename(event_filter_fn).replace('.bin', '')
 
-if year == 2015:
-    fns = ['%s/JetHT2015%s.root' % (file_path, s) for s in 'CD']
-    mask_fn = '%s/dataok_2015.json' % file_path
-else:
-    fns = ['%s/JetHT2016%s.root' % (file_path, s) for s in 'B3 C D E F G H2 H3'.split()]
-    mask_fn = '%s/dataok_2016.json' % file_path
+fns = ['%s/JetHT%s%s.root' % (file_path, year, era) for era in eras]
+mask_fn = '%s/dataok_%s.json' % (file_path, year)
 
 ####
 
-ps = plot_saver(plot_dir(plot_path), size=(2000,600), log=False, pdf=True)
+ps = plot_saver(plot_dir(plot_path), size=(1800,600), log=False, pdf=True)
 plotter = ByRunPlotter(ps, mask_fn)
 
 event_filter = EventFilter(event_filter_fn) if event_filter_fn else None
 
-for ntracks, oneortwo in (3, 1), (4, 1), (3, 2), (4, 2):
+for ntracks, oneortwo in (3,1),: #, (4,1), (3,2), (4,2):
     tree_path = 'mfvMiniTreeNtk%i/t' % ntracks if ntracks < 5 else 'mfvMiniTree/t'
     title = '%i, %i-track %i-vtx events' % (year, ntracks, oneortwo)
     print title
