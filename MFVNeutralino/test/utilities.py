@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
-import sys, os
+import sys, os, shutil
 from pprint import pprint
 from glob import glob
+from time import time
 from JMTucker.Tools import Samples
 from JMTucker.Tools import SampleFiles
 from JMTucker.Tools.general import bool_from_argv
@@ -43,14 +44,33 @@ def cmd_report_data():
             ex += '_10pc'
         elif '1pc' in sys.argv:
             ex += '_1pc'
+
         for year in 2017, 2018:
             if not glob('*%s%i*' % (ds, year)):
                 continue
+
             os.system('mreport c*_%s%i*' % (ds, year))
+            json_fn = 'processedLumis.json'
+            if not os.path.isfile(json_fn):
+                raise IOError('something went wrong with mreport?')
+
             print 'jsondiff'
-            os.system('compareJSON.py --diff processedLumis.json ' + json_path('ana_avail_%i%s.json' % (year, ex)))
-            raw_input('ok?')
-            os.rename('processedLumis.json', 'dataok_%i.json' % year)
+            avail_fn = json_path('ana_avail_%i%s.json' % (year, ex))
+            ok = False
+            if not os.path.isfile(avail_fn):
+                if raw_input('no file %s, enter y to create it: ' % avail_fn)[0] == 'y':
+                    shutil.copy(json_fn, avail_fn)
+                    ok = True
+            else:
+                os.system('compareJSON.py --diff %s %s' % (json_fn, avail_fn))
+                if raw_input('enter y if ok: ') == 'y':
+                    ok = True
+            if ok:
+                os.rename('processedLumis.json', 'dataok_%i.json' % year)
+            else:
+                bad_fn = '%s.bad.%i' % (json_fn, int(time()))
+                print 'saving %s as %s' % (json_fn, bad_fn)
+                os.rename(json_fn, bad_fn)
 
 def cmd_hadd_data():
     permissive = bool_from_argv('permissive')
