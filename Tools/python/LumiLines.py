@@ -17,6 +17,7 @@ class LumiLine:
         'PLTZERO': 2,
         'HFOC': 3,
         'HFET': 4,
+        'BCM1F': 5,
         }
 
 class LumiLines:
@@ -24,12 +25,16 @@ class LumiLines:
     # runs for each year, inclusive
     year_boundaries = {2015: (254227, 260627),
                        2016: (272007, 284068),
-                       2017: (297047, 306460)}
+                       2017: (297047, 306460),
+                       2018: (315252, 324878),
+                       '2017p8': (297047, 324878),
+                       }
     years = sorted(year_boundaries.keys())
     # starting runs of each era
     era_boundaries = [254227, 256630,                                         # 2015 C D
                       272007, 275657, 276315, 276831, 277772, 278820, 280919, # 2016 B3 C D E F G H2
                       297047, 299368, 302031, 303824, 305040,                 # 2017 B C D E F
+                      315252, 317080, 319337, 320497,                         # 2018 A B C D
                       ]
 
     @classmethod
@@ -155,24 +160,29 @@ class LumiLines:
         return s/sw
 
 if __name__ == '__main__':
-    #LumiLines.save('/uscms/home/tucker/public/mfv/lumi/2017.byls.csv.gz', '/uscms/home/tucker/public/mfv/lumi/2017.gzpickle')
-    #LumiLines.strip('/uscms/home/tucker/public/mfv/lumi/2017.gzpickle', '/uscms/home/tucker/public/mfv/lumi/2017stripped.gzpickle')
-    lls = LumiLines('/uscms/home/tucker/public/mfv/lumi/2017stripped.gzpickle')
-    eb = lls.era_boundaries[:] + [1000000]
-    bins = [ [x,y,-1,0,0] for x,y in zip(eb, eb[1:]) ]
-    print bins
-    for run in lls.runs(2017):
-        for i in xrange(len(bins)):
-            x,y,r,m,s = bins[i]
-            if x <= run < y:
-                recorded = lls.recorded(run)
-                s += recorded
-                if recorded > m:
-                    m = recorded
-                    r = run
-                bins[i] = x,y,r,m,s
-    ss = 0
-    for x,y,r,m,s in bins:
-        ss += s
-        print x,y,r,m,s
-    print ss
+    year = '2017p8'
+    LumiLines.save('/uscms/home/tucker/public/mfv/lumi/%s.byls.csv.gz' % year,
+                   '/uscms/home/tucker/public/mfv/lumi/%s.gzpickle'    % year)
+    LumiLines.strip('/uscms/home/tucker/public/mfv/lumi/%s.gzpickle'          % year,
+                    '/uscms/home/tucker/public/mfv/lumi/%s.stripped.gzpickle' % year)
+
+    if 0:
+        lls = LumiLines('/uscms/home/tucker/public/mfv/lumi/2017stripped.gzpickle')
+        eb = lls.era_boundaries[:] + [1000000]
+        bins = [ [x,y,-1,0,0] for x,y in zip(eb, eb[1:]) ]
+        print bins
+        for run in lls.runs(2017):
+            for i in xrange(len(bins)):
+                x,y,r,m,s = bins[i]
+                if x <= run < y:
+                    recorded = lls.recorded(run)
+                    s += recorded
+                    if recorded > m:
+                        m = recorded
+                        r = run
+                    bins[i] = x,y,r,m,s
+        ss = 0
+        for x,y,r,m,s in bins:
+            ss += s
+            print x,y,r,m,s
+        print ss
