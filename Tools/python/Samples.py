@@ -260,8 +260,12 @@ auxiliary_data_samples_2018 = [
 from JMTucker.Tools.CMSSWTools import json_path
 for s in data_samples_2017 + auxiliary_data_samples_2017:
     s.json = json_path('2017.json')
+    s.json_10pc = json_path('ana_2017_10pc.json')
+    s.json_1pc = json_path('ana_2017_1pc.json')
 for s in data_samples_2018 + auxiliary_data_samples_2018:
     s.json = json_path('2018.json')
+    s.json_10pc = json_path('ana_2018_10pc.json')
+    s.json_1pc = json_path('ana_2018_1pc.json')
 
 ########################################################################
 
