@@ -40,16 +40,19 @@ def cmd_hadd_vertexer_histos():
 
 def cmd_report_data():
     for ds, ex in ('SingleMuon', '_mu'), ('JetHT', ''):
+        pc = ''
         if '10pc' in sys.argv:
+            pc = '10pc'
             ex += '_10pc'
         elif '1pc' in sys.argv:
+            pc = '1pc'
             ex += '_1pc'
 
         for year in 2017, 2018:
             if not glob('*%s%i*' % (ds, year)):
                 continue
 
-            os.system('mreport c*_%s%i*' % (ds, year))
+            os.system('mreport c*_%s%i* %s' % (ds, year, pc))
             json_fn = 'processedLumis.json'
             if not os.path.isfile(json_fn):
                 raise IOError('something went wrong with mreport?')

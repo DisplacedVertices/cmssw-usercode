@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
-import os
+import os, sys
 from itertools import combinations
 from pprint import pprint
 from FWCore.PythonUtilities.LumiList import LumiList
+from JMTucker.Tools.CMSSWTools import json_path
 from JMTucker.Tools.CRAB3Tools import crab_command, crab_dirs_from_argv
 from JMTucker.Tools.CondorTools import cs_dirs_from_argv, cs_report
 from JMTucker.Tools.DBS import ll_for_dataset
@@ -23,6 +24,12 @@ def check_and_print_diff(a,b):
     else:
         print colors.green('%s == %s' % (a,b))
 
+pc = 100
+if '10pc' in sys.argv:
+    pc = 10
+elif '1pc' in sys.argv:
+    pc = 1
+
 ll_alls = []
 for is_crab, wds in (True, crab_dirs_from_argv()), (False, cs_dirs_from_argv()):
     for wd in wds:
@@ -31,7 +38,12 @@ for is_crab, wds in (True, crab_dirs_from_argv()), (False, cs_dirs_from_argv()):
             ll_alls.append((wd, cs_report(wd)))
         else:
             sample = Samples.sample_from_end_string(Samples, wd)
-            goodLumis = LumiList(sample.json)
+            json = sample.json
+            if pc == 10:
+                json = sample.json_10pc
+            elif pc == 10:
+                json = sample.json_1pc
+            goodLumis = LumiList(json)
 
             expected_files = [os.path.join(wd, 'results', x) for x in ['processedLumis.json']]
             if any(not os.path.isfile(x) for x in expected_files):
