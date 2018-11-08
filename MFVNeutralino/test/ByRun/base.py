@@ -51,7 +51,12 @@ class ByRunPlotter:
                         break
 
             if verbose:
-                print '(%3i) %i: %r' % (i,run,n)
+                fmt = '%s'
+                if type(n) == float:
+                    fmt = '%.3g'
+                elif type(n) == tuple and type(n[0]) == float:
+                    fmt = ' '.join(['%.3g']*len(n))
+                print '(%3i) %i: %s' % (i,run,fmt%n)
 
             if scale_by_lumi or scale_by_avgpu:
                 lumi = self.lls.recorded(run)/1e6
@@ -143,10 +148,14 @@ class ByRunPlotter:
                 fy  = fcn.GetParameter(0)
                 fye = fcn.GetParError(0)
                 if not first:
-                    first = fy, fye, fye/fy
+                    print 'zzz',fy, fye
+                    first = fy, fye, fye/fy if fy > 0 else None
                     ratio = 1,0
                 else:
-                    ratio = fy/first[0], 0 if i == 0 else ((fye/fy)**2 + first[2]**2)**0.5
+                    if first[0] > 0:
+                        ratio = fy/first[0], 0 if i == 0 else ((fye/fy)**2 + first[2]**2)**0.5
+                    else:
+                        ratio = -1,-1
                 print '%i (%3i) - %i (%3i): %.3f +- %.3f  (%.4f +- %.4f)  chi2/ndf = %6.3f/%3i -> prob = %f' % (r.runs[a], a, r.runs[b], b, fy, fye, ratio[0], ratio[1], fr.Chi2(), fr.Ndf(), fr.Prob()),
                 r.frs.append(fr)
                 these_miss = []
