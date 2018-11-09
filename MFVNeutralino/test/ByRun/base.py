@@ -148,7 +148,6 @@ class ByRunPlotter:
                 fy  = fcn.GetParameter(0)
                 fye = fcn.GetParError(0)
                 if not first:
-                    print 'zzz',fy, fye
                     first = fy, fye, fye/fy if fy > 0 else None
                     ratio = 1,0
                 else:
