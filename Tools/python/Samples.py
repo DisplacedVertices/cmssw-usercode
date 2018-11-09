@@ -255,6 +255,10 @@ auxiliary_data_samples_2018 = [
     DataSample('SingleMuon2018C2', '/SingleMuon/Run2018C-PromptReco-v2/AOD'),  # 319449 319756   3.297
     DataSample('SingleMuon2018C3', '/SingleMuon/Run2018C-PromptReco-v3/AOD'),  # 319833 320191   2.839
     DataSample('SingleMuon2018D2', '/SingleMuon/Run2018D-PromptReco-v2/AOD'),  # 320500 324878  24.103
+
+    DataSample('EarlyReRecoJetHT2018A', '/JetHT/Run2018A-17Sep2018_pilot-v1/AOD'),
+    DataSample('EarlyReRecoJetHT2018B', '/JetHT/Run2018B-17Sep2018_pilot-v1/AOD'),
+    DataSample('EarlyReRecoJetHT2018C', '/JetHT/Run2018C-17Sep2018_pilot-v1/AOD'),
     ]
 
 from JMTucker.Tools.CMSSWTools import json_path
