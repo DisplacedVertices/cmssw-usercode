@@ -324,18 +324,19 @@ def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=2
             sample.files_per = d.get(n, 20)
 
     elif jobtype == 'ntuple':
+        # Shed/presel_splitting.py
         d = {'miniaod': {
-                'signal':         ( 1,     200),
-                'JetHT':          (25, 2250000),
-                'qcdht0700_2017': (50, 3130000),
-                'qcdht1000_2017': (11,  551000),
-                'qcdht1500_2017': ( 4,  186000),
-                'qcdht2000_2017': ( 5,  202000),
-                'ttbar_2017':     (50, 3040000),
-                'ttbarht0600_2017': (50, 3040000),
-                'ttbarht0800_2017': (50, 3040000),
-                'ttbarht1200_2017': (50, 3040000),
-                'ttbarht2500_2017': (50, 3040000),
+                'signal':           ( 1,     200),
+                'JetHT':            (25, 2250000),
+                'qcdht0700_2017':   (50, 3130000),
+                'qcdht1000_2017':   (11,  551000),
+                'qcdht1500_2017':   ( 4,  186000),
+                'qcdht2000_2017':   ( 5,  202000),
+                'ttbar_2017':       (50, 3040000),
+                'ttbarht0600_2017': (10,  143000),
+                'ttbarht0800_2017': ( 6,   90000),
+                'ttbarht1200_2017': ( 6,   65000),
+                'ttbarht2500_2017': ( 6,   55000),
                 }
              }
         assert dataset == 'miniaod'
