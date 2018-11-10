@@ -347,7 +347,7 @@ def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=2
 
             name = sample.name
 
-            if name.startswith('JetHT'):
+            if 'JetHT' in name:
                 name = 'JetHT'
             elif sample.is_signal:
                 name = 'signal'
