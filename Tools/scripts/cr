@@ -8,16 +8,21 @@ from JMTucker.Tools import colors
 dirs = crab_dirs_from_argv()
 verbose = True
 
+def simple_cmd_ex(cmd):
+    if verbose:
+        print colors.bold(cmd)
+    code = os.system(cmd)
+    if verbose:
+        color = colors.boldred if code != 0 else colors.boldgreen
+        print color('exit code: %s' % code)
+        print
+
 def simple_cmd(cmd_fmt):
-    for d in dirs:
-        cmd = cmd_fmt % d
-        if verbose:
-            print colors.bold(cmd)
-        code = os.system(cmd)
-        if verbose:
-            color = colors.boldred if code != 0 else colors.boldgreen
-            print color('exit code: %s' % code)
-            print
+    if '%s' not in cmd_fmt:
+        simple_cmd_ex(cmd_fmt)
+    else:
+        for d in dirs:
+            simple_cmd_ex(cmd_fmt % d)
 
 def simple_fcn(fcn):
     for d in dirs:
@@ -62,7 +67,7 @@ def help():
     print 'available commands:\n'
     for cmd in sorted(cmds):
         print '%-10s: %s' % (cmd, cmds[cmd].replace('simple_',''))
-    print '\ncmd (shell command(s)) is executed for each crab working dir in argv. %s is replaced with the working dir.'
+    print '\ncmd (shell command(s)) is executed for each crab working dir in argv if %s is in the cmd. (%s is replaced with the working dir.) Otherwise, the command is run once.'
     print 'fcn (part of CRABTools library) is called for each crab working dir in argv. The argument to the fcn is the working dir.'
 
 if 'help' in argv or '-h' in argv or '--help' in argv:
