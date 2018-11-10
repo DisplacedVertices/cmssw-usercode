@@ -256,20 +256,16 @@ auxiliary_data_samples_2018 = [
     DataSample('SingleMuon2018C3', '/SingleMuon/Run2018C-PromptReco-v3/AOD'),  # 319833 320191   2.839
     DataSample('SingleMuon2018D2', '/SingleMuon/Run2018D-PromptReco-v2/AOD'),  # 320500 324878  24.103
 
-    DataSample('EarlyReRecoJetHT2018A', '/JetHT/Run2018A-17Sep2018_pilot-v1/AOD'),
-    DataSample('EarlyReRecoJetHT2018B', '/JetHT/Run2018B-17Sep2018_pilot-v1/AOD'),
-    DataSample('EarlyReRecoJetHT2018C', '/JetHT/Run2018C-17Sep2018_pilot-v1/AOD'),
+    DataSample('EarlyReRecoJetHT2018A', '/JetHT/Run2018A-17Sep2018-v1/AOD'),
+    DataSample('EarlyReRecoJetHT2018B', '/JetHT/Run2018B-17Sep2018-v1/AOD'),
     ]
 
 from JMTucker.Tools.CMSSWTools import json_path
-for s in data_samples_2017 + auxiliary_data_samples_2017:
-    s.json = json_path('2017.json')
-    s.json_10pc = json_path('ana_2017_10pc.json')
-    s.json_1pc = json_path('ana_2017_1pc.json')
-for s in data_samples_2018 + auxiliary_data_samples_2018:
-    s.json = json_path('2018.json')
-    s.json_10pc = json_path('ana_2018_10pc.json')
-    s.json_1pc = json_path('ana_2018_1pc.json')
+for y,ss in (2017, data_samples_2017 + auxiliary_data_samples_2017), (2018, data_samples_2018 + auxiliary_data_samples_2018):
+    for s in ss:
+        s.json = json_path('%s.json' % y)
+        s.json_10pc = json_path('ana_%s_10pc.json' % y)
+        s.json_1pc = json_path('ana_%s_1pc.json' % y)
 
 ########################################################################
 
