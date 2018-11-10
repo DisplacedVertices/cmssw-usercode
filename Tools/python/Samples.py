@@ -256,8 +256,8 @@ auxiliary_data_samples_2018 = [
     DataSample('SingleMuon2018C3', '/SingleMuon/Run2018C-PromptReco-v3/AOD'),  # 319833 320191   2.839
     DataSample('SingleMuon2018D2', '/SingleMuon/Run2018D-PromptReco-v2/AOD'),  # 320500 324878  24.103
 
-    DataSample('EarlyReRecoJetHT2018A', '/JetHT/Run2018A-17Sep2018-v1/AOD'),
-    DataSample('EarlyReRecoJetHT2018B', '/JetHT/Run2018B-17Sep2018-v1/AOD'),
+    DataSample('ReRecoJetHT2018A', '/JetHT/Run2018A-17Sep2018-v1/AOD'),
+    DataSample('ReRecoJetHT2018B', '/JetHT/Run2018B-17Sep2018-v1/AOD'),
     ]
 
 from JMTucker.Tools.CMSSWTools import json_path
@@ -355,9 +355,9 @@ for sample in mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017:
     sample.datasets['miniaod'].condor = True
     sample.datasets['miniaod'].xrootd_url = xrootd_sites['T3_US_FNALLPC']
 
-# these stuck at status=PRODUCTION for some reason
 for ds in 'main', 'miniaod':
-    for s in ttbarht0600_2017, ttbarht0800_2017, ttbarht1200_2017: #dyjetstollM10ext_2017,:
+    # these in status=PRODUCTION
+    for s in ttbarht0600_2017, ttbarht0800_2017, ttbarht1200_2017, ReRecoJetHT2018A, ReRecoJetHT2018B: #dyjetstollM10ext_2017,:
         s.datasets[ds].ignore_invalid = True
 
     # 'PU2017' in dataset can be a lie https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/3128.html
