@@ -132,6 +132,7 @@ def cmd_rm_mc_parts():
         if os.path.isfile(c):
             for y in a,b:
                 if os.path.isfile(y):
+                    print y
                     os.remove(y)
 
 def _background_samples(trigeff=False):
