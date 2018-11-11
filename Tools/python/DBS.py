@@ -197,7 +197,13 @@ def files_for_events(run_events, dataset, instance='global'):
     return sorted(files)
 
 if __name__ == '__main__':
-    pass
+    if len(sys.argv) > 1:
+        cmd = sys.argv[1]
+        if cmd == 'll':
+            dataset, outfn = sys.argv[2:4]
+            ll_for_dataset(dataset).writeJSON(outfn)
+        else:
+            sys.exit('unrecognized cmd %s' % cmd)
 
     #ds = '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/AODSIM'
     #all_files = files_in_dataset(ds)
