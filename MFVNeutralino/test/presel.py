@@ -3,7 +3,7 @@ from JMTucker.MFVNeutralino.NtupleCommon import *
 settings = NtupleSettings()
 settings.is_mc = True
 settings.is_miniaod = True
-settings.cross = '' # 2017to2018 2017to2017p8
+settings.cross = '' # 2017to2018' # 2017to2017p8'
 
 process = ntuple_process(settings)
 tfileservice(process, 'presel.root')

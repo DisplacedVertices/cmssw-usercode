@@ -2,7 +2,7 @@ import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 is_mc = True # for blinding
-cross = '' # 2017to2018 2017to2017p8
+cross = '' # 2017to2018' # 2017to2017p8'
 
 version = 'v21m'
 dataset = 'ntuple' + version
