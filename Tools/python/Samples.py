@@ -365,9 +365,9 @@ for ds in 'main', 'miniaod':
 ########
 
 for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + \
-         data_samples_2018:
+         data_samples_2018 + auxiliary_data_samples_2018[-2:]:
     x.add_dataset("ntuplev21m")
-    if not x.is_signal and not x in ttbar_samples_2017:
+    if not x.is_signal and not x in ttbar_samples_2017 and not x in auxiliary_data_samples_2018[-2:]:
         x.add_dataset("ntuplev21m_ntkseeds")
 
 ########
