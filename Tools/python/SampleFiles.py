@@ -276,6 +276,7 @@ _add_ds("ntuplev21m", {
 'qcdht2000_2017': _fromnum0("/store/user/tucker/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/NtupleV21m_2017/181031_143854", 30),
 'ttbar_2017': _fromnum0("/store/user/tucker/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleV21m_2017/181101_153920", 51),
 'ttbarht0600_2017': (15+57, ["/store/user/tucker/TTJets_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV21m_recover_2017/181111_020458/0000/ntuple_%i.root" % i for i in xrange(1,16)] + ['/store/user/tucker/TTJets_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV21m_2017/181107_012022/0000/ntuple_%i.root' % i for i in chain(xrange(1,7), xrange(10,14), xrange(15,61), [8])]),
+# TTBARHT0800 STILL MISSING A FILE IN RECOVER DS
 'ttbarht0800_2017': (42+37, ['/store/user/tucker/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV21m_recover_2017/181111_020531/0000/ntuple_%i.root' % i for i in chain(xrange(1,13), xrange(14,44))] + ['/store/user/tucker/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV21m_2017/181107_012041/0000/ntuple_%i.root' % i for i in chain(xrange(1,20), xrange(25,31), xrange(32,43), [21])]),
 'ttbarht1200_2017': ( 9+31, ["/store/user/tucker/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV21m_recover_2017/181111_020554/0000/ntuple_%i.root" % i for i in xrange(1,10)] + ['/store/user/tucker/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV21m_2017/181107_012100/0000/ntuple_%i.root' % i for i in chain(xrange(1,10), xrange(11,33))]),
 'ttbarht2500_2017': _fromnum1("/store/user/tucker/TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV21m_2017/181107_005843", 29),
@@ -392,64 +393,6 @@ _add_ds("ntuplev21m_ntkseeds", {
 'JetHT2018D2': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2018/181101_204401", 207, fnbase="ntkseeds"),
 })
 
-
-_add_ds("ntuplev20m", {
-'JetHT2017B': _fromnum1("/store/user/tucker/JetHT/NtupleV20m_2017/180925_201903", 513),
-'JetHT2017C': _fromnum1("/store/user/tucker/JetHT/NtupleV20m_2017/180925_201922", 777),
-'JetHT2017D': _fromnum1("/store/user/tucker/JetHT/NtupleV20m_2017/180925_201941", 372),
-'JetHT2017E': _fromnum1("/store/user/tucker/JetHT/NtupleV20m_2017/180925_202003", 724),
-'JetHT2017F': _fromnum1("/store/user/tucker/JetHT/NtupleV20m_2017/180925_202026", 931),
-'qcdht0700_2017': _frommerge("/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/NtupleV20m_merge_2017/180810_090200/0000/merge",  3),
-'qcdht1000_2017': _frommerge("/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/NtupleV20m_merge_2017/180810_090201/0000/merge", 12),
-'qcdht1500_2017': _frommerge("/store/user/tucker/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/NtupleV20m_merge_2017/180810_090202/0000/merge", 25),
-'qcdht2000_2017': _frommerge("/store/user/tucker/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/NtupleV20m_merge_2017/180810_090203/0000/merge", 15),
-'ttbar_2017': _fromnum1("/store/user/tucker/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleV20m_2017/180808_064546", 308),
-'wjetstolnu_2017': _frommerge("/store/user/tucker/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV20m_merge_2017/180810_090204/0000/merge", 1),
-'dyjetstollM10_2017': _frommerge("/store/user/tucker/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV20m_merge_2017/180810_090205/0000/merge", 1),
-'dyjetstollM50_2017': _frommerge("/store/user/tucker/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleV20m_merge_2017/180810_090206/0000/merge", 2),
-'qcdmupt15_2017': _frommerge("/store/user/tucker/QCD_Pt-20toInf_MuEnrichedPt15_TuneCP5_13TeV_pythia8/NtupleV20m_merge_2017/180810_090207/0000/merge", 1),
-'qcdempt015_2017': _frommerge("/store/user/tucker/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV_pythia8/NtupleV20m_merge_2017/180810_090208/0000/merge", 1),
-'qcdempt020_2017': _frommerge("/store/user/tucker/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV_pythia8/NtupleV20m_merge_2017/180810_090209/0000/merge", 1),
-'qcdempt030_2017': _frommerge("/store/user/tucker/QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV_pythia8/NtupleV20m_merge_2017/180810_090210/0000/merge", 1),
-'qcdempt050_2017': _frommerge("/store/user/tucker/QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV_pythia8/NtupleV20m_merge_2017/180810_090211/0000/merge", 1),
-'qcdempt080_2017': _frommerge("/store/user/tucker/QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV_pythia8/NtupleV20m_merge_2017/180810_090212/0000/merge", 1),
-'qcdempt120_2017': _frommerge("/store/user/tucker/QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV_pythia8/NtupleV20m_merge_2017/180810_090213/0000/merge", 1),
-'qcdempt170_2017': _frommerge("/store/user/tucker/QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV_pythia8/NtupleV20m_merge_2017/180810_090214/0000/merge", 1),
-'qcdempt300_2017': _frommerge("/store/user/tucker/QCD_Pt-300toInf_EMEnriched_TuneCP5_13TeV_pythia8/NtupleV20m_merge_2017/180810_090215/0000/merge", 1),
-'qcdbctoept015_2017': _frommerge("/store/user/tucker/QCD_Pt_15to20_bcToE_TuneCP5_13TeV_pythia8/NtupleV20m_merge_2017/180810_090216/0000/merge", 1),
-'qcdbctoept020_2017': _frommerge("/store/user/tucker/QCD_Pt_20to30_bcToE_TuneCP5_13TeV_pythia8/NtupleV20m_merge_2017/180810_090217/0000/merge", 1),
-'qcdbctoept030_2017': _frommerge("/store/user/tucker/QCD_Pt_30to80_bcToE_TuneCP5_13TeV_pythia8/NtupleV20m_merge_2017/180810_090218/0000/merge", 1),
-'qcdbctoept080_2017': _frommerge("/store/user/tucker/QCD_Pt_80to170_bcToE_TuneCP5_13TeV_pythia8/NtupleV20m_merge_2017/180810_090219/0000/merge", 1),
-'qcdbctoept170_2017': _frommerge("/store/user/tucker/QCD_Pt_170to250_bcToE_TuneCP5_13TeV_pythia8/NtupleV20m_merge_2017/180810_090220/0000/merge", 1),
-'qcdbctoept250_2017': _frommerge("/store/user/tucker/QCD_Pt_250toInf_bcToE_TuneCP5_13TeV_pythia8/NtupleV20m_merge_2017/180810_090221/0000/merge", 4),
-})
-
-
-_add_ds("ntuplev20m_ntkseeds", {
-'qcdht0700_2017': _fromnum1("/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/NtupleV20m_NTkSeeds_2017/180919_182021", 199, fnbase="ntkseeds"),
-'qcdht1000_2017': _fromnum1("/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/NtupleV20m_NTkSeeds_2017/180919_182039", 883, fnbase="ntkseeds"),
-'qcdht1500_2017': _fromnum1("/store/user/tucker/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/NtupleV20m_NTkSeeds_2017/180919_182058", 780, fnbase="ntkseeds"),
-'qcdht2000_2017': _fromnum1("/store/user/tucker/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/NtupleV20m_NTkSeeds_2017/180919_182117", 361, fnbase="ntkseeds"),
-'ttbar_2017': _fromnum1("/store/user/tucker/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleV20m_NTkSeeds_2017/180919_181958", 308, fnbase="ntkseeds"),
-'wjetstolnu_2017': _fromnum1("/store/user/tucker/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV20m_NTkSeeds_2017/180919_182136", 197, fnbase="ntkseeds"),
-'dyjetstollM10_2017': _fromnum1("/store/user/tucker/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV20m_NTkSeeds_2017/180919_182154", 312, fnbase="ntkseeds"),
-'dyjetstollM50_2017': _fromnum1("/store/user/tucker/DYJetsToLL_M-50_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleV20m_NTkSeeds_2017/180919_182213", 216, fnbase="ntkseeds"),
-'qcdmupt15_2017': _fromnum1("/store/user/tucker/QCD_Pt-20toInf_MuEnrichedPt15_TuneCP5_13TeV_pythia8/NtupleV20m_NTkSeeds_2017/180919_182232", 137, fnbase="ntkseeds"),
-'qcdempt015_2017': _fromnum1("/store/user/tucker/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV_pythia8/NtupleV20m_NTkSeeds_2017/180919_182251", 89, fnbase="ntkseeds"),
-'qcdempt020_2017': _fromnum1("/store/user/tucker/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV_pythia8/NtupleV20m_NTkSeeds_2017/180919_182309", 93, fnbase="ntkseeds"),
-'qcdempt030_2017': _fromnum1("/store/user/tucker/QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV_pythia8/NtupleV20m_NTkSeeds_2017/180919_182328", 118, fnbase="ntkseeds"),
-'qcdempt050_2017': _fromnum1("/store/user/tucker/QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV_pythia8/NtupleV20m_NTkSeeds_2017/180919_182347", 86, fnbase="ntkseeds"),
-'qcdempt080_2017': _fromnum1("/store/user/tucker/QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV_pythia8/NtupleV20m_NTkSeeds_2017/180919_182411", 68, fnbase="ntkseeds"),
-'qcdempt120_2017': _fromnum1("/store/user/tucker/QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV_pythia8/NtupleV20m_NTkSeeds_2017/180919_182433", 71, fnbase="ntkseeds"),
-'qcdempt170_2017': _fromnum1("/store/user/tucker/QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV_pythia8/NtupleV20m_NTkSeeds_2017/180919_182451", 29, fnbase="ntkseeds"),
-'qcdempt300_2017': _fromnum1("/store/user/tucker/QCD_Pt-300toInf_EMEnriched_TuneCP5_13TeV_pythia8/NtupleV20m_NTkSeeds_2017/180919_182510", 24, fnbase="ntkseeds"),
-'qcdbctoept015_2017': _fromnum1("/store/user/tucker/QCD_Pt_15to20_bcToE_TuneCP5_13TeV_pythia8/NtupleV20m_NTkSeeds_2017/180919_182529", 18, fnbase="ntkseeds"),
-'qcdbctoept020_2017': _fromnum1("/store/user/tucker/QCD_Pt_20to30_bcToE_TuneCP5_13TeV_pythia8/NtupleV20m_NTkSeeds_2017/180919_182550", 83, fnbase="ntkseeds"),
-'qcdbctoept030_2017': _fromnum1("/store/user/tucker/QCD_Pt_30to80_bcToE_TuneCP5_13TeV_pythia8/NtupleV20m_NTkSeeds_2017/180919_182609", 129, fnbase="ntkseeds"),
-'qcdbctoept080_2017': _fromnum1("/store/user/tucker/QCD_Pt_80to170_bcToE_TuneCP5_13TeV_pythia8/NtupleV20m_NTkSeeds_2017/180919_182627", 129, fnbase="ntkseeds"),
-'qcdbctoept170_2017': _fromnum1("/store/user/tucker/QCD_Pt_170to250_bcToE_TuneCP5_13TeV_pythia8/NtupleV20m_NTkSeeds_2017/180919_182646", 79, fnbase="ntkseeds"),
-'qcdbctoept250_2017': _fromnum1("/store/user/tucker/QCD_Pt_250toInf_bcToE_TuneCP5_13TeV_pythia8/NtupleV20m_NTkSeeds_2017/180919_182706", 80, fnbase="ntkseeds"),
-})
 
 ################################################################################
 

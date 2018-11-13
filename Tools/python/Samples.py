@@ -82,9 +82,6 @@ qcd_samples_2017 = [
 
 ttbar_samples_2017 = [
     MCSample('ttbar_2017', '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 155582358, nice='t#bar{t}', color=4, syst_frac=0.15, xsec=832.),
-    ]
-
-ttbar_ht_samples_2017 = [
     MCSample('ttbarht0600_2017', '/TTJets_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM',   81565576, nice='t#bar{t}, 600 < H_{T} < 800 GeV',   color=600, syst_frac=0.15, xsec=1.817),
     MCSample('ttbarht0800_2017', '/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM',  40248127, nice='t#bar{t}, 800 < H_{T} < 1200 GeV',  color=601, syst_frac=0.15, xsec=0.7520),
     MCSample('ttbarht1200_2017', '/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 13214871, nice='t#bar{t}, 1200 < H_{T} < 2500 GeV', color=602, syst_frac=0.15, xsec=0.1313),
@@ -280,7 +277,6 @@ _adbp3 = partial(_adbp, dbs_inst='phys03')
 __all__ = [
     'qcd_samples_2017',
     'ttbar_samples_2017',
-    'ttbar_ht_samples_2017',
     'leptonic_samples_2017',
     'leptonic_samples_sum_2017',
     'mfv_signal_samples_2017',
@@ -368,15 +364,10 @@ for ds in 'main', 'miniaod':
 # ntuples
 ########
 
-for x in data_samples_2017 + ttbar_samples_2017 + qcd_samples_2017 + leptonic_samples_2017 + mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017:
-    x.add_dataset("ntuplev20m")
-for x in ttbar_samples_2017 + qcd_samples_2017 + leptonic_samples_2017:
-    x.add_dataset("ntuplev20m_ntkseeds")
-
-for x in data_samples_2017 + ttbar_samples_2017 + qcd_samples_2017 + mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + \
+for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + \
          data_samples_2018:
     x.add_dataset("ntuplev21m")
-    if not x.is_signal:
+    if not x.is_signal and not x in ttbar_samples_2017:
         x.add_dataset("ntuplev21m_ntkseeds")
 
 ########
