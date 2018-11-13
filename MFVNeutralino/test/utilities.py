@@ -135,8 +135,11 @@ def cmd_rm_mc_parts():
                     print y
                     os.remove(y)
 
-def _background_samples(trigeff=False):
-    x = ['ttbar']
+def _background_samples(trigeff=False, use_ttbar_ht=False):
+    if use_ttbar_ht:
+        x = ['ttbarht%04i' % x for x in [600, 800, 1200, 2500]]
+    else:
+        x = ['ttbar']
     if _leptonpresel or trigeff:
         x += ['wjetstolnusum', 'dyjetstollM10', 'dyjetstollM50sum', 'qcdmupt15']
         if not trigeff:
@@ -148,24 +151,25 @@ def _background_samples(trigeff=False):
 
 def cmd_merge_background():
     permissive = bool_from_argv('permissive')
-    for year_s, scale in ('_2017', -AnalysisConstants.int_lumi_2017 * AnalysisConstants.scale_factor_2017),:
-        files = _background_samples()
-        files = ['%s%s.root' % (x, year_s) for x in files]
-        files2 = []
-        for fn in files:
-            if not os.path.isfile(fn):
-                msg = '%s not found' % fn
-                if permissive:
-                    print msg
+    for use_ttbar_ht_s, use_ttbar_ht in ('_ttbarht', True), ('', False):
+        for year_s, scale in ('_2017', -AnalysisConstants.int_lumi_2017 * AnalysisConstants.scale_factor_2017),:
+            files = _background_samples(use_ttbar_ht=use_ttbar_ht)
+            files = ['%s%s.root' % (x, year_s) for x in files]
+            files2 = []
+            for fn in files:
+                if not os.path.isfile(fn):
+                    msg = '%s not found' % fn
+                    if permissive:
+                        print msg
+                    else:
+                        raise RuntimeError(msg)
                 else:
-                    raise RuntimeError(msg)
-            else:
-                files2.append(fn)
-        if files2:
-            cmd = 'samples merge %f background%s%s.root ' % (scale, _presel_s, year_s)
-            cmd += ' '.join(files2)
-            print cmd
-            os.system(cmd)
+                    files2.append(fn)
+            if files2:
+                cmd = 'samples merge %f background%s%s%s.root ' % (scale, _presel_s, use_ttbar_ht_s, year_s)
+                cmd += ' '.join(files2)
+                print cmd
+                os.system(cmd)
 
 def cmd_effsprint():
     background_fns = ' '.join(x + '_2017.root' for x in _background_samples())
