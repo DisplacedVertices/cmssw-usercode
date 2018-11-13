@@ -6,7 +6,7 @@ process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
 tfileservice(process, 'evids.root')
 file_event_from_argv(process)
 
-add_analyzer(process, 'EventIdRecorder', prints = untracked.bool('prints' in sys.argv))
+add_analyzer(process, 'EventIdRecorder', prints = cms.untracked.bool('prints' in sys.argv))
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
