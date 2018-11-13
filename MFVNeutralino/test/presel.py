@@ -59,7 +59,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples += Samples.data_samples_2017
         #samples += Samples.leptonic_samples_2017
     elif year == 2018:
-        samples = Samples.data_samples_2018
+        samples = Samples.data_samples_2018 + [s for s in Samples.auxiliary_data_samples_2018 if s.name.startswith('ReRecoJetHT')]
 
     samples = [s for s in samples if s.has_dataset(dataset) and (s.is_mc or not settings.cross)]
     set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2017p8_1pc.json'))
