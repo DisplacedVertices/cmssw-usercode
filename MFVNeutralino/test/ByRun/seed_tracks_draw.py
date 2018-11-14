@@ -2,21 +2,18 @@ from base import *
 
 ROOT.gStyle.SetOptFit(0)
 
-year, ntracks = 2016, 3
+year, ntracks = 2018, 3
 do_ana_related = False
 
 path = 'byrun%i%i' % (ntracks, ntracks) if ntracks < 5 else None
 if do_ana_related:
     path += 'noana' # i.e. remove the njets/HT cuts
-plot_path = 'by_run_stuff_%i_%itrk' % (year, ntracks)
-title = '%i, %i-track events' % (year, ntracks)
-if year == 2015:
-    fn_path = '/uscms_data/d2/tucker/crab_dirs/ByRunStuff_2015_v5'
-    fns = [fn_path + '/JetHT2015%s.root' % s for s in 'CD']
-else:
-    fn_path = '/uscms_data/d2/tucker/crab_dirs/ByRunStuff_2016partial2_v5'
-    fns = [fn_path + '/JetHT2016%s.root' % s for s in 'B3 C D E F G H2 H3'.split()]
-mask_fn = fn_path + '/processedLumis.json'
+path = 'byrunInclusiveNoAna'
+plot_path = 'by_run_stuff_%s_%itrk' % (year, ntracks)
+title = '%s, %i-track events' % (year, ntracks)
+fn_path = '/uscms_data/d2/tucker/crab_dirs/ByRunStuffV21m'
+fn = os.path.join(fn_path, 'JetHT%s.root' % year)
+mask_fn = os.path.join(fn_path, 'dataok_%s.json' % year)
 
 def book():
     def b():
@@ -58,33 +55,32 @@ else:
 
 ds = dict((dn, book()) for dn in dns)
 
-for fn in fns:
-    f = ROOT.TFile(fn)
-    for _, _, objects in tdirectory_walk(f.Get(path)):
-        for h in objects:
-            hname, nvtx, run = h.GetName().rsplit('_', 2)
-            if not ds.has_key(hname):
-                continue
-            nvtx = int(nvtx)
-            assert 0 <= nvtx <= 1
-            run = int(run.replace('run', ''))
+f = ROOT.TFile(fn)
+for _, _, objects in tdirectory_walk(f.Get(path)):
+    for h in objects:
+        hname, nvtx, run = h.GetName().rsplit('_', 2)
+        if not ds.has_key(hname):
+            continue
+        nvtx = int(nvtx)
+        assert 0 <= nvtx <= 1
+        run = int(run.replace('run', ''))
 
-            q10, q25, q50, q75, q90 = get_hist_quantiles(h, [0.1, 0.25, 0.5, 0.75, 0.9], 'error')
+        q10, q25, q50, q75, q90 = get_hist_quantiles(h, [0.1, 0.25, 0.5, 0.75, 0.9], 'error')
 
-            if do_ana_related:
-                if hname.startswith('h_trig'):
-                    ds[hname][nvtx]['mean'][run] = int(h.GetEntries())
-                else:
-                    ds[hname][nvtx]['mean'][run] = (h.GetMean(), h.GetMeanError())
+        if do_ana_related:
+            if hname.startswith('h_trig'):
+                ds[hname][nvtx]['mean'][run] = int(h.GetEntries())
             else:
                 ds[hname][nvtx]['mean'][run] = (h.GetMean(), h.GetMeanError())
-                ds[hname][nvtx]['rms' ][run] = (h.GetRMS(),  h.GetRMSError())
-                ds[hname][nvtx]['q50' ][run] = q50
-                ds[hname][nvtx]['iqr' ][run] = (q75[0] - q25[0], q75[1])
-                ds[hname][nvtx]['q10' ][run] = q10
-                ds[hname][nvtx]['q90' ][run] = q90
+        else:
+            ds[hname][nvtx]['mean'][run] = (h.GetMean(), h.GetMeanError())
+            ds[hname][nvtx]['rms' ][run] = (h.GetRMS(),  h.GetRMSError())
+            ds[hname][nvtx]['q50' ][run] = q50
+            ds[hname][nvtx]['iqr' ][run] = (q75[0] - q25[0], q75[1])
+            ds[hname][nvtx]['q10' ][run] = q10
+            ds[hname][nvtx]['q90' ][run] = q90
 
-ps = plot_saver(plot_dir(plot_path), size=(2000,600), log=False, pdf=True)
+ps = plot_saver(plot_dir(plot_path), size=(1800,600), log=False, pdf=True)
 plotter = ByRunPlotter(ps, mask_fn)
 
 excludes = [
@@ -92,14 +88,14 @@ excludes = [
     ]
 
 for exclude_name, exclude in excludes:
-    print 'excludes:', exclude_name
     for dn in dns:
         d = ds[dn]
-        for nvtx in xrange(2):
+        for nvtx in 0,1:
             if nvtx == 0 and dn in dns_1v_only:
                 continue
             qs = ['mean'] if do_ana_related else ['mean', 'rms', 'q50', 'iqr', 'q10', 'q90']
             for q in qs:
+                print path, exclude_name, dn, nvtx, q
                 name = '%s_%s_%i_%s' % (exclude_name, dn, nvtx, q)
                 plotter.make(d[nvtx][q], name, '', '', year, exclude, verbose=True, scale_by_lumi=dn.startswith('h_trig'))
     print '\n'
