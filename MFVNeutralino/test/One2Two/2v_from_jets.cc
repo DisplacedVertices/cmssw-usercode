@@ -344,12 +344,21 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
         h_2v_dphivv->Fill(dphi, w);
         h_2v_absdphivv->Fill(fabs(dphi), w);
         h_2v_npu->Fill(nt.npu, w);
+        //printf("ibkg %i %s 2v event j %i weight %f * %f = %f dbv %f %f dvv %f npu %i\n", i, samples[i], j, weights[i], nt.weight, w, dbv0, dbv1, dvv, nt.npu);
       }
     }
 
     f->Close();
     delete f;
   }
+
+  // check for negative bins in dbv histograms that we throw from below--JMTBAD set zero, only wrong ~by a little
+  for (TH1* h : { h_1v_dbv0, h_1v_dbv1})
+    for (int ibin = 0; ibin <= h->GetNbinsX()+1; ++ibin)
+      if (h->GetBinContent(ibin) < 0) {
+        printf("\e[1;31mdbv histogram %s has negative content %f in bin %i\e[0m\n", h->GetName(), h->GetBinContent(ibin), ibin);
+        h->SetBinContent(ibin, 0);
+      }
 
   //construct dvvc
   TH1F* h_c1v_dbv = new TH1F("h_c1v_dbv", "constructed from only-one-vertex events;d_{BV} (cm);vertices", 1250, 0, 2.5);
@@ -564,10 +573,14 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 }
 
 int main(int argc, const char* argv[]) {
-  const bool only_default = strcmp(getenv("USER"), "tucker") == 0 || (argc >= 2 && strcmp(argv[1], "only_default"));
+  const bool only_default = false; //strcmp(getenv("USER"), "tucker") == 0 || (argc >= 2 && strcmp(argv[1], "only_default"));
   ConstructDvvcParameters pars;
   if (only_default) {
-    construct_dvvc(pars, "2v_from_jets_2017_5track_default_v20mp2.root");
+    ConstructDvvcParameters pars2 = pars.year("2017").ntracks(4);
+    construct_dvvc(pars2, "duh.root");
+    TCanvas c("c","",500,500);
+    ((TH1*)((TFile*)TFile::Open("duh.root"))->Get("h_2v_dvv"))->Draw();
+    c.SaveAs("$asdf/a.png");
     return 0;
   }
 
