@@ -204,6 +204,11 @@ def cmd_presel():
     cmd_hadd_data()
     cmd_merge_background()
 
+def cmd_vpeffs():
+    cmd_report_data()
+    cmd_hadd_data()
+    cmd_merge_background()
+
 def cmd_minitree():
     cmd_report_data()
     cmd_hadd_data()
