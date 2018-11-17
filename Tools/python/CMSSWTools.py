@@ -14,10 +14,15 @@ class InputTagCollector(object):
     def input_tag(x):
        return x if isinstance(x, cms.InputTag) else cms.InputTag(x)
 
-    def __init__(self):
+    def __init__(self, include_src_strings=False):
         self._result = []
+        self.include_src_strings = include_src_strings
     def result(self):
         return self._result
+    def enter(self,visitee):
+        self.doit(visitee, '')
+    def leave(self,visitee):
+        pass
 
     def doit(self, pizable, base):
         if isinstance(pizable, cms._Parameterizable):
@@ -29,19 +34,16 @@ class InputTagCollector(object):
                 elif pytype == 'cms.VPSet':
                     for i, x in enumerate(value):
                         self.doit(x, "%s[%d]" % (based_name, i))
-                elif pytype == 'cms.VInputTag':
+                elif pytype.endswith('.VInputTag'):
                     for i, x in enumerate(value):
                          self._result.append(('%s[%i]' % (based_name, i), self.input_tag(x)))
                 elif pytype.endswith('.InputTag'):
                     self._result.append((based_name, self.input_tag(value)))
-
-    def enter(self,visitee):
-        self.doit(visitee, '')
-    def leave(self,visitee):
-        pass
+                elif self.include_src_strings and pytype.endswith('.string') and name.endswith('_src'):
+                    self._result.append((based_name, self.input_tag(value.value())))
 
 class ReferencedTagsTaskAdder(object):
-    def __init__(self, process, task='task'):
+    def __init__(self, process, task='task', include_src_strings=True):
         self.process = process
         if type(task) == str:
             if hasattr(process, task):
@@ -51,13 +53,14 @@ class ReferencedTagsTaskAdder(object):
                 setattr(process, task, self.task)
         else:
             self.task = task
+        self.include_src_strings = include_src_strings
         self.seen = set()
 
     def __call__(self, name, obj=None):
         if obj is None:
             obj = getattr(self.process, name)
         self.seen.add(name)
-        for _, tag in input_tags_referenced(obj):
+        for _, tag in input_tags_referenced(obj, self.include_src_strings):
             if hasattr(self.process, tag.moduleLabel):
                 obj2 = getattr(self.process, tag.moduleLabel)
                 if tag.moduleLabel not in self.task.moduleNames():
@@ -221,10 +224,10 @@ def glob_store(pattern):
         raise ValueError('not at fermilab?')
     return [x.replace(magic, '/store') for x in glob.glob(pattern.replace('/store', magic))]
 
-def input_tags_referenced(thing):
+def input_tags_referenced(thing, include_src_strings=True):
     '''Get all the InputTags referenced under thing.
     thing can be a single module or a sequence/path.'''
-    coll = InputTagCollector()
+    coll = InputTagCollector(include_src_strings)
     if isinstance(thing, cms._ModuleSequenceType):
         thing.visit(coll)
     elif isinstance(thing, cms._Module):
