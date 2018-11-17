@@ -79,6 +79,7 @@ for icfg, cfg in enumerate(cfgs):
                            )
 
     tree = cms.EDAnalyzer('MFVMovedTracksTreer',
+                          mfvJetTrackRefGetter,
                           event_src = cms.InputTag('mfvEvent'),
                           weight_src = cms.InputTag('mfvWeight'),
                           mover_src = cms.string(tracks_name),
