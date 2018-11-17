@@ -8,6 +8,7 @@ from JMTucker.MFVNeutralino.JetVertexAssociator_cfi import mfvVerticesToJets
 
 mfvSelectedVerticesTmp = mfvSelectedVertices.clone(vertex_aux_src = 'mfvVerticesAuxTmp',
                                                    produce_refs = True,
+                                                   vertex_src = 'mfvVertices',
                                                    min_ntracks = 3)
 
 mfvVerticesAuxPresel = mfvVerticesAux
@@ -39,8 +40,8 @@ def modifiedVertexSequence(process, name, **kwargs):
     mfvVertexTracksNew = process.mfvVertexTracks.clone(**kwargs_tracks)
     mfvVerticesNew = process.mfvVertices.clone(seed_tracks_src = cms.InputTag('mfvVertexTracks%s' % name, 'seed'), **kwargs_vertices)
     mfvVerticesAuxTmpNew = process.mfvVerticesAuxTmp.clone(vertex_src = 'mfvVertices%s' % name)
-    mfvSelectedVerticesTmpNew = process.mfvSelectedVerticesTmp.clone(vertex_src = 'mfvVertices%s' % name,
-                                                                     vertex_aux_src = 'mfvVerticesAuxTmp%s' % name)
+    mfvSelectedVerticesTmpNew = process.mfvSelectedVerticesTmp.clone(vertex_aux_src = 'mfvVerticesAuxTmp%s' % name,
+                                                                     vertex_src = 'mfvVertices%s' % name)
     mfvVerticesToJetsNew = process.mfvVerticesToJets.clone(vertex_src = 'mfvSelectedVerticesTmp%s' % name)
     mfvVerticesAuxPreselNew = process.mfvVerticesAuxPresel.clone(vertex_src = 'mfvVertices%s' % name,
                                                                  sv_to_jets_src = 'mfvVerticesToJets%s' % name)

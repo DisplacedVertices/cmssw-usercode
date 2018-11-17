@@ -2,11 +2,11 @@ import FWCore.ParameterSet.Config as cms
 
 mfvSelectedVertices = cms.EDProducer('MFVVertexSelector',
                                      mevent_src = cms.InputTag(''),
-                                     vertex_src = cms.InputTag('mfvVertices'),
                                      vertex_aux_src = cms.InputTag('mfvVerticesAux'),
                                      produce_vertices = cms.bool(False),
                                      produce_tracks = cms.bool(False),
                                      produce_refs = cms.bool(False),
+                                     vertex_src = cms.InputTag(''), # used when produce_vertices or produce_refs is true
                                      use_mva = cms.bool(False),
                                      mva_cut = cms.double(0.7),
                                      match_to_vertices_src = cms.InputTag(''), # cms.InputTag('mfvGenParticles','genVertex') ,

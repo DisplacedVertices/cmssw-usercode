@@ -400,9 +400,6 @@ void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
   if (use_mevent)
     event.getByToken(mevent_token, mevent);
 
-  edm::Handle<reco::VertexCollection> vertices;
-  event.getByToken(vertex_token, vertices);
-
   edm::Handle<MFVVertexAuxCollection> auxes;
   event.getByToken(vertex_aux_token, auxes);
 
@@ -422,8 +419,10 @@ void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
 
   sorter.sort(*selected);
 
-
   if (produce_vertices || produce_refs) {
+    edm::Handle<reco::VertexCollection> vertices;
+    event.getByToken(vertex_token, vertices);
+
     std::unique_ptr<reco::VertexRefVector> selected_vertex_refs(new reco::VertexRefVector);
     for (const MFVVertexAux& aux : *selected)
       selected_vertex_refs->push_back(reco::VertexRef(vertices, aux.which));

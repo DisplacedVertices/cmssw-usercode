@@ -26,6 +26,7 @@ def prepare_vis(process, mode, settings, output_commands):
         for x in process.mfvSelectedVerticesTight, process.mfvSelectedVerticesTightNtk3, process.mfvSelectedVerticesTightNtk4:
             x.produce_vertices = True
             x.produce_tracks = True
+            x.vertex_src = 'mfvVertices'
 
         process.load('JMTucker.MFVNeutralino.VertexRefitter_cfi')
         process.mfvVertexRefitsDrop0 = process.mfvVertexRefits.clone(n_tracks_to_drop = 0)
