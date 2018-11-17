@@ -41,29 +41,38 @@ class InputTagCollector(object):
         pass
 
 class ReferencedTagsTaskAdder(object):
-    # for some reason the patTask doesn't have everything in it, or I don't understand something
-
-    def __init__(self, process, task=None):
+    def __init__(self, process, task='task'):
         self.process = process
-        self.task = process.patTask if task is None else task
+        if type(task) == str:
+            if hasattr(process, task):
+                self.task = getattr(process, task)
+            else:
+                self.task = cms.Task()
+                setattr(process, task, self.task)
+        else:
+            self.task = task
         self.seen = set()
 
-    def doit(self, name, obj, seen=set()):
+    def __call__(self, name, obj=None):
+        if obj is None:
+            obj = getattr(self.process, name)
         self.seen.add(name)
         for _, tag in input_tags_referenced(obj):
             if hasattr(self.process, tag.moduleLabel):
-                obj2 = getattr(process, tag.moduleLabel)
+                obj2 = getattr(self.process, tag.moduleLabel)
                 if tag.moduleLabel not in self.task.moduleNames():
                     self.task.add(obj2)
                 if tag.moduleLabel not in self.seen:
-                    self.doit(tag.moduleLabel, obj2)
+                    self(tag.moduleLabel, obj2)
+        if type(obj) == cms.Path:
+            obj.associate(self.task)
 
     def modules_to_add(self, *finals):
         before = set(self.task.moduleNames())
         for f in finals:
             if type(f) == str:
-                f = getattr(process, f)
-            self.doit(name, f)
+                f = getattr(self.process, f)
+            self(name, f)
         after = set(self.task.moduleNames())
         return before, after, sorted(after - before)
 
