@@ -5,6 +5,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include "JMTucker/MFVNeutralino/interface/JetTrackRefGetter.h"
 #include "JMTucker/MFVNeutralino/interface/MovedTracksNtuple.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
@@ -31,6 +32,8 @@ public:
   const unsigned nbjets_req;
   const bool for_mctruth;
 
+  mfv::JetTrackRefGetter jet_track_ref_getter;
+
   mfv::MovedTracksNtuple nt;
   TTree* tree;
 };
@@ -51,7 +54,8 @@ MFVMovedTracksTreer::MFVMovedTracksTreer(const edm::ParameterSet& cfg)
     apply_presel(cfg.getParameter<bool>("apply_presel")),
     njets_req(cfg.getParameter<unsigned>("njets_req")),
     nbjets_req(cfg.getParameter<unsigned>("nbjets_req")),
-    for_mctruth(cfg.getParameter<bool>("for_mctruth"))
+    for_mctruth(cfg.getParameter<bool>("for_mctruth")),
+    jet_track_ref_getter(cfg, consumesCollector())
 {
   edm::Service<TFileService> fs;
   tree = fs->make<TTree>("t", "");
@@ -142,12 +146,7 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
         nt.jets_eta.push_back(jet.eta());
         nt.jets_phi.push_back(jet.phi());
         nt.jets_energy.push_back(jet.energy());
-
-        ushort jet_ntracks = 0;
-        for (const reco::PFCandidatePtr& pfcand : jet.getPFConstituents())
-          if (pfcand->trackRef().isNonnull())
-            ++jet_ntracks;
-        nt.jets_ntracks.push_back(jet_ntracks);
+        nt.jets_ntracks.push_back(jet_track_ref_getter.tracks(event, jet).size());
       }
     }
 

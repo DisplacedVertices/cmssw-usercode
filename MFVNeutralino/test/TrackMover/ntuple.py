@@ -21,7 +21,7 @@ cfgs = named_product(njets = [2,3],
 
 process = ntuple_process(settings)
 tfileservice(process, 'movedtree.root')
-max_events(process, 10000)
+max_events(process, 100)
 report_every(process, 1000000)
 #want_summary(process)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
@@ -60,6 +60,7 @@ for icfg, cfg in enumerate(cfgs):
                             mfvJetTrackRefGetter,
                             tracks_src = cms.InputTag('mfvUnpackedCandidateTracks' if settings.is_miniaod else 'generalTracks'),
                             primary_vertices_src = cms.InputTag('goodOfflinePrimaryVertices'),
+                            packed_candidates_src = cms.InputTag('packedPFCandidates'),
                             jets_src = cms.InputTag('selectedPatJets'),
                             min_jet_pt = cms.double(50),
                             min_jet_ntracks = cms.uint32(4),
