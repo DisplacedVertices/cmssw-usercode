@@ -71,6 +71,12 @@ def event_filter(process, mode, settings, output_commands):
             setup(trigger_filter='jets only', event_filter='jets only')
         elif mode == 'leptons only':
             setup(trigger_filter='leptons only', event_filter='leptons only')
+        elif mode == 'jets only novtx':
+            setup(trigger_filter='jets only', event_filter='jets only', event_filter_require_vertex=False)
+        elif mode == 'leptons only novtx':
+            setup(trigger_filter='leptons only', event_filter='leptons only', event_filter_require_vertex=False)
+        elif mode == 'novtx':
+            setup(event_filter=True, event_filter_require_vertex=False)
         else:
             assert mode is True
             setup(event_filter=True)
