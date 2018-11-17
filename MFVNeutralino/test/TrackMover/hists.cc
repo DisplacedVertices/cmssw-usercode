@@ -198,10 +198,7 @@ int main(int argc, char** argv) {
 
     const size_t n_raw_vtx = nt.p_vtxs_x->size();
 
-    const bool pass_800 = bool(nt.pass_hlt & 0x2);
-    const bool pass_900_450_AK450 = bool(nt.pass_hlt & 0x1C);
-    const bool is_H = nt.run > 281000;
-    const bool pass_trig = pass_800 || (is_H && pass_900_450_AK450);
+    const bool pass_trig = nt.pass_hlt & 1;
 
     double jet_sume = 0;
     double jet_drmax = 0;
@@ -222,7 +219,7 @@ int main(int argc, char** argv) {
     }
     jet_dravg /= n_jets * (n_jets - 1) / 2.;
 
-    if (nt.jetht < 1000 ||
+    if (nt.jetht < 1200 ||
         nt.nalljets() < 4 ||
 	!pass_trig || 
         movedist2 < 0.03 ||
