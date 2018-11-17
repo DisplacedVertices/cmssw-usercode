@@ -14,7 +14,7 @@ class InputTagCollector(object):
     def input_tag(x):
        return x if isinstance(x, cms.InputTag) else cms.InputTag(x)
 
-    def __init__(self, include_src_strings=False):
+    def __init__(self, include_src_strings=True):
         self._result = []
         self.include_src_strings = include_src_strings
     def result(self):
