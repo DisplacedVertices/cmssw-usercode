@@ -86,7 +86,8 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
     }
   }
 
-  nt.pass_hlt = mevent->pass_ & 0x1F;
+  static_assert(mfv::n_hlt_paths <= 8);
+  nt.pass_hlt = mevent->pass_hlt_bits();
   nt.bsx = mevent->bsx;
   nt.bsy = mevent->bsy;
   nt.bsz = mevent->bsz;

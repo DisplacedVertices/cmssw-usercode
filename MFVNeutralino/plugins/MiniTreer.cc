@@ -66,7 +66,8 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   nt.gen_flavor_code = mevent->gen_flavor_code;
 
-  nt.pass_hlt = mevent->pass_ & 0x1F;
+  static_assert(mfv::n_hlt_paths <= 8);
+  nt.pass_hlt = mevent->pass_hlt_bits();
   nt.l1_htt = mevent->l1_htt;
   nt.l1_myhtt = mevent->l1_myhtt;
   nt.l1_myhttwbug = mevent->l1_myhttwbug;
