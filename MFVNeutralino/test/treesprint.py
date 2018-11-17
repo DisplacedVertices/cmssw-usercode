@@ -4,10 +4,11 @@ import sys, os
 from glob import glob
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.Sample import norm_from_file
-from JMTucker.Tools.general import typed_from_argv
+from JMTucker.Tools.general import typed_from_argv, bool_from_argv
 from JMTucker.Tools import Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
+nosig = bool_from_argv('nosig')
 which = typed_from_argv(int, -1)
 ntks = ('mfvMiniTreeNtk3', 'mfvMiniTreeNtk4', 'mfvMiniTree')
 if which != -1:
@@ -25,10 +26,10 @@ for x in sys.argv[1:]:
         print 'using', x2
         fns.extend(glob(x2))
 if not fns:
-    gg = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV20mp2/*.root'
+    gg = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV21m/*.root'
     print 'using default', gg
     fns = glob(gg)
-fns = [x for x in fns if '2015' not in x and not 'hip1p0' in x]
+
 if len(fns) != 2: # leave in specified order if there are two, user wants to print a ratio
     fns.sort()
     fns.sort(key=lambda fn: not os.path.basename(fn).startswith('mfv_')) # puts signals first, then bkg
@@ -75,9 +76,12 @@ for ntk in ntks:
 
         sname = os.path.basename(fn).replace('.root', '')
         is_sig = sname.startswith('mfv_')
-        is_data = sname.startswith('JetHT') or sname.startswith('SingleMuon') or sname.startswith('SingleElectron')
-        is_bkg = not is_sig and not is_data
+        is_data = sname.startswith('ReRecoJetHT') or sname.startswith('JetHT') or sname.startswith('SingleMuon') or sname.startswith('SingleElectron')
+        is_bkg = sname in ['qcdht0700_2017', 'qcdht1000_2017', 'qcdht1500_2017', 'qcdht2000_2017', 'ttbarht0600_2017', 'ttbarht0800_2017', 'ttbarht1200_2017', 'ttbarht2500_2017']
+        include_in_sum = is_bkg
 
+        if is_sig and nosig:
+            continue
         if is_bkg and not seen_bkg:
             seen_bkg = True
             print
@@ -123,7 +127,7 @@ for ntk in ntks:
         else:
             print '%36s  n1v = %9.2f  n2v = %9.2f' % (sname, n1v, n2v)
 
-        if is_bkg:
+        if include_in_sum:
             raw_n1v += r1v
             sum_n1v += n1v * w
             var_n1v += (en1v * w)**2
