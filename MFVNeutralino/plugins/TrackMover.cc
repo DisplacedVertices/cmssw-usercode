@@ -13,6 +13,7 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/Utilities/interface/RandomNumberGenerator.h"
+#include "JMTucker/MFVNeutralino/interface/JetTrackRefGetter.h"
 
 class MFVTrackMover : public edm::EDProducer {
 public:
@@ -21,7 +22,7 @@ public:
 private:
   virtual void produce(edm::Event&, const edm::EventSetup&);
 
-  const edm::EDGetTokenT<reco::TrackCollection> track_token;
+  const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
   const edm::EDGetTokenT<pat::JetCollection> pat_jet_token;
   const double min_jet_pt;
@@ -35,10 +36,12 @@ private:
   const double tau;
   const double sig_theta;
   const double sig_phi;
+
+  mfv::JetTrackRefGetter jet_track_ref_getter;
 };
 
 MFVTrackMover::MFVTrackMover(const edm::ParameterSet& cfg) 
-  : track_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("tracks_src"))),
+  : tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("tracks_src"))),
     primary_vertices_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertices_src"))),
     pat_jet_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
     min_jet_pt(cfg.getParameter<double>("min_jet_pt")),
@@ -50,7 +53,8 @@ MFVTrackMover::MFVTrackMover(const edm::ParameterSet& cfg)
     nbjets(cfg.getParameter<unsigned>("nbjets")),
     tau(cfg.getParameter<double>("tau")),
     sig_theta(cfg.getParameter<double>("sig_theta")),
-    sig_phi(cfg.getParameter<double>("sig_phi"))
+    sig_phi(cfg.getParameter<double>("sig_phi")),
+    jet_track_ref_getter(cfg, consumesCollector())
 {
   edm::Service<edm::RandomNumberGenerator> rng;
   if (!rng.isAvailable())
@@ -70,7 +74,7 @@ void MFVTrackMover::produce(edm::Event& event, const edm::EventSetup&) {
   edm::Service<edm::RandomNumberGenerator> rng;
   CLHEP::HepRandomEngine& rng_engine = rng->getEngine(event.streamID());
 
-  auto knuth_select = [&](int n, int N) -> std::vector<int> {
+  auto knuth_select = [&rng_engine](int n, int N) -> std::vector<int> {
     std::vector<int> ts;
     int t = 0, m = 0;
     while (m < n) {
@@ -112,14 +116,7 @@ void MFVTrackMover::produce(edm::Event& event, const edm::EventSetup&) {
     // Pick the (b-)jets we'll use.
 
     for (const pat::Jet& jet : *jets) {
-      if (jet.pt() < min_jet_pt)
-        continue;
-
-      unsigned jet_ntracks = 0;
-      for (const reco::PFCandidatePtr& pfcand : jet.getPFConstituents())
-        if (pfcand->trackRef().isNonnull())
-          ++jet_ntracks;
-      if (jet_ntracks < min_jet_ntracks)
+      if (jet.pt() < min_jet_pt || jet_track_ref_getter.tracks(event, jet).size() < min_jet_ntracks)
         continue;
 
       const double b_disc = jet.bDiscriminator(b_discriminator);
@@ -173,18 +170,18 @@ void MFVTrackMover::produce(edm::Event& event, const edm::EventSetup&) {
     // reference points to the move vertex.
 
     edm::Handle<reco::TrackCollection> tracks;
-    event.getByToken(track_token, tracks);
+    event.getByToken(tracks_token, tracks);
 
     for (size_t i = 0, ie = tracks->size(); i < ie; ++i) {
       reco::TrackRef tk(tracks, i);
       bool to_move = false;
       for (const pat::Jet* jet : selected_jets)
-        for (const reco::PFCandidatePtr& pfcand : jet->getPFConstituents())
-          if (tk == pfcand->trackRef()) {
+        for (const reco::TrackRef& jet_tk : jet_track_ref_getter.tracks(event, *jet))
+          if (tk == jet_tk) {
             to_move = true;
             goto done_check_to_move;
           }
-    done_check_to_move:
+      done_check_to_move:
     
       if (to_move) {
         reco::TrackBase::Point new_point(tk->vx() + move.x(),
