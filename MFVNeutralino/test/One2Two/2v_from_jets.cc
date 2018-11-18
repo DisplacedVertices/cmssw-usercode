@@ -132,36 +132,39 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   const char* file_path; //which filepath?
   if (p.only_10pc()) {
-    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV20mp2";
+    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV21m";
   } else {
-    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV20mp2";
+    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV21m";
   }
 
-  const int nbkg = 18; //which samples?
+  const int nbkg = 21; //which samples?
   const char* samples[nbkg];
   float       weights[nbkg];
   samples[0]  = "mfv_neu_tau001000um_M0800_2017"; weights[0]  = 0.004153;
-  samples[1]  = "qcdht0700_2017";                 weights[1]  = 5.87992;
-  samples[2]  = "qcdht1000_2017";                 weights[2]  = 3.01370;
-  samples[3]  = "qcdht1500_2017";                 weights[3]  = 0.44013;
-  samples[4]  = "qcdht2000_2017";                 weights[4]  = 0.19212;
-  samples[5]  = "ttbar_2017";                     weights[5]  = 0.22485;
-  samples[6]  = "qcdht0700_2018";                 weights[6]  = 1;
-  samples[7]  = "qcdht1000_2018";                 weights[7]  = 1;
-  samples[8]  = "qcdht1500_2018";                 weights[8]  = 1;
-  samples[9]  = "qcdht2000_2018";                 weights[9]  = 1;
-  samples[10] = "ttbar_2018";                     weights[10] = 1;
-  samples[11] = "mfv_neu_tau001000um_M0800_2018"; weights[11] = 1;
-  samples[12] = "JetHT2017B";                     weights[12] = 1;
-  samples[13] = "JetHT2017C";                     weights[13] = 1;
-  samples[14] = "JetHT2017D";                     weights[14] = 1;
-  samples[15] = "JetHT2017E";                     weights[15] = 1;
-  samples[16] = "JetHT2017F";                     weights[16] = 1;
-  samples[17] = "JetHT2018";                      weights[17] = 1;
+  samples[1]  = "qcdht0700_2017";                 weights[1]  = 5.49006 * 2;
+  samples[2]  = "qcdht1000_2017";                 weights[2]  = 2.69604 * 2;
+  samples[3]  = "qcdht1500_2017";                 weights[3]  = 0.35339 * 2;
+  samples[4]  = "qcdht2000_2017";                 weights[4]  = 0.14120 * 2;
+  samples[5]  = "ttbarht0600_2017";               weights[5]  = 0.00093 * 2;
+  samples[6]  = "ttbarht0800_2017";               weights[6]  = 0.00078 * 2;
+  samples[7]  = "ttbarht1200_2017";               weights[7]  = 0.00041 * 2;
+  samples[8]  = "ttbarht2500_2017";               weights[8]  = 0.00001 * 2;
+  samples[9]  = "qcdht0700_2018";                 weights[9]  = 1;
+  samples[10] = "qcdht1000_2018";                 weights[10] = 1;
+  samples[11] = "qcdht1500_2018";                 weights[11] = 1;
+  samples[12] = "qcdht2000_2018";                 weights[12] = 1;
+  samples[13] = "ttbar_2018";                     weights[13] = 1;
+  samples[14] = "mfv_neu_tau001000um_M0800_2018"; weights[14] = 1;
+  samples[15] = "JetHT2017B";                     weights[15] = 1;
+  samples[16] = "JetHT2017C";                     weights[16] = 1;
+  samples[17] = "JetHT2017D";                     weights[17] = 1;
+  samples[18] = "JetHT2017E";                     weights[18] = 1;
+  samples[19] = "JetHT2017F";                     weights[19] = 1;
+  samples[20] = "JetHT2018";                      weights[20] = 1;
 
   int ibkg_begin; int ibkg_end;
   if (p.is_mc()) {
-    if (p.year() == "2017")         { ibkg_begin =  1; ibkg_end =  5; if (p.inject_signal()) ibkg_begin = 0; }
+    if (p.year() == "2017")         { ibkg_begin =  1; ibkg_end =  8; if (p.inject_signal()) ibkg_begin = 0; }
     else if (p.year() == "2018")    { ibkg_begin =  6; ibkg_end = 10; if (p.inject_signal()) ibkg_end = 11; }
     else if (p.year() == "2017p8")  { ibkg_begin =  1; ibkg_end = 10; if (p.inject_signal()) {ibkg_begin = 0; ibkg_end = 11;} }
     else { fprintf(stderr, "bad year"); exit(1); }
@@ -186,9 +189,9 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   double dphi_pdf_c; double dphi_pdf_e = 2; double dphi_pdf_a; //deltaphi input
   if (p.is_mc()) {
-    if (p.year() == "2017")         { dphi_pdf_c = 1.42; dphi_pdf_a = 3.46; }
-    else if (p.year() == "2018")    { dphi_pdf_c = 1.42; dphi_pdf_a = 3.46; }
-    else if (p.year() == "2017p8")  { dphi_pdf_c = 1.42; dphi_pdf_a = 3.46; }
+    if (p.year() == "2017")         { dphi_pdf_c = 1.40; dphi_pdf_a = 3.55; }
+    else if (p.year() == "2018")    { dphi_pdf_c = 1.40; dphi_pdf_a = 3.55; }
+    else if (p.year() == "2017p8")  { dphi_pdf_c = 1.40; dphi_pdf_a = 3.55; }
     else { fprintf(stderr, "bad year"); exit(1); }
   } else if (p.only_10pc()) {
     if (p.year() == "2017")         { dphi_pdf_c = 1.29; dphi_pdf_a = 4.84; }
@@ -207,9 +210,9 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   const char* vpeffs_version; //efficiency input
   if (p.only_10pc()) {
-    vpeffs_version = "v20m";
+    vpeffs_version = "v21mp1";
   } else {
-    vpeffs_version = "v20m";
+    vpeffs_version = "v21mp1";
   }
   TString eff_file_name = TString::Format("vpeffs%s_%s_%s%s.root", p.is_mc() ? "" : "_data", p.year().c_str(), vpeffs_version, p.vary_eff() ? "_ntkseeds" : "");
 
@@ -225,19 +228,19 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   if (p.ntracks() == 3) {
     if (p.year() == "2018")        { bquark_correction[0] = 0.93; bquark_correction[1] = 1.07; bquark_correction[2] = 1.10; }
     else if (p.year() == "2017p8") { bquark_correction[0] = 0.93; bquark_correction[1] = 1.07; bquark_correction[2] = 1.10; }
-    else                           { bquark_correction[0] = 0.93; bquark_correction[1] = 1.09; bquark_correction[2] = 1.07; }
+    else                           { bquark_correction[0] = 0.93; bquark_correction[1] = 1.08; bquark_correction[2] = 1.08; }
   } else if (p.ntracks() == 4) {
     if (p.year() == "2018")        { bquark_correction[0] = 0.93; bquark_correction[1] = 1.11; bquark_correction[2] = 1.20; }
     else if (p.year() == "2017p8") { bquark_correction[0] = 0.93; bquark_correction[1] = 1.11; bquark_correction[2] = 1.20; }
-    else                           { bquark_correction[0] = 0.93; bquark_correction[1] = 1.08; bquark_correction[2] = 1.18; }
+    else                           { bquark_correction[0] = 0.93; bquark_correction[1] = 1.11; bquark_correction[2] = 1.12; }
   } else if (p.ntracks() == 5) {
     if (p.year() == "2018")        { bquark_correction[0] = 0.92; bquark_correction[1] = 1.25; bquark_correction[2] = 1.57; }
     else if (p.year() == "2017p8") { bquark_correction[0] = 0.92; bquark_correction[1] = 1.25; bquark_correction[2] = 1.57; }
-    else                           { bquark_correction[0] = 0.95; bquark_correction[1] = 1.22; bquark_correction[2] = 0.96; }
+    else                           { bquark_correction[0] = 0.96; bquark_correction[1] = 1.00; bquark_correction[2] = 1.25; }
   } else if (p.ntracks() == 7) {
     if (p.year() == "2018")        { bquark_correction[0] = 0.93; bquark_correction[1] = 1.09; bquark_correction[2] = 1.14; }
     else if (p.year() == "2017p8") { bquark_correction[0] = 0.93; bquark_correction[1] = 1.09; bquark_correction[2] = 1.14; }
-    else                           { bquark_correction[0] = 0.93; bquark_correction[1] = 1.08; bquark_correction[2] = 1.12; }
+    else                           { bquark_correction[0] = 0.93; bquark_correction[1] = 1.09; bquark_correction[2] = 1.10; }
   } else {
     fprintf(stderr, "bad ntracks"); exit(1);
   }
@@ -587,7 +590,7 @@ int main(int argc, const char* argv[]) {
   for (const char* year : {"2017"}) { //, "2018", "2017p8"}) {
     for (int ntracks : {3, 4, 5, 7}) {
       ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks);
-      const char* version = "v20mp2";
+      const char* version = "v21m";
       construct_dvvc(pars2.correct_bquarks(false),              TString::Format("2v_from_jets_%s_%dtrack_bquark_uncorrected_%s.root", year, ntracks, version));
       construct_dvvc(pars2.correct_bquarks(false).bquarks(1),   TString::Format("2v_from_jets_%s_%dtrack_bquarks_%s.root", year, ntracks, version));
       construct_dvvc(pars2.correct_bquarks(false).bquarks(0),   TString::Format("2v_from_jets_%s_%dtrack_nobquarks_%s.root", year, ntracks, version));
