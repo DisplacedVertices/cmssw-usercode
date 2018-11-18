@@ -143,55 +143,7 @@ class secondary_files_modifier:
 ####
 
 def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=20):
-    def intround(x,y):
-        return int(round(float(x)/y))
-
-    if jobtype == 'trackmover':
-        d = {
-            'JetHT2015C':         ( 200000,    33),
-            'JetHT2015D':         ( 665202,    29),
-            'JetHT2016B3':        ( 288462,    17),
-            'JetHT2016C':         ( 111940,     8),
-            'JetHT2016D':         ( 245902,    17),
-            'JetHT2016E':         ( 157895,    12),
-            'JetHT2016F':         ( 104167,     9),
-            'JetHT2016G':         ( 232826,    19),
-            'JetHT2016H2':        ( 202703,    16),
-            'JetHT2016H3':        ( 319149,    25),
-            'qcdht0500':          (1657600,   200),
-            'qcdht0500_2015':     (4762566,   333),
-            'qcdht0500ext':       (1753088,   214),
-            'qcdht0500ext_2015':  (4645127,   353),
-            'qcdht0700':          (  98684,    12),
-            'qcdht0700_2015':     ( 211212,    18),
-            'qcdht0700ext':       ( 110422,    13),
-            'qcdht0700ext_2015':  ( 200896,    16),
-            'qcdht1000':          (  55762,     9),
-            'qcdht1000_2015':     (  61176,     6),
-            'qcdht1000ext':       (  56880,     8),
-            'qcdht1000ext_2015':  (  60624,     6),
-            'qcdht1500':          (  52785,     9),
-            'qcdht1500_2015':     (  49775,     5),
-            'qcdht1500ext':       (  49520,     8),
-            'qcdht1500ext_2015':  (  48996,     4),
-            'qcdht2000':          (  44922,     6),
-            'qcdht2000_2015':     (  53304,     6),
-            'qcdht2000ext':       (  40338,     6),
-            'qcdht2000ext_2015':  (  49705,     5),
-            'ttbar':              ( 399372,    46),
-            'ttbar_2015':         ( 919380,    66),
-            'qcdht1000_hip1p0_mit':( 55762,    25),
-            'qcdht1500_hip1p0_mit':( 52785,     9),
-            }
-        for sample in samples:
-            # prefer to split by file with CondorSubmitter  for these jobs to not overload xrootd aaa
-            sample.set_curr_dataset(dataset)
-            sample.split_by = 'files' if sample.condor else 'events'
-            assert d.has_key(sample.name)
-            sample.events_per = intround(d[sample.name][0], 4)
-            sample.files_per  = intround(d[sample.name][1], 4)
-
-    elif jobtype == 'histos' or jobtype == 'minitree':
+    if jobtype == 'histos' or jobtype == 'minitree':
         d = {
             'qcdht1000_2017': 11,
             'qcdht1500_2017': 11,
@@ -228,7 +180,6 @@ def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=2
         for sample in samples:
             sample.set_curr_dataset(dataset)
             sample.split_by = 'files'
-
             name = sample.name
 
             if 'JetHT' in name:
