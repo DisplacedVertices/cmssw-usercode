@@ -12,6 +12,10 @@ all: hists.exe mctruth.exe tests.exe
 	@mkdir -p bin
 	g++ -o $@ $(OBJECTS) $< $(LIBS) $(CFLAGS)
 
+bin/BTagCalibrationStandalone.o : BTagCalibrationStandalone.cc
+	@mkdir -p bin
+	g++ $(CFLAGS) -Wno-deprecated-declarations -c -o $@ $<
+
 bin/%.o : %.cc
 	@mkdir -p bin
 	g++ $(CFLAGS) -c -o $@ $<
