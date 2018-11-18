@@ -27,6 +27,8 @@ parser.add_option('--resub-force', action='store_true', default=False,
                   help='Use the --force option on resubmit (implies --resub).')
 parser.add_option('--resub-xferring', action='store_true', default=False,
                   help='Resubmit jobs that claim to be xferring (implies --resub-force and --resub).')
+parser.add_option('--resub-condor', action='store_true', default=False,
+                  help='Resubmit condor jobs with "probs" or "killed" (implies --resub).')
 #parser.add_option('--resub-white-list', default='',
 #                  help='Comma-separated list (no spaces!) of sites to whitelist when resubmitting.')
 #parser.add_option('--resub-black-list', default='',
@@ -73,6 +75,9 @@ if options.resub_force:
     if options.continuous:
         print 'refusing to force resubmits in continuous mode, only running once'
         options.continuous = False
+
+if options.resub_condor and not options.resub:
+    options.resub = True
 
 if options.continuous and options.fake_results:
     print '--fake-results implies not continuous, setting it.'
@@ -196,11 +201,13 @@ while 1:
         if options.resub:
             to_resub = defaultdict(list)
             for d, res in results.iteritems():
-                if not is_crab_working_dir(d):
-                    continue
-                to_resub[d].extend(res['jobListByStatus'].get('failed', []))
-                if options.resub_xferring:
-                    to_resub[d].extend(res['jobListByStatus'].get('transferring', []))
+                if is_crab_working_dir(d):
+                    to_resub[d].extend(res['jobListByStatus'].get('failed', []))
+                    if options.resub_xferring:
+                        to_resub[d].extend(res['jobListByStatus'].get('transferring', []))
+                elif is_cs_dir(d) and options.resub_condor:
+                    to_resub[d].extend(res['jobListByStatus'].get('probs', []))
+                    to_resub[d].extend(res['jobListByStatus'].get('killed', []))
 # 'Error' not present in job json since 5/14/2017
 #               for something in something else:
 #                    job = res['jobs'][str(job_num)]
@@ -213,11 +220,14 @@ while 1:
                 if jobs:
                     jobs = ','.join(str(j) for j in jobs)
                     print 'resubmit', d, jobs
-                    #crab_command('resubmit', dir=d, jobids=jobs, sitewhitelist=options.resub_white_list, siteblacklist=options.resub_black_list, suppress_stdout=False)
-                    try:
-                        crab_command('resubmit', dir=d, jobids=jobs, force=options.resub_force) #, suppress_stdout=False)
-                    except CRABConfigurationException:
-                        print 'CRABConfigurationException when resubmitting, skip this time'
+                    if is_crab_working_dir(d):
+                        try:
+                           #crab_command('resubmit', dir=d, jobids=jobs, sitewhitelist=options.resub_white_list, siteblacklist=options.resub_black_list, suppress_stdout=False)
+                            crab_command('resubmit', dir=d, jobids=jobs, force=options.resub_force) #, suppress_stdout=False)
+                        except CRABConfigurationException:
+                            print 'CRABConfigurationException when resubmitting, skip this time'
+                    elif is_cs_dir(d):
+                        os.system('cs_resubmit %s %s' % (d, jobs))
 
     if options.verbose:
         # Print a recap of all the status summaries.
