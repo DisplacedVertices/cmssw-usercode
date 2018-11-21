@@ -41,7 +41,7 @@ process.mfvEvent.vertex_seed_tracks_src = ''
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
 process.mfvWeight.throw_if_no_mcstat = False
 
-process.p = cms.Path()
+process.p = cms.Path(process.mfvEventFilterSequence * process.goodOfflinePrimaryVertices)
 random_dict = {}
 
 for icfg, cfg in enumerate(cfgs):
