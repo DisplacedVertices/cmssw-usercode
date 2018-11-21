@@ -73,6 +73,8 @@ def setup_event_filter(process,
             else:
                 overall *= process.goodOfflinePrimaryVertices                                      * process.mfvVertexSequenceBare * vertexFilter
 
+    process.mfvEventFilterSequence = overall
+
     if not path_name:
         return overall
     elif hasattr(process, path_name):
