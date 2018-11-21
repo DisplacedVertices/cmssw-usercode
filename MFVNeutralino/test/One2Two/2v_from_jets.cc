@@ -10,10 +10,12 @@
  *
  * which samples?
  *  - The MC and data samples and weights are set in static arrays; edit nbkg if necessary.
- *  - For the 2017 MC samples the weights calculated assume an integrated luminosity of 41.53 fb^-1 and the original number of events for each sample:
- *      python -i ../../../Tools/python/Samples.py
- *      >>> for sample in qcd_samples_2017 + ttbar_samples_2017:
- *      ...     print '%14s %7.1f %6.1f %9d %7.5f' % (sample.name, 41530., sample.xsec, sample.nevents_orig, 41530.*sample.xsec/sample.nevents_orig)
+ *  - For the 2017 MC samples the weights calculated assume an integrated luminosity of 41.53 fb^-1 and the number of events run on for each sample:
+samples -i <<EOF
+for sample in qcd_samples_2017 + ttbar_samples_2017:
+    nevents = sample.nevents('/uscms_data/d2/tucker/crab_dirs/MiniTreeV21m/%s.root' % sample.name)
+    print '%20s %6.1f %9d %10.3g' % (sample.name, sample.xsec, nevents, 41530.*sample.xsec/nevents)
+EOF
  *  - For the background template only the relative weights are relevant because we only construct the shape; the normalization comes from the fit.
  *  - Todo: MC weights and data samples for 2018.
  *  - If the samples array is modified, ibkg_begin and ibkg_end should also be modified.
