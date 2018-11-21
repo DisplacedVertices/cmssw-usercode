@@ -25,7 +25,6 @@ private:
 
   const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
-  const edm::EDGetTokenT<pat::PackedCandidateCollection> packed_candidates_token;
   const edm::EDGetTokenT<pat::JetCollection> jets_token;
   const double min_jet_pt;
   const unsigned min_jet_ntracks;
@@ -39,15 +38,12 @@ private:
   const double sig_theta;
   const double sig_phi;
 
-  const bool input_is_miniaod;
-
   mfv::JetTrackRefGetter jet_track_ref_getter;
 };
 
 MFVTrackMover::MFVTrackMover(const edm::ParameterSet& cfg) 
   : tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("tracks_src"))),
     primary_vertices_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertices_src"))),
-    packed_candidates_token(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("packed_candidates_src"))),
     jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
     min_jet_pt(cfg.getParameter<double>("min_jet_pt")),
     min_jet_ntracks(cfg.getParameter<unsigned>("min_jet_ntracks")),
@@ -59,7 +55,6 @@ MFVTrackMover::MFVTrackMover(const edm::ParameterSet& cfg)
     tau(cfg.getParameter<double>("tau")),
     sig_theta(cfg.getParameter<double>("sig_theta")),
     sig_phi(cfg.getParameter<double>("sig_phi")),
-    input_is_miniaod(cfg.getParameter<bool>("input_is_miniaod")),
     jet_track_ref_getter(cfg, consumesCollector())
 {
   edm::Service<edm::RandomNumberGenerator> rng;
@@ -105,19 +100,9 @@ void MFVTrackMover::produce(edm::Event& event, const edm::EventSetup&) {
 
   edm::Handle<reco::VertexCollection> primary_vertices;
   event.getByToken(primary_vertices_token, primary_vertices);
-
-  edm::Handle<pat::PackedCandidateCollection> packed_candidates;
-  if (input_is_miniaod)
-    event.getByToken(packed_candidates_token, packed_candidates);
-
   const reco::Vertex* pv = primary_vertices->size() ? &(*primary_vertices)[0] : 0;
-  int npvtracks = 0;
-  if (input_is_miniaod)
-    npvtracks = std::count_if(packed_candidates->begin(), packed_candidates->end(), [](const pat::PackedCandidate& cand) { return cand.vertexRef().key() == 0 && cand.charge() && cand.hasTrackDetails(); });
-  else if (pv)
-    npvtracks = pv->nTracks();
 
-  if (npvtracks) {
+  if (pv) {
     edm::Handle<pat::JetCollection> jets;
     event.getByToken(jets_token, jets);
 
