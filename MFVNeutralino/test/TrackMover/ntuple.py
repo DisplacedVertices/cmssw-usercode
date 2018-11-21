@@ -9,7 +9,7 @@ settings.is_miniaod = True
 settings.event_filter = 'jets only novtx'
 settings.cross = '' # 2017to2018' # 2017to2017p8'
 
-version = settings.version + 'V1'
+version = settings.version + 'V2'
 
 cfgs = named_product(njets = [2,3],
                      nbjets = [0,1,2],
