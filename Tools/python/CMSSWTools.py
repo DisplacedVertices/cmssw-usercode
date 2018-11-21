@@ -182,7 +182,19 @@ def find_output_files(process):
     d = {}
     if hasattr(process, 'TFileService'):
         d['TFileService'] = [process.TFileService.fileName.value()]
-    d['PoolOutputModule'] = [v.fileName.value() for v in process.outputModules.itervalues()]
+    d['PoolOutputModule'] = []
+    for v in process.outputModules.itervalues():
+        found = False
+        for ep in process.endpaths.itervalues():
+            try:
+                ep.index(v)
+            except ValueError:
+                pass
+            else:
+                found = True
+                break
+        if found:
+            d['PoolOutputModule'].append(v.fileName.value())
     return d
 
 def friendly_argparse(**kwargs):
