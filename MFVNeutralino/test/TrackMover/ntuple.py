@@ -30,6 +30,7 @@ file_event_from_argv(process)
 
 ####
 
+del process.out
 del process.outp
 
 from JMTucker.MFVNeutralino.Vertexer_cff import modifiedVertexSequence
