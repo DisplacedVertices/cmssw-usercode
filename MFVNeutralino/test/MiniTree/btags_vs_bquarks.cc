@@ -26,9 +26,14 @@ TH1F* h_1v_btag2_flavor_code_bquarks[3] = {0,0,0};
 TH1F* h_1v_btag2_flavor_code_nobquarks[3] = {0,0,0};
 TH1F* h_1v_bquark_flavor_code_btag2[3] = {0,0,0};
 TH1F* h_1v_bquark_flavor_code_nobtag2[3] = {0,0,0};
+
 TH1F* h_1v_dbv = 0;
 TH1F* h_1v_dbv_bquarks = 0;
 TH1F* h_1v_dbv_nobquarks = 0;
+TH1F* h_1v_dbv_btag1[3] = {0,0,0};
+TH1F* h_1v_dbv_nobtag1[3] = {0,0,0};
+TH1F* h_1v_dbv_btag2[3] = {0,0,0};
+TH1F* h_1v_dbv_nobtag2[3] = {0,0,0};
 
 void book_hists(int ntk) {
   h_1v_bquark_flavor_code = new TH1F("h_1v_bquark_flavor_code", TString::Format("%d-track one-vertex events;bquark_flavor_code;Events", ntk), 2, 0, 2);
@@ -50,9 +55,16 @@ void book_hists(int ntk) {
     h_1v_bquark_flavor_code_btag2[i] = new TH1F(TString::Format("h_1v_bquark_flavor_code_%s_btag2", b_discriminator_wps[i]), TString::Format("%d-track one-vertex events with #geq2 %s btags;bquark_flavor_code;Events", ntk, b_discriminator_wps[i]), 2, 0, 2);
     h_1v_bquark_flavor_code_nobtag2[i] = new TH1F(TString::Format("h_1v_bquark_flavor_code_%s_nobtag2", b_discriminator_wps[i]), TString::Format("%d-track one-vertex events without #geq2 %s btags;bquark_flavor_code;Events", ntk, b_discriminator_wps[i]), 2, 0, 2);
   }
+
   h_1v_dbv = new TH1F("h_1v_dbv", TString::Format("%d-track one-vertex events;d_{BV} (cm);Events", ntk), 40, 0, 0.2);
   h_1v_dbv_bquarks = new TH1F("h_1v_dbv_bquarks", TString::Format("%d-track one-vertex events with b quarks;d_{BV} (cm);Events", ntk), 40, 0, 0.2);
   h_1v_dbv_nobquarks = new TH1F("h_1v_dbv_nobquarks", TString::Format("%d-track one-vertex events without b quarks;d_{BV} (cm);Events", ntk), 40, 0, 0.2);
+  for (int i = 0; i < 3; ++i) {
+    h_1v_dbv_btag1[i] = new TH1F(TString::Format("h_1v_dbv_%s_btag1", b_discriminator_wps[i]), TString::Format("%d-track one-vertex events with #geq1 %s btag;d_{BV} (cm);Events", ntk, b_discriminator_wps[i]), 40, 0, 0.2);
+    h_1v_dbv_nobtag1[i] = new TH1F(TString::Format("h_1v_dbv_%s_nobtag1", b_discriminator_wps[i]), TString::Format("%d-track one-vertex events without #geq1 %s btag;d_{BV} (cm);Events", ntk, b_discriminator_wps[i]), 40, 0, 0.2);
+    h_1v_dbv_btag2[i] = new TH1F(TString::Format("h_1v_dbv_%s_btag2", b_discriminator_wps[i]), TString::Format("%d-track one-vertex events with #geq2 %s btags;d_{BV} (cm);Events", ntk, b_discriminator_wps[i]), 40, 0, 0.2);
+    h_1v_dbv_nobtag2[i] = new TH1F(TString::Format("h_1v_dbv_%s_nobtag2", b_discriminator_wps[i]), TString::Format("%d-track one-vertex events without #geq2 %s btags;d_{BV} (cm);Events", ntk, b_discriminator_wps[i]), 40, 0, 0.2);
+  }
 }
 
 bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
@@ -62,6 +74,11 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
     int bquark_flavor_code = nt.gen_flavor_code == 2 ? 1 : 0;
     h_1v_bquark_flavor_code->Fill(bquark_flavor_code, w);
     h_1v_njets->Fill(nt.njets, w);
+
+    double dbv = hypot(nt.x0, nt.y0);
+    h_1v_dbv->Fill(dbv, w);
+    if (bquark_flavor_code) h_1v_dbv_bquarks->Fill(dbv, w);
+    if (!bquark_flavor_code) h_1v_dbv_nobquarks->Fill(dbv, w);
 
     int nbtags[3] = {0,0,0};
     for (int ijet = 0; ijet < nt.njets; ++ijet) {
@@ -93,12 +110,12 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
       if (!bquark_flavor_code) h_1v_btag2_flavor_code_nobquarks[i]->Fill(btag2_flavor_code, w);
       if (btag2_flavor_code) h_1v_bquark_flavor_code_btag2[i]->Fill(bquark_flavor_code, w);
       if (!btag2_flavor_code) h_1v_bquark_flavor_code_nobtag2[i]->Fill(bquark_flavor_code, w);
-    }
 
-    double dbv = hypot(nt.x0, nt.y0);
-    h_1v_dbv->Fill(dbv, w);
-    if (bquark_flavor_code) h_1v_dbv_bquarks->Fill(dbv, w);
-    if (!bquark_flavor_code) h_1v_dbv_nobquarks->Fill(dbv, w);
+      if (btag1_flavor_code) h_1v_dbv_btag1[i]->Fill(dbv, w);
+      if (!btag1_flavor_code) h_1v_dbv_nobtag1[i]->Fill(dbv, w);
+      if (btag2_flavor_code) h_1v_dbv_btag2[i]->Fill(dbv, w);
+      if (!btag2_flavor_code) h_1v_dbv_nobtag2[i]->Fill(dbv, w);
+    }
   }
 
   return true;
