@@ -49,6 +49,8 @@ EOF
 #include "TLegend.h"
 #include "TMath.h"
 #include "TRandom3.h"
+#include "TRatioPlot.h"
+#include "TStyle.h"
 #include "TTree.h"
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
@@ -275,7 +277,6 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   printf("\tdphi_pdf_c = %.2f, dphi_pdf_e = %.2f, dphi_pdf_a = %.2f, eff_file_name = %s, eff_hist = %s, bquark_correction = {%.2f, %.2f, %.2f}\n", dphi_pdf_c, dphi_pdf_e, dphi_pdf_a, eff_file_name.Data(), eff_hist, bquark_correction[0], bquark_correction[1], bquark_correction[2]);
 
-  TH1::SetDefaultSumw2();
   gRandom->SetSeed(12191982);
 
   //fill only-one-vertex dBV distribution
@@ -402,45 +403,45 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   int outofbin2 = 0;
   int outofbin3 = 0;
 
-  for (int i = 0; i < 20; ++i) {
-    for (int j = 0; j < int(h_1v_dbv->GetEntries()); ++j) {
-      double dbv0 = h_1v_dbv0->GetRandom();
-      double dbv1 = h_1v_dbv1->GetRandom();
-      h_c1v_dbv->Fill(dbv0);
-      h_c1v_dbv->Fill(dbv1);
+  const int nsamples = 20*int(h_1v_dbv->GetEntries());
+  printf("sampling %i times (should be %i)\n", nsamples, 20*int(h_1v_dbv->Integral()));
+  for (int ij = 0; ij < nsamples; ++ij) {
+    double dbv0 = h_1v_dbv0->GetRandom();
+    double dbv1 = h_1v_dbv1->GetRandom();
+    h_c1v_dbv->Fill(dbv0);
+    h_c1v_dbv->Fill(dbv1);
 
-      double dphi = f_dphi->GetRandom();
+    double dphi = f_dphi->GetRandom();
 
-      double dvvc = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(dphi));
+    double dvvc = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(dphi));
 
-      if (p.vary_dphi()) {
-        double dphi2 = i_dphi2->GetX(i_dphi->Eval(dphi), 0, M_PI);
-        double dvvc2 = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(dphi2));
-        if (dvvc < 0.04) ++bin1;
-        if (dvvc >= 0.04 && dvvc < 0.07) ++bin2;
-        if (dvvc >= 0.07) ++bin3;
-        if (!(dvvc < 0.04) && (dvvc2 < 0.04)) ++intobin1;
-        if (!(dvvc >= 0.04 && dvvc < 0.07) && (dvvc2 >= 0.04 && dvvc2 < 0.07)) ++intobin2;
-        if (!(dvvc >= 0.07) && (dvvc2 >= 0.07)) ++intobin3;
-        if ((dvvc < 0.04) && !(dvvc2 < 0.04)) ++outofbin1;
-        if ((dvvc >= 0.04 && dvvc < 0.07) && !(dvvc2 >= 0.04 && dvvc2 < 0.07)) ++outofbin2;
-        if ((dvvc >= 0.07) && !(dvvc2 >= 0.07)) ++outofbin3;
-        dphi = dphi2;
-        dvvc = dvvc2;
-      }
-
-      double prob = 1;
-      if (p.clearing_from_eff()) {
-        prob = h_eff->GetBinContent(h_eff->FindBin(dvvc));
-      }
-
-      if (dvvc > dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width) dvvc = dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width;
-      h_c1v_dvv->Fill(dvvc, prob);
-      h_c1v_absdphivv->Fill(fabs(dphi), prob);
-      h_c1v_dbv0->Fill(dbv0, prob);
-      h_c1v_dbv1->Fill(dbv1, prob);
-      h_c1v_dbv1_dbv0->Fill(dbv0, dbv1, prob);
+    if (p.vary_dphi()) {
+      double dphi2 = i_dphi2->GetX(i_dphi->Eval(dphi), 0, M_PI);
+      double dvvc2 = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(dphi2));
+      if (dvvc < 0.04) ++bin1;
+      if (dvvc >= 0.04 && dvvc < 0.07) ++bin2;
+      if (dvvc >= 0.07) ++bin3;
+      if (!(dvvc < 0.04) && (dvvc2 < 0.04)) ++intobin1;
+      if (!(dvvc >= 0.04 && dvvc < 0.07) && (dvvc2 >= 0.04 && dvvc2 < 0.07)) ++intobin2;
+      if (!(dvvc >= 0.07) && (dvvc2 >= 0.07)) ++intobin3;
+      if ((dvvc < 0.04) && !(dvvc2 < 0.04)) ++outofbin1;
+      if ((dvvc >= 0.04 && dvvc < 0.07) && !(dvvc2 >= 0.04 && dvvc2 < 0.07)) ++outofbin2;
+      if ((dvvc >= 0.07) && !(dvvc2 >= 0.07)) ++outofbin3;
+      dphi = dphi2;
+      dvvc = dvvc2;
     }
+
+    double prob = 1;
+    if (p.clearing_from_eff()) {
+      prob = h_eff->GetBinContent(h_eff->FindBin(dvvc));
+    }
+
+    if (dvvc > dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width) dvvc = dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width;
+    h_c1v_dvv->Fill(dvvc, prob);
+    h_c1v_absdphivv->Fill(fabs(dphi), prob);
+    h_c1v_dbv0->Fill(dbv0, prob);
+    h_c1v_dbv1->Fill(dbv1, prob);
+    h_c1v_dbv1_dbv0->Fill(dbv0, dbv1, prob);
   }
 
   for (int i = 1; i <= h_c1v_dvv->GetNbinsX(); ++i) {
@@ -578,14 +579,50 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 }
 
 int main(int argc, const char* argv[]) {
-  const bool only_default = false; //strcmp(getenv("USER"), "tucker") == 0 || (argc >= 2 && strcmp(argv[1], "only_default"));
+  TH1::SetDefaultSumw2();
+  gStyle->SetPadTickX(1);
+  gStyle->SetPadTickY(1);
+
+  const bool only_default = argc >= 2 && strcmp(argv[1], "only_default") == 0;
   ConstructDvvcParameters pars;
   if (only_default) {
-    ConstructDvvcParameters pars2 = pars.year("2017").ntracks(4);
-    construct_dvvc(pars2, "duh.root");
-    TCanvas c("c","",500,500);
-    ((TH1*)((TFile*)TFile::Open("duh.root"))->Get("h_2v_dvv"))->Draw();
-    c.SaveAs("$asdf/a.png");
+    const char* outfn  = "2v_from_jets.root";
+    const char* drawfn = "2v_from_jets.png";
+    const int ntracks  = argc >= 3 ? atoi(argv[2]) : 3;
+    const char* year   = argc >= 4 ? argv[3] : "2017";
+
+    ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks);
+    construct_dvvc(pars2, outfn);
+    TCanvas c("c","",700,900);
+    TFile* f = TFile::Open(outfn);
+    TH1* h_2v_dvv  = (TH1*)f->Get("h_2v_dvv");
+    TH1* h_c1v_dvv = (TH1*)f->Get("h_c1v_dvv");
+    h_c1v_dvv->Scale(h_2v_dvv->Integral()/h_c1v_dvv->Integral());
+    h_c1v_dvv->SetLineColor(kRed);
+    h_2v_dvv->SetLineColor(kBlue);
+    for (auto h : {h_c1v_dvv, h_2v_dvv}) {
+      h->SetTitle(TString::Format("%i-track, 2-vertex events (%s);d_{VV} (cm);events", ntracks, year));
+      h->SetLineWidth(2);
+      h->SetStats(0);
+    }
+    TRatioPlot rat(h_2v_dvv, h_c1v_dvv);
+    rat.SetH1DrawOpt("e");
+    rat.SetH2DrawOpt("hist");
+    rat.Draw();
+    c.Update();
+    rat.GetLowerPad()->SetLogy();
+    double minr = 1e99, maxr = 0;
+    for (int ibin = 1; ibin <= std::min(10,h_2v_dvv->GetNbinsX()); ++ibin) {
+      const double r = h_2v_dvv->GetBinContent(ibin) / h_c1v_dvv->GetBinContent(ibin);
+      minr = std::min(minr, r);
+      maxr = std::max(maxr, r);
+    }
+    rat.GetLowerRefYaxis()->SetRangeUser(minr*0.5,maxr*2);
+    rat.GetCalculationOutputGraph()->SetLineWidth(2);
+    rat.GetCalculationOutputGraph()->SetLineColor(kBlue);
+    rat.SetGridlines(std::vector<double>({1.}));
+
+    c.SaveAs(drawfn);
     return 0;
   }
 
