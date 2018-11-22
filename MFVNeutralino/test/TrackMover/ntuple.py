@@ -7,7 +7,6 @@ settings = NtupleSettings()
 settings.is_mc = True
 settings.is_miniaod = True
 settings.event_filter = 'jets only novtx'
-settings.cross = '' # 2017to2018' # 2017to2017p8'
 
 version = settings.version + 'V2'
 
@@ -113,6 +112,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2017p8_1pc.json'))
 
     ms = MetaSubmitter('TrackMover' + version, dataset=dataset)
-    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(cross=settings.cross))
+    ms.common.pset_modifier = is_mc_modifier
     ms.condor.stageout_files = 'all'
     ms.submit(samples)
