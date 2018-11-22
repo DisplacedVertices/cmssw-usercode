@@ -78,8 +78,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     #samples = [s for s in samples if s.has_dataset(dataset)]
     set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2017p8_1pc.json'))
 
-    from JMTucker.Tools.MetaSubmitter import *
-    ms = MetaSubmitter('V0Ntuple' + version)
+    ms = MetaSubmitter('V0Ntuple' + version, dataset=dataset)
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, zerobias_modifier)
     ms.condor.stageout_files = 'all'
     ms.submit(samples)
