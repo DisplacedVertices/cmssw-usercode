@@ -13,11 +13,11 @@ version = settings.version + 'V1'
 
 process = ntuple_process(settings)
 remove_tfileservice(process)
-max_events(process, 100)
+max_events(process, 10000)
 report_every(process, 1000000)
-want_summary(process)
+#want_summary(process)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
-sample_files(process, 'qcdht2000_2017', dataset, 1)
+sample_files(process, 'qcdht1500_2017' if settings.is_mc else 'JetHT2017F', dataset, 1)
 file_event_from_argv(process)
 
 ####
