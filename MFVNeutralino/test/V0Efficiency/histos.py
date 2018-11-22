@@ -1,29 +1,26 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
-from JMTucker.Tools.CMSSWTools import which_global_tag
 from JMTucker.Tools.PileupWeights import pileup_weights
 from JMTucker.Tools.Year import year
 
-is_mc = True
-H = False
-zerobias = False
-repro = False
+settings = CMSSWSettings()
+settings.is_mc = True
+settings.zerobias = False
 meatloverssupreme = True
 dataset_version = 1
 dataset = 'v0ntuplev%i' % dataset_version
 
-geometry_etc(process, which_global_tag(is_mc, year, H, repro))
-process.TFileService.fileName = 'v0histos.root'
+geometry_etc(process, which_global_tag(settings))
+tfileservice(process, 'v0histos.root')
 
-sample_files(process, 'qcdht1000' if is_mc else 'JetHT2016D', dataset)
-report_every(process, 100)
-process.maxEvents.input = -1
+input_files(process, 'ntuple.root')
+#sample_files(process, 'qcdht1000' if is_mc else 'JetHT2016D', dataset)
 
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
 process.mfvWeight.enable = False # just do mcStat
 
 process.load('JMTucker.MFVNeutralino.TriggerFloatsFilter_cfi')
-process.mfvTriggerFloatsFilter.require_hlt = -5 if H else 1
-process.mfvTriggerFloatsFilter.ht_cut = 1000
+process.mfvTriggerFloatsFilter.require_hlt = 0
+process.mfvTriggerFloatsFilter.ht_cut = 1200
 process.mfvTriggerFloatsFilter.min_njets = 4
 
 process.v0eff = cms.EDAnalyzer('MFVV0Efficiency',
@@ -58,7 +55,7 @@ process.v0eff = cms.EDAnalyzer('MFVV0Efficiency',
                                )
 
 process.p = cms.Path(process.mfvWeight * process.v0eff)
-if not zerobias:
+if not settings.zerobias:
     process.p.insert(0, process.mfvTriggerFloatsFilter)
 
 process.v0effbkglo = process.v0eff.clone(mass_window_lo = -0.420, mass_window_hi = -0.460)
@@ -79,6 +76,7 @@ if meatloverssupreme:
         process.p *= al * lo * hi * on
 
     if dataset_version >= 2:
+        raise 'check this' 
         addmodified('loose', 'min_track_nsigmadxybs = 1')
         addmodified('loosenocos', 'min_track_nsigmadxybs = 1, min_costh2 = -2')
 
@@ -109,9 +107,9 @@ if meatloverssupreme:
     addmodified('costh2tight', 'min_costh2 = 0.9998')
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.CondorSubmitter import CondorSubmitter
     from JMTucker.Tools.MetaSubmitter import *
-    import JMTucker.Tools.Samples as Samples 
+    from JMTucker.Tools.Year import year
+    from JMTucker.Tools import Samples
 
     samples = [s for s in Samples.registry.all() if s.has_dataset(dataset)]
     #samples = [Samples.JetHT2016D, Samples.JetHT2016G, Samples.qcdht1000, Samples.qcdht1500] #, Samples.qcdht1000_hip1p0_mit, Samples.qcdht1500_hip1p0_mit]
