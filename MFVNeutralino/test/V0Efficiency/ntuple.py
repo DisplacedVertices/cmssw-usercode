@@ -1,34 +1,38 @@
-raise NotImplementedError('2017 and JMTWeightProducer')
+from JMTucker.MFVNeutralino.NtupleCommon import *
 
-from JMTucker.Tools.CMSSWTools import *
-from JMTucker.Tools.MiniAOD_cfg import *
-from JMTucker.Tools.PileupWeights import pileup_weights
-from JMTucker.Tools.Year import year
+settings = NtupleSettings()
+settings.is_mc = True
+settings.is_miniaod = True
+settings.zerobias = False
+assert not settings.zerobias # need to check trigger/event filter
+settings.event_filter = 'trigger jets only'
 
-is_mc = True
-H = False
-zerobias = False
-repro = False
+version = settings.version + 'V1'
 
-process = pat_tuple_process(None, is_mc, year, H, repro)
-jets_only(process)
+####
 
-if is_mc:
-    process.source.fileNames = ['/store/user/wsun/croncopyeos/qcdht1000/RunIISummer16DR80-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6/170606_165644/0000/reco_%i.root' % i for i in xrange(1,11)]
-else:
-    if repro:
-        process.source.fileNames = ['/store/data/Run2016B/JetHT/AOD/18Apr2017_ver2-v1/70001/960D0247-3725-E711-9A69-24BE05CEFB31.root']
-    else:
-        process.source.fileNames = ['/store/data/Run2016E/ZeroBias/AOD/23Sep2016-v1/100000/18151C77-4486-E611-84FD-0CC47A7C357A.root']
+process = ntuple_process(settings)
+remove_tfileservice(process)
+max_events(process, 100)
+report_every(process, 1000000)
+want_summary(process)
+dataset = 'miniaod' if settings.is_miniaod else 'main'
+sample_files(process, 'qcdht2000_2017', dataset, 1)
+file_event_from_argv(process)
 
+####
 
 process.load('JMTucker.Tools.FirstGoodPrimaryVertex_cfi')
+if settings.is_miniaod:
+    process.firstGoodPrimaryVertex.src = 'offlineSlimmedPrimaryVertices'
 process.firstGoodPrimaryVertex.cut = True
 
 process.load('JMTucker.MFVNeutralino.SkimmedTracks_cfi')
-process.mfvSkimmedTracks.min_pt = 1.0
-process.mfvSkimmedTracks.min_dxybs = 0.01
-process.mfvSkimmedTracks.min_nsigmadxybs = 1
+process.mfvSkimmedTracks.min_pt = 1
+process.mfvSkimmedTracks.min_dxybs = 0
+process.mfvSkimmedTracks.min_nsigmadxybs = 3
+process.mfvSkimmedTracks.tracks_src = 'mfvUnpackedCandidateTracks' if settings.is_miniaod else 'generalTracks'
+process.mfvSkimmedTracks.input_is_miniaod = settings.is_miniaod
 process.mfvSkimmedTracks.cut = True
 
 process.load('JMTucker.MFVNeutralino.V0Vertexer_cff')
@@ -36,13 +40,13 @@ process.mfvV0Vertices.cut = True
 
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
 
-process.p = cms.Path(process.firstGoodPrimaryVertex * process.mfvSkimmedTracks * process.mfvV0Vertices * process.mfvTriggerFloats)
+process.p = cms.Path(process.mfvEventFilterSequence * process.firstGoodPrimaryVertex * process.mfvV0Vertices * process.mfvTriggerFloats)
 
-if is_mc:
+if settings.is_mc and not settings.is_miniaod:
     process.load('PhysicsTools.PatAlgos.slimming.slimmedAddPileupInfo_cfi')
     process.p *= process.slimmedAddPileupInfo
 
-output_commands = [
+process.out.outputCommands = [
     'drop *',
     'keep *_mcStat_*_*',
     'keep *_mfvSkimmedTracks_*_*',
@@ -53,29 +57,29 @@ output_commands = [
     'keep *_firstGoodPrimaryVertex_*_*',
     'keep *_TriggerResults_*_HLT', # for ZeroBias since I don't wanna mess with MFVTriggerFloats for it
     ]
-output_file(process, 'ntuple.root', output_commands)
 
-import JMTucker.MFVNeutralino.EventFilter as ef
-ef.setup_event_filter(process, path_name='p', trigger_filter='jets only')
-
-if zerobias:
+if settings.zerobias:
     process.mfvTriggerFilter.HLTPaths.append('HLT_ZeroBias_v*') # what are the ZeroBias_part* paths?
 
-process.maxEvents.input = 100
-#report_every(process, 1)
-#want_summary(process)
+ReferencedTagsTaskAdder(process)('p')
+
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    import JMTucker.Tools.Samples as Samples 
-    samples = Samples.data_samples
-    samples += [s for s in Samples.auxiliary_data_samples if s.name.startswith('ZeroBias') or s.name.startswith('ReproJetHT')]
-    samples += [Samples.qcdht1000, Samples.qcdht1500, Samples.qcdht1000ext, Samples.qcdht1500ext, Samples.qcdht1000_hip1p0_mit, Samples.qcdht1500_hip1p0_mit]
+    from JMTucker.Tools.MetaSubmitter import *
+    from JMTucker.Tools import Samples
 
-    for s in samples:
-        s.files_per = 20
+    if year == 2017:
+        samples = Samples.data_samples_2017 + Samples.ttbar_samples_2017 + Samples.qcd_samples_2017
+        #samples += [s for s in Samples.auxiliary_data_samples_2017 if s.name.startswith('ZeroBias')]
+    elif year == 2018:
+        samples = Samples.data_samples_2018 + [s for s in Samples.auxiliary_data_samples_2018 if s.name.startswith('ReRecoJetHT')]
+        #samples += [s for s in Samples.auxiliary_data_samples_2018 if s.name.startswith('ZeroBias')]
+
+    #samples = [s for s in samples if s.has_dataset(dataset)]
+    set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2017p8_1pc.json'))
 
     from JMTucker.Tools.MetaSubmitter import *
-    ms = MetaSubmitter('V0NtupleV2')
-    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, zerobias_modifier, repro_modifier)
+    ms = MetaSubmitter('V0Ntuple' + version)
+    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, zerobias_modifier)
     ms.condor.stageout_files = 'all'
     ms.submit(samples)
