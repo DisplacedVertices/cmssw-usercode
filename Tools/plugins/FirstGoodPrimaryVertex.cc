@@ -15,7 +15,7 @@ private:
 };
 
 JMTFirstGoodPrimaryVertex::JMTFirstGoodPrimaryVertex(const edm::ParameterSet& cfg)
-  : vertices_token(consumes<reco::VertexCollection>(edm::InputTag("offlinePrimaryVertices"))),
+  : vertices_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("src"))),
     cut(cfg.getParameter<bool>("cut"))
 {
   produces<reco::VertexCollection>();
