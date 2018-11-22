@@ -3,7 +3,7 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 version = 'v21m'
 dataset = 'ntuple' + version
 sample_files(process, 'JetHT2017F', dataset, 1)
-tfileservice(process, 'seed_tracks_pervtx.root')
+tfileservice(process, 'per_vertex.root')
 file_event_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
