@@ -149,10 +149,10 @@ def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=2
             'qcdht1500_2017': 11,
             'qcdht2000_2017': 11,
             'ttbar_2017': 22,
-            'ttbarht0600_2017': 4,
-            'ttbarht0800_2017': 4,
-            'ttbarht1200_2017': 4,
-            'ttbarht2500_2017': 4,
+            'ttbarht0600_2017': 8,
+            'ttbarht0800_2017': 8,
+            'ttbarht1200_2017': 8,
+            'ttbarht2500_2017': 8,
             }
         for sample in samples:
             sample.set_curr_dataset(dataset)
@@ -169,10 +169,10 @@ def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=2
                 'qcdht1500_2017':   ( 4,  186000),
                 'qcdht2000_2017':   ( 5,  202000),
                 'ttbar_2017':       (50, 3040000),
-                'ttbarht0600_2017': (10,  143000),
-                'ttbarht0800_2017': ( 6,   90000),
-                'ttbarht1200_2017': ( 6,   65000),
-                'ttbarht2500_2017': ( 6,   55000),
+                'ttbarht0600_2017': ( 5,   71500),
+                'ttbarht0800_2017': ( 3,   45000),
+                'ttbarht1200_2017': ( 3,   32500),
+                'ttbarht2500_2017': ( 3,   27500),
                 }
              }
         assert dataset == 'miniaod'
