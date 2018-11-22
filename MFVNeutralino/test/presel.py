@@ -15,39 +15,43 @@ max_events(process, 10000)
 report_every(process, 1000000)
 #want_summary(process)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
-sample_files(process, 'qcdht2000_2017', dataset, 1)
+sample_files(process, 'qcdht2000_2017' if settings.is_mc else 'JetHT2017F', dataset, 1)
 file_event_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
-process.load('JMTucker.MFVNeutralino.EventHistos_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
+process.load('JMTucker.MFVNeutralino.EventHistos_cfi')
+process.load('JMTucker.MFVNeutralino.ByX_cfi')
 
 process.mfvEvent.vertex_seed_tracks_src = cms.InputTag('mfvVertexTracks', 'seed')
 process.mfvWeight.throw_if_no_mcstat = False
 
-process.mfvAnalysisCutsForJetHistos    = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)
-process.mfvAnalysisCutsForLeptonHistos = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False, apply_presel = 2)
+process.mfvAnalysisCutsJet    = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)
+process.mfvAnalysisCutsLepton = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False, apply_presel = 2)
 
-process.mfvEventHistosJetTriggered    = process.mfvEventHistos.clone()
-process.mfvEventHistosLeptonTriggered = process.mfvEventHistos.clone()
-process.mfvEventHistosJetPreSel       = process.mfvEventHistos.clone()
-process.mfvEventHistosLeptonPreSel    = process.mfvEventHistos.clone()
+process.preSeq = cms.Sequence(process.goodOfflinePrimaryVertices *
+                              process.selectedPatJets *
+                              process.selectedPatMuons *
+                              process.selectedPatElectrons *
+                              process.mfvTriggerFloats *
+                              process.mfvGenParticles *
+                              process.mfvUnpackedCandidateTracks *
+                              process.mfvVertexTracks *
+                              process.mfvEvent *
+                              process.mfvWeight)
 
-process.eventHistosPreSeq = cms.Sequence(process.goodOfflinePrimaryVertices *
-                                         process.selectedPatJets *
-                                         process.selectedPatMuons *
-                                         process.selectedPatElectrons *
-                                         process.mfvTriggerFloats *
-                                         process.mfvGenParticles *
-                                         process.mfvUnpackedCandidateTracks *
-                                         process.mfvVertexTracks *
-                                         process.mfvEvent *
-                                         process.mfvWeight)
+def doit(name):
+    obj = getattr(process, name)
+    setattr(process, '%sJetTriggered'    % name, obj.clone())
+    setattr(process, '%sJetPreSel'       % name, obj.clone())
+    setattr(process, '%sLeptonTriggered' % name, obj.clone())
+    setattr(process, '%sLeptonPreSel'    % name, obj.clone())
+    setattr(process, 'p%sJet' % name, cms.Path(process.mfvTriggerFilterJetsOnly    * process.preSeq * getattr(process, '%sJetTriggered'    % name) * process.mfvAnalysisCutsJet    * getattr(process, '%sJetPreSel'    % name)))
+    setattr(process, 'p%sLep' % name, cms.Path(process.mfvTriggerFilterLeptonsOnly * process.preSeq * getattr(process, '%sLeptonTriggered' % name) * process.mfvAnalysisCutsLepton * getattr(process, '%sLeptonPreSel' % name)))
 
-process.pEventHistosJetTriggered = cms.Path(process.mfvTriggerFilterJetsOnly    * process.eventHistosPreSeq                                          * process.mfvEventHistosJetTriggered)
-process.pEventHistosJetPreSel    = cms.Path(process.mfvTriggerFilterJetsOnly    * process.eventHistosPreSeq * process.mfvAnalysisCutsForJetHistos    * process.mfvEventHistosJetPreSel)
-process.pEventHistosLepTriggered = cms.Path(process.mfvTriggerFilterLeptonsOnly * process.eventHistosPreSeq                                          * process.mfvEventHistosLeptonTriggered)
-process.pEventHistosLepPreSel    = cms.Path(process.mfvTriggerFilterLeptonsOnly * process.eventHistosPreSeq * process.mfvAnalysisCutsForLeptonHistos * process.mfvEventHistosLeptonPreSel)
+doit('mfvEventHistos')
+if not settings.is_mc:
+    doit('mfvByRun')
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
@@ -55,14 +59,12 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools import Samples
 
     if year == 2017:
-        samples  = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.all_signal_samples_2017
-        samples += Samples.data_samples_2017
-        #samples += Samples.leptonic_samples_2017
+        samples = Samples.data_samples_2017 + Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.all_signal_samples_2017
     elif year == 2018:
         samples = Samples.data_samples_2018 + [s for s in Samples.auxiliary_data_samples_2018 if s.name.startswith('ReRecoJetHT')]
 
     samples = [s for s in samples if s.has_dataset(dataset) and (s.is_mc or not settings.cross)]
-    set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2017p8_1pc.json'))
+    set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2017p8.json'))
 
     ms = MetaSubmitter('PreselHistos%s%s' % (settings.version.capitalize(), '_' + settings.cross if settings.cross else ''), dataset=dataset)
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(cross=settings.cross))
