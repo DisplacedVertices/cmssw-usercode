@@ -8,6 +8,8 @@ file_event_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
+process.load('JMTucker.MFVNeutralino.ByX_cfi')
+
 process.mfvAnalysisCuts.apply_vertex_cuts = False
 
 for mn,mx in (3,3), (3,4), (4,4):
@@ -16,13 +18,7 @@ for mn,mx in (3,3), (3,4), (4,4):
     pth_name = 'pth%i%i' % (mn,mx)
 
     vtx = process.mfvSelectedVerticesTight.clone(min_ntracks = mn, max_ntracks = mx)
-
-    obj = cms.EDAnalyzer('MFVByX',
-                         event_src = cms.InputTag('mfvEvent'),
-                         vertex_src = cms.InputTag(vtx_name),
-                         by_npu = cms.bool(True),
-                         )
-
+    obj = process.mfvByNpu.clone(vertex_src = vtx_name)
     pth = cms.Path(process.mfvAnalysisCuts * vtx * obj)
     setattr(process, vtx_name, vtx)
     setattr(process, obj_name, obj)

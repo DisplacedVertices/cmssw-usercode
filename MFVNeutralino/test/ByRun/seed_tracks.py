@@ -21,6 +21,7 @@ file_event_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
+process.load('JMTucker.MFVNeutralino.ByX_cfi')
 
 process.mfvEvent.vertex_seed_tracks_src = cms.InputTag('mfvVertexTracks', 'seed')
 process.mfvWeight.throw_if_no_mcstat = False
@@ -38,13 +39,8 @@ process.pre = cms.Sequence(process.mfvTriggerFilterJetsOnly *
                            process.mfvEvent *
                            process.mfvWeight)
 
-process.byrunInclusive = cms.EDAnalyzer('MFVByX',
-                                        event_src = cms.InputTag('mfvEvent'),
-                                        vertex_src = cms.InputTag(''),
-                                        by_run = cms.bool(True),
-                                        )
-
-process.byrunInclusiveNoAna = process.byrunInclusive.clone()
+process.byrunInclusive      = process.mfvByRun.clone()
+process.byrunInclusiveNoAna = process.mfvByRun.clone()
 
 process.p = cms.Path(process.pre * process.byrunInclusiveNoAna * process.mfvAnalysisCuts * process.byrunInclusive)
 
