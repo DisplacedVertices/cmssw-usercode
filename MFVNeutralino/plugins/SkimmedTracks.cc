@@ -80,14 +80,13 @@ bool MFVSkimmedTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
   int itk = -1;
   for (const reco::Track& tk : *tracks) {
     ++itk;
-    const double pt = tk.pt();
     const bool min_r = tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1);
     const int npxlayers = tk.hitPattern().pixelLayersWithMeasurement();
     const int nstlayers = tk.hitPattern().stripLayersWithMeasurement();
 
-    bool pass = pt > min_pt && min_r && npxlayers >= 2 && nstlayers >= 6;
+    bool pass = !std::isinf(tk.pt()) && !std::isnan(tk.eta()) && tk.pt() > min_pt && min_r && npxlayers >= 2 && nstlayers >= 6;
 
-    if (debug) std::cout << "track #" << itk << " pt " << pt << " eta " << tk.eta() << " min_r " << min_r << " npxlayers " << npxlayers << " nstlayers " << nstlayers << " pass so far? " << pass;
+    if (debug) std::cout << "track #" << itk << " pt " << tk.pt() << " eta " << tk.eta() << " min_r " << min_r << " npxlayers " << npxlayers << " nstlayers " << nstlayers << " pass so far? " << pass;
 
     if (pass && (min_dxybs > 0 || min_nsigmadxybs > 0)) {
       const double dxybs = tk.dxy(*beamspot);

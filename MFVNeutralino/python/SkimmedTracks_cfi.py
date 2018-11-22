@@ -9,4 +9,5 @@ mfvSkimmedTracks = cms.EDFilter('MFVSkimmedTracks',
                                 packed_candidates_src = cms.InputTag('packedPFCandidates'),
                                 input_is_miniaod = cms.bool(False),
                                 cut = cms.bool(False),
+                                debug = cms.untracked.bool(False),
                                 )
