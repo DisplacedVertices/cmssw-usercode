@@ -3,19 +3,20 @@
 '''
 example:
 
+y=/uscms_data/d2/tucker/crab_dirs/TrackMoverHistsV21mV2/nsig4p0/tau10000um
 for x in 20 21 22 30 31 32; do
-  py draw.py hipplusno_$x $x/JetHT2016.root $x/qcdht1000and1500_hipplusno.root
+  py draw.py V21mV2_${x} $y/$x/JetHT2017.root $y/$x/background_2017.root 0.01
 done
 '''
 
-extra_factor = 1. #17600/3629.809
+mc_scale_factor = 1.
 use_effective = True
 
 from JMTucker.Tools.ROOTTools import *
 set_style()
 ROOT.TH1.AddDirectory(0)
 
-def get_em(fn, alpha=1-0.6827):
+def get_em(fn, scale=1., alpha=1-0.6827):
     f = ROOT.TFile(fn)
     d = {}
     integ = None
@@ -46,7 +47,8 @@ def get_em(fn, alpha=1-0.6827):
             obj.Rebin(4)
         return obj
 
-    integ = f.Get('h_weight').Integral(0,100000)
+    hdummy = f.Get('h_weight')
+    integ = hdummy.Integral(0,hdummy.GetNbinsX()+2)
     print 'integral:', integ
 
     for key in f.GetListOfKeys():
@@ -59,6 +61,7 @@ def get_em(fn, alpha=1-0.6827):
         if skip(sub, obj):
             continue
 
+        obj.Scale(scale)
         obj = rebin(sub, obj)
 
         if name.startswith('h_'):
@@ -115,19 +118,19 @@ def get_em(fn, alpha=1-0.6827):
 
 def comp(ex, fn1='data.root', fn2='mc.root'):
     assert ex
-    ps = plot_saver(plot_dir('trackmover_' + ex), size=(600,600), log=False)
+    ps = plot_saver(plot_dir('TrackMover_' + ex), size=(600,600), log=False)
 
     print ex
     print 'fn1:', fn1
     f_1, l_1, d_1, c_1, integ_1 = get_em(fn1)
     print 'fn2:', fn2
-    f_2, l_2, d_2, c_2, integ_2 = get_em(fn2)
+    f_2, l_2, d_2, c_2, integ_2 = get_em(fn2, scale=mc_scale_factor)
     assert l_1 == l_2
     assert len(d_1) == len(d_2)
     l = l_1
 
     scale = integ_1 / integ_2
-    print 'scale is %f = %f * (extra_factor=%f)' % (scale, scale/extra_factor, extra_factor)
+    print 'scale is %f = %f * (mc_scale_factor=%f)' % (scale, scale/mc_scale_factor, mc_scale_factor)
     print 'diff (mc - data)'
     for i, (cutset, eff_1, eeff_1) in enumerate(c_1):
        cutset_2, eff_2, eeff_2 = c_2[i]
@@ -152,34 +155,40 @@ def comp(ex, fn1='data.root', fn2='mc.root'):
             mc.SetLineColor(2)
             mc.SetFillColor(2)
 
+            x_range = None
+            y_range = None
+            objs = [mc, data]
+            statbox_size = (0.2,0.2)
             if name.endswith('_rat'):
                 for g in both:
                     g.GetYaxis().SetTitle('efficiency')
                 objs = [(mc, 'PE2'), (data, 'P')]
                 y_range = (0, 1.05)
                 statbox_size = None
-            else:
-                objs = [mc, data]
-                y_range = None
-                statbox_size = (0.2,0.2)
+            if 'bs2derr' in name:
+                x_range = (0, 0.01)
 
-            ratios_plot(name, 
+            ratios_plot(name,
                         objs,
                         plot_saver=ps,
+                        x_range=x_range,
                         y_range=y_range,
-                        res_y_range=0.05,
+                        res_y_range=0.10,
                         res_y_title='data/MC',
                         res_fit=False,
                         res_divide_opt={'confint': propagate_ratio, 'force_le_1': False, 'allow_subset': True}, #name in ('all_jetsumntracks_rat', )},
+                        res_lines=1.,
                         statbox_size=statbox_size,
                         )
 
 if __name__ == '__main__':
     import sys
     if len(sys.argv) < 4:
-        sys.exit('usage: python draw.py tag_for_plots fn1 fn2')
+        sys.exit('usage: python draw.py tag_for_plots fn1 fn2 [fn2 scale factor]')
 
     ex = sys.argv[1]
     fn1 = sys.argv[2]
     fn2 = sys.argv[3]
+    if len(sys.argv) > 4:
+        mc_scale_factor = float(sys.argv[4])
     comp(ex, fn1, fn2)
