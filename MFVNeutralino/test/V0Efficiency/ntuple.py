@@ -9,6 +9,8 @@ settings.event_filter = 'trigger jets only'
 
 version = settings.version + 'V1'
 
+debug = False
+
 ####
 
 process = ntuple_process(settings)
@@ -37,6 +39,12 @@ process.mfvSkimmedTracks.cut = True
 
 process.load('JMTucker.MFVNeutralino.V0Vertexer_cff')
 process.mfvV0Vertices.cut = True
+
+if debug:
+    if settings.is_miniaod:
+        process.mfvUnpackedCandidateTracks.debug = True
+    process.mfvSkimmedTracks.debug = True
+    process.mfvV0Vertices.debug = True
 
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
 
