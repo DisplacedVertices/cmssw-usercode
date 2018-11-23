@@ -109,9 +109,12 @@ def cmssw_base(extra=''):
 
 def input_files(process, fns):
     if type(fns) == str:
-        if not fns.endswith('.root'):
+        if '*' in fns or '?' in fns:
+            fns = glob.glob(fns)
+        elif not fns.endswith('.root'):
             files_from_file(process, fns)
             return
+    if type(fns) == str:
         fns = [fns]
     files = []
     for fn in fns:
