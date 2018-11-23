@@ -1888,9 +1888,9 @@ def ratios_plot(name,
 
     if type(res_y_range) == float: # dynamic, the number is the fraction to add under/over min/max
         min_r, max_r = 1e99, -1e99
-        for i,h in enumerate(hists):
+        for h in hists:
             v1, v2 = histogram_divide_values(h, h0, True)
-            rs = [v1.y[i] / v2.y[i] for i in xrange(v2.n) if v2.y[i] != 0.]
+            rs = [v1.y[i] / v2.y[i] for i in xrange(v2.n) if v2.y[i] != 0. and (not x_range or x_range[0] < v1.x[i] < x_range[1])]
             if rs:
                 min_r = min(min_r, min(rs))
                 max_r = max(max_r, max(rs))
@@ -1951,15 +1951,20 @@ def ratios_plot(name,
             txt.SetTextAlign(12)
             txt.SetTextColor(h.GetLineColor())
 
-    if res_lines:
+    if res_lines and ratios:
+        if type(res_lines) in (int,float):
+            res_lines = [res_lines]
+        if all([type(x) in (int,float) for x in res_lines]):
+            res_lines = [(x, 1, 1, 7) for x in res_lines]
         res_ls = []
         for res_line_y, res_line_color, res_line_width, res_line_style in res_lines:
-            res_l = ROOT.TLine(x_range[0], res_line_y, x_range[1], res_line_y)
-            res_ls.append(res_l)
-            res_l.SetLineColor(res_line_color)
-            res_l.SetLineWidth(res_line_width)
-            res_l.SetLineStyle(res_line_style)
-            res_l.Draw()
+            if res_y_range[0] < res_line_y < res_y_range[1]:
+                res_l = ROOT.TLine(x_range[0], res_line_y, x_range[1], res_line_y)
+                res_ls.append(res_l)
+                res_l.SetLineColor(res_line_color)
+                res_l.SetLineWidth(res_line_width)
+                res_l.SetLineStyle(res_line_style)
+                res_l.Draw()
 
     if fit_tpt:
         fit_tpt.Draw()
