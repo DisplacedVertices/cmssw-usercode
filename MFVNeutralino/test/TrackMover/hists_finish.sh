@@ -45,7 +45,7 @@ elif [[ $1 == "cleanup" ]]; then
 
 elif [[ $1 == "finish" ]]; then
     for x in TrackMoverV*.root ; do
-        y=$(echo $x | sed 's/TrackMoverV._//' | sed 's@_@XXX@g4' | sed 's@_@/@g' | sed 's/XXX/_/g')
+        y=$(echo $x | sed 's/TrackMoverV._//' | sed 's@_@XXX@g5' | sed 's@_@/@g' | sed 's/XXX/_/g')
         mkdir -p $(dirname $y)
         mv $x $y
     done
@@ -79,5 +79,4 @@ elif [[ $1 == "allthere" ]]; then
             fi
         done
     done
-
 fi
