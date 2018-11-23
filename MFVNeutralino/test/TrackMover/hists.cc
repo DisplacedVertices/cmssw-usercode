@@ -121,6 +121,9 @@ int main(int argc, char** argv) {
   const bool use_extra_weights = extra_weights != 0 && extra_weights->IsOpen();
   printf("using extra weights from reweight.root? %i\n", use_extra_weights);
 
+  int nden = 0, ndennegweight = 0, nnegweight = 0;
+  double sumnegweightden = 0;
+
   for (int j = 0, je = t->GetEntries(); j < je; ++j) {
     //if (j == 100000) break;
     if (t->LoadTree(j) < 0) break;
@@ -140,6 +143,7 @@ int main(int argc, char** argv) {
     }
 
     if (is_mc && apply_weights) {
+      if (nt.weight < 0) ++nnegweight;
       w *= nt.weight;
 
       if (btagsf_weights) {
@@ -253,7 +257,9 @@ int main(int argc, char** argv) {
       Fill(nd(k_jetsumntracks).den, jet_sumntracks);
     }
 
+    ++nden;
     den += w;
+    if (w < 0) { ++ndennegweight; sumnegweightden += w; }
 
     int n_pass_nocuts = 0;
     int n_pass_ntracks = 0;
@@ -325,10 +331,11 @@ int main(int argc, char** argv) {
   }
 
   printf("\r                                \n");
-  printf("%f events in denominator\n", den);
-  printf("%30s  %12s  %12s  %10s [%10s, %10s] +%10s -%10s\n", "name", "num", "den", "eff", "lo", "hi", "+", "-");
+  printf("%i/%i (%i/%i den) events with negative weights\n", nnegweight, int(t->GetEntries()), ndennegweight, nden);
+  printf("%.1f events in denominator (including %.1f negative)\n", den, sumnegweightden);
+  printf("%20s  %12s  %12s  %10s [%10s, %10s] +%10s -%10s\n", "name", "num", "den", "eff", "lo", "hi", "+", "-");
   for (const auto& p : nums) {
     const interval i = clopper_pearson_binom(p.second, den);
-    printf("%30s  %12f  %12f  %10f [%10f, %10f] +%10f -%10f\n", p.first.c_str(), p.second, den, i.value, i.lower, i.upper, i.upper - i.value, i.value - i.lower);
+    printf("%20s  %12.1f  %12.1f  %10.4f [%10.4f, %10.4f] +%10.4f -%10.4f\n", p.first.c_str(), p.second, den, i.value, i.lower, i.upper, i.upper - i.value, i.value - i.lower);
   }
 }
