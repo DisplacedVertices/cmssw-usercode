@@ -61,7 +61,7 @@ ii=$((ii / nnls))
 nb=${nbs[$((ii % nnbs))]}
 ii=$((ii / nnbs))
 
-outfn=$(basename $path)_nsig${nsig}_tau$(printf %05i $tau)um_${nl}${nb}_$(basename $fn .root).root
+outfn=$(basename $path)_nsig${nsig}_tau$(printf %06i $tau)um_${nl}${nb}_$(basename $fn .root).root
 treepath=mfvMovedTree${nl}${nb}/t
 
 echo path $path fn $fn nl $nl nb $nb outfn $outfn treepath $treepath
