@@ -67,13 +67,9 @@ int main(int argc, char** argv) {
     if (t->LoadTree(j) < 0) break;
     if (t->GetEntry(j) <= 0) continue;
 
-    const bool pass_800 = bool(nt.pass_hlt & 0x2);
-    const bool pass_900_450_AK450 = bool(nt.pass_hlt & 0x1C);
-    const double data_set_frac = gRandom->Rndm();
-    const bool is_H = data_set_frac > 0.81; // 81% of the 2015+16 data is B-G, rest is H
-    const bool pass_trig = pass_800 || (is_H && pass_900_450_AK450);
+    const bool pass_trig = nt.pass_hlt & 1;
 
-    if (nt.jetht < 1000 ||
+    if (nt.jetht < 1200 ||
         nt.nalljets() < 4 ||
         !pass_trig)
       continue;

@@ -1,15 +1,16 @@
-#!/usr/bin/env python
+from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-import sys
-from JMTucker.Tools.general import typed_from_argv
-from JMTucker.Tools.CMSSWTools import *
-from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
-
-process.TFileService.fileName = 'mctruth.root'
+dataset = 'ntuplev21m'
+sample_files(process, 'mfv_neu_tau010000um_M0800_2017', dataset, 1)
+tfileservice(process, 'mctruth.root')
+file_event_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
 
+from JMTucker.MFVNeutralino.JetTrackRefGetter_cff import mfvJetTrackRefGetter
+
 process.mfvMovedTree = cms.EDAnalyzer('MFVMovedTracksTreer',
+                                      mfvJetTrackRefGetter,
                                       event_src = cms.InputTag('mfvEvent'),
                                       weight_src = cms.InputTag('mfvWeight'),
                                       mover_src = cms.string(''),
@@ -23,22 +24,20 @@ process.mfvMovedTree = cms.EDAnalyzer('MFVMovedTracksTreer',
 
 process.p = cms.Path(process.mfvWeight * process.mfvMovedTree)
 
-file_event_from_argv(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
+    from JMTucker.Tools.MetaSubmitter import *
     from JMTucker.Tools.Year import year
-    import JMTucker.Tools.Samples as Samples
-    if year == 2015:
-        samples = Samples.mfv_signal_samples_2015
-    elif year == 2016:
-        samples = Samples.mfv_signal_samples + Samples.mfv_stopdbardbar_samples
+    from JMTucker.Tools import Samples
 
-    dataset = 'ntuplev16'
-    for sample in samples:
-        sample.datasets[dataset].files_per = 2
+    assert year == 2017
+    if year == 2017:
+        samples = Samples.all_signal_samples_2017
 
-    from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    cs = CondorSubmitter('TrackMoverMCTruthV16',
+    #samples = [s for s in samples if s.has_dataset(dataset)]
+    set_splitting(samples, dataset, 'minitree')
+
+    cs = CondorSubmitter('TrackMoverMCTruth%s' % dataset.replace('ntuple', '').capitalize(),
                          ex = year,
                          dataset = dataset,
                          )
