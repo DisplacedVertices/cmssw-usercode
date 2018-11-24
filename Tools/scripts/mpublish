@@ -126,7 +126,7 @@ for wd in wds:
                     files.append(fn.strip()[fn.find('/store'):])
         nevents = cs_eventswritten(wd) if options.include_condor_nevents else 0
 
-    files = [fn for fn in files if fn_ok(fn)]
+    files = [str(fn) for fn in files if fn_ok(fn)]
     if not files:
         msg = 'warning: no files found for %s' % wd
         if options.partial:
