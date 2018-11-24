@@ -30,15 +30,13 @@ void MFVUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetu
   std::unique_ptr<reco::TrackCollection> tracks(new reco::TrackCollection);
   std::unique_ptr<std::vector<size_t>> which(new std::vector<size_t>);
 
-  int itk = 0;
   for (size_t i = 0, ie = packed_candidates->size(); i < ie; ++i) {
     const pat::PackedCandidate& cand = (*packed_candidates)[i];
     if (debug) std::cout << "cand #" << i << " id " << cand.pdgId() << " pt " << cand.pt() << " eta " << cand.eta() << " charge " << cand.charge() << " hasTrackDetails? " << cand.hasTrackDetails() << " ";
     if (cand.charge() && cand.hasTrackDetails()) {
-      if (debug) std::cout << "-> track #" << itk << " pt " << cand.pseudoTrack().pt() << " eta " << cand.pseudoTrack().eta() << " min_r? " << cand.pseudoTrack().hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1) << " npxlayers " << cand.pseudoTrack().hitPattern().pixelLayersWithMeasurement() << " nstlayers " << cand.pseudoTrack().hitPattern().stripLayersWithMeasurement() << " dxy " << cand.pseudoTrack().dxy() << " +- " << cand.pseudoTrack().dxyError();
+      if (debug) std::cout << "-> track #" << tracks->size() << " pt " << cand.pseudoTrack().pt() << " eta " << cand.pseudoTrack().eta() << " min_r? " << cand.pseudoTrack().hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1) << " npxlayers " << cand.pseudoTrack().hitPattern().pixelLayersWithMeasurement() << " nstlayers " << cand.pseudoTrack().hitPattern().stripLayersWithMeasurement() << " dxy " << cand.pseudoTrack().dxy() << " +- " << cand.pseudoTrack().dxyError();
       tracks->push_back(cand.pseudoTrack());
       which->push_back(i);
-      ++itk;
     }
     if (debug) std::cout << "\n";
   }
