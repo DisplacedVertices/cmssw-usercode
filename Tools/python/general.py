@@ -206,10 +206,11 @@ def save_git_status(path):
     os.system("git status --untracked-files=all --ignored | grep -v pyc > %s" % os.path.join(path, 'status'))
     os.system('mkdir -p /tmp/%s' % os.environ['USER'])
     git_untracked_tmp_fn = '/tmp/%s/untracked.tgz' % os.environ['USER']
-    git_untracked_file_list_cmd = "git status --porcelain | grep '^??' | sed 's/??//'"
+    git_untracked_file_list_cmd = "git status --porcelain | grep '^??' | sed 's/^?? //'"
     git_untracked_file_list = popen(git_untracked_file_list_cmd)
+    git_untracked_file_list = ['"%s"' % x for x in git_untracked_file_list.split('\n') if x]
     if git_untracked_file_list:
-        git_tar_ret = os.system("tar czf %s -C `git rev-parse --show-toplevel` `%s`" % (git_untracked_tmp_fn, git_untracked_file_list_cmd))
+        git_tar_ret = os.system('tar czf %s -C `git rev-parse --show-toplevel` %s' % (git_untracked_tmp_fn, ' '.join(git_untracked_file_list)))
         if git_tar_ret != 0:
             print '\033[36;7m warning: \033[m git-untracked tar returned non-zero exit code'
         elif os.stat(git_untracked_tmp_fn).st_size > 100*1024**2:
