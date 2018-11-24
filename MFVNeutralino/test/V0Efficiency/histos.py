@@ -124,6 +124,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     cs = CondorSubmitter('V0Efficiency%s' % dataset.replace('v0ntuple', '').capitalize(),
                          ex = year,
                          dataset = dataset,
-                         pset_modifier = chain_modifiers(is_mc_modifier, zerobias_modifier, per_sample_pileup_weights_modifier(cross=settings.cross)),
+                         pset_modifier = chain_modifiers(is_mc_modifier, zerobias_modifier, per_sample_pileup_weights_modifier(module_names='auto', cross=settings.cross)),
                          )
     cs.submit_all(samples)
