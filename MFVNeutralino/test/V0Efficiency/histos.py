@@ -5,9 +5,10 @@ from JMTucker.Tools.Year import year
 settings = CMSSWSettings()
 settings.is_mc = True
 settings.zerobias = False
+settings.cross = '' # 2017to2018' # 2017to2017p8'
 meatloverssupreme = True
 dataset_version = 1
-dataset = 'v0ntuplev%i' % dataset_version
+dataset = 'v0ntuplev21mv%i' % dataset_version
 
 geometry_etc(process, which_global_tag(settings))
 tfileservice(process, 'v0histos.root')
@@ -108,16 +109,21 @@ if meatloverssupreme:
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
-    from JMTucker.Tools.Year import year
     from JMTucker.Tools import Samples
 
-    samples = [s for s in Samples.registry.all() if s.has_dataset(dataset)]
-    #samples = [Samples.JetHT2016D, Samples.JetHT2016G, Samples.qcdht1000, Samples.qcdht1500] #, Samples.qcdht1000_hip1p0_mit, Samples.qcdht1500_hip1p0_mit]
-    set_splitting(samples, dataset, 'default', '../jsons/ana_2015p6.json', 2)
+    if year == 2017:
+        samples = Samples.data_samples_2017 + Samples.ttbar_samples_2017 + Samples.qcd_samples_2017
+        #samples += [s for s in Samples.auxiliary_data_samples_2017 if s.name.startswith('ZeroBias')]
+    elif year == 2018:
+        samples = Samples.data_samples_2018 + [s for s in Samples.auxiliary_data_samples_2018 if s.name.startswith('ReRecoJetHT')]
+        #samples += [s for s in Samples.auxiliary_data_samples_2018 if s.name.startswith('ZeroBias')]
 
-    cs = CondorSubmitter('V0EfficiencyV%i_v22' % dataset_version,
+    #samples = [s for s in samples if s.has_dataset(dataset)]
+    set_splitting(samples, dataset, 'default', json_path('ana_2017p8.json'), default_files_per=50)
+
+    cs = CondorSubmitter('V0Efficiency%s' % dataset.replace('v0ntuple', '').capitalize(),
                          ex = year,
                          dataset = dataset,
-                         pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, zerobias_modifier, repro_modifier),
+                         pset_modifier = chain_modifiers(is_mc_modifier, zerobias_modifier, per_sample_pileup_weights_modifier(cross=settings.cross)),
                          )
     cs.submit_all(samples)
