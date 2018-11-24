@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, sys, gzip, cPickle, subprocess, glob, time
+import os, sys, gzip, cPickle, subprocess, glob, tempfile, time
 from itertools import chain, product, starmap
 from collections import namedtuple
 from pprint import pprint
@@ -205,7 +205,7 @@ def save_git_status(path):
     os.system("git log --pretty=format:'%%H' -n 1 > %s" % os.path.join(path, 'hash'))
     os.system("git status --untracked-files=all --ignored | grep -v pyc > %s" % os.path.join(path, 'status'))
     os.system('mkdir -p /tmp/%s' % os.environ['USER'])
-    git_untracked_tmp_fn = '/tmp/%s/untracked.tgz' % os.environ['USER']
+    git_untracked_tmp_fn = tempfile.mktemp()
     git_untracked_file_list_cmd = "git status --porcelain | grep '^??' | sed 's/^?? //'"
     git_untracked_file_list = popen(git_untracked_file_list_cmd)
     git_untracked_file_list = ['"%s"' % x for x in git_untracked_file_list.split('\n') if x]
@@ -216,7 +216,7 @@ def save_git_status(path):
         elif os.stat(git_untracked_tmp_fn).st_size > 100*1024**2:
             print '\033[36;7m warning: \033[m git-untracked tarball is bigger than 100M, leaving in %s' % git_untracked_tmp_fn
         else:
-            os.system('mv %s %s' % (git_untracked_tmp_fn, path))
+            os.system('mv %s %s/untracked.tgz' % (git_untracked_tmp_fn, path))
     os.system('git diff > %s' % os.path.join(path, 'diff'))
 
 def reverse_readline(filename, buf_size=8192):
