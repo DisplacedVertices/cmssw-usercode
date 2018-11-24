@@ -22,7 +22,10 @@ for dir_of_wds in sys.argv[1:]:
         if x.startswith('ex_') and os.path.isdir(fx):
             exs.add(x)
     s_good_exs = set(good_exs.keys())
-    assert s_good_exs.issubset(exs)
+    if not s_good_exs.issubset(exs):
+        print 'good exs:', sorted(s_good_exs)
+        print '     exs:', sorted(exs)
+        raise ValueError('not a subset')
     if dry_run:
         for ex in sorted(exs):
             print ex
