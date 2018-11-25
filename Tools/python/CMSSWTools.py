@@ -107,27 +107,31 @@ def cmssw_base(extra=''):
     b = os.environ['CMSSW_BASE']
     return os.path.join(b, extra) if extra else b
 
-def input_files(process, fns):
-    if type(fns) == str:
-        if '*' in fns or '?' in fns:
-            fns = glob.glob(fns)
-        elif not fns.endswith('.root'):
-            files_from_file(process, fns)
-            return
-    if type(fns) == str:
-        fns = [fns]
-    files = []
-    for fn in fns:
-        if not fn.startswith('/store') and not fn.startswith('root://'):
-            fn = 'file:' + fn
-        files.append(fn)
-    process.source.fileNames = cms.untracked.vstring(*files)
+def input_files(process, fns, sec_fns=None):
+    def _norm_arg(x):
+        if type(x) == str:
+            if '*' in x or '?' in x:
+                x = glob.glob(x)
+            elif not x.endswith('.root'):
+                x = files_from_file(process, fns)
+        if type(x) == str:
+            x = [x]
+        fns = []
+        for y in x:
+            if y.startswith('itch:'):
+                y = y.replace('itch:', '/uscmst1b_scratch/lpc1/3DayLifetime/tucker/itch')
+            if not y.startswith('/store') and not y.startswith('root://'):
+                y = 'file:' + y
+            fns.append(y)
+        return fns
+    process.source.fileNames = cms.untracked.vstring(*_norm_arg(fns))
+    if sec_fns:
+        process.source.secondaryFileNames = cms.untracked.vstring(*_norm_arg(sec_fns))
 
 def files_from_file(process, fn, n=-1):
     fns = [line.strip() for line in open(fn).read().split('\n') if line.strip().endswith('.root')]
     if n > 0:
         fns = fns[:n]
-    process.source.fileNames = cms.untracked.vstring(*fns)
     return fns
 
 def file_event_from_argv(process, warn=True):

@@ -7,8 +7,7 @@ tfileservice(process, 'packedcands.root')
 geometry_etc(process)
 report_every(process, 1 if prints else 1000000)
 
-input_files(process, 'root://cmsxrootd-site.fnal.gov//store/mc/RunIIFall17MiniAOD/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/50000/7EF2B30C-37EA-E711-B605-0026B92785F6.root')
-process.source.secondaryFileNames = cms.untracked.vstring('/store/mc/RunIIFall17DRPremix/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/AODSIM/94X_mc2017_realistic_v10-v1/50000/10757D90-12E9-E711-A588-1CB72C1B6C32.root','/store/mc/RunIIFall17DRPremix/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/AODSIM/94X_mc2017_realistic_v10-v1/50000/B43D6EA3-F2E8-E711-8D8C-1CB72C1B649A.root')
+input_files(process, 'itch:/store/mc/RunIIFall17MiniAOD/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/50000/7EF2B30C-37EA-E711-B605-0026B92785F6.root', ['itch:/store/mc/RunIIFall17DRPremix/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/AODSIM/94X_mc2017_realistic_v10-v1/50000/10757D90-12E9-E711-A588-1CB72C1B6C32.root', 'itch:/store/mc/RunIIFall17DRPremix/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/AODSIM/94X_mc2017_realistic_v10-v1/50000/B43D6EA3-F2E8-E711-8D8C-1CB72C1B649A.root'])
 
 process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
 process.goodOfflinePrimaryVertices.src = 'offlineSlimmedPrimaryVertices'
@@ -21,6 +20,8 @@ process.mfvPackedCands = cms.EDAnalyzer('MFVPackedCandidates',
                                         )
 
 process.load('JMTucker.MFVNeutralino.UnpackedCandidateTracks_cfi')
+if prints:
+    process.mfvUnpackedCandidateTracks.debug = True
 #process.mfvPackedCands.tracks_src = 'mfvUnpackedCandidateTracks'
 process.p = cms.Path(process.goodOfflinePrimaryVertices * process.mfvUnpackedCandidateTracks * process.mfvPackedCands)
 
