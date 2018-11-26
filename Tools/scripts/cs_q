@@ -2,7 +2,7 @@
 
 if [ $# -ne 1 ]; then
     crab_dirs_root=$(grep crab_dirs_root ~/.jmtct | cut -d ' ' -f 3)
-    for x in $(condor_q $USER | grep $USER | cut -d '.'  -f 1 | sort -n | uniq); do
+    for x in $(condor_q -submitter $USER | awk '{ if ($2 == "'${USER}'") print }' | cut -d '.'  -f 1 | sort -n | uniq); do
         echo $x $(readlink $crab_dirs_root/cs_links/$x)
     done
 else
