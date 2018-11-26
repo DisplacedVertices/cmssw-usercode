@@ -81,7 +81,7 @@ void MFVUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetu
 
   for (size_t i = 0, ie = lost_candidates->size(); i < ie; ++i) {
     const pat::PackedCandidate& cand = (*lost_candidates)[i];
-    if (debug) debug_cand(cand, "", i);
+    if (debug) debug_cand(cand, "lost", i);
     if (pass_cand(cand)) {
       const reco::Track& tk = cand.pseudoTrack();
       if (debug) {
