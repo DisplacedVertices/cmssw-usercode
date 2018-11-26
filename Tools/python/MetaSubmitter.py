@@ -49,6 +49,27 @@ half_mc_by_lumi(process, %r)
         else:
             return [], []
 
+class npu_filter_modifier:
+    def __init__(self, is_miniaod=False, samples={'qcdht0700_2017': 131, 'dyjetstollM10_2017': 126, 'dyjetstollM50_2017': 131, 'dyjetstollM50ext_2017': 129}, paths_to_skip=['pmcStat']):
+        self.is_miniaod = is_miniaod
+        self.samples = samples
+        self.paths_to_skip = paths_to_skip
+    def __call__(self, sample):
+        if sample.name in self.samples:
+            which = 'MiniAOD' if self.is_miniaod else ''
+            max_npu = self.samples[sample.name]
+            paths_to_skip = self.paths_to_skip
+            x = '''
+process.load('JMTucker.Tools.NpuFilter_cfi')
+process.jmtNpuFilter%(which)s.max_npu = %(max_npu)i
+for n,p in process.paths.iteritems():
+    if n not in %(paths_to_skip)r:
+        p.insert(0, process.jmtNpuFilter%(which)s)
+''' % locals()
+            return [x], []
+        else:
+            return [], []
+
 class per_sample_pileup_weights_modifier:
     def __init__(self, module_names=['jmtWeight', 'jmtWeightMiniAOD', 'mfvWeight'], cross=None):
         if type(module_names) == str:
@@ -280,6 +301,7 @@ __all__ = [
     'zerobias_modifier',
     'repro_modifier',
     'half_mc_modifier',
+    'npu_filter_modifier',
     'per_sample_pileup_weights_modifier',
     'event_veto_modifier',
     'chain_modifiers',
