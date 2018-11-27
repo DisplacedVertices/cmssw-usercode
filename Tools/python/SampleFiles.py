@@ -380,6 +380,10 @@ _add_ds("ntuplev21m_ntkseeds", {
 'qcdht1500_2017': _fromnum0("/store/user/tucker/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/NtupleV21m_NTkSeeds_2017/181101_153818", 63, fnbase="ntkseeds"),
 'qcdht2000_2017': _fromnum0("/store/user/tucker/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/NtupleV21m_NTkSeeds_2017/181101_153819", 30, fnbase="ntkseeds"),
 'ttbar_2017': _fromnum0("/store/user/tucker/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleV21m_NTkSeeds_2017/181101_153817", 51, fnbase="ntkseeds"),
+'ttbarht0600_2017': _join((217, ['/store/user/tucker/TTJets_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV21m_NTkSeeds_2017/181113_165019/0000/ntkseeds_%i.root' % i for i in chain(xrange(1,17), xrange(18,24), xrange(25,37), xrange(38,40), xrange(41,51), xrange(52,56), xrange(57,59), xrange(61,66), xrange(67,69), xrange(72,76), xrange(78,80), xrange(81,84), xrange(85,92), xrange(93,95), xrange(96,166), xrange(167,188), xrange(189,200), xrange(203,206), xrange(210,214), xrange(217,224), xrange(225,246), [70, 207, 215])]), (55, ['/store/user/tucker/TTJets_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV21m_NTkSeeds_recover_2017/181123_180324/0000/ntkseeds_%i.root' % i for i in chain(xrange(1,27), xrange(28,57))])),
+'ttbarht0800_2017': _join((179, ['/store/user/tucker/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV21m_NTkSeeds_2017/181113_165041/0000/ntkseeds_%i.root' % i for i in chain(xrange(1,12), xrange(13,16), xrange(20,28), xrange(29,49), xrange(50,59), xrange(60,74), xrange(76,78), xrange(82,110), xrange(111,115), xrange(116,122), xrange(125,128), xrange(131,135), xrange(137,144), xrange(145,148), xrange(150,158), xrange(163,176), xrange(177,189), xrange(190,198), xrange(199,210), [17, 80, 129, 159, 161])]),(59, ['/store/user/tucker/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV21m_NTkSeeds_recover_2017/181123_180351/0000/ntkseeds_%i.root' % i for i in chain(xrange(1,4), xrange(5,61))])),
+'ttbarht1200_2017': _join((96, ['/store/user/tucker/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV21m_NTkSeeds_2017/181113_165100/0000/ntkseeds_%i.root' % i for i in chain(xrange(1,7), xrange(9,22), xrange(23,66), xrange(67,91), xrange(92,96), xrange(98,104))]),_fromnum1("/store/user/tucker/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV21m_NTkSeeds_recover_2017/181123_180413", 14, fnbase="ntkseeds")),
+'ttbarht2500_2017': _join((56, ['/store/user/tucker/TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV21m_NTkSeeds_2017/181113_165127/0000/ntkseeds_%i.root' % i for i in chain(xrange(1,6), xrange(11,62))]),(8, ['/store/user/tucker/TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV21m_NTkSeeds_recover_2017/181123_180430/0000/ntkseeds_%i.root' % i for i in chain(xrange(1,8), [9])])),
 'JetHT2017B': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2017/181101_203624", 25, fnbase="ntkseeds"),
 'JetHT2017C': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2017/181101_203710", 38, fnbase="ntkseeds"),
 'JetHT2017D': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2017/181101_203730", 18, fnbase="ntkseeds"),
@@ -394,6 +398,8 @@ _add_ds("ntuplev21m_ntkseeds", {
 'JetHT2018C2': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2018/181101_204325", 18, fnbase="ntkseeds"),
 'JetHT2018C3': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2018/181101_204342", 19, fnbase="ntkseeds"),
 'JetHT2018D2': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2018/181101_204401", 207, fnbase="ntkseeds"),
+'ReRecoJetHT2018A': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_ReReco_2018/181110_155029", 122, fnbase="ntkseeds"),
+'ReRecoJetHT2018B': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_ReReco_2018/181110_155044", 66, fnbase="ntkseeds"),
 })
 
 

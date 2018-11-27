@@ -368,9 +368,8 @@ for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + mfv_signal_
          data_samples_2018 + auxiliary_data_samples_2018[-2:]:
     x.add_dataset("ntuplev21m")
     if not x.is_signal:
-        x.add_dataset("v0ntuplev21mv1")
-    if not x.is_signal and not x in ttbar_samples_2017[1:] and not x in auxiliary_data_samples_2018[-2:]:
         x.add_dataset("ntuplev21m_ntkseeds")
+        x.add_dataset("v0ntuplev21mv1")
 
 ########
 # automatic condor declarations for ntuples
