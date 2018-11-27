@@ -391,7 +391,7 @@ for s in registry.all():
 condorable = {
     "T3_US_FNALLPC": {
         "main": [],
-        "miniaod": [],
+        "miniaod": ttbar_samples_2017,
         },
     "T1_US_FNAL_Disk": {
         "miniaod": [qcdht1500_2017, qcdht2000_2017, ttbar_2017, dyjetstollM10_2017, qcdmupt15_2017],
