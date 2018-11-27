@@ -189,7 +189,7 @@ def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=2
             sample.split_by = 'files'
             sample.files_per = d.get(sample.name, 10000)
 
-    elif jobtype == 'ntuple':
+    elif jobtype == 'ntuple' or jobtype == 'trackmover':
         # Shed/presel_splitting.py
         d = {'miniaod': {
                 'signal':           ( 1,     200),
@@ -219,6 +219,11 @@ def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=2
                 sample.split_by = 'events'
 
             sample.files_per, sample.events_per = d[dataset].get(name, (50, 100000))
+
+            if jobtype == 'trackmover':
+                if name != 'signal':
+                    sample.files_per = int(round(samples.files_per / 3.))
+                    sample.events_per /= 3
 
     elif jobtype == 'default':
         for sample in samples:
