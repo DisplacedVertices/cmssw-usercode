@@ -77,7 +77,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
     if year == 2017:
-        samples = Samples.auxiliary_data_samples_2017 + Samples.leptonic_samples_2017 + Samples.ttbar_samples_2017
+        samples = Samples.auxiliary_data_samples_2017 + Samples.leptonic_samples_2017
         masses = (400, 800, 1200, 1600)
         samples += [getattr(Samples, 'mfv_neu_tau001000um_M%04i_2017' % m) for m in masses] + [Samples.mfv_neu_tau010000um_M0800_2017]
     elif year == 2018:
