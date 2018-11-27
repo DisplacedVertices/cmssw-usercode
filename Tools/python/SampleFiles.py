@@ -64,6 +64,10 @@ def _frommerge(path, n):
     assert path.endswith('/merge') and path.count('/merge') == 1
     return (n, [path.replace('/merge', '/merge%s_0.root') % s for s in [''] + ['%03i' % x for x in xrange(1,n)]])
 
+def _join(*l):
+    ns, ls = zip(*l)
+    return (sum(ns), sum(ls, []))
+
 def keys():
     return _d.keys()
 
