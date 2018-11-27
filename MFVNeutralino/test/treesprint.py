@@ -9,6 +9,12 @@ from JMTucker.Tools import Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
 nosig = bool_from_argv('nosig')
+nodata = bool_from_argv('nodata')
+nobkg = bool_from_argv('nobkg')
+onlysig = bool_from_argv('onlysig')
+onlydata = bool_from_argv('onlydata')
+onlybkg = bool_from_argv('onlybkg')
+
 which = typed_from_argv(int, -1)
 ntks = ('mfvMiniTreeNtk3', 'mfvMiniTreeNtk4', 'mfvMiniTree')
 if which != -1:
@@ -78,10 +84,17 @@ for ntk in ntks:
         is_sig = sname.startswith('mfv_')
         is_data = sname.startswith('ReRecoJetHT') or sname.startswith('JetHT') or sname.startswith('SingleMuon') or sname.startswith('SingleElectron')
         is_bkg = sname in ['qcdht0700_2017', 'qcdht1000_2017', 'qcdht1500_2017', 'qcdht2000_2017', 'ttbarht0600_2017', 'ttbarht0800_2017', 'ttbarht1200_2017', 'ttbarht2500_2017']
+        is_other = not any((is_sig, is_data, is_bkg))
         include_in_sum = is_bkg
 
-        if is_sig and nosig:
+        if any((onlysig  and (is_other or is_data or is_bkg),
+                onlydata and (is_other or is_sig or is_bkg),
+                onlybkg  and (is_other or is_sig or is_data),
+                is_sig and nosig,
+                is_data and nodata,
+                is_bkg and nobkg)):
             continue
+
         if is_bkg and not seen_bkg:
             seen_bkg = True
             print
