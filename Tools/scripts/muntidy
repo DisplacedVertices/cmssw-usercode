@@ -1,0 +1,36 @@
+#!/usr/bin/env python
+
+import os, sys
+from JMTucker.Tools.CondorTools import cs_dirs_from_argv
+from JMTucker.Tools.CRAB3ToolsBase import crab_dirs_from_argv
+from JMTucker.Tools import colors
+
+cr_dirs = crab_dirs_from_argv()
+wds = cr_dirs + cs_dirs_from_argv()
+
+if not wds:
+    sys.exit('usage: muntidy wd [wd2 ...]')
+
+cr_cmds = ['gunzip crab.log.gz mmon_last.gz', 'tar -xf inputs.tgz']
+cs_cmds = ['tar -xf mtidied.tgz']
+
+prevd = os.getcwd()
+    
+for wd in wds:
+    is_cr = wd in cr_dirs
+
+    print colors.bold(wd)
+    if not os.path.isfile(os.path.join(wd, 'mtidied')):
+        print 'not mtidied, skipping'
+        continue
+    elif not os.path.isfile(os.path.join(wd, 'mtidied_finished')):
+        print colors.red('mtidied but no _finished?')
+        continue
+    
+    os.chdir(wd)
+    for cmd in (cr_cmds if is_cr else cs_cmds):
+        #print cmd
+        if os.system(cmd) != 0:
+            raise IOError('problem')
+    os.system('rm inputs.tgz mtidied mtidied_started mtidied_finished')
+    os.chdir(prevd)
