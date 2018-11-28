@@ -13,7 +13,7 @@ process.load('JMTucker.MFVNeutralino.ByX_cfi')
 process.mfvAnalysisCuts.min_nvertex = 1
 process.mfvAnalysisCuts.max_nvertex = 1 # nsv >= 2 blinded in ByX but set this anyway
 
-for ntk in 3,4,5:
+for ntk in 3,4: #,5:
     vtx_name = 'mfvSelectedVerticesTightNtk%i' % ntk
     vtx = getattr(process, vtx_name)
     ana = process.mfvAnalysisCuts.clone(vertex_src = vtx_name)
@@ -34,7 +34,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = Samples.data_samples_2018 + [s for s in Samples.auxiliary_data_samples_2018 if s.name.startswith('ReRecoJetHT')]
 
     #samples = [s for s in samples if s.has_dataset(dataset)]
-    set_splitting(samples, dataset, 'minitree', data_json=json_path('ana_2017p8_1pc.json'))
+    set_splitting(samples, dataset, 'minitree', data_json=json_path('ana_2017p8.json'))
 
     cs = CondorSubmitter('ByRunPerVertex' + version.capitalize(),
                          ex = year,
