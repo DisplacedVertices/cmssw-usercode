@@ -230,31 +230,19 @@ auxiliary_data_samples_2017 = [
     ]
 
 data_samples_2018 = [
-    DataSample('JetHT2018A1', '/JetHT/Run2018A-PromptReco-v1/AOD'),  # 315252 316238   8.080
-    DataSample('JetHT2018A2', '/JetHT/Run2018A-PromptReco-v2/AOD'),  # 316239 316944   4.980 NB overlap with v3, while there is no nice exclusive other dataset as in SingleMuon--supposedly the files lost are invalidated and v3 just picks it up?
-    DataSample('JetHT2018A3', '/JetHT/Run2018A-PromptReco-v3/AOD'),  # 316569 316995   3.596
-    DataSample('JetHT2018B1', '/JetHT/Run2018B-PromptReco-v1/AOD'),  # 317080 317949   6.378
-    DataSample('JetHT2018B2', '/JetHT/Run2018B-PromptReco-v2/AOD'),  # 318432 319310   0.407
-    DataSample('JetHT2018C1', '/JetHT/Run2018C-PromptReco-v1/AOD'),  # 319337 319349   0.473
-    DataSample('JetHT2018C2', '/JetHT/Run2018C-PromptReco-v2/AOD'),  # 319447 319811   3.297
-    DataSample('JetHT2018C3', '/JetHT/Run2018C-PromptReco-v3/AOD'),  # 319833 320393   2.839
+    DataSample('JetHT2018A', '/JetHT/Run2018A-17Sep2018-v1/AOD'),
+    DataSample('JetHT2018B', '/JetHT/Run2018B-17Sep2018-v1/AOD'),
+    DataSample('JetHT2018C', '/JetHT/Run2018C-17Sep2018-v1/AOD'),
+
     DataSample('JetHT2018D2', '/JetHT/Run2018D-PromptReco-v2/AOD'),  # 320497 324841  24.103
     ]
 
 auxiliary_data_samples_2018 = [
-    # 06Jun2018 is the recovery of deletions in A v1 and v2, not relevant for JetHT datasets--see slide 7 https://indico.cern.ch/event/735909/contributions/3035377/attachments/1668108/2674949/18-06-14_News_PPD.pdf
-    # "A0" name avoids comparison with A1,2 in JetHT
-    DataSample('SingleMuon2018A0', '/SingleMuon/Run2018A-06Jun2018-v1/AOD'),   # 315257 316505   9.886
-    DataSample('SingleMuon2018A3', '/SingleMuon/Run2018A-PromptReco-v3/AOD'),  # 316569 316995   3.596
-    DataSample('SingleMuon2018B1', '/SingleMuon/Run2018B-PromptReco-v1/AOD'),  # 317080 317696   6.378
-    DataSample('SingleMuon2018B2', '/SingleMuon/Run2018B-PromptReco-v2/AOD'),  # 318070 319310   0.407
-    DataSample('SingleMuon2018C1', '/SingleMuon/Run2018C-PromptReco-v1/AOD'),  # 319337 319349   0.473
-    DataSample('SingleMuon2018C2', '/SingleMuon/Run2018C-PromptReco-v2/AOD'),  # 319449 319756   3.297
-    DataSample('SingleMuon2018C3', '/SingleMuon/Run2018C-PromptReco-v3/AOD'),  # 319833 320191   2.839
-    DataSample('SingleMuon2018D2', '/SingleMuon/Run2018D-PromptReco-v2/AOD'),  # 320500 324878  24.103
+    DataSample('SingleMuon2018A', '/SingleMuon/Run2018A-17Sep2018-v2/AOD'),
+    DataSample('SingleMuon2018B', '/SingleMuon/Run2018B-17Sep2018-v1/AOD'),
+    DataSample('SingleMuon2018C', '/SingleMuon/Run2018C-17Sep2018-v1/AOD'),
 
-    DataSample('ReRecoJetHT2018A', '/JetHT/Run2018A-17Sep2018-v1/AOD'),
-    DataSample('ReRecoJetHT2018B', '/JetHT/Run2018B-17Sep2018-v1/AOD'),
+    DataSample('SingleMuon2018D2', '/SingleMuon/Run2018D-PromptReco-v2/AOD'),  # 320500 324878  24.103
     ]
 
 from JMTucker.Tools.CMSSWTools import json_path

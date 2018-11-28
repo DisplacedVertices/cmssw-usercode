@@ -362,17 +362,10 @@ _add_ds("ntuplev21m", {
 'JetHT2017D': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_2017/181031_190658", 18),
 'JetHT2017E': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_2017/181031_190719", 42),
 'JetHT2017F': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_2017/181031_190738", 51),
-'JetHT2018A1': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_2018/181031_192223", 58),
-'JetHT2018A2': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_2018/181031_192237", 12),
-'JetHT2018A3': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_2018/181031_192255", 25),
-'JetHT2018B1': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_2018/181031_192315", 43),
-'JetHT2018B2': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_2018/181031_192336", 4),
-'JetHT2018C1': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_2018/181031_192350", 3),
-'JetHT2018C2': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_2018/181031_192406", 18),
-'JetHT2018C3': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_2018/181031_192422", 19),
+'JetHT2018A': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_ReReco_2018/181110_151715", 122),
+'JetHT2018B': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_ReReco_2018/181110_151729", 66),
+
 'JetHT2018D2': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_2018/181031_192438", 206),
-'ReRecoJetHT2018A': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_ReReco_2018/181110_151715", 122),
-'ReRecoJetHT2018B': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_ReReco_2018/181110_151729", 66),
 })
 
 
@@ -391,17 +384,10 @@ _add_ds("ntuplev21m_ntkseeds", {
 'JetHT2017D': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2017/181101_203730", 18, fnbase="ntkseeds"),
 'JetHT2017E': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2017/181101_203749", 42, fnbase="ntkseeds"),
 'JetHT2017F': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2017/181101_203815", 51, fnbase="ntkseeds"),
-'JetHT2018A1': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2018/181101_204136", 58, fnbase="ntkseeds"),
-'JetHT2018A2': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2018/181101_204154", 12, fnbase="ntkseeds"),
-'JetHT2018A3': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2018/181101_204211", 25, fnbase="ntkseeds"),
-'JetHT2018B1': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2018/181101_204229", 43, fnbase="ntkseeds"),
-'JetHT2018B2': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2018/181101_204244", 4, fnbase="ntkseeds"),
-'JetHT2018C1': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2018/181101_204311", 3, fnbase="ntkseeds"),
-'JetHT2018C2': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2018/181101_204325", 18, fnbase="ntkseeds"),
-'JetHT2018C3': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2018/181101_204342", 19, fnbase="ntkseeds"),
+'JetHT2018A': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_ReReco_2018/181110_155029", 122, fnbase="ntkseeds"),
+'JetHT2018B': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_ReReco_2018/181110_155044", 66, fnbase="ntkseeds"),
+
 'JetHT2018D2': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_2018/181101_204401", 207, fnbase="ntkseeds"),
-'ReRecoJetHT2018A': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_ReReco_2018/181110_155029", 122, fnbase="ntkseeds"),
-'ReRecoJetHT2018B': _fromnum1("/store/user/tucker/JetHT/NtupleV21m_NTkSeeds_ReReco_2018/181110_155044", 66, fnbase="ntkseeds"),
 })
 
 
