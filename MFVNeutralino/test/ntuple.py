@@ -33,7 +33,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     elif year == 2018:
         samples = Samples.data_samples_2018
 
-    samples = [Samples.JetHT2018C]
     #samples = [s for s in samples if s.has_dataset(dataset)]
     set_splitting(samples, dataset, 'ntuple')
 
