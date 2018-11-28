@@ -27,14 +27,10 @@ if for_2018:
     common += """
         pythia8PSweightsSettingsBlock,"""
 common += """
-        pdfSettings = cms.vstring(
-            'PDF:pSet = LHAPDF6:NNPDF31_lo_as_0130',
-            ),
         processParameters = cms.vstring(PROCESS_PARAMETERS),
         parameterSets = cms.vstring(
             'pythia8CommonSettings',
-            'pythia8CP2Settings',
-            'pdfSettings',"""
+            'pythia8CP2Settings',"""
 if for_2018:
     common += """
             'pythia8PSweightsSettings',"""
