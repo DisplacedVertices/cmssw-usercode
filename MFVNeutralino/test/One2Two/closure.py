@@ -9,11 +9,22 @@ year = '2017'
 set_style()
 ps = plot_saver(plot_dir('closure%s%s_%s' % ('' if is_mc else '_data', '_10pc' if only_10pc else '', year)), size=(700,700), root=False, log=False)
 
-fns = ['2v_from_jets%s_%s_3track_default_v20mp2.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_7track_default_v20mp2.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_4track_default_v20mp2.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_5track_default_v20mp2.root' % ('' if is_mc else '_data', year)]
+fns = ['2v_from_jets%s_%s_3track_default_v21m.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_7track_default_v21m.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_4track_default_v21m.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_5track_default_v21m.root' % ('' if is_mc else '_data', year)]
 ntk = ['3-track', '4-track-3-track', '4-track', '5-track']
 names = ['3-track x 3-track', '4-track x 3-track', '4-track x 4-track', '#geq 5-track x #geq 5-track']
 
-n2v = [773., 9., 5., 1.] if year == '2017' else [991., 213., 8., 1.]
+n2v = [641., 137., 2.21, 1.] if year == '2017' else [991., 213., 8., 1.]
+n2verr = [52., 30., 1.13, 0.6]
+
+def errprop(val0, err0, val1, err1):
+    if val0 == 0 and val1 == 0:
+        return 0
+    elif val1 == 0:
+        return err0 / val0
+    elif val0 == 0:
+        return err1 / val1
+    else:
+        return ((err0 / val0)**2 + (err1 / val1)**2)**0.5
 
 def write(font, size, x, y, text):
     w = ROOT.TLatex()
@@ -67,17 +78,33 @@ for i,ntracks in enumerate([3,7,4,5]):
     h.SetLineColor(ROOT.kRed)
     h.SetLineWidth(2)
     if is_mc:
-        h.Scale(n2v[i]/h.Integral())
+        eintegral = ROOT.Double(0)
+        integral = h.IntegralAndError(0, h.GetNbinsX(), eintegral)
+        ratio = n2v[i] / integral
+        eratio = ratio * errprop(n2v[i], n2verr[i], integral, eintegral)
+
+        newerrarray = []
+        for bin in range(h.GetNbinsX() + 1):
+            newerr = ratio * h.GetBinContent(bin) * errprop(ratio, eratio, h.GetBinContent(bin), h.GetBinError(bin))
+            newerrarray.append(newerr)
+
+        h.Scale(ratio)
+        for bin, err in enumerate(newerrarray):
+            h.SetBinError(bin, err)
     else:
         if hh.Integral() > 0:
             h.Scale(hh.Integral()/h.Integral())
         else:
             h.Scale(1./h.Integral())
-    h.Draw('hist e sames')
+    uncertband = h.Clone('uncertband')
+    uncertband.SetFillColor(ROOT.kRed - 3)
+    uncertband.SetFillStyle(3254)
+    uncertband.Draw('E2 sames')
+    h.Draw('hist sames')
 
     l1 = ROOT.TLegend(0.35, 0.75, 0.85, 0.85)
     l1.AddEntry(hh, 'Simulated events' if is_mc else 'Data')
-    l1.AddEntry(h, 'd_{VV}^{C}')
+    l1.AddEntry(h, 'Background template')
     l1.SetFillColor(0)
     l1.Draw()
     ps.save(ntk[i])
