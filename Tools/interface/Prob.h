@@ -1,5 +1,5 @@
-#ifndef JMTucker_MFVNeutralino_One2Two_Prob_h
-#define JMTucker_MFVNeutralino_One2Two_Prob_h
+#ifndef JMTucker_Tools_Prob_h
+#define JMTucker_Tools_Prob_h
 
 class TRandom;
 

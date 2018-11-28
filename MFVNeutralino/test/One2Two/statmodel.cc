@@ -64,10 +64,10 @@ template <typename T> using uptr = std::unique_ptr<T>;
 #include "TRatioPlot.h"
 #include "TStyle.h"
 #include "TVector2.h"
-#include "ConfigFromEnv.h"
-#include "Prob.h"
-#include "ROOTTools.h"
-#include "Utility.h"
+#include "JMTucker/Tools/interface/ConfigFromEnv.h"
+#include "JMTucker/Tools/interface/Prob.h"
+#include "JMTucker/Tools/interface/ROOTTools.h"
+#include "JMTucker/Tools/interface/Utility.h"
 
 // Helper classes for vertices and pairs of vertices (simplified version of those used in the fitter)
 

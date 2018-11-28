@@ -1,4 +1,4 @@
-#include "ROOTTools.h"
+#include "JMTucker/Tools/interface/ROOTTools.h"
 #include <cassert>
 #include <cmath>
 #include "TColor.h"
@@ -8,7 +8,7 @@
 #include "TPaveStats.h"
 #include "TROOT.h"
 #include "TStyle.h"
-#include "Prob.h"
+#include "JMTucker/Tools/interface/Prob.h"
 
 namespace jmt {
   void cumulate(TH1D* h, const bool do_overflow) {

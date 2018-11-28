@@ -1,5 +1,5 @@
-#ifndef JMTucker_MFVNeutralino_One2Two_Utility_h
-#define JMTucker_MFVNeutralino_One2Two_Utility_h
+#ifndef JMTucker_Tools_Utility_h
+#define JMTucker_Tools_Utility_h
 
 #include <string>
 

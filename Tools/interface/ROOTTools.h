@@ -1,5 +1,5 @@
-#ifndef JMTucker_MFVNeutralino_One2Two_ROOTTools_h
-#define JMTucker_MFVNeutralino_One2Two_ROOTTools_h
+#ifndef JMTucker_Tools_ROOTTools_h
+#define JMTucker_Tools_ROOTTools_h
 
 class TGraphAsymmErrors;
 class TH1;

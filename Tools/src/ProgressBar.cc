@@ -1,4 +1,4 @@
-#include "ProgressBar.h"
+#include "JMTucker/Tools/interface/ProgressBar.h"
 #include <cassert>
 #include <cstdio>
 
@@ -8,7 +8,7 @@ namespace jmt {
       n_per_dot(n_complete / n_dots > 0 ? n_complete / n_dots : 1),
       flush(flush_),
       chars(chars_),
-      enabled(getenv("mfvo2t_no_progressbar") == 0),
+      enabled(getenv("jmt_no_progressbar") == 0),
       i(0),
       idot(0)
   {
