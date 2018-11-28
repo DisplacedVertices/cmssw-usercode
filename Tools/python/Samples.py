@@ -341,7 +341,7 @@ for sample in mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017:
 
 for ds in 'main', 'miniaod':
     # these in status=PRODUCTION
-    for s in ttbarht0600_2017, ttbarht0800_2017, ttbarht1200_2017, ReRecoJetHT2018A, ReRecoJetHT2018B: #dyjetstollM10ext_2017,:
+    for s in ttbarht0600_2017, ttbarht0800_2017, ttbarht1200_2017, JetHT2018C: #dyjetstollM10ext_2017,:
         s.datasets[ds].ignore_invalid = True
 
     # 'PU2017' in dataset can be a lie https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/3128.html
