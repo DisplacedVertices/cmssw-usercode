@@ -415,22 +415,6 @@ _add_ds("v0ntuplev21mv1", {
 'ttbarht0800_2017': _fromnum0("/store/user/tucker/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/HTFilteredV0NtupleV21mV1_2017/181123_220140", 65),
 'ttbarht1200_2017': _fromnum0("/store/user/tucker/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/HTFilteredV0NtupleV21mV1_2017/181123_220141", 31),
 'ttbarht2500_2017': _fromnum0("/store/user/tucker/TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8/HTFilteredV0NtupleV21mV1_2017/181123_220142", 16),
-'JetHT2017B': _fromnum0("/store/user/tucker/JetHT/HTFilteredV0NtupleV21mV1_2017/181123_220133", 3),
-'JetHT2017C': _fromnum0("/store/user/tucker/JetHT/HTFilteredV0NtupleV21mV1_2017/181123_220134", 6),
-'JetHT2017D': _fromnum0("/store/user/tucker/JetHT/HTFilteredV0NtupleV21mV1_2017/181123_220135", 3),
-'JetHT2017E': _fromnum0("/store/user/tucker/JetHT/HTFilteredV0NtupleV21mV1_2017/181123_220136", 5),
-'JetHT2017F': _fromnum0("/store/user/tucker/JetHT/HTFilteredV0NtupleV21mV1_2017/181123_220137", 7),
-'JetHT2018A1': _fromnum0("/store/user/tucker/JetHT/HTFilteredV0NtupleV21mV1_2018/181123_220653", 4),
-'JetHT2018A2': (1, ['/store/user/tucker/JetHT/HTFilteredV0NtupleV21mV1_2018/181123_220654/0000/ntuple_0.root']),
-'JetHT2018A3': _fromnum0("/store/user/tucker/JetHT/HTFilteredV0NtupleV21mV1_2018/181123_220655", 2),
-'JetHT2018B1': _fromnum0("/store/user/tucker/JetHT/HTFilteredV0NtupleV21mV1_2018/181123_220656", 3),
-'JetHT2018B2': (1, ['/store/user/tucker/JetHT/HTFilteredV0NtupleV21mV1_2018/181123_221235/0000/ntuple_0.root']),
-'JetHT2018C1': (1, ['/store/user/tucker/JetHT/HTFilteredV0NtupleV21mV1_2018/181123_221312/0000/ntuple_0.root']),
-'JetHT2018C2': _fromnum0("/store/user/tucker/JetHT/HTFilteredV0NtupleV21mV1_2018/181123_220659", 2),
-'JetHT2018C3': _fromnum0("/store/user/tucker/JetHT/HTFilteredV0NtupleV21mV1_2018/181123_220700", 2),
-'JetHT2018D2': _fromnum0("/store/user/tucker/JetHT/HTFilteredV0NtupleV21mV1_2018/181123_220701", 11),
-'ReRecoJetHT2018A': _fromnum0("/store/user/tucker/JetHT/HTFilteredV0NtupleV21mV1_2018/181123_220702", 10),
-'ReRecoJetHT2018B': _fromnum0("/store/user/tucker/JetHT/HTFilteredV0NtupleV21mV1_2018/181123_220703", 6),
 })
 
 
