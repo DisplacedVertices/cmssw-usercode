@@ -67,7 +67,7 @@ template <typename T> using uptr = std::unique_ptr<T>;
 #include "JMTucker/Tools/interface/ConfigFromEnv.h"
 #include "JMTucker/Tools/interface/Prob.h"
 #include "JMTucker/Tools/interface/ROOTTools.h"
-#include "JMTucker/Tools/interface/Utility.h"
+#include "JMTucker/Tools/interface/Utilities.h"
 
 // Helper classes for vertices and pairs of vertices (simplified version of those used in the fitter)
 
@@ -86,7 +86,7 @@ struct Vertex {
   double rho() const { return r; }
   double phi() const { return p; }
 
-  double rho(const Vertex& o) const { return jmt::mag(x - o.x, y - o.y);          }
+  double rho(const Vertex& o) const { return mag(x - o.x, y - o.y);          }
   double phi(const Vertex& o) const { return TVector2::Phi_mpi_pi(phi() - o.phi()); }
  };
 

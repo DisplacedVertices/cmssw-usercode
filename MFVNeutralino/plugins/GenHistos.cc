@@ -544,8 +544,8 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     h_lsp_dist2d->Fill(mci->dvv());
     h_lsp_dist3d->Fill(mci->d3d());
 
-    TVector3 lsp_mom_0 = make_tlv(mci->primaries()[0]).Vect();
-    TVector3 lsp_mom_1 = make_tlv(mci->primaries()[1]).Vect();
+    TVector3 lsp_mom_0 = make_tlv(*mci->primaries()[0]).Vect();
+    TVector3 lsp_mom_1 = make_tlv(*mci->primaries()[1]).Vect();
     h_lsp_angle3->Fill(lsp_mom_0.Dot(lsp_mom_1)/lsp_mom_0.Mag()/lsp_mom_1.Mag());
     lsp_mom_0.SetZ(0);
     lsp_mom_1.SetZ(0);

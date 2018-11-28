@@ -182,7 +182,7 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
     v[i][0] = x.x - x0;
     v[i][1] = x.y - y0;
     v[i][2] = x.z - z0;
-    lsp_p4s[i] = make_tlv(mci->primaries()[i]);
+    lsp_p4s[i] = make_tlv(*mci->primaries()[i]);
   }
 
   const double dbv[2] = { mag(v[0][0], v[0][1]), mag(v[1][0], v[1][1]) };

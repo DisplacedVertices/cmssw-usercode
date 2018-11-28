@@ -5,7 +5,6 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include "Utility.h"
 #include "VAException.h"
 
 namespace jmt {
@@ -181,6 +180,52 @@ namespace jmt {
 
     std::vector<double> get_vdouble(const char* name)                          const { return _get_v(name, parse_double);      }
     std::vector<double> get_vdouble(const char* name, std::vector<double> def) const { return _get_v(name, parse_double, def); }
+
+  private:
+    static bool parse_int(const char* s, int& v) {
+      return sscanf(s, "%i", &v) == 1;
+    }
+
+    static bool parse_long(const char* s, long& v) {
+      return sscanf(s, "%li", &v) == 1;
+    }
+
+    static bool parse_unsigned(const char* s, unsigned& v) {
+      return sscanf(s, "%u", &v) == 1;
+    }
+
+    static bool parse_bool(const char* s, bool& v) {
+      char buf[8];
+      strncpy(buf, s, 8);
+      char* p = buf;
+      while (*p)
+        tolower(*p++);
+      bool t = strcmp(buf, "true")  == 0;
+      bool f = strcmp(buf, "false") == 0;
+      bool o = strcmp(buf, "1")     == 0;
+      bool z = strcmp(buf, "0")     == 0;
+      v = (t || o);
+      return t+f+o+z == 1;
+    }
+
+    static bool parse_double(const char* s, double& v) {
+      return sscanf(s, "%lf", &v) == 1;
+    }
+
+    static bool parse_long_double(const char* s, long double& v) {
+      return sscanf(s, "%Lf", &v) == 1;
+    }
+
+    static bool parse_float(const char* s, float& v) {
+      return sscanf(s, "%f", &v) == 1;
+    }
+
+    static bool parse_string(const char* s, std::string& v) {
+      bool ok = s != 0;
+      if (ok)
+        v = s;
+      return ok;
+    }
   };
 }
 
