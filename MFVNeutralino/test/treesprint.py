@@ -82,7 +82,7 @@ for ntk in ntks:
 
         sname = os.path.basename(fn).replace('.root', '')
         is_sig = sname.startswith('mfv_')
-        is_data = sname.startswith('ReRecoJetHT') or sname.startswith('JetHT') or sname.startswith('SingleMuon') or sname.startswith('SingleElectron')
+        is_data = sname.startswith('JetHT') or sname.startswith('SingleMuon') or sname.startswith('SingleElectron')
         is_bkg = sname in ['qcdht0700_2017', 'qcdht1000_2017', 'qcdht1500_2017', 'qcdht2000_2017', 'ttbarht0600_2017', 'ttbarht0800_2017', 'ttbarht1200_2017', 'ttbarht2500_2017']
         is_other = not any((is_sig, is_data, is_bkg))
         include_in_sum = is_bkg
