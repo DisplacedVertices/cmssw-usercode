@@ -1,3 +1,5 @@
+// e.g. EVENTIDSREADER_PRINTS=1 EVENTIDSREADER_IS_MC=1 ./dups.exe EventIdRecorder/event_ids root://cmseos.fnal.gov//store/user/tucker/TTJets_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/EventIdsV21m_NTkSeeds2_2017/181127_180141/0000/evids_%i.root  root://cmseos.fnal.gov//store/user/tucker/TTJets_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/EventIdsV21m_NTkSeeds2_2017/181127_180141/0000/evids_{0..271}.root
+
 #include "EventIdsReader.h"
 
 int main(int argc, char** argv) {
