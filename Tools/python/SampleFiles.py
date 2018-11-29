@@ -401,6 +401,15 @@ _add_ds("v0ntuplev21mv1", {
 'ttbarht0800_2017': _fromnum0("/store/user/tucker/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/HTFilteredV0NtupleV21mV1_2017/181123_220140", 65),
 'ttbarht1200_2017': _fromnum0("/store/user/tucker/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/HTFilteredV0NtupleV21mV1_2017/181123_220141", 31),
 'ttbarht2500_2017': _fromnum0("/store/user/tucker/TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8/HTFilteredV0NtupleV21mV1_2017/181123_220142", 16),
+'JetHT2017B': _fromnum1("/store/user/tucker/JetHT/V0NtupleV21mV1_full_2017/181124_025655", 25),
+'JetHT2017C': _fromnum1("/store/user/tucker/JetHT/V0NtupleV21mV1_full_2017/181124_025711", 39),
+'JetHT2017D': _fromnum1("/store/user/tucker/JetHT/V0NtupleV21mV1_full_2017/181124_025726", 18),
+'JetHT2017E': _fromnum1("/store/user/tucker/JetHT/V0NtupleV21mV1_full_2017/181124_025741", 42),
+'JetHT2017F': _fromnum1("/store/user/tucker/JetHT/V0NtupleV21mV1_full_2017/181124_025759", 51),
+'JetHT2018A': _fromnum1("/store/user/tucker/JetHT/V0NtupleV21mV1_full_2018/181124_030337", 128),
+'JetHT2018B': _fromnum1("/store/user/tucker/JetHT/V0NtupleV21mV1_full_2018/181124_030350", 70),
+'JetHT2018C': (51, ['/store/user/tucker/JetHT/V0NtupleV21mV1_2018/181128_173812/0000/ntuple_%i.root' % i for i in chain(xrange(1,19), xrange(22,25), xrange(27,56), [20])]),
+'JetHT2018D2': _fromnum1("/store/user/tucker/JetHT/V0NtupleV21mV1_full_2018/181124_030326", 209),
 })
 
 
