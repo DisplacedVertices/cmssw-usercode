@@ -80,6 +80,6 @@ cd CMSSW_9_4_6_patch1/src
 eval $(scram ru -sh)
 cd ../..
 
-cmd="./hists.exe $path/$fn $outfn $treepath $tau"
+cmd="./hists.exe -i $path/$fn -o $outfn -t $treepath --tau $tau"
 echo $cmd
 eval $cmd 2>&1

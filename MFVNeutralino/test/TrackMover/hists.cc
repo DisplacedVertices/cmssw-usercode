@@ -1,50 +1,91 @@
 #include <cassert>
 #include <iostream>
+#include <boost/program_options.hpp>
 #include "TH1.h"
 #include "TH2.h"
 #include "TFile.h"
 #include "TTree.h"
 #include "TVector2.h"
 #include "TVector3.h"
+#include "JMTucker/Tools/interface/LumiList.h"
 #include "JMTucker/MFVNeutralino/interface/MovedTracksNtuple.h"
 #include "BTagSFHelper.h"
 #include "utils.h"
 
 int main(int argc, char** argv) {
-  if (argc < 5) {
-    fprintf(stderr, "usage: hists.exe in.root out.root tree_path tau[int:microns] [btagsf_weights]-\n");
-    return 1;
+  std::string in_fn;
+  std::string out_fn("hists.root");
+  std::string tree_path("mfvMovedTree20/t");
+  std::string json;
+  int itau = 10000;
+  bool apply_weights = true;
+  bool btagsf_weights = false;
+
+  {
+    namespace po = boost::program_options;
+    po::options_description desc("Allowed options");
+    desc.add_options()
+      ("help,h", "this help message")
+      ("input-file,i",  po::value<std::string>(&in_fn),                                             "the input file (required)")
+      ("output-file,o", po::value<std::string>(&out_fn)        ->default_value("hists.root"),       "the output file")
+      ("tree-path,t",   po::value<std::string>(&tree_path)     ->default_value("mfvMovedTree20/t"), "the tree path")
+      ("json,j",        po::value<std::string>(&json),                                              "lumi mask json file for data")
+      ("tau",           po::value<int>        (&itau)          ->default_value(10000),              "tau in microns, for reweighting")
+      ("weights",       po::value<bool>       (&apply_weights) ->default_value(true),               "whether to use any weights")
+      ("btagsf",        po::value<bool>       (&btagsf_weights)->default_value(false),              "whether to use b-tag SF weights")
+      ;
+
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+    po::notify(vm);
+
+    if (vm.count("help")) {
+      std::cout << desc << "\n";
+      return 1;
+    }
+
+    if (in_fn == "") {
+      std::cout << "value for --input-file is required\n" << desc << "\n";
+      return 1;
+    }
+
+    if (tree_path.find("/") == std::string::npos) {
+      tree_path += "/t";
+      std::cout << "tree_path changed to " << tree_path << "\n";
+    }
   }
 
-  const char* in_fn  = argv[1];
-  const char* out_fn = argv[2];
-  const char* tree_path = argv[3];
-  const int itau = atoi(argv[4]);
+  std::cout << argv[0] << " with options:"
+            << " in_fn: " << in_fn
+            << " out_fn: " << out_fn
+            << " tree_path: " << tree_path
+            << " json: " << (json != "" ? json : "none")
+            << " tau: " << itau
+            << " weights: " << apply_weights
+            << " btagsf: " << btagsf_weights << "\n";
+
+  ////
 
   const int itau_original = 10000; // JMTBAD if you change this in ntuple.py, change it here
   if (itau != itau_original)
-    printf("reweighting tau distribution from 10000 um to %i um\n", itau);
+    printf("reweighting tau distribution from %i um to %i um\n", itau_original, itau);
   const double o_tau_from = 10000./itau_original;
   const double o_tau_to = 10000./itau;
-
-  bool apply_weights = true;
-  bool btagsf_weights = false;
-  for (int argi = 5; argi < argc; ++argi) {
-    if      (strcmp(argv[argi], "btagsf_weights") == 0) { btagsf_weights = true; printf("btagsf_weights -> true\n"); }
-    else if (strcmp(argv[argi], "no_weights"    ) == 0) { apply_weights = false; printf("apply_weights -> false\n"); }
-  }
 
   std::unique_ptr<BTagSFHelper> btagsfhelper;
   if (btagsf_weights) btagsfhelper.reset(new BTagSFHelper);
 
   root_setup();
 
-  file_and_tree fat(in_fn, out_fn, tree_path);
+  file_and_tree fat(in_fn.c_str(), out_fn.c_str(), tree_path.c_str());
   TTree* t = fat.t;
   mfv::MovedTracksNtuple& nt = fat.nt;
   t->GetEntry(0);
 
   const bool is_mc = nt.run == 1;
+  std::unique_ptr<jmt::LumiList> good_ll;
+  if (!is_mc && json != "") good_ll.reset(new jmt::LumiList(json));
+
   TH1F* h_sums = is_mc ? ((TH1F*)fat.f->Get("mcStat/h_sums")) : 0;
 
   fat.f_out->mkdir("mfvWeight")->cd();
@@ -121,17 +162,22 @@ int main(int argc, char** argv) {
   const bool use_extra_weights = extra_weights != 0 && extra_weights->IsOpen();
   printf("using extra weights from reweight.root? %i\n", use_extra_weights);
 
-  int nden = 0, ndennegweight = 0, nnegweight = 0;
+  long notskipped = 0, nden = 0, ndennegweight = 0, nnegweight = 0;
   double sumnegweightden = 0;
 
-  for (int j = 0, je = t->GetEntries(); j < je; ++j) {
+  for (long j = 0, je = t->GetEntries(); j < je; ++j) {
     //if (j == 100000) break;
     if (t->LoadTree(j) < 0) break;
     if (t->GetEntry(j) <= 0) continue;
     if (j % 250000 == 0) {
-      printf("\r%i/%i", j, je);
-      fflush(stdout);
+      fprintf(stderr, "\r%li/%li", j, je);
+      fflush(stderr);
     }
+
+    if (!is_mc && good_ll.get() && !good_ll->contains(nt))
+      continue;
+
+    ++notskipped;
 
     double w = 1;
 
@@ -331,7 +377,7 @@ int main(int argc, char** argv) {
   }
 
   printf("\r                                \n");
-  printf("%i/%i (%i/%i den) events with negative weights\n", nnegweight, int(t->GetEntries()), ndennegweight, nden);
+  printf("%li/%li (%li/%li den) events with negative weights\n", nnegweight, notskipped, ndennegweight, nden);
   printf("%.1f events in denominator (including %.1f negative)\n", den, sumnegweightden);
   printf("%20s  %12s  %12s  %10s [%10s, %10s] +%10s -%10s\n", "name", "num", "den", "eff", "lo", "hi", "+", "-");
   for (const auto& p : nums) {
