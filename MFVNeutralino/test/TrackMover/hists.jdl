@@ -7,7 +7,7 @@ Log = hists.log.$(Process)
 stream_output = false
 stream_error  = false
 notification  = never
-transfer_input_files = hists.exe
+transfer_input_files = hists.exe,ana_2017p8.json
 should_transfer_files   = YES
 when_to_transfer_output = ON_EXIT
-Queue 300
+Queue 510

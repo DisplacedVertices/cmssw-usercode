@@ -1,6 +1,6 @@
 #!/bin/bash
 
-njobstot=300
+njobstot=510
 
 function mergemc {
     allthere=1

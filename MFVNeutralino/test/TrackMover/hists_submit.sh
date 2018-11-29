@@ -24,7 +24,7 @@ echo -n 'ok? '
 read ok
 
 mkdir -p $batchdir
-cp -p hists.sh hists.exe hists.jdl $batchdir
+cp -p hists.sh hists.exe hists.jdl $(python -c "from JMTucker.Tools.CMSSWTools import json_path; print json_path('ana_2017p8.json')") $batchdir
 cd $batchdir
 condor_submit hists.jdl
 cd - >/dev/null
