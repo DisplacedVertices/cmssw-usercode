@@ -3,7 +3,7 @@ from JMTucker.Tools.ROOTTools import *
 
 is_mc = True
 version = 'v21mp1'
-path = '/uscms_data/d2/tucker/crab_dirs/________________wo_neg_weights/VertexerPairEffs' + version.capitalize()
+path = '/uscms_data/d2/tucker/crab_dirs/VertexerPairEffs' + version.capitalize()
 year = '2017'
 
 set_style()
