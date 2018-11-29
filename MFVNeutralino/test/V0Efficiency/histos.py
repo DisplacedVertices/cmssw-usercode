@@ -118,7 +118,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = Samples.data_samples_2018
         #samples += [s for s in Samples.auxiliary_data_samples_2018 if s.name.startswith('ZeroBias')]
 
-    #samples = [s for s in samples if s.has_dataset(dataset)]
+    samples = [s for s in samples if s.has_dataset(dataset)]
     set_splitting(samples, dataset, 'default', json_path('ana_2017p8.json'), default_files_per=50)
 
     cs = CondorSubmitter('V0Efficiency%s' % dataset.replace('v0ntuple', '').capitalize(),
