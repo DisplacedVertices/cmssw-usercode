@@ -233,16 +233,14 @@ data_samples_2018 = [
     DataSample('JetHT2018A', '/JetHT/Run2018A-17Sep2018-v1/AOD'),
     DataSample('JetHT2018B', '/JetHT/Run2018B-17Sep2018-v1/AOD'),
     DataSample('JetHT2018C', '/JetHT/Run2018C-17Sep2018-v1/AOD'),
-
-    DataSample('JetHT2018D2', '/JetHT/Run2018D-PromptReco-v2/AOD'),  # 320497 324841  24.103
+    DataSample('JetHT2018D', '/JetHT/Run2018D-PromptReco-v2/AOD'),
     ]
 
 auxiliary_data_samples_2018 = [
     DataSample('SingleMuon2018A', '/SingleMuon/Run2018A-17Sep2018-v2/AOD'),
     DataSample('SingleMuon2018B', '/SingleMuon/Run2018B-17Sep2018-v1/AOD'),
     DataSample('SingleMuon2018C', '/SingleMuon/Run2018C-17Sep2018-v1/AOD'),
-
-    DataSample('SingleMuon2018D2', '/SingleMuon/Run2018D-PromptReco-v2/AOD'),  # 320500 324878  24.103
+    DataSample('SingleMuon2018D', '/SingleMuon/Run2018D-PromptReco-v2/AOD'),
     ]
 
 from JMTucker.Tools.CMSSWTools import json_path

@@ -22,7 +22,7 @@ JetHT2017F.root
 JetHT2018A.root
 JetHT2018B.root
 JetHT2018C.root
-JetHT2018D2.root
+JetHT2018D.root
 qcdht0700_2017.root
 qcdht1000_2017.root
 qcdht1500_2017.root

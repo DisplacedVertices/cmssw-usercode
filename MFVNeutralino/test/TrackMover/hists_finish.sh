@@ -18,7 +18,7 @@ function mergemc {
 
 function mergedata {
     allthere=1
-    for x in JetHT2017{B,C,D,E,F}.root JetHT2018{A,B,D2}.root ; do
+    for x in JetHT2017{B,C,D,E,F}.root JetHT2018{A,B,C,D}.root ; do
         if [[ ! -e $x ]]; then
             echo mergedata: $x does not exist
             allthere=0
@@ -28,7 +28,7 @@ function mergedata {
         fi
     done
     hadd.py JetHT2017.root JetHT2017{B,C,D,E,F}.root
-    hadd.py JetHT2018.root JetHT2018{A,B,D2}.root
+    hadd.py JetHT2018.root JetHT2018{A,B,C,D}.root
     hadd.py JetHT2017p8.root JetHT2017.root JetHT2018.root
 }
 
