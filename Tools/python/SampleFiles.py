@@ -408,7 +408,7 @@ _add_ds("v0ntuplev21mv1", {
 'JetHT2017F': _fromnum1("/store/user/tucker/JetHT/V0NtupleV21mV1_full_2017/181124_025759", 51),
 'JetHT2018A': _fromnum1("/store/user/tucker/JetHT/V0NtupleV21mV1_full_2018/181124_030337", 128),
 'JetHT2018B': _fromnum1("/store/user/tucker/JetHT/V0NtupleV21mV1_full_2018/181124_030350", 70),
-'JetHT2018C': (54, ['/store/user/tucker/JetHT/V0NtupleV21mV1_2018/181128_173812/0000/ntuple_%i.root' % i for i in chain(xrange(1,19), xrange(20,56))]),
+'JetHT2018C': _fromnum1("/store/user/tucker/JetHT/V0NtupleV21mV1_2018/181128_173812", 55),
 'JetHT2018D2': _fromnum1("/store/user/tucker/JetHT/V0NtupleV21mV1_full_2018/181124_030326", 209),
 })
 
