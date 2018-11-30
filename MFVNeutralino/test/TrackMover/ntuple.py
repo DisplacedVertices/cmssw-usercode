@@ -109,7 +109,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = Samples.data_samples_2018
 
     #samples = [s for s in samples if s.has_dataset(dataset)]
-    set_splitting(samples, dataset, 'ntuple')
+    set_splitting(samples, dataset, 'trackmover')
 
     ms = MetaSubmitter('TrackMover' + version, dataset=dataset)
     ms.common.pset_modifier = is_mc_modifier
