@@ -354,11 +354,10 @@ for ds in 'main', 'miniaod':
 
 for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + \
          data_samples_2018:
-    if x == JetHT2018C:
-        continue
     x.add_dataset("ntuplev21m")
     if not x.is_signal:
-        x.add_dataset("ntuplev21m_ntkseeds")
+        if x != JetHT2018C:
+            x.add_dataset("ntuplev21m_ntkseeds")
         x.add_dataset("v0ntuplev21mv1")
 
 ########
