@@ -4,7 +4,7 @@ njobstot=510
 
 function mergemc {
     allthere=1
-    for x in qcdht0700_2017.root qcdht1000_2017.root qcdht1500_2017.root qcdht2000_2017.root ttbar_2017.root ; do
+    for x in qcdht0700_2017.root qcdht1000_2017.root qcdht1500_2017.root qcdht2000_2017.root ttbarht0600_2017.root ttbarht0800_2017.root ; do
         if [[ ! -e $x ]]; then
             echo mergemc: $x does not exist
             allthere=0
@@ -13,12 +13,12 @@ function mergemc {
             return 1
         fi
     done
-    samples merge qcdht0700_2017.root qcdht1000_2017.root qcdht1500_2017.root qcdht2000_2017.root ttbar_2017.root -41530 background_2017.root
+    samples merge qcdht0700_2017.root qcdht1000_2017.root qcdht1500_2017.root qcdht2000_2017.root ttbarht0600_2017.root ttbarht0800_2017.root -41530 background_2017.root
 }
 
 function mergedata {
     allthere=1
-    for x in JetHT2017{B,C,D,E,F}.root ; do
+    for x in JetHT2017{B,C,D,E,F}.root JetHT2018{A,B,D2}.root ; do
         if [[ ! -e $x ]]; then
             echo mergedata: $x does not exist
             allthere=0
@@ -27,7 +27,9 @@ function mergedata {
             return 1
         fi
     done
-    hadd.py JetHT2017.root JetHT2017{B,C,D,E,F}.root # just need it all in one for now
+    hadd.py JetHT2017.root JetHT2017{B,C,D,E,F}.root
+    hadd.py JetHT2018.root JetHT2018{A,B,D2}.root
+    hadd.py JetHT2017p8.root JetHT2017.root JetHT2018.root
 }
 
 if [[ $1 == "check" ]]; then
