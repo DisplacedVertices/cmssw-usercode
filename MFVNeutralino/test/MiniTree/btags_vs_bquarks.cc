@@ -10,6 +10,8 @@
 TH1F* h_1v_bquark_flavor_code = 0;
 TH1F* h_1v_njets = 0;
 TH1F* h_1v_jet_bdisc = 0;
+TH1F* h_1v_jet_bdisc_bquarks = 0;
+TH1F* h_1v_jet_bdisc_nobquarks = 0;
 const char* b_discriminator_wps[3] = {"loose", "medium", "tight"};
 const double b_discriminator_mins[3] = {0.5803, 0.8838, 0.9693};
 TH1F* h_1v_nbtags[3] = {0,0,0};
@@ -39,6 +41,8 @@ void book_hists(int ntk) {
   h_1v_bquark_flavor_code = new TH1F("h_1v_bquark_flavor_code", TString::Format("%d-track one-vertex events;bquark_flavor_code;Events", ntk), 2, 0, 2);
   h_1v_njets = new TH1F("h_1v_njets", TString::Format("%d-track one-vertex events;number of jets;Events", ntk), 40, 0, 40);
   h_1v_jet_bdisc = new TH1F("h_1v_jet_bdisc", TString::Format("%d-track one-vertex events;jet bdisc;Number of jets", ntk), 100, 0, 1);
+  h_1v_jet_bdisc_bquarks = new TH1F("h_1v_jet_bdisc_bquarks", TString::Format("%d-track one-vertex events with b quarks;jet bdisc;Number of jets", ntk), 100, 0, 1);
+  h_1v_jet_bdisc_nobquarks = new TH1F("h_1v_jet_bdisc_nobquarks", TString::Format("%d-track one-vertex events without b quarks;jet bdisc;Number of jets", ntk), 100, 0, 1);
   for (int i = 0; i < 3; ++i) {
     h_1v_nbtags[i] = new TH1F(TString::Format("h_1v_nbtags_%s", b_discriminator_wps[i]), TString::Format("%d-track one-vertex events;number of %s btags;Events", ntk, b_discriminator_wps[i]), 20, 0, 20);
     h_1v_nbtags_vs_bquark_flavor_code[i] = new TH2F(TString::Format("h_1v_nbtags_%s_vs_bquark_flavor_code", b_discriminator_wps[i]), TString::Format("%d-track one-vertex events;bquark_flavor_code;number of %s btags", ntk, b_discriminator_wps[i]), 2, 0, 2, 20, 0, 20);
@@ -84,6 +88,8 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
     for (int ijet = 0; ijet < nt.njets; ++ijet) {
       double bdisc = nt.jet_bdisc[ijet];
       h_1v_jet_bdisc->Fill(bdisc, w);
+      if (bquark_flavor_code) h_1v_jet_bdisc_bquarks->Fill(bdisc, w);
+      if (!bquark_flavor_code) h_1v_jet_bdisc_nobquarks->Fill(bdisc, w);
       for (int i = 0; i < 3; ++i) {
         if (bdisc >= b_discriminator_mins[i]) {
           ++nbtags[i];
