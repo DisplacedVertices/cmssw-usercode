@@ -6,7 +6,7 @@ set_style()
 ps = plot_saver(plot_dir('compare_btags_vs_bquarks_MiniTreeV21m_ntk%s' % ntk), size=(600,600))
 
 f = ROOT.TFile('output/background.root')
-btags = ['loose_btag1', 'loose_btag2', 'medium_btag1', 'medium_btag2', 'tight_btag1', 'tight_btag2']
+btags = ['1loose', '2loose', '1medium', '2medium', '1tight', '2tight']
 btag_names = ['#geq1 loose', '#geq2 loose', '#geq1 medium', '#geq2 medium', '#geq1 tight', '#geq2 tight']
 
 #plot jet bdisc in events with and without b quarks
@@ -49,7 +49,7 @@ ps.save('jet_bdisc')
 x = []
 y = []
 for i,btag in enumerate(btags):
-  h = f.Get('h_1v_%s_flavor_code' % btag)
+  h = f.Get('h_1v_%s_btag_flavor_code' % btag)
   x.append(i+1)
   y.append(h.GetBinContent(2)/h.Integral())
 
@@ -76,8 +76,8 @@ ps.save('btag_fraction')
 x = []
 y = []
 for i,btag in enumerate(btags):
-  h1 = f.Get('h_1v_%s_flavor_code_bquarks' % btag)
-  h2 = f.Get('h_1v_%s_flavor_code_nobquarks' % btag)
+  h1 = f.Get('h_1v_%s_btag_flavor_code_bquarks' % btag)
+  h2 = f.Get('h_1v_%s_btag_flavor_code_nobquarks' % btag)
   x.append(h1.GetBinContent(2)/h1.Integral())
   y.append(h2.GetBinContent(2)/h2.Integral())
 
@@ -101,8 +101,8 @@ ey1 = []
 y2 = []
 ey2 = []
 for i,btag in enumerate(btags):
-  h1 = f.Get('h_1v_dbv_%s' % btag)
-  h2 = f.Get('h_1v_dbv_%s' % btag.replace('btag','nobtag'))
+  h1 = f.Get('h_1v_dbv_%s_btag' % btag)
+  h2 = f.Get('h_1v_dbv_%s_nobtag' % btag)
   x.append(i+1)
   ex.append(0)
   y1.append(h1.GetMean()*10000)
@@ -185,12 +185,12 @@ for i,btag in enumerate(btags):
   h_dbv.Draw('hist')
   h_dbv_bquarks.DrawNormalized('sames')
   h_dbv_nobquarks.DrawNormalized('sames')
-  h1 = f.Get('h_1v_dbv_%s' % btag)
+  h1 = f.Get('h_1v_dbv_%s_btag' % btag)
   h1.SetStats(0)
   h1.SetLineColor(ROOT.kMagenta)
   h1.SetLineWidth(2)
   h1.DrawNormalized('sames')
-  h2 = f.Get('h_1v_dbv_%s' % btag.replace('btag','nobtag'))
+  h2 = f.Get('h_1v_dbv_%s_nobtag' % btag)
   h2.SetStats(0)
   h2.SetLineColor(ROOT.kAzure+10)
   h2.SetLineWidth(2)
@@ -202,4 +202,4 @@ for i,btag in enumerate(btags):
   l.AddEntry(h1, 'events with %s btag' % btag_names[i])
   l.AddEntry(h2, 'events without %s btag' % btag_names[i])
   l.Draw()
-  ps.save('dbv_%s' % btag)
+  ps.save('dbv_%s_btag' % btag)
