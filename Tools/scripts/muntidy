@@ -11,8 +11,8 @@ wds = cr_dirs + cs_dirs_from_argv()
 if not wds:
     sys.exit('usage: muntidy wd [wd2 ...]')
 
-cr_cmds = ['gunzip crab.log.gz mmon_last.gz', 'tar -xf inputs.tgz']
-cs_cmds = ['tar -xf mtidied.tgz']
+cr_cmds = ['gunzip crab.log.gz mmon_last.gz', 'tar -xf inputs.tgz', 'rm inputs.tgz']
+cs_cmds = ['tar -xf mtidied.tgz', 'rm mtidied.tgz']
 
 prevd = os.getcwd()
     
@@ -32,5 +32,6 @@ for wd in wds:
         #print cmd
         if os.system(cmd) != 0:
             raise IOError('problem')
-    os.system('rm inputs.tgz mtidied mtidied_started mtidied_finished')
+
+    os.system('rm mtidied mtidied_started mtidied_finished')
     os.chdir(prevd)
