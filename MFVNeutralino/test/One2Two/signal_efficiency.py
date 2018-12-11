@@ -1,4 +1,4 @@
-# NB: this module should not depend on any local imports, except in __main__, unless you ship them with combine/submit.py
+# NB: this module cannot depend on any local imports, except in __main__, unless you ship them with combine/submit.py
 
 import ROOT; ROOT.gROOT.SetBatch()
 
@@ -32,11 +32,13 @@ class SignalEfficiencyCombiner:
     def _get(cls, h, offset=0., mult=1.):
         return [offset + mult*h.GetBinContent(ibin) for ibin in xrange(1,cls.nbins+1)]
 
-    def __init__(self, simple=False):
+    def __init__(self, simple=True):
         if simple:
             fn = simple if type(simple) == str else 'limitsinput.root'
-            self.inputs = [Input(fn=fn, int_lumi=38.529, sf=one, include_stat=True)]
+            #FIXME=41.527+59.973
+            self.inputs = [Input(fn=fn, int_lumi=FIXME, sf=one, include_stat=True)]
         else:
+            raise NotImplementedError('no non-simple yet in 2017'
             self.inputs = [
                 Input(fn='limitsinput_nonhip.root', int_lumi= 2.62, sf=sf20156,  include_stat=False),
                 Input(fn='limitsinput_hip.root',    int_lumi=19.70, sf=trigmult, include_stat=True),
@@ -90,7 +92,7 @@ class SignalEfficiencyCombiner:
             ngen = 1e-3 / h_norm.GetBinContent(2)
             ngens.append(ngen)
             nice_name = checkedset(nice_name, h_norm.GetTitle())
-            mass = int(nice_name.split('_M')[-1])
+            mass = int(nice_name.split('_M')[-1].split('_')[0])
 
             scale = inp.int_lumi / ngen * inp.sf(mass)
 

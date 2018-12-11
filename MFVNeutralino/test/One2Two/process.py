@@ -43,9 +43,8 @@ def doit(path, out_fn):
         x = fromtree(os.path.join(path, 'observed_byhand.root'))
     obs = x[0]
 
-    x = fromtree(os.path.join(path, 'expected.root'))
-    assert len(x) >= 999 # maybe one toy crashes, who is zoidberg to judge
-    exp = x
+    exp = fromtree(os.path.join(path, 'expected.root'))
+    print 'num expected is', len(exp)
 
     stats(out_fn, obs, exp)
 

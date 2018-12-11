@@ -130,7 +130,7 @@ os.mkdir(os.path.join(batch_root, 'inputs'))
 save_git_status(os.path.join(batch_root, 'gitstatus'))
 
 input_files = []
-for x in ['signal_efficiency.py', 'combine/datacard.py', 'combine/process.py', 'limitsinput_hip.root', 'limitsinput_nonhip.root']:
+for x in ['signal_efficiency.py', 'datacard.py', 'process.py', 'limitsinput.root']:
     nx = os.path.abspath(os.path.join(batch_root, 'inputs', os.path.basename(x)))
     shutil.copy2(x, nx)
     input_files.append(nx)

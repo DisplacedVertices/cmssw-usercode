@@ -2,7 +2,7 @@ import sys, os
 from array import array
 from JMTucker.Tools.ROOTTools import *
 
-path = plot_dir('pretty_limits_1d', make=True)
+path = plot_dir('pretty_limits_1d_2017temp', make=True)
 
 ts = tdr_style()
 
@@ -19,13 +19,13 @@ f = ROOT.TFile('limits_1d.root')
 kinds = [
     'multijet_M0800',
     'multijet_M1600',
-    'multijet_M2400',
+#    'multijet_M2400',
     'multijet_tau300um',
     'multijet_tau1mm',
     'multijet_tau10mm',
     'dijet_M0800',
     'dijet_M1600',
-    'dijet_M2400',
+#    'dijet_M2400',
     'dijet_tau300um',
     'dijet_tau1mm',
     'dijet_tau10mm',
@@ -77,23 +77,24 @@ for kind in kinds:
     expect95 = f.Get('%s/expect95' % kind)
     theory = f.Get('%s/theory' % kind)
 
-    if kind == 'dijet_tau300um':
-        for i in xrange(20):
-            print 'ugh'
-        g = expect95
-        x,y = tgraph_getpoint(g, 9)
-        assert x == 1800
-        g.SetPointEYhigh(9, (g.GetErrorYhigh(8) + g.GetErrorYhigh(10))/2)
-    elif kind == 'multijet_tau300um':
-        for i in xrange(20):
-            print 'ugh'
-        g = expect95
-        x,y = tgraph_getpoint(g, 9)
-        assert x == 1800
-        g.SetPointEYhigh(9, (g.GetErrorYhigh(8) + g.GetErrorYhigh(10))/2)
-        x,y = tgraph_getpoint(g, 11)
-        assert x == 2200
-        g.SetPointEYhigh(11, (g.GetErrorYhigh(10) + g.GetErrorYhigh(12))/2)
+    if 0:
+        if kind == 'dijet_tau300um':
+            for i in xrange(20):
+                print 'ugh'
+            g = expect95
+            x,y = tgraph_getpoint(g, 9)
+            assert x == 1800
+            g.SetPointEYhigh(9, (g.GetErrorYhigh(8) + g.GetErrorYhigh(10))/2)
+        elif kind == 'multijet_tau300um':
+            for i in xrange(20):
+                print 'ugh'
+            g = expect95
+            x,y = tgraph_getpoint(g, 9)
+            assert x == 1800
+            g.SetPointEYhigh(9, (g.GetErrorYhigh(8) + g.GetErrorYhigh(10))/2)
+            x,y = tgraph_getpoint(g, 11)
+            assert x == 2200
+            g.SetPointEYhigh(11, (g.GetErrorYhigh(10) + g.GetErrorYhigh(12))/2)
 
     particle = '#tilde{t}' if 'dijet' in kind else '#tilde{#chi}^{0} / #tilde{g}'
     if versus_mass:
@@ -119,7 +120,7 @@ for kind in kinds:
     yax.SetLabelSize(0.045)
 
     if versus_mass:
-        xax.SetLimits(105, 3000)
+        xax.SetLimits(105, 3200)
     elif versus_tau:
         xax.SetLimits(0.068, 130)
     yax.SetRangeUser(0.08, 100000 if (versus_tau and draw_theory) else 130)
@@ -145,7 +146,7 @@ for kind in kinds:
     if draw_theory:
         theory.Draw('L3')
     expect50.Draw('L')
-    observed.Draw('L')
+#    observed.Draw('L')
 
     if draw_theory:
         leg = ROOT.TLegend(0.552, 0.563, 0.870, 0.867)
@@ -157,7 +158,7 @@ for kind in kinds:
     leg.SetBorderSize(0)
     leg.AddEntry(0, '#kern[-0.22]{%s}' % nice_leg(kind), '')
     leg.AddEntry(0, '#kern[-0.22]{95% CL upper limits:}', '')
-    leg.AddEntry(observed, 'Observed', 'L')
+ #   leg.AddEntry(observed, 'Observed', 'L')
     leg.AddEntry(expect50, 'Median expected', 'L')
     leg.AddEntry(expect68, '68% expected', 'F')
     leg.AddEntry(expect95, '95% expected', 'F')
@@ -166,13 +167,13 @@ for kind in kinds:
     leg.Draw()
 
     cms = write(61, 0.050, 0.142, 0.825, 'CMS')
-    lum = write(42, 0.050, 0.548, 0.913, '38.5 fb^{-1} (13 TeV)')
+    lum = write(42, 0.050, 0.548, 0.913, '101 fb^{-1} (13 TeV)')
     fn = os.path.join(path, 'limit1d_' + kind)
     c.SaveAs(fn + '.pdf')
     c.SaveAs(fn + '.png')
     c.SaveAs(fn + '.root')
 
-    pre = write(52, 0.037, 0.155, 0.835, 'Preliminary')
+    pre = write(52, 0.037, 0.145, 0.785, 'Preliminary')
     c.SaveAs(fn + '_prelim.pdf')
     c.SaveAs(fn + '_prelim.png')
     c.SaveAs(fn + '_prelim.root')

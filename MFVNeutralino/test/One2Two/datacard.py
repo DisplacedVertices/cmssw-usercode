@@ -37,7 +37,7 @@ bkg3 lnN - - - - - {0.bkg_uncert_3}
 '''
 
 def make(which):
-    combiner = SignalEfficiencyCombiner(simple=False)
+    combiner = SignalEfficiencyCombiner(simple=True)
     r = combiner.combine(which)
 
     def _strit(fmt,typ,n,offset=0,mult=1):
@@ -48,7 +48,7 @@ def make(which):
         return _strit('%.9g',float,n,offset,mult)
 
     f = combiner.inputs[0].f # for background/etc. all same
-    combiner.check(f.Get('h_observed').GetNbinsX(), f.Get('h_int_lumi').GetBinContent(1) / 1000)
+    combiner.check(f.Get('h_observed').GetNbinsX(), f.Get('h_int_lumi').GetBinContent(1))
     r.observed = intstrit('h_observed')
     r.bkg_rate = floatstrit('h_bkg_dvv_rebin', mult=f.Get('h_observed').Integral())
     r.bkg_uncert = floatstrit('h_bkg_uncert', offset=1.)

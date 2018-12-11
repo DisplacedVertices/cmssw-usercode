@@ -6,21 +6,20 @@ bins = to_array(0., 0.04, 0.07, 4)
 
 observed = [1,0,0]
 
-int_lumi = ac.int_lumi_2015p6 * ac.scale_factor_2015p6
+int_lumi = FIXME #41.527 + 59.973
 
-bkg_n1v = 1183.
+bkg_n1v = FIXME #703.
 bkg_n2v = 1.
 
-bkg_frac_check = [0.51, 0.37, 0.12]
+bkg_frac_check = [0.67, 0.20, 0.13]
 sig_uncert = [0.24, 0.24, 0.24]
 bkg_uncert = [0.25, 0.25, 0.69]
 bkg_uncert_stat = [0.02, 0.05, 0.18]
 bkg_uncert = [(a**2 + b**2)**0.5 for a,b in zip(bkg_uncert, bkg_uncert_stat)] # JMTBAD use proper gmN?
 
-in_fn = '/uscms/home/jchu/public/2v_from_jets_data_2015p6_5track_default_v15_v5.root'
-#in_trees, in_scanpack_list = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV15_v5/mfv*root', None
-in_trees, in_scanpack_list = None, '/uscms/home/tucker/public/mfv/scanpacks/scanpack_merge_1_1p5_2_2p5_2p7_3_3p5_removeddbar.list.gz'
-#in_trees, in_scanpack_list = None, '/uscms/home/tucker/public/mfv/scanpacks/scanpack_merge_hip_1_2_2p6_3_3p6_removeddbar.list.gz'
+in_fn = '2v_from_jets_2017_5track_default_v21m.root'
+in_trees, in_scanpack_list = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV21m/mfv*root', None
+#in_trees, in_scanpack_list = None, '/uscms/home/tucker/public/mfv/scanpacks/None'
 
 limitsinput_fn = 'limitsinput.root'
 
@@ -50,13 +49,13 @@ def nsamples(f):
 
 def details2name(kind, tau, mass):
     # same convention as scanpack: tau float:mm, mass int:GeV
-    return '%s_tau%06ium_M%04i' % (kind, int(tau*1000), mass)
+    return '%s_tau%06ium_M%04i_2017' % (kind, int(tau*1000), mass)
 def name2kind(name):
     return name.split('_tau')[0]
 def name2tau(name):
     return int(name.split('tau')[1].split('um')[0]) / 1000.
 def name2mass(name):
-    return int(name.split('M')[1])
+    return int(name.split('M')[1].split('_')[0])
 def name2details(name):
     return name2kind(name), name2tau(name), name2mass(name)
 def name2taumass(name):
@@ -105,9 +104,9 @@ def sample_iterator(f):
         yield s
 
 def test_sample_iterator(f):
-    kinds = 'mfv_neu', 'mfv_ddbar'
-    taus = [t/1000. for t in 100, 400, 1000, 10000, 31000]
-    masses = [300, 400, 500, 600, 800, 1200, 1800, 3000]
+    kinds = 'mfv_neu', 'mfv_stopdbardbar'
+    taus = [t/1000. for t in 100, 300, 1000, 10000, 30000, 100000]
+    masses = [400, 600, 800, 1200, 1600, 3000]
 
     allowed = {name:isample for isample,name in isamplename_iterator(f)}
     for k in kinds:
