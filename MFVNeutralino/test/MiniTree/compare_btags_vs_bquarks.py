@@ -203,3 +203,67 @@ for i,btag in enumerate(btags):
   l.AddEntry(h2, 'events without %s btag' % btag_names[i])
   l.Draw()
   ps.save('dbv_%s_btag' % btag)
+
+#plot mean dBV in one-vertex events (with, without) b quarks x (with, without) btag
+hists = ['btag', 'btag_bquarks', 'btag_nobquarks', 'nobtag', 'nobtag_bquarks', 'nobtag_nobquarks']
+colors = [ROOT.kRed, ROOT.kMagenta, ROOT.kViolet, ROOT.kBlue, ROOT.kAzure+10, ROOT.kAzure+1]
+gs = []
+l = ROOT.TLegend(0.30,0.10,0.80,0.30)
+for j,hist in enumerate(hists):
+  x = []
+  ex = []
+  y = []
+  ey = []
+  for i,btag in enumerate(btags):
+    x.append(i+1)
+    ex.append(0)
+    h = f.Get('h_1v_dbv_%s_%s' % (btag, hist))
+    y.append(h.GetMean()*10000)
+    ey.append(h.GetMeanError()*10000)
+  g = ROOT.TGraphErrors(len(btags), array('d',x), array('d',y), array('d',ex), array('d',ey))
+  g.SetMarkerStyle(21)
+  g.SetMarkerColor(colors[j])
+  if j == 0:
+    g.SetTitle('%s-track one-vertex events;;mean d_{BV} (#mum)' % ntk)
+    for i,name in enumerate(btag_names):
+      g.GetXaxis().SetBinLabel(g.GetXaxis().FindBin(x[i]), name.replace('medium','med'))
+    g.GetXaxis().SetLabelSize(0.04)
+    g.GetYaxis().SetRangeUser(200,320)
+    g.GetYaxis().SetTitleOffset(1.5)
+    g.Draw('AP')
+  else:
+    g.Draw('P')
+  gs.append(g)
+  l.AddEntry(g, 'events with %s' % hist, 'PE')
+l.Draw()
+
+mean_dbv = f.Get('h_1v_dbv').GetMean()*10000
+l0 = ROOT.TLine(x[0]-0.5, mean_dbv, x[-1]+0.5, mean_dbv)
+l0.SetLineStyle(2)
+l0.SetLineWidth(2)
+l0.Draw()
+t0 = ROOT.TLatex()
+t0.SetTextSize(0.03)
+t0.DrawLatex(0.5*(x[0]+x[-1]), mean_dbv, 'mean d_{BV} in all events')
+
+mean_dbv_bquarks = f.Get('h_1v_dbv_bquarks').GetMean()*10000
+l1 = ROOT.TLine(x[0]-0.5, mean_dbv_bquarks, x[-1]+0.5, mean_dbv_bquarks)
+l1.SetLineStyle(2)
+l1.SetLineWidth(2)
+l1.SetLineColor(ROOT.kRed)
+l1.Draw()
+t1 = ROOT.TLatex()
+t1.SetTextSize(0.03)
+t1.DrawLatex(0.5*(x[0]+x[-1]), mean_dbv_bquarks, 'mean d_{BV} in events with b quarks')
+
+mean_dbv_nobquarks = f.Get('h_1v_dbv_nobquarks').GetMean()*10000
+l2 = ROOT.TLine(x[0]-0.5, mean_dbv_nobquarks, x[-1]+0.5, mean_dbv_nobquarks)
+l2.SetLineStyle(2)
+l2.SetLineWidth(2)
+l2.SetLineColor(ROOT.kBlue)
+l2.Draw()
+t2 = ROOT.TLatex()
+t2.SetTextSize(0.03)
+t2.DrawLatex(0.5*(x[0]+x[-1]), mean_dbv_nobquarks, 'mean d_{BV} in events without b quarks')
+
+ps.save('mean_dbv_bquarks_btags')
