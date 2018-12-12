@@ -5,7 +5,7 @@ ntk = 3
 set_style()
 ps = plot_saver(plot_dir('compare_btags_vs_bquarks_MiniTreeV21m_ntk%s' % ntk), size=(600,600))
 
-f = ROOT.TFile('output/background.root')
+f = ROOT.TFile('output_btags_vs_bquarks_MiniTreeV21m_ntk%s/background.root' % ntk)
 btags = ['1loose', '2loose', '1medium', '2medium', '1tight', '2tight']
 btag_names = ['#geq1 loose', '#geq2 loose', '#geq1 medium', '#geq2 medium', '#geq1 tight', '#geq2 tight']
 
@@ -115,7 +115,12 @@ g1.SetTitle('%s-track one-vertex events;;mean d_{BV} (#mum)' % ntk)
 for i,name in enumerate(btag_names):
   g1.GetXaxis().SetBinLabel(g1.GetXaxis().FindBin(x[i]), name.replace('medium','med'))
 g1.GetXaxis().SetLabelSize(0.04)
-g1.GetYaxis().SetRangeUser(200,320)
+if ntk == 3:
+  g1.GetYaxis().SetRangeUser(200,320)
+elif ntk == 4:
+  g1.GetYaxis().SetRangeUser(170,290)
+elif ntk == 5:
+  g1.GetYaxis().SetRangeUser(140,260)
 g1.GetYaxis().SetTitleOffset(1.5)
 g1.SetMarkerStyle(21)
 g1.SetMarkerColor(ROOT.kRed)
@@ -169,6 +174,8 @@ h_dbv.SetLineColor(ROOT.kBlack)
 h_dbv.SetLineWidth(3)
 h_dbv.Scale(1./h_dbv.Integral())
 h_dbv.GetYaxis().SetRangeUser(1e-5,0.4)
+if ntk == 5:
+  h_dbv.GetYaxis().SetRangeUser(1e-5,0.8)
 h_dbv.GetYaxis().SetTitleOffset(1.55)
 h_dbv.Draw('hist')
 h_dbv_bquarks = f.Get('h_1v_dbv_bquarks')
@@ -228,7 +235,12 @@ for j,hist in enumerate(hists):
     for i,name in enumerate(btag_names):
       g.GetXaxis().SetBinLabel(g.GetXaxis().FindBin(x[i]), name.replace('medium','med'))
     g.GetXaxis().SetLabelSize(0.04)
-    g.GetYaxis().SetRangeUser(200,320)
+    if ntk == 3:
+      g.GetYaxis().SetRangeUser(200,320)
+    elif ntk == 4:
+      g.GetYaxis().SetRangeUser(170,290)
+    elif ntk == 5:
+      g.GetYaxis().SetRangeUser(140,260)
     g.GetYaxis().SetTitleOffset(1.5)
     g.Draw('AP')
   else:
