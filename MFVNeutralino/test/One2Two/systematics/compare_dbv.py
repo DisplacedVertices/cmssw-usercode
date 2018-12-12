@@ -8,14 +8,14 @@ set_style()
 ROOT.TH1.SetDefaultSumw2()
 
 year = 2017
-sns = 'qcdht0700_2017 qcdht1000_2017 qcdht1500_2017 qcdht2000_2017 ttbar_2017'.split()
+sns = 'qcdht0700_2017 qcdht1000_2017 qcdht1500_2017 qcdht2000_2017 ttbarht0600_2017 ttbarht0800_2017 ttbarht1200_2017 ttbarht2500_2017'.split()
 sc = ac.int_lumi_2017 * ac.scale_factor_2017
 
 if year == 2015:
     sns = 'qcdht0700sum_2015 qcdht1000sum_2015 qcdht1500sum_2015 qcdht2000sum_2015 ttbar_2015'.split()
     sc = ac.int_lumi_2015 * ac.scale_factor_2015
 
-ntk = 5
+ntk = 4
 tree_path = 'mfvMiniTree/t'
 if ntk == 3:
     tree_path = 'mfvMiniTreeNtk3/t'
@@ -24,7 +24,7 @@ if ntk == 4:
 
 bquarkpt = False
 
-path = 'MiniTreeV20mp2'
+path = 'MiniTreeV21m'
 if bquarkpt:
     path = 'MiniTreeV15_v4_bquarkpt'
 ps = plot_saver(plot_dir('compare_dbv_%s_%s_ntk%i' % (path, year, ntk)), size=(700,700), root=False)
@@ -41,6 +41,7 @@ h_dbv_sum = book_dbv('dbv_sum')
 h_dbv_nob = book_dbv('dbv_nob')
 h_dbv_b = book_dbv('dbv_b')
 h_dbv_qcdb = book_dbv('dbv_qcdb')
+h_dbv_ttbarb = book_dbv('dbv_ttbarb')
 h_bquarkpt = book_pt('bquarkpt')
 h_dbv_bquarkpt = book_dbv_pt('dbv_bquarkpt')
 
@@ -77,6 +78,8 @@ for sn in sns:
     h_dbv_b.Add(h_dbv, sc * s.partial_weight_orig)
     if 'ttbar' not in sn:
         h_dbv_qcdb.Add(h_dbv, sc * s.partial_weight_orig)
+    else:
+        h_dbv_ttbarb.Add(h_dbv, sc * s.partial_weight_orig)
     ps.save(n)
 
     h = h_dbv.Clone()
@@ -157,8 +160,8 @@ h_dbv_qcdb.SetLineColor(ROOT.kPink)
 h_dbv_qcdb.SetLineWidth(3)
 h_dbv_qcdb.DrawNormalized('sames')
 l.AddEntry(h_dbv_qcdb, 'qcd, b quarks: mean d_{BV} = %4.1f #pm %2.1f #mum' % (10000*h_dbv_qcdb.GetMean(), 10000*h_dbv_qcdb.GetMeanError()))
-hs_b[4].DrawNormalized('sames')
-l.AddEntry(hs_b[4], 'ttbar: mean d_{BV} = %4.1f #pm %2.1f #mum' % (10000*hs_b[4].GetMean(), 10000*hs_b[4].GetMeanError()))
+h_dbv_ttbarb.DrawNormalized('sames')
+l.AddEntry(h_dbv_ttbarb, 'ttbar: mean d_{BV} = %4.1f #pm %2.1f #mum' % (10000*h_dbv_ttbarb.GetMean(), 10000*h_dbv_ttbarb.GetMeanError()))
 l.SetFillColor(0)
 l.Draw()
 ps.save('dbv_qcdb')

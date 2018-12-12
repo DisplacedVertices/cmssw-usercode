@@ -13,8 +13,8 @@ fns = ['2v_from_jets%s_%s_3track_default_v21m.root' % ('' if is_mc else '_data',
 ntk = ['3-track', '4-track-3-track', '4-track', '5-track']
 names = ['3-track x 3-track', '4-track x 3-track', '4-track x 4-track', '#geq 5-track x #geq 5-track']
 
-n2v = [641., 137., 2.21, 1.] if year == '2017' else [991., 213., 8., 1.]
-n2verr = [52., 30., 1.13, 0.6]
+n2v = [641., 779., 2.21, 1.] if year == '2017' else [991., 213., 8., 1.]
+n2verr = [49., 54., 1.08, 0.6]
 
 def errprop(val0, err0, val1, err1):
     if val0 == 0 and val1 == 0:

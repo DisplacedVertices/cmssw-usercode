@@ -257,13 +257,13 @@ def cmd_trigeff():
 
 def cmd_merge_bquarks_nobquarks():
     for year in ['2017']:
-        weights = '0.84,0.16'
+        weights = '0.79,0.21'
         for ntracks in [3,4,5,7]:
-            files = ['One2Two/2v_from_jets_%s_%dtrack_bquarks_v20mp2.root' % (year, ntracks), 'One2Two/2v_from_jets_%s_%dtrack_nobquarks_v20mp2.root' % (year, ntracks)]
+            files = ['One2Two/2v_from_jets_%s_%dtrack_bquarks_v21m.root' % (year, ntracks), 'One2Two/2v_from_jets_%s_%dtrack_nobquarks_v21m.root' % (year, ntracks)]
             for fn in files:
                 if not os.path.isfile(fn):
                     raise RuntimeError('%s not found' % fn)
-            cmd = 'mergeTFileServiceHistograms -w %s -i %s -o One2Two/2v_from_jets_%s_%dtrack_bquark_corrected_v20mp2.root' % (weights, ' '.join(files), year, ntracks)
+            cmd = 'mergeTFileServiceHistograms -w %s -i %s -o One2Two/2v_from_jets_%s_%dtrack_bquark_corrected_v21m.root' % (weights, ' '.join(files), year, ntracks)
             print cmd
             os.system(cmd)
 
