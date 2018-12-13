@@ -87,10 +87,6 @@ def cmd_hadd_data():
         have = []
         year_eras = [
             ('2017', 'BCDEF'),
-            ('2018A', '03' if ds == 'SingleMuon' else '123'),
-            ('2018B', '12'),
-            ('2018C', '123'),
-            ('2018D', '2'),
             ('2018', 'ABCD'),
             ]
 
