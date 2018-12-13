@@ -32,7 +32,8 @@
 - "ana_avail_" are what condor/crab report say they were able to run
   on.  This is made after the first time condor/crab ntuple is run on
   the default set of datasets (currently JetHT) and the report is
-  scrutinized.  Thereafter, compare subsequent runs' reports to this
+  scrutinized.  (Can run Tools/test/noop.py for this.)
+  Thereafter, compare subsequent runs' reports to this
   file. (See utilities.py.)  For a different set of datasets,
   e.g. /SingleMu, use "ana_avail_*_mu".
 
