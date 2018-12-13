@@ -121,8 +121,6 @@ __all__ = [
 
 execfile(cmssw_base('src/JMTucker/Tools/python/enc_SampleFiles.py'))
 
-_remove_file('ttbarht0800_2017', 'miniaod', '/store/mc/RunIIFall17MiniAODv2/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/60000/363FCBF3-48BB-E811-BDC3-7CD30AD09C7C.root')
-
 _add_ds("main", {
 'mfv_neu_tau000100um_M0400_2017': _fromnum1("/store/user/wsun/croncopyeos/mfv_neu_cp2_tau000100um_M0400/RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1/181027_053632", 100, fnbase="reco"),
 'mfv_neu_tau000100um_M0600_2017': _fromnum1("/store/user/wsun/croncopyeos/mfv_neu_cp2_tau000100um_M0600/RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1/181027_053653", 100, fnbase="reco"),
