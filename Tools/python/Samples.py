@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from JMTucker.Tools.Sample import *
+from JMTucker.Tools.CMSSWTools import json_path
 
 ########################################################################
 
@@ -243,13 +244,6 @@ auxiliary_data_samples_2018 = [
     DataSample('SingleMuon2018D', '/SingleMuon/Run2018D-PromptReco-v2/AOD'),
     ]
 
-from JMTucker.Tools.CMSSWTools import json_path
-for y,ss in (2017, data_samples_2017 + auxiliary_data_samples_2017), (2018, data_samples_2018 + auxiliary_data_samples_2018):
-    for s in ss:
-        s.json = json_path('%s.json' % y)
-        s.json_10pc = json_path('ana_%s_10pc.json' % y)
-        s.json_1pc = json_path('ana_%s_1pc.json' % y)
-
 ########################################################################
 
 registry = SamplesRegistry()
@@ -337,15 +331,6 @@ for sample in mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017:
     sample.datasets['miniaod'].condor = True
     sample.datasets['miniaod'].xrootd_url = xrootd_sites['T3_US_FNALLPC']
 
-for ds in 'main', 'miniaod':
-    # these in status=PRODUCTION
-    for s in (): #dyjetstollM10ext_2017,:
-        s.datasets[ds].ignore_invalid = True
-
-    # 'PU2017' in dataset can be a lie https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/3128.html
-    for s in qcdht0700_2017, dyjetstollM10_2017, dyjetstollM50_2017, dyjetstollM50ext_2017:
-        s.datasets[ds].notes['buggedpileup2017'] = True
-
 ########
 # ntuples
 ########
@@ -396,6 +381,26 @@ for site, d in condorable.iteritems():
         for s in samples:
             s.datasets[ds].condor = True
             s.datasets[ds].xrootd_url = xrootd_sites[site]
+
+########
+# other info
+########
+
+for ds in 'main', 'miniaod':
+    # these in status=PRODUCTION
+    #for s in ():
+    #    s.datasets[ds].ignore_invalid = True
+
+    # 'PU2017' in dataset can be a lie https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/3128.html
+    for s in qcdht0700_2017, dyjetstollM10_2017, dyjetstollM50_2017, dyjetstollM50ext_2017:
+        s.datasets[ds].notes['buggedpileup2017'] = True
+
+    # set up jsons
+    for y,ss in (2017, data_samples_2017 + auxiliary_data_samples_2017), (2018, data_samples_2018 + auxiliary_data_samples_2018):
+        for s in ss:
+            s.datasets[ds].json      = json_path('ana_%s.json'      % y)
+            s.datasets[ds].json_10pc = json_path('ana_%s_10pc.json' % y)
+            s.datasets[ds].json_1pc  = json_path('ana_%s_1pc.json'  % y)
 
 ########################################################################
 
