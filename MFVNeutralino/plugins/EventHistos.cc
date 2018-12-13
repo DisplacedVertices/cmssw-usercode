@@ -128,6 +128,11 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_vertex_seed_track_phi;
   TH1F* h_vertex_seed_track_dxy;
   TH1F* h_vertex_seed_track_dz;
+  TH1F* h_vertex_seed_track_err_pt;
+  TH1F* h_vertex_seed_track_err_eta;
+  TH1F* h_vertex_seed_track_err_phi;
+  TH1F* h_vertex_seed_track_err_dxy;
+  TH1F* h_vertex_seed_track_err_dz;
   TH1F* h_vertex_seed_track_npxhits;
   TH1F* h_vertex_seed_track_nsthits;
   TH1F* h_vertex_seed_track_nhits;
@@ -233,6 +238,11 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_vertex_seed_track_phi = fs->make<TH1F>("h_vertex_seed_track_phi", ";vertex seed track #phi;tracks/0.063", 100, -3.15, 3.15);
   h_vertex_seed_track_dxy = fs->make<TH1F>("h_vertex_seed_track_dxy", ";vertex seed track dxy (cm);tracks/10 #mum", 200, -0.1, 0.1);
   h_vertex_seed_track_dz = fs->make<TH1F>("h_vertex_seed_track_dz", ";vertex seed track dz (cm);tracks/10 #mum", 200, -0.1, 0.1);
+  h_vertex_seed_track_err_pt = fs->make<TH1F>("h_vertex_seed_track_err_pt", ";vertex seed track #sigma(p_{T})/p_{T} (GeV);tracks/0.005", 100, 0, 0.5);
+  h_vertex_seed_track_err_eta = fs->make<TH1F>("h_vertex_seed_track_err_eta", ";vertex seed track #sigma(#eta);tracks/5e-5", 100, 0, 0.005);
+  h_vertex_seed_track_err_phi = fs->make<TH1F>("h_vertex_seed_track_err_phi", ";vertex seed track #sigma(#phi);tracks/5e-5", 100, 0, 0.005);
+  h_vertex_seed_track_err_dxy = fs->make<TH1F>("h_vertex_seed_track_err_dxy", ";vertex seed track #sigma(dxy) (cm);tracks/3 #mum", 100, 0, 0.03);
+  h_vertex_seed_track_err_dz = fs->make<TH1F>("h_vertex_seed_track_err_dz", ";vertex seed track #sigma(dz) (cm);tracks/15 #mum", 100, 0, 0.15);
   h_vertex_seed_track_npxhits = fs->make<TH1F>("h_vertex_seed_track_npxhits", ";vertex seed track # pixel hits;tracks", 10, 0, 10);
   h_vertex_seed_track_nsthits = fs->make<TH1F>("h_vertex_seed_track_nsthits", ";vertex seed track # strip hits;tracks", 50, 0, 50);
   h_vertex_seed_track_nhits = fs->make<TH1F>("h_vertex_seed_track_nhits", ";vertex seed track # hits;tracks", 60, 0, 60);
@@ -474,6 +484,11 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_vertex_seed_track_phi->Fill(mevent->vertex_seed_track_phi[i], w);
     h_vertex_seed_track_dxy->Fill(mevent->vertex_seed_track_dxy[i], w);
     h_vertex_seed_track_dz->Fill(mevent->vertex_seed_track_dz[i], w);
+    h_vertex_seed_track_err_pt->Fill(mevent->vertex_seed_track_err_pt[i] / mevent->vertex_seed_track_pt(i), w);
+    h_vertex_seed_track_err_eta->Fill(mevent->vertex_seed_track_err_eta[i], w);
+    h_vertex_seed_track_err_phi->Fill(mevent->vertex_seed_track_err_phi[i], w);
+    h_vertex_seed_track_err_dxy->Fill(mevent->vertex_seed_track_err_dxy[i], w);
+    h_vertex_seed_track_err_dz->Fill(mevent->vertex_seed_track_err_dz[i], w);
     h_vertex_seed_track_npxhits->Fill(mevent->vertex_seed_track_npxhits(i), w);
     h_vertex_seed_track_nsthits->Fill(mevent->vertex_seed_track_nsthits(i), w);
     h_vertex_seed_track_nhits->Fill(mevent->vertex_seed_track_nhits(i), w);

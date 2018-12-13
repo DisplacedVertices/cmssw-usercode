@@ -436,6 +436,11 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       mevent->vertex_seed_track_phi.push_back(tk.phi());
       mevent->vertex_seed_track_dxy.push_back(tk.dxy(beamspot->position()));
       mevent->vertex_seed_track_dz.push_back(primary_vertex ? tk.dz(primary_vertex->position()) : 0);
+      mevent->vertex_seed_track_err_pt.push_back(tk.ptError());
+      mevent->vertex_seed_track_err_eta.push_back(tk.etaError());
+      mevent->vertex_seed_track_err_phi.push_back(tk.phiError());
+      mevent->vertex_seed_track_err_dxy.push_back(tk.dxyError());
+      mevent->vertex_seed_track_err_dz.push_back(tk.dzError());
       mevent->vertex_seed_track_hp_push_back(tk.hitPattern().numberOfValidPixelHits(), tk.hitPattern().numberOfValidStripHits(), tk.hitPattern().pixelLayersWithMeasurement(), tk.hitPattern().stripLayersWithMeasurement());
     }
   }
