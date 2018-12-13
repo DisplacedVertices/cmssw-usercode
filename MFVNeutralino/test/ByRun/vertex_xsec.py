@@ -2,18 +2,18 @@ from base import *
 
 ROOT.gStyle.SetOptFit(0)
 
-year, eras = 2017, 'BCDEF'
 year, eras = 2018, ('A1','A2','A3','B1','B2','C1','C2','C3','D2')
+year, eras = 2018, 'BCDEF'
 excludes = [('all', [])]
 event_filter_fn = None #'/uscms_data/d2/tucker/eventids_temp/HT900_L1300.bin'
-file_path = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV21m'
+file_path = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV21m/dontlook'
 plot_path = 'vertex_xsec_v21m_%i' % year
 
 if event_filter_fn:
     plot_path += '_' + os.path.basename(event_filter_fn).replace('.bin', '')
 
-fns = ['%s/JetHT%s%s.root' % (file_path, year, era) for era in eras]
-mask_fn = '%s/dataok_%s.json' % (file_path, year)
+fns = ['%s/JetHT2018.root' % (file_path)]
+mask_fn = '%s/dataok_2018.json' % (file_path)
 
 ####
 
