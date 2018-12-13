@@ -30,6 +30,6 @@ def doit(*x):
     print 'tot = %f, picked %i lumis' % (tot, len(out_ll))
     LumiList(lumis=out_ll).writeJSON(out_fn)
 
-for year, intlumi in (2017, 41.529), (2018, 50.983):
+for year, intlumi in (2017, 41.529), (2018, 59.972):
     for pc in 10, 1:
         doit('ana_%s.json' % year, '/uscms/home/tucker/public/mfv/lumi/%s.byls.csv.gz' % year, intlumi, pc/100., 'ana_%s_%spc.json' % (year, pc))

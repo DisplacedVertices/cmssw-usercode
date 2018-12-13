@@ -8,9 +8,9 @@ from JMTucker.Tools.general import intlumi_from_brilcalc_csv as parse
 # brilcalc lumi -i 2016.json -o 2016.byls.HLT_PFHT900.csv --byls --normtag=normtag_2016.json --hltpath=HLT_PFHT900_v\* ; gzip 2016.byls.HLT_PFHT900.csv
 # brilcalc lumi -i 2017.json -o 2017.byls.csv --byls --normtag=normtag_2017.json ; gzip 2017.byls.csv
 # brilcalc lumi -i 2017.json -o 2017.byls.HLT_PFHT1050.csv --byls --normtag=normtag_2017.json --hltpath=HLT_PFHT1050_v\* ; gzip 2017.byls.HLT_PFHT1050.csv
-#    no 2018 normtag available yet
-# brilcalc lumi -i 2018.json -o 2018.byls.csv --byls                             ; gzip 2018.byls.csv
-# brilcalc lumi -i 2018.json -o 2018.byls.HLT_PFHT1050.csv --byls                             --hltpath=HLT_PFHT1050_v\* ; gzip 2018.byls.HLT_PFHT1050.csv
+# NB preliminary 2018 normtag
+# brilcalc lumi -i 2018.json -o 2018.byls.csv --byls --normtag=normtag_2018.json ; gzip 2018.byls.csv
+# brilcalc lumi -i 2018.json -o 2018.byls.HLT_PFHT1050.csv --byls --normtag=normtag_2018.json --hltpath=HLT_PFHT1050_v\* ; gzip 2018.byls.HLT_PFHT1050.csv
 
 ils = [
     (2017, (parse('/uscms/home/tucker/public/mfv/lumi/2017.byls.csv.gz',              False),
