@@ -15,9 +15,9 @@ set_style()
 ROOT.gStyle.SetOptFit(0)
 ps = plot_saver(plot_dir('compare_dvvc_%s%s%s_%s' % (mode, '' if is_mc else '_data', '_10pc' if only_10pc else '', year)), size=(700,700), root=False, log=False)
 
-fn1 = ['2v_from_jets%s_%s_3track_default_v20mp2.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_3track_%s_v20mp2.root' % ('' if is_mc else '_data', year, mode)]
-fn2 = ['2v_from_jets%s_%s_4track_default_v20mp2.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_4track_%s_v20mp2.root' % ('' if is_mc else '_data', year, mode)]
-fn3 = ['2v_from_jets%s_%s_5track_default_v20mp2.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_5track_%s_v20mp2.root' % ('' if is_mc else '_data', year, mode)]
+fn1 = ['2v_from_jets%s_%s_3track_default_v21m.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_3track_%s_v21m.root' % ('' if is_mc else '_data', year, mode)]
+fn2 = ['2v_from_jets%s_%s_4track_default_v21m.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_4track_%s_v21m.root' % ('' if is_mc else '_data', year, mode)]
+fn3 = ['2v_from_jets%s_%s_5track_default_v21m.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_5track_%s_v21m.root' % ('' if is_mc else '_data', year, mode)]
 
 if mode == 'vary_eff':
     ls = ['vertexer efficiency', 'ntkseeds efficiency']
@@ -32,7 +32,7 @@ fns = [fn1, fn2, fn3]
 ntk = ['3-track', '4-track', '5-track']
 names = ['3-track x 3-track', '4-track x 4-track', '#geq 5-track x #geq 5-track']
 
-n2v = [773., 5., 1.] if year == '2017' else [991., 8., 1.]
+n2v = [641., 2.21, 1.] if year == '2017' else [991., 8., 1.]
 
 colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kOrange, ROOT.kViolet, ROOT.kPink+1]
 
