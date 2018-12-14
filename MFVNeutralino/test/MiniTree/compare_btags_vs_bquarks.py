@@ -76,6 +76,8 @@ for nvtx in [1,2]:
 
 #plot fake rate vs. btag efficiency
 for nvtx in [1,2]:
+  if ntk == 5 and nvtx == 2:
+    continue
   x = []
   y = []
   for i,btag in enumerate(btags):
