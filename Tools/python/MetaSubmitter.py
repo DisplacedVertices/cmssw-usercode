@@ -1,4 +1,4 @@
-import sys
+import sys, re
 from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
 from JMTucker.Tools.CondorSubmitter import CondorSubmitter
 
@@ -15,17 +15,20 @@ def is_mc_modifier(sample):
         to_replace.append((magic, 'is_mc = False', 'trying to submit on data, and tuple template does not contain the magic string "%s"' % magic))
     return [], to_replace
 
-def H_modifier(sample):
-    to_replace = []
-    if '2016H' in sample.name:
-        magic = 'H = False'
-        to_replace.append((magic, 'H = True', 'trying to submit on 2016H and no magic string "%s"' % magic))
-    return [], to_replace
-
 def zerobias_modifier(sample):
     if sample.name.startswith('ZeroBias'):
         magic = 'zerobias = False'
         return [], [(magic, 'zerobias = True', 'trying to submit on ZeroBias and no magic string "%s"' % magic)]
+    else:
+        return [], []
+
+def era_modifier(sample):
+    if not sample.is_mc:
+        groups = re.search(r'(201\d)([A-Z])', sample.name)
+        yr, era = groups
+        from JMTucker.Tools.Year import year
+        assert year == int(yr)
+        return ['settings.era = "%s"' % era], []
     else:
         return [], []
 

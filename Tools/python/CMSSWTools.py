@@ -6,6 +6,7 @@ class CMSSWSettings(object):
         self.year = year
         self.is_mc = True
         self.is_miniaod = False
+        self.era = None
         #self.repro
 
 # following FWCore.ParameterSet.MassReplace.MassSearchReplaceAnyInputTagVisitor
@@ -455,13 +456,17 @@ def which_global_tag(settings=None):
         settings = CMSSWSettings()
     if settings.year == 2017:
         if settings.is_mc:
-            return '94X_mc2017_realistic_v16'
+            return '94X_mc2017_realistic_v17'
         else:
-            return '94X_dataRun2_v10'
+            return '94X_dataRun2_v11'
     elif settings.year == 2018:
         if settings.is_mc:
             return '102X_upgrade2018_realistic_v12'
         else:
-            return '102X_dataRun2_Prompt_v11'
+            assert settings.era
+            if settings.era in ('A','B','C'):
+                return '102X_dataRun2_Sep2018Rereco_v1'
+            else:
+                return '102X_dataRun2_Prompt_v11'
     else:
         raise ValueError('what year is it')
