@@ -405,6 +405,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   const int nsamples = 20*int(h_1v_dbv->GetEntries());
   printf("sampling %i times (should be %i)\n", nsamples, 20*int(h_1v_dbv->Integral()));
+  double events_after_eff = 0;
   for (int ij = 0; ij < nsamples; ++ij) {
     double dbv0 = h_1v_dbv0->GetRandom();
     double dbv1 = h_1v_dbv1->GetRandom();
@@ -442,7 +443,10 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
     h_c1v_dbv0->Fill(dbv0, prob);
     h_c1v_dbv1->Fill(dbv1, prob);
     h_c1v_dbv1_dbv0->Fill(dbv0, dbv1, prob);
+
+    events_after_eff += prob;
   }
+  printf("events before efficiency correction = %d, events after efficiency correction = %f, integrated efficiency correction = %f\n", nsamples, events_after_eff, events_after_eff/nsamples);
 
   for (int i = 1; i <= h_c1v_dvv->GetNbinsX(); ++i) {
     if (h_c1v_dvv->GetBinLowEdge(i) < 0.04) {
