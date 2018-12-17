@@ -224,6 +224,7 @@ def miniaod_ntuple_process(settings):
     process.load('PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi')
     process.load('PhysicsTools.PatAlgos.selectionLayer1.electronSelector_cfi')
     process.load('JMTucker.Tools.MCStatProducer_cff')
+    process.load('JMTucker.Tools.UpdatedJets_cff')
     process.load('JMTucker.Tools.PATTupleSelection_cfi')
     process.load('JMTucker.MFVNeutralino.UnpackedCandidateTracks_cfi')
     process.load('JMTucker.MFVNeutralino.Vertexer_cff')
@@ -232,7 +233,7 @@ def miniaod_ntuple_process(settings):
     process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 
     process.goodOfflinePrimaryVertices.src = 'offlineSlimmedPrimaryVertices'
-    process.selectedPatJets.src = 'slimmedJets'
+    process.selectedPatJets.src = 'updatedJetsMiniAOD'
     process.selectedPatMuons.src = 'slimmedMuons'
     process.selectedPatElectrons.src = 'slimmedElectrons'
     process.selectedPatJets.cut = process.jtupleParams.jetCut
@@ -253,6 +254,7 @@ def miniaod_ntuple_process(settings):
     process.mfvEvent.met_src = 'slimmedMETs'
 
     process.p = cms.Path(process.goodOfflinePrimaryVertices *
+                         process.updatedJetsSeqMiniAOD *
                          process.selectedPatJets *
                          process.selectedPatMuons *
                          process.selectedPatElectrons *
