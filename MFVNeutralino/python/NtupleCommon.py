@@ -177,6 +177,8 @@ def aod_ntuple_process(settings):
     random_service(process, {'mfvVertexTracks': 1222})
     tfileservice(process, 'vertex_histos.root')
 
+    process.load('JMTucker.Tools.L1ECALPrefiringWeightProducer_cfi')
+
     process.load('JMTucker.MFVNeutralino.Vertexer_cff')
     process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
     process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
@@ -184,6 +186,7 @@ def aod_ntuple_process(settings):
 
     process.p = cms.Path(process.mfvVertexSequence *
                          process.mfvTriggerFloats *
+                         process.prefiringweight *
                          process.mfvEvent)
 
     output_commands = make_output_commands(process, settings)
@@ -223,6 +226,7 @@ def miniaod_ntuple_process(settings):
     process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
     process.load('PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi')
     process.load('PhysicsTools.PatAlgos.selectionLayer1.electronSelector_cfi')
+    process.load('JMTucker.Tools.L1ECALPrefiringWeightProducer_cfi')
     process.load('JMTucker.Tools.MCStatProducer_cff')
     process.load('JMTucker.Tools.UpdatedJets_cff')
     process.load('JMTucker.Tools.PATTupleSelection_cfi')
@@ -261,6 +265,7 @@ def miniaod_ntuple_process(settings):
                          process.mfvTriggerFloats *
                          process.mfvUnpackedCandidateTracks *
                          process.mfvVertexSequence *
+                         process.prefiringweight *
                          process.mfvEvent)
 
     output_commands = make_output_commands(process, settings)
