@@ -20,7 +20,8 @@ input_files(process, {
 process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
 
-process.mfvTriggerFloats.jets_src = 'slimmedJets'
+process.load('JMTucker.Tools.UpdatedJets_cff')
+process.mfvTriggerFloats.jets_src = 'updatedJetsMiniAOD'
 process.mfvTriggerFloats.prints = 1
 
 process.p = cms.Path(process.mfvTriggerFilterJetsOnly * process.mfvTriggerFloats)
