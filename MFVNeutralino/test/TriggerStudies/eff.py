@@ -34,6 +34,13 @@ from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
 process.mutrig = hltHighLevel.clone()
 process.mutrig.HLTPaths = ['HLT_IsoMu%i_v*' % mu_thresh_hlt]
 
+process.weightSeq = cms.Sequence(process.jmtWeightMiniAOD)
+if False and settings.is_mc and settings.year == 2017:
+    process.load('JMTucker.Tools.L1ECALPrefiringWeightProducer_cfi')
+    process.weightSeq.insert(0, process.prefiringweight)
+    process.jmtWeightMiniAOD.weight_misc = True
+    process.jmtWeightMiniAOD.misc_srcs = cms.VInputTag(cms.InputTag('prefiringweight', "NonPrefiringProb"))
+
 process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
                              use_jetpt_weights = cms.int32(0),
                              require_hlt = cms.int32(-1),
@@ -53,13 +60,13 @@ process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
 process.denht1000 = process.den.clone(require_ht = 1000)
 process.denjet6pt75 = process.den.clone(require_6thjetpt = 75)
 process.denht1000jet6pt75 = process.den.clone(require_ht = 1000, require_6thjetpt = 75)
-process.p = cms.Path(process.jmtWeightMiniAOD * process.mutrig * process.updatedJetsSeqMiniAOD * process.selectedPatJets * process.mfvTriggerFloats * process.den * process.denht1000 * process.denjet6pt75 * process.denht1000jet6pt75)
+process.p = cms.Path(process.weightSeq * process.mutrig * process.updatedJetsSeqMiniAOD * process.selectedPatJets * process.mfvTriggerFloats * process.den * process.denht1000 * process.denjet6pt75 * process.denht1000jet6pt75)
 
 process.dennomu = process.den.clone(require_muon = False)
 process.dennomuht1000 = process.den.clone(require_muon = False, require_ht = 1000)
 process.dennomujet6pt75 = process.den.clone(require_muon = False, require_6thjetpt = 75)
 process.dennomuht1000jet6pt75 = process.den.clone(require_muon = False, require_ht = 1000, require_6thjetpt = 75)
-process.pnomu = cms.Path(process.jmtWeightMiniAOD * process.updatedJetsSeqMiniAOD * process.selectedPatJets * process.mfvTriggerFloats * process.dennomu * process.dennomuht1000 * process.dennomujet6pt75 * process.dennomuht1000jet6pt75)
+process.pnomu = cms.Path(process.weightSeq * process.updatedJetsSeqMiniAOD * process.selectedPatJets * process.mfvTriggerFloats * process.dennomu * process.dennomuht1000 * process.dennomujet6pt75 * process.dennomuht1000jet6pt75)
 
 for x in '', 'ht1000', 'jet6pt75', 'ht1000jet6pt75', 'nomu', 'nomuht1000', 'nomujet6pt75', 'nomuht1000jet6pt75':
     num = getattr(process, 'den%s' % x).clone(require_hlt = 0)
