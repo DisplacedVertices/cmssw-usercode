@@ -447,6 +447,9 @@ struct MFVEvent {
   int jet_track_npxlayers(int i) const { return jet_track_hp(i).npxlayers(); }
   int jet_track_nstlayers(int i) const { return jet_track_hp(i).nstlayers(); }
   int jet_track_nlayers(int i) const { return jet_track_hp(i).nlayers(); }
+
+  // stuff we aren't sure should be permanently in ntuple; the meaning of the entries is version-dependent
+  std::vector<float> misc;
 };
 
 #endif
