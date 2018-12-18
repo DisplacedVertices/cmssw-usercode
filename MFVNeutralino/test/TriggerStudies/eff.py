@@ -35,7 +35,7 @@ process.mutrig = hltHighLevel.clone()
 process.mutrig.HLTPaths = ['HLT_IsoMu%i_v*' % mu_thresh_hlt]
 
 process.weightSeq = cms.Sequence(process.jmtWeightMiniAOD)
-if False and settings.is_mc and settings.year == 2017:
+if False and settings.is_mc and settings.year == 2017 and settings.cross == '':
     process.load('JMTucker.Tools.L1ECALPrefiringWeightProducer_cfi')
     process.weightSeq.insert(0, process.prefiringweight)
     process.jmtWeightMiniAOD.weight_misc = True
