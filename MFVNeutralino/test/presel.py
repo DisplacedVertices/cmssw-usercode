@@ -67,6 +67,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2017p8.json'))
 
     ms = MetaSubmitter('PreselHistos%sV2%s' % (settings.version.capitalize(), '_' + settings.cross if settings.cross else ''), dataset=dataset)
-    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(cross=settings.cross))
+    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier(cross=settings.cross))
     ms.condor.stageout_files = 'all'
     ms.submit(samples)

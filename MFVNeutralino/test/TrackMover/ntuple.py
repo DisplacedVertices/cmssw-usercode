@@ -112,6 +112,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     set_splitting(samples, dataset, 'trackmover')
 
     ms = MetaSubmitter('TrackMover' + version, dataset=dataset)
-    ms.common.pset_modifier = is_mc_modifier
+    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier)
     ms.condor.stageout_files = 'all'
     ms.submit(samples)
