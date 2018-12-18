@@ -22,11 +22,12 @@ dataset = 'miniaod'
 sample_files(process, 'wjetstolnu_2017', dataset, 1)
 
 process.load('JMTucker.Tools.MCStatProducer_cff')
+process.load('JMTucker.Tools.UpdatedJets_cff')
 process.load('JMTucker.Tools.WeightProducer_cfi')
 process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
 
-process.selectedPatJets.src = 'slimmedJets'
+process.selectedPatJets.src = 'updatedJetsMiniAOD'
 process.selectedPatJets.cut = jtupleParams.jetCut
 
 from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
@@ -52,13 +53,13 @@ process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
 process.denht1000 = process.den.clone(require_ht = 1000)
 process.denjet6pt75 = process.den.clone(require_6thjetpt = 75)
 process.denht1000jet6pt75 = process.den.clone(require_ht = 1000, require_6thjetpt = 75)
-process.p = cms.Path(process.jmtWeightMiniAOD * process.mutrig * process.selectedPatJets * process.mfvTriggerFloats * process.den * process.denht1000 * process.denjet6pt75 * process.denht1000jet6pt75)
+process.p = cms.Path(process.jmtWeightMiniAOD * process.mutrig * process.updatedJetsSeqMiniAOD * process.selectedPatJets * process.mfvTriggerFloats * process.den * process.denht1000 * process.denjet6pt75 * process.denht1000jet6pt75)
 
 process.dennomu = process.den.clone(require_muon = False)
 process.dennomuht1000 = process.den.clone(require_muon = False, require_ht = 1000)
 process.dennomujet6pt75 = process.den.clone(require_muon = False, require_6thjetpt = 75)
 process.dennomuht1000jet6pt75 = process.den.clone(require_muon = False, require_ht = 1000, require_6thjetpt = 75)
-process.pnomu = cms.Path(process.jmtWeightMiniAOD * process.selectedPatJets * process.mfvTriggerFloats * process.dennomu * process.dennomuht1000 * process.dennomujet6pt75 * process.dennomuht1000jet6pt75)
+process.pnomu = cms.Path(process.jmtWeightMiniAOD * process.updatedJetsSeqMiniAOD * process.selectedPatJets * process.mfvTriggerFloats * process.dennomu * process.dennomuht1000 * process.dennomujet6pt75 * process.dennomuht1000jet6pt75)
 
 for x in '', 'ht1000', 'jet6pt75', 'ht1000jet6pt75', 'nomu', 'nomuht1000', 'nomujet6pt75', 'nomuht1000jet6pt75':
     num = getattr(process, 'den%s' % x).clone(require_hlt = 0)
@@ -87,6 +88,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     set_splitting(samples, dataset, 'default', json_path('ana_2017p8.json'), 50)
 
     ms = MetaSubmitter('TrigEff%s%s' % (version, '_' + settings.cross if settings.cross else ''), dataset=dataset)
-    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(cross=settings.cross))
+    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier(cross=settings.cross))
     ms.condor.stageout_files = 'all'
     ms.submit(samples)
