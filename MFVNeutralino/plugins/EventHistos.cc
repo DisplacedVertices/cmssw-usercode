@@ -126,6 +126,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_vertex_seed_track_pt;
   TH1F* h_vertex_seed_track_eta;
   TH1F* h_vertex_seed_track_phi;
+  TH2F* h_vertex_seed_track_phi_v_eta;
   TH1F* h_vertex_seed_track_dxy;
   TH1F* h_vertex_seed_track_dz;
   TH1F* h_vertex_seed_track_err_pt;
@@ -236,6 +237,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_vertex_seed_track_pt = fs->make<TH1F>("h_vertex_seed_track_pt", ";vertex seed track p_{T} (GeV);tracks/GeV", 300, 0, 300);
   h_vertex_seed_track_eta = fs->make<TH1F>("h_vertex_seed_track_eta", ";vertex seed track #eta;tracks/0.052", 100, -2.6, 2.6);
   h_vertex_seed_track_phi = fs->make<TH1F>("h_vertex_seed_track_phi", ";vertex seed track #phi;tracks/0.063", 100, -3.15, 3.15);
+  h_vertex_seed_track_phi_v_eta = fs->make<TH2F>("h_vertex_seed_track_phi_v_eta", ";vertex seed track #eta;vertex seed track #phi", 26, -2.6, 2.6, 24, -M_PI, M_PI);
   h_vertex_seed_track_dxy = fs->make<TH1F>("h_vertex_seed_track_dxy", ";vertex seed track dxy (cm);tracks/10 #mum", 200, -0.1, 0.1);
   h_vertex_seed_track_dz = fs->make<TH1F>("h_vertex_seed_track_dz", ";vertex seed track dz (cm);tracks/10 #mum", 200, -0.1, 0.1);
   h_vertex_seed_track_err_pt = fs->make<TH1F>("h_vertex_seed_track_err_pt", ";vertex seed track #sigma(p_{T})/p_{T} (GeV);tracks/0.005", 100, 0, 0.5);
@@ -482,6 +484,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_vertex_seed_track_pt->Fill(mevent->vertex_seed_track_pt(i), w);
     h_vertex_seed_track_eta->Fill(mevent->vertex_seed_track_eta[i], w);
     h_vertex_seed_track_phi->Fill(mevent->vertex_seed_track_phi[i], w);
+    h_vertex_seed_track_phi_v_eta->Fill(mevent->vertex_seed_track_eta[i], mevent->vertex_seed_track_phi[i], w);
     h_vertex_seed_track_dxy->Fill(mevent->vertex_seed_track_dxy[i], w);
     h_vertex_seed_track_dz->Fill(mevent->vertex_seed_track_dz[i], w);
     h_vertex_seed_track_err_pt->Fill(mevent->vertex_seed_track_err_pt[i] / mevent->vertex_seed_track_pt(i), w);
