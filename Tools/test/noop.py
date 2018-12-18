@@ -5,6 +5,8 @@ sample_files(process, 'qcdht0700_2017', dataset, 1)
 remove_tfileservice(process)
 file_event_from_argv(process)
 
+add_analyzer(process, 'NoOP')
+
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
