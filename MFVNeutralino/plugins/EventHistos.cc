@@ -11,8 +11,6 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
 
-#define NBDISC 2
-
 class MFVEventHistos : public edm::EDAnalyzer {
  public:
   explicit MFVEventHistos(const edm::ParameterSet&);
@@ -34,15 +32,6 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_bquark_phi;
   TH1F* h_bquark_energy;
   TH1F* h_bquark_pairdphi;
-  TH1F* h_bquark_pairdr;
-  TH1F* h_bquarks_absdphi;
-  TH1F* h_bquarks_dphi;
-  TH1F* h_bquarks_deta;
-  TH2F* h_bquarks_deta_dphi;
-  TH1F* h_bquarks_avgeta;
-  TH2F* h_bquarks_avgeta_dphi;
-  TH1F* h_bquarks_dR;
-  TH2F* h_bquarks_dR_dphi;
 
   TH1F* h_minlspdist2d;
   TH1F* h_lspdist2d;
@@ -92,21 +81,15 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_met;
   TH1F* h_metphi;
 
-  TH1F* h_nbtags;
+  TH1F* h_nbtags[3];
+  TH2F* h_nbtags_v_bquark_code[3];
+  TH1F* h_jet_bdisc;
+  TH2F* h_jet_bdisc_v_bquark_code;
   TH1F* h_bjet_pt;
   TH1F* h_bjet_eta;
   TH1F* h_bjet_phi;
+  TH1F* h_bjet_energy;
   TH1F* h_bjet_pairdphi;
-  TH1F* h_bjet_pairdr;
-
-  TH1F* h_bjets_absdphi[2];
-  TH1F* h_bjets_dphi[2];
-  TH1F* h_bjets_deta[2];
-  TH2F* h_bjets_deta_dphi[2];
-  TH1F* h_bjets_avgeta[2];
-  TH2F* h_bjets_avgeta_dphi[2];
-  TH1F* h_bjets_dR[2];
-  TH2F* h_bjets_dR_dphi[2];
 
   TH1F* h_nmuons[2];
   TH1F* h_nelectrons[2];
@@ -163,15 +146,6 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_bquark_phi = fs->make<TH1F>("h_bquark_phi", ";bquarks #phi (rad);bquarks/.063", 100, -3.1416, 3.1416);
   h_bquark_energy = fs->make<TH1F>("h_bquark_energy", ";bquarks energy (GeV);bquarks/10 GeV", 100, 0, 1000);
   h_bquark_pairdphi = fs->make<TH1F>("h_bquark_pairdphi", ";bquark pair #Delta#phi (rad);bquark pairs/.063", 100, -3.1416, 3.1416);
-  h_bquark_pairdr = fs->make<TH1F>("h_bquark_pairdr", ";bquark pair #DeltaR (rad);bquark pairs/.063", 100, 0, 6.3);
-  h_bquarks_absdphi = fs->make<TH1F>("h_bquarks_absdphi", "events with two bquarks;|#Delta#phi|;Events/0.126", 25, 0, 3.15);
-  h_bquarks_dphi = fs->make<TH1F>("h_bquarks_dphi", "events with two bquarks;#Delta#phi;Events/0.126", 50, -3.15, 3.15);
-  h_bquarks_deta = fs->make<TH1F>("h_bquarks_deta", "events with two bquarks;#Delta#eta;Events/0.16", 50, -4, 4);
-  h_bquarks_deta_dphi = fs->make<TH2F>("h_bquarks_deta_dphi", "events with two bquarks;#Delta#phi;#Delta#eta", 20, -3.15, 3.15, 20, -4, 4);
-  h_bquarks_avgeta = fs->make<TH1F>("h_bquarks_avgeta", "events with two bquarks;avg #eta;Events/0.16", 50, -4, 4);
-  h_bquarks_avgeta_dphi = fs->make<TH2F>("h_bquarks_avgeta_dphi", "events with two bquarks;#Delta#phi;avg #eta", 20, -3.15, 3.15, 20, -4, 4);
-  h_bquarks_dR = fs->make<TH1F>("h_bquarks_dR", "events with two bquarks;#Delta R;Events/0.126", 50, 0, 6.3);
-  h_bquarks_dR_dphi = fs->make<TH2F>("h_bquarks_dR_dphi", "events with two bquarks;#Delta#phi;#Delta R", 20, -3.15, 3.15, 20, 0, 6.3);
 
   h_minlspdist2d = fs->make<TH1F>("h_minlspdist2d", ";min dist2d(gen vtx #i) (cm);events/0.1 mm", 200, 0, 2);
   h_lspdist2d = fs->make<TH1F>("h_lspdist2d", ";dist2d(gen vtx #0, #1) (cm);events/0.1 mm", 200, 0, 2);
@@ -255,25 +229,19 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_met = fs->make<TH1F>("h_met", ";MET (GeV);events/5 GeV", 100, 0, 500);
   h_metphi = fs->make<TH1F>("h_metphi", ";MET #phi (rad);events/.063", 100, -3.1416, 3.1416);
 
+  const char* lmt_ex[3] = {"loose", "medium", "tight"};
   const char* lep_kind[2] = {"muon", "electron"};
-  const char* bjets_pt[2] = {"20", "50"};
-  h_nbtags = fs->make<TH1F>("h_nbtags", ";# of b-tags;events", 10, 0, 10);
+  for (int i = 0; i < 3; ++i) {
+    h_nbtags[i] = fs->make<TH1F>(TString::Format("h_nbtags_%i", i), TString::Format(";# of %s b tags;events", lmt_ex[i]), 10, 0, 10);
+    h_nbtags_v_bquark_code[i] = fs->make<TH2F>(TString::Format("h_nbtags_v_bquark_code_%i", i), TString::Format(";bquark code;# of %s b tags", lmt_ex[i]), 3, 0, 3, 3, 0, 3);
+  }
+  h_jet_bdisc = fs->make<TH1F>("h_jet_bdisc", ";jets' b discriminator;/10 GeV", 51, 0, 1.02);
+  h_jet_bdisc_v_bquark_code = fs->make<TH2F>("h_jet_bdisc_v_bquark_code", ";b quark code;jets' b discriminator", 3, 0, 3, 51, 0, 1.02);
   h_bjet_pt = fs->make<TH1F>("h_bjet_pt", ";bjets p_{T} (GeV);bjets/10 GeV", 150, 0, 1500);
   h_bjet_eta = fs->make<TH1F>("h_bjet_eta", ";bjets #eta (rad);bjets/.05", 120, -3, 3);
   h_bjet_phi = fs->make<TH1F>("h_bjet_phi", ";bjets #phi (rad);bjets/.063", 100, -3.1416, 3.1416);
+  h_bjet_energy = fs->make<TH1F>("h_bjet_energy", ";bjets E (GeV);bjets/10 GeV", 150, 0, 1500);
   h_bjet_pairdphi = fs->make<TH1F>("h_bjet_pairdphi", ";bjet pair #Delta#phi (rad);bjet pairs/.063", 100, -3.1416, 3.1416);
-  h_bjet_pairdr = fs->make<TH1F>("h_bjet_pairdr", ";bjet pair #DeltaR (rad);bjet pairs/.063", 100, 0, 6.3);
-
-  for (int j = 0; j < 2; ++j) {
-    h_bjets_absdphi[j] = fs->make<TH1F>(TString::Format("h_bjets_ptgt%s_absdphi", bjets_pt[j]), TString::Format("events with two %s GeV bjets;|#Delta#phi| (rad);events/0.126", bjets_pt[j]), 25, 0, 3.15);
-    h_bjets_dphi[j] = fs->make<TH1F>(TString::Format("h_bjets_ptgt%s_dphi", bjets_pt[j]), TString::Format("events with two %s GeV bjets;#Delta#phi (rad);events/0.126", bjets_pt[j]), 50, -3.15, 3.15);
-    h_bjets_deta[j] = fs->make<TH1F>(TString::Format("h_bjets_ptgt%s_deta", bjets_pt[j]), TString::Format("events with two %s GeV bjets;#Delta#eta (rad);events/0.16", bjets_pt[j]), 50, -4, 4);
-    h_bjets_deta_dphi[j] = fs->make<TH2F>(TString::Format("h_bjets_ptgt%s_deta_dphi", bjets_pt[j]), TString::Format("events with two %s GeV bjets;#Delta#phi (rad);#Delta#eta (rad)", bjets_pt[j]), 50, -3.15, 3.15, 50, -4, 4);
-    h_bjets_avgeta[j] = fs->make<TH1F>(TString::Format("h_bjets_ptgt%s_avgeta", bjets_pt[j]), TString::Format("events with two %s GeV bjets;avg #eta (rad);events/0.16", bjets_pt[j]), 50, -4, 4);
-    h_bjets_avgeta_dphi[j] = fs->make<TH2F>(TString::Format("h_bjets_ptgt%s_avgeta_dphi", bjets_pt[j]), TString::Format("events with two %s GeV bjets;#Delta#phi (rad); avg #eta (rad)", bjets_pt[j]), 50, -3.15, 3.15, 50, -4, 4);
-    h_bjets_dR[j] = fs->make<TH1F>(TString::Format("h_bjets_ptgt%s_dR", bjets_pt[j]), TString::Format("events with two %s GeV bjets;#Delta R (rad); events/0.126", bjets_pt[j]), 50, 0, 6.3);
-    h_bjets_dR_dphi[j] = fs->make<TH2F>(TString::Format("h_bjets_ptgt%s_dR_dphi", bjets_pt[j]), TString::Format("events with two %s GeV bjets;#Delta#phi (rad);#Delta R (rad)", bjets_pt[j]), 50, -3.15, 3.15, 50, 0, 6.3);
-  }
 
   const char* lep_ex[2] = {"any", "selected"};
   for (int i = 0; i < 2; ++i) {
@@ -317,24 +285,8 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_bquark_eta->Fill(mevent->gen_bquarks[i].Eta(), w);
     h_bquark_phi->Fill(mevent->gen_bquarks[i].Phi(), w);
     h_bquark_energy->Fill(mevent->gen_bquarks[i].E(), w);
-    for (size_t j = i+1; j < nbquarks; ++j) {
-      const double dphi = reco::deltaPhi(mevent->gen_bquarks[i].Phi(), mevent->gen_bquarks[j].Phi());
-      const double deta = mevent->gen_bquarks[i].Eta() - mevent->gen_bquarks[j].Eta(); // JMTBAD why not fabs
-      const double avgeta = (mevent->gen_bquarks[i].Eta() + mevent->gen_bquarks[j].Eta()) / 2;
-      const double dR = reco::deltaR(mevent->gen_bquarks[i].Eta(), mevent->gen_bquarks[i].Phi(), mevent->gen_bquarks[j].Eta(), mevent->gen_bquarks[j].Phi());
-      h_bquark_pairdphi->Fill(dphi, w);
-      h_bquark_pairdr->Fill(dR, w);
-      if (nbquarks == 2) {
-        h_bquarks_absdphi->Fill(fabs(dphi), w);
-        h_bquarks_dphi->Fill(dphi, w);
-        h_bquarks_deta->Fill(deta, w);
-        h_bquarks_deta_dphi->Fill(dphi, deta, w);
-        h_bquarks_avgeta->Fill(avgeta, w);
-        h_bquarks_avgeta_dphi->Fill(dphi, avgeta, w);
-        h_bquarks_dR->Fill(dR, w);
-        h_bquarks_dR_dphi->Fill(dphi, dR, w);
-      }
-    }
+    for (size_t j = i+1; j < nbquarks; ++j)
+      h_bquark_pairdphi->Fill(reco::deltaPhi(mevent->gen_bquarks[i].Phi(), mevent->gen_bquarks[j].Phi()), w);
   }
 
   h_minlspdist2d->Fill(mevent->minlspdist2d(), w);
@@ -428,49 +380,28 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_met->Fill(mevent->met(), w);
   h_metphi->Fill(mevent->metphi(), w);
 
-  std::vector<double> bjets_eta[2];
-  std::vector<double> bjets_phi[2];
+  for (int i = 0; i < 3; ++i) {
+    h_nbtags[i]->Fill(mevent->nbtags(i), w);
+    h_nbtags_v_bquark_code[i]->Fill(mevent->gen_flavor_code, mevent->nbtags(i), w);
+  }
   const int ibtag = 2; // tight only
-  h_nbtags->Fill(mevent->nbtags(ibtag), w);
-
   for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
     if (mevent->jet_pt[ijet] < mfv::min_jet_pt)
       continue;
+    h_jet_bdisc->Fill(mevent->jet_bdisc[ijet], w);
+    h_jet_bdisc_v_bquark_code->Fill(mevent->gen_flavor_code, mevent->jet_bdisc[ijet], w);
     if (mevent->is_btagged(ijet, ibtag)) {
       h_bjet_pt->Fill(mevent->jet_pt[ijet], w);
       h_bjet_eta->Fill(mevent->jet_eta[ijet], w);
       h_bjet_phi->Fill(mevent->jet_phi[ijet], w);
+      h_bjet_energy->Fill(mevent->jet_energy[ijet], w);
       for (size_t jjet = ijet+1; jjet < mevent->jet_id.size(); ++jjet) {
         if (mevent->jet_pt[jjet] < mfv::min_jet_pt)
           continue;
         if (mevent->is_btagged(jjet, ibtag)) {
           h_bjet_pairdphi->Fill(reco::deltaPhi(mevent->jet_phi[ijet], mevent->jet_phi[jjet]), w);
-          h_bjet_pairdr->Fill(reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->jet_eta[jjet], mevent->jet_phi[jjet]), w);
         }
       }
-
-      for (int j = 0; j < 2; ++j) {
-        if (j == 1 && mevent->jet_pt[ijet] < 50) continue;
-        bjets_eta[j].push_back(mevent->jet_eta[ijet]);
-        bjets_phi[j].push_back(mevent->jet_phi[ijet]);
-      }
-    }
-  }
-
-  for (int j = 0; j < 2; ++j) {
-    if (bjets_phi[j].size() == 2) { // JMTBAD why only consider events with exactly 2 btags?
-      double dphi = reco::deltaPhi(bjets_phi[j][0], bjets_phi[j][1]);
-      double deta = bjets_eta[j][0] - bjets_eta[j][1];
-      double avgeta = (bjets_eta[j][0] + bjets_eta[j][1]) / 2;
-      double dR = reco::deltaR(bjets_eta[j][0], bjets_phi[j][0], bjets_eta[j][1], bjets_phi[j][1]);
-      h_bjets_absdphi[j]->Fill(fabs(dphi), w);
-      h_bjets_dphi[j]->Fill(dphi, w);
-      h_bjets_deta[j]->Fill(deta, w);
-      h_bjets_deta_dphi[j]->Fill(dphi, deta, w);
-      h_bjets_avgeta[j]->Fill(avgeta, w);
-      h_bjets_avgeta_dphi[j]->Fill(dphi, avgeta, w);
-      h_bjets_dR[j]->Fill(dR, w);
-      h_bjets_dR_dphi[j]->Fill(dphi, dR, w);
     }
   }
 
