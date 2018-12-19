@@ -30,6 +30,7 @@ process.mfvAnalysisCutsJet    = process.mfvAnalysisCuts.clone(apply_vertex_cuts 
 process.mfvAnalysisCutsLepton = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False, apply_presel = 2)
 
 process.preSeq = cms.Sequence(process.goodOfflinePrimaryVertices *
+                              process.updatedJetsSeqMiniAOD *
                               process.selectedPatJets *
                               process.selectedPatMuons *
                               process.selectedPatElectrons *
@@ -37,6 +38,7 @@ process.preSeq = cms.Sequence(process.goodOfflinePrimaryVertices *
                               process.mfvGenParticles *
                               process.mfvUnpackedCandidateTracks *
                               process.mfvVertexTracks *
+                              process.prefiringweight *
                               process.mfvEvent *
                               process.mfvWeight)
 
