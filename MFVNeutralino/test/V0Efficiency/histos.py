@@ -8,7 +8,7 @@ settings.zerobias = False
 settings.cross = '' # 2017to2018' # 2017to2017p8'
 meatloverssupreme = True
 dataset_version = 1
-dataset = 'v0ntuplev21mv%i' % dataset_version
+dataset = 'v0ntuplev22mv%i' % dataset_version
 
 geometry_etc(process, which_global_tag(settings))
 tfileservice(process, 'v0histos.root')

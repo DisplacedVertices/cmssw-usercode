@@ -3,7 +3,7 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 is_mc = True # for blinding
 cross = '' # 2017to2018' # 2017to2017p8'
 
-version = 'v21m'
+version = 'v22m'
 dataset = 'ntuple' + version
 sample_files(process, 'qcdht2000_2017', dataset, 1)
 tfileservice(process, 'histos.root')

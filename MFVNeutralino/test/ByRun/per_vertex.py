@@ -1,6 +1,6 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-version = 'v21m'
+version = 'v22m'
 dataset = 'ntuple' + version
 sample_files(process, 'JetHT2017F', dataset, 1)
 tfileservice(process, 'per_vertex.root')

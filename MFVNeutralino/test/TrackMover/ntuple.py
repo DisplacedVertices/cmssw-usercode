@@ -8,7 +8,7 @@ settings.is_mc = True
 settings.is_miniaod = True
 settings.event_filter = 'jets only novtx'
 
-version = settings.version + 'V2'
+version = settings.version + 'V1'
 
 cfgs = named_product(njets = [2,3],
                      nbjets = [0,1,2],

@@ -19,10 +19,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     else:
         samples = Samples.data_samples_2018
 
-    dataset = 'ntuplev21m'
+    dataset = 'ntuplev22m'
     samples = [s for s in samples if s.has_dataset(dataset)]
     set_splitting(samples, dataset, 'default', default_files_per=50)
 
-    ms = MetaSubmitter('EventIdsV21m', dataset=dataset)
+    ms = MetaSubmitter('EventIdsV22m', dataset=dataset)
     ms.condor.stageout_files = 'all'
     ms.submit(samples)

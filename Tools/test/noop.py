@@ -1,6 +1,6 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-dataset = 'miniaod'
+dataset = 'ntuplev22m' # 'miniaod'
 sample_files(process, 'qcdht0700_2017', dataset, 1)
 remove_tfileservice(process)
 file_event_from_argv(process)
@@ -21,6 +21,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     samples = [s for s in samples if s.has_dataset(dataset)]
     set_splitting(samples, dataset, 'default', default_files_per=50)
 
-    ms = MetaSubmitter('NoOPV21m', dataset=dataset)
+    ms = MetaSubmitter('NoOPV22m', dataset=dataset)
     ms.condor.stageout_files = 'all'
     ms.submit(samples)

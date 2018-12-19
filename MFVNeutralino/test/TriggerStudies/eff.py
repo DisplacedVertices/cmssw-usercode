@@ -8,7 +8,7 @@ settings = CMSSWSettings()
 settings.is_mc = True
 settings.cross = ''
 
-version = '2017p8v3'
+version = '2017p8v4'
 
 mu_thresh_hlt = 27
 mu_thresh_offline = 30

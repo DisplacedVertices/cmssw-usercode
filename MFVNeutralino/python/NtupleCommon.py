@@ -1,7 +1,7 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version = 'V21'
+ntuple_version = 'V22'
 
 def run_n_tk_seeds(process, mode, settings, output_commands):
     if mode:
