@@ -24,8 +24,9 @@ def zerobias_modifier(sample):
 
 def era_modifier(sample):
     if not sample.is_mc:
-        groups = re.search(r'(201\d)([A-Z])', sample.name)
-        yr, era = groups
+        mo = re.search(r'(201\d)([A-Z])', sample.name)
+        assert mo
+        yr, era = mo.groups()
         from JMTucker.Tools.Year import year
         assert year == int(yr)
         return ['settings.era = "%s"' % era], []
@@ -309,8 +310,8 @@ __all__ = [
     'set_splitting',
     'max_output_modifier',
     'is_mc_modifier',
-    'H_modifier',
     'zerobias_modifier',
+    'era_modifier',
     'repro_modifier',
     'half_mc_modifier',
     'npu_filter_modifier',
