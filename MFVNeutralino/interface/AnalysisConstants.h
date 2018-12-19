@@ -15,6 +15,15 @@ namespace mfv {
 
     const double
     scale_factor_2017 = 1.;
+
+    const double
+    int_lumi_2018 = 59968.;
+
+    const char*
+    int_lumi_nice_2018 = "  60.0 fb^{-1} (13 TeV)";
+
+    const double
+    scale_factor_2018 = 1.;
   }
 }
 
