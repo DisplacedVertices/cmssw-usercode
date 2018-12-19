@@ -6,7 +6,7 @@ from JMTucker.Tools.Year import year
 
 settings = CMSSWSettings()
 settings.is_mc = True
-settings.cross = ''
+settings.cross = '' # 2017to2018' # 2017to2017p8'
 
 version = '2017p8v4'
 
