@@ -29,7 +29,8 @@ def era_modifier(sample):
         yr, era = mo.groups()
         from JMTucker.Tools.Year import year
         assert year == int(yr)
-        return ['settings.era = "%s"' % era], []
+        magic = '\nsettings.is_mc ='
+        return [], [(magic, ('\nsettings.era = "%s"' % era) + magic, 'trying to submit on data and no magic string %r' % magic)]
     else:
         return [], []
 
