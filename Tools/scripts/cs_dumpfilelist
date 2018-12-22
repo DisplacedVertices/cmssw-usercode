@@ -32,9 +32,9 @@ for wd in wds:
 
     if edit:
         os.system('emacs -nw cs_filelist.py cs_filelist2.py')
-        if raw_input('replace? ') == 'y':
-            bak_fn = 'cs_filelist.py.bak'
-            while os.path.isfile(bak_fn):
-                bak_fn += '.bak'
-            os.rename('cs_filelist.py', bak_fn)
-            os.rename('cs_filelist2.py', 'cs_filelist.py')
+        raw_input('hit enter to replace, ^C to cancel '):
+        bak_fn = 'cs_filelist.py.bak'
+        while os.path.isfile(bak_fn):
+            bak_fn += '.bak'
+        os.rename('cs_filelist.py', bak_fn)
+        os.rename('cs_filelist2.py', 'cs_filelist.py')
