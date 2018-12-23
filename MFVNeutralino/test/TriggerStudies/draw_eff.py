@@ -5,7 +5,7 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.Tools.Samples import *
 
-version = '2017p8v3'
+version = '2017p8v4'
 zoom = False #(0.98,1.005)
 save_more = True
 data_only = False
@@ -59,7 +59,7 @@ n_bkg_samples = len(bkg_samples)
 for samples in bkg_samples, sig_samples:
     for sample in samples:
         sample.fn = os.path.join(root_dir, sample.name + '.root')
-        sample.f = ROOT.TFile(sample.fn)
+        sample.f = ROOT.TFile(sample.fn) if os.path.isfile(sample.fn) else None
 
 ########################################################################
 
@@ -311,9 +311,10 @@ for kind in kinds:
 
         print '\nsignals'
         for sample in sig_samples:
-            sig_num, sig_den = get(sample.f, kind, n)
-            ib = sig_num.FindBin(lump_lower)
-            ni = sig_num.Integral(ib, 10000)
-            di = sig_den.Integral(ib, 10000)
-            print '   %10i %10i %10s %10s  %.6f [%.6f, %.6f]' % ((ni, di, '', '') + clopper_pearson(ni, di))
-            print '+- %10.2f %10.2f' % (ni**0.5, di**0.5)
+            if sample.f:
+                sig_num, sig_den = get(sample.f, kind, n)
+                ib = sig_num.FindBin(lump_lower)
+                ni = sig_num.Integral(ib, 10000)
+                di = sig_den.Integral(ib, 10000)
+                print '   %10i %10i %10s %10s  %.6f [%.6f, %.6f]' % ((ni, di, '', '') + clopper_pearson(ni, di))
+                print '+- %10.2f %10.2f' % (ni**0.5, di**0.5)
