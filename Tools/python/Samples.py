@@ -343,6 +343,12 @@ for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + mfv_signal_
             x.add_dataset("ntuplev21m_ntkseeds")
         x.add_dataset("v0ntuplev21mv1")
 
+for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + \
+         data_samples_2018:
+    if x == JetHT2017F:
+        continue
+    x.add_dataset("ntuplev22m")
+
 ########
 # automatic condor declarations for ntuples
 ########
