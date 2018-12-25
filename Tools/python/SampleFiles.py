@@ -500,7 +500,7 @@ _add_ds("ntuplev22m", {
 'JetHT2017C': _fromnum1("/store/user/tucker/JetHT/NtupleV22m_2017/181219_024516", 38),
 'JetHT2017D': _fromnum1("/store/user/tucker/JetHT/NtupleV22m_2017/181219_024618", 18),
 'JetHT2017E': _fromnum1("/store/user/tucker/JetHT/NtupleV22m_2017/181219_024646", 41),
-#'JetHT2017F'
+'JetHT2017F': _fromnum1("/store/user/tucker/JetHT/NtupleV22m_2017/181219_024707", 51),
 'JetHT2018A': _fromnum1("/store/user/tucker/JetHT/NtupleV22m_2018/181219_024606", 121),
 'JetHT2018B': _fromnum1("/store/user/tucker/JetHT/NtupleV22m_2018/181219_024626", 64),
 'JetHT2018C': _fromnum1("/store/user/tucker/JetHT/NtupleV22m_2018/181219_024642", 50),
