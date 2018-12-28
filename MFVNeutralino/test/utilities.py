@@ -227,7 +227,9 @@ def cmd_trigeff():
     if glob('*SingleMuon*'):
         cmd_report_data()
         cmd_hadd_data()
+    cmd_trigeff_merge()
 
+def cmd_trigeff_merge():
     permissive = bool_from_argv('permissive')
     print colors.yellow('using *_2017* for 2018')
     for year_s, scale in ('_2017', -AnalysisConstants.int_lumi_2017), ('_2018', -AnalysisConstants.int_lumi_2018):
@@ -248,9 +250,13 @@ def cmd_trigeff():
                     files2.append(fn)
 
             if files2:
-                cmd = 'samples merge %f background%s%s.root %s' % (scale, wqcd_s, year_s, ' '.join(files2))
-                print cmd
-                os.system(cmd)
+                out_fn = 'background%s%s.root' % (wqcd_s, year_s)
+                if os.path.exists(out_fn):
+                    print colors.yellow('skipping %s because it exists' % out_fn)
+                else:
+                    cmd = 'samples merge %f %s %s' % (scale, out_fn, ' '.join(files2))
+                    print cmd
+                    os.system(cmd)
 
 def cmd_merge_bquarks_nobquarks():
     for year in ['2017']:
