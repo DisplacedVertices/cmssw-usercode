@@ -12,6 +12,7 @@ version = '2017p8v4'
 
 mu_thresh_hlt = 27
 mu_thresh_offline = 30
+weight_l1ecal = ''
 
 tfileservice(process, 'eff.root')
 global_tag(process, which_global_tag(settings))
@@ -35,11 +36,21 @@ process.mutrig = hltHighLevel.clone()
 process.mutrig.HLTPaths = ['HLT_IsoMu%i_v*' % mu_thresh_hlt]
 
 process.weightSeq = cms.Sequence(process.jmtWeightMiniAOD)
-if False and settings.is_mc and settings.year == 2017 and settings.cross == '':
+
+if weight_l1ecal and settings.is_mc and settings.year == 2017 and settings.cross == '':
     process.load('JMTucker.Tools.L1ECALPrefiringWeightProducer_cfi')
-    process.weightSeq.insert(0, process.prefiringweight)
-    process.jmtWeightMiniAOD.weight_misc = True
-    process.jmtWeightMiniAOD.misc_srcs = cms.VInputTag(cms.InputTag('prefiringweight', "NonPrefiringProb"))
+    if 'separate' in weight_l1ecal:
+        w = process.jmtWeightMiniAODL1Ecal = process.jmtWeightMiniAOD.clone()
+        process.weightSeq.insert(0, process.prefiringweight * process.jmtWeightMiniAODL1Ecal)
+    else:
+        w = process.jmtWeightMiniAOD
+    which = 'NonPrefiringProb'
+    if 'up' in weight_l1ecal:
+        which += 'Up'
+    elif 'down' in weight_l1ecal:
+        which += 'Down'
+    w.weight_misc = True
+    w.misc_srcs = cms.VInputTag(cms.InputTag('prefiringweight', which))
 
 process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
                              use_jetpt_weights = cms.int32(0),
@@ -70,6 +81,8 @@ process.pnomu = cms.Path(process.weightSeq * process.updatedJetsSeqMiniAOD * pro
 
 for x in '', 'ht1000', 'jet6pt75', 'ht1000jet6pt75', 'nomu', 'nomuht1000', 'nomujet6pt75', 'nomuht1000jet6pt75':
     num = getattr(process, 'den%s' % x).clone(require_hlt = 0)
+    if 'separate' in weight_l1ecal:
+        num.weight_src = 'jmtWeightMiniAODL1Ecal'
     setattr(process, 'num%s' % x, num)
     if 'nomu' in x:
         process.pnomu *= num
