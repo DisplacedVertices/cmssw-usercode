@@ -3,7 +3,7 @@
 import os, sys
 from collections import defaultdict
 from fnmatch import fnmatch
-import JMTucker.Tools.DBS as DBS
+from JMTucker.Tools import DBS
 from JMTucker.Tools.general import big_warn, typed_from_argv
 
 ########################################################################
@@ -499,7 +499,9 @@ def merge(samples, output='merge.root', norm_to=1., norm_path=''):
     files = ' '.join(files)
 
     cmd = 'mergeTFileServiceHistograms -w %s -i %s -o %s 2>&1 | grep -v "Sum of squares of weights structure already created"' % (weights, files, output)
-    print cmd
+    ocmd = cmd.split(' 2>&1')[0]
+    print ocmd
+    open(output + '.log', 'wt').write(ocmd)
     os.system(cmd)
 
 def sample_from_end_string(namespace, d):
