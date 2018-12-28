@@ -16,12 +16,15 @@ if not wds:
     sys.exit(1)
 
 for wd in wds:
-    execfile(os.path.join(wd, 'cs_filelist.py'))
+    orig_fn = os.path.join(wd, 'cs_filelist.py')
+    new_fn  = os.path.join(wd, 'cs_filelist2.py')
+
+    execfile(orig_fn)
 
     if stdout:
         f = sys.stdout
     else:
-        f = open(os.path.join(wd, 'cs_filelist2.py'), 'wt')
+        f = open(new_fn, 'wt')
 
     f.write('_l = ')
     pprint(_l, f)
@@ -31,10 +34,11 @@ for wd in wds:
         f.close()
 
     if edit:
-        os.system('emacs -nw cs_filelist.py cs_filelist2.py')
-        raw_input('hit enter to replace, ^C to cancel '):
-        bak_fn = 'cs_filelist.py.bak'
-        while os.path.isfile(bak_fn):
-            bak_fn += '.bak'
-        os.rename('cs_filelist.py', bak_fn)
-        os.rename('cs_filelist2.py', 'cs_filelist.py')
+        os.system('emacs -nw %s %s' % (orig_fn, new_fn))
+        if os.system('diff %s %s' % (orig_fn, new_fn)) != 0:
+            raw_input('hit enter to replace, ^C to cancel ')
+            bak_fn = os.path.join(wd, 'cs_filelist.py.bak')
+            while os.path.isfile(bak_fn):
+                bak_fn += '.bak'
+            os.rename(orig_fn, bak_fn)
+            os.rename(new_fn, orig_fn)
