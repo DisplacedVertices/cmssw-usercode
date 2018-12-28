@@ -118,6 +118,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     if year == 2017:
         samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.all_signal_samples_2017 + Samples.data_samples_2017
+        #samples = Samples.data_samples_2017
         #samples = Samples.ttbar_samples_2017 + Samples.leptonic_samples_2017 + Samples.mfv_signal_samples_2017
     elif year == 2018:
         samples = Samples.data_samples_2018
