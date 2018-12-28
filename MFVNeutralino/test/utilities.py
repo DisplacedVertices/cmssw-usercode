@@ -4,8 +4,7 @@ import sys, os, shutil
 from pprint import pprint
 from glob import glob
 from time import time
-from JMTucker.Tools import Samples
-from JMTucker.Tools import SampleFiles
+from JMTucker.Tools import Samples, SampleFiles, colors
 from JMTucker.Tools.general import bool_from_argv
 from JMTucker.Tools.hadd import hadd
 from JMTucker.Tools.CMSSWTools import is_edm_file, merge_edm_files, cmssw_base, json_path
@@ -225,16 +224,18 @@ def cmd_v0eff():
 
 def cmd_trigeff():
     cmd_hadd_mc_sums()
-    cmd_report_data()
-    cmd_hadd_data()
+    if glob('*SingleMuon*'):
+        cmd_report_data()
+        cmd_hadd_data()
 
     permissive = bool_from_argv('permissive')
-    for year_s, scale in ('_2017', -AnalysisConstants.int_lumi_2017),:
+    print colors.yellow('using *_2017* for 2018')
+    for year_s, scale in ('_2017', -AnalysisConstants.int_lumi_2017), ('_2018', -AnalysisConstants.int_lumi_2018):
         for wqcd_s in '', '_wqcd':
             files = _background_samples(trigeff=True)
             if not wqcd_s:
                 files.remove('qcdmupt15')
-            files = ['%s%s.root' % (x, year_s) for x in files]
+            files = ['%s%s.root' % (x, '_2017') for x in files]
             files2 = []
             for fn in files:
                 if not os.path.isfile(fn):
