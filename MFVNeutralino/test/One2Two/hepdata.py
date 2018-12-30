@@ -34,7 +34,6 @@ syms_replaces = [
 from JMTucker.Tools import colors
 from JMTucker.Tools.ROOTTools import ROOT
 import os, string, textwrap, hepdata_lib as hepdata
-from itertools import combinations
 from pprint import pprint
 
 paper_path = os.path.join(tdr_path, 'papers/%s/trunk' % paper_code)
@@ -177,9 +176,8 @@ print '\n', colors.bold('parsed figures:')
 for figure in figures:
     print '\n', colors.bold('%s %s' % (figure.name, figure.label))
     printwrap(repr(figure.caption))
-    for subfig in figure.subfigs:
-        print '   ', figure.pdfs[subfig]
-        print '       ', [x.GetName() for x in figure.roots[subfig].tfile.Get('c0').GetListOfPrimitives()]
+    for fn in figure.files:
+        print '   ', fn
 print
 
 assert abstract
@@ -305,9 +303,20 @@ for subfig in 'ab':
 fig004.objs['a']['sig00p3mm'] = fig004.roots['a'].read_hist_1d('c0/h_signal_-46_dbv_mm', xlim=(0., 4.))
 fig004.objs['a']['sig01p0mm'] = fig004.roots['a'].read_hist_1d('c0/h_signal_-53_dbv_mm', xlim=(0., 4.))
 fig004.objs['a']['sig10p0mm'] = fig004.roots['a'].read_hist_1d('c0/h_signal_-60_dbv_mm', xlim=(0., 4.))
-fig004.reps['a'] = fig004.objs['a']['sig00p3mm']
+r = fig004.reps['a'] = fig004.objs['a']['sig00p3mm']
 
-fig004.objs['a']['observed']  = graph_on_hist(fig004.roots['a'].read_graph('c0/Graph'), fig004.reps['a'])
+fig004.objs['a']['observed']  = graph_on_hist(fig004.roots['a'].read_graph('c0/Graph'), r)
+
+####
+
+for subfig in 'abcd':
+    r = fig005.reps[subfig] = fig005.objs[subfig]['predicted'] = fig005.roots[subfig].read_hist_1d('c0/h_c1v_dvv_mm', xlim=(0., 4.))
+    fig005.objs[subfig]['observed'] = graph_on_hist(fig005.roots[subfig].read_graph('c0/Graph'), r)
+
+####
+
+fig006.reps['a'] = fig006.objs['a']['lim2d_neu']  = lower_edge(fig006.roots['a'].read_hist_2d('c/observed', xlim=(300,2800), ylim=(0.1,100)))
+fig006.reps['b'] = fig006.objs['b']['lim2d_stop'] = lower_edge(fig006.roots['b'].read_hist_2d('c/observed', xlim=(300,2800), ylim=(0.1,100)))
 
 ####
 
@@ -335,7 +344,7 @@ add_variable(t, hepdata.Variable('d_{VV}', is_independent=True, is_binned=True, 
 
 for signame in signames:
     o = f.objs['a'][signame]
-    v = hepdata.Variable('Predicted number of signal events, c tau = %s mm, m = 800 GeV, sigma = 1 fb' % nicesigname[signame], is_independent=False, is_binned=False)
+    v = hepdata.Variable('Predicted signal yield, c tau = %s mm, m = 800 GeV, sigma = 1 fb' % nicesigname[signame], is_independent=False, is_binned=False)
     u = hepdata.Uncertainty('Statistical (~sqrt(n_generated))')
     add_variable(t, v, o['y'], u, o['dy'])
 
@@ -368,16 +377,58 @@ add_variable(t, hepdata.Variable('d_{BV}', is_independent=True, is_binned=True, 
 
 for signame in signames:
     o = f.objs['a'][signame]
-    v = hepdata.Variable('Predicted number of signal events, c tau = %s mm, m = 800 GeV, sigma = 1 fb' % nicesigname[signame], is_independent=False, is_binned=False)
+    v = hepdata.Variable('Predicted signal yield, c tau = %s mm, m = 800 GeV, sigma = 1 fb' % nicesigname[signame], is_independent=False, is_binned=False)
     u = hepdata.Uncertainty('Statistical (~sqrt(n_generated))')
     add_variable(t, v, o['y'], u, o['dy'])
 
 o = f.objs['a']['observed']
-v = hepdata.Variable('Observed number of events', is_independent=False, is_binned=False)
+v = hepdata.Variable('Observed yield', is_independent=False, is_binned=False)
 u = hepdata.Uncertainty('Garwood intervals', is_symmetric=False)
 add_variable(t, v, o['y'], u, o['dy'])
 
 sub.add_table(t)
+
+####
+
+f = fig005
+for subfig in 'abcd':
+    t = f.tables[subfig]
+    t.location += ' (%s plot)' % {'a': 'upper left', 'b': 'upper right', 'c': 'lower left', 'd': 'lower right'}[subfig]
+
+    add_variable(t, hepdata.Variable('d_{VV}', is_independent=True, is_binned=True, units='mm'), f.reps[subfig]['x_edges'])
+
+    ntracks = {'a': (3,3), 'b': (4,3), 'c': (4,4), 'd': (5,5)}[subfig]
+    ntracks_title = 'n_tracks = %i x %i' % ntracks
+    if subfig == 'd':
+        ntracks_title = ntracks_title.replace('=', '>=')
+
+    o = f.objs[subfig]['predicted']
+    v = hepdata.Variable('Constructed background template normalized to total observed yield, ' + ntracks_title, is_independent=False, is_binned=False)
+    add_variable(t, v, o['y'])
+
+    o = f.objs[subfig]['observed']
+    v = hepdata.Variable('Observed yield, ' + ntracks_title, is_independent=False, is_binned=False)
+    u = hepdata.Uncertainty('Garwood intervals', is_symmetric=False)
+    add_variable(t, v, o['y'], u, o['dy'])
+
+    sub.add_table(t)
+
+####
+
+f = fig006
+for subfig in 'ab':
+    o = f.reps[subfig]
+    t = f.tables[subfig]
+    t.location += ' (%s upper and lower plots)' % {'a': 'left', 'b': 'right'}[subfig]
+    particle = {'a': r'\tilde{\chi}^{0} / \tilde{g}', 'b': '\tilde{t}'}[subfig]
+
+    add_variable(t, hepdata.Variable(r'm_{%s}'     % particle, is_independent=True, is_binned=False, units='GeV'), o['x'])
+    add_variable(t, hepdata.Variable(r'c\tau_{%s}' % particle, is_independent=True, is_binned=False, units='mm'),  o['y'])
+
+    v = hepdata.Variable('Observed 95% C.L. upper limits on $\sigma\mathcal{B}^2$', is_independent=False, is_binned=False)
+    add_variable(t, v, o['z'])
+
+    sub.add_table(t)
 
 ####
 
