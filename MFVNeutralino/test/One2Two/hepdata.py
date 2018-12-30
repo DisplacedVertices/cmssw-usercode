@@ -374,7 +374,7 @@ for subfig in 'ab':
     o = f.reps[subfig]
     t = f.tables[subfig]
     t.location += ' (%s plot)' % {'a': 'upper', 'b': 'lower'}[subfig]
-    particle = {'a': r'\tilde{\chi}^{0} / \tilde{g}', 'b': '\tilde{t}'}[subfig]
+    particle = {'a': r'\tilde{\chi}^{0} / \tilde{g}', 'b': r'\tilde{t}'}[subfig]
 
     add_variable(t, hepdata.Variable(r'm_{%s}'     % particle, is_independent=True, is_binned=False, units='GeV'), o['x'])
     add_variable(t, hepdata.Variable(r'c\tau_{%s}' % particle, is_independent=True, is_binned=False, units='mm'),  o['y'])
@@ -437,12 +437,12 @@ for subfig in 'ab':
     o = f.reps[subfig]
     t = f.tables[subfig]
     t.location += ' (%s upper and lower plots)' % {'a': 'left', 'b': 'right'}[subfig]
-    particle = {'a': r'\tilde{\chi}^{0} / \tilde{g}', 'b': '\tilde{t}'}[subfig]
+    particle = {'a': r'\tilde{\chi}^{0} / \tilde{g}', 'b': r'\tilde{t}'}[subfig]
 
     add_variable(t, hepdata.Variable(r'm_{%s}'     % particle, is_independent=True, is_binned=False, units='GeV'), o['x'])
     add_variable(t, hepdata.Variable(r'c\tau_{%s}' % particle, is_independent=True, is_binned=False, units='mm'),  o['y'])
 
-    v = hepdata.Variable('Observed 95% C.L. upper limits on $\sigma\mathcal{B}^2$', is_independent=False, is_binned=False)
+    v = hepdata.Variable(r'Observed 95% C.L. upper limits on \sigma\mathcal{B}^{2}', is_independent=False, is_binned=False)
     add_variable(t, v, o['z'])
 
     sub.add_table(t)
@@ -455,20 +455,20 @@ for f in fig007, fig008:
         t = f.tables[subfig]
         t.location += ' (%s plot)' % {'a': 'upper left', 'b': 'upper right', 'c': 'middle left', 'd': 'middle right', 'e': 'lower left', 'f': 'lower right'}[subfig]
         n = 'abcdef'.index(subfig)
-        particle = {0: r'\tilde{\chi}^{0} / \tilde{g}', 1: '\tilde{t}'}[n%2]
+        particle = {0: r'\tilde{\chi}^{0} / \tilde{g}', 1: r'\tilde{t}'}[n%2]
         umb = n/2
 
         if f == fig007:
-            fixed = 'c\tau_{%s} = %s mm' % (particle, {0: '0.3', 1: '1', 2: '10'}[umb])
+            fixed = r'c\tau_{%s} = %s mm' % (particle, {0: '0.3', 1: '1', 2: '10'}[umb])
             add_variable(t, hepdata.Variable(r'm_{%s}'     % particle, is_independent=True, is_binned=False, units='GeV'), o['x'])
         else:
             fixed = 'm_{%s} = %i GeV' % (particle, {0: 800, 1: 1600, 2: 2400}[umb])
             add_variable(t, hepdata.Variable(r'c\tau_{%s}' % particle, is_independent=True, is_binned=False, units='mm'),  o['x'])
 
-        v = hepdata.Variable('Observed 95% C.L. upper limits on $\sigma\mathcal{B}^2$ for fixed ' + fixed, is_independent=False, is_binned=False)
+        v = hepdata.Variable(r'Observed 95% C.L. upper limits on \sigma\mathcal{B}^{2} for fixed ' + fixed, is_independent=False, is_binned=False)
         add_variable(t, v, f.objs[subfig]['observed']['y'])
 
-        v = hepdata.Variable('Expected 95% C.L. upper limits on $\sigma\mathcal{B}^2$ for fixed ' + fixed, is_independent=False, is_binned=False)
+        v = hepdata.Variable(r'Expected 95% C.L. upper limits on \sigma\mathcal{B}^{2} for fixed ' + fixed, is_independent=False, is_binned=False)
         u68 = hepdata.Uncertainty('68% expected', is_symmetric=False)
         u95 = hepdata.Uncertainty('95% expected', is_symmetric=False)
         add_variable(t, v, f.objs[subfig]['expect50']['y'], [(u68, f.objs[subfig]['expect50']['dy68']), (u95, f.objs[subfig]['expect50']['dy95'])])
