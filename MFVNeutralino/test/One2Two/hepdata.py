@@ -14,10 +14,26 @@ cds = '2633728'
 inspire = '1685992'
 doi = '10.1103/PhysRevD.98.09201'
 
+# symbols in captions that need to be defined (if one is substring of another, put the longer one first)
+syms_replaces = [
+    (r'\GeV', 'GeV'),
+    (r'\mm', 'mm'),
+    (r'\PSGcz', r'$\tilde{\chi}^{0}$'),
+    (r'\PSg', r'$\tilde{g}$'),
+    (r'\PSQt', r'$\tilde{t}$'),
+    (r'\CL', 'C.L.'),
+    (r'\cmsLeft', 'upper'), # in PRD copy, "left" and "right" translate to upper and lower in the column format
+    (r'\cmsRight', 'lower'),
+    (r'\dbv', '$d_{BV}$'),
+    (r'\dvvc', '$d_{VV}^{C}$'),
+    (r'\dvv', '$d_{VV}$'),
+    ]
+
 ####
 
+from JMTucker.Tools import colors
 from JMTucker.Tools.ROOTTools import ROOT
-import os, string, hepdata_lib as hepdata
+import os, string, textwrap, hepdata_lib as hepdata
 from pprint import pprint
 
 paper_path = os.path.join(tdr_path, 'papers/%s/trunk' % paper_code)
@@ -117,14 +133,17 @@ for line in open(paper_fn):
                 label = label[4:]
                 assert figure.label is None
                 figure.label = label
-                
-print 'parsed abstract:'
-print repr(abstract)
-print
-print 'parsed figures:'
+
+def printwrap(s):
+    for line in textwrap.wrap(s):
+        print line
+
+print colors.bold('parsed abstract:')
+printwrap(repr(abstract))
+print '\n', colors.bold('parsed figures:')
 for figure in figures:
-    print figure.name, figure.label
-    print repr(figure.caption)
+    print '\n', colors.bold('%s %s' % (figure.name, figure.label))
+    printwrap(repr(figure.caption))
     for fn in figure.files:
         print '   ', fn
 print
@@ -132,8 +151,26 @@ print
 assert abstract
 assert len(figures) == len(nfigures_expected) and all(figure.ok(nexp) for figure, nexp in zip(figures, nfigures_expected))
 
+syms_left = set()
+
 for figure in figures:
     exec '%s = figure' % figure.name
+
+    for a,b in syms_replaces:
+        figure.caption = figure.caption.replace(a,b)
+
+    print '\n', colors.bold('%s %s revised caption' % (figure.name, figure.label))
+    printwrap(figure.caption)
+
+    for word in figure.caption.split():
+        if '\\' in word:
+            sym = word[word.find('\\'):]
+            sym = sym[0] + ''.join(x for x in sym[1:] if x in string.ascii_letters + string.digits)
+            if sym != '\\':
+                syms_left.add(sym)
+
+if syms_left:
+    print '\n', colors.bold('remaining possibly undefined syms:'), '\n', sorted(syms_left)
 
 ####
 
@@ -150,9 +187,11 @@ sub.add_record_id(inspire, 'inspire')
 fig004.sig00p3mm = fig004.roots['a'].read_hist_1d('c0/h_signal_-46_dbv_mm')
 fig004.sig01p0mm = fig004.roots['a'].read_hist_1d('c0/h_signal_-53_dbv_mm')
 fig004.sig10p0mm = fig004.roots['a'].read_hist_1d('c0/h_signal_-60_dbv_mm')
+fig004.data      = fig004.roots['a'].read_graph('c0/Graph')
 
 #f = ROOT.TFile(fig004.files[0].replace('pdf','root'))
 #h = f.Get('c0').FindObject("h_signal_-46_dbv_mm")
 #fig004.sig0p3mm = hepdata.(fig004.files[0].replace('pdf','root')).read_hist_1d('c0/h_signal_-46_dbv_mm')
 #fig004.sig0p3mm = hepdata.RootFileReader(fig004.files[0].replace('pdf','root')).read_hist_1d('
+
 #sub.create_files(submission_path)
