@@ -29,11 +29,12 @@ syms_replaces = [
     (r'\dvv', '$d_{VV}$'),
     ]
 
-####
+########################################################################
 
 from JMTucker.Tools import colors
 from JMTucker.Tools.ROOTTools import ROOT
 import os, string, textwrap, hepdata_lib as hepdata
+from itertools import combinations
 from pprint import pprint
 
 paper_path = os.path.join(tdr_path, 'papers/%s/trunk' % paper_code)
@@ -50,10 +51,16 @@ class Figure:
         self.label = None
         self.caption = None
         self.files = []
+        self.subfigs = []
+        self.rootfns = {}
         self.roots = {}
+        self.canvases = {}
         self.pdfs = {}
+        self.objs = {} # the raw value dicts read from root files
+        self.reps = {} # representative of the dependent variables for all the objects
+        self.tables = {} # the hepdata objects
 
-    def ok(self, nfiles_expected):
+    def finalize(self, nfiles_expected):
         if not all((self.name,
                     self.label,
                     self.caption,
@@ -62,24 +69,50 @@ class Figure:
                     )):
             return False
 
+        self.fig = int(self.name.replace('fig', ''))
+        self.uno = len(self.files) == 1
+
         for fn in self.files:
             if not os.path.isfile(fn):
                 print 'no file', fn
                 return False
-            root_fn = fn.replace('.pdf', '.root')
-            if not os.path.isfile(root_fn):
-                print 'no file', root_fn
-                root_fn = None
+            rootfn = fn.replace('.pdf', '.root')
+            if not os.path.isfile(rootfn):
+                rootfn = None
             
             subfig = fn[fn.index('.pdf')-1]
             if subfig not in string.ascii_lowercase:
-                assert len(self.files) == 1
+                assert self.uno
                 subfig = 'a'
+            self.subfigs.append(subfig)
 
-            self.pdfs [subfig] = fn
-            self.roots[subfig] = hepdata.RootFileReader(root_fn) if root_fn else root_fn
+            self.pdfs[subfig] = fn
+            self.rootfns[subfig] = rootfn
+            r = self.roots[subfig] = hepdata.RootFileReader(rootfn) if rootfn else rootfn
+            if rootfn:
+                c = self.canvases[subfig] = r.tfile.Get('c0')
+                if not c:
+                    self.canvases[subfig] = r.tfile.Get('c')
+            self.objs[subfig] = {}
+            self.reps[subfig] = None
+
+            table_name = 'Figure %i' % self.fig
+            if not self.uno:
+                table_name += subfig
+            self.tables[subfig] = hepdata.Table(table_name)
+            self.tables[subfig].description = self.caption
+            self.tables[subfig].location = table_name
 
         return True
+
+    def check_objs(self):
+        for subfig in self.objs.iterkeys():
+            o = self.objs[subfig]
+            r = self.reps[subfig]
+            for z in o.itervalues():
+                if z['x'] != r['x'] or z['x_edges'] != r['x_edges']:
+                    import pdb
+                    pdb.set_trace()
 
 def dedouble(s):
     while '  ' in s:
@@ -144,12 +177,12 @@ print '\n', colors.bold('parsed figures:')
 for figure in figures:
     print '\n', colors.bold('%s %s' % (figure.name, figure.label))
     printwrap(repr(figure.caption))
-    for fn in figure.files:
-        print '   ', fn
+    for subfig in figure.subfigs:
+        print '   ', figure.pdfs[subfig]
+        print '       ', [x.GetName() for x in figure.roots[subfig].tfile.Get('c0').GetListOfPrimitives()]
 print
 
 assert abstract
-assert len(figures) == len(nfigures_expected) and all(figure.ok(nexp) for figure, nexp in zip(figures, nfigures_expected))
 
 syms_left = set()
 
@@ -170,9 +203,118 @@ for figure in figures:
                 syms_left.add(sym)
 
 if syms_left:
-    print '\n', colors.bold('remaining possibly undefined syms:'), '\n', sorted(syms_left)
+    print '\n', colors.bold('remaining possibly undefined syms:'), '\n', sorted(syms_left), '\n'
+
+assert len(figures) == len(nfigures_expected) and all(figure.finalize(nexp) for figure, nexp in zip(figures, nfigures_expected))
+
+for figure in figures:
+    print colors.bold('%s %s' % (figure.name, figure.label))
+    for subfig in figure.subfigs:
+        if figure.rootfns[subfig]:
+            print '    %s:' % subfig, figure.rootfns[subfig], [x.GetName() for x in figure.canvases[subfig].GetListOfPrimitives() if x.GetName() and x.GetName()[0] != 'T']
+        else:
+            print '    %s: no root files' % subfig
+
+########################################################################
+
+def _check(o,keys):
+    assert sorted(o.iterkeys()) == sorted(keys)
+    s = set(len(x) for x in o.itervalues())
+    assert len(s) == 1
+    return s.pop()
+def hist_check(h):
+    return _check(h, ['dy','x','x_edges','y'])
+def graph_check(g):
+    return _check(g, ['x','dx','y','dy'])
+def hist2d_check(h):
+    return _check(h, ['x','x_edges','y','y_edges','z','dz'])
+
+#def truncate_hist(h, nbins):
+#    hist_check(h)
+#    for z in 'x','x_edges','y','dy':
+#        h[z] = h[z][:nbins]
+#    return h
+
+def graph_on_hist(g, h):
+    graph_check(g)
+    n = hist_check(h)
+
+    dy0 = 0. if type(g['dy']) == float else (-0.,0.)
+    hg = {
+        'y': [0.]*n,
+        'dy': [dy0]*n,
+        'x': h['x'],
+        'x_edges': h['x_edges']
+        }
+
+    used = set()
+    for x,y,dx,dy in zip(g['x'], g['y'], g['dx'], g['dy']):
+        assert dx == (-0., 0.)
+        for i,(xa,xb) in enumerate(h['x_edges']):
+            if xa <= x < xb:
+                if i in used:
+                    raise ValueError('x = %f maps to already used i = %i' % (x, i))
+                used.add(i)
+                break
+        else:
+            raise ValueError('x = %f not contained in x_edges %r' % (x, h['x_edges']))
+        assert abs(x-h['x'][i]) < 1e-6
+        hg['y'][i] = y
+        hg['dy'][i] = dy
+    return hg
+
+def lower_edge(h):
+    for i in xrange(hist2d_check(h)):
+        h['x'][i] = h['x_edges'][i][0]
+        h['y'][i] = h['y_edges'][i][0]
+    return h
+
+def add_variable(t, v, vals, unc=None, unc_vals=None):
+    v.values = vals
+    if unc:
+        assert unc_vals
+        unc.values = unc_vals
+        v.add_uncertainty(unc)
+    t.add_variable(v)
+
+########################################################################
+
+# rest of the script is more paper dependent and may have gotchas
+
+signames = ('sig00p3mm', 'sig01p0mm', 'sig10p0mm') # for Figs. 2,4
+nicesigname = {'sig00p3mm': '0.3', 'sig01p0mm': '1', 'sig10p0mm': '10'}
 
 ####
+
+fig002.objs['a']['sig00p3mm'] = fig002.roots['a'].read_hist_1d('c0/h_signal_-46_dvv_mm', xlim=(0., 4.))
+fig002.objs['a']['sig01p0mm'] = fig002.roots['a'].read_hist_1d('c0/h_signal_-53_dvv_mm', xlim=(0., 4.))
+fig002.objs['a']['sig10p0mm'] = fig002.roots['a'].read_hist_1d('c0/h_signal_-60_dvv_mm', xlim=(0., 4.))
+fig002.objs['a']['sig10p0mm']['y'][-1] += 18.2 - 1 # gotcha (broken y-axis in paper)
+fig002.reps['a'] = fig002.objs['a']['sig00p3mm']
+
+####
+
+fig003.reps['a'] = fig003.objs['a']['eff_neu']  = lower_edge(fig003.roots['a'].read_hist_2d('c/signal_efficiency_mfv_neu',           xlim=(300,2800), ylim=(0.1,100)))
+fig003.reps['b'] = fig003.objs['b']['eff_stop'] = lower_edge(fig003.roots['b'].read_hist_2d('c/signal_efficiency_mfv_stopdbardbar',  xlim=(300,2800), ylim=(0.1,100)))
+for subfig in 'ab':
+    assert set(fig003.reps[subfig]['dz']) == set([0.])
+    fig003.reps[subfig]['dz'] = [z*0.24 for z in fig003.reps[subfig]['z']] # gotcha (flat 24% from Table 2)
+
+####
+
+fig004.objs['a']['sig00p3mm'] = fig004.roots['a'].read_hist_1d('c0/h_signal_-46_dbv_mm', xlim=(0., 4.))
+fig004.objs['a']['sig01p0mm'] = fig004.roots['a'].read_hist_1d('c0/h_signal_-53_dbv_mm', xlim=(0., 4.))
+fig004.objs['a']['sig10p0mm'] = fig004.roots['a'].read_hist_1d('c0/h_signal_-60_dbv_mm', xlim=(0., 4.))
+fig004.reps['a'] = fig004.objs['a']['sig00p3mm']
+
+fig004.objs['a']['observed']  = graph_on_hist(fig004.roots['a'].read_graph('c0/Graph'), fig004.reps['a'])
+
+####
+
+for figure in figures:
+    figure.check_objs()
+
+########################################################################
 
 sub = hepdata.Submission()
 
@@ -184,14 +326,59 @@ sub.add_link('CDS', 'https://cds.cern.ch/record/%s' % cds)
 sub.add_link('DOI', 'http://doi.org/%s' % doi)
 sub.add_record_id(inspire, 'inspire')
 
-fig004.sig00p3mm = fig004.roots['a'].read_hist_1d('c0/h_signal_-46_dbv_mm')
-fig004.sig01p0mm = fig004.roots['a'].read_hist_1d('c0/h_signal_-53_dbv_mm')
-fig004.sig10p0mm = fig004.roots['a'].read_hist_1d('c0/h_signal_-60_dbv_mm')
-fig004.data      = fig004.roots['a'].read_graph('c0/Graph')
+####
 
-#f = ROOT.TFile(fig004.files[0].replace('pdf','root'))
-#h = f.Get('c0').FindObject("h_signal_-46_dbv_mm")
-#fig004.sig0p3mm = hepdata.(fig004.files[0].replace('pdf','root')).read_hist_1d('c0/h_signal_-46_dbv_mm')
-#fig004.sig0p3mm = hepdata.RootFileReader(fig004.files[0].replace('pdf','root')).read_hist_1d('
+f = fig002
+t = f.tables['a']
 
-#sub.create_files(submission_path)
+add_variable(t, hepdata.Variable('d_{VV}', is_independent=True, is_binned=True, units='mm'), f.reps['a']['x_edges'])
+
+for signame in signames:
+    o = f.objs['a'][signame]
+    v = hepdata.Variable('Predicted number of signal events, c tau = %s mm, m = 800 GeV, sigma = 1 fb' % nicesigname[signame], is_independent=False, is_binned=False)
+    u = hepdata.Uncertainty('Statistical (~sqrt(n_generated))')
+    add_variable(t, v, o['y'], u, o['dy'])
+
+sub.add_table(t)
+
+####
+
+f = fig003
+for subfig in 'ab':
+    o = f.reps[subfig]
+    t = f.tables[subfig]
+    t.location += ' (%s plot)' % {'a': 'upper', 'b': 'lower'}[subfig]
+    particle = {'a': r'\tilde{\chi}^{0} / \tilde{g}', 'b': '\tilde{t}'}[subfig]
+
+    add_variable(t, hepdata.Variable(r'm_{%s}'     % particle, is_independent=True, is_binned=False, units='GeV'), o['x'])
+    add_variable(t, hepdata.Variable(r'c\tau_{%s}' % particle, is_independent=True, is_binned=False, units='mm'),  o['y'])
+
+    v = hepdata.Variable('Efficiency (full selection + d_{VV} > 0.4 mm)', is_independent=False, is_binned=False)
+    u = hepdata.Uncertainty('Statistical (+) systematic (from Table 2)')
+    add_variable(t, v, o['z'], u, o['dz'])
+
+    sub.add_table(t)
+
+####
+
+f = fig004
+t = f.tables['a']
+
+add_variable(t, hepdata.Variable('d_{BV}', is_independent=True, is_binned=True, units='mm'), f.reps['a']['x_edges'])
+
+for signame in signames:
+    o = f.objs['a'][signame]
+    v = hepdata.Variable('Predicted number of signal events, c tau = %s mm, m = 800 GeV, sigma = 1 fb' % nicesigname[signame], is_independent=False, is_binned=False)
+    u = hepdata.Uncertainty('Statistical (~sqrt(n_generated))')
+    add_variable(t, v, o['y'], u, o['dy'])
+
+o = f.objs['a']['observed']
+v = hepdata.Variable('Observed number of events', is_independent=False, is_binned=False)
+u = hepdata.Uncertainty('Garwood intervals', is_symmetric=False)
+add_variable(t, v, o['y'], u, o['dy'])
+
+sub.add_table(t)
+
+####
+
+sub.create_files(submission_path)
