@@ -14,13 +14,17 @@ cds = '2633728'
 inspire = '1685992'
 doi = '10.1103/PhysRevD.98.09201'
 
-# symbols in captions that need to be defined (if one is substring of another, put the longer one first)
+# symbols in abstract/captions that need to be defined (if one is substring of another, put the longer one first)
 syms_replaces = [
-    (r'\GeV', 'GeV'),
-    (r'\mm', 'mm'),
+    (r'\GeV', r' GeV'),
+    (r'\TeV', r' TeV'),
+    (r'\mm', r' mm'),
     (r'\PSGcz', r'$\tilde{\chi}^{0}$'),
     (r'\PSg', r'$\tilde{g}$'),
     (r'\PSQt', r'$\tilde{t}$'),
+    (r'\unit', r' '),
+    (r'{fb}', r'fb'),
+    (r'\fbinv', r'$~\textrm{fb}^{-1}$'),
     (r'\CL', 'C.L.'),
     (r'\cmsLeft', 'upper'), # in PRD copy, "left" and "right" translate to upper and lower in the column format
     (r'\cmsRight', 'lower'),
@@ -173,6 +177,13 @@ def printwrap(s):
 
 print colors.bold('parsed abstract:')
 printwrap(repr(abstract))
+
+for a,b in syms_replaces:
+    abstract = abstract.replace(a,b)
+
+print '\n', colors.bold('revised abstract:')
+printwrap(abstract)
+
 print '\n', colors.bold('parsed figures:')
 for figure in figures:
     print '\n', colors.bold('%s %s' % (figure.name, figure.label))
@@ -268,6 +279,16 @@ def lower_edge(h):
         h['y'][i] = h['y_edges'][i][0]
     return h
 
+def upper_limit_on_zero(h):
+    n = hist_check(h)
+    ul = 1.841054761
+    for i in xrange(n):
+        if h['y'][i] == 0.:
+            dy0, dy1 = h['dy'][i]
+            assert dy0 == -0. and (dy1 == 0. or abs(dy1-ul) < 1e-6)
+            h['dy'][i] = (-0., ul)
+    return h
+
 def add_variable(t, v, vals, uncs=[]):
     v.values = vals
     for unc, unc_vals in uncs:
@@ -310,13 +331,13 @@ fig004.objs['a']['sig01p0mm'] = fig004.roots['a'].read_hist_1d('c0/h_signal_-53_
 fig004.objs['a']['sig10p0mm'] = fig004.roots['a'].read_hist_1d('c0/h_signal_-60_dbv_mm', xlim=(0., 4.))
 r = fig004.reps['a'] = fig004.objs['a']['sig00p3mm']
 
-fig004.objs['a']['observed']  = graph_on_hist(fig004.roots['a'].read_graph('c0/Graph'), r)
+fig004.objs['a']['observed']  = upper_limit_on_zero(graph_on_hist(fig004.roots['a'].read_graph('c0/Graph'), r))
 
 ####
 
 for subfig in 'abcd':
     r = fig005.reps[subfig] = fig005.objs[subfig]['predicted'] = fig005.roots[subfig].read_hist_1d('c0/h_c1v_dvv_mm', xlim=(0., 4.))
-    fig005.objs[subfig]['observed'] = graph_on_hist(fig005.roots[subfig].read_graph('c0/Graph'), r)
+    fig005.objs[subfig]['observed'] = upper_limit_on_zero(graph_on_hist(fig005.roots[subfig].read_graph('c0/Graph'), r))
 
 ####
 
@@ -357,11 +378,11 @@ sub.add_record_id(inspire, 'inspire')
 f = fig002
 t = f.tables['a']
 
-add_variable(t, hepdata.Variable('d_{VV}', is_independent=True, is_binned=True, units='mm'), f.reps['a']['x_edges'])
+add_variable(t, hepdata.Variable('$d_{VV}$', is_independent=True, is_binned=True, units='mm'), f.reps['a']['x_edges'])
 
 for signame in signames:
     o = f.objs['a'][signame]
-    v = hepdata.Variable('Predicted signal yield, c tau = %s mm, m = 800 GeV, sigma = 1 fb' % nicesigname[signame], is_independent=False, is_binned=False)
+    v = hepdata.Variable(r'Predicted signal yield, $c\tau = %s~\textrm{mm}$, $m = 800~\textrm{GeV}$, $\sigma = 1~\textrm{fb}$' % nicesigname[signame], is_independent=False, is_binned=False)
     u = hepdata.Uncertainty('Statistical (~sqrt(n_generated))')
     add_variable(t, v, o['y'], [(u, o['dy'])])
 
@@ -376,10 +397,10 @@ for subfig in 'ab':
     t.location += ' (%s plot)' % {'a': 'upper', 'b': 'lower'}[subfig]
     particle = {'a': r'\tilde{\chi}^{0} / \tilde{g}', 'b': r'\tilde{t}'}[subfig]
 
-    add_variable(t, hepdata.Variable(r'm_{%s}'     % particle, is_independent=True, is_binned=False, units='GeV'), o['x'])
-    add_variable(t, hepdata.Variable(r'c\tau_{%s}' % particle, is_independent=True, is_binned=False, units='mm'),  o['y'])
+    add_variable(t, hepdata.Variable(r'$m_{%s}$'     % particle, is_independent=True, is_binned=False, units='GeV'), o['x'])
+    add_variable(t, hepdata.Variable(r'$c\tau_{%s}$' % particle, is_independent=True, is_binned=False, units='mm'),  o['y'])
 
-    v = hepdata.Variable('Efficiency (full selection + d_{VV} > 0.4 mm)', is_independent=False, is_binned=False)
+    v = hepdata.Variable(r'Efficiency (full selection + $d_{VV} > 0.4~\textrm{mm}$)', is_independent=False, is_binned=False)
     u = hepdata.Uncertainty('Statistical (+) systematic (from Table 2)')
     add_variable(t, v, o['z'], [(u, o['dz'])])
 
@@ -390,11 +411,11 @@ for subfig in 'ab':
 f = fig004
 t = f.tables['a']
 
-add_variable(t, hepdata.Variable('d_{BV}', is_independent=True, is_binned=True, units='mm'), f.reps['a']['x_edges'])
+add_variable(t, hepdata.Variable('$d_{BV}$', is_independent=True, is_binned=True, units='mm'), f.reps['a']['x_edges'])
 
 for signame in signames:
     o = f.objs['a'][signame]
-    v = hepdata.Variable('Predicted signal yield, c tau = %s mm, m = 800 GeV, sigma = 1 fb' % nicesigname[signame], is_independent=False, is_binned=False)
+    v = hepdata.Variable(r'Predicted signal yield, $c\tau = %s~\textrm{mm}$, $m = 800~\textrm{GeV}$, $\sigma = 1~\textrm{fb}$' % nicesigname[signame], is_independent=False, is_binned=False)
     u = hepdata.Uncertainty('Statistical (~sqrt(n_generated))')
     add_variable(t, v, o['y'], [(u, o['dy'])])
 
@@ -412,10 +433,10 @@ for subfig in 'abcd':
     t = f.tables[subfig]
     t.location += ' (%s plot)' % {'a': 'upper left', 'b': 'upper right', 'c': 'lower left', 'd': 'lower right'}[subfig]
 
-    add_variable(t, hepdata.Variable('d_{VV}', is_independent=True, is_binned=True, units='mm'), f.reps[subfig]['x_edges'])
+    add_variable(t, hepdata.Variable('$d_{VV}$', is_independent=True, is_binned=True, units='mm'), f.reps[subfig]['x_edges'])
 
     ntracks = {'a': (3,3), 'b': (4,3), 'c': (4,4), 'd': (5,5)}[subfig]
-    ntracks_title = 'n_tracks = %i x %i' % ntracks
+    ntracks_title = r'$n_{\textrm{tracks}} = %i \times %i$' % ntracks
     if subfig == 'd':
         ntracks_title = ntracks_title.replace('=', '>=')
 
@@ -439,10 +460,10 @@ for subfig in 'ab':
     t.location += ' (%s upper and lower plots)' % {'a': 'left', 'b': 'right'}[subfig]
     particle = {'a': r'\tilde{\chi}^{0} / \tilde{g}', 'b': r'\tilde{t}'}[subfig]
 
-    add_variable(t, hepdata.Variable(r'm_{%s}'     % particle, is_independent=True, is_binned=False, units='GeV'), o['x'])
-    add_variable(t, hepdata.Variable(r'c\tau_{%s}' % particle, is_independent=True, is_binned=False, units='mm'),  o['y'])
+    add_variable(t, hepdata.Variable(r'$m_{%s}$'     % particle, is_independent=True, is_binned=False, units='GeV'), o['x'])
+    add_variable(t, hepdata.Variable(r'$c\tau_{%s}$' % particle, is_independent=True, is_binned=False, units='mm'),  o['y'])
 
-    v = hepdata.Variable(r'Observed 95% C.L. upper limits on \sigma\mathcal{B}^{2}', is_independent=False, is_binned=False)
+    v = hepdata.Variable(r'Observed 95% C.L. upper limits on $\sigma\mathcal{B}^{2}$', is_independent=False, is_binned=False, units='fb')
     add_variable(t, v, o['z'])
 
     sub.add_table(t)
@@ -459,16 +480,16 @@ for f in fig007, fig008:
         umb = n/2
 
         if f == fig007:
-            fixed = r'c\tau_{%s} = %s mm' % (particle, {0: '0.3', 1: '1', 2: '10'}[umb])
-            add_variable(t, hepdata.Variable(r'm_{%s}'     % particle, is_independent=True, is_binned=False, units='GeV'), o['x'])
+            fixed = r'$c\tau_{%s} = %s~\textrm{mm}$' % (particle, {0: '0.3', 1: '1', 2: '10'}[umb])
+            add_variable(t, hepdata.Variable(r'$m_{%s}$'     % particle, is_independent=True, is_binned=False, units='GeV'), o['x'])
         else:
-            fixed = 'm_{%s} = %i GeV' % (particle, {0: 800, 1: 1600, 2: 2400}[umb])
-            add_variable(t, hepdata.Variable(r'c\tau_{%s}' % particle, is_independent=True, is_binned=False, units='mm'),  o['x'])
+            fixed = r'$m_{%s} = %i~\textrm{GeV}$' % (particle, {0: 800, 1: 1600, 2: 2400}[umb])
+            add_variable(t, hepdata.Variable(r'$c\tau_{%s}$' % particle, is_independent=True, is_binned=False, units='mm'),  o['x'])
 
-        v = hepdata.Variable(r'Observed 95% C.L. upper limits on \sigma\mathcal{B}^{2} for fixed ' + fixed, is_independent=False, is_binned=False)
+        v = hepdata.Variable(r'Observed 95% C.L. upper limits on $\sigma\mathcal{B}^{2}$ for fixed ' + fixed, is_independent=False, is_binned=False, units='fb')
         add_variable(t, v, f.objs[subfig]['observed']['y'])
 
-        v = hepdata.Variable(r'Expected 95% C.L. upper limits on \sigma\mathcal{B}^{2} for fixed ' + fixed, is_independent=False, is_binned=False)
+        v = hepdata.Variable(r'Expected 95% C.L. upper limits on $\sigma\mathcal{B}^{2}$ for fixed ' + fixed, is_independent=False, is_binned=False, units='fb')
         u68 = hepdata.Uncertainty('68% expected', is_symmetric=False)
         u95 = hepdata.Uncertainty('95% expected', is_symmetric=False)
         add_variable(t, v, f.objs[subfig]['expect50']['y'], [(u68, f.objs[subfig]['expect50']['dy68']), (u95, f.objs[subfig]['expect50']['dy95'])])
