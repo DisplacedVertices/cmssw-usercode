@@ -524,7 +524,7 @@ _add_ds("ntuplev22m_ntkseeds", {
 'JetHT2017F': (50+9, ['/store/user/tucker/JetHT/NtupleV22m_NTkSeeds_2017/181219_025144/0000/ntkseeds_%i.root' % i for i in chain(xrange(1,33), xrange(34,52))] + ["/store/user/tucker/JetHT/NtupleV22m_NTkSeeds_recover_2017/181227_165342/0000/ntkseeds_%i.root" % i for i in xrange(1,10)]),
 'JetHT2018A': _fromnum1("/store/user/tucker/JetHT/NtupleV22m_NTkSeeds_2018/181219_024948", 121, fnbase="ntkseeds"),
 'JetHT2018B': _fromnum1("/store/user/tucker/JetHT/NtupleV22m_NTkSeeds_2018/181219_025004", 64, fnbase="ntkseeds"),
-'JetHT2018C': (49+8, ['/store/user/tucker/JetHT/NtupleV22m_NTkSeeds_2018/181219_025019/0000/ntkseeds_%i.root' % i for i in chain(xrange(1,25), xrange(26,51))] + ['/store/user/tucker/JetHT/NtupleV22m_NTkSeeds_recover_2018/181227_165411/0000/ntkseeds_%i.root' % i for i in chain(xrange(3,10), [1])]),
+'JetHT2018C': (49+8+2, ['/store/user/tucker/JetHT/NtupleV22m_NTkSeeds_2018/181219_025019/0000/ntkseeds_%i.root' % i for i in chain(xrange(1,25), xrange(26,51))] + ['/store/user/tucker/JetHT/NtupleV22m_NTkSeeds_recover_2018/181227_165411/0000/ntkseeds_%i.root' % i for i in chain(xrange(3,10), [1])] + ['/store/user/tucker/JetHT/NtupleV22m_NTkSeeds_recover2_2018/190102_210036/0000/ntkseeds_%i.root' % i for i in [1, 3]]),
 'JetHT2018D': _fromnum1("/store/user/tucker/JetHT/NtupleV22m_NTkSeeds_2018/181219_025037", 189, fnbase="ntkseeds"),
 })
 
