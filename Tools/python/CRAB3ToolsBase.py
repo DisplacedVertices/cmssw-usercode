@@ -16,6 +16,8 @@ from ConfigParser import ConfigParser, NoSectionError, NoOptionError
 from collections import defaultdict
 from cStringIO import StringIO
 from pprint import pprint
+from FWCore.PythonUtilities.LumiList import LumiList
+from JMTucker.Tools import colors
 from JMTucker.Tools.general import bool_from_argv, typed_from_argv, popen
 
 class CRABToolsException(Exception):
@@ -274,6 +276,22 @@ def crab_log_open(working_dir):
             return gzip.open(fn)
     return CRABToolsException('no crab.log(.gz) found in %s' % working_dir)
 
+def crab_fjr_json(fn):
+    j = open(fn).read()
+    j = json.loads(j)
+    return j
+
+def crab_fjr_json_to_ll(fn):
+    print colors.yellow('this is not fully tested')
+    j = crab_fjr_json(fn)
+    ll = LumiList()
+    for x in j['steps']['cmsRun']['input']['source']:
+        x2 = defaultdict(list)
+        for k,v in x['runs'].iteritems():
+            for l in v.keys():
+                x2[int(k)].append(int(l))
+        ll += LumiList(runsAndLumis=x2)
+    return ll
 
 if __name__ == '__main__':
     rq = crab_requestcache(sys.argv[1])
