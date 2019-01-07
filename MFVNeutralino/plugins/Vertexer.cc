@@ -255,7 +255,7 @@ void MFVVertexer::finish(edm::Event& event, const std::vector<reco::TransientTra
     if (verbose) printf("x: %f y %f z %f\n", v.x(), v.y(), v.z());
     for (auto it = v.tracks_begin(), ite = v.tracks_end(); it != ite; ++it) {
       reco::TrackRef tk = it->castTo<reco::TrackRef>();
-      if (verbose) printf("id: %i key: %u pt: %f\n", tk.id().id(), tk.key(), tk->pt());
+      if (verbose) printf("id: %i key: %u <%f,%f,%f,%f,%f>\n", tk.id().id(), tk.key(), tk->charge()*tk->pt(), tk->eta(), tk->phi(), tk->dxy(), tk->dz());
       tracks_inVertices->push_back(*tk);
     }
   }

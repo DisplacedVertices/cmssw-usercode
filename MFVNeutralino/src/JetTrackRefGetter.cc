@@ -27,6 +27,8 @@ namespace mfv {
     : input_is_miniaod(cfg.getParameter<bool>("input_is_miniaod")),
       unpacked_tracks_token(cc.consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("unpacked_tracks_src"))),
       unpacking_map_token(cc.consumes<std::vector<size_t>>(cfg.getParameter<edm::InputTag>("unpacking_map_src"))),
+      verbose(cfg.getUntrackedParameter<bool>("jtrg_verbose", false)),
+      module_label(cfg.getParameter<std::string>("@module_label")),
       last_cacheIdentifier(0)
   {
   }
@@ -51,6 +53,12 @@ namespace mfv {
           r.push_back(tk);
       }
     }
+
+    if (verbose)
+      for (auto tk : r)
+        printf("JetTrackRefGetter %s: jet %f,%f,%f,%f got track %f,%f,%f,%f,%f\n",
+               module_label.c_str(), jet.pt(), jet.eta(), jet.phi(), jet.energy(),
+               tk->charge()*tk->pt(), tk->eta(), tk->phi(), tk->dxy(), tk->dz());
 
     return r;
   }

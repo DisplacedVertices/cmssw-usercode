@@ -12,6 +12,7 @@ mfvVerticesAuxTmp = cms.EDProducer('MFVVertexAuxProducer',
                                    vertex_src = cms.InputTag('mfvVertices'),
                                    sv_to_jets_src = cms.string('dummy'),
                                    sort_by = cms.string('ntracks_then_mass'),
+                                   verbose = cms.untracked.bool(False),
                                    )
 
 mfvVerticesAux = mfvVerticesAuxTmp.clone(sv_to_jets_src = 'mfvVerticesToJets')
