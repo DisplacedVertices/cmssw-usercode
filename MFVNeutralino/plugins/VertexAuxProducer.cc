@@ -209,7 +209,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
           }
         
           math::XYZTLorentzVector jpt_p4 = p4s[1+i_jet_assoc];
-          printf("    jpt accounting:\n");
+          if (verbose) printf("    jpt accounting:\n");
           for (auto it = sv.tracks_begin(), ite = sv.tracks_end(); it != ite; ++it) {
             if (sv.trackWeight(*it) >= mfv::track_vertex_weight_min) {
               reco::TrackRef tk = it->castTo<reco::TrackRef>();
