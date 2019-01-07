@@ -231,7 +231,7 @@ def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=2
                     sample.events_per /= fp
                     sample.files_per = 1
                 elif name != 'signal':
-                    sample.files_per = int(round(samples.files_per / 3.))
+                    sample.files_per = int(round(sample.files_per / 3.))
                     sample.events_per /= 3
 
     elif jobtype == 'default':
