@@ -78,6 +78,13 @@ for icfg, cfg in enumerate(cfgs):
                            min_track_sigmadxy = cfg.nsigmadxy,
                            )
 
+    # hack track-jet association:
+    # jets are composed of packedPFCandidates and JetTrackRefGetter knows how to compare those to mfvUnpackedCandidateTracks
+    # but since there is a mfvMovedTracks entry for every one of mfvUnpackedCandidateTracks, the keys are the same
+    # if this breaks, need to make JetTrackRefGetter know how to compose two maps
+    getattr(process, 'mfvVerticesToJets' + ex).unpacked_tracks_src = tracks_name
+    getattr(process, 'mfvVerticesAuxPresel' + ex).jets_tracks_keys_only = True
+
     tree = cms.EDAnalyzer('MFVMovedTracksTreer',
                           mfvJetTrackRefGetter,
                           event_src = cms.InputTag('mfvEvent'),
