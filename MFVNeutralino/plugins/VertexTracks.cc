@@ -8,7 +8,7 @@
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
-#include "FWCore/Framework/interface/EDProducer.h"
+#include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
@@ -18,10 +18,10 @@
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 
-class MFVVertexTracks : public edm::EDProducer {
+class MFVVertexTracks : public edm::EDFilter {
 public:
   MFVVertexTracks(const edm::ParameterSet&);
-  virtual void produce(edm::Event&, const edm::EventSetup&);
+  virtual bool filter(edm::Event&, const edm::EventSetup&);
 
 private:
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
@@ -40,6 +40,7 @@ private:
   const edm::EDGetTokenT<pat::JetCollection> pat_jet_token;
   const bool use_second_tracks;
   const edm::EDGetTokenT<reco::TrackCollection> second_tracks_token;
+  const int min_n_seed_tracks;
   const bool no_track_cuts;
   const double min_seed_jet_pt;
   const double min_track_pt;
@@ -103,6 +104,7 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
     pat_jet_token(use_pat_jets ? consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("pat_jet_src")) : edm::EDGetTokenT<pat::JetCollection>()),
     use_second_tracks(cfg.getParameter<bool>("use_second_tracks")),
     second_tracks_token(use_second_tracks ? consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("second_tracks_src")) : edm::EDGetTokenT<reco::TrackCollection>()),
+    min_n_seed_tracks(cfg.getParameter<int>("min_n_seed_tracks")),
     no_track_cuts(cfg.getParameter<bool>("no_track_cuts")),
     min_seed_jet_pt(cfg.getParameter<double>("min_seed_jet_pt")),
     min_track_pt(cfg.getParameter<double>("min_track_pt")),
@@ -185,7 +187,7 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
   }
 }
 
-void MFVVertexTracks::produce(edm::Event& event, const edm::EventSetup& setup) {
+bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
   if (verbose)
     std::cout << "MFVVertexTracks " << module_label << " run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
 
@@ -464,9 +466,13 @@ void MFVVertexTracks::produce(edm::Event& event, const edm::EventSetup& setup) {
     h_n_seed_tracks->Fill(seed_tracks->size());
   }
 
+  const bool pass_min_n_seed_tracks = int(seed_tracks->size()) >= min_n_seed_tracks;
+
   event.put(std::move(all_tracks), "all");
   event.put(std::move(seed_tracks), "seed");
   event.put(std::move(seed_tracks_copy), "seed");
+
+  return pass_min_n_seed_tracks;
 }
 
 DEFINE_FWK_MODULE(MFVVertexTracks);
