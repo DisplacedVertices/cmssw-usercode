@@ -12,7 +12,7 @@ version = settings.version + 'V1'
 
 cfgs = named_product(njets = [2,3],
                      nbjets = [0,1,2],
-                     nsigmadxy = [4.0], #, 4.1],
+                     nsigmadxy = [4.0,4.25,4.35,4.45], #, 4.1],
                      angle = [0.2], #, 0.1, 0.3],
                      )
 
@@ -44,10 +44,10 @@ process.p = cms.Path(process.mfvEventFilterSequence * process.goodOfflinePrimary
 random_dict = {}
 
 for icfg, cfg in enumerate(cfgs):
-    #nsigmadxy_name = ('nsig%.1f' % cfg.nsigmadxy).replace('.', 'p')
+    nsigmadxy_name = ('nsig%.2f' % cfg.nsigmadxy).replace('.', 'p')
     #angle_name = ('angle%.1f' % cfg.angle).replace('.', 'p')
     #ex = '%i%i%s%s' % (cfg.njets, cfg.nbjets, nsigmadxy_name, angle_name)
-    ex = '%i%i' % (cfg.njets, cfg.nbjets)
+    ex = '%i%i%s' % (cfg.njets, cfg.nbjets, nsigmadxy_name)
 
     tracks_name = 'mfvMovedTracks' + ex
     auxes_name = 'mfvVerticesAux' + ex
@@ -116,7 +116,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = Samples.data_samples_2018
 
     #samples = [s for s in samples if s.has_dataset(dataset)]
-    set_splitting(samples, dataset, 'trackmover')
+    set_splitting(samples, dataset, 'trackmover', data_json=json_path('ana_2017p8.json'))
 
     ms = MetaSubmitter('TrackMover' + version, dataset=dataset)
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier)
