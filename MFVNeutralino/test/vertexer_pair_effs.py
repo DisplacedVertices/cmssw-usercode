@@ -1,7 +1,7 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-cross = '' # 2017to2018 2017to2017p8
+cross = '' # 2017to2018' # 2017to2017p8'
 
 dataset = 'ntuplev22m_ntkseeds'
 sample_files(process, 'qcdht2000_2017', dataset, 1)
