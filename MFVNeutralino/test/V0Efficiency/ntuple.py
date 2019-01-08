@@ -87,6 +87,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     set_splitting(samples, dataset, 'ntuple')
 
     ms = MetaSubmitter('V0Ntuple' + version, dataset=dataset)
-    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, zerobias_modifier)
+    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, zerobias_modifier)
     ms.condor.stageout_files = 'all'
     ms.submit(samples)

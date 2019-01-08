@@ -31,11 +31,14 @@ private:
   const std::vector<double> npv_weights;
   double npv_weight(int mc_npu) const;
 
+  const bool weight_misc;
+  std::vector<edm::EDGetTokenT<double>> misc_tokens;
+
   TH1D* h_gensign;
   TH1D* h_npu;
   TH1D* h_npv;
 
-  enum { sum_gen_weight, sum_gen_weightprod, sum_pileup_weight, sum_npv_weight, sum_weight, n_sums };
+  enum { sum_gen_weight, sum_gen_weightprod, sum_pileup_weight, sum_npv_weight, sum_misc_weight, sum_weight, n_sums };
   TH1D* h_sums;
 };
 
@@ -51,10 +54,14 @@ JMTWeightProducer::JMTWeightProducer(const edm::ParameterSet& cfg)
     weight_pileup(cfg.getParameter<bool>("weight_pileup")),
     pileup_weights(cfg.getParameter<std::vector<double> >("pileup_weights")),
     weight_npv(cfg.getParameter<bool>("weight_npv")),
-    npv_weights(cfg.getParameter<std::vector<double> >("npv_weights"))
+    npv_weights(cfg.getParameter<std::vector<double> >("npv_weights")),
+    weight_misc(cfg.getParameter<bool>("weight_misc"))
 {
   if (weight_gen + weight_gen_sign_only > 1)
     throw cms::Exception("Configuration", "can only set one of weight_gen, weight_gen_sign_only");
+
+  for (const edm::InputTag& src : cfg.getParameter<std::vector<edm::InputTag> >("misc_srcs"))
+    misc_tokens.push_back(consumes<double>(src));
 
   produces<double>();
 
@@ -68,7 +75,7 @@ JMTWeightProducer::JMTWeightProducer(const edm::ParameterSet& cfg)
 
     h_sums = fs->make<TH1D>("h_sums", "", n_sums+1, 0, n_sums+1);
     int ibin = 1;
-    for (const char* x : { "sum_gen_weight", "sum_gen_weightprod", "sum_pileup_weight", "sum_npv_weight", "sum_weight", "n_sums" })
+    for (const char* x : { "sum_gen_weight", "sum_gen_weightprod", "sum_pileup_weight", "sum_npv_weight", "sum_misc_weight", "sum_weight", "n_sums" })
       h_sums->GetXaxis()->SetBinLabel(ibin++, x);
   }
 }
@@ -157,6 +164,17 @@ void JMTWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
         }
         *weight *= npv_w;
       }
+    }
+
+    if (weight_misc) {
+      double misc_w = 1;
+      for (auto t : misc_tokens) {
+        edm::Handle<double> m;
+        event.getByToken(t, m);
+        misc_w *= *m;
+      }
+      h_sums->Fill(sum_misc_weight, misc_w);
+      *weight *= misc_w;
     }
   }
 

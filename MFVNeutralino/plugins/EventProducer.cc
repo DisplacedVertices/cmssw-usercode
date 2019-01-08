@@ -57,6 +57,7 @@ private:
   std::vector<StringCutObjectSelector<pat::Electron>> electron_EB_selectors;
   std::vector<StringCutObjectSelector<pat::Electron>> electron_EE_selectors;
   EffectiveAreas electron_effective_areas;
+  std::vector<edm::EDGetTokenT<double>> misc_tokens;
   const bool lightweight;
 };
 
@@ -97,6 +98,9 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     electron_effective_areas(cfg.getParameter<edm::FileInPath>("electron_effective_areas").fullPath()),
     lightweight(cfg.getParameter<bool>("lightweight"))
 {
+  for (const edm::InputTag& src : cfg.getParameter<std::vector<edm::InputTag> >("misc_srcs"))
+    misc_tokens.push_back(consumes<double>(src));
+
   produces<MFVEvent>();
   assert(muon_selectors.size() == MFVEvent::n_lep_mu_idrequired);
   assert(MFVEvent::n_lep_mu_idrequired == MFVEvent::n_lep_mu_idbits);
@@ -436,8 +440,21 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       mevent->vertex_seed_track_phi.push_back(tk.phi());
       mevent->vertex_seed_track_dxy.push_back(tk.dxy(beamspot->position()));
       mevent->vertex_seed_track_dz.push_back(primary_vertex ? tk.dz(primary_vertex->position()) : 0);
+      mevent->vertex_seed_track_err_pt.push_back(tk.ptError());
+      mevent->vertex_seed_track_err_eta.push_back(tk.etaError());
+      mevent->vertex_seed_track_err_phi.push_back(tk.phiError());
+      mevent->vertex_seed_track_err_dxy.push_back(tk.dxyError());
+      mevent->vertex_seed_track_err_dz.push_back(tk.dzError());
       mevent->vertex_seed_track_hp_push_back(tk.hitPattern().numberOfValidPixelHits(), tk.hitPattern().numberOfValidStripHits(), tk.hitPattern().pixelLayersWithMeasurement(), tk.hitPattern().stripLayersWithMeasurement());
     }
+  }
+
+  //////////////////////////////////////////////////////////////////////
+
+  for (auto t : misc_tokens) {
+    edm::Handle<double> m;
+    event.getByToken(t, m);
+    mevent->misc.push_back(*m);
   }
 
   //////////////////////////////////////////////////////////////////////

@@ -16,6 +16,7 @@ private:
   const double max_pt_for_ht;
   const double min_ht;
   const bool debug;
+  const std::string module_label;
 };
 
 JMTJetFilter::JMTJetFilter(const edm::ParameterSet& cfg)
@@ -24,22 +25,27 @@ JMTJetFilter::JMTJetFilter(const edm::ParameterSet& cfg)
     min_pt_for_ht(cfg.getParameter<double>("min_pt_for_ht")),
     max_pt_for_ht(cfg.getParameter<double>("max_pt_for_ht")),
     min_ht(cfg.getParameter<double>("min_ht")),
-    debug(cfg.getUntrackedParameter<bool>("debug", false))
+    debug(cfg.getUntrackedParameter<bool>("debug", false)),
+    module_label(cfg.getParameter<std::string>("@module_label"))
 {
 }
 
 bool JMTJetFilter::filter(edm::Event& event, const edm::EventSetup&) {
+  if (debug) std::cout << "JMTJetFilter=" << module_label << " event " << event.id().run() << "," << event.luminosityBlock() << "," << event.id().event() << "\n";
+
   edm::Handle<pat::JetCollection> jets;
   event.getByToken(jets_token, jets);
 
   double ht = 0;
+  int ijet = 0;
   for (const pat::Jet& jet : *jets) {
+    if (debug) std::cout << "jet #" << ijet++ << ": pt " << jet.pt() << " eta " << jet.eta() << " phi " << jet.phi() << " E " << jet.energy() << " nconst " << jet.nConstituents() << "\n";
     const double pt = jet.pt();
     if (pt > min_pt_for_ht && pt < max_pt_for_ht)
       ht += pt;
   }
 
-  if (debug) printf("JetFilter: njets: %lu  ht: %f\n", jets->size(), ht);
+  if (debug) std::cout << "JMTJetFilter=" << module_label << " njets: " << jets->size() << " ht: " << ht << "\n";
 
   return
     int(jets->size()) >= min_njets && 

@@ -14,6 +14,8 @@ jmtWeight = cms.EDProducer('JMTWeightProducer',
                            pileup_weights = cms.vdouble(*get_pileup_weights('default')),
                            weight_npv = cms.bool(False),
                            npv_weights = cms.vdouble(),
+                           weight_misc = cms.bool(False),
+                           misc_srcs = cms.VInputTag(),
                            )
 
 jmtWeightMiniAOD = jmtWeight.clone(

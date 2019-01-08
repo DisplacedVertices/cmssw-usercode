@@ -5,9 +5,9 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.MFVNeutralino.PerSignal import PerSignal
 
-titles = 'v18', 'v19'
-paths = ('/uscms_data/d2/tucker/crab_dirs/MiniTreeV18mp1',
-         '/uscms_data/d2/tucker/crab_dirs/MiniTreeV19m')
+titles = 'v22', 'v21'
+paths = ('/uscms_data/d2/tucker/crab_dirs/MiniTreeV22m',
+         '/uscms_data/d2/tucker/crab_dirs/MiniTreeV21m')
 
 set_style()
 ps = plot_saver(plot_dir('sigeff_ratio_%sV%s' % titles), size=(600,600), log=False)
@@ -51,7 +51,7 @@ ps.save('eff')
 per = PerSignal('ratio %s/%s' % titles, y_range=(0.6,1.15))
 PerSignal.clear_samples(samples)
 for s in samples:
-    s.y, s.yl, s.yh = clopper_pearson_poisson_means(s.e2[2], s.e1[2])
+    s.y, s.yl, s.yh = clopper_pearson_poisson_means(s.e1[2], s.e2[2])
 per.add(available(Samples.mfv_signal_samples_2017),       title='multijet', color=ROOT.kPink)
 per.add(available(Samples.mfv_stopdbardbar_samples_2017), title='dijet',    color=ROOT.kCyan)
 per.draw(canvas=ps.c)

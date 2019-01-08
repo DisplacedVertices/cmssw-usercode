@@ -30,6 +30,7 @@ process.mfvAnalysisCutsJet    = process.mfvAnalysisCuts.clone(apply_vertex_cuts 
 process.mfvAnalysisCutsLepton = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False, apply_presel = 2)
 
 process.preSeq = cms.Sequence(process.goodOfflinePrimaryVertices *
+                              process.updatedJetsSeqMiniAOD *
                               process.selectedPatJets *
                               process.selectedPatMuons *
                               process.selectedPatElectrons *
@@ -37,6 +38,7 @@ process.preSeq = cms.Sequence(process.goodOfflinePrimaryVertices *
                               process.mfvGenParticles *
                               process.mfvUnpackedCandidateTracks *
                               process.mfvVertexTracks *
+                              process.prefiringweight *
                               process.mfvEvent *
                               process.mfvWeight)
 
@@ -66,7 +68,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     samples = [s for s in samples if s.has_dataset(dataset) and (s.is_mc or not settings.cross)]
     set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2017p8.json'))
 
-    ms = MetaSubmitter('PreselHistos%sV2%s' % (settings.version.capitalize(), '_' + settings.cross if settings.cross else ''), dataset=dataset)
-    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(cross=settings.cross))
+    ms = MetaSubmitter('PreselHistos%sV1%s' % (settings.version.capitalize(), '_' + settings.cross if settings.cross else ''), dataset=dataset)
+    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier(cross=settings.cross))
     ms.condor.stageout_files = 'all'
     ms.submit(samples)

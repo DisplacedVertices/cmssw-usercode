@@ -4,8 +4,7 @@ import sys, os, shutil
 from pprint import pprint
 from glob import glob
 from time import time
-from JMTucker.Tools import Samples
-from JMTucker.Tools import SampleFiles
+from JMTucker.Tools import Samples, SampleFiles, colors
 from JMTucker.Tools.general import bool_from_argv
 from JMTucker.Tools.hadd import hadd
 from JMTucker.Tools.CMSSWTools import is_edm_file, merge_edm_files, cmssw_base, json_path
@@ -143,24 +142,35 @@ def _background_samples(trigeff=False):
 
 def cmd_merge_background():
     permissive = bool_from_argv('permissive')
-    for year_s, scale in ('_2017', -AnalysisConstants.int_lumi_2017 * AnalysisConstants.scale_factor_2017),:
-        files = _background_samples()
-        files = ['%s%s.root' % (x, year_s) for x in files]
-        files2 = []
-        for fn in files:
-            if not os.path.isfile(fn):
-                msg = '%s not found' % fn
-                if permissive:
-                    print msg
-                else:
-                    raise RuntimeError(msg)
+    cwd = os.getcwd()
+    if cwd.endswith('2017to2018'):
+        year_s, scale = '_2018', -AnalysisConstants.int_lumi_2018 * AnalysisConstants.scale_factor_2018
+    elif cwd.endswith('2017to2017p8'):
+        year_s, scale = '_2017p8', -AnalysisConstants.int_lumi_2017p8 * AnalysisConstants.scale_factor_2017p8
+    else:
+        year_s, scale = '_2017', -AnalysisConstants.int_lumi_2017 * AnalysisConstants.scale_factor_2017
+
+    print 'scaling to', year_s[1:], scale
+    if year_s != '_2017':
+        print colors.yellow('using *_2017* for 2018')
+
+    files = _background_samples()
+    files = ['%s%s.root' % (x, '_2017') for x in files]
+    files2 = []
+    for fn in files:
+        if not os.path.isfile(fn):
+            msg = '%s not found' % fn
+            if permissive:
+                print msg
             else:
-                files2.append(fn)
-        if files2:
-            cmd = 'samples merge %f background%s%s.root ' % (scale, _presel_s, year_s)
-            cmd += ' '.join(files2)
-            print cmd
-            os.system(cmd)
+                raise RuntimeError(msg)
+        else:
+            files2.append(fn)
+    if files2:
+        cmd = 'samples merge %f background%s%s.root ' % (scale, _presel_s, year_s)
+        cmd += ' '.join(files2)
+        print cmd
+        os.system(cmd)
 
 def cmd_effsprint():
     background_fns = ' '.join(x + '_2017.root' for x in _background_samples())
@@ -225,16 +235,20 @@ def cmd_v0eff():
 
 def cmd_trigeff():
     cmd_hadd_mc_sums()
-    cmd_report_data()
-    cmd_hadd_data()
+    if glob('*SingleMuon*'):
+        cmd_report_data()
+        cmd_hadd_data()
+    cmd_trigeff_merge()
 
+def cmd_trigeff_merge():
     permissive = bool_from_argv('permissive')
-    for year_s, scale in ('_2017', -AnalysisConstants.int_lumi_2017),:
+    print colors.yellow('using *_2017* for 2018')
+    for year_s, scale in ('_2017', -AnalysisConstants.int_lumi_2017), ('_2018', -AnalysisConstants.int_lumi_2018):
         for wqcd_s in '', '_wqcd':
             files = _background_samples(trigeff=True)
             if not wqcd_s:
                 files.remove('qcdmupt15')
-            files = ['%s%s.root' % (x, year_s) for x in files]
+            files = ['%s%s.root' % (x, '_2017') for x in files]
             files2 = []
             for fn in files:
                 if not os.path.isfile(fn):
@@ -247,9 +261,13 @@ def cmd_trigeff():
                     files2.append(fn)
 
             if files2:
-                cmd = 'samples merge %f background%s%s.root %s' % (scale, wqcd_s, year_s, ' '.join(files2))
-                print cmd
-                os.system(cmd)
+                out_fn = 'background%s%s.root' % (wqcd_s, year_s)
+                if os.path.exists(out_fn):
+                    print colors.yellow('skipping %s because it exists' % out_fn)
+                else:
+                    cmd = 'samples merge %f %s %s' % (scale, out_fn, ' '.join(files2))
+                    print cmd
+                    os.system(cmd)
 
 def cmd_merge_bquarks_nobquarks():
     for year in ['2017']:

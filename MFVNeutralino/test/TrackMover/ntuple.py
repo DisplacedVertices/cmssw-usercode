@@ -8,11 +8,11 @@ settings.is_mc = True
 settings.is_miniaod = True
 settings.event_filter = 'jets only novtx'
 
-version = settings.version + 'V2'
+version = settings.version + 'V1'
 
 cfgs = named_product(njets = [2,3],
                      nbjets = [0,1,2],
-                     nsigmadxy = [4.0], #, 4.1],
+                     nsigmadxy = [4.0,4.25,4.35,4.45], #, 4.1],
                      angle = [0.2], #, 0.1, 0.3],
                      )
 
@@ -44,10 +44,10 @@ process.p = cms.Path(process.mfvEventFilterSequence * process.goodOfflinePrimary
 random_dict = {}
 
 for icfg, cfg in enumerate(cfgs):
-    #nsigmadxy_name = ('nsig%.1f' % cfg.nsigmadxy).replace('.', 'p')
+    nsigmadxy_name = ('nsig%.2f' % cfg.nsigmadxy).replace('.', 'p')
     #angle_name = ('angle%.1f' % cfg.angle).replace('.', 'p')
     #ex = '%i%i%s%s' % (cfg.njets, cfg.nbjets, nsigmadxy_name, angle_name)
-    ex = '%i%i' % (cfg.njets, cfg.nbjets)
+    ex = '%i%i%s' % (cfg.njets, cfg.nbjets, nsigmadxy_name)
 
     tracks_name = 'mfvMovedTracks' + ex
     auxes_name = 'mfvVerticesAux' + ex
@@ -77,6 +77,13 @@ for icfg, cfg in enumerate(cfgs):
     modifiedVertexSequence(process, ex, tracks_src = tracks_name,
                            min_track_sigmadxy = cfg.nsigmadxy,
                            )
+
+    # hack track-jet association:
+    # jets are composed of packedPFCandidates and JetTrackRefGetter knows how to compare those to mfvUnpackedCandidateTracks
+    # but since there is a mfvMovedTracks entry for every one of mfvUnpackedCandidateTracks, the keys are the same
+    # if this breaks, need to make JetTrackRefGetter know how to compose two maps
+    getattr(process, 'mfvVerticesToJets' + ex).unpacked_tracks_src = tracks_name
+    getattr(process, 'mfvVerticesAuxPresel' + ex).jets_tracks_keys_only = True
 
     tree = cms.EDAnalyzer('MFVMovedTracksTreer',
                           mfvJetTrackRefGetter,
@@ -109,9 +116,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = Samples.data_samples_2018
 
     #samples = [s for s in samples if s.has_dataset(dataset)]
-    set_splitting(samples, dataset, 'trackmover')
+    set_splitting(samples, dataset, 'trackmover', data_json=json_path('ana_2017p8.json'))
 
     ms = MetaSubmitter('TrackMover' + version, dataset=dataset)
-    ms.common.pset_modifier = is_mc_modifier
+    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier)
     ms.condor.stageout_files = 'all'
     ms.submit(samples)

@@ -45,7 +45,10 @@ class MFVVertexAuxProducer : public edm::EDProducer {
   const std::string sv_to_jets_src;
   edm::EDGetTokenT<mfv::JetVertexAssociation> sv_to_jets_token[mfv::NJetsByUse];
   mfv::JetTrackRefGetter jet_track_ref_getter;
+  const bool jets_tracks_keys_only;
   const MFVVertexAuxSorter sorter;
+  const bool verbose;
+  const std::string module_label;
 };
 
 MFVVertexAuxProducer::MFVVertexAuxProducer(const edm::ParameterSet& cfg)
@@ -58,7 +61,10 @@ MFVVertexAuxProducer::MFVVertexAuxProducer(const edm::ParameterSet& cfg)
     sv_to_jets_src(cfg.getParameter<std::string>("sv_to_jets_src")),
     //sv_to_jets_token(consumes<mfv::JetVertexAssociation>(edm::InputTag("sv_to_jets_src"))),
     jet_track_ref_getter(cfg, consumesCollector()),
-    sorter(cfg.getParameter<std::string>("sort_by"))
+    jets_tracks_keys_only(cfg.getParameter<bool>("jets_tracks_keys_only")),
+    sorter(cfg.getParameter<std::string>("sort_by")),
+    verbose(cfg.getUntrackedParameter<bool>("verbose", false)),
+    module_label(cfg.getParameter<std::string>("@module_label"))
 {
   for (int i = 0; i < mfv::NJetsByUse; ++i)
     sv_to_jets_token[i] = consumes<mfv::JetVertexAssociation>(edm::InputTag(sv_to_jets_src, mfv::jetsby_names[i])); // JMTBAD yuck, rethink
@@ -67,6 +73,7 @@ MFVVertexAuxProducer::MFVVertexAuxProducer(const edm::ParameterSet& cfg)
 }
 
 void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
+  if (verbose) std::cout << "MFVVertexAuxProducer " << module_label << " run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
 
   //////////////////////////////////////////////////////////////////////
 
@@ -147,6 +154,8 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     aux.chi2 = sv.chi2();
     aux.ndof_ = int2uchar_clamp(int(sv.ndof()));
 
+    if (verbose) printf("v#%i at %f,%f,%f ndof %.1f\n", isv, aux.x, aux.y, aux.z, sv.ndof());
+
     math::XYZVector pv2sv;
     if (primary_vertex != 0)
       pv2sv = sv.position() - primary_vertex->position();
@@ -161,43 +170,57 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     std::vector<double> jetpairdrs[mfv::NJetsByUse];
     std::vector<double> costhjetmomvtxdisps[mfv::NJetsByUse];
     std::set<reco::TrackRef> jets_tracks[mfv::NJetsByUse];
+    std::set<int> jets_tracks_keys[mfv::NJetsByUse];
+    auto track_in_a_jet = [&](const int i_jet_assoc, const reco::TrackRef& r) {
+      if (jets_tracks_keys_only)
+        return jets_tracks_keys[i_jet_assoc].count(r.key()) > 0;
+      else
+        return jets_tracks     [i_jet_assoc].count(r)       > 0;
+    };
 
     if (use_sv_to_jets) {
-      for (int i = 0; i < mfv::NJetsByUse; ++i) {
-        int njets = sv_to_jets[i]->numberOfAssociations(svref);
-        aux.njets[i] = int2uchar(njets);
-      
+      for (int i_jet_assoc = 0; i_jet_assoc < mfv::NJetsByUse; ++i_jet_assoc) {
+        const int njets = sv_to_jets[i_jet_assoc]->numberOfAssociations(svref);
+        if (verbose) printf("    njets %i:\n", njets);
+        aux.njets[i_jet_assoc] = int2uchar(njets);
+
         if (njets > 0) {
-          const edm::RefVector<pat::JetCollection>& jets = (*sv_to_jets[i])[svref];
+          const edm::RefVector<pat::JetCollection>& jets = (*sv_to_jets[i_jet_assoc])[svref];
 
           for (int ijet = 0; ijet < njets; ++ijet) {
-            p4s[1+i] += jets[ijet]->p4();
+            if (verbose) printf("        %i <%f,%f,%f,%f>\n", ijet, jets[ijet]->pt(), jets[ijet]->eta(), jets[ijet]->phi(), jets[ijet]->energy());
+            p4s[1+i_jet_assoc] += jets[ijet]->p4();
 
-            for (auto r : jet_track_ref_getter.tracks(event, *jets[ijet]))
-              jets_tracks[i].insert(r);
+            for (auto r : jet_track_ref_getter.tracks(event, *jets[ijet])) {
+              jets_tracks[i_jet_assoc].insert(r);
+              jets_tracks_keys[i_jet_assoc].insert(r.key());
+              if (verbose) printf("            tk key %i <%f,%f,%f,%f,%f>\n", r.key(), r->charge()*r->pt(), r->eta(), r->phi(), r->dxy(), r->dz());
+            }
 
             if (primary_vertex)
-              costhjetmomvtxdisps[i].push_back(costh3(jets[ijet]->p4(), pv2sv));
+              costhjetmomvtxdisps[i_jet_assoc].push_back(costh3(jets[ijet]->p4(), pv2sv));
             else
-              costhjetmomvtxdisps[i].push_back(-2);
+              costhjetmomvtxdisps[i_jet_assoc].push_back(-2);
 
             for (int jjet = ijet+1; jjet < njets; ++jjet) {
-              jetpairdetas[i].push_back(fabs(jets[ijet]->eta() - jets[jjet]->eta()));
-              jetpairdrs[i].push_back(reco::deltaR(*jets[ijet], *jets[jjet]));
+              jetpairdetas[i_jet_assoc].push_back(fabs(jets[ijet]->eta() - jets[jjet]->eta()));
+              jetpairdrs[i_jet_assoc].push_back(reco::deltaR(*jets[ijet], *jets[jjet]));
             }
           }
         
-          math::XYZTLorentzVector jpt_p4 = p4s[1+i];
-
+          math::XYZTLorentzVector jpt_p4 = p4s[1+i_jet_assoc];
+          if (verbose) printf("    jpt accounting:\n");
           for (auto it = sv.tracks_begin(), ite = sv.tracks_end(); it != ite; ++it) {
             if (sv.trackWeight(*it) >= mfv::track_vertex_weight_min) {
               reco::TrackRef tk = it->castTo<reco::TrackRef>();
-              if (!jets_tracks[i].count(tk))
+              if (!track_in_a_jet(i_jet_assoc, tk)) {
                 jpt_p4 += math::XYZTLorentzVector(tk->px(), tk->py(), tk->pz(), tk->p());
+                if (verbose) printf("        add tk key %i <%f,%f,%f,%f,%f>\n", tk.key(), tk->charge()*tk->pt(), tk->eta(), tk->phi(), tk->dxy(), tk->dz());
+              }
             }
           }
 
-          p4s[1 + i + mfv::NJetsByUse] = jpt_p4;
+          p4s[1 + i_jet_assoc + mfv::NJetsByUse] = jpt_p4;
         }
       }
 
@@ -228,13 +251,14 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       }
     }
 
+    if (verbose) printf("    momenta:\n");
     for (int i = 0; i < mfv::NMomenta; ++i) {
       aux.pt[i]   = p4s[i].pt();
       aux.eta[i]  = p4s[i].eta();
       aux.phi[i]  = p4s[i].phi();
       aux.mass[i] = p4s[i].mass();
+      if (verbose) printf("    %i <%f,%f,%f,%f>\n", i, aux.pt[i], aux.eta[i], aux.phi[i], aux.mass[i]);
     }
-
       
     //const double sv_r = mag(sv.position().x() - bsx, sv.position().y() - bsy);
     //const double sv_z = fabs(sv.position().z() - bsz);
@@ -244,6 +268,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
     std::vector<double> costhtkmomvtxdisps;
 
+    if (verbose) printf("    tracks %i:\n", int(trke-trkb));
     for (auto trki = trkb; trki != trke; ++trki) {
       const reco::TrackBaseRef& tri = *trki;
       const reco::TrackRef& trref = tri.castTo<reco::TrackRef>();
@@ -275,6 +300,8 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       if (pv_for_track.size() > 1)
         throw cms::Exception("VertexAuxProducer") << "multiple PV for a track";
 
+      if (verbose) printf("        %i <%f,%f,%f,%f,%f>\n", int(trki-trkb), tri->charge()*tri->pt(), tri->eta(), tri->phi(), tri->dxy(), tri->dz());
+
       aux.track_weight(-1, sv.trackWeight(tri));
       aux.track_q(-1, tri->charge());
       aux.track_hitpattern(-1,
@@ -285,7 +312,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
                            nhitsbehind,
                            tri->hitPattern().numberOfLostHits(reco::HitPattern::TRACK_HITS)); // JMTBAD could add missing inner, outer
 
-      aux.track_injet.push_back(jets_tracks[0].count(trref)); // JMTBAD
+      aux.track_injet.push_back(track_in_a_jet(mfv::JByNtracks, trref)); // JMTBAD multiple jet assoc types
       aux.track_inpv.push_back(pv_for_track.size() ? pv_for_track[0].first : -1);
       aux.track_dxy.push_back(fabs(tri->dxy(beamspot->position())));
       aux.track_dz.push_back(primary_vertex ? fabs(tri->dz(primary_vertex->position())) : 0); // JMTBAD not the previous behavior when no PV

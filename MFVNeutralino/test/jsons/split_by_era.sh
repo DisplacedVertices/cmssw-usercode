@@ -16,6 +16,9 @@ while read x; do
         if [[ $x =~ PromptReco ]]; then
             era=${era}$(echo $x | sed 's/.*PromptReco-v\(.\).*/\1/')
         fi
+        if [[ $era == 2018D2 ]]; then
+            era=2018D
+        fi
     fi
     runfn=runs-${era}.txt
     dasgoclient -query "run dataset=$x" > $runfn

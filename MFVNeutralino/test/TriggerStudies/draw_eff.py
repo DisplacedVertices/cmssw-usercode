@@ -5,7 +5,7 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.Tools.Samples import *
 
-version = '2017p8v3'
+version = '2017p8v4'
 zoom = False #(0.98,1.005)
 save_more = True
 data_only = False
@@ -15,18 +15,18 @@ num_dir, den_dir = 'num', 'den'
 
 which = typed_from_argv(int, 0)
 data_period, int_lumi = [
-    ('p8',92509.),
-    ('',  41530.),
-    ('B',  4794.),
-    ('C',  9631.),
-    ('D',  4248.),
-    ('E',  9315.),
-    ('F', 13540.),
-    ('',  50979.),
-    ('A', 13482.),
-    ('B',  6785.),
-    ('C',  6609.),
-    ('D', 24103.),
+    ('p8',101037.),
+    ('',   41525.),
+    ('B',   4794.),
+    ('C',   9631.),
+    ('D',   4248.),
+    ('E',   9314.),
+    ('F',  13538.),
+    ('',   59512.),
+    ('A',  14002.),
+    ('B',   7091.),
+    ('C',   6937.),
+    ('D',  31482.),
     ][which]
 year = 2017 if which < 7 else 2018
 print year, data_period, int_lumi
@@ -50,7 +50,7 @@ if data_only:
     bkg_samples, sig_samples = [], []
 else:
     if year == 2017 or year == 2018:
-        bkg_samples = [ttbar_2017, wjetstolnusum_2017, dyjetstollM50sum_2017] #, dyjetstollM10_2017]
+        bkg_samples = [ttbar_2017, wjetstolnusum_2017, dyjetstollM50sum_2017, dyjetstollM10_2017, qcdmupt15_2017]
         if use_qcd:
             bkg_samples.append(qcdmupt15_2017)
         sig_samples = [getattr(Samples, 'mfv_neu_tau001000um_M%04i_2017' % m) for m in (400, 800, 1200, 1600)] + [Samples.mfv_neu_tau010000um_M0800_2017]
@@ -59,7 +59,7 @@ n_bkg_samples = len(bkg_samples)
 for samples in bkg_samples, sig_samples:
     for sample in samples:
         sample.fn = os.path.join(root_dir, sample.name + '.root')
-        sample.f = ROOT.TFile(sample.fn)
+        sample.f = ROOT.TFile(sample.fn) if os.path.isfile(sample.fn) else None
 
 ########################################################################
 
@@ -311,9 +311,10 @@ for kind in kinds:
 
         print '\nsignals'
         for sample in sig_samples:
-            sig_num, sig_den = get(sample.f, kind, n)
-            ib = sig_num.FindBin(lump_lower)
-            ni = sig_num.Integral(ib, 10000)
-            di = sig_den.Integral(ib, 10000)
-            print '   %10i %10i %10s %10s  %.6f [%.6f, %.6f]' % ((ni, di, '', '') + clopper_pearson(ni, di))
-            print '+- %10.2f %10.2f' % (ni**0.5, di**0.5)
+            if sample.f:
+                sig_num, sig_den = get(sample.f, kind, n)
+                ib = sig_num.FindBin(lump_lower)
+                ni = sig_num.Integral(ib, 10000)
+                di = sig_den.Integral(ib, 10000)
+                print '   %10i %10i %10s %10s  %.6f [%.6f, %.6f]' % ((ni, di, '', '') + clopper_pearson(ni, di))
+                print '+- %10.2f %10.2f' % (ni**0.5, di**0.5)

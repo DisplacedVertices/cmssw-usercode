@@ -1,4 +1,4 @@
-import sys
+import sys, re
 from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
 from JMTucker.Tools.CondorSubmitter import CondorSubmitter
 
@@ -15,17 +15,22 @@ def is_mc_modifier(sample):
         to_replace.append((magic, 'is_mc = False', 'trying to submit on data, and tuple template does not contain the magic string "%s"' % magic))
     return [], to_replace
 
-def H_modifier(sample):
-    to_replace = []
-    if '2016H' in sample.name:
-        magic = 'H = False'
-        to_replace.append((magic, 'H = True', 'trying to submit on 2016H and no magic string "%s"' % magic))
-    return [], to_replace
-
 def zerobias_modifier(sample):
     if sample.name.startswith('ZeroBias'):
         magic = 'zerobias = False'
         return [], [(magic, 'zerobias = True', 'trying to submit on ZeroBias and no magic string "%s"' % magic)]
+    else:
+        return [], []
+
+def era_modifier(sample):
+    if not sample.is_mc:
+        mo = re.search(r'(201\d)([A-Z])', sample.name)
+        assert mo
+        yr, era = mo.groups()
+        from JMTucker.Tools.Year import year
+        assert year == int(yr)
+        magic = '\nsettings.is_mc ='
+        return [], [(magic, ('\nsettings.era = "%s"' % era) + magic, 'trying to submit on data and no magic string %r' % magic)]
     else:
         return [], []
 
@@ -226,7 +231,7 @@ def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=2
                     sample.events_per /= fp
                     sample.files_per = 1
                 elif name != 'signal':
-                    sample.files_per = int(round(samples.files_per / 3.))
+                    sample.files_per = int(round(sample.files_per / 3.))
                     sample.events_per /= 3
 
     elif jobtype == 'default':
@@ -306,8 +311,8 @@ __all__ = [
     'set_splitting',
     'max_output_modifier',
     'is_mc_modifier',
-    'H_modifier',
     'zerobias_modifier',
+    'era_modifier',
     'repro_modifier',
     'half_mc_modifier',
     'npu_filter_modifier',

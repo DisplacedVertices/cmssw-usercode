@@ -1,6 +1,6 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-dataset = 'ntuplev21m'
+dataset = 'ntuplev22m'
 sample_files(process, 'mfv_neu_tau010000um_M0800_2017', dataset, 1)
 tfileservice(process, 'mctruth.root')
 file_event_from_argv(process)

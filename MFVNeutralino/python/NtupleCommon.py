@@ -1,7 +1,7 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version = 'V21'
+ntuple_version = 'V22'
 
 def run_n_tk_seeds(process, mode, settings, output_commands):
     if mode:
@@ -55,31 +55,31 @@ def minitree_only(process, mode, settings, output_commands):
             p.insert(0, process.pmcStat._seq)
             p.insert(0, process.p._seq)
 
-def event_filter(process, mode, settings, output_commands):
+def event_filter(process, mode, settings, output_commands, **kwargs):
     if mode:
         from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
         def setup(**kwargs):
             setup_event_filter(process, path_name='p', input_is_miniaod=settings.is_miniaod, **kwargs)
 
         if mode == 'trigger only':
-            setup()
+            setup(**kwargs)
         elif mode == 'trigger jets only':
-            setup(trigger_filter='jets only')
+            setup(trigger_filter='jets only', **kwargs)
         elif mode == 'trigger leptons only':
-            setup(trigger_filter='leptons only')
+            setup(trigger_filter='leptons only', **kwargs)
         elif mode == 'jets only':
-            setup(trigger_filter='jets only', event_filter='jets only')
+            setup(trigger_filter='jets only', event_filter='jets only', **kwargs)
         elif mode == 'leptons only':
-            setup(trigger_filter='leptons only', event_filter='leptons only')
+            setup(trigger_filter='leptons only', event_filter='leptons only', **kwargs)
         elif mode == 'jets only novtx':
-            setup(trigger_filter='jets only', event_filter='jets only', event_filter_require_vertex=False)
+            setup(trigger_filter='jets only', event_filter='jets only', event_filter_require_vertex=False, **kwargs)
         elif mode == 'leptons only novtx':
-            setup(trigger_filter='leptons only', event_filter='leptons only', event_filter_require_vertex=False)
+            setup(trigger_filter='leptons only', event_filter='leptons only', event_filter_require_vertex=False, **kwargs)
         elif mode == 'novtx':
-            setup(event_filter=True, event_filter_require_vertex=False)
+            setup(event_filter=True, event_filter_require_vertex=False, **kwargs)
         else:
             assert mode is True
-            setup(event_filter=True)
+            setup(event_filter=True, **kwargs)
 
 ########################################################################
 
@@ -177,6 +177,8 @@ def aod_ntuple_process(settings):
     random_service(process, {'mfvVertexTracks': 1222})
     tfileservice(process, 'vertex_histos.root')
 
+    process.load('JMTucker.Tools.L1ECALPrefiringWeightProducer_cfi')
+
     process.load('JMTucker.MFVNeutralino.Vertexer_cff')
     process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
     process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
@@ -184,6 +186,7 @@ def aod_ntuple_process(settings):
 
     process.p = cms.Path(process.mfvVertexSequence *
                          process.mfvTriggerFloats *
+                         process.prefiringweight *
                          process.mfvEvent)
 
     output_commands = make_output_commands(process, settings)
@@ -223,7 +226,9 @@ def miniaod_ntuple_process(settings):
     process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
     process.load('PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi')
     process.load('PhysicsTools.PatAlgos.selectionLayer1.electronSelector_cfi')
+    process.load('JMTucker.Tools.L1ECALPrefiringWeightProducer_cfi')
     process.load('JMTucker.Tools.MCStatProducer_cff')
+    process.load('JMTucker.Tools.UpdatedJets_cff')
     process.load('JMTucker.Tools.PATTupleSelection_cfi')
     process.load('JMTucker.MFVNeutralino.UnpackedCandidateTracks_cfi')
     process.load('JMTucker.MFVNeutralino.Vertexer_cff')
@@ -232,7 +237,7 @@ def miniaod_ntuple_process(settings):
     process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 
     process.goodOfflinePrimaryVertices.src = 'offlineSlimmedPrimaryVertices'
-    process.selectedPatJets.src = 'slimmedJets'
+    process.selectedPatJets.src = 'updatedJetsMiniAOD'
     process.selectedPatMuons.src = 'slimmedMuons'
     process.selectedPatElectrons.src = 'slimmedElectrons'
     process.selectedPatJets.cut = process.jtupleParams.jetCut
@@ -253,12 +258,14 @@ def miniaod_ntuple_process(settings):
     process.mfvEvent.met_src = 'slimmedMETs'
 
     process.p = cms.Path(process.goodOfflinePrimaryVertices *
+                         process.updatedJetsSeqMiniAOD *
                          process.selectedPatJets *
                          process.selectedPatMuons *
                          process.selectedPatElectrons *
                          process.mfvTriggerFloats *
                          process.mfvUnpackedCandidateTracks *
                          process.mfvVertexSequence *
+                         process.prefiringweight *
                          process.mfvEvent)
 
     output_commands = make_output_commands(process, settings)

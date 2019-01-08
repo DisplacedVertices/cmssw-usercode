@@ -408,6 +408,11 @@ struct MFVEvent {
   std::vector<float> vertex_seed_track_phi;
   std::vector<float> vertex_seed_track_dxy;
   std::vector<float> vertex_seed_track_dz;
+  std::vector<float> vertex_seed_track_err_pt;
+  std::vector<float> vertex_seed_track_err_eta;
+  std::vector<float> vertex_seed_track_err_phi;
+  std::vector<float> vertex_seed_track_err_dxy;
+  std::vector<float> vertex_seed_track_err_dz;
   std::vector<HitPattern::value_t> vertex_seed_track_hp_;
   HitPattern vertex_seed_track_hp(int i) const { return HitPattern(vertex_seed_track_hp_[i]); }
   void vertex_seed_track_hp_push_back(int npxh, int nsth, int npxl, int nstl) { vertex_seed_track_hp_.push_back(HitPattern(npxh, nsth, npxl, nstl).value); }
@@ -442,6 +447,9 @@ struct MFVEvent {
   int jet_track_npxlayers(int i) const { return jet_track_hp(i).npxlayers(); }
   int jet_track_nstlayers(int i) const { return jet_track_hp(i).nstlayers(); }
   int jet_track_nlayers(int i) const { return jet_track_hp(i).nlayers(); }
+
+  // stuff we aren't sure should be permanently in ntuple; the meaning of the entries is version-dependent
+  std::vector<float> misc;
 };
 
 #endif

@@ -39,7 +39,9 @@ def setup_event_filter(process,
 
         eventFilter = eventFilter.clone()
         if input_is_miniaod:
-            eventFilter.jets_src = 'slimmedJets'
+            process.load('JMTucker.Tools.UpdatedJets_cff')
+            overall *= process.updatedJetsSeqMiniAOD
+            eventFilter.jets_src = 'updatedJetsMiniAOD'
             eventFilter.muons_src = 'slimmedMuons'
             eventFilter.electrons_src = 'slimmedElectrons'
         setattr(process, event_filter_name, eventFilter)
@@ -48,7 +50,7 @@ def setup_event_filter(process,
             from JMTucker.Tools.JetShifter_cfi import jmtJetShifter as jetShifter
             jetShifter = jetShifter.clone()
             if input_is_miniaod:
-                jetShifter.jets_src = 'slimmedJets'
+                jetShifter.jets_src = 'updatedJetsMiniAOD'
             jetShifter.mult = event_filter_jes_mult
             jetShifter_name = event_filter_name + 'JetsJESUp%iSig' % event_filter_jes_mult
             eventFilter.jets_src = jetShifter_name

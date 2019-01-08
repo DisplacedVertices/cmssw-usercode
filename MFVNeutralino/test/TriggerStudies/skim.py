@@ -18,9 +18,10 @@ process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring())
 from Configuration.EventContent.EventContent_cff import MINIAODSIMEventContent as miniaod
 process.out.outputCommands = miniaod.outputCommands.value() + process.out.outputCommands.value()[1:]
 
+process.load('JMTucker.Tools.UpdatedJets_cff')
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
 process.load('JMTucker.MFVNeutralino.TriggerFloatsFilter_cfi')
-process.mfvTriggerFloats.jets_src = 'slimmedJets'
+process.mfvTriggerFloats.jets_src = 'updatedJetsMiniAOD'
 
 def a(name, **kwargs):
     obj = process.mfvTriggerFloatsFilter.clone(**kwargs)
