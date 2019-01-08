@@ -12,7 +12,7 @@ nfigures_expected = [2, 1, 2, 1, 4, 4, 6, 6]
 arxiv = '1808.03078'
 cds = '2633728'
 inspire = '1685992'
-doi = '10.1103/PhysRevD.98.09201'
+doi = '10.1103/PhysRevD.98.092011'
 
 # symbols in abstract/captions that need to be defined (if one is substring of another, put the longer one first)
 syms_replaces = [
@@ -370,7 +370,7 @@ sub.comment = abstract
 sub.add_link('CMS-Results', 'https://cms-results.web.cern.ch/cms-results/public-results/publications/%s/' % paper_code)
 sub.add_link('arXiv', 'https://arxiv.org/abs/%s' % arxiv)
 sub.add_link('CDS', 'https://cds.cern.ch/record/%s' % cds)
-sub.add_link('DOI', 'http://doi.org/%s' % doi)
+sub.add_link('DOI', 'https://doi.org/%s' % doi)
 sub.add_record_id(inspire, 'inspire')
 
 ####
@@ -383,7 +383,7 @@ add_variable(t, hepdata.Variable('$d_{VV}$', is_independent=True, is_binned=True
 for signame in signames:
     o = f.objs['a'][signame]
     v = hepdata.Variable(r'Predicted signal yield, $c\tau = %s~\textrm{mm}$, $m = 800~\textrm{GeV}$, $\sigma = 1~\textrm{fb}$' % nicesigname[signame], is_independent=False, is_binned=False)
-    u = hepdata.Uncertainty('Statistical (~sqrt(n_generated))')
+    u = hepdata.Uncertainty('Statistical (~sqrt(n_generated))') # gotcha: hand-edit yaml first bins to have 0 error with label "Exact ($d_{BV}$ > 0.1 mm)"
     add_variable(t, v, o['y'], [(u, o['dy'])])
 
 sub.add_table(t)
@@ -400,7 +400,7 @@ for subfig in 'ab':
     add_variable(t, hepdata.Variable(r'$m_{%s}$'     % particle, is_independent=True, is_binned=False, units='GeV'), o['x'])
     add_variable(t, hepdata.Variable(r'$c\tau_{%s}$' % particle, is_independent=True, is_binned=False, units='mm'),  o['y'])
 
-    v = hepdata.Variable(r'Efficiency (full selection + $d_{VV} > 0.4~\textrm{mm}$)', is_independent=False, is_binned=False)
+    v = hepdata.Variable(r'Efficiency (full selection + $d_{VV}$ > 0.4 mm)', is_independent=False, is_binned=False)
     u = hepdata.Uncertainty('Statistical (+) systematic (from Table 2)')
     add_variable(t, v, o['z'], [(u, o['dz'])])
 
@@ -435,8 +435,12 @@ for subfig in 'abcd':
 
     add_variable(t, hepdata.Variable('$d_{VV}$', is_independent=True, is_binned=True, units='mm'), f.reps[subfig]['x_edges'])
 
-    ntracks = {'a': (3,3), 'b': (4,3), 'c': (4,4), 'd': (5,5)}[subfig]
-    ntracks_title = r'$n_{\textrm{tracks}} = %i \times %i$' % ntracks
+    if subfig == 'a':
+        ntracks_title = r'3-track $\times$ 3-track'
+    elif subfig == 'b':
+        ntracks_title = r'4-track $\times$ 3-track'
+    elif subfig == 'c':
+        ntracks_title = r'4-track $\times$ 4-track'
     if subfig == 'd':
         ntracks_title = ntracks_title.replace('=', '>=')
 
