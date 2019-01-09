@@ -32,7 +32,7 @@ for x in sys.argv[1:]:
         print 'using', x2
         fns.extend(glob(x2))
 if not fns:
-    gg = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV21m/*.root'
+    gg = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV22m/*.root'
     print 'using default', gg
     fns = glob(gg)
 
