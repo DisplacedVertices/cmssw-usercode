@@ -333,6 +333,8 @@ r = fig004.reps['a'] = fig004.objs['a']['sig00p3mm']
 
 fig004.objs['a']['observed']  = upper_limit_on_zero(graph_on_hist(fig004.roots['a'].read_graph('c0/Graph'), r))
 
+# gotcha: hand-edit the first bins in the yaml to have 0 error with label "Exact ($d_{BV}$ > 0.1 mm)"
+
 ####
 
 for subfig in 'abcd':
@@ -383,7 +385,7 @@ add_variable(t, hepdata.Variable('$d_{VV}$', is_independent=True, is_binned=True
 for signame in signames:
     o = f.objs['a'][signame]
     v = hepdata.Variable(r'Predicted signal yield, $c\tau = %s~\textrm{mm}$, $m = 800~\textrm{GeV}$, $\sigma = 1~\textrm{fb}$' % nicesigname[signame], is_independent=False, is_binned=False)
-    u = hepdata.Uncertainty('Statistical (~sqrt(n_generated))') # gotcha: hand-edit yaml first bins to have 0 error with label "Exact ($d_{BV}$ > 0.1 mm)"
+    u = hepdata.Uncertainty('Statistical (~sqrt(n_generated))')
     add_variable(t, v, o['y'], [(u, o['dy'])])
 
 sub.add_table(t)
@@ -441,8 +443,8 @@ for subfig in 'abcd':
         ntracks_title = r'4-track $\times$ 3-track'
     elif subfig == 'c':
         ntracks_title = r'4-track $\times$ 4-track'
-    if subfig == 'd':
-        ntracks_title = ntracks_title.replace('=', '>=')
+    elif subfig == 'd':
+        ntracks_title = r'$\geq$5-track $\times$ $\geq$5-track'
 
     o = f.objs[subfig]['predicted']
     v = hepdata.Variable('Constructed background template normalized to total observed yield, ' + ntracks_title, is_independent=False, is_binned=False)
