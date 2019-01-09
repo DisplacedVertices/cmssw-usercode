@@ -41,6 +41,8 @@ cmds = {
         "simple_cmd('crab status --long -d %s')",
     'rq':
         "simple_fcn(crab_print_requestcache)",
+    'cf':
+        "simple_cmd('tar -Oxf %s/inputs/debugFiles.tgz debug/crabConfig.py')",
     'kl':
         "simple_cmd('crab kill -d %s')",
     'od':
