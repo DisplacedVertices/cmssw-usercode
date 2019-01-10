@@ -31,6 +31,7 @@ syms_replaces = [
     (r'\dbv', '$d_{BV}$'),
     (r'\dvvc', '$d_{VV}^{C}$'),
     (r'\dvv', '$d_{VV}$'),
+    (r'\%', '%'),
     ]
 
 ########################################################################
@@ -38,6 +39,7 @@ syms_replaces = [
 from JMTucker.Tools import colors
 from JMTucker.Tools.ROOTTools import ROOT
 import os, string, textwrap, hepdata_lib as hepdata
+from math import hypot
 from pprint import pprint
 
 paper_path = os.path.join(tdr_path, 'papers/%s/trunk' % paper_code)
@@ -321,8 +323,7 @@ fig002.reps['a'] = fig002.objs['a']['sig00p3mm']
 fig003.reps['a'] = fig003.objs['a']['eff_neu']  = lower_edge(fig003.roots['a'].read_hist_2d('c/signal_efficiency_mfv_neu',           xlim=(300,2800), ylim=(0.1,100)))
 fig003.reps['b'] = fig003.objs['b']['eff_stop'] = lower_edge(fig003.roots['b'].read_hist_2d('c/signal_efficiency_mfv_stopdbardbar',  xlim=(300,2800), ylim=(0.1,100)))
 for subfig in 'ab':
-    assert set(fig003.reps[subfig]['dz']) == set([0.])
-    fig003.reps[subfig]['dz'] = [z*0.24 for z in fig003.reps[subfig]['z']] # gotcha (flat 24% from Table 2)
+    fig003.reps[subfig]['dz_syst'] = [z*0.24 for z in fig003.reps[subfig]['z']] # gotcha (add flat 24% syst uncert from Table 2)
 
 ####
 
@@ -403,8 +404,7 @@ for subfig in 'ab':
     add_variable(t, hepdata.Variable(r'$c\tau_{%s}$' % particle, is_independent=True, is_binned=False, units='mm'),  o['y'])
 
     v = hepdata.Variable(r'Efficiency (full selection + $d_{VV}$ > 0.4 mm)', is_independent=False, is_binned=False)
-    u = hepdata.Uncertainty('Statistical (+) systematic (from Table 2)')
-    add_variable(t, v, o['z'], [(u, o['dz'])])
+    add_variable(t, v, o['z'], [(hepdata.Uncertainty('Statistical'), o['dz']), (hepdata.Uncertainty('Systematic (Table 2)'), o['dz_syst'])])
 
     sub.add_table(t)
 
@@ -505,3 +505,105 @@ for f in fig007, fig008:
 ####
 
 sub.create_files(submission_path)
+
+
+'''
+hand-edit patch:
+
+diff -uN -x '*png' -r /uscms_data/d2/tucker/hepdata_tmp_redofig3/figure_4.yaml /uscms_data/d2/tucker/hepdata_tmp/figure_4.yaml
+--- /uscms_data/d2/tucker/hepdata_tmp_redofig3/figure_4.yaml	2019-01-10 08:38:21.268649791 -0600
++++ /uscms_data/d2/tucker/hepdata_tmp/figure_4.yaml	2019-01-07 14:55:13.939520556 -0600
+@@ -5,7 +5,7 @@
+     units: ''
+   values:
+   - errors:
+-    - label: Statistical (~sqrt(n_generated))
++    - label: Exact ($d_{BV}$ > 0.1 mm)
+       symerror: 0
+     value: 0
+   - errors:
+@@ -170,7 +170,7 @@
+     units: ''
+   values:
+   - errors:
+-    - label: Statistical (~sqrt(n_generated))
++    - label: Exact ($d_{BV}$ > 0.1 mm)
+       symerror: 0
+     value: 0
+   - errors:
+@@ -335,7 +335,7 @@
+     units: ''
+   values:
+   - errors:
+-    - label: Statistical (~sqrt(n_generated))
++    - label: Exact ($d_{BV}$ > 0.1 mm)
+       symerror: 0
+     value: 0
+   - errors:
+@@ -501,8 +501,8 @@
+   - errors:
+     - asymerror:
+         minus: 0
+-        plus: 1.8411
+-      label: Garwood intervals
++        plus: 0
++      label: Exact ($d_{BV}$ > 0.1 mm)
+     value: 0
+   - errors:
+     - asymerror:
+diff -uN -x '*png' -r /uscms_data/d2/tucker/hepdata_tmp_redofig3/submission.yaml /uscms_data/d2/tucker/hepdata_tmp/submission.yaml
+--- /uscms_data/d2/tucker/hepdata_tmp_redofig3/submission.yaml	2019-01-10 08:38:29.751306582 -0600
++++ /uscms_data/d2/tucker/hepdata_tmp/submission.yaml	2019-01-07 14:52:13.164816247 -0600
+@@ -9,9 +9,9 @@
+ - description: DOI
+   location: https://doi.org/10.1103/PhysRevD.98.092011
+ comment: Results are reported from a search for long-lived particles in proton-proton
+-  collisions at $\sqrt{s}=13 TeV$ delivered by the CERN LHC and collected by the CMS
++  collisions at $\sqrt{s}$ = 13 TeV delivered by the CERN LHC and collected by the CMS
+   experiment. The data sample, which was recorded during 2015 and 2016, corresponds
+-  to an integrated luminosity of 38.5$~\textrm{fb}^{-1}$. This search uses benchmark
++  to an integrated luminosity of $38.5~\textrm{fb}^{-1}$. This search uses benchmark
+   signal models in which long-lived particles are pair-produced and each decays into
+   two or more quarks, leading to a signal with multiple jets and two displaced vertices
+   composed of many tracks. No events with two well-separated high-track-multiplicity
+@@ -40,8 +40,8 @@
+   location: thumb_Figure_002.png
+ data_file: figure_2.yaml
+ description: Distribution of the distance between vertices in the $x$-$y$ plane, $d_{VV}$,
+-  for simulated multijet signals with $m = 800 GeV$, production cross section 1 fb,
+-  and $c\tau = 0.3$, 1.0, and 10 mm, with the background template overlaid. All vertex
++  for simulated multijet signals with $m$ = 800 GeV, production cross section 1 fb,
++  and $c\tau$ = 0.3, 1.0, and 10 mm, with the background template overlaid. All vertex
+   and event selection criteria have been applied. The last bin includes the overflow
+   events.
+ keywords: []
+@@ -56,7 +56,7 @@
+ data_file: figure_3a.yaml
+ description: Signal efficiency as a function of signal mass and lifetime, for the
+   multijet (upper) and dijet (lower) signal samples. All vertex and event selection
+-  criteria have been applied, as well as the requirement $$d_{VV}$ > 0.4 mm$.
++  criteria have been applied, as well as the requirement $d_{VV}$ > 0.4 mm.
+ keywords: []
+ location: Figure 3a (upper plot)
+ name: Figure 3a
+@@ -69,7 +69,7 @@
+ data_file: figure_3b.yaml
+ description: Signal efficiency as a function of signal mass and lifetime, for the
+   multijet (upper) and dijet (lower) signal samples. All vertex and event selection
+-  criteria have been applied, as well as the requirement $$d_{VV}$ > 0.4 mm$.
++  criteria have been applied, as well as the requirement $d_{VV}$ > 0.4 mm.
+ keywords: []
+ location: Figure 3b (lower plot)
+ name: Figure 3b
+@@ -81,8 +81,8 @@
+   location: thumb_Figure_004.png
+ data_file: figure_4.yaml
+ description: Distribution of $d_{BV}$ in $\geq$5-track one-vertex events for data
+-  and simulated multijet signals with $m = 800 GeV$, production cross section 1 fb,
+-  and $c\tau = 0.3$, 1.0, and 10 mm. Event preselection and vertex selection criteria
++  and simulated multijet signals with $m$ = 800 GeV, production cross section 1 fb,
++  and $c\tau$ = 0.3, 1.0, and 10 mm. Event preselection and vertex selection criteria
+   have been applied. The last bin includes the overflow events.
+ keywords: []
+ location: Figure 4
+'''

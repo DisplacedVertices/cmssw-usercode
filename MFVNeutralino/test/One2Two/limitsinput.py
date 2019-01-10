@@ -455,8 +455,9 @@ def signal_efficiency():
                     continue
 
                 r = combiner.combine(isample)
-                e = sum(x for x in r.sig_rate[1:]) / combiner.int_lumi # 1 for >=400 um, 2 for >=700um
-                ee = 0. # JMTBAD
+                bin_start = 1 # 1 for >=400 um, 2 for >=700um
+                e  = sum(x for x in r.sig_rate       [bin_start:]) / combiner.int_lumi
+                ee = sum(x for x in r.sig_stat_uncert[bin_start:]) / combiner.int_lumi # JMTBAD
 
                 h.SetBinContent(ibin, jbin, e)
                 h.SetBinError  (ibin, jbin, ee)
