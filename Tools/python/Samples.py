@@ -45,10 +45,9 @@ def _decay(sample):
         'mfv_stopdbardbar': r'\tilde{t} \rightarrow \bar{d}\bar{d}',
         'mfv_stopbbarbbar': r'\tilde{t} \rightarrow \bar{b}\bar{b}',
         }[_model(sample)]
-    if s.endswith('_2015'):
-        decay += ' (2015)'
-    if 'hip1p0_mit' in s:
-        decay += ' (HIP)'
+    year = int(s.rsplit('_')[-1])
+    assert 2015 <= year <= 2018
+    decay += ' (%i)' % year
     return decay
 
 def _latex(sample):
@@ -208,10 +207,19 @@ for s in all_signal_samples_2017:
         s.condor = True
         s.xrootd_url = xrootd_sites['T3_US_FNALLPC']
 
-########################################################################
+########
+# 2018 MC
+########
+
+qcd_samples_2018 = [
+    MCSample('qcdht0700_2018', '/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18DRPremix-102X_upgrade2018_realistic_v15-v1/AODSIM',  43523821, nice='QCD, 700 < H_{T} < 1000 GeV',  color=805, syst_frac=0.20, xsec=6.351e3),
+    MCSample('qcdht1000_2018', '/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18DRPremix-102X_upgrade2018_realistic_v15-v1/AODSIM', 15174716, nice='QCD, 1000 < H_{T} < 1500 GeV', color=806, syst_frac=0.20, xsec=1.096e3),
+    MCSample('qcdht1500_2018', '/QCD_HT1500to2000_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18DRPremix-102X_upgrade2018_realistic_v15-v1/AODSIM', 11082955, nice='QCD, 1500 < H_{T} < 2000 GeV', color=807, syst_frac=0.20, xsec=99.0),
+    MCSample('qcdht2000_2018', '/QCD_HT2000toInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18DRPremix-102X_upgrade2018_realistic_v15-v1/AODSIM',   5557453, nice='QCD, H_{T} > 2000',            color=808, syst_frac=0.20, xsec=20.2),
+    ]
 
 ########
-# 2017 data
+# data
 ########
 
 data_samples_2017 = [                                              # in dataset      in json          int lumi avail (/fb)
@@ -261,6 +269,7 @@ __all__ = [
     'leptonic_samples_sum_2017',
     'mfv_signal_samples_2017',
     'mfv_stopdbardbar_samples_2017',
+    'qcd_samples_2018',
     'data_samples_2017',
     'auxiliary_data_samples_2017',
     'data_samples_2018',
@@ -330,6 +339,12 @@ for sample in mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017:
     sample.add_dataset('miniaod', '/%s/None/USER' % sample.primary_dataset, sample.nevents_orig)
     sample.datasets['miniaod'].condor = True
     sample.datasets['miniaod'].xrootd_url = xrootd_sites['T3_US_FNALLPC']
+
+# the 2018 samples have 'MLM' in them so this works still, ugh
+_adbp('miniaod', '/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM',  43523821)
+_adbp('miniaod', '/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM', 15065049)
+_adbp('miniaod', '/QCD_HT1500to2000_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM', 10955087)
+_adbp('miniaod', '/QCD_HT2000toInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM',   5475677)
 
 ########
 # ntuples
