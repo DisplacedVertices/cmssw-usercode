@@ -1,5 +1,6 @@
 # NB: this module should not depend on any local imports, except in __main__, unless you ship them with combine/submit.py
 
+from math import hypot
 import ROOT; ROOT.gROOT.SetBatch()
 
 def trigmult(x):
@@ -31,6 +32,9 @@ class SignalEfficiencyCombiner:
     @classmethod
     def _get(cls, h, offset=0., mult=1.):
         return [offset + mult*h.GetBinContent(ibin) for ibin in xrange(1,cls.nbins+1)]
+    @classmethod
+    def _gete(cls, h):
+        return [h.GetBinError(ibin) for ibin in xrange(1,cls.nbins+1)]
 
     def __init__(self, simple=False):
         if simple:
@@ -76,6 +80,7 @@ class SignalEfficiencyCombiner:
         int_lumi_sum = 0.
         total_nsig = 0
         sig_rate = [0.] * self.nbins
+        sig_stat_uncert = [0.] * self.nbins
         sig_uncert = None
         h_dbv_sum = None
         h_dvvs = []
@@ -96,8 +101,8 @@ class SignalEfficiencyCombiner:
 
             h_dbv = f.Get('h_signal_%i_dbv' % which)
             h_dvv = f.Get('h_signal_%i_dvv' % which)
-            h_dvvs.append(h_dvv)
             h_dvv_rebin = f.Get('h_signal_%i_dvv_rebin' % which)
+            h_dvvs.append(h_dvv_rebin)
             assert h_dbv.GetTitle() == nice_name
             assert h_dvv.GetTitle() == nice_name
             assert h_dvv_rebin.GetTitle() == nice_name
@@ -106,13 +111,16 @@ class SignalEfficiencyCombiner:
             h_dbv_sum = self.__add_h(h_dbv_sum, h_dbv, scale)
             h_dvv_sum = self.__add_h(h_dvv_sum, h_dvv, scale)
 
-            nsig = self._get(h_dvv_rebin)
+            nsig  = self._get (h_dvv_rebin)
+            nsige = self._gete(h_dvv_rebin)
 
             if inp.include_stat:
                 total_nsig += int(sum(nsig))
 
             for i in xrange(self.nbins):
                 sig_rate[i] += nsig[i] * scale
+                if inp.include_stat:
+                    sig_stat_uncert[i] = hypot(sig_stat_uncert[i], scale * nsige[i])
 
             h_uncert = f.Get('h_signal_%i_uncert' % which)
             sig_uncert = checkedset(sig_uncert, self._get(h_uncert, offset=1))
@@ -120,6 +128,9 @@ class SignalEfficiencyCombiner:
         total_sig_rate = sum(sig_rate)
         total_sig_1v = h_dbv_sum.Integral(0,h_dbv_sum.GetNbinsX()+2)
 
+        # NB do not confuse the three entries of h_dvvs, ngens (which
+        # are the three inputs listed above) with the three entries of
+        # sig_* (which are the three dvv bins)
         return Result(which = which,
                       nice_name = nice_name,
                       ngens = ngens,
@@ -129,6 +140,7 @@ class SignalEfficiencyCombiner:
                       total_sig_rate = total_sig_rate,
                       sig_rate_norm = [x / total_sig_rate if total_sig_rate > 0 else 0. for x in sig_rate],
                       total_efficiency = total_sig_rate / int_lumi_sum,
+                      sig_stat_uncert = sig_stat_uncert,
                       sig_uncert = sig_uncert,
                       sig_uncert_rate = [x*(y-1) for x,y in zip(sig_rate, sig_uncert)],
                       total_sig_1v = total_sig_1v,
