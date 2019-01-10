@@ -387,7 +387,7 @@ condorable = {
         "miniaod": ttbar_samples_2017,
         },
     "T1_US_FNAL_Disk": {
-        "miniaod": [qcdht0700_2017, qcdht1500_2017, qcdht2000_2017, ttbar_2017, dyjetstollM10_2017, qcdmupt15_2017],
+        "miniaod": [qcdht0700_2017, qcdht1500_2017, qcdht2000_2017, ttbar_2017, dyjetstollM10_2017, qcdmupt15_2017] + qcd_samples_2018,
         },
     "T2_DE_DESY": {
         "main": [],
