@@ -31,6 +31,7 @@ syms_replaces = [
     (r'\dbv', '$d_{BV}$'),
     (r'\dvvc', '$d_{VV}^{C}$'),
     (r'\dvv', '$d_{VV}$'),
+    (r'\%', '%'),
     ]
 
 ########################################################################
@@ -38,6 +39,7 @@ syms_replaces = [
 from JMTucker.Tools import colors
 from JMTucker.Tools.ROOTTools import ROOT
 import os, string, textwrap, hepdata_lib as hepdata
+from math import hypot
 from pprint import pprint
 
 paper_path = os.path.join(tdr_path, 'papers/%s/trunk' % paper_code)
@@ -321,8 +323,7 @@ fig002.reps['a'] = fig002.objs['a']['sig00p3mm']
 fig003.reps['a'] = fig003.objs['a']['eff_neu']  = lower_edge(fig003.roots['a'].read_hist_2d('c/signal_efficiency_mfv_neu',           xlim=(300,2800), ylim=(0.1,100)))
 fig003.reps['b'] = fig003.objs['b']['eff_stop'] = lower_edge(fig003.roots['b'].read_hist_2d('c/signal_efficiency_mfv_stopdbardbar',  xlim=(300,2800), ylim=(0.1,100)))
 for subfig in 'ab':
-    assert set(fig003.reps[subfig]['dz']) == set([0.])
-    fig003.reps[subfig]['dz'] = [z*0.24 for z in fig003.reps[subfig]['z']] # gotcha (flat 24% from Table 2)
+    fig003.reps[subfig]['dz_syst'] = [z*0.24 for z in fig003.reps[subfig]['z']] # gotcha (add flat 24% syst uncert from Table 2)
 
 ####
 
@@ -403,8 +404,7 @@ for subfig in 'ab':
     add_variable(t, hepdata.Variable(r'$c\tau_{%s}$' % particle, is_independent=True, is_binned=False, units='mm'),  o['y'])
 
     v = hepdata.Variable(r'Efficiency (full selection + $d_{VV}$ > 0.4 mm)', is_independent=False, is_binned=False)
-    u = hepdata.Uncertainty('Statistical (+) systematic (from Table 2)')
-    add_variable(t, v, o['z'], [(u, o['dz'])])
+    add_variable(t, v, o['z'], [(hepdata.Uncertainty('Statistical'), o['dz']), (hepdata.Uncertainty('Systematic (Table 2)'), o['dz_syst'])])
 
     sub.add_table(t)
 
