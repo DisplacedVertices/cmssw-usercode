@@ -461,7 +461,7 @@ def which_global_tag(settings=None):
             return '94X_dataRun2_v11'
     elif settings.year == 2018:
         if settings.is_mc:
-            return '102X_upgrade2018_realistic_v12'
+            return '102X_upgrade2018_realistic_v15'
         else:
             assert settings.era
             if settings.era in ('A','B','C'):
