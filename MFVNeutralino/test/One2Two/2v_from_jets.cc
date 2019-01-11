@@ -66,6 +66,16 @@ float ht(int njets, float* jet_pt) {
   return sum;
 }
 
+int nbtags(int njets, float* jet_bdisc, float bdisc_min) {
+  int sum = 0;
+  for (int i = 0; i < njets; ++i) {
+    if (jet_bdisc[i] >= bdisc_min) {
+      ++sum;
+    }
+  }
+  return sum;
+}
+
 struct ConstructDvvcParameters {
   bool is_mc_;
   bool only_10pc_;
@@ -74,6 +84,7 @@ struct ConstructDvvcParameters {
   int ntracks_;
   bool correct_bquarks_;
   int bquarks_;
+  int btags_;
   bool vary_dphi_;
   bool clearing_from_eff_;
   bool vary_eff_;
@@ -89,6 +100,7 @@ struct ConstructDvvcParameters {
       ntracks_(5),
       correct_bquarks_(true),
       bquarks_(-1),
+      btags_(-1),
       vary_dphi_(false),
       clearing_from_eff_(true),
       vary_eff_(false),
@@ -105,6 +117,7 @@ struct ConstructDvvcParameters {
   int ntracks() const { return ntracks_; }
   bool correct_bquarks() const { return correct_bquarks_; }
   int bquarks() const { return bquarks_; }
+  int btags() const { return btags_; }
   bool vary_dphi() const { return vary_dphi_; }
   bool clearing_from_eff() const { return clearing_from_eff_; }
   bool vary_eff() const { return vary_eff_; }
@@ -119,6 +132,7 @@ struct ConstructDvvcParameters {
   ConstructDvvcParameters ntracks(int x)            { ConstructDvvcParameters y(*this); y.ntracks_           = x; return y; }
   ConstructDvvcParameters correct_bquarks(bool x)   { ConstructDvvcParameters y(*this); y.correct_bquarks_   = x; return y; }
   ConstructDvvcParameters bquarks(int x)            { ConstructDvvcParameters y(*this); y.bquarks_           = x; return y; }
+  ConstructDvvcParameters btags(int x)              { ConstructDvvcParameters y(*this); y.btags_             = x; return y; }
   ConstructDvvcParameters vary_dphi(bool x)         { ConstructDvvcParameters y(*this); y.vary_dphi_         = x; return y; }
   ConstructDvvcParameters clearing_from_eff(bool x) { ConstructDvvcParameters y(*this); y.clearing_from_eff_ = x; return y; }
   ConstructDvvcParameters vary_eff(bool x)          { ConstructDvvcParameters y(*this); y.vary_eff_          = x; return y; }
@@ -127,7 +141,7 @@ struct ConstructDvvcParameters {
   ConstructDvvcParameters max_npu(int x)            { ConstructDvvcParameters y(*this); y.max_npu_           = x; return y; }
 
   void print() const {
-    printf("is_mc = %d, only_10pc = %d, inject_signal = %d, year = %s, ntracks = %d, correct_bquarks = %d, bquarks = %d, vary_dphi = %d, clearing_from_eff = %d, vary_eff = %d, vary_bquarks = %d", is_mc(), only_10pc(), inject_signal(), year_.c_str(), ntracks(), correct_bquarks(), bquarks(), vary_dphi(), clearing_from_eff(), vary_eff(), vary_bquarks());
+    printf("is_mc = %d, only_10pc = %d, inject_signal = %d, year = %s, ntracks = %d, correct_bquarks = %d, bquarks = %d, btags = %d, vary_dphi = %d, clearing_from_eff = %d, vary_eff = %d, vary_bquarks = %d", is_mc(), only_10pc(), inject_signal(), year_.c_str(), ntracks(), correct_bquarks(), bquarks(), btags(), vary_dphi(), clearing_from_eff(), vary_eff(), vary_bquarks());
   }
 };
 
@@ -313,6 +327,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
       if (t->GetEntry(j) <= 0) continue;
       //if (i == 2 && nt.run == 1 && nt.lumi == 11522 && nt.event == 132003224) continue;
       if ((p.bquarks() == 0 && nt.gen_flavor_code == 2) || (p.bquarks() == 1 && nt.gen_flavor_code != 2)) continue;
+      if ((p.btags() == 0 && nbtags(nt.njets, nt.jet_bdisc, 0.8838) >= 1) || (p.btags() == 1 && nbtags(nt.njets, nt.jet_bdisc, 0.8838) < 1)) continue;
       if (nt.npu < p.min_npu() || nt.npu > p.max_npu()) continue;
 
       const float w = weights[i] * nt.weight;
@@ -637,6 +652,8 @@ int main(int argc, const char* argv[]) {
       construct_dvvc(pars2.correct_bquarks(false),              TString::Format("2v_from_jets_%s_%dtrack_bquark_uncorrected_%s.root", year, ntracks, version));
       construct_dvvc(pars2.correct_bquarks(false).bquarks(1),   TString::Format("2v_from_jets_%s_%dtrack_bquarks_%s.root", year, ntracks, version));
       construct_dvvc(pars2.correct_bquarks(false).bquarks(0),   TString::Format("2v_from_jets_%s_%dtrack_nobquarks_%s.root", year, ntracks, version));
+      construct_dvvc(pars2.correct_bquarks(false).btags(1),     TString::Format("2v_from_jets_%s_%dtrack_btags_%s.root", year, ntracks, version));
+      construct_dvvc(pars2.correct_bquarks(false).btags(0),     TString::Format("2v_from_jets_%s_%dtrack_nobtags_%s.root", year, ntracks, version));
       construct_dvvc(pars2,                                     TString::Format("2v_from_jets_%s_%dtrack_default_%s.root", year, ntracks, version));
       construct_dvvc(pars2.vary_dphi(true),                     TString::Format("2v_from_jets_%s_%dtrack_vary_dphi_%s.root", year, ntracks, version));
       construct_dvvc(pars2.clearing_from_eff(false),            TString::Format("2v_from_jets_%s_%dtrack_noclearing_%s.root", year, ntracks, version));
