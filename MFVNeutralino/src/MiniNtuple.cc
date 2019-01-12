@@ -51,6 +51,21 @@ namespace mfv {
     tk1_cov.clear();
   }
 
+  float MiniNtuple::ht(float min_jet_pt) const {
+    double sum = 0;
+    for (int i = 0; i < njets; ++i)
+      sum += jet_pt[i];
+    return sum;
+  }
+
+  float MiniNtuple::nbtags(float min_bdisc) const {
+    int sum = 0;
+    for (int i = 0; i < njets; ++i)
+      if (jet_bdisc[i] >= min_bdisc)
+        ++sum;
+    return sum;
+  }
+
   void write_to_tree(TTree* tree, MiniNtuple& nt) {
     tree->Branch("run", &nt.run);
     tree->Branch("lumi", &nt.lumi);

@@ -58,24 +58,6 @@ EOF
 int dvv_nbins = 40;
 double dvv_bin_width = 0.01;
 
-float ht(int njets, float* jet_pt) {
-  double sum = 0;
-  for (int i = 0; i < njets; ++i) {
-    sum += jet_pt[i];
-  }
-  return sum;
-}
-
-int nbtags(int njets, float* jet_bdisc, float bdisc_min) {
-  int sum = 0;
-  for (int i = 0; i < njets; ++i) {
-    if (jet_bdisc[i] >= bdisc_min) {
-      ++sum;
-    }
-  }
-  return sum;
-}
-
 struct ConstructDvvcParameters {
   bool is_mc_;
   bool only_10pc_;
@@ -327,7 +309,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
       if (t->GetEntry(j) <= 0) continue;
       //if (i == 2 && nt.run == 1 && nt.lumi == 11522 && nt.event == 132003224) continue;
       if ((p.bquarks() == 0 && nt.gen_flavor_code == 2) || (p.bquarks() == 1 && nt.gen_flavor_code != 2)) continue;
-      if ((p.btags() == 0 && nbtags(nt.njets, nt.jet_bdisc, 0.8838) >= 1) || (p.btags() == 1 && nbtags(nt.njets, nt.jet_bdisc, 0.8838) < 1)) continue;
+      if ((p.btags() == 0 && nt.nbtags(0.8838) >= 1) || (p.btags() == 1 && nt.nbtags(0.8838) < 1)) continue;
       if (nt.npu < p.min_npu() || nt.npu > p.max_npu()) continue;
 
       const float w = weights[i] * nt.weight;
@@ -338,12 +320,12 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
         h_1v_phiv->Fill(atan2(nt.y0,nt.x0), w);
         h_1v_npu->Fill(nt.npu, w);
         h_1v_njets->Fill(nt.njets, w);
-        h_1v_ht->Fill(ht(nt.njets, nt.jet_pt), w);
+        h_1v_ht->Fill(nt.ht(0.), w);
         double dphijvmin = M_PI;
         for (int k = 0; k < nt.njets; ++k) {
           h_1v_phij->Fill(nt.jet_phi[k], w);
           h_1v_dphijv->Fill(TVector2::Phi_mpi_pi(atan2(nt.y0,nt.x0) - nt.jet_phi[k]), w);
-          h_1v_dphijvpt->Fill(TVector2::Phi_mpi_pi(atan2(nt.y0,nt.x0) - nt.jet_phi[k]), w * (nt.jet_pt[k]/ht(nt.njets, nt.jet_pt)));
+          h_1v_dphijvpt->Fill(TVector2::Phi_mpi_pi(atan2(nt.y0,nt.x0) - nt.jet_phi[k]), w * (nt.jet_pt[k]/nt.ht(0.)));
           if (fabs(TVector2::Phi_mpi_pi(atan2(nt.y0,nt.x0) - nt.jet_phi[k])) < dphijvmin) dphijvmin = fabs(TVector2::Phi_mpi_pi(atan2(nt.y0,nt.x0) - nt.jet_phi[k]));
           for (int l = k+1; l < nt.njets; ++l) {
             h_1v_dphijj->Fill(TVector2::Phi_mpi_pi(nt.jet_phi[k] - nt.jet_phi[l]), w);

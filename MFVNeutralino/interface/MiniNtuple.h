@@ -41,6 +41,8 @@ namespace mfv {
     float jet_energy[50];
     unsigned char jet_id[50];
     float jet_bdisc[50];
+    float ht(float min_jet_pt=40.) const;
+    float nbtags(float min_bdisc) const;
     float gen_x[2];
     float gen_y[2];
     float gen_z[2];
