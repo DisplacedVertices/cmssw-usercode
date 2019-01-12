@@ -54,7 +54,8 @@ namespace mfv {
   float MiniNtuple::ht(float min_jet_pt) const {
     double sum = 0;
     for (int i = 0; i < njets; ++i)
-      sum += jet_pt[i];
+      if (jet_pt[i] >= min_jet_pt)
+        sum += jet_pt[i];
     return sum;
   }
 
