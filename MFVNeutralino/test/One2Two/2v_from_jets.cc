@@ -282,7 +282,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   TH1F* h_1v_phiv = new TH1F("h_1v_phiv", "only-one-vertex events;vertex #phi;events", 50, -3.15, 3.15);
   TH1D* h_1v_npu = new TH1D("h_1v_npu", "only-one-vertex events;# PU interactions;events", 100, 0, 100);
   TH1F* h_1v_njets = new TH1F("h_1v_njets", "only-one-vertex events;number of jets;events", 20, 0, 20);
-  TH1F* h_1v_ht = new TH1F("h_1v_ht", "only-one-vertex events;#Sigma H_{T} of jets (GeV);events", 200, 0, 5000);
+  TH1F* h_1v_ht40 = new TH1F("h_1v_ht40", "only-one-vertex events;H_{T} of jets with p_{T} > 40 GeV;events", 200, 0, 5000);
   TH1F* h_1v_phij = new TH1F("h_1v_phij", "only-one-vertex events;jets #phi;jets", 50, -3.15, 3.15);
   TH1F* h_1v_dphijj = new TH1F("h_1v_dphijj", "only-one-vertex events;#Delta#phi_{JJ};jet pairs", 100, -3.1416, 3.1416);
   TH1F* h_1v_dphijv = new TH1F("h_1v_dphijv", "only-one-vertex events;#Delta#phi_{JV};jet-vertex pairs", 100, -3.1416, 3.1416);
@@ -320,7 +320,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
         h_1v_phiv->Fill(atan2(nt.y0,nt.x0), w);
         h_1v_npu->Fill(nt.npu, w);
         h_1v_njets->Fill(nt.njets, w);
-        h_1v_ht->Fill(nt.ht(0.), w);
+        h_1v_ht40->Fill(nt.ht(40.), w);
         double dphijvmin = M_PI;
         for (int k = 0; k < nt.njets; ++k) {
           h_1v_phij->Fill(nt.jet_phi[k], w);
@@ -476,7 +476,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   h_1v_phiv->Write();
   h_1v_npu->Write();
   h_1v_njets->Write();
-  h_1v_ht->Write();
+  h_1v_ht40->Write();
   h_1v_phij->Write();
   h_1v_dphijj->Write();
   h_1v_dphijv->Write();
@@ -557,7 +557,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   delete h_1v_phiv;
   delete h_1v_npu;
   delete h_1v_njets;
-  delete h_1v_ht;
+  delete h_1v_ht40;
   delete h_1v_phij;
   delete h_1v_dphijj;
   delete h_1v_dphijv;
