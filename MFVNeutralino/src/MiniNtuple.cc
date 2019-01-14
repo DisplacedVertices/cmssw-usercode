@@ -59,7 +59,7 @@ namespace mfv {
     return sum;
   }
 
-  float MiniNtuple::nbtags(float min_bdisc) const {
+  int MiniNtuple::nbtags(float min_bdisc) const {
     int sum = 0;
     for (int i = 0; i < njets; ++i)
       if (jet_bdisc[i] >= min_bdisc)
