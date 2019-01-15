@@ -281,6 +281,18 @@ def cmd_merge_bquarks_nobquarks():
             print cmd
             os.system(cmd)
 
+def cmd_merge_btags_nobtags():
+    for year in ['2017']:
+        weights = '0.79,0.21'
+        for ntracks in [3,4,5,7]:
+            files = ['One2Two/2v_from_jets_%s_%dtrack_btags_v21m.root' % (year, ntracks), 'One2Two/2v_from_jets_%s_%dtrack_nobtags_v21m.root' % (year, ntracks)]
+            for fn in files:
+                if not os.path.isfile(fn):
+                    raise RuntimeError('%s not found' % fn)
+            cmd = 'mergeTFileServiceHistograms -w %s -i %s -o One2Two/2v_from_jets_%s_%dtrack_btag_corrected_v21m.root' % (weights, ' '.join(files), year, ntracks)
+            print cmd
+            os.system(cmd)
+
 ####
 
 cmd = sys.argv[1] if len(sys.argv) > 1 else ''
