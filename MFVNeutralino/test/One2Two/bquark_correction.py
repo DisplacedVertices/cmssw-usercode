@@ -8,6 +8,8 @@ year = '2017'
 mode = ''
 #mode = 'ratio1'
 
+compare_btags = False
+
 set_style()
 ps = plot_saver(plot_dir('bquark_correction_%s%s' % (year, '' if mode == '' else '_%s'%mode)), size=(700,700), root=True, log=False)
 
@@ -46,6 +48,31 @@ for i,ntracks in enumerate([3,4,5,7]):
     lb.Draw()
     ps.save('compare_dvvc_bquarks_%s' % ntk[i])
 
+    if compare_btags:
+        h0.SetLineWidth(3)
+        h0.Draw('hist e')
+        hb.SetLineWidth(3)
+        hb.Draw('hist e sames')
+
+        h0tag = ROOT.TFile('2v_from_jets_%s_%itrack_nobtags_v21m.root' % (year, ntracks)).Get('h_c1v_dvv')
+        h0tag.SetStats(0)
+        h0tag.SetLineColor(ROOT.kAzure+10)
+        h0tag.SetLineWidth(2)
+        h0tag.Scale(1./h0tag.Integral())
+        h0tag.Draw('hist e sames')
+
+        hbtag = ROOT.TFile('2v_from_jets_%s_%itrack_btags_v21m.root' % (year, ntracks)).Get('h_c1v_dvv')
+        hbtag.SetStats(0)
+        hbtag.SetLineColor(ROOT.kMagenta)
+        hbtag.SetLineWidth(2)
+        hbtag.Scale(1./hbtag.Integral())
+        hbtag.Draw('hist e sames')
+
+        lb.AddEntry(h0tag, 'without btags')
+        lb.AddEntry(hbtag, 'with btags')
+        lb.Draw()
+        ps.save('compare_dvvc_btags_%s' % ntk[i])
+
     h1 = ROOT.TFile('2v_from_jets_%s_%itrack_bquark_uncorrected_v21m.root' % (year, ntracks)).Get('h_c1v_dvv')
     h1.SetStats(0)
     h1.SetLineColor(ROOT.kBlack)
@@ -68,7 +95,24 @@ for i,ntracks in enumerate([3,4,5,7]):
     l.AddEntry(h1, 'without b quark correction')
     l.AddEntry(h2, 'with b quark correction')
     l.Draw()
-    ps.save('compare_dvvc_%s' % ntk[i])
+    ps.save('compare_dvvc_bquark_correction_%s' % ntk[i])
+
+    if compare_btags:
+        h1.Draw('hist e')
+        h2.Draw('hist e sames')
+
+        h3 = ROOT.TFile('2v_from_jets_%s_%itrack_btag_corrected_v21m.root' % (year, ntracks)).Get('h_c1v_dvv')
+        if mode == 'ratio1':
+            h3 = ROOT.TFile('2v_from_jets_%s_%itrack_btags_v21m.root' % (year, ntracks)).Get('h_c1v_dvv')
+        h3.SetStats(0)
+        h3.SetLineColor(ROOT.kMagenta)
+        h3.SetLineWidth(3)
+        h3.Scale(1./h3.Integral())
+        h3.Draw('hist e sames')
+
+        l.AddEntry(h3, 'with btag correction')
+        l.Draw()
+        ps.save('compare_dvvc_btag_correction_%s' % ntk[i])
 
     h = h2.Clone('%s' % ntk[i])
     h.Divide(h1)
