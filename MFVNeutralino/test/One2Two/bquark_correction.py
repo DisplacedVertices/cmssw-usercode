@@ -3,6 +3,7 @@ from statmodel import ebins
 from array import array
 ROOT.TH1.AddDirectory(0)
 
+version = 'v21m'
 year = '2017'
 
 mode = ''
@@ -11,7 +12,7 @@ mode = ''
 compare_btags = False
 
 set_style()
-ps = plot_saver(plot_dir('bquark_correction_%s%s' % (year, '' if mode == '' else '_%s'%mode)), size=(700,700), root=True, log=False)
+ps = plot_saver(plot_dir('bquark_correction_%s_%s%s' % (version.capitalize(), year, '' if mode == '' else '_%s'%mode)), size=(700,700), root=True, log=False)
 
 ntk = ['3-track', '4-track', '5-track', '4-track-3-track']
 
@@ -26,7 +27,7 @@ ey3 = []
 for i,ntracks in enumerate([3,4,5,7]):
     print ntk[i]
 
-    h0 = ROOT.TFile('2v_from_jets_%s_%itrack_nobquarks_v21m.root' % (year, ntracks)).Get('h_c1v_dvv')
+    h0 = ROOT.TFile('2v_from_jets_%s_%itrack_nobquarks_%s.root' % (year, ntracks, version)).Get('h_c1v_dvv')
     h0.SetStats(0)
     h0.SetLineColor(ROOT.kBlue)
     h0.SetLineWidth(2)
@@ -35,7 +36,7 @@ for i,ntracks in enumerate([3,4,5,7]):
     h0.GetYaxis().SetRangeUser(0,0.5)
     h0.Draw('hist e')
 
-    hb = ROOT.TFile('2v_from_jets_%s_%itrack_bquarks_v21m.root' % (year, ntracks)).Get('h_c1v_dvv')
+    hb = ROOT.TFile('2v_from_jets_%s_%itrack_bquarks_%s.root' % (year, ntracks, version)).Get('h_c1v_dvv')
     hb.SetStats(0)
     hb.SetLineColor(ROOT.kRed)
     hb.SetLineWidth(2)
@@ -54,14 +55,14 @@ for i,ntracks in enumerate([3,4,5,7]):
         hb.SetLineWidth(3)
         hb.Draw('hist e sames')
 
-        h0tag = ROOT.TFile('2v_from_jets_%s_%itrack_nobtags_v21m.root' % (year, ntracks)).Get('h_c1v_dvv')
+        h0tag = ROOT.TFile('2v_from_jets_%s_%itrack_nobtags_%s.root' % (year, ntracks, version)).Get('h_c1v_dvv')
         h0tag.SetStats(0)
         h0tag.SetLineColor(ROOT.kAzure+10)
         h0tag.SetLineWidth(2)
         h0tag.Scale(1./h0tag.Integral())
         h0tag.Draw('hist e sames')
 
-        hbtag = ROOT.TFile('2v_from_jets_%s_%itrack_btags_v21m.root' % (year, ntracks)).Get('h_c1v_dvv')
+        hbtag = ROOT.TFile('2v_from_jets_%s_%itrack_btags_%s.root' % (year, ntracks, version)).Get('h_c1v_dvv')
         hbtag.SetStats(0)
         hbtag.SetLineColor(ROOT.kMagenta)
         hbtag.SetLineWidth(2)
@@ -73,7 +74,7 @@ for i,ntracks in enumerate([3,4,5,7]):
         lb.Draw()
         ps.save('compare_dvvc_btags_%s' % ntk[i])
 
-    h1 = ROOT.TFile('2v_from_jets_%s_%itrack_bquark_uncorrected_v21m.root' % (year, ntracks)).Get('h_c1v_dvv')
+    h1 = ROOT.TFile('2v_from_jets_%s_%itrack_bquark_uncorrected_%s.root' % (year, ntracks, version)).Get('h_c1v_dvv')
     h1.SetStats(0)
     h1.SetLineColor(ROOT.kBlack)
     h1.SetLineWidth(3)
@@ -82,9 +83,9 @@ for i,ntracks in enumerate([3,4,5,7]):
     h1.GetYaxis().SetRangeUser(0,0.5)
     h1.Draw('hist e')
 
-    h2 = ROOT.TFile('2v_from_jets_%s_%itrack_bquark_corrected_v21m.root' % (year, ntracks)).Get('h_c1v_dvv')
+    h2 = ROOT.TFile('2v_from_jets_%s_%itrack_bquark_corrected_%s.root' % (year, ntracks, version)).Get('h_c1v_dvv')
     if mode == 'ratio1':
-        h2 = ROOT.TFile('2v_from_jets_%s_%itrack_bquarks_v21m.root' % (year, ntracks)).Get('h_c1v_dvv')
+        h2 = ROOT.TFile('2v_from_jets_%s_%itrack_bquarks_%s.root' % (year, ntracks, version)).Get('h_c1v_dvv')
     h2.SetStats(0)
     h2.SetLineColor(ROOT.kViolet)
     h2.SetLineWidth(3)
@@ -101,9 +102,9 @@ for i,ntracks in enumerate([3,4,5,7]):
         h1.Draw('hist e')
         h2.Draw('hist e sames')
 
-        h3 = ROOT.TFile('2v_from_jets_%s_%itrack_btag_corrected_v21m.root' % (year, ntracks)).Get('h_c1v_dvv')
+        h3 = ROOT.TFile('2v_from_jets_%s_%itrack_btag_corrected_%s.root' % (year, ntracks, version)).Get('h_c1v_dvv')
         if mode == 'ratio1':
-            h3 = ROOT.TFile('2v_from_jets_%s_%itrack_btags_v21m.root' % (year, ntracks)).Get('h_c1v_dvv')
+            h3 = ROOT.TFile('2v_from_jets_%s_%itrack_btags_%s.root' % (year, ntracks, version)).Get('h_c1v_dvv')
         h3.SetStats(0)
         h3.SetLineColor(ROOT.kMagenta)
         h3.SetLineWidth(3)
