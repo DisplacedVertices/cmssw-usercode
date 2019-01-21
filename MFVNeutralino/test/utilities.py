@@ -283,8 +283,7 @@ def cmd_merge_bquarks_nobquarks():
 
 def cmd_merge_btags_nobtags():
     for year in ['2017']:
-        weights = '0.79,0.21'
-        for ntracks in [3,4,5,7]:
+        for ntracks,weights in [(3,'0.79,0.21'),(4,'0.83,0.17'),(5,'0.89,0.11'),(7,'0.79,0.21')]:
             files = ['One2Two/2v_from_jets_%s_%dtrack_btags_v21m.root' % (year, ntracks), 'One2Two/2v_from_jets_%s_%dtrack_nobtags_v21m.root' % (year, ntracks)]
             for fn in files:
                 if not os.path.isfile(fn):
