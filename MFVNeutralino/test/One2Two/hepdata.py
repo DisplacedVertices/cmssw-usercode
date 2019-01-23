@@ -5,7 +5,7 @@
 # pip doesn't come with SLC6 or CMSSW <= 8 but it does with >= 9
 
 tdr_path = '/uscms_data/d2/tucker/tdr'
-submission_path = '/uscms_data/d2/tucker/hepdata_tmp'
+submission_path = '/uscms_data/d2/tucker/hepdata_tmp_3'
 
 paper_code = 'EXO-17-018'
 nfigures_expected = [2, 1, 2, 1, 4, 4, 6, 6]
@@ -39,6 +39,7 @@ syms_replaces = [
 from JMTucker.Tools import colors
 from JMTucker.Tools.ROOTTools import ROOT
 import os, string, textwrap, hepdata_lib as hepdata
+from copy import deepcopy
 from math import hypot
 from pprint import pprint
 
@@ -310,6 +311,13 @@ nicesigname = {'sig00p3mm': '0.3', 'sig01p0mm': '1', 'sig10p0mm': '10'}
 
 figures = figures[1:] # drop the feynman diagram one
 
+# gotcha: exclusion curve isn't on the limit grid
+fig006excl = deepcopy(fig006)
+fig006excl.name = 'fig006excl'
+for subfig in 'ab':
+    fig006excl.tables[subfig].name = 'figure_6%s_excl' % subfig
+fig006excl.roots = fig006.roots # the deepcopy of the root files crashes
+
 ####
 
 fig002.objs['a']['sig00p3mm'] = fig002.roots['a'].read_hist_1d('c0/h_signal_-46_dvv_mm', xlim=(0., 4.))
@@ -346,6 +354,10 @@ for subfig in 'abcd':
 
 fig006.reps['a'] = fig006.objs['a']['lim2d_neu']  = lower_edge(fig006.roots['a'].read_hist_2d('c/observed', xlim=(300,2800), ylim=(0.1,100)))
 fig006.reps['b'] = fig006.objs['b']['lim2d_stop'] = lower_edge(fig006.roots['b'].read_hist_2d('c/observed', xlim=(300,2800), ylim=(0.1,100)))
+
+for subfig, particle in zip('ab', ('neu', 'stopdbardbar')):
+    fig006excl.objs[subfig]['observed'] = fig006excl.roots[subfig].read_graph('c/mfv_%s_observed_fromrinterp_nm_exc_g' % particle)
+    fig006excl.objs[subfig]['expected'] = fig006excl.roots[subfig].read_graph('c/mfv_%s_expect50_fromrinterp_nm_exc_g' % particle)
 
 ####
 
@@ -385,7 +397,7 @@ add_variable(t, hepdata.Variable('$d_{VV}$', is_independent=True, is_binned=True
 
 for signame in signames:
     o = f.objs['a'][signame]
-    v = hepdata.Variable(r'Predicted signal yield, $c\tau = %s~\textrm{mm}$, $m = 800~\textrm{GeV}$, $\sigma = 1~\textrm{fb}$' % nicesigname[signame], is_independent=False, is_binned=False)
+    v = hepdata.Variable(r'Predicted multijet signal yield, $c\tau = %s~\textrm{mm}$, $m = 800~\textrm{GeV}$, $\sigma = 1~\textrm{fb}$' % nicesigname[signame], is_independent=False, is_binned=False)
     u = hepdata.Uncertainty('Statistical (~sqrt(n_generated))')
     add_variable(t, v, o['y'], [(u, o['dy'])])
 
@@ -417,14 +429,13 @@ add_variable(t, hepdata.Variable('$d_{BV}$', is_independent=True, is_binned=True
 
 for signame in signames:
     o = f.objs['a'][signame]
-    v = hepdata.Variable(r'Predicted signal yield, $c\tau = %s~\textrm{mm}$, $m = 800~\textrm{GeV}$, $\sigma = 1~\textrm{fb}$' % nicesigname[signame], is_independent=False, is_binned=False)
+    v = hepdata.Variable(r'Predicted multijet signal yield, $c\tau = %s~\textrm{mm}$, $m = 800~\textrm{GeV}$, $\sigma = 1~\textrm{fb}$' % nicesigname[signame], is_independent=False, is_binned=False)
     u = hepdata.Uncertainty('Statistical (~sqrt(n_generated))')
     add_variable(t, v, o['y'], [(u, o['dy'])])
 
 o = f.objs['a']['observed']
 v = hepdata.Variable('Observed yield', is_independent=False, is_binned=False)
-u = hepdata.Uncertainty('Garwood intervals', is_symmetric=False)
-add_variable(t, v, o['y'], [(u, o['dy'])])
+add_variable(t, v, o['y'])
 
 sub.add_table(t)
 
@@ -447,13 +458,12 @@ for subfig in 'abcd':
         ntracks_title = r'$\geq$5-track $\times$ $\geq$5-track'
 
     o = f.objs[subfig]['predicted']
-    v = hepdata.Variable('Constructed background template normalized to total observed yield, ' + ntracks_title, is_independent=False, is_binned=False)
+    v = hepdata.Variable('Background template normalized to total observed yield, ' + ntracks_title, is_independent=False, is_binned=False)
     add_variable(t, v, o['y'])
 
     o = f.objs[subfig]['observed']
     v = hepdata.Variable('Observed yield, ' + ntracks_title, is_independent=False, is_binned=False)
-    u = hepdata.Uncertainty('Garwood intervals', is_symmetric=False)
-    add_variable(t, v, o['y'], [(u, o['dy'])])
+    add_variable(t, v, o['y'])
 
     sub.add_table(t)
 
@@ -463,7 +473,7 @@ f = fig006
 for subfig in 'ab':
     o = f.reps[subfig]
     t = f.tables[subfig]
-    t.location += ' (%s upper and lower plots)' % {'a': 'left', 'b': 'right'}[subfig]
+    t.location += ' (%s upper and lower plots, grid of limit values)' % {'a': 'left', 'b': 'right'}[subfig]
     particle = {'a': r'\tilde{\chi}^{0} / \tilde{g}', 'b': r'\tilde{t}'}[subfig]
 
     add_variable(t, hepdata.Variable(r'$m_{%s}$'     % particle, is_independent=True, is_binned=False, units='GeV'), o['x'])
@@ -471,6 +481,22 @@ for subfig in 'ab':
 
     v = hepdata.Variable(r'Observed 95% C.L. upper limits on $\sigma\mathcal{B}^{2}$', is_independent=False, is_binned=False, units='fb')
     add_variable(t, v, o['z'])
+
+    sub.add_table(t)
+
+####
+
+f = fig006excl
+for subfig in 'ab':
+    o = f.objs[subfig]
+    t = f.tables[subfig]
+    t.location += ' (%s upper and lower plots, mass exclusion curves)' % {'a': 'left', 'b': 'right'}[subfig]
+    particle = {'a': r'\tilde{\chi}^{0} / \tilde{g}', 'b': r'\tilde{t}'}[subfig]
+
+    assert o['expected']['y'] == o['observed']['y']
+    add_variable(t, hepdata.Variable(r'$c\tau_{%s}$' % particle, is_independent=True,  is_binned=False, units='mm'), o['expected']['y'])
+    add_variable(t, hepdata.Variable(r'$m_{%s}$ observed lower limit' % particle, is_independent=False, is_binned=False, units='GeV'), o['observed']['x'])
+    add_variable(t, hepdata.Variable(r'$m_{%s}$ expected lower limit' % particle, is_independent=False, is_binned=False, units='GeV'), o['expected']['x'])
 
     sub.add_table(t)
 
@@ -510,9 +536,9 @@ sub.create_files(submission_path)
 '''
 hand-edit patch:
 
-diff -uN -x '*png' -r /uscms_data/d2/tucker/hepdata_tmp_redofig3/figure_4.yaml /uscms_data/d2/tucker/hepdata_tmp/figure_4.yaml
---- /uscms_data/d2/tucker/hepdata_tmp_redofig3/figure_4.yaml	2019-01-10 08:38:21.268649791 -0600
-+++ /uscms_data/d2/tucker/hepdata_tmp/figure_4.yaml	2019-01-07 14:55:13.939520556 -0600
+diff -r -x '*png' -uN hepdata_tmp_3/figure_4.yaml hepdata_cand4/figure_4.yaml
+--- hepdata_tmp_3/figure_4.yaml	2019-01-23 11:26:32.789611179 -0600
++++ hepdata_cand4/figure_4.yaml	2019-01-23 04:07:21.294676562 -0600
 @@ -5,7 +5,7 @@
      units: ''
    values:
@@ -540,20 +566,9 @@ diff -uN -x '*png' -r /uscms_data/d2/tucker/hepdata_tmp_redofig3/figure_4.yaml /
        symerror: 0
      value: 0
    - errors:
-@@ -501,8 +501,8 @@
-   - errors:
-     - asymerror:
-         minus: 0
--        plus: 1.8411
--      label: Garwood intervals
-+        plus: 0
-+      label: Exact ($d_{BV}$ > 0.1 mm)
-     value: 0
-   - errors:
-     - asymerror:
-diff -uN -x '*png' -r /uscms_data/d2/tucker/hepdata_tmp_redofig3/submission.yaml /uscms_data/d2/tucker/hepdata_tmp/submission.yaml
---- /uscms_data/d2/tucker/hepdata_tmp_redofig3/submission.yaml	2019-01-10 08:38:29.751306582 -0600
-+++ /uscms_data/d2/tucker/hepdata_tmp/submission.yaml	2019-01-07 14:52:13.164816247 -0600
+diff -r -x '*png' -uN hepdata_tmp_3/submission.yaml hepdata_cand4/submission.yaml
+--- hepdata_tmp_3/submission.yaml	2019-01-23 11:26:50.316896681 -0600
++++ hepdata_cand4/submission.yaml	2019-01-23 03:56:35.019005752 -0600
 @@ -9,9 +9,9 @@
  - description: DOI
    location: https://doi.org/10.1103/PhysRevD.98.092011
@@ -577,20 +592,28 @@ diff -uN -x '*png' -r /uscms_data/d2/tucker/hepdata_tmp_redofig3/submission.yaml
    and event selection criteria have been applied. The last bin includes the overflow
    events.
  keywords: []
-@@ -56,7 +56,7 @@
+@@ -54,9 +54,9 @@
+ - description: Thumbnail image file
+   location: thumb_Figure_003-a.png
  data_file: figure_3a.yaml
- description: Signal efficiency as a function of signal mass and lifetime, for the
-   multijet (upper) and dijet (lower) signal samples. All vertex and event selection
+-description: Signal efficiency as a function of signal mass and lifetime, for the
+-  multijet (upper) and dijet (lower) signal samples. All vertex and event selection
 -  criteria have been applied, as well as the requirement $$d_{VV}$ > 0.4 mm$.
++description: Signal efficiency as a function of signal mass and lifetime for the
++  multijet signal samples. All vertex and event selection
 +  criteria have been applied, as well as the requirement $d_{VV}$ > 0.4 mm.
  keywords: []
  location: Figure 3a (upper plot)
  name: Figure 3a
-@@ -69,7 +69,7 @@
+@@ -67,9 +67,9 @@
+ - description: Thumbnail image file
+   location: thumb_Figure_003-b.png
  data_file: figure_3b.yaml
- description: Signal efficiency as a function of signal mass and lifetime, for the
-   multijet (upper) and dijet (lower) signal samples. All vertex and event selection
+-description: Signal efficiency as a function of signal mass and lifetime, for the
+-  multijet (upper) and dijet (lower) signal samples. All vertex and event selection
 -  criteria have been applied, as well as the requirement $$d_{VV}$ > 0.4 mm$.
++description: Signal efficiency as a function of signal mass and lifetime for the
++  dijet signal samples. All vertex and event selection
 +  criteria have been applied, as well as the requirement $d_{VV}$ > 0.4 mm.
  keywords: []
  location: Figure 3b (lower plot)
@@ -606,4 +629,308 @@ diff -uN -x '*png' -r /uscms_data/d2/tucker/hepdata_tmp_redofig3/submission.yaml
    have been applied. The last bin includes the overflow events.
  keywords: []
  location: Figure 4
+@@ -95,11 +95,9 @@
+   location: thumb_Figure_005-a.png
+ data_file: figure_5a.yaml
+ description: Distribution of the distance between vertices in the $x$-$y$ plane in
+-  two-vertex events. The points show the data ($d_{VV}$), and the solid lines show
+-  the background template ($d_{VV}^{C}$) normalized to the data, for events with two
+-  3-track vertices (upper left), one 4-track vertex and one 3-track vertex (upper
+-  right), two 4-track vertices (lower left), and two $\geq$5-track vertices (lower
+-  right). In each plot, the last bin includes the overflow events. The dotted lines
++  events with two 3-track vertices. The points show the data ($d_{VV}$), and the solid lines show
++  the background template ($d_{VV}^{C}$) normalized to the data.
++  The last bin includes the overflow events. The dotted lines
+   indicate the boundaries between the three bins used in the fit.
+ keywords: []
+ location: Figure 5a (upper left plot)
+@@ -112,11 +110,9 @@
+   location: thumb_Figure_005-b.png
+ data_file: figure_5b.yaml
+ description: Distribution of the distance between vertices in the $x$-$y$ plane in
+-  two-vertex events. The points show the data ($d_{VV}$), and the solid lines show
+-  the background template ($d_{VV}^{C}$) normalized to the data, for events with two
+-  3-track vertices (upper left), one 4-track vertex and one 3-track vertex (upper
+-  right), two 4-track vertices (lower left), and two $\geq$5-track vertices (lower
+-  right). In each plot, the last bin includes the overflow events. The dotted lines
++  events with one 4-track vertex and one 3-track vertex. The points show the data ($d_{VV}$), and the solid lines show
++  the background template ($d_{VV}^{C}$) normalized to the data.
++  The last bin includes the overflow events. The dotted lines
+   indicate the boundaries between the three bins used in the fit.
+ keywords: []
+ location: Figure 5b (upper right plot)
+@@ -129,11 +125,9 @@
+   location: thumb_Figure_005-c.png
+ data_file: figure_5c.yaml
+ description: Distribution of the distance between vertices in the $x$-$y$ plane in
+-  two-vertex events. The points show the data ($d_{VV}$), and the solid lines show
+-  the background template ($d_{VV}^{C}$) normalized to the data, for events with two
+-  3-track vertices (upper left), one 4-track vertex and one 3-track vertex (upper
+-  right), two 4-track vertices (lower left), and two $\geq$5-track vertices (lower
+-  right). In each plot, the last bin includes the overflow events. The dotted lines
++  events with two 4-track vertices. The points show the data ($d_{VV}$), and the solid lines show
++  the background template ($d_{VV}^{C}$) normalized to the data.
++  The last bin includes the overflow events. The dotted lines
+   indicate the boundaries between the three bins used in the fit.
+ keywords: []
+ location: Figure 5c (lower left plot)
+@@ -146,11 +140,9 @@
+   location: thumb_Figure_005-d.png
+ data_file: figure_5d.yaml
+ description: Distribution of the distance between vertices in the $x$-$y$ plane in
+-  two-vertex events. The points show the data ($d_{VV}$), and the solid lines show
+-  the background template ($d_{VV}^{C}$) normalized to the data, for events with two
+-  3-track vertices (upper left), one 4-track vertex and one 3-track vertex (upper
+-  right), two 4-track vertices (lower left), and two $\geq$5-track vertices (lower
+-  right). In each plot, the last bin includes the overflow events. The dotted lines
++  events with two $\geq$5-track vertices. The points show the data ($d_{VV}$), and the solid lines show
++  the background template ($d_{VV}^{C}$) normalized to the data.
++  The last bin includes the overflow events. The dotted lines
+   indicate the boundaries between the three bins used in the fit.
+ keywords: []
+ location: Figure 5d (lower right plot)
+@@ -163,14 +155,10 @@
+   location: thumb_Figure_006-a.png
+ data_file: figure_6a.yaml
+ description: Observed 95% C.L. upper limits on $\sigma\mathcal{B}^2$ for the multijet
+-  (left) and dijet (right) signals as a function of mass and mean proper decay length.
+-  The upper plots span $c\tau$ from 1 to 100 mm, and the lower plots span $c\tau$
+-  from 0.1 to 1 mm. The overlaid mass exclusion curves assume gluino pair production
+-  cross sections for the multijet signals and top squark pair production cross sections
+-  for the dijet signals, and 100% branching fraction.
++  signals as a function of mass and mean proper decay length.
+ keywords: []
+ location: Figure 6a (left upper and lower plots, grid of limit values)
+-name: Figure 6a
++name: Figure 6a (grid of limit values)
+ ---
+ additional_resources:
+ - description: Image file
+@@ -178,15 +166,11 @@
+ - description: Thumbnail image file
+   location: thumb_Figure_006-b.png
+ data_file: figure_6b.yaml
+-description: Observed 95% C.L. upper limits on $\sigma\mathcal{B}^2$ for the multijet
+-  (left) and dijet (right) signals as a function of mass and mean proper decay length.
+-  The upper plots span $c\tau$ from 1 to 100 mm, and the lower plots span $c\tau$
+-  from 0.1 to 1 mm. The overlaid mass exclusion curves assume gluino pair production
+-  cross sections for the multijet signals and top squark pair production cross sections
+-  for the dijet signals, and 100% branching fraction.
++description: Observed 95% C.L. upper limits on $\sigma\mathcal{B}^2$ for the
++  dijet signals as a function of mass and mean proper decay length.
+ keywords: []
+ location: Figure 6b (right upper and lower plots, grid of limit values)
+-name: Figure 6b
++name: Figure 6b (grid of limit values)
+ ---
+ additional_resources:
+ - description: Image file
+@@ -194,15 +178,12 @@
+ - description: Thumbnail image file
+   location: thumb_Figure_006-a.png
+ data_file: figure_6a_excl.yaml
+-description: Observed 95% C.L. upper limits on $\sigma\mathcal{B}^2$ for the multijet
+-  (left) and dijet (right) signals as a function of mass and mean proper decay length.
+-  The upper plots span $c\tau$ from 1 to 100 mm, and the lower plots span $c\tau$
+-  from 0.1 to 1 mm. The overlaid mass exclusion curves assume gluino pair production
+-  cross sections for the multijet signals and top squark pair production cross sections
+-  for the dijet signals, and 100% branching fraction.
++description: Mass exclusion curves for the multijet signals, assuming
++  gluino pair production cross sections
++  and 100% branching fraction.
+ keywords: []
+ location: Figure 6a (left upper and lower plots, mass exclusion curves)
+-name: figure_6a_excl
++name: Figure 6a (mass exclusion curves)
+ ---
+ additional_resources:
+ - description: Image file
+@@ -210,15 +191,12 @@
+ - description: Thumbnail image file
+   location: thumb_Figure_006-b.png
+ data_file: figure_6b_excl.yaml
+-description: Observed 95% C.L. upper limits on $\sigma\mathcal{B}^2$ for the multijet
+-  (left) and dijet (right) signals as a function of mass and mean proper decay length.
+-  The upper plots span $c\tau$ from 1 to 100 mm, and the lower plots span $c\tau$
+-  from 0.1 to 1 mm. The overlaid mass exclusion curves assume gluino pair production
+-  cross sections for the multijet signals and top squark pair production cross sections
+-  for the dijet signals, and 100% branching fraction.
++description: Mass exclusion curves for the dijet signals, assuming
++  top squark pair production cross sections
++  and 100% branching fraction.
+ keywords: []
+ location: Figure 6b (right upper and lower plots, mass exclusion curves)
+-name: figure_6b_excl
++name: Figure 6b (mass exclusion curves)
+ ---
+ additional_resources:
+ - description: Image file
+@@ -227,11 +205,11 @@
+   location: thumb_Figure_007-a.png
+ data_file: figure_7a.yaml
+ description: Observed and expected 95% C.L. upper limits on $\sigma\mathcal{B}^2$
+-  for the multijet (left) and dijet (right) signals, as a function of mass for a fixed
+-  $c\tau$ of 0.3 mm (upper), 1.0 mm (middle), and 10 mm (lower). The gluino pair production
+-  cross section is overlaid for the multijet signals, and the top squark pair production
+-  cross section is overlaid for the dijet signals. The uncertainties in the theoretical
+-  cross sections include those due to the renormalization and factorization scales,
++  for the multijet signals as a function of mass for a fixed
++  $c\tau$ of 0.3 mm. The gluino pair production
++  cross section is overlaid.
++  The uncertainties in the theoretical
++  cross section include those due to the renormalization and factorization scales,
+   and the parton distribution functions.
+ keywords: []
+ location: Figure 7a (upper left plot)
+@@ -244,11 +222,11 @@
+   location: thumb_Figure_007-b.png
+ data_file: figure_7b.yaml
+ description: Observed and expected 95% C.L. upper limits on $\sigma\mathcal{B}^2$
+-  for the multijet (left) and dijet (right) signals, as a function of mass for a fixed
+-  $c\tau$ of 0.3 mm (upper), 1.0 mm (middle), and 10 mm (lower). The gluino pair production
+-  cross section is overlaid for the multijet signals, and the top squark pair production
+-  cross section is overlaid for the dijet signals. The uncertainties in the theoretical
+-  cross sections include those due to the renormalization and factorization scales,
++  for the dijet signals as a function of mass for a fixed
++  $c\tau$ of 0.3 mm.
++  The top squark pair production
++  cross section is overlaid. The uncertainties in the theoretical
++  cross section include those due to the renormalization and factorization scales,
+   and the parton distribution functions.
+ keywords: []
+ location: Figure 7b (upper right plot)
+@@ -261,11 +239,11 @@
+   location: thumb_Figure_007-c.png
+ data_file: figure_7c.yaml
+ description: Observed and expected 95% C.L. upper limits on $\sigma\mathcal{B}^2$
+-  for the multijet (left) and dijet (right) signals, as a function of mass for a fixed
+-  $c\tau$ of 0.3 mm (upper), 1.0 mm (middle), and 10 mm (lower). The gluino pair production
+-  cross section is overlaid for the multijet signals, and the top squark pair production
+-  cross section is overlaid for the dijet signals. The uncertainties in the theoretical
+-  cross sections include those due to the renormalization and factorization scales,
++  for the multijet signals as a function of mass for a fixed
++  $c\tau$ of 1.0 mm. The gluino pair production
++  cross section is overlaid.
++  The uncertainties in the theoretical
++  cross section include those due to the renormalization and factorization scales,
+   and the parton distribution functions.
+ keywords: []
+ location: Figure 7c (middle left plot)
+@@ -278,11 +256,11 @@
+   location: thumb_Figure_007-d.png
+ data_file: figure_7d.yaml
+ description: Observed and expected 95% C.L. upper limits on $\sigma\mathcal{B}^2$
+-  for the multijet (left) and dijet (right) signals, as a function of mass for a fixed
+-  $c\tau$ of 0.3 mm (upper), 1.0 mm (middle), and 10 mm (lower). The gluino pair production
+-  cross section is overlaid for the multijet signals, and the top squark pair production
+-  cross section is overlaid for the dijet signals. The uncertainties in the theoretical
+-  cross sections include those due to the renormalization and factorization scales,
++  for the dijet signals as a function of mass for a fixed
++  $c\tau$ of 1.0 mm.
++  The top squark pair production
++  cross section is overlaid. The uncertainties in the theoretical
++  cross section include those due to the renormalization and factorization scales,
+   and the parton distribution functions.
+ keywords: []
+ location: Figure 7d (middle right plot)
+@@ -295,11 +273,11 @@
+   location: thumb_Figure_007-e.png
+ data_file: figure_7e.yaml
+ description: Observed and expected 95% C.L. upper limits on $\sigma\mathcal{B}^2$
+-  for the multijet (left) and dijet (right) signals, as a function of mass for a fixed
+-  $c\tau$ of 0.3 mm (upper), 1.0 mm (middle), and 10 mm (lower). The gluino pair production
+-  cross section is overlaid for the multijet signals, and the top squark pair production
+-  cross section is overlaid for the dijet signals. The uncertainties in the theoretical
+-  cross sections include those due to the renormalization and factorization scales,
++  for the multijet signals as a function of mass for a fixed
++  $c\tau$ of 10 mm. The gluino pair production
++  cross section is overlaid.
++  The uncertainties in the theoretical
++  cross section include those due to the renormalization and factorization scales,
+   and the parton distribution functions.
+ keywords: []
+ location: Figure 7e (lower left plot)
+@@ -312,11 +290,11 @@
+   location: thumb_Figure_007-f.png
+ data_file: figure_7f.yaml
+ description: Observed and expected 95% C.L. upper limits on $\sigma\mathcal{B}^2$
+-  for the multijet (left) and dijet (right) signals, as a function of mass for a fixed
+-  $c\tau$ of 0.3 mm (upper), 1.0 mm (middle), and 10 mm (lower). The gluino pair production
+-  cross section is overlaid for the multijet signals, and the top squark pair production
+-  cross section is overlaid for the dijet signals. The uncertainties in the theoretical
+-  cross sections include those due to the renormalization and factorization scales,
++  for the dijet signals as a function of mass for a fixed
++  $c\tau$ of 10 mm.
++  The top squark pair production
++  cross section is overlaid. The uncertainties in the theoretical
++  cross section include those due to the renormalization and factorization scales,
+   and the parton distribution functions.
+ keywords: []
+ location: Figure 7f (lower right plot)
+@@ -329,8 +307,8 @@
+   location: thumb_Figure_008-a.png
+ data_file: figure_8a.yaml
+ description: Observed and expected 95% C.L. upper limits on $\sigma\mathcal{B}^2$
+-  for the multijet (left) and dijet (right) signals, as a function of $c\tau$ for
+-  a fixed mass of 800 GeV (upper), 1600 GeV (middle), and 2400 GeV (lower).
++  for the multijet signals as a function of $c\tau$ for
++  a fixed mass of 800 GeV.
+ keywords: []
+ location: Figure 8a (upper left plot)
+ name: Figure 8a
+@@ -342,8 +320,8 @@
+   location: thumb_Figure_008-b.png
+ data_file: figure_8b.yaml
+ description: Observed and expected 95% C.L. upper limits on $\sigma\mathcal{B}^2$
+-  for the multijet (left) and dijet (right) signals, as a function of $c\tau$ for
+-  a fixed mass of 800 GeV (upper), 1600 GeV (middle), and 2400 GeV (lower).
++  for the dijet signals as a function of $c\tau$ for
++  a fixed mass of 800 GeV.
+ keywords: []
+ location: Figure 8b (upper right plot)
+ name: Figure 8b
+@@ -355,8 +333,8 @@
+   location: thumb_Figure_008-c.png
+ data_file: figure_8c.yaml
+ description: Observed and expected 95% C.L. upper limits on $\sigma\mathcal{B}^2$
+-  for the multijet (left) and dijet (right) signals, as a function of $c\tau$ for
+-  a fixed mass of 800 GeV (upper), 1600 GeV (middle), and 2400 GeV (lower).
++  for the multijet signals as a function of $c\tau$ for
++  a fixed mass of 1600 GeV.
+ keywords: []
+ location: Figure 8c (middle left plot)
+ name: Figure 8c
+@@ -368,8 +346,8 @@
+   location: thumb_Figure_008-d.png
+ data_file: figure_8d.yaml
+ description: Observed and expected 95% C.L. upper limits on $\sigma\mathcal{B}^2$
+-  for the multijet (left) and dijet (right) signals, as a function of $c\tau$ for
+-  a fixed mass of 800 GeV (upper), 1600 GeV (middle), and 2400 GeV (lower).
++  for the dijet signals as a function of $c\tau$ for
++  a fixed mass of 1600 GeV.
+ keywords: []
+ location: Figure 8d (middle right plot)
+ name: Figure 8d
+@@ -381,8 +359,8 @@
+   location: thumb_Figure_008-e.png
+ data_file: figure_8e.yaml
+ description: Observed and expected 95% C.L. upper limits on $\sigma\mathcal{B}^2$
+-  for the multijet (left) and dijet (right) signals, as a function of $c\tau$ for
+-  a fixed mass of 800 GeV (upper), 1600 GeV (middle), and 2400 GeV (lower).
++  for the multijet signals as a function of $c\tau$ for
++  a fixed mass of 2400 GeV.
+ keywords: []
+ location: Figure 8e (lower left plot)
+ name: Figure 8e
+@@ -394,8 +372,8 @@
+   location: thumb_Figure_008-f.png
+ data_file: figure_8f.yaml
+ description: Observed and expected 95% C.L. upper limits on $\sigma\mathcal{B}^2$
+-  for the multijet (left) and dijet (right) signals, as a function of $c\tau$ for
+-  a fixed mass of 800 GeV (upper), 1600 GeV (middle), and 2400 GeV (lower).
++  for the dijet signals as a function of $c\tau$ for
++  a fixed mass of 2400 GeV.
+ keywords: []
+ location: Figure 8f (lower right plot)
+ name: Figure 8f
 '''
