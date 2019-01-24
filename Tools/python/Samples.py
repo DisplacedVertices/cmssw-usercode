@@ -351,14 +351,6 @@ _adbp('miniaod', '/QCD_HT2000toInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn
 ########
 
 for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + \
-         data_samples_2018:
-    x.add_dataset("ntuplev21m")
-    if not x.is_signal:
-        if x != JetHT2018C:
-            x.add_dataset("ntuplev21m_ntkseeds")
-        x.add_dataset("v0ntuplev21mv1")
-
-for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + \
          data_samples_2018 + qcd_samples_2018:
     x.add_dataset("ntuplev22m")
     if not x.is_signal and x not in qcd_samples_2018:
