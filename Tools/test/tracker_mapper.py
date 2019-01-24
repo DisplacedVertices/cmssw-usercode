@@ -40,15 +40,15 @@ process.TrackerMapper = cms.EDAnalyzer('TrackerMapper',
                                        )
 
 from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-process.jetsOnly = setup_event_filter(process,
-                                      path_name = '',
-                                      trigger_filter = 'jets only',
-                                      event_filter = 'jets only',
-                                      event_filter_jes_mult = 0,
-                                      event_filter_require_vertex = False,
-                                      input_is_miniaod = True)
+jetsOnly = setup_event_filter(process,
+                              path_name = '',
+                              trigger_filter = 'jets only',
+                              event_filter = 'jets only',
+                              event_filter_jes_mult = 0,
+                              event_filter_require_vertex = False,
+                              input_is_miniaod = True)
 
-common = cms.Sequence(process.jetsOnly * process.goodOfflinePrimaryVertices * process.mfvUnpackedCandidateTracks * process.jmtWeightMiniAOD)
+common = cms.Sequence(jetsOnly * process.goodOfflinePrimaryVertices * process.mfvUnpackedCandidateTracks * process.jmtWeightMiniAOD)
 process.p = cms.Path(common * process.TrackerMapper)
 
 for name, filt in ('LightFlavor', process.lightFlavor), ('HeavyFlavor', process.heavyFlavor): #, ('BFlavor', process.bFlavor), ('DisplacedGenPV', process.displacedGenPV):
