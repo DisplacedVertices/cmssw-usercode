@@ -2244,6 +2244,9 @@ def tgraph_getpoint(g, i):
     g.GetPoint(i,x,y)
     return x,y
 
+def tgraph_points(g):
+    return [tgraph_getpoint(g, i) for i in xrange(g.GetN())]
+
 def to_array(*l):
     if type(l[0]) in (tuple, list):
         return array('d', l[0])
@@ -2409,6 +2412,7 @@ __all__ = [
     'tdr_style',
     'tgraph',
     'tgraph_getpoint',
+    'tgraph_points',
     'to_array',
     'to_ascii',
     'to_TH1D',
