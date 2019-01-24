@@ -1,25 +1,8 @@
 #!/usr/bin/env python
 
-import sys, os, shutil
-from pprint import pprint
-from glob import glob
-from time import time
-from JMTucker.Tools import Samples, SampleFiles, colors
-from JMTucker.Tools.general import bool_from_argv
-from JMTucker.Tools.hadd import hadd
-from JMTucker.Tools.CMSSWTools import is_edm_file, merge_edm_files, cmssw_base, json_path
-from JMTucker.MFVNeutralino import AnalysisConstants
+from JMTucker.MFVNeutralino.UtilitiesBase import *
 
-def hadd_or_merge(out_fn, files):
-    files = [fn for fn in files if os.path.exists(fn)]
-    print out_fn, files
-    if not files:
-        print 'skipping', out_fn, 'because no files'
-    is_edm = set([is_edm_file(f) for f in files])
-    if len(is_edm) != 1:
-        raise ValueError('uh you have a mix of edm and non-edm files?')
-    is_edm = is_edm.pop()
-    (merge_edm_files if is_edm else hadd)(out_fn, files)
+####
 
 _leptonpresel = bool_from_argv('leptonpresel')
 _presel_s = '_leptonpresel' if _leptonpresel else ''
@@ -269,39 +252,8 @@ def cmd_trigeff_merge():
                     print cmd
                     os.system(cmd)
 
-def cmd_merge_bquarks_nobquarks():
-    for year in ['2017']:
-        weights = '0.79,0.21'
-        for ntracks in [3,4,5,7]:
-            files = ['One2Two/2v_from_jets_%s_%dtrack_bquarks_v21m.root' % (year, ntracks), 'One2Two/2v_from_jets_%s_%dtrack_nobquarks_v21m.root' % (year, ntracks)]
-            for fn in files:
-                if not os.path.isfile(fn):
-                    raise RuntimeError('%s not found' % fn)
-            cmd = 'mergeTFileServiceHistograms -w %s -i %s -o One2Two/2v_from_jets_%s_%dtrack_bquark_corrected_v21m.root' % (weights, ' '.join(files), year, ntracks)
-            print cmd
-            os.system(cmd)
-
-def cmd_merge_btags_nobtags():
-    for year in ['2017']:
-        for ntracks,weights in [(3,'0.79,0.21'),(4,'0.83,0.17'),(5,'0.89,0.11'),(7,'0.79,0.21')]:
-            files = ['One2Two/2v_from_jets_%s_%dtrack_btags_v21m.root' % (year, ntracks), 'One2Two/2v_from_jets_%s_%dtrack_nobtags_v21m.root' % (year, ntracks)]
-            for fn in files:
-                if not os.path.isfile(fn):
-                    raise RuntimeError('%s not found' % fn)
-            cmd = 'mergeTFileServiceHistograms -w %s -i %s -o One2Two/2v_from_jets_%s_%dtrack_btag_corrected_v21m.root' % (weights, ' '.join(files), year, ntracks)
-            print cmd
-            os.system(cmd)
-
 ####
 
-cmd = sys.argv[1] if len(sys.argv) > 1 else ''
-cmds = locals()
+if __name__ == '__main__':
+    main(locals())
 
-if not cmds.has_key('cmd_' + cmd):
-    print 'valid cmds are:'
-    for cmd in sorted(cmds.keys()):
-        if cmd.startswith('cmd_'):
-            print cmd.replace('cmd_', '')
-    sys.exit(1)
-
-cmds['cmd_' + cmd]()
