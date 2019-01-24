@@ -61,7 +61,7 @@ int main(int argc, char** argv) {
     h_vtxntracks[i] = new TH1D(TString::Format("h_%i_vtxntracks",      i), ";# tracks in largest vertex;events/1", 40, 0, 40);
     h_vtxbs2derr[i] = new TH1D(TString::Format("h_%i_vtxbs2derr",      i), ";#sigma(d_{BV}) of largest vertex (cm);events/2 #mum", 50, 0, 0.01);
     h_vtxtkonlymass[i] = new TH1D(TString::Format("h_%i_vtxtkonlymass", i), ";track-only mass of largest vertex (GeV);events/1 GeV", 500, 0, 500);
-    h_vtxs_mass[i] = new TH1D(TString::Format("h_%i_vtxs_mass", i), ";track+jets mass of largest vertex (GeV);events/1 GeV", 100, 0, 5000);
+    h_vtxs_mass[i] = new TH1D(TString::Format("h_%i_vtxs_mass", i), ";track+jets mass of largest vertex (GeV);vertices/50 GeV", 100, 0, 5000);
   }
 
   double den = 0;
@@ -158,7 +158,7 @@ int main(int argc, char** argv) {
           h_vtxntracks      [i]->Fill(nt.p_vtxs_ntracks->at(ivtx));
           h_vtxbs2derr      [i]->Fill(nt.p_vtxs_bs2derr->at(ivtx));
 	  h_vtxtkonlymass[i]->Fill(nt.p_vtxs_tkonlymass->at(ivtx));
-	  h_vtxs_mass[i]->Fill(nt.p_vtxs_tkonlymass->at(ivtx));
+	  h_vtxs_mass[i]->Fill(nt.p_vtxs_mass->at(ivtx));
         }
       }
 
