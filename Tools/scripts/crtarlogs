@@ -25,7 +25,7 @@ for arg in $@; do
         echo not a date dir
     else
         # first get rid of all failed dirs
-        faileds=($(eos $url find $lpath | egrep '/failed/$') )
+        faileds=($(eos $url find $lpath | sed 's/^path=//' | sort | egrep '/failed/$') )
         if [[ ${#failed[@]} -gt 0 ]]; then
             for fn in ${faileds[@]}; do
                 echo failed $fn
@@ -42,7 +42,7 @@ for arg in $@; do
         else
             tmpdir=$(mktemp -d)
         fi
-        logfns=($(eos $url find $lpath | grep -v /failed/ | egrep 'log.tar.gz$') )
+        logfns=($(eos $url find $lpath | sed 's/^path=//' | sort | grep -v /failed/ | egrep 'log.tar.gz$') )
 
         if [[ ${#logfns[@]} -eq 0 ]]; then
             echo no log dirs in $lpath
