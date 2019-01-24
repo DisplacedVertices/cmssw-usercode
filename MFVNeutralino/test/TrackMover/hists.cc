@@ -20,6 +20,7 @@ int main(int argc, char** argv) {
   int itau = 10000;
   bool apply_weights = true;
   bool btagsf_weights = false;
+  bool pu_cross_weights = false;
 
   {
     namespace po = boost::program_options;
@@ -65,6 +66,7 @@ int main(int argc, char** argv) {
             << " btagsf: " << btagsf_weights << "\n";
 
   ////
+  const double pu_2017to2018[118] = { 0.8088707410249003, 0.6419315492929617, 1.0289843771164762, 1.2197433115877707, 2.0279361447384607, 2.1534273598348346, 2.828875717156401, 3.7562409631757463, 3.7723330080421347, 2.128823541813255, 1.4437282808060388, 1.0592335461744988, 0.9296008325854023, 0.8981341246581729, 0.8661838708148207, 0.8217817668661503, 0.7698094682358639, 0.736530117843042, 0.7324825824243237, 0.7464654505340651, 0.7689672475157527, 0.7962598319502678, 0.8238273378355885, 0.84709530856804, 0.8629571604669926, 0.8715575979660287, 0.8790646285472657, 0.8930068377451257, 0.9181154528911909, 0.9565916718906213, 1.0085885148613083, 1.0733677243858069, 1.1513074018453253, 1.2438041844310648, 1.350425854765928, 1.4667928985090142, 1.5852313012565622, 1.6964317350776834, 1.7888779559697383, 1.8463573710989412, 1.8483344785348048, 1.777156775240319, 1.6296890426047426, 1.4238791110873033, 1.192636304616271, 0.9691350867625012, 0.7752988582908152, 0.6194609177490059, 0.5004018080190712, 0.41258518896855334, 0.3496354676827754, 0.3057454957410425, 0.27651357625145984, 0.2587768794251079, 0.2503442053532996, 0.24978113594279056, 0.25620094485064937, 0.269077026686218, 0.2880879933617664, 0.31297537926425495, 0.34340097870928926, 0.37879522132496796, 0.4181914535828073, 0.46006239241614966, 0.5022042593864846, 0.5417448111098889, 0.5753590543126583, 0.599729908816729, 0.6121804339703449, 0.6112764589874742, 0.5971519453774672, 0.5714120667068647, 0.5366696442401658, 0.4959276770798611, 0.45203677112054097, 0.4073572740266353, 0.3636364273599529, 0.3220390572953875, 0.2832554359014485, 0.24762792649752466, 0.2152638164237845, 0.18612213801734914, 0.1600742314358133, 0.13694300589056346, 0.1165269986399804, 0.0986145541296668, 0.08299205921121872, 0.06944883162594205, 0.057780217187997036, 0.04778974199444527, 0.03929073201556682, 0.03210757396626401, 0.02607667588961756, 0.02104713973802034, 0.016881148969658692, 0.013454078923061686, 0.010654347125878181, 0.008383033422255411, 0.006553300860721036, 0.005089663013060519, 0.0039271342139648915, 0.0030102988351013078, 0.0022923603178735402, 0.001734152193216896, 0.0013032269067089236, 0.0009729254729590597, 0.0007215235730044382, 0.000531537519428578, 0.0003890108881886131, 0.0002828005460800867, 0.0002043072260251089, 0.00014647800144821486, 0.00010417815899462249, 7.364182160440637e-05, 5.127986461383892e-05, 3.7258169988485095e-05, 2.3663515932329523e-05, 1.4565424506047685e-05 };
 
   const int itau_original = 10000; // JMTBAD if you change this in ntuple.py, change it here
   if (itau != itau_original)
@@ -109,10 +111,11 @@ int main(int argc, char** argv) {
     numdens("all")
   };
 
-  enum { k_movedist2, k_movedist3, k_npv, k_pvx, k_pvy, k_pvz, k_pvrho, k_pvntracks, k_pvsumpt2, k_ht, k_ntracks, k_nseltracks, k_npreseljets, k_npreselbjets, k_jetsume, k_jetdrmax, k_jetdravg, k_jetsumntracks };
+  enum { k_movedist2, k_movedist3, k_movevectoreta, k_npv, k_pvx, k_pvy, k_pvz, k_pvrho, k_pvntracks, k_pvsumpt2, k_ht, k_ntracks, k_nseltracks, k_npreseljets, k_npreselbjets, k_jetsume, k_jetdrmax, k_jetdravg, k_jetsumntracks };
   for (numdens& nd : nds) {
     nd.book(k_movedist2, "movedist2", ";movement 2-dist;events/0.01 cm", 200, 0, 2);
     nd.book(k_movedist3, "movedist3", ";movement 3-dist;events/0.01 cm", 200, 0, 2);
+    nd.book(k_movevectoreta, "movevectoreta", ";move vector eta;events/0.08 cm", 100, -4, 4);
     nd.book(k_npv, "npv", ";# PV;events/1", 100, 0, 100);
     nd.book(k_pvx, "pvx", ";PV x (cm);events/1.5 #mum", 200, -0.015, 0.015);
     nd.book(k_pvy, "pvy", ";PV y (cm);events/1.5 #mum", 200, -0.015, 0.015);
@@ -135,14 +138,38 @@ int main(int argc, char** argv) {
   TH1D* h_vtxntracks[num_numdens] = {0};
   TH1D* h_vtxbs2derr[num_numdens] = {0};
   TH1D* h_vtxtkonlymass[num_numdens] = {0};
+  TH1D* h_vtxs_mass[num_numdens] = {0};
   TH1D* h_vtxanglemax[num_numdens] = {0};
+  TH1D* h_vtxphi[num_numdens] = {0};
+  TH1D* h_vtxtheta[num_numdens] = {0};
+  TH1D* h_vtxpt[num_numdens] = {0};
+  TH2D* h_vtxntracks_v_vtxbs2derr[num_numdens] = {0};
+  TH2D* h_vtxtkonlymass_v_vtxbs2derr[num_numdens] = {0};
+  TH2D* h_vtxanglemax_v_vtxbs2derr[num_numdens] = {0};
+  TH2D* h_vtxphi_v_vtxbs2derr[num_numdens] = {0};
+  TH2D* h_vtxtheta_v_vtxbs2derr[num_numdens] = {0};
+  TH2D* h_vtxpt_v_vtxbs2derr[num_numdens] = {0};
+  TH2D* h_vtxdbv_v_vtxbs2derr[num_numdens] = {0};
+  TH2D* h_etamovevec_v_vtxbs2derr[num_numdens] = {0};
 
   for (int i = 0; i < num_numdens; ++i) {
     h_vtxdbv[i] = new TH1D(TString::Format("h_%i_vtxdbv", i), ";d_{BV} of largest vertex (cm);events/50 #mum", 400, 0, 2);
     h_vtxntracks[i] = new TH1D(TString::Format("h_%i_vtxntracks", i), ";# tracks in largest vertex;events/1", 60, 0, 60);
     h_vtxbs2derr[i] = new TH1D(TString::Format("h_%i_vtxbs2derr", i), ";#sigma(d_{BV}) of largest vertex (cm);events/1 #mum", 500, 0, 0.05);
     h_vtxtkonlymass[i] = new TH1D(TString::Format("h_%i_vtxtkonlymass", i), ";track-only mass of largest vertex (GeV);events/1 GeV", 500, 0, 500);
+    h_vtxs_mass[i] = new TH1D(TString::Format("h_%i_vtxs_mass", i), ";track+jets mass of largest vertex (GeV);events/1 GeV", 5000, 0, 5000);
     h_vtxanglemax[i] = new TH1D(TString::Format("h_%i_vtxanglemax", i), ";biggest angle between track in vertex and move vector;events/0.03", 100, 0, M_PI);
+    h_vtxphi[i] = new TH1D(TString::Format("h_%i_vtxphi", i), ";tracks-plus-jets-by-ntracks #phi of largest vertex;events/0.06", 100, -M_PI, M_PI);
+    h_vtxtheta[i] = new TH1D(TString::Format("h_%i_vtxtheta", i), ";tracks-plus-jets-by-ntracks #theta of largest vertex; events/0.03", 100, 0, M_PI);
+    h_vtxpt[i] = new TH1D(TString::Format("h_%i_vtxpt", i), ";tracks-plus-jets-by-ntracks p_{T} of largest vertex (GeV);events/1", 500, 0, 500);
+    h_vtxntracks_v_vtxbs2derr[i] = new TH2D(TString::Format("h_%i_vtxntracks_v_vtxbs2derr", i), ";#sigma(d_{BV}) of largest vertex (cm);# tracks in largest vertex", 500, 0, 0.05, 60, 0, 60);
+    h_vtxtkonlymass_v_vtxbs2derr[i] = new TH2D(TString::Format("h_%i_vtxtkonlymass_v_vtxbs2derr", i), ";#sigma(d_{BV}) of largest vertex (cm);track-only mass of largest vertex (GeV)", 500, 0, 0.05, 500, 0, 500);
+    h_vtxanglemax_v_vtxbs2derr[i] = new TH2D(TString::Format("h_%i_vtxanglemax_v_vtxbs2derr", i), ";#sigma(d_{BV}) of largest vertex (cm);biggest angle between track in vertex and move vector", 500, 0, 0.05, 100, 0, M_PI);
+    h_vtxphi_v_vtxbs2derr[i] = new TH2D(TString::Format("h_%i_vtxphi_v_vtxbs2derr", i), ";#sigma(d_{BV}) of largest vertex (cm);tracks-plus-jets-by-ntracks #phi of largest vertex", 500, 0, 0.05, 100, -M_PI, M_PI);
+    h_vtxtheta_v_vtxbs2derr[i] = new TH2D(TString::Format("h_%i_vtxtheta_v_vtxbs2derr", i), ";#sigma(d_{BV}) of largest vertex (cm);tracks-plus-jets-by-ntracks #theta of largest vertex", 500, 0, 0.05, 100, 0, M_PI);
+    h_vtxpt_v_vtxbs2derr[i] = new TH2D(TString::Format("h_%i_vtxpt_v_vtxbs2derr", i), ";#sigma(d_{BV}) of largest vertex (cm);tracks-plus-jets-by-ntracks p_{T} of largest vertex (GeV)", 500, 0, 0.05, 500, 0, 500);
+    h_vtxdbv_v_vtxbs2derr[i] = new TH2D(TString::Format("h_%i_vtxdbv_v_vtxbs2derr", i), ";#sigma(d_{BV}) of largest vertex (cm);d_{BV} of largest vertex (cm)", 500, 0, 0.05, 400, 0, 2);
+    h_etamovevec_v_vtxbs2derr[i] = new TH2D(TString::Format("h_%i_etamovevec_v_vtxbs2derr", i), ";#sigma(d_{BV}) of largest vertex (cm);eta of move vector", 500, 0, 0.05, 100, -4, 4);
   }
 
   double den = 0;
@@ -191,6 +218,11 @@ int main(int argc, char** argv) {
     if (is_mc && apply_weights) {
       if (nt.weight < 0) ++nnegweight;
       w *= nt.weight;
+
+      if (pu_cross_weights) {
+	int inpu = int(nt.npu);
+	w *= pu_2017to2018[inpu];
+      }
 
       if (btagsf_weights) {
         double p_mc = 1, p_data = 1;
@@ -245,6 +277,7 @@ int main(int argc, char** argv) {
     const TVector3 move_vector = nt.move_vector();
     const double movedist2 = move_vector.Perp();
     const double movedist3 = move_vector.Mag();
+    const double movevectoreta = move_vector.Eta();
 
     const size_t n_raw_vtx = nt.p_vtxs_x->size();
 
@@ -285,6 +318,7 @@ int main(int argc, char** argv) {
     for (numdens& nd : nds) {
       Fill(nd(k_movedist2)    .den, movedist2);
       Fill(nd(k_movedist3)    .den, movedist3);
+      Fill(nd(k_movevectoreta).den, movevectoreta);
       Fill(nd(k_npv)          .den, nt.npv);
       Fill(nd(k_pvx)          .den, nt.pvx);
       Fill(nd(k_pvy)          .den, nt.pvy);
@@ -338,6 +372,18 @@ int main(int argc, char** argv) {
         h_vtxbs2derr[i]->Fill(nt.p_vtxs_bs2derr->at(ivtx), w);
         h_vtxanglemax[i]->Fill(nt.p_vtxs_anglemax->at(ivtx), w);
         h_vtxtkonlymass[i]->Fill(nt.p_vtxs_tkonlymass->at(ivtx), w);
+        h_vtxs_mass[i]->Fill(nt.p_vtxs_mass->at(ivtx), w);
+	h_vtxphi[i]->Fill(nt.p_vtxs_phi->at(ivtx), w);
+	h_vtxtheta[i]->Fill(nt.p_vtxs_theta->at(ivtx), w);
+	h_vtxpt[i]->Fill(nt.p_vtxs_pt->at(ivtx), w);
+	h_vtxntracks_v_vtxbs2derr[i]->Fill(nt.p_vtxs_bs2derr->at(ivtx), nt.p_vtxs_ntracks->at(ivtx), w);
+	h_vtxtkonlymass_v_vtxbs2derr[i]->Fill(nt.p_vtxs_bs2derr->at(ivtx), nt.p_vtxs_tkonlymass->at(ivtx), w);
+	h_vtxanglemax_v_vtxbs2derr[i]->Fill(nt.p_vtxs_bs2derr->at(ivtx), nt.p_vtxs_anglemax->at(ivtx), w);
+	h_vtxphi_v_vtxbs2derr[i]->Fill(nt.p_vtxs_bs2derr->at(ivtx), nt.p_vtxs_phi->at(ivtx), w);
+	h_vtxtheta_v_vtxbs2derr[i]->Fill(nt.p_vtxs_bs2derr->at(ivtx), nt.p_vtxs_theta->at(ivtx), w);
+	h_vtxpt_v_vtxbs2derr[i]->Fill(nt.p_vtxs_bs2derr->at(ivtx), nt.p_vtxs_pt->at(ivtx), w);
+	h_vtxdbv_v_vtxbs2derr[i]->Fill(nt.p_vtxs_bs2derr->at(ivtx), mag(nt.p_vtxs_x->at(ivtx),nt.p_vtxs_y->at(ivtx)), w);
+	h_etamovevec_v_vtxbs2derr[i]->Fill(nt.p_vtxs_bs2derr->at(ivtx), move_vector.Eta(), w);
       }
     }
 
@@ -356,6 +402,7 @@ int main(int argc, char** argv) {
         numdens& nd = nds[i];
         Fill(nd(k_movedist2)    .num, movedist2);
         Fill(nd(k_movedist3)    .num, movedist3);
+        Fill(nd(k_movevectoreta).num, movevectoreta);
         Fill(nd(k_npv)          .num, nt.npv);
         Fill(nd(k_pvx)          .num, nt.pvx);
         Fill(nd(k_pvy)          .num, nt.pvy);
