@@ -60,8 +60,26 @@ namespace mfv {
     std::vector<float> jets_phi;
     std::vector<float> jets_energy;
     std::vector<uchar> jets_ntracks;
-    uchar njets() const { return uchar(jets_pt.size()); }
+    uchar njets() const { return p_jets_pt ? uchar(p_jets_pt->size()) : uchar(jets_pt.size()); }
     uchar nbjets() const { return njets() - nlightjets; }
+
+    TLorentzVector alljets_p4(size_t i) const {
+      TLorentzVector p;
+      if (p_alljets_pt)
+        p.SetPtEtaPhiE((*p_alljets_pt)[i], (*p_alljets_eta)[i], (*p_alljets_phi)[i], (*p_alljets_energy)[i]);
+      else
+        p.SetPtEtaPhiE(alljets_pt[i], alljets_eta[i], alljets_phi[i], alljets_energy[i]);
+      return p;
+    }
+
+    TLorentzVector jets_p4(size_t i) const {
+      TLorentzVector p;
+      if (p_jets_pt)
+        p.SetPtEtaPhiE((*p_jets_pt)[i], (*p_jets_eta)[i], (*p_jets_phi)[i], (*p_jets_energy)[i]);
+      else
+        p.SetPtEtaPhiE(jets_pt[i], jets_eta[i], jets_phi[i], jets_energy[i]);
+      return p;
+    }
 
     float move_x;
     float move_y;
