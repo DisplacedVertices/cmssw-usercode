@@ -13,7 +13,7 @@
  *  - For the 2017 MC samples the weights calculated assume an integrated luminosity of 41.53 fb^-1 and the number of events run on for each sample:
 samples -i <<EOF
 for sample in qcd_samples_2017 + ttbar_samples_2017:
-    nevents = sample.nevents('/uscms_data/d2/tucker/crab_dirs/MiniTreeV21m/%s.root' % sample.name)
+    nevents = sample.nevents('/uscms_data/d2/tucker/crab_dirs/MiniTreeV22m/%s.root' % sample.name)
     print '%20s %6.1f %9d %10.3g' % (sample.name, sample.xsec, nevents, 41530.*sample.xsec/nevents)
 EOF
  *  - For the background template only the relative weights are relevant because we only construct the shape; the normalization comes from the fit.
@@ -132,23 +132,23 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   const char* file_path; //which filepath?
   if (p.only_10pc()) {
-    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV21m";
+    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV22m";
   } else {
-    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV21m";
+    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV22m";
   }
 
   const int nbkg = 21; //which samples?
   const char* samples[nbkg];
   float       weights[nbkg];
   samples[0]  = "mfv_neu_tau001000um_M0800_2017"; weights[0]  = 0.004153;
-  samples[1]  = "qcdht0700_2017";                 weights[1]  = 5.49006 * 2;
-  samples[2]  = "qcdht1000_2017";                 weights[2]  = 2.69604 * 2;
-  samples[3]  = "qcdht1500_2017";                 weights[3]  = 0.35339 * 2;
-  samples[4]  = "qcdht2000_2017";                 weights[4]  = 0.14120 * 2;
-  samples[5]  = "ttbarht0600_2017";               weights[5]  = 0.00093 * 2;
-  samples[6]  = "ttbarht0800_2017";               weights[6]  = 0.00078 * 2;
-  samples[7]  = "ttbarht1200_2017";               weights[7]  = 0.00041 * 2;
-  samples[8]  = "ttbarht2500_2017";               weights[8]  = 0.00001 * 2;
+  samples[1]  = "qcdht0700_2017";                 weights[1]  = 11.1;
+  samples[2]  = "qcdht1000_2017";                 weights[2]  = 5.39;
+  samples[3]  = "qcdht1500_2017";                 weights[3]  = 0.707;
+  samples[4]  = "qcdht2000_2017";                 weights[4]  = 0.282;
+  samples[5]  = "ttbarht0600_2017";               weights[5]  = 0.00185;
+  samples[6]  = "ttbarht0800_2017";               weights[6]  = 0.00156;
+  samples[7]  = "ttbarht1200_2017";               weights[7]  = 0.000833;
+  samples[8]  = "ttbarht2500_2017";               weights[8]  = 2.27e-05;
   samples[9]  = "qcdht0700_2018";                 weights[9]  = 1;
   samples[10] = "qcdht1000_2018";                 weights[10] = 1;
   samples[11] = "qcdht1500_2018";                 weights[11] = 1;
@@ -189,9 +189,9 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   double dphi_pdf_c; double dphi_pdf_e = 2; double dphi_pdf_a; //deltaphi input
   if (p.is_mc()) {
-    if (p.year() == "2017")         { dphi_pdf_c = 1.39; dphi_pdf_a = 3.58; }
-    else if (p.year() == "2018")    { dphi_pdf_c = 1.39; dphi_pdf_a = 3.58; }
-    else if (p.year() == "2017p8")  { dphi_pdf_c = 1.39; dphi_pdf_a = 3.58; }
+    if (p.year() == "2017")         { dphi_pdf_c = 1.40; dphi_pdf_a = 3.62; }
+    else if (p.year() == "2018")    { dphi_pdf_c = 1.40; dphi_pdf_a = 3.62; }
+    else if (p.year() == "2017p8")  { dphi_pdf_c = 1.40; dphi_pdf_a = 3.62; }
     else { fprintf(stderr, "bad year"); exit(1); }
   } else if (p.only_10pc()) {
     if (p.year() == "2017")         { dphi_pdf_c = 1.29; dphi_pdf_a = 4.84; }
@@ -210,9 +210,9 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   const char* vpeffs_version; //efficiency input
   if (p.only_10pc()) {
-    vpeffs_version = "v21mp1";
+    vpeffs_version = "v22m";
   } else {
-    vpeffs_version = "v21mp1";
+    vpeffs_version = "v22m";
   }
   TString eff_file_name = TString::Format("vpeffs%s_%s_%s%s.root", p.is_mc() ? "" : "_data", p.year().c_str(), vpeffs_version, p.vary_eff() ? "_ntkseeds" : "");
 
@@ -228,7 +228,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   if (p.ntracks() == 3) {
     if (p.year() == "2018")        { bquark_correction[0] = 0.93; bquark_correction[1] = 1.07; bquark_correction[2] = 1.10; }
     else if (p.year() == "2017p8") { bquark_correction[0] = 0.93; bquark_correction[1] = 1.07; bquark_correction[2] = 1.10; }
-    else                           { bquark_correction[0] = 0.93; bquark_correction[1] = 1.08; bquark_correction[2] = 1.08; }
+    else                           { bquark_correction[0] = 0.94; bquark_correction[1] = 1.07; bquark_correction[2] = 1.06; }
   } else if (p.ntracks() == 4) {
     if (p.year() == "2018")        { bquark_correction[0] = 0.93; bquark_correction[1] = 1.11; bquark_correction[2] = 1.20; }
     else if (p.year() == "2017p8") { bquark_correction[0] = 0.93; bquark_correction[1] = 1.11; bquark_correction[2] = 1.20; }
@@ -236,11 +236,11 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   } else if (p.ntracks() == 5) {
     if (p.year() == "2018")        { bquark_correction[0] = 0.92; bquark_correction[1] = 1.25; bquark_correction[2] = 1.57; }
     else if (p.year() == "2017p8") { bquark_correction[0] = 0.92; bquark_correction[1] = 1.25; bquark_correction[2] = 1.57; }
-    else                           { bquark_correction[0] = 0.96; bquark_correction[1] = 1.00; bquark_correction[2] = 1.25; }
+    else                           { bquark_correction[0] = 0.97; bquark_correction[1] = 1.00; bquark_correction[2] = 1.24; }
   } else if (p.ntracks() == 7) {
     if (p.year() == "2018")        { bquark_correction[0] = 0.93; bquark_correction[1] = 1.09; bquark_correction[2] = 1.14; }
     else if (p.year() == "2017p8") { bquark_correction[0] = 0.93; bquark_correction[1] = 1.09; bquark_correction[2] = 1.14; }
-    else                           { bquark_correction[0] = 0.93; bquark_correction[1] = 1.09; bquark_correction[2] = 1.10; }
+    else                           { bquark_correction[0] = 0.94; bquark_correction[1] = 1.08; bquark_correction[2] = 1.08; }
   } else {
     fprintf(stderr, "bad ntracks"); exit(1);
   }
@@ -630,7 +630,7 @@ int main(int argc, const char* argv[]) {
   for (const char* year : {"2017"}) { //, "2018", "2017p8"}) {
     for (int ntracks : {3, 4, 5, 7}) {
       ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks);
-      const char* version = "v21m";
+      const char* version = "v22m";
       construct_dvvc(pars2.correct_bquarks(false),              TString::Format("2v_from_jets_%s_%dtrack_bquark_uncorrected_%s.root", year, ntracks, version));
       construct_dvvc(pars2.correct_bquarks(false).bquarks(1),   TString::Format("2v_from_jets_%s_%dtrack_bquarks_%s.root", year, ntracks, version));
       construct_dvvc(pars2.correct_bquarks(false).bquarks(0),   TString::Format("2v_from_jets_%s_%dtrack_nobquarks_%s.root", year, ntracks, version));
@@ -647,7 +647,7 @@ int main(int argc, const char* argv[]) {
   for (const char* year : {"2017", "2018", "2017p8", "2017B", "2017C", "2017D", "2017E", "2017F"}) {
     for (int ntracks : {3, 4, 5, 7}) {
       ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks).is_mc(false).only_10pc(true);
-      const char* version = "v21m";
+      const char* version = "v22m";
       //construct_dvvc(pars2,                    TString::Format("2v_from_jets_data_%s_%dtrack_default_%s.root", year, ntracks, version));
       //construct_dvvc(pars2.vary_dphi(true),    TString::Format("2v_from_jets_data_%s_%dtrack_vary_dphi_%s.root", year, ntracks, version));
       //construct_dvvc(pars2.vary_eff(true),     TString::Format("2v_from_jets_data_%s_%dtrack_vary_eff_%s.root", year, ntracks, version));
@@ -657,7 +657,7 @@ int main(int argc, const char* argv[]) {
   for (const char* year : {"2017p8"}) {
     for (int ntracks : {3, 4, 5, 7}) {
       ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks).is_mc(false);
-      const char* version = "v21m";
+      const char* version = "v22m";
       construct_dvvc(pars2,                    TString::Format("2v_from_jets_data_%s_%dtrack_default_%s.root", year, ntracks, version));
       construct_dvvc(pars2.vary_dphi(true),    TString::Format("2v_from_jets_data_%s_%dtrack_vary_dphi_%s.root", year, ntracks, version));
       //construct_dvvc(pars2.clearing_from_eff(false), TString::Format("2v_from_jets_data_%s_%dtrack_noclearing_%s.root", year, ntracks, version));

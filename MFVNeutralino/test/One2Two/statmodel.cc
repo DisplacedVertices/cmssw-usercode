@@ -200,16 +200,16 @@ int main(int, char**) {
 
   jmt::ConfigFromEnv env("sm", true);
 
-                                       // 2017                                2018                     2017+2018
-  const double default_n1v[4][3][6] = {{{ 104166, 10097, 826 }, { 1, 1, 1 }, { 104166, 10097,  826 }},  //MC scaled to int. lumi.
-                                       {{  22501,  2245, 181 }, { 1, 1, 1 }, {  22501,  2245,  181 }},  //MC effective
-                                       {{      1,     1,   1 }, { 1, 1, 1 }, {      1,     1,    1 }},  //data 10%
-                                       {{      1,     1,   1 }, { 1, 1, 1 }, {      1,     1,    1 }}}; //data 100%
+                                       //  2017                   2018         2017+2018
+  const double default_n1v[4][3][3] = {{{  89055,  8827, 696 }, { 1, 1, 1 }, { 1, 1, 1 }},  //MC scaled to int. lumi.
+                                       {{  20109,  1987, 160 }, { 1, 1, 1 }, { 1, 1, 1 }},  //MC effective
+                                       {{      1,     1,   1 }, { 1, 1, 1 }, { 1, 1, 1 }},  //data 10%
+                                       {{      1,     1,   1 }, { 1, 1, 1 }, { 1, 1, 1 }}}; //data 100%
 
-  const double default_n2v[4][3][6] = {{{    773,     5,   1 }, { 1, 1, 1 }, {    773,     5,    1 }},
-                                       {{    184,     8,   1 }, { 1, 1, 1 }, {    184,     8,    1 }},
-                                       {{      1,     1,   1 }, { 1, 1, 1 }, {      1,     1,    1 }},
-                                       {{      1,     1,   1 }, { 1, 1, 1 }, {      1,     1,    1 }}};
+  const double default_n2v[4][3][3] = {{{    651,     2,   1 }, { 1, 1, 1 }, { 1, 1, 1 }},
+                                       {{    151,     4,   1 }, { 1, 1, 1 }, { 1, 1, 1 }},
+                                       {{      1,     1,   1 }, { 1, 1, 1 }, { 1, 1, 1 }},
+                                       {{      1,     1,   1 }, { 1, 1, 1 }, { 1, 1, 1 }}};
 
   const int inst = env.get_int("inst", 0);
   const int seed = env.get_int("seed", 12919135 + inst);
@@ -228,13 +228,13 @@ int main(int, char**) {
   const long ntrue_1v = env.get_long("ntrue_1v", 10000000L);
   const long ntrue_2v = env.get_long("ntrue_2v", 1000000L);
   const double oversample = env.get_double("oversample", 20);
-  const std::string rho_compare_fn = env.get_string("rho_compare_fn", "/uscms_data/d2/tucker/crab_dirs/HistosV20mp1/background_2017.root");
+  const std::string rho_compare_fn = env.get_string("rho_compare_fn", "/uscms_data/d2/tucker/crab_dirs/HistosV22m/background_2017.root");
   rho_tail_norm = env.get_long_double("rho_tail_norm", 1L);
   rho_tail_slope = env.get_long_double("rho_tail_slope", 1L);
-  phi_c = env.get_double("phi_c", 1.42);
+  phi_c = env.get_double("phi_c", 1.40);
   phi_e = env.get_double("phi_e", 2);
-  phi_a = env.get_double("phi_a", 3.46);
-  const std::string eff_fn = env.get_string("eff_fn", "vpeffs_2017_v20m.root");
+  phi_a = env.get_double("phi_a", 3.62);
+  const std::string eff_fn = env.get_string("eff_fn", "vpeffs_2017_v22m.root");
   const std::string eff_path = env.get_string("eff_path", "maxtk3");
 
   /////////////////////////////////////////////
@@ -673,7 +673,7 @@ int main(int, char**) {
   }
 
   printf("2v bins means:\n");
-  printf("%3s %28s  %28s  %28s  %28s\n", "bin", "bin mean", "scaled true", "diff", "rms");
+  printf("%3s %28s  %28s  %28s  %28s  %12s\n", "bin", "bin mean", "scaled true", "diff", "rms", "rms/true");
   for (int i_base = 0; i_base < nbins_2v; i_base += 4) {
     c->Divide(2,2);
     for (int i = i_base; i < std::min(i_base + 4, nbins_2v); ++i) {
@@ -687,7 +687,8 @@ int main(int, char**) {
       const double te = h_true_2v_dvv_norm->GetBinError  (i+1);
       const double d  = b - t;
       const double de = sqrt(be*be + te*te);
-      printf("%3i %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f +- %12.4f\n", i+1, b, be, t, te, b-t, sqrt(be*be + te*te), r, re);
+      const double statuncert = r / t;
+      printf("%3i %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f\n", i+1, b, be, t, te, b-t, sqrt(be*be + te*te), r, re, statuncert);
       if (d > 2*de)
         tl.SetTextColor(kRed);
       else if (d > de)

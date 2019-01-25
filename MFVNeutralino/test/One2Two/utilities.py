@@ -4,7 +4,7 @@ from JMTucker.MFVNeutralino.UtilitiesBase import *
 
 ####
 
-_version = 'v21m'
+_version = 'v22m'
 
 def cmd_merge_bquarks_nobquarks():
     for year in '2017',:
