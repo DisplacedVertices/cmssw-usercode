@@ -44,24 +44,20 @@ namespace mfv {
     float jetht;
     ushort ntracks;
     uchar nseltracks;
+
     std::vector<float> alljets_pt;
     std::vector<float> alljets_eta;
     std::vector<float> alljets_phi;
     std::vector<float> alljets_energy;
+    std::vector<uchar> alljets_ntracks;
     std::vector<float> alljets_bdisc;
     std::vector<uchar> alljets_hadronflavor;
+    std::vector<bool>  alljets_moved;
     size_t nalljets() const { return p_alljets_pt ? p_alljets_pt->size() : alljets_pt.size(); }
 
-    uchar npreseljets;
+    // JMTBAD "presel" on these two really doesn't mean anything other than they have pt > 20 and pass the jet id
+    uchar npreseljets; // JMTBAD this is actually # of jets with bdisc < veto
     uchar npreselbjets;
-    uchar nlightjets;
-    std::vector<float> jets_pt; // these are the moved jets
-    std::vector<float> jets_eta;
-    std::vector<float> jets_phi;
-    std::vector<float> jets_energy;
-    std::vector<uchar> jets_ntracks;
-    uchar njets() const { return p_jets_pt ? uchar(p_jets_pt->size()) : uchar(jets_pt.size()); }
-    uchar nbjets() const { return njets() - nlightjets; }
 
     TLorentzVector alljets_p4(size_t i) const {
       TLorentzVector p;
@@ -69,15 +65,6 @@ namespace mfv {
         p.SetPtEtaPhiE((*p_alljets_pt)[i], (*p_alljets_eta)[i], (*p_alljets_phi)[i], (*p_alljets_energy)[i]);
       else
         p.SetPtEtaPhiE(alljets_pt[i], alljets_eta[i], alljets_phi[i], alljets_energy[i]);
-      return p;
-    }
-
-    TLorentzVector jets_p4(size_t i) const {
-      TLorentzVector p;
-      if (p_jets_pt)
-        p.SetPtEtaPhiE((*p_jets_pt)[i], (*p_jets_eta)[i], (*p_jets_phi)[i], (*p_jets_energy)[i]);
-      else
-        p.SetPtEtaPhiE(jets_pt[i], jets_eta[i], jets_phi[i], jets_energy[i]);
       return p;
     }
 
@@ -110,13 +97,10 @@ namespace mfv {
     std::vector<float>* p_alljets_eta;
     std::vector<float>* p_alljets_phi;
     std::vector<float>* p_alljets_energy;
+    std::vector<uchar>* p_alljets_ntracks;
     std::vector<float>* p_alljets_bdisc;
     std::vector<uchar>* p_alljets_hadronflavor;
-    std::vector<float>* p_jets_pt;
-    std::vector<float>* p_jets_eta;
-    std::vector<float>* p_jets_phi;
-    std::vector<float>* p_jets_energy;
-    std::vector<uchar>* p_jets_ntracks;
+    std::vector<bool>* p_alljets_moved;
     std::vector<float>* p_vtxs_x;
     std::vector<float>* p_vtxs_y;
     std::vector<float>* p_vtxs_z;

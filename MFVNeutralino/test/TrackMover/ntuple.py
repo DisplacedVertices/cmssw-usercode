@@ -85,7 +85,6 @@ for icfg, cfg in enumerate(cfgs):
     getattr(process, 'mfvVerticesAuxPresel' + ex).jets_tracks_keys_only = True
 
     tree = cms.EDAnalyzer('MFVMovedTracksTreer',
-                          mfvJetTrackRefGetter,
                           event_src = cms.InputTag('mfvEvent'),
                           weight_src = cms.InputTag('mfvWeight'),
                           mover_src = cms.string(tracks_name),

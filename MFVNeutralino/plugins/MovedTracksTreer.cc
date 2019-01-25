@@ -15,6 +15,7 @@ public:
   explicit MFVMovedTracksTreer(const edm::ParameterSet&);
   void analyze(const edm::Event&, const edm::EventSetup&);
 
+private:
   const edm::EDGetTokenT<MFVEvent> event_token;
   const edm::EDGetTokenT<MFVVertexAuxCollection> vertices_token;
   const edm::EDGetTokenT<double> weight_token;
@@ -31,8 +32,6 @@ public:
   const unsigned njets_req;
   const unsigned nbjets_req;
   const bool for_mctruth;
-
-  mfv::JetTrackRefGetter jet_track_ref_getter;
 
   mfv::MovedTracksNtuple nt;
   TTree* tree;
@@ -54,12 +53,15 @@ MFVMovedTracksTreer::MFVMovedTracksTreer(const edm::ParameterSet& cfg)
     apply_presel(cfg.getParameter<bool>("apply_presel")),
     njets_req(cfg.getParameter<unsigned>("njets_req")),
     nbjets_req(cfg.getParameter<unsigned>("nbjets_req")),
-    for_mctruth(cfg.getParameter<bool>("for_mctruth")),
-    jet_track_ref_getter(cfg, consumesCollector())
+    for_mctruth(cfg.getParameter<bool>("for_mctruth"))
 {
   edm::Service<TFileService> fs;
   tree = fs->make<TTree>("t", "");
   nt.write_to_tree(tree);
+}
+
+namespace {
+  double mag2(double x, double y, double z, double w) { return x*x + y*y + z*z + w*w; }
 }
 
 void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
@@ -113,8 +115,10 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
     nt.alljets_eta.push_back(mevent->jet_eta[i]);
     nt.alljets_phi.push_back(mevent->jet_phi[i]);
     nt.alljets_energy.push_back(mevent->jet_energy[i]);
+    nt.alljets_ntracks.push_back(mevent->n_jet_tracks(i));
     nt.alljets_bdisc.push_back(mevent->jet_bdisc[i]);
     nt.alljets_hadronflavor.push_back(mevent->jet_hadron_flavor(i));
+    nt.alljets_moved.push_back(false); // set below
   }
 
   TVector3 move_vector;
@@ -138,17 +142,37 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
     nt.npreseljets  = *npreseljets;
     nt.npreselbjets = *npreselbjets;
 
-    nt.nlightjets = jets_used->size();
+    const size_t nalljets = nt.alljets_pt.size();
+    const size_t nmovedjets = jets_used->size() + bjets_used->size();
+    std::vector<int> whichs(nmovedjets, -1);
 
+    int ijet = -1;
     for (const pat::JetCollection* jets : { &*jets_used, &*bjets_used }) {
       for (const pat::Jet& jet : *jets) {
-        nt.jets_pt.push_back(jet.pt());
-        nt.jets_eta.push_back(jet.eta());
-        nt.jets_phi.push_back(jet.phi());
-        nt.jets_energy.push_back(jet.energy());
-        nt.jets_ntracks.push_back(jet_track_ref_getter.tracks(event, jet).size());
+        ++ijet;
+        double dist2min = 1;
+        int which = -1;
+
+        for (size_t j = 0; j < nalljets; ++j) {
+          const double dist2 = mag2(jet.pt()     - nt.alljets_pt[j],
+                                    jet.eta()    - nt.alljets_eta[j],
+                                    jet.phi()    - nt.alljets_phi[j],
+                                    jet.energy() - nt.alljets_energy[j]);
+          if (dist2 < dist2min) {
+            dist2min = dist2;
+            which = j;
+          }
+        }
+
+        assert(which != -1);
+        whichs[ijet] = which;
+        nt.alljets_moved[which] = true;
       }
     }
+
+    for (size_t i = 0; i < nmovedjets; ++i)
+      for (size_t j = i+1; j < nmovedjets; ++j)
+        assert(whichs[i] != whichs[j]);
 
     nt.move_z = move_vertex->at(2);
     nt.move_x = move_vertex->at(0) - mevent->bsx_at_z(nt.move_z);

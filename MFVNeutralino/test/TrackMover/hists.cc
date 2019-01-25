@@ -287,20 +287,24 @@ int main(int argc, char** argv) {
     double jet_drmax = 0;
     double jet_dravg = 0;
     double jet_sumntracks = 0;
-    const size_t n_jets = nt.p_jets_pt->size();
-    for (size_t ijet = 0; ijet < n_jets; ++ijet) {
-      jet_sume += nt.p_jets_energy->at(ijet);
-      jet_sumntracks += nt.p_jets_ntracks->at(ijet);
+    size_t nmovedjets = 0;
+    for (size_t ijet = 0; ijet < nt.nalljets(); ++ijet) {
+      if (nt.p_alljets_moved->at(ijet)) {
+        ++nmovedjets;
+        jet_sume += nt.p_alljets_energy->at(ijet);
+        jet_sumntracks += nt.p_alljets_ntracks->at(ijet);
 
-      for (size_t jjet = ijet+1; jjet < n_jets; ++jjet) {
-        const double dr = mag(double(nt.p_jets_eta->at(ijet) - nt.p_jets_eta->at(jjet)),
-                              TVector2::Phi_mpi_pi(nt.p_jets_phi->at(ijet) - nt.p_jets_phi->at(jjet)));
-        jet_dravg += dr;
-        if (dr > jet_drmax)
-          jet_drmax = dr;
+        for (size_t jjet = ijet+1; jjet < nt.nalljets(); ++jjet) {
+          if (nt.p_alljets_moved->at(jjet)) {
+            const double dr = nt.alljets_p4(ijet).DeltaR(nt.alljets_p4(jjet));
+            jet_dravg += dr;
+            if (dr > jet_drmax)
+              jet_drmax = dr;
+          }
+        }
       }
     }
-    jet_dravg /= n_jets * (n_jets - 1) / 2.;
+    jet_dravg /= nmovedjets * (nmovedjets - 1) / 2.;
 
     if (nt.jetht < 1200 ||
         nt.nalljets() < 4 ||
