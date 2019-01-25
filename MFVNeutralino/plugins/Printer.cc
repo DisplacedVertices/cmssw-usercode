@@ -146,8 +146,8 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
     printf("npv: %u\n", mevent->npv);
     printf("pv: ntracks: %u   sumpt2: %11.3g   coords: (%11.3g, %11.3g, %11.3g)   rho: %11.3g\n", mevent->pv_ntracks, mevent->pv_sumpt2, mevent->pvx, mevent->pvy, mevent->pvz, mevent->pv_rho());
     printf("njets: %i (>20GeV: %i)  (no pu l: %u  m: %u  t: %u)  jet_ht: %11.3g   pt of jet #3: %11.3g   pt of jet #4: %11.3g   pt of jet #5: %11.3g\n", mevent->njets(), mevent->njets(20), mevent->njetsnopu(0), mevent->njetsnopu(1), mevent->njetsnopu(2), mevent->jet_ht(), mevent->nth_jet_pt(3), mevent->nth_jet_pt(4), mevent->nth_jet_pt(5));
-    printf("jet tracks (n total = %lu)\n", mevent->n_jet_tracks());
-    for (size_t i = 0, ie = mevent->n_jet_tracks(); i < ie; ++i)
+    printf("jet tracks (n all = %lu)\n", mevent->n_jet_tracks_all());
+    for (size_t i = 0, ie = mevent->n_jet_tracks_all(); i < ie; ++i)
       printf("  jet %2i npxhits: %i npxlayers: %i nsthits: %i nstlayers: %i chi2/dof: %.4f qpt %11.3g +- %11.3g eta %11.3g +- %11.3g phi %11.3g +- %11.3g dxy %11.3g +- %11.3g dz %11.3g +- %11.3g\n",
              mevent->jet_track_which_jet[i],
              mevent->jet_track_npxhits(i), mevent->jet_track_npxlayers(i),

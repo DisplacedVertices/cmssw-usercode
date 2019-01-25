@@ -423,8 +423,9 @@ struct MFVEvent {
   int vertex_seed_track_nstlayers(int i) const { return vertex_seed_track_hp(i).nstlayers(); }
   int vertex_seed_track_nlayers(int i) const { return vertex_seed_track_hp(i).nlayers(); }
 
-  size_t n_jet_tracks() const { return jet_track_which_jet.size(); }
+  size_t n_jet_tracks_all() const { return jet_track_which_jet.size(); }
   std::vector<uchar> jet_track_which_jet;
+  size_t n_jet_tracks(const size_t i) const { return std::count(jet_track_which_jet.begin(), jet_track_which_jet.end(), i); }
   std::vector<float> jet_track_chi2dof;
   std::vector<float> jet_track_qpt;
   int jet_track_q(int i) const { return jet_track_qpt[i] > 0 ? 1 : -1; }
