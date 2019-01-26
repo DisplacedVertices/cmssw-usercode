@@ -27,9 +27,10 @@ def f2(f0,f1,cb,cbbar):
 
 
 def print_f2(ntk,f0,f1,cb,cbbar):
-    print 'ntk = %d: f0 = %.2f, f1 = %.2f, cb/cbbar = %.3f/%.3f = %.2f, nb/nbbar = %.2f, effb/effbbar = %.1f, f2 = %.2f' % (ntk, f0, f1, cb, cbbar, c(cb,cbbar), n(f0), e(f0,f1), f2(f0,f1,cb,cbbar))
+    print 'ntk = %d: f0 = %.3f, f1 = %.3f, cb/cbbar = %.3f/%.3f = %.2f, nb/nbbar = %.2f, effb/effbbar = %.1f, f2 = %.2f' % (ntk, f0, f1, cb, cbbar, c(cb,cbbar), n(f0), e(f0,f1), f2(f0,f1,cb,cbbar))
 
 if __name__ == '__main__':
-    print_f2(3, 0.17, 0.46, 0.588, 0.551)
-    print_f2(4, 0.17, 0.49, 0.567, 0.520)
-    print_f2(5, 0.17, 0.55, 0.539, 0.494)
+    print_f2(3, 0.176, 0.461, 0.584, 0.547)
+    print_f2(7, 0.176, 0.463, 0.574, 0.532)
+    print_f2(4, 0.176, 0.487, 0.563, 0.516)
+    print_f2(5, 0.176, 0.549, 0.535, 0.493)
