@@ -101,8 +101,8 @@ namespace mfv {
     std::vector<bool> tks_moved;
     std::vector<uchar> tks_vtx;
     size_t ntks() const { return p_tks_qpt ? p_tks_qpt->size() : tks_qpt.size(); }
-    float tks_pt(int i) const { return fabs(tks_qpt[i]); }
-    TVector3 tks_p(int i) const { TVector3 p; p.SetPtEtaPhi(tks_pt(i), tks_eta[i], tks_phi[i]); return p; }
+    float tks_pt(int i) const { return fabs(p_tks_qpt ? (*p_tks_qpt)[i] : tks_qpt[i]); }
+    TVector3 tks_p(int i) const { TVector3 p; p.SetPtEtaPhi(tks_pt(i), p_tks_eta ? (*p_tks_eta)[i] : tks_eta[i], p_tks_phi ? (*p_tks_phi)[i] : tks_phi[i]); return p; }
     void tks_hp_push_back(int npxh, int nsth, int npxl, int nstl) { tks_hp_.push_back(mfv::HitPattern(npxh, nsth, npxl, nstl).value); }
     mfv::HitPattern tks_hp(int i) const { return mfv::HitPattern(p_tks_hp_ ? (*p_tks_hp_)[i] : tks_hp_[i]); }
     int tks_npxhits(int i) const { return tks_hp(i).npxhits(); }

@@ -311,10 +311,10 @@ int main(int argc, char** argv) {
     for (size_t i = 0; i < n_raw_vtx; ++i) {
       vtxs_tracks[i] = nt.vtxs_tracks(i);
 
-      for (int j = 0; j < nt.vtxs_ntracks[i]; ++j) {
+      for (int j = 0; j < (*nt.p_vtxs_ntracks)[i]; ++j) {
         const int jtrk = vtxs_tracks[i][j];
         const TVector3 jtrkp = nt.tks_p(jtrk);
-        for (int k = j+1; k < nt.vtxs_ntracks[i]; ++k) {
+        for (int k = j+1; k < (*nt.p_vtxs_ntracks)[i]; ++k) {
           const int ktrk = vtxs_tracks[i][k];
           const TVector3 ktrkp = nt.tks_p(ktrk);
 

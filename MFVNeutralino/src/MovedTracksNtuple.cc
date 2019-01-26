@@ -15,9 +15,9 @@ namespace mfv {
   std::vector<int> MovedTracksNtuple::vtxs_tracks(int i) const {
     std::vector<int> r;
     for (size_t j = 0, je = ntks(); j < je; ++j)
-      if (tks_vtx[j] == i)
+      if ((p_tks_vtx ? (*p_tks_vtx)[j] : tks_vtx[j]) == i)
         r.push_back(j);
-    assert(r.size() == vtxs_ntracks[i]);
+    assert(r.size() == (p_vtxs_ntracks ? (*p_vtxs_ntracks)[i] : vtxs_ntracks[i]));
     return r;
   }
 
