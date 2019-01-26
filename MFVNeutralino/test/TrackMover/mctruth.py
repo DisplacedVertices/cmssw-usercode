@@ -10,6 +10,7 @@ process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
 process.mfvMovedTree = cms.EDAnalyzer('MFVMovedTracksTreer',
                                       event_src = cms.InputTag('mfvEvent'),
                                       weight_src = cms.InputTag('mfvWeight'),
+                                      sel_tracks_src = cms.InputTag(''),
                                       mover_src = cms.string(''),
                                       vertices_src = cms.InputTag('mfvVerticesAux'),
                                       max_dist2move = cms.double(-1),

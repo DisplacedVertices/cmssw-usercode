@@ -23,10 +23,11 @@ namespace mfv {
 
   MovedTracksNtuple::MovedTracksNtuple() {
     clear();
-    p_alljets_pt = p_alljets_eta = p_alljets_phi = p_alljets_energy = p_alljets_bdisc = p_vtxs_x = p_vtxs_y = p_vtxs_z = p_vtxs_pt = p_vtxs_theta = p_vtxs_phi = p_vtxs_mass = p_vtxs_tkonlymass = p_vtxs_bs2derr = p_tks_qpt = p_tks_eta = p_tks_phi = p_tks_dxy = p_tks_dz = p_tks_err_pt = p_tks_err_eta = p_tks_err_phi = p_tks_err_dxy = p_tks_err_dz = 0;
+    p_gen_daughter_pt = p_gen_daughter_eta = p_gen_daughter_phi = p_gen_daughter_mass = p_alljets_pt = p_alljets_eta = p_alljets_phi = p_alljets_energy = p_alljets_bdisc = p_vtxs_x = p_vtxs_y = p_vtxs_z = p_vtxs_pt = p_vtxs_theta = p_vtxs_phi = p_vtxs_mass = p_vtxs_tkonlymass = p_vtxs_bs2derr = p_tks_qpt = p_tks_eta = p_tks_phi = p_tks_dxy = p_tks_dz = p_tks_err_pt = p_tks_err_eta = p_tks_err_phi = p_tks_err_dxy = p_tks_err_dz = 0;
     p_tks_hp_ = 0;
     p_alljets_ntracks = p_alljets_hadronflavor = p_vtxs_ntracks = p_tks_vtx = 0;
     p_alljets_moved = p_tks_moved = 0;
+    p_gen_daughter_id = 0;
   }
 
   void MovedTracksNtuple::clear() {
@@ -43,6 +44,11 @@ namespace mfv {
         gen_lsp_decay[i*3+j] = 0;
     }
 
+    gen_daughter_pt.clear();
+    gen_daughter_eta.clear();
+    gen_daughter_phi.clear();
+    gen_daughter_mass.clear();
+    gen_daughter_id.clear();
     alljets_pt.clear();
     alljets_eta.clear();
     alljets_phi.clear();
@@ -88,6 +94,11 @@ namespace mfv {
     tree->Branch("gen_lsp_mass", gen_lsp_mass, "gen_lsp_mass[2]/F");
     tree->Branch("gen_lsp_decay", gen_lsp_decay, "gen_lsp_decay[6]/F");
     tree->Branch("gen_decay_type", gen_decay_type, "gen_decay_type[2]/b");
+    tree->Branch("gen_daughter_pt", &gen_daughter_pt);
+    tree->Branch("gen_daughter_eta", &gen_daughter_eta);
+    tree->Branch("gen_daughter_phi", &gen_daughter_phi);
+    tree->Branch("gen_daughter_mass", &gen_daughter_mass);
+    tree->Branch("gen_daughter_id", &gen_daughter_id);
     tree->Branch("pass_hlt", &pass_hlt);
     tree->Branch("bsx", &bsx);
     tree->Branch("bsy", &bsy);
@@ -154,6 +165,11 @@ namespace mfv {
     tree->SetBranchAddress("gen_lsp_mass", gen_lsp_mass);
     tree->SetBranchAddress("gen_lsp_decay", gen_lsp_decay);
     tree->SetBranchAddress("gen_decay_type", gen_decay_type);
+    tree->SetBranchAddress("gen_daughter_pt", &p_gen_daughter_pt);
+    tree->SetBranchAddress("gen_daughter_eta", &p_gen_daughter_eta);
+    tree->SetBranchAddress("gen_daughter_phi", &p_gen_daughter_phi);
+    tree->SetBranchAddress("gen_daughter_mass", &p_gen_daughter_mass);
+    tree->SetBranchAddress("gen_daughter_id", &p_gen_daughter_id);
     tree->SetBranchAddress("pass_hlt", &pass_hlt);
     tree->SetBranchAddress("bsx", &bsx);
     tree->SetBranchAddress("bsy", &bsy);

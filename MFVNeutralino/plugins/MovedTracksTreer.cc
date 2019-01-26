@@ -92,6 +92,13 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
       nt.gen_lsp_decay[i*3+0] = mevent->gen_lsp_decay[i*3+0] - mevent->bsx_at_z(z);
       nt.gen_lsp_decay[i*3+1] = mevent->gen_lsp_decay[i*3+1] - mevent->bsy_at_z(z);
     }
+    for (auto p : mevent->gen_daughters) {
+      nt.gen_daughter_pt.push_back(p.Pt());
+      nt.gen_daughter_eta.push_back(p.Eta());
+      nt.gen_daughter_phi.push_back(p.Phi());
+      nt.gen_daughter_mass.push_back(p.M());
+    }
+    nt.gen_daughter_id = mevent->gen_daughter_id;
   }
 
   static_assert(mfv::n_hlt_paths <= 8);
@@ -256,24 +263,25 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
     nt.vtxs_ntracks.push_back(v.ntracks());
     nt.vtxs_bs2derr.push_back(v.bs2derr);
 
-    for (size_t i = 0, ie = v.ntracks(); i < ie; ++i) {
-      double dist2min = 0.1;
-      int which = -1;
-      for (size_t j = 0, je = nt.ntks(); j < je; ++j) {
-        const double dist2 = mag2(v.track_qpt(i) - nt.tks_qpt[j],
-                                  v.track_eta[i] - nt.tks_eta[j],
-                                  v.track_phi[i] - nt.tks_phi[j]);
-        if (dist2 < dist2min) {
-          dist2min = dist2;
-          which = j;
+    if (!for_mctruth)
+      for (size_t i = 0, ie = v.ntracks(); i < ie; ++i) {
+        double dist2min = 0.1;
+        int which = -1;
+        for (size_t j = 0, je = nt.ntks(); j < je; ++j) {
+          const double dist2 = mag2(v.track_qpt(i) - nt.tks_qpt[j],
+                                    v.track_eta[i] - nt.tks_eta[j],
+                                    v.track_phi[i] - nt.tks_phi[j]);
+          if (dist2 < dist2min) {
+            dist2min = dist2;
+            which = j;
+          }
         }
-      }
 
-      assert(which != -1);
-      assert(nt.tks_vtx[which] == 255);
-      assert(iv < 255);
-      nt.tks_vtx[which] = iv;
-    }
+        assert(which != -1);
+        assert(nt.tks_vtx[which] == 255);
+        assert(iv < 255);
+        nt.tks_vtx[which] = iv;
+      }
   }
 
   if (apply_presel) {

@@ -26,6 +26,12 @@ namespace mfv {
     float gen_lsp_mass[2];
     float gen_lsp_decay[2*3];
     uchar gen_decay_type[2];
+    std::vector<float> gen_daughter_pt;
+    std::vector<float> gen_daughter_eta;
+    std::vector<float> gen_daughter_phi;
+    std::vector<float> gen_daughter_mass;
+    TLorentzVector gen_daughter_p4(int i) const { TLorentzVector v; v.SetPtEtaPhiM(p_gen_daughter_pt ? (*p_gen_daughter_pt)[i] : gen_daughter_pt[i], p_gen_daughter_eta ? (*p_gen_daughter_eta)[i] : gen_daughter_eta[i], p_gen_daughter_phi ? (*p_gen_daughter_phi)[i] : gen_daughter_phi[i], p_gen_daughter_mass ? (*p_gen_daughter_mass)[i] : gen_daughter_mass[i]); return v; }
+    std::vector<int> gen_daughter_id;
 
     uchar pass_hlt;
     float bsx;
@@ -120,6 +126,11 @@ namespace mfv {
     void read_from_tree(TTree* tree);
 
     // ugh
+    std::vector<float>* p_gen_daughter_pt;
+    std::vector<float>* p_gen_daughter_eta;
+    std::vector<float>* p_gen_daughter_phi;
+    std::vector<float>* p_gen_daughter_mass;
+    std::vector<int>* p_gen_daughter_id;
     std::vector<float>* p_alljets_pt;
     std::vector<float>* p_alljets_eta;
     std::vector<float>* p_alljets_phi;
