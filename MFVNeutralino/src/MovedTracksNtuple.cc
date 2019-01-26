@@ -12,6 +12,15 @@ namespace mfv {
 
   double MovedTracksNtuple::move_tau() const { return move_vector().Mag(); }
 
+  std::vector<int> MovedTracksNtuple::vtxs_tracks(int i) const {
+    std::vector<int> r;
+    for (size_t j = 0, je = ntks(); j < je; ++j)
+      if (tks_vtx[j] == i)
+        r.push_back(j);
+    assert(r.size() == vtxs_ntracks[i]);
+    return r;
+  }
+
   MovedTracksNtuple::MovedTracksNtuple() {
     clear();
     p_alljets_pt = p_alljets_eta = p_alljets_phi = p_alljets_energy = p_alljets_bdisc = p_vtxs_x = p_vtxs_y = p_vtxs_z = p_vtxs_pt = p_vtxs_theta = p_vtxs_phi = p_vtxs_mass = p_vtxs_tkonlymass = p_vtxs_bs2derr = p_tks_qpt = p_tks_eta = p_tks_phi = p_tks_dxy = p_tks_dz = p_tks_err_pt = p_tks_err_eta = p_tks_err_phi = p_tks_err_dxy = p_tks_err_dz = 0;
