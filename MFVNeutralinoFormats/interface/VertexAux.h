@@ -249,6 +249,8 @@ struct MFVVertexAux {
 
   double track_p(int i) const { return mag(track_px[i], track_py[i], track_pz[i]); }
   double track_pt(int i) const { return mag(track_px[i], track_py[i]); }
+  double track_qpt(int i) const { return track_q(i) * track_pt(i); }
+  double track_theta(int i) const { return atan2(track_pt(i), track_pz[i]); }
   double track_err(int i, int j) const { return sqrt(track_cov[i](j,j)); }
   double track_eta_err(int i) const { return track_err(i, reco::TrackBase::i_lambda) * track_p(i) / track_pt(i); }
   double track_phi_err(int i) const { return track_err(i, reco::TrackBase::i_phi); }
