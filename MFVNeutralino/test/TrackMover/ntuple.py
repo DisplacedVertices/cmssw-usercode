@@ -87,6 +87,7 @@ for icfg, cfg in enumerate(cfgs):
     tree = cms.EDAnalyzer('MFVMovedTracksTreer',
                           event_src = cms.InputTag('mfvEvent'),
                           weight_src = cms.InputTag('mfvWeight'),
+                          sel_tracks_src = cms.InputTag('mfvVertexTracks' + ex, 'seed'),
                           mover_src = cms.string(tracks_name),
                           vertices_src = cms.InputTag(auxes_name),
                           max_dist2move = cms.double(0.02),

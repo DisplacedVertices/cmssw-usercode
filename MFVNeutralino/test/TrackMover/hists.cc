@@ -111,7 +111,7 @@ int main(int argc, char** argv) {
     numdens("all")
   };
 
-  enum { k_movedist2, k_movedist3, k_movevectoreta, k_npv, k_pvx, k_pvy, k_pvz, k_pvrho, k_pvntracks, k_pvsumpt2, k_ht, k_ntracks, k_nseltracks, k_npreseljets, k_npreselbjets, k_jetsume, k_jetdrmax, k_jetdravg, k_jetsumntracks };
+  enum { k_movedist2, k_movedist3, k_movevectoreta, k_npv, k_pvx, k_pvy, k_pvz, k_pvrho, k_pvntracks, k_pvsumpt2, k_ht, k_ntracks, k_nmovedtracks, k_npreseljets, k_npreselbjets, k_jetsume, k_jetdrmax, k_jetdravg, k_jetsumntracks };
   for (numdens& nd : nds) {
     nd.book(k_movedist2, "movedist2", ";movement 2-dist;events/0.01 cm", 200, 0, 2);
     nd.book(k_movedist3, "movedist3", ";movement 3-dist;events/0.01 cm", 200, 0, 2);
@@ -125,7 +125,7 @@ int main(int argc, char** argv) {
     nd.book(k_pvsumpt2, "pvsumpt2", ";PV #Sigma p_{T}^{2} (GeV^{2});events/200 GeV^{2}", 200, 0, 40000);
     nd.book(k_ht, "ht", ";H_{T} (GeV);events/50 GeV", 50, 0, 2500);
     nd.book(k_ntracks, "ntracks", ";# tracks;events/10", 200, 0, 2000);
-    nd.book(k_nseltracks, "nseltracks", ";# selected tracks;events/2", 200, 0, 400);
+    nd.book(k_nmovedtracks, "nmovedtracks", ";# moved tracks;events/2", 200, 0, 400);
     nd.book(k_npreseljets, "npreseljets", ";# preselected jets;events/1", 20, 0, 20);
     nd.book(k_npreselbjets, "npreselbjets", ";# preselected b jets;events/1", 20, 0, 20);
     nd.book(k_jetsume, "jetsume", ";#Sigma jet energy (GeV);events/5 GeV", 200, 0, 1000);
@@ -139,13 +139,13 @@ int main(int argc, char** argv) {
   TH1D* h_vtxbs2derr[num_numdens] = {0};
   TH1D* h_vtxtkonlymass[num_numdens] = {0};
   TH1D* h_vtxs_mass[num_numdens] = {0};
-  TH1D* h_vtxanglemax[num_numdens] = {0};
+  //  TH1D* h_vtxanglemax[num_numdens] = {0};
   TH1D* h_vtxphi[num_numdens] = {0};
   TH1D* h_vtxtheta[num_numdens] = {0};
   TH1D* h_vtxpt[num_numdens] = {0};
   TH2D* h_vtxntracks_v_vtxbs2derr[num_numdens] = {0};
   TH2D* h_vtxtkonlymass_v_vtxbs2derr[num_numdens] = {0};
-  TH2D* h_vtxanglemax_v_vtxbs2derr[num_numdens] = {0};
+  //  TH2D* h_vtxanglemax_v_vtxbs2derr[num_numdens] = {0};
   TH2D* h_vtxphi_v_vtxbs2derr[num_numdens] = {0};
   TH2D* h_vtxtheta_v_vtxbs2derr[num_numdens] = {0};
   TH2D* h_vtxpt_v_vtxbs2derr[num_numdens] = {0};
@@ -158,13 +158,13 @@ int main(int argc, char** argv) {
     h_vtxbs2derr[i] = new TH1D(TString::Format("h_%i_vtxbs2derr", i), ";#sigma(d_{BV}) of largest vertex (cm);events/1 #mum", 500, 0, 0.05);
     h_vtxtkonlymass[i] = new TH1D(TString::Format("h_%i_vtxtkonlymass", i), ";track-only mass of largest vertex (GeV);events/1 GeV", 500, 0, 500);
     h_vtxs_mass[i] = new TH1D(TString::Format("h_%i_vtxs_mass", i), ";track+jets mass of largest vertex (GeV);events/1 GeV", 100, 0, 5000);
-    h_vtxanglemax[i] = new TH1D(TString::Format("h_%i_vtxanglemax", i), ";biggest angle between track in vertex and move vector;events/0.03", 100, 0, M_PI);
+    //    h_vtxanglemax[i] = new TH1D(TString::Format("h_%i_vtxanglemax", i), ";biggest angle between track in vertex and move vector;events/0.03", 100, 0, M_PI);
     h_vtxphi[i] = new TH1D(TString::Format("h_%i_vtxphi", i), ";tracks-plus-jets-by-ntracks #phi of largest vertex;events/0.06", 100, -M_PI, M_PI);
     h_vtxtheta[i] = new TH1D(TString::Format("h_%i_vtxtheta", i), ";tracks-plus-jets-by-ntracks #theta of largest vertex; events/0.03", 100, 0, M_PI);
     h_vtxpt[i] = new TH1D(TString::Format("h_%i_vtxpt", i), ";tracks-plus-jets-by-ntracks p_{T} of largest vertex (GeV);events/1", 500, 0, 500);
     h_vtxntracks_v_vtxbs2derr[i] = new TH2D(TString::Format("h_%i_vtxntracks_v_vtxbs2derr", i), ";#sigma(d_{BV}) of largest vertex (cm);# tracks in largest vertex", 500, 0, 0.05, 60, 0, 60);
     h_vtxtkonlymass_v_vtxbs2derr[i] = new TH2D(TString::Format("h_%i_vtxtkonlymass_v_vtxbs2derr", i), ";#sigma(d_{BV}) of largest vertex (cm);track-only mass of largest vertex (GeV)", 500, 0, 0.05, 500, 0, 500);
-    h_vtxanglemax_v_vtxbs2derr[i] = new TH2D(TString::Format("h_%i_vtxanglemax_v_vtxbs2derr", i), ";#sigma(d_{BV}) of largest vertex (cm);biggest angle between track in vertex and move vector", 500, 0, 0.05, 100, 0, M_PI);
+    //    h_vtxanglemax_v_vtxbs2derr[i] = new TH2D(TString::Format("h_%i_vtxanglemax_v_vtxbs2derr", i), ";#sigma(d_{BV}) of largest vertex (cm);biggest angle between track in vertex and move vector", 500, 0, 0.05, 100, 0, M_PI);
     h_vtxphi_v_vtxbs2derr[i] = new TH2D(TString::Format("h_%i_vtxphi_v_vtxbs2derr", i), ";#sigma(d_{BV}) of largest vertex (cm);tracks-plus-jets-by-ntracks #phi of largest vertex", 500, 0, 0.05, 100, -M_PI, M_PI);
     h_vtxtheta_v_vtxbs2derr[i] = new TH2D(TString::Format("h_%i_vtxtheta_v_vtxbs2derr", i), ";#sigma(d_{BV}) of largest vertex (cm);tracks-plus-jets-by-ntracks #theta of largest vertex", 500, 0, 0.05, 100, 0, M_PI);
     h_vtxpt_v_vtxbs2derr[i] = new TH2D(TString::Format("h_%i_vtxpt_v_vtxbs2derr", i), ";#sigma(d_{BV}) of largest vertex (cm);tracks-plus-jets-by-ntracks p_{T} of largest vertex (GeV)", 500, 0, 0.05, 500, 0, 500);
@@ -332,7 +332,7 @@ int main(int argc, char** argv) {
       Fill(nd(k_pvsumpt2)     .den, nt.pvsumpt2);
       Fill(nd(k_ht)           .den, nt.jetht);
       Fill(nd(k_ntracks)      .den, nt.ntracks);
-      Fill(nd(k_nseltracks)   .den, nt.nseltracks);
+      Fill(nd(k_nmovedtracks) .den, nt.nmovedtracks);
       Fill(nd(k_npreseljets)  .den, nt.npreseljets);
       Fill(nd(k_npreselbjets) .den, nt.npreselbjets);
       Fill(nd(k_jetsume)      .den, jet_sume);
@@ -374,7 +374,7 @@ int main(int argc, char** argv) {
                               nt.p_vtxs_y->at(ivtx)));
         h_vtxntracks[i]->Fill(nt.p_vtxs_ntracks->at(ivtx), w);
         h_vtxbs2derr[i]->Fill(nt.p_vtxs_bs2derr->at(ivtx), w);
-        h_vtxanglemax[i]->Fill(nt.p_vtxs_anglemax->at(ivtx), w);
+        //h_vtxanglemax[i]->Fill(nt.p_vtxs_anglemax->at(ivtx), w);
         h_vtxtkonlymass[i]->Fill(nt.p_vtxs_tkonlymass->at(ivtx), w);
         h_vtxs_mass[i]->Fill(nt.p_vtxs_mass->at(ivtx), w);
 	h_vtxphi[i]->Fill(nt.p_vtxs_phi->at(ivtx), w);
@@ -382,7 +382,7 @@ int main(int argc, char** argv) {
 	h_vtxpt[i]->Fill(nt.p_vtxs_pt->at(ivtx), w);
 	h_vtxntracks_v_vtxbs2derr[i]->Fill(nt.p_vtxs_bs2derr->at(ivtx), nt.p_vtxs_ntracks->at(ivtx), w);
 	h_vtxtkonlymass_v_vtxbs2derr[i]->Fill(nt.p_vtxs_bs2derr->at(ivtx), nt.p_vtxs_tkonlymass->at(ivtx), w);
-	h_vtxanglemax_v_vtxbs2derr[i]->Fill(nt.p_vtxs_bs2derr->at(ivtx), nt.p_vtxs_anglemax->at(ivtx), w);
+	//h_vtxanglemax_v_vtxbs2derr[i]->Fill(nt.p_vtxs_bs2derr->at(ivtx), nt.p_vtxs_anglemax->at(ivtx), w);
 	h_vtxphi_v_vtxbs2derr[i]->Fill(nt.p_vtxs_bs2derr->at(ivtx), nt.p_vtxs_phi->at(ivtx), w);
 	h_vtxtheta_v_vtxbs2derr[i]->Fill(nt.p_vtxs_bs2derr->at(ivtx), nt.p_vtxs_theta->at(ivtx), w);
 	h_vtxpt_v_vtxbs2derr[i]->Fill(nt.p_vtxs_bs2derr->at(ivtx), nt.p_vtxs_pt->at(ivtx), w);
@@ -416,7 +416,7 @@ int main(int argc, char** argv) {
         Fill(nd(k_pvsumpt2)     .num, nt.pvsumpt2);
         Fill(nd(k_ht)           .num, nt.jetht);
         Fill(nd(k_ntracks)      .num, nt.ntracks);
-        Fill(nd(k_nseltracks)   .num, nt.nseltracks);
+        Fill(nd(k_nmovedtracks) .num, nt.nmovedtracks);
         Fill(nd(k_npreseljets)  .num, nt.npreseljets);
         Fill(nd(k_npreselbjets) .num, nt.npreselbjets);
         Fill(nd(k_jetsume)      .num, jet_sume);

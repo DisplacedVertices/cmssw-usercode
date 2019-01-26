@@ -36,7 +36,7 @@ def get_em(fn, scale=1., alpha=1-0.6827):
         elif 'jetsume' == name or \
              'movedist2' == name or \
              'movedist3' == name or \
-             'nseltracks' == name or \
+             'nmovedtracks' == name or \
              'ntracks' == name or \
              'pvntracks' == name or \
              'pvrho' == name or \

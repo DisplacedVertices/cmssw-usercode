@@ -14,9 +14,10 @@ namespace mfv {
 
   MovedTracksNtuple::MovedTracksNtuple() {
     clear();
-    p_alljets_pt = p_alljets_eta = p_alljets_phi = p_alljets_energy = p_alljets_bdisc = p_vtxs_x = p_vtxs_y = p_vtxs_z = p_vtxs_pt = p_vtxs_theta = p_vtxs_phi = p_vtxs_mass = p_vtxs_tkonlymass = p_vtxs_anglemin = p_vtxs_anglemax = p_vtxs_bs2derr = 0;
-    p_alljets_ntracks = p_alljets_hadronflavor = p_vtxs_ntracks = 0;
-    p_alljets_moved = 0;
+    p_alljets_pt = p_alljets_eta = p_alljets_phi = p_alljets_energy = p_alljets_bdisc = p_vtxs_x = p_vtxs_y = p_vtxs_z = p_vtxs_pt = p_vtxs_theta = p_vtxs_phi = p_vtxs_mass = p_vtxs_tkonlymass = p_vtxs_bs2derr = p_tks_qpt = p_tks_eta = p_tks_phi = p_tks_dxy = p_tks_dz = p_tks_err_pt = p_tks_err_eta = p_tks_err_phi = p_tks_err_dxy = p_tks_err_dz = 0;
+    p_tks_hp_ = 0;
+    p_alljets_ntracks = p_alljets_hadronflavor = p_vtxs_ntracks = p_tks_vtx = 0;
+    p_alljets_moved = p_tks_moved = 0;
   }
 
   void MovedTracksNtuple::clear() {
@@ -24,7 +25,7 @@ namespace mfv {
     event = 0;
     weight = bsx = bsy = bsz = bsdxdz = bsdydz = pvx = pvy = pvz = pvsumpt2 = jetht = move_x = move_y = move_z = 0;
     gen_valid = 0;
-    pass_hlt = npu = npv = nseltracks = npreseljets = npreselbjets = 0;
+    pass_hlt = npu = npv = nmovedtracks = npreseljets = npreselbjets = 0;
     pvntracks = ntracks = 0;
     for (int i = 0; i < 2; ++i) {
       gen_lsp_pt[i] = gen_lsp_eta[i] = gen_lsp_phi[i] = gen_lsp_mass[i] = 0;
@@ -50,9 +51,20 @@ namespace mfv {
     vtxs_mass.clear();
     vtxs_tkonlymass.clear();
     vtxs_ntracks.clear();
-    vtxs_anglemin.clear();
-    vtxs_anglemax.clear();
     vtxs_bs2derr.clear();
+    tks_qpt.clear();
+    tks_eta.clear();
+    tks_phi.clear();
+    tks_dxy.clear();
+    tks_dz.clear();
+    tks_err_pt.clear();
+    tks_err_eta.clear();
+    tks_err_phi.clear();
+    tks_err_dxy.clear();
+    tks_err_dz.clear();
+    tks_hp_.clear();
+    tks_moved.clear();
+    tks_vtx.clear();
   }
 
   void MovedTracksNtuple::write_to_tree(TTree* tree) {
@@ -82,7 +94,7 @@ namespace mfv {
     tree->Branch("pvsumpt2", &pvsumpt2);
     tree->Branch("jetht", &jetht);
     tree->Branch("ntracks", &ntracks);
-    tree->Branch("nseltracks", &nseltracks);
+    tree->Branch("nmovedtracks", &nmovedtracks);
     tree->Branch("npreseljets", &npreseljets);
     tree->Branch("npreselbjets", &npreselbjets);
     tree->Branch("alljets_pt", &alljets_pt);
@@ -105,9 +117,20 @@ namespace mfv {
     tree->Branch("vtxs_mass", &vtxs_mass);
     tree->Branch("vtxs_tkonlymass", &vtxs_tkonlymass);
     tree->Branch("vtxs_ntracks", &vtxs_ntracks);
-    tree->Branch("vtxs_anglemin", &vtxs_anglemin);
-    tree->Branch("vtxs_anglemax", &vtxs_anglemax);
     tree->Branch("vtxs_bs2derr", &vtxs_bs2derr);
+    tree->Branch("tks_qpt", &tks_qpt);
+    tree->Branch("tks_eta", &tks_eta);
+    tree->Branch("tks_phi", &tks_phi);
+    tree->Branch("tks_dxy", &tks_dxy);
+    tree->Branch("tks_dz", &tks_dz);
+    tree->Branch("tks_err_pt", &tks_err_pt);
+    tree->Branch("tks_err_eta", &tks_err_eta);
+    tree->Branch("tks_err_phi", &tks_err_phi);
+    tree->Branch("tks_err_dxy", &tks_err_dxy);
+    tree->Branch("tks_err_dz", &tks_err_dz);
+    tree->Branch("tks_hp_", &tks_hp_);
+    tree->Branch("tks_moved", &tks_moved);
+    tree->Branch("tks_vtx", &tks_vtx);
   }
 
   void MovedTracksNtuple::read_from_tree(TTree* tree) {
@@ -137,7 +160,7 @@ namespace mfv {
     tree->SetBranchAddress("pvsumpt2", &pvsumpt2);
     tree->SetBranchAddress("jetht", &jetht);
     tree->SetBranchAddress("ntracks", &ntracks);
-    tree->SetBranchAddress("nseltracks", &nseltracks);
+    tree->SetBranchAddress("nmovedtracks", &nmovedtracks);
     tree->SetBranchAddress("npreseljets", &npreseljets);
     tree->SetBranchAddress("npreselbjets", &npreselbjets);
     tree->SetBranchAddress("alljets_pt", &p_alljets_pt);
@@ -160,8 +183,19 @@ namespace mfv {
     tree->SetBranchAddress("vtxs_mass", &p_vtxs_mass);
     tree->SetBranchAddress("vtxs_tkonlymass", &p_vtxs_tkonlymass);
     tree->SetBranchAddress("vtxs_ntracks", &p_vtxs_ntracks);
-    tree->SetBranchAddress("vtxs_anglemin", &p_vtxs_anglemin);
-    tree->SetBranchAddress("vtxs_anglemax", &p_vtxs_anglemax);
     tree->SetBranchAddress("vtxs_bs2derr", &p_vtxs_bs2derr);
+    tree->SetBranchAddress("tks_qpt", &p_tks_qpt);
+    tree->SetBranchAddress("tks_eta", &p_tks_eta);
+    tree->SetBranchAddress("tks_phi", &p_tks_phi);
+    tree->SetBranchAddress("tks_dxy", &p_tks_dxy);
+    tree->SetBranchAddress("tks_dz", &p_tks_dz);
+    tree->SetBranchAddress("tks_err_pt", &p_tks_err_pt);
+    tree->SetBranchAddress("tks_err_eta", &p_tks_err_eta);
+    tree->SetBranchAddress("tks_err_phi", &p_tks_err_phi);
+    tree->SetBranchAddress("tks_err_dxy", &p_tks_err_dxy);
+    tree->SetBranchAddress("tks_err_dz", &p_tks_err_dz);
+    tree->SetBranchAddress("tks_hp_", &p_tks_hp_);
+    tree->SetBranchAddress("tks_moved", &p_tks_moved);
+    tree->SetBranchAddress("tks_vtx", &p_tks_vtx);
   }
 }

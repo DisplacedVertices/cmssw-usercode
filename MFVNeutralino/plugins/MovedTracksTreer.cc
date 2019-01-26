@@ -5,7 +5,6 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "JMTucker/MFVNeutralino/interface/JetTrackRefGetter.h"
 #include "JMTucker/MFVNeutralino/interface/MovedTracksNtuple.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
@@ -19,6 +18,7 @@ private:
   const edm::EDGetTokenT<MFVEvent> event_token;
   const edm::EDGetTokenT<MFVVertexAuxCollection> vertices_token;
   const edm::EDGetTokenT<double> weight_token;
+  const edm::EDGetTokenT<std::vector<reco::TrackRef>> sel_tracks_token;
   const std::string mover_src;
   const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
   const edm::EDGetTokenT<reco::TrackCollection> moved_tracks_token;
@@ -41,6 +41,7 @@ MFVMovedTracksTreer::MFVMovedTracksTreer(const edm::ParameterSet& cfg)
   : event_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("event_src"))),
     vertices_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertices_src"))),
     weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
+    sel_tracks_token(consumes<std::vector<reco::TrackRef>>(cfg.getParameter<edm::InputTag>("sel_tracks_src"))),
     mover_src(cfg.getParameter<std::string>("mover_src")),
     tracks_token(consumes<reco::TrackCollection>(edm::InputTag(mover_src))),
     moved_tracks_token(consumes<reco::TrackCollection>(edm::InputTag(mover_src, "moved"))),
@@ -61,6 +62,7 @@ MFVMovedTracksTreer::MFVMovedTracksTreer(const edm::ParameterSet& cfg)
 }
 
 namespace {
+  double mag2(double x, double y, double z)           { return x*x + y*y + z*z; }
   double mag2(double x, double y, double z, double w) { return x*x + y*y + z*z + w*w; }
 }
 
@@ -125,10 +127,12 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
 
   if (!for_mctruth) {
     edm::Handle<reco::TrackCollection> tracks, moved_tracks;
+    edm::Handle<std::vector<reco::TrackRef>> sel_tracks;
     edm::Handle<int> npreseljets, npreselbjets;
     edm::Handle<pat::JetCollection> jets_used, bjets_used;
     edm::Handle<std::vector<double> > move_vertex;
     event.getByToken(tracks_token,       tracks);
+    event.getByToken(sel_tracks_token,   sel_tracks);
     event.getByToken(moved_tracks_token, moved_tracks);
     event.getByToken(npreseljets_token,  npreseljets);
     event.getByToken(npreselbjets_token, npreselbjets);
@@ -137,7 +141,47 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
     event.getByToken(move_vertex_token,  move_vertex);
 
     nt.ntracks = tracks->size();
-    nt.nseltracks = moved_tracks->size();
+    nt.nmovedtracks = moved_tracks->size();
+
+    auto tks_push_back = [&](const reco::Track& tk) {
+      nt.tks_qpt.push_back(tk.charge() * tk.pt());
+      nt.tks_eta.push_back(tk.eta());
+      nt.tks_phi.push_back(tk.phi());
+      nt.tks_dxy.push_back(tk.dxy(reco::TrackBase::Point(mevent->bsx_at_z(tk.vz()), mevent->bsy_at_z(tk.vz()), 0)));
+      nt.tks_dz.push_back(tk.dxy(reco::TrackBase::Point(mevent->pvx, mevent->pvy, mevent->pvz)));
+      nt.tks_err_pt.push_back(tk.ptError());
+      nt.tks_err_eta.push_back(tk.etaError());
+      nt.tks_err_phi.push_back(tk.phiError());
+      nt.tks_err_dxy.push_back(tk.dxyError());
+      nt.tks_err_dz.push_back(tk.dzError());
+      nt.tks_hp_.push_back(mfv::HitPattern(tk.hitPattern().numberOfValidPixelHits(), tk.hitPattern().numberOfValidStripHits(), tk.hitPattern().pixelLayersWithMeasurement(), tk.hitPattern().stripLayersWithMeasurement()).value);
+      nt.tks_moved.push_back(0);
+      nt.tks_vtx.push_back(255);
+    };
+
+    for (const reco::TrackRef& tk : *sel_tracks)
+      tks_push_back(*tk);
+
+    for (const reco::Track& tk : *moved_tracks) {
+      double dist2min = 0.1;
+      int which = -1;
+      for (size_t i = 0, ie = nt.ntks(); i < ie; ++i) {
+        const double dist2 = mag2(tk.charge() * tk.pt() - nt.tks_qpt[i],
+                                  tk.eta() - nt.tks_eta[i],
+                                  tk.phi() - nt.tks_phi[i]);
+        if (dist2 < dist2min) {
+          dist2min = dist2;
+          which = i;
+        }
+      }
+
+      if (which == -1) { // moved tracks don't have to be selected
+        tks_push_back(tk);
+        nt.tks_moved.back() = true;
+      }
+      else
+        nt.tks_moved[which] = true;
+    }
 
     nt.npreseljets  = *npreseljets;
     nt.npreselbjets = *npreselbjets;
@@ -150,7 +194,7 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
     for (const pat::JetCollection* jets : { &*jets_used, &*bjets_used }) {
       for (const pat::Jet& jet : *jets) {
         ++ijet;
-        double dist2min = 1;
+        double dist2min = 0.1;
         int which = -1;
 
         for (size_t j = 0; j < nalljets; ++j) {
@@ -186,7 +230,9 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
   edm::Handle<MFVVertexAuxCollection> vertices;
   event.getByToken(vertices_token, vertices);
 
+  int iv = -1;
   for (const MFVVertexAux& v : *vertices) {
+    ++iv;
     const double vx = v.x - mevent->bsx_at_z(v.z);
     const double vy = v.y - mevent->bsy_at_z(v.z);
     const double vz = v.z;
@@ -210,17 +256,24 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
     nt.vtxs_ntracks.push_back(v.ntracks());
     nt.vtxs_bs2derr.push_back(v.bs2derr);
 
-    double anglemin = 1e99;
-    double anglemax = -1e99;
-    for (size_t itk = 0, itke = v.ntracks(); itk < itke; ++itk) {
-      const TVector3 ptk(v.track_px[itk], v.track_py[itk], v.track_pz[itk]);
-      const double angle = ptk.Angle(move_vector);
-      if (angle < anglemin) anglemin = angle;
-      if (angle > anglemax) anglemax = angle;
-    }
+    for (size_t i = 0, ie = v.ntracks(); i < ie; ++i) {
+      double dist2min = 0.1;
+      int which = -1;
+      for (size_t j = 0, je = nt.ntks(); j < je; ++j) {
+        const double dist2 = mag2(v.track_qpt(i) - nt.tks_qpt[j],
+                                  v.track_eta[i] - nt.tks_eta[j],
+                                  v.track_phi[i] - nt.tks_phi[j]);
+        if (dist2 < dist2min) {
+          dist2min = dist2;
+          which = j;
+        }
+      }
 
-    nt.vtxs_anglemin.push_back(anglemin);
-    nt.vtxs_anglemax.push_back(anglemax);
+      assert(which != -1);
+      assert(nt.tks_vtx[which] == 255);
+      assert(iv < 255);
+      nt.tks_vtx[which] = iv;
+    }
   }
 
   if (apply_presel) {

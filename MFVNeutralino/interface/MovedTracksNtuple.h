@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "TLorentzVector.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/HitPattern.h"
 
 class TTree;
 class TVector3;
@@ -43,7 +44,7 @@ namespace mfv {
     float pvsumpt2;
     float jetht;
     ushort ntracks;
-    uchar nseltracks;
+    uchar nmovedtracks;
 
     std::vector<float> alljets_pt;
     std::vector<float> alljets_eta;
@@ -83,9 +84,32 @@ namespace mfv {
     std::vector<float> vtxs_mass;
     std::vector<float> vtxs_tkonlymass;
     std::vector<uchar> vtxs_ntracks;
-    std::vector<float> vtxs_anglemin; // tracks' angles are between momentum and the move vector
-    std::vector<float> vtxs_anglemax;
     std::vector<float> vtxs_bs2derr;
+
+    std::vector<float> tks_qpt;
+    std::vector<float> tks_eta;
+    std::vector<float> tks_phi;
+    std::vector<float> tks_dxy;
+    std::vector<float> tks_dz;
+    std::vector<float> tks_err_pt;
+    std::vector<float> tks_err_eta;
+    std::vector<float> tks_err_phi;
+    std::vector<float> tks_err_dxy;
+    std::vector<float> tks_err_dz;
+    std::vector<mfv::HitPattern::value_t> tks_hp_;
+    std::vector<bool> tks_moved;
+    std::vector<uchar> tks_vtx;
+    size_t ntks() const { return p_tks_qpt ? p_tks_qpt->size() : tks_qpt.size(); }
+    void tks_hp_push_back(int npxh, int nsth, int npxl, int nstl) { tks_hp_.push_back(mfv::HitPattern(npxh, nsth, npxl, nstl).value); }
+    mfv::HitPattern tks_hp(int i) const { return mfv::HitPattern(p_tks_hp_ ? (*p_tks_hp_)[i] : tks_hp_[i]); }
+    int tks_npxhits(int i) const { return tks_hp(i).npxhits(); }
+    int tks_nsthits(int i) const { return tks_hp(i).nsthits(); }
+    int tks_nhits(int i) const { return tks_hp(i).nhits(); }
+    int tks_npxlayers(int i) const { return tks_hp(i).npxlayers(); }
+    int tks_nstlayers(int i) const { return tks_hp(i).nstlayers(); }
+    int tks_nlayers(int i) const { return tks_hp(i).nlayers(); }
+
+    ////
 
     MovedTracksNtuple();
     void clear();
@@ -110,9 +134,20 @@ namespace mfv {
     std::vector<float>* p_vtxs_mass;
     std::vector<float>* p_vtxs_tkonlymass;
     std::vector<uchar>* p_vtxs_ntracks;
-    std::vector<float>* p_vtxs_anglemin;
-    std::vector<float>* p_vtxs_anglemax;
     std::vector<float>* p_vtxs_bs2derr;
+    std::vector<float>* p_tks_qpt;
+    std::vector<float>* p_tks_eta;
+    std::vector<float>* p_tks_phi;
+    std::vector<float>* p_tks_dxy;
+    std::vector<float>* p_tks_dz;
+    std::vector<float>* p_tks_err_pt;
+    std::vector<float>* p_tks_err_eta;
+    std::vector<float>* p_tks_err_phi;
+    std::vector<float>* p_tks_err_dxy;
+    std::vector<float>* p_tks_err_dz;
+    std::vector<mfv::HitPattern::value_t>* p_tks_hp_;
+    std::vector<bool>* p_tks_moved;
+    std::vector<uchar>* p_tks_vtx;
   };
 }
 

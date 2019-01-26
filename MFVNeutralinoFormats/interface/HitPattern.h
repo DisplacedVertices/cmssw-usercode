@@ -1,6 +1,8 @@
 #ifndef JMTucker_MFVNeutralinoFormats_interface_HitPattern_h
 #define JMTucker_MFVNeutralinoFormats_interface_HitPattern_h
 
+#include <cassert>
+
 namespace mfv {
   struct HitPattern {
     typedef unsigned short value_t;
