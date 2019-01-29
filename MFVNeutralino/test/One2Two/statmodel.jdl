@@ -8,6 +8,6 @@ stream_output = false
 stream_error  = false
 notification  = never
 should_transfer_files   = YES
-transfer_input_files = statmodel.exe,vpeffs_2017_v22m.root
+transfer_input_files = statmodel.exe,vpeffs_2017_v22m.root,$ENV(CMSSW_BASE)/lib/slc6_amd64_gcc630/libJMTuckerTools.so
 when_to_transfer_output = ON_EXIT
 Queue 36
