@@ -5,6 +5,7 @@
 #include <numeric>
 #include "TLorentzVector.h"
 #include "DataFormats/Math/interface/Point3D.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/HitPattern.h"
 
 namespace reco { class Track; class Candidate; }
 
@@ -40,27 +41,6 @@ struct MFVEvent {
 
   static bool test_bit(uint64_t v, size_t i) { return bool((v >> i) & 1); }
   static void set_bit(uint64_t& v, size_t i, bool x) { v ^= (-uint64_t(x) ^ v) & (1ULL << i); }
-
-  struct HitPattern {
-    typedef unsigned short value_t;
-    value_t value;
-    int npxhits() const { return value & 0x7; }
-    int nsthits() const { return (value >> 3) & 0x1f; }
-    int npxlayers() const { return (value >> 8) & 0x7; }
-    int nstlayers() const { return (value >> 11) & 0x1f; }
-    int nhits() const { return npxhits() + nsthits(); }
-    int nlayers() const { return npxlayers() + nstlayers(); }
-    HitPattern(value_t v) : value(v) {}
-    HitPattern(int npxh, int nsth, int npxl, int nstl) : value(_encode(npxh, nsth, npxl, nstl)) {}
-    static value_t _encode(int npxh, int nsth, int npxl, int nstl) {
-      assert(npxh >= 0 && nsth >= 0 && npxl >= 0 && nstl >= 0);
-      if (npxh > 7) npxh = 7;
-      if (nsth > 31) nsth = 31;
-      if (npxl > 7) npxl = 7;
-      if (nstl > 31) nstl = 31;
-      return (nstl << 11) | (npxl << 8) | (nsth << 3) | npxh;
-    }
-  };
 
   MFVEvent() {
     gen_valid = 0;
@@ -339,9 +319,9 @@ struct MFVEvent {
   std::vector<float> lep_dxy_err;
   std::vector<float> lep_dz_err;
   std::vector<float> lep_chi2dof;
-  std::vector<HitPattern::value_t> lep_hp_;
-  HitPattern lep_hp(int i) const { return HitPattern(lep_hp_[i]); }
-  void lep_hp_push_back(int npxh, int nsth, int npxl, int nstl) { lep_hp_.push_back(HitPattern(npxh, nsth, npxl, nstl).value); }
+  std::vector<mfv::HitPattern::value_t> lep_hp_;
+  mfv::HitPattern lep_hp(int i) const { return mfv::HitPattern(lep_hp_[i]); }
+  void lep_hp_push_back(int npxh, int nsth, int npxl, int nstl) { lep_hp_.push_back(mfv::HitPattern(npxh, nsth, npxl, nstl).value); }
   int lep_npxhits(int i) const { return lep_hp(i).npxhits(); }
   int lep_nsthits(int i) const { return lep_hp(i).nsthits(); }
   int lep_nhits(int i) const { return lep_hp(i).nhits(); }
@@ -413,9 +393,9 @@ struct MFVEvent {
   std::vector<float> vertex_seed_track_err_phi;
   std::vector<float> vertex_seed_track_err_dxy;
   std::vector<float> vertex_seed_track_err_dz;
-  std::vector<HitPattern::value_t> vertex_seed_track_hp_;
-  HitPattern vertex_seed_track_hp(int i) const { return HitPattern(vertex_seed_track_hp_[i]); }
-  void vertex_seed_track_hp_push_back(int npxh, int nsth, int npxl, int nstl) { vertex_seed_track_hp_.push_back(HitPattern(npxh, nsth, npxl, nstl).value); }
+  std::vector<mfv::HitPattern::value_t> vertex_seed_track_hp_;
+  mfv::HitPattern vertex_seed_track_hp(int i) const { return mfv::HitPattern(vertex_seed_track_hp_[i]); }
+  void vertex_seed_track_hp_push_back(int npxh, int nsth, int npxl, int nstl) { vertex_seed_track_hp_.push_back(mfv::HitPattern(npxh, nsth, npxl, nstl).value); }
   int vertex_seed_track_npxhits(int i) const { return vertex_seed_track_hp(i).npxhits(); }
   int vertex_seed_track_nsthits(int i) const { return vertex_seed_track_hp(i).nsthits(); }
   int vertex_seed_track_nhits(int i) const { return vertex_seed_track_hp(i).nhits(); }
@@ -423,8 +403,9 @@ struct MFVEvent {
   int vertex_seed_track_nstlayers(int i) const { return vertex_seed_track_hp(i).nstlayers(); }
   int vertex_seed_track_nlayers(int i) const { return vertex_seed_track_hp(i).nlayers(); }
 
-  size_t n_jet_tracks() const { return jet_track_which_jet.size(); }
+  size_t n_jet_tracks_all() const { return jet_track_which_jet.size(); }
   std::vector<uchar> jet_track_which_jet;
+  size_t n_jet_tracks(const size_t i) const { return std::count(jet_track_which_jet.begin(), jet_track_which_jet.end(), i); }
   std::vector<float> jet_track_chi2dof;
   std::vector<float> jet_track_qpt;
   int jet_track_q(int i) const { return jet_track_qpt[i] > 0 ? 1 : -1; }
@@ -438,9 +419,9 @@ struct MFVEvent {
   std::vector<float> jet_track_phi_err;
   std::vector<float> jet_track_dxy_err;
   std::vector<float> jet_track_dz_err;
-  std::vector<HitPattern::value_t> jet_track_hp_;
-  HitPattern jet_track_hp(int i) const { return HitPattern(jet_track_hp_[i]); }
-  void jet_track_hp_push_back(int npxh, int nsth, int npxl, int nstl) { jet_track_hp_.push_back(HitPattern(npxh, nsth, npxl, nstl).value); }
+  std::vector<mfv::HitPattern::value_t> jet_track_hp_;
+  mfv::HitPattern jet_track_hp(int i) const { return mfv::HitPattern(jet_track_hp_[i]); }
+  void jet_track_hp_push_back(int npxh, int nsth, int npxl, int nstl) { jet_track_hp_.push_back(mfv::HitPattern(npxh, nsth, npxl, nstl).value); }
   int jet_track_npxhits(int i) const { return jet_track_hp(i).npxhits(); }
   int jet_track_nsthits(int i) const { return jet_track_hp(i).nsthits(); }
   int jet_track_nhits(int i) const { return jet_track_hp(i).nhits(); }

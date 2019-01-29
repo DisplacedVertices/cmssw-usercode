@@ -7,12 +7,10 @@ file_event_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
 
-from JMTucker.MFVNeutralino.JetTrackRefGetter_cff import mfvJetTrackRefGetter
-
 process.mfvMovedTree = cms.EDAnalyzer('MFVMovedTracksTreer',
-                                      mfvJetTrackRefGetter,
                                       event_src = cms.InputTag('mfvEvent'),
                                       weight_src = cms.InputTag('mfvWeight'),
+                                      sel_tracks_src = cms.InputTag(''),
                                       mover_src = cms.string(''),
                                       vertices_src = cms.InputTag('mfvVerticesAux'),
                                       max_dist2move = cms.double(-1),

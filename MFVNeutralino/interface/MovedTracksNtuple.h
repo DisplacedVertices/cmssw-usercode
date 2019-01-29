@@ -3,6 +3,7 @@
 
 #include <vector>
 #include "TLorentzVector.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/HitPattern.h"
 
 class TTree;
 class TVector3;
@@ -25,6 +26,12 @@ namespace mfv {
     float gen_lsp_mass[2];
     float gen_lsp_decay[2*3];
     uchar gen_decay_type[2];
+    std::vector<float> gen_daughter_pt;
+    std::vector<float> gen_daughter_eta;
+    std::vector<float> gen_daughter_phi;
+    std::vector<float> gen_daughter_mass;
+    TLorentzVector gen_daughter_p4(int i) const { TLorentzVector v; v.SetPtEtaPhiM(p_gen_daughter_pt ? (*p_gen_daughter_pt)[i] : gen_daughter_pt[i], p_gen_daughter_eta ? (*p_gen_daughter_eta)[i] : gen_daughter_eta[i], p_gen_daughter_phi ? (*p_gen_daughter_phi)[i] : gen_daughter_phi[i], p_gen_daughter_mass ? (*p_gen_daughter_mass)[i] : gen_daughter_mass[i]); return v; }
+    std::vector<int> gen_daughter_id;
 
     uchar pass_hlt;
     float bsx;
@@ -43,25 +50,30 @@ namespace mfv {
     float pvsumpt2;
     float jetht;
     ushort ntracks;
-    uchar nseltracks;
+    uchar nmovedtracks;
+
     std::vector<float> alljets_pt;
     std::vector<float> alljets_eta;
     std::vector<float> alljets_phi;
     std::vector<float> alljets_energy;
+    std::vector<uchar> alljets_ntracks;
     std::vector<float> alljets_bdisc;
     std::vector<uchar> alljets_hadronflavor;
+    std::vector<bool>  alljets_moved;
     size_t nalljets() const { return p_alljets_pt ? p_alljets_pt->size() : alljets_pt.size(); }
 
-    uchar npreseljets;
+    // JMTBAD "presel" on these two really doesn't mean anything other than they have pt > 20 and pass the jet id
+    uchar npreseljets; // JMTBAD this is actually # of jets with bdisc < veto
     uchar npreselbjets;
-    uchar nlightjets;
-    std::vector<float> jets_pt; // these are the moved jets
-    std::vector<float> jets_eta;
-    std::vector<float> jets_phi;
-    std::vector<float> jets_energy;
-    std::vector<uchar> jets_ntracks;
-    uchar njets() const { return uchar(jets_pt.size()); }
-    uchar nbjets() const { return njets() - nlightjets; }
+
+    TLorentzVector alljets_p4(size_t i) const {
+      TLorentzVector p;
+      if (p_alljets_pt)
+        p.SetPtEtaPhiE((*p_alljets_pt)[i], (*p_alljets_eta)[i], (*p_alljets_phi)[i], (*p_alljets_energy)[i]);
+      else
+        p.SetPtEtaPhiE(alljets_pt[i], alljets_eta[i], alljets_phi[i], alljets_energy[i]);
+      return p;
+    }
 
     float move_x;
     float move_y;
@@ -78,9 +90,36 @@ namespace mfv {
     std::vector<float> vtxs_mass;
     std::vector<float> vtxs_tkonlymass;
     std::vector<uchar> vtxs_ntracks;
-    std::vector<float> vtxs_anglemin; // tracks' angles are between momentum and the move vector
-    std::vector<float> vtxs_anglemax;
     std::vector<float> vtxs_bs2derr;
+    std::vector<int> vtxs_tracks(int i) const;
+    size_t nvtxs() const { return p_vtxs_x ? p_vtxs_x->size() : vtxs_x.size(); }
+
+    std::vector<float> tks_qpt;
+    std::vector<float> tks_eta;
+    std::vector<float> tks_phi;
+    std::vector<float> tks_dxy;
+    std::vector<float> tks_dz;
+    std::vector<float> tks_err_pt;
+    std::vector<float> tks_err_eta;
+    std::vector<float> tks_err_phi;
+    std::vector<float> tks_err_dxy;
+    std::vector<float> tks_err_dz;
+    std::vector<mfv::HitPattern::value_t> tks_hp_;
+    std::vector<bool> tks_moved;
+    std::vector<uchar> tks_vtx;
+    size_t ntks() const { return p_tks_qpt ? p_tks_qpt->size() : tks_qpt.size(); }
+    float tks_pt(int i) const { return fabs(p_tks_qpt ? (*p_tks_qpt)[i] : tks_qpt[i]); }
+    TVector3 tks_p(int i) const { TVector3 p; p.SetPtEtaPhi(tks_pt(i), p_tks_eta ? (*p_tks_eta)[i] : tks_eta[i], p_tks_phi ? (*p_tks_phi)[i] : tks_phi[i]); return p; }
+    void tks_hp_push_back(int npxh, int nsth, int npxl, int nstl) { tks_hp_.push_back(mfv::HitPattern(npxh, nsth, npxl, nstl).value); }
+    mfv::HitPattern tks_hp(int i) const { return mfv::HitPattern(p_tks_hp_ ? (*p_tks_hp_)[i] : tks_hp_[i]); }
+    int tks_npxhits(int i) const { return tks_hp(i).npxhits(); }
+    int tks_nsthits(int i) const { return tks_hp(i).nsthits(); }
+    int tks_nhits(int i) const { return tks_hp(i).nhits(); }
+    int tks_npxlayers(int i) const { return tks_hp(i).npxlayers(); }
+    int tks_nstlayers(int i) const { return tks_hp(i).nstlayers(); }
+    int tks_nlayers(int i) const { return tks_hp(i).nlayers(); }
+
+    ////
 
     MovedTracksNtuple();
     void clear();
@@ -88,17 +127,19 @@ namespace mfv {
     void read_from_tree(TTree* tree);
 
     // ugh
+    std::vector<float>* p_gen_daughter_pt;
+    std::vector<float>* p_gen_daughter_eta;
+    std::vector<float>* p_gen_daughter_phi;
+    std::vector<float>* p_gen_daughter_mass;
+    std::vector<int>* p_gen_daughter_id;
     std::vector<float>* p_alljets_pt;
     std::vector<float>* p_alljets_eta;
     std::vector<float>* p_alljets_phi;
     std::vector<float>* p_alljets_energy;
+    std::vector<uchar>* p_alljets_ntracks;
     std::vector<float>* p_alljets_bdisc;
     std::vector<uchar>* p_alljets_hadronflavor;
-    std::vector<float>* p_jets_pt;
-    std::vector<float>* p_jets_eta;
-    std::vector<float>* p_jets_phi;
-    std::vector<float>* p_jets_energy;
-    std::vector<uchar>* p_jets_ntracks;
+    std::vector<bool>* p_alljets_moved;
     std::vector<float>* p_vtxs_x;
     std::vector<float>* p_vtxs_y;
     std::vector<float>* p_vtxs_z;
@@ -108,9 +149,20 @@ namespace mfv {
     std::vector<float>* p_vtxs_mass;
     std::vector<float>* p_vtxs_tkonlymass;
     std::vector<uchar>* p_vtxs_ntracks;
-    std::vector<float>* p_vtxs_anglemin;
-    std::vector<float>* p_vtxs_anglemax;
     std::vector<float>* p_vtxs_bs2derr;
+    std::vector<float>* p_tks_qpt;
+    std::vector<float>* p_tks_eta;
+    std::vector<float>* p_tks_phi;
+    std::vector<float>* p_tks_dxy;
+    std::vector<float>* p_tks_dz;
+    std::vector<float>* p_tks_err_pt;
+    std::vector<float>* p_tks_err_eta;
+    std::vector<float>* p_tks_err_phi;
+    std::vector<float>* p_tks_err_dxy;
+    std::vector<float>* p_tks_err_dz;
+    std::vector<mfv::HitPattern::value_t>* p_tks_hp_;
+    std::vector<bool>* p_tks_moved;
+    std::vector<uchar>* p_tks_vtx;
   };
 }
 

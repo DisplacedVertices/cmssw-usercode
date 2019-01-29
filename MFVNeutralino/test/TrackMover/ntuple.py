@@ -8,11 +8,11 @@ settings.is_mc = True
 settings.is_miniaod = True
 settings.event_filter = 'jets only novtx'
 
-version = settings.version + 'V1'
+version = settings.version + 'V2'
 
 cfgs = named_product(njets = [2,3],
                      nbjets = [0,1,2],
-                     nsigmadxy = [4.0,4.25,4.35,4.45], #, 4.1],
+                     nsigmadxy = [4.0],
                      angle = [0.2], #, 0.1, 0.3],
                      )
 
@@ -44,10 +44,9 @@ process.p = cms.Path(process.mfvEventFilterSequence * process.goodOfflinePrimary
 random_dict = {}
 
 for icfg, cfg in enumerate(cfgs):
-    nsigmadxy_name = ('nsig%.2f' % cfg.nsigmadxy).replace('.', 'p')
-    #angle_name = ('angle%.1f' % cfg.angle).replace('.', 'p')
-    #ex = '%i%i%s%s' % (cfg.njets, cfg.nbjets, nsigmadxy_name, angle_name)
-    ex = '%i%i%s' % (cfg.njets, cfg.nbjets, nsigmadxy_name)
+    ex = '%i%i' % (cfg.njets, cfg.nbjets)
+    #ex += ('nsig%.2f' % cfg.nsigmadxy).replace('.', 'p')
+    #ex += ('angle%.1f' % cfg.angle).replace('.', 'p')
 
     tracks_name = 'mfvMovedTracks' + ex
     auxes_name = 'mfvVerticesAux' + ex
@@ -86,9 +85,9 @@ for icfg, cfg in enumerate(cfgs):
     getattr(process, 'mfvVerticesAuxPresel' + ex).jets_tracks_keys_only = True
 
     tree = cms.EDAnalyzer('MFVMovedTracksTreer',
-                          mfvJetTrackRefGetter,
                           event_src = cms.InputTag('mfvEvent'),
                           weight_src = cms.InputTag('mfvWeight'),
+                          sel_tracks_src = cms.InputTag('mfvVertexTracks' + ex, 'seed'),
                           mover_src = cms.string(tracks_name),
                           vertices_src = cms.InputTag(auxes_name),
                           max_dist2move = cms.double(0.02),
