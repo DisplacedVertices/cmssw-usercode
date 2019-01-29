@@ -4,9 +4,9 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "SimDataFormats/GeneratorProducts/interface/LHERunInfoProduct.h"
 
-class LHEVersions : public edm::EDAnalyzer {
+class JMTLHERunInfo : public edm::EDAnalyzer {
 public:
-  explicit LHEVersions(const edm::ParameterSet&);
+  explicit JMTLHERunInfo(const edm::ParameterSet&);
 private:
   virtual void endRun(const edm::Run&, const edm::EventSetup&) override;
   virtual void analyze(const edm::Event&, const edm::EventSetup&) override {}
@@ -15,13 +15,13 @@ private:
   const std::string sep;
 };
 
-LHEVersions::LHEVersions(const edm::ParameterSet& cfg)
+JMTLHERunInfo::JMTLHERunInfo(const edm::ParameterSet& cfg)
   : token(consumes<LHERunInfoProduct, edm::InRun>(edm::InputTag("externalLHEProducer"))),
     sep("\n================================================================================\n")
 {}
 
-void LHEVersions::endRun(const edm::Run& run, edm::EventSetup const&) {
-  std::cout << "LHEVersions::beginRun run " << run.id().run() << "\n";
+void JMTLHERunInfo::endRun(const edm::Run& run, edm::EventSetup const&) {
+  std::cout << "JMTLHERunInfo::beginRun run " << run.id().run() << "\n";
 
   edm::Handle<LHERunInfoProduct> product;
   run.getByToken(token, product);
@@ -42,4 +42,4 @@ void LHEVersions::endRun(const edm::Run& run, edm::EventSetup const&) {
     std::cout << sep << "LHE comments empty\n";
 }
 
-DEFINE_FWK_MODULE(LHEVersions);
+DEFINE_FWK_MODULE(JMTLHERunInfo);
