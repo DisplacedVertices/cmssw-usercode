@@ -54,7 +54,7 @@ def cs_njobs(d):
     return int(open(os.path.join(d, 'njobs')).read())
 
 def cs_jobmap(d):
-    # takes fake job # (the jobnum in the cluster) tot he original real job number
+    # takes fake job # (the jobnum in the cluster) to the original real job number
     # same for original submission, for resubdirs can be different
     return dict(enumerate(open(os.path.join(d, 'cs_jobmap')).read().split()))
 
@@ -65,11 +65,18 @@ def cs_resubs(d):
     return glob(os.path.join(d, 'resub*'))
 
 def cs_clusters(d):
-    return [(p, int(open(os.path.join(p, 'cluster')).read())) for p in [d] + cs_resubs(d)]
+    return [(p, tuple(open(os.path.join(p, 'cluster')).read().strip().split())) for p in [d] + cs_resubs(d)]
+
+def _cluster2cmd(c):
+    if len(c) == 2:
+        return '%s -name %s' % c
+    else:
+        assert len(c) == 1
+        return c[0]
     
 def cs_kill(d):
     for _, c in cs_clusters(d):
-        os.system('condor_rm %s' % c)
+        os.system('condor_rm %s' % _cluster2cmd(c))
 
 def cs_logs(d):
     return glob(os.path.join(d, 'log.*'))
@@ -80,12 +87,11 @@ def cs_job_from_log(fn):
 def cs_jobs_running(d):
     jobs = []
     for subdir, cluster in cs_clusters(d):
-        cluster = str(cluster)
-        for line in sub_popen('condor_q -wide %s' % cluster).stdout:
-            if line.startswith(cluster):
+        for line in sub_popen('condor_q -wide %s' % _cluster2cmd(cluster)).stdout:
+            if line.startswith(str(cluster[0])+'.'):
                 j = int(line.split()[0].split('.')[1])
                 j = cs_realjob(subdir, j)
-                jobs.append(j)
+                jobs.append(int(j))
     return jobs
 
 def cs_primaryds(d):

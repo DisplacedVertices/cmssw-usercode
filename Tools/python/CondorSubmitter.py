@@ -149,6 +149,8 @@ def get(i): return _l[i]
     links_dir = os.path.abspath(crab_dirs_root('cs_links'))
     batch_name_allowed = string.ascii_letters + string.digits + '_'
 
+    schedds = ['lpcschedd%i.fnal.gov' % i for i in 1,2,3]
+
     def __init__(self,
                  batch_name,
                  ex = '',
@@ -227,6 +229,10 @@ def get(i): return _l[i]
 
         if not os.path.isdir(self.links_dir):
             os.mkdir(self.links_dir)
+        for schedd in self.schedds:
+            schedd_d = os.path.join(self.links_dir, schedd)
+            if not os.path.isdir(schedd_d):
+                os.mkdir(schedd_d)
 
         if not testing and self.get_proxy:
             #print 'CondorSubmitter init: checking proxies, might ask for password twice (but you can skip it with ^C if you know what you are doing).'
@@ -413,15 +419,21 @@ def get(i): return _l[i]
         try:
             submit_out, submit_ret = popen('condor_submit < cs_submit.jdl', return_exit_code=True)
             ok = False
+            schedd = None
+            for line in submit_out.split('\n'):
+                if line.startswith('Attempting to submit jobs to '):
+                    schedd = line.strip().replace('Attempting to submit jobs to ', '')
+                    assert schedd in cls.schedds
             for line in submit_out.split('\n'):
                 if 'job(s) submitted to cluster' in line:
                     ok = True
                     line = line.split()
                     try:
                         njobs_sub = int(line[0])
+                        assert line[-1][-1] == '.'
                         cluster = int(line[-1][:-1])
                         open('njobs', 'wt').write(str(njobs_sub))
-                        open('cluster', 'wt').write(str(cluster))
+                        open('cluster', 'wt').write('%i %s' % (cluster, schedd) if schedd else str(cluster))
                         if njobs_sub != njobs:
                             ok = False
                     except ValueError:
@@ -431,7 +443,10 @@ def get(i): return _l[i]
                 print submit_out
             else:
                 print '\x1b[92msuccess!\x1b[0m cluster', cluster
-                cluster_link = os.path.join(cls.links_dir, str(cluster))
+                if schedd:
+                    cluster_link = os.path.join(cls.links_dir, schedd, str(cluster))
+                else:
+                    cluster_link = os.path.join(cls.links_dir, str(cluster))
                 if os.path.islink(cluster_link):
                     print 'warning: clobbering old link:', os.readlink(cluster_link)
                     os.unlink(cluster_link)
