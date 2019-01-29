@@ -237,17 +237,15 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
   edm::Handle<MFVVertexAuxCollection> vertices;
   event.getByToken(vertices_token, vertices);
 
-  int iv = -1;
   for (const MFVVertexAux& v : *vertices) {
-    ++iv;
     const double vx = v.x - mevent->bsx_at_z(v.z);
     const double vy = v.y - mevent->bsy_at_z(v.z);
     const double vz = v.z;
 
     if (!for_mctruth) {
-      const double dist2move = pow(pow(vx - nt.move_x, 2) +
-                                   pow(vy - nt.move_y, 2) +
-                                   pow(vz - nt.move_z, 2), 0.5);
+      const double dist2move = sqrt(mag2(vx - nt.move_x,
+                                         vy - nt.move_y,
+                                         vz - nt.move_z));
       if (dist2move > max_dist2move)
         continue;
     }
@@ -279,6 +277,7 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
 
         assert(which != -1);
         assert(nt.tks_vtx[which] == 255);
+        const size_t iv = nt.nvtxs() - 1;
         assert(iv < 255);
         nt.tks_vtx[which] = iv;
       }

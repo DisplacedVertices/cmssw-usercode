@@ -92,6 +92,7 @@ namespace mfv {
     std::vector<uchar> vtxs_ntracks;
     std::vector<float> vtxs_bs2derr;
     std::vector<int> vtxs_tracks(int i) const;
+    size_t nvtxs() const { return p_vtxs_x ? p_vtxs_x->size() : vtxs_x.size(); }
 
     std::vector<float> tks_qpt;
     std::vector<float> tks_eta;
