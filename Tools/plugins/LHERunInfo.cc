@@ -1,7 +1,10 @@
 #include <iostream>
 #include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Run.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+#include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/LHERunInfoProduct.h"
 
 class JMTLHERunInfo : public edm::EDAnalyzer {
@@ -9,37 +12,98 @@ public:
   explicit JMTLHERunInfo(const edm::ParameterSet&);
 private:
   virtual void endRun(const edm::Run&, const edm::EventSetup&) override;
-  virtual void analyze(const edm::Event&, const edm::EventSetup&) override {}
+  virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
 
-  edm::EDGetTokenT<LHERunInfoProduct> token;
+  const edm::EDGetTokenT<LHERunInfoProduct> lhe_run_token;
+  const edm::EDGetTokenT<LHEEventProduct> lhe_event_token;
+  const edm::EDGetTokenT<GenEventInfoProduct> gen_event_token;
   const std::string sep;
 };
 
 JMTLHERunInfo::JMTLHERunInfo(const edm::ParameterSet& cfg)
-  : token(consumes<LHERunInfoProduct, edm::InRun>(edm::InputTag("externalLHEProducer"))),
+  : lhe_run_token(consumes<LHERunInfoProduct, edm::InRun>(edm::InputTag("externalLHEProducer"))),
+    lhe_event_token(consumes<LHEEventProduct>(edm::InputTag("externalLHEProducer"))),
+    gen_event_token(consumes<GenEventInfoProduct>(edm::InputTag("generator"))),
     sep("\n================================================================================\n")
 {}
 
 void JMTLHERunInfo::endRun(const edm::Run& run, edm::EventSetup const&) {
-  std::cout << "JMTLHERunInfo::beginRun run " << run.id().run() << "\n";
+  std::cout << sep << "JMTLHERunInfo::endRun run " << run.id().run() << "\n";
 
-  edm::Handle<LHERunInfoProduct> product;
-  run.getByToken(token, product);
+  edm::Handle<LHERunInfoProduct> lhe;
+  run.getByToken(lhe_run_token, lhe);
 
   int count = 0;
-  for (LHERunInfoProduct::headers_const_iterator it = product->headers_begin(); it != product->headers_end(); ++it, ++count) {
-    std::cout << sep << "LHE header #" << count << " tag " << it->tag() << " lines:\n";
+  for (LHERunInfoProduct::headers_const_iterator it = lhe->headers_begin(); it != lhe->headers_end(); ++it, ++count) {
+    std::cout << sep << "LHE run header #" << count << " tag " << it->tag() << " lines:\n";
     for (auto line : it->lines())
       std::cout << line;
   }
 
-  if (product->comments_size()) {
+  if (lhe->comments_size()) {
     count = 0;
-    for (LHERunInfoProduct::comments_const_iterator it = product->comments_begin(); it != product->comments_end(); ++it, ++count)
-      std::cout << sep << "LHE comment #" << count << " " << *it;
+    for (LHERunInfoProduct::comments_const_iterator it = lhe->comments_begin(); it != lhe->comments_end(); ++it, ++count)
+      std::cout << sep << "LHE run comment #" << count << " " << *it;
   }
   else
-    std::cout << sep << "LHE comments empty\n";
+    std::cout << sep << "LHE run comments empty\n";
+
+  std::cout << sep << "JMTLHERunInfo::endRun done\n";
+}
+
+void JMTLHERunInfo::analyze(const edm::Event& event, const edm::EventSetup&) {
+  std::cout << sep << "JMTLHERunInfo::analyze run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
+
+  edm::Handle<LHEEventProduct> lhe;
+  event.getByToken(lhe_event_token, lhe);
+
+  edm::Handle<GenEventInfoProduct> gen;
+  event.getByToken(gen_event_token, gen);
+
+  int count = 0;
+
+  if (lhe->comments_size())
+    for (LHERunInfoProduct::comments_const_iterator it = lhe->comments_begin(); it != lhe->comments_end(); ++it, ++count)
+      std::cout << sep << "LHE event comment #" << count << " " << *it;
+  else
+    std::cout << sep << "LHE event comments empty\n";
+
+  std::cout << sep << "LHE event stuff:\nnpLO = " << lhe->npLO() << " npNLO = " << lhe->npNLO() << " originalXWGTUP = " << lhe->originalXWGTUP() << "\n";
+
+  if (lhe->pdf())
+    std::cout << "PDF info: id = " << lhe->pdf()->id.first << "," << lhe->pdf()->id.second
+              << " x = " << lhe->pdf()->x.first << "," << lhe->pdf()->x.second
+              << " xPDF = " << lhe->pdf()->xPDF.first << "," << lhe->pdf()->xPDF.second
+              << " scalePDF = " << lhe->pdf()->scalePDF << "\n";
+  else
+    std::cout << "PDF info empty\n";
+
+  std::cout << "scales (#=" << lhe->scales().size() << "):\n";
+  count = 0;
+  for (auto s : lhe->scales())
+    std::cout << "  s #" << std::setw(4) << count++ << ": " << s << "\n";
+
+  std::cout << "weights (#=" << lhe->weights().size() << "):\n";
+  count = 0;
+  for (auto w : lhe->weights())
+    std::cout << "  w #" << std::setw(4) << count++ << ": '" << w.id << "' = " << w.wgt << "\n";
+
+  std::cout << sep << "GenEventInfo stuff:\nqScale = " << gen->qScale() << " alphaQCD = " << gen->alphaQCD() << " alphaQED = " << gen->alphaQED() << " nMEPartons = " << gen->nMEPartons() << " nMEPartonsFiltered = " << gen->nMEPartonsFiltered() << "\n";
+
+  if (gen->pdf())
+    std::cout << "PDF info: id = " << gen->pdf()->id.first << "," << gen->pdf()->id.second
+              << " x = " << gen->pdf()->x.first << "," << gen->pdf()->x.second
+              << " xPDF = " << gen->pdf()->xPDF.first << "," << gen->pdf()->xPDF.second
+              << " scalePDF = " << gen->pdf()->scalePDF << "\n";
+  else
+    std::cout << "PDF info empty\n";
+
+  std::cout << "weights (#=" << gen->weights().size() << "):\n";
+  count = 0;
+  for (auto w : gen->weights())
+    std::cout << "  w #" << std::setw(4) << count++ << ": " << w << "\n";
+
+  std::cout << sep << "JMTLHERunInfo::analyze done\n";
 }
 
 DEFINE_FWK_MODULE(JMTLHERunInfo);
