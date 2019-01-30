@@ -6,6 +6,7 @@ ROOT.TH1.AddDirectory(0)
 is_mc = True
 only_10pc = False
 year = '2017'
+version = 'v22m'
 
 mode = 'vary_eff'
 #mode = 'vary_dphi'
@@ -13,11 +14,11 @@ mode = 'vary_eff'
 
 set_style()
 ROOT.gStyle.SetOptFit(0)
-ps = plot_saver(plot_dir('compare_dvvc_%s%s%s_%s' % (mode, '' if is_mc else '_data', '_10pc' if only_10pc else '', year)), size=(700,700), root=False, log=False)
+ps = plot_saver(plot_dir('compare_dvvc_%s_%s%s%s_%s' % (version.capitalize(), mode, '' if is_mc else '_data', '_10pc' if only_10pc else '', year)), size=(700,700), root=False, log=False)
 
-fn1 = ['2v_from_jets%s_%s_3track_default_v21m.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_3track_%s_v21m.root' % ('' if is_mc else '_data', year, mode)]
-fn2 = ['2v_from_jets%s_%s_4track_default_v21m.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_4track_%s_v21m.root' % ('' if is_mc else '_data', year, mode)]
-fn3 = ['2v_from_jets%s_%s_5track_default_v21m.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_5track_%s_v21m.root' % ('' if is_mc else '_data', year, mode)]
+fn1 = ['2v_from_jets%s_%s_3track_default_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_3track_%s_%s.root' % ('' if is_mc else '_data', year, mode, version)]
+fn2 = ['2v_from_jets%s_%s_4track_default_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_4track_%s_%s.root' % ('' if is_mc else '_data', year, mode, version)]
+fn3 = ['2v_from_jets%s_%s_5track_default_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_5track_%s_%s.root' % ('' if is_mc else '_data', year, mode, version)]
 
 if mode == 'vary_eff':
     ls = ['vertexer efficiency', 'ntkseeds efficiency']

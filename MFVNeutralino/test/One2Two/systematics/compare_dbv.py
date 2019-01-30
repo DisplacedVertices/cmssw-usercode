@@ -15,7 +15,7 @@ if year == 2015:
     sns = 'qcdht0700sum_2015 qcdht1000sum_2015 qcdht1500sum_2015 qcdht2000sum_2015 ttbar_2015'.split()
     sc = ac.int_lumi_2015 * ac.scale_factor_2015
 
-ntk = 4
+ntk = 3
 tree_path = 'mfvMiniTree/t'
 if ntk == 3:
     tree_path = 'mfvMiniTreeNtk3/t'
@@ -24,7 +24,8 @@ if ntk == 4:
 
 bquarkpt = False
 
-path = 'MiniTreeV21m'
+version = 'v22m'
+path = 'MiniTree%s' % version.capitalize()
 if bquarkpt:
     path = 'MiniTreeV15_v4_bquarkpt'
 ps = plot_saver(plot_dir('compare_dbv_%s_%s_ntk%i' % (path, year, ntk)), size=(700,700), root=False)

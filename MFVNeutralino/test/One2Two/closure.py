@@ -5,11 +5,11 @@ ROOT.TH1.AddDirectory(0)
 is_mc = True
 only_10pc = False
 year = '2017'
-
+version = 'v22m'
 set_style()
-ps = plot_saver(plot_dir('closure%s%s_%s' % ('' if is_mc else '_data', '_10pc' if only_10pc else '', year)), size=(700,700), root=False, log=False)
+ps = plot_saver(plot_dir('closure_%s%s%s_%s' % (version.capitalize(), '' if is_mc else '_data', '_10pc' if only_10pc else '', year)), size=(700,700), root=False, log=False)
 
-fns = ['2v_from_jets%s_%s_3track_default_v21m.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_7track_default_v21m.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_4track_default_v21m.root' % ('' if is_mc else '_data', year), '2v_from_jets%s_%s_5track_default_v21m.root' % ('' if is_mc else '_data', year)]
+fns = ['2v_from_jets%s_%s_3track_default_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_7track_default_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_4track_default_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_5track_default_%s.root' % ('' if is_mc else '_data', year, version)]
 ntk = ['3-track', '4-track-3-track', '4-track', '5-track']
 names = ['3-track x 3-track', '4-track x 3-track', '4-track x 4-track', '#geq 5-track x #geq 5-track']
 
