@@ -7,9 +7,9 @@
 #include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
 #include "SimDataFormats/GeneratorProducts/interface/LHERunInfoProduct.h"
 
-class JMTLHERunInfo : public edm::EDAnalyzer {
+class JMTLHEGenInfo : public edm::EDAnalyzer {
 public:
-  explicit JMTLHERunInfo(const edm::ParameterSet&);
+  explicit JMTLHEGenInfo(const edm::ParameterSet&);
 private:
   virtual void endRun(const edm::Run&, const edm::EventSetup&) override;
   virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
@@ -20,15 +20,15 @@ private:
   const std::string sep;
 };
 
-JMTLHERunInfo::JMTLHERunInfo(const edm::ParameterSet& cfg)
+JMTLHEGenInfo::JMTLHEGenInfo(const edm::ParameterSet& cfg)
   : lhe_run_token(consumes<LHERunInfoProduct, edm::InRun>(edm::InputTag("externalLHEProducer"))),
     lhe_event_token(consumes<LHEEventProduct>(edm::InputTag("externalLHEProducer"))),
     gen_event_token(consumes<GenEventInfoProduct>(edm::InputTag("generator"))),
     sep("\n================================================================================\n")
 {}
 
-void JMTLHERunInfo::endRun(const edm::Run& run, edm::EventSetup const&) {
-  std::cout << sep << "JMTLHERunInfo::endRun run " << run.id().run() << "\n";
+void JMTLHEGenInfo::endRun(const edm::Run& run, edm::EventSetup const&) {
+  std::cout << sep << "JMTLHEGenInfo::endRun run " << run.id().run() << "\n";
 
   edm::Handle<LHERunInfoProduct> lhe;
   run.getByToken(lhe_run_token, lhe);
@@ -48,11 +48,11 @@ void JMTLHERunInfo::endRun(const edm::Run& run, edm::EventSetup const&) {
   else
     std::cout << sep << "LHE run comments empty\n";
 
-  std::cout << sep << "JMTLHERunInfo::endRun done\n";
+  std::cout << sep << "JMTLHEGenInfo::endRun done\n";
 }
 
-void JMTLHERunInfo::analyze(const edm::Event& event, const edm::EventSetup&) {
-  std::cout << sep << "JMTLHERunInfo::analyze run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
+void JMTLHEGenInfo::analyze(const edm::Event& event, const edm::EventSetup&) {
+  std::cout << sep << "JMTLHEGenInfo::analyze run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
 
   edm::Handle<LHEEventProduct> lhe;
   event.getByToken(lhe_event_token, lhe);
@@ -103,7 +103,7 @@ void JMTLHERunInfo::analyze(const edm::Event& event, const edm::EventSetup&) {
   for (auto w : gen->weights())
     std::cout << "  w #" << std::setw(4) << count++ << ": " << w << "\n";
 
-  std::cout << sep << "JMTLHERunInfo::analyze done\n";
+  std::cout << sep << "JMTLHEGenInfo::analyze done\n";
 }
 
-DEFINE_FWK_MODULE(JMTLHERunInfo);
+DEFINE_FWK_MODULE(JMTLHEGenInfo);
