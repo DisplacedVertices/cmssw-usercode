@@ -135,7 +135,7 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 
     if (!event.isRealData()) {
       if (weight_gen || weight_gen_sign_only) {
-        assert(mevent->gen_weightprod == 0 || (mevent->gen_weight - mevent->gen_weightprod)/mevent->gen_weightprod < 1e-3); // JMTBAD
+        //assert(mevent->gen_weightprod == 0 || (mevent->gen_weight - mevent->gen_weightprod)/mevent->gen_weightprod < 1e-3); // JMTBAD
         if (prints)
           printf("gen_weight: %g  weightprod: %g  ", mevent->gen_weight, mevent->gen_weightprod);
         if (histos) {
