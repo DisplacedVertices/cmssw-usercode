@@ -86,7 +86,7 @@ void JMTLHEGenInfo::analyze(const edm::Event& event, const edm::EventSetup&) {
   std::cout << "weights (#=" << lhe->weights().size() << "):\n";
   count = 0;
   for (auto w : lhe->weights())
-    std::cout << "  w #" << std::setw(4) << count++ << ": '" << w.id << "' = " << w.wgt << "\n";
+    std::cout << "  w #" << std::setw(4) << count++ << ": '" << w.id << "' = " << w.wgt << " (" << w.wgt / lhe->originalXWGTUP() << ")\n";
 
   std::cout << sep << "GenEventInfo stuff:\nqScale = " << gen->qScale() << " alphaQCD = " << gen->alphaQCD() << " alphaQED = " << gen->alphaQED() << " nMEPartons = " << gen->nMEPartons() << " nMEPartonsFiltered = " << gen->nMEPartonsFiltered() << "\n";
 
