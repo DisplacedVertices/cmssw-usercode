@@ -111,7 +111,7 @@ int main(int argc, char** argv) {
     numdens("all")
   };
 
-  enum { k_movedist2, k_movedist3, k_movevectoreta, k_npv, k_pvx, k_pvy, k_pvz, k_pvrho, k_pvntracks, k_pvsumpt2, k_ht, k_ntracks, k_nmovedtracks, k_npreseljets, k_npreselbjets, k_jetsume, k_jetdrmax, k_jetdravg, k_jetsumntracks };
+  enum { k_movedist2, k_movedist3, k_movevectoreta, k_npv, k_pvx, k_pvy, k_pvz, k_pvrho, k_pvntracks, k_pvsumpt2, k_ht, k_ntracks, k_nmovedtracks, k_npreseljets, k_npreselbjets, k_jetsume, k_jetdrmax, k_jetdravg, k_jetsumntracks, k_nvtxs }; 
   for (numdens& nd : nds) {
     nd.book(k_movedist2, "movedist2", ";movement 2-dist;events/0.01 cm", 200, 0, 2);
     nd.book(k_movedist3, "movedist3", ";movement 3-dist;events/0.01 cm", 200, 0, 2);
@@ -132,6 +132,7 @@ int main(int argc, char** argv) {
     nd.book(k_jetdrmax, "jetdrmax", ";max jet #Delta R;events/0.1", 70, 0, 7);
     nd.book(k_jetdravg, "jetdravg", ";avg jet #Delta R;events/0.1", 70, 0, 7);
     nd.book(k_jetsumntracks, "jetsumntracks", ";#Sigma jet # tracks;events/5", 200, 0, 1000);
+    nd.book(k_nvtxs, "nvtxs", ";number of vertices;events/1", 8, 0, 8);
   }
 
   TH1D* h_vtxdbv[num_numdens] = {0};
@@ -152,11 +153,25 @@ int main(int argc, char** argv) {
   TH2D* h_vtxdbv_v_vtxbs2derr[num_numdens] = {0};
   TH2D* h_etamovevec_v_vtxbs2derr[num_numdens] = {0};
 
+  TH1D* h_tks_pt[num_numdens] = {0};
+  TH1D* h_tks_eta[num_numdens] = {0};
+  TH1D* h_tks_phi[num_numdens] = {0};
+  TH1D* h_tks_dxy[num_numdens] = {0};
+  TH1D* h_tks_dz[num_numdens] = {0};
+  TH1D* h_tks_err_pt[num_numdens] = {0};
+  TH1D* h_tks_err_eta[num_numdens] = {0};
+  TH1D* h_tks_err_phi[num_numdens] = {0};
+  TH1D* h_tks_err_dxy[num_numdens] = {0};
+  TH1D* h_tks_err_dz[num_numdens] = {0};
+  TH1D* h_tks_npxlayers[num_numdens] = {0};
+  TH1D* h_tks_nstlayers[num_numdens] = {0};
+  TH1D* h_tks_vtx[num_numdens] = {0};
+
   for (int i = 0; i < num_numdens; ++i) {
     h_vtxdbv[i] = new TH1D(TString::Format("h_%i_vtxdbv", i), ";d_{BV} of largest vertex (cm);events/50 #mum", 400, 0, 2);
     h_vtxntracks[i] = new TH1D(TString::Format("h_%i_vtxntracks", i), ";# tracks in largest vertex;events/1", 60, 0, 60);
     h_vtxbs2derr[i] = new TH1D(TString::Format("h_%i_vtxbs2derr", i), ";#sigma(d_{BV}) of largest vertex (cm);events/1 #mum", 500, 0, 0.05);
-    h_vtxtkonlymass[i] = new TH1D(TString::Format("h_%i_vtxtkonlymass", i), ";track-only mass of largest vertex (GeV);events/1 GeV", 500, 0, 500);
+    h_vtxtkonlymass[i] = new TH1D(TString::Format("h_%i_vtxtkonlymass", i), ";track-only mass of largest vertex (GeV);events/1 GeV", 50, 0, 500);
     h_vtxs_mass[i] = new TH1D(TString::Format("h_%i_vtxs_mass", i), ";track+jets mass of largest vertex (GeV);events/1 GeV", 100, 0, 5000);
     h_vtxanglemax[i] = new TH1D(TString::Format("h_%i_vtxanglemax", i), ";biggest angle between pairs of tracks in vertex;events/0.03", 100, 0, M_PI);
     h_vtxphi[i] = new TH1D(TString::Format("h_%i_vtxphi", i), ";tracks-plus-jets-by-ntracks #phi of largest vertex;events/0.06", 100, -M_PI, M_PI);
@@ -170,6 +185,20 @@ int main(int argc, char** argv) {
     h_vtxpt_v_vtxbs2derr[i] = new TH2D(TString::Format("h_%i_vtxpt_v_vtxbs2derr", i), ";#sigma(d_{BV}) of largest vertex (cm);tracks-plus-jets-by-ntracks p_{T} of largest vertex (GeV)", 500, 0, 0.05, 500, 0, 500);
     h_vtxdbv_v_vtxbs2derr[i] = new TH2D(TString::Format("h_%i_vtxdbv_v_vtxbs2derr", i), ";#sigma(d_{BV}) of largest vertex (cm);d_{BV} of largest vertex (cm)", 500, 0, 0.05, 400, 0, 2);
     h_etamovevec_v_vtxbs2derr[i] = new TH2D(TString::Format("h_%i_etamovevec_v_vtxbs2derr", i), ";#sigma(d_{BV}) of largest vertex (cm);eta of move vector", 500, 0, 0.05, 100, -4, 4);
+
+    h_tks_pt[i] = new TH1D(TString::Format("h_%i_tks_pt", i), ";moved and selected track p_{T} (GeV);tracks/1 GeV", 200, 0, 200);
+    h_tks_eta[i] = new TH1D(TString::Format("h_%i_tks_eta", i), ";moved and selected track #eta;tracks/0.16", 50, -4, 4);
+    h_tks_phi[i] = new TH1D(TString::Format("h_%i_tks_phi", i), ";moved and selected track #phi;tracks/0.13", 50, -M_PI, M_PI);
+    h_tks_dxy[i] = new TH1D(TString::Format("h_%i_tks_dxy", i), ";moved and selected track dxy;tracks/40 #mum", 100, 0, 0.4);
+    h_tks_dz[i] = new TH1D(TString::Format("h_%i_tks_dz", i), ";moved and selected track dz;tracks/100 #mum", 100, 0, 1);
+    h_tks_err_pt[i] = new TH1D(TString::Format("h_%i_tks_err_pt", i), ";moved and selected track #sigma(p_{T});tracks/0.01", 200, 0, 2);
+    h_tks_err_eta[i] = new TH1D(TString::Format("h_%i_tks_err_eta", i), ";moved and selected track #sigma(#eta);tracks/0.0001", 200, 0, 0.02);
+    h_tks_err_phi[i] = new TH1D(TString::Format("h_%i_tks_err_phi", i), ";moved and selected track #sigma(#phi);tracks/0.0001", 200, 0, 0.02);
+    h_tks_err_dxy[i] = new TH1D(TString::Format("h_%i_tks_err_dxy", i), ";moved and selected track #sigma(dxy) (cm);tracks/0.001 cm", 100, 0, 0.1);
+    h_tks_err_dz[i] = new TH1D(TString::Format("h_%i_tks_err_dz", i), ";moved and selected track #sigma(dz) (cm);tracks/0.001 cm", 100, 0, 0.1);
+    h_tks_npxlayers[i] = new TH1D(TString::Format("h_%i_tks_npxlayers", i), ";moved and selected track npxlayers;tracks/1", 20, 0, 20);
+    h_tks_nstlayers[i] = new TH1D(TString::Format("h_%i_tks_nstlayers", i), ";moved and selected track nstlayers;tracks/1", 20, 0, 20);
+    h_tks_vtx[i] = new TH1D(TString::Format("h_%i_tks_vtx", i), ";moved and selected track vertex-association index;tracks/1", 255, 0, 255);
   }
 
   double den = 0;
@@ -358,6 +387,7 @@ int main(int argc, char** argv) {
       Fill(nd(k_jetdrmax)     .den, jet_drmax);
       Fill(nd(k_jetdravg)     .den, jet_dravg);
       Fill(nd(k_jetsumntracks).den, jet_sumntracks);
+      Fill(nd(k_nvtxs)        .den, nt.nvtxs());
     }
 
     ++nden;
@@ -442,6 +472,23 @@ int main(int argc, char** argv) {
         Fill(nd(k_jetdrmax)     .num, jet_drmax);
         Fill(nd(k_jetdravg)     .num, jet_dravg);
         Fill(nd(k_jetsumntracks).num, jet_sumntracks);
+        Fill(nd(k_nvtxs)        .num, nt.nvtxs());
+
+	for (size_t itk = 0; itk < nt.ntks(); itk++) {
+	  h_tks_pt[i]->Fill(nt.tks_pt(itk), w);
+	  h_tks_eta[i]->Fill(nt.p_tks_eta->at(itk), w);
+	  h_tks_phi[i]->Fill(nt.p_tks_phi->at(itk), w);
+	  h_tks_dxy[i]->Fill(nt.p_tks_dxy->at(itk), w);
+	  h_tks_dz[i]->Fill(nt.p_tks_dz->at(itk), w);
+	  h_tks_err_pt[i]->Fill(nt.p_tks_err_pt->at(itk), w);
+	  h_tks_err_eta[i]->Fill(nt.p_tks_err_eta->at(itk), w);
+	  h_tks_err_phi[i]->Fill(nt.p_tks_phi->at(itk), w);
+	  h_tks_err_dxy[i]->Fill(nt.p_tks_dxy->at(itk), w);
+	  h_tks_err_dz[i]->Fill(nt.p_tks_dz->at(itk), w);
+	  h_tks_npxlayers[i]->Fill(nt.tks_npxlayers(itk), w);
+	  h_tks_nstlayers[i]->Fill(nt.tks_nstlayers(itk), w);
+	  h_tks_vtx[i]->Fill(nt.p_tks_vtx->at(itk), w);
+	}
       }
     }
   }
