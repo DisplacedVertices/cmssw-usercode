@@ -24,19 +24,20 @@ private:
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
   const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
-
   const bool assert_diag_cov;
+  const bool track_sel;
 
   TTree* tree;
   TrackingTree nt;
 };
 
 TrackingTreer::TrackingTreer(const edm::ParameterSet& cfg)
-  : pileup_token(consumes<std::vector<PileupSummaryInfo>>(edm::InputTag("addPileupInfo"))),
+  : pileup_token(consumes<std::vector<PileupSummaryInfo>>(cfg.getParameter<edm::InputTag>("pileup_info_src"))),
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     primary_vertices_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertices_src"))),
     tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("tracks_src"))),
-    assert_diag_cov(cfg.getParameter<bool>("assert_diag_cov"))
+    assert_diag_cov(cfg.getParameter<bool>("assert_diag_cov")),
+    track_sel(cfg.getParameter<bool>("track_sel"))
 {
   edm::Service<TFileService> fs;
   tree = fs->make<TTree>("t", "");
@@ -121,6 +122,9 @@ void TrackingTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   TrackerSpaceExtents tracker_extents;
 
   for (const reco::Track& tk : *tracks) {
+    if (track_sel && (tk.pt() < 1 || tk.hitPattern().pixelLayersWithMeasurement() < 2 || tk.hitPattern().stripLayersWithMeasurement() < 6))
+      continue;
+
     nt.tk_chi2dof.push_back(tk.normalizedChi2());
     nt.tk_qpt.push_back(tk.charge() * tk.pt());
     nt.tk_eta.push_back(tk.eta());

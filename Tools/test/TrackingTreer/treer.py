@@ -1,69 +1,56 @@
-import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-is_mc = True
+settings = CMSSWSettings()
+settings.is_mc = True
 
-silence_messages(process, ['HLTConfigData'])
-geometry_etc(process, '76X_mcRun2_asymptotic_v12' if is_mc else '76X_dataRun2_v15')
-#report_every(process, 1)
-#process.options.wantSummary = True
-process.maxEvents.input = 100
+max_events(process, 1000)
+report_every(process, 1000000)
+geometry_etc(process, which_global_tag(settings))
+tfileservice(process, 'trackingtreer.root')
+sample_files(process, 'qcdht2000_2017', 'miniaod')
+file_event_from_argv(process)
+#want_summary(process)
 
-process.source.fileNames = ['/store/mc/RunIIFall15DR76/QCD_Pt_1000to1400_TuneCUETP8M1_13TeV_pythia8/AODSIM/PU25nsData2015v1_76X_mcRun2_asymptotic_v12-v1/40000/0874DD13-DDA0-E511-AC76-001E67A3FD26.root']
-if not is_mc:
-    process.source.fileNames = ['/store/data/Run2015D/JetHT/AOD/16Dec2015-v1/00000/0A2C6696-AEAF-E511-8551-0026189438EB.root']
-
-process.TFileService.fileName = 'tracking_tree.root'
-
+process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
+process.load('JMTucker.MFVNeutralino.UnpackedCandidateTracks_cfi')
 process.load('JMTucker.Tools.MCStatProducer_cff')
 
-process.goodVertices = cms.EDFilter('VertexSelector',
-                                    filter = cms.bool(True),
-                                    src = cms.InputTag('offlinePrimaryVertices'),
-                                    cut = cms.string('!isFake && ndof > 4 && abs(z) <= 24 && position.rho < 2')
-                                    )
+process.goodOfflinePrimaryVertices.src = 'offlineSlimmedPrimaryVertices'
 
 process.tt = cms.EDAnalyzer('TrackingTreer',
-                           beamspot_src = cms.InputTag('offlineBeamSpot'),
-                           primary_vertices_src = cms.InputTag('goodVertices'),
-                           tracks_src = cms.InputTag('generalTracks'),
-                           assert_diag_cov = cms.bool(True),
-                           )
+                            pileup_info_src = cms.InputTag('slimmedAddPileupInfo'),
+                            beamspot_src = cms.InputTag('offlineBeamSpot'),
+                            primary_vertices_src = cms.InputTag('goodOfflinePrimaryVertices'),
+                            tracks_src = cms.InputTag('mfvUnpackedCandidateTracks'),
+                            assert_diag_cov = cms.bool(True),
+                            track_sel = cms.bool(True),
+                            )
+
+process.p = cms.Path(process.goodOfflinePrimaryVertices * process.mfvUnpackedCandidateTracks * process.tt)
 
 from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-setup_event_filter(process, 'p', need_pat=True)
-process.p *= process.goodVertices * process.tt
+jetsOnly = setup_event_filter(process,
+                              path_name = 'p',
+                              trigger_filter = 'jets only',
+                              event_filter = 'jets only',
+                              event_filter_jes_mult = 0,
+                              event_filter_require_vertex = False,
+                              input_is_miniaod = True)
+
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
+    from JMTucker.Tools.MetaSubmitter import *
     import JMTucker.Tools.Samples as Samples
+    from JMTucker.Tools.Year import year
 
-    samples = Samples.registry.from_argv(Samples.data_samples + Samples.qcdpt_samples)
+    if year == 2017:
+        samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.all_signal_samples_2017 + Samples.data_samples_2017
+    elif year == 2018:
+        samples = Samples.qcd_samples_2018 + Samples.data_samples_2018
 
-    for s in samples:
-        if s.is_mc:
-            s.events_per = 50000
-            s.total_events = s.nevents_orig/10
-        else:
-            s.json = '/uscms/home/tucker/work/mfv_763p2/src/JMTucker/MFVNeutralino/test/ana_10pc.json'
-            s.lumis_per = 150
-            s.total_lumis = -1
+    set_splitting(samples, 'miniaod', 'default', json_path('bstest.json'), 16)
 
-    def modify(sample):
-        to_add = []
-        to_replace = []
-
-        if not sample.is_mc:
-            magic = 'is_mcX=XTrue'.replace('X', ' ')
-            err = 'trying to submit on data, and tuple template does not contain the magic string "%s"' % magic
-            to_replace.append((magic, 'is_mc = False', err))
-            # JMTBAD different globaltags?
-
-        return to_add, to_replace
-
-    cs = CRABSubmitter('TrackTreeV3',
-                       pset_modifier = modify,
-                       job_control_from_sample = True,
-                       )
-
-    cs.submit_all(samples)
+    ms = MetaSubmitter('TrackingTreerV1', dataset='miniaod')
+    ms.common.pset_modifier = chain_modifiers(is_mc_modifier)
+    ms.condor.stageout_files = 'all'
+    ms.submit(samples)
