@@ -81,7 +81,8 @@ def hadd_(is_crab, *args, **kwargs):
 
     working_dir, new_name, new_dir = hadd_args(working_dir, kwargs.get('new_name', None), new_dir)
 
-    if new_dir and '/store/' in new_dir:
+    on_eos = new_dir and '/store/' in new_dir
+    if on_eos:
         exists, mkdir, rm = eos.exists, eos.mkdir, eos.rm
     else:
         exists, mkdir, rm = os.path.exists, os.mkdir, os.remove
@@ -103,11 +104,13 @@ def hadd_(is_crab, *args, **kwargs):
             rm(new_name)
         else:
             log_fn = new_name + '.haddlog'
+            if on_eos:
+                log_fn = eos.fusemount(log_fn)
             njobs = hadd_files(working_dir, **kwargs)[0]
-            if not os.path.isfile(log_fn):
+            if not exists(log_fn):
                 log_njobs = 1 # assume 1 file copied
             else:
-                p = HaddlogParser(new_name + '.haddlog')
+                p = HaddlogParser(log_fn)
                 log_njobs = p.num_sources
             if log_njobs != njobs:
                 print colors.boldred('skipping existing file %s (for which num sources %i != njobs %i)' % (new_name, log_njobs, njobs))
