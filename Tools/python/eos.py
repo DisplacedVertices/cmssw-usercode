@@ -15,6 +15,9 @@ def _system(cmd):
     #print cmd
     return subprocess.call(cmd, stdout=open(os.devnull, 'w'), stderr=subprocess.STDOUT) == 0
 
+def fusemount(fn):
+    return '/eos/uscms' + storeonly(fn)
+
 def storeonly(fn):
     if fn.startswith('/store'):
         return fn
