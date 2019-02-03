@@ -135,7 +135,7 @@ def files_from_file(process, fn, n=-1):
         fns = fns[:n]
     return fns
 
-def file_event_from_argv(process, warn=True):
+def file_event_from_argv(process, verbose=False):
     '''Set the filename and event to run on from argv.'''
     files = []
     nums = []
@@ -151,7 +151,8 @@ def file_event_from_argv(process, warn=True):
             sname, dataset = arg.split(':')
             sample_files(process, sname, dataset, nfiles)
             files = None
-            print 'sample from argv: %s %s (%i files)' % (sname, dataset, nfiles)
+            if verbose:
+                print 'sample from argv: %s %s (%i files)' % (sname, dataset, nfiles)
         elif arg.endswith('.root') and files is not None:
             files.append(arg)
         else:
@@ -166,21 +167,24 @@ def file_event_from_argv(process, warn=True):
                 file = 'file:' + file
             files_.append(file)
         files = files_
-        print 'files from argv:'
-        for file in files:
-            print file
+        if verbose:
+            print 'files from argv:'
+            for file in files:
+                print file
         process.source.fileNames = files
-    elif files is not None and warn:
+    elif files is not None and verbose:
         print 'file_event_from_argv warning: no filename found'
     l = len(nums)
     if l == 1:
-        print 'maxEvents from argv:', nums[0]
+        if verbose:
+            print 'maxEvents from argv:', nums[0]
         process.maxEvents.input = nums[0]
     elif l == 2 or l == 3:
         nums = tuple(nums)
-        print 'set_events from argv:', nums
+        if verbose:
+            print 'set_events from argv:', nums
         set_events(process, [nums])
-    elif warn:
+    elif verbose:
         print 'file_event_from_argv warning: did not understand event number'
 
 def find_output_files(process):
