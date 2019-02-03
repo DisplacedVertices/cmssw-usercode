@@ -21,7 +21,7 @@ parser.add_argument('--pattern',
                     help='Glob-style pattern to filter the files, useful if there are multiple files output per job.')
 parser.add_argument('--no-lpc-shortcut', action='store_false', dest='lpc_shortcut', default=True,
                     help='(Only for crab dirs) Most of the time files went to FNAL LPC EOS, this is used to bypass talking to the crab server--turn off if needed.')
-parser.add_argument('--ignore-done', '--partial', action='store_true', default=False,
+parser.add_argument('-p', '--ignore-done', '--partial', action='store_true', default=False,
                     help='Ignore the done marker files and try to hadd whatever specified.')
 parser.add_argument('--only-notdones', action='store_true', default=False,
                     help='Only do not-dones (implies --overwrite and --ignore-done).')
