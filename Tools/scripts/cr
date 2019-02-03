@@ -59,6 +59,8 @@ cmds = {
         "simple_cmd('crab report -d %s')",
     'hl':
         "simple_cmd('tar --remove-files -czf haddlogs.tgz *.haddlog*')",
+    'bd':
+        "simple_cmd('tar --remove-files -czf batchdirs.tgz condor_* crab* ex_*')",
     'ds':
         "simple_cmd('grep \"Output dataset:\" %s/crab.log | tail -1')",
     'web':
