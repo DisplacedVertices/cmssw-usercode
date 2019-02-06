@@ -69,6 +69,7 @@ void book_hists(int ntk) {
 
   for (int k = 0; k < NVTX; ++k) {
     for (int l = 0; l < NDBV; ++l) {
+      if (k == 0 && l != 0) continue;
       h_dbv[k][l] = new TH1F(TString::Format("h_%dv_%s_dbv", k+1, dbv_names[l]), TString::Format("%d-track %s events;%s d_{BV} (cm);Vertices", ntk, vtx_names[k], dbv_names[l]), 40, 0, 0.2);
       h_dbv_bquarks[k][l] = new TH1F(TString::Format("h_%dv_%s_dbv_bquarks", k+1, dbv_names[l]), TString::Format("%d-track %s events with b quarks;%s d_{BV} (cm);Vertices", ntk, vtx_names[k], dbv_names[l]), 40, 0, 0.2);
       h_dbv_nobquarks[k][l] = new TH1F(TString::Format("h_%dv_%s_dbv_nobquarks", k+1, dbv_names[l]), TString::Format("%d-track %s events without b quarks;%s d_{BV} (cm);Vertices", ntk, vtx_names[k], dbv_names[l]), 40, 0, 0.2);
@@ -97,17 +98,18 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
     h_njets[k]->Fill(nt.njets, w);
 
     double dbv0 = hypot(nt.x0, nt.y0);
+    h_dbv[k][0]->Fill(dbv0, w);
+    if (bquark_flavor_code) h_dbv_bquarks[k][0]->Fill(dbv0, w);
+    if (!bquark_flavor_code) h_dbv_nobquarks[k][0]->Fill(dbv0, w);
+
     double dbv1 = hypot(nt.x1, nt.y1);
-    const double dbv[NDBV] = {dbv0, dbv0 >= dbv1 ? dbv0 : dbv1, dbv0 >= dbv1 ? dbv1 : dbv0};
-    for (int l = 0; l < NDBV; ++l) {
-      h_dbv[k][l]->Fill(dbv[l], w);
-      if (bquark_flavor_code) h_dbv_bquarks[k][l]->Fill(dbv[l], w);
-      if (!bquark_flavor_code) h_dbv_nobquarks[k][l]->Fill(dbv[l], w);
-    }
+    const double dbv[NDBV] = {dbv1, dbv0 >= dbv1 ? dbv0 : dbv1, dbv0 >= dbv1 ? dbv1 : dbv0};
     if (nt.nvtx >= 2) {
-      h_dbv[k][0]->Fill(dbv1, w);
-      if (bquark_flavor_code) h_dbv_bquarks[k][0]->Fill(dbv1, w);
-      if (!bquark_flavor_code) h_dbv_nobquarks[k][0]->Fill(dbv1, w);
+      for (int l = 0; l < NDBV; ++l) {
+        h_dbv[k][l]->Fill(dbv[l], w);
+        if (bquark_flavor_code) h_dbv_bquarks[k][l]->Fill(dbv[l], w);
+        if (!bquark_flavor_code) h_dbv_nobquarks[k][l]->Fill(dbv[l], w);
+      }
     }
 
     int nbtags[NBDISC] = {0};
@@ -136,21 +138,22 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
         if (btag_flavor_code) h_bquark_flavor_code_btag[k][j][i]->Fill(bquark_flavor_code, w);
         if (!btag_flavor_code) h_bquark_flavor_code_nobtag[k][j][i]->Fill(bquark_flavor_code, w);
 
-        for (int l = 0; l < NDBV; ++l) {
-          if (btag_flavor_code) h_dbv_btag[k][j][i][l]->Fill(dbv[l], w);
-          if (btag_flavor_code && bquark_flavor_code) h_dbv_btag_bquarks[k][j][i][l]->Fill(dbv[l], w);
-          if (btag_flavor_code && !bquark_flavor_code) h_dbv_btag_nobquarks[k][j][i][l]->Fill(dbv[l], w);
-          if (!btag_flavor_code) h_dbv_nobtag[k][j][i][l]->Fill(dbv[l], w);
-          if (!btag_flavor_code && bquark_flavor_code) h_dbv_nobtag_bquarks[k][j][i][l]->Fill(dbv[l], w);
-          if (!btag_flavor_code && !bquark_flavor_code) h_dbv_nobtag_nobquarks[k][j][i][l]->Fill(dbv[l], w);
-        }
+        if (btag_flavor_code) h_dbv_btag[k][j][i][0]->Fill(dbv0, w);
+        if (btag_flavor_code && bquark_flavor_code) h_dbv_btag_bquarks[k][j][i][0]->Fill(dbv0, w);
+        if (btag_flavor_code && !bquark_flavor_code) h_dbv_btag_nobquarks[k][j][i][0]->Fill(dbv0, w);
+        if (!btag_flavor_code) h_dbv_nobtag[k][j][i][0]->Fill(dbv0, w);
+        if (!btag_flavor_code && bquark_flavor_code) h_dbv_nobtag_bquarks[k][j][i][0]->Fill(dbv0, w);
+        if (!btag_flavor_code && !bquark_flavor_code) h_dbv_nobtag_nobquarks[k][j][i][0]->Fill(dbv0, w);
+
         if (nt.nvtx >= 2) {
-          if (btag_flavor_code) h_dbv_btag[k][j][i][0]->Fill(dbv1, w);
-          if (btag_flavor_code && bquark_flavor_code) h_dbv_btag_bquarks[k][j][i][0]->Fill(dbv1, w);
-          if (btag_flavor_code && !bquark_flavor_code) h_dbv_btag_nobquarks[k][j][i][0]->Fill(dbv1, w);
-          if (!btag_flavor_code) h_dbv_nobtag[k][j][i][0]->Fill(dbv1, w);
-          if (!btag_flavor_code && bquark_flavor_code) h_dbv_nobtag_bquarks[k][j][i][0]->Fill(dbv1, w);
-          if (!btag_flavor_code && !bquark_flavor_code) h_dbv_nobtag_nobquarks[k][j][i][0]->Fill(dbv1, w);
+          for (int l = 0; l < NDBV; ++l) {
+            if (btag_flavor_code) h_dbv_btag[k][j][i][l]->Fill(dbv[l], w);
+            if (btag_flavor_code && bquark_flavor_code) h_dbv_btag_bquarks[k][j][i][l]->Fill(dbv[l], w);
+            if (btag_flavor_code && !bquark_flavor_code) h_dbv_btag_nobquarks[k][j][i][l]->Fill(dbv[l], w);
+            if (!btag_flavor_code) h_dbv_nobtag[k][j][i][l]->Fill(dbv[l], w);
+            if (!btag_flavor_code && bquark_flavor_code) h_dbv_nobtag_bquarks[k][j][i][l]->Fill(dbv[l], w);
+            if (!btag_flavor_code && !bquark_flavor_code) h_dbv_nobtag_nobquarks[k][j][i][l]->Fill(dbv[l], w);
+          }
         }
       }
     }

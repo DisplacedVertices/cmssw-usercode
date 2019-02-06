@@ -101,6 +101,8 @@ for nvtx in [1,2]:
 #plot mean dBV in events with and without btag
 for nvtx in [1,2]:
   for dbv in ['all', 'longer', 'shorter']:
+    if nvtx == 1 and dbv != 'all':
+      continue
     x = []
     ex = []
     y1 = []
@@ -177,6 +179,8 @@ for nvtx in [1,2]:
 #plot dBV in events with and without btag
 for nvtx in [1,2]:
   for dbv in ['all', 'longer', 'shorter']:
+    if nvtx == 1 and dbv != 'all':
+      continue
     h_dbv = f.Get('h_%dv_%s_dbv' % (nvtx,dbv))
     h_dbv.SetStats(0)
     h_dbv.SetLineColor(ROOT.kBlack)
@@ -223,6 +227,8 @@ for nvtx in [1,2]:
 #plot mean dBV in events (with, without) b quarks x (with, without) btag
 for nvtx in [1,2]:
   for dbv in ['all', 'longer', 'shorter']:
+    if nvtx == 1 and dbv != 'all':
+      continue
     hists = ['btag', 'btag_bquarks', 'btag_nobquarks', 'nobtag', 'nobtag_bquarks', 'nobtag_nobquarks']
     colors = [ROOT.kRed, ROOT.kMagenta, ROOT.kViolet, ROOT.kBlue, ROOT.kAzure+10, ROOT.kAzure+1]
     gs = []
