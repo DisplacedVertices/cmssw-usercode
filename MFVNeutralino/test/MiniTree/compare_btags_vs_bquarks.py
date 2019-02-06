@@ -124,12 +124,15 @@ for nvtx in [1,2]:
     for i,name in enumerate(btag_names):
       g1.GetXaxis().SetBinLabel(g1.GetXaxis().FindBin(x[i]), name.replace('medium','med'))
     g1.GetXaxis().SetLabelSize(0.04)
-    if ntk == 3:
-      g1.GetYaxis().SetRangeUser(200,320)
-    elif ntk == 4:
-      g1.GetYaxis().SetRangeUser(170,290)
-    elif ntk == 5:
-      g1.GetYaxis().SetRangeUser(140,260)
+    if nvtx == 1:
+      if ntk == 3 or ntk == 7:
+        g1.GetYaxis().SetRangeUser(200,320)
+      elif ntk == 4:
+        g1.GetYaxis().SetRangeUser(170,290)
+      elif ntk == 5:
+        g1.GetYaxis().SetRangeUser(140,260)
+    elif nvtx == 2:
+      g1.GetYaxis().SetRangeUser(0,500)
     g1.GetYaxis().SetTitleOffset(1.5)
     g1.SetMarkerStyle(21)
     g1.SetMarkerColor(ROOT.kRed)
@@ -252,12 +255,15 @@ for nvtx in [1,2]:
         for i,name in enumerate(btag_names):
           g.GetXaxis().SetBinLabel(g.GetXaxis().FindBin(x[i]), name.replace('medium','med'))
         g.GetXaxis().SetLabelSize(0.04)
-        if ntk == 3:
-          g.GetYaxis().SetRangeUser(200,320)
-        elif ntk == 4:
-          g.GetYaxis().SetRangeUser(170,290)
-        elif ntk == 5:
-          g.GetYaxis().SetRangeUser(140,260)
+        if nvtx == 1:
+          if ntk == 3 or ntk == 7:
+            g.GetYaxis().SetRangeUser(200,320)
+          elif ntk == 4:
+            g.GetYaxis().SetRangeUser(170,290)
+          elif ntk == 5:
+            g.GetYaxis().SetRangeUser(140,260)
+        elif nvtx == 2:
+          g.GetYaxis().SetRangeUser(0,500)
         g.GetYaxis().SetTitleOffset(1.5)
         g.Draw('AP')
       else:
