@@ -100,190 +100,193 @@ for nvtx in [1,2]:
 
 #plot mean dBV in events with and without btag
 for nvtx in [1,2]:
-  x = []
-  ex = []
-  y1 = []
-  ey1 = []
-  y2 = []
-  ey2 = []
-  for i,btag in enumerate(btags):
-    h1 = f.Get('h_%dv_dbv_%s_btag' % (nvtx,btag))
-    h2 = f.Get('h_%dv_dbv_%s_nobtag' % (nvtx,btag))
-    x.append(i+1)
-    ex.append(0)
-    y1.append(h1.GetMean()*10000)
-    ey1.append(h1.GetMeanError()*10000)
-    y2.append(h2.GetMean()*10000)
-    ey2.append(h2.GetMeanError()*10000)
+  for dbv in ['all', 'longer', 'shorter']:
+    x = []
+    ex = []
+    y1 = []
+    ey1 = []
+    y2 = []
+    ey2 = []
+    for i,btag in enumerate(btags):
+      h1 = f.Get('h_%dv_%s_dbv_%s_btag' % (nvtx,dbv,btag))
+      h2 = f.Get('h_%dv_%s_dbv_%s_nobtag' % (nvtx,dbv,btag))
+      x.append(i+1)
+      ex.append(0)
+      y1.append(h1.GetMean()*10000)
+      ey1.append(h1.GetMeanError()*10000)
+      y2.append(h2.GetMean()*10000)
+      ey2.append(h2.GetMeanError()*10000)
 
-  g1 = ROOT.TGraphErrors(len(btags), array('d',x), array('d',y1), array('d',ex), array('d',ey1))
-  g1.SetTitle('%s-track %s-vertex events;;mean d_{BV} (#mum)' % (ntk, 'one' if nvtx==1 else 'two' if nvtx==2 else ''))
-  for i,name in enumerate(btag_names):
-    g1.GetXaxis().SetBinLabel(g1.GetXaxis().FindBin(x[i]), name.replace('medium','med'))
-  g1.GetXaxis().SetLabelSize(0.04)
-  if ntk == 3:
-    g1.GetYaxis().SetRangeUser(200,320)
-  elif ntk == 4:
-    g1.GetYaxis().SetRangeUser(170,290)
-  elif ntk == 5:
-    g1.GetYaxis().SetRangeUser(140,260)
-  g1.GetYaxis().SetTitleOffset(1.5)
-  g1.SetMarkerStyle(21)
-  g1.SetMarkerColor(ROOT.kRed)
-  g1.Draw('AP')
+    g1 = ROOT.TGraphErrors(len(btags), array('d',x), array('d',y1), array('d',ex), array('d',ey1))
+    g1.SetTitle('%s-track %s-vertex events;;mean %s d_{BV} (#mum)' % (ntk, 'one' if nvtx==1 else 'two' if nvtx==2 else '', dbv))
+    for i,name in enumerate(btag_names):
+      g1.GetXaxis().SetBinLabel(g1.GetXaxis().FindBin(x[i]), name.replace('medium','med'))
+    g1.GetXaxis().SetLabelSize(0.04)
+    if ntk == 3:
+      g1.GetYaxis().SetRangeUser(200,320)
+    elif ntk == 4:
+      g1.GetYaxis().SetRangeUser(170,290)
+    elif ntk == 5:
+      g1.GetYaxis().SetRangeUser(140,260)
+    g1.GetYaxis().SetTitleOffset(1.5)
+    g1.SetMarkerStyle(21)
+    g1.SetMarkerColor(ROOT.kRed)
+    g1.Draw('AP')
 
-  g2 = ROOT.TGraphErrors(len(btags), array('d',x), array('d',y2), array('d',ex), array('d',ey2))
-  g2.SetMarkerStyle(21)
-  g2.SetMarkerColor(ROOT.kBlue)
-  g2.Draw('P')
+    g2 = ROOT.TGraphErrors(len(btags), array('d',x), array('d',y2), array('d',ex), array('d',ey2))
+    g2.SetMarkerStyle(21)
+    g2.SetMarkerColor(ROOT.kBlue)
+    g2.Draw('P')
 
-  l = ROOT.TLegend(0.50,0.15,0.85,0.25)
-  l.AddEntry(g1, 'events with btag', 'PE')
-  l.AddEntry(g2, 'events without btag', 'PE')
-  l.Draw()
+    l = ROOT.TLegend(0.50,0.15,0.85,0.25)
+    l.AddEntry(g1, 'events with btag', 'PE')
+    l.AddEntry(g2, 'events without btag', 'PE')
+    l.Draw()
 
-  mean_dbv = f.Get('h_%dv_dbv' % nvtx).GetMean()*10000
-  l0 = ROOT.TLine(x[0]-0.5, mean_dbv, x[-1]+0.5, mean_dbv)
-  l0.SetLineStyle(2)
-  l0.SetLineWidth(2)
-  l0.Draw()
-  t0 = ROOT.TLatex()
-  t0.SetTextSize(0.03)
-  t0.DrawLatex(0.5*(x[0]+x[-1]), mean_dbv, 'mean d_{BV} in all events')
+    mean_dbv = f.Get('h_%dv_%s_dbv' % (nvtx,dbv)).GetMean()*10000
+    l0 = ROOT.TLine(x[0]-0.5, mean_dbv, x[-1]+0.5, mean_dbv)
+    l0.SetLineStyle(2)
+    l0.SetLineWidth(2)
+    l0.Draw()
+    t0 = ROOT.TLatex()
+    t0.SetTextSize(0.03)
+    t0.DrawLatex(0.5*(x[0]+x[-1]), mean_dbv, 'mean d_{BV} in all events')
 
-  mean_dbv_bquarks = f.Get('h_%dv_dbv_bquarks' % nvtx).GetMean()*10000
-  l1 = ROOT.TLine(x[0]-0.5, mean_dbv_bquarks, x[-1]+0.5, mean_dbv_bquarks)
-  l1.SetLineStyle(2)
-  l1.SetLineWidth(2)
-  l1.SetLineColor(ROOT.kRed)
-  l1.Draw()
-  t1 = ROOT.TLatex()
-  t1.SetTextSize(0.03)
-  t1.DrawLatex(0.5*(x[0]+x[-1]), mean_dbv_bquarks, 'mean d_{BV} in events with b quarks')
+    mean_dbv_bquarks = f.Get('h_%dv_%s_dbv_bquarks' % (nvtx,dbv)).GetMean()*10000
+    l1 = ROOT.TLine(x[0]-0.5, mean_dbv_bquarks, x[-1]+0.5, mean_dbv_bquarks)
+    l1.SetLineStyle(2)
+    l1.SetLineWidth(2)
+    l1.SetLineColor(ROOT.kRed)
+    l1.Draw()
+    t1 = ROOT.TLatex()
+    t1.SetTextSize(0.03)
+    t1.DrawLatex(0.5*(x[0]+x[-1]), mean_dbv_bquarks, 'mean d_{BV} in events with b quarks')
 
-  mean_dbv_nobquarks = f.Get('h_%dv_dbv_nobquarks' % nvtx).GetMean()*10000
-  l2 = ROOT.TLine(x[0]-0.5, mean_dbv_nobquarks, x[-1]+0.5, mean_dbv_nobquarks)
-  l2.SetLineStyle(2)
-  l2.SetLineWidth(2)
-  l2.SetLineColor(ROOT.kBlue)
-  l2.Draw()
-  t2 = ROOT.TLatex()
-  t2.SetTextSize(0.03)
-  t2.DrawLatex(0.5*(x[0]+x[-1]), mean_dbv_nobquarks, 'mean d_{BV} in events without b quarks')
+    mean_dbv_nobquarks = f.Get('h_%dv_%s_dbv_nobquarks' % (nvtx,dbv)).GetMean()*10000
+    l2 = ROOT.TLine(x[0]-0.5, mean_dbv_nobquarks, x[-1]+0.5, mean_dbv_nobquarks)
+    l2.SetLineStyle(2)
+    l2.SetLineWidth(2)
+    l2.SetLineColor(ROOT.kBlue)
+    l2.Draw()
+    t2 = ROOT.TLatex()
+    t2.SetTextSize(0.03)
+    t2.DrawLatex(0.5*(x[0]+x[-1]), mean_dbv_nobquarks, 'mean d_{BV} in events without b quarks')
 
-  ps.save('%dv_mean_dbv' % nvtx)
+    ps.save('%dv_mean_%s_dbv' % (nvtx,dbv))
 
 #plot dBV in events with and without btag
 for nvtx in [1,2]:
-  h_dbv = f.Get('h_%dv_dbv' % nvtx)
-  h_dbv.SetStats(0)
-  h_dbv.SetLineColor(ROOT.kBlack)
-  h_dbv.SetLineWidth(3)
-  h_dbv.Scale(1./h_dbv.Integral())
-  h_dbv.GetYaxis().SetRangeUser(1e-5,0.4)
-  if ntk == 5 or nvtx == 2:
-    h_dbv.GetYaxis().SetRangeUser(1e-5,0.8)
-  h_dbv.GetYaxis().SetTitleOffset(1.55)
-  h_dbv.Draw('hist')
-  h_dbv_bquarks = f.Get('h_%dv_dbv_bquarks' % nvtx)
-  h_dbv_bquarks.SetStats(0)
-  h_dbv_bquarks.SetLineColor(ROOT.kRed)
-  h_dbv_bquarks.SetLineWidth(3)
-  h_dbv_bquarks.DrawNormalized('sames')
-  h_dbv_nobquarks = f.Get('h_%dv_dbv_nobquarks' % nvtx)
-  h_dbv_nobquarks.SetStats(0)
-  h_dbv_nobquarks.SetLineColor(ROOT.kBlue)
-  h_dbv_nobquarks.SetLineWidth(3)
-  h_dbv_nobquarks.DrawNormalized('sames')
-  for i,btag in enumerate(btags):
+  for dbv in ['all', 'longer', 'shorter']:
+    h_dbv = f.Get('h_%dv_%s_dbv' % (nvtx,dbv))
+    h_dbv.SetStats(0)
+    h_dbv.SetLineColor(ROOT.kBlack)
+    h_dbv.SetLineWidth(3)
+    h_dbv.Scale(1./h_dbv.Integral())
+    h_dbv.GetYaxis().SetRangeUser(1e-5,0.4)
+    if ntk == 5 or nvtx == 2:
+      h_dbv.GetYaxis().SetRangeUser(1e-5,0.8)
+    h_dbv.GetYaxis().SetTitleOffset(1.55)
     h_dbv.Draw('hist')
+    h_dbv_bquarks = f.Get('h_%dv_%s_dbv_bquarks' % (nvtx,dbv))
+    h_dbv_bquarks.SetStats(0)
+    h_dbv_bquarks.SetLineColor(ROOT.kRed)
+    h_dbv_bquarks.SetLineWidth(3)
     h_dbv_bquarks.DrawNormalized('sames')
+    h_dbv_nobquarks = f.Get('h_%dv_%s_dbv_nobquarks' % (nvtx,dbv))
+    h_dbv_nobquarks.SetStats(0)
+    h_dbv_nobquarks.SetLineColor(ROOT.kBlue)
+    h_dbv_nobquarks.SetLineWidth(3)
     h_dbv_nobquarks.DrawNormalized('sames')
-    h1 = f.Get('h_%dv_dbv_%s_btag' % (nvtx,btag))
-    h1.SetStats(0)
-    h1.SetLineColor(ROOT.kMagenta)
-    h1.SetLineWidth(2)
-    h1.DrawNormalized('sames')
-    h2 = f.Get('h_%dv_dbv_%s_nobtag' % (nvtx,btag))
-    h2.SetStats(0)
-    h2.SetLineColor(ROOT.kAzure+10)
-    h2.SetLineWidth(2)
-    h2.DrawNormalized('sames')
-    l = ROOT.TLegend(0.35,0.65,0.85,0.85)
-    l.AddEntry(h_dbv, 'all events')
-    l.AddEntry(h_dbv_bquarks, 'events with b quarks')
-    l.AddEntry(h_dbv_nobquarks, 'events without b quarks')
-    l.AddEntry(h1, 'events with %s btag' % btag_names[i])
-    l.AddEntry(h2, 'events without %s btag' % btag_names[i])
-    l.Draw()
-    ps.save('%dv_dbv_%s_btag' % (nvtx,btag))
+    for i,btag in enumerate(btags):
+      h_dbv.Draw('hist')
+      h_dbv_bquarks.DrawNormalized('sames')
+      h_dbv_nobquarks.DrawNormalized('sames')
+      h1 = f.Get('h_%dv_%s_dbv_%s_btag' % (nvtx,dbv,btag))
+      h1.SetStats(0)
+      h1.SetLineColor(ROOT.kMagenta)
+      h1.SetLineWidth(2)
+      h1.DrawNormalized('sames')
+      h2 = f.Get('h_%dv_%s_dbv_%s_nobtag' % (nvtx,dbv,btag))
+      h2.SetStats(0)
+      h2.SetLineColor(ROOT.kAzure+10)
+      h2.SetLineWidth(2)
+      h2.DrawNormalized('sames')
+      l = ROOT.TLegend(0.35,0.65,0.85,0.85)
+      l.AddEntry(h_dbv, 'all events')
+      l.AddEntry(h_dbv_bquarks, 'events with b quarks')
+      l.AddEntry(h_dbv_nobquarks, 'events without b quarks')
+      l.AddEntry(h1, 'events with %s btag' % btag_names[i])
+      l.AddEntry(h2, 'events without %s btag' % btag_names[i])
+      l.Draw()
+      ps.save('%dv_%s_dbv_%s_btag' % (nvtx,dbv,btag))
 
 #plot mean dBV in events (with, without) b quarks x (with, without) btag
 for nvtx in [1,2]:
-  hists = ['btag', 'btag_bquarks', 'btag_nobquarks', 'nobtag', 'nobtag_bquarks', 'nobtag_nobquarks']
-  colors = [ROOT.kRed, ROOT.kMagenta, ROOT.kViolet, ROOT.kBlue, ROOT.kAzure+10, ROOT.kAzure+1]
-  gs = []
-  l = ROOT.TLegend(0.30,0.10,0.80,0.30)
-  for j,hist in enumerate(hists):
-    x = []
-    ex = []
-    y = []
-    ey = []
-    for i,btag in enumerate(btags):
-      x.append(i+1)
-      ex.append(0)
-      h = f.Get('h_%dv_dbv_%s_%s' % (nvtx, btag, hist))
-      y.append(h.GetMean()*10000)
-      ey.append(h.GetMeanError()*10000)
-    g = ROOT.TGraphErrors(len(btags), array('d',x), array('d',y), array('d',ex), array('d',ey))
-    g.SetMarkerStyle(21)
-    g.SetMarkerColor(colors[j])
-    if j == 0:
-      g.SetTitle('%s-track %s-vertex events;;mean d_{BV} (#mum)' % (ntk, 'one' if nvtx==1 else 'two' if nvtx==2 else ''))
-      for i,name in enumerate(btag_names):
-        g.GetXaxis().SetBinLabel(g.GetXaxis().FindBin(x[i]), name.replace('medium','med'))
-      g.GetXaxis().SetLabelSize(0.04)
-      if ntk == 3:
-        g.GetYaxis().SetRangeUser(200,320)
-      elif ntk == 4:
-        g.GetYaxis().SetRangeUser(170,290)
-      elif ntk == 5:
-        g.GetYaxis().SetRangeUser(140,260)
-      g.GetYaxis().SetTitleOffset(1.5)
-      g.Draw('AP')
-    else:
-      g.Draw('P')
-    gs.append(g)
-    l.AddEntry(g, 'events with %s' % hist, 'PE')
-  l.Draw()
+  for dbv in ['all', 'longer', 'shorter']:
+    hists = ['btag', 'btag_bquarks', 'btag_nobquarks', 'nobtag', 'nobtag_bquarks', 'nobtag_nobquarks']
+    colors = [ROOT.kRed, ROOT.kMagenta, ROOT.kViolet, ROOT.kBlue, ROOT.kAzure+10, ROOT.kAzure+1]
+    gs = []
+    l = ROOT.TLegend(0.30,0.10,0.80,0.30)
+    for j,hist in enumerate(hists):
+      x = []
+      ex = []
+      y = []
+      ey = []
+      for i,btag in enumerate(btags):
+        x.append(i+1)
+        ex.append(0)
+        h = f.Get('h_%dv_%s_dbv_%s_%s' % (nvtx, dbv, btag, hist))
+        y.append(h.GetMean()*10000)
+        ey.append(h.GetMeanError()*10000)
+      g = ROOT.TGraphErrors(len(btags), array('d',x), array('d',y), array('d',ex), array('d',ey))
+      g.SetMarkerStyle(21)
+      g.SetMarkerColor(colors[j])
+      if j == 0:
+        g.SetTitle('%s-track %s-vertex events;;mean %s d_{BV} (#mum)' % (ntk, 'one' if nvtx==1 else 'two' if nvtx==2 else '', dbv))
+        for i,name in enumerate(btag_names):
+          g.GetXaxis().SetBinLabel(g.GetXaxis().FindBin(x[i]), name.replace('medium','med'))
+        g.GetXaxis().SetLabelSize(0.04)
+        if ntk == 3:
+          g.GetYaxis().SetRangeUser(200,320)
+        elif ntk == 4:
+          g.GetYaxis().SetRangeUser(170,290)
+        elif ntk == 5:
+          g.GetYaxis().SetRangeUser(140,260)
+        g.GetYaxis().SetTitleOffset(1.5)
+        g.Draw('AP')
+      else:
+        g.Draw('P')
+      gs.append(g)
+      l.AddEntry(g, 'events with %s' % hist, 'PE')
+    l.Draw()
 
-  mean_dbv = f.Get('h_%dv_dbv' % nvtx).GetMean()*10000
-  l0 = ROOT.TLine(x[0]-0.5, mean_dbv, x[-1]+0.5, mean_dbv)
-  l0.SetLineStyle(2)
-  l0.SetLineWidth(2)
-  l0.Draw()
-  t0 = ROOT.TLatex()
-  t0.SetTextSize(0.03)
-  t0.DrawLatex(0.5*(x[0]+x[-1]), mean_dbv, 'mean d_{BV} in all events')
+    mean_dbv = f.Get('h_%dv_%s_dbv' % (nvtx,dbv)).GetMean()*10000
+    l0 = ROOT.TLine(x[0]-0.5, mean_dbv, x[-1]+0.5, mean_dbv)
+    l0.SetLineStyle(2)
+    l0.SetLineWidth(2)
+    l0.Draw()
+    t0 = ROOT.TLatex()
+    t0.SetTextSize(0.03)
+    t0.DrawLatex(0.5*(x[0]+x[-1]), mean_dbv, 'mean d_{BV} in all events')
 
-  mean_dbv_bquarks = f.Get('h_%dv_dbv_bquarks' % nvtx).GetMean()*10000
-  l1 = ROOT.TLine(x[0]-0.5, mean_dbv_bquarks, x[-1]+0.5, mean_dbv_bquarks)
-  l1.SetLineStyle(2)
-  l1.SetLineWidth(2)
-  l1.SetLineColor(ROOT.kRed)
-  l1.Draw()
-  t1 = ROOT.TLatex()
-  t1.SetTextSize(0.03)
-  t1.DrawLatex(0.5*(x[0]+x[-1]), mean_dbv_bquarks, 'mean d_{BV} in events with b quarks')
+    mean_dbv_bquarks = f.Get('h_%dv_%s_dbv_bquarks' % (nvtx,dbv)).GetMean()*10000
+    l1 = ROOT.TLine(x[0]-0.5, mean_dbv_bquarks, x[-1]+0.5, mean_dbv_bquarks)
+    l1.SetLineStyle(2)
+    l1.SetLineWidth(2)
+    l1.SetLineColor(ROOT.kRed)
+    l1.Draw()
+    t1 = ROOT.TLatex()
+    t1.SetTextSize(0.03)
+    t1.DrawLatex(0.5*(x[0]+x[-1]), mean_dbv_bquarks, 'mean d_{BV} in events with b quarks')
 
-  mean_dbv_nobquarks = f.Get('h_%dv_dbv_nobquarks' % nvtx).GetMean()*10000
-  l2 = ROOT.TLine(x[0]-0.5, mean_dbv_nobquarks, x[-1]+0.5, mean_dbv_nobquarks)
-  l2.SetLineStyle(2)
-  l2.SetLineWidth(2)
-  l2.SetLineColor(ROOT.kBlue)
-  l2.Draw()
-  t2 = ROOT.TLatex()
-  t2.SetTextSize(0.03)
-  t2.DrawLatex(0.5*(x[0]+x[-1]), mean_dbv_nobquarks, 'mean d_{BV} in events without b quarks')
+    mean_dbv_nobquarks = f.Get('h_%dv_%s_dbv_nobquarks' % (nvtx,dbv)).GetMean()*10000
+    l2 = ROOT.TLine(x[0]-0.5, mean_dbv_nobquarks, x[-1]+0.5, mean_dbv_nobquarks)
+    l2.SetLineStyle(2)
+    l2.SetLineWidth(2)
+    l2.SetLineColor(ROOT.kBlue)
+    l2.Draw()
+    t2 = ROOT.TLatex()
+    t2.SetTextSize(0.03)
+    t2.DrawLatex(0.5*(x[0]+x[-1]), mean_dbv_nobquarks, 'mean d_{BV} in events without b quarks')
 
-  ps.save('%dv_mean_dbv_bquarks_btags' % nvtx)
+    ps.save('%dv_mean_%s_dbv_bquarks_btags' % (nvtx,dbv))

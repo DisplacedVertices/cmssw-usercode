@@ -17,6 +17,9 @@ const int NBDISC = 3;
 const char* bdisc_names[NBDISC] = {"loose", "medium", "tight"};
 const double bdisc_mins[NBDISC] = {0.5803, 0.8838, 0.9693};
 
+const int NDBV = 3;
+const char* dbv_names[NDBV] = {"all", "longer", "shorter"};
+
 TH1F* h_bquark_flavor_code[NVTX] = {0};
 TH1F* h_njets[NVTX] = {0};
 TH1F* h_jet_bdisc[NVTX] = {0};
@@ -32,15 +35,15 @@ TH1F* h_btag_flavor_code_nobquarks[NVTX][NBTAGS][NBDISC] = {{{0}}};
 TH1F* h_bquark_flavor_code_btag[NVTX][NBTAGS][NBDISC] = {{{0}}};
 TH1F* h_bquark_flavor_code_nobtag[NVTX][NBTAGS][NBDISC] = {{{0}}};
 
-TH1F* h_dbv[NVTX] = {0};
-TH1F* h_dbv_bquarks[NVTX] = {0};
-TH1F* h_dbv_nobquarks[NVTX] = {0};
-TH1F* h_dbv_btag[NVTX][NBTAGS][NBDISC] = {{{0}}};
-TH1F* h_dbv_btag_bquarks[NVTX][NBTAGS][NBDISC] = {{{0}}};
-TH1F* h_dbv_btag_nobquarks[NVTX][NBTAGS][NBDISC] = {{{0}}};
-TH1F* h_dbv_nobtag[NVTX][NBTAGS][NBDISC] = {{{0}}};
-TH1F* h_dbv_nobtag_bquarks[NVTX][NBTAGS][NBDISC] = {{{0}}};
-TH1F* h_dbv_nobtag_nobquarks[NVTX][NBTAGS][NBDISC] = {{{0}}};
+TH1F* h_dbv[NVTX][NDBV] = {{0}};
+TH1F* h_dbv_bquarks[NVTX][NDBV] = {{0}};
+TH1F* h_dbv_nobquarks[NVTX][NDBV] = {{0}};
+TH1F* h_dbv_btag[NVTX][NBTAGS][NBDISC][NDBV] = {{{{0}}}};
+TH1F* h_dbv_btag_bquarks[NVTX][NBTAGS][NBDISC][NDBV] = {{{{0}}}};
+TH1F* h_dbv_btag_nobquarks[NVTX][NBTAGS][NBDISC][NDBV] = {{{{0}}}};
+TH1F* h_dbv_nobtag[NVTX][NBTAGS][NBDISC][NDBV] = {{{{0}}}};
+TH1F* h_dbv_nobtag_bquarks[NVTX][NBTAGS][NBDISC][NDBV] = {{{{0}}}};
+TH1F* h_dbv_nobtag_nobquarks[NVTX][NBTAGS][NBDISC][NDBV] = {{{{0}}}};
 
 void book_hists(int ntk) {
   for (int k = 0; k < NVTX; ++k) {
@@ -65,17 +68,19 @@ void book_hists(int ntk) {
   }
 
   for (int k = 0; k < NVTX; ++k) {
-    h_dbv[k] = new TH1F(TString::Format("h_%dv_dbv", k+1), TString::Format("%d-track %s events;d_{BV} (cm);Vertices", ntk, vtx_names[k]), 40, 0, 0.2);
-    h_dbv_bquarks[k] = new TH1F(TString::Format("h_%dv_dbv_bquarks", k+1), TString::Format("%d-track %s events with b quarks;d_{BV} (cm);Vertices", ntk, vtx_names[k]), 40, 0, 0.2);
-    h_dbv_nobquarks[k] = new TH1F(TString::Format("h_%dv_dbv_nobquarks", k+1), TString::Format("%d-track %s events without b quarks;d_{BV} (cm);Vertices", ntk, vtx_names[k]), 40, 0, 0.2);
-    for (int i = 0; i < NBDISC; ++i) {
-      for (int j = 0; j < NBTAGS; ++j) {
-        h_dbv_btag[k][j][i] = new TH1F(TString::Format("h_%dv_dbv_%d%s_btag", k+1, nbtag_mins[j], bdisc_names[i]), TString::Format("%d-track %s events with #geq%d %s btag;d_{BV} (cm);Vertices", ntk, vtx_names[k], nbtag_mins[j], bdisc_names[i]), 40, 0, 0.2);
-        h_dbv_btag_bquarks[k][j][i] = new TH1F(TString::Format("h_%dv_dbv_%d%s_btag_bquarks", k+1, nbtag_mins[j], bdisc_names[i]), TString::Format("%d-track %s events with b quarks and with #geq%d %s btag;d_{BV} (cm);Vertices", ntk, vtx_names[k], nbtag_mins[j], bdisc_names[i]), 40, 0, 0.2);
-        h_dbv_btag_nobquarks[k][j][i] = new TH1F(TString::Format("h_%dv_dbv_%d%s_btag_nobquarks", k+1, nbtag_mins[j], bdisc_names[i]), TString::Format("%d-track %s events without b quarks and with #geq%d %s btag;d_{BV} (cm);Vertices", ntk, vtx_names[k], nbtag_mins[j], bdisc_names[i]), 40, 0, 0.2);
-        h_dbv_nobtag[k][j][i] = new TH1F(TString::Format("h_%dv_dbv_%d%s_nobtag", k+1, nbtag_mins[j], bdisc_names[i]), TString::Format("%d-track %s events without #geq%d %s btag;d_{BV} (cm);Vertices", ntk, vtx_names[k], nbtag_mins[j], bdisc_names[i]), 40, 0, 0.2);
-        h_dbv_nobtag_bquarks[k][j][i] = new TH1F(TString::Format("h_%dv_dbv_%d%s_nobtag_bquarks", k+1, nbtag_mins[j], bdisc_names[i]), TString::Format("%d-track %s events with b quarks and without #geq%d %s btag;d_{BV} (cm);Vertices", ntk, vtx_names[k], nbtag_mins[j], bdisc_names[i]), 40, 0, 0.2);
-        h_dbv_nobtag_nobquarks[k][j][i] = new TH1F(TString::Format("h_%dv_dbv_%d%s_nobtag_nobquarks", k+1, nbtag_mins[j], bdisc_names[i]), TString::Format("%d-track %s events without b quarks and without #geq%d %s btag;d_{BV} (cm);Vertices", ntk, vtx_names[k], nbtag_mins[j], bdisc_names[i]), 40, 0, 0.2);
+    for (int l = 0; l < NDBV; ++l) {
+      h_dbv[k][l] = new TH1F(TString::Format("h_%dv_%s_dbv", k+1, dbv_names[l]), TString::Format("%d-track %s events;%s d_{BV} (cm);Vertices", ntk, vtx_names[k], dbv_names[l]), 40, 0, 0.2);
+      h_dbv_bquarks[k][l] = new TH1F(TString::Format("h_%dv_%s_dbv_bquarks", k+1, dbv_names[l]), TString::Format("%d-track %s events with b quarks;%s d_{BV} (cm);Vertices", ntk, vtx_names[k], dbv_names[l]), 40, 0, 0.2);
+      h_dbv_nobquarks[k][l] = new TH1F(TString::Format("h_%dv_%s_dbv_nobquarks", k+1, dbv_names[l]), TString::Format("%d-track %s events without b quarks;%s d_{BV} (cm);Vertices", ntk, vtx_names[k], dbv_names[l]), 40, 0, 0.2);
+      for (int i = 0; i < NBDISC; ++i) {
+        for (int j = 0; j < NBTAGS; ++j) {
+          h_dbv_btag[k][j][i][l] = new TH1F(TString::Format("h_%dv_%s_dbv_%d%s_btag", k+1, dbv_names[l], nbtag_mins[j], bdisc_names[i]), TString::Format("%d-track %s events with #geq%d %s btag;%s d_{BV} (cm);Vertices", ntk, vtx_names[k], nbtag_mins[j], bdisc_names[i], dbv_names[l]), 40, 0, 0.2);
+          h_dbv_btag_bquarks[k][j][i][l] = new TH1F(TString::Format("h_%dv_%s_dbv_%d%s_btag_bquarks", k+1, dbv_names[l], nbtag_mins[j], bdisc_names[i]), TString::Format("%d-track %s events with b quarks and with #geq%d %s btag;%s d_{BV} (cm);Vertices", ntk, vtx_names[k], nbtag_mins[j], bdisc_names[i], dbv_names[l]), 40, 0, 0.2);
+          h_dbv_btag_nobquarks[k][j][i][l] = new TH1F(TString::Format("h_%dv_%s_dbv_%d%s_btag_nobquarks", k+1, dbv_names[l], nbtag_mins[j], bdisc_names[i]), TString::Format("%d-track %s events without b quarks and with #geq%d %s btag;%s d_{BV} (cm);Vertices", ntk, vtx_names[k], nbtag_mins[j], bdisc_names[i], dbv_names[l]), 40, 0, 0.2);
+          h_dbv_nobtag[k][j][i][l] = new TH1F(TString::Format("h_%dv_%s_dbv_%d%s_nobtag", k+1, dbv_names[l], nbtag_mins[j], bdisc_names[i]), TString::Format("%d-track %s events without #geq%d %s btag;%s d_{BV} (cm);Vertices", ntk, vtx_names[k], nbtag_mins[j], bdisc_names[i], dbv_names[l]), 40, 0, 0.2);
+          h_dbv_nobtag_bquarks[k][j][i][l] = new TH1F(TString::Format("h_%dv_%s_dbv_%d%s_nobtag_bquarks", k+1, dbv_names[l], nbtag_mins[j], bdisc_names[i]), TString::Format("%d-track %s events with b quarks and without #geq%d %s btag;%s d_{BV} (cm);Vertices", ntk, vtx_names[k], nbtag_mins[j], bdisc_names[i], dbv_names[l]), 40, 0, 0.2);
+          h_dbv_nobtag_nobquarks[k][j][i][l] = new TH1F(TString::Format("h_%dv_%s_dbv_%d%s_nobtag_nobquarks", k+1, dbv_names[l], nbtag_mins[j], bdisc_names[i]), TString::Format("%d-track %s events without b quarks and without #geq%d %s btag;%s d_{BV} (cm);Vertices", ntk, vtx_names[k], nbtag_mins[j], bdisc_names[i], dbv_names[l]), 40, 0, 0.2);
+        }
       }
     }
   }
@@ -92,15 +97,17 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
     h_njets[k]->Fill(nt.njets, w);
 
     double dbv0 = hypot(nt.x0, nt.y0);
-    h_dbv[k]->Fill(dbv0, w);
-    if (bquark_flavor_code) h_dbv_bquarks[k]->Fill(dbv0, w);
-    if (!bquark_flavor_code) h_dbv_nobquarks[k]->Fill(dbv0, w);
-
     double dbv1 = hypot(nt.x1, nt.y1);
+    const double dbv[NDBV] = {dbv0, dbv0 >= dbv1 ? dbv0 : dbv1, dbv0 >= dbv1 ? dbv1 : dbv0};
+    for (int l = 0; l < NDBV; ++l) {
+      h_dbv[k][l]->Fill(dbv[l], w);
+      if (bquark_flavor_code) h_dbv_bquarks[k][l]->Fill(dbv[l], w);
+      if (!bquark_flavor_code) h_dbv_nobquarks[k][l]->Fill(dbv[l], w);
+    }
     if (nt.nvtx >= 2) {
-      h_dbv[k]->Fill(dbv1, w);
-      if (bquark_flavor_code) h_dbv_bquarks[k]->Fill(dbv1, w);
-      if (!bquark_flavor_code) h_dbv_nobquarks[k]->Fill(dbv1, w);
+      h_dbv[k][0]->Fill(dbv1, w);
+      if (bquark_flavor_code) h_dbv_bquarks[k][0]->Fill(dbv1, w);
+      if (!bquark_flavor_code) h_dbv_nobquarks[k][0]->Fill(dbv1, w);
     }
 
     int nbtags[NBDISC] = {0};
@@ -129,20 +136,21 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
         if (btag_flavor_code) h_bquark_flavor_code_btag[k][j][i]->Fill(bquark_flavor_code, w);
         if (!btag_flavor_code) h_bquark_flavor_code_nobtag[k][j][i]->Fill(bquark_flavor_code, w);
 
-        if (btag_flavor_code) h_dbv_btag[k][j][i]->Fill(dbv0, w);
-        if (btag_flavor_code && bquark_flavor_code) h_dbv_btag_bquarks[k][j][i]->Fill(dbv0, w);
-        if (btag_flavor_code && !bquark_flavor_code) h_dbv_btag_nobquarks[k][j][i]->Fill(dbv0, w);
-        if (!btag_flavor_code) h_dbv_nobtag[k][j][i]->Fill(dbv0, w);
-        if (!btag_flavor_code && bquark_flavor_code) h_dbv_nobtag_bquarks[k][j][i]->Fill(dbv0, w);
-        if (!btag_flavor_code && !bquark_flavor_code) h_dbv_nobtag_nobquarks[k][j][i]->Fill(dbv0, w);
-
+        for (int l = 0; l < NDBV; ++l) {
+          if (btag_flavor_code) h_dbv_btag[k][j][i][l]->Fill(dbv[l], w);
+          if (btag_flavor_code && bquark_flavor_code) h_dbv_btag_bquarks[k][j][i][l]->Fill(dbv[l], w);
+          if (btag_flavor_code && !bquark_flavor_code) h_dbv_btag_nobquarks[k][j][i][l]->Fill(dbv[l], w);
+          if (!btag_flavor_code) h_dbv_nobtag[k][j][i][l]->Fill(dbv[l], w);
+          if (!btag_flavor_code && bquark_flavor_code) h_dbv_nobtag_bquarks[k][j][i][l]->Fill(dbv[l], w);
+          if (!btag_flavor_code && !bquark_flavor_code) h_dbv_nobtag_nobquarks[k][j][i][l]->Fill(dbv[l], w);
+        }
         if (nt.nvtx >= 2) {
-          if (btag_flavor_code) h_dbv_btag[k][j][i]->Fill(dbv1, w);
-          if (btag_flavor_code && bquark_flavor_code) h_dbv_btag_bquarks[k][j][i]->Fill(dbv1, w);
-          if (btag_flavor_code && !bquark_flavor_code) h_dbv_btag_nobquarks[k][j][i]->Fill(dbv1, w);
-          if (!btag_flavor_code) h_dbv_nobtag[k][j][i]->Fill(dbv1, w);
-          if (!btag_flavor_code && bquark_flavor_code) h_dbv_nobtag_bquarks[k][j][i]->Fill(dbv1, w);
-          if (!btag_flavor_code && !bquark_flavor_code) h_dbv_nobtag_nobquarks[k][j][i]->Fill(dbv1, w);
+          if (btag_flavor_code) h_dbv_btag[k][j][i][0]->Fill(dbv1, w);
+          if (btag_flavor_code && bquark_flavor_code) h_dbv_btag_bquarks[k][j][i][0]->Fill(dbv1, w);
+          if (btag_flavor_code && !bquark_flavor_code) h_dbv_btag_nobquarks[k][j][i][0]->Fill(dbv1, w);
+          if (!btag_flavor_code) h_dbv_nobtag[k][j][i][0]->Fill(dbv1, w);
+          if (!btag_flavor_code && bquark_flavor_code) h_dbv_nobtag_bquarks[k][j][i][0]->Fill(dbv1, w);
+          if (!btag_flavor_code && !bquark_flavor_code) h_dbv_nobtag_nobquarks[k][j][i][0]->Fill(dbv1, w);
         }
       }
     }
