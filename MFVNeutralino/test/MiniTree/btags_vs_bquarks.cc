@@ -70,17 +70,17 @@ void book_hists(int ntk) {
   for (int k = 0; k < NVTX; ++k) {
     for (int l = 0; l < NDBV; ++l) {
       if (k == 0 && l != 0) continue;
-      h_dbv[k][l] = new TH1F(TString::Format("h_%dv_%s_dbv", k+1, dbv_names[l]), TString::Format("%d-track %s events;%s d_{BV} (cm);Vertices", ntk, vtx_names[k], dbv_names[l]), 40, 0, 0.2);
-      h_dbv_bquarks[k][l] = new TH1F(TString::Format("h_%dv_%s_dbv_bquarks", k+1, dbv_names[l]), TString::Format("%d-track %s events with b quarks;%s d_{BV} (cm);Vertices", ntk, vtx_names[k], dbv_names[l]), 40, 0, 0.2);
-      h_dbv_nobquarks[k][l] = new TH1F(TString::Format("h_%dv_%s_dbv_nobquarks", k+1, dbv_names[l]), TString::Format("%d-track %s events without b quarks;%s d_{BV} (cm);Vertices", ntk, vtx_names[k], dbv_names[l]), 40, 0, 0.2);
+      h_dbv[k][l] = new TH1F(TString::Format("h_%dv_%s_dbv", k+1, dbv_names[l]), TString::Format("%d-track %s events;d_{BV} (cm);Events", ntk, vtx_names[k]), 40, 0, 0.2);
+      h_dbv_bquarks[k][l] = new TH1F(TString::Format("h_%dv_%s_dbv_bquarks", k+1, dbv_names[l]), TString::Format("%d-track %s events with b quarks;d_{BV} (cm);Events", ntk, vtx_names[k]), 40, 0, 0.2);
+      h_dbv_nobquarks[k][l] = new TH1F(TString::Format("h_%dv_%s_dbv_nobquarks", k+1, dbv_names[l]), TString::Format("%d-track %s events without b quarks;d_{BV} (cm);Events", ntk, vtx_names[k]), 40, 0, 0.2);
       for (int i = 0; i < NBDISC; ++i) {
         for (int j = 0; j < NBTAGS; ++j) {
-          h_dbv_btag[k][j][i][l] = new TH1F(TString::Format("h_%dv_%s_dbv_%d%s_btag", k+1, dbv_names[l], nbtag_mins[j], bdisc_names[i]), TString::Format("%d-track %s events with #geq%d %s btag;%s d_{BV} (cm);Vertices", ntk, vtx_names[k], nbtag_mins[j], bdisc_names[i], dbv_names[l]), 40, 0, 0.2);
-          h_dbv_btag_bquarks[k][j][i][l] = new TH1F(TString::Format("h_%dv_%s_dbv_%d%s_btag_bquarks", k+1, dbv_names[l], nbtag_mins[j], bdisc_names[i]), TString::Format("%d-track %s events with b quarks and with #geq%d %s btag;%s d_{BV} (cm);Vertices", ntk, vtx_names[k], nbtag_mins[j], bdisc_names[i], dbv_names[l]), 40, 0, 0.2);
-          h_dbv_btag_nobquarks[k][j][i][l] = new TH1F(TString::Format("h_%dv_%s_dbv_%d%s_btag_nobquarks", k+1, dbv_names[l], nbtag_mins[j], bdisc_names[i]), TString::Format("%d-track %s events without b quarks and with #geq%d %s btag;%s d_{BV} (cm);Vertices", ntk, vtx_names[k], nbtag_mins[j], bdisc_names[i], dbv_names[l]), 40, 0, 0.2);
-          h_dbv_nobtag[k][j][i][l] = new TH1F(TString::Format("h_%dv_%s_dbv_%d%s_nobtag", k+1, dbv_names[l], nbtag_mins[j], bdisc_names[i]), TString::Format("%d-track %s events without #geq%d %s btag;%s d_{BV} (cm);Vertices", ntk, vtx_names[k], nbtag_mins[j], bdisc_names[i], dbv_names[l]), 40, 0, 0.2);
-          h_dbv_nobtag_bquarks[k][j][i][l] = new TH1F(TString::Format("h_%dv_%s_dbv_%d%s_nobtag_bquarks", k+1, dbv_names[l], nbtag_mins[j], bdisc_names[i]), TString::Format("%d-track %s events with b quarks and without #geq%d %s btag;%s d_{BV} (cm);Vertices", ntk, vtx_names[k], nbtag_mins[j], bdisc_names[i], dbv_names[l]), 40, 0, 0.2);
-          h_dbv_nobtag_nobquarks[k][j][i][l] = new TH1F(TString::Format("h_%dv_%s_dbv_%d%s_nobtag_nobquarks", k+1, dbv_names[l], nbtag_mins[j], bdisc_names[i]), TString::Format("%d-track %s events without b quarks and without #geq%d %s btag;%s d_{BV} (cm);Vertices", ntk, vtx_names[k], nbtag_mins[j], bdisc_names[i], dbv_names[l]), 40, 0, 0.2);
+          h_dbv_btag[k][j][i][l] = new TH1F(TString::Format("h_%dv_%s_dbv_%d%s_btag", k+1, dbv_names[l], nbtag_mins[j], bdisc_names[i]), TString::Format("%d-track %s events with #geq%d %s btag;d_{BV} (cm);Events", ntk, vtx_names[k], nbtag_mins[j], bdisc_names[i]), 40, 0, 0.2);
+          h_dbv_btag_bquarks[k][j][i][l] = new TH1F(TString::Format("h_%dv_%s_dbv_%d%s_btag_bquarks", k+1, dbv_names[l], nbtag_mins[j], bdisc_names[i]), TString::Format("%d-track %s events with b quarks and with #geq%d %s btag;d_{BV} (cm);Events", ntk, vtx_names[k], nbtag_mins[j], bdisc_names[i]), 40, 0, 0.2);
+          h_dbv_btag_nobquarks[k][j][i][l] = new TH1F(TString::Format("h_%dv_%s_dbv_%d%s_btag_nobquarks", k+1, dbv_names[l], nbtag_mins[j], bdisc_names[i]), TString::Format("%d-track %s events without b quarks and with #geq%d %s btag;d_{BV} (cm);Events", ntk, vtx_names[k], nbtag_mins[j], bdisc_names[i]), 40, 0, 0.2);
+          h_dbv_nobtag[k][j][i][l] = new TH1F(TString::Format("h_%dv_%s_dbv_%d%s_nobtag", k+1, dbv_names[l], nbtag_mins[j], bdisc_names[i]), TString::Format("%d-track %s events without #geq%d %s btag;d_{BV} (cm);Events", ntk, vtx_names[k], nbtag_mins[j], bdisc_names[i]), 40, 0, 0.2);
+          h_dbv_nobtag_bquarks[k][j][i][l] = new TH1F(TString::Format("h_%dv_%s_dbv_%d%s_nobtag_bquarks", k+1, dbv_names[l], nbtag_mins[j], bdisc_names[i]), TString::Format("%d-track %s events with b quarks and without #geq%d %s btag;d_{BV} (cm);Events", ntk, vtx_names[k], nbtag_mins[j], bdisc_names[i]), 40, 0, 0.2);
+          h_dbv_nobtag_nobquarks[k][j][i][l] = new TH1F(TString::Format("h_%dv_%s_dbv_%d%s_nobtag_nobquarks", k+1, dbv_names[l], nbtag_mins[j], bdisc_names[i]), TString::Format("%d-track %s events without b quarks and without #geq%d %s btag;d_{BV} (cm);Events", ntk, vtx_names[k], nbtag_mins[j], bdisc_names[i]), 40, 0, 0.2);
         }
       }
     }
