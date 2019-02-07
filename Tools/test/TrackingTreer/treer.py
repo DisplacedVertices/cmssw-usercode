@@ -11,22 +11,20 @@ sample_files(process, 'qcdht2000_2017', 'miniaod')
 file_event_from_argv(process)
 #want_summary(process)
 
-process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
 process.load('JMTucker.MFVNeutralino.UnpackedCandidateTracks_cfi')
 process.load('JMTucker.Tools.MCStatProducer_cff')
 
-process.goodOfflinePrimaryVertices.src = 'offlineSlimmedPrimaryVertices'
-
 process.tt = cms.EDAnalyzer('TrackingTreer',
+                            input_is_miniaod = cms.bool(True),
                             pileup_info_src = cms.InputTag('slimmedAddPileupInfo'),
                             beamspot_src = cms.InputTag('offlineBeamSpot'),
-                            primary_vertices_src = cms.InputTag('goodOfflinePrimaryVertices'),
+                            primary_vertices_src = cms.InputTag('offlineSlimmedPrimaryVertices'),
                             tracks_src = cms.InputTag('mfvUnpackedCandidateTracks'),
                             assert_diag_cov = cms.bool(True),
                             track_sel = cms.bool(True),
                             )
 
-process.p = cms.Path(process.goodOfflinePrimaryVertices * process.mfvUnpackedCandidateTracks * process.tt)
+process.p = cms.Path(process.mfvUnpackedCandidateTracks * process.tt)
 
 from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
 jetsOnly = setup_event_filter(process,
@@ -50,7 +48,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, 'miniaod', 'default', json_path('ana_2017p8_1pc.json'), 16)
 
-    ms = MetaSubmitter('TrackingTreerV1', dataset='miniaod')
+    ms = MetaSubmitter('TrackingTreerV2', dataset='miniaod')
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier)
     ms.condor.stageout_files = 'all'
     ms.submit(samples)

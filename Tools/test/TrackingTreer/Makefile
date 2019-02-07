@@ -3,10 +3,11 @@ INCLUDES      = $(patsubst %.cc, %.h, $(SOURCES))
 OBJECTS       = $(patsubst %.cc, bin/%.o, $(SOURCES))
 ROOTCFLAGS    = $(shell root-config --cflags)
 ROOTLIBS      = $(shell root-config --nonew --glibs)
-CFLAGS        = $(ROOTCFLAGS) -I$(CMSSW_BASE)/src -std=c++0x -pedantic -Werror -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-qual -O3
+CFLAGS        = $(ROOTCFLAGS) -I$(CMSSW_BASE)/src -std=c++17 -pedantic -Werror -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-qual -O3
 LIBS          = $(ROOTLIBS)
+EXES          = hists.exe
 
-all: hists.exe
+all: $(EXES)
 
 %.exe: bin/%.o $(OBJECTS)
 	g++ -o $@ $(OBJECTS) $< $(LIBS) $(CFLAGS)
@@ -28,5 +29,7 @@ test:
 .PRECIOUS: bin/%.o
 
 clean:	
-	-rm -f hists.exe
-	-rm -rf bin/
+	-rm -rf bin/ $(EXES)
+
+setup:
+	ln -s ../../src/TrackingTree.cc

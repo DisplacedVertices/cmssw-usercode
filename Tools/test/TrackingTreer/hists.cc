@@ -29,10 +29,6 @@ int main(int argc, char** argv) {
     fns.push_back(fn_tmp);
   printf("will read %lu files:\n", fns.size());
 
-  bool is_mc = true;
-  if (std::string(files_in_fn) == "data.txt")
-    is_mc = false;
-
   bool z_slice = false;
   bool nhits_slice = false;
   bool pt_slice = true;
@@ -60,7 +56,7 @@ int main(int argc, char** argv) {
   TFile* f_out = new TFile(out_fn, "recreate");
 
   TH1D* h_norm = new TH1D("h_norm", "", 1, 0, 1);
-  TH1D* h_npu = new TH1D("h_npu", ";true npu", 50, 0, 50);
+  TH1D* h_npu = new TH1D("h_npu", ";true npu", 100, 0, 100);
   TH1D* h_npv = new TH1D("h_npv", ";number of primary vertices", 50, 0, 50);
   TH1D* h_bsx = new TH1D("h_bsx", ";beamspot x", 400, -0.15, 0.15);
   TH1D* h_bsy = new TH1D("h_bsy", ";beamspot y", 400, -0.15, 0.15);
@@ -71,7 +67,7 @@ int main(int argc, char** argv) {
   TH1D* h_pvbsy = new TH1D("h_pvbsy", ";pvy - bsy", 400, -0.05, 0.05); 
   TH1D* h_pvbsz = new TH1D("h_pvbsz", ";pvz - bsz", 500, -15, 15);
   TH2D* h_bsy_v_bsx = new TH2D("h_bsy_v_bsx", ";beamspot x;beamspot y", 4000, -1, 1, 4000, -1, 1);
-  TH2D* h_pvy_v_pvx = new TH2D("h_pvy_v_pvx", ";pvx;pvy", 4000, -1, 1, 4000, -1, 1);
+  TH2D* h_pvy_v_pvx = new TH2D("h_pvy_v_pvx", ";pvx;pvy", 400, -1, 1, 400, -1, 1);
 
   TH1D* h_n_all_tracks = new TH1D("h_n_all_tracks",  ";all tracks", 40, 0, 2000);
   TH1D* h_n_seed_tracks = new TH1D("h_n_seed_tracks", ";seed tracks", 50, 0,  50);
@@ -178,13 +174,14 @@ int main(int argc, char** argv) {
     TrackingTree& nt = fat.nt;
     
     TH1D* h_sums = ((TH1D*)fat.f->Get("mcStat/h_sums"));
-    is_mc = h_sums != 0;
+    const bool is_mc = h_sums->GetBinContent(2) > 0; 
 
     if (is_mc)
       h_norm->Fill(0.5, ((TH1D*)fat.f->Get("mcStat/h_sums"))->GetBinContent(1));
       
     long jj = 0, jje = fat.t->GetEntries();
     for (; jj < jje; ++jj) {
+      //if (jj > 1000) break;
       if (fat.t->LoadTree(jj) < 0) break;
       if (fat.t->GetEntry(jj) <= 0) continue;
       if (jj % 2000 == 0) {
@@ -192,57 +189,52 @@ int main(int argc, char** argv) {
         fflush(stdout);
       }
 
-      h_npu->Fill(nt.npu);
+      double w = 1.0;
 
-      int inpu = int(nt.npu);
-      assert(inpu >= 0);
+      if (is_mc) {
+        const int npu = int(nt.npu());
+        h_npu->Fill(npu);
+        assert(npu >= 0);
+        const double pileup_weight = pileup_weights[npu >= 40 ? 39 : npu];
+	w *= pileup_weight;
+      }
       
       int n_all_tracks = 0;
       int n_seed_tracks = 0;
       int n_seed_nosigcut_tracks = 0;
-      
-      double weight;
-      if (inpu >= 40)
-	weight = pileup_weights[39];
-      else
-	weight = pileup_weights[inpu];
-      
-      double w = 1.0;
-      if (is_mc)
-	w = weight;
 
       h_npv->Fill(nt.npvs(), w);
 
-      const double bsx = nt.bs_x;
-      const double bsy = nt.bs_y;
-      const double bsz = nt.bs_z;
+      const double bsx = nt.bs_x();
+      const double bsy = nt.bs_y();
+      const double bsz = nt.bs_z();
       
       h_bsx->Fill(bsx, w);
       h_bsy->Fill(bsy, w);
       h_bsz->Fill(bsz, w);
-      h_bsdxdz->Fill(nt.bs_dxdz, w);
-      h_bsdydz->Fill(nt.bs_dydz, w);
+      h_bsdxdz->Fill(nt.bs_dxdz(), w);
+      h_bsdydz->Fill(nt.bs_dydz(), w);
       h_bsy_v_bsx->Fill(bsx, bsy, w);
 
-      const double pvbsx = nt.p_pv_x->at(0) - bsx;
-      const double pvbsy = nt.p_pv_y->at(0) - bsy;
-      const double pvbsz = nt.p_pv_z->at(0) - bsz;
+      const double pvbsx = nt.pv_x(0) - bsx;
+      const double pvbsy = nt.pv_y(0) - bsy;
+      const double pvbsz = nt.pv_z(0) - bsz;
       h_pvbsx->Fill(pvbsx, w);
       h_pvbsy->Fill(pvbsy, w);
       h_pvbsz->Fill(pvbsz, w);
 
-      h_pvy_v_pvx->Fill(nt.p_pv_x->at(0), nt.p_pv_y->at(0), w);
+      h_pvy_v_pvx->Fill(nt.pv_x(0), nt.pv_y(0), w);
 
       for (int itk = 0, itke = nt.ntks(); itk < itke; ++itk) {
-	const double pt = fabs(nt.p_tk_qpt->at(itk));
-	const double sigmadxy = nt.p_tk_dxybs->at(itk) / nt.p_tk_err_dxy->at(itk);
-	const int npxhits = nt.p_tk_npxhit->at(itk);
-	const int nsthits = nt.p_tk_nsthit->at(itk);
-	const int nhits = npxhits + nsthits;
-	const int npxlays = nt.p_tk_npxlay->at(itk);
-	const int nstlays = nt.p_tk_nstlay->at(itk);
-	const double vz = nt.p_tk_vz->at(itk);
-	const double dzpv = nt.p_tk_dzpv->at(itk);
+	const double pt = nt.tk_pt(itk);
+	const double sigmadxy = nt.tk_dxybs(itk) / nt.tk_err_dxy(itk);
+	const int npxhits = nt.tk_npxhits(itk);
+	const int nsthits = nt.tk_nsthits(itk);
+	const int nhits = nt.tk_nhits(itk);
+	const int npxlays = nt.tk_npxlayers(itk);
+	const int nstlays = nt.tk_nstlayers(itk);
+	const double vz = nt.tk_vz(itk);
+	const double dzpv = nt.tk_dzpv(itk);
 	const int min_r = nt.tk_min_r(itk);
 	const int min_z = nt.tk_min_z(itk);
 	const int max_r = nt.tk_max_r(itk);
@@ -250,10 +242,10 @@ int main(int argc, char** argv) {
 	const int maxpx_r = nt.tk_maxpx_r(itk);
 	const int maxpx_z = nt.tk_maxpx_z(itk);
 	const int deltarpx = maxpx_r - min_r;
-	const double eta = fabs(nt.p_tk_eta->at(itk));
+	const double aeta = fabs(nt.tk_eta(itk));
 
 	int charge;
-	if (nt.p_tk_qpt->at(itk) > 0)
+	if (nt.tk_qpt(itk) > 0)
 	  charge = 1;
 	else
 	  charge = -1;
@@ -267,7 +259,7 @@ int main(int argc, char** argv) {
 	bool z_slice_use = vz > z_slice_bounds[0] && vz < z_slice_bounds[1];
 	bool nhits_slice_use = nhits > nhits_slice_bounds[0] && nhits < nhits_slice_bounds[1];
 	bool pt_slice_use = pt > pt_slice_bounds[0] && pt < pt_slice_bounds[1];
-	bool eta_slice_use = eta > eta_slice_bounds[0] && eta < eta_slice_bounds[1];
+	bool eta_slice_use = aeta > eta_slice_bounds[0] && aeta < eta_slice_bounds[1];
 
 	if (!z_slice)
 	  z_slice_use = true;
@@ -281,8 +273,8 @@ int main(int argc, char** argv) {
 	if (!eta_slice)
 	  eta_slice_use = true;
 
-	const double pars[9] = {pt, nt.p_tk_eta->at(itk), nt.p_tk_phi->at(itk), nt.p_tk_dxybs->at(itk), nt.p_tk_dxypv->at(itk), nt.p_tk_dxybs->at(itk), vz, dzpv, dzpv};
-	const double errs[5] = {nt.p_tk_err_qpt->at(itk), nt.p_tk_err_eta->at(itk), nt.p_tk_err_phi->at(itk), nt.p_tk_err_dxy->at(itk), nt.p_tk_err_dz->at(itk)};
+	const double pars[9] = {pt, nt.tk_eta(itk), nt.tk_phi(itk), nt.tk_dxybs(itk), nt.tk_dxypv(itk), nt.tk_dxybs(itk), vz, dzpv, dzpv};
+	const double errs[5] = {nt.tk_err_pt(itk), nt.tk_err_eta(itk), nt.tk_err_phi(itk), nt.tk_err_dxy(itk), nt.tk_err_dz(itk)};
 	const int hitpars[12] = {nhits, npxhits, npxlays, nsthits, nstlays, min_r, max_r, maxpx_r, min_z, max_z, maxpx_z, deltarpx};
 	if (z_slice_use && nhits_slice_use && pt_slice_use && eta_slice_use) {
 	  ++n_all_tracks;
