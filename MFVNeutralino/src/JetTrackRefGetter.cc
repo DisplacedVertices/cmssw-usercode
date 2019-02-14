@@ -25,6 +25,7 @@ namespace mfv {
         dump_ptr(std::cout, it.first, &event);
         std::cout << " -> ";
         dump_ref(std::cout, it.second, &event);
+        std::cout << "\n";
       }
     }
   }
@@ -51,6 +52,7 @@ namespace mfv {
         if (verbose) {
           std::cout << "  dau " << p->charge()*p->pt() << "," << p->eta() << "," << p->phi() << " ";
           dump_ptr(std::cout, p, &event);
+          std::cout << "\n";
         }
 
         reco::TrackRef tk = unpacked_candidate_tracks_map->find(p);
@@ -61,6 +63,7 @@ namespace mfv {
           if (verbose) {
             std::cout << "    in map -> track " << tk->charge()*tk->pt() << "," << tk->eta() << "," << tk->phi() << "," << tk->dxy() << "," << tk->dz() << " ";
             dump_ref(std::cout, tk, &event);
+            std::cout << "\n";
           }
         }
       }
