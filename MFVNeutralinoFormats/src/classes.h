@@ -9,7 +9,7 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/MCInteractions.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/TriggerFloats.h"
-#include "JMTucker/MFVNeutralinoFormats/interface/UnpackedCandidateTracksMap.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/TracksMap.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexerPairEff.h"
 
@@ -33,6 +33,7 @@ namespace JMTucker_MFVNeutralinoFormats {
 
     edm::Wrapper<mfv::MCInteraction> wmci;
     edm::Wrapper<mfv::TriggerFloats> wtf;
+    edm::Wrapper<mfv::TracksMap> wtm;
     edm::Wrapper<mfv::UnpackedCandidateTracksMap> wuctm;
     edm::Wrapper<std::vector<VertexerPairEff> > wvvpe;
 

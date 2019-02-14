@@ -7,7 +7,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
-#include "JMTucker/MFVNeutralinoFormats/interface/UnpackedCandidateTracksMap.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/TracksMap.h"
 
 class MFVSkimmedTracks : public edm::EDFilter {
 public:
@@ -96,7 +96,7 @@ bool MFVSkimmedTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
       output_tracks->push_back(*tk);
 
       if (input_is_miniaod) {
-        reco::CandidatePtr c = unpacked_candidate_tracks_map->find(tk);
+        reco::CandidatePtr c = unpacked_candidate_tracks_map->rfind(tk);
         const pat::PackedCandidate* pc = dynamic_cast<const pat::PackedCandidate*>(&*c);
         output_pvindex->push_back(pc->vertexRef().key());
       }

@@ -5,7 +5,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
-#include "JMTucker/MFVNeutralinoFormats/interface/UnpackedCandidateTracksMap.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/TracksMap.h"
 
 class MFVUnpackedCandidateTracks : public edm::EDProducer {
 public:

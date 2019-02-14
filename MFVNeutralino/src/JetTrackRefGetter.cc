@@ -5,7 +5,6 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "JMTucker/Tools/interface/Framework.h"
 #include "JMTucker/MFVNeutralino/interface/JetTrackRefGetter.h"
-#include "JMTucker/MFVNeutralinoFormats/interface/UnpackedCandidateTracksMap.h"
 
 namespace mfv {
   void JetTrackRefGetter::setup_event(const edm::Event& event) {

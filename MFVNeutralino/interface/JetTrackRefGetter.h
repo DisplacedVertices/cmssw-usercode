@@ -4,13 +4,13 @@
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/TracksMap.h"
 
 namespace pat {
   class Jet;
 }
 
 namespace mfv {
-  class UnpackedCandidateTracksMap;
 
   class JetTrackRefGetter {
   private:

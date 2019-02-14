@@ -1,24 +1,28 @@
 #ifndef JMTucker_MFVNeutralinoFormats_UnpackedCandidateTracksMap_h
 #define JMTucker_MFVNeutralinoFormats_UnpackedCandidateTracksMap_h
 
+#include "DataFormats/Candidate/interface/CandidateFwd.h"
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
+
 namespace mfv {
-  class UnpackedCandidateTracksMap {
+  template <typename A, typename B>
+  class ITracksMap {
   public:
-    reco::TrackRef find(const reco::CandidatePtr& a) const {
+    B find(const A& a) const {
       for (size_t i = 0, ie = map_.size(); i < ie; ++i)
         if (a == map_[i].first)
           return map_[i].second;
-      return reco::TrackRef();
+      return B();
     }
 
-    reco::CandidatePtr find(const reco::TrackRef& b) const {
+    A rfind(const B& b) const {
       for (size_t i = 0, ie = map_.size(); i < ie; ++i)
         if (b == map_[i].second)
           return map_[i].first;
-      return reco::CandidatePtr();
+      return A();
     }
 
-    void insert(const reco::CandidatePtr& a, const reco::TrackRef& b) {
+    void insert(const A& a, const B& b) {
       for (size_t i = 0, ie = map_.size(); i < ie; ++i) {
         if (a == map_[i].first)  { map_[i].second = b; return; }
         if (b == map_[i].second) { map_[i].first  = a; return; }
@@ -26,9 +30,9 @@ namespace mfv {
       map_.push_back(std::make_pair(a,b));
     }
 
-    typedef std::vector<std::pair<reco::CandidatePtr, reco::TrackRef>> map_t;
-    typedef map_t::iterator iterator;
-    typedef map_t::const_iterator const_iterator;
+    typedef std::vector<std::pair<A, B>> map_t;
+    typedef typename map_t::iterator iterator;
+    typedef typename map_t::const_iterator const_iterator;
     iterator begin() { return map_.begin(); }
     iterator end() { return map_.end(); }
     const_iterator begin() const { return map_.begin(); }
@@ -37,8 +41,11 @@ namespace mfv {
     const_iterator cend() const { return map_.cend(); }
 
   private:
-    std::vector<std::pair<reco::CandidatePtr, reco::TrackRef>> map_;
+    map_t map_;
   };
+
+  typedef ITracksMap<reco::CandidatePtr, reco::TrackRef> UnpackedCandidateTracksMap;
+  typedef ITracksMap<reco::TrackRef, reco::TrackRef> TracksMap;
 }
 
 #endif
