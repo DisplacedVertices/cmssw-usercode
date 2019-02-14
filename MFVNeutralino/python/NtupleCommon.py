@@ -247,7 +247,7 @@ def miniaod_ntuple_process(settings):
     process.mfvGenParticles.gen_particles_src = 'prunedGenParticles'
     process.mfvGenParticles.last_flag_check = False
 
-    process.mfvVertexTracks.tracks_src = 'mfvUnpackedCandidateTracks'
+    process.mfvRescaledTracks.tracks_src = 'mfvUnpackedCandidateTracks'
 
     for x in process.mfvVerticesToJets, process.mfvVerticesAuxTmp, process.mfvVerticesAuxPresel, process.mfvEvent:
         x.input_is_miniaod = True

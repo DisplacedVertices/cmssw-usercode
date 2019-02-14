@@ -49,6 +49,13 @@ jetsOnly = setup_event_filter(process,
                               input_is_miniaod = True)
 
 common = cms.Sequence(jetsOnly * process.goodOfflinePrimaryVertices * process.mfvUnpackedCandidateTracks * process.jmtWeightMiniAOD)
+
+if False:
+    process.load('JMTucker.MFVNeutralino.RescaledTracks_cfi')
+    process.mfvRescaledTracks.tracks_src = 'mfvUnpackedCandidateTracks'
+    common *= process.mfvRescaledTracks
+    process.TrackerMapper.track_src = 'mfvRescaledTracks'
+
 process.p = cms.Path(common * process.TrackerMapper)
 
 for name, filt in ('LightFlavor', process.lightFlavor), ('HeavyFlavor', process.heavyFlavor): #, ('BFlavor', process.bFlavor), ('DisplacedGenPV', process.displacedGenPV):
