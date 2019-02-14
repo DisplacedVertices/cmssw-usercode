@@ -28,4 +28,8 @@
   <class name="mfv::MCInteraction"/>
   <class name="edm::Wrapper<mfv::MCInteraction>"/>
 
+  <class name="std::vector<std::pair<edm::Ptr<reco::Candidate>,edm::Ref<vector<reco::Track>,reco::Track,edm::refhelper::FindUsingAdvance<std::vector<reco::Track>,reco::Track> > > >"/>
+  <class name="mfv::UnpackedCandidateTracksMap"/>
+  <class name="edm::Wrapper<mfv::UnpackedCandidateTracksMap>"/>
+
 </lcgdict>

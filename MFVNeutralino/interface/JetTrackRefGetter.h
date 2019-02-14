@@ -10,18 +10,17 @@ namespace pat {
 }
 
 namespace mfv {
+  class UnpackedCandidateTracksMap;
+
   class JetTrackRefGetter {
   private:
     const bool input_is_miniaod;
-    const edm::EDGetTokenT<reco::TrackCollection> unpacked_tracks_token;
-    const edm::EDGetTokenT<std::vector<size_t>> unpacking_map_token;
+    const edm::EDGetTokenT<mfv::UnpackedCandidateTracksMap> unpacked_candidate_tracks_map_token;
     const bool verbose;
     const std::string module_label;
 
     edm::Event::CacheIdentifier_t last_cacheIdentifier;
-    edm::Handle<reco::TrackCollection> unpacked_tracks;
-    edm::Handle<std::vector<size_t>> unpacking_map;
-    std::map<size_t, size_t> inverse_unpacking_map;
+    edm::Handle<mfv::UnpackedCandidateTracksMap> unpacked_candidate_tracks_map;
 
     void setup_event(const edm::Event&);
 

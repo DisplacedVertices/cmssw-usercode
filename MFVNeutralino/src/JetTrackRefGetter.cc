@@ -3,7 +3,9 @@
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "JMTucker/Tools/interface/Framework.h"
 #include "JMTucker/MFVNeutralino/interface/JetTrackRefGetter.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/UnpackedCandidateTracksMap.h"
 
 namespace mfv {
   void JetTrackRefGetter::setup_event(const edm::Event& event) {
@@ -14,19 +16,22 @@ namespace mfv {
       return;
 
     last_cacheIdentifier = event.cacheIdentifier();
-    event.getByToken(unpacked_tracks_token, unpacked_tracks);
-    event.getByToken(unpacking_map_token, unpacking_map);
-    inverse_unpacking_map.clear();
-    for (size_t itrk = 0, itrke = unpacking_map->size(); itrk < itrke; ++itrk) {
-      const size_t ipack = (*unpacking_map)[itrk];
-      inverse_unpacking_map[ipack] = itrk;
+    event.getByToken(unpacked_candidate_tracks_map_token, unpacked_candidate_tracks_map);
+
+    if (verbose) {
+      std::cout << "JetTrackRefGetter " << module_label << " map:\n";
+      for (auto it : *unpacked_candidate_tracks_map) {
+        std::cout << "  ";
+        dump_ptr(std::cout, it.first, &event);
+        std::cout << " -> ";
+        dump_ref(std::cout, it.second, &event);
+      }
     }
   }
 
   JetTrackRefGetter::JetTrackRefGetter(const edm::ParameterSet& cfg, edm::ConsumesCollector&& cc)
     : input_is_miniaod(cfg.getParameter<bool>("input_is_miniaod")),
-      unpacked_tracks_token(cc.consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("unpacked_tracks_src"))),
-      unpacking_map_token(cc.consumes<std::vector<size_t>>(cfg.getParameter<edm::InputTag>("unpacking_map_src"))),
+      unpacked_candidate_tracks_map_token(cc.consumes<mfv::UnpackedCandidateTracksMap>(cfg.getParameter<edm::InputTag>("unpacked_candidate_tracks_map_src"))),
       verbose(cfg.getUntrackedParameter<bool>("jtrg_verbose", false)),
       module_label(cfg.getParameter<std::string>("@module_label")),
       last_cacheIdentifier(0)
@@ -39,11 +44,25 @@ namespace mfv {
     std::vector<reco::TrackRef> r;
 
     if (input_is_miniaod) {
+      if (verbose)
+        std::cout << "JetTrackRefGetter " << module_label << " jet " << jet.pt() << "," << jet.eta() << "," << jet.phi() << "," << jet.energy() << ":\n";
+
       for (const reco::CandidatePtr& p : jet.daughterPtrVector()) {
-        const size_t ipack = p.key();
-        auto it = inverse_unpacking_map.find(ipack);
-        if (it != inverse_unpacking_map.end())
-          r.push_back(reco::TrackRef(unpacked_tracks, it->second));
+        if (verbose) {
+          std::cout << "  dau " << p->charge()*p->pt() << "," << p->eta() << "," << p->phi() << " ";
+          dump_ptr(std::cout, p, &event);
+        }
+
+        reco::TrackRef tk = unpacked_candidate_tracks_map->find(p);
+
+        if (tk.isNonnull()) {
+          r.push_back(tk);
+
+          if (verbose) {
+            std::cout << "    in map -> track " << tk->charge()*tk->pt() << "," << tk->eta() << "," << tk->phi() << "," << tk->dxy() << "," << tk->dz() << " ";
+            dump_ref(std::cout, tk, &event);
+          }
+        }
       }
     }
     else {
@@ -53,12 +72,6 @@ namespace mfv {
           r.push_back(tk);
       }
     }
-
-    if (verbose)
-      for (auto tk : r)
-        printf("JetTrackRefGetter %s: jet %f,%f,%f,%f got track %f,%f,%f,%f,%f\n",
-               module_label.c_str(), jet.pt(), jet.eta(), jet.phi(), jet.energy(),
-               tk->charge()*tk->pt(), tk->eta(), tk->phi(), tk->dxy(), tk->dz());
 
     return r;
   }
