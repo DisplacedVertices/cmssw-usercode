@@ -8,30 +8,31 @@
 
 namespace mfv {
   void JetTrackRefGetter::setup_event(const edm::Event& event) {
-    if (!input_is_miniaod)
-      return;
-
     if (event.cacheIdentifier() == last_cacheIdentifier)
       return;
 
     last_cacheIdentifier = event.cacheIdentifier();
-    event.getByToken(unpacked_candidate_tracks_map_token, unpacked_candidate_tracks_map);
+    if (input_is_miniaod)
+      event.getByToken(unpacked_candidate_tracks_map_token, unpacked_candidate_tracks_map);
     for (size_t i = 0, ie = tracks_maps_tokens.size(); i < ie; ++i)
       event.getByToken(tracks_maps_tokens[i], tracks_maps[i]);
 
     if (verbose) {
-      std::cout << "JetTrackRefGetter " << module_label << " unpacked candidate tracks map:\n";
-      for (auto it : *unpacked_candidate_tracks_map) {
-        std::cout << "  ";
-        dump_ptr(std::cout, it.first, &event);
-        std::cout << " -> ";
-        dump_ref(std::cout, it.second, &event);
-        std::cout << "\n";
+      if (input_is_miniaod) {
+        std::cout << "JetTrackRefGetter " << module_label << " unpacked candidate tracks map:\n";
+        for (auto it : *unpacked_candidate_tracks_map) {
+          std::cout << "  ";
+          dump_ptr(std::cout, it.first, &event);
+          std::cout << " -> ";
+          dump_ref(std::cout, it.second, &event);
+          std::cout << "\n";
+        }
+        std::cout << "JetTrackRefGetter " << module_label << " END unpacked candidate tracks map\n";
       }
-      std::cout << "JetTrackRefGetter " << module_label << " END unpacked candidate tracks map\n";
 
+      std::cout << "JetTrackRefGetter " << module_label << " # tracks maps: " << tracks_maps.size() << ":\n";
       for (size_t i = 0, ie = tracks_maps.size(); i < ie; ++i) {
-        std::cout << "JetTrackRefGetter " << module_label << " tracks map #" << i << ":\n";
+        std::cout << " tracks map #" << i << ":\n";
         for (auto it : *tracks_maps[i]) {
           std::cout << "  ";
           dump_ref(std::cout, it.first, &event);
@@ -89,7 +90,9 @@ namespace mfv {
     }
     else {
       for (const reco::PFCandidatePtr& pfcand : jet.getPFConstituents()) {
-        const reco::TrackRef& tk = pfcand->trackRef();
+        reco::TrackRef tk = pfcand->trackRef();
+        for (auto m : tracks_maps)
+          tk = m->find(tk);
         if (tk.isNonnull())
           r.push_back(tk);
       }
