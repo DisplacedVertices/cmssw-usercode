@@ -45,7 +45,6 @@ class MFVVertexAuxProducer : public edm::EDProducer {
   const std::string sv_to_jets_src;
   edm::EDGetTokenT<mfv::JetVertexAssociation> sv_to_jets_token[mfv::NJetsByUse];
   mfv::JetTrackRefGetter jet_track_ref_getter;
-  const bool jets_tracks_keys_only;
   const MFVVertexAuxSorter sorter;
   const bool verbose;
   const std::string module_label;
@@ -60,8 +59,9 @@ MFVVertexAuxProducer::MFVVertexAuxProducer(const edm::ParameterSet& cfg)
     vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     sv_to_jets_src(cfg.getParameter<std::string>("sv_to_jets_src")),
     //sv_to_jets_token(consumes<mfv::JetVertexAssociation>(edm::InputTag("sv_to_jets_src"))),
-    jet_track_ref_getter(cfg, consumesCollector()),
-    jets_tracks_keys_only(cfg.getParameter<bool>("jets_tracks_keys_only")),
+    jet_track_ref_getter(cfg.getParameter<std::string>("@module_label"),
+                         cfg.getParameter<edm::ParameterSet>("jet_track_ref_getter"),
+                         consumesCollector()),
     sorter(cfg.getParameter<std::string>("sort_by")),
     verbose(cfg.getUntrackedParameter<bool>("verbose", false)),
     module_label(cfg.getParameter<std::string>("@module_label"))
@@ -170,12 +170,8 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     std::vector<double> jetpairdrs[mfv::NJetsByUse];
     std::vector<double> costhjetmomvtxdisps[mfv::NJetsByUse];
     std::set<reco::TrackRef> jets_tracks[mfv::NJetsByUse];
-    std::set<int> jets_tracks_keys[mfv::NJetsByUse];
     auto track_in_a_jet = [&](const int i_jet_assoc, const reco::TrackRef& r) {
-      if (jets_tracks_keys_only)
-        return jets_tracks_keys[i_jet_assoc].count(r.key()) > 0;
-      else
-        return jets_tracks     [i_jet_assoc].count(r)       > 0;
+      return jets_tracks[i_jet_assoc].count(r) > 0;
     };
 
     if (use_sv_to_jets) {
@@ -193,7 +189,6 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
             for (auto r : jet_track_ref_getter.tracks(event, *jets[ijet])) {
               jets_tracks[i_jet_assoc].insert(r);
-              jets_tracks_keys[i_jet_assoc].insert(r.key());
               if (verbose) printf("            tk key %i <%f,%f,%f,%f,%f>\n", r.key(), r->charge()*r->pt(), r->eta(), r->phi(), r->dxy(), r->dz());
             }
 

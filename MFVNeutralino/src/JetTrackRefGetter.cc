@@ -16,9 +16,11 @@ namespace mfv {
 
     last_cacheIdentifier = event.cacheIdentifier();
     event.getByToken(unpacked_candidate_tracks_map_token, unpacked_candidate_tracks_map);
+    for (size_t i = 0, ie = tracks_maps_tokens.size(); i < ie; ++i)
+      event.getByToken(tracks_maps_tokens[i], tracks_maps[i]);
 
     if (verbose) {
-      std::cout << "JetTrackRefGetter " << module_label << " map:\n";
+      std::cout << "JetTrackRefGetter " << module_label << " unpacked candidate tracks map:\n";
       for (auto it : *unpacked_candidate_tracks_map) {
         std::cout << "  ";
         dump_ptr(std::cout, it.first, &event);
@@ -26,16 +28,32 @@ namespace mfv {
         dump_ref(std::cout, it.second, &event);
         std::cout << "\n";
       }
+      std::cout << "JetTrackRefGetter " << module_label << " END unpacked candidate tracks map\n";
+
+      for (size_t i = 0, ie = tracks_maps.size(); i < ie; ++i) {
+        std::cout << "JetTrackRefGetter " << module_label << " tracks map #" << i << ":\n";
+        for (auto it : *tracks_maps[i]) {
+          std::cout << "  ";
+          dump_ref(std::cout, it.first, &event);
+          std::cout << " -> ";
+          dump_ref(std::cout, it.second, &event);
+          std::cout << "\n";
+        }
+        std::cout << "JetTrackRefGetter " << module_label << " END tracks map #" << i << "\n";
+      }
     }
   }
 
-  JetTrackRefGetter::JetTrackRefGetter(const edm::ParameterSet& cfg, edm::ConsumesCollector&& cc)
+  JetTrackRefGetter::JetTrackRefGetter(const std::string& label, const edm::ParameterSet& cfg, edm::ConsumesCollector&& cc)
     : input_is_miniaod(cfg.getParameter<bool>("input_is_miniaod")),
       unpacked_candidate_tracks_map_token(cc.consumes<mfv::UnpackedCandidateTracksMap>(cfg.getParameter<edm::InputTag>("unpacked_candidate_tracks_map_src"))),
-      verbose(cfg.getUntrackedParameter<bool>("jtrg_verbose", false)),
-      module_label(cfg.getParameter<std::string>("@module_label")),
+      verbose(cfg.getUntrackedParameter<bool>("verbose", false)),
+      module_label(label),
       last_cacheIdentifier(0)
   {
+    for (auto tag : cfg.getParameter<std::vector<edm::InputTag>>("tracks_maps_srcs"))
+      tracks_maps_tokens.push_back(cc.consumes<mfv::TracksMap>(tag));
+    tracks_maps.resize(tracks_maps_tokens.size());
   }
 
   std::vector<reco::TrackRef> JetTrackRefGetter::tracks(const edm::Event& event, const pat::Jet& jet) {
@@ -55,6 +73,8 @@ namespace mfv {
         }
 
         reco::TrackRef tk = unpacked_candidate_tracks_map->find(p);
+        for (auto m : tracks_maps)
+          tk = m->find(tk);
 
         if (tk.isNonnull()) {
           r.push_back(tk);

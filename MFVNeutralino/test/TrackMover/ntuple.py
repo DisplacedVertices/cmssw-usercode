@@ -36,6 +36,9 @@ from JMTucker.MFVNeutralino.Vertexer_cff import modifiedVertexSequence
 from JMTucker.MFVNeutralino.JetTrackRefGetter_cff import mfvJetTrackRefGetter
 mfvJetTrackRefGetter.input_is_miniaod = settings.is_miniaod
 
+if settings.is_miniaod:
+    process.mfvRescaledTracks.tracks_src = 'mfvUnpackedCandidateTracks'
+
 process.mfvEvent.vertex_seed_tracks_src = ''
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
 process.mfvWeight.throw_if_no_mcstat = False
@@ -56,11 +59,11 @@ for icfg, cfg in enumerate(cfgs):
     random_dict[tracks_name] = 13068 + icfg
 
     tracks = cms.EDProducer('MFVTrackMover',
-                            mfvJetTrackRefGetter,
-                            tracks_src = cms.InputTag('mfvUnpackedCandidateTracks' if settings.is_miniaod else 'generalTracks'),
+                            tracks_src = cms.InputTag('mfvRescaledTracks'),
                             primary_vertices_src = cms.InputTag('goodOfflinePrimaryVertices'),
                             packed_candidates_src = cms.InputTag('packedPFCandidates'),
                             jets_src = cms.InputTag('selectedPatJets'),
+                            jet_track_ref_getter = mfvJetTrackRefGetter,
                             min_jet_pt = cms.double(50),
                             min_jet_ntracks = cms.uint32(4),
                             b_discriminator = cms.string('pfCombinedInclusiveSecondaryVertexV2BJetTags'),
@@ -77,12 +80,8 @@ for icfg, cfg in enumerate(cfgs):
                            min_track_sigmadxy = cfg.nsigmadxy,
                            )
 
-    # hack track-jet association:
-    # jets are composed of packedPFCandidates and JetTrackRefGetter knows how to compare those to mfvUnpackedCandidateTracks
-    # but since there is a mfvMovedTracks entry for every one of mfvUnpackedCandidateTracks, the keys are the same
-    # if this breaks, need to make JetTrackRefGetter know how to compose two maps
-    getattr(process, 'mfvVerticesToJets' + ex).unpacked_tracks_src = tracks_name
-    getattr(process, 'mfvVerticesAuxPresel' + ex).jets_tracks_keys_only = True
+    for x in 'mfvVerticesToJets', 'mfvVerticesAuxTmp', 'mfvVerticesAuxPresel':
+        getattr(process, x + ex).jet_track_ref_getter.tracks_maps_srcs.append(cms.InputTag(tracks_name))
 
     tree = cms.EDAnalyzer('MFVMovedTracksTreer',
                           event_src = cms.InputTag('mfvEvent'),

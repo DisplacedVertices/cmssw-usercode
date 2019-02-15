@@ -60,7 +60,7 @@ void MFVUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetu
   std::unique_ptr<reco::TrackCollection> lost_tracks(new reco::TrackCollection);
   std::unique_ptr<mfv::UnpackedCandidateTracksMap> tracks_map(new mfv::UnpackedCandidateTracksMap);
 
-  reco::TrackRefProd h_tracks = event.getRefBeforePut<reco::TrackCollection>();
+  reco::TrackRefProd h_output_tracks = event.getRefBeforePut<reco::TrackCollection>();
 
   int ntkpass = 0, nlosttkpass = 0;
 
@@ -77,7 +77,7 @@ void MFVUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetu
       }
 
       tracks->push_back(tk);
-      tracks_map->insert(reco::CandidatePtr(packed_candidates, i), reco::TrackRef(h_tracks, tracks->size() - 1));
+      tracks_map->insert(reco::CandidatePtr(packed_candidates, i), reco::TrackRef(h_output_tracks, tracks->size() - 1));
     }
 
     if (debug) std::cout << "\n";
@@ -100,7 +100,7 @@ void MFVUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetu
 
       if (add_lost_candidates) {
         tracks->push_back(tk);
-        tracks_map->insert(reco::CandidatePtr(lost_candidates, i), reco::TrackRef(h_tracks, tracks->size() - 1));
+        tracks_map->insert(reco::CandidatePtr(lost_candidates, i), reco::TrackRef(h_output_tracks, tracks->size() - 1));
       }
 
       lost_tracks->push_back(tk);
