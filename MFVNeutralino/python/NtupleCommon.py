@@ -177,8 +177,6 @@ def aod_ntuple_process(settings):
     random_service(process, {'mfvVertexTracks': 1222})
     tfileservice(process, 'vertex_histos.root')
 
-    process.load('JMTucker.Tools.L1ECALPrefiringWeightProducer_cfi')
-
     process.load('JMTucker.MFVNeutralino.Vertexer_cff')
     process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
     process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
@@ -186,8 +184,9 @@ def aod_ntuple_process(settings):
 
     process.p = cms.Path(process.mfvVertexSequence *
                          process.mfvTriggerFloats *
-                         process.prefiringweight *
                          process.mfvEvent)
+
+    process.mfvEvent.misc_srcs = [x for x in process.mfvEvent.misc_srcs if x.moduleLabel != 'prefiringweight'] # JMTBAD doesn't work with miniaod-on-fly here
 
     output_commands = make_output_commands(process, settings)
 
