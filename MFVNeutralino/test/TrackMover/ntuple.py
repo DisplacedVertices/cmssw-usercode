@@ -36,9 +36,6 @@ from JMTucker.MFVNeutralino.Vertexer_cff import modifiedVertexSequence
 from JMTucker.MFVNeutralino.JetTrackRefGetter_cff import mfvJetTrackRefGetter
 mfvJetTrackRefGetter.input_is_miniaod = settings.is_miniaod
 
-if settings.is_miniaod:
-    process.mfvRescaledTracks.tracks_src = 'mfvUnpackedCandidateTracks'
-
 process.mfvEvent.vertex_seed_tracks_src = ''
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
 process.mfvWeight.throw_if_no_mcstat = False
