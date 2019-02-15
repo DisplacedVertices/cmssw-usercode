@@ -161,7 +161,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       pv2sv = sv.position() - primary_vertex->position();
 
     std::vector<math::XYZTLorentzVector> p4s(mfv::NMomenta);
-    p4s[mfv::PTracksOnly] = sv.p4();
+    p4s[mfv::PTracksOnly] = p4s[mfv::PJetsByNtracks] = p4s[mfv::PTracksPlusJetsByNtracks] = sv.p4();
 
     for (int i = 0; i < mfv::NJetsByUse; ++i)
       aux.njets[i] = 0;
@@ -181,6 +181,8 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
         aux.njets[i_jet_assoc] = int2uchar(njets);
 
         if (njets > 0) {
+          p4s[mfv::PJetsByNtracks] = p4s[mfv::PTracksPlusJetsByNtracks] = math::XYZTLorentzVector();
+
           const edm::RefVector<pat::JetCollection>& jets = (*sv_to_jets[i_jet_assoc])[svref];
 
           for (int ijet = 0; ijet < njets; ++ijet) {
