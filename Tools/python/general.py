@@ -20,6 +20,15 @@ def bool_from_argv(s, remove=True, return_pos=False):
         sys.argv.remove(s)
     return ret
 
+class chdir(object):
+    def __init__(self, path):
+        self.old_dir = os.getcwd()
+        self.new_dir = path
+    def __enter__(self):
+        os.chdir(self.new_dir)
+    def __exit__(self, *args):
+        os.chdir(self.old_dir)
+
 def coderep_compactify_list(l):
     a = b = None
     xranges = []
