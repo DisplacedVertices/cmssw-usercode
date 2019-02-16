@@ -40,7 +40,7 @@ def get_em(fn, scale=1., alpha=1-0.6827):
              'ntracks' == name or \
              'pvntracks' == name or \
              'pvrho' == name or \
-             'pvsumpt2' == name or \
+             'pvscore' == name or \
              'pvx' == name or \
              'pvy' == name or \
              'pvz' == name:

@@ -177,12 +177,16 @@ def aod_ntuple_process(settings):
     random_service(process, {'mfvVertexTracks': 1222})
     tfileservice(process, 'vertex_histos.root')
 
+    for x in process.patAlgosToolsTask, process.slimmingTask, process.packedPFCandidatesTask, process.patTask, process.pfNoPileUpJMETask:
+        x.remove(process.goodOfflinePrimaryVertices)
+    process.load('JMTucker.Tools.GoodPrimaryVertices_cfi')
     process.load('JMTucker.MFVNeutralino.Vertexer_cff')
     process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
     process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
     process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 
-    process.p = cms.Path(process.mfvVertexSequence *
+    process.p = cms.Path(process.goodOfflinePrimaryVertices *
+                         process.mfvVertexSequence *
                          process.mfvTriggerFloats *
                          process.mfvEvent)
 
@@ -221,10 +225,10 @@ def miniaod_ntuple_process(settings):
     tfileservice(process, 'vertex_histos.root')
     output_file(process, 'ntuple.root', [])
 
-    process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
     process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
     process.load('PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi')
     process.load('PhysicsTools.PatAlgos.selectionLayer1.electronSelector_cfi')
+    process.load('JMTucker.Tools.GoodPrimaryVertices_cfi')
     process.load('JMTucker.Tools.L1ECALPrefiringWeightProducer_cfi')
     process.load('JMTucker.Tools.MCStatProducer_cff')
     process.load('JMTucker.Tools.UpdatedJets_cff')
@@ -235,7 +239,7 @@ def miniaod_ntuple_process(settings):
     process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
     process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 
-    process.goodOfflinePrimaryVertices.src = 'offlineSlimmedPrimaryVertices'
+    process.goodOfflinePrimaryVertices.input_is_miniaod = True
     process.selectedPatJets.src = 'updatedJetsMiniAOD'
     process.selectedPatMuons.src = 'slimmedMuons'
     process.selectedPatElectrons.src = 'slimmedElectrons'

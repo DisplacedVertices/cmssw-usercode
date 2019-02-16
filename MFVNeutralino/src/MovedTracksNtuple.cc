@@ -33,7 +33,7 @@ namespace mfv {
   void MovedTracksNtuple::clear() {
     run = lumi = 0;
     event = 0;
-    weight = bsx = bsy = bsz = bsdxdz = bsdydz = pvx = pvy = pvz = pvsumpt2 = jetht = move_x = move_y = move_z = 0;
+    weight = bsx = bsy = bsz = bsdxdz = bsdydz = pvx = pvy = pvz = pvscore = jetht = move_x = move_y = move_z = 0;
     gen_valid = 0;
     pass_hlt = npu = npv = nmovedtracks = npreseljets = npreselbjets = 0;
     pvntracks = ntracks = 0;
@@ -111,7 +111,7 @@ namespace mfv {
     tree->Branch("pvy", &pvy);
     tree->Branch("pvz", &pvz);
     tree->Branch("pvntracks", &pvntracks);
-    tree->Branch("pvsumpt2", &pvsumpt2);
+    tree->Branch("pvscore", &pvscore);
     tree->Branch("jetht", &jetht);
     tree->Branch("ntracks", &ntracks);
     tree->Branch("nmovedtracks", &nmovedtracks);
@@ -182,7 +182,7 @@ namespace mfv {
     tree->SetBranchAddress("pvy", &pvy);
     tree->SetBranchAddress("pvz", &pvz);
     tree->SetBranchAddress("pvntracks", &pvntracks);
-    tree->SetBranchAddress("pvsumpt2", &pvsumpt2);
+    tree->SetBranchAddress("pvscore", &pvscore);
     tree->SetBranchAddress("jetht", &jetht);
     tree->SetBranchAddress("ntracks", &ntracks);
     tree->SetBranchAddress("nmovedtracks", &nmovedtracks);

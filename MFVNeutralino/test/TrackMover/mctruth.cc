@@ -37,7 +37,7 @@ int main(int argc, char** argv) {
     numdens("all")
   };
 
-  enum { k_lspdist2, k_lspdist3, k_lspdistz, k_movedist2, k_movedist3, k_npv, k_pvz, k_pvrho, k_pvntracks, k_pvsumpt2, k_ht };
+  enum { k_lspdist2, k_lspdist3, k_lspdistz, k_movedist2, k_movedist3, k_npv, k_pvz, k_pvrho, k_pvntracks, k_pvscore, k_ht };
   for (numdens& nd : nds) {
     nd.book(k_lspdist2, "lspdist2", ";2-dist between gen verts;events/0.01 cm", 200, 0, 2);
     nd.book(k_lspdist3, "lspdist3", ";3-dist between gen verts;events/0.01 cm", 200, 0, 2);
@@ -48,7 +48,7 @@ int main(int argc, char** argv) {
     nd.book(k_pvz, "pvz", ";PV z (cm);events/0.24 cm", 200, -24, 24);
     nd.book(k_pvrho, "pvrho", ";PV #rho (cm);events/1 #mum", 200, 0, 0.02);
     nd.book(k_pvntracks, "pvntracks", ";PV # tracks;events/2", 200, 0, 400);
-    nd.book(k_pvsumpt2, "pvsumpt2", ";PV #Sigma p_{T}^{2} (GeV^{2});events/200 GeV^{2}", 200, 0, 40000);
+    nd.book(k_pvscore, "pvscore", ";PV #Sigma p_{T}^{2} (GeV^{2});events/200 GeV^{2}", 200, 0, 40000);
     nd.book(k_ht, "ht", ";#Sigma H_{T} (GeV);events/50 GeV", 50, 0, 2500);
   }
 
@@ -121,7 +121,7 @@ int main(int argc, char** argv) {
         Fill(nd(k_pvz)      .den, nt.pvz);
         Fill(nd(k_pvrho)    .den, mag(nt.pvx, nt.pvy));
         Fill(nd(k_pvntracks).den, nt.pvntracks);
-        Fill(nd(k_pvsumpt2) .den, nt.pvsumpt2);
+        Fill(nd(k_pvscore)  .den, nt.pvscore);
         Fill(nd(k_ht)       .den, nt.jetht);
       }
 
@@ -184,7 +184,7 @@ int main(int argc, char** argv) {
           Fill(nd(k_pvz)      .num, nt.pvz);
           Fill(nd(k_pvrho)    .num, mag(nt.pvx, nt.pvy));
           Fill(nd(k_pvntracks).num, nt.pvntracks);
-          Fill(nd(k_pvsumpt2) .num, nt.pvsumpt2);
+          Fill(nd(k_pvscore)  .num, nt.pvscore);
           Fill(nd(k_ht)       .num, nt.jetht);
         }
       }

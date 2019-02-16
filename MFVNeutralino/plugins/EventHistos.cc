@@ -63,7 +63,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_pvrhowide;
   TH1F* h_pvphi;
   TH1F* h_pvntracks;
-  TH1F* h_pvsumpt2;
+  TH1F* h_pvscore;
 
   TH1F* h_njets;
   TH1F* h_njets20;
@@ -188,7 +188,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_pvrhowide = fs->make<TH1F>("h_pvrhowide", ";PV rho (cm);events/10 #mum", 100, 0, 0.1);
   h_pvphi = fs->make<TH1F>("h_pvphi", ";primary vertex #phi (rad);events/.063", 100, -3.1416, 3.1416);
   h_pvntracks = fs->make<TH1F>("h_pvntracks", ";# of tracks in primary vertex;events/3", 100, 0, 300);
-  h_pvsumpt2 = fs->make<TH1F>("h_pvsumpt2", ";PV #Sigma p_{T}^{2} (GeV^{2});events/10000 GeV^{2}", 100, 0, 1e6);
+  h_pvscore = fs->make<TH1F>("h_pvscore", ";PV #Sigma p_{T}^{2} (GeV^{2});events/10000 GeV^{2}", 100, 0, 1e6);
 
   h_njets = fs->make<TH1F>("h_njets", ";# of jets;events", 30, 0, 30);
   h_njets20 = fs->make<TH1F>("h_njets20", ";# of jets w. p_{T} > 20 GeV;events", 20, 0, 20);
@@ -327,7 +327,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_pvczz->Fill(mevent->pvczz, w);
   h_pvphi->Fill(atan2(mevent->pvy - mevent->bsy_at_z(mevent->pvz), mevent->pvx - mevent->bsx_at_z(mevent->pvz)), w);
   h_pvntracks->Fill(mevent->pv_ntracks, w);
-  h_pvsumpt2->Fill(mevent->pv_sumpt2, w);
+  h_pvscore->Fill(mevent->pv_score, w);
   h_pvrho->Fill(mevent->pv_rho(), w);
   for (auto h : { h_pvrho, h_pvrhowide }) h->Fill(mevent->pv_rho(), w);
 

@@ -114,7 +114,7 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
   nt.pvy = mevent->pvy - mevent->bsy_at_z(mevent->pvz);
   nt.pvz = mevent->pvz;
   nt.pvntracks = mevent->pv_ntracks;
-  nt.pvsumpt2 = mevent->pv_sumpt2;
+  nt.pvscore = mevent->pv_score;
   nt.jetht = mevent->jet_ht(40);
 
   for (size_t i = 0, ie = mevent->njets(); i < ie; ++i) {

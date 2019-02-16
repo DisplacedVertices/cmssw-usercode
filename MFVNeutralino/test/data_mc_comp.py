@@ -146,8 +146,8 @@ C('presel_pvntracks',
   histogram_path = 'mfvEventHistosPreSel/h_pvntracks',
   )
 
-C('presel_pvsumpt2',
-  histogram_path = 'mfvEventHistosPreSel/h_pvsumpt2',
+C('presel_pvscore',
+  histogram_path = 'mfvEventHistosPreSel/h_pvscore',
   )
 
 C('presel_pvrho',
