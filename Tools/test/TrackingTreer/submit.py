@@ -1,9 +1,20 @@
-import os, sys
+# JMTBAD need to figure out general version of CondorSubmitter not tied into CMSSW jobs
+
+import os, sys, shutil
+from glob import glob
+from JMTucker.Tools.general import chdir
+
+if len(sys.argv) < 2:
+    sys.exit('usage: submit.py output_dir')
+
+txts = glob('/uscms_data/d2/tucker/crab_dirs/AAdone/TrackingTreerV2/*txt')
+if not txts:
+    raise ValueError('no txts?')
 
 jdl = '''universe = vanilla
-Executable = ../submit.sh
+Executable = submit.sh
 arguments = %(batch)s $(Process) %(eos_output_dir)s
-transfer_input_files = ../hists.exe,%(txt)s
+transfer_input_files = hists.exe,%(txt)s
 Output = %(batch)s_$(Process).stdout
 Error = %(batch)s_$(Process).stderr
 Log = %(batch)s_$(Process).log
@@ -16,53 +27,37 @@ Queue %(njobs)i
 '''
 
 user = os.environ['USER']
-output_dir = raw_input('output dir? ')
-assert '/' not in output_dir
-if os.system('mkdir %s' % output_dir) != 0:
-    raise IOError('directory already existed')
-os.chdir(output_dir)
+prevwd = os.getcwd()
+batch_dir = sys.argv[1]
+eos_output_dir = '/store/user/%s/%s' % (user, batch_dir)
 
-eos_output_dir = '/store/user/%s/%s' % (user, output_dir)
-if os.system('mkdir %s' % output_dir) != 0 or os.system('eos root://cmseos.fnal.gov mkdir %s' % eos_output_dir) != 0:
-    raise IOError('directory already existed')
+if os.path.exists(batch_dir) or \
+        os.system('mkdir %s' % batch_dir) != 0 or \
+        os.system('eos root://cmseos.fnal.gov ls %s 2>/dev/null >/dev/null' % eos_output_dir) == 0 or \
+        os.system('eos root://cmseos.fnal.gov mkdir %s' % eos_output_dir) != 0:
+    raise IOError('working or eos output directory already exists?')
 
-txts = []
-for x in sys.argv[1:]:
-    if x.endswith('.txt') and os.path.isfile(x):
-        txts.append(x)
+for x in ['hists.exe', 'submit.sh'] + txts:
+    shutil.copy2(x, batch_dir)
 
-if not txts:
-    raise ValueError('no txts')
+with chdir(batch_dir) as _, open('checkem.sh', 'wt') as checkem, open('haddem.sh', 'wt') as haddem, open('cleanup.sh', 'wt') as cleanup:
+    for txt in txts:
+        txt = os.path.basename(txt)
+        batch = os.path.splitext(txt)[0]
+        njobs = len(open(txt).readlines())
+        open('%s.jdl' % batch, 'wt').write(jdl % locals())
+        if os.system('condor_submit %s.jdl' % batch) != 0:
+            raise ValueError('problem submitting')
 
-checkem = open('checkem.sh', 'wt')
-haddem = open('haddem.sh', 'wt')
+        log_files = ' '.join(os.path.join(os.getcwd(), '%s_%i.log' % (batch, i)) for i in xrange(njobs))
+        checkem.write('if [[ $(grep "Normal termination (return value 0)" %(log_files)s | wc -l) != "%(njobs)s" ]]; then echo %(batch)s not done or bad; fi\n' % locals())
 
-for txt in txts:
-    batch = os.path.splitext(os.path.basename(txt))[0]
-    njobs = len(open(txt).readlines())
-    open('temp.jdl', 'wt').write(jdl % locals())
-    if os.system("condor_submit temp.jdl") != 0:
-        raise ValueError('problem submitting')
+        out_fn = 'root://cmseos.fnal.gov/%s/%s.root' % (eos_output_dir, batch)
+        out_files_base = ['%s/%s_%i.root' % (eos_output_dir, batch, i) for i in xrange(njobs)]
+        out_files = ' '.join('root://cmseos.fnal.gov/' + x for x in out_files_base)
+        haddem.write('hadd.py %s %s\n' % (out_fn, out_files))
+        for x in out_files_base:
+            cleanup.write('eos root://cmseos.fnal.gov/ rm %s\n' % x)
 
-    log_files = ['%(batch)s_%(i)i.log' % locals() for i in xrange(njobs)]
-    log_files = ' '.join(log_files)
-    checkem.write('''
-if [[ $(grep "Normal termination (return value 0)" %(log_files)s  | wc -l) == "%(njobs)s" ]]; then
-  echo %(batch)s OK
-else
-  echo %(batch)s BAD
-fi
-''' % locals())
-
-    out_files = ['root://cmseos.fnal.gov/%(eos_output_dir)s/%(batch)s_%(i)i.root' % locals() for i in xrange(njobs)]
-    out_files = ' '.join(out_files)
-    out_fn = '/uscmst1b_scratch/lpc1/3DayLifetime/%s/%s.root' % (user, batch)
-    haddem.write('hadd.py %(out_fn)s %(out_files)s\n' % locals())
-    haddem.write('xrdcp %(out_fn)s root://cmseos.fnal.gov/%(eos_output_dir)s\n\n' % locals())
-
-checkem.close()
-haddem.close()
-
-os.chmod('checkem.sh', 0766)
-os.chmod('haddem.sh', 0766)
-
+for sh in 'checkem.sh', 'haddem.sh', 'cleanup.sh':
+    os.chmod(os.path.join(batch_dir, sh), 0755)

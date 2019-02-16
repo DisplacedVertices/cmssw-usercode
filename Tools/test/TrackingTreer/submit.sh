@@ -1,40 +1,25 @@
 #!/bin/sh
 
-echo script starting on `date`
-echo script args: $@
 wd=$(pwd)
-echo in $wd
-
 batch=$1
 job=$2
 out_dir=$3
-echo batch $batch job $job
 
+export SCRAM_ARCH=slc6_amd64_gcc630
 source /cvmfs/cms.cern.ch/cmsset_default.sh
-cmsrel CMSSW_7_6_3_patch2 2>&1 > /dev/null
-cd CMSSW_7_6_3_patch2/src
-cmsenv
+scram project CMSSW CMSSW_9_4_6_patch1 2>/dev/null >/dev/null
+cd CMSSW_9_4_6_patch1/src
+eval $(scram ru -sh)
 cd $wd
 
-echo which root
-which root
-
-sed -n "$((job+1))p" ${batch}.txt > input.txt
-echo input.txt
-cat input.txt
-
+in_fn=$(sed -n "$((job+1))p" ${batch}.txt)
 out_fn=${batch}_${job}.root
 
-cmd="./hists.exe input.txt $out_fn"
-echo $cmd
-$cmd
+./hists.exe -i $in_fn -o $out_fn
 exit_code=$?
-if [[ $exit_code == "0" ]]; then
-    cmd="xrdcp -s $out_fn root://cmseos.fnal.gov/${out_dir}"
-    echo $cmd
-    $cmd
+if [[ $exit_code == 0 ]]; then
+    xrdcp -s $out_fn root://cmseos.fnal.gov/${out_dir}
 fi
 
-rm input.txt
 rm $out_fn
 exit $exit_code
