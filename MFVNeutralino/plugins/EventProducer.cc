@@ -141,7 +141,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     event.getByToken(gen_info_token, gen_info);
 
     mevent->gen_weight = gen_info->weight();
-    mevent->gen_weightprod = gen_info->weightProduct();
 
     edm::Handle<reco::GenJetCollection> gen_jets;
     event.getByToken(gen_jets_token, gen_jets);
@@ -468,7 +467,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     // beamspot and slopes, pvx,y,z
 
     mevent->gen_valid = 0;
-    mevent->gen_weightprod = 0;
     mevent->gen_flavor_code = 0;
     for (int i = 0; i < 2; ++i) {
       mevent->gen_lsp_pt[i] = mevent->gen_lsp_eta[i] = mevent->gen_lsp_phi[i] = mevent->gen_lsp_mass[i] = 0;

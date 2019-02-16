@@ -46,7 +46,7 @@ struct MFVEvent {
     gen_valid = 0;
     npv = pv_ntracks = 0;
     gen_flavor_code = 0;
-    gen_weight = gen_weightprod = l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = npu = bsx = bsy = bsz = bsdxdz = bsdydz = bswidthx = bswidthy = pvx = pvy = pvz = pvcxx = pvcxy = pvcxz = pvcyy = pvcyz = pvczz = pv_sumpt2 = metx = mety = 0;
+    gen_weight = l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = npu = bsx = bsy = bsz = bsdxdz = bsdydz = bswidthx = bswidthy = pvx = pvy = pvz = pvcxx = pvcxy = pvcxz = pvcyy = pvcyz = pvczz = pv_sumpt2 = metx = mety = 0;
     for (int i = 0; i < 2; ++i) {
       gen_lsp_pt[i] = gen_lsp_eta[i] = gen_lsp_phi[i] = gen_lsp_mass[i] = 0;
       gen_decay_type[i] = 0;
@@ -81,7 +81,6 @@ struct MFVEvent {
   }
 
   float gen_weight;
-  float gen_weightprod;
   uchar gen_flavor_code;
   float gen_pv[3];
   std::vector<TLorentzVector> gen_bquarks;

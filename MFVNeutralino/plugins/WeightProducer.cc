@@ -16,7 +16,6 @@ public:
 private:
   const edm::EDGetTokenT<jmt::MergeableInt> nevents_token;
   const edm::EDGetTokenT<jmt::MergeableFloat> sumweight_token;
-  const edm::EDGetTokenT<jmt::MergeableFloat> sumweightprod_token;
   const bool throw_if_no_mcstat;
   const edm::EDGetTokenT<MFVEvent> mevent_token;
   const bool enable;
@@ -38,14 +37,13 @@ private:
   TH1D* h_npu;
   TH1D* h_npv;
 
-  enum { sum_nevents_total, sum_gen_weight_total, sum_gen_weightprod_total, sum_gen_weight, sum_gen_weightprod, sum_pileup_weight, sum_npv_weight, sum_weight, n_sums };
+  enum { sum_nevents_total, sum_gen_weight_total, sum_gen_weight, sum_pileup_weight, sum_npv_weight, sum_weight, n_sums };
   TH1D* h_sums;
 };
 
 MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
   : nevents_token(consumes<jmt::MergeableInt, edm::InLumi>(edm::InputTag("mcStat", "nEvents"))),
     sumweight_token(consumes<jmt::MergeableFloat, edm::InLumi>(edm::InputTag("mcStat", "sumWeight"))),
-    sumweightprod_token(consumes<jmt::MergeableFloat, edm::InLumi>(edm::InputTag("mcStat", "sumWeightProd"))),
     throw_if_no_mcstat(cfg.getParameter<bool>("throw_if_no_mcstat")),
     mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
     enable(cfg.getParameter<bool>("enable")),
@@ -75,7 +73,7 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
 
     h_sums = fs->make<TH1D>("h_sums", TString::Format("half_mc_weight = %.3f", half_mc_weight), n_sums+1, 0, n_sums+1);
     int ibin = 1;
-    for (const char* x : { "sum_nevents_total", "sum_gen_weight_total", "sum_gen_weightprod_total", "sum_gen_weight", "sum_gen_weightprod", "sum_pileup_weight", "sum_npv_weight", "sum_weight", "n_sums" })
+    for (const char* x : { "sum_nevents_total", "sum_gen_weight_total", "sum_gen_weight", "sum_pileup_weight", "sum_npv_weight", "sum_weight", "n_sums" })
       h_sums->GetXaxis()->SetBinLabel(ibin++, x);
   }
 }
@@ -83,19 +81,17 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
 void MFVWeightProducer::endLuminosityBlock(const edm::LuminosityBlock& lumi, const edm::EventSetup&) {
   if (lumi.run() == 1) { // no lumi.isRealData()
     edm::Handle<jmt::MergeableInt> nEvents;
-    edm::Handle<jmt::MergeableFloat> sumWeight, sumWeightProd;
+    edm::Handle<jmt::MergeableFloat> sumWeight;
     lumi.getByToken(nevents_token, nEvents);
     lumi.getByToken(sumweight_token, sumWeight);
-    lumi.getByToken(sumweightprod_token, sumWeightProd);
 
-    if (nEvents.isValid() && sumWeight.isValid() && sumWeightProd.isValid()) {
+    if (nEvents.isValid() && sumWeight.isValid()) {
       if (prints)
-        printf("MFVWeight::beginLuminosityBlock r: %u l: %u nEvents: %i  sumWeight: %f  sumWeightProd: %f\n", lumi.run(), lumi.luminosityBlock(), nEvents->get(), sumWeight->get(), sumWeightProd->get());
+        printf("MFVWeight::beginLuminosityBlock r: %u l: %u nEvents: %i  sumWeight: %f\n", lumi.run(), lumi.luminosityBlock(), nEvents->get(), sumWeight->get());
       
       if (histos) {
         h_sums->Fill(sum_nevents_total,        half_mc_weight * nEvents->get());
         h_sums->Fill(sum_gen_weight_total,     half_mc_weight * sumWeight->get());
-        h_sums->Fill(sum_gen_weightprod_total, half_mc_weight * sumWeightProd->get());
       }
     }
     else if (throw_if_no_mcstat)
@@ -135,13 +131,11 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
 
     if (!event.isRealData()) {
       if (weight_gen || weight_gen_sign_only) {
-        //assert(mevent->gen_weightprod == 0 || (mevent->gen_weight - mevent->gen_weightprod)/mevent->gen_weightprod < 1e-3); // JMTBAD
         if (prints)
-          printf("gen_weight: %g  weightprod: %g  ", mevent->gen_weight, mevent->gen_weightprod);
+          printf("gen_weight: %g  ", mevent->gen_weight);
         if (histos) {
           h_gensign->Fill(mevent->gen_weight > 0 ? 1 : -1);
           h_sums->Fill(sum_gen_weight, mevent->gen_weight);
-          h_sums->Fill(sum_gen_weightprod, mevent->gen_weightprod);
         }
         if (weight_gen_sign_only) {
           if (mevent->gen_weight < 0)

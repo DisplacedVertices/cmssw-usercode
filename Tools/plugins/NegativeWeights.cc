@@ -17,7 +17,6 @@ private:
   const edm::EDGetTokenT<GenEventInfoProduct> gen_info_token;
 
   TH1D* h_nweights;
-  TH1D* h_weight_eq_product;
   TH1D* h_weight_sign;
 };
 
@@ -28,7 +27,6 @@ JMTNegativeWeights::JMTNegativeWeights(const edm::ParameterSet& cfg)
   TH1::SetDefaultSumw2();
 
   h_nweights = fs->make<TH1D>("h_nweights", "", 100, 0, 100);
-  h_weight_eq_product = fs->make<TH1D>("h_weight_eq_product", "", 2, 0, 2);
   h_weight_sign = fs->make<TH1D>("h_weight_sign", "", 2, 0, 2);
 }
 
@@ -40,7 +38,6 @@ void JMTNegativeWeights::analyze(const edm::Event& event, const edm::EventSetup&
   event.getByToken(gen_info_token, gen_info);
 
   h_nweights->Fill(gen_info->weights().size());
-  h_weight_eq_product->Fill(fabs(gen_info->weight() - gen_info->weightProduct()) / gen_info->weight() < 1e-3);
   h_weight_sign->Fill(gen_info->weight() > 0);
 }
 
