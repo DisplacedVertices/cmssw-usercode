@@ -16,7 +16,7 @@ void root_setup() {
   gROOT->ProcessLine("gErrorIgnoreLevel = 1001;");
 }
 
-file_and_tree::file_and_tree(const char* in_fn) {
+file_and_tree::file_and_tree(const char* in_fn, const char* out_fn) {
   f = TFile::Open(in_fn);
   if (!f || !f->IsOpen()) {
     fprintf(stderr, "could not open %s\n", in_fn);
@@ -31,9 +31,20 @@ file_and_tree::file_and_tree(const char* in_fn) {
   }
 
   nt.read_from_tree(t);
+
+  if (strncmp(out_fn, "n/a", 3) == 0)
+    f_out = 0;
+  else
+    f_out = new TFile(out_fn, "recreate");
 }
 
 file_and_tree::~file_and_tree() {
+  if (f_out) {
+    f_out->Write();
+    f_out->Close();
+  }
   f->Close();
+
   delete f;
+  delete f_out;
 }

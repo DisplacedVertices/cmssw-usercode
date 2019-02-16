@@ -6,14 +6,17 @@
 class TFile;
 class TTree;
 
+// JMTBAD common library with e.g. TrackMover
+
 void root_setup();
 
 struct file_and_tree {
   TFile* f;
   TTree* t;
   TrackingTree nt;
+  TFile* f_out;
 
-  file_and_tree(const char* in_fn);
+  file_and_tree(const char* in_fn, const char* out_fn);
   ~file_and_tree();
 };
 

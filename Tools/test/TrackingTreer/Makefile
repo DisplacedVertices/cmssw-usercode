@@ -3,8 +3,10 @@ INCLUDES      = $(patsubst %.cc, %.h, $(SOURCES))
 OBJECTS       = $(patsubst %.cc, bin/%.o, $(SOURCES))
 ROOTCFLAGS    = $(shell root-config --cflags)
 ROOTLIBS      = $(shell root-config --nonew --glibs)
-CFLAGS        = $(ROOTCFLAGS) -I$(CMSSW_BASE)/src -std=c++17 -pedantic -Werror -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-qual -O3
-LIBS          = $(ROOTLIBS)
+BOOSTCFLAGS   = -I$(shell scram tool tag boost INCLUDE)
+BOOSTLIBS     = -L$(shell scram tool tag boost LIBDIR) -lboost_program_options
+CFLAGS        = $(ROOTCFLAGS) $(BOOSTCFLAGS) -I$(CMSSW_BASE)/src -std=c++17 -pedantic -Werror -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-qual -O3
+LIBS          = $(ROOTLIBS) $(BOOSTLIBS)
 EXES          = hists.exe
 
 all: $(EXES)

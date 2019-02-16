@@ -1,32 +1,84 @@
+#include <cassert>
 #include <fstream>
 #include <iostream>
 #include <string>
 #include <vector>
+#include <boost/program_options.hpp>
 #include "TFile.h"
-#include "TH1.h"
 #include "TH2.h"
 #include "TTree.h"
 #include "TVector2.h"
+#include "JMTucker/Tools/interface/LumiList.h"
 #include "JMTucker/Tools/interface/TrackingTree.h"
 #include "utils.h"
-#include <assert.h>
+
+// be sure to change these if you target a different sample, e.g. 2018
+// JMTBAD standardize pileup weight access
+const double pileup_weights[96] = { 0.184739, 3.87862, 3.43873, 2.55711, 1.66222, 1.50921, 1.28595, 1.25693, 0.615431, 1.45522, 1.4954, 1.48321, 1.33156, 1.16429, 1.07819, 1.05333, 1.08185, 1.1281, 1.16611, 1.18882, 1.2123, 1.23819, 1.26049, 1.27054, 1.27151, 1.27133, 1.27212, 1.26675, 1.27518, 1.25199, 1.22257, 1.16871, 1.10992, 1.03781, 0.968667, 0.911656, 0.867131, 0.834894, 0.787916, 0.750576, 0.758612, 0.79302, 0.859323, 0.959067, 1.09514, 1.25685, 1.41972, 1.49691, 1.52938, 1.46324, 1.33617, 1.15483, 0.950685, 0.749146, 0.569927, 0.411027, 0.28984, 0.198626, 0.13758, 0.0964932, 0.0693175, 0.0508504, 0.038385, 0.0299888, 0.0240799, 0.0170695, 0.0124844, 0.0107651, 0.00962124, 0.00879133, 0.00826726, 0.00803058, 0.00783523, 0.00781574, 0.00631688, 0.00535918, 0.00553274, 0.00551791, 0.00589565, 0.00594138, 0.00625883, 0.00628165, 0.00635429, 0.00491238, 0.00435898, 0.00445464, 0.00438023, 0.00456194, 0.00393917, 0.00424369, 0.00310455, 0.00284123, 0.00176242, 0.00148484, 0.00316881, 0.00199287 };
 
 int main(int argc, char** argv) {
-  if (argc < 3) {
-    fprintf(stderr, "usage: hists.exe files_in.txt out.root\n");
-    return 1;
+  std::string in_fn;
+  std::string out_fn("hists.root");
+  std::string json;
+  float nevents_frac;
+
+  {
+    namespace po = boost::program_options;
+    po::options_description desc("Allowed options");
+    desc.add_options()
+      ("help,h", "this help message")
+      ("input-file,i",   po::value<std::string>(&in_fn),                                             "the input file (required)")
+      ("output-file,o",  po::value<std::string>(&out_fn)        ->default_value("hists.root"),       "the output file")
+      ("json,j",         po::value<std::string>(&json),                                              "lumi mask json file for data")
+      ("nevents-frac,n", po::value<float>(&nevents_frac)        ->default_value(1.f),                "only run on this fraction of events in the tree")
+      ;
+
+    po::variables_map vm;
+    po::store(po::parse_command_line(argc, argv, desc), vm);
+    po::notify(vm);
+
+    if (vm.count("help")) {
+      std::cout << desc << "\n";
+      return 1;
+    }
+
+    if (in_fn == "") {
+      std::cout << "value for --input-file is required\n" << desc << "\n";
+      return 1;
+    }
   }
 
-  const char* in_fn = argv[1];
-  const char* out_fn = argv[2];
+  std::cout << argv[0] << " with options:"
+            << " in_fn: " << in_fn
+            << " out_fn: " << out_fn
+            << " json: " << (json != "" ? json : "none")
+            << " nevents_frac: " << nevents_frac
+            << "\n";
 
   root_setup();
 
-  const double pileup_weights[96] = { 0.184739, 3.87862, 3.43873, 2.55711, 1.66222, 1.50921, 1.28595, 1.25693, 0.615431, 1.45522, 1.4954, 1.48321, 1.33156, 1.16429, 1.07819, 1.05333, 1.08185, 1.1281, 1.16611, 1.18882, 1.2123, 1.23819, 1.26049, 1.27054, 1.27151, 1.27133, 1.27212, 1.26675, 1.27518, 1.25199, 1.22257, 1.16871, 1.10992, 1.03781, 0.968667, 0.911656, 0.867131, 0.834894, 0.787916, 0.750576, 0.758612, 0.79302, 0.859323, 0.959067, 1.09514, 1.25685, 1.41972, 1.49691, 1.52938, 1.46324, 1.33617, 1.15483, 0.950685, 0.749146, 0.569927, 0.411027, 0.28984, 0.198626, 0.13758, 0.0964932, 0.0693175, 0.0508504, 0.038385, 0.0299888, 0.0240799, 0.0170695, 0.0124844, 0.0107651, 0.00962124, 0.00879133, 0.00826726, 0.00803058, 0.00783523, 0.00781574, 0.00631688, 0.00535918, 0.00553274, 0.00551791, 0.00589565, 0.00594138, 0.00625883, 0.00628165, 0.00635429, 0.00491238, 0.00435898, 0.00445464, 0.00438023, 0.00456194, 0.00393917, 0.00424369, 0.00310455, 0.00284123, 0.00176242, 0.00148484, 0.00316881, 0.00199287 };
+  file_and_tree fat(in_fn.c_str(), out_fn.c_str());
+  TrackingTree& nt = fat.nt;
+  fat.t->GetEntry(0);
 
-  TFile* f_out = new TFile(out_fn, "recreate");
+  const bool is_mc = nt.run() == 1;
+
+  fat.f_out->mkdir("mfvWeight")->cd();
+  TH1D* h_sums = (TH1D*)fat.f->Get("mcStat/h_sums")->Clone();
+  if (is_mc && nevents_frac < 1) {
+    h_sums->SetBinContent(1, h_sums->GetBinContent(1) * nevents_frac);
+    for (int i = 2, ie = h_sums->GetNbinsX(); i <= ie; ++i) // invalidate other entries since we can't just assume equal weights in them
+      h_sums->SetBinContent(i, -1e9);
+  }
+  fat.f_out->cd();
+
+  std::unique_ptr<jmt::LumiList> good_ll;
+  if (!is_mc && json != "") good_ll.reset(new jmt::LumiList(json));
 
   TH1D* h_norm = new TH1D("h_norm", "", 1, 0, 1);
+  if (is_mc)
+    h_norm->Fill(0.5, h_sums->GetBinContent(1));
+
   TH1D* h_npu = new TH1D("h_npu", ";true npu", 100, 0, 100);
   TH1D* h_npv = new TH1D("h_npv", ";number of primary vertices", 50, 0, 50);
   TH1D* h_bsx = new TH1D("h_bsx", ";beamspot x", 400, -0.15, 0.15);
@@ -136,25 +188,23 @@ int main(int argc, char** argv) {
     h_tracks_dxyerr_v_nstlayers[i] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_nstlayers", ex[i]), TString::Format("%s tracks;tracks nstlayers;tracks dxyerr", ex[i]), 20, 0, 20, 200, 0, 0.2);
   }
 
-  file_and_tree fat(in_fn);
-  TrackingTree& nt = fat.nt;
-
-  TH1D* h_sums = ((TH1D*)fat.f->Get("mcStat/h_sums"));
-  const bool is_mc = h_sums->GetBinContent(2) > 0; 
-
-  if (is_mc)
-    h_norm->Fill(0.5, ((TH1D*)fat.f->Get("mcStat/h_sums"))->GetBinContent(1));
-
-  long jj = 0, jje = fat.t->GetEntries();
-  for (; jj < jje; ++jj) {
-    if (jj > 100000) break;
+  unsigned long long jj = 0;
+  const unsigned long long jje = fat.t->GetEntries();
+  const unsigned long long jjmax = nevents_frac < 1 ? nevents_frac * jje : jje;
+  for (; jj < jjmax; ++jj) {
     if (fat.t->LoadTree(jj) < 0) break;
     if (fat.t->GetEntry(jj) <= 0) continue;
     if (jj % 2000 == 0) {
-      printf("\r%li/%li", jj, jje);
+      if (jjmax != jje) printf("\r%llu/%llu(/%llu)", jj, jjmax, jje);
+      else              printf("\r%llu/%llu",        jj, jjmax);
       fflush(stdout);
     }
-    double w = 1.0;
+
+    if (!is_mc && good_ll.get() && !good_ll->contains(nt.run(), nt.lumi()))
+      continue;
+
+    double w = 1;
+
     if (is_mc) {
       const int npu = int(nt.npu());
       h_npu->Fill(npu);
@@ -262,9 +312,7 @@ int main(int argc, char** argv) {
       h_ntracks[i]->Fill(ntracks[i], w);
     }
   }
-  printf("\r%li/%li\n", jj, jje);
 
-  f_out->Write();
-  f_out->Close();
-  delete f_out;
+  if (jjmax != jje) printf("\rdone with %llu events (out of %llu)\n", jjmax, jje);
+  else              printf("\rdone with %llu events\n",               jjmax);
 }
