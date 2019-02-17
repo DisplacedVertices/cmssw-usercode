@@ -5,9 +5,9 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.MFVNeutralino.PerSignal import PerSignal
 
-titles = 'v22', 'v21'
-paths = ('/uscms_data/d2/tucker/crab_dirs/MiniTreeV22m',
-         '/uscms_data/d2/tucker/crab_dirs/MiniTreeV21m')
+titles = 'v23', 'v22'
+paths = ('/uscms_data/d2/tucker/crab_dirs/MiniTreeV23m',
+         '/uscms_data/d2/tucker/crab_dirs/MiniTreeV22m')
 
 set_style()
 ps = plot_saver(plot_dir('sigeff_ratio_%sV%s' % titles), size=(600,600), log=False)

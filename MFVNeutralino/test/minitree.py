@@ -3,8 +3,7 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 is_mc = True # for blinding
 cross = '' # 2017to2018' # 2017to2017p8'
 
-version = 'v22m'
-dataset = 'ntuple' + version
+from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset
 sample_files(process, 'qcdht2000_2017', dataset, 1)
 tfileservice(process, 'minitree.root')
 file_event_from_argv(process)
@@ -35,7 +34,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     samples = [s for s in samples if s.has_dataset(dataset) and (s.is_mc or not cross)]
     set_splitting(samples, dataset, 'minitree', data_json=json_path('ana_2017p8_1pc.json'))
 
-    cs = CondorSubmitter('MiniTree%s%s' % (version.capitalize(), '_' + cross if cross else ''),
+    cs = CondorSubmitter('MiniTree%s%s' % (version, '_' + cross if cross else ''),
                          ex = year,
                          dataset = dataset,
                          pset_modifier = chain_modifiers(is_mc_modifier, half_mc_modifier(), per_sample_pileup_weights_modifier(cross=cross)),

@@ -2,6 +2,7 @@
 
 import sys, os
 from glob import glob
+from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.Sample import norm_from_file
 from JMTucker.Tools.general import typed_from_argv, bool_from_argv
@@ -32,7 +33,7 @@ for x in sys.argv[1:]:
         print 'using', x2
         fns.extend(glob(x2))
 if not fns:
-    gg = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV22m/*.root'
+    gg = '/uscms_data/d2/tucker/crab_dirs/MiniTree%s/*.root' % version
     print 'using default', gg
     fns = glob(gg)
 

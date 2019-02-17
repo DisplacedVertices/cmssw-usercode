@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ntk=5
-indir=/uscms_data/d2/tucker/crab_dirs/MiniTreeV22m
+indir=/uscms_data/d2/tucker/crab_dirs/MiniTreeV23m
 outdir=output
 files=(
     qcdht0700_2017.root

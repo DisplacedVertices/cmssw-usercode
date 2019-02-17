@@ -7,7 +7,7 @@ settings.zerobias = False
 assert not settings.zerobias # need to check trigger/event filter
 settings.event_filter = 'trigger jets only'
 
-version = settings.version + 'V1'
+version = settings.version + 'v1'
 
 debug = False
 
