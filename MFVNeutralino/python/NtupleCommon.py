@@ -2,7 +2,7 @@ from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
 ntuple_version_ = 'V23'
-ntuple_version_use = ntuple_version + 'm'
+ntuple_version_use = ntuple_version_ + 'm'
 dataset = 'ntuple' + ntuple_version_use.lower()
 
 def run_n_tk_seeds(process, mode, settings, output_commands):
@@ -99,9 +99,9 @@ class NtupleSettings(CMSSWSettings):
     @property
     def version(self):
         if self.is_miniaod:
-            return ntuple_version + 'm'
+            return ntuple_version_ + 'm'
         else:
-            return ntuple_version
+            return ntuple_version_
 
     def normalize(self):
         if self.run_n_tk_seeds:
