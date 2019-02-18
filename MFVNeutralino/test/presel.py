@@ -37,6 +37,7 @@ process.preSeq = cms.Sequence(process.goodOfflinePrimaryVertices *
                               process.mfvTriggerFloats *
                               process.mfvGenParticles *
                               process.mfvUnpackedCandidateTracks *
+                              process.mfvRescaledTracks *
                               process.mfvVertexTracks *
                               process.prefiringweight *
                               process.mfvEvent *
