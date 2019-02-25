@@ -144,7 +144,7 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
     printf("npu: %f\n", mevent->npu);
     printf("beamspot: (%11.3g, %11.3g, %11.3g)  dxdz: %11.3g  dydz: %11.3g  widthx: %11.3g  widthy: %11.3g\n", mevent->bsx, mevent->bsy, mevent->bsz, mevent->bsdxdz, mevent->bsdydz, mevent->bswidthx, mevent->bswidthy);
     printf("npv: %u\n", mevent->npv);
-    printf("pv: ntracks: %u   sumpt2: %11.3g   coords: (%11.3g, %11.3g, %11.3g)   rho: %11.3g\n", mevent->pv_ntracks, mevent->pv_sumpt2, mevent->pvx, mevent->pvy, mevent->pvz, mevent->pv_rho());
+    printf("pv: ntracks: %u   score: %11.3g   coords: (%11.3g, %11.3g, %11.3g)   rho: %11.3g\n", mevent->pv_ntracks, mevent->pv_score, mevent->pvx, mevent->pvy, mevent->pvz, mevent->pv_rho());
     printf("njets: %i (>20GeV: %i)  (no pu l: %u  m: %u  t: %u)  jet_ht: %11.3g   pt of jet #3: %11.3g   pt of jet #4: %11.3g   pt of jet #5: %11.3g\n", mevent->njets(), mevent->njets(20), mevent->njetsnopu(0), mevent->njetsnopu(1), mevent->njetsnopu(2), mevent->jet_ht(), mevent->nth_jet_pt(3), mevent->nth_jet_pt(4), mevent->nth_jet_pt(5));
     printf("jet tracks (n all = %lu)\n", mevent->n_jet_tracks_all());
     for (size_t i = 0, ie = mevent->n_jet_tracks_all(); i < ie; ++i)

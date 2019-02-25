@@ -1,7 +1,6 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-version = 'v22m'
-dataset = 'ntuple' + version
+from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset
 sample_files(process, 'JetHT2017F', dataset, 1)
 tfileservice(process, 'per_vertex.root')
 file_event_from_argv(process)
@@ -36,7 +35,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     #samples = [s for s in samples if s.has_dataset(dataset)]
     set_splitting(samples, dataset, 'minitree', data_json=json_path('ana_2017p8.json'))
 
-    cs = CondorSubmitter('ByRunPerVertex' + version.capitalize(),
+    cs = CondorSubmitter('ByRunPerVertex' + version,
                          ex = year,
                          dataset = dataset,
                          )

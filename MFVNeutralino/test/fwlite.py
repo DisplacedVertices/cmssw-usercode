@@ -1,3 +1,4 @@
+from JMTucker.MFVNeutralino.NtupleCommon import dataset
 from JMTucker.Tools import colors
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.SampleFiles import get_local_fns
@@ -10,7 +11,7 @@ from DataFormats.FWLite import Handle, Events
 auxes, auxesLabel = Handle('std::vector<MFVVertexAux>'), 'mfvVerticesAux'
 mfvev, mfvevLabel = Handle('MFVEvent'), 'mfvEvent'
 
-events = Events(get_local_fns('mfv_stopdbardbar_tau001000um_M0800_2017', 'ntuplev22m'))
+events = Events(get_local_fns('mfv_stopdbardbar_tau001000um_M0800_2017', dataset))
 
 JByNtracks = 0
 PTracksOnly, PJetsByNtracks, PTracksPlusJetsByNtracks = 0,1,2

@@ -5,6 +5,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/TracksMap.h"
 
 class MFVUnpackedCandidateTracks : public edm::EDProducer {
 public:
@@ -46,7 +47,7 @@ MFVUnpackedCandidateTracks::MFVUnpackedCandidateTracks(const edm::ParameterSet& 
 {
   produces<reco::TrackCollection>();
   produces<reco::TrackCollection>("lost");
-  produces<std::vector<size_t>>(); // map back to which packed candidate
+  produces<mfv::UnpackedCandidateTracksMap>();
 }
 
 void MFVUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetup& setup) {
@@ -57,22 +58,28 @@ void MFVUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetu
 
   std::unique_ptr<reco::TrackCollection> tracks(new reco::TrackCollection);
   std::unique_ptr<reco::TrackCollection> lost_tracks(new reco::TrackCollection);
-  std::unique_ptr<std::vector<size_t>> which(new std::vector<size_t>);
+  std::unique_ptr<mfv::UnpackedCandidateTracksMap> tracks_map(new mfv::UnpackedCandidateTracksMap);
+
+  reco::TrackRefProd h_output_tracks = event.getRefBeforePut<reco::TrackCollection>();
 
   int ntkpass = 0, nlosttkpass = 0;
 
   for (size_t i = 0, ie = packed_candidates->size(); i < ie; ++i) {
     const pat::PackedCandidate& cand = (*packed_candidates)[i];
     if (debug) debug_cand(cand, "", i);
+
     if (pass_cand(cand)) {
       const reco::Track& tk = cand.pseudoTrack();
+
       if (debug) {
         debug_tk(tk, "", tracks->size());
         if (pass_tk(tk)) ++ntkpass;
       }
+
       tracks->push_back(tk);
-      which->push_back(i);
+      tracks_map->insert(reco::CandidatePtr(packed_candidates, i), reco::TrackRef(h_output_tracks, tracks->size() - 1));
     }
+
     if (debug) std::cout << "\n";
   }
 
@@ -82,16 +89,23 @@ void MFVUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetu
   for (size_t i = 0, ie = lost_candidates->size(); i < ie; ++i) {
     const pat::PackedCandidate& cand = (*lost_candidates)[i];
     if (debug) debug_cand(cand, "lost", i);
+
     if (pass_cand(cand)) {
       const reco::Track& tk = cand.pseudoTrack();
+
       if (debug) {
         debug_tk(tk, "lost", lost_tracks->size());
         if (pass_tk(tk)) ++nlosttkpass;
       }
-      if (add_lost_candidates)
-        tracks->push_back(tk); // JMTBAD the map
+
+      if (add_lost_candidates) {
+        tracks->push_back(tk);
+        tracks_map->insert(reco::CandidatePtr(lost_candidates, i), reco::TrackRef(h_output_tracks, tracks->size() - 1));
+      }
+
       lost_tracks->push_back(tk);
     }
+
     if (debug) std::cout << "\n";
   }
 
@@ -99,7 +113,7 @@ void MFVUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetu
 
   event.put(std::move(tracks));
   event.put(std::move(lost_tracks), "lost");
-  event.put(std::move(which));
+  event.put(std::move(tracks_map));
 }
 
 DEFINE_FWK_MODULE(MFVUnpackedCandidateTracks);

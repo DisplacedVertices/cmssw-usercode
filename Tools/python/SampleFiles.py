@@ -123,10 +123,27 @@ __all__ = [
 
 execfile(cmssw_base('src/JMTucker/Tools/python/enc_SampleFiles.py'))
 
-_remove_file('ttbarht0800_2017', 'miniaod', '/store/mc/RunIIFall17MiniAODv2/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/40000/225CD078-B3A4-E811-AA74-001E67DDC254.root')
-_remove_file('ttbarht0800_2017', 'miniaod', '/store/mc/RunIIFall17MiniAODv2/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/60000/BC22A92A-7BBA-E811-8A2B-0242AC1C0501.root')
-_remove_file('ttbarht1200_2017', 'miniaod', '/store/mc/RunIIFall17MiniAODv2/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/90000/6E6C0DD6-349B-E811-A4E1-0CC47A6C063E.root')
-_remove_file('qcdht0700_2018', 'miniaod', '/store/mc/RunIIAutumn18MiniAOD/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/020000/582A14C2-1BD1-6848-AE57-C110F6E929A0.root')
+for x,y in [
+    ('qcdht0700_2017', '/store/mc/RunIIFall17MiniAODv2/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/90000/B234A578-B844-E811-BB35-0025905B85D8.root'),
+    ('qcdht0700_2017', '/store/mc/RunIIFall17MiniAODv2/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/40000/2A23B4F0-3F43-E811-B600-0CC47A7C34E6.root'),
+    ('qcdht0700_2017', '/store/mc/RunIIFall17MiniAODv2/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/40000/964601B9-4F43-E811-9557-0025905A611E.root'),
+    ('qcdht0700_2017', '/store/mc/RunIIFall17MiniAODv2/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/70000/4AD19A1D-F443-E811-B7FE-0025905B85D8.root'),
+    ('qcdht0700_2017', '/store/mc/RunIIFall17MiniAODv2/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/20000/9CD54B20-9642-E811-9189-0CC47A78A340.root'),
+    ('qcdht1500_2017', '/store/mc/RunIIFall17MiniAODv2/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/10000/AC4239D2-5A5C-E811-A0F6-0025905B857C.root'),
+    ('qcdht2000_2017', '/store/mc/RunIIFall17MiniAODv2/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/100000/3C55942E-FB66-E811-8781-00000086FE80.root'),
+    ('qcdht0700_2018', '/store/mc/RunIIAutumn18MiniAOD/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/020000/582A14C2-1BD1-6848-AE57-C110F6E929A0.root'),
+    ('qcdht0700_2018', '/store/mc/RunIIAutumn18MiniAOD/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/20000/20DB6628-3A60-3245-A133-F831ED22EFE4.root'),
+    ('qcdht0700_2018', '/store/mc/RunIIAutumn18MiniAOD/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/210000/0F36F5C9-DEE9-DD47-B1CB-54593A37E62E.root'),
+    ('qcdht0700_2018', '/store/mc/RunIIAutumn18MiniAOD/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/110000/D68ADEFB-1AFC-B74B-B887-FA6A270E93D3.root'),
+    ('qcdht0700_2018', '/store/mc/RunIIAutumn18MiniAOD/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/60000/818480BB-489C-AE4F-AE90-15E4F609DFF5.root'),
+    ('qcdht1000_2018', '/store/mc/RunIIAutumn18MiniAOD/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/80000/65289A90-B55E-7846-8657-4A9E1D72D8DE.root'),
+    ('qcdht1000_2018', '/store/mc/RunIIAutumn18MiniAOD/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/80000/81B07983-AA32-D94C-98C5-7D9D5C357D05.root'),
+    ('qcdht1000_2018', '/store/mc/RunIIAutumn18MiniAOD/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/120000/C32DE14A-0192-E74E-AB88-E9D3CD16435F.root'),
+    ('ttbarht0800_2017', '/store/mc/RunIIFall17MiniAODv2/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/40000/225CD078-B3A4-E811-AA74-001E67DDC254.root'),
+    ('ttbarht0800_2017', '/store/mc/RunIIFall17MiniAODv2/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/60000/BC22A92A-7BBA-E811-8A2B-0242AC1C0501.root'),
+    ('ttbarht1200_2017', '/store/mc/RunIIFall17MiniAODv2/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/90000/6E6C0DD6-349B-E811-A4E1-0CC47A6C063E.root'),
+    ]:
+    _remove_file(x, 'miniaod', y)
 
 _add_ds("main", {
 'mfv_neu_tau000100um_M0400_2017': _fromnum1("/store/user/wsun/croncopyeos/mfv_neu_cp2_tau000100um_M0400/RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1/181027_053632", 100, fnbase="reco"),
@@ -280,28 +297,6 @@ _add_ds("miniaod", {
 })
 
 
-_add_ds("v0ntuplev21mv1", {
-'qcdht0700_2017': _fromnum0("/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/HTFilteredV0NtupleV21mV1_2017/181123_220143", 6),
-'qcdht1000_2017': _fromnum0("/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/HTFilteredV0NtupleV21mV1_2017/181123_220144", 11),
-'qcdht1500_2017': _fromnum0("/store/user/tucker/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/HTFilteredV0NtupleV21mV1_2017/181123_220145", 21),
-'qcdht2000_2017': _fromnum0("/store/user/tucker/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/HTFilteredV0NtupleV21mV1_2017/181123_220146", 10),
-'ttbar_2017': _fromnum0("/store/user/tucker/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/HTFilteredV0NtupleV21mV1_2017/181123_220138", 17),
-'ttbarht0600_2017': _fromnum0("/store/user/tucker/TTJets_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/HTFilteredV0NtupleV21mV1_2017/181123_220139", 77),
-'ttbarht0800_2017': _fromnum0("/store/user/tucker/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/HTFilteredV0NtupleV21mV1_2017/181123_220140", 65),
-'ttbarht1200_2017': _fromnum0("/store/user/tucker/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/HTFilteredV0NtupleV21mV1_2017/181123_220141", 31),
-'ttbarht2500_2017': _fromnum0("/store/user/tucker/TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8/HTFilteredV0NtupleV21mV1_2017/181123_220142", 16),
-'JetHT2017B': _fromnum1("/store/user/tucker/JetHT/V0NtupleV21mV1_full_2017/181124_025655", 25),
-'JetHT2017C': _fromnum1("/store/user/tucker/JetHT/V0NtupleV21mV1_full_2017/181124_025711", 39),
-'JetHT2017D': _fromnum1("/store/user/tucker/JetHT/V0NtupleV21mV1_full_2017/181124_025726", 18),
-'JetHT2017E': _fromnum1("/store/user/tucker/JetHT/V0NtupleV21mV1_full_2017/181124_025741", 42),
-'JetHT2017F': _fromnum1("/store/user/tucker/JetHT/V0NtupleV21mV1_full_2017/181124_025759", 51),
-'JetHT2018A': _fromnum1("/store/user/tucker/JetHT/V0NtupleV21mV1_full_2018/181124_030337", 128),
-'JetHT2018B': _fromnum1("/store/user/tucker/JetHT/V0NtupleV21mV1_full_2018/181124_030350", 70),
-'JetHT2018C': _fromnum1("/store/user/tucker/JetHT/V0NtupleV21mV1_2018/181128_173812", 55),
-'JetHT2018D2': _fromnum1("/store/user/tucker/JetHT/V0NtupleV21mV1_full_2018/181124_030326", 209),
-})
-
-
 _add_ds("ntuplev22m", {
 'qcdht0700_2017': _fromnum0("/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/NtupleV22m_2017/181218_204713", 16),
 'qcdht1000_2017': _fromnum1("/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/NtupleV22m_2017/181219_024439", 31),
@@ -398,7 +393,6 @@ _add_ds("ntuplev22m", {
 'JetHT2018D': _fromnum1("/store/user/tucker/JetHT/NtupleV22m_2018/181219_024658", 189),
 })
 
-
 _add_ds("ntuplev22m_ntkseeds", {
 'qcdht0700_2017': _fromnum0("/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/NtupleV22m_NTkSeeds_2017/181218_205150", 16, fnbase="ntkseeds"),
 'qcdht1000_2017': _fromnum1("/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/NtupleV22m_NTkSeeds_2017/181219_024941", 31, fnbase="ntkseeds"),
@@ -419,6 +413,126 @@ _add_ds("ntuplev22m_ntkseeds", {
 'JetHT2018D': _fromnum1("/store/user/tucker/JetHT/NtupleV22m_NTkSeeds_2018/181219_025037", 189, fnbase="ntkseeds"),
 })
 
+
+_add_ds("ntuplev23m", {
+'qcdht0700_2017': (16, ['/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/NtupleV23m_2017/190218_014828/0000/ntuple_%i.root' % i for i in chain(xrange(4,8), [14])] + ['/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/NtupleV23m_2017/190217_090223/0000/ntuple_%i.root' % i for i in chain(xrange(4), xrange(8,14), [15])]),
+'qcdht1000_2017': _fromnum1("/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/NtupleV23m_2017/190218_155129", 31),
+'qcdht1500_2017': (63, ['/store/user/tucker/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/NtupleV23m_2017/190217_090224/0000/ntuple_%i.root' % i for i in chain(xrange(40), xrange(41,63))] + ['/store/user/tucker/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/NtupleV23m_2017/190218_014829/0000/ntuple_40.root']),
+'qcdht2000_2017': (30, ['/store/user/tucker/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/NtupleV23m_2017/190218_014831/0000/ntuple_29.root'] + ['/store/user/tucker/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/NtupleV23m_2017/190217_090225/0000/ntuple_%i.root' % i for i in xrange(29)]),
+'ttbarht0600_2017': _fromnum0("/store/user/tucker/TTJets_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV23m_2017/190217_090219", 468),
+'ttbarht0800_2017': _fromnum0("/store/user/tucker/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV23m_2017/190217_090220", 388),
+'ttbarht1200_2017': _fromnum0("/store/user/tucker/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV23m_2017/190217_090221", 180),
+'ttbarht2500_2017': _fromnum0("/store/user/tucker/TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV23m_2017/190217_090222", 95),
+'mfv_neu_tau000100um_M0400_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau000100um_M0400/NtupleV23m_2017/190217_090226", 50),
+'mfv_neu_tau000100um_M0600_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau000100um_M0600/NtupleV23m_2017/190217_090227", 50),
+'mfv_neu_tau000100um_M0800_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau000100um_M0800/NtupleV23m_2017/190217_090228", 50),
+'mfv_neu_tau000100um_M1200_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau000100um_M1200/NtupleV23m_2017/190217_090229", 50),
+'mfv_neu_tau000100um_M1600_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau000100um_M1600/NtupleV23m_2017/190217_090230", 50),
+'mfv_neu_tau000100um_M3000_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau000100um_M3000/NtupleV23m_2017/190217_090231", 50),
+'mfv_neu_tau000300um_M0400_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau000300um_M0400/NtupleV23m_2017/190217_090232", 50),
+'mfv_neu_tau000300um_M0600_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau000300um_M0600/NtupleV23m_2017/190217_090233", 50),
+'mfv_neu_tau000300um_M0800_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau000300um_M0800/NtupleV23m_2017/190217_090234", 50),
+'mfv_neu_tau000300um_M1200_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau000300um_M1200/NtupleV23m_2017/190217_090235", 50),
+'mfv_neu_tau000300um_M1600_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau000300um_M1600/NtupleV23m_2017/190217_090236", 50),
+'mfv_neu_tau000300um_M3000_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau000300um_M3000/NtupleV23m_2017/190217_090237", 50),
+'mfv_neu_tau001000um_M0400_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau001000um_M0400/NtupleV23m_2017/190217_090238", 50),
+'mfv_neu_tau001000um_M0600_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau001000um_M0600/NtupleV23m_2017/190217_090239", 50),
+'mfv_neu_tau001000um_M0800_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau001000um_M0800/NtupleV23m_2017/190217_090240", 50),
+'mfv_neu_tau001000um_M1200_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau001000um_M1200/NtupleV23m_2017/190217_090241", 50),
+'mfv_neu_tau001000um_M1600_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau001000um_M1600/NtupleV23m_2017/190217_090242", 50),
+'mfv_neu_tau001000um_M3000_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau001000um_M3000/NtupleV23m_2017/190217_090243", 50),
+'mfv_neu_tau010000um_M0400_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau010000um_M0400/NtupleV23m_2017/190217_090244", 50),
+'mfv_neu_tau010000um_M0600_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau010000um_M0600/NtupleV23m_2017/190217_090245", 50),
+'mfv_neu_tau010000um_M0800_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau010000um_M0800/NtupleV23m_2017/190217_090246", 50),
+'mfv_neu_tau010000um_M1200_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau010000um_M1200/NtupleV23m_2017/190217_090247", 50),
+'mfv_neu_tau010000um_M1600_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau010000um_M1600/NtupleV23m_2017/190217_090248", 50),
+'mfv_neu_tau010000um_M3000_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau010000um_M3000/NtupleV23m_2017/190217_090249", 50),
+'mfv_neu_tau030000um_M0400_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau030000um_M0400/NtupleV23m_2017/190217_090250", 50),
+'mfv_neu_tau030000um_M0600_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau030000um_M0600/NtupleV23m_2017/190217_090251", 50),
+'mfv_neu_tau030000um_M0800_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau030000um_M0800/NtupleV23m_2017/190217_090252", 50),
+'mfv_neu_tau030000um_M1200_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau030000um_M1200/NtupleV23m_2017/190217_090253", 50),
+'mfv_neu_tau030000um_M1600_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau030000um_M1600/NtupleV23m_2017/190217_090254", 50),
+'mfv_neu_tau030000um_M3000_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau030000um_M3000/NtupleV23m_2017/190217_090255", 50),
+'mfv_neu_tau100000um_M0400_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau100000um_M0400/NtupleV23m_2017/190217_090256", 50),
+'mfv_neu_tau100000um_M0600_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau100000um_M0600/NtupleV23m_2017/190217_090257", 50),
+'mfv_neu_tau100000um_M0800_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau100000um_M0800/NtupleV23m_2017/190217_090258", 50),
+'mfv_neu_tau100000um_M1200_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau100000um_M1200/NtupleV23m_2017/190217_090259", 50),
+'mfv_neu_tau100000um_M1600_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau100000um_M1600/NtupleV23m_2017/190217_090300", 50),
+'mfv_neu_tau100000um_M3000_2017': _fromnum0("/store/user/tucker/mfv_neu_cp2_tau100000um_M3000/NtupleV23m_2017/190217_090301", 50),
+'mfv_stopdbardbar_tau000100um_M0400_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau000100um_M0400/NtupleV23m_2017/190217_090302", 50),
+'mfv_stopdbardbar_tau000100um_M0600_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau000100um_M0600/NtupleV23m_2017/190217_090303", 50),
+'mfv_stopdbardbar_tau000100um_M0800_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau000100um_M0800/NtupleV23m_2017/190217_090304", 50),
+'mfv_stopdbardbar_tau000100um_M1200_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau000100um_M1200/NtupleV23m_2017/190217_090305", 50),
+'mfv_stopdbardbar_tau000100um_M1600_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau000100um_M1600/NtupleV23m_2017/190217_090306", 50),
+'mfv_stopdbardbar_tau000100um_M3000_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau000100um_M3000/NtupleV23m_2017/190217_090307", 50),
+'mfv_stopdbardbar_tau000300um_M0400_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau000300um_M0400/NtupleV23m_2017/190217_090308", 50),
+'mfv_stopdbardbar_tau000300um_M0600_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau000300um_M0600/NtupleV23m_2017/190217_090309", 50),
+'mfv_stopdbardbar_tau000300um_M0800_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau000300um_M0800/NtupleV23m_2017/190217_090310", 50),
+'mfv_stopdbardbar_tau000300um_M1200_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau000300um_M1200/NtupleV23m_2017/190217_090311", 50),
+'mfv_stopdbardbar_tau000300um_M1600_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau000300um_M1600/NtupleV23m_2017/190217_090312", 50),
+'mfv_stopdbardbar_tau000300um_M3000_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau000300um_M3000/NtupleV23m_2017/190217_090313", 50),
+'mfv_stopdbardbar_tau001000um_M0400_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau001000um_M0400/NtupleV23m_2017/190217_090314", 50),
+'mfv_stopdbardbar_tau001000um_M0600_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau001000um_M0600/NtupleV23m_2017/190217_090315", 50),
+'mfv_stopdbardbar_tau001000um_M0800_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau001000um_M0800/NtupleV23m_2017/190217_090316", 50),
+'mfv_stopdbardbar_tau001000um_M1200_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau001000um_M1200/NtupleV23m_2017/190217_090317", 50),
+'mfv_stopdbardbar_tau001000um_M1600_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau001000um_M1600/NtupleV23m_2017/190217_090318", 50),
+'mfv_stopdbardbar_tau001000um_M3000_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau001000um_M3000/NtupleV23m_2017/190217_090319", 50),
+'mfv_stopdbardbar_tau010000um_M0400_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau010000um_M0400/NtupleV23m_2017/190217_090320", 50),
+'mfv_stopdbardbar_tau010000um_M0600_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau010000um_M0600/NtupleV23m_2017/190217_090321", 50),
+'mfv_stopdbardbar_tau010000um_M0800_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau010000um_M0800/NtupleV23m_2017/190217_090322", 50),
+'mfv_stopdbardbar_tau010000um_M1200_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau010000um_M1200/NtupleV23m_2017/190217_090323", 50),
+'mfv_stopdbardbar_tau010000um_M1600_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau010000um_M1600/NtupleV23m_2017/190217_090324", 50),
+'mfv_stopdbardbar_tau010000um_M3000_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau010000um_M3000/NtupleV23m_2017/190217_090325", 50),
+'mfv_stopdbardbar_tau030000um_M0400_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau030000um_M0400/NtupleV23m_2017/190217_090326", 50),
+'mfv_stopdbardbar_tau030000um_M0600_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau030000um_M0600/NtupleV23m_2017/190217_090327", 50),
+'mfv_stopdbardbar_tau030000um_M0800_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau030000um_M0800/NtupleV23m_2017/190217_090328", 50),
+'mfv_stopdbardbar_tau030000um_M1200_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau030000um_M1200/NtupleV23m_2017/190217_090329", 50),
+'mfv_stopdbardbar_tau030000um_M1600_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau030000um_M1600/NtupleV23m_2017/190217_090330", 50),
+'mfv_stopdbardbar_tau030000um_M3000_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau030000um_M3000/NtupleV23m_2017/190217_090331", 50),
+'mfv_stopdbardbar_tau100000um_M0400_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau100000um_M0400/NtupleV23m_2017/190217_090332", 50),
+'mfv_stopdbardbar_tau100000um_M0600_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau100000um_M0600/NtupleV23m_2017/190217_090333", 50),
+'mfv_stopdbardbar_tau100000um_M0800_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau100000um_M0800/NtupleV23m_2017/190217_090334", 50),
+'mfv_stopdbardbar_tau100000um_M1200_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau100000um_M1200/NtupleV23m_2017/190217_090335", 50),
+'mfv_stopdbardbar_tau100000um_M1600_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau100000um_M1600/NtupleV23m_2017/190217_090336", 50),
+'mfv_stopdbardbar_tau100000um_M3000_2017': _fromnum0("/store/user/tucker/mfv_stopdbardbar_cp2_tau100000um_M3000/NtupleV23m_2017/190217_090337", 50),
+'qcdht0700_2018': (23, ['/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV23m_2018/190217_090944/0000/ntuple_%i.root' % i for i in chain(xrange(4), xrange(6,18), xrange(19,21), [22])] + ['/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV23m_2018/190218_014832/0000/ntuple_%i.root' % i for i in chain(xrange(4,6), [18, 21])]),
+'qcdht1000_2018': (37, ['/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV23m_2018/190218_014834/0000/ntuple_%i.root' % i for i in [8, 28, 32]] + ['/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV23m_2018/190217_090945/0000/ntuple_%i.root' % i for i in chain(xrange(8), xrange(9,28), xrange(29,32), xrange(33,37))]),
+'qcdht1500_2018': _fromnum1("/store/user/tucker/QCD_HT1500to2000_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV23m_2018/190218_155138", 76),
+'qcdht2000_2018': _fromnum0("/store/user/tucker/QCD_HT2000toInf_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV23m_2018/190217_090946", 34),
+'JetHT2017B': _fromnum1("/store/user/tucker/JetHT/NtupleV23m_2017/190218_155143", 25),
+'JetHT2017C': _fromnum1("/store/user/tucker/JetHT/NtupleV23m_2017/190218_155156", 38),
+'JetHT2017D': _fromnum1("/store/user/tucker/JetHT/NtupleV23m_2017/190218_155209", 18),
+'JetHT2017E': _fromnum1("/store/user/tucker/JetHT/NtupleV23m_2017/190218_155227", 41),
+'JetHT2017F': _fromnum1("/store/user/tucker/JetHT/NtupleV23m_2017/190218_155242", 51),
+'JetHT2018A': _fromnum1("/store/user/tucker/JetHT/NtupleV23m_2018/190218_155149", 114),
+'JetHT2018B': _fromnum1("/store/user/tucker/JetHT/NtupleV23m_2018/190218_155201", 64),
+'JetHT2018C': _fromnum1("/store/user/tucker/JetHT/NtupleV23m_2018/190218_155213", 43),
+'JetHT2018D': _fromnum1("/store/user/tucker/JetHT/NtupleV23m_2018/190218_155227", 189),
+})
+
+_add_ds("ntuplev23m_ntkseeds", {
+'qcdht0700_2017': _fromnum0("/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/NtupleV23m_NTkSeeds_2017/190218_102925", 16, fnbase="ntkseeds"),
+'qcdht1000_2017': _fromnum1("/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/NtupleV23m_NTkSeeds_2017/190218_162806", 31, fnbase="ntkseeds"),
+'qcdht1500_2017': _fromnum0("/store/user/tucker/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/NtupleV23m_NTkSeeds_2017/190218_102926", 63, fnbase="ntkseeds"),
+'qcdht2000_2017': _fromnum0("/store/user/tucker/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/NtupleV23m_NTkSeeds_2017/190218_102927", 30, fnbase="ntkseeds"),
+'ttbarht0600_2017': (467, ['/store/user/tucker/TTJets_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV23m_NTkSeeds_2017/190218_102921/0000/ntkseeds_%i.root' % i for i in chain(xrange(375), xrange(376,468))]),
+'ttbarht0800_2017': (388, ['/store/user/tucker/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV23m_NTkSeeds_2017/190218_102922/0000/ntkseeds_%i.root' % i for i in chain(xrange(253), xrange(254,388))] + ['/store/user/tucker/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV23m_NTkSeeds_2017/190220_132152/0000/ntkseeds_253.root']),
+'ttbarht1200_2017': _fromnum0("/store/user/tucker/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV23m_NTkSeeds_2017/190218_102923", 180, fnbase="ntkseeds"),
+'ttbarht2500_2017': _fromnum0("/store/user/tucker/TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV23m_NTkSeeds_2017/190218_102924", 95, fnbase="ntkseeds"),
+'qcdht0700_2018': _fromnum0("/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV23m_NTkSeeds_2018/190218_103158", 23, fnbase="ntkseeds"),
+'qcdht1000_2018': _fromnum0("/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV23m_NTkSeeds_2018/190218_103159", 37, fnbase="ntkseeds"),
+'qcdht1500_2018': _fromnum1("/store/user/tucker/QCD_HT1500to2000_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV23m_NTkSeeds_2018/190218_163108", 76, fnbase="ntkseeds"),
+'qcdht2000_2018': _fromnum0("/store/user/tucker/QCD_HT2000toInf_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV23m_NTkSeeds_2018/190218_103200", 34, fnbase="ntkseeds"),
+'JetHT2017B': _fromnum1("/store/user/tucker/JetHT/NtupleV23m_NTkSeeds_2017/190218_162819", 25, fnbase="ntkseeds"),
+'JetHT2017C': _fromnum1("/store/user/tucker/JetHT/NtupleV23m_NTkSeeds_2017/190218_162834", 38, fnbase="ntkseeds"),
+'JetHT2017D': _fromnum1("/store/user/tucker/JetHT/NtupleV23m_NTkSeeds_2017/190218_162849", 18, fnbase="ntkseeds"),
+'JetHT2017E': _fromnum1("/store/user/tucker/JetHT/NtupleV23m_NTkSeeds_2017/190218_162907", 41, fnbase="ntkseeds"),
+'JetHT2017F': _fromnum1("/store/user/tucker/JetHT/NtupleV23m_NTkSeeds_2017/190218_162919", 51, fnbase="ntkseeds"),
+'JetHT2018A': _fromnum1("/store/user/tucker/JetHT/NtupleV23m_NTkSeeds_2018/190218_163120", 114, fnbase="ntkseeds"),
+'JetHT2018B': _fromnum1("/store/user/tucker/JetHT/NtupleV23m_NTkSeeds_2018/190218_163132", 64, fnbase="ntkseeds"),
+'JetHT2018C': _fromnum1("/store/user/tucker/JetHT/NtupleV23m_NTkSeeds_2018/190218_163145", 43, fnbase="ntkseeds"),
+'JetHT2018D': _fromnum1("/store/user/tucker/JetHT/NtupleV23m_NTkSeeds_2018/190218_163157", 189, fnbase="ntkseeds"),
+})
 
 ################################################################################
 

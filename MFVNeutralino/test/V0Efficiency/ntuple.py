@@ -7,7 +7,7 @@ settings.zerobias = False
 assert not settings.zerobias # need to check trigger/event filter
 settings.event_filter = 'trigger jets only'
 
-version = settings.version + 'V1'
+version = settings.version + 'v1'
 
 debug = False
 
@@ -24,10 +24,8 @@ file_event_from_argv(process)
 
 ####
 
-process.load('JMTucker.Tools.FirstGoodPrimaryVertex_cfi')
-if settings.is_miniaod:
-    process.firstGoodPrimaryVertex.src = 'offlineSlimmedPrimaryVertices'
-process.firstGoodPrimaryVertex.cut = True
+from JMTucker.Tools.GoodPrimaryVertices_cfi import goodOfflinePrimaryVertices
+process.firstGoodPrimaryVertex = goodOfflinePrimaryVertices.clone(input_is_miniaod = settings.is_miniaod, nfirst = 1)
 
 process.load('JMTucker.MFVNeutralino.SkimmedTracks_cfi')
 process.mfvSkimmedTracks.min_pt = 1

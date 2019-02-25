@@ -3,7 +3,8 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 cross = '' # 2017to2018' # 2017to2017p8'
 
-dataset = 'ntuplev22m_ntkseeds'
+from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset
+dataset += '_ntkseeds'
 sample_files(process, 'qcdht2000_2017', dataset, 1)
 process.TFileService.fileName = 'vertexer_pair_effs.root'
 file_event_from_argv(process)
@@ -35,12 +36,12 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if year == 2017:
         samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.data_samples_2017
     elif year == 2018:
-        samples = Samples.data_samples_2018
+        samples = Samples.qcd_samples_2018 + Samples.data_samples_2018
 
     samples = [s for s in samples if s.has_dataset(dataset) and (s.is_mc or not cross)]
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8_1pc.json'))
 
-    cs = CondorSubmitter('VertexerPairEffsV22m%s' % ('_' + cross if cross else ''),
+    cs = CondorSubmitter('VertexerPairEffs%s%s' % (version, '_' + cross if cross else ''),
                          ex = year,
                          dataset = dataset,
                          pset_modifier = chain_modifiers(half_mc_modifier(), per_sample_pileup_weights_modifier(cross=cross)),

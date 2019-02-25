@@ -8,7 +8,7 @@ settings.is_mc = True
 settings.is_miniaod = True
 settings.event_filter = 'jets only novtx'
 
-version = settings.version + 'V2'
+version = settings.version + 'v1'
 
 cfgs = named_product(njets = [2,3],
                      nbjets = [0,1,2],
@@ -56,11 +56,11 @@ for icfg, cfg in enumerate(cfgs):
     random_dict[tracks_name] = 13068 + icfg
 
     tracks = cms.EDProducer('MFVTrackMover',
-                            mfvJetTrackRefGetter,
-                            tracks_src = cms.InputTag('mfvUnpackedCandidateTracks' if settings.is_miniaod else 'generalTracks'),
+                            tracks_src = cms.InputTag('mfvRescaledTracks'),
                             primary_vertices_src = cms.InputTag('goodOfflinePrimaryVertices'),
                             packed_candidates_src = cms.InputTag('packedPFCandidates'),
                             jets_src = cms.InputTag('selectedPatJets'),
+                            jet_track_ref_getter = mfvJetTrackRefGetter,
                             min_jet_pt = cms.double(50),
                             min_jet_ntracks = cms.uint32(4),
                             b_discriminator = cms.string('pfCombinedInclusiveSecondaryVertexV2BJetTags'),
@@ -77,12 +77,8 @@ for icfg, cfg in enumerate(cfgs):
                            min_track_sigmadxy = cfg.nsigmadxy,
                            )
 
-    # hack track-jet association:
-    # jets are composed of packedPFCandidates and JetTrackRefGetter knows how to compare those to mfvUnpackedCandidateTracks
-    # but since there is a mfvMovedTracks entry for every one of mfvUnpackedCandidateTracks, the keys are the same
-    # if this breaks, need to make JetTrackRefGetter know how to compose two maps
-    getattr(process, 'mfvVerticesToJets' + ex).unpacked_tracks_src = tracks_name
-    getattr(process, 'mfvVerticesAuxPresel' + ex).jets_tracks_keys_only = True
+    for x in 'mfvVerticesToJets', 'mfvVerticesAuxTmp', 'mfvVerticesAuxPresel':
+        getattr(process, x + ex).jet_track_ref_getter.tracks_maps_srcs.append(cms.InputTag(tracks_name))
 
     tree = cms.EDAnalyzer('MFVMovedTracksTreer',
                           event_src = cms.InputTag('mfvEvent'),
@@ -112,7 +108,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if year == 2017:
         samples = Samples.data_samples_2017 + Samples.ttbar_samples_2017 + Samples.qcd_samples_2017
     elif year == 2018:
-        samples = Samples.data_samples_2018
+        samples = Samples.data_samples_2018 + Samples.qcd_samples_2018
 
     #samples = [s for s in samples if s.has_dataset(dataset)]
     set_splitting(samples, dataset, 'trackmover', data_json=json_path('ana_2017p8.json'))

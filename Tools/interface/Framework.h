@@ -15,7 +15,7 @@ void dump_ref(std::ostream& out, const edm::Ref<T>& ref, const edm::Event* event
     edm::Provenance prov = event->getProvenance(ref.id());
     out << ", branch " << prov.branchName() << " (id " << prov.branchID().id() << "),";
   }
-  out << " with index " << ref.index() << "\n";
+  out << " with index " << ref.index();
 }
 
 template <typename T>
@@ -29,7 +29,7 @@ void dump_ptr(std::ostream& out, const edm::Ptr<T>& ptr, const edm::Event* event
     edm::Provenance prov = event->getProvenance(ptr.id());
     out << ", branch " << prov.branchName() << " (id " << prov.branchID().id() << "),";
   }
-  out << " with key " << ptr.key() << "\n";
+  out << " with key " << ptr.key();
 }
 
 template <typename T>
@@ -43,7 +43,7 @@ void dump_ref2base(std::ostream& out, const edm::RefToBase<T>& ref, const edm::E
     edm::Provenance prov = event->getProvenance(ref.id());
     out << ", branch " << prov.branchName() << " (id " << prov.branchID().id() << "),";
   }
-  out << " with key " << ref.key() << "\n";
+  out << " with key " << ref.key();
 }
 
 template <typename T>

@@ -7,6 +7,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/TracksMap.h"
 
 class MFVSkimmedTracks : public edm::EDFilter {
 public:
@@ -17,8 +18,7 @@ private:
   const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
-  const edm::EDGetTokenT<pat::PackedCandidateCollection> packed_candidates_token;
-  const edm::EDGetTokenT<std::vector<size_t>> packed_candidates_indices_token;
+  const edm::EDGetTokenT<mfv::UnpackedCandidateTracksMap> unpacked_candidate_tracks_map_token;
 
   const double min_pt;
   const double min_dxybs;
@@ -32,8 +32,7 @@ MFVSkimmedTracks::MFVSkimmedTracks(const edm::ParameterSet& cfg)
   : tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("tracks_src"))),
     beamspot_token(consumes<reco::BeamSpot>(edm::InputTag("offlineBeamSpot"))),
     primary_vertices_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertices_src"))),
-    packed_candidates_token(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("packed_candidates_src"))),
-    packed_candidates_indices_token(consumes<std::vector<size_t>>(cfg.getParameter<edm::InputTag>("tracks_src"))),
+    unpacked_candidate_tracks_map_token(consumes<mfv::UnpackedCandidateTracksMap>(cfg.getParameter<edm::InputTag>("tracks_src"))),
     min_pt(cfg.getParameter<double>("min_pt")),
     min_dxybs(cfg.getParameter<double>("min_dxybs")),
     min_nsigmadxybs(cfg.getParameter<double>("min_nsigmadxybs")),
@@ -56,13 +55,9 @@ bool MFVSkimmedTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
   edm::Handle<reco::VertexCollection> primary_vertices;
   event.getByToken(primary_vertices_token, primary_vertices);
 
-  edm::Handle<pat::PackedCandidateCollection> packed_candidates;
-  edm::Handle<std::vector<size_t>> packed_candidates_indices;
-  if (input_is_miniaod) {
-    event.getByToken(packed_candidates_token, packed_candidates);
-    event.getByToken(packed_candidates_indices_token, packed_candidates_indices);
-    assert(packed_candidates_indices->size() == tracks->size());
-  }
+  edm::Handle<mfv::UnpackedCandidateTracksMap> unpacked_candidate_tracks_map;
+  if (input_is_miniaod)
+    event.getByToken(unpacked_candidate_tracks_map_token, unpacked_candidate_tracks_map);
 
   if (debug) std::cout << "MFVSkimmedTracks::filter: run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << " has " << tracks->size() << " input tracks, " << primary_vertices->size() << " primary vertices\n";
 
@@ -77,20 +72,20 @@ bool MFVSkimmedTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
   std::unique_ptr<reco::TrackCollection> output_tracks(new reco::TrackCollection);
   std::unique_ptr<std::vector<int>> output_pvindex(new std::vector<int>);
 
-  int itk = -1;
-  for (const reco::Track& tk : *tracks) {
-    ++itk;
-    const bool min_r = tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1);
-    const int npxlayers = tk.hitPattern().pixelLayersWithMeasurement();
-    const int nstlayers = tk.hitPattern().stripLayersWithMeasurement();
+  for (size_t itk = 0, itke = tracks->size(); itk < itke; ++itk) {
+    reco::TrackRef tk(tracks, itk);
 
-    bool pass = !std::isinf(tk.pt()) && !std::isnan(tk.eta()) && tk.pt() > min_pt && min_r && npxlayers >= 2 && nstlayers >= 6;
+    const bool min_r = tk->hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1);
+    const int npxlayers = tk->hitPattern().pixelLayersWithMeasurement();
+    const int nstlayers = tk->hitPattern().stripLayersWithMeasurement();
 
-    if (debug) std::cout << "track #" << itk << " pt " << tk.pt() << " eta " << tk.eta() << " min_r " << min_r << " npxlayers " << npxlayers << " nstlayers " << nstlayers << " pass so far? " << pass;
+    bool pass = !std::isinf(tk->pt()) && !std::isnan(tk->eta()) && tk->pt() > min_pt && min_r && npxlayers >= 2 && nstlayers >= 6;
+
+    if (debug) std::cout << "track #" << itk << " pt " << tk->pt() << " eta " << tk->eta() << " min_r " << min_r << " npxlayers " << npxlayers << " nstlayers " << nstlayers << " pass so far? " << pass;
 
     if (pass && (min_dxybs > 0 || min_nsigmadxybs > 0)) {
-      const double dxybs = tk.dxy(*beamspot);
-      const double dxyerr = tk.dxyError();
+      const double dxybs = tk->dxy(*beamspot);
+      const double dxyerr = tk->dxyError();
       const double nsigmadxybs = dxybs / dxyerr;
       if (fabs(dxybs) < min_dxybs || fabs(nsigmadxybs) < min_nsigmadxybs)
         pass = false;
@@ -98,16 +93,15 @@ bool MFVSkimmedTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
     }
 
     if (pass) {
-      output_tracks->push_back(tk);
+      output_tracks->push_back(*tk);
 
       if (input_is_miniaod) {
-        const size_t ipc = (*packed_candidates_indices)[itk];
-        const pat::PackedCandidate& pc = (*packed_candidates)[ipc];
-        output_pvindex->push_back(pc.vertexRef().key());
+        reco::CandidatePtr c = unpacked_candidate_tracks_map->rfind(tk);
+        const pat::PackedCandidate* pc = dynamic_cast<const pat::PackedCandidate*>(&*c);
+        output_pvindex->push_back(pc->vertexRef().key());
       }
       else {
-        reco::TrackRef ref(tracks, itk);
-        const std::vector<int>& pv_for_track = tracks_in_pvs[ref];
+        const std::vector<int>& pv_for_track = tracks_in_pvs[tk];
         if (pv_for_track.size() > 1)
           throw cms::Exception("BadAssumption", "multiple PV for a track");
         output_pvindex->push_back(pv_for_track.size() ? pv_for_track[0] : -1);

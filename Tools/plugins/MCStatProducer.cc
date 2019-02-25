@@ -25,9 +25,8 @@ private:
 
   int nevents;
   float sumweight;
-  float sumweightprod;
 
-  enum { sum_nevents_total, sum_gen_weight_total, sum_gen_weight_prod_total, n_sums };
+  enum { sum_nevents_total, sum_gen_weight_total, n_sums };
   TH1D* h_sums;
 };
 
@@ -36,19 +35,17 @@ MCStatProducer::MCStatProducer(const edm::ParameterSet& cfg)
     debug(cfg.getUntrackedParameter<int>("debug", 0)),
     nevents(0),
     sumweight(0),
-    sumweightprod(0),
     h_sums(0)
 {
   produces<jmt::MergeableInt,   edm::Transition::EndLuminosityBlock>("nEvents");
   produces<jmt::MergeableFloat, edm::Transition::EndLuminosityBlock>("sumWeight");
-  produces<jmt::MergeableFloat, edm::Transition::EndLuminosityBlock>("sumWeightProd");
 
   edm::Service<TFileService> fs;
   if (fs) {
     TH1::SetDefaultSumw2();
     h_sums = fs->make<TH1D>("h_sums", "", n_sums, 0, n_sums);
     int ibin = 1;
-    for (const char* x : { "sum_nevents_total", "sum_gen_weight_total", "sum_gen_weight_prod_total" })
+    for (const char* x : { "sum_nevents_total", "sum_gen_weight_total" })
       h_sums->GetXaxis()->SetBinLabel(ibin++, x);
   }
 }
@@ -60,22 +57,20 @@ void MCStatProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
     edm::Handle<GenEventInfoProduct> gen_info;
     event.getByToken(gen_info_token, gen_info);
     sumweight += gen_info->weight();
-    sumweightprod += gen_info->weightProduct();
   }
 
   if (debug >= 2)
-    std::cout << "after event " << event.id().run() << "," << event.luminosityBlock() << "," << event.id().event() << ": nevents = " << nevents << ", sumweight = " << sumweight << ", sumweightprod = " << sumweightprod << "\n";
+    std::cout << "after event " << event.id().run() << "," << event.luminosityBlock() << "," << event.id().event() << ": nevents = " << nevents << ", sumweight = " << sumweight << "\n";
 }
 
 void MCStatProducer::endLuminosityBlockProduce(edm::LuminosityBlock& lumi, const edm::EventSetup&) {
   if (h_sums) {
     h_sums->Fill(sum_nevents_total, nevents);
     h_sums->Fill(sum_gen_weight_total, sumweight);
-    h_sums->Fill(sum_gen_weight_prod_total, sumweightprod);
   }
 
   if (debug >= 1)
-    std::cout << "endLumiBlock lumi = " << lumi.id().run() << "," << lumi.luminosityBlock() << ": nevents = " << nevents << ", sumweight = " << sumweight << ", sumweightprod = " << sumweightprod << std::endl;
+    std::cout << "endLumiBlock lumi = " << lumi.id().run() << "," << lumi.luminosityBlock() << ": nevents = " << nevents << ", sumweight = " << sumweight << "\n";
 
   std::unique_ptr<jmt::MergeableInt> pnevents(new jmt::MergeableInt(nevents));
   lumi.put(std::move(pnevents), "nEvents");
@@ -83,11 +78,8 @@ void MCStatProducer::endLuminosityBlockProduce(edm::LuminosityBlock& lumi, const
   std::unique_ptr<jmt::MergeableFloat> psumweight(new jmt::MergeableFloat(sumweight));
   lumi.put(std::move(psumweight), "sumWeight");
 
-  std::unique_ptr<jmt::MergeableFloat> psumweightprod(new jmt::MergeableFloat(sumweightprod));
-  lumi.put(std::move(psumweightprod), "sumWeightProd");
-
   nevents = 0;
-  sumweight = sumweightprod = 0;
+  sumweight = 0;
 }
 
 DEFINE_FWK_MODULE(MCStatProducer);

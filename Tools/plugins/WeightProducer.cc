@@ -38,7 +38,7 @@ private:
   TH1D* h_npu;
   TH1D* h_npv;
 
-  enum { sum_gen_weight, sum_gen_weightprod, sum_pileup_weight, sum_npv_weight, sum_misc_weight, sum_weight, n_sums };
+  enum { sum_gen_weight, sum_pileup_weight, sum_npv_weight, sum_misc_weight, sum_weight, n_sums };
   TH1D* h_sums;
 };
 
@@ -75,7 +75,7 @@ JMTWeightProducer::JMTWeightProducer(const edm::ParameterSet& cfg)
 
     h_sums = fs->make<TH1D>("h_sums", "", n_sums+1, 0, n_sums+1);
     int ibin = 1;
-    for (const char* x : { "sum_gen_weight", "sum_gen_weightprod", "sum_pileup_weight", "sum_npv_weight", "sum_misc_weight", "sum_weight", "n_sums" })
+    for (const char* x : { "sum_gen_weight", "sum_pileup_weight", "sum_npv_weight", "sum_misc_weight", "sum_weight", "n_sums" })
       h_sums->GetXaxis()->SetBinLabel(ibin++, x);
   }
 }
@@ -113,15 +113,12 @@ void JMTWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
         event.getByToken(gen_info_token, gen_info);
 
         const double gen_weight = gen_info->weight();
-        const double gen_weightprod = gen_info->weightProduct();
-        assert((gen_weight - gen_weightprod)/gen_weightprod < 1e-3); // JMTBAD
 
         if (prints)
-          printf("gen_weight: %g  weightprod: %g  ", gen_weight, gen_weightprod);
+          printf("gen_weight: %g  ", gen_weight);
         if (histos) {
           h_gensign->Fill(gen_weight > 0 ? 1 : -1);
           h_sums->Fill(sum_gen_weight, gen_weight);
-          h_sums->Fill(sum_gen_weightprod, gen_weightprod);
         }
         if (weight_gen_sign_only) {
           if (gen_weight < 0)

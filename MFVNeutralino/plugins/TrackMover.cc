@@ -15,6 +15,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/Utilities/interface/RandomNumberGenerator.h"
 #include "JMTucker/MFVNeutralino/interface/JetTrackRefGetter.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/TracksMap.h"
 
 class MFVTrackMover : public edm::EDProducer {
 public:
@@ -26,6 +27,8 @@ private:
   const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
   const edm::EDGetTokenT<pat::JetCollection> jets_token;
+  mfv::JetTrackRefGetter jet_track_ref_getter;
+
   const double min_jet_pt;
   const unsigned min_jet_ntracks;
   const std::string b_discriminator;
@@ -37,14 +40,15 @@ private:
   const double tau;
   const double sig_theta;
   const double sig_phi;
-
-  mfv::JetTrackRefGetter jet_track_ref_getter;
 };
 
 MFVTrackMover::MFVTrackMover(const edm::ParameterSet& cfg) 
   : tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("tracks_src"))),
     primary_vertices_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertices_src"))),
     jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
+    jet_track_ref_getter(cfg.getParameter<std::string>("@module_label"),
+                         cfg.getParameter<edm::ParameterSet>("jet_track_ref_getter"),
+                         consumesCollector()),
     min_jet_pt(cfg.getParameter<double>("min_jet_pt")),
     min_jet_ntracks(cfg.getParameter<unsigned>("min_jet_ntracks")),
     b_discriminator(cfg.getParameter<std::string>("b_discriminator")),
@@ -54,14 +58,14 @@ MFVTrackMover::MFVTrackMover(const edm::ParameterSet& cfg)
     nbjets(cfg.getParameter<unsigned>("nbjets")),
     tau(cfg.getParameter<double>("tau")),
     sig_theta(cfg.getParameter<double>("sig_theta")),
-    sig_phi(cfg.getParameter<double>("sig_phi")),
-    jet_track_ref_getter(cfg, consumesCollector())
+    sig_phi(cfg.getParameter<double>("sig_phi"))
 {
   edm::Service<edm::RandomNumberGenerator> rng;
   if (!rng.isAvailable())
     throw cms::Exception("MFVTrackMover", "RandomNumberGeneratorService not available");
 
   produces<reco::TrackCollection>();
+  produces<mfv::TracksMap>();
   produces<reco::TrackCollection>("moved");
   produces<int>("npreseljets");
   produces<int>("npreselbjets");
@@ -89,14 +93,16 @@ void MFVTrackMover::produce(edm::Event& event, const edm::EventSetup&) {
     return ts;
   };
 
-  std::unique_ptr<reco::TrackCollection> output_tracks(new reco::TrackCollection);
-  std::unique_ptr<reco::TrackCollection> moved_tracks(new reco::TrackCollection);
-  std::unique_ptr<int> npreseljets(new int);
-  std::unique_ptr<int> npreselbjets(new int);
-  std::unique_ptr<pat::JetCollection> jets_used(new pat::JetCollection);
-  std::unique_ptr<pat::JetCollection> bjets_used(new pat::JetCollection);
-  std::unique_ptr<std::vector<double> > flight_vect(new std::vector<double>(3, 0.));
-  std::unique_ptr<std::vector<double> > move_vertex(new std::vector<double>(3, 0.));
+  auto output_tracks = std::make_unique<reco::TrackCollection>();
+  reco::TrackRefProd h_output_tracks = event.getRefBeforePut<reco::TrackCollection>();
+  auto output_tracks_map = std::make_unique<mfv::TracksMap>();
+  auto moved_tracks = std::make_unique<reco::TrackCollection>(); // JMTBAD just write a vector<bool> and pick it up in MovedTracksTreer
+  auto npreseljets = std::make_unique<int>();
+  auto npreselbjets = std::make_unique<int>();
+  auto jets_used = std::make_unique<pat::JetCollection>();
+  auto bjets_used = std::make_unique<pat::JetCollection>();
+  auto flight_vect = std::make_unique<std::vector<double>>(3, 0.);
+  auto move_vertex = std::make_unique<std::vector<double>>(3, 0.);
 
   edm::Handle<reco::VertexCollection> primary_vertices;
   event.getByToken(primary_vertices_token, primary_vertices);
@@ -199,10 +205,13 @@ void MFVTrackMover::produce(edm::Event& event, const edm::EventSetup&) {
       }
       else
         output_tracks->push_back(*tk);
+
+      output_tracks_map->insert(tk, reco::TrackRef(h_output_tracks, output_tracks->size() - 1));
     }
   }
 
   event.put(std::move(output_tracks));
+  event.put(std::move(output_tracks_map));
   event.put(std::move(moved_tracks), "moved");
   event.put(std::move(npreseljets), "npreseljets");
   event.put(std::move(npreselbjets), "npreselbjets");

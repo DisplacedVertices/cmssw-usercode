@@ -1,7 +1,9 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version = 'V22'
+ntuple_version_ = 'V23'
+ntuple_version_use = ntuple_version_ + 'm'
+dataset = 'ntuple' + ntuple_version_use.lower()
 
 def run_n_tk_seeds(process, mode, settings, output_commands):
     if mode:
@@ -97,9 +99,9 @@ class NtupleSettings(CMSSWSettings):
     @property
     def version(self):
         if self.is_miniaod:
-            return ntuple_version + 'm'
+            return ntuple_version_ + 'm'
         else:
-            return ntuple_version
+            return ntuple_version_
 
     def normalize(self):
         if self.run_n_tk_seeds:
@@ -177,17 +179,20 @@ def aod_ntuple_process(settings):
     random_service(process, {'mfvVertexTracks': 1222})
     tfileservice(process, 'vertex_histos.root')
 
-    process.load('JMTucker.Tools.L1ECALPrefiringWeightProducer_cfi')
-
+    for x in process.patAlgosToolsTask, process.slimmingTask, process.packedPFCandidatesTask, process.patTask, process.pfNoPileUpJMETask:
+        x.remove(process.goodOfflinePrimaryVertices)
+    process.load('JMTucker.Tools.GoodPrimaryVertices_cfi')
     process.load('JMTucker.MFVNeutralino.Vertexer_cff')
     process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
     process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
     process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 
-    process.p = cms.Path(process.mfvVertexSequence *
+    process.p = cms.Path(process.goodOfflinePrimaryVertices *
+                         process.mfvVertexSequence *
                          process.mfvTriggerFloats *
-                         process.prefiringweight *
                          process.mfvEvent)
+
+    process.mfvEvent.misc_srcs = [x for x in process.mfvEvent.misc_srcs if x.moduleLabel != 'prefiringweight'] # JMTBAD doesn't work with miniaod-on-fly here
 
     output_commands = make_output_commands(process, settings)
 
@@ -222,10 +227,10 @@ def miniaod_ntuple_process(settings):
     tfileservice(process, 'vertex_histos.root')
     output_file(process, 'ntuple.root', [])
 
-    process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
     process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
     process.load('PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi')
     process.load('PhysicsTools.PatAlgos.selectionLayer1.electronSelector_cfi')
+    process.load('JMTucker.Tools.GoodPrimaryVertices_cfi')
     process.load('JMTucker.Tools.L1ECALPrefiringWeightProducer_cfi')
     process.load('JMTucker.Tools.MCStatProducer_cff')
     process.load('JMTucker.Tools.UpdatedJets_cff')
@@ -236,7 +241,7 @@ def miniaod_ntuple_process(settings):
     process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
     process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
 
-    process.goodOfflinePrimaryVertices.src = 'offlineSlimmedPrimaryVertices'
+    process.goodOfflinePrimaryVertices.input_is_miniaod = True
     process.selectedPatJets.src = 'updatedJetsMiniAOD'
     process.selectedPatMuons.src = 'slimmedMuons'
     process.selectedPatElectrons.src = 'slimmedElectrons'
@@ -247,11 +252,12 @@ def miniaod_ntuple_process(settings):
     process.mfvGenParticles.gen_particles_src = 'prunedGenParticles'
     process.mfvGenParticles.last_flag_check = False
 
-    process.mfvVertexTracks.tracks_src = 'mfvUnpackedCandidateTracks'
+    process.mfvRescaledTracks.tracks_src = 'mfvUnpackedCandidateTracks'
 
-    for x in process.mfvVerticesToJets, process.mfvVerticesAuxTmp, process.mfvVerticesAuxPresel, process.mfvEvent:
-        x.input_is_miniaod = True
+    for x in process.mfvVerticesToJets, process.mfvVerticesAuxTmp, process.mfvVerticesAuxPresel:
+        x.jet_track_ref_getter.input_is_miniaod = True
 
+    process.mfvEvent.input_is_miniaod = True
     process.mfvEvent.gen_particles_src = 'prunedGenParticles' # no idea if this lets gen_bquarks, gen_leptons work--may want the packed ones that have status 1 particles
     process.mfvEvent.gen_jets_src = 'slimmedGenJets'
     process.mfvEvent.pileup_info_src = 'slimmedAddPileupInfo'

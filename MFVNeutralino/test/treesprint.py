@@ -2,6 +2,7 @@
 
 import sys, os
 from glob import glob
+from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.Sample import norm_from_file
 from JMTucker.Tools.general import typed_from_argv, bool_from_argv
@@ -14,6 +15,7 @@ nobkg = bool_from_argv('nobkg')
 onlysig = bool_from_argv('onlysig')
 onlydata = bool_from_argv('onlydata')
 onlybkg = bool_from_argv('onlybkg')
+sumall = bool_from_argv('sumall')
 
 which = typed_from_argv(int, -1)
 ntks = ('mfvMiniTreeNtk3', 'mfvMiniTreeNtk4', 'mfvMiniTree')
@@ -32,7 +34,7 @@ for x in sys.argv[1:]:
         print 'using', x2
         fns.extend(glob(x2))
 if not fns:
-    gg = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV22m/*.root'
+    gg = '/uscms_data/d2/tucker/crab_dirs/MiniTree%s/*.root' % version
     print 'using default', gg
     fns = glob(gg)
 
@@ -85,7 +87,7 @@ for ntk in ntks:
         is_data = sname.startswith('JetHT') or sname.startswith('SingleMuon') or sname.startswith('SingleElectron')
         is_bkg = sname in ['qcdht0700_2017', 'qcdht1000_2017', 'qcdht1500_2017', 'qcdht2000_2017', 'ttbarht0600_2017', 'ttbarht0800_2017', 'ttbarht1200_2017', 'ttbarht2500_2017']
         is_other = not any((is_sig, is_data, is_bkg))
-        include_in_sum = is_bkg
+        include_in_sum = sumall or is_bkg
 
         if any((onlysig  and (is_other or is_data or is_bkg),
                 onlydata and (is_other or is_sig or is_bkg),

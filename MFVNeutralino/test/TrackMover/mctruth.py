@@ -1,6 +1,6 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-dataset = 'ntuplev22m'
+from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset
 sample_files(process, 'mfv_neu_tau010000um_M0800_2017', dataset, 1)
 tfileservice(process, 'mctruth.root')
 file_event_from_argv(process)
@@ -35,7 +35,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     #samples = [s for s in samples if s.has_dataset(dataset)]
     set_splitting(samples, dataset, 'minitree')
 
-    cs = CondorSubmitter('TrackMoverMCTruth%s' % dataset.replace('ntuple', '').capitalize(),
+    cs = CondorSubmitter('TrackMoverMCTruth' + version,
                          ex = year,
                          dataset = dataset,
                          )

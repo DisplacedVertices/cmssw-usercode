@@ -38,8 +38,6 @@ private:
   const std::vector<int> max_nbtags;
   const double min_ht;
   const double max_ht;
-  const double min_sum_other_pv_sumpt2;
-  const double max_sum_other_pv_sumpt2;
   const int min_nleptons;
   const int min_nselleptons;
 
@@ -92,8 +90,6 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     max_nbtags(cfg.getParameter<std::vector<int> >("max_nbtags")),
     min_ht(cfg.getParameter<double>("min_ht")),
     max_ht(cfg.getParameter<double>("max_ht")),
-    min_sum_other_pv_sumpt2(cfg.getParameter<double>("min_sum_other_pv_sumpt2")),
-    max_sum_other_pv_sumpt2(cfg.getParameter<double>("max_sum_other_pv_sumpt2")),
     min_nleptons(cfg.getParameter<int>("min_nleptons")),
     min_nselleptons(cfg.getParameter<int>("min_nselleptons")),
     apply_vertex_cuts(cfg.getParameter<bool>("apply_vertex_cuts")),
@@ -202,20 +198,6 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
 
     if (mevent->jet_ht(40) > max_ht)
       return false;
-
-    if (min_sum_other_pv_sumpt2 > 0 || max_sum_other_pv_sumpt2 < 1e9) {
-      edm::Handle<reco::VertexCollection> primary_vertices;
-      event.getByLabel("offlinePrimaryVertices", primary_vertices);
-      double other_pv_sumpt2 = 0;
-      for (size_t i = 1; i < primary_vertices->size(); ++i) {
-        const reco::Vertex& pv = primary_vertices->at(i);
-        for (auto trki = pv.tracks_begin(), trke = pv.tracks_end(); trki != trke; ++trki)
-          other_pv_sumpt2 += (*trki)->pt() * (*trki)->pt();
-      }
-
-      if (other_pv_sumpt2 < min_sum_other_pv_sumpt2 || other_pv_sumpt2 > max_sum_other_pv_sumpt2)
-        return false;
-    }
   }
 
   if (apply_vertex_cuts) {

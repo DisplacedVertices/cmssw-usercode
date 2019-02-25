@@ -47,7 +47,7 @@ namespace mfv {
     float pvy;
     float pvz;
     ushort pvntracks;
-    float pvsumpt2;
+    float pvscore;
     float jetht;
     ushort ntracks;
     uchar nmovedtracks;
