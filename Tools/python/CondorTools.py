@@ -104,9 +104,12 @@ def cs_rootfiles(d):
     return [fn for fn in glob(os.path.join(d, '*.root')) if os.path.isfile(fn)]
 
 def cs_analyze(d, 
-            _re=re.compile(r'return value (\d+)'),
-            _cmsRun_re=re.compile(r"(?:cmsRun|meat) exited with code (\d+)"),
-            _exception_re=re.compile(r"An exception of category '(.*)' occurred while")):
+               _re=re.compile(r'return value (\d+)'),
+               _ab_re=re.compile(r'Abnormal termination \(signal (\d+)\)'),
+               _cmsRun_re=re.compile(r"(?:cmsRun|meat) exited with code (\d+)"),
+               _exception_re=re.compile(r"An exception of category '(.*)' occurred while")
+               ):
+
     class cs_analyze_result:
         def _list(self, ret):
             return [i for i,r in enumerate(self.returns) if ret(r)]
@@ -120,6 +123,9 @@ def cs_analyze(d,
             return self._list(lambda r: r > 0)
         def done(self):
             return self._list(lambda r: r == 0)
+        def __repr__(self):
+            return '<cs_analyze_result idle=%r running=%r killed=%r probs=%r done=%r>' % (self.idle(), self.running(), self.killed(), self.probs(), self.done())
+
     result = cs_analyze_result()
     result.working_dir = d
     result.njobs = cs_njobs(d)
@@ -143,7 +149,9 @@ def cs_analyze(d,
             elif 'Job was aborted by the user' in line:
                 ret = -4
             else:
-                mo = _re.search(line)
+                mo = _ab_re.search(line)
+                if not mo:
+                    mo = _re.search(line)
                 if mo:
                     ret = int(mo.group(1))
 
@@ -177,7 +185,7 @@ def cs_analyze(d,
     for i, r in enumerate(result.returns):
         if r > 0:
             if result.cmsRun_returns.has_key(i):
-                assert result.cmsRun_returns[i] == (0 if r == 147 else r)
+                assert result.cmsRun_returns[i] == (0 if r in (147,19) else r)  # xrdcp exit code (?), xrdcp signal socket error
             else:
                 assert len(result.cmsRun_returns) == 0
             result.by_exit[r].append(i)
