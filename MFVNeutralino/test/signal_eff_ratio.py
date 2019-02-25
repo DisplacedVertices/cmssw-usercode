@@ -48,11 +48,13 @@ per.add(available(Samples.mfv_stopdbardbar_samples_2017), title=titles[1] + ' di
 per.draw(canvas=ps.c)
 ps.save('eff')
 
-per = PerSignal('ratio %s/%s' % titles, y_range=(0.6,1.15))
+per = PerSignal('ratio %s/%s' % titles, y_range=(0.4,1.1))
 PerSignal.clear_samples(samples)
 for s in samples:
-    s.y, s.yl, s.yh = clopper_pearson_poisson_means(s.e1[2], s.e2[2])
-per.add(available(Samples.mfv_signal_samples_2017),       title='multijet', color=ROOT.kPink)
-per.add(available(Samples.mfv_stopdbardbar_samples_2017), title='dijet',    color=ROOT.kCyan)
+    n1, n2 = s.e1[2], s.e2[2]
+    d1, d2 = s.e1[3], s.e2[3]
+    s.y, s.yl, s.yh = [x*d2/d1 for x in clopper_pearson_poisson_means(s.e1[2], s.e2[2])]
+per.add(available(Samples.mfv_signal_samples_2017),       title='multijet', color=ROOT.kRed)
+per.add(available(Samples.mfv_stopdbardbar_samples_2017), title='dijet',    color=ROOT.kBlue)
 per.draw(canvas=ps.c)
 ps.save('eff_ratio')
