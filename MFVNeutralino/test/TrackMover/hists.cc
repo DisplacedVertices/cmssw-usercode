@@ -703,7 +703,7 @@ int main(int argc, char** argv) {
 	    h_moved_tks_nstlayers[i]->Fill(nstlay, w);
 	    h_moved_tks_vtx[i]->Fill(nt.p_tks_vtx->at(itk), w);
 
-	    const bool selected = pt > 1.0 && npxlay >= 2 && nstlay >= 6 && dxy / dxyerr > 4.0;
+	    const bool selected = pt > 1.0 && npxlay >= 2 && nstlay >= 6 && nsigmadxy > 4;
 	    if (!selected) {
 	      h_moved_nosel_tks_pt[i]->Fill(pt, w);
 	      h_moved_nosel_tks_eta[i]->Fill(nt.p_tks_eta->at(itk), w);
