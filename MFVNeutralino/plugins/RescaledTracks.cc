@@ -41,12 +41,9 @@ void MFVRescaledTracks::produce(edm::Event& event, const edm::EventSetup&) {
     reco::TrackBase::CovarianceMatrix cov = tk->covariance();
 
     if (!event.isRealData() && enable) {
-      const double pt = tk->pt();
-      double dxyerr_scale = 1.2;
-      if (pt < 6)
-        dxyerr_scale =  0.0375 * pt + 1.025;
-      else if (6 <= pt && pt < 10)
-        dxyerr_scale = -0.0125 * pt + 1.325;
+      const double x = tk->pt();
+      const double p[10] = {1.045827403566987, 0.040807560577685954, 1.3770763063884373, -0.017990433591499638, 1.1569381971927997, 0.003552228220366273, 1.014069277138742, 0.011362995927480872, 1.5171519453490503, -0.0011509536017205234};
+      const double dxyerr_scale = (x<=6)*(p[0]+p[1]*x)+(x>6&&x<=10)*(p[2]+p[3]*x)+(x>10&&x<=20)*(p[4]+p[5]*x)+(x>20&&x<=40)*(p[6]+p[7]*x)+(x>40&&x<=200)*(p[8]+p[9]*x) + (x>200)*(p[8]+p[9]*200);
 
       const int i_dxy = reco::TrackBase::i_dxy;
       for (int idim = 0; idim < reco::TrackBase::dimension; ++idim) {
