@@ -17,6 +17,7 @@ int main(int argc, char** argv) {
   std::string out_fn("hists.root");
   std::string tree_path("mfvMovedTree20/t");
   std::string json;
+  float nevents_frac;
   int itau = 10000;
   bool apply_weights = true;
   bool btagsf_weights = false;
@@ -32,6 +33,7 @@ int main(int argc, char** argv) {
       ("output-file,o", po::value<std::string>(&out_fn)        ->default_value("hists.root"),       "the output file")
       ("tree-path,t",   po::value<std::string>(&tree_path)     ->default_value("mfvMovedTree20/t"), "the tree path")
       ("json,j",        po::value<std::string>(&json),                                              "lumi mask json file for data")
+      ("nevents-frac,n",po::value<float>      (&nevents_frac)  ->default_value(1.f),                "only run on this fraction of events in the tree")
       ("tau",           po::value<int>        (&itau)          ->default_value(10000),              "tau in microns, for reweighting")
       ("weights",       po::value<bool>       (&apply_weights) ->default_value(true),               "whether to use any weights")
       ("btagsf",        po::value<bool>       (&btagsf_weights)->default_value(false),              "whether to use b-tag SF weights")
@@ -62,6 +64,7 @@ int main(int argc, char** argv) {
             << " out_fn: " << out_fn
             << " tree_path: " << tree_path
             << " json: " << (json != "" ? json : "none")
+            << " nevents_frac: " << nevents_frac
             << " tau: " << itau
             << " weights: " << apply_weights
             << " btagsf: " << btagsf_weights << "\n";
@@ -92,10 +95,13 @@ int main(int argc, char** argv) {
   std::unique_ptr<jmt::LumiList> good_ll;
   if (!is_mc && json != "") good_ll.reset(new jmt::LumiList(json));
 
-  TH1F* h_sums = is_mc ? ((TH1F*)fat.f->Get("mcStat/h_sums")) : 0;
-
   fat.f_out->mkdir("mfvWeight")->cd();
-  fat.f->Get("mcStat/h_sums")->Clone("h_sums");
+  TH1D* h_sums = (TH1D*)fat.f->Get("mcStat/h_sums")->Clone("h_sums");
+  if (is_mc && nevents_frac < 1) {
+    h_sums->SetBinContent(1, h_sums->GetBinContent(1) * nevents_frac);
+    for (int i = 2, ie = h_sums->GetNbinsX(); i <= ie; ++i) // invalidate other entries since we can't just assume equal weights in them
+      h_sums->SetBinContent(i, -1e9);
+  }
   fat.f_out->cd();
 
   TH1F* h_norm = new TH1F("h_norm", "", 1, 0, 1);
@@ -345,18 +351,21 @@ int main(int argc, char** argv) {
   };
   TFile* extra_weights = extra_weights_hists.size() > 0 ? TFile::Open("reweight.root") : 0;
   const bool use_extra_weights = extra_weights != 0 && extra_weights->IsOpen();
-  printf("using extra weights from reweight.root? %i\n", use_extra_weights);
+  if (use_extra_weights) printf("using extra weights from reweight.root\n");
 
   long notskipped = 0, nden = 0, ndennegweight = 0, nnegweight = 0;
   double sumnegweightden = 0;
 
-  for (long ej = 0, eje = t->GetEntries(); ej < eje; ++ej) {
-    if (ej == 100000) break;
-    if (t->LoadTree(ej) < 0) break;
-    if (t->GetEntry(ej) <= 0) continue;
-    if (ej % 250000 == 0) {
-      fprintf(stderr, "\r%li/%li", ej, eje);
-      fflush(stderr);
+  unsigned long long jj = 0;
+  const unsigned long long jje = fat.t->GetEntries();
+  const unsigned long long jjmax = nevents_frac < 1 ? nevents_frac * jje : jje;
+  for (; jj < jjmax; ++jj) {
+    if (fat.t->LoadTree(jj) < 0) break;
+    if (fat.t->GetEntry(jj) <= 0) continue;
+    if (jj % 25000 == 0) {
+      if (jjmax != jje) printf("\r%llu/%llu(/%llu)", jj, jjmax, jje);
+      else              printf("\r%llu/%llu",        jj, jjmax);
+      fflush(stdout);
     }
 
     if (!is_mc && good_ll.get() && !good_ll->contains(nt))
@@ -717,7 +726,8 @@ int main(int argc, char** argv) {
     }
   }
 
-  printf("\r                                \n");
+  if (jjmax != jje) printf("\rdone with %llu events (out of %llu)\n", jjmax, jje);
+  else              printf("\rdone with %llu events\n",               jjmax);
   printf("%li/%li (%li/%li den) events with negative weights\n", nnegweight, notskipped, ndennegweight, nden);
   printf("%.1f events in denominator (including %.1f negative)\n", den, sumnegweightden);
   printf("%20s  %12s  %12s  %10s [%10s, %10s] +%10s -%10s\n", "name", "num", "den", "eff", "lo", "hi", "+", "-");
