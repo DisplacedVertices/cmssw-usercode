@@ -95,6 +95,10 @@ def md5sum(fn):
     p.stdout.close()  # Allow p1 to receive a SIGPIPE if p2 exits.
     return p2.communicate()[0].split()[0]
 
+def touch(fn):
+    fn = storeonly(fn)
+    return _system('eos %s touch %s' % (url, fn))
+
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
