@@ -6,7 +6,7 @@ import sys
 import JMTucker.Tools.argparse as argparse
 from JMTucker.Tools.CRAB3ToolsSh import is_crab_working_dir, crab_hadd_args, crab_hadd_files, crab_hadd
 from JMTucker.Tools.CondorTools import is_cs_dir, cs_hadd_args, cs_hadd_files, cs_hadd
-from JMTucker.Tools.general import touch
+from JMTucker.Tools.general import touch as _touch
 from JMTucker.Tools.hadd import HaddlogParser
 from JMTucker.Tools import eos, colors
 
@@ -83,9 +83,9 @@ def hadd_(is_crab, *args, **kwargs):
 
     on_eos = new_dir and '/store/' in new_dir
     if on_eos:
-        exists, mkdir, rm = eos.exists, eos.mkdir, eos.rm
+        exists, mkdir, rm, touch = eos.exists, eos.mkdir, eos.rm, eos.touch
     else:
-        exists, mkdir, rm = os.path.exists, os.mkdir, os.remove
+        exists, mkdir, rm, touch = os.path.exists, os.mkdir, os.remove, _touch
 
     if new_dir and not exists(new_dir):
         mkdir(new_dir)
