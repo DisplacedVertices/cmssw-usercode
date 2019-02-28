@@ -1503,12 +1503,15 @@ def p4(pt,eta,phi,mass):
 def poisson_means_divide(h1, h2, no_zeroes=False):
     return histogram_divide(h1, h2, confint=clopper_pearson_poisson_means, force_lt_1=False, no_zeroes=no_zeroes)
 
-def plot_dir(x='', make=False):
+def plot_dir(x='', make=False, temp=False):
     hostname = os.environ['HOSTNAME']
     username = os.environ['USER']
     d = None
     if 'fnal.gov' in hostname and username == 'tucker':
-        d = '/publicweb/t/tucker/asdf/plots'
+        if temp:
+            d = '/publicweb/t/tucker/asdf/tempplots'
+        else:
+            d = '/publicweb/t/tucker/asdf/plots'
     elif 'fnal.gov' in hostname and username == 'jchu':
         d = '/publicweb/j/jchu/plots'
     elif 'fnal.gov' in hostname and username == 'dquach':
