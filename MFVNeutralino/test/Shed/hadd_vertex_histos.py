@@ -2,22 +2,21 @@ import sys, os, re
 from collections import Counter
 from pprint import pprint
 from JMTucker.Tools import eos, SampleFiles
+from JMTucker.Tools.general import bool_from_argv
 from JMTucker.Tools.hadd import hadd
 
 if len(sys.argv) < 3:
     sys.exit('usage: %s dataset sample\n  where dataset and sample are as registered in SampleFiles. sample can be "*" to mean all samples having the dataset.' % sys.argv[0])
 
-dataset = sys.argv[1]
-sample = sys.argv[2]
-interactive = True
 verbosity = 0
-
-if '-f' in sys.argv:
-    interactive = False
+rm = bool_from_argv('rm')
 
 while '-v' in sys.argv:
     verbosity += 1
     sys.argv.remove('-v')
+
+dataset = sys.argv[1]
+sample = sys.argv[2]
 
 if sample == '*':
     samples = []
@@ -78,11 +77,15 @@ for sample in samples:
 
     hadds.append((new_vh_fn, vh_fns))
 
-print 'will hadd and rm these:'
+if rm:
+    print 'hadd and rm these:'
+else:
+    print 'hadd these:'
 pprint(hadds)
-if interactive:
-    raw_input('ok?')
+if rm and raw_input('ok? ').strip().lower() != 'y':
+    sys.exit('giving up')
+
 for new_fn, fns in hadds:
-    if hadd(new_fn, fns):
+    if hadd(new_fn, fns) and rm:
         for fn in fns:
             eos.rm(fn)
