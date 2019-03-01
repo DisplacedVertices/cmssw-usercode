@@ -4,6 +4,7 @@
 #include "TH2.h"
 #include "TTree.h"
 #include "TVector2.h"
+#include "DataFormats/Math/interface/deltaR.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
@@ -45,6 +46,10 @@ TH1F* h_dbv_nobtag[NVTX][NBTAGS][NBDISC][NDBV] = {{{{0}}}};
 TH1F* h_dbv_nobtag_bquarks[NVTX][NBTAGS][NBDISC][NDBV] = {{{{0}}}};
 TH1F* h_dbv_nobtag_nobquarks[NVTX][NBTAGS][NBDISC][NDBV] = {{{{0}}}};
 
+TH1F* h_nbquarks[NVTX] = {0};
+TH1F* h_drmin_tkp_bquark[NVTX] = {0};
+TH1F* h_ntk_bquark[NVTX] = {0};
+
 void book_hists(int ntk) {
   for (int k = 0; k < NVTX; ++k) {
     h_bquark_flavor_code[k] = new TH1F(TString::Format("h_%dv_bquark_flavor_code", k+1), TString::Format("%d-track %s events;bquark_flavor_code;Events", ntk, vtx_names[k]), 2, 0, 2);
@@ -84,6 +89,12 @@ void book_hists(int ntk) {
         }
       }
     }
+  }
+
+  for (int k = 0; k < NVTX; ++k) {
+    h_nbquarks[k] = new TH1F(TString::Format("h_%dv_nbquarks", k+1), TString::Format("%d-track %s events with b quarks;number of b quarks;Events", ntk, vtx_names[k]), 20, 0, 20);
+    h_drmin_tkp_bquark[k] = new TH1F(TString::Format("h_%dv_drmin_tkp_bquark", k+1), TString::Format("%d-track %s events with b quarks;#DeltaR(track momentum, closest b quark);Number of tracks", ntk, vtx_names[k]), 100, 0, 10);
+    h_ntk_bquark[k] = new TH1F(TString::Format("h_%dv_ntk_bquark", k+1), TString::Format("%d-track %s events with b quarks;number of tracks with #DeltaR(track momentum, closest b quark) < 0.4;Vertices", ntk, vtx_names[k]), 40, 0, 40);
   }
 }
 
@@ -155,6 +166,34 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
             if (!btag_flavor_code && !bquark_flavor_code) h_dbv_nobtag_nobquarks[k][j][i][l]->Fill(dbv[l], w);
           }
         }
+      }
+    }
+
+    if (bquark_flavor_code) {
+      const int nbquarks = int(nt.p_gen_bquarks->size());
+      h_nbquarks[k]->Fill(nbquarks, w);
+
+      for (int ivtx = 0; ivtx < 2; ++ivtx) {
+        if (nt.nvtx == 1 && ivtx != 0) continue;
+
+        int ntk_vtx = ivtx == 0 ? nt.ntk0 : nt.ntk1;
+        int ntk_bquark = 0;
+        for (int itk = 0; itk < ntk_vtx; ++itk) {
+          TVector3 tkp = ivtx == 0 ? TVector3(nt.p_tk0_px->at(itk), nt.p_tk0_py->at(itk), nt.p_tk0_pz->at(itk))
+                                   : TVector3(nt.p_tk1_px->at(itk), nt.p_tk1_py->at(itk), nt.p_tk1_pz->at(itk));
+          double drmin = 1e9;
+          for (int ibquark = 0; ibquark < nbquarks; ++ibquark) {
+            double dr = reco::deltaR(tkp.Eta(), tkp.Phi(), nt.p_gen_bquarks->at(ibquark).Eta(), nt.p_gen_bquarks->at(ibquark).Phi());
+            if (dr < drmin) {
+              drmin = dr;
+            }
+          }
+          h_drmin_tkp_bquark[k]->Fill(drmin, w);
+          if (drmin < 0.4) {
+            ++ntk_bquark;
+          }
+        }
+        h_ntk_bquark[k]->Fill(ntk_bquark, w);
       }
     }
   }
