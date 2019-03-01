@@ -43,7 +43,7 @@ void MFVRescaledTracks::produce(edm::Event& event, const edm::EventSetup&) {
     if (!event.isRealData() && enable) {
       const double x = tk->pt();
       const double p[12] = {1.0173011869120834, 0.044533302581799744, 1.3195634354617685, -0.009976304901909844, 1.1850626163736517, 0.0012770778723076347, 1.0049535896045954, 0.011293826864722332, 1.3791408353275811, 0.00163492657307045, 1.5557569970128258, -0.0014711711689202145};
-      const double dxyerr_scale = (x<=5)*(p[0]+p[1]*x)+(x>5&&x<=10)*(p[2]+p[3]*x)+(x>10&&x<=18)*(p[4]+p[5]*x)+(x>18&&x<=40)*(p[6]+p[7]*x)+(x>40&&x<=60)*(p[8]+p[9]*x)+(x>60&&x<=200)*(p[10]+p[11]*x);
+      const double dxyerr_scale = (x<=5)*(p[0]+p[1]*x)+(x>5&&x<=10)*(p[2]+p[3]*x)+(x>10&&x<=18)*(p[4]+p[5]*x)+(x>18&&x<=40)*(p[6]+p[7]*x)+(x>40&&x<=60)*(p[8]+p[9]*x)+(x>60&&x<=200)*(p[10]+p[11]*x) + (x>200)*(p[10]+p[11]*200);
 
       const int i_dxy = reco::TrackBase::i_dxy;
       for (int idim = 0; idim < reco::TrackBase::dimension; ++idim) {
