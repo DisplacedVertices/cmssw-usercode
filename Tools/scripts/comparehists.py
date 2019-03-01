@@ -111,14 +111,14 @@ if options.file_dirs:
     file_dirs = [file.split(':', 1) for file in options.file_dirs]
     files, dirs = [], []
     for fn, dir_path in file_dirs:
-        f = ROOT.TFile(fn)
+        f = ROOT.TFile.Open(fn)
         if not f.IsOpen():
             raise ValueError('file %s not readable' % fn)
         files.append(f)
         d = f.Get(dir_path)
         dirs.append(d)
 else:
-    files = [ROOT.TFile(file) for file in options.files]
+    files = [ROOT.TFile.Open(file) for file in options.files]
     for i,f in enumerate(files):
         if not f.IsOpen():
             raise ValueError('file %s not readable' % options.files[i])

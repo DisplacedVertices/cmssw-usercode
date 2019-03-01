@@ -2,7 +2,7 @@
 #include <cassert>
 #include "TColor.h"
 #include "TFile.h"
-#include "TH1.h"
+#include "TH2.h"
 #include "TROOT.h"
 #include "TString.h"
 #include "TStyle.h"
@@ -29,12 +29,21 @@ numden::numden(const char* name, const char* title, int nbins, double xlo, doubl
     den(new TH1D(TString::Format("%s_den", name), title, nbins, xlo, xhi))
 {}
 
+numden::numden(const char* name, const char* title, int nbins, double xlo, double xhi, int nbinsy, double ylo, double yhi)
+  : num(new TH2D(TString::Format("%s_num", name), title, nbins, xlo, xhi, nbinsy, ylo, yhi)),
+    den(new TH2D(TString::Format("%s_den", name), title, nbins, xlo, xhi, nbinsy, ylo, yhi))
+{}
+
 numdens::numdens(const char* c)
   : common(c + std::string("_"))
 {}
 
 void numdens::book(int key, const char* name, const char* title, int nbins, double xlo, double xhi) {
   m.insert(std::make_pair(key, numden((common + name).c_str(), title, nbins, xlo, xhi)));
+}
+
+void numdens::book(int key, const char* name, const char* title, int nbins, double xlo, double xhi, int nbinsy, double ylo, double yhi) {
+  m.insert(std::make_pair(key, numden((common + name).c_str(), title, nbins, xlo, xhi, nbinsy, ylo, yhi)));
 }
 
 numden& numdens::operator()(int k) {

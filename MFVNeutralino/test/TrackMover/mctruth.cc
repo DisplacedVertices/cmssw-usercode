@@ -1,4 +1,4 @@
-#include "TH1.h"
+#include "TH2.h"
 #include "TRandom3.h"
 #include "TTree.h"
 #include "TVector2.h"
@@ -81,7 +81,8 @@ int main(int argc, char** argv) {
     const double w = apply_weight ? nt.weight : 1.;
     h_weight->Fill(w);
     h_npu->Fill(nt.npu, w);
-    auto Fill = [&w](TH1D* h, double v) { h->Fill(v, w); };
+    auto F1 = [&w](TH1* h, double v)            { h                    ->Fill(v,     w); };
+    //auto F2 = [&w](TH1* h, double v, double v2) { dynamic_cast<TH2*>(h)->Fill(v, v2, w); };
 
     const size_t n_raw_vtx = nt.p_vtxs_x->size();
 
@@ -112,17 +113,17 @@ int main(int argc, char** argv) {
         continue;
 
       for (numdens& nd : nds) {
-        Fill(nd(k_lspdist2) .den, lspdist2);
-        Fill(nd(k_lspdist3) .den, lspdist3);
-        Fill(nd(k_lspdistz) .den, lspdistz);
-        Fill(nd(k_movedist2).den, movedist2);
-        Fill(nd(k_movedist3).den, movedist3);
-        Fill(nd(k_npv)      .den, nt.npv);
-        Fill(nd(k_pvz)      .den, nt.pvz);
-        Fill(nd(k_pvrho)    .den, mag(nt.pvx, nt.pvy));
-        Fill(nd(k_pvntracks).den, nt.pvntracks);
-        Fill(nd(k_pvscore)  .den, nt.pvscore);
-        Fill(nd(k_ht)       .den, nt.jetht);
+        F1(nd(k_lspdist2) .den, lspdist2);
+        F1(nd(k_lspdist3) .den, lspdist3);
+        F1(nd(k_lspdistz) .den, lspdistz);
+        F1(nd(k_movedist2).den, movedist2);
+        F1(nd(k_movedist3).den, movedist3);
+        F1(nd(k_npv)      .den, nt.npv);
+        F1(nd(k_pvz)      .den, nt.pvz);
+        F1(nd(k_pvrho)    .den, mag(nt.pvx, nt.pvy));
+        F1(nd(k_pvntracks).den, nt.pvntracks);
+        F1(nd(k_pvscore)  .den, nt.pvscore);
+        F1(nd(k_ht)       .den, nt.jetht);
       }
 
       den += w;
@@ -175,17 +176,17 @@ int main(int argc, char** argv) {
       for (int i = 0; i < num_numdens; ++i) {
         if (passes[i]) {
           numdens& nd = nds[i];
-          Fill(nd(k_lspdist2) .num, lspdist2);
-          Fill(nd(k_lspdist3) .num, lspdist3);
-          Fill(nd(k_lspdistz) .num, lspdistz);
-          Fill(nd(k_movedist2).num, movedist2);
-          Fill(nd(k_movedist3).num, movedist3);
-          Fill(nd(k_npv)      .num, nt.npv);
-          Fill(nd(k_pvz)      .num, nt.pvz);
-          Fill(nd(k_pvrho)    .num, mag(nt.pvx, nt.pvy));
-          Fill(nd(k_pvntracks).num, nt.pvntracks);
-          Fill(nd(k_pvscore)  .num, nt.pvscore);
-          Fill(nd(k_ht)       .num, nt.jetht);
+          F1(nd(k_lspdist2) .num, lspdist2);
+          F1(nd(k_lspdist3) .num, lspdist3);
+          F1(nd(k_lspdistz) .num, lspdistz);
+          F1(nd(k_movedist2).num, movedist2);
+          F1(nd(k_movedist3).num, movedist3);
+          F1(nd(k_npv)      .num, nt.npv);
+          F1(nd(k_pvz)      .num, nt.pvz);
+          F1(nd(k_pvrho)    .num, mag(nt.pvx, nt.pvy));
+          F1(nd(k_pvntracks).num, nt.pvntracks);
+          F1(nd(k_pvscore)  .num, nt.pvscore);
+          F1(nd(k_ht)       .num, nt.jetht);
         }
       }
     }
