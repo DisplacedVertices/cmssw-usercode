@@ -121,7 +121,7 @@ int main(int argc, char** argv) {
     numdens("all")
   };
 
-  enum { k_movedist2, k_movedist3, k_movevectoreta, k_npv, k_pvx, k_pvy, k_pvz, k_pvrho, k_pvntracks, k_pvscore, k_ht, k_ntracks, k_nmovedtracks, k_npreseljets, k_npreselbjets, k_jetsume, k_jetdrmax, k_jetdravg, k_jeta3dmax, k_jetsumntracks, k_jetntracks01, k_nvtxs };
+  enum { k_movedist2, k_movedist3, k_movevectoreta, k_npv, k_pvx, k_pvy, k_pvz, k_pvrho, k_pvntracks, k_pvscore, k_ht, k_ntracks, k_nmovedtracks, k_nseltracks, k_npreseljets, k_npreselbjets, k_jetpt01, k_jetsume, k_jetdrmax, k_jetdravg, k_jeta3dmax, k_jetsumntracks, k_jetntracks01, k_jetnseltracks01, k_nvtxs };
   for (numdens& nd : nds) {
     nd.book(k_movedist2, "movedist2", ";movement 2-dist;events/0.01 cm", 200, 0, 2);
     nd.book(k_movedist3, "movedist3", ";movement 3-dist;events/0.01 cm", 200, 0, 2);
@@ -135,18 +135,22 @@ int main(int argc, char** argv) {
     nd.book(k_pvscore, "pvscore", ";PV #Sigma p_{T}^{2} (GeV^{2});events/200 GeV^{2}", 200, 0, 40000);
     nd.book(k_ht, "ht", ";H_{T} (GeV);events/50 GeV", 50, 0, 2500);
     nd.book(k_ntracks, "ntracks", ";# tracks;events/10", 200, 0, 2000);
-    nd.book(k_nmovedtracks, "nmovedtracks", ";# moved tracks;events/2", 200, 0, 400);
+    nd.book(k_nmovedtracks, "nmovedtracks", ";# moved tracks;events/2", 120, 0, 120);
+    nd.book(k_nseltracks, "nseltracks", ";# selected tracks;events", 80, 0, 80);
     nd.book(k_npreseljets, "npreseljets", ";# preselected jets;events/1", 20, 0, 20);
     nd.book(k_npreselbjets, "npreselbjets", ";# preselected b jets;events/1", 20, 0, 20);
+    nd.book(k_jetpt01, "jetpt01", ";jet p_{T} 0 (GeV);jet p_{T} 1 (GeV);events/5 GeV", 50, 0, 1000, 50, 0, 1000);
     nd.book(k_jetsume, "jetsume", ";#Sigma jet energy (GeV);events/5 GeV", 200, 0, 1000);
     nd.book(k_jetdrmax, "jetdrmax", ";max jet #Delta R;events/0.1", 70, 0, 7);
     nd.book(k_jetdravg, "jetdravg", ";avg jet #Delta R;events/0.1", 70, 0, 7);
     nd.book(k_jeta3dmax, "jeta3dmax", ";max 3D angle between jets;events/0.05", 63, 0, M_PI);
     nd.book(k_jetsumntracks, "jetsumntracks", ";#Sigma jet # tracks;events/5", 200, 0, 1000);
-    nd.book(k_jetntracks01, "jetntracks01", ";jet tracks 0;jet tracks 1", 25, 0, 50, 25, 0, 50);
+    nd.book(k_jetntracks01, "jetntracks01", ";jet # tracks 0;jet # tracks 1", 50, 0, 50, 50, 0, 50);
+    nd.book(k_jetnseltracks01, "jetnseltracks01", ";jet # sel tracks 0;jet # sel tracks 1", 50, 0, 50, 50, 0, 50);
     nd.book(k_nvtxs, "nvtxs", ";number of vertices;events/1", 8, 0, 8);
   }
 
+  // JMTBAD some (all?) of these should be numdens
   TH1D* h_vtxdbv[num_numdens] = {0};
   TH1D* h_vtxntracks[num_numdens] = {0};
   TH1D* h_vtxbs2derr[num_numdens] = {0};
@@ -338,6 +342,8 @@ int main(int argc, char** argv) {
     h_moved_nosel_tks_vtx[i] = new TH1D(TString::Format("h_%i_moved_nosel_tks_vtx", i), ";moved but not selected track vertex-association index;tracks/1", 255, 0, 255);
   }
 
+  TH2D* h_diag_alljetsntrackseq = new TH2D("h_diag_alljetsntrackseq", ";jet p_{T} (GeV);ntracks saved - ntracks dR < 0.4", 50, 0, 2000, 20, -20, 20);
+
   double den = 0;
   std::map<std::string, double> nums;
 
@@ -450,18 +456,24 @@ int main(int argc, char** argv) {
 
     const bool pass_trig = nt.pass_hlt & 1;
 
+
     double jet_sume = 0;
     double jet_drmax = 0;
     double jet_dravg = 0;
     double jet_a3dmax = 0;
     double jet_sumntracks = 0;
+    double jet_pt_0 = 0, jet_pt_1 = 0;
     int jet_ntracks_0 = 0, jet_ntracks_1 = 0;
+    int jet_nseltracks_0 = 0, jet_nseltracks_1 = 0;
     size_t nmovedjets = 0;
     for (size_t ijet = 0; ijet < nt.nalljets(); ++ijet) {
       if (nt.p_alljets_moved->at(ijet)) {
         ++nmovedjets;
         jet_sume += nt.p_alljets_energy->at(ijet);
         jet_sumntracks += nt.p_alljets_ntracks->at(ijet);
+
+        std::vector<int> ijet_tracks = nt.alljets_tracks(ijet);
+        h_diag_alljetsntrackseq->Fill(nt.p_alljets_pt->at(ijet), nt.p_alljets_ntracks->at(ijet) - ijet_tracks.size());
 
         for (size_t jjet = ijet+1; jjet < nt.nalljets(); ++jjet) {
           if (nt.p_alljets_moved->at(jjet)) {
@@ -470,16 +482,33 @@ int main(int argc, char** argv) {
             jet_dravg += dr;
             if (dr > jet_drmax)
               jet_drmax = dr;
+
             if (a3d > jet_a3dmax) {
+              std::vector<int> jjet_tracks = nt.alljets_tracks(jjet);
+
+              const int ijet_nseltracks = std::count_if(ijet_tracks.begin(), ijet_tracks.end(), [&](const int k) { return nt.tks_sel(k); });
+              const int jjet_nseltracks = std::count_if(jjet_tracks.begin(), jjet_tracks.end(), [&](const int k) { return nt.tks_sel(k); });
+
               jet_a3dmax = a3d;
+              jet_pt_0 = std::max(nt.p_alljets_pt->at(ijet), nt.p_alljets_pt->at(jjet));
+              jet_pt_1 = std::min(nt.p_alljets_pt->at(ijet), nt.p_alljets_pt->at(jjet));
               jet_ntracks_0 = std::max(nt.p_alljets_ntracks->at(ijet), nt.p_alljets_ntracks->at(jjet));
               jet_ntracks_1 = std::min(nt.p_alljets_ntracks->at(ijet), nt.p_alljets_ntracks->at(jjet));
+              jet_nseltracks_0 = std::max(ijet_nseltracks, jjet_nseltracks);
+              jet_nseltracks_1 = std::min(ijet_nseltracks, jjet_nseltracks);
             }
           }
         }
       }
     }
     jet_dravg /= nmovedjets * (nmovedjets - 1) / 2.;
+
+
+    int nseltracks = 0;
+    for (int itk = 0, itke = nt.ntks(); itk < itke; ++itk)
+      if (nt.tks_sel(itk))
+        ++nseltracks;
+
 
     const size_t n_raw_vtx = nt.p_vtxs_x->size();
     std::vector<std::vector<int>> vtxs_tracks(n_raw_vtx);
@@ -561,14 +590,17 @@ int main(int argc, char** argv) {
       F1(nd(k_ht)           .den, nt.jetht);
       F1(nd(k_ntracks)      .den, nt.ntracks);
       F1(nd(k_nmovedtracks) .den, nt.nmovedtracks);
+      F1(nd(k_nseltracks)   .den, nseltracks);
       F1(nd(k_npreseljets)  .den, nt.npreseljets);
       F1(nd(k_npreselbjets) .den, nt.npreselbjets);
+      F2(nd(k_jetpt01)      .den, jet_pt_0, jet_pt_1);
       F1(nd(k_jetsume)      .den, jet_sume);
       F1(nd(k_jetdrmax)     .den, jet_drmax);
       F1(nd(k_jetdravg)     .den, jet_dravg);
       F1(nd(k_jeta3dmax)    .den, jet_a3dmax);
       F1(nd(k_jetsumntracks).den, jet_sumntracks);
       F2(nd(k_jetntracks01) .den, jet_ntracks_0, jet_ntracks_1);
+      F2(nd(k_jetnseltracks01) .den, jet_nseltracks_0, jet_nseltracks_1);
       F1(nd(k_nvtxs)        .den, nt.nvtxs());
     }
 
@@ -669,21 +701,24 @@ int main(int argc, char** argv) {
         F1(nd(k_ht)           .num, nt.jetht);
         F1(nd(k_ntracks)      .num, nt.ntracks);
         F1(nd(k_nmovedtracks) .num, nt.nmovedtracks);
+        F1(nd(k_nseltracks)   .num, nseltracks);
         F1(nd(k_npreseljets)  .num, nt.npreseljets);
         F1(nd(k_npreselbjets) .num, nt.npreselbjets);
+        F2(nd(k_jetpt01)      .num, jet_pt_0, jet_pt_1);
         F1(nd(k_jetsume)      .num, jet_sume);
         F1(nd(k_jetdrmax)     .num, jet_drmax);
         F1(nd(k_jetdravg)     .num, jet_dravg);
         F1(nd(k_jeta3dmax)    .num, jet_a3dmax);
         F1(nd(k_jetsumntracks).num, jet_sumntracks);
         F2(nd(k_jetntracks01) .num, jet_ntracks_0, jet_ntracks_1);
+        F2(nd(k_jetnseltracks01).num, jet_nseltracks_0, jet_nseltracks_1);
         F1(nd(k_nvtxs)        .num, passes[i]);
 
 	for (size_t itk = 0; itk < nt.ntks(); itk++) {
 	  const float pt = nt.tks_pt(itk);
 	  const float dxy = nt.p_tks_dxy->at(itk);
 	  const float dxyerr = nt.p_tks_err_dxy->at(itk);
-	  const float nsigmadxy = fabs(dxy / dxyerr);
+	  const float nsigmadxy = nt.tks_nsigmadxy(itk);
 	  const float npxlay = nt.tks_npxlayers(itk);
 	  const float nstlay = nt.tks_nstlayers(itk);
 
@@ -718,8 +753,7 @@ int main(int argc, char** argv) {
 	    h_moved_tks_nstlayers[i]->Fill(nstlay, w);
 	    h_moved_tks_vtx[i]->Fill(nt.p_tks_vtx->at(itk), w);
 
-	    const bool selected = pt > 1.0 && npxlay >= 2 && nstlay >= 6 && nsigmadxy > 4;
-	    if (!selected) {
+	    if (!nt.tks_sel(itk)) {
 	      h_moved_nosel_tks_pt[i]->Fill(pt, w);
 	      h_moved_nosel_tks_eta[i]->Fill(nt.p_tks_eta->at(itk), w);
 	      h_moved_nosel_tks_phi[i]->Fill(nt.p_tks_phi->at(itk), w);

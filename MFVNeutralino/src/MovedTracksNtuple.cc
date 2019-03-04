@@ -1,9 +1,34 @@
 #include "JMTucker/MFVNeutralino/interface/MovedTracksNtuple.h"
 
 #include "TTree.h"
-#include "TVector3.h"
 
 namespace mfv {
+  TLorentzVector MovedTracksNtuple::gen_daughter_p4(int i) const {
+    TLorentzVector p;
+    if (p_gen_daughter_pt)
+      p.SetPtEtaPhiE((*p_gen_daughter_pt)[i], (*p_gen_daughter_eta)[i], (*p_gen_daughter_phi)[i], (*p_gen_daughter_mass)[i]);
+    else
+      p.SetPtEtaPhiE(gen_daughter_pt[i], gen_daughter_eta[i], gen_daughter_phi[i], gen_daughter_mass[i]);
+    return p;
+  }
+
+  TLorentzVector MovedTracksNtuple::alljets_p4(size_t i) const {
+    TLorentzVector p;
+    if (p_alljets_pt)
+      p.SetPtEtaPhiE((*p_alljets_pt)[i], (*p_alljets_eta)[i], (*p_alljets_phi)[i], (*p_alljets_energy)[i]);
+    else
+      p.SetPtEtaPhiE(alljets_pt[i], alljets_eta[i], alljets_phi[i], alljets_energy[i]);
+    return p;
+  }
+
+  std::vector<int> MovedTracksNtuple::alljets_tracks(int i, double dRmax) const {
+    std::vector<int> r;
+    for (size_t j = 0, je = ntks(); j < je; ++j)
+      if (tks_p(j).DeltaR(alljets_p4(i).Vect()) < dRmax)
+        r.push_back(j);
+    return r;
+  }
+
   TVector3 MovedTracksNtuple::move_vector() const {
     return TVector3(move_x + bsx_at_z(move_z) - (pvx + bsx_at_z(pvz)),
                     move_y + bsy_at_z(move_z) - (pvy + bsy_at_z(pvz)),
@@ -19,6 +44,10 @@ namespace mfv {
         r.push_back(j);
     assert(r.size() == (p_vtxs_ntracks ? (*p_vtxs_ntracks)[i] : vtxs_ntracks[i]));
     return r;
+  }
+
+  bool MovedTracksNtuple::tks_sel(int i) const {
+    return tks_pt(i) > 1 && tks_npxlayers(i) >= 2 && tks_nstlayers(i) >= 6 && tks_nsigmadxy(i) > 4;
   }
 
   MovedTracksNtuple::MovedTracksNtuple() {

@@ -6,7 +6,6 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/HitPattern.h"
 
 class TTree;
-class TVector3;
 
 namespace mfv {
   struct MovedTracksNtuple {
@@ -30,7 +29,7 @@ namespace mfv {
     std::vector<float> gen_daughter_eta;
     std::vector<float> gen_daughter_phi;
     std::vector<float> gen_daughter_mass;
-    TLorentzVector gen_daughter_p4(int i) const { TLorentzVector v; v.SetPtEtaPhiM(p_gen_daughter_pt ? (*p_gen_daughter_pt)[i] : gen_daughter_pt[i], p_gen_daughter_eta ? (*p_gen_daughter_eta)[i] : gen_daughter_eta[i], p_gen_daughter_phi ? (*p_gen_daughter_phi)[i] : gen_daughter_phi[i], p_gen_daughter_mass ? (*p_gen_daughter_mass)[i] : gen_daughter_mass[i]); return v; }
+    TLorentzVector gen_daughter_p4(int i) const;
     std::vector<int> gen_daughter_id;
 
     uchar pass_hlt;
@@ -56,24 +55,17 @@ namespace mfv {
     std::vector<float> alljets_eta;
     std::vector<float> alljets_phi;
     std::vector<float> alljets_energy;
+    TLorentzVector alljets_p4(size_t i) const;
     std::vector<uchar> alljets_ntracks;
     std::vector<float> alljets_bdisc;
     std::vector<uchar> alljets_hadronflavor;
     std::vector<bool>  alljets_moved;
     size_t nalljets() const { return p_alljets_pt ? p_alljets_pt->size() : alljets_pt.size(); }
+    std::vector<int> alljets_tracks(int i, double dRmax=0.4) const;
 
     // JMTBAD "presel" on these two really doesn't mean anything other than they have pt > 20 and pass the jet id
     uchar npreseljets; // JMTBAD this is actually # of jets with bdisc < veto
     uchar npreselbjets;
-
-    TLorentzVector alljets_p4(size_t i) const {
-      TLorentzVector p;
-      if (p_alljets_pt)
-        p.SetPtEtaPhiE((*p_alljets_pt)[i], (*p_alljets_eta)[i], (*p_alljets_phi)[i], (*p_alljets_energy)[i]);
-      else
-        p.SetPtEtaPhiE(alljets_pt[i], alljets_eta[i], alljets_phi[i], alljets_energy[i]);
-      return p;
-    }
 
     float move_x;
     float move_y;
@@ -118,6 +110,8 @@ namespace mfv {
     int tks_npxlayers(int i) const { return tks_hp(i).npxlayers(); }
     int tks_nstlayers(int i) const { return tks_hp(i).nstlayers(); }
     int tks_nlayers(int i) const { return tks_hp(i).nlayers(); }
+    float tks_nsigmadxy(int i) const { return fabs(p_tks_dxy ? (*p_tks_dxy)[i] : tks_dxy[i]) / (p_tks_err_dxy ? (*p_tks_err_dxy)[i] : tks_err_dxy[i]); }
+    bool tks_sel(int i) const;
 
     ////
 
