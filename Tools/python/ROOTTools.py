@@ -457,6 +457,7 @@ def compare_hists(ps, samples, **kwargs):
     scaling        = _get('scaling',        1.)
     ratio          = _get('ratio',          True)
     x_range        = _get('x_range',        None)
+    profile        = _get('profile',        None)
 
     ###
 
@@ -490,26 +491,30 @@ def compare_hists(ps, samples, **kwargs):
 
         name_clean = name.replace('/','_').replace('#','n')
 
-        hists = []
-        for sample_name, dir, color in samples:
-            hist = dir.Get(name)
+        hists = [dir.Get(name) for _,dir,_ in samples]
+
+        is2d = all_same([issubclass(type(hist), ROOT.TH2) for hist in hists], "for name %s, some samples' histograms are TH2, and some are not" % name)
+        if not all_same([issubclass(type(hist), ROOT.TH1) for hist in hists], "for name %s, some samples' histograms are TH1, and some are not" % name):
+            continue
+
+        hist_list = _hist_list((sample_name, hist) for hist, (sample_name,_,_) in zip(hists, samples))
+        if skip(name, hist_list, None):
+            continue
+
+        if is2d:
+            pf = profile(name, hist_list, None)
+            if pf:
+                if pf is True or pf == 1:
+                    pf = 'x'
+                assert pf in 'xXyY'
+                hists = [(hist.ProfileY if pf in 'yY' else hist.ProfileX)('%s_%s_pfx' % (hist.GetName(), sample_name)) for hist, (sample_name,_,_) in zip(hists, samples)]
+
+        for hist, (sample_name, dir, color) in zip(hists, samples):
             # Store these data in the histogram object so we don't
             # have to cross-reference later. If we give them unique
             # names (prefix 'cah_') ROOT probably won't mind...
             hist.cah_sample_name = sample_name
             hist.cah_color = color
-            hists.append(hist)
-        hist_list = _hist_list((hist.cah_sample_name, hist) for hist in hists)
-
-        if skip(name, hist_list, None):
-            continue
-
-        is2d = all_same([issubclass(type(hist), ROOT.TH2) for hist in hists],
-                        "for name %s, some samples' histograms are TH2, and some are not" % name)
-        
-        if not all_same([issubclass(type(hist), ROOT.TH1) for hist in hists],
-                        "for name %s, some samples' histograms are TH1, and some are not" % name):
-            continue
 
         for hist in hists:
             if hist.GetSumw2N() == 0:
