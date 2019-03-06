@@ -6,9 +6,9 @@ from JMTucker.Tools.ROOTTools import *
 set_style()
 
 year = '2017'
-ps = plot_saver(plot_dir('dxyerr_v_pt_ratio_%s' % year), size=(600,600), pdf=True, log=False)
+ps = plot_saver(plot_dir('dxyerr_v_pt_ratio_defaultcuts_etalt1p5_%s' % year), size=(600,600), pdf=True, log=False)
 
-eras = ['B', 'C', 'DE', 'F']
+eras = ['B', 'C', 'DE', 'F']# ['B', 'C', 'D', 'E', 'F']
 if year == '2018':
     eras = ['A', 'B', 'C', 'D']
 
@@ -16,7 +16,7 @@ bkgr = 'background_%s' % year
 datasets = ['JetHT%(yr)s%(era)s' % locals() for yr in [year] for era in eras]
 
 hn = 'h_sel_tracks_dxyerr_v_pt'
-fn_string = '~/private/mfv_946p1/src/JMTucker/Tools/test/TrackingTreer/%s_higherpt/%s.root' 
+fn_string = '/uscms_data/d3/dquach/TrackingTreer/defaultcuts_etalt1p5_%s/%s.root' 
 
 buff = []
 
@@ -38,7 +38,7 @@ def ratio_hist(num, den):
     binedges = []
     for bin in range(1, ratio.GetNbinsX()+2):
         binedges.append(ratio.GetBinLowEdge(bin))
-    ratiohist = ROOT.TH1D('ratio_hist', 'mean dxyerr ratio vs. p_{T} for ultra clean tracks;track p_{T} (GeV);mean dxyerr data/MC ratio', len(binedges)-1, array('d', binedges))
+    ratiohist = ROOT.TH1D('ratio_hist', 'mean dxyerr ratio vs. p_{T};track p_{T} (GeV);mean dxyerr data/MC ratio', len(binedges)-1, array('d', binedges))
     for bin in range(1, ratio.GetNbinsX()+1):
         err = ratio.GetBinContent(bin) * (div(num.GetBinError(bin), num.GetBinContent(bin))**2 + div(den.GetBinError(bin), den.GetBinContent(bin))**2)**0.5
         ratiohist.SetBinContent(bin, ratio.GetBinContent(bin))
@@ -47,22 +47,24 @@ def ratio_hist(num, den):
 
 colors = [ROOT.kPink-3, ROOT.kBlue, ROOT.kGreen, ROOT.kOrange+7, ROOT.kViolet-4]
 
-leg1 = ROOT.TLegend(0.5,0.7,0.75,0.9)
+leg1 = ROOT.TLegend(0.65,0.7,0.9,0.9)
 for idata, data in enumerate(datasets):
     num = get_profile(fn_string % (year, data), hn)
     den = get_profile(fn_string % (year, bkgr), hn)
 
-    bins = [x for x in range(1,20)]
-    bins += [x for x in range(20, 202, 2)]
-    bins += [x for x in range(200, 840, 40)]
-    bins += [x for x in range(800, 2400, 400)]
-    newnum = num.Rebin(len(bins)-1, 'newnum', array('d', bins))
-    newden = den.Rebin(len(bins)-1, 'newden', array('d', bins))
+#    bins = [x for x in range(1,20,2)]
+#    bins += [x for x in range(20, 202, 5)]
+#    bins += [x for x in range(200, 840, 40)]
+#    bins += [x for x in range(800, 2600, 600)]
+#    newnum = num.Rebin(len(bins)-1, 'newnum', array('d', bins))
+#    newden = den.Rebin(len(bins)-1, 'newden', array('d', bins))
+    newnum = num.Rebin(40)
+    newden = den.Rebin(40)
 
     ratio = ratio_hist(newnum, newden)
 
-    ratio.GetYaxis().SetRangeUser(0, 3)
-    ratio.GetXaxis().SetRangeUser(1,2000)
+    ratio.GetYaxis().SetRangeUser(0, 2)
+    ratio.GetXaxis().SetRangeUser(1,200)
     ratio.SetLineColor(colors[idata])
     ratio.SetLineWidth(2)
     ratio.SetFillColor(0)
@@ -76,10 +78,10 @@ for idata, data in enumerate(datasets):
 leg1.Draw()
 ps.save('ratio')
 
-fitfuncs = {'JetHT2017B':'(x<=5)*pol1(0) + (x>5 && x<=10)*pol1(2) + (x>10 && x<=18)*pol1(4) + (x>18 && x<=40)*pol1(6) + (x>40 && x<=60)*pol1(8) + (x>60 && x<=200)*pol1(10)',
-            'JetHT2017C':'(x<=5)*pol1(0) + (x>5 && x<=8)*pol1(2) + (x>8 && x<=20)*pol3(4) + (x>20 && x<=60)*pol3(8) + (x>60 && x<=200)*pol1(12)',
-            'JetHT2017DE':'(x<=5)*pol1(0) + (x>5 && x<=7)*pol1(2) + (x>7 && x<=14)*pol1(4) + (x>14 && x<=20)*pol1(6) + (x>20 && x<=59)*pol3(8) + (x>59 && x<=200)*pol2(12)',
-            'JetHT2017F':'(x<=5)*pol1(0) + (x>5 && x<=8)*pol1(2) + (x>8 && x<=11)*pol1(4) + (x>11 && x<=15)*pol1(6) + (x>15 && x<=40)*pol3(8) + (x>40 && x<=200)*pol2(12)',
+fitfuncs = {'JetHT2017B':'(x<=5)*pol1(0) + (x>5 && x<=10)*pol1(2) + (x>10 && x<=19)*pol1(4) + (x>19)*pol1(6)',
+            'JetHT2017C':'(x<=5)*pol1(0) + (x>5 && x<=8)*pol1(2) + (x>8 && x<=11)*pol1(4) + (x>11)*pol1(6)',
+            'JetHT2017DE':'(x<=5)*pol1(0) + (x>5 && x<=9)*pol1(2) + (x>9 && x<=20)*pol1(4) + (x>20)*pol2(6)',
+            'JetHT2017F':'(x<=5)*pol1(0) + (x>5 && x<=9)*pol1(2) + (x>9 && x<=17)*pol1(4) + (x>17)*pol2(6)',
             }
 
 for idata, data in enumerate(datasets):
@@ -87,13 +89,12 @@ for idata, data in enumerate(datasets):
     den = get_profile(fn_string % (year, bkgr), hn)
 
     bins = [x for x in range(1,20)]
-    bins += [x for x in range(20, 202, 2)]
+    bins += [x for x in range(20, 204, 4)]
     newnum = num.Rebin(len(bins)-1, 'newnum', array('d', bins))
     newden = den.Rebin(len(bins)-1, 'newden', array('d', bins))
 
     ratio = ratio_hist(newnum, newden)
 
-    ratio.GetYaxis().SetRangeUser(0,3)
     ratio.GetXaxis().SetRangeUser(1,200)
     ratio.SetLineColor(colors[idata])
     ratio.SetLineWidth(2)
@@ -102,7 +103,7 @@ for idata, data in enumerate(datasets):
 
     fnc = ROOT.TF1('fnc', '%s' % fitfuncs[data], 1, 200)
     ratio.Fit(fnc, 'R')
-    ratio.GetYaxis().SetRangeUser(0.9, 1.7)
+    ratio.GetYaxis().SetRangeUser(0.8, 1.5)
 
     tratioplot = ROOT.TRatioPlot(ratio)
 
