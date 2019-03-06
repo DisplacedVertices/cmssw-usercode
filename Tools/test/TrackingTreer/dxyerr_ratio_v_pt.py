@@ -78,10 +78,10 @@ for idata, data in enumerate(datasets):
 leg1.Draw()
 ps.save('ratio')
 
-fitfuncs = {'JetHT2017B':'(x<=5)*pol1(0) + (x>5 && x<=10)*pol1(2) + (x>10 && x<=19)*pol1(4) + (x>19)*pol1(6)',
-            'JetHT2017C':'(x<=5)*pol1(0) + (x>5 && x<=8)*pol1(2) + (x>8 && x<=11)*pol1(4) + (x>11)*pol1(6)',
-            'JetHT2017DE':'(x<=5)*pol1(0) + (x>5 && x<=9)*pol1(2) + (x>9 && x<=20)*pol1(4) + (x>20)*pol2(6)',
-            'JetHT2017F':'(x<=5)*pol1(0) + (x>5 && x<=9)*pol1(2) + (x>9 && x<=17)*pol1(4) + (x>17)*pol2(6)',
+fitfuncs = {'JetHT2017B':'(x<=5)*pol1(0) + (x>5 && x<=10)*pol1(2) + (x>10 && x<=19)*pol1(4) + (x>19 && x<=200)*pol1(6)',
+            'JetHT2017C':'(x<=5)*pol1(0) + (x>5 && x<=8)*pol1(2) + (x>8 && x<=11)*pol1(4) + (x>11 && x<=200)*pol1(6)',
+            'JetHT2017DE':'(x<=5)*pol1(0) + (x>5 && x<=9)*pol1(2) + (x>9 && x<=20)*pol1(4) + (x>20 && x<=200)*pol2(6)',
+            'JetHT2017F':'(x<=5)*pol1(0) + (x>5 && x<=9)*pol1(2) + (x>9 && x<=17)*pol1(4) + (x>17 && x<=200)*pol2(6)',
             }
 
 for idata, data in enumerate(datasets):
