@@ -19,12 +19,12 @@ for nvtx in [1,2]:
   h_jet_bdisc.GetYaxis().SetRangeUser(1e-9,0.045)
   h_jet_bdisc.GetYaxis().SetTitleOffset(1.55)
   h_jet_bdisc.Draw('hist')
-  h_jet_bdisc_bquarks = f.Get('h_%dv_jet_bdisc_bquarks' % nvtx)
+  h_jet_bdisc_bquarks = f.Get('h_bquarks_%dv_jet_bdisc' % nvtx)
   h_jet_bdisc_bquarks.SetStats(0)
   h_jet_bdisc_bquarks.SetLineColor(ROOT.kRed)
   h_jet_bdisc_bquarks.SetLineWidth(3)
   h_jet_bdisc_bquarks.DrawNormalized('sames')
-  h_jet_bdisc_nobquarks = f.Get('h_%dv_jet_bdisc_nobquarks' % nvtx)
+  h_jet_bdisc_nobquarks = f.Get('h_nobquarks_%dv_jet_bdisc' % nvtx)
   h_jet_bdisc_nobquarks.SetStats(0)
   h_jet_bdisc_nobquarks.SetLineColor(ROOT.kBlue)
   h_jet_bdisc_nobquarks.SetLineWidth(3)
@@ -81,8 +81,8 @@ for nvtx in [1,2]:
   x = []
   y = []
   for i,btag in enumerate(btags):
-    h1 = f.Get('h_%dv_%s_btag_flavor_code_bquarks' % (nvtx,btag))
-    h2 = f.Get('h_%dv_%s_btag_flavor_code_nobquarks' % (nvtx,btag))
+    h1 = f.Get('h_bquarks_%dv_%s_btag_flavor_code' % (nvtx,btag))
+    h2 = f.Get('h_nobquarks_%dv_%s_btag_flavor_code' % (nvtx,btag))
     x.append(h1.GetBinContent(2)/h1.Integral())
     y.append(h2.GetBinContent(2)/h2.Integral())
 
@@ -157,7 +157,7 @@ for nvtx in [1,2]:
     t0.SetTextSize(0.03)
     t0.DrawLatex(0.5*(x[0]+x[-1]), mean_dbv, 'mean d_{BV} in all events')
 
-    mean_dbv_bquarks = f.Get('h_%dv_%s_dbv_bquarks' % (nvtx,dbv)).GetMean()*10000
+    mean_dbv_bquarks = f.Get('h_bquarks_%dv_%s_dbv' % (nvtx,dbv)).GetMean()*10000
     l1 = ROOT.TLine(x[0]-0.5, mean_dbv_bquarks, x[-1]+0.5, mean_dbv_bquarks)
     l1.SetLineStyle(2)
     l1.SetLineWidth(2)
@@ -167,7 +167,7 @@ for nvtx in [1,2]:
     t1.SetTextSize(0.03)
     t1.DrawLatex(0.5*(x[0]+x[-1]), mean_dbv_bquarks, 'mean d_{BV} in events with b quarks')
 
-    mean_dbv_nobquarks = f.Get('h_%dv_%s_dbv_nobquarks' % (nvtx,dbv)).GetMean()*10000
+    mean_dbv_nobquarks = f.Get('h_nobquarks_%dv_%s_dbv' % (nvtx,dbv)).GetMean()*10000
     l2 = ROOT.TLine(x[0]-0.5, mean_dbv_nobquarks, x[-1]+0.5, mean_dbv_nobquarks)
     l2.SetLineStyle(2)
     l2.SetLineWidth(2)
@@ -194,12 +194,12 @@ for nvtx in [1,2]:
       h_dbv.GetYaxis().SetRangeUser(1e-5,0.8)
     h_dbv.GetYaxis().SetTitleOffset(1.55)
     h_dbv.Draw('hist')
-    h_dbv_bquarks = f.Get('h_%dv_%s_dbv_bquarks' % (nvtx,dbv))
+    h_dbv_bquarks = f.Get('h_bquarks_%dv_%s_dbv' % (nvtx,dbv))
     h_dbv_bquarks.SetStats(0)
     h_dbv_bquarks.SetLineColor(ROOT.kRed)
     h_dbv_bquarks.SetLineWidth(3)
     h_dbv_bquarks.DrawNormalized('sames')
-    h_dbv_nobquarks = f.Get('h_%dv_%s_dbv_nobquarks' % (nvtx,dbv))
+    h_dbv_nobquarks = f.Get('h_nobquarks_%dv_%s_dbv' % (nvtx,dbv))
     h_dbv_nobquarks.SetStats(0)
     h_dbv_nobquarks.SetLineColor(ROOT.kBlue)
     h_dbv_nobquarks.SetLineWidth(3)
@@ -232,7 +232,7 @@ for nvtx in [1,2]:
   for dbv in ['all', 'longer', 'shorter']:
     if nvtx == 1 and dbv != 'all':
       continue
-    hists = ['btag', 'btag_bquarks', 'btag_nobquarks', 'nobtag', 'nobtag_bquarks', 'nobtag_nobquarks']
+    hists = [('','btag'), ('_bquarks','btag'), ('_nobquarks','btag'), ('','nobtag'), ('_bquarks','nobtag'), ('_nobquarks','nobtag')]
     colors = [ROOT.kRed, ROOT.kMagenta, ROOT.kViolet, ROOT.kBlue, ROOT.kAzure+10, ROOT.kAzure+1]
     gs = []
     l = ROOT.TLegend(0.30,0.10,0.80,0.30)
@@ -244,7 +244,7 @@ for nvtx in [1,2]:
       for i,btag in enumerate(btags):
         x.append(i+1)
         ex.append(0)
-        h = f.Get('h_%dv_%s_dbv_%s_%s' % (nvtx, dbv, btag, hist))
+        h = f.Get('h%s_%dv_%s_dbv_%s_%s' % (hist[0], nvtx, dbv, btag, hist[1]))
         y.append(h.GetMean()*10000)
         ey.append(h.GetMeanError()*10000)
       g = ROOT.TGraphErrors(len(btags), array('d',x), array('d',y), array('d',ex), array('d',ey))
@@ -269,7 +269,7 @@ for nvtx in [1,2]:
       else:
         g.Draw('P')
       gs.append(g)
-      l.AddEntry(g, 'events with %s' % hist, 'PE')
+      l.AddEntry(g, 'events with %s%s' % (hist[1], hist[0]), 'PE')
     l.Draw()
 
     mean_dbv = f.Get('h_%dv_%s_dbv' % (nvtx,dbv)).GetMean()*10000
@@ -281,7 +281,7 @@ for nvtx in [1,2]:
     t0.SetTextSize(0.03)
     t0.DrawLatex(0.5*(x[0]+x[-1]), mean_dbv, 'mean d_{BV} in all events')
 
-    mean_dbv_bquarks = f.Get('h_%dv_%s_dbv_bquarks' % (nvtx,dbv)).GetMean()*10000
+    mean_dbv_bquarks = f.Get('h_bquarks_%dv_%s_dbv' % (nvtx,dbv)).GetMean()*10000
     l1 = ROOT.TLine(x[0]-0.5, mean_dbv_bquarks, x[-1]+0.5, mean_dbv_bquarks)
     l1.SetLineStyle(2)
     l1.SetLineWidth(2)
@@ -291,7 +291,7 @@ for nvtx in [1,2]:
     t1.SetTextSize(0.03)
     t1.DrawLatex(0.5*(x[0]+x[-1]), mean_dbv_bquarks, 'mean d_{BV} in events with b quarks')
 
-    mean_dbv_nobquarks = f.Get('h_%dv_%s_dbv_nobquarks' % (nvtx,dbv)).GetMean()*10000
+    mean_dbv_nobquarks = f.Get('h_nobquarks_%dv_%s_dbv' % (nvtx,dbv)).GetMean()*10000
     l2 = ROOT.TLine(x[0]-0.5, mean_dbv_nobquarks, x[-1]+0.5, mean_dbv_nobquarks)
     l2.SetLineStyle(2)
     l2.SetLineWidth(2)
