@@ -39,7 +39,7 @@ private:
           u.i == 0x3cd24697 ||  // 0.0256684255
           u.i == 0x3dfc7c28 ||  // 0.1232836843
           u.i == 0x3e948f67;    // 0.2901565731
-        if (debug && pass_tk(tk,false,false)) printf("(weirdo check %i %i %i 0x%08x %.10g) ", weirdo, pass_tk(tk,true,false), pass_tk(tk,true,true), u.i, u.f);
+        if (debug) printf("(weirdo check %i %i %i %i 0x%08x %.10g) ", weirdo, pass_tk(tk,false,false), pass_tk(tk,true,false), pass_tk(tk,true,true), u.i, u.f);
         if (skip_weirdos && weirdo) return false;
       }
       return true;
