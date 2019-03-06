@@ -15,6 +15,7 @@ private:
   const edm::EDGetTokenT<pat::PackedCandidateCollection> packed_candidates_token;
   const bool add_lost_candidates;
   const edm::EDGetTokenT<pat::PackedCandidateCollection> lost_candidates_token;
+  const bool skip_weirdos;
   const bool debug;
 
   void debug_cand(const pat::PackedCandidate& cand, const char* tag, const size_t i) const {
@@ -27,15 +28,32 @@ private:
   };
 
   bool pass_cand(const pat::PackedCandidate& cand) const {
-    return cand.charge() && cand.hasTrackDetails();
+    if (cand.charge() && cand.hasTrackDetails()) {
+      if (skip_weirdos || debug) {
+        const reco::Track& tk = cand.pseudoTrack();
+        union U { float f; int i; } u;
+        u.f = tk.dxyError();
+        const bool weirdo =
+          u.i == 0x3b8c70c2 ||  // 0.0042859027
+          u.i == 0x3c060959 ||  // 0.0081809396
+          u.i == 0x3cd24697 ||  // 0.0256684255
+          u.i == 0x3dfc7c28 ||  // 0.1232836843
+          u.i == 0x3e948f67;    // 0.2901565731
+        if (debug && pass_tk(tk,false,false)) printf("(weirdo check %i %i %i 0x%08x %.10g) ", weirdo, pass_tk(tk,true,false), pass_tk(tk,true,true), u.i, u.f);
+        if (skip_weirdos) return false;
+      }
+      return true;
+    }
+    return false;
   }
 
-  bool pass_tk(const reco::Track& tk) const {
+  bool pass_tk(const reco::Track& tk, bool req_min_r=true, bool req_nsigmadxy=true) const {
     return
-      tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1) &&
+      tk.pt() > 1 &&
       tk.hitPattern().pixelLayersWithMeasurement() >= 2 &&
       tk.hitPattern().stripLayersWithMeasurement() >= 6 &&
-      fabs(tk.dxy() / tk.dxyError()) > 4;
+      (!req_min_r || tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1)) &&
+      (!req_nsigmadxy || fabs(tk.dxy() / tk.dxyError()) > 4);
   }
 };
 
@@ -43,6 +61,7 @@ MFVUnpackedCandidateTracks::MFVUnpackedCandidateTracks(const edm::ParameterSet& 
   : packed_candidates_token(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("packed_candidates_src"))),
     add_lost_candidates(cfg.getParameter<bool>("add_lost_candidates")),
     lost_candidates_token(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("lost_candidates_src"))),
+    skip_weirdos(cfg.getParameter<bool>("skip_weirdos")),
     debug(cfg.getUntrackedParameter<bool>("debug", false))
 {
   produces<reco::TrackCollection>();

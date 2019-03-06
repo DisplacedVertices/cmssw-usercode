@@ -4,5 +4,6 @@ mfvUnpackedCandidateTracks = cms.EDProducer('MFVUnpackedCandidateTracks',
                                             packed_candidates_src = cms.InputTag('packedPFCandidates'),
                                             add_lost_candidates = cms.bool(False),
                                             lost_candidates_src = cms.InputTag('lostTracks'),
-                                            debug = cms.untracked.bool(False),
+                                            skip_weirdos = cms.bool(True),
+                                            debug = cms.untracked.bool(True),
                                             )
