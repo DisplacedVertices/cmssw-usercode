@@ -41,16 +41,18 @@ void MFVRescaledTracks::produce(edm::Event& event, const edm::EventSetup&) {
     reco::TrackBase::CovarianceMatrix cov = tk->covariance();
 
     if (!event.isRealData() && enable) {
-      const double x = tk->pt();
-      const double p[8] = {1.003954411196716, 0.04680608038556485, 1.1651640253424076, 0.010686515626581808, 1.2423728669230774, 0.002510211465163767, 1.301491397216935, -0.0005992241020962791};
-      const double dxyerr_scale = (x<=5)*(p[0]+p[1]*x)+(x>5&&x<=10)*(p[2]+p[3]*x)+(x>10&&x<=19)*(p[4]+p[5]*x)+(x>19&&x<=200)*(p[6]+p[7]*x)+(x>200)*(p[6]+p[7]*200);
+      if (fabs(tk->eta()) < 1.5) {
+        const double x = tk->pt();
+        const double p[8] = {1.003954411196716, 0.04680608038556485, 1.1651640253424076, 0.010686515626581808, 1.2423728669230774, 0.002510211465163767, 1.301491397216935, -0.0005992241020962791};
+        const double dxyerr_scale = (x<=5)*(p[0]+p[1]*x)+(x>5&&x<=10)*(p[2]+p[3]*x)+(x>10&&x<=19)*(p[4]+p[5]*x)+(x>19&&x<=200)*(p[6]+p[7]*x)+(x>200)*(p[6]+p[7]*200);
 
-      const int i_dxy = reco::TrackBase::i_dxy;
-      for (int idim = 0; idim < reco::TrackBase::dimension; ++idim) {
-        if (idim == i_dxy)
-          cov(idim, i_dxy) *= dxyerr_scale * dxyerr_scale;
-        else
-          cov(idim, i_dxy) *= dxyerr_scale;
+        const int i_dxy = reco::TrackBase::i_dxy;
+        for (int idim = 0; idim < reco::TrackBase::dimension; ++idim) {
+          if (idim == i_dxy)
+            cov(idim, i_dxy) *= dxyerr_scale * dxyerr_scale;
+          else
+            cov(idim, i_dxy) *= dxyerr_scale;
+        }
       }
     }
 
