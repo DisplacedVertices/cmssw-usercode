@@ -9,8 +9,8 @@ from scanpack import get_scanpack, scanpackbase
 condor = False
 nevents = 10000
 events_per = 100
+expected_events_frac = 1.
 scanpack = None
-from_lhe = False
 output_level = 'reco'
 output_dataset_tag = ''
 fixed_salt = ''
@@ -45,16 +45,16 @@ elif 0:
 elif 0:
     meta = 'qcdht2000'
     nevents, events_per = 396000, 1500
-    from_lhe = True
+    expected_events_frac = 0.09  # JMTBAD
     output_level = 'gensim'
     output_dataset_tag = 'RunIISummer15GS-MCRUN2_71_V1'
 elif 0:
     meta = 'qcdht1500'
     fixed_salt = 'fixedsalt'
     nevents, events_per = 200000, 1000 # 0.06 eff at gen matching with lhe events for 1000, more like 0.025 for 700
+    expected_events_frac = 0.09  # JMTBAD
     if meta.endswith('0700'):
         nevents *= 14
-    from_lhe = True
     trig_filter = True
     hip_simulation = 1.0
     hip_mitigation = True
@@ -204,9 +204,8 @@ def submit(config, name, scanpack_or_todo, todo_rawhlt=[], todo_reco=[], todo_nt
     dummy_for_hash = int(time()*1e6)
     steering = [
         'MAXEVENTS=%i' % events_per,
-        'EXPECTEDEVENTS=%i' % (ceil(events_per*0.06) if from_lhe else events_per),
+        'EXPECTEDEVENTS=%i' % ceil(events_per*expected_events_frac),
         'USETHISCMSSW=%i' % use_this_cmssw,
-        'FROMLHE=%i' % from_lhe,
         'TRIGFILTER=%i' % trig_filter,
         'PREMIX=%i' % premix,
         'export DUMMYFORHASH=%i' % dummy_for_hash,  # exported so the python script executed in cmsRun can just get it from os.environ instead of parsing argv like we do the rest

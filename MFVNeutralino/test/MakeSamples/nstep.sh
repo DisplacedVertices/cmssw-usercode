@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for fn in lhe.py gensim.py rawhlt.py reco.py ntuple.py minitree.py; do
+for fn in gensim.py rawhlt.py reco.py ntuple.py minitree.py; do
     if [[ -e $fn ]]; then
         ./todoify.sh $fn > temp
         mv temp $fn
@@ -22,7 +22,6 @@ echo MAXEVENTS: ${MAXEVENTS}
 echo EXPECTEDEVENTS: ${EXPECTEDEVENTS}
 echo SALT: ${SALT}
 echo USETHISCMSSW: ${USETHISCMSSW}
-echo FROMLHE: ${FROMLHE}
 echo PREMIX: ${PREMIX}
 echo TRIGFILTER: ${TRIGFILTER}
 echo DUMMYFORHASH: ${DUMMYFORHASH}
@@ -74,13 +73,8 @@ function exitbanner {
     echo END $2 at $(date) filesize $(stat -c %s ${2,,}.root) nevents $(nevents ${2,,}.root)
 }
 
-function lhe {
-    cmd="cmsRun lhe.py salt=${SALT} jobnum=${JOBNUM} maxevents=${MAXEVENTS} ${TODO}"
-    echo $cmd at $(date) ; eval $cmd 2>&1
-}
-
 function gensim {
-    cmd="cmsRun -j tempfjr.xml gensim.py fromlhe=${FROMLHE} salt=${SALT} jobnum=${JOBNUM} maxevents=${MAXEVENTS} ${TODO} ${SCANPACK}"
+    cmd="cmsRun -j tempfjr.xml gensim.py salt=${SALT} jobnum=${JOBNUM} maxevents=${MAXEVENTS} ${TODO} ${SCANPACK}"
     echo $cmd at $(date) ; eval $cmd 2>&1
 }
 
@@ -98,27 +92,6 @@ function reco {
 
 if [[ $USETHISCMSSW -ne 1 ]]; then
     eval $(scram unsetenv -sh)
-fi
-
-################################################################################
-
-if [[ $FROMLHE -eq 1 ]]; then
-    exitbanner 1 LHE 2017 and CMSSW versions below
-    echo
-    echo START LHE at $(date)
-
-    if [[ $USETHISCMSSW -eq 1 ]]; then
-        eval $(scram unsetenv -sh)
-    fi
-
-    scramproj LHE 7_1_16_patch1 && lhe
-    exitbanner $? LHE
-
-    if [[ $USETHISCMSSW -eq 1 ]]; then
-        cd CMSSW_8_0_25/src
-        eval $(scram runtime -sh)
-        cd ../..
-    fi
 fi
 
 ################################################################################
@@ -220,7 +193,7 @@ fi
 ################################################################################
 
 echo recap of events in files:
-for fn in lhe gensim rawhlt reco ntuple; do
+for fn in gensim rawhlt reco ntuple; do
     fn=${fn}.root
     if [[ -e $fn ]]; then
         echo $(nevents $fn)

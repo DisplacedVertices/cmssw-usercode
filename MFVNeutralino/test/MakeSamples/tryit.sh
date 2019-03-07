@@ -9,7 +9,7 @@ tmpdir=/uscmst1b_scratch/lpc1/3DayLifetime/$USER/nstep_tryit_$(date +%s)
 echo $tmpdir
 mkdir $tmpdir 
 edmConfigDump dummy.py > $tmpdir/pset.py
-cp nstep.sh todoify.sh lhe.py gensim.py modify.py dynamicconf.py scanpack.py rawhlt.py minbias.py minbias.txt.gz minbias_premix.txt.gz private_minbias.txt.gz reco.py fixfjr.py $tmpdir
+cp nstep.sh todoify.sh gensim.py modify.py dynamicconf.py scanpack.py rawhlt.py minbias.py minbias.txt.gz minbias_premix.txt.gz private_minbias.txt.gz reco.py fixfjr.py $tmpdir
 for x in ntuple.py minitree.py; do
     cmsDumpPython.py ../$x > $tmpdir/$x
 done
@@ -23,7 +23,6 @@ cat > $tmpdir/steering.sh <<EOF
 MAXEVENTS=1
 EXPECTEDEVENTS=1
 USETHISCMSSW=0
-FROMLHE=0
 TRIGFILTER=0
 PREMIX=1
 export DUMMYFORHASH=1512629531475509

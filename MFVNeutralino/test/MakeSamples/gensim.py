@@ -9,17 +9,12 @@ genonly = 'genonly' in sys.argv
 debug = 'debug' in sys.argv
 randomize = 'norandomize' not in sys.argv
 salt = ''
-fromlhe = False
 maxevents = 1
 jobnum = 1
 scanpack = None
 
 for arg in sys.argv:
-    if arg == 'fromlhe=1':
-        print 'fromlhe: wiping out todos'
-        todos = []
-        fromlhe = True
-    elif arg.startswith('scanpack='):
+    if arg.startswith('scanpack='):
         print 'scanpack: wiping out todos'
         todos = []
         scanpack = arg.replace('scanpack=','').split(',')
@@ -50,17 +45,8 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 process.MessageLogger.cerr.FwkReport.reportEvery = 10000
 process.options = cms.untracked.PSet(wantSummary = cms.untracked.bool(False))
-
-if fromlhe:
-    process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
-    process.source = cms.Source('PoolSource',
-                                fileNames = cms.untracked.vstring('file:lhe.root'),
-                                inputCommands = cms.untracked.vstring('keep *', 'drop LHEXMLStringProduct_*_*_*'),
-                                dropDescendantsOfDroppedBranches = cms.untracked.bool(False),
-                                )
-else:
-    process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(maxevents))
-    process.source = cms.Source('EmptySource', firstLuminosityBlock = cms.untracked.uint32(jobnum))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(maxevents))
+process.source = cms.Source('EmptySource', firstLuminosityBlock = cms.untracked.uint32(jobnum))
 
 process.XMLFromDBSource.label = cms.string("Extended")
 process.genstepfilter.triggerConditions = cms.vstring('generation_step')
@@ -71,7 +57,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, dynamicconf.globaltag, '')
 from Configuration.Generator.Pythia8CommonSettings_cfi import pythia8CommonSettingsBlock
 from Configuration.Generator.MCTunes2017.PythiaCP2Settings_cfi import pythia8CP2SettingsBlock
 
-process.generator = cms.EDFilter('Pythia8HadronizerFilter' if fromlhe else 'Pythia8GeneratorFilter',
+process.generator = cms.EDFilter('Pythia8GeneratorFilter',
     comEnergy = cms.double(13000.0),
     filterEfficiency = cms.untracked.double(1.0),
     maxEventsToPrint = cms.untracked.int32(0),
@@ -88,21 +74,6 @@ process.generator = cms.EDFilter('Pythia8HadronizerFilter' if fromlhe else 'Pyth
         processParameters = cms.vstring(),
         ),
     )
-
-if fromlhe:
-    process.generator.PythiaParameters.processParameters = [
-        'JetMatching:setMad = off',
-        'JetMatching:scheme = 1',
-        'JetMatching:merge = on',
-        'JetMatching:jetAlgorithm = 2',
-        'JetMatching:etaJetMax = 5.',
-        'JetMatching:coneRadius = 1.',
-        'JetMatching:slowJetPower = 1',
-        'JetMatching:qCut = 14.',
-        'JetMatching:nQmatch = 5',
-        'JetMatching:nJetMax = 4',
-        'JetMatching:doShowerKt = off',
-        ]
 
 process.generation_step = cms.Path(process.pgen)
 process.simulation_step = cms.Path(process.psim)
@@ -139,7 +110,8 @@ if debug:
     sched.insert(-1, process.pp)
 
 process.schedule = cms.Schedule(*sched)
-#task?
+#from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
+#associatePatAlgosToolsTask(process)
 
 process.ProductionFilterSequence = cms.Sequence(process.generator)
 for path in process.paths:

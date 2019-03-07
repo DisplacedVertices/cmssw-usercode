@@ -33,17 +33,43 @@ def set_minbias(process):
         'SoftQCD:doubleDiffractive = on'
         )
 
-def set_qcdht(process, which):
-    process.externalLHEProducer.args = [{
-            # yes octal
-            0700: '/cvmfs/cms.cern.ch/phys_generator/gridpacks/slc6_amd64_gcc481/13TeV/madgraph/V5_2.2.2/QCD_HT_LO_MLM/QCD_HT700to1000/v1/QCD_HT700to1000_tarball.tar.xz',
-            1000: '/cvmfs/cms.cern.ch/phys_generator/gridpacks/slc6_amd64_gcc481/13TeV/madgraph/V5_2.2.2/QCD_HT_LO_MLM/QCD_HT1000to1500/v1/QCD_HT1000to1500_tarball.tar.xz',
-            1500: '/cvmfs/cms.cern.ch/phys_generator/gridpacks/slc6_amd64_gcc481/13TeV/madgraph/V5_2.2.2/QCD_HT_LO_MLM/QCD_HT1500to2000/v1/QCD_HT1500to2000_tarball.tar.xz',
-            2000: '/cvmfs/cms.cern.ch/phys_generator/gridpacks/slc6_amd64_gcc481/13TeV/madgraph/V5_2.2.2/QCD_HT_LO_MLM/QCD_HT2000toInf/v1/QCD_HT2000toInf_tarball.tar.xz',
-            }[which]]
+def set_gridpack(process, gridpack):
+    # from https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/HIG-RunIIFall17wmLHEGS-00021
+    # 939patch1 cmsDriver.py Configuration/GenProduction/python/HIG-RunIIFall17wmLHEGS-00021-fragment.py --fileout file:HIG-RunIIFall17wmLHEGS-00021.root --mc --eventcontent RAWSIM,LHE --datatier GEN-SIM,LHE --conditions 93X_mc2017_realistic_v3 --beamspot Realistic25ns13TeVEarly2017Collision --step LHE,GEN,SIM --nThreads 8 --geometry DB:Extended --era Run2_2017 --python_filename HIG-RunIIFall17wmLHEGS-00021_1_cfg.py --no_exec --customise Configuration/DataProcessing/Utils.addMonitoring --customise_commands process.RandomNumberGeneratorService.externalLHEProducer.initialSeed="int(${seed}%100)" -n 4254
+    process.externalLHEProducer = cms.EDProducer('ExternalLHEProducer',
+                                                 args = cms.vstring(gridpack),
+                                                 nEvents = cms.untracked.uint32(process.maxEvents.input.value()),
+                                                 numberOfParameters = cms.uint32(1),
+                                                 outputFile = cms.string('cmsgrid_final.lhe'),
+                                                 scriptName = cms.FileInPath('GeneratorInterface/LHEInterface/data/run_generic_tarball_cvmfs.sh')
+                                                 )
+    process.lhe_step = cms.Path(process.externalLHEProducer)
+    process.schedule.insert(0, process.lhe_step)
 
-def set_qcdht2000(process):
-    process.externalLHEProducer.args = ['/cvmfs/cms.cern.ch/phys_generator/gridpacks/slc6_amd64_gcc481/13TeV/madgraph/V5_2.2.2/QCD_HT_LO_MLM/QCD_HT2000toInf/v1/QCD_HT2000toInf_tarball.tar.xz']
+    assert process.generator._TypedParameterizable__type == 'Pythia8GeneratorFilter'
+    process.generator._TypedParameterizable__type = 'Pythia8HadronizerFilter'
+    process.generator.PythiaParameters.processParameters = [
+        'JetMatching:setMad = off',
+        'JetMatching:scheme = 1',
+        'JetMatching:merge = on',
+        'JetMatching:jetAlgorithm = 2',
+        'JetMatching:etaJetMax = 5.',
+        'JetMatching:coneRadius = 1.',
+        'JetMatching:slowJetPower = 1',
+        'JetMatching:qCut = 14.',
+        'JetMatching:nQmatch = 5',
+        'JetMatching:nJetMax = 4',
+        'JetMatching:doShowerKt = off',
+        ]
+    
+def set_qcdht(process, which):
+    set_tune_cp(process, 5)
+    set_gridpack(process, {
+            700:  '/cvmfs/cms.cern.ch/phys_generator/gridpacks/2017/13TeV/madgraph/V5_2.4.2/QCD_HT700to1000/v1/QCD_HT700to1000_slc6_amd64_gcc481_CMSSW_7_1_30_tarball.tar.xz',
+            1000: '/cvmfs/cms.cern.ch/phys_generator/gridpacks/2017/13TeV/madgraph/V5_2.4.2/QCD_HT1000to1500/v1/QCD_HT1000to1500_slc6_amd64_gcc481_CMSSW_7_1_30_tarball.tar.xz',
+            1500: '/cvmfs/cms.cern.ch/phys_generator/gridpacks/2017/13TeV/madgraph/V5_2.4.2/QCD_HT1500to2000/v1/QCD_HT1500to2000_slc6_amd64_gcc481_CMSSW_7_1_30_tarball.tar.xz',
+            2000: '/cvmfs/cms.cern.ch/phys_generator/gridpacks/2017/13TeV/madgraph/V5_2.4.2/QCD_HT2000toInf/v1/QCD_HT2000toInf_slc6_amd64_gcc481_CMSSW_7_1_30_tarball.tar.xz',
+            }[which])
 
 def set_ttbar(process):
     process.generator.PythiaParameters.processParameters = cms.vstring(
@@ -135,11 +161,18 @@ def set_particle_tau0(process, id, tau0):
     process.generator.PythiaParameters.processParameters = params
     process.generator.PythiaParameters.processParameters.append('%i:tau0 = %f' % (id, tau0)) # tau0 is in mm by pythia convention
 
-def set_energy(process, energy):
-    process.generator.comEnergy = energy # JMTBAD does nothing if LHE gridpacks being used
-
 def set_tune(process, tune):
     _find_tune_settings(process).value.append('Tune:pp %i' % tune)
+
+def set_tune_cp(process, n):
+    assert n in [1,3,4,5]
+    p = process.generator.PythiaParameters
+    i = p.parameterSets.value().index('pythia8CP2Settings')
+    del p.pythia8CP2Settings
+    s = 'pythia8CP%iSettings' % n
+    p.parameterSets[i] = s
+    exec 'from Configuration.Generator.MCTunes2017.PythiaCP%iSettings_cfi import pythia8CP%iSettingsBlock as x' % (n,n)
+    setattr(p, s, getattr(x,s))
 
 def set_gluino_tau0(process, tau0):
     set_particle_tau0(process, 1000021, tau0)
