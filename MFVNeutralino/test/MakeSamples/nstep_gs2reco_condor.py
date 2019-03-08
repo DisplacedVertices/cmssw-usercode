@@ -1,23 +1,20 @@
 #!/usr/bin/env python
 
-which = 'qcdht2000_80_noPU_cond15_oldDMoutrej'
+which = 'qcdht2000_reg_reco'
 output_dir = which
 inputfns_fn = 'inputfns.txt'
 todos = [
     'fns,%s,$(Process)' % inputfns_fn,
-    'nopu',
-    'cond15',
-    'oldduplicatemerge,True',
     ]
 njobs = None
 
 ####
 
-if len(todos) > 2:
+if len(todos) > 1:
     print 'fyi: rawhlt will get todos'
     print todos
-    print 'while reco will get'
-    print todos[2:]
+    print 'while reco, miniaod will get'
+    print todos[1:]
 
 import os, sys, shutil
 
@@ -38,6 +35,7 @@ if os.path.exists(full_output_dir):
 ####
 
 from JMTucker.Tools.CRAB3ToolsBase import crab_dirs_root
+from JMTucker.Tools.Year import year; assert year == 2017
 from JMTucker.Tools.general import save_git_status
 from JMTucker.Tools import colors
 
@@ -51,8 +49,10 @@ save_git_status(os.path.join(work_area, 'gitstatus'))
 inputs_dir = os.path.join(work_area, 'inputs')
 os.mkdir(inputs_dir)
 
+open('year.txt', 'wt').write(str(year))
+
 sh_fn = 'nstep_gs2reco_condor.sh'
-input_files = 'todoify.sh rawhlt.py reco.py modify.py inputfns.txt minbias.py minbias.txt.gz minbias_premix.txt.gz'.split()
+input_files = 'todoify.sh rawhlt.py reco.py miniaod.py dynamicconf.py year.txt modify.py inputfns.txt minbias.py minbias_premix.txt.gz'.split()
 for fn in [sh_fn] + input_files:
     shutil.copy2(fn, inputs_dir)
 
@@ -77,6 +77,7 @@ should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 transfer_input_files = %(input_files)s
 x509userproxy = $ENV(X509_USER_PROXY)
+request_memory = 3000
 Queue %(njobs)s
 '''
 
