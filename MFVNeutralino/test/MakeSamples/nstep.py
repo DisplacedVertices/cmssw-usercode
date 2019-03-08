@@ -44,10 +44,10 @@ elif 0:
     output_dataset_tag = 'RunIISummer15GS-MCRUN2_71_V1'
 elif 0:
     meta = 'qcdht2000'
-    nevents, events_per = 396000, 1500
+    nevents, events_per = 10000, 500
     expected_events_frac = 0.09  # JMTBAD
     output_level = 'gensim'
-    output_dataset_tag = 'RunIISummer15GS-MCRUN2_71_V1'
+    output_dataset_tag = 'RunIIFall17wmLHEGS-93X_mc2017_realistic_v3'
 elif 0:
     meta = 'qcdht1500'
     fixed_salt = 'fixedsalt'
@@ -137,7 +137,7 @@ config.JobType.maxMemoryMB = 3000
 
 steering_fn = 'steering.sh'
 
-config.JobType.inputFiles = ['todoify.sh', steering_fn, 'lhe.py', 'gensim.py', 'dynamicconf.py', 'modify.py', 'scanpack.py', 'rawhlt.py', 'minbias.py', 'minbias_premix.txt.gz', 'reco.py', 'fixfjr.py', 'year.txt']
+config.JobType.inputFiles = ['todoify.sh', steering_fn, 'gensim.py', 'dynamicconf.py', 'modify.py', 'scanpack.py', 'rawhlt.py', 'minbias.py', 'minbias_premix.txt.gz', 'reco.py', 'fixfjr.py', 'year.txt']
 if output_level in ('minitree', 'ntuple'):
     config.JobType.inputFiles += ['ntuple.py', 'minitree.py']
 
