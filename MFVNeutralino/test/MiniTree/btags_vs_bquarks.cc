@@ -27,6 +27,7 @@ const int NDBV = 3;
 const char* dbv_names[NDBV] = {"all", "longer", "shorter"};
 
 TH1F* h_bquark_flavor_code[NBQUARKS][NVTX] = {{0}};
+TH1F* h_nbquarks[NBQUARKS][NVTX] = {{0}};
 TH1F* h_njets[NBQUARKS][NVTX] = {{0}};
 TH1F* h_jet_bdisc[NBQUARKS][NVTX] = {{0}};
 
@@ -38,14 +39,16 @@ TH1F* h_dbv[NBQUARKS][NVTX][NDBV] = {{{0}}};
 TH1F* h_dbv_btag[NBQUARKS][NVTX][NDBV][NBDISC][NBTAGS] = {{{{{0}}}}};
 TH1F* h_dbv_nobtag[NBQUARKS][NVTX][NDBV][NBDISC][NBTAGS] = {{{{{0}}}}};
 
-TH1F* h_nbquarks[NBQUARKS][NVTX] = {{0}};
 TH1F* h_drmin_tkp_bquark[NBQUARKS][NVTX] = {{0}};
+TH1F* h_drmin_tkp_jet[NBQUARKS][NVTX] = {{0}};
 TH1F* h_ntk_bquark[NBQUARKS][NVTX] = {{0}};
+TH1F* h_ntk_jet[NBQUARKS][NVTX] = {{0}};
 
 void book_hists(int ntk) {
   for (int i_nbquarks = 0; i_nbquarks < NBQUARKS; ++i_nbquarks) {
     for (int i_nvtx = 0; i_nvtx < NVTX; ++i_nvtx) {
       h_bquark_flavor_code[i_nbquarks][i_nvtx] = new TH1F(TString::Format("h%s_%s_bquark_flavor_code", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx]), TString::Format("%d-track %s events%s;bquark_flavor_code;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks]), 2, 0, 2);
+      h_nbquarks[i_nbquarks][i_nvtx] = new TH1F(TString::Format("h%s_%s_nbquarks", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx]), TString::Format("%d-track %s events%s;number of b quarks;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks]), 20, 0, 20);
       h_njets[i_nbquarks][i_nvtx] = new TH1F(TString::Format("h%s_%s_njets", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx]), TString::Format("%d-track %s events%s;number of jets;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks]), 40, 0, 40);
       h_jet_bdisc[i_nbquarks][i_nvtx] = new TH1F(TString::Format("h%s_%s_jet_bdisc", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx]), TString::Format("%d-track %s events%s;jet bdisc;Number of jets", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks]), 100, 0, 1);
 
@@ -78,9 +81,10 @@ void book_hists(int ntk) {
 
   for (int i_nbquarks = 0; i_nbquarks < NBQUARKS; ++i_nbquarks) {
     for (int i_nvtx = 0; i_nvtx < NVTX; ++i_nvtx) {
-      h_nbquarks[i_nbquarks][i_nvtx] = new TH1F(TString::Format("h%s_%s_nbquarks", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx]), TString::Format("%d-track %s events%s;number of b quarks;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks]), 20, 0, 20);
       h_drmin_tkp_bquark[i_nbquarks][i_nvtx] = new TH1F(TString::Format("h%s_%s_drmin_tkp_bquark", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx]), TString::Format("%d-track %s events%s;#DeltaR(track momentum, closest b quark);Number of tracks", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks]), 100, 0, 10);
+      h_drmin_tkp_jet[i_nbquarks][i_nvtx] = new TH1F(TString::Format("h%s_%s_drmin_tkp_jet", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx]), TString::Format("%d-track %s events%s;#DeltaR(track momentum, closest jet);Number of tracks", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks]), 100, 0, 10);
       h_ntk_bquark[i_nbquarks][i_nvtx] = new TH1F(TString::Format("h%s_%s_ntk_bquark", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx]), TString::Format("%d-track %s events%s;number of tracks with #DeltaR(track momentum, closest b quark) < 0.4;Vertices", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks]), 40, 0, 40);
+      h_ntk_jet[i_nbquarks][i_nvtx] = new TH1F(TString::Format("h%s_%s_ntk_jet", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx]), TString::Format("%d-track %s events%s;number of tracks with #DeltaR(track momentum, closest jet) < 0.4;Vertices", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks]), 40, 0, 40);
     }
   }
 }
@@ -96,6 +100,8 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
 
   for (int i = 0; i < 2; ++i) {
     h_bquark_flavor_code[i_nbquarks[i]][i_nvtx]->Fill(bquark_flavor_code, w);
+    int nbquarks = nt.p_gen_bquarks->size();
+    h_nbquarks[i_nbquarks[i]][i_nvtx]->Fill(nbquarks, w);
     h_njets[i_nbquarks[i]][i_nvtx]->Fill(nt.njets, w);
 
     double dbv0 = hypot(nt.x0, nt.y0);
@@ -146,30 +152,42 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
       }
     }
 
-    int nbquarks = nt.p_gen_bquarks->size();
-    h_nbquarks[i_nbquarks[i]][i_nvtx]->Fill(nbquarks, w);
-
     for (int ivtx = 0; ivtx < 2; ++ivtx) {
       if (nt.nvtx == 1 && ivtx != 0) continue;
 
       int ntk_vtx = ivtx == 0 ? nt.ntk0 : nt.ntk1;
       int ntk_bquark = 0;
+      int ntk_jet = 0;
       for (int itk = 0; itk < ntk_vtx; ++itk) {
         TVector3 tkp = ivtx == 0 ? TVector3(nt.p_tk0_px->at(itk), nt.p_tk0_py->at(itk), nt.p_tk0_pz->at(itk))
                                  : TVector3(nt.p_tk1_px->at(itk), nt.p_tk1_py->at(itk), nt.p_tk1_pz->at(itk));
-        double drmin = 1e9;
+
+        double drmin_tkp_bquark = 1e9;
         for (int ibquark = 0; ibquark < nbquarks; ++ibquark) {
           double dr = reco::deltaR(tkp.Eta(), tkp.Phi(), nt.p_gen_bquarks->at(ibquark).Eta(), nt.p_gen_bquarks->at(ibquark).Phi());
-          if (dr < drmin) {
-            drmin = dr;
+          if (dr < drmin_tkp_bquark) {
+            drmin_tkp_bquark = dr;
           }
         }
-        h_drmin_tkp_bquark[i_nbquarks[i]][i_nvtx]->Fill(drmin, w);
-        if (drmin < 0.4) {
+        h_drmin_tkp_bquark[i_nbquarks[i]][i_nvtx]->Fill(drmin_tkp_bquark, w);
+        if (drmin_tkp_bquark < 0.4) {
           ++ntk_bquark;
+        }
+
+        double drmin_tkp_jet = 1e9;
+        for (int ijet = 0; ijet < nt.njets; ++ijet) {
+          double dr = reco::deltaR(tkp.Eta(), tkp.Phi(), nt.jet_eta[ijet], nt.jet_phi[ijet]);
+          if (dr < drmin_tkp_jet) {
+            drmin_tkp_jet = dr;
+          }
+        }
+        h_drmin_tkp_jet[i_nbquarks[i]][i_nvtx]->Fill(drmin_tkp_jet, w);
+        if (drmin_tkp_jet < 0.4) {
+          ++ntk_jet;
         }
       }
       h_ntk_bquark[i_nbquarks[i]][i_nvtx]->Fill(ntk_bquark, w);
+      h_ntk_jet[i_nbquarks[i]][i_nvtx]->Fill(ntk_jet, w);
     }
   }
 
