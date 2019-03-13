@@ -4,6 +4,7 @@
 
 import sys, FWCore.ParameterSet.Config as cms
 from Configuration.StandardSequences.Eras import eras
+import dynamicconf
 
 process = cms.Process('PAT',eras.Run2_2017,eras.run2_miniAOD_94XFall17)
 
@@ -28,7 +29,7 @@ if not 'debug' in sys.argv:
     process.MessageLogger.cerr.FwkReport.reportEvery = 1000000
 
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, '94X_mc2017_realistic_v14', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, dynamicconf.globaltag, '')
 
 process.MINIAODSIMoutput = cms.OutputModule('PoolOutputModule',
                                             fileName = cms.untracked.string('miniaod.root'),
