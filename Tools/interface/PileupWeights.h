@@ -14,14 +14,16 @@ namespace jmt {
     void set_key(const std::string& k) {
       if (!k.size())
         v_ = nullptr;
-      map_t::const_iterator it = w_.find(k);
-      if (it == w_.end())
-        throw std::invalid_argument("jmt::PileupWeights: bad key");
-      v_ = &it->second;
+      else {
+        map_t::const_iterator it = w_.find(k);
+        if (it == w_.end())
+          throw std::invalid_argument("jmt::PileupWeights: bad key");
+        v_ = &it->second;
+      }
     }
 
     double w(int i) const {
-      if (i < 0 || i >= int(v_->size()))
+      if (!valid() || i < 0 || i >= int(v_->size()))
         return 0;
       return (*v_)[i];
     }
