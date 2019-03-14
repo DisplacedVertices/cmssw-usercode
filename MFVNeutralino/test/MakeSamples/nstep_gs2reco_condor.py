@@ -6,7 +6,7 @@ inputfns_fn = sys.argv[1]
 which = sys.argv[2]
 output_dir = which
 todos = [
-    'fns,inputfns.txt,$(Process)' % inputfns_fn,
+    'fns,inputfns.txt,$(Process)'
     ]
 njobs = None
 
