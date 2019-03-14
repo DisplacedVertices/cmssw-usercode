@@ -1,4 +1,5 @@
-- Run PileupDist with Tools/test/pileup_dist.py to get the
+- If different from the production PU distribution (e.g. bugs),
+  run PileupDist with Tools/test/pileup_dist.py to get the
   distribution in MC samples. This gives a histogram PileupDist/h_npu
   in the output root file. (The other versions with trigger/offline
   jet selection are for diagnostics/curiosity. PileupDist also gives a
@@ -12,7 +13,7 @@
   - Centrally produced 2017 samples had bug in mixing module so we
     have to derive pileup weights per sample for these.
 
-- Run pileupCalc.py via Tools/test/pileup.py to get the distribution
+- Run pileupCalc.py via Tools/scripts/pileup.py to get the distribution
   of pileup in the data as measured by the BRIL group.
 
   - The output files are kept in /uscms/home/tucker/public/mfv/pileup
