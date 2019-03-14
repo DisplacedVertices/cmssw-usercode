@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 
-which = 'qcdht2000_reg_reco'
+import os, sys, shutil
+
+inputfns_fn = sys.argv[1]
+which = sys.argv[2]
 output_dir = which
-inputfns_fn = 'inputfns.txt'
 todos = [
-    'fns,%s,$(Process)' % inputfns_fn,
+    'fns,inputfns.txt,$(Process)' % inputfns_fn,
     ]
 njobs = None
 
@@ -16,14 +18,13 @@ if len(todos) > 1:
     print 'while reco, miniaod will get'
     print todos[1:]
 
-import os, sys, shutil
-
 if not os.path.isfile(inputfns_fn):
     sys.exit('no file %s' % inputfns_fn)
 
-ninputfns = len([x for x in open(inputfns_fn).read().split('\n') if x.strip().endswith('.root')])
-if ninputfns == 0:
+inputfns = [x for x in open(inputfns_fn).read().split('\n') if x.strip().endswith('.root')]
+if not inputfns:
     sys.exit("no input fns in %s?", inputfns_fn)
+open('inputfns.txt','wt').write('\n'.join(inputfns) + '\n')
 
 if len(todos) > 7:
     sys.exit("I'm lazy, max 7 todos supported")
@@ -62,7 +63,7 @@ input_files = ','.join([os.path.join(inputs_dir, x) for x in input_files])
 todos = ' '.join('todo=' + x for x in todos)
 
 if njobs is None:
-    njobs = str(ninputfns)
+    njobs = len(inputfns)
 
 jdl_template = '''universe = vanilla
 Executable = %(sh_fn)s
@@ -78,7 +79,7 @@ when_to_transfer_output = ON_EXIT
 transfer_input_files = %(input_files)s
 x509userproxy = $ENV(X509_USER_PROXY)
 request_memory = 3000
-Queue %(njobs)s
+Queue %(njobs)i
 '''
 
 jdl_fn = os.path.join(work_area, 'jdl')
@@ -88,3 +89,6 @@ cwd = os.getcwd()
 os.chdir(work_area)
 os.system('condor_submit %s' % jdl_fn)
 os.chdir(cwd)
+
+for x in 'year.txt', 'inputfns.txt':
+    os.remove(x)

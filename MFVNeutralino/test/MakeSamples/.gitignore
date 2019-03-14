@@ -1,6 +1,6 @@
 *minbias*txt.gz
 *.root
 out.*.gz
-inputfns.txt
+inputfns*.txt
 scanpacks/
 year.txt
