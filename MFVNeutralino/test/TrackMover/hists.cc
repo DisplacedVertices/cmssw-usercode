@@ -8,9 +8,18 @@
 #include "TVector2.h"
 #include "TVector3.h"
 #include "JMTucker/Tools/interface/LumiList.h"
+#include "JMTucker/Tools/interface/PileupWeights.h"
 #include "JMTucker/MFVNeutralino/interface/MovedTracksNtuple.h"
 #include "BTagSFHelper.h"
 #include "utils.h"
+
+double ntks_weight(int i) {
+  const int N = 60;
+  if (i < 0 || i >= N) return 0;
+  // from h_2_vtxntracks so only apply there?
+  const double ws[N] = { 0., 0., 0., 0., 0., 0., 1.674196, 1.550810, 1.459271, 1.284317, 1.187709, 1.231090, 1.242313, 1.145012, 1.182134, 1.114840, 1.093479, 0.964026, 1.039401, 0.940219, 0.907171, 0.976593, 0.918716, 0.904142, 0.867394, 0.777177, 0.814517, 0.799371, 0.829022, 0.834422, 0.609130, 0.599720, 0.726436, 0.570779, 0.677044, 0.590878, 0.540080, 0.490107, 0.561173, 0.464503, 0.537223, 0.414802, 0.426949, 0.173858, 0.267836, 0.725926, 0.237331, 0.201321, 0.121923, 0.311854, 0.193843, 0.995309, 0., 0., 0., 0.559031, 0.810189, 0., 0., 0. };
+  return ws[i];
+}
 
 int main(int argc, char** argv) {
   std::string in_fn;
@@ -20,8 +29,8 @@ int main(int argc, char** argv) {
   float nevents_frac;
   int itau = 10000;
   bool apply_weights = true;
+  std::string pu_weights;
   bool btagsf_weights = false;
-  bool pu_cross_weights = false;
   bool ntks_weights = false;
 
   {
@@ -35,8 +44,10 @@ int main(int argc, char** argv) {
       ("json,j",        po::value<std::string>(&json),                                              "lumi mask json file for data")
       ("nevents-frac,n",po::value<float>      (&nevents_frac)  ->default_value(1.f),                "only run on this fraction of events in the tree")
       ("tau",           po::value<int>        (&itau)          ->default_value(10000),              "tau in microns, for reweighting")
-      ("weights",       po::value<bool>       (&apply_weights) ->default_value(true),               "whether to use any weights")
+      ("weights",       po::value<bool>       (&apply_weights) ->default_value(true),               "whether to use any other weights, including those in the tree")
+      ("pu-weights",    po::value<std::string>(&pu_weights)    ->default_value(""),                 "extra pileup weights beyond whatever's already in the tree")
       ("btagsf",        po::value<bool>       (&btagsf_weights)->default_value(false),              "whether to use b-tag SF weights")
+      ("ntks-weights",  po::value<bool>       (&ntks_weights)  ->default_value(false),              "whether to use ntracks weights")
       ;
 
     po::variables_map vm;
@@ -67,19 +78,20 @@ int main(int argc, char** argv) {
             << " nevents_frac: " << nevents_frac
             << " tau: " << itau
             << " weights: " << apply_weights
-            << " btagsf: " << btagsf_weights << "\n";
+            << " pu_weights: " << pu_weights
+            << " btagsf: " << btagsf_weights
+            << " ntks_weights: " << ntks_weights
+            << "\n";
 
   ////
-  const double pu_2017to2018[118] = { 0.8088707410249003, 0.6419315492929617, 1.0289843771164762, 1.2197433115877707, 2.0279361447384607, 2.1534273598348346, 2.828875717156401, 3.7562409631757463, 3.7723330080421347, 2.128823541813255, 1.4437282808060388, 1.0592335461744988, 0.9296008325854023, 0.8981341246581729, 0.8661838708148207, 0.8217817668661503, 0.7698094682358639, 0.736530117843042, 0.7324825824243237, 0.7464654505340651, 0.7689672475157527, 0.7962598319502678, 0.8238273378355885, 0.84709530856804, 0.8629571604669926, 0.8715575979660287, 0.8790646285472657, 0.8930068377451257, 0.9181154528911909, 0.9565916718906213, 1.0085885148613083, 1.0733677243858069, 1.1513074018453253, 1.2438041844310648, 1.350425854765928, 1.4667928985090142, 1.5852313012565622, 1.6964317350776834, 1.7888779559697383, 1.8463573710989412, 1.8483344785348048, 1.777156775240319, 1.6296890426047426, 1.4238791110873033, 1.192636304616271, 0.9691350867625012, 0.7752988582908152, 0.6194609177490059, 0.5004018080190712, 0.41258518896855334, 0.3496354676827754, 0.3057454957410425, 0.27651357625145984, 0.2587768794251079, 0.2503442053532996, 0.24978113594279056, 0.25620094485064937, 0.269077026686218, 0.2880879933617664, 0.31297537926425495, 0.34340097870928926, 0.37879522132496796, 0.4181914535828073, 0.46006239241614966, 0.5022042593864846, 0.5417448111098889, 0.5753590543126583, 0.599729908816729, 0.6121804339703449, 0.6112764589874742, 0.5971519453774672, 0.5714120667068647, 0.5366696442401658, 0.4959276770798611, 0.45203677112054097, 0.4073572740266353, 0.3636364273599529, 0.3220390572953875, 0.2832554359014485, 0.24762792649752466, 0.2152638164237845, 0.18612213801734914, 0.1600742314358133, 0.13694300589056346, 0.1165269986399804, 0.0986145541296668, 0.08299205921121872, 0.06944883162594205, 0.057780217187997036, 0.04778974199444527, 0.03929073201556682, 0.03210757396626401, 0.02607667588961756, 0.02104713973802034, 0.016881148969658692, 0.013454078923061686, 0.010654347125878181, 0.008383033422255411, 0.006553300860721036, 0.005089663013060519, 0.0039271342139648915, 0.0030102988351013078, 0.0022923603178735402, 0.001734152193216896, 0.0013032269067089236, 0.0009729254729590597, 0.0007215235730044382, 0.000531537519428578, 0.0003890108881886131, 0.0002828005460800867, 0.0002043072260251089, 0.00014647800144821486, 0.00010417815899462249, 7.364182160440637e-05, 5.127986461383892e-05, 3.7258169988485095e-05, 2.3663515932329523e-05, 1.4565424506047685e-05 };
-
-  // from h_2_vtxntracks
-  const double ntks_weight[60] = {  0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 0.000000, 1.674196, 1.550810, 1.459271, 1.284317, 1.187709, 1.231090, 1.242313, 1.145012, 1.182134, 1.114840, 1.093479, 0.964026, 1.039401, 0.940219, 0.907171, 0.976593, 0.918716, 0.904142, 0.867394, 0.777177, 0.814517, 0.799371, 0.829022, 0.834422, 0.609130, 0.599720, 0.726436, 0.570779, 0.677044, 0.590878, 0.540080, 0.490107, 0.561173, 0.464503, 0.537223, 0.414802, 0.426949, 0.173858, 0.267836, 0.725926, 0.237331, 0.201321, 0.121923, 0.311854, 0.193843, 0.995309, 0.000000, 0.000000, 0.000000, 0.559031, 0.810189, 0.000000, 0.000000, 0.000000 };
 
   const int itau_original = 10000; // JMTBAD if you change this in ntuple.py, change it here
   if (itau != itau_original)
     printf("reweighting tau distribution from %i um to %i um\n", itau_original, itau);
   const double o_tau_from = 10000./itau_original;
   const double o_tau_to = 10000./itau;
+
+  jmt::PileupWeights puwhelper(pu_weights);
 
   std::unique_ptr<BTagSFHelper> btagsfhelper;
   if (btagsf_weights) btagsfhelper.reset(new BTagSFHelper);
@@ -395,10 +407,8 @@ int main(int argc, char** argv) {
       if (nt.weight < 0) ++nnegweight;
       w *= nt.weight;
 
-      if (pu_cross_weights) {
-	int inpu = int(nt.npu);
-	w *= pu_2017to2018[inpu];
-      }
+      if (puwhelper.valid())
+        w *= puwhelper.w(nt.npu);
 
       if (btagsf_weights) {
         double p_mc = 1, p_data = 1;
@@ -565,16 +575,10 @@ int main(int argc, char** argv) {
 
       if (1)                            { set_it_if_first(first_vtx_to_pass[0], ivtx); ++n_pass_nocuts;  }
       if (pass_ntracks)                 { set_it_if_first(first_vtx_to_pass[1], ivtx); ++n_pass_ntracks; }
-      if (pass_ntracks && pass_bs2derr) { 
-	set_it_if_first(first_vtx_to_pass[2], ivtx); 
-	++n_pass_all;
-	if (is_mc && apply_weights) {
-	  if (ntks_weights) {
-	    int ntks = nt.p_vtxs_ntracks->at(ivtx);
-	    w *= ntks_weight[ntks];
-	  }
-	}
-      }
+      if (pass_ntracks && pass_bs2derr) { set_it_if_first(first_vtx_to_pass[2], ivtx); ++n_pass_all;     }
+
+      if (pass_ntracks && pass_bs2derr && is_mc && apply_weights && ntks_weights)
+        w *= ntks_weight(nt.p_vtxs_ntracks->at(ivtx));
     }
 
     auto F1 = [&w](TH1* h, double v)            { h                    ->Fill(v,     w); };
