@@ -620,8 +620,7 @@ int main(int argc, char** argv) {
     for (int i = 0; i < num_numdens; ++i) {
       int ivtx = first_vtx_to_pass[i];
       if (ivtx != -1) {
-        h_vtxdbv[i]->Fill(mag(nt.p_vtxs_x->at(ivtx),
-                              nt.p_vtxs_y->at(ivtx)));
+        h_vtxdbv[i]->Fill(mag(nt.p_vtxs_x->at(ivtx), nt.p_vtxs_y->at(ivtx)), w);
         h_vtxntracks[i]->Fill(nt.p_vtxs_ntracks->at(ivtx), w);
         h_vtxbs2derr[i]->Fill(nt.p_vtxs_bs2derr->at(ivtx), w);
         h_vtxanglemax[i]->Fill(vtxs_anglemax[ivtx], w);
