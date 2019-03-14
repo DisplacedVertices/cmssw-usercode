@@ -344,6 +344,11 @@ elif meta.startswith('qcdht'):
     todo = meta.replace('qcdht', 'qcdht,')
     submit(config, name, todo)
 
+elif meta.startswith('mugun'):
+    name = meta
+    todo = meta.replace('mugun', 'mugun,')
+    submit(config, name, todo)
+
 elif meta in metamap:
     def signal_point_iterator():
         if tau_masses:

@@ -26,6 +26,21 @@ def set_scales(process, which):
         'SigmaProcess:factorMultFac = %.1f' % factor,
         ]
 
+def set_gun(process, pid, pt, anti=True, etas=[-2.5,2.5], phis=[-3.14159265359,3.14159265359]):
+    process.generator = cms.EDProducer('FlatRandomPtGunProducer', AddAntiParticle = cms.bool(anti))
+    process.generator.PGunParameters = cms.PSet(
+        MinPt = cms.double(pt - 1e-3),
+        MaxPt = cms.double(pt + 1e-3),
+        PartID = cms.vint32(pid),
+        MinEta = cms.double(etas[0]),
+        MaxEta = cms.double(etas[1]),
+        MinPhi = cms.double(phis[0]),
+        MaxPhi = cms.double(phis[1]),
+        )
+
+def set_mugun(process, pt):
+    set_gun(process, 13, pt, etas=[-2.44,2.44])
+
 def set_minbias(process):
     process.generator.PythiaParameters.processParameters = cms.vstring(
         'SoftQCD:nonDiffractive = on', 
