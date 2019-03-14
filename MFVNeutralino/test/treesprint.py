@@ -73,7 +73,7 @@ for ntk in ntks:
     print ntk
     print fmt % ('sample', 'xsec', 'nevents', 'weight', 'f1vb', 'rn1v', 'unc', 'wn1v', 'unc', 'f2vb', 'rn2v', 'unc', 'wn2v', 'unc')
 
-    raw_n1v, sum_n1v, var_n1v, raw_n2v, sum_n2v, var_n2v = 0, 0, 0, 0, 0, 0
+    raw_n1v, sum_n1v, var_n1v, sum_n1vb, raw_n2v, sum_n2v, var_n2v, sum_n2vb = 0, 0, 0, 0, 0, 0, 0, 0
     seen_bkg, seen_data = False, False
 
     weighted = []
@@ -147,8 +147,10 @@ for ntk in ntks:
             sum_n1v += n1v * w
             var_n1v += (en1v * w)**2
             raw_n2v += r2v
+            sum_n1vb += n1vb * w
             sum_n2v += n2v * w
             var_n2v += (en2v * w)**2
+            sum_n2vb += n2vb * w
 
     if len(weighted) == 2:
         (n1v1, en1v1, n2v1, en2v1), (n1v2, en1v2, n2v2, en2v2) = weighted
@@ -158,7 +160,9 @@ for ntk in ntks:
 
     if raw_n1v or raw_n2v:
         x = (raw_n1v, raw_n1v**0.5, sum_n1v, var_n1v**0.5), (raw_n2v, raw_n2v**0.5, sum_n2v, var_n2v**0.5)
+        f1vb = float(sum_n1vb) / sum_n1v if raw_n1v > 0 else 0.
+        f2vb = float(sum_n2vb) / sum_n2v if raw_n2v > 0 else 0.
         print
         print fmt % ('total background', '', '', '',
-                     '', x[0][0], '%9.2f' % x[0][1], '%9.2f' % x[0][2], '%9.2f' % x[0][3],
-                     '', x[1][0], '%9.2f' % x[1][1], '%9.2f' % x[1][2], '%9.2f' % x[1][3])
+                     '%7.2f' % f1vb, x[0][0], '%9.2f' % x[0][1], '%9.2f' % x[0][2], '%9.2f' % x[0][3],
+                     '%7.2f' % f2vb, x[1][0], '%9.2f' % x[1][1], '%9.2f' % x[1][2], '%9.2f' % x[1][3])
