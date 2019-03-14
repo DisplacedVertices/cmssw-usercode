@@ -72,18 +72,10 @@ from JMTucker.Tools.PileupWeights import derive_weights
 ww = derive_weights(options.data_fn, options.mc_fn, options.data_path, options.mc_path, options.tol)
 
 print 'average weight =', sum(ww.weights)/len(ww.weights)
-
-print '\npython:'
-print 'weights = [',
+print 'w_[""] = std::vector<double>({',
 for w in ww.weights:
     print '%.6g,' % w,
-print ']'
-print '\nc++:'
-print 'const int max_npu = %i;' % len(ww.weights)
-print 'const double pileup_weights[max_npu] = {',
-for w in ww.weights:
-    print '%.6g,' % w,
-print '};'
+print '});'
 
 if options.plots:
     from JMTucker.Tools.ROOTTools import *
