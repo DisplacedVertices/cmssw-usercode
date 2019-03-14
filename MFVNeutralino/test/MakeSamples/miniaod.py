@@ -29,7 +29,7 @@ if not 'debug' in sys.argv:
     process.MessageLogger.cerr.FwkReport.reportEvery = 1000000
 
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, dynamicconf.globaltag, '')
+process.GlobalTag = GlobalTag(process.GlobalTag, dynamicconf.globaltag_miniaod, '')
 
 process.MINIAODSIMoutput = cms.OutputModule('PoolOutputModule',
                                             fileName = cms.untracked.string('miniaod.root'),
