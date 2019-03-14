@@ -1,7 +1,5 @@
 #!/bin/bash
 
-njobstot=510
-
 function mergemc {
     allthere=1
     for x in qcdht0700_2017.root qcdht1000_2017.root qcdht1500_2017.root qcdht2000_2017.root ttbarht0600_2017.root ttbarht0800_2017.root ; do
@@ -34,6 +32,7 @@ function mergedata {
 
 if [[ $1 == "check" ]]; then
     njobs=$(grep 'return value' hists.log.* | grep -c 'value 0')
+    njobstot=$(./hists.sh -1 | tail -n 1)
     if [[ $njobs != $njobstot ]]; then
         echo only $njobs done
         exit 1

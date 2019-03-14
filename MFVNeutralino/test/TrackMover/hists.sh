@@ -48,6 +48,7 @@ nnls=${#nls[@]}
 nnbs=${#nbs[@]}
 njobs=$((npaths * nfns * nnsigs * ntaus * nnls * nnbs))
 echo job $job inpathbase $inpathbase \#paths $npaths \#fns $nfns \#nsigs $nnsigs \#taus $ntaus \#nls $nnls \#nbs $nnbs max jobs $njobs
+
 if [[ $job -ge $njobs ]]; then
     echo problem
     exit 1
@@ -74,9 +75,8 @@ treepath=mfvMovedTree${nl}${nb}/t
 echo path $path fn $fn nl $nl nb $nb outfn $outfn treepath $treepath
 
 if [[ $test == 1 ]]; then
-    echo test only, possibly modifying hists.jdl and hists_finish.sh
-    sed -i -e "s/Queue.*/Queue ${njobs}/" hists.jdl
-    sed -i -e "s/^njobstot=.*/njobstot=${njobs}/" hists_finish.sh
+    echo test only
+    echo $njobs
     exit 1
 fi
 
