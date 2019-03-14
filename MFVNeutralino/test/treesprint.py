@@ -63,7 +63,7 @@ def getit(fn, ntk):
         n2vb = c('nvtx>=2 && gen_flavor_code==2')
     return n1v, n1vb, n2v, n2vb
 
-fmt = '%50s %9s %9s %9s      %7s  %9s +- %9s  %9s +- %9s     %7s  %9s +- %9s  %9s +- %9s'
+fmt = '%50s %9s %9s %9s      %12s  %9s +- %9s  %9s +- %9s     %12s  %9s +- %9s  %9s +- %9s'
 
 int_lumi = ac.int_lumi_2017 * ac.scale_factor_2017
 print 'MC scaled to int. lumi. %.3f/fb' % (int_lumi/1000)
@@ -80,7 +80,9 @@ for ntk in ntks:
     for fn in fns:
         (r1v, n1v, en1v), (_, n1vb, _), (r2v, n2v, en2v), (_, n2vb, _) = getit(fn, ntk)
         f1vb = float(n1vb) / n1v if r1v > 0 else 0.
+        ef1vb = (f1vb * (1-f1vb) / effective_n(n1v,en1v))**0.5 if r1v > 0 else 0.
         f2vb = float(n2vb) / n2v if r2v > 0 else 0.
+        ef2vb = (f2vb * (1-f2vb) / effective_n(n2v,en2v))**0.5 if r2v > 0 else 0.
 
         sname = os.path.basename(fn).replace('.root', '')
         is_sig = sname.startswith('mfv_')
@@ -128,12 +130,12 @@ for ntk in ntks:
                              xsec,
                              '%.0f' % sample.nevents(fn),
                              '%9.3g' % w,
-                             '%7.2f' % f1vb,
+                             '%4.2f +- %4.2f' % (f1vb, ef1vb),
                              x[0][0],
                              '%9.0f' % x[0][1],
                              '%9.2f' % x[0][2],
                              '%9.2f' % x[0][3],
-                             '%7.2f' % f2vb,
+                             '%4.2f +- %4.2f' % (f2vb, ef2vb),
                              x[1][0],
                              '%9.0f' % x[1][1],
                              '%9.2f' % x[1][2],
@@ -161,8 +163,10 @@ for ntk in ntks:
     if raw_n1v or raw_n2v:
         x = (raw_n1v, raw_n1v**0.5, sum_n1v, var_n1v**0.5), (raw_n2v, raw_n2v**0.5, sum_n2v, var_n2v**0.5)
         f1vb = float(sum_n1vb) / sum_n1v if raw_n1v > 0 else 0.
+        ef1vb = (f1vb * (1-f1vb) / effective_n(sum_n1v,var_n1v**0.5))**0.5 if raw_n1v > 0 else 0.
         f2vb = float(sum_n2vb) / sum_n2v if raw_n2v > 0 else 0.
+        ef2vb = (f2vb * (1-f2vb) / effective_n(sum_n2v,var_n2v**0.5))**0.5 if raw_n2v > 0 else 0.
         print
         print fmt % ('total background', '', '', '',
-                     '%7.2f' % f1vb, x[0][0], '%9.2f' % x[0][1], '%9.2f' % x[0][2], '%9.2f' % x[0][3],
-                     '%7.2f' % f2vb, x[1][0], '%9.2f' % x[1][1], '%9.2f' % x[1][2], '%9.2f' % x[1][3])
+                     '%4.2f +- %4.2f' % (f1vb, ef1vb), x[0][0], '%9.2f' % x[0][1], '%9.2f' % x[0][2], '%9.2f' % x[0][3],
+                     '%4.2f +- %4.2f' % (f2vb, ef2vb), x[1][0], '%9.2f' % x[1][1], '%9.2f' % x[1][2], '%9.2f' % x[1][3])
