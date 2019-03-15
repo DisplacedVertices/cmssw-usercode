@@ -63,7 +63,7 @@ def getit(fn, ntk):
         n2vb = c('nvtx>=2 && gen_flavor_code==2')
     return n1v, n1vb, n2v, n2vb
 
-fmt = '%50s %9s %9s %9s      %12s  %9s +- %9s  %9s +- %9s     %12s  %9s +- %9s  %9s +- %9s'
+fmt = '%40s %9s %9s %9s      %14s  %9s +- %9s  %9s +- %9s     %12s  %9s +- %9s  %9s +- %9s'
 
 int_lumi = ac.int_lumi_2017 * ac.scale_factor_2017
 print 'MC scaled to int. lumi. %.3f/fb' % (int_lumi/1000)
@@ -130,7 +130,7 @@ for ntk in ntks:
                              xsec,
                              '%.0f' % sample.nevents(fn),
                              '%9.3g' % w,
-                             '%4.2f +- %4.2f' % (f1vb, ef1vb),
+                             '%5.3f +- %5.3f' % (f1vb, ef1vb),
                              x[0][0],
                              '%9.0f' % x[0][1],
                              '%9.2f' % x[0][2],
@@ -168,5 +168,5 @@ for ntk in ntks:
         ef2vb = (f2vb * (1-f2vb) / effective_n(sum_n2v,var_n2v**0.5))**0.5 if raw_n2v > 0 else 0.
         print
         print fmt % ('total background', '', '', '',
-                     '%4.2f +- %4.2f' % (f1vb, ef1vb), x[0][0], '%9.2f' % x[0][1], '%9.2f' % x[0][2], '%9.2f' % x[0][3],
+                     '%5.3f +- %5.3f' % (f1vb, ef1vb), x[0][0], '%9.2f' % x[0][1], '%9.2f' % x[0][2], '%9.2f' % x[0][3],
                      '%4.2f +- %4.2f' % (f2vb, ef2vb), x[1][0], '%9.2f' % x[1][1], '%9.2f' % x[1][2], '%9.2f' % x[1][3])
