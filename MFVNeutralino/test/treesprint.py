@@ -20,9 +20,10 @@ sumall = bool_from_argv('sumall')
 which = typed_from_argv(int, -1)
 ntks = ('mfvMiniTreeNtk3', 'mfvMiniTreeNtk4', 'mfvMiniTree')
 if which != -1:
-    if which < 3 or which > 5:
+    ntks_to_trees = {3: 'mfvMiniTreeNtk3', 4: 'mfvMiniTreeNtk4', 5: 'mfvMiniTree', 7: 'mfvMiniTreeNtk3or4'}
+    if which not in ntks_to_trees:
         raise ValueError('bad ntks %s' % which)
-    ntks = ntks[which-3:which-2]
+    ntks = (ntks_to_trees[which],)
 
 ROOT.gErrorIgnoreLevel = 6000
 fns = []
@@ -58,6 +59,7 @@ def getit(fn, ntk):
     n1vb = c('nvtx==1 && gen_flavor_code==2')
     if ntk == 'mfvMiniTreeNtk3or4':
         n2v = c('nvtx>=2 && ntk0==4 && ntk1==3')
+        n2vb = c('nvtx>=2 && ntk0==4 && ntk1==3 && gen_flavor_code==2')
     else:
         n2v = c('nvtx>=2')
         n2vb = c('nvtx>=2 && gen_flavor_code==2')
