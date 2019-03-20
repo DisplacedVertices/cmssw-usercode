@@ -1090,7 +1090,10 @@ def detree(t, branches='run:lumi:event', cut='', xform=lambda x: tuple(int(y) fo
         xf = xform
         xform = lambda x: tuple(xf(y) for y in x)
 
-    tmp_f, tmp_fn = tempfile.mkstemp()
+    dir = None
+    if os.environ['HOSTNAME'].startswith('cmslpc'):
+        dir = '/uscmst1b_scratch/lpc1/3DayLifetime/' + os.environ['USER']
+    tmp_f, tmp_fn = tempfile.mkstemp(dir=dir)
     t.GetPlayer().SetScanRedirect(True)
     t.GetPlayer().SetScanFileName(tmp_fn)
     t.Scan(branches, cut, 'colsize=50')
