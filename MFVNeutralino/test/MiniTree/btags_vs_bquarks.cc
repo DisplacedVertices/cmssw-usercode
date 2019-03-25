@@ -168,7 +168,7 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
     h_nljets[i_nbquarks[i]][i_nvtx]->Fill(nljets, w);
 
     for (int i_nbdisc = 0; i_nbdisc < NBDISC; ++i_nbdisc) {
-      h_nbtags[i_nbquarks[i]][i_nvtx][i_nbdisc]->Fill(nbtags[i], w);
+      h_nbtags[i_nbquarks[i]][i_nvtx][i_nbdisc]->Fill(nbtags[i_nbdisc], w);
       h_nbjets_btag[i_nbquarks[i]][i_nvtx][i_nbdisc]->Fill(nbjets_btag[i_nbdisc], w);
       h_nljets_btag[i_nbquarks[i]][i_nvtx][i_nbdisc]->Fill(nljets_btag[i_nbdisc], w);
 
