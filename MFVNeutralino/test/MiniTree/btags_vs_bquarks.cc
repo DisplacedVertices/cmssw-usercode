@@ -46,6 +46,7 @@ TH1F* h_ntk_jet[NBQUARKS][NVTX] = {{0}};
 
 TH1F* h_nbjets[NBQUARKS][NVTX] = {{0}};
 TH1F* h_nljets[NBQUARKS][NVTX] = {{0}};
+TH2F* h_nljets_vs_nbjets[NBQUARKS][NVTX] = {{0}};
 TH1F* h_nbjets_btag[NBQUARKS][NVTX][NBDISC] = {{{0}}};
 TH1F* h_nljets_btag[NBQUARKS][NVTX][NBDISC] = {{{0}}};
 
@@ -97,6 +98,7 @@ void book_hists(int ntk) {
     for (int i_nvtx = 0; i_nvtx < NVTX; ++i_nvtx) {
       h_nbjets[i_nbquarks][i_nvtx] = new TH1F(TString::Format("h%s_%s_nbjets", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx]), TString::Format("%d-track %s events%s;Number of jets with #DeltaR(jet, closest b quark) < 0.4;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks]), 40, 0, 40);
       h_nljets[i_nbquarks][i_nvtx] = new TH1F(TString::Format("h%s_%s_nljets", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx]), TString::Format("%d-track %s events%s;Number of jets without #DeltaR(jet, closest b quark) < 0.4;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks]), 40, 0, 40);
+      h_nljets_vs_nbjets[i_nbquarks][i_nvtx] = new TH2F(TString::Format("h%s_%s_nljets_vs_nbjets", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx]), TString::Format("%d-track %s events%s;Number of jets with #DeltaR(jet, closest b quark) < 0.4;Number of jets without #DeltaR(jet, closest b quark) < 0.4", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks]), 40, 0, 40, 40, 0, 40);
       for (int i_nbdisc = 0; i_nbdisc < NBDISC; ++i_nbdisc) {
         h_nbjets_btag[i_nbquarks][i_nvtx][i_nbdisc] = new TH1F(TString::Format("h%s_%s_nbjets_%s_btag", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx], bdisc_names[i_nbdisc]), TString::Format("%d-track %s events%s;Number of %s b-tagged jets with #DeltaR(jet, closest b quark) < 0.4;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks], bdisc_names[i_nbdisc]), 40, 0, 40);
         h_nljets_btag[i_nbquarks][i_nvtx][i_nbdisc] = new TH1F(TString::Format("h%s_%s_nljets_%s_btag", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx], bdisc_names[i_nbdisc]), TString::Format("%d-track %s events%s;Number of %s b-tagged jets without #DeltaR(jet, closest b quark) < 0.4;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks], bdisc_names[i_nbdisc]), 40, 0, 40);
@@ -166,6 +168,7 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
     }
     h_nbjets[i_nbquarks[i]][i_nvtx]->Fill(nbjets, w);
     h_nljets[i_nbquarks[i]][i_nvtx]->Fill(nljets, w);
+    h_nljets_vs_nbjets[i_nbquarks[i]][i_nvtx]->Fill(nbjets, nljets, w);
 
     for (int i_nbdisc = 0; i_nbdisc < NBDISC; ++i_nbdisc) {
       h_nbtags[i_nbquarks[i]][i_nvtx][i_nbdisc]->Fill(nbtags[i_nbdisc], w);
