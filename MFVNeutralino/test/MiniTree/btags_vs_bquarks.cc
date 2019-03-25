@@ -44,6 +44,11 @@ TH1F* h_drmin_tkp_jet[NBQUARKS][NVTX] = {{0}};
 TH1F* h_ntk_bquark[NBQUARKS][NVTX] = {{0}};
 TH1F* h_ntk_jet[NBQUARKS][NVTX] = {{0}};
 
+TH1F* h_nbjets[NBQUARKS][NVTX] = {{0}};
+TH1F* h_nljets[NBQUARKS][NVTX] = {{0}};
+TH1F* h_nbjets_btag[NBQUARKS][NVTX][NBDISC] = {{{0}}};
+TH1F* h_nljets_btag[NBQUARKS][NVTX][NBDISC] = {{{0}}};
+
 void book_hists(int ntk) {
   for (int i_nbquarks = 0; i_nbquarks < NBQUARKS; ++i_nbquarks) {
     for (int i_nvtx = 0; i_nvtx < NVTX; ++i_nvtx) {
@@ -87,6 +92,17 @@ void book_hists(int ntk) {
       h_ntk_jet[i_nbquarks][i_nvtx] = new TH1F(TString::Format("h%s_%s_ntk_jet", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx]), TString::Format("%d-track %s events%s;number of tracks with #DeltaR(track momentum, closest jet) < 0.4;Vertices", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks]), 40, 0, 40);
     }
   }
+
+  for (int i_nbquarks = 0; i_nbquarks < NBQUARKS; ++i_nbquarks) {
+    for (int i_nvtx = 0; i_nvtx < NVTX; ++i_nvtx) {
+      h_nbjets[i_nbquarks][i_nvtx] = new TH1F(TString::Format("h%s_%s_nbjets", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx]), TString::Format("%d-track %s events%s;Number of jets with #DeltaR(jet, closest b quark) < 0.4;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks]), 40, 0, 40);
+      h_nljets[i_nbquarks][i_nvtx] = new TH1F(TString::Format("h%s_%s_nljets", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx]), TString::Format("%d-track %s events%s;Number of jets without #DeltaR(jet, closest b quark) < 0.4;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks]), 40, 0, 40);
+      for (int i_nbdisc = 0; i_nbdisc < NBDISC; ++i_nbdisc) {
+        h_nbjets_btag[i_nbquarks][i_nvtx][i_nbdisc] = new TH1F(TString::Format("h%s_%s_nbjets_%s_btag", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx], bdisc_names[i_nbdisc]), TString::Format("%d-track %s events%s;Number of %s b-tagged jets with #DeltaR(jet, closest b quark) < 0.4;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks], bdisc_names[i_nbdisc]), 40, 0, 40);
+        h_nljets_btag[i_nbquarks][i_nvtx][i_nbdisc] = new TH1F(TString::Format("h%s_%s_nljets_%s_btag", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx], bdisc_names[i_nbdisc]), TString::Format("%d-track %s events%s;Number of %s b-tagged jets without #DeltaR(jet, closest b quark) < 0.4;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks], bdisc_names[i_nbdisc]), 40, 0, 40);
+      }
+    }
+  }
 }
 
 bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
@@ -116,18 +132,45 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
     }
 
     int nbtags[NBDISC] = {0};
+    int nbjets = 0;
+    int nljets = 0;
+    int nbjets_btag[NBDISC] = {0};
+    int nljets_btag[NBDISC] = {0};
     for (int ijet = 0; ijet < nt.njets; ++ijet) {
       double bdisc = nt.jet_bdisc[ijet];
       h_jet_bdisc[i_nbquarks[i]][i_nvtx]->Fill(bdisc, w);
+
+      double drmin_jet_bquark = 1e9;
+      for (int ibquark = 0; ibquark < nbquarks; ++ibquark) {
+        double dr = reco::deltaR(nt.jet_eta[ijet], nt.jet_phi[ijet], nt.p_gen_bquarks->at(ibquark).Eta(), nt.p_gen_bquarks->at(ibquark).Phi());
+        if (dr < drmin_jet_bquark) {
+          drmin_jet_bquark = dr;
+        }
+      }
+      if (drmin_jet_bquark < 0.4) {
+        ++nbjets;
+      } else {
+        ++nljets;
+      }
+
       for (int i_nbdisc = 0; i_nbdisc < NBDISC; ++i_nbdisc) {
         if (bdisc >= bdisc_mins[i_nbdisc]) {
           ++nbtags[i_nbdisc];
+          if (drmin_jet_bquark < 0.4) {
+            ++nbjets_btag[i_nbdisc];
+          } else {
+            ++nljets_btag[i_nbdisc];
+          }
         }
       }
     }
+    h_nbjets[i_nbquarks[i]][i_nvtx]->Fill(nbjets, w);
+    h_nljets[i_nbquarks[i]][i_nvtx]->Fill(nljets, w);
 
     for (int i_nbdisc = 0; i_nbdisc < NBDISC; ++i_nbdisc) {
       h_nbtags[i_nbquarks[i]][i_nvtx][i_nbdisc]->Fill(nbtags[i], w);
+      h_nbjets_btag[i_nbquarks[i]][i_nvtx][i_nbdisc]->Fill(nbjets_btag[i_nbdisc], w);
+      h_nljets_btag[i_nbquarks[i]][i_nvtx][i_nbdisc]->Fill(nljets_btag[i_nbdisc], w);
 
       for (int i_nbtags = 0; i_nbtags < NBTAGS; ++i_nbtags) {
         int btag_flavor_code = nbtags[i_nbdisc] >= nbtag_mins[i_nbtags] ? 1 : 0;
