@@ -172,7 +172,7 @@ namespace jmt {
     float z      (int i) const { return p_get(i, z_,       p_z_       ); }
     float chi2   (int i) const { return p_get(i, chi2_,    p_chi2_    ); }
     float ndof   (int i) const { return p_get(i, ndof_,    p_ndof_    ); }
-    float ntracks(int i) const { return p_get(i, ntracks_, p_ntracks_ ); }
+    uchar ntracks(int i) const { return p_get(i, ntracks_, p_ntracks_ ); }
     float score  (int i) const { return p_get(i, score_,   p_score_   ); }
     float cxx    (int i) const { return p_get(i, cxx_,     p_cxx_     ); }
     float cxy    (int i) const { return p_get(i, cxy_,     p_cxy_     ); }

@@ -55,8 +55,10 @@ namespace jmt {
       if (filter_ && cut(pv))
         continue;
 
-      if (pv_ == nullptr)
+      if (pv_ == nullptr) {
         pv_ = &pv;
+        ipv_ = i;
+      }
 
       int ntracks = 0;
       float score = 0;

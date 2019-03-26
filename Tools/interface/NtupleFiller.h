@@ -61,6 +61,7 @@ namespace jmt {
     edm::Handle<edm::ValueMap<float>> scores_;
     edm::Handle<pat::PackedCandidateCollection> cands_;
     const reco::Vertex* pv_;
+    int ipv_;
   public:
     PrimaryVerticesSubNtupleFiller(PrimaryVerticesSubNtuple& nt, const edm::ParameterSet& cfg, edm::ConsumesCollector&& cc, bool filter, bool first_only)
       : nt_(nt),
@@ -71,12 +72,15 @@ namespace jmt {
         cands_token_(cc.consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("packed_candidates_src"))),
         filter_(filter),
         first_only_(first_only),
-        pv_(nullptr)
+        pv_(nullptr),
+        ipv_(-1)
     {}
     bool cut(const reco::Vertex& pv) const { return pv.isFake() || pv.ndof() < 4 || fabs(pv.z()) > 24 || fabs(pv.position().Rho()) > 2; }
     const reco::VertexCollection& pvs(const edm::Event& e) { e.getByToken(token_, pvs_); return *pvs_; }
+    const pat::PackedCandidateCollection& cands(const edm::Event& e) { e.getByToken(cands_token_, cands_); return *cands_; }
     void operator()(const edm::Event&, const reco::BeamSpot* =0);
     const reco::Vertex* pv() const { return pv_; }
+    int ipv() const { return ipv_; }
   };
 
   void NtupleAdd(TracksSubNtuple&, const reco::Track&, const reco::BeamSpot&, const reco::Vertex*);
