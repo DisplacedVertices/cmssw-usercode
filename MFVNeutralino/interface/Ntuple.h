@@ -273,6 +273,10 @@ namespace mfv {
     jmt::SecondaryVerticesSubNtuple svs_;
     jmt::RefitTracksSubNtuple refit_tks_;
   };
+
+  ////
+
+  class SplitPVNtuple : public jmt::TrackingAndJetsNtuple {};
 }
 
 #endif
