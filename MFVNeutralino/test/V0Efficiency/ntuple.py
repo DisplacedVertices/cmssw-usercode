@@ -3,9 +3,7 @@ from JMTucker.MFVNeutralino.NtupleCommon import *
 settings = NtupleSettings()
 settings.is_mc = True
 settings.is_miniaod = True
-settings.zerobias = False
-assert not settings.zerobias # need to check trigger/event filter
-settings.event_filter = 'trigger jets only'
+settings.event_filter = 'jets only novtx'
 
 version = settings.version + 'v1'
 
@@ -14,8 +12,8 @@ debug = False
 ####
 
 process = ntuple_process(settings)
-remove_tfileservice(process)
-max_events(process, 10000)
+tfileservice(process, 'k0tree.root')
+max_events(process, 100)
 report_every(process, 1000000)
 #want_summary(process)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
@@ -24,48 +22,22 @@ file_event_from_argv(process)
 
 ####
 
-from JMTucker.Tools.GoodPrimaryVertices_cfi import goodOfflinePrimaryVertices
-process.firstGoodPrimaryVertex = goodOfflinePrimaryVertices.clone(input_is_miniaod = settings.is_miniaod, nfirst = 1)
+remove_output_module(process)
 
-process.load('JMTucker.MFVNeutralino.SkimmedTracks_cfi')
-process.mfvSkimmedTracks.min_pt = 1
-process.mfvSkimmedTracks.min_dxybs = 0
-process.mfvSkimmedTracks.min_nsigmadxybs = 3
-process.mfvSkimmedTracks.tracks_src = 'mfvUnpackedCandidateTracks' if settings.is_miniaod else 'generalTracks'
-process.mfvSkimmedTracks.input_is_miniaod = settings.is_miniaod
-process.mfvSkimmedTracks.cut = True
+process.load('JMTucker.Tools.NtupleFiller_cff')
+process.load('JMTucker.Tools.WeightProducer_cfi')
 
-process.load('JMTucker.MFVNeutralino.V0Vertexer_cff')
-process.mfvV0Vertices.cut = True
+#process.mfvUnpackedCandidateTracks.debug = debug
+process.mfvUnpackedCandidateTracks.cut_level = 1
 
-if debug:
-    if settings.is_miniaod:
-        process.mfvUnpackedCandidateTracks.debug = True
-    process.mfvSkimmedTracks.debug = True
-    process.mfvV0Vertices.debug = True
+from JMTucker.MFVNeutralino.Vertexer_cfi import kvr_params
+process.mfvK0s = cms.EDAnalyzer('MFVK0Treer',
+                                process.jmtNtupleFillerMiniAOD if settings.is_miniaod else process.jmtNtupleFiller,
+                                kvr_params = kvr_params,
+                                debug = cms.untracked.bool(debug),
+                                )
 
-process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
-
-process.p = cms.Path(process.mfvEventFilterSequence * process.firstGoodPrimaryVertex * process.mfvV0Vertices * process.mfvTriggerFloats)
-
-if settings.is_mc and not settings.is_miniaod:
-    process.load('PhysicsTools.PatAlgos.slimming.slimmedAddPileupInfo_cfi')
-    process.p *= process.slimmedAddPileupInfo
-
-process.out.outputCommands = [
-    'drop *',
-    'keep *_mcStat_*_*',
-    'keep *_mfvSkimmedTracks_*_*',
-    'keep *_mfvV0Vertices_*_*',
-    'keep *_mfvTriggerFloats_*_*',
-    'keep *_offlineBeamSpot_*_*',
-    'keep *_slimmedAddPileupInfo_*_*',
-    'keep *_firstGoodPrimaryVertex_*_*',
-    'keep *_TriggerResults_*_HLT', # for ZeroBias since I don't wanna mess with MFVTriggerFloats for it
-    ]
-
-if settings.zerobias:
-    process.mfvTriggerFilter.HLTPaths.append('HLT_ZeroBias_v*') # what are the ZeroBias_part* paths?
+process.p = cms.Path(process.mfvEventFilterSequence * process.goodOfflinePrimaryVertices * process.mfvK0s)
 
 ReferencedTagsTaskAdder(process)('p')
 
@@ -75,16 +47,13 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools import Samples
 
     if year == 2017:
-        samples = Samples.data_samples_2017 + Samples.ttbar_samples_2017 + Samples.qcd_samples_2017
-        #samples += [s for s in Samples.auxiliary_data_samples_2017 if s.name.startswith('ZeroBias')]
+        samples = Samples.data_samples_2017 + Samples.qcd_samples_2017
     elif year == 2018:
-        samples = Samples.data_samples_2018
-        #samples += [s for s in Samples.auxiliary_data_samples_2018 if s.name.startswith('ZeroBias')]
+        samples = Samples.data_samples_2018 + Samples.qcd_samples_2017
 
-    #samples = [s for s in samples if s.has_dataset(dataset)]
-    set_splitting(samples, dataset, 'ntuple')
+    set_splitting(samples, dataset, 'default', json_path('ana_2017p8.json'), 16)
 
-    ms = MetaSubmitter('V0Ntuple' + version, dataset=dataset)
-    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, zerobias_modifier)
+    ms = MetaSubmitter('K0Ntuple' + version, dataset=dataset)
+    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier())
     ms.condor.stageout_files = 'all'
     ms.submit(samples)

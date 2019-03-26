@@ -186,6 +186,7 @@ namespace jmt {
 
     float chi2dof(int i) const { return chi2(i) / ndof(i); }
     float rho(int i) const { return std::hypot(x(i), y(i)); }
+    TVector3 pos(int i) const { return TVector3(x(i), y(i), z(i)); }
 
   private:
     vfloat x_;           vfloat* p_x_;

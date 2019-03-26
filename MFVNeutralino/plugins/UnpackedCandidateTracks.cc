@@ -15,6 +15,7 @@ private:
   const edm::EDGetTokenT<pat::PackedCandidateCollection> packed_candidates_token;
   const bool add_lost_candidates;
   const edm::EDGetTokenT<pat::PackedCandidateCollection> lost_candidates_token;
+  const int cut_level;
   const bool skip_weirdos;
   const bool debug;
 
@@ -39,7 +40,7 @@ private:
           u.i == 0x3cd24697 ||  // 0.0256684255
           u.i == 0x3dfc7c28 ||  // 0.1232836843
           u.i == 0x3e948f67;    // 0.2901565731
-        if (debug) printf("(weirdo check %i %i %i %i 0x%08x %.10g) ", weirdo, pass_tk(tk,false,false), pass_tk(tk,true,false), pass_tk(tk,true,true), u.i, u.f);
+        if (debug) printf("(weirdo check %i %i %i %i 0x%08x %.10g) ", weirdo, pass_tk(tk,true,false,false), pass_tk(tk,true,true,false), pass_tk(tk,true,true,true), u.i, u.f);
         if (skip_weirdos && weirdo) return false;
       }
       return true;
@@ -47,20 +48,22 @@ private:
     return false;
   }
 
-  bool pass_tk(const reco::Track& tk, bool req_min_r=true, bool req_nsigmadxy=true) const {
+
+  bool pass_tk(const reco::Track& tk, bool req_base, bool req_min_r, bool req_nsigmadxy) const {
     return
-      tk.pt() > 1 &&
-      tk.hitPattern().pixelLayersWithMeasurement() >= 2 &&
-      tk.hitPattern().stripLayersWithMeasurement() >= 6 &&
+      (!req_base || (tk.pt() >= 1 && tk.hitPattern().pixelLayersWithMeasurement() >= 2 && tk.hitPattern().stripLayersWithMeasurement() >= 6)) &&
       (!req_min_r || tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1)) &&
       (!req_nsigmadxy || fabs(tk.dxy() / tk.dxyError()) > 4);
   }
+
+  bool pass_tk(const reco::Track& tk) const { return pass_tk(tk, cut_level >= 0, cut_level >= 1, cut_level >= 2); }
 };
 
 MFVUnpackedCandidateTracks::MFVUnpackedCandidateTracks(const edm::ParameterSet& cfg)
   : packed_candidates_token(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("packed_candidates_src"))),
     add_lost_candidates(cfg.getParameter<bool>("add_lost_candidates")),
     lost_candidates_token(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("lost_candidates_src"))),
+    cut_level(cfg.getParameter<int>("cut_level")),
     skip_weirdos(cfg.getParameter<bool>("skip_weirdos")),
     debug(cfg.getUntrackedParameter<bool>("debug", false))
 {
@@ -89,14 +92,13 @@ void MFVUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetu
 
     if (pass_cand(cand)) {
       const reco::Track& tk = cand.pseudoTrack();
+      if (debug) debug_tk(tk, "", tracks->size());
 
-      if (debug) {
-        debug_tk(tk, "", tracks->size());
-        if (pass_tk(tk)) ++ntkpass;
+      if (pass_tk(tk)) {
+        ++ntkpass;
+        tracks->push_back(tk);
+        tracks_map->insert(reco::CandidatePtr(packed_candidates, i), reco::TrackRef(h_output_tracks, tracks->size() - 1));
       }
-
-      tracks->push_back(tk);
-      tracks_map->insert(reco::CandidatePtr(packed_candidates, i), reco::TrackRef(h_output_tracks, tracks->size() - 1));
     }
 
     if (debug) std::cout << "\n";
@@ -111,18 +113,18 @@ void MFVUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetu
 
     if (pass_cand(cand)) {
       const reco::Track& tk = cand.pseudoTrack();
+      if (debug) debug_tk(tk, "lost", lost_tracks->size());
 
-      if (debug) {
-        debug_tk(tk, "lost", lost_tracks->size());
-        if (pass_tk(tk)) ++nlosttkpass;
+      if (pass_tk(tk)) {
+        ++nlosttkpass;
+
+        if (add_lost_candidates) {
+          tracks->push_back(tk);
+          tracks_map->insert(reco::CandidatePtr(lost_candidates, i), reco::TrackRef(h_output_tracks, tracks->size() - 1));
+        }
+
+        lost_tracks->push_back(tk);
       }
-
-      if (add_lost_candidates) {
-        tracks->push_back(tk);
-        tracks_map->insert(reco::CandidatePtr(lost_candidates, i), reco::TrackRef(h_output_tracks, tracks->size() - 1));
-      }
-
-      lost_tracks->push_back(tk);
     }
 
     if (debug) std::cout << "\n";

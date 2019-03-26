@@ -10,8 +10,8 @@ settings.event_filter = 'jets only novtx'
 
 version = settings.version + 'v2'
 
-cfgs = named_product(njets = [2,3],
-                     nbjets = [0,1,2],
+cfgs = named_product(njets = [2],
+                     nbjets = [0],
                      nsigmadxy = [4.0],
                      angle = [0.2], #, 0.1, 0.3],
                      )
@@ -29,8 +29,7 @@ file_event_from_argv(process)
 
 ####
 
-del process.out
-del process.outp
+remove_output_module(process)
 
 if settings.is_miniaod:
     from JMTucker.Tools.NtupleFiller_cff import jmtNtupleFillerMiniAOD as jmtNtupleFiller

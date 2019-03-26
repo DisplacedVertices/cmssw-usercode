@@ -302,3 +302,7 @@ def signals_no_event_filter_modifier(sample):
     else:
         to_replace = []
     return [], to_replace
+
+def remove_output_module(process):
+    del process.out
+    del process.outp

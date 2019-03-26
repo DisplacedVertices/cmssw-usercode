@@ -254,6 +254,25 @@ namespace mfv {
     VerticesSubNtuple vertices_;
     MovedTracksSubNtuple tm_;
   };
+
+  ////
+
+  class K0Ntuple : public jmt::TrackingAndJetsNtuple {
+  public:
+    K0Ntuple() { clear(); }
+    virtual void clear() { jmt::TrackingAndJetsNtuple::clear(); svs().clear(); refit_tks().clear(); }
+    virtual void write_to_tree(TTree* t) { jmt::TrackingAndJetsNtuple::write_to_tree(t); svs().write_to_tree(t); refit_tks().write_to_tree(t); }
+    virtual void read_from_tree(TTree* t) { jmt::TrackingAndJetsNtuple::read_from_tree(t); svs().read_from_tree(t); refit_tks().read_from_tree(t); }
+
+    jmt::SecondaryVerticesSubNtuple& svs() { return svs_; }
+    jmt::RefitTracksSubNtuple& refit_tks() { return refit_tks_; }
+    const jmt::SecondaryVerticesSubNtuple& svs() const { return svs_; }
+    const jmt::RefitTracksSubNtuple& refit_tks() const { return refit_tks_; }
+
+  private:
+    jmt::SecondaryVerticesSubNtuple svs_;
+    jmt::RefitTracksSubNtuple refit_tks_;
+  };
 }
 
 #endif
