@@ -1,4 +1,4 @@
-SOURCES       = TrackingTree.cc utils.cc
+SOURCES       = Ntuple.cc utils.cc
 INCLUDES      = $(patsubst %.cc, %.h, $(SOURCES))
 OBJECTS       = $(patsubst %.cc, bin/%.o, $(SOURCES))
 ROOTCFLAGS    = $(shell root-config --cflags)
@@ -34,4 +34,4 @@ clean:
 	-rm -rf bin/ $(EXES)
 
 setup:
-	ln -s ../../src/TrackingTree.cc
+	ln -s ../../src/Ntuple.cc

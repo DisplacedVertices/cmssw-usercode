@@ -2,7 +2,7 @@
 #include "TRandom3.h"
 #include "TTree.h"
 #include "TVector2.h"
-#include "JMTucker/MFVNeutralino/interface/MovedTracksNtuple.h"
+#include "JMTucker/MFVNeutralino/interface/Ntuple.h"
 #include "utils.h"
 
 int main(int argc, char** argv) {
@@ -71,42 +71,29 @@ int main(int argc, char** argv) {
     if (t->LoadTree(j) < 0) break;
     if (t->GetEntry(j) <= 0) continue;
 
-    const bool pass_trig = nt.pass_hlt & 1;
-
-    if (nt.jetht < 1200 ||
-        nt.nalljets() < 4 ||
-        !pass_trig)
+    if (nt.jets().ht() < 1200 ||
+        nt.jets().nminpt() < 4)
       continue;
 
-    const double w = apply_weight ? nt.weight : 1.;
+    const double w = apply_weight ? nt.base().weight() : 1.;
     h_weight->Fill(w);
-    h_npu->Fill(nt.npu, w);
+    h_npu->Fill(nt.base().npu(), w);
     auto F1 = [&w](TH1* h, double v)            { h                    ->Fill(v,     w); };
     //auto F2 = [&w](TH1* h, double v, double v2) { dynamic_cast<TH2*>(h)->Fill(v, v2, w); };
 
-    const size_t n_raw_vtx = nt.p_vtxs_x->size();
+    const double lspdist3 = nt.gentruth().lspdist3();
 
-    const double lspdist2 = mag(nt.gen_lsp_decay[0] - nt.gen_lsp_decay[3],
-                                nt.gen_lsp_decay[1] - nt.gen_lsp_decay[4]);
-    const double lspdist3 = mag(nt.gen_lsp_decay[0] - nt.gen_lsp_decay[3],
-                                nt.gen_lsp_decay[1] - nt.gen_lsp_decay[4],
-                                nt.gen_lsp_decay[2] - nt.gen_lsp_decay[5]);
-    const double lspdistz = fabs(nt.gen_lsp_decay[2] - nt.gen_lsp_decay[5]);
-
-    //printf("lspdist2 %f dist3 %f distz %f n_raw_vtx %lu  weight %f\n", lspdist2, lspdist3, lspdistz, n_raw_vtx, w);
-
-    if (lspdist3 < min_lspdist3 ||
-        lspdistz < 0)
+    if (lspdist3 < min_lspdist3)
       continue;
 
-    for (int ilsp = 0; ilsp < 2; ++ilsp) {
-      const double gen_vx = nt.gen_lsp_decay[ilsp*3 + 0];
-      const double gen_vy = nt.gen_lsp_decay[ilsp*3 + 1]; 
-      const double gen_vz = nt.gen_lsp_decay[ilsp*3 + 2];
-      const double movedist2 = mag(gen_vx, gen_vy);
-      const double movedist3 = mag(gen_vx, gen_vy, gen_vz);
+    const size_t nvtx = nt.vertices().n();
+    const double lspdist2 = nt.gentruth().lspdist2();
+    const double lspdistz = nt.gentruth().lspdistz();
 
-      //printf("ilsp %i movedist2 %f dist3 %f\n", ilsp, movedist2, movedist3);
+    for (int ilsp = 0; ilsp < 2; ++ilsp) {
+      const TVector3 lspdecay = nt.gentruth().decay(ilsp);
+      const double movedist2 = lspdecay.Perp();
+      const double movedist3 = lspdecay.Mag();
 
       if (movedist2 < 0.03 ||
           movedist2 > 2.0)
@@ -118,12 +105,12 @@ int main(int argc, char** argv) {
         F1(nd(k_lspdistz) .den, lspdistz);
         F1(nd(k_movedist2).den, movedist2);
         F1(nd(k_movedist3).den, movedist3);
-        F1(nd(k_npv)      .den, nt.npv);
-        F1(nd(k_pvz)      .den, nt.pvz);
-        F1(nd(k_pvrho)    .den, mag(nt.pvx, nt.pvy));
-        F1(nd(k_pvntracks).den, nt.pvntracks);
-        F1(nd(k_pvscore)  .den, nt.pvscore);
-        F1(nd(k_ht)       .den, nt.jetht);
+        F1(nd(k_npv)      .den, nt.pvs().n());
+        F1(nd(k_pvz)      .den, nt.pvs().z(0));
+        F1(nd(k_pvrho)    .den, nt.pvs().rho(0));
+        F1(nd(k_pvntracks).den, nt.pvs().ntracks(0));
+        F1(nd(k_pvscore)  .den, nt.pvs().score(0));
+        F1(nd(k_ht)       .den, nt.jets().ht());
       }
 
       den += w;
@@ -135,31 +122,26 @@ int main(int argc, char** argv) {
       std::vector<int> first_vtx_to_pass(num_numdens, -1);
       auto set_it_if_first = [](int& to_set, int to_set_to) { if (to_set == -1) to_set = to_set_to; };
 
-      for (size_t ivtx = 0; ivtx < n_raw_vtx; ++ivtx) {
-        const double dist2move = mag(gen_vx - nt.p_vtxs_x->at(ivtx),
-                                     gen_vy - nt.p_vtxs_y->at(ivtx),
-                                     gen_vz - nt.p_vtxs_z->at(ivtx));
-        //printf("ivtx %lu dist2move %f\n", ivtx, dist2move);
+      for (size_t i = 0; i < nvtx; ++i) {
+        const double dist2move = (lspdecay - nt.vertices().pos(i)).Mag();
         if (dist2move > 0.0084)
           continue;
 
-        const bool pass_ntracks = nt.p_vtxs_ntracks->at(ivtx) >= 5;
-        const bool pass_bs2derr = nt.p_vtxs_bs2derr->at(ivtx) < 0.0025;
+        const bool pass_ntracks = nt.vertices().ntracks(i) >= 5;
+        const bool pass_bs2derr = nt.vertices().bs2derr(i) < 0.0025;
 
-        //printf("  ntracks %i pass? %i  bs2derr %f pass? %i\n", nt.p_vtxs_ntracks->at(ivtx), pass_ntracks, nt.p_vtxs_bs2derr->at(ivtx), pass_bs2derr);
-
-        if (1)                             { set_it_if_first(first_vtx_to_pass[0], ivtx); ++n_pass_nocuts;       }
-        if (pass_ntracks)                  { set_it_if_first(first_vtx_to_pass[1], ivtx); ++n_pass_ntracks;      }
-        if (pass_ntracks && pass_bs2derr)  { set_it_if_first(first_vtx_to_pass[2], ivtx); ++n_pass_all; }
+        if (1)                             { set_it_if_first(first_vtx_to_pass[0], i); ++n_pass_nocuts;  }
+        if (pass_ntracks)                  { set_it_if_first(first_vtx_to_pass[1], i); ++n_pass_ntracks; }
+        if (pass_ntracks && pass_bs2derr)  { set_it_if_first(first_vtx_to_pass[2], i); ++n_pass_all;     }
       }
 
-      for (int i = 0; i < num_numdens; ++i) {
-        int ivtx = first_vtx_to_pass[i];
-        if (ivtx != -1) {
-          h_vtxntracks      [i]->Fill(nt.p_vtxs_ntracks->at(ivtx));
-          h_vtxbs2derr      [i]->Fill(nt.p_vtxs_bs2derr->at(ivtx));
-	  h_vtxtkonlymass[i]->Fill(nt.p_vtxs_tkonlymass->at(ivtx));
-	  h_vtxs_mass[i]->Fill(nt.p_vtxs_mass->at(ivtx));
+      for (int in = 0; in < num_numdens; ++in) {
+        const int iv = first_vtx_to_pass[in];
+        if (iv != -1) {
+          h_vtxntracks   [in]->Fill(nt.vertices().ntracks(iv));
+          h_vtxbs2derr   [in]->Fill(nt.vertices().bs2derr(iv));
+	  h_vtxtkonlymass[in]->Fill(nt.vertices().tkonlymass(iv));
+	  h_vtxs_mass    [in]->Fill(nt.vertices().mass(iv));
         }
       }
 
@@ -167,27 +149,28 @@ int main(int argc, char** argv) {
       if (n_pass_ntracks) nums["ntracks"] += w;
       if (n_pass_all)     nums["all"]     += w;
 
-      const int passes[num_numdens] = {
+      const int npasses[num_numdens] = {
         n_pass_nocuts,
         n_pass_ntracks,
         n_pass_all
       };
 
-      for (int i = 0; i < num_numdens; ++i) {
-        if (passes[i]) {
-          numdens& nd = nds[i];
-          F1(nd(k_lspdist2) .num, lspdist2);
-          F1(nd(k_lspdist3) .num, lspdist3);
-          F1(nd(k_lspdistz) .num, lspdistz);
-          F1(nd(k_movedist2).num, movedist2);
-          F1(nd(k_movedist3).num, movedist3);
-          F1(nd(k_npv)      .num, nt.npv);
-          F1(nd(k_pvz)      .num, nt.pvz);
-          F1(nd(k_pvrho)    .num, mag(nt.pvx, nt.pvy));
-          F1(nd(k_pvntracks).num, nt.pvntracks);
-          F1(nd(k_pvscore)  .num, nt.pvscore);
-          F1(nd(k_ht)       .num, nt.jetht);
-        }
+      for (int in = 0; in < num_numdens; ++in) {
+        if (!npasses[in])
+          continue;
+
+        numdens& nd = nds[in];
+        F1(nd(k_lspdist2) .num, lspdist2);
+        F1(nd(k_lspdist3) .num, lspdist3);
+        F1(nd(k_lspdistz) .num, lspdistz);
+        F1(nd(k_movedist2).num, movedist2);
+        F1(nd(k_movedist3).num, movedist3);
+        F1(nd(k_npv)      .num, nt.pvs().n());
+        F1(nd(k_pvz)      .num, nt.pvs().z(0));
+        F1(nd(k_pvrho)    .num, nt.pvs().rho(0));
+        F1(nd(k_pvntracks).num, nt.pvs().ntracks(0));
+        F1(nd(k_pvscore)  .num, nt.pvs().score(0));
+        F1(nd(k_ht)       .num, nt.jets().ht());
       }
     }
   }

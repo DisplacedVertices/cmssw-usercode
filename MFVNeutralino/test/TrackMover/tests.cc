@@ -1,7 +1,7 @@
 #include "TFile.h"
 #include "TH1.h"
 #include "TTree.h"
-#include "JMTucker/MFVNeutralino/interface/MovedTracksNtuple.h"
+#include "JMTucker/MFVNeutralino/interface/Ntuple.h"
 #include "utils.h"
 #include <iostream>
 
@@ -34,9 +34,9 @@ int main(int argc, char** argv) {
       fflush(stdout);
     }
 
-    if (nt.npreseljets < njets_req || nt.npreselbjets < nbjets_req) {
+    if (nt.tm().npreseljets() < njets_req || nt.tm().npreselbjets() < nbjets_req) {
       ok = false;
-      std::cout << "bad event with " << +nt.npreseljets << "," << +nt.npreselbjets << ": " << nt.run << "," << nt.lumi << "," << nt.event << "\n";
+      std::cout << "bad event with " << +nt.tm().npreseljets() << "," << +nt.tm().npreselbjets() << ": " << nt.base().run() << "," << nt.base().lumi() << "," << nt.base().event() << "\n";
     }
 
     h_tau->Fill(nt.move_tau());

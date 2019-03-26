@@ -8,7 +8,7 @@ settings.is_mc = True
 settings.is_miniaod = True
 settings.event_filter = 'jets only novtx'
 
-version = settings.version + 'v1'
+version = settings.version + 'v2'
 
 cfgs = named_product(njets = [2,3],
                      nbjets = [0,1,2],
@@ -31,6 +31,15 @@ file_event_from_argv(process)
 
 del process.out
 del process.outp
+
+if settings.is_miniaod:
+    from JMTucker.Tools.NtupleFiller_cff import jmtNtupleFillerMiniAOD as jmtNtupleFiller
+    from JMTucker.MFVNeutralino.NtupleFiller_cff import mfvNtupleFillerMiniAOD as mfvNtupleFiller
+else:
+    from JMTucker.Tools.NtupleFiller_cff import jmtNtupleFiller
+    from JMTucker.MFVNeutralino.NtupleFiller_cff import mfvNtupleFiller
+
+process.load('JMTucker.Tools.WeightProducer_cfi')
 
 from JMTucker.MFVNeutralino.Vertexer_cff import modifiedVertexSequence
 from JMTucker.MFVNeutralino.JetTrackRefGetter_cff import mfvJetTrackRefGetter
@@ -81,8 +90,8 @@ for icfg, cfg in enumerate(cfgs):
         getattr(process, x + ex).jet_track_ref_getter.tracks_maps_srcs.append(cms.InputTag(tracks_name))
 
     tree = cms.EDAnalyzer('MFVMovedTracksTreer',
-                          event_src = cms.InputTag('mfvEvent'),
-                          weight_src = cms.InputTag('mfvWeight'),
+                          jmtNtupleFiller,
+                          mfvNtupleFiller,
                           sel_tracks_src = cms.InputTag('mfvVertexTracks' + ex, 'seed'),
                           mover_src = cms.string(tracks_name),
                           vertices_src = cms.InputTag(auxes_name),

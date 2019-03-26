@@ -1,7 +1,7 @@
 #ifndef JMTucker_Tools_TrackingTreer_utils
 #define JMTucker_Tools_TrackingTreer_utils
 
-#include "JMTucker/Tools/interface/TrackingTree.h"
+#include "JMTucker/Tools/interface/Ntuple.h"
 
 class TFile;
 class TTree;
@@ -13,7 +13,7 @@ void root_setup();
 struct file_and_tree {
   TFile* f;
   TTree* t;
-  TrackingTree nt;
+  jmt::TrackingNtuple nt;
   TFile* f_out;
 
   file_and_tree(const char* in_fn, const char* out_fn);

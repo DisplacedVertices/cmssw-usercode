@@ -1,4 +1,4 @@
-SOURCES       = BTagCalibrationStandalone.cc MovedTracksNtuple.cc utils.cc
+SOURCES       = BTagCalibrationStandalone.cc Ntuple.cc mfvNtuple.cc utils.cc
 INCLUDES      = $(patsubst %.cc, %.h, $(SOURCES))
 OBJECTS       = $(patsubst %.cc, bin/%.o, $(SOURCES))
 ROOTCFLAGS    = $(shell root-config --cflags)
@@ -39,6 +39,7 @@ clean:
 	-rm -rf bin/
 
 setup:
-	ln -sf ../../src/MovedTracksNtuple.cc
+	ln -sf ../../../Tools/src/Ntuple.cc
+	ln -sf ../../src/Ntuple.cc mfvNtuple.cc
 	ln -sf $(CMSSW_RELEASE_BASE)/src/CondTools/BTau/test/BTagCalibrationStandalone.cpp BTagCalibrationStandalone.cc
 	ln -sf $(CMSSW_RELEASE_BASE)/src/CondTools/BTau/test/BTagCalibrationStandalone.h BTagCalibrationStandalone.h

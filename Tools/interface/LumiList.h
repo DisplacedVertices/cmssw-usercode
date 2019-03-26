@@ -50,7 +50,7 @@ namespace jmt {
 
     template <typename T>
     bool contains(const T& t) const {
-      return contains(int(t.run), int(t.lumi));
+      return contains(int(t.run()), int(t.lumi()));
     }
 
     void dump(std::ostream& out) const {

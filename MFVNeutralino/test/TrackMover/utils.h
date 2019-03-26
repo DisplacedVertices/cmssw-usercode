@@ -4,7 +4,7 @@
 #include <cmath>
 #include <map>
 #include <string>
-#include "JMTucker/MFVNeutralino/interface/MovedTracksNtuple.h"
+#include "JMTucker/MFVNeutralino/interface/Ntuple.h"
 
 class TH1;
 class TFile;

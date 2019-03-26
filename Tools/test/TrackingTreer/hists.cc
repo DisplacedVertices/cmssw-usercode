@@ -10,7 +10,7 @@
 #include "TVector2.h"
 #include "JMTucker/Tools/interface/LumiList.h"
 #include "JMTucker/Tools/interface/PileupWeights.h"
-#include "JMTucker/Tools/interface/TrackingTree.h"
+#include "JMTucker/Tools/interface/Ntuple.h"
 #include "utils.h"
 
 int main(int argc, char** argv) {
@@ -60,10 +60,11 @@ int main(int argc, char** argv) {
   jmt::PileupWeights puwhelper(pu_weights);
 
   file_and_tree fat(in_fn.c_str(), out_fn.c_str());
-  TrackingTree& nt = fat.nt;
   fat.t->GetEntry(0);
+  const jmt::TrackingNtuple& nt = fat.nt;
+  const jmt::TracksSubNtuple& ntt = nt.tracks();
 
-  const bool is_mc = nt.run() == 1;
+  const bool is_mc = nt.base().run() == 1;
 
   fat.f_out->mkdir("mfvWeight")->cd();
   TH1D* h_sums = (TH1D*)fat.f->Get("mcStat/h_sums")->Clone();
@@ -206,46 +207,39 @@ int main(int argc, char** argv) {
       fflush(stdout);
     }
 
-    if (!is_mc && good_ll.get() && !good_ll->contains(nt.run(), nt.lumi()))
+    if (!is_mc && good_ll.get() && !good_ll->contains(nt.base()))
       continue;
 
     double w = 1;
 
-    h_npu->Fill(nt.npu());
+    h_npu->Fill(nt.base().npu());
 
     if (is_mc && puwhelper.valid())
-      w *= puwhelper.w(nt.npu());
+      w *= puwhelper.w(nt.base().npu());
 
-    h_npv->Fill(nt.npvs(), w);
+    h_npv->Fill(nt.pvs().n(), w);
 
-    const double bsx = nt.bs_x();
-    const double bsy = nt.bs_y();
-    const double bsz = nt.bs_z();
+    h_bsx->Fill(nt.bs().x(), w);
+    h_bsy->Fill(nt.bs().y(), w);
+    h_bsz->Fill(nt.bs().z(), w);
+    h_bsdxdz->Fill(nt.bs().dxdz(), w);
+    h_bsdydz->Fill(nt.bs().dydz(), w);
+    h_bsy_v_bsx->Fill(nt.bs().x(), nt.bs().y(), w);
 
-    h_bsx->Fill(bsx, w);
-    h_bsy->Fill(bsy, w);
-    h_bsz->Fill(bsz, w);
-    h_bsdxdz->Fill(nt.bs_dxdz(), w);
-    h_bsdydz->Fill(nt.bs_dydz(), w);
-    h_bsy_v_bsx->Fill(bsx, bsy, w);
+    h_pvbsx->Fill(nt.pvs().x(0) - nt.bs().x(nt.pvs().z(0)), w);
+    h_pvbsy->Fill(nt.pvs().y(0) - nt.bs().y(nt.pvs().z(0)), w);
+    h_pvbsz->Fill(nt.pvs().z(0) - nt.bs().z(),              w);
 
-    const double pvbsx = nt.pv_x(0) - bsx;
-    const double pvbsy = nt.pv_y(0) - bsy;
-    const double pvbsz = nt.pv_z(0) - bsz;
-    h_pvbsx->Fill(pvbsx, w);
-    h_pvbsy->Fill(pvbsy, w);
-    h_pvbsz->Fill(pvbsz, w);
-
-    h_pvy_v_pvx->Fill(nt.pv_x(0), nt.pv_y(0), w);
+    h_pvy_v_pvx->Fill(nt.pvs().x(0), nt.pvs().y(0), w);
 
     int ntracks[max_tk_type] = {0};
 
-    for (int itk = 0, itke = nt.ntks(); itk < itke; ++itk) {
-      const double pt = nt.tk_pt(itk);
-      const int min_r = nt.tk_min_r(itk);
-      const int npxlayers = nt.tk_npxlayers(itk);
-      const int nstlayers = nt.tk_nstlayers(itk);
-      const double nsigmadxy = fabs(nt.tk_dxybs(itk)) / nt.tk_err_dxy(itk);
+    for (int itk = 0, itke = ntt.n(); itk < itke; ++itk) {
+      const double pt = ntt.pt(itk);
+      const int min_r = ntt.min_r(itk);
+      const int npxlayers = ntt.npxlayers(itk);
+      const int nstlayers = ntt.nstlayers(itk);
+      const double nsigmadxy = ntt.nsigmadxybs(itk);
 
       const bool nm1[5] = {
 	pt > 1,
@@ -259,58 +253,60 @@ int main(int argc, char** argv) {
       const bool seed = sel && nm1[4];
       const bool tk_ok[max_tk_type] = { true, sel, seed };
 
-      //const bool high_purity = npxlayers == 4 && fabs(nt.tk_eta(itk)) < 0.8 && fabs(nt.tk_dzpv(itk) - pvbsz) < 10;
-      //const bool etalt1p5 = fabs(nt.tk_eta(itk)) < 1.5;
+      //const bool high_purity = npxlayers == 4 && fabs(ntt.eta(itk)) < 0.8 && fabs(ntt.dz(itk)) < 10;
+      //const bool etalt1p5 = fabs(ntt.eta(itk)) < 1.5;
 
       for (int i = 0; i < max_tk_type; ++i) {
 	if (!tk_ok[i]) continue;
 	++ntracks[i];
 
+        // JMTBAD separate plots for dxy, dxybs, dxypv, dz, dzpv
+
 	h_tracks_pt[i]->Fill(pt, w);
-	h_tracks_eta[i]->Fill(nt.tk_eta(itk), w);
-	h_tracks_phi[i]->Fill(nt.tk_phi(itk), w);
-	h_tracks_dxy[i]->Fill(nt.tk_dxybs(itk), w);
-	h_tracks_absdxy[i]->Fill(fabs(nt.tk_dxybs(itk)), w);
-	h_tracks_dz[i]->Fill(nt.tk_dzpv(itk) - pvbsz, w);
-	h_tracks_dzpv[i]->Fill(nt.tk_dzpv(itk), w);
-	h_tracks_nhits[i]->Fill(nt.tk_nhits(itk), w);
-	h_tracks_npxhits[i]->Fill(nt.tk_npxhits(itk), w);
-	h_tracks_nsthits[i]->Fill(nt.tk_nsthits(itk), w);
+	h_tracks_eta[i]->Fill(ntt.eta(itk), w);
+	h_tracks_phi[i]->Fill(ntt.phi(itk), w);
+	h_tracks_dxy[i]->Fill(ntt.dxybs(itk), w);
+	h_tracks_absdxy[i]->Fill(fabs(ntt.dxybs(itk)), w);
+	h_tracks_dz[i]->Fill(ntt.dz(itk), w);
+	h_tracks_dzpv[i]->Fill(ntt.dzpv(itk), w);
+	h_tracks_nhits[i]->Fill(ntt.nhits(itk), w);
+	h_tracks_npxhits[i]->Fill(ntt.npxhits(itk), w);
+	h_tracks_nsthits[i]->Fill(ntt.nsthits(itk), w);
 	h_tracks_min_r[i]->Fill(min_r, w);
 	h_tracks_npxlayers[i]->Fill(npxlayers, w);
 	h_tracks_nstlayers[i]->Fill(nstlayers, w);
 	h_tracks_nsigmadxy[i]->Fill(nsigmadxy, w);
 
-	h_tracks_dxyerr[i]->Fill(nt.tk_err_dxy(itk), w);
-	h_tracks_dzerr[i]->Fill(nt.tk_err_dz(itk), w);
-	h_tracks_pterr[i]->Fill(nt.tk_err_pt(itk), w);
-	h_tracks_phierr[i]->Fill(nt.tk_err_phi(itk), w);
-	h_tracks_etaerr[i]->Fill(nt.tk_err_eta(itk), w);
+	h_tracks_dxyerr[i]->Fill(ntt.err_dxy(itk), w);
+	h_tracks_dzerr[i]->Fill(ntt.err_dz(itk), w);
+	h_tracks_pterr[i]->Fill(ntt.err_pt(itk), w);
+	h_tracks_phierr[i]->Fill(ntt.err_phi(itk), w);
+	h_tracks_etaerr[i]->Fill(ntt.err_eta(itk), w);
 
-	h_tracks_nstlayers_v_eta[i]->Fill(nt.tk_eta(itk), nstlayers, w);
-	h_tracks_dxy_v_eta[i]->Fill(nt.tk_eta(itk), nt.tk_dxybs(itk), w);
-	h_tracks_dxy_v_phi[i]->Fill(nt.tk_phi(itk), nt.tk_dxybs(itk), w);
-	h_tracks_dxy_v_nstlayers[i]->Fill(nstlayers, nt.tk_dxybs(itk), w);
-	h_tracks_nstlayers_v_phi[i]->Fill(nt.tk_phi(itk), nstlayers, w);
-	h_tracks_npxlayers_v_phi[i]->Fill(nt.tk_phi(itk), npxlayers, w);
-	h_tracks_nhits_v_phi[i]->Fill(nt.tk_phi(itk), nt.tk_nhits(itk), w);
-	h_tracks_npxhits_v_phi[i]->Fill(nt.tk_phi(itk), nt.tk_npxhits(itk), w);
-	h_tracks_nsthits_v_phi[i]->Fill(nt.tk_phi(itk), nt.tk_nsthits(itk), w);
+	h_tracks_nstlayers_v_eta[i]->Fill(ntt.eta(itk), nstlayers, w);
+	h_tracks_dxy_v_eta[i]->Fill(ntt.eta(itk), ntt.dxybs(itk), w);
+	h_tracks_dxy_v_phi[i]->Fill(ntt.phi(itk), ntt.dxybs(itk), w);
+	h_tracks_dxy_v_nstlayers[i]->Fill(nstlayers, ntt.dxybs(itk), w);
+	h_tracks_nstlayers_v_phi[i]->Fill(ntt.phi(itk), nstlayers, w);
+	h_tracks_npxlayers_v_phi[i]->Fill(ntt.phi(itk), npxlayers, w);
+	h_tracks_nhits_v_phi[i]->Fill(ntt.phi(itk), ntt.nhits(itk), w);
+	h_tracks_npxhits_v_phi[i]->Fill(ntt.phi(itk), ntt.npxhits(itk), w);
+	h_tracks_nsthits_v_phi[i]->Fill(ntt.phi(itk), ntt.nsthits(itk), w);
 
-	h_tracks_nsigmadxy_v_eta[i]->Fill(nt.tk_eta(itk), nsigmadxy, w);
+	h_tracks_nsigmadxy_v_eta[i]->Fill(ntt.eta(itk), nsigmadxy, w);
 	h_tracks_nsigmadxy_v_nstlayers[i]->Fill(nstlayers, nsigmadxy, w);
-	h_tracks_nsigmadxy_v_dxy[i]->Fill(nt.tk_dxybs(itk), nsigmadxy, w);
-	h_tracks_nsigmadxy_v_dxyerr[i]->Fill(nt.tk_err_dxy(itk), nsigmadxy, w);
+	h_tracks_nsigmadxy_v_dxy[i]->Fill(ntt.dxybs(itk), nsigmadxy, w);
+	h_tracks_nsigmadxy_v_dxyerr[i]->Fill(ntt.err_dxy(itk), nsigmadxy, w);
 
-	h_tracks_dxyerr_v_pt[i]->Fill(pt, nt.tk_err_dxy(itk), w);
-	h_tracks_dxyerr_v_eta[i]->Fill(nt.tk_eta(itk), nt.tk_err_dxy(itk), w);
-	h_tracks_dxyerr_v_phi[i]->Fill(nt.tk_phi(itk), nt.tk_err_dxy(itk), w);
-	h_tracks_dxyerr_v_dxy[i]->Fill(nt.tk_dxybs(itk), nt.tk_err_dxy(itk), w);
-	h_tracks_dxyerr_v_dz[i]->Fill(nt.tk_dzpv(itk) - pvbsz, nt.tk_err_dxy(itk), w);
-	h_tracks_dxyerr_v_npxlayers[i]->Fill(npxlayers, nt.tk_err_dxy(itk), w);
-	h_tracks_dxyerr_v_nstlayers[i]->Fill(nstlayers, nt.tk_err_dxy(itk), w);
+	h_tracks_dxyerr_v_pt[i]->Fill(pt, ntt.err_dxy(itk), w);
+	h_tracks_dxyerr_v_eta[i]->Fill(ntt.eta(itk), ntt.err_dxy(itk), w);
+	h_tracks_dxyerr_v_phi[i]->Fill(ntt.phi(itk), ntt.err_dxy(itk), w);
+	h_tracks_dxyerr_v_dxy[i]->Fill(ntt.dxybs(itk), ntt.err_dxy(itk), w);
+	h_tracks_dxyerr_v_dz[i]->Fill(ntt.dz(itk), ntt.err_dxy(itk), w);
+	h_tracks_dxyerr_v_npxlayers[i]->Fill(npxlayers, ntt.err_dxy(itk), w);
+	h_tracks_dxyerr_v_nstlayers[i]->Fill(nstlayers, ntt.err_dxy(itk), w);
 
-	h_tracks_eta_v_phi[i]->Fill(nt.tk_phi(itk), nt.tk_eta(itk), w);
+	h_tracks_eta_v_phi[i]->Fill(ntt.phi(itk), ntt.eta(itk), w);
       }
     }
     for (int i = 0; i < max_tk_type; ++i) {

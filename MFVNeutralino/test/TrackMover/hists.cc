@@ -9,7 +9,7 @@
 #include "TVector3.h"
 #include "JMTucker/Tools/interface/LumiList.h"
 #include "JMTucker/Tools/interface/PileupWeights.h"
-#include "JMTucker/MFVNeutralino/interface/MovedTracksNtuple.h"
+#include "JMTucker/MFVNeutralino/interface/Ntuple.h"
 #include "BTagSFHelper.h"
 #include "utils.h"
 
@@ -103,7 +103,7 @@ int main(int argc, char** argv) {
   mfv::MovedTracksNtuple& nt = fat.nt;
   t->GetEntry(0);
 
-  const bool is_mc = nt.run == 1;
+  const bool is_mc = nt.base().run() == 1;
   std::unique_ptr<jmt::LumiList> good_ll;
   if (!is_mc && json != "") good_ll.reset(new jmt::LumiList(json));
 
@@ -133,7 +133,7 @@ int main(int argc, char** argv) {
     numdens("all")
   };
 
-  enum { k_movedist2, k_movedist3, k_movevectoreta, k_npv, k_pvx, k_pvy, k_pvz, k_pvrho, k_pvntracks, k_pvscore, k_ht, k_ntracks, k_nmovedtracks, k_nseltracks, k_npreseljets, k_npreselbjets, k_jeti01, k_jetpt01, k_jetsume, k_jetdrmax, k_jetdravg, k_jeta3dmax, k_jetsumntracks, k_jetntracks01, k_jetnseltracks01, k_nvtxs };
+  enum { k_movedist2, k_movedist3, k_movevectoreta, k_npv, k_pvx, k_pvy, k_pvz, k_pvrho, k_pvntracks, k_pvscore, k_ht, k_nalltracks, k_nmovedtracks, k_nseedtracks, k_npreseljets, k_npreselbjets, k_jeti01, k_jetpt01, k_jetsume, k_jetdrmax, k_jetdravg, k_jeta3dmax, k_jetsumntracks, k_jetntracks01, k_jetnseedtracks01, k_nvtx };
   for (numdens& nd : nds) {
     nd.book(k_movedist2, "movedist2", ";movement 2-dist;events/0.01 cm", 200, 0, 2);
     nd.book(k_movedist3, "movedist3", ";movement 3-dist;events/0.01 cm", 200, 0, 2);
@@ -146,9 +146,9 @@ int main(int argc, char** argv) {
     nd.book(k_pvntracks, "pvntracks", ";PV # tracks;events/2", 200, 0, 400);
     nd.book(k_pvscore, "pvscore", ";PV #Sigma p_{T}^{2} (GeV^{2});events/200 GeV^{2}", 200, 0, 40000);
     nd.book(k_ht, "ht", ";H_{T} (GeV);events/50 GeV", 50, 0, 2500);
-    nd.book(k_ntracks, "ntracks", ";# tracks;events/10", 200, 0, 2000);
+    nd.book(k_nalltracks, "nalltracks", ";# all tracks;events/10", 200, 0, 2000);
     nd.book(k_nmovedtracks, "nmovedtracks", ";# moved tracks;events/2", 120, 0, 120);
-    nd.book(k_nseltracks, "nseltracks", ";# selected tracks;events", 80, 0, 80);
+    nd.book(k_nseedtracks, "nseedtracks", ";# selected tracks;events", 80, 0, 80);
     nd.book(k_npreseljets, "npreseljets", ";# preselected jets;events/1", 20, 0, 20);
     nd.book(k_npreselbjets, "npreselbjets", ";# preselected b jets;events/1", 20, 0, 20);
     nd.book(k_jeti01, "jeti01", ";jet i 0 (GeV);jet i 1 (GeV);events", 15, 0, 15, 15, 0, 15);
@@ -159,8 +159,8 @@ int main(int argc, char** argv) {
     nd.book(k_jeta3dmax, "jeta3dmax", ";max 3D angle between jets;events/0.05", 63, 0, M_PI);
     nd.book(k_jetsumntracks, "jetsumntracks", ";#Sigma jet # tracks;events/5", 200, 0, 1000);
     nd.book(k_jetntracks01, "jetntracks01", ";jet # tracks 0;jet # tracks 1", 50, 0, 50, 50, 0, 50);
-    nd.book(k_jetnseltracks01, "jetnseltracks01", ";jet # sel tracks 0;jet # sel tracks 1", 50, 0, 50, 50, 0, 50);
-    nd.book(k_nvtxs, "nvtxs", ";number of vertices;events/1", 8, 0, 8);
+    nd.book(k_jetnseedtracks01, "jetnseedtracks01", ";jet # sel tracks 0;jet # sel tracks 1", 50, 0, 50, 50, 0, 50);
+    nd.book(k_nvtx, "nvtx", ";number of vertices;events/1", 8, 0, 8);
   }
 
   // JMTBAD some (all?) of these should be numdens
@@ -168,20 +168,20 @@ int main(int argc, char** argv) {
   TH1D* h_vtxntracks[num_numdens] = {0};
   TH1D* h_vtxbs2derr[num_numdens] = {0};
   TH1D* h_vtxtkonlymass[num_numdens] = {0};
-  TH1D* h_vtxs_mass[num_numdens] = {0};
+  TH1D* h_vtxmass[num_numdens] = {0};
   TH1D* h_vtxanglemax[num_numdens] = {0};
   TH1D* h_vtxphi[num_numdens] = {0};
-  TH1D* h_vtxtheta[num_numdens] = {0};
+  TH1D* h_vtxeta[num_numdens] = {0};
   TH1D* h_vtxpt[num_numdens] = {0};
   TH2D* h_vtxbs2derr_v_vtxntracks[num_numdens] = {0};
   TH2D* h_vtxbs2derr_v_vtxtkonlymass[num_numdens] = {0};
   TH2D* h_vtxbs2derr_v_vtxanglemax[num_numdens] = {0};
   TH2D* h_vtxbs2derr_v_vtxphi[num_numdens] = {0};
-  TH2D* h_vtxbs2derr_v_vtxtheta[num_numdens] = {0};
+  TH2D* h_vtxbs2derr_v_vtxeta[num_numdens] = {0};
   TH2D* h_vtxbs2derr_v_vtxpt[num_numdens] = {0};
   TH2D* h_vtxbs2derr_v_vtxdbv[num_numdens] = {0};
   TH2D* h_vtxbs2derr_v_etamovevec[num_numdens] = {0};
-  TH2D* h_vtxbs2derr_v_tksdxyerr[num_numdens] = {0};
+  TH2D* h_vtxbs2derr_v_maxtkerrdxy[num_numdens] = {0};
 
   TH1D* h_tks_pt[num_numdens] = {0};
   TH1D* h_tks_eta[num_numdens] = {0};
@@ -196,7 +196,6 @@ int main(int argc, char** argv) {
   TH1D* h_tks_nsigmadxy[num_numdens] = {0};
   TH1D* h_tks_npxlayers[num_numdens] = {0};
   TH1D* h_tks_nstlayers[num_numdens] = {0};
-  TH1D* h_tks_vtx[num_numdens] = {0};
 
   TH1D* h_vtx_tks_pt[num_numdens] = {0};
   TH1D* h_vtx_tks_eta[num_numdens] = {0};
@@ -211,7 +210,6 @@ int main(int argc, char** argv) {
   TH1D* h_vtx_tks_nsigmadxy[num_numdens] = {0};
   TH1D* h_vtx_tks_npxlayers[num_numdens] = {0};
   TH1D* h_vtx_tks_nstlayers[num_numdens] = {0};
-  TH1D* h_vtx_tks_vtx[num_numdens] = {0};
 
   TH1D* h_vtx_tks_nomove_pt[num_numdens] = {0};
   TH1D* h_vtx_tks_nomove_eta[num_numdens] = {0};
@@ -226,7 +224,6 @@ int main(int argc, char** argv) {
   TH1D* h_vtx_tks_nomove_nsigmadxy[num_numdens] = {0};
   TH1D* h_vtx_tks_nomove_npxlayers[num_numdens] = {0};
   TH1D* h_vtx_tks_nomove_nstlayers[num_numdens] = {0};
-  TH1D* h_vtx_tks_nomove_vtx[num_numdens] = {0};
   
   TH1D* h_moved_tks_pt[num_numdens] = {0};
   TH1D* h_moved_tks_eta[num_numdens] = {0};
@@ -241,7 +238,6 @@ int main(int argc, char** argv) {
   TH1D* h_moved_tks_nsigmadxy[num_numdens] = {0};
   TH1D* h_moved_tks_npxlayers[num_numdens] = {0};
   TH1D* h_moved_tks_nstlayers[num_numdens] = {0};
-  TH1D* h_moved_tks_vtx[num_numdens] = {0};
 
   TH1D* h_moved_nosel_tks_pt[num_numdens] = {0};
   TH1D* h_moved_nosel_tks_eta[num_numdens] = {0};
@@ -256,28 +252,27 @@ int main(int argc, char** argv) {
   TH1D* h_moved_nosel_tks_nsigmadxy[num_numdens] = {0};
   TH1D* h_moved_nosel_tks_npxlayers[num_numdens] = {0};
   TH1D* h_moved_nosel_tks_nstlayers[num_numdens] = {0};
-  TH1D* h_moved_nosel_tks_vtx[num_numdens] = {0};
 
   for (int i = 0; i < num_numdens; ++i) {
     h_vtxdbv[i] = new TH1D(TString::Format("h_%i_vtxdbv", i), ";d_{BV} of largest vertex (cm);events/50 #mum", 400, 0, 2);
     h_vtxntracks[i] = new TH1D(TString::Format("h_%i_vtxntracks", i), ";# tracks in largest vertex;events/1", 60, 0, 60);
     h_vtxbs2derr[i] = new TH1D(TString::Format("h_%i_vtxbs2derr", i), ";#sigma(d_{BV}) of largest vertex (cm);events/1 #mum", 500, 0, 0.05);
     h_vtxtkonlymass[i] = new TH1D(TString::Format("h_%i_vtxtkonlymass", i), ";track-only mass of largest vertex (GeV);events/1 GeV", 50, 0, 500);
-    h_vtxs_mass[i] = new TH1D(TString::Format("h_%i_vtxs_mass", i), ";track+jets mass of largest vertex (GeV);events/1 GeV", 100, 0, 5000);
+    h_vtxmass[i] = new TH1D(TString::Format("h_%i_vtxmass", i), ";track+jets mass of largest vertex (GeV);events/1 GeV", 100, 0, 5000);
     h_vtxanglemax[i] = new TH1D(TString::Format("h_%i_vtxanglemax", i), ";biggest angle between pairs of tracks in vertex;events/0.03", 100, 0, M_PI);
     h_vtxphi[i] = new TH1D(TString::Format("h_%i_vtxphi", i), ";tracks-plus-jets-by-ntracks #phi of largest vertex;events/0.06", 100, -M_PI, M_PI);
-    h_vtxtheta[i] = new TH1D(TString::Format("h_%i_vtxtheta", i), ";tracks-plus-jets-by-ntracks #theta of largest vertex; events/0.03", 100, 0, M_PI);
+    h_vtxeta[i] = new TH1D(TString::Format("h_%i_vtxeta", i), ";tracks-plus-jets-by-ntracks #theta of largest vertex; events/0.03", 100, 0, M_PI);
     h_vtxpt[i] = new TH1D(TString::Format("h_%i_vtxpt", i), ";tracks-plus-jets-by-ntracks p_{T} of largest vertex (GeV);events/1", 500, 0, 500);
 
     h_vtxbs2derr_v_vtxntracks[i] = new TH2D(TString::Format("h_%i_vtxbs2derr_v_vtxntracks", i), ";# tracks in largest vertex;#sigma(d_{BV}) of largest vertex (cm)", 60, 0, 60, 500, 0, 0.05);
     h_vtxbs2derr_v_vtxtkonlymass[i] = new TH2D(TString::Format("h_%i_vtxbs2derr_v_vtxtkonlymass", i), ";track-only mass of largest vertex (GeV);#sigma(d_{BV}) of largest vertex (cm)", 500, 0, 500, 500, 0, 0.05);
     h_vtxbs2derr_v_vtxanglemax[i] = new TH2D(TString::Format("h_%i_vtxbs2derr_v_vtxanglemax", i), ";biggest angle between pairs of tracks in vertex;#sigma(d_{BV}) of largest vertex (cm)", 100, 0, M_PI, 500, 0, 0.05);
     h_vtxbs2derr_v_vtxphi[i] = new TH2D(TString::Format("h_%i_vtxbs2derr_v_vtxphi", i), ";tracks-plus-jets-by-ntracks #phi of largest vertex;#sigma(d_{BV}) of largest vertex (cm)", 100, -M_PI, M_PI, 500, 0, 0.05);
-    h_vtxbs2derr_v_vtxtheta[i] = new TH2D(TString::Format("h_%i_vtxbs2derr_v_vtxtheta", i), ";tracks-plus-jets-by-ntracks #theta of largest vertex;#sigma(d_{BV}) of largest vertex (cm)", 100, 0, M_PI, 500, 0, 0.05);
+    h_vtxbs2derr_v_vtxeta[i] = new TH2D(TString::Format("h_%i_vtxbs2derr_v_vtxeta", i), ";tracks-plus-jets-by-ntracks #theta of largest vertex;#sigma(d_{BV}) of largest vertex (cm)", 100, 0, M_PI, 500, 0, 0.05);
     h_vtxbs2derr_v_vtxpt[i] = new TH2D(TString::Format("h_%i_vtxbs2derr_v_vtxpt", i), ";tracks-plus-jets-by-ntracks p_{T} of largest vertex (GeV);#sigma(d_{BV}) of largest vertex (cm)", 500, 0, 500, 500, 0, 0.05);
     h_vtxbs2derr_v_vtxdbv[i] = new TH2D(TString::Format("h_%i_vtxbs2derr_v_vtxdbv", i), ";d_{BV} of largest vertex (cm);#sigma(d_{BV}) of largest vertex (cm)", 400, 0, 2, 500, 0, 0.05);
     h_vtxbs2derr_v_etamovevec[i] = new TH2D(TString::Format("h_%i_vtxbs2derr_v_etamovevec", i), ";eta of move vector;#sigma(d_{BV}) of largest vertex (cm)", 100, -4, 4, 500, 0, 0.05);
-    h_vtxbs2derr_v_tksdxyerr[i] = new TH2D(TString::Format("h_%i_vtxbs2derr_v_tksdxyerr", i), ";track #sigma(dxy) in largest vertex (cm);#sigma(d_{BV}) of largest vertex (cm)", 100, 0, 0.1, 500, 0, 0.05);
+    h_vtxbs2derr_v_maxtkerrdxy[i] = new TH2D(TString::Format("h_%i_vtxbs2derr_v_maxtkerrdxy", i), ";largest track #sigma(dxy) in largest vertex (cm);#sigma(d_{BV}) of largest vertex (cm)", 100, 0, 0.1, 500, 0, 0.05);
 
     h_tks_pt[i] = new TH1D(TString::Format("h_%i_tks_pt", i), ";moved and selected track p_{T} (GeV);tracks/1 GeV", 200, 0, 200);
     h_tks_eta[i] = new TH1D(TString::Format("h_%i_tks_eta", i), ";moved and selected track #eta;tracks/0.16", 50, -4, 4);
@@ -292,7 +287,6 @@ int main(int argc, char** argv) {
     h_tks_nsigmadxy[i] = new TH1D(TString::Format("h_%i_tks_nsigmadxy", i), ";moved and selected track n#sigma(dxy);tracks/0.1", 200, 0, 20);
     h_tks_npxlayers[i] = new TH1D(TString::Format("h_%i_tks_npxlayers", i), ";moved and selected track npxlayers;tracks/1", 20, 0, 20);
     h_tks_nstlayers[i] = new TH1D(TString::Format("h_%i_tks_nstlayers", i), ";moved and selected track nstlayers;tracks/1", 20, 0, 20);
-    h_tks_vtx[i] = new TH1D(TString::Format("h_%i_tks_vtx", i), ";moved and selected track vertex-association index;tracks/1", 255, 0, 255);
 
     h_vtx_tks_pt[i] = new TH1D(TString::Format("h_%i_vtx_tks_pt", i), ";track p_{T} in largest vertex (GeV);tracks/1 GeV", 200, 0, 200);
     h_vtx_tks_eta[i] = new TH1D(TString::Format("h_%i_vtx_tks_eta", i), ";track #eta in largest vertex;tracks/0.16", 50, -4, 4);
@@ -307,7 +301,6 @@ int main(int argc, char** argv) {
     h_vtx_tks_nsigmadxy[i] = new TH1D(TString::Format("h_%i_vtx_tks_nsigmadxy", i), ";track n#sigma(dxy) in largest vertex;tracks/0.1", 200, 0, 20);
     h_vtx_tks_npxlayers[i] = new TH1D(TString::Format("h_%i_vtx_tks_npxlayers", i), ";track npxlayers in largest vertex;tracks/1", 20, 0, 20);
     h_vtx_tks_nstlayers[i] = new TH1D(TString::Format("h_%i_vtx_tks_nstlayers", i), ";track nstlayers in largest vertex;tracks/1", 20, 0, 20);
-    h_vtx_tks_vtx[i] = new TH1D(TString::Format("h_%i_vtx_tks_vtx", i), ";track vertex-association index in largest vertex;tracks/1", 255, 0, 255);
 
     h_vtx_tks_nomove_pt[i] = new TH1D(TString::Format("h_%i_vtx_tks_nomove_pt", i), ";track p_{T} in largest vertex but not moved (GeV);tracks/1 GeV", 200, 0, 200);
     h_vtx_tks_nomove_eta[i] = new TH1D(TString::Format("h_%i_vtx_tks_nomove_eta", i), ";track #eta in largest vertex but not moved;tracks/0.16", 50, -4, 4);
@@ -322,7 +315,6 @@ int main(int argc, char** argv) {
     h_vtx_tks_nomove_nsigmadxy[i] = new TH1D(TString::Format("h_%i_vtx_tks_nomove_nsigmadxy", i), ";track n#sigma(dxy) in largest vertex but not moved;tracks/0.1", 200, 0, 20);
     h_vtx_tks_nomove_npxlayers[i] = new TH1D(TString::Format("h_%i_vtx_tks_nomove_npxlayers", i), ";track npxlayers in largest vertex but not moved;tracks/1", 20, 0, 20);
     h_vtx_tks_nomove_nstlayers[i] = new TH1D(TString::Format("h_%i_vtx_tks_nomove_nstlayers", i), ";track nstlayers in largest vertex but not moved;tracks/1", 20, 0, 20);
-    h_vtx_tks_nomove_vtx[i] = new TH1D(TString::Format("h_%i_vtx_tks_nomove_vtx", i), ";track vertex-association index in largest vertex but not moved;tracks/1", 255, 0, 255);
 
     h_moved_tks_pt[i] = new TH1D(TString::Format("h_%i_moved_tks_pt", i), ";moved track p_{T} (GeV);tracks/1 GeV", 200, 0, 200);
     h_moved_tks_eta[i] = new TH1D(TString::Format("h_%i_moved_tks_eta", i), ";moved track #eta;tracks/0.16", 50, -4, 4);
@@ -337,7 +329,6 @@ int main(int argc, char** argv) {
     h_moved_tks_nsigmadxy[i] = new TH1D(TString::Format("h_%i_moved_tks_nsigmadxy", i), ";moved track n#sigma(dxy);tracks/0.1", 200, 0, 20);
     h_moved_tks_npxlayers[i] = new TH1D(TString::Format("h_%i_moved_tks_npxlayers", i), ";moved track npxlayers;tracks/1", 20, 0, 20);
     h_moved_tks_nstlayers[i] = new TH1D(TString::Format("h_%i_moved_tks_nstlayers", i), ";moved track nstlayers;tracks/1", 20, 0, 20);
-    h_moved_tks_vtx[i] = new TH1D(TString::Format("h_%i_moved_tks_vtx", i), ";moved track vertex-association index;tracks/1", 255, 0, 255);
 
     h_moved_nosel_tks_pt[i] = new TH1D(TString::Format("h_%i_moved_nosel_tks_pt", i), ";moved but not selected track p_{T} (GeV);tracks/1 GeV", 200, 0, 200);
     h_moved_nosel_tks_eta[i] = new TH1D(TString::Format("h_%i_moved_nosel_tks_eta", i), ";moved but not selected track #eta;tracks/0.16", 50, -4, 4);
@@ -352,10 +343,7 @@ int main(int argc, char** argv) {
     h_moved_nosel_tks_nsigmadxy[i] = new TH1D(TString::Format("h_%i_moved_nosel_tks_nsigmadxy", i), ";moved but not selected track n#sigma(dxy);tracks/0.1", 200, 0, 20);
     h_moved_nosel_tks_npxlayers[i] = new TH1D(TString::Format("h_%i_moved_nosel_tks_npxlayers", i), ";moved but not selected track npxlayers;tracks/1", 20, 0, 20);
     h_moved_nosel_tks_nstlayers[i] = new TH1D(TString::Format("h_%i_moved_nosel_tks_nstlayers", i), ";moved but not selected track nstlayers;tracks/1", 20, 0, 20);
-    h_moved_nosel_tks_vtx[i] = new TH1D(TString::Format("h_%i_moved_nosel_tks_vtx", i), ";moved but not selected track vertex-association index;tracks/1", 255, 0, 255);
   }
-
-  TH2D* h_diag_alljetsntrackseq = new TH2D("h_diag_alljetsntrackseq", ";jet p_{T} (GeV);ntracks saved - ntracks dR < 0.4", 50, 0, 2000, 20, -20, 20);
 
   double den = 0;
   std::map<std::string, double> nums;
@@ -389,7 +377,7 @@ int main(int argc, char** argv) {
       fflush(stdout);
     }
 
-    if (!is_mc && good_ll.get() && !good_ll->contains(nt))
+    if (!is_mc && good_ll.get() && !good_ll->contains(nt.base()))
       continue;
 
     ++notskipped;
@@ -404,20 +392,20 @@ int main(int argc, char** argv) {
     }
 
     if (is_mc && apply_weights) {
-      if (nt.weight < 0) ++nnegweight;
-      w *= nt.weight;
+      if (nt.base().weight() < 0) ++nnegweight;
+      w *= nt.base().weight();
 
       if (puwhelper.valid())
-        w *= puwhelper.w(nt.npu);
+        w *= puwhelper.w(nt.base().npu());
 
       if (btagsf_weights) {
         double p_mc = 1, p_data = 1;
 
-        for (size_t i = 0, ie = nt.nalljets(); i < ie; ++i) {
-          const double pt = (*nt.p_alljets_pt)[i];
-          const double eta = (*nt.p_alljets_eta)[i];
-          const bool is_tagged = (*nt.p_alljets_bdisc)[i] > 0.935; // what ever
-          const int hf = (*nt.p_alljets_hadronflavor)[i];
+        for (size_t i = 0, ie = nt.jets().n(); i < ie; ++i) {
+          const double pt = nt.jets().pt(i);
+          const double eta = nt.jets().eta(i);
+          const bool is_tagged = nt.jets().bdisc(i) > 0.935; // what ever
+          const int hf = nt.jets().genflavor(i);
 
           const double sf = btagsfhelper->scale_factor(BTagSFHelper::BH, BTagSFHelper::tight, hf, eta, pt).v;
           const double e = btagsfhelper->efficiency(hf, eta, pt).v;
@@ -443,14 +431,14 @@ int main(int argc, char** argv) {
           TH1D* hw = (TH1D*)extra_weights->Get(name.c_str());
           assert(hw);
           const double v =
-            name == "nocuts_npv_den" ? nt.npv :
-            name == "nocuts_pvz_den" ? nt.pvz :
-            name == "nocuts_pvx_den" ? nt.pvx :
-            name == "nocuts_pvy_den" ? nt.pvy :
-            name == "nocuts_ntracks_den" ? nt.ntracks :
-            name == "nocuts_npv_den_redo" ? nt.npv :
-            name == "nocuts_ht_den" ? nt.jetht :
-            name == "nocuts_pvntracks_den" ? nt.pvntracks :
+            name == "nocuts_npv_den" ? nt.pvs().n() :
+            name == "nocuts_pvz_den" ? nt.pvs().z(0) :
+            name == "nocuts_pvx_den" ? nt.pvs().x(0) :
+            name == "nocuts_pvy_den" ? nt.pvs().y(0) :
+            name == "nocuts_nalltracks_den" ? nt.tm().nalltracks() :
+            name == "nocuts_npv_den_redo" ? nt.pvs().n() :
+            name == "nocuts_ht_den" ? nt.jets().ht() :
+            name == "nocuts_pvndof_den" ? nt.pvs().ndof(0) :
             -1e99;
           assert(v > -1e98);
           const int bin = hw->FindBin(v);
@@ -460,13 +448,10 @@ int main(int argc, char** argv) {
       }
     }
 
-    const TVector3 move_vector = nt.move_vector();
+    const TVector3& move_vector = nt.move_vector();
     const double movedist2 = move_vector.Perp();
     const double movedist3 = move_vector.Mag();
     const double movevectoreta = move_vector.Eta();
-
-    const bool pass_trig = nt.pass_hlt & 1;
-
 
     double jet_sume = 0;
     double jet_drmax = 0;
@@ -476,85 +461,87 @@ int main(int argc, char** argv) {
     int jet_i_0 = -1, jet_i_1 = -1;
     double jet_pt_0 = 0, jet_pt_1 = 0;
     int jet_ntracks_0 = 0, jet_ntracks_1 = 0;
-    int jet_nseltracks_0 = 0, jet_nseltracks_1 = 0;
+    int jet_nseedtracks_0 = 0, jet_nseedtracks_1 = 0;
     size_t nmovedjets = 0;
-    for (size_t ijet = 0; ijet < nt.nalljets(); ++ijet) {
-      if (nt.p_alljets_moved->at(ijet)) {
-        ++nmovedjets;
-        jet_sume += nt.p_alljets_energy->at(ijet);
-        jet_sumntracks += nt.p_alljets_ntracks->at(ijet);
+    for (int i = 0, ie = nt.jets().n(); i < ie; ++i) {
+      if (!nt.jet_moved(i))
+        continue;
 
-        std::vector<int> ijet_tracks = nt.alljets_tracks(ijet);
-        h_diag_alljetsntrackseq->Fill(nt.p_alljets_pt->at(ijet), nt.p_alljets_ntracks->at(ijet) - ijet_tracks.size());
+      const auto i_p4 = nt.jets().p4(i);
+      const auto i_tracks = nt.tracks().tks_for_jet(i);
 
-        for (size_t jjet = ijet+1; jjet < nt.nalljets(); ++jjet) {
-          if (nt.p_alljets_moved->at(jjet)) {
-            const double dr = nt.alljets_p4(ijet).DeltaR(nt.alljets_p4(jjet));
-            const double a3d = nt.alljets_p4(ijet).Angle(nt.alljets_p4(jjet).Vect());
-            jet_dravg += dr;
-            if (dr > jet_drmax)
-              jet_drmax = dr;
+      ++nmovedjets;
+      jet_sume += nt.jets().energy(i);
+      jet_sumntracks += nt.jets().ntracks(i);
 
-            if (a3d > jet_a3dmax) {
-              std::vector<int> jjet_tracks = nt.alljets_tracks(jjet);
+      for (int j = i+1; j < ie; ++j) {
+        if (!nt.jet_moved(j))
+          continue;
 
-              const int ijet_nseltracks = std::count_if(ijet_tracks.begin(), ijet_tracks.end(), [&](const int k) { return nt.tks_sel(k); });
-              const int jjet_nseltracks = std::count_if(jjet_tracks.begin(), jjet_tracks.end(), [&](const int k) { return nt.tks_sel(k); });
+        const auto j_p4 = nt.jets().p4(j);
 
-              jet_a3dmax = a3d;
-              jet_i_0 = ijet;
-              jet_i_1 = jjet;
-              jet_pt_0 = std::max(nt.p_alljets_pt->at(ijet), nt.p_alljets_pt->at(jjet));
-              jet_pt_1 = std::min(nt.p_alljets_pt->at(ijet), nt.p_alljets_pt->at(jjet));
-              jet_ntracks_0 = std::max(nt.p_alljets_ntracks->at(ijet), nt.p_alljets_ntracks->at(jjet));
-              jet_ntracks_1 = std::min(nt.p_alljets_ntracks->at(ijet), nt.p_alljets_ntracks->at(jjet));
-              jet_nseltracks_0 = std::max(ijet_nseltracks, jjet_nseltracks);
-              jet_nseltracks_1 = std::min(ijet_nseltracks, jjet_nseltracks);
-            }
-          }
+        const double dr = i_p4.DeltaR(j_p4);
+        const double a3d = i_p4.Angle(j_p4.Vect());
+        jet_dravg += dr;
+        if (dr > jet_drmax)
+          jet_drmax = dr;
+
+        if (a3d > jet_a3dmax) {
+          const auto j_tracks = nt.tracks().tks_for_jet(j);
+
+          auto nps = [&nt](const int k) { return nt.tracks().pass_seed(k); };
+          const int i_nseedtracks = std::count_if(i_tracks.begin(), i_tracks.end(), nps);
+          const int j_nseedtracks = std::count_if(j_tracks.begin(), j_tracks.end(), nps);
+
+          jet_a3dmax = a3d;
+          jet_i_0 = i;
+          jet_i_1 = j;
+          jet_pt_0 = std::max(nt.jets().pt(i), nt.jets().pt(j));
+          jet_pt_1 = std::min(nt.jets().pt(i), nt.jets().pt(j));
+          jet_ntracks_0 = std::max(nt.jets().ntracks(i), nt.jets().ntracks(j));
+          jet_ntracks_1 = std::min(nt.jets().ntracks(i), nt.jets().ntracks(j));
+          jet_nseedtracks_0 = std::max(i_nseedtracks, j_nseedtracks);
+          jet_nseedtracks_1 = std::min(i_nseedtracks, j_nseedtracks);
         }
       }
     }
     jet_dravg /= nmovedjets * (nmovedjets - 1) / 2.;
 
 
-    int nseltracks = 0;
-    for (int itk = 0, itke = nt.ntks(); itk < itke; ++itk)
-      if (nt.tks_sel(itk))
-        ++nseltracks;
+    int nseedtracks = 0;
+    for (int i = 0, ie = nt.tracks().n(); i < ie; ++i)
+      if (nt.tracks().pass_seed(i))
+        ++nseedtracks;
 
 
-    const size_t n_raw_vtx = nt.p_vtxs_x->size();
-    std::vector<std::vector<int>> vtxs_tracks(n_raw_vtx);
-    std::vector<double> vtxs_anglemax(n_raw_vtx, 0);
+    const int nvtx = nt.vertices().n();
+    std::vector<double> vtxs_anglemax(nvtx, 0);
 
-    for (size_t i = 0; i < n_raw_vtx; ++i) {
-      vtxs_tracks[i] = nt.vtxs_tracks(i);
+    for (int i = 0; i < nvtx; ++i) {
+      const std::vector<int> tracks = nt.tracks().tks_for_sv(i);
+      const int ntracks = int(tracks.size());
+      assert(nt.vertices().ntracks(i) == ntracks);
 
-      for (int j = 0; j < (*nt.p_vtxs_ntracks)[i]; ++j) {
-        const int jtrk = vtxs_tracks[i][j];
-        const TVector3 jtrkp = nt.tks_p(jtrk);
-        for (int k = j+1; k < (*nt.p_vtxs_ntracks)[i]; ++k) {
-          const int ktrk = vtxs_tracks[i][k];
-          const TVector3 ktrkp = nt.tks_p(ktrk);
-
-          const double angle = jtrkp.Angle(ktrkp); // JMTBAD probably should tighten cuts on tracks used for this
+      for (int j = 0; j < ntracks; ++j) {
+        const TVector3 jp = nt.tracks().p3(tracks[j]);
+        for (int k = j+1; k < ntracks; ++k) {
+          const TVector3 kp = nt.tracks().p3(tracks[k]);
+          const double angle = jp.Angle(kp); // JMTBAD probably should tighten cuts on tracks used for this
           if (angle > vtxs_anglemax[i])
             vtxs_anglemax[i] = angle;
         }
       }
     }
 
-    if (nt.jetht < 1200 ||
-        nt.nalljets() < 4 ||
-	!pass_trig || 
+    if (nt.jets().ht() < 1200 ||
+        nt.jets().nminpt() < 4 ||
         movedist2 < 0.03 ||
         movedist2 > 2.0) {
       continue;
     }
 
     h_weight->Fill(w);
-    h_npu->Fill(nt.npu, w);
+    h_npu->Fill(nt.base().npu(), w);
 
     int n_pass_nocuts = 0;
     int n_pass_ntracks = 0;
@@ -563,123 +550,117 @@ int main(int argc, char** argv) {
     std::vector<int> first_vtx_to_pass(num_numdens, -1);
     auto set_it_if_first = [](int& to_set, int to_set_to) { if (to_set == -1) to_set = to_set_to; };
 
-    for (size_t ivtx = 0; ivtx < n_raw_vtx; ++ivtx) {
-      const double dist2move = mag(nt.move_x - nt.p_vtxs_x->at(ivtx),
-                                   nt.move_y - nt.p_vtxs_y->at(ivtx),
-                                   nt.move_z - nt.p_vtxs_z->at(ivtx));
+    for (int ivtx = 0; ivtx < nvtx; ++ivtx) {
+      const double dist2move = (nt.vertices().pos(ivtx) - nt.tm().move_pos()).Mag();
       if (dist2move > 0.0084)
         continue;
 
-      const bool pass_ntracks = nt.p_vtxs_ntracks->at(ivtx) >= 5;
-      const bool pass_bs2derr = nt.p_vtxs_bs2derr->at(ivtx) < 0.0025;
+      const bool pass_ntracks = nt.vertices().ntracks(ivtx) >= 5;
+      const bool pass_bs2derr = nt.vertices().bs2derr(ivtx) < 0.0025;
 
       if (1)                            { set_it_if_first(first_vtx_to_pass[0], ivtx); ++n_pass_nocuts;  }
       if (pass_ntracks)                 { set_it_if_first(first_vtx_to_pass[1], ivtx); ++n_pass_ntracks; }
       if (pass_ntracks && pass_bs2derr) { set_it_if_first(first_vtx_to_pass[2], ivtx); ++n_pass_all;     }
 
       if (pass_ntracks && pass_bs2derr && is_mc && apply_weights && ntks_weights)
-        w *= ntks_weight(nt.p_vtxs_ntracks->at(ivtx));
+        w *= ntks_weight(nt.vertices().ntracks(ivtx));
     }
 
     auto F1 = [&w](TH1* h, double v)            { h                    ->Fill(v,     w); };
     auto F2 = [&w](TH1* h, double v, double v2) { dynamic_cast<TH2*>(h)->Fill(v, v2, w); };
 
+    // JMTBAD why multiple dens?
     for (numdens& nd : nds) {
-      F1(nd(k_movedist2)    .den, movedist2);
-      F1(nd(k_movedist3)    .den, movedist3);
-      F1(nd(k_movevectoreta).den, movevectoreta);
-      F1(nd(k_npv)          .den, nt.npv);
-      F1(nd(k_pvx)          .den, nt.pvx);
-      F1(nd(k_pvy)          .den, nt.pvy);
-      F1(nd(k_pvz)          .den, nt.pvz);
-      F1(nd(k_pvrho)        .den, mag(nt.pvx, nt.pvy));
-      F1(nd(k_pvntracks)    .den, nt.pvntracks);
-      F1(nd(k_pvscore)      .den, nt.pvscore);
-      F1(nd(k_ht)           .den, nt.jetht);
-      F1(nd(k_ntracks)      .den, nt.ntracks);
-      F1(nd(k_nmovedtracks) .den, nt.nmovedtracks);
-      F1(nd(k_nseltracks)   .den, nseltracks);
-      F1(nd(k_npreseljets)  .den, nt.npreseljets);
-      F1(nd(k_npreselbjets) .den, nt.npreselbjets);
-      F2(nd(k_jeti01)       .den, jet_i_0, jet_i_1);
-      F2(nd(k_jetpt01)      .den, jet_pt_0, jet_pt_1);
-      F1(nd(k_jetsume)      .den, jet_sume);
-      F1(nd(k_jetdrmax)     .den, jet_drmax);
-      F1(nd(k_jetdravg)     .den, jet_dravg);
-      F1(nd(k_jeta3dmax)    .den, jet_a3dmax);
-      F1(nd(k_jetsumntracks).den, jet_sumntracks);
-      F2(nd(k_jetntracks01) .den, jet_ntracks_0, jet_ntracks_1);
-      F2(nd(k_jetnseltracks01) .den, jet_nseltracks_0, jet_nseltracks_1);
-      F1(nd(k_nvtxs)        .den, nt.nvtxs());
+      F1(nd(k_movedist2)        .den, movedist2);
+      F1(nd(k_movedist3)        .den, movedist3);
+      F1(nd(k_movevectoreta)    .den, movevectoreta);
+      F1(nd(k_npv)              .den, nt.pvs().n());
+      F1(nd(k_pvx)              .den, nt.pvs().x(0));
+      F1(nd(k_pvy)              .den, nt.pvs().y(0));
+      F1(nd(k_pvz)              .den, nt.pvs().z(0));
+      F1(nd(k_pvrho)            .den, nt.pvs().rho(0));
+      F1(nd(k_pvntracks)        .den, nt.pvs().ntracks(0));
+      F1(nd(k_pvscore)          .den, nt.pvs().score(0));
+      F1(nd(k_ht)               .den, nt.jets().ht());
+      F1(nd(k_nalltracks)       .den, nt.tm().nalltracks());
+      F1(nd(k_nmovedtracks)     .den, nt.tm().nmovedtracks());
+      F1(nd(k_nseedtracks)      .den, nseedtracks);
+      F1(nd(k_npreseljets)      .den, nt.tm().npreseljets());
+      F1(nd(k_npreselbjets)     .den, nt.tm().npreselbjets());
+      F2(nd(k_jeti01)           .den, jet_i_0, jet_i_1);
+      F2(nd(k_jetpt01)          .den, jet_pt_0, jet_pt_1);
+      F1(nd(k_jetsume)          .den, jet_sume);
+      F1(nd(k_jetdrmax)         .den, jet_drmax);
+      F1(nd(k_jetdravg)         .den, jet_dravg);
+      F1(nd(k_jeta3dmax)        .den, jet_a3dmax);
+      F1(nd(k_jetsumntracks)    .den, jet_sumntracks);
+      F2(nd(k_jetntracks01)     .den, jet_ntracks_0, jet_ntracks_1);
+      F2(nd(k_jetnseedtracks01) .den, jet_nseedtracks_0, jet_nseedtracks_1);
+      F1(nd(k_nvtx)             .den, nvtx);
     }
 
     ++nden;
     den += w;
     if (w < 0) { ++ndennegweight; sumnegweightden += w; }
 
-    for (int i = 0; i < num_numdens; ++i) {
-      int ivtx = first_vtx_to_pass[i];
-      if (ivtx != -1) {
-        h_vtxdbv[i]->Fill(mag(nt.p_vtxs_x->at(ivtx), nt.p_vtxs_y->at(ivtx)), w);
-        h_vtxntracks[i]->Fill(nt.p_vtxs_ntracks->at(ivtx), w);
-        h_vtxbs2derr[i]->Fill(nt.p_vtxs_bs2derr->at(ivtx), w);
-        h_vtxanglemax[i]->Fill(vtxs_anglemax[ivtx], w);
-        h_vtxtkonlymass[i]->Fill(nt.p_vtxs_tkonlymass->at(ivtx), w);
-        h_vtxs_mass[i]->Fill(nt.p_vtxs_mass->at(ivtx), w);
-	h_vtxphi[i]->Fill(nt.p_vtxs_phi->at(ivtx), w);
-	h_vtxtheta[i]->Fill(nt.p_vtxs_theta->at(ivtx), w);
-	h_vtxpt[i]->Fill(nt.p_vtxs_pt->at(ivtx), w);
-	h_vtxbs2derr_v_vtxntracks[i]->Fill(nt.p_vtxs_ntracks->at(ivtx), nt.p_vtxs_bs2derr->at(ivtx), w);
-	h_vtxbs2derr_v_vtxtkonlymass[i]->Fill(nt.p_vtxs_tkonlymass->at(ivtx), nt.p_vtxs_bs2derr->at(ivtx), w);
-	h_vtxbs2derr_v_vtxanglemax[i]->Fill(vtxs_anglemax[ivtx], nt.p_vtxs_bs2derr->at(ivtx), w);
-	h_vtxbs2derr_v_vtxphi[i]->Fill(nt.p_vtxs_phi->at(ivtx), nt.p_vtxs_bs2derr->at(ivtx), w);
-	h_vtxbs2derr_v_vtxtheta[i]->Fill(nt.p_vtxs_theta->at(ivtx), nt.p_vtxs_bs2derr->at(ivtx), w);
-	h_vtxbs2derr_v_vtxpt[i]->Fill(nt.p_vtxs_pt->at(ivtx), nt.p_vtxs_bs2derr->at(ivtx), w);
-	h_vtxbs2derr_v_vtxdbv[i]->Fill(mag(nt.p_vtxs_x->at(ivtx),nt.p_vtxs_y->at(ivtx)), nt.p_vtxs_bs2derr->at(ivtx), w);
-	h_vtxbs2derr_v_etamovevec[i]->Fill(move_vector.Eta(), nt.p_vtxs_bs2derr->at(ivtx), w);
+    for (int in = 0; in < num_numdens; ++in) {
+      const int iv = first_vtx_to_pass[in];
+      if (iv == -1)
+        continue;
 
-	for (size_t itk = 0; itk < nt.ntks(); itk++) {
-	  if (nt.p_tks_vtx->at(itk) == ivtx) {
-	    h_vtx_tks_pt[i]->Fill(nt.tks_pt(itk), w);
-	    h_vtx_tks_eta[i]->Fill(nt.p_tks_eta->at(itk), w);
-	    h_vtx_tks_phi[i]->Fill(nt.p_tks_phi->at(itk), w);
-	    h_vtx_tks_dxy[i]->Fill(nt.p_tks_dxy->at(itk), w);
-	    h_vtx_tks_dz[i]->Fill(nt.p_tks_dz->at(itk), w);
-	    h_vtx_tks_err_pt[i]->Fill(nt.p_tks_err_pt->at(itk), w);
-	    h_vtx_tks_err_eta[i]->Fill(nt.p_tks_err_eta->at(itk), w);
-	    h_vtx_tks_err_phi[i]->Fill(nt.p_tks_err_phi->at(itk), w);
-	    h_vtx_tks_err_dxy[i]->Fill(nt.p_tks_err_dxy->at(itk), w);
-	    h_vtx_tks_err_dz[i]->Fill(nt.p_tks_err_dz->at(itk), w);
-	    h_vtx_tks_nsigmadxy[i]->Fill(fabs(nt.p_tks_dxy->at(itk) / nt.p_tks_err_dxy->at(itk)), w);
-	    h_vtx_tks_npxlayers[i]->Fill(nt.tks_npxlayers(itk), w);
-	    h_vtx_tks_nstlayers[i]->Fill(nt.tks_nstlayers(itk), w);
-	    h_vtx_tks_vtx[i]->Fill(nt.p_tks_vtx->at(itk), w);
+      const std::vector<int> its = nt.tracks().tks_for_sv(iv);
+      const float max_tk_err_dxy = nt.tracks().err_dxy(*std::max_element(its.begin(), its.end(), [&nt](const int ia, const int ib) { return nt.tracks().err_dxy(ia) < nt.tracks().err_dxy(ib); }));
 
-	    double largest_dxyerr = nt.p_tks_err_dxy->at(itk);
-	    for (size_t jtk = itk+1; jtk < nt.ntks(); jtk++) {
-	      if ((nt.p_tks_vtx->at(jtk) == ivtx) && (nt.p_tks_err_dxy->at(jtk) > nt.p_tks_err_dxy->at(itk)))
-		largest_dxyerr = nt.p_tks_err_dxy->at(jtk);
-	    }
-	    h_vtxbs2derr_v_tksdxyerr[i]->Fill(largest_dxyerr, nt.p_vtxs_bs2derr->at(ivtx), w);
+      h_vtxdbv[in]->Fill(nt.vertices().rho(iv), w);
+      h_vtxntracks[in]->Fill(nt.vertices().ntracks(iv), w);
+      h_vtxbs2derr[in]->Fill(nt.vertices().bs2derr(iv), w);
+      h_vtxanglemax[in]->Fill(vtxs_anglemax[iv], w);
+      h_vtxtkonlymass[in]->Fill(nt.vertices().tkonlymass(iv), w);
+      h_vtxmass[in]->Fill(nt.vertices().mass(iv), w);
+      h_vtxphi[in]->Fill(nt.vertices().phi(iv), w);
+      h_vtxeta[in]->Fill(nt.vertices().eta(iv), w);
+      h_vtxpt[in]->Fill(nt.vertices().pt(iv), w);
+      h_vtxbs2derr_v_vtxntracks[in]->Fill(nt.vertices().ntracks(iv), nt.vertices().bs2derr(iv), w);
+      h_vtxbs2derr_v_vtxtkonlymass[in]->Fill(nt.vertices().tkonlymass(iv), nt.vertices().bs2derr(iv), w);
+      h_vtxbs2derr_v_vtxanglemax[in]->Fill(vtxs_anglemax[iv], nt.vertices().bs2derr(iv), w);
+      h_vtxbs2derr_v_vtxphi[in]->Fill(nt.vertices().phi(iv), nt.vertices().bs2derr(iv), w);
+      h_vtxbs2derr_v_vtxeta[in]->Fill(nt.vertices().eta(iv), nt.vertices().bs2derr(iv), w);
+      h_vtxbs2derr_v_vtxpt[in]->Fill(nt.vertices().pt(iv), nt.vertices().bs2derr(iv), w);
+      h_vtxbs2derr_v_vtxdbv[in]->Fill(nt.vertices().rho(iv), nt.vertices().bs2derr(iv), w);
+      h_vtxbs2derr_v_etamovevec[in]->Fill(move_vector.Eta(), nt.vertices().bs2derr(iv), w);
 
-	    if (!nt.p_tks_moved->at(itk)) {
-	      h_vtx_tks_nomove_pt[i]->Fill(nt.tks_pt(itk), w);
-	      h_vtx_tks_nomove_eta[i]->Fill(nt.p_tks_eta->at(itk), w);
-	      h_vtx_tks_nomove_phi[i]->Fill(nt.p_tks_phi->at(itk), w);
-	      h_vtx_tks_nomove_dxy[i]->Fill(nt.p_tks_dxy->at(itk), w);
-	      h_vtx_tks_nomove_dz[i]->Fill(nt.p_tks_dz->at(itk), w);
-	      h_vtx_tks_nomove_err_pt[i]->Fill(nt.p_tks_err_pt->at(itk), w);
-	      h_vtx_tks_nomove_err_eta[i]->Fill(nt.p_tks_err_eta->at(itk), w);
-	      h_vtx_tks_nomove_err_phi[i]->Fill(nt.p_tks_err_phi->at(itk), w);
-	      h_vtx_tks_nomove_err_dxy[i]->Fill(nt.p_tks_err_dxy->at(itk), w);
-	      h_vtx_tks_nomove_err_dz[i]->Fill(nt.p_tks_err_dz->at(itk), w);
-	      h_vtx_tks_nomove_nsigmadxy[i]->Fill(fabs(nt.p_tks_dxy->at(itk) / nt.p_tks_err_dxy->at(itk)), w);
-	      h_vtx_tks_nomove_npxlayers[i]->Fill(nt.tks_npxlayers(itk), w);
-	      h_vtx_tks_nomove_nstlayers[i]->Fill(nt.tks_nstlayers(itk), w);
-	      h_vtx_tks_nomove_vtx[i]->Fill(nt.p_tks_vtx->at(itk), w);
-	    }
-	  }
-	}
+      h_vtxbs2derr_v_maxtkerrdxy[in]->Fill(max_tk_err_dxy, nt.vertices().bs2derr(iv), w);
+
+      for (const int it : its) {
+        h_vtx_tks_pt[in]->Fill(nt.tracks().pt(it), w);
+        h_vtx_tks_eta[in]->Fill(nt.tracks().eta(it), w);
+        h_vtx_tks_phi[in]->Fill(nt.tracks().phi(it), w);
+        h_vtx_tks_dxy[in]->Fill(nt.tracks().dxybs(it), w);
+        h_vtx_tks_dz[in]->Fill(nt.tracks().dzpv(it), w);
+        h_vtx_tks_err_pt[in]->Fill(nt.tracks().err_pt(it), w);
+        h_vtx_tks_err_eta[in]->Fill(nt.tracks().err_eta(it), w);
+        h_vtx_tks_err_phi[in]->Fill(nt.tracks().err_phi(it), w);
+        h_vtx_tks_err_dxy[in]->Fill(nt.tracks().err_dxy(it), w);
+        h_vtx_tks_err_dz[in]->Fill(nt.tracks().err_dz(it), w);
+        h_vtx_tks_nsigmadxy[in]->Fill(nt.tracks().nsigmadxybs(it), w);
+        h_vtx_tks_npxlayers[in]->Fill(nt.tracks().npxlayers(it), w);
+        h_vtx_tks_nstlayers[in]->Fill(nt.tracks().nstlayers(it), w);
+
+        if (!nt.tk_moved(it)) {
+          h_vtx_tks_nomove_pt[in]->Fill(nt.tracks().pt(it), w);
+          h_vtx_tks_nomove_eta[in]->Fill(nt.tracks().eta(it), w);
+          h_vtx_tks_nomove_phi[in]->Fill(nt.tracks().phi(it), w);
+          h_vtx_tks_nomove_dxy[in]->Fill(nt.tracks().dxybs(it), w);
+          h_vtx_tks_nomove_dz[in]->Fill(nt.tracks().dzpv(it), w);
+          h_vtx_tks_nomove_err_pt[in]->Fill(nt.tracks().err_pt(it), w);
+          h_vtx_tks_nomove_err_eta[in]->Fill(nt.tracks().err_eta(it), w);
+          h_vtx_tks_nomove_err_phi[in]->Fill(nt.tracks().err_phi(it), w);
+          h_vtx_tks_nomove_err_dxy[in]->Fill(nt.tracks().err_dxy(it), w);
+          h_vtx_tks_nomove_err_dz[in]->Fill(nt.tracks().err_dz(it), w);
+          h_vtx_tks_nomove_nsigmadxy[in]->Fill(nt.tracks().nsigmadxybs(it), w);
+          h_vtx_tks_nomove_npxlayers[in]->Fill(nt.tracks().npxlayers(it), w);
+          h_vtx_tks_nomove_nstlayers[in]->Fill(nt.tracks().nstlayers(it), w);
+        }
       }
     }
 
@@ -687,99 +668,90 @@ int main(int argc, char** argv) {
     if (n_pass_ntracks) nums["ntracks"] += w;
     if (n_pass_all)     nums["all"]     += w;
 
-    const int passes[num_numdens] = {
+    const int npasses[num_numdens] = {
       n_pass_nocuts,
       n_pass_ntracks,
       n_pass_all
     };
 
     for (int i = 0; i < num_numdens; ++i) {
-      if (passes[i]) {
-        numdens& nd = nds[i];
-        F1(nd(k_movedist2)    .num, movedist2);
-        F1(nd(k_movedist3)    .num, movedist3);
-        F1(nd(k_movevectoreta).num, movevectoreta);
-        F1(nd(k_npv)          .num, nt.npv);
-        F1(nd(k_pvx)          .num, nt.pvx);
-        F1(nd(k_pvy)          .num, nt.pvy);
-        F1(nd(k_pvz)          .num, nt.pvz);
-        F1(nd(k_pvrho)        .num, mag(nt.pvx, nt.pvy));
-        F1(nd(k_pvntracks)    .num, nt.pvntracks);
-        F1(nd(k_pvscore)      .num, nt.pvscore);
-        F1(nd(k_ht)           .num, nt.jetht);
-        F1(nd(k_ntracks)      .num, nt.ntracks);
-        F1(nd(k_nmovedtracks) .num, nt.nmovedtracks);
-        F1(nd(k_nseltracks)   .num, nseltracks);
-        F1(nd(k_npreseljets)  .num, nt.npreseljets);
-        F1(nd(k_npreselbjets) .num, nt.npreselbjets);
-        F2(nd(k_jeti01)       .num, jet_i_0, jet_i_1);
-        F2(nd(k_jetpt01)      .num, jet_pt_0, jet_pt_1);
-        F1(nd(k_jetsume)      .num, jet_sume);
-        F1(nd(k_jetdrmax)     .num, jet_drmax);
-        F1(nd(k_jetdravg)     .num, jet_dravg);
-        F1(nd(k_jeta3dmax)    .num, jet_a3dmax);
-        F1(nd(k_jetsumntracks).num, jet_sumntracks);
-        F2(nd(k_jetntracks01) .num, jet_ntracks_0, jet_ntracks_1);
-        F2(nd(k_jetnseltracks01).num, jet_nseltracks_0, jet_nseltracks_1);
-        F1(nd(k_nvtxs)        .num, passes[i]);
+      if (!npasses[i])
+        continue;
 
-	for (size_t itk = 0; itk < nt.ntks(); itk++) {
-	  const float pt = nt.tks_pt(itk);
-	  const float dxy = nt.p_tks_dxy->at(itk);
-	  const float dxyerr = nt.p_tks_err_dxy->at(itk);
-	  const float nsigmadxy = nt.tks_nsigmadxy(itk);
-	  const float npxlay = nt.tks_npxlayers(itk);
-	  const float nstlay = nt.tks_nstlayers(itk);
+      numdens& nd = nds[i];
+      F1(nd(k_movedist2)        .num, movedist2);
+      F1(nd(k_movedist3)        .num, movedist3);
+      F1(nd(k_movevectoreta)    .num, movevectoreta);
+      F1(nd(k_npv)              .num, nt.pvs().n());
+      F1(nd(k_pvx)              .num, nt.pvs().x(0));
+      F1(nd(k_pvy)              .num, nt.pvs().y(0));
+      F1(nd(k_pvz)              .num, nt.pvs().z(0));
+      F1(nd(k_pvrho)            .num, nt.pvs().rho(0));
+      F1(nd(k_pvntracks)        .num, nt.pvs().ntracks(0));
+      F1(nd(k_pvscore)          .num, nt.pvs().score(0));
+      F1(nd(k_ht)               .num, nt.jets().ht());
+      F1(nd(k_nalltracks)       .num, nt.tm().nalltracks());
+      F1(nd(k_nmovedtracks)     .num, nt.tm().nmovedtracks());
+      F1(nd(k_nseedtracks)      .num, nseedtracks);
+      F1(nd(k_npreseljets)      .num, nt.tm().npreseljets());
+      F1(nd(k_npreselbjets)     .num, nt.tm().npreselbjets());
+      F2(nd(k_jeti01)           .num, jet_i_0, jet_i_1);
+      F2(nd(k_jetpt01)          .num, jet_pt_0, jet_pt_1);
+      F1(nd(k_jetsume)          .num, jet_sume);
+      F1(nd(k_jetdrmax)         .num, jet_drmax);
+      F1(nd(k_jetdravg)         .num, jet_dravg);
+      F1(nd(k_jeta3dmax)        .num, jet_a3dmax);
+      F1(nd(k_jetsumntracks)    .num, jet_sumntracks);
+      F2(nd(k_jetntracks01)     .num, jet_ntracks_0, jet_ntracks_1);
+      F2(nd(k_jetnseedtracks01) .num, jet_nseedtracks_0, jet_nseedtracks_1);
+      F1(nd(k_nvtx)             .num, npasses[i]);
 
-	  h_tks_pt[i]->Fill(pt, w);
-	  h_tks_eta[i]->Fill(nt.p_tks_eta->at(itk), w);
-	  h_tks_phi[i]->Fill(nt.p_tks_phi->at(itk), w);
-	  h_tks_dxy[i]->Fill(dxy, w);
-	  h_tks_dz[i]->Fill(nt.p_tks_dz->at(itk), w);
-	  h_tks_err_pt[i]->Fill(nt.p_tks_err_pt->at(itk), w);
-	  h_tks_err_eta[i]->Fill(nt.p_tks_err_eta->at(itk), w);
-	  h_tks_err_phi[i]->Fill(nt.p_tks_err_phi->at(itk), w);
-	  h_tks_err_dxy[i]->Fill(dxyerr, w);
-	  h_tks_err_dz[i]->Fill(nt.p_tks_err_dz->at(itk), w);
-	  h_tks_nsigmadxy[i]->Fill(nsigmadxy, w);
-	  h_tks_npxlayers[i]->Fill(npxlay, w);
-	  h_tks_nstlayers[i]->Fill(nstlay, w);
-	  h_tks_vtx[i]->Fill(nt.p_tks_vtx->at(itk), w);
+      for (size_t it = 0, ite = nt.tracks().n(); it < ite; ++it) {
+        h_tks_pt[i]->Fill(nt.tracks().pt(it), w);
+        h_tks_eta[i]->Fill(nt.tracks().eta(it), w);
+        h_tks_phi[i]->Fill(nt.tracks().phi(it), w);
+        h_tks_dxy[i]->Fill(nt.tracks().dxybs(it), w);
+        h_tks_dz[i]->Fill(nt.tracks().dzpv(it), w);
+        h_tks_err_pt[i]->Fill(nt.tracks().err_pt(it), w);
+        h_tks_err_eta[i]->Fill(nt.tracks().err_eta(it), w);
+        h_tks_err_phi[i]->Fill(nt.tracks().err_phi(it), w);
+        h_tks_err_dxy[i]->Fill(nt.tracks().err_dxy(it), w);
+        h_tks_err_dz[i]->Fill(nt.tracks().err_dz(it), w);
+        h_tks_nsigmadxy[i]->Fill(nt.tracks().nsigmadxybs(it), w);
+        h_tks_npxlayers[i]->Fill(nt.tracks().npxlayers(it), w);
+        h_tks_nstlayers[i]->Fill(nt.tracks().nstlayers(it), w);
 
-	  if (nt.p_tks_moved->at(itk)) {
-	    h_moved_tks_pt[i]->Fill(pt, w);
-	    h_moved_tks_eta[i]->Fill(nt.p_tks_eta->at(itk), w);
-	    h_moved_tks_phi[i]->Fill(nt.p_tks_phi->at(itk), w);
-	    h_moved_tks_dxy[i]->Fill(dxy, w);
-	    h_moved_tks_dz[i]->Fill(nt.p_tks_dz->at(itk), w);
-	    h_moved_tks_err_pt[i]->Fill(nt.p_tks_err_pt->at(itk), w);
-	    h_moved_tks_err_eta[i]->Fill(nt.p_tks_err_eta->at(itk), w);
-	    h_moved_tks_err_phi[i]->Fill(nt.p_tks_err_phi->at(itk), w);
-	    h_moved_tks_err_dxy[i]->Fill(dxyerr, w);
-	    h_moved_tks_err_dz[i]->Fill(nt.p_tks_err_dz->at(itk), w);
-	    h_moved_tks_nsigmadxy[i]->Fill(nsigmadxy, w);
-	    h_moved_tks_npxlayers[i]->Fill(npxlay, w);
-	    h_moved_tks_nstlayers[i]->Fill(nstlay, w);
-	    h_moved_tks_vtx[i]->Fill(nt.p_tks_vtx->at(itk), w);
+        if (nt.tk_moved(it)) {
+          h_moved_tks_pt[i]->Fill(nt.tracks().pt(it), w);
+          h_moved_tks_eta[i]->Fill(nt.tracks().eta(it), w);
+          h_moved_tks_phi[i]->Fill(nt.tracks().phi(it), w);
+          h_moved_tks_dxy[i]->Fill(nt.tracks().dxybs(it), w);
+          h_moved_tks_dz[i]->Fill(nt.tracks().dzpv(it), w);
+          h_moved_tks_err_pt[i]->Fill(nt.tracks().err_pt(it), w);
+          h_moved_tks_err_eta[i]->Fill(nt.tracks().err_eta(it), w);
+          h_moved_tks_err_phi[i]->Fill(nt.tracks().err_phi(it), w);
+          h_moved_tks_err_dxy[i]->Fill(nt.tracks().err_dxy(it), w);
+          h_moved_tks_err_dz[i]->Fill(nt.tracks().err_dz(it), w);
+          h_moved_tks_nsigmadxy[i]->Fill(nt.tracks().nsigmadxybs(it), w);
+          h_moved_tks_npxlayers[i]->Fill(nt.tracks().npxlayers(it), w);
+          h_moved_tks_nstlayers[i]->Fill(nt.tracks().nstlayers(it), w);
 
-	    if (!nt.tks_sel(itk)) {
-	      h_moved_nosel_tks_pt[i]->Fill(pt, w);
-	      h_moved_nosel_tks_eta[i]->Fill(nt.p_tks_eta->at(itk), w);
-	      h_moved_nosel_tks_phi[i]->Fill(nt.p_tks_phi->at(itk), w);
-	      h_moved_nosel_tks_dxy[i]->Fill(dxy, w);
-	      h_moved_nosel_tks_dz[i]->Fill(nt.p_tks_dz->at(itk), w);
-	      h_moved_nosel_tks_err_pt[i]->Fill(nt.p_tks_err_pt->at(itk), w);
-	      h_moved_nosel_tks_err_eta[i]->Fill(nt.p_tks_err_eta->at(itk), w);
-	      h_moved_nosel_tks_err_phi[i]->Fill(nt.p_tks_err_phi->at(itk), w);
-	      h_moved_nosel_tks_err_dxy[i]->Fill(dxyerr, w);
-	      h_moved_nosel_tks_err_dz[i]->Fill(nt.p_tks_err_dz->at(itk), w);
-	      h_moved_nosel_tks_nsigmadxy[i]->Fill(nsigmadxy, w);
-	      h_moved_nosel_tks_npxlayers[i]->Fill(npxlay, w);
-	      h_moved_nosel_tks_nstlayers[i]->Fill(nstlay, w);
-	      h_moved_nosel_tks_vtx[i]->Fill(nt.p_tks_vtx->at(itk), w);
-	    }
-	  }
-	}
+          if (!nt.tracks().pass_seed(it)) {
+            h_moved_nosel_tks_pt[i]->Fill(nt.tracks().pt(it), w);
+            h_moved_nosel_tks_eta[i]->Fill(nt.tracks().eta(it), w);
+            h_moved_nosel_tks_phi[i]->Fill(nt.tracks().phi(it), w);
+            h_moved_nosel_tks_dxy[i]->Fill(nt.tracks().dxybs(it), w);
+            h_moved_nosel_tks_dz[i]->Fill(nt.tracks().dzpv(it), w);
+            h_moved_nosel_tks_err_pt[i]->Fill(nt.tracks().err_pt(it), w);
+            h_moved_nosel_tks_err_eta[i]->Fill(nt.tracks().err_eta(it), w);
+            h_moved_nosel_tks_err_phi[i]->Fill(nt.tracks().err_phi(it), w);
+            h_moved_nosel_tks_err_dxy[i]->Fill(nt.tracks().err_dxy(it), w);
+            h_moved_nosel_tks_err_dz[i]->Fill(nt.tracks().err_dz(it), w);
+            h_moved_nosel_tks_nsigmadxy[i]->Fill(nt.tracks().nsigmadxybs(it), w);
+            h_moved_nosel_tks_npxlayers[i]->Fill(nt.tracks().npxlayers(it), w);
+            h_moved_nosel_tks_nstlayers[i]->Fill(nt.tracks().nstlayers(it), w);
+          }
+        }
       }
     }
   }

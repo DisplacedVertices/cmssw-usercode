@@ -1,5 +1,8 @@
 #include <cstdarg>
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
+#include "DataFormats/TrackReco/interface/Track.h"
 #include "FWCore/Utilities/interface/Exception.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
@@ -108,4 +111,28 @@ uchar uint2uchar_clamp(unsigned x) {
 void inc_uchar_clamp(uchar& x) {
   if (x < 255)
     ++x;
+}
+
+const reco::Track* jetDaughterTrack(const pat::Jet& jet, size_t idau) {
+  if (idau >= jet.numberOfDaughters())
+    return 0;
+
+  const reco::Candidate* dau = jet.daughter(idau);
+  if (dau->charge() == 0)
+    return 0;
+
+  const reco::Track* tk = 0;
+  const reco::PFCandidate* pf = dynamic_cast<const reco::PFCandidate*>(dau);
+  if (pf) {
+    const reco::TrackRef& r = pf->trackRef();
+    if (r.isNonnull())
+      tk = &*r;
+  }
+  else {
+    const pat::PackedCandidate* pk = dynamic_cast<const pat::PackedCandidate*>(dau);
+    if (pk && pk->charge() && pk->hasTrackDetails())
+      tk = &pk->pseudoTrack();
+  }
+
+  return tk;
 }
