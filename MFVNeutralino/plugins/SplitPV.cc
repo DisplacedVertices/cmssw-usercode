@@ -48,7 +48,7 @@ MFVSplitPV::MFVSplitPV(const edm::ParameterSet& cfg)
 }
 
 void MFVSplitPV::analyze(const edm::Event& event, const edm::EventSetup& setup) {
-  if (debug) printf("\nMFVSplitPV analyze (%u, %u, %llu)\n", event.id().run(), event.luminosityBlock(), event.id().event());
+  if (debug) printf("MFVSplitPV analyze (%u, %u, %llu)\n", event.id().run(), event.luminosityBlock(), event.id().event());
 
   nt.clear();
 
@@ -57,31 +57,46 @@ void MFVSplitPV::analyze(const edm::Event& event, const edm::EventSetup& setup) 
   pvs_filler(event);
   jets_filler(event);
 
-  if (debug) printf("PV ndof %f ntracks %i\n", nt.pvs().ndof(0), nt.pvs().ntracks(0));
-
-  auto doit = [&](const std::vector<reco::TransientTrack>& ts, int which) {
-    TransientVertex tv = kv_reco->vertex(ts);
+  auto doit = [&](const std::vector<reco::TransientTrack>& ts, unsigned which, unsigned ex=0) {
+    TransientVertex tv;
+    try { tv = kv_reco->vertex(ts); } catch (...) {}
     if (tv.isValid()) {
       reco::Vertex v(tv);
       nt.pvs().add(v.x(), v.y(), v.z(), v.chi2(), v.ndof(), v.nTracks(), 0,
                    v.covariance(0,0), v.covariance(0,1), v.covariance(0,2),
                    v.covariance(1,1), v.covariance(1,2),
                    v.covariance(2,2),
-                   which);
+                   (ex << 16) | which);
     }
   };
+
+  std::vector<reco::TransientTrack> ttks;
 
   edm::ESHandle<TransientTrackBuilder> tt_builder;
   setup.get<TransientTrackRecord>().get("TransientTrackBuilder", tt_builder);
 
-  std::vector<reco::TransientTrack> ttks;
-  for (const pat::PackedCandidate& c : pvs_filler.cands(event))
-    if (int(c.vertexRef().key()) == pvs_filler.ipv() && c.charge() && c.hasTrackDetails())
-      ttks.push_back(tt_builder->build(c.pseudoTrack()));
-  const size_t n = ttks.size();
-  std::vector<reco::TransientTrack> ttksa(n/2+n%2), ttksb(n/2);
+  if (debug) printf("ipv %i, cands:", pvs_filler.ipv());
 
-  doit(ttks, 1);
+  for (const pat::PackedCandidate& c : pvs_filler.cands(event))
+    if (c.charge() && c.hasTrackDetails()) {
+      int k = int(c.vertexRef().key());
+      if (debug) printf(" %i", k);
+      if (k == pvs_filler.ipv())
+        ttks.push_back(tt_builder->build(c.pseudoTrack()));
+    }
+
+  const size_t n = ttks.size();
+  if (debug) printf("\nPV ndof %f ntracks %i n %lu\n", nt.pvs().ndof(0), nt.pvs().ntracks(0), n);
+
+  if (n < 2)
+    return;
+
+  doit(ttks, 1, n);
+
+  if (n < 4)
+    return;
+
+  std::vector<reco::TransientTrack> ttksa(n/2+n%2), ttksb(n/2);
 
   for (int k : {0,1}) {
     if (k == 0) std::sort(ttks.begin(), ttks.end(), [](auto a, auto b) { return a.track().pt() > b.track().pt(); });
