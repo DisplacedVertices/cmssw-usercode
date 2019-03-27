@@ -1,26 +1,33 @@
-from JMTucker.Tools.BasicAnalyzer_cfg import *
+from JMTucker.MFVNeutralino.NtupleCommon import *
 
-from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset
-sample_files(process, 'mfv_neu_tau010000um_M0800_2017', dataset, 1)
+settings = NtupleSettings()
+settings.is_mc = True
+settings.is_miniaod = True
+settings.event_filter = 'jets only novtx'
+
+process = ntuple_process(settings)
+remove_output_module(process)
 tfileservice(process, 'mctruth.root')
-file_event_from_argv(process)
+dataset = 'miniaod' if settings.is_miniaod else 'main'
+sample_files(process, 'mfv_neu_tau010000um_M0800_2017', dataset, 1)
+cmssw_from_argv(process)
 
-process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
+from JMTucker.Tools.NtupleFiller_cff import jmtNtupleFiller_pset
 
-process.mfvMovedTree = cms.EDAnalyzer('MFVMovedTracksTreer',
-                                      event_src = cms.InputTag('mfvEvent'),
-                                      weight_src = cms.InputTag('mfvWeight'),
-                                      sel_tracks_src = cms.InputTag(''),
-                                      mover_src = cms.string(''),
-                                      vertices_src = cms.InputTag('mfvVerticesAux'),
-                                      max_dist2move = cms.double(-1),
-                                      apply_presel = cms.bool(False),
-                                      njets_req = cms.uint32(0),
-                                      nbjets_req = cms.uint32(0),
-                                      for_mctruth = cms.bool(True),
-                                      )
+process.mfvMovedTreeMCTruth = cms.EDAnalyzer('MFVMovedTracksTreer',
+                                             jmtNtupleFiller_pset(settings.is_miniaod),
+                                             sel_tracks_src = cms.InputTag(''),
+                                             mover_src = cms.string(''),
+                                             vertices_src = cms.InputTag('mfvVerticesAux'),
+                                             max_dist2move = cms.double(-1),
+                                             apply_presel = cms.bool(False),
+                                             njets_req = cms.uint32(0),
+                                             nbjets_req = cms.uint32(0),
+                                             for_mctruth = cms.bool(True),
+                                             )
 
-process.p = cms.Path(process.mfvWeight * process.mfvMovedTree)
+process.p = cms.Path(process.mfvMovedTreeMCTruth)
+ReferencedTagsTaskAdder(process)('p')
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
