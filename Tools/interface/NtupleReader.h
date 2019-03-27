@@ -27,7 +27,8 @@ namespace jmt {
         f_out_->Write();
         f_out_->Close();
       }
-      f_->Close();
+      if (f_)
+        f_->Close();
     }
 
     TFile& f() { return *f_.get(); }
@@ -83,7 +84,8 @@ namespace jmt {
                 << " json: " << (json_ != "" ? json_ : "none")
                 << " nevents_frac: " << nevents_frac_
                 << " weights: " << use_weights_
-                << " pu_weights: " << (pu_weights_ != "" ? pu_weights_ : "none");
+                << " pu_weights: " << (pu_weights_ != "" ? pu_weights_ : "none")
+                << "\n";
 
       return true;
     }
