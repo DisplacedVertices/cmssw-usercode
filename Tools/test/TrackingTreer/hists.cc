@@ -103,7 +103,6 @@ int main(int argc, char** argv) {
   TH1D* h_tracks_dxy[max_tk_type];
 
   TH1D* h_tracks_absdxy[max_tk_type];
-  TH1D* h_tracks_dz[max_tk_type];
   TH1D* h_tracks_dzpv[max_tk_type];
   TH1D* h_tracks_nhits[max_tk_type];
   TH1D* h_tracks_npxhits[max_tk_type];
@@ -138,9 +137,17 @@ int main(int argc, char** argv) {
   TH2D* h_tracks_dxyerr_v_eta[max_tk_type];
   TH2D* h_tracks_dxyerr_v_phi[max_tk_type];
   TH2D* h_tracks_dxyerr_v_dxy[max_tk_type];
-  TH2D* h_tracks_dxyerr_v_dz[max_tk_type];
+  TH2D* h_tracks_dxyerr_v_dzpv[max_tk_type];
   TH2D* h_tracks_dxyerr_v_npxlayers[max_tk_type];
   TH2D* h_tracks_dxyerr_v_nstlayers[max_tk_type];
+
+  TH2D* h_tracks_dzerr_v_pt[max_tk_type];
+  TH2D* h_tracks_dzerr_v_eta[max_tk_type];
+  TH2D* h_tracks_dzerr_v_phi[max_tk_type];
+  TH2D* h_tracks_dzerr_v_dxy[max_tk_type];
+  TH2D* h_tracks_dzerr_v_dzpv[max_tk_type];
+  TH2D* h_tracks_dzerr_v_npxlayers[max_tk_type];
+  TH2D* h_tracks_dzerr_v_nstlayers[max_tk_type];
 
   TH2D* h_tracks_eta_v_phi[max_tk_type];
 
@@ -152,7 +159,6 @@ int main(int argc, char** argv) {
     h_tracks_phi[i] = new TH1D(TString::Format("h_%s_tracks_phi", ex[i]), TString::Format("%s tracks;tracks phi;arb. units", ex[i]), 315, -3.15, 3.15);
     h_tracks_dxy[i] = new TH1D(TString::Format("h_%s_tracks_dxy", ex[i]), TString::Format("%s tracks;tracks dxy to beamspot;arb. units", ex[i]), 400, -0.2, 0.2);
     h_tracks_absdxy[i] = new TH1D(TString::Format("h_%s_tracks_absdxy", ex[i]), TString::Format("%s tracks;tracks |dxy| to beamspot;arb. units", ex[i]), 200, 0, 0.2);
-    h_tracks_dz[i] = new TH1D(TString::Format("h_%s_tracks_dz", ex[i]), TString::Format("%s tracks;tracks dz to BS;arb. units", ex[i]), 400, -20, 20);
     h_tracks_dzpv[i] = new TH1D(TString::Format("h_%s_tracks_dzpv", ex[i]), TString::Format("%s tracks;tracks dz to PV;arb. units", ex[i]), 400, -20, 20);
     h_tracks_nhits[i] = new TH1D(TString::Format("h_%s_tracks_nhits", ex[i]), TString::Format("%s tracks;tracks nhits;arb. units", ex[i]), 40, 0, 40);
     h_tracks_npxhits[i] = new TH1D(TString::Format("h_%s_tracks_npxhits", ex[i]), TString::Format("%s tracks;tracks npxhits;arb. units", ex[i]), 40, 0, 40);
@@ -164,7 +170,7 @@ int main(int argc, char** argv) {
     h_tracks_nsigmadxy[i] = new TH1D(TString::Format("h_%s_tracks_nsigmadxy", ex[i]), TString::Format("%s tracks;tracks nsigmadxy;arb. units", ex[i]), 400, 0, 40);
     
     h_tracks_dxyerr[i] = new TH1D(TString::Format("h_%s_tracks_dxyerr", ex[i]), TString::Format("%s tracks;tracks dxyerr;arb. units", ex[i]), 2000, 0, 0.2);
-    h_tracks_dzerr[i] = new TH1D(TString::Format("h_%s_tracks_dzerr", ex[i]), TString::Format("%s tracks;tracks dzerr;arb. units", ex[i]), 200, 0, 2);
+    h_tracks_dzerr[i] = new TH1D(TString::Format("h_%s_tracks_dzerr", ex[i]), TString::Format("%s tracks;tracks dzerr;arb. units", ex[i]), 2000, 0, 0.2);
     h_tracks_pterr[i] = new TH1D(TString::Format("h_%s_tracks_pterr", ex[i]), TString::Format("%s tracks;tracks pterr;arb. units", ex[i]), 200, 0, 0.2);
     h_tracks_phierr[i] = new TH1D(TString::Format("h_%s_tracks_phierr", ex[i]), TString::Format("%s tracks;tracks phierr;arb. units", ex[i]), 200, 0, 0.2);
     h_tracks_etaerr[i] = new TH1D(TString::Format("h_%s_tracks_etaerr", ex[i]), TString::Format("%s tracks;tracks etaerr;arb. units", ex[i]), 200, 0, 0.2);
@@ -187,9 +193,18 @@ int main(int argc, char** argv) {
     h_tracks_dxyerr_v_eta[i] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_eta", ex[i]), TString::Format("%s tracks;tracks eta;tracks dxyerr", ex[i]), 80, -4, 4, 2000, 0, 0.2);
     h_tracks_dxyerr_v_phi[i] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_phi", ex[i]), TString::Format("%s tracks;tracks phi;tracks dxyerr", ex[i]), 126, -3.15, 3.15, 200, 0, 0.2);
     h_tracks_dxyerr_v_dxy[i] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_dxy", ex[i]), TString::Format("%s tracks;tracks dxy to beamspot;tracks dxyerr", ex[i]), 400, -0.2, 0.2, 200, 0, 0.2);
-    h_tracks_dxyerr_v_dz[i] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_dz", ex[i]), TString::Format("%s tracks;tracks dz to beamspot;tracks dxyerr", ex[i]), 400, -20, 20, 200, 0, 0.2);
+    h_tracks_dxyerr_v_dzpv[i] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_dzpv", ex[i]), TString::Format("%s tracks;tracks dz to PV;tracks dxyerr", ex[i]), 400, -20, 20, 200, 0, 0.2);
     h_tracks_dxyerr_v_npxlayers[i] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_npxlayers", ex[i]), TString::Format("%s tracks;tracks npxlayers;tracks dxyerr", ex[i]), 10, 0, 10, 200, 0, 0.2);
     h_tracks_dxyerr_v_nstlayers[i] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_nstlayers", ex[i]), TString::Format("%s tracks;tracks nstlayers;tracks dxyerr", ex[i]), 20, 0, 20, 200, 0, 0.2);
+
+    h_tracks_dzerr_v_pt[i] = new TH2D(TString::Format("h_%s_tracks_dzerr_v_pt", ex[i]), TString::Format("%s tracks;tracks pt;tracks dzerr", ex[i]), 2000, 0, 200, 2000, 0, 0.2);
+    h_tracks_dzerr_v_eta[i] = new TH2D(TString::Format("h_%s_tracks_dzerr_v_eta", ex[i]), TString::Format("%s tracks;tracks eta;tracks dzerr", ex[i]), 80, -4, 4, 2000, 0, 0.2);
+    h_tracks_dzerr_v_phi[i] = new TH2D(TString::Format("h_%s_tracks_dzerr_v_phi", ex[i]), TString::Format("%s tracks;tracks phi;tracks dzerr", ex[i]), 126, -3.15, 3.15, 200, 0, 0.2);
+    h_tracks_dzerr_v_dxy[i] = new TH2D(TString::Format("h_%s_tracks_dzerr_v_dxy", ex[i]), TString::Format("%s tracks;tracks dxy to beamspot;tracks dzerr", ex[i]), 400, -0.2, 0.2, 200, 0, 0.2);
+    h_tracks_dzerr_v_dzpv[i] = new TH2D(TString::Format("h_%s_tracks_dzerr_v_dzpv", ex[i]), TString::Format("%s tracks;tracks dz to PV;tracks dzerr", ex[i]), 400, -20, 20, 200, 0, 0.2);
+    h_tracks_dzerr_v_npxlayers[i] = new TH2D(TString::Format("h_%s_tracks_dzerr_v_npxlayers", ex[i]), TString::Format("%s tracks;tracks npxlayers;tracks dzerr", ex[i]), 10, 0, 10, 200, 0, 0.2);
+    h_tracks_dzerr_v_nstlayers[i] = new TH2D(TString::Format("h_%s_tracks_dzerr_v_nstlayers", ex[i]), TString::Format("%s tracks;tracks nstlayers;tracks dzerr", ex[i]), 20, 0, 20, 200, 0, 0.2);
+
 
     h_tracks_eta_v_phi[i] = new TH2D(TString::Format("h_%s_tracks_eta_v_phi", ex[i]), TString::Format("%s tracks;tracks phi;tracks eta", ex[i]), 126, -3.15, 3.15, 80, -4, 4);
   }
@@ -259,7 +274,7 @@ int main(int argc, char** argv) {
       const bool seed = sel && nm1[4];
       const bool tk_ok[max_tk_type] = { true, sel, seed };
 
-      //const bool high_purity = npxlayers == 4 && fabs(nt.tk_eta(itk)) < 0.8 && fabs(nt.tk_dzpv(itk) - pvbsz) < 10;
+      //const bool high_purity = npxlayers == 4 && fabs(nt.tk_eta(itk)) < 0.8 && fabs(nt.tk_vz(itk)) < 10;
       //const bool etalt1p5 = fabs(nt.tk_eta(itk)) < 1.5;
 
       for (int i = 0; i < max_tk_type; ++i) {
@@ -271,7 +286,6 @@ int main(int argc, char** argv) {
 	h_tracks_phi[i]->Fill(nt.tk_phi(itk), w);
 	h_tracks_dxy[i]->Fill(nt.tk_dxybs(itk), w);
 	h_tracks_absdxy[i]->Fill(fabs(nt.tk_dxybs(itk)), w);
-	h_tracks_dz[i]->Fill(nt.tk_dzpv(itk) - pvbsz, w);
 	h_tracks_dzpv[i]->Fill(nt.tk_dzpv(itk), w);
 	h_tracks_nhits[i]->Fill(nt.tk_nhits(itk), w);
 	h_tracks_npxhits[i]->Fill(nt.tk_npxhits(itk), w);
@@ -306,9 +320,17 @@ int main(int argc, char** argv) {
 	h_tracks_dxyerr_v_eta[i]->Fill(nt.tk_eta(itk), nt.tk_err_dxy(itk), w);
 	h_tracks_dxyerr_v_phi[i]->Fill(nt.tk_phi(itk), nt.tk_err_dxy(itk), w);
 	h_tracks_dxyerr_v_dxy[i]->Fill(nt.tk_dxybs(itk), nt.tk_err_dxy(itk), w);
-	h_tracks_dxyerr_v_dz[i]->Fill(nt.tk_dzpv(itk) - pvbsz, nt.tk_err_dxy(itk), w);
+	h_tracks_dxyerr_v_dzpv[i]->Fill(nt.tk_dzpv(itk), nt.tk_err_dxy(itk), w);
 	h_tracks_dxyerr_v_npxlayers[i]->Fill(npxlayers, nt.tk_err_dxy(itk), w);
 	h_tracks_dxyerr_v_nstlayers[i]->Fill(nstlayers, nt.tk_err_dxy(itk), w);
+
+	h_tracks_dzerr_v_pt[i]->Fill(pt, nt.tk_err_dz(itk), w);
+	h_tracks_dzerr_v_eta[i]->Fill(nt.tk_eta(itk), nt.tk_err_dz(itk), w);
+	h_tracks_dzerr_v_phi[i]->Fill(nt.tk_phi(itk), nt.tk_err_dz(itk), w);
+	h_tracks_dzerr_v_dxy[i]->Fill(nt.tk_dxybs(itk), nt.tk_err_dz(itk), w);
+	h_tracks_dzerr_v_dzpv[i]->Fill(nt.tk_dzpv(itk), nt.tk_err_dz(itk), w);
+	h_tracks_dzerr_v_npxlayers[i]->Fill(npxlayers, nt.tk_err_dz(itk), w);
+	h_tracks_dzerr_v_nstlayers[i]->Fill(nstlayers, nt.tk_err_dz(itk), w);
 
 	h_tracks_eta_v_phi[i]->Fill(nt.tk_phi(itk), nt.tk_eta(itk), w);
       }
