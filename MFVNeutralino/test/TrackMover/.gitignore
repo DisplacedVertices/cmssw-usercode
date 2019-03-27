@@ -1,7 +1,3 @@
-*Ntuple.cc
-hists.std*.*
-hists.log.*
-mctruths.txt
 BTagCalibrationStandalone.h
 BTagCalibrationStandalone.cc
 CSVv2_Moriond17_B_F.csv
