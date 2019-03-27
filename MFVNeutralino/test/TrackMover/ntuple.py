@@ -31,21 +31,14 @@ file_event_from_argv(process)
 
 remove_output_module(process)
 
-if settings.is_miniaod:
-    from JMTucker.Tools.NtupleFiller_cff import jmtNtupleFillerMiniAOD as jmtNtupleFiller
-    from JMTucker.MFVNeutralino.NtupleFiller_cff import mfvNtupleFillerMiniAOD as mfvNtupleFiller
-else:
-    from JMTucker.Tools.NtupleFiller_cff import jmtNtupleFiller
-    from JMTucker.MFVNeutralino.NtupleFiller_cff import mfvNtupleFiller
-
-process.load('JMTucker.Tools.WeightProducer_cfi')
-
+from JMTucker.Tools.NtupleFiller_cff import jmtNtupleFiller_pset
 from JMTucker.MFVNeutralino.Vertexer_cff import modifiedVertexSequence
 from JMTucker.MFVNeutralino.JetTrackRefGetter_cff import mfvJetTrackRefGetter
 mfvJetTrackRefGetter.input_is_miniaod = settings.is_miniaod
 
 process.mfvEvent.vertex_seed_tracks_src = ''
-process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
+process.load('JMTucker.Tools.WeightProducer_cfi')
+process.load('JMTucker.MFVNeutralino.WeightProducer_cfi') # JMTBAD
 process.mfvWeight.throw_if_no_mcstat = False
 
 process.p = cms.Path(process.mfvEventFilterSequence * process.goodOfflinePrimaryVertices)
@@ -89,8 +82,7 @@ for icfg, cfg in enumerate(cfgs):
         getattr(process, x + ex).jet_track_ref_getter.tracks_maps_srcs.append(cms.InputTag(tracks_name))
 
     tree = cms.EDAnalyzer('MFVMovedTracksTreer',
-                          jmtNtupleFiller,
-                          mfvNtupleFiller,
+                          jmtNtupleFiller_pset(settings.is_miniaod),
                           sel_tracks_src = cms.InputTag('mfvVertexTracks' + ex, 'seed'),
                           mover_src = cms.string(tracks_name),
                           vertices_src = cms.InputTag(auxes_name),
@@ -122,6 +114,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     set_splitting(samples, dataset, 'trackmover', data_json=json_path('ana_2017p8.json'))
 
     ms = MetaSubmitter('TrackMover' + version, dataset=dataset)
-    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier)
+    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier())
     ms.condor.stageout_files = 'all'
     ms.submit(samples)

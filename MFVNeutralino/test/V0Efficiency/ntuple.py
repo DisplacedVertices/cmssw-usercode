@@ -12,33 +12,27 @@ debug = False
 ####
 
 process = ntuple_process(settings)
+remove_output_module(process)
 tfileservice(process, 'k0tree.root')
-max_events(process, 100)
-report_every(process, 1000000)
-#want_summary(process)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
 sample_files(process, 'qcdht1500_2017' if settings.is_mc else 'JetHT2017F', dataset, 1)
-file_event_from_argv(process)
+cmssw_from_argv(process)
 
 ####
 
-remove_output_module(process)
-
-process.load('JMTucker.Tools.NtupleFiller_cff')
-process.load('JMTucker.Tools.WeightProducer_cfi')
+from JMTucker.Tools.NtupleFiller_cff import jmtNtupleFiller_pset
 
 #process.mfvUnpackedCandidateTracks.debug = debug
 process.mfvUnpackedCandidateTracks.cut_level = 1
 
 from JMTucker.MFVNeutralino.Vertexer_cfi import kvr_params
 process.mfvK0s = cms.EDAnalyzer('MFVK0Treer',
-                                process.jmtNtupleFillerMiniAOD if settings.is_miniaod else process.jmtNtupleFiller,
+                                jmtNtupleFiller_pset(settings.is_miniaod),
                                 kvr_params = kvr_params,
                                 debug = cms.untracked.bool(debug),
                                 )
 
 process.p = cms.Path(process.mfvEventFilterSequence * process.goodOfflinePrimaryVertices * process.mfvK0s)
-
 ReferencedTagsTaskAdder(process)('p')
 
 

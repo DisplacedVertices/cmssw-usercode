@@ -182,6 +182,7 @@ def aod_ntuple_process(settings):
     for x in process.patAlgosToolsTask, process.slimmingTask, process.packedPFCandidatesTask, process.patTask, process.pfNoPileUpJMETask:
         x.remove(process.goodOfflinePrimaryVertices)
     process.load('JMTucker.Tools.GoodPrimaryVertices_cfi')
+    process.load('JMTucker.Tools.WeightProducer_cfi')
     process.load('JMTucker.MFVNeutralino.Vertexer_cff')
     process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
     process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
@@ -235,6 +236,7 @@ def miniaod_ntuple_process(settings):
     process.load('JMTucker.Tools.MCStatProducer_cff')
     process.load('JMTucker.Tools.UpdatedJets_cff')
     process.load('JMTucker.Tools.PATTupleSelection_cfi')
+    process.load('JMTucker.Tools.WeightProducer_cfi')
     process.load('JMTucker.MFVNeutralino.UnpackedCandidateTracks_cfi')
     process.load('JMTucker.MFVNeutralino.Vertexer_cff')
     process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
