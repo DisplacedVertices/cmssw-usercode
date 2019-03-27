@@ -1,88 +1,14 @@
-#include <cassert>
-#include <fstream>
-#include <iostream>
-#include <string>
-#include <vector>
-#include <boost/program_options.hpp>
-#include "TFile.h"
 #include "TH2.h"
-#include "TTree.h"
-#include "TVector2.h"
-#include "JMTucker/Tools/interface/LumiList.h"
-#include "JMTucker/Tools/interface/PileupWeights.h"
-#include "JMTucker/Tools/interface/Ntuple.h"
-#include "utils.h"
+#include "JMTucker/MFVNeutralino/interface/Ntuple.h"
+#include "JMTucker/Tools/interface/NtupleReader.h"
 
 int main(int argc, char** argv) {
-  std::string in_fn;
-  std::string out_fn("hists.root");
-  std::string json;
-  float nevents_frac;
-  std::string pu_weights;
+  jmt::NtupleReader<mfv::K0Ntuple> nr;
+  nr.init_options("mfvK0s/t");
+  if (!nr.parse_options(argc, argv) || !nr.init()) return 1;
+  auto& nt = nr.nt();
+  auto& ntt = nt.tracks();
 
-  {
-    namespace po = boost::program_options;
-    po::options_description desc("Allowed options");
-    desc.add_options()
-      ("help,h", "this help message")
-      ("input-file,i",   po::value<std::string>(&in_fn),                                             "the input file (required)")
-      ("output-file,o",  po::value<std::string>(&out_fn)        ->default_value("hists.root"),       "the output file")
-      ("json,j",         po::value<std::string>(&json),                                              "lumi mask json file for data")
-      ("nevents-frac,n", po::value<float>(&nevents_frac)        ->default_value(1.f),                "only run on this fraction of events in the tree")
-      ("pu-weights",     po::value<std::string>(&pu_weights)    ->default_value("2017"),             "pileup weights to use")
-      ;
-
-    po::variables_map vm;
-    po::store(po::parse_command_line(argc, argv, desc), vm);
-    po::notify(vm);
-
-    if (vm.count("help")) {
-      std::cout << desc << "\n";
-      return 1;
-    }
-
-    if (in_fn == "") {
-      std::cout << "value for --input-file is required\n" << desc << "\n";
-      return 1;
-    }
-  }
-
-  std::cout << argv[0] << " with options:"
-            << " in_fn: " << in_fn
-            << " out_fn: " << out_fn
-            << " json: " << (json != "" ? json : "none")
-            << " nevents_frac: " << nevents_frac
-            << " pu_weights: " << pu_weights
-            << "\n";
-
-  root_setup();
-
-  jmt::PileupWeights puwhelper(pu_weights);
-
-  file_and_tree fat(in_fn.c_str(), out_fn.c_str());
-  fat.t->GetEntry(0);
-  const jmt::TrackingNtuple& nt = fat.nt;
-  const jmt::TracksSubNtuple& ntt = nt.tracks();
-
-  const bool is_mc = nt.base().run() == 1;
-
-  fat.f_out->mkdir("mfvWeight")->cd();
-  TH1D* h_sums = (TH1D*)fat.f->Get("mcStat/h_sums")->Clone();
-  if (is_mc && nevents_frac < 1) {
-    h_sums->SetBinContent(1, h_sums->GetBinContent(1) * nevents_frac);
-    for (int i = 2, ie = h_sums->GetNbinsX(); i <= ie; ++i) // invalidate other entries since we can't just assume equal weights in them
-      h_sums->SetBinContent(i, -1e9);
-  }
-  fat.f_out->cd();
-
-  std::unique_ptr<jmt::LumiList> good_ll;
-  if (!is_mc && json != "") good_ll.reset(new jmt::LumiList(json));
-
-  TH1D* h_norm = new TH1D("h_norm", "", 1, 0, 1);
-  if (is_mc)
-    h_norm->Fill(0.5, h_sums->GetBinContent(1));
-
-  TH1D* h_npu = new TH1D("h_npu", ";true npu", 100, 0, 100);
   TH1D* h_npv = new TH1D("h_npv", ";number of primary vertices", 50, 0, 50);
   TH1D* h_bsx = new TH1D("h_bsx", ";beamspot x", 400, -0.15, 0.15);
   TH1D* h_bsy = new TH1D("h_bsy", ";beamspot y", 400, -0.15, 0.15);
@@ -195,27 +121,8 @@ int main(int argc, char** argv) {
     h_tracks_eta_v_phi[i] = new TH2D(TString::Format("h_%s_tracks_eta_v_phi", ex[i]), TString::Format("%s tracks;tracks phi;tracks eta", ex[i]), 126, -3.15, 3.15, 80, -4, 4);
   }
 
-  unsigned long long jj = 0;
-  const unsigned long long jje = fat.t->GetEntries();
-  const unsigned long long jjmax = nevents_frac < 1 ? nevents_frac * jje : jje;
-  for (; jj < jjmax; ++jj) {
-    if (fat.t->LoadTree(jj) < 0) break;
-    if (fat.t->GetEntry(jj) <= 0) continue;
-    if (jj % 2000 == 0) {
-      if (jjmax != jje) printf("\r%llu/%llu(/%llu)", jj, jjmax, jje);
-      else              printf("\r%llu/%llu",        jj, jjmax);
-      fflush(stdout);
-    }
-
-    if (!is_mc && good_ll.get() && !good_ll->contains(nt.base()))
-      continue;
-
-    double w = 1;
-
-    h_npu->Fill(nt.base().npu());
-
-    if (is_mc && puwhelper.valid())
-      w *= puwhelper.w(nt.base().npu());
+  auto fcn = [&]() {
+    const double w = nr.weight();
 
     h_npv->Fill(nt.pvs().n(), w);
 
@@ -309,11 +216,12 @@ int main(int argc, char** argv) {
 	h_tracks_eta_v_phi[i]->Fill(ntt.phi(itk), ntt.eta(itk), w);
       }
     }
-    for (int i = 0; i < max_tk_type; ++i) {
-      h_ntracks[i]->Fill(ntracks[i], w);
-    }
-  }
 
-  if (jjmax != jje) printf("\rdone with %llu events (out of %llu)\n", jjmax, jje);
-  else              printf("\rdone with %llu events\n",               jjmax);
+    for (int i = 0; i < max_tk_type; ++i)
+      h_ntracks[i]->Fill(ntracks[i], w);
+
+    return std::make_pair(true, w);
+  };
+
+  nr.loop(fcn);
 }
