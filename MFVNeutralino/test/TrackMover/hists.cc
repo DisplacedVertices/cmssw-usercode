@@ -1,6 +1,3 @@
-#include <boost/program_options.hpp>
-#include "JMTucker/Tools/interface/LumiList.h"
-#include "JMTucker/Tools/interface/PileupWeights.h"
 #include "BTagSFHelper.h"
 #include "utils.h"
 
@@ -13,111 +10,55 @@ double ntks_weight(int i) {
 }
 
 int main(int argc, char** argv) {
-  std::string in_fn;
-  std::string out_fn("hists.root");
-  std::string tree_path("mfvMovedTree20/t");
-  std::string json;
-  float nevents_frac;
   int itau = 10000;
-  bool apply_weights = true;
-  std::string pu_weights;
   bool btagsf_weights = false;
   bool ntks_weights = false;
 
-  {
-    namespace po = boost::program_options;
-    po::options_description desc("Allowed options");
-    desc.add_options()
-      ("help,h", "this help message")
-      ("input-file,i",  po::value<std::string>(&in_fn),                                             "the input file (required)")
-      ("output-file,o", po::value<std::string>(&out_fn)        ->default_value("hists.root"),       "the output file")
-      ("tree-path,t",   po::value<std::string>(&tree_path)     ->default_value("mfvMovedTree20/t"), "the tree path")
-      ("json,j",        po::value<std::string>(&json),                                              "lumi mask json file for data")
-      ("nevents-frac,n",po::value<float>      (&nevents_frac)  ->default_value(1.f),                "only run on this fraction of events in the tree")
-      ("tau",           po::value<int>        (&itau)          ->default_value(10000),              "tau in microns, for reweighting")
-      ("weights",       po::value<bool>       (&apply_weights) ->default_value(true),               "whether to use any other weights, including those in the tree")
-      ("pu-weights",    po::value<std::string>(&pu_weights)    ->default_value(""),                 "extra pileup weights beyond whatever's already in the tree")
-      ("btagsf",        po::value<bool>       (&btagsf_weights)->default_value(false),              "whether to use b-tag SF weights")
-      ("ntks-weights",  po::value<bool>       (&ntks_weights)  ->default_value(false),              "whether to use ntracks weights")
-      ;
+  jmt::NtupleReader<mfv::MovedTracksNtuple> nr;
 
-    po::variables_map vm;
-    po::store(po::parse_command_line(argc, argv, desc), vm);
-    po::notify(vm);
+  namespace po = boost::program_options;
+  nr.init_options("mfvMovedTree20/t")
+    ("tau",           po::value<int>   (&itau)          ->default_value(10000),   "tau in microns, for reweighting")
+    ("btagsf",        po::value<bool>  (&btagsf_weights)->default_value(false),   "whether to use b-tag SF weights")
+    ("ntks-weights",  po::value<bool>  (&ntks_weights)  ->default_value(false),   "whether to use ntracks weights")
+    ;
 
-    if (vm.count("help")) {
-      std::cout << desc << "\n";
-      return 1;
-    }
+  if (!nr.parse_options(argc, argv)) return 1;
+  std::cout << " tau: " << itau << " btagsf: " << btagsf_weights << " ntks_weights: " << ntks_weights << "\n";
 
-    if (in_fn == "") {
-      std::cout << "value for --input-file is required\n" << desc << "\n";
-      return 1;
-    }
-
-    if (tree_path.find("/") == std::string::npos) {
-      tree_path += "/t";
-      std::cout << "tree_path changed to " << tree_path << "\n";
-    }
-  }
-
-  std::cout << argv[0] << " with options:"
-            << " in_fn: " << in_fn
-            << " out_fn: " << out_fn
-            << " tree_path: " << tree_path
-            << " json: " << (json != "" ? json : "none")
-            << " nevents_frac: " << nevents_frac
-            << " tau: " << itau
-            << " weights: " << apply_weights
-            << " pu_weights: " << pu_weights
-            << " btagsf: " << btagsf_weights
-            << " ntks_weights: " << ntks_weights
-            << "\n";
+  if (!nr.init()) return 1;
+  auto& nt = nr.nt();
 
   ////
 
-  const int itau_original = 10000; // JMTBAD if you change this in ntuple.py, change it here
+  const int itau_original = 10000; // JMTBAD keep in sync with value in ntuple.py
   if (itau != itau_original)
-    printf("reweighting tau distribution from %i um to %i um\n", itau_original, itau);
+    std::cout << "reweighting tau distribution from " << itau_original << " um to " << itau << " um\n";
   const double o_tau_from = 10000./itau_original;
   const double o_tau_to = 10000./itau;
-
-  jmt::PileupWeights puwhelper(pu_weights);
+  auto tau_weight = [&](double tau) { return o_tau_to/o_tau_from * exp((o_tau_from - o_tau_to) * tau); };
 
   std::unique_ptr<BTagSFHelper> btagsfhelper;
   if (btagsf_weights) btagsfhelper.reset(new BTagSFHelper);
 
-  jmt::set_root_style();
+  const std::vector<std::string> extra_weights_hists = {
+    //"nocuts_npv_den",
+    //"nocuts_pvz_den",
+    //"nocuts_pvx_den",
+    //"nocuts_pvy_den",
+    //"nocuts_ntracks_den",
+    //"nocuts_npv_den_redo"
+    //"nocuts_ht_den",
+    //"nocuts_pvntracks_den",
+  };
+  TFile* extra_weights = extra_weights_hists.size() > 0 ? TFile::Open("reweight.root") : 0;
+  const bool use_extra_weights = extra_weights != 0 && extra_weights->IsOpen();
+  if (use_extra_weights) printf("using extra weights from reweight.root\n");
 
-  jmt::NtupleReader<mfv::MovedTracksNtuple> nr(in_fn, out_fn, tree_path);
-  TTree* t = nr.t;
-  mfv::MovedTracksNtuple& nt = nr.nt;
-  t->GetEntry(0);
-
-  const bool is_mc = nt.base().run() == 1;
-  std::unique_ptr<jmt::LumiList> good_ll;
-  if (!is_mc && json != "") good_ll.reset(new jmt::LumiList(json));
-
-  nr.f_out->mkdir("mfvWeight")->cd();
-  TH1D* h_sums = (TH1D*)nr.f->Get("mcStat/h_sums")->Clone("h_sums");
-  if (is_mc && nevents_frac < 1) {
-    h_sums->SetBinContent(1, h_sums->GetBinContent(1) * nevents_frac);
-    for (int i = 2, ie = h_sums->GetNbinsX(); i <= ie; ++i) // invalidate other entries since we can't just assume equal weights in them
-      h_sums->SetBinContent(i, -1e9);
-  }
-  nr.f_out->cd();
-
-  TH1F* h_norm = new TH1F("h_norm", "", 1, 0, 1);
-  if (is_mc)
-    h_norm->Fill(0.5, h_sums->GetBinContent(1));
-
-  TH1D* h_weight = new TH1D("h_weight", ";weight;events/0.01", 200, 0, 2);
-  TH1D* h_btagsfweight = new TH1D("h_btagsfweight", ";weight;events/0.01", 200, 0, 2);
   TH1D* h_tau = new TH1D("h_tau", ";tau (cm);events/10 #mum", 10000, 0,10);
-  TH1D* h_npu = new TH1D("h_npu", ";# PU;events/1", 100, 0, 100);
+  TH1D* h_btagsfweight = new TH1D("h_btagsfweight", ";weight;events/0.01", 200, 0, 2);
 
   const int num_numdens = 3;
-
   numdens nds[num_numdens] = {
     numdens("nocuts"),
     numdens("ntracks"),
@@ -336,60 +277,23 @@ int main(int argc, char** argv) {
     h_moved_nosel_tks_nstlayers[i] = new TH1D(TString::Format("h_%i_moved_nosel_tks_nstlayers", i), ";moved but not selected track nstlayers;tracks/1", 20, 0, 20);
   }
 
-  double den = 0;
+
   std::map<std::string, double> nums;
+  unsigned long long nden = 0, nnegden = 0;
+  double den = 0, negden = 0;
 
-  const std::vector<std::string> extra_weights_hists = {
-    //"nocuts_npv_den",
-    //"nocuts_pvz_den",
-    //"nocuts_pvx_den",
-    //"nocuts_pvy_den",
-    //"nocuts_ntracks_den",
-    //"nocuts_npv_den_redo"
-    //"nocuts_ht_den",
-    //"nocuts_pvntracks_den",
-  };
-  TFile* extra_weights = extra_weights_hists.size() > 0 ? TFile::Open("reweight.root") : 0;
-  const bool use_extra_weights = extra_weights != 0 && extra_weights->IsOpen();
-  if (use_extra_weights) printf("using extra weights from reweight.root\n");
-
-  long notskipped = 0, nden = 0, ndennegweight = 0, nnegweight = 0;
-  double sumnegweightden = 0;
-
-  unsigned long long jj = 0;
-  const unsigned long long jje = nr.t->GetEntries();
-  const unsigned long long jjmax = nevents_frac < 1 ? nevents_frac * jje : jje;
-  for (; jj < jjmax; ++jj) {
-    if (nr.t->LoadTree(jj) < 0) break;
-    if (nr.t->GetEntry(jj) <= 0) continue;
-    if (jj % 25000 == 0) {
-      if (jjmax != jje) printf("\r%llu/%llu(/%llu)", jj, jjmax, jje);
-      else              printf("\r%llu/%llu",        jj, jjmax);
-      fflush(stdout);
-    }
-
-    if (!is_mc && good_ll.get() && !good_ll->contains(nt.base()))
-      continue;
-
-    ++notskipped;
-
-    double w = 1;
+  auto fcn = [&]() {
+    double w = nr.weight();
 
     if (itau != 10000) {
       const double tau = nt.move_tau();
-      const double tau_weight = o_tau_to/o_tau_from * exp((o_tau_from - o_tau_to) * tau);
-      h_tau->Fill(tau, tau_weight);
-      w *= tau_weight;
+      const double tw = tau_weight(tau);
+      h_tau->Fill(tau, tw);
+      w *= tw;
     }
 
-    if (is_mc && apply_weights) {
-      if (nt.base().weight() < 0) ++nnegweight;
-      w *= nt.base().weight();
-
-      if (puwhelper.valid())
-        w *= puwhelper.w(nt.base().npu());
-
-      if (btagsf_weights) {
+    if (nr.use_weights()) {
+      if (nr.is_mc() && btagsf_weights) {
         double p_mc = 1, p_data = 1;
 
         for (size_t i = 0, ie = nt.jets().n(); i < ie; ++i) {
@@ -417,7 +321,7 @@ int main(int argc, char** argv) {
         w *= btagsfw;
       }
 
-      if (use_extra_weights) {
+      if (nr.is_mc() && use_extra_weights) {
         for (const auto& name : extra_weights_hists) {
           TH1D* hw = (TH1D*)extra_weights->Get(name.c_str());
           assert(hw);
@@ -443,6 +347,13 @@ int main(int argc, char** argv) {
     const double movedist2 = move_vector.Perp();
     const double movedist3 = move_vector.Mag();
     const double movevectoreta = move_vector.Eta();
+
+    if (nt.jets().ht() < 1200 ||
+        nt.jets().nminpt() < 4 ||
+        movedist2 < 0.03 ||
+        movedist2 > 2.0) {
+      return std::make_pair(true, w);
+    }
 
     double jet_sume = 0;
     double jet_drmax = 0;
@@ -524,16 +435,6 @@ int main(int argc, char** argv) {
       }
     }
 
-    if (nt.jets().ht() < 1200 ||
-        nt.jets().nminpt() < 4 ||
-        movedist2 < 0.03 ||
-        movedist2 > 2.0) {
-      continue;
-    }
-
-    h_weight->Fill(w);
-    h_npu->Fill(nt.base().npu(), w);
-
     int n_pass_nocuts = 0;
     int n_pass_ntracks = 0;
     int n_pass_all = 0;
@@ -553,7 +454,7 @@ int main(int argc, char** argv) {
       if (pass_ntracks)                 { set_it_if_first(first_vtx_to_pass[1], ivtx); ++n_pass_ntracks; }
       if (pass_ntracks && pass_bs2derr) { set_it_if_first(first_vtx_to_pass[2], ivtx); ++n_pass_all;     }
 
-      if (pass_ntracks && pass_bs2derr && is_mc && apply_weights && ntks_weights)
+      if (pass_ntracks && pass_bs2derr && nr.is_mc() && nr.use_weights() && ntks_weights)
         w *= ntks_weight(nt.vertices().ntracks(ivtx));
     }
 
@@ -592,7 +493,7 @@ int main(int argc, char** argv) {
 
     ++nden;
     den += w;
-    if (w < 0) { ++ndennegweight; sumnegweightden += w; }
+    if (w < 0) { ++nnegden; negden += w; }
 
     for (int in = 0; in < num_numdens; ++in) {
       const int iv = first_vtx_to_pass[in];
@@ -745,12 +646,13 @@ int main(int argc, char** argv) {
         }
       }
     }
-  }
 
-  if (jjmax != jje) printf("\rdone with %llu events (out of %llu)\n", jjmax, jje);
-  else              printf("\rdone with %llu events\n",               jjmax);
-  printf("%li/%li (%li/%li den) events with negative weights\n", nnegweight, notskipped, ndennegweight, nden);
-  printf("%.1f events in denominator (including %.1f negative)\n", den, sumnegweightden);
+    return std::make_pair(true, w);
+  };
+
+  nr.loop(fcn);
+
+  printf("%llu/%llu = %.1f/%.1f denominator events with negative weights\n", nnegden, nden, negden, den);
   printf("%20s  %12s  %12s  %10s [%10s, %10s] +%10s -%10s\n", "name", "num", "den", "eff", "lo", "hi", "+", "-");
   for (const auto& p : nums) {
     const jmt::interval i = jmt::clopper_pearson_binom(p.second, den);

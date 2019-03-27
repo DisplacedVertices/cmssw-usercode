@@ -1,28 +1,21 @@
 #include "utils.h"
 
 int main(int argc, char** argv) {
-  if (argc < 4) {
-    fprintf(stderr, "usage: mctruth.exe in.root out.root min_lspdist3\n");
-    return 1;
-  }
+  double min_lspdist3 = 0.02;
 
-  gRandom->SetSeed(4916823);
+  jmt::NtupleReader<mfv::MovedTracksNtuple> nr;
+  namespace po = boost::program_options;
+  nr.init_options("mfvMovedTree/t")
+    ("min-lspdist3", po::value<double>(&min_lspdist3)->default_value(0.02), "min distance between LSP decays to use event")
+    ;
 
-  const char* in_fn  = argv[1];
-  const char* out_fn = argv[2];
-  const double min_lspdist3 = atof(argv[3]);
-  const bool apply_weight = true;
-  if (!apply_weight)
-    printf("******************************\nno pileup weight applied\n******************************\n");
+  if (!nr.parse_options(argc, argv)) return 1;
+  std::cout << " min_lspdist3: " << min_lspdist3 << "\n";
 
-  jmt::set_root_style();
+  if (!nr.init()) return 1;
+  auto& nt = nr.nt();
 
-  jmt::NtupleReader<mfv::MovedTracksNtuple> nr(in_fn, out_fn, "mfvMovedTree/t");
-  TTree* t = nr.t;
-  mfv::MovedTracksNtuple& nt = nr.nt;
-
-  TH1D* h_weight = new TH1D("h_weight", ";weight;events/0.01", 200, 0, 2);
-  TH1D* h_npu = new TH1D("h_npu", ";# PU;events/1", 100, 0, 100);
+  ////
 
   const int num_numdens = 3;
 
@@ -62,24 +55,15 @@ int main(int argc, char** argv) {
   double den = 0;
   std::map<std::string, double> nums;
 
-  for (int j = 0, je = t->GetEntries(); j < je; ++j) {
-    if (t->LoadTree(j) < 0) break;
-    if (t->GetEntry(j) <= 0) continue;
-
-    if (nt.jets().ht() < 1200 ||
-        nt.jets().nminpt() < 4)
-      continue;
-
-    const double w = apply_weight ? nt.base().weight() : 1.;
-    h_weight->Fill(w);
-    h_npu->Fill(nt.base().npu(), w);
-    auto F1 = [&w](TH1* h, double v)            { h                    ->Fill(v,     w); };
-    //auto F2 = [&w](TH1* h, double v, double v2) { dynamic_cast<TH2*>(h)->Fill(v, v2, w); };
-
+  auto fcn = [&]() {
+    double w = nr.weight();
     const double lspdist3 = nt.gentruth().lspdist3();
 
-    if (lspdist3 < min_lspdist3)
-      continue;
+    if (nt.jets().ht() < 1200 || nt.jets().nminpt() < 4 || lspdist3 < min_lspdist3)
+      return std::make_pair(true, w);
+
+    auto F1 = [&w](TH1* h, double v)            { h                    ->Fill(v,     w); };
+  //auto F2 = [&w](TH1* h, double v, double v2) { dynamic_cast<TH2*>(h)->Fill(v, v2, w); };
 
     const size_t nvtx = nt.vertices().n();
     const double lspdist2 = nt.gentruth().lspdist2();
@@ -168,7 +152,11 @@ int main(int argc, char** argv) {
         F1(nd(k_ht)       .num, nt.jets().ht());
       }
     }
-  }
+
+    return std::make_pair(true, w);
+  };
+
+  nr.loop(fcn);
 
   printf("%12.1f", den);
   for (const std::string& c : {"nocuts", "ntracks", "all"}) {

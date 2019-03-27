@@ -4,11 +4,8 @@
 #include <map>
 #include <string>
 #include "TH2.h"
-#include "TRandom3.h"
 #include "JMTucker/MFVNeutralino/interface/Ntuple.h"
 #include "JMTucker/Tools/interface/NtupleReader.h"
-#include "JMTucker/Tools/interface/Prob.h"
-#include "JMTucker/Tools/interface/ROOTTools.h"
 
 struct numden {
   numden() : num(0), den(0) {}

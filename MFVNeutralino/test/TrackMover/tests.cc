@@ -1,41 +1,33 @@
 #include "utils.h"
 
 int main(int argc, char** argv) {
-  if (argc < 6) {
-    fprintf(stderr, "usage: checknjets.exe in.root out.root tree/path njets_req nbjets_req\n");
-    return 1;
-  }
+  int njets, nbjets;
 
-  const char* in_fn  = argv[1];
-  const char* out_fn  = argv[2];
-  const char* tree_path = argv[3];
-  const int njets_req = atoi(argv[4]);
-  const int nbjets_req = atoi(argv[5]);
+  jmt::NtupleReader<mfv::MovedTracksNtuple> nr;
+  namespace po = boost::program_options;
+  nr.init_options("mfvMovedTree20/t")
+    ("njets",  po::value<int>(&njets) ->default_value(2), "njets")
+    ("nbjets", po::value<int>(&nbjets)->default_value(0), "nbjets")
+    ;
 
-  jmt::NtupleReader<mfv::MovedTracksNtuple> nr(in_fn, out_fn, tree_path);
-  TTree* t = nr.t;
-  mfv::MovedTracksNtuple& nt = nr.nt;
+  if (!nr.parse_options(argc, argv)) return 1;
+  std::cout << " njets: " << njets << " nbjets: " << nbjets << "\n";
+
+  if (!nr.init()) return 1;
+  auto& nt = nr.nt();
+
   bool ok = true;
 
-  nr.f_out->cd();
-  TH1D* h_tau = new TH1D("h_tau", "", 10000, 0, 10);
-
-  for (int j = 0, je = t->GetEntries(); j < je; ++j) {
-    //if (j == 100000) break;
-    if (t->LoadTree(j) < 0) break;
-    if (t->GetEntry(j) <= 0) continue;
-    if (j % 250000 == 0) {
-      printf("\r%i/%i", j, je);
-      fflush(stdout);
-    }
-
-    if (nt.tm().npreseljets() < njets_req || nt.tm().npreselbjets() < nbjets_req) {
+  auto fcn = [&]() {
+    if (nt.tm().npreseljets() < njets || nt.tm().npreselbjets() < nbjets) {
       ok = false;
       std::cout << "bad event with " << +nt.tm().npreseljets() << "," << +nt.tm().npreselbjets() << ": " << nt.base().run() << "," << nt.base().lumi() << "," << nt.base().event() << "\n";
     }
 
-    h_tau->Fill(nt.move_tau());
-  }
+    return std::make_pair(true, nr.weight());
+  };
+
+  nr.loop(fcn);
 
   printf(ok ? "\nkein problem\n" : "\nscheisse\n");
   return !ok;
