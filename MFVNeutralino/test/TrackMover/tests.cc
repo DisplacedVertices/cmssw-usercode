@@ -1,9 +1,4 @@
-#include "TFile.h"
-#include "TH1.h"
-#include "TTree.h"
-#include "JMTucker/MFVNeutralino/interface/Ntuple.h"
 #include "utils.h"
-#include <iostream>
 
 int main(int argc, char** argv) {
   if (argc < 6) {
@@ -17,12 +12,12 @@ int main(int argc, char** argv) {
   const int njets_req = atoi(argv[4]);
   const int nbjets_req = atoi(argv[5]);
 
-  file_and_tree fat(in_fn, out_fn, tree_path);
-  TTree* t = fat.t;
-  mfv::MovedTracksNtuple& nt = fat.nt;
+  jmt::NtupleReader<mfv::MovedTracksNtuple> nr(in_fn, out_fn, tree_path);
+  TTree* t = nr.t;
+  mfv::MovedTracksNtuple& nt = nr.nt;
   bool ok = true;
 
-  fat.f_out->cd();
+  nr.f_out->cd();
   TH1D* h_tau = new TH1D("h_tau", "", 10000, 0, 10);
 
   for (int j = 0, je = t->GetEntries(); j < je; ++j) {

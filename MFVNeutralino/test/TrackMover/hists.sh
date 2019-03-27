@@ -7,7 +7,7 @@ if [[ $job < 0 ]]; then
     test=1
 fi
 
-inpathbase=root://cmseos.fnal.gov//store/user/tucker/TrackMoverV21mV2
+inpathbase=root://cmseos.fnal.gov//store/user/tucker/TrackMoverV23mv2
 
 paths=(
 ${inpathbase}
@@ -27,16 +27,12 @@ qcdht0700_2017.root
 qcdht1000_2017.root
 qcdht1500_2017.root
 qcdht2000_2017.root
-ttbarht0600_2017.root
-ttbarht0800_2017.root
-ttbarht1200_2017.root
-ttbarht2500_2017.root
 )
 
 nsigs=( 4p0 )
-taus=( 100 300 1000 10000 30000 )
-nls=( 2 3 )
-nbs=( 0 1 2 )
+taus=( 1000 )
+nls=( 2 )
+nbs=( 0 )
 
 ####
 
@@ -80,12 +76,14 @@ if [[ $test == 1 ]]; then
     exit 1
 fi
 
+wd=$(pwd)
 export SCRAM_ARCH=slc6_amd64_gcc630
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 scram project CMSSW CMSSW_9_4_6_patch1 2>&1
-cd CMSSW_9_4_6_patch1/src
+cd CMSSW_9_4_6_patch1
+tar xf $wd/libs.tgz
 eval $(scram ru -sh)
-cd ../..
+cd $wd
 
 cmd="./hists.exe -i $path/$fn -o $outfn -t $treepath --tau $tau"
 if [[ $fn == JetHT* ]]; then

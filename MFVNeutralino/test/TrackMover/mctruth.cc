@@ -1,8 +1,3 @@
-#include "TH2.h"
-#include "TRandom3.h"
-#include "TTree.h"
-#include "TVector2.h"
-#include "JMTucker/MFVNeutralino/interface/Ntuple.h"
 #include "utils.h"
 
 int main(int argc, char** argv) {
@@ -20,11 +15,11 @@ int main(int argc, char** argv) {
   if (!apply_weight)
     printf("******************************\nno pileup weight applied\n******************************\n");
 
-  root_setup();
+  jmt::set_root_style();
 
-  file_and_tree fat(in_fn, out_fn, "mfvMovedTree/t");
-  TTree* t = fat.t;
-  mfv::MovedTracksNtuple& nt = fat.nt;
+  jmt::NtupleReader<mfv::MovedTracksNtuple> nr(in_fn, out_fn, "mfvMovedTree/t");
+  TTree* t = nr.t;
+  mfv::MovedTracksNtuple& nt = nr.nt;
 
   TH1D* h_weight = new TH1D("h_weight", ";weight;events/0.01", 200, 0, 2);
   TH1D* h_npu = new TH1D("h_npu", ";# PU;events/1", 100, 0, 100);
@@ -177,7 +172,7 @@ int main(int argc, char** argv) {
 
   printf("%12.1f", den);
   for (const std::string& c : {"nocuts", "ntracks", "all"}) {
-    const interval i = clopper_pearson_binom(nums[c], den);
+    const jmt::interval i = jmt::clopper_pearson_binom(nums[c], den);
     printf("    %6.4f +- %6.4f", i.value, i.error());
   }
   printf("\n");

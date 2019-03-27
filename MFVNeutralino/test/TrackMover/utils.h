@@ -1,61 +1,38 @@
 #ifndef trackmover_utils_h
 #define trackmover_utils_h
 
-#include <cmath>
 #include <map>
 #include <string>
+#include "TH2.h"
+#include "TRandom3.h"
 #include "JMTucker/MFVNeutralino/interface/Ntuple.h"
-
-class TH1;
-class TFile;
-class TTree;
-
-template <typename T>
-T mag(T x, T y, T z=0) {
-  return sqrt(x*x + y*y + z*z);
-}
-
-struct interval {
-  bool success;
-  double value;
-  double lower;
-  double upper;
-  double error() const { return (upper - lower)/2; }
-  double in(double v) const { return v >= lower && v <= upper; }
-};
-
-interval clopper_pearson_binom(const double n_on, const double n_tot,
-                               const double alpha=1-0.6827, const bool equal_tailed=true);
+#include "JMTucker/Tools/interface/NtupleReader.h"
+#include "JMTucker/Tools/interface/Prob.h"
+#include "JMTucker/Tools/interface/ROOTTools.h"
 
 struct numden {
   numden() : num(0), den(0) {}
-  numden(const char* name, const char* title, int nbins, double xlo, double xhi);
-  numden(const char* name, const char* title, int nbins, double xlo, double xhi, int nbinsy, double ylo, double yhi);
+  numden(const char* name, const char* title, int nbins, double xlo, double xhi)
+  : num(new TH1D(TString::Format("%s_num", name), title, nbins, xlo, xhi)),
+    den(new TH1D(TString::Format("%s_den", name), title, nbins, xlo, xhi))
+  {}
+  numden(const char* name, const char* title, int nbins, double xlo, double xhi, int nbinsy, double ylo, double yhi)
+  : num(new TH2D(TString::Format("%s_num", name), title, nbins, xlo, xhi, nbinsy, ylo, yhi)),
+    den(new TH2D(TString::Format("%s_den", name), title, nbins, xlo, xhi, nbinsy, ylo, yhi))
+  {}
   // no ownership, the TFile owns the histos
   TH1* num;
   TH1* den;
 };
 
 struct numdens {
-  numdens(const char* c);
-  void book(int key, const char* name, const char* title, int nbins, double xlo, double xhi);
-  void book(int key, const char* name, const char* title, int nbins, double xlo, double xhi, int nbinsy, double ylo, double yhi);
-  numden& operator()(int);
+  numdens(const char* c) : common(c + std::string("_")) {}
+  void book(int key, const char* name, const char* title, int nbins, double xlo, double xhi) { m.insert(std::make_pair(key, numden((common + name).c_str(), title, nbins, xlo, xhi))); }
+  void book(int key, const char* name, const char* title, int nbins, double xlo, double xhi, int nbinsy, double ylo, double yhi) { m.insert(std::make_pair(key, numden((common + name).c_str(), title, nbins, xlo, xhi, nbinsy, ylo, yhi))); }
+  numden& operator()(int k) { return m[k]; }
 
   std::string common;
   std::map<int, numden> m;
-};
-
-void root_setup();
-
-struct file_and_tree {
-  TFile* f;
-  TTree* t;
-  mfv::MovedTracksNtuple nt;
-  TFile* f_out;
-
-  file_and_tree(const char* in_fn, const char* out_fn, const char* tree_path);
-  ~file_and_tree();
 };
 
 #endif

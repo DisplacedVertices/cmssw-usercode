@@ -1,15 +1,6 @@
-#include <cassert>
-#include <iostream>
 #include <boost/program_options.hpp>
-#include "TH1.h"
-#include "TH2.h"
-#include "TFile.h"
-#include "TTree.h"
-#include "TVector2.h"
-#include "TVector3.h"
 #include "JMTucker/Tools/interface/LumiList.h"
 #include "JMTucker/Tools/interface/PileupWeights.h"
-#include "JMTucker/MFVNeutralino/interface/Ntuple.h"
 #include "BTagSFHelper.h"
 #include "utils.h"
 
@@ -96,25 +87,25 @@ int main(int argc, char** argv) {
   std::unique_ptr<BTagSFHelper> btagsfhelper;
   if (btagsf_weights) btagsfhelper.reset(new BTagSFHelper);
 
-  root_setup();
+  jmt::set_root_style();
 
-  file_and_tree fat(in_fn.c_str(), out_fn.c_str(), tree_path.c_str());
-  TTree* t = fat.t;
-  mfv::MovedTracksNtuple& nt = fat.nt;
+  jmt::NtupleReader<mfv::MovedTracksNtuple> nr(in_fn, out_fn, tree_path);
+  TTree* t = nr.t;
+  mfv::MovedTracksNtuple& nt = nr.nt;
   t->GetEntry(0);
 
   const bool is_mc = nt.base().run() == 1;
   std::unique_ptr<jmt::LumiList> good_ll;
   if (!is_mc && json != "") good_ll.reset(new jmt::LumiList(json));
 
-  fat.f_out->mkdir("mfvWeight")->cd();
-  TH1D* h_sums = (TH1D*)fat.f->Get("mcStat/h_sums")->Clone("h_sums");
+  nr.f_out->mkdir("mfvWeight")->cd();
+  TH1D* h_sums = (TH1D*)nr.f->Get("mcStat/h_sums")->Clone("h_sums");
   if (is_mc && nevents_frac < 1) {
     h_sums->SetBinContent(1, h_sums->GetBinContent(1) * nevents_frac);
     for (int i = 2, ie = h_sums->GetNbinsX(); i <= ie; ++i) // invalidate other entries since we can't just assume equal weights in them
       h_sums->SetBinContent(i, -1e9);
   }
-  fat.f_out->cd();
+  nr.f_out->cd();
 
   TH1F* h_norm = new TH1F("h_norm", "", 1, 0, 1);
   if (is_mc)
@@ -366,11 +357,11 @@ int main(int argc, char** argv) {
   double sumnegweightden = 0;
 
   unsigned long long jj = 0;
-  const unsigned long long jje = fat.t->GetEntries();
+  const unsigned long long jje = nr.t->GetEntries();
   const unsigned long long jjmax = nevents_frac < 1 ? nevents_frac * jje : jje;
   for (; jj < jjmax; ++jj) {
-    if (fat.t->LoadTree(jj) < 0) break;
-    if (fat.t->GetEntry(jj) <= 0) continue;
+    if (nr.t->LoadTree(jj) < 0) break;
+    if (nr.t->GetEntry(jj) <= 0) continue;
     if (jj % 25000 == 0) {
       if (jjmax != jje) printf("\r%llu/%llu(/%llu)", jj, jjmax, jje);
       else              printf("\r%llu/%llu",        jj, jjmax);
@@ -762,7 +753,7 @@ int main(int argc, char** argv) {
   printf("%.1f events in denominator (including %.1f negative)\n", den, sumnegweightden);
   printf("%20s  %12s  %12s  %10s [%10s, %10s] +%10s -%10s\n", "name", "num", "den", "eff", "lo", "hi", "+", "-");
   for (const auto& p : nums) {
-    const interval i = clopper_pearson_binom(p.second, den);
+    const jmt::interval i = jmt::clopper_pearson_binom(p.second, den);
     printf("%20s  %12.1f  %12.1f  %10.4f [%10.4f, %10.4f] +%10.4f -%10.4f\n", p.first.c_str(), p.second, den, i.value, i.lower, i.upper, i.upper - i.value, i.value - i.lower);
   }
 }

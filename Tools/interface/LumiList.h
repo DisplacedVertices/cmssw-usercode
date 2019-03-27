@@ -8,7 +8,7 @@
 namespace jmt {
   class LumiList {
   public:
-    LumiList(const std::string& fn, const bool debug=false) {
+    LumiList(const std::string& fn) {
       std::ifstream ifs(fn);
       std::regex run_re("(\\d+)");
       std::regex range_re("\\[\\s*(\\d+)\\s*,\\s*(\\d+)\\s*\\]");
@@ -16,20 +16,20 @@ namespace jmt {
       int run = -1;
       for (std::string line; std::getline(ifs, line, '"'); ) {
         // line = _trim(line);
-        if (debug) std::cout << "LumiList (TRIMMED) LINE: " << _trim(line) << "\n";
+        //if (debug) std::cout << "LumiList (TRIMMED) LINE: " << _trim(line) << "\n";
         if (std::regex_match(line, m, run_re)) {
-          if (debug) std::cout << "LumiList   RUN: " << m.str() << "\n";
+          //if (debug) std::cout << "LumiList   RUN: " << m.str() << "\n";
           run = std::stoi(m.str());
           assert(!containsRun(run));
         }
         else {
           auto b = std::sregex_iterator(line.begin(), line.end(), range_re);
           auto e = std::sregex_iterator();
-          if (debug && std::distance(b,e)) std::cout << "LumiList  RANGE(s):\n";
+          //if (debug && std::distance(b,e)) std::cout << "LumiList  RANGE(s):\n";
           for (std::sregex_iterator i = b; i != e; ++i) {
             const int la = std::stoi((*i)[1]);
             const int lb = std::stoi((*i)[2]);
-            if (debug) std::cout << "LumiList     " << i->str() << " = run " << run << " ls " << la << " through " << lb << "\n";
+            //if (debug) std::cout << "LumiList     " << i->str() << " = run " << run << " ls " << la << " through " << lb << "\n";
             _map[run].push_back(std::make_pair(la,lb));
           }
         }
