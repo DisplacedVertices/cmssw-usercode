@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 def setup_event_filter(process,
-                       path_name='pevtsel',
+                       path_name='p',
                        trigger_filter = True,
                        trigger_filter_name = 'mfvTriggerFilter',
                        event_filter = False,
@@ -9,7 +9,31 @@ def setup_event_filter(process,
                        event_filter_name = 'mfvEventFilter',
                        event_filter_require_vertex = True,
                        input_is_miniaod = False,
+                       mode = None,
                        ):
+
+    if mode == 'trigger only':
+        pass
+    elif mode == 'trigger jets only':
+        trigger_filter = 'jets only'
+    elif mode == 'trigger leptons only':
+        trigger_filter = 'leptons only'
+    elif mode == 'jets only':
+        trigger_filter = event_filter = 'jets only'
+    elif mode == 'leptons only':
+        trigger_filter = event_filter = 'leptons only'
+    elif mode == 'jets only novtx':
+        trigger_filter = event_filter = 'jets only'
+        event_filter_require_vertex = False
+    elif mode == 'leptons only novtx':
+        trigger_filter = event_filter = 'leptons only'
+        event_filter_require_vertex = False
+    elif mode == 'novtx':
+        event_filter = True
+        event_filter_require_vertex = False
+    elif mode:
+        assert mode is True
+        event_filter = True
 
     if trigger_filter == 'jets only':
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterJetsOnly as triggerFilter

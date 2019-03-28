@@ -60,28 +60,7 @@ def minitree_only(process, mode, settings, output_commands):
 def event_filter(process, mode, settings, output_commands, **kwargs):
     if mode:
         from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-        def setup(**kwargs):
-            setup_event_filter(process, path_name='p', input_is_miniaod=settings.is_miniaod, **kwargs)
-
-        if mode == 'trigger only':
-            setup(**kwargs)
-        elif mode == 'trigger jets only':
-            setup(trigger_filter='jets only', **kwargs)
-        elif mode == 'trigger leptons only':
-            setup(trigger_filter='leptons only', **kwargs)
-        elif mode == 'jets only':
-            setup(trigger_filter='jets only', event_filter='jets only', **kwargs)
-        elif mode == 'leptons only':
-            setup(trigger_filter='leptons only', event_filter='leptons only', **kwargs)
-        elif mode == 'jets only novtx':
-            setup(trigger_filter='jets only', event_filter='jets only', event_filter_require_vertex=False, **kwargs)
-        elif mode == 'leptons only novtx':
-            setup(trigger_filter='leptons only', event_filter='leptons only', event_filter_require_vertex=False, **kwargs)
-        elif mode == 'novtx':
-            setup(event_filter=True, event_filter_require_vertex=False, **kwargs)
-        else:
-            assert mode is True
-            setup(event_filter=True, **kwargs)
+        setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode, **kwargs)
 
 ########################################################################
 

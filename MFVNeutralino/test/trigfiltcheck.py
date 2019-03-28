@@ -10,9 +10,9 @@ tfileservice(process, 'trigfiltcheck.root')
 from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
 sef = lambda *a,**kwa: setup_event_filter(process, *a, input_is_miniaod=True, **kwa)
 sef('ptrigger')
-sef('pevtsel',        event_filter = True)
-sef('pevtselNoJESUp', event_filter = True, event_filter_jes_mult = 0, event_filter_name = 'mfvEventFilterNoJESUp')
-sef('pevtselWoVtx',   event_filter = True, event_filter_require_vertex = False, event_filter_name = 'mfvEventFilterWoVtx')
+sef('p',        event_filter = True)
+sef('pNoJESUp', event_filter = True, event_filter_jes_mult = 0, event_filter_name = 'mfvEventFilterNoJESUp')
+sef('pWoVtx',   event_filter = True, event_filter_require_vertex = False, event_filter_name = 'mfvEventFilterWoVtx')
 
 for x in process.mfvTriggerFilter.HLTPaths.value():
     filt_name = ''.join(x.split('_')[1:-1])
