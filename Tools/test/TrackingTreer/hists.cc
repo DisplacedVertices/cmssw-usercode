@@ -3,7 +3,7 @@
 #include "JMTucker/Tools/interface/NtupleReader.h"
 
 int main(int argc, char** argv) {
-  jmt::NtupleReader<jmt::TrackingNtuple> nr;
+  jmt::NtupleReader<jmt::TrackingAndJetsNtuple> nr;
   nr.init_options("tt/t");
   if (!nr.parse_options(argc, argv) || !nr.init()) return 1;
   auto& nt = nr.nt();
