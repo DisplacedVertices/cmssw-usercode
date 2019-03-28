@@ -1,17 +1,12 @@
-FLAGS = \
-	$(shell root-config --cflags --libs) \
-	-I$(shell scram tool tag boost INCLUDE) -L$(shell scram tool tag boost LIBDIR) -lboost_program_options \
-	-I$(CMSSW_BASE)/src -I$(CMSSW_RELEASE_BASE)/src \
-        -L${CMSSW_BASE}/lib/${SCRAM_ARCH} -lJMTuckerTools -lJMTuckerMFVNeutralino \
-	-std=c++17 -pedantic -Werror -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-qual -O3
+include $(CMSSW_BASE)/src/JMTucker/Tools/NtupleMakefile.in
+
+SHADOWDEPS += $(CMSSW_BASE)/lib/$(SCRAM_ARCH)/libJMTuckerMFVNeutralino.so utils.h
+FLAGS += -lJMTuckerMFVNeutralino
 
 all: hists.exe mctruth.exe tests.exe
 
-hists.exe: hists.cc utils.h BTagSFHelper.o
-	g++ -o $@ $^ $(FLAGS)
-
-%.exe: %.cc utils.h
-	g++ -o $@ $^ $(FLAGS)
+hists.exe: hists.cc BTagSFHelper.o $(SHADOWDEPS)
+	g++ -o $@ $< BTagSFHelper.o $(FLAGS)
 
 BTagCalibrationStandalone.h:
 	ln -sf $(CMSSW_RELEASE_BASE)/src/CondTools/BTau/test/BTagCalibrationStandalone.h BTagCalibrationStandalone.h
