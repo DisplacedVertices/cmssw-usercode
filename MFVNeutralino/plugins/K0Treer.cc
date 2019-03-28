@@ -76,7 +76,7 @@ void MFVK0Treer::analyze(const edm::Event& event, const edm::EventSetup& setup) 
     auto it = tkind.find(tk.key());
     if (it != tkind.end())
       return it->second;
-    jmt::NtupleAdd(nt.tracks(), *tk, bs_filler.bs(), pvs_filler.pv());
+    jmt::NtupleAdd(nt.tracks(), *tk);
     size_t r = nt.tracks().n() - 1;
     tkind[tk.key()] = r;
     assert(r < (1<<16));
@@ -142,7 +142,7 @@ void MFVK0Treer::analyze(const edm::Event& event, const edm::EventSetup& setup) 
                    (jtk_nt << 16) | itk_nt);
 
       for (const reco::Track& tk : {tkrefi, tkrefj})
-        jmt::NtupleAdd(nt.refit_tks(), tk, bs_filler.bs(), pvs_filler.pv());
+        jmt::NtupleAdd(nt.refit_tks(), tk);
 
       ok = true;
     }

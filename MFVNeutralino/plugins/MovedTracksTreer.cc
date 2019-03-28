@@ -20,7 +20,6 @@ private:
   jmt::BaseSubNtupleFiller base_filler;
   jmt::BeamspotSubNtupleFiller bs_filler;
   jmt::PrimaryVerticesSubNtupleFiller pvs_filler;
-  //  jmt::TracksSubNtupleFiller tracks_filler;
   jmt::JetsSubNtupleFiller jets_filler;
   mfv::GenTruthSubNtupleFiller gentruth_filler;
   const edm::EDGetTokenT<MFVVertexAuxCollection> vertices_token;
@@ -48,7 +47,6 @@ MFVMovedTracksTreer::MFVMovedTracksTreer(const edm::ParameterSet& cfg)
   : base_filler(nt.base(), cfg, consumesCollector()),
     bs_filler(nt.bs(), cfg, consumesCollector()),
     pvs_filler(nt.pvs(), cfg, consumesCollector(), true, false),
-    //    tracks_filler(nt.tracks(), cfg, consumesCollector()),
     jets_filler(nt.jets(), cfg, consumesCollector()),
     gentruth_filler(nt.gentruth(), cfg, consumesCollector()),
     vertices_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertices_src"))),
@@ -106,7 +104,7 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
                 (*move_vertex)[1] - bs_filler.bs().y((*move_vertex)[2]),
                 (*move_vertex)[2]);
 
-    auto tks_push_back = [&](const reco::Track& tk) { NtupleAdd(nt.tracks(), tk, bs_filler.bs(), pvs_filler.pv()); };
+    auto tks_push_back = [&](const reco::Track& tk) { NtupleAdd(nt.tracks(), tk); };
 
     for (const reco::TrackRef& tk : *sel_tracks)
       tks_push_back(*tk);

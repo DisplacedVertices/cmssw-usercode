@@ -41,7 +41,9 @@ void TrackingTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   base_filler(event);
   bs_filler(event);
   pvs_filler(event);
-  tracks_filler(event, bs_filler.bs(), pvs_filler.pv());
+  tracks_filler(event);
+
+  // JMTBAD jets, tracks which pv and jet
 
   tree->Fill();
 }

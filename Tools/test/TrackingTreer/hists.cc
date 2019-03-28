@@ -3,8 +3,8 @@
 #include "JMTucker/Tools/interface/NtupleReader.h"
 
 int main(int argc, char** argv) {
-  jmt::NtupleReader<mfv::K0Ntuple> nr;
-  nr.init_options("mfvK0s/t");
+  jmt::NtupleReader<jmt::TrackingNtuple> nr;
+  nr.init_options("tt/t");
   if (!nr.parse_options(argc, argv) || !nr.init()) return 1;
   auto& nt = nr.nt();
   auto& ntt = nt.tracks();
@@ -146,7 +146,8 @@ int main(int argc, char** argv) {
       const int min_r = ntt.min_r(itk);
       const int npxlayers = ntt.npxlayers(itk);
       const int nstlayers = ntt.nstlayers(itk);
-      const double nsigmadxy = ntt.nsigmadxybs(itk);
+      const double dxybs = ntt.dxybs(itk, nt.bs());
+      const double nsigmadxy = ntt.nsigmadxybs(itk, nt.bs());
 
       const bool nm1[5] = {
 	pt > 1,
@@ -172,10 +173,10 @@ int main(int argc, char** argv) {
 	h_tracks_pt[i]->Fill(pt, w);
 	h_tracks_eta[i]->Fill(ntt.eta(itk), w);
 	h_tracks_phi[i]->Fill(ntt.phi(itk), w);
-	h_tracks_dxy[i]->Fill(ntt.dxybs(itk), w);
-	h_tracks_absdxy[i]->Fill(fabs(ntt.dxybs(itk)), w);
+	h_tracks_dxy[i]->Fill(dxybs, w);
+	h_tracks_absdxy[i]->Fill(fabs(dxybs), w);
 	h_tracks_dz[i]->Fill(ntt.dz(itk), w);
-	h_tracks_dzpv[i]->Fill(ntt.dzpv(itk), w);
+	h_tracks_dzpv[i]->Fill(ntt.dzpv(itk, nt.pvs()), w);
 	h_tracks_nhits[i]->Fill(ntt.nhits(itk), w);
 	h_tracks_npxhits[i]->Fill(ntt.npxhits(itk), w);
 	h_tracks_nsthits[i]->Fill(ntt.nsthits(itk), w);
@@ -191,9 +192,9 @@ int main(int argc, char** argv) {
 	h_tracks_etaerr[i]->Fill(ntt.err_eta(itk), w);
 
 	h_tracks_nstlayers_v_eta[i]->Fill(ntt.eta(itk), nstlayers, w);
-	h_tracks_dxy_v_eta[i]->Fill(ntt.eta(itk), ntt.dxybs(itk), w);
-	h_tracks_dxy_v_phi[i]->Fill(ntt.phi(itk), ntt.dxybs(itk), w);
-	h_tracks_dxy_v_nstlayers[i]->Fill(nstlayers, ntt.dxybs(itk), w);
+	h_tracks_dxy_v_eta[i]->Fill(ntt.eta(itk), dxybs, w);
+	h_tracks_dxy_v_phi[i]->Fill(ntt.phi(itk), dxybs, w);
+	h_tracks_dxy_v_nstlayers[i]->Fill(nstlayers, dxybs, w);
 	h_tracks_nstlayers_v_phi[i]->Fill(ntt.phi(itk), nstlayers, w);
 	h_tracks_npxlayers_v_phi[i]->Fill(ntt.phi(itk), npxlayers, w);
 	h_tracks_nhits_v_phi[i]->Fill(ntt.phi(itk), ntt.nhits(itk), w);
@@ -202,13 +203,13 @@ int main(int argc, char** argv) {
 
 	h_tracks_nsigmadxy_v_eta[i]->Fill(ntt.eta(itk), nsigmadxy, w);
 	h_tracks_nsigmadxy_v_nstlayers[i]->Fill(nstlayers, nsigmadxy, w);
-	h_tracks_nsigmadxy_v_dxy[i]->Fill(ntt.dxybs(itk), nsigmadxy, w);
+	h_tracks_nsigmadxy_v_dxy[i]->Fill(dxybs, nsigmadxy, w);
 	h_tracks_nsigmadxy_v_dxyerr[i]->Fill(ntt.err_dxy(itk), nsigmadxy, w);
 
 	h_tracks_dxyerr_v_pt[i]->Fill(pt, ntt.err_dxy(itk), w);
 	h_tracks_dxyerr_v_eta[i]->Fill(ntt.eta(itk), ntt.err_dxy(itk), w);
 	h_tracks_dxyerr_v_phi[i]->Fill(ntt.phi(itk), ntt.err_dxy(itk), w);
-	h_tracks_dxyerr_v_dxy[i]->Fill(ntt.dxybs(itk), ntt.err_dxy(itk), w);
+	h_tracks_dxyerr_v_dxy[i]->Fill(dxybs, ntt.err_dxy(itk), w);
 	h_tracks_dxyerr_v_dz[i]->Fill(ntt.dz(itk), ntt.err_dxy(itk), w);
 	h_tracks_dxyerr_v_npxlayers[i]->Fill(npxlayers, ntt.err_dxy(itk), w);
 	h_tracks_dxyerr_v_nstlayers[i]->Fill(nstlayers, ntt.err_dxy(itk), w);

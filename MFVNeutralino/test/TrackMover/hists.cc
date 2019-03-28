@@ -391,7 +391,7 @@ int main(int argc, char** argv) {
         if (a3d > jet_a3dmax) {
           const auto j_tracks = nt.tracks().tks_for_jet(j);
 
-          auto nps = [&nt](const int k) { return nt.tracks().pass_seed(k); };
+          auto nps = [&nt](const int k) { return nt.tracks().pass_seed(k, nt.bs()); };
           const int i_nseedtracks = std::count_if(i_tracks.begin(), i_tracks.end(), nps);
           const int j_nseedtracks = std::count_if(j_tracks.begin(), j_tracks.end(), nps);
 
@@ -412,7 +412,7 @@ int main(int argc, char** argv) {
 
     int nseedtracks = 0;
     for (int i = 0, ie = nt.tracks().n(); i < ie; ++i)
-      if (nt.tracks().pass_seed(i))
+      if (nt.tracks().pass_seed(i, nt.bs()))
         ++nseedtracks;
 
 
@@ -527,14 +527,14 @@ int main(int argc, char** argv) {
         h_vtx_tks_pt[in]->Fill(nt.tracks().pt(it), w);
         h_vtx_tks_eta[in]->Fill(nt.tracks().eta(it), w);
         h_vtx_tks_phi[in]->Fill(nt.tracks().phi(it), w);
-        h_vtx_tks_dxy[in]->Fill(nt.tracks().dxybs(it), w);
-        h_vtx_tks_dz[in]->Fill(nt.tracks().dzpv(it), w);
+        h_vtx_tks_dxy[in]->Fill(nt.tracks().dxybs(it, nt.bs()), w);
+        h_vtx_tks_dz[in]->Fill(nt.tracks().dzpv(it, nt.pvs()), w);
         h_vtx_tks_err_pt[in]->Fill(nt.tracks().err_pt(it), w);
         h_vtx_tks_err_eta[in]->Fill(nt.tracks().err_eta(it), w);
         h_vtx_tks_err_phi[in]->Fill(nt.tracks().err_phi(it), w);
         h_vtx_tks_err_dxy[in]->Fill(nt.tracks().err_dxy(it), w);
         h_vtx_tks_err_dz[in]->Fill(nt.tracks().err_dz(it), w);
-        h_vtx_tks_nsigmadxy[in]->Fill(nt.tracks().nsigmadxybs(it), w);
+        h_vtx_tks_nsigmadxy[in]->Fill(nt.tracks().nsigmadxybs(it, nt.bs()), w);
         h_vtx_tks_npxlayers[in]->Fill(nt.tracks().npxlayers(it), w);
         h_vtx_tks_nstlayers[in]->Fill(nt.tracks().nstlayers(it), w);
 
@@ -542,14 +542,14 @@ int main(int argc, char** argv) {
           h_vtx_tks_nomove_pt[in]->Fill(nt.tracks().pt(it), w);
           h_vtx_tks_nomove_eta[in]->Fill(nt.tracks().eta(it), w);
           h_vtx_tks_nomove_phi[in]->Fill(nt.tracks().phi(it), w);
-          h_vtx_tks_nomove_dxy[in]->Fill(nt.tracks().dxybs(it), w);
-          h_vtx_tks_nomove_dz[in]->Fill(nt.tracks().dzpv(it), w);
+          h_vtx_tks_nomove_dxy[in]->Fill(nt.tracks().dxybs(it, nt.bs()), w);
+          h_vtx_tks_nomove_dz[in]->Fill(nt.tracks().dzpv(it, nt.pvs()), w);
           h_vtx_tks_nomove_err_pt[in]->Fill(nt.tracks().err_pt(it), w);
           h_vtx_tks_nomove_err_eta[in]->Fill(nt.tracks().err_eta(it), w);
           h_vtx_tks_nomove_err_phi[in]->Fill(nt.tracks().err_phi(it), w);
           h_vtx_tks_nomove_err_dxy[in]->Fill(nt.tracks().err_dxy(it), w);
           h_vtx_tks_nomove_err_dz[in]->Fill(nt.tracks().err_dz(it), w);
-          h_vtx_tks_nomove_nsigmadxy[in]->Fill(nt.tracks().nsigmadxybs(it), w);
+          h_vtx_tks_nomove_nsigmadxy[in]->Fill(nt.tracks().nsigmadxybs(it, nt.bs()), w);
           h_vtx_tks_nomove_npxlayers[in]->Fill(nt.tracks().npxlayers(it), w);
           h_vtx_tks_nomove_nstlayers[in]->Fill(nt.tracks().nstlayers(it), w);
         }
@@ -602,14 +602,14 @@ int main(int argc, char** argv) {
         h_tks_pt[i]->Fill(nt.tracks().pt(it), w);
         h_tks_eta[i]->Fill(nt.tracks().eta(it), w);
         h_tks_phi[i]->Fill(nt.tracks().phi(it), w);
-        h_tks_dxy[i]->Fill(nt.tracks().dxybs(it), w);
-        h_tks_dz[i]->Fill(nt.tracks().dzpv(it), w);
+        h_tks_dxy[i]->Fill(nt.tracks().dxybs(it, nt.bs()), w);
+        h_tks_dz[i]->Fill(nt.tracks().dzpv(it, nt.pvs()), w);
         h_tks_err_pt[i]->Fill(nt.tracks().err_pt(it), w);
         h_tks_err_eta[i]->Fill(nt.tracks().err_eta(it), w);
         h_tks_err_phi[i]->Fill(nt.tracks().err_phi(it), w);
         h_tks_err_dxy[i]->Fill(nt.tracks().err_dxy(it), w);
         h_tks_err_dz[i]->Fill(nt.tracks().err_dz(it), w);
-        h_tks_nsigmadxy[i]->Fill(nt.tracks().nsigmadxybs(it), w);
+        h_tks_nsigmadxy[i]->Fill(nt.tracks().nsigmadxybs(it, nt.bs()), w);
         h_tks_npxlayers[i]->Fill(nt.tracks().npxlayers(it), w);
         h_tks_nstlayers[i]->Fill(nt.tracks().nstlayers(it), w);
 
@@ -617,29 +617,29 @@ int main(int argc, char** argv) {
           h_moved_tks_pt[i]->Fill(nt.tracks().pt(it), w);
           h_moved_tks_eta[i]->Fill(nt.tracks().eta(it), w);
           h_moved_tks_phi[i]->Fill(nt.tracks().phi(it), w);
-          h_moved_tks_dxy[i]->Fill(nt.tracks().dxybs(it), w);
-          h_moved_tks_dz[i]->Fill(nt.tracks().dzpv(it), w);
+          h_moved_tks_dxy[i]->Fill(nt.tracks().dxybs(it, nt.bs()), w);
+          h_moved_tks_dz[i]->Fill(nt.tracks().dzpv(it, nt.pvs()), w);
           h_moved_tks_err_pt[i]->Fill(nt.tracks().err_pt(it), w);
           h_moved_tks_err_eta[i]->Fill(nt.tracks().err_eta(it), w);
           h_moved_tks_err_phi[i]->Fill(nt.tracks().err_phi(it), w);
           h_moved_tks_err_dxy[i]->Fill(nt.tracks().err_dxy(it), w);
           h_moved_tks_err_dz[i]->Fill(nt.tracks().err_dz(it), w);
-          h_moved_tks_nsigmadxy[i]->Fill(nt.tracks().nsigmadxybs(it), w);
+          h_moved_tks_nsigmadxy[i]->Fill(nt.tracks().nsigmadxybs(it, nt.bs()), w);
           h_moved_tks_npxlayers[i]->Fill(nt.tracks().npxlayers(it), w);
           h_moved_tks_nstlayers[i]->Fill(nt.tracks().nstlayers(it), w);
 
-          if (!nt.tracks().pass_seed(it)) {
+          if (!nt.tracks().pass_seed(it, nt.bs())) {
             h_moved_nosel_tks_pt[i]->Fill(nt.tracks().pt(it), w);
             h_moved_nosel_tks_eta[i]->Fill(nt.tracks().eta(it), w);
             h_moved_nosel_tks_phi[i]->Fill(nt.tracks().phi(it), w);
-            h_moved_nosel_tks_dxy[i]->Fill(nt.tracks().dxybs(it), w);
-            h_moved_nosel_tks_dz[i]->Fill(nt.tracks().dzpv(it), w);
+            h_moved_nosel_tks_dxy[i]->Fill(nt.tracks().dxybs(it, nt.bs()), w);
+            h_moved_nosel_tks_dz[i]->Fill(nt.tracks().dzpv(it, nt.pvs()), w);
             h_moved_nosel_tks_err_pt[i]->Fill(nt.tracks().err_pt(it), w);
             h_moved_nosel_tks_err_eta[i]->Fill(nt.tracks().err_eta(it), w);
             h_moved_nosel_tks_err_phi[i]->Fill(nt.tracks().err_phi(it), w);
             h_moved_nosel_tks_err_dxy[i]->Fill(nt.tracks().err_dxy(it), w);
             h_moved_nosel_tks_err_dz[i]->Fill(nt.tracks().err_dz(it), w);
-            h_moved_nosel_tks_nsigmadxy[i]->Fill(nt.tracks().nsigmadxybs(it), w);
+            h_moved_nosel_tks_nsigmadxy[i]->Fill(nt.tracks().nsigmadxybs(it, nt.bs()), w);
             h_moved_nosel_tks_npxlayers[i]->Fill(nt.tracks().npxlayers(it), w);
             h_moved_nosel_tks_nstlayers[i]->Fill(nt.tracks().nstlayers(it), w);
           }

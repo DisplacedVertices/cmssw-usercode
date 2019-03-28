@@ -83,7 +83,7 @@ namespace jmt {
     int ipv() const { return ipv_; }
   };
 
-  void NtupleAdd(TracksSubNtuple&, const reco::Track&, const reco::BeamSpot&, const reco::Vertex*);
+  void NtupleAdd(TracksSubNtuple&, const reco::Track&);
 
   class TracksSubNtupleFiller {
     TracksSubNtuple& nt_;
@@ -100,7 +100,7 @@ namespace jmt {
     {}
     bool cut(const reco::Track& t) const { return cut_ == 0 ? false : cut_(t); }
     const reco::TrackCollection& tracks(const edm::Event& e) { e.getByToken(token_, tracks_); return *tracks_; }
-    void operator()(const edm::Event& e, const reco::BeamSpot& bs, const reco::Vertex* pv) { for (const auto& tk : tracks(e)) if (!cut(tk)) NtupleAdd(nt_, tk, bs, pv); }
+    void operator()(const edm::Event& e) { for (const auto& tk : tracks(e)) if (!cut(tk)) NtupleAdd(nt_, tk); }
   };
 
   void NtupleAdd(JetsSubNtuple&, const pat::Jet&);

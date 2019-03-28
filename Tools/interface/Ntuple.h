@@ -217,8 +217,9 @@ namespace jmt {
     virtual void write_to_tree(TTree* tree);
     virtual void read_from_tree(TTree* tree);
 
-    void add(int q, float pt, float eta, float phi, float dxybs, float dxypv, float dzpv, float vx, float vy, float vz,
-             float err_pt, float err_eta, float err_phi, float err_dxy, float err_dz, float chi2dof,
+    void add(int q, float pt, float eta, float phi, float vx, float vy, float vz,
+             float cov_00, float cov_11, float cov_14, float cov_22, float cov_23, float cov_33, float cov_34, float cov_44,
+             float chi2dof,
              int npxh, int nsth, int npxl, int nstl,
              int minhit_r, int minhit_z, int maxhit_r, int maxhit_z, int maxpxhit_r, int maxpxhit_z,
              int which_jet, int which_pv, int which_sv,
@@ -226,17 +227,17 @@ namespace jmt {
       qpt_.push_back(q*pt);
       eta_.push_back(eta);
       phi_.push_back(phi);
-      dxybs_.push_back(dxybs);
-      dxypv_.push_back(dxypv);
-      dzpv_.push_back(dzpv);
       vx_.push_back(vx);
       vy_.push_back(vy);
       vz_.push_back(vz);
-      err_pt_.push_back(err_pt);
-      err_eta_.push_back(err_eta);
-      err_phi_.push_back(err_phi);
-      err_dxy_.push_back(err_dxy);
-      err_dz_.push_back(err_dz);
+      cov_00_.push_back(cov_00);
+      cov_11_.push_back(cov_11);
+      cov_14_.push_back(cov_14);
+      cov_22_.push_back(cov_22);
+      cov_23_.push_back(cov_23);
+      cov_33_.push_back(cov_33);
+      cov_34_.push_back(cov_34);
+      cov_44_.push_back(cov_44);
       chi2dof_.push_back(chi2dof);
 
       assert(npxh >= 0 && nsth >= 0 && npxl >= 0 && nstl >= 0);
@@ -265,17 +266,17 @@ namespace jmt {
     float    qpt      (int i) const { return p_get(i, qpt_,       p_qpt_       ); }
     float    eta      (int i) const { return p_get(i, eta_,       p_eta_       ); }
     float    phi      (int i) const { return p_get(i, phi_,       p_phi_       ); }
-    float    dxybs    (int i) const { return p_get(i, dxybs_,     p_dxybs_     ); }
-    float    dxypv    (int i) const { return p_get(i, dxypv_,     p_dxypv_     ); }
-    float    dzpv     (int i) const { return p_get(i, dzpv_,      p_dzpv_      ); }
     float    vx       (int i) const { return p_get(i, vx_,        p_vx_        ); }
     float    vy       (int i) const { return p_get(i, vy_,        p_vy_        ); }
     float    vz       (int i) const { return p_get(i, vz_,        p_vz_        ); }
-    float    err_pt   (int i) const { return p_get(i, err_pt_,    p_err_pt_    ); }
-    float    err_eta  (int i) const { return p_get(i, err_eta_,   p_err_eta_   ); }
-    float    err_phi  (int i) const { return p_get(i, err_phi_,   p_err_phi_   ); }
-    float    err_dxy  (int i) const { return p_get(i, err_dxy_,   p_err_dxy_   ); }
-    float    err_dz   (int i) const { return p_get(i, err_dz_,    p_err_dz_    ); }
+    float    cov_00   (int i) const { return p_get(i, cov_00_,    p_cov_00_    ); }
+    float    cov_11   (int i) const { return p_get(i, cov_11_,    p_cov_11_    ); }
+    float    cov_14   (int i) const { return p_get(i, cov_14_,    p_cov_14_    ); }
+    float    cov_22   (int i) const { return p_get(i, cov_22_,    p_cov_22_    ); }
+    float    cov_23   (int i) const { return p_get(i, cov_23_,    p_cov_23_    ); }
+    float    cov_33   (int i) const { return p_get(i, cov_33_,    p_cov_33_    ); }
+    float    cov_34   (int i) const { return p_get(i, cov_34_,    p_cov_34_    ); }
+    float    cov_44   (int i) const { return p_get(i, cov_44_,    p_cov_44_    ); }
     float    chi2dof  (int i) const { return p_get(i, chi2dof_,   p_chi2dof_   ); }
     unsigned hp       (int i) const { return p_get(i, hp_,        p_hp_        ); }
     uchar    minhit   (int i) const { return p_get(i, minhit_,    p_minhit_    ); }
@@ -296,11 +297,33 @@ namespace jmt {
     float px(int i) const { return p3(i).X(); }
     float py(int i) const { return p3(i).Y(); }
     float pz(int i) const { return p3(i).Z(); }
-    float nsigmadxybs(int i) const { return std::abs(dxybs(i) / err_dxy(i)); }
-    float dxy(int i) const { return (vy(i) * px(i) - vx(i) * py(i)) / pt(i); }
-    float dxy(int i, float x, float y) const { return ((vy(i) - y) * px(i) - (vx(i) - x) * py(i)) / pt(i); }
-    float dz(int i) const { return vz(i) - (vx(i) * px(i) + vy(i) * py(i)) / pt(i) * pz(i) / pt(i); }
-    float dz(int i, float x, float y, float z) const { return (vz(i) - z) - ((vx(i) - x) * px(i) + (vy(i) - y) * py(i)) / pt(i) * pz(i) / pt(i); }
+    float p(int i) const { return p3(i).Mag(); }
+    float p2(int i) const { return p3(i).Mag2(); }
+    float dxy(int i, float x=0, float y=0) const { return ((vy(i) - y) * px(i) - (vx(i) - x) * py(i)) / pt(i); }
+    template <typename BS> float dxybs(int i, const BS& bs) const { return dxy(i, bs.x(vz(i)), bs.y(vz(i))); }
+    template <typename BS> float nsigmadxybs(int i, const BS& bs) const { return std::abs(dxybs(i, bs) / err_dxy(i)); }
+    template <typename PV> float dxypv(int i, const PV& pv, int j=0) const { return dxy(i, pv.x(j), pv.y(j)); }
+    float dz(int i, float x=0, float y=0, float z=0) const { return (vz(i) - z) - ((vx(i) - x) * px(i) + (vy(i) - y) * py(i)) / pt(i) * pz(i) / pt(i); }
+    template <typename PV> float dzpv(int i, const PV& pv, int j=0) const { return dz(i, pv.x(j), pv.y(j), pv.z(j)); }
+    float cov(int i, int j, int k) const {
+      if (j > k) { j = j^k; k = j^k; j = j^k; }
+      switch (j*10 + k) {
+      case 00: return cov_00(i);
+      case 11: return cov_11(i);
+      case 14: return cov_14(i);
+      case 22: return cov_22(i);
+      case 23: return cov_23(i);
+      case 33: return cov_33(i);
+      case 34: return cov_34(i);
+      case 44: return cov_44(i);
+      default: return 0.f;
+      }
+    }
+    float err_pt(int i) const { return sqrt(cov_00(i) * pt(i) * pt(i) * p2(i) / q(i) / q(i) + cov_11(i) * pz(i) * pz(i)); } // + cov(i,0,1) * 2 * pt(i) * p(i) / q(i) * pz(i)); }
+    float err_eta(int i) const { return sqrt(cov_11(i) * p2(i)) / pt(i); }
+    float err_phi(int i) const { return sqrt(cov_22(i)); }
+    float err_dxy(int i) const { return sqrt(cov_33(i)); }
+    float err_dz(int i) const { return sqrt(cov_44(i) * p2(i)) / pt(i); }
     int npxhits(int i) const { return hp(i) & 0xf; }
     int nsthits(int i) const { return (hp(i) >> 4) & 0x1f; }
     int npxlayers(int i) const { return (hp(i) >> 9) & 0xf; }
@@ -316,7 +339,7 @@ namespace jmt {
     TVector3 p3(int i) const { return p3_(pt(i), eta(i), phi(i)); }
     TLorentzVector p4(int i, double m=0) const { return p4_m(pt(i), eta(i), phi(i), m); }
     bool pass_sel(int i) const { return pt(i) > 1 && min_r(i) <= 1 && npxlayers(i) >= 2 && nstlayers(i) >= 6; }
-    bool pass_seed(int i) const { return pass_sel(i) && nsigmadxybs(i) > 4; }
+    template <typename BS> bool pass_seed(int i, const BS& bs) const { return pass_sel(i) && nsigmadxybs(i,bs) > 4; }
 
     std::vector<int> tks_for_jet(uchar i) const { return tks_for_x_(0, i); }
     std::vector<int> tks_for_pv (uchar i) const { return tks_for_x_(1, i); }
@@ -336,17 +359,17 @@ namespace jmt {
     vfloat qpt_;         vfloat* p_qpt_;
     vfloat eta_;         vfloat* p_eta_;
     vfloat phi_;         vfloat* p_phi_;
-    vfloat dxybs_;       vfloat* p_dxybs_; // JMTBAD drop/recalculate these three
-    vfloat dxypv_;       vfloat* p_dxypv_;
-    vfloat dzpv_;        vfloat* p_dzpv_;
     vfloat vx_;          vfloat* p_vx_;
     vfloat vy_;          vfloat* p_vy_;
     vfloat vz_;          vfloat* p_vz_;
-    vfloat err_pt_;      vfloat* p_err_pt_;
-    vfloat err_eta_;     vfloat* p_err_eta_;
-    vfloat err_phi_;     vfloat* p_err_phi_;
-    vfloat err_dxy_;     vfloat* p_err_dxy_;
-    vfloat err_dz_;      vfloat* p_err_dz_;
+    vfloat cov_00_;      vfloat* p_cov_00_;
+    vfloat cov_11_;      vfloat* p_cov_11_;
+    vfloat cov_14_;      vfloat* p_cov_14_;
+    vfloat cov_22_;      vfloat* p_cov_22_;
+    vfloat cov_23_;      vfloat* p_cov_23_;
+    vfloat cov_33_;      vfloat* p_cov_33_;
+    vfloat cov_34_;      vfloat* p_cov_34_;
+    vfloat cov_44_;      vfloat* p_cov_44_;
     vfloat chi2dof_;     vfloat* p_chi2dof_;
     vunsigned hp_;       vunsigned* p_hp_;
     vuchar minhit_;      vuchar* p_minhit_;

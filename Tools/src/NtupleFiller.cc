@@ -48,6 +48,9 @@ namespace jmt {
       event.getByToken(cands_token_, cands_);
     }
 
+    pv_ = nullptr;
+    ipv_ = -1;
+
     int i = -1;
     for (const reco::Vertex& pv : pvs(event)) {
       ++i;
@@ -92,7 +95,7 @@ namespace jmt {
     }
   }
 
-  void NtupleAdd(TracksSubNtuple& nt, const reco::Track& tk, const reco::BeamSpot& bs, const reco::Vertex* pv) {
+  void NtupleAdd(TracksSubNtuple& nt, const reco::Track& tk) {
     TrackerSpaceExtents te;
     NumExtents ex    = te.numExtentInRAndZ(tk.hitPattern(), TrackerSpaceExtents::AllowAll);
     NumExtents ex_px = te.numExtentInRAndZ(tk.hitPattern(), TrackerSpaceExtents::PixelOnly);
@@ -100,11 +103,9 @@ namespace jmt {
     const reco::HitPattern& hp = tk.hitPattern();
 
     nt.add(tk.charge(), tk.pt(), tk.eta(), tk.phi(),
-           tk.dxy(bs),
-           pv ? tk.dxy(pv->position()) : 1e99,
-           pv ? tk.dz (pv->position()) : 1e99,
            tk.vx(), tk.vy(), tk.vz(),
-           tk.ptError(), tk.etaError(), tk.phiError(), tk.dxyError(), tk.dzError(), tk.normalizedChi2(),
+           tk.covariance(0,0), tk.covariance(1,1), tk.covariance(1,4), tk.covariance(2,2), tk.covariance(2,3), tk.covariance(3,3), tk.covariance(3,4), tk.covariance(4,4),
+           tk.normalizedChi2(),
            hp.numberOfValidPixelHits(),
            hp.numberOfValidStripHits(),
            hp.pixelLayersWithMeasurement(),
