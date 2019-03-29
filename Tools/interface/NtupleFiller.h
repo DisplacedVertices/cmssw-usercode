@@ -14,6 +14,7 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "JMTucker/Tools/interface/Ntuple.h"
+#include "JMTucker/Tools/interface/TrackRefGetter.h"
 
 namespace jmt {
   class BaseSubNtupleFiller {
@@ -60,6 +61,7 @@ namespace jmt {
     edm::Handle<reco::VertexCollection> pvs_;
     edm::Handle<edm::ValueMap<float>> scores_;
     edm::Handle<pat::PackedCandidateCollection> cands_;
+    std::vector<int> i2nti_;
     const reco::Vertex* pv_;
     int ipv_;
   public:
@@ -76,31 +78,13 @@ namespace jmt {
         ipv_(-1)
     {}
     bool cut(const reco::Vertex& pv) const { return pv.isFake() || pv.ndof() < 4 || fabs(pv.z()) > 24 || fabs(pv.position().Rho()) > 2; }
-    const reco::VertexCollection& pvs(const edm::Event& e) { e.getByToken(token_, pvs_); return *pvs_; }
+    const edm::Handle<reco::VertexCollection>& hpvs(const edm::Event& e) { e.getByToken(token_, pvs_); return pvs_; }
+    const reco::VertexCollection& pvs(const edm::Event& e) { return *hpvs(e); }
     const pat::PackedCandidateCollection& cands(const edm::Event& e) { e.getByToken(cands_token_, cands_); return *cands_; }
     void operator()(const edm::Event&, const reco::BeamSpot* =0);
+    int i2nti(size_t i) const { return i2nti_[i]; }
     const reco::Vertex* pv() const { return pv_; }
     int ipv() const { return ipv_; }
-  };
-
-  void NtupleAdd(TracksSubNtuple&, const reco::Track&);
-
-  class TracksSubNtupleFiller {
-    TracksSubNtuple& nt_;
-    const edm::InputTag tag_;
-    const edm::EDGetTokenT<reco::TrackCollection> token_;
-    bool (*cut_)(const reco::Track&);
-    edm::Handle<reco::TrackCollection> tracks_;
-  public:
-    TracksSubNtupleFiller(TracksSubNtuple& nt, const edm::ParameterSet& cfg, edm::ConsumesCollector&& cc, bool (*cut)(const reco::Track&) = 0)
-      : nt_(nt),
-        tag_(cfg.getParameter<edm::InputTag>("tracks_src")),
-        token_(cc.consumes<reco::TrackCollection>(tag_)),
-        cut_(cut)
-    {}
-    bool cut(const reco::Track& t) const { return cut_ == 0 ? false : cut_(t); }
-    const reco::TrackCollection& tracks(const edm::Event& e) { e.getByToken(token_, tracks_); return *tracks_; }
-    void operator()(const edm::Event& e) { for (const auto& tk : tracks(e)) if (!cut(tk)) NtupleAdd(nt_, tk); }
   };
 
   void NtupleAdd(JetsSubNtuple&, const pat::Jet&);
@@ -111,6 +95,7 @@ namespace jmt {
     const edm::EDGetTokenT<pat::JetCollection> token_;
     bool (*cut_)(const pat::Jet&);
     edm::Handle<pat::JetCollection> jets_;
+    std::vector<int> i2nti_;
   public:
     JetsSubNtupleFiller(JetsSubNtuple& nt, const edm::ParameterSet& cfg, edm::ConsumesCollector&& cc, bool (*cut)(const pat::Jet&) = 0)
       : nt_(nt),
@@ -119,8 +104,33 @@ namespace jmt {
         cut_(cut)
     {}
     bool cut(const pat::Jet& j) const { return cut_ == 0 ? false : cut_(j); }
-    const pat::JetCollection& jets(const edm::Event& e) { e.getByToken(token_, jets_); return *jets_; }
-    void operator()(const edm::Event& e) { for (const auto& j : jets(e)) if (!cut(j)) NtupleAdd(nt_, j); }
+    const edm::Handle<pat::JetCollection>& hjets(const edm::Event& e) { e.getByToken(token_, jets_); return jets_; }
+    const pat::JetCollection& jets(const edm::Event& e) { return *hjets(e); }
+    void operator()(const edm::Event&);
+    int i2nti(size_t i) const { return i2nti_[i]; }
+  };
+
+  void NtupleAdd(TracksSubNtuple&, const reco::Track&, int which_jet=-1, int which_pv=-1, int which_sv=-1, unsigned misc=0);
+
+  class TracksSubNtupleFiller {
+    TracksSubNtuple& nt_;
+    const edm::InputTag tag_;
+    const edm::EDGetTokenT<reco::TrackCollection> token_;
+    bool (*cut_)(const reco::Track&);
+    edm::Handle<reco::TrackCollection> tracks_;
+    jmt::TrackRefGetter trg_;
+  public:
+    TracksSubNtupleFiller(TracksSubNtuple& nt, const edm::ParameterSet& cfg, edm::ConsumesCollector&& cc, bool (*cut)(const reco::Track&) = 0)
+      : nt_(nt),
+        tag_(cfg.getParameter<edm::InputTag>("tracks_src")),
+        token_(cc.consumes<reco::TrackCollection>(tag_)),
+        cut_(cut),
+        trg_("TracksSubNtupleFiller", cfg.getParameter<edm::ParameterSet>("track_ref_getter"), std::move(cc))
+    {}
+    bool cut(const reco::Track& t) const { return cut_ == 0 ? false : cut_(t); }
+    const edm::Handle<reco::TrackCollection>& htracks(const edm::Event& e) { e.getByToken(token_, tracks_); return tracks_; }
+    const reco::TrackCollection& tracks(const edm::Event& e) { return *htracks(e); }
+    void operator()(const edm::Event&, JetsSubNtupleFiller* =0, PrimaryVerticesSubNtupleFiller* =0);
   };
 };
 

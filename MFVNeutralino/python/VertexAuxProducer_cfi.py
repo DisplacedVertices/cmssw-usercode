@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-from JMTucker.MFVNeutralino.JetTrackRefGetter_cff import *
+from JMTucker.Tools.TrackRefGetter_cff import jmtTrackRefGetter
 
 mfvVerticesAuxTmp = cms.EDProducer('MFVVertexAuxProducer',
                                    beamspot_src = cms.InputTag('offlineBeamSpot'),
@@ -10,7 +10,7 @@ mfvVerticesAuxTmp = cms.EDProducer('MFVVertexAuxProducer',
                                    gen_vertices_src = cms.InputTag('mfvGenParticles', 'decays'),
                                    vertex_src = cms.InputTag('mfvVertices'),
                                    sv_to_jets_src = cms.string('dummy'),
-                                   jet_track_ref_getter = mfvJetTrackRefGetter,
+                                   track_ref_getter = jmtTrackRefGetter,
                                    sort_by = cms.string('ntracks_then_mass'),
                                    verbose = cms.untracked.bool(False),
                                    )

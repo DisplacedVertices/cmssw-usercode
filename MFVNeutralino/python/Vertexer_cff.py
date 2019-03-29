@@ -1,11 +1,11 @@
 import FWCore.ParameterSet.Config as cms
 
 from JMTucker.MFVNeutralino.GenParticles_cff import mfvGenParticles
-from JMTucker.MFVNeutralino.RescaledTracks_cfi import mfvRescaledTracks
 from JMTucker.MFVNeutralino.Vertexer_cfi import mfvVertexTracks, mfvVertices
 from JMTucker.MFVNeutralino.VertexAuxProducer_cfi import mfvVerticesAuxTmp, mfvVerticesAux
 from JMTucker.MFVNeutralino.VertexSelector_cfi import mfvSelectedVertices
 from JMTucker.MFVNeutralino.JetVertexAssociator_cfi import mfvVerticesToJets
+from JMTucker.Tools.RescaledTracks_cfi import jmtRescaledTracks
 
 mfvSelectedVerticesTmp = mfvSelectedVertices.clone(vertex_aux_src = 'mfvVerticesAuxTmp',
                                                    produce_refs = True,
@@ -16,7 +16,7 @@ mfvVerticesAuxPresel = mfvVerticesAux
 mfvVerticesAux = mfvSelectedVertices.clone(vertex_aux_src = 'mfvVerticesAuxPresel', min_ntracks = 3)
 
 mfvVertexSequenceBare = cms.Sequence(
-    mfvRescaledTracks *
+    jmtRescaledTracks *
     mfvVertexTracks *
     mfvVertices
     )

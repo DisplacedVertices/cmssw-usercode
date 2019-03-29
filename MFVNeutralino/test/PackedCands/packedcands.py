@@ -19,11 +19,10 @@ process.mfvPackedCands = cms.EDAnalyzer('MFVPackedCandidates',
                                         prints = cms.int32(prints),
                                         )
 
-process.load('JMTucker.MFVNeutralino.UnpackedCandidateTracks_cfi')
-if prints:
-    process.mfvUnpackedCandidateTracks.debug = True
-#process.mfvPackedCands.tracks_src = 'mfvUnpackedCandidateTracks'
-process.p = cms.Path(process.goodOfflinePrimaryVertices * process.mfvUnpackedCandidateTracks * process.mfvPackedCands)
+process.load('JMTucker.Tools.UnpackedCandidateTracks_cfi')
+process.jmtUnpackedCandidateTracks.debug = prints
+#process.mfvPackedCands.tracks_src = 'jmtUnpackedCandidateTracks'
+process.p = cms.Path(process.goodOfflinePrimaryVertices * process.jmtUnpackedCandidateTracks * process.mfvPackedCands)
 
 import JMTucker.MFVNeutralino.EventFilter
 JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process, path_name='p')

@@ -293,7 +293,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
     if (input_is_miniaod) {
       for (const pat::PackedCandidate& cand : *packed_candidates)
-        if (cand.vertexRef().key() == 0 && cand.charge() && cand.hasTrackDetails())
+        if (cand.vertexRef().key() == 0 && cand.charge() && cand.hasTrackDetails()) // && cand.pvAssociationQuality() == UsedInFitTight)
           inc_uchar_clamp(mevent->pv_ntracks);
     }
     else
@@ -343,7 +343,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       // getPFConstituents() doesn't work because the daughters are
       // pat::PackedCandidates. Since we don't care about track
       // identities e.g. to compare with vertices we don't use
-      // JetTrackRefGetter here, but could
+      // TrackRefGetter here, but could
       const reco::Candidate* dau = jet.daughter(idau);
       if (dau->charge() == 0)
         continue;

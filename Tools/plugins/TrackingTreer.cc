@@ -16,8 +16,8 @@ private:
   jmt::BaseSubNtupleFiller base_filler;
   jmt::BeamspotSubNtupleFiller bs_filler;
   jmt::PrimaryVerticesSubNtupleFiller pvs_filler;
-  jmt::TracksSubNtupleFiller tracks_filler;
   jmt::JetsSubNtupleFiller jets_filler;
+  jmt::TracksSubNtupleFiller tracks_filler;
 
   TTree* tree;
   jmt::TrackingAndJetsNtuple nt;
@@ -27,10 +27,10 @@ TrackingTreer::TrackingTreer(const edm::ParameterSet& cfg)
   : base_filler(nt.base(), cfg, consumesCollector()),
     bs_filler(nt.bs(), cfg, consumesCollector()),
     pvs_filler(nt.pvs(), cfg, consumesCollector(), true, false),
+    jets_filler(nt.jets(), cfg, consumesCollector()),
     tracks_filler(nt.tracks(), cfg, consumesCollector(),
                   cfg.getParameter<bool>("track_sel") ? [](const reco::Track& tk) { return tk.pt() < 1 || tk.hitPattern().pixelLayersWithMeasurement() < 2 || tk.hitPattern().stripLayersWithMeasurement() < 6; }
-                                                      : [](const reco::Track& tk) { return false; }),
-    jets_filler(nt.jets(), cfg, consumesCollector())
+                                                      : [](const reco::Track& tk) { return false; })
 {
   edm::Service<TFileService> fs;
   tree = fs->make<TTree>("t", "");
@@ -43,10 +43,8 @@ void TrackingTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   base_filler(event);
   bs_filler(event);
   pvs_filler(event);
-  tracks_filler(event);
   jets_filler(event);
-
-  // JMTBAD tracks which pv and jet
+  tracks_filler(event, &jets_filler, &pvs_filler);
 
   tree->Fill();
 }

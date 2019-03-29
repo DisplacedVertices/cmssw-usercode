@@ -9,10 +9,10 @@ sample_files(process, 'qcdht2000_2017', 'miniaod')
 cmssw_from_argv(process)
 
 process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
-process.load('JMTucker.MFVNeutralino.UnpackedCandidateTracks_cfi')
 process.load('JMTucker.Tools.MCStatProducer_cff')
 process.load('JMTucker.Tools.NtupleFiller_cff')
 process.load('JMTucker.Tools.PATTupleSelection_cfi')
+process.load('JMTucker.Tools.UnpackedCandidateTracks_cfi')
 process.load('JMTucker.Tools.UpdatedJets_cff')
 process.load('JMTucker.Tools.WeightProducer_cfi')
 
@@ -23,6 +23,8 @@ process.tt = cms.EDAnalyzer('TrackingTreer',
                             process.jmtNtupleFillerMiniAOD,
                             track_sel = cms.bool(True),
                             )
+
+process.tt.track_ref_getter.tracks_maps_srcs = []
 
 process.p = cms.Path(process.tt)
 

@@ -1,5 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
+from JMTucker.Tools.TrackRefGetter_cff import *
+
 jmtNtupleFiller = cms.PSet(
     input_is_miniaod = cms.bool(False),
     gen_particles_src = cms.InputTag('genParticles'),
@@ -13,6 +15,7 @@ jmtNtupleFiller = cms.PSet(
     tracks_src = cms.InputTag('generalTracks'),
     jets_src = cms.InputTag('selectedPatJets'),
     packed_candidates_src = cms.InputTag('packedPFCandidates'),
+    track_ref_getter = jmtTrackRefGetter,
     )
 
 jmtNtupleFillerMiniAOD = jmtNtupleFiller.clone(
@@ -21,7 +24,8 @@ jmtNtupleFillerMiniAOD = jmtNtupleFiller.clone(
     weight_src = 'jmtWeightMiniAOD',
     pileup_info_src = 'slimmedAddPileupInfo',
     primary_vertices_src = 'offlineSlimmedPrimaryVertices',
-    tracks_src = 'mfvUnpackedCandidateTracks',
+    tracks_src = 'jmtUnpackedCandidateTracks',
+    track_ref_getter = jmtTrackRefGetterMiniAOD,
     )
 
 def jmtNtupleFiller_pset(miniaod):

@@ -31,10 +31,10 @@ file_event_from_argv(process)
 
 remove_output_module(process)
 
-from JMTucker.Tools.NtupleFiller_cff import jmtNtupleFiller_pset
 from JMTucker.MFVNeutralino.Vertexer_cff import modifiedVertexSequence
-from JMTucker.MFVNeutralino.JetTrackRefGetter_cff import mfvJetTrackRefGetter
-mfvJetTrackRefGetter.input_is_miniaod = settings.is_miniaod
+from JMTucker.Tools.NtupleFiller_cff import jmtNtupleFiller_pset
+from JMTucker.Tools.TrackRefGetter_cff import jmtTrackRefGetter
+jmtTrackRefGetter.input_is_miniaod = settings.is_miniaod
 
 process.mfvEvent.vertex_seed_tracks_src = ''
 process.load('JMTucker.Tools.WeightProducer_cfi')
@@ -57,11 +57,11 @@ for icfg, cfg in enumerate(cfgs):
     random_dict[tracks_name] = 13068 + icfg
 
     tracks = cms.EDProducer('MFVTrackMover',
-                            tracks_src = cms.InputTag('mfvRescaledTracks'),
+                            tracks_src = cms.InputTag('jmtRescaledTracks'),
                             primary_vertices_src = cms.InputTag('goodOfflinePrimaryVertices'),
                             packed_candidates_src = cms.InputTag('packedPFCandidates'),
                             jets_src = cms.InputTag('selectedPatJets'),
-                            jet_track_ref_getter = mfvJetTrackRefGetter,
+                            track_ref_getter = jmtTrackRefGetter,
                             min_jet_pt = cms.double(50),
                             min_jet_ntracks = cms.uint32(4),
                             b_discriminator = cms.string('pfCombinedInclusiveSecondaryVertexV2BJetTags'),
@@ -79,7 +79,7 @@ for icfg, cfg in enumerate(cfgs):
                            )
 
     for x in 'mfvVerticesToJets', 'mfvVerticesAuxTmp', 'mfvVerticesAuxPresel':
-        getattr(process, x + ex).jet_track_ref_getter.tracks_maps_srcs.append(cms.InputTag(tracks_name))
+        getattr(process, x + ex).track_ref_getter.tracks_maps_srcs.append(cms.InputTag(tracks_name))
 
     tree = cms.EDAnalyzer('MFVMovedTracksTreer',
                           jmtNtupleFiller_pset(settings.is_miniaod),

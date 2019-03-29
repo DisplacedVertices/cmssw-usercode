@@ -5,11 +5,11 @@
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "JMTucker/MFVNeutralinoFormats/interface/TracksMap.h"
+#include "JMTucker/Formats/interface/TracksMap.h"
 
-class MFVRescaledTracks : public edm::EDProducer {
+class JMTRescaledTracks : public edm::EDProducer {
 public:
-  explicit MFVRescaledTracks(const edm::ParameterSet&);
+  explicit JMTRescaledTracks(const edm::ParameterSet&);
 
 private:
   virtual void produce(edm::Event&, const edm::EventSetup&) override;
@@ -18,20 +18,20 @@ private:
   const bool enable;
 };
 
-MFVRescaledTracks::MFVRescaledTracks(const edm::ParameterSet& cfg) 
+JMTRescaledTracks::JMTRescaledTracks(const edm::ParameterSet& cfg) 
   : tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("tracks_src"))),
     enable(cfg.getParameter<bool>("enable"))
 {
   produces<reco::TrackCollection>();
-  produces<mfv::TracksMap>();
+  produces<jmt::TracksMap>();
 }
 
-void MFVRescaledTracks::produce(edm::Event& event, const edm::EventSetup&) {
+void JMTRescaledTracks::produce(edm::Event& event, const edm::EventSetup&) {
   edm::Handle<reco::TrackCollection> tracks;
   event.getByToken(tracks_token, tracks);
 
   auto output_tracks = std::make_unique<reco::TrackCollection>();
-  auto output_tracks_map = std::make_unique<mfv::TracksMap>();
+  auto output_tracks_map = std::make_unique<jmt::TracksMap>();
 
   reco::TrackRefProd h_output_tracks = event.getRefBeforePut<reco::TrackCollection>();
 
@@ -69,4 +69,4 @@ void MFVRescaledTracks::produce(edm::Event& event, const edm::EventSetup&) {
   event.put(std::move(output_tracks_map));
 }
 
-DEFINE_FWK_MODULE(MFVRescaledTracks);
+DEFINE_FWK_MODULE(JMTRescaledTracks);

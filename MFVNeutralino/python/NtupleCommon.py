@@ -216,7 +216,7 @@ def miniaod_ntuple_process(settings):
     process.load('JMTucker.Tools.UpdatedJets_cff')
     process.load('JMTucker.Tools.PATTupleSelection_cfi')
     process.load('JMTucker.Tools.WeightProducer_cfi')
-    process.load('JMTucker.MFVNeutralino.UnpackedCandidateTracks_cfi')
+    process.load('JMTucker.Tools.UnpackedCandidateTracks_cfi')
     process.load('JMTucker.MFVNeutralino.Vertexer_cff')
     process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
     process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
@@ -233,10 +233,10 @@ def miniaod_ntuple_process(settings):
     process.mfvGenParticles.gen_particles_src = 'prunedGenParticles'
     process.mfvGenParticles.last_flag_check = False
 
-    process.mfvRescaledTracks.tracks_src = 'mfvUnpackedCandidateTracks'
+    process.jmtRescaledTracks.tracks_src = 'jmtUnpackedCandidateTracks'
 
     for x in process.mfvVerticesToJets, process.mfvVerticesAuxTmp, process.mfvVerticesAuxPresel:
-        x.jet_track_ref_getter.input_is_miniaod = True
+        x.track_ref_getter.input_is_miniaod = True
 
     process.mfvEvent.input_is_miniaod = True
     process.mfvEvent.gen_particles_src = 'prunedGenParticles' # no idea if this lets gen_bquarks, gen_leptons work--may want the packed ones that have status 1 particles
@@ -250,7 +250,7 @@ def miniaod_ntuple_process(settings):
                          process.selectedPatMuons *
                          process.selectedPatElectrons *
                          process.mfvTriggerFloats *
-                         process.mfvUnpackedCandidateTracks *
+                         process.jmtUnpackedCandidateTracks *
                          process.mfvVertexSequence *
                          process.prefiringweight *
                          process.mfvEvent)

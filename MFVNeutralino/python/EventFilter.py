@@ -90,12 +90,12 @@ def setup_event_filter(process,
                 process.load('JMTucker.MFVNeutralino.Vertexer_cff')
                 if input_is_miniaod:
                     process.goodOfflinePrimaryVertices.src = 'offlineSlimmedPrimaryVertices'
-                    process.load('JMTucker.MFVNeutralino.UnpackedCandidateTracks_cfi')
-                    process.mfvVertexTracks.tracks_src = 'mfvUnpackedCandidateTracks'
+                    process.load('JMTucker.Tools.UnpackedCandidateTracks_cfi')
+                    process.mfvVertexTracks.tracks_src = 'jmtUnpackedCandidateTracks'
             vertexFilter = cms.EDFilter('VertexSelector', src = cms.InputTag('mfvVertices'), cut = cms.string('nTracks > 2'), filter = cms.bool(True))
             setattr(process, event_filter_name + 'W1Vtx', vertexFilter)
             if input_is_miniaod:
-                overall *= process.goodOfflinePrimaryVertices * process.mfvUnpackedCandidateTracks * process.mfvVertexSequenceBare * vertexFilter
+                overall *= process.goodOfflinePrimaryVertices * process.jmtUnpackedCandidateTracks * process.mfvVertexSequenceBare * vertexFilter
             else:
                 overall *= process.goodOfflinePrimaryVertices                                      * process.mfvVertexSequenceBare * vertexFilter
 

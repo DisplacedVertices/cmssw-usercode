@@ -13,11 +13,11 @@ sample_files(process, 'qcdht2000_2017', 'miniaod')
 file_event_from_argv(process)
 #want_summary(process)
 
-process.load('JMTucker.Tools.MCStatProducer_cff')
-process.load('JMTucker.Tools.WeightProducer_cfi')
 process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
-process.load('JMTucker.MFVNeutralino.UnpackedCandidateTracks_cfi')
 process.load('JMTucker.Tools.GenParticleFilter_cfi')
+process.load('JMTucker.Tools.MCStatProducer_cff')
+process.load('JMTucker.Tools.UnpackedCandidateTracks_cfi')
+process.load('JMTucker.Tools.WeightProducer_cfi')
 
 process.goodOfflinePrimaryVertices.src = 'offlineSlimmedPrimaryVertices'
 process.goodOfflinePrimaryVertices.filter = True
@@ -30,7 +30,7 @@ process.bFlavor = process.jmtGenParticleFilter.clone(min_flavor_code = 2)
 process.displacedGenPV = process.jmtGenParticleFilter.clone(min_pvrho = 0.0036)
 
 process.TrackerMapper = cms.EDAnalyzer('TrackerMapper',
-                                       track_src = cms.InputTag('mfvUnpackedCandidateTracks'),
+                                       track_src = cms.InputTag('jmtUnpackedCandidateTracks'),
                                        heavy_flavor_src = cms.InputTag(''),
                                        beamspot_src = cms.InputTag('offlineBeamSpot'),
                                        primary_vertex_src = cms.InputTag('goodOfflinePrimaryVertices'),
@@ -48,13 +48,13 @@ jetsOnly = setup_event_filter(process,
                               event_filter_require_vertex = False,
                               input_is_miniaod = True)
 
-common = cms.Sequence(jetsOnly * process.goodOfflinePrimaryVertices * process.mfvUnpackedCandidateTracks * process.jmtWeightMiniAOD)
+common = cms.Sequence(jetsOnly * process.goodOfflinePrimaryVertices * process.jmtUnpackedCandidateTracks * process.jmtWeightMiniAOD)
 
 if False:
-    process.load('JMTucker.MFVNeutralino.RescaledTracks_cfi')
-    process.mfvRescaledTracks.tracks_src = 'mfvUnpackedCandidateTracks'
-    common *= process.mfvRescaledTracks
-    process.TrackerMapper.track_src = 'mfvRescaledTracks'
+    process.load('JMTucker.Tools.RescaledTracks_cfi')
+    process.jmtRescaledTracks.tracks_src = 'jmtUnpackedCandidateTracks'
+    common *= process.jmtRescaledTracks
+    process.TrackerMapper.track_src = 'jmtRescaledTracks'
 
 process.p = cms.Path(common * process.TrackerMapper)
 

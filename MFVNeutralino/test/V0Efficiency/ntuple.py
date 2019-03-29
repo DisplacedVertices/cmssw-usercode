@@ -22,8 +22,8 @@ cmssw_from_argv(process)
 
 from JMTucker.Tools.NtupleFiller_cff import jmtNtupleFiller_pset
 
-#process.mfvUnpackedCandidateTracks.debug = debug
-process.mfvUnpackedCandidateTracks.cut_level = 1
+#process.jmtUnpackedCandidateTracks.debug = debug
+process.jmtUnpackedCandidateTracks.cut_level = 1
 
 from JMTucker.MFVNeutralino.Vertexer_cfi import kvr_params
 process.mfvK0s = cms.EDAnalyzer('MFVK0Treer',

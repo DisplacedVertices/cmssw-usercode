@@ -12,7 +12,7 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/JetVertexAssociation.h"
-#include "JMTucker/MFVNeutralino/interface/JetTrackRefGetter.h"
+#include "JMTucker/Tools/interface/TrackRefGetter.h"
 
 class MFVJetVertexAssociator : public edm::EDProducer {
 public:
@@ -28,7 +28,7 @@ private:
   const edm::EDGetTokenT<reco::VertexRefVector> vertex_ref_token;
   const edm::EDGetTokenT<reco::VertexCollection> vertex_token;
 
-  mfv::JetTrackRefGetter jet_track_ref_getter;
+  jmt::TrackRefGetter track_ref_getter;
 
   const bool input_is_refs;
   const std::string tag_info_name;
@@ -83,8 +83,8 @@ MFVJetVertexAssociator::MFVJetVertexAssociator(const edm::ParameterSet& cfg)
     jet_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jet_src"))),
     vertex_ref_token(consumes<reco::VertexRefVector>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
-    jet_track_ref_getter(cfg.getParameter<std::string>("@module_label"),
-                         cfg.getParameter<edm::ParameterSet>("jet_track_ref_getter"),
+    track_ref_getter(cfg.getParameter<std::string>("@module_label"),
+                         cfg.getParameter<edm::ParameterSet>("track_ref_getter"),
                          consumesCollector()),
     input_is_refs(cfg.getParameter<bool>("input_is_refs")),
     tag_info_name(cfg.getParameter<std::string>("tag_info_name")),
@@ -222,7 +222,7 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
       const pat::Jet& jet = jets->at(ijet);
       std::set<reco::TrackRef> jet_tracks;
 
-      for (auto r : jet_track_ref_getter.tracks(event, jet))
+      for (auto r : track_ref_getter.tracks(event, jet))
         jet_tracks.insert(r);
 
       const size_t n_jet_tracks = jet_tracks.size();
