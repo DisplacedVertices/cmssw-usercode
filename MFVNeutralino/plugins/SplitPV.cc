@@ -120,9 +120,9 @@ void MFVSplitPV::analyze(const edm::Event& event, const edm::EventSetup& setup) 
   
     for (auto tp : ttks)
       jmt::NtupleAdd(nt.tracks(), tp.first.track(), -1, tp.second);
-  }
 
-  tree->Fill();
+    tree->Fill();
+  }
 }
 
 DEFINE_FWK_MODULE(MFVSplitPV);
