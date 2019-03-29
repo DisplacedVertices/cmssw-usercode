@@ -8,7 +8,7 @@ settings.is_mc = True
 settings.is_miniaod = True
 settings.event_filter = 'jets only novtx'
 
-version = settings.version + 'v2'
+version = settings.version + 'v3'
 
 cfgs = named_product(njets = [2],
                      nbjets = [0],
@@ -106,7 +106,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools import Samples
 
     if year == 2017:
-        samples = Samples.data_samples_2017 + Samples.ttbar_samples_2017 + Samples.qcd_samples_2017
+        samples = Samples.data_samples_2017 + Samples.qcd_samples_2017
     elif year == 2018:
         samples = Samples.data_samples_2018 + Samples.qcd_samples_2018
 
