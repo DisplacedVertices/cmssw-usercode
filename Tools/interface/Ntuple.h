@@ -11,6 +11,8 @@
 namespace jmt {
   class INtuple {
   public:
+    virtual ~INtuple() {};
+
     const char* pfx() const { return pfx_; }
     void set_pfx(const char* p) { pfx_ = p; }
 
