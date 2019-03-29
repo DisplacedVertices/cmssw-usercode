@@ -56,8 +56,10 @@ void MFVSplitPV::analyze(const edm::Event& event, const edm::EventSetup& setup) 
   pvs_filler(event);
   jets_filler(event);
 
-  auto doit = [&](const std::vector<reco::TransientTrack>& ts, unsigned which, unsigned ex=0) {
+  auto doit = [&](const std::vector<std::pair<reco::TransientTrack, unsigned>>& tps, unsigned which, unsigned ex=0) {
     TransientVertex tv;
+    std::vector<reco::TransientTrack> ts(tps.size());
+    for (size_t i = 0, ie = tps.size(); i < ie; ++i) ts[i] = tps[i].first;
     try { tv = kv_reco->vertex(ts); } catch (...) {}
     if (tv.isValid()) {
       reco::Vertex v(tv);
@@ -69,7 +71,7 @@ void MFVSplitPV::analyze(const edm::Event& event, const edm::EventSetup& setup) 
     }
   };
 
-  std::vector<reco::TransientTrack> ttks;
+  std::vector<std::pair<reco::TransientTrack,unsigned>> ttks, ttks_loose;
 
   edm::ESHandle<TransientTrackBuilder> tt_builder;
   setup.get<TransientTrackRecord>().get("TransientTrackBuilder", tt_builder);
@@ -78,34 +80,46 @@ void MFVSplitPV::analyze(const edm::Event& event, const edm::EventSetup& setup) 
 
   for (const pat::PackedCandidate& c : pvs_filler.cands(event))
     if (c.charge() && c.hasTrackDetails()) {
-      int k = int(c.vertexRef().key());
-      if (debug) printf(" %i", k);
-      if (k == pvs_filler.ipv())
-        ttks.push_back(tt_builder->build(c.pseudoTrack()));
+      const int k = int(c.vertexRef().key());
+      const int q = c.pvAssociationQuality();
+      if (debug) printf(" %i-%i", k, q);
+      if (k == pvs_filler.ipv()) {
+        if (q == pat::PackedCandidate::UsedInFitLoose || q == pat::PackedCandidate::UsedInFitTight) {
+          auto ttk = std::make_pair(tt_builder->build(c.pseudoTrack()), 0U);
+          ttks_loose.push_back(ttk);
+          if (q == pat::PackedCandidate::UsedInFitTight)
+            ttks.push_back(ttk);
+        }
+      }
     }
 
   const size_t n = ttks.size();
   if (debug) printf("\nPV ndof %f ntracks %i n %lu\n", nt.pvs().ndof(0), nt.pvs().ntracks(0), n);
 
-  if (n < 2)
-    return;
+  if (n >= 2) {
+    doit(ttks, 1, n);
+    doit(ttks, 2, ttks_loose.size());
 
-  doit(ttks, 1, n);
+    if (n >= 4) {
+      std::vector<std::pair<reco::TransientTrack, unsigned>> ttksa(n/2+n%2), ttksb(n/2);
 
-  if (n < 4)
-    return;
+      for (int k : {0,1}) {
+        if (k == 0) std::sort(ttks.begin(), ttks.end(), [](auto a, auto b) { return a.first.track().pt() > b.first.track().pt(); });
+        else        std::sort(ttks.begin(), ttks.end(), [](auto a, auto b) { return a.first.track().dxyError() < b.first.track().dxyError(); });
 
-  std::vector<reco::TransientTrack> ttksa(n/2+n%2), ttksb(n/2);
+        for (size_t i = 0; i < n; ++i) {
+          const int which = i % 2 == 0;
+          ttks[i].second |= which << k;
+          (which ? ttksa : ttksb)[i/2] = ttks[i];
+        }
 
-  for (int k : {0,1}) {
-    if (k == 0) std::sort(ttks.begin(), ttks.end(), [](auto a, auto b) { return a.track().pt() > b.track().pt(); });
-    else        std::sort(ttks.begin(), ttks.end(), [](auto a, auto b) { return a.track().dxyError() < b.track().dxyError(); });
+        doit(ttksa, 2*k+3);
+        doit(ttksb, 2*k+4);
+      }
+    }
   
-    for (size_t i = 0; i < n; ++i)
-      (i % 2 == 0 ? ttksa : ttksb)[i/2] = ttks[i];
-
-    doit(ttksa, 2*k+2);
-    doit(ttksb, 2*k+3);
+    for (auto tp : ttks)
+      jmt::NtupleAdd(nt.tracks(), tp.first.track(), -1, tp.second);
   }
 
   tree->Fill();
