@@ -119,11 +119,8 @@ void MFVK0Treer::analyze(const edm::Event& event, const edm::EventSetup& setup) 
 
       TLorentzVector vp4 = p4(tkrefi) + p4(tkrefj);
       const double mass = vp4.M();
-      const bool masson = mass >= 0.490 && mass <= 0.505;
-      const bool masslo = mass >= 0.420 && mass <= 0.460;
-      const bool masshi = mass >= 0.540 && mass <= 0.600;
-      if (debug) printf("  p: %f m: %f (%i%i%i)\n", vp4.P(), mass, masson, masslo, masshi);
-      if (!masson && !masslo && !masshi)
+      if (debug) printf("  p: %f m: %f\n", vp4.P(), mass);
+      if (mass < 0.42 || mass > 0.58)
         continue;
 
       const TVector3 flight(v.x() - pv.x(), v.y() - pv.y(), v.z() - pv.z());
