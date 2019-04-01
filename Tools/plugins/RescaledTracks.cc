@@ -72,7 +72,7 @@ void JMTRescaledTracks::produce(edm::Event& event, const edm::EventSetup&) {
 	if (idim == i_dsz) {
 	  const double cov_dz = tk->dzError() * tk->dzError();
 	  const double cov_theta = tk->thetaError() * tk->thetaError();
-	  cov(idim, i_dsz) = cov_dz * dzerr_scale * dzerr_scale * sin(tk->theta()) + cov_theta * tk->dz() * cos(tk->theta()); // neglecting dz/theta covariance cross term
+	  cov(idim, i_dsz) = cov_dz * pow(dzerr_scale, 2) * pow(sin(tk->theta()), 2) + cov_theta * pow(tk->dz(), 2) * pow(cos(tk->theta()), 2); // neglecting dz/theta covariance cross term
 	}
       }
     }
