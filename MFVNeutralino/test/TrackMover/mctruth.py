@@ -5,6 +5,8 @@ settings.is_mc = True
 settings.is_miniaod = True
 settings.event_filter = 'jets only novtx'
 
+version = settings.version + 'v3'
+
 process = ntuple_process(settings)
 remove_output_module(process)
 tfileservice(process, 'mctruth.root')
@@ -40,7 +42,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = Samples.all_signal_samples_2017
 
     #samples = [s for s in samples if s.has_dataset(dataset)]
-    set_splitting(samples, dataset, 'minitree')
+    set_splitting(samples, dataset, 'ntuple')
 
     cs = CondorSubmitter('TrackMoverMCTruth' + version,
                          ex = year,

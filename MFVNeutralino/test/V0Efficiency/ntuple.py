@@ -45,7 +45,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     elif year == 2018:
         samples = Samples.data_samples_2018 + Samples.qcd_samples_2018
 
-    set_splitting(samples, dataset, 'default', json_path('ana_2017p8.json'), 16)
+    set_splitting(samples, dataset, 'default', json_path('ana_2017p8.json'), 4)
 
     ms = MetaSubmitter('K0Ntuple' + version, dataset=dataset)
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier())
