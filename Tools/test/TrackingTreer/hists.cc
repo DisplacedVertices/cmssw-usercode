@@ -42,6 +42,8 @@ int main(int argc, char** argv) {
 
   TH1D* h_tracks_dxyerr[max_tk_type];
   TH1D* h_tracks_dzerr[max_tk_type];
+  TH1D* h_tracks_dszerr[max_tk_type];
+  TH1D* h_tracks_lambdaerr[max_tk_type];
   TH1D* h_tracks_pterr[max_tk_type];
   TH1D* h_tracks_phierr[max_tk_type];
   TH1D* h_tracks_etaerr[max_tk_type];
@@ -69,6 +71,22 @@ int main(int argc, char** argv) {
   TH2D* h_tracks_dxyerr_v_npxlayers[max_tk_type];
   TH2D* h_tracks_dxyerr_v_nstlayers[max_tk_type];
 
+  TH2D* h_tracks_dszerr_v_pt[max_tk_type];
+  TH2D* h_tracks_dszerr_v_eta[max_tk_type];
+  TH2D* h_tracks_dszerr_v_phi[max_tk_type];
+  TH2D* h_tracks_dszerr_v_dxy[max_tk_type];
+  TH2D* h_tracks_dszerr_v_dz[max_tk_type];
+  TH2D* h_tracks_dszerr_v_npxlayers[max_tk_type];
+  TH2D* h_tracks_dszerr_v_nstlayers[max_tk_type];
+
+  TH2D* h_tracks_lambdaerr_v_pt[max_tk_type];
+  TH2D* h_tracks_lambdaerr_v_eta[max_tk_type];
+  TH2D* h_tracks_lambdaerr_v_phi[max_tk_type];
+  TH2D* h_tracks_lambdaerr_v_dxy[max_tk_type];
+  TH2D* h_tracks_lambdaerr_v_dz[max_tk_type];
+  TH2D* h_tracks_lambdaerr_v_npxlayers[max_tk_type];
+  TH2D* h_tracks_lambdaerr_v_nstlayers[max_tk_type];
+
   TH2D* h_tracks_eta_v_phi[max_tk_type];
 
   const char* ex[max_tk_type] = {"all", "sel", "seed"};
@@ -91,7 +109,9 @@ int main(int argc, char** argv) {
     h_tracks_nsigmadxy[i] = new TH1D(TString::Format("h_%s_tracks_nsigmadxy", ex[i]), TString::Format("%s tracks;tracks nsigmadxy;arb. units", ex[i]), 400, 0, 40);
     
     h_tracks_dxyerr[i] = new TH1D(TString::Format("h_%s_tracks_dxyerr", ex[i]), TString::Format("%s tracks;tracks dxyerr;arb. units", ex[i]), 2000, 0, 0.2);
-    h_tracks_dzerr[i] = new TH1D(TString::Format("h_%s_tracks_dzerr", ex[i]), TString::Format("%s tracks;tracks dzerr;arb. units", ex[i]), 200, 0, 2);
+    h_tracks_dzerr[i] = new TH1D(TString::Format("h_%s_tracks_dzerr", ex[i]), TString::Format("%s tracks;tracks dzerr;arb. units", ex[i]), 2000, 0, 0.2);
+    h_tracks_dszerr[i] = new TH1D(TString::Format("h_%s_tracks_dszerr", ex[i]), TString::Format("%s tracks;tracks dszerr;arb. units", ex[i]), 2000, 0, 0.2);
+    h_tracks_lambdaerr[i] = new TH1D(TString::Format("h_%s_tracks_lambdaerr", ex[i]), TString::Format("%s tracks;tracks lambdaerr;arb. units", ex[i]), 2000, 0, 0.2);
     h_tracks_pterr[i] = new TH1D(TString::Format("h_%s_tracks_pterr", ex[i]), TString::Format("%s tracks;tracks pterr;arb. units", ex[i]), 200, 0, 0.2);
     h_tracks_phierr[i] = new TH1D(TString::Format("h_%s_tracks_phierr", ex[i]), TString::Format("%s tracks;tracks phierr;arb. units", ex[i]), 200, 0, 0.2);
     h_tracks_etaerr[i] = new TH1D(TString::Format("h_%s_tracks_etaerr", ex[i]), TString::Format("%s tracks;tracks etaerr;arb. units", ex[i]), 200, 0, 0.2);
@@ -117,6 +137,22 @@ int main(int argc, char** argv) {
     h_tracks_dxyerr_v_dz[i] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_dz", ex[i]), TString::Format("%s tracks;tracks dz to beamspot;tracks dxyerr", ex[i]), 400, -20, 20, 200, 0, 0.2);
     h_tracks_dxyerr_v_npxlayers[i] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_npxlayers", ex[i]), TString::Format("%s tracks;tracks npxlayers;tracks dxyerr", ex[i]), 10, 0, 10, 200, 0, 0.2);
     h_tracks_dxyerr_v_nstlayers[i] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_nstlayers", ex[i]), TString::Format("%s tracks;tracks nstlayers;tracks dxyerr", ex[i]), 20, 0, 20, 200, 0, 0.2);
+
+    h_tracks_dszerr_v_pt[i] = new TH2D(TString::Format("h_%s_tracks_dszerr_v_pt", ex[i]), TString::Format("%s tracks;tracks pt;tracks dszerr", ex[i]), 2000, 0, 200, 2000, 0, 0.2);
+    h_tracks_dszerr_v_eta[i] = new TH2D(TString::Format("h_%s_tracks_dszerr_v_eta", ex[i]), TString::Format("%s tracks;tracks eta;tracks dszerr", ex[i]), 80, -4, 4, 2000, 0, 0.2);
+    h_tracks_dszerr_v_phi[i] = new TH2D(TString::Format("h_%s_tracks_dszerr_v_phi", ex[i]), TString::Format("%s tracks;tracks phi;tracks dszerr", ex[i]), 126, -3.15, 3.15, 200, 0, 0.2);
+    h_tracks_dszerr_v_dxy[i] = new TH2D(TString::Format("h_%s_tracks_dszerr_v_dxy", ex[i]), TString::Format("%s tracks;tracks dxy to beamspot;tracks dszerr", ex[i]), 400, -0.2, 0.2, 200, 0, 0.2);
+    h_tracks_dszerr_v_dz[i] = new TH2D(TString::Format("h_%s_tracks_dszerr_v_dz", ex[i]), TString::Format("%s tracks;tracks dz to beamspot;tracks dszerr", ex[i]), 400, -20, 20, 200, 0, 0.2);
+    h_tracks_dszerr_v_npxlayers[i] = new TH2D(TString::Format("h_%s_tracks_dszerr_v_npxlayers", ex[i]), TString::Format("%s tracks;tracks npxlayers;tracks dszerr", ex[i]), 10, 0, 10, 200, 0, 0.2);
+    h_tracks_dszerr_v_nstlayers[i] = new TH2D(TString::Format("h_%s_tracks_dszerr_v_nstlayers", ex[i]), TString::Format("%s tracks;tracks nstlayers;tracks dszerr", ex[i]), 20, 0, 20, 200, 0, 0.2);
+
+    h_tracks_lambdaerr_v_pt[i] = new TH2D(TString::Format("h_%s_tracks_lambdaerr_v_pt", ex[i]), TString::Format("%s tracks;tracks pt;tracks lambdaerr", ex[i]), 2000, 0, 200, 2000, 0, 0.2);
+    h_tracks_lambdaerr_v_eta[i] = new TH2D(TString::Format("h_%s_tracks_lambdaerr_v_eta", ex[i]), TString::Format("%s tracks;tracks eta;tracks lambdaerr", ex[i]), 80, -4, 4, 2000, 0, 0.2);
+    h_tracks_lambdaerr_v_phi[i] = new TH2D(TString::Format("h_%s_tracks_lambdaerr_v_phi", ex[i]), TString::Format("%s tracks;tracks phi;tracks lambdaerr", ex[i]), 126, -3.15, 3.15, 200, 0, 0.2);
+    h_tracks_lambdaerr_v_dxy[i] = new TH2D(TString::Format("h_%s_tracks_lambdaerr_v_dxy", ex[i]), TString::Format("%s tracks;tracks dxy to beamspot;tracks lambdaerr", ex[i]), 400, -0.2, 0.2, 200, 0, 0.2);
+    h_tracks_lambdaerr_v_dz[i] = new TH2D(TString::Format("h_%s_tracks_lambdaerr_v_dz", ex[i]), TString::Format("%s tracks;tracks dz to beamspot;tracks lambdaerr", ex[i]), 400, -20, 20, 200, 0, 0.2);
+    h_tracks_lambdaerr_v_npxlayers[i] = new TH2D(TString::Format("h_%s_tracks_lambdaerr_v_npxlayers", ex[i]), TString::Format("%s tracks;tracks npxlayers;tracks lambdaerr", ex[i]), 10, 0, 10, 200, 0, 0.2);
+    h_tracks_lambdaerr_v_nstlayers[i] = new TH2D(TString::Format("h_%s_tracks_lambdaerr_v_nstlayers", ex[i]), TString::Format("%s tracks;tracks nstlayers;tracks lambdaerr", ex[i]), 20, 0, 20, 200, 0, 0.2);
 
     h_tracks_eta_v_phi[i] = new TH2D(TString::Format("h_%s_tracks_eta_v_phi", ex[i]), TString::Format("%s tracks;tracks phi;tracks eta", ex[i]), 126, -3.15, 3.15, 80, -4, 4);
   }
@@ -187,6 +223,8 @@ int main(int argc, char** argv) {
 
 	h_tracks_dxyerr[i]->Fill(ntt.err_dxy(itk), w);
 	h_tracks_dzerr[i]->Fill(ntt.err_dz(itk), w);
+	h_tracks_dszerr[i]->Fill(ntt.err_dsz(itk), w);
+	h_tracks_lambdaerr[i]->Fill(ntt.err_lambda(itk), w);
 	h_tracks_pterr[i]->Fill(ntt.err_pt(itk), w);
 	h_tracks_phierr[i]->Fill(ntt.err_phi(itk), w);
 	h_tracks_etaerr[i]->Fill(ntt.err_eta(itk), w);
@@ -213,6 +251,22 @@ int main(int argc, char** argv) {
 	h_tracks_dxyerr_v_dz[i]->Fill(ntt.dz(itk), ntt.err_dxy(itk), w);
 	h_tracks_dxyerr_v_npxlayers[i]->Fill(npxlayers, ntt.err_dxy(itk), w);
 	h_tracks_dxyerr_v_nstlayers[i]->Fill(nstlayers, ntt.err_dxy(itk), w);
+
+	h_tracks_dszerr_v_pt[i]->Fill(pt, ntt.err_dsz(itk), w);
+	h_tracks_dszerr_v_eta[i]->Fill(ntt.eta(itk), ntt.err_dsz(itk), w);
+	h_tracks_dszerr_v_phi[i]->Fill(ntt.phi(itk), ntt.err_dsz(itk), w);
+	h_tracks_dszerr_v_dxy[i]->Fill(dxybs, ntt.err_dsz(itk), w);
+	h_tracks_dszerr_v_dz[i]->Fill(ntt.dz(itk), ntt.err_dsz(itk), w);
+	h_tracks_dszerr_v_npxlayers[i]->Fill(npxlayers, ntt.err_dsz(itk), w);
+	h_tracks_dszerr_v_nstlayers[i]->Fill(nstlayers, ntt.err_dsz(itk), w);
+
+	h_tracks_lambdaerr_v_pt[i]->Fill(pt, ntt.err_lambda(itk), w);
+	h_tracks_lambdaerr_v_eta[i]->Fill(ntt.eta(itk), ntt.err_lambda(itk), w);
+	h_tracks_lambdaerr_v_phi[i]->Fill(ntt.phi(itk), ntt.err_lambda(itk), w);
+	h_tracks_lambdaerr_v_dxy[i]->Fill(dxybs, ntt.err_lambda(itk), w);
+	h_tracks_lambdaerr_v_dz[i]->Fill(ntt.dz(itk), ntt.err_lambda(itk), w);
+	h_tracks_lambdaerr_v_npxlayers[i]->Fill(npxlayers, ntt.err_lambda(itk), w);
+	h_tracks_lambdaerr_v_nstlayers[i]->Fill(nstlayers, ntt.err_lambda(itk), w);
 
 	h_tracks_eta_v_phi[i]->Fill(ntt.phi(itk), ntt.eta(itk), w);
       }

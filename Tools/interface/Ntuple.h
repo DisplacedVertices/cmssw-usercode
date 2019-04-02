@@ -326,6 +326,8 @@ namespace jmt {
     float err_phi(int i) const { return sqrt(cov_22(i)); }
     float err_dxy(int i) const { return sqrt(cov_33(i)); }
     float err_dz(int i) const { return sqrt(cov_44(i) * p2(i)) / pt(i); }
+    float err_dsz(int i) const { return sqrt(cov_44(i)); }
+    float err_lambda(int i) const { return sqrt(cov_11(i)); }
     int npxhits(int i) const { return hp(i) & 0xf; }
     int nsthits(int i) const { return (hp(i) >> 4) & 0x1f; }
     int npxlayers(int i) const { return (hp(i) >> 9) & 0xf; }
