@@ -7,7 +7,7 @@ if [[ $job < 0 ]]; then
     test=1
 fi
 
-inpathbase=root://cmseos.fnal.gov//store/user/tucker/TrackMoverV23mv2
+inpathbase=root://cmseos.fnal.gov//store/user/tucker/TrackMoverV23mv3
 
 paths=(
 ${inpathbase}
