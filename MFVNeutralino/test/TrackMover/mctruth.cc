@@ -71,7 +71,7 @@ int main(int argc, char** argv) {
     const double lspdistz = nt.gentruth().lspdistz();
 
     for (int ilsp = 0; ilsp < 2; ++ilsp) {
-      const TVector3 lspdecay = nt.gentruth().decay(ilsp);
+      const TVector3 lspdecay = nt.gentruth().decay(ilsp, nt.bs());  // JMTBAD BS BS
       const double movedist2 = lspdecay.Perp();
       const double movedist3 = lspdecay.Mag();
 
