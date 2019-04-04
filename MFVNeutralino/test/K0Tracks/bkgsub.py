@@ -136,7 +136,7 @@ for lo in xrange(50):
         if z > max_z:
             max_z = z
 print
-xlo,xhi,n,ne,b,be,s,se,p,z = do(7,7, True) # print the one we're using
+xlo,xhi,n,ne,b,be,s,se,p,z = do(1,1, True) # print the one we're using
 assert abs(xlo-0.490) < 1e-5 and abs(xhi-0.505) < 1e-5 # check that we're in sync with histos
 
 out_f = ROOT.TFile(out_fn, 'recreate')
@@ -147,21 +147,27 @@ integ = lambda h: h.Integral(0,h.GetNbinsX()+2)
 
 colors = (2,3,4,6)
 variables = [
-    ('h_rho', 1, 10, (0,2)),
-#    ('h_tracks_charge', 2, 1, None),
-    ('h_tracks_pt', 2, 10, (0,100)),
-    ('h_tracks_eta', 2, 10, None),
-    ('h_tracks_phi', 2, 10, None),
-    ('h_tracks_dxy', 2, 10, (-0.5,0.5)),
-    ('h_tracks_absdxy', 2, 10, (0.,0.5)),
-    ('h_tracks_dz', 2, 10, None),
-    ('h_tracks_dzpv', 2, 10, None),
-    ('h_tracks_sigmadxy', 2, 1, (0,0.03)),
-    ('h_tracks_npxlayers', 2, 1, None),
-    ('h_tracks_nstlayers', 2, 1, None),
-    ('h_tracks_dxyerr', 2, 10, (0,0.5)),
+    ('h_rho', 1, 1, (0,2)),
+    ('h_pt', 1, 1, None),
+    ('h_eta', 1, 1, None),
+    ('h_phi', 1, 1, None),
+    ('h_costh', 1, 1, (0.95,1.01)),
     ]
-
+#    ('h_tracks_charge', 2, 1, None),
+#    ('h_tracks_pt', 2, 10, (0,100)),
+#    ('h_tracks_eta', 2, 10, None),
+#    ('h_tracks_phi', 2, 10, None),
+#    ('h_tracks_dxy', 2, 10, (-0.5,0.5)),
+#    ('h_tracks_absdxy', 2, 10, (0.,0.5)),
+#    ('h_tracks_dz', 2, 10, None),
+#    ('h_tracks_dzpv', 2, 10, None),
+#    ('h_tracks_nsigmadxy', 2, 1, (0,0.03)),
+#    ('h_tracks_npxlayers', 2, 1, None),
+#    ('h_tracks_nstlayers', 2, 1, None),
+#    ('h_tracks_dxyerr', 2, 1, None),
+#    ('h_tracks_dszerr', 2, 1, None),
+#    ]
+#
 for hname, integ_factor, rebin, x_range in variables:
     hon = in_f.Get('masson/%s' % hname)
     hbkglo = in_f.Get('masslo/%s' % hname)
