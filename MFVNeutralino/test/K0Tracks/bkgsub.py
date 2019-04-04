@@ -1,34 +1,25 @@
 import sys, os
 from JMTucker.Tools.ROOTTools import *
-from JMTucker.Tools.general import bool_from_argv
 set_style()
 
-clobber = bool_from_argv('clobber')
 in_fn = sys.argv[1]
-ex = sys.argv[2] if len(sys.argv) >= 3 else ''
-if ex == 'default':
-    ex = ''
-out_fn = os.path.basename(in_fn)
-if in_fn == out_fn or (os.path.exists(out_fn) and not clobber):
-    raise IOError('refusing to clobber existing file %s' % out_fn)
-
+os.mkdir('bkgsub')
+out_fn = os.path.join('bkgsub', os.path.basename(in_fn))
 sample = out_fn.replace('.root', '')
 
-ps = plot_saver(plot_dir('v0bkgsub/!%s/' % ('default' if not ex else ex)  + sample), size=(600,600))
+ps = plot_saver(plot_dir('v0bkgsub_%s' % sample), size=(600,600))
 
 # fit for s and b using sidebands
 
 in_f = ROOT.TFile(in_fn)
-
-h = in_f.Get('v0eff%s/h_nvtx_pass' % ex)
-h.Draw()
+in_f.Get('massall/h_nvtx').Draw()
 ps.save('nvtx')
 
-h = in_f.Get('v0eff%s/K0_2pi/h_vtx_mass' % ex)
+h = in_f.Get('massall/h_mass')
 
-# must keep these numbers in sync with histos!
-fit_range = 0.42, 0.6 
-fit_exclude = 0.46, 0.54
+# must keep these numbers in sync
+fit_range = 0.420, 0.580
+fit_exclude = 0.490, 0.505
 
 npars = 3 # 2 if sample.startswith('ZeroBias') else 3
 while 1:
@@ -112,7 +103,7 @@ ps.save('mass_fit')
 del insert
 
 # scan mass window for best yield, purity, and significance z = s/sqrt(b + sigb^2)
-# -- but mass window is fixed in histos to 490-505 MeV, so if you want to change it you have to do it there and rerun histos
+# -- but mass window is now fixed in histos to 490-505 MeV, so if you want to change it you have to do it there and rerun hists
 
 xax = h.GetXaxis()
 ibinc = xax.FindBin(0.4976)
@@ -151,37 +142,30 @@ assert abs(xlo-0.490) < 1e-5 and abs(xhi-0.505) < 1e-5 # check that we're in syn
 out_f = ROOT.TFile(out_fn, 'recreate')
 integ = lambda h: h.Integral(0,h.GetNbinsX()+2)
 
-# do the bkg subtraction in whatever variables you want as long as the histos exist
+# do the bkg subtraction in whatever variables you want as long as the hists exist
 # written out to file in folders so the cmp script can do the rest
 
 colors = (2,3,4,6)
 variables = [
-    ('h_vtx_rho', 1, 10, (0,2)),
-#    ('h_track_charge', 2, 1, None),
-    ('h_track_pt', 2, 10, (0,100)),
-    ('h_track_eta', 2, 10, None),
-    ('h_track_phi', 2, 10, None),
-    ('h_track_npxhits', 2, 1, None),
-    ('h_track_nsthits', 2, 1, None),
-    ('h_track_npxlayers', 2, 1, None),
-    ('h_track_nstlayers', 2, 1, None),
-    ('h_track_nstlayersmono', 2, 1, None),
-    ('h_track_nstlayersstereo', 2, 1, None),
-    ('h_track_maxpxlayer', 2, 1, None),
-    ('h_track_minstlayer', 2, 1, None),
-    ('h_track_deltapxlayers', 2, 1, None),
-    ('h_track_deltastlayers', 2, 1, None),
-    ('h_track_dxybs', 2, 10, (-0.5,0.5)),
-    ('h_track_dxypv', 2, 10, (-0.5,0.5)),
-    ('h_track_dzbs', 2, 10, None),
-    ('h_track_sigmadxy', 2, 1, (0,0.03)),
-#    ('h_npv', 1, 1, (0, 60)),
+    ('h_rho', 1, 10, (0,2)),
+#    ('h_tracks_charge', 2, 1, None),
+    ('h_tracks_pt', 2, 10, (0,100)),
+    ('h_tracks_eta', 2, 10, None),
+    ('h_tracks_phi', 2, 10, None),
+    ('h_tracks_dxy', 2, 10, (-0.5,0.5)),
+    ('h_tracks_absdxy', 2, 10, (0.,0.5)),
+    ('h_tracks_dz', 2, 10, None),
+    ('h_tracks_dzpv', 2, 10, None),
+    ('h_tracks_sigmadxy', 2, 1, (0,0.03)),
+    ('h_tracks_npxlayers', 2, 1, None),
+    ('h_tracks_nstlayers', 2, 1, None),
+    ('h_tracks_dxyerr', 2, 10, (0,0.5)),
     ]
 
 for hname, integ_factor, rebin, x_range in variables:
-    hon = in_f.Get('v0effon%s/K0_2pi/' % ex + hname)
-    hbkglo = in_f.Get('v0effbkglo%s/K0_2pi/' % ex + hname)
-    hbkghi = in_f.Get('v0effbkghi%s/K0_2pi/' % ex + hname)
+    hon = in_f.Get('masson/%s' % hname)
+    hbkglo = in_f.Get('masslo/%s' % hname)
+    hbkghi = in_f.Get('masshi/%s' % hname)
 
     d = out_f.mkdir(hname)
     d.cd()
