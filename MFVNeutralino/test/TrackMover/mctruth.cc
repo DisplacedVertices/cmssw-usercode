@@ -56,10 +56,10 @@ int main(int argc, char** argv) {
   std::map<std::string, double> nums;
 
   auto fcn = [&]() {
+    //std::cout <<  nt.base().run() << " " << nt.base().lumi() << " " << nt.base().event() << "\n";
     double w = nr.weight();
-    const double lspdist3 = nt.gentruth().lspdist3();
 
-    if (nt.jets().ht() < 1200 || nt.jets().nminpt() < 4 || lspdist3 < min_lspdist3)
+    if (!nt.gentruth().valid() || nt.jets().ht() < 1200 || nt.jets().nminpt() < 4 || nt.gentruth().lspdist3() < min_lspdist3)
       return std::make_pair(true, w);
 
     auto F1 = [&w](TH1* h, double v)            { h                    ->Fill(v,     w); };
@@ -67,6 +67,7 @@ int main(int argc, char** argv) {
 
     const size_t nvtx = nt.vertices().n();
     const double lspdist2 = nt.gentruth().lspdist2();
+    const double lspdist3 = nt.gentruth().lspdist3();
     const double lspdistz = nt.gentruth().lspdistz();
 
     for (int ilsp = 0; ilsp < 2; ++ilsp) {
