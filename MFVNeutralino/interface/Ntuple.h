@@ -55,7 +55,7 @@ namespace mfv {
     TLorentzVector p4(int i) const { return p4_m(pt(i), eta(i), phi(i), mass(i)); }
 
     TVector3 decay(int i) const { return TVector3(decay_x(i), decay_y(i), decay_z(i)); }
-    template <typename BS> TVector3 decay(int i, const BS& bs) const { return TVector3(decay_x(i) - bs.x(), decay_y(i) - bs.y(), decay_z(i)); } // JMTBAD BS BS
+    template <typename BS> TVector3 decay(int i, const BS& bs) const { return TVector3(decay_x(i) - bs.x(decay_z(i)), decay_y(i) - bs.y(decay_z(i)), decay_z(i)); } // JMTBAD BS BS
 
     float lspdist2() const { return (decay(0) - decay(1)).Perp(); }
     float lspdist3() const { return (decay(0) - decay(1)).Mag(); }
