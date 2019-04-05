@@ -65,7 +65,8 @@ int main(int argc, char** argv) {
     numdens("all")
   };
 
-  enum { k_movedist2, k_movedist3, k_movevectoreta, k_npv, k_pvx, k_pvy, k_pvz, k_pvrho, k_pvntracks, k_pvscore, k_ht, k_nalltracks, k_nmovedtracks, k_nseedtracks, k_npreseljets, k_npreselbjets, k_jeti01, k_jetpt01, k_jetsume, k_jetdrmax, k_jetdravg, k_jeta3dmax, k_jetsumntracks, k_jetntracks01, k_jetnseedtracks01, k_nvtx };
+  enum { k_movedist2, k_movedist3, k_movevectoreta, k_npv, k_pvx, k_pvy, k_pvz, k_pvrho, k_pvntracks, k_pvscore, k_ht, k_nalltracks, k_nmovedtracks, k_nseedtracks, k_npreseljets, k_npreselbjets, k_jeti01, k_jetp01, k_jetpt01, k_jeteta01, k_jetphi01, k_jetsume, k_jetdrmax, k_jetdravg, k_jetmovea3d01, k_jetmovea3d_v_jetp, k_jetmovea3d0_v_movevectoreta, k_jetmovea3d1_v_movevectoreta, k_jeta3dmax, k_jetsumntracks, k_jetntracks01, k_jetntracks_v_jetp, k_jetnseedtracks01, k_nvtx };
+
   for (numdens& nd : nds) {
     nd.book(k_movedist2, "movedist2", ";movement 2-dist;events/0.01 cm", 200, 0, 2);
     nd.book(k_movedist3, "movedist3", ";movement 3-dist;events/0.01 cm", 200, 0, 2);
@@ -84,13 +85,21 @@ int main(int argc, char** argv) {
     nd.book(k_npreseljets, "npreseljets", ";# preselected jets;events/1", 20, 0, 20);
     nd.book(k_npreselbjets, "npreselbjets", ";# preselected b jets;events/1", 20, 0, 20);
     nd.book(k_jeti01, "jeti01", ";jet i 0 (GeV);jet i 1 (GeV);events", 15, 0, 15, 15, 0, 15);
+    nd.book(k_jetp01, "jetp01", ";jet 0 momentum (GeV);jet 1 momentum (GeV)", 200, 0, 2000, 200, 0, 2000);
     nd.book(k_jetpt01, "jetpt01", ";jet p_{T} 0 (GeV);jet p_{T} 1 (GeV)", 50, 0, 1000, 50, 0, 1000);
+    nd.book(k_jeteta01, "jeteta01", ";jet #eta 0 (GeV);jet #eta 1 (GeV)", 100, -4, 4, 100, -4, 4);
+    nd.book(k_jetphi01, "jetphi01", ";jet #phi 0 (GeV);jet #phi 1 (GeV)", 126, -M_PI, M_PI, 126, -M_PI, M_PI);
     nd.book(k_jetsume, "jetsume", ";#Sigma jet energy (GeV);events/5 GeV", 200, 0, 1000);
     nd.book(k_jetdrmax, "jetdrmax", ";max jet #Delta R;events/0.1", 70, 0, 7);
     nd.book(k_jetdravg, "jetdravg", ";avg jet #Delta R;events/0.1", 70, 0, 7);
-    nd.book(k_jeta3dmax, "jeta3dmax", ";max 3D angle between jets;events/0.05", 63, 0, M_PI);
+    nd.book(k_jetmovea3d01, "jetmovea3d", ";3D angle between jet 0 and move vector;3D angle between jet 1 and move vector", 63, 0, M_PI, 63, 0, M_PI);
+    nd.book(k_jetmovea3d_v_jetp, "jetmovea3d_v_jetp", ";jet momentum p (GeV);3D angle between moved jet and move vector", 200, 0, 2000, 63, 0, M_PI);
+    nd.book(k_jetmovea3d0_v_movevectoreta, "jetmovea3d0_v_movevectoreta", ";move vector eta;3D angle between moved jet and move vector", 100, -4, -4, 63, 0, M_PI);
+    nd.book(k_jetmovea3d1_v_movevectoreta, "jetmovea3d1_v_movevectoreta", ";move vector eta;3D angle between moved jet and move vector", 100, -4, -4, 63, 0, M_PI);
+    nd.book(k_jeta3dmax, "jeta3dmax", ";max 3D angle between moved jets;events/0.05", 63, 0, M_PI);
     nd.book(k_jetsumntracks, "jetsumntracks", ";#Sigma jet # tracks;events/5", 200, 0, 1000);
     nd.book(k_jetntracks01, "jetntracks01", ";jet # tracks 0;jet # tracks 1", 50, 0, 50, 50, 0, 50);
+    nd.book(k_jetntracks_v_jetp, "jetntracks_v_jetp01", ";jet momentum (GeV);jet # tracks", 200, 0, 2000, 50, 0, 50);
     nd.book(k_jetnseedtracks01, "jetnseedtracks01", ";jet # sel tracks 0;jet # sel tracks 1", 50, 0, 50, 50, 0, 50);
     nd.book(k_nvtx, "nvtx", ";number of vertices;events/1", 8, 0, 8);
   }
@@ -361,7 +370,11 @@ int main(int argc, char** argv) {
     double jet_a3dmax = 0;
     double jet_sumntracks = 0;
     int jet_i_0 = -1, jet_i_1 = -1;
+    double jet_p_0 = 0, jet_p_1 = 0;
     double jet_pt_0 = 0, jet_pt_1 = 0;
+    double jet_eta_0 = 0, jet_eta_1 = 0;
+    double jet_phi_0 = 0, jet_phi_1 = 0;
+    double jet_move_a3d_0 = 0, jet_move_a3d_1 = 0;
     int jet_ntracks_0 = 0, jet_ntracks_1 = 0;
     int jet_nseedtracks_0 = 0, jet_nseedtracks_1 = 0;
     size_t nmovedjets = 0;
@@ -400,15 +413,24 @@ int main(int argc, char** argv) {
           jet_i_1 = j;
           jet_pt_0 = std::max(nt.jets().pt(i), nt.jets().pt(j));
           jet_pt_1 = std::min(nt.jets().pt(i), nt.jets().pt(j));
-          jet_ntracks_0 = std::max(nt.jets().ntracks(i), nt.jets().ntracks(j));
-          jet_ntracks_1 = std::min(nt.jets().ntracks(i), nt.jets().ntracks(j));
+          //jet_ntracks_0 = std::max(nt.jets().ntracks(i), nt.jets().ntracks(j));
+          //jet_ntracks_1 = std::min(nt.jets().ntracks(i), nt.jets().ntracks(j));
           jet_nseedtracks_0 = std::max(i_nseedtracks, j_nseedtracks);
           jet_nseedtracks_1 = std::min(i_nseedtracks, j_nseedtracks);
+          jet_p_0 = i_p4.P();
+          jet_p_1 = j_p4.P();
+          jet_ntracks_0 = nt.jets().ntracks(i);
+          jet_ntracks_1 = nt.jets().ntracks(j);
+	  jet_move_a3d_0 = move_vector.Angle(i_p4.Vect());
+	  jet_move_a3d_1 = move_vector.Angle(j_p4.Vect());
+          jet_eta_0 = i_p4.Eta();
+          jet_eta_1 = j_p4.Eta();
+          jet_phi_0 = i_p4.Phi();
+          jet_phi_1 = j_p4.Phi();
         }
       }
     }
     jet_dravg /= nmovedjets * (nmovedjets - 1) / 2.;
-
 
     int nseedtracks = 0;
     for (int i = 0, ie = nt.tracks().n(); i < ie; ++i)
@@ -447,6 +469,7 @@ int main(int argc, char** argv) {
       if (dist2move > 0.0084)
         continue;
 
+
       const bool pass_ntracks = nt.vertices().ntracks(ivtx) >= 5;
       const bool pass_bs2derr = nt.vertices().bs2derr(ivtx) < 0.0025;
 
@@ -480,13 +503,23 @@ int main(int argc, char** argv) {
       F1(nd(k_npreseljets)      .den, nt.tm().npreseljets());
       F1(nd(k_npreselbjets)     .den, nt.tm().npreselbjets());
       F2(nd(k_jeti01)           .den, jet_i_0, jet_i_1);
+      F2(nd(k_jetp01)           .den, jet_p_0, jet_p_1);
       F2(nd(k_jetpt01)          .den, jet_pt_0, jet_pt_1);
+      F2(nd(k_jeteta01)         .den, jet_eta_0, jet_eta_1);
+      F2(nd(k_jetphi01)         .den, jet_phi_0, jet_phi_1);
       F1(nd(k_jetsume)          .den, jet_sume);
       F1(nd(k_jetdrmax)         .den, jet_drmax);
       F1(nd(k_jetdravg)         .den, jet_dravg);
+      F2(nd(k_jetmovea3d01)     .den, jet_move_a3d_0, jet_move_a3d_1);
+      F2(nd(k_jetmovea3d_v_jetp).den, jet_p_0, jet_move_a3d_0);
+      F2(nd(k_jetmovea3d_v_jetp).den, jet_p_1, jet_move_a3d_1);
+      F2(nd(k_jetmovea3d0_v_movevectoreta).den, movevectoreta, jet_move_a3d_0);
+      F2(nd(k_jetmovea3d1_v_movevectoreta).den, movevectoreta, jet_move_a3d_1);
       F1(nd(k_jeta3dmax)        .den, jet_a3dmax);
       F1(nd(k_jetsumntracks)    .den, jet_sumntracks);
       F2(nd(k_jetntracks01)     .den, jet_ntracks_0, jet_ntracks_1);
+      F2(nd(k_jetntracks_v_jetp).den, jet_p_0, jet_ntracks_0);
+      F2(nd(k_jetntracks_v_jetp).den, jet_p_1, jet_ntracks_1);
       F2(nd(k_jetnseedtracks01) .den, jet_nseedtracks_0, jet_nseedtracks_1);
       F1(nd(k_nvtx)             .den, nvtx);
     }
@@ -588,13 +621,23 @@ int main(int argc, char** argv) {
       F1(nd(k_npreseljets)      .num, nt.tm().npreseljets());
       F1(nd(k_npreselbjets)     .num, nt.tm().npreselbjets());
       F2(nd(k_jeti01)           .num, jet_i_0, jet_i_1);
+      F2(nd(k_jetp01)           .num, jet_p_0, jet_p_1);
       F2(nd(k_jetpt01)          .num, jet_pt_0, jet_pt_1);
+      F2(nd(k_jeteta01)         .num, jet_eta_0, jet_eta_1);
+      F2(nd(k_jetphi01)         .num, jet_phi_0, jet_phi_1);
       F1(nd(k_jetsume)          .num, jet_sume);
       F1(nd(k_jetdrmax)         .num, jet_drmax);
       F1(nd(k_jetdravg)         .num, jet_dravg);
+      F2(nd(k_jetmovea3d01)     .num, jet_move_a3d_0, jet_move_a3d_1);
+      F2(nd(k_jetmovea3d_v_jetp).num, jet_p_0, jet_move_a3d_0);
+      F2(nd(k_jetmovea3d_v_jetp).num, jet_p_1, jet_move_a3d_1);
+      F2(nd(k_jetmovea3d0_v_movevectoreta).num, movevectoreta, jet_move_a3d_0);
+      F2(nd(k_jetmovea3d1_v_movevectoreta).num, movevectoreta, jet_move_a3d_1);
       F1(nd(k_jeta3dmax)        .num, jet_a3dmax);
       F1(nd(k_jetsumntracks)    .num, jet_sumntracks);
       F2(nd(k_jetntracks01)     .num, jet_ntracks_0, jet_ntracks_1);
+      F2(nd(k_jetntracks_v_jetp).num, jet_p_0, jet_ntracks_0);
+      F2(nd(k_jetntracks_v_jetp).num, jet_p_1, jet_ntracks_1);
       F2(nd(k_jetnseedtracks01) .num, jet_nseedtracks_0, jet_nseedtracks_1);
       F1(nd(k_nvtx)             .num, npasses[i]);
 
