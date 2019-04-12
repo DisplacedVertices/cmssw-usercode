@@ -201,13 +201,13 @@ int main(int, char**) {
   jmt::ConfigFromEnv env("sm", true);
 
                                        //  2017                   2018         2017+2018
-  const double default_n1v[4][3][3] = {{{  89055,  8827, 696 }, { 1, 1, 1 }, { 1, 1, 1 }},  //MC scaled to int. lumi.
-                                       {{  20109,  1987, 160 }, { 1, 1, 1 }, { 1, 1, 1 }},  //MC effective
+  const double default_n1v[4][3][3] = {{{  89055,  8827, 696 }, { 88730, 9850, 665 }, { 1, 1, 1 }},  //MC scaled to int. lumi.
+                                       {{  20109,  1987, 160 }, { 12188, 1292, 100 }, { 1, 1, 1 }},  //MC effective
                                        {{      1,     1,   1 }, { 1, 1, 1 }, { 1, 1, 1 }},  //data 10%
                                        {{      1,     1,   1 }, { 1, 1, 1 }, { 1, 1, 1 }}}; //data 100%
 
-  const double default_n2v[4][3][3] = {{{    651,     2,   1 }, { 1, 1, 1 }, { 1, 1, 1 }},
-                                       {{    151,     4,   1 }, { 1, 1, 1 }, { 1, 1, 1 }},
+  const double default_n2v[4][3][3] = {{{    651,     2,   1 }, { 426, 5, 1 }, { 1, 1, 1 }},
+                                       {{    151,     4,   1 }, {  74, 4, 1 }, { 1, 1, 1 }},
                                        {{      1,     1,   1 }, { 1, 1, 1 }, { 1, 1, 1 }},
                                        {{      1,     1,   1 }, { 1, 1, 1 }, { 1, 1, 1 }}};
 
@@ -228,13 +228,13 @@ int main(int, char**) {
   const long ntrue_1v = env.get_long("ntrue_1v", 10000000L);
   const long ntrue_2v = env.get_long("ntrue_2v", 1000000L);
   const double oversample = env.get_double("oversample", 20);
-  const std::string rho_compare_fn = env.get_string("rho_compare_fn", "/uscms_data/d2/tucker/crab_dirs/HistosV22m/background_2017.root");
+  const std::string rho_compare_fn = env.get_string("rho_compare_fn", "/uscms_data/d3/dquach/crab3dirs/HistosV23m/background_2018.root");
   rho_tail_norm = env.get_long_double("rho_tail_norm", 1L);
   rho_tail_slope = env.get_long_double("rho_tail_slope", 1L);
-  phi_c = env.get_double("phi_c", 1.40);
+  phi_c = env.get_double("phi_c", 1.44);
   phi_e = env.get_double("phi_e", 2);
-  phi_a = env.get_double("phi_a", 3.62);
-  const std::string eff_fn = env.get_string("eff_fn", "vpeffs_2017_v22m.root");
+  phi_a = env.get_double("phi_a", 3.45);
+  const std::string eff_fn = env.get_string("eff_fn", "vpeffs_2018_v23m.root");
   const std::string eff_path = env.get_string("eff_path", "maxtk3");
 
   /////////////////////////////////////////////

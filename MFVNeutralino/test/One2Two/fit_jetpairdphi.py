@@ -3,13 +3,13 @@
 from JMTucker.Tools.ROOTTools import *
 
 is_mc = True
-year = '2017'
-version = 'v22m'
+year = '2018'
+version = 'v23m'
 
 set_style()
 ps = plot_saver(plot_dir('fit_jetpairdphi%s%s_%s' % (version.capitalize(), '' if is_mc else '_data', year)), size=(700,700), log=False, root=False)
 
-fn = '/uscms_data/d2/tucker/crab_dirs/Histos%s/background_%s.root' % (version.capitalize(), year)
+fn = '/uscms/home/dquach/nobackup/crab3dirs/Histos%s/background_%s.root' % (version.capitalize(), year)
 if not is_mc:
   fn = '/uscms_data/d2/tucker/crab_dirs/HistosV15_v2/JetHT%s.root' % year
 

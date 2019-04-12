@@ -4,8 +4,8 @@ ROOT.TH1.AddDirectory(0)
 
 is_mc = True
 only_10pc = False
-year = '2017'
-version = 'v22m'
+year = '2018'
+version = 'v23m'
 set_style()
 ps = plot_saver(plot_dir('closure_%s%s%s_%s' % (version.capitalize(), '' if is_mc else '_data', '_10pc' if only_10pc else '', year)), size=(700,700), root=False, log=False)
 
@@ -13,8 +13,8 @@ fns = ['2v_from_jets%s_%s_3track_default_%s.root' % ('' if is_mc else '_data', y
 ntk = ['3-track', '4-track-3-track', '4-track', '5-track']
 names = ['3-track x 3-track', '4-track x 3-track', '4-track x 4-track', '#geq 5-track x #geq 5-track']
 
-n2v = [641., 779., 2.21, 1.] if year == '2017' else [991., 213., 8., 1.]
-n2verr = [49., 54., 1.08, 0.6]
+n2v = [651., 788., 2.22, 1.] if year == '2017' else [426., 509., 4.85, 1.]
+n2verr = [50., 54., 1.09, 0.6] if year == '2017' else [49., 53., 2.15, 0.6]
 
 def errprop(val0, err0, val1, err1):
     if val0 == 0 and val1 == 0:

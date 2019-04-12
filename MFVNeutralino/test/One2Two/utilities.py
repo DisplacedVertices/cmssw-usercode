@@ -4,10 +4,10 @@ from JMTucker.MFVNeutralino.UtilitiesBase import *
 
 ####
 
-_version = 'v22m'
+_version = 'v23m'
 
 def cmd_merge_bquarks_nobquarks():
-    for year in '2017',:
+    for year in '2017', '2018':
         weights = '0.79,0.21'
         for ntracks in 3,4,5,7:
             files = ['2v_from_jets_%s_%dtrack_bquarks_%s.root' % (year, ntracks, _version), '2v_from_jets_%s_%dtrack_nobquarks_%s.root' % (year, ntracks, _version)]
