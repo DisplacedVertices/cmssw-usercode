@@ -307,6 +307,7 @@ namespace jmt {
     template <typename PV> float dxypv(int i, const PV& pv, int j=0) const { return dxy(i, pv.x(j), pv.y(j)); }
     float dz(int i, float x=0, float y=0, float z=0) const { return (vz(i) - z) - ((vx(i) - x) * px(i) + (vy(i) - y) * py(i)) / pt(i) * pz(i) / pt(i); }
     template <typename PV> float dzpv(int i, const PV& pv, int j=0) const { return dz(i, pv.x(j), pv.y(j), pv.z(j)); }
+    float dsz(int i, float x=0, float y=0, float z=0) const { return (vz(i) - z) * pt(i) / p(i) - ((vx(i) - x) * px(i) + (vy(i) - y) * py(i)) / pt(i) * pz(i) / p(i); }
     float cov(int i, int j, int k) const {
       if (j > k) { j = j^k; k = j^k; j = j^k; }
       switch (j*10 + k) {

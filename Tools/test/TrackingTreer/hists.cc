@@ -38,7 +38,9 @@ int main(int argc, char** argv) {
   TH1D* h_tracks_min_r[max_tk_type];
   TH1D* h_tracks_npxlayers[max_tk_type];
   TH1D* h_tracks_nstlayers[max_tk_type];
+  TH1D* h_tracks_absnsigmadxy[max_tk_type];
   TH1D* h_tracks_nsigmadxy[max_tk_type];
+  TH1D* h_tracks_nsigmadsz[max_tk_type];
 
   TH1D* h_tracks_dxyerr[max_tk_type];
   TH1D* h_tracks_dzerr[max_tk_type];
@@ -106,7 +108,9 @@ int main(int argc, char** argv) {
     h_tracks_min_r[i] = new TH1D(TString::Format("h_%s_tracks_min_r", ex[i]), TString::Format("%s tracks;tracks min_r;arb. units", ex[i]), 20, 0, 20);
     h_tracks_npxlayers[i] = new TH1D(TString::Format("h_%s_tracks_npxlayers", ex[i]), TString::Format("%s tracks;tracks npxlayers;arb. units", ex[i]), 20, 0, 20);
     h_tracks_nstlayers[i] = new TH1D(TString::Format("h_%s_tracks_nstlayers", ex[i]), TString::Format("%s tracks;tracks nstlayers;arb. units", ex[i]), 20, 0, 20);
-    h_tracks_nsigmadxy[i] = new TH1D(TString::Format("h_%s_tracks_nsigmadxy", ex[i]), TString::Format("%s tracks;tracks nsigmadxy;arb. units", ex[i]), 400, 0, 40);
+    h_tracks_absnsigmadxy[i] = new TH1D(TString::Format("h_%s_tracks_absnsigmadxy", ex[i]), TString::Format("%s tracks;tracks abs nsigmadxy;arb. units", ex[i]), 400, 0, 40);
+    h_tracks_nsigmadxy[i] = new TH1D(TString::Format("h_%s_tracks_nsigmadxy", ex[i]), TString::Format("%s tracks;tracks nsigmadxy;arb. units", ex[i]), 2000, -20, 20);
+    h_tracks_nsigmadsz[i] = new TH1D(TString::Format("h_%s_tracks_nsigmadsz", ex[i]), TString::Format("%s tracks;tracks nsigmadsz;arb. units", ex[i]), 2000, -20, 20);
     
     h_tracks_dxyerr[i] = new TH1D(TString::Format("h_%s_tracks_dxyerr", ex[i]), TString::Format("%s tracks;tracks dxyerr;arb. units", ex[i]), 2000, 0, 0.2);
     h_tracks_dzerr[i] = new TH1D(TString::Format("h_%s_tracks_dzerr", ex[i]), TString::Format("%s tracks;tracks dzerr;arb. units", ex[i]), 2000, 0, 0.2);
@@ -219,7 +223,9 @@ int main(int argc, char** argv) {
 	h_tracks_min_r[i]->Fill(min_r, w);
 	h_tracks_npxlayers[i]->Fill(npxlayers, w);
 	h_tracks_nstlayers[i]->Fill(nstlayers, w);
-	h_tracks_nsigmadxy[i]->Fill(nsigmadxy, w);
+	h_tracks_absnsigmadxy[i]->Fill(nsigmadxy, w);
+	h_tracks_nsigmadxy[i]->Fill(dxybs / ntt.err_dxy(itk), w);
+	h_tracks_nsigmadsz[i]->Fill(ntt.dsz(itk) / ntt.err_dsz(itk), w);
 
 	h_tracks_dxyerr[i]->Fill(ntt.err_dxy(itk), w);
 	h_tracks_dzerr[i]->Fill(ntt.err_dz(itk), w);
