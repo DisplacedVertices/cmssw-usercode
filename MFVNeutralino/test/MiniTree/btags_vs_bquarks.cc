@@ -96,12 +96,12 @@ void book_hists(int ntk) {
 
   for (int i_nbquarks = 0; i_nbquarks < NBQUARKS; ++i_nbquarks) {
     for (int i_nvtx = 0; i_nvtx < NVTX; ++i_nvtx) {
-      h_nbjets[i_nbquarks][i_nvtx] = new TH1F(TString::Format("h%s_%s_nbjets", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx]), TString::Format("%d-track %s events%s;Number of jets with #DeltaR(jet, closest b quark) < 0.4;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks]), 40, 0, 40);
-      h_nljets[i_nbquarks][i_nvtx] = new TH1F(TString::Format("h%s_%s_nljets", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx]), TString::Format("%d-track %s events%s;Number of jets without #DeltaR(jet, closest b quark) < 0.4;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks]), 40, 0, 40);
-      h_nljets_vs_nbjets[i_nbquarks][i_nvtx] = new TH2F(TString::Format("h%s_%s_nljets_vs_nbjets", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx]), TString::Format("%d-track %s events%s;Number of jets with #DeltaR(jet, closest b quark) < 0.4;Number of jets without #DeltaR(jet, closest b quark) < 0.4", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks]), 40, 0, 40, 40, 0, 40);
+      h_nbjets[i_nbquarks][i_nvtx] = new TH1F(TString::Format("h%s_%s_nbjets", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx]), TString::Format("%d-track %s events%s;Number of b jets;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks]), 40, 0, 40);
+      h_nljets[i_nbquarks][i_nvtx] = new TH1F(TString::Format("h%s_%s_nljets", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx]), TString::Format("%d-track %s events%s;Number of non-b jets;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks]), 40, 0, 40);
+      h_nljets_vs_nbjets[i_nbquarks][i_nvtx] = new TH2F(TString::Format("h%s_%s_nljets_vs_nbjets", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx]), TString::Format("%d-track %s events%s;Number of b jets;Number of non-b jets", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks]), 40, 0, 40, 40, 0, 40);
       for (int i_nbdisc = 0; i_nbdisc < NBDISC; ++i_nbdisc) {
-        h_nbjets_btag[i_nbquarks][i_nvtx][i_nbdisc] = new TH1F(TString::Format("h%s_%s_nbjets_%s_btag", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx], bdisc_names[i_nbdisc]), TString::Format("%d-track %s events%s;Number of %s b-tagged jets with #DeltaR(jet, closest b quark) < 0.4;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks], bdisc_names[i_nbdisc]), 40, 0, 40);
-        h_nljets_btag[i_nbquarks][i_nvtx][i_nbdisc] = new TH1F(TString::Format("h%s_%s_nljets_%s_btag", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx], bdisc_names[i_nbdisc]), TString::Format("%d-track %s events%s;Number of %s b-tagged jets without #DeltaR(jet, closest b quark) < 0.4;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks], bdisc_names[i_nbdisc]), 40, 0, 40);
+        h_nbjets_btag[i_nbquarks][i_nvtx][i_nbdisc] = new TH1F(TString::Format("h%s_%s_nbjets_%s_btag", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx], bdisc_names[i_nbdisc]), TString::Format("%d-track %s events%s;Number of %s b-tagged b jets;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks], bdisc_names[i_nbdisc]), 40, 0, 40);
+        h_nljets_btag[i_nbquarks][i_nvtx][i_nbdisc] = new TH1F(TString::Format("h%s_%s_nljets_%s_btag", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx], bdisc_names[i_nbdisc]), TString::Format("%d-track %s events%s;Number of %s b-tagged non-b jets;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks], bdisc_names[i_nbdisc]), 40, 0, 40);
       }
     }
   }
@@ -142,14 +142,8 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
       double bdisc = nt.jet_bdisc[ijet];
       h_jet_bdisc[i_nbquarks[i]][i_nvtx]->Fill(bdisc, w);
 
-      double drmin_jet_bquark = 1e9;
-      for (int ibquark = 0; ibquark < nbquarks; ++ibquark) {
-        double dr = reco::deltaR(nt.jet_eta[ijet], nt.jet_phi[ijet], nt.p_gen_bquarks->at(ibquark).Eta(), nt.p_gen_bquarks->at(ibquark).Phi());
-        if (dr < drmin_jet_bquark) {
-          drmin_jet_bquark = dr;
-        }
-      }
-      if (drmin_jet_bquark < 0.4) {
+      int hadron_flavor = nt.jet_id[ijet] >> 4;
+      if (hadron_flavor == 2) {
         ++nbjets;
       } else {
         ++nljets;
@@ -158,7 +152,7 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
       for (int i_nbdisc = 0; i_nbdisc < NBDISC; ++i_nbdisc) {
         if (bdisc >= bdisc_mins[i_nbdisc]) {
           ++nbtags[i_nbdisc];
-          if (drmin_jet_bquark < 0.4) {
+          if (hadron_flavor == 2) {
             ++nbjets_btag[i_nbdisc];
           } else {
             ++nljets_btag[i_nbdisc];
