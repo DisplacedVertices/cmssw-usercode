@@ -12,10 +12,11 @@ def btag_eff_per_jet(nvtx, jet_flavor, bdisc):
   den = njets('h_%dv_n%sjets' % (nvtx, jet_flavor))
   return num/den
 
-def btag_eff_per_event_from_btag_eff_per_jet(nvtx, event_flavor, bdisc):
-  effb = btag_eff_per_jet(nvtx, 'b', bdisc)
-  effc = btag_eff_per_jet(nvtx, 'c', bdisc)
-  effl = btag_eff_per_jet(nvtx, 'l', bdisc)
+def scale_factor(nvtx, jet_flavor, bdisc):
+  h = f.Get('h_%dv_scalefactor_%s_%s_btag' % (nvtx, jet_flavor, bdisc))
+  return h.GetMean()
+
+def btag_eff_per_event_from_btag_eff_per_jet(nvtx, event_flavor, effb, effc, effl):
   num = 0
   den = 0
   for nc in range(0, 40):
@@ -31,12 +32,21 @@ def btag_eff_per_event(nvtx, event_flavor, bdisc):
   h = f.Get('h_%s_%dv_1%s_btag_flavor_code' % (event_flavor, nvtx, bdisc))
   return h.GetBinContent(2) / h.Integral()
 
-print '%10s%60s%40s%40s' % ('', 'per-jet', 'per-event from per-jet', 'per-event')
-fmt = '%10s%20s%20s%20s%20s%20s%20s%20s'
-print fmt % ('', 'btag efficiency', 'c misid prob', 'udsg misid prob', 'btag efficiency', 'fake rate', 'btag efficiency', 'fake rate')
+print '%10s%90s%26s%26s%26s' % ('', 'per-jet', 'per-event from per-jet', 'per-event from per-jet*SF', 'per-event')
+fmt = '%10s' + '%10s'*9 + '%13s'*6
+print fmt % ('', 'effb', 'SFb', 'effb*SFb', 'effc', 'SFc', 'effc*SFc', 'effl', 'SFl', 'effl*SFl', 'btag eff', 'fake rate', 'btag eff', 'fake rate', 'btag eff', 'fake rate')
 for nvtx in [1, 2]:
   print '%d-track %d-vertex' % (ntk, nvtx)
   for bdisc in ['loose', 'medium', 'tight']:
-    print fmt % (bdisc, '%.3f' % btag_eff_per_jet(nvtx, 'b', bdisc), '%.3f' % btag_eff_per_jet(nvtx, 'c', bdisc), '%.3f' % btag_eff_per_jet(nvtx, 'l', bdisc),
-                        '%.3f' % btag_eff_per_event_from_btag_eff_per_jet(nvtx, 'bjets', bdisc), '%.3f' % btag_eff_per_event_from_btag_eff_per_jet(nvtx, 'nobjets', bdisc),
-                        '%.3f' % btag_eff_per_event(nvtx, 'bquarks', bdisc),                     '%.3f' % btag_eff_per_event(nvtx, 'nobquarks', bdisc))
+    effb, sfb = btag_eff_per_jet(nvtx, 'b', bdisc), scale_factor(nvtx, 'b', bdisc)
+    effc, sfc = btag_eff_per_jet(nvtx, 'c', bdisc), scale_factor(nvtx, 'c', bdisc)
+    effl, sfl = btag_eff_per_jet(nvtx, 'l', bdisc), scale_factor(nvtx, 'l', bdisc)
+    print fmt % (bdisc, '%.3f' % effb, '%.3f' % sfb, '%.3f' % (effb*sfb),
+                        '%.3f' % effc, '%.3f' % sfc, '%.3f' % (effc*sfc),
+                        '%.3f' % effl, '%.3f' % sfl, '%.3f' % (effl*sfl),
+                        '%.3f' % btag_eff_per_event_from_btag_eff_per_jet(nvtx, 'bjets', effb, effc, effl),
+                        '%.3f' % btag_eff_per_event_from_btag_eff_per_jet(nvtx, 'nobjets', effb, effc, effl),
+                        '%.3f' % btag_eff_per_event_from_btag_eff_per_jet(nvtx, 'bjets', effb*sfb, effc*sfc, effl*sfl),
+                        '%.3f' % btag_eff_per_event_from_btag_eff_per_jet(nvtx, 'nobjets', effb*sfb, effc*sfc, effl*sfl),
+                        '%.3f' % btag_eff_per_event(nvtx, 'bquarks', bdisc),
+                        '%.3f' % btag_eff_per_event(nvtx, 'nobquarks', bdisc))
