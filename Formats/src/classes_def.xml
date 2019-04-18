@@ -3,4 +3,11 @@
   <class name="jmt::MergeablePOD<float>"/>
   <class name="edm::Wrapper<jmt::MergeablePOD<int> >"/>
   <class name="edm::Wrapper<jmt::MergeablePOD<float> >"/>
+
+  <class name="std::vector<std::pair<edm::Ref<std::vector<reco::Track>,reco::Track,edm::refhelper::FindUsingAdvance<std::vector<reco::Track>,reco::Track> >,edm::Ref<std::vector<reco::Track>,reco::Track,edm::refhelper::FindUsingAdvance<std::vector<reco::Track>,reco::Track> > > >"/>
+  <class name="std::vector<std::pair<edm::Ptr<reco::Candidate>,edm::Ref<vector<reco::Track>,reco::Track,edm::refhelper::FindUsingAdvance<std::vector<reco::Track>,reco::Track> > > >"/>
+  <class name="jmt::TracksMap"/>
+  <class name="jmt::UnpackedCandidateTracksMap"/>
+  <class name="edm::Wrapper<jmt::TracksMap>"/>
+  <class name="edm::Wrapper<jmt::UnpackedCandidateTracksMap>"/>
 </lcgdict>

@@ -1,10 +1,10 @@
-#ifndef JMTucker_MFVNeutralinoFormats_UnpackedCandidateTracksMap_h
-#define JMTucker_MFVNeutralinoFormats_UnpackedCandidateTracksMap_h
+#ifndef JMTucker_Formats_UnpackedCandidateTracksMap_h
+#define JMTucker_Formats_UnpackedCandidateTracksMap_h
 
 #include "DataFormats/Candidate/interface/CandidateFwd.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 
-namespace mfv {
+namespace jmt {
   template <typename A, typename B>
   class ITracksMap {
   public:

@@ -15,7 +15,7 @@ file_event_from_argv(process)
 process.mfvVertexTracks.min_n_seed_tracks = 35
 
 process.p = cms.Path(process.goodOfflinePrimaryVertices *
-                     process.mfvUnpackedCandidateTracks *
+                     process.jmtUnpackedCandidateTracks *
                      process.mfvVertexTracks)
 
 del process.out.SelectEvents

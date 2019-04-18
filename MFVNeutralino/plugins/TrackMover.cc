@@ -14,8 +14,8 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/Utilities/interface/RandomNumberGenerator.h"
-#include "JMTucker/MFVNeutralino/interface/JetTrackRefGetter.h"
-#include "JMTucker/MFVNeutralinoFormats/interface/TracksMap.h"
+#include "JMTucker/Formats/interface/TracksMap.h"
+#include "JMTucker/Tools/interface/TrackRefGetter.h"
 
 class MFVTrackMover : public edm::EDProducer {
 public:
@@ -27,7 +27,7 @@ private:
   const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
   const edm::EDGetTokenT<pat::JetCollection> jets_token;
-  mfv::JetTrackRefGetter jet_track_ref_getter;
+  jmt::TrackRefGetter track_ref_getter;
 
   const double min_jet_pt;
   const unsigned min_jet_ntracks;
@@ -46,8 +46,8 @@ MFVTrackMover::MFVTrackMover(const edm::ParameterSet& cfg)
   : tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("tracks_src"))),
     primary_vertices_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertices_src"))),
     jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
-    jet_track_ref_getter(cfg.getParameter<std::string>("@module_label"),
-                         cfg.getParameter<edm::ParameterSet>("jet_track_ref_getter"),
+    track_ref_getter(cfg.getParameter<std::string>("@module_label"),
+                         cfg.getParameter<edm::ParameterSet>("track_ref_getter"),
                          consumesCollector()),
     min_jet_pt(cfg.getParameter<double>("min_jet_pt")),
     min_jet_ntracks(cfg.getParameter<unsigned>("min_jet_ntracks")),
@@ -65,7 +65,7 @@ MFVTrackMover::MFVTrackMover(const edm::ParameterSet& cfg)
     throw cms::Exception("MFVTrackMover", "RandomNumberGeneratorService not available");
 
   produces<reco::TrackCollection>();
-  produces<mfv::TracksMap>();
+  produces<jmt::TracksMap>();
   produces<reco::TrackCollection>("moved");
   produces<int>("npreseljets");
   produces<int>("npreselbjets");
@@ -95,7 +95,7 @@ void MFVTrackMover::produce(edm::Event& event, const edm::EventSetup&) {
 
   auto output_tracks = std::make_unique<reco::TrackCollection>();
   reco::TrackRefProd h_output_tracks = event.getRefBeforePut<reco::TrackCollection>();
-  auto output_tracks_map = std::make_unique<mfv::TracksMap>();
+  auto output_tracks_map = std::make_unique<jmt::TracksMap>();
   auto moved_tracks = std::make_unique<reco::TrackCollection>(); // JMTBAD just write a vector<bool> and pick it up in MovedTracksTreer
   auto npreseljets = std::make_unique<int>();
   auto npreselbjets = std::make_unique<int>();
@@ -124,7 +124,7 @@ void MFVTrackMover::produce(edm::Event& event, const edm::EventSetup&) {
     // Pick the (b-)jets we'll use.
 
     for (const pat::Jet& jet : *jets) {
-      if (jet.pt() < min_jet_pt || jet_track_ref_getter.tracks(event, jet).size() < min_jet_ntracks)
+      if (jet.pt() < min_jet_pt || track_ref_getter.tracks(event, jet).size() < min_jet_ntracks)
         continue;
 
       const double b_disc = jet.bDiscriminator(b_discriminator);
@@ -184,7 +184,7 @@ void MFVTrackMover::produce(edm::Event& event, const edm::EventSetup&) {
       reco::TrackRef tk(tracks, i);
       bool to_move = false;
       for (const pat::Jet* jet : selected_jets)
-        for (const reco::TrackRef& jet_tk : jet_track_ref_getter.tracks(event, *jet))
+        for (const reco::TrackRef& jet_tk : track_ref_getter.tracks(event, *jet))
           if (tk == jet_tk) {
             to_move = true;
             goto done_check_to_move;

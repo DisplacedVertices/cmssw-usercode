@@ -60,28 +60,7 @@ def minitree_only(process, mode, settings, output_commands):
 def event_filter(process, mode, settings, output_commands, **kwargs):
     if mode:
         from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-        def setup(**kwargs):
-            setup_event_filter(process, path_name='p', input_is_miniaod=settings.is_miniaod, **kwargs)
-
-        if mode == 'trigger only':
-            setup(**kwargs)
-        elif mode == 'trigger jets only':
-            setup(trigger_filter='jets only', **kwargs)
-        elif mode == 'trigger leptons only':
-            setup(trigger_filter='leptons only', **kwargs)
-        elif mode == 'jets only':
-            setup(trigger_filter='jets only', event_filter='jets only', **kwargs)
-        elif mode == 'leptons only':
-            setup(trigger_filter='leptons only', event_filter='leptons only', **kwargs)
-        elif mode == 'jets only novtx':
-            setup(trigger_filter='jets only', event_filter='jets only', event_filter_require_vertex=False, **kwargs)
-        elif mode == 'leptons only novtx':
-            setup(trigger_filter='leptons only', event_filter='leptons only', event_filter_require_vertex=False, **kwargs)
-        elif mode == 'novtx':
-            setup(event_filter=True, event_filter_require_vertex=False, **kwargs)
-        else:
-            assert mode is True
-            setup(event_filter=True, **kwargs)
+        setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode, **kwargs)
 
 ########################################################################
 
@@ -182,6 +161,7 @@ def aod_ntuple_process(settings):
     for x in process.patAlgosToolsTask, process.slimmingTask, process.packedPFCandidatesTask, process.patTask, process.pfNoPileUpJMETask:
         x.remove(process.goodOfflinePrimaryVertices)
     process.load('JMTucker.Tools.GoodPrimaryVertices_cfi')
+    process.load('JMTucker.Tools.WeightProducer_cfi')
     process.load('JMTucker.MFVNeutralino.Vertexer_cff')
     process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
     process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
@@ -235,7 +215,8 @@ def miniaod_ntuple_process(settings):
     process.load('JMTucker.Tools.MCStatProducer_cff')
     process.load('JMTucker.Tools.UpdatedJets_cff')
     process.load('JMTucker.Tools.PATTupleSelection_cfi')
-    process.load('JMTucker.MFVNeutralino.UnpackedCandidateTracks_cfi')
+    process.load('JMTucker.Tools.WeightProducer_cfi')
+    process.load('JMTucker.Tools.UnpackedCandidateTracks_cfi')
     process.load('JMTucker.MFVNeutralino.Vertexer_cff')
     process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
     process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
@@ -252,10 +233,10 @@ def miniaod_ntuple_process(settings):
     process.mfvGenParticles.gen_particles_src = 'prunedGenParticles'
     process.mfvGenParticles.last_flag_check = False
 
-    process.mfvRescaledTracks.tracks_src = 'mfvUnpackedCandidateTracks'
+    process.jmtRescaledTracks.tracks_src = 'jmtUnpackedCandidateTracks'
 
     for x in process.mfvVerticesToJets, process.mfvVerticesAuxTmp, process.mfvVerticesAuxPresel:
-        x.jet_track_ref_getter.input_is_miniaod = True
+        x.track_ref_getter.input_is_miniaod = True
 
     process.mfvEvent.input_is_miniaod = True
     process.mfvEvent.gen_particles_src = 'prunedGenParticles' # no idea if this lets gen_bquarks, gen_leptons work--may want the packed ones that have status 1 particles
@@ -269,7 +250,7 @@ def miniaod_ntuple_process(settings):
                          process.selectedPatMuons *
                          process.selectedPatElectrons *
                          process.mfvTriggerFloats *
-                         process.mfvUnpackedCandidateTracks *
+                         process.jmtUnpackedCandidateTracks *
                          process.mfvVertexSequence *
                          process.prefiringweight *
                          process.mfvEvent)
@@ -302,3 +283,7 @@ def signals_no_event_filter_modifier(sample):
     else:
         to_replace = []
     return [], to_replace
+
+def remove_output_module(process):
+    del process.out
+    del process.outp

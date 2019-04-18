@@ -7,14 +7,14 @@ from JMTucker.Tools.general import chdir
 if len(sys.argv) < 2:
     sys.exit('usage: submit.py output_dir')
 
-txts = glob('/uscms_data/d2/tucker/crab_dirs/AAdone/TrackingTreerV2/*txt')
+txts = glob('/uscms_data/d2/tucker/crab_dirs/TrackingTreerV23mv3/*txt')
 if not txts:
     raise ValueError('no txts?')
 
 jdl = '''universe = vanilla
 Executable = submit.sh
 arguments = %(batch)s $(Process) %(eos_output_dir)s
-transfer_input_files = hists.exe,%(txt)s
+transfer_input_files = hists.exe,libs.tgz,%(txt)s
 Output = %(batch)s_$(Process).stdout
 Error = %(batch)s_$(Process).stderr
 Log = %(batch)s_$(Process).log
@@ -39,6 +39,9 @@ if os.path.exists(batch_dir) or \
 
 for x in ['hists.exe', 'submit.sh'] + txts:
     shutil.copy2(x, batch_dir)
+
+if os.system('cmsMakeTarball.py %s/libs.tgz --no-include-python --no-include-interface' % batch_dir) != 0:
+    raise IOError('problem making tarball')
 
 with chdir(batch_dir) as _, open('checkem.sh', 'wt') as checkem, open('haddem.sh', 'wt') as haddem, open('cleanup.sh', 'wt') as cleanup:
     for txt in txts:

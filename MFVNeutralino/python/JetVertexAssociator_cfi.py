@@ -1,12 +1,12 @@
 import FWCore.ParameterSet.Config as cms
 
-from JMTucker.MFVNeutralino.JetTrackRefGetter_cff import *
+from JMTucker.Tools.TrackRefGetter_cff import jmtTrackRefGetter
 
 mfvVerticesToJets = cms.EDProducer('MFVJetVertexAssociator',
                                    enable = cms.bool(True),
                                    jet_src = cms.InputTag('selectedPatJets'),
                                    vertex_src = cms.InputTag('mfvSelectedVerticesTmp'),
-                                   jet_track_ref_getter = mfvJetTrackRefGetter,
+                                   track_ref_getter = jmtTrackRefGetter,
                                    input_is_refs = cms.bool(True),
                                    tag_info_name = cms.string('secondaryVertexMaxDR6p0'),
                                    min_vertex_track_weight = cms.double(0.5),

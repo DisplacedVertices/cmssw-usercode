@@ -5,16 +5,17 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
-#include "JMTucker/MFVNeutralinoFormats/interface/TracksMap.h"
+#include "JMTucker/Formats/interface/TracksMap.h"
 
-class MFVUnpackedCandidateTracks : public edm::EDProducer {
+class JMTUnpackedCandidateTracks : public edm::EDProducer {
 public:
-  explicit MFVUnpackedCandidateTracks(const edm::ParameterSet&);
+  explicit JMTUnpackedCandidateTracks(const edm::ParameterSet&);
   virtual void produce(edm::Event&, const edm::EventSetup&);
 private:
   const edm::EDGetTokenT<pat::PackedCandidateCollection> packed_candidates_token;
   const bool add_lost_candidates;
   const edm::EDGetTokenT<pat::PackedCandidateCollection> lost_candidates_token;
+  const int cut_level;
   const bool skip_weirdos;
   const bool debug;
 
@@ -39,7 +40,7 @@ private:
           u.i == 0x3cd24697 ||  // 0.0256684255
           u.i == 0x3dfc7c28 ||  // 0.1232836843
           u.i == 0x3e948f67;    // 0.2901565731
-        if (debug) printf("(weirdo check %i %i %i %i 0x%08x %.10g) ", weirdo, pass_tk(tk,false,false), pass_tk(tk,true,false), pass_tk(tk,true,true), u.i, u.f);
+        if (debug) printf("(weirdo check %i %i %i %i 0x%08x %.10g) ", weirdo, pass_tk(tk,true,false,false), pass_tk(tk,true,true,false), pass_tk(tk,true,true,true), u.i, u.f);
         if (skip_weirdos && weirdo) return false;
       }
       return true;
@@ -47,37 +48,52 @@ private:
     return false;
   }
 
-  bool pass_tk(const reco::Track& tk, bool req_min_r=true, bool req_nsigmadxy=true) const {
+
+  bool pass_tk(const reco::Track& tk, bool req_base, bool req_min_r, bool req_nsigmadxy) const {
     return
-      tk.pt() > 1 &&
-      tk.hitPattern().pixelLayersWithMeasurement() >= 2 &&
-      tk.hitPattern().stripLayersWithMeasurement() >= 6 &&
+      (!req_base || (tk.pt() >= 1 && tk.hitPattern().pixelLayersWithMeasurement() >= 2 && tk.hitPattern().stripLayersWithMeasurement() >= 6)) &&
       (!req_min_r || tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1)) &&
       (!req_nsigmadxy || fabs(tk.dxy() / tk.dxyError()) > 4);
   }
+
+  bool pass_tk(const reco::Track& tk) const { return pass_tk(tk, cut_level >= 0, cut_level >= 1, cut_level >= 2); }
+
+  unsigned encode_vertex_ref(const pat::PackedCandidate& c) {
+    unsigned k = c.vertexRef().key();
+    if (k == unsigned(-1)) return k;
+    assert((k & (0x7 << 29)) == 0);
+    unsigned q = c.pvAssociationQuality();
+    assert(q < 8);
+    return k & (q << 29);
+  }
 };
 
-MFVUnpackedCandidateTracks::MFVUnpackedCandidateTracks(const edm::ParameterSet& cfg)
+JMTUnpackedCandidateTracks::JMTUnpackedCandidateTracks(const edm::ParameterSet& cfg)
   : packed_candidates_token(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("packed_candidates_src"))),
     add_lost_candidates(cfg.getParameter<bool>("add_lost_candidates")),
     lost_candidates_token(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("lost_candidates_src"))),
+    cut_level(cfg.getParameter<int>("cut_level")),
     skip_weirdos(cfg.getParameter<bool>("skip_weirdos")),
     debug(cfg.getUntrackedParameter<bool>("debug", false))
 {
   produces<reco::TrackCollection>();
   produces<reco::TrackCollection>("lost");
-  produces<mfv::UnpackedCandidateTracksMap>();
+  produces<jmt::UnpackedCandidateTracksMap>();
+  produces<std::vector<unsigned>>(); // which PV
+  produces<std::vector<unsigned>>("lost");
 }
 
-void MFVUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetup& setup) {
-  if (debug) std::cout << "MFVUnpackedCandidateTracks::produce: run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
+void JMTUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetup& setup) {
+  if (debug) std::cout << "JMTUnpackedCandidateTracks::produce: run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
 
   edm::Handle<pat::PackedCandidateCollection> packed_candidates;
   event.getByToken(packed_candidates_token, packed_candidates);
 
-  std::unique_ptr<reco::TrackCollection> tracks(new reco::TrackCollection);
-  std::unique_ptr<reco::TrackCollection> lost_tracks(new reco::TrackCollection);
-  std::unique_ptr<mfv::UnpackedCandidateTracksMap> tracks_map(new mfv::UnpackedCandidateTracksMap);
+  auto tracks = std::make_unique<reco::TrackCollection>();
+  auto lost_tracks = std::make_unique<reco::TrackCollection>();
+  auto tracks_map = std::make_unique<jmt::UnpackedCandidateTracksMap>();
+  auto tracks_pvs = std::make_unique<std::vector<unsigned>>();
+  auto lost_tracks_pvs = std::make_unique<std::vector<unsigned>>();
 
   reco::TrackRefProd h_output_tracks = event.getRefBeforePut<reco::TrackCollection>();
 
@@ -89,14 +105,14 @@ void MFVUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetu
 
     if (pass_cand(cand)) {
       const reco::Track& tk = cand.pseudoTrack();
+      if (debug) debug_tk(tk, "", tracks->size());
 
-      if (debug) {
-        debug_tk(tk, "", tracks->size());
-        if (pass_tk(tk)) ++ntkpass;
+      if (pass_tk(tk)) {
+        ++ntkpass;
+        tracks->push_back(tk);
+        tracks_map->insert(reco::CandidatePtr(packed_candidates, i), reco::TrackRef(h_output_tracks, tracks->size() - 1));
+        tracks_pvs->push_back(encode_vertex_ref(cand));
       }
-
-      tracks->push_back(tk);
-      tracks_map->insert(reco::CandidatePtr(packed_candidates, i), reco::TrackRef(h_output_tracks, tracks->size() - 1));
     }
 
     if (debug) std::cout << "\n";
@@ -111,28 +127,32 @@ void MFVUnpackedCandidateTracks::produce(edm::Event& event, const edm::EventSetu
 
     if (pass_cand(cand)) {
       const reco::Track& tk = cand.pseudoTrack();
+      if (debug) debug_tk(tk, "lost", lost_tracks->size());
 
-      if (debug) {
-        debug_tk(tk, "lost", lost_tracks->size());
-        if (pass_tk(tk)) ++nlosttkpass;
+      if (pass_tk(tk)) {
+        ++nlosttkpass;
+
+        if (add_lost_candidates) {
+          tracks->push_back(tk);
+          tracks_map->insert(reco::CandidatePtr(lost_candidates, i), reco::TrackRef(h_output_tracks, tracks->size() - 1));
+          tracks_pvs->push_back(encode_vertex_ref(cand));
+        }
+
+        lost_tracks->push_back(tk);
+        lost_tracks_pvs->push_back(encode_vertex_ref(cand));
       }
-
-      if (add_lost_candidates) {
-        tracks->push_back(tk);
-        tracks_map->insert(reco::CandidatePtr(lost_candidates, i), reco::TrackRef(h_output_tracks, tracks->size() - 1));
-      }
-
-      lost_tracks->push_back(tk);
     }
 
     if (debug) std::cout << "\n";
   }
 
-  if (debug) std::cout << "MFVUnpackedCandidateTracks::produce: npass/ntk = " << ntkpass << " / " << tracks->size() << " npass/nlost = " << nlosttkpass << " / " << lost_tracks->size() << "\n";
+  if (debug) std::cout << "JMTUnpackedCandidateTracks::produce: npass/ntk = " << ntkpass << " / " << tracks->size() << " npass/nlost = " << nlosttkpass << " / " << lost_tracks->size() << "\n";
 
   event.put(std::move(tracks));
   event.put(std::move(lost_tracks), "lost");
   event.put(std::move(tracks_map));
+  event.put(std::move(tracks_pvs));
+  event.put(std::move(lost_tracks_pvs));
 }
 
-DEFINE_FWK_MODULE(MFVUnpackedCandidateTracks);
+DEFINE_FWK_MODULE(JMTUnpackedCandidateTracks);

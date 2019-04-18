@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-mfvRescaledTracks = cms.EDProducer('MFVRescaledTracks',
+jmtRescaledTracks = cms.EDProducer('JMTRescaledTracks',
                                    tracks_src = cms.InputTag('generalTracks'),
                                    enable = cms.bool(False),
                                    )

@@ -1,87 +1,14 @@
-#include <cassert>
-#include <fstream>
-#include <iostream>
-#include <string>
-#include <vector>
-#include <boost/program_options.hpp>
-#include "TFile.h"
 #include "TH2.h"
-#include "TTree.h"
-#include "TVector2.h"
-#include "JMTucker/Tools/interface/LumiList.h"
-#include "JMTucker/Tools/interface/PileupWeights.h"
-#include "JMTucker/Tools/interface/TrackingTree.h"
-#include "utils.h"
+#include "JMTucker/MFVNeutralino/interface/Ntuple.h"
+#include "JMTucker/Tools/interface/NtupleReader.h"
 
 int main(int argc, char** argv) {
-  std::string in_fn;
-  std::string out_fn("hists.root");
-  std::string json;
-  float nevents_frac;
-  std::string pu_weights;
+  jmt::NtupleReader<jmt::TrackingAndJetsNtuple> nr;
+  nr.init_options("tt/t");
+  if (!nr.parse_options(argc, argv) || !nr.init()) return 1;
+  auto& nt = nr.nt();
+  auto& ntt = nt.tracks();
 
-  {
-    namespace po = boost::program_options;
-    po::options_description desc("Allowed options");
-    desc.add_options()
-      ("help,h", "this help message")
-      ("input-file,i",   po::value<std::string>(&in_fn),                                             "the input file (required)")
-      ("output-file,o",  po::value<std::string>(&out_fn)        ->default_value("hists.root"),       "the output file")
-      ("json,j",         po::value<std::string>(&json),                                              "lumi mask json file for data")
-      ("nevents-frac,n", po::value<float>(&nevents_frac)        ->default_value(1.f),                "only run on this fraction of events in the tree")
-      ("pu-weights",     po::value<std::string>(&pu_weights)    ->default_value("2017"),             "pileup weights to use")
-      ;
-
-    po::variables_map vm;
-    po::store(po::parse_command_line(argc, argv, desc), vm);
-    po::notify(vm);
-
-    if (vm.count("help")) {
-      std::cout << desc << "\n";
-      return 1;
-    }
-
-    if (in_fn == "") {
-      std::cout << "value for --input-file is required\n" << desc << "\n";
-      return 1;
-    }
-  }
-
-  std::cout << argv[0] << " with options:"
-            << " in_fn: " << in_fn
-            << " out_fn: " << out_fn
-            << " json: " << (json != "" ? json : "none")
-            << " nevents_frac: " << nevents_frac
-            << " pu_weights: " << pu_weights
-            << "\n";
-
-  root_setup();
-
-  jmt::PileupWeights puwhelper(pu_weights);
-
-  file_and_tree fat(in_fn.c_str(), out_fn.c_str());
-  TrackingTree& nt = fat.nt;
-  fat.t->GetEntry(0);
-
-  const bool is_mc = nt.run() == 1;
-
-  fat.f_out->mkdir("mfvWeight")->cd();
-  TH1D* h_sums = (TH1D*)fat.f->Get("mcStat/h_sums")->Clone();
-  if (is_mc && nevents_frac < 1) {
-    h_sums->SetBinContent(1, h_sums->GetBinContent(1) * nevents_frac);
-    for (int i = 2, ie = h_sums->GetNbinsX(); i <= ie; ++i) // invalidate other entries since we can't just assume equal weights in them
-      h_sums->SetBinContent(i, -1e9);
-  }
-  fat.f_out->cd();
-
-  std::unique_ptr<jmt::LumiList> good_ll;
-  if (!is_mc && json != "") good_ll.reset(new jmt::LumiList(json));
-
-  TH1D* h_norm = new TH1D("h_norm", "", 1, 0, 1);
-  if (is_mc)
-    h_norm->Fill(0.5, h_sums->GetBinContent(1));
-
-  TH1D* h_npu = new TH1D("h_npu", ";true npu", 100, 0, 100);
   TH1D* h_npv = new TH1D("h_npv", ";number of primary vertices", 50, 0, 50);
   TH1D* h_bsx = new TH1D("h_bsx", ";beamspot x", 400, -0.15, 0.15);
   TH1D* h_bsy = new TH1D("h_bsy", ";beamspot y", 400, -0.15, 0.15);
@@ -110,10 +37,14 @@ int main(int argc, char** argv) {
   TH1D* h_tracks_min_r[max_tk_type];
   TH1D* h_tracks_npxlayers[max_tk_type];
   TH1D* h_tracks_nstlayers[max_tk_type];
+  TH1D* h_tracks_absnsigmadxy[max_tk_type];
   TH1D* h_tracks_nsigmadxy[max_tk_type];
+  TH1D* h_tracks_nsigmadsz[max_tk_type];
 
   TH1D* h_tracks_dxyerr[max_tk_type];
   TH1D* h_tracks_dzerr[max_tk_type];
+  TH1D* h_tracks_dszerr[max_tk_type];
+  TH1D* h_tracks_lambdaerr[max_tk_type];
   TH1D* h_tracks_pterr[max_tk_type];
   TH1D* h_tracks_phierr[max_tk_type];
   TH1D* h_tracks_etaerr[max_tk_type];
@@ -141,13 +72,21 @@ int main(int argc, char** argv) {
   TH2D* h_tracks_dxyerr_v_npxlayers[max_tk_type];
   TH2D* h_tracks_dxyerr_v_nstlayers[max_tk_type];
 
-  TH2D* h_tracks_dzerr_v_pt[max_tk_type];
-  TH2D* h_tracks_dzerr_v_eta[max_tk_type];
-  TH2D* h_tracks_dzerr_v_phi[max_tk_type];
-  TH2D* h_tracks_dzerr_v_dxy[max_tk_type];
-  TH2D* h_tracks_dzerr_v_dzpv[max_tk_type];
-  TH2D* h_tracks_dzerr_v_npxlayers[max_tk_type];
-  TH2D* h_tracks_dzerr_v_nstlayers[max_tk_type];
+  TH2D* h_tracks_dszerr_v_pt[max_tk_type];
+  TH2D* h_tracks_dszerr_v_eta[max_tk_type];
+  TH2D* h_tracks_dszerr_v_phi[max_tk_type];
+  TH2D* h_tracks_dszerr_v_dxy[max_tk_type];
+  TH2D* h_tracks_dszerr_v_dz[max_tk_type];
+  TH2D* h_tracks_dszerr_v_npxlayers[max_tk_type];
+  TH2D* h_tracks_dszerr_v_nstlayers[max_tk_type];
+
+  TH2D* h_tracks_lambdaerr_v_pt[max_tk_type];
+  TH2D* h_tracks_lambdaerr_v_eta[max_tk_type];
+  TH2D* h_tracks_lambdaerr_v_phi[max_tk_type];
+  TH2D* h_tracks_lambdaerr_v_dxy[max_tk_type];
+  TH2D* h_tracks_lambdaerr_v_dz[max_tk_type];
+  TH2D* h_tracks_lambdaerr_v_npxlayers[max_tk_type];
+  TH2D* h_tracks_lambdaerr_v_nstlayers[max_tk_type];
 
   TH2D* h_tracks_eta_v_phi[max_tk_type];
 
@@ -167,10 +106,14 @@ int main(int argc, char** argv) {
     h_tracks_min_r[i] = new TH1D(TString::Format("h_%s_tracks_min_r", ex[i]), TString::Format("%s tracks;tracks min_r;arb. units", ex[i]), 20, 0, 20);
     h_tracks_npxlayers[i] = new TH1D(TString::Format("h_%s_tracks_npxlayers", ex[i]), TString::Format("%s tracks;tracks npxlayers;arb. units", ex[i]), 20, 0, 20);
     h_tracks_nstlayers[i] = new TH1D(TString::Format("h_%s_tracks_nstlayers", ex[i]), TString::Format("%s tracks;tracks nstlayers;arb. units", ex[i]), 20, 0, 20);
-    h_tracks_nsigmadxy[i] = new TH1D(TString::Format("h_%s_tracks_nsigmadxy", ex[i]), TString::Format("%s tracks;tracks nsigmadxy;arb. units", ex[i]), 400, 0, 40);
+    h_tracks_absnsigmadxy[i] = new TH1D(TString::Format("h_%s_tracks_absnsigmadxy", ex[i]), TString::Format("%s tracks;tracks abs nsigmadxy;arb. units", ex[i]), 400, 0, 40);
+    h_tracks_nsigmadxy[i] = new TH1D(TString::Format("h_%s_tracks_nsigmadxy", ex[i]), TString::Format("%s tracks;tracks nsigmadxy;arb. units", ex[i]), 2000, -20, 20);
+    h_tracks_nsigmadsz[i] = new TH1D(TString::Format("h_%s_tracks_nsigmadsz", ex[i]), TString::Format("%s tracks;tracks nsigmadsz;arb. units", ex[i]), 2000, -20, 20);
     
     h_tracks_dxyerr[i] = new TH1D(TString::Format("h_%s_tracks_dxyerr", ex[i]), TString::Format("%s tracks;tracks dxyerr;arb. units", ex[i]), 2000, 0, 0.2);
     h_tracks_dzerr[i] = new TH1D(TString::Format("h_%s_tracks_dzerr", ex[i]), TString::Format("%s tracks;tracks dzerr;arb. units", ex[i]), 2000, 0, 0.2);
+    h_tracks_dszerr[i] = new TH1D(TString::Format("h_%s_tracks_dszerr", ex[i]), TString::Format("%s tracks;tracks dszerr;arb. units", ex[i]), 2000, 0, 0.2);
+    h_tracks_lambdaerr[i] = new TH1D(TString::Format("h_%s_tracks_lambdaerr", ex[i]), TString::Format("%s tracks;tracks lambdaerr;arb. units", ex[i]), 2000, 0, 0.2);
     h_tracks_pterr[i] = new TH1D(TString::Format("h_%s_tracks_pterr", ex[i]), TString::Format("%s tracks;tracks pterr;arb. units", ex[i]), 200, 0, 0.2);
     h_tracks_phierr[i] = new TH1D(TString::Format("h_%s_tracks_phierr", ex[i]), TString::Format("%s tracks;tracks phierr;arb. units", ex[i]), 200, 0, 0.2);
     h_tracks_etaerr[i] = new TH1D(TString::Format("h_%s_tracks_etaerr", ex[i]), TString::Format("%s tracks;tracks etaerr;arb. units", ex[i]), 200, 0, 0.2);
@@ -197,70 +140,52 @@ int main(int argc, char** argv) {
     h_tracks_dxyerr_v_npxlayers[i] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_npxlayers", ex[i]), TString::Format("%s tracks;tracks npxlayers;tracks dxyerr", ex[i]), 10, 0, 10, 200, 0, 0.2);
     h_tracks_dxyerr_v_nstlayers[i] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_nstlayers", ex[i]), TString::Format("%s tracks;tracks nstlayers;tracks dxyerr", ex[i]), 20, 0, 20, 200, 0, 0.2);
 
-    h_tracks_dzerr_v_pt[i] = new TH2D(TString::Format("h_%s_tracks_dzerr_v_pt", ex[i]), TString::Format("%s tracks;tracks pt;tracks dzerr", ex[i]), 2000, 0, 200, 2000, 0, 0.2);
-    h_tracks_dzerr_v_eta[i] = new TH2D(TString::Format("h_%s_tracks_dzerr_v_eta", ex[i]), TString::Format("%s tracks;tracks eta;tracks dzerr", ex[i]), 80, -4, 4, 2000, 0, 0.2);
-    h_tracks_dzerr_v_phi[i] = new TH2D(TString::Format("h_%s_tracks_dzerr_v_phi", ex[i]), TString::Format("%s tracks;tracks phi;tracks dzerr", ex[i]), 126, -3.15, 3.15, 200, 0, 0.2);
-    h_tracks_dzerr_v_dxy[i] = new TH2D(TString::Format("h_%s_tracks_dzerr_v_dxy", ex[i]), TString::Format("%s tracks;tracks dxy to beamspot;tracks dzerr", ex[i]), 400, -0.2, 0.2, 200, 0, 0.2);
-    h_tracks_dzerr_v_dzpv[i] = new TH2D(TString::Format("h_%s_tracks_dzerr_v_dzpv", ex[i]), TString::Format("%s tracks;tracks dz to PV;tracks dzerr", ex[i]), 400, -20, 20, 200, 0, 0.2);
-    h_tracks_dzerr_v_npxlayers[i] = new TH2D(TString::Format("h_%s_tracks_dzerr_v_npxlayers", ex[i]), TString::Format("%s tracks;tracks npxlayers;tracks dzerr", ex[i]), 10, 0, 10, 200, 0, 0.2);
-    h_tracks_dzerr_v_nstlayers[i] = new TH2D(TString::Format("h_%s_tracks_dzerr_v_nstlayers", ex[i]), TString::Format("%s tracks;tracks nstlayers;tracks dzerr", ex[i]), 20, 0, 20, 200, 0, 0.2);
+    h_tracks_dszerr_v_pt[i] = new TH2D(TString::Format("h_%s_tracks_dszerr_v_pt", ex[i]), TString::Format("%s tracks;tracks pt;tracks dszerr", ex[i]), 2000, 0, 200, 2000, 0, 0.2);
+    h_tracks_dszerr_v_eta[i] = new TH2D(TString::Format("h_%s_tracks_dszerr_v_eta", ex[i]), TString::Format("%s tracks;tracks eta;tracks dszerr", ex[i]), 80, -4, 4, 2000, 0, 0.2);
+    h_tracks_dszerr_v_phi[i] = new TH2D(TString::Format("h_%s_tracks_dszerr_v_phi", ex[i]), TString::Format("%s tracks;tracks phi;tracks dszerr", ex[i]), 126, -3.15, 3.15, 200, 0, 0.2);
+    h_tracks_dszerr_v_dxy[i] = new TH2D(TString::Format("h_%s_tracks_dszerr_v_dxy", ex[i]), TString::Format("%s tracks;tracks dxy to beamspot;tracks dszerr", ex[i]), 400, -0.2, 0.2, 200, 0, 0.2);
+    h_tracks_dszerr_v_dz[i] = new TH2D(TString::Format("h_%s_tracks_dszerr_v_dz", ex[i]), TString::Format("%s tracks;tracks dz to beamspot;tracks dszerr", ex[i]), 400, -20, 20, 200, 0, 0.2);
+    h_tracks_dszerr_v_npxlayers[i] = new TH2D(TString::Format("h_%s_tracks_dszerr_v_npxlayers", ex[i]), TString::Format("%s tracks;tracks npxlayers;tracks dszerr", ex[i]), 10, 0, 10, 200, 0, 0.2);
+    h_tracks_dszerr_v_nstlayers[i] = new TH2D(TString::Format("h_%s_tracks_dszerr_v_nstlayers", ex[i]), TString::Format("%s tracks;tracks nstlayers;tracks dszerr", ex[i]), 20, 0, 20, 200, 0, 0.2);
 
+    h_tracks_lambdaerr_v_pt[i] = new TH2D(TString::Format("h_%s_tracks_lambdaerr_v_pt", ex[i]), TString::Format("%s tracks;tracks pt;tracks lambdaerr", ex[i]), 2000, 0, 200, 2000, 0, 0.2);
+    h_tracks_lambdaerr_v_eta[i] = new TH2D(TString::Format("h_%s_tracks_lambdaerr_v_eta", ex[i]), TString::Format("%s tracks;tracks eta;tracks lambdaerr", ex[i]), 80, -4, 4, 2000, 0, 0.2);
+    h_tracks_lambdaerr_v_phi[i] = new TH2D(TString::Format("h_%s_tracks_lambdaerr_v_phi", ex[i]), TString::Format("%s tracks;tracks phi;tracks lambdaerr", ex[i]), 126, -3.15, 3.15, 200, 0, 0.2);
+    h_tracks_lambdaerr_v_dxy[i] = new TH2D(TString::Format("h_%s_tracks_lambdaerr_v_dxy", ex[i]), TString::Format("%s tracks;tracks dxy to beamspot;tracks lambdaerr", ex[i]), 400, -0.2, 0.2, 200, 0, 0.2);
+    h_tracks_lambdaerr_v_dz[i] = new TH2D(TString::Format("h_%s_tracks_lambdaerr_v_dz", ex[i]), TString::Format("%s tracks;tracks dz to beamspot;tracks lambdaerr", ex[i]), 400, -20, 20, 200, 0, 0.2);
+    h_tracks_lambdaerr_v_npxlayers[i] = new TH2D(TString::Format("h_%s_tracks_lambdaerr_v_npxlayers", ex[i]), TString::Format("%s tracks;tracks npxlayers;tracks lambdaerr", ex[i]), 10, 0, 10, 200, 0, 0.2);
+    h_tracks_lambdaerr_v_nstlayers[i] = new TH2D(TString::Format("h_%s_tracks_lambdaerr_v_nstlayers", ex[i]), TString::Format("%s tracks;tracks nstlayers;tracks lambdaerr", ex[i]), 20, 0, 20, 200, 0, 0.2);
 
     h_tracks_eta_v_phi[i] = new TH2D(TString::Format("h_%s_tracks_eta_v_phi", ex[i]), TString::Format("%s tracks;tracks phi;tracks eta", ex[i]), 126, -3.15, 3.15, 80, -4, 4);
   }
 
-  unsigned long long jj = 0;
-  const unsigned long long jje = fat.t->GetEntries();
-  const unsigned long long jjmax = nevents_frac < 1 ? nevents_frac * jje : jje;
-  for (; jj < jjmax; ++jj) {
-    if (fat.t->LoadTree(jj) < 0) break;
-    if (fat.t->GetEntry(jj) <= 0) continue;
-    if (jj % 2000 == 0) {
-      if (jjmax != jje) printf("\r%llu/%llu(/%llu)", jj, jjmax, jje);
-      else              printf("\r%llu/%llu",        jj, jjmax);
-      fflush(stdout);
-    }
+  auto fcn = [&]() {
+    const double w = nr.weight();
 
-    if (!is_mc && good_ll.get() && !good_ll->contains(nt.run(), nt.lumi()))
-      continue;
+    h_npv->Fill(nt.pvs().n(), w);
 
-    double w = 1;
+    h_bsx->Fill(nt.bs().x(), w);
+    h_bsy->Fill(nt.bs().y(), w);
+    h_bsz->Fill(nt.bs().z(), w);
+    h_bsdxdz->Fill(nt.bs().dxdz(), w);
+    h_bsdydz->Fill(nt.bs().dydz(), w);
+    h_bsy_v_bsx->Fill(nt.bs().x(), nt.bs().y(), w);
 
-    h_npu->Fill(nt.npu());
+    h_pvbsx->Fill(nt.pvs().x(0) - nt.bs().x(nt.pvs().z(0)), w);
+    h_pvbsy->Fill(nt.pvs().y(0) - nt.bs().y(nt.pvs().z(0)), w);
+    h_pvbsz->Fill(nt.pvs().z(0) - nt.bs().z(),              w);
 
-    if (is_mc && puwhelper.valid())
-      w *= puwhelper.w(nt.npu());
-
-    h_npv->Fill(nt.npvs(), w);
-
-    const double bsx = nt.bs_x();
-    const double bsy = nt.bs_y();
-    const double bsz = nt.bs_z();
-
-    h_bsx->Fill(bsx, w);
-    h_bsy->Fill(bsy, w);
-    h_bsz->Fill(bsz, w);
-    h_bsdxdz->Fill(nt.bs_dxdz(), w);
-    h_bsdydz->Fill(nt.bs_dydz(), w);
-    h_bsy_v_bsx->Fill(bsx, bsy, w);
-
-    const double pvbsx = nt.pv_x(0) - bsx;
-    const double pvbsy = nt.pv_y(0) - bsy;
-    const double pvbsz = nt.pv_z(0) - bsz;
-    h_pvbsx->Fill(pvbsx, w);
-    h_pvbsy->Fill(pvbsy, w);
-    h_pvbsz->Fill(pvbsz, w);
-
-    h_pvy_v_pvx->Fill(nt.pv_x(0), nt.pv_y(0), w);
+    h_pvy_v_pvx->Fill(nt.pvs().x(0), nt.pvs().y(0), w);
 
     int ntracks[max_tk_type] = {0};
 
-    for (int itk = 0, itke = nt.ntks(); itk < itke; ++itk) {
-      const double pt = nt.tk_pt(itk);
-      const int min_r = nt.tk_min_r(itk);
-      const int npxlayers = nt.tk_npxlayers(itk);
-      const int nstlayers = nt.tk_nstlayers(itk);
-      const double nsigmadxy = fabs(nt.tk_dxybs(itk)) / nt.tk_err_dxy(itk);
+    for (int itk = 0, itke = ntt.n(); itk < itke; ++itk) {
+      const double pt = ntt.pt(itk);
+      const int min_r = ntt.min_r(itk);
+      const int npxlayers = ntt.npxlayers(itk);
+      const int nstlayers = ntt.nstlayers(itk);
+      const double dxybs = ntt.dxybs(itk, nt.bs());
+      const double nsigmadxy = ntt.nsigmadxybs(itk, nt.bs());
 
       const bool nm1[5] = {
 	pt > 1,
@@ -274,72 +199,88 @@ int main(int argc, char** argv) {
       const bool seed = sel && nm1[4];
       const bool tk_ok[max_tk_type] = { true, sel, seed };
 
-      //const bool high_purity = npxlayers == 4 && fabs(nt.tk_eta(itk)) < 0.8 && fabs(nt.tk_vz(itk)) < 10;
-      //const bool etalt1p5 = fabs(nt.tk_eta(itk)) < 1.5;
+      //const bool high_purity = npxlayers == 4 && fabs(ntt.eta(itk)) < 0.8 && fabs(ntt.dz(itk)) < 10;
+      //const bool etalt1p5 = fabs(ntt.eta(itk)) < 1.5;
 
       for (int i = 0; i < max_tk_type; ++i) {
 	if (!tk_ok[i]) continue;
 	++ntracks[i];
 
+        // JMTBAD separate plots for dxy, dxybs, dxypv, dz, dzpv
+
 	h_tracks_pt[i]->Fill(pt, w);
-	h_tracks_eta[i]->Fill(nt.tk_eta(itk), w);
-	h_tracks_phi[i]->Fill(nt.tk_phi(itk), w);
-	h_tracks_dxy[i]->Fill(nt.tk_dxybs(itk), w);
-	h_tracks_absdxy[i]->Fill(fabs(nt.tk_dxybs(itk)), w);
-	h_tracks_dzpv[i]->Fill(nt.tk_dzpv(itk), w);
-	h_tracks_nhits[i]->Fill(nt.tk_nhits(itk), w);
-	h_tracks_npxhits[i]->Fill(nt.tk_npxhits(itk), w);
-	h_tracks_nsthits[i]->Fill(nt.tk_nsthits(itk), w);
+	h_tracks_eta[i]->Fill(ntt.eta(itk), w);
+	h_tracks_phi[i]->Fill(ntt.phi(itk), w);
+	h_tracks_dxy[i]->Fill(dxybs, w);
+	h_tracks_absdxy[i]->Fill(fabs(dxybs), w);
+	h_tracks_dz[i]->Fill(ntt.dz(itk), w);
+	h_tracks_dzpv[i]->Fill(ntt.dzpv(itk, nt.pvs()), w);
+	h_tracks_nhits[i]->Fill(ntt.nhits(itk), w);
+	h_tracks_npxhits[i]->Fill(ntt.npxhits(itk), w);
+	h_tracks_nsthits[i]->Fill(ntt.nsthits(itk), w);
 	h_tracks_min_r[i]->Fill(min_r, w);
 	h_tracks_npxlayers[i]->Fill(npxlayers, w);
 	h_tracks_nstlayers[i]->Fill(nstlayers, w);
-	h_tracks_nsigmadxy[i]->Fill(nsigmadxy, w);
+	h_tracks_absnsigmadxy[i]->Fill(nsigmadxy, w);
+	h_tracks_nsigmadxy[i]->Fill(dxybs / ntt.err_dxy(itk), w);
+	h_tracks_nsigmadsz[i]->Fill(ntt.dsz(itk) / ntt.err_dsz(itk), w);
 
-	h_tracks_dxyerr[i]->Fill(nt.tk_err_dxy(itk), w);
-	h_tracks_dzerr[i]->Fill(nt.tk_err_dz(itk), w);
-	h_tracks_pterr[i]->Fill(nt.tk_err_pt(itk), w);
-	h_tracks_phierr[i]->Fill(nt.tk_err_phi(itk), w);
-	h_tracks_etaerr[i]->Fill(nt.tk_err_eta(itk), w);
+	h_tracks_dxyerr[i]->Fill(ntt.err_dxy(itk), w);
+	h_tracks_dzerr[i]->Fill(ntt.err_dz(itk), w);
+	h_tracks_dszerr[i]->Fill(ntt.err_dsz(itk), w);
+	h_tracks_lambdaerr[i]->Fill(ntt.err_lambda(itk), w);
+	h_tracks_pterr[i]->Fill(ntt.err_pt(itk), w);
+	h_tracks_phierr[i]->Fill(ntt.err_phi(itk), w);
+	h_tracks_etaerr[i]->Fill(ntt.err_eta(itk), w);
 
-	h_tracks_nstlayers_v_eta[i]->Fill(nt.tk_eta(itk), nstlayers, w);
-	h_tracks_dxy_v_eta[i]->Fill(nt.tk_eta(itk), nt.tk_dxybs(itk), w);
-	h_tracks_dxy_v_phi[i]->Fill(nt.tk_phi(itk), nt.tk_dxybs(itk), w);
-	h_tracks_dxy_v_nstlayers[i]->Fill(nstlayers, nt.tk_dxybs(itk), w);
-	h_tracks_nstlayers_v_phi[i]->Fill(nt.tk_phi(itk), nstlayers, w);
-	h_tracks_npxlayers_v_phi[i]->Fill(nt.tk_phi(itk), npxlayers, w);
-	h_tracks_nhits_v_phi[i]->Fill(nt.tk_phi(itk), nt.tk_nhits(itk), w);
-	h_tracks_npxhits_v_phi[i]->Fill(nt.tk_phi(itk), nt.tk_npxhits(itk), w);
-	h_tracks_nsthits_v_phi[i]->Fill(nt.tk_phi(itk), nt.tk_nsthits(itk), w);
+	h_tracks_nstlayers_v_eta[i]->Fill(ntt.eta(itk), nstlayers, w);
+	h_tracks_dxy_v_eta[i]->Fill(ntt.eta(itk), dxybs, w);
+	h_tracks_dxy_v_phi[i]->Fill(ntt.phi(itk), dxybs, w);
+	h_tracks_dxy_v_nstlayers[i]->Fill(nstlayers, dxybs, w);
+	h_tracks_nstlayers_v_phi[i]->Fill(ntt.phi(itk), nstlayers, w);
+	h_tracks_npxlayers_v_phi[i]->Fill(ntt.phi(itk), npxlayers, w);
+	h_tracks_nhits_v_phi[i]->Fill(ntt.phi(itk), ntt.nhits(itk), w);
+	h_tracks_npxhits_v_phi[i]->Fill(ntt.phi(itk), ntt.npxhits(itk), w);
+	h_tracks_nsthits_v_phi[i]->Fill(ntt.phi(itk), ntt.nsthits(itk), w);
 
-	h_tracks_nsigmadxy_v_eta[i]->Fill(nt.tk_eta(itk), nsigmadxy, w);
+	h_tracks_nsigmadxy_v_eta[i]->Fill(ntt.eta(itk), nsigmadxy, w);
 	h_tracks_nsigmadxy_v_nstlayers[i]->Fill(nstlayers, nsigmadxy, w);
-	h_tracks_nsigmadxy_v_dxy[i]->Fill(nt.tk_dxybs(itk), nsigmadxy, w);
-	h_tracks_nsigmadxy_v_dxyerr[i]->Fill(nt.tk_err_dxy(itk), nsigmadxy, w);
+	h_tracks_nsigmadxy_v_dxy[i]->Fill(dxybs, nsigmadxy, w);
+	h_tracks_nsigmadxy_v_dxyerr[i]->Fill(ntt.err_dxy(itk), nsigmadxy, w);
 
-	h_tracks_dxyerr_v_pt[i]->Fill(pt, nt.tk_err_dxy(itk), w);
-	h_tracks_dxyerr_v_eta[i]->Fill(nt.tk_eta(itk), nt.tk_err_dxy(itk), w);
-	h_tracks_dxyerr_v_phi[i]->Fill(nt.tk_phi(itk), nt.tk_err_dxy(itk), w);
-	h_tracks_dxyerr_v_dxy[i]->Fill(nt.tk_dxybs(itk), nt.tk_err_dxy(itk), w);
-	h_tracks_dxyerr_v_dzpv[i]->Fill(nt.tk_dzpv(itk), nt.tk_err_dxy(itk), w);
-	h_tracks_dxyerr_v_npxlayers[i]->Fill(npxlayers, nt.tk_err_dxy(itk), w);
-	h_tracks_dxyerr_v_nstlayers[i]->Fill(nstlayers, nt.tk_err_dxy(itk), w);
+	h_tracks_dxyerr_v_pt[i]->Fill(pt, ntt.err_dxy(itk), w);
+	h_tracks_dxyerr_v_eta[i]->Fill(ntt.eta(itk), ntt.err_dxy(itk), w);
+	h_tracks_dxyerr_v_phi[i]->Fill(ntt.phi(itk), ntt.err_dxy(itk), w);
+	h_tracks_dxyerr_v_dxy[i]->Fill(dxybs, ntt.err_dxy(itk), w);
+	h_tracks_dxyerr_v_dz[i]->Fill(ntt.dz(itk), ntt.err_dxy(itk), w);
+	h_tracks_dxyerr_v_npxlayers[i]->Fill(npxlayers, ntt.err_dxy(itk), w);
+	h_tracks_dxyerr_v_nstlayers[i]->Fill(nstlayers, ntt.err_dxy(itk), w);
 
-	h_tracks_dzerr_v_pt[i]->Fill(pt, nt.tk_err_dz(itk), w);
-	h_tracks_dzerr_v_eta[i]->Fill(nt.tk_eta(itk), nt.tk_err_dz(itk), w);
-	h_tracks_dzerr_v_phi[i]->Fill(nt.tk_phi(itk), nt.tk_err_dz(itk), w);
-	h_tracks_dzerr_v_dxy[i]->Fill(nt.tk_dxybs(itk), nt.tk_err_dz(itk), w);
-	h_tracks_dzerr_v_dzpv[i]->Fill(nt.tk_dzpv(itk), nt.tk_err_dz(itk), w);
-	h_tracks_dzerr_v_npxlayers[i]->Fill(npxlayers, nt.tk_err_dz(itk), w);
-	h_tracks_dzerr_v_nstlayers[i]->Fill(nstlayers, nt.tk_err_dz(itk), w);
+	h_tracks_dszerr_v_pt[i]->Fill(pt, ntt.err_dsz(itk), w);
+	h_tracks_dszerr_v_eta[i]->Fill(ntt.eta(itk), ntt.err_dsz(itk), w);
+	h_tracks_dszerr_v_phi[i]->Fill(ntt.phi(itk), ntt.err_dsz(itk), w);
+	h_tracks_dszerr_v_dxy[i]->Fill(dxybs, ntt.err_dsz(itk), w);
+	h_tracks_dszerr_v_dz[i]->Fill(ntt.dz(itk), ntt.err_dsz(itk), w);
+	h_tracks_dszerr_v_npxlayers[i]->Fill(npxlayers, ntt.err_dsz(itk), w);
+	h_tracks_dszerr_v_nstlayers[i]->Fill(nstlayers, ntt.err_dsz(itk), w);
 
-	h_tracks_eta_v_phi[i]->Fill(nt.tk_phi(itk), nt.tk_eta(itk), w);
+	h_tracks_lambdaerr_v_pt[i]->Fill(pt, ntt.err_lambda(itk), w);
+	h_tracks_lambdaerr_v_eta[i]->Fill(ntt.eta(itk), ntt.err_lambda(itk), w);
+	h_tracks_lambdaerr_v_phi[i]->Fill(ntt.phi(itk), ntt.err_lambda(itk), w);
+	h_tracks_lambdaerr_v_dxy[i]->Fill(dxybs, ntt.err_lambda(itk), w);
+	h_tracks_lambdaerr_v_dz[i]->Fill(ntt.dz(itk), ntt.err_lambda(itk), w);
+	h_tracks_lambdaerr_v_npxlayers[i]->Fill(npxlayers, ntt.err_lambda(itk), w);
+	h_tracks_lambdaerr_v_nstlayers[i]->Fill(nstlayers, ntt.err_lambda(itk), w);
+
+	h_tracks_eta_v_phi[i]->Fill(ntt.phi(itk), ntt.eta(itk), w);
       }
     }
-    for (int i = 0; i < max_tk_type; ++i) {
-      h_ntracks[i]->Fill(ntracks[i], w);
-    }
-  }
 
-  if (jjmax != jje) printf("\rdone with %llu events (out of %llu)\n", jjmax, jje);
-  else              printf("\rdone with %llu events\n",               jjmax);
+    for (int i = 0; i < max_tk_type; ++i)
+      h_ntracks[i]->Fill(ntracks[i], w);
+
+    return std::make_pair(true, w);
+  };
+
+  nr.loop(fcn);
 }

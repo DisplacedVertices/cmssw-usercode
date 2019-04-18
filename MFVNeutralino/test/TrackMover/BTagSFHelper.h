@@ -1,6 +1,9 @@
 #ifndef TrackMover_BTagSFHelper_h
 #define TrackMover_BTagSFHelper_h
 
+#include <cassert>
+#include "TFile.h"
+#include "TH2.h"
 #include "BTagCalibrationStandalone.h"
 
 class BTagSFHelper {

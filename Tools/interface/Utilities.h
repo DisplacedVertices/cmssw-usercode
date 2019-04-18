@@ -10,6 +10,11 @@
 
 namespace reco {
   class Candidate;
+  class Track;
+}
+
+namespace pat {
+  class Jet;
 }
 
 double cos_angle(const TVector3& v1, const TVector3& v2);
@@ -139,5 +144,7 @@ struct distrib_calculator {
     }
   }
 };
+
+const reco::Track* jetDaughterTrack(const pat::Jet&, size_t idau);
 
 #endif

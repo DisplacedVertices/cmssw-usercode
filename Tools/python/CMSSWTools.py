@@ -187,6 +187,11 @@ def file_event_from_argv(process, verbose=False):
     elif verbose:
         print 'file_event_from_argv warning: did not understand event number'
 
+def cmssw_from_argv(process, verbose=False):
+    file_event_from_argv(process, verbose)
+    if 'summary' in sys.argv:
+        want_summary(process)
+
 def find_output_files(process):
     '''Get the TFileService and PoolOutputModule filenames if these
     services exist in process.'''

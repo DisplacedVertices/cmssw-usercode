@@ -3,37 +3,35 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 settings = CMSSWSettings()
 settings.is_mc = True
 
-max_events(process, 1000)
-report_every(process, 1000000)
 geometry_etc(process, which_global_tag(settings))
 tfileservice(process, 'trackingtreer.root')
 sample_files(process, 'qcdht2000_2017', 'miniaod')
-file_event_from_argv(process)
-#want_summary(process)
+cmssw_from_argv(process)
 
-process.load('JMTucker.MFVNeutralino.UnpackedCandidateTracks_cfi')
+process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
 process.load('JMTucker.Tools.MCStatProducer_cff')
+process.load('JMTucker.Tools.NtupleFiller_cff')
+process.load('JMTucker.Tools.PATTupleSelection_cfi')
+process.load('JMTucker.Tools.UnpackedCandidateTracks_cfi')
+process.load('JMTucker.Tools.UpdatedJets_cff')
+process.load('JMTucker.Tools.WeightProducer_cfi')
+
+process.selectedPatJets.src = 'updatedJetsMiniAOD'
+process.selectedPatJets.cut = process.jtupleParams.jetCut
 
 process.tt = cms.EDAnalyzer('TrackingTreer',
-                            input_is_miniaod = cms.bool(True),
-                            pileup_info_src = cms.InputTag('slimmedAddPileupInfo'),
-                            beamspot_src = cms.InputTag('offlineBeamSpot'),
-                            primary_vertices_src = cms.InputTag('offlineSlimmedPrimaryVertices'),
-                            tracks_src = cms.InputTag('mfvUnpackedCandidateTracks'),
-                            assert_diag_cov = cms.bool(True),
+                            process.jmtNtupleFillerMiniAOD,
                             track_sel = cms.bool(True),
                             )
 
-process.p = cms.Path(process.mfvUnpackedCandidateTracks * process.tt)
+process.tt.track_ref_getter.tracks_maps_srcs = []
+
+process.p = cms.Path(process.tt)
 
 from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-jetsOnly = setup_event_filter(process,
-                              path_name = 'p',
-                              trigger_filter = 'jets only',
-                              event_filter = 'jets only',
-                              event_filter_jes_mult = 0,
-                              event_filter_require_vertex = False,
-                              input_is_miniaod = True)
+setup_event_filter(process, input_is_miniaod=True, mode='jets only novtx', event_filter_jes_mult=0)
+
+ReferencedTagsTaskAdder(process)('p')
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
@@ -48,7 +46,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, 'miniaod', 'default', json_path('ana_2017p8_1pc.json'), 16)
 
-    ms = MetaSubmitter('TrackingTreerV2', dataset='miniaod')
-    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier)
+    ms = MetaSubmitter('TrackingTreerV23mv3', dataset='miniaod')
+    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier())
     ms.condor.stageout_files = 'all'
     ms.submit(samples)
