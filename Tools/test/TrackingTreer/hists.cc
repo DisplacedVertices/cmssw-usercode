@@ -28,8 +28,9 @@ int main(int argc, char** argv) {
   TH1D* h_tracks_eta[max_tk_type];
   TH1D* h_tracks_phi[max_tk_type];
   TH1D* h_tracks_dxy[max_tk_type];
-
   TH1D* h_tracks_absdxy[max_tk_type];
+  TH1D* h_tracks_dsz[max_tk_type];
+  TH1D* h_tracks_dz[max_tk_type];
   TH1D* h_tracks_dzpv[max_tk_type];
   TH1D* h_tracks_nhits[max_tk_type];
   TH1D* h_tracks_npxhits[max_tk_type];
@@ -93,12 +94,14 @@ int main(int argc, char** argv) {
   const char* ex[max_tk_type] = {"all", "sel", "seed"};
   for (int i = 0; i < max_tk_type; ++i) {
     h_ntracks[i] = new TH1D(TString::Format("h_%s_ntracks", ex[i]), TString::Format(";number of %s tracks;events", ex[i]), 2000, 0, 2000);
-    h_tracks_pt[i] = new TH1D(TString::Format("h_%s_tracks_pt", ex[i]), TString::Format("%s tracks;tracks pt;arb. units", ex[i]), 2000, 0, 200);
+    h_tracks_pt[i] = new TH1D(TString::Format("h_%s_tracks_pt", ex[i]), TString::Format("%s tracks;tracks pt (GeV);arb. units", ex[i]), 2000, 0, 200);
     h_tracks_eta[i] = new TH1D(TString::Format("h_%s_tracks_eta", ex[i]), TString::Format("%s tracks;tracks eta;arb. units", ex[i]), 50, -4, 4);
     h_tracks_phi[i] = new TH1D(TString::Format("h_%s_tracks_phi", ex[i]), TString::Format("%s tracks;tracks phi;arb. units", ex[i]), 315, -3.15, 3.15);
-    h_tracks_dxy[i] = new TH1D(TString::Format("h_%s_tracks_dxy", ex[i]), TString::Format("%s tracks;tracks dxy to beamspot;arb. units", ex[i]), 400, -0.2, 0.2);
-    h_tracks_absdxy[i] = new TH1D(TString::Format("h_%s_tracks_absdxy", ex[i]), TString::Format("%s tracks;tracks |dxy| to beamspot;arb. units", ex[i]), 200, 0, 0.2);
-    h_tracks_dzpv[i] = new TH1D(TString::Format("h_%s_tracks_dzpv", ex[i]), TString::Format("%s tracks;tracks dz to PV;arb. units", ex[i]), 400, -20, 20);
+    h_tracks_dxy[i] = new TH1D(TString::Format("h_%s_tracks_dxy", ex[i]), TString::Format("%s tracks;tracks dxy to beamspot (cm);arb. units", ex[i]), 400, -0.2, 0.2);
+    h_tracks_absdxy[i] = new TH1D(TString::Format("h_%s_tracks_absdxy", ex[i]), TString::Format("%s tracks;tracks |dxy| to beamspot (cm);arb. units", ex[i]), 200, 0, 0.2);
+    h_tracks_dsz[i] = new TH1D(TString::Format("h_%s_tracks_dsz", ex[i]), TString::Format("%s tracks;tracks dsz (cm);arb. units", ex[i]), 400, -20, 20);
+    h_tracks_dz[i] = new TH1D(TString::Format("h_%s_tracks_dz", ex[i]), TString::Format("%s tracks;tracks dz (cm);arb. units", ex[i]), 400, -20, 20);
+    h_tracks_dzpv[i] = new TH1D(TString::Format("h_%s_tracks_dzpv", ex[i]), TString::Format("%s tracks;tracks dz to PV (cm);arb. units", ex[i]), 400, -20, 20);
     h_tracks_nhits[i] = new TH1D(TString::Format("h_%s_tracks_nhits", ex[i]), TString::Format("%s tracks;tracks nhits;arb. units", ex[i]), 40, 0, 40);
     h_tracks_npxhits[i] = new TH1D(TString::Format("h_%s_tracks_npxhits", ex[i]), TString::Format("%s tracks;tracks npxhits;arb. units", ex[i]), 40, 0, 40);
     h_tracks_nsthits[i] = new TH1D(TString::Format("h_%s_tracks_nsthits", ex[i]), TString::Format("%s tracks;tracks nsthits;arb. units", ex[i]), 40, 0, 40);
@@ -213,6 +216,7 @@ int main(int argc, char** argv) {
 	h_tracks_phi[i]->Fill(ntt.phi(itk), w);
 	h_tracks_dxy[i]->Fill(dxybs, w);
 	h_tracks_absdxy[i]->Fill(fabs(dxybs), w);
+	h_tracks_dsz[i]->Fill(ntt.dsz(itk), w);
 	h_tracks_dz[i]->Fill(ntt.dz(itk), w);
 	h_tracks_dzpv[i]->Fill(ntt.dzpv(itk, nt.pvs()), w);
 	h_tracks_nhits[i]->Fill(ntt.nhits(itk), w);
@@ -252,7 +256,7 @@ int main(int argc, char** argv) {
 	h_tracks_dxyerr_v_eta[i]->Fill(ntt.eta(itk), ntt.err_dxy(itk), w);
 	h_tracks_dxyerr_v_phi[i]->Fill(ntt.phi(itk), ntt.err_dxy(itk), w);
 	h_tracks_dxyerr_v_dxy[i]->Fill(dxybs, ntt.err_dxy(itk), w);
-	h_tracks_dxyerr_v_dz[i]->Fill(ntt.dz(itk), ntt.err_dxy(itk), w);
+	h_tracks_dxyerr_v_dzpv[i]->Fill(ntt.dzpv(itk, nt.pvs()), ntt.err_dxy(itk), w);
 	h_tracks_dxyerr_v_npxlayers[i]->Fill(npxlayers, ntt.err_dxy(itk), w);
 	h_tracks_dxyerr_v_nstlayers[i]->Fill(nstlayers, ntt.err_dxy(itk), w);
 
