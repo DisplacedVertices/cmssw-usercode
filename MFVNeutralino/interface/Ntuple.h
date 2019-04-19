@@ -10,6 +10,7 @@ namespace mfv {
     virtual void clear();
     virtual void write_to_tree(TTree*);
     virtual void read_from_tree(TTree*);
+    virtual void copy_vectors();
 
     void set(bool valid, float vx, float vy, float vz, bool saw_c, bool saw_b) {
       valid_ = valid;
@@ -110,6 +111,7 @@ namespace mfv {
     virtual void clear();
     virtual void write_to_tree(TTree*);
     virtual void read_from_tree(TTree*);
+    virtual void copy_vectors();
 
     void add(float x, float y, float z,
              float cxx, float cxy, float cxz, float cyy, float cyz, float czz,
@@ -187,6 +189,7 @@ namespace mfv {
     virtual void clear();
     virtual void write_to_tree(TTree*);
     virtual void read_from_tree(TTree*);
+    virtual void copy_vectors() {}
 
     void set(ushort nalltracks, uchar nmovedtracks, uchar npreseljets, uchar npreselbjets,
              float move_x, float move_y, float move_z) {
@@ -229,6 +232,7 @@ namespace mfv {
     virtual void clear() { jmt::TrackingAndJetsNtuple::clear(); gentruth().clear(); vertices().clear(); tm().clear(); }
     virtual void write_to_tree(TTree* t) { jmt::TrackingAndJetsNtuple::write_to_tree(t); gentruth().write_to_tree(t); vertices().write_to_tree(t); tm().write_to_tree(t); }
     virtual void read_from_tree(TTree* t) { jmt::TrackingAndJetsNtuple::read_from_tree(t); gentruth().read_from_tree(t); vertices().read_from_tree(t); tm().read_from_tree(t); }
+    virtual void copy_vectors() { jmt::TrackingAndJetsNtuple::copy_vectors(); gentruth().copy_vectors(); vertices().copy_vectors(); tm().copy_vectors(); }
 
     GenTruthSubNtuple& gentruth() { return gentruth_; }
     VerticesSubNtuple& vertices() { return vertices_; }
@@ -264,6 +268,7 @@ namespace mfv {
     virtual void clear() { jmt::TrackingAndJetsNtuple::clear(); svs().clear(); refit_tks().clear(); }
     virtual void write_to_tree(TTree* t) { jmt::TrackingAndJetsNtuple::write_to_tree(t); svs().write_to_tree(t); refit_tks().write_to_tree(t); }
     virtual void read_from_tree(TTree* t) { jmt::TrackingAndJetsNtuple::read_from_tree(t); svs().read_from_tree(t); refit_tks().read_from_tree(t); }
+    virtual void copy_vectors() { jmt::TrackingAndJetsNtuple::copy_vectors(); svs().copy_vectors(); refit_tks().copy_vectors(); }
 
     jmt::SecondaryVerticesSubNtuple& svs() { return svs_; }
     jmt::RefitTracksSubNtuple& refit_tks() { return refit_tks_; }

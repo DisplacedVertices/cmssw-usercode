@@ -5,6 +5,7 @@
 #include <string>
 #include <boost/program_options.hpp>
 #include "TFile.h"
+#include "TH2.h"
 #include "TTree.h"
 #include "JMTucker/Tools/interface/LumiList.h"
 #include "JMTucker/Tools/interface/PileupWeights.h"
@@ -19,7 +20,9 @@ namespace jmt {
       : desc_("Allowed options"),
         t_(nullptr),
         nt_(new Ntuple),
-        puw_helper_(new jmt::PileupWeights)
+        puw_helper_(new jmt::PileupWeights),
+        h_weight_(nullptr),
+        h_npu_(nullptr)
     {}
 
     ~NtupleReader() {
@@ -90,7 +93,7 @@ namespace jmt {
       return true;
     }
 
-    bool init() {
+    bool init(bool for_copy=false) {
       jmt::set_root_style();
 
       f_.reset(TFile::Open(in_fn_.c_str()));
@@ -118,7 +121,7 @@ namespace jmt {
       if (!is_mc() && json_ != "")
         ll_.reset(new jmt::LumiList(json_));
 
-      f_out_->mkdir("mfvWeight")->cd();
+      f_out_->mkdir(for_copy ? "mcStat" : "mfvWeight")->cd();
       auto h_sums = (TH1D*)f_->Get("mcStat/h_sums")->Clone("h_sums");
       if (is_mc() && nevents_frac_ < 1) {
         h_sums->SetBinContent(1, h_sums->GetBinContent(1) * nevents_frac_);
@@ -128,11 +131,13 @@ namespace jmt {
       }
       f_out_->cd();
 
-      auto h_norm = new TH1F("h_norm", "", 1, 0, 1);
-      if (is_mc()) h_norm->Fill(0.5, h_sums->GetBinContent(1));
+      if (!for_copy) {
+        auto h_norm = new TH1F("h_norm", "", 1, 0, 1);
+        if (is_mc()) h_norm->Fill(0.5, h_sums->GetBinContent(1));
 
-      h_weight = new TH1D("h_weight", ";weight;events/0.01", 100, 0, 10);
-      h_npu = new TH1D("h_npu", ";# PU;events/1", 100, 0, 100);
+        h_weight_ = new TH1D("h_weight", ";weight;events/0.01", 100, 0, 10);
+        h_npu_ = new TH1D("h_npu", ";# PU;events/1", 100, 0, 100);
+      }
 
       return true;
     }
@@ -174,8 +179,8 @@ namespace jmt {
         if (w < 0)
           ++nnegweight;
 
-        h_weight->Fill(w);
-        h_npu->Fill(nt_->base().npu(), w);
+        if (h_weight_) h_weight_->Fill(w);
+        if (h_npu_) h_npu_->Fill(nt_->base().npu(), w);
       }
 
       if (jjmax != jje) printf("\rdone with %llu events (out of %llu)\n", jjmax, jje);
@@ -206,8 +211,8 @@ namespace jmt {
 
     bool is_mc_;
 
-    TH1D* h_weight;
-    TH1D* h_npu;
+    TH1D* h_weight_;
+    TH1D* h_npu_;
   };
 }
 
