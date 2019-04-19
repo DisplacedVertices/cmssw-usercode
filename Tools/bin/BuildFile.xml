@@ -1,0 +1,6 @@
+<use name="root"/>
+<use name="boost_program_options"/>
+
+<environment>
+  <bin file="mergeTFileServiceHistograms.cpp"></bin>
+</environment>
