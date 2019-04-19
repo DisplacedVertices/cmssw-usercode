@@ -19,7 +19,7 @@ h = in_f.Get('massall/h_mass')
 
 # must keep these numbers in sync
 fit_range = 0.420, 0.580
-fit_exclude = 0.490, 0.505
+fit_exclude = 0.475, 0.525
 
 npars = 3 # 2 if sample.startswith('ZeroBias') else 3
 while 1:
@@ -56,6 +56,7 @@ hbkg = ROOT.TH1F('hbkg', h.GetTitle(), h.GetNbinsX(), xax.GetXmin(), xax.GetXmax
 hres = h.Clone('hres')
 xax = hres.GetXaxis()
 xax.SetRangeUser(*fit_range)
+maxr = 0
 for ibin in xrange(xax.FindBin(fit_range[0]), xax.FindBin(fit_range[1])):
     xlo = xax.GetBinLowEdge(ibin)
     xhi = xax.GetBinLowEdge(ibin+1)
@@ -67,11 +68,12 @@ for ibin in xrange(xax.FindBin(fit_range[0]), xax.FindBin(fit_range[1])):
     ie = fdraw.IntegralError(xlo, xhi) / w
     r = (i - c) / i
     re = ce / i # (ie**2 + ce**2)**0.5 / i
-    #print i, ie, c, ce, r
     hbkg.SetBinContent(ibin, i)
     hbkg.SetBinError(ibin, ie)
     if fit_exclude[0] <= xmd <= fit_exclude[1]:
         r, re = 0, 0
+    #print i, ie, c, ce, r, re
+    maxr = max(maxr, abs(r)+re)
     hres.SetBinContent(ibin, r)
     hres.SetBinError(ibin, re)
 
@@ -84,7 +86,7 @@ fdraw.Draw('same')
 
 insert = ROOT.TPad("insert","insert",0.431, 0.671, 0.863, 0.869)
 insert.SetRightMargin(0.01)
-insert.SetLeftMargin(0.01)
+insert.SetLeftMargin(0.15)
 insert.SetTopMargin(0.01)
 insert.SetBottomMargin(0.01)
 insert.Draw()
@@ -95,8 +97,8 @@ hres.GetXaxis().SetLabelSize(0.065)
 hres.GetYaxis().SetTitleSize(0.08)
 hres.GetXaxis().SetTitleSize(0.08)
 hres.GetYaxis().SetTitleOffset(0.75)
+hres.GetYaxis().SetRangeUser(-maxr*1.05, maxr*1.05)
 hres.SetStats(0)
-
 hres.Fit('pol1')
 ps.c.cd()
 ps.save('mass_fit')
@@ -137,38 +139,47 @@ for lo in xrange(50):
             max_z = z
 print
 xlo,xhi,n,ne,b,be,s,se,p,z = do(1,1, True) # print the one we're using
+the_b = b
 assert abs(xlo-0.490) < 1e-5 and abs(xhi-0.505) < 1e-5 # check that we're in sync with histos
 
 out_f = ROOT.TFile(out_fn, 'recreate')
-integ = lambda h: h.Integral(0,h.GetNbinsX()+2)
+
+def is_th2(h):
+    return issubclass(type(h), ROOT.TH2)
+
+def integ(h):
+    if is_th2(h):
+        return h.Integral(0,h.GetNbinsX()+2,0,h.GetNbinsY()+2)
+    else:
+        return h.Integral(0,h.GetNbinsX()+2)
 
 # do the bkg subtraction in whatever variables you want as long as the hists exist
 # written out to file in folders so the cmp script can do the rest
 
-colors = (2,3,4,6)
+scans = True
 variables = [
-    ('h_rho', 1, 1, (0,2)),
-    ('h_pt', 1, 1, None),
-    ('h_eta', 1, 1, None),
-    ('h_phi', 1, 1, None),
-    ('h_costh', 1, 1, (0.95,1.01)),
+    ('h_rho', 1, 1, (0,2), 0),
+    ('h_pt', 1, 1, None, 0),
+    ('h_eta', 1, 1, None, 0),
+    ('h_phi', 1, 1, None, 0),
+    ('h_costh3', 1, 1, None, 0),
+    ('h_costh2', 1, 1, None, 0),
+    ('h_tracks_pt', 2, 1, None, 0),
+    ('h_tracks_eta', 2, 1, None, 0),
+    ('h_tracks_phi', 2, 1, None, 0),
+    ('h_tracks_dxy', 2, 1, None, 0),
+    ('h_tracks_absdxy', 2, 1, None, 0),
+    ('h_tracks_dz', 2, 1, None, 0),
+    ('h_tracks_dzpv', 2, 1, None, 0),
+    ('h_tracks_dxyerr', 2, 1, None, 0),
+    ('h_tracks_dszerr', 2, 1, None, 0),
+    ('h_tracks_nsigmadxy', 2, 1, None, 0),
+    ('h_tracks_npxlayers', 2, 1, None, 0),
+    ('h_tracks_nstlayers', 2, 1, None, 0),
+    ('h_tracks_dxyerr_v_pt', 2, None, (0, 40), 0),
     ]
-#    ('h_tracks_charge', 2, 1, None),
-#    ('h_tracks_pt', 2, 10, (0,100)),
-#    ('h_tracks_eta', 2, 10, None),
-#    ('h_tracks_phi', 2, 10, None),
-#    ('h_tracks_dxy', 2, 10, (-0.5,0.5)),
-#    ('h_tracks_absdxy', 2, 10, (0.,0.5)),
-#    ('h_tracks_dz', 2, 10, None),
-#    ('h_tracks_dzpv', 2, 10, None),
-#    ('h_tracks_nsigmadxy', 2, 1, (0,0.03)),
-#    ('h_tracks_npxlayers', 2, 1, None),
-#    ('h_tracks_nstlayers', 2, 1, None),
-#    ('h_tracks_dxyerr', 2, 1, None),
-#    ('h_tracks_dszerr', 2, 1, None),
-#    ]
-#
-for hname, integ_factor, rebin, x_range in variables:
+
+for hname, integ_factor, rebin, x_range, scan_dir in variables:
     hon = in_f.Get('masson/%s' % hname)
     hbkglo = in_f.Get('masslo/%s' % hname)
     hbkghi = in_f.Get('masshi/%s' % hname)
@@ -180,38 +191,56 @@ for hname, integ_factor, rebin, x_range in variables:
     hbkghi = hbkghi.Clone('hbkghi')
     hbkg = hbkglo.Clone('hbkg')
     hbkg.Add(hbkghi)
-    hsig = [hon.Clone(name) for name in 'hsiglo', 'hsighi', 'hsig']
-    hoth = [hbkglo, hbkghi, hbkg, hon]
+    hsig = hon.Clone('hsig')
+
+    if abs(integ(hon) - integ_factor * n) > 1e-5:
+        raise ValueError('hint %s n %s' % (hint, n))
+
+    hbkg.Scale(the_b / integ(hbkg))
+    hsig.Add(hbkg, -1)
  
-    for i,h in enumerate(hoth + hsig):
-        h.Rebin(rebin)
+    for h,c in zip((hon, hbkg, hsig), (1, 4, 2)):
+        h.SetLineColor(c)
         h.SetLineWidth(2)
-        h.SetLineColor(colors[i-len(hoth) if h in hsig else i])
         h.SetStats(0)
-        if x_range:
+        if rebin:
+            h.Rebin(rebin)
+        if not is_th2(h) and x_range:
             h.GetXaxis().SetRangeUser(*x_range)
 
-    for i,h in enumerate(reversed(hoth)):
-        hint = integ(h)
-        if i == 0:
-            if abs(hint - integ_factor * n) > 1e-5:
-                print 'hint', hint, 'n', n
-                raise ValueError('duh?')
-            h.Draw('hist e')
-        else:
-            h.Scale(b/hint)
-            hsig[i-1].Add(h, -1)
-            h.Draw('hist e same')
+    if is_th2(hon):
+        p_hon, p_hbkg, p_hsig = pfs = [h.ProfileX() for h in hon, hbkg, hsig]
+        for p in pfs:
+            p.SetLineWidth(2)
+            p.SetStats(0)
+            if x_range:
+                p.GetXaxis().SetRangeUser(*x_range)
+        p_hon.Draw('hist')
+        p_hbkg.Draw('hist same')
+        p_hsig.Draw('hist same')
+    else:
+        hon.Draw('hist e')
+        hbkg.Draw('hist e same')
+        hsig.Draw('hist e same')
 
-    for i,h in enumerate(hsig):
-        h.Draw('hist e same')
     ps.save(hname)
 
-    for h in hoth + hsig:
+    if scans and scan_dir:
+        hsig_cumu, hbkg_cumu = [cumulative_histogram(h, 'ge' if scan_dir == 1 else 'le') for h in hsig, hbkg] 
+        print hname
+        max_z = 0
+        for ibin in xrange(1, hsig.GetNbinsX()+1):
+            s = hsig_cumu.GetBinContent(ibin)
+            b = hbkg_cumu.GetBinContent(ibin)
+            be = hbkg_cumu.GetBinError(ibin)
+            if b > 0:
+                z = s/(b + be**2)**0.5
+                print '%6.3f' % hsig.GetXaxis().GetBinLowEdge(ibin), 's = %10.1f' % s, 'b = %10.1f +- %6.1f' % (b,be), 'z = %4.1f' % z
+
+    for h in hon, hbkg, hsig:
         h.Write()
 
 # copy over normalization hist
-
 h = in_f.Get('mfvWeight/h_sums').Clone('h_sums')
 h.SetDirectory(out_f.mkdir('mfvWeight'))
 
