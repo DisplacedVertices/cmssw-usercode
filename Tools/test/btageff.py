@@ -1,43 +1,54 @@
 #!/usr/bin/env python
 
-raise NotImplementedError('2017 and JMTWeightProducer')
+from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-from JMTucker.Tools.MiniAOD_cfg import *
-from JMTucker.Tools.CMSSWTools import *
-from JMTucker.Tools.PileupWeights import pileup_weights
-from JMTucker.Tools.Year import year
+settings = CMSSWSettings()
+settings.is_mc = True
 
-process = pat_tuple_process(None, True, year, False, False)
-remove_met_filters(process)
-remove_output_module(process)
+global_tag(process, which_global_tag(settings))
 tfileservice(process, 'btageff.root')
+sample_files(process, 'qcdht2000_2017', 'miniaod', 1)
+cmssw_from_argv(process)
 
-add_analyzer(process, 'JMTBTagEfficiency',
-             pileup_info_src = cms.InputTag('addPileupInfo'),
-             pileup_weights = cms.vdouble(*pileup_weights[year]),
-             jets_src = cms.InputTag('selectedPatJets'),
-             jet_pt_min = cms.double(20),
-             jet_ht_min = cms.double(1000),
-             njets_min = cms.int32(4),
-             b_discriminator = cms.string('pfCombinedInclusiveSecondaryVertexV2BJetTags'),
-             b_discriminator_min = cms.vdouble(0.46, 0.935, 0.5426, 0.9535),
-             )
+process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
+process.load('JMTucker.Tools.MCStatProducer_cff')
+process.load('JMTucker.Tools.PATTupleSelection_cfi')
+process.load('JMTucker.Tools.UpdatedJets_cff')
+process.load('JMTucker.Tools.WeightProducer_cfi')
 
-process.maxEvents.input = 100
-file_event_from_argv(process)
+process.selectedPatJets.src = 'updatedJetsMiniAOD'
+process.selectedPatJets.cut = process.jtupleParams.jetCut
 
-nwp = len(process.JMTBTagEfficiency.b_discriminator_min)
+process.JMTBTagEfficiency = cms.EDAnalyzer('JMTBTagEfficiency',
+                                           weight_src = cms.InputTag('jmtWeightMiniAOD'),
+                                           jets_src = cms.InputTag('selectedPatJets'),
+                                           jet_pt_min = cms.double(20),
+                                           b_discriminator = cms.string('pfCombinedInclusiveSecondaryVertexV2BJetTags'),
+                                           b_discriminator_min = cms.vdouble(0.5803, 0.8838, 0.9693),
+                                           )
+
+process.p = cms.Path(process.JMTBTagEfficiency)
+
+from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
+setup_event_filter(process, input_is_miniaod=True, mode='jets only novtx', event_filter_jes_mult=0)
+
+ReferencedTagsTaskAdder(process)('p')
+
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
+    from JMTucker.Tools.Year import year
     import JMTucker.Tools.Samples as Samples 
 
-    if year == 2015:
-        samples = Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015
-    elif year == 2016:
-        samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + Samples.qcd_hip_samples
+    if year == 2017:
+        samples = Samples.qcd_samples_2017 + Samples.ttbar_samples_2017
+    elif year == 2018:
+        samples = Samples.qcd_samples_2018
 
-    ms = MetaSubmitter('BTagEffV1')
+    set_splitting(samples, 'miniaod', 'default', default_files_per=16)
+
+    ms = MetaSubmitter('BTagEffV1', dataset='miniaod')
+    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
     ms.submit(samples)
 
 elif __name__ == '__main__' and hasattr(sys, 'argv') and 'ana' in sys.argv:
@@ -46,6 +57,7 @@ elif __name__ == '__main__' and hasattr(sys, 'argv') and 'ana' in sys.argv:
     f = ROOT.TFile(fn, 'update')
     d = f.GetDirectory('JMTBTagEfficiency')
     d.cd()
+    nwp = len(process.JMTBTagEfficiency.b_discriminator_min)
     for kind in 'light', 'charm', 'bottom':
         den = d.Get('den_%s' % kind)
         nx, ny = den.GetNbinsX(), den.GetNbinsY()
