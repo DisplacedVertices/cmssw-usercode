@@ -4,10 +4,11 @@ from array import array
 ROOT.TH1.AddDirectory(0)
 
 is_mc = True
-year = '2015p6'
+version = 'v23m'
+year = '2017'
 
 set_style()
-ps = plot_saver('../plots/bkgest/v15_v5/efficiency_correction%s_%s' % ('' if is_mc else '_data', year), size=(700,700), root=False, log=False)
+ps = plot_saver(plot_dir('VertexerPairEffs%s/efficiency_correction%s_%s' % (version.capitalize(), '' if is_mc else '_data', year)), size=(700,700), root=False, log=False)
 
 ntk = ['3-track', '4-track', '5-track', '4-track-3-track']
 
@@ -30,7 +31,7 @@ ey3 = []
 for i,ntracks in enumerate([3,4,5,7]):
     print ntk[i]
 
-    h1 = ROOT.TFile('2v_from_jets%s_%s_%itrack_noclearing_v15_v5.root' % ('' if is_mc else '_data', year, ntracks)).Get('h_c1v_dvv')
+    h1 = ROOT.TFile('2v_from_jets%s_%s_%itrack_noclearing_%s.root' % ('' if is_mc else '_data', year, ntracks, version)).Get('h_c1v_dvv')
     h1.SetStats(0)
     h1.SetLineColor(ROOT.kBlack)
     h1.SetLineWidth(2)
@@ -40,7 +41,7 @@ for i,ntracks in enumerate([3,4,5,7]):
         h1.GetYaxis().SetRangeUser(0,0.4)
     h1.Draw('hist e')
 
-    h2 = ROOT.TFile('2v_from_jets%s_%s_%itrack_default_v15_v5.root' % ('' if is_mc else '_data', year, ntracks)).Get('h_c1v_dvv')
+    h2 = ROOT.TFile('2v_from_jets%s_%s_%itrack_default_%s.root' % ('' if is_mc else '_data', year, ntracks, version)).Get('h_c1v_dvv')
     h2.SetStats(0)
     h2.SetLineColor(ROOT.kRed)
     h2.SetLineWidth(2)

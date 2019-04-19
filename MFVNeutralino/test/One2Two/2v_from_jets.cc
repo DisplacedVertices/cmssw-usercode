@@ -247,19 +247,19 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   if (p.vary_bquarks()) {
     if (p.ntracks() == 3) {
-      if (p.year() == "2018")        { bquark_correction[0] = 0.87; bquark_correction[1] = 1.14; bquark_correction[2] = 1.18; }
+      if (p.year() == "2018")        { bquark_correction[0] = 0.87; bquark_correction[1] = 1.11; bquark_correction[2] = 1.22; }
       else if (p.year() == "2017p8") { bquark_correction[0] = 0.87; bquark_correction[1] = 1.14; bquark_correction[2] = 1.18; }
       else                           { bquark_correction[0] = 0.89; bquark_correction[1] = 1.13; bquark_correction[2] = 1.12; }
     } else if (p.ntracks() == 4) {
-      if (p.year() == "2018")        { bquark_correction[0] = 0.87; bquark_correction[1] = 1.21; bquark_correction[2] = 1.35; }
+      if (p.year() == "2018")        { bquark_correction[0] = 0.93; bquark_correction[1] = 1.10; bquark_correction[2] = 1.06; }
       else if (p.year() == "2017p8") { bquark_correction[0] = 0.87; bquark_correction[1] = 1.21; bquark_correction[2] = 1.35; }
       else                           { bquark_correction[0] = 0.88; bquark_correction[1] = 1.19; bquark_correction[2] = 1.19; }
     } else if (p.ntracks() == 5) {
-      if (p.year() == "2018")        { bquark_correction[0] = 0.86; bquark_correction[1] = 1.43; bquark_correction[2] = 1.95; }
+      if (p.year() == "2018")        { bquark_correction[0] = 0.81; bquark_correction[1] = 1.06; bquark_correction[2] = 1.40; }
       else if (p.year() == "2017p8") { bquark_correction[0] = 0.86; bquark_correction[1] = 1.43; bquark_correction[2] = 1.95; }
       else                           { bquark_correction[0] = 0.93; bquark_correction[1] = 0.99; bquark_correction[2] = 1.47; }
     } else if (p.ntracks() == 7) {
-      if (p.year() == "2018")        { bquark_correction[0] = 0.87; bquark_correction[1] = 1.17; bquark_correction[2] = 1.24; }
+      if (p.year() == "2018")        { bquark_correction[0] = 0.90; bquark_correction[1] = 1.10; bquark_correction[2] = 1.17; }
       else if (p.year() == "2017p8") { bquark_correction[0] = 0.87; bquark_correction[1] = 1.17; bquark_correction[2] = 1.24; }
       else                           { bquark_correction[0] = 0.89; bquark_correction[1] = 1.15; bquark_correction[2] = 1.14; }
     } else {

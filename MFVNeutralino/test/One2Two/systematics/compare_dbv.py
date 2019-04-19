@@ -11,11 +11,11 @@ year = 2017
 sns = 'qcdht0700_2017 qcdht1000_2017 qcdht1500_2017 qcdht2000_2017 ttbarht0600_2017 ttbarht0800_2017 ttbarht1200_2017 ttbarht2500_2017'.split()
 sc = ac.int_lumi_2017 * ac.scale_factor_2017
 
-if year == 2015:
-    sns = 'qcdht0700sum_2015 qcdht1000sum_2015 qcdht1500sum_2015 qcdht2000sum_2015 ttbar_2015'.split()
-    sc = ac.int_lumi_2015 * ac.scale_factor_2015
+if year == 2018:
+    sns = 'qcdht0700_2018 qcdht1000_2018 qcdht1500_2018 qcdht2000_2018'.split()
+    sc = ac.int_lumi_2018 * ac.scale_factor_2018
 
-ntk = 3
+ntk = 5
 tree_path = 'mfvMiniTree/t'
 if ntk == 3:
     tree_path = 'mfvMiniTreeNtk3/t'
@@ -24,7 +24,7 @@ if ntk == 4:
 
 bquarkpt = False
 
-version = 'v22m'
+version = 'v23m'
 path = 'MiniTree%s' % version.capitalize()
 if bquarkpt:
     path = 'MiniTreeV15_v4_bquarkpt'
