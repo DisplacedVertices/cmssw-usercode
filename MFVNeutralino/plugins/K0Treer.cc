@@ -33,6 +33,7 @@ private:
   mfv::K0Ntuple nt;
   TTree* tree;
 
+  bool pass(const reco::Track& tk) const { return tk.pt() >= 1 && tk.hitPattern().pixelLayersWithMeasurement() >= 2 && tk.hitPattern().stripLayersWithMeasurement() >= 6 && tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1); }
   TLorentzVector p4(const reco::Track& tk) const { TLorentzVector v; v.SetPtEtaPhiM(tk.pt(), tk.eta(), tk.phi(), 0.13957); return v; }
 };
 
@@ -89,8 +90,13 @@ void MFVK0Treer::analyze(const edm::Event& event, const edm::EventSetup& setup) 
 
   for (size_t itk = 0; itk < ntracks; ++itk) {
     reco::TrackRef tki(tracks, itk);
+    if (!pass(*tki))
+      continue;
+
     for (size_t jtk = itk+1; jtk < ntracks; ++jtk) {
       reco::TrackRef tkj(tracks, jtk);
+      if (!pass(*tkj))
+        continue;
 
       if (tki->charge() + tkj->charge() != 0)
         continue;
@@ -123,11 +129,11 @@ void MFVK0Treer::analyze(const edm::Event& event, const edm::EventSetup& setup) 
       if (mass < 0.42 || mass > 0.58)
         continue;
 
-      const TVector3 flight(v.x() - pv.x(), v.y() - pv.y(), v.z() - pv.z());
-      const double costh = vp4.Vect().Unit().Dot(flight.Unit());
-      if (costh < 0.95)
+      const TVector3 vp42(vp4.X(), vp4.Y(), 0);
+      const TVector3 flight2(v.x() - pv.x(), v.y() - pv.y(), 0);
+      const double costh2 = vp42.Unit().Dot(flight2.Unit());
+      if (costh2 < 0.95)
         continue;
-
 
       const size_t itk_nt = nt_add_tk(tki);
       const size_t jtk_nt = nt_add_tk(tkj);
