@@ -78,6 +78,9 @@ def cs_kill(d):
     for _, c in cs_clusters(d):
         os.system('condor_rm %s' % _cluster2cmd(c))
 
+def cs_output_fn(d, job, kind='stdout'):
+    return os.path.join(d, '%s.%s' % (kind, job))
+
 def cs_logs(d):
     return glob(os.path.join(d, 'log.*'))
 
@@ -297,6 +300,13 @@ def cs_report(wd):
     ll_all.writeJSON(os.path.join(wd, 'processedLumis.json'))
     return ll_all
 
+def cs_last_input_file(wd, job):
+    _r = re.compile(r'(/store.*\.root)')
+    for line in reversed(file(cs_output_fn(wd, job)).readlines()):
+        mo = _r.search(line)
+        if mo:
+            return mo.group(1)
+
 __all__ = [
     'is_cs_dir',
     'cs_dirs_from_argv',
@@ -309,6 +319,7 @@ __all__ = [
     'cs_resubs',
     'cs_clusters',
     'cs_kill',
+    'cs_output_fn',
     'cs_logs',
     'cs_job_from_log',
     'cs_jobs_running',
@@ -321,6 +332,7 @@ __all__ = [
     'cs_hadd_args',
     'cs_hadd',
     'cs_report',
+    'cs_last_input_file',
     ]
 
 if __name__ == '__main__':
