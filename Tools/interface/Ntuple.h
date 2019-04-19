@@ -344,7 +344,7 @@ namespace jmt {
     TVector3 p3(int i) const { return p3_(pt(i), eta(i), phi(i)); }
     TLorentzVector p4(int i, double m=0) const { return p4_m(pt(i), eta(i), phi(i), m); }
     bool pass_sel(int i) const { return pt(i) > 1 && min_r(i) <= 1 && npxlayers(i) >= 2 && nstlayers(i) >= 6; }
-    template <typename BS> bool pass_seed(int i, const BS& bs) const { return pass_sel(i) && nsigmadxybs(i,bs) > 4; }
+    template <typename BS> bool pass_seed(int i, const BS& bs, float ns=4) const { return pass_sel(i) && nsigmadxybs(i,bs) > ns; }
 
     std::vector<int> tks_for_jet(uchar i) const { return tks_for_x_(0, i); }
     std::vector<int> tks_for_pv (uchar i) const { return tks_for_x_(1, i); }
