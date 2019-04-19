@@ -123,27 +123,20 @@ __all__ = [
 
 execfile(cmssw_base('src/JMTucker/Tools/python/enc_SampleFiles.py'))
 
-for x,y in [
-    ('qcdht0700_2017', '/store/mc/RunIIFall17MiniAODv2/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/90000/B234A578-B844-E811-BB35-0025905B85D8.root'),
-    ('qcdht0700_2017', '/store/mc/RunIIFall17MiniAODv2/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/40000/2A23B4F0-3F43-E811-B600-0CC47A7C34E6.root'),
-    ('qcdht0700_2017', '/store/mc/RunIIFall17MiniAODv2/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/40000/964601B9-4F43-E811-9557-0025905A611E.root'),
-    ('qcdht0700_2017', '/store/mc/RunIIFall17MiniAODv2/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/70000/4AD19A1D-F443-E811-B7FE-0025905B85D8.root'),
-    ('qcdht0700_2017', '/store/mc/RunIIFall17MiniAODv2/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/20000/9CD54B20-9642-E811-9189-0CC47A78A340.root'),
-    ('qcdht1500_2017', '/store/mc/RunIIFall17MiniAODv2/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/10000/AC4239D2-5A5C-E811-A0F6-0025905B857C.root'),
-    ('qcdht2000_2017', '/store/mc/RunIIFall17MiniAODv2/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/100000/3C55942E-FB66-E811-8781-00000086FE80.root'),
-    ('qcdht0700_2018', '/store/mc/RunIIAutumn18MiniAOD/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/020000/582A14C2-1BD1-6848-AE57-C110F6E929A0.root'),
-    ('qcdht0700_2018', '/store/mc/RunIIAutumn18MiniAOD/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/20000/20DB6628-3A60-3245-A133-F831ED22EFE4.root'),
-    ('qcdht0700_2018', '/store/mc/RunIIAutumn18MiniAOD/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/210000/0F36F5C9-DEE9-DD47-B1CB-54593A37E62E.root'),
-    ('qcdht0700_2018', '/store/mc/RunIIAutumn18MiniAOD/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/110000/D68ADEFB-1AFC-B74B-B887-FA6A270E93D3.root'),
-    ('qcdht0700_2018', '/store/mc/RunIIAutumn18MiniAOD/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/60000/818480BB-489C-AE4F-AE90-15E4F609DFF5.root'),
-    ('qcdht1000_2018', '/store/mc/RunIIAutumn18MiniAOD/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/80000/65289A90-B55E-7846-8657-4A9E1D72D8DE.root'),
-    ('qcdht1000_2018', '/store/mc/RunIIAutumn18MiniAOD/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/80000/81B07983-AA32-D94C-98C5-7D9D5C357D05.root'),
-    ('qcdht1000_2018', '/store/mc/RunIIAutumn18MiniAOD/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/120000/C32DE14A-0192-E74E-AB88-E9D3CD16435F.root'),
-    ('ttbarht0800_2017', '/store/mc/RunIIFall17MiniAODv2/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/40000/225CD078-B3A4-E811-AA74-001E67DDC254.root'),
-    ('ttbarht0800_2017', '/store/mc/RunIIFall17MiniAODv2/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/60000/BC22A92A-7BBA-E811-8A2B-0242AC1C0501.root'),
-    ('ttbarht1200_2017', '/store/mc/RunIIFall17MiniAODv2/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/90000/6E6C0DD6-349B-E811-A4E1-0CC47A6C063E.root'),
-    ]:
-    _remove_file(x, 'miniaod', y)
+_removed = [
+    (('qcdht0700_2017', 'miniaod'), '/store/mc/RunIIFall17MiniAODv2/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/10000/767F174C-3343-E811-A5F5-0025905A60A6.root'),
+    (('qcdht0700_2017', 'miniaod'), '/store/mc/RunIIFall17MiniAODv2/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/40000/8E6AE107-6A42-E811-8422-0CC47A4C8E0E.root'),
+    (('qcdht1500_2017', 'miniaod'), '/store/mc/RunIIFall17MiniAODv2/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/10000/58077132-935C-E811-85A0-0CC47A4D7666.root'),
+    (('qcdht0700_2018', 'miniaod'), '/store/mc/RunIIAutumn18MiniAOD/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/60000/5AC8C151-EDC5-424C-ADA1-34CCAF24428E.root'),
+    (('qcdht0700_2018', 'miniaod'), '/store/mc/RunIIAutumn18MiniAOD/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/270000/ECBC623B-15F9-FF41-94D2-1673DF22A595.root'),
+    (('qcdht0700_2018', 'miniaod'), '/store/mc/RunIIAutumn18MiniAOD/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/20000/F23C4EF6-BC50-9748-B132-523B7F19F5E1.root'),
+    (('qcdht1000_2018', 'miniaod'), '/store/mc/RunIIAutumn18MiniAOD/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/120000/8F138429-3D58-5440-9FBE-4E4ABAF5A6A7.root'),
+    (('qcdht1000_2018', 'miniaod'), '/store/mc/RunIIAutumn18MiniAOD/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/120000/BAA789CF-E98B-9744-842C-C34D221F58C4.root'),
+    (('qcdht1000_2018', 'miniaod'), '/store/mc/RunIIAutumn18MiniAOD/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/120000/D2359D81-EB07-8A46-8DBA-7D4DCA14F6F4.root'),
+    (('qcdht1000_2018', 'miniaod'), '/store/mc/RunIIAutumn18MiniAOD/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/80000/643EC53B-D428-FB4B-A932-B199085745A7.root'),
+    ]
+for (name,ds),fn in _removed:
+    _remove_file(name, ds, fn)
 
 _add_ds("main", {
 'mfv_neu_tau000100um_M0400_2017': _fromnum1("/store/user/wsun/croncopyeos/mfv_neu_cp2_tau000100um_M0400/RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1/181027_053632", 100, fnbase="reco"),
@@ -582,6 +575,17 @@ if __name__ == '__main__':
         print '%-45s %25s' % ('in Samples but not SampleFiles:', '')
         for k in sorted(in_s_not_sf):
             print '%-45s %25s' % k
+
+    elif 'removed' in sys.argv:
+        import colors
+        def ok(fn):
+            assert fn.startswith('/store') and fn.endswith('.root')
+            ret = os.system('xrdcp -sf root://cmsxrootd-site.fnal.gov/%s /dev/null' % fn)
+            if ret != 0:
+                ret = os.system('xrdcp -sf root://cmseos.fnal.gov/%s /dev/null' % fn)
+            return ret == 0
+        for (name,ds), fn in _removed:
+            print (colors.boldred if ok(fn) else colors.green)('%s %s %s' % (name, ds, fn))
 
     else:
         sys.exit('did not understand argv %r' % sys.argv)
