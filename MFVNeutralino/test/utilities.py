@@ -113,47 +113,44 @@ def cmd_rm_mc_parts():
                     print y
                     os.remove(y)
 
-def _background_samples(trigeff=False):
+def _background_samples(trigeff=False, year=2017):
     if _leptonpresel or trigeff:
         x = ['ttbar', 'wjetstolnusum', 'dyjetstollM10', 'dyjetstollM50sum', 'qcdmupt15']
         if not trigeff:
             x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]]
             x += ['qcdbctoept%03i' % x for x in [15,20,30,80,170,250]]
     else:
-        x = ['qcdht%04i' % x for x in [700, 1000, 1500, 2000]] + ['ttbarht%04i' % x for x in [600, 800, 1200, 2500]]
+        x = ['qcdht%04i' % x for x in [700, 1000, 1500, 2000]]
+        if year == 2017:
+            x += ['ttbarht%04i' % x for x in [600, 800, 1200, 2500]]
     return x
 
 def cmd_merge_background():
     permissive = bool_from_argv('permissive')
     cwd = os.getcwd()
-    if cwd.endswith('2017to2018'):
-        year_s, scale = '_2018', -AnalysisConstants.int_lumi_2018 * AnalysisConstants.scale_factor_2018
-    elif cwd.endswith('2017to2017p8'):
-        year_s, scale = '_2017p8', -AnalysisConstants.int_lumi_2017p8 * AnalysisConstants.scale_factor_2017p8
-    else:
-        year_s, scale = '_2017', -AnalysisConstants.int_lumi_2017 * AnalysisConstants.scale_factor_2017
+    for year_s, scale in [('_2017', -AnalysisConstants.int_lumi_2017 * AnalysisConstants.scale_factor_2017),
+                          ('_2018', -AnalysisConstants.int_lumi_2018 * AnalysisConstants.scale_factor_2018)]:
 
-    print 'scaling to', year_s[1:], scale
-    if year_s != '_2017':
-        print colors.yellow('using *_2017* for 2018')
+        year = int(year_s[1:])
+        print 'scaling to', year, scale
 
-    files = _background_samples()
-    files = ['%s%s.root' % (x, '_2017') for x in files]
-    files2 = []
-    for fn in files:
-        if not os.path.isfile(fn):
-            msg = '%s not found' % fn
-            if permissive:
-                print msg
+        files = _background_samples(year=year)
+        files = ['%s%s.root' % (x, year_s) for x in files]
+        files2 = []
+        for fn in files:
+            if not os.path.isfile(fn):
+                msg = '%s not found' % fn
+                if permissive:
+                    print msg
+                else:
+                    raise RuntimeError(msg)
             else:
-                raise RuntimeError(msg)
-        else:
-            files2.append(fn)
-    if files2:
-        cmd = 'samples merge %f background%s%s.root ' % (scale, _presel_s, year_s)
-        cmd += ' '.join(files2)
-        print cmd
-        os.system(cmd)
+                files2.append(fn)
+        if files2:
+            cmd = 'samples merge %f background%s%s.root ' % (scale, _presel_s, year_s)
+            cmd += ' '.join(files2)
+            print cmd
+            os.system(cmd)
 
 def cmd_effsprint():
     background_fns = ' '.join(x + '_2017.root' for x in _background_samples())
