@@ -53,8 +53,8 @@ namespace jmt {
         ("output-file,o", po::value<std::string>(&out_fn_)        ->default_value("hists.root"), "the output file")
         ("tree-path,t",   po::value<std::string>(&tree_path_)     ->default_value(tree_path),    "the tree path")
         ("json,j",        po::value<std::string>(&json_),                                        "lumi mask json file for data")
-        ("nevents-frac,n",po::value<double>     (&nevents_frac_)  ->default_value(1.),           "only run on this fraction of events in the tree")
-        ("which-frac,w",  po::value<int>        (&which_frac_)    ->default_value(0),            "which fraction to run over")
+        ("num-chunks,n",  po::value<int>        (&num_chunks_)    ->default_value(1),            "split the tree entries into this many chunks")
+        ("which-chunk,w", po::value<int>        (&which_chunk_)   ->default_value(0),            "chunk to run")
         ("weights",       po::value<bool>       (&use_weights_)   ->default_value(true),         "whether to use any other weights, including those in the tree")
         ("pu-weights",    po::value<std::string>(&pu_weights_)    ->default_value(""),           "extra pileup weights beyond whatever's already in the tree")
         ;
@@ -81,13 +81,8 @@ namespace jmt {
         std::cerr << "tree_path changed to " << tree_path_ << "\n";
       }
 
-      if (nevents_frac_ <= 0 || nevents_frac_ > 1) {
-        std::cerr << "0 < nevents_frac <= 1 required\n";
-        return false;
-      }
-
-      if (which_frac_ < 0 || (which_frac_ > 0 && nevents_frac_ == 1)) {
-        std::cerr << "bad which_frac\n";
+      if (num_chunks_ <= 0 || which_chunk_ < 0 || which_chunk_ >= num_chunks_) {
+        std::cerr << "required: num_chunks >= 1 and 0 <= which_chunk < num_chunks\n";
         return false;
       }
 
@@ -96,8 +91,8 @@ namespace jmt {
                 << " out_fn: " << out_fn_
                 << " tree_path: " << tree_path_
                 << " json: " << (json_ != "" ? json_ : "none")
-                << " nevents_frac: " << nevents_frac_
-                << " which_frac: " << which_frac_
+                << " num_chunks: " << num_chunks_
+                << " which_chunk: " << which_chunk_
                 << " weights: " << use_weights_
                 << " pu_weights: " << (pu_weights_ != "" ? pu_weights_ : "none")
                 << "\n";
@@ -120,16 +115,12 @@ namespace jmt {
         return false;
       }
 
-      const entry_t nentries = t_->GetEntries();
-      const entry_t per = nevents_frac_ < 1 ? nevents_frac_ * nentries : nentries;
-      entry_start_ = which_frac_ * per;
-      entry_end_ = std::min((which_frac_ + 1) * per, nentries);
-      if (entry_end_ <= entry_start_) {
-        std::cerr << "end " << entry_end_ << " <= start " << entry_start_ << "; bad nevents/which_frac\n";
-        return false;
-      }
-
+      nentries_ = t_->GetEntries();
+      entry_t per = num_chunks_ > 1 ? nentries_ / double(num_chunks_) : nentries_;
+      entry_start_ = which_chunk_ * per;
+      entry_end_ = which_chunk_ == num_chunks_ - 1 ? nentries_ : (which_chunk_+1)*per;
       entries_run_ = entry_end_ - entry_start_;
+      assert(entry_start_ < entry_end_);
 
       nt_->read_from_tree(t_);
 
@@ -146,8 +137,8 @@ namespace jmt {
 
       f_out_->mkdir(for_copy ? "mcStat" : "mfvWeight")->cd();
       auto h_sums = (TH1D*)f_->Get("mcStat/h_sums")->Clone("h_sums");
-      if (is_mc() && nevents_frac_ < 1) {
-        h_sums->SetBinContent(1, h_sums->GetBinContent(1) * nevents_frac_);
+      if (is_mc() && num_chunks_ > 1) {
+        h_sums->SetBinContent(1, h_sums->GetBinContent(1) * entries_run_ / nentries_);
         // invalidate other entries since we can't just assume equal weights in them
         for (int i = 2, ie = h_sums->GetNbinsX(); i <= ie; ++i) 
           h_sums->SetBinContent(i, -1e9);
@@ -180,7 +171,7 @@ namespace jmt {
       entry_t notskipped = 0, nnegweight = 0;
       entry_t print_per = entries_run_ / 20;
       if (print_per == 0) print_per = 1;
-      printf("tree has %llu entries; running on %llu-%llu\n", t_->GetEntries(), entry_start_, entry_end_-1);
+      printf("tree has %llu entries; running on %llu-%llu\n", nentries_, entry_start_, entry_end_-1);
       for (entry_t jj = entry_start_; jj < entry_end_; ++jj) {
         if (t_->LoadTree(jj) < 0) break;
         if (t_->GetEntry(jj) <= 0) continue;
@@ -203,8 +194,7 @@ namespace jmt {
         if (h_npu_) h_npu_->Fill(nt_->base().npu(), w);
       }
 
-      printf("\rdone with %llu events (%g-frac %i of %llu)\n", entries_run_, nevents_frac_, which_frac_, t_->GetEntries());
-      printf("%llu/%llu events with negative weights\n", nnegweight, notskipped);
+      printf("\r%llu events done, %llu not skipped, %llu with negative weights\n", entries_run_, notskipped, nnegweight);
     }
 
   private:
@@ -214,8 +204,8 @@ namespace jmt {
     std::string out_fn_;
     std::string tree_path_;
     std::string json_;
-    double nevents_frac_;
-    int which_frac_;
+    int num_chunks_;
+    int which_chunk_;
     bool use_weights_;
     std::string pu_weights_;
 
@@ -232,6 +222,7 @@ namespace jmt {
     bool is_mc_;
 
     typedef unsigned long long entry_t;
+    entry_t nentries_;
     entry_t entry_start_;
     entry_t entry_end_;
     entry_t entries_run_;
