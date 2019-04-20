@@ -54,6 +54,7 @@ namespace jmt {
         ("tree-path,t",   po::value<std::string>(&tree_path_)     ->default_value(tree_path),    "the tree path")
         ("json,j",        po::value<std::string>(&json_),                                        "lumi mask json file for data")
         ("nevents-frac,n",po::value<double>     (&nevents_frac_)  ->default_value(1.),           "only run on this fraction of events in the tree")
+        ("which-frac,w",  po::value<int>        (&which_frac_)    ->default_value(0),            "which fraction to run over")
         ("weights",       po::value<bool>       (&use_weights_)   ->default_value(true),         "whether to use any other weights, including those in the tree")
         ("pu-weights",    po::value<std::string>(&pu_weights_)    ->default_value(""),           "extra pileup weights beyond whatever's already in the tree")
         ;
@@ -80,12 +81,23 @@ namespace jmt {
         std::cerr << "tree_path changed to " << tree_path_ << "\n";
       }
 
+      if (nevents_frac_ <= 0 || nevents_frac_ > 1) {
+        std::cerr << "0 < nevents_frac <= 1 required\n";
+        return false;
+      }
+
+      if (which_frac_ < 0 || (which_frac_ > 0 && nevents_frac_ == 1)) {
+        std::cerr << "bad which_frac\n";
+        return false;
+      }
+
       std::cout << argv[0] << " with options:"
                 << " in_fn: " << in_fn_
                 << " out_fn: " << out_fn_
                 << " tree_path: " << tree_path_
                 << " json: " << (json_ != "" ? json_ : "none")
                 << " nevents_frac: " << nevents_frac_
+                << " which_frac: " << which_frac_
                 << " weights: " << use_weights_
                 << " pu_weights: " << (pu_weights_ != "" ? pu_weights_ : "none")
                 << "\n";
@@ -107,6 +119,17 @@ namespace jmt {
         std::cerr << "could not get tree " << tree_path_ << " from " << in_fn_ << "\n";
         return false;
       }
+
+      const entry_t nentries = t_->GetEntries();
+      const entry_t per = nevents_frac_ < 1 ? nevents_frac_ * nentries : nentries;
+      entry_start_ = which_frac_ * per;
+      entry_end_ = std::min((which_frac_ + 1) * per, nentries);
+      if (entry_end_ <= entry_start_) {
+        std::cerr << "end " << entry_end_ << " <= start " << entry_start_ << "; bad nevents/which_frac\n";
+        return false;
+      }
+
+      entries_run_ = entry_end_ - entry_start_;
 
       nt_->read_from_tree(t_);
 
@@ -154,17 +177,14 @@ namespace jmt {
 
     typedef std::pair<bool,double> fcn_ret_t;
     void loop(std::function<fcn_ret_t()> fcn) { 
-      unsigned long long notskipped = 0, nnegweight = 0, jj = 0;
-      const unsigned long long jje = t_->GetEntries();
-      const unsigned long long jjmax = nevents_frac_ < 1 ? nevents_frac_ * jje : jje;
-      for (; jj < jjmax; ++jj) {
+      entry_t notskipped = 0, nnegweight = 0;
+      entry_t print_per = entries_run_ / 20;
+      if (print_per == 0) print_per = 1;
+      printf("tree has %llu entries; running on %llu-%llu\n", t_->GetEntries(), entry_start_, entry_end_-1);
+      for (entry_t jj = entry_start_; jj < entry_end_; ++jj) {
         if (t_->LoadTree(jj) < 0) break;
         if (t_->GetEntry(jj) <= 0) continue;
-        if (jj % 25000 == 0) {
-          if (jjmax != jje) printf("\r%llu/%llu(/%llu)", jj, jjmax, jje);
-          else              printf("\r%llu/%llu",        jj, jjmax);
-          fflush(stdout);
-        }
+        if (jj % print_per == 0) { printf("\r%llu", jj); fflush(stdout); }
 
         if (!is_mc() && ll_ && !ll_->contains(nt_->base()))
           continue;
@@ -183,8 +203,7 @@ namespace jmt {
         if (h_npu_) h_npu_->Fill(nt_->base().npu(), w);
       }
 
-      if (jjmax != jje) printf("\rdone with %llu events (out of %llu)\n", jjmax, jje);
-      else              printf("\rdone with %llu events\n",               jjmax);
+      printf("\rdone with %llu events (%g-frac %i of %llu)\n", entries_run_, nevents_frac_, which_frac_, t_->GetEntries());
       printf("%llu/%llu events with negative weights\n", nnegweight, notskipped);
     }
 
@@ -196,6 +215,7 @@ namespace jmt {
     std::string tree_path_;
     std::string json_;
     double nevents_frac_;
+    int which_frac_;
     bool use_weights_;
     std::string pu_weights_;
 
@@ -210,6 +230,11 @@ namespace jmt {
     uptr<jmt::LumiList> ll_;
 
     bool is_mc_;
+
+    typedef unsigned long long entry_t;
+    entry_t entry_start_;
+    entry_t entry_end_;
+    entry_t entries_run_;
 
     TH1D* h_weight_;
     TH1D* h_npu_;
