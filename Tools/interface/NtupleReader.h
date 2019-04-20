@@ -214,6 +214,27 @@ namespace jmt {
     TH1D* h_weight_;
     TH1D* h_npu_;
   };
+
+  template <typename Ntuple> int copy(int argc, char** argv, const char* path) {
+    jmt::NtupleReader<Ntuple> nr;
+    char tpath[256];
+    snprintf(tpath, 256, "%s/t", path);
+    nr.init_options(path);
+    if (!nr.parse_options(argc, argv) || !nr.init(true)) return 1;
+
+    nr.f_out().mkdir(path)->cd();
+    TTree* t_out = new TTree("t", "");
+    nr.nt().write_to_tree(t_out);
+
+    auto fcn = [&]() {
+      nr.nt().copy_vectors();
+      t_out->Fill();
+      return std::make_pair(true, nr.weight());
+    };
+
+    nr.loop(fcn);
+    return 1;
+  }
 }
 
 #endif
