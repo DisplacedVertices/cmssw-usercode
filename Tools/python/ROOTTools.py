@@ -263,7 +263,8 @@ class HorGValues:
     def __init__(self, z):
         self.x, self.exl, self.exh, self.y, self.eyl, self.eyh = [], [], [], [], [], []
 
-        if z.Class().GetName().startswith('TH1'):
+        zclass = z.Class().GetName()
+        if zclass.startswith('TH1') or zclass == 'TProfile':
             self.n = z.GetNbinsX()
             xax = z.GetXaxis()
             for ibin in xrange(1, self.n+1):
@@ -276,7 +277,7 @@ class HorGValues:
                 self.eyl.append(ey)
                 self.eyh.append(ey)
 
-        elif z.Class().GetName().startswith('TGraph'):
+        elif zclass.startswith('TGraph'):
             self.n = z.GetN()
             for i in xrange(self.n):
                 x,y = ROOT.Double(), ROOT.Double()
@@ -289,7 +290,7 @@ class HorGValues:
                 self.eyh.append(z.GetErrorYhigh(i))
 
         else:
-            assert ValueError('only works with TH1- or TGraph-descended objects')
+            assert ValueError('only works with TProfile or TH1-, TGraph-descended objects')
 
         self.ey = [(l+h)/2 for l,h in zip(self.eyl, self.eyh)]
 
@@ -501,12 +502,14 @@ def compare_hists(ps, samples, **kwargs):
         if skip(name, hist_list, None):
             continue
 
+        profiled = False
         if is2d:
             pf = profile(name, hist_list, None)
             if pf:
                 if pf is True or pf == 1:
                     pf = 'x'
                 assert pf in 'xXyY'
+                profiled = True
                 hists = [(hist.ProfileY if pf in 'yY' else hist.ProfileX)('%s_%s_pfx' % (hist.GetName(), sample_name)) for hist, (sample_name,_,_) in zip(hists, samples)]
 
         for hist, (sample_name, dir, color) in zip(hists, samples):
@@ -549,12 +552,12 @@ def compare_hists(ps, samples, **kwargs):
                 ps.save(name_clean + '_' + hist.cah_sample_name, logz=is2d)
 
         hists_sorted = hists[:]
-        if not is2d:
+        if not is2d or profiled:
             hists_sorted.sort(key=lambda hist: hist.GetMaximum(), reverse=True)
 
         x_r = x_range(name, hist_list, None)
 
-        if len(hists) > 1 and ratio(name, hist_list, None) and not is2d:
+        if len(hists) > 1 and ratio(name, hist_list, None) and (not is2d or profiled):
             ratios_plot(name_clean,
                         hists,
                         plot_saver=ps,
@@ -570,7 +573,7 @@ def compare_hists(ps, samples, **kwargs):
                     hist.Draw(draw_cmd)
                 else:
                     hist.Draw((draw_cmd + ' sames').strip())
-                if not is2d and x_r:
+                if (not is2d or profiled) and x_r:
                     hist.GetXaxis().SetRangeUser(*x_r)
 
             ps.c.Update()
@@ -1792,8 +1795,8 @@ def ratios_plot(name,
             _hists.append(x)
             draw_cmds.append('')
     hists = _hists
-    
-    are_hists  = all(h.Class().GetName().startswith('TH1')    for h in hists)
+
+    are_hists  = all(h.Class().GetName().startswith('TH1') or h.Class().GetName().startswith('TProfile') for h in hists)
     are_graphs = all(h.Class().GetName().startswith('TGraph') for h in hists)
 
     # Sanity checks on the parameters.

@@ -2,12 +2,14 @@ import sys, os
 from JMTucker.Tools.ROOTTools import *
 set_style()
 
-in_fn = sys.argv[1]
-os.mkdir('bkgsub')
-out_fn = os.path.join('bkgsub', os.path.basename(in_fn))
-sample = out_fn.replace('.root', '')
+batch = sys.argv[1]
+in_fn = sys.argv[2]
+in_bn = os.path.basename(in_fn)
+os.system('mkdir %s' % batch)
+out_fn = os.path.join(batch, in_bn)
+sample = in_bn.replace('.root', '')
 
-ps = plot_saver(plot_dir('v0bkgsub_%s' % sample), size=(600,600))
+ps = plot_saver(plot_dir('v0bkgsub_%s/%s' % (batch, sample)), size=(600,600))
 
 # fit for s and b using sidebands
 
@@ -234,8 +236,9 @@ for hname, integ_factor, rebin, x_range, scan_dir in variables:
             b = hbkg_cumu.GetBinContent(ibin)
             be = hbkg_cumu.GetBinError(ibin)
             if b > 0:
+                p = s/(s+b)
                 z = s/(b + be**2)**0.5
-                print '%6.3f' % hsig.GetXaxis().GetBinLowEdge(ibin), 's = %10.1f' % s, 'b = %10.1f +- %6.1f' % (b,be), 'z = %4.1f' % z
+                print '%6.3f' % hsig.GetXaxis().GetBinLowEdge(ibin), 's = %10.1f' % s, 'b = %10.1f +- %6.1f' % (b,be), 'p = %.3f' % p, 'z = %4.1f' % z
 
     for h in hon, hbkg, hsig:
         h.Write()

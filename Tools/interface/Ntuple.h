@@ -39,6 +39,7 @@ namespace jmt {
     virtual void clear() = 0;
     virtual void write_to_tree(TTree*) = 0;
     virtual void read_from_tree(TTree*) = 0;
+    virtual void copy_vectors() = 0;
 
     const char* pfx_;
   };
@@ -51,6 +52,7 @@ namespace jmt {
     virtual void clear();
     virtual void write_to_tree(TTree*);
     virtual void read_from_tree(TTree*);
+    virtual void copy_vectors() {}
 
     void set_weight(float x) { weight_ = x; }
     float weight() const { return weight_; }
@@ -86,6 +88,7 @@ namespace jmt {
     virtual void clear();
     virtual void write_to_tree(TTree* tree);
     virtual void read_from_tree(TTree* tree);
+    virtual void copy_vectors() {}
 
     void set(float x, float y, float z, float sigmaz, float dxdz, float dydz, float width,
              float err_x, float err_y, float err_z, float err_sigmaz, float err_dxdz, float err_dydz, float err_width) {
@@ -148,6 +151,7 @@ namespace jmt {
     virtual void clear();
     virtual void write_to_tree(TTree* tree);
     virtual void read_from_tree(TTree* tree);
+    virtual void copy_vectors();
 
     void add(float x, float y, float z, float chi2, float ndof, int ntracks, float score,
              float cxx, float cxy, float cxz, float cyy, float cyz, float czz,
@@ -218,6 +222,7 @@ namespace jmt {
     virtual void clear();
     virtual void write_to_tree(TTree* tree);
     virtual void read_from_tree(TTree* tree);
+    virtual void copy_vectors();
 
     void add(int q, float pt, float eta, float phi, float vx, float vy, float vz,
              float cov_00, float cov_11, float cov_14, float cov_22, float cov_23, float cov_33, float cov_34, float cov_44,
@@ -396,6 +401,7 @@ namespace jmt {
     virtual void clear();
     virtual void write_to_tree(TTree*);
     virtual void read_from_tree(TTree*);
+    virtual void copy_vectors();
 
     void add(float pt, float eta, float phi, float energy, float uncorr, uchar ntracks, float bdisc, uchar genflavor, unsigned misc) {
       pt_.push_back(pt);
@@ -468,6 +474,13 @@ namespace jmt {
       tracks().read_from_tree(t);
     }
 
+    virtual void copy_vectors() {
+      base().copy_vectors();
+      bs().copy_vectors();
+      pvs().copy_vectors();
+      tracks().copy_vectors();
+    }
+
     BaseSubNtuple& base() { return base_; }
     BeamspotSubNtuple& bs() { return bs_; }
     PrimaryVerticesSubNtuple& pvs() { return pvs_; }
@@ -502,6 +515,11 @@ namespace jmt {
     virtual void read_from_tree(TTree* t) {
       TrackingNtuple::read_from_tree(t);
       jets().read_from_tree(t);
+    }
+
+    virtual void copy_vectors() {
+      TrackingNtuple::copy_vectors();
+      jets().copy_vectors();
     }
 
     JetsSubNtuple& jets() { return jets_; }

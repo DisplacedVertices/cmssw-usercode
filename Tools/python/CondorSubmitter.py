@@ -39,7 +39,7 @@ scram b -j 2 2>&1 > /dev/null
 mkdir $workdir/subworkdir
 cd $workdir/subworkdir
 
-cp $workdir/{cs.json,cs_filelist.py,cs_cmsrun_args,cs_primaryds,cs_samplename,cs_timestamp__INPUT_BNS__} .
+cp $workdir/{cs_njobs,cs.json,cs_filelist.py,cs_cmsrun_args,cs_primaryds,cs_samplename,cs_timestamp__INPUT_BNS__} .
 echo $job > cs_job
 
 echo meat start at $(date)
@@ -104,7 +104,7 @@ stream_error = false
 notification = never
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
-transfer_input_files = __TARBALL_FN__,cs_jobmap,cs_pset.py,cs_filelist.py,cs.json,cs_cmsrun_args,cs_primaryds,cs_samplename,cs_timestamp__INPUT_FNS__
+transfer_input_files = __TARBALL_FN__,cs_jobmap,cs_njobs,cs_pset.py,cs_filelist.py,cs.json,cs_cmsrun_args,cs_primaryds,cs_samplename,cs_timestamp__INPUT_FNS__
 x509userproxy = $ENV(X509_USER_PROXY)
 __EXTRAS__
 Queue __NJOBS__
@@ -275,19 +275,21 @@ def get(i): return _l[i]
 
         # JMTBAD if pset_modifier or cmsrun_args modifies the output filenames, we won't catch them
         #print 'CondorSubmitter init: importing pset_template fn %s to get output filenames' % pset_template_fn
-        module = imp.load_source('dummy', self.pset_template_fn)
-        module_output_files = find_output_files(module.process)
-        for l in module_output_files.itervalues():
-            for x in l:
-                if x not in skip_output_files:
-                    output_files.append(x)
+        module_output_files = {}
+        if self.pset_template_fn:
+            module = imp.load_source('dummy', self.pset_template_fn)
+            module_output_files = find_output_files(module.process)
+            for l in module_output_files.itervalues():
+                for x in l:
+                    if x not in skip_output_files:
+                        output_files.append(x)
 
         if type(stageout_files) == str:
             stageout_which = stageout_files
             if stageout_which == 'all':
                 stageout_files = output_files
             elif stageout_which == 'pool':
-                stageout_files = [x for x in module_output_files['PoolOutputModule'] if x not in skip_output_files]
+                stageout_files = [x for x in module_output_files.get('PoolOutputModule', []) if x not in skip_output_files]
             else:
                 raise ValueError("don't understand stageout_files = %s" % stageout_which)
         output_files = [x for x in output_files if x not in stageout_files]
@@ -352,7 +354,7 @@ def get(i): return _l[i]
         else:
             if sample.files_per < 0:
                 per = len(sample.filenames)
-                njobs = 1
+                njobs = sample.njobs if hasattr(sample, 'njobs') else 1
                 fn_groups = [sample.filenames]
             else:
                 per = sample.files_per
@@ -369,6 +371,7 @@ def get(i): return _l[i]
             ('cs_outputfiles',   self.output_files),
             ('cs_stageoutfiles', self.stageout_files),
             ('cs_filelist.py',   self.filelist_py_template.replace('__FILELIST__', encoded_filelist)),
+            ('cs_njobs',         str(njobs)),
             ('cs_jobmap',        '\n'.join(str(i) for i in xrange(njobs)) + '\n'), # will be more complicated for resubmits
             ('cs_primaryds',     sample.primary_dataset),
             ('cs_samplename',    sample.name),
@@ -387,7 +390,10 @@ def get(i): return _l[i]
             cmsrun_args = ' '.join(cmsrun_args)
         open(cmsrun_args_fn, 'wt').write(cmsrun_args)
 
-        pset = open(self.pset_template_fn).read()
+        pset = ''
+        if self.pset_template_fn:
+            pset = open(self.pset_template_fn).read()
+
         if self.pset_modifier is not None:
             ret = self.pset_modifier(sample)
             if type(ret) != tuple:
@@ -487,13 +493,35 @@ def get(i): return _l[i]
             self._submit(working_dir, njobs)
         else:
             print 'in testing mode, not submitting anything.'
-            diff_out, diff_ret = popen('diff -uN %s %s' % (self.pset_template_fn, pset_fn), return_exit_code=True)
-            if diff_ret != 0:
-                print '.py diff:\n---------'
-                print diff_out
-                raw_input('continue?')
-                print
+            if pset_fn:
+                diff_out, diff_ret = popen('diff -uN %s %s' % (self.pset_template_fn, pset_fn), return_exit_code=True)
+                if diff_ret != 0:
+                    print '.py diff:\n---------'
+                    print diff_out
+                    raw_input('continue?')
+                    print
 
     def submit_all(self, samples):
         for sample in samples:
             self.submit(sample)
+
+def NtupleReader_submit(batch_name, filepath, samples, exe_fn='hists.exe', output_fn='hists.root', njobs_default=10):
+    meat = '''
+job=$(<cs_job)
+njobs=$(<cs_njobs)
+fn=$(python -c 'from cs_filelist import get; print get(0)[0]')
+
+cmd="./__EXE__ -i $fn -n $njobs -w $job"
+#echo $cmd
+$cmd 2>&1
+meatexit=$?
+'''.replace('__EXE__', exe_fn)
+
+    for sample in samples:
+        if not hasattr(sample, 'njobs'):
+            sample.njobs = njobs_default
+        sample.files_per = -1
+        sample.filenames = [os.path.join(filepath, '%s.root' % sample.name)]
+
+    cs = CondorSubmitter(batch_name=batch_name, meat=meat, pset_template_fn='', input_files=[exe_fn], output_files=[output_fn])
+    cs.submit_all(samples)

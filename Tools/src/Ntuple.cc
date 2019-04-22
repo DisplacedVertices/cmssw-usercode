@@ -170,6 +170,23 @@ namespace jmt {
     t->SetBranchAddress(TString::Format("%s_misc", pfx()), &p_misc_);
   }
 
+  void VerticesSubNtuple::copy_vectors() {
+    x_ = *p_x_;
+    y_ = *p_y_;
+    z_ = *p_z_;
+    chi2_ = *p_chi2_;
+    ndof_ = *p_ndof_;
+    ntracks_ = *p_ntracks_;
+    score_ = *p_score_;
+    cxx_ = *p_cxx_;
+    cxy_ = *p_cxy_;
+    cxz_ = *p_cxz_;
+    cyy_ = *p_cyy_;
+    cyz_ = *p_cyz_;
+    czz_ = *p_czz_;
+    misc_ = *p_misc_;
+  }
+
   ////
 
   TracksSubNtuple::TracksSubNtuple() {
@@ -294,6 +311,32 @@ namespace jmt {
     t->SetBranchAddress(TString::Format("%s_misc", pfx()), &p_misc_);
   }
 
+  void TracksSubNtuple::copy_vectors() {
+    qpt_ = *p_qpt_;
+    eta_ = *p_eta_;
+    phi_ = *p_phi_;
+    vx_ = *p_vx_;
+    vy_ = *p_vy_;
+    vz_ = *p_vz_;
+    cov_00_ = *p_cov_00_;
+    cov_11_ = *p_cov_11_;
+    cov_14_ = *p_cov_14_;
+    cov_22_ = *p_cov_22_;
+    cov_23_ = *p_cov_23_;
+    cov_33_ = *p_cov_33_;
+    cov_34_ = *p_cov_34_;
+    cov_44_ = *p_cov_44_;
+    chi2dof_ = *p_chi2dof_;
+    hp_ = *p_hp_;
+    minhit_ = *p_minhit_;
+    maxhit_ = *p_maxhit_;
+    maxpxhit_ = *p_maxpxhit_;
+    which_jet_ = *p_which_jet_;
+    which_pv_ = *p_which_pv_;
+    which_sv_ = *p_which_sv_;
+    misc_ = *p_misc_;
+  }
+
   ////
 
   JetsSubNtuple::JetsSubNtuple() {
@@ -344,5 +387,17 @@ namespace jmt {
     t->SetBranchAddress(TString::Format("%s_bdisc", pfx()), &p_bdisc_);
     t->SetBranchAddress(TString::Format("%s_genflavor", pfx()), &p_genflavor_);
     t->SetBranchAddress(TString::Format("%s_misc", pfx()), &p_misc_);
+  }
+
+  void JetsSubNtuple::copy_vectors() {
+    pt_ = *p_pt_;
+    eta_ = *p_eta_;
+    phi_ = *p_phi_;
+    energy_ = *p_energy_;
+    uncorr_ = *p_uncorr_;
+    ntracks_ = *p_ntracks_;
+    bdisc_ = *p_bdisc_;
+    genflavor_ = *p_genflavor_;
+    misc_ = *p_misc_;
   }
 }

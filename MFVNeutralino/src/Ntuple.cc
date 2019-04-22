@@ -92,6 +92,24 @@ namespace mfv {
     t->SetBranchAddress("gen_lepton_phi", &p_lepton_phi_);
   }
 
+  void GenTruthSubNtuple::copy_vectors() {
+    id_ = *p_id_;
+    pt_ = *p_pt_;
+    eta_ = *p_eta_;
+    phi_ = *p_phi_;
+    mass_ = *p_mass_;
+    decay_x_ = *p_decay_x_;
+    decay_y_ = *p_decay_y_;
+    decay_z_ = *p_decay_z_;
+    bquark_pt_ = *p_bquark_pt_;
+    bquark_eta_ = *p_bquark_eta_;
+    bquark_phi_ = *p_bquark_phi_;
+    lepton_is_el_ = *p_lepton_is_el_;
+    lepton_qpt_ = *p_lepton_qpt_;
+    lepton_eta_ = *p_lepton_eta_;
+    lepton_phi_ = *p_lepton_phi_;
+  }
+
   ////
 
   VerticesSubNtuple::VerticesSubNtuple() {
@@ -177,6 +195,27 @@ namespace mfv {
     t->SetBranchAddress("v_phi", &p_phi_);
     t->SetBranchAddress("v_mass", &p_mass_);
     t->SetBranchAddress("v_tkonlymass", &p_tkonlymass_);
+  }
+
+  void VerticesSubNtuple::copy_vectors() {
+    x_ = *p_x_;
+    y_ = *p_y_;
+    z_ = *p_z_;
+    cxx_ = *p_cxx_;
+    cxy_ = *p_cxy_;
+    cxz_ = *p_cxz_;
+    cyy_ = *p_cyy_;
+    cyz_ = *p_cyz_;
+    czz_ = *p_czz_;
+    ntracks_ = *p_ntracks_;
+    bs2derr_ = *p_bs2derr_;
+    geo2ddist_ = *p_geo2ddist_;
+    genmatch_ = *p_genmatch_;
+    pt_ = *p_pt_;
+    eta_ = *p_eta_;
+    phi_ = *p_phi_;
+    mass_ = *p_mass_;
+    tkonlymass_ = *p_tkonlymass_;
   }
 
   ////

@@ -81,7 +81,7 @@ for wd in wds:
                 print '  %s:' % return_code(r), crabify_list(l)
             for e, l in ana.by_exception.iteritems():
                 print '  %s:' % e, crabify_list(l)
-                if e == 'FileOpenError':
+                if e in ('FileOpenError', 'FileReadError'):
                     for j in sorted(l):
                         print '    job %3i: %s' % (j, cs_last_input_file(wd, j))
 
