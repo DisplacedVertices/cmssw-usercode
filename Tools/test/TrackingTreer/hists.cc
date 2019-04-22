@@ -43,6 +43,8 @@ int main(int argc, char** argv) {
   TH1D* h_tracks_nsigmadsz[max_tk_type];
 
   TH1D* h_tracks_dxyerr[max_tk_type];
+  TH1D* h_tracks_dxydszcov[max_tk_type];
+  TH1D* h_tracks_absdxydszcov[max_tk_type];
   TH1D* h_tracks_dzerr[max_tk_type];
   TH1D* h_tracks_dszerr[max_tk_type];
   TH1D* h_tracks_lambdaerr[max_tk_type];
@@ -114,6 +116,8 @@ int main(int argc, char** argv) {
     h_tracks_nsigmadsz[i] = new TH1D(TString::Format("h_%s_tracks_nsigmadsz", ex[i]), TString::Format("%s tracks;tracks nsigmadsz;arb. units", ex[i]), 2000, -20, 20);
     
     h_tracks_dxyerr[i] = new TH1D(TString::Format("h_%s_tracks_dxyerr", ex[i]), TString::Format("%s tracks;tracks dxyerr;arb. units", ex[i]), 2000, 0, 0.2);
+    h_tracks_dxydszcov[i] = new TH1D(TString::Format("h_%s_tracks_dxydszcov", ex[i]), TString::Format("%s tracks;tracks dxy-dsz covariance;arb. units", ex[i]), 2000, -0.00002, 0.00002);
+    h_tracks_absdxydszcov[i] = new TH1D(TString::Format("h_%s_tracks_absdxydszcov", ex[i]), TString::Format("%s tracks;tracks dxy-dsz covariance;arb. units", ex[i]), 2000, 0, 0.00002);
     h_tracks_dzerr[i] = new TH1D(TString::Format("h_%s_tracks_dzerr", ex[i]), TString::Format("%s tracks;tracks dzerr;arb. units", ex[i]), 2000, 0, 0.2);
     h_tracks_dszerr[i] = new TH1D(TString::Format("h_%s_tracks_dszerr", ex[i]), TString::Format("%s tracks;tracks dszerr;arb. units", ex[i]), 2000, 0, 0.2);
     h_tracks_lambdaerr[i] = new TH1D(TString::Format("h_%s_tracks_lambdaerr", ex[i]), TString::Format("%s tracks;tracks lambdaerr;arb. units", ex[i]), 2000, 0, 0.2);
@@ -230,6 +234,8 @@ int main(int argc, char** argv) {
 	h_tracks_nsigmadsz[i]->Fill(ntt.dsz(itk) / ntt.err_dsz(itk), w);
 
 	h_tracks_dxyerr[i]->Fill(ntt.err_dxy(itk), w);
+	h_tracks_dxydszcov[i]->Fill(ntt.cov_34(itk), w);
+	h_tracks_absdxydszcov[i]->Fill(fabs(ntt.cov_34(itk)), w);
 	h_tracks_dzerr[i]->Fill(ntt.err_dz(itk), w);
 	h_tracks_dszerr[i]->Fill(ntt.err_dsz(itk), w);
 	h_tracks_lambdaerr[i]->Fill(ntt.err_lambda(itk), w);
