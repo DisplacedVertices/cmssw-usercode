@@ -53,7 +53,7 @@ assert jdl[-1].startswith('Queue ')
 jdl[-1] = 'Queue %i\n' % len(jobs)
 rd_f('cs_submit.jdl').write(''.join(jdl))
 
-for bn in ('cs.json', 'cs_filelist.py', 'cs_cmsrun_args', 'cs_primaryds', 'cs_samplename', 'cs_pset.py'):
+for bn in ('cs.json', 'cs_filelist.py', 'cs_cmsrun_args', 'cs_primaryds', 'cs_samplename', 'cs_pset.py', 'cs_njobs'):
     os.symlink(join(wd, bn), join(rd, bn))
 
 rd_f('cs_timestamp').write(cs_timestamp())
