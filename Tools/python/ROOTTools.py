@@ -1529,6 +1529,8 @@ def plot_dir(x='', make=False, temp=False):
         d = '/publicweb/d/dquach/plots'
     elif 'fnal.gov' in hostname and username == 'shogan':
 	d = '/publicweb/s/shogan/images'
+    elif 'fnal.gov' in hostname and username == 'joeyr':
+        d = '/publicweb/j/joeyr/plots'
     if d:
         x = os.path.join(d,x)
     else:
