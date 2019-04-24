@@ -23,7 +23,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     for sample in samples:
         sample.datasets[dataset].split_by = 'files'
-        sample.datasets[dataset].files_per = -1
+        sample.datasets[dataset].files_per = -1000000
 
     from JMTucker.Tools.CondorSubmitter import CondorSubmitter
     cs = CondorSubmitter(batch_name,

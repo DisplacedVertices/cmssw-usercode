@@ -352,14 +352,11 @@ def get(i): return _l[i]
             njobs = int_ceil(sample.nevents_orig, per)
             fn_groups = [sample.filenames]
         else:
-            if sample.files_per < 0:
-                per = len(sample.filenames)
-                njobs = sample.njobs if hasattr(sample, 'njobs') else 1
-                fn_groups = [sample.filenames]
-            else:
-                per = sample.files_per
-                njobs = sample.njobs if hasattr(sample, 'njobs') else int_ceil(len(sample.filenames), per)
-                fn_groups = [x for x in (sample.filenames[i*per:(i+1)*per] for i in xrange(njobs)) if x]
+            use_njobs = sample.files_per < 0
+            per = abs(sample.files_per)
+            njobs = getattr(sample, 'njobs', int_ceil(len(sample.filenames), per))
+            fn_groups = [x for x in (sample.filenames[i*per:(i+1)*per] for i in xrange(njobs)) if x]
+            if not use_njobs:
                 njobs = len(fn_groups) # let it fail downward
         if self._njobs is not None:
             assert self._njobs <= njobs
@@ -505,23 +502,31 @@ def get(i): return _l[i]
         for sample in samples:
             self.submit(sample)
 
-def NtupleReader_submit(batch_name, filepath, samples, exe_fn='hists.exe', output_fn='hists.root', njobs_default=10):
+def NtupleReader_submit(batch_name, dataset, samples, exe_fn='hists.exe', output_fn='hists.root', split_default=10):
     meat = '''
 job=$(<cs_job)
 njobs=$(<cs_njobs)
-fn=$(python -c 'from cs_filelist import get; print get(0)[0]')
+nfns=$(python -c 'from cs_filelist import _l; print len(_l)')
+split=$((njobs/nfns))
+fnum=$((job/split))
+fn=$(python -c 'from cs_filelist import get; print get('$fnum')[0]')
 
-cmd="./__EXE__ -i $fn -n $njobs -w $job"
-#echo $cmd
-$cmd 2>&1
-meatexit=$?
-'''.replace('__EXE__', exe_fn)
+cmd="./__EXE_FN__ -i $fn -o __OUTPUT_FN__ -n $split -w $((job%split))"
+if false; then
+  echo $cmd
+  meatexit=0
+  touch __OUTPUT_FN__
+else
+  $cmd 2>&1
+  meatexit=$?
+fi
+'''.replace('__EXE_FN__', exe_fn).replace('__OUTPUT_FN__', output_fn)
 
     for sample in samples:
-        if not hasattr(sample, 'njobs'):
-            sample.njobs = njobs_default
+        sample.set_curr_dataset(dataset)
         sample.files_per = -1
-        sample.filenames = [os.path.join(filepath, '%s.root' % sample.name)]
+        sample.njobs = len(sample.filenames) * getattr(sample, 'nr_split', split_default)
+        sample.filenames = ['root://cmseos.fnal.gov/' + x for x in sample.filenames]
 
-    cs = CondorSubmitter(batch_name=batch_name, meat=meat, pset_template_fn='', input_files=[exe_fn], output_files=[output_fn])
+    cs = CondorSubmitter(batch_name=batch_name, dataset=dataset, meat=meat, pset_template_fn='', input_files=[exe_fn], output_files=[output_fn])
     cs.submit_all(samples)
