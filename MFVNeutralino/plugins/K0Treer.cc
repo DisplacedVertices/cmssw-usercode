@@ -107,7 +107,8 @@ void MFVK0Treer::analyze(const edm::Event& event, const edm::EventSetup& setup) 
           printf("  %4u: %s <%12.6f %12.6f %12.6f %12.6f %12.6f>\n", tk.key(), tk->charge() > 0 ? "+" : "-", tk->pt(), tk->eta(), tk->phi(), tk->dxy(), tk->dz());
       }
 
-      TransientVertex tv = kv_reco->vertex({tt_builder->build(tki), tt_builder->build(tkj)});
+      TransientVertex tv;
+      try { tv = kv_reco->vertex({tt_builder->build(tki), tt_builder->build(tkj)}); } catch (...) {}
       const bool vok = tv.isValid() && tv.normalisedChiSquared() < 7;
       if (debug) printf("vertex valid? %i chi2/ndf %f ok? %i\n", tv.isValid(), (tv.isValid() ? tv.normalisedChiSquared() : -1), vok);
       if (!vok)

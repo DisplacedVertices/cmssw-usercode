@@ -5,7 +5,7 @@ settings.is_mc = True
 settings.is_miniaod = True
 settings.event_filter = 'jets only novtx'
 
-version = settings.version + 'v4'
+version = settings.version + 'v5'
 
 debug = False
 
