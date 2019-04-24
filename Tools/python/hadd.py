@@ -39,7 +39,8 @@ def hadd(output_fn, input_fns):
     """
     
     l = len(input_fns)
-    print 'hadding %i files to %s at %s' % (l, output_fn, datetime.now())
+    start = datetime.now()
+    print 'hadding %i files to %s at %s' % (l, output_fn, start)
     args = ['hadd', output_fn] + input_fns
 
     p = subprocess.Popen(args=args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
@@ -65,7 +66,7 @@ def hadd(output_fn, input_fns):
         return False
 
     max_file_num = max(int(line.split(':')[0].split(' ')[-1]) for line in stdout.split('\n') if 'Source file' in line)
-    print '-> %i files merged' % max_file_num
+    print '-> %i files merged in %s' % (max_file_num, datetime.now() - start)
     if max_file_num != l:
         print colors.boldred('PROBLEM hadding %s' % output_fn)
         return False
