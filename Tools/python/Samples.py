@@ -356,6 +356,10 @@ for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + mfv_signal_
     if not x.is_signal:
         x.add_dataset("ntuplev23m_ntkseeds")
 
+for x in data_samples_2017 + qcd_samples_2017 + data_samples_2018 + qcd_samples_2018:
+    x.add_dataset("nr_trackingtreerv23mv3")
+    x.add_dataset("nr_k0ntuplev23mv4")
+
 ########
 # automatic condor declarations for ntuples
 ########
