@@ -142,7 +142,7 @@ for wd in wds:
         else:
             raise ValueError(msg)
 
-    if ds.endswith('/None') and nevents == 0:
+    if not ds or (ds.endswith('/None') and nevents == 0):
         samples_lump.append(sample)
     else:
         samples.append((sample, ds, nevents))
