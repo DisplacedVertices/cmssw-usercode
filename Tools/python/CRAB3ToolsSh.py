@@ -99,11 +99,16 @@ def crab_hadd_files(working_dir, lpc_shortcut=False, **kwargs):
         else:
             files = [x.strip() for x in res.split('\n') if x.strip() and '.root' in x]
 
+    rf = kwargs.get('range_filter')
+    if rf:
+        a,b,c = rf
+        files = files[a:b:c]
+
     return expected, files
 
-def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None, lpc_shortcut=False):
+def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None, lpc_shortcut=False, range_filter=None):
     working_dir, new_name, new_dir = crab_hadd_args(working_dir, new_name, new_dir)
-    expected, files = crab_hadd_files(working_dir, lpc_shortcut)
+    expected, files = crab_hadd_files(working_dir, lpc_shortcut, range_filter=range_filter)
     print '%s: expecting %i files if all jobs succeeded' % (working_dir, expected)
 
     if pattern:

@@ -237,11 +237,15 @@ def cs_hadd_files(working_dir, **kwargs):
     files = cs_published(working_dir)
     if not files:
         files = cs_rootfiles(working_dir)
+    rf = kwargs.get('range_filter')
+    if rf:
+        a,b,c = rf
+        files = files[a:b:c]
     return expected, files
 
-def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None):
+def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None, range_filter=None):
     working_dir, new_name, new_dir = cs_hadd_args(working_dir, new_name, new_dir)
-    expected, files = cs_hadd_files(working_dir)
+    expected, files = cs_hadd_files(working_dir, range_filter=range_filter)
     print '%s: expecting %i files if all jobs succeeded' % (working_dir, expected)
 
     if pattern:
