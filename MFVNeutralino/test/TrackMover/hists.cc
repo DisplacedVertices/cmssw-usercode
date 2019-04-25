@@ -65,7 +65,7 @@ int main(int argc, char** argv) {
     numdens("all")
   };
 
-  enum { k_movedist2, k_movedist3, k_movevectoreta, k_npv, k_pvx, k_pvy, k_pvz, k_pvrho, k_pvntracks, k_pvscore, k_ht, k_nalltracks, k_nmovedtracks, k_nseedtracks, k_npreseljets, k_npreselbjets, k_jeti01, k_jetp01, k_jetpt01, k_jeteta01, k_jetphi01, k_jetsume, k_jetdrmax, k_jetdravg, k_jetmovea3d01, k_jetmovea3d_v_jetp, k_jetmovea3d0_v_movevectoreta, k_jetmovea3d1_v_movevectoreta, k_jeta3dmax, k_jetsumntracks, k_jetntracks01, k_jetntracks_v_jetp, k_jetnseedtracks01, k_nvtx };
+  enum { k_movedist2, k_movedist3, k_movevectoreta, k_npv, k_pvx, k_pvy, k_pvz, k_pvrho, k_pvntracks, k_pvscore, k_ht, k_jet_asymm, k_nalltracks, k_nmovedtracks, k_nseedtracks, k_npreseljets, k_npreselbjets, k_jeti01, k_jetp01, k_jetpt01, k_jeteta01, k_jetphi01, k_jetsume, k_jetdrmax, k_jetdravg, k_jetmovea3d01, k_jetmovea3d_v_jetp, k_jetmovea3d0_v_movevectoreta, k_jetmovea3d1_v_movevectoreta, k_jeta3dmax, k_jetsumntracks, k_jetntracks01, k_jetntracks_v_jetp, k_jetnseedtracks01, k_nvtx };
 
   for (numdens& nd : nds) {
     nd.book(k_movedist2, "movedist2", ";movement 2-dist;events/0.01 cm", 200, 0, 2);
@@ -79,6 +79,7 @@ int main(int argc, char** argv) {
     nd.book(k_pvntracks, "pvntracks", ";PV # tracks;events/2", 200, 0, 400);
     nd.book(k_pvscore, "pvscore", ";PV #Sigma p_{T}^{2} (GeV^{2});events/200 GeV^{2}", 200, 0, 40000);
     nd.book(k_ht, "ht", ";H_{T} (GeV);events/50 GeV", 50, 0, 2500);
+    nd.book(k_jet_asymm, "jet_asymm", ";Jet asymmetry A_{J}; arb. units", 25, 0, 1);
     nd.book(k_nalltracks, "nalltracks", ";# all tracks;events/10", 200, 0, 2000);
     nd.book(k_nmovedtracks, "nmovedtracks", ";# moved tracks;events/2", 120, 0, 120);
     nd.book(k_nseedtracks, "nseedtracks", ";# selected tracks;events", 80, 0, 80);
@@ -413,16 +414,14 @@ int main(int argc, char** argv) {
           jet_i_1 = j;
           jet_pt_0 = std::max(nt.jets().pt(i), nt.jets().pt(j));
           jet_pt_1 = std::min(nt.jets().pt(i), nt.jets().pt(j));
-          //jet_ntracks_0 = std::max(nt.jets().ntracks(i), nt.jets().ntracks(j));
-          //jet_ntracks_1 = std::min(nt.jets().ntracks(i), nt.jets().ntracks(j));
           jet_nseedtracks_0 = std::max(i_nseedtracks, j_nseedtracks);
           jet_nseedtracks_1 = std::min(i_nseedtracks, j_nseedtracks);
           jet_p_0 = i_p4.P();
           jet_p_1 = j_p4.P();
           jet_ntracks_0 = nt.jets().ntracks(i);
           jet_ntracks_1 = nt.jets().ntracks(j);
-	  jet_move_a3d_0 = move_vector.Angle(i_p4.Vect());
-	  jet_move_a3d_1 = move_vector.Angle(j_p4.Vect());
+	      jet_move_a3d_0 = move_vector.Angle(i_p4.Vect());
+	      jet_move_a3d_1 = move_vector.Angle(j_p4.Vect());
           jet_eta_0 = i_p4.Eta();
           jet_eta_1 = j_p4.Eta();
           jet_phi_0 = i_p4.Phi();
@@ -497,6 +496,7 @@ int main(int argc, char** argv) {
       F1(nd(k_pvntracks)        .den, nt.pvs().ntracks(0));
       F1(nd(k_pvscore)          .den, nt.pvs().score(0));
       F1(nd(k_ht)               .den, nt.jets().ht());
+      F1(nd(k_jet_asymm)        .den, (jet_pt_0 - jet_pt_1)/(jet_pt_0 + jet_pt_1));
       F1(nd(k_nalltracks)       .den, nt.tm().nalltracks());
       F1(nd(k_nmovedtracks)     .den, nt.tm().nmovedtracks());
       F1(nd(k_nseedtracks)      .den, nseedtracks);
@@ -615,6 +615,7 @@ int main(int argc, char** argv) {
       F1(nd(k_pvntracks)        .num, nt.pvs().ntracks(0));
       F1(nd(k_pvscore)          .num, nt.pvs().score(0));
       F1(nd(k_ht)               .num, nt.jets().ht());
+      F1(nd(k_jet_asymm)        .num, (jet_pt_0 - jet_pt_1)/(jet_pt_0 + jet_pt_1));
       F1(nd(k_nalltracks)       .num, nt.tm().nalltracks());
       F1(nd(k_nmovedtracks)     .num, nt.tm().nmovedtracks());
       F1(nd(k_nseedtracks)      .num, nseedtracks);
