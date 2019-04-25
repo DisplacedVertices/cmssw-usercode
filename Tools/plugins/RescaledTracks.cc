@@ -43,8 +43,9 @@ private:
         rbreaks_(max_which)
     {
       assert(intlumis_.size() == max_which);
-      const double sum = std::accumulate(intlumis_.begin(), intlumis_.end(), 0.);
-      std::transform(intlumis_.begin(), intlumis_.end(), rbreaks_.begin(), [&sum](double x) { return x / sum; });
+      std::partial_sum(intlumis_.begin(), intlumis_.end(), rbreaks_.begin());
+      const double sum = rbreaks_.back();
+      std::transform(rbreaks_.begin(), rbreaks_.end(), rbreaks_.begin(), [&sum](double x) { return x / sum; });
     }
 
     bool pick() const { return pick_; }
