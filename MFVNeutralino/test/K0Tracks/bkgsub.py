@@ -16,6 +16,8 @@ ps = plot_saver(plot_dir('v0bkgsub_%s/%s' % (batch, sample)), size=(600,600))
 in_f = ROOT.TFile(in_fn)
 in_f.Get('massall/h_nvtx').Draw()
 ps.save('nvtx')
+in_f.Get('massall/h_premass').Draw()
+ps.save('prefit_mass')
 
 h = in_f.Get('massall/h_mass')
 
@@ -108,41 +110,41 @@ del insert
 
 # scan mass window for best yield, purity, and significance z = s/sqrt(b + sigb^2)
 # -- but mass window is now fixed in histos to 490-505 MeV, so if you want to change it you have to do it there and rerun hists
+class do(object):
+    xax = h.GetXaxis()
+    ibinc = xax.FindBin(0.4976)
+    def __init__(self,lo,hi,prnt=False):
+        ibinlo = self.ibinc - lo
+        ibinhi = self.ibinc + hi
+        xlo = self.xax.GetBinLowEdge(ibinlo)
+        xhi = self.xax.GetBinLowEdge(ibinhi+1)
+        ne, be = ROOT.Double(), ROOT.Double()
+        n = h.IntegralAndError(ibinlo, ibinhi, ne)
+        b = hbkg.IntegralAndError(ibinlo, ibinhi, be)
+        s = n - b
+        se = (ne**2 + be**2)**0.5
+        z = s / (b + be**2)**0.5
+        p = s/n
+        if prnt:
+            print '%.3f-%.3f: %10.1f +- %5.1f  %10.1f +- %5.1f  %10.1f +- %5.1f : %5.2f : %5.1f' % (xlo, xhi, n, ne, b, be, s, se, p, z)
+        for X in 'xlo xhi n ne b be s se p z'.split():
+            setattr(self, X, eval(X))
 
-xax = h.GetXaxis()
-ibinc = xax.FindBin(0.4976)
 max_s, max_p, max_z = 0, 0, 0
-def do(lo,hi,prnt=False):
-    ibinlo = ibinc - lo
-    ibinhi = ibinc + hi
-    xlo = xax.GetBinLowEdge(ibinlo)
-    xhi = xax.GetBinLowEdge(ibinhi+1)
-    ne, be = ROOT.Double(), ROOT.Double()
-    n = h.IntegralAndError(ibinlo, ibinhi, ne)
-    b = hbkg.IntegralAndError(ibinlo, ibinhi, be)
-    s = n - b
-    se = (ne**2 + be**2)**0.5
-    z = s / (b + be**2)**0.5
-    p = s/n
-    if prnt:
-        print '%.3f-%.3f: %10.1f +- %5.1f  %10.1f +- %5.1f  %10.1f +- %5.1f : %5.2f : %5.1f' % (xlo, xhi, n, ne, b, be, s, se, p, z)
-    return xlo,xhi,n,ne,b,be,s,se,p,z
-
 for lo in xrange(50):
     for hi in xrange(50):
-        xlo,xhi,n,ne,b,be,s,se,p,z = do(lo,hi)
-        if (s > max_s or p > max_p or z > max_z) and p >= 0.85:
+        d = do(lo,hi)
+        if (d.s > max_s or d.p > max_p or d.z > max_z) and d.p >= 0.85:
             do(lo,hi,True)
-        if s > max_s:
-            max_s = s
-        if p > max_p:
-            max_p = p
-        if z > max_z:
-            max_z = z
+        if d.s > max_s:
+            max_s = d.s
+        if d.p > max_p:
+            max_p = d.p
+        if d.z > max_z:
+            max_z = d.z
 print
-xlo,xhi,n,ne,b,be,s,se,p,z = do(1,1, True) # print the one we're using
-the_b = b
-assert abs(xlo-0.490) < 1e-5 and abs(xhi-0.505) < 1e-5 # check that we're in sync with histos
+the_d = do(1,1, True) # print the one we're using
+assert abs(the_d.xlo-0.490) < 1e-5 and abs(the_d.xhi-0.505) < 1e-5 # check that we're in sync with histos
 
 out_f = ROOT.TFile(out_fn, 'recreate')
 
@@ -160,12 +162,18 @@ def integ(h):
 
 scans = True
 variables = [
-    ('h_rho', 1, 1, (0,2), 0),
-    ('h_pt', 1, 1, None, 0),
+    ('h_chi2dof', 1, 1, None, -1),
+    ('h_rho', 1, 1, None, 1),
+    ('h_ct', 1, 1, None, 1),
+    ('h_ctau', 1, 1, None, 1),
+    ('h_p', 1, 1, None, -1),
+    ('h_pt', 1, 1, None, -1),
     ('h_eta', 1, 1, None, 0),
     ('h_phi', 1, 1, None, 0),
-    ('h_costh3', 1, 1, None, 0),
-    ('h_costh2', 1, 1, None, 0),
+    ('h_deltazpv', 1, 1, None, -1),
+    ('h_costh3', 1, 1, None, 1),
+    ('h_costh2', 1, 1, None, 1),
+    ('h_trackdeltaz', 1, 1, None, -1),
     ('h_tracks_pt', 2, 1, None, 0),
     ('h_tracks_eta', 2, 1, None, 0),
     ('h_tracks_phi', 2, 1, None, 0),
@@ -195,10 +203,10 @@ for hname, integ_factor, rebin, x_range, scan_dir in variables:
     hbkg.Add(hbkghi)
     hsig = hon.Clone('hsig')
 
-    if abs(integ(hon) - integ_factor * n) > 1e-5:
-        raise ValueError('hint %s n %s' % (hint, n))
+    if abs(integ(hon) - integ_factor * the_d.n) > 1e-5:
+        raise ValueError('hint %s n %s' % (hint, the_d.n))
 
-    hbkg.Scale(the_b / integ(hbkg))
+    hbkg.Scale(the_d.b / integ(hbkg))
     hsig.Add(hbkg, -1)
  
     for h,c in zip((hon, hbkg, hsig), (1, 4, 2)):
@@ -235,10 +243,10 @@ for hname, integ_factor, rebin, x_range, scan_dir in variables:
             s = hsig_cumu.GetBinContent(ibin)
             b = hbkg_cumu.GetBinContent(ibin)
             be = hbkg_cumu.GetBinError(ibin)
-            if b > 0:
+            if b > 0 and s+b > 0:
                 p = s/(s+b)
                 z = s/(b + be**2)**0.5
-                print '%6.3f' % hsig.GetXaxis().GetBinLowEdge(ibin), 's = %10.1f' % s, 'b = %10.1f +- %6.1f' % (b,be), 'p = %.3f' % p, 'z = %4.1f' % z
+                print '%7.5f' % hsig.GetXaxis().GetBinLowEdge(ibin), 's = %10.1f (%.3f)' % (s, s/the_d.s), 'b = %10.1f +- %6.1f (%.3f)' % (b,be,b/the_d.b), 'p = %.3f' % p, 'z = %4.1f' % z
 
     for h in hon, hbkg, hsig:
         h.Write()

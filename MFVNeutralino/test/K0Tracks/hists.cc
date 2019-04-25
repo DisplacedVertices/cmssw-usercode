@@ -15,13 +15,17 @@ int main(int argc, char** argv) {
   const char* mass_names[max_mass_type] = {"massall", "masslo", "masshi", "masson"};
 
   TH1D* h_nvtx[max_mass_type];
+  TH1D* h_chi2dof[max_mass_type];
   TH1D* h_premass[max_mass_type];
   TH1D* h_mass[max_mass_type];
+  TH1D* h_p[max_mass_type];
   TH1D* h_pt[max_mass_type];
   TH1D* h_eta[max_mass_type];
   TH1D* h_phi[max_mass_type];
+  TH1D* h_deltazpv[max_mass_type];
   TH1D* h_costh3[max_mass_type];
   TH1D* h_costh2[max_mass_type];
+  TH1D* h_trackdeltaz[max_mass_type];
   TH1D* h_ct[max_mass_type];
   TH1D* h_ctau[max_mass_type];
   TH1D* h_rho[max_mass_type];
@@ -54,16 +58,20 @@ int main(int argc, char** argv) {
     d->cd();
 
     h_nvtx[i] = new TH1D("h_nvtx", ";# of K0 candidates;events", 30, 0, 30);
+    h_chi2dof[i] = new TH1D("h_chi2dof", ";K0 candidate #chi^{2}/dof;cands/0.1", 70, 0, 7);
     h_premass[i] = new TH1D("h_premass", ";K0 candidate pre-fit mass (GeV);cands/5 MeV", 400, 0, 2);
     h_mass[i] = new TH1D("h_mass", ";K0 candidate mass (GeV);cands/5 MeV", 400, 0, 2);
-    h_pt[i] = new TH1D("h_pt", ";K0 candidate p_{T} (GeV);cands/5 GeV", 100, 0, 500);
+    h_p[i] = new TH1D("h_p", ";K0 candidate p (GeV);cands/1 GeV", 200, 0, 200);
+    h_pt[i] = new TH1D("h_pt", ";K0 candidate p_{T} (GeV);cands/1 GeV", 200, 0, 200);
     h_eta[i] = new TH1D("h_eta", ";K0 candidate #eta;cands/0.05", 100, -2.5, 2.5);
     h_phi[i] = new TH1D("h_phi", ";K0 candidate #phi;cands/0.063", 100, -M_PI, M_PI);
-    h_costh3[i] = new TH1D("h_costh3", ";K0 candidate cos(angle3{flight,momentum});cands/0.001", 101, 0.9, 1.001);
-    h_costh2[i] = new TH1D("h_costh2", ";K0 candidate cos(angle2{flight,momentum});cands/0.001", 101, 0.9, 1.001);
-    h_ct[i] = new TH1D("h_ct", ";K0 candidate ct (cm);cands/0.01", 100, 0, 10);
-    h_ctau[i] = new TH1D("h_ctau", ";K0 candidate c#tau (cm);cands/0.01", 100, 0, 10);
-    h_rho[i] = new TH1D("h_rho", ";K0 candidate #rho (cm);cands/0.01", 100, 0, 10);
+    h_deltazpv[i] = new TH1D("h_deltazpv", ";K0 candidate |#Delta z to PV| (cm);cands/0.1 cm", 200, 0, 20);
+    h_costh3[i] = new TH1D("h_costh3", ";K0 candidate cos(angle3{flight,momentum});cands/0.00025", 202, 0.95, 1.001);
+    h_costh2[i] = new TH1D("h_costh2", ";K0 candidate cos(angle2{flight,momentum});cands/0.00025", 202, 0.95, 1.001);
+    h_trackdeltaz[i] = new TH1D("h_trackdeltaz", ";K0 candidate |#Delta track z| (cm);cands/0.03 cm", 100, 0, 3);
+    h_ct[i] = new TH1D("h_ct", ";K0 candidate ct (cm);cands/0.005 cm", 400, 0, 2);
+    h_ctau[i] = new TH1D("h_ctau", ";K0 candidate c#tau (cm);cands/0.005 cm", 400, 0, 2);
+    h_rho[i] = new TH1D("h_rho", ";K0 candidate #rho (cm);cands/0.005 cm", 400, 0, 2);
     h_tracks_pt[i] = new TH1D("h_tracks_pt", ";tracks pt;arb. units", 200, 0, 200);
     h_tracks_eta[i] = new TH1D("h_tracks_eta", ";tracks eta;arb. units", 50, -4, 4);
     h_tracks_phi[i] = new TH1D("h_tracks_phi", ";tracks phi;arb. units", 32, -3.15, 3.15);
@@ -92,7 +100,7 @@ int main(int argc, char** argv) {
   nr.f_out().cd();
 
   const double mpion = 0.13957;
-  const double min_nsigmadxybs = 1.5;
+  const double min_nsigmadxybs = 0.;
 
   auto fcn = [&]() {
     const double w = nr.weight();
@@ -108,12 +116,14 @@ int main(int argc, char** argv) {
       const TVector3 flight = pos - pv;
       const TVector3 flight2(flight.X(), flight.Y(), 0);
       const double rho = flight.Perp();
+      const double deltazpv = flight.Z();
 
-      if (rho > 2. || rho < 0.2)
+      if (rho > 2. || rho < 0.268)
         continue;
 
       const int itk = nt.svs().misc(isv) & 0xFFFF;
       const int jtk = nt.svs().misc(isv) >> 16;
+      const double trackdeltaz = fabs(ntt.vz(itk) - ntt.vz(jtk));
 
       if (!ntt.pass_seed(itk, nt.bs(), min_nsigmadxybs) ||
           !ntt.pass_seed(jtk, nt.bs(), min_nsigmadxybs))
@@ -135,11 +145,11 @@ int main(int argc, char** argv) {
       const double costh3 = p4.Vect().Unit().Dot(flight.Unit());
       const double costh2 = pperp.Unit().Dot(flight2.Unit());
 
-      if (costh2 < 0.999)
-        continue;
-
       const double ct = flight.Mag();
       const double ctau = ct / p4.Beta() / p4.Gamma();
+
+      if (costh2 < 0.99975) continue;
+      if (ctau < 0.0268) continue;
 
       int imass2 = mass_on;
       if      (mass < 0.490) imass2 = mass_lo;
@@ -148,13 +158,17 @@ int main(int argc, char** argv) {
       for (int ii : {0,1}) {
         const int imass = ii == 0 ? mass_all : imass2;
 
+        fill(h_chi2dof[imass], nt.svs().chi2dof(isv));
         fill(h_premass[imass], prep4.M());
         fill(h_mass[imass], mass);
+        fill(h_p[imass], p4.P());
         fill(h_pt[imass], p4.Pt());
         fill(h_eta[imass], p4.Eta());
         fill(h_phi[imass], p4.Phi());
+        fill(h_deltazpv[imass], deltazpv);
         fill(h_costh3[imass], costh3);
         fill(h_costh2[imass], costh2);
+        fill(h_trackdeltaz[imass], trackdeltaz);
         fill(h_ct[imass], ct);
         fill(h_ctau[imass], ctau);
         fill(h_rho[imass], rho);
