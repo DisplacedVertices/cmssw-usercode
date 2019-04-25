@@ -494,6 +494,10 @@ def compare_hists(ps, samples, **kwargs):
 
         hists = [dir.Get(name) for _,dir,_ in samples]
 
+        is3d = all_same([issubclass(type(hist), ROOT.TH3) for hist in hists], "for name %s, some samples' histograms are TH3, and some are not" % name)
+        if is3d:
+            print 'skipping TH3 %s' % name # JMTBAD projections?
+            continue
         is2d = all_same([issubclass(type(hist), ROOT.TH2) for hist in hists], "for name %s, some samples' histograms are TH2, and some are not" % name)
         if not all_same([issubclass(type(hist), ROOT.TH1) for hist in hists], "for name %s, some samples' histograms are TH1, and some are not" % name):
             continue
