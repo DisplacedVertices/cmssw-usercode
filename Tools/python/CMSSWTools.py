@@ -191,6 +191,8 @@ def cmssw_from_argv(process, verbose=False):
     file_event_from_argv(process, verbose)
     if 'summary' in sys.argv:
         want_summary(process)
+    if 'every' in sys.argv:
+        report_every(process, 1)
 
 def find_output_files(process):
     '''Get the TFileService and PoolOutputModule filenames if these
