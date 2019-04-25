@@ -43,21 +43,26 @@ void JMTRescaledTracks::produce(edm::Event& event, const edm::EventSetup&) {
     if (!event.isRealData() && enable) {
       double dxyerr_scale = 1.;
       double dszerr_scale = 1.;
+      double dxydszcov_scale = 1.;
 
       if (fabs(tk->eta()) < 1.5) {
         const double x = tk->pt();
         const double p_dxy[8] = {1.003954411196716, 0.04680608038556485, 1.1651640253424076, 0.010686515626581808, 1.2423728669230774, 0.002510211465163767, 1.301491397216935, -0.0005992241020962791};
 	const double p_dsz[10] = {1.0245229183638793, 0.06544824469215105, 1.1860096333638355, 0.009315198253046261, 1.2534005803324926, -0.0010188848309496473, 1.2759550243574909, -0.0033600655572815436, 2.0547714269037252e-05, -3.967354320030131e-08};
+	const double p_dxydsz[5] = {1.2373808693167834, -0.06306772746156655, 0.9989407561722071, 0.004296811774057659, 1.0281436760070548};
 
         dxyerr_scale = (x<=5)*(p_dxy[0]+p_dxy[1]*x)+(x>5&&x<=10)*(p_dxy[2]+p_dxy[3]*x)+(x>10&&x<=19)*(p_dxy[4]+p_dxy[5]*x)+(x>19&&x<=200)*(p_dxy[6]+p_dxy[7]*x)+(x>200)*(p_dxy[6]+p_dxy[7]*200);
 	dszerr_scale = (x<=3)*(p_dsz[0]+p_dsz[1]*x)+(x>3&&x<=7)*(p_dsz[2]+p_dsz[3]*x)+(x>7&&x<=11)*(p_dsz[4]+p_dsz[5]*x)+(x>11&&x<=200)*(p_dsz[6]+p_dsz[7]*x+p_dsz[8]*pow(x,2)+p_dsz[9]*pow(x,3))+(x>200)*(p_dsz[6]+p_dsz[7]*200+p_dsz[8]*pow(200,2)+p_dsz[9]*pow(200,3));
+	dxydszcov_scale = (x<=3.5)*(p_dxydsz[0]+p_dxydsz[1]*x)+(x>3.5&&x<=20)*(p_dxydsz[2]+p_dxydsz[3]*x)+(x>20)*p_dxydsz[4];
       } else {
         const double x = tk->pt();
 	const double p_dxy[8] = {0.9809194238515303, 0.02988345020861421, 1.0494209346433279, 0.01638247946618149, 1.1747904134913318, 0.004173705981459077, 1.27170013468283, -0.0015234534159011834};
 	const double p_dsz[7] = {0.9741157497540216, 0.03454031770932743, 1.1551685052673273, 0.008041427889944022, 1.3366714462830347, -0.0034743381492504328, 1.3448120785319356e-05};
+	const double p_dxydsz[5] = {1.1772587629670426, -0.012843798533138594, 1.097301005478153, -0.005013846780833367, 0.952633219303397};
 
 	dxyerr_scale = (x<=5)*(p_dxy[0]+p_dxy[1]*x)+(x>5&&x<=10)*(p_dxy[2]+p_dxy[3]*x)+(x>10&&x<=19)*(p_dxy[4]+p_dxy[5]*x)+(x>19&&x<=200)*(p_dxy[6]+p_dxy[7]*x)+(x>200)*(p_dxy[6]+p_dxy[7]*200);
 	dszerr_scale = (x<=7)*(p_dsz[0]+p_dsz[1]*x)+(x>7&&x<=17)*(p_dsz[2]+p_dsz[3]*x)+(x>17&&x<=200)*(p_dsz[4]+p_dsz[5]*x+p_dsz[6]*pow(x,2))+(x>200)*(p_dsz[4]+p_dsz[5]*200+p_dsz[6]*pow(200,2));
+	dxydszcov_scale = (x<=5)*(p_dxydsz[0]+p_dxydsz[1]*x)+(x>5&&x<=21)*(p_dxydsz[2]+p_dxydsz[3]*x)+(x>21)*p_dxydsz[4];
       }
 
       const int i_dxy = reco::TrackBase::i_dxy;
@@ -74,6 +79,7 @@ void JMTRescaledTracks::produce(edm::Event& event, const edm::EventSetup&) {
 	else
 	  cov(idim, i_dsz) *= dszerr_scale;
       }
+      cov(i_dxy, i_dsz) *= dxydszcov_scale;
     }
 
     output_tracks->push_back(reco::Track(tk->chi2(), tk->ndof(), tk->referencePoint(), tk->momentum(), tk->charge(), cov, tk->algo()));
