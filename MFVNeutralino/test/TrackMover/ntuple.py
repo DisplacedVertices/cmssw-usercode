@@ -25,7 +25,7 @@ report_every(process, 1000000)
 #want_summary(process)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
 sample_files(process, 'qcdht2000_2017', dataset, 1)
-file_event_from_argv(process)
+cmssw_from_argv(process)
 
 ####
 
@@ -42,7 +42,7 @@ process.load('JMTucker.MFVNeutralino.WeightProducer_cfi') # JMTBAD
 process.mfvWeight.throw_if_no_mcstat = False
 
 process.p = cms.Path(process.mfvEventFilterSequence * process.goodOfflinePrimaryVertices)
-random_dict = {}
+random_dict = {'jmtRescaledTracks': 1031}
 
 for icfg, cfg in enumerate(cfgs):
     ex = '%i%i' % (cfg.njets, cfg.nbjets)
