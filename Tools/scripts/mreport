@@ -24,6 +24,8 @@ def check_and_print_diff(a,b):
     else:
         print colors.green('%s == %s' % (a,b))
 
+miniaod = 'miniaod' in sys.argv
+
 pc = 100
 if '10pc' in sys.argv:
     pc = 10
@@ -38,6 +40,8 @@ for is_crab, wds in (True, crab_dirs_from_argv()), (False, cs_dirs_from_argv()):
             ll_alls.append((wd, cs_report(wd)))
         else:
             sample = Samples.sample_from_end_string(Samples, wd)
+            if miniaod:
+                sample.set_curr_dataset('miniaod')
             json = sample.json
             if pc == 10:
                 json = sample.json_10pc
