@@ -2,6 +2,7 @@
 
 import math, sys, os, tempfile
 from array import array
+from collections import namedtuple
 
 if os.environ.has_key('JMT_ROOTTOOLS_NOBATCHMODE'):
     import ROOT
@@ -1778,6 +1779,7 @@ def ratios_plot(name,
                 res_draw_cmd = 'pez',
                 res_fit = True,
                 res_lines = None,
+                res_fcns = [],
                 legend = None,
                 draw_normalized = False,
                 statbox_size = None,
@@ -1986,6 +1988,10 @@ def ratios_plot(name,
                 res_l.SetLineStyle(res_line_style)
                 res_l.Draw()
 
+    if ratios:
+        for fcn in res_fcns:
+            fcn.Draw('same')
+
     if fit_tpt:
         fit_tpt.Draw()
 
@@ -1999,7 +2005,7 @@ def ratios_plot(name,
     if old_opt_fit is not None:
         ROOT.gStyle.SetOptFit(old_opt_fit)
 
-    return canvas, legend, ratio_pad, ratios
+    return namedtuple('ratios_plot_result', 'canvas legend ratio_pad ratios'.split())(canvas, legend, ratio_pad, ratios)
 
 def real_hist_max(h, return_bin=False, user_range=None, use_error_bars=True):
     """Find the real maximum value of the histogram, taking into
