@@ -122,11 +122,15 @@ def file_details_run_lumis(dataset, instance='global'):
         files, runs, lumis = o['file'], o['run'], o['lumi']
         assert len(files) == len(runs) and len(runs) == len(lumis)
         for f,r,l in izip(files, runs, lumis):
-            assert type(f) == dict and f.keys() == ['name'] and type(f['name']) == unicode
-            assert type(r) == dict and r.keys() == ['run_number'] and type(r['run_number']) == int
-            assert type(l) == dict and l.keys() == ['number'] and type(l['number']) == list
-            f,r,l = str(f['name']), r['run_number'], l['number']
-            raw[f][r] += l
+            if f['name'] is None:
+                assert r['run_number'] is None
+                assert l['number'] is None
+            else:
+                assert type(f) == dict and f.keys() == ['name'] and type(f['name']) == unicode
+                assert type(r) == dict and r.keys() == ['run_number'] and type(r['run_number']) == int
+                assert type(l) == dict and l.keys() == ['number'] and type(l['number']) == list
+                f,r,l = str(f['name']), r['run_number'], l['number']
+                raw[f][r] += l
 
     ret = {}
     for k,d in raw.iteritems():
