@@ -15,7 +15,7 @@ if len(sys.argv) < 2:
 
 rm_root_files = bool_from_argv('rm_root_files') or bool_from_argv('rm')
 cr_cmds = ['gzip crab.log mmon_last', 'tar --remove-files -czf inputs.tgz inputs/']
-cs_cmds = ['tar --remove-files -czf mtidied.tgz stdout.* stderr.* log.* fjr*xml EXTRA']
+cs_cmds = ['tar --remove-files -czf mtidied.tgz stdout.* stderr.* log.* EXTRA']
 if rm_root_files:
     cs_cmds.append('rm -r *.root')
 
@@ -42,13 +42,7 @@ for wd in cr_dirs + cs_dirs_from_argv():
     for cmd in (cr_cmds if is_cr else cs_cmds):
         #print cmd
         if not is_cr and cmd.endswith('EXTRA'):
-            extra = ''
-            if glob('publish*txt'):
-                extra += ' publish*txt'
-            if glob('resub*'):
-                extra += ' resub*'
-            if glob('mmon_last'):
-                extra += ' mmon_last'
+            extra = ' '.join([x for x in 'fjr*xml', 'publish*txt', 'resub*', 'mmon_last' if glob(x)])
             cmd = cmd.replace('EXTRA', extra)
         os.system(cmd)
     touch('mtidied_finished')
