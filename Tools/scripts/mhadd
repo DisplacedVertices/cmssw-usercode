@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 
-import os
-import glob
-import sys
-import JMTucker.Tools.argparse as argparse
+import sys, os, glob, argparse
 from JMTucker.Tools.CRAB3ToolsSh import is_crab_working_dir, crab_hadd_args, crab_hadd_files, crab_hadd
 from JMTucker.Tools.CondorTools import is_cs_dir, cs_hadd_args, cs_hadd_files, cs_hadd
 from JMTucker.Tools.general import touch as _touch

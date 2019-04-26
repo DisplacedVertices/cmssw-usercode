@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
-import sys, os
+import sys, os, argparse
 from pprint import pprint
-import JMTucker.Tools.argparse as argparse
 
 parser = argparse.ArgumentParser(description = 'extracthists: extract hists from fileA and put in fileB, with renaming',
                                  usage = '%(prog)s [options] fileA.root fileB.root pathA1 pathB1 [pathA2 pathB2 ...]')

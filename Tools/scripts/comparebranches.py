@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, sys, JMTucker.Tools.argparse as argparse
+import os, sys, argparse
 
 parser = argparse.ArgumentParser(description = 'comparebranches: compare the branches present in two files',
                                  usage = '%(prog)s [options] file1.root file2.root')

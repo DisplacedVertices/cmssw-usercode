@@ -1,8 +1,7 @@
 #!/usr/bin/env python
 
-import sys
+import sys, argparse
 from pprint import pprint
-import JMTucker.Tools.argparse as argparse
 
 parser = argparse.ArgumentParser(description = 'comparehists: compare all histograms in multiple files or multiple directories',
                                  usage = '%(prog)s [options] file1.root [file2.root ... fileN.root] dir1_path [dir2_path ... dirN_path] plot_path')

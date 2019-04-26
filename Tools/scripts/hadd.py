@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-import sys
-import JMTucker.Tools.argparse as argparse
+import sys, argparse
 from JMTucker.Tools.hadd import hadd
 
 parser = argparse.ArgumentParser(description = 'hadd.py: run hadd wrapper',
