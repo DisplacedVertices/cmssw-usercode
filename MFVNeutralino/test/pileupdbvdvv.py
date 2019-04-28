@@ -1,11 +1,11 @@
 from JMTucker.MFVNeutralino.MiniTreeBase import *
 ROOT.gStyle.SetOptStat(2211)
 
-min_ntracks, tree_path = 3, '/uscms_data/d2/tucker/crab_dirs/MiniTreeV14'
-min_ntracks, tree_path = 4, '/uscms_data/d2/tucker/crab_dirs/MiniTreeV14'
-min_ntracks, tree_path = 5, '/uscms_data/d2/tucker/crab_dirs/MiniTreeV14'
+min_ntracks, tree_path = 3, '/uscms_data/d2/tucker/crab_dirs/MiniTreeV23m'
+min_ntracks, tree_path = 4, '/uscms_data/d2/tucker/crab_dirs/MiniTreeV23m'
+min_ntracks, tree_path = 5, '/uscms_data/d2/tucker/crab_dirs/MiniTreeV23m'
 
-ps = plot_saver(plot_dir('pileupdbvdvv_run2_16MC_ntk%i' % min_ntracks), size=(600,600), pdf=True)
+ps = plot_saver(plot_dir('pileupdbvdvv_ntk%i' % min_ntracks), size=(600,600), pdf=True)
 
 f,t = get_f_t(bkg_samples[0], min_ntracks, tree_path)
 t.Draw('npu>>h_npu_1v(70,0,70)', 'nvtx==1')
@@ -14,8 +14,8 @@ t.Draw('npu>>h_npu_2v(70,0,70)', 'nvtx>=2')
 ps.save('npu_2v')
 
 if 0: # run this to figure out the npu_bins
-    #h, per = ROOT.h_npu_1v, 2000
-    h, per = ROOT.h_npu_2v, 40
+    h, per = ROOT.h_npu_1v, 100000
+    #h, per = ROOT.h_npu_2v, 40
     bins = [0]
     for ibin in xrange(1,70):
         i = h.Integral(bins[-1], ibin)
@@ -27,7 +27,7 @@ if 0: # run this to figure out the npu_bins
         print a,b,h.Integral(a,b)
     raise 1
 
-npu_bins = [(0,18), (19,22), (23,27), (28,32), (33,50)]
+npu_bins = [(0,25), (26, 31), (32, 37), (38, 45), (46, 60)] 
 nbins = len(npu_bins)
 
 for q in ['dbv', 'dvv']:
@@ -37,13 +37,11 @@ for q in ['dbv', 'dvv']:
         if min_ntracks == 5:
             continue
         hs = [ROOT.TH1F('h_dvv_%i_%i' % ab, ';d_{VV} (cm);events/0.01 cm', 30, 0, 0.3) for ab in npu_bins]
-
     for sample in bkg_samples:
         if min_ntracks in (4,5) and sample.name in ['qcdht0500sum']:
             continue
-
         f,t = get_f_t(sample, min_ntracks, tree_path)
-        weight = sample.partial_weight_orig * ac.int_lumi_2016 * ac.scale_factor_2016
+        weight = sample.partial_weight_orig * ac.int_lumi_2017 * ac.scale_factor_2017
         for i,(a,b) in enumerate(npu_bins):
             hn = 'h_%s_%i_%i_%s' % (q,a,b,sample.name)
             if q == 'dbv':

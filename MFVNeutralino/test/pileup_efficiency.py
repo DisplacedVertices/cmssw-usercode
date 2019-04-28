@@ -4,10 +4,8 @@ from JMTucker.Tools.ROOTTools import *
 ROOT.TH1.AddDirectory(0)
 set_style()
 
-if os.environ['USER'] == 'tucker':
-    ps = plot_saver(plot_dir('pileup_efficiency_run2_v15'), size=(600,600), pdf=True)
-else:
-    ps = plot_saver('plots/pileup/v15/efficiency', size=(700,700), root=False)
+version = 'V23m'
+ps = plot_saver(plot_dir('pileup_efficiency_%s' % version), size=(600,600), pdf=True)
 
 bins = to_array([0,10,13,15,65])
 nbins = len(bins)-1
@@ -24,9 +22,9 @@ hists = [
     ('sigreg', 'mfvEventHistosSigReg')
     ]
 
-for sample in ['background', 'mfv_neu_tau00100um_M0800', 'mfv_neu_tau00300um_M0800', 'mfv_neu_tau01000um_M0800', 'mfv_neu_tau10000um_M0800']:
+for sample in ['background_2017', 'mfv_neu_tau000100um_M0800_2017', 'mfv_neu_tau000300um_M0800_2017', 'mfv_neu_tau001000um_M0800_2017', 'mfv_neu_tau010000um_M0800_2017']:
     print sample
-    f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/HistosV15/%s.root' % sample)
+    f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/Histos%s/%s.root' % (version,sample))
     presel = f.Get('mfvEventHistosPreSel/h_npu').Clone('presel')
     presel.Rebin(5)
     presel.GetXaxis().SetRangeUser(0,70)
