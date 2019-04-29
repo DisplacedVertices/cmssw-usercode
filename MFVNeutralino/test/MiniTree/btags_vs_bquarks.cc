@@ -2,6 +2,7 @@
 #include "TCanvas.h"
 #include "TFile.h"
 #include "TH2.h"
+#include "TH3.h"
 #include "TTree.h"
 #include "TVector2.h"
 #include "DataFormats/Math/interface/deltaR.h"
@@ -26,8 +27,6 @@ const int nbtag_mins[NBTAGS] = {1, 2};
 const int NDBV = 3;
 const char* dbv_names[NDBV] = {"all", "longer", "shorter"};
 
-const int NCJETS = 40;
-
 TH1F* h_bquark_flavor_code[NBQUARKS][NVTX] = {{0}};
 TH1F* h_nbquarks[NBQUARKS][NVTX] = {{0}};
 TH1F* h_njets[NBQUARKS][NVTX] = {{0}};
@@ -49,7 +48,7 @@ TH1F* h_ntk_jet[NBQUARKS][NVTX] = {{0}};
 TH1F* h_nbjets[NBQUARKS][NVTX] = {{0}};
 TH1F* h_ncjets[NBQUARKS][NVTX] = {{0}};
 TH1F* h_nljets[NBQUARKS][NVTX] = {{0}};
-TH2F* h_nljets_vs_nbjets[NBQUARKS][NVTX][NCJETS] = {{{0}}};
+TH3F* h_nlcb[NBQUARKS][NVTX] = {{0}};
 TH1F* h_nbjets_btag[NBQUARKS][NVTX][NBDISC] = {{{0}}};
 TH1F* h_ncjets_btag[NBQUARKS][NVTX][NBDISC] = {{{0}}};
 TH1F* h_nljets_btag[NBQUARKS][NVTX][NBDISC] = {{{0}}};
@@ -106,9 +105,7 @@ void book_hists(int ntk) {
       h_nbjets[i_nbquarks][i_nvtx] = new TH1F(TString::Format("h%s_%s_nbjets", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx]), TString::Format("%d-track %s events%s;Number of b jets;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks]), 40, 0, 40);
       h_ncjets[i_nbquarks][i_nvtx] = new TH1F(TString::Format("h%s_%s_ncjets", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx]), TString::Format("%d-track %s events%s;Number of c jets;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks]), 40, 0, 40);
       h_nljets[i_nbquarks][i_nvtx] = new TH1F(TString::Format("h%s_%s_nljets", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx]), TString::Format("%d-track %s events%s;Number of udsg jets;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks]), 40, 0, 40);
-      for (int i_ncjets = 0; i_ncjets < NCJETS; ++i_ncjets) {
-        h_nljets_vs_nbjets[i_nbquarks][i_nvtx][i_ncjets] = new TH2F(TString::Format("h%s_%s_%dcjets_nljets_vs_nbjets", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx], i_ncjets), TString::Format("%d-track %s events%s with %d c jets;Number of b jets;Number of udsg jets", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks], i_ncjets), 40, 0, 40, 40, 0, 40);
-      }
+      h_nlcb[i_nbquarks][i_nvtx] = new TH3F(TString::Format("h%s_%s_nlcb", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx]), TString::Format("%d-track %s events%s;Number of udsg jets;Number of c jets;Number of b jets", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks]), 40, 0, 40, 40, 0, 40, 40, 0, 40);
       for (int i_nbdisc = 0; i_nbdisc < NBDISC; ++i_nbdisc) {
         h_nbjets_btag[i_nbquarks][i_nvtx][i_nbdisc] = new TH1F(TString::Format("h%s_%s_nbjets_%s_btag", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx], bdisc_names[i_nbdisc]), TString::Format("%d-track %s events%s;Number of %s b-tagged b jets;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks], bdisc_names[i_nbdisc]), 40, 0, 40);
         h_ncjets_btag[i_nbquarks][i_nvtx][i_nbdisc] = new TH1F(TString::Format("h%s_%s_ncjets_%s_btag", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx], bdisc_names[i_nbdisc]), TString::Format("%d-track %s events%s;Number of %s b-tagged c jets;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks], bdisc_names[i_nbdisc]), 40, 0, 40);
@@ -194,8 +191,7 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
     h_nbjets[i_nbquarks[i]][i_nvtx]->Fill(nbjets, w);
     h_ncjets[i_nbquarks[i]][i_nvtx]->Fill(ncjets, w);
     h_nljets[i_nbquarks[i]][i_nvtx]->Fill(nljets, w);
-    assert(ncjets < NCJETS);
-    h_nljets_vs_nbjets[i_nbquarks[i]][i_nvtx][ncjets]->Fill(nbjets, nljets, w);
+    h_nlcb[i_nbquarks[i]][i_nvtx]->Fill(nljets, ncjets, nbjets, w);
 
     for (int i_nbdisc = 0; i_nbdisc < NBDISC; ++i_nbdisc) {
       h_nbtags[i_nbquarks[i]][i_nvtx][i_nbdisc]->Fill(nbtags[i_nbdisc], w);

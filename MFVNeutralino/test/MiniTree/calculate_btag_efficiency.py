@@ -19,13 +19,13 @@ def scale_factor(nvtx, jet_flavor, bdisc):
 def btag_eff_per_event_from_btag_eff_per_jet(nvtx, event_flavor, effb, effc, effl):
   num = 0
   den = 0
-  for nc in range(0, 40):
-    h_nbnl = f.Get('h_%dv_%dcjets_nljets_vs_nbjets' % (nvtx, nc))
-    for nb in range(0, 1) if event_flavor == 'nobjets' else range(1, h_nbnl.GetNbinsX()):
-      for nl in range(0, h_nbnl.GetNbinsY()):
-        n_nbnl = h_nbnl.GetBinContent(nb+1, nl+1)
-        num += n_nbnl * (1 - (1-effb)**nb * (1-effc)**nc * (1-effl)**nl)
-        den += n_nbnl
+  h_nlcb = f.Get('h_%dv_nlcb' % nvtx)
+  for nl in range(0, h_nlcb.GetNbinsX()):
+    for nc in range(0, h_nlcb.GetNbinsY()):
+      for nb in range(0, 1) if event_flavor == 'nobjets' else range(1, h_nlcb.GetNbinsZ()):
+        nlcb = h_nlcb.GetBinContent(nl+1, nc+1, nb+1)
+        num += nlcb * (1 - (1-effb)**nb * (1-effc)**nc * (1-effl)**nl)
+        den += nlcb
   return num/den
 
 def btag_eff_per_event(nvtx, event_flavor, bdisc):
