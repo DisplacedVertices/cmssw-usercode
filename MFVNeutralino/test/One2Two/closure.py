@@ -178,13 +178,29 @@ for i,ntracks in enumerate([3,7,4,5]):
     h.SetLineColor(ROOT.kRed)
     h.SetLineWidth(2)
     if is_mc:
-        h.Scale(n2v[i]/h.Integral())
+        eintegral = ROOT.Double(0)
+        integral = h.IntegralAndError(0, h.GetNbinsX(), eintegral)
+        ratio = n2v[i] / integral
+        eratio = ratio * errprop(n2v[i], n2verr[i], integral, eintegral)
+
+        newerrarray = []
+        for bin in range(h.GetNbinsX() + 1):
+            newerr = ratio * h.GetBinContent(bin) * errprop(ratio, eratio, h.GetBinContent(bin), h.GetBinError(bin))
+            newerrarray.append(newerr)
+
+        h.Scale(ratio)
+        for bin, err in enumerate(newerrarray):
+            h.SetBinError(bin, err)
     else:
         if hh.Integral() > 0:
             h.Scale(hh.Integral()/h.Integral())
         else:
             h.Scale(1./h.Integral())
-    h.Draw('hist e sames')
+    uncertband = h.Clone('uncertband')
+    uncertband.SetFillColor(ROOT.kRed - 3)
+    uncertband.SetFillStyle(3254)
+    uncertband.Draw('E2 sames')
+    h.Draw('hist sames')
 
     l1 = ROOT.TLegend(0.15, 0.75, 0.65, 0.85)
     l1.AddEntry(hh, 'Simulated events' if is_mc else 'Data')
