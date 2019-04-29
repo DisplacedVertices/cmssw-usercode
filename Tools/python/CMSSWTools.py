@@ -241,8 +241,8 @@ def geometry_etc(process, tag=None):
     process.load('TrackingTools.TransientTrack.TransientTrackBuilder_cfi')
     
 def global_tag(process, tag=None):
-    if not tag:
-        tag = which_global_tag()
+    if type(tag) != str:
+        tag = which_global_tag(tag)
     process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
     from Configuration.AlCa.GlobalTag_condDBv2 import GlobalTag
     process.GlobalTag = GlobalTag(process.GlobalTag, tag, '')
