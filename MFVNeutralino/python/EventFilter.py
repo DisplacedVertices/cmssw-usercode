@@ -10,7 +10,14 @@ def setup_event_filter(process,
                        event_filter_require_vertex = True,
                        input_is_miniaod = False,
                        mode = None,
+                       sequence_name = 'mfvEventFilterSequence',
+                       name_ex = None,
                        ):
+
+    if name_ex:
+        trigger_filter_name += name_ex
+        event_filter_name += name_ex
+        sequence_name += name_ex
 
     if mode == 'trigger only':
         pass
@@ -32,7 +39,8 @@ def setup_event_filter(process,
         event_filter = True
         event_filter_require_vertex = False
     elif mode:
-        assert mode is True
+        if mode is not True:
+            raise ValueError('bad mode %r' % mode)
         event_filter = True
 
     if trigger_filter == 'jets only':
@@ -42,7 +50,7 @@ def setup_event_filter(process,
     elif trigger_filter is True:
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilter as triggerFilter
     elif trigger_filter is not False:
-        raise ValueError('trigger_filter must be one of ("jets only", "leptons only", True, False)')
+        raise ValueError('trigger_filter %r bad: must be one of ("jets only", "leptons only", True, False)' % trigger_filter)
 
     overall = cms.Sequence()
 
@@ -92,6 +100,7 @@ def setup_event_filter(process,
                     process.goodOfflinePrimaryVertices.src = 'offlineSlimmedPrimaryVertices'
                     process.load('JMTucker.Tools.UnpackedCandidateTracks_cfi')
                     process.mfvVertexTracks.tracks_src = 'jmtUnpackedCandidateTracks'
+                    process.jmtRescaledTracks.tracks_src = 'jmtUnpackedCandidateTracks' # JMTBAD use rescaled tracks
             vertexFilter = cms.EDFilter('VertexSelector', src = cms.InputTag('mfvVertices'), cut = cms.string('nTracks > 2'), filter = cms.bool(True))
             setattr(process, event_filter_name + 'W1Vtx', vertexFilter)
             if input_is_miniaod:
@@ -99,7 +108,7 @@ def setup_event_filter(process,
             else:
                 overall *= process.goodOfflinePrimaryVertices                                      * process.mfvVertexSequenceBare * vertexFilter
 
-    process.mfvEventFilterSequence = overall
+    setattr(process, sequence_name, overall)
 
     if not path_name:
         return overall
