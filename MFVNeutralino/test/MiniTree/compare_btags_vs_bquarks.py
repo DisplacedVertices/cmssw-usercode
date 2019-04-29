@@ -1,11 +1,12 @@
 from JMTucker.Tools.ROOTTools import *
 
 ntk = 3
+year = 2018
 
 set_style()
-ps = plot_saver(plot_dir('compare_btags_vs_bquarks_MiniTreeV23m_ntk%s' % ntk), size=(600,600))
+ps = plot_saver(plot_dir('compare_btags_vs_bquarks_MiniTreeV23m_ntk%s_%s' % (ntk,year)), size=(600,600))
 
-f = ROOT.TFile('output_btags_vs_bquarks_MiniTreeV23m_ntk%s/background.root' % ntk)
+f = ROOT.TFile('output_btags_vs_bquarks_MiniTreeV23m_ntk%s_%s/background.root' % (ntk,year))
 btags = ['1loose', '2loose', '1medium', '2medium', '1tight', '2tight']
 btag_names = ['#geq1 loose', '#geq2 loose', '#geq1 medium', '#geq2 medium', '#geq1 tight', '#geq2 tight']
 

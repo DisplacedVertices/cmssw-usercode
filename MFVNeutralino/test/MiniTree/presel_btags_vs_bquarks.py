@@ -1,9 +1,9 @@
 from JMTucker.Tools.ROOTTools import *
 
 set_style()
-ps = plot_saver(plot_dir('compare_btags_vs_bquarks_PreselHistosV22m'), size=(600,600))
+ps = plot_saver(plot_dir('compare_btags_vs_bquarks_PreselHistosV23mV1'), size=(600,600))
 
-f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/PreselHistosV22m/background_2017.root')
+f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/PreselHistosV23mV1/background_2017.root')
 btag_names = ['#geq1 loose', '#geq2 loose', '#geq1 medium', '#geq2 medium', '#geq1 tight', '#geq2 tight']
 
 #plot jet bdisc in events with and without b quarks
