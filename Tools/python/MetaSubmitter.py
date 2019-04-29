@@ -1,6 +1,7 @@
 import sys, re
 from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
 from JMTucker.Tools.CondorSubmitter import CondorSubmitter
+from JMTucker.Tools.Year import year
 
 class max_output_modifier:
     def __init__(self, n):
@@ -27,7 +28,6 @@ def era_modifier(sample):
         mo = re.search(r'(201\d)([A-Z])', sample.name)
         assert mo
         yr, era = mo.groups()
-        from JMTucker.Tools.Year import year
         assert year == int(yr)
         magic = '\nsettings.is_mc ='
         return [], [(magic, ('\nsettings.era = "%s"' % era) + magic, 'trying to submit on data and no magic string %r' % magic)]
@@ -177,7 +177,7 @@ class secondary_files_modifier:
 
 ####
 
-def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=20):
+def set_splitting(samples, dataset, jobtype='default', data_json=None, default_files_per=20):
     if jobtype == 'histos' or jobtype == 'minitree':
         d = {
             'qcdht1000_2017': 11,
@@ -282,7 +282,6 @@ class MetaSubmitter:
 
     def normalize(self):
         assert not hasattr(self.common, 'ex')
-        from JMTucker.Tools.Year import year
         self.common.ex = year
         if not hasattr(self.common, 'publish_name'):
             self.common.publish_name = '%s_%s' % (self.batch_name, year)
@@ -322,6 +321,7 @@ class MetaSubmitter:
 ####
 
 __all__ = [
+    'year',
     'CRABSubmitter',
     'CondorSubmitter',
     'MetaSubmitter',
