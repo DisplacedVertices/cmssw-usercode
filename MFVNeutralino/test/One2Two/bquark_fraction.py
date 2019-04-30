@@ -49,10 +49,10 @@ if __name__ == '__main__':
     print
 
     print 'f0,f1,cb,cbbar from sorting events by at least 1 medium btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1)'
-    print_f2(3, fb(0.199,0.727,0.110), fb(0.522,0.804,0.247), 0.580, 0.547, 1)
-    print_f2(7, fb(0.199,0.727,0.110), fb(0.525,0.804,0.250), 0.568, 0.535, 1)
-    print_f2(4, fb(0.199,0.727,0.110), fb(0.557,0.811,0.284), 0.555, 0.521, 1)
-    print_f2(5, fb(0.199,0.727,0.110), fb(0.536,0.778,0.227), 0.534, 0.494, 1)
+    print_f2(3, fb(0.199,0.685,0.109), fb(0.522,0.804,0.247), 0.580, 0.547, 1)
+    print_f2(7, fb(0.199,0.685,0.109), fb(0.525,0.804,0.250), 0.568, 0.535, 1)
+    print_f2(4, fb(0.199,0.685,0.109), fb(0.557,0.811,0.284), 0.555, 0.521, 1)
+    print_f2(5, fb(0.199,0.685,0.109), fb(0.536,0.778,0.227), 0.534, 0.494, 1)
     print
 
     print 'f0,f1,cb,cbbar from sorting events by b quarks; assume all vertices in events with b quarks are reconstructed from b quarks (s=2)'
@@ -70,8 +70,8 @@ if __name__ == '__main__':
     print
 
     print 'f0,f1,cb,cbbar from sorting events by at least 1 medium btag and unfolding; assume all vertices in events with b quarks are reconstructed from b quarks (s=2)'
-    print_f2(3, fb(0.199,0.727,0.110), fb(0.522,0.804,0.247), 0.580, 0.547, 2)
-    print_f2(7, fb(0.199,0.727,0.110), fb(0.525,0.804,0.250), 0.568, 0.535, 2)
-    print_f2(4, fb(0.199,0.727,0.110), fb(0.557,0.811,0.284), 0.555, 0.521, 2)
-    print_f2(5, fb(0.199,0.727,0.110), fb(0.536,0.778,0.227), 0.534, 0.494, 2)
+    print_f2(3, fb(0.199,0.685,0.109), fb(0.522,0.804,0.247), 0.580, 0.547, 2)
+    print_f2(7, fb(0.199,0.685,0.109), fb(0.525,0.804,0.250), 0.568, 0.535, 2)
+    print_f2(4, fb(0.199,0.685,0.109), fb(0.557,0.811,0.284), 0.555, 0.521, 2)
+    print_f2(5, fb(0.199,0.685,0.109), fb(0.536,0.778,0.227), 0.534, 0.494, 2)
     print

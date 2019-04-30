@@ -1,6 +1,6 @@
 from JMTucker.Tools.ROOTTools import *
 
-f_btageff = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/BTagEffV1/background_2017.root')
+f_btageff = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_946p1/BTagEffV1/background_2017.root')
 f_presel = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/PreselHistosV22m/background_2017.root')
 
 def njets(hname):
@@ -13,7 +13,8 @@ def btag_eff_per_jet(jet_flavor, bdisc):
   return num/den
 
 def scale_factor(jet_flavor, bdisc):
-  return 1
+  h = f_btageff.Get('JMTBTagEfficiency/scalefactor_%s_%s' % (jet_flavor, bdisc))
+  return h.GetMean()
 
 def btag_eff_per_event_from_btag_eff_per_jet(event_flavor, effb, effc, effl):
   num = 0
