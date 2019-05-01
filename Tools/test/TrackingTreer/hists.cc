@@ -168,6 +168,8 @@ int main(int argc, char** argv) {
 
   auto fcn = [&]() {
     const double w = nr.weight();
+    if (nt.pvs().n() == 0)
+      return std::make_pair(true, w);
 
     h_npv->Fill(nt.pvs().n(), w);
 
