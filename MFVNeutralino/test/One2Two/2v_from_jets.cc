@@ -153,8 +153,8 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   samples[10] = "qcdht1000_2018";                 weights[10] = 8.8;
   samples[11] = "qcdht1500_2018";                 weights[11] = 1.08;
   samples[12] = "qcdht2000_2018";                 weights[12] = 0.442;
-  samples[13] = "ttbar_2018";                     weights[13] = 1;
-  samples[14] = "mfv_neu_tau001000um_M0800_2018"; weights[14] = 1;
+  samples[13] = "ttbar_2018";                     weights[13] = 1; // FIXME once we have the (sliced) 2018 ttbar samples
+  samples[14] = "mfv_neu_tau001000um_M0800_2018"; weights[14] = 1; // FIXME but irrelevant other than for signal contamination
   samples[15] = "JetHT2017B";                     weights[15] = 1;
   samples[16] = "JetHT2017C";                     weights[16] = 1;
   samples[17] = "JetHT2017D";                     weights[17] = 1;
