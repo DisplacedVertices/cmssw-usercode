@@ -1,10 +1,8 @@
 #!/bin/bash
 
 ntk=3
-year=2017
 
 indir=/uscms_data/d2/tucker/crab_dirs/MiniTreeV23m
-outdir=output
 files2017=(
     qcdht0700_2017.root
     qcdht1000_2017.root
@@ -51,64 +49,69 @@ files2018=(
 #    mfv_stopdbardbar_tau100000um_M0800_2018.root
 )
 
-if [[ $year -eq 2017 ]]; then
-  echo "Year is: $year"
-  files=("${files2017[@]}")
-elif [[ $year -eq 2018 ]]; then
-  echo "Year is: $year"
-  files=("${files2018[@]}")
-else
-  echo "Invalid year specified ($year). Exiting."
-  exit 1
-fi
+for year in {2017..2018} 
+do
+  outdir=output_${year}
 
-intlumi=$(python -c 'import JMTucker.MFVNeutralino.AnalysisConstants as ac; print ac.int_lumi_'${year}' * ac.scale_factor_'${year})
-
-########################################################################
-
-if [[ -d $outdir ]]; then
-    echo $outdir already exists
+  if [[ $year -eq 2017 ]]; then
+    echo "Year is: $year"
+    files=("${files2017[@]}")
+  elif [[ $year -eq 2018 ]]; then
+    echo "Year is: $year"
+    files=("${files2018[@]}")
+  else
+    echo "Invalid year specified ($year). Exiting."
     exit 1
-fi
+  fi
 
-mkdir $outdir
+  intlumi=$(python -c 'import JMTucker.MFVNeutralino.AnalysisConstants as ac; print ac.int_lumi_'${year}' * ac.scale_factor_'${year})
 
-make
-if [[ $? != 0 ]]; then
-    exit 1
-fi
+  ########################################################################
 
-outbackgrounds=()
-outsignals=()
+  if [[ -d $outdir ]]; then
+      echo $outdir already exists
+      exit 1
+  fi
 
-for x in ${files[@]}; do
-    fin=$indir/$x
-    fout=$outdir/$x
-    if [[ ! -e $fin ]]; then
-        echo $fin missing
-        exit 1
-    fi
+  mkdir $outdir
 
-    echo $x
-    ./btags_vs_bquarks.exe $fin $fout $ntk
-    if [[ $? != 0 ]]; then
-        echo problem, exit code was $?
-        exit 1
-    fi
+  make
+  if [[ $? != 0 ]]; then
+      exit 1
+  fi
 
-    if [[ $x != mfv* ]]; then
-        outbackgrounds+=($fout)
-    else
-        outsignals+=($fout)
-    fi
-done
+  outbackgrounds=()
+  outsignals=()
 
-samples merge -${intlumi} $outdir/background.root ${outbackgrounds[@]}
+  for x in ${files[@]}; do
+      fin=$indir/$x
+      fout=$outdir/$x
+      if [[ ! -e $fin ]]; then
+          echo $fin missing
+          exit 1
+      fi
 
-echo; echo scaling files, do not rerun merge background or use the h_sums in these files after this
-for x in ${outbackgrounds[@]} ${outsignals[@]}; do
-    y=$outdir/temp.root
-    samples merge -${intlumi} $x $y
-    mv $x ${x/.root/.unscaled.root}
-    mv $y $x
+      echo $x
+      ./btags_vs_bquarks.exe $fin $fout $ntk
+      if [[ $? != 0 ]]; then
+          echo problem, exit code was $?
+          exit 1
+      fi
+
+      if [[ $x != mfv* ]]; then
+          outbackgrounds+=($fout)
+      else
+          outsignals+=($fout)
+      fi
+  done
+
+  samples merge -${intlumi} $outdir/background.root ${outbackgrounds[@]}
+
+  echo; echo scaling files, do not rerun merge background or use the h_sums in these files after this
+  for x in ${outbackgrounds[@]} ${outsignals[@]}; do
+      y=$outdir/temp.root
+      samples merge -${intlumi} $x $y
+      mv $x ${x/.root/.unscaled.root}
+      mv $y $x
+  done
 done
