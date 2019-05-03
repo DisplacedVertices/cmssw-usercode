@@ -200,14 +200,14 @@ int main(int, char**) {
 
   jmt::ConfigFromEnv env("sm", true);
 
-                                       //  2017                   2018         2017+2018
-  const double default_n1v[4][3][3] = {{{  89055,  8827, 696 }, { 88730, 9850, 665 }, { 1, 1, 1 }},  //MC scaled to int. lumi.
-                                       {{  20109,  1987, 160 }, { 12188, 1292, 100 }, { 1, 1, 1 }},  //MC effective
+                                       //  2017                   2018                  2017+2018
+  const double default_n1v[4][3][3] = {{{  89055,  8827, 696 }, { 88730, 9850, 665 }, { 177773, 18672, 1363 }},  //MC scaled to int. lumi.
+                                       {{  20109,  1987, 160 }, { 12188, 1292, 100 }, {  30389,  3051,  249 }},  //MC effective
                                        {{      1,     1,   1 }, { 1, 1, 1 }, { 1, 1, 1 }},  //data 10%
                                        {{      1,     1,   1 }, { 1, 1, 1 }, { 1, 1, 1 }}}; //data 100%
 
-  const double default_n2v[4][3][3] = {{{    651,     2,   1 }, { 426, 5, 1 }, { 1, 1, 1 }},
-                                       {{    151,     4,   1 }, {  74, 4, 1 }, { 1, 1, 1 }},
+  const double default_n2v[4][3][3] = {{{    651,     2,   1 }, { 426, 5, 1 }, { 1077, 7, 1 }},
+                                       {{    151,     4,   1 }, {  74, 4, 1 }, {  222, 7, 1 }},
                                        {{      1,     1,   1 }, { 1, 1, 1 }, { 1, 1, 1 }},
                                        {{      1,     1,   1 }, { 1, 1, 1 }, { 1, 1, 1 }}};
 
@@ -231,10 +231,10 @@ int main(int, char**) {
   const std::string rho_compare_fn = env.get_string("rho_compare_fn", "/uscms_data/d3/dquach/crab3dirs/HistosV23m/background_2018.root");
   rho_tail_norm = env.get_long_double("rho_tail_norm", 1L);
   rho_tail_slope = env.get_long_double("rho_tail_slope", 1L);
-  phi_c = env.get_double("phi_c", 1.44);
+  phi_c = env.get_double("phi_c", 1.42);
   phi_e = env.get_double("phi_e", 2);
-  phi_a = env.get_double("phi_a", 3.45);
-  const std::string eff_fn = env.get_string("eff_fn", "vpeffs_2018_v23m.root");
+  phi_a = env.get_double("phi_a", 3.53);
+  const std::string eff_fn = env.get_string("eff_fn", "vpeffs_2017p8_v23m.root");
   const std::string eff_path = env.get_string("eff_path", "maxtk3");
 
   /////////////////////////////////////////////
