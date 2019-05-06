@@ -228,13 +228,14 @@ int main(int, char**) {
   const long ntrue_1v = env.get_long("ntrue_1v", 10000000L);
   const long ntrue_2v = env.get_long("ntrue_2v", 1000000L);
   const double oversample = env.get_double("oversample", 20);
-  const std::string rho_compare_fn = env.get_string("rho_compare_fn", "/uscms_data/d3/dquach/crab3dirs/HistosV23m/background_2018.root");
+  const std::string year_str[3] = {"2017","2018","2017p8"};
+  const std::string rho_compare_fn = env.get_string("rho_compare_fn", "/uscms_data/d3/dquach/crab3dirs/HistosV23m/background_"+year_str[year_index]+".root");
   rho_tail_norm = env.get_long_double("rho_tail_norm", 1L);
   rho_tail_slope = env.get_long_double("rho_tail_slope", 1L);
   phi_c = env.get_double("phi_c", 1.42);
   phi_e = env.get_double("phi_e", 2);
   phi_a = env.get_double("phi_a", 3.53);
-  const std::string eff_fn = env.get_string("eff_fn", "vpeffs_2017p8_v23m.root");
+  const std::string eff_fn = env.get_string("eff_fn", "vpeffs_"+year_str[year_index]+"_v23m.root");
   const std::string eff_path = env.get_string("eff_path", "maxtk3");
 
   /////////////////////////////////////////////
@@ -309,7 +310,13 @@ int main(int, char**) {
     else if (ntracks == 3) h_rho_compare = (TH1*)fin->Get("Ntk3mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist");
     else if (ntracks == 4) h_rho_compare = (TH1*)fin->Get("Ntk4mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist");
     h_rho_compare->SetStats(0);
+
+    // Note for those who are forgetful about the TH1::Fit options:
+    // "WL" Use Loglikelihood method and bin contents are not integer, i.e. histogram is weighted (must have Sumw2() set)
+    // "Q" Quiet mode (minimum printing)
+    // "R" Use the Range specified in the function range
     h_rho_compare->Fit(f_func_rho_norm, "WL Q R");
+
     h_rho_compare->GetXaxis()->SetRangeUser(0,0.5);
     //  h_rho_compare->GetYaxis()->SetRangeUser(3e-2,500);
     c->SetLogy();
