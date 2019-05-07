@@ -130,7 +130,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     samples = [s for s in samples if s.has_dataset(dataset) and (s.is_mc or not cross)]
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8_1pc.json'))
 
-    cs = CondorSubmitter('Histos%s%s_fix3or4' % (version, '_' + cross if cross else ''),
+    cs = CondorSubmitter('Histos%s%s' % (version, '_' + cross if cross else ''),
                          ex = year,
                          dataset = dataset,
                          pset_modifier = chain_modifiers(is_mc_modifier, half_mc_modifier(), per_sample_pileup_weights_modifier(cross=cross)),
