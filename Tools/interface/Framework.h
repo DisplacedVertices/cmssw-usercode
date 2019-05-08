@@ -52,7 +52,7 @@ namespace jmt {
   template <typename T, typename T2>
     T getProcessModuleParameter(const edm::Event& event, const T2& consumer, const std::string& module, const std::string& parameter) {
     edm::ParameterSet process_ps;
-    if (!event.getProcessParameterSet(consumer.moduleDescription().processName(), process_ps))
+    if (!event.getProcessParameterSet(consumer->moduleDescription().processName(), process_ps))
       throw cms::Exception("getProcessModuleParameter", "could not get ParameterSet from event provenance");
     const edm::ParameterSet& module_ps = process_ps.getParameterSet(module); // may throw if module not found, consider catching exception and rethrowing with "better" reason
     return module_ps.getParameter<T>(parameter);

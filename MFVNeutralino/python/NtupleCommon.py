@@ -160,6 +160,7 @@ def aod_ntuple_process(settings):
 
     for x in process.patAlgosToolsTask, process.slimmingTask, process.packedPFCandidatesTask, process.patTask, process.pfNoPileUpJMETask:
         x.remove(process.goodOfflinePrimaryVertices)
+    process.load('JMTucker.Tools.AnalysisEras_cff')
     process.load('JMTucker.Tools.GoodPrimaryVertices_cfi')
     process.load('JMTucker.Tools.WeightProducer_cfi')
     process.load('JMTucker.MFVNeutralino.Vertexer_cff')
@@ -210,6 +211,7 @@ def miniaod_ntuple_process(settings):
     process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
     process.load('PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi')
     process.load('PhysicsTools.PatAlgos.selectionLayer1.electronSelector_cfi')
+    process.load('JMTucker.Tools.AnalysisEras_cff')
     process.load('JMTucker.Tools.GoodPrimaryVertices_cfi')
     process.load('JMTucker.Tools.L1ECALPrefiringWeightProducer_cfi')
     process.load('JMTucker.Tools.MCStatProducer_cff')
