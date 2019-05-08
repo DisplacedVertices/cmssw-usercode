@@ -182,6 +182,7 @@ def get(i): return _l[i]
         if 'meatexit=' not in meat:
             raise ValueError('meatexit not set in meat?')
         self.meat = meat
+        self.is_cmsRun = meat == self.cmsRun_meat
 
         if '$' in pset_template_fn:
             pset_template_fn =  os.path.expandvars(pset_template_fn)
@@ -338,6 +339,10 @@ def get(i): return _l[i]
 
         open(sh_fn, 'wt').write(self.sh_template)
 
+    def normalize_fns(self, fns):
+        # JMTBAD fall back to global redirector
+        return ['root://cmseos.fnal.gov/' + x for x in fns if x.startswith('/store')]
+
     def filelist(self, sample, working_dir):
         # JMTBAD are there performance problems by not matching the json to the files per job?
         json_fn = os.path.join(working_dir, 'cs.json')
@@ -346,16 +351,20 @@ def get(i): return _l[i]
         else:
             touch(json_fn)
 
+        filenames = sample.filenames
+        if not self.is_cmsRun:
+            filenames = self.normalize_fns(filenames)
+
         if sample.split_by == 'events':
             per = sample.events_per
             assert sample.nevents_orig > 0
             njobs = int_ceil(sample.nevents_orig, per)
-            fn_groups = [sample.filenames]
+            fn_groups = [filenames]
         else:
             use_njobs = sample.files_per < 0
             per = abs(sample.files_per)
-            njobs = getattr(sample, 'njobs', int_ceil(len(sample.filenames), per))
-            fn_groups = [x for x in (sample.filenames[i*per:(i+1)*per] for i in xrange(njobs)) if x]
+            njobs = getattr(sample, 'njobs', int_ceil(len(filenames), per))
+            fn_groups = [x for x in (filenames[i*per:(i+1)*per] for i in xrange(njobs)) if x]
             if not use_njobs:
                 njobs = len(fn_groups) # let it fail downward
         if self._njobs is not None:
@@ -461,11 +470,12 @@ def get(i): return _l[i]
         self.nsubmits += 1
         print 'batch', self.batch_name, 'sample', sample.name, 
 
-        try:
-            sample.set_curr_dataset(self.dataset)
-        except KeyError:
-            print "\033[1m warning: \033[0m sample %s not submitted, doesn't have dataset %s" % (sample.name, self.dataset)
-            return
+        if self.dataset:
+            try:
+                sample.set_curr_dataset(self.dataset)
+            except KeyError:
+                print "\033[1m warning: \033[0m sample %s not submitted, doesn't have dataset %s" % (sample.name, self.dataset)
+                return
 
         if sample.split_by == 'events' and not sample.is_mc:
             print "\033[1m warning: \033[0m sample %s not submitted because can't split by events on data sample"
@@ -526,7 +536,6 @@ fi
         sample.set_curr_dataset(dataset)
         sample.files_per = -1
         sample.njobs = len(sample.filenames) * getattr(sample, 'nr_split', split_default)
-        sample.filenames = ['root://cmseos.fnal.gov/' + x for x in sample.filenames]
 
     cs = CondorSubmitter(batch_name=batch_name, dataset=dataset, meat=meat, pset_template_fn='', input_files=[exe_fn], output_files=[output_fn])
     cs.submit_all(samples)
