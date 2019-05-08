@@ -26,6 +26,7 @@ if mode == 'vary_eff':
 if mode == 'vary_dphi':
     ls = ['|#Delta#phi| from 3-track #Delta#phi_{JJ}', 'uniform |#Delta#phi|']
 
+# Note in 2015--2016, the 5-trk, two-vertex ratio was equal to 1 (hence "bratio1")
 if mode == 'vary_bquarks':
     ls = ['3-track two-vertex ratio', '5-track two-vertex ratio']
 

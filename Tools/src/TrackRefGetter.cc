@@ -23,9 +23,9 @@ namespace jmt {
         std::cout << "TrackRefGetter " << module_label << " unpacked candidate tracks map:\n";
         for (auto it : *unpacked_candidate_tracks_map) {
           std::cout << "  ";
-          dump_ptr(std::cout, it.first, &event);
+          jmt::dump_ptr(std::cout, it.first, &event);
           std::cout << " -> ";
-          dump_ref(std::cout, it.second, &event);
+          jmt::dump_ref(std::cout, it.second, &event);
           std::cout << "\n";
         }
         std::cout << "TrackRefGetter " << module_label << " END unpacked candidate tracks map\n";
@@ -36,9 +36,9 @@ namespace jmt {
         std::cout << " tracks map #" << i << ":\n";
         for (auto it : *tracks_maps[i]) {
           std::cout << "  ";
-          dump_ref(std::cout, it.first, &event);
+          jmt::dump_ref(std::cout, it.first, &event);
           std::cout << " -> ";
-          dump_ref(std::cout, it.second, &event);
+          jmt::dump_ref(std::cout, it.second, &event);
           std::cout << "\n";
         }
         std::cout << "TrackRefGetter " << module_label << " END tracks map #" << i << "\n";
@@ -69,7 +69,7 @@ namespace jmt {
       for (const reco::CandidatePtr& p : jet.daughterPtrVector()) {
         if (verbose) {
           std::cout << "  dau " << p->charge()*p->pt() << "," << p->eta() << "," << p->phi() << " ";
-          dump_ptr(std::cout, p, &event);
+          jmt::dump_ptr(std::cout, p, &event);
           std::cout << "\n";
         }
 
@@ -82,7 +82,7 @@ namespace jmt {
 
           if (verbose) {
             std::cout << "    in map -> track " << tk->charge()*tk->pt() << "," << tk->eta() << "," << tk->phi() << "," << tk->dxy() << "," << tk->dz() << " ";
-            dump_ref(std::cout, tk, &event);
+            jmt::dump_ref(std::cout, tk, &event);
             std::cout << "\n";
           }
         }

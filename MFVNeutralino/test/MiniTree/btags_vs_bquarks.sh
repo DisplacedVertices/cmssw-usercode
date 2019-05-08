@@ -51,7 +51,7 @@ files2018=(
 
 for year in {2017..2018} 
 do
-  outdir=output_${year}
+  outdir=output_ntk${ntk}_${year}
 
   if [[ $year -eq 2017 ]]; then
     echo "Year is: $year"

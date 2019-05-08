@@ -1,8 +1,59 @@
-Here is the procedure for constructing the background template and estimating the associated statistical and systematic uncertainties.
+Here is the procedure for constructing the background template and estimating the associated statistical and systematic uncertainties. Some of this information is duplicated in the header of 2v_from_jets.cc and elsewhere.
+
 1) Determine deltaphi input (fit_jetpairdphi.py).
-2) Determine efficiency input (vertexer_eff.py).  Set ntkseeds=False for default method; set ntkseeds=True for variation.
-3) Determine statistical uncertainties (treesprint.py, statmodel.cc, Makefile, statmodel.sh, statmodel.jdl, statmodel.py).  See statmodel.cc for documentation.
-4) Determine bquark input (2v_from_jets.cc, Makefile, treesprint.py, utilities.py, bquark_correction.py).  Set mode='' for default method; set mode='ratio1' for variation.
+   --> `python fit_jetpairdphi.py`
+   --> Modify the file for the other year(s) of interest and repeat the previous command (may be improved going forward)
+   --> Read off the fit parameters ("a" and "c") from the high statistics 3-track 1-vertex dphi_JJ plot and input them into dphi_pdf_a and dphi_pdf_c in 2v_from_jets.cc
+   --> Also input the fit parameters in phi_a and phi_c for statmodel.cc
+
+2) Determine efficiency input (vertexer_eff.py).  Set ntkseeds=False for default method; set ntkseeds=True for variation where triplets/quadruplets/quintuplets of tracks are used to form the seed vertices; currently both settings are automatically run.
+   --> `python vertexer_eff.py`
+   --> Modify the file for the other year(s) of interest and repeat the previous command (may be improved going forward)
+   --> This script outputs root files (vpeffs_*.root) which are used as input to 2v_from_jets.cc (for both the nominal and the variation)
+
+3) Determine statistical uncertainties (../treesprint.py, statmodel.cc, Makefile, statmodel.sh, statmodel.jdl, statmodel.py).  See statmodel.cc for documentation.
+   --> FIXME add description here (but it mostly already exists in statmodel.cc anyway!)
+
+4) Determine bquark input (2v_from_jets.cc, Makefile, ../treesprint.py, utilities.py, bquark_correction.py).  Set mode='' for default method; set mode='ratio1' for variation.
+   --> Compile 2v_from_jets.cc via `make`
+   --> Run the executable via `./2v_from_jets.exe`
+   --> This outputs root files for several variants of the dVVc construction (2v_from_jets_*.root). For this step, the important outputs are those pertaining to the bquark correction, since this step is used to compute this correction.
+
+   --> a) "Old" method: Use generator-level b-quarks (obviously MC-only) for the correction:
+          --> `python ../treesprint.py onlybkg`, which prints the event yields and the fractions of events containing at least one b-quark. We use the f2 value from ntk=3 events as the weight for events with b-quarks, and 1-f2 for events without b-quarks.
+          --> Modify utilities.py for the proper f2 weights.
+          --> `python utilities.py merge_bquarks_nobquarks`, which produces 2v_from_jets*_bquark_corrected_*.root (used as input to the next step).
+          --> `python bquark_correction.py`, which computes the correction factors. Modify this file for the other year(s) of interest and repeat. Also modify for the `ratio1` variation (in 2015--2016, the 5-trk 2-vertex ratio was equal to 1; other variations are in principle possible) and repeat.
+          --> Read off the correction factors for each bin / n-track configuration and input into the `bquark_correction` array of 2v_from_jets.cc.
+
+   --> b) "New" method: Use b-tagged jets (either data or MC) for the correction:
+          --> `cd ../MiniTree/`
+          --> Modify btags_vs_bquarks.cc if needed for e.g. the b-tagging scale factors (in the h_scalefactor_* arrays of hists). Also note that Tools/plugins/BTagEfficiency.cc (and Tools/test/btageff.py) exists for extracting these SFs.
+          --> Compile btags_vs_bquarks.cc via `make`
+          --> `./btags_vs_bquarks.sh`, which loops over the MiniTrees for 2017 and 2018, runs the btags_vs_bquarks.exe executable, and performs a mergeTFileServiceHistograms for each sample. The outputs live in e.g. output_ntk3_2017/, which should be appropriately renamed as needed. This step produces output root files with many histograms for studying the use of b-tagged jets for the b-quark correction.
+          --> Dump plots based on the outputs via `comparehists.py output_ntk3_2017/background.root "" /publicweb/j/joeyr/plots/btags_vs_bquarks_MiniTreeV23m_ntk3_2017 --draw-command '"colz text0" if "flavor_code" in name else ""' --nice "MCbackground_2017"` (and similar for 2018 or to overlay any of these)
+          --> Use `python compare_btags_vs_bquarks.py` for useful comparison plots of the b-tag method and the generator-level b-quark method, as well as b-tag WP efficiency vs. rejection plots.
+          --> Modify calculate_btag_efficiency.py for the proper input filename.
+          --> `python calculate_btag_efficiency.py`
+          --> Use the printed table to fill in the fb(ft,efft,frt) inputs of ../One2Two/bquark_fraction.py for f1 (the fraction of 1-vertex events with b-quarks), which allows us to compute the fraction of events with b-quarks after unfolding the b-tagging efficiencies/fake rates. ft comes from the right-hand bin of h_1v_1medium_btag_flavor_code.png histogram from comparehists, efft comes from the "btag eff" column, and frt comes from the "fake rate" column.
+          --> Similarly, use `python presel_btags_vs_bquarks.py` and `python presel_btag_efficiency.py` for the 0-vertex preselection-level information for the f0 inputs of ../One2Two/bquark_fraction.py. These also have to be modified and rerun for the year(s) of interest
+          --> `cd ../One2Two/`
+          --> Modify bquark_fraction.py for f0, f1, cb, and cbbar based on the 2v_from_jets.exe stdout printouts
+          --> `python bquark_fraction.py`, which returns the fraction of 2-vertex events containing at least one b-quark. We use the f2 values as the weights for events with b-quarks, and 1-f2 for events without b-quarks.
+          --> Modify utilities.py for the proper f2 weights.
+          --> `python utilities.py merge_btags_nobtags`, which produces 2v_from_jets_*_btag_corrected_*.root. These are the dVVc background templates, so we can skip step 5!
+
 5) Construct background template (2v_from_jets.cc, Makefile).  See 2v_from_jets.cc for documentation.
+   --> Recompile 2v_from_jets.cc via `make` if it was modified during the previous step.
+   --> Run the executable via `./2v_from_jets.exe`
+   --> This outputs root files for several variants of the dVVc construction (2v_from_jets_*.root) which *include* the bquark correction.
+
 6) Test background template construction method (closure.py).
+   --> `python closure.py`
+   --> Modify the file for the other year(s) of interest and repeat the previous command (may be improved going forward)
+   --> Uses the dVVc templates and closure distributions from 2v_from_jets_*.root to produce closure plots and tables
+
 7) Determine systematic uncertainties (compare_dvvc.py).
+   --> `python compare_dvvc.py`
+   --> Modify the file for the other year(s) of interest and repeat the previous command (may be improved going forward)
+   --> Also repeat for each variation (e.g. vary_eff, vary_dphi, vary_bquarks)

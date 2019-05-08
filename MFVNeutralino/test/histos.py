@@ -40,18 +40,21 @@ nvs = [0,1,2]
 
 for ntk in ntks:
     if ntk == 5:
-        EX1 = EX2 = ''
+        EX1 = EX2 = EX3 = ''
     elif ntk == 7:
         EX1 = 'Ntk3or4'
     else:
         EX1 = 'Ntk%i' % ntk
+
     if EX1:
         EX2 = "vertex_src = 'mfvSelectedVerticesTight%s', " % EX1
+    if ntk == 7:
+        EX3 = 'min_ntracks01 = 7, max_ntracks01 = 7, '
 
     exec '''
 process.EX1mfvAnalysisCutsOnlyOneVtx = process.mfvAnalysisCuts.clone(EX2min_nvertex = 1, max_nvertex = 1)
-process.EX1mfvAnalysisCutsFullSel    = process.mfvAnalysisCuts.clone(EX2)
-process.EX1mfvAnalysisCutsSigReg     = process.mfvAnalysisCuts.clone(EX2min_svdist2d = 0.04)
+process.EX1mfvAnalysisCutsFullSel    = process.mfvAnalysisCuts.clone(EX2EX3)
+process.EX1mfvAnalysisCutsSigReg     = process.mfvAnalysisCuts.clone(EX2EX3min_svdist2d = 0.04)
 
 process.EX1mfvEventHistosOnlyOneVtx = process.mfvEventHistos.clone()
 process.EX1mfvEventHistosFullSel    = process.mfvEventHistos.clone()
@@ -64,13 +67,13 @@ process.EX1mfvVertexHistosSigReg     = process.mfvVertexHistos.clone(EX2)
 
 process.EX1pPreSel     = cms.Path(common * process.mfvAnalysisCutsPreSel                                              * process.EX1mfvVertexHistosPreSel)
 process.EX1pOnlyOneVtx = cms.Path(common * process.EX1mfvAnalysisCutsOnlyOneVtx * process.EX1mfvEventHistosOnlyOneVtx * process.EX1mfvVertexHistosOnlyOneVtx)
-'''.replace('EX1', EX1).replace('EX2', EX2)
+'''.replace('EX1', EX1).replace('EX2', EX2).replace('EX3', EX3)
 
     if 2 in nvs:
         exec '''
 process.EX1pFullSel    = cms.Path(common * process.EX1mfvAnalysisCutsFullSel    * process.EX1mfvEventHistosFullSel    * process.EX1mfvVertexHistosFullSel)
 process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     * process.EX1mfvEventHistosSigReg     * process.EX1mfvVertexHistosSigReg)
-'''.replace('EX1', EX1).replace('EX2', EX2)
+'''.replace('EX1', EX1)
 
     for name, cut in nm1s:
         evt_cut = ''
@@ -89,6 +92,8 @@ process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     
             if nv == 1:
                 ana.max_nvertex = nv
             ana.min_nvertex = nv
+            if nv == 2 and ntk == 7:
+                ana.min_ntracks01 = ana.max_ntracks01 = 7
             ana_name = '%sana%iVNo' % (EX1, nv) + name
 
             evt_hst = process.mfvEventHistos.clone()

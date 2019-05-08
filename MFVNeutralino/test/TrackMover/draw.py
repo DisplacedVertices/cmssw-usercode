@@ -24,7 +24,7 @@ def get_em(fn, scale=1., alpha=1-0.6827):
     ltmp = []
 
     def skip(name, obj):
-        return obj.GetName() in ('h_norm', 'h_weight', 'h_npu') #or name in ('nlep')
+        return not obj.Class().GetName().startswith('TH1') or obj.GetName() in ('h_norm', 'h_weight', 'h_npu') #or name in ('nlep')
 
     def rebin(name, obj):
         return obj
