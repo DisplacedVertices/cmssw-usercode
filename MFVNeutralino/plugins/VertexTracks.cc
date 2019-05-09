@@ -321,7 +321,7 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
     const double dxybs = tk->dxy(*beamspot);
     const double dxypv = primary_vertex ? tk->dxy(primary_vertex->position()) : 1e99;
     const double dxyerr = tk->dxyError();
-    const double rescaled_dxyerr = rs.rescaled_tk.error(reco::TrackBase::i_dxy);
+    const double rescaled_dxyerr = rs.rescaled_tk.dxyError();
     const double sigmadxybs = dxybs / dxyerr;
     const double rescaled_sigmadxybs = dxybs / rescaled_dxyerr;
     const double sigmadxypv = dxypv / dxyerr;
