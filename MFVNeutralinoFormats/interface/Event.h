@@ -44,7 +44,7 @@ struct MFVEvent {
 
   MFVEvent() {
     gen_valid = 0;
-    npv = pv_ntracks = 0;
+    npv = pv_ntracks = pv_ntracksloose = 0;
     gen_flavor_code = 0;
     gen_weight = l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = npu = bsx = bsy = bsz = bsdxdz = bsdydz = bswidthx = bswidthy = pvx = pvy = pvz = pvcxx = pvcxy = pvcxz = pvcyy = pvcyz = pvczz = pv_score = metx = mety = 0;
     for (int i = 0; i < 2; ++i) {
@@ -197,8 +197,9 @@ struct MFVEvent {
   float pvcyy;
   float pvcyz;
   float pvczz;
-  uchar pv_ntracks;
   float pv_score;
+  uchar pv_ntracks;
+  uchar pv_ntracksloose;
   float pv_rho() const { return mag(pvx - bsx_at_z(pvz), pvy - bsy_at_z(pvz)); }
 
   std::vector<uchar> jet_id;

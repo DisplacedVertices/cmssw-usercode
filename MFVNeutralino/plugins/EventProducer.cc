@@ -287,17 +287,26 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->pvcyy = primary_vertex->covariance(1,1);
     mevent->pvcyz = primary_vertex->covariance(1,2);
     mevent->pvczz = primary_vertex->covariance(2,2);
-
-    mevent->pv_ntracks = 0;
     mevent->pv_score = (*primary_vertex_scores)[reco::VertexRef(primary_vertices, 0)];
 
     if (input_is_miniaod) {
+      mevent->pv_ntracks = 0;
+      mevent->pv_ntracksloose = 0;
+
       for (const pat::PackedCandidate& cand : *packed_candidates)
-        if (cand.vertexRef().key() == 0 && cand.charge() && cand.hasTrackDetails()) // && cand.pvAssociationQuality() == UsedInFitTight)
-          inc_uchar_clamp(mevent->pv_ntracks);
+        if (cand.vertexRef().key() == 0 && cand.charge() && cand.hasTrackDetails()) {
+          if (cand.pvAssociationQuality() == pat::PackedCandidate::UsedInFitTight) {
+            inc_uchar_clamp(mevent->pv_ntracks);
+            inc_uchar_clamp(mevent->pv_ntracksloose);
+          }
+          else if (cand.pvAssociationQuality() == pat::PackedCandidate::UsedInFitLoose)
+            inc_uchar_clamp(mevent->pv_ntracksloose);
+        }
     }
-    else
+    else {
       mevent->pv_ntracks = int2uchar_clamp(primary_vertex->nTracks());
+      mevent->pv_ntracksloose = int2uchar_clamp(primary_vertex->nTracks(0.));
+    }
   }
 
   //////////////////////////////////////////////////////////////////////
