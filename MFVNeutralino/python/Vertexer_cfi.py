@@ -45,12 +45,6 @@ mfvVertexTracks = cms.EDFilter('MFVVertexTracks',
 
 mfvVertices = cms.EDProducer('MFVVertexer',
                              kvr_params = kvr_params,
-                             avr_params = cms.PSet(
-                                 finder = cms.string('avr'),
-                                 primcut = cms.double(1.0),
-                                 seccut = cms.double(3),
-                                 smoothing = cms.bool(True)
-                                 ),
                              beamspot_src = cms.InputTag('offlineBeamSpot'),
                              seed_tracks_src = cms.InputTag('mfvVertexTracks', 'seed'),
                              n_tracks_per_seed_vertex = cms.int32(2),

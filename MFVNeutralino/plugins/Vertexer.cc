@@ -10,7 +10,6 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "RecoVertex/ConfigurableVertexReco/interface/ConfigurableVertexReconstructor.h"
 #include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
 #include "RecoVertex/VertexTools/interface/VertexDistance3D.h"
 #include "TrackingTools/IPTools/interface/IPTools.h"
@@ -93,7 +92,6 @@ private:
   VertexDistanceXY vertex_dist_2d;
   VertexDistance3D vertex_dist_3d;
   std::unique_ptr<KalmanVertexFitter> kv_reco;
-  std::unique_ptr<VertexReconstructor> av_reco;
 
   std::vector<TransientVertex> kv_reco_dropin(std::vector<reco::TransientTrack>& ttks) {
     if (ttks.size() < 2)
@@ -159,7 +157,6 @@ private:
 
 MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
   : kv_reco(new KalmanVertexFitter(cfg.getParameter<edm::ParameterSet>("kvr_params"), cfg.getParameter<edm::ParameterSet>("kvr_params").getParameter<bool>("doSmoothing"))),
-    av_reco(new ConfigurableVertexReconstructor(cfg.getParameter<edm::ParameterSet>("avr_params"))),
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     seed_tracks_token(consumes<std::vector<reco::TrackRef>>(cfg.getParameter<edm::InputTag>("seed_tracks_src"))),
     n_tracks_per_seed_vertex(cfg.getParameter<int>("n_tracks_per_seed_vertex")),
