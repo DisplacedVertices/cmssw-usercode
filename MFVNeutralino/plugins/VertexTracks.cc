@@ -17,6 +17,8 @@
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
+#include "JMTucker/Tools/interface/AnalysisEras.h"
+#include "JMTucker/Tools/interface/TrackRescaler.h"
 
 class MFVVertexTracks : public edm::EDFilter {
 public:
@@ -46,6 +48,7 @@ private:
   const double min_track_pt;
   const double min_track_dxy;
   const double min_track_sigmadxy;
+  const double min_track_rescaled_sigmadxy;
   const double min_track_sigmadxypv;
   const int min_track_hit_r;
   const int min_track_nhits;
@@ -60,6 +63,8 @@ private:
   const bool histos;
   const bool verbose;
   const std::string module_label;
+
+  jmt::TrackRescaler track_rescaler;
 
   TH1F* h_n_all_tracks;
   TH1F* h_all_track_pars[6];
@@ -110,6 +115,7 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
     min_track_pt(cfg.getParameter<double>("min_track_pt")),
     min_track_dxy(cfg.getParameter<double>("min_track_dxy")),
     min_track_sigmadxy(cfg.getParameter<double>("min_track_sigmadxy")),
+    min_track_rescaled_sigmadxy(cfg.getParameter<double>("min_track_rescaled_sigmadxy")),
     min_track_sigmadxypv(cfg.getParameter<double>("min_track_sigmadxypv")),
     min_track_hit_r(cfg.getParameter<int>("min_track_hit_r")),
     min_track_nhits(cfg.getParameter<int>("min_track_nhits")),
@@ -190,6 +196,11 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
 bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
   if (verbose)
     std::cout << "MFVVertexTracks " << module_label << " run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
+
+  const int track_rescaler_which = 0; // JMTBAD which rescaling if ever a different one
+  track_rescaler.setup(!event.isRealData() && track_rescaler_which != -1 && min_track_rescaled_sigmadxy > 0,
+                       jmt::AnalysisEras::pick(event, this),
+                       track_rescaler_which);
 
   edm::Handle<reco::BeamSpot> beamspot;
   event.getByToken(beamspot_token, beamspot);
@@ -302,6 +313,7 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
 
   for (size_t i = 0, ie = all_tracks->size(); i < ie; ++i) {
     const reco::TrackRef& tk = (*all_tracks)[i];
+    const auto rs = track_rescaler.scale(*tk);
     const bool is_second_track = i >= second_tracks_start_at;
 
     // copy/calculate cheap things, which may be used later in histos
@@ -309,7 +321,9 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
     const double dxybs = tk->dxy(*beamspot);
     const double dxypv = primary_vertex ? tk->dxy(primary_vertex->position()) : 1e99;
     const double dxyerr = tk->dxyError();
+    const double rescaled_dxyerr = rs.rescaled_tk.error(reco::TrackBase::i_dxy);
     const double sigmadxybs = dxybs / dxyerr;
+    const double rescaled_sigmadxybs = dxybs / rescaled_dxyerr;
     const double sigmadxypv = dxypv / dxyerr;
     const int nhits = tk->hitPattern().numberOfValidHits();
     const int npxhits = tk->hitPattern().numberOfValidPixelHits();
@@ -330,6 +344,7 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
         fabs(dxybs) > min_track_dxy &&
         dxyerr < max_track_dxyerr &&
         fabs(sigmadxybs) > min_track_sigmadxy &&
+        fabs(rescaled_sigmadxybs) > min_track_rescaled_sigmadxy &&
         fabs(sigmadxypv) > min_track_sigmadxypv &&
         nhits >= min_track_nhits &&
         npxhits >= min_track_npxhits &&
@@ -434,7 +449,7 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
         pt > min_track_pt,
         npxlayers >= min_track_npxlayers,
         nstlayers >= min_track_nstlayers,
-        fabs(sigmadxybs) > min_track_sigmadxy
+        fabs(sigmadxybs) > min_track_sigmadxy, // JMTBAD rescaled_sigmadxybs
       };
 
       if (nm1[1] && nm1[2] && nm1[3]) h_seed_nm1_pt->Fill(pt);

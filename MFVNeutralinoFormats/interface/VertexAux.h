@@ -45,7 +45,7 @@ struct MFVVertexAux {
 
   MFVVertexAux() {
     which = ndof_ = jetpairdrmin_ = jetpairdrmax_ = jetpairdravg_ = jetpairdrrms_ = costhtkmomvtxdispmin_ = costhtkmomvtxdispmax_ = costhtkmomvtxdispavg_ = costhtkmomvtxdisprms_ = costhjetmomvtxdispmin_ = costhjetmomvtxdispmax_ = costhjetmomvtxdispavg_ = costhjetmomvtxdisprms_ = 0;
-    x = y = z = cxx = cxy = cxz = cyy = cyz = czz = chi2 = gen2ddist = gen2derr = gen3ddist = gen3derr = bs2ddist = bs2derr = pv2ddist = pv2derr = pv3ddist = pv3derr = 0;
+    x = y = z = cxx = cxy = cxz = cyy = cyz = czz = chi2 = rescale_x = rescale_y = rescale_z = rescale_cxx = rescale_cxy = rescale_cxz = rescale_cyy = rescale_cyz = rescale_czz = rescale_bs2ddist = rescale_bs2derr = rescale_chi2 = gen2ddist = gen2derr = gen3ddist = gen3derr = bs2ddist = bs2derr = pv2ddist = pv2derr = pv3ddist = pv3derr = 0;
     for (int i = 0; i < mfv::NJetsByUse; ++i)
       njets[i] = 0;
     for (int i = 0; i < mfv::NMomenta; ++i) {
@@ -69,9 +69,22 @@ struct MFVVertexAux {
   float czz;
 
   float chi2;
-  uchar ndof_; // may not be = ntracks - 3 if weights used in vtx fit
+  uchar ndof_; // may not be = 2*ntracks - 3 if weights used in vtx fit
   float ndof() const { return float(ndof_); }
   float chi2dof() const { return chi2 / ndof(); }
+
+  float rescale_chi2;
+  float rescale_x;
+  float rescale_y;
+  float rescale_z;
+  float rescale_cxx;
+  float rescale_cxy;
+  float rescale_cxz;
+  float rescale_cyy;
+  float rescale_cyz;
+  float rescale_czz;
+  float rescale_bs2ddist;
+  float rescale_bs2derr;
 
   uchar njets[mfv::NJetsByUse];
 

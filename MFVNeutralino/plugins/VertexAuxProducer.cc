@@ -13,9 +13,16 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
+#include "RecoVertex/VertexTools/interface/VertexDistanceXY.h"
+#include "TrackingTools/Records/interface/TransientTrackRecord.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/MFVNeutralino/interface/VertexTools.h"
+#include "JMTucker/Tools/interface/AnalysisEras.h"
 #include "JMTucker/Tools/interface/TrackRefGetter.h"
+#include "JMTucker/Tools/interface/TrackRescaler.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
 namespace {
@@ -36,6 +43,8 @@ class MFVVertexAuxProducer : public edm::EDProducer {
   void produce(edm::Event&, const edm::EventSetup&);
 
  private:
+  jmt::TrackRescaler track_rescaler;
+  std::unique_ptr<KalmanVertexFitter> kv_reco;
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertex_token;
   const edm::EDGetTokenT<pat::MuonCollection> muons_token;
@@ -51,7 +60,8 @@ class MFVVertexAuxProducer : public edm::EDProducer {
 };
 
 MFVVertexAuxProducer::MFVVertexAuxProducer(const edm::ParameterSet& cfg)
-  : beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
+  : kv_reco(new KalmanVertexFitter(cfg.getParameter<edm::ParameterSet>("kvr_params"), cfg.getParameter<edm::ParameterSet>("kvr_params").getParameter<bool>("doSmoothing"))),
+    beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     primary_vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertex_src"))),
     muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
     electrons_token(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("electrons_src"))),
@@ -74,6 +84,14 @@ MFVVertexAuxProducer::MFVVertexAuxProducer(const edm::ParameterSet& cfg)
 
 void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
   if (verbose) std::cout << "MFVVertexAuxProducer " << module_label << " run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
+
+  const int track_rescaler_which = 0; // JMTBAD which rescaling if ever a different one
+  track_rescaler.setup(!event.isRealData() && track_rescaler_which != -1,
+                       jmt::AnalysisEras::pick(event, this),
+                       track_rescaler_which);
+
+  edm::ESHandle<TransientTrackBuilder> tt_builder;
+  setup.get<TransientTrackRecord>().get("TransientTrackBuilder", tt_builder);
 
   //////////////////////////////////////////////////////////////////////
 
@@ -153,6 +171,31 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
     aux.chi2 = sv.chi2();
     aux.ndof_ = int2uchar_clamp(int(sv.ndof()));
+
+    std::vector<reco::TransientTrack> rs_ttks;
+    for (auto it = sv.tracks_begin(), ite = sv.tracks_end(); it != ite; ++it)
+      if (sv.trackWeight(*it) >= mfv::track_vertex_weight_min)
+        rs_ttks.push_back(tt_builder->build(track_rescaler.scale(**it).rescaled_tk));
+    if (rs_ttks.size() > 1) {
+      reco::Vertex rs_sv(TransientVertex(kv_reco->vertex(rs_ttks)));
+      if (rs_sv.isValid()) {
+        aux.rescale_chi2 = rs_sv.chi2();
+        aux.rescale_x = rs_sv.x();
+        aux.rescale_y = rs_sv.y();
+        aux.rescale_z = rs_sv.z();
+        aux.rescale_cxx = rs_sv.covariance(0,0);
+        aux.rescale_cxy = rs_sv.covariance(0,1);
+        aux.rescale_cxz = rs_sv.covariance(0,2);
+        aux.rescale_cyy = rs_sv.covariance(1,1);
+        aux.rescale_cyz = rs_sv.covariance(1,2);
+        aux.rescale_czz = rs_sv.covariance(2,2);
+        const auto d = VertexDistanceXY().distance(rs_sv, fake_bs_vtx);
+        aux.rescale_bs2ddist = d.value();
+        aux.rescale_bs2derr = d.error();
+      }
+      else
+        aux.rescale_chi2 = -1;
+    }
 
     if (verbose) printf("v#%i at %f,%f,%f ndof %.1f\n", isv, aux.x, aux.y, aux.z, sv.ndof());
 
