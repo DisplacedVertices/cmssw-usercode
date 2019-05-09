@@ -395,10 +395,10 @@ condorable = {
         "miniaod": ttbar_samples_2017,
         },
     "T1_US_FNAL_Disk": {
-        "miniaod": [qcdht0700_2017, qcdht1500_2017, qcdht2000_2017, ttbar_2017, dyjetstollM10_2017, qcdmupt15_2017, qcdht0700_2018, qcdht1000_2018, qcdht2000_2018],
+        "miniaod": [qcdht0700_2017, qcdht1500_2017, qcdht2000_2017, ttbar_2017, dyjetstollM10_2017, qcdmupt15_2017, qcdht0700_2018, qcdht1000_2018, qcdht2000_2018, ttbarht0800_2018],
         },
     "T2_US_Wisconsin": {
-        "miniaod": [qcdht1000_2017],
+        "miniaod": [qcdht1000_2017, ttbarht0600_2018],
         },
     "T2_US_Purdue": {
         "miniaod": [qcdht1500_2018],
