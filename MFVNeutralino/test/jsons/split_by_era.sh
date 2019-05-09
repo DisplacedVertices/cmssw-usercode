@@ -24,8 +24,8 @@ while read x; do
     dasgoclient -query "run dataset=$x" > $runfn
     minrun=$(sort -n $runfn | head -1)
     maxrun=$(sort -n $runfn | tail -1)
-    echo $year $era $x $minrun $maxrun
     for xx in '' ana_; do
         filterJSON.py --min=$minrun --max=$maxrun ${xx}${year}.json > ${xx}${era}.json
     done
+    echo $year $era $x $minrun $maxrun $(python -c 'import json; l = [int(x) for x in json.load(open("'${era}.json'"))]; print min(l), max(l)')
 done < ds.txt
