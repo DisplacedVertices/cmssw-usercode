@@ -35,25 +35,18 @@ void JMTRescaledTracks::produce(edm::Event& event, const edm::EventSetup&) {
   edm::Handle<reco::TrackCollection> tracks;
   event.getByToken(tracks_token, tracks);
 
-  const int era = jmt::AnalysisEras::pick(event, this);
-
   auto output_tracks = std::make_unique<reco::TrackCollection>();
   auto output_tracks_map = std::make_unique<jmt::TracksMap>();
 
   reco::TrackRefProd h_output_tracks = event.getRefBeforePut<reco::TrackCollection>();
 
-  const bool enable = !event.isRealData() && which != -1;
+  rescaler.setup(!event.isRealData() && which != -1,
+                 jmt::AnalysisEras::pick(event, this),
+                 which);
 
   for (size_t i = 0, ie = tracks->size(); i < ie; ++i) {
     reco::TrackRef tk(tracks, i);
-    const auto r = rescaler.scale(*tk, enable, era, which);
-
-    output_tracks->push_back(reco::Track(tk->chi2(), tk->ndof(), tk->referencePoint(), tk->momentum(), tk->charge(), r.cov, tk->algo()));
-    reco::Track& new_tk = output_tracks->back();
-    new_tk.setQualityMask(tk->qualityMask());
-    new_tk.setNLoops(tk->nLoops());
-    reco::HitPattern* hp = const_cast<reco::HitPattern*>(&new_tk.hitPattern());  *hp = tk->hitPattern(); // lmao
-
+    output_tracks->push_back(rescaler.scale(*tk).rescaled_tk);
     output_tracks_map->insert(tk, reco::TrackRef(h_output_tracks, output_tracks->size() - 1));
   }
 

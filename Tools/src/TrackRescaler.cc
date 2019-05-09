@@ -182,27 +182,37 @@ namespace jmt {
     else throw std::out_of_range("bad era");
   }
 
-  TrackRescaler::ret_t TrackRescaler::scale(const reco::Track& tk, bool enable, int era, int which) {
-    ret_t r { tk.covariance() };
+  TrackRescaler::ret_t TrackRescaler::scale(const reco::Track& tk) {
+    ret_t r;
+    r.tk = tk;
 
-    if (enable) {
-      set(era, which, tk.pt(), tk.eta());
+    if (enable_) {
+      set(era_, which_, tk.pt(), tk.eta());
+
+      reco::TrackBase::CovarianceMatrix cov = tk.covariance();
 
       const int i_dxy = reco::TrackBase::i_dxy;
       const int i_dsz = reco::TrackBase::i_dsz;
 
       for (int idim = 0; idim < reco::TrackBase::dimension; ++idim) {
-        if (idim == i_dxy) r.cov(idim, i_dxy) *= scales_.dxyerr * scales_.dxyerr;
-        else               r.cov(idim, i_dxy) *= scales_.dxyerr;
+        if (idim == i_dxy) cov(idim, i_dxy) *= scales_.dxyerr * scales_.dxyerr;
+        else               cov(idim, i_dxy) *= scales_.dxyerr;
       }
 
       for (int idim = 0; idim < reco::TrackBase::dimension; ++idim) {
-        if (idim == i_dsz) r.cov(idim, i_dsz) *= scales_.dszerr * scales_.dszerr;
-        else               r.cov(idim, i_dsz) *= scales_.dszerr;
+        if (idim == i_dsz) cov(idim, i_dsz) *= scales_.dszerr * scales_.dszerr;
+        else               cov(idim, i_dsz) *= scales_.dszerr;
       }
 
-      r.cov(i_dxy, i_dsz) *= scales_.dxydszcov;
+      cov(i_dxy, i_dsz) *= scales_.dxydszcov;
+
+      r.rescaled_tk = reco::Track(tk.chi2(), tk.ndof(), tk.referencePoint(), tk.momentum(), tk.charge(), cov, tk.algo());
+      r.rescaled_tk.setQualityMask(tk.qualityMask());
+      r.rescaled_tk.setNLoops(tk.nLoops());
+      (*const_cast<reco::HitPattern*>(&r.rescaled_tk.hitPattern())) = tk.hitPattern(); // lmao
     }
+    else
+      r.rescaled_tk = tk;
 
     return r;
   }

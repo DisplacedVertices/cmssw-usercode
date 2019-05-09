@@ -12,7 +12,14 @@ namespace jmt {
       double dxydszcov;
     } scales_;
 
+    bool enable_;
+    int era_;
+    int which_;
+
   public:
+    TrackRescaler() : enable_(false), era_(0), which_(w_JetHT) {}
+    void setup(bool enable, int era, int which) { enable_ = enable; era_ = era; which_ = which; }
+
     enum { w_JetHT, w_max };
 
     void set_JetHT2017B(double pt, double eta);
@@ -27,11 +34,11 @@ namespace jmt {
     void set(double era, int which, double pt, double eta);
 
     struct ret_t {
-      //reco::TrackBase::ParameterVector val;
-      reco::TrackBase::CovarianceMatrix cov;
+      reco::Track tk;
+      reco::Track rescaled_tk;
     };
 
-    ret_t scale(const reco::Track& tk, bool enable, int era, int which);
+    ret_t scale(const reco::Track& tk);
   };
 }
 
