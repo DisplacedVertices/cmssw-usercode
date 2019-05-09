@@ -33,7 +33,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = Samples.qcd_samples_2018 + Samples.data_samples_2018
 
     #samples = [s for s in samples if s.has_dataset(dataset)]
-    set_splitting(samples, dataset, 'ntuple')
+    set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2017p8.json'))
 
     if settings.run_n_tk_seeds:
         samples = [s for s in samples if not s.is_signal]
