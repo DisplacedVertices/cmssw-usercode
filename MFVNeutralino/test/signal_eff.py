@@ -6,13 +6,14 @@ from JMTucker.Tools import Samples
 from JMTucker.MFVNeutralino.PerSignal import PerSignal
 
 set_style()
-ps = plot_saver(plot_dir('sigeff_v16'), size=(600,600), pdf=True, log=False)
+version = 'V23m'
+ps = plot_saver(plot_dir('sigeff_%s' % version), size=(600,600), pdf=True, log=False)
 
-multijet = Samples.mfv_signal_samples
-dijet = Samples.mfv_stopdbardbar_samples
+multijet = Samples.mfv_signal_samples_2017
+dijet = Samples.mfv_stopdbardbar_samples_2017
 
 for sample in multijet + dijet:
-    fn = os.path.join('/uscms_data/d2/tucker/crab_dirs/MiniTreeV16', sample.name + '.root')
+    fn = os.path.join('/uscms_data/d2/tucker/crab_dirs/MiniTree%s' % version, sample.name + '.root')
     if not os.path.exists(fn):
         print 'no', sample.name
         continue
