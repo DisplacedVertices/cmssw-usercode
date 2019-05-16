@@ -4,7 +4,7 @@ from array import array
 ROOT.TH1.AddDirectory(0)
 
 version = 'v23m'
-year = '2018'
+year = '2017p8'
 
 mode = ''
 #mode = 'ratio1'

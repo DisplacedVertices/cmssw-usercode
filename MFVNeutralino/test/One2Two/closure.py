@@ -4,7 +4,7 @@ ROOT.TH1.AddDirectory(0)
 
 is_mc = True
 only_10pc = False
-year = '2018'
+year = '2017p8'
 version = 'v23m'
 set_style()
 ps = plot_saver(plot_dir('closure_%s%s%s_%s' % (version.capitalize(), '' if is_mc else '_data', '_10pc' if only_10pc else '', year)), size=(700,700), root=False, log=False)
@@ -15,6 +15,9 @@ names = ['3-track x 3-track', '4-track x 3-track', '4-track x 4-track', '#geq 5-
 
 n2v = [651., 788., 2.22, 1.] if year == '2017' else [426., 509., 4.85, 1.]
 n2verr = [50., 54., 1.09, 0.6] if year == '2017' else [49., 53., 2.15, 0.6]
+if year == '2017p8':
+    n2v = [1077., 215., 7., 1.]
+    n2verr = [72., 31., 2.6, 0.6]
 
 def errprop(val0, err0, val1, err1):
     if val0 == 0 and val1 == 0:
@@ -182,7 +185,6 @@ for i,ntracks in enumerate([3,7,4,5]):
         integral = h.IntegralAndError(0, h.GetNbinsX(), eintegral)
         ratio = n2v[i] / integral
         eratio = ratio * errprop(n2v[i], n2verr[i], integral, eintegral)
-
         newerrarray = []
         for bin in range(h.GetNbinsX() + 1):
             newerr = ratio * h.GetBinContent(bin) * errprop(ratio, eratio, h.GetBinContent(bin), h.GetBinError(bin))

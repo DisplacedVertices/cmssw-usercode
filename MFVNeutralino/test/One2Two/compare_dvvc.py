@@ -5,12 +5,12 @@ ROOT.TH1.AddDirectory(0)
 
 is_mc = True
 only_10pc = False
-year = '2018'
+year = '2017p8'
 version = 'v23m'
 
 #mode = 'vary_eff'
-mode = 'vary_dphi'
-#mode = 'vary_bquarks'
+#mode = 'vary_dphi'
+mode = 'vary_bquarks'
 
 set_style()
 ROOT.gStyle.SetOptFit(0)
@@ -34,7 +34,7 @@ fns = [fn1, fn2, fn3]
 ntk = ['3-track', '4-track', '5-track']
 names = ['3-track x 3-track', '4-track x 4-track', '#geq 5-track x #geq 5-track']
 
-n2v = [641., 2.21, 1.] if year == '2017' else [426., 5., 1.]
+n2v = [651., 2.21, 1.] if year == '2017' else [426., 5., 1.]
 
 colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kOrange, ROOT.kViolet, ROOT.kPink+1]
 
