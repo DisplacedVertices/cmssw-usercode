@@ -372,6 +372,12 @@ for x in data_samples_2017 + qcd_samples_2017 + data_samples_2018 + qcd_samples_
     x.add_dataset("nr_trackingtreerv23mv3")
     x.add_dataset("nr_k0ntuplev23mv4")
 
+for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + \
+         data_samples_2018 + qcd_samples_2018 + ttbar_samples_2018:
+    x.add_dataset("ntuplev24m")
+    if not x.is_signal:
+        x.add_dataset("ntuplev24m_ntkseeds")
+
 ########
 # automatic condor declarations for ntuples
 ########
@@ -398,7 +404,7 @@ condorable = {
         "miniaod": [qcdht0700_2017, qcdht1500_2017, qcdht2000_2017, ttbar_2017, dyjetstollM10_2017, qcdmupt15_2017, qcdht0700_2018, qcdht1000_2018, qcdht2000_2018, ttbarht0800_2018],
         },
     "T2_US_Wisconsin": {
-        "miniaod": [qcdht1000_2017, ttbarht0600_2018],
+        "miniaod": [ttbarht0600_2018],
         },
     "T2_US_Purdue": {
         "miniaod": [qcdht1500_2018],
