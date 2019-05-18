@@ -1,0 +1,7 @@
+#!/bin/bash
+for x in "$@"; do
+    y=$(basename $x)
+    if [[ $y == condor_* || $y == crab_* ]]; then
+        touch $x/mmon_done
+    fi
+done
