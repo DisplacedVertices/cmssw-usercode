@@ -1,5 +1,7 @@
 # NB: this module cannot depend on any local imports, except in __main__, unless you ship them with combine/submit.py
 
+raise 'dont forget: L1 EE prefiring, HEM15/16; what else?'
+
 from math import hypot
 import ROOT; ROOT.gROOT.SetBatch()
 
