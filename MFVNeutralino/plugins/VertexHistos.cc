@@ -169,6 +169,20 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("cyz", "SV covariance yz (cm^{2})", 100, -1e-5, 1e-5);
   hs.add("czz", "SV covariance zz (cm^{2})", 100, 0, 1e-5);
 
+  hs.add("rescale_x", "rescaled-fit SV x (cm)", 100, -4, 4);
+  hs.add("rescale_y", "rescaled-fit SV y (cm)", 100, -4, 4);
+  hs.add("rescale_z", "rescaled-fit SV z (cm)", 100, -25, 25);
+  hs.add("rescale_cxx", "rescaled-fit SV covariance xx (cm^{2})", 100, 0, 1e-5);
+  hs.add("rescale_cxy", "rescaled-fit SV covariance xy (cm^{2})", 100, -1e-5, 1e-5);
+  hs.add("rescale_cxz", "rescaled-fit SV covariance xz (cm^{2})", 100, -1e-5, 1e-5);
+  hs.add("rescale_cyy", "rescaled-fit SV covariance yy (cm^{2})", 100, 0, 1e-5);
+  hs.add("rescale_cyz", "rescaled-fit SV covariance yz (cm^{2})", 100, -1e-5, 1e-5);
+  hs.add("rescale_czz", "rescaled-fit SV covariance zz (cm^{2})", 100, 0, 1e-5);
+  hs.add("rescale_dx", "rescaled-fit - nominal SV x (cm)", 100, -5e-4, 5e-4);
+  hs.add("rescale_dy", "rescaled-fit - nominal SV y (cm)", 100, -5e-4, 5e-4);
+  hs.add("rescale_dz", "rescaled-fit - nominal SV z (cm)", 100, -5e-4, 5e-4);
+  hs.add("rescale_bs2derr", "rescaled-fit #sigma(dist2d(SV, beamspot)) (cm)", 1000, 0, 0.05);
+
   hs.add("nlep", "# leptons", 10, 0, 10);
 
   hs.add("ntracks",                       "# of tracks/SV",                                                               40,    0,      40);
@@ -300,7 +314,7 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("gen3dsig",                      "N#sigma(dist3d(SV, closest gen vtx)) (cm)",                                   200,    0,     100);
   hs.add("bs2ddist",                      "dist2d(SV, beamspot) (cm)",                                                   500,    0,      2.5);
   hs.add("bsbs2ddist",                    "dist2d(SV, beamspot) (cm)",                                                   500,    0,      2.5);
-  hs.add("bs2derr",                       "#sigma(dist2d(SV, beamspot)) (cm)",                                           100,    0,       0.05);
+  hs.add("bs2derr",                       "#sigma(dist2d(SV, beamspot)) (cm)",                                           1000,    0,       0.05);
   hs.add("bs2dsig",                       "N#sigma(dist2d(SV, beamspot))",                                               100,    0,     100);
   hs.add("pv2ddist",                      "dist2d(SV, PV) (cm)",                                                         100,    0,       0.5);
   hs.add("pv2derr",                       "#sigma(dist2d(SV, PV)) (cm)",                                                 100,    0,       0.05);
@@ -434,6 +448,20 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         {"cyy", aux.cyy},
         {"cyz", aux.cyz},
         {"czz", aux.czz},
+
+        {"rescale_x", aux.rescale_x - mevent->bsx_at_z(aux.z)},
+        {"rescale_y", aux.rescale_y - mevent->bsy_at_z(aux.z)},
+        {"rescale_z", aux.rescale_z - bsz},
+        {"rescale_cxx", aux.rescale_cxx},
+        {"rescale_cxy", aux.rescale_cxy},
+        {"rescale_cxz", aux.rescale_cxz},
+        {"rescale_cyy", aux.rescale_cyy},
+        {"rescale_cyz", aux.rescale_cyz},
+        {"rescale_czz", aux.rescale_czz},
+        {"rescale_dx", aux.rescale_x - aux.x},
+        {"rescale_dy", aux.rescale_y - aux.y},
+        {"rescale_dz", aux.rescale_z - aux.z},
+        {"rescale_bs2derr", aux.rescale_bs2derr},
 
         {"nlep",                    aux.which_lep.size()},
         {"ntracks",                 aux.ntracks()},
