@@ -544,7 +544,7 @@ _add_ds("ntuplev24m", {
 'ttbarht2500_2018': _fromnum1("/store/user/tucker/TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV24m_2018/190509_203802", 21),
 'JetHT2017B': _fromnum1("/store/user/tucker/JetHT/NtupleV24m_2017/190509_203731", 25),
 'JetHT2017C': _fromnum1("/store/user/tucker/JetHT/NtupleV24m_2017/190509_203744", 38),
-'JetHT2017D': (17, ['/store/user/tucker/JetHT/NtupleV24m_2017/190509_203758/0000/ntuple_%i.root' % i for i in chain(xrange(1,10), xrange(11,19))]),
+'JetHT2017D': _fromnum1("/store/user/tucker/JetHT/NtupleV24m_2017/190509_203758", 18),
 'JetHT2017E': _fromnum1("/store/user/tucker/JetHT/NtupleV24m_2017/190509_203815", 41),
 'JetHT2017F': _fromnum1("/store/user/tucker/JetHT/NtupleV24m_2017/190509_203829", 51),
 'JetHT2018A': _fromnum1("/store/user/tucker/JetHT/NtupleV24m_2018/190509_203813", 114),
