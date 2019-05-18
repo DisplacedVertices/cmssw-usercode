@@ -19,12 +19,13 @@ class PerSignal:
         def get(self, tau, mass):
             return self.v.get((tau,mass), None)
 
-    def __init__(self, y_title='', y_range=(0.,1.)):
+    def __init__(self, y_title='', y_range=(0.,1.), decay_paves_at_top=True):
         self.masses = set()
         self.taus = set()
         self.y_title = y_title
         self.y_range = y_range
         self.y_span = y_range[1] - y_range[0]
+        self.decay_paves_at_top = decay_paves_at_top
         self.curves = []
 
     def add(self, samples, title='', color=ROOT.kRed, style=1, in_legend=True):
@@ -117,6 +118,8 @@ class PerSignal:
             xax.SetRangeUser(0, npoints)
             yax.SetRangeUser(*self.y_range)
             yax.SetTitle(self.y_title)
+            yax.SetLabelSize(0.03)
+#            yax.SetTitleSize(0.032)
 
             if curve.g_missing:
                 curve.g_missing.Draw('P')
@@ -133,7 +136,7 @@ class PerSignal:
                 ymin = y_tau
                 if '#mu' not in tau_name:
                     ymin += 0.006 * self.y_span
-                p = ROOT.TPaveText(i*nmasses+1, ymin, (i+1)*nmasses-1, ymin+0.07)
+                p = ROOT.TPaveText(i*nmasses+1, ymin, (i+1)*nmasses-1, ymin + 0.07*self.y_span)
                 p.SetTextFont(42)
                 p.SetFillColor(ROOT.kWhite)
                 p.AddText(tau_name)
@@ -169,7 +172,11 @@ class PerSignal:
         self.decay_paves = []
         if do_decay_paves:
             for ic, curve in enumerate([c for c in self.curves if c.in_legend]):
-                p = ROOT.TPaveText(0.5, 0.97*self.y_span-(ic+1)*self.y_span*0.05, nmasses, 0.97*self.y_span-ic*self.y_span*0.05)
+                if self.decay_paves_at_top:
+                    decay_pave_loc = 0.5, self.y_range[0]+self.y_span*(0.97-(ic+1)*0.05), nmasses, self.y_range[0]+self.y_span*(0.97-ic*0.05)
+                else:
+                    decay_pave_loc = 0.5, self.y_range[0]+self.y_span*(0.03+ic*0.05), nmasses, self.y_range[0]+self.y_span*(0.03+(ic+1)*0.05)
+                p = ROOT.TPaveText(*decay_pave_loc)
                 p.AddText(curve.title)
                 p.SetTextFont(42)
                 p.SetTextColor(curve.color) #if len(self.curves) > 1 else ROOT.kBlack)
@@ -178,7 +185,7 @@ class PerSignal:
                 p.Draw()
                 self.decay_paves.append(p)
 
-        self.lifetime_pave = ROOT.TPaveText(-3, y_tau, -0.01, y_tau + 0.07)
+        self.lifetime_pave = ROOT.TPaveText(-3, y_tau, -0.01, y_tau + 0.07*self.y_span)
         self.lifetime_pave.SetTextFont(42)
         self.lifetime_pave.SetTextSize(0.048)
         self.lifetime_pave.AddText('#tau')
@@ -186,7 +193,7 @@ class PerSignal:
         self.lifetime_pave.SetBorderSize(0)
         self.lifetime_pave.Draw()
 
-        self.mass_pave = ROOT.TPaveText(0.013, 0.007, 0.119, 0.080, 'NDC')
+        self.mass_pave = ROOT.TPaveText(0.013, 0.007, 0.105, 0.080, 'NDC')
         self.mass_pave.SetFillColor(ROOT.kWhite)
         self.mass_pave.SetTextFont(42)
         self.mass_pave.SetTextSize(0.03)
