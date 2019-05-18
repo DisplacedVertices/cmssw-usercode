@@ -1,4 +1,4 @@
-#include "TH2F.h"
+#include "TH2.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
@@ -50,16 +50,6 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   void fill_multi(TH2F** hs, const int isv, const double val, const double val2, const double weight) const;
   void fill_multi(PairwiseHistos* hs, const int isv, const PairwiseHistos::ValueMap& val, const double weight) const;
 
-  TH1F* h_sv_pos_1d[3];
-  TH2F* h_sv_pos_2d[3];
-  TH2F* h_sv_pos_rz;
-  TH1F* h_sv_pos_phi;
-  TH1F* h_sv_pos_phi_pv;
-  TH1F* h_sv_pos_bs1d[3];
-  TH2F* h_sv_pos_bs2d[3];
-  TH2F* h_sv_pos_bsrz;
-  TH1F* h_sv_pos_bsphi;
-
   PairwiseHistos h_sv[sv_num_indices];
 
   TH1F* h_sv_jets_deltaphi[4][sv_num_indices];
@@ -67,6 +57,10 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH2F* h_sv_bs2derr_bsbs2ddist[sv_num_indices];
   TH2F* h_pvrho_bsbs2ddist[sv_num_indices];
 
+  TH2F* h_sv_xy;
+  TH2F* h_sv_yz;
+  TH2F* h_sv_xz;
+  TH2F* h_sv_rz;
   TH1F* h_svdist2d;
   TH1F* h_svdist3d;
   TH2F* h_sv0pvdz_v_sv1pvdz;
@@ -162,6 +156,18 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
       hs.add(TString::Format("track%i_jet_deltaphi0", i).Data(), TString::Format("track%i |#Delta#phi| to closest jet", i).Data(),  25,  0,      3.15);
     }
   }
+
+  hs.add("x", "SV x (cm)", 100, -4, 4);
+  hs.add("y", "SV y (cm)", 100, -4, 4);
+  hs.add("z", "SV z (cm)", 100, -25, 25);
+  hs.add("phi", "SV phi", 25, -3.15, 3.15);
+  hs.add("phi_pv", "SV phi w.r.t. PV", 25, -3.15, 3.15);
+  hs.add("cxx", "SV covariance xx (cm^{2})", 100, 0, 1e-5);
+  hs.add("cxy", "SV covariance xy (cm^{2})", 100, -1e-5, 1e-5);
+  hs.add("cxz", "SV covariance xz (cm^{2})", 100, -1e-5, 1e-5);
+  hs.add("cyy", "SV covariance yy (cm^{2})", 100, 0, 1e-5);
+  hs.add("cyz", "SV covariance yz (cm^{2})", 100, -1e-5, 1e-5);
+  hs.add("czz", "SV covariance zz (cm^{2})", 100, 0, 1e-5);
 
   hs.add("nlep", "# leptons", 10, 0, 10);
 
@@ -312,23 +318,6 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
     hs.add(TString::Format("jet%d_deltaphi1", i).Data(), TString::Format("|#Delta#phi| to next closest %sjet", lmt_ex[i]).Data(),          25, 0,   3.15);
   }
 
-  for (int i = 0; i < 3; ++i) {
-    float l = i == 2 ? 25 : 4;
-    h_sv_pos_1d[i] = fs->make<TH1F>(TString::Format("h_sv_pos_1d_%i", i), TString::Format(";SV pos[%i] (cm);arb. units", i), 100, -l, l);
-    h_sv_pos_bs1d[i] = fs->make<TH1F>(TString::Format("h_sv_pos_bs1d_%i", i), TString::Format(";SV pos[%i] (cm);arb. units", i), 100, -l, l);
-  }
-  h_sv_pos_2d[0] = fs->make<TH2F>("h_sv_pos_2d_xy", ";SV x (cm);SV y (cm)", 100, -4, 4, 100, -4, 4);
-  h_sv_pos_2d[1] = fs->make<TH2F>("h_sv_pos_2d_xz", ";SV x (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
-  h_sv_pos_2d[2] = fs->make<TH2F>("h_sv_pos_2d_yz", ";SV y (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
-  h_sv_pos_rz    = fs->make<TH2F>("h_sv_pos_rz", ";SV r (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
-  h_sv_pos_phi   = fs->make<TH1F>("h_sv_pos_phi", ";SV phi;arb. units", 25, -3.15, 3.15);
-  h_sv_pos_phi_pv = fs->make<TH1F>("h_sv_pos_phi_pv", ";SV phi w.r.t. PV;arb. units", 25, -3.15, 3.15);
-  h_sv_pos_bs2d[0] = fs->make<TH2F>("h_sv_pos_bs2dxy", ";SV x (cm);SV y (cm)", 100, -4, 4, 100, -4, 4);
-  h_sv_pos_bs2d[1] = fs->make<TH2F>("h_sv_pos_bs2dxz", ";SV x (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
-  h_sv_pos_bs2d[2] = fs->make<TH2F>("h_sv_pos_bs2dyz", ";SV y (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
-  h_sv_pos_bsrz    = fs->make<TH2F>("h_sv_pos_bsrz", ";SV r (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
-  h_sv_pos_bsphi   = fs->make<TH1F>("h_sv_pos_bsphi", ";SV phi;arb. units", 25, -3.15, 3.15);
-
   for (int j = 0; j < sv_num_indices; ++j) {
     const char* exc = sv_index_names[j];
 
@@ -376,6 +365,10 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
     h_sv_bs2derr_track_nsthits[j] = fs->make<TH2F>(TString::Format("h_sv_%s_bs2derr_track_nsthits", exc), TString::Format("%s SV;tracks number of strip hits;#sigma(dist2d(SV, beamspot)) (cm)", exc), 28, 0, 28, 100, 0, 0.05);
   }
 
+  h_sv_xy = fs->make<TH2F>("h_sv_xy", ";SV x (cm);SV y (cm)", 100, -4, 4, 100, -4, 4);
+  h_sv_xz = fs->make<TH2F>("h_sv_xz", ";SV x (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
+  h_sv_yz = fs->make<TH2F>("h_sv_yz", ";SV y (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
+  h_sv_rz = fs->make<TH2F>("h_sv_rz", ";SV r (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
   h_svdist2d = fs->make<TH1F>("h_svdist2d", ";dist2d(sv #0, #1) (cm);arb. units", 500, 0, 1);
   h_svdist3d = fs->make<TH1F>("h_svdist3d", ";dist3d(sv #0, #1) (cm);arb. units", 500, 0, 1);
   h_sv0pvdz_v_sv1pvdz = fs->make<TH2F>("h_sv0pvdz_v_sv1pvdz", ";sv #1 dz to PV (cm);sv #0 dz to PV (cm)", 100, 0, 0.5, 100, 0, 0.5);
@@ -386,7 +379,6 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   h_pvmosttracksshared = fs->make<TH2F>("h_pvmosttracksshared", ";index of pv most-shared to sv #0; index of pv most-shared to sv #1", 71, -1, 70, 71, -1, 70);
 }
 
-// JMTBAD get rid of this crap
 void MFVVertexHistos::fill_multi(TH1F** hs, const int, const double val, const double weight) const {
   hs[sv_all]->Fill(val, weight);
 }
@@ -422,31 +414,27 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   for (int isv = 0; isv < nsv; ++isv) {
     const MFVVertexAux& aux = auxes->at(isv);
 
-    h_sv_pos_1d[0]->Fill(aux.x - bsx, w);
-    h_sv_pos_1d[1]->Fill(aux.y - bsy, w);
-    h_sv_pos_1d[2]->Fill(aux.z - bsz, w);
-    h_sv_pos_2d[0]->Fill(aux.x - bsx, aux.y - bsy, w);
-    h_sv_pos_2d[1]->Fill(aux.x - bsx, aux.z - bsz, w);
-    h_sv_pos_2d[2]->Fill(aux.y - bsy, aux.z - bsz, w);
-    h_sv_pos_rz->Fill(aux.bs2ddist * (aux.y - bsy >= 0 ? 1 : -1), aux.z - bsz, w);
-    const double pos_phi = atan2(aux.y - bsy, aux.x - bsx);
-    h_sv_pos_phi->Fill(pos_phi, w);
-    h_sv_pos_phi_pv->Fill(atan2(aux.y - mevent->pvy, aux.x - mevent->pvx), w);
-
-    h_sv_pos_bs1d[0]->Fill(aux.x - mevent->bsx_at_z(aux.z), w);
-    h_sv_pos_bs1d[1]->Fill(aux.y - mevent->bsy_at_z(aux.z), w);
-    h_sv_pos_bs1d[2]->Fill(aux.z - bsz, w);
-    h_sv_pos_bs2d[0]->Fill(aux.x - mevent->bsx_at_z(aux.z), aux.y - mevent->bsy_at_z(aux.z), w);
-    h_sv_pos_bs2d[1]->Fill(aux.x - mevent->bsx_at_z(aux.z), aux.z - bsz, w);
-    h_sv_pos_bs2d[2]->Fill(aux.y - mevent->bsy_at_z(aux.z), aux.z - bsz, w);
-    h_sv_pos_bsrz->Fill(mevent->bs2ddist(aux) * (aux.y - mevent->bsy_at_z(aux.z) >= 0 ? 1 : -1), aux.z - bsz, w);
-    const double pos_bsphi = atan2(aux.y - mevent->bsy_at_z(aux.z), aux.x - mevent->bsx_at_z(aux.z));
-    h_sv_pos_bsphi->Fill(pos_bsphi, w);
+    h_sv_xy->Fill(aux.x - mevent->bsx_at_z(aux.z), aux.y - mevent->bsy_at_z(aux.z), w);
+    h_sv_xz->Fill(aux.x - mevent->bsx_at_z(aux.z), aux.z - bsz, w);
+    h_sv_yz->Fill(aux.y - mevent->bsy_at_z(aux.z), aux.z - bsz, w);
+    h_sv_rz->Fill(mevent->bs2ddist(aux) * (aux.y - mevent->bsy_at_z(aux.z) >= 0 ? 1 : -1), aux.z - bsz, w);
 
     MFVVertexAux::stats trackpairdeta_stats(&aux, aux.trackpairdetas());
     MFVVertexAux::stats   trackpairdr_stats(&aux, aux.trackpairdrs());
 
     PairwiseHistos::ValueMap v = {
+        {"x", aux.x - mevent->bsx_at_z(aux.z)},
+        {"y", aux.y - mevent->bsy_at_z(aux.z)},
+        {"z", aux.z - bsz},
+        {"phi", atan2(aux.y - mevent->bsy_at_z(aux.z), aux.x - mevent->bsx_at_z(aux.z))},
+        {"phi_pv", atan2(aux.y - mevent->pvy, aux.x - mevent->pvx)},
+        {"cxx", aux.cxx},
+        {"cxy", aux.cxy},
+        {"cxz", aux.cxz},
+        {"cyy", aux.cyy},
+        {"cyz", aux.cyz},
+        {"czz", aux.czz},
+
         {"nlep",                    aux.which_lep.size()},
         {"ntracks",                 aux.ntracks()},
         {"ntracksptgt3",            aux.ntracksptgt(3)},
