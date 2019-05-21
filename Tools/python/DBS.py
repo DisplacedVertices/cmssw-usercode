@@ -47,6 +47,9 @@ class das_query:
                 raise RuntimeError('query %r (instance: %s) did not succeed. full das command:\n%s\ndas command output:\n%s' % (query, self.instance, full_cmd, ''.join(cmdout) if cmdout else cmdout))
             return ret
 
+def datasets(pattern, instance='global'):
+    return das_query(instance)('dataset dataset=%s' % pattern)
+
 def files_in_dataset(dataset, instance='global'):
     return das_query(instance)('file dataset=%s' % dataset,
                                lambda s: s.endswith('.root'))
