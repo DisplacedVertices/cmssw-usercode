@@ -59,6 +59,8 @@ int dvv_nbins = 40;
 double dvv_bin_width = 0.01;
 
 struct ConstructDvvcParameters {
+  int ibkg_begin_;
+  int ibkg_end_;
   bool is_mc_;
   bool only_10pc_;
   bool inject_signal_;
@@ -75,7 +77,9 @@ struct ConstructDvvcParameters {
   int max_npu_;
 
   ConstructDvvcParameters()
-    : is_mc_(true),
+    : ibkg_begin_(-999),
+      ibkg_end_(-999),
+      is_mc_(true),
       only_10pc_(false),
       inject_signal_(false),
       year_("2017"),
@@ -92,6 +96,8 @@ struct ConstructDvvcParameters {
   {
   }
 
+  int ibkg_begin() const { return ibkg_begin_; }
+  int ibkg_end() const { return ibkg_end_; }
   bool is_mc() const { return is_mc_; }
   bool only_10pc() const { return only_10pc_; }
   bool inject_signal() const { return inject_signal_; }
@@ -107,6 +113,8 @@ struct ConstructDvvcParameters {
   int min_npu() const { return min_npu_; }
   int max_npu() const { return max_npu_; }
 
+  ConstructDvvcParameters ibkg_begin(bool x)        { ConstructDvvcParameters y(*this); y.ibkg_begin_        = x; return y; }
+  ConstructDvvcParameters ibkg_end(bool x)          { ConstructDvvcParameters y(*this); y.ibkg_end_          = x; return y; }
   ConstructDvvcParameters is_mc(bool x)             { ConstructDvvcParameters y(*this); y.is_mc_             = x; return y; }
   ConstructDvvcParameters only_10pc(bool x)         { ConstructDvvcParameters y(*this); y.only_10pc_         = x; return y; }
   ConstructDvvcParameters inject_signal(bool x)     { ConstructDvvcParameters y(*this); y.inject_signal_     = x; return y; }
@@ -123,7 +131,7 @@ struct ConstructDvvcParameters {
   ConstructDvvcParameters max_npu(int x)            { ConstructDvvcParameters y(*this); y.max_npu_           = x; return y; }
 
   void print() const {
-    printf("is_mc = %d, only_10pc = %d, inject_signal = %d, year = %s, ntracks = %d, correct_bquarks = %d, bquarks = %d, btags = %d, vary_dphi = %d, clearing_from_eff = %d, vary_eff = %d, vary_bquarks = %d", is_mc(), only_10pc(), inject_signal(), year_.c_str(), ntracks(), correct_bquarks(), bquarks(), btags(), vary_dphi(), clearing_from_eff(), vary_eff(), vary_bquarks());
+    printf("ibkg_begin-end = %d-%d, is_mc = %d, only_10pc = %d, inject_signal = %d, year = %s, ntracks = %d, correct_bquarks = %d, bquarks = %d, btags = %d, vary_dphi = %d, clearing_from_eff = %d, vary_eff = %d, vary_bquarks = %d", ibkg_begin(), ibkg_end(), is_mc(), only_10pc(), inject_signal(), year_.c_str(), ntracks(), correct_bquarks(), bquarks(), btags(), vary_dphi(), clearing_from_eff(), vary_eff(), vary_bquarks());
   }
 };
 
@@ -179,6 +187,9 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
     else if (p.year() == "2017F")   { ibkg_begin = 19; ibkg_end = 19; }
     else { fprintf(stderr, "bad year"); exit(1); }
   }
+
+  if (p.ibkg_begin() != -999) ibkg_begin = p.ibkg_begin();
+  if (p.ibkg_end() != -999) ibkg_end = p.ibkg_end();
 
   const char* tree_path; int min_ntracks0 = 0; int max_ntracks0 = 1000000; int min_ntracks1 = 0; int max_ntracks1 = 1000000; //which ntracks?
   if (p.ntracks() == 3)      { tree_path = "mfvMiniTreeNtk3/t"; }
@@ -297,7 +308,9 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   for (int i = ibkg_begin; i <= ibkg_end; ++i) {
     mfv::MiniNtuple nt;
-    TFile* f = TFile::Open(TString::Format("%s/%s.root", file_path, samples[i]));
+    TString fn = TString::Format("%s/%s.root", file_path, samples[i]);
+    //std::cout << fn.Data() << "\n";
+    TFile* f = TFile::Open(fn);
     if (!f || !f->IsOpen()) { fprintf(stderr, "bad file"); exit(1); }
 
     TTree* t = (TTree*)f->Get(tree_path);
@@ -590,9 +603,11 @@ int main(int argc, const char* argv[]) {
     const char* outfn  = "2v_from_jets.root";
     const char* drawfn = "2v_from_jets.png";
     const int ntracks  = argc >= 3 ? atoi(argv[2]) : 3;
-    const char* year   = argc >= 4 ? argv[3] : "2017";
+    const char* year  = argc >= 4 ? argv[3] : "2017";
+    const int ibkg  = argc >= 5 ? atoi(argv[4]) : -999;
 
     ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks);
+    if (ibkg != -999) pars2 = pars2.ibkg_begin(ibkg).ibkg_end(ibkg);
     construct_dvvc(pars2, outfn);
     TCanvas c("c","",700,900);
     TFile* f = TFile::Open(outfn);
