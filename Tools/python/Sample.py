@@ -600,6 +600,7 @@ def main(samples_registry):
                     continue
                 is_complete = DBS.complete_at_site(site)
                 print (colors.green if is_complete else colors.yellow)(DBS.site_completions_string(site)),
+            print
 
     elif 'samplefiles' in argv:
         # rm a; touch a; for ds in '' miniaod; do for x in qcd ttbar leptonic; do ( samples samplefiles ${x}_samples_2017 $ds >> a ) ; done; done
