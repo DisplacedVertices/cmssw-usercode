@@ -97,6 +97,8 @@ private:
   const double max_bsbs2ddist;
   const double min_bs2derr;
   const double max_bs2derr;
+  const double min_rescale_bs2derr;
+  const double max_rescale_bs2derr;
   const double min_bs2dsig;
   const double min_geo2ddist;
   const double max_geo2ddist;
@@ -192,6 +194,8 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     max_bsbs2ddist(cfg.getParameter<double>("max_bsbs2ddist")),
     min_bs2derr(cfg.getParameter<double>("min_bs2derr")),
     max_bs2derr(cfg.getParameter<double>("max_bs2derr")),
+    min_rescale_bs2derr(cfg.getParameter<double>("min_rescale_bs2derr")),
+    max_rescale_bs2derr(cfg.getParameter<double>("max_rescale_bs2derr")),
     min_bs2dsig(cfg.getParameter<double>("min_bs2dsig")),
     min_geo2ddist(cfg.getParameter<double>("min_geo2ddist")),
     max_geo2ddist(cfg.getParameter<double>("max_geo2ddist")),
@@ -386,6 +390,8 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx, const MFVEvent* meve
     vtx.bs2ddist < max_bs2ddist &&
     vtx.bs2derr >= min_bs2derr &&
     vtx.bs2derr < max_bs2derr &&
+    vtx.rescale_bs2derr >= min_rescale_bs2derr &&
+    vtx.rescale_bs2derr < max_rescale_bs2derr &&
     vtx.bs2dsig() >= min_bs2dsig &&
     vtx.geo2ddist() >= min_geo2ddist &&
     vtx.geo2ddist() < max_geo2ddist &&
