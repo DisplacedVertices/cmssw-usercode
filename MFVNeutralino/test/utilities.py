@@ -122,8 +122,7 @@ def _background_samples(trigeff=False, year=2017):
             x += ['qcdbctoept%03i' % x for x in [15,20,30,80,170,250]]
     else:
         x = ['qcdht%04i' % x for x in [700, 1000, 1500, 2000]]
-        if year == 2017:
-            x += ['ttbarht%04i' % x for x in [600, 800, 1200, 2500]]
+        x += ['ttbarht%04i' % x for x in [600, 800, 1200, 2500]]
     return x
 
 def cmd_merge_background():
@@ -198,21 +197,6 @@ def cmd_minitree():
 def cmd_trackmover():
     cmd_report_data()
     cmd_hadd_data()
-
-def cmd_v0eff():
-    cmd_hadd_data()
-    scale = -AnalysisConstants.int_lumi_2015p6 * AnalysisConstants.scale_factor_2015p6
-    for fn,files in [
-        ('qcd.root', ['qcdht%04isum.root' % x for x in (500, 700, 1000, 1500, 2000)]),
-        ('qcdht1000and1500.root', ['qcdht%04isum.root' % x for x in (1000, 1500)]),
-        ('qcdht1000and1500_hip1p0_mit.root', ['qcdht%04i_hip1p0_mit.root' % x for x in (1000, 1500)]),
-        ]:
-        cmd = 'python ' + os.environ['CMSSW_BASE'] + '/src/JMTucker/Tools/python/Samples.py merge %f %s %s' % (scale, fn, ' '.join(files))
-        print cmd
-        os.system(cmd)
-    os.mkdir('no')
-    for fn in ['qcdht%04i%s.root' % (x,y) for x in [500, 700, 1000, 1500, 2000] for y in ['', 'ext', 'sum']] + ['qcdht1000_hip1p0_mit.root', 'qcdht1500_hip1p0_mit.root'] + ['%s2016H%i.root' % (x,y) for x in ['JetHT', 'ZeroBias'] for y in [2,3]]:
-        os.rename(fn, 'no/' + fn)
 
 def cmd_trigeff():
     cmd_hadd_mc_sums()
