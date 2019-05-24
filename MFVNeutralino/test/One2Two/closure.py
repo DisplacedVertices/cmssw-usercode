@@ -10,16 +10,21 @@ set_style()
 ps = plot_saver(plot_dir('closure_%s%s%s_%s' % (version.capitalize(), '' if is_mc else '_data', '_10pc' if only_10pc else '', year)), size=(700,700), root=False, log=False)
 
 fns = ['2v_from_jets%s_%s_3track_default_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_7track_default_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_4track_default_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_5track_default_%s.root' % ('' if is_mc else '_data', year, version)]
+
 ntk = ['3-track', '4-track-3-track', '4-track', '5-track']
 names = ['3-track x 3-track', '4-track x 3-track', '4-track x 4-track', '#geq 5-track x #geq 5-track']
 
-n2v = [651., 788., 2.22, 1.] if year == '2017' else [426., 509., 4.85, 1.]
-n2verr = [50., 54., 1.09, 0.6] if year == '2017' else [49., 53., 2.15, 0.6]
-if year == '2017p8':
-    n2v = [1077., 215., 7., 1.]
-    n2verr = [72., 31., 2.6, 0.6]
+n2v_year = {'2017': [651., 136., 2.22, 1.],
+            '2018': [426., 79., 4.85, 1.],
+            '2017p8': [1077., 215., 7.06, 1.]}
+n2verr_year = {'2017': [53., 24., 1.14, 0.6],
+               '2018': [50., 21., 2.35, 0.6],
+               '2017p8': [72., 31., 2.61, 0.6]}
 
-def errprop(val0, err0, val1, err1):
+n2v = n2v_year[year]
+n2verr = n2verr_year[year]
+
+def errprop(val0, val1, err0, err1):
     if val0 == 0 and val1 == 0:
         return 0
     elif val1 == 0:
@@ -29,191 +34,137 @@ def errprop(val0, err0, val1, err1):
     else:
         return ((err0 / val0)**2 + (err1 / val1)**2)**0.5
 
-def write(font, size, x, y, text):
-    w = ROOT.TLatex()
-    w.SetNDC()
-    w.SetTextFont(font)
-    w.SetTextSize(size)
-    w.DrawLatex(x, y, text)
-    return w
+def make_closure_plots(i):
+    dvv_closure = ('h_2v_dvv', 'h_c1v_dvv')
+    dphi_closure = ('h_2v_absdphivv', 'h_c1v_absdphivv')
 
-for i,ntracks in enumerate([3,7,4,5]):
-    if not is_mc and i > 2:
-        h = ROOT.TFile(fns[i]).Get('h_c1v_dvv')
-        h.SetTitle(';d_{VV}^{C} (cm);')
-        h.SetStats(0)
-        h.SetLineColor(ROOT.kRed)
-        h.SetLineWidth(2)
-        h.Scale(1./h.Integral())
-        h.Draw('hist e')
-        ps.save('%s_dvvc' % ntk[i])
-
-        ebin = ebins['data%s_%s_5track' % ('10pc' if only_10pc else '100pc', year)]
-
-        ec = ROOT.Double(0)
-        c = h.IntegralAndError(1,40,ec)
-        c1 = h.Integral(1,4)
-        ec1 = ebin[0] * c1
-        c2 = h.Integral(5,7)
-        ec2 = ebin[1] * c2
-        c3 = h.Integral(8,40)
-        ec3 = ebin[2] * c3
-
-        print ntk[i]
-        print ' constructed events: %7.2f +/- %5.2f, 0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (c, ec, c1, ec1, c2, ec2, c3, ec3)
-        print '    dVVC normalized: %7.3f +/- %5.3f, 0-400 um: %7.3f +/- %5.3f, 400-700 um: %6.3f +/- %5.3f, 700-40000 um: %6.3f +/- %5.3f' % (c/c, ec/c, c1/c, ec1/c, c2/c, ec2/c, c3/c, ec3/c)
-
-    hh = ROOT.TFile(fns[i]).Get('h_2v_dvv')
-    hh.SetTitle(';d_{VV} (cm);Events')
-    hh.SetStats(0)
-    hh.SetLineColor(ROOT.kBlue)
-    hh.SetLineWidth(2)
-    if is_mc:
-        if hh.Integral() > 0:
-            hh.Scale(n2v[i]/hh.Integral())
+    for closure in (dvv_closure, dphi_closure):
+        simulated = ROOT.TFile(fns[i]).Get(closure[0])
+        simulated.SetStats(0)
+        simulated.SetLineColor(ROOT.kBlue)
+        simulated.SetLineWidth(2)
+        if is_mc:
+            if simulated.Integral() > 0:
+                simulated.Scale(n2v[i]/simulated.Integral())
         else:
-            hh.SetMaximum(0.4)
-    hh.SetMinimum(0)
-    hh.Draw()
+            simulated.SetMaximum(0.4)
+        simulated.SetMinimum(0)
+        simulated.Draw()
 
-    h = ROOT.TFile(fns[i]).Get('h_c1v_dvv')
-    h.SetStats(0)
-    h.SetLineColor(ROOT.kRed)
-    h.SetLineWidth(2)
-    if is_mc:
-        eintegral = ROOT.Double(0)
-        integral = h.IntegralAndError(0, h.GetNbinsX(), eintegral)
-        ratio = n2v[i] / integral
-        eratio = ratio * errprop(n2v[i], n2verr[i], integral, eintegral)
+        template = ROOT.TFile(fns[i]).Get(closure[1])
+        template.SetStats(0)
+        template.SetLineColor(ROOT.kRed)
+        template.SetLineWidth(2)
+        if is_mc:
+            ratio = n2v[i] / template.Integral()
 
-        newerrarray = []
-        for bin in range(h.GetNbinsX() + 1):
-            newerr = ratio * h.GetBinContent(bin) * errprop(ratio, eratio, h.GetBinContent(bin), h.GetBinError(bin))
-            newerrarray.append(newerr)
-
-        h.Scale(ratio)
-        for bin, err in enumerate(newerrarray):
-            h.SetBinError(bin, err)
-    else:
-        if hh.Integral() > 0:
-            h.Scale(hh.Integral()/h.Integral())
+            newerrarray = []
+            for bin in range(template.GetNbinsX() + 1):
+                newerr = template.GetBinContent(bin) / template.Integral() * n2verr[i]
+                newerrarray.append(newerr)
+            template.Scale(ratio)
+            for bin, err in enumerate(newerrarray):
+                template.SetBinError(bin, err)
         else:
-            h.Scale(1./h.Integral())
-    uncertband = h.Clone('uncertband')
-    uncertband.SetFillColor(ROOT.kRed - 3)
-    uncertband.SetFillStyle(3254)
-    uncertband.Draw('E2 sames')
-    h.Draw('hist sames')
+            if simulated.Integral() > 0:
+                template.Scale(simulated.Integral()/template.Integral())
+            else:
+                template.Scale(1./template.Integral())
+        uncertband = template.Clone('uncertband')
+        uncertband.SetFillColor(ROOT.kRed - 3)
+        uncertband.SetFillStyle(3254)
+        uncertband.Draw('E2 sames')
+        template.Draw('hist sames')
 
-    l1 = ROOT.TLegend(0.35, 0.75, 0.85, 0.85)
-    l1.AddEntry(hh, 'Simulated events' if is_mc else 'Data')
-    l1.AddEntry(h, 'Background template')
-    l1.SetFillColor(0)
-    l1.Draw()
-    ps.save(ntk[i])
+        l1 = ROOT.TLegend(0.35, 0.75, 0.85, 0.85)
+        l1.AddEntry(simulated, 'Simulated events' if is_mc else 'Data')
+        l1.AddEntry(template, 'Background template')
+        l1.SetFillColor(0)
+        l1.Draw()
+        ps.save(ntk[i] if 'phi' not in closure[0] else '%s_dphi' % ntk[i])
 
-    es = ROOT.Double(0)
-    s = hh.IntegralAndError(1,40,es)
-    if s == 0:
-        s = 1
-    es1 = ROOT.Double(0)
-    s1 = hh.IntegralAndError(1,4,es1)
-    if s1 == 0:
-        s1 = 1
-    es2 = ROOT.Double(0)
-    s2 = hh.IntegralAndError(5,7,es2)
-    if s2 == 0:
-        s2 = 1
-    es3 = ROOT.Double(0)
-    s3 = hh.IntegralAndError(8,40,es3)
-    if s3 == 0:
-        s3 = 1
+def calculate_ratio(x, y, xerr, yerr):
+    y_ = y
+    yerr_ = yerr
 
-    sample = ''
-    if is_mc:
-        sample = 'MCeffective'
-    elif only_10pc:
+    if y == 0: 
+        y_ = 1.
+        yerr_ = 1.
+
+    r = x/y_
+    e = r * errprop(x, y_, xerr, yerr_)
+    return r, e
+
+def get_bin_integral_and_stat_uncert(hist):
+    sample = 'MCeffective' if is_mc else 'data100pc'
+    if not is_mc and only_10pc:
         sample = 'data10pc'
-    else:
-        sample = 'data100pc'
     ebin = ebins['%s_%s_%dtrack' % (sample, year, 4 if ntracks==7 else ntracks)]
 
-    ec = ROOT.Double(0)
-    c = h.IntegralAndError(1,40,ec)
-    c1 = h.Integral(1,4)
-    ec1 = ebin[0] * c1
-    c2 = h.Integral(5,7)
-    ec2 = ebin[1] * c2
-    c3 = h.Integral(8,40)
-    ec3 = ebin[2] * c3
+    bin1 = bin1_err = bin2 = bin2_err = bin3 = bin3_err = 0.
 
-    r = c/s
-    er = (c/s) * ((ec/c)**2 + (es/s)**2)**0.5
-    r1 = c1/s1
-    er1 = (c1/s1) * ((ec1/c1)**2 + (es1/s1)**2)**0.5
-    r2 = c2/s2
-    er2 = (c2/s2) * ((ec2/c2)**2 + (es2/s2)**2)**0.5
-    r3 = c3/s3
-    er3 = (c3/s3) * ((ec3/c3)**2 + (es3/s3)**2)**0.5
-
-    print ntk[i]
-    print '   simulated events: %7.2f +/- %5.2f, 0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (s, es, s1, es1, s2, es2, s3, es3)
-    print ' constructed events: %7.2f +/- %5.2f, 0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (c, ec, c1, ec1, c2, ec2, c3, ec3)
-    print '     dVV normalized: %7.3f +/- %5.3f, 0-400 um: %7.3f +/- %5.3f, 400-700 um: %6.3f +/- %5.3f, 700-40000 um: %6.3f +/- %5.3f' % (s/s, es/s, s1/s, es1/s, s2/s, es2/s, s3/s, es3/s)
-    print '    dVVC normalized: %7.3f +/- %5.3f, 0-400 um: %7.3f +/- %5.3f, 400-700 um: %6.3f +/- %5.3f, 700-40000 um: %6.3f +/- %5.3f' % (c/c, ec/c, c1/c, ec1/c, c2/c, ec2/c, c3/c, ec3/c)
-    print '   ratio dVVC / dVV: %7.2f +/- %5.2f, 0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % (r, er, r1, er1, r2, er2, r3, er3)
-
-    hh = ROOT.TFile(fns[i]).Get('h_2v_absdphivv')
-    hh.SetTitle(';|#Delta#phi_{VV}|;Events')
-    hh.SetStats(0)
-    hh.SetLineColor(ROOT.kBlue)
-    hh.SetLineWidth(2)
-    if is_mc:
-        if hh.Integral() > 0:
-            hh.Scale(n2v[i]/hh.Integral())
-        else:
-            hh.SetMaximum(0.4)
-    hh.SetMinimum(0)
-    hh.Draw()
-
-    h = ROOT.TFile(fns[i]).Get('h_c1v_absdphivv')
-    h.SetStats(0)
-    h.SetLineColor(ROOT.kRed)
-    h.SetLineWidth(2)
-    if is_mc:
-        eintegral = ROOT.Double(0)
-        integral = h.IntegralAndError(0, h.GetNbinsX(), eintegral)
-        ratio = n2v[i] / integral
-        eratio = ratio * errprop(n2v[i], n2verr[i], integral, eintegral)
-        newerrarray = []
-        for bin in range(h.GetNbinsX() + 1):
-            newerr = ratio * h.GetBinContent(bin) * errprop(ratio, eratio, h.GetBinContent(bin), h.GetBinError(bin))
-            newerrarray.append(newerr)
-
-        h.Scale(ratio)
-        for bin, err in enumerate(newerrarray):
-            h.SetBinError(bin, err)
+    if 'c1v' not in hist.GetName():
+        bin1, bin1_err = get_integral(hist, xhi=0.04, include_last_bin=False)
+        bin2, bin2_err = get_integral(hist, xlo=0.04, xhi=0.07, include_last_bin=False)
+        bin3, bin3_err = get_integral(hist, xlo=0.07, xhi=0.4, include_last_bin=False)
     else:
-        if hh.Integral() > 0:
-            h.Scale(hh.Integral()/h.Integral())
-        else:
-            h.Scale(1./h.Integral())
-    uncertband = h.Clone('uncertband')
-    uncertband.SetFillColor(ROOT.kRed - 3)
-    uncertband.SetFillStyle(3254)
-    uncertband.Draw('E2 sames')
-    h.Draw('hist sames')
+        bin1 = get_integral(hist, 0., 0.04, integral_only=True, include_last_bin=False)
+        bin1_err = bin1 * ebin[0]
+        bin2 = get_integral(hist, 0.04, 0.07, integral_only=True, include_last_bin=False)
+        bin2_err = bin2 * ebin[1]
+        bin3 = get_integral(hist, 0.07, 0.4, integral_only=True, include_last_bin=False)
+        bin3_err = bin3 * ebin[2]
+    return [(bin1, bin1_err), (bin2, bin2_err), (bin3, bin3_err)]
 
-    l1 = ROOT.TLegend(0.15, 0.75, 0.65, 0.85)
-    l1.AddEntry(hh, 'Simulated events' if is_mc else 'Data')
-    l1.AddEntry(h, 'Construction')
-    l1.SetFillColor(0)
-    l1.Draw()
+def get_norm_frac_uncert(bins, total):
+    allbins = []
+    norm_sum = 0.
+    for bin in bins:
+        norm_sum += (bin[1] / total)**2
+    
+    for bin in bins:
+        frac_uncert = ((1 - 2 * bin[0] / total) * (bin[1] / total)**2 + (bin[0] / total)**2 * norm_sum)**0.5
+        allbins.append((bin[0] / total, frac_uncert))
+    return allbins
 
-    if not is_mc and not only_10pc and year == '2015p6':
-        write(42, 0.040, 0.150, 0.700, names[i])
-        write(61, 0.050, 0.098, 0.913, 'CMS')
-        write(52, 0.035, 0.200, 0.913, 'Preliminary')
-        write(42, 0.050, 0.560, 0.913, '38.5 fb^{-1} (13 TeV)')
+def get_ratios(nums, dens):
+    ratios = []
+    for num, den in zip(nums, dens):
+        r_bin, r_bin_err = calculate_ratio(num[0], den[0], num[1], den[1])
+        ratios.append((r_bin, r_bin_err))
+    return ratios
 
-    ps.save('%s_dphi' % ntk[i])
+for i, ntracks in enumerate([3,7,4,5]):
+    make_closure_plots(i)
+
+    simulated = ROOT.TFile(fns[i]).Get('h_2v_dvv')
+    constructed = ROOT.TFile(fns[i]).Get('h_c1v_dvv')
+
+    if is_mc:
+        if simulated.Integral() > 0:
+            simulated.Scale(n2v[i] / simulated.Integral())
+        constructed.Scale(n2v[i] / constructed.Integral())
+
+    sim_total, sim_total_err = get_integral(simulated)
+    sim_bins = get_bin_integral_and_stat_uncert(simulated)
+
+    con_total, con_total_err = get_integral(constructed)
+    con_bins = get_bin_integral_and_stat_uncert(constructed)
+
+    sim_bin_norm = get_norm_frac_uncert(sim_bins, sim_total)
+    con_bin_norm = get_norm_frac_uncert(con_bins, con_total)
+
+    ratios = get_ratios(con_bin_norm, sim_bin_norm)
+
+    sim = (sim_total, sim_total_err) + tuple(x for bin in sim_bins for x in bin)
+    con = (con_total, con_total_err) + tuple(x for bin in con_bins for x in bin)
+    sim_norm = tuple(x for bin in sim_bin_norm for x in bin)
+    con_norm = tuple(x for bin in con_bin_norm for x in bin)
+    rat = tuple(x for bin in ratios for x in bin)
+    
+    print ntk[i]
+    print '   simulated events: %7.2f +/- %5.2f, 0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % sim
+    print ' constructed events: %7.2f +/- %5.2f, 0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % con
+    print '     dVV normalized:                    0-400 um: %7.3f +/- %5.3f, 400-700 um: %6.3f +/- %5.3f, 700-40000 um: %6.3f +/- %5.3f' % sim_norm
+    print '    dVVC normalized:                    0-400 um: %7.3f +/- %5.3f, 400-700 um: %6.3f +/- %5.3f, 700-40000 um: %6.3f +/- %5.3f' % con_norm
+    print '   ratio dVVC / dVV:                    0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % rat
