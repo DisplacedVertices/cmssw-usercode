@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+raise 'use new btagging'
+
 from JMTucker.Tools.general import named_product
 from JMTucker.MFVNeutralino.NtupleCommon import *
 
