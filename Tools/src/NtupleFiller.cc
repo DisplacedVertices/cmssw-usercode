@@ -119,7 +119,7 @@ namespace jmt {
     nt.add(jet.pt(), jet.eta(), jet.phi(), jet.energy(),
            jet.jecFactor("Uncorrected"),
            ntracks,
-           jet.bDiscriminator("pfDeepFlavourJetTags:probb") + jet.bDiscriminator("pfDeepFlavourJetTags:probbb") + jet.bDiscriminator("pfDeepFlavourJetTags:problebp"),
+           jet.bDiscriminator("pfDeepFlavourJetTags:probb") + jet.bDiscriminator("pfDeepFlavourJetTags:probbb") + jet.bDiscriminator("pfDeepFlavourJetTags:problepb"),
            jet.hadronFlavour(),
            0);
   }

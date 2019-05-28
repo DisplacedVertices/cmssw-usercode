@@ -339,7 +339,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->jet_pt.push_back(jet.pt());
     mevent->jet_raw_pt.push_back(jet.pt()*jet.jecFactor("Uncorrected"));
     mevent->jet_bdisc_old.push_back(jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
-    const float bdisc = jet.bDiscriminator("pfDeepFlavourJetTags:probb") + jet.bDiscriminator("pfDeepFlavourJetTags:probbb") + jet.bDiscriminator("pfDeepFlavourJetTags:problebp");
+    const float bdisc = jet.bDiscriminator("pfDeepFlavourJetTags:probb") + jet.bDiscriminator("pfDeepFlavourJetTags:probbb") + jet.bDiscriminator("pfDeepFlavourJetTags:problepb");
     mevent->jet_bdisc.push_back(bdisc);
     mevent->jet_eta.push_back(jet.eta());
     mevent->jet_phi.push_back(jet.phi());
