@@ -2,6 +2,7 @@ from JMTucker.Tools.ROOTTools import *
 from statmodel import ebins
 ROOT.TH1.AddDirectory(0)
 
+do_btag = False
 is_mc = True
 only_10pc = False
 year = '2017p8'
@@ -10,6 +11,9 @@ set_style()
 ps = plot_saver(plot_dir('closure_%s%s%s_%s' % (version.capitalize(), '' if is_mc else '_data', '_10pc' if only_10pc else '', year)), size=(700,700), root=False, log=False)
 
 fns = ['2v_from_jets%s_%s_3track_default_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_7track_default_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_4track_default_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_5track_default_%s.root' % ('' if is_mc else '_data', year, version)]
+
+# for overlaying the btag-based template
+fns_btag = ['2v_from_jets%s_%s_3track_btag_corrected_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_7track_btag_corrected_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_4track_btag_corrected_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_5track_btag_corrected_%s.root' % ('' if is_mc else '_data', year, version)]
 
 ntk = ['3-track', '4-track-3-track', '4-track', '5-track']
 names = ['3-track x 3-track', '4-track x 3-track', '4-track x 4-track', '#geq 5-track x #geq 5-track']
@@ -34,6 +38,28 @@ def errprop(val0, val1, err0, err1):
     else:
         return ((err0 / val0)**2 + (err1 / val1)**2)**0.5
 
+def scale_and_draw_template(template, n2v, i, simulated, color) :
+    template.SetStats(0)
+    template.SetLineColor(color)
+    template.SetLineWidth(2)
+    if is_mc:
+        ratio = n2v[i] / template.Integral()
+
+        newerrarray = []
+        for bin in range(template.GetNbinsX() + 1):
+            newerr = template.GetBinContent(bin) / template.Integral() * n2verr[i]
+            newerrarray.append(newerr)
+        template.Scale(ratio)
+        for bin, err in enumerate(newerrarray):
+            template.SetBinError(bin, err)
+    else:
+        if simulated.Integral() > 0:
+            template.Scale(simulated.Integral()/template.Integral())
+        else:
+            template.Scale(1./template.Integral())
+    template.Draw('hist sames')
+
+
 def make_closure_plots(i):
     dvv_closure = ('h_2v_dvv', 'h_c1v_dvv')
     dphi_closure = ('h_2v_absdphivv', 'h_c1v_absdphivv')
@@ -52,33 +78,28 @@ def make_closure_plots(i):
         simulated.Draw()
 
         template = ROOT.TFile(fns[i]).Get(closure[1])
-        template.SetStats(0)
-        template.SetLineColor(ROOT.kRed)
-        template.SetLineWidth(2)
-        if is_mc:
-            ratio = n2v[i] / template.Integral()
+        scale_and_draw_template(template, n2v, i, simulated, ROOT.kRed)
 
-            newerrarray = []
-            for bin in range(template.GetNbinsX() + 1):
-                newerr = template.GetBinContent(bin) / template.Integral() * n2verr[i]
-                newerrarray.append(newerr)
-            template.Scale(ratio)
-            for bin, err in enumerate(newerrarray):
-                template.SetBinError(bin, err)
-        else:
-            if simulated.Integral() > 0:
-                template.Scale(simulated.Integral()/template.Integral())
-            else:
-                template.Scale(1./template.Integral())
         uncertband = template.Clone('uncertband')
-        uncertband.SetFillColor(ROOT.kRed - 3)
-        uncertband.SetFillStyle(3254)
+        uncertband.SetFillColor(ROOT.kRed-3)
+        uncertband.SetFillStyle(3004)
         uncertband.Draw('E2 sames')
-        template.Draw('hist sames')
+
 
         l1 = ROOT.TLegend(0.35, 0.75, 0.85, 0.85)
         l1.AddEntry(simulated, 'Simulated events' if is_mc else 'Data')
-        l1.AddEntry(template, 'Background template')
+        l1.AddEntry(template, 'Background template' + (' (bquark method)' if do_btag else '') )
+
+        if do_btag :
+            template_btag = ROOT.TFile(fns_btag[i]).Get(closure[1])
+            scale_and_draw_template(template_btag, n2v, i, simulated, ROOT.kGreen+2)
+
+            uncertband_btag = template_btag.Clone('uncertband_btag')
+            uncertband_btag.SetFillColor(ROOT.kGreen-3)
+            uncertband_btag.SetFillStyle(3005)
+            uncertband_btag.Draw('E2 sames')
+            l1.AddEntry(template_btag, 'Background template (btag method)')
+
         l1.SetFillColor(0)
         l1.Draw()
         ps.save(ntk[i] if 'phi' not in closure[0] else '%s_dphi' % ntk[i])
