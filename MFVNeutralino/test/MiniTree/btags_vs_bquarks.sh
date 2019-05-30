@@ -94,7 +94,7 @@ do
         fi
 
         echo $x
-        ./btags_vs_bquarks.exe $fin $fout $ntk
+        ./btags_vs_bquarks.exe $fin $fout $ntk $year
         if [[ $? != 0 ]]; then
             echo problem, exit code was $?
             exit 1

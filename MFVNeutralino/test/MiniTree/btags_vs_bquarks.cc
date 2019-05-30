@@ -9,6 +9,8 @@
 #include "JMTucker/Tools/interface/Utilities.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
+int year = 0;
+
 const int NBQUARKS = 3;
 const char* bquarks_hist_names[NBQUARKS] = {"", "_bquarks", "_nobquarks"};
 const char* bquarks_nice_names[NBQUARKS] = {"", " with b quarks", " without b quarks"};
@@ -19,7 +21,8 @@ const char* vtx_nice_names[NVTX] = {"one-vertex", "two-vertex"};
 
 const int NBDISC = 3;
 const char* bdisc_names[NBDISC] = {"loose", "medium", "tight"};
-const double bdisc_mins[NBDISC] = {0.5803, 0.8838, 0.9693};
+const double bdisc_mins_2017[NBDISC] = {0.0521, 0.3033, 0.7489};
+const double bdisc_mins_2018[NBDISC] = {0.0494, 0.2770, 0.7264};
 
 const int NBTAGS = 2;
 const int nbtag_mins[NBTAGS] = {1, 2};
@@ -110,9 +113,9 @@ void book_hists(int ntk) {
         h_nbjets_btag[i_nbquarks][i_nvtx][i_nbdisc] = new TH1F(TString::Format("h%s_%s_nbjets_%s_btag", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx], bdisc_names[i_nbdisc]), TString::Format("%d-track %s events%s;Number of %s b-tagged b jets;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks], bdisc_names[i_nbdisc]), 40, 0, 40);
         h_ncjets_btag[i_nbquarks][i_nvtx][i_nbdisc] = new TH1F(TString::Format("h%s_%s_ncjets_%s_btag", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx], bdisc_names[i_nbdisc]), TString::Format("%d-track %s events%s;Number of %s b-tagged c jets;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks], bdisc_names[i_nbdisc]), 40, 0, 40);
         h_nljets_btag[i_nbquarks][i_nvtx][i_nbdisc] = new TH1F(TString::Format("h%s_%s_nljets_%s_btag", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx], bdisc_names[i_nbdisc]), TString::Format("%d-track %s events%s;Number of %s b-tagged udsg jets;Events", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks], bdisc_names[i_nbdisc]), 40, 0, 40);
-        h_scalefactor_b[i_nbquarks][i_nvtx][i_nbdisc] = new TH1F(TString::Format("h%s_%s_scalefactor_b_%s_btag", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx], bdisc_names[i_nbdisc]), TString::Format("%d-track %s events%s;2017 data-to-simulation scale factor for CSVv2 %s btag b jet identification efficiency;Number of b jets", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks], bdisc_names[i_nbdisc]), 50, 0.75, 1.25);
-        h_scalefactor_c[i_nbquarks][i_nvtx][i_nbdisc] = new TH1F(TString::Format("h%s_%s_scalefactor_c_%s_btag", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx], bdisc_names[i_nbdisc]), TString::Format("%d-track %s events%s;2017 data-to-simulation scale factor for CSVv2 %s btag c jet misidentification probability;Number of c jets", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks], bdisc_names[i_nbdisc]), 50, 0.75, 1.25);
-        h_scalefactor_l[i_nbquarks][i_nvtx][i_nbdisc] = new TH1F(TString::Format("h%s_%s_scalefactor_l_%s_btag", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx], bdisc_names[i_nbdisc]), TString::Format("%d-track %s events%s;2017 data-to-simulation scale factor for CSVv2 %s btag udsg jet misidentification probability;Number of udsg jets", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks], bdisc_names[i_nbdisc]), 50, 0.75, 1.25);
+        h_scalefactor_b[i_nbquarks][i_nvtx][i_nbdisc] = new TH1F(TString::Format("h%s_%s_scalefactor_b_%s_btag", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx], bdisc_names[i_nbdisc]), TString::Format("%d-track %s events%s; %s data-to-simulation scale factor for DeepJet %s btag b jet identification efficiency;Number of b jets", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks], std::to_string(year), bdisc_names[i_nbdisc]), 50, 0.75, 1.25);
+        h_scalefactor_c[i_nbquarks][i_nvtx][i_nbdisc] = new TH1F(TString::Format("h%s_%s_scalefactor_c_%s_btag", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx], bdisc_names[i_nbdisc]), TString::Format("%d-track %s events%s; %s data-to-simulation scale factor for DeepJet %s btag c jet misidentification probability;Number of c jets", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks], std::to_string(year), bdisc_names[i_nbdisc]), 50, 0.75, 1.25);
+        h_scalefactor_l[i_nbquarks][i_nvtx][i_nbdisc] = new TH1F(TString::Format("h%s_%s_scalefactor_l_%s_btag", bquarks_hist_names[i_nbquarks], vtx_hist_names[i_nvtx], bdisc_names[i_nbdisc]), TString::Format("%d-track %s events%s; %s data-to-simulation scale factor for DeepJet %s btag udsg jet misidentification probability;Number of udsg jets", ntk, vtx_nice_names[i_nvtx], bquarks_nice_names[i_nbquarks], std::to_string(year), bdisc_names[i_nbdisc]), 50, 0.75, 1.25);
       }
     }
   }
@@ -160,23 +163,53 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
       assert(x >= 20); if (x > 1000) x = 1000;
       if (hadron_flavor == 2) {
         ++nbjets;
-        h_scalefactor_b[i_nbquarks[i]][i_nvtx][0]->Fill(0.986369+(-(4.21155e-05*(log(x+19)*(log(x+18)*(3-(-(6.02128*log(x+18)))))))), w);
-        h_scalefactor_b[i_nbquarks[i]][i_nvtx][1]->Fill(1.09079*((1.+(0.180764*x))/(1.+(0.216797*x))), w);
-        h_scalefactor_b[i_nbquarks[i]][i_nvtx][2]->Fill(0.91423*((1.+(0.00958053*x))/(1.+(0.010132*x))), w);
+        if(year == 2017){
+          h_scalefactor_b[i_nbquarks[i]][i_nvtx][0]->Fill(1.04891*((1.+(0.0145976*x))/(1.+(0.0165274*x))), w);
+          h_scalefactor_b[i_nbquarks[i]][i_nvtx][1]->Fill(0.991757*((1.+(0.0209615*x))/(1.+(0.0234962*x))), w);
+          h_scalefactor_b[i_nbquarks[i]][i_nvtx][2]->Fill(0.908648*((1.+(0.00516407*x))/(1.+(0.00564675*x))), w);
+        }
+        else if(year == 2018){
+          h_scalefactor_b[i_nbquarks[i]][i_nvtx][0]->Fill(0.873139+(0.00420739*(log(x+19)*(log(x+18)*(3-(0.380932*log(x+18)))))), w);
+          h_scalefactor_b[i_nbquarks[i]][i_nvtx][1]->Fill(1.0097+(-(2.89663e-06*(log(x+19)*(log(x+18)*(3-(-(110.381*log(x+18)))))))), w);
+          h_scalefactor_b[i_nbquarks[i]][i_nvtx][2]->Fill(0.818896+(0.00682971*(log(x+19)*(log(x+18)*(3-(0.440998*log(x+18)))))), w);
+        }
       } else if (hadron_flavor == 1) {
         ++ncjets;
-        h_scalefactor_c[i_nbquarks[i]][i_nvtx][0]->Fill(0.986369+(-(4.21155e-05*(log(x+19)*(log(x+18)*(3-(-(6.02128*log(x+18)))))))), w);
-        h_scalefactor_c[i_nbquarks[i]][i_nvtx][1]->Fill(1.09079*((1.+(0.180764*x))/(1.+(0.216797*x))), w);
-        h_scalefactor_c[i_nbquarks[i]][i_nvtx][2]->Fill(0.91423*((1.+(0.00958053*x))/(1.+(0.010132*x))), w);
+        if(year == 2017){
+          h_scalefactor_c[i_nbquarks[i]][i_nvtx][0]->Fill(1.04891*((1.+(0.0145976*x))/(1.+(0.0165274*x))), w);
+          h_scalefactor_c[i_nbquarks[i]][i_nvtx][1]->Fill(0.991757*((1.+(0.0209615*x))/(1.+(0.0234962*x))), w);
+          h_scalefactor_c[i_nbquarks[i]][i_nvtx][2]->Fill(0.908648*((1.+(0.00516407*x))/(1.+(0.00564675*x))), w);
+        }
+        else if(year == 2018){
+          h_scalefactor_c[i_nbquarks[i]][i_nvtx][0]->Fill(0.873139+(0.00420739*(log(x+19)*(log(x+18)*(3-(0.380932*log(x+18)))))), w);
+          h_scalefactor_c[i_nbquarks[i]][i_nvtx][1]->Fill(1.0097+(-(2.89663e-06*(log(x+19)*(log(x+18)*(3-(-(110.381*log(x+18)))))))), w);
+          h_scalefactor_c[i_nbquarks[i]][i_nvtx][2]->Fill(0.818896+(0.00682971*(log(x+19)*(log(x+18)*(3-(0.440998*log(x+18)))))), w);
+        }
       } else {
         ++nljets;
-        h_scalefactor_l[i_nbquarks[i]][i_nvtx][0]->Fill(0.948763+0.000459508*x+-2.36079e-07*x*x+4.13462/x, w);
-        h_scalefactor_l[i_nbquarks[i]][i_nvtx][1]->Fill(0.949449+0.000516201*x+7.13398e-08*x*x+-3.55644e-10*x*x*x, w);
-        h_scalefactor_l[i_nbquarks[i]][i_nvtx][2]->Fill(0.943355+8.95816/(x*x)+0.000240703*x, w);
+        if(year == 2017){
+          h_scalefactor_l[i_nbquarks[i]][i_nvtx][0]->Fill(1.43763+-0.000337048*x+2.22072e-07*x*x+-4.85489/x, w);
+          h_scalefactor_l[i_nbquarks[i]][i_nvtx][1]->Fill(1.40779+-0.00094558*x+8.74982e-07*x*x+-4.67814/x, w);
+          h_scalefactor_l[i_nbquarks[i]][i_nvtx][2]->Fill(0.952956+0.000569069*x+-1.88872e-06*x*x+1.25729e-09*x*x*x, w);
+        }
+        else if(year == 2018){
+          h_scalefactor_l[i_nbquarks[i]][i_nvtx][0]->Fill(1.61341+-0.000566321*x+1.99464e-07*x*x+-5.09199/x, w);
+          h_scalefactor_l[i_nbquarks[i]][i_nvtx][1]->Fill(1.59373+-0.00113028*x+8.66631e-07*x*x+-1.10505/x, w);
+          h_scalefactor_l[i_nbquarks[i]][i_nvtx][2]->Fill(1.77088+-0.00371551*x+5.86489e-06*x*x+-3.01178e-09*x*x*x, w);
+        }
       }
 
       for (int i_nbdisc = 0; i_nbdisc < NBDISC; ++i_nbdisc) {
-        if (bdisc >= bdisc_mins[i_nbdisc]) {
+
+        bool bdisc_passes = false;
+        if (year == 2017)      bdisc_passes = (bdisc >= bdisc_mins_2017[i_nbdisc]);
+        else if (year == 2018) bdisc_passes = (bdisc >= bdisc_mins_2018[i_nbdisc]);
+        else{
+          std::cerr << "Invalid year (" << year << ")!" << std::endl;
+          abort();
+        }
+
+        if (bdisc_passes) {
           ++nbtags[i_nbdisc];
           if (hadron_flavor == 2) {
             ++nbjets_btag[i_nbdisc];
@@ -265,14 +298,15 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
 }
 
 int main(int argc, char** argv) {
-  if (argc < 4) {
-    fprintf(stderr, "usage: %s in_fn out_fn ntk\n", argv[0]);
+  if (argc < 5) {
+    fprintf(stderr, "usage: %s in_fn out_fn ntk year\n", argv[0]);
     return 1;
   }
 
   const char* fn = argv[1];
   const char* out_fn = argv[2];
   const int ntk = atoi(argv[3]);
+  year = atoi(argv[4]);
 
   if (!(ntk == 3 || ntk == 4 || ntk == 7 || ntk == 5)) {
     fprintf(stderr, "ntk must be one of 3,4,7,5\n");

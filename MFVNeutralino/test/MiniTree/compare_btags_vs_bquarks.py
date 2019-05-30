@@ -1,8 +1,9 @@
 from JMTucker.Tools.ROOTTools import *
+import sys
 
 version = 'V25m'
-ntk = 3
-year = 2017
+year = int(sys.argv[1])
+ntk = int(sys.argv[2])
 
 set_style()
 ps = plot_saver(plot_dir('compare_btags_vs_bquarks_MiniTree%s_ntk%s_%s' % (version,ntk,year)), size=(600,600))
