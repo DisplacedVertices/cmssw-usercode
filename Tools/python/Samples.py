@@ -647,6 +647,10 @@ for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + mfv_signal_
 for x in qcd_samples_2017 + ttbar_samples_2017 + mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017:
     x.add_dataset("ntuplev24m_rescalednsigmadxy")
 
+for x in qcd_samples_2017 + ttbar_samples_2017 + \
+         qcd_samples_2018 + ttbar_samples_2018:
+    x.add_dataset("ntuplev25m")
+
 ########
 # automatic condor declarations for ntuples
 ########
