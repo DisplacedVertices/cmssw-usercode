@@ -46,7 +46,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if year == 2017:
         samples = Samples.qcd_samples_2017 + Samples.ttbar_samples_2017
     elif year == 2018:
-        samples = Samples.qcd_samples_2018 + Samples.ttbar_samples_2017
+        samples = Samples.qcd_samples_2018 + Samples.ttbar_samples_2018
 
     set_splitting(samples, 'miniaod', 'default', default_files_per=16)
 
