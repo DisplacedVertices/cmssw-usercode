@@ -40,9 +40,12 @@ namespace mfv {
     float jet_phi[50];
     float jet_energy[50];
     unsigned char jet_id[50];
+    float jet_bdisc_old[50];
     float jet_bdisc[50];
     float ht(float min_jet_pt=40.) const;
-    int nbtags(float min_bdisc) const;
+    int nbtags_(float min_bdisc, bool old) const;
+    int nbtags_old(float min_bdisc) const { return nbtags_(min_bdisc, true); }
+    int nbtags(float min_bdisc) const { return nbtags_(min_bdisc, false); }
     float gen_x[2];
     float gen_y[2];
     float gen_z[2];

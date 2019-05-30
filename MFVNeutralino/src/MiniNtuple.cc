@@ -59,10 +59,11 @@ namespace mfv {
     return sum;
   }
 
-  int MiniNtuple::nbtags(float min_bdisc) const {
+  int MiniNtuple::nbtags_(float min_bdisc, bool old) const {
     int sum = 0;
+    const float* bdisc = old ? jet_bdisc_old : jet_bdisc;
     for (int i = 0; i < njets; ++i)
-      if (jet_bdisc[i] >= min_bdisc)
+      if (bdisc[i] >= min_bdisc)
         ++sum;
     return sum;
   }
@@ -92,6 +93,7 @@ namespace mfv {
     tree->Branch("jet_phi", nt.jet_phi, "jet_phi[njets]/F");
     tree->Branch("jet_energy", nt.jet_energy, "jet_energy[njets]/F");
     tree->Branch("jet_id", nt.jet_id, "jet_id[njets]/b");
+    tree->Branch("jet_bdisc_old", nt.jet_bdisc_old, "jet_bdisc_old[njets]/F");
     tree->Branch("jet_bdisc", nt.jet_bdisc, "jet_bdisc[njets]/F");
     tree->Branch("gen_x", nt.gen_x, "gen_x[2]/F");
     tree->Branch("gen_y", nt.gen_y, "gen_y[2]/F");
@@ -176,6 +178,7 @@ namespace mfv {
     tree->SetBranchAddress("jet_phi", nt.jet_phi);
     tree->SetBranchAddress("jet_energy", nt.jet_energy);
     tree->SetBranchAddress("jet_id", nt.jet_id);
+    tree->SetBranchAddress("jet_bdisc_old", nt.jet_bdisc_old);
     tree->SetBranchAddress("jet_bdisc", nt.jet_bdisc);
     tree->SetBranchAddress("gen_x", nt.gen_x);
     tree->SetBranchAddress("gen_y", nt.gen_y);
