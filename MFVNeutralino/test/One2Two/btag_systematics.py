@@ -2,39 +2,42 @@ from JMTucker.Tools.ROOTTools import *
 from statmodel import ebins
 from array import array
 ROOT.TH1.AddDirectory(0)
+import sys
 
 is_mc = True
 only_10pc = False
-year = '2017p8'
 version = 'v23m'
 
-#mode = 'vary_eff'
-#mode = 'vary_dphi'
-mode = 'vary_bquarks'
+year = sys.argv[1]
+mode = sys.argv[2]
+
+#mode = 'vary_SFs_up'
+#mode = 'vary_SFs_down'
+#mode = 'vary_3trk_to_5trk_up'
+#mode = 'vary_3trk_to_5trk_down'
 
 set_style()
 ROOT.gStyle.SetOptFit(0)
 ps = plot_saver(plot_dir('compare_dvvc_%s_%s%s%s_%s' % (version.capitalize(), mode, '' if is_mc else '_data', '_10pc' if only_10pc else '', year)), size=(700,700), root=False, log=False)
 
-fn1 = ['2v_from_jets%s_%s_3track_default_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_3track_%s_%s.root' % ('' if is_mc else '_data', year, mode, version)]
-fn2 = ['2v_from_jets%s_%s_4track_default_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_4track_%s_%s.root' % ('' if is_mc else '_data', year, mode, version)]
-fn3 = ['2v_from_jets%s_%s_5track_default_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_5track_%s_%s.root' % ('' if is_mc else '_data', year, mode, version)]
+fn1 = ['2v_from_jets%s_%s_3track_btag_corrected_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_3track_btag_corrected_%s_%s.root' % ('' if is_mc else '_data', year, mode, version)]
+fn2 = ['2v_from_jets%s_%s_4track_btag_corrected_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_4track_btag_corrected_%s_%s.root' % ('' if is_mc else '_data', year, mode, version)]
+fn3 = ['2v_from_jets%s_%s_5track_btag_corrected_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_5track_btag_corrected_%s_%s.root' % ('' if is_mc else '_data', year, mode, version)]
 
-if mode == 'vary_eff':
-    ls = ['vertexer efficiency', 'ntkseeds efficiency']
-
-if mode == 'vary_dphi':
-    ls = ['|#Delta#phi| from 3-track #Delta#phi_{JJ}', 'uniform |#Delta#phi|']
-
-# Note in 2015--2016, the 5-trk, two-vertex ratio was equal to 1 (hence "bratio1")
-if mode == 'vary_bquarks':
-    ls = ['3-track two-vertex ratio', '5-track two-vertex ratio']
+if mode == 'vary_SFs_up':
+    ls = ['nominal','vary SFs up']
+if mode == 'vary_SFs_down':
+    ls = ['nominal','vary SFs down']
+if mode == 'vary_3trk_to_5trk_up':
+    ls = ['nominal','vary 3trk to 5trk up']
+if mode == 'vary_3trk_to_5trk_down':
+    ls = ['nominal','vary 3trk to 5trk down']
 
 fns = [fn1, fn2, fn3]
 ntk = ['3-track', '4-track', '5-track']
 names = ['3-track x 3-track', '4-track x 4-track', '#geq 5-track x #geq 5-track']
 
-n2v = [651., 2.21, 1.] if year == '2017' else [426., 5., 1.]
+n2v = [641., 2.21, 1.] if year == '2017' else [426., 5., 1.]
 
 colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kOrange, ROOT.kViolet, ROOT.kPink+1]
 
@@ -78,33 +81,6 @@ for i in range(3):
         l1.SetFillColor(0)
         l1.Draw()
         ps.save('compare_dvvc_%s_%s' % (mode, ntk[i]))
-
-        h2s = []
-        l2 = ROOT.TLegend(0.15,0.75,0.50,0.85)
-        for j in range(len(ls)):
-            h = ROOT.TFile(fns[i][j]).Get('h_c1v_absdphivv')
-            h.SetStats(0)
-            h.SetLineColor(colors[j])
-            h.SetLineWidth(2)
-            h.Scale(n2v[i]/h.Integral())
-            if j == 0:
-                h.SetTitle(';|#Delta#phi_{VV}|;Events')
-                h.SetMinimum(0)
-                h.Draw('hist e')
-            elif j == 1:
-                h.Draw('hist e sames')
-            h2s.append(h)
-            if j > 1:
-                continue
-            l2.AddEntry(h, ls[j])
-        l2.SetFillColor(0)
-        l2.Draw()
-        if not only_10pc and year == '2015p6':
-            write(42, 0.040, 0.150, 0.700, names[i])
-            write(61, 0.050, 0.098, 0.913, 'CMS')
-            write(52, 0.035, 0.200, 0.913, 'Preliminary')
-            write(42, 0.050, 0.560, 0.913, '38.5 fb^{-1} (13 TeV)')
-        ps.save('compare_dphi_%s_%s' % (mode, ntk[i]))
 
         ebin = ebins['data%s_%s_%strack' % ('10pc' if only_10pc else '100pc', year, ntk[i][0])]
 
@@ -197,62 +173,6 @@ for i in range(3):
             l1.SetFillColor(0)
             l1.Draw()
             ps.save('compare_dvvc_%s' % mode)
-
-        l2 = ROOT.TLegend(0.15,0.70,0.50,0.85)
-        h2 = ROOT.TFile(fns[i][0]).Get('h_2v_absdphivv')
-        h2.SetTitle('%s;|#Delta#phi_{VV}|;events' % ntk[i])
-        h2.SetStats(0)
-        h2.SetLineColor(ROOT.kBlack)
-        h2.SetLineWidth(5)
-        if h2.Integral() > 0:
-            h2.Scale(n2v[i]/h2.Integral())
-        h2.SetMinimum(0)
-        h2.Draw()
-        l2.AddEntry(h2, 'simulated events')
-
-        h2s = []
-        for j in range(len(ls)):
-            h = ROOT.TFile(fns[i][j]).Get('h_c1v_absdphivv')
-            h.SetStats(0)
-            h.SetLineColor(colors[j])
-            h.SetLineWidth(2)
-            h.Scale(n2v[i]/h.Integral())
-            h.Draw('hist e sames')
-            h2s.append(h)
-            l2.AddEntry(h, ls[j])
-
-            chi2 = 0
-            for k in range(1,h.GetNbinsX()+1):
-                if (h2.GetBinError(k) > 0):
-                    chi2 += (h.GetBinContent(k)-h2.GetBinContent(k))**2 / h2.GetBinError(k)**2
-            print '%35s: deltaphi chi2/ndf = %f' % (ls[j], chi2/(h.GetNbinsX()-1))
-
-        l2.SetFillColor(0)
-        l2.Draw()
-        ps.save('%s_dphi'%ntk[i])
-
-        if i == 2:
-            h2s = []
-            l2 = ROOT.TLegend(0.15,0.75,0.50,0.85)
-            for j in range(len(ls)):
-                h = ROOT.TFile(fns[i][j]).Get('h_c1v_absdphivv')
-                h.SetStats(0)
-                h.SetLineColor(colors[j])
-                h.SetLineWidth(2)
-                h.Scale(n2v[i]/h.Integral())
-                if j == 0:
-                    h.SetTitle(';|#Delta#phi_{VV}|;Events')
-                    h.SetMinimum(0)
-                    h.Draw('hist e')
-                elif j == 1:
-                    h.Draw('hist e sames')
-                h2s.append(h)
-                if j > 1:
-                    continue
-                l2.AddEntry(h, ls[j])
-            l2.SetFillColor(0)
-            l2.Draw()
-            ps.save('compare_dphi_%s' % mode)
 
         es1 = ROOT.Double(0)
         s1 = hh.IntegralAndError(1,4,es1)

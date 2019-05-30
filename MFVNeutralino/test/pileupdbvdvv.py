@@ -2,22 +2,22 @@ from JMTucker.MFVNeutralino.MiniTreeBase import *
 ROOT.gStyle.SetOptStat(2211)
 
 min_ntracks, tree_path = 3, '/uscms_data/d2/tucker/crab_dirs/MiniTreeV23m'
-min_ntracks, tree_path = 4, '/uscms_data/d2/tucker/crab_dirs/MiniTreeV23m'
-min_ntracks, tree_path = 5, '/uscms_data/d2/tucker/crab_dirs/MiniTreeV23m'
+#min_ntracks, tree_path = 4, '/uscms_data/d2/tucker/crab_dirs/MiniTreeV23m'
+#min_ntracks, tree_path = 5, '/uscms_data/d2/tucker/crab_dirs/MiniTreeV23m'
 
 ps = plot_saver(plot_dir('pileupdbvdvv_ntk%i' % min_ntracks), size=(600,600), pdf=True)
 
 f,t = get_f_t(bkg_samples[0], min_ntracks, tree_path)
-t.Draw('npu>>h_npu_1v(70,0,70)', 'nvtx==1')
-ps.save('npu_1v')
-t.Draw('npu>>h_npu_2v(70,0,70)', 'nvtx>=2')
+#t.Draw('npu>>h_npu_1v(70,0,70)', 'nvtx==1')
+#ps.save('npu_1v')
+t.Draw('npu>>h_npu_2v(120,0,120)', 'nvtx>=2')
 ps.save('npu_2v')
 
 if 0: # run this to figure out the npu_bins
-    h, per = ROOT.h_npu_1v, 100000
-    #h, per = ROOT.h_npu_2v, 40
+    #h, per = ROOT.h_npu_1v, 100000
+    h, per = ROOT.h_npu_2v, 2000
     bins = [0]
-    for ibin in xrange(1,70):
+    for ibin in xrange(1,120):
         i = h.Integral(bins[-1], ibin)
         if i > per:
             bins.append(ibin)
@@ -27,12 +27,13 @@ if 0: # run this to figure out the npu_bins
         print a,b,h.Integral(a,b)
     raise 1
 
-npu_bins = [(0,25), (26, 31), (32, 37), (38, 45), (46, 60)] 
+#npu_bins = [(0,25), (26, 31), (32, 37), (38, 45), (46, 60)] 
+npu_bins = [(0,40), (41, 60), (61, 120)]
 nbins = len(npu_bins)
 
 for q in ['dbv', 'dvv']:
     if q == 'dbv':
-        hs = [ROOT.TH1F('h_dbv_%i_%i' % ab, ';d_{BV} (cm);events/0.01 cm', 100, 0, 1) for ab in npu_bins]
+        hs = [ROOT.TH1F('h_dbv_%i_%i' % ab, ';d_{BV} (cm);events/0.01 cm', 25, 0, 1) for ab in npu_bins]
     else:
         if min_ntracks == 5:
             continue
@@ -62,7 +63,7 @@ for q in ['dbv', 'dvv']:
             h.SetLineWidth(2)
             h.SetLineColor(colors[i])
             d = h.DrawNormalized if scale else h.Draw
-            d() if i == 0 else d('sames')
+            d('hist e') if i == 0 else d('sames hist e')
             ps.c.Update()
             differentiate_stat_box(h, (nbins-1-i,0), new_size=(0.2,0.2))
         ps.save(q + '_v_npu' + ('_scale' if scale else ''))
