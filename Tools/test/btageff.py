@@ -1,13 +1,14 @@
 #!/usr/bin/env python
 
 from JMTucker.Tools.BasicAnalyzer_cfg import *
+from JMTucker.Tools.Year import year
 
 settings = CMSSWSettings()
 settings.is_mc = True
 
 global_tag(process, which_global_tag(settings))
 tfileservice(process, 'btageff.root')
-sample_files(process, 'qcdht2000_2017', 'miniaod', 1)
+sample_files(process, 'qcdht2000_%s' % year, 'miniaod', 1)
 cmssw_from_argv(process)
 
 process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
@@ -23,11 +24,14 @@ process.JMTBTagEfficiency = cms.EDAnalyzer('JMTBTagEfficiency',
                                            weight_src = cms.InputTag('jmtWeightMiniAOD'),
                                            jets_src = cms.InputTag('selectedPatJets'),
                                            jet_pt_min = cms.double(20),
-                                           b_discriminator = cms.string('pfCombinedInclusiveSecondaryVertexV2BJetTags'),
-                                           b_discriminator_min = cms.vdouble(0.5803, 0.8838, 0.9693),
+                                           b_discriminator = cms.string(str(year)),
                                            )
 
 process.p = cms.Path(process.JMTBTagEfficiency)
+
+if year == 2017:
+    process.JMTBTagEfficiencyOld = process.JMTBTagEfficiency.clone(b_discriminator = '2017old')
+    process.p *= process.JMTBTagEfficiencyOld
 
 from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
 setup_event_filter(process, input_is_miniaod=True, mode='jets only novtx', event_filter_jes_mult=0)
@@ -37,17 +41,16 @@ ReferencedTagsTaskAdder(process)('p')
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
-    from JMTucker.Tools.Year import year
     import JMTucker.Tools.Samples as Samples 
 
     if year == 2017:
         samples = Samples.qcd_samples_2017 + Samples.ttbar_samples_2017
     elif year == 2018:
-        samples = Samples.qcd_samples_2018
+        samples = Samples.qcd_samples_2018 + Samples.ttbar_samples_2017
 
     set_splitting(samples, 'miniaod', 'default', default_files_per=16)
 
-    ms = MetaSubmitter('BTagEffV1', dataset='miniaod')
+    ms = MetaSubmitter('BTagEffV25mv1', dataset='miniaod')
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
     ms.submit(samples)
 
