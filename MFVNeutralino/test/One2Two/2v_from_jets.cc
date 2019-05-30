@@ -140,51 +140,54 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   const char* file_path; //which filepath?
   if (p.only_10pc()) {
-    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV23m";
+    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV25m";
   } else {
-    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV23m";
+    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV25m";
   }
 
-  const int nbkg = 21; //which samples?
+  const int nbkg = 24; //which samples?
   const char* samples[nbkg];
   float       weights[nbkg];
   samples[0]  = "mfv_neu_tau001000um_M0800_2017"; weights[0]  = 0.004153;
   samples[1]  = "qcdht0700_2017";                 weights[1]  = 11.1;
   samples[2]  = "qcdht1000_2017";                 weights[2]  = 5.39;
-  samples[3]  = "qcdht1500_2017";                 weights[3]  = 0.707;
+  samples[3]  = "qcdht1500_2017";                 weights[3]  = 0.709;
   samples[4]  = "qcdht2000_2017";                 weights[4]  = 0.282;
   samples[5]  = "ttbarht0600_2017";               weights[5]  = 0.00185;
   samples[6]  = "ttbarht0800_2017";               weights[6]  = 0.00156;
-  samples[7]  = "ttbarht1200_2017";               weights[7]  = 0.000833;
+  samples[7]  = "ttbarht1200_2017";               weights[7]  = 0.000829;
   samples[8]  = "ttbarht2500_2017";               weights[8]  = 2.27e-05;
-  samples[9]  = "qcdht0700_2018";                 weights[9]  = 17.6;
-  samples[10] = "qcdht1000_2018";                 weights[10] = 8.8;
+  samples[9]  = "qcdht0700_2018";                 weights[9]  = 17.5;
+  samples[10] = "qcdht1000_2018";                 weights[10] = 8.76;
   samples[11] = "qcdht1500_2018";                 weights[11] = 1.08;
-  samples[12] = "qcdht2000_2018";                 weights[12] = 0.442;
-  samples[13] = "ttbar_2018";                     weights[13] = 1; // FIXME once we have the (sliced) 2018 ttbar samples
-  samples[14] = "mfv_neu_tau001000um_M0800_2018"; weights[14] = 1; // FIXME but irrelevant other than for signal contamination
-  samples[15] = "JetHT2017B";                     weights[15] = 1;
-  samples[16] = "JetHT2017C";                     weights[16] = 1;
-  samples[17] = "JetHT2017D";                     weights[17] = 1;
-  samples[18] = "JetHT2017E";                     weights[18] = 1;
-  samples[19] = "JetHT2017F";                     weights[19] = 1;
-  samples[20] = "JetHT2018";                      weights[20] = 1;
+  samples[12] = "qcdht2000_2018";                 weights[12] = 0.44;
+  samples[13] = "ttbar0600_2018";                 weights[13] = 0.0153;
+  samples[14] = "ttbar0800_2018";                 weights[14] = 0.00866;
+  samples[15] = "ttbar1200_2018";                 weights[15] = 0.00564;
+  samples[16] = "ttbar2500_2018";                 weights[16] = 0.000116;
+  samples[17] = "mfv_neu_tau001000um_M0800_2018"; weights[17] = 1; // FIXME but irrelevant other than for signal contamination
+  samples[18] = "JetHT2017B";                     weights[18] = 1;
+  samples[19] = "JetHT2017C";                     weights[19] = 1;
+  samples[20] = "JetHT2017D";                     weights[20] = 1;
+  samples[21] = "JetHT2017E";                     weights[21] = 1;
+  samples[22] = "JetHT2017F";                     weights[22] = 1;
+  samples[23] = "JetHT2018";                      weights[23] = 1;
 
   int ibkg_begin; int ibkg_end;
   if (p.is_mc()) {
     if (p.year() == "2017")         { ibkg_begin =  1; ibkg_end =  8; if (p.inject_signal()) ibkg_begin = 0; }
-    else if (p.year() == "2018")    { ibkg_begin =  9; ibkg_end = 12; if (p.inject_signal()) ibkg_end = 14; }
-    else if (p.year() == "2017p8")  { ibkg_begin =  1; ibkg_end = 12; if (p.inject_signal()) {ibkg_begin = 0; ibkg_end = 14;} }
+    else if (p.year() == "2018")    { ibkg_begin =  9; ibkg_end = 16; if (p.inject_signal()) ibkg_end = 17; }
+    else if (p.year() == "2017p8")  { ibkg_begin =  1; ibkg_end = 12; if (p.inject_signal()) {ibkg_begin = 0; ibkg_end = 17;} }
     else { fprintf(stderr, "bad year"); exit(1); }
   } else {
-    if (p.year() == "2017")         { ibkg_begin = 15; ibkg_end = 19; }
-    else if (p.year() == "2018")    { ibkg_begin = 20; ibkg_end = 20; }
-    else if (p.year() == "2017p8")  { ibkg_begin = 15; ibkg_end = 20; }
-    else if (p.year() == "2017B")   { ibkg_begin = 15; ibkg_end = 15; }
-    else if (p.year() == "2017C")   { ibkg_begin = 16; ibkg_end = 16; }
-    else if (p.year() == "2017D")   { ibkg_begin = 17; ibkg_end = 17; }
-    else if (p.year() == "2017E")   { ibkg_begin = 18; ibkg_end = 18; }
-    else if (p.year() == "2017F")   { ibkg_begin = 19; ibkg_end = 19; }
+    if (p.year() == "2017")         { ibkg_begin = 18; ibkg_end = 22; }
+    else if (p.year() == "2018")    { ibkg_begin = 23; ibkg_end = 23; }
+    else if (p.year() == "2017p8")  { ibkg_begin = 18; ibkg_end = 23; }
+    else if (p.year() == "2017B")   { ibkg_begin = 18; ibkg_end = 18; }
+    else if (p.year() == "2017C")   { ibkg_begin = 19; ibkg_end = 19; }
+    else if (p.year() == "2017D")   { ibkg_begin = 20; ibkg_end = 20; }
+    else if (p.year() == "2017E")   { ibkg_begin = 21; ibkg_end = 21; }
+    else if (p.year() == "2017F")   { ibkg_begin = 22; ibkg_end = 22; }
     else { fprintf(stderr, "bad year"); exit(1); }
   }
 

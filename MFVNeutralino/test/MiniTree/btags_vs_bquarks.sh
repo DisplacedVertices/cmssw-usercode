@@ -1,6 +1,8 @@
 #!/bin/bash
 
-indir=/uscms_data/d2/tucker/crab_dirs/MiniTreeV23m
+version=V25m
+
+indir=/uscms_data/d2/tucker/crab_dirs/MiniTree${version}
 files2017=(
     qcdht0700_2017.root
     qcdht1000_2017.root
@@ -12,7 +14,7 @@ files2017=(
     ttbarht2500_2017.root
 #    mfv_neu_tau000100um_M0800_2017.root
 #    mfv_neu_tau000300um_M0800_2017.root
-    mfv_neu_tau001000um_M0800_2017.root
+#    mfv_neu_tau001000um_M0800_2017.root
 #    mfv_neu_tau010000um_M0800_2017.root
 #    mfv_neu_tau030000um_M0800_2017.root
 #    mfv_neu_tau100000um_M0800_2017.root
@@ -29,10 +31,10 @@ files2018=(
     qcdht1000_2018.root
     qcdht1500_2018.root
     qcdht2000_2018.root
-#    ttbarht0600_2018.root
-#    ttbarht0800_2018.root
-#    ttbarht1200_2018.root
-#    ttbarht2500_2018.root
+    ttbarht0600_2018.root
+    ttbarht0800_2018.root
+    ttbarht1200_2018.root
+    ttbarht2500_2018.root
 #    mfv_neu_tau000100um_M0800_2018.root
 #    mfv_neu_tau000300um_M0800_2018.root
 #    mfv_neu_tau001000um_M0800_2018.root
@@ -51,7 +53,7 @@ for ntk in 3 4 5 7
 do
   for year in 2017 2018
   do
-    outdir=output_ntk${ntk}_${year}
+    outdir=output_btags_vs_bquarks_MiniTree${version}_ntk${ntk}_${year}
 
     if [[ $year -eq 2017 ]]; then
       echo "Year is: $year"

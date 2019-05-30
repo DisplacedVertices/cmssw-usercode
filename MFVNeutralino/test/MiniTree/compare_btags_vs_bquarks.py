@@ -1,12 +1,13 @@
 from JMTucker.Tools.ROOTTools import *
 
+version = 'V25m'
 ntk = 3
-year = 2018
+year = 2017
 
 set_style()
-ps = plot_saver(plot_dir('compare_btags_vs_bquarks_MiniTreeV23m_ntk%s_%s' % (ntk,year)), size=(600,600))
+ps = plot_saver(plot_dir('compare_btags_vs_bquarks_MiniTree%s_ntk%s_%s' % (version,ntk,year)), size=(600,600))
 
-f = ROOT.TFile('output_btags_vs_bquarks_MiniTreeV23m_ntk%s_%s/background.root' % (ntk,year))
+f = ROOT.TFile('output_btags_vs_bquarks_MiniTree%s_ntk%s_%s/background.root' % (version,ntk,year))
 btags = ['1loose', '2loose', '1medium', '2medium', '1tight', '2tight']
 btag_names = ['#geq1 loose', '#geq2 loose', '#geq1 medium', '#geq2 medium', '#geq1 tight', '#geq2 tight']
 
@@ -36,7 +37,15 @@ for nvtx in [1,2]:
   l.AddEntry(h_jet_bdisc_nobquarks, 'events without b quarks')
   l.Draw()
   ls = []
-  for bdisc_wp, bdisc_min in [('loose', 0.5803), ('med', 0.8838), ('tight', 0.9693)]:
+
+  if year == 2017 :
+    bdisc_arr = [('loose', 0.0521), ('med', 0.3033), ('tight', 0.7489)]
+  elif year == 2018 :
+    bdisc_arr = [('loose', 0.0494), ('med', 0.2770), ('tight', 0.7264)]
+  else :
+    exit("Invalid year!")
+
+  for bdisc_wp, bdisc_min in bdisc_arr :
     line = ROOT.TLine(bdisc_min, 1e-9, bdisc_min, 0.045)
     line.SetLineStyle(2)
     line.SetLineWidth(2)
