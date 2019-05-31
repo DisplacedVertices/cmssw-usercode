@@ -63,8 +63,6 @@ class Dataset(object):
             conf_obj.splitting = 'FileBased'
             conf_obj.unitsPerJob = self.files_per
             conf_obj.totalUnits = self.total_files
-        else:
-            raise ValueError('split_by must be one of "events", "events_nolumiaware", "files" while it is %r' % self.split_by)
         if self.json:
             conf_obj.lumiMask = self.json
         if self.run_range:
@@ -166,9 +164,9 @@ class Sample(object):
 
     @split_by.setter
     def split_by(self, val):
-        allowed = ('events', 'files')
+        allowed = ('events', 'events_nolumiaware', 'files')
         if val not in allowed:
-            raise ValueError('split_by may only be one of %r' % (allowed,))
+            raise ValueError('split_by may only be one of %r while it is %r' % (allowed, val))
         self.datasets[self.curr_dataset].split_by = val
 
     @property
