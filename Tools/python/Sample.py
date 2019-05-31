@@ -379,7 +379,7 @@ class SamplesRegistry:
             samples = [s for s in samples if s.ready]
 
         if sort_and_set:
-            samples = sorted(set(samples))
+            samples = sorted(set(samples), key=lambda s: s.isample)
 
         if check:
             print 'from_argv got these:'
