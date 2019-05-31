@@ -134,6 +134,9 @@ _removed = [
     (('qcdht1000_2018', 'miniaod'), '/store/mc/RunIIAutumn18MiniAOD/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/120000/BAA789CF-E98B-9744-842C-C34D221F58C4.root'),
     (('qcdht1000_2018', 'miniaod'), '/store/mc/RunIIAutumn18MiniAOD/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/120000/D2359D81-EB07-8A46-8DBA-7D4DCA14F6F4.root'),
     (('qcdht1000_2018', 'miniaod'), '/store/mc/RunIIAutumn18MiniAOD/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/102X_upgrade2018_realistic_v15-v1/80000/643EC53B-D428-FB4B-A932-B199085745A7.root'),
+    (('ttbarht0800_2017', 'miniaod'), '/store/mc/RunIIFall17MiniAODv2/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/40000/225CD078-B3A4-E811-AA74-001E67DDC254.root'),
+    (('ttbarht0800_2017', 'miniaod'), '/store/mc/RunIIFall17MiniAODv2/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/60000/BC22A92A-7BBA-E811-8A2B-0242AC1C0501.root'),
+    (('ttbarht1200_2017', 'miniaod'), '/store/mc/RunIIFall17MiniAODv2/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/90000/6E6C0DD6-349B-E811-A4E1-0CC47A6C063E.root'),
     ]
 for (name,ds),fn in _removed:
     _remove_file(name, ds, fn)
