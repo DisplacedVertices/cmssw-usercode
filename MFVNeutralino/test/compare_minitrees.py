@@ -16,7 +16,8 @@ dvvbinning = '400 #mum', '100,0,4'
 f1, t1 = get_f_t(fn1)
 f2, t2 = get_f_t(fn2)
 n1, n2 = float(t1.GetEntries()), float(t2.GetEntries())
-print 'entries %6i %6i' % (n1, n2)
+nr1, nr2 = Samples.norm_from_file(f1), Samples.norm_from_file(f2)
+print 'entries %6i/%6i %6i/%6i -> nr2/nr1 = %.3f' % (n1, nr1, n2, nr2, nr2/nr1)
 
 def foo(which, var_name, title, draw_str, cut):
     nm1 = '%s_%s' % (var_name, nice1)
