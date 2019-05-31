@@ -127,153 +127,74 @@ leptonic_samples_sum_2017 = [
     ]
 
 mfv_signal_samples_2017 = [
-    MCSample('mfv_neu_tau000100um_M0400_2017', '/mfv_neu_cp2_tau000100um_M0400/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-e19c32c4f9d94e596684928085d1f2f4/USER', 10000),
-    MCSample('mfv_neu_tau000100um_M0600_2017', '/mfv_neu_cp2_tau000100um_M0600/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-98a6b130f95e6de782a84e79560989b4/USER', 10000),
-    MCSample('mfv_neu_tau000100um_M0800_2017', '/mfv_neu_cp2_tau000100um_M0800/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-f1acdde05f5ae67a63f236356d3a3929/USER', 10000),
-    MCSample('mfv_neu_tau000100um_M1200_2017', '/mfv_neu_cp2_tau000100um_M1200/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-b4c24ee44c55453e27105fbfc1a50f1e/USER', 10000),
-    MCSample('mfv_neu_tau000100um_M1600_2017', '/mfv_neu_cp2_tau000100um_M1600/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-a16fede3a15ec9e78bc60b859a96ec7d/USER', 10000),
-    MCSample('mfv_neu_tau000100um_M3000_2017', '/mfv_neu_cp2_tau000100um_M3000/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-06885863ce8a716b61297c212a1d6ccb/USER', 10000),
-    MCSample('mfv_neu_tau000300um_M0400_2017', '/mfv_neu_cp2_tau000300um_M0400/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-19b36f0dc7bf56de03ab8ea241cddbe4/USER', 10000),
-    MCSample('mfv_neu_tau000300um_M0600_2017', '/mfv_neu_cp2_tau000300um_M0600/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-6f6233dc0f004db465ed499fb0859298/USER', 10000),
-    MCSample('mfv_neu_tau000300um_M0800_2017', '/mfv_neu_cp2_tau000300um_M0800/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-446aa89128f5e93f5d7e59296f77922c/USER', 10000),
-    MCSample('mfv_neu_tau000300um_M1200_2017', '/mfv_neu_cp2_tau000300um_M1200/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-73a90851d5907c77b1d4757913ce05c7/USER', 10000),
-    MCSample('mfv_neu_tau000300um_M1600_2017', '/mfv_neu_cp2_tau000300um_M1600/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-2846a70bad54494c0dca2cf6d6846d8f/USER', 10000),
-    MCSample('mfv_neu_tau000300um_M3000_2017', '/mfv_neu_cp2_tau000300um_M3000/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-adc565be1789a5083a44b2d3645cd801/USER', 10000),
-    MCSample('mfv_neu_tau001000um_M0400_2017', '/mfv_neu_cp2_tau001000um_M0400/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-a757c4bf78c91222ead284fe74e95b67/USER', 10000),
-    MCSample('mfv_neu_tau001000um_M0600_2017', '/mfv_neu_cp2_tau001000um_M0600/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-d45245fcd1697f7c43bc03cf682944a9/USER', 10000),
-    MCSample('mfv_neu_tau001000um_M0800_2017', '/mfv_neu_cp2_tau001000um_M0800/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-6f63fc6954c100df7f3d48f533bb9743/USER', 10000),
-    MCSample('mfv_neu_tau001000um_M1200_2017', '/mfv_neu_cp2_tau001000um_M1200/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-fb45182cb8c5c0041b9b0e198aad7419/USER', 10000),
-    MCSample('mfv_neu_tau001000um_M1600_2017', '/mfv_neu_cp2_tau001000um_M1600/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-08c0f3d8fbe0068949c5db9eac4678e8/USER', 10000),
-    MCSample('mfv_neu_tau001000um_M3000_2017', '/mfv_neu_cp2_tau001000um_M3000/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-570c4a54f61953548f5f22ff0dd9d42c/USER', 10000),
-    MCSample('mfv_neu_tau010000um_M0400_2017', '/mfv_neu_cp2_tau010000um_M0400/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-bd4b3de2f988859726a7cb875f0cc840/USER', 10000),
-    MCSample('mfv_neu_tau010000um_M0600_2017', '/mfv_neu_cp2_tau010000um_M0600/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-d4f1e7ae5b0bb5de2932e0bde376e61a/USER', 10000),
-    MCSample('mfv_neu_tau010000um_M0800_2017', '/mfv_neu_cp2_tau010000um_M0800/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-7b53adcc89bbf593ed5aba60bfb3a5f5/USER', 10000),
-    MCSample('mfv_neu_tau010000um_M1200_2017', '/mfv_neu_cp2_tau010000um_M1200/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-8c12e8f45a6f0e3eecf5a4b2026e69d6/USER', 10000),
-    MCSample('mfv_neu_tau010000um_M1600_2017', '/mfv_neu_cp2_tau010000um_M1600/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-b09c8118ee7dae1892997cd84f519da4/USER', 10000),
-    MCSample('mfv_neu_tau010000um_M3000_2017', '/mfv_neu_cp2_tau010000um_M3000/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-382bee073321d400b463da9e5e04463a/USER', 10000),
-    MCSample('mfv_neu_tau030000um_M0400_2017', '/mfv_neu_cp2_tau030000um_M0400/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-b900b24766a395c6a602904beb671093/USER', 10000),
-    MCSample('mfv_neu_tau030000um_M0600_2017', '/mfv_neu_cp2_tau030000um_M0600/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-b156edd7a24c6cf97c4092bedba82cb3/USER', 10000),
-    MCSample('mfv_neu_tau030000um_M0800_2017', '/mfv_neu_cp2_tau030000um_M0800/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-9073331bdef335aaab0baac64e350432/USER', 10000),
-    MCSample('mfv_neu_tau030000um_M1200_2017', '/mfv_neu_cp2_tau030000um_M1200/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-b077b6b163bf4909a33d46c782207ec2/USER', 10000),
-    MCSample('mfv_neu_tau030000um_M1600_2017', '/mfv_neu_cp2_tau030000um_M1600/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-0d40934f09beb1cfb9c9c3d02dddd16f/USER', 10000),
-    MCSample('mfv_neu_tau030000um_M3000_2017', '/mfv_neu_cp2_tau030000um_M3000/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-a24bebdbc9f1f696346005182d2d7ea2/USER', 10000),
-    MCSample('mfv_neu_tau100000um_M0400_2017', '/mfv_neu_cp2_tau100000um_M0400/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-ac116e932f994ac79ee477bfe1229b61/USER', 10000),
-    MCSample('mfv_neu_tau100000um_M0600_2017', '/mfv_neu_cp2_tau100000um_M0600/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-4b57b0077ac36c6db262447c29e73782/USER', 10000),
-    MCSample('mfv_neu_tau100000um_M0800_2017', '/mfv_neu_cp2_tau100000um_M0800/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-570f60cad749a4699470d1a3f6aff699/USER', 10000),
-    MCSample('mfv_neu_tau100000um_M1200_2017', '/mfv_neu_cp2_tau100000um_M1200/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-4c8c238162f211a5efbbe45d1ecfca18/USER', 10000),
-    MCSample('mfv_neu_tau100000um_M1600_2017', '/mfv_neu_cp2_tau100000um_M1600/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-1af2dcc9c59a4ad598bc4a7f2db8616d/USER', 10000),
-    MCSample('mfv_neu_tau100000um_M3000_2017', '/mfv_neu_cp2_tau100000um_M3000/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-0f425094ecffff5ee7c713678fa04f5c/USER', 10000),
-    ]
-
-of_mfv_signal_samples_2017 = [
-    MCSample('of_mfv_neu_tau000100um_M0400_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-100um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 96000),
-    MCSample('of_mfv_neu_tau000100um_M0600_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-600_CTau-100um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_neu_tau000100um_M0800_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-100um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_neu_tau000100um_M1200_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-100um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_neu_tau000100um_M1600_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-100um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_neu_tau000100um_M3000_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-3000_CTau-100um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 99997),
-    MCSample('of_mfv_neu_tau000300um_M0400_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-300um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_neu_tau000300um_M0600_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-600_CTau-300um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 98000),
-    MCSample('of_mfv_neu_tau000300um_M0800_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-300um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_neu_tau000300um_M1200_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-300um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_neu_tau000300um_M1600_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-300um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_neu_tau000300um_M3000_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-3000_CTau-300um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 97999),
-    MCSample('of_mfv_neu_tau001000um_M0400_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-1mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_neu_tau001000um_M0600_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-600_CTau-1mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_neu_tau001000um_M0800_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-1mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_neu_tau001000um_M1200_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-1mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 98000),
-    MCSample('of_mfv_neu_tau001000um_M1600_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-1mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_neu_tau001000um_M3000_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-3000_CTau-1mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 97999),
-    MCSample('of_mfv_neu_tau010000um_M0400_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-10mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_neu_tau010000um_M0600_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-600_CTau-10mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_neu_tau010000um_M0800_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_neu_tau010000um_M1200_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-10mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_neu_tau010000um_M1600_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-10mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_neu_tau010000um_M3000_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-3000_CTau-10mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 97999),
-    MCSample('of_mfv_neu_tau030000um_M0400_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-30mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_neu_tau030000um_M0600_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-600_CTau-30mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_neu_tau030000um_M0800_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-30mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_neu_tau030000um_M1200_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-30mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_neu_tau030000um_M1600_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-30mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_neu_tau030000um_M3000_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-3000_CTau-30mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 99999),
+    MCSample('mfv_neu_tau000100um_M0400_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-100um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 96000),
+    MCSample('mfv_neu_tau000100um_M0600_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-600_CTau-100um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_neu_tau000100um_M0800_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-100um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_neu_tau000100um_M1200_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-100um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_neu_tau000100um_M1600_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-100um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_neu_tau000100um_M3000_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-3000_CTau-100um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 99997),
+    MCSample('mfv_neu_tau000300um_M0400_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-300um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_neu_tau000300um_M0600_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-600_CTau-300um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 98000),
+    MCSample('mfv_neu_tau000300um_M0800_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-300um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_neu_tau000300um_M1200_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-300um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_neu_tau000300um_M1600_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-300um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_neu_tau000300um_M3000_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-3000_CTau-300um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 97999),
+    MCSample('mfv_neu_tau001000um_M0400_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-1mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_neu_tau001000um_M0600_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-600_CTau-1mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_neu_tau001000um_M0800_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-1mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_neu_tau001000um_M1200_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-1mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 98000),
+    MCSample('mfv_neu_tau001000um_M1600_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-1mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_neu_tau001000um_M3000_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-3000_CTau-1mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 97999),
+    MCSample('mfv_neu_tau010000um_M0400_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-10mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_neu_tau010000um_M0600_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-600_CTau-10mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_neu_tau010000um_M0800_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_neu_tau010000um_M1200_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-10mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_neu_tau010000um_M1600_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-10mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_neu_tau010000um_M3000_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-3000_CTau-10mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 97999),
+    MCSample('mfv_neu_tau030000um_M0400_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-30mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_neu_tau030000um_M0600_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-600_CTau-30mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_neu_tau030000um_M0800_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-30mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_neu_tau030000um_M1200_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-30mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_neu_tau030000um_M1600_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-30mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_neu_tau030000um_M3000_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-3000_CTau-30mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 99999),
     ]
 
 mfv_stopdbardbar_samples_2017 = [
-    MCSample('mfv_stopdbardbar_tau000100um_M0400_2017', '/mfv_stopdbardbar_cp2_tau000100um_M0400/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-205b3ca875fdf079d3fcbb5409038584/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau000100um_M0600_2017', '/mfv_stopdbardbar_cp2_tau000100um_M0600/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-fe488ff0566ec904395d68041c25d292/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau000100um_M0800_2017', '/mfv_stopdbardbar_cp2_tau000100um_M0800/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-108f49845c950ea66b573802fd76b993/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau000100um_M1200_2017', '/mfv_stopdbardbar_cp2_tau000100um_M1200/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-7ce38d30d549597e5ef0980e1a77bde1/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau000100um_M1600_2017', '/mfv_stopdbardbar_cp2_tau000100um_M1600/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-cb8aea1afffd09910656c276d423c1de/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau000100um_M3000_2017', '/mfv_stopdbardbar_cp2_tau000100um_M3000/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-bd86962041d10293fe3955b9a2a76b49/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau000300um_M0400_2017', '/mfv_stopdbardbar_cp2_tau000300um_M0400/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-51c30fc02760b805732692dd721a5cbb/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau000300um_M0600_2017', '/mfv_stopdbardbar_cp2_tau000300um_M0600/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-2595a5c801f07763931a8ff6eda02a63/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau000300um_M0800_2017', '/mfv_stopdbardbar_cp2_tau000300um_M0800/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-c412575ec602b0b281d9135280672f6f/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau000300um_M1200_2017', '/mfv_stopdbardbar_cp2_tau000300um_M1200/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-9b69b6acaf1b70dec6c84b2c9b483e15/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau000300um_M1600_2017', '/mfv_stopdbardbar_cp2_tau000300um_M1600/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-6f4ec8de19007716424c533ff7fcbad9/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau000300um_M3000_2017', '/mfv_stopdbardbar_cp2_tau000300um_M3000/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-37bfabf9a21402171345e243e2425fce/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau001000um_M0400_2017', '/mfv_stopdbardbar_cp2_tau001000um_M0400/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-3bd71289304d7951247b24b5853da07d/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau001000um_M0600_2017', '/mfv_stopdbardbar_cp2_tau001000um_M0600/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-bf170f8b92d3c7d880869aad6980545c/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau001000um_M0800_2017', '/mfv_stopdbardbar_cp2_tau001000um_M0800/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-041e733a7f4ff104f7dd4f67dbf58be5/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau001000um_M1200_2017', '/mfv_stopdbardbar_cp2_tau001000um_M1200/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-fab8472ef16e983f555223fdb1db93fb/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau001000um_M1600_2017', '/mfv_stopdbardbar_cp2_tau001000um_M1600/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-edf30737fc1be198c48ee3d323ebeb87/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau001000um_M3000_2017', '/mfv_stopdbardbar_cp2_tau001000um_M3000/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-f919e91dd53b0c14e11792ef139c06d8/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau010000um_M0400_2017', '/mfv_stopdbardbar_cp2_tau010000um_M0400/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-1b2d6ee167e76719cb00d4d783998e2e/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau010000um_M0600_2017', '/mfv_stopdbardbar_cp2_tau010000um_M0600/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-25b738ea3ef1af921967b4546f75f92f/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau010000um_M0800_2017', '/mfv_stopdbardbar_cp2_tau010000um_M0800/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-2f966991153a44d60e05d8544a913c1b/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau010000um_M1200_2017', '/mfv_stopdbardbar_cp2_tau010000um_M1200/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-4110b6bd0bc3083e5e4cf8e57f4f4079/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau010000um_M1600_2017', '/mfv_stopdbardbar_cp2_tau010000um_M1600/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-dd199e2242766a01e02398b2ce7f126c/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau010000um_M3000_2017', '/mfv_stopdbardbar_cp2_tau010000um_M3000/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-8477664b65144f1bb1994d6b7f7d3f28/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau030000um_M0400_2017', '/mfv_stopdbardbar_cp2_tau030000um_M0400/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-25b46c716765e8645a4500f5e175acb8/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau030000um_M0600_2017', '/mfv_stopdbardbar_cp2_tau030000um_M0600/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-27cbbb98a47b45a5289409b2d7bc84d0/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau030000um_M0800_2017', '/mfv_stopdbardbar_cp2_tau030000um_M0800/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-08160c924bc4aa73adb4fbd1f3bf2607/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau030000um_M1200_2017', '/mfv_stopdbardbar_cp2_tau030000um_M1200/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-d15231bf5cd7993b220b8ce189a2f4a7/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau030000um_M1600_2017', '/mfv_stopdbardbar_cp2_tau030000um_M1600/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-136b1c100c9499d6b2ba33a57064fce5/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau030000um_M3000_2017', '/mfv_stopdbardbar_cp2_tau030000um_M3000/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-8ccf3900ed71f208132799cc91baa8aa/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau100000um_M0400_2017', '/mfv_stopdbardbar_cp2_tau100000um_M0400/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-92309752170a5d0cea009fdf5e6bcf87/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau100000um_M0600_2017', '/mfv_stopdbardbar_cp2_tau100000um_M0600/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-1930c786a83a564f929f2436120e9f11/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau100000um_M0800_2017', '/mfv_stopdbardbar_cp2_tau100000um_M0800/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-317019a7fc3cefbbd0893f4f46014422/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau100000um_M1200_2017', '/mfv_stopdbardbar_cp2_tau100000um_M1200/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-98039a8a53a0af9912eb3505baf842b9/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau100000um_M1600_2017', '/mfv_stopdbardbar_cp2_tau100000um_M1600/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-0fc64622f57632cfb8f0e54327a4be9a/USER', 10000),
-    MCSample('mfv_stopdbardbar_tau100000um_M3000_2017', '/mfv_stopdbardbar_cp2_tau100000um_M3000/tucker-RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1-5ccf703e67d55a4cf75fc47cfbde08aa/USER', 10000),
-    ]
-
-of_mfv_stopdbardbar_samples_2017 = [
-    MCSample('of_mfv_stopdbardbar_tau000100um_M0400_2017', '/StopStopbarTo2Dbar2D_M-400_CTau-100um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_stopdbardbar_tau000100um_M0600_2017', '/StopStopbarTo2Dbar2D_M-600_CTau-100um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 96000),
-    MCSample('of_mfv_stopdbardbar_tau000100um_M0800_2017', '/StopStopbarTo2Dbar2D_M-800_CTau-100um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_stopdbardbar_tau000100um_M1200_2017', '/StopStopbarTo2Dbar2D_M-1200_CTau-100um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_stopdbardbar_tau000100um_M1600_2017', '/StopStopbarTo2Dbar2D_M-1600_CTau-100um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_stopdbardbar_tau000100um_M3000_2017', '/StopStopbarTo2Dbar2D_M-3000_CTau-100um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 95000),
-    MCSample('of_mfv_stopdbardbar_tau000300um_M0400_2017', '/StopStopbarTo2Dbar2D_M-400_CTau-300um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_stopdbardbar_tau000300um_M0600_2017', '/StopStopbarTo2Dbar2D_M-600_CTau-300um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_stopdbardbar_tau000300um_M0800_2017', '/StopStopbarTo2Dbar2D_M-800_CTau-300um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_stopdbardbar_tau000300um_M1200_2017', '/StopStopbarTo2Dbar2D_M-1200_CTau-300um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_stopdbardbar_tau000300um_M1600_2017', '/StopStopbarTo2Dbar2D_M-1600_CTau-300um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_stopdbardbar_tau000300um_M3000_2017', '/StopStopbarTo2Dbar2D_M-3000_CTau-300um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_stopdbardbar_tau001000um_M0400_2017', '/StopStopbarTo2Dbar2D_M-400_CTau-1mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_stopdbardbar_tau001000um_M0600_2017', '/StopStopbarTo2Dbar2D_M-600_CTau-1mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 97000),
-    MCSample('of_mfv_stopdbardbar_tau001000um_M0800_2017', '/StopStopbarTo2Dbar2D_M-800_CTau-1mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_stopdbardbar_tau001000um_M1200_2017', '/StopStopbarTo2Dbar2D_M-1200_CTau-1mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 99000),
-    MCSample('of_mfv_stopdbardbar_tau001000um_M1600_2017', '/StopStopbarTo2Dbar2D_M-1600_CTau-1mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_stopdbardbar_tau001000um_M3000_2017', '/StopStopbarTo2Dbar2D_M-3000_CTau-1mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_stopdbardbar_tau010000um_M0400_2017', '/StopStopbarTo2Dbar2D_M-400_CTau-10mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_stopdbardbar_tau010000um_M0600_2017', '/StopStopbarTo2Dbar2D_M-600_CTau-10mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_stopdbardbar_tau010000um_M0800_2017', '/StopStopbarTo2Dbar2D_M-800_CTau-10mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 98000),
-    MCSample('of_mfv_stopdbardbar_tau010000um_M1200_2017', '/StopStopbarTo2Dbar2D_M-1200_CTau-10mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_stopdbardbar_tau010000um_M1600_2017', '/StopStopbarTo2Dbar2D_M-1600_CTau-10mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_stopdbardbar_tau010000um_M3000_2017', '/StopStopbarTo2Dbar2D_M-3000_CTau-10mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_stopdbardbar_tau030000um_M0400_2017', '/StopStopbarTo2Dbar2D_M-400_CTau-30mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_stopdbardbar_tau030000um_M0600_2017', '/StopStopbarTo2Dbar2D_M-600_CTau-30mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_stopdbardbar_tau030000um_M0800_2017', '/StopStopbarTo2Dbar2D_M-800_CTau-30mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_stopdbardbar_tau030000um_M1200_2017', '/StopStopbarTo2Dbar2D_M-1200_CTau-30mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 98000),
-    MCSample('of_mfv_stopdbardbar_tau030000um_M1600_2017', '/StopStopbarTo2Dbar2D_M-1600_CTau-30mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
-    MCSample('of_mfv_stopdbardbar_tau030000um_M3000_2017', '/StopStopbarTo2Dbar2D_M-3000_CTau-30mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_stopdbardbar_tau000100um_M0400_2017', '/StopStopbarTo2Dbar2D_M-400_CTau-100um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_stopdbardbar_tau000100um_M0600_2017', '/StopStopbarTo2Dbar2D_M-600_CTau-100um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 96000),
+    MCSample('mfv_stopdbardbar_tau000100um_M0800_2017', '/StopStopbarTo2Dbar2D_M-800_CTau-100um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_stopdbardbar_tau000100um_M1200_2017', '/StopStopbarTo2Dbar2D_M-1200_CTau-100um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_stopdbardbar_tau000100um_M1600_2017', '/StopStopbarTo2Dbar2D_M-1600_CTau-100um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_stopdbardbar_tau000100um_M3000_2017', '/StopStopbarTo2Dbar2D_M-3000_CTau-100um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 95000),
+    MCSample('mfv_stopdbardbar_tau000300um_M0400_2017', '/StopStopbarTo2Dbar2D_M-400_CTau-300um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_stopdbardbar_tau000300um_M0600_2017', '/StopStopbarTo2Dbar2D_M-600_CTau-300um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_stopdbardbar_tau000300um_M0800_2017', '/StopStopbarTo2Dbar2D_M-800_CTau-300um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_stopdbardbar_tau000300um_M1200_2017', '/StopStopbarTo2Dbar2D_M-1200_CTau-300um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_stopdbardbar_tau000300um_M1600_2017', '/StopStopbarTo2Dbar2D_M-1600_CTau-300um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_stopdbardbar_tau000300um_M3000_2017', '/StopStopbarTo2Dbar2D_M-3000_CTau-300um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_stopdbardbar_tau001000um_M0400_2017', '/StopStopbarTo2Dbar2D_M-400_CTau-1mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_stopdbardbar_tau001000um_M0600_2017', '/StopStopbarTo2Dbar2D_M-600_CTau-1mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 97000),
+    MCSample('mfv_stopdbardbar_tau001000um_M0800_2017', '/StopStopbarTo2Dbar2D_M-800_CTau-1mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_stopdbardbar_tau001000um_M1200_2017', '/StopStopbarTo2Dbar2D_M-1200_CTau-1mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 99000),
+    MCSample('mfv_stopdbardbar_tau001000um_M1600_2017', '/StopStopbarTo2Dbar2D_M-1600_CTau-1mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_stopdbardbar_tau001000um_M3000_2017', '/StopStopbarTo2Dbar2D_M-3000_CTau-1mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_stopdbardbar_tau010000um_M0400_2017', '/StopStopbarTo2Dbar2D_M-400_CTau-10mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_stopdbardbar_tau010000um_M0600_2017', '/StopStopbarTo2Dbar2D_M-600_CTau-10mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_stopdbardbar_tau010000um_M0800_2017', '/StopStopbarTo2Dbar2D_M-800_CTau-10mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 98000),
+    MCSample('mfv_stopdbardbar_tau010000um_M1200_2017', '/StopStopbarTo2Dbar2D_M-1200_CTau-10mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_stopdbardbar_tau010000um_M1600_2017', '/StopStopbarTo2Dbar2D_M-1600_CTau-10mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_stopdbardbar_tau010000um_M3000_2017', '/StopStopbarTo2Dbar2D_M-3000_CTau-10mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_stopdbardbar_tau030000um_M0400_2017', '/StopStopbarTo2Dbar2D_M-400_CTau-30mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_stopdbardbar_tau030000um_M0600_2017', '/StopStopbarTo2Dbar2D_M-600_CTau-30mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_stopdbardbar_tau030000um_M0800_2017', '/StopStopbarTo2Dbar2D_M-800_CTau-30mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_stopdbardbar_tau030000um_M1200_2017', '/StopStopbarTo2Dbar2D_M-1200_CTau-30mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 98000),
+    MCSample('mfv_stopdbardbar_tau030000um_M1600_2017', '/StopStopbarTo2Dbar2D_M-1600_CTau-30mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
+    MCSample('mfv_stopdbardbar_tau030000um_M3000_2017', '/StopStopbarTo2Dbar2D_M-3000_CTau-30mm_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 100000),
     ]
 
 all_signal_samples_2017 = mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017
-of_all_signal_samples_2017 = of_mfv_signal_samples_2017 + of_mfv_stopdbardbar_samples_2017
 
-for s in all_signal_samples_2017 + of_all_signal_samples_2017:
+for s in all_signal_samples_2017:
     _set_signal_stuff(s)
 
 ########
@@ -415,9 +336,7 @@ __all__ = [
     'leptonic_samples_2017',
     'leptonic_samples_sum_2017',
     'mfv_signal_samples_2017',
-    'of_mfv_signal_samples_2017',
     'mfv_stopdbardbar_samples_2017',
-    'of_mfv_stopdbardbar_samples_2017',
     'qcd_samples_2018',
     'ttbar_samples_2018',
     'mfv_signal_samples_2018',
@@ -441,7 +360,6 @@ for x in __all__:
 
 __all__ += [
     'all_signal_samples_2017',
-    'of_all_signal_samples_2017',
     'all_signal_samples_2018',
     ]
 
@@ -497,11 +415,6 @@ ttbarht0600_2018.add_dataset('miniaod', '/TTJets_HT-600to800_TuneCP5_13TeV-madgr
 ttbarht0800_2018.add_dataset('miniaod', '/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM', 10372802)
 ttbarht1200_2018.add_dataset('miniaod', '/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM', 2779427)
 ttbarht2500_2018.add_dataset('miniaod', '/TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM',  1451104)
-
-for sample in mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017:
-    sample.add_dataset('miniaod', '/%s/None/USER' % sample.primary_dataset, sample.nevents_orig)
-    sample.datasets['miniaod'].condor = True
-    sample.datasets['miniaod'].xrootd_url = xrootd_sites['T3_US_FNALLPC']
 
 _adbp('miniaod', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-100um_TuneCP2_13TeV-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 96000)
 _adbp('miniaod', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-600_CTau-100um_TuneCP2_13TeV-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 100000)
@@ -729,7 +642,7 @@ if __name__ == '__main__':
                     print "    MCSample('%s_tau%06ium_M%04i_%s', '%s', %i)," % (model, tau, mass, year, dataset, nevents)
 
     if 0:
-        for s in all_of_signal_samples_2017 + all_signal_samples_2018:
+        for s in all_signal_samples_2017 + all_signal_samples_2018:
             l = DBS.datasets('/%s/*/MINIAODSIM' % s.primary_dataset)
             if len(l) == 1:
                 nevents = DBS.numevents_in_dataset(l[0])
