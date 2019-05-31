@@ -358,10 +358,13 @@ for x in __all__:
             exec '%s = sample' % sample.name
             __all__.append(sample.name)
 
-__all__ += [
+_alls = [
     'all_signal_samples_2017',
     'all_signal_samples_2018',
     ]
+__all__ += _alls
+for x in _alls:
+    registry.add_list(x, eval(x))
 
 ########################################################################
 
