@@ -56,6 +56,10 @@ class Dataset(object):
             conf_obj.splitting = 'EventAwareLumiBased'
             conf_obj.unitsPerJob = self.events_per
             conf_obj.totalUnits = self.total_events
+        elif self.split_by == 'events_nolumiaware':
+            conf_obj.splitting = 'EventBased'
+            conf_obj.unitsPerJob = self.events_per
+            conf_obj.totalUnits = self.total_events
         elif self.split_by == 'files':
             conf_obj.splitting = 'FileBased'
             conf_obj.unitsPerJob = self.files_per
