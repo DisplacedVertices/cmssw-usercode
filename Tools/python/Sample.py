@@ -519,6 +519,19 @@ def main(samples_registry):
     from pprint import pprint
     from JMTucker.Tools import colors
 
+    samples = samples_registry.from_argv()
+    datasets = samples_registry.datasets_from_argv()
+    def prnt(*x):
+        print ' '.join(x)
+    def runem(cb):
+        for dataset in datasets:
+            for sample in samples:
+                if not sample.has_dataset(dataset):
+                    print colors.yellow('no dataset %s for %s' % (dataset, sample.name))
+                    continue
+                sample.set_curr_dataset(dataset)
+                cb(dataset, sample)
+
     if 'merge' in argv:
         samples = samples_registry.from_argv(from_root_fns=True, raise_if_none=True)
         out_fn = [x for x in argv if x.endswith('.root') and not os.path.isfile(x)]
@@ -547,85 +560,49 @@ def main(samples_registry):
                 print s
 
     elif 'ds' in argv:
-        samples = samples_registry.from_argv(raise_if_none=True)
-        if len(samples) != 1:
-            raise ValueError('must have exactly one sample in argv')
-        sample = samples[0]
-        dataset = argv[argv.index(sample.name)+1]
-        if not sample.has_dataset(dataset):
-            raise KeyError('no dataset %s in %s' % (dataset, sample))
-        print sample.datasets[dataset].dataset
+        runem(lambda dataset, sample: prnt(sample.name, dataset, sample.dataset))
 
     elif 'file' in argv:
-        samples = samples_registry.from_argv(raise_if_none=True)
-        if len(samples) != 1:
-            raise ValueError('must have exactly one sample in argv')
-        sample = samples[0]
-        dataset = argv[argv.index(sample.name)+1]
-        if not sample.has_dataset(dataset):
-            raise KeyError('no dataset %s in %s' % (dataset, sample))
-        sample.set_curr_dataset(dataset)
-        for x in sample.filenames[:typed_from_argv(int, 5)]:
-            print x
+        runem(lambda dataset, sample: [prnt(sample.name, dataset, x) for x in sample.filenames[:typed_from_argv(int, 5)]])
 
     elif 'nevents' in argv:
-        samples = samples_registry.from_argv(raise_if_none=True)
-        if len(samples) != 1:
-            raise ValueError('must have exactly one sample in argv')
-        sample = samples[0]
-        dataset = argv[argv.index(sample.name)+1]
-        if not sample.has_dataset(dataset):
-            raise KeyError('no dataset %s in %s' % (dataset, sample))
-        sample.set_curr_dataset(dataset)
-        print DBS.numevents_in_dataset(sample.dataset)
+        runem(lambda dataset, sample: prnt(sample.name, dataset, DBS.numevents_in_dataset(sample.dataset)))
 
     elif 'site' in argv:
-        samples = samples_registry.from_argv(raise_if_none=True)
-        dataset = samples_registry.datasets_from_argv()
-        if len(dataset) > 1:
-            raise ValueError('only zero/one dataset allowed')
-        dataset = dataset[0] if len(dataset) == 1 else 'main'
         mlen = max(len(s.name) for s in samples)
-        for sample in samples:
-            sample.set_curr_dataset(dataset)
+        def cb(dataset, sample):
+            ljname = sample.name.ljust(mlen+3)
             try:
                 sites = DBS.sites_for_dataset(sample.dataset, json=True)
             except RuntimeError:
-                print sample.name, 'PROBLEM'
-                continue
-            print sample.name.ljust(mlen+5),
-            sites.sort(key=lambda x: x['name'])
-            for site in sites:
-                if DBS.site_is_tape(site):
-                    continue
-                is_complete = DBS.complete_at_site(site)
-                print (colors.green if is_complete else colors.yellow)(DBS.site_completions_string(site)),
-            print
+                print colors.boldred(ljname + ' DBS problem')
+            else:
+                print ljname,
+                sites.sort(key=lambda x: x['name'])
+                for site in sites:
+                    if DBS.site_is_tape(site):
+                        continue
+                    is_complete = DBS.complete_at_site(site)
+                    print (colors.green if is_complete else colors.yellow)(DBS.site_completions_string(site)), ' ',
+                print
+        runem(cb)
 
     elif 'samplefiles' in argv:
-        # rm a; touch a; for ds in '' miniaod; do for x in qcd ttbar leptonic; do ( samples samplefiles ${x}_samples_2017 $ds >> a ) ; done; done
-        # rm a; touch a; for ds in '' miniaod; do for year in 2017 2018; do for x in data auxiliary_data ; do ( samples samplefiles ${x}_samples_${year} $ds >> a ) ; done; done; done
-        samples = samples_registry.from_argv(raise_if_none=True)
-        dataset = 'main'
-        for arg in argv[1:]:
-            if arg == 'miniaod' or arg.startswith('ntuple'):
-                dataset = arg
-                break
-        print 'getting files for dataset %s:' % dataset, ', '.join(s.name for s in samples)
         import SampleFiles as sf
-        for s in samples:
-            d = {}
-            if not s.has_dataset(dataset):
-                print colors.yellow('no dataset %s for %s' % (dataset, s.name))
-                continue
-            s.set_curr_dataset(dataset)
-            if sf.has(s.name, dataset):
-                raise KeyError('SampleFiles already has an entry for %s' % s.name)
-            else:
-                fns = s.filenames
-                print 'DBS has %i files for %s' % (len(fns), s.name)
-                d[(s.name, dataset)] = (len(fns), fns)
-            print "('%s:%s', '%s')," % (s.name, dataset, sf._enc(d))
+        samples = samples_registry.from_argv()
+        datasets = samples_registry.datasets_from_argv()
+        for dataset in datasets:
+            for sample in samples:
+                if not sample.has_dataset(dataset):
+                    print colors.yellow('no dataset %s for %s' % (dataset, sample.name))
+                    continue
+                if sf.has(sample.name, dataset):
+                    raise KeyError('SampleFiles already has an entry for %s' % sample.name)
+                sample.set_curr_dataset(dataset)
+                fns = sample.filenames
+                print 'DBS has %i files for %s' % (len(fns), sample.name)
+                d = {(sample.name, dataset): (len(fns), fns)}
+                print "('%s:%s', '%s')," % (sample.name, dataset, sf._enc(d))
 
 __all__ = [
     'xrootd_sites',
