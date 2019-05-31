@@ -578,18 +578,30 @@ condorable = {
         "miniaod": ttbar_samples_2017 + [qcdht1000_2017, qcdht1500_2018, qcdht2000_2018, ttbarht0600_2018, ttbarht1200_2018, ttbarht2500_2018],
         },
     "T1_US_FNAL_Disk": {
-        "miniaod": [qcdht0700_2017, qcdht1500_2017, qcdht2000_2017, ttbar_2017, dyjetstollM10_2017, qcdmupt15_2017, qcdht0700_2018, qcdht1000_2018, ttbarht0800_2018],
+        "miniaod": [qcdht0700_2017, qcdht1500_2017, qcdht2000_2017, ttbar_2017, dyjetstollM10_2017, qcdmupt15_2017, qcdht0700_2018, qcdht1000_2018, ttbarht0800_2018,
+                    mfv_neu_tau000100um_M0400_2017, mfv_neu_tau000100um_M0600_2017, mfv_neu_tau000100um_M0600_2018, mfv_neu_tau000100um_M0800_2017, mfv_neu_tau000100um_M0800_2018, mfv_neu_tau000100um_M1200_2017, mfv_neu_tau000100um_M1200_2018, mfv_neu_tau000100um_M1600_2018, mfv_neu_tau000100um_M3000_2018, mfv_neu_tau000300um_M0400_2017, mfv_neu_tau000300um_M0400_2018, mfv_neu_tau000300um_M0600_2018, mfv_neu_tau000300um_M0800_2017, mfv_neu_tau000300um_M0800_2018, mfv_neu_tau000300um_M1200_2018, mfv_neu_tau000300um_M1600_2018, mfv_neu_tau000300um_M3000_2017, mfv_neu_tau000300um_M3000_2018, mfv_neu_tau001000um_M0400_2017, mfv_neu_tau001000um_M0400_2018, mfv_neu_tau001000um_M0600_2017, mfv_neu_tau001000um_M0600_2018, mfv_neu_tau001000um_M0800_2017, mfv_neu_tau001000um_M0800_2018, mfv_neu_tau001000um_M1200_2017, mfv_neu_tau001000um_M1200_2018, mfv_neu_tau001000um_M1600_2018, mfv_neu_tau001000um_M3000_2017, mfv_neu_tau010000um_M0400_2017, mfv_neu_tau010000um_M0400_2018, mfv_neu_tau010000um_M0600_2017, mfv_neu_tau010000um_M0600_2018, mfv_neu_tau010000um_M0800_2017, mfv_neu_tau010000um_M0800_2018, mfv_neu_tau010000um_M1600_2017, mfv_neu_tau010000um_M1600_2018, mfv_neu_tau030000um_M0400_2017, mfv_neu_tau030000um_M0600_2017, mfv_neu_tau030000um_M0800_2017, mfv_neu_tau030000um_M1200_2017, mfv_neu_tau030000um_M3000_2017, mfv_neu_tau030000um_M3000_2018, mfv_stopdbardbar_tau000100um_M0400_2017, mfv_stopdbardbar_tau000100um_M0400_2018, mfv_stopdbardbar_tau000100um_M0600_2017, mfv_stopdbardbar_tau000100um_M0800_2018, mfv_stopdbardbar_tau000100um_M1600_2017, mfv_stopdbardbar_tau000100um_M1600_2018, mfv_stopdbardbar_tau000100um_M3000_2017, mfv_stopdbardbar_tau000100um_M3000_2018, mfv_stopdbardbar_tau000300um_M0400_2017, mfv_stopdbardbar_tau000300um_M0400_2018, mfv_stopdbardbar_tau000300um_M0600_2018, mfv_stopdbardbar_tau000300um_M0800_2018, mfv_stopdbardbar_tau000300um_M1200_2017, mfv_stopdbardbar_tau000300um_M1600_2018, mfv_stopdbardbar_tau000300um_M3000_2017, mfv_stopdbardbar_tau000300um_M3000_2018, mfv_stopdbardbar_tau001000um_M0400_2017, mfv_stopdbardbar_tau001000um_M0400_2018, mfv_stopdbardbar_tau001000um_M0600_2017, mfv_stopdbardbar_tau001000um_M0600_2018, mfv_stopdbardbar_tau001000um_M0800_2018, mfv_stopdbardbar_tau001000um_M1200_2017, mfv_stopdbardbar_tau001000um_M1200_2018, mfv_stopdbardbar_tau001000um_M3000_2017, mfv_stopdbardbar_tau001000um_M3000_2018, mfv_stopdbardbar_tau010000um_M0600_2017, mfv_stopdbardbar_tau010000um_M0800_2017, mfv_stopdbardbar_tau010000um_M1200_2018, mfv_stopdbardbar_tau010000um_M1600_2017, mfv_stopdbardbar_tau010000um_M3000_2017, mfv_stopdbardbar_tau010000um_M3000_2018, mfv_stopdbardbar_tau030000um_M0400_2017, mfv_stopdbardbar_tau030000um_M0400_2018, mfv_stopdbardbar_tau030000um_M0600_2018, mfv_stopdbardbar_tau030000um_M0800_2017, mfv_stopdbardbar_tau030000um_M1200_2017, mfv_stopdbardbar_tau030000um_M1200_2018, mfv_stopdbardbar_tau030000um_M1600_2017, mfv_stopdbardbar_tau030000um_M1600_2018],
         },
-    "T2_US_Wisconsin": {},
-    "T2_US_Purdue": {},
+    "T2_US_Nebraska": {
+        "miniaod": [mfv_neu_tau000100um_M1600_2017, mfv_neu_tau000300um_M0600_2017, mfv_neu_tau001000um_M1600_2017, mfv_neu_tau010000um_M1200_2017, mfv_neu_tau010000um_M1200_2018, mfv_neu_tau030000um_M1600_2017, mfv_stopdbardbar_tau000300um_M0800_2017, mfv_stopdbardbar_tau010000um_M0400_2018, mfv_stopdbardbar_tau030000um_M0600_2017, mfv_stopdbardbar_tau030000um_M3000_2018],
+        },
+    "T2_US_Wisconsin": {
+        "miniaod": [mfv_neu_tau030000um_M1200_2018, mfv_stopdbardbar_tau000300um_M0600_2017, mfv_stopdbardbar_tau001000um_M0800_2017, mfv_stopdbardbar_tau001000um_M1600_2017, mfv_stopdbardbar_tau010000um_M1200_2017, mfv_stopdbardbar_tau030000um_M0800_2018],
+        },
+    "T2_US_Purdue": {
+        "miniaod": [mfv_neu_tau010000um_M3000_2017, mfv_neu_tau030000um_M1600_2018, mfv_stopdbardbar_tau000100um_M0600_2018, mfv_stopdbardbar_tau000100um_M1200_2018, mfv_stopdbardbar_tau010000um_M0400_2017, mfv_stopdbardbar_tau010000um_M0800_2018],
+        },
     "T2_DE_DESY": {},
     }
 
 for site, d in condorable.iteritems():
     if not xrootd_sites.has_key(site):
         raise ValueError('need entry in xrootd_sites for %s' % site)
+    _seen = set()
     for ds, samples in d.iteritems():
         for s in samples:
+            if s in _seen:
+                raise ValueError('%s duplicated in condorable dict' % s.name)
+            _seen.add(s)
             s.datasets[ds].condor = True
             s.datasets[ds].xrootd_url = xrootd_sites[site]
 
