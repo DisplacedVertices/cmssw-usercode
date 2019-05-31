@@ -51,7 +51,6 @@ class Dataset(object):
         self.filenames = kwargs.get('filenames', [])
 
     def job_control(self, conf_obj):
-        assert self.split_by in ('events', 'files')
         if self.split_by == 'events':
             conf_obj.splitting = 'EventAwareLumiBased'
             conf_obj.unitsPerJob = self.events_per
@@ -64,6 +63,8 @@ class Dataset(object):
             conf_obj.splitting = 'FileBased'
             conf_obj.unitsPerJob = self.files_per
             conf_obj.totalUnits = self.total_files
+        else:
+            raise ValueError('split_by must be one of "events", "events_nolumiaware", "files" while it is %r' % self.split_by)
         if self.json:
             conf_obj.lumiMask = self.json
         if self.run_range:
