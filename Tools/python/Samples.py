@@ -673,20 +673,14 @@ for s in registry.all():
 # 2018-11-01
 condorable = {
     "T3_US_FNALLPC": {
-        "main": [],
-        "miniaod": ttbar_samples_2017,
+        "miniaod": ttbar_samples_2017 + [qcdht1000_2017, qcdht1500_2018, qcdht2000_2018, ttbarht0600_2018, ttbarht1200_2018, ttbarht2500_2018],
         },
     "T1_US_FNAL_Disk": {
         "miniaod": [qcdht0700_2017, qcdht1500_2017, qcdht2000_2017, ttbar_2017, dyjetstollM10_2017, qcdmupt15_2017, qcdht0700_2018, qcdht1000_2018, ttbarht0800_2018],
         },
     "T2_US_Wisconsin": {},
-    "T2_US_Purdue": {
-        "miniaod": [qcdht1500_2018],
-        },
-    "T2_DE_DESY": {
-        "main": [],
-        "miniaod": [],
-        },
+    "T2_US_Purdue": {},
+    "T2_DE_DESY": {},
     }
 
 for site, d in condorable.iteritems():
