@@ -15,6 +15,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "FWCore/Utilities/interface/RandomNumberGenerator.h"
 #include "JMTucker/Formats/interface/TracksMap.h"
+#include "JMTucker/Tools/interface/BTagging.h"
 #include "JMTucker/Tools/interface/TrackRefGetter.h"
 
 class MFVTrackMover : public edm::EDProducer {
@@ -31,9 +32,6 @@ private:
 
   const double min_jet_pt;
   const unsigned min_jet_ntracks;
-  const std::string b_discriminator;
-  const double b_discriminator_veto;
-  const double b_discriminator_tag;
 
   const unsigned njets;
   const unsigned nbjets;
@@ -51,9 +49,6 @@ MFVTrackMover::MFVTrackMover(const edm::ParameterSet& cfg)
                          consumesCollector()),
     min_jet_pt(cfg.getParameter<double>("min_jet_pt")),
     min_jet_ntracks(cfg.getParameter<unsigned>("min_jet_ntracks")),
-    b_discriminator(cfg.getParameter<std::string>("b_discriminator")),
-    b_discriminator_veto(cfg.getParameter<double>("b_discriminator_veto")),
-    b_discriminator_tag(cfg.getParameter<double>("b_discriminator_tag")),
     njets(cfg.getParameter<unsigned>("njets")),
     nbjets(cfg.getParameter<unsigned>("nbjets")),
     tau(cfg.getParameter<double>("tau")),
@@ -127,10 +122,10 @@ void MFVTrackMover::produce(edm::Event& event, const edm::EventSetup&) {
       if (jet.pt() < min_jet_pt || track_ref_getter.tracks(event, jet).size() < min_jet_ntracks)
         continue;
 
-      const double b_disc = jet.bDiscriminator(b_discriminator);
-      if (b_disc < b_discriminator_veto)
+      const double b_disc = jmt::BTagging::discriminator(jet);
+      if (b_disc < jmt::BTagging::discriminator_min(jmt::BTagging::loose))
         presel_jets.push_back(&jet);
-      else if (b_disc > b_discriminator_tag)
+      else if (b_disc > jmt::BTagging::discriminator_min(jmt::BTagging::tight))
         presel_bjets.push_back(&jet);
     }
 

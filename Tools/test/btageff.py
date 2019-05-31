@@ -24,13 +24,13 @@ process.JMTBTagEfficiency = cms.EDAnalyzer('JMTBTagEfficiency',
                                            weight_src = cms.InputTag('jmtWeightMiniAOD'),
                                            jets_src = cms.InputTag('selectedPatJets'),
                                            jet_pt_min = cms.double(20),
-                                           b_discriminator = cms.string(str(year)),
+                                           old = cms.bool(False),
                                            )
 
 process.p = cms.Path(process.JMTBTagEfficiency)
 
 if year == 2017:
-    process.JMTBTagEfficiencyOld = process.JMTBTagEfficiency.clone(b_discriminator = '2017old')
+    process.JMTBTagEfficiencyOld = process.JMTBTagEfficiency.clone(old = True)
     process.p *= process.JMTBTagEfficiencyOld
 
 from JMTucker.MFVNeutralino.EventFilter import setup_event_filter

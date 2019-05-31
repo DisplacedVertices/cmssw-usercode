@@ -1,3 +1,4 @@
+#include "JMTucker/Tools/interface/BTagging.h"
 #include "JMTucker/Tools/interface/NtupleFiller.h"
 #include "JMTucker/Tools/interface/TrackerSpaceExtent.h"
 #include "JMTucker/Tools/interface/Utilities.h"
@@ -119,7 +120,7 @@ namespace jmt {
     nt.add(jet.pt(), jet.eta(), jet.phi(), jet.energy(),
            jet.jecFactor("Uncorrected"),
            ntracks,
-           jet.bDiscriminator("pfDeepFlavourJetTags:probb") + jet.bDiscriminator("pfDeepFlavourJetTags:probbb") + jet.bDiscriminator("pfDeepFlavourJetTags:problepb"),
+           jmt::BTagging::discriminator(jet),
            jet.hadronFlavour(),
            0);
   }

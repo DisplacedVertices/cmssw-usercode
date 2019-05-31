@@ -22,10 +22,10 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/MCInteractions.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/TriggerFloats.h"
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
+#include "JMTucker/Tools/interface/BTagging.h"
 #include "JMTucker/Tools/interface/GenUtilities.h"
 #include "JMTucker/Tools/interface/TriggerHelper.h"
 #include "JMTucker/Tools/interface/Utilities.h"
-#include "JMTucker/Tools/interface/Year.h"
 
 class MFVEventProducer : public edm::EDProducer {
 public:
@@ -324,13 +324,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   edm::Handle<double> rho;
   event.getByToken(rho_token, rho);
 
-#ifdef MFVNEUTRALINO_2017
-  const float b_discriminator_mins[3] = {0.0521, 0.3033, 0.7489};
-#elif defined(MFVNEUTRALINO_2018)
-  const float b_discriminator_mins[3] = {0.0494, 0.2770, 0.7264};
-#else
-#error bad year
-#endif
 
   for (int jjet = 0, jjete = int(jets->size()); jjet < jjete; ++jjet) {
     const pat::Jet& jet = jets->at(jjet);
@@ -338,16 +331,15 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->jet_pudisc.push_back(jet.userFloat("pileupJetId:fullDiscriminant")); // to be removed and put into _id when working points defined
     mevent->jet_pt.push_back(jet.pt());
     mevent->jet_raw_pt.push_back(jet.pt()*jet.jecFactor("Uncorrected"));
-    mevent->jet_bdisc_old.push_back(jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"));
-    const float bdisc = jet.bDiscriminator("pfDeepFlavourJetTags:probb") + jet.bDiscriminator("pfDeepFlavourJetTags:probbb") + jet.bDiscriminator("pfDeepFlavourJetTags:problepb");
-    mevent->jet_bdisc.push_back(bdisc);
+    mevent->jet_bdisc_old.push_back(jmt::BTagging::discriminator(jet, true));
+    mevent->jet_bdisc.push_back(jmt::BTagging::discriminator(jet));
     mevent->jet_eta.push_back(jet.eta());
     mevent->jet_phi.push_back(jet.phi());
     mevent->jet_energy.push_back(jet.energy());
 
     int bdisc_level = 0;
     for (int i = 0; i < 3; ++i)
-      if (bdisc > b_discriminator_mins[i])
+      if (jmt::BTagging::is_tagged(jet, i))
         bdisc_level = i+1;
 
     mevent->jet_id.push_back(MFVEvent::encode_jet_id(0, bdisc_level, jet.hadronFlavour()));
