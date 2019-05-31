@@ -594,20 +594,14 @@ def main(samples_registry):
 
     elif 'samplefiles' in argv:
         import SampleFiles as sf
-        samples = samples_registry.from_argv()
-        datasets = samples_registry.datasets_from_argv()
-        for dataset in datasets:
-            for sample in samples:
-                if not sample.has_dataset(dataset):
-                    print colors.yellow('no dataset %s for %s' % (dataset, sample.name))
-                    continue
-                if sf.has(sample.name, dataset):
-                    raise KeyError('SampleFiles already has an entry for %s' % sample.name)
-                sample.set_curr_dataset(dataset)
-                fns = sample.filenames
-                print 'DBS has %i files for %s' % (len(fns), sample.name)
-                d = {(sample.name, dataset): (len(fns), fns)}
-                print "('%s:%s', '%s')," % (sample.name, dataset, sf._enc(d))
+        def cb(dataset, sample):
+            if sf.has(sample.name, dataset):
+                raise KeyError('SampleFiles already has an entry for %s' % sample.name)
+            fns = sample.filenames
+            print 'DBS has %i files for %s' % (len(fns), sample.name)
+            d = {(sample.name, dataset): (len(fns), fns)}
+            print "('%s:%s', '%s')," % (sample.name, dataset, sf._enc(d))
+        runem(cb)
 
 __all__ = [
     'xrootd_sites',
