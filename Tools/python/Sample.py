@@ -11,6 +11,7 @@ from JMTucker.Tools.general import big_warn, typed_from_argv
 xrootd_sites = {
     'T3_US_FNALLPC': 'root://cmseos.fnal.gov/',
     'T1_US_FNAL_Disk': 'root://cmsxrootd-site.fnal.gov/',
+    'T2_US_Nebraska': 'root://cmsxrootd.fnal.gov/',
     'T2_US_Wisconsin': 'root://pubxrootd.hep.wisc.edu/',
     'T2_US_Purdue': 'root://xrootd.rcac.purdue.edu/',
     'T2_DE_DESY': 'root://dcache-cms-xrootd.desy.de/'
