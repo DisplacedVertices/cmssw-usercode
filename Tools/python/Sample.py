@@ -55,10 +55,6 @@ class Dataset(object):
             conf_obj.splitting = 'EventAwareLumiBased'
             conf_obj.unitsPerJob = self.events_per
             conf_obj.totalUnits = self.total_events
-        elif self.split_by == 'events_nolumiaware':
-            conf_obj.splitting = 'EventBased'
-            conf_obj.unitsPerJob = self.events_per
-            conf_obj.totalUnits = self.total_events
         elif self.split_by == 'files':
             conf_obj.splitting = 'FileBased'
             conf_obj.unitsPerJob = self.files_per
@@ -164,7 +160,7 @@ class Sample(object):
 
     @split_by.setter
     def split_by(self, val):
-        allowed = ('events', 'events_nolumiaware', 'files')
+        allowed = ('events', 'files')
         if val not in allowed:
             raise ValueError('split_by may only be one of %r while it is %r' % (allowed, val))
         self.datasets[self.curr_dataset].split_by = val
