@@ -285,10 +285,22 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
 ####
 
 def pick_samples(dataset, qcd=True, ttbar=True, all_signal=True, data=True, leptonic=False):
+    args = dict([(a,eval(a)) for a in ('qcd', 'ttbar', 'all_signal', 'data', 'leptonic')])
+
+    onlys = [a for a in args if args[a] == 'only']
+    if len(onlys) > 1:
+        raise ValueError('only one only allowed')
+    elif len(onlys) == 1:
+        a = onlys[0]
+        args[a] = True
+        for a2 in args:
+            if a2 != a:
+                args[a2] = False
+
     samples = []
-    for name in 'qcd', 'ttbar', 'all_signal', 'data', 'leptonic':
-        if eval(name):
-            samples += getattr(Samples, '%s_samples_%i' % (name, year))
+    for a in args:
+        if args[a]:
+            samples += getattr(Samples, '%s_samples_%i' % (a, year))
     return [s for s in samples if s.has_dataset(dataset)]
 
 ####
