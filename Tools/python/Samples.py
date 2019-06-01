@@ -664,3 +664,10 @@ if __name__ == '__main__':
                 print "_adbp('miniaod', '%s', %i)" % (l[0], nevents)
             else:
                 print colors.boldred('no miniaod for %s' % s.name)
+
+    if 0:
+        for s in qcd_samples_2017 + ttbar_samples_2017 + qcd_samples_2018 + ttbar_samples_2018:
+            s.set_curr_dataset('miniaod')
+            il = s.int_lumi_orig / 1000
+            nfn = len(s.filenames)
+            print s.name, nfn, il, '->', int(400/il*nfn), int(400/il*s.nevents_orig)
