@@ -125,6 +125,7 @@ namespace mfv {
     p_czz_ = 0;
     p_ntracks_ = 0;
     p_bs2derr_ = 0;
+    p_rescale_bs2derr_ = 0;
     p_geo2ddist_ = 0;
     p_genmatch_ = 0;
     p_pt_ = 0;
@@ -146,6 +147,7 @@ namespace mfv {
     czz_.clear();
     ntracks_.clear();
     bs2derr_.clear();
+    rescale_bs2derr_.clear();
     geo2ddist_.clear();
     genmatch_.clear();
     pt_.clear();
@@ -167,6 +169,7 @@ namespace mfv {
     t->Branch("v_czz", &czz_);
     t->Branch("v_ntracks", &ntracks_);
     t->Branch("v_bs2derr", &bs2derr_);
+    t->Branch("v_rescale_bs2derr", &rescale_bs2derr_);
     t->Branch("v_geo2ddist", &geo2ddist_);
     t->Branch("v_genmatch", &genmatch_);
     t->Branch("v_pt", &pt_);
@@ -188,6 +191,7 @@ namespace mfv {
     t->SetBranchAddress("v_czz", &p_czz_);
     t->SetBranchAddress("v_ntracks", &p_ntracks_);
     t->SetBranchAddress("v_bs2derr", &p_bs2derr_);
+    t->SetBranchAddress("v_rescale_bs2derr", &p_rescale_bs2derr_);
     t->SetBranchAddress("v_geo2ddist", &p_geo2ddist_);
     t->SetBranchAddress("v_genmatch", &p_genmatch_);
     t->SetBranchAddress("v_pt", &p_pt_);
@@ -209,6 +213,7 @@ namespace mfv {
     czz_ = *p_czz_;
     ntracks_ = *p_ntracks_;
     bs2derr_ = *p_bs2derr_;
+    rescale_bs2derr_ = *p_rescale_bs2derr_;
     geo2ddist_ = *p_geo2ddist_;
     genmatch_ = *p_genmatch_;
     pt_ = *p_pt_;
