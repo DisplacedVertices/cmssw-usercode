@@ -91,6 +91,7 @@ namespace mfv {
     float y0;
     float z0;
     float bs2derr0;
+    float rescale_bs2derr0;
     float geo2ddist0;
 
     unsigned char ntk1;
@@ -119,6 +120,7 @@ namespace mfv {
     float y1;
     float z1;
     float bs2derr1;
+    float rescale_bs2derr1;
     float geo2ddist1;
   };
 

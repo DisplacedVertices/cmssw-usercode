@@ -16,7 +16,7 @@ namespace mfv {
     run = lumi = 0;
     event = 0;
     gen_flavor_code = pass_hlt = npv = npu = njets = nvtx = ntk0 = ntk1 = 0;
-    l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = bsx = bsy = bsz = bsdxdz = bsdydz = pvx = pvy = pvz = weight = x0 = y0 = z0 = bs2derr0 = geo2ddist0 = x1 = y1 = z1 = bs2derr1 = geo2ddist1 = 0;
+    l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = bsx = bsy = bsz = bsdxdz = bsdydz = pvx = pvy = pvz = weight = x0 = y0 = z0 = bs2derr0 = rescale_bs2derr0 = geo2ddist0 = x1 = y1 = z1 = bs2derr1 = rescale_bs2derr1 = geo2ddist1 = 0;
     genmatch0 = genmatch1 = 0;
     for (int i = 0; i < 2; ++i)
       gen_x[i] = gen_y[i] = gen_z[i] = gen_lsp_pt[i] = gen_lsp_eta[i] = gen_lsp_phi[i] = gen_lsp_mass[i] = 0;
@@ -126,6 +126,7 @@ namespace mfv {
     tree->Branch("y0", &nt.y0);
     tree->Branch("z0", &nt.z0);
     tree->Branch("bs2derr0", &nt.bs2derr0);
+    tree->Branch("rescale_bs2derr0", &nt.rescale_bs2derr0);
     tree->Branch("geo2ddist0", &nt.geo2ddist0);
 
     tree->Branch("ntk1", &nt.ntk1);
@@ -144,6 +145,7 @@ namespace mfv {
     tree->Branch("y1", &nt.y1);
     tree->Branch("z1", &nt.z1);
     tree->Branch("bs2derr1", &nt.bs2derr1);
+    tree->Branch("rescale_bs2derr1", &nt.rescale_bs2derr1);
     tree->Branch("geo2ddist1", &nt.geo2ddist1);
 
     tree->SetAlias("jetht", "Sum$((jet_pt>40)*jet_pt)");
@@ -210,6 +212,7 @@ namespace mfv {
     tree->SetBranchAddress("y0", &nt.y0);
     tree->SetBranchAddress("z0", &nt.z0);
     tree->SetBranchAddress("bs2derr0", &nt.bs2derr0);
+    tree->SetBranchAddress("rescale_bs2derr0", &nt.rescale_bs2derr0);
     tree->SetBranchAddress("geo2ddist0", &nt.geo2ddist0);
     tree->SetBranchAddress("ntk1", &nt.ntk1);
     tree->SetBranchAddress("tk1_qchi2", &nt.p_tk1_qchi2);
@@ -227,6 +230,7 @@ namespace mfv {
     tree->SetBranchAddress("y1", &nt.y1);
     tree->SetBranchAddress("z1", &nt.z1);
     tree->SetBranchAddress("bs2derr1", &nt.bs2derr1);
+    tree->SetBranchAddress("rescale_bs2derr1", &nt.rescale_bs2derr1);
     tree->SetBranchAddress("geo2ddist1", &nt.geo2ddist1);
   }
 
