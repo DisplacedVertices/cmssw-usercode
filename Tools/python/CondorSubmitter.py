@@ -357,12 +357,15 @@ def get(i): return _l[i]
 
         if sample.split_by == 'events':
             per = sample.events_per
-            assert sample.nevents_orig > 0
-            njobs = int_ceil(sample.nevents_orig, per)
+            assert sample.nevents_orig > 0 or sample.total_events > 0
+            nevents = sample.total_events if sample.total_events > 0 else sample.nevents_orig
+            njobs = int_ceil(nevents, per)
             fn_groups = [filenames]
         else:
             use_njobs = sample.files_per < 0
             per = abs(sample.files_per)
+            if sample.total_files > 0:
+                filenames = filenames[:sample.total_files]
             njobs = getattr(sample, 'njobs', int_ceil(len(filenames), per))
             fn_groups = [x for x in (filenames[i*per:(i+1)*per] for i in xrange(njobs)) if x]
             if not use_njobs:
