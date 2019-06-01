@@ -3,7 +3,6 @@ from JMTucker.MFVNeutralino.NtupleCommon import *
 settings = NtupleSettings()
 settings.is_mc = True
 settings.is_miniaod = True
-settings.cross = '' # 2017to2018' # 2017to2017p8'
 
 process = ntuple_process(settings)
 tfileservice(process, 'presel.root')
@@ -11,12 +10,9 @@ del process.out
 del process.outp
 del process.p
 
-max_events(process, 10000)
-report_every(process, 1000000)
-#want_summary(process)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
 sample_files(process, 'qcdht2000_2017' if settings.is_mc else 'JetHT2017F', dataset, 1)
-file_event_from_argv(process)
+cmssw_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
@@ -59,17 +55,11 @@ if not settings.is_mc:
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
-    from JMTucker.Tools import Samples
 
-    if year == 2017:
-        samples = Samples.data_samples_2017 + Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.all_signal_samples_2017
-    elif year == 2018:
-        samples = Samples.data_samples_2018 + Samples.qcd_samples_2018
+    samples = pick_samples(dataset)
+    set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2017p8.json'), limit_ttbar=True)
 
-    samples = [s for s in samples if s.has_dataset(dataset) and (s.is_mc or not settings.cross)]
-    set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2017p8.json'))
-
-    ms = MetaSubmitter('PreselHistos%sV1%s' % (settings.version, '_' + settings.cross if settings.cross else ''), dataset=dataset)
-    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier(cross=settings.cross))
+    ms = MetaSubmitter('PreselHistos' + settings.version, dataset=dataset)
+    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier())
     ms.condor.stageout_files = 'all'
     ms.submit(samples)

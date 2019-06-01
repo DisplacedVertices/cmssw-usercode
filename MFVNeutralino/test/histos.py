@@ -1,12 +1,11 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 is_mc = True # for blinding
-cross = '' # 2017to2018' # 2017to2017p8'
 
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset
 sample_files(process, 'qcdht2000_2017', dataset, 1)
 tfileservice(process, 'histos.root')
-file_event_from_argv(process)
+cmssw_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
@@ -117,20 +116,13 @@ if not is_mc:
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
-    from JMTucker.Tools.Year import year
-    from JMTucker.Tools import Samples 
 
-    if year == 2017:
-        samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.all_signal_samples_2017 + Samples.data_samples_2017
-    elif year == 2018:
-        samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2018 + Samples.data_samples_2018
-
-    samples = [s for s in samples if s.has_dataset(dataset) and (s.is_mc or not cross)]
+    samples = pick_samples(dataset)
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8_1pc.json'))
 
-    cs = CondorSubmitter('Histos%s%s' % (version, '_' + cross if cross else ''),
+    cs = CondorSubmitter('Histos' + version,
                          ex = year,
                          dataset = dataset,
-                         pset_modifier = chain_modifiers(is_mc_modifier, half_mc_modifier(), per_sample_pileup_weights_modifier(cross=cross)),
+                         pset_modifier = chain_modifiers(is_mc_modifier, half_mc_modifier(), per_sample_pileup_weights_modifier()),
                          )
     cs.submit_all(samples)
