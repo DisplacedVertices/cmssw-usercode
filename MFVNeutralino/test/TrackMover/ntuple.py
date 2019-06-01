@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-raise 'use new btagging'
-
 from JMTucker.Tools.general import named_product
 from JMTucker.MFVNeutralino.NtupleCommon import *
 
@@ -10,10 +8,10 @@ settings.is_mc = True
 settings.is_miniaod = True
 settings.event_filter = 'jets only novtx'
 
-version = settings.version + 'v3'
+version = settings.version + 'v1'
 
-cfgs = named_product(njets = [2],
-                     nbjets = [0],
+cfgs = named_product(njets = [2,3],
+                     nbjets = [0,1,2],
                      nsigmadxy = [4.0],
                      angle = [0.2], #, 0.1, 0.3],
                      )
@@ -23,8 +21,6 @@ cfgs = named_product(njets = [2],
 process = ntuple_process(settings)
 tfileservice(process, 'movedtree.root')
 max_events(process, 100)
-report_every(process, 1000000)
-#want_summary(process)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
 sample_files(process, 'qcdht2000_2017', dataset, 1)
 cmssw_from_argv(process)
@@ -74,7 +70,8 @@ for icfg, cfg in enumerate(cfgs):
                             )
 
     modifiedVertexSequence(process, ex, tracks_src = tracks_name,
-                           min_track_sigmadxy = cfg.nsigmadxy,
+                           min_track_sigmadxy = 0,
+                           min_track_rescaled_sigmadxy = cfg.nsigmadxy,
                            )
 
     for x in 'mfvVerticesToJets', 'mfvVerticesAuxTmp', 'mfvVerticesAuxPresel':
@@ -102,15 +99,9 @@ random_service(process, random_dict)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
-    from JMTucker.Tools import Samples
 
-    if year == 2017:
-        samples = Samples.data_samples_2017 + Samples.qcd_samples_2017
-    elif year == 2018:
-        samples = Samples.data_samples_2018 + Samples.qcd_samples_2018
-
-    #samples = [s for s in samples if s.has_dataset(dataset)]
-    set_splitting(samples, dataset, 'trackmover', data_json=json_path('ana_2017p8.json'))
+    samples = pick_samples(dataset, all_signal=False)
+    set_splitting(samples, dataset, 'trackmover', data_json=json_path('ana_2017p8.json'), limit_ttbar=True)
 
     ms = MetaSubmitter('TrackMover' + version, dataset=dataset)
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier())
