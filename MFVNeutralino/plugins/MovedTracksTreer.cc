@@ -217,7 +217,7 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
 
     nt.vertices().add(vx, vy, vz,
                       v.cxx, v.cxy, v.cxz, v.cyy, v.cyz, v.czz,
-                      v.ntracks(), v.bs2derr, v.geo2ddist(), false,
+                      v.ntracks(), v.bs2derr, v.rescale_bs2derr, v.geo2ddist(), false,
                       v.pt[mfv::PTracksPlusJetsByNtracks], v.eta[mfv::PTracksPlusJetsByNtracks], v.phi[mfv::PTracksPlusJetsByNtracks], v.mass[mfv::PTracksPlusJetsByNtracks],
                       v.mass[mfv::PTracksOnly]);
 

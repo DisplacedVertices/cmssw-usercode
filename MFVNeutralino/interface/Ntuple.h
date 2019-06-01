@@ -115,7 +115,7 @@ namespace mfv {
 
     void add(float x, float y, float z,
              float cxx, float cxy, float cxz, float cyy, float cyz, float czz,
-             uchar ntracks, float bs2derr, float geo2ddist, bool genmatch,
+             uchar ntracks, float bs2derr, float rescale_bs2derr, float geo2ddist, bool genmatch,
              float pt, float eta, float phi, float mass, float tkonlymass) {
       x_.push_back(x);
       y_.push_back(y);
@@ -128,6 +128,7 @@ namespace mfv {
       czz_.push_back(czz);
       ntracks_.push_back(ntracks);
       bs2derr_.push_back(bs2derr);
+      rescale_bs2derr_.push_back(rescale_bs2derr);
       geo2ddist_.push_back(geo2ddist);
       genmatch_.push_back(genmatch);
       pt_.push_back(pt);
@@ -149,6 +150,7 @@ namespace mfv {
     float czz        (int i) const { return p_get(i, czz_,        p_czz_        ); }
     uchar ntracks    (int i) const { return p_get(i, ntracks_,    p_ntracks_    ); }
     float bs2derr    (int i) const { return p_get(i, bs2derr_,    p_bs2derr_    ); }
+    float rescale_bs2derr(int i) const { return p_get(i, rescale_bs2derr_, p_rescale_bs2derr_); }
     float geo2ddist  (int i) const { return p_get(i, geo2ddist_,  p_geo2ddist_  ); }
     bool  genmatch   (int i) const { return p_get(i, genmatch_,   p_genmatch_   ); }
     float pt         (int i) const { return p_get(i, pt_,         p_pt_         ); }
@@ -172,6 +174,7 @@ namespace mfv {
     vfloat czz_;         vfloat* p_czz_;
     vuchar ntracks_;     vuchar* p_ntracks_;
     vfloat bs2derr_;     vfloat* p_bs2derr_;
+    vfloat rescale_bs2derr_; vfloat* p_rescale_bs2derr_;
     vfloat geo2ddist_;   vfloat* p_geo2ddist_;
     vbool  genmatch_;    vbool * p_genmatch_;
     vfloat pt_;          vfloat* p_pt_;
