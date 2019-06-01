@@ -56,7 +56,7 @@ if not settings.is_mc:
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
-    samples = pick_samples(dataset)
+    samples = pick_samples(dataset, all_signal=False)
     set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2017p8.json'), limit_ttbar=True)
 
     ms = MetaSubmitter('PreselHistos' + settings.version, dataset=dataset)
