@@ -2,6 +2,7 @@ import sys, re
 from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
 from JMTucker.Tools.CondorSubmitter import CondorSubmitter
 from JMTucker.Tools.Year import year
+from JMTucker.Tools import Samples
 
 class max_output_modifier:
     def __init__(self, n):
@@ -283,6 +284,15 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
 
 ####
 
+def pick_samples(dataset, qcd=True, ttbar=True, all_signal=True, data=True, leptonic=False):
+    samples = []
+    for name in 'qcd', 'ttbar', 'all_signal', 'data', 'leptonic':
+        if eval(name):
+            samples += getattr(Samples, '%s_samples_%i' % (name, year))
+    return [s for s in samples if s.has_dataset(dataset)]
+
+####
+
 class MetaSubmitter:
     class args:
         pass
@@ -338,9 +348,11 @@ class MetaSubmitter:
 
 __all__ = [
     'year',
+    'Samples',
     'CRABSubmitter',
     'CondorSubmitter',
     'MetaSubmitter',
+    'pick_samples',
     'set_splitting',
     'max_output_modifier',
     'is_mc_modifier',
