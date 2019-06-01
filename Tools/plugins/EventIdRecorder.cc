@@ -1,6 +1,6 @@
-#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "TTree.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
@@ -35,7 +35,7 @@ EventIdRecorder::EventIdRecorder(const edm::ParameterSet& cfg)
 
   edm::Service<TFileService> fs;
 
-  tree = fs->make<TTree>("event_ids", "");
+  tree = fs->make<TTree>("t", "");
   tree->Branch("run",   &run,   "run/i");
   tree->Branch("lumi",  &lumi,  "lumi/i");
   tree->Branch("event", &evt,   "event/l");

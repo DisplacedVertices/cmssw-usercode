@@ -8,7 +8,7 @@ ps = plot_saver(plot_dir('lumimodn'), size=(600,600), log=False)
 fns = root_fns_from_argv()
 ns = [os.path.basename(fn).replace('.root', '') for fn in fns]
 fs = [ROOT.TFile.Open(fn) for fn in fns]
-ts = [f.Get('EventIdRecorder/event_ids') for f in fs]
+ts = [f.Get('EventIdRecorder/t') for f in fs]
 drs = [draw_hist_register(t) for t in ts]
 cs = [1,2,3,4,6,7,8,9] + range(40,50) + range(30,40)
 while len(cs) < len(drs):
