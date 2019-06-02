@@ -6,7 +6,7 @@ settings = NtupleSettings()
 settings.is_mc = True
 settings.is_miniaod = True
 
-settings.run_n_tk_seeds = True
+settings.run_n_tk_seeds = False
 settings.minitree_only = False
 settings.prepare_vis = False
 settings.keep_all = False
