@@ -515,7 +515,7 @@ def get(i): return _l[i]
         for sample in samples:
             self.submit(sample)
 
-def NtupleReader_submit(batch_name, dataset, samples, exe_fn='hists.exe', output_fn='hists.root', split_default=10):
+def NtupleReader_submit(batch_name, dataset, samples, exe_fn='hists.exe', exe_args='', output_fn='hists.root', split_default=1):
     meat = '''
 job=$(<cs_job)
 njobs=$(<cs_njobs)
@@ -524,7 +524,7 @@ split=$((njobs/nfns))
 fnum=$((job/split))
 fn=$(python -c 'from cs_filelist import get; print get('$fnum')[0]')
 
-cmd="./__EXE_FN__ -i $fn -o __OUTPUT_FN__ -n $split -w $((job%split))"
+cmd="./__EXE_FN__ -i $fn -o __OUTPUT_FN__ -n $split -w $((job%split)) __EXE_ARGS__"
 if false; then
   echo $cmd
   meatexit=0
@@ -533,7 +533,10 @@ else
   $cmd 2>&1
   meatexit=$?
 fi
-'''.replace('__EXE_FN__', exe_fn).replace('__OUTPUT_FN__', output_fn)
+'''\
+.replace('__EXE_FN__', exe_fn) \
+.replace('__EXE_ARGS__', exe_args) \
+.replace('__OUTPUT_FN__', output_fn)
 
     for sample in samples:
         sample.set_curr_dataset(dataset)
