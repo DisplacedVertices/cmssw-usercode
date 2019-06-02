@@ -1,6 +1,6 @@
 import sys, re
 from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
-from JMTucker.Tools.CondorSubmitter import CondorSubmitter
+from JMTucker.Tools.CondorSubmitter import CondorSubmitter, NtupleReader_submit
 from JMTucker.Tools.Year import year
 from JMTucker.Tools import Samples
 
@@ -284,7 +284,8 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
 
 ####
 
-def pick_samples(dataset, qcd=True, ttbar=True, all_signal=True, data=True, leptonic=False):
+def pick_samples(dataset, both_years=False,
+                 qcd=True, ttbar=True, all_signal=True, data=True, leptonic=False):
     args = dict([(a,eval(a)) for a in ('qcd', 'ttbar', 'all_signal', 'data', 'leptonic')])
     if not set(args.values()).issubset([True, False, 'only']):
         raise ValueError('arg must be one of True, False, "only"')
@@ -299,10 +300,13 @@ def pick_samples(dataset, qcd=True, ttbar=True, all_signal=True, data=True, lept
             if a2 != a:
                 args[a2] = False
 
+    years = [2017, 2018] if both_years else [year]
+
     samples = []
     for a in args:
         if args[a]:
-            samples += getattr(Samples, '%s_samples_%i' % (a, year))
+            for yr in years:
+                samples += getattr(Samples, '%s_samples_%i' % (a, yr))
     return [s for s in samples if s.has_dataset(dataset)]
 
 ####
@@ -365,6 +369,7 @@ __all__ = [
     'Samples',
     'CRABSubmitter',
     'CondorSubmitter',
+    'NtupleReader_submit',
     'MetaSubmitter',
     'pick_samples',
     'set_splitting',
