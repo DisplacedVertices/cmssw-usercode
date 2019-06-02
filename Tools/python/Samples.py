@@ -591,6 +591,15 @@ condorable = {
         "miniaod": [mfv_neu_tau010000um_M3000_2017, mfv_neu_tau030000um_M1600_2018, mfv_stopdbardbar_tau000100um_M0600_2018, mfv_stopdbardbar_tau000100um_M1200_2018, mfv_stopdbardbar_tau010000um_M0400_2017, mfv_stopdbardbar_tau010000um_M0800_2018],
         },
     "T2_DE_DESY": {},
+    "T2_US_Florida": {
+        "miniaod": [mfv_neu_tau000100um_M3000_2017, mfv_neu_tau001000um_M0400_2017, mfv_stopdbardbar_tau000100um_M0800_2017, mfv_stopdbardbar_tau030000um_M3000_2017, mfv_neu_tau000100um_M0400_2018, mfv_neu_tau030000um_M0400_2018, mfv_neu_tau030000um_M0600_2018, mfv_neu_tau030000um_M0800_2018, mfv_stopdbardbar_tau000300um_M1200_2018, mfv_stopdbardbar_tau010000um_M1600_2018],
+        },
+    "T2_US_MIT": {
+        "miniaod": [mfv_neu_tau000300um_M1200_2017, mfv_stopdbardbar_tau000100um_M1200_2017, mfv_stopdbardbar_tau000300um_M1600_2017, mfv_neu_tau010000um_M3000_2018, mfv_stopdbardbar_tau001000um_M1600_2018, mfv_stopdbardbar_tau010000um_M0600_2018],
+        },
+    "T2_US_UCSD": {
+        "miniaod": [mfv_neu_tau000300um_M1600_2017, mfv_neu_tau001000um_M3000_2018],
+        },
     }
 
 for site, d in condorable.iteritems():
