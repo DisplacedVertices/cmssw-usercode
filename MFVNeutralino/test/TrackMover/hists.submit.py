@@ -2,7 +2,7 @@ from JMTucker.Tools.MetaSubmitter import *
 
 version = 'v25mv1'
 dataset = 'nr_trackmover' + version
-samples = pick_samples(dataset, both_years=True, all_signal=False)[:1]
+samples = pick_samples(dataset, both_years=True, all_signal=False)
 
 for nl in 2,: #3:
     for nb in 0,: #1,2:
