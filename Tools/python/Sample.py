@@ -393,8 +393,8 @@ class SamplesRegistry:
         return sorted(set(ds))
 
     def datasets_from_argv(self, default=[], sort_and_set=True, raise_if_none=False):
-        check = 'fa_check' in sys.argv
-        use_all = 'fa_all' in sys.argv
+        check = 'fa_ds_check' in sys.argv
+        use_all = 'fa_ds_all' in sys.argv
 
         ds = []
         if use_all:
@@ -559,6 +559,9 @@ def main(samples_registry):
             for s in no_root_file:
                 print s
 
+    elif 'name' in argv:
+        runem(lambda dataset, sample: prnt(sample.name, dataset))
+
     elif 'ds' in argv:
         runem(lambda dataset, sample: prnt(sample.name, dataset, sample.dataset))
 
@@ -597,6 +600,14 @@ def main(samples_registry):
             d = {(sample.name, dataset): (len(fns), fns)}
             print "('%s:%s', '%s')," % (sample.name, dataset, sf._enc(d))
         runem(cb)
+
+    elif 'sfhas' in argv:
+        neg = 'neg' in argv
+        import SampleFiles as sf
+        for dataset in datasets:
+            for sample in samples:
+                if sf.has(sample.name, dataset) != neg:
+                    print sample.name
 
 __all__ = [
     'xrootd_sites',
