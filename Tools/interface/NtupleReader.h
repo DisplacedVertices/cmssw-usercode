@@ -45,7 +45,7 @@ namespace jmt {
     bool is_mc() const { return is_mc_; }
     bool use_weights() const { return use_weights_; }
 
-    boost::program_options::options_description_easy_init& init_options(const std::string& tree_path) {
+    boost::program_options::options_description_easy_init init_options(const std::string& tree_path) {
       namespace po = boost::program_options;
       return desc_.add_options()
         ("help,h", "this help message")

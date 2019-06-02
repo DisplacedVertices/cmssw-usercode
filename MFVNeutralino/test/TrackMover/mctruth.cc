@@ -6,7 +6,7 @@ int main(int argc, char** argv) {
   jmt::NtupleReader<mfv::MovedTracksNtuple> nr;
   namespace po = boost::program_options;
   nr.init_options("mfvMovedTreeMCTruth/t")
-    //("min-lspdist3", po::value<double>(&min_lspdist3)->default_value(0.02), "min distance between LSP decays to use event")
+    ("min-lspdist3", po::value<double>(&min_lspdist3)->default_value(0.02), "min distance between LSP decays to use event")
     ;
 
   if (!nr.parse_options(argc, argv)) return 1;
