@@ -17,7 +17,7 @@ xrootd_sites = {
     'T2_DE_DESY': 'root://dcache-cms-xrootd.desy.de/',
     'T2_US_Florida': 'root://cmsio5.rc.ufl.edu/',
     'T2_US_MIT': 'root://xrootd.cmsaf.mit.edu/',
-    'T2_US_UCSD': 'root://redirector.t2.ucsd.edu',
+    'T2_US_UCSD': 'root://redirector.t2.ucsd.edu/',
     }
 
 ########################################################################
