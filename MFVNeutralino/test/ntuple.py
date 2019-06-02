@@ -6,7 +6,7 @@ settings = NtupleSettings()
 settings.is_mc = True
 settings.is_miniaod = True
 
-settings.run_n_tk_seeds = False
+settings.run_n_tk_seeds = True
 settings.minitree_only = False
 settings.prepare_vis = False
 settings.keep_all = False
@@ -27,7 +27,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if settings.run_n_tk_seeds:
         samples = [s for s in samples if not s.is_signal]
 
-    set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2017p8.json'))
+    set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2017p8.json'), limit_ttbar=settings.run_n_tk_seeds)
 
     ms = MetaSubmitter(settings.batch_name(), dataset=dataset)
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, npu_filter_modifier(settings.is_miniaod), signals_no_event_filter_modifier)
