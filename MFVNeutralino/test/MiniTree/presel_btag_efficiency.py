@@ -1,7 +1,10 @@
 from JMTucker.Tools.ROOTTools import *
 
-f_btageff = ROOT.TFile('/uscms_data/d1/jchu/crab_dirs/mfv_946p1/BTagEffV1/background_2017.root')
-f_presel = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/PreselHistosV22m/background_2017.root')
+year = 2018
+version = 'V25m'
+
+f_btageff = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/BTagEff%sv1/background_%s.root' % (version, year) )
+f_presel = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/PreselHistos%s/background_%s.root' % (version, year))
 
 def njets(hname):
   h = f_btageff.Get(hname)

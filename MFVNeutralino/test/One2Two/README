@@ -36,7 +36,7 @@ Here is the procedure for constructing the background template and estimating th
           --> Modify calculate_btag_efficiency.py for the proper input filename.
           --> `python calculate_btag_efficiency.py`
           --> Use the printed table to fill in the fb(ft,efft,frt) inputs of ../One2Two/bquark_fraction.py for f1 (the fraction of 1-vertex events with b-quarks), which allows us to compute the fraction of events with b-quarks after unfolding the b-tagging efficiencies/fake rates. ft comes from the right-hand bin of h_1v_1medium_btag_flavor_code.png histogram from comparehists, efft comes from the "btag eff" column, and frt comes from the "fake rate" column.
-          --> Similarly, use `python presel_btags_vs_bquarks.py` and `python presel_btag_efficiency.py` for the 0-vertex preselection-level information for the f0 inputs of ../One2Two/bquark_fraction.py. These also have to be modified and rerun for the year(s) of interest
+          --> Similarly, use `python presel_btags_vs_bquarks.py` and `python presel_btag_efficiency.py` for the preselection-level information for the f0 inputs of ../One2Two/bquark_fraction.py. These also have to be modified and rerun for the year(s) of interest
           --> `cd ../One2Two/`
           --> Modify bquark_fraction.py for f0, f1, cb, and cbbar based on the 2v_from_jets.exe stdout printouts
           --> `python bquark_fraction.py`, which returns the fraction of 2-vertex events containing at least one b-quark. We use the f2 values as the weights for events with b-quarks, and 1-f2 for events without b-quarks.

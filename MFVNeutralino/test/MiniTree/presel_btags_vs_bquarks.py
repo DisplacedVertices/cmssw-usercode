@@ -1,9 +1,12 @@
 from JMTucker.Tools.ROOTTools import *
 
-set_style()
-ps = plot_saver(plot_dir('compare_btags_vs_bquarks_PreselHistosV23mV1'), size=(600,600))
+year = 2018
+version = 'V25m'
 
-f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/PreselHistosV23mV1/background_2017.root')
+set_style()
+ps = plot_saver(plot_dir('compare_btags_vs_bquarks_PreselHistos%s' % version), size=(600,600))
+
+f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/PreselHistos%s/background_%s.root' % (version, year) )
 btag_names = ['#geq1 loose', '#geq2 loose', '#geq1 medium', '#geq2 medium', '#geq1 tight', '#geq2 tight']
 
 #plot jet bdisc in events with and without b quarks
@@ -32,7 +35,15 @@ l.AddEntry(h_jet_bdisc_bquarks, 'events with b quarks')
 l.AddEntry(h_jet_bdisc_nobquarks, 'events without b quarks')
 l.Draw()
 ls = []
-for bdisc_wp, bdisc_min in [('loose', 0.5803), ('med', 0.8838), ('tight', 0.9693)]:
+
+if year == 2017 :
+  bdisc_arr = [('loose', 0.0521), ('med', 0.3033), ('tight', 0.7489)]
+elif year == 2018 :
+  bdisc_arr = [('loose', 0.0494), ('med', 0.2770), ('tight', 0.7264)]
+else :
+  exit("Invalid year!")
+
+for bdisc_wp, bdisc_min in bdisc_arr :
   line = ROOT.TLine(bdisc_min, 1e-9, bdisc_min, 0.1)
   line.SetLineStyle(2)
   line.SetLineWidth(2)

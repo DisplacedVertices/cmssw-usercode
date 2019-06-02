@@ -1,7 +1,11 @@
 from JMTucker.Tools.ROOTTools import *
+import sys
 
-ntk = 3
-f = ROOT.TFile('output_btags_vs_bquarks_MiniTreeV23m_ntk%s/background.root' % ntk)
+version = 'V25m'
+year = int(sys.argv[1])
+ntk = int(sys.argv[2])
+
+f = ROOT.TFile('output_btags_vs_bquarks_MiniTree%s_ntk%s_%s/background.root' % (version, ntk, year) )
 
 def njets(hname):
   h = f.Get(hname)
