@@ -556,6 +556,7 @@ for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + \
          data_samples_2018 + qcd_samples_2018 + ttbar_samples_2018:
     x.add_dataset("ntuplev25m")
     if not x.is_signal:
+        x.add_dataset("ntuplev25m_ntkseeds")
         x.add_dataset("nr_trackmoverv25mv1")
 
 ########
