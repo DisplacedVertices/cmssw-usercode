@@ -1,22 +1,18 @@
-#include "TH2F.h"
+#include "TH2.h"
 #include "TRandom3.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
-#include "DataFormats/Math/interface/deltaR.h"
-#include "DataFormats/PatCandidates/interface/Jet.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
-#include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-#include "FWCore/ServiceRegistry/interface/Service.h"
-#include "JMTucker/Tools/interface/Utilities.h"
-#include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
-#include "JMTucker/MFVNeutralino/interface/EventTools.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
-#include "JetMETCorrections/Objects/interface/JetCorrectionsRecord.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
+#include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/ESHandle.h"
+#include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
-
-#define NBDISC 2
+#include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "JetMETCorrections/Objects/interface/JetCorrectionsRecord.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
+#include "JMTucker/Tools/interface/Year.h"
 
 class MFVJetEnergyHistos : public edm::EDAnalyzer {
  public:
@@ -49,7 +45,7 @@ class MFVJetEnergyHistos : public edm::EDAnalyzer {
 
   TH1F* h_jet_ht_40_1000cut;
   TH1F* h_jet_ht_40_up_1000cut;
-  TH1F* h_jet_ht_40_down_1000cut;  
+  TH1F* h_jet_ht_40_down_1000cut;
 
   TH1F* h_scale_up;
   TH1F* h_scale_down;
@@ -101,117 +97,84 @@ void MFVJetEnergyHistos::analyze(const edm::Event& event, const edm::EventSetup&
   setup.get<JetCorrectionsRecord>().get("AK4PF", jet_corr);
   JetCorrectionUncertainty jec_unc((*jet_corr)["Uncertainty"]);
 
-  double scale_up = 1e9;
-  double scale_down = 1e9;
-  
   h_w->Fill(w);
 
   h_njets->Fill(mevent->njets(), w);
   h_njets20->Fill(mevent->njets(20), w);
   h_jet_ht->Fill(mevent->jet_ht(), w);
-  h_jet_ht_40->Fill(mevent->jet_ht(40), w);
-  if (mevent->jet_ht(40) > 1000) h_jet_ht_40_1000cut->Fill(mevent->jet_ht(40), w); 
+  const double ht_40 = mevent->jet_ht(40);
+  h_jet_ht_40->Fill(ht_40, w);
+  if (ht_40 > 1000) h_jet_ht_40_1000cut->Fill(ht_40, w);
 
-  double ht_up = 0;
-  double ht_down = 0;
-  double ht_40_up = 0;
-  double ht_40_down = 0;
+  double ht_up = 0, ht_down = 0, ht_40_up = 0, ht_40_down = 0;
 
-  for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
-    if (mevent->jet_pt[ijet] < mfv::min_jet_pt)
+  for (int i = 0, ie = mevent->njets(); i < ie; ++i) {
+    if (mevent->jet_pt[i] < mfv::min_jet_pt)
       continue;
-    h_jet_pt->Fill(mevent->jet_pt[ijet]);
-    h_jet_eta->Fill(mevent->jet_eta[ijet]);
-    h_jet_phi->Fill(mevent->jet_phi[ijet]);
-    h_jet_energy->Fill(mevent->jet_energy[ijet]);
 
-    jec_unc.setJetEta(mevent->jet_eta[ijet]);
-    jec_unc.setJetPt(mevent->jet_pt[ijet]);
-    const double unc_up = jec_unc.getUncertainty(true);
+    h_jet_pt->Fill(mevent->jet_pt[i], w);
+    h_jet_eta->Fill(mevent->jet_eta[i], w);
+    h_jet_phi->Fill(mevent->jet_phi[i], w);
+    h_jet_energy->Fill(mevent->jet_energy[i], w);
 
-    jec_unc.setJetEta(mevent->jet_eta[ijet]);
-    jec_unc.setJetPt(mevent->jet_pt[ijet]);
-    const double unc_down = jec_unc.getUncertainty(false);
+    double scale_up = 1e9, scale_down = 1e9;
 
     if (jes) {
-      double mult = 1.0;
-      scale_up = 1 + mult * unc_up;
-      scale_down = 1 - mult * unc_down;
+      jec_unc.setJetEta(mevent->jet_eta[i]);
+      jec_unc.setJetPt(mevent->jet_pt[i]);
+      scale_up   = 1 + jec_unc.getUncertainty(true);
+      jec_unc.setJetEta(mevent->jet_eta[i]); // yes, you have to call the setters again
+      jec_unc.setJetPt(mevent->jet_pt[i]);
+      scale_down = 1 - jec_unc.getUncertainty(false);
     }
     else {
-      double factorup = 1;
-      double factordown = 1;
-      const float aeta = fabs(mevent->jet_eta[ijet]);
-      if      (aeta < 0.5) {
-	factorup = 1.117;
-	factordown = 1.101;
-      }
-      else if (aeta < 0.8) {
-	factorup = 1.151;
-	factordown = 1.125;
-      }
-      else if (aeta < 1.1) {
-	factorup = 1.127;
-	factordown = 1.101;
-      }
-      else if (aeta < 1.3) {
-	factorup = 1.147;
-	factordown = 1.099;
-      }
-      else if (aeta < 1.7) {
-	factorup = 1.095;
-	factordown = 1.073;
-      }
-      else if (aeta < 1.9) {
-	factorup = 1.117;
-	factordown = 1.047;
-      }
-      else if (aeta < 2.1) {
-	factorup = 1.187;
-	factordown = 1.093;
-      }
-      else if (aeta < 2.3) {
-	factorup = 1.120;
-	factordown = 1.014;
-      }
-      else if (aeta < 2.5) {
-	factorup = 1.218;
-	factordown = 1.136;
-      }
-      else if (aeta < 2.8) {
-	factorup = 1.403;
-	factordown = 1.325;
-      }
-      else if (aeta < 3.0) {
-	factorup = 1.928;
-	factordown = 1.786;
-      }
-      else if (aeta < 3.2) {
-	factorup = 1.350;
-	factordown = 1.306;
-      }
-      else if (aeta < 5.0) {
-	factorup = 1.189;
-	factordown = 1.131;
-      }
+      int ind = -1;
+      const double aeta = fabs(mevent->jet_eta[i]);
+      if      (aeta < 0.522) ind = 0;
+      else if (aeta < 0.783) ind = 1;
+      else if (aeta < 1.131) ind = 2;
+      else if (aeta < 1.305) ind = 3;
+      else if (aeta < 1.740) ind = 4;
+      else if (aeta < 1.930) ind = 5;
+      else if (aeta < 2.043) ind = 6;
+      else if (aeta < 2.322) ind = 7;
+      else if (aeta < 2.500) ind = 8;
+      else if (aeta < 2.853) ind = 9;
+      else if (aeta < 2.964) ind = 10;
+      else if (aeta < 3.139) ind = 11;
+      else if (aeta < 5.191) ind = 12;
       else
-	throw cms::Exception("BadJet") << "JER jet with pt " << mevent->jet_pt[ijet] << " eta " << mevent->jet_eta[ijet] << " out of range?";
+	throw cms::Exception("BadJet") << "JER jet with pt " << mevent->jet_pt[i] << " eta " << mevent->jet_eta[i] << " out of range?";
 
-      const float gen_jet_energy = gRandom->Gaus(mevent->jet_energy[ijet], 0.1);
-      scale_up = (gen_jet_energy + factorup * (mevent->jet_energy[ijet] - gen_jet_energy))/mevent->jet_energy[ijet];
-      scale_down = (gen_jet_energy + factordown * (mevent->jet_energy[ijet] - gen_jet_energy))/mevent->jet_energy[ijet];
+      // https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution
+#ifdef MFVNEUTRALINO_2017
+      const double sf[13] = {1.1432, 1.1815, 1.0989, 1.1137, 1.1307, 1.1600, 1.2393, 1.2604, 1.4085, 1.9909, 2.2923, 1.2696, 1.1542};
+      const double un[13] = {0.0222, 0.0484, 0.0456, 0.1397, 0.1470, 0.0976, 0.1909, 0.1501, 0.2020, 0.5684, 0.3743, 0.1089, 0.1524};
+#elif defined(MFVNEUTRALINO_2018)
+      const double sf[13] = {1.15, 1.134, 1.102, 1.134, 1.104, 1.149, 1.148, 1.114, 1.347, 2.137, 1.65, 1.225, 1.082};
+      const double un[13] = {0.043, 0.08, 0.052, 0.112, 0.211, 0.159, 0.209, 0.191, 0.274, 0.524, 0.941, 0.194, 0.198};
+#else
+#error bad year
+#endif
+      const double up = sf[ind] + un[ind];
+      const double dn = sf[ind] - un[ind];
+      const double gen_jet_energy = gRandom->Gaus(mevent->jet_energy[i], 0.1); // JMTBAD
+      scale_up   = (gen_jet_energy + up * (mevent->jet_energy[i] - gen_jet_energy))/mevent->jet_energy[i];
+      scale_down = (gen_jet_energy + dn * (mevent->jet_energy[i] - gen_jet_energy))/mevent->jet_energy[i];
     }
 
-    h_scale_up->Fill(scale_up);
-    h_scale_down->Fill(scale_down);
+    //printf("jet %i pt %f eta %f up %f dn %f\n", i, mevent->jet_pt[i], mevent->jet_eta[i], scale_up, scale_down);
 
-    h_jet_pt_up->Fill(mevent->jet_pt[ijet] * scale_up);
-    h_jet_pt_down->Fill(mevent->jet_pt[ijet] * scale_down);
-    ht_up += mevent->jet_pt[ijet] * scale_up;
-    ht_down += mevent->jet_pt[ijet] * scale_down;
-    if (mevent->jet_pt[ijet] > 40) {
-      ht_40_up += mevent->jet_pt[ijet] * scale_up;
-      ht_40_down += mevent->jet_pt[ijet] * scale_down;
+    h_scale_up->Fill(scale_up, w);
+    h_scale_down->Fill(scale_down, w);
+
+    h_jet_pt_up->Fill(mevent->jet_pt[i] * scale_up, w);
+    h_jet_pt_down->Fill(mevent->jet_pt[i] * scale_down, w);
+    ht_up += mevent->jet_pt[i] * scale_up;
+    ht_down += mevent->jet_pt[i] * scale_down;
+    if (mevent->jet_pt[i] > 40) {
+      ht_40_up += mevent->jet_pt[i] * scale_up;
+      ht_40_down += mevent->jet_pt[i] * scale_down;
     }
   }
 
@@ -223,4 +186,5 @@ void MFVJetEnergyHistos::analyze(const edm::Event& event, const edm::EventSetup&
   if (ht_40_up > 1000) h_jet_ht_40_up_1000cut->Fill(ht_40_up, w);
   if (ht_40_down > 1000) h_jet_ht_40_down_1000cut->Fill(ht_40_down, w);
 }
+
 DEFINE_FWK_MODULE(MFVJetEnergyHistos);
