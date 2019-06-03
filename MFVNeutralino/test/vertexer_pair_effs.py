@@ -1,13 +1,10 @@
-import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
-
-cross = '' # 2017to2018' # 2017to2017p8'
 
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset
 dataset += '_ntkseeds'
 sample_files(process, 'qcdht2000_2017', dataset, 1)
 process.TFileService.fileName = 'vertexer_pair_effs.root'
-file_event_from_argv(process)
+cmssw_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
@@ -30,20 +27,13 @@ process.p = cms.Path(process.mfvWeight * process.mfvAnalysisCuts * process.mfvVe
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
-    from JMTucker.Tools.Year import year
-    from JMTucker.Tools import Samples 
 
-    if year == 2017:
-        samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.data_samples_2017
-    elif year == 2018:
-        samples = Samples.ttbar_samples_2018 + Samples.qcd_samples_2018 + Samples.data_samples_2018
-
-    samples = [s for s in samples if s.has_dataset(dataset) and (s.is_mc or not cross)]
+    samples = pick_samples(dataset, all_signal=False)
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8_1pc.json'))
 
-    cs = CondorSubmitter('VertexerPairEffs%s%s' % (version, '_' + cross if cross else ''),
+    cs = CondorSubmitter('VertexerPairEffs' + version,
                          ex = year,
                          dataset = dataset,
-                         pset_modifier = chain_modifiers(half_mc_modifier(), per_sample_pileup_weights_modifier(cross=cross)),
+                         pset_modifier = chain_modifiers(half_mc_modifier(), per_sample_pileup_weights_modifier()),
                          )
     cs.submit_all(samples)
