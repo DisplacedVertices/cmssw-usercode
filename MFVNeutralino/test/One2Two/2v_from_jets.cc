@@ -57,7 +57,7 @@ EOF
 
 int dvv_nbins = 40;
 double dvv_bin_width = 0.01;
-std::vector<TString> cb_cbbar_vector;
+std::vector<TString> cb_cbbar_vector = {};
 
 struct ConstructDvvcParameters {
   int ibkg_begin_;
@@ -648,9 +648,6 @@ int main(int argc, const char* argv[]) {
     c.SaveAs(drawfn);
     return 0;
   }
-
-  // prepare the vector to save our efficiency corrections
-  cb_cbbar_vector.clear();
 
   // production version
   const char* version = "V25m";
