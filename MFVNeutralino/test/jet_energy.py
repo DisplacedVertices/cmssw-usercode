@@ -1,6 +1,6 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-dataset = 'ntuplev25m'
+from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset
 sample_files(process, 'mfv_neu_tau001000um_M0800_2017', dataset, 1)
 tfileservice(process, 'jet_energy.root')
 global_tag(process)
@@ -35,7 +35,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     samples = pick_samples(dataset, all_signal='only')
     set_splitting(samples, dataset, 'histos')
 
-    cs = CondorSubmitter('JetEnergyHistosV16',
+    cs = CondorSubmitter('JetEnergyHistos' + version,
                          ex = year,
                          dataset = dataset,
                          pset_modifier = per_sample_pileup_weights_modifier(),
