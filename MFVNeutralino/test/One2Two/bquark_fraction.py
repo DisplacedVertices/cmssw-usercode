@@ -36,25 +36,25 @@ def fb(ft,efft,frt):
     return (ft-frt)/(efft-frt)
 
 if __name__ == '__main__':
-    print 'f0,f1,cb,cbbar from sorting events by b quarks; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1)'
-    print_f2(3, 0.176, 0.461, 0.584, 0.547, 1)
-    print_f2(7, 0.176, 0.463, 0.574, 0.532, 1)
-    print_f2(4, 0.176, 0.487, 0.563, 0.516, 1)
-    print_f2(5, 0.176, 0.549, 0.535, 0.493, 1)
+
+    print 'f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); 2017'
+    f2_val_3trk = print_f2(3, fb(0.146, 0.658, 0.044), fb(0.420, 0.755, 0.101), 0.591, 0.549, 1)
+    f2_val_4trk = print_f2(4, fb(0.146, 0.658, 0.044), fb(0.441, 0.762, 0.108), 0.568, 0.522, 1)
+    f2_val_5trk = print_f2(5, fb(0.146, 0.658, 0.044), fb(0.484, 0.737, 0.107), 0.557, 0.489, 1)
+    f2_val_7trk = print_f2(7, fb(0.146, 0.658, 0.044), fb(0.421, 0.755, 0.101), 0.580, 0.536, 1)
     print
 
-    print 'f0,f1,cb,cbbar from sorting events by at least 1 medium btag; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1)'
-    print_f2(3, 0.199, 0.522, 0.580, 0.547, 1)
-    print_f2(7, 0.199, 0.525, 0.568, 0.535, 1)
-    print_f2(4, 0.199, 0.557, 0.555, 0.521, 1)
-    print_f2(5, 0.199, 0.536, 0.534, 0.494, 1)
+    print '###########################'
+    print "For utilities.py:"
+    print "(3,'%.2f,%.2f'), (4,'%.2f,%.2f'), (5,'%.2f,%.2f'), (7,'%.2f,%.2f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
+    print '###########################'
     print
 
-    print 'f0,f1,cb,cbbar from sorting events by at least 1 medium btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1)'
-    f2_val_3trk = print_f2(3, fb(0.199,0.685,0.109), fb(0.522,0.804,0.247), 0.580, 0.547, 1)
-    f2_val_7trk = print_f2(7, fb(0.199,0.685,0.109), fb(0.525,0.804,0.250), 0.568, 0.535, 1)
-    f2_val_4trk = print_f2(4, fb(0.199,0.685,0.109), fb(0.557,0.811,0.284), 0.555, 0.521, 1)
-    f2_val_5trk = print_f2(5, fb(0.199,0.685,0.109), fb(0.536,0.778,0.227), 0.534, 0.494, 1)
+    print 'f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); 2018'
+    f2_val_3trk = print_f2(3, fb(0.127, 0.663, 0.029), fb(0.432, 0.781, 0.078), 0.535, 0.489, 1)
+    f2_val_4trk = print_f2(4, fb(0.127, 0.663, 0.029), fb(0.470, 0.785, 0.078), 0.509, 0.479, 1)
+    f2_val_5trk = print_f2(5, fb(0.127, 0.663, 0.029), fb(0.580, 0.792, 0.109), 0.555, 0.471, 1)
+    f2_val_7trk = print_f2(7, fb(0.127, 0.663, 0.029), fb(0.435, 0.781, 0.078), 0.523, 0.484, 1)
     print
 
     print '###########################'
@@ -64,23 +64,37 @@ if __name__ == '__main__':
     print
 
 
-    print 'f0,f1,cb,cbbar from sorting events by b quarks; assume all vertices in events with b quarks are reconstructed from b quarks (s=2)'
-    print_f2(3, 0.176, 0.461, 0.584, 0.547, 2)
-    print_f2(7, 0.176, 0.463, 0.574, 0.532, 2)
-    print_f2(4, 0.176, 0.487, 0.563, 0.516, 2)
-    print_f2(5, 0.176, 0.549, 0.535, 0.493, 2)
-    print
+    #print 'f0,f1,cb,cbbar from sorting events by at least 1 medium btag; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1)'
+    #print_f2(3, 0.199, 0.522, 0.580, 0.547, 1)
+    #print_f2(7, 0.199, 0.525, 0.568, 0.535, 1)
+    #print_f2(4, 0.199, 0.557, 0.555, 0.521, 1)
+    #print_f2(5, 0.199, 0.536, 0.534, 0.494, 1)
+    #print
 
-    print 'f0,f1,cb,cbbar from sorting events by at least 1 medium btag; assume all vertices in events with b quarks are reconstructed from b quarks (s=2)'
-    print_f2(3, 0.199, 0.522, 0.580, 0.547, 2)
-    print_f2(7, 0.199, 0.525, 0.568, 0.535, 2)
-    print_f2(4, 0.199, 0.557, 0.555, 0.521, 2)
-    print_f2(5, 0.199, 0.536, 0.534, 0.494, 2)
-    print
+    #print 'f0,f1,cb,cbbar from sorting events by at least 1 medium btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1)'
+    #f2_val_3trk = print_f2(3, fb(0.199,0.685,0.109), fb(0.522,0.804,0.247), 0.580, 0.547, 1)
+    #f2_val_7trk = print_f2(7, fb(0.199,0.685,0.109), fb(0.525,0.804,0.250), 0.568, 0.535, 1)
+    #f2_val_4trk = print_f2(4, fb(0.199,0.685,0.109), fb(0.557,0.811,0.284), 0.555, 0.521, 1)
+    #f2_val_5trk = print_f2(5, fb(0.199,0.685,0.109), fb(0.536,0.778,0.227), 0.534, 0.494, 1)
+    #print
 
-    print 'f0,f1,cb,cbbar from sorting events by at least 1 medium btag and unfolding; assume all vertices in events with b quarks are reconstructed from b quarks (s=2)'
-    print_f2(3, fb(0.199,0.685,0.109), fb(0.522,0.804,0.247), 0.580, 0.547, 2)
-    print_f2(7, fb(0.199,0.685,0.109), fb(0.525,0.804,0.250), 0.568, 0.535, 2)
-    print_f2(4, fb(0.199,0.685,0.109), fb(0.557,0.811,0.284), 0.555, 0.521, 2)
-    print_f2(5, fb(0.199,0.685,0.109), fb(0.536,0.778,0.227), 0.534, 0.494, 2)
-    print
+    #print 'f0,f1,cb,cbbar from sorting events by b quarks; assume all vertices in events with b quarks are reconstructed from b quarks (s=2)'
+    #print_f2(3, 0.176, 0.461, 0.584, 0.547, 2)
+    #print_f2(7, 0.176, 0.463, 0.574, 0.532, 2)
+    #print_f2(4, 0.176, 0.487, 0.563, 0.516, 2)
+    #print_f2(5, 0.176, 0.549, 0.535, 0.493, 2)
+    #print
+
+    #print 'f0,f1,cb,cbbar from sorting events by at least 1 medium btag; assume all vertices in events with b quarks are reconstructed from b quarks (s=2)'
+    #print_f2(3, 0.199, 0.522, 0.580, 0.547, 2)
+    #print_f2(7, 0.199, 0.525, 0.568, 0.535, 2)
+    #print_f2(4, 0.199, 0.557, 0.555, 0.521, 2)
+    #print_f2(5, 0.199, 0.536, 0.534, 0.494, 2)
+    #print
+
+    #print 'f0,f1,cb,cbbar from sorting events by at least 1 medium btag and unfolding; assume all vertices in events with b quarks are reconstructed from b quarks (s=2)'
+    #print_f2(3, fb(0.199,0.685,0.109), fb(0.522,0.804,0.247), 0.580, 0.547, 2)
+    #print_f2(7, fb(0.199,0.685,0.109), fb(0.525,0.804,0.250), 0.568, 0.535, 2)
+    #print_f2(4, fb(0.199,0.685,0.109), fb(0.557,0.811,0.284), 0.555, 0.521, 2)
+    #print_f2(5, fb(0.199,0.685,0.109), fb(0.536,0.778,0.227), 0.534, 0.494, 2)
+    #print

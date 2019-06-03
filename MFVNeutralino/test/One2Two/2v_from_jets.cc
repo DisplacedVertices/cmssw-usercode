@@ -245,13 +245,13 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
     else if (p.year() == "2017p8") { bquark_correction[0] = 0.93; bquark_correction[1] = 1.07; bquark_correction[2] = 1.10; }
     else                           { bquark_correction[0] = 0.94; bquark_correction[1] = 1.07; bquark_correction[2] = 1.06; }
   } else if (p.ntracks() == 4) {
-    if (p.year() == "2018")        { bquark_correction[0] = 0.96; bquark_correction[1] = 1.05; bquark_correction[2] = 1.04; }
+    if (p.year() == "2018")        { bquark_correction[0] = 0.96; bquark_correction[1] = 1.05; bquark_correction[2] = 1.05; }
     else if (p.year() == "2017p8") { bquark_correction[0] = 0.95; bquark_correction[1] = 1.07; bquark_correction[2] = 1.08; }
     else                           { bquark_correction[0] = 0.93; bquark_correction[1] = 1.11; bquark_correction[2] = 1.12; }
   } else if (p.ntracks() == 5) {
-    if (p.year() == "2018")        { bquark_correction[0] = 0.92; bquark_correction[1] = 1.04; bquark_correction[2] = 1.16; }
+    if (p.year() == "2018")        { bquark_correction[0] = 0.93; bquark_correction[1] = 1.02; bquark_correction[2] = 1.19; }
     else if (p.year() == "2017p8") { bquark_correction[0] = 0.94; bquark_correction[1] = 1.01; bquark_correction[2] = 1.23; }
-    else                           { bquark_correction[0] = 0.97; bquark_correction[1] = 1.00; bquark_correction[2] = 1.24; }
+    else                           { bquark_correction[0] = 0.97; bquark_correction[1] = 0.99; bquark_correction[2] = 1.24; }
   } else if (p.ntracks() == 7) {
     if (p.year() == "2018")        { bquark_correction[0] = 0.94; bquark_correction[1] = 1.06; bquark_correction[2] = 1.10; }
     else if (p.year() == "2017p8") { bquark_correction[0] = 0.94; bquark_correction[1] = 1.07; bquark_correction[2] = 1.09; }
