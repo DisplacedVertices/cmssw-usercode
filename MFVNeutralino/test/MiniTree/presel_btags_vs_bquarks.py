@@ -1,10 +1,10 @@
 from JMTucker.Tools.ROOTTools import *
 
-year = 2018
+year = 2017
 version = 'V25m'
 
 set_style()
-ps = plot_saver(plot_dir('compare_btags_vs_bquarks_PreselHistos%s' % version), size=(600,600))
+ps = plot_saver(plot_dir('compare_btags_vs_bquarks_PreselHistos%s_%s' % (version, year)), size=(600,600))
 
 f = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/PreselHistos%s/background_%s.root' % (version, year) )
 btag_names = ['#geq1 loose', '#geq2 loose', '#geq1 medium', '#geq2 medium', '#geq1 tight', '#geq2 tight']

@@ -36,6 +36,29 @@ def btag_eff_per_event(nvtx, event_flavor, bdisc):
   h = f.Get('h_%s_%dv_1%s_btag_flavor_code' % (event_flavor, nvtx, bdisc))
   return h.GetBinContent(2) / h.Integral()
 
+# convenient printout to copy into bquark_fraction.py
+bdisc = 'tight' # Tight WP
+nvtx = 1
+effb, sfb = btag_eff_per_jet(nvtx, 'b', bdisc), scale_factor(nvtx, 'b', bdisc)
+effc, sfc = btag_eff_per_jet(nvtx, 'c', bdisc), scale_factor(nvtx, 'c', bdisc)
+effl, sfl = btag_eff_per_jet(nvtx, 'l', bdisc), scale_factor(nvtx, 'l', bdisc)
+
+event_eff = btag_eff_per_event_from_btag_eff_per_jet(nvtx, 'bjets', effb*sfb, effc*sfc, effl*sfl)
+event_fakerate = btag_eff_per_event_from_btag_eff_per_jet(nvtx, 'nobjets', effb*sfb, effc*sfc, effl*sfl)
+
+h_1v_1tight_btag_flavor_code = f.Get('h_1v_1tight_btag_flavor_code')
+ft = h_1v_1tight_btag_flavor_code.GetBinContent(2) / h_1v_1tight_btag_flavor_code.Integral()
+
+print
+print 'Inputs for bquark_fraction.py (for per-event from per-jet*SF; %s; Tight WP)' % year
+print '###########################'
+print '    print \'f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); %s\'' % year
+print '    f2_val_%strk = print_f2(%s, fb(ft0, efft0, frt0), fb(%.3f, %.3f, %.3f), cb, cbbar, 1)' % (ntk, ntk, ft, event_eff, event_fakerate)
+print '    print'
+print '###########################'
+print
+
+# full table of information
 print '%10s%90s%26s%26s%26s' % ('', 'per-jet', 'per-event from per-jet', 'per-event from per-jet*SF', 'per-event')
 fmt = '%10s' + '%10s'*9 + '%13s'*6
 print fmt % ('', 'effb', 'SFb', 'effb*SFb', 'effc', 'SFc', 'effc*SFc', 'effl', 'SFl', 'effl*SFl', 'btag eff', 'fake rate', 'btag eff', 'fake rate', 'btag eff', 'fake rate')
@@ -54,3 +77,4 @@ for nvtx in [1, 2]:
                         '%.3f' % btag_eff_per_event_from_btag_eff_per_jet(nvtx, 'nobjets', effb*sfb, effc*sfc, effl*sfl),
                         '%.3f' % btag_eff_per_event(nvtx, 'bquarks', bdisc),
                         '%.3f' % btag_eff_per_event(nvtx, 'nobquarks', bdisc))
+
