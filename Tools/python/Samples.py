@@ -552,8 +552,8 @@ for x in data_samples_2017 + qcd_samples_2017 + data_samples_2018 + qcd_samples_
     x.add_dataset("nr_trackingtreerv23mv3")
     x.add_dataset("nr_k0ntuplev23mv4")
 
-for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + \
-         data_samples_2018 + qcd_samples_2018 + ttbar_samples_2018:
+for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + all_signal_samples_2017 + \
+         data_samples_2018 + qcd_samples_2018 + ttbar_samples_2018 + all_signal_samples_2018:
     x.add_dataset("ntuplev25m")
     if not x.is_signal:
         x.add_dataset("ntuplev25m_ntkseeds")
@@ -563,10 +563,9 @@ for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + \
 # automatic condor declarations for ntuples
 ########
 
-ds4condor = ['ntuple', 'v0ntuple', 'pick1vtx']
 for s in registry.all():
     for ds in s.datasets.keys():
-        for ds4 in ds4condor:
+        for ds4 in 'ntuple', 'nr_':
             if ds.startswith(ds4):
                 s.datasets[ds].condor = True
                 s.datasets[ds].xrootd_url = xrootd_sites['T3_US_FNALLPC']
@@ -575,7 +574,6 @@ for s in registry.all():
 # other condor declarations, generate condorable dict with Shed/condor_list.py
 ########
 
-# 2018-11-01
 condorable = {
     "T3_US_FNALLPC": {
         "miniaod": ttbar_samples_2017 + [qcdht1000_2017, qcdht1500_2018, qcdht2000_2018, ttbarht0600_2018, ttbarht1200_2018, ttbarht2500_2018],
