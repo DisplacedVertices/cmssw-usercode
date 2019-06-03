@@ -23,10 +23,7 @@ cmssw_from_argv(process)
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
-    samples = pick_samples(dataset)
-    if settings.run_n_tk_seeds:
-        samples = [s for s in samples if not s.is_signal]
-
+    samples = pick_samples(dataset, all_signal=not settings.run_n_tk_seeds)
     set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2017p8.json'), limit_ttbar=settings.run_n_tk_seeds)
 
     ms = MetaSubmitter(settings.batch_name(), dataset=dataset)
