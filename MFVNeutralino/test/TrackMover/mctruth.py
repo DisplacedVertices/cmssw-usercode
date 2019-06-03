@@ -5,7 +5,7 @@ settings.is_mc = True
 settings.is_miniaod = True
 settings.event_filter = 'jets only novtx'
 
-version = settings.version + 'v3'
+version = settings.version + 'v1'
 
 process = ntuple_process(settings)
 remove_output_module(process)
@@ -34,14 +34,8 @@ ReferencedTagsTaskAdder(process)('p')
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
-    from JMTucker.Tools.Year import year
-    from JMTucker.Tools import Samples
 
-    assert year == 2017
-    if year == 2017:
-        samples = Samples.all_signal_samples_2017
-
-    #samples = [s for s in samples if s.has_dataset(dataset)]
+    samples = pick_samples(dataset, all_signal='only')
     set_splitting(samples, dataset, 'ntuple')
 
     cs = CondorSubmitter('TrackMoverMCTruth' + version,
