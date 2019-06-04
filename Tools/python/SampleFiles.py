@@ -447,15 +447,15 @@ _add_ds("ntuplev25m_ntkseeds", {
 'ttbarht0800_2018': _fromnum0("/store/user/tucker/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV25m_NTkSeeds_2018/190601_224521", 4, fnbase="ntkseeds"),
 'ttbarht1200_2018': (1, ['/store/user/tucker/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV25m_NTkSeeds_2018/190601_224522/0000/ntkseeds_0.root']),
 'ttbarht2500_2018': (1, ['/store/user/tucker/TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV25m_NTkSeeds_2018/190601_224523/0000/ntkseeds_0.root']),
-'JetHT2017B': (21, ['/store/user/tucker/JetHT/NtupleV25m_NTkSeeds_2017/190602_034450/0000/ntkseeds_%i.root' % i for i in chain(xrange(1,11), xrange(13,16), xrange(17,19), xrange(20,26))]),
-'JetHT2017C': (29, ['/store/user/tucker/JetHT/NtupleV25m_NTkSeeds_2017/190602_034507/0000/ntkseeds_%i.root' % i for i in chain(xrange(1,3), xrange(4,13), xrange(22,25), xrange(26,39), [17, 19])]),
+'JetHT2017B': _join(_fromnum1("/store/user/tucker/JetHT/NtupleV25m_NTkSeeds_2017/190603_130104", 20, fnbase="ntkseeds"),(21, ['/store/user/tucker/JetHT/NtupleV25m_NTkSeeds_2017/190602_034450/0000/ntkseeds_%i.root' % i for i in chain(xrange(1,11), xrange(13,16), xrange(17,19), xrange(20,26))])),
+'JetHT2017C': _join(_fromnum1("/store/user/tucker/JetHT/NtupleV25m_NTkSeeds_2017/190603_130121", 45, fnbase="ntkseeds"),(29, ['/store/user/tucker/JetHT/NtupleV25m_NTkSeeds_2017/190602_034507/0000/ntkseeds_%i.root' % i for i in chain(xrange(1,3), xrange(4,13), xrange(22,25), xrange(26,39), [17, 19])])),
 'JetHT2017D': _fromnum1("/store/user/tucker/JetHT/NtupleV25m_NTkSeeds_2017/190602_034525", 18, fnbase="ntkseeds"),
-'JetHT2017E': (39, ['/store/user/tucker/JetHT/NtupleV25m_NTkSeeds_2017/190602_034542/0000/ntkseeds_%i.root' % i for i in chain(xrange(1,30), xrange(31,37), xrange(38,42))]),
-'JetHT2017F': (40, ['/store/user/tucker/JetHT/NtupleV25m_NTkSeeds_2017/190602_034558/0000/ntkseeds_%i.root' % i for i in chain(xrange(1,9), xrange(13,15), xrange(26,52), [10, 16, 19, 21])]),
-'JetHT2018A': (106, ['/store/user/tucker/JetHT/NtupleV25m_NTkSeeds_2018/190602_034439/0000/ntkseeds_%i.root' % i for i in chain(xrange(1,21), xrange(22,82), xrange(83,90), xrange(91,97), xrange(98,102), xrange(103,105), xrange(106,109), xrange(110,113), [114])]),
+'JetHT2017E': _join(_fromnum1("/store/user/tucker/JetHT/NtupleV25m_NTkSeeds_2017/190603_130136", 10, fnbase="ntkseeds"),(39, ['/store/user/tucker/JetHT/NtupleV25m_NTkSeeds_2017/190602_034542/0000/ntkseeds_%i.root' % i for i in chain(xrange(1,30), xrange(31,37), xrange(38,42))])),
+'JetHT2017F': _join(_fromnum1("/store/user/tucker/JetHT/NtupleV25m_NTkSeeds_2017/190603_130151", 55, fnbase="ntkseeds"),(40, ['/store/user/tucker/JetHT/NtupleV25m_NTkSeeds_2017/190602_034558/0000/ntkseeds_%i.root' % i for i in chain(xrange(1,9), xrange(13,15), xrange(26,52), [10, 16, 19, 21])])),
+'JetHT2018A': _join(_fromnum1("/store/user/tucker/JetHT/NtupleV25m_NTkSeeds_2018/190603_125848", 40, fnbase="ntkseeds"),(106, ['/store/user/tucker/JetHT/NtupleV25m_NTkSeeds_2018/190602_034439/0000/ntkseeds_%i.root' % i for i in chain(xrange(1,21), xrange(22,82), xrange(83,90), xrange(91,97), xrange(98,102), xrange(103,105), xrange(106,109), xrange(110,113), [114])])),
 'JetHT2018B': _fromnum1("/store/user/tucker/JetHT/NtupleV25m_NTkSeeds_2018/190602_034453", 57, fnbase="ntkseeds"),
-'JetHT2018C': (39, ['/store/user/tucker/JetHT/NtupleV25m_NTkSeeds_2018/190602_034506/0000/ntkseeds_%i.root' % i for i in chain(xrange(1,7), xrange(9,11), xrange(13,44))]),
-'JetHT2018D': (181, ['/store/user/tucker/JetHT/NtupleV25m_NTkSeeds_2018/190602_034519/0000/ntkseeds_%i.root' % i for i in chain(xrange(1,3), xrange(6,15), xrange(16,142), xrange(143,176), xrange(177,179), xrange(182,190), [4])]),
+'JetHT2018C': _join(_fromnum1("/store/user/tucker/JetHT/NtupleV25m_NTkSeeds_2018/190603_125901", 20, fnbase="ntkseeds"),(39, ['/store/user/tucker/JetHT/NtupleV25m_NTkSeeds_2018/190602_034506/0000/ntkseeds_%i.root' % i for i in chain(xrange(1,7), xrange(9,11), xrange(13,44))])),
+'JetHT2018D': _join(_fromnum1("/store/user/tucker/JetHT/NtupleV25m_NTkSeeds_2018/190603_125914", 40, fnbase="ntkseeds"),(181, ['/store/user/tucker/JetHT/NtupleV25m_NTkSeeds_2018/190602_034519/0000/ntkseeds_%i.root' % i for i in chain(xrange(1,3), xrange(6,15), xrange(16,142), xrange(143,176), xrange(177,179), xrange(182,190), [4])])),
 })
 
 
