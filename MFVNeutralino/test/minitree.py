@@ -10,8 +10,8 @@ cmssw_from_argv(process)
 process.load('JMTucker.MFVNeutralino.MiniTree_cff')
 
 if not is_mc:
-    # blind everything except presel and 3-track 1-vertex events
-    for x in process.mfvAnalysisCutsGE1Vtx, process.mfvAnalysisCutsGE1VtxNtk3, process.mfvAnalysisCutsGE1VtxNtk4, process.mfvAnalysisCutsGE1VtxNtk3or4:
+    # blind everything except presel and 3-track 1,2-vertex events
+    for x in process.mfvAnalysisCutsGE1Vtx, process.mfvAnalysisCutsGE1VtxNtk4, process.mfvAnalysisCutsGE1VtxNtk3or4:
         x.max_nvertex = 1
     del process.pMiniTreeNtk3or4
     del process.pMiniTreeNtk4

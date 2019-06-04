@@ -109,7 +109,7 @@ process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     
 
 if not is_mc:
     for p in process.paths.keys():
-        if not (p == 'pSkimSel' or p == 'pEventPreSel' or p == 'Ntk3pOnlyOneVtx' or p.startswith('p0V') or p.startswith('Ntk3p1V')):  # everything but skim/presel and 3-track 1-vertex paths blind
+        if not (p == 'pSkimSel' or p == 'pEventPreSel' or p.startswith('p0V') or (p.startswith('Ntk3') and not p.startswith('Ntk3or4'))):  # everything but skim/presel and 3-track paths blind
        #if not (p == 'pSkimSel' or p == 'pEventPreSel' or p.startswith('Ntk3') or p.startswith('Ntk4') or p.startswith('p0V')):       # unblinds all 3,4-track sets, keeps 5-track stuff blind
             delattr(process, p)
 
