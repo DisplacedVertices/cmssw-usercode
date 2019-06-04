@@ -30,12 +30,16 @@ def cmd_merge_btags_nobtags():
             tuple_ntracks_weights_SFs_20percent_up   = (3,'0.78,0.22'), (4,'0.81,0.19'), (5,'0.89,0.11'), (7,'0.78,0.22')
             tuple_ntracks_weights_SFs_10percent_down = (3,'0.86,0.14'), (4,'0.88,0.12'), (5,'0.95,0.05'), (7,'0.87,0.13')
             tuple_ntracks_weights_SFs_10percent_up   = (3,'0.80,0.20'), (4,'0.83,0.17'), (5,'0.91,0.09'), (7,'0.81,0.19')
+            tuple_ntracks_weights_SFs_flavor_down    = (3,'0.87,0.13'), (4,'0.89,0.11'), (5,'0.95,0.05'), (7,'0.87,0.13')
+            tuple_ntracks_weights_SFs_flavor_up      = (3,'0.80,0.20'), (4,'0.83,0.17'), (5,'0.91,0.09'), (7,'0.80,0.20')
         elif year == '2018' :
             tuple_ntracks_weights                    = (3,'0.86,0.14'), (4,'0.90,0.10'), (5,'0.97,0.03'), (7,'0.86,0.14')
             tuple_ntracks_weights_SFs_20percent_down = (3,'0.92,0.08'), (4,'0.95,0.05'), (5,'0.99,0.01'), (7,'0.92,0.08')
             tuple_ntracks_weights_SFs_20percent_up   = (3,'0.82,0.18'), (4,'0.86,0.14'), (5,'0.95,0.05'), (7,'0.82,0.18')
             tuple_ntracks_weights_SFs_10percent_down = (3,'0.89,0.11'), (4,'0.92,0.08'), (5,'0.98,0.02'), (7,'0.89,0.11')
             tuple_ntracks_weights_SFs_10percent_up   = (3,'0.84,0.16'), (4,'0.88,0.12'), (5,'0.96,0.04'), (7,'0.84,0.16')
+            tuple_ntracks_weights_SFs_flavor_down    = (3,'0.89,0.11'), (4,'0.92,0.08'), (5,'0.98,0.02'), (7,'0.89,0.11')
+            tuple_ntracks_weights_SFs_flavor_up      = (3,'0.84,0.16'), (4,'0.88,0.12'), (5,'0.96,0.04'), (7,'0.84,0.16')
         else :
             print("Unknown year (%s)! Exiting." % year)
             sys.exit()
@@ -75,7 +79,7 @@ def cmd_merge_btags_nobtags():
 
 
         # for the SF variations
-        for syst in ['vary_SFs_20percent_down', 'vary_SFs_20percent_up', 'vary_SFs_10percent_down', 'vary_SFs_10percent_up'] :
+        for syst in ['vary_SFs_20percent_down', 'vary_SFs_20percent_up', 'vary_SFs_10percent_down', 'vary_SFs_10percent_up', 'vary_SFs_flavor_down', 'vary_SFs_flavor_up'] :
 
             if syst == 'vary_SFs_20percent_down' : 
                 tuple_ntracks_weights_syst = tuple_ntracks_weights_SFs_20percent_down
@@ -85,6 +89,10 @@ def cmd_merge_btags_nobtags():
                 tuple_ntracks_weights_syst = tuple_ntracks_weights_SFs_10percent_down
             elif syst == 'vary_SFs_10percent_up' : 
                 tuple_ntracks_weights_syst = tuple_ntracks_weights_SFs_10percent_up
+            elif syst == 'vary_SFs_flavor_down' : 
+                tuple_ntracks_weights_syst = tuple_ntracks_weights_SFs_flavor_down
+            elif syst == 'vary_SFs_flavor_up' : 
+                tuple_ntracks_weights_syst = tuple_ntracks_weights_SFs_flavor_up
 
             for ntracks,weights in tuple_ntracks_weights_syst :
                 files = ['2v_from_jets_%s_%dtrack_btags_%s.root' % (year, ntracks, _version), '2v_from_jets_%s_%dtrack_nobtags_%s.root' % (year, ntracks, _version)]

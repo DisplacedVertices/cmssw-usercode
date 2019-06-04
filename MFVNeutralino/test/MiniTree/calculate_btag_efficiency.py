@@ -22,6 +22,17 @@ def btag_eff_per_jet(nvtx, jet_flavor, bdisc):
   return num/den
 
 def scale_factor(nvtx, jet_flavor, bdisc):
+
+  if jet_flavor == 'b' :
+    SF_syst_var_up = 1.1
+    SF_syst_var_down = 0.9
+  elif jet_flavor == 'c' :
+    SF_syst_var_up = 1.2
+    SF_syst_var_down = 0.8
+  elif jet_flavor == 'l' :
+    SF_syst_var_up = 1.3
+    SF_syst_var_down = 0.7
+
   h = f.Get('h_%dv_scalefactor_%s_%s_btag' % (nvtx, jet_flavor, bdisc))
   return h.GetMean() * SF_syst_var
 

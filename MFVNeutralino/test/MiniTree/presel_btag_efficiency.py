@@ -22,6 +22,17 @@ def btag_eff_per_jet(jet_flavor, bdisc):
   return num/den
 
 def scale_factor(jet_flavor, bdisc):
+
+  if jet_flavor == 'bottom' :
+    SF_syst_var_up = 1.1
+    SF_syst_var_down = 0.9
+  elif jet_flavor == 'charm' :
+    SF_syst_var_up = 1.2
+    SF_syst_var_down = 0.8
+  elif jet_flavor == 'light' :
+    SF_syst_var_up = 1.3
+    SF_syst_var_down = 0.7
+
   h = f_btageff.Get('JMTBTagEfficiency/scalefactor_%s_%s' % (jet_flavor, bdisc))
   return h.GetMean() * SF_syst_var
 
