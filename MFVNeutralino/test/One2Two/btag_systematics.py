@@ -29,13 +29,13 @@ if mode == 'vary_SFs_up':
 if mode == 'vary_SFs_down':
     ls = ['nominal','vary SFs down']
 if mode == 'vary_SFs_20percent_up':
-    ls = ['nominal','vary SFs up 20\%']
+    ls = ['nominal','vary SFs up 20%']
 if mode == 'vary_SFs_20percent_down':
-    ls = ['nominal','vary SFs down 20\%']
+    ls = ['nominal','vary SFs down 20%']
 if mode == 'vary_SFs_10percent_up':
-    ls = ['nominal','vary SFs up 10\%']
+    ls = ['nominal','vary SFs up 10%']
 if mode == 'vary_SFs_10percent_down':
-    ls = ['nominal','vary SFs down 10\%']
+    ls = ['nominal','vary SFs down 10%']
 if mode == 'vary_3trk_to_5trk_up':
     ls = ['nominal','vary 3trk to 5trk up']
 if mode == 'vary_3trk_to_5trk_down':
