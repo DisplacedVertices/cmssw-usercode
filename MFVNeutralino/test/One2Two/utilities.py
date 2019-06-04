@@ -58,7 +58,7 @@ def cmd_merge_btags_nobtags():
             os.system(cmd)
 
             # f2 variation up
-            weight_btag_up   = min( float(weights.split(",")[0]) * (1+frac_variation), 1)
+            weight_btag_up   = min( float(weights.split(",")[0]) * (1.0/(1+frac_variation)*(1+2*frac_variation)), 1)
             weight_nobtag_up = 1-weight_btag_up
             weights_up = '%.2f,%.2f' % (weight_btag_up, weight_nobtag_up)
             cmd = 'mergeTFileServiceHistograms -w %s -i %s -o 2v_from_jets_%s_%dtrack_btag_corrected_vary_3trk_to_5trk_up_%s.root' % (weights_up, ' '.join(files), year, ntracks, _version)
@@ -66,7 +66,7 @@ def cmd_merge_btags_nobtags():
             os.system(cmd)
 
             # f2 variation down
-            weight_btag_down   = min( float(weights.split(",")[0]) * (1-frac_variation), 1)
+            weight_btag_down   = min( float(weights.split(",")[0]) * (1.0/(1+frac_variation)), 1)
             weight_nobtag_down = 1-weight_btag_down
             weights_down = '%.2f,%.2f' % (weight_btag_down, weight_nobtag_down)
             cmd = 'mergeTFileServiceHistograms -w %s -i %s -o 2v_from_jets_%s_%dtrack_btag_corrected_vary_3trk_to_5trk_down_%s.root' % (weights_down, ' '.join(files), year, ntracks, _version)
