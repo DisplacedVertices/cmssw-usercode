@@ -5,6 +5,11 @@ version = 'V25m'
 year = int(sys.argv[1])
 ntk = int(sys.argv[2])
 
+if len(sys.argv) > 3 :
+  SF_syst_var = float(sys.argv[3])
+else :
+  SF_syst_var = 1.0
+
 f = ROOT.TFile('output_btags_vs_bquarks_MiniTree%s_ntk%s_%s/background.root' % (version, ntk, year) )
 
 def njets(hname):
@@ -18,7 +23,7 @@ def btag_eff_per_jet(nvtx, jet_flavor, bdisc):
 
 def scale_factor(nvtx, jet_flavor, bdisc):
   h = f.Get('h_%dv_scalefactor_%s_%s_btag' % (nvtx, jet_flavor, bdisc))
-  return h.GetMean()
+  return h.GetMean() * SF_syst_var
 
 def btag_eff_per_event_from_btag_eff_per_jet(nvtx, event_flavor, effb, effc, effl):
   num = 0

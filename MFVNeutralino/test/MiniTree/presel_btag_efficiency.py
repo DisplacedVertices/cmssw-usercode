@@ -1,7 +1,13 @@
 from JMTucker.Tools.ROOTTools import *
+import sys
 
-year = 2017
+year = int(sys.argv[1])
 version = 'V25m'
+
+if len(sys.argv) > 2 :
+  SF_syst_var = float(sys.argv[2])
+else :
+  SF_syst_var = 1.0
 
 f_btageff = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/BTagEff%sv1/background_%s.root' % (version, year) )
 f_presel = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/PreselHistos%s/background_%s.root' % (version, year))
@@ -17,7 +23,7 @@ def btag_eff_per_jet(jet_flavor, bdisc):
 
 def scale_factor(jet_flavor, bdisc):
   h = f_btageff.Get('JMTBTagEfficiency/scalefactor_%s_%s' % (jet_flavor, bdisc))
-  return h.GetMean()
+  return h.GetMean() * SF_syst_var
 
 def btag_eff_per_event_from_btag_eff_per_jet(event_flavor, effb, effc, effl):
   num = 0
