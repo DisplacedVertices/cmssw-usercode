@@ -63,6 +63,125 @@ if __name__ == '__main__':
     print '###########################'
     print
 
+    ######################################
+    # Systematics based on SF variations #
+    ######################################
+
+    # vary all SFs down by 20%
+    print 'f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); 2017; vary all SFs down by 20\%'
+    f2_val_3trk = print_f2(3, fb(0.146, 0.550, 0.036), fb(0.420, 0.646, 0.081), 0.591, 0.549, 1)
+    f2_val_4trk = print_f2(4, fb(0.146, 0.550, 0.036), fb(0.441, 0.655, 0.087), 0.568, 0.522, 1)
+    f2_val_5trk = print_f2(5, fb(0.146, 0.550, 0.036), fb(0.484, 0.631, 0.087), 0.557, 0.489, 1)
+    f2_val_7trk = print_f2(7, fb(0.146, 0.550, 0.036), fb(0.421, 0.646, 0.082), 0.580, 0.536, 1)
+    print
+
+    print '###########################'
+    print "For utilities.py: (2017; 20\% down)"
+    print "(3,'%.2f,%.2f'), (4,'%.2f,%.2f'), (5,'%.2f,%.2f'), (7,'%.2f,%.2f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
+    print '###########################'
+    print
+
+    print 'f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); 2018; vary all SFs down by 20\%'
+    f2_val_3trk = print_f2(3, fb(0.127, 0.554, 0.024), fb(0.432, 0.671, 0.063), 0.535, 0.489, 1)
+    f2_val_4trk = print_f2(4, fb(0.127, 0.554, 0.024), fb(0.470, 0.674, 0.063), 0.509, 0.479, 1)
+    f2_val_5trk = print_f2(5, fb(0.127, 0.554, 0.024), fb(0.580, 0.686, 0.088), 0.555, 0.471, 1)
+    f2_val_7trk = print_f2(7, fb(0.127, 0.554, 0.024), fb(0.435, 0.671, 0.063), 0.523, 0.484, 1)
+    print
+
+    print '###########################'
+    print "For utilities.py: (2018; 20\% down)"
+    print "(3,'%.2f,%.2f'), (4,'%.2f,%.2f'), (5,'%.2f,%.2f'), (7,'%.2f,%.2f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
+    print '###########################'
+    print
+
+
+    # vary all SFs up by 20%
+    print 'f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); 2017; vary all SFs up by 20\%'
+    f2_val_3trk = print_f2(3, fb(0.146, 0.756, 0.053), fb(0.420, 0.846, 0.119), 0.591, 0.549, 1)
+    f2_val_4trk = print_f2(4, fb(0.146, 0.756, 0.053), fb(0.441, 0.851, 0.128), 0.568, 0.522, 1)
+    f2_val_5trk = print_f2(5, fb(0.146, 0.756, 0.053), fb(0.484, 0.827, 0.127), 0.557, 0.489, 1)
+    f2_val_7trk = print_f2(7, fb(0.146, 0.756, 0.053), fb(0.421, 0.846, 0.120), 0.580, 0.536, 1)
+    print
+
+    print '###########################'
+    print "For utilities.py: (2017; 20\% up)"
+    print "(3,'%.2f,%.2f'), (4,'%.2f,%.2f'), (5,'%.2f,%.2f'), (7,'%.2f,%.2f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
+    print '###########################'
+    print
+
+    print 'f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); 2018; vary all SFs up by 20\%'
+    f2_val_3trk = print_f2(3, fb(0.127, 0.762, 0.035), fb(0.432, 0.872, 0.093), 0.535, 0.489, 1)
+    f2_val_4trk = print_f2(4, fb(0.127, 0.762, 0.035), fb(0.470, 0.877, 0.092), 0.509, 0.479, 1)
+    f2_val_5trk = print_f2(5, fb(0.127, 0.762, 0.035), fb(0.580, 0.877, 0.129), 0.555, 0.471, 1)
+    f2_val_7trk = print_f2(7, fb(0.127, 0.762, 0.035), fb(0.435, 0.872, 0.093), 0.523, 0.484, 1)
+    print
+
+    print '###########################'
+    print "For utilities.py: (2018; 20\% up)"
+    print "(3,'%.2f,%.2f'), (4,'%.2f,%.2f'), (5,'%.2f,%.2f'), (7,'%.2f,%.2f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
+    print '###########################'
+    print
+
+
+    # vary all SFs down by 10%
+    print 'f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); 2017; vary all SFs down by 10\%'
+    f2_val_3trk = print_f2(3, fb(0.146, 0.606, 0.040), fb(0.420, 0.703, 0.091), 0.591, 0.549, 1)
+    f2_val_4trk = print_f2(4, fb(0.146, 0.606, 0.040), fb(0.441, 0.711, 0.098), 0.568, 0.522, 1)
+    f2_val_5trk = print_f2(5, fb(0.146, 0.606, 0.040), fb(0.484, 0.686, 0.097), 0.557, 0.489, 1)
+    f2_val_7trk = print_f2(7, fb(0.146, 0.606, 0.040), fb(0.421, 0.703, 0.091), 0.580, 0.536, 1)
+    print
+
+    print '###########################'
+    print "For utilities.py: (2017; 10\% down)"
+    print "(3,'%.2f,%.2f'), (4,'%.2f,%.2f'), (5,'%.2f,%.2f'), (7,'%.2f,%.2f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
+    print '###########################'
+    print
+
+    print 'f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); 2018; vary all SFs down by 10\%'
+
+    f2_val_3trk = print_f2(3, fb(0.127, 0.610, 0.026), fb(0.432, 0.729, 0.071), 0.535, 0.489, 1)
+    f2_val_4trk = print_f2(4, fb(0.127, 0.610, 0.026), fb(0.470, 0.732, 0.070), 0.509, 0.479, 1)
+    f2_val_5trk = print_f2(5, fb(0.127, 0.610, 0.026), fb(0.580, 0.742, 0.098), 0.555, 0.471, 1)
+    f2_val_7trk = print_f2(7, fb(0.127, 0.610, 0.026), fb(0.435, 0.729, 0.070), 0.523, 0.484, 1)
+    print
+
+    print '###########################'
+    print "For utilities.py: (2018; 10\% down)"
+    print "(3,'%.2f,%.2f'), (4,'%.2f,%.2f'), (5,'%.2f,%.2f'), (7,'%.2f,%.2f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
+    print '###########################'
+    print
+
+    # vary all SFs up by 10%
+    print 'f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); 2017; vary all SFs up by 10\%'
+    f2_val_3trk = print_f2(3, fb(0.146, 0.708, 0.049), fb(0.420, 0.802, 0.110), 0.591, 0.549, 1)
+    f2_val_4trk = print_f2(4, fb(0.146, 0.708, 0.049), fb(0.441, 0.809, 0.118), 0.568, 0.522, 1)
+    f2_val_5trk = print_f2(5, fb(0.146, 0.708, 0.049), fb(0.484, 0.784, 0.117), 0.557, 0.489, 1)
+    f2_val_7trk = print_f2(7, fb(0.146, 0.708, 0.049), fb(0.421, 0.802, 0.110), 0.580, 0.536, 1)
+    print
+
+    print '###########################'
+    print "For utilities.py: (2017; 10\% up)"
+    print "(3,'%.2f,%.2f'), (4,'%.2f,%.2f'), (5,'%.2f,%.2f'), (7,'%.2f,%.2f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
+    print '###########################'
+    print
+
+    print 'f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); 2018; vary all SFs up by 10\%'
+    f2_val_3trk = print_f2(3, fb(0.127, 0.714, 0.032), fb(0.432, 0.829, 0.085), 0.535, 0.489, 1)
+    f2_val_4trk = print_f2(4, fb(0.127, 0.714, 0.032), fb(0.470, 0.833, 0.085), 0.509, 0.479, 1)
+    f2_val_5trk = print_f2(5, fb(0.127, 0.714, 0.032), fb(0.580, 0.837, 0.119), 0.555, 0.471, 1)
+    f2_val_7trk = print_f2(7, fb(0.127, 0.714, 0.032), fb(0.435, 0.829, 0.085), 0.523, 0.484, 1)
+    print
+
+    print '###########################'
+    print "For utilities.py: (2018; 10\% up)"
+    print "(3,'%.2f,%.2f'), (4,'%.2f,%.2f'), (5,'%.2f,%.2f'), (7,'%.2f,%.2f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
+    print '###########################'
+    print
+
+    
+    ##################################
+    # old stuff from the old btagger #
+    ##################################
 
     #print 'f0,f1,cb,cbbar from sorting events by at least 1 medium btag; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1)'
     #print_f2(3, 0.199, 0.522, 0.580, 0.547, 1)

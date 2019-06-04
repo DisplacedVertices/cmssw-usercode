@@ -6,7 +6,7 @@ import sys
 
 is_mc = True
 only_10pc = False
-version = 'v23m'
+version = 'V25m'
 
 year = sys.argv[1]
 mode = sys.argv[2]
@@ -28,6 +28,14 @@ if mode == 'vary_SFs_up':
     ls = ['nominal','vary SFs up']
 if mode == 'vary_SFs_down':
     ls = ['nominal','vary SFs down']
+if mode == 'vary_SFs_20percent_up':
+    ls = ['nominal','vary SFs up 20\%']
+if mode == 'vary_SFs_20percent_down':
+    ls = ['nominal','vary SFs down 20\%']
+if mode == 'vary_SFs_10percent_up':
+    ls = ['nominal','vary SFs up 10\%']
+if mode == 'vary_SFs_10percent_down':
+    ls = ['nominal','vary SFs down 10\%']
 if mode == 'vary_3trk_to_5trk_up':
     ls = ['nominal','vary 3trk to 5trk up']
 if mode == 'vary_3trk_to_5trk_down':
