@@ -32,7 +32,7 @@ def cmd_merge_btags_nobtags():
             print("Unknown year (%s)! Exiting." % year)
             sys.exit()
 
-        # for the f2 variation (note that in data this may need to be structured differently, since we won't have the 5-trk 2-vertex fraction in data before unblinding)
+        # for the f2 variation
         btag_frac_threetrk = float(tuple_ntracks_weights[0][1].split(",")[0])
         btag_frac_fivetrk  = float(tuple_ntracks_weights[2][1].split(",")[0])
         frac_variation = (btag_frac_fivetrk / btag_frac_threetrk) - 1
