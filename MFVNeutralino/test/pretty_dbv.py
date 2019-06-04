@@ -4,23 +4,22 @@ import os
 from functools import partial
 import JMTucker.Tools.Samples as Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
-from JMTucker.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, plot_saver
+from JMTucker.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, plot_saver, plot_dir
 
-root_file_dir = '/uscms_data/d2/tucker/crab_dirs/HistosV15_v2'
-plot_dir = 'plots/EXO-17-018/dbv'
+year = '2017p8'
+version = 'V23m'
+root_file_dir = '/uscms_data/d2/tucker/crab_dirs/Histos%s' % version
 
 set_style()
-ps = plot_saver(plot_dir, pdf_log=True)
+ps = plot_saver(plot_dir('dbv_%s_%s' % (year, version)), pdf_log=True)
 
-int_lumi_2015 = ac.int_lumi_2015 * ac.scale_factor_2015
-int_lumi_2016 = ac.int_lumi_2016 * ac.scale_factor_2016
-int_lumi = ac.int_lumi_2015p6 * ac.scale_factor_2015p6
-int_lumi_nice = ac.int_lumi_nice_2015p6
+int_lumi = ac.int_lumi_2017p8 * ac.scale_factor_2017p8
+int_lumi_nice = ac.int_lumi_nice_2017p8
 
-qcd_samples = Samples.qcd_samples_sum_2015 + Samples.qcd_samples_sum
-ttbar_samples = Samples.ttbar_samples_2015 + Samples.ttbar_samples
-signal_sample = Samples.mfv_neu_tau01000um_M0800
-data_samples = Samples.data_samples_2015 + Samples.data_samples
+qcd_samples = Samples.qcd_samples_2017[1:] + Samples.qcd_samples_2018
+ttbar_samples = Samples.ttbar_samples_2017
+signal_sample = Samples.mfv_neu_tau001000um_M0800_2017
+data_samples = Samples.data_samples_2017
 
 background_samples = ttbar_samples + qcd_samples
 for s in qcd_samples:
@@ -38,8 +37,6 @@ C = partial(data_mc_comparison,
             plot_saver = ps,
             file_path = os.path.join(root_file_dir, '%(name)s.root'),
             int_lumi = int_lumi,
-            int_lumi_2015 = int_lumi_2015,
-            int_lumi_2016 = int_lumi_2016,
             int_lumi_nice = int_lumi_nice,
             canvas_top_margin = 0.08,
             overflow_in_last = True,
@@ -52,12 +49,12 @@ C = partial(data_mc_comparison,
             )
 
 C('dbv',
-  data_samples = data_samples,
-  normalize_to_data = True,
-  simulation = False,
-  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist',
+#  data_samples = data_samples,
+#  normalize_to_data = True,
+#  simulation = False,
+  histogram_path = 'Ntk3mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist',
   x_title = 'd_{BV} (cm)',
   y_title = 'Events/50 #mum',
   x_range = (0, 0.4),
-  y_range = (1, 1e3),
+  y_range = (1, 1e5),
   )
