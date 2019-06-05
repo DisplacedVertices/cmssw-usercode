@@ -1,14 +1,5 @@
 #!/usr/bin/env python
 
-'''
-example:
-
-y=/uscms_data/d2/tucker/crab_dirs/TrackMoverHistsV21mV2/nsig4p0/tau10000um
-for x in 20 21 22 30 31 32; do
-  py draw.py V21mV2_${x} $y/$x/JetHT2017.root $y/$x/background_2017.root 0.01
-done
-'''
-
 mc_scale_factor = 1.
 use_effective = True
 
@@ -88,14 +79,16 @@ def get_em(fn, scale=1., alpha=1-0.6827):
             d[rat_name] = g
             l.append(rat_name)
 
-            if 'nlep' in name: # nlep is just a convenient one to take the integral of, can be any
-                cutset = name.split('nlep')[0]
+            if '_nvtx_' in name: # nvtx is just a convenient one to take the integral of, can be any
+                cutset = name.split('_nvtx_')[0]
+                print name, cutset
                 num_err, den_err = ROOT.Double(), ROOT.Double()
                 num_int = num.IntegralAndError(0, 100, num_err)
                 den_int = den.IntegralAndError(0, 100, den_err)
                 cutsets.append((cutset, num_int, num_err, den_int, den_err))
 
-
+    if not cutsets:
+        raise ValueError('no cutsets?')
     cutsets.sort()
     c = []
     for cutset, num_int, num_err, den_int, den_err in cutsets:
@@ -107,7 +100,7 @@ def get_em(fn, scale=1., alpha=1-0.6827):
         den.SetBinError  (1, den_err)
         ef, lo, hi = clopper_pearson(num_int, den_int, alpha)
         ef, lo, hi = 100*ef, 100*lo, 100*hi
-        print '%40s %.2f [%.2f, %.2f] +%.2f -%.2f' % (cutset, ef, lo, hi, hi-ef, ef-lo)
+        print '%40s %5.2f [%5.2f, %5.2f] +%.2f -%.2f' % (cutset, ef, lo, hi, hi-ef, ef-lo)
         c.append((cutset, ef, (hi-lo)/2))
         g = histogram_divide(num, den, confint_params=(alpha,), use_effective=use_effective)
         rat_name = cutset + '_rat'
@@ -135,7 +128,7 @@ def comp(ex, fn1='data.root', fn2='mc.root'):
     for i, (cutset, eff_1, eeff_1) in enumerate(c_1):
        cutset_2, eff_2, eeff_2 = c_2[i]
        assert cutset == cutset_2
-       print '%40s %.2f +- %.2f' % (cutset, eff_2 - eff_1, (eeff_2**2 + eeff_1**2)**0.5)
+       print '%40s %5.2f +- %5.2f' % (cutset, eff_2 - eff_1, (eeff_2**2 + eeff_1**2)**0.5)
 
     for name in l:
         data = d_1[name]
