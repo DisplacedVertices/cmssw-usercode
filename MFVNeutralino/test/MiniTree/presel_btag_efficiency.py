@@ -24,8 +24,8 @@ def btag_eff_per_jet(jet_flavor, bdisc):
 def scale_factor(jet_flavor, bdisc):
 
   if jet_flavor == 'bottom' :
-    SF_syst_var_up = 1.1
-    SF_syst_var_down = 0.9
+    SF_syst_var_up = 1.05
+    SF_syst_var_down = 0.95
   elif jet_flavor == 'charm' :
     SF_syst_var_up = 1.2
     SF_syst_var_down = 0.8

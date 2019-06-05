@@ -181,10 +181,10 @@ if __name__ == '__main__':
 
     # vary all SFs down by flavor
     print 'f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); 2017; vary all SFs down by flavor'
-    f2_val_3trk = print_f2(3, fb(0.146, 0.603, 0.033), fb(0.420, 0.700, 0.078), 0.591, 0.549, 1)
-    f2_val_4trk = print_f2(4, fb(0.146, 0.603, 0.033), fb(0.441, 0.708, 0.084), 0.568, 0.522, 1)
-    f2_val_5trk = print_f2(5, fb(0.146, 0.603, 0.033), fb(0.484, 0.682, 0.083), 0.557, 0.489, 1)
-    f2_val_7trk = print_f2(7, fb(0.146, 0.603, 0.033), fb(0.421, 0.699, 0.078), 0.580, 0.536, 1)
+    f2_val_3trk = print_f2(3, fb(0.146, 0.629, 0.033), fb(0.420, 0.725, 0.078), 0.591, 0.549, 1)
+    f2_val_4trk = print_f2(4, fb(0.146, 0.629, 0.033), fb(0.441, 0.733, 0.084), 0.568, 0.522, 1)
+    f2_val_5trk = print_f2(5, fb(0.146, 0.629, 0.033), fb(0.484, 0.707, 0.083), 0.557, 0.489, 1)
+    f2_val_7trk = print_f2(7, fb(0.146, 0.629, 0.033), fb(0.421, 0.725, 0.078), 0.580, 0.536, 1)
     print
 
     print '###########################'
@@ -194,10 +194,10 @@ if __name__ == '__main__':
     print
 
     print 'f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); 2018; vary all SFs down by flavor'
-    f2_val_3trk = print_f2(3, fb(0.127, 0.609, 0.022), fb(0.432, 0.727, 0.061), 0.535, 0.489, 1)
-    f2_val_4trk = print_f2(4, fb(0.127, 0.609, 0.022), fb(0.470, 0.730, 0.061), 0.509, 0.479, 1)
-    f2_val_5trk = print_f2(5, fb(0.127, 0.609, 0.022), fb(0.580, 0.739, 0.086), 0.555, 0.471, 1)
-    f2_val_7trk = print_f2(7, fb(0.127, 0.609, 0.022), fb(0.435, 0.727, 0.061), 0.523, 0.484, 1)
+    f2_val_3trk = print_f2(3, fb(0.127, 0.635, 0.022), fb(0.432, 0.753, 0.061), 0.535, 0.489, 1)
+    f2_val_4trk = print_f2(4, fb(0.127, 0.635, 0.022), fb(0.470, 0.757, 0.061), 0.509, 0.479, 1)
+    f2_val_5trk = print_f2(5, fb(0.127, 0.635, 0.022), fb(0.580, 0.764, 0.086), 0.555, 0.471, 1)
+    f2_val_7trk = print_f2(7, fb(0.127, 0.635, 0.022), fb(0.435, 0.753, 0.061), 0.523, 0.484, 1)
     print
 
     print '###########################'
@@ -209,10 +209,10 @@ if __name__ == '__main__':
 
     # vary all SFs up by flavor
     print 'f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); 2017; vary all SFs up by flavor'
-    f2_val_3trk = print_f2(3, fb(0.146, 0.710, 0.056), fb(0.420, 0.805, 0.123), 0.591, 0.549, 1)
-    f2_val_4trk = print_f2(4, fb(0.146, 0.710, 0.056), fb(0.441, 0.811, 0.132), 0.568, 0.522, 1)
-    f2_val_5trk = print_f2(5, fb(0.146, 0.710, 0.056), fb(0.484, 0.786, 0.131), 0.557, 0.489, 1)
-    f2_val_7trk = print_f2(7, fb(0.146, 0.710, 0.056), fb(0.421, 0.804, 0.123), 0.580, 0.536, 1)
+    f2_val_3trk = print_f2(3, fb(0.146, 0.686, 0.056), fb(0.420, 0.783, 0.123), 0.591, 0.549, 1)
+    f2_val_4trk = print_f2(4, fb(0.146, 0.686, 0.056), fb(0.441, 0.789, 0.132), 0.568, 0.522, 1)
+    f2_val_5trk = print_f2(5, fb(0.146, 0.686, 0.056), fb(0.484, 0.765, 0.131), 0.557, 0.489, 1)
+    f2_val_7trk = print_f2(7, fb(0.146, 0.686, 0.056), fb(0.421, 0.782, 0.123), 0.580, 0.536, 1)
     print
 
     print '###########################'
@@ -223,10 +223,10 @@ if __name__ == '__main__':
 
     print 'f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); 2018; vary all SFs up by flavor'
 
-    f2_val_3trk = print_f2(3, fb(0.127, 0.715, 0.036), fb(0.432, 0.830, 0.094), 0.535, 0.489, 1)
-    f2_val_4trk = print_f2(4, fb(0.127, 0.715, 0.036), fb(0.470, 0.834, 0.094), 0.509, 0.479, 1)
-    f2_val_5trk = print_f2(5, fb(0.127, 0.715, 0.036), fb(0.580, 0.839, 0.131), 0.555, 0.471, 1)
-    f2_val_7trk = print_f2(7, fb(0.127, 0.715, 0.036), fb(0.435, 0.830, 0.094), 0.523, 0.484, 1)
+    f2_val_3trk = print_f2(3, fb(0.127, 0.691, 0.036), fb(0.432, 0.807, 0.094), 0.535, 0.489, 1)
+    f2_val_4trk = print_f2(4, fb(0.127, 0.691, 0.036), fb(0.470, 0.811, 0.094), 0.509, 0.479, 1)
+    f2_val_5trk = print_f2(5, fb(0.127, 0.691, 0.036), fb(0.580, 0.818, 0.131), 0.555, 0.471, 1)
+    f2_val_7trk = print_f2(7, fb(0.127, 0.691, 0.036), fb(0.435, 0.807, 0.094), 0.523, 0.484, 1)
     print
 
     print '###########################'
