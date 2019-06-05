@@ -25,22 +25,30 @@ def btag_eff_per_jet(jet_flavor, bdisc):
 
 def scale_factor(jet_flavor, bdisc):
 
-  if jet_flavor == 'bottom' :
-    SF_syst_var_up = 1.05
-    SF_syst_var_down = 0.95
-  elif jet_flavor == 'charm' :
-    SF_syst_var_up = 1.2
-    SF_syst_var_down = 0.8
-  elif jet_flavor == 'light' :
-    SF_syst_var_up = 1.3
-    SF_syst_var_down = 0.7
-
-  if   syst_var_str == 'nom'  : SF_syst_var = 1.0
-  elif syst_var_str == 'up'   : SF_syst_var = SF_syst_var_up
-  elif syst_var_str == 'down' : SF_syst_var = SF_syst_var_down
-
   h = f_btageff.Get('JMTBTagEfficiency/scalefactor_%s_%s' % (jet_flavor, bdisc))
-  return h.GetMean() * SF_syst_var
+  SF = h.GetMean()
+
+  if   syst_var_str == 'nom'  : SF_var = 0
+  elif syst_var_str == 'up'   : SF_var = 1
+  elif syst_var_str == 'down' : SF_var = -1
+
+  # bjets and cjets have SF variations of the form SF +/- var
+  # light jets have SF variations of the form SF * (1 +/- var)
+  if jet_flavor == 'bottom' :
+    SF_var *= 0.05
+    SF += SF_var
+
+  elif jet_flavor == 'charm' :
+    SF_var *= 0.20
+    SF += SF_var
+
+  elif jet_flavor == 'light' :
+    SF_var *= 0.30
+    SF *= (1+SF_var)
+
+  print SF_var
+  return SF
+
 
 def btag_eff_per_event_from_btag_eff_per_jet(event_flavor, effb, effc, effl):
   num = 0
