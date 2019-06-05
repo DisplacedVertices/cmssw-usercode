@@ -198,6 +198,10 @@ def cmd_trackmover():
     cmd_report_data()
     cmd_hadd_data()
 
+def cmd_trackmoverhists():
+    cmd_hadd_data()
+    cmd_merge_background()
+
 def cmd_trigeff():
     cmd_hadd_mc_sums()
     if glob('*SingleMuon*'):
