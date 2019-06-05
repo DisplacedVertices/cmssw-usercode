@@ -2,7 +2,6 @@ import sys, subprocess, os, fnmatch, re
 
 url = 'root://cmseos.fnal.gov/'
 global_url = 'root://cms-xrd-global.cern.ch/'
-user = os.environ['USER']
 
 def _popen(cmd, shell=False):
     if type(cmd) == str:
@@ -34,6 +33,9 @@ def canon(fn):
         return os.path.realpath(fn)
 
 def quota():
+    user = os.environ.get('USER')
+    if not user:
+        raise ValueError('no env var $USER')
     x = _popen('eos root://cmseos.fnal.gov quota /eos/uscms/store/user/').communicate()[0].split('\n')
     for i, line in enumerate(x):
         if user in line:

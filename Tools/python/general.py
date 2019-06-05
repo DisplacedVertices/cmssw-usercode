@@ -117,6 +117,12 @@ def to_pickle(obj, fn, proto=-1, comp=False):
         f = open(fn, 'wb')
     cPickle.dump(obj, f, proto)
 
+def type_or_none(type_, s, default_value=None):
+    try:
+        return type_(s)
+    except ValueError:
+        return default_value
+
 def typed_from_argv(type_, default_value=None, raise_on_multiple=False, name=None, return_multiple=False):
     found = []
     if name and not name.endswith('='):
@@ -134,12 +140,9 @@ def typed_from_argv(type_, default_value=None, raise_on_multiple=False, name=Non
     if raise_on_multiple and len(found) > 1:
         raise ValueError('multiple values found in argv')
     if found:
-        if return_multiple:
-            return found
-        else:
-            return found[0]
+        return found if return_multiple else found[0]
     else:
-        return default_value
+        return [] if return_multiple else default_value
 
 def from_argv(*args, **kwargs):
     return typed_from_argv(str, *args, **kwargs)
@@ -301,6 +304,7 @@ __all__ = [
     'intlumi_from_brilcalc_csv',
     'from_pickle',
     'to_pickle',
+    'type_or_none',
     'typed_from_argv',
     'from_argv',
     'index_startswith',
