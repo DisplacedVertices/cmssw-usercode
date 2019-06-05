@@ -7,7 +7,7 @@ ntk = int(sys.argv[2])
 
 if len(sys.argv) > 3 :
   syst_var_str = str(sys.argv[3])
-  if syst_var_str != 'nom' and syst_var_str != 'down' and syst_var_str != 'up' :
+  if syst_var_str != 'nom' and syst_var_str != 'bcjet_down' and syst_var_str != 'bcjet_up' and syst_var_str != 'ljet_down' and syst_var_str != 'ljet_up' :
     exit("invalid syst_var_str (%s), exiting!" % syst_var_str)
 else :
   syst_var_str = 'nom'
@@ -28,30 +28,34 @@ def scale_factor(nvtx, jet_flavor, bdisc):
   h = f.Get('h_%dv_scalefactor_%s_%s_btag' % (nvtx, jet_flavor, bdisc))
   SF = h.GetMean()
 
-  if   syst_var_str == 'nom'  : SF_var = 0
-  elif syst_var_str == 'up'   : SF_var = 1
-  elif syst_var_str == 'down' : SF_var = -1
+  if   'up'   in syst_var_str : SF_var = 1
+  elif 'down' in syst_var_str : SF_var = -1
+  else                        : SF_var = 0
 
   # bjets and cjets have SF variations of the form SF +/- var
   # light jets have SF variations of the form SF * (1 +/- var)
   if jet_flavor == 'b' :
-    # max variation from the csv files for 30 GeV < pT < 600 GeV; 
-    # note that the variations for 20 GeV < pT < 30 GeV and for pT > 600 GeV 
-    # are slightly larger in some cases
-    SF_var *= 0.05 
-    SF += SF_var
+    if 'bcjet' in syst_var_str :
+      # max variation from the csv files for 30 GeV < pT < 600 GeV; 
+      # note that the variations for 20 GeV < pT < 30 GeV and for pT > 600 GeV 
+      # are slightly larger in some cases
+      SF_var *= 0.05 
+      SF += SF_var
 
   elif jet_flavor == 'c' :
-    # max variation from the csv files (from the pT > 600 GeV bin)
-    SF_var *= 0.43 
-    SF += SF_var
+    if 'bcjet' in syst_var_str :
+      # max variation from the csv files (from the pT > 600 GeV bin)
+      SF_var *= 0.43 
+      SF += SF_var
 
   elif jet_flavor == 'l' :
-    # max variation from the csv files (occurs near pT = 450 GeV)
-    SF_var *= 0.28 
-    SF *= (1+SF_var)
+    if 'ljet' in syst_var_str :
+      # max variation from the csv files (occurs near pT = 450 GeV)
+      SF_var *= 0.28
+      SF *= (1+SF_var)
 
   return SF
+
 
 def btag_eff_per_event_from_btag_eff_per_jet(nvtx, event_flavor, effb, effc, effl):
   num = 0

@@ -36,10 +36,14 @@ if mode == 'vary_SFs_10percent_up':
     ls = ['nominal','vary SFs up 10%']
 if mode == 'vary_SFs_10percent_down':
     ls = ['nominal','vary SFs down 10%']
-if mode == 'vary_SFs_flavor_up':
-    ls = ['nominal','vary SFs up by flavor']
-if mode == 'vary_SFs_flavor_down':
-    ls = ['nominal','vary SFs down by flavor']
+if mode == 'vary_bcjet_SFs_up':
+    ls = ['nominal','vary bcjet SFs up']
+if mode == 'vary_bcjet_SFs_down':
+    ls = ['nominal','vary bcjet SFs down']
+if mode == 'vary_ljet_SFs_up':
+    ls = ['nominal','vary ljet SFs up']
+if mode == 'vary_ljet_SFs_down':
+    ls = ['nominal','vary ljet SFs down']
 if mode == 'vary_3trk_to_5trk_up':
     ls = ['nominal','vary 3trk to 5trk up']
 if mode == 'vary_3trk_to_5trk_down':
