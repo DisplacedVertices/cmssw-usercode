@@ -5,9 +5,11 @@ year = int(sys.argv[1])
 version = 'V25m'
 
 if len(sys.argv) > 2 :
-  SF_syst_var = float(sys.argv[2])
+  syst_var_str = str(sys.argv[2])
+  if syst_var_str != 'nom' and syst_var_str != 'down' and syst_var_str != 'up' :
+    exit("invalid syst_var_str (%s), exiting!" % syst_var_str)
 else :
-  SF_syst_var = 1.0
+  syst_var_str = 'nom'
 
 f_btageff = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/BTagEff%sv1/background_%s.root' % (version, year) )
 f_presel = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/PreselHistos%s/background_%s.root' % (version, year))
@@ -32,6 +34,10 @@ def scale_factor(jet_flavor, bdisc):
   elif jet_flavor == 'light' :
     SF_syst_var_up = 1.3
     SF_syst_var_down = 0.7
+
+  if   syst_var_str == 'nom'  : SF_syst_var = 1.0
+  elif syst_var_str == 'up'   : SF_syst_var = SF_syst_var_up
+  elif syst_var_str == 'down' : SF_syst_var = SF_syst_var_down
 
   h = f_btageff.Get('JMTBTagEfficiency/scalefactor_%s_%s' % (jet_flavor, bdisc))
   return h.GetMean() * SF_syst_var

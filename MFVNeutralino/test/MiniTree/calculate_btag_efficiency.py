@@ -6,9 +6,11 @@ year = int(sys.argv[1])
 ntk = int(sys.argv[2])
 
 if len(sys.argv) > 3 :
-  SF_syst_var = float(sys.argv[3])
+  syst_var_str = str(sys.argv[3])
+  if syst_var_str != 'nom' and syst_var_str != 'down' and syst_var_str != 'up' :
+    exit("invalid syst_var_str (%s), exiting!" % syst_var_str)
 else :
-  SF_syst_var = 1.0
+  syst_var_str = 'nom'
 
 f = ROOT.TFile('output_btags_vs_bquarks_MiniTree%s_ntk%s_%s/background.root' % (version, ntk, year) )
 
@@ -32,6 +34,10 @@ def scale_factor(nvtx, jet_flavor, bdisc):
   elif jet_flavor == 'l' :
     SF_syst_var_up = 1.3
     SF_syst_var_down = 0.7
+
+  if   syst_var_str == 'nom'  : SF_syst_var = 1.0
+  elif syst_var_str == 'up'   : SF_syst_var = SF_syst_var_up
+  elif syst_var_str == 'down' : SF_syst_var = SF_syst_var_down
 
   h = f.Get('h_%dv_scalefactor_%s_%s_btag' % (nvtx, jet_flavor, bdisc))
   return h.GetMean() * SF_syst_var
