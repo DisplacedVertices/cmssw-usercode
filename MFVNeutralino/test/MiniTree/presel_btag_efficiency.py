@@ -51,7 +51,6 @@ def scale_factor(jet_flavor, bdisc):
     SF_var *= 0.28
     SF *= (1+SF_var)
 
-  print SF_var
   return SF
 
 

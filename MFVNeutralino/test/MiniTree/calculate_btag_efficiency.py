@@ -51,7 +51,6 @@ def scale_factor(nvtx, jet_flavor, bdisc):
     SF_var *= 0.28 
     SF *= (1+SF_var)
 
-  print SF_var
   return SF
 
 def btag_eff_per_event_from_btag_eff_per_jet(nvtx, event_flavor, effb, effc, effl):
