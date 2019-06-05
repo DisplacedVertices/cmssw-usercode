@@ -187,9 +187,9 @@ def cs_analyze(d,
     result.by_exit = defaultdict(list)
     for i, r in enumerate(result.returns):
         if r > 0:
-            if (result.cmsRun_returns.has_key(i) and result.cmsRun_returns[i] != (0 if r in (147,19) else r) or # xrdcp exit code (?), xrdcp signal socket error
-                len(result.cmsRun_returns) != 0):
-                    raise ValueError('bad cmsRun return %r for job %i in %s' % (result.cmsRun_returns.get(i), i, d))
+            #if (result.cmsRun_returns.has_key(i) and result.cmsRun_returns[i] != (0 if r in (147,19) else r) or # xrdcp exit code (?), xrdcp signal socket error
+            #    len(result.cmsRun_returns) != 0):
+            #        raise ValueError('bad cmsRun return %r for job %i in %s' % (result.cmsRun_returns.get(i), i, d))
             result.by_exit[r].append(i)
 
     result.by_exception = defaultdict(list)
