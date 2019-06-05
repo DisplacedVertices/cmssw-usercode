@@ -35,15 +35,20 @@ def scale_factor(jet_flavor, bdisc):
   # bjets and cjets have SF variations of the form SF +/- var
   # light jets have SF variations of the form SF * (1 +/- var)
   if jet_flavor == 'bottom' :
-    SF_var *= 0.05
+    # max variation from the csv files for 30 GeV < pT < 600 GeV; 
+    # note that the variations for 20 GeV < pT < 30 GeV and for pT > 600 GeV 
+    # are slightly larger in some cases
+    SF_var *= 0.05 
     SF += SF_var
 
   elif jet_flavor == 'charm' :
-    SF_var *= 0.20
+    # max variation from the csv files (from the pT > 600 GeV bin)
+    SF_var *= 0.43
     SF += SF_var
 
   elif jet_flavor == 'light' :
-    SF_var *= 0.30
+    # max variation from the csv files (occurs near pT = 450 GeV)
+    SF_var *= 0.28
     SF *= (1+SF_var)
 
   print SF_var
