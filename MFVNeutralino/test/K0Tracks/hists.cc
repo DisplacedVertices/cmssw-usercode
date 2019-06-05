@@ -25,6 +25,8 @@ int main(int argc, char** argv) {
   TH1D* h_deltazpv[max_mass_type];
   TH1D* h_costh3[max_mass_type];
   TH1D* h_costh2[max_mass_type];
+  TH1D* h_trackdeltaeta[max_mass_type];
+  TH1D* h_trackdeltaphi[max_mass_type];
   TH1D* h_trackdeltaz[max_mass_type];
   TH1D* h_ct[max_mass_type];
   TH1D* h_ctau[max_mass_type];
@@ -68,6 +70,8 @@ int main(int argc, char** argv) {
     h_deltazpv[i] = new TH1D("h_deltazpv", ";K0 candidate |#Delta z to PV| (cm);cands/0.1 cm", 200, 0, 20);
     h_costh3[i] = new TH1D("h_costh3", ";K0 candidate cos(angle3{flight,momentum});cands/0.00025", 202, 0.95, 1.001);
     h_costh2[i] = new TH1D("h_costh2", ";K0 candidate cos(angle2{flight,momentum});cands/0.00025", 202, 0.95, 1.001);
+    h_trackdeltaeta[i] = new TH1D("h_trackdeltaeta", ";K0 candidate track #Delta #eta;cands/0.025", 100, 0, 2.5);
+    h_trackdeltaphi[i] = new TH1D("h_trackdeltaphi", ";K0 candidate track #Delta #phi;cands/0.063", 100, -M_PI, M_PI);
     h_trackdeltaz[i] = new TH1D("h_trackdeltaz", ";K0 candidate |#Delta track z| (cm);cands/0.03 cm", 100, 0, 3);
     h_ct[i] = new TH1D("h_ct", ";K0 candidate ct (cm);cands/0.005 cm", 400, 0, 2);
     h_ctau[i] = new TH1D("h_ctau", ";K0 candidate c#tau (cm);cands/0.005 cm", 400, 0, 2);
@@ -124,6 +128,8 @@ int main(int argc, char** argv) {
       const int itk = nt.svs().misc(isv) & 0xFFFF;
       const int jtk = nt.svs().misc(isv) >> 16;
       const double trackdeltaz = fabs(ntt.vz(itk) - ntt.vz(jtk));
+      const double trackdeltaeta = fabs(ntt.eta(itk) - ntt.eta(jtk));
+      const double trackdeltaphi = TVector2::Phi_mpi_pi(ntt.phi(itk) - ntt.phi(jtk));
 
       if (!ntt.pass_seed(itk, nt.bs(), min_nsigmadxybs) ||
           !ntt.pass_seed(jtk, nt.bs(), min_nsigmadxybs))
@@ -168,6 +174,8 @@ int main(int argc, char** argv) {
         fill(h_deltazpv[imass], deltazpv);
         fill(h_costh3[imass], costh3);
         fill(h_costh2[imass], costh2);
+        fill(h_trackdeltaeta[imass], trackdeltaeta);
+        fill(h_trackdeltaphi[imass], trackdeltaphi);
         fill(h_trackdeltaz[imass], trackdeltaz);
         fill(h_ct[imass], ct);
         fill(h_ctau[imass], ctau);
