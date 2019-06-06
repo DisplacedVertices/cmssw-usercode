@@ -369,6 +369,27 @@ _add_ds("nr_trackmoverv25mv1", {
 'JetHT2018D': _fromnum1("/store/user/tucker/JetHT/TrackMoverV25mv1_2018/190601_152743", 590, fnbase="movedtree"),
 })
 
+
+_add_ds("nr_k0ntuplev25mv1", {
+'qcdht0700_2017': _fromnum0("/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/K0NtupleV25mv1_2017/190605_111954", 191, fnbase="k0tree"),
+'qcdht1000_2017': _fromnum0("/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/K0NtupleV25mv1_2017/190605_111955", 85, fnbase="k0tree"),
+'qcdht1500_2017': (34, ['/store/user/tucker/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/K0NtupleV25mv1_2017/190605_111956/0000/k0tree_%i.root' % i for i in chain(xrange(2), xrange(4,7), xrange(9,11), xrange(12,16), xrange(17,19), xrange(20,22), xrange(24,28), xrange(30,32), xrange(38,40), xrange(53,56), xrange(57,60), xrange(61,63), [34, 41, 47])]),
+'qcdht2000_2017': (19, ['/store/user/tucker/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/K0NtupleV25mv1_2017/190605_111957/0000/k0tree_%i.root' % i for i in chain(xrange(3), xrange(10,12), xrange(17,19), xrange(23,25), xrange(33,37), [6, 14, 27, 29, 31])] + ['/store/user/tucker/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/K0NtupleV25mv1_2017/190605_225222/0000/k0tree_12.root']),
+'qcdht0700_2018': _fromnum0("/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/K0NtupleV25mv1_2018/190605_112200", 286, fnbase="k0tree"),
+'qcdht1000_2018': (101, ['/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/K0NtupleV25mv1_2018/190605_112201/0000/k0tree_%i.root' % i for i in chain(xrange(69), xrange(70,101))] + ['/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/K0NtupleV25mv1_2018/190605_180905/0000/k0tree_69.root']),
+'qcdht1500_2018': _fromnum0("/store/user/tucker/QCD_HT1500to2000_TuneCP5_13TeV-madgraphMLM-pythia8/K0NtupleV25mv1_2018/190605_112202", 76, fnbase="k0tree"),
+'qcdht2000_2018': (41, ['/store/user/tucker/QCD_HT2000toInf_TuneCP5_13TeV-madgraphMLM-pythia8/K0NtupleV25mv1_2018/190605_112203/0000/k0tree_%i.root' % i for i in chain(xrange(18), xrange(19,42))]),
+'JetHT2017B': _fromnum1("/store/user/tucker/JetHT/K0NtupleV25mv1_2017/190605_161857", 154, fnbase="k0tree"),
+'JetHT2017C': (231, ['/store/user/tucker/JetHT/K0NtupleV25mv1_2017/190605_161910/0000/k0tree_%i.root' % i for i in chain(xrange(1,113), xrange(114,153), xrange(154,234))]),
+'JetHT2017D': _fromnum1("/store/user/tucker/JetHT/K0NtupleV25mv1_2017/190605_161923", 110, fnbase="k0tree"),
+'JetHT2017E': _fromnum1("/store/user/tucker/JetHT/K0NtupleV25mv1_2017/190605_161937", 256, fnbase="k0tree"),
+'JetHT2017F': _fromnum1("/store/user/tucker/JetHT/K0NtupleV25mv1_2017/190605_161953", 318, fnbase="k0tree"),
+'JetHT2018A': _fromnum1("/store/user/tucker/JetHT/K0NtupleV25mv1_2018/190605_162116", 710, fnbase="k0tree"),
+'JetHT2018B': _fromnum1("/store/user/tucker/JetHT/K0NtupleV25mv1_2018/190605_162129", 356, fnbase="k0tree"),
+'JetHT2018C': _fromnum1("/store/user/tucker/JetHT/K0NtupleV25mv1_2018/190605_162145", 267, fnbase="k0tree"),
+'JetHT2018D': _fromnum1("/store/user/tucker/JetHT/K0NtupleV25mv1_2018/190605_162159", 1179, fnbase="k0tree"),
+})
+
 ################################################################################
 
 if __name__ == '__main__':

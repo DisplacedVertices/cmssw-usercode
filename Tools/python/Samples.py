@@ -546,7 +546,7 @@ _adbp('miniaod', '/StopStopbarTo2Dbar2D_M-3000_CTau-30mm_TuneCP2_13TeV_2018-pyth
 
 for x in data_samples_2017 + qcd_samples_2017 + data_samples_2018 + qcd_samples_2018:
     x.add_dataset("nr_trackingtreerv23mv3")
-    x.add_dataset("nr_k0ntuplev23mv4")
+    x.add_dataset("nr_k0ntuplev25mv1")
 
 for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + all_signal_samples_2017 + \
          data_samples_2018 + qcd_samples_2018 + ttbar_samples_2018 + all_signal_samples_2018:
