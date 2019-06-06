@@ -211,6 +211,7 @@ struct MFVEvent {
   std::vector<float> jet_eta;
   std::vector<float> jet_phi;
   std::vector<float> jet_energy;
+  std::vector<float> jet_gen_energy;
 
   TLorentzVector jet_p4(int w) const {
     TLorentzVector v;
