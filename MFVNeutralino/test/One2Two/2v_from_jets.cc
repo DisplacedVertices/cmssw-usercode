@@ -310,6 +310,25 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   TH1F* h_2v_absdphivv = new TH1F("h_2v_absdphivv", "two-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
   TH1D* h_2v_npu = new TH1D("h_2v_npu", "two-vertex events;# PU interactions;events", 100, 0, 100);
 
+  // Tight WP of DeepJet
+  float bdisc_cut_value = 0;
+
+  if(p.year().find("2017p8") != std::string::npos){
+    std::cerr << "Need to handle this! (" << p.year() << ")" << std::endl;
+    abort();
+  }
+
+  if(p.year().find("2017") != std::string::npos){
+    bdisc_cut_value = 0.7489;
+  }
+  else if(p.year().find("2018") != std::string::npos){
+    bdisc_cut_value = 0.7264;
+  }
+  else{
+    std::cerr << "Need to handle this! (" << p.year() << ")" << std::endl;
+    abort();
+  }
+
   for (int i = ibkg_begin; i <= ibkg_end; ++i) {
     mfv::MiniNtuple nt;
     TString fn = TString::Format("%s/%s.root", file_path, samples[i]);
@@ -326,7 +345,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
       if (t->GetEntry(j) <= 0) continue;
       //if (i == 2 && nt.run == 1 && nt.lumi == 11522 && nt.event == 132003224) continue;
       if ((p.bquarks() == 0 && nt.gen_flavor_code == 2) || (p.bquarks() == 1 && nt.gen_flavor_code != 2)) continue;
-      if ((p.btags() == 0 && nt.nbtags(0.8838) >= 1) || (p.btags() == 1 && nt.nbtags(0.8838) < 1)) continue;
+      if ((p.btags() == 0 && nt.nbtags(bdisc_cut_value) >= 1) || (p.btags() == 1 && nt.nbtags(bdisc_cut_value) < 1)) continue;
       if (nt.npu < p.min_npu() || nt.npu > p.max_npu()) continue;
 
       const float w = weights[i] * nt.weight;
