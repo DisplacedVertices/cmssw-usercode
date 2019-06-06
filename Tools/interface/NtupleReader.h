@@ -6,6 +6,7 @@
 #include <boost/program_options.hpp>
 #include "TFile.h"
 #include "TH2.h"
+#include "TStopwatch.h"
 #include "TTree.h"
 #include "JMTucker/Tools/interface/LumiList.h"
 #include "JMTucker/Tools/interface/PileupWeights.h"
@@ -101,6 +102,8 @@ namespace jmt {
     }
 
     bool init(bool for_copy=false) {
+      time_.Start();
+
       jmt::set_root_style();
 
       f_.reset(TFile::Open(in_fn_.c_str()));
@@ -153,6 +156,7 @@ namespace jmt {
         h_npu_ = new TH1D("h_npu", ";# PU;events/1", 100, 0, 100);
       }
 
+      std::cout << "init time: "; time_.Print();
       return true;
     }
 
@@ -168,6 +172,7 @@ namespace jmt {
 
     typedef std::pair<bool,double> fcn_ret_t;
     void loop(std::function<fcn_ret_t()> fcn) { 
+      time_.Start();
       entry_t notskipped = 0, nnegweight = 0;
       entry_t print_per = entries_run_ / 20;
       if (print_per == 0) print_per = 1;
@@ -195,6 +200,7 @@ namespace jmt {
       }
 
       printf("\r%llu events done, %llu not skipped, %llu with negative weights\n", entries_run_, notskipped, nnegweight);
+      printf("loop time: "); time_.Print(); printf("cpu time per not-skipped event: %.3g\n", time_.CpuTime() / notskipped);
     }
 
   private:
@@ -229,6 +235,8 @@ namespace jmt {
 
     TH1D* h_weight_;
     TH1D* h_npu_;
+
+    TStopwatch time_;
   };
 
   template <typename Ntuple> int copy(int argc, char** argv, const char* path) {
