@@ -44,8 +44,10 @@ def scale_factor(jet_flavor, bdisc):
 
   elif jet_flavor == 'charm' :
     if 'bcjet' in syst_var_str :
-      # max variation from the csv files (from the pT > 600 GeV bin)
-      SF_var *= 0.43 
+      # max variation from the csv files for 30 GeV < pT < 600 GeV; 
+      # note that the variations for 20 GeV < pT < 30 GeV and for pT > 600 GeV 
+      # are slightly larger in some cases
+      SF_var *= 0.18 
       SF += SF_var
 
   elif jet_flavor == 'light' :

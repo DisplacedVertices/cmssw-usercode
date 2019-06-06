@@ -46,7 +46,7 @@ if __name__ == '__main__':
 
     print '###########################'
     print "For utilities.py:"
-    print "(3,'%.2f,%.2f'), (4,'%.2f,%.2f'), (5,'%.2f,%.2f'), (7,'%.2f,%.2f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
+    print "(3,'%.3f,%.3f'), (4,'%.3f,%.3f'), (5,'%.3f,%.3f'), (7,'%.3f,%.3f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
     print '###########################'
     print
 
@@ -59,7 +59,7 @@ if __name__ == '__main__':
 
     print '###########################'
     print "For utilities.py:"
-    print "(3,'%.2f,%.2f'), (4,'%.2f,%.2f'), (5,'%.2f,%.2f'), (7,'%.2f,%.2f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
+    print "(3,'%.3f,%.3f'), (4,'%.3f,%.3f'), (5,'%.3f,%.3f'), (7,'%.3f,%.3f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
     print '###########################'
     print
 
@@ -69,56 +69,56 @@ if __name__ == '__main__':
 
     # vary bcjet SFs up
     print 'f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); 2017; vary bcjet SFs up'
-    f2_val_3trk = print_f2(3, fb(0.146, 0.689, 0.053), fb(0.420, 0.786, 0.129), 0.587, 0.546, 1)
-    f2_val_4trk = print_f2(4, fb(0.146, 0.689, 0.053), fb(0.441, 0.793, 0.141), 0.563, 0.521, 1)
-    f2_val_5trk = print_f2(5, fb(0.146, 0.689, 0.053), fb(0.484, 0.769, 0.138), 0.540, 0.491, 1)
-    f2_val_7trk = print_f2(7, fb(0.146, 0.689, 0.053), fb(0.421, 0.786, 0.130), 0.575, 0.534, 1)
+    f2_val_3trk = print_f2(3, fb(0.146, 0.688, 0.048), fb(0.420, 0.784, 0.113), 0.587, 0.546, 1)
+    f2_val_4trk = print_f2(4, fb(0.146, 0.688, 0.048), fb(0.441, 0.790, 0.122), 0.563, 0.521, 1)
+    f2_val_5trk = print_f2(5, fb(0.146, 0.688, 0.048), fb(0.484, 0.765, 0.120), 0.540, 0.491, 1)
+    f2_val_7trk = print_f2(7, fb(0.146, 0.688, 0.048), fb(0.421, 0.783, 0.113), 0.575, 0.534, 1)
     print
 
     print '###########################'
     print "For utilities.py: (2017; bcjet SFs up)"
-    print "(3,'%.2f,%.2f'), (4,'%.2f,%.2f'), (5,'%.2f,%.2f'), (7,'%.2f,%.2f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
+    print "(3,'%.3f,%.3f'), (4,'%.3f,%.3f'), (5,'%.3f,%.3f'), (7,'%.3f,%.3f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
     print '###########################'
     print
 
     print 'f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); 2018; vary bcjet SFs up'
-    f2_val_3trk = print_f2(3, fb(0.127, 0.693, 0.037), fb(0.432, 0.810, 0.105), 0.530, 0.487, 1)
-    f2_val_4trk = print_f2(4, fb(0.127, 0.693, 0.037), fb(0.470, 0.814, 0.106), 0.503, 0.480, 1)
-    f2_val_5trk = print_f2(5, fb(0.127, 0.693, 0.037), fb(0.580, 0.821, 0.148), 0.541, 0.476, 1)
-    f2_val_7trk = print_f2(7, fb(0.127, 0.693, 0.037), fb(0.435, 0.811, 0.105), 0.517, 0.484, 1)
+    f2_val_3trk = print_f2(3, fb(0.127, 0.692, 0.033), fb(0.432, 0.808, 0.090), 0.530, 0.487, 1)
+    f2_val_4trk = print_f2(4, fb(0.127, 0.692, 0.033), fb(0.470, 0.812, 0.090), 0.503, 0.480, 1)
+    f2_val_5trk = print_f2(5, fb(0.127, 0.692, 0.033), fb(0.580, 0.818, 0.125), 0.541, 0.476, 1)
+    f2_val_7trk = print_f2(7, fb(0.127, 0.692, 0.033), fb(0.435, 0.808, 0.089), 0.517, 0.484, 1)
     print
 
     print '###########################'
     print "For utilities.py: (2018; bcjet SFs up)"
-    print "(3,'%.2f,%.2f'), (4,'%.2f,%.2f'), (5,'%.2f,%.2f'), (7,'%.2f,%.2f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
+    print "(3,'%.3f,%.3f'), (4,'%.3f,%.3f'), (5,'%.3f,%.3f'), (7,'%.3f,%.3f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
     print '###########################'
     print
 
 
     # vary bcjet SFs down
     print 'f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); 2017; vary bcjet SFs down'
-    f2_val_3trk = print_f2(3, fb(0.146, 0.626, 0.035), fb(0.420, 0.721, 0.071), 0.587, 0.546, 1)
-    f2_val_4trk = print_f2(4, fb(0.146, 0.626, 0.035), fb(0.441, 0.728, 0.074), 0.563, 0.521, 1)
-    f2_val_5trk = print_f2(5, fb(0.146, 0.626, 0.035), fb(0.484, 0.702, 0.075), 0.540, 0.491, 1)
-    f2_val_7trk = print_f2(7, fb(0.146, 0.626, 0.035), fb(0.421, 0.721, 0.071), 0.575, 0.534, 1)
+    f2_val_3trk = print_f2(3, fb(0.146, 0.628, 0.041), fb(0.420, 0.724, 0.088), 0.587, 0.546, 1)
+    f2_val_4trk = print_f2(4, fb(0.146, 0.628, 0.041), fb(0.441, 0.732, 0.094), 0.563, 0.521, 1)
+    f2_val_5trk = print_f2(5, fb(0.146, 0.628, 0.041), fb(0.484, 0.707, 0.094), 0.540, 0.491, 1)
+    f2_val_7trk = print_f2(7, fb(0.146, 0.628, 0.041), fb(0.421, 0.724, 0.088), 0.575, 0.534, 1)
     print
 
     print '###########################'
     print "For utilities.py: (2017; bcjet SFs down)"
-    print "(3,'%.2f,%.2f'), (4,'%.2f,%.2f'), (5,'%.2f,%.2f'), (7,'%.2f,%.2f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
+    print "(3,'%.3f,%.3f'), (4,'%.3f,%.3f'), (5,'%.3f,%.3f'), (7,'%.3f,%.3f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
     print '###########################'
     print
 
     print 'f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); 2018; vary bcjet SFs down'
-    f2_val_3trk = print_f2(3, fb(0.127, 0.633, 0.021), fb(0.432, 0.749, 0.050), 0.530, 0.487, 1)
-    f2_val_4trk = print_f2(4, fb(0.127, 0.633, 0.021), fb(0.470, 0.753, 0.048), 0.503, 0.480, 1)
-    f2_val_5trk = print_f2(5, fb(0.127, 0.633, 0.021), fb(0.580, 0.760, 0.069), 0.541, 0.476, 1)
-    f2_val_7trk = print_f2(7, fb(0.127, 0.633, 0.021), fb(0.435, 0.749, 0.050), 0.517, 0.484, 1)
+    f2_val_3trk = print_f2(3, fb(0.127, 0.634, 0.026), fb(0.432, 0.752, 0.066), 0.530, 0.487, 1)
+    f2_val_4trk = print_f2(4, fb(0.127, 0.634, 0.026), fb(0.470, 0.755, 0.065), 0.503, 0.480, 1)
+    f2_val_5trk = print_f2(5, fb(0.127, 0.634, 0.026), fb(0.580, 0.764, 0.092), 0.541, 0.476, 1)
+    f2_val_7trk = print_f2(7, fb(0.127, 0.634, 0.026), fb(0.435, 0.752, 0.066), 0.517, 0.484, 1)
     print
 
     print '###########################'
     print "For utilities.py: (2018; bcjet SFs down)"
-    print "(3,'%.2f,%.2f'), (4,'%.2f,%.2f'), (5,'%.2f,%.2f'), (7,'%.2f,%.2f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
+    print "(3,'%.3f,%.3f'), (4,'%.3f,%.3f'), (5,'%.3f,%.3f'), (7,'%.3f,%.3f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
     print '###########################'
     print
 
@@ -133,7 +133,7 @@ if __name__ == '__main__':
 
     print '###########################'
     print "For utilities.py: (2017; ljet SFs up)"
-    print "(3,'%.2f,%.2f'), (4,'%.2f,%.2f'), (5,'%.2f,%.2f'), (7,'%.2f,%.2f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
+    print "(3,'%.3f,%.3f'), (4,'%.3f,%.3f'), (5,'%.3f,%.3f'), (7,'%.3f,%.3f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
     print '###########################'
     print
 
@@ -146,7 +146,7 @@ if __name__ == '__main__':
 
     print '###########################'
     print "For utilities.py: (2018; ljet SFs up)"
-    print "(3,'%.2f,%.2f'), (4,'%.2f,%.2f'), (5,'%.2f,%.2f'), (7,'%.2f,%.2f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
+    print "(3,'%.3f,%.3f'), (4,'%.3f,%.3f'), (5,'%.3f,%.3f'), (7,'%.3f,%.3f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
     print '###########################'
     print
 
@@ -161,7 +161,7 @@ if __name__ == '__main__':
 
     print '###########################'
     print "For utilities.py: (2017; ljet SFs down)"
-    print "(3,'%.2f,%.2f'), (4,'%.2f,%.2f'), (5,'%.2f,%.2f'), (7,'%.2f,%.2f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
+    print "(3,'%.3f,%.3f'), (4,'%.3f,%.3f'), (5,'%.3f,%.3f'), (7,'%.3f,%.3f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
     print '###########################'
     print
 
@@ -174,7 +174,7 @@ if __name__ == '__main__':
 
     print '###########################'
     print "For utilities.py: (2018; ljet SFs down)"
-    print "(3,'%.2f,%.2f'), (4,'%.2f,%.2f'), (5,'%.2f,%.2f'), (7,'%.2f,%.2f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
+    print "(3,'%.3f,%.3f'), (4,'%.3f,%.3f'), (5,'%.3f,%.3f'), (7,'%.3f,%.3f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
     print '###########################'
     print
 
