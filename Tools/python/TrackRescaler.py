@@ -20,9 +20,9 @@ class TrackRescalerFcnsHelper(object):
         pars = [float(x) for x in self.lines[offset].split('{')[1].split('}')[0].split(',')]
         fcn = self.lines[offset+1].split(' = ')[1].replace(';','').replace('p_dxy[', '[p')
         assert '[p%i]' % (len(pars)-1) in fcn        
-        fcn = self.fcns[name] = ROOT.TF1('fcn_' + name, fcn, 0, 200)
+        fcn = self.fcns[name] = ROOT.TF1('fcn_' + name, fcn, 1, 200)
         fcn.SetParameters(*pars)
-        print self.lines[offset], self.lines[offset+1], len(pars), pars
+        #print self.lines[offset], self.lines[offset+1], len(pars), pars
         return fcn
 
 fcns = TrackRescalerFcnsHelper()
