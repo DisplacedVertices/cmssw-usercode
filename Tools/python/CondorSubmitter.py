@@ -515,7 +515,7 @@ def get(i): return _l[i]
         for sample in samples:
             self.submit(sample)
 
-def NtupleReader_submit(batch_name, dataset, samples, exe_fn='hists.exe', exe_args='', output_fn='hists.root', split_default=1):
+def NtupleReader_submit(batch_name, dataset, samples, exe_fn='hists.exe', exe_args='', output_fn='hists.root', split_default=1, split={}):
     meat = '''
 job=$(<cs_job)
 njobs=$(<cs_njobs)
@@ -541,7 +541,7 @@ fi
     for sample in samples:
         sample.set_curr_dataset(dataset)
         sample.files_per = -1
-        sample.njobs = len(sample.filenames) * getattr(sample, 'nr_split', split_default)
+        sample.njobs = len(sample.filenames) * getattr(sample, 'nr_split', split.get(sample.name, split_default))
 
     cs = CondorSubmitter(batch_name=batch_name, dataset=dataset, meat=meat, pset_template_fn='', input_files=[exe_fn], output_files=[output_fn])
     cs.submit_all(samples)
