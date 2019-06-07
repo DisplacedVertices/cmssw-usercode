@@ -1819,6 +1819,8 @@ def ratios_plot(name,
     if 'a' in res_draw_cmd:
         raise ValueError('no "a" in res_draw_cmd')
 
+    res_fcns = [(x + ('',) if type(x) != tuple else x) for x in res_fcns]
+
     canvas = ROOT.TCanvas('c_ratiosplot_' + name, '', *canvas_size)
     canvas.SetTopMargin(canvas_top_margin)
     canvas.SetBottomMargin(canvas_bottom_margin)
@@ -1891,6 +1893,9 @@ def ratios_plot(name,
         legend.SetBorderSize(0)
         for h in hists:
             legend.AddEntry(h, h.nice, 'LPE')
+        for res_fcn, res_fcn_title in res_fcns:
+            if res_fcn_title:
+                legend.AddEntry(res_fcn, res_fcn_title, 'L')
         legend.Draw()
 
     h0 = hists.pop(0)
@@ -1989,8 +1994,8 @@ def ratios_plot(name,
                 res_l.Draw()
 
     if ratios:
-        for fcn in res_fcns:
-            fcn.Draw('same')
+        for res_fcn, _ in res_fcns:
+            res_fcn.Draw('same')
 
     if fit_tpt:
         fit_tpt.Draw()
