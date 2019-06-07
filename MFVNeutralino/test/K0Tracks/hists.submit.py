@@ -1,7 +1,7 @@
 from JMTucker.Tools.MetaSubmitter import *
 
 dataset = 'nr_k0ntuplev25mv1'
-samples = pick_samples(dataset, ttbar=False, all_signal=False)
+samples = pick_samples(dataset, both_years=True, ttbar=False, all_signal=False)
 NtupleReader_submit('K0HistsV25mv1_nsigdxy0p0_rhomin0p268_ctaumin0p0268_costh2min0p99975', dataset, samples,
                     split = {'qcdht1000_2017': 2,
                              'qcdht1000_2018': 2,
