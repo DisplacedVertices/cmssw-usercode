@@ -160,7 +160,7 @@ def integ(h):
 # do the bkg subtraction in whatever variables you want as long as the hists exist
 # written out to file in folders so the cmp script can do the rest
 
-scans = True
+scans = False
 variables = [
     ('h_chi2dof', 1, 1, None, -1),
     ('h_rho', 1, 1, None, 1),
