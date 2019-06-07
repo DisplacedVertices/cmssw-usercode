@@ -45,6 +45,8 @@ parser.add_option('-n', '--no-renew-proxies', action='store_false', dest='renew_
                   help='Do not renew proxies first.')
 parser.add_option('--no-shorten-statuses', action='store_false', dest='shorten_statuses', default=True,
                   help='Do not shorten statuses in the status table.')
+parser.add_option('-a', '--hadd', action='store_true', default=False,
+                  help='At the end of each iteration, hadd the done dirs. The destination path for the output file is next to the dir.')
 options, args = parser.parse_args()
 #print options ; print args ; import sys ; print sys.argv ; raise 1
 
@@ -388,6 +390,12 @@ while 1:
 
     for d in done:
         touch(done_fn(d))
+
+    if options.hadd:
+        for d in done:
+            cmd = 'mhadd %s -o %s' % (d, os.path.dirname(d))
+            print cmd
+            os.system(cmd)
 
     done_msg = '\nThese are done as far as mmon is concerned (all jobs are "finished" or one of %s):' % done_stats_info_text 
     if done:
