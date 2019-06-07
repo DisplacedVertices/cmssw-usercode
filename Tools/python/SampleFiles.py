@@ -373,8 +373,8 @@ _add_ds("nr_trackmoverv25mv1", {
 _add_ds("nr_k0ntuplev25mv1", {
 'qcdht0700_2017': (1, ['/store/user/tucker/hadded/K0NtupleV25mv1/qcdht0700_2017.root']),
 'qcdht1000_2017': (1, ['/store/user/tucker/hadded/K0NtupleV25mv1/qcdht1000_2017.root']),
-'qcdht1500_2018': (1, ['/store/user/tucker/hadded/K0NtupleV25mv1/qcdht1500_2017.root']),
-'qcdht2000_2018': (1, ['/store/user/tucker/hadded/K0NtupleV25mv1/qcdht2000_2017.root']),
+'qcdht1500_2017': (1, ['/store/user/tucker/hadded/K0NtupleV25mv1/qcdht1500_2017.root']),
+'qcdht2000_2017': (1, ['/store/user/tucker/hadded/K0NtupleV25mv1/qcdht2000_2017.root']),
 'qcdht0700_2018': (1, ['/store/user/tucker/hadded/K0NtupleV25mv1/qcdht0700_2018.root']),
 'qcdht1000_2018': (1, ['/store/user/tucker/hadded/K0NtupleV25mv1/qcdht1000_2018.root']),
 'qcdht1500_2018': (1, ['/store/user/tucker/hadded/K0NtupleV25mv1/qcdht1500_2018.root']),
