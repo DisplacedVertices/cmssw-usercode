@@ -125,8 +125,7 @@ def _background_samples(trigeff=False, year=2017):
         x += ['ttbarht%04i' % x for x in [600, 800, 1200, 2500]]
     return x
 
-def cmd_merge_background():
-    permissive = bool_from_argv('permissive')
+def cmd_merge_background(permissive=bool_from_argv('permissive')):
     cwd = os.getcwd()
     for year_s, scale in [('_2017', -AnalysisConstants.int_lumi_2017 * AnalysisConstants.scale_factor_2017),
                           ('_2018', -AnalysisConstants.int_lumi_2018 * AnalysisConstants.scale_factor_2018)]:
@@ -201,6 +200,10 @@ def cmd_trackmover():
 def cmd_trackmoverhists():
     cmd_hadd_data()
     cmd_merge_background()
+
+def cmd_k0hists():
+    cmd_hadd_data()
+    cmd_merge_background(True)
 
 def cmd_trigeff():
     cmd_hadd_mc_sums()
