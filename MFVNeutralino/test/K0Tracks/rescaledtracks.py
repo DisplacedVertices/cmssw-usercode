@@ -6,8 +6,9 @@ set_style()
 batch = sys.argv[1]
 eta = batch.split('tketa')[1]
 incl = '/uscms_data/d3/dquach/crab3dirs/TrackingTreerHistsV23mv3_eta%s' % eta
+use_bkgsub = True
 
-ps = plot_saver(plot_dir('v0bkgsub_%s/cfrescaled' % batch), size=(600,600), log=False)
+ps = plot_saver(plot_dir('v0bkgsub_%s/cfrescaled%s' % (batch, '' if not use_bkgsub else '_hon'), size=(600,600), log=False)
 
 eras = fcns.eras[:]
 de = eras.index('2017DE')
@@ -19,7 +20,7 @@ for era in eras:
     samples = ['background_%s' % year, 'JetHT' + era]
 
     fs = [ROOT.TFile(os.path.join(batch, '%s.root' % s)) for s in samples]
-    hs = [f.Get('h_tracks_dxyerr_v_pt/hsig') for f in fs]
+    hs = [f.Get('h_tracks_dxyerr_v_pt/%s' % ('hsig' if use_bkgsub else 'hon') for f in fs]
 
     incl_fs = [ROOT.TFile(os.path.join(incl, '%s.root' % s)) for s in samples]
     hs += [f.Get('h_sel_tracks_dxyerr_v_pt') for f in incl_fs]
