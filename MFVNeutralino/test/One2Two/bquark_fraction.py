@@ -63,6 +63,26 @@ if __name__ == '__main__':
     print '###########################'
     print
 
+    print '2017 Data: f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); 2017'
+    f2_val_3trk_data = print_f2(3, fb(0.146, 0.658, 0.044), fb(0.420, 0.755, 0.101), 0.677, 0.632, 1)
+    print
+
+    print '###########################'
+    print "For utilities.py:"
+    print "(3,'%.3f,%.3f')" % (f2_val_3trk_data, 1-f2_val_3trk_data)
+    print '###########################'
+    print
+
+    print '2018 Data: f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); 2018'
+    f2_val_3trk_data = print_f2(3, fb(0.127, 0.663, 0.029), fb(0.432, 0.781, 0.078), 0.601, 0.554, 1)
+    print
+
+    print '###########################'
+    print "For utilities.py:"
+    print "(3,'%.3f,%.3f')" % (f2_val_3trk_data, 1-f2_val_3trk_data)
+    print '###########################'
+    print
+
     ######################################
     # Systematics based on SF variations #
     ######################################

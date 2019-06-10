@@ -11,7 +11,7 @@ ps = plot_saver(plot_dir('fit_jetpairdphi%s%s_%s' % (version.capitalize(), '' if
 
 fn = '/uscms_data/d2/tucker/crab_dirs/Histos%s/background_%s.root' % (version.capitalize(), year)
 if not is_mc:
-  fn = '/uscms_data/d2/tucker/crab_dirs/HistosV23m/10pc/JetHT%s.root' % year
+  fn = '/uscms_data/d2/tucker/crab_dirs/Histos%s/10pc/JetHT%s.root' % (version.capitalize(), year)
 
 ntk = ['Ntk3', 'Ntk3or4', 'Ntk4', '']
 ntracks = ['3-track', '3-or-4-track', '4-track', '5-or-more-track']
