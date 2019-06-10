@@ -555,6 +555,9 @@ for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + all_signal_
         x.add_dataset("ntuplev25m_ntkseeds")
         x.add_dataset("nr_trackmoverv25mv1")
 
+for x in all_signal_samples_2017 + all_signal_samples_2018:
+    x.add_dataset("ntuplev25m_genjetenergy")
+
 ########
 # automatic condor declarations for ntuples
 ########
