@@ -3,6 +3,7 @@
 import math, sys, os, tempfile
 from array import array
 from collections import namedtuple
+from JMTucker.Tools.general import chunks
 
 if os.environ.has_key('JMT_ROOTTOOLS_NOBATCHMODE'):
     import ROOT
@@ -1783,6 +1784,7 @@ def ratios_plot(name,
                 legend = None,
                 draw_normalized = False,
                 statbox_size = None,
+                which_ratios = 'first', # 'first' or 'pairs'
                 ):
     '''With n hists/graphs, draw them and the n-1 ratios to hists[0].
     hists can be a list of just the hists/graphs, or it can be a list
@@ -1818,6 +1820,8 @@ def ratios_plot(name,
         raise ValueError('only one of output_fn and plot_saver may be supplied')
     if 'a' in res_draw_cmd:
         raise ValueError('no "a" in res_draw_cmd')
+    if which_ratios not in ('first','pairs'):
+        raise ValueError('which_ratios must be either "first" or "pairs"')
 
     res_fcns = [(x + ('',) if type(x) != tuple else x) for x in res_fcns]
 
@@ -1898,8 +1902,6 @@ def ratios_plot(name,
                 legend.AddEntry(res_fcn, res_fcn_title, 'L')
         legend.Draw()
 
-    h0 = hists.pop(0)
-    
     ratio_pad = ROOT.TPad('ratio_pad_' + name, '', 0, 0, 1, 1)
     ratio_pad.SetTopMargin(1-canvas_bottom_margin + 0.015)
     ratio_pad.SetLeftMargin(canvas_left_margin)
@@ -1913,9 +1915,14 @@ def ratios_plot(name,
     old_opt_fit = None
     fit_tpt = None
 
+    if which_ratios == 'first':
+        pairs_for_ratios = [(hists[0],h) for h in hists[1:]]
+    elif which_ratios == 'pairs':
+        pairs_for_ratios = list(chunks(hists, 2))
+
     if type(res_y_range) == float: # dynamic, the number is the fraction to add under/over min/max
         min_r, max_r = 1e99, -1e99
-        for h in hists:
+        for h0,h in pairs_for_ratios:
             v1, v2 = histogram_divide_values(h, h0, True)
             rs = [v1.y[i] / v2.y[i] for i in xrange(v2.n) if v2.y[i] != 0. and (not x_range or x_range[0] < v1.x[i] < x_range[1])]
             if rs:
@@ -1923,7 +1930,7 @@ def ratios_plot(name,
                 max_r = max(max_r, max(rs))
         res_y_range = min_r-res_y_range, max_r+res_y_range
 
-    for i,h in enumerate(hists):
+    for i,(h0,h) in enumerate(pairs_for_ratios):
         r = histogram_divide(h, h0, **res_divide_opt)
         if not r:
             continue
