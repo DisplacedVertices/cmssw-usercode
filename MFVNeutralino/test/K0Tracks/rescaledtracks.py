@@ -8,7 +8,7 @@ eta = batch.split('tketa')[1]
 incl = '/uscms_data/d3/dquach/crab3dirs/TrackingTreerHistsV23mv3_eta%s' % eta
 use_bkgsub = True
 
-ps = plot_saver(plot_dir('v0bkgsub_%s/cfrescaled%s' % (batch, '' if not use_bkgsub else '_hon'), size=(600,600), log=False)
+ps = plot_saver(plot_dir('v0bkgsub_%s/cfrescaled%s' % (batch, '' if not use_bkgsub else '_hon')), size=(600,600), log=False)
 
 eras = fcns.eras[:]
 de = eras.index('2017DE')
@@ -20,7 +20,7 @@ for era in eras:
     samples = ['background_%s' % year, 'JetHT' + era]
 
     fs = [ROOT.TFile(os.path.join(batch, '%s.root' % s)) for s in samples]
-    hs = [f.Get('h_tracks_dxyerr_v_pt/%s' % ('hsig' if use_bkgsub else 'hon') for f in fs]
+    hs = [f.Get('h_tracks_dxyerr_v_pt/%s' % ('hsig' if use_bkgsub else 'hon')) for f in fs]
 
     incl_fs = [ROOT.TFile(os.path.join(incl, '%s.root' % s)) for s in samples]
     hs += [f.Get('h_sel_tracks_dxyerr_v_pt') for f in incl_fs]
@@ -51,4 +51,5 @@ for era in eras:
                      res_y_title='data/MC',
                      res_y_range=(0.9,1.5),
                      res_fcns = [(fcn, 'prescribed rescaling')],
+                     which_ratios = 'pairs',
                      )
