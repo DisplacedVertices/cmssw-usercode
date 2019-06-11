@@ -4,7 +4,6 @@ import os, sys
 from collections import defaultdict
 from fnmatch import fnmatch
 from JMTucker.Tools import DBS
-from JMTucker.Tools.general import big_warn, typed_from_argv
 
 ########################################################################
 
@@ -521,6 +520,7 @@ def main(samples_registry):
     from sys import argv
     from pprint import pprint
     from JMTucker.Tools import colors
+    from JMTucker.Tools.general import chunks, typed_from_argv
 
     samples = samples_registry.from_argv()
     datasets = samples_registry.datasets_from_argv()
@@ -573,6 +573,13 @@ def main(samples_registry):
 
     elif 'nevents' in argv:
         runem(lambda dataset, sample: prnt(sample.name, dataset, DBS.numevents_in_dataset(sample.dataset)))
+
+    elif 'files_for_events' in argv:
+        rles = typed_from_argv(int, return_multiple=True)
+        if len(rles) % 3 != 0:
+            raise ValueError('expect list of ints in argv with length divisible by 3 [run1 lumi1 event1 ...]')
+        rles = list(chunks(rles,3))
+        runem(lambda dataset, sample: prnt(sample.name, dataset, ' '.join(DBS.files_for_events(rles, sample.dataset))))
 
     elif 'site' in argv:
         mlen = max(len(s.name) for s in samples)
