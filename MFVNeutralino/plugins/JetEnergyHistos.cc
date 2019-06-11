@@ -45,6 +45,8 @@ class MFVJetEnergyHistos : public edm::EDAnalyzer {
   TH1D* h_jet_ht_down;
   TH1D* h_jet_ht_40_up;
   TH1D* h_jet_ht_40_down;
+  TH1D* h_jet_ht_40_mup;
+  TH1D* h_jet_ht_40_mdown;
 
   TH1D* h_jet_ht_40_1200cut;
   TH1D* h_jet_ht_40_up_1200cut;
@@ -82,6 +84,8 @@ MFVJetEnergyHistos::MFVJetEnergyHistos(const edm::ParameterSet& cfg)
   h_jet_ht_down = fs->make<TH1D>("h_jet_ht_down", ";shifted down H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
   h_jet_ht_40_up = fs->make<TH1D>("h_jet_ht_40_up", ";shifted up H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
   h_jet_ht_40_down = fs->make<TH1D>("h_jet_ht_40_down", ";shifted down H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
+  h_jet_ht_40_mup = fs->make<TH1D>("h_jet_ht_40_mup", ";shifted up H_{T} of jets - nominal (GeV);events/25 GeV", 200, -500, 500);
+  h_jet_ht_40_mdown = fs->make<TH1D>("h_jet_ht_40_mdown", ";shifted down H_{T} of jets - nominal (GeV);events/25 GeV", 200, -500, 500);
 
   h_jet_ht_40_1200cut = fs->make<TH1D>("h_jet_ht_40_1200cut", ";H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
   h_jet_ht_40_up_1200cut = fs->make<TH1D>("h_jet_ht_40_up_1200cut", ";shifted up H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
@@ -196,6 +200,8 @@ void MFVJetEnergyHistos::analyze(const edm::Event& event, const edm::EventSetup&
   h_jet_ht_down->Fill(ht_down, w);
   h_jet_ht_40_up->Fill(ht_40_up, w);
   h_jet_ht_40_down->Fill(ht_40_down, w);
+  h_jet_ht_40_mup->Fill(ht_40 - ht_40_up, w);
+  h_jet_ht_40_mdown->Fill(ht_40 - ht_40_down, w);
 
   if (ht_40_up > 1200) h_jet_ht_40_up_1200cut->Fill(ht_40_up, w);
   if (ht_40_down > 1200) h_jet_ht_40_down_1200cut->Fill(ht_40_down, w);
