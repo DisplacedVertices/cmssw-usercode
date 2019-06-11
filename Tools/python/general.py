@@ -29,6 +29,10 @@ class chdir(object):
     def __exit__(self, *args):
         os.chdir(self.old_dir)
 
+def chunks(l,n):
+    for i in xrange(0, len(l), n):
+        yield l[i:i+n]
+
 def coderep_compactify_list(l):
     a = b = None
     xranges = []
@@ -301,6 +305,7 @@ def intlumi_from_brilcalc_csv(fn, has_hlt):
 __all__ = [
     'bool_from_argv',
     'big_warn',
+    'chunks',
     'intlumi_from_brilcalc_csv',
     'from_pickle',
     'to_pickle',
