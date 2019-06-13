@@ -133,9 +133,10 @@ def make_output_commands(process, settings):
         def dedrop(l):
             return [x for x in l if not x.strip().startswith('drop')]
         our_output_commands = output_commands
-        output_commands = process.AODSIMEventContent.outputCommands if settings.is_mc else process.AODEventContent.outputCommands
+        import Configuration.EventContent.EventContent_cff as ec
+        output_commands = ec.AODSIMEventContent.outputCommands if settings.is_mc else ec.AODEventContent.outputCommands
         if settings.is_miniaod:
-            output_commands += dedrop(process.MINIAODSIMEventContent.outputCommands if settings.is_mc else process.MINIAODEventContent.outputCommands)
+            output_commands += dedrop(ec.MINIAODSIMEventContent.outputCommands if settings.is_mc else ec.MINIAODEventContent.outputCommands)
         output_commands += dedrop(our_output_commands)
 
     return output_commands
