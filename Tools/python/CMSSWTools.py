@@ -354,6 +354,10 @@ def output_file(process, filename, output_commands, select_events=[]):
         process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring(*select_events))
     process.outp = cms.EndPath(process.out)
 
+def pprint_path(path):
+    for x in repr(path).split('+'):
+        print x
+
 def random_service(process, seeds):
     '''Set up the RandomNumberGeneratorService. seeds is a dict taking
     labels of modules to the random number seed for that module. If
