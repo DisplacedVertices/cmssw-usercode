@@ -113,6 +113,8 @@ def cs_analyze(d,
                _exception_re=re.compile(r"An exception of category '(.*)' occurred while")
                ):
 
+    as_killed = lambda r: r in (-3,-4,-5)
+
     class cs_analyze_result:
         def _list(self, ret):
             return [i for i,r in enumerate(self.returns) if ret(r)]
@@ -121,7 +123,7 @@ def cs_analyze(d,
         def running(self):
             return self._list(lambda r: r == -2)
         def killed(self):
-            return self._list(lambda r: r == -3 or r == -4)
+            return self._list(lambda r: as_killed(r))
         def probs(self):
             return self._list(lambda r: r > 0)
         def done(self):
@@ -147,10 +149,12 @@ def cs_analyze(d,
                 ret = -2
             elif 'Job was evicted' in line:
                 ret = -3
-            elif 'Job executing on host' in line and ret == -3:
+            elif 'Job executing on host' in line and as_killed(ret):
                 ret = -2
             elif 'Job was aborted by the user' in line:
                 ret = -4
+            elif 'Job was held' in line:
+                ret = -5
             else:
                 mo = _ab_re.search(line)
                 if not mo:
@@ -164,7 +168,7 @@ def cs_analyze(d,
             ns[1] += 1
         elif ret == -2:
             ns[2] += 1
-        elif ret == -3 or ret == -4:
+        elif as_killed(ret):
             ns[3] += 1
         else:
             ns[4] += 1
