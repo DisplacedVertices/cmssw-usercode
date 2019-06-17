@@ -548,6 +548,9 @@ for x in data_samples_2017 + qcd_samples_2017 + data_samples_2018 + qcd_samples_
     x.add_dataset("nr_trackingtreerv23mv3")
     x.add_dataset("nr_k0ntuplev25mv1")
 
+for x in qcd_samples_2017 + ttbar_samples_2017:
+    x.add_dataset("nr_trackmoverv25mv1_tright350")
+
 for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + all_signal_samples_2017 + \
          data_samples_2018 + qcd_samples_2018 + ttbar_samples_2018 + all_signal_samples_2018:
     x.add_dataset("ntuplev25m")

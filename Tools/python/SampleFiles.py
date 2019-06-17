@@ -370,6 +370,18 @@ _add_ds("nr_trackmoverv25mv1", {
 })
 
 
+_add_ds("nr_trackmoverv25mv1_tright350", {
+'qcdht0700_2017': (378, ['/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/TrackMoverV25mv1_TrigHT350_2017/190616_192729/0000/movedtree_%i.root' % i for i in chain(xrange(56), xrange(57,192), xrange(193,278), xrange(279,381))]),
+'qcdht1000_2017': _fromnum0("/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/TrackMoverV25mv1_TrigHT350_2017/190614_152122", 85, fnbase="movedtree"),
+'qcdht1500_2017': _fromnum0("/store/user/tucker/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/TrackMoverV25mv1_TrigHT350_2017/190614_152123", 249, fnbase="movedtree"),
+'qcdht2000_2017': _fromnum0("/store/user/tucker/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/TrackMoverV25mv1_TrigHT350_2017/190614_152124", 74, fnbase="movedtree"),
+'ttbarht0600_2017': _fromnum0("/store/user/tucker/TTJets_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/TrackMoverV25mv1_TrigHT350_2017/190614_152117", 20, fnbase="movedtree"),
+'ttbarht0800_2017': _fromnum0("/store/user/tucker/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/TrackMoverV25mv1_TrigHT350_2017/190614_152118", 8, fnbase="movedtree"),
+'ttbarht1200_2017': _fromnum0("/store/user/tucker/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/TrackMoverV25mv1_TrigHT350_2017/190614_152119", 2, fnbase="movedtree"),
+'ttbarht2500_2017': (1, ['/store/user/tucker/TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8/TrackMoverV25mv1_TrigHT350_2017/190614_152120/0000/movedtree_0.root']),
+})
+
+
 _add_ds("nr_k0ntuplev25mv1", {
 'qcdht0700_2017': (1, ['/store/user/wsun/croncopyeos/hadded/K0NtupleV25mv1/qcdht0700_2017.root']),
 'qcdht1000_2017': (1, ['/store/user/wsun/croncopyeos/hadded/K0NtupleV25mv1/qcdht1000_2017.root']),
