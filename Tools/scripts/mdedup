@@ -1,0 +1,64 @@
+#!/bin/bash
+
+shopt -s nullglob
+
+if ! command -v fdupes; then
+    echo need fdupes, can use copy in ~tucker/local/bin
+    exit 1
+fi
+
+if ! compgen -G "ex_*" >/dev/null; then
+    echo need to cd to a batch dir
+    exit 1
+fi
+
+for cr in crab_*; do
+    if [[ -f $cr/inputs.tgz ]]; then # already mtidied
+        gunzip $cr/inputs.tgz
+        tar -C $cr -xf $cr/inputs.tar 'inputs/*default.tgz'
+        tar --delete -f $cr/inputs.tar 'inputs/*default.tgz'
+        gzip $cr/inputs.tar
+        mv $cr/inputs.tar.gz $cr/inputs.tgz
+    fi
+    mkdir $cr/input
+    tar -C $cr/input -xf $cr/inputs/*default.tgz
+    rm $cr/inputs/*default.tgz
+    rmdir $cr/inputs
+done
+
+for ex in ex_*; do
+    if [[ -d $ex/psets ]]; then # crab
+        tar --remove-files -czf $ex/psets.tgz $ex/psets/
+    fi
+
+    if [[ -f $ex/inputs/input.tgz ]]; then # condor
+        mkdir $ex/inputs/input
+        tar -C $ex/inputs/input -xf $ex/inputs/input.tgz
+        rm $ex/inputs/input.tgz
+    fi
+done
+
+fdupes -q1r crab_*/input ex_* | while read line; do
+    master=""
+    for file in ${line[*]}; do
+        if [[ -z $master ]]; then
+            master=$file
+        else
+            dircount=$(awk -F/ '{print NF-1}' <<< $master)
+            dots=$(printf '../%.0s' $(seq $dircount))
+            ln -sf $dots$master $file
+        fi
+    done
+done
+
+for cr in crab_*; do
+    tar --remove-files -czf $cr/input.tgz $cr/input/
+done
+
+for ex in ex_*; do
+    if [[ -d $ex/inputs ]]; then
+        tar --remove-files -czf $ex/inputs/input.tgz $ex/inputs/input/
+    fi
+done
+
+#    gzip $ex/gitstatus/*
