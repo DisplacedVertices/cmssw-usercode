@@ -8,6 +8,7 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/MFVNeutralino/interface/VertexTools.h"
 #include "JMTucker/Tools/interface/Utilities.h"
+#include "JMTucker/Tools/interface/Year.h"
 //#include "JMTucker/MFVNeutralino/plugins/VertexMVAWrap.h"
 
 class MFVVertexSelector : public edm::EDProducer {
@@ -22,7 +23,7 @@ private:
   const edm::EDGetTokenT<MFVEvent> mevent_token;
   const bool use_mevent;
 
-  bool use_vertex(const MFVVertexAux& vtx, const MFVEvent* mevent=0) const;
+  bool use_vertex(const bool is_mc, const MFVVertexAux& vtx, const MFVEvent* mevent=0) const;
 
   const edm::EDGetTokenT<reco::VertexCollection> vertex_token;
   const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_aux_token;
@@ -41,6 +42,8 @@ private:
   const double max_match_distance;
   const double min_match_distance;
   const std::vector<double>* match_to_vertices;
+
+  const bool exclude_beampipe;
 
   const int min_ntracks;
   const int max_ntracks;
@@ -139,6 +142,7 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     max_match_distance(cfg.getParameter<double>("max_match_distance")),
     min_match_distance(cfg.getParameter<double>("min_match_distance")),
     match_to_vertices(0),
+    exclude_beampipe(cfg.getParameter<bool>("exclude_beampipe")),
     min_ntracks(cfg.getParameter<int>("min_ntracks")),
     max_ntracks(cfg.getParameter<int>("max_ntracks")),
     min_ntracksptgt2(cfg.getParameter<int>("min_ntracksptgt2")),
@@ -232,7 +236,7 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
   produces<MFVVertexAuxCollection>();
 }
 
-bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx, const MFVEvent* mevent) const {
+bool MFVVertexSelector::use_vertex(const bool is_mc, const MFVVertexAux& vtx, const MFVEvent* mevent) const {
   if (use_mva) {
     if (vtx.ntracks() < 5)
       return false;
@@ -261,6 +265,25 @@ bool MFVVertexSelector::use_vertex(const MFVVertexAux& vtx, const MFVEvent* meve
     }
 
     if (!ok)
+      return false;
+  }
+
+  if (exclude_beampipe) {
+    const double r = 2.09;
+    double cx = 0, cy = 0;
+    if (!is_mc) {
+#ifdef MFVNEUTRALINO_2017
+      cx =  0.113;
+      cy = -0.180;
+#elif defined(MFVNEUTRALINO_2018)
+      cx =  0.171;
+      cy = -0.175;
+#else
+#error bad year
+#endif
+    }
+
+    if (hypot(vtx.x - cx, vtx.y - cy) > r)
       return false;
   }
 
@@ -420,7 +443,7 @@ void MFVVertexSelector::produce(edm::Event& event, const edm::EventSetup&) {
   std::unique_ptr<MFVVertexAuxCollection> selected(new MFVVertexAuxCollection);
 
   for (const MFVVertexAux& aux : *auxes)
-    if (use_vertex(aux, use_mevent ? &*mevent : 0))
+    if (use_vertex(!event.isRealData(), aux, use_mevent ? &*mevent : 0))
       selected->push_back(aux);
 
   sorter.sort(*selected);
