@@ -73,20 +73,22 @@ namespace mfv {
     tree->Branch("lumi", &nt.lumi);
     tree->Branch("event", &nt.event);
     tree->Branch("gen_flavor_code", &nt.gen_flavor_code);
-
     tree->Branch("pass_hlt", &nt.pass_hlt);
     tree->Branch("l1_htt", &nt.l1_htt);
     tree->Branch("l1_myhtt", &nt.l1_myhtt);
     tree->Branch("l1_myhttwbug", &nt.l1_myhttwbug);
     tree->Branch("hlt_ht", &nt.hlt_ht);
-
+    tree->Branch("bsx", &nt.bsx);
+    tree->Branch("bsy", &nt.bsy);
+    tree->Branch("bsz", &nt.bsz);
+    tree->Branch("bsdxdz", &nt.bsdxdz);
+    tree->Branch("bsdydz", &nt.bsdydz);
     tree->Branch("npv", &nt.npv);
     tree->Branch("pvx", &nt.pvx);
     tree->Branch("pvy", &nt.pvy);
     tree->Branch("pvz", &nt.pvz);
     tree->Branch("npu", &nt.npu);
     tree->Branch("weight", &nt.weight);
-
     tree->Branch("njets", &nt.njets);
     tree->Branch("jet_pt", nt.jet_pt, "jet_pt[njets]/F");
     tree->Branch("jet_eta", nt.jet_eta, "jet_eta[njets]/F");
@@ -108,7 +110,6 @@ namespace mfv {
     tree->Branch("gen_leptons", &nt.gen_leptons, 32000, 0);
     tree->Branch("gen_jet_ht", &nt.gen_jet_ht);
     tree->Branch("gen_jet_ht40", &nt.gen_jet_ht40);
-
     tree->Branch("nvtx", &nt.nvtx);
     tree->Branch("ntk0", &nt.ntk0);
     tree->Branch("tk0_qchi2", &nt.tk0_qchi2);
@@ -128,7 +129,6 @@ namespace mfv {
     tree->Branch("bs2derr0", &nt.bs2derr0);
     tree->Branch("rescale_bs2derr0", &nt.rescale_bs2derr0);
     tree->Branch("geo2ddist0", &nt.geo2ddist0);
-
     tree->Branch("ntk1", &nt.ntk1);
     tree->Branch("tk1_qchi2", &nt.tk1_qchi2);
     tree->Branch("tk1_ndof", &nt.tk1_ndof);
@@ -168,6 +168,11 @@ namespace mfv {
     tree->SetBranchAddress("l1_myhtt", &nt.l1_myhtt);
     tree->SetBranchAddress("l1_myhttwbug", &nt.l1_myhttwbug);
     tree->SetBranchAddress("hlt_ht", &nt.hlt_ht);
+    tree->SetBranchAddress("bsx", &nt.bsx);
+    tree->SetBranchAddress("bsy", &nt.bsy);
+    tree->SetBranchAddress("bsz", &nt.bsz);
+    tree->SetBranchAddress("bsdxdz", &nt.bsdxdz);
+    tree->SetBranchAddress("bsdydz", &nt.bsdydz);
     tree->SetBranchAddress("npv", &nt.npv);
     tree->SetBranchAddress("pvx", &nt.pvx);
     tree->SetBranchAddress("pvy", &nt.pvy);
