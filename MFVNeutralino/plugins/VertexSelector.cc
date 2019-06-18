@@ -6,9 +6,10 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
+#include "JMTucker/MFVNeutralino/interface/VertexAuxSorter.h"
+#include "JMTucker/MFVNeutralino/interface/VertexTrackClusters.h"
 #include "JMTucker/MFVNeutralino/interface/VertexTools.h"
 #include "JMTucker/Tools/interface/Utilities.h"
-#include "JMTucker/Tools/interface/Year.h"
 //#include "JMTucker/MFVNeutralino/plugins/VertexMVAWrap.h"
 
 class MFVVertexSelector : public edm::EDProducer {
@@ -30,7 +31,7 @@ private:
   const bool produce_vertices;
   const bool produce_tracks;
   const bool produce_refs;
-  const MFVVertexAuxSorter sorter;
+  const mfv::VertexAuxSorter sorter;
 
   const bool use_mva;
   //const MFVVertexMVAWrap* mva;
@@ -268,24 +269,8 @@ bool MFVVertexSelector::use_vertex(const bool is_mc, const MFVVertexAux& vtx, co
       return false;
   }
 
-  if (exclude_beampipe) {
-    const double r = 2.09;
-    double cx = 0, cy = 0;
-    if (!is_mc) {
-#ifdef MFVNEUTRALINO_2017
-      cx =  0.113;
-      cy = -0.180;
-#elif defined(MFVNEUTRALINO_2018)
-      cx =  0.171;
-      cy = -0.175;
-#else
-#error bad year
-#endif
-    }
-
-    if (hypot(vtx.x - cx, vtx.y - cy) > r)
-      return false;
-  }
+  if (exclude_beampipe && !mfv::inside_beampipe(is_mc, vtx.x, vtx.y))
+    return false;
 
   if (use_cluster_cuts) {
     assert(mevent);

@@ -1,9 +1,10 @@
 #include "TVector3.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
-#include "JMTucker/MFVNeutralino/interface/VertexTools.h"
 #include "RecoVertex/VertexTools/interface/VertexDistanceXY.h"
 #include "RecoVertex/VertexTools/interface/VertexDistance3D.h"
+#include "JMTucker/MFVNeutralino/interface/VertexTools.h"
+#include "JMTucker/Tools/interface/Year.h"
 
 namespace {
   template <typename T>
@@ -14,11 +15,6 @@ namespace {
   template <typename T>
   T mag(T x, T y, T z) {
     return sqrt(x*x + y*y + z*z);
-  }
-
-  template <typename T>
-  T mag(T x, T y, T z, T t) {
-    return sqrt(x*x + y*y + z*z + t*t);
   }
 
   template <typename T, typename T2>
@@ -43,6 +39,24 @@ namespace {
 }
 
 namespace mfv {
+  bool inside_beampipe(bool is_mc, double x, double y) {
+    double cx = 0, cy = 0;
+    if (!is_mc) {
+#ifdef MFVNEUTRALINO_2017
+      cx =  0.113;
+      cy = -0.180;
+#elif defined(MFVNEUTRALINO_2018)
+      cx =  0.171;
+      cy = -0.175;
+#else
+#error bad year
+#endif
+    }
+
+    const double r = 2.09;
+    return hypot(x - cx, y - cy) < r;
+  }
+
   float abs_error(const reco::Vertex& sv, bool use3d) {
     const double x = sv.x();
     const double y = sv.y();
@@ -163,68 +177,5 @@ namespace mfv {
         missdistpv.push_back(Measurement1D(1e9,-1));
       }
     }
-  }
-
-  //////////////////////////////////////////////////////////////////////
-
-  reco::Vertex aux_to_reco(const MFVVertexAux& aux) {
-    reco::Vertex::Error e;
-    e(0,0) = aux.cxx;
-    e(0,1) = aux.cxy;
-    e(0,2) = aux.cxz;
-    e(1,1) = aux.cyy;
-    e(1,2) = aux.cyz;
-    e(2,2) = aux.czz;
-    return reco::Vertex(reco::Vertex::Point(aux.x, aux.y, aux.z), e, aux.chi2, aux.ndof(), aux.ntracks());
-  }
-
-  track_clusters::track_clusters(const MFVVertexAux& v,
-                                 double R_,
-                                 fastjet::JetAlgorithm algo_,
-                                 fastjet::RecombinationScheme recomb_scheme_,
-                                 double track_mass_)
-    : R(R_),
-      algo(algo_),
-      recomb_scheme(recomb_scheme_),
-      track_mass(track_mass_)
-  {
-    std::vector<fastjet::PseudoJet> particles;
-    for (size_t i = 0, ie = v.ntracks(); i < ie; ++i) {
-      particles.push_back(fastjet::PseudoJet(v.track_px[i],
-                                             v.track_py[i],
-                                             v.track_pz[i],
-                                             mag(v.track_px[i],
-                                                 v.track_py[i],
-                                                 v.track_pz[i],
-                                                 track_mass)));
-      particles.back().set_user_index(i);
-    }
-
-    fastjet::ClusterSequence cs(particles, fastjet::JetDefinition(algo, R, recomb_scheme));
-    std::vector<fastjet::PseudoJet> cs_clusters = fastjet::sorted_by_pt(cs.inclusive_jets());
-
-    // have to repack because can't keep the fastjet PseudoJets around
-    // without the ClusterSequence, and it doesn't seem to work to
-    // pass the latter back too...
-    const size_t nc = cs_clusters.size();
-    clusters.resize(nc);
-    for (size_t i = 0; i < nc; ++i) {
-      const fastjet::PseudoJet& c = cs_clusters[i];
-      clusters[i].p4.SetPtEtaPhiM(c.pt(), c.eta(), c.phi_std(), c.m());
-      for (const fastjet::PseudoJet& d : c.constituents())
-        clusters[i].tracks.push_back(d.user_index());
-    }
-  }
-
-  size_t track_clusters::nsingle() const {
-    return std::count_if(clusters.begin(), clusters.end(), [](const track_cluster& c) { return c.size() == 1; });
-  }
-
-  size_t track_clusters::ndouble() const {
-    return std::count_if(clusters.begin(), clusters.end(), [](const track_cluster& c) { return c.size() == 2; });
-  }
-
-  double track_clusters::avgnconst() const {
-    return std::accumulate(clusters.begin(), clusters.end(), 0., [](const double& sum, const track_cluster& c) { return sum + c.size(); }) / clusters.size();
   }
 }
