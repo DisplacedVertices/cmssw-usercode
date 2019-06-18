@@ -17,6 +17,7 @@
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexerPairEff.h"
+#include "JMTucker/MFVNeutralino/interface/VertexTools.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
 class MFVVertexer : public edm::EDProducer {
@@ -38,12 +39,12 @@ private:
   template <typename T>
   void print_track_set(const T& ts, const reco::Vertex& v) const {
     for (auto r : ts)
-      printf(" %u%s", r.key(), (v.trackWeight(r) < 0.5 ? "!" : ""));
+      printf(" %u%s", r.key(), (v.trackWeight(r) < mfv::track_vertex_weight_min ? "!" : ""));
   }
 
   void print_track_set(const reco::Vertex& v) const {
     for (auto r = v.tracks_begin(), re = v.tracks_end(); r != re; ++r)
-      printf(" %lu%s", r->key(), (v.trackWeight(*r) < 0.5 ? "!" : ""));
+      printf(" %lu%s", r->key(), (v.trackWeight(*r) < mfv::track_vertex_weight_min ? "!" : ""));
   }
 
   bool is_track_subset(const track_set& a, const track_set& b) const {
@@ -60,7 +61,7 @@ private:
     return is_subset;
   }
 
-  track_set vertex_track_set(const reco::Vertex& v, const double min_weight = 0.5) const {
+  track_set vertex_track_set(const reco::Vertex& v, const double min_weight = mfv::track_vertex_weight_min) const {
     std::set<reco::TrackRef> result;
 
     for (auto it = v.tracks_begin(), ite = v.tracks_end(); it != ite; ++it) {
