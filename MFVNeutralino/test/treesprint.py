@@ -5,10 +5,12 @@ from glob import glob
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.Sample import norm_from_file
+from JMTucker.Tools.Year import year
 from JMTucker.Tools.general import typed_from_argv, bool_from_argv
 from JMTucker.Tools import Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
+year = typed_from_argv(int, year, name='year')
 nosig = bool_from_argv('nosig')
 nodata = bool_from_argv('nodata')
 nobkg = bool_from_argv('nobkg')
@@ -67,7 +69,11 @@ def getit(fn, ntk):
 
 fmt = '%40s %9s %9s %9s      %14s  %9s +- %9s  %9s +- %9s     %12s  %9s +- %9s  %9s +- %9s'
 
-int_lumi = ac.int_lumi_2017 * ac.scale_factor_2017
+if year == 2017:
+    int_lumi = ac.int_lumi_2017 * ac.scale_factor_2017
+elif year == 2018:
+    int_lumi = ac.int_lumi_2018 * ac.scale_factor_2018
+
 print 'MC scaled to int. lumi. %.3f/fb' % (int_lumi/1000)
 
 for ntk in ntks:
@@ -80,6 +86,9 @@ for ntk in ntks:
 
     weighted = []
     for fn in fns:
+        if str(year) not in fn:
+            continue
+
         (r1v, n1v, en1v), (_, n1vb, _), (r2v, n2v, en2v), (_, n2vb, _) = getit(fn, ntk)
         f1vb = float(n1vb) / n1v if r1v > 0 else 0.
         ef1vb = (f1vb * (1-f1vb) / effective_n(n1v,en1v))**0.5 if r1v > 0 else 0.
@@ -89,7 +98,7 @@ for ntk in ntks:
         sname = os.path.basename(fn).replace('.root', '')
         is_sig = sname.startswith('mfv_')
         is_data = sname.startswith('JetHT') or sname.startswith('SingleMuon') or sname.startswith('SingleElectron')
-        is_bkg = sname in ['qcdht0700_2017', 'qcdht1000_2017', 'qcdht1500_2017', 'qcdht2000_2017', 'ttbarht0600_2017', 'ttbarht0800_2017', 'ttbarht1200_2017', 'ttbarht2500_2017']
+        is_bkg = any((sname.startswith(s) for s in ('qcdht0700', 'qcdht1000', 'qcdht1500', 'qcdht2000', 'ttbarht0600', 'ttbarht0800', 'ttbarht1200', 'ttbarht2500')))
         is_other = not any((is_sig, is_data, is_bkg))
         include_in_sum = sumall or is_bkg
 
