@@ -5,6 +5,7 @@
 #include "TLorentzVector.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/TrackReco/interface/TrackBase.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/JetVertexAssociation.h"
 
 struct MFVVertexAux {
@@ -734,8 +735,20 @@ struct MFVVertexAux {
     }
     return 1 - sqrt(1 - 4/(sumpt() * sumpt()) * sum);
   }
+
+  operator reco::Vertex() const {
+    reco::Vertex::Error e;
+    e(0,0) = cxx; e(0,1) = cxy; e(0,2) = cxz;
+                  e(1,1) = cyy; e(1,2) = cyz;
+                                e(2,2) = czz;
+    return reco::Vertex(reco::Vertex::Point(x, y, z), e, chi2, ndof(), ntracks());
+  }
 };
 
 typedef std::vector<MFVVertexAux> MFVVertexAuxCollection;
+
+namespace mfv {
+  typedef std::vector<MFVVertexAux> VertexAuxCollection;
+}
 
 #endif
