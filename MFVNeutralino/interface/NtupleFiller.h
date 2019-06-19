@@ -2,6 +2,7 @@
 #define JMTucker_MFVNeutralino_NtupleFiller_h
 
 #include "JMTucker/MFVNeutralinoFormats/interface/MCInteractions.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/MFVNeutralino/interface/Ntuple.h"
 #include "JMTucker/Tools/interface/NtupleFiller.h"
 
@@ -26,7 +27,8 @@ namespace mfv {
     const std::vector<double>& vertex() const { return *vertex_; }
     const mfv::MCInteraction& mci() const { return *mci_; }
   };
+
+  void NtupleAdd(VerticesSubNtuple&, const MFVVertexAux&, bool genmatch=false);
 }
 
 #endif
-

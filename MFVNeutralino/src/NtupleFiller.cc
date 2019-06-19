@@ -63,4 +63,12 @@ namespace mfv {
             (*vertex_)[0], (*vertex_)[1], (*vertex_)[2],
             saw_c, saw_b);
   }
+
+  void NtupleAdd(VerticesSubNtuple& nt, const MFVVertexAux& v, bool genmatch) {
+    nt.add(v.x, v.y, v.z,
+           v.cxx, v.cxy, v.cxz, v.cyy, v.cyz, v.czz,
+           v.ntracks(), v.bs2derr, v.rescale_bs2derr, v.geo2ddist(), genmatch,
+           v.pt[mfv::PTracksPlusJetsByNtracks], v.eta[mfv::PTracksPlusJetsByNtracks], v.phi[mfv::PTracksPlusJetsByNtracks], v.mass[mfv::PTracksPlusJetsByNtracks],
+           v.mass[mfv::PTracksOnly]);
+  }
 }
