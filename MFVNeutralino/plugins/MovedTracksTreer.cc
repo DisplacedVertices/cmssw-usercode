@@ -1,13 +1,11 @@
 #include "TTree.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
-#include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "JMTucker/MFVNeutralino/interface/Ntuple.h"
 #include "JMTucker/MFVNeutralino/interface/NtupleFiller.h"
-#include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
@@ -23,7 +21,6 @@ private:
   jmt::JetsSubNtupleFiller jets_filler;
   mfv::GenTruthSubNtupleFiller gentruth_filler;
   const edm::EDGetTokenT<MFVVertexAuxCollection> vertices_token;
-  const edm::EDGetTokenT<double> weight_token;
   const edm::EDGetTokenT<std::vector<reco::TrackRef>> sel_tracks_token;
   const std::string mover_src;
   const edm::EDGetTokenT<reco::TrackCollection> all_tracks_token;
