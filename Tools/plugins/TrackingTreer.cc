@@ -28,9 +28,7 @@ TrackingTreer::TrackingTreer(const edm::ParameterSet& cfg)
     bs_filler(nt.bs(), cfg, consumesCollector()),
     pvs_filler(nt.pvs(), cfg, consumesCollector(), true, false),
     jets_filler(nt.jets(), cfg, consumesCollector()),
-    tracks_filler(nt.tracks(), cfg, consumesCollector(),
-                  cfg.getParameter<bool>("track_sel") ? [](const reco::Track& tk) { return tk.pt() < 1 || tk.hitPattern().pixelLayersWithMeasurement() < 2 || tk.hitPattern().stripLayersWithMeasurement() < 6; }
-                                                      : [](const reco::Track& tk) { return false; })
+    tracks_filler(nt.tracks(), cfg, consumesCollector(), cfg.getParameter<int>("track_cut_level"))
 {
   edm::Service<TFileService> fs;
   tree = fs->make<TTree>("t", "");
@@ -44,7 +42,7 @@ void TrackingTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   bs_filler(event);
   pvs_filler(event);
   jets_filler(event);
-  tracks_filler(event, &jets_filler, &pvs_filler);
+  tracks_filler(event, &jets_filler, &pvs_filler, &bs_filler);
 
   tree->Fill();
 }

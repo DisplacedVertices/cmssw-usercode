@@ -21,7 +21,7 @@ process.selectedPatJets.cut = process.jtupleParams.jetCut
 
 process.tt = cms.EDAnalyzer('TrackingTreer',
                             process.jmtNtupleFillerMiniAOD,
-                            track_sel = cms.bool(True),
+                            track_cut_level = cms.int32(0), # -1 = all, 0 = pt & pix & strip, 1 = 0 + min_r, 2 = 1 + nsigmadxybs
                             )
 
 process.tt.track_ref_getter.tracks_maps_srcs = []

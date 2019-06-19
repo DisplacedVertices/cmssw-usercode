@@ -1,6 +1,7 @@
 #include "JMTucker/Tools/interface/BTagging.h"
 #include "JMTucker/Tools/interface/NtupleFiller.h"
 #include "JMTucker/Tools/interface/TrackerSpaceExtent.h"
+#include "JMTucker/Tools/interface/TrackTools.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
 namespace jmt {
@@ -160,38 +161,46 @@ namespace jmt {
            );
   }
 
-  void TracksSubNtupleFiller::operator()(const edm::Event& e, JetsSubNtupleFiller* jf, PrimaryVerticesSubNtupleFiller* vf) {
+  bool TracksSubNtupleFiller::cut(const reco::Track& tk, BeamspotSubNtupleFiller* bf) const {
+    if (cut_level_ < 0)
+      return cut_ ? cut_(tk) : false;
+
+    return !pass_track(tk, cut_level_, bf ? &bf->bs() : 0);
+  }
+
+  void TracksSubNtupleFiller::operator()(const edm::Event& e, JetsSubNtupleFiller* jf, PrimaryVerticesSubNtupleFiller* vf, BeamspotSubNtupleFiller* bf) {
     auto h = htracks(e);
     for (size_t i = 0, ie = h->size(); i < ie; ++i) {
       reco::TrackRef tk(h, i);
-      if (!cut(*tk)) {
-        int which_jet = -1;
-        int which_pv = -1;
+      if (cut(*tk, bf))
+        continue;
 
-        if (jf) {
-          auto js = jf->jets(e);
-          for (size_t i = 0, ie = js.size(); i < ie; ++i) {
-            int nti = jf->i2nti(i);
-            if (nti != -1 && trg_.has_track(e, js[i], tk))
-              which_jet = nti;
-          }
+      int which_jet = -1;
+      int which_pv = -1;
+
+      if (jf) {
+        auto js = jf->jets(e);
+        for (size_t i = 0, ie = js.size(); i < ie; ++i) {
+          int nti = jf->i2nti(i);
+          if (nti != -1 && trg_.has_track(e, js[i], tk))
+            which_jet = nti;
         }
-
-        if (vf) {
-          auto vh = vf->hpvs(e);
-          for (size_t i = 0, ie = vh->size(); i < ie; ++i) {
-            int nti = vf->i2nti(i);
-            if (nti != -1 && nti < 128) {
-              const int q = trg_.has_track(e, reco::VertexRef(vh,i), tk);
-              const int loosebit = int(q == pat::PackedCandidate::UsedInFitLoose) << 7;
-              if (q == pat::PackedCandidate::UsedInFitTight || loosebit)
-                which_pv = nti | loosebit;
-            }
-          }
-        }
-
-        NtupleAdd(nt_, *tk, which_jet, which_pv);
       }
+
+      if (vf) {
+        auto vh = vf->hpvs(e);
+        for (size_t i = 0, ie = vh->size(); i < ie; ++i) {
+          int nti = vf->i2nti(i);
+          if (nti != -1 && nti < 128) {
+            const int q = trg_.has_track(e, reco::VertexRef(vh,i), tk);
+            const int loosebit = int(q == pat::PackedCandidate::UsedInFitLoose) << 7;
+            if (q == pat::PackedCandidate::UsedInFitTight || loosebit)
+              which_pv = nti | loosebit;
+          }
+        }
+      }
+
+      NtupleAdd(nt_, *tk, which_jet, which_pv);
     }
   }
 }
