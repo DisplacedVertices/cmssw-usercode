@@ -192,6 +192,8 @@ def cmssw_from_argv(process, verbose=False):
         want_summary(process)
     if 'every' in sys.argv:
         report_every(process, 1)
+    if 'tracer' in sys.argv:
+        tracer(process)
     for arg in sys.argv:
         if arg.startswith('tfs='):
             tfileservice(process, arg.replace('tfs=',''))
