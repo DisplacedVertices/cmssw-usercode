@@ -44,8 +44,10 @@ def cmd_merge_btags_nobtags():
 
         # for the f2 variation
         btag_frac_threetrk = float(tuple_ntracks_weights[0][1].split(",")[0])
+        btag_frac_fourtrk = float(tuple_ntracks_weights[1][1].split(",")[0])
         btag_frac_fivetrk  = float(tuple_ntracks_weights[2][1].split(",")[0])
         frac_variation = (btag_frac_fivetrk / btag_frac_threetrk) - 1
+        frac_variation_var = (btag_frac_fourtrk / btag_frac_threetrk) - 1
 
         # for the nominal and the f2 variation
         for ntracks,weights in tuple_ntracks_weights :
@@ -68,7 +70,7 @@ def cmd_merge_btags_nobtags():
             os.system(cmd)
 
             # f2 variation down
-            weight_btag_down   = min( float(weights.split(",")[0]) * (1.0/(1+frac_variation)), 1)
+            weight_btag_down   = min( float(weights.split(",")[0]) * (1.0/(1+frac_variation)*(1+frac_variation_var)), 1)
             weight_nobtag_down = 1-weight_btag_down
             weights_down = '%.3f,%.3f' % (weight_btag_down, weight_nobtag_down)
             cmd = 'mergeTFileServiceHistograms -w %s -i %s -o 2v_from_jets_%s_%dtrack_btag_corrected_vary_3trk_to_5trk_down_%s.root' % (weights_down, ' '.join(files), year, ntracks, _version)
