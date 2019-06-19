@@ -62,6 +62,15 @@ namespace mfv {
     float lspdist3() const { return (decay(0) - decay(1)).Mag(); }
     float lspdistz() const { return std::abs(decay_z(0) - decay_z(1)); }
 
+    int lspmatch(double x, double y, double z, double d3d=0.0084) {
+      if (valid())
+        for (int i = 0, ie = std::min(n(), 2); i < ie; ++i)
+          if ((decay(i) - TVector3(x,y,z)).Mag2() < d3d*d3d)
+            return i;
+      return -1;
+    }
+    template <typename T> int lspmatch(const T& v, double d3d=0.0084) { return lspmatch(v.x, v.y, v.z, d3d); }
+
     void add_bquark(float pt, float eta, float phi) {
       bquark_pt_.push_back(pt);
       bquark_eta_.push_back(eta);
