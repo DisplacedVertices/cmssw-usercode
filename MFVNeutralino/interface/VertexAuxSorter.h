@@ -18,7 +18,7 @@ namespace mfv {
     static bool by_ntracks_then_mass(const MFVVertexAux& a, const MFVVertexAux& b) {
       if (a.ntracks() == b.ntracks())
         return by_mass(a,b);
-      return by_ntracks_then_mass(a,b);
+      return by_ntracks(a,b);
     }
   };
 }
