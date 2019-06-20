@@ -73,7 +73,6 @@ private:
   const double min_sumpt2;
   const double min_maxtrackpt;
   const double min_maxm1trackpt;
-  const double max_trackdxy;
   const double max_trackdxyerrmin;
   const double max_trackdxyerrmax;
   const double max_trackdxyerravg;
@@ -171,7 +170,6 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     min_sumpt2(cfg.getParameter<double>("min_sumpt2")),
     min_maxtrackpt(cfg.getParameter<double>("min_maxtrackpt")),
     min_maxm1trackpt(cfg.getParameter<double>("min_maxm1trackpt")),
-    max_trackdxy(cfg.getParameter<double>("max_trackdxy")),
     max_trackdxyerrmin(cfg.getParameter<double>("max_trackdxyerrmin")),
     max_trackdxyerrmax(cfg.getParameter<double>("max_trackdxyerrmax")),
     max_trackdxyerravg(cfg.getParameter<double>("max_trackdxyerravg")),
@@ -312,11 +310,6 @@ bool MFVVertexSelector::use_vertex(const bool is_mc, const MFVVertexAux& vtx, co
       return false;
   }
 
-  int ntracks_sub = 0;
-  for (size_t i = 0, n = vtx.ntracks(); i < n; ++i)
-    if (fabs(vtx.track_dxy[i]) > max_trackdxy)
-      ++ntracks_sub;
-
   float trackpairdphimax = -1;
   if (min_trackpairdphimax > 0)
     for (float dphi : vtx.trackpairdphis()) {
@@ -350,12 +343,12 @@ bool MFVVertexSelector::use_vertex(const bool is_mc, const MFVVertexAux& vtx, co
   }
 
   return 
-    (vtx.ntracks() - ntracks_sub) >= min_ntracks &&
-    (vtx.ntracks() - ntracks_sub) <= max_ntracks &&
-    (vtx.ntracksptgt(2)  - ntracks_sub) >= min_ntracksptgt2 &&
-    (vtx.ntracksptgt(3)  - ntracks_sub) >= min_ntracksptgt3 &&
-    (vtx.ntracksptgt(5)  - ntracks_sub) >= min_ntracksptgt5 &&
-    (vtx.ntracksptgt(10) - ntracks_sub) >= min_ntracksptgt10 &&
+    vtx.ntracks() >= min_ntracks &&
+    vtx.ntracks() <= max_ntracks &&
+    vtx.ntracksptgt(2)  >= min_ntracksptgt2 &&
+    vtx.ntracksptgt(3)  >= min_ntracksptgt3 &&
+    vtx.ntracksptgt(5)  >= min_ntracksptgt5 &&
+    vtx.ntracksptgt(10) >= min_ntracksptgt10 &&
     vtx.njets[mfv::JByNtracks] >= min_njetsntks &&
     vtx.njets[mfv::JByNtracks] <= max_njetsntks &&
     vtx.chi2dof() < max_chi2dof &&
