@@ -306,6 +306,7 @@ namespace jmt {
     float pz(int i) const { return p3(i).Z(); }
     float p(int i) const { return p3(i).Mag(); }
     float p2(int i) const { return p3(i).Mag2(); }
+    TVector3 v(int i) const { return TVector3(vx(i), vy(i), vz(i)); }
     float dxy(int i, float x=0, float y=0) const { return ((vy(i) - y) * px(i) - (vx(i) - x) * py(i)) / pt(i); }
     template <typename BS> float dxybs(int i, const BS& bs) const { return dxy(i, bs.x(vz(i)), bs.y(vz(i))); }
     template <typename BS> float nsigmadxybs(int i, const BS& bs) const { return std::abs(dxybs(i, bs) / err_dxy(i)); }
