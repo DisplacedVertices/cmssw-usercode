@@ -3,7 +3,7 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 is_mc = True # for blinding
 
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset
-sample_files(process, 'qcdht2000_2017', dataset, 1)
+sample_files(process, 'qcdht2000_2017' if is_mc else 'JetHT2017B', dataset, 1)
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
 
@@ -109,8 +109,7 @@ process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     
 
 if not is_mc:
     for p in process.paths.keys():
-        if not (p == 'pSkimSel' or p == 'pEventPreSel' or p.startswith('p0V') or (p.startswith('Ntk3') and not p.startswith('Ntk3or4'))):  # everything but skim/presel and 3-track paths blind
-       #if not (p == 'pSkimSel' or p == 'pEventPreSel' or p.startswith('Ntk3') or p.startswith('Ntk4') or p.startswith('p0V')):       # unblinds all 3,4-track sets, keeps 5-track stuff blind
+        if not (p == 'pSkimSel' or p == 'pEventPreSel' or p.startswith('Ntk3') or p.startswith('Ntk4') or p.startswith('p0V')):       # unblinds all 3,4-track sets, keeps 5-track stuff blind
             delattr(process, p)
 
 
@@ -118,9 +117,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
     samples = pick_samples(dataset)
-    set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8_1pc.json'))
+    set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8_10pc.json'))
 
-    cs = CondorSubmitter('Histos' + version,
+    cs = CondorSubmitter('Histos' + version + 'v3',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = chain_modifiers(is_mc_modifier, half_mc_modifier(), per_sample_pileup_weights_modifier()),
