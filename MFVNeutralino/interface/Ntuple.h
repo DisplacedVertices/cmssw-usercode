@@ -170,6 +170,7 @@ namespace mfv {
 
     TVector3 pos(int i) const { return TVector3(x(i), y(i), z(i)); }
     float rho(int i) const { return std::hypot(x(i), y(i)); }
+    template <typename BS> float dbv(int i, const BS& bs) const { return std::hypot(x(i) - bs.x(z(i)), y(i) - bs.y(z(i))); }
 
   private:
     vfloat x_;           vfloat* p_x_;
@@ -191,6 +192,41 @@ namespace mfv {
     vfloat phi_;         vfloat* p_phi_;
     vfloat mass_;        vfloat* p_mass_;
     vfloat tkonlymass_;  vfloat* p_tkonlymass_;
+    // missing: whole rescale fit; njets shortcut?
+  };
+
+  ////
+
+  class MiniNtuple2SubNtuple : public jmt::INtuple {
+  public:
+    MiniNtuple2SubNtuple();
+    virtual void clear();
+    virtual void write_to_tree(TTree*);
+    virtual void read_from_tree(TTree*);
+    virtual void copy_vectors() {}
+
+    void set(uchar vcode) {
+      vcode_ = vcode;
+    }
+
+    uchar vcode() const { return vcode_; }
+
+    static uchar vcode(int n3, int n7, int n4, int n5)  {
+      uchar code = 0;
+      if (n3 == 1) code |= 0x01;
+      if (n3 >= 2) code |= 0x02;
+      if (n7 == 1) code |= 0x04;
+      if (n7 >= 2) code |= 0x08;
+      if (n4 == 1) code |= 0x10;
+      if (n4 >= 2) code |= 0x20;
+      if (n5 == 1) code |= 0x40;
+      if (n5 >= 2) code |= 0x80;
+      return code;
+    }
+
+  private:
+    uchar vcode_;
+    // missing: trig bits; met, leptons?
   };
 
   ////
@@ -234,6 +270,29 @@ namespace mfv {
     float move_x_;
     float move_y_;
     float move_z_;
+  };
+
+  //////////////////////////////////////////////////////////////////////
+
+  class MiniNtuple2 : public jmt::TrackingAndJetsNtuple {
+  public:
+    MiniNtuple2() { clear(); }
+    virtual void clear() { jmt::TrackingAndJetsNtuple::clear(); gentruth().clear(); vertices().clear(); event().clear(); }
+    virtual void write_to_tree(TTree* t) { jmt::TrackingAndJetsNtuple::write_to_tree(t); gentruth().write_to_tree(t); vertices().write_to_tree(t); event().write_to_tree(t); }
+    virtual void read_from_tree(TTree* t) { jmt::TrackingAndJetsNtuple::read_from_tree(t); gentruth().read_from_tree(t); vertices().read_from_tree(t); event().read_from_tree(t); }
+    virtual void copy_vectors() { jmt::TrackingAndJetsNtuple::copy_vectors(); gentruth().copy_vectors(); vertices().copy_vectors(); event().copy_vectors(); }
+
+    GenTruthSubNtuple& gentruth() { return gentruth_; }
+    VerticesSubNtuple& vertices() { return vertices_; }
+    MiniNtuple2SubNtuple& event() { return event_; }
+    const GenTruthSubNtuple& gentruth() const { return gentruth_; }
+    const VerticesSubNtuple& vertices() const { return vertices_; }
+    const MiniNtuple2SubNtuple& event() const { return event_; }
+
+  private:
+    GenTruthSubNtuple gentruth_;
+    VerticesSubNtuple vertices_;
+    MiniNtuple2SubNtuple event_;
   };
 
   ////

@@ -225,6 +225,24 @@ namespace mfv {
 
   ////
 
+  MiniNtuple2SubNtuple::MiniNtuple2SubNtuple() {
+    clear();
+  }
+
+  void MiniNtuple2SubNtuple::clear() {
+    vcode_ = 0;
+  }
+
+  void MiniNtuple2SubNtuple::write_to_tree(TTree* t) {
+    t->Branch("vcode", &vcode_);
+  }
+
+  void MiniNtuple2SubNtuple::read_from_tree(TTree* t) {
+    t->SetBranchAddress("vcode", &vcode_);
+  }
+
+  ////
+
   MovedTracksSubNtuple::MovedTracksSubNtuple() {
     clear();
   }

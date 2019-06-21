@@ -48,14 +48,30 @@ def prepare_vis(process, mode, settings, output_commands):
 
 def minitree_only(process, mode, settings, output_commands):
     if mode:
-        del process.out
-        del process.outp
+        mode = str(mode)
+
+        if 'both' not in mode:
+            del process.out
+            del process.outp
+
+        if '2' in mode:
+            from JMTucker.Tools.NtupleFiller_cff import jmtNtupleFiller_pset
+            process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
+            process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
+            vertices = 'mfvSelectedVerticesTightMinNtk3' if 'tight' in mode else 'mfvSelectedVerticesLoose'
+            process.mfvAnalysisCuts.vertex_src = vertices
+            process.mfvAnalysisCuts.min_nvertex = 1
+            process.mfvMiniTree2 = cms.EDAnalyzer('MFVMiniTreer2', jmtNtupleFiller_pset(settings.is_miniaod), vertices_src = cms.InputTag(vertices))
+            weight_obj = process.jmtWeightMiniAOD if settings.is_miniaod else process.jmtWeight
+            process.p *= weight_obj * getattr(process, vertices) * process.mfvAnalysisCuts * process.mfvMiniTree2
+        else:
+            process.load('JMTucker.MFVNeutralino.MiniTree_cff')
+            process.mfvWeight.throw_if_no_mcstat = False
+            for p in process.pMiniTree, process.pMiniTreeNtk3, process.pMiniTreeNtk4, process.pMiniTreeNtk3or4:
+                p.insert(0, process.pmcStat._seq)
+                p.insert(0, process.p._seq)
+
         process.TFileService.fileName = 'minintuple.root'
-        process.load('JMTucker.MFVNeutralino.MiniTree_cff')
-        process.mfvWeight.throw_if_no_mcstat = False
-        for p in process.pMiniTree, process.pMiniTreeNtk3, process.pMiniTreeNtk4, process.pMiniTreeNtk3or4:
-            p.insert(0, process.pmcStat._seq)
-            p.insert(0, process.p._seq)
 
 def event_filter(process, mode, settings, output_commands, **kwargs):
     if mode:
