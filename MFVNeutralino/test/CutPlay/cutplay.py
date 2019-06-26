@@ -1,25 +1,30 @@
-import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 use_weights = True
+ntracks = None
 single_vertex = False
 do_nominal = False
 do_distances = False
 do_clusters = False
 
-dataset = 'ntuplev20m'
-batch_name = 'CutPlayV20m'
+dataset = 'ntuplev25m'
+batch_name = 'CutPlayV25m'
+if ntracks:
+    batch_name += '_%iT' % ntracks
 if single_vertex:
     batch_name += '_1V'
 
 sample_files(process, 'qcdht2000_2017', dataset, 1)
 process.TFileService.fileName = 'cutplay.root'
+cmssw_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 vtx_sel = process.mfvSelectedVerticesTight
 ana_sel = process.mfvAnalysisCuts
 
+if ntracks:
+    vtx_sel.min_ntracks = vtx_sel.max_ntracks = ntracks
 if single_vertex:
     ana_sel.min_nvertex = 1
 
@@ -31,6 +36,10 @@ changes = []
 changes.append(('nm1', '', ''))
 
 if do_nominal:
+    for i in xrange(0,50):
+        changes.append(('zoutlierX%i' % i, 'max_zoutlier = %i' % i, ''))
+    for i in xrange(0,50):
+        changes.append(('zoutliermaxdphi0piX%i' % i, 'max_zoutlier_maxdphi0pi = %i' % i, ''))
     for i in xrange(0,200):
         changes.append(('thetaoutlierX%i' % i, 'max_thetaoutlier = %i' % i, ''))
     for i in xrange(0,10):
@@ -120,13 +129,9 @@ SimpleTriggerEfficiency.setup_endpath(process, weight_src='mfvWeight' if use_wei
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
-    from JMTucker.Tools.Year import year
-    from JMTucker.Tools import Samples
 
-    if year == 2017:
-        samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.all_signal_samples_2017
-
-    set_splitting(samples, dataset, 'minitree', data_json='../jsons/ana_2017.json')
+    samples = pick_samples(dataset)
+    set_splitting(samples, dataset, 'minitree', data_json=json_path('ana_2017p8_1pc.json'))
 
     cs = CondorSubmitter(batch_name,
                          ex = year,
