@@ -111,6 +111,8 @@ private:
   const int max_npvswtracksshared;
   const double min_thetaoutlier;
   const double max_thetaoutlier;
+  const double max_zoutlier;
+  const double max_zoutlier_maxdphi0pi;
 
   const bool use_cluster_cuts;
   const int min_nclusters;
@@ -208,6 +210,8 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     max_npvswtracksshared(cfg.getParameter<int>("max_npvswtracksshared")),
     min_thetaoutlier(cfg.getParameter<double>("min_thetaoutlier")),
     max_thetaoutlier(cfg.getParameter<double>("max_thetaoutlier")),
+    max_zoutlier(cfg.getParameter<double>("max_zoutlier")),
+    max_zoutlier_maxdphi0pi(cfg.getParameter<double>("max_zoutlier_maxdphi0pi")),
     use_cluster_cuts(cfg.getParameter<bool>("use_cluster_cuts")),
     min_nclusters(cfg.getParameter<int>("min_nclusters")),
     max_nsingleclusters(cfg.getParameter<int>("max_nsingleclusters")),
@@ -340,6 +344,26 @@ bool MFVVertexSelector::use_vertex(const bool is_mc, const MFVVertexAux& vtx, co
     }
     if (mx < min_thetaoutlier || mx > max_thetaoutlier)
       return false;
+  }
+
+  if (max_zoutlier < 1e9 || max_zoutlier_maxdphi0pi < 1e9) {
+    distrib_calculator s(vtx.track_vz);
+
+    double mx = 0;
+    for (size_t i = 0, ie = vtx.ntracks(); i < ie; ++i) {
+      const double v = fabs(vtx.track_vz[i] - s.avg[i]) / s.rms[i];
+      if (v > mx) mx = v;
+    }
+
+    //printf("vtx ntk %i dist %f max zoutlier %f\n", vtx.ntracks(), vtx.bs2ddist, mx);
+    if (max_zoutlier < 1e9 && mx > max_zoutlier)
+      return false;
+
+    if (max_zoutlier_maxdphi0pi < 1e9 && mx > max_zoutlier_maxdphi0pi) {
+      const double maxdphi = vtx.trackpairdphimax();
+      if (fabs(maxdphi) < 0.25 || fabs(maxdphi - M_PI) < 0.25)
+        return false;
+    }
   }
 
   return 
