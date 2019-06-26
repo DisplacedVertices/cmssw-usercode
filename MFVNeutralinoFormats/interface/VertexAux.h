@@ -461,9 +461,9 @@ struct MFVVertexAux {
     return a / c;
   }
 
-  float _rms(const std::vector<float>& v, const bool filter=true) const {
+  float _rms(const std::vector<float>& v, const bool filter=true, const double aavg=-1e99) const {
     if (v.size() == 0) return 0.f;
-    float avg = _avg(v, filter);
+    const float avg = aavg > -1e99 ? aavg : _avg(v, filter);
     std::vector<float> v2;
     for (size_t i = 0, ie = v.size(); i < ie; ++i)
       if (!filter || use_track(i))
@@ -477,7 +477,7 @@ struct MFVVertexAux {
       : min(a->_min(v, filter)),
         max(a->_max(v, filter)),
         avg(a->_avg(v, filter)),
-        rms(a->_rms(v, filter))
+        rms(a->_rms(v, filter, avg))
     {}
   };
 
