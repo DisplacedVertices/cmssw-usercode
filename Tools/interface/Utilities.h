@@ -83,6 +83,8 @@ struct distrib_calculator {
   // ith value of these are the corresponding stat with the ith value
   // of the n-length input removed, value n is the stat with no input
   // values removed
+  const size_t n;
+  const bool rmscorr;
   std::vector<double> min; 
   std::vector<double> max;
   std::vector<double> med;
@@ -120,11 +122,10 @@ struct distrib_calculator {
 
     for (auto a : v)
       rms += pow(a - avg, 2);
-    rms = sqrt(rms/m); //m-1
+    rms = sqrt(rms/(rmscorr ? m-1 : m)); //m-1
   }
 
-  distrib_calculator(const std::vector<double>& v) {
-    const size_t n = v.size();
+  distrib_calculator(const std::vector<double>& v, bool rmscorr_=false) : n(v.size()), rmscorr(rmscorr_) {
     min.assign(n+1, 0);
     max.assign(n+1, 0);
     med.assign(n+1, 0);
