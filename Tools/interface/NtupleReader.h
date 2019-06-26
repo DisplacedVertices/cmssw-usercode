@@ -54,6 +54,7 @@ namespace jmt {
         ("output-file,o", po::value<std::string>(&out_fn_)        ->default_value("hists.root"), "the output file")
         ("tree-path,t",   po::value<std::string>(&tree_path_)     ->default_value(tree_path),    "the tree path")
         ("json,j",        po::value<std::string>(&json_),                                        "lumi mask json file for data")
+        ("quiet,q",       po::value<bool>       (&quiet_)         ->default_value(false),        "whether to be quiet")
         ("num-chunks,n",  po::value<int>        (&num_chunks_)    ->default_value(1),            "split the tree entries into this many chunks")
         ("which-chunk,w", po::value<int>        (&which_chunk_)   ->default_value(0),            "chunk to run")
         ("weights",       po::value<bool>       (&use_weights_)   ->default_value(true),         "whether to use any other weights, including those in the tree")
@@ -92,6 +93,7 @@ namespace jmt {
                 << " out_fn: " << out_fn_
                 << " tree_path: " << tree_path_
                 << " json: " << (json_ != "" ? json_ : "none")
+                << " quiet: " << quiet_
                 << " num_chunks: " << num_chunks_
                 << " which_chunk: " << which_chunk_
                 << " weights: " << use_weights_
@@ -102,7 +104,7 @@ namespace jmt {
     }
 
     bool init(bool for_copy=false) {
-      time_.Start();
+      if (!quiet_) time_.Start();
 
       jmt::set_root_style();
 
@@ -156,7 +158,10 @@ namespace jmt {
         h_npu_ = new TH1D("h_npu", ";# PU;events/1", 100, 0, 100);
       }
 
-      std::cout << "init time: "; time_.Print();
+      if (!quiet_) {
+        std::cout << "init time: ";
+        time_.Print();
+      }
       return true;
     }
 
@@ -172,15 +177,15 @@ namespace jmt {
 
     typedef std::pair<bool,double> fcn_ret_t;
     void loop(std::function<fcn_ret_t()> fcn) { 
-      time_.Start();
+      if (!quiet_) time_.Start();
       entry_t notskipped = 0, nnegweight = 0;
       entry_t print_per = entries_run_ / 20;
       if (print_per == 0) print_per = 1;
-      printf("tree has %llu entries; running on %llu-%llu\n", nentries_, entry_start_, entry_end_-1);
+      if (!quiet_) printf("tree has %llu entries; running on %llu-%llu\n", nentries_, entry_start_, entry_end_-1);
       for (entry_t jj = entry_start_; jj < entry_end_; ++jj) {
         if (t_->LoadTree(jj) < 0) break;
         if (t_->GetEntry(jj) <= 0) continue;
-        if (jj % print_per == 0) { printf("\r%llu", jj); fflush(stdout); }
+        if (!quiet_ && jj % print_per == 0) { printf("\r%llu", jj); fflush(stdout); }
 
         if (!is_mc() && ll_ && !ll_->contains(nt_->base()))
           continue;
@@ -199,8 +204,11 @@ namespace jmt {
         if (h_npu_) h_npu_->Fill(nt_->base().npu(), w);
       }
 
-      printf("\r%llu events done, %llu not skipped, %llu with negative weights\n", entries_run_, notskipped, nnegweight);
-      printf("loop time: "); time_.Print(); printf("cpu time per not-skipped event: %.3g\n", time_.CpuTime() / notskipped);
+      printf("\rfinished %s, %llu events done, %llu not skipped, %llu with negative weights\n", in_fn_.c_str(), entries_run_, notskipped, nnegweight);
+      if (!quiet_) {
+        printf("cpu time per not-skipped event: %.3g, loop time:", time_.CpuTime() / notskipped);
+        time_.Print();
+      }
     }
 
   private:
@@ -210,6 +218,7 @@ namespace jmt {
     std::string out_fn_;
     std::string tree_path_;
     std::string json_;
+    bool quiet_;
     int num_chunks_;
     int which_chunk_;
     bool use_weights_;
