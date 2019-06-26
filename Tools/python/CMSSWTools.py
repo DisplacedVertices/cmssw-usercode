@@ -140,7 +140,13 @@ def file_event_from_argv(process, verbose=False):
     files = []
     nums = []
     for arg in sys.argv[1:]:
-        if arg.startswith('sample='):
+        if arg.startswith('eventsfile='):
+            for line in open(arg.replace('eventsfile=', '')):
+                x = line.strip().split()
+                files.append(x[-1])
+                nums.append(tuple(int(y) for y in x[:3]))
+            break
+        elif arg.startswith('sample='):
             arg = arg.replace('sample=', '')
             assert ':' in arg
             if ',' in arg:
@@ -160,6 +166,7 @@ def file_event_from_argv(process, verbose=False):
                 nums.append(int(arg))
             except ValueError:
                 pass
+
     if files:
         files_ = []
         for file in files:
@@ -174,16 +181,21 @@ def file_event_from_argv(process, verbose=False):
         process.source.fileNames = files
     elif files is not None and verbose:
         print 'file_event_from_argv warning: no filename found'
+
     l = len(nums)
-    if l == 1:
-        if verbose:
-            print 'maxEvents from argv:', nums[0]
-        process.maxEvents.input = nums[0]
-    elif l == 2 or l == 3:
-        nums = tuple(nums)
-        if verbose:
-            print 'set_events from argv:', nums
-        set_events(process, [nums])
+    lt = set(type(x) for x in nums)
+    if lt == set([int]):
+        if l == 1:
+            if verbose:
+                print 'maxEvents from argv:', nums[0]
+            process.maxEvents.input = nums[0]
+        elif l == 2 or l == 3:
+            nums = tuple(nums)
+            if verbose:
+                print 'set_events from argv:', nums
+            set_events(process, [nums])
+    elif lt == set([tuple]):
+        set_events(process, nums)
     elif verbose:
         print 'file_event_from_argv warning: did not understand event number'
 
