@@ -194,11 +194,14 @@ def cmssw_from_argv(process, verbose=False):
         report_every(process, 1)
     if 'tracer' in sys.argv:
         tracer(process)
-    for arg in sys.argv:
-        if arg.startswith('tfs='):
-            tfileservice(process, arg.replace('tfs=',''))
-            sys.argv.remove(arg)
-            break
+    def doif(x, fcn):
+        for a in sys.argv:
+            if a.startswith(x + '='):
+                fcn(a.replace(x + '=', ''))
+                sys.argv.remove(a)
+                break
+    doif('name', lambda s: process.setName_(s))
+    doif('tfs',  lambda s: tfileservice(process, s))
     file_event_from_argv(process, verbose)
 
 def find_output_files(process):
