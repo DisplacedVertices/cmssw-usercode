@@ -1,18 +1,15 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 use_weights = True
-ntracks = None
-single_vertex = False
+ntracks, nvtx = ntracks_nvtx = 5,2 #3,1
 do_nominal = False
 do_distances = False
 do_clusters = False
 
 dataset = 'ntuplev25m'
 batch_name = 'CutPlayV25m'
-if ntracks:
-    batch_name += '_%iT' % ntracks
-if single_vertex:
-    batch_name += '_1V'
+if ntracks_nvtx != (5, 2):
+    batch_name += '_%it%iv' % (ntracks, nvtx)
 
 sample_files(process, 'qcdht2000_2017', dataset, 1)
 process.TFileService.fileName = 'cutplay.root'
@@ -23,10 +20,9 @@ process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 vtx_sel = process.mfvSelectedVerticesTight
 ana_sel = process.mfvAnalysisCuts
 
-if ntracks:
+if ntracks != 5:
     vtx_sel.min_ntracks = vtx_sel.max_ntracks = ntracks
-if single_vertex:
-    ana_sel.min_nvertex = 1
+ana_sel.min_nvertex = nvtx
 
 def pize(f,sz):
     fmt = '%.' + str(sz) + 'f'
@@ -130,7 +126,7 @@ SimpleTriggerEfficiency.setup_endpath(process, weight_src='mfvWeight' if use_wei
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
-    samples = pick_samples(dataset)
+    samples = pick_samples(dataset, all_signal=(ntracks == 5 and nvtx == 2), data=False)
     set_splitting(samples, dataset, 'minitree', data_json=json_path('ana_2017p8_1pc.json'))
 
     cs = CondorSubmitter(batch_name,
