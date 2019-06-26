@@ -347,7 +347,7 @@ bool MFVVertexSelector::use_vertex(const bool is_mc, const MFVVertexAux& vtx, co
   }
 
   if (max_zoutlier < 1e9 || max_zoutlier_maxdphi0pi < 1e9) {
-    distrib_calculator s(vtx.track_vz);
+    distrib_calculator s(vtx.track_vz, true);
 
     double mx = 0;
     for (size_t i = 0, ie = vtx.ntracks(); i < ie; ++i) {
@@ -355,7 +355,7 @@ bool MFVVertexSelector::use_vertex(const bool is_mc, const MFVVertexAux& vtx, co
       if (v > mx) mx = v;
     }
 
-    //printf("vtx ntk %i dist %f max zoutlier %f\n", vtx.ntracks(), vtx.bs2ddist, mx);
+    //{ const double maxdphi = vtx.trackpairdphimax(); printf("vtx ntk %i dist %f max zoutlier %f maxdphi %f isdphi0pi %i\n", vtx.ntracks(), vtx.bs2ddist, mx, maxdphi, fabs(maxdphi) < 0.25 || fabs(maxdphi - M_PI) < 0.25); }
     if (max_zoutlier < 1e9 && mx > max_zoutlier)
       return false;
 
