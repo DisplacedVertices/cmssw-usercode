@@ -141,7 +141,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   const char* file_path; //which filepath?
   if (p.only_10pc()) {
-    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV25m/10pc";
+    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV25mv3";
   } else {
     file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV25m";
   }
@@ -700,7 +700,7 @@ int main(int argc, const char* argv[]) {
   //for (const char* year : {"2017", "2018", "2017p8", "2017B", "2017C", "2017D", "2017E", "2017F"}) {
   for (const char* year : {"2017", "2018"}) {
     //for (int ntracks : {3, 4, 5, 7}) {
-    for (int ntracks : {3}) {
+    for (int ntracks : {3, 4}) {
       ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks).is_mc(false).only_10pc(true);
       const char* version = "v25m";
       construct_dvvc(pars2,                    TString::Format("2v_from_jets_data_%s_%dtrack_default_%s.root", year, ntracks, version));

@@ -2,31 +2,32 @@ from JMTucker.Tools.ROOTTools import *
 from statmodel import ebins
 ROOT.TH1.AddDirectory(0)
 
-do_btag = False
-is_mc = True
-only_10pc = False
+do_btag = True
+is_mc = False
+only_10pc = True
 year = '2017'
 version = 'V25m'
 set_style()
 ps = plot_saver(plot_dir('closure_%s%s%s_%s' % (version.capitalize(), '' if is_mc else '_data', '_10pc' if only_10pc else '', year)), size=(700,700), root=False, log=False)
 
-fns = ['2v_from_jets%s_%s_3track_default_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_7track_default_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_4track_default_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_5track_default_%s.root' % ('' if is_mc else '_data', year, version)]
+fns = ['2v_from_jets%s_%s_3track_default_%s.root' % ('' if is_mc else '_data', year, version), 
+       #'2v_from_jets%s_%s_7track_default_%s.root' % ('' if is_mc else '_data', year, version), 
+       '2v_from_jets%s_%s_4track_default_%s.root' % ('' if is_mc else '_data', year, version), 
+       #'2v_from_jets%s_%s_5track_default_%s.root' % ('' if is_mc else '_data', year, version)
+       ]
 
 # for overlaying the btag-based template
-fns_btag = ['2v_from_jets%s_%s_3track_btag_corrected_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_7track_btag_corrected_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_4track_btag_corrected_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_5track_btag_corrected_%s.root' % ('' if is_mc else '_data', year, version)]
+fns_btag = ['2v_from_jets%s_%s_3track_btag_corrected_%s.root' % ('' if is_mc else '_data', year, version), 
+            #'2v_from_jets%s_%s_7track_btag_corrected_%s.root' % ('' if is_mc else '_data', year, version), 
+            '2v_from_jets%s_%s_4track_btag_corrected_%s.root' % ('' if is_mc else '_data', year, version), 
+            #'2v_from_jets%s_%s_5track_btag_corrected_%s.root' % ('' if is_mc else '_data', year, version)
+            ]
 
-ntk = ['3-track', '4-track-3-track', '4-track', '5-track']
-names = ['3-track x 3-track', '4-track x 3-track', '4-track x 4-track', '#geq 5-track x #geq 5-track']
-
-n2v_year = {'2017': [651., 136., 2.22, 1.],
-            '2018': [426., 79., 4.85, 1.],
-            '2017p8': [1077., 215., 7.06, 1.]}
-n2verr_year = {'2017': [53., 24., 1.14, 0.6],
-               '2018': [50., 21., 2.35, 0.6],
-               '2017p8': [72., 31., 2.61, 0.6]}
-
-n2v = n2v_year[year]
-n2verr = n2verr_year[year]
+ntk = []
+for fn in fns:
+    for x in fn.split('_'):
+        if 'track' in x:
+            ntk.append(int(x[:1]))
 
 def errprop(val0, val1, err0, err1):
     if val0 == 0 and val1 == 0:
@@ -38,27 +39,23 @@ def errprop(val0, val1, err0, err1):
     else:
         return ((err0 / val0)**2 + (err1 / val1)**2)**0.5
 
-def scale_and_draw_template(template, n2v, i, simulated, color) :
+def scale_and_draw_template(template, i, simulated, color) :
     template.SetStats(0)
     template.SetLineColor(color)
     template.SetLineWidth(2)
-    if is_mc:
-        ratio = n2v[i] / template.Integral()
-
+    if simulated.Integral() > 0:
         newerrarray = []
+        simerr = ROOT.Double(0)
+        sim = simulated.IntegralAndError(0, simulated.GetNbinsX(), simerr)
         for bin in range(template.GetNbinsX() + 1):
-            newerr = template.GetBinContent(bin) / template.Integral() * n2verr[i]
+            newerr = template.GetBinContent(bin) / template.Integral() * simerr
             newerrarray.append(newerr)
-        template.Scale(ratio)
+        template.Scale(sim/template.Integral())
         for bin, err in enumerate(newerrarray):
             template.SetBinError(bin, err)
     else:
-        if simulated.Integral() > 0:
-            template.Scale(simulated.Integral()/template.Integral())
-        else:
-            template.Scale(1./template.Integral())
+        template.Scale(1./template.Integral())
     template.Draw('hist sames')
-
 
 def make_closure_plots(i):
     dvv_closure = ('h_2v_dvv', 'h_c1v_dvv')
@@ -69,16 +66,11 @@ def make_closure_plots(i):
         simulated.SetStats(0)
         simulated.SetLineColor(ROOT.kBlue)
         simulated.SetLineWidth(2)
-        if is_mc:
-            if simulated.Integral() > 0:
-                simulated.Scale(n2v[i]/simulated.Integral())
-        else:
-            simulated.SetMaximum(0.4)
         simulated.SetMinimum(0)
         simulated.Draw()
 
         template = ROOT.TFile(fns[i]).Get(closure[1])
-        scale_and_draw_template(template, n2v, i, simulated, ROOT.kRed)
+        scale_and_draw_template(template, i, simulated, ROOT.kRed)
 
         uncertband = template.Clone('uncertband')
         uncertband.SetFillColor(ROOT.kRed-3)
@@ -92,7 +84,7 @@ def make_closure_plots(i):
 
         if do_btag :
             template_btag = ROOT.TFile(fns_btag[i]).Get(closure[1])
-            scale_and_draw_template(template_btag, n2v, i, simulated, ROOT.kGreen+2)
+            scale_and_draw_template(template_btag, i, simulated, ROOT.kGreen+2)
 
             uncertband_btag = template_btag.Clone('uncertband_btag')
             uncertband_btag.SetFillColor(ROOT.kGreen-3)
@@ -102,7 +94,7 @@ def make_closure_plots(i):
 
         l1.SetFillColor(0)
         l1.Draw()
-        ps.save(ntk[i] if 'phi' not in closure[0] else '%s_dphi' % ntk[i])
+        ps.save('%s-track' % ntk[i] if 'phi' not in closure[0] else '%s_dphi' % ntk[i])
 
 def calculate_ratio(x, y, xerr, yerr):
     y_ = y
@@ -142,9 +134,9 @@ def get_norm_frac_uncert(bins, total):
     norm_sum = 0.
     for bin in bins:
         norm_sum += (bin[1] / total)**2
-    
+
     for bin in bins:
-        frac_uncert = ((1 - 2 * bin[0] / total) * (bin[1] / total)**2 + (bin[0] / total)**2 * norm_sum)**0.5
+        frac_uncert = ((1 - bin[0] / total) * (bin[1] / total)**2 + (bin[0] / total)**2 * norm_sum)**0.5
         allbins.append((bin[0] / total, frac_uncert))
     return allbins
 
@@ -155,16 +147,16 @@ def get_ratios(nums, dens):
         ratios.append((r_bin, r_bin_err))
     return ratios
 
-for i, ntracks in enumerate([3,7,4,5]):
+for i, ntracks in enumerate(ntk):
     make_closure_plots(i)
 
     simulated = ROOT.TFile(fns[i]).Get('h_2v_dvv')
-    constructed = ROOT.TFile(fns[i]).Get('h_c1v_dvv')
+    constructed = ROOT.TFile(fns_btag[i]).Get('h_c1v_dvv')
 
-    if is_mc:
-        if simulated.Integral() > 0:
-            simulated.Scale(n2v[i] / simulated.Integral())
-        constructed.Scale(n2v[i] / constructed.Integral())
+    if simulated.Integral() > 0:
+        constructed.Scale(simulated.Integral()/constructed.Integral())
+    else:
+        constructed.Scale(1./constructed.Integral())
 
     sim_total, sim_total_err = get_integral(simulated)
     sim_bins = get_bin_integral_and_stat_uncert(simulated)
@@ -182,8 +174,8 @@ for i, ntracks in enumerate([3,7,4,5]):
     sim_norm = tuple(x for bin in sim_bin_norm for x in bin)
     con_norm = tuple(x for bin in con_bin_norm for x in bin)
     rat = tuple(x for bin in ratios for x in bin)
-    
-    print ntk[i]
+
+    print '%s-track' % ntk[i]
     print '   simulated events: %7.2f +/- %5.2f, 0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % sim
     print ' constructed events: %7.2f +/- %5.2f, 0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % con
     print '     dVV normalized:                    0-400 um: %7.3f +/- %5.3f, 400-700 um: %6.3f +/- %5.3f, 700-40000 um: %6.3f +/- %5.3f' % sim_norm

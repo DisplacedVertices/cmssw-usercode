@@ -203,12 +203,12 @@ int main(int, char**) {
                                        //  2017                   2018                  2017+2018
   const double default_n1v[4][3][3] = {{{  89055,  8827, 696 }, { 88730, 9850, 665 }, { 177773, 18672, 1363 }},  //MC scaled to int. lumi.
                                        {{  20109,  1987, 160 }, { 12188, 1292, 100 }, {  30389,  3051,  249 }},  //MC effective
-                                       {{  11984,     1,   1 }, { 11735, 1, 1 }, { 1, 1, 1 }},  //data 10%
+                                       {{  11975,  1558,   1 }, { 11710, 1437, 1 }, { 1, 1, 1 }},  //data 10%
                                        {{      1,     1,   1 }, { 1, 1, 1 }, { 1, 1, 1 }}}; //data 100%
 
   const double default_n2v[4][3][3] = {{{    651,     2,   1 }, { 426, 5, 1 }, { 1077, 7, 1 }},
                                        {{    151,     4,   1 }, {  74, 4, 1 }, {  222, 7, 1 }},
-                                       {{    110,     1,   1 }, {  96, 1, 1 }, { 1, 1, 1 }},
+                                       {{    110,     3,   1 }, {  96, 0, 1 }, { 1, 1, 1 }},
                                        {{      1,     1,   1 }, { 1, 1, 1 }, { 1, 1, 1 }}};
 
   const int inst = env.get_int("inst", 0);
@@ -229,7 +229,7 @@ int main(int, char**) {
   const long ntrue_2v = env.get_long("ntrue_2v", 1000000L);
   const double oversample = env.get_double("oversample", 20);
   const std::string year_str[3] = {"2017","2018","2017p8"};
-  const std::string rho_compare_fn = env.get_string("rho_compare_fn", "/uscms_data/d3/dquach/crab3dirs/HistosV25m/background_"+year_str[year_index]+".root");
+  const std::string rho_compare_fn = env.get_string("rho_compare_fn", "/uscms_data/d3/dquach/crab3dirs/HistosV25mv2/background_"+year_str[year_index]+".root");
   rho_tail_norm = env.get_long_double("rho_tail_norm", 1L);
   rho_tail_slope = env.get_long_double("rho_tail_slope", 1L);
   phi_c = env.get_double("phi_c", 1.42);

@@ -30,14 +30,14 @@ def cmd_merge_btags_nobtags():
             tuple_ntracks_weights_bcjet_SFs_down     = (3,'0.855,0.145'), (4,'0.876,0.124'), (5,'0.939,0.061'), (7,'0.857,0.143')
             tuple_ntracks_weights_ljet_SFs_up        = (3,'0.831,0.169'), (4,'0.854,0.146'), (5,'0.924,0.076'), (7,'0.832,0.168')
             tuple_ntracks_weights_ljet_SFs_down      = (3,'0.832,0.168'), (4,'0.853,0.147'), (5,'0.925,0.075'), (7,'0.834,0.166')
-            tuple_ntracks_weights_data               = (3,'0.830,0.170'),
+            tuple_ntracks_weights_data               = (3,'0.830,0.170'), (4,'0.857,0.143')
         elif year == '2018' :
             tuple_ntracks_weights                    = (3,'0.860,0.140'), (4,'0.899,0.101'), (5,'0.968,0.032'), (7,'0.861,0.139')
             tuple_ntracks_weights_bcjet_SFs_up       = (3,'0.844,0.156'), (4,'0.886,0.114'), (5,'0.961,0.039'), (7,'0.847,0.153')
             tuple_ntracks_weights_bcjet_SFs_down     = (3,'0.877,0.123'), (4,'0.914,0.086'), (5,'0.976,0.024'), (7,'0.879,0.121')
             tuple_ntracks_weights_ljet_SFs_up        = (3,'0.861,0.139'), (4,'0.901,0.099'), (5,'0.969,0.031'), (7,'0.863,0.137')
             tuple_ntracks_weights_ljet_SFs_down      = (3,'0.859,0.141'), (4,'0.898,0.102'), (5,'0.969,0.031'), (7,'0.861,0.139')
-            tuple_ntracks_weights_data               = (3,'0.859,0.141'),
+            tuple_ntracks_weights_data               = (3,'0.860,0.140'), (4,'0.902,0.098')
         else :
             print("Unknown year (%s)! Exiting." % year)
             sys.exit()
@@ -87,7 +87,6 @@ def cmd_merge_btags_nobtags():
             cmd = 'mergeTFileServiceHistograms -w %s -i %s -o 2v_from_jets_data_%s_%dtrack_btag_corrected_%s.root' % (weights, ' '.join(files), year, ntracks, _version)
             print cmd
             os.system(cmd)
-
 
         # for the SF variations
         for syst in ['vary_bcjet_SFs_up', 'vary_bcjet_SFs_down', 'vary_ljet_SFs_up', 'vary_ljet_SFs_down'] :
