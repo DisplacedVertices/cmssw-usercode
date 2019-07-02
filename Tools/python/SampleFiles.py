@@ -49,6 +49,12 @@ def _add_ds(ds, d, allow_overwrite=False):
         d2[(k,ds)] = d[k]
     _add(d2, allow_overwrite)
 
+def _add_single_files(ds, path, l, allow_overwrite=False):
+    d = {}
+    for sample in l:
+        d[(sample,ds)] = (1, [os.path.join(path, sample + '.root')])
+    _add(d, allow_overwrite)
+
 def _fromnumlist(path, numlist, but=[], fnbase='ntuple', add=[], numbereddirs=True):
     return add + [path + ('/%04i' % (i/1000) if numbereddirs else '') + '/%s_%i.root' % (fnbase, i) for i in numlist if i not in but]
 
@@ -382,25 +388,62 @@ _add_ds("nr_trackmoverv25mv1_tright350", {
 })
 
 
-_add_ds("nr_k0ntuplev25mv1", {
-'qcdht0700_2017': (1, ['/store/user/wsun/croncopyeos/hadded/K0NtupleV25mv1/qcdht0700_2017.root']),
-'qcdht1000_2017': (1, ['/store/user/wsun/croncopyeos/hadded/K0NtupleV25mv1/qcdht1000_2017.root']),
-'qcdht1500_2017': (1, ['/store/user/wsun/croncopyeos/hadded/K0NtupleV25mv1/qcdht1500_2017.root']),
-'qcdht2000_2017': (1, ['/store/user/wsun/croncopyeos/hadded/K0NtupleV25mv1/qcdht2000_2017.root']),
-'qcdht0700_2018': (1, ['/store/user/wsun/croncopyeos/hadded/K0NtupleV25mv1/qcdht0700_2018.root']),
-'qcdht1000_2018': (1, ['/store/user/wsun/croncopyeos/hadded/K0NtupleV25mv1/qcdht1000_2018.root']),
-'qcdht1500_2018': (1, ['/store/user/wsun/croncopyeos/hadded/K0NtupleV25mv1/qcdht1500_2018.root']),
-'qcdht2000_2018': (1, ['/store/user/wsun/croncopyeos/hadded/K0NtupleV25mv1/qcdht2000_2018.root']),
-'JetHT2017B': (1, ['/store/user/wsun/croncopyeos/hadded/K0NtupleV25mv1/JetHT2017B.root']),
-'JetHT2017C': (1, ['/store/user/wsun/croncopyeos/hadded/K0NtupleV25mv1/JetHT2017C.root']),
-'JetHT2017D': (1, ['/store/user/wsun/croncopyeos/hadded/K0NtupleV25mv1/JetHT2017D.root']),
-'JetHT2017E': (1, ['/store/user/wsun/croncopyeos/hadded/K0NtupleV25mv1/JetHT2017E.root']),
-'JetHT2017F': (1, ['/store/user/wsun/croncopyeos/hadded/K0NtupleV25mv1/JetHT2017F.root']),
-'JetHT2018A': (1, ['/store/user/wsun/croncopyeos/hadded/K0NtupleV25mv1/JetHT2018A.root']),
-'JetHT2018B': (1, ['/store/user/wsun/croncopyeos/hadded/K0NtupleV25mv1/JetHT2018B.root']),
-'JetHT2018C': (1, ['/store/user/wsun/croncopyeos/hadded/K0NtupleV25mv1/JetHT2018C.root']),
-'JetHT2018D': (1, ['/store/user/wsun/croncopyeos/hadded/K0NtupleV25mv1/JetHT2018D.root']),
-})
+_add_single_files('nr_k0ntuplev25mv1',
+                  '/store/user/wsun/croncopyeos/hadded/K0NtupleV25mv1', [
+        'qcdht0700_2017',
+        'qcdht1000_2017',
+        'qcdht1500_2017',
+        'qcdht2000_2017',
+        'qcdht0700_2018',
+        'qcdht1000_2018',
+        'qcdht1500_2018',
+        'qcdht2000_2018',
+        'JetHT2017B',
+        'JetHT2017C',
+        'JetHT2017D',
+        'JetHT2017E',
+        'JetHT2017F',
+        'JetHT2018A',
+        'JetHT2018B',
+        'JetHT2018C',
+        'JetHT2018D',
+        ])
+
+_add_single_files('nr_minintuplev25mv1',
+                  '/store/user/tucker/hadded/MiniNtupleV25m', [
+        'mfv_neu_tau000300um_M0800_2017',
+        'mfv_neu_tau000300um_M1600_2017',
+        'mfv_neu_tau000300um_M3000_2017',
+        'mfv_neu_tau001000um_M0800_2017',
+        'mfv_neu_tau001000um_M1600_2017',
+        'mfv_neu_tau001000um_M3000_2017',
+        'mfv_neu_tau010000um_M0800_2017',
+        'mfv_neu_tau010000um_M1600_2017',
+        'mfv_neu_tau010000um_M3000_2017',
+        'mfv_neu_tau030000um_M0800_2017',
+        'mfv_neu_tau030000um_M1600_2017',
+        'mfv_neu_tau030000um_M3000_2017',
+        'mfv_stopdbardbar_tau000300um_M0800_2017',
+        'mfv_stopdbardbar_tau000300um_M1600_2017',
+        'mfv_stopdbardbar_tau000300um_M3000_2017',
+        'mfv_stopdbardbar_tau001000um_M0800_2017',
+        'mfv_stopdbardbar_tau001000um_M1600_2017',
+        'mfv_stopdbardbar_tau001000um_M3000_2017',
+        'mfv_stopdbardbar_tau010000um_M0800_2017',
+        'mfv_stopdbardbar_tau010000um_M1600_2017',
+        'mfv_stopdbardbar_tau010000um_M3000_2017',
+        'mfv_stopdbardbar_tau030000um_M0800_2017',
+        'mfv_stopdbardbar_tau030000um_M1600_2017',
+        'mfv_stopdbardbar_tau030000um_M3000_2017',
+        'qcdht0700_2017',
+        'qcdht1000_2017',
+        'qcdht1500_2017',
+        'qcdht2000_2017',
+        'ttbarht0600_2017',
+        'ttbarht0800_2017',
+        'ttbarht1200_2017',
+        'ttbarht2500_2017',
+        ])
 
 ################################################################################
 
