@@ -218,7 +218,7 @@ def save_git_status(path):
                 os.rename(f, os.path.join(replaced_path, os.path.basename(f)))
     else:
         os.system('mkdir -p %s' % path)
-    os.system("git log --pretty=format:'%%H' -n 1 > %s" % os.path.join(path, 'hash'))
+    os.system("git log --pretty=tformat:'%%H' -n 1 > %s" % os.path.join(path, 'hash'))
     os.system("git status --untracked-files=all --ignored | grep -v pyc > %s" % os.path.join(path, 'status'))
     os.system('mkdir -p /tmp/%s' % os.environ['USER'])
     git_untracked_tmp_fn = tempfile.mktemp()
