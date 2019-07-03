@@ -1,7 +1,7 @@
 from JMTucker.Tools.ROOTTools import *
 
-presel_fn = '/uscms_data/d2/tucker/crab_dirs/NtupleV20m_EventHistosOnlyV2/background_2017.root'
-fn = '/uscms_data/d2/tucker/crab_dirs/HistosV20mp1/background_2017.root'
+presel_fn = '/uscms_data/d2/tucker/crab_dirs/PreselHistosV25m/background_2017.root'
+fn = '/uscms_data/d2/tucker/crab_dirs/HistosV25mv3/background_2017.root'
 
 presel_f = ROOT.TFile(presel_fn)
 f = ROOT.TFile(fn)
