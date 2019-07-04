@@ -8,7 +8,7 @@ from itertools import combinations
 import xml.etree.ElementTree as ET
 from JMTucker.Tools.LumiJSONTools import fjr2ll
 from JMTucker.Tools.general import sub_popen
-from JMTucker.Tools.hadd import hadd
+from JMTucker.Tools.hadd import HaddBatchResult, hadd
 
 class CSHelpersException(Exception):
     pass
@@ -249,6 +249,7 @@ def cs_hadd_files(working_dir, **kwargs):
 def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None, range_filter=None):
     working_dir, new_name, new_dir = cs_hadd_args(working_dir, new_name, new_dir)
     expected, files = cs_hadd_files(working_dir, range_filter=range_filter)
+    result = HaddBatchResult('condor', working_dir, new_name, new_dir, expected, files)
     print '%s: expecting %i files if all jobs succeeded' % (working_dir, expected)
 
     if pattern:
@@ -267,6 +268,7 @@ def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chun
 
     l = len(files)
     if l == 0:
+        result.success = False
         msg = 'cs_hadd: no files found in %s' % working_dir
         if raise_on_empty:
             raise CSHelpersException(msg)
@@ -278,12 +280,13 @@ def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chun
             cmd = 'xrdcp -s %s %s' % (files[0], new_name)
         else:
             cmd = 'cp %s %s' % (files[0], new_name)
-        os.system(cmd)
-        os.chmod(new_name, 0644)
+        result.success = os.system(cmd) == 0
+        if result.success:
+            os.chmod(new_name, 0644)
     else:
-        hadd(new_name, files)
+        result.success = hadd(new_name, files)
 
-    return new_name
+    return result
 
 def cs_report(wd):
     njobs = cs_njobs(wd)
