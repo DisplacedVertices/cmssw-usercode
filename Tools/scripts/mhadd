@@ -28,6 +28,8 @@ parser.add_argument('-f', '--overwrite', action='store_true', default=False,
                     help='If the output file exists, overwrite it (really, delete it before hadd ever sees it).')
 parser.add_argument('-o', '--output-dir',
                     help='Path for the output files. (Can be an xrootd url, e.g. root://cmseos.fnal.gov//store/user/tucker/outputdir.) If doing dirs of dirs, directories are created under the output dir corresponding to the basenames of the toplevel dirs. If the toplevel dirs are not unique, you will have a bad time.')
+parser.add_argument('-r', '--remove-originals', action='store_true', default=False,
+                    help='Remove the original files.')
 parser.add_argument('-v', '--verbose', action='store_true', default=False,
                     help='Print more info.')
 
@@ -126,7 +128,14 @@ def hadd_(is_crab, *args, **kwargs):
                     print colors.yellow('skipping existing file %s (which looks complete by njobs and haddlog)' % new_name)
             return
 
-    hadd(*args, **kwargs)
+    result = hadd(*args, **kwargs)
+
+    if options.remove_originals and result.success:
+        for fn in result.files:
+            if os.path.isfile(fn):
+                os.remove(fn)
+            else:
+                print 'dunno how to rm', fn
 
 
 for x in wds:
