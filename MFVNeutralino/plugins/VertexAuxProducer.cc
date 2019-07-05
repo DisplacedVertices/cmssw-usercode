@@ -22,6 +22,7 @@
 #include "JMTucker/MFVNeutralino/interface/VertexAuxSorter.h"
 #include "JMTucker/MFVNeutralino/interface/VertexTools.h"
 #include "JMTucker/Tools/interface/AnalysisEras.h"
+#include "JMTucker/Tools/interface/StatCalculator.h"
 #include "JMTucker/Tools/interface/TrackRefGetter.h"
 #include "JMTucker/Tools/interface/TrackRescaler.h"
 #include "JMTucker/Tools/interface/Utilities.h"
@@ -265,20 +266,20 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
         }
       }
 
-      distrib_calculator jetpairdeta(jetpairdetas[mfv::JByNtracks]);
+      jmt::StatCalculator jetpairdeta(jetpairdetas[mfv::JByNtracks]);
       aux.jetpairdetamin(jetpairdeta.min.back());
       aux.jetpairdetamax(jetpairdeta.max.back());
       aux.jetpairdetaavg(jetpairdeta.avg.back());
       aux.jetpairdetarms(jetpairdeta.rms.back());
 
-      distrib_calculator jetpairdr(jetpairdrs[mfv::JByNtracks]);
+      jmt::StatCalculator jetpairdr(jetpairdrs[mfv::JByNtracks]);
       aux.jetpairdrmin(jetpairdr.min.back());
       aux.jetpairdrmax(jetpairdr.max.back());
       aux.jetpairdravg(jetpairdr.avg.back());
       aux.jetpairdrrms(jetpairdr.rms.back());
 
       if (aux.njets[mfv::JByNtracks] > 0) {
-        distrib_calculator costhjetmomvtxdisp(costhjetmomvtxdisps[mfv::JByNtracks]);
+        jmt::StatCalculator costhjetmomvtxdisp(costhjetmomvtxdisps[mfv::JByNtracks]);
         aux.costhjetmomvtxdispmin(costhjetmomvtxdisp.min.back());
         aux.costhjetmomvtxdispmax(costhjetmomvtxdisp.max.back());
         aux.costhjetmomvtxdispavg(costhjetmomvtxdisp.avg.back());
@@ -373,7 +374,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
     const mfv::vertex_distances vtx_distances(sv, *gen_vertices, *beamspot, primary_vertex, p4s);
 
-    distrib_calculator costhtkmomvtxdisp(costhtkmomvtxdisps);
+    jmt::StatCalculator costhtkmomvtxdisp(costhtkmomvtxdisps);
     aux.costhtkmomvtxdispmin(costhtkmomvtxdisp.min.back());
     aux.costhtkmomvtxdispmax(costhtkmomvtxdisp.max.back());
     aux.costhtkmomvtxdispavg(costhtkmomvtxdisp.avg.back());

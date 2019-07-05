@@ -9,6 +9,7 @@
 #include "JMTucker/MFVNeutralino/interface/VertexAuxSorter.h"
 #include "JMTucker/MFVNeutralino/interface/VertexTrackClusters.h"
 #include "JMTucker/MFVNeutralino/interface/VertexTools.h"
+#include "JMTucker/Tools/interface/StatCalculator.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 //#include "JMTucker/MFVNeutralino/plugins/VertexMVAWrap.h"
 
@@ -331,7 +332,7 @@ bool MFVVertexSelector::use_vertex(const bool is_mc, const MFVVertexAux& vtx, co
     std::vector<double> thetas(n);
     for (size_t i = 0; i < n; ++i)
       thetas[i] = atan2(vtx.track_pt(i), vtx.track_pz[i]);
-    distrib_calculator s(thetas);
+    jmt::StatCalculator s(thetas);
     for (size_t i = 0; i < n; ++i) {
       const double v = fabs(thetas[i] - s.med[i]) / s.mad[i];
       if (v > mx) mx = v;
@@ -341,7 +342,7 @@ bool MFVVertexSelector::use_vertex(const bool is_mc, const MFVVertexAux& vtx, co
   }
 
   if (min_zoutlier > 0 || max_zoutlier < 1e9 || max_zoutlier_maxdphi0pi < 1e9) {
-    distrib_calculator s(vtx.track_vz, true);
+    jmt::StatCalculator s(vtx.track_vz, true);
 
     double mx = 0;
     for (size_t i = 0, ie = vtx.ntracks(); i < ie; ++i) {
