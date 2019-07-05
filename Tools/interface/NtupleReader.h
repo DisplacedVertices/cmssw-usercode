@@ -175,6 +175,14 @@ namespace jmt {
       return w;
     }
 
+    void fill(TH1* h, double x) {
+      h->Fill(x, weight());
+    }
+
+    void fill(TH2* h, double x, double y) {
+      h->Fill(x, y, weight());
+    }
+
     typedef std::pair<bool,double> fcn_ret_t;
     void loop(std::function<fcn_ret_t()> fcn) { 
       if (!quiet_) time_.Start();
