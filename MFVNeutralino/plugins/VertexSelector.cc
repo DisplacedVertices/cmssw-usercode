@@ -316,14 +316,6 @@ bool MFVVertexSelector::use_vertex(const bool is_mc, const MFVVertexAux& vtx, co
       return false;
   }
 
-  float trackpairdphimax = -1;
-  if (min_trackpairdphimax > 0)
-    for (float dphi : vtx.trackpairdphis()) {
-      dphi = fabs(dphi);
-      if (dphi > trackpairdphimax)
-        trackpairdphimax = dphi;
-    }
-
   if (min_drmin > 0 || max_drmin < 1e9 || min_drmax > 0 || max_drmax < 1e9) {
     MFVVertexAux::stats s(&vtx, vtx.trackpairdrs());
     if (s.min <  min_drmin ||
@@ -404,7 +396,7 @@ bool MFVVertexSelector::use_vertex(const bool is_mc, const MFVVertexAux& vtx, co
     vtx.trackdzerrmax() < max_trackdzerrmax &&
     vtx.trackdzerravg() < max_trackdzerravg &&
     vtx.trackdzerrrms() < max_trackdzerrrms &&
-    trackpairdphimax > min_trackpairdphimax &&
+    vtx.trackpairdphimax() > min_trackpairdphimax &&
     (max_jetpairdrmin > 1e6 || vtx.jetpairdrmin() < max_jetpairdrmin) &&
     vtx.jetpairdrmax() < max_jetpairdrmax &&
     vtx.gen2derr < max_err2d &&

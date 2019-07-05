@@ -619,14 +619,11 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     };
 
     std::vector<float> trackpairdphis = aux.trackpairdphis();
-    int npairs = trackpairdphis.size();
-    for (int i = 0; i < npairs; ++i) {
-      trackpairdphis[i] = fabs(trackpairdphis[i]);
-    }
     std::sort(trackpairdphis.begin(), trackpairdphis.end());
-    v["trackpairdphimax"] = 0 > npairs - 1 ? -1 : trackpairdphis[npairs-1-0];
-    v["trackpairdphimaxm1"] = 1 > npairs - 1 ? -1 : trackpairdphis[npairs-1-1];
-    v["trackpairdphimaxm2"] = 2 > npairs - 1 ? -1 : trackpairdphis[npairs-1-2];
+    const size_t ntrackpairs = trackpairdphis.size();
+    v["trackpairdphimax"]   = ntrackpairs < 1 ? -1 : trackpairdphis[ntrackpairs-1];
+    v["trackpairdphimaxm1"] = ntrackpairs < 2 ? -1 : trackpairdphis[ntrackpairs-2];
+    v["trackpairdphimaxm2"] = ntrackpairs < 3 ? -1 : trackpairdphis[ntrackpairs-3];
 
     std::vector<double> jetdeltaphis;
     for (int i = 0; i < 4; ++i) {

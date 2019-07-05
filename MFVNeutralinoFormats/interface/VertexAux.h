@@ -604,7 +604,7 @@ struct MFVVertexAux {
         if (use_track(i))
           for (size_t j = i+1, je = n; j < je; ++j)
             if (use_track(j))
-              v.push_back(reco::deltaPhi(track_phi[i], track_phi[j]));
+              v.push_back(fabs(reco::deltaPhi(track_phi[i], track_phi[j])));
     return v;
   }
 
