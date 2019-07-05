@@ -68,16 +68,6 @@ uchar uint2uchar_clamp(unsigned x);
 void inc_uchar(uchar& x);
 void inc_uchar_clamp(uchar& x);
 
-struct weight_fill {
-  double weight;
-  weight_fill(double w) : weight(w) {}
-  void operator()(TH1F* h, double x) const {
-    h->Fill(x, weight);
-  }
-  void operator()(TH2F* h, double x, double y) const {
-    h->Fill(x, y, weight);
-  }
-};
 
 struct distrib_calculator {
   // ith value of these are the corresponding stat with the ith value
