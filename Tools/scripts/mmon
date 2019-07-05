@@ -47,6 +47,8 @@ parser.add_option('--no-shorten-statuses', action='store_false', dest='shorten_s
                   help='Do not shorten statuses in the status table.')
 parser.add_option('-a', '--hadd', action='store_true', default=False,
                   help='At the end of each iteration, hadd the done dirs. The destination path for the output file is next to the dir.')
+parser.add_option('-b', '--hadd-rm', action='store_true', default=False,
+                  help='Like --hadd, but remove the originals (passes -r to mhadd).')
 options, args = parser.parse_args()
 #print options ; print args ; import sys ; print sys.argv ; raise 1
 
@@ -394,6 +396,8 @@ while 1:
     if options.hadd:
         for d in done:
             cmd = 'mhadd %s -o %s' % (d, os.path.dirname(d))
+            if options.hadd_rm:
+                cmd = cmd.replace('mhadd', 'mhadd -r')
             print cmd
             os.system(cmd)
 
