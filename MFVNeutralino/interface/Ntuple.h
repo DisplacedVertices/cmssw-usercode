@@ -289,6 +289,28 @@ namespace mfv {
     const VerticesSubNtuple& vertices() const { return vertices_; }
     const MiniNtuple2SubNtuple& event() const { return event_; }
 
+    std::vector<int> vertices_tracks(int iv) const {
+      const size_t n = vertices().ntracks(iv);
+      std::vector<int> t(n, -1);
+      size_t z = 0;
+      for (int itk = 0, itke = tracks().n(); itk < itke; ++itk)
+        if (tracks().which_sv(itk) == iv)
+          t[z++] = itk;
+      assert(z == n);
+      return t;
+    }
+
+    std::vector<std::pair<int,int>> vertices_track_pairs(int ivtx) const {
+      std::vector<int> t = vertices_tracks(ivtx);
+      const size_t n = t.size();
+      std::vector<std::pair<int,int>> t2(n*(n-1)/2);
+      size_t z = 0;
+      for (size_t i = 0; i < n-1; ++i)
+        for (size_t j = i+1; j < n; ++j)
+          t2[z++] = std::make_pair(t[i], t[j]);
+      return t2;
+    }
+
   private:
     GenTruthSubNtuple gentruth_;
     VerticesSubNtuple vertices_;
