@@ -124,16 +124,13 @@ namespace jmt {
       if (submit_) {
         std::ostringstream o;
         o << "from JMTucker.Tools.MetaSubmitter import *\n"
-          << "dataset = '" << submit_dataset_ << "'\n";
-        if (submit_samples_ != "")
-          o << "samples = pick_samples(dataset, " << submit_samples_ << ")\n";
-        else
-          o << "samples = pick_samples(dataset)\n";
-        o << "NtupleReader_submit('" << submit_batch_ << "', dataset, samples, exe_fn='" << submit_exe_ << "', output_fn='" << out_fn_ << "')\n";
+          << "dataset = '" << submit_dataset_ << "'\n"
+          << "samples = pick_samples(dataset, " << submit_samples_ << ")\n"
+          << "NtupleReader_submit('" << submit_batch_ << "', dataset, samples, exe_fn='" << submit_exe_ << "', output_fn='" << out_fn_ << "')\n";
 
         std::cout << o.str();
 
-        char* tmpnam = strdup("/tmp/tmpnrsubmitXXXXXX");
+        char tmpnam[] = "/tmp/tmpnrsubmitXXXXXX";
         mkstemp(tmpnam);
         std::ofstream of(tmpnam);
         of << o.str();
