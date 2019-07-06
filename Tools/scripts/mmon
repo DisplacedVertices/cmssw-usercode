@@ -92,6 +92,9 @@ if options.wait_time > 0 or options.delay:
 if options.continuous and options.wait_time < 0:
     options.wait_time = 60*10
 
+if options.hadd_rm:
+    options.hadd = True
+
 def timestamp():
     return str(int(time.time()*1e6))
 
