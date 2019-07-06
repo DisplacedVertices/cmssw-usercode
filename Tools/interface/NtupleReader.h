@@ -1,6 +1,7 @@
 #ifndef JMTucker_Tools_NtupleReader_h
 #define JMTucker_Tools_NtupleReader_h
 
+#include <cstdlib>
 #include <iostream>
 #include <string>
 #include <boost/program_options.hpp>
@@ -46,19 +47,25 @@ namespace jmt {
     bool is_mc() const { return is_mc_; }
     bool use_weights() const { return use_weights_; }
 
-    boost::program_options::options_description_easy_init init_options(const std::string& tree_path) {
+    boost::program_options::options_description_easy_init init_options(const std::string& tree_path,
+                                                                       const std::string& batch_name="", const std::string& batch_dataset="", const std::string& batch_samples="") {
       namespace po = boost::program_options;
       return desc_.add_options()
         ("help,h", "this help message")
-        ("input-file,i",  po::value<std::string>(&in_fn_),                                       "the input file (required)")
-        ("output-file,o", po::value<std::string>(&out_fn_)        ->default_value("hists.root"), "the output file")
-        ("tree-path,t",   po::value<std::string>(&tree_path_)     ->default_value(tree_path),    "the tree path")
-        ("json,j",        po::value<std::string>(&json_),                                        "lumi mask json file for data")
-        ("quiet,q",       po::value<bool>       (&quiet_)         ->default_value(false),        "whether to be quiet")
-        ("num-chunks,n",  po::value<int>        (&num_chunks_)    ->default_value(1),            "split the tree entries into this many chunks")
-        ("which-chunk,w", po::value<int>        (&which_chunk_)   ->default_value(0),            "chunk to run")
-        ("weights",       po::value<bool>       (&use_weights_)   ->default_value(true),         "whether to use any other weights, including those in the tree")
-        ("pu-weights",    po::value<std::string>(&pu_weights_)    ->default_value(""),           "extra pileup weights beyond whatever's already in the tree")
+        ("input-file,i",   po::value<std::string>(&in_fn_),                                       "the input file (required)")
+        ("output-file,o",  po::value<std::string>(&out_fn_)        ->default_value("hists.root"), "the output file")
+        ("tree-path,t",    po::value<std::string>(&tree_path_)     ->default_value(tree_path),    "the tree path")
+        ("json,j",         po::value<std::string>(&json_),                                        "lumi mask json file for data")
+        ("quiet,q",        po::bool_switch       (&quiet_)         ->default_value(false),        "whether to be quiet")
+        ("num-chunks,n",   po::value<int>        (&num_chunks_)    ->default_value(1),            "split the tree entries into this many chunks")
+        ("which-chunk,w",  po::value<int>        (&which_chunk_)   ->default_value(0),            "chunk to run")
+        ("weights",        po::bool_switch       (&use_weights_)   ->default_value(true),         "whether to use any other weights, including those in the tree")
+        ("pu-weights",     po::value<std::string>(&pu_weights_)    ->default_value(""),           "extra pileup weights beyond whatever's already in the tree")
+
+        ("submit,s",       po::bool_switch       (&submit_)        ->default_value(false),         "submit batch via CondorSubmitter")
+        ("submit-batch",   po::value<std::string>(&submit_batch_)  ->default_value(batch_name),    "batch name")
+        ("submit-dataset", po::value<std::string>(&submit_dataset_)->default_value(batch_dataset), "batch dataset")
+        ("submit-samples", po::value<std::string>(&submit_samples_)->default_value(batch_samples), "batch code for pick_samples")
         ;
     }
 
@@ -73,37 +80,74 @@ namespace jmt {
         return false;
       }
 
-      if (in_fn_ == "") {
-        std::cerr << "value for --input-file is required\n" << desc_ << "\n";
-        return false;
-      }
+      if (submit_) {
+        if (submit_batch_ == "" || submit_dataset_ == "") {
+          std::cerr << "value for --submit-batch and --submit-dataset required, defaults not set\n";
+          return false;
+        }
 
-      if (tree_path_.find("/") == std::string::npos) {
-        tree_path_ += "/t";
-        std::cerr << "tree_path changed to " << tree_path_ << "\n";
+        submit_exe_ = argv[0];
       }
+      else {
+        if (in_fn_ == "") {
+          std::cerr << "in interactive mode, value for --input-file is required\n" << desc_ << "\n";
+          return false;
+        }
 
-      if (num_chunks_ <= 0 || which_chunk_ < 0 || which_chunk_ >= num_chunks_) {
-        std::cerr << "required: num_chunks >= 1 and 0 <= which_chunk < num_chunks\n";
-        return false;
+        if (tree_path_.find("/") == std::string::npos) {
+          tree_path_ += "/t";
+          std::cerr << "tree_path changed to " << tree_path_ << "\n";
+        }
+
+        if (num_chunks_ <= 0 || which_chunk_ < 0 || which_chunk_ >= num_chunks_) {
+          std::cerr << "required: num_chunks >= 1 and 0 <= which_chunk < num_chunks\n";
+          return false;
+        }
+
+        std::cout << argv[0] << " with options:"
+                  << " in_fn: " << in_fn_
+                  << " out_fn: " << out_fn_
+                  << " tree_path: " << tree_path_
+                  << " json: " << (json_ != "" ? json_ : "none")
+                  << " quiet: " << quiet_
+                  << " num_chunks: " << num_chunks_
+                  << " which_chunk: " << which_chunk_
+                  << " weights: " << use_weights_
+                  << " pu_weights: " << (pu_weights_ != "" ? pu_weights_ : "none")
+                  << "\n";
       }
-
-      std::cout << argv[0] << " with options:"
-                << " in_fn: " << in_fn_
-                << " out_fn: " << out_fn_
-                << " tree_path: " << tree_path_
-                << " json: " << (json_ != "" ? json_ : "none")
-                << " quiet: " << quiet_
-                << " num_chunks: " << num_chunks_
-                << " which_chunk: " << which_chunk_
-                << " weights: " << use_weights_
-                << " pu_weights: " << (pu_weights_ != "" ? pu_weights_ : "none")
-                << "\n";
 
       return true;
     }
 
     bool init(bool for_copy=false) {
+      if (submit_) {
+        std::ostringstream o;
+        o << "from JMTucker.Tools.MetaSubmitter import *\n"
+          << "dataset = '" << submit_dataset_ << "'\n";
+        if (submit_samples_ != "")
+          o << "samples = pick_samples(dataset, " << submit_samples_ << ")\n";
+        else
+          o << "samples = pick_samples(dataset)\n";
+        o << "NtupleReader_submit('" << submit_batch_ << "', dataset, samples, exe_fn='" << submit_exe_ << "', output_fn='" << out_fn_ << "')\n";
+
+        std::cout << o.str();
+
+        char* tmpnam = strdup("/tmp/tmpnrsubmitXXXXXX");
+        mkstemp(tmpnam);
+        std::ofstream of(tmpnam);
+        of << o.str();
+        of.close();
+
+        std::string cmd("python ");
+        cmd += tmpnam;
+        system(cmd.c_str());
+
+        remove(tmpnam);
+
+        return false;
+      }
+
       if (!quiet_) time_.Start();
 
       jmt::set_root_style();
@@ -231,6 +275,12 @@ namespace jmt {
     int which_chunk_;
     bool use_weights_;
     std::string pu_weights_;
+
+    bool submit_;
+    std::string submit_exe_;
+    std::string submit_batch_;
+    std::string submit_dataset_;
+    std::string submit_samples_;
 
     template <typename T> using uptr = std::unique_ptr<T>;
 
