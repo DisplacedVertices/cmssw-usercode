@@ -174,13 +174,16 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     aux.chi2 = sv.chi2();
     aux.ndof_ = int2uchar_clamp(int(sv.ndof()));
 
-    std::vector<reco::TransientTrack> rs_ttks;
+    std::vector<reco::TransientTrack> ttks, rs_ttks;
     for (auto it = sv.tracks_begin(), ite = sv.tracks_end(); it != ite; ++it)
-      if (sv.trackWeight(*it) >= mfv::track_vertex_weight_min)
+      if (sv.trackWeight(*it) >= mfv::track_vertex_weight_min) {
+        ttks.push_back(tt_builder->build(**it));
         rs_ttks.push_back(tt_builder->build(track_rescaler.scale(**it).rescaled_tk));
+      }
     if (rs_ttks.size() > 1) {
       reco::Vertex rs_sv(TransientVertex(kv_reco->vertex(rs_ttks)));
       if (rs_sv.isValid()) {
+        const auto d = VertexDistanceXY().distance(rs_sv, fake_bs_vtx);
         aux.rescale_chi2 = rs_sv.chi2();
         aux.rescale_x = rs_sv.x();
         aux.rescale_y = rs_sv.y();
@@ -191,12 +194,65 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
         aux.rescale_cyy = rs_sv.covariance(1,1);
         aux.rescale_cyz = rs_sv.covariance(1,2);
         aux.rescale_czz = rs_sv.covariance(2,2);
-        const auto d = VertexDistanceXY().distance(rs_sv, fake_bs_vtx);
         aux.rescale_bs2ddist = d.value();
         aux.rescale_bs2derr = d.error();
       }
       else
         aux.rescale_chi2 = -1;
+    }
+
+    if (ttks.size() > 2) {
+      const size_t nttks = ttks.size();
+      if (verbose) {
+        printf("x %f y %f z %f nttks %lu, pts:", aux.x,aux.y,aux.z, nttks);
+        for (size_t i = 0; i < nttks; ++i)
+          printf(" %f", ttks[i].track().pt());
+        printf("\n");
+      }
+      aux.nm1_chi2.assign(nttks, -1);
+      aux.nm1_x.assign(nttks, -1);
+      aux.nm1_y.assign(nttks, -1);
+      aux.nm1_z.assign(nttks, -1);
+      aux.nm1_cxx.assign(nttks, -1);
+      aux.nm1_cxy.assign(nttks, -1);
+      aux.nm1_cxz.assign(nttks, -1);
+      aux.nm1_cyy.assign(nttks, -1);
+      aux.nm1_cyz.assign(nttks, -1);
+      aux.nm1_czz.assign(nttks, -1);
+      aux.nm1_bs2ddist.assign(nttks, -1);
+      aux.nm1_bs2derr.assign(nttks, -1);
+
+      std::vector<reco::TransientTrack> ttks_nm1(nttks-1);
+      for (size_t i = 0; i < nttks; ++i) {
+        for (size_t j = 0; j < nttks; ++j)
+          if (j != i)
+            ttks_nm1[j-(j>=i)] = ttks[j];
+
+        if (verbose) {
+          printf("refit %lu, pts:", i);
+          for (size_t j = 0; j < nttks-1; ++j)
+            printf(" %f", ttks_nm1[j].track().pt());
+        }
+
+        reco::Vertex rf_sv(TransientVertex(kv_reco->vertex(ttks_nm1)));
+        if (rf_sv.isValid()) {
+          const auto d = VertexDistanceXY().distance(rf_sv, fake_bs_vtx);
+          aux.nm1_chi2[i] = rf_sv.chi2();
+          aux.nm1_x[i] = rf_sv.x();
+          aux.nm1_y[i] = rf_sv.y();
+          aux.nm1_z[i] = rf_sv.z();
+          aux.nm1_cxx[i] = rf_sv.covariance(0,0);
+          aux.nm1_cxy[i] = rf_sv.covariance(0,1);
+          aux.nm1_cxz[i] = rf_sv.covariance(0,2);
+          aux.nm1_cyy[i] = rf_sv.covariance(1,1);
+          aux.nm1_cyz[i] = rf_sv.covariance(1,2);
+          aux.nm1_czz[i] = rf_sv.covariance(2,2);
+          aux.nm1_bs2ddist[i] = d.value();
+          aux.nm1_bs2derr[i] = d.error();
+        }
+
+        if (verbose) printf(" -> chi2 %f x %f y %f z %f\n", aux.nm1_chi2[i], aux.nm1_x[i], aux.nm1_y[i], aux.nm1_z[i]);
+      }
     }
 
     if (verbose) printf("v#%i at %f,%f,%f ndof %.1f\n", isv, aux.x, aux.y, aux.z, sv.ndof());
