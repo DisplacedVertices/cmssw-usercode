@@ -11,8 +11,10 @@ namespace jmt {
     int i_;
   public:
     ExtValue(bool lt) : lt_(lt), v_(lt ? std::numeric_limits<double>::max() : -std::numeric_limits<double>::max()), i_(-1) {}
-    void operator()(const int i, const double v) { if ((lt_ && v < v_) || (!lt_ && v > v_)) { v_ = v; i_ = i; } }
-    void operator()(             const double v) { (*this)(-1, v); }
+    void operator()(const int i, const double v) { if ((lt_ && v < v_) || (!lt_ && v > v_)) { set(i, v); } }
+    void operator()(             const double v) { set(-1, v); }
+    void set(const int i, const double v) { i_ = i; v_ = v; }
+    void set(             const double v) { set(-1, v); }
     operator double() const { return v_; }
     int i() const { return i_; }
   };
