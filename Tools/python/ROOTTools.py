@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-import math, sys, os, tempfile
+import math, sys, os, glob, tempfile
 from array import array
-from collections import namedtuple
+from collections import defaultdict, namedtuple
 from JMTucker.Tools.general import chunks
 
 if os.environ.has_key('JMT_ROOTTOOLS_NOBATCHMODE'):
@@ -1275,6 +1275,8 @@ def get_integral(hist, xlo=None, xhi=None, integral_only=False, include_last_bin
         wsq += hist.GetBinError(i)**2
     return integral, wsq**0.5
 
+integral = get_integral
+
 def get_hist_quantiles(hist, probs, options='list'):
     """Get the quantiles for the histogram corresponding to the listed
     probs (e.g. probs = [0.1, 0.5, 0.9] to find the first decile, the
@@ -2422,6 +2424,7 @@ __all__ = [
     'fit_gaussian',
     'get_bin_content_error',
     'get_integral',
+    'integral',
     'get_hist_quantiles',
     'get_quantiles',
     'get_hist_stats',
@@ -2459,4 +2462,5 @@ __all__ = [
     'zgammatau',
     'zgammatauwrong',
     'ROOT',
+    'math', 'sys', 'os', 'glob', 'array', 'defaultdict', 'namedtuple'
     ]
