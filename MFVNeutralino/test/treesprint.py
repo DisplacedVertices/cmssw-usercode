@@ -11,6 +11,7 @@ from JMTucker.Tools import Samples
 import JMTucker.MFVNeutralino.AnalysisConstants as ac
 
 year = typed_from_argv(int, year, name='year')
+yearcheck = not bool_from_argv('noyearcheck')
 nosig = bool_from_argv('nosig')
 nodata = bool_from_argv('nodata')
 nobkg = bool_from_argv('nobkg')
@@ -86,7 +87,7 @@ for ntk in ntks:
 
     weighted = []
     for fn in fns:
-        if str(year) not in fn:
+        if yearcheck and str(year) not in fn:
             continue
 
         (r1v, n1v, en1v), (_, n1vb, _), (r2v, n2v, en2v), (_, n2vb, _) = getit(fn, ntk)
