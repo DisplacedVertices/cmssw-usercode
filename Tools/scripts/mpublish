@@ -178,7 +178,7 @@ for k in sorted(publish.keys(), key=_key):
         else:
             print '%r: (%i, %s),' % (k, n, c)
     else:
-        pprint((k,(n,c)))
+        print "'%s': (%i, %r)," % (k, n, c)
 print '})'
 print
 encoded = _enc(publish)
