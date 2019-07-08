@@ -80,6 +80,11 @@ struct MFVEvent {
     return sqrt(x*x + y*y + z*z);
   }
 
+  template <typename T>
+  static T mag2(T x, T y, T z) {
+    return x*x + y*y + z*z;
+  }
+
   float gen_weight;
   uchar gen_flavor_code;
   float gen_pv[3];
@@ -155,6 +160,16 @@ struct MFVEvent {
                gen_lsp_decay[0*3+1] - gen_lsp_decay[1*3+1],
                gen_lsp_decay[0*3+2] - gen_lsp_decay[1*3+2]);
   }
+
+  int lspmatches(const float x, const float y, const float z, const float dist2=0.0084*0.0084) const {
+    for (int i = 0; i < 2; ++i)
+      if (mag2(x - gen_lsp_decay[i*3+0],
+               y - gen_lsp_decay[i*3+1],
+               z - gen_lsp_decay[i*3+2]) < dist2)
+        return i;
+    return -1;
+  }
+  template <typename T> int lspmatches(const T& v, const float dist2=0.0084*0.0084) const { return lspmatches(v.x, v.y, v.z, dist2); }
 
   float l1_htt;
   float l1_myhtt;
