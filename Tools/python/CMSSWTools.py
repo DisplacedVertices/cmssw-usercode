@@ -376,12 +376,11 @@ def output_file(process, filename, output_commands=[], select_events=[]):
                                    compressionLevel = cms.untracked.int32(4),
                                    compressionAlgorithm = cms.untracked.string('LZMA'),
                                    eventAutoFlushCompressedSize = cms.untracked.int32(15728640),
+                                   outputCommands = cms.untracked.vstring(*output_commands),
                                    dropMetaData = cms.untracked.string('ALL'),
                                    fastCloning = cms.untracked.bool(False),
                                    overrideInputFileSplitLevels = cms.untracked.bool(True)
                                    )
-    if output_commands:
-        process.out.outputCommands = cms.untracked.vstring(*output_commands),
     if select_events:
         process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring(*select_events))
     process.outp = cms.EndPath(process.out)
