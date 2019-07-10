@@ -60,6 +60,8 @@ mfvVertices = cms.EDProducer('MFVVertexer',
                              max_track_vertex_sig = cms.double(5),
                              min_track_vertex_sig_to_remove = cms.double(1.5),
                              remove_one_track_at_a_time = cms.bool(True),
+                             max_nm1_refit_dist3 = cms.double(-1),
+                             max_nm1_refit_distz = cms.double(-1),
                              histos = cms.untracked.bool(True),
                              verbose = cms.untracked.bool(False),
                              )

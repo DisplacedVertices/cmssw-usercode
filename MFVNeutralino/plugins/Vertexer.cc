@@ -27,6 +27,7 @@ public:
 
 private:
   typedef std::set<reco::TrackRef> track_set;
+  typedef std::vector<reco::TrackRef> track_vec;
 
   void finish(edm::Event&, const std::vector<reco::TransientTrack>&, std::unique_ptr<reco::VertexCollection>, std::unique_ptr<VertexerPairEffs>, const std::vector<std::pair<track_set, track_set>>&);
 
@@ -62,7 +63,7 @@ private:
   }
 
   track_set vertex_track_set(const reco::Vertex& v, const double min_weight = mfv::track_vertex_weight_min) const {
-    std::set<reco::TrackRef> result;
+    track_set result;
 
     for (auto it = v.tracks_begin(), ite = v.tracks_end(); it != ite; ++it) {
       const double w = v.trackWeight(*it);
@@ -74,6 +75,11 @@ private:
     }
 
     return result;
+  }
+
+  track_vec vertex_track_vec(const reco::Vertex& v, const double min_weight = mfv::track_vertex_weight_min) const {
+    track_set s = vertex_track_set(v, min_weight);
+    return track_vec(s.begin(), s.end());
   }
 
   Measurement1D vertex_dist(const reco::Vertex& v0, const reco::Vertex& v1) const {
@@ -117,6 +123,8 @@ private:
   const double max_track_vertex_sig;
   const double min_track_vertex_sig_to_remove;
   const bool remove_one_track_at_a_time;
+  const double max_nm1_refit_dist3;
+  const double max_nm1_refit_distz;
   const bool histos;
   const bool verbose;
   const std::string module_label;
@@ -172,6 +180,8 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     max_track_vertex_sig(cfg.getParameter<double>("max_track_vertex_sig")),
     min_track_vertex_sig_to_remove(cfg.getParameter<double>("min_track_vertex_sig_to_remove")),
     remove_one_track_at_a_time(cfg.getParameter<bool>("remove_one_track_at_a_time")),
+    max_nm1_refit_dist3(cfg.getParameter<double>("max_nm1_refit_dist3")),
+    max_nm1_refit_distz(cfg.getParameter<double>("max_nm1_refit_distz")),
     histos(cfg.getUntrackedParameter<bool>("histos", false)),
     verbose(cfg.getUntrackedParameter<bool>("verbose", false)),
     module_label(cfg.getParameter<std::string>("@module_label"))
@@ -763,57 +773,99 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   }
 
   //////////////////////////////////////////////////////////////////////
-  // Merge vertices that are still "close". JMTBAD this doesn't do anything currently.
+  // Merge vertices that are still "close". JMTBAD this doesn't do anything currently, only run in verbose mode
   //////////////////////////////////////////////////////////////////////
 
   if (verbose)
-    printf("fun2!\n");
+    printf("fun2! before merge loop, # vertices = %lu\n", vertices->size());
 
-  for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
-    ivtx[0] = v[0] - vertices->begin();
+  if (verbose) {
+    for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
+      ivtx[0] = v[0] - vertices->begin();
 
-    bool merge = false;
-    for (v[1] = v[0] + 1; v[1] != vertices->end(); ++v[1]) {
-      ivtx[1] = v[1] - vertices->begin();
+      bool merge = false;
+      for (v[1] = v[0] + 1; v[1] != vertices->end(); ++v[1]) {
+        ivtx[1] = v[1] - vertices->begin();
 
-      if (verbose)
-        printf("close-merge: # vertices = %lu. considering vertices #%lu (ntk = %i) and #%lu (ntk = %i):", vertices->size(), ivtx[0], v[0]->nTracks(), ivtx[1], v[1]->nTracks());
-
-      Measurement1D v_dist = vertex_dist(*v[0], *v[1]);
-      if (verbose)
-        printf("   vertex dist (2d? %i) %7.3f  sig %7.3f\n", use_2d_vertex_dist, v_dist.value(), v_dist.significance());
-  
-      if (v_dist.value() < merge_anyway_dist || v_dist.significance() < merge_anyway_sig) {
         if (verbose)
-          printf("          dist < %7.3f || sig < %7.3f, breaking to merge\n", merge_anyway_dist, merge_anyway_sig);
-        merge = true;
-        break;
-      }
-    }
+          printf("close-merge: # vertices = %lu. considering vertices #%lu (ntk = %i) and #%lu (ntk = %i):", vertices->size(), ivtx[0], v[0]->nTracks(), ivtx[1], v[1]->nTracks());
 
-    if (merge) {
-      std::vector<reco::TransientTrack> ttks;
-      for (int i = 0; i < 2; ++i)
-        for (auto tk : vertex_track_set(*v[i]))
-          ttks.push_back(tt_builder->build(tk));
-      
-      reco::VertexCollection new_vertices;
-      for (const TransientVertex& tv : kv_reco_dropin(ttks))
-        new_vertices.push_back(reco::Vertex(tv));
-      
-      if (verbose) {
-        printf("      got %lu new vertices out of the av fit\n", new_vertices.size());
-        printf("      these track sets:");
-        for (const auto& nv : new_vertices) {
-          printf(" (");
-          print_track_set(nv);
-          printf(" ),");
+        Measurement1D v_dist = vertex_dist(*v[0], *v[1]);
+        if (verbose)
+          printf("   vertex dist (2d? %i) %7.3f  sig %7.3f\n", use_2d_vertex_dist, v_dist.value(), v_dist.significance());
+
+        if (v_dist.value() < merge_anyway_dist || v_dist.significance() < merge_anyway_sig) {
+          if (verbose)
+            printf("          dist < %7.3f || sig < %7.3f, breaking to merge\n", merge_anyway_dist, merge_anyway_sig);
+          merge = true;
+          break;
         }
-        printf("\n");
+      }
+
+      if (merge) {
+        std::vector<reco::TransientTrack> ttks;
+        for (int i = 0; i < 2; ++i)
+          for (auto tk : vertex_track_set(*v[i]))
+            ttks.push_back(tt_builder->build(tk));
+      
+        reco::VertexCollection new_vertices;
+        for (const TransientVertex& tv : kv_reco_dropin(ttks))
+          new_vertices.push_back(reco::Vertex(tv));
+      
+        if (verbose) {
+          printf("      got %lu new vertices out of the av fit\n", new_vertices.size());
+          printf("      these track sets:");
+          for (const auto& nv : new_vertices) {
+            printf(" (");
+            print_track_set(nv);
+            printf(" ),");
+          }
+          printf("\n");
+        }
       }
     }
   }
- 
+
+  //////////////////////////////////////////////////////////////////////
+  // Drop tracks that "move" the vertex too much by refitting without each track.
+  //////////////////////////////////////////////////////////////////////
+
+  if (max_nm1_refit_dist3 > 0 || max_nm1_refit_distz > 0) {
+    for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
+      const track_vec tks = vertex_track_vec(*v[0]);
+      const size_t ntks = tks.size();
+      if (ntks < 3)
+        continue;
+
+      if (verbose) {
+        printf("doing n-1 refits on vertex at %7.4f %7.4f %7.4f with %lu tracks\n", v[0]->x(), v[0]->y(), v[0]->z(), ntks);
+        for (size_t i = 0; i < ntks; ++i)
+          printf("  refit %lu will drop tk pt %7.4f +- %7.4f eta %7.4f +- %7.4f phi %7.4f +- %7.4f dxy %7.4f +- %7.4f dz %7.4f +- %7.4f\n", i, tks[i]->pt(), tks[i]->ptError(), tks[i]->eta(), tks[i]->etaError(), tks[i]->phi(), tks[i]->phiError(), tks[i]->dxy(), tks[i]->dxyError(), tks[i]->dz(), tks[i]->dzError());
+      }
+
+      std::vector<reco::TransientTrack> ttks(ntks-1);
+      for (size_t i = 0; i < ntks; ++i) {
+        for (size_t j = 0; j < ntks; ++j)
+          if (j != i)
+            ttks[j-(j>=i)] = tt_builder->build(tks[j]);
+
+        reco::Vertex vnm1(TransientVertex(kv_reco->vertex(ttks)));
+        const double dist3_2 = mag2(vnm1.x() - v[0]->x(), vnm1.y() - v[0]->y(), vnm1.z() - v[0]->z());
+        const double distz = mag(vnm1.z() - v[0]->z());
+        if (verbose) printf("  refit %lu chi2 %7.4f vtx %7.4f %7.4f %7.4f dist3 %7.4f distz %7.4f\n", i, vnm1.chi2(), vnm1.x(), vnm1.y(), vnm1.z(), sqrt(dist3_2), distz);
+
+        if (vnm1.chi2() < 0 ||
+            (max_nm1_refit_dist3 > 0 && mag2(vnm1.x() - v[0]->x(), vnm1.y() - v[0]->y(), vnm1.z() - v[0]->z()) > pow(max_nm1_refit_dist3, 2)) ||
+            (max_nm1_refit_distz > 0 && distz > max_nm1_refit_distz)) {
+          if (verbose) printf("    replacing and reconsidering!\n");
+          *v[0] = vnm1;
+          --v[0];
+          break;
+        }
+      }
+    }
+  }
+
   //////////////////////////////////////////////////////////////////////
   // Put the output.
   //////////////////////////////////////////////////////////////////////
