@@ -1,7 +1,4 @@
-#!/usr/bin/env python
-
-import sys
-from JMTucker.Tools.Merge_cfg import cms, process
+from JMTucker.Tools.Merge_cfg import *
 
 process.out.maxSize = cms.untracked.int32(2**19) # in kB, ~537 MB
 
