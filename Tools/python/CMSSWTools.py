@@ -139,13 +139,23 @@ def file_event_from_argv(process, verbose=False):
     '''Set the filename and event to run on from argv.'''
     files = []
     nums = []
+
     for arg in sys.argv[1:]:
-        if arg.startswith('eventsfile='):
-            for line in open(arg.replace('eventsfile=', '')):
+        if arg.startswith('eventsfn='):
+            files = []
+            nums = []
+            for line in open(arg.replace('eventsfn=', '')):
                 x = line.strip().split()
-                files.append(x[-1])
+                if x[-1] not in files:
+                    files.append(x[-1])
                 nums.append(tuple(int(y) for y in x[:3]))
-            break
+            break # no other cmd line file/events steering allowed
+
+        elif arg.startswith('listfn='):
+            for line in open(arg.replace('listfn=', '')):
+                x = line.strip()
+                files.append(x)
+
         elif arg.startswith('sample='):
             arg = arg.replace('sample=', '')
             assert ':' in arg
@@ -159,8 +169,10 @@ def file_event_from_argv(process, verbose=False):
             files = None
             if verbose:
                 print 'sample from argv: %s %s (%i files)' % (sname, dataset, nfiles)
+
         elif arg.endswith('.root') and files is not None:
             files.append(arg)
+
         else:
             try:
                 nums.append(int(arg))
@@ -213,7 +225,9 @@ def cmssw_from_argv(process, verbose=False):
                 sys.argv.remove(a)
                 break
     doif('name', lambda s: process.setName_(s))
+    doif('skip', lambda s: setattr(process.source, 'skipEvents', cms.untracked.uint32(int(s))))
     doif('tfs',  lambda s: tfileservice(process, s))
+    doif('pool', lambda s: setattr(process.out, 'fileName', s) if hasattr(process, 'out') else None)
     file_event_from_argv(process, verbose)
 
 def find_output_files(process):
@@ -356,17 +370,18 @@ def max_events(process, n):
 def no_event_sort(process):
     process.source.noEventSort = cms.untracked.bool(True)
 
-def output_file(process, filename, output_commands, select_events=[]):
+def output_file(process, filename, output_commands=[], select_events=[]):
     process.out = cms.OutputModule('PoolOutputModule',
                                    fileName = cms.untracked.string(filename),
                                    compressionLevel = cms.untracked.int32(4),
                                    compressionAlgorithm = cms.untracked.string('LZMA'),
                                    eventAutoFlushCompressedSize = cms.untracked.int32(15728640),
-                                   outputCommands = cms.untracked.vstring(*output_commands),
                                    dropMetaData = cms.untracked.string('ALL'),
                                    fastCloning = cms.untracked.bool(False),
                                    overrideInputFileSplitLevels = cms.untracked.bool(True)
                                    )
+    if output_commands:
+        process.out.outputCommands = cms.untracked.vstring(*output_commands),
     if select_events:
         process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring(*select_events))
     process.outp = cms.EndPath(process.out)
