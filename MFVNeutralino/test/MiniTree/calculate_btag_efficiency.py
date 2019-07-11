@@ -1,8 +1,8 @@
 from JMTucker.Tools.ROOTTools import *
 import sys
 
-version = 'V25m'
-year = int(sys.argv[1])
+version = 'V25mv3'
+year = sys.argv[1]
 ntk = int(sys.argv[2])
 
 if len(sys.argv) > 3 :
