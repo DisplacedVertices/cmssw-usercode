@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import os, sys, gzip, cPickle, subprocess, glob, tempfile, time
 from itertools import chain, product, starmap
 from collections import namedtuple
@@ -106,6 +104,9 @@ def coderep_files(files):
         raise ValueError('I am dumb')
     code = ' + '.join(codes)
     return code
+
+def expanduservars(path):
+    return os.path.expandvars(os.path.expanduser(path))
 
 def from_pickle(fn, comp=False):
     if comp or '.gzpickle' in fn:
@@ -301,25 +302,3 @@ def intlumi_from_brilcalc_csv(fn, has_hlt):
                 intlumis[(run, ls)] = intlumi
                 intlumi_sum += intlumi
     return intlumis, intlumi_sum
-
-__all__ = [
-    'bool_from_argv',
-    'big_warn',
-    'chunks',
-    'intlumi_from_brilcalc_csv',
-    'from_pickle',
-    'to_pickle',
-    'type_or_none',
-    'typed_from_argv',
-    'from_argv',
-    'index_startswith',
-    'int_ceil',
-    'mkdirp',
-    'mkdirs_if_needed',
-    'sub_popen',
-    'popen',
-    'reverse_readline',
-    'save_git_status',
-    'terminal_size',
-    'touch',
-    ]
