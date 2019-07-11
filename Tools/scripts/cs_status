@@ -21,6 +21,8 @@ resubmit = resubmit_all or '-r' in sys.argv
 resubmit_killed = '-k' in sys.argv
 list_done = '-l' in sys.argv
 ignore_done = '-d' not in sys.argv
+print_file_errors = '-nfe' not in sys.argv
+test_file_errors = '-tfe' in sys.argv
 verbose = True #'-v' in sys.argv
 wds = cs_dirs_from_argv()
 ml = max(len(wd) for wd in wds) + 3
@@ -81,9 +83,12 @@ for wd in wds:
                 print '  %s:' % return_code(r), crabify_list(l)
             for e, l in ana.by_exception.iteritems():
                 print '  %s:' % e, crabify_list(l)
-                if e in ('FileOpenError', 'FileReadError'):
+                if print_file_errors and e in ('FileOpenError', 'FileReadError'):
                     for j in sorted(l):
-                        print '    job %3i: %s' % (j, cs_last_input_file(wd, j))
+                        fn = cs_last_input_file(wd, j)
+                        print '    job %3i: %s' % (j, fn)
+                        if test_file_errors:
+                            os.system('xrdcp -f root://cmsxrootd.fnal.gov/%s /dev/null' % fn)
 
         if resubmit:
             to_resubmit = []
