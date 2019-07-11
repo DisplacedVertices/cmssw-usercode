@@ -295,7 +295,9 @@ def get(i): return _l[i]
                 raise ValueError("don't understand stageout_files = %s" % stageout_which)
         output_files = [x for x in output_files if x not in stageout_files]
 
-        assert all(os.path.basename(x) == x for x in output_files + stageout_files)
+        for x in output_files + stageout_files:
+            if os.path.basename(x) != x:
+                raise ValueError('output file must have no slashes: %r' % x)
         self.output_files   = output_files   = ' '.join(output_files)
         self.stageout_files = stageout_files = ' '.join(stageout_files)
 
