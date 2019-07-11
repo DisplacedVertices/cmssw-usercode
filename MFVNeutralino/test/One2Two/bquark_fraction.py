@@ -63,6 +63,23 @@ if __name__ == '__main__':
     print '###########################'
     print
 
+    print 'f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); 2017p8'
+    f2_val_3trk = print_f2(3, fb(0.134, 0.662, 0.037), fb(0.426, 0.769, 0.089), 0.559, 0.516, 1)
+    f2_val_4trk = print_f2(4, fb(0.134, 0.662, 0.037), fb(0.457, 0.775, 0.092), 0.533, 0.501, 1)
+    f2_val_5trk = print_f2(5, fb(0.134, 0.662, 0.037), fb(0.531, 0.767, 0.100), 0.545, 0.480, 1)
+    f2_val_7trk = print_f2(7, fb(0.134, 0.662, 0.037), fb(0.429, 0.769, 0.089), 0.547, 0.508, 1)
+    print
+
+    print '###########################'
+    print "For utilities.py:"
+    print "(3,'%.3f,%.3f'), (4,'%.3f,%.3f'), (5,'%.3f,%.3f'), (7,'%.3f,%.3f')" % (f2_val_3trk, 1-f2_val_3trk, f2_val_4trk, 1-f2_val_4trk, f2_val_5trk, 1-f2_val_5trk, f2_val_7trk, 1-f2_val_7trk)
+    print '###########################'
+    print
+
+    ######################################
+    #             ~ Data ~               #
+    ######################################
+
     print '2017 Data: f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); 2017'
     f2_val_3trk_data = print_f2(3, fb(0.146, 0.658, 0.044), fb(0.420, 0.755, 0.101), 0.677, 0.630, 1)
     f2_val_4trk_data = print_f2(4, fb(0.146, 0.658, 0.044), fb(0.441, 0.762, 0.108), 0.662, 0.599, 1)
@@ -84,6 +101,18 @@ if __name__ == '__main__':
     print "(3,'%.3f,%.3f'), (4,'%.3f,%.3f')" % (f2_val_3trk_data, 1-f2_val_3trk_data, f2_val_4trk_data, 1-f2_val_4trk_data)
     print '###########################'
     print
+
+    print '2017p8 Data: f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); 2017p8'
+    f2_val_3trk_data = print_f2(3, fb(0.134, 0.662, 0.037), fb(0.426, 0.769, 0.089), 0.641, 0.592, 1)
+    f2_val_4trk_data = print_f2(4, fb(0.134, 0.662, 0.037), fb(0.457, 0.775, 0.092), 0.621, 0.565, 1)
+    print
+
+    print '###########################'
+    print "For utilities.py:"
+    print "(3,'%.3f,%.3f'), (4,'%.3f,%.3f')" % (f2_val_3trk_data, 1-f2_val_3trk_data, f2_val_4trk_data, 1-f2_val_4trk_data)
+    print '###########################'
+    print
+
 
     ######################################
     # Systematics based on SF variations #

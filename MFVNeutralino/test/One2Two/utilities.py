@@ -22,8 +22,7 @@ def cmd_merge_bquarks_nobquarks():
             os.system(cmd)
 
 def cmd_merge_btags_nobtags():
-    for year in '2017', '2018':
-
+    for year in '2017', '2018', '2017p8',:
         if year == '2017' :
             tuple_ntracks_weights                    = (3,'0.830,0.170'), (4,'0.854,0.146'), (5,'0.925,0.075'), (7,'0.832,0.168')
             tuple_ntracks_weights_bcjet_SFs_up       = (3,'0.809,0.191'), (4,'0.833,0.167'), (5,'0.911,0.089'), (7,'0.812,0.188')
@@ -38,6 +37,9 @@ def cmd_merge_btags_nobtags():
             tuple_ntracks_weights_ljet_SFs_up        = (3,'0.861,0.139'), (4,'0.901,0.099'), (5,'0.969,0.031'), (7,'0.863,0.137')
             tuple_ntracks_weights_ljet_SFs_down      = (3,'0.859,0.141'), (4,'0.898,0.102'), (5,'0.969,0.031'), (7,'0.861,0.139')
             tuple_ntracks_weights_data               = (3,'0.860,0.140'), (4,'0.902,0.098')
+        elif year == '2017p8' :
+            tuple_ntracks_weights                    = (3,'0.851,0.149'), (4,'0.884,0.116'), (5,'0.954,0.046'), (7,'0.854,0.146')
+            tuple_ntracks_weights_data               = (3,'0.851,0.149'), (4,'0.887,0.113')
         else :
             print("Unknown year (%s)! Exiting." % year)
             sys.exit()
