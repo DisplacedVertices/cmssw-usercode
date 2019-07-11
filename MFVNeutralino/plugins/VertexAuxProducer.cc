@@ -456,6 +456,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       aux.missdistpverr[i] = vtx_distances.missdistpv[i].error();
     }
 
+    if (verbose) printf("aux finish isv %i at %f %f %f ntracks %i bs2ddist %f bs2derr %f\n", isv, aux.x, aux.y, aux.z, aux.ntracks(), aux.bs2ddist, aux.bs2derr);
   }
 
   sorter.sort(*auxes);
