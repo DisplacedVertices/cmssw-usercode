@@ -3,4 +3,5 @@
 from JMTucker.Tools.CondorTools import *
 
 for wd in cs_dirs_from_argv():
-    cs_kill(wd)
+    if not os.path.isfile(os.path.join(wd, 'mmon_done')):
+        cs_kill(wd)
