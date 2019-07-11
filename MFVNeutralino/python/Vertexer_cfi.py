@@ -62,6 +62,7 @@ mfvVertices = cms.EDProducer('MFVVertexer',
                              remove_one_track_at_a_time = cms.bool(True),
                              max_nm1_refit_dist3 = cms.double(-1),
                              max_nm1_refit_distz = cms.double(-1),
+                             max_nm1_refit_count = cms.int32(2),
                              histos = cms.untracked.bool(True),
                              verbose = cms.untracked.bool(False),
                              )

@@ -125,6 +125,7 @@ private:
   const bool remove_one_track_at_a_time;
   const double max_nm1_refit_dist3;
   const double max_nm1_refit_distz;
+  const int max_nm1_refit_count;
   const bool histos;
   const bool verbose;
   const std::string module_label;
@@ -182,6 +183,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     remove_one_track_at_a_time(cfg.getParameter<bool>("remove_one_track_at_a_time")),
     max_nm1_refit_dist3(cfg.getParameter<double>("max_nm1_refit_dist3")),
     max_nm1_refit_distz(cfg.getParameter<double>("max_nm1_refit_distz")),
+    max_nm1_refit_count(cfg.getParameter<int>("max_nm1_refit_count")),
     histos(cfg.getUntrackedParameter<bool>("histos", false)),
     verbose(cfg.getUntrackedParameter<bool>("verbose", false)),
     module_label(cfg.getParameter<std::string>("@module_label"))
@@ -831,14 +833,20 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   //////////////////////////////////////////////////////////////////////
 
   if (max_nm1_refit_dist3 > 0 || max_nm1_refit_distz > 0) {
-    for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
+    std::vector<int> refit_count(vertices->size(), 0);
+
+    int iv = 0;
+    for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0], ++iv) {
+      if (refit_count[iv] >= max_nm1_refit_count)
+        continue;
+
       const track_vec tks = vertex_track_vec(*v[0]);
       const size_t ntks = tks.size();
       if (ntks < 3)
         continue;
 
       if (verbose) {
-        printf("doing n-1 refits on vertex at %7.4f %7.4f %7.4f with %lu tracks\n", v[0]->x(), v[0]->y(), v[0]->z(), ntks);
+        printf("doing n-%i refit on vertex at %7.4f %7.4f %7.4f with %lu tracks\n", refit_count[iv]+1, v[0]->x(), v[0]->y(), v[0]->z(), ntks);
         for (size_t i = 0; i < ntks; ++i)
           printf("  refit %lu will drop tk pt %7.4f +- %7.4f eta %7.4f +- %7.4f phi %7.4f +- %7.4f dxy %7.4f +- %7.4f dz %7.4f +- %7.4f\n", i, tks[i]->pt(), tks[i]->ptError(), tks[i]->eta(), tks[i]->etaError(), tks[i]->phi(), tks[i]->phiError(), tks[i]->dxy(), tks[i]->dxyError(), tks[i]->dz(), tks[i]->dzError());
       }
@@ -857,9 +865,16 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         if (vnm1.chi2() < 0 ||
             (max_nm1_refit_dist3 > 0 && mag2(vnm1.x() - v[0]->x(), vnm1.y() - v[0]->y(), vnm1.z() - v[0]->z()) > pow(max_nm1_refit_dist3, 2)) ||
             (max_nm1_refit_distz > 0 && distz > max_nm1_refit_distz)) {
-          if (verbose) printf("    replacing and reconsidering!\n");
+          if (verbose) {
+            printf("    replacing");
+            if (refit_count[iv] < max_nm1_refit_count - 1)
+              printf(" and reconsidering");
+            printf("\n");
+          }
+
           *v[0] = vnm1;
-          --v[0];
+          ++refit_count[iv];
+          --v[0], --iv;
           break;
         }
       }
