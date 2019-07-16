@@ -130,16 +130,8 @@ __all__ = [
 execfile(cmssw_base('src/JMTucker/Tools/python/enc_SampleFiles.py'))
 
 _removed = [
-    ('qcdht0700_2017', 'miniaod', ['/store/mc/RunIIFall17MiniAODv2/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/40000/CEB84208-FC42-E811-B127-0025905B8600.root',
-                                   '/store/mc/RunIIFall17MiniAODv2/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/40000/183CE124-6542-E811-94A9-0CC47A4D765A.root',
-                                   '/store/mc/RunIIFall17MiniAODv2/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/40000/4ECD918D-2E43-E811-AEDF-0025905B85B6.root',
-                                   '/store/mc/RunIIFall17MiniAODv2/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/20000/0439B5E2-7142-E811-B207-0025905A608C.root',]),
-    ('qcdht1500_2017', 'miniaod', ['/store/mc/RunIIFall17MiniAODv2/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/10000/A24E6377-265B-E811-9C65-00238B8A3CEE.root',
-                                   '/store/mc/RunIIFall17MiniAODv2/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/10000/1AA8AA30-2B5C-E811-B0A2-0025905B857C.root',
-                                   '/store/mc/RunIIFall17MiniAODv2/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/10000/3C8B92E4-345C-E811-83F6-0CC47A745250.root',]),
     ('ttbarht0800_2017', 'miniaod', ['/store/mc/RunIIFall17MiniAODv2/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/40000/225CD078-B3A4-E811-AA74-001E67DDC254.root',
                                      '/store/mc/RunIIFall17MiniAODv2/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/60000/BC22A92A-7BBA-E811-8A2B-0242AC1C0501.root',]),
-    ('mfv_neu_tau000300um_M3000_2017', 'miniaod', ['/store/mc/RunIIFall17MiniAODv2/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-3000_CTau-300um_TuneCP2_13TeV-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/80000/C6C4C310-E40D-E911-B7AB-0025904C66A4.root']),
     ]
 
 for name, ds, fns in _removed:
@@ -696,8 +688,10 @@ if __name__ == '__main__':
             if ret != 0:
                 ret = os.system('xrdcp -sf root://cmseos.fnal.gov/%s /dev/null' % fn)
             return ret == 0
-        for (name,ds), fn in _removed:
-            print (colors.boldred if ok(fn) else colors.green)('%s %s %s' % (name, ds, fn))
+        print colors.boldred('red means the file is OK,'), colors.green('green means it should stay in the removed list')
+        for name, ds, fns in _removed:
+            for fn in fns:
+                print (colors.boldred if ok(fn) else colors.green)('%s %s %s' % (name, ds, fn))
 
     else:
         sys.exit('did not understand argv %r' % sys.argv)
