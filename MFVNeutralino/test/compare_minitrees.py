@@ -1,11 +1,12 @@
 from JMTucker.MFVNeutralino.MiniTreeBase import *
 
-ps = plot_saver(plot_dir('compare_minitrees'), size=(600,600))
+ps = plot_saver(plot_dir('compare_minitrees', temp=True), size=(600,600))
 
 fn1 = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV25mv3/mfv_stopdbardbar_tau010000um_M0800_2017.root'
-fn2 = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV25mv3_maxnm1dz20um/mfv_stopdbardbar_tau010000um_M0800_2017.root'
+fn2 = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV25mv3_maxnm1dz50um_onlyonce/mfv_stopdbardbar_tau010000um_M0800_2017.root'
 nice1 = 'nom'
 nice2 = 'mxdz20'
+req_genmatch = False # whether to only use 1/2 vtx events where one/both vertices "match" a generated lsp
 one2one = True # whether to compare result event by event (must be same events but processed differently)
 scale1, scale2 = 1., 1.  # not smart enough to figure out the appropriate scaling by e.g. nevents generated
 dbvbinning = '200 #mum', '100,0,2'
@@ -39,7 +40,7 @@ def foo(which, var_name, title, draw_str, cut):
                 res_fit='pol1',
                 res_divide_opt={'confint': clopper_pearson_poisson_means, 'force_le_1': False},
                 statbox_size=(0.2,0.2),
-                res_y_range=0.05,
+                res_y_range=0.25,
                 res_lines = [(1.0, 1, 1, 2)],
                 )
     ef1, ef1l, ef1h = clopper_pearson(x1, n1)
@@ -58,15 +59,18 @@ def foo(which, var_name, title, draw_str, cut):
     fmt = '%10s: n1 %5i (%.3f +- %.3f) n2 %5i (%.3f +- %.3f)  means (%.3f +- %.3f) - (%.3f +- %.3f) = %.3f +- %.3f  rmses (%.3f +- %.3f) - (%.3f +- %.3f) = %.3f +- %.3f'
     print fmt % to_print
 
-foo('dbv1vtx',   '1dbv', 'nvtx==1;d_{BV} (cm);events/' + dbvbinning[0], 'dist0>>%s(' + dbvbinning[1] + ')',  'nvtx==1')
-foo('dbvge2vtx', '2dbv', 'nvtx>=2;d_{BV} (cm);events/' + dbvbinning[0], 'dist0>>%s(' + dbvbinning[1] + ')',  'nvtx>=2')
-foo('ge2vtx', 'dvv',  'nvtx>=2;d_{VV} (cm);events/' + dvvbinning[0], 'svdist>>%s(' + dvvbinning[1] + ')', 'nvtx>=2')
-foo('2vtx',   'dvv2', 'nvtx==2;d_{VV} (cm);events/' + dvvbinning[0], 'svdist>>%s(' + dvvbinning[1] + ')', 'nvtx==2')
-foo('ge3vtx', 'dvv3', 'nvtx>=3;d_{VV} (cm);events/' + dvvbinning[0], 'svdist>>%s(' + dvvbinning[1] + ')', 'nvtx>=3')
+genmatch_1v = ' && genmatch0' if req_genmatch else ''
+genmatch_2v = ' && genmatch0 && genmatch1' if req_genmatch else ''
+
+foo('dbv1vtx',   '1dbv', 'nvtx==1;d_{BV} (cm);events/' + dbvbinning[0], 'dist0>>%s('  + dbvbinning[1] + ')', 'nvtx==1' + genmatch_1v)
+foo('dbvge2vtx', '2dbv', 'nvtx>=2;d_{BV} (cm);events/' + dbvbinning[0], 'dist0>>%s('  + dbvbinning[1] + ')', 'nvtx>=2' + genmatch_2v)
+foo('ge2vtx',    'dvv',  'nvtx>=2;d_{VV} (cm);events/' + dvvbinning[0], 'svdist>>%s(' + dvvbinning[1] + ')', 'nvtx>=2' + genmatch_2v)
+foo('2vtx',      'dvv2', 'nvtx==2;d_{VV} (cm);events/' + dvvbinning[0], 'svdist>>%s(' + dvvbinning[1] + ')', 'nvtx==2' + genmatch_2v)
+foo('ge3vtx',    'dvv3', 'nvtx>=3;d_{VV} (cm);events/' + dvvbinning[0], 'svdist>>%s(' + dvvbinning[1] + ')', 'nvtx>=3' + genmatch_2v)
 
 if one2one:
     xform = lambda x: tuple(int(y) for y in x[:3]) + tuple(float(y) for y in x[3:])
-    d1, d2 = [{tuple(x[:3]) : tuple(x[3:]) for x in detree(t, 'run:lumi:event:nvtx:svdist*(nvtx>=2):ntk0*(nvtx>=2):ntk1*(nvtx>=2)', xform=xform)} for t in (t1,t2)]
+    d1, d2 = [{tuple(x[:3]) : tuple(x[3:]) for x in detree(t, 'run:lumi:event:nvtx:svdist*(nvtx>=2%s):ntk0*(nvtx>=2%s):ntk1*(nvtx>=2%s)' % (genmatch_2v, genmatch_2v, genmatch_2v), 'nvtx>=2'+genmatch_2v, xform=xform)} for t in (t1,t2)]
     rles = list(set(d1.keys()) | set(d2.keys()))
     h_nvtx = ROOT.TH2F('h_nvtx', ';nvtx %s;nvtx %s' % (nice1, nice2), 10, 0, 10, 10, 0, 10)
     h_svdist = ROOT.TH2F('h_svdist', ';svdist %s;svdist %s' % (nice1, nice2), 100, 0, 4, 100, 0, 4)
@@ -89,8 +93,6 @@ if one2one:
         h_svdistzoom.Fill(svdist1, svdist2)
         h_ntk0.Fill(ntk01, ntk02)
         h_ntk1.Fill(ntk11, ntk12)
-        if nvtx1 == 2 and nvtx2 == 1:
-            print rle, svdist1
         if nvtx1 == nvtx2 and nvtx2 == 2 or nvtx2 == 3:
             h_svdisteq.Fill(svdist1, svdist2)
             h_ntk0eq.Fill(ntk01, ntk02)
@@ -100,27 +102,27 @@ if one2one:
             h_ntk0neq.Fill(ntk01, ntk02)
             h_ntk1neq.Fill(ntk11, ntk12)
 
-    h1 = h_nvtx.ProjectionX()
-    h2 = h_nvtx.ProjectionY()
-    h1.SetName(nice1)
-    h2.SetName(nice2)
-    h1.SetLineColor(ROOT.kRed)
-    h2.SetLineColor(ROOT.kBlue)
-    for h in h1,h2:
-        h.SetLineWidth(2)
-    h1.Draw('hist')
-    h2.Draw('hist sames')
-    ps.c.Update()
-    differentiate_stat_box(h1, (1,0), new_size=(0.3,0.3))
-    differentiate_stat_box(h2, (0,0), new_size=(0.3,0.3))
-    ps.save('nvtx')
-
-    h_nvtx.Draw('colz text00')
-    h_nvtx.SetStats(0)
-    ps.save('h_nvtx_scatter', logz=True)
-
-    for nh in 'svdist', 'svdistzoom', 'svdisteq', 'svdistneq', 'ntk0', 'ntk1', 'ntk0eq', 'ntk1eq', 'ntk0neq', 'ntk1neq':
+    for nh in 'nvtx', 'ntk0', 'ntk1':
         h = eval('h_%s' % nh)
-        h.Draw('colz')
+        h1 = h.ProjectionX()
+        h2 = h.ProjectionY()
+        h1.SetName(nice1)
+        h2.SetName(nice2)
+        h1.SetLineColor(ROOT.kRed)
+        h2.SetLineColor(ROOT.kBlue)
+        for h in h1,h2:
+            h.SetLineWidth(2)
+        draw_in_order(((h1,h2), 'hist'), True)
+        ps.c.Update()
+        differentiate_stat_box(h1, (1,0), new_size=(0.3,0.3))
+        differentiate_stat_box(h2, (0,0), new_size=(0.3,0.3))
+        ps.save(nh + '_1d')
+
+    for nh in 'nvtx', 'svdist', 'svdistzoom', 'svdisteq', 'svdistneq', 'ntk0', 'ntk1', 'ntk0eq', 'ntk1eq', 'ntk0neq', 'ntk1neq':
+        h = eval('h_%s' % nh)
+        cmd = 'colz'
+        if nh == 'nvtx':
+            cmd += ' text00'
+        h.Draw(cmd)
         h.SetStats(0)
         ps.save(nh, logz=True)
