@@ -358,9 +358,14 @@ for x in __all__:
             exec '%s = sample' % sample.name
             __all__.append(sample.name)
 
+span_signal_samples_2017 = [eval('mfv_%s_tau%06ium_M%04i_2017' % (a,b,c)) for a in ('neu','stopdbardbar') for b in (300,1000,10000) for c in (800,1600,3000)]
+span_signal_samples_2018 = [eval('mfv_%s_tau%06ium_M%04i_2018' % (a,b,c)) for a in ('neu','stopdbardbar') for b in (300,1000,10000) for c in (800,1600,3000)]
+
 _alls = [
     'all_signal_samples_2017',
     'all_signal_samples_2018',
+    'span_signal_samples_2017',
+    'span_signal_samples_2018',
     ]
 __all__ += _alls
 for x in _alls:
