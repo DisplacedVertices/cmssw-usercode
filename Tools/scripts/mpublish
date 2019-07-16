@@ -75,7 +75,8 @@ for wd in wds:
             sample = Samples.sample_from_end_string(Samples, wd).name
         except AttributeError:
             raise ValueError('cannot find sample name from %s, rerun with --main?' % wd)
-    assert not publish.has_key(sample)
+    if publish.has_key(sample):
+        raise ValueError('sample %s already encountered' % sample)
 
     if is_crab:
         njobs = crab_get_njobs_from_log(wd)
@@ -189,5 +190,5 @@ print colors.bold('lines for Samples:')
 for sample, ds, nevents in samples:
     print "%s.add_dataset('%s', '%s', %i)" % (sample, options.dataset, ds, nevents)
 if samples_lump:
-    print 'for x in (%s,):' % ', '.join(samples_lump)
+    print 'for x in %s:' % ', '.join(samples_lump)
     print '    x.add_dataset("%s")' % options.dataset
