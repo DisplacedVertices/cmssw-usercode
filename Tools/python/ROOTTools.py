@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
-import math, sys, os, glob, tempfile
+import math, sys, os, tempfile
 from array import array
+from glob import glob
 from collections import defaultdict, namedtuple
 from JMTucker.Tools.general import chunks
 
