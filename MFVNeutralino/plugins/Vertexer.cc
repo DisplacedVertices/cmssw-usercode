@@ -837,7 +837,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
     int iv = 0;
     for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0], ++iv) {
-      if (refit_count[iv] >= max_nm1_refit_count)
+      if (max_nm1_refit_count > 0 && refit_count[iv] >= max_nm1_refit_count)
         continue;
 
       const track_vec tks = vertex_track_vec(*v[0]);
