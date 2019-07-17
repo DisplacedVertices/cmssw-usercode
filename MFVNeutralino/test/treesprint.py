@@ -19,6 +19,7 @@ sumbkg = not bool_from_argv('nosumbkg')
 sumall = bool_from_argv('sumall')
 sort = not bool_from_argv('nosort')
 
+genmatch = bool_from_argv('genmatch')
 minnjets = typed_from_argv(int, name='minnjets')
 maxnjets = typed_from_argv(int, name='maxnjets')
 minht = typed_from_argv(float, name='minht')
@@ -76,6 +77,8 @@ def getit(fn, ntk):
         return (-1,-1,-1), (-1,-1,-1), (-1,-1,-1), (-1,-1,-1)
     hr = draw_hist_register(t, True)
     def c(cut):
+        if genmatch:
+            cut = '(%s) && genmatch0 && (nvtx < 2 || genmatch1)' % cut
         if minnjets != None:
             cut = '(%s) && njets >= %i' % (cut, minnjets)
         if maxnjets != None:
