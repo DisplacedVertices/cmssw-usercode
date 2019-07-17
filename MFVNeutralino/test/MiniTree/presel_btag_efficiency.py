@@ -1,7 +1,7 @@
 from JMTucker.Tools.ROOTTools import *
 import sys
 
-year = int(sys.argv[1])
+year = sys.argv[1]
 version = 'V25m'
 
 if len(sys.argv) > 2 :
@@ -91,7 +91,7 @@ ft = h_nbtags_tight.Integral(2,11) / h_nbtags_tight.Integral(1,11)
 print
 print 'Inputs for bquark_fraction.py (for per-event from per-jet*SF; %s; Tight WP)' % year
 print '###########################'
-print '    print \'f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); %s\'' % year
+print '    print \'f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); %s; %s\'' % (year, syst_var_str)
 print '    f2_val_3trk = print_f2(3, fb(%.3f, %.3f, %.3f), fb(ft1, efft1, frt1), cb, cbbar, 1)' % (ft, event_eff, event_fakerate)
 print '    f2_val_7trk = print_f2(7, fb(%.3f, %.3f, %.3f), fb(ft1, efft1, frt1), cb, cbbar, 1)' % (ft, event_eff, event_fakerate)
 print '    f2_val_4trk = print_f2(4, fb(%.3f, %.3f, %.3f), fb(ft1, efft1, frt1), cb, cbbar, 1)' % (ft, event_eff, event_fakerate)

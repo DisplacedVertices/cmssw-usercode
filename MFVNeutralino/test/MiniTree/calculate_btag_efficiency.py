@@ -91,7 +91,7 @@ ft = h_1v_1tight_btag_flavor_code.GetBinContent(2) / h_1v_1tight_btag_flavor_cod
 print
 print 'Inputs for bquark_fraction.py (for per-event from per-jet*SF; %s; Tight WP)' % year
 print '###########################'
-print '    print \'f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); %s\'' % year
+print '    print \'f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); %s; %s\'' % (year, syst_var_str)
 print '    f2_val_%strk = print_f2(%s, fb(ft0, efft0, frt0), fb(%.3f, %.3f, %.3f), cb, cbbar, 1)' % (ntk, ntk, ft, event_eff, event_fakerate)
 print '    print'
 print '###########################'

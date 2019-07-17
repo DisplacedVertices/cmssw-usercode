@@ -216,9 +216,9 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
     else if (p.year() == "2017p8")  { dphi_pdf_c = 1.42; dphi_pdf_a = 3.60; }
     else { fprintf(stderr, "bad year"); exit(1); }
   } else if (p.only_10pc()) {
-    if (p.year() == "2017")         { dphi_pdf_c = 1.38; dphi_pdf_a = 4.89; }
+    if (p.year() == "2017")         { dphi_pdf_c = 1.38; dphi_pdf_a = 4.90; }
     else if (p.year() == "2018")    { dphi_pdf_c = 1.35; dphi_pdf_a = 4.71; }
-    else if (p.year() == "2017p8")  { dphi_pdf_c = 1.37; dphi_pdf_a = 4.80; }
+    else if (p.year() == "2017p8")  { dphi_pdf_c = 1.37; dphi_pdf_a = 4.81; }
     else if (p.year() == "2017B")   { dphi_pdf_c = 1.29; dphi_pdf_a = 4.84; }
     else if (p.year() == "2017C")   { dphi_pdf_c = 1.29; dphi_pdf_a = 4.84; }
     else if (p.year() == "2017D")   { dphi_pdf_c = 1.29; dphi_pdf_a = 4.84; }
@@ -681,7 +681,7 @@ int main(int argc, const char* argv[]) {
   // production version
   const char* version = "V25m";
 
-  for (const char* year : {"2017p8"}) {
+  for (const char* year : {"2017","2018","2017p8"}) {
     for (int ntracks : {3, 4, 5, 7}) {
       ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks);
       construct_dvvc(pars2.correct_bquarks(false),              TString::Format("2v_from_jets_%s_%dtrack_bquark_uncorrected_%s.root", year, ntracks, version));
@@ -701,7 +701,7 @@ int main(int argc, const char* argv[]) {
   }
 
   //for (const char* year : {"2017", "2018", "2017p8", "2017B", "2017C", "2017D", "2017E", "2017F"}) {
-  for (const char* year : {"2017p8"}) {
+  for (const char* year : {"2017","2018","2017p8"}) {
     //for (int ntracks : {3, 4, 5, 7}) {
     for (int ntracks : {3, 4}) {
       ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks).is_mc(false).only_10pc(true);
