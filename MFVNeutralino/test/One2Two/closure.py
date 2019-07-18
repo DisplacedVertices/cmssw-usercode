@@ -2,7 +2,7 @@ from JMTucker.Tools.ROOTTools import *
 from statmodel import ebins
 ROOT.TH1.AddDirectory(0)
 
-do_btag = True
+do_bquark = False
 is_mc = True
 only_10pc = False
 year = '2017p8'
@@ -63,34 +63,35 @@ def make_closure_plots(i):
 
     for closure in (dvv_closure, dphi_closure):
         simulated = ROOT.TFile(fns[i]).Get(closure[0])
+        simulated.SetTitle(';|#Delta#phi_{VV}|;Events' if 'phi' in closure[0] else ';d_{VV} (cm);Events')
         simulated.SetStats(0)
         simulated.SetLineColor(ROOT.kBlue)
         simulated.SetLineWidth(2)
         simulated.SetMinimum(0)
         simulated.Draw()
 
-        template = ROOT.TFile(fns[i]).Get(closure[1])
-        scale_and_draw_template(template, i, simulated, ROOT.kRed)
+        template_btag = ROOT.TFile(fns_btag[i]).Get(closure[1])
+        scale_and_draw_template(template_btag, i, simulated, ROOT.kRed)
 
-        uncertband = template.Clone('uncertband')
-        uncertband.SetFillColor(ROOT.kRed-3)
-        uncertband.SetFillStyle(3004)
-        uncertband.Draw('E2 sames')
-
+        uncertband_btag = template_btag.Clone('uncertband_btag')
+        uncertband_btag.SetFillColor(ROOT.kRed-3)
+        uncertband_btag.SetFillStyle(3004)
+        uncertband_btag.Draw('E2 sames')
 
         l1 = ROOT.TLegend(0.35, 0.75, 0.85, 0.85)
         l1.AddEntry(simulated, 'Simulated events' if is_mc else 'Data')
-        l1.AddEntry(template, 'Background template' + (' (bquark method)' if do_btag else '') )
+        l1.AddEntry(template_btag, 'Background template' + (' (btag method)' if do_bquark else ''))
 
-        if do_btag :
-            template_btag = ROOT.TFile(fns_btag[i]).Get(closure[1])
-            scale_and_draw_template(template_btag, i, simulated, ROOT.kGreen+2)
+        if do_bquark:
+            template = ROOT.TFile(fns[i]).Get(closure[1])
+            scale_and_draw_template(template, i, simulated, ROOT.kGreen+2)
 
-            uncertband_btag = template_btag.Clone('uncertband_btag')
-            uncertband_btag.SetFillColor(ROOT.kGreen-3)
-            uncertband_btag.SetFillStyle(3005)
-            uncertband_btag.Draw('E2 sames')
-            l1.AddEntry(template_btag, 'Background template (btag method)')
+            uncertband = template.Clone('uncertband')
+            uncertband.SetFillColor(ROOT.kGreen-3)
+            uncertband.SetFillStyle(3005)
+            uncertband.Draw('E2 sames')
+            l1.AddEntry(template, 'Background template (bquark method)')
+
 
         l1.SetFillColor(0)
         l1.Draw()
