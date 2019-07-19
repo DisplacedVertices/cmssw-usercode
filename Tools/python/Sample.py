@@ -525,7 +525,7 @@ def main(samples_registry):
     samples = samples_registry.from_argv()
     datasets = samples_registry.datasets_from_argv()
     def prnt(*x):
-        print ' '.join(x)
+        print ' '.join(str(y) for y in x)
     def runem(cb):
         for dataset in datasets:
             for sample in samples:
