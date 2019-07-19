@@ -461,6 +461,7 @@ def compare_hists(ps, samples, **kwargs):
     scaling        = _get('scaling',        1.)
     ratio          = _get('ratio',          True)
     x_range        = _get('x_range',        None)
+    move_overflows = _get('move_overflows', 'under over')
     profile        = _get('profile',        None)
 
     ###
@@ -563,6 +564,7 @@ def compare_hists(ps, samples, **kwargs):
             hists_sorted.sort(key=lambda hist: hist.GetMaximum(), reverse=True)
 
         x_r = x_range(name, hist_list, None)
+        m_o = move_overflows(name, hist_list, None)
 
         if len(hists) > 1 and ratio(name, hist_list, None) and (not is2d or profiled):
             ratios_plot(name_clean,
@@ -571,8 +573,9 @@ def compare_hists(ps, samples, **kwargs):
                         res_fit=False,
                         res_divide_opt={'confint': propagate_ratio, 'force_le_1': False},
                         statbox_size=stat_size(name, hist_list, None),
-                        res_y_range=(0, 3),
+                        res_y_range=0.15,
                         x_range = x_r,
+                        move_overflows = m_o,
                         )
         else:
             for i,hist in enumerate(hists_sorted):
@@ -582,6 +585,7 @@ def compare_hists(ps, samples, **kwargs):
                     hist.Draw((draw_cmd + ' sames').strip())
                 if (not is2d or profiled) and x_r:
                     hist.GetXaxis().SetRangeUser(*x_r)
+                move_overflows_into_visible_bins(hist, m_o)
 
             ps.c.Update()
             if not no_stats(name, hist_list, None):
@@ -648,7 +652,7 @@ def data_mc_comparison(name,
                        canvas_right_margin = 0.08,
                        join_info_override = None,
                        stack_draw_cmd = 'hist',
-                       overflow_in_last = False,
+                       move_overflows = 'under over',
                        rebin = None,
                        bin_width_to = None,
                        poisson_intervals = False,
@@ -802,6 +806,8 @@ def data_mc_comparison(name,
                 if int_lumi_bkg_scale is not None and sample not in signal_samples:
                     sample.hist.Scale(int_lumi_bkg_scale)
 
+            move_overflows_into_visible_bins(sample.hist, move_overflows)
+
             if rebin is not None:
                 sample.hist_before_rebin = sample.hist
                 rebin_name = sample.hist.GetName() + '_rebinned'
@@ -814,20 +820,6 @@ def data_mc_comparison(name,
                 else:
                     sample.hist = sample.hist.Rebin(rebin, rebin_name)
             
-            if overflow_in_last:
-                if x_range is not None:
-                    # if not some decent fraction of the bin visible, use the last wholly visible bin
-                    # for now "decent" = half the bin width
-                    ibin = sample.hist.FindBin(x_range[1])
-                    a = sample.hist.GetBinLowEdge(ibin)
-                    b = sample.hist.GetBinLowEdge(ibin+1)
-                    w = b - a
-                    x_range_w = x_range[1] - x_range[0]
-                    minus_one = x_range[1] - a < w * 0.5
-                    move_above_into_bin(sample.hist, x_range[1], minus_one)
-                else:
-                    move_overflow_into_last_bin(sample.hist)
-
             if bin_width_to:
                 if bin_width_to_scales is None:
                     bin_width_to_scales = [None]
@@ -1498,6 +1490,18 @@ def move_overflow_into_last_bin(h):
     h.SetBinContent(nb+1, 0)
     h.SetBinError(nb+1, 0)
 
+def move_overflows_into_visible_bins(h, opt='under over'):
+    """Combination of move_above/below_into_bin and
+    move_overflow_into_last_bin, except automatic in the range. Have
+    to already have SetRangeUser."""
+    if type(opt) != str:
+        opt = 'under over' if opt else ''
+    opt = opt.strip().lower()
+    if 'under' in opt:
+        move_below_into_bin(h, h.GetBinLowEdge(h.GetXaxis().GetFirst()))
+    if 'over' in opt:
+        move_above_into_bin(h, h.GetBinLowEdge(h.GetXaxis().GetLast()))
+
 def move_stat_box(s, ndc_coords):
     """Move the stat box s (or if s is its hist, get s from it) to the
     NDC coords (x1, y1, x2, y2) specified. (Remember to call
@@ -1785,6 +1789,7 @@ def ratios_plot(name,
                 res_lines = None,
                 res_fcns = [],
                 legend = None,
+                move_overflows = 'under over',
                 draw_normalized = False,
                 statbox_size = None,
                 which_ratios = 'first', # 'first' or 'pairs'
@@ -1863,6 +1868,8 @@ def ratios_plot(name,
                 dc = 'p'
             gg.Add(h, dc)
         elif are_hists:
+            if move_overflows:
+                move_overflows_into_visible_bins(h, move_overflows)
             if draw_normalized:
                 h.v = h.GetMaximum() / h.Integral(0,h.GetNbinsX()+1)
             else:
@@ -1927,11 +1934,12 @@ def ratios_plot(name,
         min_r, max_r = 1e99, -1e99
         for h0,h in pairs_for_ratios:
             v1, v2 = histogram_divide_values(h, h0, True)
-            rs = [v1.y[i] / v2.y[i] for i in xrange(v2.n) if v2.y[i] != 0. and (not x_range or x_range[0] < v1.x[i] < x_range[1])]
+            xa, xb = h.GetBinLowEdge(h.GetXaxis().GetFirst()), h.GetBinLowEdge(h.GetXaxis().GetLast())
+            rs = [v1.y[i] / v2.y[i] for i in xrange(v2.n) if v2.y[i] != 0. and xa < v1.x[i] < xb]
             if rs:
                 min_r = min(min_r, min(rs))
                 max_r = max(max_r, max(rs))
-        res_y_range = min_r-res_y_range, max_r+res_y_range
+        res_y_range = min_r*(1-res_y_range), max_r*(1+res_y_range)
 
     for i,(h0,h) in enumerate(pairs_for_ratios):
         r = histogram_divide(h, h0, **res_divide_opt)
@@ -2434,6 +2442,7 @@ __all__ = [
     'make_rms_hist',
     'move_below_into_bin',
     'move_above_into_bin',
+    'move_overflows_into_visible_bins',
     'move_overflow_into_last_bin',
     'move_stat_box',
     'p4',

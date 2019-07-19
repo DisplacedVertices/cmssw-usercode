@@ -43,6 +43,8 @@ group.add_argument('--ratio', default='True',
                    help='Snippet for ratio lambda (default: %(default)s).')
 group.add_argument('--x-range', default='None',
                    help='Snippet for x_range lambda (default: %(default)s).')
+group.add_argument('--move-overflows', default='"under over"',
+                   help='Snippet for move_overflows lambda (default: %(default)s).')
 group.add_argument('--profile', default='None',
                    help='Snippet for profile lambda (default: %(default)s).')
 
@@ -94,7 +96,7 @@ def lambda_it(options, name):
     return o
 
 lambda_kwargs = {}
-for name in 'no_stats', 'stat_size', 'apply_commands', 'separate_plots', 'skip', 'draw_command', 'scaling', 'ratio', 'x_range', 'profile':
+for name in 'no_stats', 'stat_size', 'apply_commands', 'separate_plots', 'skip', 'draw_command', 'scaling', 'ratio', 'x_range', 'move_overflows', 'profile':
     lambda_kwargs[name] = lambda_it(options, name)
 
 print 'comparehists running with these options:'
