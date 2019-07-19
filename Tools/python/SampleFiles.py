@@ -514,6 +514,32 @@ _add_ds("ntuplev25m_nm1refits", {
 'JetHT2017F': _fromnum1("/store/user/tucker/JetHT/NtupleV25m_Nm1Refits_2017/190706_201050", 51),
 })
 
+
+_add_ds("ntuplev25m_maxnm1dz50um_inf", {
+'qcdht0700_2017': _fromnum0("/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/NtupleV25m_maxnm1dz50um_inf_2017/190716_154225", 16),
+'qcdht1000_2017': _fromnum0("/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/NtupleV25m_maxnm1dz50um_inf_2017/190716_154226", 31),
+'qcdht1500_2017': _fromnum0("/store/user/tucker/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/NtupleV25m_maxnm1dz50um_inf_2017/190716_154227", 63),
+'qcdht2000_2017': _fromnum0("/store/user/tucker/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/NtupleV25m_maxnm1dz50um_inf_2017/190716_154228", 30),
+'mfv_neu_tau000300um_M0800_2017': _fromnum0("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-300um_TuneCP2_13TeV-pythia8/NtupleV25m_maxnm1dz50um_inf_2017/190716_154229", 500),
+'mfv_neu_tau000300um_M1600_2017': _fromnum0("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-300um_TuneCP2_13TeV-pythia8/NtupleV25m_maxnm1dz50um_inf_2017/190716_154230", 500),
+'mfv_neu_tau000300um_M3000_2017': _fromnum0("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-3000_CTau-300um_TuneCP2_13TeV-pythia8/NtupleV25m_maxnm1dz50um_inf_2017/190716_154231", 490),
+'mfv_neu_tau001000um_M0800_2017': _fromnum0("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-1mm_TuneCP2_13TeV-pythia8/NtupleV25m_maxnm1dz50um_inf_2017/190716_154232", 500),
+'mfv_neu_tau001000um_M1600_2017': _fromnum0("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-1mm_TuneCP2_13TeV-pythia8/NtupleV25m_maxnm1dz50um_inf_2017/190716_154233", 500),
+'mfv_neu_tau001000um_M3000_2017': _fromnum0("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-3000_CTau-1mm_TuneCP2_13TeV-pythia8/NtupleV25m_maxnm1dz50um_inf_2017/190716_154234", 490),
+'mfv_neu_tau010000um_M0800_2017': _fromnum0("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCP2_13TeV-pythia8/NtupleV25m_maxnm1dz50um_inf_2017/190716_154235", 500),
+'mfv_neu_tau010000um_M1600_2017': _fromnum0("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-10mm_TuneCP2_13TeV-pythia8/NtupleV25m_maxnm1dz50um_inf_2017/190716_154236", 500),
+'mfv_neu_tau010000um_M3000_2017': _fromnum0("/store/user/tucker/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-3000_CTau-10mm_TuneCP2_13TeV-pythia8/NtupleV25m_maxnm1dz50um_inf_2017/190716_154237", 490),
+'mfv_stopdbardbar_tau000300um_M0800_2017': _fromnum0("/store/user/tucker/StopStopbarTo2Dbar2D_M-800_CTau-300um_TuneCP2_13TeV-pythia8/NtupleV25m_maxnm1dz50um_inf_2017/190716_154238", 500),
+'mfv_stopdbardbar_tau000300um_M1600_2017': _fromnum0("/store/user/tucker/StopStopbarTo2Dbar2D_M-1600_CTau-300um_TuneCP2_13TeV-pythia8/NtupleV25m_maxnm1dz50um_inf_2017/190716_154239", 500),
+'mfv_stopdbardbar_tau000300um_M3000_2017': _fromnum0("/store/user/tucker/StopStopbarTo2Dbar2D_M-3000_CTau-300um_TuneCP2_13TeV-pythia8/NtupleV25m_maxnm1dz50um_inf_2017/190716_154240", 500),
+'mfv_stopdbardbar_tau001000um_M0800_2017': _fromnum0("/store/user/tucker/StopStopbarTo2Dbar2D_M-800_CTau-1mm_TuneCP2_13TeV-pythia8/NtupleV25m_maxnm1dz50um_inf_2017/190716_154241", 500),
+'mfv_stopdbardbar_tau001000um_M1600_2017': _fromnum0("/store/user/tucker/StopStopbarTo2Dbar2D_M-1600_CTau-1mm_TuneCP2_13TeV-pythia8/NtupleV25m_maxnm1dz50um_inf_2017/190716_154242", 500),
+'mfv_stopdbardbar_tau001000um_M3000_2017': _fromnum0("/store/user/tucker/StopStopbarTo2Dbar2D_M-3000_CTau-1mm_TuneCP2_13TeV-pythia8/NtupleV25m_maxnm1dz50um_inf_2017/190716_154243", 500),
+'mfv_stopdbardbar_tau010000um_M0800_2017': _fromnum0("/store/user/tucker/StopStopbarTo2Dbar2D_M-800_CTau-10mm_TuneCP2_13TeV-pythia8/NtupleV25m_maxnm1dz50um_inf_2017/190716_154244", 490),
+'mfv_stopdbardbar_tau010000um_M1600_2017': _fromnum0("/store/user/tucker/StopStopbarTo2Dbar2D_M-1600_CTau-10mm_TuneCP2_13TeV-pythia8/NtupleV25m_maxnm1dz50um_inf_2017/190716_154245", 500),
+'mfv_stopdbardbar_tau010000um_M3000_2017': _fromnum0("/store/user/tucker/StopStopbarTo2Dbar2D_M-3000_CTau-10mm_TuneCP2_13TeV-pythia8/NtupleV25m_maxnm1dz50um_inf_2017/190716_154246", 500),
+})
+
 ################################################################################
 
 if __name__ == '__main__':
