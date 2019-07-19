@@ -509,12 +509,13 @@ def which_global_tag(settings=None):
             return '94X_dataRun2_v11'
     elif settings.year == 2018:
         if settings.is_mc:
-            return '102X_upgrade2018_realistic_v15'
+            return '102X_upgrade2018_realistic_v19'
         else:
-            assert settings.era
-            if settings.era in ('A','B','C'):
-                return '102X_dataRun2_Sep2018Rereco_v1'
+            eras = tuple('ABCD')
+            assert settings.era in eras
+            if settings.era in eras[:3]:
+                return '102X_dataRun2_v11'
             else:
-                return '102X_dataRun2_Prompt_v11'
+                return '102X_dataRun2_Prompt_v14'
     else:
         raise ValueError('what year is it')
