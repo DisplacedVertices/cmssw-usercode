@@ -6,7 +6,7 @@ ROOT.TH1.AddDirectory(0)
 is_mc = True
 only_10pc = False
 year = '2017p8'
-version = 'v23m'
+version = 'V25m'
 
 #mode = 'vary_eff'
 #mode = 'vary_dphi'
@@ -34,7 +34,18 @@ fns = [fn1, fn2, fn3]
 ntk = ['3-track', '4-track', '5-track']
 names = ['3-track x 3-track', '4-track x 4-track', '#geq 5-track x #geq 5-track']
 
-n2v = [651., 2.21, 1.] if year == '2017' else [426., 5., 1.]
+n2v_2017 = [651., 2.21, 1.]
+n2v_2018 = [426., 5., 1.]
+
+if year == '2017' :
+    n2v = n2v_2017
+elif year == '2018' :
+    n2v = n2v_2018
+elif year == '2017p8' :
+    n2v = [sum(n2v_val) for n2v_val in zip(n2v_2017, n2v_2018)]
+else :
+    print("Unsupported year %s! Exiting." % year)
+    sys.exit()
 
 colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kOrange, ROOT.kViolet, ROOT.kPink+1]
 
