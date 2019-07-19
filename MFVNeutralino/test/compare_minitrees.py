@@ -59,18 +59,27 @@ def foo(which, var_name, title, draw_str, cut):
     fmt = '%10s: n1 %5i (%.3f +- %.3f) n2 %5i (%.3f +- %.3f)  means (%.3f +- %.3f) - (%.3f +- %.3f) = %.3f +- %.3f  rmses (%.3f +- %.3f) - (%.3f +- %.3f) = %.3f +- %.3f'
     print fmt % to_print
 
-genmatch_1v = ' && genmatch0' if req_genmatch else ''
-genmatch_2v = ' && genmatch0 && genmatch1' if req_genmatch else ''
+def genmatch_cut(c, n):
+    if not req_genmatch:
+        return c
+    if n == 1:
+        gmc = 'genmatch0'
+    elif n >= 2:
+        gmc = 'genmatch0 && genmatch1'
+    if c:
+        return '(%s) && (%s)' % (c, gmc)
+    else:
+        return gmc
 
-foo('dbv1vtx',   '1dbv', 'nvtx==1;d_{BV} (cm);events/' + dbvbinning[0], 'dist0>>%s('  + dbvbinning[1] + ')', 'nvtx==1' + genmatch_1v)
-foo('dbvge2vtx', '2dbv', 'nvtx>=2;d_{BV} (cm);events/' + dbvbinning[0], 'dist0>>%s('  + dbvbinning[1] + ')', 'nvtx>=2' + genmatch_2v)
-foo('ge2vtx',    'dvv',  'nvtx>=2;d_{VV} (cm);events/' + dvvbinning[0], 'svdist>>%s(' + dvvbinning[1] + ')', 'nvtx>=2' + genmatch_2v)
-foo('2vtx',      'dvv2', 'nvtx==2;d_{VV} (cm);events/' + dvvbinning[0], 'svdist>>%s(' + dvvbinning[1] + ')', 'nvtx==2' + genmatch_2v)
-foo('ge3vtx',    'dvv3', 'nvtx>=3;d_{VV} (cm);events/' + dvvbinning[0], 'svdist>>%s(' + dvvbinning[1] + ')', 'nvtx>=3' + genmatch_2v)
+foo('dbv1vtx',   '1dbv', 'nvtx==1;d_{BV} (cm);events/' + dbvbinning[0], 'dist0>>%s('  + dbvbinning[1] + ')', genmatch_cut('nvtx==1', 1))
+foo('dbvge2vtx', '2dbv', 'nvtx>=2;d_{BV} (cm);events/' + dbvbinning[0], 'dist0>>%s('  + dbvbinning[1] + ')', genmatch_cut('nvtx>=2', 2))
+foo('ge2vtx',    'dvv',  'nvtx>=2;d_{VV} (cm);events/' + dvvbinning[0], 'svdist>>%s(' + dvvbinning[1] + ')', genmatch_cut('nvtx>=2', 2))
+foo('2vtx',      'dvv2', 'nvtx==2;d_{VV} (cm);events/' + dvvbinning[0], 'svdist>>%s(' + dvvbinning[1] + ')', genmatch_cut('nvtx==2', 2))
+foo('ge3vtx',    'dvv3', 'nvtx>=3;d_{VV} (cm);events/' + dvvbinning[0], 'svdist>>%s(' + dvvbinning[1] + ')', genmatch_cut('nvtx>=3', 3))
 
 if one2one:
     xform = lambda x: tuple(int(y) for y in x[:3]) + tuple(float(y) for y in x[3:])
-    d1, d2 = [{tuple(x[:3]) : tuple(x[3:]) for x in detree(t, 'run:lumi:event:nvtx:svdist*(nvtx>=2%s):ntk0*(nvtx>=2%s):ntk1*(nvtx>=2%s)' % (genmatch_2v, genmatch_2v, genmatch_2v), 'nvtx>=2'+genmatch_2v, xform=xform)} for t in (t1,t2)]
+    d1, d2 = [{tuple(x[:3]) : tuple(x[3:]) for x in detree(t, 'run:lumi:event:nvtx:svdist:ntk0:ntk1', genmatch_cut('', 2), xform=xform)} for t in (t1,t2)]
     rles = list(set(d1.keys()) | set(d2.keys()))
     h_nvtx = ROOT.TH2F('h_nvtx', ';nvtx %s;nvtx %s' % (nice1, nice2), 10, 0, 10, 10, 0, 10)
     h_svdist = ROOT.TH2F('h_svdist', ';svdist %s;svdist %s' % (nice1, nice2), 100, 0, 4, 100, 0, 4)
