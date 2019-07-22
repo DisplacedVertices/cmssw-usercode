@@ -29,4 +29,3 @@ done
 
 echo "variant,ft,efft,frt" > efficiencies/all_effs.csv
 cat efficiencies/effs_* >> efficiencies/all_effs.csv
-rm efficiencies/effs_*
