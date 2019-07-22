@@ -113,14 +113,10 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
   if (primary_vertices->size())
     primary_vertex = &primary_vertices->at(0);
 
-  std::map<reco::TrackRef, std::vector<std::pair<int, float> > > tracks_in_pvs;
+  std::map<reco::TrackRef, size_t> tracks_in_pvs;
   for (size_t i = 0, ie = primary_vertices->size(); i < ie; ++i) {
-    const reco::Vertex& pv = primary_vertices->at(i);
-    for (auto it = pv.tracks_begin(), ite = pv.tracks_end(); it != ite; ++it) {
-      float w = pv.trackWeight(*it);
-      reco::TrackRef tk = it->castTo<reco::TrackRef>();
-      tracks_in_pvs[tk].push_back(std::make_pair(i, w));
-    }
+    for (const auto& p : track_ref_getter.tracks(event, reco::VertexRef(primary_vertices, i)))
+      tracks_in_pvs[p.first] = i;
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -394,9 +390,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
       const uchar nhitsbehind = 0; //int2uchar(tracker_extents.numHitsBehind(tri->hitPattern(), sv_r, sv_z));
 
-      const std::vector<std::pair<int, float> >& pv_for_track = tracks_in_pvs[trref];
-      if (pv_for_track.size() > 1)
-        throw cms::Exception("VertexAuxProducer") << "multiple PV for a track";
+      const auto pv_for_track = tracks_in_pvs.find(trref);
 
       if (verbose) printf("        %i <%f,%f,%f,%f,%f>\n", int(trki-trkb), tri->charge()*tri->pt(), tri->eta(), tri->phi(), tri->dxy(), tri->dz());
 
@@ -411,7 +405,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
                            tri->hitPattern().numberOfLostHits(reco::HitPattern::TRACK_HITS)); // JMTBAD could add missing inner, outer
 
       aux.track_injet.push_back(track_in_a_jet(mfv::JByNtracks, trref)); // JMTBAD multiple jet assoc types
-      aux.track_inpv.push_back(pv_for_track.size() ? pv_for_track[0].first : -1);
+      aux.track_inpv.push_back(pv_for_track == tracks_in_pvs.end() ? -1 : pv_for_track->second);
       aux.track_dxy.push_back(fabs(tri->dxy(beamspot->position())));
       aux.track_dz.push_back(primary_vertex ? fabs(tri->dz(primary_vertex->position())) : 0); // JMTBAD not the previous behavior when no PV
       aux.track_vx.push_back(tri->vx());
