@@ -100,6 +100,10 @@ print '    print'
 print '###########################'
 print
 
+variant = 'presel_%s_%s' % (year,syst_var_str)
+outfile = open('efficiencies/effs_%s.csv' % (variant),'w')
+outfile.write('%s,%s,%s,%s\n' % (variant,ft, event_eff, event_fakerate))
+outfile.close()
 
 # full table of information
 print 'preselected events'

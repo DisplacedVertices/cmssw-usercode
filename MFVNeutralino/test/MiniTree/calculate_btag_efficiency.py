@@ -97,6 +97,11 @@ print '    print'
 print '###########################'
 print
 
+variant = '%strk_1v_%s_%s' % (ntk,year,syst_var_str)
+outfile = open('efficiencies/effs_%s.csv' % (variant),'w')
+outfile.write('%s,%s,%s,%s\n' % (variant, ft, event_eff, event_fakerate))
+outfile.close()
+
 # full table of information
 print '%10s%90s%26s%26s%26s' % ('', 'per-jet', 'per-event from per-jet', 'per-event from per-jet*SF', 'per-event')
 fmt = '%10s' + '%10s'*9 + '%13s'*6

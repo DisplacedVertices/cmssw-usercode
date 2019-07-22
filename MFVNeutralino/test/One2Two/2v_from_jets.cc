@@ -42,6 +42,8 @@ EOF
 
 #include <cstdlib>
 #include <math.h>
+#include <iostream>
+#include <fstream>
 #include "TCanvas.h"
 #include "TF1.h"
 #include "TFile.h"
@@ -491,7 +493,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   }
   printf("events before efficiency correction = %d, events after efficiency correction = %f, integrated efficiency correction = %f\n", nsamples, events_after_eff, events_after_eff/nsamples);
 
-  TString cb_cbbar = TString::Format("%s, %.3f", out_fn, events_after_eff/nsamples);
+  TString cb_cbbar = TString::Format("%s, %f", out_fn, events_after_eff/nsamples);
   cb_cbbar_vector.push_back(cb_cbbar);
 
   for (int i = 1; i <= h_c1v_dvv->GetNbinsX(); ++i) {
@@ -715,29 +717,25 @@ int main(int argc, const char* argv[]) {
   }
 
   // For use in bquark_fraction.py
-  std::cout << "\nIntegrated dVVc efficiency correction values:" << std::endl;
-  for(TString cb_cbbar : cb_cbbar_vector){
-    if(cb_cbbar.Contains("track_bquarks_") || cb_cbbar.Contains("track_nobquarks_") || cb_cbbar.Contains("track_btags_") || cb_cbbar.Contains("track_nobtags_")){
+  std::ofstream outfile;
+  outfile.open("cb_vals/cb_vals.csv");
+  outfile << "variant,cb_val" << std::endl;;
 
+  for(TString cb_cbbar : cb_cbbar_vector){
+    if(cb_cbbar.Contains("track_btags_") || cb_cbbar.Contains("track_nobtags_")){
+
+      // format for our csv file
       cb_cbbar.ReplaceAll("2v_from_jets_","");
       cb_cbbar.ReplaceAll((TString)version+".root","");
-      if(cb_cbbar.Contains("_bquarks_") || cb_cbbar.Contains("_btags_")){
-        cb_cbbar.ReplaceAll(",",", cb    = ");
-      }
-      if(cb_cbbar.Contains("_nobquarks_") || cb_cbbar.Contains("_nobtags_")){
-        cb_cbbar.ReplaceAll(",",", cbbar = ");
-      }
 
-      cb_cbbar.ReplaceAll("_nobquarks_"," bquark method");
-      cb_cbbar.ReplaceAll("_bquarks_"," bquark method");
-      cb_cbbar.ReplaceAll("_nobtags_"," btag   method");
-      cb_cbbar.ReplaceAll("_btags_"," btag   method");
-
-      cb_cbbar.ReplaceAll("_"," ");
-
-      std::cout << cb_cbbar << std::endl;
+      cb_cbbar.ReplaceAll("_btags_","_cb");
+      cb_cbbar.ReplaceAll("_nobtags_","_cbbar");
+      cb_cbbar.ReplaceAll("track","trk");
+      cb_cbbar.ReplaceAll(" ","");
+      outfile << cb_cbbar << std::endl;
     }
   }
+  outfile.close();
 
   /*
   for (const char* year : {"2017p8"}) {
