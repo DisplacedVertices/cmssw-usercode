@@ -1,0 +1,11 @@
+version="V25mv3"
+
+mkdir output_btags_vs_bquarks_MiniTree${version}_ntk3_2017p8
+mkdir output_btags_vs_bquarks_MiniTree${version}_ntk4_2017p8
+mkdir output_btags_vs_bquarks_MiniTree${version}_ntk5_2017p8
+mkdir output_btags_vs_bquarks_MiniTree${version}_ntk7_2017p8
+
+hadd.py output_btags_vs_bquarks_MiniTree${version}_ntk3_2017p8/background.root output_btags_vs_bquarks_MiniTree${version}_ntk3_2017/background.root output_btags_vs_bquarks_MiniTree${version}_ntk3_2018/background.root
+hadd.py output_btags_vs_bquarks_MiniTree${version}_ntk4_2017p8/background.root output_btags_vs_bquarks_MiniTree${version}_ntk4_2017/background.root output_btags_vs_bquarks_MiniTree${version}_ntk4_2018/background.root
+hadd.py output_btags_vs_bquarks_MiniTree${version}_ntk5_2017p8/background.root output_btags_vs_bquarks_MiniTree${version}_ntk5_2017/background.root output_btags_vs_bquarks_MiniTree${version}_ntk5_2018/background.root
+hadd.py output_btags_vs_bquarks_MiniTree${version}_ntk7_2017p8/background.root output_btags_vs_bquarks_MiniTree${version}_ntk7_2017/background.root output_btags_vs_bquarks_MiniTree${version}_ntk7_2018/background.root
