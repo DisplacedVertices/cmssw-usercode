@@ -569,7 +569,7 @@ for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + all_signal_
 for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + all_signal_samples_2017:
     x.add_dataset("ntuplev25m_nm1refits")
 
-for x in qcd_samples_2017 + span_signal_samples_2017:
+for x in qcd_samples_2017 + span_signal_samples_2017 + qcd_samples_2018 + span_signal_samples_2018:
     x.add_dataset("ntuplev25m_maxnm1dz50um_inf")
 
 ########
