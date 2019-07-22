@@ -92,7 +92,6 @@ namespace mfv {
     float z0;
     float bs2derr0;
     float rescale_bs2derr0;
-    float geo2ddist0;
 
     unsigned char ntk1;
     std::vector<double> tk1_qchi2;
@@ -121,7 +120,6 @@ namespace mfv {
     float z1;
     float bs2derr1;
     float rescale_bs2derr1;
-    float geo2ddist1;
   };
 
   void write_to_tree(TTree* tree, MiniNtuple& nt);
