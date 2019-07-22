@@ -75,7 +75,7 @@ def btag_eff_per_event(nvtx, event_flavor, bdisc):
   h = f.Get('h_%s_%dv_1%s_btag_flavor_code' % (event_flavor, nvtx, bdisc))
   return h.GetBinContent(2) / h.Integral()
 
-# convenient printout to copy into bquark_fraction.py
+# Convenient inputs for bquark_fraction.py
 bdisc = 'tight' # Tight WP
 nvtx = 1
 effb, sfb = btag_eff_per_jet(nvtx, 'b', bdisc), scale_factor(nvtx, 'b', bdisc)
@@ -88,15 +88,7 @@ event_fakerate = btag_eff_per_event_from_btag_eff_per_jet(nvtx, 'nobjets', effb*
 h_1v_1tight_btag_flavor_code = f.Get('h_1v_1tight_btag_flavor_code')
 ft = h_1v_1tight_btag_flavor_code.GetBinContent(2) / h_1v_1tight_btag_flavor_code.Integral()
 
-print
-print 'Inputs for bquark_fraction.py (for per-event from per-jet*SF; %s; Tight WP)' % year
-print '###########################'
-print '    print \'f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); %s; %s\'' % (year, syst_var_str)
-print '    f2_val_%strk = print_f2(%s, fb(ft0, efft0, frt0), fb(%.3f, %.3f, %.3f), cb, cbbar, 1)' % (ntk, ntk, ft, event_eff, event_fakerate)
-print '    print'
-print '###########################'
-print
-
+# for the .csv file
 variant = '%strk_1v_%s_%s' % (ntk,year,syst_var_str)
 outfile = open('efficiencies/effs_%s.csv' % (variant),'w')
 outfile.write('%s,%s,%s,%s\n' % (variant, ft, event_eff, event_fakerate))
