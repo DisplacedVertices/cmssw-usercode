@@ -217,6 +217,11 @@ struct MFVEvent {
   uchar pv_ntracksloose;
   float pv_rho() const { return mag(pvx - bsx_at_z(pvz), pvy - bsy_at_z(pvz)); }
 
+  std::vector<float> pvsx;
+  std::vector<float> pvsy;
+  std::vector<float> pvsz;
+  std::vector<uchar> pvsscores;
+
   std::vector<uchar> jet_id; // see encode_jet_id for definition
   std::vector<float> jet_bdisc_old; // JMTBAD CSV for backward compatibility, to be removed
   std::vector<float> jet_bdisc;
