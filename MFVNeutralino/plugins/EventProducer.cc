@@ -336,6 +336,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->jet_eta.push_back(jet.eta());
     mevent->jet_phi.push_back(jet.phi());
     mevent->jet_energy.push_back(jet.energy());
+    mevent->jet_gen_energy.push_back(jet.genJet() ? jet.genJet()->energy() : -1);
 
     int bdisc_level = 0;
     for (int i = 0; i < 3; ++i)
