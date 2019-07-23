@@ -1,6 +1,6 @@
 #!/bin/bash
 
-version=V25m
+version=V25mv3
 
 indir=/uscms_data/d2/tucker/crab_dirs/MiniTree${version}
 files2017=(

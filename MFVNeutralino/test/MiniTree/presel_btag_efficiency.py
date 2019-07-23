@@ -1,7 +1,7 @@
 from JMTucker.Tools.ROOTTools import *
 import sys
 
-year = int(sys.argv[1])
+year = sys.argv[1]
 version = 'V25m'
 
 if len(sys.argv) > 2 :
@@ -76,7 +76,7 @@ def btag_eff_per_event(event_flavor, bdisc):
   h = f_presel.Get('mfvEventHistosJetPreSel/h_nbtags_v_bquark_code_%s' % bdisc).ProjectionY('h_nbtags', firstxbin, lastxbin)
   return h.Integral(2,4)/h.Integral(1,4)
 
-# convenient printout to copy into bquark_fraction.py
+# Convenient inputs for bquark_fraction.py
 bdisc = '2' # Tight WP
 effb, sfb = btag_eff_per_jet('bottom', bdisc), scale_factor('bottom', bdisc)
 effc, sfc = btag_eff_per_jet('charm', bdisc), scale_factor('charm', bdisc)
@@ -88,18 +88,11 @@ event_fakerate = btag_eff_per_event_from_btag_eff_per_jet('nobjets', effb*sfb, e
 h_nbtags_tight = f_presel.Get('mfvEventHistosJetPreSel/h_nbtags_2')
 ft = h_nbtags_tight.Integral(2,11) / h_nbtags_tight.Integral(1,11)
 
-print
-print 'Inputs for bquark_fraction.py (for per-event from per-jet*SF; %s; Tight WP)' % year
-print '###########################'
-print '    print \'f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); %s\'' % year
-print '    f2_val_3trk = print_f2(3, fb(%.3f, %.3f, %.3f), fb(ft1, efft1, frt1), cb, cbbar, 1)' % (ft, event_eff, event_fakerate)
-print '    f2_val_7trk = print_f2(7, fb(%.3f, %.3f, %.3f), fb(ft1, efft1, frt1), cb, cbbar, 1)' % (ft, event_eff, event_fakerate)
-print '    f2_val_4trk = print_f2(4, fb(%.3f, %.3f, %.3f), fb(ft1, efft1, frt1), cb, cbbar, 1)' % (ft, event_eff, event_fakerate)
-print '    f2_val_5trk = print_f2(5, fb(%.3f, %.3f, %.3f), fb(ft1, efft1, frt1), cb, cbbar, 1)' % (ft, event_eff, event_fakerate)
-print '    print'
-print '###########################'
-print
-
+# for the .csv file
+variant = 'presel_%s_%s' % (year,syst_var_str)
+outfile = open('efficiencies/effs_%s.csv' % (variant),'w')
+outfile.write('%s,%s,%s,%s\n' % (variant,ft, event_eff, event_fakerate))
+outfile.close()
 
 # full table of information
 print 'preselected events'
