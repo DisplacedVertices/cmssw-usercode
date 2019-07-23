@@ -1,7 +1,7 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version_ = 'V25'
+ntuple_version_ = 'V26'
 ntuple_version_use = ntuple_version_ + 'm'
 dataset = 'ntuple' + ntuple_version_use.lower()
 
