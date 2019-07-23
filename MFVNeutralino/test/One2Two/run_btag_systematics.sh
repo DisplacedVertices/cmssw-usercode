@@ -1,3 +1,5 @@
+mkdir btag_systs/
+
 python btag_systematics.py 2017 vary_bcjet_SFs_up > btag_systs/syst_2017_vary_bcjet_SFs_up.txt
 python btag_systematics.py 2017 vary_bcjet_SFs_down > btag_systs/syst_2017_vary_bcjet_SFs_down.txt
 python btag_systematics.py 2017 vary_ljet_SFs_up > btag_systs/syst_2017_vary_ljet_SFs_up.txt
