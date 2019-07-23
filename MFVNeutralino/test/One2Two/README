@@ -14,10 +14,11 @@ Here is the procedure for constructing the background template and estimating th
 3) Determine statistical uncertainties (../treesprint.py, statmodel.cc, Makefile, statmodel.sh, statmodel.jdl, statmodel.py).  See statmodel.cc for documentation.
    --> FIXME add description here (but it mostly already exists in statmodel.cc anyway!)
 
-4) Determine bquark input (2v_from_jets.cc, Makefile, ../treesprint.py, utilities.py, bquark_correction.py).  Set mode='' for default method; set mode='ratio1' for variation.
+4) Determine bquark input (2v_from_jets.cc, Makefile, ../treesprint.py, utilities.py, bquark_correction.py).  Set mode='' for default method; set mode='ratio1' for variation used in 2015--2016 (no longer used for 2017--2018).
    --> Compile 2v_from_jets.cc via `make`
    --> Run the executable via `./2v_from_jets.exe`
    --> This outputs root files for several variants of the dVVc construction (2v_from_jets_*.root). For this step, the important outputs are those pertaining to the bquark correction, since this step is used to compute this correction.
+   --> This also outputs cb_vals/cb_vals.csv, which stores the integrated efficiency correction values used in bquark_fraction.py below.
 
    --> a) "Old" method: Use generator-level b-quarks (obviously MC-only) for the correction:
           --> `python ../treesprint.py onlybkg`, which prints the event yields and the fractions of events containing at least one b-quark. We use the f2 value from ntk=3 events as the weight for events with b-quarks, and 1-f2 for events without b-quarks.
@@ -31,16 +32,12 @@ Here is the procedure for constructing the background template and estimating th
           --> Modify btags_vs_bquarks.cc if needed for e.g. the b-tagging scale factors (in the h_scalefactor_* arrays of hists). Also note that Tools/plugins/BTagEfficiency.cc (and Tools/test/btageff.py) exists for extracting these SFs.
           --> Compile btags_vs_bquarks.cc via `make`
           --> `./btags_vs_bquarks.sh`, which loops over the MiniTrees for 2017 and 2018, runs the btags_vs_bquarks.exe executable, and performs a mergeTFileServiceHistograms for each sample. The outputs live in directories named e.g. output_btags_vs_bquarks_MiniTreeV25m_ntk3_2017. This step produces output root files with many histograms for studying the use of b-tagged jets for the b-quark correction.
+          --> `./mkdirAndHadd.sh`, which makes directories for 2017p8 and hadds the relevant 2017 and 2018 files together.
           --> Dump plots based on the outputs via `comparehists.py output_ntk3_2017/background.root "" /publicweb/j/joeyr/plots/btags_vs_bquarks_MiniTreeV23m_ntk3_2017 --draw-command '"colz text0" if "flavor_code" in name else ""' --nice "MCbackground_2017"` (and similar for 2018 or to overlay any of these)
-          --> Use `python compare_btags_vs_bquarks.py` for useful comparison plots of the b-tag method and the generator-level b-quark method, as well as b-tag WP efficiency vs. rejection plots.
-          --> Modify calculate_btag_efficiency.py for the proper input filename.
-          --> `python calculate_btag_efficiency.py`
-          --> Use the printed table to fill in the fb(ft,efft,frt) inputs of ../One2Two/bquark_fraction.py for f1 (the fraction of 1-vertex events with b-quarks), which allows us to compute the fraction of events with b-quarks after unfolding the b-tagging efficiencies/fake rates. ft comes from the right-hand bin of h_1v_1medium_btag_flavor_code.png histogram from comparehists, efft comes from the "btag eff" column, and frt comes from the "fake rate" column. These are also summarized and printed to the screen at the end of calculate_btag_efficiency.py.
-          --> Similarly, use `python presel_btags_vs_bquarks.py` and `python presel_btag_efficiency.py` for the preselection-level information for the f0 inputs of ../One2Two/bquark_fraction.py. These also have to be modified and rerun for the year(s) of interest
+          --> Use `python compare_btags_vs_bquarks.py ${year} ${ntk}` for useful comparison plots of the b-tag method and the generator-level b-quark method, as well as b-tag WP efficiency vs. rejection plots. Similarly, `python presel_btags_vs_bquarks.py` can be used for the corresponding preselection-level information.
+          --> Run `./all_btag_effs.sh` to calculate the event-level b-tagging efficiencies (as well as fake rates and the fraction of events with a b-tag) for preselected and 1-vertex events. These are saved to efficiencies/all_effs.csv, which is used as input to bquark_fraction.py below. These efficiencies allow us to compute the fraction of events with b-quarks after unfolding the b-tagging efficiencies/fake rates.
           --> `cd ../One2Two/`
-          --> Modify bquark_fraction.py for cb and cbbar based on the 2v_from_jets.exe stdout printouts
-          --> `python bquark_fraction.py`, which returns the fraction of 2-vertex events containing at least one b-quark. We use the f2 values as the weights for events with b-quarks, and 1-f2 for events without b-quarks.
-          --> Modify utilities.py for the proper f2 weights.
+          --> `python bquark_fraction.py`, which returns the fraction of 2-vertex events containing at least one b-quark. We use the f2 values as the weights for events with b-tags, and 1-f2 for events without b-tags. bquark_fraction.py relies on the .csv files ../MiniTree/efficiencies/all_effs.csv and cb_vals/cb_vals.csv, which are generated by all_btag_effs.sh and 2v_from_jets.exe (respectively). bquark_fraction.py also writes out the f2 values in f2_vals.py, which is used by utilities.py in the next step.
           --> `python utilities.py merge_btags_nobtags`, which produces 2v_from_jets_*_btag_corrected_*.root. These are the dVVc background templates, so we can skip step 5!
 
 5) Construct background template (2v_from_jets.cc, Makefile).  See 2v_from_jets.cc for documentation.
@@ -57,3 +54,4 @@ Here is the procedure for constructing the background template and estimating th
    --> `python compare_dvvc.py`
    --> Modify the file for the other year(s) of interest and repeat the previous command (may be improved going forward)
    --> Also repeat for each variation (e.g. vary_eff, vary_dphi, vary_bquarks)
+   --> To determine systematic uncertainties on the new method relying on b-tagged jets, `./run_btag_systematics.sh` is used, which runs btag_systematics.py with several variants (years and systematic variations).
