@@ -436,6 +436,7 @@ def get(i): return _l[i]
         try:
             submit_out, submit_ret = popen('condor_submit < cs_submit.jdl', return_exit_code=True)
             ok = False
+            cluster = None
             schedd = None
             for line in submit_out.split('\n'):
                 if line.startswith('Attempting to submit jobs to '):
@@ -455,15 +456,19 @@ def get(i): return _l[i]
                             ok = False
                     except ValueError:
                         ok = False
+            if ok and not cluster:
+                print '\033[1m problem, ok but no cluster? \033[0m'
             if not ok:
                 print '\033[1m problem! \033[0m'
                 print submit_out
             else:
-                print '\x1b[92msuccess!\x1b[0m cluster', cluster
                 if schedd:
+                    cluster_s = '%s:%s' % (schedd, cluster)
                     cluster_link = os.path.join(cls.links_dir, schedd, str(cluster))
                 else:
+                    cluster_s = cluster
                     cluster_link = os.path.join(cls.links_dir, str(cluster))
+                print '\x1b[92msuccess!\x1b[0m %s' % cluster_s
                 if os.path.islink(cluster_link):
                     print 'warning: clobbering old link:', os.readlink(cluster_link)
                     os.unlink(cluster_link)
@@ -473,7 +478,7 @@ def get(i): return _l[i]
 
     def submit(self, sample):
         self.nsubmits += 1
-        print 'batch', self.batch_name, 'sample', sample.name, 
+        print 'submit', self.batch_name, sample.name,
 
         if self.dataset:
             try:
