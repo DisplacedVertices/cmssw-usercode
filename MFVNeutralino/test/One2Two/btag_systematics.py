@@ -11,11 +11,6 @@ version = 'V25m'
 year = sys.argv[1]
 mode = sys.argv[2]
 
-#mode = 'vary_SFs_up'
-#mode = 'vary_SFs_down'
-#mode = 'vary_3trk_to_5trk_up'
-#mode = 'vary_3trk_to_5trk_down'
-
 set_style()
 ROOT.gStyle.SetOptFit(0)
 ps = plot_saver(plot_dir('compare_dvvc_%s_%s%s%s_%s' % (version.capitalize(), mode, '' if is_mc else '_data', '_10pc' if only_10pc else '', year)), size=(700,700), root=False, log=False)
@@ -50,10 +45,10 @@ if mode == 'vary_ljet_SFs_up':
     ls = ['nominal','vary ljet SFs up']
 if mode == 'vary_ljet_SFs_down':
     ls = ['nominal','vary ljet SFs down']
-if mode == 'vary_3trk_to_5trk_up':
-    ls = ['nominal','vary 3trk to 5trk up']
-if mode == 'vary_3trk_to_5trk_down':
-    ls = ['nominal','vary 3trk to 5trk down']
+if mode == 'vary_4trk_to_5trk_up':
+    ls = ['nominal','vary 4trk to 5trk up']
+if mode == 'vary_4trk_to_5trk_down':
+    ls = ['nominal','vary 4trk to 5trk down']
 
 fns = [fn1, fn2, fn3]
 fns_uncorr = [fn1_uncorr, fn2_uncorr, fn3_uncorr]
