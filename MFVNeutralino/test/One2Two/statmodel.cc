@@ -215,6 +215,7 @@ int main(int, char**) {
   const int seed = env.get_int("seed", 12919135 + inst);
   const int ntoys = env.get_int("ntoys", 10000);
   const std::string out_fn = env.get_string("out_fn", "statmodel");
+  const bool save_all_1v_bins = env.get_int("save_all_1v_bins", 0);
   const int samples_index = env.get_int("samples_index", 0);
   assert(samples_index >= 0 && samples_index <= 3);
   const int year_index = env.get_int("year_index", 0);
@@ -634,6 +635,7 @@ int main(int, char**) {
   printf("1v bins means:\n");
   printf("%3s %28s  %28s  %28s\n", "bin", "bin mean", "scaled true", "diff");
   for (int i_base = 0; i_base < nbins_1v; i_base += 4) {
+    bool save = save_all_1v_bins;
     c->Divide(2,2);
     for (int i = i_base; i < std::min(i_base + 4, nbins_1v); ++i) {
       c->cd(i%4+1);
@@ -652,8 +654,10 @@ int main(int, char**) {
         printf("%3i %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f +- %12.4f\n", i+1, b, be, t, te, d, de);
         if (twosig) printf("\x1b[0m");
       }
-      if (twosig)
+      if (twosig) {
+        save = true;
         tl.SetTextColor(kRed);
+      }
       else if (d > de)
         tl.SetTextColor(kOrange+2);
       else
@@ -675,7 +679,7 @@ int main(int, char**) {
       h_1v_rho_bins_diffs_norm->SetBinContent(i+1, d/t);
       h_1v_rho_bins_diffs_norm->SetBinError  (i+1, sqrt(be*be/b/b + te*te/t/t)); // JMTBAD
     }
-    p();
+    if (save) p();
     c->Clear();
   }
 
