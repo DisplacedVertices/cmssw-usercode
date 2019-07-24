@@ -24,17 +24,25 @@ def cmd_merge_bquarks_nobquarks():
 def cmd_merge_btags_nobtags():
 
     for year in ['2017', '2018', '2017p8'] :
-        tuple_ntracks_weights                    = dict_of_f2_tuples[year+'_nom']
-        tuple_ntracks_weights_bcjet_SFs_up       = dict_of_f2_tuples[year+'_bcjet_up']
-        tuple_ntracks_weights_bcjet_SFs_down     = dict_of_f2_tuples[year+'_bcjet_down']
-        tuple_ntracks_weights_ljet_SFs_up        = dict_of_f2_tuples[year+'_ljet_up']
-        tuple_ntracks_weights_ljet_SFs_down      = dict_of_f2_tuples[year+'_ljet_down']
-        tuple_ntracks_weights_data               = dict_of_f2_tuples['data_'+year+'_nom'] # FIXME note that we'll have to add systs here for data too
+        tuple_ntracks_weights                    = dict_of_f2_tuples.get(year+'_nom', ())
+        tuple_ntracks_weights_bcjet_SFs_up       = dict_of_f2_tuples.get(year+'_bcjet_up', ())
+        tuple_ntracks_weights_bcjet_SFs_down     = dict_of_f2_tuples.get(year+'_bcjet_down', ())
+        tuple_ntracks_weights_ljet_SFs_up        = dict_of_f2_tuples.get(year+'_ljet_up', ())
+        tuple_ntracks_weights_ljet_SFs_down      = dict_of_f2_tuples.get(year+'_ljet_down', ())
+        tuple_ntracks_weights_data               = dict_of_f2_tuples.get('data_'+year+'_nom', ()) # FIXME note that we'll have to add systs here for data too
 
         # for the f2 variation
-        btag_frac_threetrk = float(tuple_ntracks_weights[0][1].split(",")[0])
-        btag_frac_fourtrk = float(tuple_ntracks_weights[1][1].split(",")[0])
-        btag_frac_fivetrk  = float(tuple_ntracks_weights[2][1].split(",")[0])
+        btag_frac_threetrk = btag_frac_fourtrk = btag_frac_fivetrk = 1
+        for ntk, wt in tuple_ntracks_weights:
+            frac = float(wt.split(",")[0])
+            if ntk == 3:
+                btag_frac_threetrk = frac
+            if ntk == 4:
+                btag_frac_fourtrk = frac
+            if ntk == 5:
+                btag_frac_fivetrk = frac
+        if btag_frac_threetrk == 1 or btag_frac_fourtrk == 1 or btag_frac_fivetrk == 1:
+            print "WARNING: You might not have run everything (intentional or not) so don't trust your result"
         frac_variation = (btag_frac_fivetrk / btag_frac_threetrk) - 1
         frac_variation_var = (btag_frac_fourtrk / btag_frac_threetrk) - 1
 

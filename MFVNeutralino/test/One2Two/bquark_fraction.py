@@ -76,16 +76,19 @@ if __name__ == '__main__':
                     frt_presel  = effs.at[var_presel,'frt']
 
                     cb_label = year_formatted+'_'+str(ntk)+'trk_'
-                    cb    = cb_vals.at[cb_label+'cb','cb_val']
-                    cbbar = cb_vals.at[cb_label+'cbbar','cb_val']
+                    try:
+                        cb    = cb_vals.at[cb_label+'cb','cb_val']
+                        cbbar = cb_vals.at[cb_label+'cbbar','cb_val']
+                    except:
+                        print cb_label, 'not found'
+                        continue
 
                     f2_val = print_f2(ntk, fb(ft_presel,efft_presel,frt_presel), fb(ft_1v,efft_1v,frt_1v), cb, cbbar, 1)
                     
-                    if f2_vals_printout != '' :
-                        f2_vals_printout += ', '
-                    f2_vals_printout += "(%s,'%f,%f')" % (ntk, f2_val, 1-f2_val)
+                    f2_vals_printout += "(%s,'%f,%f'), " % (ntk, f2_val, 1-f2_val)
 
-                outfile.write("dict_of_f2_tuples['%s_%s'] = %s\n" % (year_formatted, sys_var, f2_vals_printout))
+                if f2_vals_printout != '':
+                    outfile.write("dict_of_f2_tuples['%s_%s'] = %s\n" % (year_formatted, sys_var, f2_vals_printout))
 
     outfile.close()
 
