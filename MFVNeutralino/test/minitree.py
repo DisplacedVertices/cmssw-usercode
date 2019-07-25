@@ -23,6 +23,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     cs = CondorSubmitter('MiniTree' + version,
                          ex = year,
                          dataset = dataset,
-                         pset_modifier = chain_modifiers(is_mc_modifier, half_mc_modifier(), per_sample_pileup_weights_modifier()),
+                         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier()),
                          )
     cs.submit_all(samples)
