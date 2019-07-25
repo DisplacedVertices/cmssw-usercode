@@ -46,7 +46,6 @@ for x in sys.argv[1:]:
         fns.extend(glob(x2))
 if not fns:
     from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version
-    version += 'v3'
     gg = '/uscms_data/d2/tucker/crab_dirs/MiniTree%s/*.root' % version
     print 'using default', gg
     fns = glob(gg)
