@@ -54,16 +54,7 @@ def fn_ok(fn):
             return False
     return True
 
-publish = {}
-samples = []
-samples_lump = []
-for wd in wds:
-    print colors.bold(wd)
-    if options.only_done:
-        if not os.path.isfile(os.path.join(wd, 'mmon_done')):
-            print colors.yellow('not done, skipping')
-            continue
-
+def extract_sample(wd):
     bd = os.path.basename(wd)
     is_crab = bd.startswith('crab_')
     assert is_crab or bd.startswith('condor_')
@@ -75,6 +66,22 @@ for wd in wds:
             sample = Samples.sample_from_end_string(Samples, wd).name
         except AttributeError:
             raise ValueError('cannot find sample name from %s, rerun with --main?' % wd)
+    return is_crab, sample
+
+publish = {}
+samples = []
+samples_lump = []
+not_done_skipped = []
+for wd in wds:
+    print colors.bold(wd)
+    is_crab, sample = extract_sample(wd)
+
+    if options.only_done:
+        if not os.path.isfile(os.path.join(wd, 'mmon_done')):
+            not_done_skipped.append(sample)
+            print colors.yellow('not done, skipping')
+            continue
+
     if publish.has_key(sample):
         raise ValueError('sample %s already encountered' % sample)
 
@@ -192,3 +199,5 @@ for sample, ds, nevents in samples:
 if samples_lump:
     print 'for x in %s:' % ', '.join(samples_lump)
     print '    x.add_dataset("%s")' % options.dataset
+if not_done_skipped:
+    print 'or use lists with:\n    if x in (%s):\n        continue' % ', '.join(not_done_skipped)
