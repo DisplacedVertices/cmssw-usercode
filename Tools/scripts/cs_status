@@ -14,6 +14,8 @@ if len(sys.argv) < 2 or '-h' in sys.argv or '--help' in sys.argv:
     print '   -r   resubmit: resubmit jobs that failed because of xrdcp problems'
     print '   -k   resubmit killed: resubmit all killed jobs (with no check on reason)'
     print '   -d   include done: do not skip dirs with mmon_done marker file'
+    print ' -nfe   do not print files associated with opening errors'
+    print ' -tfe   test files with opening errors'
     sys.exit(1)
 
 resubmit_all = '-a' in sys.argv
