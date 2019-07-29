@@ -29,9 +29,7 @@
  *
  *
  * How statmodel.cc works:
- *  - Model the dBV distribution with a function:
- *      f(rho) = p0 + p1 * expl(-p2 * rho) + p3 * expl(-p4 * rho^0.5) + rho_tail_norm * p5 * expl(-p6 * rho_tail_slope * rho^0.15)
- *      {p0, p1, p2, p3, p4, p5, p6} depends on ntracks
+ *  - Model the dBV distribution with a function depending on ntracks
  *  - Generate the true dVV distribution using the dBV function (and the deltaphi function and efficiency curve).
  *  - Throw ntoys.  For each toy:
  *     - Randomly sample i1v from Poisson(n1v)
@@ -43,7 +41,7 @@
  *   inst, seed, ntoys, out_fn, samples_index, year_index, ntracks, n1v, n2v, true_fn, true_from_file,
  *   ntrue_1v, ntrue_2v, oversample, rho_tail_norm, rho_tail_slope, phi_c, phi_e, phi_a, eff_fn, eff_path
  *
- * These should be modified in the code:
+ * These can be modified in the code:
  *   nbins_1v, bins_1v, nbins_2v, bins_2v, func_rho, rho_min, rho_max, default_n1v, default_n2v
  */
 
@@ -104,8 +102,6 @@ struct VertexPair {
 // Globals: parameters for the throwing fcns and the fcns themselves, and the binning for 1v/2v hists
 
 int ntracks;
-long double rho_tail_norm;
-long double rho_tail_slope;
 double phi_c;
 double phi_e;
 double phi_a;
@@ -124,23 +120,42 @@ TF1* f_func_rho = 0;
 TF1* f_func_dphi = 0;
 TH1F* h_eff = 0;
 
-double func_rho(double* x, double*) {
-  const long double rho(fabs(x[0]));
+//#define FITTING_DBV
+double func_rho(double* x, double* p) {
+  const long double r(fabs(x[0]));
   long double f = 1e-6;
-  const long double p[3][10] = {
-    { 2.87190e-04L, 3.35391e-08L, 3.56126e+02L, 6.74967e+02L, 2.19970e+01L, 1.07814e+06L, 5.97512e+01L },
-    { 6.72207e-10L, 8.71486e-03L, 2.50698e+00L, 1.30699e+03L, 2.63253e+01L, 2.84286e+04L, 3.09081e+01L },
-    { 8.91883e-04L, 2.12659e-01L, 1.32012e+01L, 5.11276e+03L, 3.63974e+01L, 3.30855e+06L, 4.13659e+02L }
+
+#ifndef FITTING_DBV
+  const long double k[3][5] = {
+    { 0, 0.015, 0.075, 0.150, 2 },
+    { 0, 0.025, 0.040, 0.075, 2 },
+    { 0, 0.05, 2, -1, -1 },
+  };
+  const long double c[3][8] = {
+    { 4.28892e+03, 3.91957e+00, 1.57188e+04, 8.14913e+01, 1.65776e+03, 4.56113e+01, 8.21690e+00, 1.05875e+01 },
+    { 1.22632e+03, 3.76819e+01, 1.82293e+03, 6.83555e+01, 2.53814e+03, 8.84097e+01, 1.55360e+01, 2.35235e+01 },
+    { 3.84285e+02, 9.97862e+01, 3.00052e+00, 2.33992e+01 }
   };
 
   const size_t i = ntracks - 3;
-  f = p[i][0] + p[i][1] * expl(-p[i][2] * rho) + p[i][3] * expl(-p[i][4] * powl(rho, 0.5L)) + rho_tail_norm * p[i][5] * expl(-p[i][6] * rho_tail_slope * powl(rho, 0.15L));
+
+  if      (k[i][0] <= r && k[i][1] > r) f = c[i][0] * expl(-c[i][1] * r);
+  else if (k[i][1] <= r && k[i][2] > r) f = c[i][2] * expl(-c[i][3] * r);
+  else if (k[i][2] <= r && k[i][3] > r) f = c[i][4] * expl(-c[i][5] * r);
+  else if (k[i][3] <= r && k[i][4] > r) f = c[i][6] * expl(-c[i][7] * r);
+#else
+  f = p[0] * expl(-fabsl(p[1]) * r);
+#endif
 
   return double(f);
 }
 
 double func_rho_norm(double* x, double* p) {
+#ifdef FITTING_DBV
+  return func_rho(x,p);
+#else
   return p[0] * func_rho(x,0);
+#endif
 }
 
 double func_dphi(double* x, double*) {
@@ -201,15 +216,16 @@ int main(int, char**) {
   jmt::ConfigFromEnv env("sm", true);
 
                                        //  2017                   2018                  2017+2018
-  const double default_n1v[4][3][3] = {{{  89055,  8827, 696 }, { 88730, 9850, 665 }, { 177773, 18672, 1363 }},  //MC scaled to int. lumi.
-                                       {{  20109,  1987, 160 }, { 12188, 1292, 100 }, {  30389,  3051,  249 }},  //MC effective
-                                       {{  11975,  1558,   1 }, { 11710, 1437, 1   }, {  23685,  2995,    1 }},  //data 10%
-                                       {{      1,     1,   1 }, { 1, 1, 1 }, { 1, 1, 1 }}}; //data 100%
-
-  const double default_n2v[4][3][3] = {{{    651,     2,   1 }, { 426, 5, 1 }, { 1077, 7, 1 }},
-                                       {{    151,     4,   1 }, {  74, 4, 1 }, {  222, 7, 1 }},
-                                       {{    110,     3,   1 }, {  96, 0, 1 }, {  206, 3, 1 }},
-                                       {{      1,     1,   1 }, { 1, 1, 1 }, { 1, 1, 1 }}};
+  const double default_n1v[4][3][3] = {{{  15549, 2722, 284 }, { 12465, 2497, 318 }, {  15549+12465, 2722+2497, 284+318 }},  // MC scaled to int. lumi.
+                                       {{   7087, 1283, 129 }, {  3697,  737,  99 }, {   7087+ 3697, 1283+ 737, 129+ 99 }},  // MC effective
+                                       {{   3203,  786,   1 }, {  3036,  689,   1 }, {   3203+ 3036,  786+ 689,   1+  1 }},  // data 10%
+                                       {{1,1,1},{1,1,1},{1,1,1}}                                                             // data 100%
+                                      };
+  const double default_n2v[4][3][3] = {{{     56,    1,   1 }, { 19, 1, 1 }, { 56+19,   1, 1 }},
+                                       {{     22,    3,   1 }, {  9, 2, 1 }, { 22+ 9, 3+2, 1 }},
+                                       {{      7,    3,   1 }, { 13, 1, 1 }, {  7+13, 3+0, 1 }},
+                                       {{1,1,1},{1,1,1},{1,1,1}}
+                                      };
 
   const int inst = env.get_int("inst", 0);
   const int seed = env.get_int("seed", 12919135 + inst);
@@ -230,9 +246,7 @@ int main(int, char**) {
   const long ntrue_2v = env.get_long("ntrue_2v", 1000000L);
   const double oversample = env.get_double("oversample", 20);
   const std::string year_str[3] = {"2017","2018","2017p8"};
-  const std::string rho_compare_fn = env.get_string("rho_compare_fn", "/uscms_data/d3/dquach/crab3dirs/HistosV25mv2/background_"+year_str[year_index]+".root");
-  rho_tail_norm = env.get_long_double("rho_tail_norm", 1L);
-  rho_tail_slope = env.get_long_double("rho_tail_slope", 1L);
+  const std::string rho_compare_fn = env.get_string("rho_compare_fn", "/uscms_data/d2/tucker/crab_dirs/HistosV26m/background_"+year_str[year_index]+".root");
   phi_c = env.get_double("phi_c", 1.42);
   phi_e = env.get_double("phi_e", 2);
   phi_a = env.get_double("phi_a", 3.53);
@@ -286,6 +300,7 @@ int main(int, char**) {
 
   // 1st page of output: show the rho fcn itself lin/log
 
+#ifndef FITTING_DBV
   const double func_rho_max   = f_func_rho->GetMaximum();
   const double func_rho_max_x = f_func_rho->GetMaximumX();
   printf("max of 1v fcn %f at %f\n", func_rho_max, func_rho_max_x);
@@ -298,27 +313,30 @@ int main(int, char**) {
   f_func_rho->Draw();
   p();
   c->Clear();
+#endif
 
   // 2nd page: compare rho to MC background distributions.
 
   if (std::experimental::filesystem::exists(rho_compare_fn)) {
-    TF1* f_func_rho_norm = new TF1("func_rho_norm", func_rho_norm, rho_min, rho_max, 1);
+#ifdef FITTING_DBV
+    const double rho_min = 0.15;
+    const double rho_max = 2;
+    const int npar = 2;
+#else
+    const int npar = 1;
+#endif
+    TF1* f_func_rho_norm = new TF1("func_rho_norm", func_rho_norm, rho_min, rho_max, npar);
     f_func_rho_norm->SetNpx(25000);
-    f_func_rho_norm->SetParameter(1,1);
+    for (int ipar = 0; ipar < npar; ++ipar)
+      f_func_rho_norm->SetParameter(ipar,1);
     uptr<TFile> fin(TFile::Open(rho_compare_fn.c_str()));
     TH1* h_rho_compare = 0;
     if      (ntracks == 5) h_rho_compare = (TH1*)fin->Get(    "mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist");
     else if (ntracks == 3) h_rho_compare = (TH1*)fin->Get("Ntk3mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist");
     else if (ntracks == 4) h_rho_compare = (TH1*)fin->Get("Ntk4mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist");
     h_rho_compare->SetStats(0);
-
-    // Note for those who are forgetful about the TH1::Fit options:
-    // "WL" Use Loglikelihood method and bin contents are not integer, i.e. histogram is weighted (must have Sumw2() set)
-    // "Q" Quiet mode (minimum printing)
-    // "R" Use the Range specified in the function range
     h_rho_compare->Fit(f_func_rho_norm, "WL Q R");
-
-    h_rho_compare->GetXaxis()->SetRangeUser(0,0.5);
+    h_rho_compare->GetXaxis()->SetRangeUser(0, 0.5);
     //  h_rho_compare->GetYaxis()->SetRangeUser(3e-2,500);
     c->SetLogy();
     uptr<TRatioPlot> rho_compare(new TRatioPlot(h_rho_compare));
@@ -327,6 +345,13 @@ int main(int, char**) {
     c->Update();
     rho_compare->GetLowerRefYaxis()->SetRangeUser(-7,7);
     p();
+#ifdef FITTING_DBV
+    printf("fit dbv for ntracks %i in [%f, %f]:", ntracks, rho_min, rho_max);
+    for (int ipar = 0; ipar < npar; ++ipar)
+      printf(", %.5e", f_func_rho_norm->GetParameter(ipar));
+    printf("\n");
+#endif
+    if (getenv("asdf")) c->SaveAs("$asdf/sm_rho_compare.png");
   }
   else {
     TText tt(0.1, 0.75, TString::Format("no file %s", rho_compare_fn.c_str()));
@@ -334,6 +359,10 @@ int main(int, char**) {
     p();
   }
   c->Clear();
+
+#ifdef FITTING_DBV
+  return 0;
+#endif
 
   // Generate the true 1v & 2v distributions from func_rho and
   // func_dphi. Takes a while, so if true_fn is set on cmd line, will
@@ -651,7 +680,7 @@ int main(int, char**) {
       const bool twosig = d > 2*de;
       if (twosig || i % (nbins_1v/10) == 0) {
         if (twosig) printf("\x1b[31;1m");
-        printf("%3i %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f +- %12.4f\n", i+1, b, be, t, te, d, de);
+        printf("%3i [%.3f-%.3f) %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f +- %12.4f\n", i+1, bins_1v[i], bins_1v[i+1], b, be, t, te, d, de);
         if (twosig) printf("\x1b[0m");
       }
       if (twosig) {
@@ -724,6 +753,7 @@ int main(int, char**) {
       h_2v_dvvc_bins_diffs_norm->SetBinError  (i+1, sqrt(be*be/b/b + te*te/t/t)); // JMTBAD
     }
     p();
+    if (getenv("asdf")) c->SaveAs("$asdf/sm_dvvc_bins.png");
     c->Clear();
   }
 
