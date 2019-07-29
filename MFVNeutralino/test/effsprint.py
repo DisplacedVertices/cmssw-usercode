@@ -18,7 +18,7 @@ if plots:
 
 tot_sum = 0.
 tot_var = 0.
-cuts = () if 'nonm1' in sys.argv else ('Njets', 'Ht', 'Ntracks', 'Bsbs2ddist', 'Geo2ddist', 'Bs2derr')
+cuts = () if 'nonm1' in sys.argv else ('Bsbs2ddist', 'Bs2derr')
 max_cut_name_len = max(len(x) for x in cuts) if cuts else -1
 integral = 'entries' not in sys.argv
 nvtx = 1 if 'one' in sys.argv else 2
@@ -40,7 +40,10 @@ if any([sigreg,presel,nocuts]):
 if not integral:
     print 'using GetEntries(), but "pass vtx only" and all nm1s still use Integral()'
 
-int_lumi = ac.int_lumi_2017 * ac.scale_factor_2017
+if '2018' in sys.argv:
+    int_lumi = ac.int_lumi_2018 * ac.scale_factor_2018
+else:
+    int_lumi = ac.int_lumi_2017 * ac.scale_factor_2017
 
 def effs(fn):
     global tot_sum, tot_var
@@ -129,7 +132,7 @@ fns = [x for x in sys.argv[1:] if os.path.isfile(x) and x.endswith('.root')]
 print_sum = 'sum' in sys.argv
 if not fns:
     dir = os.path.abspath([x for x in sys.argv[1:] if os.path.isdir(x)][0])
-    fns = [os.path.join(dir, sn + '.root') for sn in 'qcdht0500_2017 qcdht0700_2017 qcdht1000_2017 qcdht1500_2017 qcdht2000_2017 ttbar_2017'.split()]
+    fns = [os.path.join(dir, sn + '.root') for sn in 'qcdht0700_2017 qcdht1000_2017 qcdht1500_2017 qcdht2000_2017 ttbarht0600_2017 ttbarht0800_2017 ttbarht1200_2017 ttbarht2500_2017'.split()]
     fns = [fn for fn in fns if os.path.isfile(fn)]
     nosort = True
     print_sum = True
