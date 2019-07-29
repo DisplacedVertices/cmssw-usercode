@@ -615,6 +615,7 @@ _add_ds("ntuplev26m", {
 'JetHT2017B': _fromnum1("/store/user/tucker/JetHT/NtupleV26m_2017/190723_224759", 25),
 'JetHT2017C': _fromnum1("/store/user/tucker/JetHT/NtupleV26m_2017/190723_224813", 38),
 'JetHT2017D': _fromnum1("/store/user/tucker/JetHT/NtupleV26m_2017/190723_224829", 18),
+'JetHT2017E': _fromnum0("/store/user/tucker/JetHT/NtupleV26m_2017/190724_085213", 42),
 'JetHT2017F': _fromnum1("/store/user/tucker/JetHT/NtupleV26m_2017/190723_224901", 51),
 'JetHT2018A': (115, ['/store/user/tucker/JetHT/NtupleV26m_2018/190725_152254/0000/ntuple_%i.root' % i for i in chain(xrange(8,10), xrange(21,23), [1, 5, 16, 19, 25])] + ['/store/user/tucker/JetHT/NtupleV26m_2018/190725_085501/0000/ntuple_%i.root' % i for i in chain(xrange(2,5), xrange(6,8), xrange(10,16), xrange(17,19), xrange(23,25), xrange(26,115), [0, 20])]),
 'JetHT2018B': _fromnum1("/store/user/tucker/JetHT/NtupleV26m_2018/190723_224816", 57),

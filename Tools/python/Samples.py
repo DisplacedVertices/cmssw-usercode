@@ -568,8 +568,6 @@ for x in qcd_samples_2017 + span_signal_samples_2017 + qcd_samples_2018 + span_s
 
 for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + all_signal_samples_2017 + \
          data_samples_2018 + qcd_samples_2018 + ttbar_samples_2018 + all_signal_samples_2018:
-    if x == JetHT2017E:
-        continue
     x.add_dataset("ntuplev26m")
 
 ########
