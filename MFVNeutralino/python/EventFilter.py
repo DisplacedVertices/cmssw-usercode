@@ -23,6 +23,12 @@ def setup_event_filter(process,
         pass
     elif mode == 'trigger jets only':
         trigger_filter = 'jets only'
+    elif mode == 'trigger bjets only':
+        trigger_filter = 'bjets only'
+    elif mode == 'trigger displaced dijet only':
+        trigger_filter = 'displaced dijet only'
+    elif mode == 'trigger HT OR bjets OR displaced dijet':
+        trigger_filter = 'HT OR bjets OR displaced dijet'
     elif mode == 'trigger leptons only':
         trigger_filter = 'leptons only'
     elif mode == 'jets only':
@@ -45,6 +51,12 @@ def setup_event_filter(process,
 
     if trigger_filter == 'jets only':
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterJetsOnly as triggerFilter
+    elif trigger_filter == 'bjets only':
+        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterBJetsOnly as triggerFilter
+    elif trigger_filter == 'displaced dijet only':
+        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterDisplacedDijetOnly as triggerFilter
+    elif trigger_filter == 'HT OR bjets OR displaced dijet':
+        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterHTORBjetsORDisplacedDijet as triggerFilter
     elif trigger_filter == 'leptons only':
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterLeptonsOnly as triggerFilter
     elif trigger_filter is True:
