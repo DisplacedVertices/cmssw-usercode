@@ -648,6 +648,63 @@ _add_ds("ntuplev26m_ntkseeds", {
 'JetHT2018D': (207, ['/store/user/tucker/JetHT/NtupleV26m_NTkSeeds_2018/190726_090754/0000/ntkseeds_190.root'] + ['/store/user/tucker/JetHT/NtupleV26m_NTkSeeds_2018/190724_094053/0000/ntkseeds_%i.root' % i for i in chain(xrange(190), xrange(191,207))]),
 })
 
+
+_add_ds("ntuplev27m", {
+'qcdht0700_2017': _fromnum0("/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/NtupleV27m_2017/190802_112506", 16),
+'qcdht1000_2017': _fromnum0("/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/NtupleV27m_2017/190802_112507", 31),
+'qcdht1500_2017': _fromnum0("/store/user/tucker/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/NtupleV27m_2017/190802_112508", 63),
+'qcdht2000_2017': _fromnum0("/store/user/tucker/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/NtupleV27m_2017/190802_112509", 30),
+'ttbarht0600_2017': _fromnum0("/store/user/tucker/TTJets_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_2017/190802_112510", 4),
+'ttbarht0800_2017': _fromnum0("/store/user/tucker/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_2017/190802_112511", 3),
+'ttbarht1200_2017': (1, ['/store/user/tucker/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_2017/190802_112512/0000/ntuple_0.root']),
+'ttbarht2500_2017': (1, ['/store/user/tucker/TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_2017/190802_112513/0000/ntuple_0.root']),
+'qcdht0700_2018': _fromnum0("/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_2018/190802_113539", 23),
+'qcdht1000_2018': _fromnum0("/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_2018/190802_113540", 37),
+'qcdht1500_2018': _fromnum0("/store/user/tucker/QCD_HT1500to2000_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_2018/190802_113541", 76),
+'qcdht2000_2018': _fromnum0("/store/user/tucker/QCD_HT2000toInf_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_2018/190802_113542", 34),
+'ttbarht0600_2018': _fromnum0("/store/user/tucker/TTJets_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_2018/190802_113543", 5),
+'ttbarht0800_2018': _fromnum0("/store/user/tucker/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_2018/190802_113544", 4),
+'ttbarht1200_2018': (1, ['/store/user/tucker/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_2018/190802_113545/0000/ntuple_0.root']),
+'ttbarht2500_2018': (1, ['/store/user/tucker/TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_2018/190802_113546/0000/ntuple_0.root']),
+'JetHT2017B': _fromnum0("/store/user/tucker/JetHT/NtupleV27m_2017/190802_112514", 25),
+'JetHT2017C': _fromnum0("/store/user/tucker/JetHT/NtupleV27m_2017/190802_112515", 38),
+'JetHT2017D': _fromnum0("/store/user/tucker/JetHT/NtupleV27m_2017/190802_112516", 18),
+
+'JetHT2017F': _fromnum0("/store/user/tucker/JetHT/NtupleV27m_2017/190802_112518", 51),
+'JetHT2018A': _fromnum0("/store/user/tucker/JetHT/NtupleV27m_2018/190802_113547", 115),
+'JetHT2018B': _fromnum0("/store/user/tucker/JetHT/NtupleV27m_2018/190802_113548", 58),
+
+'JetHT2018D': _fromnum0("/store/user/tucker/JetHT/NtupleV27m_2018/190802_113550", 207),
+})
+
+_add_ds("ntuplev27m_ntkseeds", {
+'qcdht0700_2017': _fromnum0("/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/NtupleV27m_NTkSeeds_2017/190802_115905", 16, fnbase="ntkseeds"),
+'qcdht1000_2017': _fromnum0("/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/NtupleV27m_NTkSeeds_2017/190802_115906", 31, fnbase="ntkseeds"),
+'qcdht1500_2017': _fromnum0("/store/user/tucker/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/NtupleV27m_NTkSeeds_2017/190802_115907", 63, fnbase="ntkseeds"),
+'qcdht2000_2017': _fromnum0("/store/user/tucker/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/NtupleV27m_NTkSeeds_2017/190802_115908", 30, fnbase="ntkseeds"),
+'ttbarht0600_2017': _fromnum0("/store/user/tucker/TTJets_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_NTkSeeds_2017/190802_115909", 4, fnbase="ntkseeds"),
+'ttbarht0800_2017': _fromnum0("/store/user/tucker/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_NTkSeeds_2017/190802_115910", 3, fnbase="ntkseeds"),
+'ttbarht1200_2017': (1, ['/store/user/tucker/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_NTkSeeds_2017/190802_115911/0000/ntkseeds_0.root']),
+'ttbarht2500_2017': (1, ['/store/user/tucker/TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_NTkSeeds_2017/190802_115912/0000/ntkseeds_0.root']),
+'qcdht0700_2018': _fromnum0("/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_NTkSeeds_2018/190802_115936", 23, fnbase="ntkseeds"),
+'qcdht1000_2018': _fromnum0("/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_NTkSeeds_2018/190802_115937", 37, fnbase="ntkseeds"),
+'qcdht1500_2018': _fromnum0("/store/user/tucker/QCD_HT1500to2000_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_NTkSeeds_2018/190802_115938", 76, fnbase="ntkseeds"),
+'qcdht2000_2018': _fromnum0("/store/user/tucker/QCD_HT2000toInf_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_NTkSeeds_2018/190802_115939", 34, fnbase="ntkseeds"),
+'ttbarht0600_2018': _fromnum0("/store/user/tucker/TTJets_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_NTkSeeds_2018/190802_115940", 5, fnbase="ntkseeds"),
+'ttbarht0800_2018': _fromnum0("/store/user/tucker/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_NTkSeeds_2018/190802_115941", 4, fnbase="ntkseeds"),
+'ttbarht1200_2018': (1, ['/store/user/tucker/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_NTkSeeds_2018/190802_115942/0000/ntkseeds_0.root']),
+'ttbarht2500_2018': (1, ['/store/user/tucker/TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_NTkSeeds_2018/190802_115943/0000/ntkseeds_0.root']),
+'JetHT2017B': _fromnum0("/store/user/tucker/JetHT/NtupleV27m_NTkSeeds_2017/190802_115913", 62, fnbase="ntkseeds"),
+'JetHT2017C': _fromnum0("/store/user/tucker/JetHT/NtupleV27m_NTkSeeds_2017/190802_115914", 95, fnbase="ntkseeds"),
+'JetHT2017D': _fromnum0("/store/user/tucker/JetHT/NtupleV27m_NTkSeeds_2017/190802_115915", 44, fnbase="ntkseeds"),
+'JetHT2017E': _fromnum0("/store/user/tucker/JetHT/NtupleV27m_NTkSeeds_2017/190802_115916", 103, fnbase="ntkseeds"),
+'JetHT2017F': _fromnum0("/store/user/tucker/JetHT/NtupleV27m_NTkSeeds_2017/190802_115917", 127, fnbase="ntkseeds"),
+'JetHT2018A': _fromnum0("/store/user/tucker/JetHT/NtupleV27m_NTkSeeds_2018/190802_115944", 286, fnbase="ntkseeds"),
+'JetHT2018B': _fromnum0("/store/user/tucker/JetHT/NtupleV27m_NTkSeeds_2018/190802_115945", 145, fnbase="ntkseeds"),
+'JetHT2018C': _fromnum0("/store/user/tucker/JetHT/NtupleV27m_NTkSeeds_2018/190802_115946", 107, fnbase="ntkseeds"),
+'JetHT2018D': _fromnum0("/store/user/tucker/JetHT/NtupleV27m_NTkSeeds_2018/190802_115947", 516, fnbase="ntkseeds"),
+})
+
 ################################################################################
 
 if __name__ == '__main__':
