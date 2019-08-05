@@ -207,7 +207,7 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
         # Shed/presel_splitting.py
         d = {'miniaod': {
                 'signal':           ( 1,     200),
-                'JetHT':            (25, 2250000),
+                'JetHT':            (15, 1350000),
                 'qcdht0700_2017':   (50, 3130000),
                 'qcdht1000_2017':   (11,  551000),
                 'qcdht1500_2017':   ( 4,  186000),
