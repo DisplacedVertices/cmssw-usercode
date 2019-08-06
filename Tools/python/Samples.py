@@ -574,8 +574,7 @@ for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + all_signal_
 
 for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + \
          data_samples_2018 + qcd_samples_2018 + ttbar_samples_2018:
-    if x not in (JetHT2017E, JetHT2018C):
-        x.add_dataset("ntuplev27m")
+    x.add_dataset("ntuplev27m")
     if not x.is_signal:
         x.add_dataset("ntuplev27m_ntkseeds")
 
