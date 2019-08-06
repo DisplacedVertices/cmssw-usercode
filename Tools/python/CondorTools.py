@@ -9,6 +9,7 @@ import xml.etree.ElementTree as ET
 from JMTucker.Tools.LumiJSONTools import fjr2ll
 from JMTucker.Tools.general import sub_popen
 from JMTucker.Tools.hadd import HaddBatchResult, hadd
+from JMTucker.Tools import colors
 
 class CSHelpersException(Exception):
     pass
@@ -294,13 +295,18 @@ def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chun
 
     return result
 
-def cs_report(wd):
+def cs_report(wd, partial=False):
     njobs = cs_njobs(wd)
     lls = []
 
     for i in xrange(njobs):
         fjr_fn = os.path.join(wd, 'fjr_%i.xml' % i)
-        lls.append((i, fjr2ll(fjr_fn)))
+        if os.path.isfile(fjr_fn):
+            lls.append((i, fjr2ll(fjr_fn)))
+        elif partial:
+            print colors.yellow('missing fjr %s but partial allowed' % fjr_fn)
+        else:
+            raise IOError('missing fjr %s' % fjr_fn)
 
     for (ia,lla),(ib,llb) in combinations(lls,2):
         if lla & llb:
