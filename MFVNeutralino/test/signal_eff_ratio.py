@@ -5,14 +5,15 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.MFVNeutralino.PerSignal import PerSignal
 
-titles = 'v2', 'v1'
-paths = ('/uscms_data/d2/tucker/crab_dirs/MiniTreeV25mv2',
-         '/uscms_data/d2/tucker/crab_dirs/MiniTreeV25m')
+titles = 'mxdz50inf', 'nominal'
+paths = ('/uscms_data/d2/tucker/crab_dirs/MiniTreeV25mv3_maxnm1dz50um_inf',
+         '/uscms_data/d2/tucker/crab_dirs/MiniTreeV25mv3')
 ratio_y_range = 0.4, 1.1
 zero_error_bars = False
+req_genmatch = False
 
 set_style()
-ps = plot_saver(plot_dir('sigeff_ratio_%sV%s' % titles), size=(600,600), log=False)
+ps = plot_saver(plot_dir('sigeff_ratio', temp=True), size=(600,600), log=False)
 
 samples = Samples.all_signal_samples_2017
 def available(samples):
@@ -23,7 +24,7 @@ def getit(fn):
     f = ROOT.TFile(fn)
     t = f.Get('mfvMiniTree/t')
     hr = draw_hist_register(t, True)
-    h,n = hr.draw('weight', 'nvtx>=2', binning='1,0,1', get_n=True, goff=True)
+    h,n = hr.draw('weight', 'nvtx>=2' + ('&& genmatch0 && genmatch1' if req_genmatch else ''), binning='1,0,1', get_n=True, goff=True)
     #i = get_integral(h)[0]
     #c = i/n
     d = Samples.norm_from_file(f)

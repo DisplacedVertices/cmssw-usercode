@@ -13,6 +13,7 @@
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
+#include "JMTucker/Tools/interface/ExtValue.h"
 #include "JMTucker/Tools/interface/PairwiseHistos.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
@@ -190,6 +191,11 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("rescale_d3_big", "rescaled-fit - nominal SV (3D) (cm)", 100, 0, 4);
   hs.add("rescale_bsbs2ddist", "rescaled-fit d_{BV} (cm)", 500, 0, 2.5);
   hs.add("rescale_bs2derr", "rescaled-fit #sigma(dist2d(SV, beamspot)) (cm)", 1000, 0, 0.05);
+
+  hs.add("max_nm1_refit_dist3_wbad", "maximum n-1 refit distance (3D) (cm)", 1001, -0.001, 1);
+  hs.add("max_nm1_refit_dist3", "maximum n-1 refit distance (3D) (cm)", 1000, 0, 1);
+  hs.add("max_nm1_refit_dist2", "maximum n-1 refit distance (2D) (cm)", 1000, 0, 1);
+  hs.add("max_nm1_refit_distz", "maximum n-1 refit z distance (cm)", 1000, 0, 1);
 
   hs.add("nlep", "# leptons", 10, 0, 10);
 
@@ -444,6 +450,22 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     MFVVertexAux::stats trackpairdeta_stats(&aux, aux.trackpairdetas());
     MFVVertexAux::stats   trackpairdr_stats(&aux, aux.trackpairdrs());
 
+    jmt::MaxValue max_nm1_refit_dist3_wbad, max_nm1_refit_dist3, max_nm1_refit_dist2, max_nm1_refit_distz;
+    for (size_t i = 0, ie = aux.nnm1(); i < ie; ++i) {
+      const double dist3 = mag(aux.nm1_x[i] - aux.x, aux.nm1_y[i] - aux.y, aux.nm1_z[i] - aux.z);
+      if (aux.nm1_chi2[i] < 0)
+        max_nm1_refit_dist3_wbad(std::numeric_limits<double>::max());
+      else {
+        max_nm1_refit_dist3_wbad(dist3);
+        max_nm1_refit_dist3(dist3);
+        max_nm1_refit_dist2(mag(aux.nm1_x[i] - aux.x, aux.nm1_y[i] - aux.y));
+        max_nm1_refit_distz(fabs(aux.nm1_z[i] - aux.z));
+      }
+    }
+
+    if (max_nm1_refit_dist3_wbad == std::numeric_limits<double>::max())
+      max_nm1_refit_dist3_wbad.set(-0.0005);
+
     PairwiseHistos::ValueMap v = {
         {"x", aux.x - mevent->bsx_at_z(aux.z)},
         {"y", aux.y - mevent->bsy_at_z(aux.z)},
@@ -478,6 +500,11 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         {"rescale_d3_big", mag(aux.rescale_x - aux.x, aux.rescale_y - aux.y, aux.rescale_z - aux.z)},
         {"rescale_bsbs2ddist", mag(aux.x - mevent->bsx_at_z(aux.z), aux.y - mevent->bsy_at_z(aux.z))},
         {"rescale_bs2derr", aux.rescale_bs2derr},
+
+        {"max_nm1_refit_dist3_wbad", max_nm1_refit_dist3_wbad},
+        {"max_nm1_refit_dist3", max_nm1_refit_dist3},
+        {"max_nm1_refit_dist2", max_nm1_refit_dist2},
+        {"max_nm1_refit_distz", max_nm1_refit_distz},
 
         {"nlep",                    aux.which_lep.size()},
         {"ntracks",                 aux.ntracks()},

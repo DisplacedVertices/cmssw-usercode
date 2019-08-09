@@ -1,4 +1,5 @@
-import os, sys, glob, FWCore.ParameterSet.Config as cms
+import FWCore.ParameterSet.Config as cms
+from JMTucker.Tools.general import *
 
 class CMSSWSettings(object):
     def __init__(self):
@@ -108,6 +109,11 @@ def cmssw_base(extra=''):
     b = os.environ['CMSSW_BASE']
     return os.path.join(b, extra) if extra else b
 
+def norm_fn(fn, fs_prefix=''):
+    if not fn.startswith('/store') and not fn.startswith('root://'):
+        fn = fs_prefix + expanduservars(fn)
+    return fn
+
 def input_files(process, fns, sec_fns=None):
     def _norm_arg(x):
         if type(x) == str:
@@ -119,18 +125,14 @@ def input_files(process, fns, sec_fns=None):
             x = [x]
         fns = []
         for y in x:
-            if y.startswith('itch:'):
-                y = y.replace('itch:', '/uscmst1b_scratch/lpc1/3DayLifetime/tucker/itch')
-            if not y.startswith('/store') and not y.startswith('root://'):
-                y = 'file:' + y
-            fns.append(y)
+            fns.append(norm_fn(y, 'file:'))
         return fns
     process.source.fileNames = cms.untracked.vstring(*_norm_arg(fns))
     if sec_fns:
         process.source.secondaryFileNames = cms.untracked.vstring(*_norm_arg(sec_fns))
 
 def files_from_file(process, fn, n=-1):
-    fns = [line.strip() for line in open(fn).read().split('\n') if line.strip().endswith('.root')]
+    fns = [norm_fn(line.strip()) for line in open(fn).read().split('\n') if line.strip().endswith('.root')]
     if n > 0:
         fns = fns[:n]
     return fns
@@ -139,13 +141,23 @@ def file_event_from_argv(process, verbose=False):
     '''Set the filename and event to run on from argv.'''
     files = []
     nums = []
+
     for arg in sys.argv[1:]:
-        if arg.startswith('eventsfile='):
-            for line in open(arg.replace('eventsfile=', '')):
+        if arg.startswith('eventsfn='):
+            files = []
+            nums = []
+            for line in open(arg.replace('eventsfn=', '')):
                 x = line.strip().split()
-                files.append(x[-1])
+                if x[-1] not in files:
+                    files.append(x[-1])
                 nums.append(tuple(int(y) for y in x[:3]))
-            break
+            break # no other cmd line file/events steering allowed
+
+        elif arg.startswith('listfn='):
+            for line in open(arg.replace('listfn=', '')):
+                x = line.strip()
+                files.append(x)
+
         elif arg.startswith('sample='):
             arg = arg.replace('sample=', '')
             assert ':' in arg
@@ -159,8 +171,10 @@ def file_event_from_argv(process, verbose=False):
             files = None
             if verbose:
                 print 'sample from argv: %s %s (%i files)' % (sname, dataset, nfiles)
+
         elif arg.endswith('.root') and files is not None:
             files.append(arg)
+
         else:
             try:
                 nums.append(int(arg))
@@ -168,12 +182,7 @@ def file_event_from_argv(process, verbose=False):
                 pass
 
     if files:
-        files_ = []
-        for file in files:
-            if not file.startswith('/store') and not file.startswith('root://'):
-                file = 'file:' + file
-            files_.append(file)
-        files = files_
+        files = [norm_fn(fn, 'file:') for fn in files]
         if verbose:
             print 'files from argv:'
             for file in files:
@@ -213,7 +222,9 @@ def cmssw_from_argv(process, verbose=False):
                 sys.argv.remove(a)
                 break
     doif('name', lambda s: process.setName_(s))
+    doif('skip', lambda s: setattr(process.source, 'skipEvents', cms.untracked.uint32(int(s))))
     doif('tfs',  lambda s: tfileservice(process, s))
+    doif('pool', lambda s: setattr(process.out, 'fileName', s) if hasattr(process, 'out') else None)
     file_event_from_argv(process, verbose)
 
 def find_output_files(process):
@@ -295,7 +306,7 @@ def json_path(bn):
 
 def merge_edm_files(out_fn, fns):
     print 'merging %i edm files to %s' % (len(fns), out_fn)
-    cmd = 'cmsRun $CMSSW_BASE/src/JMTucker/Tools/python/Merge_cfg.py argv %s out=%s >%s.mergelog 2>&1' % (' '.join(fns), out_fn, out_fn)
+    cmd = 'cmsRun $CMSSW_BASE/src/JMTucker/Tools/python/Merge_cfg.py %s pool=%s >%s.mergelog 2>&1' % (' '.join(fns), out_fn, out_fn)
     #print cmd
     return os.system(cmd) == 0
 
@@ -356,9 +367,9 @@ def max_events(process, n):
 def no_event_sort(process):
     process.source.noEventSort = cms.untracked.bool(True)
 
-def output_file(process, filename, output_commands, select_events=[]):
+def output_file(process, filename, output_commands=[], select_events=[]):
     process.out = cms.OutputModule('PoolOutputModule',
-                                   fileName = cms.untracked.string(filename),
+                                   fileName = cms.untracked.string(norm_fn(filename)),
                                    compressionLevel = cms.untracked.int32(4),
                                    compressionAlgorithm = cms.untracked.string('LZMA'),
                                    eventAutoFlushCompressedSize = cms.untracked.int32(15728640),
@@ -477,7 +488,7 @@ def remove_tfileservice(process):
         pass
 
 def tfileservice(process, filename='tfileservice.root'):
-    process.TFileService = cms.Service('TFileService', fileName = cms.string(filename))
+    process.TFileService = cms.Service('TFileService', fileName = cms.string(norm_fn(filename)))
 
 def tracer(process):
     process.Tracer = cms.Service('Tracer')
@@ -498,12 +509,13 @@ def which_global_tag(settings=None):
             return '94X_dataRun2_v11'
     elif settings.year == 2018:
         if settings.is_mc:
-            return '102X_upgrade2018_realistic_v15'
+            return '102X_upgrade2018_realistic_v19'
         else:
-            assert settings.era
-            if settings.era in ('A','B','C'):
-                return '102X_dataRun2_Sep2018Rereco_v1'
+            eras = tuple('ABCD')
+            assert settings.era in eras
+            if settings.era in eras[:3]:
+                return '102X_dataRun2_v11'
             else:
-                return '102X_dataRun2_Prompt_v11'
+                return '102X_dataRun2_Prompt_v14'
     else:
         raise ValueError('what year is it')

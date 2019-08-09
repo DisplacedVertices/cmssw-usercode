@@ -24,31 +24,36 @@ class MFVJetEnergyHistos : public edm::EDAnalyzer {
   const edm::EDGetTokenT<double> weight_token;
   const bool jes;
 
-  TH1F* h_w;
+  TH1D* h_w;
 
-  TH1F* h_njets;
-  TH1F* h_njets20;
-  TH1F* h_jet_ht;
-  TH1F* h_jet_ht_40;
+  TH1D* h_njets;
+  TH1D* h_njets20;
+  TH1D* h_jet_ht;
+  TH1D* h_jet_ht_40;
 
-  TH1F* h_jet_pt;
-  TH1F* h_jet_eta;
-  TH1F* h_jet_phi;
-  TH1F* h_jet_energy;
+  TH1D* h_jet_pt;
+  TH1D* h_jet_eta;
+  TH1D* h_jet_phi;
+  TH1D* h_jet_energy;
 
-  TH1F* h_jet_pt_up;
-  TH1F* h_jet_pt_down;
-  TH1F* h_jet_ht_up;
-  TH1F* h_jet_ht_down;
-  TH1F* h_jet_ht_40_up;
-  TH1F* h_jet_ht_40_down;
+  TH1D* h_njets_notmatched;
+  TH1D* h_jet_pt_notmatched;
 
-  TH1F* h_jet_ht_40_1200cut;
-  TH1F* h_jet_ht_40_up_1200cut;
-  TH1F* h_jet_ht_40_down_1200cut;
+  TH1D* h_jet_pt_up;
+  TH1D* h_jet_pt_down;
+  TH1D* h_jet_ht_up;
+  TH1D* h_jet_ht_down;
+  TH1D* h_jet_ht_40_up;
+  TH1D* h_jet_ht_40_down;
+  TH1D* h_jet_ht_40_mup;
+  TH1D* h_jet_ht_40_mdown;
 
-  TH1F* h_scale_up;
-  TH1F* h_scale_down;
+  TH1D* h_jet_ht_40_1200cut;
+  TH1D* h_jet_ht_40_up_1200cut;
+  TH1D* h_jet_ht_40_down_1200cut;
+
+  TH1D* h_scale_up;
+  TH1D* h_scale_down;
 };
 
 MFVJetEnergyHistos::MFVJetEnergyHistos(const edm::ParameterSet& cfg)
@@ -58,31 +63,36 @@ MFVJetEnergyHistos::MFVJetEnergyHistos(const edm::ParameterSet& cfg)
 {
   edm::Service<TFileService> fs;
 
-  h_w = fs->make<TH1F>("h_w", ";event weight;events/0.1", 100, 0, 10);
+  h_w = fs->make<TH1D>("h_w", ";event weight;events/0.1", 100, 0, 10);
 
-  h_njets = fs->make<TH1F>("h_njets", ";# of jets;events", 20, 0, 20);
-  h_njets20 = fs->make<TH1F>("h_njets20", ";# of jets with p_{T} > 20 GeV;events", 20, 0, 20);
-  h_jet_ht = fs->make<TH1F>("h_jet_ht", ";H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
-  h_jet_ht_40 = fs->make<TH1F>("h_jet_ht_40", ";H_{T} of jets with p_{T} > 40 GeV;events/25 GeV", 200, 0, 5000);
+  h_njets = fs->make<TH1D>("h_njets", ";# of jets;events", 20, 0, 20);
+  h_njets20 = fs->make<TH1D>("h_njets20", ";# of jets with p_{T} > 20 GeV;events", 20, 0, 20);
+  h_jet_ht = fs->make<TH1D>("h_jet_ht", ";H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
+  h_jet_ht_40 = fs->make<TH1D>("h_jet_ht_40", ";H_{T} of jets with p_{T} > 40 GeV;events/25 GeV", 200, 0, 5000);
 
-  h_jet_pt = fs->make<TH1F>("h_jet_pt", ";jets p_{T} (GeV);jets/10 GeV", 100, 0, 1000);
-  h_jet_eta = fs->make<TH1F>("h_jet_eta", ";jets #eta (rad);jets/.08", 100, -4, 4);
-  h_jet_phi = fs->make<TH1F>("h_jet_phi", ";jets #phi (rad);jets/.063", 100, -3.1416, 3.1416);
-  h_jet_energy = fs->make<TH1F>("h_jet_energy", ";jets energy (GeV);jets/10 GeV", 100, 0, 1000);
+  h_jet_pt = fs->make<TH1D>("h_jet_pt", ";jets p_{T} (GeV);jets/10 GeV", 100, 0, 1000);
+  h_jet_eta = fs->make<TH1D>("h_jet_eta", ";jets #eta (rad);jets/.08", 100, -4, 4);
+  h_jet_phi = fs->make<TH1D>("h_jet_phi", ";jets #phi (rad);jets/.063", 100, -3.1416, 3.1416);
+  h_jet_energy = fs->make<TH1D>("h_jet_energy", ";jets energy (GeV);jets/10 GeV", 100, 0, 1000);
 
-  h_jet_pt_up = fs->make<TH1F>("h_jet_pt_up", ";shifted up jets p_{T} (GeV);jets/10 GeV", 100, 0, 1000);
-  h_jet_pt_down = fs->make<TH1F>("h_jet_pt_down", ";shifted down jets p_{T} (GeV);jets/10 GeV", 100, 0, 1000);
-  h_jet_ht_up = fs->make<TH1F>("h_jet_ht_up", ";shifted up H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
-  h_jet_ht_down = fs->make<TH1F>("h_jet_ht_down", ";shifted down H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
-  h_jet_ht_40_up = fs->make<TH1F>("h_jet_ht_40_up", ";shifted up H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
-  h_jet_ht_40_down = fs->make<TH1F>("h_jet_ht_40_down", ";shifted down H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
+  h_njets_notmatched = fs->make<TH1D>("h_njets_notmatched", ";# of jets without gen jet;events", 20, 0, 20);
+  h_jet_pt_notmatched = fs->make<TH1D>("h_jet_pt_notmatched", ";jets without gen jet p_{T} (GeV);jets/10 GeV", 100, 0, 1000);
 
-  h_jet_ht_40_1200cut = fs->make<TH1F>("h_jet_ht_40_1200cut", ";H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
-  h_jet_ht_40_up_1200cut = fs->make<TH1F>("h_jet_ht_40_up_1200cut", ";shifted up H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
-  h_jet_ht_40_down_1200cut = fs->make<TH1F>("h_jet_ht_40_down_1200cut", ";shifted down H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
+  h_jet_pt_up = fs->make<TH1D>("h_jet_pt_up", ";shifted up jets p_{T} (GeV);jets/10 GeV", 100, 0, 1000);
+  h_jet_pt_down = fs->make<TH1D>("h_jet_pt_down", ";shifted down jets p_{T} (GeV);jets/10 GeV", 100, 0, 1000);
+  h_jet_ht_up = fs->make<TH1D>("h_jet_ht_up", ";shifted up H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
+  h_jet_ht_down = fs->make<TH1D>("h_jet_ht_down", ";shifted down H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
+  h_jet_ht_40_up = fs->make<TH1D>("h_jet_ht_40_up", ";shifted up H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
+  h_jet_ht_40_down = fs->make<TH1D>("h_jet_ht_40_down", ";shifted down H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
+  h_jet_ht_40_mup = fs->make<TH1D>("h_jet_ht_40_mup", ";shifted up H_{T} of jets - nominal (GeV);events/25 GeV", 200, -500, 500);
+  h_jet_ht_40_mdown = fs->make<TH1D>("h_jet_ht_40_mdown", ";shifted down H_{T} of jets - nominal (GeV);events/25 GeV", 200, -500, 500);
 
-  h_scale_up = fs->make<TH1F>("h_scale_up", ";scale factor;jets/0.004", 50, 0.9, 1.1);
-  h_scale_down = fs->make<TH1F>("h_scale_down", ";scale factor;jets/0.004", 50, 0.9, 1.1);
+  h_jet_ht_40_1200cut = fs->make<TH1D>("h_jet_ht_40_1200cut", ";H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
+  h_jet_ht_40_up_1200cut = fs->make<TH1D>("h_jet_ht_40_up_1200cut", ";shifted up H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
+  h_jet_ht_40_down_1200cut = fs->make<TH1D>("h_jet_ht_40_down_1200cut", ";shifted down H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
+
+  h_scale_up = fs->make<TH1D>("h_scale_up", ";scale factor;jets/0.004", 50, 0.9, 1.1);
+  h_scale_down = fs->make<TH1D>("h_scale_down", ";scale factor;jets/0.004", 50, 0.9, 1.1);
 }
 
 void MFVJetEnergyHistos::analyze(const edm::Event& event, const edm::EventSetup& setup) {
@@ -106,6 +116,7 @@ void MFVJetEnergyHistos::analyze(const edm::Event& event, const edm::EventSetup&
   h_jet_ht_40->Fill(ht_40, w);
   if (ht_40 > 1200) h_jet_ht_40_1200cut->Fill(ht_40, w);
 
+  int njets_notmatched = 0;
   double ht_up = 0, ht_down = 0, ht_40_up = 0, ht_40_down = 0;
 
   for (int i = 0, ie = mevent->njets(); i < ie; ++i) {
@@ -117,7 +128,7 @@ void MFVJetEnergyHistos::analyze(const edm::Event& event, const edm::EventSetup&
     h_jet_phi->Fill(mevent->jet_phi[i], w);
     h_jet_energy->Fill(mevent->jet_energy[i], w);
 
-    double scale_up = 1e9, scale_down = 1e9;
+    double scale_up = 1, scale_down = 1;
 
     if (jes) {
       jec_unc.setJetEta(mevent->jet_eta[i]);
@@ -156,11 +167,17 @@ void MFVJetEnergyHistos::analyze(const edm::Event& event, const edm::EventSetup&
 #else
 #error bad year
 #endif
-      const double up = sf[ind] + un[ind];
-      const double dn = sf[ind] - un[ind];
-      const double gen_jet_energy = gRandom->Gaus(mevent->jet_energy[i], 0.1); // JMTBAD
-      scale_up   = (gen_jet_energy + up * (mevent->jet_energy[i] - gen_jet_energy))/mevent->jet_energy[i];
-      scale_down = (gen_jet_energy + dn * (mevent->jet_energy[i] - gen_jet_energy))/mevent->jet_energy[i];
+
+      if (mevent->jet_gen_energy[i] > 0) {
+        const double up = sf[ind] + un[ind];
+        const double dn = sf[ind] - un[ind];
+        scale_up   = (mevent->jet_gen_energy[i] + up * (mevent->jet_energy[i] - mevent->jet_gen_energy[i])) / mevent->jet_energy[i];
+        scale_down = (mevent->jet_gen_energy[i] + dn * (mevent->jet_energy[i] - mevent->jet_gen_energy[i])) / mevent->jet_energy[i];
+      }
+      else { // JMTBAD
+        ++njets_notmatched;
+        h_jet_pt_notmatched->Fill(mevent->jet_pt[i], w);
+      }
     }
 
     //printf("jet %i pt %f eta %f up %f dn %f\n", i, mevent->jet_pt[i], mevent->jet_eta[i], scale_up, scale_down);
@@ -178,10 +195,13 @@ void MFVJetEnergyHistos::analyze(const edm::Event& event, const edm::EventSetup&
     }
   }
 
+  h_njets_notmatched->Fill(njets_notmatched, w);
   h_jet_ht_up->Fill(ht_up, w);
   h_jet_ht_down->Fill(ht_down, w);
   h_jet_ht_40_up->Fill(ht_40_up, w);
   h_jet_ht_40_down->Fill(ht_40_down, w);
+  h_jet_ht_40_mup->Fill(ht_40 - ht_40_up, w);
+  h_jet_ht_40_mdown->Fill(ht_40 - ht_40_down, w);
 
   if (ht_40_up > 1200) h_jet_ht_40_up_1200cut->Fill(ht_40_up, w);
   if (ht_40_down > 1200) h_jet_ht_40_down_1200cut->Fill(ht_40_down, w);

@@ -166,8 +166,7 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.z0 = v0.z;
     nt.bs2derr0 = v0.bs2derr;
     nt.rescale_bs2derr0 = v0.rescale_bs2derr;
-    nt.geo2ddist0 = v0.geo2ddist();
-    nt.x1 = nt.y1 = nt.z1 = nt.bs2derr1 = nt.rescale_bs2derr1 = nt.geo2ddist1 = 0;
+    nt.x1 = nt.y1 = nt.z1 = nt.bs2derr1 = nt.rescale_bs2derr1 = 0;
   }
   else if (vertices.size() >= 2) {
     const MFVVertexAux& v0 = vertices[0];
@@ -207,10 +206,8 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.x1 = v1.x; nt.y1 = v1.y; nt.z1 = v1.z;
     nt.bs2derr0 = v0.bs2derr;
     nt.rescale_bs2derr0 = v0.rescale_bs2derr;
-    nt.geo2ddist0 = v0.geo2ddist();
     nt.bs2derr1 = v1.bs2derr;
     nt.rescale_bs2derr1 = v1.rescale_bs2derr;
-    nt.geo2ddist1 = v1.geo2ddist();
   }
   else
     return;

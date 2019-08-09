@@ -4,19 +4,13 @@ import os, sys
 join = os.path.join
 from glob import glob
 from JMTucker.Tools.CRAB3ToolsBase import crabify_list, crab_jobs_from_argv
-from JMTucker.Tools.CondorSubmitter import CondorSubmitter
 from JMTucker.Tools.CondorTools import *
-from JMTucker.Tools.general import mkdirp
+from JMTucker.Tools.general import bool_from_argv, mkdirp
 
-fns_only = '-f' in sys.argv
-include_log = '-l' in sys.argv
-include_stderr = '-e' in sys.argv
-if fns_only:
-    sys.argv.remove('-f')
-if include_log:
-    sys.argv.remove('-l')
-if include_stderr:
-    sys.argv.remove('-e')
+fns_only = bool_from_argv('-f')
+include_log = bool_from_argv('-l')
+include_stdout = not bool_from_argv('-no')
+include_stderr = bool_from_argv('-e')
 if '-le' in sys.argv:
     include_log = include_stderr = True
     sys.argv.remove('-le')
@@ -41,7 +35,8 @@ def doit(fn):
         os.system('less %s' % fn)
 
 for job in jobs:
-    doit('%s/stdout.%s' % (wd, job))
+    if include_stdout:
+        doit('%s/stdout.%s' % (wd, job))
     if include_stderr:
         doit('%s/stderr.%s' % (wd, job))
     if include_log:

@@ -272,7 +272,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   //////////////////////////////////////////////////////////////////////
 
-  mevent->npv = int2uchar_clamp(primary_vertices->size());
+  const size_t npv = mevent->npv = int2uchar_clamp(primary_vertices->size());
 
   if (primary_vertex != 0) {
     mevent->pvx = primary_vertex->x();
@@ -303,6 +303,13 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     else {
       mevent->pv_ntracks = int2uchar_clamp(primary_vertex->nTracks());
       mevent->pv_ntracksloose = int2uchar_clamp(primary_vertex->nTracks(0.));
+    }
+
+    for (size_t i = 1; i < npv; ++i) {
+      mevent->pvsx.push_back((*primary_vertices)[i].x());
+      mevent->pvsy.push_back((*primary_vertices)[i].y());
+      mevent->pvsz.push_back((*primary_vertices)[i].z());
+      mevent->pvsscores.push_back((*primary_vertex_scores)[reco::VertexRef(primary_vertices, i)]);
     }
   }
 
@@ -336,6 +343,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->jet_eta.push_back(jet.eta());
     mevent->jet_phi.push_back(jet.phi());
     mevent->jet_energy.push_back(jet.energy());
+    mevent->jet_gen_energy.push_back(jet.genJet() ? jet.genJet()->energy() : -1);
 
     int bdisc_level = 0;
     for (int i = 0; i < 3; ++i)
@@ -502,6 +510,10 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->pvczz = 0;
     mevent->pv_ntracks = 0;
     mevent->pv_score = 0;
+    mevent->pvsx.clear();
+    mevent->pvsy.clear();
+    mevent->pvsz.clear();
+    mevent->pvsscores.clear();
     mevent->jet_pudisc.clear();
     mevent->jet_raw_pt.clear();
     mevent->jet_bdisc.clear();

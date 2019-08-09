@@ -87,6 +87,20 @@ struct MFVVertexAux {
   float rescale_bs2ddist;
   float rescale_bs2derr;
 
+  size_t nnm1() const { return nm1_chi2.size(); }
+  std::vector<float> nm1_chi2;
+  std::vector<float> nm1_x;
+  std::vector<float> nm1_y;
+  std::vector<float> nm1_z;
+  std::vector<float> nm1_cxx;
+  std::vector<float> nm1_cxy;
+  std::vector<float> nm1_cxz;
+  std::vector<float> nm1_cyy;
+  std::vector<float> nm1_cyz;
+  std::vector<float> nm1_czz;
+  std::vector<float> nm1_bs2ddist;
+  std::vector<float> nm1_bs2derr;
+
   uchar njets[mfv::NJetsByUse];
 
   float pt  [mfv::NMomenta];

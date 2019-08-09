@@ -9,6 +9,7 @@ import xml.etree.ElementTree as ET
 from JMTucker.Tools.LumiJSONTools import fjr2ll
 from JMTucker.Tools.general import sub_popen
 from JMTucker.Tools.hadd import HaddBatchResult, hadd
+from JMTucker.Tools import colors
 
 class CSHelpersException(Exception):
     pass
@@ -30,6 +31,9 @@ def cs_dirs_from_argv():
         if d not in r and d is not None:
             r.append(d)
     return r
+
+def cs_done(wd):
+    return os.path.isfile(os.path.join(wd, 'mmon_done'))
 
 def cs_fjrs(d):
     return glob(os.path.join(d, 'fjr_*.xml'))
@@ -67,9 +71,12 @@ def cs_resubs(d):
 def cs_clusters(d):
     return [(p, tuple(open(os.path.join(p, 'cluster')).read().strip().split())) for p in [d] + cs_resubs(d)]
 
-def _cluster2cmd(c):
+def _cluster2cmd(c, n=False):
     if len(c) == 2:
-        return '%s -name %s' % c
+        if n:
+            return '%s -n %s' % c
+        else:
+            return '%s -name %s' % c
     else:
         assert len(c) == 1
         return c[0]
@@ -288,13 +295,18 @@ def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chun
 
     return result
 
-def cs_report(wd):
+def cs_report(wd, partial=False):
     njobs = cs_njobs(wd)
     lls = []
 
     for i in xrange(njobs):
         fjr_fn = os.path.join(wd, 'fjr_%i.xml' % i)
-        lls.append((i, fjr2ll(fjr_fn)))
+        if os.path.isfile(fjr_fn):
+            lls.append((i, fjr2ll(fjr_fn)))
+        elif partial:
+            print colors.yellow('missing fjr %s but partial allowed' % fjr_fn)
+        else:
+            raise IOError('missing fjr %s' % fjr_fn)
 
     for (ia,lla),(ib,llb) in combinations(lls,2):
         if lla & llb:
@@ -317,9 +329,14 @@ def cs_last_input_file(wd, job):
         if mo:
             return mo.group(1)
 
+def cs_prio(wd, prio):
+    for _, c in cs_clusters(wd):
+        os.system('condor_prio %s %s' % (prio, _cluster2cmd(c, n=True)))
+
 __all__ = [
     'is_cs_dir',
     'cs_dirs_from_argv',
+    'cs_done',
     'cs_fjrs',
     'cs_eventsread',
     'cs_eventswritten',
@@ -343,6 +360,7 @@ __all__ = [
     'cs_hadd',
     'cs_report',
     'cs_last_input_file',
+    'cs_prio',
     ]
 
 if __name__ == '__main__':

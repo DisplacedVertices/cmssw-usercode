@@ -29,25 +29,16 @@ void set_bin_labels(TAxis* xax, const char** labels);
 void fill_by_label(TH1F* h, const std::string& label);
 void fill_by_label(TH2F* h, const std::string& label_x, const std::string& label_y);
 
-template <typename T>
-int sgn(T x) {
-  return x >= 0 ? 1 : -1;
-}
+template <typename T> int sgn(T x) { return x >= 0 ? 1 : -1; }
 
-template <typename T>
-T min(T x, T y) {
-  return x < y ? x : y;
-}
+template <typename T> T mag(T x)                { return fabs(x); }
+template <typename T> T mag(T x, T y)           { return sqrt(x*x + y*y); }
+template <typename T> T mag(T x, T y, T z)      { return sqrt(x*x + y*y + z*z); }
+template <typename T> T mag(T x, T y, T z, T w) { return sqrt(x*x + y*y + z*z + w*w); }
 
-template <typename T>
-T mag(T x, T y) {
-  return sqrt(x*x + y*y);
-}
-
-template <typename T>
-T mag(T x, T y, T z) {
-  return sqrt(x*x + y*y + z*z);
-}
+template <typename T> T mag2(T x, T y)           { return x*x + y*y; }
+template <typename T> T mag2(T x, T y, T z)      { return x*x + y*y + z*z; }
+template <typename T> T mag2(T x, T y, T z, T w) { return x*x + y*y + z*z + w*w; }
 
 template <typename T, typename T2>
 T2 mag(const T& v) {
