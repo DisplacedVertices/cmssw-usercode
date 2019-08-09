@@ -32,8 +32,12 @@ parser.add_argument('--no-dbs', action='store_false', dest='dbs', help='whether 
 parser.add_argument('--nevents-per-job', type=int, default=-1, help='nevents to use if reading dbs fails')
 parser.add_argument('--include-condor-nevents', action='store_true',
                     help='If set, parse xmls to get nevents from condor wds.')
+parser.add_argument('--from-merge', action='store_true', help='Input is from merge jobs (implies --partial and --no-coderep).')
 
 options = parser.parse_args()
+if options.from_merge:
+    options.partial = True
+    options.coderep = False
 
 ########################################################################
 
