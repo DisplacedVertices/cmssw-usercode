@@ -4,7 +4,7 @@ import math, sys, os, tempfile
 from array import array
 from glob import glob
 from collections import defaultdict, namedtuple
-from JMTucker.Tools.general import chunks
+from JMTucker.Tools.general import chunks, int_ceil
 
 if os.environ.has_key('JMT_ROOTTOOLS_NOBATCHMODE'):
     import ROOT
@@ -418,12 +418,18 @@ def compare_hists(ps, samples, **kwargs):
 
     Options (see the list below) are specified as keyword arguments in
     kwargs, and so far include
+
+    - recurse: if True, recurse down the directory structure, i.e. use
+    all histograms in the given directory and all subdirectories.
     - sort_names: True: process the histograms in alphabetical
     order. False (default): in the order found in the ROOT directory.
-    - show_progress: if True (default), print how far along we are
-    processing the histograms.
+    - show_progress: print how far along we are processing the
+    histograms: if this is 10 (default), a line is printed for every
+    1/10 chunk. Disable with value <= 0.
     - only_n_first: if supplied, only do that that many histograms. If
     -1 (default), do all.
+    - raise_on_incompatibility: if histograms are not comparable
+    (e.g. different binning), skip if True, else raise an exception.
     
     Various callbacks (see the other list below) can be specified as
     keyword arguments to modify the drawing depending on the
@@ -443,7 +449,7 @@ def compare_hists(ps, samples, **kwargs):
     # options
     recurse        = kwargs.get('recurse',        False)
     sort_names     = kwargs.get('sort_names',     False)
-    show_progress  = kwargs.get('show_progress',  True)
+    show_progress  = kwargs.get('show_progress',  10)
     only_n_first   = kwargs.get('only_n_first',   -1)
     raise_on_incompatibility = kwargs.get('raise_on_incompatibility', False)
 
@@ -490,8 +496,9 @@ def compare_hists(ps, samples, **kwargs):
             return l[0]
 
     nnames = len(names)
+    pnames = int_ceil(nnames, show_progress) if show_progress > 0 else 1
     for iname, name in enumerate(names):
-        if show_progress and (nnames < 10 or iname % (nnames/10) == 0):
+        if show_progress > 0 and (nnames < 10 or iname % pnames == 0):
             print '%5i/%5i' % (iname, nnames), name
 
         name_clean = name.replace('/','_').replace('#','n')
@@ -583,9 +590,10 @@ def compare_hists(ps, samples, **kwargs):
                     hist.Draw(draw_cmd)
                 else:
                     hist.Draw((draw_cmd + ' sames').strip())
-                if (not is2d or profiled) and x_r:
-                    hist.GetXaxis().SetRangeUser(*x_r)
-                move_overflows_into_visible_bins(hist, m_o)
+                if not is2d or profiled:
+                    if x_r:
+                        hist.GetXaxis().SetRangeUser(*x_r)
+                    move_overflows_into_visible_bins(hist, m_o)
 
             ps.c.Update()
             if not no_stats(name, hist_list, None):
