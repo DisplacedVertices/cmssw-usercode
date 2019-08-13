@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, os, re, fnmatch
+import sys, os, re, fnmatch, imp
 from collections import defaultdict
 from datetime import datetime
 from glob import glob
@@ -333,6 +333,13 @@ def cs_prio(wd, prio):
     for _, c in cs_clusters(wd):
         os.system('condor_prio %s %s' % (prio, _cluster2cmd(c, n=True)))
 
+def cs_filelist(wd):
+    fn = os.path.join(wd, 'cs_filelist.py')
+    if not os.path.isfile(fn):
+        raise IOError('no %s' % fn)
+    m = imp.load_source('dummy', fn)
+    return m._l
+
 __all__ = [
     'is_cs_dir',
     'cs_dirs_from_argv',
@@ -361,6 +368,7 @@ __all__ = [
     'cs_report',
     'cs_last_input_file',
     'cs_prio',
+    'cs_filelist',
     ]
 
 if __name__ == '__main__':
