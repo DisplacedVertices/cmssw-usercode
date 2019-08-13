@@ -170,6 +170,7 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("cyz", "SV covariance yz (cm^{2})", 100, -1e-5, 1e-5);
   hs.add("czz", "SV covariance zz (cm^{2})", 100, 0, 1e-5);
 
+  hs.add("rescale_chi2", "rescaled-fit SV x (cm)", 40, 0, 10);
   hs.add("rescale_x", "rescaled-fit SV x (cm)", 100, -4, 4);
   hs.add("rescale_y", "rescaled-fit SV y (cm)", 100, -4, 4);
   hs.add("rescale_z", "rescaled-fit SV z (cm)", 100, -25, 25);
@@ -479,6 +480,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         {"cyz", aux.cyz},
         {"czz", aux.czz},
 
+        {"rescale_chi2", aux.rescale_chi2},
         {"rescale_x", aux.rescale_x - mevent->bsx_at_z(aux.z)},
         {"rescale_y", aux.rescale_y - mevent->bsy_at_z(aux.z)},
         {"rescale_z", aux.rescale_z - bsz},

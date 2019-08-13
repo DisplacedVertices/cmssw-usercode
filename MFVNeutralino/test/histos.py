@@ -27,7 +27,7 @@ process.pEventPreSel = cms.Path(common * process.mfvAnalysisCutsPreSel * process
 
 nm1s = [
     ('Bsbs2ddist', 'min_bsbs2ddist = 0'),
-    ('Bs2derr',    'max_bs2derr = 1e9'),
+    ('Bs2derr',    'max_rescale_bs2derr = 1e9'),
     ]
 
 ntks = [5,3,4,7]
