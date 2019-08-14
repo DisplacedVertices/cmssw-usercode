@@ -7,13 +7,18 @@ namespace mfv {
   // be sure these end in _v
   const char* hlt_paths[mfv::n_hlt_paths] = {
     "HLT_PFHT1050_v",
-    "HLT_Ele35_WPTight_Gsf_v",
-    "HLT_Ele115_CaloIdVT_GsfTrkIdT_v",
-    "HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165_v",
-    "HLT_IsoMu27_v",
-    "HLT_Mu50_v",
-    "HLT_Ele15_IsoVVVL_PFHT450_v",
-    "HLT_Mu15_IsoVVVL_PFHT450_v"
+    "HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33_v", // 2017
+    "HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0_v", // 2017
+    "HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2_v", // 2017
+    "HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_v", // 2017
+    "HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5_v", // 2017
+//    "HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71_v", // 2018
+//    "HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5_v", // 2017
+//    "HLT_PFHT400_FivePFJet_100_100_60_30_30_DoublePFBTagDeepCSV_4p5_v", // 2018
+//    "HLT_PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94_v", // 2018
+//    "HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59_v", // 2018
+    "HLT_HT430_DisplacedDijet40_DisplacedTrack_v",
+    "HLT_HT650_DisplacedDijet60_Inclusive_v",
   };
 
   const char* l1_paths[mfv::n_l1_paths] = {

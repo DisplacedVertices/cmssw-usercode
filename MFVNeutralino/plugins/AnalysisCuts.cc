@@ -144,6 +144,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       return false;
 
     if (apply_presel == 2) {
+      /*
       if (!mevent->pass_hlt(mfv::b_HLT_Ele35_WPTight_Gsf) && !mevent->pass_hlt(mfv::b_HLT_IsoMu27))
         return false;
 
@@ -154,6 +155,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
 
       if (mevent->pass_hlt(mfv::b_HLT_IsoMu27) && mevent->first_lep_pass(MFVEvent::lep_mu).Pt() < 27)
         return false;
+      */
     }
 
     if (require_bquarks && mevent->gen_flavor_code != 2)
@@ -168,8 +170,10 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (apply_trigger == 1 && !mevent->pass_hlt(mfv::b_HLT_PFHT1050))
       return false;
 
+    /*
     if (apply_trigger == 2 && !mevent->pass_hlt(mfv::b_HLT_Ele35_WPTight_Gsf) && !mevent->pass_hlt(mfv::b_HLT_IsoMu27))
       return false;
+    */
 
     if (mevent->npv < min_npv || mevent->npv > max_npv)
       return false;
