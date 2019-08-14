@@ -127,6 +127,7 @@ def _background_samples(trigeff=False, year=2017):
 
 def cmd_merge_background(permissive=bool_from_argv('permissive')):
     cwd = os.getcwd()
+    ok = True
     for year_s, scale in [('_2017', -AnalysisConstants.int_lumi_2017 * AnalysisConstants.scale_factor_2017),
                           ('_2018', -AnalysisConstants.int_lumi_2018 * AnalysisConstants.scale_factor_2018)]:
 
@@ -149,7 +150,12 @@ def cmd_merge_background(permissive=bool_from_argv('permissive')):
             cmd = 'samples merge %f background%s%s.root ' % (scale, _presel_s, year_s)
             cmd += ' '.join(files2)
             print cmd
-            os.system(cmd)
+            if os.system(cmd) != 0:
+                ok = False
+    if ok:
+        cmd = 'hadd.py background_2017p8.root background_2017.root background_2018.root'
+        print cmd
+        os.system(cmd)
 
 def cmd_effsprint():
     for year in 2017, 2018:
