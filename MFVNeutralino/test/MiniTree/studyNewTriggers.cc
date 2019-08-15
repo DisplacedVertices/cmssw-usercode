@@ -12,8 +12,8 @@ const bool prints = false;
 
 TH1D* h_nvtx = 0;
 TH1D* h_dbv = 0;
-TH1D* h_dvv = 0;
-TH1D* h_dvv_coarse = 0;
+TH1D* h_dvv_all = 0;
+TH1D* h_dvv_all_coarse = 0;
 TH1D* h_dvv_HT = 0;
 TH1D* h_dvv_HT_coarse = 0;
 TH1D* h_dvv_Bjet = 0;
@@ -81,8 +81,8 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
   }
   else if (dbvs.size() == 2){
     double dvv = hypot(nt.x0 - nt.x1, nt.y0 - nt.y1);
-    h_dvv->Fill(dvv, w);
-    h_dvv_coarse->Fill(dvv, w);
+    h_dvv_all->Fill(dvv, w);
+    h_dvv_all_coarse->Fill(dvv, w);
 
     // HT trigger
     if(passesHTTrigger && nt.ht() > 1200){
@@ -147,8 +147,8 @@ int main(int argc, char** argv) {
   // book hists
   h_nvtx = new TH1D("h_nvtx", ";# of vertices;Events", 10, 0, 10);
   h_dbv = new TH1D("h_dbv", ";d_{BV} (cm);Events/20 #mum", 1250, 0, 2.5);
-  h_dvv = new TH1D("h_dvv", ";d_{VV} (cm);Events/20 #mum", 2500, 0, 5.);
-  h_dvv_coarse = new TH1D("h_dvv_coarse", ";d_{VV} (cm);Events/100 #mum", 40, 0, 0.4);
+  h_dvv_all = new TH1D("h_dvv_all", ";d_{VV} (cm);Events/20 #mum", 2500, 0, 5.);
+  h_dvv_all_coarse = new TH1D("h_dvv_all_coarse", ";d_{VV} (cm);Events/100 #mum", 40, 0, 0.4);
   h_dvv_HT = new TH1D("h_dvv_HT", ";d_{VV} (cm);Events/20 #mum", 2500, 0, 5.);
   h_dvv_HT_coarse = new TH1D("h_dvv_HT_coarse", ";d_{VV} (cm);Events/100 #mum", 40, 0, 0.4);
   h_dvv_Bjet = new TH1D("h_dvv_Bjet", ";d_{VV} (cm);Events/20 #mum", 2500, 0, 5.);
