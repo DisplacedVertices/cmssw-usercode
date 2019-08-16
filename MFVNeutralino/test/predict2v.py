@@ -1,10 +1,10 @@
 from JMTucker.Tools.ROOTTools import *
 
-presel_path = '/uscms_data/d2/tucker/crab_dirs/PreselHistosV25m'
-sel_path = '/uscms_data/d2/tucker/crab_dirs/HistosV25mv3'
+presel_path = '/uscms_data/d2/tucker/crab_dirs/PreselHistosV27m'
+sel_path = '/uscms_data/d2/tucker/crab_dirs/HistosV27m/100pc'
 
 if 'data' in sys.argv:
-    fn, presel_scale = 'JetHT2017p8.root', 0.1
+    fn, presel_scale = 'JetHT2017p8.root', 1.
 else:
     fn, presel_scale = 'background_2017.root', 1.
 
