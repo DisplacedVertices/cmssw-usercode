@@ -3,7 +3,7 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset
 sample_files(process, 'JetHT2017F', dataset, 1)
 tfileservice(process, 'per_vertex.root')
-file_event_from_argv(process)
+cmssw_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
@@ -24,15 +24,8 @@ for ntk in 3,4: #,5:
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
-    from JMTucker.Tools.Year import year
-    from JMTucker.Tools import Samples
 
-    if year == 2017:
-        samples = Samples.data_samples_2017
-    elif year == 2018:
-        samples = Samples.data_samples_2018
-
-    #samples = [s for s in samples if s.has_dataset(dataset)]
+    samples = pick_samples(dataset, data='only')
     set_splitting(samples, dataset, 'minitree', data_json=json_path('ana_2017p8.json'))
 
     cs = CondorSubmitter('ByRunPerVertex' + version,
