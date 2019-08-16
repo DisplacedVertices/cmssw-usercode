@@ -151,7 +151,7 @@ class ByRunPlotter:
                     first = fy, fye, fye/fy if fy > 0 else None
                     ratio = 1,0
                 else:
-                    if first[0] > 0:
+                    if first[0] > 0 and fy > 0:
                         ratio = fy/first[0], 0 if i == 0 else ((fye/fy)**2 + first[2]**2)**0.5
                     else:
                         ratio = -1,-1
@@ -201,7 +201,7 @@ class ByRunPlotter:
             if i not in era_boundaries:
                 l.SetLineStyle(2)
             else:
-                l.SetLineWidth(2)
+                l.SetLineWidth(4)
             l.Draw()
 
         self.ps.save(name)
