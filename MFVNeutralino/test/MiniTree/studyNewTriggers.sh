@@ -1,8 +1,10 @@
 #!/bin/bash
 
 indir=/uscms/home/joeyr/crabdirs/NtupleV27m_MiniNtuple_NoEF
+#indir=/uscms_data/d2/tucker/crab_dirs/MiniTreeV27m
 
 files2017=(
+    qcdht0500_2017.root
     qcdht0700_2017.root
     qcdht1000_2017.root
     qcdht1500_2017.root
@@ -17,11 +19,60 @@ files2017=(
     mfv_neu_tau000100um_M0800_2017.root
     mfv_neu_tau000100um_M1200_2017.root
     mfv_neu_tau000100um_M1600_2017.root
+    mfv_neu_tau000100um_M3000_2017.root
+    mfv_neu_tau000300um_M0400_2017.root
+    mfv_neu_tau000300um_M0600_2017.root
+    mfv_neu_tau000300um_M0800_2017.root
+    mfv_neu_tau000300um_M1200_2017.root
+    mfv_neu_tau000300um_M1600_2017.root
+    mfv_neu_tau000300um_M3000_2017.root
+    mfv_neu_tau001000um_M0400_2017.root
+    mfv_neu_tau001000um_M0600_2017.root
+    mfv_neu_tau001000um_M0800_2017.root
+    mfv_neu_tau001000um_M1200_2017.root
+    mfv_neu_tau001000um_M1600_2017.root
+    mfv_neu_tau001000um_M3000_2017.root
+    mfv_neu_tau010000um_M0400_2017.root
+    mfv_neu_tau010000um_M0600_2017.root
+    mfv_neu_tau010000um_M0800_2017.root
+    mfv_neu_tau010000um_M1200_2017.root
+    mfv_neu_tau010000um_M1600_2017.root
+    mfv_neu_tau030000um_M0400_2017.root
+    mfv_neu_tau030000um_M0600_2017.root
+    mfv_neu_tau030000um_M0800_2017.root
+    mfv_neu_tau030000um_M1200_2017.root
+    mfv_neu_tau030000um_M1600_2017.root
+    mfv_neu_tau030000um_M3000_2017.root
     mfv_stopdbardbar_tau000100um_M0400_2017.root
     mfv_stopdbardbar_tau000100um_M0600_2017.root
     mfv_stopdbardbar_tau000100um_M0800_2017.root
     mfv_stopdbardbar_tau000100um_M1200_2017.root
     mfv_stopdbardbar_tau000100um_M1600_2017.root
+    mfv_stopdbardbar_tau000100um_M3000_2017.root
+    mfv_stopdbardbar_tau000300um_M0400_2017.root
+    mfv_stopdbardbar_tau000300um_M0600_2017.root
+    mfv_stopdbardbar_tau000300um_M0800_2017.root
+    mfv_stopdbardbar_tau000300um_M1200_2017.root
+    mfv_stopdbardbar_tau000300um_M1600_2017.root
+    mfv_stopdbardbar_tau000300um_M3000_2017.root
+    mfv_stopdbardbar_tau001000um_M0400_2017.root
+    mfv_stopdbardbar_tau001000um_M0600_2017.root
+    mfv_stopdbardbar_tau001000um_M0800_2017.root
+    mfv_stopdbardbar_tau001000um_M1200_2017.root
+    mfv_stopdbardbar_tau001000um_M1600_2017.root
+    mfv_stopdbardbar_tau001000um_M3000_2017.root
+    mfv_stopdbardbar_tau010000um_M0400_2017.root
+    mfv_stopdbardbar_tau010000um_M0600_2017.root
+    mfv_stopdbardbar_tau010000um_M0800_2017.root
+    mfv_stopdbardbar_tau010000um_M1200_2017.root
+    mfv_stopdbardbar_tau010000um_M1600_2017.root
+    mfv_stopdbardbar_tau010000um_M3000_2017.root
+    mfv_stopdbardbar_tau030000um_M0400_2017.root
+    mfv_stopdbardbar_tau030000um_M0600_2017.root
+    mfv_stopdbardbar_tau030000um_M0800_2017.root
+    mfv_stopdbardbar_tau030000um_M1200_2017.root
+    mfv_stopdbardbar_tau030000um_M1600_2017.root
+    mfv_stopdbardbar_tau030000um_M3000_2017.root
 )
 
 files2018=(

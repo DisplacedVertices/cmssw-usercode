@@ -1881,7 +1881,8 @@ def ratios_plot(name,
         gg.GetYaxis().SetTitle(hists[0].GetYaxis().GetTitle())
         #canvas.Update()
     else:
-        for i,h in enumerate(sorted(hists, key=lambda h: h.v, reverse=True)):
+        #for i,h in enumerate(sorted(hists, key=lambda h: h.v, reverse=True)): # this sorts by the integral
+        for i,h in enumerate(hists) : # this keeps the initial order
             cmd = h.DrawNormalized if draw_normalized else h.Draw
             dc = draw_cmds[i]
             if i == 0:
