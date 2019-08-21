@@ -437,15 +437,23 @@ def set_events(process, events, run=None):
     given the desired runs/event numbers passed in. If run is None,
     run_events must be a list of 3-tuples, each entry being (run, lumi,
     event). If run is a number, list must be of 2-tuples (lumi, event).
+
+    events can also be a multiline string containing the output of
+    TTree::Scan, where the run, lumi, and event are expected to be in
+    columns 1-3 (column 0 is the "Row" column).
     '''
-    if type(run) == int:
-        for event in events:
-            if type(event) != tuple or len(event) != 2:
-                raise ValueError('with run=%s, expected events to be list of (lumi,event) pairs, but encountered item %r' % (run, event))
-        events = [(run,) + event for event in events]
-    lengths = list(set(len(x) for x in events))
-    if len(lengths) != 1 or lengths[0] != 3:
-        raise ValueError('expected either list of (lumi,event) or (run,lumi,event) in events')
+    if type(events) == str:
+        events = [x.replace('*','').strip().split()[1:4] for x in events.split('\n') if x.strip()]
+        events = [tuple(int(y) for y in x) for x in events]
+    else:
+        if type(run) == int:
+            for event in events:
+                if type(event) != tuple or len(event) != 2:
+                    raise ValueError('with run=%s, expected events to be list of (lumi,event) pairs, but encountered item %r' % (run, event))
+            events = [(run,) + event for event in events]
+        lengths = list(set(len(x) for x in events))
+        if len(lengths) != 1 or lengths[0] != 3:
+            raise ValueError('expected either list of (lumi,event) or (run,lumi,event) in events')
     process.source.eventsToProcess = cms.untracked.VEventRange(*[cms.untracked.EventRange(x[0],x[1],x[2], x[0],x[1],x[2]) for x in events])
 
 def set_lumis(process, *args, **kwargs):
