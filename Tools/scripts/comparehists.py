@@ -26,7 +26,7 @@ parser.add_argument('--size', nargs=2, type=int, default=(600,600), metavar='SIZ
                     help='Set the plot size to SIZEX x SIZEY (default %(default)s.')
 parser.add_argument('--nice', nargs='+', default=[],
                     help='Nice names for the files (default is file1, file2, ...).')
-parser.add_argument('--colors', nargs='+', default=['ROOT.kRed', 'ROOT.kBlue', 'ROOT.kGreen+2', 'ROOT.kMagenta'],
+parser.add_argument('--colors', nargs='+', default=['ROOT.kRed', 'ROOT.kBlue', 'ROOT.kGreen+2', 'ROOT.kMagenta', 'ROOT.kCyan', 'ROOT.kOrange+2'],
                     help='Colors for the files: may be a python snippet, e.g. the default %(default)s.')
 
 lambda_fmt = 'lambda name, hists, curr: (%s)'
