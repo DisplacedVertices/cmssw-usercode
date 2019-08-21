@@ -740,6 +740,35 @@ _add_ds("ntuplev27m_ntkseeds", {
 'JetHT2018D': _fromnum0("/store/user/tucker/JetHT/NtupleV27m_NTkSeeds_2018/190802_115947", 516, fnbase="ntkseeds"),
 })
 
+
+_add_ds("ntuplev27m_norefitdzcut", {
+'qcdht0700_2017': _fromnum0("/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/NtupleV27m_NoRefitDzCut_2017/190819_163618", 16),
+'qcdht1000_2017': _fromnum0("/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/NtupleV27m_NoRefitDzCut_2017/190819_163619", 31),
+'qcdht1500_2017': _fromnum0("/store/user/tucker/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/NtupleV27m_NoRefitDzCut_2017/190819_163620", 63),
+'qcdht2000_2017': _fromnum0("/store/user/tucker/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/NtupleV27m_NoRefitDzCut_2017/190819_163621", 30),
+'ttbarht0600_2017': _fromnum0("/store/user/tucker/TTJets_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_NoRefitDzCut_2017/190819_163622", 4),
+'ttbarht0800_2017': _fromnum0("/store/user/tucker/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_NoRefitDzCut_2017/190819_163623", 3),
+'ttbarht1200_2017': (1, ['/store/user/tucker/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_NoRefitDzCut_2017/190819_163624/0000/ntuple_0.root']),
+'ttbarht2500_2017': (1, ['/store/user/tucker/TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_NoRefitDzCut_2017/190819_163625/0000/ntuple_0.root']),
+'qcdht0700_2018': _fromnum0("/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_NoRefitDzCut_2018/190819_163623", 23),
+'qcdht1000_2018': _fromnum0("/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_NoRefitDzCut_2018/190819_163624", 37),
+'qcdht1500_2018': _fromnum0("/store/user/tucker/QCD_HT1500to2000_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_NoRefitDzCut_2018/190819_163625", 76),
+'qcdht2000_2018': _fromnum0("/store/user/tucker/QCD_HT2000toInf_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_NoRefitDzCut_2018/190819_163626", 34),
+'ttbarht0600_2018': _fromnum0("/store/user/tucker/TTJets_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_NoRefitDzCut_2018/190819_163627", 5),
+'ttbarht0800_2018': _fromnum0("/store/user/tucker/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_NoRefitDzCut_2018/190819_163628", 4),
+'ttbarht1200_2018': (1, ['/store/user/tucker/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_NoRefitDzCut_2018/190819_163629/0000/ntuple_0.root']),
+'ttbarht2500_2018': (1, ['/store/user/tucker/TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV27m_NoRefitDzCut_2018/190819_163630/0000/ntuple_0.root']),
+'JetHT2017B': _fromnum0("/store/user/tucker/JetHT/NtupleV27m_NoRefitDzCut_2017/190819_163626", 41),
+'JetHT2017C': (63, ['/store/user/tucker/JetHT/NtupleV27m_NoRefitDzCut_2017/190820_080617/0000/ntuple_%i.root' % i for i in [42, 51]] + ['/store/user/tucker/JetHT/NtupleV27m_NoRefitDzCut_2017/190819_163627/0000/ntuple_%i.root' % i for i in chain(xrange(42), xrange(43,51), xrange(52,63))]),
+'JetHT2017D': _fromnum0("/store/user/tucker/JetHT/NtupleV27m_NoRefitDzCut_2017/190819_163628", 30),
+'JetHT2017E': (69, ['/store/user/tucker/JetHT/NtupleV27m_NoRefitDzCut_2017/190819_163629/0000/ntuple_%i.root' % i for i in chain(xrange(3), xrange(4,53), xrange(54,69))] + ['/store/user/tucker/JetHT/NtupleV27m_NoRefitDzCut_2017/190820_080619/0000/ntuple_%i.root' % i for i in [3, 53]]),
+'JetHT2017F': _fromnum0("/store/user/tucker/JetHT/NtupleV27m_NoRefitDzCut_2017/190819_163630", 85),
+'JetHT2018A': _fromnum0("/store/user/tucker/JetHT/NtupleV27m_NoRefitDzCut_2018/190819_163631", 191),
+'JetHT2018B': _fromnum0("/store/user/tucker/JetHT/NtupleV27m_NoRefitDzCut_2018/190819_163632", 97),
+'JetHT2018C': (72, ['/store/user/tucker/JetHT/NtupleV27m_NoRefitDzCut_2018/190819_163633/0000/ntuple_%i.root' % i for i in chain(xrange(6), xrange(8,11), xrange(12,14), xrange(16,31), xrange(32,35), xrange(39,45), xrange(46,52), xrange(53,59), xrange(60,72), [37])] + ['/store/user/tucker/JetHT/NtupleV27m_NoRefitDzCut_2018/190820_080621/0000/ntuple_%i.root' % i for i in chain(xrange(6,8), xrange(14,16), xrange(35,37), [11, 31, 38, 45, 52, 59])]),
+'JetHT2018D': _fromnum0("/store/user/tucker/JetHT/NtupleV27m_NoRefitDzCut_2018/190819_163634", 344),
+})
+
 ################################################################################
 
 if __name__ == '__main__':

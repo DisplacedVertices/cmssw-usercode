@@ -559,6 +559,7 @@ for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + all_signal_
     x.add_dataset("ntuplev26m")
     x.add_dataset("ntuplev27m")
     if not x.is_signal:
+        x.add_dataset("ntuplev27m_norefitdzcut")
         x.add_dataset("nr_trackmoverv25mv1")
         x.add_dataset("ntuplev25m_ntkseeds")
         if x not in (JetHT2017C, JetHT2017E, JetHT2018C):
