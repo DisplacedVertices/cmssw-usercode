@@ -48,13 +48,37 @@ bool pass_hlt(const mfv::MiniNtuple& nt, size_t i){
 bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
   if (prints) std::cout << "Entry " << j << "\n";
 
+  // count nbjets for the bjet triggers
+  int nbjets = 0;
+  for(int ijet = 0; ijet < nt.njets; ++ijet){
+    double bdisc = nt.jet_bdisc[ijet];
+    
+    // Tight WP, 2017
+    if(bdisc >= 0.7489) ++nbjets;
+  }
+
   bool passesHTTrigger = pass_hlt(nt, mfv::b_HLT_PFHT1050);
 
+  // pt requirements: go 40 GeV above threshold based on https://twiki.cern.ch/twiki/bin/view/CMSPublic/HLTplots2018DataJets
+  // HT requirements: go 150 GeV above threshold based on what we've done with the HT1050 trigger
+  //
+  // should think about whether we can be more aggressive with the offline HT threshold
+  // e.g. from https://twiki.cern.ch/twiki/pub/CMSPublic/HighLevelTriggerRunIIResults/SUSY2015_trig-Ele15_HT350__var-HT.png
+  // it looks like the HT350 leg is 95% efficient already at ~400 GeV
+  bool passesBjetTrigger = 
+   (pass_hlt(nt, mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33) && nt.njets >= 2 && nt.jet_pt[0] > 140 && nt.jet_pt[1] > 140 && fabs(nt.jet_eta[0] - nt.jet_eta[1]) < 1.6 && nbjets >= 2)
+|| (pass_hlt(nt, mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0) && nt.ht(30) > 450 && nt.njets >= 4 && nt.jet_pt[0] > 115 && nt.jet_pt[1] > 100 && nt.jet_pt[2] > 85 && nt.jet_pt[3] > 80 && nbjets >= 3)
+|| (pass_hlt(nt, mfv::b_HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2) && nt.ht() > 530 && nt.njets >= 6 && nt.jet_pt[0] > 72 && nt.jet_pt[1] > 72 && nt.jet_pt[2] > 72 && nt.jet_pt[3] > 72 && nt.jet_pt[4] > 72 && nt.jet_pt[5] > 72 && nbjets >= 2)
+|| (pass_hlt(nt, mfv::b_HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2)     && nt.ht() > 530 && nt.njets >= 6 && nt.jet_pt[0] > 72 && nt.jet_pt[1] > 72 && nt.jet_pt[2] > 72 && nt.jet_pt[3] > 72 && nt.jet_pt[4] > 72 && nt.jet_pt[5] > 72 && nbjets >= 2)
+|| (pass_hlt(nt, mfv::b_HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5) && nt.ht() > 580 && nt.njets >= 6 && nt.jet_pt[0] > 80 && nt.jet_pt[1] > 80 && nt.jet_pt[2] > 80 && nt.jet_pt[3] > 80 && nt.jet_pt[4] > 80 && nt.jet_pt[5] > 80 && nbjets >= 1);
+
+  /*
   bool passesBjetTrigger = pass_hlt(nt, mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33) 
                         || pass_hlt(nt, mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0) 
                         || pass_hlt(nt, mfv::b_HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2) 
                         || pass_hlt(nt, mfv::b_HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2) 
                         || pass_hlt(nt, mfv::b_HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5);
+  */
 
   bool passesDisplacedDijetTrigger = pass_hlt(nt, mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack); // ignore the other one with a higher HT threshold for now...
 
@@ -102,10 +126,8 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
       h_dbv_HT->Fill(dbvs[0], w);
       h_dbv_HT_coarse->Fill(dbvs[0], w);
     }
-    // Bjet trigger - should think about whether we can be more aggressive with the offline HT threshold
-    // e.g. from https://twiki.cern.ch/twiki/pub/CMSPublic/HighLevelTriggerRunIIResults/SUSY2015_trig-Ele15_HT350__var-HT.png
-    // it looks like the HT350 leg is 95% efficient already at ~400 GeV
-    if(passesBjetTrigger && nt.njets >= 4 && nt.ht() > 600){
+    // Bjet trigger
+    if(passesBjetTrigger && nt.njets >= 4){
       h_dbv_Bjet->Fill(dbvs[0], w);
       h_dbv_Bjet_coarse->Fill(dbvs[0], w);
     }
@@ -120,7 +142,7 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
       h_dbv_passHT_failBjet_coarse->Fill(dbvs[0], w);
     }
     // pass Bjet trigger fail HT trigger (to study the shape differences)
-    if(!passesHTTrigger && passesBjetTrigger && nt.njets >= 4 && nt.ht() > 600){
+    if(!passesHTTrigger && passesBjetTrigger && nt.njets >= 4){
       h_dbv_failHT_passBjet->Fill(dbvs[0], w);
       h_dbv_failHT_passBjet_coarse->Fill(dbvs[0], w);
     }
@@ -135,10 +157,8 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
       h_dvv_HT->Fill(dvv, w);
       h_dvv_HT_coarse->Fill(dvv, w);
     }
-    // Bjet trigger - should think about whether we can be more aggressive with the offline HT threshold
-    // e.g. from https://twiki.cern.ch/twiki/pub/CMSPublic/HighLevelTriggerRunIIResults/SUSY2015_trig-Ele15_HT350__var-HT.png
-    // it looks like the HT350 leg is 95% efficient already at ~400 GeV
-    if(passesBjetTrigger && nt.njets >= 4 && nt.ht() > 600){
+    // Bjet trigger
+    if(passesBjetTrigger && nt.njets >= 4){
       h_dvv_Bjet->Fill(dvv, w);
       h_dvv_Bjet_coarse->Fill(dvv, w);
     }
@@ -153,7 +173,7 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
       h_dvv_passHT_failBjet_coarse->Fill(dvv, w);
     }
     // pass Bjet trigger fail HT trigger (to study the shape differences)
-    if(!passesHTTrigger && passesBjetTrigger && nt.njets >= 4 && nt.ht() > 600){
+    if(!passesHTTrigger && passesBjetTrigger && nt.njets >= 4){
       h_dvv_failHT_passBjet->Fill(dvv, w);
       h_dvv_failHT_passBjet_coarse->Fill(dvv, w);
     }
@@ -201,30 +221,30 @@ int main(int argc, char** argv) {
   h_nvtx = new TH1D("h_nvtx", ";# of vertices;Events", 10, 0, 10);
   h_dbv = new TH1D("h_dbv", ";d_{BV} (cm);Events/20 #mum", 1250, 0, 2.5);
 
-  h_dbv_all = new TH1D("h_dbv_all", ";d_{BV} (cm);Events/20 #mum", 2500, 0, 5.);
+  h_dbv_all = new TH1D("h_dbv_all", ";d_{BV} (cm);Events/1000 #mum", 50, 0, 5.);
   h_dbv_all_coarse = new TH1D("h_dbv_all_coarse", ";d_{BV} (cm);Events/100 #mum", 40, 0, 0.4);
-  h_dbv_HT = new TH1D("h_dbv_HT", ";d_{BV} (cm);Events/20 #mum", 2500, 0, 5.);
+  h_dbv_HT = new TH1D("h_dbv_HT", ";d_{BV} (cm);Events/1000 #mum", 50, 0, 5.);
   h_dbv_HT_coarse = new TH1D("h_dbv_HT_coarse", ";d_{BV} (cm);Events/100 #mum", 40, 0, 0.4);
-  h_dbv_Bjet = new TH1D("h_dbv_Bjet", ";d_{BV} (cm);Events/20 #mum", 2500, 0, 5.);
+  h_dbv_Bjet = new TH1D("h_dbv_Bjet", ";d_{BV} (cm);Events/1000 #mum", 50, 0, 5.);
   h_dbv_Bjet_coarse = new TH1D("h_dbv_Bjet_coarse", ";d_{BV} (cm);Events/100 #mum", 40, 0, 0.4);
-  h_dbv_DisplacedDijet = new TH1D("h_dbv_DisplacedDijet", ";d_{BV} (cm);Events/20 #mum", 2500, 0, 5.);
+  h_dbv_DisplacedDijet = new TH1D("h_dbv_DisplacedDijet", ";d_{BV} (cm);Events/1000 #mum", 50, 0, 5.);
   h_dbv_DisplacedDijet_coarse = new TH1D("h_dbv_DisplacedDijet_coarse", ";d_{BV} (cm);Events/100 #mum", 40, 0, 0.4);
-  h_dbv_passHT_failBjet = new TH1D("h_dbv_passHT_failBjet", ";d_{BV} (cm);Events/20 #mum", 2500, 0, 5.);
+  h_dbv_passHT_failBjet = new TH1D("h_dbv_passHT_failBjet", ";d_{BV} (cm);Events/1000 #mum", 50, 0, 5.);
   h_dbv_passHT_failBjet_coarse = new TH1D("h_dbv_passHT_failBjet_coarse", ";d_{BV} (cm);Events/100 #mum", 40, 0, 0.4);
-  h_dbv_failHT_passBjet = new TH1D("h_dbv_failHT_passBjet", ";d_{BV} (cm);Events/20 #mum", 2500, 0, 5.);
+  h_dbv_failHT_passBjet = new TH1D("h_dbv_failHT_passBjet", ";d_{BV} (cm);Events/1000 #mum", 50, 0, 5.);
   h_dbv_failHT_passBjet_coarse = new TH1D("h_dbv_failHT_passBjet_coarse", ";d_{BV} (cm);Events/100 #mum", 40, 0, 0.4);
 
-  h_dvv_all = new TH1D("h_dvv_all", ";d_{VV} (cm);Events/20 #mum", 2500, 0, 5.);
+  h_dvv_all = new TH1D("h_dvv_all", ";d_{VV} (cm);Events/1000 #mum", 50, 0, 5.);
   h_dvv_all_coarse = new TH1D("h_dvv_all_coarse", ";d_{VV} (cm);Events/100 #mum", 40, 0, 0.4);
-  h_dvv_HT = new TH1D("h_dvv_HT", ";d_{VV} (cm);Events/20 #mum", 2500, 0, 5.);
+  h_dvv_HT = new TH1D("h_dvv_HT", ";d_{VV} (cm);Events/1000 #mum", 50, 0, 5.);
   h_dvv_HT_coarse = new TH1D("h_dvv_HT_coarse", ";d_{VV} (cm);Events/100 #mum", 40, 0, 0.4);
-  h_dvv_Bjet = new TH1D("h_dvv_Bjet", ";d_{VV} (cm);Events/20 #mum", 2500, 0, 5.);
+  h_dvv_Bjet = new TH1D("h_dvv_Bjet", ";d_{VV} (cm);Events/1000 #mum", 50, 0, 5.);
   h_dvv_Bjet_coarse = new TH1D("h_dvv_Bjet_coarse", ";d_{VV} (cm);Events/100 #mum", 40, 0, 0.4);
-  h_dvv_DisplacedDijet = new TH1D("h_dvv_DisplacedDijet", ";d_{VV} (cm);Events/20 #mum", 2500, 0, 5.);
+  h_dvv_DisplacedDijet = new TH1D("h_dvv_DisplacedDijet", ";d_{VV} (cm);Events/1000 #mum", 50, 0, 5.);
   h_dvv_DisplacedDijet_coarse = new TH1D("h_dvv_DisplacedDijet_coarse", ";d_{VV} (cm);Events/100 #mum", 40, 0, 0.4);
-  h_dvv_passHT_failBjet = new TH1D("h_dvv_passHT_failBjet", ";d_{VV} (cm);Events/20 #mum", 2500, 0, 5.);
+  h_dvv_passHT_failBjet = new TH1D("h_dvv_passHT_failBjet", ";d_{VV} (cm);Events/1000 #mum", 50, 0, 5.);
   h_dvv_passHT_failBjet_coarse = new TH1D("h_dvv_passHT_failBjet_coarse", ";d_{VV} (cm);Events/100 #mum", 40, 0, 0.4);
-  h_dvv_failHT_passBjet = new TH1D("h_dvv_failHT_passBjet", ";d_{VV} (cm);Events/20 #mum", 2500, 0, 5.);
+  h_dvv_failHT_passBjet = new TH1D("h_dvv_failHT_passBjet", ";d_{VV} (cm);Events/1000 #mum", 50, 0, 5.);
   h_dvv_failHT_passBjet_coarse = new TH1D("h_dvv_failHT_passBjet_coarse", ";d_{VV} (cm);Events/100 #mum", 40, 0, 0.4);
 
   const char* tree_path =

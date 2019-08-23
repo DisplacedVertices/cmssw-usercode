@@ -115,6 +115,14 @@ do
     outsignals=()
 
     for x in ${files[@]}; do
+        
+        if [[ $x == *"mfv"* ]]; then
+          if [[ $ntk != 5 ]]; then
+            echo "Skipping $x"
+            continue
+          fi
+        fi
+
         fin=$indir/$x
         fout=$outdir/$x
         if [[ ! -e $fin ]]; then
