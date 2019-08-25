@@ -248,6 +248,9 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("costhjetmomvtxdispavg", "SV avg{cos(angle(jet_{i}, SV-PV))}", 50, -1, 1);
   hs.add("costhjetmomvtxdisprms", "SV rms{cos(angle(jet_{i}, SV-PV))}", 50,  0, 1);
 
+  hs.add("multipv_maxdz",    "max #Delta z of PV w tracks shared (cm)", 100, 0, 10);
+  hs.add("multipvbyz_maxdz", "max #Delta z of PV w track-assoc-by-z (cm)", 100, 0, 10);
+
   hs.add("gen2ddist",                     "dist2d(SV, closest gen vtx) (cm)",                                            200,    0,       0.2);
   hs.add("gen2derr",                      "#sigma(dist2d(SV, closest gen vtx)) (cm)",                                    200,    0,       0.2);
   hs.add("gen2dsig",                      "N#sigma(dist2d(SV, closest gen vtx)) (cm)",                                   200,    0,     100);
@@ -368,6 +371,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   for (int isv = 0; isv < nsv; ++isv) {
     const MFVVertexAux& aux = auxes->at(isv);
+    const int ntracks = aux.ntracks();
 
     h_sv_xy->Fill(aux.x - mevent->bsx_at_z(aux.z), aux.y - mevent->bsy_at_z(aux.z), w);
     h_sv_xz->Fill(aux.x - mevent->bsx_at_z(aux.z), aux.z - bsz, w);
@@ -435,7 +439,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         {"max_nm1_refit_distz", max_nm1_refit_distz},
 
         {"nlep",                    aux.which_lep.size()},
-        {"ntracks",                 aux.ntracks()},
+        {"ntracks",                 ntracks},
         {"ntracksptgt3",            aux.ntracksptgt(3)},
         {"ntracksptgt10",           aux.ntracksptgt(10)},
         {"trackminnhits",           aux.trackminnhits()},
@@ -485,8 +489,8 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
         {"ntrackssharedwpv", aux.ntrackssharedwpv()},
         {"ntrackssharedwpvs", aux.ntrackssharedwpvs()},
-        {"fractrackssharedwpv", float(aux.ntrackssharedwpv()) / aux.ntracks()},
-        {"fractrackssharedwpvs", float(aux.ntrackssharedwpvs()) / aux.ntracks()},
+        {"fractrackssharedwpv", float(aux.ntrackssharedwpv()) / ntracks},
+        {"fractrackssharedwpvs", float(aux.ntrackssharedwpvs()) / ntracks},
         {"npvswtracksshared", aux.npvswtracksshared()},
 
         {"trackdxymin", aux.trackdxymin()},
@@ -565,6 +569,27 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         {"pvdzsig",     aux.pvdzsig()}
     };
 
+    std::map<int,int> multipv = aux.pvswtracksshared();
+    std::map<int,int> multipvbyz;
+    for (int i = 0; i < ntracks; ++i) {
+      jmt::MinValue closest(0.03);
+      for (int j = 0; j < mevent->npv; ++j)
+        closest(j, fabs(aux.track_vz[i] - mevent->pv_z(j)));
+      if (closest.i() >= 0)
+        ++multipvbyz[closest.i()];
+    }
+
+    auto multipv_maxdz = [&](const std::map<int,int>& m) {
+      const size_t n = m.size();
+      jmt::MaxValue v;
+      for (size_t i = 0; i < n; ++i)
+        for (size_t j = i+1; j < n; ++j)
+          v(fabs(mevent->pv_z(i) - mevent->pv_z(j)));
+      return double(v);
+    };
+    v["multipv_maxdz"] = multipv_maxdz(multipv);
+    v["multipvbyz_maxdz"] = multipv_maxdz(multipvbyz);
+
     std::vector<float> trackpairdphis = aux.trackpairdphis();
     std::sort(trackpairdphis.begin(), trackpairdphis.end());
     const size_t ntrackpairs = trackpairdphis.size();
@@ -592,7 +617,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     fill(h_sv_bs2derr_bsbs2ddist, isv, mevent->bs2ddist(aux), aux.bs2derr, w);
     fill(h_pvrho_bsbs2ddist, isv, mevent->bs2ddist(aux), mevent->pv_rho(), w);
 
-    for (int i = 0; i < int(aux.ntracks()); ++i) {
+    for (int i = 0; i < ntracks; ++i) {
       fill(h_sv_track_weight, isv, aux.track_weight(i), w);
       fill(h_sv_track_q, isv, aux.track_q(i), w);
       fill(h_sv_track_pt, isv, aux.track_pt(i), w);
@@ -617,12 +642,12 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
     if (max_ntrackplots > 0) {
       std::vector<std::pair<int,float>> itk_pt;
-      for (int i = 0; i < int(aux.ntracks()); ++i)
+      for (int i = 0; i < ntracks; ++i)
         itk_pt.push_back(std::make_pair(i, aux.track_pt(i)));
 
       std::sort(itk_pt.begin(), itk_pt.end(), [](std::pair<int,float> itk_pt1, std::pair<int,float> itk_pt2) { return itk_pt1.second > itk_pt2.second; } );
       for (int i = 0; i < max_ntrackplots; ++i) {
-        if (i < int(aux.ntracks())) {
+        if (i < ntracks) {
           v[TString::Format("track%i_weight",        i).Data()] = aux.track_weight(itk_pt[i].first);
           v[TString::Format("track%i_q",             i).Data()] = aux.track_q(itk_pt[i].first);
           v[TString::Format("track%i_pt",            i).Data()] = aux.track_pt(itk_pt[i].first);
