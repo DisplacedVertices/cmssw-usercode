@@ -1,6 +1,5 @@
 #include <vector>
-#include "TH1F.h"
-#include "TH2F.h"
+#include "TH2.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "JMTucker/Tools/interface/Utilities.h"
@@ -36,8 +35,8 @@ struct PairwiseHistos {
     C::const_iterator begin() const { return defs.begin(); }
     C::const_iterator end()   const { return defs.end();   }
 
-    void add(const std::string& name, const std::string& nice, int nbins, float min, float max) {
-      defs.push_back(HistoDef(name, nice, nbins, min, max));
+    void add(const TString& name, const TString& nice, int nbins, float min, float max) {
+      defs.push_back(HistoDef(name.Data(), nice.Data(), nbins, min, max));
     }
   };
 
@@ -84,7 +83,16 @@ struct PairwiseHistos {
 
   void Fill(const ValueMap& values, const int fill_num=-1, const double weight=1.) {
     die_if_not(n > 0, "PairwiseHistos not properly initialized");
-    die_if_not(int(values.size()) == n, "wrong size for values: %i != %i expected", values.size(), h1.size());
+    if (int(values.size()) != n) {
+      cms::Exception ce("PairwiseHistos", "wrong size for values: ");
+      ce << values.size() << " != " << h1.size() << " expected:\nvalues' names:\n";
+      for (const auto& v : values)
+        ce << v.first << "\n";
+      ce << "expected names:\n";
+      for (const auto& v : h1)
+        ce << v.first << "\n";
+      throw ce;
+    }
 
     const auto b = names.begin();
     const auto e = names.end();
