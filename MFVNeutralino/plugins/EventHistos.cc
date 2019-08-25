@@ -19,7 +19,6 @@ class MFVEventHistos : public edm::EDAnalyzer {
  private:
   const edm::EDGetTokenT<MFVEvent> mevent_token;
   const edm::EDGetTokenT<double> weight_token;
-  const std::vector<double> force_bs;
 
   TH1F* h_w;
 
@@ -127,12 +126,8 @@ class MFVEventHistos : public edm::EDAnalyzer {
 
 MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   : mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
-    weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
-    force_bs(cfg.getParameter<std::vector<double> >("force_bs"))
+    weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src")))
 {
-  if (force_bs.size() && force_bs.size() != 3)
-    throw cms::Exception("Misconfiguration", "force_bs must be empty or size 3");
-
   edm::Service<TFileService> fs;
 
   h_w = fs->make<TH1F>("h_w", ";event weight;events/0.1", 100, 0, 10);
@@ -269,10 +264,6 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   const double w = *weight;
   h_w->Fill(w);
 
-  const double bsx = force_bs.size() ? force_bs[0] : mevent->bsx;
-  const double bsy = force_bs.size() ? force_bs[1] : mevent->bsy;
-  const double bsz = force_bs.size() ? force_bs[2] : mevent->bsz;
-
   //////////////////////////////////////////////////////////////////////////////
 
   h_gen_decay->Fill(mevent->gen_decay_type[0], mevent->gen_decay_type[1], w);
@@ -310,15 +301,15 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   h_npu->Fill(mevent->npu, w);
 
-  h_bsx->Fill(bsx, w);
-  h_bsy->Fill(bsy, w);
-  h_bsz->Fill(bsz, w);
-  h_bsphi->Fill(atan2(bsy, bsx), w);
+  h_bsx->Fill(mevent->bsx, w);
+  h_bsy->Fill(mevent->bsy, w);
+  h_bsz->Fill(mevent->bsz, w);
+  h_bsphi->Fill(atan2(mevent->bsy, mevent->bsx), w);
 
   h_npv->Fill(mevent->npv, w);
   for (auto h : { h_pvx, h_pvxwide }) h->Fill(mevent->pvx - mevent->bsx_at_z(mevent->pvz), w);
   for (auto h : { h_pvy, h_pvywide }) h->Fill(mevent->pvy - mevent->bsy_at_z(mevent->pvz), w);
-  h_pvz->Fill(mevent->pvz - bsz, w);
+  h_pvz->Fill(mevent->pvz - mevent->bsz, w);
   h_pvcxx->Fill(mevent->pvcxx, w);
   h_pvcxy->Fill(mevent->pvcxy, w);
   h_pvcxz->Fill(mevent->pvcxz, w);
