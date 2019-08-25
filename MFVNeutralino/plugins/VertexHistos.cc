@@ -1,18 +1,12 @@
 #include "TH2.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
-#include "DataFormats/Math/interface/deltaR.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
-#include "RecoVertex/VertexTools/interface/VertexDistanceXY.h"
-#include "RecoVertex/VertexTools/interface/VertexDistance3D.h"
-#include "TrackingTools/IPTools/interface/IPTools.h"
-#include "TrackingTools/Records/interface/TransientTrackRecord.h"
-#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
-#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "JMTucker/Tools/interface/ExtValue.h"
 #include "JMTucker/Tools/interface/PairwiseHistos.h"
 #include "JMTucker/Tools/interface/Utilities.h"
@@ -30,26 +24,15 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   const edm::EDGetTokenT<double> weight_token;
   const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_token;
   const std::vector<double> force_bs;
-  const bool do_trackplots;
+  const int max_ntrackplots;
   const bool do_scatterplots;
 
-  VertexDistanceXY distcalc_2d;
-  VertexDistance3D distcalc_3d;
-
-  TH1F* h_w;
-
-  TH1F* h_nsv;
-
-  // indices for h_sv below:
   enum sv_index { sv_all, sv_num_indices };
   static const char* sv_index_names[sv_num_indices];
 
-  // max number of extra track-related plots to make
-  static const int max_ntracks;
-
-  void fill_multi(TH1F** hs, const int isv, const double val, const double weight) const;
-  void fill_multi(TH2F** hs, const int isv, const double val, const double val2, const double weight) const;
-  void fill_multi(PairwiseHistos* hs, const int isv, const PairwiseHistos::ValueMap& val, const double weight) const;
+  void fill(TH1F** hs,          const int, const double val,                    const double weight) const { hs[sv_all]->Fill(val, weight); }
+  void fill(TH2F** hs,          const int, const double val, const double val2, const double weight) const { hs[sv_all]->Fill(val, val2, weight); }
+  void fill(PairwiseHistos* hs, const int, const PairwiseHistos::ValueMap& val, const double weight) const { hs[sv_all].Fill(val, -1, weight); }
 
   PairwiseHistos h_sv[sv_num_indices];
 
@@ -58,6 +41,8 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH2F* h_sv_bs2derr_bsbs2ddist[sv_num_indices];
   TH2F* h_pvrho_bsbs2ddist[sv_num_indices];
 
+  TH1F* h_w;
+  TH1F* h_nsv;
   TH2F* h_sv_xy;
   TH2F* h_sv_yz;
   TH2F* h_sv_xz;
@@ -91,31 +76,16 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH1F* h_sv_track_nhits[sv_num_indices];
   TH1F* h_sv_track_injet[sv_num_indices];
   TH1F* h_sv_track_inpv[sv_num_indices];
-
-  TH2F* h_sv_track_nsthits_track_eta[sv_num_indices];
-  TH2F* h_sv_bs2derr_track_pt[sv_num_indices];
-  TH2F* h_sv_bs2derr_track_eta[sv_num_indices];
-  TH2F* h_sv_bs2derr_track_phi[sv_num_indices];
-  TH2F* h_sv_bs2derr_track_dxy[sv_num_indices];
-  TH2F* h_sv_bs2derr_track_dz[sv_num_indices];
-  TH2F* h_sv_bs2derr_track_pt_err[sv_num_indices];
-  TH2F* h_sv_bs2derr_track_eta_err[sv_num_indices];
-  TH2F* h_sv_bs2derr_track_phi_err[sv_num_indices];
-  TH2F* h_sv_bs2derr_track_dxy_err[sv_num_indices];
-  TH2F* h_sv_bs2derr_track_dz_err[sv_num_indices];
-  TH2F* h_sv_bs2derr_track_npxhits[sv_num_indices];
-  TH2F* h_sv_bs2derr_track_nsthits[sv_num_indices];
 };
 
 const char* MFVVertexHistos::sv_index_names[MFVVertexHistos::sv_num_indices] = { "all" };
-const int MFVVertexHistos::max_ntracks = 5;
 
 MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   : mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
     weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
     vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     force_bs(cfg.getParameter<std::vector<double> >("force_bs")),
-    do_trackplots(cfg.getParameter<bool>("do_trackplots")),
+    max_ntrackplots(cfg.getParameter<int>("max_ntrackplots")),
     do_scatterplots(cfg.getParameter<bool>("do_scatterplots"))
 {
   if (force_bs.size() && force_bs.size() != 3)
@@ -124,39 +94,9 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   edm::Service<TFileService> fs;
 
   h_w = fs->make<TH1F>("h_w", ";event weight;events/0.1", 100, 0, 10);
-
   h_nsv = fs->make<TH1F>("h_nsv", ";# of secondary vertices;arb. units", 15, 0, 15);
 
   PairwiseHistos::HistoDefs hs;
-
-  if (do_trackplots) {
-    for (int i = 0; i < 11; ++i) {
-      hs.add(TString::Format("ntracksstgt%i", i).Data(), TString::Format("# of tracks/SV w/ number of strip hits >= %i", i).Data(), 10, 0, 10);
-    }
-    for (int i = 0; i < max_ntracks; ++i) {
-      hs.add(TString::Format("track%i_weight",        i).Data(), TString::Format("track%i weight",                      i).Data(),  21,  0,      1.05);
-      hs.add(TString::Format("track%i_q",             i).Data(), TString::Format("track%i charge",                      i).Data(),   4, -2,      2);
-      hs.add(TString::Format("track%i_pt",            i).Data(), TString::Format("track%i p_{T} (GeV)",                 i).Data(), 200,  0,    200);
-      hs.add(TString::Format("track%i_eta",           i).Data(), TString::Format("track%i #eta",                        i).Data(),  50, -4,      4);
-      hs.add(TString::Format("track%i_phi",           i).Data(), TString::Format("track%i #phi",                        i).Data(),  50, -3.15,   3.15);
-      hs.add(TString::Format("track%i_dxy",           i).Data(), TString::Format("track%i dxy (cm)",                    i).Data(), 100,  0,      1);
-      hs.add(TString::Format("track%i_dz",            i).Data(), TString::Format("track%i dz (cm)",                     i).Data(), 100,  0,      1);
-      hs.add(TString::Format("track%i_pt_err",        i).Data(), TString::Format("track%i #sigma(p_{T})/p_{T}",         i).Data(), 200,  0,      2);
-      hs.add(TString::Format("track%i_eta_err",       i).Data(), TString::Format("track%i #sigma(#eta)",                i).Data(), 200,  0,      0.02);
-      hs.add(TString::Format("track%i_phi_err",       i).Data(), TString::Format("track%i #sigma(#phi)",                i).Data(), 200,  0,      0.02);
-      hs.add(TString::Format("track%i_dxy_err",       i).Data(), TString::Format("track%i #sigma(dxy) (cm)",            i).Data(), 100,  0,      0.1);
-      hs.add(TString::Format("track%i_dz_err",        i).Data(), TString::Format("track%i #sigma(dz) (cm)",             i).Data(), 100,  0,      0.1);
-      hs.add(TString::Format("track%i_chi2dof",       i).Data(), TString::Format("track%i #chi^{2}/dof",                i).Data(), 100,  0,     10);
-      hs.add(TString::Format("track%i_npxhits",       i).Data(), TString::Format("track%i number of pixel hits",        i).Data(),  12,  0,     12);
-      hs.add(TString::Format("track%i_nsthits",       i).Data(), TString::Format("track%i number of strip hits",        i).Data(),  28,  0,     28);
-      hs.add(TString::Format("track%i_nhitsbehind",   i).Data(), TString::Format("track%i number of hits behind",       i).Data(),  10,  0,     10);
-      hs.add(TString::Format("track%i_nhitslost",     i).Data(), TString::Format("track%i number of hits lost",         i).Data(),  10,  0,     10);
-      hs.add(TString::Format("track%i_nhits",         i).Data(), TString::Format("track%i number of hits",              i).Data(),  40,  0,     40);
-      hs.add(TString::Format("track%i_injet",         i).Data(), TString::Format("track%i in-jet?",                     i).Data(),   2,  0,      2);
-      hs.add(TString::Format("track%i_inpv",          i).Data(), TString::Format("track%i in-PV?",                      i).Data(),  10, -1,      9);
-      hs.add(TString::Format("track%i_jet_deltaphi0", i).Data(), TString::Format("track%i |#Delta#phi| to closest jet", i).Data(),  25,  0,      3.15);
-    }
-  }
 
   hs.add("x", "SV x (cm)", 100, -4, 4);
   hs.add("y", "SV y (cm)", 100, -4, 4);
@@ -234,10 +174,6 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("costhtkonlymompv2d",            "cos(angle(2-momentum (tracks-only), 2-dist to PV))",                           21,   -1,       1.1);
   hs.add("costhtkonlymompv3d",            "cos(angle(3-momentum (tracks-only), 3-dist to PV))",                           21,   -1,       1.1);
 
-  hs.add("costhjetsntkmombs",             "cos(angle(2-momentum (jets-by-ntracks -only), 2-dist to BS))",                21,   -1,       1.1);
-  hs.add("costhjetsntkmompv2d",           "cos(angle(2-momentum (jets-by-ntracks -only), 2-dist to PV))",                21,   -1,       1.1);
-  hs.add("costhjetsntkmompv3d",           "cos(angle(3-momentum (jets-by-ntracks -only), 3-dist to PV))",                21,   -1,       1.1);
-
   hs.add("costhtksjetsntkmombs",          "cos(angle(2-momentum (tracks-plus-jets-by-ntracks), 2-dist to BS))",          21,   -1,       1.1);
   hs.add("costhtksjetsntkmompv2d",        "cos(angle(2-momentum (tracks-plus-jets-by-ntracks), 2-dist to PV))",          21,   -1,       1.1);
   hs.add("costhtksjetsntkmompv3d",        "cos(angle(3-momentum (tracks-plus-jets-by-ntracks), 3-dist to PV))",          21,   -1,       1.1);
@@ -245,10 +181,6 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("missdisttkonlypv",              "miss dist. (tracks-only) of SV to PV (cm)",                                   100,    0,       2);
   hs.add("missdisttkonlypverr",           "#sigma(miss dist. (tracks-only) of SV to PV) (cm)",                           100,    0,       0.05);
   hs.add("missdisttkonlypvsig",           "N#sigma(miss dist. (tracks-only) of SV to PV) (cm)",                          100,    0,     100);
-
-  hs.add("missdistjetsntkpv",             "miss dist. (jets-by-ntracks -only) of SV to PV (cm)",                         100,    0,       2);
-  hs.add("missdistjetsntkpverr",          "#sigma(miss dist. (jets-by-ntracks -only) of SV to PV) (cm)",                 100,    0,       0.05);
-  hs.add("missdistjetsntkpvsig",          "N#sigma(miss dist. (jets-by-ntracks -only) of SV to PV) (cm)",                100,    0,     100);
 
   hs.add("missdisttksjetsntkpv",          "miss dist. (tracks-plus-jets-by-ntracks) of SV to PV (cm)",                   100,    0,       2);
   hs.add("missdisttksjetsntkpverr",       "#sigma(miss dist. (tracks-plus-jets-by-ntracks) of SV to PV) (cm)",           100,    0,       0.05);
@@ -306,10 +238,10 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("trackpairdphimaxm1", "SV max-1{|#Delta #phi(i,j)|}", 100, 0, 3.15);
   hs.add("trackpairdphimaxm2", "SV max-2{|#Delta #phi(i,j)|}", 100, 0, 3.15);
 
-  hs.add("drmin",                         "SV min{#Delta R(i,j)}",                                                       150,    0,       1.5);
-  hs.add("drmax",                         "SV max{#Delta R(i,j)}",                                                       150,    0,       7);
-  hs.add("dravg",                         "SV avg{#Delta R(i,j)}",                                                       150,    0,       5);
-  hs.add("drrms",                         "SV rms{#Delta R(i,j)}",                                                       150,    0,       3);
+  hs.add("trackpairdrmin", "SV min{#Delta R(i,j)}", 150, 0, 1.5);
+  hs.add("trackpairdrmax", "SV max{#Delta R(i,j)}", 150, 0, 7);
+  hs.add("trackpairdravg", "SV avg{#Delta R(i,j)}", 150, 0, 5);
+  hs.add("trackpairdrrms", "SV rms{#Delta R(i,j)}", 150, 0, 3);
 
   hs.add("costhtkmomvtxdispmin", "SV min{cos(angle(trk_{i}, SV-PV))}", 50, -1, 1);
   hs.add("costhtkmomvtxdispmax", "SV max{cos(angle(trk_{i}, SV-PV))}", 50, -1, 1);
@@ -341,10 +273,34 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("pvdzerr",                       "#sigma(dz(SV, PV)) (cm)",                                                     100,    0,       0.1);
   hs.add("pvdzsig",                       "N#sigma(dz(SV, PV))",                                                         100,    0,     100);
 
-  const char* lmt_ex[4] = {"", "loose_b", "medium_b", "tight_b"};
+  const char* lmt_ex[4] = {"", "loose b-", "medium b-", "tight b-"};
   for (int i = 0; i < 4; ++i) {
-    hs.add(TString::Format("jet%d_deltaphi0", i).Data(), TString::Format("|#Delta#phi| to closest %sjet", lmt_ex[i]).Data(),               25, 0,   3.15);
-    hs.add(TString::Format("jet%d_deltaphi1", i).Data(), TString::Format("|#Delta#phi| to next closest %sjet", lmt_ex[i]).Data(),          25, 0,   3.15);
+    hs.add(TString::Format("jet%d_deltaphi0", i), TString::Format("|#Delta#phi| to closest %sjet", lmt_ex[i]),      25, 0, 3.15);
+    hs.add(TString::Format("jet%d_deltaphi1", i), TString::Format("|#Delta#phi| to next closest %sjet", lmt_ex[i]), 25, 0, 3.15);
+  }
+
+  for (int i = 0; i < max_ntrackplots; ++i) {
+    hs.add(TString::Format("track%i_weight",        i), TString::Format("track%i weight",                      i),  21,  0,      1.05);
+    hs.add(TString::Format("track%i_q",             i), TString::Format("track%i charge",                      i),   4, -2,      2);
+    hs.add(TString::Format("track%i_pt",            i), TString::Format("track%i p_{T} (GeV)",                 i), 200,  0,    200);
+    hs.add(TString::Format("track%i_eta",           i), TString::Format("track%i #eta",                        i),  50, -4,      4);
+    hs.add(TString::Format("track%i_phi",           i), TString::Format("track%i #phi",                        i),  50, -3.15,   3.15);
+    hs.add(TString::Format("track%i_dxy",           i), TString::Format("track%i dxy (cm)",                    i), 100,  0,      1);
+    hs.add(TString::Format("track%i_dz",            i), TString::Format("track%i dz (cm)",                     i), 100,  0,      1);
+    hs.add(TString::Format("track%i_pt_err",        i), TString::Format("track%i #sigma(p_{T})/p_{T}",         i), 200,  0,      2);
+    hs.add(TString::Format("track%i_eta_err",       i), TString::Format("track%i #sigma(#eta)",                i), 200,  0,      0.02);
+    hs.add(TString::Format("track%i_phi_err",       i), TString::Format("track%i #sigma(#phi)",                i), 200,  0,      0.02);
+    hs.add(TString::Format("track%i_dxy_err",       i), TString::Format("track%i #sigma(dxy) (cm)",            i), 100,  0,      0.1);
+    hs.add(TString::Format("track%i_dz_err",        i), TString::Format("track%i #sigma(dz) (cm)",             i), 100,  0,      0.1);
+    hs.add(TString::Format("track%i_chi2dof",       i), TString::Format("track%i #chi^{2}/dof",                i), 100,  0,     10);
+    hs.add(TString::Format("track%i_npxhits",       i), TString::Format("track%i number of pixel hits",        i),  12,  0,     12);
+    hs.add(TString::Format("track%i_nsthits",       i), TString::Format("track%i number of strip hits",        i),  28,  0,     28);
+    hs.add(TString::Format("track%i_nhitsbehind",   i), TString::Format("track%i number of hits behind",       i),  10,  0,     10);
+    hs.add(TString::Format("track%i_nhitslost",     i), TString::Format("track%i number of hits lost",         i),  10,  0,     10);
+    hs.add(TString::Format("track%i_nhits",         i), TString::Format("track%i number of hits",              i),  40,  0,     40);
+    hs.add(TString::Format("track%i_injet",         i), TString::Format("track%i in-jet?",                     i),   2,  0,      2);
+    hs.add(TString::Format("track%i_inpv",          i), TString::Format("track%i in-PV?",                      i),  10, -1,      9);
+    hs.add(TString::Format("track%i_jet_deltaphi0", i), TString::Format("track%i |#Delta#phi| to closest jet", i),  25,  0,      3.15);
   }
 
   for (int j = 0; j < sv_num_indices; ++j) {
@@ -378,20 +334,6 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
     h_sv_track_nhits[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_nhits", exc), TString::Format(";%s SV tracks number of hits", exc), 40, 0, 40);
     h_sv_track_injet[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_injet", exc), TString::Format(";%s SV tracks in-jet?", exc), 2, 0, 2);
     h_sv_track_inpv[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_inpv", exc), TString::Format(";%s SV tracks in-PV?", exc), 10, -1, 9);
-
-    h_sv_track_nsthits_track_eta[j] = fs->make<TH2F>(TString::Format("h_sv_%s_track_nsthits_track_eta", exc), TString::Format("%s SV;tracks #eta;tracks number of strip hits;", exc), 50, -4, 4, 28, 0, 28);
-    h_sv_bs2derr_track_pt[j] = fs->make<TH2F>(TString::Format("h_sv_%s_bs2derr_track_pt", exc), TString::Format("%s SV;tracks p_{T} (GeV);#sigma(dist2d(SV, beamspot)) (cm)", exc), 200, 0, 200, 100, 0, 0.05);
-    h_sv_bs2derr_track_eta[j] = fs->make<TH2F>(TString::Format("h_sv_%s_bs2derr_track_eta", exc), TString::Format("%s SV;tracks #eta;#sigma(dist2d(SV, beamspot)) (cm)", exc), 50, -4, 4, 100, 0, 0.05);
-    h_sv_bs2derr_track_phi[j] = fs->make<TH2F>(TString::Format("h_sv_%s_bs2derr_track_phi", exc), TString::Format("%s SV;tracks #phi;#sigma(dist2d(SV, beamspot)) (cm)", exc), 50, -3.15, 3.15, 100, 0, 0.05);
-    h_sv_bs2derr_track_dxy[j] = fs->make<TH2F>(TString::Format("h_sv_%s_bs2derr_track_dxy", exc), TString::Format("%s SV;tracks dxy (cm);#sigma(dist2d(SV, beamspot)) (cm)", exc), 100, 0, 1, 100, 0, 0.05);
-    h_sv_bs2derr_track_dz[j] = fs->make<TH2F>(TString::Format("h_sv_%s_bs2derr_track_dz", exc), TString::Format("%s SV;tracks dz (cm);#sigma(dist2d(SV, beamspot)) (cm)", exc), 100, 0, 1, 100, 0, 0.05);
-    h_sv_bs2derr_track_pt_err[j] = fs->make<TH2F>(TString::Format("h_sv_%s_bs2derr_track_pt_err", exc), TString::Format("%s SV;tracks #sigma(p_{T})/p_{T};#sigma(dist2d(SV, beamspot)) (cm)", exc), 200, 0, 2, 100, 0, 0.05);
-    h_sv_bs2derr_track_eta_err[j] = fs->make<TH2F>(TString::Format("h_sv_%s_bs2derr_track_eta_err", exc), TString::Format("%s SV;tracks #sigma(#eta);#sigma(dist2d(SV, beamspot)) (cm)", exc), 200, 0, 0.02, 100, 0, 0.05);
-    h_sv_bs2derr_track_phi_err[j] = fs->make<TH2F>(TString::Format("h_sv_%s_bs2derr_track_phi_err", exc), TString::Format("%s SV;tracks #sigma(#phi);#sigma(dist2d(SV, beamspot)) (cm)", exc), 200, 0, 0.02, 100, 0, 0.05);
-    h_sv_bs2derr_track_dxy_err[j] = fs->make<TH2F>(TString::Format("h_sv_%s_bs2derr_track_dxy_err", exc), TString::Format("%s SV;tracks #sigma(dxy) (cm);#sigma(dist2d(SV, beamspot)) (cm)", exc), 100, 0, 0.1, 100, 0, 0.05);
-    h_sv_bs2derr_track_dz_err[j] = fs->make<TH2F>(TString::Format("h_sv_%s_bs2derr_track_dz_err", exc), TString::Format("%s SV;tracks #sigma(dz) (cm);#sigma(dist2d(SV, beamspot)) (cm)", exc), 100, 0, 0.1, 100, 0, 0.05);
-    h_sv_bs2derr_track_npxhits[j] = fs->make<TH2F>(TString::Format("h_sv_%s_bs2derr_track_npxhits", exc), TString::Format("%s SV;tracks number of pixel hits;#sigma(dist2d(SV, beamspot)) (cm)", exc), 12, 0, 12, 100, 0, 0.05);
-    h_sv_bs2derr_track_nsthits[j] = fs->make<TH2F>(TString::Format("h_sv_%s_bs2derr_track_nsthits", exc), TString::Format("%s SV;tracks number of strip hits;#sigma(dist2d(SV, beamspot)) (cm)", exc), 28, 0, 28, 100, 0, 0.05);
   }
 
   h_sv_xy = fs->make<TH2F>("h_sv_xy", ";SV x (cm);SV y (cm)", 100, -4, 4, 100, -4, 4);
@@ -406,18 +348,6 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   h_fractrackssharedwpv01 = fs->make<TH1F>("h_fractrackssharedwpv01", ";fraction of sv #0 and sv #1 tracks shared with the PV;arb. units", 41, 0, 1.025);
   h_fractrackssharedwpvs01 = fs->make<TH1F>("h_fractrackssharedwpvs01", ";fraction of sv #0 and sv #1 tracks shared with any PV;arb. units", 41, 0, 1.025);
   h_pvmosttracksshared = fs->make<TH2F>("h_pvmosttracksshared", ";index of pv most-shared to sv #0; index of pv most-shared to sv #1", 71, -1, 70, 71, -1, 70);
-}
-
-void MFVVertexHistos::fill_multi(TH1F** hs, const int, const double val, const double weight) const {
-  hs[sv_all]->Fill(val, weight);
-}
-
-void MFVVertexHistos::fill_multi(TH2F** hs, const int, const double val, const double val2, const double weight) const {
-  hs[sv_all]->Fill(val, val2, weight);
-}
-
-void MFVVertexHistos::fill_multi(PairwiseHistos* hs, const int, const PairwiseHistos::ValueMap& val, const double weight) const {
-  hs[sv_all].Fill(val, -1, weight);
 }
 
 void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
@@ -439,6 +369,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   event.getByToken(vertex_token, auxes);
 
   const int nsv = int(auxes->size());
+  h_nsv->Fill(nsv, w);
 
   for (int isv = 0; isv < nsv; ++isv) {
     const MFVVertexAux& aux = auxes->at(isv);
@@ -543,10 +474,6 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         {"costhtkonlymompv2d",       aux.costhmompv2d(mfv::PTracksOnly)},
         {"costhtkonlymompv3d",       aux.costhmompv3d(mfv::PTracksOnly)},
 
-        {"costhjetsntkmombs",        aux.costhmombs  (mfv::PJetsByNtracks)},
-        {"costhjetsntkmompv2d",      aux.costhmompv2d(mfv::PJetsByNtracks)},
-        {"costhjetsntkmompv3d",      aux.costhmompv3d(mfv::PJetsByNtracks)},
-
         {"costhtksjetsntkmombs",     aux.costhmombs  (mfv::PTracksPlusJetsByNtracks)},
         {"costhtksjetsntkmompv2d",   aux.costhmompv2d(mfv::PTracksPlusJetsByNtracks)},
         {"costhtksjetsntkmompv3d",   aux.costhmompv3d(mfv::PTracksPlusJetsByNtracks)},
@@ -554,10 +481,6 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         {"missdisttkonlypv",        aux.missdistpv   [mfv::PTracksOnly]},
         {"missdisttkonlypverr",     aux.missdistpverr[mfv::PTracksOnly]},
         {"missdisttkonlypvsig",     aux.missdistpvsig(mfv::PTracksOnly)},
-
-        {"missdistjetsntkpv",        aux.missdistpv   [mfv::PJetsByNtracks]},
-        {"missdistjetsntkpverr",     aux.missdistpverr[mfv::PJetsByNtracks]},
-        {"missdistjetsntkpvsig",     aux.missdistpvsig(mfv::PJetsByNtracks)},
 
         {"missdisttksjetsntkpv",        aux.missdistpv   [mfv::PTracksPlusJetsByNtracks]},
         {"missdisttksjetsntkpverr",     aux.missdistpverr[mfv::PTracksPlusJetsByNtracks]},
@@ -611,10 +534,10 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         {"trackpairdetaavg", trackpairdeta_stats.avg},
         {"trackpairdetarms", trackpairdeta_stats.rms},
 
-        {"drmin",  trackpairdr_stats.min},
-        {"drmax",  trackpairdr_stats.max},
-        {"dravg",  trackpairdr_stats.avg},
-        {"drrms",  trackpairdr_stats.rms},
+        {"trackpairdrmin",  trackpairdr_stats.min},
+        {"trackpairdrmax",  trackpairdr_stats.max},
+        {"trackpairdravg",  trackpairdr_stats.avg},
+        {"trackpairdrrms",  trackpairdr_stats.rms},
 
         {"costhtkmomvtxdispmin", aux.costhtkmomvtxdispmin()},
         {"costhtkmomvtxdispmax", aux.costhtkmomvtxdispmax()},
@@ -626,25 +549,25 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         {"costhjetmomvtxdispavg", aux.costhjetmomvtxdispavg()},
         {"costhjetmomvtxdisprms", aux.costhjetmomvtxdisprms()},
 
-        {"gen2ddist",               aux.gen2ddist},
-        {"gen2derr",                aux.gen2derr},
-        {"gen2dsig",                aux.gen2dsig()},
-        {"gen3ddist",               aux.gen3ddist},
-        {"gen3derr",                aux.gen3derr},
-        {"gen3dsig",                aux.gen3dsig()},
-        {"bs2ddist",                aux.bs2ddist},
-        {"bsbs2ddist",              mevent->bs2ddist(aux)},
-        {"bs2derr",                 aux.bs2derr},
-        {"bs2dsig",                 aux.bs2dsig()},
-        {"pv2ddist",                aux.pv2ddist},
-        {"pv2derr",                 aux.pv2derr},
-        {"pv2dsig",                 aux.pv2dsig()},
-        {"pv3ddist",                aux.pv3ddist},
-        {"pv3derr",                 aux.pv3derr},
-        {"pv3dsig",                 aux.pv3dsig()},
-        {"pvdz",                    aux.pvdz()},
-        {"pvdzerr",                 aux.pvdzerr()},
-        {"pvdzsig",                 aux.pvdzsig()}
+        {"gen2ddist",   aux.gen2ddist},
+        {"gen2derr",    aux.gen2derr},
+        {"gen2dsig",    aux.gen2dsig()},
+        {"gen3ddist",   aux.gen3ddist},
+        {"gen3derr",    aux.gen3derr},
+        {"gen3dsig",    aux.gen3dsig()},
+        {"bs2ddist",    aux.bs2ddist},
+        {"bsbs2ddist",  mevent->bs2ddist(aux)},
+        {"bs2derr",     aux.bs2derr},
+        {"bs2dsig",     aux.bs2dsig()},
+        {"pv2ddist",    aux.pv2ddist},
+        {"pv2derr",     aux.pv2derr},
+        {"pv2dsig",     aux.pv2dsig()},
+        {"pv3ddist",    aux.pv3ddist},
+        {"pv3derr",     aux.pv3derr},
+        {"pv3dsig",     aux.pv3dsig()},
+        {"pvdz",        aux.pvdz()},
+        {"pvdzerr",     aux.pvdzerr()},
+        {"pvdzsig",     aux.pvdzsig()}
     };
 
     std::vector<float> trackpairdphis = aux.trackpairdphis();
@@ -654,15 +577,15 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     v["trackpairdphimaxm1"] = ntrackpairs < 2 ? -1 : trackpairdphis[ntrackpairs-2];
     v["trackpairdphimaxm2"] = ntrackpairs < 3 ? -1 : trackpairdphis[ntrackpairs-3];
 
-    std::vector<double> jetdeltaphis;
     for (int i = 0; i < 4; ++i) {
-      jetdeltaphis.clear();
+      std::vector<double> jetdeltaphis;
       for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
         if (mevent->jet_pt[ijet] < mfv::min_jet_pt)
           continue;
         if (((mevent->jet_id[ijet] >> 2) & 3) >= i) {
-          fill_multi(h_sv_jets_deltaphi[i], isv, reco::deltaPhi(atan2(aux.y - bsy, aux.x - bsx), mevent->jet_phi[ijet]), w);
-          jetdeltaphis.push_back(fabs(reco::deltaPhi(atan2(aux.y - bsy, aux.x - bsx), mevent->jet_phi[ijet])));
+          const double dphi = reco::deltaPhi(atan2(aux.y - bsy, aux.x - bsx), mevent->jet_phi[ijet]);
+          fill(h_sv_jets_deltaphi[i], isv, dphi, w);
+          jetdeltaphis.push_back(fabs(dphi));
         }
       }
       std::sort(jetdeltaphis.begin(), jetdeltaphis.end());
@@ -671,66 +594,39 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       v[TString::Format("jet%d_deltaphi1", i).Data()] = 1 > njets - 1 ? -1 : jetdeltaphis[1];
     }
 
-    fill_multi(h_sv_bs2derr_bsbs2ddist, isv, mevent->bs2ddist(aux), aux.bs2derr, w);
-    fill_multi(h_pvrho_bsbs2ddist, isv, mevent->bs2ddist(aux), mevent->pv_rho(), w);
+    fill(h_sv_bs2derr_bsbs2ddist, isv, mevent->bs2ddist(aux), aux.bs2derr, w);
+    fill(h_pvrho_bsbs2ddist, isv, mevent->bs2ddist(aux), mevent->pv_rho(), w);
 
     for (int i = 0; i < int(aux.ntracks()); ++i) {
-      fill_multi(h_sv_track_weight, isv, aux.track_weight(i), w);
-      fill_multi(h_sv_track_q, isv, aux.track_q(i), w);
-      fill_multi(h_sv_track_pt, isv, aux.track_pt(i), w);
-      fill_multi(h_sv_track_eta, isv, aux.track_eta[i], w);
-      fill_multi(h_sv_track_phi, isv, aux.track_phi[i], w);
-      fill_multi(h_sv_track_dxy, isv, aux.track_dxy[i], w);
-      fill_multi(h_sv_track_dz, isv, aux.track_dz[i], w);
-      fill_multi(h_sv_track_pt_err, isv, aux.track_pt_err[i], w);
-      fill_multi(h_sv_track_eta_err, isv, aux.track_eta_err(i), w);
-      fill_multi(h_sv_track_phi_err, isv, aux.track_phi_err(i), w);
-      fill_multi(h_sv_track_dxy_err, isv, aux.track_dxy_err(i), w);
-      fill_multi(h_sv_track_dz_err, isv, aux.track_dz_err(i), w);
-      fill_multi(h_sv_track_chi2dof, isv, aux.track_chi2dof(i), w);
-      fill_multi(h_sv_track_npxhits, isv, aux.track_npxhits(i), w);
-      fill_multi(h_sv_track_nsthits, isv, aux.track_nsthits(i), w);
-      fill_multi(h_sv_track_nhitsbehind, isv, aux.track_nhitsbehind(i), w);
-      fill_multi(h_sv_track_nhitslost, isv, aux.track_nhitslost(i), w);
-      fill_multi(h_sv_track_nhits, isv, aux.track_nhits(i), w);
-      fill_multi(h_sv_track_injet, isv, aux.track_injet[i], w);
-      fill_multi(h_sv_track_inpv, isv, aux.track_inpv[i], w);
-
-      fill_multi(h_sv_track_nsthits_track_eta, isv, aux.track_eta[i], aux.track_nsthits(i), w);
-      fill_multi(h_sv_bs2derr_track_pt, isv, aux.track_pt(i), aux.bs2derr, w);
-      fill_multi(h_sv_bs2derr_track_eta, isv, aux.track_eta[i], aux.bs2derr, w);
-      fill_multi(h_sv_bs2derr_track_phi, isv, aux.track_phi[i], aux.bs2derr, w);
-      fill_multi(h_sv_bs2derr_track_dxy, isv, aux.track_dxy[i], aux.bs2derr, w);
-      fill_multi(h_sv_bs2derr_track_dz, isv, aux.track_dz[i], aux.bs2derr, w);
-      fill_multi(h_sv_bs2derr_track_pt_err, isv, aux.track_pt_err[i], aux.bs2derr, w);
-      fill_multi(h_sv_bs2derr_track_eta_err, isv, aux.track_eta_err(i), aux.bs2derr, w);
-      fill_multi(h_sv_bs2derr_track_phi_err, isv, aux.track_phi_err(i), aux.bs2derr, w);
-      fill_multi(h_sv_bs2derr_track_dxy_err, isv, aux.track_dxy_err(i), aux.bs2derr, w);
-      fill_multi(h_sv_bs2derr_track_dz_err, isv, aux.track_dz_err(i), aux.bs2derr, w);
-      fill_multi(h_sv_bs2derr_track_npxhits, isv, aux.track_npxhits(i), aux.bs2derr, w);
-      fill_multi(h_sv_bs2derr_track_nsthits, isv, aux.track_nsthits(i), aux.bs2derr, w);
+      fill(h_sv_track_weight, isv, aux.track_weight(i), w);
+      fill(h_sv_track_q, isv, aux.track_q(i), w);
+      fill(h_sv_track_pt, isv, aux.track_pt(i), w);
+      fill(h_sv_track_eta, isv, aux.track_eta[i], w);
+      fill(h_sv_track_phi, isv, aux.track_phi[i], w);
+      fill(h_sv_track_dxy, isv, aux.track_dxy[i], w);
+      fill(h_sv_track_dz, isv, aux.track_dz[i], w);
+      fill(h_sv_track_pt_err, isv, aux.track_pt_err[i], w);
+      fill(h_sv_track_eta_err, isv, aux.track_eta_err(i), w);
+      fill(h_sv_track_phi_err, isv, aux.track_phi_err(i), w);
+      fill(h_sv_track_dxy_err, isv, aux.track_dxy_err(i), w);
+      fill(h_sv_track_dz_err, isv, aux.track_dz_err(i), w);
+      fill(h_sv_track_chi2dof, isv, aux.track_chi2dof(i), w);
+      fill(h_sv_track_npxhits, isv, aux.track_npxhits(i), w);
+      fill(h_sv_track_nsthits, isv, aux.track_nsthits(i), w);
+      fill(h_sv_track_nhitsbehind, isv, aux.track_nhitsbehind(i), w);
+      fill(h_sv_track_nhitslost, isv, aux.track_nhitslost(i), w);
+      fill(h_sv_track_nhits, isv, aux.track_nhits(i), w);
+      fill(h_sv_track_injet, isv, aux.track_injet[i], w);
+      fill(h_sv_track_inpv, isv, aux.track_inpv[i], w);
     }
 
-    if (do_trackplots) {
-      int ntracksstgtn[11] = {0};
-
+    if (max_ntrackplots > 0) {
       std::vector<std::pair<int,float>> itk_pt;
-      for (int i = 0; i < int(aux.ntracks()); ++i) {
+      for (int i = 0; i < int(aux.ntracks()); ++i)
         itk_pt.push_back(std::make_pair(i, aux.track_pt(i)));
 
-        for (int j = 0; j < 11; ++j) {
-          if (aux.track_nsthits(i) >= j) {
-            ++ntracksstgtn[j];
-          }
-        }
-      }
-
-      for (int i = 0; i < 11; ++i) {
-        v[TString::Format("ntracksstgt%i", i).Data()] = ntracksstgtn[i];
-      }
-
       std::sort(itk_pt.begin(), itk_pt.end(), [](std::pair<int,float> itk_pt1, std::pair<int,float> itk_pt2) { return itk_pt1.second > itk_pt2.second; } );
-      for (int i = 0; i < max_ntracks; ++i) {
+      for (int i = 0; i < max_ntrackplots; ++i) {
         if (i < int(aux.ntracks())) {
           v[TString::Format("track%i_weight",        i).Data()] = aux.track_weight(itk_pt[i].first);
           v[TString::Format("track%i_q",             i).Data()] = aux.track_q(itk_pt[i].first);
@@ -788,12 +684,10 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       }
     }
 
-    fill_multi(h_sv, isv, v, w);
+    fill(h_sv, isv, v, w);
   }
 
   //////////////////////////////////////////////////////////////////////
-
-  h_nsv->Fill(nsv, w);
 
   if (nsv >= 2) {
     const MFVVertexAux& sv0 = auxes->at(0);
