@@ -580,11 +580,15 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     }
 
     auto multipv_maxdz = [&](const std::map<int,int>& m) {
-      const size_t n = m.size();
+      std::vector<int> mv;
+      for (auto c : m)
+        if (c.first != -1)
+          mv.push_back(c.first);
       jmt::MaxValue v;
+      const size_t n = mv.size();
       for (size_t i = 0; i < n; ++i)
         for (size_t j = i+1; j < n; ++j)
-          v(fabs(mevent->pv_z(i) - mevent->pv_z(j)));
+          v(fabs(mevent->pv_z(mv[i]) - mevent->pv_z(mv[j])));
       return double(v);
     };
     v["multipv_maxdz"] = multipv_maxdz(multipv);
