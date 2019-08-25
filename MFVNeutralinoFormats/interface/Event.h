@@ -222,6 +222,10 @@ struct MFVEvent {
   std::vector<float> pvsz;
   std::vector<uchar> pvsscores;
 
+  float pv_x(size_t i) const { return i == 0 ? pvx : pvsx[i-1]; } // these whole classes need cleaning with fire
+  float pv_y(size_t i) const { return i == 0 ? pvy : pvsy[i-1]; }
+  float pv_z(size_t i) const { return i == 0 ? pvz : pvsz[i-1]; }
+
   std::vector<uchar> jet_id; // see encode_jet_id for definition
   std::vector<float> jet_bdisc_old; // JMTBAD CSV for backward compatibility, to be removed
   std::vector<float> jet_bdisc;
