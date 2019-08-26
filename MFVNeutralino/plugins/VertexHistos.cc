@@ -572,7 +572,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     std::map<int,int> multipv = aux.pvswtracksshared();
     std::map<int,int> multipvbyz;
     for (int i = 0; i < ntracks; ++i) {
-      jmt::MinValue closest(0.03);
+      jmt::MinValue closest(0.1);
       for (int j = 0; j < mevent->npv; ++j)
         closest(j, fabs(aux.track_vz[i] - mevent->pv_z(j)));
       if (closest.i() >= 0)
