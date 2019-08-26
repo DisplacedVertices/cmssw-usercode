@@ -225,6 +225,7 @@ struct MFVEvent {
   float pv_x(size_t i) const { return i == 0 ? pvx : pvsx[i-1]; } // these whole classes need cleaning with fire
   float pv_y(size_t i) const { return i == 0 ? pvy : pvsy[i-1]; }
   float pv_z(size_t i) const { return i == 0 ? pvz : pvsz[i-1]; }
+  float pv_score_(size_t i) const { return i == 0 ? pv_score : pvsscores[i-1]; } // JMTBAD oops, didn't bin in Producer
 
   std::vector<uchar> jet_id; // see encode_jet_id for definition
   std::vector<float> jet_bdisc_old; // JMTBAD CSV for backward compatibility, to be removed
