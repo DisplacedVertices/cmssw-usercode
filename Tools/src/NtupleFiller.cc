@@ -161,18 +161,18 @@ namespace jmt {
            );
   }
 
-  bool TracksSubNtupleFiller::cut(const reco::Track& tk, BeamspotSubNtupleFiller* bf) const {
+  bool TracksSubNtupleFiller::cut(const reco::Track& tk, const edm::Event& e, BeamspotSubNtupleFiller* bf) const {
     if (cut_level_ < 0)
       return cut_ ? cut_(tk) : false;
 
-    return !pass_track(tk, cut_level_, bf ? &bf->bs() : 0);
+    return !pass_track(tk, cut_level_, -1, &e, bf ? &bf->bs() : 0); // JMTBAD hardcoded using either plain or rescaled track
   }
 
   void TracksSubNtupleFiller::operator()(const edm::Event& e, JetsSubNtupleFiller* jf, PrimaryVerticesSubNtupleFiller* vf, BeamspotSubNtupleFiller* bf) {
     auto h = htracks(e);
     for (size_t i = 0, ie = h->size(); i < ie; ++i) {
       reco::TrackRef tk(h, i);
-      if (cut(*tk, bf))
+      if (cut(*tk, e, bf))
         continue;
 
       int which_jet = -1;

@@ -129,7 +129,7 @@ namespace jmt {
         cut_(cut),
         trg_("TracksSubNtupleFiller", cfg.getParameter<edm::ParameterSet>("track_ref_getter"), std::move(cc))
     {}
-    bool cut(const reco::Track&, BeamspotSubNtupleFiller* =0) const;
+    bool cut(const reco::Track&, const edm::Event&, BeamspotSubNtupleFiller* =0) const;
     const edm::Handle<reco::TrackCollection>& htracks(const edm::Event& e) { e.getByToken(token_, tracks_); return tracks_; }
     const reco::TrackCollection& tracks(const edm::Event& e) { return *htracks(e); }
     void operator()(const edm::Event&, JetsSubNtupleFiller* =0, PrimaryVerticesSubNtupleFiller* =0, BeamspotSubNtupleFiller* =0);
