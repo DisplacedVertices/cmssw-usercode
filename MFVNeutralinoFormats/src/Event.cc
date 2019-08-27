@@ -13,7 +13,26 @@ namespace mfv {
     "HLT_IsoMu27_v",
     "HLT_Mu50_v",
     "HLT_Ele15_IsoVVVL_PFHT450_v",
-    "HLT_Mu15_IsoVVVL_PFHT450_v"
+    "HLT_Mu15_IsoVVVL_PFHT450_v",
+
+    // 2017 bjet triggers
+    "HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33_v",
+    "HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0_v",
+    "HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2_v",
+    "HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_v",
+    "HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5_v",
+
+    // 2018 bjet triggers
+    "HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71_v",
+    "HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5_v",
+    "HLT_PFHT400_FivePFJet_100_100_60_30_30_DoublePFBTagDeepCSV_4p5_v",
+    "HLT_PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94_v",
+    "HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59_v",
+
+    // Displaced Dijet triggers
+    "HLT_HT430_DisplacedDijet40_DisplacedTrack_v",
+    "HLT_HT650_DisplacedDijet60_Inclusive_v",
+
   };
 
   const char* l1_paths[mfv::n_l1_paths] = {
@@ -35,35 +54,6 @@ namespace mfv {
     "L1_HTT250er_QuadJet_70_55_40_35_er2p5",
     "L1_HTT280er_QuadJet_70_55_40_35_er2p5",
     "L1_HTT300er_QuadJet_70_55_40_35_er2p5",
-    "L1_SingleEG24",
-    "L1_SingleEG26",
-    "L1_SingleEG30",
-    "L1_SingleEG32",
-    "L1_SingleEG34",
-    "L1_SingleEG34er2p1",
-    "L1_SingleEG36",
-    "L1_SingleEG36er2p1",
-    "L1_SingleEG38",
-    "L1_SingleEG38er2p1",
-    "L1_SingleEG40",
-    "L1_SingleEG42",
-    "L1_SingleEG45",
-    "L1_SingleEG50",
-    "L1_SingleIsoEG24",
-    "L1_SingleIsoEG24er2p1",
-    "L1_SingleIsoEG26",
-    "L1_SingleIsoEG26er2p1",
-    "L1_SingleIsoEG28",
-    "L1_SingleIsoEG28er2p1",
-    "L1_SingleIsoEG30",
-    "L1_SingleIsoEG30er2p1",
-    "L1_SingleIsoEG32",
-    "L1_SingleIsoEG32er2p1",
-    "L1_SingleIsoEG34",
-    "L1_SingleIsoEG34er2p1",
-    "L1_SingleIsoEG36",
-    "L1_SingleIsoEG36er2p1",
-    "L1_SingleIsoEG38",
     "L1_SingleJet170",
     "L1_SingleJet180",
     "L1_SingleJet200",
