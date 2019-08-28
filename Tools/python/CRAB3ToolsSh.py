@@ -154,7 +154,7 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
         print working_dir, ': just one file found, copying'
         cmd = 'xrdcp -s %s %s' % (files[0], new_name)
         result.success = os.system(cmd) == 0
-        if result.success:
+        if result.success and not new_name.startswith('root://'):
             os.chmod(new_name, 0644)
     else:
         result.success = hadd(new_name, files)
