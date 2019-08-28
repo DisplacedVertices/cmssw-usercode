@@ -56,7 +56,8 @@ namespace jmt {
         ("output-file,o",  po::value<std::string>(&out_fn_)        ->default_value("hists.root"), "the output file")
         ("tree-path,t",    po::value<std::string>(&tree_path_)     ->default_value(tree_path),    "the tree path")
         ("json,j",         po::value<std::string>(&json_),                                        "lumi mask json file for data")
-        ("quiet,q",        po::bool_switch       (&quiet_)         ->default_value(false),        "whether to be quiet")
+        ("quiet,q",        po::bool_switch       (&quiet_)         ->default_value(false),        "whether to be quiet (suppresses progress and timing prints)")
+        ("silent,l",       po::bool_switch       (&silent_)        ->default_value(false),        "whether to be silent (absolutely no prints from us)")
         ("num-chunks,n",   po::value<int>        (&num_chunks_)    ->default_value(1),            "split the tree entries into this many chunks")
         ("which-chunk,w",  po::value<int>        (&which_chunk_)   ->default_value(0),            "chunk to run")
         ("weights",        po::bool_switch       (&use_weights_)   ->default_value(true),         "whether to use any other weights, including those in the tree")
@@ -74,6 +75,9 @@ namespace jmt {
       po::variables_map vm;
       po::store(po::parse_command_line(argc, argv, desc_), vm);
       po::notify(vm);
+
+      if (silent_)
+        quiet_ = true;
 
       if (vm.count("help")) {
         std::cerr << desc_ << "\n";
@@ -104,17 +108,18 @@ namespace jmt {
           return false;
         }
 
-        std::cout << argv[0] << " with options:"
-                  << " in_fn: " << in_fn_
-                  << " out_fn: " << out_fn_
-                  << " tree_path: " << tree_path_
-                  << " json: " << (json_ != "" ? json_ : "none")
-                  << " quiet: " << quiet_
-                  << " num_chunks: " << num_chunks_
-                  << " which_chunk: " << which_chunk_
-                  << " weights: " << use_weights_
-                  << " pu_weights: " << (pu_weights_ != "" ? pu_weights_ : "none")
-                  << "\n";
+        if (!silent_)
+          std::cout << argv[0] << " with options:"
+                    << " in_fn: " << in_fn_
+                    << " out_fn: " << out_fn_
+                    << " tree_path: " << tree_path_
+                    << " json: " << (json_ != "" ? json_ : "none")
+                    << " quiet/silent: " << quiet_ << "/" << silent_
+                    << " num_chunks: " << num_chunks_
+                    << " which_chunk: " << which_chunk_
+                    << " weights: " << use_weights_
+                    << " pu_weights: " << (pu_weights_ != "" ? pu_weights_ : "none")
+                    << "\n";
       }
 
       return true;
@@ -253,7 +258,7 @@ namespace jmt {
         if (h_npu_) h_npu_->Fill(nt_->base().npu(), w);
       }
 
-      printf("\rfinished %s, %llu events done, %llu not skipped, %llu with negative weights\n", in_fn_.c_str(), entries_run_, notskipped, nnegweight);
+      if (!silent_) printf("\rfinished %s, %llu events done, %llu not skipped, %llu with negative weights\n", in_fn_.c_str(), entries_run_, notskipped, nnegweight);
       if (!quiet_) {
         printf("cpu time per not-skipped event: %.3g, loop time:", time_.CpuTime() / notskipped);
         time_.Print();
@@ -268,6 +273,7 @@ namespace jmt {
     std::string tree_path_;
     std::string json_;
     bool quiet_;
+    bool silent_;
     int num_chunks_;
     int which_chunk_;
     bool use_weights_;
