@@ -69,6 +69,8 @@ namespace jmt {
     void set_nallpv(uchar x) { nallpv_ = x; }
     uchar nallpv() const { return nallpv_; }
 
+    bool is_mc() const { return run() == 1; }
+
   private:
     float weight_;
     unsigned run_;
@@ -123,6 +125,7 @@ namespace jmt {
     float err_dydz() const { return err_dydz_; }
     float err_width() const { return err_width_; }
 
+    float phi() const { return atan2(y(), x()); }
     float x(float zp) const { return x() + dxdz() * (zp - z()); }
     float y(float zp) const { return y() + dydz() * (zp - z()); }
 
@@ -153,12 +156,12 @@ namespace jmt {
     virtual void read_from_tree(TTree* tree);
     virtual void copy_vectors();
 
-    void add(float x, float y, float z, float chi2, float ndof, int ntracks, float score,
+    void add(float xx, float yy, float zz, float chi2, float ndof, int ntracks, float score,
              float cxx, float cxy, float cxz, float cyy, float cyz, float czz,
              unsigned misc) {
-      x_.push_back(x);
-      y_.push_back(y);
-      z_.push_back(z);
+      x_.push_back(xx);
+      y_.push_back(yy);
+      z_.push_back(zz);
       chi2_.push_back(chi2);
       ndof_.push_back(ndof);
       ntracks_.push_back(ntracks);
@@ -188,11 +191,17 @@ namespace jmt {
     float czz    (int i) const { return p_get(i, czz_,     p_czz_     ); }
     unsigned misc(int i) const { return p_get(i, misc_,    p_misc_    ); }
 
-    void set_misc(int i, unsigned x) { assert(0 == p_misc_); misc_[i] = x; }
+    void set_misc(int i, unsigned m) { assert(0 == p_misc_); misc_[i] = m; }
 
-    float chi2dof(int i) const { return chi2(i) / ndof(i); }
+    float phi(int i) const { return atan2(y(i), x(i)); }
     float rho(int i) const { return std::hypot(x(i), y(i)); }
     TVector3 pos(int i) const { return TVector3(x(i), y(i), z(i)); }
+    template <typename BS> float xraw(int i, const BS& bs) const { return x(i) + bs.x(z(i)); }
+    template <typename BS> float yraw(int i, const BS& bs) const { return y(i) + bs.y(z(i)); }
+    template <typename BS> float phiraw(int i, const BS& bs) const { return atan2(y(i, bs), x(i, bs)); }
+    template <typename BS> float rhoraw(int i, const BS& bs) const { return std::hypot(x(i, bs), y(i, bs)); }
+    template <typename BS> TVector3 posraw(int i, const BS& bs) const { return TVector3(xraw(i, bs), yraw(i, bs), z(i, bs)); }
+    float chi2dof(int i) const { return chi2(i) / ndof(i); }
 
   private:
     vfloat x_;           vfloat* p_x_;
@@ -281,9 +290,9 @@ namespace jmt {
     float    cov_14   (int i) const { return p_get(i, cov_14_,    p_cov_14_    ); }
     float    cov_22   (int i) const { return p_get(i, cov_22_,    p_cov_22_    ); }
     float    cov_23   (int i) const { return p_get(i, cov_23_,    p_cov_23_    ); }
-    float    cov_33   (int i) const { return p_get(i, cov_33_,    p_cov_33_    ); }
-    float    cov_34   (int i) const { return p_get(i, cov_34_,    p_cov_34_    ); }
-    float    cov_44   (int i) const { return p_get(i, cov_44_,    p_cov_44_    ); }
+    virtual float cov_33 (int i) const { return p_get(i, cov_33_, p_cov_33_ ); }
+    virtual float cov_34 (int i) const { return p_get(i, cov_34_, p_cov_34_ ); }
+    virtual float cov_44 (int i) const { return p_get(i, cov_44_, p_cov_44_ ); }
     float    chi2dof  (int i) const { return p_get(i, chi2dof_,   p_chi2dof_   ); }
     unsigned hp       (int i) const { return p_get(i, hp_,        p_hp_        ); }
     uchar    minhit   (int i) const { return p_get(i, minhit_,    p_minhit_    ); }
@@ -329,6 +338,7 @@ namespace jmt {
       }
     }
     float err_pt(int i) const { return sqrt(cov_00(i) * pt(i) * pt(i) * p2(i) / q(i) / q(i) + cov_11(i) * pz(i) * pz(i)); } // + cov(i,0,1) * 2 * pt(i) * p(i) / q(i) * pz(i)); }
+    float err_pt_rel(int i) const { return err_pt(i) / pt(i); }
     float err_eta(int i) const { return sqrt(cov_11(i) * p2(i)) / pt(i); }
     float err_phi(int i) const { return sqrt(cov_22(i)); }
     float err_dxy(int i) const { return sqrt(cov_33(i)); }
