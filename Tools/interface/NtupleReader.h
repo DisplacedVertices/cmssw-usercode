@@ -14,6 +14,9 @@
 #include "JMTucker/Tools/interface/Prob.h"
 #include "JMTucker/Tools/interface/ROOTTools.h"
 
+#define NR_loop_continue return std::make_pair(true, nr.weight())
+#define NR_loop_break return std::make_pair(false, nr.weight())
+
 namespace jmt {
   template <typename Ntuple>
   class NtupleReader {
@@ -56,6 +59,7 @@ namespace jmt {
         ("output-file,o",  po::value<std::string>(&out_fn_)        ->default_value("hists.root"), "the output file")
         ("tree-path,t",    po::value<std::string>(&tree_path_)     ->default_value(tree_path),    "the tree path")
         ("json,j",         po::value<std::string>(&json_),                                        "lumi mask json file for data")
+        ("every,e",        po::bool_switch       (&every_)         ->default_value(false),        "print a message every event")
         ("quiet,q",        po::bool_switch       (&quiet_)         ->default_value(false),        "whether to be quiet (suppresses progress and timing prints)")
         ("silent,l",       po::bool_switch       (&silent_)        ->default_value(false),        "whether to be silent (absolutely no prints from us)")
         ("num-chunks,n",   po::value<int>        (&num_chunks_)    ->default_value(1),            "split the tree entries into this many chunks")
@@ -78,6 +82,8 @@ namespace jmt {
 
       if (silent_)
         quiet_ = true;
+      if (quiet_)
+        every_ = false;
 
       if (vm.count("help")) {
         std::cerr << desc_ << "\n";
@@ -114,7 +120,7 @@ namespace jmt {
                     << " out_fn: " << out_fn_
                     << " tree_path: " << tree_path_
                     << " json: " << (json_ != "" ? json_ : "none")
-                    << " quiet/silent: " << quiet_ << "/" << silent_
+                    << " every/quiet/silent: " << every_ << "/" << quiet_ << "/" << silent_
                     << " num_chunks: " << num_chunks_
                     << " which_chunk: " << which_chunk_
                     << " weights: " << use_weights_
@@ -239,7 +245,8 @@ namespace jmt {
       for (entry_t jj = entry_start_; jj < entry_end_; ++jj) {
         if (t_->LoadTree(jj) < 0) break;
         if (t_->GetEntry(jj) <= 0) continue;
-        if (!quiet_ && jj % print_per == 0) { printf("\r%llu", jj); fflush(stdout); }
+        if (every_) printf("NtupleReader loop: r: %u l: %u e: %llu\n", nt_->base().run(), nt_->base().lumi(), nt_->base().event());
+        else if (!quiet_ && jj % print_per == 0) { printf("\r%llu", jj); fflush(stdout); }
 
         if (!is_mc() && ll_ && !ll_->contains(nt_->base()))
           continue;
@@ -272,6 +279,7 @@ namespace jmt {
     std::string out_fn_;
     std::string tree_path_;
     std::string json_;
+    bool every_;
     bool quiet_;
     bool silent_;
     int num_chunks_;
