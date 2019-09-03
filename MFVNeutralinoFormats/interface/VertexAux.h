@@ -363,6 +363,14 @@ struct MFVVertexAux {
     return c;
   }
 
+  int ntracksetagt(float thr) const {
+    int c = 0;
+    for (size_t i = 0, ie = ntracks(); i < ie; ++i)
+      if (use_track(i) && fabs(track_eta[i]) > thr)
+        ++c;
+    return c;
+  }
+
   int trackminnhits() const {
     int m = 255, m2;
     for (size_t i = 0, ie = ntracks(); i < ie; ++i)
