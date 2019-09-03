@@ -1,8 +1,8 @@
 import os
 from JMTucker.Tools.ROOTTools import *
 
-is_mc = True
-version = 'V25m'
+is_mc = False
+version = 'V27m'
 path = '/uscms_data/d2/tucker/crab_dirs/VertexerPairEffs' + version.capitalize()
 year = '2017'
 
