@@ -1,6 +1,6 @@
 ROOTFLAGS=$(shell root-config --cflags --libs)
 CFLAGS=-I${CMSSW_BASE}/src -I${CMSSW_RELEASE_BASE}/src -std=c++17 -O3
-EXES=looptrees.exe btags_vs_bquarks.exe studyNewTriggers.exe
+EXES=looptrees.exe btags_vs_bquarks.exe studyNewTriggers.exe effs.exe
 
 all: $(EXES)
 
