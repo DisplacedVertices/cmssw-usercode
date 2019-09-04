@@ -769,6 +769,29 @@ _add_ds("ntuplev27m_norefitdzcut", {
 'JetHT2018D': _fromnum0("/store/user/tucker/JetHT/NtupleV27m_NoRefitDzCut_2018/190819_163634", 344),
 })
 
+
+_add_single_files('nr_ntuplev27mm',
+                  '/store/user/tucker/hadded/NtupleV27mm', [
+        'qcdht0700_2017',
+        'qcdht1000_2017',
+        'qcdht1500_2017',
+        'qcdht2000_2017',
+        'qcdht0700_2018',
+        'qcdht1000_2018',
+        'qcdht1500_2018',
+        'qcdht2000_2018',
+        'mfv_neu_tau010000um_M0800_2017',
+        'JetHT2017B',
+        'JetHT2017C',
+        'JetHT2017D',
+        'JetHT2017E',
+        'JetHT2017F',
+        'JetHT2018A',
+        'JetHT2018B',
+        'JetHT2018C',
+        'JetHT2018D',
+        ])
+
 ################################################################################
 
 if __name__ == '__main__':
