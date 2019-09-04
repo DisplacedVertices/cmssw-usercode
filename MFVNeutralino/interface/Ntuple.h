@@ -58,9 +58,10 @@ namespace mfv {
     TVector3 decay(int i) const { return TVector3(decay_x(i), decay_y(i), decay_z(i)); }
     template <typename BS> TVector3 decay(int i, const BS& bs) const { return TVector3(decay_x(i) - bs.x(decay_z(i)), decay_y(i) - bs.y(decay_z(i)), decay_z(i)); } // JMTBAD BS BS
 
-    float lspdist2() const { return (decay(0) - decay(1)).Perp(); }
-    float lspdist3() const { return (decay(0) - decay(1)).Mag(); }
-    float lspdistz() const { return std::abs(decay_z(0) - decay_z(1)); }
+    float minlspdist2() const { return valid() ? std::min(decay(0).Perp(), decay(1).Perp()) : -1; }
+    float lspdist2() const { return valid() ? (decay(0) - decay(1)).Perp() : -1; }
+    float lspdist3() const { return valid() ? (decay(0) - decay(1)).Mag() : -1; }
+    float lspdistz() const { return valid() ? std::abs(decay_z(0) - decay_z(1)) : -1; }
 
     int lspmatch(double x, double y, double z, double d3d=0.0084) {
       if (valid())
@@ -85,8 +86,13 @@ namespace mfv {
     }
 
     int nbquarks() const { return p_size(bquark_pt_, p_bquark_pt_); }
+    float bquark_pt (int i) const { return p_get(i, bquark_pt_,  p_bquark_pt_ ); }
+    float bquark_eta(int i) const { return p_get(i, bquark_eta_, p_bquark_eta_); }
+    float bquark_phi(int i) const { return p_get(i, bquark_phi_, p_bquark_phi_); }
     int nleptons() const { return p_size(lepton_qpt_, p_lepton_qpt_); }
     // JMTBAD
+
+    TLorentzVector bquark_p4(int i) const { return p4_m(bquark_pt(i), bquark_eta(i), bquark_phi(i), 4.18); }
 
   private:
     bool valid_;
