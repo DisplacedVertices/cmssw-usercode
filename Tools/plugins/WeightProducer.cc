@@ -8,6 +8,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
+#include "JMTucker/Tools/interface/Year.h"
 
 class JMTWeightProducer : public edm::EDProducer {
 public:
@@ -38,7 +39,7 @@ private:
   TH1D* h_npu;
   TH1D* h_npv;
 
-  enum { sum_gen_weight, sum_pileup_weight, sum_npv_weight, sum_misc_weight, sum_weight, n_sums };
+  enum { sum_gen_weight, sum_pileup_weight, sum_npv_weight, sum_misc_weight, sum_weight, yearcode_x_nfiles, n_sums };
   TH1D* h_sums;
 };
 
@@ -75,8 +76,9 @@ JMTWeightProducer::JMTWeightProducer(const edm::ParameterSet& cfg)
 
     h_sums = fs->make<TH1D>("h_sums", "", n_sums+1, 0, n_sums+1);
     int ibin = 1;
-    for (const char* x : { "sum_gen_weight", "sum_pileup_weight", "sum_npv_weight", "sum_misc_weight", "sum_weight", "n_sums" })
+    for (const char* x : { "sum_gen_weight", "sum_pileup_weight", "sum_npv_weight", "sum_misc_weight", "sum_weight", "yearcode_x_nfiles", "n_sums" })
       h_sums->GetXaxis()->SetBinLabel(ibin++, x);
+    h_sums->Fill(yearcode_x_nfiles, MFVNEUTRALINO_YEAR_P);
   }
 }
 

@@ -11,6 +11,7 @@
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 //#include "DataFormats/NanoAOD/interface/MergeableCounterTable.h" // not until CMSSW 9?
 #include "JMTucker/Formats/interface/MergeablePOD.h"
+#include "JMTucker/Tools/interface/Year.h"
 
 class MCStatProducer : public edm::one::EDProducer<edm::EndLuminosityBlockProducer> {
 public:
@@ -26,7 +27,7 @@ private:
   int nevents;
   float sumweight;
 
-  enum { sum_nevents_total, sum_gen_weight_total, n_sums };
+  enum { sum_nevents_total, sum_gen_weight_total, yearcode_x_nfiles, n_sums };
   TH1D* h_sums;
 };
 
@@ -45,8 +46,9 @@ MCStatProducer::MCStatProducer(const edm::ParameterSet& cfg)
     TH1::SetDefaultSumw2();
     h_sums = fs->make<TH1D>("h_sums", "", n_sums, 0, n_sums);
     int ibin = 1;
-    for (const char* x : { "sum_nevents_total", "sum_gen_weight_total" })
+    for (const char* x : { "sum_nevents_total", "sum_gen_weight_total", "yearcode_x_nfiles" })
       h_sums->GetXaxis()->SetBinLabel(ibin++, x);
+    h_sums->Fill(yearcode_x_nfiles, MFVNEUTRALINO_YEAR_P);
   }
 }
 
