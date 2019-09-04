@@ -2,7 +2,6 @@
 #define JMTucker_Tools_BTagging_h
 
 #include "DataFormats/PatCandidates/interface/Jet.h"
-#include "JMTucker/Tools/interface/BTagging.h"
 #include "JMTucker/Tools/interface/Year.h"
 
 namespace jmt {
