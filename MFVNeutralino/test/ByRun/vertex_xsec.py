@@ -44,5 +44,16 @@ for min_dbv in 0, 0.035, 0.05:
 
         for exclude_name, exclude in excludes:
             print 'excludes:', exclude_name
-            plotter.make(nvtx, exclude_name + '_%itrk_%iV_mindbv%.3f_xsec' % (ntracks, oneortwo, min_dbv), title, '#sigma (pb)', year, exclude, scale_by_lumi=True, verbose=True) #, scale_by_avgpu = True)
+            plotter.make(nvtx,
+                         exclude_name + '_%itrk_%iV_mindbv%.3f_xsec' % (ntracks, oneortwo, min_dbv),
+                         title,
+                         '#sigma (pb)',
+                         year,
+                         exclude,
+                         scale_by_lumi=True,
+                         verbose=True,
+                         #scale_by_avgpu = True,
+                         do_fits=False,
+                         #highlight=thirteen.l,
+                         )
             print '\n'
