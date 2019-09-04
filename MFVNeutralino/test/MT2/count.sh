@@ -3,6 +3,13 @@
 inpath=/store/user/tucker/hadded/NtupleV27mm
 outpath=count
 
+if [[ -e $outpath ]]; then
+    ls -l $outpath
+    echo ok to rm\?
+    read
+    rm -r $outpath
+fi
+
 mkdir -p $outpath
 make count.exe || exit 1
 
