@@ -1,3 +1,4 @@
+#include "TLorentzVector.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "JMTucker/Tools/interface/AnalysisEras.h"
 #include "JMTucker/Tools/interface/TrackRescaler.h"
@@ -46,5 +47,11 @@ namespace jmt {
     }
 
     return true;
+  }
+
+  TLorentzVector track_p4(const reco::Track& tk, double mass) {
+    TLorentzVector v;
+    v.SetPtEtaPhiM(tk.pt(), tk.eta(), tk.phi(), mass);
+    return v;
   }
 }
