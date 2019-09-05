@@ -231,8 +231,8 @@ namespace mfv {
     }
 
   private:
-    uchar vcode_;
-    // missing: trig bits; met, leptons?
+    uchar vcode_; // this value is not very useful before cuts are applied
+    // missing: trig bits and floats; leptons?
   };
 
   ////

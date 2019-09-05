@@ -36,12 +36,13 @@ namespace jmt {
     static TLorentzVector p4_e(double pt, double eta, double phi, double e) { TLorentzVector v; v.SetPtEtaPhiE(pt, eta, phi, e); return v; }
     static TLorentzVector p4_m(double pt, double eta, double phi, double m) { TLorentzVector v; v.SetPtEtaPhiM(pt, eta, phi, m); return v; }
 
+    const char* pfx_;
+
+  public:
     virtual void clear() = 0;
     virtual void write_to_tree(TTree*) = 0;
     virtual void read_from_tree(TTree*) = 0;
     virtual void copy_vectors() = 0;
-
-    const char* pfx_;
   };
 
   ////
@@ -125,7 +126,7 @@ namespace jmt {
     float err_dydz() const { return err_dydz_; }
     float err_width() const { return err_width_; }
 
-    float phi() const { return atan2(y(), x()); }
+    float phi() const { return std::atan2(y(), x()); }
     float x(float zp) const { return x() + dxdz() * (zp - z()); }
     float y(float zp) const { return y() + dydz() * (zp - z()); }
 
@@ -193,12 +194,12 @@ namespace jmt {
 
     void set_misc(int i, unsigned m) { assert(0 == p_misc_); misc_[i] = m; }
 
-    float phi(int i) const { return atan2(y(i), x(i)); }
+    float phi(int i) const { return std::atan2(y(i), x(i)); }
     float rho(int i) const { return std::hypot(x(i), y(i)); }
     TVector3 pos(int i) const { return TVector3(x(i), y(i), z(i)); }
     template <typename BS> float xraw(int i, const BS& bs) const { return x(i) + bs.x(z(i)); }
     template <typename BS> float yraw(int i, const BS& bs) const { return y(i) + bs.y(z(i)); }
-    template <typename BS> float phiraw(int i, const BS& bs) const { return atan2(y(i, bs), x(i, bs)); }
+    template <typename BS> float phiraw(int i, const BS& bs) const { return std::atan2(y(i, bs), x(i, bs)); }
     template <typename BS> float rhoraw(int i, const BS& bs) const { return std::hypot(x(i, bs), y(i, bs)); }
     template <typename BS> TVector3 posraw(int i, const BS& bs) const { return TVector3(xraw(i, bs), yraw(i, bs), z(i, bs)); }
     float chi2dof(int i) const { return chi2(i) / ndof(i); }
@@ -460,6 +461,32 @@ namespace jmt {
 
   ////
 
+  class PFSubNtuple : public INtuple {
+  public:
+    PFSubNtuple();
+    virtual void clear();
+    virtual void write_to_tree(TTree*);
+    virtual void read_from_tree(TTree*);
+    virtual void copy_vectors() {}
+
+    void set(float met_x, float met_y) {
+      met_x_ = met_x;
+      met_y_ = met_y;
+    }
+
+    float met_x() const { return met_x_; }
+    float met_y() const { return met_y_; }
+
+    float met_phi() const { return std::atan2(met_y(), met_x()); }
+    float met()     const { return std::hypot(met_y(), met_x()); }
+
+  private:
+    float met_x_;
+    float met_y_;
+  };
+
+  ////
+
   class TrackingNtuple : public INtuple {
   public:
     TrackingNtuple() { clear(); }
@@ -516,28 +543,35 @@ namespace jmt {
     virtual void clear() {
       TrackingNtuple::clear();
       jets().clear();
+      pf().clear();
     }
 
     virtual void write_to_tree(TTree* t) {
       TrackingNtuple::write_to_tree(t);
       jets().write_to_tree(t);
+      pf().write_to_tree(t);
     }
 
     virtual void read_from_tree(TTree* t) {
       TrackingNtuple::read_from_tree(t);
       jets().read_from_tree(t);
+      pf().read_from_tree(t);
     }
 
     virtual void copy_vectors() {
       TrackingNtuple::copy_vectors();
       jets().copy_vectors();
+      pf().copy_vectors();
     }
 
     JetsSubNtuple& jets() { return jets_; }
+    PFSubNtuple& pf() { return pf_; }
     const JetsSubNtuple& jets() const { return jets_; }
+    const PFSubNtuple& pf() const { return pf_; }
 
   private:
     JetsSubNtuple jets_;
+    PFSubNtuple pf_;
   };
 }
 

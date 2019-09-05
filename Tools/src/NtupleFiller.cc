@@ -136,6 +136,11 @@ namespace jmt {
       }
   }
 
+  void PFSubNtupleFiller::operator()(const edm::Event& event) {
+    event.getByToken(token_, mets_);
+    nt_.set(mets_->at(0).px(), mets_->at(0).py());
+  }
+
   void NtupleAdd(TracksSubNtuple& nt, const reco::Track& tk, int which_jet, int which_pv, int which_sv, unsigned misc) {
     const reco::HitPattern& hp = tk.hitPattern();
 
@@ -202,5 +207,22 @@ namespace jmt {
 
       NtupleAdd(nt_, *tk, which_jet, which_pv);
     }
+  }
+
+  TTree* NtupleFiller_setup(INtuple& nt) {
+    edm::Service<TFileService> fs;
+    TTree* t = fs->make<TTree>("t", "");
+    nt.write_to_tree(t);
+    return t;
+  }
+
+  void TrackingAndJetsNtupleFiller::operator()(const edm::Event& e) {
+    base_filler_(e);
+    bs_filler_(e);
+    pvs_filler_(e, p_.pvs_subtract_bs() ? &bs() : 0);
+    jets_filler_(e);
+    pf_filler_(e);
+    if (p_.fill_tracks())
+      tracks_filler_(e, &jets_filler_, &pvs_filler_, &bs_filler_);
   }
 }

@@ -400,4 +400,26 @@ namespace jmt {
     genflavor_ = *p_genflavor_;
     misc_ = *p_misc_;
   }
+
+  ////
+
+  PFSubNtuple::PFSubNtuple() {
+    set_pfx("pf");
+    clear();
+  }
+
+  void PFSubNtuple::clear() {
+    met_x_ = 0;
+    met_y_ = 0;
+  }
+
+  void PFSubNtuple::write_to_tree(TTree* t) {
+    t->Branch(TString::Format("%s_met_x", pfx()), &met_x_);
+    t->Branch(TString::Format("%s_met_y", pfx()), &met_y_);
+  }
+
+  void PFSubNtuple::read_from_tree(TTree* t) {
+    t->SetBranchAddress(TString::Format("%s_met_x", pfx()), &met_x_);
+    t->SetBranchAddress(TString::Format("%s_met_y", pfx()), &met_y_);
+  }
 }

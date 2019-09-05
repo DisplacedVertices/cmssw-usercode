@@ -1,17 +1,8 @@
-#include "CommonTools/UtilAlgos/interface/TFileService.h"
-#include "DataFormats/TrackReco/interface/Track.h"
-#include "DataFormats/TrackReco/interface/TrackFwd.h"
-#include "DataFormats/VertexReco/interface/Vertex.h"
-#include "DataFormats/VertexReco/interface/VertexFwd.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
-#include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-#include "FWCore/ServiceRegistry/interface/Service.h"
 #include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
-#include "JMTucker/MFVNeutralino/interface/Ntuple.h"
+#include "JMTucker/Tools/interface/TrackTools.h"
 #include "JMTucker/MFVNeutralino/interface/NtupleFiller.h"
 
 class MFVK0Treer : public edm::EDAnalyzer {
@@ -21,46 +12,33 @@ public:
 private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
 
+  TTree* t;
+  mfv::K0Ntuple nt;
+  jmt::TrackingAndJetsNtupleFiller nt_filler;
+
   std::unique_ptr<KalmanVertexFitter> kv_reco;
   const TransientTrackBuilder* tt_builder;
   const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
-  jmt::BaseSubNtupleFiller base_filler;
-  jmt::BeamspotSubNtupleFiller bs_filler;
-  jmt::PrimaryVerticesSubNtupleFiller pvs_filler;
-  jmt::JetsSubNtupleFiller jets_filler;
   const bool debug;
 
-  mfv::K0Ntuple nt;
-  TTree* tree;
-
-  bool pass(const reco::Track& tk) const { return tk.pt() >= 1 && tk.hitPattern().pixelLayersWithMeasurement() >= 2 && tk.hitPattern().stripLayersWithMeasurement() >= 6 && tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,1); }
-  TLorentzVector p4(const reco::Track& tk) const { TLorentzVector v; v.SetPtEtaPhiM(tk.pt(), tk.eta(), tk.phi(), 0.13957); return v; }
 };
 
 MFVK0Treer::MFVK0Treer(const edm::ParameterSet& cfg)
-  : kv_reco(new KalmanVertexFitter(cfg.getParameter<edm::ParameterSet>("kvr_params"), cfg.getParameter<edm::ParameterSet>("kvr_params").getParameter<bool>("doSmoothing"))),
-    tt_builder(nullptr),
+  : t(NtupleFiller_setup(nt)),
+    nt_filler(nt, cfg, NF_CC_TrackingAndJets_v,
+              jmt::TrackingAndJetsNtupleFillerParams()
+                .pvs_first_only(true)
+                .fill_tracks(false)),
+    kv_reco(new KalmanVertexFitter(cfg.getParameter<edm::ParameterSet>("kvr_params"), cfg.getParameter<edm::ParameterSet>("kvr_params").getParameter<bool>("doSmoothing"))),
     tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("tracks_src"))),
-    base_filler(nt.base(), cfg, consumesCollector()),
-    bs_filler(nt.bs(), cfg, consumesCollector()),
-    pvs_filler(nt.pvs(), cfg, consumesCollector(), true, true),
-    jets_filler(nt.jets(), cfg, consumesCollector()),
     debug(cfg.getUntrackedParameter<bool>("debug", false))
-{
-  edm::Service<TFileService> fs;
-  tree = fs->make<TTree>("t", "");
-  nt.write_to_tree(tree);
-}
+{}
 
 void MFVK0Treer::analyze(const edm::Event& event, const edm::EventSetup& setup) {
   if (debug) printf("\nMFVK0Treer analyze (%u, %u, %llu)\n", event.id().run(), event.luminosityBlock(), event.id().event());
 
   nt.clear();
-
-  base_filler(event);
-  bs_filler(event);
-  pvs_filler(event);
-  jets_filler(event);
+  nt_filler(event);
 
   edm::Handle<reco::TrackCollection> tracks;
   event.getByToken(tracks_token, tracks);
@@ -86,16 +64,16 @@ void MFVK0Treer::analyze(const edm::Event& event, const edm::EventSetup& setup) 
 
   bool ok = false;
 
-  const reco::Vertex& pv = *pvs_filler.pv();
+  const reco::Vertex& pv = *nt_filler.pv();
 
   for (size_t itk = 0; itk < ntracks; ++itk) {
     reco::TrackRef tki(tracks, itk);
-    if (!pass(*tki))
+    if (!jmt::pass_track(*tki, 1))
       continue;
 
     for (size_t jtk = itk+1; jtk < ntracks; ++jtk) {
       reco::TrackRef tkj(tracks, jtk);
-      if (!pass(*tkj))
+      if (!jmt::pass_track(*tkj, 1))
         continue;
 
       if (tki->charge() + tkj->charge() != 0)
@@ -124,7 +102,7 @@ void MFVK0Treer::analyze(const edm::Event& event, const edm::EventSetup& setup) 
           printf("        %s <%12.6f %12.6f %12.6f %12.6f %12.6f>\n", tk.charge() > 0 ? "+" : "-", tk.pt(), tk.eta(), tk.phi(), tk.dxy(), tk.dz());
       }
 
-      TLorentzVector vp4 = p4(tkrefi) + p4(tkrefj);
+      TLorentzVector vp4 = jmt::track_p4(tkrefi) + jmt::track_p4(tkrefj);
       const double mass = vp4.M();
       if (debug) printf("  p: %f m: %f\n", vp4.P(), mass);
       if (mass < 0.42 || mass > 0.58)
@@ -152,8 +130,7 @@ void MFVK0Treer::analyze(const edm::Event& event, const edm::EventSetup& setup) 
     }
   }
 
-  if (ok)
-    tree->Fill();
+  if (ok) t->Fill();
 }
 
 DEFINE_FWK_MODULE(MFVK0Treer);
