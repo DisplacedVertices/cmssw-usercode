@@ -15,7 +15,7 @@ settings.event_filter = 'jets only'
 
 process = ntuple_process(settings)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
-sample_files(process, 'qcdht2000_2017', dataset, 1)
+sample_files(process, 'qcdht2000_year', dataset, 1)
 max_events(process, 1000)
 cmssw_from_argv(process)
 
