@@ -76,7 +76,7 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
     int ibin = 1;
     for (const char* x : { "sum_nevents_total", "sum_gen_weight_total", "sum_gen_weight", "sum_pileup_weight", "sum_npv_weight", "sum_weight", "yearcode_x_nfiles", "n_sums" })
       h_sums->GetXaxis()->SetBinLabel(ibin++, x);
-    h_sums->Fill(yearcode_x_nfiles, MFVNEUTRALINO_YEAR_P);
+    h_sums->Fill(yearcode_x_nfiles, MFVNEUTRALINO_YEARCODE);
   }
 }
 
