@@ -161,6 +161,7 @@ namespace jmt {
 
   class INtupleFiller {
   public:
+    virtual ~INtupleFiller() {}
     INtupleFiller(INtuple& nt)
       : nt_(nt)
     {
