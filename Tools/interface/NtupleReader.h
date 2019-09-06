@@ -1,6 +1,7 @@
 #ifndef JMTucker_Tools_NtupleReader_h
 #define JMTucker_Tools_NtupleReader_h
 
+#include <cmath>
 #include <cstdlib>
 #include <iostream>
 #include <string>
@@ -13,6 +14,7 @@
 #include "JMTucker/Tools/interface/PileupWeights.h"
 #include "JMTucker/Tools/interface/Prob.h"
 #include "JMTucker/Tools/interface/ROOTTools.h"
+#include "JMTucker/Tools/interface/Year.h"
 
 #define NR_loop_continue return std::make_pair(true, nr.weight())
 #define NR_loop_break return std::make_pair(false, nr.weight())
@@ -26,6 +28,8 @@ namespace jmt {
         t_(nullptr),
         nt_(new Ntuple),
         puw_helper_(new jmt::PileupWeights),
+        norm_(-1),
+        year_(-1),
         h_weight_(nullptr),
         h_npu_(nullptr)
     {}
@@ -204,7 +208,17 @@ namespace jmt {
 
       if (!for_copy) {
         auto h_norm = new TH1F("h_norm", "", 1, 0, 1);
-        if (is_mc()) h_norm->Fill(0.5, h_sums->GetBinContent(1));
+        auto xax = h_sums->GetXaxis();
+        for (int ibin = 1; ibin <= h_sums->GetNbinsX(); ++ibin) {
+          const double c = h_sums->GetBinContent(ibin);
+          const std::string l = xax->GetBinLabel(ibin);
+          if (is_mc() && l == "sum_nevents_total")
+            h_norm->Fill(0.5, norm_ = c);
+          else if (l == "yearcode_x_nfiles")
+            year_ = jmt::yearcode(c).year();
+        }
+
+        assert(year_ > 0);
 
         h_weight_ = new TH1D("h_weight", ";weight;events/0.01", 100, 0, 10);
         h_npu_ = new TH1D("h_npu", ";# PU;events/1", 100, 0, 100);
@@ -304,6 +318,8 @@ namespace jmt {
     uptr<jmt::LumiList> ll_;
 
     bool is_mc_;
+    double norm_;
+    int year_;
 
     typedef unsigned long long entry_t;
     entry_t nentries_;
