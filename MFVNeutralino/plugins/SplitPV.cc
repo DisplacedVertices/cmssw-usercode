@@ -22,35 +22,26 @@ public:
 private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
 
-  TTree* t;
   mfv::SplitPVNtuple nt;
   jmt::TrackingAndJetsNtupleFiller nt_filler;
 
   std::unique_ptr<KalmanVertexFitter> kv_reco;
   const bool debug;
-
-  TTree* tree;
 };
 
 MFVSplitPV::MFVSplitPV(const edm::ParameterSet& cfg)
-  : t(NtupleFiller_setup(nt)),
-    nt_filler(nt, cfg, NF_CC_TrackingAndJets_v,
+  : nt_filler(nt, cfg, NF_CC_TrackingAndJets_v,
               jmt::TrackingAndJetsNtupleFillerParams()
                 .pvs_first_only(true)
                 .fill_tracks(false)),
     kv_reco(new KalmanVertexFitter(cfg.getParameter<edm::ParameterSet>("kvr_params"), cfg.getParameter<edm::ParameterSet>("kvr_params").getParameter<bool>("doSmoothing"))),
     debug(cfg.getUntrackedParameter<bool>("debug", false))
-{
-  edm::Service<TFileService> fs;
-  tree = fs->make<TTree>("t", "");
-  nt.write_to_tree(tree);
-}
+{}
 
 void MFVSplitPV::analyze(const edm::Event& event, const edm::EventSetup& setup) {
   if (debug) printf("MFVSplitPV analyze (%u, %u, %llu)\n", event.id().run(), event.luminosityBlock(), event.id().event());
 
-  nt.clear();
-  nt_filler(event);
+  nt_filler.fill(event);
 
   auto doit = [&](const std::vector<std::pair<reco::TransientTrack, unsigned>>& tps, unsigned which, unsigned ex=0) {
     TransientVertex tv;
@@ -117,7 +108,7 @@ void MFVSplitPV::analyze(const edm::Event& event, const edm::EventSetup& setup) 
     for (auto tp : ttks)
       jmt::NtupleAdd(nt.tracks(), tp.first.track(), -1, tp.second);
 
-    t->Fill();
+    nt_filler.finalize();
   }
 }
 

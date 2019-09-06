@@ -8,7 +8,6 @@ public:
   void analyze(const edm::Event&, const edm::EventSetup&);
 
 private:
-  TTree* t;
   mfv::MovedTracksNtuple nt;
   jmt::TrackingAndJetsNtupleFiller nt_filler;
   mfv::GenTruthSubNtupleFiller gentruth_filler;
@@ -31,8 +30,7 @@ private:
 };
 
 MFVMovedTracksTreer::MFVMovedTracksTreer(const edm::ParameterSet& cfg)
-  : t(NtupleFiller_setup(nt)),
-    nt_filler(nt, cfg, NF_CC_TrackingAndJets_v,
+  : nt_filler(nt, cfg, NF_CC_TrackingAndJets_v,
               jmt::TrackingAndJetsNtupleFillerParams()
                 .pvs_subtract_bs(true) // JMTBAD get rid of beamspot subtraction everywhere
                 .fill_tracks(false)),
@@ -60,8 +58,7 @@ namespace {
 }
 
 void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
-  nt.clear();
-  nt_filler(event);
+  nt_filler.fill(event);
   gentruth_filler(event);
 
   if (!for_mctruth) {
@@ -229,7 +226,7 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
     return;
   }
 
-  t->Fill();
+  nt_filler.finalize();
 }
 
 DEFINE_FWK_MODULE(MFVMovedTracksTreer);

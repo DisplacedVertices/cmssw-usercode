@@ -12,7 +12,6 @@ public:
 private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
 
-  TTree* t;
   mfv::K0Ntuple nt;
   jmt::TrackingAndJetsNtupleFiller nt_filler;
 
@@ -20,12 +19,10 @@ private:
   const TransientTrackBuilder* tt_builder;
   const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
   const bool debug;
-
 };
 
 MFVK0Treer::MFVK0Treer(const edm::ParameterSet& cfg)
-  : t(NtupleFiller_setup(nt)),
-    nt_filler(nt, cfg, NF_CC_TrackingAndJets_v,
+  : nt_filler(nt, cfg, NF_CC_TrackingAndJets_v,
               jmt::TrackingAndJetsNtupleFillerParams()
                 .pvs_first_only(true)
                 .fill_tracks(false)),
@@ -37,8 +34,7 @@ MFVK0Treer::MFVK0Treer(const edm::ParameterSet& cfg)
 void MFVK0Treer::analyze(const edm::Event& event, const edm::EventSetup& setup) {
   if (debug) printf("\nMFVK0Treer analyze (%u, %u, %llu)\n", event.id().run(), event.luminosityBlock(), event.id().event());
 
-  nt.clear();
-  nt_filler(event);
+  nt_filler.fill(event);
 
   edm::Handle<reco::TrackCollection> tracks;
   event.getByToken(tracks_token, tracks);
@@ -130,7 +126,7 @@ void MFVK0Treer::analyze(const edm::Event& event, const edm::EventSetup& setup) 
     }
   }
 
-  if (ok) t->Fill();
+  if (ok) nt_filler.finalize();
 }
 
 DEFINE_FWK_MODULE(MFVK0Treer);

@@ -7,17 +7,15 @@ public:
   explicit MFVMiniTreer2(const edm::ParameterSet&);
   void analyze(const edm::Event&, const edm::EventSetup&);
 
-  TTree* t;
   mfv::MiniNtuple2 nt;
-  jmt::TrackingAndJetsNtupleFiller nt_filler;
+  jmt::TrackingAndJetsNtupleFiller nt_filler; // JMTBAD MiniNtuple2Filler
   mfv::GenTruthSubNtupleFiller gentruth_filler;
 
   const edm::EDGetTokenT<MFVVertexAuxCollection> vertices_token;
 };
 
 MFVMiniTreer2::MFVMiniTreer2(const edm::ParameterSet& cfg)
-  : t(NtupleFiller_setup(nt)),
-    nt_filler(nt, cfg, NF_CC_TrackingAndJets_v,
+  : nt_filler(nt, cfg, NF_CC_TrackingAndJets_v,
               jmt::TrackingAndJetsNtupleFillerParams()
                 .pvs_subtract_bs(true) // JMTBAD get rid of this everywhere
                 .tracks_cut_level(2)),
@@ -28,17 +26,14 @@ MFVMiniTreer2::MFVMiniTreer2(const edm::ParameterSet& cfg)
 namespace { double mag2(double x, double y, double z) { return x*x + y*y + z*z; } }
 
 void MFVMiniTreer2::analyze(const edm::Event& event, const edm::EventSetup&) {
-  edm::Handle<MFVVertexAuxCollection> vertices;
-  event.getByToken(vertices_token, vertices);
-
-  nt.clear();
-  nt_filler(event);
+  nt_filler.fill(event);
   gentruth_filler(event);
 
+  edm::Handle<MFVVertexAuxCollection> vertices;
+  event.getByToken(vertices_token, vertices);
   int n3 = 0, n7 = 0, n4 = 0, n5 = 0;
 
-  // JMTBAD Filler for this
-  for (const auto& v : *vertices) {
+  for (const auto& v : *vertices) { // JMTBAD SubFiller for this
     mfv::NtupleAdd(nt.vertices(), v, nt.gentruth().lspmatch(v));
 
     if      (v.ntracks() == 3) ++n3, ++n7;
@@ -71,7 +66,7 @@ void MFVMiniTreer2::analyze(const edm::Event& event, const edm::EventSetup&) {
   nt.event().set(mfv::MiniNtuple2SubNtuple::vcode(n3, n7, n4, n5));
   // trim tracks/jets?
 
-  t->Fill();
+  nt_filler.finalize();
 }
 
 DEFINE_FWK_MODULE(MFVMiniTreer2);

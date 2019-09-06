@@ -209,13 +209,6 @@ namespace jmt {
     }
   }
 
-  TTree* NtupleFiller_setup(INtuple& nt) {
-    edm::Service<TFileService> fs;
-    TTree* t = fs->make<TTree>("t", "");
-    nt.write_to_tree(t);
-    return t;
-  }
-
   void TrackingAndJetsNtupleFiller::operator()(const edm::Event& e) {
     base_filler_(e);
     bs_filler_(e);

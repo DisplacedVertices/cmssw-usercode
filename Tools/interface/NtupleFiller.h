@@ -159,7 +159,32 @@ namespace jmt {
 
   //////////////////////////////////////////////////////////////////////
 
-  TTree* NtupleFiller_setup(INtuple&);
+  class INtupleFiller {
+  public:
+    INtupleFiller(INtuple& nt)
+      : nt_(nt)
+    {
+      edm::Service<TFileService> fs;
+      t_ = fs->make<TTree>("t", "");
+      nt_.write_to_tree(t_);
+    }
+
+    void fill(const edm::Event& e, bool final=false) {
+      nt_.clear();
+      (*this)(e);
+      if (final) finalize();
+    }
+
+    void finalize() {
+      t_->Fill();
+    }
+
+    virtual void operator()(const edm::Event&) = 0;
+
+  private:
+    INtuple& nt_;
+    TTree* t_;
+  };
 
   class TrackingAndJetsNtupleFillerParams { // for a bit more verbosity at caller instead of many anonymous params in Filler ctor
     bool pvs_subtract_bs_;
@@ -201,18 +226,19 @@ namespace jmt {
 #define NF_CC_TrackingAndJets_p edm::ConsumesCollector&& cc0, edm::ConsumesCollector&& cc1, edm::ConsumesCollector&& cc2, edm::ConsumesCollector&& cc3, edm::ConsumesCollector&& cc4, edm::ConsumesCollector&& cc5
 #define NF_CC_TrackingAndJets_v consumesCollector(),          consumesCollector(),          consumesCollector(),          consumesCollector(),          consumesCollector(),          consumesCollector()
 
-  class TrackingAndJetsNtupleFiller {
+  class TrackingAndJetsNtupleFiller : public INtupleFiller {
     TrackingAndJetsNtuple& nt_;
     TrackingAndJetsNtupleFillerParams p_;
-    jmt::BaseSubNtupleFiller base_filler_;
-    jmt::BeamspotSubNtupleFiller bs_filler_;
-    jmt::PrimaryVerticesSubNtupleFiller pvs_filler_;
-    jmt::JetsSubNtupleFiller jets_filler_;
-    jmt::PFSubNtupleFiller pf_filler_;
-    jmt::TracksSubNtupleFiller tracks_filler_;
+    BaseSubNtupleFiller base_filler_;
+    BeamspotSubNtupleFiller bs_filler_;
+    PrimaryVerticesSubNtupleFiller pvs_filler_;
+    JetsSubNtupleFiller jets_filler_;
+    PFSubNtupleFiller pf_filler_;
+    TracksSubNtupleFiller tracks_filler_;
   public:
     TrackingAndJetsNtupleFiller(TrackingAndJetsNtuple& nt, const edm::ParameterSet& cfg, NF_CC_TrackingAndJets_p, TrackingAndJetsNtupleFillerParams p)
-      : nt_(nt),
+      : INtupleFiller(nt),
+        nt_(nt),
         p_(p),
         base_filler_(nt.base(), cfg, std::move(cc0)),
         bs_filler_(nt.bs(), cfg, std::move(cc1)),
@@ -222,17 +248,17 @@ namespace jmt {
         tracks_filler_(nt.tracks(), cfg, std::move(cc5), p.tracks_cut_level(), p.tracks_cut())
     {}
 
-    jmt::BaseSubNtupleFiller base_filler() { return base_filler_; }
-    jmt::BeamspotSubNtupleFiller bs_filler() { return bs_filler_; }
-    jmt::PrimaryVerticesSubNtupleFiller pvs_filler() { return pvs_filler_; }
-    jmt::JetsSubNtupleFiller jets_filler() { return jets_filler_; }
-    jmt::PFSubNtupleFiller pf_filler() { return pf_filler_; }
-    jmt::TracksSubNtupleFiller tracks_filler() { return tracks_filler_; }
+    BaseSubNtupleFiller base_filler() { return base_filler_; }
+    BeamspotSubNtupleFiller bs_filler() { return bs_filler_; }
+    PrimaryVerticesSubNtupleFiller pvs_filler() { return pvs_filler_; }
+    JetsSubNtupleFiller jets_filler() { return jets_filler_; }
+    PFSubNtupleFiller pf_filler() { return pf_filler_; }
+    TracksSubNtupleFiller tracks_filler() { return tracks_filler_; }
 
     const reco::BeamSpot& bs() { return bs_filler_.bs(); }
     const reco::Vertex* pv() const { return pvs_filler_.pv(); }
 
-    void operator()(const edm::Event&);
+    virtual void operator()(const edm::Event&);
   };
 }
 
