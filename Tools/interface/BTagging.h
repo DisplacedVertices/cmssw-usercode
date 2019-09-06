@@ -23,6 +23,10 @@ namespace jmt {
       return (old ? old_mins : mins[year_-2017])[wp];
     }
 
+    static bool is_tagged(double disc, int wp, bool old=false) {
+      return disc > discriminator_min(wp, old);
+    }
+
 #ifndef JMT_STANDALONE_BTAGGING
     static float discriminator(const pat::Jet& jet, bool old=false) {
       if (old)
@@ -32,7 +36,7 @@ namespace jmt {
     }
 
     static bool is_tagged(const pat::Jet& jet, int wp, bool old=false) {
-      return discriminator(jet, old) > discriminator_min(wp, old);
+      return is_tagged(discriminator(jet, old), wp, old);
     }
 #endif
   };
