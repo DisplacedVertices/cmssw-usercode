@@ -5,6 +5,9 @@
 #include "JMTucker/Tools/interface/NtupleReader.h"
 #include "JMTucker/Tools/interface/NtupleViews.h"
 
+#define JMT_STANDALONE_BTAGGING
+#include "JMTucker/Tools/interface/BTagging.h"
+
 int main(int argc, char** argv) {
   jmt::NtupleReader<mfv::MiniNtuple2> nr;
   nr.init_options("mfvMiniTree2/t", "HistsV27mm", "nr_ntuplev27mm");
@@ -102,7 +105,6 @@ int main(int argc, char** argv) {
   auto h_pvsmaxdz_minscore = new TH1F("h_pvmaxdz_minscore", ";max primary vertices pairs (with score req) #delta z (cm);events/1 mm", 100, 0, 10);
 
   auto h_njets = new TH1F("h_njets", ";# of jets;events", 30, 0, 30);
-  auto h_njets20 = new TH1F("h_njets20", ";# of jets w. p_{T}  20 GeV;events", 20, 0, 20);
   const int max_njets = 10;
   TH1F* h_jet_pt[max_njets+1];
   TH1F* h_jet_eta[max_njets+1];
@@ -173,8 +175,10 @@ int main(int argc, char** argv) {
     h_vertex_seed_track_nlayers[i] = new TH1F("h_vertex_seed_track_nlayers" + ex, ";vertex seed track" + ex2 + " # layers;tracks", 30, 0, 30);
   }
 
-  /* auto h_met = new TH1F("h_met", ";MET (GeV);events/5 GeV", 100, 0, 500);
-  auto h_metphi = new TH1F("h_metphi", ";MET #phi (rad);events/.063", 100, -3.1416, 3.1416);
+  auto h_met_x = new TH1F("h_met_x", ";MET x (GeV);events/5 GeV", 80, -200, 200);
+  auto h_met_y = new TH1F("h_met_y", ";MET y (GeV);events/5 GeV", 80, -200, 200);
+  auto h_met = new TH1F("h_met", ";MET (GeV);events/5 GeV", 100, 0, 500);
+  auto h_met_phi = new TH1F("h_met_phi", ";MET #phi (rad);events/.063", 100, -3.1416, 3.1416);
 
   const char* lmt_ex[3] = {"loose", "medium", "tight"};
   TH1F* h_nbtags[3];
@@ -191,6 +195,7 @@ int main(int argc, char** argv) {
   auto h_bjet_energy = new TH1F("h_bjet_energy", ";bjets E (GeV);bjets/10 GeV", 150, 0, 1500);
   auto h_bjet_pairdphi = new TH1F("h_bjet_pairdphi", ";bjet pair #Delta#phi (rad);bjet pairs/.063", 100, -3.1416, 3.1416);
 
+  /*
   const char* lep_ex[2] = {"any", "selected"};
   const char* lep_kind[2] = {"muon", "electron"};
   TH1F* h_nmuons[2];
@@ -298,8 +303,8 @@ int main(int argc, char** argv) {
 
       ////
 
+      assert(jets.n() == jets.nminpt(20));
       nr.fill(h_njets, jets.n());
-      nr.fill(h_njets20, jets.nminpt(20));
       for (int i = 0, ie = std::min(max_njets, jets.n()); i < ie; ++i) {
         for (int j : {i, max_njets}) {
           nr.fill(h_jet_pt[j], jets.pt(i));
@@ -317,6 +322,32 @@ int main(int argc, char** argv) {
           nr.fill(h_jet_pairdr, jmt::dR(jets.eta(i), jets.phi(i), jets.eta(j), jets.phi(j)));
         }
       }
+
+      for (int i = 0; i < jmt::BTagging::nwp; ++i) {
+        const int nb = jets.nbtags(jmt::BTagging::discriminator_min(i));
+        nr.fill(h_nbtags[i], nb);
+        nr.fill(h_nbtags_v_bquark_code[i], gen.flavor_code(), nb);
+      }
+
+      std::vector<bool> jets_btagged = jets.btagged(jmt::BTagging::discriminator_min(jmt::BTagging::tight));
+      for (int i = 0, ie = jets.n(); i < ie; ++i) {
+        nr.fill(h_jet_bdisc, jets.bdisc(i));
+        nr.fill(h_jet_bdisc_v_bquark_code, gen.flavor_code(), jets.bdisc(i));
+        if (jets_btagged[i]) {
+          nr.fill(h_bjet_pt, jets.pt(i));
+          nr.fill(h_bjet_eta, jets.eta(i));
+          nr.fill(h_bjet_phi, jets.phi(i));
+          nr.fill(h_bjet_energy, jets.energy(i));
+          for (int j = i+1, je = jets.n(); j < je; ++j)
+            if (jets_btagged[j])
+              nr.fill(h_bjet_pairdphi, jmt::dphi(jets.phi(i), jets.phi(j)));
+        }
+      }
+
+      nr.fill(h_met_x, nt.pf().met_x());
+      nr.fill(h_met_y, nt.pf().met_y());
+      nr.fill(h_met, nt.pf().met());
+      nr.fill(h_met_phi, nt.pf().met_phi());
 
       ////
 
@@ -376,33 +407,6 @@ int main(int argc, char** argv) {
           }
       }
 
-      nr.fill(h_met, met());
-      nr.fill(h_metphi, metphi());
-
-      for (int i = 0; i < 3; ++i) {
-        nr.fill(h_nbtags[i], nbtags(i));
-        nr.fill(h_nbtags_v_bquark_code[i], gen_flavor_code, nbtags(i));
-      }
-      const int ibtag = 2; // tight only
-      for (size_t ijet = 0; ijet < jet_id.size(); ++ijet) {
-        if (jet_pt[ijet] < mfv::min_jet_pt)
-          continue;
-        nr.fill(h_jet_bdisc, jet_bdisc[ijet]);
-        nr.fill(h_jet_bdisc_v_bquark_code, gen_flavor_code, jet_bdisc[ijet]);
-        if (is_btagged(ijet, ibtag)) {
-          nr.fill(h_bjet_pt, jet_pt[ijet]);
-          nr.fill(h_bjet_eta, jet_eta[ijet]);
-          nr.fill(h_bjet_phi, jet_phi[ijet]);
-          nr.fill(h_bjet_energy, jet_energy[ijet]);
-          for (size_t jjet = ijet+1; jjet < jet_id.size(); ++jjet) {
-            if (jet_pt[jjet] < mfv::min_jet_pt)
-              continue;
-            if (is_btagged(jjet, ibtag)) {
-              nr.fill(h_bjet_pairdphi, reco::deltaPhi(jet_phi[ijet], jet_phi[jjet]));
-            }
-          }
-        }
-      }
 
       //////////////////////////////////////////////////////////////////////////////
       */
