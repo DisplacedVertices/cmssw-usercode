@@ -484,7 +484,7 @@ class sums_from_file(object):
         self._yearcode = None
         self._yearcodemult = 2371
         self._year = None
-        self._njobs = None
+        self._nfiles = None
 
     def _get(self, bin_label):
         return self._h.GetBinContent(self._labels.index(bin_label)+1)
@@ -511,13 +511,13 @@ class sums_from_file(object):
                 raise ValueError('not in sync with multiplier in Year.h? %s' % n)
         return self._year
 
-    def njobs(self):
-        if self._njobs is None:
+    def nfiles(self):
+        if self._nfiles is None:
             c,y = self.yearcode(), self.year()
             n = c / float(y*self._yearcodemult)
             assert n.is_integer()
-            self._njobs = int(n)
-        return self._njobs
+            self._nfiles = int(n)
+        return self._nfiles
 
 def norm_from_file(f_or_fn, path=None):
     return sums_from_file(f_or_fn, path).norm()
