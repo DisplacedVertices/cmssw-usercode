@@ -1,7 +1,9 @@
 #ifndef JMTucker_Tools_BTagging_h
 #define JMTucker_Tools_BTagging_h
 
+#ifndef JMT_STANDALONE_BTAGGING
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#endif
 #include "JMTucker/Tools/interface/Year.h"
 
 namespace jmt {
@@ -10,13 +12,6 @@ namespace jmt {
 
   public:
     static void set_year(int y) { year_ = y; }
-
-    static float discriminator(const pat::Jet& jet, bool old=false) {
-      if (old)
-        return jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"); // CSVv2
-      else
-        return jet.bDiscriminator("pfDeepFlavourJetTags:probb") + jet.bDiscriminator("pfDeepFlavourJetTags:probbb") + jet.bDiscriminator("pfDeepFlavourJetTags:problepb"); // DeepFlavour
-    }
 
     enum { loose, medium, tight, nwp };
 
@@ -28,9 +23,18 @@ namespace jmt {
       return (old ? old_mins : mins[year_-2017])[wp];
     }
 
+#ifndef JMT_STANDALONE_BTAGGING
+    static float discriminator(const pat::Jet& jet, bool old=false) {
+      if (old)
+        return jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"); // CSVv2
+      else
+        return jet.bDiscriminator("pfDeepFlavourJetTags:probb") + jet.bDiscriminator("pfDeepFlavourJetTags:probbb") + jet.bDiscriminator("pfDeepFlavourJetTags:problepb"); // DeepFlavour
+    }
+
     static bool is_tagged(const pat::Jet& jet, int wp, bool old=false) {
       return discriminator(jet, old) > discriminator_min(wp, old);
     }
+#endif
   };
 }
 
