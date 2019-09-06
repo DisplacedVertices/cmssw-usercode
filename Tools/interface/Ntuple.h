@@ -446,6 +446,20 @@ namespace jmt {
     float ht(float minpt=40.f) const { return std::accumulate(pt_begin(), pt_end(), 0.f, [minpt](float init, float pt) { if (pt > minpt) init += pt; return init; }); }
     TVector3 p3(int i) const { return p3_(pt(i), eta(i), phi(i)); }
     TLorentzVector p4(int i) const { return p4_e(pt(i), eta(i), phi(i), energy(i)); }
+    std::vector<bool> btagged(float d) const {
+      std::vector<bool> r(n(), false);
+      for (int i = 0, ie = n(); i < ie; ++i)
+        if (bdisc(i) > d)
+          r[i] = true;
+      return r;
+    }
+    int nbtags(float d) const {
+      int c = 0;
+      for (int i = 0, ie = n(); i < ie; ++i)
+        if (bdisc(i) > d)
+          ++c;
+      return c;
+    }
 
   private:
     vfloat pt_;          vfloat* p_pt_;
