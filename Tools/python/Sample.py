@@ -461,23 +461,66 @@ def fn_to_sample(Samples, fn):
     sn = os.path.basename(fn).replace('.root', '')
     return sn, getattr(Samples, sn, None)
 
-def norm_from_file(f_or_fn, path=None):
-    if type(f_or_fn) == str:
-        from JMTucker.Tools.ROOTTools import ROOT
-        f = ROOT.TFile.Open(f_or_fn)
-    else:
-        f = f_or_fn
-    if path:
-        h = f.Get(path)
-    else:
-        if hasattr(f, 'mcStat'):
-            h = f.Get('mcStat/h_sums')
-        elif hasattr(f, 'mfvWeight'):
-            h = f.Get('mfvWeight/h_sums')
+class sums_from_file(object):
+    def __init__(self, f_or_fn, path=None):
+        if type(f_or_fn) == str:
+            from JMTucker.Tools.ROOTTools import ROOT
+            self._f = ROOT.TFile.Open(f_or_fn)
         else:
-            raise ValueError("don't know where to get norm from %r" % f_or_fn)
-        assert h.GetXaxis().GetBinLabel(1) == 'sum_nevents_total'
-    return h.GetBinContent(1)
+            self._f = f_or_fn
+        if path:
+            self._h = self._f.Get(path)
+        else:
+            if hasattr(self._f, 'mcStat'):
+                self._h = self._f.Get('mcStat/h_sums')
+            elif hasattr(self._f, 'mfvWeight'):
+                self._h = self._f.Get('mfvWeight/h_sums')
+            else:
+                raise ValueError("don't know where to get norm from %r" % f_or_fn)
+        self._labels = [self._h.GetXaxis().GetBinLabel(ibin) for ibin in xrange(1, self._h.GetNbinsX()+1)]
+        assert len(set(self._labels)) == len(self._labels)
+
+        self._norm = None
+        self._yearcode = None
+        self._yearcodemult = 2371
+        self._year = None
+        self._nfiles = None
+
+    def _get(self, bin_label):
+        return self._h.GetBinContent(self._labels.index(bin_label)+1)
+
+    def norm(self):
+        if self._norm is None:
+            self._norm = self._get('sum_nevents_total')
+        return self._norm
+
+    def yearcode(self):
+        if self._yearcode is None:
+            c = self._get('yearcode_x_nfiles')
+            assert c.is_integer
+            self._yearcode = int(c)
+        return self._yearcode
+
+    def year(self):
+        if self._year is None:
+            c = self.yearcode()
+            for y in 2017, 2018:
+                if c % (y*self._yearcodemult) == 0:
+                    self._year = y
+            if self._year is None:
+                raise ValueError('not in sync with multiplier in Year.h? %s' % n)
+        return self._year
+
+    def nfiles(self):
+        if self._nfiles is None:
+            c,y = self.yearcode(), self.year()
+            n = c / float(y*self._yearcodemult)
+            assert n.is_integer()
+            self._nfiles = int(n)
+        return self._nfiles
+
+def norm_from_file(f_or_fn, path=None):
+    return sums_from_file(f_or_fn, path).norm()
 
 def merge(samples, output='merge.root', norm_to=1., norm_path=''):
     if norm_to > 0:

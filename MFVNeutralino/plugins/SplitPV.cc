@@ -22,39 +22,26 @@ public:
 private:
   virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
 
-  std::unique_ptr<KalmanVertexFitter> kv_reco;
-  jmt::BaseSubNtupleFiller base_filler;
-  jmt::BeamspotSubNtupleFiller bs_filler;
-  jmt::PrimaryVerticesSubNtupleFiller pvs_filler;
-  jmt::JetsSubNtupleFiller jets_filler;
-  const bool debug;
-
   mfv::SplitPVNtuple nt;
-  TTree* tree;
+  jmt::TrackingAndJetsNtupleFiller nt_filler;
+
+  std::unique_ptr<KalmanVertexFitter> kv_reco;
+  const bool debug;
 };
 
 MFVSplitPV::MFVSplitPV(const edm::ParameterSet& cfg)
-  : kv_reco(new KalmanVertexFitter(cfg.getParameter<edm::ParameterSet>("kvr_params"), cfg.getParameter<edm::ParameterSet>("kvr_params").getParameter<bool>("doSmoothing"))),
-    base_filler(nt.base(), cfg, consumesCollector()),
-    bs_filler(nt.bs(), cfg, consumesCollector()),
-    pvs_filler(nt.pvs(), cfg, consumesCollector(), true, true),
-    jets_filler(nt.jets(), cfg, consumesCollector()),
+  : nt_filler(nt, cfg, NF_CC_TrackingAndJets_v,
+              jmt::TrackingAndJetsNtupleFillerParams()
+                .pvs_first_only(true)
+                .fill_tracks(false)),
+    kv_reco(new KalmanVertexFitter(cfg.getParameter<edm::ParameterSet>("kvr_params"), cfg.getParameter<edm::ParameterSet>("kvr_params").getParameter<bool>("doSmoothing"))),
     debug(cfg.getUntrackedParameter<bool>("debug", false))
-{
-  edm::Service<TFileService> fs;
-  tree = fs->make<TTree>("t", "");
-  nt.write_to_tree(tree);
-}
+{}
 
 void MFVSplitPV::analyze(const edm::Event& event, const edm::EventSetup& setup) {
   if (debug) printf("MFVSplitPV analyze (%u, %u, %llu)\n", event.id().run(), event.luminosityBlock(), event.id().event());
 
-  nt.clear();
-
-  base_filler(event);
-  bs_filler(event);
-  pvs_filler(event);
-  jets_filler(event);
+  nt_filler.fill(event);
 
   auto doit = [&](const std::vector<std::pair<reco::TransientTrack, unsigned>>& tps, unsigned which, unsigned ex=0) {
     TransientVertex tv;
@@ -76,14 +63,14 @@ void MFVSplitPV::analyze(const edm::Event& event, const edm::EventSetup& setup) 
   edm::ESHandle<TransientTrackBuilder> tt_builder;
   setup.get<TransientTrackRecord>().get("TransientTrackBuilder", tt_builder);
 
-  if (debug) printf("ipv %i, cands:", pvs_filler.ipv());
+  if (debug) printf("ipv %i, cands:", nt_filler.pvs_filler().ipv());
 
-  for (const pat::PackedCandidate& c : pvs_filler.cands(event))
+  for (const pat::PackedCandidate& c : nt_filler.pvs_filler().cands(event))
     if (c.charge() && c.hasTrackDetails()) {
       const int k = int(c.vertexRef().key());
       const int q = c.pvAssociationQuality();
       if (debug) printf(" %i-%i", k, q);
-      if (k == pvs_filler.ipv()) {
+      if (k == nt_filler.pvs_filler().ipv()) {
         if (q == pat::PackedCandidate::UsedInFitLoose || q == pat::PackedCandidate::UsedInFitTight) {
           auto ttk = std::make_pair(tt_builder->build(c.pseudoTrack()), 0U);
           ttks_loose.push_back(ttk);
@@ -121,7 +108,7 @@ void MFVSplitPV::analyze(const edm::Event& event, const edm::EventSetup& setup) 
     for (auto tp : ttks)
       jmt::NtupleAdd(nt.tracks(), tp.first.track(), -1, tp.second);
 
-    tree->Fill();
+    nt_filler.finalize();
   }
 }
 

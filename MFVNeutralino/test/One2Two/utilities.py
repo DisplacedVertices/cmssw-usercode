@@ -4,7 +4,7 @@ from JMTucker.MFVNeutralino.UtilitiesBase import *
 from f2_vals import dict_of_f2_tuples
 ####
 
-_version = 'V25m'
+_version = 'V27m'
 
 def cmd_merge_bquarks_nobquarks():
     for year in ['2017', '2018'] :

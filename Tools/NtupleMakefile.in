@@ -1,5 +1,5 @@
 SHADOWDEPS = $(wildcard $(CMSSW_BASE)/src/JMTucker/Tools/*/Ntuple*) $(wildcard $(CMSSW_BASE)/src/JMTucker/Tools/interface/*) $(CMSSW_BASE)/lib/$(SCRAM_ARCH)/libJMTuckerTools.so
-FLAGS = \
+FLAGS = $(CFLAGS) \
 	$(shell root-config --cflags --libs) \
 	-I$(shell scram tool tag boost INCLUDE) -L$(shell scram tool tag boost LIBDIR) -lboost_program_options \
 	-I$(CMSSW_BASE)/src -I$(CMSSW_RELEASE_BASE)/src \

@@ -36,12 +36,13 @@ namespace jmt {
     static TLorentzVector p4_e(double pt, double eta, double phi, double e) { TLorentzVector v; v.SetPtEtaPhiE(pt, eta, phi, e); return v; }
     static TLorentzVector p4_m(double pt, double eta, double phi, double m) { TLorentzVector v; v.SetPtEtaPhiM(pt, eta, phi, m); return v; }
 
+    const char* pfx_;
+
+  public:
     virtual void clear() = 0;
     virtual void write_to_tree(TTree*) = 0;
     virtual void read_from_tree(TTree*) = 0;
     virtual void copy_vectors() = 0;
-
-    const char* pfx_;
   };
 
   ////
@@ -68,6 +69,8 @@ namespace jmt {
     float rho() const { return rho_; }
     void set_nallpv(uchar x) { nallpv_ = x; }
     uchar nallpv() const { return nallpv_; }
+
+    bool is_mc() const { return run() == 1; }
 
   private:
     float weight_;
@@ -123,6 +126,7 @@ namespace jmt {
     float err_dydz() const { return err_dydz_; }
     float err_width() const { return err_width_; }
 
+    float phi() const { return std::atan2(y(), x()); }
     float x(float zp) const { return x() + dxdz() * (zp - z()); }
     float y(float zp) const { return y() + dydz() * (zp - z()); }
 
@@ -153,12 +157,12 @@ namespace jmt {
     virtual void read_from_tree(TTree* tree);
     virtual void copy_vectors();
 
-    void add(float x, float y, float z, float chi2, float ndof, int ntracks, float score,
+    void add(float xx, float yy, float zz, float chi2, float ndof, int ntracks, float score,
              float cxx, float cxy, float cxz, float cyy, float cyz, float czz,
              unsigned misc) {
-      x_.push_back(x);
-      y_.push_back(y);
-      z_.push_back(z);
+      x_.push_back(xx);
+      y_.push_back(yy);
+      z_.push_back(zz);
       chi2_.push_back(chi2);
       ndof_.push_back(ndof);
       ntracks_.push_back(ntracks);
@@ -188,11 +192,17 @@ namespace jmt {
     float czz    (int i) const { return p_get(i, czz_,     p_czz_     ); }
     unsigned misc(int i) const { return p_get(i, misc_,    p_misc_    ); }
 
-    void set_misc(int i, unsigned x) { assert(0 == p_misc_); misc_[i] = x; }
+    void set_misc(int i, unsigned m) { assert(0 == p_misc_); misc_[i] = m; }
 
-    float chi2dof(int i) const { return chi2(i) / ndof(i); }
+    float phi(int i) const { return std::atan2(y(i), x(i)); }
     float rho(int i) const { return std::hypot(x(i), y(i)); }
     TVector3 pos(int i) const { return TVector3(x(i), y(i), z(i)); }
+    template <typename BS> float xraw(int i, const BS& bs) const { return x(i) + bs.x(z(i)); }
+    template <typename BS> float yraw(int i, const BS& bs) const { return y(i) + bs.y(z(i)); }
+    template <typename BS> float phiraw(int i, const BS& bs) const { return std::atan2(y(i, bs), x(i, bs)); }
+    template <typename BS> float rhoraw(int i, const BS& bs) const { return std::hypot(x(i, bs), y(i, bs)); }
+    template <typename BS> TVector3 posraw(int i, const BS& bs) const { return TVector3(xraw(i, bs), yraw(i, bs), z(i, bs)); }
+    float chi2dof(int i) const { return chi2(i) / ndof(i); }
 
   private:
     vfloat x_;           vfloat* p_x_;
@@ -281,9 +291,9 @@ namespace jmt {
     float    cov_14   (int i) const { return p_get(i, cov_14_,    p_cov_14_    ); }
     float    cov_22   (int i) const { return p_get(i, cov_22_,    p_cov_22_    ); }
     float    cov_23   (int i) const { return p_get(i, cov_23_,    p_cov_23_    ); }
-    float    cov_33   (int i) const { return p_get(i, cov_33_,    p_cov_33_    ); }
-    float    cov_34   (int i) const { return p_get(i, cov_34_,    p_cov_34_    ); }
-    float    cov_44   (int i) const { return p_get(i, cov_44_,    p_cov_44_    ); }
+    virtual float cov_33 (int i) const { return p_get(i, cov_33_, p_cov_33_ ); }
+    virtual float cov_34 (int i) const { return p_get(i, cov_34_, p_cov_34_ ); }
+    virtual float cov_44 (int i) const { return p_get(i, cov_44_, p_cov_44_ ); }
     float    chi2dof  (int i) const { return p_get(i, chi2dof_,   p_chi2dof_   ); }
     unsigned hp       (int i) const { return p_get(i, hp_,        p_hp_        ); }
     uchar    minhit   (int i) const { return p_get(i, minhit_,    p_minhit_    ); }
@@ -329,6 +339,7 @@ namespace jmt {
       }
     }
     float err_pt(int i) const { return sqrt(cov_00(i) * pt(i) * pt(i) * p2(i) / q(i) / q(i) + cov_11(i) * pz(i) * pz(i)); } // + cov(i,0,1) * 2 * pt(i) * p(i) / q(i) * pz(i)); }
+    float err_pt_rel(int i) const { return err_pt(i) / pt(i); }
     float err_eta(int i) const { return sqrt(cov_11(i) * p2(i)) / pt(i); }
     float err_phi(int i) const { return sqrt(cov_22(i)); }
     float err_dxy(int i) const { return sqrt(cov_33(i)); }
@@ -435,6 +446,20 @@ namespace jmt {
     float ht(float minpt=40.f) const { return std::accumulate(pt_begin(), pt_end(), 0.f, [minpt](float init, float pt) { if (pt > minpt) init += pt; return init; }); }
     TVector3 p3(int i) const { return p3_(pt(i), eta(i), phi(i)); }
     TLorentzVector p4(int i) const { return p4_e(pt(i), eta(i), phi(i), energy(i)); }
+    std::vector<bool> btagged(float d) const {
+      std::vector<bool> r(n(), false);
+      for (int i = 0, ie = n(); i < ie; ++i)
+        if (bdisc(i) > d)
+          r[i] = true;
+      return r;
+    }
+    int nbtags(float d) const {
+      int c = 0;
+      for (int i = 0, ie = n(); i < ie; ++i)
+        if (bdisc(i) > d)
+          ++c;
+      return c;
+    }
 
   private:
     vfloat pt_;          vfloat* p_pt_;
@@ -446,6 +471,32 @@ namespace jmt {
     vfloat bdisc_;       vfloat* p_bdisc_;
     vuchar genflavor_;   vuchar* p_genflavor_;
     vunsigned misc_;     vunsigned* p_misc_;
+  };
+
+  ////
+
+  class PFSubNtuple : public INtuple {
+  public:
+    PFSubNtuple();
+    virtual void clear();
+    virtual void write_to_tree(TTree*);
+    virtual void read_from_tree(TTree*);
+    virtual void copy_vectors() {}
+
+    void set(float met_x, float met_y) {
+      met_x_ = met_x;
+      met_y_ = met_y;
+    }
+
+    float met_x() const { return met_x_; }
+    float met_y() const { return met_y_; }
+
+    float met_phi() const { return std::atan2(met_y(), met_x()); }
+    float met()     const { return std::hypot(met_y(), met_x()); }
+
+  private:
+    float met_x_;
+    float met_y_;
   };
 
   ////
@@ -506,28 +557,35 @@ namespace jmt {
     virtual void clear() {
       TrackingNtuple::clear();
       jets().clear();
+      pf().clear();
     }
 
     virtual void write_to_tree(TTree* t) {
       TrackingNtuple::write_to_tree(t);
       jets().write_to_tree(t);
+      pf().write_to_tree(t);
     }
 
     virtual void read_from_tree(TTree* t) {
       TrackingNtuple::read_from_tree(t);
       jets().read_from_tree(t);
+      pf().read_from_tree(t);
     }
 
     virtual void copy_vectors() {
       TrackingNtuple::copy_vectors();
       jets().copy_vectors();
+      pf().copy_vectors();
     }
 
     JetsSubNtuple& jets() { return jets_; }
+    PFSubNtuple& pf() { return pf_; }
     const JetsSubNtuple& jets() const { return jets_; }
+    const PFSubNtuple& pf() const { return pf_; }
 
   private:
     JetsSubNtuple jets_;
+    PFSubNtuple pf_;
   };
 }
 

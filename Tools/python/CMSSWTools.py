@@ -1,9 +1,9 @@
 import FWCore.ParameterSet.Config as cms
+from JMTucker.Tools.Year import year
 from JMTucker.Tools.general import *
 
 class CMSSWSettings(object):
     def __init__(self):
-        from JMTucker.Tools.Year import year
         self.year = year
         self.is_mc = True
         self.is_miniaod = False
@@ -429,6 +429,8 @@ def report_every(process, i):
     process.MessageLogger.cerr.FwkReport.reportEvery = i
 
 def sample_files(process, sample, dataset, n=-1):
+    if sample.endswith('_year'):
+        sample = sample[:-4] + str(year)
     import JMTucker.Tools.SampleFiles as sf
     sf.set_process(process, sample, dataset, n)
 

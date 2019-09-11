@@ -216,15 +216,15 @@ int main(int, char**) {
   jmt::ConfigFromEnv env("sm", true);
 
                                        //  2017                   2018                  2017+2018
-  const double default_n1v[4][3][3] = {{{  15549, 2722, 284 }, { 12465, 2497, 318 }, {  15549+12465, 2722+2497, 284+318 }},  // MC scaled to int. lumi.
-                                       {{   7087, 1283, 129 }, {  3697,  737,  99 }, {   7087+ 3697, 1283+ 737, 129+ 99 }},  // MC effective
+  const double default_n1v[4][3][3] = {{{  14349, 2258, 199 }, { 11600, 2094, 249 }, {  14349+11600, 2258+2094, 199+249 }},  // MC scaled to int. lumi.
+                                       {{   6561, 1073,  92 }, {  3427,  642,  75 }, {   6561+ 3427, 1073+ 642,  92+ 75 }},  // MC effective
                                        {{   3203,  786,   1 }, {  3036,  689,   1 }, {   3203+ 3036,  786+ 689,   1+  1 }},  // data 10%
-                                       {{1,1,1},{1,1,1},{1,1,1}}                                                             // data 100%
+                                       {{  32152,    1,   1 }, { 29666,    1,   1 }, {  32152+29666,         1,       1 }}   // data 100%
                                       };
-  const double default_n2v[4][3][3] = {{{     56,    1,   1 }, { 19, 1, 1 }, { 56+19,   1, 1 }},
-                                       {{     22,    3,   1 }, {  9, 2, 1 }, { 22+ 9, 3+2, 1 }},
-                                       {{      7,    3,   1 }, { 13, 1, 1 }, {  7+13, 3+0, 1 }},
-                                       {{1,1,1},{1,1,1},{1,1,1}}
+  const double default_n2v[4][3][3] = {{{     55,    1,   1 }, { 14, 1, 1 }, {  55+14,   1, 1 }},
+                                       {{     22,    3,   1 }, {  8, 1, 1 }, {  22+ 8, 3+1, 1 }},
+                                       {{      7,    3,   1 }, { 13, 1, 1 }, {   7+13, 3+0, 1 }},
+                                       {{    113,    1,   1 }, { 72, 1, 1 }, { 113+72,   1, 1 }}
                                       };
 
   const int inst = env.get_int("inst", 0);
@@ -246,11 +246,11 @@ int main(int, char**) {
   const long ntrue_2v = env.get_long("ntrue_2v", 1000000L);
   const double oversample = env.get_double("oversample", 20);
   const std::string year_str[3] = {"2017","2018","2017p8"};
-  const std::string rho_compare_fn = env.get_string("rho_compare_fn", "/uscms_data/d2/tucker/crab_dirs/HistosV26m/background_"+year_str[year_index]+".root");
-  phi_c = env.get_double("phi_c", 1.42);
+  const std::string rho_compare_fn = env.get_string("rho_compare_fn", "/uscms_data/d2/tucker/crab_dirs/HistosV27m/background_"+year_str[year_index]+".root");
+  phi_c = env.get_double("phi_c", 1.31);
   phi_e = env.get_double("phi_e", 2);
-  phi_a = env.get_double("phi_a", 3.53);
-  const std::string eff_fn = env.get_string("eff_fn", "vpeffs_"+year_str[year_index]+"_V25m.root");
+  phi_a = env.get_double("phi_a", 5.96);
+  const std::string eff_fn = env.get_string("eff_fn", "vpeffs_"+year_str[year_index]+"_V27m.root");
   const std::string eff_path = env.get_string("eff_path", "maxtk3");
 
   /////////////////////////////////////////////

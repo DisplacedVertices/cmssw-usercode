@@ -136,6 +136,11 @@ namespace jmt {
       }
   }
 
+  void PFSubNtupleFiller::operator()(const edm::Event& event) {
+    event.getByToken(token_, mets_);
+    nt_.set(mets_->at(0).px(), mets_->at(0).py());
+  }
+
   void NtupleAdd(TracksSubNtuple& nt, const reco::Track& tk, int which_jet, int which_pv, int which_sv, unsigned misc) {
     const reco::HitPattern& hp = tk.hitPattern();
 
@@ -161,18 +166,18 @@ namespace jmt {
            );
   }
 
-  bool TracksSubNtupleFiller::cut(const reco::Track& tk, BeamspotSubNtupleFiller* bf) const {
+  bool TracksSubNtupleFiller::cut(const reco::Track& tk, const edm::Event& e, BeamspotSubNtupleFiller* bf) const {
     if (cut_level_ < 0)
       return cut_ ? cut_(tk) : false;
 
-    return !pass_track(tk, cut_level_, bf ? &bf->bs() : 0);
+    return !pass_track(tk, cut_level_, -1, &e, bf ? &bf->bs() : 0); // JMTBAD hardcoded using either plain or rescaled track
   }
 
   void TracksSubNtupleFiller::operator()(const edm::Event& e, JetsSubNtupleFiller* jf, PrimaryVerticesSubNtupleFiller* vf, BeamspotSubNtupleFiller* bf) {
     auto h = htracks(e);
     for (size_t i = 0, ie = h->size(); i < ie; ++i) {
       reco::TrackRef tk(h, i);
-      if (cut(*tk, bf))
+      if (cut(*tk, e, bf))
         continue;
 
       int which_jet = -1;
@@ -202,5 +207,15 @@ namespace jmt {
 
       NtupleAdd(nt_, *tk, which_jet, which_pv);
     }
+  }
+
+  void TrackingAndJetsNtupleFiller::operator()(const edm::Event& e) {
+    base_filler_(e);
+    bs_filler_(e);
+    pvs_filler_(e, p_.pvs_subtract_bs() ? &bs() : 0);
+    jets_filler_(e);
+    pf_filler_(e);
+    if (p_.fill_tracks())
+      tracks_filler_(e, &jets_filler_, &pvs_filler_, &bs_filler_);
   }
 }

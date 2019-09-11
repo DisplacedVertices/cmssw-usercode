@@ -29,8 +29,9 @@ maxdbv = typed_from_argv(float, name='maxdbv')
 
 which = typed_from_argv(int, -1)
 ntks = ('mfvMiniTreeNtk3', 'mfvMiniTreeNtk4', 'mfvMiniTree')
+ntks_to_trees = {3: 'mfvMiniTreeNtk3', 4: 'mfvMiniTreeNtk4', 5: 'mfvMiniTree', 7: 'mfvMiniTreeNtk3or4'}
+trees_to_ntks = {v:k for k,v in ntks_to_trees.iteritems()}
 if which != -1:
-    ntks_to_trees = {3: 'mfvMiniTreeNtk3', 4: 'mfvMiniTreeNtk4', 5: 'mfvMiniTree', 7: 'mfvMiniTreeNtk3or4'}
     if which not in ntks_to_trees:
         raise ValueError('bad ntks %s' % which)
     ntks = (ntks_to_trees[which],)
@@ -71,34 +72,46 @@ if sort and len(fns) != 2: # leave in specified order if there are two, user wan
 
 def getit(fn, ntk):
     f = ROOT.TFile.Open(fn)
-    t = f.Get('%s/t' % ntk)
-    if not t:
-        return (-1,-1,-1), (-1,-1,-1), (-1,-1,-1), (-1,-1,-1)
-    hr = draw_hist_register(t, True)
-    def c(cut):
-        if genmatch:
-            cut = '(%s) && genmatch0 && (nvtx < 2 || genmatch1)' % cut
-        if minnjets != None:
-            cut = '(%s) && njets >= %i' % (cut, minnjets)
-        if maxnjets != None:
-            cut = '(%s) && njets <= %i' % (cut, maxnjets)
-        if minht != None:
-            cut = '(%s) && jetht >= %f' % (cut, minht)
-        if maxht != None:
-            cut = '(%s) && jetht < %f' % (cut, maxht)
-        if mindbv != None:
-            cut = '(%s) && dist0 >= %f && (nvtx < 2 || dist1 >= %f)' % (cut, mindbv, mindbv)
-        if maxdbv != None:
-            cut = '(%s) && dist0 < %f && (nvtx < 2 || dist1 < %f)' % (cut, maxdbv, maxdbv)
-        h,n = hr.draw('weight', cut, binning='1,0,1', get_n=True, goff=True)
-        return (n,) + get_integral(h)
-    n1v = c('nvtx==1')
-    n1vb = c('nvtx==1 && gen_flavor_code==2')
-    if ntk == 'mfvMiniTreeNtk3or4':
-        n2v = c('nvtx>=2 && ntk0==4 && ntk1==3')
-        n2vb = c('nvtx>=2 && ntk0==4 && ntk1==3 && gen_flavor_code==2')
+    if all(f.Get(h) for h in ('h_n', 'h_w', 'h_b_n', 'h_b_w')): # MT2
+        n  = lambda i: int(f.Get('h_n')  .GetBinContent(i))
+        bn = lambda i: int(f.Get('h_b_n').GetBinContent(i))
+        w, we   = f.Get('h_w')  .GetBinContent, f.Get('h_w')  .GetBinError
+        bw, bwe = f.Get('h_b_w').GetBinContent, f.Get('h_b_w').GetBinError
+        itk = {7:1,3:2,4:3,5:4}[trees_to_ntks[ntk]]
+        n1v  = ( n(itk),  w(itk),  we(itk))
+        n1vb = (bn(itk), bw(itk), bwe(itk))
+        itk += 4
+        n2v  = ( n(itk),  w(itk),  we(itk))
+        n2vb = (bn(itk), bw(itk), bwe(itk))
     else:
-        n2v = c('nvtx>=2')
+        t = f.Get('%s/t' % ntk)
+        if not t:
+            return (-1,-1,-1), (-1,-1,-1), (-1,-1,-1), (-1,-1,-1)
+        hr = draw_hist_register(t, True)
+        def c(cut):
+            if genmatch:
+                cut = '(%s) && genmatch0 && (nvtx < 2 || genmatch1)' % cut
+            if minnjets != None:
+                cut = '(%s) && njets >= %i' % (cut, minnjets)
+            if maxnjets != None:
+                cut = '(%s) && njets <= %i' % (cut, maxnjets)
+            if minht != None:
+                cut = '(%s) && jetht >= %f' % (cut, minht)
+            if maxht != None:
+                cut = '(%s) && jetht < %f' % (cut, maxht)
+            if mindbv != None:
+                cut = '(%s) && dist0 >= %f && (nvtx < 2 || dist1 >= %f)' % (cut, mindbv, mindbv)
+            if maxdbv != None:
+                cut = '(%s) && dist0 < %f && (nvtx < 2 || dist1 < %f)' % (cut, maxdbv, maxdbv)
+            h,n = hr.draw('weight', cut, binning='1,0,1', get_n=True, goff=True)
+            return (n,) + get_integral(h)
+        n1v = c('nvtx==1')
+        n1vb = c('nvtx==1 && gen_flavor_code==2')
+        if ntk == 'mfvMiniTreeNtk3or4':
+            n2v = c('nvtx>=2 && ntk0==4 && ntk1==3')
+            n2vb = c('nvtx>=2 && ntk0==4 && ntk1==3 && gen_flavor_code==2')
+        else:
+            n2v = c('nvtx>=2')
         n2vb = c('nvtx>=2 && gen_flavor_code==2')
     return n1v, n1vb, n2v, n2vb
 
