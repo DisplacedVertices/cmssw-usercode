@@ -4,8 +4,6 @@
 #include "Math/SMatrix.h"
 #include "TLorentzVector.h"
 #include "TTree.h"
-#include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
-#include "JMTucker/Tools/interface/BTagging.h"
 
 namespace mfv {
   typedef ROOT::Math::SMatrix<double, 5, 5, ROOT::Math::MatRepSym<double, 5> >  TrackCovarianceMatrix;

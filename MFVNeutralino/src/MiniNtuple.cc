@@ -1,6 +1,10 @@
 #include "TFile.h"
 #include "TTree.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/TriggerEnum.h"
+
+#define JMT_STANDALONE_BTAGGING
+#include "JMTucker/Tools/interface/BTagging.h"
 
 namespace mfv {
   MiniNtuple::MiniNtuple() {
@@ -78,9 +82,9 @@ namespace mfv {
     int nbjets = nbtags(jmt::BTagging::discriminator_min(jmt::BTagging::tight));
 
     switch(trig){
-      case mfv::b_HLT_PFHT1050 :
+      case b_HLT_PFHT1050 :
         return ht(40) > 1200 && njets >= 4;
-      case mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33 :
+      case b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33 :
       {
         bool passed_kinematics = false;
         for(int ijet = 0; ijet < njets; ++ijet){
@@ -92,15 +96,15 @@ namespace mfv {
         }
         return njets >= 4 && passed_kinematics && nbjets >= 2;
       }
-      case mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0 :
+      case b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0 :
         return ht(30) > 300 && njets >= 4 && jet_pt[0] > 75 && jet_pt[1] > 60 && jet_pt[2] > 45 && jet_pt[3] > 40 && nbjets >= 3;
-      case mfv::b_HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2 :
+      case b_HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2 :
         return ht(40) > 380 && njets >= 6 && jet_pt[5] > 32 && nbjets >= 2;
-      case mfv::b_HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2 :
+      case b_HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2 :
         return ht(40) > 380 && njets >= 6 && jet_pt[5] > 32 && nbjets >= 2;
-      case mfv::b_HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5 :
+      case b_HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5 :
         return ht(40) > 430 && njets >= 6 && jet_pt[5] > 40 && nbjets >= 1;
-      case mfv::b_HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71 :
+      case b_HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71 :
       {
         bool passed_kinematics = false;
         for(int ijet = 0; ijet < njets; ++ijet){
@@ -112,21 +116,23 @@ namespace mfv {
         }
         return njets >= 4 && passed_kinematics && nbjets >= 2;
       }
-      case mfv::b_HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5 :
+      case b_HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5 :
         return ht(30) > 330 && njets >= 4 && jet_pt[0] > 75 && jet_pt[1] > 60 && jet_pt[2] > 45 && jet_pt[3] > 40 && nbjets >= 3;
-      case mfv::b_HLT_PFHT400_FivePFJet_100_100_60_30_30_DoublePFBTagDeepCSV_4p5 :
+      case b_HLT_PFHT400_FivePFJet_100_100_60_30_30_DoublePFBTagDeepCSV_4p5 :
         return ht(40) > 400 && njets >= 5 && jet_pt[1] > 100 && jet_pt[2] > 60 && jet_pt[4] > 30 && nbjets >= 2;
-      case mfv::b_HLT_PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94 :
+      case b_HLT_PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94 :
         return ht(40) > 400 && njets >= 6 && jet_pt[5] > 32 && nbjets >= 2;
-      case mfv::b_HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59 :
+      case b_HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59 :
         return ht(40) > 450 && njets >= 6 && jet_pt[5] > 36 && nbjets >= 1;
-      case mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack :
+      case b_HLT_HT430_DisplacedDijet40_DisplacedTrack :
         return ht(40) > 430 && njets >= 4 && jet_pt[0] > 40;
-      case mfv::b_HLT_HT650_DisplacedDijet60_Inclusive :
+      case b_HLT_HT650_DisplacedDijet60_Inclusive :
         return ht(40) > 650 && njets >= 4 && jet_pt[0] > 60;
+      default :
+      {
+        throw std::invalid_argument(std::string(hlt_paths[trig]) + " not implemented in satisfiesTrigger");
+      }
     }
-
-    throw cms::Exception("NotImplemented") << "Trigger " << trig << " not implemented in satisfiesTrigger" << std::endl;
 
     return false;
   }
