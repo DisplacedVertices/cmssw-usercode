@@ -11,7 +11,7 @@ settings.minitree_only = False
 settings.prepare_vis = False
 settings.keep_all = False
 settings.keep_gen = False
-settings.event_filter = 'jets only'
+settings.event_filter = 'HT OR bjets OR displaced dijet'
 
 process = ntuple_process(settings)
 dataset = 'miniaod' if settings.is_miniaod else 'main'

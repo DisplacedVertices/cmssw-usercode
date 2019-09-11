@@ -20,3 +20,4 @@ mfvEventFilter = cms.EDFilter('MFVEventFilter',
 
 mfvEventFilterJetsOnly = mfvEventFilter.clone(mode = 'jets only')
 mfvEventFilterLeptonsOnly = mfvEventFilter.clone(mode = 'leptons only')
+mfvEventFilterHTORBjetsORDisplacedDijet = mfvEventFilter.clone(mode = 'HT OR bjets OR displaced dijet', min_ht = cms.double(-1)) # FIXME check if I actually need to set min_ht

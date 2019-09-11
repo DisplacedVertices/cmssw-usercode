@@ -35,6 +35,8 @@ def setup_event_filter(process,
         trigger_filter = event_filter = 'jets only'
     elif mode == 'leptons only':
         trigger_filter = event_filter = 'leptons only'
+    elif mode == 'HT OR bjets OR displaced dijet':
+        trigger_filter = event_filter = 'HT OR bjets OR displaced dijet'
     elif mode == 'jets only novtx':
         trigger_filter = event_filter = 'jets only'
         event_filter_require_vertex = False
@@ -62,7 +64,7 @@ def setup_event_filter(process,
     elif trigger_filter is True:
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilter as triggerFilter
     elif trigger_filter is not False:
-        raise ValueError('trigger_filter %r bad: must be one of ("jets only", "leptons only", True, False)' % trigger_filter)
+        raise ValueError('trigger_filter %r bad: must be one of ("jets only", "leptons only", "bjets only", "displaced dijet only", "HT OR bjets OR displaced dijet", True, False)' % trigger_filter)
 
     overall = cms.Sequence()
 
@@ -72,14 +74,17 @@ def setup_event_filter(process,
         overall *= triggerFilter
 
     if event_filter:
+        # FIXME for bjet trigger stuff
         if event_filter == 'jets only':
             from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterJetsOnly as eventFilter
         elif event_filter == 'leptons only':
             from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterLeptonsOnly as eventFilter
+        elif event_filter == 'HT OR bjets OR displaced dijet':
+            from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterHTORBjetsORDisplacedDijet as eventFilter
         elif event_filter is True:
             from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilter as eventFilter
         elif event_filter is not False:
-            raise ValueError('event_filter must be one of ("jets only", "leptons only", True, False)')
+            raise ValueError('event_filter must be one of ("jets only", "leptons only", "HT OR bjets OR displaced dijet", True, False)')
 
         eventFilter = eventFilter.clone()
         if input_is_miniaod:

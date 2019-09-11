@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 mfvAnalysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                mevent_src = cms.InputTag('mfvEvent'),
-                               apply_presel = cms.int32(1),  # 1 = jets, 2 = el/mu
+                               apply_presel = cms.int32(3),  # 1 = jets, 2 = el/mu, 3 = jets OR bjet/displaced dijet triggers
                                require_bquarks = cms.bool(False),
                                # to make any of the next 3 trigger cuts work, or min/max_njets/ht, you have to set apply_presel = 0 above
                                l1_bit = cms.int32(-1),
