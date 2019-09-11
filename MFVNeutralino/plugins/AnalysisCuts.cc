@@ -14,7 +14,6 @@ public:
 
 private:
   virtual bool filter(edm::Event&, const edm::EventSetup&);
-  virtual bool satisfiesTrigger(edm::Handle<MFVEvent> mevent, int nbjets, size_t trig);
 
   const edm::InputTag mevent_src;
   const edm::EDGetTokenT<MFVEvent> mevent_token;
@@ -68,18 +67,6 @@ private:
   const int max_ntrackssharedwpvs01;
   const int max_fractrackssharedwpv01;
   const int max_fractrackssharedwpvs01;
-
-  const std::vector<size_t> listOfTriggers = {
-    // HT trigger
-    mfv::b_HLT_PFHT1050,
-    // bjet triggers 2017
-    mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33, mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0, mfv::b_HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2, mfv::b_HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2, mfv::b_HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5,
-    // bjet triggers 2018
-    mfv::b_HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71, mfv::b_HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5, mfv::b_HLT_PFHT400_FivePFJet_100_100_60_30_30_DoublePFBTagDeepCSV_4p5, mfv::b_HLT_PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94, mfv::b_HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59,
-    // displaced dijet triggers
-    mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack, mfv::b_HLT_HT650_DisplacedDijet60_Inclusive
-  };
-
 };
 
 MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg) 
@@ -170,27 +157,16 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
         return false;
     }
 
+    // Note that for simplicity, offline criteria have to be applied at analysis level
     if (apply_presel == 3) {
-
-      // compute nbjets once per event, assuming Tight WP for btagging
-      int nbjets = 0;
-      for(int ijet = 0; ijet < mevent->njets(20); ++ijet){
-        if(mevent->jet_bdisc[ijet] >= jmt::BTagging::discriminator_min(jmt::BTagging::tight)){
-          ++nbjets;
-        }
-      }
-
-      // success = passes at least one trigger and its corresponding offline criteria
-      bool success = false;
-
-      for(size_t trig : listOfTriggers){
-        if(satisfiesTrigger(mevent, nbjets, trig)){
-          success = true;
+      bool at_least_one_trigger_passed = false;
+      for(size_t trig : mfv::HTOrBjetOrDisplacedDijetTriggers){
+        if(mevent->pass_hlt(trig)){
+          at_least_one_trigger_passed = true;
           break;
         }
       }
-
-      if(!success) return false;
+      if(!at_least_one_trigger_passed) return false;
     }
 
     if (require_bquarks && mevent->gen_flavor_code != 2)
@@ -210,9 +186,10 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
 
     if (apply_trigger == 3){
       bool at_least_one_trigger_passed = false;
-      for(size_t trig : listOfTriggers){
+      for(size_t trig : mfv::HTOrBjetOrDisplacedDijetTriggers){
         if(mevent->pass_hlt(trig)){
           at_least_one_trigger_passed = true;
+          break;
         }
       }
       if(!at_least_one_trigger_passed) return false;
@@ -352,71 +329,6 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
   }
 
   return true;
-}
-
-// FIXME put all of this somewhere else instead?? Maybe MiniNtuple.h/.cc
-// And perhaps give it a function to return whether a given path was successful, to make it easier to throw extra cuts on top...
-bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, int nbjets, size_t trig){
-
-  // Only need to look at events that pass a trigger
-  if(!mevent->pass_hlt(trig)) return false;
-
-  // The offline criteria used here use the same values as the trigger thresholds,
-  // which means tighter criteria should be used with the final trees. Also note
-  // that njets >= 4 is used everywhere to suppress background
-  // FIXME I use some shorthand that assumes the jet_pt is ordered by decreasing pt, but maybe better to be explicit
-  switch(trig){
-    case mfv::b_HLT_PFHT1050 :
-      return mevent->jet_ht(40) > 1200 && mevent->njets(20) >= 4;
-    case mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33 :
-    {
-      bool passed_kinematics = false;
-      for(int ijet = 0; ijet < mevent->njets(20); ++ijet){
-        for(int jjet = ijet+1; jjet < mevent->njets(20); ++jjet){
-          if(mevent->jet_pt[ijet] > 100 && mevent->jet_pt[jjet] > 100 && fabs(mevent->jet_eta[ijet] - mevent->jet_eta[jjet]) < 1.6){
-            passed_kinematics = true;
-          }
-        }
-      }
-      return mevent->njets(20) >= 4 && passed_kinematics && nbjets >= 2;
-    }
-    case mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0 :
-      return mevent->jet_ht(30) > 300 && mevent->njets(20) >= 4 && mevent->jet_pt[0] > 75 && mevent->jet_pt[1] > 60 && mevent->jet_pt[2] > 45 && mevent->jet_pt[3] > 40 && nbjets >= 3;
-    case mfv::b_HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2 :
-      return mevent->jet_ht(40) > 380 && mevent->njets(20) >= 6 && mevent->jet_pt[5] > 32 && nbjets >= 2;
-    case mfv::b_HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2 :
-      return mevent->jet_ht(40) > 380 && mevent->njets(20) >= 6 && mevent->jet_pt[5] > 32 && nbjets >= 2;
-    case mfv::b_HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5 :
-      return mevent->jet_ht(40) > 430 && mevent->njets(20) >= 6 && mevent->jet_pt[5] > 40 && nbjets >= 1;
-    case mfv::b_HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71 :
-    {
-      bool passed_kinematics = false;
-      for(int ijet = 0; ijet < mevent->njets(20); ++ijet){
-        for(int jjet = ijet+1; jjet < mevent->njets(20); ++jjet){
-          if(mevent->jet_pt[ijet] > 116 && mevent->jet_pt[jjet] > 116 && fabs(mevent->jet_eta[ijet] - mevent->jet_eta[jjet]) < 1.6){
-            passed_kinematics = true;
-          }
-        }
-      }
-      return mevent->njets(20) >= 4 && passed_kinematics && nbjets >= 2;
-    }
-    case mfv::b_HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5 :
-      return mevent->jet_ht(30) > 330 && mevent->njets(20) >= 4 && mevent->jet_pt[0] > 75 && mevent->jet_pt[1] > 60 && mevent->jet_pt[2] > 45 && mevent->jet_pt[3] > 40 && nbjets >= 3;
-    case mfv::b_HLT_PFHT400_FivePFJet_100_100_60_30_30_DoublePFBTagDeepCSV_4p5 :
-      return mevent->jet_ht(40) > 400 && mevent->njets(20) >= 5 && mevent->jet_pt[1] > 100 && mevent->jet_pt[2] > 60 && mevent->jet_pt[4] > 30 && nbjets >= 2;
-    case mfv::b_HLT_PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94 :
-      return mevent->jet_ht(40) > 400 && mevent->njets(20) >= 6 && mevent->jet_pt[5] > 32 && nbjets >= 2;
-    case mfv::b_HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59 :
-      return mevent->jet_ht(40) > 450 && mevent->njets(20) >= 6 && mevent->jet_pt[5] > 36 && nbjets >= 1;
-    case mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack :
-      return mevent->jet_ht(40) > 430 && mevent->njets(20) >= 4 && mevent->jet_pt[0] > 40;
-    case mfv::b_HLT_HT650_DisplacedDijet60_Inclusive :
-      return mevent->jet_ht(40) > 650 && mevent->njets(20) >= 4 && mevent->jet_pt[0] > 60;
-  }
-
-  throw cms::Exception("NotImplemented") << "Trigger " << trig << " not implemented in satisfiesTrigger" << std::endl;
-
-  return false;
 }
 
 DEFINE_FWK_MODULE(MFVAnalysisCuts);

@@ -4,6 +4,8 @@
 #include "Math/SMatrix.h"
 #include "TLorentzVector.h"
 #include "TTree.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
+#include "JMTucker/Tools/interface/BTagging.h"
 
 namespace mfv {
   typedef ROOT::Math::SMatrix<double, 5, 5, ROOT::Math::MatRepSym<double, 5> >  TrackCovarianceMatrix;
@@ -120,6 +122,11 @@ namespace mfv {
     float z1;
     float bs2derr1;
     float rescale_bs2derr1;
+
+    bool satisfiesTrigger(size_t trig) const;
+    bool satisfiesTriggerAndOffline(size_t trig) const;
+    bool satisfiesHTOrBjetOrDisplacedDijetTrigger() const;
+    bool satisfiesHTOrBjetOrDisplacedDijetTriggerAndOffline() const;
   };
 
   void write_to_tree(TTree* tree, MiniNtuple& nt);

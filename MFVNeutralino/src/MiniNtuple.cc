@@ -68,6 +68,91 @@ namespace mfv {
     return sum;
   }
 
+  bool MiniNtuple::satisfiesTrigger(size_t trig) const {
+    return bool((pass_hlt >> trig) & 1);
+  }
+
+  bool MiniNtuple::satisfiesTriggerAndOffline(size_t trig) const {
+    if(!satisfiesTrigger(trig)) return false;
+
+    int nbjets = nbtags(jmt::BTagging::discriminator_min(jmt::BTagging::tight));
+
+    switch(trig){
+      case mfv::b_HLT_PFHT1050 :
+        return ht(40) > 1200 && njets >= 4;
+      case mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33 :
+      {
+        bool passed_kinematics = false;
+        for(int ijet = 0; ijet < njets; ++ijet){
+          for(int jjet = ijet+1; jjet < njets; ++jjet){
+            if(jet_pt[ijet] > 100 && jet_pt[jjet] > 100 && fabs(jet_eta[ijet] - jet_eta[jjet]) < 1.6){
+              passed_kinematics = true;
+            }
+          }
+        }
+        return njets >= 4 && passed_kinematics && nbjets >= 2;
+      }
+      case mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0 :
+        return ht(30) > 300 && njets >= 4 && jet_pt[0] > 75 && jet_pt[1] > 60 && jet_pt[2] > 45 && jet_pt[3] > 40 && nbjets >= 3;
+      case mfv::b_HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2 :
+        return ht(40) > 380 && njets >= 6 && jet_pt[5] > 32 && nbjets >= 2;
+      case mfv::b_HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2 :
+        return ht(40) > 380 && njets >= 6 && jet_pt[5] > 32 && nbjets >= 2;
+      case mfv::b_HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5 :
+        return ht(40) > 430 && njets >= 6 && jet_pt[5] > 40 && nbjets >= 1;
+      case mfv::b_HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71 :
+      {
+        bool passed_kinematics = false;
+        for(int ijet = 0; ijet < njets; ++ijet){
+          for(int jjet = ijet+1; jjet < njets; ++jjet){
+            if(jet_pt[ijet] > 116 && jet_pt[jjet] > 116 && fabs(jet_eta[ijet] - jet_eta[jjet]) < 1.6){
+              passed_kinematics = true;
+            }
+          }
+        }
+        return njets >= 4 && passed_kinematics && nbjets >= 2;
+      }
+      case mfv::b_HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5 :
+        return ht(30) > 330 && njets >= 4 && jet_pt[0] > 75 && jet_pt[1] > 60 && jet_pt[2] > 45 && jet_pt[3] > 40 && nbjets >= 3;
+      case mfv::b_HLT_PFHT400_FivePFJet_100_100_60_30_30_DoublePFBTagDeepCSV_4p5 :
+        return ht(40) > 400 && njets >= 5 && jet_pt[1] > 100 && jet_pt[2] > 60 && jet_pt[4] > 30 && nbjets >= 2;
+      case mfv::b_HLT_PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94 :
+        return ht(40) > 400 && njets >= 6 && jet_pt[5] > 32 && nbjets >= 2;
+      case mfv::b_HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59 :
+        return ht(40) > 450 && njets >= 6 && jet_pt[5] > 36 && nbjets >= 1;
+      case mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack :
+        return ht(40) > 430 && njets >= 4 && jet_pt[0] > 40;
+      case mfv::b_HLT_HT650_DisplacedDijet60_Inclusive :
+        return ht(40) > 650 && njets >= 4 && jet_pt[0] > 60;
+    }
+
+    throw cms::Exception("NotImplemented") << "Trigger " << trig << " not implemented in satisfiesTrigger" << std::endl;
+
+    return false;
+  }
+
+  bool MiniNtuple::satisfiesHTOrBjetOrDisplacedDijetTrigger() const {
+    bool at_least_one_trigger_passed = false;
+    for(size_t trig : HTOrBjetOrDisplacedDijetTriggers){
+      if(satisfiesTrigger(trig)){
+        at_least_one_trigger_passed = true;
+        break;
+      }
+    }
+    return at_least_one_trigger_passed;
+  }
+
+  bool MiniNtuple::satisfiesHTOrBjetOrDisplacedDijetTriggerAndOffline() const {
+    bool at_least_one_trigger_passed = false;
+    for(size_t trig : HTOrBjetOrDisplacedDijetTriggers){
+      if(satisfiesTriggerAndOffline(trig)){
+        at_least_one_trigger_passed = true;
+        break;
+      }
+    }
+    return at_least_one_trigger_passed;
+  }
+
   void write_to_tree(TTree* tree, MiniNtuple& nt) {
     tree->Branch("run", &nt.run);
     tree->Branch("lumi", &nt.lumi);
