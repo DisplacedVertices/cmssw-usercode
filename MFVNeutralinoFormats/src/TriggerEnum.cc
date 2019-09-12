@@ -54,7 +54,7 @@ namespace mfv {
     "L1_HTT300er_QuadJet_70_55_40_35_er2p5",
     "L1_HTT320er_QuadJet_70_55_40_40_er2p4",
     "L1_DoubleJet100er2p3_dEta_Max1p6",
-    "L1_DoubleJet112er2p3_dEta_Max1p6"
+    "L1_DoubleJet112er2p3_dEta_Max1p6",
     "L1_SingleJet170",
     "L1_SingleJet180",
     "L1_SingleJet200",
