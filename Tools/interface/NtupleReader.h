@@ -274,6 +274,10 @@ namespace jmt {
       h->Fill(x, y, weight());
     }
 
+    void print_event() {
+      printf("NtupleReader loop: r: %u l: %u e: %llu\n", nt_->base().run(), nt_->base().lumi(), nt_->base().event());
+    }
+
     typedef std::pair<bool,double> fcn_ret_t;
     void loop(std::function<fcn_ret_t()> fcn) { 
       if (!quiet_) time_.Start();
@@ -284,7 +288,7 @@ namespace jmt {
       for (entry_t jj = entry_start_; jj < entry_end_; ++jj) {
         if (t_->LoadTree(jj) < 0) break;
         if (t_->GetEntry(jj) <= 0) continue;
-        if (every_) printf("NtupleReader loop: r: %u l: %u e: %llu\n", nt_->base().run(), nt_->base().lumi(), nt_->base().event());
+        if (every_) print_event();
         else if (!quiet_ && jj % print_per == 0) { printf("\r%llu", jj); fflush(stdout); }
 
         if (!is_mc() && ll_ && !ll_->contains(nt_->base()))
