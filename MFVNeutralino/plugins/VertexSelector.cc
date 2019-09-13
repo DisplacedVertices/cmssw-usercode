@@ -8,7 +8,7 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/MFVNeutralino/interface/VertexAuxSorter.h"
 #include "JMTucker/MFVNeutralino/interface/VertexTrackClusters.h"
-#include "JMTucker/MFVNeutralino/interface/VertexTools.h"
+#include "JMTucker/Tools/interface/Geometry.h"
 #include "JMTucker/Tools/interface/StatCalculator.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 //#include "JMTucker/MFVNeutralino/plugins/VertexMVAWrap.h"
@@ -274,7 +274,7 @@ bool MFVVertexSelector::use_vertex(const bool is_mc, const MFVVertexAux& vtx, co
       return false;
   }
 
-  if (exclude_beampipe && !mfv::inside_beampipe(is_mc, vtx.x, vtx.y))
+  if (exclude_beampipe && !jmt::Geometry::inside_beampipe(is_mc, vtx.x, vtx.y))
     return false;
 
   if (use_cluster_cuts) {

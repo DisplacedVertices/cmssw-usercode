@@ -1,6 +1,6 @@
 #include "TH2.h"
 #include "JMTucker/MFVNeutralino/interface/Ntuple.h"
-#include "JMTucker/MFVNeutralino/interface/VertexTools.h"
+#include "JMTucker/Tools/interface/Geometry.h"
 #include "JMTucker/Tools/interface/NtupleReader.h"
 
 int main(int argc, char** argv) {
@@ -118,7 +118,7 @@ int main(int argc, char** argv) {
 
     for (int isv = 0, isve = nt.svs().n(); isv < isve; ++isv) {
       const TVector3 pos = nt.svs().pos(isv);
-      if (!mfv::inside_beampipe(nr.is_mc(), pos.X(), pos.Y()))
+      if (!jmt::Geometry::inside_beampipe(nr.is_mc(), pos.X(), pos.Y()))
         continue;
 
       const TVector3 flight = pos - pv;
