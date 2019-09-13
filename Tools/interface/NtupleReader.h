@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <experimental/filesystem>
 #include <iostream>
 #include <string>
 #include <boost/program_options.hpp>
@@ -65,6 +66,7 @@ namespace jmt {
         ("help,h", "this help message")
         ("input-file,i",   po::value<std::string>(&in_fn_),                                       "the input file (required)")
         ("output-file,o",  po::value<std::string>(&out_fn_)        ->default_value("hists.root"), "the output file")
+        ("same-name,f",    po::bool_switch       (&same_fn_)       ->default_value(false),        "override output filename with basename of input filename")
         ("tree-path,t",    po::value<std::string>(&tree_path_)     ->default_value(tree_path),    "the tree path")
         ("json,j",         po::value<std::string>(&json_),                                        "lumi mask json file for data")
         ("every,e",        po::bool_switch       (&every_)         ->default_value(false),        "print a message every event")
@@ -110,6 +112,19 @@ namespace jmt {
         if (in_fn_ == "") {
           std::cerr << "in interactive mode, value for --input-file is required\n" << desc_ << "\n";
           return false;
+        }
+
+        if (same_fn_) {
+          if (out_fn_ != "hists.root")
+            std::cerr << "warning, overriding --output-file value since --same-name is set\n";
+          namespace fs = std::experimental::filesystem;
+          // JMTBAD gcc6 version doesn't have append
+          auto dn = fs::path(out_fn_).parent_path().string();
+          auto bn = fs::path(in_fn_).filename().string();
+          if (dn != "")
+            out_fn_ = dn + "/" + bn;
+          else
+            out_fn_ = bn;
         }
 
         if (tree_path_.find("/") == std::string::npos) {
@@ -303,6 +318,7 @@ namespace jmt {
 
     std::string in_fn_;
     std::string out_fn_;
+    bool same_fn_;
     std::string tree_path_;
     std::string json_;
     bool every_;
