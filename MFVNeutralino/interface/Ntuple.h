@@ -121,6 +121,10 @@ namespace mfv {
 
   ////
 
+  namespace VertexNm1s {
+    enum { nm1_none, nm1_dbv, nm1_edbv, nm1_beampipe, nm1_all, max_nm1 }; // none = regular cuts applied, all = drop all cuts
+  }
+
   class VerticesSubNtuple : public jmt::INtuple {
   public:
     VerticesSubNtuple();
@@ -180,20 +184,18 @@ namespace mfv {
     float edbv(int i) const { return rescale_bs2derr(i); }
     template <typename BS> float dbv(int i, const BS& bs) const { return std::hypot(x(i) - bs.x(z(i)), y(i) - bs.y(z(i))); }
 
-    enum { nm1_none, nm1_dbv, nm1_edbv, nm1_beampipe, nm1_all, max_nm1 }; // none = regular cuts applied, all = drop all cuts
-
     template <typename BS> bool pass(int i, const BS& bs, const int min_ntracks=-1, const int max_ntracks=-1,
-                                     int nm1=nm1_none, const double min_dbv=0.01, const double max_edbv=0.0025) const {
+                                     int nm1=VertexNm1s::nm1_none, const double min_dbv=0.01, const double max_edbv=0.0025) const {
       return
         (min_ntracks < 0 || ntracks(i) >= min_ntracks) &&
         (max_ntracks < 0 || ntracks(i) <= max_ntracks) &&
-        (nm1 == nm1_all || nm1 == nm1_dbv      || dbv(i, bs) > min_dbv) &&
-        (nm1 == nm1_all || nm1 == nm1_edbv     || edbv(i) < max_edbv) &&
-        (nm1 == nm1_all || nm1 == nm1_beampipe || jmt::Geometry::inside_beampipe(x(i), y(i)));
+        (nm1 == VertexNm1s::nm1_all || nm1 == VertexNm1s::nm1_dbv      || dbv(i, bs) > min_dbv) &&
+        (nm1 == VertexNm1s::nm1_all || nm1 == VertexNm1s::nm1_edbv     || edbv(i) < max_edbv) &&
+        (nm1 == VertexNm1s::nm1_all || nm1 == VertexNm1s::nm1_beampipe || jmt::Geometry::inside_beampipe(x(i), y(i)));
     }
 
     template <typename BS> std::vector<int> pass(const BS& bs, const int min_ntracks=-1, const int max_ntracks=-1,
-                                                 int nm1=nm1_none, const double min_dbv=0.01, const double max_edbv=0.0025) const {
+                                                 int nm1=VertexNm1s::nm1_none, const double min_dbv=0.01, const double max_edbv=0.0025) const {
       std::vector<int> r;
       for (int i = 0, ie = n(); i < ie; ++i)
         if (pass(i, bs, min_ntracks, max_ntracks, nm1, min_dbv, max_edbv))
@@ -202,7 +204,7 @@ namespace mfv {
     }
 
     template <typename BS> std::vector<int> npass(const BS& bs, const int min_ntracks=-1, const int max_ntracks=-1,
-                                                  int nm1=nm1_none, const double min_dbv=0.01, const double max_edbv=0.0025) const {
+                                                  int nm1=VertexNm1s::nm1_none, const double min_dbv=0.01, const double max_edbv=0.0025) const {
       return pass(bs, min_ntracks, max_ntracks, nm1, min_dbv, max_edbv).size();
     }
 
