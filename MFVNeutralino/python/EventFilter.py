@@ -74,7 +74,6 @@ def setup_event_filter(process,
         overall *= triggerFilter
 
     if event_filter:
-        # FIXME for bjet trigger stuff
         if event_filter == 'jets only':
             from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterJetsOnly as eventFilter
         elif event_filter == 'leptons only':

@@ -157,11 +157,20 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
         return false;
     }
 
-    // Note that for simplicity, offline criteria have to be applied at analysis level
     if (apply_presel == 3) {
+
+      // Note that for simplicity, offline criteria beyond njets >= 4 have to be applied at analysis level
+      if(mevent->njets(20) < 4) return false;
+
       bool at_least_one_trigger_passed = false;
       for(size_t trig : mfv::HTOrBjetOrDisplacedDijetTriggers){
         if(mevent->pass_hlt(trig)){
+
+          // For HT trigger, only keep events with offline HT > 1200 to align with apply_presel == 1
+          if(trig == mfv::b_HLT_PFHT1050){
+            if(mevent->jet_ht(40) < 1200) continue;
+          }
+
           at_least_one_trigger_passed = true;
           break;
         }
