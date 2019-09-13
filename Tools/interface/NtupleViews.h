@@ -1,8 +1,7 @@
 #ifndef JMTucker_Tools_NtupleTrackRescaler_h
 #define JMTucker_Tools_NtupleTrackRescaler_h
 
-#define JMT_STANDALONE_ANALYSISERAS // JMTBAD decide whether to just use JMT_STANDALONE
-#define JMT_STANDALONE_TRACKRESCALER
+#define JMT_STANDALONE
 #include "JMTucker/Tools/interface/AnalysisEras.h"
 #include "JMTucker/Tools/interface/TrackRescaler.h"
 

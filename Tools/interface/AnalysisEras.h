@@ -3,7 +3,7 @@
 
 #include <random>
 #include <vector>
-#ifndef JMT_STANDALONE_ANALYSISERAS
+#ifndef JMT_STANDALONE
 #include "JMTucker/Tools/interface/Framework.h"
 #endif
 
@@ -22,7 +22,7 @@ namespace jmt {
       return d(g);
     }
 
-#ifndef JMT_STANDALONE_ANALYSISERAS
+#ifndef JMT_STANDALONE
     template <typename T>
     static int pick(const edm::Event& event, const T& consumer) {
       const int which = jmt::getProcessModuleParameter<int>(event, consumer, "jmtAnalysisEras", "which");
