@@ -10,6 +10,8 @@
 #include "TH2.h"
 #include "TStopwatch.h"
 #include "TTree.h"
+#define JMT_STANDALONE
+#include "JMTucker/Tools/interface/AnalysisEras.h"
 #include "JMTucker/Tools/interface/LumiList.h"
 #include "JMTucker/Tools/interface/PileupWeights.h"
 #include "JMTucker/Tools/interface/Prob.h"
@@ -52,6 +54,8 @@ namespace jmt {
     //    jmt::LumiList& ll() { return *ll_.get(); }
 
     bool is_mc() const { return is_mc_; }
+    double norm() const { return norm_; }
+    int year() const { return year_; }
     bool use_weights() const { return use_weights_; }
 
     boost::program_options::options_description_easy_init init_options(const std::string& tree_path,
@@ -177,10 +181,12 @@ namespace jmt {
       }
 
       nentries_ = t_->GetEntries();
-      entry_t per = num_chunks_ > 1 ? nentries_ / double(num_chunks_) : nentries_;
+      const entry_t per = num_chunks_ > 1 ? nentries_ / double(num_chunks_) : nentries_;
       entry_start_ = which_chunk_ * per;
       entry_end_ = which_chunk_ == num_chunks_ - 1 ? nentries_ : (which_chunk_+1)*per;
       entries_run_ = entry_end_ - entry_start_;
+      const double chunk_factor = double(entries_run_) / nentries_;
+      const bool chunking_mc = is_mc() && num_chunks_ > 1;
       assert(entry_start_ < entry_end_);
 
       nt_->read_from_tree(t_);
@@ -193,33 +199,37 @@ namespace jmt {
       puw_helper_->set_key(pu_weights_);
 
       is_mc_ = nt_->base().run() == 1;
+      jmt::AnalysisEras::set_current(nt_->base().run(), nt_->base().lumi(), nt_->base().event());
       if (!is_mc() && json_ != "")
         ll_.reset(new jmt::LumiList(json_));
 
       f_out_->mkdir(for_copy ? "mcStat" : "mfvWeight")->cd();
       auto h_sums = (TH1D*)f_->Get("mcStat/h_sums")->Clone("h_sums");
-      if (is_mc() && num_chunks_ > 1) {
-        h_sums->SetBinContent(1, h_sums->GetBinContent(1) * entries_run_ / nentries_);
-        // invalidate other entries since we can't just assume equal weights in them
-        for (int i = 2, ie = h_sums->GetNbinsX(); i <= ie; ++i) 
-          h_sums->SetBinContent(i, -1e9);
-      }
       f_out_->cd();
 
       if (!for_copy) {
         auto h_norm = new TH1F("h_norm", "", 1, 0, 1);
         auto xax = h_sums->GetXaxis();
         for (int ibin = 1; ibin <= h_sums->GetNbinsX(); ++ibin) {
-          const double c = h_sums->GetBinContent(ibin);
+          double c = h_sums->GetBinContent(ibin);
           const std::string l = xax->GetBinLabel(ibin);
-          if (is_mc() && l == "sum_nevents_total")
+          if (is_mc() && l == "sum_nevents_total") {
+            if (chunking_mc) {
+              c *= chunk_factor;
+              h_sums->SetBinContent(ibin, c);
+            }
             h_norm->Fill(0.5, norm_ = c);
+          }
           else if (l == "yearcode_x_nfiles")
-            year_ = jmt::yearcode(c).year();
+            year_ = jmt::yearcode(c).year(); // sets the Year global
+          else if (chunking_mc)
+            h_sums->SetBinContent(ibin, -1e9); // invalidate other entries since we can't just assume equal weights in them
         }
 
         assert(year_ > 0);
+      }
 
+      if (!for_copy) {
         h_weight_ = new TH1D("h_weight", ";weight;events/0.01", 100, 0, 10);
         h_npu_ = new TH1D("h_npu", ";# PU;events/1", 100, 0, 100);
       }
@@ -264,6 +274,8 @@ namespace jmt {
 
         if (!is_mc() && ll_ && !ll_->contains(nt_->base()))
           continue;
+
+        jmt::AnalysisEras::set_current(nt_->base().run(), nt_->base().lumi(), nt_->base().event());
 
         ++notskipped;
 
