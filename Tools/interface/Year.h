@@ -19,8 +19,15 @@
 
 namespace jmt {
   // for standalone code where we don't want to have to have two environments and we read the year out of the input file
-  void set_year(int y);
-  void assert_year(int y);
+  class Year {
+    static int year_;
+  public:
+    static void check(int y);
+    static void set(int y, bool chk=true) { if (chk) check(y); year_ = y; }
+    static int get() { return year_; }
+    static bool is(int y) { return y == year_; }
+  };
+
   class yearcode {
   public:
     yearcode() = delete;

@@ -1,30 +1,29 @@
-#include "JMTucker/Tools/interface/BTagging.h"
 #include "JMTucker/Tools/interface/Year.h"
+#include <cmath>
+#include <initializer_list>
+#include <stdexcept>
 
 namespace jmt {
-  void assert_year(int year) {
-    bool ok = false;
-    for (int y : MFVNEUTRALINO_YEARS)
-      if (y == year)
-        ok = true;
-    assert(ok);
-  }
+  int Year::year_ = MFVNEUTRALINO_YEAR;
 
-  void set_year(int y, bool check=true) {
-    if (check) assert_year(y);
-    jmt::BTagging::set_year(y);
+  void Year::check(int y) {
+    bool ok = false;
+    for (int y2 : MFVNEUTRALINO_YEARS)
+      if (y == y2)
+        ok = true;
+    if (!ok)
+      throw std::invalid_argument("bad year");
   }
 
   yearcode::yearcode(double cc)
     : year_(-1), nfiles_(-1)
   {
-    double ip; assert(std::modf(cc, &ip) == 0.);
+    double ip; if (std::modf(cc, &ip) != 0.) throw std::invalid_argument("bad double yearcode");
     const int c(cc);
     for (int y : MFVNEUTRALINO_YEARS) {
       const int cd = y * MFVNEUTRALINO_YEARCODE_MULT;
       if (c % cd == 0) {
-        set_year(y, false);
-        year_ = y;
+        Year::set(year_ = y, false);
         nfiles_ = c / cd;
         break;
       }
