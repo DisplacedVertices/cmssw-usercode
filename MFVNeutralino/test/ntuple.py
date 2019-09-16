@@ -24,7 +24,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
     #samples = pick_samples(dataset, all_signal=not settings.run_n_tk_seeds)
-    samples = pick_samples(dataset, qcd=True, ttbar=True, all_signal=True, data=False, leptonic=False, extra_bjet_study=True)
+    samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=True, data=False, leptonic=False, extra_bjet_study=True)
     set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2017p8.json'), limit_ttbar=True)
 
     ms = MetaSubmitter(settings.batch_name(), dataset=dataset)
