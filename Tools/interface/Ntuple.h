@@ -7,6 +7,12 @@
 #include "TLorentzVector.h"
 #include "TTree.h"
 #include "TVector3.h"
+#define SMATRIX_USE_CONSTEXPR
+#include <Math/SVector.h>
+#include <Math/SMatrix.h>
+
+typedef ROOT::Math::SVector<double,3> Vec3;
+typedef ROOT::Math::SMatrix<double,3,3,ROOT::Math::MatRepSym<double,3> > SymMat33;
 
 namespace jmt {
   class INtuple {
@@ -129,6 +135,9 @@ namespace jmt {
     float phi() const { return std::atan2(y(), x()); }
     float x(float zp) const { return x() + dxdz() * (zp - z()); }
     float y(float zp) const { return y() + dydz() * (zp - z()); }
+
+    Vec3 pos() const { return Vec3(x(), y(), z()); }
+    SymMat33 cov() const { SymMat33 c; c(0,0) = pow(err_x(),2), c(1,1) = pow(err_y(),2), c(2,2) = pow(err_z(),2); return c; }
 
   private:
     float x_;

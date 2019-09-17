@@ -179,7 +179,11 @@ namespace mfv {
     float mass       (int i) const { return p_get(i, mass_,       p_mass_       ); }
     float tkonlymass (int i) const { return p_get(i, tkonlymass_, p_tkonlymass_ ); }
 
-    TVector3 pos(int i) const { return TVector3(x(i), y(i), z(i)); }
+    Vec3 pos(int i) const { return Vec3(x(i), y(i), z(i)); }
+    SymMat33 cov(int i) const { SymMat33 c; c(0,0) = cxx(i), c(0,1) = cxy(i), c(0,2) = cxz(i),
+                                                             c(1,1) = cyy(i), c(1,2) = cyz(i),
+                                                                              c(2,2) = czz(i); return c; }
+
     float rho(int i) const { return std::hypot(x(i), y(i)); }
     float edbv(int i) const { return rescale_bs2derr(i); }
     template <typename BS> float dbv(int i, const BS& bs) const { return std::hypot(x(i) - bs.x(z(i)), y(i) - bs.y(z(i))); }
@@ -219,9 +223,9 @@ namespace mfv {
     vfloat cyz_;         vfloat* p_cyz_;
     vfloat czz_;         vfloat* p_czz_;
     vuchar ntracks_;     vuchar* p_ntracks_;
-    vfloat bs2derr_;     vfloat* p_bs2derr_;
+    vfloat bs2derr_;     vfloat* p_bs2derr_;  // drop after recalculating
     vfloat rescale_bs2derr_; vfloat* p_rescale_bs2derr_;
-    vfloat geo2ddist_;   vfloat* p_geo2ddist_;
+    vfloat geo2ddist_;   vfloat* p_geo2ddist_; // drop after being sure bs subtraction is undone everywhere
     vbool  genmatch_;    vbool * p_genmatch_;
     vfloat pt_;          vfloat* p_pt_;
     vfloat eta_;         vfloat* p_eta_;
