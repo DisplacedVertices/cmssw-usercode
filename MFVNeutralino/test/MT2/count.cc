@@ -1,4 +1,3 @@
-#include "TH2.h"
 #include "JMTucker/MFVNeutralino/interface/Ntuple.h"
 #include "JMTucker/Tools/interface/NtupleReader.h"
 
@@ -30,7 +29,7 @@ int main(int argc, char** argv) {
         const int ntk = vs.ntracks(i);
         if      (ntk == 3) ++c[3], ++c[7];
         else if (ntk == 4) ++c[4], ++c[7];
-        else if (ntk >= 5) ++c[5];
+        else if (jmt::AnalysisEras::is_mc() && ntk >= 5) ++c[5];
       }
 
       const double w = nr.weight();
@@ -45,6 +44,6 @@ int main(int argc, char** argv) {
         }
       }
 
-      return std::make_pair(true, w);
+      NR_loop_continue;
     });
 }
