@@ -21,6 +21,7 @@
 
 #define NR_loop_continue return std::make_pair(true, nr.weight())
 #define NR_loop_break return std::make_pair(false, nr.weight())
+#define NR_loop_only(r,l,e) if (nr.nt().base().run() != (r) || nr.nt().base().lumi() != (l) || nr.nt().base().event() != (e)) NR_loop_continue
 
 namespace jmt {
   template <typename Ntuple>
