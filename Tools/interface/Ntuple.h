@@ -131,13 +131,18 @@ namespace jmt {
     float err_dxdz() const { return err_dxdz_; }
     float err_dydz() const { return err_dydz_; }
     float err_width() const { return err_width_; }
-
+    float cxx() const { return std::pow(err_x(), 2); }
+    float cyy() const { return std::pow(err_y(), 2); }
+    float czz() const { return std::pow(err_z(), 2); }
+    float cxy() const { return 0; }
+    float cxz() const { return 0; }
+    float cyz() const { return 0; }
     float phi() const { return std::atan2(y(), x()); }
     float x(float zp) const { return x() + dxdz() * (zp - z()); }
     float y(float zp) const { return y() + dydz() * (zp - z()); }
 
     Vec3 pos() const { return Vec3(x(), y(), z()); }
-    SymMat33 cov() const { SymMat33 c; c(0,0) = pow(err_x(),2), c(1,1) = pow(err_y(),2), c(2,2) = pow(err_z(),2); return c; }
+    SymMat33 cov() const { SymMat33 c; c(0,0) = cxx(), c(1,1) = cyy(), c(2,2) = czz(); return c; }
 
   private:
     float x_;
