@@ -65,10 +65,9 @@ namespace mfv {
   }
 
   void NtupleAdd(VerticesSubNtuple& nt, const MFVVertexAux& v, bool genmatch) {
-    nt.add(v.x, v.y, v.z,
-           v.cxx, v.cxy, v.cxz, v.cyy, v.cyz, v.czz,
-           v.ntracks(), v.bs2derr, v.rescale_bs2derr, v.geo2ddist(), genmatch,
-           v.pt[mfv::PTracksPlusJetsByNtracks], v.eta[mfv::PTracksPlusJetsByNtracks], v.phi[mfv::PTracksPlusJetsByNtracks], v.mass[mfv::PTracksPlusJetsByNtracks],
-           v.mass[mfv::PTracksOnly]);
+    nt.add(v.chi2, v.x, v.y, v.z, v.cxx, v.cxy, v.cxz, v.cyy, v.cyz, v.czz,
+           v.rescale_chi2, v.rescale_x, v.rescale_y, v.rescale_z, v.rescale_cxx, v.rescale_cxy, v.rescale_cxz, v.rescale_cyy, v.rescale_cyz, v.rescale_czz,
+           v.ntracks(), v.njets[0], v.bs2derr, v.rescale_bs2derr, genmatch,
+           v.pt[mfv::PTracksPlusJetsByNtracks], v.eta[mfv::PTracksPlusJetsByNtracks], v.phi[mfv::PTracksPlusJetsByNtracks], v.mass[mfv::PTracksPlusJetsByNtracks]);
   }
 }

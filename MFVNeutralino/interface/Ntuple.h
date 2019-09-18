@@ -125,7 +125,7 @@ namespace mfv {
     enum { nm1_none, nm1_dbv, nm1_edbv, nm1_beampipe, nm1_all, max_nm1 }; // none = regular cuts applied, all = drop all cuts
   }
 
-  class VerticesSubNtuple : public jmt::INtuple {
+  class VerticesSubNtuple : public jmt::VerticesSubNtuple {
   public:
     VerticesSubNtuple();
     virtual void clear();
@@ -133,58 +133,61 @@ namespace mfv {
     virtual void read_from_tree(TTree*);
     virtual void copy_vectors();
 
-    void add(float x, float y, float z,
-             float cxx, float cxy, float cxz, float cyy, float cyz, float czz,
-             uchar ntracks, float bs2derr, float rescale_bs2derr, float geo2ddist, bool genmatch,
-             float pt, float eta, float phi, float mass, float tkonlymass) {
-      x_.push_back(x);
-      y_.push_back(y);
-      z_.push_back(z);
-      cxx_.push_back(cxx);
-      cxy_.push_back(cxy);
-      cxz_.push_back(cxz);
-      cyy_.push_back(cyy);
-      cyz_.push_back(cyz);
-      czz_.push_back(czz);
-      ntracks_.push_back(ntracks);
-      bs2derr_.push_back(bs2derr);
+    void add(float chi2, float x, float y, float z, float cxx, float cxy, float cxz, float cyy, float cyz, float czz,
+             float rescale_chi2, float rescale_x, float rescale_y, float rescale_z, float rescale_cxx, float rescale_cxy, float rescale_cxz, float rescale_cyy, float rescale_cyz, float rescale_czz,
+             uchar ntracks, uchar njets, float bbs2derr, float rescale_bs2derr, bool genmatch,
+             float pt, float eta, float phi, float mass) {
+      jmt::VerticesSubNtuple::add(x,y,z, chi2, 2*ntracks-3, ntracks, -1, cxx,cxy,cxz,cyy,cyz,czz, 0);
+      rescale_chi2_.push_back(rescale_chi2);
+      rescale_x_.push_back(rescale_x);
+      rescale_y_.push_back(rescale_y);
+      rescale_z_.push_back(rescale_z);
+      rescale_cxx_.push_back(rescale_cxx);
+      rescale_cxy_.push_back(rescale_cxy);
+      rescale_cxz_.push_back(rescale_cxz);
+      rescale_cyy_.push_back(rescale_cyy);
+      rescale_cyz_.push_back(rescale_cyz);
+      rescale_czz_.push_back(rescale_czz);
+      njets_.push_back(njets);
+      bs2derr_.push_back(bbs2derr);
       rescale_bs2derr_.push_back(rescale_bs2derr);
-      geo2ddist_.push_back(geo2ddist);
       genmatch_.push_back(genmatch);
       pt_.push_back(pt);
       eta_.push_back(eta);
       phi_.push_back(phi);
       mass_.push_back(mass);
-      tkonlymass_.push_back(tkonlymass);
     }
 
-    int n() const { return p_size(x_, p_x_); }
-    float x          (int i) const { return p_get(i, x_,          p_x_          ); }
-    float y          (int i) const { return p_get(i, y_,          p_y_          ); }
-    float z          (int i) const { return p_get(i, z_,          p_z_          ); }
-    float cxx        (int i) const { return p_get(i, cxx_,        p_cxx_        ); }
-    float cxy        (int i) const { return p_get(i, cxy_,        p_cxy_        ); }
-    float cxz        (int i) const { return p_get(i, cxz_,        p_cxz_        ); }
-    float cyy        (int i) const { return p_get(i, cyy_,        p_cyy_        ); }
-    float cyz        (int i) const { return p_get(i, cyz_,        p_cyz_        ); }
-    float czz        (int i) const { return p_get(i, czz_,        p_czz_        ); }
-    uchar ntracks    (int i) const { return p_get(i, ntracks_,    p_ntracks_    ); }
-    float bs2derr    (int i) const { return p_get(i, bs2derr_,    p_bs2derr_    ); }
+    float rescale_chi2   (int i) const { return p_get(i, rescale_chi2_, p_rescale_chi2_); }
+    float rescale_x      (int i) const { return p_get(i, rescale_x_,    p_rescale_x_   ); }
+    float rescale_y      (int i) const { return p_get(i, rescale_y_,    p_rescale_y_   ); }
+    float rescale_z      (int i) const { return p_get(i, rescale_z_,    p_rescale_z_   ); }
+    float rescale_cxx    (int i) const { return p_get(i, rescale_cxx_,  p_rescale_cxx_ ); }
+    float rescale_cxy    (int i) const { return p_get(i, rescale_cxy_,  p_rescale_cxy_ ); }
+    float rescale_cxz    (int i) const { return p_get(i, rescale_cxz_,  p_rescale_cxz_ ); }
+    float rescale_cyy    (int i) const { return p_get(i, rescale_cyy_,  p_rescale_cyy_ ); }
+    float rescale_cyz    (int i) const { return p_get(i, rescale_cyz_,  p_rescale_cyz_ ); }
+    float rescale_czz    (int i) const { return p_get(i, rescale_czz_,  p_rescale_czz_ ); }
+    uchar njets          (int i) const { return p_get(i, njets_,        p_njets_       ); }
+    float bs2derr        (int i) const { return p_get(i, bs2derr_,      p_bs2derr_     ); }
     float rescale_bs2derr(int i) const { return p_get(i, rescale_bs2derr_, p_rescale_bs2derr_); }
-    float geo2ddist  (int i) const { return p_get(i, geo2ddist_,  p_geo2ddist_  ); }
-    bool  genmatch   (int i) const { return p_get(i, genmatch_,   p_genmatch_   ); }
-    float pt         (int i) const { return p_get(i, pt_,         p_pt_         ); }
-    float eta        (int i) const { return p_get(i, eta_,        p_eta_        ); }
-    float phi        (int i) const { return p_get(i, phi_,        p_phi_        ); }
-    float mass       (int i) const { return p_get(i, mass_,       p_mass_       ); }
-    float tkonlymass (int i) const { return p_get(i, tkonlymass_, p_tkonlymass_ ); }
+    bool  genmatch       (int i) const { return p_get(i, genmatch_,     p_genmatch_    ); }
+    float pt             (int i) const { return p_get(i, pt_,           p_pt_          ); }
+    float eta            (int i) const { return p_get(i, eta_,          p_eta_         ); }
+    float phi            (int i) const { return p_get(i, phi_,          p_phi_         ); }
+    float mass           (int i) const { return p_get(i, mass_,         p_mass_        ); }
 
-    Vec3 pos(int i) const { return Vec3(x(i), y(i), z(i)); }
-    SymMat33 cov(int i) const { SymMat33 c; c(0,0) = cxx(i), c(0,1) = cxy(i), c(0,2) = cxz(i),
-                                                             c(1,1) = cyy(i), c(1,2) = cyz(i),
-                                                                              c(2,2) = czz(i); return c; }
+    template <typename BS> float bs2derr(int i, const BS& bs, bool rescale=false) const {
+      float dx = -bs.x(), dy = -bs.y(); // JMTBAD we never used the slope-corrected version
+      if (rescale) dx += rescale_x(i), dy += rescale_y(i);
+      else         dx +=         x(i), dy +=         y(i);
+      if (dx == 0 && dy == 0) return -1;
+      float xx = bs.cxx(), yy = bs.cyy(), xy = bs.cxy();
+      if (rescale) xx += rescale_cxx(i), yy += rescale_cyy(i), xy += rescale_cxy(i);
+      else         xx +=         cxx(i), yy +=         cyy(i), xy +=         cxy(i);
+      return sqrt((xx*dx*dx + yy*dy*dy + 2*xy*dx*dy)/(dx*dx + dy*dy));
+    }
 
-    float rho(int i) const { return std::hypot(x(i), y(i)); }
     float edbv(int i) const { return rescale_bs2derr(i); }
     template <typename BS> float dbv(int i, const BS& bs) const { return std::hypot(x(i) - bs.x(z(i)), y(i) - bs.y(z(i))); }
 
@@ -213,26 +216,24 @@ namespace mfv {
     }
 
   private:
-    vfloat x_;           vfloat* p_x_;
-    vfloat y_;           vfloat* p_y_;
-    vfloat z_;           vfloat* p_z_;
-    vfloat cxx_;         vfloat* p_cxx_;
-    vfloat cxy_;         vfloat* p_cxy_;
-    vfloat cxz_;         vfloat* p_cxz_;
-    vfloat cyy_;         vfloat* p_cyy_;
-    vfloat cyz_;         vfloat* p_cyz_;
-    vfloat czz_;         vfloat* p_czz_;
-    vuchar ntracks_;     vuchar* p_ntracks_;
-    vfloat bs2derr_;     vfloat* p_bs2derr_;  // drop after recalculating
+    vfloat rescale_chi2_;vfloat* p_rescale_chi2_;
+    vfloat rescale_x_;   vfloat* p_rescale_x_;
+    vfloat rescale_y_;   vfloat* p_rescale_y_;
+    vfloat rescale_z_;   vfloat* p_rescale_z_;
+    vfloat rescale_cxx_; vfloat* p_rescale_cxx_;
+    vfloat rescale_cxy_; vfloat* p_rescale_cxy_;
+    vfloat rescale_cxz_; vfloat* p_rescale_cxz_;
+    vfloat rescale_cyy_; vfloat* p_rescale_cyy_;
+    vfloat rescale_cyz_; vfloat* p_rescale_cyz_;
+    vfloat rescale_czz_; vfloat* p_rescale_czz_;
+    vuchar njets_;       vuchar* p_njets_;
+    vfloat bs2derr_;     vfloat* p_bs2derr_; // drop these two after confirming recalculation
     vfloat rescale_bs2derr_; vfloat* p_rescale_bs2derr_;
-    vfloat geo2ddist_;   vfloat* p_geo2ddist_; // drop after being sure bs subtraction is undone everywhere
     vbool  genmatch_;    vbool * p_genmatch_;
-    vfloat pt_;          vfloat* p_pt_;
+    vfloat pt_;          vfloat* p_pt_; // drop after jet match saved
     vfloat eta_;         vfloat* p_eta_;
     vfloat phi_;         vfloat* p_phi_;
     vfloat mass_;        vfloat* p_mass_;
-    vfloat tkonlymass_;  vfloat* p_tkonlymass_;
-    // missing: whole rescale fit; njets shortcut?
   };
 
   ////
@@ -329,7 +330,7 @@ namespace mfv {
     const VerticesSubNtuple& vertices() const { return vertices_; }
     const MiniNtuple2SubNtuple& event() const { return event_; }
 
-    std::vector<int> vertices_tracks(int iv) const {
+    std::vector<int> vertex_tracks(int iv) const {
       const size_t n = vertices().ntracks(iv);
       std::vector<int> t(n, -1);
       size_t z = 0;
@@ -340,8 +341,8 @@ namespace mfv {
       return t;
     }
 
-    std::vector<std::pair<int,int>> vertices_track_pairs(int ivtx) const {
-      std::vector<int> t = vertices_tracks(ivtx);
+    std::vector<std::pair<int,int>> vertex_track_pairs(int iv) const {
+      std::vector<int> t = vertex_tracks(iv);
       const size_t n = t.size();
       std::vector<std::pair<int,int>> t2(n*(n-1)/2);
       size_t z = 0;
@@ -349,6 +350,13 @@ namespace mfv {
         for (size_t j = i+1; j < n; ++j)
           t2[z++] = std::make_pair(t[i], t[j]);
       return t2;
+    }
+
+    TLorentzVector vertex_tracks_p4(int iv, float mtk=0.13957) const {
+      TLorentzVector p4;
+      for (int j : vertex_tracks(iv))
+        p4 += tracks().p4(j, mtk);
+      return p4;
     }
 
   private:

@@ -171,7 +171,7 @@ namespace jmt {
     virtual void read_from_tree(TTree* tree);
     virtual void copy_vectors();
 
-    void add(float xx, float yy, float zz, float chi2, float ndof, int ntracks, float score,
+    void add(float xx, float yy, float zz, float chi2, float ndof, uchar ntracks, float score,
              float cxx, float cxy, float cxz, float cyy, float cyz, float czz,
              unsigned misc) {
       x_.push_back(xx);
@@ -208,14 +208,18 @@ namespace jmt {
 
     void set_misc(int i, unsigned m) { assert(0 == p_misc_); misc_[i] = m; }
 
+    Vec3 pos(int i) const { return Vec3(x(i), y(i), z(i)); }
+    SymMat33 cov(int i) const { SymMat33 c; c(0,0) = cxx(i), c(0,1) = cxy(i), c(0,2) = cxz(i),
+                                                             c(1,1) = cyy(i), c(1,2) = cyz(i),
+                                                                              c(2,2) = czz(i); return c; }
+
     float phi(int i) const { return std::atan2(y(i), x(i)); }
     float rho(int i) const { return std::hypot(x(i), y(i)); }
-    TVector3 pos(int i) const { return TVector3(x(i), y(i), z(i)); }
     template <typename BS> float xraw(int i, const BS& bs) const { return x(i) + bs.x(z(i)); }
     template <typename BS> float yraw(int i, const BS& bs) const { return y(i) + bs.y(z(i)); }
     template <typename BS> float phiraw(int i, const BS& bs) const { return std::atan2(y(i, bs), x(i, bs)); }
     template <typename BS> float rhoraw(int i, const BS& bs) const { return std::hypot(x(i, bs), y(i, bs)); }
-    template <typename BS> TVector3 posraw(int i, const BS& bs) const { return TVector3(xraw(i, bs), yraw(i, bs), z(i, bs)); }
+    template <typename BS> Vec3 posraw(int i, const BS& bs) const { return Vec3(xraw(i, bs), yraw(i, bs), z(i, bs)); }
     float chi2dof(int i) const { return chi2(i) / ndof(i); }
 
   private:
