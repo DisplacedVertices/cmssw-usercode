@@ -48,8 +48,8 @@ if __name__ == '__main__':
     ntk_list = [3,4,5,7]
 
     for is_data in False, True :
-        for sys_var in ['nom','bcjet_up','bcjet_down','ljet_up','ljet_down'] :
-            for year in ['2017','2018','2017p8'] :
+        for sys_var in ['nom','bcjet_up','bcjet_down','ljet_up','ljet_down', 'vary_dphi', 'vary_eff'] :
+            for year in ['2017','2018'] :
                 f2_vals_printout = ''
 
                 year_formatted = year
@@ -63,22 +63,28 @@ if __name__ == '__main__':
 
                     # ntk == 5 is blinded still!
                     if is_data :
-                        if ntk == 5 or ntk == 7 : continue 
+                        if ntk == 5 : continue 
 
                     var_1v  = str(ntk) + 'trk_1v_%s_%s' % (year, sys_var)
+                    if sys_var == 'vary_dphi' or sys_var == 'vary_eff':
+                        var_1v = str(ntk) + 'trk_1v_%s_%s' % (year, 'nom')
                     ft_1v   = effs.at[var_1v,'ft']
                     efft_1v = effs.at[var_1v,'efft']
                     frt_1v  = effs.at[var_1v,'frt']
 
                     var_presel = 'presel_%s_%s' % (year, sys_var)
+                    if sys_var == 'vary_dphi' or sys_var == 'vary_eff':
+                        var_presel = str(ntk) + 'trk_1v_%s_%s' % (year, 'nom')
                     ft_presel   = effs.at[var_presel,'ft']
                     efft_presel = effs.at[var_presel,'efft']
                     frt_presel  = effs.at[var_presel,'frt']
 
-                    cb_label = year_formatted+'_'+str(ntk)+'trk_'
+                    cb_label = '%s_%strk' % (year_formatted, ntk)
+                    if sys_var == 'vary_dphi' or sys_var == 'vary_eff':
+                        cb_label = '%s_%strk_%s' % (year_formatted, ntk, sys_var)
                     try:
-                        cb    = cb_vals.at[cb_label+'cb','cb_val']
-                        cbbar = cb_vals.at[cb_label+'cbbar','cb_val']
+                        cb    = cb_vals.at[cb_label+'_cb','cb_val']
+                        cbbar = cb_vals.at[cb_label+'_cbbar','cb_val']
                     except:
                         print cb_label, 'not found'
                         continue
