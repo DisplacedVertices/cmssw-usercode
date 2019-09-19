@@ -359,6 +359,41 @@ namespace mfv {
       return p4;
     }
 
+    std::vector<std::pair<int,int>> vertex_tracks_jets(int iv) const {
+      std::vector<std::pair<int,int>> r;
+      for (int it : vertex_tracks(iv))
+        r.push_back(std::make_pair(it, tracks().which_jet(it)));
+      return r;
+    }
+
+    std::set<int> vertex_jets(int iv) const {
+      std::set<int> r;
+      for (std::pair<int,int> p : vertex_tracks_jets(iv))
+        if (p.second >= 0 && p.second < 255)
+          r.insert(p.second);
+      return r;
+    }
+
+    TLorentzVector vertex_jets_p4(int iv) const {
+      TLorentzVector p4;
+      for (int j : vertex_jets(iv))
+        p4 += jets().p4(j);
+      return p4;
+    }
+
+    TLorentzVector vertex_tracks_jets_p4(int iv, const float mtk=0.13957) const {
+      TLorentzVector p4;
+      std::vector<bool> seen_jet(jets().n(), false);
+      for (std::pair<int,int> p : vertex_tracks_jets(iv))
+        if (p.second >= 0 && p.second < 255 && !seen_jet[p.second]) {
+          seen_jet[p.second] = true;
+          p4 += jets().p4(p.second);
+        }
+        else
+          p4 += tracks().p4(p.first, mtk);
+      return p4;
+    }
+
   private:
     GenTruthSubNtuple gentruth_;
     VerticesSubNtuple vertices_;
