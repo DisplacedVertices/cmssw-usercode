@@ -5,8 +5,21 @@
 #include <numeric>
 #include <vector>
 #include <cstddef>
+#include "TLorentzVector.h"
 
 namespace mfv {
+
+  // For use in jet trigger matching
+  struct HLTJet {
+    TLorentzVector p4;
+    float bdisc_CSV;
+    float bdisc_DeepCSV;
+
+    HLTJet()
+    : bdisc_CSV(-999), bdisc_DeepCSV(-999)
+    {}
+  };
+
   // JMTBAD hope you keep these in sync with TriggerEnum.cc
   static const int n_clean_paths = 7;
   enum {

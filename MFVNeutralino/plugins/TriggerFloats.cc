@@ -383,7 +383,6 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
           floats->hltpfjets.push_back(hltjet);
         }
 
-        // FIXME also need to add things into MFVNeutralino/plugins/EventProducer.cc
         // FIXME also need to decide the matching criteria + variable to use (dR with eta x phi or dR with rapidity x phi? and what window size?)
         // FIXME hey what are hltAK4PFJetsCorrected and hltAK4PFJetsLooseIDCorrected anyway? LooseID = some pileup rejection maybe?
         // at least in 2017 signal MC, the following never seem to show up, though I do see them in cmssw.... should be careful though:

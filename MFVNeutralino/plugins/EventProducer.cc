@@ -345,6 +345,9 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->jet_energy.push_back(jet.energy());
     mevent->jet_gen_energy.push_back(jet.genJet() ? jet.genJet()->energy() : -1);
 
+    // FIXME note that I currently do nothing with calo jets here; see the "NOTE" in MFVNeutralino/plugins/TriggerFloats.cc
+    mevent->jet_hlt_push_back(jet, triggerfloats->hltpfjets);
+
     int bdisc_level = 0;
     for (int i = 0; i < 3; ++i)
       if (jmt::BTagging::is_tagged(jet, i))
@@ -520,6 +523,10 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->jet_eta.clear();
     mevent->jet_phi.clear();
     mevent->jet_energy.clear();
+    mevent->jet_hlt_pt.clear();
+    mevent->jet_hlt_eta.clear();
+    mevent->jet_hlt_phi.clear();
+    mevent->jet_hlt_energy.clear();
     mevent->metx = 0;
     mevent->mety = 0;
     mevent->lep_id_.clear();

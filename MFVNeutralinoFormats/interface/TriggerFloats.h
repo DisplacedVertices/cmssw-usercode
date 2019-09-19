@@ -6,16 +6,6 @@
 
 namespace mfv {
 
-  struct HLTJet {
-    TLorentzVector p4;
-    float bdisc_CSV;
-    float bdisc_DeepCSV;
-
-    HLTJet()
-    : bdisc_CSV(-999), bdisc_DeepCSV(-999)
-    {}
-  };
-
   struct TriggerFloats {
     std::vector<TLorentzVector> l1jets;
     int nl1jets() const { return l1jets.size(); }

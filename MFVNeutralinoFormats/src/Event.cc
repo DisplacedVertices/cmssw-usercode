@@ -46,3 +46,21 @@ void MFVEvent::lep_push_back(MFVEvent::lep_id_t id,
   lep_hlt_eta.push_back(hltmatch.Eta());
   lep_hlt_phi.push_back(hltmatch.Phi());
 }
+
+void MFVEvent::jet_hlt_push_back(const reco::Candidate& jet, const std::vector<mfv::HLTJet>& hltjets){
+
+  // FIXME is 0.1*0.1 sufficient, and is eta x phi sufficient?
+  double hltmatchdist2 = 0.1*0.1;
+  mfv::HLTJet hltmatch;
+  for (auto hlt : hltjets) {
+    const double dist2 = reco::deltaR2(jet.eta(), jet.phi(), hlt.p4.Eta(), hlt.p4.Phi());
+    if (dist2 < hltmatchdist2) {
+      hltmatchdist2 = dist2;
+      hltmatch = hlt;
+    }
+  }
+  jet_hlt_pt.push_back(hltmatch.p4.Pt());
+  jet_hlt_eta.push_back(hltmatch.p4.Eta());
+  jet_hlt_phi.push_back(hltmatch.p4.Phi());
+  jet_hlt_energy.push_back(hltmatch.p4.E());
+}

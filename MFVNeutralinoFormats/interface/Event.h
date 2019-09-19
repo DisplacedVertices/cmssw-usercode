@@ -223,6 +223,12 @@ struct MFVEvent {
     v.SetPtEtaPhiE(jet_pt[w], jet_eta[w], jet_phi[w], jet_energy[w]);
     return v;
   }
+
+  std::vector<float> jet_hlt_pt;
+  std::vector<float> jet_hlt_eta;
+  std::vector<float> jet_hlt_phi;
+  std::vector<float> jet_hlt_energy;
+  void jet_hlt_push_back(const reco::Candidate& jet, const std::vector<mfv::HLTJet>& hltjets);
     
   int njets() const { return int(jet_id.size()); }
   int njets(float min_jet_pt) const { return std::count_if(jet_pt.begin(), jet_pt.end(),
