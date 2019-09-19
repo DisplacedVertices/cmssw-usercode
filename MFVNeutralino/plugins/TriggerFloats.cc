@@ -297,7 +297,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
         is_photon = true;
       else if (id == trigger::TriggerMuon)
         is_muon = true;
-      else if (id == trigger::TriggerJet)
+      else if (id == trigger::TriggerBJet)
         is_jet = true;
     }
 
@@ -376,18 +376,26 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
         // NOTE: all of the bjet triggers actually use PF jets for the kinematics, but
         // one or two of them rely on calojets for the btagging (whereas the rest
         // use PF jets for the btagging)
+        //
+        // We can probably drop the calo jets here, and probably only
+        // need to rely on one of the collections for the PF jets......
         if(obj.collection() == "hltAK4CaloJetsCorrectedIDPassed::HLT"){
           floats->hltcalojets.push_back(hltjet);
         }
-        else if(obj.collection() == "hltAK4PFJetsCorrected::HLT" || obj.collection() == "hltAK4PFJetsLooseIDCorrected::HLT"){
+        else if( obj.collection() == "hltAK4PFJetsCorrected::HLT" 
+              || obj.collection() == "hltAK4PFJetsLooseIDCorrected::HLT" 
+              || obj.collection() == "hltPFJetForBtag::HLT" ){
           floats->hltpfjets.push_back(hltjet);
         }
 
         // FIXME also need to decide the matching criteria + variable to use (dR with eta x phi or dR with rapidity x phi? and what window size?)
-        // FIXME hey what are hltAK4PFJetsCorrected and hltAK4PFJetsLooseIDCorrected anyway? LooseID = some pileup rejection maybe?
-        // at least in 2017 signal MC, the following never seem to show up, though I do see them in cmssw.... should be careful though:
+        // FIXME hey what are hltAK4PFJetsCorrected and hltAK4PFJetsLooseIDCorrected anyway? LooseID = some pileup rejection maybe? ALSO I think the LooseID collection is a subset of the nominal one, with the same kinematics as the nominal one, at least in signal MC...
+        // Answer: https://github.com/cms-sw/cmssw/blob/CMSSW_9_4_X/HLTrigger/Configuration/python/HLT_PRef_cff.py
+        // and LooseID is a subset of the nominal container (pre-corrections); not yet positive if the corrections could differ between the containers though.
+        //
+        // at least in signal MC, the following never seem to show up, though I do see them in cmssw.... should be careful though:
         // bool is_calojet = obj.collection() == "hltAK4CaloJetsCorrected::HLT";
-        // bool is_pfjet = obj.collection() == "hltPFJetForBtag::HLT";
+        // bool is_pfjet = obj.collection() == "hltPFJetForBtag::HLT"; <-- these do show up once I fixed TriggerJet -> TriggerBJet, but THESE are a subset of hltAK4PFJetsCorrected... It looks like the hltPFJetForBtag objects are those which the btagging is run on, which might also be useful to keep track of
 
         if (prints) {
           std::cout << "TriggerFloats jet object for path " << mfv::hlt_paths[ipath]
