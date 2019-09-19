@@ -240,12 +240,6 @@ struct MFVEvent {
   int njets_hlt(float min_jet_pt) const { return std::count_if(jet_hlt_pt.begin(), jet_hlt_pt.end(),
                                                            [min_jet_pt](float b) { return b > min_jet_pt; }); }
 
-  bool jet_hlt_match(int i, float min_jet_pt=mfv::min_jet_pt) const {
-    // an offline jet with a successful HLT match will have a nonzero jet_hlt_pt;
-    // all others have the default value of 0
-    return jet_hlt_pt[i] > min_jet_pt;
-  }
-
   float jet_ht(float min_jet_pt=0.f) const { return std::accumulate(jet_pt.begin(), jet_pt.end(), 0.f,
                                                                     [min_jet_pt](float init, float b) { if (b > min_jet_pt) init += b; return init; }); }
 
