@@ -301,7 +301,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
         is_jet = true;
     }
 
-    if (prints) printf(" is_l1 %i is_ht %i is_cluster %i is_photon %i is_muon %i is_bjet %i\n", is_l1, is_ht, is_cluster, is_photon, is_muon, is_jet);
+    if (prints) printf(" is_l1 %i is_ht %i is_cluster %i is_photon %i is_muon %i is_jet %i\n", is_l1, is_ht, is_cluster, is_photon, is_muon, is_jet);
 
     if (is_l1) assert(nids == 1 && !is_ht && !is_cluster && !is_photon && !is_muon && !is_jet);
     if (is_ht) {
@@ -358,11 +358,12 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
       const std::vector<std::string>& pathNamesAll  = obj.pathNames(false);
       int ipath = -1;
       for (const std::string& p : pathNamesAll) {
-        for (int i = 0; i < mfv::n_hlt_paths; ++i)
+        for (int i = 0; i < mfv::n_hlt_paths; ++i){
           if (helper.path_same_without_version(p, mfv::hlt_paths[i])) {
             ipath = i;
             break;
           }
+        }
         if (ipath != -1) break;
       }
 
@@ -378,7 +379,8 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
         // use PF jets for the btagging)
         //
         // We can probably drop the calo jets here, and probably only
-        // need to rely on one of the collections for the PF jets......
+        // need to rely on one of the (more inclusive) collections for the PF jets......
+        // (Note: b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33 never seems to have hltAK4PFJetsLooseIDCorrected, so if we do drop some collections, we should favor hltAK4PFJetsCorrected)
         if(obj.collection() == "hltAK4CaloJetsCorrectedIDPassed::HLT"){
           floats->hltcalojets.push_back(hltjet);
         }
@@ -395,7 +397,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
         //
         // at least in signal MC, the following never seem to show up, though I do see them in cmssw.... should be careful though:
         // bool is_calojet = obj.collection() == "hltAK4CaloJetsCorrected::HLT";
-        // bool is_pfjet = obj.collection() == "hltPFJetForBtag::HLT"; <-- these do show up once I fixed TriggerJet -> TriggerBJet, but THESE are a subset of hltAK4PFJetsCorrected... It looks like the hltPFJetForBtag objects are those which the btagging is run on, which might also be useful to keep track of
+        // bool is_pfjet = obj.collection() == "hltPFJetForBtag::HLT"; <-- these do show up once I fixed TriggerJet -> TriggerBJet, but THESE are a subset of hltAK4PFJetsCorrected... It looks like the hltPFJetForBtag objects are those which the btagging is run on, which might also be useful to keep track of--however, that only covers the PFBTags; the CaloBTags use hltSelector6CentralJetsL1FastJet and hltSelector8CentralJetsL1FastJet as input
 
         if (prints) {
           std::cout << "TriggerFloats jet object for path " << mfv::hlt_paths[ipath]
