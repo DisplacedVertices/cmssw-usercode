@@ -373,6 +373,9 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
         hltjet.bdisc_CSV = -999; // FIXME if/when I figure these out
         hltjet.bdisc_DeepCSV = -999; // FIXME if/when I figure these out
 
+        // NOTE: all of the bjet triggers actually use PF jets for the kinematics, but
+        // one or two of them rely on calojets for the btagging (whereas the rest
+        // use PF jets for the btagging)
         if(obj.collection() == "hltAK4CaloJetsCorrectedIDPassed::HLT"){
           floats->hltcalojets.push_back(hltjet);
         }
