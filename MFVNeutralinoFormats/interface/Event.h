@@ -224,21 +224,28 @@ struct MFVEvent {
     return v;
   }
 
-  std::vector<float> jet_hlt_pt;
-  std::vector<float> jet_hlt_eta;
-  std::vector<float> jet_hlt_phi;
-  std::vector<float> jet_hlt_energy;
-  void jet_hlt_push_back(const reco::Candidate& jet, const std::vector<mfv::HLTJet>& hltjets);
-    
   int njets() const { return int(jet_id.size()); }
   int njets(float min_jet_pt) const { return std::count_if(jet_pt.begin(), jet_pt.end(),
-                                                           [min_jet_pt](float b) { return b > min_jet_pt; }); }
-  int njets_hlt(float min_jet_pt) const { return std::count_if(jet_hlt_pt.begin(), jet_hlt_pt.end(),
                                                            [min_jet_pt](float b) { return b > min_jet_pt; }); }
 
   float nth_jet_pt (int w) const { return njets() > w ? jet_pt [w] :   -1.f; }
   float nth_jet_eta(int w) const { return njets() > w ? jet_eta[w] : -999.f; }
   float nth_jet_phi(int w) const { return njets() > w ? jet_phi[w] : -999.f; }
+
+  std::vector<float> jet_hlt_pt;
+  std::vector<float> jet_hlt_eta;
+  std::vector<float> jet_hlt_phi;
+  std::vector<float> jet_hlt_energy;
+  void jet_hlt_push_back(const reco::Candidate& jet, const std::vector<mfv::HLTJet>& hltjets);
+  int njets_hlt(float min_jet_pt) const { return std::count_if(jet_hlt_pt.begin(), jet_hlt_pt.end(),
+                                                           [min_jet_pt](float b) { return b > min_jet_pt; }); }
+
+  bool jet_hlt_match(int i, float min_jet_pt=mfv::min_jet_pt) const {
+    // an offline jet with a successful HLT match will have a nonzero jet_hlt_pt;
+    // all others have the default value of 0
+    return jet_hlt_pt[i] > min_jet_pt;
+  }
+
   float jet_ht(float min_jet_pt=0.f) const { return std::accumulate(jet_pt.begin(), jet_pt.end(), 0.f,
                                                                     [min_jet_pt](float init, float b) { if (b > min_jet_pt) init += b; return init; }); }
 
