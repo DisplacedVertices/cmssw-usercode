@@ -62,7 +62,7 @@ def minitree_only(process, mode, settings, output_commands):
             process.mfvAnalysisCuts.vertex_src = vertices
             process.mfvAnalysisCuts.min_nvertex = 1
             process.mfvMiniTree2 = cms.EDAnalyzer('MFVMiniTreer2',
-                                                  jmtNtupleFiller_pset(settings.is_miniaod),
+                                                  jmtNtupleFiller_pset(settings.is_miniaod, True),
                                                   vertices_src = cms.InputTag(vertices))
             weight_obj = process.jmtWeightMiniAOD if settings.is_miniaod else process.jmtWeight
             process.p *= weight_obj * getattr(process, vertices) * process.mfvAnalysisCuts * process.mfvMiniTree2
