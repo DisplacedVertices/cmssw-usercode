@@ -5,6 +5,17 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 
 namespace mfv {
+
+  struct HLTJet {
+    TLorentzVector p4;
+    float bdisc_CSV;
+    float bdisc_DeepCSV;
+
+    HLTJet()
+    : bdisc_CSV(-999), bdisc_DeepCSV(-999)
+    {}
+  };
+
   struct TriggerFloats {
     std::vector<TLorentzVector> l1jets;
     int nl1jets() const { return l1jets.size(); }
@@ -12,6 +23,10 @@ namespace mfv {
     float myhtt;
     float myhttwbug;
     float hltht;
+    std::vector<HLTJet> hltcalojets;
+    std::vector<HLTJet> hltpfjets;
+    int nhltcalojets() const { return hltcalojets.size(); }
+    int nhltpfjets() const { return hltpfjets.size(); }
     std::vector<TLorentzVector> hltelectrons;
     std::vector<TLorentzVector> hltmuons;
     std::vector<int> L1decisions;

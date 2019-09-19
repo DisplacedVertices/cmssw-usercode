@@ -31,6 +31,11 @@ namespace JMTucker_MFVNeutralinoFormats {
     edm::Wrapper<std::vector<MFVVertexAux> > wvva;
 
     edm::Wrapper<mfv::MCInteraction> wmci;
+
+    edm::Wrapper<mfv::HLTJet> whj;
+    std::vector<mfv::HLTJet> vwhj;
+    edm::Wrapper<std::vector<mfv::HLTJet> > wvwhj;
+
     edm::Wrapper<mfv::TriggerFloats> wtf;
     edm::Wrapper<std::vector<VertexerPairEff> > wvvpe;
 

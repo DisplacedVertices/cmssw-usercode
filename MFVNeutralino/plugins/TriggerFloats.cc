@@ -277,6 +277,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
     bool is_cluster = false;
     bool is_photon = false;
     bool is_muon = false;
+    bool is_jet = false;
 
     if (prints) printf("obj pt %f eta %f phi %f coll %s ids (#=%lu)", obj.pt(), obj.eta(), obj.phi(), obj.collection().c_str(), nids);
 
@@ -296,13 +297,15 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
         is_photon = true;
       else if (id == trigger::TriggerMuon)
         is_muon = true;
+      else if (id == trigger::TriggerJet)
+        is_jet = true;
     }
 
-    if (prints) printf(" is_l1 %i is_ht %i is_cluster %i is_photon %i is_muon %i\n", is_l1, is_ht, is_cluster, is_photon, is_muon);
+    if (prints) printf(" is_l1 %i is_ht %i is_cluster %i is_photon %i is_muon %i is_bjet %i\n", is_l1, is_ht, is_cluster, is_photon, is_muon, is_jet);
 
-    if (is_l1) assert(nids == 1 && !is_ht && !is_cluster && !is_photon && !is_muon);
+    if (is_l1) assert(nids == 1 && !is_ht && !is_cluster && !is_photon && !is_muon && !is_jet);
     if (is_ht) {
-      if      (nids == 1) assert(!is_cluster && !is_photon && !is_muon);
+      if      (nids == 1) assert(!is_cluster && !is_photon && !is_muon && !is_jet); // FIXME just check that we want this for is_jet
       else if (nids == 2) assert(!is_cluster && !is_photon);
       else assert(0);
     }
@@ -341,7 +344,51 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
         }
 
         if (prints) {
-          std::cout << "TriggerFloats object for path " << mfv::hlt_paths[ipath]
+          std::cout << "TriggerFloats lepton object for path " << mfv::hlt_paths[ipath]
+                    << " pt " << obj.pt() << " eta " << obj.eta() << " phi " << obj.phi()
+                    << " collection: " << obj.collection() << " ids (# = " << obj.filterIds().size() << "):";
+          for (auto id : obj.filterIds())
+            std::cout << " " << id;
+          std::cout << "\n";
+        }
+      }
+    }
+    else if (is_jet) {
+      obj.unpackNamesAndLabels(event, *trigger_results);
+      const std::vector<std::string>& pathNamesAll  = obj.pathNames(false);
+      int ipath = -1;
+      for (const std::string& p : pathNamesAll) {
+        for (int i = 0; i < mfv::n_hlt_paths; ++i)
+          if (helper.path_same_without_version(p, mfv::hlt_paths[i])) {
+            ipath = i;
+            break;
+          }
+        if (ipath != -1) break;
+      }
+
+      if (ipath != -1) {
+
+        mfv::HLTJet hltjet;
+        hltjet.p4 = p4(obj.pt(), obj.eta(), obj.phi(), obj.energy());
+        hltjet.bdisc_CSV = -999; // FIXME if/when I figure these out
+        hltjet.bdisc_DeepCSV = -999; // FIXME if/when I figure these out
+
+        if(obj.collection() == "hltAK4CaloJetsCorrectedIDPassed::HLT"){
+          floats->hltcalojets.push_back(hltjet);
+        }
+        else if(obj.collection() == "hltAK4PFJetsCorrected::HLT" || obj.collection() == "hltAK4PFJetsLooseIDCorrected::HLT"){
+          floats->hltpfjets.push_back(hltjet);
+        }
+
+        // FIXME also need to add things into MFVNeutralino/plugins/EventProducer.cc
+        // FIXME also need to decide the matching criteria + variable to use (dR with eta x phi or dR with rapidity x phi? and what window size?)
+        // FIXME hey what are hltAK4PFJetsCorrected and hltAK4PFJetsLooseIDCorrected anyway? LooseID = some pileup rejection maybe?
+        // at least in 2017 signal MC, the following never seem to show up, though I do see them in cmssw.... should be careful though:
+        // bool is_calojet = obj.collection() == "hltAK4CaloJetsCorrected::HLT";
+        // bool is_pfjet = obj.collection() == "hltPFJetForBtag::HLT";
+
+        if (prints) {
+          std::cout << "TriggerFloats jet object for path " << mfv::hlt_paths[ipath]
                     << " pt " << obj.pt() << " eta " << obj.eta() << " phi " << obj.phi()
                     << " collection: " << obj.collection() << " ids (# = " << obj.filterIds().size() << "):";
           for (auto id : obj.filterIds())
