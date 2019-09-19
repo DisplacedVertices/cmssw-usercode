@@ -275,8 +275,9 @@ namespace jmt {
       h->Fill(x, y, weight());
     }
 
-    void print_event() {
-      printf("NtupleReader loop: r: %u l: %u e: %llu\n", nt_->base().run(), nt_->base().lumi(), nt_->base().event());
+    void print_event(bool newline=true) {
+      printf("NtupleReader loop: r: %u l: %u e: %llu", nt_->base().run(), nt_->base().lumi(), nt_->base().event());
+      if (newline) printf("\n");
     }
 
     typedef std::pair<bool,double> fcn_ret_t;
