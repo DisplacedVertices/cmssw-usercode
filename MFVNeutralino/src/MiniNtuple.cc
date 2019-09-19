@@ -89,6 +89,9 @@ namespace mfv {
   bool MiniNtuple::satisfiesTriggerAndOffline(size_t trig) const {
     if(!satisfiesTrigger(trig)) return false;
 
+    // for the trigger chains where we need to do any detailed matching
+    bool passed_kinematics = false;
+
     switch(trig){
       case b_HLT_PFHT1050 :
         return ht(40) > 1200 && njets >= 4;
@@ -96,7 +99,6 @@ namespace mfv {
       {
         if(njets < 4) return false;
 
-        bool passed_kinematics = false;
         for(int j0 = 0; j0 < njets; ++j0){
           if(!jet_hlt_match(j0) || jet_pt[j0] < 100) continue;
 
@@ -114,7 +116,6 @@ namespace mfv {
       {
         if(ht(30) < 300 || njets < 4) return false;
 
-        bool passed_kinematics = false;
         for(int j0 = 0; j0 < njets; ++j0){
           if(!jet_hlt_match(j0) || jet_pt[j0] < 75) continue;
 
@@ -138,7 +139,6 @@ namespace mfv {
       {
         if(ht(40) < 380 || njets < 6) return false;
 
-        bool passed_kinematics = false;
         for(int j0 = 0; j0 < njets; ++j0){
           if(!jet_hlt_match(j0) || jet_pt[j0] < 32) continue;
 
@@ -171,7 +171,6 @@ namespace mfv {
       {
         if(ht(40) < 380 || njets < 6) return false;
 
-        bool passed_kinematics = false;
         for(int j0 = 0; j0 < njets; ++j0){
           if(!jet_hlt_match(j0) || jet_pt[j0] < 32) continue;
 
@@ -204,7 +203,6 @@ namespace mfv {
       {
         if(ht(40) < 430 || njets < 6) return false;
 
-        bool passed_kinematics = false;
         for(int j0 = 0; j0 < njets; ++j0){
           if(!jet_hlt_match(j0) || jet_pt[j0] < 40) continue;
 
@@ -237,7 +235,6 @@ namespace mfv {
       {
         if(njets < 4) return false;
 
-        bool passed_kinematics = false;
         for(int j0 = 0; j0 < njets; ++j0){
           if(!jet_hlt_match(j0) || jet_pt[j0] < 116) continue;
 
@@ -255,7 +252,6 @@ namespace mfv {
       {
         if(ht(30) < 330 || njets < 4) return false;
 
-        bool passed_kinematics = false;
         for(int j0 = 0; j0 < njets; ++j0){
           if(!jet_hlt_match(j0) || jet_pt[j0] < 75) continue;
 
@@ -279,7 +275,6 @@ namespace mfv {
       {
         if(ht(40) < 400 || njets < 5) return false;
 
-        bool passed_kinematics = false;
         for(int j0 = 0; j0 < njets; ++j0){
           if(!jet_hlt_match(j0) || jet_pt[j0] < 100) continue;
 
@@ -307,7 +302,6 @@ namespace mfv {
       {
         if(ht(40) < 400 || njets < 6) return false;
 
-        bool passed_kinematics = false;
         for(int j0 = 0; j0 < njets; ++j0){
           if(!jet_hlt_match(j0) || jet_pt[j0] < 32) continue;
 
@@ -339,7 +333,6 @@ namespace mfv {
       {
         if(ht(40) < 450 || njets < 6) return false;
 
-        bool passed_kinematics = false;
         for(int j0 = 0; j0 < njets; ++j0){
           if(!jet_hlt_match(j0) || jet_pt[j0] < 36) continue;
 
