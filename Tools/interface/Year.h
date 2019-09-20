@@ -14,7 +14,7 @@
 #endif
 
 // this lets us uniquely determine the year from {MCStat,{JMT,MFV}Weight}Producer h_sums
-#define MFVNEUTRALINO_YEARCODE_MULT 2371
+#define MFVNEUTRALINO_YEARCODE_MULT 2371ULL
 #define MFVNEUTRALINO_YEARCODE (MFVNEUTRALINO_YEAR * MFVNEUTRALINO_YEARCODE_MULT)
 
 namespace jmt {

@@ -1,6 +1,7 @@
 #include "JMTucker/Tools/interface/Year.h"
 #include <cmath>
 #include <initializer_list>
+#include <limits>
 #include <stdexcept>
 
 namespace jmt {
@@ -18,13 +19,19 @@ namespace jmt {
   yearcode::yearcode(double cc)
     : year_(-1), nfiles_(-1)
   {
-    double ip; if (std::modf(cc, &ip) != 0.) throw std::invalid_argument("bad double yearcode");
-    const int c(cc);
+    typedef unsigned long long ull;
+    double ip;
+    if (cc < 0 || cc > std::numeric_limits<ull>::max() ||
+        std::modf(cc, &ip) != 0.)
+      throw std::invalid_argument("bad double yearcode");
+    const ull c(cc);
     for (int y : MFVNEUTRALINO_YEARS) {
-      const int cd = y * MFVNEUTRALINO_YEARCODE_MULT;
+      const ull cd = y * MFVNEUTRALINO_YEARCODE_MULT;
       if (c % cd == 0) {
         Year::set(year_ = y, false);
-        nfiles_ = c / cd;
+        const ull nf = c / cd;
+        if (nf > std::numeric_limits<int>::max()) throw std::overflow_error("nfiles overflow");
+        nfiles_ = nf;
         break;
       }
     }
