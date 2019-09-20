@@ -66,15 +66,15 @@ if __name__ == '__main__':
                         if ntk == 5 : continue 
 
                     var_1v  = str(ntk) + 'trk_1v_%s_%s' % (year, sys_var)
-                    if sys_var == 'vary_dphi' or sys_var == 'vary_eff':
+                    if sys_var in ['vary_dphi', 'vary_eff']:
                         var_1v = str(ntk) + 'trk_1v_%s_%s' % (year, 'nom')
                     ft_1v   = effs.at[var_1v,'ft']
                     efft_1v = effs.at[var_1v,'efft']
                     frt_1v  = effs.at[var_1v,'frt']
 
                     var_presel = 'presel_%s_%s' % (year, sys_var)
-                    if sys_var == 'vary_dphi' or sys_var == 'vary_eff':
-                        var_presel = str(ntk) + 'trk_1v_%s_%s' % (year, 'nom')
+                    if sys_var in ['vary_dphi', 'vary_eff']:
+                        var_presel = 'presel_%s_%s' % (year, 'nom')
                     ft_presel   = effs.at[var_presel,'ft']
                     efft_presel = effs.at[var_presel,'efft']
                     frt_presel  = effs.at[var_presel,'frt']

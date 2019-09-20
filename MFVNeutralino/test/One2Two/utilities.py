@@ -48,6 +48,8 @@ def cmd_merge_btags_nobtags():
 
                 for ntracks,weights in tuple_ntracks_weights :
                     files = ['2v_from_jets_%s_%dtrack_btags_%s.root' % (year, ntracks, _version), '2v_from_jets_%s_%dtrack_nobtags_%s.root' % (year, ntracks, _version)]
+                    if sys_var in ['vary_dphi', 'vary_eff']:
+                        files = ['2v_from_jets_%s_%dtrack_%s_btags_%s.root' % (year, ntracks, sys_var, _version), '2v_from_jets_%s_%dtrack_%s_nobtags_%s.root' % (year, ntracks, sys_var, _version)]
                     for fn in files:
                         if not os.path.isfile(fn):
                             raise RuntimeError('%s not found' % fn)
