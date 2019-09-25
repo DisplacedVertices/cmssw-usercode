@@ -49,8 +49,8 @@ void MFVEvent::lep_push_back(MFVEvent::lep_id_t id,
 
 void MFVEvent::jet_hlt_push_back(const reco::Candidate& jet, const std::vector<mfv::HLTJet>& hltjets){
 
-  // FIXME is 0.1*0.1 sufficient, and is eta x phi sufficient?
-  double hltmatchdist2 = 0.1*0.1;
+  // use dR = 0.4 for the matching (in eta x phi)
+  double hltmatchdist2 = 0.4*0.4;
   mfv::HLTJet hltmatch;
   for (auto hlt : hltjets) {
     const double dist2 = reco::deltaR2(jet.eta(), jet.phi(), hlt.p4.Eta(), hlt.p4.Phi());
