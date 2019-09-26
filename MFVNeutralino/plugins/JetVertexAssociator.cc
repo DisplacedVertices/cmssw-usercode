@@ -229,6 +229,12 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
       if (histos)
         h_n_jet_tracks->Fill(n_jet_tracks);
 
+      if (verbose) {
+        printf("jet with pt %f eta %f phi %f has %lu assoc tracks:\n", jet.pt(), jet.eta(), jet.phi(), n_jet_tracks);
+        for (auto r : jet_tracks)
+          printf("  pt %f eta %f phi %f\n", r->pt(), r->eta(), r->phi());
+      }
+
       const reco::SecondaryVertexTagInfo* jet_tag = jet.tagInfoSecondaryVertex(tag_info_name);
       const reco::Vertex* jet_tag_vtx = 0;
       TVector3 jet_tag_vtx_pos;
@@ -251,8 +257,12 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
             reco::TrackRef tk = itk->castTo<reco::TrackRef>();
             if (jet_tracks.count(tk) > 0) {
               ++ntracks;
-              if (tk->pt() > min_track_pt)
+              if (verbose) printf("tk pt %f eta %f phi %f also in vtx %f,%f,%f -> nshared %i\n", tk->pt(), tk->eta(), tk->phi(), vtx.x(), vtx.y(), vtx.z(), ntracks);
+              if (tk->pt() > min_track_pt) {
                 ++ntracks_ptmin;
+                if (verbose) printf("tk pt %f eta %f phi %f also in vtx %f,%f,%f -> nshared_minpt %i\n", tk->pt(), tk->eta(), tk->phi(), vtx.x(), vtx.y(), vtx.z(), ntracks_ptmin);
+              }
+
               sum_nhits += tk->hitPattern().numberOfValidHits();
             }
           }
@@ -344,7 +354,7 @@ void MFVJetVertexAssociator::produce(edm::Event& event, const edm::EventSetup&) 
       }        
 
       //if (verbose)
-      //  printf("ijet %lu pt %f eta %f phi %f  assoc ivtx %i\n", ijet, jet.pt(), jet.eta(), jet.phi(), indices[ijet]);
+      //printf("ijet %lu pt %f eta %f phi %f  assoc ivtx %i\n", ijet, jet.pt(), jet.eta(), jet.phi(), indices[ijet]);
     }
   }
 
