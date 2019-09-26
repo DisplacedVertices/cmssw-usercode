@@ -13,11 +13,6 @@
   <class name="std::vector<TLorentzVector>"/>
   <class name="edm::Wrapper<std::vector<TLorentzVector> >"/>
 
-  <class name="mfv::HLTJet"/>
-  <class name="edm::Wrapper<mfv::HLTJet>"/>
-  <class name="std::vector<mfv::HLTJet>"/>
-  <class name="edm::Wrapper<std::vector<mfv::HLTJet> >"/>
-
   <class name="mfv::TriggerFloats"/>
   <class name="edm::Wrapper<mfv::TriggerFloats>"/>
   <class name="MFVEvent"/>

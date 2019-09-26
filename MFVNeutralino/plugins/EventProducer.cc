@@ -345,7 +345,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->jet_energy.push_back(jet.energy());
     mevent->jet_gen_energy.push_back(jet.genJet() ? jet.genJet()->energy() : -1);
 
-    // FIXME note that I currently do nothing with calo jets here; see the "NOTE" in MFVNeutralino/plugins/TriggerFloats.cc
+    // match trigger and offline jets
     mevent->jet_hlt_push_back(jet, triggerfloats->hltpfjets);
 
     int bdisc_level = 0;
