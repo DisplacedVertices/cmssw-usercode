@@ -5,7 +5,6 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 
 namespace mfv {
-
   struct TriggerFloats {
     std::vector<TLorentzVector> l1jets;
     int nl1jets() const { return l1jets.size(); }
