@@ -47,7 +47,7 @@ void MFVEvent::lep_push_back(MFVEvent::lep_id_t id,
   lep_hlt_phi.push_back(hltmatch.Phi());
 }
 
-void MFVEvent::jet_hlt_push_back(const reco::Candidate& jet, const std::vector<TLorentzVector>& hltjets){
+void MFVEvent::jet_hlt_push_back(const reco::Candidate& jet, const std::vector<TLorentzVector>& hltjets, bool is_displaced_calojets){
 
   // use dR = 0.4 for the matching (in eta x phi)
   double hltmatchdist2 = 0.4*0.4;
@@ -59,8 +59,17 @@ void MFVEvent::jet_hlt_push_back(const reco::Candidate& jet, const std::vector<T
       hltmatch = hlt;
     }
   }
-  jet_hlt_pt.push_back(hltmatch.Pt());
-  jet_hlt_eta.push_back(hltmatch.Eta());
-  jet_hlt_phi.push_back(hltmatch.Phi());
-  jet_hlt_energy.push_back(hltmatch.E());
+
+  if(is_displaced_calojets){
+    displaced_jet_hlt_pt.push_back(hltmatch.Pt());
+    displaced_jet_hlt_eta.push_back(hltmatch.Eta());
+    displaced_jet_hlt_phi.push_back(hltmatch.Phi());
+    displaced_jet_hlt_energy.push_back(hltmatch.E());
+  }
+  else{
+    jet_hlt_pt.push_back(hltmatch.Pt());
+    jet_hlt_eta.push_back(hltmatch.Eta());
+    jet_hlt_phi.push_back(hltmatch.Phi());
+    jet_hlt_energy.push_back(hltmatch.E());
+  }
 }

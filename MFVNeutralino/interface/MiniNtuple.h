@@ -54,6 +54,15 @@ namespace mfv {
       // all others have the default value of 0
       return jet_hlt_pt[i] > min_jet_pt;
     }
+    float displaced_jet_hlt_pt[50];
+    float displaced_jet_hlt_eta[50];
+    float displaced_jet_hlt_phi[50];
+    float displaced_jet_hlt_energy[50];
+    bool displaced_jet_hlt_match(int i, float min_jet_pt=20.) const {
+      // an offline jet with a successful HLT match will have a nonzero displaced_jet_hlt_pt;
+      // all others have the default value of 0
+      return displaced_jet_hlt_pt[i] > min_jet_pt;
+    }
     float ht(float min_jet_pt=40.) const;
     bool is_btagged(int i, float min_bdisc=jmt::BTagging::discriminator_min(jmt::BTagging::tight)) const;
     int nbtags(std::vector<int> indices) const;

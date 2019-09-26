@@ -15,6 +15,8 @@ namespace mfv {
     float hltht;
     std::vector<TLorentzVector> hltpfjets;
     int nhltpfjets() const { return hltpfjets.size(); }
+    std::vector<TLorentzVector> hltdisplacedcalojets;
+    int nhltdisplacedcalojets() const { return hltdisplacedcalojets.size(); }
     std::vector<TLorentzVector> hltelectrons;
     std::vector<TLorentzVector> hltmuons;
     std::vector<int> L1decisions;

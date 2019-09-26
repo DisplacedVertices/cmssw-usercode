@@ -375,6 +375,9 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
         if(obj.collection() == "hltAK4PFJetsCorrected::HLT"){
           floats->hltpfjets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
         }
+        else if(obj.collection() == "hltDisplacedHLTCaloJetCollectionProducerLowPt::HLT" || obj.collection() == "hltDisplacedHLTCaloJetCollectionProducerMidPt::HLT"){
+          floats->hltdisplacedcalojets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
+        }
 
         if (prints) {
           std::cout << "TriggerFloats jet object for path " << mfv::hlt_paths[ipath]

@@ -346,7 +346,8 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->jet_gen_energy.push_back(jet.genJet() ? jet.genJet()->energy() : -1);
 
     // match trigger and offline jets
-    mevent->jet_hlt_push_back(jet, triggerfloats->hltpfjets);
+    mevent->jet_hlt_push_back(jet, triggerfloats->hltpfjets, false);
+    mevent->jet_hlt_push_back(jet, triggerfloats->hltdisplacedcalojets, true);
 
     int bdisc_level = 0;
     for (int i = 0; i < 3; ++i)
@@ -527,6 +528,10 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->jet_hlt_eta.clear();
     mevent->jet_hlt_phi.clear();
     mevent->jet_hlt_energy.clear();
+    mevent->displaced_jet_hlt_pt.clear();
+    mevent->displaced_jet_hlt_eta.clear();
+    mevent->displaced_jet_hlt_phi.clear();
+    mevent->displaced_jet_hlt_energy.clear();
     mevent->metx = 0;
     mevent->mety = 0;
     mevent->lep_id_.clear();

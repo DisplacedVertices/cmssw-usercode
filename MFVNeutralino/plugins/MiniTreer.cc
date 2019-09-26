@@ -109,6 +109,10 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.jet_hlt_eta[i] = mevent->jet_hlt_eta[i];
     nt.jet_hlt_phi[i] = mevent->jet_hlt_phi[i];
     nt.jet_hlt_energy[i] = mevent->jet_hlt_energy[i];
+    nt.displaced_jet_hlt_pt[i] = mevent->displaced_jet_hlt_pt[i];
+    nt.displaced_jet_hlt_eta[i] = mevent->displaced_jet_hlt_eta[i];
+    nt.displaced_jet_hlt_phi[i] = mevent->displaced_jet_hlt_phi[i];
+    nt.displaced_jet_hlt_energy[i] = mevent->displaced_jet_hlt_energy[i];
   }
 
   for (int i = 0; i < 2; ++i) {

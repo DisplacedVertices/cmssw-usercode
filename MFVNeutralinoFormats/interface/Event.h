@@ -236,9 +236,11 @@ struct MFVEvent {
   std::vector<float> jet_hlt_eta;
   std::vector<float> jet_hlt_phi;
   std::vector<float> jet_hlt_energy;
-  void jet_hlt_push_back(const reco::Candidate& jet, const std::vector<TLorentzVector>& hltjets);
-  int njets_hlt(float min_jet_pt) const { return std::count_if(jet_hlt_pt.begin(), jet_hlt_pt.end(),
-                                                           [min_jet_pt](float b) { return b > min_jet_pt; }); }
+  std::vector<float> displaced_jet_hlt_pt;
+  std::vector<float> displaced_jet_hlt_eta;
+  std::vector<float> displaced_jet_hlt_phi;
+  std::vector<float> displaced_jet_hlt_energy;
+  void jet_hlt_push_back(const reco::Candidate& jet, const std::vector<TLorentzVector>& hltjets, bool is_displaced_calojets);
 
   float jet_ht(float min_jet_pt=0.f) const { return std::accumulate(jet_pt.begin(), jet_pt.end(), 0.f,
                                                                     [min_jet_pt](float init, float b) { if (b > min_jet_pt) init += b; return init; }); }

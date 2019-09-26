@@ -29,6 +29,7 @@ namespace mfv {
     for (int i = 0; i < 50; ++i) {
       jet_pt[i] = jet_eta[i] = jet_phi[i] = jet_energy[i] = jet_bdisc[i] = 0;
       jet_hlt_pt[i] = jet_hlt_eta[i] = jet_hlt_phi[i] = jet_hlt_energy[i] = 0;
+      displaced_jet_hlt_pt[i] = displaced_jet_hlt_eta[i] = displaced_jet_hlt_phi[i] = displaced_jet_hlt_energy[i] = 0;
       jet_id[i] = 0;
     }
     tk0_qchi2.clear();
@@ -361,9 +362,33 @@ namespace mfv {
         return passed_kinematics;
       }
       case b_HLT_HT430_DisplacedDijet40_DisplacedTrack :
-        return ht(40) > 430 && njets >= 4 && jet_pt[0] > 40;
+      {
+        if(ht(40) < 430 || njets < 4) return false;
+
+        for(int j0 = 0; j0 < njets; ++j0){
+          if(!displaced_jet_hlt_match(j0) || jet_pt[j0] < 40) continue;
+
+          for(int j1 = j0+1; j1 < njets; ++j1){
+            if(!displaced_jet_hlt_match(j1) || jet_pt[j1] < 40) continue;
+            passed_kinematics = true;
+          }
+        }
+        return passed_kinematics;
+      }
       case b_HLT_HT650_DisplacedDijet60_Inclusive :
-        return ht(40) > 650 && njets >= 4 && jet_pt[0] > 60;
+      {
+        if(ht(40) < 650 || njets < 4) return false;
+
+        for(int j0 = 0; j0 < njets; ++j0){
+          if(!displaced_jet_hlt_match(j0) || jet_pt[j0] < 60) continue;
+
+          for(int j1 = j0+1; j1 < njets; ++j1){
+            if(!displaced_jet_hlt_match(j1) || jet_pt[j1] < 60) continue;
+            passed_kinematics = true;
+          }
+        }
+        return passed_kinematics;
+      }
       default :
       {
         throw std::invalid_argument(std::string(hlt_paths[trig]) + " not implemented in satisfiesTrigger");
@@ -428,6 +453,10 @@ namespace mfv {
     tree->Branch("jet_hlt_eta", nt.jet_hlt_eta, "jet_hlt_eta[njets]/F");
     tree->Branch("jet_hlt_phi", nt.jet_hlt_phi, "jet_hlt_phi[njets]/F");
     tree->Branch("jet_hlt_energy", nt.jet_hlt_energy, "jet_hlt_energy[njets]/F");
+    tree->Branch("displaced_jet_hlt_pt", nt.displaced_jet_hlt_pt, "displaced_jet_hlt_pt[njets]/F");
+    tree->Branch("displaced_jet_hlt_eta", nt.displaced_jet_hlt_eta, "displaced_jet_hlt_eta[njets]/F");
+    tree->Branch("displaced_jet_hlt_phi", nt.displaced_jet_hlt_phi, "displaced_jet_hlt_phi[njets]/F");
+    tree->Branch("displaced_jet_hlt_energy", nt.displaced_jet_hlt_energy, "displaced_jet_hlt_energy[njets]/F");
     tree->Branch("gen_x", nt.gen_x, "gen_x[2]/F");
     tree->Branch("gen_y", nt.gen_y, "gen_y[2]/F");
     tree->Branch("gen_z", nt.gen_z, "gen_z[2]/F");
@@ -520,6 +549,10 @@ namespace mfv {
     tree->SetBranchAddress("jet_hlt_eta", nt.jet_hlt_eta);
     tree->SetBranchAddress("jet_hlt_phi", nt.jet_hlt_phi);
     tree->SetBranchAddress("jet_hlt_energy", nt.jet_hlt_energy);
+    tree->SetBranchAddress("displaced_jet_hlt_pt", nt.displaced_jet_hlt_pt);
+    tree->SetBranchAddress("displaced_jet_hlt_eta", nt.displaced_jet_hlt_eta);
+    tree->SetBranchAddress("displaced_jet_hlt_phi", nt.displaced_jet_hlt_phi);
+    tree->SetBranchAddress("displaced_jet_hlt_energy", nt.displaced_jet_hlt_energy);
     tree->SetBranchAddress("gen_x", nt.gen_x);
     tree->SetBranchAddress("gen_y", nt.gen_y);
     tree->SetBranchAddress("gen_z", nt.gen_z);
