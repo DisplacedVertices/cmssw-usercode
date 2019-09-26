@@ -7,6 +7,8 @@ int main(int argc, char** argv) {
   if (!nr.parse_options(argc, argv) || !nr.init()) return 1;
   auto& nt = nr.nt();
   auto& bs = nt.bs();
+  auto& tks = nt.tracks();
+  auto& js = nt.jets();
   auto& vs = nt.vertices();
 
   auto h_dbs2derr = new TH1F("h_dbs2derr","",200,-0.01,0.01);
@@ -39,7 +41,13 @@ int main(int argc, char** argv) {
         h_ntracks->Fill(ntracks, vs.ntracks(i));
 
         const int njets = nt.vertex_jets(i).size();
-        if (njets != vs.njets(i)) { nr.print_event(false); printf(" found njets %i != stored %i\n", njets, vs.njets(i)); ok = false; }
+        if (njets != vs.njets(i)) { nr.print_event(false); printf(" found njets %i != stored %i\n", njets, vs.njets(i)); ok = false; 
+          for (auto x : nt.vertex_tracks_jets(i)) {
+            printf("  tk %5i: %10.4f, %10.4f, %10.4f   -> jet %5i", x.first, tks.pt(x.first), tks.eta(x.first), tks.phi(x.first), x.second);
+            if (x.second != 255) printf(": %10.4f, %10.4f, %10.4f\n", js.pt(x.second), js.eta(x.second), js.phi(x.second));
+            else printf(": none\n");
+          }
+        }
         h_dnjets->Fill(njets - vs.njets(i));
         h_njets->Fill(njets, vs.njets(i));
 
