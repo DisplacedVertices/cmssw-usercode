@@ -1,7 +1,9 @@
 #include "TFile.h"
 #include "TTree.h"
+#include "TH1F.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/TriggerEnum.h"
+#include "JMTucker/Tools/interface/Year.h"
 
 namespace mfv {
   MiniNtuple::MiniNtuple() {
@@ -646,6 +648,22 @@ namespace mfv {
   long long loop(const char* fn, const char* tree_path, bool (*fcn)(long long, long long, const mfv::MiniNtuple&)) {
     TFile* f = TFile::Open(fn);
     assert(f);
+
+    // Set the year for the proper btagging WPs
+    int year = 0;
+    TH1F* h_sums = (TH1F*) f->Get("mfvWeight/h_sums");
+    assert(h_sums);
+
+    for(int ibin = 1; ibin < h_sums->GetNbinsX()+1; ++ibin){
+      const std::string bin_label = h_sums->GetXaxis()->GetBinLabel(ibin);
+      if(bin_label == "yearcode_x_nfiles"){
+        const double yearcode_val = h_sums->GetBinContent(ibin);
+        year = jmt::yearcode(yearcode_val).year();
+      }
+    }
+    assert(year > 0);
+    //jmt::Year::set(year); // this is what works in master
+    jmt::BTagging::set_year(year);
 
     TTree* tree = (TTree*)f->Get(tree_path);
     assert(tree);
