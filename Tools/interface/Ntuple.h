@@ -144,6 +144,16 @@ namespace jmt {
     Vec3 pos() const { return Vec3(x(), y(), z()); }
     SymMat33 cov() const { SymMat33 c; c(0,0) = cxx(), c(1,1) = cyy(), c(2,2) = czz(); return c; }
 
+    float rho(float xx, float yy, float zz) const { return std::hypot(xx - x(zz), yy - y(zz)); }
+    float erho(float xx, float yy, float /*zz*/, float exx, float exy, float eyy) const {
+      float dx = xx - x(), dy = yy - y(); // JMTBAD we never used the slope-corrected version
+      if (dx == 0 && dy == 0) return std::numeric_limits<float>::infinity();
+      float Cxx = exx + cxx(), Cxy = exy + cxy(), Cyy = eyy + cyy();
+      return sqrt((Cxx*dx*dx + Cyy*dy*dy + 2*Cxy*dx*dy) / (dx*dx + dy*dy));
+    }
+    template <typename T> float rho (const T& v) const { return rho (v.x(), v.y(), v.z()); }
+    template <typename T> float erho(const T& v) const { return erho(v.x(), v.y(), v.z(), v.covariance(0,0), v.covariance(0,1), v.covariance(1,1)); }
+
   private:
     float x_;
     float y_;

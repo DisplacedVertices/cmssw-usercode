@@ -181,15 +181,15 @@ namespace mfv {
       float dx = -bs.x(), dy = -bs.y(); // JMTBAD we never used the slope-corrected version
       if (rescale) dx += rescale_x(i), dy += rescale_y(i);
       else         dx +=         x(i), dy +=         y(i);
-      if (dx == 0 && dy == 0) return -1;
+      if (dx == 0 && dy == 0) return std::numeric_limits<float>::infinity();
       float xx = bs.cxx(), yy = bs.cyy(), xy = bs.cxy();
       if (rescale) xx += rescale_cxx(i), yy += rescale_cyy(i), xy += rescale_cxy(i);
       else         xx +=         cxx(i), yy +=         cyy(i), xy +=         cxy(i);
       return sqrt((xx*dx*dx + yy*dy*dy + 2*xy*dx*dy)/(dx*dx + dy*dy));
     }
 
-    float edbv(int i) const { return rescale_bs2derr(i); }
-    template <typename BS> float dbv(int i, const BS& bs) const { return std::hypot(x(i) - bs.x(z(i)), y(i) - bs.y(z(i))); }
+    float edbv(int i) const { return rescale_bs2derr(i); } // JMTBAD
+    template <typename BS> float dbv(int i, const BS& bs) const { return bs.rho(x(i), y(i), z(i)); }
 
     template <typename BS> bool pass(int i, const BS& bs, const int min_ntracks=-1, const int max_ntracks=-1,
                                      int nm1=VertexNm1s::nm1_none, const double min_dbv=0.01, const double max_edbv=0.0025) const {
