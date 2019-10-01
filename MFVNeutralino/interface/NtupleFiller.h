@@ -28,7 +28,7 @@ namespace mfv {
     const mfv::MCInteraction& mci() const { return *mci_; }
   };
 
-  void NtupleAdd(VerticesSubNtuple&, const MFVVertexAux&, bool genmatch=false);
+  void NtupleAdd(VerticesSubNtuple&, const reco::Vertex&, const reco::Vertex& rescale_v, const MFVVertexAux&, bool genmatch=false);
 }
 
 #endif

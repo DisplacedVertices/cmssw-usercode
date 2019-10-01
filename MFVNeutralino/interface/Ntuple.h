@@ -169,13 +169,13 @@ namespace mfv {
     float rescale_cyz    (int i) const { return p_get(i, rescale_cyz_,  p_rescale_cyz_ ); }
     float rescale_czz    (int i) const { return p_get(i, rescale_czz_,  p_rescale_czz_ ); }
     uchar njets          (int i) const { return p_get(i, njets_,        p_njets_       ); }
-    float bs2derr        (int i) const { return p_get(i, bs2derr_,      p_bs2derr_     ); }
-    float rescale_bs2derr(int i) const { return p_get(i, rescale_bs2derr_, p_rescale_bs2derr_); }
+    float bs2derr        (int i) const { return p_get(i, bs2derr_,      p_bs2derr_     ); } // DELME
+    float rescale_bs2derr(int i) const { return p_get(i, rescale_bs2derr_, p_rescale_bs2derr_); } // DELME
     bool  genmatch       (int i) const { return p_get(i, genmatch_,     p_genmatch_    ); }
-    float pt             (int i) const { return p_get(i, pt_,           p_pt_          ); }
-    float eta            (int i) const { return p_get(i, eta_,          p_eta_         ); }
-    float phi            (int i) const { return p_get(i, phi_,          p_phi_         ); }
-    float mass           (int i) const { return p_get(i, mass_,         p_mass_        ); }
+    float pt             (int i) const { return p_get(i, pt_,           p_pt_          ); } // DELME
+    float eta            (int i) const { return p_get(i, eta_,          p_eta_         ); } // DELME
+    float phi            (int i) const { return p_get(i, phi_,          p_phi_         ); } // DELME
+    float mass           (int i) const { return p_get(i, mass_,         p_mass_        ); } // DELME
 
     template <typename BS> float bs2derr(int i, const BS& bs, bool rescale=false) const {
       float dx = -bs.x(), dy = -bs.y(); // JMTBAD we never used the slope-corrected version
@@ -188,8 +188,8 @@ namespace mfv {
       return sqrt((xx*dx*dx + yy*dy*dy + 2*xy*dx*dy)/(dx*dx + dy*dy));
     }
 
-    float edbv(int i) const { return rescale_bs2derr(i); } // JMTBAD
     template <typename BS> float dbv(int i, const BS& bs) const { return bs.rho(x(i), y(i), z(i)); }
+    float edbv(int i) const { return rescale_bs2derr(i); } // JMTBAD
 
     template <typename BS> bool pass(int i, const BS& bs, const int min_ntracks=-1, const int max_ntracks=-1,
                                      int nm1=VertexNm1s::nm1_none, const double min_dbv=0.01, const double max_edbv=0.0025) const {
@@ -266,8 +266,8 @@ namespace mfv {
     }
 
   private:
-    uchar vcode_; // this value is not very useful before cuts are applied
-    // missing: trig bits and floats; leptons?
+    uchar vcode_;
+    // missing: trig bits and floats; leptons (should be a Tools-level SubNtuple)
   };
 
   ////
@@ -366,13 +366,39 @@ namespace mfv {
       return r;
     }
 
-    std::set<int> vertex_jets(int iv) const {
+    std::set<int> vertex_jets_raw(int iv) const { // no arbitration of jets to vertices
       std::set<int> r;
       for (std::pair<int,int> p : vertex_tracks_jets(iv))
         if (p.second >= 0 && p.second < 255)
           r.insert(p.second);
       return r;
     }
+
+    std::vector<std::set<int>> vertices_jets() const { // arbitration: assign a jet to the vertex with which it shares the most tracks
+      int nv = vertices().n(), nj = jets().n();
+      std::vector<int> ntracks(nv * nj, 0);
+      for (int iv = 0; iv < nv; ++iv) {
+        if (vertices().ntracks(iv) < 3) // JMTBAD
+          continue;
+        for (auto tj : vertex_tracks_jets(iv))
+          if (tj.second >= 0 && tj.second < 255)
+            ++ntracks[nv*tj.second + iv];
+      }
+
+      std::vector<std::set<int>> r(nv);
+      for (int ij = 0; ij < nj; ++ij) {
+        int mx = 0, wv = -1;
+        for (int iv = 0; iv < nv; ++iv) {
+          int ntk = ntracks[nv*ij + iv];
+          if (ntk > mx) mx = ntk, wv = iv;
+        }
+        if (wv != -1) r[wv].insert(ij);
+      }
+
+      return r;
+    }
+
+    std::set<int> vertex_jets(int iv) const { return vertices_jets()[iv]; }
 
     TLorentzVector vertex_jets_p4(int iv) const {
       TLorentzVector p4;
@@ -383,13 +409,11 @@ namespace mfv {
 
     TLorentzVector vertex_tracks_jets_p4(int iv, const float mtk=0.13957) const {
       TLorentzVector p4;
-      std::vector<bool> seen_jet(jets().n(), false);
+      std::set<int> js = vertex_jets(iv);
+      for (int ij : js)
+        p4 += jets().p4(ij);
       for (std::pair<int,int> p : vertex_tracks_jets(iv))
-        if (p.second >= 0 && p.second < 255 && !seen_jet[p.second]) {
-          seen_jet[p.second] = true;
-          p4 += jets().p4(p.second);
-        }
-        else
+        if (p.second >= 0 && p.second < 255 && js.count(p.second) == 0)
           p4 += tracks().p4(p.first, mtk);
       return p4;
     }
