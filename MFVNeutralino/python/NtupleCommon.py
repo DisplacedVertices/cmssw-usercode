@@ -127,7 +127,10 @@ class NtupleSettings(CMSSWSettings):
         if self.run_n_tk_seeds:
             s += '_NTkSeeds'
         elif self.minitree_only:
-            s += '_MiniNtuple'
+            if '2' in str(self.minitree_only):
+                s += 'm'
+            else:
+                s += '_MiniNtuple'
         elif self.prepare_vis:
             s += '_PrepareVis'
 
