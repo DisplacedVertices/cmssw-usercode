@@ -26,6 +26,7 @@ public:
   enum { vertex_sel_none, vertex_sel_loose, vertex_sel_tight };
   const std::string vertex_sel_s;
   const int vertex_sel;
+  const bool verbose;
 };
 
 MFVMiniTreer2::MFVMiniTreer2(const edm::ParameterSet& cfg)
@@ -39,7 +40,8 @@ MFVMiniTreer2::MFVMiniTreer2(const edm::ParameterSet& cfg)
     kv_reco(new KalmanVertexFitter(cfg.getParameter<edm::ParameterSet>("kvr_params"), cfg.getParameter<edm::ParameterSet>("kvr_params").getParameter<bool>("doSmoothing"))),
     vertex_sel_s(cfg.getParameter<std::string>("vertex_sel")),
     vertex_sel(vertex_sel_s == "loose" ? vertex_sel_loose :
-            vertex_sel_s == "tight" ? vertex_sel_tight : vertex_sel_none)
+               vertex_sel_s == "tight" ? vertex_sel_tight : vertex_sel_none),
+    verbose(cfg.getParameter<bool>("verbose"))
 {}
 
 void MFVMiniTreer2::analyze(const edm::Event& event, const edm::EventSetup& setup) {
@@ -59,6 +61,14 @@ void MFVMiniTreer2::analyze(const edm::Event& event, const edm::EventSetup& setu
   edm::Handle<reco::VertexCollection> vertices;
   event.getByToken(vertices_token, vertices);
 
+  if (verbose) {
+    std::cout << "MFVMiniTreer2 run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n"
+              << "got " << vertices->size() << " vertices. before sorting:\n";
+    int i = 0;
+    for (const auto& v : *vertices)
+      std::cout << "  " << i++ << " " << v.x() << ", " << v.y() << ", " << v.z() << " ntracks " << v.nTracks(mfv::track_vertex_weight_min) << " isFake? " << v.isFake() << "\n";
+  }
+
   std::vector<size_t> indices(vertices->size());
   std::iota(indices.begin(), indices.end(), 0);
   auto vertices_sorter = [&vertices](size_t i1, size_t i2) {
@@ -70,6 +80,11 @@ void MFVMiniTreer2::analyze(const edm::Event& event, const edm::EventSetup& setu
     return n1 > n2;
   };
   std::sort(indices.begin(), indices.end(), vertices_sorter);
+  if (verbose) {
+    std::cout << "sort order:";
+    for (int i : indices) std::cout << " " << i;
+    std::cout << "\n";
+  }
 
   edm::Handle<MFVVertexAuxCollection> auxes;
   event.getByToken(auxes_token, auxes);
@@ -81,12 +96,16 @@ void MFVMiniTreer2::analyze(const edm::Event& event, const edm::EventSetup& setu
   for (size_t i : indices) { // JMTBAD SubFiller for this?
     const reco::Vertex& v = (*vertices)[i];
     const int ntracks = v.nTracks(mfv::track_vertex_weight_min);
+    if (v.isFake() || ntracks == 0) continue; // avoid junk put in from the nm1 refits
 
     // rescaled track fit
     std::vector<reco::TransientTrack> /*ttks,*/ rs_ttks;
     for (auto it = v.tracks_begin(), ite = v.tracks_end(); it != ite; ++it)
       if (v.trackWeight(*it) >= mfv::track_vertex_weight_min)
         rs_ttks.push_back(tt_builder->build(track_rescaler.scale(**it).rescaled_tk));
+
+    if (verbose) std::cout << "processing " << i << " with ntracks " << ntracks << " and " << rs_ttks.size() << " rescaled tks\n";
+
     assert(rs_ttks.size() > 1);
     const reco::Vertex rescale_v(TransientVertex(kv_reco->vertex(rs_ttks)));
 

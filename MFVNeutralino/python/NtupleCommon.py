@@ -68,6 +68,7 @@ def minitree_only(process, mode, settings, output_commands):
                                                   vertices_src = cms.InputTag('mfvVertices'),
                                                   auxes_src = cms.InputTag('mfvVerticesAuxPresel'),
                                                   vertex_sel = cms.string('tight' if 'tight' in mode else 'loose'),
+                                                  verbose = cms.bool(False),
                                                   )
             weight_obj = process.jmtWeightMiniAOD if settings.is_miniaod else process.jmtWeight
             process.p *= weight_obj * process.mfvMiniTree2
