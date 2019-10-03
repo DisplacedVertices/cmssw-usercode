@@ -41,6 +41,30 @@ namespace jmt {
 
   ////
 
+  TriggerSubNtuple::TriggerSubNtuple() {
+    set_pfx("trg");
+    clear();
+    p_bits_ = 0;
+  }
+
+  void TriggerSubNtuple::clear() {
+    bits_.clear();
+  }
+
+  void TriggerSubNtuple::write_to_tree(TTree* t) {
+    t->Branch(TString::Format("%s_bits", pfx()), &bits_);
+  }
+
+  void TriggerSubNtuple::read_from_tree(TTree* t) {
+    t->SetBranchAddress(TString::Format("%s_bits", pfx()), &p_bits_);
+  }
+
+  void TriggerSubNtuple::copy_vectors() {
+    bits_ = *p_bits_;
+  }
+
+  ////
+
   BeamspotSubNtuple::BeamspotSubNtuple() {
     set_pfx("bs");
     clear();

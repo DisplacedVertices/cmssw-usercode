@@ -79,6 +79,9 @@ namespace jmt {
     void set_nallpv(uchar x) { nallpv_ = x; }
     uchar nallpv() const { return nallpv_; }
 
+    typedef std::tuple<unsigned, unsigned, unsigned long long> RLE;
+    static RLE make_RLE(unsigned r, unsigned l, unsigned long long e) { return std::make_tuple(r,l,e); }
+    RLE rle() const { return make_RLE(run(), lumi(), event()); }
     bool is_mc() const { return run() == 1; }
 
   private:
@@ -90,6 +93,27 @@ namespace jmt {
     uchar npu_;
     float rho_;
     uchar nallpv_;
+  };
+
+  ////
+
+  class TriggerSubNtuple : public INtuple {
+  public:
+    TriggerSubNtuple();
+    virtual void clear();
+    virtual void write_to_tree(TTree* tree);
+    virtual void read_from_tree(TTree* tree);
+    virtual void copy_vectors();
+
+    void set(vbool bits) {
+      bits_ = bits;
+    }
+
+    int n() const { return p_size(bits_, p_bits_); }
+    bool bit(int i) const { return p_get(i, bits_, p_bits_); }
+
+  private:
+    vbool bits_; vbool* p_bits_;
   };
 
   ////
