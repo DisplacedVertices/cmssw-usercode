@@ -613,40 +613,47 @@ namespace jmt {
   };
 
 
-  class TrackingAndJetsNtuple : public TrackingNtuple {
+  class TrackingAndJetsNtuple : public TrackingNtuple { // JMTBAD rename
   public:
     TrackingAndJetsNtuple() { clear(); }
 
     virtual void clear() {
       TrackingNtuple::clear();
+      trigger().clear();
       jets().clear();
       pf().clear();
     }
 
     virtual void write_to_tree(TTree* t) {
       TrackingNtuple::write_to_tree(t);
+      trigger().write_to_tree(t);
       jets().write_to_tree(t);
       pf().write_to_tree(t);
     }
 
     virtual void read_from_tree(TTree* t) {
       TrackingNtuple::read_from_tree(t);
+      trigger().read_from_tree(t);
       jets().read_from_tree(t);
       pf().read_from_tree(t);
     }
 
     virtual void copy_vectors() {
       TrackingNtuple::copy_vectors();
+      trigger().copy_vectors();
       jets().copy_vectors();
       pf().copy_vectors();
     }
 
+    TriggerSubNtuple& trigger() { return trigger_; }
     JetsSubNtuple& jets() { return jets_; }
     PFSubNtuple& pf() { return pf_; }
+    const TriggerSubNtuple& trigger() const { return trigger_; }
     const JetsSubNtuple& jets() const { return jets_; }
     const PFSubNtuple& pf() const { return pf_; }
 
   private:
+    TriggerSubNtuple trigger_;
     JetsSubNtuple jets_;
     PFSubNtuple pf_;
   };

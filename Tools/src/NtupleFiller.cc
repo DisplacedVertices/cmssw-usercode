@@ -2,6 +2,7 @@
 #include "JMTucker/Tools/interface/NtupleFiller.h"
 #include "JMTucker/Tools/interface/TrackerSpaceExtent.h"
 #include "JMTucker/Tools/interface/TrackTools.h"
+#include "JMTucker/Tools/interface/TriggerHelper.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
 namespace jmt {
@@ -28,6 +29,16 @@ namespace jmt {
     edm::Handle<reco::VertexCollection> pvs;
     event.getByToken(pvs_token_, pvs);
     nt_.set_nallpv(pvs->size());
+  }
+
+  void TriggerSubNtupleFiller::operator()(const edm::Event& event) {
+    edm::Handle<edm::TriggerResults> h;
+    event.getByToken(token_, h);
+    TriggerHelper helper(*h, event.triggerNames(*h));
+    std::vector<bool> bits(paths_.size(), false);
+    for (size_t i = 0, ie = paths_.size(); i < ie; ++i)
+      bits[i] = helper.pass_any_version(paths_[i], false);
+    nt_.set(bits);
   }
 
   void BeamspotSubNtupleFiller::operator()(const edm::Event& event) {
@@ -213,6 +224,7 @@ namespace jmt {
     base_filler_(e);
     bs_filler_(e);
     pvs_filler_(e, p_.pvs_subtract_bs() ? &bs() : 0);
+    trigger_filler_(e);
     jets_filler_(e);
     pf_filler_(e);
     if (p_.fill_tracks())

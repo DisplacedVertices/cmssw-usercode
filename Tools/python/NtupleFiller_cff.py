@@ -4,6 +4,8 @@ from JMTucker.Tools.TrackRefGetter_cff import *
 
 jmtNtupleFiller = cms.PSet(
     input_is_miniaod = cms.bool(False),
+    trigger_results_src = cms.InputTag('TriggerResults', '', 'HLT'),
+    trigger_paths = cms.vstring(), # each must end in _v
     gen_particles_src = cms.InputTag('genParticles'),
     gen_vertex_src = cms.InputTag('mfvGenParticles', 'genVertex'),
     mci_src = cms.InputTag('mfvGenParticles'),

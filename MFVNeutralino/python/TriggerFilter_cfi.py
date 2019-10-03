@@ -38,6 +38,8 @@ cross_paths = [
     "HLT_Mu15_IsoVVVL_PFHT450_v*",
     ]
 
+all_paths = jet_paths + bjet_paths + displaced_dijet_paths + lepton_paths + cross_paths
+
 mfvTriggerFilter = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone(
     HLTPaths = jet_paths + lepton_paths + cross_paths,
     andOr = True, # = OR

@@ -70,6 +70,8 @@ def minitree_only(process, mode, settings, output_commands):
                                                   vertex_sel = cms.string('tight' if 'tight' in mode else 'loose'),
                                                   verbose = cms.bool(False),
                                                   )
+            from JMTucker.MFVNeutralino.TriggerFilter_cfi import all_paths as trigger_paths
+            process.mfvMiniTree2.trigger_paths = [x.replace('_v*', '_v') for x in trigger_paths]
             weight_obj = process.jmtWeightMiniAOD if settings.is_miniaod else process.jmtWeight
             process.p *= weight_obj * process.mfvMiniTree2
         else:

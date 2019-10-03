@@ -3,6 +3,7 @@
 
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
+#include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/Common/interface/ValueMap.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
@@ -35,6 +36,21 @@ namespace jmt {
         pileup_token_(cc.consumes<std::vector<PileupSummaryInfo>>(cfg.getParameter<edm::InputTag>("pileup_info_src"))),
         pvs_token_(cc.consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertices_src"))),
         rho_token_(cc.consumes<double>(cfg.getParameter<edm::InputTag>("rho_src")))
+    {}
+    void operator()(const edm::Event&);
+  };
+
+  class TriggerSubNtupleFiller {
+    TriggerSubNtuple& nt_;
+    const edm::InputTag tag_;
+    const edm::EDGetTokenT<edm::TriggerResults> token_;
+    const std::vector<std::string> paths_;
+  public:
+    TriggerSubNtupleFiller(TriggerSubNtuple& nt, const edm::ParameterSet& cfg, edm::ConsumesCollector&& cc)
+      : nt_(nt),
+        tag_(cfg.getParameter<edm::InputTag>("trigger_results_src")),
+        token_(cc.consumes<edm::TriggerResults>(tag_)),
+        paths_(cfg.getParameter<std::vector<std::string>>("trigger_paths"))
     {}
     void operator()(const edm::Event&);
   };
@@ -223,9 +239,9 @@ namespace jmt {
     TrackingAndJetsNtupleFillerParams tracks_cut      (tracks_cut_fcn x) { TrackingAndJetsNtupleFillerParams y(*this); y.tracks_cut_       = x; return y; }
   };
 
-// this is not great but I didn't want to spend time figuring out how to share a single ConsumesCollector instance
-#define NF_CC_TrackingAndJets_p edm::ConsumesCollector&& cc0, edm::ConsumesCollector&& cc1, edm::ConsumesCollector&& cc2, edm::ConsumesCollector&& cc3, edm::ConsumesCollector&& cc4, edm::ConsumesCollector&& cc5
-#define NF_CC_TrackingAndJets_v consumesCollector(),          consumesCollector(),          consumesCollector(),          consumesCollector(),          consumesCollector(),          consumesCollector()
+// this is icky but I didn't want to spend time figuring out how to share a single ConsumesCollector instance
+#define NF_CC_TrackingAndJets_p edm::ConsumesCollector&& cc0, edm::ConsumesCollector&& cc1, edm::ConsumesCollector&& cc2, edm::ConsumesCollector&& cc3, edm::ConsumesCollector&& cc4, edm::ConsumesCollector&& cc5, edm::ConsumesCollector&& cc6
+#define NF_CC_TrackingAndJets_v consumesCollector(),          consumesCollector(),          consumesCollector(),          consumesCollector(),          consumesCollector(),          consumesCollector(),          consumesCollector()
 
   class TrackingAndJetsNtupleFiller : public INtupleFiller {
     TrackingAndJetsNtuple& nt_;
@@ -233,6 +249,7 @@ namespace jmt {
     BaseSubNtupleFiller base_filler_;
     BeamspotSubNtupleFiller bs_filler_;
     PrimaryVerticesSubNtupleFiller pvs_filler_;
+    TriggerSubNtupleFiller trigger_filler_;
     JetsSubNtupleFiller jets_filler_;
     PFSubNtupleFiller pf_filler_;
     TracksSubNtupleFiller tracks_filler_;
@@ -244,14 +261,16 @@ namespace jmt {
         base_filler_(nt.base(), cfg, std::move(cc0)),
         bs_filler_(nt.bs(), cfg, std::move(cc1)),
         pvs_filler_(nt.pvs(), cfg, std::move(cc2), p.pvs_filter(), p.pvs_first_only()),
-        jets_filler_(nt.jets(), cfg, std::move(cc3), p.jets_cut()),
-        pf_filler_(nt.pf(), cfg, std::move(cc4)),
-        tracks_filler_(nt.tracks(), cfg, std::move(cc5), p.tracks_cut_level(), p.tracks_cut())
+        trigger_filler_(nt.trigger(), cfg, std::move(cc3)),
+        jets_filler_(nt.jets(), cfg, std::move(cc4), p.jets_cut()),
+        pf_filler_(nt.pf(), cfg, std::move(cc5)),
+        tracks_filler_(nt.tracks(), cfg, std::move(cc6), p.tracks_cut_level(), p.tracks_cut())
     {}
 
     BaseSubNtupleFiller base_filler() { return base_filler_; }
     BeamspotSubNtupleFiller bs_filler() { return bs_filler_; }
     PrimaryVerticesSubNtupleFiller pvs_filler() { return pvs_filler_; }
+    TriggerSubNtupleFiller trigger_filler() { return trigger_filler_; }
     JetsSubNtupleFiller jets_filler() { return jets_filler_; }
     PFSubNtupleFiller pf_filler() { return pf_filler_; }
     TracksSubNtupleFiller tracks_filler() { return tracks_filler_; }
