@@ -24,15 +24,12 @@ int main(int argc, char** argv) {
   }
 
   nr.loop([&]() {
-      int c[8] = {0};
-      for (int i : vs.pass(nt.bs())) {
-        const int ntk = vs.ntracks(i);
-        if      (ntk == 3) ++c[3], ++c[7];
-        else if (ntk == 4) ++c[4], ++c[7];
-        else if (jmt::AnalysisEras::is_mc() && ntk >= 5) ++c[5];
-      }
+      if (!nt.pass_presel())
+        NR_loop_continue;
 
+      auto c = nt.count_vertices(jmt::AnalysisEras::is_mc());
       const double w = nr.weight();
+
       for (int ntk : {7,3,4,5}) {
         if (c[ntk] == 0) continue;
         const int i = 4*(c[ntk] >= 2) + (ntk == 7 ? 0 : ntk-2); // see axis labels above

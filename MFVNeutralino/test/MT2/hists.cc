@@ -371,12 +371,12 @@ int main(int argc, char** argv) {
   //////////////////////////////////////////////////////////////////////
 
   nr.loop([&]() {
+      if (!nt.pass_presel())
+        NR_loop_continue;
+
       rtks.setup(nt.base());
 
       for (auto ec : eclasses) {
-        if (jets.ht() < 1200 || jets.nminpt() < 4) // JMTBAD trigger bits
-          continue;
-
         const auto vs_pass = vs.pass(bs, ec.min_ntk(), ec.max_ntk(), ec.nm1());
         const int nv = vs_pass.size();
         if (!ec.ok(nv))

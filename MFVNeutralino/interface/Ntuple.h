@@ -191,6 +191,8 @@ namespace mfv {
     template <typename BS> float dbv(int i, const BS& bs) const { return bs.rho(x(i), y(i), z(i)); }
     float edbv(int i) const { return rescale_bs2derr(i); } // JMTBAD
 
+    bool inside_beampipe(int i) const { return jmt::Geometry::inside_beampipe(x(i), y(i)); }
+
     template <typename BS> bool pass(int i, const BS& bs, const int min_ntracks=-1, const int max_ntracks=-1,
                                      int nm1=VertexNm1s::nm1_none, const double min_dbv=0.01, const double max_edbv=0.0025) const {
       return
@@ -198,7 +200,7 @@ namespace mfv {
         (max_ntracks < 0 || ntracks(i) <= max_ntracks) &&
         (nm1 == VertexNm1s::nm1_all || nm1 == VertexNm1s::nm1_dbv      || dbv(i, bs) > min_dbv) &&
         (nm1 == VertexNm1s::nm1_all || nm1 == VertexNm1s::nm1_edbv     || edbv(i) < max_edbv) &&
-        (nm1 == VertexNm1s::nm1_all || nm1 == VertexNm1s::nm1_beampipe || jmt::Geometry::inside_beampipe(x(i), y(i)));
+        (nm1 == VertexNm1s::nm1_all || nm1 == VertexNm1s::nm1_beampipe || inside_beampipe(i));
     }
 
     template <typename BS> std::vector<int> pass(const BS& bs, const int min_ntracks=-1, const int max_ntracks=-1,
@@ -329,6 +331,35 @@ namespace mfv {
     const GenTruthSubNtuple& gentruth() const { return gentruth_; }
     const VerticesSubNtuple& vertices() const { return vertices_; }
     const MiniNtuple2SubNtuple& event() const { return event_; }
+
+    bool pass_presel() const {
+      return jets().nminpt(20) >= 4 && jets().ht(40) >= 1200;  // JMTBAD trigger bits
+    }
+
+    std::map<int, std::vector<int>> classify_vertices(bool unblind_ntk5, bool req_pass=true) const {
+      std::map<int, std::vector<int>> r;
+      for (int i = 0, ie = vertices().n(); i < ie; ++i)
+        if (!req_pass || vertices().pass(i, bs())) {
+          const int ntk = vertices().ntracks(i);
+          if      (ntk == 3) r[3].push_back(i), r[7].push_back(i);
+          else if (ntk == 4) r[4].push_back(i), r[7].push_back(i);
+          else if (unblind_ntk5 && ntk >= 5) r[5].push_back(i);
+        }
+      return r;
+    }
+
+    std::vector<int> count_vertices(bool unblind_ntk5, bool req_pass=true) const {
+      std::vector<int> c(8, 0);
+      auto v = classify_vertices(unblind_ntk5, req_pass);
+      for (int ntk : {7,3,4,5})
+        c[ntk] = v[ntk].size();
+      return c;
+    }
+
+    float dvv(int i0, int i1) const {
+      return std::hypot(vertices().x(i0) - vertices().x(i1),
+                        vertices().y(i0) - vertices().y(i1));
+    }
 
     std::vector<int> vertex_tracks(int iv) const {
       const size_t n = vertices().ntracks(iv);
