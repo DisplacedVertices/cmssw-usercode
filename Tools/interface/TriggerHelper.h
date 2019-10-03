@@ -3,19 +3,12 @@
 
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "FWCore/Common/interface/TriggerNames.h"
-#include "FWCore/Framework/interface/Event.h"
 
 struct TriggerHelper {
   const edm::TriggerResults& trigger_results;
   const edm::TriggerNames& trigger_names;
 
   bool debug;
-
-  static const edm::TriggerResults& _get(const edm::Event& event, const edm::EDGetTokenT<edm::TriggerResults>& token) {
-    edm::Handle<edm::TriggerResults> h;
-    event.getByToken(token, h);
-    return *h;
-  }
 
   // path2 must end in _v for this cheap comparison to work
   static bool path_same_without_version(const std::string& path, const std::string& path2) {
@@ -24,8 +17,6 @@ struct TriggerHelper {
   }
 
   TriggerHelper(const edm::TriggerResults& trigger_results_, const edm::TriggerNames& trigger_names_) : trigger_results(trigger_results_), trigger_names(trigger_names_), debug(false) {}
-  TriggerHelper(const edm::Event& event, const edm::EDGetTokenT<edm::TriggerResults>& token)
-    : trigger_results(_get(event, token)), trigger_names(event.triggerNames(trigger_results)), debug(false) {}
 
   bool pass(const std::string& name, bool& found) const {
     const unsigned ndx = trigger_names.triggerIndex(name);
@@ -50,7 +41,7 @@ struct TriggerHelper {
       throw cms::Exception("TriggerHelper") << "no trigger with name " << name << " found\n";
     return result;
   }
-   
+
   bool pass(const char* fmt, int range_lo, int range_hi, bool throw_not_found=true) const {
     char name[512];
     for (int i = range_lo; i <= range_hi; ++i) {
@@ -62,18 +53,6 @@ struct TriggerHelper {
     }
     if (throw_not_found)
       throw cms::Exception("TriggerHelper") << "no trigger for fmt " << fmt << " range " << range_lo << "-" << range_hi << " found";
-    return false;
-  }
-
-  bool pass_any_version(const std::string& trigger, bool throw_not_found=true) const {
-    for (size_t ipath = 0, ipathe = trigger_names.size(); ipath < ipathe; ++ipath) {
-      const std::string path = trigger_names.triggerName(ipath);
-      if (path_same_without_version(path, trigger))
-        return trigger_results.accept(ipath);
-    }
-    
-    if (throw_not_found)
-      throw cms::Exception("TriggerHelper") << "no trigger for " << trigger << " found";
     return false;
   }
 
@@ -89,6 +68,12 @@ struct TriggerHelper {
       }
     }
     return std::make_pair(pass, found);
+  }
+
+  bool pass_any_version(const std::string& trigger, bool throw_not_found=true) const {
+    auto paf = pass_and_found_any_version(trigger);
+    if (!paf.second && throw_not_found) throw cms::Exception("TriggerHelper") << "no trigger for " << trigger << " found";
+    return paf.first;
   }
 };
 

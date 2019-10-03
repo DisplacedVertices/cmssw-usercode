@@ -24,7 +24,6 @@
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
 #include "JMTucker/Tools/interface/BTagging.h"
 #include "JMTucker/Tools/interface/GenUtilities.h"
-#include "JMTucker/Tools/interface/TriggerHelper.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
 class MFVEventProducer : public edm::EDProducer {
