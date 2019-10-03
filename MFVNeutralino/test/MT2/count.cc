@@ -3,10 +3,12 @@
 
 int main(int argc, char** argv) {
   jmt::NtupleReader<mfv::MiniNtuple2> nr;
-  nr.init_options("mfvMiniTree2/t", "CountV27mm", "nr_ntuplev27mm");
+  std::vector<int> to_print;
+  nr.init_options("mfvMiniTree2/t", "CountV27mm", "nr_ntuplev27mm")
+    ("print-by-ntracks,p", boost::program_options::value<std::vector<int>>(&to_print)->multitoken(), "print event numbers for events with vertices passing with these ntracks (3,4,7,5)")
+    ;
   if (!nr.parse_options(argc, argv) || !nr.init()) return 1;
   auto& nt = nr.nt();
-  auto& vs = nt.vertices();
 
   auto h_n = new TH1D("h_n", "", 8, 0, 8);
   auto h_w = new TH1D("h_w", "", 8, 0, 8);
@@ -23,6 +25,9 @@ int main(int argc, char** argv) {
     h->GetXaxis()->SetBinLabel(8, ">=2v, >=5 track");
   }
 
+  std::vector<bool> to_print_b(8, false);
+  for (int ntk : {7,3,4,5}) to_print_b[ntk] = std::find(to_print.begin(), to_print.end(), ntk) != to_print.end();
+
   nr.loop([&]() {
       if (!nt.pass_presel())
         NR_loop_continue;
@@ -32,6 +37,7 @@ int main(int argc, char** argv) {
 
       for (int ntk : {7,3,4,5}) {
         if (c[ntk] == 0) continue;
+        if (to_print_b[ntk]) { printf("n%i = %i in ", ntk, c[ntk]); nr.print_event(); }
         const int i = 4*(c[ntk] >= 2) + (ntk == 7 ? 0 : ntk-2); // see axis labels above
         h_n->Fill(i);
         h_w->Fill(i, w);
