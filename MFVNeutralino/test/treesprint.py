@@ -151,6 +151,10 @@ for ntk in ntks:
             name = fn.replace(snames[sname], '').replace('.root', '')
         else:
             name = sname
+        for crabdirs in 'crab_dirs', 'crabdirs', 'crab3dirs':
+            crabdirs += '/'
+            if crabdirs in name:
+                name = name[name.index(crabdirs)+len(crabdirs):]
 
         is_sig = sname.startswith('mfv_')
         is_data = sname.startswith('JetHT') or sname.startswith('SingleMuon') or sname.startswith('SingleElectron')
