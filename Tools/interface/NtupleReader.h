@@ -72,6 +72,7 @@ namespace jmt {
         ("same-name,f",    po::bool_switch       (&same_fn_)       ->default_value(false),        "override output filename with basename of input filename")
         ("tree-path,t",    po::value<std::string>(&tree_path_)     ->default_value(tree_path),    "the tree path")
         ("json,j",         po::value<std::string>(&json_),                                        "lumi mask json file for data")
+        ("events-only",    po::value<std::vector<entry_t>>(&events_only_)->multitoken(),          "list of events (run,lumi,event) to run on")
         ("every,e",        po::bool_switch       (&every_)         ->default_value(false),        "print a message every event")
         ("quiet,q",        po::bool_switch       (&quiet_)         ->default_value(false),        "whether to be quiet (suppresses progress and timing prints)")
         ("silent,l",       po::bool_switch       (&silent_)        ->default_value(false),        "whether to be silent (absolutely no prints from us)")
@@ -135,12 +136,20 @@ namespace jmt {
           std::cerr << "tree_path changed to " << tree_path_ << "\n";
         }
 
+        if (events_only_.size() % 3 == 0)
+          for (size_t i = 0, ie = events_only_.size(); i < ie; i += 3)
+            events_only_s_.insert(jmt::BaseSubNtuple::make_RLE(events_only_[i], events_only_[i+1], events_only_[i+2]));
+        else {
+          std::cerr << "events_only arg list must have length that is a multiple of 3\n";
+          return false;
+        }
+
         if (num_chunks_ <= 0 || which_chunk_ < 0 || which_chunk_ >= num_chunks_) {
           std::cerr << "required: num_chunks >= 1 and 0 <= which_chunk < num_chunks\n";
           return false;
         }
 
-        if (!silent_)
+        if (!silent_) {
           std::cout << argv[0] << " with options:"
                     << " in_fn: " << in_fn_
                     << " out_fn: " << out_fn_
@@ -152,6 +161,13 @@ namespace jmt {
                     << " weights: " << use_weights_
                     << " pu_weights: " << (pu_weights_ != "" ? pu_weights_ : "none")
                     << "\n";
+          if (events_only_.size()) {
+            std::cout << "events_only:";
+            for (size_t i = 0, ie = events_only_.size(); i < ie; i += 3)
+              std::cout << " (" << events_only_[i] << " " << events_only_[i+1] << " " << events_only_[i+2] << ")";
+            std::cout << "\n";
+          }
+        }
       }
 
       return true;
@@ -199,6 +215,7 @@ namespace jmt {
       }
 
       nentries_ = t_->GetEntries();
+      assert(nentries_ > 0); // JMTBAD
       const entry_t per = num_chunks_ > 1 ? nentries_ / double(num_chunks_) : nentries_;
       entry_start_ = which_chunk_ * per;
       entry_end_ = which_chunk_ == num_chunks_ - 1 ? nentries_ : (which_chunk_+1)*per;
@@ -288,10 +305,12 @@ namespace jmt {
       entry_t notskipped = 0, nnegweight = 0;
       entry_t print_per = entries_run_ / 20;
       if (print_per == 0) print_per = 1;
-      if (!quiet_) printf("tree has %llu entries; running on %llu-%llu\n", nentries_, entry_start_, entry_end_-1);
+      if (!quiet_) printf("tree has %llu entries from %.0f; running on %llu-%llu\n", nentries_, norm_, entry_start_, entry_end_-1);
       for (entry_t jj = entry_start_; jj < entry_end_; ++jj) {
         if (t_->LoadTree(jj) < 0) break;
         if (t_->GetEntry(jj) <= 0) continue;
+        if (!events_only_s_.empty() && events_only_s_.count(nt_->base().rle()) == 0)
+          continue;
         if (every_) print_event();
         else if (!quiet_ && jj % print_per == 0) { printf("\r%llu", jj); fflush(stdout); }
 
@@ -322,6 +341,8 @@ namespace jmt {
     }
 
   private:
+    typedef unsigned long long entry_t;
+
     boost::program_options::options_description desc_;
 
     std::string in_fn_;
@@ -329,6 +350,8 @@ namespace jmt {
     bool same_fn_;
     std::string tree_path_;
     std::string json_;
+    std::vector<entry_t> events_only_;
+    std::set<jmt::BaseSubNtuple::RLE> events_only_s_;
     bool every_;
     bool quiet_;
     bool silent_;
@@ -357,7 +380,6 @@ namespace jmt {
     double norm_;
     int year_;
 
-    typedef unsigned long long entry_t;
     entry_t nentries_;
     entry_t entry_start_;
     entry_t entry_end_;
