@@ -10,8 +10,7 @@ cmssw_from_argv(process)
 process.load('JMTucker.MFVNeutralino.MiniTree_cff')
 
 if not is_mc:
-    # blind >=5-track events
-    del process.pMiniTree
+    process.mfvAnalysisCutsGE1Vtx.max_nvertex = 1 # 5-track 2-vertex blind
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
