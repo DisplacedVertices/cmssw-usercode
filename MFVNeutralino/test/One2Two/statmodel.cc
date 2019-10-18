@@ -345,7 +345,7 @@ int main(int, char**) {
     const double rho_compare_ymax = h_rho_compare->GetMaximum() * 1.4;
     double rho_compare_ymin = 1e-4;
     for (int ibin = h_rho_compare->GetNbinsX(); ibin >= 1; --ibin)
-      if (h_rho_compare->GetBinContent(ibin) > 0) {
+      if (h_rho_compare->GetBinLowEdge(ibin) < rho_compare_xmax && h_rho_compare->GetBinContent(ibin) > 0) {
         rho_compare_ymin = f_func_rho_norm->Eval(h_rho_compare->GetBinLowEdge(ibin)) * 0.1;
         break;
       }
