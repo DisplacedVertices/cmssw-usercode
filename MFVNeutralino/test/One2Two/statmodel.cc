@@ -121,33 +121,32 @@ TF1* f_func_dphi = 0;
 TH1F* h_eff = 0;
 
 //#define FITTING_DBV
-double func_rho(double* x, double* p) {
-  const long double r(fabs(x[0]));
-  long double f = 1e-6;
+double func_rho(double* _x, double* p) {
+  const double x = fabs(_x[0]);
+  const int i = ntracks - 3;
 
-#ifndef FITTING_DBV
-  const long double k[3][5] = {
-    { 0, 0.015, 0.075, 0.150, 2 },
-    { 0, 0.025, 0.040, 0.075, 2 },
-    { 0, 0.05, 2, -1, -1 },
-  };
-  const long double c[3][8] = {
-    { 4.28892e+03, 3.91957e+00, 1.57188e+04, 8.14913e+01, 1.65776e+03, 4.56113e+01, 8.21690e+00, 1.05875e+01 },
-    { 1.22632e+03, 3.76819e+01, 1.82293e+03, 6.83555e+01, 2.53814e+03, 8.84097e+01, 1.55360e+01, 2.35235e+01 },
-    { 3.84285e+02, 9.97862e+01, 3.00052e+00, 2.33992e+01 }
+  const int maxk = 7;
+  const long double kn[3][maxk] = {
+    { 0.01, 0.02, 0.03, 0.06, 0.1, 0.2, 2 },
+    { 0.01, 0.02, 0.05, 0.1, 2,     -1,-1 },
+    { 0.01, 0.06, 2,          -1,-1,-1,-1 },
   };
 
-  const size_t i = ntracks - 3;
+  int k = 1;
+  for (; k < maxk; ++k)
+    if (kn[i][k] < 0 || (kn[i][k-1] <= x && x < kn[i][k]))
+      break;
 
-  if      (k[i][0] <= r && k[i][1] > r) f = c[i][0] * expl(-c[i][1] * r);
-  else if (k[i][1] <= r && k[i][2] > r) f = c[i][2] * expl(-c[i][3] * r);
-  else if (k[i][2] <= r && k[i][3] > r) f = c[i][4] * expl(-c[i][5] * r);
-  else if (k[i][3] <= r && k[i][4] > r) f = c[i][6] * expl(-c[i][7] * r);
-#else
-  f = p[0] * expl(-fabsl(p[1]) * r);
-#endif
+  const long double c[3][maxk] = {
+    { 9.80903, 9.66801, 8.36952, 5.86700, 3.2111, 0.05319, -10.3479 },
+    { 8.45312, 8.23969, 4.68509, 0.79881, -22.0859,           -1,-1 },
+    { 4.64386, 0.049497, -22.6856,                      -1,-1,-1,-1 },
+    //{ p[0], p[1], p[2], p[3], p[4], p[5], p[6] },
+  };
 
-  return double(f);
+  const double m = (c[i][k] - c[i][k-1])/(kn[i][k] - kn[i][k-1]);
+  const double y = m * (x - kn[i][k]) + c[i][k];
+  return exp(y);
 }
 
 double func_rho_norm(double* x, double* p) {
@@ -246,11 +245,12 @@ int main(int, char**) {
   const long ntrue_2v = env.get_long("ntrue_2v", 1000000L);
   const double oversample = env.get_double("oversample", 20);
   const std::string year_str[3] = {"2017","2018","2017p8"};
-  const std::string rho_compare_fn = env.get_string("rho_compare_fn", "/uscms_data/d2/tucker/crab_dirs/HistosV27m/background_"+year_str[year_index]+".root");
+  const std::string rho_compare_fn = env.get_string("rho_compare_fn", "/uscms_data/d2/tucker/crab_dirs/HistosV27m/" + std::string(ntracks < 5 ? "100pc/" : "") + "JetHT" + year_str[year_index] + ".root");
+  const double rho_compare_xmax = env.get_double("rho_compare_xmax", 2);
   phi_c = env.get_double("phi_c", 1.31);
   phi_e = env.get_double("phi_e", 2);
   phi_a = env.get_double("phi_a", 5.96);
-  const std::string eff_fn = env.get_string("eff_fn", "vpeffs_"+year_str[year_index]+"_V27m.root");
+  const std::string eff_fn = env.get_string("eff_fn", "vpeffs_data_"+year_str[year_index]+"_V27m.root");
   const std::string eff_path = env.get_string("eff_path", "maxtk3");
 
   /////////////////////////////////////////////
@@ -319,31 +319,44 @@ int main(int, char**) {
 
   if (std::experimental::filesystem::exists(rho_compare_fn)) {
 #ifdef FITTING_DBV
-    const double rho_min = 0.15;
+    std::vector<double> pfix = { 4.64386, 0.049497, -22.6856 };
+    const double rho_min = 0.01;
     const double rho_max = 2;
-    const int npar = 2;
+    const int npar = pfix.empty() ? 2 : pfix.size() + 1;
 #else
     const int npar = 1;
 #endif
     TF1* f_func_rho_norm = new TF1("func_rho_norm", func_rho_norm, rho_min, rho_max, npar);
     f_func_rho_norm->SetNpx(25000);
+#ifdef FITTING_DBV
     for (int ipar = 0; ipar < npar; ++ipar)
-      f_func_rho_norm->SetParameter(ipar,1);
+      if (ipar < int(pfix.size()))
+        f_func_rho_norm->FixParameter(ipar,pfix[ipar]);
+      else
+        f_func_rho_norm->SetParameter(ipar,pfix.empty()?10:pfix.back());
+#endif
     uptr<TFile> fin(TFile::Open(rho_compare_fn.c_str()));
     TH1* h_rho_compare = 0;
     if      (ntracks == 5) h_rho_compare = (TH1*)fin->Get(    "mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist");
     else if (ntracks == 3) h_rho_compare = (TH1*)fin->Get("Ntk3mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist");
     else if (ntracks == 4) h_rho_compare = (TH1*)fin->Get("Ntk4mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist");
     h_rho_compare->SetStats(0);
-    h_rho_compare->Fit(f_func_rho_norm, "WL Q R");
-    h_rho_compare->GetXaxis()->SetRangeUser(0, 0.5);
-    //  h_rho_compare->GetYaxis()->SetRangeUser(3e-2,500);
+    h_rho_compare->Fit(f_func_rho_norm, "LR");
+    const double rho_compare_ymax = h_rho_compare->GetMaximum() * 1.4;
+    double rho_compare_ymin = 1e-4;
+    for (int ibin = h_rho_compare->GetNbinsX(); ibin >= 1; --ibin)
+      if (h_rho_compare->GetBinContent(ibin) > 0) {
+        rho_compare_ymin = f_func_rho_norm->Eval(h_rho_compare->GetBinLowEdge(ibin)) * 0.1;
+        break;
+      }
+    h_rho_compare->GetXaxis()->SetRangeUser(0, rho_compare_xmax);
+    h_rho_compare->GetYaxis()->SetRangeUser(rho_compare_ymin, rho_compare_ymax);
     c->SetLogy();
     uptr<TRatioPlot> rho_compare(new TRatioPlot(h_rho_compare));
     rho_compare->SetGraphDrawOpt("P");
     rho_compare->Draw();
     c->Update();
-    rho_compare->GetLowerRefYaxis()->SetRangeUser(-7,7);
+    rho_compare->GetLowerRefYaxis()->SetRangeUser(-3,3);
     p();
 #ifdef FITTING_DBV
     printf("fit dbv for ntracks %i in [%f, %f]:", ntracks, rho_min, rho_max);
