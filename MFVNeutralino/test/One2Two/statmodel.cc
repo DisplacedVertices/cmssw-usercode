@@ -109,10 +109,8 @@ double phi_a;
 const int nbins_1v = 995;
 double bins_1v[nbins_1v+1] = {0};
 
-//const int nbins_2v = 11;
-//const double bins_2v[nbins_2v+1] = { 0., 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.2 };
 const int nbins_2v = 3;
-const double bins_2v[nbins_2v+1] = { 0., 0.04, 0.07, 0.11 };
+double bins_2v[nbins_2v+1] = {0};
 
 //#define USE_H_DBV
 TH1D* h_func_rho = 0;
@@ -211,6 +209,12 @@ int main(int, char**) {
 
   for (int i = 0; i <= nbins_1v; ++i)
     bins_1v[i] = 0.0100 + 0.0020*i;
+
+  if (nbins_2v == 3)
+    bins_2v[0] = 0, bins_2v[1] = 0.04, bins_2v[2] = 0.07, bins_2v[3] = 0.11;
+  else
+    for (int i = 0; i <= nbins_2v; ++i)
+      bins_2v[i] = 0.01*i;
 
   jmt::ConfigFromEnv env("sm", true);
 
@@ -726,7 +730,7 @@ int main(int, char**) {
   }
 
   printf("2v bins means:\n");
-  printf("%3s %28s  %28s  %28s  %28s  %12s\n", "bin", "bin mean", "scaled true", "diff", "rms", "rms/true");
+  printf("%3s               %28s  %28s  %28s  %28s  %12s\n", "bin", "bin mean", "scaled true", "diff", "rms", "rms/true");
   for (int i_base = 0; i_base < nbins_2v; i_base += 4) {
     c->Divide(2,2);
     for (int i = i_base; i < std::min(i_base + 4, nbins_2v); ++i) {
@@ -741,7 +745,7 @@ int main(int, char**) {
       const double d  = b - t;
       const double de = sqrt(be*be + te*te);
       const double statuncert = r / t;
-      printf("%3i %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f\n", i+1, b, be, t, te, b-t, sqrt(be*be + te*te), r, re, statuncert);
+      printf("%3i [%.3f-%.3f) %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f\n", i+1, bins_2v[i], bins_2v[i+1], b, be, t, te, b-t, sqrt(be*be + te*te), r, re, statuncert);
       if (d > 2*de)
         tl.SetTextColor(kRed);
       else if (d > de)
