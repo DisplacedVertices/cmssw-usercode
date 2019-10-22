@@ -237,6 +237,7 @@ int main(int, char**) {
   const bool save_all_1v_bins = env.get_int("save_all_1v_bins", 0);
   const int samples_index = env.get_int("samples_index", 0);
   assert(samples_index >= 0 && samples_index <= 3);
+  const bool sample_is_mc = samples_index < 2;
   const int year_index = env.get_int("year_index", 0);
   assert(year_index >= 0 && year_index <= 2);
   ntracks = env.get_int("ntracks", 5);
@@ -249,12 +250,13 @@ int main(int, char**) {
   const long ntrue_2v = env.get_long("ntrue_2v", 1000000L);
   const double oversample = env.get_double("oversample", 20);
   const std::string year_str[3] = {"2017","2018","2017p8"};
-  const std::string rho_compare_fn = env.get_string("rho_compare_fn", "/uscms_data/d2/tucker/crab_dirs/HistosV27m/" + std::string(ntracks < 5 ? "100pc/" : "") + "JetHT" + year_str[year_index] + ".root");
+  const std::string ntuple_version = "V27m";
+  const std::string rho_compare_fn = env.get_string("rho_compare_fn", "/uscms_data/d2/tucker/crab_dirs/Histos" + ntuple_version + std::string(ntracks < 5 ? "/100pc/" : "/") + std::string(sample_is_mc ? "background_" : "JetHT") + year_str[year_index] + ".root");
   const double rho_compare_xmax = env.get_double("rho_compare_xmax", 2);
   phi_c = env.get_double("phi_c", 1.31);
   phi_e = env.get_double("phi_e", 2);
   phi_a = env.get_double("phi_a", 5.96);
-  const std::string eff_fn = env.get_string("eff_fn", "vpeffs_data_"+year_str[year_index]+"_V27m.root");
+  const std::string eff_fn = env.get_string("eff_fn", "vpeffs_" + std::string(sample_is_mc ? "" : "data_") + year_str[year_index] + "_" + ntuple_version + ".root");
   const std::string eff_path = env.get_string("eff_path", "maxtk3");
 
   /////////////////////////////////////////////
