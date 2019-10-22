@@ -834,7 +834,7 @@ int main(int, char**) {
   c->Print(pdf_fn + "]");
 
   out_f->cd();
-  for (auto* h : {h_true_1v_rho.get(), h_true_1v_phi.get(), h_true_2v_rho.get(), h_true_2v_phi.get(), h_true_2v_dvv.get(), h_true_2v_dphi.get()})
+  for (auto* h : {h_true_1v_rho.get(), h_true_1v_phi.get(), h_true_2v_rho.get(), h_true_2v_phi.get(), h_true_2v_dvv.get(), h_true_2v_dphi.get(), h_2v_dvvc_bins_means.get(), h_2v_dvvc_bins_rmses.get()})
     h->Write();
 
   // making these unique_ptrs causes segfault at end?

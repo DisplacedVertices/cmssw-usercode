@@ -35,3 +35,20 @@ ebins = {'MCscaled_2017_3track':       (0.0072, 0.0083, 0.0340),
          'data100pc_2017p8_4track':    (0.0064, 0.0089, 0.0450),
          'data100pc_2017p8_5track':    (1,      1,      1     ),
          }
+
+if __name__ == '__main__':
+    import sys
+    from JMTucker.Tools.ROOTTools import *
+    fns = [s for s in sys.argv[1:] if s.endswith('.root')]
+    def fnsort(s, o=['MCscaled', 'MCeffective', 'data10pc', 'data100pc', '2017', '2018', '2017p8']):
+        s = s.replace('sm_','').split('_')
+        return (o.index(s[0]), o.index(s[1]), s[2][0])
+    fns.sort(key=fnsort)
+    for fn in fns:
+        f = ROOT.TFile(fn)
+        hn = f.Get('h_2v_dvvc_bins_rmses')
+        hd = f.Get('h_true_2v_dvv')
+        hd.Scale(1/hd.Integral())
+        v = lambda i: hn.GetBinContent(i) / hd.GetBinContent(i)
+        name = fn.replace('.root','').replace('sm_','')
+        print '    %-30s: (%.4f, %.4f, %.4f),' % ('"%s"' % name, v(1), v(2), v(3))
