@@ -3,12 +3,12 @@ from statmodel import ebins
 ROOT.TH1.AddDirectory(0)
 
 do_bquark = False
-is_mc = True
-only_10pc = False
-year = '2017p8'
-version = 'V25m'
+is_mc = False
+only_10pc = True
+year = '2018'
+version = 'V27m'
 set_style()
-ps = plot_saver(plot_dir('closure_%s%s%s_%s' % (version.capitalize(), '' if is_mc else '_data', '_10pc' if only_10pc else '', year)), size=(700,700), root=False, log=False)
+ps = plot_saver(plot_dir('closure_%s%s%s_%s' % (version.capitalize(), '' if is_mc else '_data', '_10pc' if only_10pc else '', year)), size=(700,700), root=True, log=False)
 
 fns = ['2v_from_jets%s_%s_3track_default_%s.root' % ('' if is_mc else '_data', year, version), 
        '2v_from_jets%s_%s_7track_default_%s.root' % ('' if is_mc else '_data', year, version), 
@@ -17,10 +17,10 @@ fns = ['2v_from_jets%s_%s_3track_default_%s.root' % ('' if is_mc else '_data', y
        ]
 
 # for overlaying the btag-based template
-fns_btag = ['2v_from_jets%s_%s_3track_btag_corrected_%s.root' % ('' if is_mc else '_data', year, version), 
-            '2v_from_jets%s_%s_7track_btag_corrected_%s.root' % ('' if is_mc else '_data', year, version), 
-            '2v_from_jets%s_%s_4track_btag_corrected_%s.root' % ('' if is_mc else '_data', year, version), 
-            '2v_from_jets%s_%s_5track_btag_corrected_%s.root' % ('' if is_mc else '_data', year, version)
+fns_btag = ['2v_from_jets%s_%s_3track_btag_corrected_nom_%s.root' % ('' if is_mc else '_data', year, version), 
+            '2v_from_jets%s_%s_7track_btag_corrected_nom_%s.root' % ('' if is_mc else '_data', year, version), 
+            '2v_from_jets%s_%s_4track_btag_corrected_nom_%s.root' % ('' if is_mc else '_data', year, version), 
+            '2v_from_jets%s_%s_5track_btag_corrected_nom_%s.root' % ('' if is_mc else '_data', year, version)
             ]
 
 ntk = []
@@ -39,22 +39,39 @@ def errprop(val0, val1, err0, err1):
     else:
         return ((err0 / val0)**2 + (err1 / val1)**2)**0.5
 
-def scale_and_draw_template(template, i, simulated, color) :
+def scale_and_draw_template(template, twovtxhist, dvvc, color) :
     template.SetStats(0)
     template.SetLineColor(color)
     template.SetLineWidth(2)
-    if simulated.Integral() > 0:
-        newerrarray = []
-        simerr = ROOT.Double(0)
-        sim = simulated.IntegralAndError(0, simulated.GetNbinsX(), simerr)
-        for bin in range(template.GetNbinsX() + 1):
-            newerr = template.GetBinContent(bin) / template.Integral() * simerr
-            newerrarray.append(newerr)
-        template.Scale(sim/template.Integral())
-        for bin, err in enumerate(newerrarray):
-            template.SetBinError(bin, err)
+
+    twovtxerr = ROOT.Double(0)
+    twovtx = twovtxhist.IntegralAndError(0, twovtxhist.GetNbinsX(), twovtxerr)
+
+    if twovtx > 0:
+        template.Scale(twovtx/template.Integral())
     else:
         template.Scale(1./template.Integral())
+        twovtxerr = 1.
+
+    template_bins = get_bin_integral_and_stat_uncert(dvvc)
+
+    if 'dphi' not in template.GetName():
+        for bin in range(template.GetNbinsX() + 1):
+            stat = 0.
+            if bin <= 3:
+                stat = template_bins[0][1] * (template.GetBinContent(bin) / template_bins[0][0])**0.5
+            elif bin <= 6:
+                stat = template_bins[1][1] * (template.GetBinContent(bin) / template_bins[1][0])**0.5
+            else:
+                stat = template_bins[2][1] * (template.GetBinContent(bin) / template_bins[2][0])**0.5
+
+            newerr = (stat**2. + (twovtxerr * template.GetBinContent(bin) / template.Integral())**2.)**0.5
+            template.SetBinError(bin, newerr)
+    else:
+        binerr_comb = ((template_bins[0][1])**2. + (template_bins[1][1])**2 + (template_bins[2][1])**2)**0.5
+        for bin in range(template.GetNbinsX() + 1):
+            newerr = (binerr_comb**2. / 5. + (twovtxerr * template.GetBinContent(bin) / template.Integral())**2)**0.5
+            template.SetBinError(bin, newerr)
     template.Draw('hist sames')
 
 def make_closure_plots(i):
@@ -62,16 +79,17 @@ def make_closure_plots(i):
     dphi_closure = ('h_2v_absdphivv', 'h_c1v_absdphivv')
 
     for closure in (dvv_closure, dphi_closure):
-        simulated = ROOT.TFile(fns[i]).Get(closure[0])
-        simulated.SetTitle(';|#Delta#phi_{VV}|;Events' if 'phi' in closure[0] else ';d_{VV} (cm);Events')
-        simulated.SetStats(0)
-        simulated.SetLineColor(ROOT.kBlue)
-        simulated.SetLineWidth(2)
-        simulated.SetMinimum(0)
-        simulated.Draw()
+        twovtxhist = ROOT.TFile(fns[i]).Get(closure[0])
+        twovtxhist.SetTitle(';|#Delta#phi_{VV}|;Events' if 'phi' in closure[0] else ';d_{VV} (cm);Events')
+        twovtxhist.SetStats(0)
+        twovtxhist.SetLineColor(ROOT.kBlue)
+        twovtxhist.SetLineWidth(2)
+        twovtxhist.SetMinimum(0)
+        twovtxhist.Draw()
 
         template_btag = ROOT.TFile(fns_btag[i]).Get(closure[1])
-        scale_and_draw_template(template_btag, i, simulated, ROOT.kRed)
+        dvvc = ROOT.TFile(fns_btag[i]).Get('h_c1v_dvv')
+        scale_and_draw_template(template_btag, twovtxhist, dvvc, ROOT.kRed)
 
         uncertband_btag = template_btag.Clone('uncertband_btag')
         uncertband_btag.SetFillColor(ROOT.kRed-3)
@@ -79,12 +97,12 @@ def make_closure_plots(i):
         uncertband_btag.Draw('E2 sames')
 
         l1 = ROOT.TLegend(0.35, 0.75, 0.85, 0.85)
-        l1.AddEntry(simulated, 'Simulated events' if is_mc else 'Data')
+        l1.AddEntry(twovtxhist, 'Simulated events' if is_mc else 'Data')
         l1.AddEntry(template_btag, 'Background template' + (' (btag method)' if do_bquark else ''))
 
         if do_bquark:
             template = ROOT.TFile(fns[i]).Get(closure[1])
-            scale_and_draw_template(template, i, simulated, ROOT.kGreen+2)
+            scale_and_draw_template(template, twovtxhist, dvvc, ROOT.kGreen+2)
 
             uncertband = template.Clone('uncertband')
             uncertband.SetFillColor(ROOT.kGreen-3)
@@ -133,12 +151,16 @@ def get_bin_integral_and_stat_uncert(hist):
 def get_norm_frac_uncert(bins, total):
     allbins = []
     norm_sum = 0.
-    for bin in bins:
-        norm_sum += (bin[1] / total)**2
 
-    for bin in bins:
-        frac_uncert = ((1 - bin[0] / total) * (bin[1] / total)**2 + (bin[0] / total)**2 * norm_sum)**0.5
-        allbins.append((bin[0] / total, frac_uncert))
+    if total == 0:
+        allbins = bins
+    else:
+        for bin in bins:
+            norm_sum += (bin[1] / total)**2
+
+        for bin in bins:
+            frac_uncert = ((1 - bin[0] / total) * (bin[1] / total)**2 + (bin[0] / total)**2 * norm_sum)**0.5
+            allbins.append((bin[0] / total, frac_uncert))
     return allbins
 
 def get_ratios(nums, dens):
@@ -151,34 +173,39 @@ def get_ratios(nums, dens):
 for i, ntracks in enumerate(ntk):
     make_closure_plots(i)
 
-    simulated = ROOT.TFile(fns[i]).Get('h_2v_dvv')
+    twovtx = ROOT.TFile(fns[i]).Get('h_2v_dvv')
     constructed = ROOT.TFile(fns_btag[i]).Get('h_c1v_dvv')
 
-    if simulated.Integral() > 0:
-        constructed.Scale(simulated.Integral()/constructed.Integral())
+    if twovtx.Integral() > 0:
+        constructed.Scale(twovtx.Integral()/constructed.Integral())
     else:
         constructed.Scale(1./constructed.Integral())
 
-    sim_total, sim_total_err = get_integral(simulated)
-    sim_bins = get_bin_integral_and_stat_uncert(simulated)
+    twovtx_total, twovtx_total_err = get_integral(twovtx)
+    twovtx_bins = get_bin_integral_and_stat_uncert(twovtx)
 
     con_total, con_total_err = get_integral(constructed)
     con_bins = get_bin_integral_and_stat_uncert(constructed)
 
-    sim_bin_norm = get_norm_frac_uncert(sim_bins, sim_total)
+    twovtx_bin_norm = get_norm_frac_uncert(twovtx_bins, twovtx_total)
     con_bin_norm = get_norm_frac_uncert(con_bins, con_total)
+    ratios = get_ratios(con_bin_norm, twovtx_bin_norm)
 
-    ratios = get_ratios(con_bin_norm, sim_bin_norm)
-
-    sim = (sim_total, sim_total_err) + tuple(x for bin in sim_bins for x in bin)
+    twovtx = (twovtx_total, twovtx_total_err) + tuple(x for bin in twovtx_bins for x in bin)
     con = (con_total, con_total_err) + tuple(x for bin in con_bins for x in bin)
-    sim_norm = tuple(x for bin in sim_bin_norm for x in bin)
+    twovtx_norm = tuple(x for bin in twovtx_bin_norm for x in bin)
     con_norm = tuple(x for bin in con_bin_norm for x in bin)
     rat = tuple(x for bin in ratios for x in bin)
+    try:
+        pval = 1 - ROOT.Math.poisson_cdf(int(twovtx_bins[2][0]) - 1, con_bins[2][0])
+    except:
+        pval = 1
+    
 
     print '%s-track' % ntk[i]
-    print '  two-vertex events: %7.2f +/- %5.2f, 0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % sim
+    print '  two-vertex events: %7.2f +/- %5.2f, 0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % twovtx
     print ' constructed events: %7.2f +/- %5.2f, 0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % con
-    print '     dVV normalized:                    0-400 um: %7.3f +/- %5.3f, 400-700 um: %6.3f +/- %5.3f, 700-40000 um: %6.3f +/- %5.3f' % sim_norm
+    print '     dVV normalized:                    0-400 um: %7.3f +/- %5.3f, 400-700 um: %6.3f +/- %5.3f, 700-40000 um: %6.3f +/- %5.3f' % twovtx_norm
     print '    dVVC normalized:                    0-400 um: %7.3f +/- %5.3f, 400-700 um: %6.3f +/- %5.3f, 700-40000 um: %6.3f +/- %5.3f' % con_norm
     print '   ratio dVVC / dVV:                    0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % rat
+    print '            p-value:                                                                               700-40000 um: %6.4f' % pval
