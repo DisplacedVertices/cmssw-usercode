@@ -42,13 +42,15 @@ if __name__ == '__main__':
     fns = [s for s in sys.argv[1:] if s.endswith('.root')]
     def fnsort(s, o=['MCscaled', 'MCeffective', 'data10pc', 'data100pc', '2017', '2018', '2017p8']):
         s = s.replace('sm_','').split('_')
-        return (o.index(s[0]), o.index(s[1]), s[2][0])
+        try:
+            return (o.index(s[0]), o.index(s[1]), s[2][0])
+        except ValueError:
+            return -1
     fns.sort(key=fnsort)
     for fn in fns:
         f = ROOT.TFile(fn)
         hn = f.Get('h_2v_dvvc_bins_rmses')
-        hd = f.Get('h_true_2v_dvv')
-        hd.Scale(1/hd.Integral())
+        hd = f.Get('h_true_2v_dvv_norm')
         v = lambda i: hn.GetBinContent(i) / hd.GetBinContent(i)
         name = fn.replace('.root','').replace('sm_','')
         print '    %-30s: (%.4f, %.4f, %.4f),' % ('"%s"' % name, v(1), v(2), v(3))
