@@ -60,11 +60,6 @@ if __name__ == '__main__':
                 print 'f0,f1,cb,cbbar from sorting events by at least 1 tight btag and unfolding; assume the probability of finding two vertices is the one-vertex efficiency squared (s=1); %s; %s' % (year_formatted, sys_var)
         
                 for ntk in ntk_list :
-
-                    # ntk == 5 is blinded still!
-                    if is_data :
-                        if ntk == 5 : continue 
-
                     var_1v  = str(ntk) + 'trk_1v_%s_%s' % (year, sys_var)
                     if sys_var in ['vary_dphi', 'vary_eff']:
                         var_1v = str(ntk) + 'trk_1v_%s_%s' % (year, 'nom')
@@ -90,7 +85,6 @@ if __name__ == '__main__':
                         continue
 
                     f2_val = print_f2(ntk, fb(ft_presel,efft_presel,frt_presel), fb(ft_1v,efft_1v,frt_1v), cb, cbbar, 1)
-                    
                     f2_vals_printout += "(%s,'%f,%f'), " % (ntk, f2_val, 1-f2_val)
 
                 if f2_vals_printout != '':
