@@ -299,7 +299,7 @@ def ntuple_process(settings):
 
 def signals_no_event_filter_modifier(sample):
     if sample.is_signal:
-        magic = "event_filter = 'HT OR bjets OR displaced dijet'"
+        magic = "event_filter = 'jets only'" # JPR FIXME do we need to do more than this?
         to_replace = [(magic, 'event_filter = False', 'tuple template does not contain the magic string "%s"' % magic)]
     else:
         to_replace = []

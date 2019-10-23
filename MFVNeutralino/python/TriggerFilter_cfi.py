@@ -54,3 +54,9 @@ mfvTriggerFilterHTORBjetsORDisplacedDijet = HLTrigger.HLTfilters.hltHighLevel_cf
         andOr = True, # OR
         throw = False,
         )
+
+mfvTriggerFilterBjetsORDisplacedDijetVetoHT = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone(
+        HLTPaths = bjet_paths + displaced_dijet_paths,
+        andOr = True, # OR
+        throw = False,
+        )

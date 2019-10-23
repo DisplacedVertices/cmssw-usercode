@@ -13,9 +13,9 @@ private:
   bool filter(edm::Event&, const edm::EventSetup&) override;
 
   struct Mode {
-    enum mode_t { either, jets_only, leptons_only, HT_OR_bjets_OR_displaced_dijet };
+    enum mode_t { either, jets_only, leptons_only, HT_OR_bjets_OR_displaced_dijet, bjets_OR_displaced_dijet_veto_HT };
     const mode_t mode;
-    Mode(const std::string& m) : mode(m == "HT OR bjets OR displaced dijet" ? HT_OR_bjets_OR_displaced_dijet : m == "leptons only" ? leptons_only : m == "jets only" ? jets_only : either) {}
+    Mode(const std::string& m) : mode(m == "bjets_OR_displaced_dijet_veto_HT" ? bjets_OR_displaced_dijet_veto_HT : m == "HT OR bjets OR displaced dijet" ? HT_OR_bjets_OR_displaced_dijet : m == "leptons only" ? leptons_only : m == "jets only" ? jets_only : either) {}
     bool operator==(mode_t m) const { return mode == m; }
   };
   const Mode mode;
@@ -74,7 +74,7 @@ bool MFVEventFilter::filter(edm::Event& event, const edm::EventSetup&) {
     return jets_pass;
   else if (mode == Mode::either && jets_pass)
     return true;
-  else if (mode == Mode::HT_OR_bjets_OR_displaced_dijet)
+  else if (mode == Mode::HT_OR_bjets_OR_displaced_dijet || mode == Mode::bjets_OR_displaced_dijet_veto_HT)
     return true;
 
   edm::Handle<pat::MuonCollection> muons;

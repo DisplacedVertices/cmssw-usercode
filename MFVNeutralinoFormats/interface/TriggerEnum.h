@@ -32,7 +32,7 @@ namespace mfv {
   extern const char* l1_paths[n_l1_paths];
   extern const char* clean_paths[n_clean_paths];
 
-  // For use in the HT or Bjet or DisplacedDijet trigger studies
+  // For use in the Bjet/DisplacedDijet trigger studies
   static const std::vector<size_t> HTOrBjetOrDisplacedDijetTriggers = {
     // HT trigger
     mfv::b_HLT_PFHT1050,
