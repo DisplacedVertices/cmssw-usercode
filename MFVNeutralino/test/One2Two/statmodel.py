@@ -36,21 +36,39 @@ ebins = {'MCscaled_2017_3track':       (0.0072, 0.0083, 0.0340),
          'data100pc_2017p8_5track':    (1,      1,      1     ),
          }
 
+def _ksort(s, o=['MCscaled', 'MCeffective', 'data10pc', 'data100pc', '2017', '2018', '2017p8']):
+    s = s.replace('sm_','').split('_')
+    try:
+        return (o.index(s[0]), o.index(s[1]), s[2][0])
+    except ValueError:
+        return -1
+
+
 if __name__ == '__main__':
     import sys
-    from JMTucker.Tools.ROOTTools import *
-    fns = [s for s in sys.argv[1:] if s.endswith('.root')]
-    def fnsort(s, o=['MCscaled', 'MCeffective', 'data10pc', 'data100pc', '2017', '2018', '2017p8']):
-        s = s.replace('sm_','').split('_')
-        try:
-            return (o.index(s[0]), o.index(s[1]), s[2][0])
-        except ValueError:
-            return -1
-    fns.sort(key=fnsort)
-    for fn in fns:
-        f = ROOT.TFile(fn)
-        hn = f.Get('h_2v_dvvc_bins_rmses')
-        hd = f.Get('h_true_2v_dvv_norm')
-        v = lambda i: hn.GetBinContent(i) / hd.GetBinContent(i)
-        name = fn.replace('.root','').replace('sm_','')
-        print '    %-30s: (%.4f, %.4f, %.4f),' % ('"%s"' % name, v(1), v(2), v(3))
+
+    if 'parse' in sys.argv:
+        from JMTucker.Tools.ROOTTools import *
+        for fn in sorted([s for s in sys.argv[1:] if s.endswith('.root')], key=_ksort):
+            f = ROOT.TFile(fn)
+            hn = f.Get('h_2v_dvvc_bins_rmses')
+            hd = f.Get('h_true_2v_dvv_norm')
+            v = lambda i: hn.GetBinContent(i) / hd.GetBinContent(i)
+            name = fn.replace('.root','').replace('sm_','')
+            print '    %-30s: (%.4f, %.4f, %.4f),' % ('"%s"' % name, v(1), v(2), v(3))
+
+    elif 'compare' in sys.argv:
+        from JMTucker.Tools import colors
+        from ebins2 import ebins2
+        for k in sorted(ebins.keys(), key=_ksort):
+            na = (-1,-1,-1)
+            e  = ebins .get(k, na)
+            e2 = ebins2.get(k, na)
+            diff = tuple(b-a for a,b in zip(e,e2))
+            mdiff = max(abs(d) for d in diff)
+            c = colors.none
+            if mdiff > 0.05:
+                c = colors.boldred
+            elif mdiff > 0.02:
+                c = colors.yellow
+            print c('%-30s: %7.4f %7.4f %7.4f      %7.4f %7.4f %7.4f       %7.4f %7.4f %7.4f' % ((k,) + e + e2 + diff))
