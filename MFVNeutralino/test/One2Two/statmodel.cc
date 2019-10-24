@@ -101,10 +101,13 @@ struct VertexPair {
 
 // Globals: parameters for the throwing fcns and the fcns themselves, and the binning for 1v/2v hists
 
-int ntracks;
-double phi_c;
-double phi_e;
-double phi_a;
+int sample_is_mc = 1;
+int year_index = 0;
+int ntracks = 3;
+int ntracks_index = ntracks - 3;
+double phi_c = 1.3;
+double phi_e = 2;
+double phi_a = 6;
 
 const int nbins_1v = 995;
 double bins_1v[nbins_1v+1] = {0};
@@ -118,32 +121,73 @@ TF1* f_func_rho = 0;
 TF1* f_func_dphi = 0;
 TH1F* h_eff = 0;
 
-//#define FITTING_DBV
+const int fr_max_kn = 7;
+const double fr_kn[3][fr_max_kn] = {
+  { 0.01, 0.02, 0.03, 0.06, 0.1, 0.2, 2 },
+  { 0.01, 0.02, 0.05, 0.1, 2,     -1,-1 },
+  { 0.01, 0.06, 2,          -1,-1,-1,-1 },
+};
+
+#ifdef FITTING_DBV
+const int fr_ic = FR_IC; // e.g.   i=6; rm statmodel.exe ; make SMFLAGS="-DFITTING_DBV -DFR_IC=${i}" statmodel.exe && env sm_year_index=0 sm_rho_compare_only=1 sm_samples_index=2 sm_ntracks=3 sm_rho_compare_xmax=0.5 ./statmodel.exe
+#endif
+double fr_c[2][3][3][fr_max_kn] = { // is_mc, year, ntracks indices
+  { // data (5tk are from 10%) are same for 2017/8--fit to 2017p8 but 2017 and 2018 look very similar in shape
+    { // 2017
+      { 9.80903, 9.66801, 8.36952, 5.86700, 3.2111, 0.05319, -10.3479 }, // 3track
+      { 8.45312, 8.23969, 4.68509, 0.79881, -22.0859,           -1,-1 }, // 4track
+      { 4.64386, 0.049497, -22.6856,                      -1,-1,-1,-1 }, // 5track
+    },
+    { // 2018
+      { 9.80903, 9.66801, 8.36952, 5.86700, 3.2111, 0.05319, -10.3479 },
+      { 8.45312, 8.23969, 4.68509, 0.79881, -22.0859,           -1,-1 },
+      { 4.64386, 0.049497, -22.6856,                      -1,-1,-1,-1 },
+    },
+    { // 2017p8
+      { 9.80903, 9.66801, 8.36952, 5.86700, 3.2111, 0.05319, -10.3479 },
+      { 8.45312, 8.23969, 4.68509, 0.79881, -22.0859,           -1,-1 },
+      { 4.64386, 0.049497, -22.6856,                      -1,-1,-1,-1 },
+    },
+  },
+  { // mc
+    { // 2017
+      { 8.27872, 8.13094, 6.9383, 4.87983, 2.33309, -0.733174, -8.93311 },
+      { 6.4729, 6.27879, 3.31899, -0.18999, -26.6506,             -1,-1 },
+      { 4.58488, -0.352759, -57.9401,                       -1,-1,-1,-1 },
+    },
+    { // 2018
+      { 7.76261, 7.96822, 7.01993, 4.46392, 2.13192, -2.76241, -7.21428 },
+      { 5.96357, 6.35436, 3.4712, -2.60817, -9.14066,             -1,-1 },
+      { 4.39865, 1.26948, -223.883,                         -1,-1,-1,-1 },
+    },
+    { // 2017p8
+      { 8.74394, 8.74316, 7.67281, 5.37591, 2.93877, -0.750633, -7.55426 },
+      { 6.93565, 7.00247, 4.09944, -0.399182, -15.6391,            -1,-1 },
+      { 5.15881, 1.33783, -114.868,                          -1,-1,-1,-1 },
+    },
+  },
+};
+
 double func_rho(double* _x, double* p) {
   const double x = fabs(_x[0]);
-  const int i = ntracks - 3;
-
-  const int maxk = 7;
-  const long double kn[3][maxk] = {
-    { 0.01, 0.02, 0.03, 0.06, 0.1, 0.2, 2 },
-    { 0.01, 0.02, 0.05, 0.1, 2,     -1,-1 },
-    { 0.01, 0.06, 2,          -1,-1,-1,-1 },
-  };
 
   int k = 1;
-  for (; k < maxk; ++k)
-    if (kn[i][k] < 0 || (kn[i][k-1] <= x && x < kn[i][k]))
+  for (; k < fr_max_kn; ++k)
+    if (fr_kn[ntracks_index][k] < 0 || (fr_kn[ntracks_index][k-1] <= x && x < fr_kn[ntracks_index][k]))
       break;
 
-  const long double c[3][maxk] = {
-    { 9.80903, 9.66801, 8.36952, 5.86700, 3.2111, 0.05319, -10.3479 },
-    { 8.45312, 8.23969, 4.68509, 0.79881, -22.0859,           -1,-1 },
-    { 4.64386, 0.049497, -22.6856,                      -1,-1,-1,-1 },
-    //{ p[0], p[1], p[2], p[3], p[4], p[5], p[6] },
-  };
+#ifdef FITTING_DBV
+  fr_c[sample_is_mc][year_index][ntracks_index][fr_ic] = p[0];
+  if (fr_ic == 0)
+    fr_c[sample_is_mc][year_index][ntracks_index][1] = p[1];
+#endif
 
-  const double m = (c[i][k] - c[i][k-1])/(kn[i][k] - kn[i][k-1]);
-  const double y = m * (x - kn[i][k]) + c[i][k];
+  const double xa = fr_kn[ntracks_index][k-1];
+  const double xb = fr_kn[ntracks_index][k];
+  const double ya = fr_c[sample_is_mc][year_index][ntracks_index][k-1];
+  const double yb = fr_c[sample_is_mc][year_index][ntracks_index][k];
+  const double m = (yb - ya) / (xb - xa);
+  const double y = m * (x - xb) + yb;
   return exp(y);
 }
 
@@ -237,13 +281,14 @@ int main(int, char**) {
   const bool save_all_1v_bins = env.get_int("save_all_1v_bins", 0);
   const int samples_index = env.get_int("samples_index", 0);
   assert(samples_index >= 0 && samples_index <= 3);
-  const bool sample_is_mc = samples_index < 2;
-  const int year_index = env.get_int("year_index", 0);
+  sample_is_mc = samples_index < 2;
+  year_index = env.get_int("year_index", 0);
   assert(year_index >= 0 && year_index <= 2);
   ntracks = env.get_int("ntracks", 5);
   assert(ntracks >= 3 && ntracks <= 5);
-  const double n1v = env.get_double("n1v", default_n1v[samples_index][year_index][ntracks-3]);
-  const double n2v = env.get_double("n2v", default_n2v[samples_index][year_index][ntracks-3]);
+  ntracks_index = ntracks - 3;
+  const double n1v = env.get_double("n1v", default_n1v[samples_index][year_index][ntracks_index]);
+  const double n2v = env.get_double("n2v", default_n2v[samples_index][year_index][ntracks_index]);
   const std::string true_fn = env.get_string("true_fn", "");
   const bool true_from_file = true_fn != "";
   const long ntrue_1v = env.get_long("ntrue_1v", 10000000L);
@@ -334,49 +379,45 @@ int main(int, char**) {
 
   if (std::experimental::filesystem::exists(rho_compare_fn)) {
 #ifdef FITTING_DBV
-    std::vector<double> pfix = { 4.64386, 0.049497, -22.6856 };
-    const double rho_min = 0.01;
-    const double rho_max = 2;
-    const int npar = pfix.empty() ? 2 : pfix.size() + 1;
+    const double rho_min = fr_kn[ntracks_index][0];
+    const double rho_max = fr_kn[ntracks_index][fr_ic == 0 ? 1 : fr_ic];
+    const int npar = fr_ic == 0 ? 2 : 1;
 #else
     const int npar = 1;
 #endif
     TF1* f_func_rho_norm = new TF1("func_rho_norm", func_rho_norm, rho_min, rho_max, npar);
     f_func_rho_norm->SetNpx(25000);
-#ifdef FITTING_DBV
     for (int ipar = 0; ipar < npar; ++ipar)
-      if (ipar < int(pfix.size()))
-        f_func_rho_norm->FixParameter(ipar,pfix[ipar]);
-      else
-        f_func_rho_norm->SetParameter(ipar,pfix.empty()?10:pfix.back());
-#endif
+      f_func_rho_norm->SetParameter(ipar,10);
     uptr<TFile> fin(TFile::Open(rho_compare_fn.c_str()));
     TH1* h_rho_compare = 0;
     if      (ntracks == 5) h_rho_compare = (TH1*)fin->Get(    "mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist");
     else if (ntracks == 3) h_rho_compare = (TH1*)fin->Get("Ntk3mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist");
     else if (ntracks == 4) h_rho_compare = (TH1*)fin->Get("Ntk4mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist");
     h_rho_compare->SetStats(0);
-    h_rho_compare->Fit(f_func_rho_norm, "LR");
+    h_rho_compare->Fit(f_func_rho_norm, sample_is_mc ? "WL R" : "LR");
     const double rho_compare_ymax = h_rho_compare->GetMaximum() * 1.4;
     double rho_compare_ymin = 1e-4;
     for (int ibin = h_rho_compare->GetNbinsX(); ibin >= 1; --ibin)
       if (h_rho_compare->GetBinLowEdge(ibin) < rho_compare_xmax && h_rho_compare->GetBinContent(ibin) > 0) {
-        rho_compare_ymin = f_func_rho_norm->Eval(h_rho_compare->GetBinLowEdge(ibin)) * 0.1;
-        break;
+        const double fval = f_func_rho_norm->Eval(h_rho_compare->GetBinLowEdge(ibin));
+        if (fval > 1e-10) {
+          rho_compare_ymin = fval * 0.1;
+          break;
+        }
       }
     h_rho_compare->GetXaxis()->SetRangeUser(0, rho_compare_xmax);
     h_rho_compare->GetYaxis()->SetRangeUser(rho_compare_ymin, rho_compare_ymax);
     c->SetLogy();
     uptr<TRatioPlot> rho_compare(new TRatioPlot(h_rho_compare));
     rho_compare->SetGraphDrawOpt("P");
-    rho_compare->Draw();
+    rho_compare->Draw("noconfint");
     c->Update();
     rho_compare->GetLowerRefYaxis()->SetRangeUser(-3,3);
     p();
 #ifdef FITTING_DBV
-    printf("fit dbv for ntracks %i in [%f, %f]:", ntracks, rho_min, rho_max);
-    for (int ipar = 0; ipar < npar; ++ipar)
-      printf(", %.5e", f_func_rho_norm->GetParameter(ipar));
+    printf("fit dbv for ntracks %i in [%f, %f] with fr_ic = %i: %.6g", ntracks, rho_min, rho_max, fr_ic, f_func_rho_norm->GetParameter(0));
+    if (fr_ic == 0) printf(", %.6g", f_func_rho_norm->GetParameter(1));
     printf("\n");
 #endif
     if (getenv("asdf")) c->SaveAs("$asdf/sm_rho_compare.png");
@@ -782,7 +823,7 @@ int main(int, char**) {
       h_2v_dvvc_bins_diffs_norm->SetBinError  (i+1, sqrt(be*be/b/b + te*te/t/t)); // JMTBAD
     }
     p();
-    if (getenv("asdf")) c->SaveAs("$asdf/sm_dvvc_bins.png");
+    //if (getenv("asdf")) c->SaveAs("$asdf/sm_dvvc_bins.png");
     c->Clear();
   }
 
