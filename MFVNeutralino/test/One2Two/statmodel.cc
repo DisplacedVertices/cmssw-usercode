@@ -251,8 +251,9 @@ int main(int, char**) {
   const double oversample = env.get_double("oversample", 20);
   const std::string year_str[3] = {"2017","2018","2017p8"};
   const std::string ntuple_version = "V27m";
-  const std::string rho_compare_fn = env.get_string("rho_compare_fn", "/uscms_data/d2/tucker/crab_dirs/Histos" + ntuple_version + std::string(ntracks < 5 ? "/100pc/" : "/") + std::string(sample_is_mc ? "background_" : "JetHT") + year_str[year_index] + ".root");
+  const std::string rho_compare_fn = env.get_string("rho_compare_fn", "/uscms_data/d2/tucker/crab_dirs/Histos" + ntuple_version + std::string(!sample_is_mc && ntracks < 5 ? "/100pc/" : "/") + std::string(sample_is_mc ? "background_" : "JetHT") + year_str[year_index] + ".root");
   const double rho_compare_xmax = env.get_double("rho_compare_xmax", 2);
+  const bool rho_compare_only = env.get_bool("rho_compare_only", false);
   phi_c = env.get_double("phi_c", 1.31);
   phi_e = env.get_double("phi_e", 2);
   phi_a = env.get_double("phi_a", 5.96);
@@ -301,6 +302,14 @@ int main(int, char**) {
   //auto lp   = [&] () { c->SetLogy(1); c->Print(pdf_fn); c->SetLogy(0); };
   //auto lxp  = [&] () { c->SetLogx(1); c->Print(pdf_fn); c->SetLogx(0); };
   //auto lxyp = [&] () { c->SetLogx(1); c->SetLogy(1); c->Print(pdf_fn); c->SetLogx(0); c->SetLogy(0); };
+
+  auto finish = [&]() {
+    c->Print(pdf_fn + "]");
+    delete h_func_rho;
+    delete f_func_rho;
+    delete f_func_dphi;
+    delete h_eff;
+  };
 
   /////////////////////////////////////////////
 
@@ -379,9 +388,10 @@ int main(int, char**) {
   }
   c->Clear();
 
-#ifdef FITTING_DBV
-  return 0;
-#endif
+  if (rho_compare_only) {
+    finish();
+    return 0;
+  }
 
   // Generate the true 1v & 2v distributions from func_rho and
   // func_dphi. Takes a while, so if true_fn is set on cmd line, will
@@ -831,15 +841,9 @@ int main(int, char**) {
   p();
   c->Clear();
 
-  c->Print(pdf_fn + "]");
-
   out_f->cd();
   for (auto* h : {h_true_1v_rho.get(), h_true_1v_phi.get(), h_true_2v_rho.get(), h_true_2v_phi.get(), h_true_2v_dvv.get(), h_true_2v_dvv_norm.get(), h_true_2v_dphi.get(), h_2v_dvvc_bins_means.get(), h_2v_dvvc_bins_rmses.get()})
     h->Write();
 
-  // making these unique_ptrs causes segfault at end?
-  delete h_func_rho;
-  delete f_func_rho;
-  delete f_func_dphi;
-  delete h_eff;
+  finish();
 }
