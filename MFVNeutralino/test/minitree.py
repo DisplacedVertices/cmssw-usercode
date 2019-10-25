@@ -9,10 +9,12 @@ cmssw_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.MiniTree_cff')
 
-if not is_mc:
-    # blind >=5-track events
+# blind btag triggered events
+if not is_mc and process.mfvAnalysisCuts.apply_presel == cms.int32(4) :
+    del process.pMiniTreeNtk3
+    del process.pMiniTreeNtk4
+    del process.pMiniTreeNtk3or4
     del process.pMiniTree
-
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
