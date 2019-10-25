@@ -104,9 +104,8 @@ process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     
             setattr(process, '%sp%iV' % (EX1, nv) + name, cms.Path(process.mfvWeight * vtx * ana * evt_hst * vtx_hst))
 
 if not is_mc:
-    for p in process.paths.keys():
-        if not (p == 'pSkimSel' or p == 'pEventPreSel' or p.startswith('Ntk3') or p.startswith('Ntk4') or p.startswith('p0V')):       # unblinds all 3,4-track sets, keeps 5-track stuff blind
-            delattr(process, p)
+    for x in 'pPreSel', 'pFullSel', 'pSigReg', 'p2VBsbs2ddist', 'p2VBs2derr': # 5-track 2-vertex blind
+        delattr(process, x)
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:

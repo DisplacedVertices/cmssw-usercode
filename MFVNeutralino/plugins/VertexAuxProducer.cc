@@ -14,30 +14,21 @@
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
+#include "RecoVertex/VertexTools/interface/VertexDistance3D.h"
 #include "RecoVertex/VertexTools/interface/VertexDistanceXY.h"
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/MFVNeutralino/interface/VertexAuxSorter.h"
-#include "JMTucker/MFVNeutralino/interface/VertexTools.h"
+#include "JMTucker/MFVNeutralino/interface/VertexerParams.h"
 #include "JMTucker/Tools/interface/AnalysisEras.h"
-#include "JMTucker/Tools/interface/StatCalculator.h"
+#include "JMTucker/Tools/interface/ExtValue.h"
+#include "JMTucker/Tools/interface/Math.h"
 #include "JMTucker/Tools/interface/TrackRefGetter.h"
 #include "JMTucker/Tools/interface/TrackRescaler.h"
+#include "JMTucker/Tools/interface/StatCalculator.h"
 #include "JMTucker/Tools/interface/Utilities.h"
-
-namespace {
-  template <typename T, typename T2>
-  double dot3(const T& a, const T2& b) {
-    return a.x() * b.x() + a.y() * b.y() + a.z() * b.z();
-  }
-
-  template <typename T, typename T2>
-  double costh3(const T& a, const T2& b) {
-    return dot3(a,b) / mag(a.x(), a.y(), a.z()) / mag(b.x(), b.y(), b.z());
-  }
-}
 
 class MFVVertexAuxProducer : public edm::EDProducer {
  public:
@@ -59,6 +50,11 @@ class MFVVertexAuxProducer : public edm::EDProducer {
   const mfv::VertexAuxSorter sorter;
   const bool verbose;
   const std::string module_label;
+
+  VertexDistanceXY distcalc_2d;
+  VertexDistance3D distcalc_3d;
+  Measurement1D gen_dist(const reco::Vertex&, const std::vector<double>& gen, const bool use3d);
+  Measurement1D miss_dist(const reco::Vertex&, const reco::Vertex&, const math::XYZTLorentzVector& mom);
 };
 
 MFVVertexAuxProducer::MFVVertexAuxProducer(const edm::ParameterSet& cfg)
@@ -82,6 +78,36 @@ MFVVertexAuxProducer::MFVVertexAuxProducer(const edm::ParameterSet& cfg)
     sv_to_jets_token[i] = consumes<mfv::JetVertexAssociation>(edm::InputTag(sv_to_jets_src, mfv::jetsby_names[i])); // JMTBAD yuck, rethink
 
   produces<std::vector<MFVVertexAux> >();
+}
+
+Measurement1D MFVVertexAuxProducer::gen_dist(const reco::Vertex& sv, const std::vector<double>& gen, const bool use3d) {
+  jmt::MinValue d;
+  for (int i = 0; i < 2; ++i)
+    d(jmt::mag(        sv.x() - gen[i*3],
+                       sv.y() - gen[i*3+1],
+               use3d ? sv.z() - gen[i*3+2] : 0));
+  AlgebraicVector3 v(sv.x(), sv.y(), use3d ? sv.z() : 0);
+  const double dist2 = ROOT::Math::Mag2(v);
+  const double sim  = ROOT::Math::Similarity(v, sv.covariance());
+  const double ed = dist2 != 0 ? sqrt(sim/dist2) : 0;
+  return Measurement1D(d, ed);
+}
+
+Measurement1D MFVVertexAuxProducer::miss_dist(const reco::Vertex& v0, const reco::Vertex& v1, const math::XYZTLorentzVector& mom) {
+  // miss distance is magnitude of (jet direction (= n) cross (tv - sv) ( = d))
+  // to calculate uncertainty, use |n X d|^2 = (|n||d|)^2 - (n . d)^2
+  AlgebraicVector3 n = ROOT::Math::Unit(AlgebraicVector3(mom.x(), mom.y(), mom.z()));
+  AlgebraicVector3 d(v1.x() - v0.x(),
+                     v1.y() - v0.y(),
+                     v1.z() - v0.z());
+  AlgebraicVector3 n_cross_d = ROOT::Math::Cross(n,d);
+  double n_dot_d = ROOT::Math::Dot(n,d);
+  double val = ROOT::Math::Mag(n_cross_d);
+
+  AlgebraicVector3 jac(2*d(0) - 2*n_dot_d*n(0),
+                       2*d(1) - 2*n_dot_d*n(1),
+                       2*d(2) - 2*n_dot_d*n(2));
+  return Measurement1D(val, sqrt(ROOT::Math::Similarity(jac, v0.covariance() + v1.covariance())) / 2 / val);
 }
 
 void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
@@ -131,6 +157,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
   edm::Handle<std::vector<double> > gen_vertices;
   event.getByToken(gen_vertices_token, gen_vertices);
+  assert(gen_vertices->size() == 6);
 
   //////////////////////////////////////////////////////////////////////
 
@@ -179,7 +206,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     if (rs_ttks.size() > 1) {
       reco::Vertex rs_sv(TransientVertex(kv_reco->vertex(rs_ttks)));
       if (rs_sv.isValid()) {
-        const auto d = VertexDistanceXY().distance(rs_sv, fake_bs_vtx);
+        const auto d = distcalc_2d.distance(rs_sv, fake_bs_vtx);
         aux.rescale_chi2 = rs_sv.chi2();
         aux.rescale_x = rs_sv.x();
         aux.rescale_y = rs_sv.y();
@@ -232,7 +259,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
         reco::Vertex rf_sv(TransientVertex(kv_reco->vertex(ttks_nm1)));
         if (rf_sv.isValid()) {
-          const auto d = VertexDistanceXY().distance(rf_sv, fake_bs_vtx);
+          const auto d = distcalc_2d.distance(rf_sv, fake_bs_vtx);
           aux.nm1_chi2[i] = rf_sv.chi2();
           aux.nm1_x[i] = rf_sv.x();
           aux.nm1_y[i] = rf_sv.y();
@@ -253,6 +280,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
     if (verbose) printf("v#%i at %f,%f,%f ndof %.1f\n", isv, aux.x, aux.y, aux.z, sv.ndof());
 
+    math::XYZVector bs2sv = sv.position() - beamspot->position();
     math::XYZVector pv2sv;
     if (primary_vertex != 0)
       pv2sv = sv.position() - primary_vertex->position();
@@ -292,7 +320,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
             }
 
             if (primary_vertex)
-              costhjetmomvtxdisps[i_jet_assoc].push_back(costh3(jets[ijet]->p4(), pv2sv));
+              costhjetmomvtxdisps[i_jet_assoc].push_back(jmt::costh3(jets[ijet]->p4(), pv2sv));
             else
               costhjetmomvtxdisps[i_jet_assoc].push_back(-2);
 
@@ -386,7 +414,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
           if (electrons->at(i).closestCtfTrackRef() == trref)
             aux.which_lep.push_back(i | (1<<7));
 
-      costhtkmomvtxdisps.push_back(costh3(tri->momentum(), pv2sv));
+      costhtkmomvtxdisps.push_back(jmt::costh3(tri->momentum(), pv2sv));
 
       const uchar nhitsbehind = 0; //int2uchar(tracker_extents.numHitsBehind(tri->hitPattern(), sv_r, sv_z));
 
@@ -422,32 +450,52 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       aux.track_phi.push_back(tri->phi());
     }
 
-    const mfv::vertex_distances vtx_distances(sv, *gen_vertices, *beamspot, primary_vertex, p4s);
-
     jmt::StatCalculator costhtkmomvtxdisp(costhtkmomvtxdisps);
     aux.costhtkmomvtxdispmin(costhtkmomvtxdisp.min.back());
     aux.costhtkmomvtxdispmax(costhtkmomvtxdisp.max.back());
     aux.costhtkmomvtxdispavg(costhtkmomvtxdisp.avg.back());
     aux.costhtkmomvtxdisprms(costhtkmomvtxdisp.rms.back());
 
-    aux.gen2ddist       = vtx_distances.gen2ddist.value();
-    aux.gen2derr        = vtx_distances.gen2ddist.error();
-    aux.gen3ddist       = vtx_distances.gen3ddist.value();
-    aux.gen3derr        = vtx_distances.gen3ddist.error();
-    aux.bs2ddist        = vtx_distances.bs2ddist.value();
-    aux.bs2derr         = vtx_distances.bs2ddist.error();
-    aux.pv2ddist        = vtx_distances.pv2ddist_val;
-    aux.pv2derr         = vtx_distances.pv2ddist_err;
-    aux.pv3ddist        = vtx_distances.pv3ddist_val;
-    aux.pv3derr         = vtx_distances.pv3ddist_err;
+    auto g2d = gen_dist(sv, *gen_vertices, false);
+    auto g3d = gen_dist(sv, *gen_vertices, true);
+    aux.gen2ddist = g2d.value();
+    aux.gen2derr  = g2d.error();
+    aux.gen3ddist = g3d.value();
+    aux.gen3derr  = g3d.error();
+
+    auto bs2d = distcalc_2d.distance(sv, fake_bs_vtx);
+    aux.bs2ddist = bs2d.value();
+    aux.bs2derr  = bs2d.error();
+
+    if (primary_vertex != 0) {
+      auto pv2d = distcalc_2d.distance(sv, *primary_vertex);
+      auto pv3d = distcalc_3d.distance(sv, *primary_vertex);
+      aux.pv2ddist = pv2d.value();
+      aux.pv2derr  = pv2d.error();
+      aux.pv3ddist = pv3d.value();
+      aux.pv3derr  = pv3d.error();
+    }
+    else
+      aux.pv2ddist = aux.pv3ddist = aux.pv2derr = aux.pv3derr = -1;
 
     for (int i = 0; i < mfv::NMomenta; ++i) {
-      aux.costhmombs  (i, vtx_distances.costhmombs  [i]);
-      aux.costhmompv2d(i, vtx_distances.costhmompv2d[i]);
-      aux.costhmompv3d(i, vtx_distances.costhmompv3d[i]);
+      const math::XYZTLorentzVector& mom = p4s[i];
+      aux.costhmombs(i, -2);
+      aux.costhmompv2d(i, -2);
+      aux.costhmompv3d(i, -2);
+      aux.missdistpv[i] = 1e9;
+      aux.missdistpverr[i] = -1;
 
-      aux.missdistpv   [i] = vtx_distances.missdistpv[i].value();
-      aux.missdistpverr[i] = vtx_distances.missdistpv[i].error();
+      if (mom.pt() > 0) {
+        aux.costhmombs(i, jmt::costh2(mom, bs2sv));
+        if (primary_vertex != 0) {
+          aux.costhmompv2d(i, jmt::costh2(mom, pv2sv));
+          aux.costhmompv3d(i, jmt::costh3(mom, pv2sv));
+          auto mdpv = miss_dist(*primary_vertex, sv, mom);
+          aux.missdistpv[i] = mdpv.value();
+          aux.missdistpverr[i] = mdpv.error();
+        }
+      }
     }
 
     if (verbose) printf("aux finish isv %i at %f %f %f ntracks %i bs2ddist %f bs2derr %f\n", isv, aux.x, aux.y, aux.z, aux.ntracks(), aux.bs2ddist, aux.bs2derr);

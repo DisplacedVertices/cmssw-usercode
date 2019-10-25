@@ -62,7 +62,6 @@ def color(s, fg=None, bg=None, style=None):
 def strip_color(s):
     return re.sub('\x1b\[.+?m', '', s)
 
-
 # Foreground shortcuts
 black = partial(color, fg='black')
 red = partial(color, fg='red')
@@ -85,6 +84,7 @@ concealed = partial(color, style='concealed')
 crossed = partial(color, style='crossed')
 
 # JMT adds
+none = lambda s: s
 boldblack = partial(bold, fg='black')
 boldred = partial(bold, fg='red')
 boldgreen = partial(bold, fg='green')

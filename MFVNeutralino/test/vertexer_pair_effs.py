@@ -29,7 +29,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
     samples = pick_samples(dataset, all_signal=False)
-    set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8_10pc.json'))
+    set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
 
     cs = CondorSubmitter('VertexerPairEffs' + version,
                          ex = year,

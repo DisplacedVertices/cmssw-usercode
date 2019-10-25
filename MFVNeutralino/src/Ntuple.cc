@@ -113,114 +113,114 @@ namespace mfv {
   ////
 
   VerticesSubNtuple::VerticesSubNtuple() {
+    set_pfx("v");
     clear();
-    p_x_ = 0;
-    p_y_ = 0;
-    p_z_ = 0;
-    p_cxx_ = 0;
-    p_cxy_ = 0;
-    p_cxz_ = 0;
-    p_cyy_ = 0;
-    p_cyz_ = 0;
-    p_czz_ = 0;
-    p_ntracks_ = 0;
+    p_rescale_chi2_ = 0;
+    p_rescale_x_ = 0;
+    p_rescale_y_ = 0;
+    p_rescale_z_ = 0;
+    p_rescale_cxx_ = 0;
+    p_rescale_cxy_ = 0;
+    p_rescale_cxz_ = 0;
+    p_rescale_cyy_ = 0;
+    p_rescale_cyz_ = 0;
+    p_rescale_czz_ = 0;
+    p_njets_ = 0;
     p_bs2derr_ = 0;
     p_rescale_bs2derr_ = 0;
-    p_geo2ddist_ = 0;
     p_genmatch_ = 0;
     p_pt_ = 0;
     p_eta_ = 0;
     p_phi_ = 0;
     p_mass_ = 0;
-    p_tkonlymass_ = 0;
   }
 
   void VerticesSubNtuple::clear() {
-    x_.clear();
-    y_.clear();
-    z_.clear();
-    cxx_.clear();
-    cxy_.clear();
-    cxz_.clear();
-    cyy_.clear();
-    cyz_.clear();
-    czz_.clear();
-    ntracks_.clear();
+    jmt::VerticesSubNtuple::clear();
+    rescale_chi2_.clear();
+    rescale_x_.clear();
+    rescale_y_.clear();
+    rescale_z_.clear();
+    rescale_cxx_.clear();
+    rescale_cxy_.clear();
+    rescale_cxz_.clear();
+    rescale_cyy_.clear();
+    rescale_cyz_.clear();
+    rescale_czz_.clear();
+    njets_.clear();
     bs2derr_.clear();
     rescale_bs2derr_.clear();
-    geo2ddist_.clear();
     genmatch_.clear();
     pt_.clear();
     eta_.clear();
     phi_.clear();
     mass_.clear();
-    tkonlymass_.clear();
   }
 
   void VerticesSubNtuple::write_to_tree(TTree* t) {
-    t->Branch("v_x", &x_);
-    t->Branch("v_y", &y_);
-    t->Branch("v_z", &z_);
-    t->Branch("v_cxx", &cxx_);
-    t->Branch("v_cxy", &cxy_);
-    t->Branch("v_cxz", &cxz_);
-    t->Branch("v_cyy", &cyy_);
-    t->Branch("v_cyz", &cyz_);
-    t->Branch("v_czz", &czz_);
-    t->Branch("v_ntracks", &ntracks_);
-    t->Branch("v_bs2derr", &bs2derr_);
-    t->Branch("v_rescale_bs2derr", &rescale_bs2derr_);
-    t->Branch("v_geo2ddist", &geo2ddist_);
-    t->Branch("v_genmatch", &genmatch_);
-    t->Branch("v_pt", &pt_);
-    t->Branch("v_eta", &eta_);
-    t->Branch("v_phi", &phi_);
-    t->Branch("v_mass", &mass_);
-    t->Branch("v_tkonlymass", &tkonlymass_);
+    jmt::VerticesSubNtuple::write_to_tree(t);
+    t->Branch(TString::Format("%s_rescale_chi2", pfx()), &rescale_chi2_);
+    t->Branch(TString::Format("%s_rescale_x", pfx()), &rescale_x_);
+    t->Branch(TString::Format("%s_rescale_y", pfx()), &rescale_y_);
+    t->Branch(TString::Format("%s_rescale_z", pfx()), &rescale_z_);
+    t->Branch(TString::Format("%s_rescale_cxx", pfx()), &rescale_cxx_);
+    t->Branch(TString::Format("%s_rescale_cxy", pfx()), &rescale_cxy_);
+    t->Branch(TString::Format("%s_rescale_cxz", pfx()), &rescale_cxz_);
+    t->Branch(TString::Format("%s_rescale_cyy", pfx()), &rescale_cyy_);
+    t->Branch(TString::Format("%s_rescale_cyz", pfx()), &rescale_cyz_);
+    t->Branch(TString::Format("%s_rescale_czz", pfx()), &rescale_czz_);
+    t->Branch(TString::Format("%s_njets", pfx()), &njets_);
+    t->Branch(TString::Format("%s_bs2derr", pfx()), &bs2derr_);
+    t->Branch(TString::Format("%s_rescale_bs2derr", pfx()), &rescale_bs2derr_);
+    t->Branch(TString::Format("%s_genmatch", pfx()), &genmatch_);
+    t->Branch(TString::Format("%s_pt", pfx()), &pt_);
+    t->Branch(TString::Format("%s_eta", pfx()), &eta_);
+    t->Branch(TString::Format("%s_phi", pfx()), &phi_);
+    t->Branch(TString::Format("%s_mass", pfx()), &mass_);
   }
 
   void VerticesSubNtuple::read_from_tree(TTree* t) {
-    t->SetBranchAddress("v_x", &p_x_);
-    t->SetBranchAddress("v_y", &p_y_);
-    t->SetBranchAddress("v_z", &p_z_);
-    t->SetBranchAddress("v_cxx", &p_cxx_);
-    t->SetBranchAddress("v_cxy", &p_cxy_);
-    t->SetBranchAddress("v_cxz", &p_cxz_);
-    t->SetBranchAddress("v_cyy", &p_cyy_);
-    t->SetBranchAddress("v_cyz", &p_cyz_);
-    t->SetBranchAddress("v_czz", &p_czz_);
-    t->SetBranchAddress("v_ntracks", &p_ntracks_);
-    t->SetBranchAddress("v_bs2derr", &p_bs2derr_);
-    t->SetBranchAddress("v_rescale_bs2derr", &p_rescale_bs2derr_);
-    t->SetBranchAddress("v_geo2ddist", &p_geo2ddist_);
-    t->SetBranchAddress("v_genmatch", &p_genmatch_);
-    t->SetBranchAddress("v_pt", &p_pt_);
-    t->SetBranchAddress("v_eta", &p_eta_);
-    t->SetBranchAddress("v_phi", &p_phi_);
-    t->SetBranchAddress("v_mass", &p_mass_);
-    t->SetBranchAddress("v_tkonlymass", &p_tkonlymass_);
+    jmt::VerticesSubNtuple::read_from_tree(t);
+    t->SetBranchAddress(TString::Format("%s_rescale_chi2", pfx()), &p_rescale_chi2_);
+    t->SetBranchAddress(TString::Format("%s_rescale_x", pfx()), &p_rescale_x_);
+    t->SetBranchAddress(TString::Format("%s_rescale_y", pfx()), &p_rescale_y_);
+    t->SetBranchAddress(TString::Format("%s_rescale_z", pfx()), &p_rescale_z_);
+    t->SetBranchAddress(TString::Format("%s_rescale_cxx", pfx()), &p_rescale_cxx_);
+    t->SetBranchAddress(TString::Format("%s_rescale_cxy", pfx()), &p_rescale_cxy_);
+    t->SetBranchAddress(TString::Format("%s_rescale_cxz", pfx()), &p_rescale_cxz_);
+    t->SetBranchAddress(TString::Format("%s_rescale_cyy", pfx()), &p_rescale_cyy_);
+    t->SetBranchAddress(TString::Format("%s_rescale_cyz", pfx()), &p_rescale_cyz_);
+    t->SetBranchAddress(TString::Format("%s_rescale_czz", pfx()), &p_rescale_czz_);
+    t->SetBranchAddress(TString::Format("%s_njets", pfx()), &p_njets_);
+    t->SetBranchAddress(TString::Format("%s_bs2derr", pfx()), &p_bs2derr_);
+    t->SetBranchAddress(TString::Format("%s_rescale_bs2derr", pfx()), &p_rescale_bs2derr_);
+    t->SetBranchAddress(TString::Format("%s_genmatch", pfx()), &p_genmatch_);
+    t->SetBranchAddress(TString::Format("%s_pt", pfx()), &p_pt_);
+    t->SetBranchAddress(TString::Format("%s_eta", pfx()), &p_eta_);
+    t->SetBranchAddress(TString::Format("%s_phi", pfx()), &p_phi_);
+    t->SetBranchAddress(TString::Format("%s_mass", pfx()), &p_mass_);
   }
 
   void VerticesSubNtuple::copy_vectors() {
-    x_ = *p_x_;
-    y_ = *p_y_;
-    z_ = *p_z_;
-    cxx_ = *p_cxx_;
-    cxy_ = *p_cxy_;
-    cxz_ = *p_cxz_;
-    cyy_ = *p_cyy_;
-    cyz_ = *p_cyz_;
-    czz_ = *p_czz_;
-    ntracks_ = *p_ntracks_;
+    jmt::VerticesSubNtuple::copy_vectors();
+    rescale_chi2_ = *p_rescale_chi2_;
+    rescale_x_ = *p_rescale_x_;
+    rescale_y_ = *p_rescale_y_;
+    rescale_z_ = *p_rescale_z_;
+    rescale_cxx_ = *p_rescale_cxx_;
+    rescale_cxy_ = *p_rescale_cxy_;
+    rescale_cxz_ = *p_rescale_cxz_;
+    rescale_cyy_ = *p_rescale_cyy_;
+    rescale_cyz_ = *p_rescale_cyz_;
+    rescale_czz_ = *p_rescale_czz_;
+    njets_ = *p_njets_;
     bs2derr_ = *p_bs2derr_;
     rescale_bs2derr_ = *p_rescale_bs2derr_;
-    geo2ddist_ = *p_geo2ddist_;
     genmatch_ = *p_genmatch_;
     pt_ = *p_pt_;
     eta_ = *p_eta_;
     phi_ = *p_phi_;
     mass_ = *p_mass_;
-    tkonlymass_ = *p_tkonlymass_;
   }
 
   ////

@@ -132,8 +132,14 @@ namespace jmt {
   }
 
   bool TrackRefGetter::has_track(const edm::Event& e, const pat::Jet& j, const reco::TrackRef& tk) {
-    auto rs = tracks(e,j);
-    return std::find(rs.begin(), rs.end(), tk) != rs.end();
+    const auto rs = tracks(e,j);
+    const bool has = std::find(rs.begin(), rs.end(), tk) != rs.end();
+    if (verbose) {
+      std::cout << "TrackRefGetter " << module_label << " jet " << j.pt() << "," << j.eta() << "," << j.phi() << "," << j.energy() << " has track ";
+      jmt::dump_ref(std::cout, tk, &e);
+      std::cout << "? " << has << "\n";
+    }
+    return has;
   }
 
   int TrackRefGetter::has_track(const edm::Event& e, const reco::VertexRef& v, const reco::TrackRef& tk) {

@@ -192,11 +192,10 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
         continue;
     }
 
-    nt.vertices().add(vx, vy, vz,
-                      v.cxx, v.cxy, v.cxz, v.cyy, v.cyz, v.czz,
-                      v.ntracks(), v.bs2derr, v.rescale_bs2derr, v.geo2ddist(), false,
-                      v.pt[mfv::PTracksPlusJetsByNtracks], v.eta[mfv::PTracksPlusJetsByNtracks], v.phi[mfv::PTracksPlusJetsByNtracks], v.mass[mfv::PTracksPlusJetsByNtracks],
-                      v.mass[mfv::PTracksOnly]);
+    nt.vertices().add(v.chi2, vx, vy, vz, v.cxx, v.cxy, v.cxz, v.cyy, v.cyz, v.czz,
+                      v.rescale_chi2, v.rescale_x - nt_filler.bs().x(v.rescale_z), v.rescale_y - nt_filler.bs().y(v.rescale_z), v.rescale_z, v.rescale_cxx, v.rescale_cxy, v.rescale_cxz, v.rescale_cyy, v.rescale_cyz, v.rescale_czz, // JMTBAD get rid of beamspot subtraction everywhere (then just use NtupleAdd here)
+                      v.ntracks(), v.njets[0], v.bs2derr, v.rescale_bs2derr, false,
+                      v.pt[mfv::PTracksPlusJetsByNtracks], v.eta[mfv::PTracksPlusJetsByNtracks], v.phi[mfv::PTracksPlusJetsByNtracks], v.mass[mfv::PTracksPlusJetsByNtracks]);
 
     if (!for_mctruth)
       for (size_t i = 0, ie = v.ntracks(); i < ie; ++i) {

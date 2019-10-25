@@ -4,7 +4,7 @@
 
 int main(int argc, char** argv) {
   jmt::NtupleReader<jmt::TrackingAndJetsNtuple> nr;
-  nr.init_options("tt/t");
+  nr.init_options("tt/t", "TrackingTreerHistsV23mv3", "nr_trackingtreerv23mv3", "ttbar=False, all_signal=False");
   if (!nr.parse_options(argc, argv) || !nr.init()) return 1;
   auto& nt = nr.nt();
   auto& ntt = nt.tracks();

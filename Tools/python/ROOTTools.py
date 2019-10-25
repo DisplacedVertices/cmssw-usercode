@@ -24,6 +24,18 @@ else:
     for _off, (_i, _x) in enumerate(_saved):
         sys.argv.insert(_i+_off, _x)
 
+class TH1EntriesProtector(object):
+    """SetBinContent increments fEntries, making a hist's stats hard
+    to understand afterward, as in e.g. move_above/below_into_bin
+    calls. This saves and resets fEntries when done."""
+    def __init__(self, h):
+        self.h = h
+    def __enter__(self):
+        self.n = self.h.GetEntries()
+    def __exit__(self, *args):
+        self.h.ResetStats() # JMTBAD probably not necessary?
+        self.h.SetEntries(self.n)
+
 def apply_hist_commands(hist, hist_cmds=None):
     """With hist_cmds a list of n-tuples, where the first entry of the
     tuple is a function name, call the function name on the histogram
@@ -834,12 +846,13 @@ def data_mc_comparison(name,
                     for ibin in xrange(1, sample.hist.GetNbinsX()+1):
                         bin_width_to_scales.append(sample.hist.GetXaxis().GetBinWidth(ibin) / bin_width_to)
 
-                for ibin in xrange(1, sample.hist.GetNbinsX()+1):
-                    c = sample.hist.GetBinContent(ibin)
-                    e = sample.hist.GetBinError(ibin)
-                    sc = bin_width_to_scales[ibin]
-                    sample.hist.SetBinContent(ibin, c / sc)
-                    sample.hist.SetBinError  (ibin, e / sc)
+                with TH1EntriesProtector(sample.hist) as _:
+                    for ibin in xrange(1, sample.hist.GetNbinsX()+1):
+                        c = sample.hist.GetBinContent(ibin)
+                        e = sample.hist.GetBinError(ibin)
+                        sc = bin_width_to_scales[ibin]
+                        sample.hist.SetBinContent(ibin, c / sc)
+                        sample.hist.SetBinError  (ibin, e / sc)
 
     # Use the first data sample to cache the summed histogram for all
     # the data.
@@ -1460,43 +1473,46 @@ def move_below_into_bin(h,a):
     """Given the TH1 h, add the contents of the bins below the one
     corresponding to a into that bin, and zero the bins below."""
     assert(h.Class().GetName().startswith('TH1')) # i bet there's a better way to do this...
-    b = h.FindBin(a)
-    bc = h.GetBinContent(b)
-    bcv = h.GetBinError(b)**2
-    for nb in xrange(0, b):
-        bc += h.GetBinContent(nb)
-        bcv += h.GetBinError(nb)**2
-        h.SetBinContent(nb, 0)
-        h.SetBinError(nb, 0)
-    h.SetBinContent(b, bc)
-    h.SetBinError(b, bcv**0.5)
+    with TH1EntriesProtector(h) as _:
+        b = h.FindBin(a)
+        bc = h.GetBinContent(b)
+        bcv = h.GetBinError(b)**2
+        for nb in xrange(0, b):
+            bc += h.GetBinContent(nb)
+            bcv += h.GetBinError(nb)**2
+            h.SetBinContent(nb, 0)
+            h.SetBinError(nb, 0)
+        h.SetBinContent(b, bc)
+        h.SetBinError(b, bcv**0.5)
 
 def move_above_into_bin(h,a,minus_one=False):
     """Given the TH1 h, add the contents of the bins above the one
     corresponding to a into that bin, and zero the bins above."""
     assert(h.Class().GetName().startswith('TH1')) # i bet there's a better way to do this...
-    b = h.FindBin(a)
-    if minus_one:
-        b -= 1
-    bc = h.GetBinContent(b)
-    bcv = h.GetBinError(b)**2
-    for nb in xrange(b+1, h.GetNbinsX()+2):
-        bc += h.GetBinContent(nb)
-        bcv += h.GetBinError(nb)**2
-        h.SetBinContent(nb, 0)
-        h.SetBinError(nb, 0)
-    h.SetBinContent(b, bc)
-    h.SetBinError(b, bcv**0.5)
+    with TH1EntriesProtector(h) as _:
+        b = h.FindBin(a)
+        if minus_one:
+            b -= 1
+        bc = h.GetBinContent(b)
+        bcv = h.GetBinError(b)**2
+        for nb in xrange(b+1, h.GetNbinsX()+2):
+            bc += h.GetBinContent(nb)
+            bcv += h.GetBinError(nb)**2
+            h.SetBinContent(nb, 0)
+            h.SetBinError(nb, 0)
+        h.SetBinContent(b, bc)
+        h.SetBinError(b, bcv**0.5)
 
 def move_overflow_into_last_bin(h):
     """Given the TH1 h, Add the contents of the overflow bin into the
     last bin, and zero the overflow bin."""
     assert(h.Class().GetName().startswith('TH1')) # i bet there's a better way to do this...
-    nb = h.GetNbinsX()
-    h.SetBinContent(nb, h.GetBinContent(nb) + h.GetBinContent(nb+1))
-    h.SetBinError(nb, (h.GetBinError(nb)**2 + h.GetBinError(nb+1)**2)**0.5)
-    h.SetBinContent(nb+1, 0)
-    h.SetBinError(nb+1, 0)
+    with TH1EntriesProtector(h) as _:
+        nb = h.GetNbinsX()
+        h.SetBinContent(nb, h.GetBinContent(nb) + h.GetBinContent(nb+1))
+        h.SetBinError(nb, (h.GetBinError(nb)**2 + h.GetBinError(nb+1)**2)**0.5)
+        h.SetBinContent(nb+1, 0)
+        h.SetBinError(nb+1, 0)
 
 def move_overflows_into_visible_bins(h, opt='under over'):
     """Combination of move_above/below_into_bin and
@@ -2350,7 +2366,7 @@ def to_TH1D(h, name):
     for ibin in xrange(h.GetNbinsX()+2):
         hh.SetBinContent(ibin, h.GetBinContent(ibin))
         hh.SetBinError  (ibin, h.GetBinError  (ibin))
-        hh.SetEntries(h.GetEntries())
+    hh.SetEntries(h.GetEntries())
     return hh
 
 def ttree_iterator(tree, return_tree=False):
@@ -2413,6 +2429,7 @@ def zgammatauwrong(x,y,tau,tau_uncert):
     return z / nz
 
 __all__ = [
+    'TH1EntriesProtector',
     'apply_hist_commands',
     'array',
     'bin_iterator',

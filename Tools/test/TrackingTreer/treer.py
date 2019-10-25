@@ -5,7 +5,8 @@ settings.is_mc = True
 
 geometry_etc(process, which_global_tag(settings))
 tfileservice(process, 'trackingtreer.root')
-sample_files(process, 'qcdht2000_2017', 'miniaod')
+dataset = 'miniaod'
+sample_files(process, 'qcdht2000_2017', dataset)
 cmssw_from_argv(process)
 
 process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
@@ -36,15 +37,9 @@ ReferencedTagsTaskAdder(process)('p')
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
-    import JMTucker.Tools.Samples as Samples
-    from JMTucker.Tools.Year import year
 
-    if year == 2017:
-        samples = Samples.qcd_samples_2017 + Samples.data_samples_2017
-    elif year == 2018:
-        samples = Samples.qcd_samples_2018 + Samples.data_samples_2018
-
-    set_splitting(samples, 'miniaod', 'default', json_path('ana_2017p8_1pc.json'), 16)
+    samples = pick_samples(dataset, all_signal=False)
+    set_splitting(samples, dataset, 'default', data_json=json_path('ana_2017p8.json'), limit_ttbar=True)
 
     ms = MetaSubmitter('TrackingTreerV23mv3', dataset='miniaod')
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier())

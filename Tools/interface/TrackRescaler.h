@@ -1,7 +1,7 @@
 #ifndef JMTucker_Tools_TrackRescaler_h
 #define JMTucker_Tools_TrackRescaler_h
 
-#ifndef JMT_STANDALONE_TRACKRESCALER
+#ifndef JMT_STANDALONE
 #include "DataFormats/TrackReco/interface/Track.h"
 #endif
 
@@ -57,7 +57,7 @@ namespace jmt {
     int era() const { return era_; }
     int which() const { return which_; }
 
-#ifndef JMT_STANDALONE_TRACKRESCALER
+#ifndef JMT_STANDALONE
     struct ret_t {
       reco::Track tk;
       reco::Track rescaled_tk;

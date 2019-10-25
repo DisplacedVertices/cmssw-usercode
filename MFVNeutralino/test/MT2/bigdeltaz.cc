@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
 
       for (int iv = 0, ive = vs.n(); iv < ive; ++iv) {
         const float dbv = vs.dbv(iv, nt.bs()); 
-        const std::vector<int> v_tracks = nt.vertices_tracks(iv);
+        const std::vector<int> v_tracks = nt.vertex_tracks(iv);
         const int vntk = vs.ntracks(iv); // assert(vntk == v_tracks.size());
 
         if (nt.gentruth().valid()) {

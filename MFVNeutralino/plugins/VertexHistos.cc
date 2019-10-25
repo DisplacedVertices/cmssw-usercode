@@ -12,7 +12,6 @@
 #include "JMTucker/Tools/interface/Utilities.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
-#include "JMTucker/MFVNeutralino/interface/VertexTools.h"
 
 class MFVVertexHistos : public edm::EDAnalyzer {
  public:

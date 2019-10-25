@@ -39,7 +39,10 @@ if which != -1:
 ROOT.gErrorIgnoreLevel = 6000
 fns = []
 for x in sys.argv[1:]:
-    if x.endswith('.root') and (os.path.isfile(x) or x.startswith('root://')):
+    if x.endswith('.root'):
+        if not os.path.isfile(x) and not x.startswith('root://'):
+            print "skipping %s in argv because it doesn't exist" % x
+            continue
         fns.append(x)
     elif os.path.isdir(x):
         x2 = os.path.join(x, '*.root')

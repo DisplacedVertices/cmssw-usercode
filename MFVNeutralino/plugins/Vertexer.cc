@@ -17,7 +17,7 @@
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexerPairEff.h"
-#include "JMTucker/MFVNeutralino/interface/VertexTools.h"
+#include "JMTucker/MFVNeutralino/interface/VertexerParams.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
 class MFVVertexer : public edm::EDProducer {

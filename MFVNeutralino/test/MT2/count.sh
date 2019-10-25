@@ -1,6 +1,6 @@
 #!/bin/bash
 
-inpath=/store/user/tucker/hadded/NtupleV27mm
+inpath=/store/user/tucker/hadded/NtupleV27mmB3
 outpath=count
 
 if [[ -e $outpath ]]; then

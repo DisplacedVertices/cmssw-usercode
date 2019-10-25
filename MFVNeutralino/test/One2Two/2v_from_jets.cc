@@ -686,6 +686,8 @@ int main(int argc, const char* argv[]) {
 
   // production version
   const char* version = "V27m";
+
+  /*
   for (const char* year : {"2017","2018","2017p8"}) {
     for (int ntracks : {3, 4, 5, 7}) {
       ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks);
@@ -707,18 +709,17 @@ int main(int argc, const char* argv[]) {
 //      construct_dvvc(pars2.min_npu(37).max_npu(255),            TString::Format("2v_from_jets_%s_%dtrack_npu37to255_%s.root", year, ntracks, version));
     }
   }
-  
-  for (const char* year : {"2017","2018", "2017p8"}) {
+  */
+  for (const char* year : {"2017","2018"}) {
     for (int ntracks : {3}) {
       ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks).is_mc(false);
       construct_dvvc(pars2,                    TString::Format("2v_from_jets_data_%s_%dtrack_default_%s.root", year, ntracks, version));
       construct_dvvc(pars2.correct_bquarks(false).btags(1),     TString::Format("2v_from_jets_data_%s_%dtrack_btags_%s.root", year, ntracks, version));
       construct_dvvc(pars2.correct_bquarks(false).btags(0),     TString::Format("2v_from_jets_data_%s_%dtrack_nobtags_%s.root", year, ntracks, version));
-      //construct_dvvc(pars2.correct_bquarks(false).btags(1).vary_dphi(true),     TString::Format("2v_from_jets_data_%s_%dtrack_btags_%s.root", year, ntracks, version));
-      //construct_dvvc(pars2.correct_bquarks(false).btags(0).vary_dphi(true),     TString::Format("2v_from_jets_data_%s_%dtrack_nobtags_%s.root", year, ntracks, version));
-      //construct_dvvc(pars2.vary_dphi(true),    TString::Format("2v_from_jets_data_%s_%dtrack_vary_dphi_%s.root", year, ntracks, version));
-      //construct_dvvc(pars2.vary_eff(true),     TString::Format("2v_from_jets_data_%s_%dtrack_vary_eff_%s.root", year, ntracks, version));
-      //construct_dvvc(pars2.vary_bquarks(true), TString::Format("2v_from_jets_data_%s_%dtrack_vary_bquarks_%s.root", year, ntracks, version));
+      construct_dvvc(pars2.correct_bquarks(false).btags(1).vary_dphi(true),     TString::Format("2v_from_jets_data_%s_%dtrack_vary_dphi_btags_%s.root", year, ntracks, version));
+      construct_dvvc(pars2.correct_bquarks(false).btags(0).vary_dphi(true),     TString::Format("2v_from_jets_data_%s_%dtrack_vary_dphi_nobtags_%s.root", year, ntracks, version));
+      construct_dvvc(pars2.correct_bquarks(false).btags(1).vary_eff(true),     TString::Format("2v_from_jets_data_%s_%dtrack_vary_eff_btags_%s.root", year, ntracks, version));
+      construct_dvvc(pars2.correct_bquarks(false).btags(0).vary_eff(true),     TString::Format("2v_from_jets_data_%s_%dtrack_vary_eff_nobtags_%s.root", year, ntracks, version));
     }
   }
 
@@ -728,7 +729,7 @@ int main(int argc, const char* argv[]) {
   outfile << "variant,cb_val" << std::endl;;
 
   for(TString cb_cbbar : cb_cbbar_vector){
-    if(cb_cbbar.Contains("track_btags_") || cb_cbbar.Contains("track_nobtags_")){
+    if(cb_cbbar.Contains("_btags_") || cb_cbbar.Contains("_nobtags_")){
 
       // format for our csv file
       cb_cbbar.ReplaceAll("2v_from_jets_","");

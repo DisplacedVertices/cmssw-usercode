@@ -4,7 +4,7 @@ FLAGS = $(CFLAGS) \
 	-I$(shell scram tool tag boost INCLUDE) -L$(shell scram tool tag boost LIBDIR) -lboost_program_options \
 	-I$(CMSSW_BASE)/src -I$(CMSSW_RELEASE_BASE)/src \
         -L$(CMSSW_BASE)/lib/$(SCRAM_ARCH) -lJMTuckerTools \
-	-std=c++17 -pedantic -Werror -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-qual -O3
+	-std=c++17 -lstdc++fs -pedantic -Werror -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-qual -O3
 
 all: hists.exe
 

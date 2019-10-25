@@ -30,5 +30,8 @@ jmtNtupleFillerMiniAOD = jmtNtupleFiller.clone(
     track_ref_getter = jmtTrackRefGetterMiniAOD,
     )
 
-def jmtNtupleFiller_pset(miniaod):
-    return jmtNtupleFillerMiniAOD if miniaod else jmtNtupleFiller
+def jmtNtupleFiller_pset(miniaod, using_rescaled_tracks=False):
+    p = jmtNtupleFillerMiniAOD if miniaod else jmtNtupleFiller
+    if using_rescaled_tracks: # not necessarily rescaling them, but that they are in the workflow and track_ref_getter will hit them
+        p.tracks_src = 'jmtRescaledTracks'
+    return p
