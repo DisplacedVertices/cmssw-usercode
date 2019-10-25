@@ -662,8 +662,7 @@ namespace mfv {
       }
     }
     assert(year > 0);
-    //jmt::Year::set(year); // this is what works in master
-    jmt::BTagging::set_year(year);
+    jmt::Year::set(year);
 
     TTree* tree = (TTree*)f->Get(tree_path);
     assert(tree);
