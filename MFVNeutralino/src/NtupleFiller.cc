@@ -64,11 +64,10 @@ namespace mfv {
             saw_c, saw_b);
   }
 
-  void NtupleAdd(VerticesSubNtuple& nt, const MFVVertexAux& v, bool genmatch) {
-    nt.add(v.x, v.y, v.z,
-           v.cxx, v.cxy, v.cxz, v.cyy, v.cyz, v.czz,
-           v.ntracks(), v.bs2derr, v.rescale_bs2derr, v.geo2ddist(), genmatch,
-           v.pt[mfv::PTracksPlusJetsByNtracks], v.eta[mfv::PTracksPlusJetsByNtracks], v.phi[mfv::PTracksPlusJetsByNtracks], v.mass[mfv::PTracksPlusJetsByNtracks],
-           v.mass[mfv::PTracksOnly]);
+  void NtupleAdd(VerticesSubNtuple& nt, const reco::Vertex& v, const reco::Vertex& rv, const MFVVertexAux& a, bool genmatch) {
+    nt.add( v.chi2(),  v.x(),  v.y(),  v.z(),  v.covariance(0,0),  v.covariance(0,1),  v.covariance(0,2),  v.covariance(1,1),  v.covariance(1,2),  v.covariance(2,2),
+           rv.chi2(), rv.x(), rv.y(), rv.z(), rv.covariance(0,0), rv.covariance(0,1), rv.covariance(0,2), rv.covariance(1,1), rv.covariance(1,2), rv.covariance(2,2),
+           a.ntracks(), a.njets[0], a.bs2derr, a.rescale_bs2derr, genmatch,
+           a.pt[mfv::PTracksPlusJetsByNtracks], a.eta[mfv::PTracksPlusJetsByNtracks], a.phi[mfv::PTracksPlusJetsByNtracks], a.mass[mfv::PTracksPlusJetsByNtracks]);
   }
 }

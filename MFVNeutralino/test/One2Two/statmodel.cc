@@ -29,9 +29,7 @@
  *
  *
  * How statmodel.cc works:
- *  - Model the dBV distribution with a function:
- *      f(rho) = p0 + p1 * expl(-p2 * rho) + p3 * expl(-p4 * rho^0.5) + rho_tail_norm * p5 * expl(-p6 * rho_tail_slope * rho^0.15)
- *      {p0, p1, p2, p3, p4, p5, p6} depends on ntracks
+ *  - Model the dBV distribution with a function depending on ntracks
  *  - Generate the true dVV distribution using the dBV function (and the deltaphi function and efficiency curve).
  *  - Throw ntoys.  For each toy:
  *     - Randomly sample i1v from Poisson(n1v)
@@ -43,7 +41,7 @@
  *   inst, seed, ntoys, out_fn, samples_index, year_index, ntracks, n1v, n2v, true_fn, true_from_file,
  *   ntrue_1v, ntrue_2v, oversample, rho_tail_norm, rho_tail_slope, phi_c, phi_e, phi_a, eff_fn, eff_path
  *
- * These should be modified in the code:
+ * These can be modified in the code:
  *   nbins_1v, bins_1v, nbins_2v, bins_2v, func_rho, rho_min, rho_max, default_n1v, default_n2v
  */
 
@@ -103,20 +101,19 @@ struct VertexPair {
 
 // Globals: parameters for the throwing fcns and the fcns themselves, and the binning for 1v/2v hists
 
-int ntracks;
-long double rho_tail_norm;
-long double rho_tail_slope;
-double phi_c;
-double phi_e;
-double phi_a;
+int sample_is_mc = 1;
+int year_index = 0;
+int ntracks = 3;
+int ntracks_index = ntracks - 3;
+double phi_c = 1.3;
+double phi_e = 2;
+double phi_a = 6;
 
 const int nbins_1v = 995;
 double bins_1v[nbins_1v+1] = {0};
 
-//const int nbins_2v = 11;
-//const double bins_2v[nbins_2v+1] = { 0., 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.2 };
 const int nbins_2v = 3;
-const double bins_2v[nbins_2v+1] = { 0., 0.04, 0.07, 0.11 };
+double bins_2v[nbins_2v+1] = {0};
 
 //#define USE_H_DBV
 TH1D* h_func_rho = 0;
@@ -124,23 +121,82 @@ TF1* f_func_rho = 0;
 TF1* f_func_dphi = 0;
 TH1F* h_eff = 0;
 
-double func_rho(double* x, double*) {
-  const long double rho(fabs(x[0]));
-  long double f = 1e-6;
-  const long double p[3][10] = {
-    { 2.87190e-04L, 3.35391e-08L, 3.56126e+02L, 6.74967e+02L, 2.19970e+01L, 1.07814e+06L, 5.97512e+01L },
-    { 6.72207e-10L, 8.71486e-03L, 2.50698e+00L, 1.30699e+03L, 2.63253e+01L, 2.84286e+04L, 3.09081e+01L },
-    { 8.91883e-04L, 2.12659e-01L, 1.32012e+01L, 5.11276e+03L, 3.63974e+01L, 3.30855e+06L, 4.13659e+02L }
-  };
+const int fr_max_kn = 7;
+const double fr_kn[3][fr_max_kn] = {
+  { 0.01, 0.02, 0.03, 0.06, 0.1, 0.2, 2 },
+  { 0.01, 0.02, 0.05, 0.1, 2,     -1,-1 },
+  { 0.01, 0.06, 2,          -1,-1,-1,-1 },
+};
 
-  const size_t i = ntracks - 3;
-  f = p[i][0] + p[i][1] * expl(-p[i][2] * rho) + p[i][3] * expl(-p[i][4] * powl(rho, 0.5L)) + rho_tail_norm * p[i][5] * expl(-p[i][6] * rho_tail_slope * powl(rho, 0.15L));
+#ifdef FITTING_DBV
+const int fr_ic = FR_IC; // e.g.   i=6; rm statmodel.exe ; make SMFLAGS="-DFITTING_DBV -DFR_IC=${i}" statmodel.exe && env sm_year_index=0 sm_rho_compare_only=1 sm_samples_index=2 sm_ntracks=3 sm_rho_compare_xmax=0.5 ./statmodel.exe
+#endif
+double fr_c[2][3][3][fr_max_kn] = { // is_mc, year, ntracks indices
+  { // data (5tk are from 10%) are same for 2017/8--fit to 2017p8 but 2017 and 2018 look very similar in shape
+    { // 2017
+      { 9.80903, 9.66801, 8.36952, 5.86700, 3.2111, 0.05319, -10.3479 }, // 3track
+      { 8.45312, 8.23969, 4.68509, 0.79881, -22.0859,           -1,-1 }, // 4track
+      { 4.64386, 0.049497, -22.6856,                      -1,-1,-1,-1 }, // 5track
+    },
+    { // 2018
+      { 9.80903, 9.66801, 8.36952, 5.86700, 3.2111, 0.05319, -10.3479 },
+      { 8.45312, 8.23969, 4.68509, 0.79881, -22.0859,           -1,-1 },
+      { 4.64386, 0.049497, -22.6856,                      -1,-1,-1,-1 },
+    },
+    { // 2017p8
+      { 9.80903, 9.66801, 8.36952, 5.86700, 3.2111, 0.05319, -10.3479 },
+      { 8.45312, 8.23969, 4.68509, 0.79881, -22.0859,           -1,-1 },
+      { 4.64386, 0.049497, -22.6856,                      -1,-1,-1,-1 },
+    },
+  },
+  { // mc
+    { // 2017
+      { 8.27872, 8.13094, 6.9383, 4.87983, 2.33309, -0.733174, -8.93311 },
+      { 6.4729, 6.27879, 3.31899, -0.18999, -26.6506,             -1,-1 },
+      { 4.58488, -0.352759, -57.9401,                       -1,-1,-1,-1 },
+    },
+    { // 2018
+      { 7.76261, 7.96822, 7.01993, 4.46392, 2.13192, -2.76241, -7.21428 },
+      { 5.96357, 6.35436, 3.4712, -2.60817, -9.14066,             -1,-1 },
+      { 4.39865, 1.26948, -223.883,                         -1,-1,-1,-1 },
+    },
+    { // 2017p8
+      { 8.74394, 8.74316, 7.67281, 5.37591, 2.93877, -0.750633, -7.55426 },
+      { 6.93565, 7.00247, 4.09944, -0.399182, -15.6391,            -1,-1 },
+      { 5.15881, 1.33783, -114.868,                          -1,-1,-1,-1 },
+    },
+  },
+};
 
-  return double(f);
+double func_rho(double* _x, double* p) {
+  const double x = fabs(_x[0]);
+
+  int k = 1;
+  for (; k < fr_max_kn; ++k)
+    if (fr_kn[ntracks_index][k] < 0 || (fr_kn[ntracks_index][k-1] <= x && x < fr_kn[ntracks_index][k]))
+      break;
+
+#ifdef FITTING_DBV
+  fr_c[sample_is_mc][year_index][ntracks_index][fr_ic] = p[0];
+  if (fr_ic == 0)
+    fr_c[sample_is_mc][year_index][ntracks_index][1] = p[1];
+#endif
+
+  const double xa = fr_kn[ntracks_index][k-1];
+  const double xb = fr_kn[ntracks_index][k];
+  const double ya = fr_c[sample_is_mc][year_index][ntracks_index][k-1];
+  const double yb = fr_c[sample_is_mc][year_index][ntracks_index][k];
+  const double m = (yb - ya) / (xb - xa);
+  const double y = m * (x - xb) + yb;
+  return exp(y);
 }
 
 double func_rho_norm(double* x, double* p) {
+#ifdef FITTING_DBV
+  return func_rho(x,p);
+#else
   return p[0] * func_rho(x,0);
+#endif
 }
 
 double func_dphi(double* x, double*) {
@@ -198,44 +254,55 @@ int main(int, char**) {
   for (int i = 0; i <= nbins_1v; ++i)
     bins_1v[i] = 0.0100 + 0.0020*i;
 
+  if (nbins_2v == 3)
+    bins_2v[0] = 0, bins_2v[1] = 0.04, bins_2v[2] = 0.07, bins_2v[3] = 0.11;
+  else
+    for (int i = 0; i <= nbins_2v; ++i)
+      bins_2v[i] = 0.01*i;
+
   jmt::ConfigFromEnv env("sm", true);
 
                                        //  2017                   2018                  2017+2018
-  const double default_n1v[4][3][3] = {{{  89055,  8827, 696 }, { 88730, 9850, 665 }, { 177773, 18672, 1363 }},  //MC scaled to int. lumi.
-                                       {{  20109,  1987, 160 }, { 12188, 1292, 100 }, {  30389,  3051,  249 }},  //MC effective
-                                       {{  11984,     1,   1 }, { 11735, 1, 1 }, { 1, 1, 1 }},  //data 10%
-                                       {{      1,     1,   1 }, { 1, 1, 1 }, { 1, 1, 1 }}}; //data 100%
-
-  const double default_n2v[4][3][3] = {{{    651,     2,   1 }, { 426, 5, 1 }, { 1077, 7, 1 }},
-                                       {{    151,     4,   1 }, {  74, 4, 1 }, {  222, 7, 1 }},
-                                       {{    110,     1,   1 }, {  96, 1, 1 }, { 1, 1, 1 }},
-                                       {{      1,     1,   1 }, { 1, 1, 1 }, { 1, 1, 1 }}};
+  const double default_n1v[4][3][3] = {{{  14349, 2258, 199 }, { 11600, 2094, 249 }, {  14349+11600, 2258+2094, 199+249 }},  // MC scaled to int. lumi.
+                                       {{   6561, 1073,  92 }, {  3427,  642,  75 }, {   6561+ 3427, 1073+ 642,  92+ 75 }},  // MC effective
+                                       {{   3203,  786, 142 }, {  3036,  689,  82 }, {   3203+ 3036,  786+ 689, 142+ 82 }},  // data 10%
+                                       {{  32152, 7838,   1 }, { 29666, 6892,   1 }, {  32152+29666, 7838+6892,       1 }}   // data 100%
+                                      };
+  const double default_n2v[4][3][3] = {{{     55,    1,   1 }, { 14, 1, 1 }, {  55+14,   1, 1 }},
+                                       {{     22,    3,   1 }, {  8, 1, 1 }, {  22+ 8, 3+1, 1 }},
+                                       {{      7,    3,   1 }, { 13, 1, 1 }, {   7+13, 3+0, 1 }},
+                                       {{    113,    9,   1 }, { 72, 3, 1 }, { 113+72, 9+3, 1 }}
+                                      };
 
   const int inst = env.get_int("inst", 0);
   const int seed = env.get_int("seed", 12919135 + inst);
   const int ntoys = env.get_int("ntoys", 10000);
   const std::string out_fn = env.get_string("out_fn", "statmodel");
+  const bool save_all_1v_bins = env.get_int("save_all_1v_bins", 0);
   const int samples_index = env.get_int("samples_index", 0);
   assert(samples_index >= 0 && samples_index <= 3);
-  const int year_index = env.get_int("year_index", 0);
+  sample_is_mc = samples_index < 2;
+  year_index = env.get_int("year_index", 0);
   assert(year_index >= 0 && year_index <= 2);
   ntracks = env.get_int("ntracks", 5);
   assert(ntracks >= 3 && ntracks <= 5);
-  const double n1v = env.get_double("n1v", default_n1v[samples_index][year_index][ntracks-3]);
-  const double n2v = env.get_double("n2v", default_n2v[samples_index][year_index][ntracks-3]);
+  ntracks_index = ntracks - 3;
+  const double n1v = env.get_double("n1v", default_n1v[samples_index][year_index][ntracks_index]);
+  const double n2v = env.get_double("n2v", default_n2v[samples_index][year_index][ntracks_index]);
   const std::string true_fn = env.get_string("true_fn", "");
   const bool true_from_file = true_fn != "";
   const long ntrue_1v = env.get_long("ntrue_1v", 10000000L);
   const long ntrue_2v = env.get_long("ntrue_2v", 1000000L);
   const double oversample = env.get_double("oversample", 20);
   const std::string year_str[3] = {"2017","2018","2017p8"};
-  const std::string rho_compare_fn = env.get_string("rho_compare_fn", "/uscms_data/d3/dquach/crab3dirs/HistosV25m/background_"+year_str[year_index]+".root");
-  rho_tail_norm = env.get_long_double("rho_tail_norm", 1L);
-  rho_tail_slope = env.get_long_double("rho_tail_slope", 1L);
-  phi_c = env.get_double("phi_c", 1.42);
+  const std::string ntuple_version = "V27m";
+  const std::string rho_compare_fn = env.get_string("rho_compare_fn", "/uscms_data/d2/tucker/crab_dirs/Histos" + ntuple_version + std::string(!sample_is_mc && ntracks < 5 ? "/100pc/" : "/") + std::string(sample_is_mc ? "background_" : "JetHT") + year_str[year_index] + ".root");
+  const double rho_compare_xmax = env.get_double("rho_compare_xmax", 2);
+  const bool rho_compare_only = env.get_bool("rho_compare_only", false);
+  phi_c = env.get_double("phi_c", 1.31);
   phi_e = env.get_double("phi_e", 2);
-  phi_a = env.get_double("phi_a", 3.53);
-  const std::string eff_fn = env.get_string("eff_fn", "vpeffs_"+year_str[year_index]+"_V25m.root");
+  phi_a = env.get_double("phi_a", 5.96);
+  const std::string eff_fn = env.get_string("eff_fn", "vpeffs_" + std::string(sample_is_mc ? "" : "data_") + year_str[year_index] + "_" + ntuple_version + ".root");
   const std::string eff_path = env.get_string("eff_path", "maxtk3");
 
   /////////////////////////////////////////////
@@ -281,10 +348,19 @@ int main(int, char**) {
   //auto lxp  = [&] () { c->SetLogx(1); c->Print(pdf_fn); c->SetLogx(0); };
   //auto lxyp = [&] () { c->SetLogx(1); c->SetLogy(1); c->Print(pdf_fn); c->SetLogx(0); c->SetLogy(0); };
 
+  auto finish = [&]() {
+    c->Print(pdf_fn + "]");
+    delete h_func_rho;
+    delete f_func_rho;
+    delete f_func_dphi;
+    delete h_eff;
+  };
+
   /////////////////////////////////////////////
 
   // 1st page of output: show the rho fcn itself lin/log
 
+#ifndef FITTING_DBV
   const double func_rho_max   = f_func_rho->GetMaximum();
   const double func_rho_max_x = f_func_rho->GetMaximumX();
   printf("max of 1v fcn %f at %f\n", func_rho_max, func_rho_max_x);
@@ -297,35 +373,54 @@ int main(int, char**) {
   f_func_rho->Draw();
   p();
   c->Clear();
+#endif
 
   // 2nd page: compare rho to MC background distributions.
 
   if (std::experimental::filesystem::exists(rho_compare_fn)) {
-    TF1* f_func_rho_norm = new TF1("func_rho_norm", func_rho_norm, rho_min, rho_max, 1);
+#ifdef FITTING_DBV
+    const double rho_min = fr_kn[ntracks_index][0];
+    const double rho_max = fr_kn[ntracks_index][fr_ic == 0 ? 1 : fr_ic];
+    const int npar = fr_ic == 0 ? 2 : 1;
+#else
+    const int npar = 1;
+#endif
+    TF1* f_func_rho_norm = new TF1("func_rho_norm", func_rho_norm, rho_min, rho_max, npar);
     f_func_rho_norm->SetNpx(25000);
-    f_func_rho_norm->SetParameter(1,1);
+    for (int ipar = 0; ipar < npar; ++ipar)
+      f_func_rho_norm->SetParameter(ipar,10);
     uptr<TFile> fin(TFile::Open(rho_compare_fn.c_str()));
     TH1* h_rho_compare = 0;
     if      (ntracks == 5) h_rho_compare = (TH1*)fin->Get(    "mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist");
     else if (ntracks == 3) h_rho_compare = (TH1*)fin->Get("Ntk3mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist");
     else if (ntracks == 4) h_rho_compare = (TH1*)fin->Get("Ntk4mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist");
     h_rho_compare->SetStats(0);
-
-    // Note for those who are forgetful about the TH1::Fit options:
-    // "WL" Use Loglikelihood method and bin contents are not integer, i.e. histogram is weighted (must have Sumw2() set)
-    // "Q" Quiet mode (minimum printing)
-    // "R" Use the Range specified in the function range
-    h_rho_compare->Fit(f_func_rho_norm, "WL Q R");
-
-    h_rho_compare->GetXaxis()->SetRangeUser(0,0.5);
-    //  h_rho_compare->GetYaxis()->SetRangeUser(3e-2,500);
+    h_rho_compare->Fit(f_func_rho_norm, sample_is_mc ? "WL R" : "LR");
+    const double rho_compare_ymax = h_rho_compare->GetMaximum() * 1.4;
+    double rho_compare_ymin = 1e-4;
+    for (int ibin = h_rho_compare->GetNbinsX(); ibin >= 1; --ibin)
+      if (h_rho_compare->GetBinLowEdge(ibin) < rho_compare_xmax && h_rho_compare->GetBinContent(ibin) > 0) {
+        const double fval = f_func_rho_norm->Eval(h_rho_compare->GetBinLowEdge(ibin));
+        if (fval > 1e-10) {
+          rho_compare_ymin = fval * 0.1;
+          break;
+        }
+      }
+    h_rho_compare->GetXaxis()->SetRangeUser(0, rho_compare_xmax);
+    h_rho_compare->GetYaxis()->SetRangeUser(rho_compare_ymin, rho_compare_ymax);
     c->SetLogy();
     uptr<TRatioPlot> rho_compare(new TRatioPlot(h_rho_compare));
     rho_compare->SetGraphDrawOpt("P");
-    rho_compare->Draw();
+    rho_compare->Draw("noconfint");
     c->Update();
-    rho_compare->GetLowerRefYaxis()->SetRangeUser(-7,7);
+    rho_compare->GetLowerRefYaxis()->SetRangeUser(-3,3);
     p();
+#ifdef FITTING_DBV
+    printf("fit dbv for ntracks %i in [%f, %f] with fr_ic = %i: %.6g", ntracks, rho_min, rho_max, fr_ic, f_func_rho_norm->GetParameter(0));
+    if (fr_ic == 0) printf(", %.6g", f_func_rho_norm->GetParameter(1));
+    printf("\n");
+#endif
+    if (getenv("asdf")) c->SaveAs("$asdf/sm_rho_compare.png");
   }
   else {
     TText tt(0.1, 0.75, TString::Format("no file %s", rho_compare_fn.c_str()));
@@ -333,6 +428,11 @@ int main(int, char**) {
     p();
   }
   c->Clear();
+
+  if (rho_compare_only) {
+    finish();
+    return 0;
+  }
 
   // Generate the true 1v & 2v distributions from func_rho and
   // func_dphi. Takes a while, so if true_fn is set on cmd line, will
@@ -634,6 +734,7 @@ int main(int, char**) {
   printf("1v bins means:\n");
   printf("%3s %28s  %28s  %28s\n", "bin", "bin mean", "scaled true", "diff");
   for (int i_base = 0; i_base < nbins_1v; i_base += 4) {
+    bool save = save_all_1v_bins;
     c->Divide(2,2);
     for (int i = i_base; i < std::min(i_base + 4, nbins_1v); ++i) {
       c->cd(i%4+1);
@@ -649,11 +750,13 @@ int main(int, char**) {
       const bool twosig = d > 2*de;
       if (twosig || i % (nbins_1v/10) == 0) {
         if (twosig) printf("\x1b[31;1m");
-        printf("%3i %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f +- %12.4f\n", i+1, b, be, t, te, d, de);
+        printf("%3i [%.3f-%.3f) %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f +- %12.4f\n", i+1, bins_1v[i], bins_1v[i+1], b, be, t, te, d, de);
         if (twosig) printf("\x1b[0m");
       }
-      if (twosig)
+      if (twosig) {
+        save = true;
         tl.SetTextColor(kRed);
+      }
       else if (d > de)
         tl.SetTextColor(kOrange+2);
       else
@@ -675,12 +778,12 @@ int main(int, char**) {
       h_1v_rho_bins_diffs_norm->SetBinContent(i+1, d/t);
       h_1v_rho_bins_diffs_norm->SetBinError  (i+1, sqrt(be*be/b/b + te*te/t/t)); // JMTBAD
     }
-    p();
+    if (save) p();
     c->Clear();
   }
 
   printf("2v bins means:\n");
-  printf("%3s %28s  %28s  %28s  %28s  %12s\n", "bin", "bin mean", "scaled true", "diff", "rms", "rms/true");
+  printf("%3s               %28s  %28s  %28s  %28s  %12s\n", "bin", "bin mean", "scaled true", "diff", "rms", "rms/true");
   for (int i_base = 0; i_base < nbins_2v; i_base += 4) {
     c->Divide(2,2);
     for (int i = i_base; i < std::min(i_base + 4, nbins_2v); ++i) {
@@ -695,7 +798,7 @@ int main(int, char**) {
       const double d  = b - t;
       const double de = sqrt(be*be + te*te);
       const double statuncert = r / t;
-      printf("%3i %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f\n", i+1, b, be, t, te, b-t, sqrt(be*be + te*te), r, re, statuncert);
+      printf("%3i [%.3f-%.3f) %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f +- %12.4f  %12.4f\n", i+1, bins_2v[i], bins_2v[i+1], b, be, t, te, b-t, sqrt(be*be + te*te), r, re, statuncert);
       if (d > 2*de)
         tl.SetTextColor(kRed);
       else if (d > de)
@@ -720,6 +823,7 @@ int main(int, char**) {
       h_2v_dvvc_bins_diffs_norm->SetBinError  (i+1, sqrt(be*be/b/b + te*te/t/t)); // JMTBAD
     }
     p();
+    //if (getenv("asdf")) c->SaveAs("$asdf/sm_dvvc_bins.png");
     c->Clear();
   }
 
@@ -778,15 +882,9 @@ int main(int, char**) {
   p();
   c->Clear();
 
-  c->Print(pdf_fn + "]");
-
   out_f->cd();
-  for (auto* h : {h_true_1v_rho.get(), h_true_1v_phi.get(), h_true_2v_rho.get(), h_true_2v_phi.get(), h_true_2v_dvv.get(), h_true_2v_dphi.get()})
+  for (auto* h : {h_true_1v_rho.get(), h_true_1v_phi.get(), h_true_2v_rho.get(), h_true_2v_phi.get(), h_true_2v_dvv.get(), h_true_2v_dvv_norm.get(), h_true_2v_dphi.get(), h_2v_dvvc_bins_means.get(), h_2v_dvvc_bins_rmses.get()})
     h->Write();
 
-  // making these unique_ptrs causes segfault at end?
-  delete h_func_rho;
-  delete f_func_rho;
-  delete f_func_dphi;
-  delete h_eff;
+  finish();
 }

@@ -1,7 +1,4 @@
-#!/usr/bin/env python
-
-import sys
-from JMTucker.Tools.Merge_cfg import cms, process
+from JMTucker.Tools.Merge_cfg import *
 
 process.out.maxSize = cms.untracked.int32(2**19) # in kB, ~537 MB
 
@@ -9,9 +6,9 @@ process.out.maxSize = cms.untracked.int32(2**19) # in kB, ~537 MB
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
-    dataset = 'ntuplev25m'
-    batch_name = 'NtupleV25m_sigs_merge'
-    publish_name = 'NtupleV25m_%s' % year
+    from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset
+    batch_name = 'Ntuple%s_sigs_merge' % version
+    publish_name = 'Ntuple%s_%s' % (version, year)
 
     samples = pick_samples(dataset, all_signal='only')
 

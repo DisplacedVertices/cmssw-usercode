@@ -87,6 +87,20 @@ struct MFVVertexAux {
   float rescale_bs2ddist;
   float rescale_bs2derr;
 
+  size_t nnm1() const { return nm1_chi2.size(); }
+  std::vector<float> nm1_chi2;
+  std::vector<float> nm1_x;
+  std::vector<float> nm1_y;
+  std::vector<float> nm1_z;
+  std::vector<float> nm1_cxx;
+  std::vector<float> nm1_cxy;
+  std::vector<float> nm1_cxz;
+  std::vector<float> nm1_cyy;
+  std::vector<float> nm1_cyz;
+  std::vector<float> nm1_czz;
+  std::vector<float> nm1_bs2ddist;
+  std::vector<float> nm1_bs2derr;
+
   uchar njets[mfv::NJetsByUse];
 
   float pt  [mfv::NMomenta];
@@ -349,6 +363,14 @@ struct MFVVertexAux {
     return c;
   }
 
+  int ntracksetagt(float thr) const {
+    int c = 0;
+    for (size_t i = 0, ie = ntracks(); i < ie; ++i)
+      if (use_track(i) && fabs(track_eta[i]) > thr)
+        ++c;
+    return c;
+  }
+
   int trackminnhits() const {
     int m = 255, m2;
     for (size_t i = 0, ie = ntracks(); i < ie; ++i)
@@ -461,9 +483,9 @@ struct MFVVertexAux {
     return a / c;
   }
 
-  float _rms(const std::vector<float>& v, const bool filter=true) const {
+  float _rms(const std::vector<float>& v, const bool filter=true, const double aavg=-1e99) const {
     if (v.size() == 0) return 0.f;
-    float avg = _avg(v, filter);
+    const float avg = aavg > -1e99 ? aavg : _avg(v, filter);
     std::vector<float> v2;
     for (size_t i = 0, ie = v.size(); i < ie; ++i)
       if (!filter || use_track(i))
@@ -477,7 +499,7 @@ struct MFVVertexAux {
       : min(a->_min(v, filter)),
         max(a->_max(v, filter)),
         avg(a->_avg(v, filter)),
-        rms(a->_rms(v, filter))
+        rms(a->_rms(v, filter, avg))
     {}
   };
 
@@ -604,7 +626,7 @@ struct MFVVertexAux {
         if (use_track(i))
           for (size_t j = i+1, je = n; j < je; ++j)
             if (use_track(j))
-              v.push_back(reco::deltaPhi(track_phi[i], track_phi[j]));
+              v.push_back(fabs(reco::deltaPhi(track_phi[i], track_phi[j])));
     return v;
   }
 

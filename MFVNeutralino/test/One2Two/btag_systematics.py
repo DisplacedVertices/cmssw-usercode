@@ -11,18 +11,19 @@ version = 'V25m'
 year = sys.argv[1]
 mode = sys.argv[2]
 
-#mode = 'vary_SFs_up'
-#mode = 'vary_SFs_down'
-#mode = 'vary_3trk_to_5trk_up'
-#mode = 'vary_3trk_to_5trk_down'
-
 set_style()
 ROOT.gStyle.SetOptFit(0)
 ps = plot_saver(plot_dir('compare_dvvc_%s_%s%s%s_%s' % (version.capitalize(), mode, '' if is_mc else '_data', '_10pc' if only_10pc else '', year)), size=(700,700), root=False, log=False)
 
+# files containing the btag corrected templates
 fn1 = ['2v_from_jets%s_%s_3track_btag_corrected_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_3track_btag_corrected_%s_%s.root' % ('' if is_mc else '_data', year, mode, version)]
 fn2 = ['2v_from_jets%s_%s_4track_btag_corrected_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_4track_btag_corrected_%s_%s.root' % ('' if is_mc else '_data', year, mode, version)]
 fn3 = ['2v_from_jets%s_%s_5track_btag_corrected_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_5track_btag_corrected_%s_%s.root' % ('' if is_mc else '_data', year, mode, version)]
+
+# files containing the out-of-the-box 2-vertex events (whereas the hists in the above files are scaled based on the btag correction)
+fn1_uncorr = ['2v_from_jets%s_%s_3track_default_%s.root' % ('' if is_mc else '_data', year, version)]
+fn2_uncorr = ['2v_from_jets%s_%s_4track_default_%s.root' % ('' if is_mc else '_data', year, version)]
+fn3_uncorr = ['2v_from_jets%s_%s_5track_default_%s.root' % ('' if is_mc else '_data', year, version)]
 
 if mode == 'vary_SFs_up':
     ls = ['nominal','vary SFs up']
@@ -44,16 +45,28 @@ if mode == 'vary_ljet_SFs_up':
     ls = ['nominal','vary ljet SFs up']
 if mode == 'vary_ljet_SFs_down':
     ls = ['nominal','vary ljet SFs down']
-if mode == 'vary_3trk_to_5trk_up':
-    ls = ['nominal','vary 3trk to 5trk up']
-if mode == 'vary_3trk_to_5trk_down':
-    ls = ['nominal','vary 3trk to 5trk down']
+if mode == 'vary_4trk_to_5trk_up':
+    ls = ['nominal','vary 4trk to 5trk up']
+if mode == 'vary_4trk_to_5trk_down':
+    ls = ['nominal','vary 4trk to 5trk down']
 
 fns = [fn1, fn2, fn3]
+fns_uncorr = [fn1_uncorr, fn2_uncorr, fn3_uncorr]
 ntk = ['3-track', '4-track', '5-track']
 names = ['3-track x 3-track', '4-track x 4-track', '#geq 5-track x #geq 5-track']
 
-n2v = [641., 2.21, 1.] if year == '2017' else [426., 5., 1.]
+n2v_2017 = [651., 2.21, 1.]
+n2v_2018 = [426., 5., 1.]
+
+if year == '2017' :
+    n2v = n2v_2017
+elif year == '2018' :
+    n2v = n2v_2018
+elif year == '2017p8' :
+    n2v = [sum(n2v_val) for n2v_val in zip(n2v_2017, n2v_2018)]
+else :
+    print("Unsupported year %s! Exiting." % year)
+    sys.exit()
 
 colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kMagenta, ROOT.kOrange, ROOT.kViolet, ROOT.kPink+1]
 
@@ -143,7 +156,7 @@ for i in range(3):
 
     else:
         l1 = ROOT.TLegend(0.50,0.70,0.85,0.85)
-        hh = ROOT.TFile(fns[i][0]).Get('h_2v_dvv')
+        hh = ROOT.TFile(fns_uncorr[i][0]).Get('h_2v_dvv')
         hh.SetTitle('%s;d_{VV} (cm);events' % ntk[i])
         hh.SetStats(0)
         hh.SetLineColor(ROOT.kBlack)

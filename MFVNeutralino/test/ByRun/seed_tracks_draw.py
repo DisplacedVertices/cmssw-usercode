@@ -2,12 +2,12 @@ from base import *
 
 ROOT.gStyle.SetOptFit(0)
 
-year = 2018
+year = '2017p8'
 path = 'mfvByRunJetPreSel'
-plot_path = 'ByRunPreSelV21m_%i' % year
+plot_path = 'ByRunPreSelV27m_%s' % year
 title = '%s, presel events' % year
-fn_path = '/uscms_data/d2/tucker/crab_dirs/PreselHistosV21mV2_100pc'
-fn = os.path.join(fn_path, 'ReRecoJetHT%sAB.root' % year)
+fn_path = '/uscms_data/d2/tucker/crab_dirs/PreselHistosV27m'
+fn = os.path.join(fn_path, 'JetHT%s.root' % year)
 mask_fn = os.path.join(fn_path, 'dataok_%s.json' % year)
 
 def book():

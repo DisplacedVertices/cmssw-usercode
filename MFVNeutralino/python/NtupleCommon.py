@@ -1,7 +1,7 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version_ = 'V25'
+ntuple_version_ = 'V27'
 ntuple_version_use = ntuple_version_ + 'm'
 dataset = 'ntuple' + ntuple_version_use.lower()
 
@@ -58,12 +58,16 @@ def minitree_only(process, mode, settings, output_commands):
             from JMTucker.Tools.NtupleFiller_cff import jmtNtupleFiller_pset
             process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
             process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
-            vertices = 'mfvSelectedVerticesTightMinNtk3' if 'tight' in mode else 'mfvSelectedVerticesLoose'
-            process.mfvAnalysisCuts.vertex_src = vertices
-            process.mfvAnalysisCuts.min_nvertex = 1
-            process.mfvMiniTree2 = cms.EDAnalyzer('MFVMiniTreer2', jmtNtupleFiller_pset(settings.is_miniaod), vertices_src = cms.InputTag(vertices))
+            from JMTucker.MFVNeutralino.Vertexer_cfi import kvr_params
+            process.mfvMiniTree2 = cms.EDAnalyzer('MFVMiniTreer2',
+                                                  jmtNtupleFiller_pset(settings.is_miniaod, True),
+                                                  kvr_params = kvr_params,
+                                                  vertices_src = cms.InputTag('mfvVertices'),
+                                                  auxes_src = cms.InputTag('mfvVerticesAuxPresel'),
+                                                  vertex_sel = cms.string('tight' if 'tight' in mode else 'loose'),
+                                                  )
             weight_obj = process.jmtWeightMiniAOD if settings.is_miniaod else process.jmtWeight
-            process.p *= weight_obj * getattr(process, vertices) * process.mfvAnalysisCuts * process.mfvMiniTree2
+            process.p *= weight_obj * process.mfvMiniTree2
         else:
             process.load('JMTucker.MFVNeutralino.MiniTree_cff')
             process.mfvWeight.throw_if_no_mcstat = False

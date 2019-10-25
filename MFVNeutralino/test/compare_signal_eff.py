@@ -6,7 +6,8 @@ from JMTucker.Tools import Samples
 from JMTucker.MFVNeutralino.PerSignal import PerSignal
 
 #mode = 'vary_pileup'
-mode = 'vary_jes'
+#mode = 'vary_jes'
+mode = 'vary_jer'
 #mode = 'vary_sigmadxy'
 #mode = 'vary_sigmadxy_dbv300um'
 #mode = 'vary_sigmadxy4p1_dbv300um'
@@ -14,7 +15,7 @@ mode = 'vary_jes'
 combine_masses = False
 
 set_style()
-ps = plot_saver(plot_dir('compare_sigeff_%s%s' % (mode, '_combine_masses' if combine_masses else '')), size=(700,700), log=False, root=False)
+ps = plot_saver(plot_dir('compare_sigeff_%s%s_2018' % (mode, '_combine_masses' if combine_masses else '')), size=(700,700), log=False, root=False)
 
 if mode == 'vary_pileup':
     root_file_dirs = ['/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV16_0', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV16_1', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV16_2']
@@ -22,9 +23,14 @@ if mode == 'vary_pileup':
     ls = ['2016', '2016mbxsecm5pc', '2016mbxsecp5pc']
 
 if mode == 'vary_jes':
-    root_file_dirs = ['/uscms_data/d3/dquach/crab3dirs/JetEnergyHistosV25m', '/uscms_data/d3/dquach/crab3dirs/JetEnergyHistosV25m', '/uscms_data/d3/dquach/crab3dirs/JetEnergyHistosV25m']
+    root_file_dirs = ['/uscms_data/d3/dquach/crab3dirs/JetEnergyHistosV25m_genjetenergy_2018', '/uscms_data/d3/dquach/crab3dirs/JetEnergyHistosV25m_genjetenergy_2018', '/uscms_data/d3/dquach/crab3dirs/JetEnergyHistosV25m_genjetenergy_2018']
     num_paths = ['mfvJetEnergyHistosJES/h_jet_ht_40_1200cut', 'mfvJetEnergyHistosJES/h_jet_ht_40_down_1200cut', 'mfvJetEnergyHistosJES/h_jet_ht_40_up_1200cut']
-    ls = ['2017', '2017jesdown', '2017jesup']
+    ls = ['2018', '2018jesdown', '2018jesup']
+
+if mode == 'vary_jer':
+    root_file_dirs = ['/uscms_data/d3/dquach/crab3dirs/JetEnergyHistosV25m_genjetenergy_2018', '/uscms_data/d3/dquach/crab3dirs/JetEnergyHistosV25m_genjetenergy_2018', '/uscms_data/d3/dquach/crab3dirs/JetEnergyHistosV25m_genjetenergy_2018']
+    num_paths = ['mfvJetEnergyHistosJER/h_jet_ht_40_1200cut', 'mfvJetEnergyHistosJER/h_jet_ht_40_down_1200cut', 'mfvJetEnergyHistosJER/h_jet_ht_40_up_1200cut']
+    ls = ['2018', '2018jerdown', '2018jerup']
 
 if mode == 'vary_sigmadxy':
     root_file_dirs = ['/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_0', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_sigmadxy3p7', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_sigmadxy3p8', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_sigmadxy3p9', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_sigmadxy4p1', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_sigmadxy4p2', '/uscms_data/d1/jchu/crab_dirs/mfv_8025/HistosV15_sigmadxy4p3']
@@ -40,8 +46,8 @@ nevs = []
 for i,root_file_dir in enumerate(root_file_dirs):
     print ls[i]
 
-    multijet = [s for s in Samples.mfv_signal_samples_2017 if not s.name.startswith('my_')]
-    dijet = Samples.mfv_stopdbardbar_samples_2017
+    multijet = [s for s in Samples.mfv_signal_samples_2018 if not s.name.startswith('my_')]
+    dijet = Samples.mfv_stopdbardbar_samples_2018
 
     nev = []
     per = PerSignal('efficiency', y_range=(0.,1.05))
@@ -77,8 +83,8 @@ for i,root_file_dir in enumerate(root_file_dirs):
     nevs.append(nev)
 
 print
-multijet = [s for s in Samples.mfv_signal_samples_2017 if not s.name.startswith('my_')]
-dijet = Samples.mfv_stopdbardbar_samples_2017
+multijet = [s for s in Samples.mfv_signal_samples_2018 if not s.name.startswith('my_')]
+dijet = Samples.mfv_stopdbardbar_samples_2018
 samples = sorted(multijet, key=lambda s: s.name) + sorted(dijet, key=lambda s: s.name)
 print 'samples = [%s]' % (', '.join('%d: %s' % (i,s.name) for i,s in enumerate(samples)))
 
@@ -118,8 +124,8 @@ print
 for i,nev in enumerate(nevs):
     print ls[i]
 
-    multijet = [s for s in Samples.mfv_signal_samples_2017 if not s.name.startswith('my_')]
-    dijet = Samples.mfv_stopdbardbar_samples_2017
+    multijet = [s for s in Samples.mfv_signal_samples_2018 if not s.name.startswith('my_')]
+    dijet = Samples.mfv_stopdbardbar_samples_2018
 
     for j,sample in enumerate(sorted(multijet, key=lambda s: s.name) + sorted(dijet, key=lambda s: s.name)):
         v = nev[j]
@@ -137,8 +143,8 @@ for i,nev in enumerate(nevs):
     per.draw(canvas=ps.c)
     ps.save('sigeff_ratio_%s' % ls[i])
 
-multijet = [s for s in Samples.mfv_signal_samples_2017 if not s.name.startswith('my_')]
-dijet = Samples.mfv_stopdbardbar_samples_2017
+multijet = [s for s in Samples.mfv_signal_samples_2018 if not s.name.startswith('my_')]
+dijet = Samples.mfv_stopdbardbar_samples_2018
 
 for j,sample in enumerate(sorted(multijet, key=lambda s: s.name) + sorted(dijet, key=lambda s: s.name)):
     d = nevs[0][j]

@@ -1,15 +1,18 @@
-SHADOWDEPS = $(wildcard $(CMSSW_BASE)/src/JMTucker/Tools/*/Ntuple*) $(CMSSW_BASE)/lib/$(SCRAM_ARCH)/libJMTuckerTools.so
-FLAGS = \
+SHADOWDEPS = $(wildcard $(CMSSW_BASE)/src/JMTucker/Tools/*/Ntuple*) $(wildcard $(CMSSW_BASE)/src/JMTucker/Tools/interface/*) $(CMSSW_BASE)/lib/$(SCRAM_ARCH)/libJMTuckerTools.so
+FLAGS = $(CFLAGS) \
 	$(shell root-config --cflags --libs) \
 	-I$(shell scram tool tag boost INCLUDE) -L$(shell scram tool tag boost LIBDIR) -lboost_program_options \
 	-I$(CMSSW_BASE)/src -I$(CMSSW_RELEASE_BASE)/src \
         -L$(CMSSW_BASE)/lib/$(SCRAM_ARCH) -lJMTuckerTools \
-	-std=c++17 -pedantic -Werror -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-qual -O3
+	-std=c++17 -lstdc++fs -pedantic -Werror -Wall -Wextra -Wshadow -Wpointer-arith -Wcast-qual -O3
 
 all: hists.exe
 
 %.exe: %.cc $(SHADOWDEPS)
 	g++ -o $@ $< $(FLAGS)
+
+#copier.cc: $(SHADOWDEPS)
+#        generate_ntuple_copier.sh mfv::SplitPVNtuple mfvSplitPVs
 
 clean:
 	-rm -f *.exe *.o

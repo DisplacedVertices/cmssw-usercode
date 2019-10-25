@@ -358,9 +358,14 @@ for x in __all__:
             exec '%s = sample' % sample.name
             __all__.append(sample.name)
 
+span_signal_samples_2017 = [eval('mfv_%s_tau%06ium_M%04i_2017' % (a,b,c)) for a in ('neu','stopdbardbar') for b in (300,1000,10000) for c in (800,1600,3000)]
+span_signal_samples_2018 = [eval('mfv_%s_tau%06ium_M%04i_2018' % (a,b,c)) for a in ('neu','stopdbardbar') for b in (300,1000,10000) for c in (800,1600,3000)]
+
 _alls = [
     'all_signal_samples_2017',
     'all_signal_samples_2018',
+    'span_signal_samples_2017',
+    'span_signal_samples_2018',
     ]
 __all__ += _alls
 for x in _alls:
@@ -548,14 +553,13 @@ for x in data_samples_2017 + qcd_samples_2017 + data_samples_2018 + qcd_samples_
     x.add_dataset("nr_trackingtreerv23mv3")
     x.add_dataset("nr_k0ntuplev25mv1")
 
-for x in qcd_samples_2017 + ttbar_samples_2017:
-    x.add_dataset("nr_trackmoverv25mv1_tright350")
-
 for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + all_signal_samples_2017 + \
          data_samples_2018 + qcd_samples_2018 + ttbar_samples_2018 + all_signal_samples_2018:
-    x.add_dataset("ntuplev25m")
+    x.add_dataset("ntuplev27m")
     if not x.is_signal:
-        x.add_dataset("ntuplev25m_ntkseeds")
+        x.add_dataset("ntuplev27m_ntkseeds")
+        x.add_dataset("ntuplev27m_norefitdzcut")
+        x.add_dataset("ntuplev27mmB3")
         x.add_dataset("nr_trackmoverv25mv1")
 
 ########
@@ -576,25 +580,16 @@ for s in registry.all():
 condorable = {
     "T3_US_FNALLPC": {
         "miniaod": ttbar_samples_2017 + [qcdht1000_2017, qcdht1500_2018, qcdht2000_2018, ttbarht0600_2018, ttbarht1200_2018, ttbarht2500_2018,
-                                         mfv_neu_tau000100um_M3000_2017, mfv_neu_tau000300um_M1200_2017, mfv_neu_tau000300um_M1600_2017, mfv_neu_tau001000um_M0400_2017, mfv_stopdbardbar_tau000100um_M0800_2017, mfv_stopdbardbar_tau000100um_M1200_2017, mfv_stopdbardbar_tau000300um_M1600_2017, mfv_stopdbardbar_tau030000um_M3000_2017, mfv_neu_tau000100um_M0400_2018, mfv_neu_tau001000um_M3000_2018, mfv_neu_tau010000um_M3000_2018, mfv_neu_tau030000um_M0400_2018, mfv_neu_tau030000um_M0600_2018, mfv_neu_tau030000um_M0800_2018, mfv_stopdbardbar_tau000300um_M1200_2018, mfv_stopdbardbar_tau001000um_M1600_2018, mfv_stopdbardbar_tau010000um_M0600_2018, mfv_stopdbardbar_tau010000um_M1600_2018],
+                                         mfv_neu_tau000100um_M3000_2017, mfv_neu_tau000300um_M1200_2017, mfv_neu_tau000300um_M1600_2017, mfv_neu_tau001000um_M0400_2017, mfv_stopdbardbar_tau000100um_M0800_2017, mfv_stopdbardbar_tau000100um_M1200_2017, mfv_stopdbardbar_tau000300um_M1600_2017, mfv_stopdbardbar_tau030000um_M3000_2017, mfv_neu_tau000100um_M0400_2018, mfv_neu_tau001000um_M3000_2018, mfv_neu_tau010000um_M3000_2018, mfv_neu_tau030000um_M0400_2018, mfv_neu_tau030000um_M0600_2018, mfv_neu_tau030000um_M0800_2018, mfv_stopdbardbar_tau000300um_M1200_2018, mfv_stopdbardbar_tau001000um_M1600_2018, mfv_stopdbardbar_tau010000um_M0600_2018, mfv_stopdbardbar_tau010000um_M1600_2018, mfv_neu_tau000100um_M1200_2017, mfv_neu_tau000100um_M1600_2017, mfv_neu_tau000300um_M0600_2017, mfv_neu_tau001000um_M1600_2017, mfv_neu_tau010000um_M1200_2017, mfv_neu_tau010000um_M3000_2017, mfv_neu_tau030000um_M1600_2017, mfv_stopdbardbar_tau000300um_M0600_2017, mfv_stopdbardbar_tau000300um_M0800_2017, mfv_stopdbardbar_tau001000um_M0800_2017, mfv_stopdbardbar_tau001000um_M1600_2017, mfv_stopdbardbar_tau010000um_M0400_2017, mfv_stopdbardbar_tau010000um_M1200_2017, mfv_stopdbardbar_tau030000um_M0600_2017, mfv_stopdbardbar_tau030000um_M0800_2017, mfv_neu_tau000100um_M0600_2018, mfv_neu_tau000300um_M0400_2018, mfv_neu_tau010000um_M0400_2018, mfv_neu_tau010000um_M1200_2018, mfv_neu_tau030000um_M1200_2018, mfv_neu_tau030000um_M1600_2018, mfv_stopdbardbar_tau000100um_M0600_2018, mfv_stopdbardbar_tau000100um_M1200_2018, mfv_stopdbardbar_tau001000um_M1200_2018, mfv_stopdbardbar_tau010000um_M0400_2018, mfv_stopdbardbar_tau010000um_M0800_2018, mfv_stopdbardbar_tau030000um_M0800_2018, mfv_stopdbardbar_tau030000um_M1200_2018, mfv_stopdbardbar_tau030000um_M3000_2018, mfv_stopdbardbar_tau000100um_M0400_2017, mfv_stopdbardbar_tau000100um_M3000_2017, mfv_stopdbardbar_tau010000um_M0600_2017, mfv_neu_tau000300um_M0800_2018, mfv_stopdbardbar_tau000100um_M0400_2018, mfv_stopdbardbar_tau000100um_M0800_2018, mfv_stopdbardbar_tau001000um_M0400_2018],
         },
     "T1_US_FNAL_Disk": {
         "miniaod": [qcdht0700_2017, qcdht1500_2017, qcdht2000_2017, ttbar_2017, dyjetstollM10_2017, qcdmupt15_2017, qcdht0700_2018, qcdht1000_2018, ttbarht0800_2018,
-                    mfv_neu_tau000100um_M0400_2017, mfv_neu_tau000100um_M0600_2017, mfv_neu_tau000100um_M0600_2018, mfv_neu_tau000100um_M0800_2017, mfv_neu_tau000100um_M0800_2018, mfv_neu_tau000100um_M1200_2017, mfv_neu_tau000100um_M1200_2018, mfv_neu_tau000100um_M1600_2018, mfv_neu_tau000100um_M3000_2018, mfv_neu_tau000300um_M0400_2017, mfv_neu_tau000300um_M0400_2018, mfv_neu_tau000300um_M0600_2018, mfv_neu_tau000300um_M0800_2017, mfv_neu_tau000300um_M0800_2018, mfv_neu_tau000300um_M1200_2018, mfv_neu_tau000300um_M1600_2018, mfv_neu_tau000300um_M3000_2017, mfv_neu_tau000300um_M3000_2018, mfv_neu_tau001000um_M0400_2018, mfv_neu_tau001000um_M0600_2017, mfv_neu_tau001000um_M0600_2018, mfv_neu_tau001000um_M0800_2017, mfv_neu_tau001000um_M0800_2018, mfv_neu_tau001000um_M1200_2017, mfv_neu_tau001000um_M1200_2018, mfv_neu_tau001000um_M1600_2018, mfv_neu_tau001000um_M3000_2017, mfv_neu_tau010000um_M0400_2017, mfv_neu_tau010000um_M0400_2018, mfv_neu_tau010000um_M0600_2017, mfv_neu_tau010000um_M0600_2018, mfv_neu_tau010000um_M0800_2017, mfv_neu_tau010000um_M0800_2018, mfv_neu_tau010000um_M1600_2017, mfv_neu_tau010000um_M1600_2018, mfv_neu_tau030000um_M0400_2017, mfv_neu_tau030000um_M0600_2017, mfv_neu_tau030000um_M0800_2017, mfv_neu_tau030000um_M1200_2017, mfv_neu_tau030000um_M3000_2017, mfv_neu_tau030000um_M3000_2018, mfv_stopdbardbar_tau000100um_M0400_2017, mfv_stopdbardbar_tau000100um_M0400_2018, mfv_stopdbardbar_tau000100um_M0600_2017, mfv_stopdbardbar_tau000100um_M0800_2018, mfv_stopdbardbar_tau000100um_M1600_2017, mfv_stopdbardbar_tau000100um_M1600_2018, mfv_stopdbardbar_tau000100um_M3000_2017, mfv_stopdbardbar_tau000100um_M3000_2018, mfv_stopdbardbar_tau000300um_M0400_2017, mfv_stopdbardbar_tau000300um_M0400_2018, mfv_stopdbardbar_tau000300um_M0600_2018, mfv_stopdbardbar_tau000300um_M0800_2018, mfv_stopdbardbar_tau000300um_M1200_2017, mfv_stopdbardbar_tau000300um_M1600_2018, mfv_stopdbardbar_tau000300um_M3000_2017, mfv_stopdbardbar_tau000300um_M3000_2018, mfv_stopdbardbar_tau001000um_M0400_2017, mfv_stopdbardbar_tau001000um_M0400_2018, mfv_stopdbardbar_tau001000um_M0600_2017, mfv_stopdbardbar_tau001000um_M0600_2018, mfv_stopdbardbar_tau001000um_M0800_2018, mfv_stopdbardbar_tau001000um_M1200_2017, mfv_stopdbardbar_tau001000um_M1200_2018, mfv_stopdbardbar_tau001000um_M3000_2017, mfv_stopdbardbar_tau001000um_M3000_2018, mfv_stopdbardbar_tau010000um_M0600_2017, mfv_stopdbardbar_tau010000um_M0800_2017, mfv_stopdbardbar_tau010000um_M1200_2018, mfv_stopdbardbar_tau010000um_M1600_2017, mfv_stopdbardbar_tau010000um_M3000_2017, mfv_stopdbardbar_tau010000um_M3000_2018, mfv_stopdbardbar_tau030000um_M0400_2017, mfv_stopdbardbar_tau030000um_M0400_2018, mfv_stopdbardbar_tau030000um_M0600_2018, mfv_stopdbardbar_tau030000um_M0800_2017, mfv_stopdbardbar_tau030000um_M1200_2017, mfv_stopdbardbar_tau030000um_M1200_2018, mfv_stopdbardbar_tau030000um_M1600_2017, mfv_stopdbardbar_tau030000um_M1600_2018],
+                    JetHT2017B, JetHT2017D, JetHT2017F, JetHT2018A, JetHT2018B, JetHT2018D,
+                    mfv_neu_tau000300um_M0800_2017, mfv_neu_tau000100um_M0400_2017, mfv_neu_tau000100um_M0600_2017, mfv_neu_tau000100um_M0800_2017, mfv_neu_tau000100um_M0800_2018, mfv_neu_tau000100um_M1200_2018, mfv_neu_tau000100um_M1600_2018, mfv_neu_tau000100um_M3000_2018, mfv_neu_tau000300um_M0400_2017, mfv_neu_tau000300um_M0600_2018, mfv_neu_tau000300um_M1200_2018, mfv_neu_tau000300um_M1600_2018, mfv_neu_tau000300um_M3000_2017, mfv_neu_tau000300um_M3000_2018, mfv_neu_tau001000um_M0400_2018, mfv_neu_tau001000um_M0600_2017, mfv_neu_tau001000um_M0600_2018, mfv_neu_tau001000um_M0800_2017, mfv_neu_tau001000um_M0800_2018, mfv_neu_tau001000um_M1200_2017, mfv_neu_tau001000um_M1200_2018, mfv_neu_tau001000um_M1600_2018, mfv_neu_tau001000um_M3000_2017, mfv_neu_tau010000um_M0400_2017, mfv_neu_tau010000um_M0600_2017, mfv_neu_tau010000um_M0600_2018, mfv_neu_tau010000um_M0800_2017, mfv_neu_tau010000um_M0800_2018, mfv_neu_tau010000um_M1600_2017, mfv_neu_tau010000um_M1600_2018, mfv_neu_tau030000um_M0400_2017, mfv_neu_tau030000um_M0600_2017, mfv_neu_tau030000um_M0800_2017, mfv_neu_tau030000um_M1200_2017, mfv_neu_tau030000um_M3000_2017, mfv_neu_tau030000um_M3000_2018, mfv_stopdbardbar_tau000100um_M0600_2017, mfv_stopdbardbar_tau000100um_M1600_2017, mfv_stopdbardbar_tau000100um_M1600_2018, mfv_stopdbardbar_tau000100um_M3000_2018, mfv_stopdbardbar_tau000300um_M0400_2017, mfv_stopdbardbar_tau000300um_M0400_2018, mfv_stopdbardbar_tau000300um_M0600_2018, mfv_stopdbardbar_tau000300um_M0800_2018, mfv_stopdbardbar_tau000300um_M1200_2017, mfv_stopdbardbar_tau000300um_M1600_2018, mfv_stopdbardbar_tau000300um_M3000_2017, mfv_stopdbardbar_tau000300um_M3000_2018, mfv_stopdbardbar_tau001000um_M0400_2017, mfv_stopdbardbar_tau001000um_M0600_2017, mfv_stopdbardbar_tau001000um_M0600_2018, mfv_stopdbardbar_tau001000um_M0800_2018, mfv_stopdbardbar_tau001000um_M1200_2017, mfv_stopdbardbar_tau001000um_M3000_2017, mfv_stopdbardbar_tau001000um_M3000_2018, mfv_stopdbardbar_tau010000um_M0800_2017, mfv_stopdbardbar_tau010000um_M1200_2018, mfv_stopdbardbar_tau010000um_M1600_2017, mfv_stopdbardbar_tau010000um_M3000_2017, mfv_stopdbardbar_tau010000um_M3000_2018, mfv_stopdbardbar_tau030000um_M0400_2017, mfv_stopdbardbar_tau030000um_M0400_2018, mfv_stopdbardbar_tau030000um_M0600_2018, mfv_stopdbardbar_tau030000um_M1200_2017, mfv_stopdbardbar_tau030000um_M1600_2017, mfv_stopdbardbar_tau030000um_M1600_2018],
         },
-    "T2_US_Nebraska": {
-        "miniaod": [mfv_neu_tau000100um_M1600_2017, mfv_neu_tau000300um_M0600_2017, mfv_neu_tau001000um_M1600_2017, mfv_neu_tau010000um_M1200_2017, mfv_neu_tau010000um_M1200_2018, mfv_neu_tau030000um_M1600_2017, mfv_stopdbardbar_tau000300um_M0800_2017, mfv_stopdbardbar_tau010000um_M0400_2018, mfv_stopdbardbar_tau030000um_M0600_2017, mfv_stopdbardbar_tau030000um_M3000_2018],
+    "T2_DE_DESY": {
+        "miniaod": [JetHT2017C, JetHT2017E, JetHT2018C],
         },
-    "T2_US_Wisconsin": {
-        "miniaod": [mfv_neu_tau030000um_M1200_2018, mfv_stopdbardbar_tau000300um_M0600_2017, mfv_stopdbardbar_tau001000um_M0800_2017, mfv_stopdbardbar_tau001000um_M1600_2017, mfv_stopdbardbar_tau010000um_M1200_2017, mfv_stopdbardbar_tau030000um_M0800_2018],
-        },
-    "T2_US_Purdue": {
-        "miniaod": [mfv_neu_tau010000um_M3000_2017, mfv_neu_tau030000um_M1600_2018, mfv_stopdbardbar_tau000100um_M0600_2018, mfv_stopdbardbar_tau000100um_M1200_2018, mfv_stopdbardbar_tau010000um_M0400_2017, mfv_stopdbardbar_tau010000um_M0800_2018],
-        },
-    "T2_DE_DESY": {},
-    "T2_US_Florida": {},
-    "T2_US_MIT": {},
-    "T2_US_UCSD": {},
     }
 
 _seen = set()

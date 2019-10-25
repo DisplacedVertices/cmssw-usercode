@@ -127,6 +127,7 @@ def _background_samples(trigeff=False, year=2017):
 
 def cmd_merge_background(permissive=bool_from_argv('permissive')):
     cwd = os.getcwd()
+    ok = True
     for year_s, scale in [('_2017', -AnalysisConstants.int_lumi_2017 * AnalysisConstants.scale_factor_2017),
                           ('_2018', -AnalysisConstants.int_lumi_2018 * AnalysisConstants.scale_factor_2018)]:
 
@@ -149,29 +150,35 @@ def cmd_merge_background(permissive=bool_from_argv('permissive')):
             cmd = 'samples merge %f background%s%s.root ' % (scale, _presel_s, year_s)
             cmd += ' '.join(files2)
             print cmd
-            os.system(cmd)
+            if os.system(cmd) != 0:
+                ok = False
+    if ok:
+        cmd = 'hadd.py background_2017p8.root background_2017.root background_2018.root'
+        print cmd
+        os.system(cmd)
 
 def cmd_effsprint():
-    background_fns = ' '.join(x + '_2017.root' for x in _background_samples())
-    todo = [('background', background_fns), ('signals', 'mfv*root')]
-    def do(cmd, outfn):
-        cmd = 'python %s %s' % (cmssw_base('src/JMTucker/MFVNeutralino/test/effsprint.py'), cmd)
-        print cmd
-        os.system('%s | tee %s' % (cmd, outfn))
-        print
-    for which, which_files in todo:
-        for ntk in 3,4,'3or4',5:
-            for vtx in 1,2:
-                cmd = 'ntk%s' % ntk
-                if which == 'background':
-                    cmd += ' sum'
-                if vtx == 1:
-                    cmd += ' one'
-                cmd += ' ' + which_files
-                outfn = 'effsprint_%s%s_ntk%s_%iv' % (which, _presel_s, ntk, vtx)
-                do(cmd, outfn)
-    do('presel sum ' + background_fns, 'effsprint_presel')
-    do('nocuts sum ' + background_fns, 'effsprint_nocuts')
+    for year in 2017, 2018:
+        background_fns = ' '.join('%s_%s.root' % (x, year) for x in _background_samples(year=year))
+        todo = [('background', background_fns), ('signals', 'mfv*%s.root' % year)]
+        def do(cmd, outfn):
+            cmd = 'python %s %s %s' % (cmssw_base('src/JMTucker/MFVNeutralino/test/effsprint.py'), cmd, year)
+            print cmd
+            os.system('%s | tee %s' % (cmd, outfn))
+            print
+        for which, which_files in todo:
+            for ntk in 3,4,'3or4',5:
+                for vtx in 1,2:
+                    cmd = 'ntk%s' % ntk
+                    if which == 'background':
+                        cmd += ' sum'
+                    if vtx == 1:
+                        cmd += ' one'
+                    cmd += ' ' + which_files
+                    outfn = 'effsprint_%s%s_%s_ntk%s_%iv' % (which, _presel_s, year, ntk, vtx)
+                    do(cmd, outfn)
+        do('presel sum ' + background_fns, 'effsprint_presel_%s' % year)
+        do('nocuts sum ' + background_fns, 'effsprint_nocuts_%s' % year)
 
 def cmd_histos():
     cmd_report_data()

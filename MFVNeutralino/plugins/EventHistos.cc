@@ -7,6 +7,7 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include "JMTucker/Tools/interface/ExtValue.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
@@ -19,7 +20,6 @@ class MFVEventHistos : public edm::EDAnalyzer {
  private:
   const edm::EDGetTokenT<MFVEvent> mevent_token;
   const edm::EDGetTokenT<double> weight_token;
-  const std::vector<double> force_bs;
 
   TH1F* h_w;
 
@@ -64,6 +64,20 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_pvphi;
   TH1F* h_pvntracks;
   TH1F* h_pvscore;
+  TH1F* h_pvsx;
+  TH1F* h_pvsy;
+  TH1F* h_pvsxwide;
+  TH1F* h_pvsywide;
+  TH1F* h_pvsz;
+  TH1F* h_pvsrho;
+  TH1F* h_pvsrhowide;
+  TH1F* h_pvsphi;
+  TH1F* h_pvsscore;
+  TH1F* h_pvsdz;
+  TH1F* h_pvsmindz;
+  TH1F* h_pvsmaxdz;
+  TH1F* h_pvsmindz_minscore;
+  TH1F* h_pvsmaxdz_minscore;
 
   TH1F* h_njets;
   TH1F* h_njets20;
@@ -127,12 +141,8 @@ class MFVEventHistos : public edm::EDAnalyzer {
 
 MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   : mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
-    weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
-    force_bs(cfg.getParameter<std::vector<double> >("force_bs"))
+    weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src")))
 {
-  if (force_bs.size() && force_bs.size() != 3)
-    throw cms::Exception("Misconfiguration", "force_bs must be empty or size 3");
-
   edm::Service<TFileService> fs;
 
   h_w = fs->make<TH1F>("h_w", ";event weight;events/0.1", 100, 0, 10);
@@ -184,11 +194,25 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_pvcxy = fs->make<TH1F>("h_pvcxy", ";primary vertex cxy;events", 100, -1e-6, 1e-6);
   h_pvcxz = fs->make<TH1F>("h_pvcxz", ";primary vertex cxz;events", 100, -1e-6, 1e-6);
   h_pvcyz = fs->make<TH1F>("h_pvcyz", ";primary vertex cyz;events", 100, -1e-6, 1e-6);
-  h_pvrho = fs->make<TH1F>("h_pvrho", ";PV rho (cm);events/5 #mum", 40, 0, 0.02);
-  h_pvrhowide = fs->make<TH1F>("h_pvrhowide", ";PV rho (cm);events/10 #mum", 100, 0, 0.1);
+  h_pvrho = fs->make<TH1F>("h_pvrho", ";primary vertex rho (cm);events/5 #mum", 40, 0, 0.02);
+  h_pvrhowide = fs->make<TH1F>("h_pvrhowide", ";primary vertex rho (cm);events/10 #mum", 100, 0, 0.1);
   h_pvphi = fs->make<TH1F>("h_pvphi", ";primary vertex #phi (rad);events/.063", 100, -3.1416, 3.1416);
   h_pvntracks = fs->make<TH1F>("h_pvntracks", ";# of tracks in primary vertex;events/3", 100, 0, 300);
-  h_pvscore = fs->make<TH1F>("h_pvscore", ";PV #Sigma p_{T}^{2} (GeV^{2});events/10000 GeV^{2}", 100, 0, 1e6);
+  h_pvscore = fs->make<TH1F>("h_pvscore", ";primary vertex #Sigma p_{T}^{2} (GeV^{2});events/10000 GeV^{2}", 100, 0, 1e6);
+  h_pvsx = fs->make<TH1F>("h_pvsx", ";primary vertices x (cm);events/2 #mum", 200, -0.02, 0.02);
+  h_pvsy = fs->make<TH1F>("h_pvsy", ";primary vertices y (cm);events/2 #mum", 200, -0.02, 0.02);
+  h_pvsxwide = fs->make<TH1F>("h_pvsxwide", ";primary vertices x (cm);events/40 #mum", 50, -0.1, 0.1);
+  h_pvsywide = fs->make<TH1F>("h_pvsywide", ";primary vertices y (cm);events/40 #mum", 50, -0.1, 0.1);
+  h_pvsz = fs->make<TH1F>("h_pvsz", ";primary vertices z (cm);events/3.6 mm", 100, -18, 18);
+  h_pvsrho = fs->make<TH1F>("h_pvsrho", ";primary vertices rho (cm);events/5 #mum", 40, 0, 0.02);
+  h_pvsrhowide = fs->make<TH1F>("h_pvsrhowide", ";primary vertices rho (cm);events/10 #mum", 100, 0, 0.1);
+  h_pvsphi = fs->make<TH1F>("h_pvsphi", ";primary vertices #phi (rad);events/.063", 100, -3.1416, 3.1416);
+  h_pvsscore = fs->make<TH1F>("h_pvsscore", ";primary vertices #Sigma p_{T}^{2} (GeV^{2});events/10000 GeV^{2}", 100, 0, 1e6);
+  h_pvsdz = fs->make<TH1F>("h_pvsdz", ";primary vertices pairs #delta z (cm);events/2 mm", 100, 0, 20);
+  h_pvsmindz = fs->make<TH1F>("h_pvsmindz", ";min primary vertices pairs #delta z (cm);events/0.5 mm", 100, 0, 5);
+  h_pvsmaxdz = fs->make<TH1F>("h_pvmaxdz", ";max primary vertices pairs #delta z (cm);events/2 mm", 100, 0, 20);
+  h_pvsmindz_minscore = fs->make<TH1F>("h_pvmindz_minscore", ";min primary vertices pairs (with score req) #delta z (cm);events/1 mm", 100, 0, 10);
+  h_pvsmaxdz_minscore = fs->make<TH1F>("h_pvmaxdz_minscore", ";max primary vertices pairs (with score req) #delta z (cm);events/1 mm", 100, 0, 10);
 
   h_njets = fs->make<TH1F>("h_njets", ";# of jets;events", 30, 0, 30);
   h_njets20 = fs->make<TH1F>("h_njets20", ";# of jets w. p_{T} > 20 GeV;events", 20, 0, 20);
@@ -269,10 +293,6 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   const double w = *weight;
   h_w->Fill(w);
 
-  const double bsx = force_bs.size() ? force_bs[0] : mevent->bsx;
-  const double bsy = force_bs.size() ? force_bs[1] : mevent->bsy;
-  const double bsz = force_bs.size() ? force_bs[2] : mevent->bsz;
-
   //////////////////////////////////////////////////////////////////////////////
 
   h_gen_decay->Fill(mevent->gen_decay_type[0], mevent->gen_decay_type[1], w);
@@ -310,15 +330,15 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   h_npu->Fill(mevent->npu, w);
 
-  h_bsx->Fill(bsx, w);
-  h_bsy->Fill(bsy, w);
-  h_bsz->Fill(bsz, w);
-  h_bsphi->Fill(atan2(bsy, bsx), w);
+  h_bsx->Fill(mevent->bsx, w);
+  h_bsy->Fill(mevent->bsy, w);
+  h_bsz->Fill(mevent->bsz, w);
+  h_bsphi->Fill(atan2(mevent->bsy, mevent->bsx), w);
 
   h_npv->Fill(mevent->npv, w);
   for (auto h : { h_pvx, h_pvxwide }) h->Fill(mevent->pvx - mevent->bsx_at_z(mevent->pvz), w);
   for (auto h : { h_pvy, h_pvywide }) h->Fill(mevent->pvy - mevent->bsy_at_z(mevent->pvz), w);
-  h_pvz->Fill(mevent->pvz - bsz, w);
+  h_pvz->Fill(mevent->pvz - mevent->bsz, w);
   h_pvcxx->Fill(mevent->pvcxx, w);
   h_pvcxy->Fill(mevent->pvcxy, w);
   h_pvcxz->Fill(mevent->pvcxz, w);
@@ -330,6 +350,34 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_pvscore->Fill(mevent->pv_score, w);
   h_pvrho->Fill(mevent->pv_rho(), w);
   for (auto h : { h_pvrho, h_pvrhowide }) h->Fill(mevent->pv_rho(), w);
+  for (size_t i = 0; i < mevent->npv; ++i) {
+    const float z = mevent->pv_z(i);
+    const float x = mevent->pv_x(i) - mevent->bsx_at_z(z);
+    const float y = mevent->pv_y(i) - mevent->bsy_at_z(z);
+    for (auto h : { h_pvsx, h_pvsxwide }) h->Fill(x, w);
+    for (auto h : { h_pvsy, h_pvsywide }) h->Fill(y, w);
+    h_pvsz->Fill(z, w);
+    for (auto h : { h_pvsrho, h_pvsrhowide }) h->Fill(hypot(x,y), w);
+    h_pvsphi->Fill(atan2(y,x), w);
+    h_pvsscore->Fill(mevent->pv_score_(i), w);
+
+    jmt::MinValue mindz, mindz_minscore;
+    jmt::MaxValue maxdz, maxdz_minscore;
+    for (size_t j = i+1; j < mevent->npv; ++j) {
+      const float z2 = mevent->pv_z(j);
+      //const float x2 = mevent->pv_x(j) - mevent->bsx_at_z(z);
+      //const float y2 = mevent->pv_y(j) - mevent->bsy_at_z(z);
+      const float dz = fabs(z-z2);
+      h_pvsdz->Fill(dz, w);
+      mindz(dz), maxdz(dz);
+      if (mevent->pv_score_(i) > 50e3 && mevent->pv_score_(j) > 50e3)
+        mindz_minscore(dz), maxdz_minscore(dz);
+    }
+    h_pvsmindz->Fill(mindz, w);
+    h_pvsmaxdz->Fill(maxdz, w);
+    h_pvsmindz_minscore->Fill(mindz_minscore, w);
+    h_pvsmaxdz_minscore->Fill(maxdz_minscore, w);
+  }
 
   h_njets->Fill(mevent->njets(), w);
   h_njets20->Fill(mevent->njets(20), w);

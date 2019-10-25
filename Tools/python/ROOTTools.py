@@ -2,8 +2,9 @@
 
 import math, sys, os, tempfile
 from array import array
-from collections import namedtuple
-from JMTucker.Tools.general import chunks
+from glob import glob
+from collections import defaultdict, namedtuple
+from JMTucker.Tools.general import chunks, int_ceil
 
 if os.environ.has_key('JMT_ROOTTOOLS_NOBATCHMODE'):
     import ROOT
@@ -22,6 +23,18 @@ else:
     sys.argv.remove('-b')     # and don't mess up sys.argv.
     for _off, (_i, _x) in enumerate(_saved):
         sys.argv.insert(_i+_off, _x)
+
+class TH1EntriesProtector(object):
+    """SetBinContent increments fEntries, making a hist's stats hard
+    to understand afterward, as in e.g. move_above/below_into_bin
+    calls. This saves and resets fEntries when done."""
+    def __init__(self, h):
+        self.h = h
+    def __enter__(self):
+        self.n = self.h.GetEntries()
+    def __exit__(self, *args):
+        self.h.ResetStats() # JMTBAD probably not necessary?
+        self.h.SetEntries(self.n)
 
 def apply_hist_commands(hist, hist_cmds=None):
     """With hist_cmds a list of n-tuples, where the first entry of the
@@ -417,12 +430,18 @@ def compare_hists(ps, samples, **kwargs):
 
     Options (see the list below) are specified as keyword arguments in
     kwargs, and so far include
+
+    - recurse: if True, recurse down the directory structure, i.e. use
+    all histograms in the given directory and all subdirectories.
     - sort_names: True: process the histograms in alphabetical
     order. False (default): in the order found in the ROOT directory.
-    - show_progress: if True (default), print how far along we are
-    processing the histograms.
+    - show_progress: print how far along we are processing the
+    histograms: if this is 10 (default), a line is printed for every
+    1/10 chunk. Disable with value <= 0.
     - only_n_first: if supplied, only do that that many histograms. If
     -1 (default), do all.
+    - raise_on_incompatibility: if histograms are not comparable
+    (e.g. different binning), skip if True, else raise an exception.
     
     Various callbacks (see the other list below) can be specified as
     keyword arguments to modify the drawing depending on the
@@ -442,7 +461,7 @@ def compare_hists(ps, samples, **kwargs):
     # options
     recurse        = kwargs.get('recurse',        False)
     sort_names     = kwargs.get('sort_names',     False)
-    show_progress  = kwargs.get('show_progress',  True)
+    show_progress  = kwargs.get('show_progress',  10)
     only_n_first   = kwargs.get('only_n_first',   -1)
     raise_on_incompatibility = kwargs.get('raise_on_incompatibility', False)
 
@@ -460,6 +479,7 @@ def compare_hists(ps, samples, **kwargs):
     scaling        = _get('scaling',        1.)
     ratio          = _get('ratio',          True)
     x_range        = _get('x_range',        None)
+    move_overflows = _get('move_overflows', 'under over')
     profile        = _get('profile',        None)
 
     ###
@@ -488,8 +508,9 @@ def compare_hists(ps, samples, **kwargs):
             return l[0]
 
     nnames = len(names)
+    pnames = int_ceil(nnames, show_progress) if show_progress > 0 else 1
     for iname, name in enumerate(names):
-        if show_progress and (nnames < 10 or iname % (nnames/10) == 0):
+        if show_progress > 0 and (nnames < 10 or iname % pnames == 0):
             print '%5i/%5i' % (iname, nnames), name
 
         name_clean = name.replace('/','_').replace('#','n')
@@ -562,6 +583,7 @@ def compare_hists(ps, samples, **kwargs):
             hists_sorted.sort(key=lambda hist: hist.GetMaximum(), reverse=True)
 
         x_r = x_range(name, hist_list, None)
+        m_o = move_overflows(name, hist_list, None)
 
         if len(hists) > 1 and ratio(name, hist_list, None) and (not is2d or profiled):
             ratios_plot(name_clean,
@@ -570,8 +592,9 @@ def compare_hists(ps, samples, **kwargs):
                         res_fit=False,
                         res_divide_opt={'confint': propagate_ratio, 'force_le_1': False},
                         statbox_size=stat_size(name, hist_list, None),
-                        res_y_range=(0, 3),
+                        res_y_range=0.15,
                         x_range = x_r,
+                        move_overflows = m_o,
                         )
         else:
             for i,hist in enumerate(hists_sorted):
@@ -579,8 +602,10 @@ def compare_hists(ps, samples, **kwargs):
                     hist.Draw(draw_cmd)
                 else:
                     hist.Draw((draw_cmd + ' sames').strip())
-                if (not is2d or profiled) and x_r:
-                    hist.GetXaxis().SetRangeUser(*x_r)
+                if not is2d or profiled:
+                    if x_r:
+                        hist.GetXaxis().SetRangeUser(*x_r)
+                    move_overflows_into_visible_bins(hist, m_o)
 
             ps.c.Update()
             if not no_stats(name, hist_list, None):
@@ -647,7 +672,7 @@ def data_mc_comparison(name,
                        canvas_right_margin = 0.08,
                        join_info_override = None,
                        stack_draw_cmd = 'hist',
-                       overflow_in_last = False,
+                       move_overflows = 'under over',
                        rebin = None,
                        bin_width_to = None,
                        poisson_intervals = False,
@@ -801,6 +826,8 @@ def data_mc_comparison(name,
                 if int_lumi_bkg_scale is not None and sample not in signal_samples:
                     sample.hist.Scale(int_lumi_bkg_scale)
 
+            move_overflows_into_visible_bins(sample.hist, move_overflows)
+
             if rebin is not None:
                 sample.hist_before_rebin = sample.hist
                 rebin_name = sample.hist.GetName() + '_rebinned'
@@ -813,32 +840,19 @@ def data_mc_comparison(name,
                 else:
                     sample.hist = sample.hist.Rebin(rebin, rebin_name)
             
-            if overflow_in_last:
-                if x_range is not None:
-                    # if not some decent fraction of the bin visible, use the last wholly visible bin
-                    # for now "decent" = half the bin width
-                    ibin = sample.hist.FindBin(x_range[1])
-                    a = sample.hist.GetBinLowEdge(ibin)
-                    b = sample.hist.GetBinLowEdge(ibin+1)
-                    w = b - a
-                    x_range_w = x_range[1] - x_range[0]
-                    minus_one = x_range[1] - a < w * 0.5
-                    move_above_into_bin(sample.hist, x_range[1], minus_one)
-                else:
-                    move_overflow_into_last_bin(sample.hist)
-
             if bin_width_to:
                 if bin_width_to_scales is None:
                     bin_width_to_scales = [None]
                     for ibin in xrange(1, sample.hist.GetNbinsX()+1):
                         bin_width_to_scales.append(sample.hist.GetXaxis().GetBinWidth(ibin) / bin_width_to)
 
-                for ibin in xrange(1, sample.hist.GetNbinsX()+1):
-                    c = sample.hist.GetBinContent(ibin)
-                    e = sample.hist.GetBinError(ibin)
-                    sc = bin_width_to_scales[ibin]
-                    sample.hist.SetBinContent(ibin, c / sc)
-                    sample.hist.SetBinError  (ibin, e / sc)
+                with TH1EntriesProtector(sample.hist) as _:
+                    for ibin in xrange(1, sample.hist.GetNbinsX()+1):
+                        c = sample.hist.GetBinContent(ibin)
+                        e = sample.hist.GetBinError(ibin)
+                        sc = bin_width_to_scales[ibin]
+                        sample.hist.SetBinContent(ibin, c / sc)
+                        sample.hist.SetBinError  (ibin, e / sc)
 
     # Use the first data sample to cache the summed histogram for all
     # the data.
@@ -1275,6 +1289,8 @@ def get_integral(hist, xlo=None, xhi=None, integral_only=False, include_last_bin
         wsq += hist.GetBinError(i)**2
     return integral, wsq**0.5
 
+integral = get_integral
+
 def get_hist_quantiles(hist, probs, options='list'):
     """Get the quantiles for the histogram corresponding to the listed
     probs (e.g. probs = [0.1, 0.5, 0.9] to find the first decile, the
@@ -1457,43 +1473,58 @@ def move_below_into_bin(h,a):
     """Given the TH1 h, add the contents of the bins below the one
     corresponding to a into that bin, and zero the bins below."""
     assert(h.Class().GetName().startswith('TH1')) # i bet there's a better way to do this...
-    b = h.FindBin(a)
-    bc = h.GetBinContent(b)
-    bcv = h.GetBinError(b)**2
-    for nb in xrange(0, b):
-        bc += h.GetBinContent(nb)
-        bcv += h.GetBinError(nb)**2
-        h.SetBinContent(nb, 0)
-        h.SetBinError(nb, 0)
-    h.SetBinContent(b, bc)
-    h.SetBinError(b, bcv**0.5)
+    with TH1EntriesProtector(h) as _:
+        b = h.FindBin(a)
+        bc = h.GetBinContent(b)
+        bcv = h.GetBinError(b)**2
+        for nb in xrange(0, b):
+            bc += h.GetBinContent(nb)
+            bcv += h.GetBinError(nb)**2
+            h.SetBinContent(nb, 0)
+            h.SetBinError(nb, 0)
+        h.SetBinContent(b, bc)
+        h.SetBinError(b, bcv**0.5)
 
 def move_above_into_bin(h,a,minus_one=False):
     """Given the TH1 h, add the contents of the bins above the one
     corresponding to a into that bin, and zero the bins above."""
     assert(h.Class().GetName().startswith('TH1')) # i bet there's a better way to do this...
-    b = h.FindBin(a)
-    if minus_one:
-        b -= 1
-    bc = h.GetBinContent(b)
-    bcv = h.GetBinError(b)**2
-    for nb in xrange(b+1, h.GetNbinsX()+2):
-        bc += h.GetBinContent(nb)
-        bcv += h.GetBinError(nb)**2
-        h.SetBinContent(nb, 0)
-        h.SetBinError(nb, 0)
-    h.SetBinContent(b, bc)
-    h.SetBinError(b, bcv**0.5)
+    with TH1EntriesProtector(h) as _:
+        b = h.FindBin(a)
+        if minus_one:
+            b -= 1
+        bc = h.GetBinContent(b)
+        bcv = h.GetBinError(b)**2
+        for nb in xrange(b+1, h.GetNbinsX()+2):
+            bc += h.GetBinContent(nb)
+            bcv += h.GetBinError(nb)**2
+            h.SetBinContent(nb, 0)
+            h.SetBinError(nb, 0)
+        h.SetBinContent(b, bc)
+        h.SetBinError(b, bcv**0.5)
 
 def move_overflow_into_last_bin(h):
     """Given the TH1 h, Add the contents of the overflow bin into the
     last bin, and zero the overflow bin."""
     assert(h.Class().GetName().startswith('TH1')) # i bet there's a better way to do this...
-    nb = h.GetNbinsX()
-    h.SetBinContent(nb, h.GetBinContent(nb) + h.GetBinContent(nb+1))
-    h.SetBinError(nb, (h.GetBinError(nb)**2 + h.GetBinError(nb+1)**2)**0.5)
-    h.SetBinContent(nb+1, 0)
-    h.SetBinError(nb+1, 0)
+    with TH1EntriesProtector(h) as _:
+        nb = h.GetNbinsX()
+        h.SetBinContent(nb, h.GetBinContent(nb) + h.GetBinContent(nb+1))
+        h.SetBinError(nb, (h.GetBinError(nb)**2 + h.GetBinError(nb+1)**2)**0.5)
+        h.SetBinContent(nb+1, 0)
+        h.SetBinError(nb+1, 0)
+
+def move_overflows_into_visible_bins(h, opt='under over'):
+    """Combination of move_above/below_into_bin and
+    move_overflow_into_last_bin, except automatic in the range. Have
+    to already have SetRangeUser."""
+    if type(opt) != str:
+        opt = 'under over' if opt else ''
+    opt = opt.strip().lower()
+    if 'under' in opt:
+        move_below_into_bin(h, h.GetBinLowEdge(h.GetXaxis().GetFirst()))
+    if 'over' in opt:
+        move_above_into_bin(h, h.GetBinLowEdge(h.GetXaxis().GetLast()))
 
 def move_stat_box(s, ndc_coords):
     """Move the stat box s (or if s is its hist, get s from it) to the
@@ -1782,6 +1813,7 @@ def ratios_plot(name,
                 res_lines = None,
                 res_fcns = [],
                 legend = None,
+                move_overflows = 'under over',
                 draw_normalized = False,
                 statbox_size = None,
                 which_ratios = 'first', # 'first' or 'pairs'
@@ -1860,6 +1892,8 @@ def ratios_plot(name,
                 dc = 'p'
             gg.Add(h, dc)
         elif are_hists:
+            if move_overflows:
+                move_overflows_into_visible_bins(h, move_overflows)
             if draw_normalized:
                 h.v = h.GetMaximum() / h.Integral(0,h.GetNbinsX()+1)
             else:
@@ -1924,11 +1958,12 @@ def ratios_plot(name,
         min_r, max_r = 1e99, -1e99
         for h0,h in pairs_for_ratios:
             v1, v2 = histogram_divide_values(h, h0, True)
-            rs = [v1.y[i] / v2.y[i] for i in xrange(v2.n) if v2.y[i] != 0. and (not x_range or x_range[0] < v1.x[i] < x_range[1])]
+            xa, xb = h.GetBinLowEdge(h.GetXaxis().GetFirst()), h.GetBinLowEdge(h.GetXaxis().GetLast())
+            rs = [v1.y[i] / v2.y[i] for i in xrange(v2.n) if v2.y[i] != 0. and xa < v1.x[i] < xb]
             if rs:
                 min_r = min(min_r, min(rs))
                 max_r = max(max_r, max(rs))
-        res_y_range = min_r-res_y_range, max_r+res_y_range
+        res_y_range = min_r*(1-res_y_range), max_r*(1+res_y_range)
 
     for i,(h0,h) in enumerate(pairs_for_ratios):
         r = histogram_divide(h, h0, **res_divide_opt)
@@ -2331,7 +2366,7 @@ def to_TH1D(h, name):
     for ibin in xrange(h.GetNbinsX()+2):
         hh.SetBinContent(ibin, h.GetBinContent(ibin))
         hh.SetBinError  (ibin, h.GetBinError  (ibin))
-        hh.SetEntries(h.GetEntries())
+    hh.SetEntries(h.GetEntries())
     return hh
 
 def ttree_iterator(tree, return_tree=False):
@@ -2394,6 +2429,7 @@ def zgammatauwrong(x,y,tau,tau_uncert):
     return z / nz
 
 __all__ = [
+    'TH1EntriesProtector',
     'apply_hist_commands',
     'array',
     'bin_iterator',
@@ -2422,6 +2458,7 @@ __all__ = [
     'fit_gaussian',
     'get_bin_content_error',
     'get_integral',
+    'integral',
     'get_hist_quantiles',
     'get_quantiles',
     'get_hist_stats',
@@ -2430,6 +2467,7 @@ __all__ = [
     'make_rms_hist',
     'move_below_into_bin',
     'move_above_into_bin',
+    'move_overflows_into_visible_bins',
     'move_overflow_into_last_bin',
     'move_stat_box',
     'p4',
@@ -2459,4 +2497,5 @@ __all__ = [
     'zgammatau',
     'zgammatauwrong',
     'ROOT',
+    'math', 'sys', 'os', 'glob', 'array', 'defaultdict', 'namedtuple'
     ]

@@ -26,12 +26,8 @@ process.mfvAnalysisCutsPreSel = process.mfvAnalysisCuts.clone(apply_vertex_cuts 
 process.pEventPreSel = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvEventHistosPreSel)
 
 nm1s = [
-    ('Njets',      ('', 'apply_presel = 0, min_ht = 1200, min_njets = 0')),
-    ('Ht',         ('', 'apply_presel = 0, min_njets = 4, min_ht = 0')),
-    ('Ntracks',    'min_ntracks = 0'),
     ('Bsbs2ddist', 'min_bsbs2ddist = 0'),
-    ('Geo2ddist',  'max_geo2ddist = 1e9'),
-    ('Bs2derr',    'max_bs2derr = 1e9'),
+    ('Bs2derr',    'max_rescale_bs2derr = 1e9'),
     ]
 
 ntks = [5,3,4,7]
@@ -108,9 +104,8 @@ process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     
             setattr(process, '%sp%iV' % (EX1, nv) + name, cms.Path(process.mfvWeight * vtx * ana * evt_hst * vtx_hst))
 
 if not is_mc:
-    for p in process.paths.keys():
-        if not (p == 'pSkimSel' or p == 'pEventPreSel' or p.startswith('Ntk3') or p.startswith('Ntk4') or p.startswith('p0V')):       # unblinds all 3,4-track sets, keeps 5-track stuff blind
-            delattr(process, p)
+    for x in 'pPreSel', 'pFullSel', 'pSigReg', 'p2VBsbs2ddist', 'p2VBs2derr': # 5-track 2-vertex blind
+        delattr(process, x)
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
@@ -119,9 +114,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     samples = pick_samples(dataset)
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8_10pc.json'))
 
-    cs = CondorSubmitter('Histos' + version + 'v3',
+    cs = CondorSubmitter('Histos' + version,
                          ex = year,
                          dataset = dataset,
-                         pset_modifier = chain_modifiers(is_mc_modifier, half_mc_modifier(), per_sample_pileup_weights_modifier()),
+                         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier()),
                          )
     cs.submit_all(samples)

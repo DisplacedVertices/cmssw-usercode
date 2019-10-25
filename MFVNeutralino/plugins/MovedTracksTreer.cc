@@ -1,10 +1,3 @@
-#include "TTree.h"
-#include "CommonTools/UtilAlgos/interface/TFileService.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
-#include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-#include "FWCore/ServiceRegistry/interface/Service.h"
-#include "JMTucker/MFVNeutralino/interface/Ntuple.h"
 #include "JMTucker/MFVNeutralino/interface/NtupleFiller.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/Tools/interface/Utilities.h"
@@ -15,11 +8,10 @@ public:
   void analyze(const edm::Event&, const edm::EventSetup&);
 
 private:
-  jmt::BaseSubNtupleFiller base_filler;
-  jmt::BeamspotSubNtupleFiller bs_filler;
-  jmt::PrimaryVerticesSubNtupleFiller pvs_filler;
-  jmt::JetsSubNtupleFiller jets_filler;
+  mfv::MovedTracksNtuple nt;
+  jmt::TrackingAndJetsNtupleFiller nt_filler;
   mfv::GenTruthSubNtupleFiller gentruth_filler;
+
   const edm::EDGetTokenT<MFVVertexAuxCollection> vertices_token;
   const edm::EDGetTokenT<std::vector<reco::TrackRef>> sel_tracks_token;
   const std::string mover_src;
@@ -35,16 +27,13 @@ private:
   const unsigned njets_req;
   const unsigned nbjets_req;
   const bool for_mctruth;
-
-  mfv::MovedTracksNtuple nt;
-  TTree* tree;
 };
 
 MFVMovedTracksTreer::MFVMovedTracksTreer(const edm::ParameterSet& cfg)
-  : base_filler(nt.base(), cfg, consumesCollector()),
-    bs_filler(nt.bs(), cfg, consumesCollector()),
-    pvs_filler(nt.pvs(), cfg, consumesCollector(), true, false),
-    jets_filler(nt.jets(), cfg, consumesCollector()),
+  : nt_filler(nt, cfg, NF_CC_TrackingAndJets_v,
+              jmt::TrackingAndJetsNtupleFillerParams()
+                .pvs_subtract_bs(true) // JMTBAD get rid of beamspot subtraction everywhere
+                .fill_tracks(false)),
     gentruth_filler(nt.gentruth(), cfg, consumesCollector()),
     vertices_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertices_src"))),
     sel_tracks_token(consumes<std::vector<reco::TrackRef>>(cfg.getParameter<edm::InputTag>("sel_tracks_src"))),
@@ -61,11 +50,7 @@ MFVMovedTracksTreer::MFVMovedTracksTreer(const edm::ParameterSet& cfg)
     njets_req(cfg.getParameter<unsigned>("njets_req")),
     nbjets_req(cfg.getParameter<unsigned>("nbjets_req")),
     for_mctruth(cfg.getParameter<bool>("for_mctruth"))
-{
-  edm::Service<TFileService> fs;
-  tree = fs->make<TTree>("t", "");
-  nt.write_to_tree(tree);
-}
+{}
 
 namespace {
   double mag2(double x, double y, double z)           { return x*x + y*y + z*z; }
@@ -73,12 +58,7 @@ namespace {
 }
 
 void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
-  nt.clear();
-
-  base_filler(event);
-  bs_filler(event);
-  pvs_filler(event, &bs_filler.bs());
-  jets_filler(event);
+  nt_filler.fill(event);
   gentruth_filler(event);
 
   if (!for_mctruth) {
@@ -97,8 +77,8 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
     event.getByToken(move_vertex_token,  move_vertex);
 
     nt.tm().set(all_tracks->size(), moved_tracks->size(), *npreseljets, *npreselbjets,
-                (*move_vertex)[0] - bs_filler.bs().x((*move_vertex)[2]),
-                (*move_vertex)[1] - bs_filler.bs().y((*move_vertex)[2]),
+                (*move_vertex)[0] - nt_filler.bs().x((*move_vertex)[2]), // JMTBAD get rid of beamspot subtraction everywhere
+                (*move_vertex)[1] - nt_filler.bs().y((*move_vertex)[2]),
                 (*move_vertex)[2]);
 
     auto tks_push_back = [&](const reco::Track& tk) { NtupleAdd(nt.tracks(), tk); };
@@ -127,7 +107,7 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
       nt.set_tk_moved(which);
     }
 
-    for (const pat::Jet& jet : jets_filler.jets(event)) {
+    for (const pat::Jet& jet : nt_filler.jets_filler().jets(event)) {
       double dist2min = 0.1;
       int whichjet = -1;
 
@@ -200,8 +180,8 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
   event.getByToken(vertices_token, vertices);
 
   for (const MFVVertexAux& v : *vertices) {
-    const double vx = v.x - bs_filler.bs().x(v.z);
-    const double vy = v.y - bs_filler.bs().y(v.z);
+    const double vx = v.x - nt_filler.bs().x(v.z); // JMTBAD get rid of beamspot subtraction everywhere
+    const double vy = v.y - nt_filler.bs().y(v.z);
     const double vz = v.z;
 
     if (!for_mctruth) {
@@ -212,11 +192,10 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
         continue;
     }
 
-    nt.vertices().add(vx, vy, vz,
-                      v.cxx, v.cxy, v.cxz, v.cyy, v.cyz, v.czz,
-                      v.ntracks(), v.bs2derr, v.rescale_bs2derr, v.geo2ddist(), false,
-                      v.pt[mfv::PTracksPlusJetsByNtracks], v.eta[mfv::PTracksPlusJetsByNtracks], v.phi[mfv::PTracksPlusJetsByNtracks], v.mass[mfv::PTracksPlusJetsByNtracks],
-                      v.mass[mfv::PTracksOnly]);
+    nt.vertices().add(v.chi2, vx, vy, vz, v.cxx, v.cxy, v.cxz, v.cyy, v.cyz, v.czz,
+                      v.rescale_chi2, v.rescale_x - nt_filler.bs().x(v.rescale_z), v.rescale_y - nt_filler.bs().y(v.rescale_z), v.rescale_z, v.rescale_cxx, v.rescale_cxy, v.rescale_cxz, v.rescale_cyy, v.rescale_cyz, v.rescale_czz, // JMTBAD get rid of beamspot subtraction everywhere (then just use NtupleAdd here)
+                      v.ntracks(), v.njets[0], v.bs2derr, v.rescale_bs2derr, false,
+                      v.pt[mfv::PTracksPlusJetsByNtracks], v.eta[mfv::PTracksPlusJetsByNtracks], v.phi[mfv::PTracksPlusJetsByNtracks], v.mass[mfv::PTracksPlusJetsByNtracks]);
 
     if (!for_mctruth)
       for (size_t i = 0, ie = v.ntracks(); i < ie; ++i) {
@@ -246,7 +225,7 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
     return;
   }
 
-  tree->Fill();
+  nt_filler.finalize();
 }
 
 DEFINE_FWK_MODULE(MFVMovedTracksTreer);

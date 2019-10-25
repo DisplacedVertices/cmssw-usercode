@@ -1,7 +1,6 @@
-include $(CMSSW_BASE)/src/JMTucker/Tools/NtupleMakefile.in
+include $(CMSSW_BASE)/src/JMTucker/MFVNeutralino/NtupleMakefile.in
 
-SHADOWDEPS += $(CMSSW_BASE)/lib/$(SCRAM_ARCH)/libJMTuckerMFVNeutralino.so utils.h
-FLAGS += -lJMTuckerMFVNeutralino
+SHADOWDEPS += utils.h
 
 all: hists.exe mctruth.exe tests.exe
 

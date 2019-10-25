@@ -6,6 +6,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "JMTucker/Formats/interface/MergeablePOD.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
+#include "JMTucker/Tools/interface/Year.h"
 
 class MFVWeightProducer : public edm::EDProducer {
 public:
@@ -37,7 +38,7 @@ private:
   TH1D* h_npu;
   TH1D* h_npv;
 
-  enum { sum_nevents_total, sum_gen_weight_total, sum_gen_weight, sum_pileup_weight, sum_npv_weight, sum_weight, n_sums };
+  enum { sum_nevents_total, sum_gen_weight_total, sum_gen_weight, sum_pileup_weight, sum_npv_weight, sum_weight, yearcode_x_nfiles, n_sums };
   TH1D* h_sums;
 };
 
@@ -73,8 +74,9 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
 
     h_sums = fs->make<TH1D>("h_sums", TString::Format("half_mc_weight = %.3f", half_mc_weight), n_sums+1, 0, n_sums+1);
     int ibin = 1;
-    for (const char* x : { "sum_nevents_total", "sum_gen_weight_total", "sum_gen_weight", "sum_pileup_weight", "sum_npv_weight", "sum_weight", "n_sums" })
+    for (const char* x : { "sum_nevents_total", "sum_gen_weight_total", "sum_gen_weight", "sum_pileup_weight", "sum_npv_weight", "sum_weight", "yearcode_x_nfiles", "n_sums" })
       h_sums->GetXaxis()->SetBinLabel(ibin++, x);
+    h_sums->Fill(yearcode_x_nfiles, MFVNEUTRALINO_YEARCODE);
   }
 }
 

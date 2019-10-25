@@ -10,6 +10,7 @@ jmtNtupleFiller = cms.PSet(
     weight_src = cms.InputTag('jmtWeight'),
     pileup_info_src = cms.InputTag('addPileupInfo'),
     rho_src = cms.InputTag('fixedGridRhoFastjetAll'),
+    mets_src = cms.InputTag('patMETsNoHF'),
     beamspot_src = cms.InputTag('offlineBeamSpot'),
     primary_vertices_src = cms.InputTag('offlinePrimaryVertices'),
     tracks_src = cms.InputTag('generalTracks'),
@@ -23,10 +24,14 @@ jmtNtupleFillerMiniAOD = jmtNtupleFiller.clone(
     gen_particles_src = 'prunedGenParticles',
     weight_src = 'jmtWeightMiniAOD',
     pileup_info_src = 'slimmedAddPileupInfo',
+    mets_src = cms.InputTag('slimmedMETs'),
     primary_vertices_src = 'offlineSlimmedPrimaryVertices',
     tracks_src = 'jmtUnpackedCandidateTracks',
     track_ref_getter = jmtTrackRefGetterMiniAOD,
     )
 
-def jmtNtupleFiller_pset(miniaod):
-    return jmtNtupleFillerMiniAOD if miniaod else jmtNtupleFiller
+def jmtNtupleFiller_pset(miniaod, using_rescaled_tracks=False):
+    p = jmtNtupleFillerMiniAOD if miniaod else jmtNtupleFiller
+    if using_rescaled_tracks: # not necessarily rescaling them, but that they are in the workflow and track_ref_getter will hit them
+        p.tracks_src = 'jmtRescaledTracks'
+    return p

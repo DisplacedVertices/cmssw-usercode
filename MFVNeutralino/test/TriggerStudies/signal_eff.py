@@ -8,15 +8,24 @@ from JMTucker.MFVNeutralino.PerSignal import PerSignal
 set_style()
 ps = plot_saver(plot_dir('sigeff_trig'), size=(600,600), log=False)
 
-root_file_dir = '/uscms_data/d2/tucker/crab_dirs/TrigFiltCheckV1'
-trigs = ['Trigger']
-nice = ['PFHT1050']
-colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kBlack]
+# where "new" triggers = bjet and displaced dijet triggers
+study_new_triggers = False
+
+if study_new_triggers :
+    root_file_dir = '/uscms/home/joeyr/crabdirs/TrigFiltCheckV1'
+    trigs = ['Trigger','TriggerBjets','TriggerDispDijet','TriggerOR']
+    nice = ['HT1050','Bjet','DisplacedDijet','Logical OR']
+    colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kOrange+3]
+else :
+    root_file_dir = '/uscms_data/d2/tucker/crab_dirs/TrigFiltCheckV1'
+    trigs = ['Trigger']
+    nice = ['PFHT1050']
+    colors = [ROOT.kRed, ROOT.kBlue, ROOT.kGreen+2, ROOT.kBlack]
 
 def sample_ok(s):
     return True #s.mass not in (500,3000)
-multijet = [s for s in Samples.mfv_signal_samples_2017 if sample_ok(s)]
-dijet = [s for s in Samples.mfv_stopdbardbar_samples_2017 if sample_ok(s)]
+multijet = [s for s in Samples.mfv_signal_samples_2018 if sample_ok(s)]
+dijet = [s for s in Samples.mfv_stopdbardbar_samples_2018 if sample_ok(s)]
 
 def getit(f, n):
     hnum = f.Get('SimpleTriggerEfficiency/triggers_pass_num')
@@ -48,11 +57,24 @@ if len(trigs) > 1:
             per.add(samples, title=nice[itrig], color=colors[itrig])
         per.draw(canvas=ps.c)
 
-    mvpave(per.decay_paves[0], 0.703, 1.018, 6.227, 1.098)
-    mvpave(per.decay_paves[1], 6.729, 1.021, 14.073, 1.101)
-    mvpave(per.decay_paves[2], 14.45, 1.033, 21.794, 1.093) 
+        if study_new_triggers :
+            mvpave(per.decay_paves[0], 5.803, 1.04, 11.427, 1.1)
+            mvpave(per.decay_paves[1], 11.529,1.035,14.073, 1.095)
+            mvpave(per.decay_paves[2], 14.1,  1.04, 22.15, 1.1) 
+            mvpave(per.decay_paves[3], 22.20, 1.04, 29.200, 1.1) 
+        else :
+            mvpave(per.decay_paves[0], 0.703, 1.018, 6.227, 1.098)
+            mvpave(per.decay_paves[1], 6.729, 1.021, 14.073, 1.101)
+            mvpave(per.decay_paves[2], 14.45, 1.033, 21.794, 1.093) 
 
-    ps.save(kind)
+        tlatex = ROOT.TLatex()
+        tlatex.SetTextSize(0.04)
+        if kind == 'multijet' :
+            tlatex.DrawLatex(0.725, 1.05, '#tilde{N} #rightarrow tbs')
+        elif kind == 'dijet' :
+            tlatex.DrawLatex(0.725, 1.05, '#tilde{t} #rightarrow #bar{d}#bar{d}')
+
+        ps.save(kind)
 else:
     for sample in multijet + dijet:
         sample.y, sample.yl, sample.yh = sample.ys[trigs[0]]
@@ -60,5 +82,7 @@ else:
     per.add(multijet, title='#tilde{N} #rightarrow tbs')
     per.add(dijet, title='#tilde{t} #rightarrow #bar{d}#bar{d}', color=ROOT.kBlue)
     per.draw(canvas=ps.c)
+    mvpave(per.decay_paves[0], 0.703, 0.098, 6, 0.158)
+    mvpave(per.decay_paves[1], 0.703, 0.038, 6, 0.098)
     ps.save('trigeff')
 

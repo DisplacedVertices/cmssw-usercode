@@ -4,7 +4,7 @@
 
 import re
 from JMTucker.Tools.CRAB3ToolsBase import *
-from JMTucker.Tools.hadd import hadd
+from JMTucker.Tools.hadd import HaddBatchResult, hadd
 if crab_global_options.support_automatic_splitting:
     from JMTucker.Tools.Sample import fn_to_sample, norm_from_file
     from JMTucker.Tools import Samples, colors
@@ -109,6 +109,7 @@ def crab_hadd_files(working_dir, lpc_shortcut=False, **kwargs):
 def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None, lpc_shortcut=False, range_filter=None):
     working_dir, new_name, new_dir = crab_hadd_args(working_dir, new_name, new_dir)
     expected, files = crab_hadd_files(working_dir, lpc_shortcut, range_filter=range_filter)
+    result = HaddBatchResult('crab', working_dir, new_name, new_dir, expected, files)
     print '%s: expecting %i files if all jobs succeeded' % (working_dir, expected)
 
     if pattern:
@@ -143,6 +144,7 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
 
     l = len(files)
     if l == 0:
+        result.success = False
         msg = 'crab_hadd: no files found in %s' % working_dir
         if raise_on_empty:
             raise CRABToolsException(msg)
@@ -151,10 +153,11 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
     elif l == 1:
         print working_dir, ': just one file found, copying'
         cmd = 'xrdcp -s %s %s' % (files[0], new_name)
-        os.system(cmd)
-        os.chmod(new_name, 0644)
+        result.success = os.system(cmd) == 0
+        if result.success and not new_name.startswith('root://'):
+            os.chmod(new_name, 0644)
     else:
-        hadd(new_name, files)
+        result.success = hadd(new_name, files)
 
     if automatic_splitting:
         n = norm_from_file(new_name)
@@ -168,7 +171,7 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
             else:
                 print colors.yellow('\tnorm_from_file returns %r while %s.nevents_orig is %i (main) %i (miniaod' % (n, sn, no1, no2))
 
-    return new_name
+    return result
 
 if __name__ == '__main__':
     dirs = crab_dirs_from_argv()

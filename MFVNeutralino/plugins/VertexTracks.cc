@@ -422,7 +422,7 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
     }
 
     if (verbose) {
-      printf("track %5lu: pt: %7.3f dxy: %7.3f nhits %3i ", i, pt, dxybs, nhits);
+      printf("track %5lu: pt: %10.3f +- %10.3f eta: %10.3f +- %10.3f phi: %10.3f +- %10.3f dxy: %10.5f +- %10.5f (-> nsig %5.3f, rescaled: %10.5f +- %10.5f -> nsig %10.3f) dz: %10.3f +- %10.3f nhits: %3i/%3i/%3i nlayers: %3i/%3i/%3i ", i, pt, tk->ptError(), tk->eta(), tk->etaError(), tk->phi(), tk->phiError(), dxybs, dxyerr, fabs(sigmadxybs), dxybs, rescaled_dxyerr, fabs(rescaled_sigmadxybs), tk->dz(), tk->dzError(), npxhits, nsthits, nhits, npxlayers, nstlayers, npxlayers + nstlayers);
       if (use)
         printf(" selected for seed! (#%lu)", seed_tracks->size()-1);
       printf("\n");

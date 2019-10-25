@@ -10,17 +10,23 @@ parser.add_argument('positional', nargs='*')
 
 parser.add_argument('--recurse', action='store_true',
                     help='Recurse down the directory structure, i.e. use all histograms in the given directory and all subdirectories.')
-parser.add_argument('--per-page', type=int, default=100,
-                    help='Put PER_PAGE histograms per html page (default: 100 per page).')
+parser.add_argument('--sort-names', action='store_true',
+                    help='Process the histograms in alphabetical order (default is to use the order found in the ROOT directory).')
+parser.add_argument('--show-progress', type=int, default=10,
+                    help='Print how far along we are processing the histograms: if this is 10 (default), a line is printed for every 1/10 chunk. Disable with value <= 0.')
 parser.add_argument('--only-n-first', type=int, default=-1,
                     help='Only do the first ONLY_N_FIRST histograms (default: do all).')
+parser.add_argument('--raise-on-incompatibility', action='store_true',
+                    help='If histograms are not comparable (e.g. different binning), raise an exception if True, else skip that one (default).')
+parser.add_argument('--per-page', type=int, default=100,
+                    help='Put PER_PAGE histograms per html page (default: 100 per page).')
 parser.add_argument('--opt-stat', type=int, default=1112211,
                     help='The value for SetOptStat (default: %(default)s).')
 parser.add_argument('--size', nargs=2, type=int, default=(600,600), metavar='SIZE',
                     help='Set the plot size to SIZEX x SIZEY (default %(default)s.')
 parser.add_argument('--nice', nargs='+', default=[],
                     help='Nice names for the files (default is file1, file2, ...).')
-parser.add_argument('--colors', nargs='+', default=['ROOT.kRed', 'ROOT.kBlue', 'ROOT.kGreen+2', 'ROOT.kMagenta'],
+parser.add_argument('--colors', nargs='+', default=['ROOT.kRed', 'ROOT.kBlue', 'ROOT.kGreen+2', 'ROOT.kMagenta', 'ROOT.kCyan', 'ROOT.kOrange+2'],
                     help='Colors for the files: may be a python snippet, e.g. the default %(default)s.')
 
 lambda_fmt = 'lambda name, hists, curr: (%s)'
@@ -43,6 +49,8 @@ group.add_argument('--ratio', default='True',
                    help='Snippet for ratio lambda (default: %(default)s).')
 group.add_argument('--x-range', default='None',
                    help='Snippet for x_range lambda (default: %(default)s).')
+group.add_argument('--move-overflows', default='"under over"',
+                   help='Snippet for move_overflows lambda (default: %(default)s).')
 group.add_argument('--profile', default='None',
                    help='Snippet for profile lambda (default: %(default)s).')
 
@@ -94,7 +102,7 @@ def lambda_it(options, name):
     return o
 
 lambda_kwargs = {}
-for name in 'no_stats', 'stat_size', 'apply_commands', 'separate_plots', 'skip', 'draw_command', 'scaling', 'ratio', 'x_range', 'profile':
+for name in 'no_stats', 'stat_size', 'apply_commands', 'separate_plots', 'skip', 'draw_command', 'scaling', 'ratio', 'x_range', 'move_overflows', 'profile':
     lambda_kwargs[name] = lambda_it(options, name)
 
 print 'comparehists running with these options:'
@@ -137,5 +145,8 @@ else:
 compare_hists(ps,
               samples = zip(options.nice, dirs, options.colors),
               recurse = options.recurse,
+              sort_names = options.sort_names,
+              show_progress = options.show_progress,
               only_n_first = options.only_n_first,
+              raise_on_incompatibility = options.raise_on_incompatibility,
               **lambda_kwargs)

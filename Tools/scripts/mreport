@@ -11,6 +11,8 @@ from JMTucker.Tools.DBS import ll_for_dataset
 from JMTucker.Tools import Samples
 from JMTucker.Tools import colors
 
+partial = 'partial' in sys.argv
+
 def ll2str(ll):
     return str(ll).replace('\n', ' ')
 
@@ -37,7 +39,7 @@ for is_crab, wds in (True, crab_dirs_from_argv()), (False, cs_dirs_from_argv()):
     for wd in wds:
         print colors.bold(wd)
         if not is_crab:
-            ll_alls.append((wd, cs_report(wd)))
+            ll_alls.append((wd, cs_report(wd, partial)))
         else:
             sample = Samples.sample_from_end_string(Samples, wd)
             if miniaod:

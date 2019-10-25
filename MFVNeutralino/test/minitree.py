@@ -10,8 +10,7 @@ cmssw_from_argv(process)
 process.load('JMTucker.MFVNeutralino.MiniTree_cff')
 
 if not is_mc:
-    # blind >=5-track events
-    del process.pMiniTree
+    process.mfvAnalysisCutsGE1Vtx.max_nvertex = 1 # 5-track 2-vertex blind
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
@@ -20,9 +19,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     samples = pick_samples(dataset)
     set_splitting(samples, dataset, 'minitree', data_json=json_path('ana_2017p8_10pc.json'))
 
-    cs = CondorSubmitter('MiniTree' + version + 'v3',
+    cs = CondorSubmitter('MiniTree' + version,
                          ex = year,
                          dataset = dataset,
-                         pset_modifier = chain_modifiers(is_mc_modifier, half_mc_modifier(), per_sample_pileup_weights_modifier()),
+                         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier()),
                          )
     cs.submit_all(samples)

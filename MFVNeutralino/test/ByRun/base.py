@@ -23,7 +23,7 @@ class ByRunPlotter:
             self._lls = LumiLines('/uscms/home/tucker/public/mfv/lumi/2017p8.stripped.gzpickle', self.mask_fn)
         return self._lls
 
-    def make(self, d, name, title, y_title, year, exclude, verbose=False, scale_by_lumi=False, scale_by_avgpu=False, draw_boundaries=True, use_index=True, do_fits=True):
+    def make(self, d, name, title, y_title, year, exclude, verbose=False, scale_by_lumi=False, scale_by_avgpu=False, draw_boundaries=True, use_index=True, do_fits=True, highlight=[]):
         r = ByRunPlotter.result()
 
         r.runs = self.runs if self.runs else self.lls.runs(year) # already sorted
@@ -32,7 +32,7 @@ class ByRunPlotter:
         r.lumi_sum = 0.
         r.zero_lumis = []
 
-        g, na = [], []
+        g, na, hl = [], [], []
         fill_boundaries = []
         era_boundaries = []
         for i, run in enumerate(r.runs):
@@ -54,7 +54,7 @@ class ByRunPlotter:
                 fmt = '%s'
                 if type(n) == float:
                     fmt = '%.3g'
-                elif type(n) == tuple and type(n[0]) == float:
+                elif type(n) == tuple and type(n[0]) in (float,int):
                     fmt = ' '.join(['%.3g']*len(n))
                 print '(%3i) %i: %s' % (i,run,fmt%n)
 
@@ -101,24 +101,36 @@ class ByRunPlotter:
                     yl /= avgpu
                     yh /= avgpu
 
-                g.append((x, y, y-yl, yh-y))
-
+                pt = (x, y, y-yl, yh-y)
+                g.append(pt)
+                if run in highlight:
+                    hl.append(pt)
 
         r.g = ROOT.TGraphAsymmErrors(len(g))
+        r.g.SetMarkerStyle(20)
+        r.g.SetMarkerSize(0.5)
         for i, (x,y,el,eh) in enumerate(g):
             r.g.SetPoint(i, x, y)
             r.g.SetPointEYlow(i, el)
             r.g.SetPointEYhigh(i, eh)
 
+        if hl:
+            r.g_highlight = ROOT.TGraphAsymmErrors(len(hl))
+            r.g_highlight.SetLineColor(ROOT.kBlue)
+            r.g_highlight.SetMarkerColor(ROOT.kBlue)
+            r.g_highlight.SetMarkerStyle(20)
+            r.g_highlight.SetMarkerSize(0.5)
+            for i, (x,y,el,eh) in enumerate(hl):
+                r.g_highlight.SetPoint(i, x, y)
+                r.g_highlight.SetPointEYlow(i, el)
+                r.g_highlight.SetPointEYhigh(i, eh)
+
         r.runs_missing = len(na)
         r.g_na = ROOT.TGraphAsymmErrors(len(na))
-        for i, irun in enumerate(na):
-            r.g_na.SetPoint(i, irun, 0)
-
-        r.g.SetMarkerStyle(20)
-        r.g.SetMarkerSize(0.5)
         r.g_na.SetMarkerStyle(22)
         r.g_na.SetMarkerSize(0.8)
+        for i, irun in enumerate(na):
+            r.g_na.SetPoint(i, irun, 0)
 
         if verbose:
             print 'lumi sum:', r.lumi_sum/1e3, '/fb'
@@ -131,6 +143,9 @@ class ByRunPlotter:
 
         r.g.SetTitle('%s  %i runs, %i missing;run index;%s' % (title, r.runs_used, r.runs_missing, y_title))
         r.g.Draw('AP')
+        if hl:
+            r.g_highlight.Draw('P')
+            print '%i highlighted' % len(hl)
 
         if do_fits:
             miss = []
@@ -151,7 +166,7 @@ class ByRunPlotter:
                     first = fy, fye, fye/fy if fy > 0 else None
                     ratio = 1,0
                 else:
-                    if first[0] > 0:
+                    if first[0] > 0 and fy > 0:
                         ratio = fy/first[0], 0 if i == 0 else ((fye/fy)**2 + first[2]**2)**0.5
                     else:
                         ratio = -1,-1
@@ -191,6 +206,10 @@ class ByRunPlotter:
         r.g.GetXaxis().SetRangeUser(-2, r.nruns+2)
         if do_fits:
             r.g.GetYaxis().SetRangeUser(0, 7 * r.fcns[0].GetParameter(0))
+        else:
+            gg = g[:]
+            gg.sort(key=lambda x: x[1]+x[3])
+            r.g.GetYaxis().SetRangeUser(0, 1.05*gg[-5][1])
 
         hh = r.g.GetHistogram()
         ymin, ymax = hh.GetMinimum(), hh.GetMaximum()
@@ -201,7 +220,7 @@ class ByRunPlotter:
             if i not in era_boundaries:
                 l.SetLineStyle(2)
             else:
-                l.SetLineWidth(2)
+                l.SetLineWidth(4)
             l.Draw()
 
         self.ps.save(name)

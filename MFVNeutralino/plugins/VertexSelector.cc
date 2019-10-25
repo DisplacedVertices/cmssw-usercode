@@ -8,7 +8,8 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/MFVNeutralino/interface/VertexAuxSorter.h"
 #include "JMTucker/MFVNeutralino/interface/VertexTrackClusters.h"
-#include "JMTucker/MFVNeutralino/interface/VertexTools.h"
+#include "JMTucker/Tools/interface/Geometry.h"
+#include "JMTucker/Tools/interface/StatCalculator.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 //#include "JMTucker/MFVNeutralino/plugins/VertexMVAWrap.h"
 
@@ -111,6 +112,9 @@ private:
   const int max_npvswtracksshared;
   const double min_thetaoutlier;
   const double max_thetaoutlier;
+  const double min_zoutlier;
+  const double max_zoutlier;
+  const double max_zoutlier_maxdphi0pi;
 
   const bool use_cluster_cuts;
   const int min_nclusters;
@@ -208,6 +212,9 @@ MFVVertexSelector::MFVVertexSelector(const edm::ParameterSet& cfg)
     max_npvswtracksshared(cfg.getParameter<int>("max_npvswtracksshared")),
     min_thetaoutlier(cfg.getParameter<double>("min_thetaoutlier")),
     max_thetaoutlier(cfg.getParameter<double>("max_thetaoutlier")),
+    min_zoutlier(cfg.getParameter<double>("min_zoutlier")),
+    max_zoutlier(cfg.getParameter<double>("max_zoutlier")),
+    max_zoutlier_maxdphi0pi(cfg.getParameter<double>("max_zoutlier_maxdphi0pi")),
     use_cluster_cuts(cfg.getParameter<bool>("use_cluster_cuts")),
     min_nclusters(cfg.getParameter<int>("min_nclusters")),
     max_nsingleclusters(cfg.getParameter<int>("max_nsingleclusters")),
@@ -267,7 +274,7 @@ bool MFVVertexSelector::use_vertex(const bool is_mc, const MFVVertexAux& vtx, co
       return false;
   }
 
-  if (exclude_beampipe && !mfv::inside_beampipe(is_mc, vtx.x, vtx.y))
+  if (exclude_beampipe && !jmt::Geometry::inside_beampipe(is_mc, vtx.x, vtx.y))
     return false;
 
   if (use_cluster_cuts) {
@@ -310,14 +317,6 @@ bool MFVVertexSelector::use_vertex(const bool is_mc, const MFVVertexAux& vtx, co
       return false;
   }
 
-  float trackpairdphimax = -1;
-  if (min_trackpairdphimax > 0)
-    for (float dphi : vtx.trackpairdphis()) {
-      dphi = fabs(dphi);
-      if (dphi > trackpairdphimax)
-        trackpairdphimax = dphi;
-    }
-
   if (min_drmin > 0 || max_drmin < 1e9 || min_drmax > 0 || max_drmax < 1e9) {
     MFVVertexAux::stats s(&vtx, vtx.trackpairdrs());
     if (s.min <  min_drmin ||
@@ -333,13 +332,33 @@ bool MFVVertexSelector::use_vertex(const bool is_mc, const MFVVertexAux& vtx, co
     std::vector<double> thetas(n);
     for (size_t i = 0; i < n; ++i)
       thetas[i] = atan2(vtx.track_pt(i), vtx.track_pz[i]);
-    distrib_calculator s(thetas);
+    jmt::StatCalculator s(thetas);
     for (size_t i = 0; i < n; ++i) {
       const double v = fabs(thetas[i] - s.med[i]) / s.mad[i];
       if (v > mx) mx = v;
     }
     if (mx < min_thetaoutlier || mx > max_thetaoutlier)
       return false;
+  }
+
+  if (min_zoutlier > 0 || max_zoutlier < 1e9 || max_zoutlier_maxdphi0pi < 1e9) {
+    jmt::StatCalculator s(vtx.track_vz, true);
+
+    double mx = 0;
+    for (size_t i = 0, ie = vtx.ntracks(); i < ie; ++i) {
+      const double v = fabs(vtx.track_vz[i] - s.avg[i]) / s.rms[i];
+      if (v > mx) mx = v;
+    }
+
+    //{ const double maxdphi = vtx.trackpairdphimax(); printf("vtx ntk %i dist %f max zoutlier %f maxdphi %f isdphi0pi %i\n", vtx.ntracks(), vtx.bs2ddist, mx, maxdphi, fabs(maxdphi) < 0.25 || fabs(maxdphi - M_PI) < 0.25); }
+    if ((min_zoutlier > 0 && mx < min_zoutlier) || (max_zoutlier < 1e9 && mx > max_zoutlier))
+      return false;
+
+    if (max_zoutlier_maxdphi0pi < 1e9 && mx > max_zoutlier_maxdphi0pi) {
+      const double maxdphi = vtx.trackpairdphimax();
+      if (fabs(maxdphi) < 0.25 || fabs(maxdphi - M_PI) < 0.25)
+        return false;
+    }
   }
 
   return 
@@ -378,7 +397,7 @@ bool MFVVertexSelector::use_vertex(const bool is_mc, const MFVVertexAux& vtx, co
     vtx.trackdzerrmax() < max_trackdzerrmax &&
     vtx.trackdzerravg() < max_trackdzerravg &&
     vtx.trackdzerrrms() < max_trackdzerrrms &&
-    trackpairdphimax > min_trackpairdphimax &&
+    vtx.trackpairdphimax() > min_trackpairdphimax &&
     (max_jetpairdrmin > 1e6 || vtx.jetpairdrmin() < max_jetpairdrmin) &&
     vtx.jetpairdrmax() < max_jetpairdrmax &&
     vtx.gen2derr < max_err2d &&

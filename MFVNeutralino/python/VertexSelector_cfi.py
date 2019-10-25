@@ -48,7 +48,7 @@ mfvSelectedVertices = cms.EDProducer('MFVVertexSelector',
                                      max_trackdzerrmax    = cms.double(1e9),
                                      max_trackdzerravg    = cms.double(1e9),
                                      max_trackdzerrrms    = cms.double(1e9),
-                                     min_trackpairdphimax = cms.double(-2),
+                                     min_trackpairdphimax = cms.double(0),
                                      min_drmin            = cms.double(0),
                                      max_drmin            = cms.double(1e9),
                                      min_drmax            = cms.double(0),
@@ -79,6 +79,9 @@ mfvSelectedVertices = cms.EDProducer('MFVVertexSelector',
                                      max_npvswtracksshared = cms.int32(1000000),
                                      min_thetaoutlier     = cms.double(0),
                                      max_thetaoutlier     = cms.double(1e9),
+                                     min_zoutlier             = cms.double(0),
+                                     max_zoutlier             = cms.double(1e9),
+                                     max_zoutlier_maxdphi0pi  = cms.double(1e9),
                                      use_cluster_cuts         = cms.bool(False),
                                      min_nclusters            = cms.int32(0),
                                      max_nsingleclusters      = cms.int32(1000000),
@@ -95,7 +98,7 @@ mfvSelectedVerticesLoose = mfvSelectedVertices.clone(
     mevent_src = 'mfvEvent',
     min_ntracks = 3,
     min_bsbs2ddist = 0.005,
-    max_bs2derr = 0.025,
+    max_rescale_bs2derr = 0.05,
     )
 
 mfvSelectedVerticesTight = mfvSelectedVertices.clone(
@@ -103,7 +106,7 @@ mfvSelectedVerticesTight = mfvSelectedVertices.clone(
     exclude_beampipe = True,
     min_ntracks = 5,
     min_bsbs2ddist = 0.01,
-    max_bs2derr = 0.0025,
+    max_rescale_bs2derr = 0.0025,
     )
 
 mfvSelectedVerticesTightMinNtk3 = mfvSelectedVerticesTight.clone(min_ntracks = 3)
