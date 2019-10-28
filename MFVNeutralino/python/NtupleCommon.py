@@ -4,7 +4,7 @@ from JMTucker.Tools.Year import year
 ntuple_version_ = 'V27'
 use_btag_triggers = False
 if use_btag_triggers : 
-    ntuple_version_ += "B" # for "Btag triggers"
+    ntuple_version_ += "B" # for "Btag triggers"; also includes DisplacedDijet triggers
 ntuple_version_use = ntuple_version_ + 'm'
 dataset = 'ntuple' + ntuple_version_use.lower()
 
@@ -304,7 +304,10 @@ def ntuple_process(settings):
 
 def signals_no_event_filter_modifier(sample):
     if sample.is_signal:
-        magic = "event_filter = 'jets only'" # JPR FIXME do we need to do more than this?
+        if use_btag_triggers :
+            magic = "event_filter = 'bjets OR displaced dijet veto HT'"
+        else :
+            magic = "event_filter = 'jets only'"
         to_replace = [(magic, 'event_filter = False', 'tuple template does not contain the magic string "%s"' % magic)]
     else:
         to_replace = []
