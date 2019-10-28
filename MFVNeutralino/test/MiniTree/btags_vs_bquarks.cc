@@ -7,7 +7,6 @@
 #include "TVector2.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "JMTucker/Tools/interface/Utilities.h"
-#include "JMTucker/Tools/interface/Year.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
 int year = 0;
@@ -124,11 +123,6 @@ void book_hists(int ntk) {
 
 bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
   double w = nt.weight;
-
-  // for testing purposes...
-  std::cout << "year is " << jmt::Year::get() << std::endl;
-  std::cout << "bdisc_tight is " << jmt::BTagging::discriminator_min(jmt::BTagging::tight) << std::endl;
-  std::cout << "nbtags is " << nt.nbtags(jmt::BTagging::discriminator_min(jmt::BTagging::tight)) << std::endl;
 
   int bquark_flavor_code = nt.gen_flavor_code == 2 ? 1 : 0;
   int i_nbquarks[2] = {0, 2-bquark_flavor_code};

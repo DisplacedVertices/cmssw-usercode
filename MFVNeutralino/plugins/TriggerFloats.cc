@@ -305,7 +305,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
 
     if (is_l1) assert(nids == 1 && !is_ht && !is_cluster && !is_photon && !is_muon && !is_jet);
     if (is_ht) {
-      if      (nids == 1) assert(!is_cluster && !is_photon && !is_muon && !is_jet); // FIXME just check that we want this for is_jet
+      if      (nids == 1) assert(!is_cluster && !is_photon && !is_muon && !is_jet);
       else if (nids == 2) assert(!is_cluster && !is_photon);
       else assert(0);
     }
