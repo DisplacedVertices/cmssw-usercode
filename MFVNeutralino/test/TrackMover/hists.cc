@@ -526,6 +526,10 @@ int main(int argc, char** argv) {
     jet_detaavg /= nmovedjets * (nmovedjets - 1) / 2.;
     jet_dphiavg /= nmovedjets * (nmovedjets - 1) / 2.;
 
+    //Signal-mocking cuts
+    if ((jet_i_1 - jet_i_0) > 3 || jet_pt_1 < 125 || jet_dr < 1.0)
+      NR_loop_continue;
+
     int nseedtracks = 0;
     for (int i = 0, ie = nt.tracks().n(); i < ie; ++i)
       if (nt.tracks().pass_seed(i, nt.bs()))
@@ -563,11 +567,6 @@ int main(int argc, char** argv) {
       if (dist2move > 0.0084)
         continue;
 
-      //Signal-mocking cuts
-      if ((jet_i_1 - jet_i_0) > 3) continue;
-      if (jet_pt_1 < 125) continue;
-      if (jet_dr < 1.0) continue;
-       
       vtx_bs2derr = nt.vertices().bs2derr(ivtx);
       vtx_eta     = nt.vertices().eta(ivtx);
       vtx_z       = nt.vertices().z(ivtx);
@@ -590,10 +589,6 @@ int main(int argc, char** argv) {
     // JMTBAD why multiple dens?
     for (numdens& nd : nds) {
 
-      //Signal-mocking cuts
-      if ((jet_i_1 - jet_i_0) > 3) continue;
-      if (jet_pt_1 < 125) continue;
-      if (jet_dr < 1.0) continue;
 
       F1(nd(k_movedist2)        .den, movedist2);
       F1(nd(k_movedist3)        .den, movedist3);
