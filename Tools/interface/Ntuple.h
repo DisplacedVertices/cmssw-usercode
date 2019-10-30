@@ -8,11 +8,8 @@
 #include "TTree.h"
 #include "TVector3.h"
 #define SMATRIX_USE_CONSTEXPR
-#include <Math/SVector.h>
-#include <Math/SMatrix.h>
-
-typedef ROOT::Math::SVector<double,3> Vec3;
-typedef ROOT::Math::SMatrix<double,3,3,ROOT::Math::MatRepSym<double,3> > SymMat33;
+#include "Math/SVector.h"
+#include "Math/SMatrix.h"
 
 namespace jmt {
   class INtuple {
@@ -31,6 +28,9 @@ namespace jmt {
     typedef std::vector<ushort> vushort;
     typedef std::vector<unsigned> vunsigned;
     typedef std::vector<int> vint;
+
+    typedef ROOT::Math::SVector<double,3> Vec3;
+    typedef ROOT::Math::SMatrix<double,3,3,ROOT::Math::MatRepSym<double,3> > SymMat33;
 
     template <typename T> static int p_size(const std::vector<T>& v, const std::vector<T>* p) { return int(p ? p->size() : v.size()); }
     template <typename T> static T p_get(int i, const std::vector<T>& v, const std::vector<T>* p) { return p ? p->at(i) : v.at(i); }
@@ -141,7 +141,7 @@ namespace jmt {
     float x(float zp) const { return x() + dxdz() * (zp - z()); }
     float y(float zp) const { return y() + dydz() * (zp - z()); }
 
-    Vec3 pos() const { return Vec3(x(), y(), z()); }
+    TVector3 pos() const { return TVector3(x(), y(), z()); }
     SymMat33 cov() const { SymMat33 c; c(0,0) = cxx(), c(1,1) = cyy(), c(2,2) = czz(); return c; }
 
     float rho(float xx, float yy, float zz) const { return std::hypot(xx - x(zz), yy - y(zz)); }
@@ -153,6 +153,9 @@ namespace jmt {
     }
     template <typename T> float rho (const T& v) const { return rho (v.x(), v.y(), v.z()); }
     template <typename T> float erho(const T& v) const { return erho(v.x(), v.y(), v.z(), v.covariance(0,0), v.covariance(0,1), v.covariance(1,1)); }
+
+  protected:
+    Vec3 pos_() const { return Vec3(x(), y(), z()); }
 
   private:
     float x_;
@@ -218,7 +221,7 @@ namespace jmt {
 
     void set_misc(int i, unsigned m) { assert(0 == p_misc_); misc_[i] = m; }
 
-    Vec3 pos(int i) const { return Vec3(x(i), y(i), z(i)); }
+    TVector3 pos(int i) const { return TVector3(x(i), y(i), z(i)); }
     SymMat33 cov(int i) const { SymMat33 c; c(0,0) = cxx(i), c(0,1) = cxy(i), c(0,2) = cxz(i),
                                                              c(1,1) = cyy(i), c(1,2) = cyz(i),
                                                                               c(2,2) = czz(i); return c; }
@@ -229,8 +232,11 @@ namespace jmt {
     template <typename BS> float yraw(int i, const BS& bs) const { return y(i) + bs.y(z(i)); }
     template <typename BS> float phiraw(int i, const BS& bs) const { return std::atan2(y(i, bs), x(i, bs)); }
     template <typename BS> float rhoraw(int i, const BS& bs) const { return std::hypot(x(i, bs), y(i, bs)); }
-    template <typename BS> Vec3 posraw(int i, const BS& bs) const { return Vec3(xraw(i, bs), yraw(i, bs), z(i, bs)); }
+    template <typename BS> TVector3 posraw(int i, const BS& bs) const { return TVector3(xraw(i, bs), yraw(i, bs), z(i, bs)); }
     float chi2dof(int i) const { return chi2(i) / ndof(i); }
+
+  protected:
+    Vec3 pos_(int i) const { return Vec3(x(i), y(i), z(i)); }
 
   private:
     vfloat x_;           vfloat* p_x_;
