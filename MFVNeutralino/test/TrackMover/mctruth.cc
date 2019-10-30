@@ -84,13 +84,13 @@ int main(int argc, char** argv) {
 
   TH1D* h_vtxntracks[num_numdens] = {0};
   TH1D* h_vtxbs2derr[num_numdens] = {0};
-  TH1D* h_vtxtkonlymass[num_numdens] = {0};
+  //TH1D* h_vtxtkonlymass[num_numdens] = {0}; // JMTBAD interface for vertex_tracks common to Mini2 and MovedTracks ntuples
   TH1D* h_vtxs_mass[num_numdens] = {0};
 
   for (int i = 0; i < num_numdens; ++i) {
     h_vtxntracks[i] = new TH1D(TString::Format("h_%i_vtxntracks",      i), ";# tracks in largest vertex;events/1", 40, 0, 40);
     h_vtxbs2derr[i] = new TH1D(TString::Format("h_%i_vtxbs2derr",      i), ";#sigma(d_{BV}) of largest vertex (cm);events/2 #mum", 50, 0, 0.01);
-    h_vtxtkonlymass[i] = new TH1D(TString::Format("h_%i_vtxtkonlymass", i), ";track-only mass of largest vertex (GeV);events/1 GeV", 500, 0, 500);
+    //h_vtxtkonlymass[i] = new TH1D(TString::Format("h_%i_vtxtkonlymass", i), ";track-only mass of largest vertex (GeV);events/1 GeV", 500, 0, 500);
     h_vtxs_mass[i] = new TH1D(TString::Format("h_%i_vtxs_mass", i), ";track+jets mass of largest vertex (GeV);vertices/50 GeV", 100, 0, 5000);
   }
 
@@ -289,9 +289,8 @@ int main(int argc, char** argv) {
         if (iv != -1) {
           h_vtxntracks   [in]->Fill(nt.vertices().ntracks(iv));
           h_vtxbs2derr   [in]->Fill(nt.vertices().bs2derr(iv));
-	      h_vtxtkonlymass[in]->Fill(nt.vertices().tkonlymass(iv));
-	      h_vtxs_mass    [in]->Fill(nt.vertices().mass(iv));
- 
+          //h_vtxtkonlymass[in]->Fill(nt.vertices().tkonlymass(iv));
+          h_vtxs_mass    [in]->Fill(nt.vertices().mass(iv));
         }
       }
 

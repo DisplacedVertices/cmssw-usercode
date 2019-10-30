@@ -144,14 +144,14 @@ int main(int argc, char** argv) {
   TH1D* h_vtxdbv[num_numdens] = {0};
   TH1D* h_vtxntracks[num_numdens] = {0};
   TH1D* h_vtxbs2derr[num_numdens] = {0};
-  TH1D* h_vtxtkonlymass[num_numdens] = {0};
+  //  TH1D* h_vtxtkonlymass[num_numdens] = {0};  // JMTBAD interface for vertex_tracks common to Mini2 and MovedTracks ntuples
   TH1D* h_vtxmass[num_numdens] = {0};
   TH1D* h_vtxanglemax[num_numdens] = {0};
   TH1D* h_vtxphi[num_numdens] = {0};
   TH1D* h_vtxeta[num_numdens] = {0};
   TH1D* h_vtxpt[num_numdens] = {0};
   TH2D* h_vtxbs2derr_v_vtxntracks[num_numdens] = {0};
-  TH2D* h_vtxbs2derr_v_vtxtkonlymass[num_numdens] = {0};
+  //  TH2D* h_vtxbs2derr_v_vtxtkonlymass[num_numdens] = {0};
   TH2D* h_vtxbs2derr_v_vtxanglemax[num_numdens] = {0};
   TH2D* h_vtxbs2derr_v_vtxphi[num_numdens] = {0};
   TH2D* h_vtxbs2derr_v_vtxeta[num_numdens] = {0};
@@ -234,7 +234,7 @@ int main(int argc, char** argv) {
     h_vtxdbv[i] = new TH1D(TString::Format("h_%i_vtxdbv", i), ";d_{BV} of largest vertex (cm);events/50 #mum", 400, 0, 2);
     h_vtxntracks[i] = new TH1D(TString::Format("h_%i_vtxntracks", i), ";# tracks in largest vertex;events/1", 60, 0, 60);
     h_vtxbs2derr[i] = new TH1D(TString::Format("h_%i_vtxbs2derr", i), ";#sigma(d_{BV}) of largest vertex (cm);events/1 #mum", 500, 0, 0.05);
-    h_vtxtkonlymass[i] = new TH1D(TString::Format("h_%i_vtxtkonlymass", i), ";track-only mass of largest vertex (GeV);events/1 GeV", 50, 0, 500);
+    //    h_vtxtkonlymass[i] = new TH1D(TString::Format("h_%i_vtxtkonlymass", i), ";track-only mass of largest vertex (GeV);events/1 GeV", 50, 0, 500);
     h_vtxmass[i] = new TH1D(TString::Format("h_%i_vtxmass", i), ";track+jets mass of largest vertex (GeV);events/1 GeV", 100, 0, 5000);
     h_vtxanglemax[i] = new TH1D(TString::Format("h_%i_vtxanglemax", i), ";biggest angle between pairs of tracks in vertex;events/0.03", 100, 0, M_PI);
     h_vtxphi[i] = new TH1D(TString::Format("h_%i_vtxphi", i), ";tracks-plus-jets-by-ntracks #phi of largest vertex;events/0.06", 100, -M_PI, M_PI);
@@ -242,7 +242,7 @@ int main(int argc, char** argv) {
     h_vtxpt[i] = new TH1D(TString::Format("h_%i_vtxpt", i), ";tracks-plus-jets-by-ntracks p_{T} of largest vertex (GeV);events/1", 500, 0, 500);
 
     h_vtxbs2derr_v_vtxntracks[i] = new TH2D(TString::Format("h_%i_vtxbs2derr_v_vtxntracks", i), ";# tracks in largest vertex;#sigma(d_{BV}) of largest vertex (cm)", 60, 0, 60, 500, 0, 0.05);
-    h_vtxbs2derr_v_vtxtkonlymass[i] = new TH2D(TString::Format("h_%i_vtxbs2derr_v_vtxtkonlymass", i), ";track-only mass of largest vertex (GeV);#sigma(d_{BV}) of largest vertex (cm)", 500, 0, 500, 500, 0, 0.05);
+    //    h_vtxbs2derr_v_vtxtkonlymass[i] = new TH2D(TString::Format("h_%i_vtxbs2derr_v_vtxtkonlymass", i), ";track-only mass of largest vertex (GeV);#sigma(d_{BV}) of largest vertex (cm)", 500, 0, 500, 500, 0, 0.05);
     h_vtxbs2derr_v_vtxanglemax[i] = new TH2D(TString::Format("h_%i_vtxbs2derr_v_vtxanglemax", i), ";biggest angle between pairs of tracks in vertex;#sigma(d_{BV}) of largest vertex (cm)", 100, 0, M_PI, 500, 0, 0.05);
     h_vtxbs2derr_v_vtxphi[i] = new TH2D(TString::Format("h_%i_vtxbs2derr_v_vtxphi", i), ";tracks-plus-jets-by-ntracks #phi of largest vertex;#sigma(d_{BV}) of largest vertex (cm)", 100, -M_PI, M_PI, 500, 0, 0.05);
     h_vtxbs2derr_v_vtxeta[i] = new TH2D(TString::Format("h_%i_vtxbs2derr_v_vtxeta", i), ";tracks-plus-jets-by-ntracks #theta of largest vertex;#sigma(d_{BV}) of largest vertex (cm)", 100, 0, M_PI, 500, 0, 0.05);
@@ -684,13 +684,13 @@ int main(int argc, char** argv) {
       h_vtxntracks[in]->Fill(nt.vertices().ntracks(iv), w);
       h_vtxbs2derr[in]->Fill(nt.vertices().bs2derr(iv), w);
       h_vtxanglemax[in]->Fill(vtxs_anglemax[iv], w);
-      h_vtxtkonlymass[in]->Fill(nt.vertices().tkonlymass(iv), w);
+      //      h_vtxtkonlymass[in]->Fill(nt.vertices().tkonlymass(iv), w);
       h_vtxmass[in]->Fill(nt.vertices().mass(iv), w);
       h_vtxphi[in]->Fill(nt.vertices().phi(iv), w);
       h_vtxeta[in]->Fill(nt.vertices().eta(iv), w);
       h_vtxpt[in]->Fill(nt.vertices().pt(iv), w);
       h_vtxbs2derr_v_vtxntracks[in]->Fill(nt.vertices().ntracks(iv), nt.vertices().bs2derr(iv), w);
-      h_vtxbs2derr_v_vtxtkonlymass[in]->Fill(nt.vertices().tkonlymass(iv), nt.vertices().bs2derr(iv), w);
+      //      h_vtxbs2derr_v_vtxtkonlymass[in]->Fill(nt.vertices().tkonlymass(iv), nt.vertices().bs2derr(iv), w);
       h_vtxbs2derr_v_vtxanglemax[in]->Fill(vtxs_anglemax[iv], nt.vertices().bs2derr(iv), w);
       h_vtxbs2derr_v_vtxphi[in]->Fill(nt.vertices().phi(iv), nt.vertices().bs2derr(iv), w);
       h_vtxbs2derr_v_vtxeta[in]->Fill(nt.vertices().eta(iv), nt.vertices().bs2derr(iv), w);
