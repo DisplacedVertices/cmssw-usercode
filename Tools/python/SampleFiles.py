@@ -621,4 +621,5 @@ if __name__ == '__main__':
                 print (colors.boldred if ok(fn) else colors.green)('%s %s %s' % (name, ds, fn))
 
     else:
-        sys.exit('did not understand argv %r' % sys.argv)
+        if not (len(sys.argv) == 1 and sys.argv[0].endswith('/SampleFiles.py')):
+            sys.exit('did not understand argv %r' % sys.argv)
