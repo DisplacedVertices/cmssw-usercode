@@ -561,6 +561,7 @@ for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + all_signal_
         x.add_dataset("ntuplev27m_norefitdzcut")
         x.add_dataset("ntuplev27mmB3")
         x.add_dataset("nr_trackmoverv25mv1")
+mfv_neu_tau010000um_M0800_2017.add_dataset('ntuplev27m_norefitdzcut')
 
 ########
 # automatic condor declarations for ntuples
