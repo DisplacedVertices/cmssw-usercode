@@ -6,6 +6,7 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
+#include "JMTucker/Tools/interface/BTagging.h"
 
 class MFVAnalysisCuts : public edm::EDFilter {
 public:
@@ -156,6 +157,49 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
         return false;
     }
 
+    if (apply_presel == 3) {
+
+      // Note that for simplicity, offline criteria beyond njets >= 4 have to be applied at analysis level
+      if(mevent->njets(20) < 4) return false;
+
+      bool at_least_one_trigger_passed = false;
+      for(size_t trig : mfv::HTOrBjetOrDisplacedDijetTriggers){
+        if(mevent->pass_hlt(trig)){
+
+          // For HT trigger, only keep events with offline HT > 1200 to align with apply_presel == 1
+          if(trig == mfv::b_HLT_PFHT1050){
+            if(mevent->jet_ht(40) < 1200) continue;
+          }
+
+          at_least_one_trigger_passed = true;
+          break;
+        }
+      }
+      if(!at_least_one_trigger_passed) return false;
+    }
+
+    if (apply_presel == 4) {
+
+      // Note that for simplicity, offline criteria beyond njets >= 4 have to be applied at analysis level
+      if(mevent->njets(20) < 4) return false;
+
+      // Veto events which pass HT trigger and offline HT > 1200 GeV, to keep orthogonal with apply_presel == 1
+      if(mevent->pass_hlt(mfv::b_HLT_PFHT1050) && mevent->jet_ht(40) >= 1200) return false;
+
+      bool at_least_one_trigger_passed = false;
+      for(size_t trig : mfv::HTOrBjetOrDisplacedDijetTriggers){
+
+        // skip HT trigger
+        if(trig == mfv::b_HLT_PFHT1050) continue;
+
+        if(mevent->pass_hlt(trig)){
+          at_least_one_trigger_passed = true;
+          break;
+        }
+      }
+      if(!at_least_one_trigger_passed) return false;
+    }
+
     if (require_bquarks && mevent->gen_flavor_code != 2)
       return false;
 
@@ -170,6 +214,32 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
 
     if (apply_trigger == 2 && !mevent->pass_hlt(mfv::b_HLT_Ele35_WPTight_Gsf) && !mevent->pass_hlt(mfv::b_HLT_IsoMu27))
       return false;
+
+    if (apply_trigger == 3){
+      bool at_least_one_trigger_passed = false;
+      for(size_t trig : mfv::HTOrBjetOrDisplacedDijetTriggers){
+        if(mevent->pass_hlt(trig)){
+          at_least_one_trigger_passed = true;
+          break;
+        }
+      }
+      if(!at_least_one_trigger_passed) return false;
+    }
+
+    if (apply_trigger == 4){
+      bool at_least_one_trigger_passed = false;
+      for(size_t trig : mfv::HTOrBjetOrDisplacedDijetTriggers){
+
+        // skip HT trigger
+        if(trig == mfv::b_HLT_PFHT1050) continue;
+
+        if(mevent->pass_hlt(trig)){
+          at_least_one_trigger_passed = true;
+          break;
+        }
+      }
+      if(!at_least_one_trigger_passed) return false;
+    }
 
     if (mevent->npv < min_npv || mevent->npv > max_npv)
       return false;

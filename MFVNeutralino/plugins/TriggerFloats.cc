@@ -277,6 +277,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
     bool is_cluster = false;
     bool is_photon = false;
     bool is_muon = false;
+    bool is_jet = false;
 
     if (prints) printf("obj pt %f eta %f phi %f coll %s ids (#=%lu)", obj.pt(), obj.eta(), obj.phi(), obj.collection().c_str(), nids);
 
@@ -296,13 +297,15 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
         is_photon = true;
       else if (id == trigger::TriggerMuon)
         is_muon = true;
+      else if (id == trigger::TriggerBJet || id == trigger::TriggerJet)
+        is_jet = true;
     }
 
-    if (prints) printf(" is_l1 %i is_ht %i is_cluster %i is_photon %i is_muon %i\n", is_l1, is_ht, is_cluster, is_photon, is_muon);
+    if (prints) printf(" is_l1 %i is_ht %i is_cluster %i is_photon %i is_muon %i is_jet %i\n", is_l1, is_ht, is_cluster, is_photon, is_muon, is_jet);
 
-    if (is_l1) assert(nids == 1 && !is_ht && !is_cluster && !is_photon && !is_muon);
+    if (is_l1) assert(nids == 1 && !is_ht && !is_cluster && !is_photon && !is_muon && !is_jet);
     if (is_ht) {
-      if      (nids == 1) assert(!is_cluster && !is_photon && !is_muon);
+      if      (nids == 1) assert(!is_cluster && !is_photon && !is_muon && !is_jet);
       else if (nids == 2) assert(!is_cluster && !is_photon);
       else assert(0);
     }
@@ -341,7 +344,43 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
         }
 
         if (prints) {
-          std::cout << "TriggerFloats object for path " << mfv::hlt_paths[ipath]
+          std::cout << "TriggerFloats lepton object for path " << mfv::hlt_paths[ipath]
+                    << " pt " << obj.pt() << " eta " << obj.eta() << " phi " << obj.phi()
+                    << " collection: " << obj.collection() << " ids (# = " << obj.filterIds().size() << "):";
+          for (auto id : obj.filterIds())
+            std::cout << " " << id;
+          std::cout << "\n";
+        }
+      }
+    }
+    else if (is_jet) {
+      obj.unpackNamesAndLabels(event, *trigger_results);
+      const std::vector<std::string>& pathNamesAll  = obj.pathNames(false);
+      int ipath = -1;
+      for (const std::string& p : pathNamesAll) {
+        for (int i = 0; i < mfv::n_hlt_paths; ++i){
+          if (helper.path_same_without_version(p, mfv::hlt_paths[i])) {
+            ipath = i;
+            break;
+          }
+        }
+        if (ipath != -1) break;
+      }
+
+      if (ipath != -1) {
+
+        // Note that all of the bjet triggers use PF jets for the kinematics, and the
+        // b-tagging discriminants aren't currently available in AODs, so this is
+        // sufficient for the trigger matching for now
+        if(obj.collection() == "hltAK4PFJetsCorrected::HLT"){
+          floats->hltpfjets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
+        }
+        else if(obj.collection() == "hltDisplacedHLTCaloJetCollectionProducerLowPt::HLT" || obj.collection() == "hltDisplacedHLTCaloJetCollectionProducerMidPt::HLT"){
+          floats->hltdisplacedcalojets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
+        }
+
+        if (prints) {
+          std::cout << "TriggerFloats jet object for path " << mfv::hlt_paths[ipath]
                     << " pt " << obj.pt() << " eta " << obj.eta() << " phi " << obj.phi()
                     << " collection: " << obj.collection() << " ids (# = " << obj.filterIds().size() << "):";
           for (auto id : obj.filterIds())

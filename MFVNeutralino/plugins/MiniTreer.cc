@@ -65,8 +65,9 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   event.getByToken(event_token, mevent);
 
   nt.gen_flavor_code = mevent->gen_flavor_code;
-
-  static_assert(mfv::n_hlt_paths <= 8);
+  
+  // nt.pass_hlt is currently an unsigned int, i.e. 32 bits available
+  static_assert(mfv::n_hlt_paths <= 32); 
   nt.pass_hlt = mevent->pass_hlt_bits();
   nt.l1_htt = mevent->l1_htt;
   nt.l1_myhtt = mevent->l1_myhtt;
@@ -103,6 +104,15 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.jet_id[i] = mevent->jet_id[i];
     nt.jet_bdisc_old[i] = mevent->jet_bdisc_old[i];
     nt.jet_bdisc[i] = mevent->jet_bdisc[i];
+
+    nt.jet_hlt_pt[i] = mevent->jet_hlt_pt[i];
+    nt.jet_hlt_eta[i] = mevent->jet_hlt_eta[i];
+    nt.jet_hlt_phi[i] = mevent->jet_hlt_phi[i];
+    nt.jet_hlt_energy[i] = mevent->jet_hlt_energy[i];
+    nt.displaced_jet_hlt_pt[i] = mevent->displaced_jet_hlt_pt[i];
+    nt.displaced_jet_hlt_eta[i] = mevent->displaced_jet_hlt_eta[i];
+    nt.displaced_jet_hlt_phi[i] = mevent->displaced_jet_hlt_phi[i];
+    nt.displaced_jet_hlt_energy[i] = mevent->displaced_jet_hlt_energy[i];
   }
 
   for (int i = 0; i < 2; ++i) {

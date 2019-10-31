@@ -1,6 +1,9 @@
 #include "TFile.h"
 #include "TTree.h"
+#include "TH1F.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/TriggerEnum.h"
+#include "JMTucker/Tools/interface/Year.h"
 
 namespace mfv {
   MiniNtuple::MiniNtuple() {
@@ -27,6 +30,8 @@ namespace mfv {
     gen_jet_ht = gen_jet_ht40 = 0;
     for (int i = 0; i < 50; ++i) {
       jet_pt[i] = jet_eta[i] = jet_phi[i] = jet_energy[i] = jet_bdisc[i] = 0;
+      jet_hlt_pt[i] = jet_hlt_eta[i] = jet_hlt_phi[i] = jet_hlt_energy[i] = 0;
+      displaced_jet_hlt_pt[i] = displaced_jet_hlt_eta[i] = displaced_jet_hlt_phi[i] = displaced_jet_hlt_energy[i] = 0;
       jet_id[i] = 0;
     }
     tk0_qchi2.clear();
@@ -59,6 +64,18 @@ namespace mfv {
     return sum;
   }
 
+  bool MiniNtuple::is_btagged(int i, float min_bdisc) const {
+    return jet_bdisc[i] >= min_bdisc;
+  }
+
+  int MiniNtuple::nbtags(std::vector<int> indices) const {
+    int nbjets = 0;
+    for(int i : indices){
+      if(is_btagged(i)) ++nbjets;
+    }
+    return nbjets;
+  }
+
   int MiniNtuple::nbtags_(float min_bdisc, bool old) const {
     int sum = 0;
     const float* bdisc = old ? jet_bdisc_old : jet_bdisc;
@@ -66,6 +83,343 @@ namespace mfv {
       if (bdisc[i] >= min_bdisc)
         ++sum;
     return sum;
+  }
+
+  bool MiniNtuple::satisfiesTrigger(size_t trig) const {
+    return bool((pass_hlt >> trig) & 1);
+  }
+
+  bool MiniNtuple::satisfiesTriggerAndOffline(size_t trig) const {
+    if(!satisfiesTrigger(trig)) return false;
+
+    // for the trigger chains where we need to do any detailed matching
+    bool passed_kinematics = false;
+
+    switch(trig){
+      case b_HLT_PFHT1050 :
+        return ht(40) > 1200 && njets >= 4;
+      case b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33 :
+      {
+        if(njets < 4) return false;
+
+        for(int j0 = 0; j0 < njets; ++j0){
+          if(!jet_hlt_match(j0) || jet_pt[j0] < 100) continue;
+
+          for(int j1 = j0+1; j1 < njets; ++j1){
+            if(!jet_hlt_match(j1) || jet_pt[j1] < 100) continue;
+
+            if(fabs(jet_eta[j0] - jet_eta[j1]) < 1.6){
+              if(nbtags({j0,j1}) >= 2) passed_kinematics = true;
+            }
+          }
+        }
+        return passed_kinematics;
+      }
+      case b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0 :
+      {
+        if(ht(30) < 300 || njets < 4) return false;
+
+        for(int j0 = 0; j0 < njets; ++j0){
+          if(!jet_hlt_match(j0) || jet_pt[j0] < 75) continue;
+
+          for(int j1 = j0+1; j1 < njets; ++j1){
+            if(!jet_hlt_match(j1) || jet_pt[j1] < 60) continue;
+
+            for(int j2 = j1+1; j2 < njets; ++j2){
+              if(!jet_hlt_match(j2) || jet_pt[j2] < 45) continue;
+
+              for(int j3 = j2+1; j3 < njets; ++j3){
+                if(!jet_hlt_match(j3) || jet_pt[j3] < 40) continue;
+
+                if(nbtags({j0,j1,j2,j3}) >= 3) passed_kinematics = true;
+              }
+            }
+          }
+        }
+        return passed_kinematics;
+      }
+      case b_HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2 :
+      {
+        if(ht(40) < 380 || njets < 6) return false;
+
+        for(int j0 = 0; j0 < njets; ++j0){
+          if(!jet_hlt_match(j0) || jet_pt[j0] < 32) continue;
+
+          for(int j1 = j0+1; j1 < njets; ++j1){
+            if(!jet_hlt_match(j1) || jet_pt[j1] < 32) continue;
+
+            for(int j2 = j1+1; j2 < njets; ++j2){
+              if(!jet_hlt_match(j2) || jet_pt[j2] < 32) continue;
+
+              for(int j3 = j2+1; j3 < njets; ++j3){
+                if(!jet_hlt_match(j3) || jet_pt[j3] < 32) continue;
+
+                for(int j4 = j3+1; j4 < njets; ++j4){
+                  if(!jet_hlt_match(j4) || jet_pt[j4] < 32) continue;
+
+                  for(int j5 = j4+1; j5 < njets; ++j5){
+                    if(!jet_hlt_match(j5) || jet_pt[j5] < 32) continue;
+
+                    if(nbtags({j0,j1,j2,j3,j4,j5}) >= 2) passed_kinematics = true;
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        return passed_kinematics;
+      }
+      case b_HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2 :
+      {
+        if(ht(40) < 380 || njets < 6) return false;
+
+        for(int j0 = 0; j0 < njets; ++j0){
+          if(!jet_hlt_match(j0) || jet_pt[j0] < 32) continue;
+
+          for(int j1 = j0+1; j1 < njets; ++j1){
+            if(!jet_hlt_match(j1) || jet_pt[j1] < 32) continue;
+
+            for(int j2 = j1+1; j2 < njets; ++j2){
+              if(!jet_hlt_match(j2) || jet_pt[j2] < 32) continue;
+
+              for(int j3 = j2+1; j3 < njets; ++j3){
+                if(!jet_hlt_match(j3) || jet_pt[j3] < 32) continue;
+
+                for(int j4 = j3+1; j4 < njets; ++j4){
+                  if(!jet_hlt_match(j4) || jet_pt[j4] < 32) continue;
+
+                  for(int j5 = j4+1; j5 < njets; ++j5){
+                    if(!jet_hlt_match(j5) || jet_pt[j5] < 32) continue;
+
+                    if(nbtags({j0,j1,j2,j3,j4,j5}) >= 2) passed_kinematics = true;
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        return passed_kinematics;
+      }
+      case b_HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5 :
+      {
+        if(ht(40) < 430 || njets < 6) return false;
+
+        for(int j0 = 0; j0 < njets; ++j0){
+          if(!jet_hlt_match(j0) || jet_pt[j0] < 40) continue;
+
+          for(int j1 = j0+1; j1 < njets; ++j1){
+            if(!jet_hlt_match(j1) || jet_pt[j1] < 40) continue;
+
+            for(int j2 = j1+1; j2 < njets; ++j2){
+              if(!jet_hlt_match(j2) || jet_pt[j2] < 40) continue;
+
+              for(int j3 = j2+1; j3 < njets; ++j3){
+                if(!jet_hlt_match(j3) || jet_pt[j3] < 40) continue;
+
+                for(int j4 = j3+1; j4 < njets; ++j4){
+                  if(!jet_hlt_match(j4) || jet_pt[j4] < 40) continue;
+
+                  for(int j5 = j4+1; j5 < njets; ++j5){
+                    if(!jet_hlt_match(j5) || jet_pt[j5] < 40) continue;
+
+                    if(nbtags({j0,j1,j2,j3,j4,j5}) >= 1) passed_kinematics = true;
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        return passed_kinematics;
+      }
+      case b_HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71 :
+      {
+        if(njets < 4) return false;
+
+        for(int j0 = 0; j0 < njets; ++j0){
+          if(!jet_hlt_match(j0) || jet_pt[j0] < 116) continue;
+
+          for(int j1 = j0+1; j1 < njets; ++j1){
+            if(!jet_hlt_match(j1) || jet_pt[j1] < 116) continue;
+
+            if(fabs(jet_eta[j0] - jet_eta[j1]) < 1.6){
+              if(nbtags({j0,j1}) >= 2) passed_kinematics = true;
+            }
+          }
+        }
+        return passed_kinematics;
+      }
+      case b_HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5 :
+      {
+        if(ht(30) < 330 || njets < 4) return false;
+
+        for(int j0 = 0; j0 < njets; ++j0){
+          if(!jet_hlt_match(j0) || jet_pt[j0] < 75) continue;
+
+          for(int j1 = j0+1; j1 < njets; ++j1){
+            if(!jet_hlt_match(j1) || jet_pt[j1] < 60) continue;
+
+            for(int j2 = j1+1; j2 < njets; ++j2){
+              if(!jet_hlt_match(j2) || jet_pt[j2] < 45) continue;
+
+              for(int j3 = j2+1; j3 < njets; ++j3){
+                if(!jet_hlt_match(j3) || jet_pt[j3] < 40) continue;
+
+                if(nbtags({j0,j1,j2,j3}) >= 3) passed_kinematics = true;
+              }
+            }
+          }
+        }
+        return passed_kinematics;
+      }
+      case b_HLT_PFHT400_FivePFJet_100_100_60_30_30_DoublePFBTagDeepCSV_4p5 :
+      {
+        if(ht(40) < 400 || njets < 5) return false;
+
+        for(int j0 = 0; j0 < njets; ++j0){
+          if(!jet_hlt_match(j0) || jet_pt[j0] < 100) continue;
+
+          for(int j1 = j0+1; j1 < njets; ++j1){
+            if(!jet_hlt_match(j1) || jet_pt[j1] < 100) continue;
+
+            for(int j2 = j1+1; j2 < njets; ++j2){
+              if(!jet_hlt_match(j2) || jet_pt[j2] < 60) continue;
+
+              for(int j3 = j2+1; j3 < njets; ++j3){
+                if(!jet_hlt_match(j3) || jet_pt[j3] < 30) continue;
+
+                for(int j4 = j3+1; j4 < njets; ++j4){
+                  if(!jet_hlt_match(j4) || jet_pt[j4] < 30) continue;
+
+                  if(nbtags({j0,j1,j2,j3,j4}) >= 2) passed_kinematics = true;
+                }
+              }
+            }
+          }
+        }
+        return passed_kinematics;
+      }
+      case b_HLT_PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94 :
+      {
+        if(ht(40) < 400 || njets < 6) return false;
+
+        for(int j0 = 0; j0 < njets; ++j0){
+          if(!jet_hlt_match(j0) || jet_pt[j0] < 32) continue;
+
+          for(int j1 = j0+1; j1 < njets; ++j1){
+            if(!jet_hlt_match(j1) || jet_pt[j1] < 32) continue;
+
+            for(int j2 = j1+1; j2 < njets; ++j2){
+              if(!jet_hlt_match(j2) || jet_pt[j2] < 32) continue;
+
+              for(int j3 = j2+1; j3 < njets; ++j3){
+                if(!jet_hlt_match(j3) || jet_pt[j3] < 32) continue;
+
+                for(int j4 = j3+1; j4 < njets; ++j4){
+                  if(!jet_hlt_match(j4) || jet_pt[j4] < 32) continue;
+
+                  for(int j5 = j4+1; j5 < njets; ++j5){
+                    if(!jet_hlt_match(j5) || jet_pt[j5] < 32) continue;
+
+                    if(nbtags({j0,j1,j2,j3,j4,j5}) >= 2) passed_kinematics = true;
+                  }
+                }
+              }
+            }
+          }
+        }
+        return passed_kinematics;
+      }
+      case b_HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59 :
+      {
+        if(ht(40) < 450 || njets < 6) return false;
+
+        for(int j0 = 0; j0 < njets; ++j0){
+          if(!jet_hlt_match(j0) || jet_pt[j0] < 36) continue;
+
+          for(int j1 = j0+1; j1 < njets; ++j1){
+            if(!jet_hlt_match(j1) || jet_pt[j1] < 36) continue;
+
+            for(int j2 = j1+1; j2 < njets; ++j2){
+              if(!jet_hlt_match(j2) || jet_pt[j2] < 36) continue;
+
+              for(int j3 = j2+1; j3 < njets; ++j3){
+                if(!jet_hlt_match(j3) || jet_pt[j3] < 36) continue;
+
+                for(int j4 = j3+1; j4 < njets; ++j4){
+                  if(!jet_hlt_match(j4) || jet_pt[j4] < 36) continue;
+
+                  for(int j5 = j4+1; j5 < njets; ++j5){
+                    if(!jet_hlt_match(j5) || jet_pt[j5] < 36) continue;
+
+                    if(nbtags({j0,j1,j2,j3,j4,j5}) >= 1) passed_kinematics = true;
+                  }
+                }
+              }
+            }
+          }
+        }
+        return passed_kinematics;
+      }
+      case b_HLT_HT430_DisplacedDijet40_DisplacedTrack :
+      {
+        if(ht(40) < 430 || njets < 4) return false;
+
+        for(int j0 = 0; j0 < njets; ++j0){
+          if(!displaced_jet_hlt_match(j0) || jet_pt[j0] < 40) continue;
+
+          for(int j1 = j0+1; j1 < njets; ++j1){
+            if(!displaced_jet_hlt_match(j1) || jet_pt[j1] < 40) continue;
+            passed_kinematics = true;
+          }
+        }
+        return passed_kinematics;
+      }
+      case b_HLT_HT650_DisplacedDijet60_Inclusive :
+      {
+        if(ht(40) < 650 || njets < 4) return false;
+
+        for(int j0 = 0; j0 < njets; ++j0){
+          if(!displaced_jet_hlt_match(j0) || jet_pt[j0] < 60) continue;
+
+          for(int j1 = j0+1; j1 < njets; ++j1){
+            if(!displaced_jet_hlt_match(j1) || jet_pt[j1] < 60) continue;
+            passed_kinematics = true;
+          }
+        }
+        return passed_kinematics;
+      }
+      default :
+      {
+        throw std::invalid_argument(std::string(hlt_paths[trig]) + " not implemented in satisfiesTrigger");
+      }
+    }
+
+    return false;
+  }
+
+  bool MiniNtuple::satisfiesHTOrBjetOrDisplacedDijetTrigger() const {
+    bool at_least_one_trigger_passed = false;
+    for(size_t trig : HTOrBjetOrDisplacedDijetTriggers){
+      if(satisfiesTrigger(trig)){
+        at_least_one_trigger_passed = true;
+        break;
+      }
+    }
+    return at_least_one_trigger_passed;
+  }
+
+  bool MiniNtuple::satisfiesHTOrBjetOrDisplacedDijetTriggerAndOffline() const {
+    bool at_least_one_trigger_passed = false;
+    for(size_t trig : HTOrBjetOrDisplacedDijetTriggers){
+      if(satisfiesTriggerAndOffline(trig)){
+        at_least_one_trigger_passed = true;
+        break;
+      }
+    }
+    return at_least_one_trigger_passed;
   }
 
   void write_to_tree(TTree* tree, MiniNtuple& nt) {
@@ -97,6 +451,14 @@ namespace mfv {
     tree->Branch("jet_id", nt.jet_id, "jet_id[njets]/b");
     tree->Branch("jet_bdisc_old", nt.jet_bdisc_old, "jet_bdisc_old[njets]/F");
     tree->Branch("jet_bdisc", nt.jet_bdisc, "jet_bdisc[njets]/F");
+    tree->Branch("jet_hlt_pt", nt.jet_hlt_pt, "jet_hlt_pt[njets]/F");
+    tree->Branch("jet_hlt_eta", nt.jet_hlt_eta, "jet_hlt_eta[njets]/F");
+    tree->Branch("jet_hlt_phi", nt.jet_hlt_phi, "jet_hlt_phi[njets]/F");
+    tree->Branch("jet_hlt_energy", nt.jet_hlt_energy, "jet_hlt_energy[njets]/F");
+    tree->Branch("displaced_jet_hlt_pt", nt.displaced_jet_hlt_pt, "displaced_jet_hlt_pt[njets]/F");
+    tree->Branch("displaced_jet_hlt_eta", nt.displaced_jet_hlt_eta, "displaced_jet_hlt_eta[njets]/F");
+    tree->Branch("displaced_jet_hlt_phi", nt.displaced_jet_hlt_phi, "displaced_jet_hlt_phi[njets]/F");
+    tree->Branch("displaced_jet_hlt_energy", nt.displaced_jet_hlt_energy, "displaced_jet_hlt_energy[njets]/F");
     tree->Branch("gen_x", nt.gen_x, "gen_x[2]/F");
     tree->Branch("gen_y", nt.gen_y, "gen_y[2]/F");
     tree->Branch("gen_z", nt.gen_z, "gen_z[2]/F");
@@ -185,6 +547,14 @@ namespace mfv {
     tree->SetBranchAddress("jet_id", nt.jet_id);
     tree->SetBranchAddress("jet_bdisc_old", nt.jet_bdisc_old);
     tree->SetBranchAddress("jet_bdisc", nt.jet_bdisc);
+    tree->SetBranchAddress("jet_hlt_pt", nt.jet_hlt_pt);
+    tree->SetBranchAddress("jet_hlt_eta", nt.jet_hlt_eta);
+    tree->SetBranchAddress("jet_hlt_phi", nt.jet_hlt_phi);
+    tree->SetBranchAddress("jet_hlt_energy", nt.jet_hlt_energy);
+    tree->SetBranchAddress("displaced_jet_hlt_pt", nt.displaced_jet_hlt_pt);
+    tree->SetBranchAddress("displaced_jet_hlt_eta", nt.displaced_jet_hlt_eta);
+    tree->SetBranchAddress("displaced_jet_hlt_phi", nt.displaced_jet_hlt_phi);
+    tree->SetBranchAddress("displaced_jet_hlt_energy", nt.displaced_jet_hlt_energy);
     tree->SetBranchAddress("gen_x", nt.gen_x);
     tree->SetBranchAddress("gen_y", nt.gen_y);
     tree->SetBranchAddress("gen_z", nt.gen_z);
@@ -278,6 +648,21 @@ namespace mfv {
   long long loop(const char* fn, const char* tree_path, bool (*fcn)(long long, long long, const mfv::MiniNtuple&)) {
     TFile* f = TFile::Open(fn);
     assert(f);
+
+    // Set the year for the proper btagging WPs
+    int year = 0;
+    TH1F* h_sums = (TH1F*) f->Get("mfvWeight/h_sums");
+    assert(h_sums);
+
+    for(int ibin = 1; ibin < h_sums->GetNbinsX()+1; ++ibin){
+      const std::string bin_label = h_sums->GetXaxis()->GetBinLabel(ibin);
+      if(bin_label == "yearcode_x_nfiles"){
+        const double yearcode_val = h_sums->GetBinContent(ibin);
+        year = jmt::yearcode(yearcode_val).year();
+      }
+    }
+    assert(year > 0);
+    jmt::Year::set(year);
 
     TTree* tree = (TTree*)f->Get(tree_path);
     assert(tree);
