@@ -141,7 +141,7 @@ def cs_analyze(d,
     result = cs_analyze_result()
     result.working_dir = d
     result.njobs = cs_njobs(d)
-    result.returns = [-1] * result.njobs # -1 means idle, -2 means still running
+    result.returns = [-1] * result.njobs # -1 means idle, -2 means still running, -3,-4,-5 mean killed of some sort
     result.cmsRun_returns = {}
     result.exceptions = {}
 
@@ -152,12 +152,15 @@ def cs_analyze(d,
 
         ret = -1
         for line in open(log_fn):
+            # later lines can override earlier lines, e.g. held = killed, then released -> idle
             if 'Image size of job updated' in line:
                 ret = -2
             elif 'Job was evicted' in line:
                 ret = -3
             elif 'Job executing on host' in line and as_killed(ret):
                 ret = -2
+            elif 'Job was released' in line and as_killed(ret):
+                ret = -1
             elif 'Job was aborted by the user' in line:
                 ret = -4
             elif 'Job was held' in line:
