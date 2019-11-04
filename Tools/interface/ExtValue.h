@@ -16,6 +16,7 @@ namespace jmt {
     void set(const int i, const double v) { i_ = i; v_ = v; }
     void set(             const double v) { set(-1, v); }
     operator double() const { return v_; }
+    double v() const { return v_; }
     int i() const { return i_; }
   };
 
