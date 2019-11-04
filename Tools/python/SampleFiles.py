@@ -190,28 +190,6 @@ _add_ds("nr_trackmoverv25mv1", {
 })
 
 
-_add_single_files('nr_k0ntuplev25mv1',
-                  '/store/user/wsun/croncopyeos/hadded/K0NtupleV25mv1', [
-        'qcdht0700_2017',
-        'qcdht1000_2017',
-        'qcdht1500_2017',
-        'qcdht2000_2017',
-        'qcdht0700_2018',
-        'qcdht1000_2018',
-        'qcdht1500_2018',
-        'qcdht2000_2018',
-        'JetHT2017B',
-        'JetHT2017C',
-        'JetHT2017D',
-        'JetHT2017E',
-        'JetHT2017F',
-        'JetHT2018A',
-        'JetHT2018B',
-        'JetHT2018C',
-        'JetHT2018D',
-        ])
-
-
 _add_ds("ntuplev27m", {
 'qcdht0700_2017': _fromnum0("/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/NtupleV27m_2017/190802_112506", 16),
 'qcdht1000_2017': _fromnum0("/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/NtupleV27m_2017/190802_112507", 31),
@@ -419,27 +397,14 @@ _add_ds("ntuplev27m_norefitdzcut", {
 })
 
 
-_add_single_files('nr_ntuplev27mmB3',
-                  '/store/user/tucker/hadded/NtupleV27mmB3', [
-        'qcdht0700_2017',
-        'qcdht1000_2017',
-        'qcdht1500_2017',
-        'qcdht2000_2017',
-        'qcdht0700_2018',
-        'qcdht1000_2018',
-        'qcdht1500_2018',
-        'qcdht2000_2018',
-        #'mfv_neu_tau010000um_M0800_2017',
-        'JetHT2017B',
-        'JetHT2017C',
-        'JetHT2017D',
-        'JetHT2017E',
-        'JetHT2017F',
-        'JetHT2018A',
-        'JetHT2018B',
-        'JetHT2018C',
-        'JetHT2018D',
-        ])
+_add_single_files('nr_trackmoverv27mv1', '/store/user/tucker/hadded/TrackMoverV27mv1', \
+                      ['qcdht%04i_%i' % (x,y) for y in (2017,2018) for x in (700,1000,1500,2000)] + \
+                      ['ttbarht%04i_%i' % (x,y) for y in (2017,2018) for x in (600,800,1200,2500)] + \
+                      ['JetHT%i%s' % (y,x) for y in (2017,2018) for x in ('BCDEF' if y == 2017 else 'ABCD')])
+
+_add_single_files('nr_k0ntuplev25mv1', '/store/user/wsun/croncopyeos/hadded/K0NtupleV25mv1', \
+                      ['qcdht%04i_%i' % (x,y) for y in (2017,2018) for x in (700,1000,1500,2000)] + \
+                      ['JetHT%i%s' % (y,x) for y in (2017,2018) for x in ('BCDEF' if y == 2017 else 'ABCD')])
 
 ################################################################################
 
