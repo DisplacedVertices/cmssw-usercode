@@ -289,15 +289,14 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
 ####
 
 def pick_samples(dataset, both_years=False,
-                 qcd=True, ttbar=True, all_signal=True, data=True, leptonic=False,
-                 extra_bjet_study=True,
+                 qcd=True, ttbar=True, all_signal=True, data=True, leptonic=False, bjet=False,
                  span_signal=False):
 
     if span_signal:
         print 'cannot use both span and all_signal, turning off the latter'
         all_signal = False
 
-    argnames = 'qcd', 'ttbar', 'all_signal', 'span_signal', 'data', 'leptonic', 'extra_bjet_study'
+    argnames = 'qcd', 'ttbar', 'all_signal', 'span_signal', 'data', 'leptonic', 'bjet'
     args = dict([(a,eval(a)) for a in argnames])
     if not set(args.values()).issubset([True, False, 'only']):
         raise ValueError('arg must be one of True, False, "only"')
