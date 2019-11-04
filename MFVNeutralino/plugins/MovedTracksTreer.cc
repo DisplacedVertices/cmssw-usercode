@@ -1,5 +1,6 @@
 #include "JMTucker/MFVNeutralino/interface/NtupleFiller.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
+#include "JMTucker/Tools/interface/ExtValue.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
 class MFVMovedTracksTreer : public edm::EDAnalyzer {
@@ -199,23 +200,29 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
 
     if (!for_mctruth)
       for (size_t i = 0, ie = v.ntracks(); i < ie; ++i) {
-        double dist2min = 0.1;
-        int which = -1;
-        for (size_t j = 0, je = nt.tracks().n(); j < je; ++j) {
-          const double dist2 = mag2(v.track_qpt(i) - nt.tracks().qpt(j),
-                                    v.track_eta[i] - nt.tracks().eta(j),
-                                    v.track_phi[i] - nt.tracks().phi(j));
-          if (dist2 < dist2min) {
-            dist2min = dist2;
-            which = j;
-          }
-        }
+        jmt::MinValue m(0.1);
+        for (size_t j = 0, je = nt.tracks().n(); j < je; ++j)
+          m(j, mag2(v.track_qpt(i) - nt.tracks().qpt(j),
+                    v.track_eta[i] - nt.tracks().eta(j),
+                    v.track_phi[i] - nt.tracks().phi(j)));
 
-        assert(which != -1);
-        assert(nt.tracks().which_sv(which) == 255);
+        assert(m.i() != -1);
+        if (nt.tracks().which_sv(m.i()) != 255) {
+          const int w = nt.tracks().which_sv(m.i());
+          cms::Exception ce("BadAssumption");
+          ce << "vertex w " << v.ntracks() << " tracks @ <" << v.x << ", " << v.y << ", " << v.z
+             << ">: track <" << v.track_qpt(i) << ", " << v.track_eta[i] << ", " << v.track_phi[i] << "> with mindist " << m.v()
+             << " to general track " << m.i() << "/" << nt.tracks().n() << ": <" << nt.tracks().qpt(m.i()) << ", " << nt.tracks().eta(m.i()) << ", " << nt.tracks().phi(m.i())
+             << "> but already found in other vertex #" << w;
+          if (nt.tracks().which_sv(m.i()) < nt.vertices().n())
+            ce << " with " << nt.vertices().ntracks(w) << " tracks @ <" << nt.vertices().x(w) << ", " << nt.vertices().y(w) << ", " << nt.vertices().z(w) << ">\n";
+          else
+            ce << "--this isn't a valid vertex number (max " << nt.vertices().n() << ")\n";
+          throw ce;
+        }
         const size_t iv = nt.vertices().n() - 1;
         assert(iv < 255);
-        nt.tracks().set_which_sv(which, iv);
+        nt.tracks().set_which_sv(m.i(), iv);
       }
   }
 
