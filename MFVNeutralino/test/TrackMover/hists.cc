@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
   jmt::NtupleReader<mfv::MovedTracksNtuple> nr;
 
   namespace po = boost::program_options;
-  nr.init_options("mfvMovedTree20/t")
+  nr.init_options("mfvMovedTree20/t", "TrackMoverHistsV27m", "nr_trackmoverv27mv1")
     ("tau",           po::value<int>   (&itau)          ->default_value(10000),   "tau in microns, for reweighting")
     ("btagsf",        po::value<bool>  (&btagsf_weights)->default_value(false),   "whether to use b-tag SF weights")
     ("ntks-weights",  po::value<bool>  (&ntks_weights)  ->default_value(false),   "whether to use ntracks weights")
