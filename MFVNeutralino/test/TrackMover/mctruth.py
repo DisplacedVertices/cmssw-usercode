@@ -41,5 +41,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     cs = CondorSubmitter('TrackMoverMCTruth' + version,
                          ex = year,
                          dataset = dataset,
+                         stageout_files = 'all'
                          )
     cs.submit_all(samples)
