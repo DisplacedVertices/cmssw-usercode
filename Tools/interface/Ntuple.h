@@ -19,6 +19,9 @@ namespace jmt {
     const char* pfx() const { return pfx_; }
     void set_pfx(const char* p) { pfx_ = p; }
 
+    virtual int n() const { return 0; } // to be implemented in classes that are indexed, e.g. tracks, vertices, etc.
+    std::vector<int> iota() const { std::vector<int> i(n()); std::iota(i.begin(), i.end(), 0); return i; }
+
   protected:
     typedef unsigned char uchar;
     typedef unsigned short ushort;
@@ -203,7 +206,7 @@ namespace jmt {
       misc_.push_back(misc);
     }
 
-    int n() const { return p_size(x_, p_x_); }
+    virtual int n() const { return p_size(x_, p_x_); }
     float x      (int i) const { return p_get(i, x_,       p_x_       ); }
     float y      (int i) const { return p_get(i, y_,       p_y_       ); }
     float z      (int i) const { return p_get(i, z_,       p_z_       ); }
@@ -313,7 +316,7 @@ namespace jmt {
       misc_.push_back(misc);
     }
 
-    int n() const { return p_size(qpt_, p_qpt_); }
+    virtual int n() const { return p_size(qpt_, p_qpt_); }
     float    qpt      (int i) const { return p_get(i, qpt_,       p_qpt_       ); }
     float    eta      (int i) const { return p_get(i, eta_,       p_eta_       ); }
     float    phi      (int i) const { return p_get(i, phi_,       p_phi_       ); }
@@ -396,6 +399,8 @@ namespace jmt {
     TLorentzVector p4(int i, double m=0) const { return p4_m(pt(i), eta(i), phi(i), m); }
     bool pass_sel(int i) const { return pt(i) > 1 && min_r(i) <= 1 && npxlayers(i) >= 2 && nstlayers(i) >= 6; }
     template <typename BS> bool pass_seed(int i, const BS& bs, float ns=4) const { return pass_sel(i) && nsigmadxybs(i,bs) > ns; }
+    int nsel() const { int c = 0; for (int i = 0, ie = n(); i < ie; ++i) if (pass_sel(i)) ++c; return c; }
+    template <typename BS> int nseed(const BS& bs) const { int c = 0; for (int i = 0, ie = n(); i < ie; ++i) if (pass_seed(i, bs)) ++c; return c; }
 
     std::vector<int> tks_for_jet(uchar i) const { return tks_for_x_(0, i); }
     std::vector<int> tks_for_pv (uchar i) const { return tks_for_x_(1, i); }
@@ -461,7 +466,7 @@ namespace jmt {
       misc_.push_back(misc);
     }
 
-    int n() const { return p_size(pt_, p_pt_); }
+    virtual int n() const { return p_size(pt_, p_pt_); }
     float pt        (int i) const { return p_get(i, pt_,        p_pt_);        }
     float eta       (int i) const { return p_get(i, eta_,       p_eta_);       }
     float phi       (int i) const { return p_get(i, phi_,       p_phi_);       }

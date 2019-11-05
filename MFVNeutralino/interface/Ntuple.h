@@ -43,7 +43,7 @@ namespace mfv {
       decay_z_.push_back(decay_z);
     }
 
-    int n() const { return p_size(id_, p_id_); }
+    virtual int n() const { return p_size(id_, p_id_); }
     int   id      (int i) const { return p_get(i, id_,       p_id_      ); }
     float pt      (int i) const { return p_get(i, pt_,       p_pt_      ); }
     float eta     (int i) const { return p_get(i, eta_,      p_eta_     ); }
