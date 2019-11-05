@@ -573,14 +573,15 @@ for x in data_samples_2017 + qcd_samples_2017 + data_samples_2018 + qcd_samples_
     x.add_dataset("nr_trackingtreerv23mv3")
     x.add_dataset("nr_k0ntuplev25mv1")
 
-for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + bjet_samples_2017 + all_signal_samples_2017 + \
-         data_samples_2018 + qcd_samples_2018 + ttbar_samples_2018 + bjet_samples_2018 + all_signal_samples_2018:
+for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + all_signal_samples_2017 + \
+         data_samples_2018 + qcd_samples_2018 + ttbar_samples_2018 + all_signal_samples_2018:
     x.add_dataset("ntuplev27m")
     if not x.is_signal:
         x.add_dataset("ntuplev27m_ntkseeds")
         x.add_dataset("ntuplev27m_norefitdzcut")
         x.add_dataset("nr_trackmoverv25mv1")
         x.add_dataset("nr_trackmoverv27mv1")
+        x.add_dataset("nr_trackmoverv27mv1_norefitdzcut")
 mfv_neu_tau010000um_M0800_2017.add_dataset('ntuplev27m_norefitdzcut')
 
 ########

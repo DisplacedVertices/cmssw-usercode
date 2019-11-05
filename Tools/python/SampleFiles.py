@@ -402,6 +402,11 @@ _add_single_files('nr_trackmoverv27mv1', '/store/user/tucker/hadded/TrackMoverV2
                       ['ttbarht%04i_%i' % (x,y) for y in (2017,2018) for x in (600,800,1200,2500)] + \
                       ['JetHT%i%s' % (y,x) for y in (2017,2018) for x in ('BCDEF' if y == 2017 else 'ABCD')])
 
+_add_single_files('nr_trackmoverv27mv1_norefitdzcut', '/store/user/tucker/hadded/TrackMoverV27mv1_NoRefitDzCut', \
+                      ['qcdht%04i_%i' % (x,y) for y in (2017,2018) for x in (700,1000,1500,2000)] + \
+                      ['ttbarht%04i_%i' % (x,y) for y in (2017,2018) for x in (600,800,1200,2500)] + \
+                      ['JetHT%i%s' % (y,x) for y in (2017,2018) for x in ('BCDEF' if y == 2017 else 'ABCD')])
+
 _add_single_files('nr_k0ntuplev25mv1', '/store/user/wsun/croncopyeos/hadded/K0NtupleV25mv1', \
                       ['qcdht%04i_%i' % (x,y) for y in (2017,2018) for x in (700,1000,1500,2000)] + \
                       ['JetHT%i%s' % (y,x) for y in (2017,2018) for x in ('BCDEF' if y == 2017 else 'ABCD')])
