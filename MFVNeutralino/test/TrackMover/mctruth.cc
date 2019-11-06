@@ -14,6 +14,12 @@ int main(int argc, char** argv) {
 
   if (!nr.init()) return 1;
   auto& nt = nr.nt();
+  auto& bs = nt.bs();
+  auto& pvs = nt.pvs();
+  auto& jets = nt.jets();
+  //auto& tks = nt.tracks();
+  auto& gen = nt.gentruth();
+  auto& vs = nt.vertices();
 
   ////
 
@@ -27,7 +33,6 @@ int main(int argc, char** argv) {
   };
 
   enum { k_decay_x, k_decay_y, k_decay_z, k_decay_xy, k_lspdist2, k_lspdist3, k_lspdistz, k_movedist2, k_movedist3, k_lspeta,k_lsppt, k_npv, k_pvz, k_pvrho, k_pvntracks, k_pvscore, k_ht, k_jet_asymm, k_jetpt0_asymm, k_jetpt1_asymm, k_jeteta0_asymm, k_jeteta1_asymm, k_jetdr_asymm, k_jetdravg, k_angle0, k_angle1, k_dphi_j0_mv, k_dphi_j1_mv, k_deta_j0_mv, k_deta_j1_mv, k_dphi_q0_mv, k_dphi_q1_mv, k_jetdphimax, k_jetdetamax, k_qrkdphimax, k_jetdphi_mveta, k_pt0, k_pt1, k_ntks_j0, k_ntks_j1, k_nmovedtracks, k_jetmovea3d01, k_jeteta01, k_jetpt01, k_pt_angle0, k_pt_angle1, k_eta_angle0, k_eta_angle1};
-
 
   for (numdens& nd : nds) {
     nd.book(k_decay_x,  "decay_x" , ";SV Decay X-pos [cm]; arb. units", 100, -4, 4);
@@ -98,18 +103,21 @@ int main(int argc, char** argv) {
   std::map<std::string, double> nums;
 
   auto fcn = [&]() {
-    double w = nr.weight();
-    if (!nt.gentruth().valid() || nt.jets().ht() < 1200 || nt.jets().nminpt() < 4 || nt.gentruth().lspdist3() < min_lspdist3)
-      return std::make_pair(true, w);
+    const double w = nr.weight();
 
-    auto F1 = [&w](TH1* h, double v)            { h                    ->Fill(v,     w); };
-    auto F2 = [&w](TH1* h, double v, double v2) { dynamic_cast<TH2*>(h)->Fill(v, v2, w); };
+    // First part of the preselection: our offline jet requirements
+    // plus require the lsps to be far enough apart that they don't
+    // interfere with each other in reconstruction
+    if (!gen.valid() || jets.ht() < 1200 || jets.nminpt() < 4 || gen.lspdist3() < min_lspdist3)
+      NR_loop_cont(w);
 
-    const size_t nvtx = nt.vertices().n();
-    const double lspdist2 = nt.gentruth().lspdist2();
-    const double lspdist3 = nt.gentruth().lspdist3();
-    const double lspdistz = nt.gentruth().lspdistz();
+    for (numdens& nd : nds)
+      nd.setw(w);
 
+    const size_t nvtx = vs.n();
+    const double lspdist2 = gen.lspdist2();
+    const double lspdist3 = gen.lspdist3();
+    const double lspdistz = gen.lspdistz();
 
     // Instantiate some jet & quark variables to be filled later
     float   jet_aj = -9.9, dr = -9.9, jet_pt_0 = -9.9, jet_pt_1 = -9.9;
@@ -121,147 +129,125 @@ int main(int argc, char** argv) {
     double  jet_dphi_max = 0.0;
     double  jet_deta_max = 0.0;
     double  qrk_dphi_max = 0.0;
-    int     jet_ntks_0 = -10, jet_ntks_1 = -10;;
+    int     jet_ntks_0 = -10, jet_ntks_1 = -10;
 
     // Loop over each LSP
     for (int ilsp = 0; ilsp < 2; ++ilsp) {
-      const TVector3 lspdecay = nt.gentruth().decay(ilsp, nt.bs());  // JMTBAD BS BS
+      const TVector3 lspdecay = gen.decay(ilsp, bs);  // JMTBAD BS BS
       const double movedist2 = lspdecay.Perp();
       const double movedist3 = lspdecay.Mag();
+      const TLorentzVector lsp_p4 = gen.p4(ilsp);
 
-      // Begin dijet-only part
+      // Second part of preselection: only look at move vectors
+      // ~inside the beampipe // JMTBAD the 2.0 cm requirement isn't
+      // exact
+      if (movedist2 < 0.01 || movedist2 > 2.0)
+        continue;
 
       if (dijet) {
-          // Match decay daughters to the closest (by dR) jet
-          std::vector<int> closest_jets;
-          std::vector<int> quark_assoc;
-          for (int i=0, iend = nt.gentruth().n(); i < iend; i++) {
-              if (nt.gentruth().id(ilsp) == 1000006 && nt.gentruth().id(i) != -1) continue;
-              if (nt.gentruth().id(ilsp) == -1000006 && nt.gentruth().id(i) != 1) continue;
-              int i_closest_jet = -1;
-              double closest_jet_dr = 0.4;
-              for (int j=0, jend = nt.jets().n(); j < jend; j++) {
-                  if (nt.gentruth().p4(i).DeltaR(nt.jets().p4(j)) < closest_jet_dr) {
-                      closest_jet_dr = nt.gentruth().p4(i).DeltaR(nt.jets().p4(j));  //dR between dbar and jet
-                      i_closest_jet = j;
-                  }
-              }
-            closest_jets.push_back(i_closest_jet);
-            quark_assoc.push_back(i);
-          }
-    
-          // If, for some reason, a daughter doesn't match to a jet, continue. Also, if both daughters match
-          // to the same jet, continue.
-          if (closest_jets[0] == -1 || closest_jets[1] == -1 || closest_jets[0] == closest_jets[1]) continue;
-          
-          // Calculate some relevant jet variables
-          jet0_lsp_angle = nt.jets().p4(closest_jets[0]).Angle(nt.gentruth().p4(ilsp).Vect());
-          jet1_lsp_angle = nt.jets().p4(closest_jets[1]).Angle(nt.gentruth().p4(ilsp).Vect());
-          const TLorentzVector jet_tot_p4 = nt.jets().p4(closest_jets[0])+nt.jets().p4(closest_jets[1]);
+        assert(abs(gen.id(ilsp)) == 1000006); // stop pair production
 
-          // Make sure that jet0 corresponds to the higher-momentum daughter
-          if (nt.gentruth().p4(quark_assoc[0]).Pt() < nt.gentruth().p4(quark_assoc[1]).Pt()) {
-            int hold_jetIndex = closest_jets[0];
-            int hold_qrkIndex = quark_assoc[0];
-            double hold_angle = jet0_lsp_angle;
-    
-            closest_jets[0] = closest_jets[1];
-            closest_jets[1] = hold_jetIndex;
-    
-            quark_assoc[0] = quark_assoc[1];
-            quark_assoc[1] = hold_qrkIndex;
-    
-            jet0_lsp_angle = jet1_lsp_angle;
-            jet1_lsp_angle = hold_angle;
-          }
-    
+        // Match decay daughters to the closest (by dR) reconstructed jet
+        std::vector<int> closest_jets(2,-1), quark_assoc(2,-1);
+        int s = 2+ilsp*2, swapem = gen.pt(s) < gen.pt(s+1); // toward making the jet assoc'd to the higher (lower) pT quark be "jet0" ("jet1")
+        for (int i = 0; i < 2; ++i) {
+          const int iq = s + (swapem ? !i : i);
+          assert(gen.id(iq) == -1000006 / gen.id(ilsp)); // stop -> dbar dbar + c.c.
 
-          // Use quarks as gen-level proxies for jets:
-          const TLorentzVector quark_p4_0 = nt.gentruth().p4(quark_assoc[0]);
-          const TLorentzVector quark_p4_1 = nt.gentruth().p4(quark_assoc[1]);
+          jmt::MinValue m(0.4);
+          for (int j = 0, je = jets.n(); j < je; ++j)
+            m(j, gen.p4(iq).DeltaR(jets.p4(j)));
+  
+          closest_jets[i] = m.i();
+          quark_assoc[i] = iq;
+        }
 
-          // Short naming scheme for jet 4-momenta:
-          const TLorentzVector jet_p4_0   = nt.jets().p4(closest_jets[0]);
-          const TLorentzVector jet_p4_1   = nt.jets().p4(closest_jets[1]);
-
-          jet_pt_0  = jet_p4_0.Pt();
-          jet_pt_1  = jet_p4_1.Pt();
-          dr        = jet_p4_0.DeltaR(jet_p4_1);
-          jet_aj    = (jet_pt_0 - jet_pt_1) / (jet_pt_0 + jet_pt_1);
-          jet_eta_0 = nt.jets().p4(closest_jets[0]).Eta();
-          jet_eta_1 = nt.jets().p4(closest_jets[1]).Eta();
-          jet_dphi_max = jet_p4_0.DeltaPhi(jet_p4_1);
-          jet_deta_max = jet_eta_0 - jet_eta_1;
-          qrk_dphi_max = quark_p4_0.DeltaPhi(quark_p4_1);
-          jet_ntks_0 = (int)nt.jets().ntracks(closest_jets[0]);
-          jet_ntks_1 = (int)nt.jets().ntracks(closest_jets[1]);
-          jet_mv_dphi_0  = nt.gentruth().p4(ilsp).DeltaPhi(jet_p4_0);
-          jet_mv_dphi_1  = nt.gentruth().p4(ilsp).DeltaPhi(jet_p4_1);
-          qrk_mv_dphi_0  = nt.gentruth().p4(ilsp).DeltaPhi(quark_p4_0);
-          qrk_mv_dphi_1  = nt.gentruth().p4(ilsp).DeltaPhi(quark_p4_1);
-          jet_mv_deta_0  = abs(jet_eta_0 - nt.gentruth().p4(ilsp).Eta());
-          jet_mv_deta_1  = abs(jet_eta_1 - nt.gentruth().p4(ilsp).Eta());
-
-      }  // End dijet-only part
-
-      if  (movedist2 > 2.0  ||  
-           movedist2 < 0.0100 )
+        // Last hidden part of the preselection: skip events where
+        // daughter doesn't match to a jet or both match to the same
+        // jet // JMTBAD how many are we skipping?
+        if (closest_jets[0] == -1 || closest_jets[1] == -1 || closest_jets[0] == closest_jets[1])
           continue;
 
-      for (numdens& nd : nds) {
-        F1(nd(k_decay_x)  .den, lspdecay.x());
-        F1(nd(k_decay_y)  .den, lspdecay.y());
-        F1(nd(k_decay_z)  .den, lspdecay.z());
-        F2(nd(k_decay_xy) .den, lspdecay.x(), lspdecay.y());
-        F1(nd(k_lspdist2) .den, lspdist2);
-        F1(nd(k_lspdist3) .den, lspdist3);
-        F1(nd(k_lspdistz) .den, lspdistz);
-        F1(nd(k_movedist2).den, movedist2);
-        F1(nd(k_movedist3).den, movedist3);
-        F1(nd(k_lspeta)   .den, nt.gentruth().p4(ilsp).Eta());
-        F1(nd(k_lsppt)    .den, nt.gentruth().p4(ilsp).Pt());
-        F1(nd(k_npv)      .den, nt.pvs().n());
-        F1(nd(k_pvz)      .den, nt.pvs().z(0));
-        F1(nd(k_pvrho)    .den, nt.pvs().rho(0));
-        F1(nd(k_pvntracks).den, nt.pvs().ntracks(0));
-        F1(nd(k_pvscore)  .den, nt.pvs().score(0));
-        F1(nd(k_ht)       .den, nt.jets().ht());
-        F1(nd(k_jet_asymm).den, jet_aj);
+        const TLorentzVector jet_p4_0   = jets.p4(closest_jets[0]);
+        const TLorentzVector jet_p4_1   = jets.p4(closest_jets[1]);
+        const TLorentzVector quark_p4_0 = gen.p4(quark_assoc[0]);
+        const TLorentzVector quark_p4_1 = gen.p4(quark_assoc[1]);
+        const TLorentzVector jet_tot_p4 = jet_p4_0 + jet_p4_1;
+          
+        jet0_lsp_angle = jet_p4_0.Angle(lsp_p4.Vect());
+        jet1_lsp_angle = jet_p4_1.Angle(lsp_p4.Vect());
 
-        F2(nd(k_jetpt0_asymm)     .den, jet_pt_0, jet_aj);
-        F2(nd(k_jetpt1_asymm)     .den, jet_pt_1, jet_aj);
-        F2(nd(k_jeteta0_asymm)    .den, jet_eta_0, jet_aj);
-        F2(nd(k_jeteta1_asymm)    .den, jet_eta_1, jet_aj);
-        F2(nd(k_jetdr_asymm)      .den, dr, jet_aj);
-        F1(nd(k_angle0)           .den, jet0_lsp_angle);
-        F1(nd(k_angle1)           .den, jet1_lsp_angle);
-        F1(nd(k_jetdravg)         .den, dr);
-        F1(nd(k_dphi_j0_mv)       .den, abs(jet_mv_dphi_0));
-        F1(nd(k_dphi_j1_mv)       .den, abs(jet_mv_dphi_1));
-        F1(nd(k_deta_j0_mv)       .den, jet_mv_deta_0);
-        F1(nd(k_deta_j1_mv)       .den, jet_mv_deta_1);
-        F1(nd(k_dphi_q0_mv)       .den, abs(qrk_mv_dphi_0));
-        F1(nd(k_dphi_q1_mv)       .den, abs(qrk_mv_dphi_1));
-        F1(nd(k_jetdphimax)       .den, jet_dphi_max);
-        F1(nd(k_jetdetamax)       .den, jet_deta_max);
-        F1(nd(k_qrkdphimax)       .den, abs(qrk_dphi_max));
-        F2(nd(k_jetdphi_mveta)    .den, abs(jet_dphi_max), abs(nt.gentruth().p4(ilsp).Eta()));
-        F1(nd(k_pt0)              .den, jet_pt_0);
-        F1(nd(k_pt1)              .den, jet_pt_1);
-        F1(nd(k_ntks_j0)          .den, jet_ntks_0);
-        F1(nd(k_ntks_j1)          .den, jet_ntks_1);
-        F1(nd(k_nmovedtracks)     .den, jet_ntks_0 + jet_ntks_1);
-        F2(nd(k_jetmovea3d01)     .den, jet0_lsp_angle, jet1_lsp_angle);
-        F2(nd(k_jeteta01)         .den,  jet_eta_0, jet_eta_1);
-        F2(nd(k_jetpt01)          .den, jet_pt_0, jet_pt_1);
-        F2(nd(k_pt_angle0)        .den, jet_pt_0, jet0_lsp_angle);
-        F2(nd(k_pt_angle1)        .den, jet_pt_1, jet1_lsp_angle);
-        F2(nd(k_eta_angle0)       .den, nt.gentruth().p4(ilsp).Eta(), jet0_lsp_angle);
-        F2(nd(k_eta_angle1)       .den, nt.gentruth().p4(ilsp).Eta(), jet1_lsp_angle);
-
+        jet_pt_0  = jet_p4_0.Pt();
+        jet_pt_1  = jet_p4_1.Pt();
+        dr        = jet_p4_0.DeltaR(jet_p4_1);
+        jet_aj    = (jet_pt_0 - jet_pt_1) / (jet_pt_0 + jet_pt_1);
+        jet_eta_0 = jets.eta(closest_jets[0]);
+        jet_eta_1 = jets.eta(closest_jets[1]);
+        jet_dphi_max = jet_p4_0.DeltaPhi(jet_p4_1);
+        jet_deta_max = jet_eta_0 - jet_eta_1; // JMTBAD fabs?
+        qrk_dphi_max = quark_p4_0.DeltaPhi(quark_p4_1);
+        jet_ntks_0 = jets.ntracks(closest_jets[0]);
+        jet_ntks_1 = jets.ntracks(closest_jets[1]);
+        jet_mv_dphi_0  = lsp_p4.DeltaPhi(jet_p4_0);
+        jet_mv_dphi_1  = lsp_p4.DeltaPhi(jet_p4_1);
+        qrk_mv_dphi_0  = lsp_p4.DeltaPhi(quark_p4_0);
+        qrk_mv_dphi_1  = lsp_p4.DeltaPhi(quark_p4_1);
+        jet_mv_deta_0  = fabs(jet_eta_0 - lsp_p4.Eta());
+        jet_mv_deta_1  = fabs(jet_eta_1 - lsp_p4.Eta());
       }
 
       den += w;
+
+      for (numdens& nd : nds) {
+        nd.den(k_decay_x, lspdecay.x());
+        nd.den(k_decay_y, lspdecay.y());
+        nd.den(k_decay_z, lspdecay.z());
+        nd.den(k_decay_xy, lspdecay.x(), lspdecay.y());
+        nd.den(k_lspdist2, lspdist2);
+        nd.den(k_lspdist3, lspdist3);
+        nd.den(k_lspdistz, lspdistz);
+        nd.den(k_movedist2, movedist2);
+        nd.den(k_movedist3, movedist3);
+        nd.den(k_lspeta, lsp_p4.Eta());
+        nd.den(k_lsppt, lsp_p4.Pt());
+        nd.den(k_npv, pvs.n());
+        nd.den(k_pvz, pvs.z(0));
+        nd.den(k_pvrho, pvs.rho(0));
+        nd.den(k_pvntracks, pvs.ntracks(0));
+        nd.den(k_pvscore, pvs.score(0));
+        nd.den(k_ht, jets.ht());
+        nd.den(k_jet_asymm, jet_aj);
+        nd.den(k_jetpt0_asymm, jet_pt_0, jet_aj);
+        nd.den(k_jetpt1_asymm, jet_pt_1, jet_aj);
+        nd.den(k_jeteta0_asymm, jet_eta_0, jet_aj);
+        nd.den(k_jeteta1_asymm, jet_eta_1, jet_aj);
+        nd.den(k_jetdr_asymm, dr, jet_aj);
+        nd.den(k_angle0, jet0_lsp_angle);
+        nd.den(k_angle1, jet1_lsp_angle);
+        nd.den(k_jetdravg, dr);
+        nd.den(k_dphi_j0_mv, fabs(jet_mv_dphi_0));
+        nd.den(k_dphi_j1_mv, fabs(jet_mv_dphi_1));
+        nd.den(k_deta_j0_mv, jet_mv_deta_0);
+        nd.den(k_deta_j1_mv, jet_mv_deta_1);
+        nd.den(k_dphi_q0_mv, fabs(qrk_mv_dphi_0));
+        nd.den(k_dphi_q1_mv, fabs(qrk_mv_dphi_1));
+        nd.den(k_jetdphimax, jet_dphi_max);
+        nd.den(k_jetdetamax, jet_deta_max);
+        nd.den(k_qrkdphimax, fabs(qrk_dphi_max));
+        nd.den(k_jetdphi_mveta, fabs(jet_dphi_max), fabs(lsp_p4.Eta()));
+        nd.den(k_pt0, jet_pt_0);
+        nd.den(k_pt1, jet_pt_1);
+        nd.den(k_ntks_j0, jet_ntks_0);
+        nd.den(k_ntks_j1, jet_ntks_1);
+        nd.den(k_nmovedtracks, jet_ntks_0 + jet_ntks_1);
+        nd.den(k_jetmovea3d01, jet0_lsp_angle, jet1_lsp_angle);
+        nd.den(k_jeteta01,  jet_eta_0, jet_eta_1);
+        nd.den(k_jetpt01, jet_pt_0, jet_pt_1);
+        nd.den(k_pt_angle0, jet_pt_0, jet0_lsp_angle);
+        nd.den(k_pt_angle1, jet_pt_1, jet1_lsp_angle);
+        nd.den(k_eta_angle0, lsp_p4.Eta(), jet0_lsp_angle);
+        nd.den(k_eta_angle1, lsp_p4.Eta(), jet1_lsp_angle);
+      }
 
       int n_pass_nocuts = 0;
       int n_pass_ntracks = 0;
@@ -271,13 +257,12 @@ int main(int argc, char** argv) {
       auto set_it_if_first = [](int& to_set, int to_set_to) { if (to_set == -1) to_set = to_set_to; };
 
       for (size_t i = 0; i < nvtx; ++i) {
-
-        const double dist2move = (lspdecay - nt.vertices().pos(i)).Mag();
+        const double dist2move = (lspdecay - vs.pos(i)).Mag();
         if (dist2move > 0.0084)
           continue;
 
-        const bool pass_ntracks = nt.vertices().ntracks(i) >= 5;
-        const bool pass_bs2derr = nt.vertices().bs2derr(i) < 0.0025;
+        const bool pass_ntracks = vs.ntracks(i) >= 5;
+        const bool pass_bs2derr = vs.bs2derr(i) < 0.0025; // JMTBAD rescale_bs2derr
 
         if (1)                             { set_it_if_first(first_vtx_to_pass[0], i); ++n_pass_nocuts;  }
         if (pass_ntracks)                  { set_it_if_first(first_vtx_to_pass[1], i); ++n_pass_ntracks; }
@@ -287,10 +272,10 @@ int main(int argc, char** argv) {
       for (int in = 0; in < num_numdens; ++in) {
         const int iv = first_vtx_to_pass[in];
         if (iv != -1) {
-          h_vtxntracks   [in]->Fill(nt.vertices().ntracks(iv));
-          h_vtxbs2derr   [in]->Fill(nt.vertices().bs2derr(iv));
-          //h_vtxtkonlymass[in]->Fill(nt.vertices().tkonlymass(iv));
-          h_vtxs_mass    [in]->Fill(nt.vertices().mass(iv));
+          h_vtxntracks   [in]->Fill(vs.ntracks(iv));
+          h_vtxbs2derr   [in]->Fill(vs.bs2derr(iv));
+          //h_vtxtkonlymass[in]->Fill(vs.tkonlymass(iv));
+          h_vtxs_mass    [in]->Fill(vs.mass(iv));
         }
       }
 
@@ -309,60 +294,59 @@ int main(int argc, char** argv) {
           continue;
 
         numdens& nd = nds[in];
-        F1(nd(k_decay_x)  .num, lspdecay.x());
-        F1(nd(k_decay_y)  .num, lspdecay.y());
-        F1(nd(k_decay_z)  .num, lspdecay.z());
-        F2(nd(k_decay_xy) .num, lspdecay.x(), lspdecay.y());
-        F1(nd(k_lspdist2) .num, lspdist2);
-        F1(nd(k_lspdist3) .num, lspdist3);
-        F1(nd(k_lspdistz) .num, lspdistz);
-        F1(nd(k_movedist2).num, movedist2);
-        F1(nd(k_movedist3).num, movedist3);
-        F1(nd(k_lspeta)   .num, nt.gentruth().p4(ilsp).Eta());
-        F1(nd(k_lsppt)    .num, nt.gentruth().p4(ilsp).Pt());
-        F1(nd(k_npv)      .num, nt.pvs().n());
-        F1(nd(k_pvz)      .num, nt.pvs().z(0));
-        F1(nd(k_pvrho)    .num, nt.pvs().rho(0));
-        F1(nd(k_pvntracks).num, nt.pvs().ntracks(0));
-        F1(nd(k_pvscore)  .num, nt.pvs().score(0));
-        F1(nd(k_ht)       .num, nt.jets().ht());
-        F1(nd(k_jet_asymm).num, jet_aj);
+        nd.num(k_decay_x, lspdecay.x());
+        nd.num(k_decay_y, lspdecay.y());
+        nd.num(k_decay_z, lspdecay.z());
+        nd.num(k_decay_xy, lspdecay.x(), lspdecay.y());
+        nd.num(k_lspdist2, lspdist2);
+        nd.num(k_lspdist3, lspdist3);
+        nd.num(k_lspdistz, lspdistz);
+        nd.num(k_movedist2, movedist2);
+        nd.num(k_movedist3, movedist3);
+        nd.num(k_lspeta, lsp_p4.Eta());
+        nd.num(k_lsppt, lsp_p4.Pt());
+        nd.num(k_npv, pvs.n());
+        nd.num(k_pvz, pvs.z(0));
+        nd.num(k_pvrho, pvs.rho(0));
+        nd.num(k_pvntracks, pvs.ntracks(0));
+        nd.num(k_pvscore, pvs.score(0));
+        nd.num(k_ht, jets.ht());
+        nd.num(k_jet_asymm, jet_aj);
 
-        F2(nd(k_jetpt0_asymm)     .num, jet_pt_0, jet_aj);
-        F2(nd(k_jetpt1_asymm)     .num, jet_pt_1, jet_aj);
-        F2(nd(k_jeteta0_asymm)    .num, jet_eta_0, jet_aj);
-        F2(nd(k_jeteta1_asymm)    .num, jet_eta_1, jet_aj);
-        F2(nd(k_jetdr_asymm)      .num, dr, jet_aj);
-        F1(nd(k_jetdravg)         .num, dr);
-        F1(nd(k_angle0)           .num, jet0_lsp_angle);
-        F1(nd(k_angle1)           .num, jet1_lsp_angle);
-        F1(nd(k_dphi_j0_mv)       .num, abs(jet_mv_dphi_0));
-        F1(nd(k_dphi_j1_mv)       .num, abs(jet_mv_dphi_1));
-        F1(nd(k_deta_j0_mv)       .num, jet_mv_deta_0);
-        F1(nd(k_deta_j1_mv)       .num, jet_mv_deta_1);
-        F1(nd(k_dphi_q0_mv)       .num, abs(qrk_mv_dphi_0));
-        F1(nd(k_dphi_q1_mv)       .num, abs(qrk_mv_dphi_1));
-        F1(nd(k_jetdphimax)       .num, jet_dphi_max);
-        F1(nd(k_jetdetamax)       .num, jet_deta_max);
-        F1(nd(k_qrkdphimax)       .num, abs(qrk_dphi_max));
-        F2(nd(k_jetdphi_mveta)    .num, abs(jet_dphi_max), abs(nt.gentruth().p4(ilsp).Eta()));
-        F1(nd(k_pt0)              .num, jet_pt_0);
-        F1(nd(k_pt1)              .num, jet_pt_1);
-        F1(nd(k_ntks_j0)          .num, jet_ntks_0);
-        F1(nd(k_ntks_j1)          .num, jet_ntks_1);
-        F1(nd(k_nmovedtracks)     .num, jet_ntks_0 + jet_ntks_1);
-        F2(nd(k_jetmovea3d01)     .num, jet0_lsp_angle, jet1_lsp_angle);
-        F2(nd(k_jeteta01)         .num,  jet_eta_0, jet_eta_1);
-        F2(nd(k_jetpt01)          .num, jet_pt_0, jet_pt_1);
-        F2(nd(k_pt_angle0)        .num, jet_pt_0, jet0_lsp_angle);
-        F2(nd(k_pt_angle1)        .num, jet_pt_1, jet1_lsp_angle);
-        F2(nd(k_eta_angle0)       .num, nt.gentruth().p4(ilsp).Eta(), jet0_lsp_angle);
-        F2(nd(k_eta_angle1)       .num, nt.gentruth().p4(ilsp).Eta(), jet1_lsp_angle);
-
+        nd.num(k_jetpt0_asymm, jet_pt_0, jet_aj);
+        nd.num(k_jetpt1_asymm, jet_pt_1, jet_aj);
+        nd.num(k_jeteta0_asymm, jet_eta_0, jet_aj);
+        nd.num(k_jeteta1_asymm, jet_eta_1, jet_aj);
+        nd.num(k_jetdr_asymm, dr, jet_aj);
+        nd.num(k_jetdravg, dr);
+        nd.num(k_angle0, jet0_lsp_angle);
+        nd.num(k_angle1, jet1_lsp_angle);
+        nd.num(k_dphi_j0_mv, fabs(jet_mv_dphi_0));
+        nd.num(k_dphi_j1_mv, fabs(jet_mv_dphi_1));
+        nd.num(k_deta_j0_mv, jet_mv_deta_0);
+        nd.num(k_deta_j1_mv, jet_mv_deta_1);
+        nd.num(k_dphi_q0_mv, fabs(qrk_mv_dphi_0));
+        nd.num(k_dphi_q1_mv, fabs(qrk_mv_dphi_1));
+        nd.num(k_jetdphimax, jet_dphi_max);
+        nd.num(k_jetdetamax, jet_deta_max);
+        nd.num(k_qrkdphimax, fabs(qrk_dphi_max));
+        nd.num(k_jetdphi_mveta, fabs(jet_dphi_max), fabs(lsp_p4.Eta()));
+        nd.num(k_pt0, jet_pt_0);
+        nd.num(k_pt1, jet_pt_1);
+        nd.num(k_ntks_j0, jet_ntks_0);
+        nd.num(k_ntks_j1, jet_ntks_1);
+        nd.num(k_nmovedtracks, jet_ntks_0 + jet_ntks_1);
+        nd.num(k_jetmovea3d01, jet0_lsp_angle, jet1_lsp_angle);
+        nd.num(k_jeteta01,  jet_eta_0, jet_eta_1);
+        nd.num(k_jetpt01, jet_pt_0, jet_pt_1);
+        nd.num(k_pt_angle0, jet_pt_0, jet0_lsp_angle);
+        nd.num(k_pt_angle1, jet_pt_1, jet1_lsp_angle);
+        nd.num(k_eta_angle0, lsp_p4.Eta(), jet0_lsp_angle);
+        nd.num(k_eta_angle1, lsp_p4.Eta(), jet1_lsp_angle);
       }
     }
 
-    return std::make_pair(true, w);
+    NR_loop_cont(w);
   };
 
   nr.loop(fcn);
