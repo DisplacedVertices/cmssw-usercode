@@ -429,7 +429,7 @@ int main(int argc, char** argv) {
         const double deta = i_p4.Eta() - j_p4.Eta();
         const double dphi = i_p4.DeltaPhi(j_p4);
         jet_dravg += dr;
-        jet_detaavg += deta; // should these be fabs'd
+        jet_detaavg += deta; // JMTBAD should these be fabs'd
         jet_dphiavg += dphi;
         if (dr > jet_drmax)
           jet_drmax = dr;
