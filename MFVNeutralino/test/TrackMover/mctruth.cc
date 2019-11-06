@@ -5,7 +5,7 @@ int main(int argc, char** argv) {
 
   jmt::NtupleReader<mfv::MovedTracksNtuple> nr;
   namespace po = boost::program_options;
-  nr.init_options("mfvMovedTreeMCTruth/t")
+  nr.init_options("mfvMovedTreeMCTruth/t", "TrackMoverMCTruthHistsV27m", "nr_trackmovermctruthv27mv1")
     ("min-lspdist3", po::value<double>(&min_lspdist3)->default_value(0.02), "min distance between LSP decays to use event")
     ;
 
@@ -145,14 +145,14 @@ int main(int argc, char** argv) {
         continue;
 
       if (dijet) {
-        assert(abs(gen.id(ilsp)) == 1000006); // stop pair production
+        //assert(abs(gen.id(ilsp)) == 1000006); // stop pair production
 
         // Match decay daughters to the closest (by dR) reconstructed jet
         std::vector<int> closest_jets(2,-1), quark_assoc(2,-1);
         int s = 2+ilsp*2, swapem = gen.pt(s) < gen.pt(s+1); // toward making the jet assoc'd to the higher (lower) pT quark be "jet0" ("jet1")
         for (int i = 0; i < 2; ++i) {
           const int iq = s + (swapem ? !i : i);
-          assert(gen.id(iq) == -1000006 / gen.id(ilsp)); // stop -> dbar dbar + c.c.
+          //assert(gen.id(iq) == -1000006 / gen.id(ilsp)); // stop -> dbar dbar + c.c.
 
           jmt::MinValue m(0.4);
           for (int j = 0, je = jets.n(); j < je; ++j)
