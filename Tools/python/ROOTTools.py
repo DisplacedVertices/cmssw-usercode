@@ -583,7 +583,7 @@ def compare_hists(ps, samples, **kwargs):
             hists_sorted.sort(key=lambda hist: hist.GetMaximum(), reverse=True)
 
         x_r = x_range(name, hist_list, None)
-        m_o = move_overflows(name, hist_list, None)
+        m_o = False if (is2d or profiled) else move_overflows(name, hist_list, None)
 
         if len(hists) > 1 and ratio(name, hist_list, None) and (not is2d or profiled):
             ratios_plot(name_clean,
