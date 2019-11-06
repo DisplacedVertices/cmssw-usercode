@@ -829,7 +829,7 @@ int main(int argc, char** argv) {
       }
     }
 
-    NR_loop_continue;
+    NR_loop_cont(w);
   };
 
   nr.loop(fcn);
