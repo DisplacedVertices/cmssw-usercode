@@ -24,6 +24,8 @@ parser.add_argument('--opt-stat', type=int, default=1112211,
                     help='The value for SetOptStat (default: %(default)s).')
 parser.add_argument('--size', nargs=2, type=int, default=(600,600), metavar='SIZE',
                     help='Set the plot size to SIZEX x SIZEY (default %(default)s.')
+parser.add_argument('--ps-args', default='',
+                    help='Other args for plot_saver.')
 parser.add_argument('--nice', nargs='+', default=[],
                     help='Nice names for the files (default is file1, file2, ...).')
 parser.add_argument('--colors', nargs='+', default=['ROOT.kRed', 'ROOT.kBlue', 'ROOT.kGreen+2', 'ROOT.kMagenta', 'ROOT.kCyan', 'ROOT.kOrange+2'],
@@ -114,7 +116,10 @@ pprint({x:y for x,y in vars(options).iteritems() if not x.startswith('lambda_')}
 
 set_style()
 ROOT.gStyle.SetOptStat(options.opt_stat)
-ps = plot_saver(options.plot_path, size=options.size, per_page=options.per_page)
+
+if options.ps_args:
+    options.ps_args = ', ' + options.ps_args
+ps = eval("plot_saver(options.plot_path, size=options.size, per_page=options.per_page%s)" % options.ps_args)
 
 if options.file_dirs:
     file_dirs = [file.split(':', 1) for file in options.file_dirs]
