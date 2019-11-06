@@ -13,6 +13,7 @@
 #include "TTree.h"
 #define JMT_STANDALONE
 #include "JMTucker/Tools/interface/AnalysisEras.h"
+#include "JMTucker/Tools/interface/ExtValue.h"
 #include "JMTucker/Tools/interface/LumiList.h"
 #include "JMTucker/Tools/interface/PileupWeights.h"
 #include "JMTucker/Tools/interface/Prob.h"
@@ -20,6 +21,7 @@
 #include "JMTucker/Tools/interface/Year.h"
 
 #define NR_loop_continue return std::make_pair(true, nr.weight())
+#define NR_loop_cont(w) return std::make_pair(true, (w))
 #define NR_loop_break return std::make_pair(false, nr.weight())
 #define NR_loop_only(r,l,e) if (nr.nt().base().run() != (r) || nr.nt().base().lumi() != (l) || nr.nt().base().event() != (e)) NR_loop_continue
 
