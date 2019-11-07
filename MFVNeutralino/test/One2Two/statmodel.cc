@@ -136,17 +136,17 @@ double fr_c[2][3][3][fr_max_kn] = { // is_mc, year, ntracks indices
     { // 2017
       { 9.80903, 9.66801, 8.36952, 5.86700, 3.2111, 0.05319, -10.3479 }, // 3track
       { 8.45312, 8.23969, 4.68509, 0.79881, -22.0859,           -1,-1 }, // 4track
-      { 4.64386, 0.049497, -22.6856,                      -1,-1,-1,-1 }, // 5track
+      { 4.64386, 0.049497, -100,                          -1,-1,-1,-1 }, // 5track
     },
     { // 2018
       { 9.80903, 9.66801, 8.36952, 5.86700, 3.2111, 0.05319, -10.3479 },
       { 8.45312, 8.23969, 4.68509, 0.79881, -22.0859,           -1,-1 },
-      { 4.64386, 0.049497, -22.6856,                      -1,-1,-1,-1 },
+      { 4.64386, 0.049497, -100,                          -1,-1,-1,-1 },
     },
     { // 2017p8
       { 9.80903, 9.66801, 8.36952, 5.86700, 3.2111, 0.05319, -10.3479 },
       { 8.45312, 8.23969, 4.68509, 0.79881, -22.0859,           -1,-1 },
-      { 4.64386, 0.049497, -22.6856,                      -1,-1,-1,-1 },
+      { 4.64386, 0.049497, -100,                          -1,-1,-1,-1 },
     },
   },
   { // mc
@@ -263,10 +263,10 @@ int main(int, char**) {
   jmt::ConfigFromEnv env("sm", true);
 
                                        //  2017                   2018                  2017+2018
-  const double default_n1v[4][3][3] = {{{  14349, 2258, 199 }, { 11600, 2094, 249 }, {  14349+11600, 2258+2094, 199+249 }},  // MC scaled to int. lumi.
-                                       {{   6561, 1073,  92 }, {  3427,  642,  75 }, {   6561+ 3427, 1073+ 642,  92+ 75 }},  // MC effective
-                                       {{   3203,  786, 142 }, {  3036,  689,  82 }, {   3203+ 3036,  786+ 689, 142+ 82 }},  // data 10%
-                                       {{  32152, 7838,   1 }, { 29666, 6892,   1 }, {  32152+29666, 7838+6892,       1 }}   // data 100%
+  const double default_n1v[4][3][3] = {{{  14349, 2258,  199 }, { 11600, 2094, 249 }, {  14349+11600, 2258+2094,  199+249 }},  // MC scaled to int. lumi.
+                                       {{   6561, 1073,   92 }, {  3427,  642,  75 }, {   6561+ 3427, 1073+ 642,   92+ 75 }},  // MC effective
+                                       {{   3203,  786,  142 }, {  3036,  689,  82 }, {   3203+ 3036,  786+ 689,  142+ 82 }},  // data 10%
+                                       {{  32152, 7838, 1303 }, { 29666, 6892, 908 }, {  32152+29666, 7838+6892, 1303+908 }}   // data 100%
                                       };
   const double default_n2v[4][3][3] = {{{     55,    1,   1 }, { 14, 1, 1 }, {  55+14,   1, 1 }},
                                        {{     22,    3,   1 }, {  8, 1, 1 }, {  22+ 8, 3+1, 1 }},
@@ -296,7 +296,7 @@ int main(int, char**) {
   const double oversample = env.get_double("oversample", 20);
   const std::string year_str[3] = {"2017","2018","2017p8"};
   const std::string ntuple_version = "V27m";
-  const std::string rho_compare_fn = env.get_string("rho_compare_fn", "/uscms_data/d2/tucker/crab_dirs/Histos" + ntuple_version + std::string(!sample_is_mc && ntracks < 5 ? "/100pc/" : "/") + std::string(sample_is_mc ? "background_" : "JetHT") + year_str[year_index] + ".root");
+  const std::string rho_compare_fn = env.get_string("rho_compare_fn", env.get_string("rho_compare_path", "/uscms_data/d2/tucker/crab_dirs/Histos" + ntuple_version) + "/" + std::string(sample_is_mc ? "background_" : "JetHT") + year_str[year_index] + ".root");
   const double rho_compare_xmax = env.get_double("rho_compare_xmax", 2);
   const bool rho_compare_only = env.get_bool("rho_compare_only", false);
   phi_c = env.get_double("phi_c", 1.31);
@@ -304,6 +304,8 @@ int main(int, char**) {
   phi_a = env.get_double("phi_a", 5.96);
   const std::string eff_fn = env.get_string("eff_fn", "vpeffs_" + std::string(sample_is_mc ? "" : "data_") + year_str[year_index] + "_" + ntuple_version + ".root");
   const std::string eff_path = env.get_string("eff_path", "maxtk3");
+  const bool print_toys = env.get_bool("print_toys", false);
+  //fr_c[0][2][2][2] = env.get_double("lastrhocoeff", -22.6856);
 
   /////////////////////////////////////////////
 
@@ -652,19 +654,27 @@ int main(int, char**) {
     h_1v_rho_bins.emplace_back(new TH1D(TString::Format("h_1v_rho_bins_%i", ibin), TString::Format("#rho bin %i", ibin), 25, iv.lower, iv.upper));
   }
 
+  printf("2v bins truth fractions:");
   for (int ibin = 1; ibin <= nbins_2v; ++ibin) {
     const double tru = h_true_2v_dvv_norm->GetBinContent(ibin);
     const double pb = 1.35e-3;
     jmt::interval iv = jmt::garwood_poisson(tru, pb, pb);
     if (iv.lower < 1) iv.lower = 0;
     h_2v_dvvc_bins.emplace_back(new TH1D(TString::Format("h_2v_dvvc_bins_%i", ibin), TString::Format("d_{VV}^{C} bin %i", ibin), 200, iv.lower, iv.upper));
+    printf("    %12.4f +- %12.4f", tru/n2v, h_true_2v_dvv_norm->GetBinError(ibin)/n2v);
+  }
+  printf("\n");
+
+  if (ntoys == 0) {
+    finish();
+    return 0;
   }
 
   // Throw the toys and fill the above hists.
   // First throw the one vertex sample, then construct dvvc from it.
   // The toy is saved in the h_1v/2v*bins vectors.
 
-  printf("toys: ");
+  printf("toys:%s", print_toys ? "\n" : " ");
   for (int itoy = 0; itoy < ntoys; ++itoy) {
     // make the toy dataset
     uptr<TH1D> h_1v_rho(book_1v("h_1v_rho"));
@@ -694,15 +704,20 @@ int main(int, char**) {
     jmt::deoverflow(h_2v_dvvc.get());
     h_2v_dvvc->Scale(n2v/h_2v_dvvc->Integral());
     
-    for (int ibin = 1; ibin <= nbins_2v; ++ibin)
-      h_2v_dvvc_bins[ibin-1]->Fill(h_2v_dvvc->GetBinContent(ibin));
+    if (print_toys) printf("toy %i:", itoy);
+    for (int ibin = 1; ibin <= nbins_2v; ++ibin) {
+      const double c = h_2v_dvvc->GetBinContent(ibin);
+      h_2v_dvvc_bins[ibin-1]->Fill(c);
+      if (print_toys) printf(" %.4f", c/n2v);
+    }
+    if (print_toys) printf("\n");
 
-    if (ntoys > 10 && itoy % (ntoys/10) == 0) {
+    if (!print_toys && ntoys > 10 && itoy % (ntoys/10) == 0) {
       printf("%i", itoy/(ntoys/10));
       fflush(stdout);
     }
   }
-  printf(" %i\n", ntoys);
+  if (!print_toys) printf(" %i\n", ntoys);
 
   h_n1v->Draw("hist");
   p();

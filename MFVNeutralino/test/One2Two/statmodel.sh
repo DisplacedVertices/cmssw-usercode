@@ -21,4 +21,4 @@ out_fn=sm_${samples_name[samples_index]}_${year_name[year_index]}_${ntracks}trac
 
 echo samples_index $samples_index year_index $year_index ntracks $ntracks out_fn $out_fn
 
-env sm_out_fn=${out_fn} sm_samples_index=${samples_index} sm_year_index=${year_index} sm_ntracks=${ntracks} ./statmodel.exe 2>&1 > ${out_fn}.txt
+env sm_rho_compare_path=. sm_out_fn=${out_fn} sm_samples_index=${samples_index} sm_year_index=${year_index} sm_ntracks=${ntracks} ./statmodel.exe 2>&1 > ${out_fn}.txt
