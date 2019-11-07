@@ -402,12 +402,12 @@ _add_single_files('nr_k0ntuplev25mv1', '/store/user/wsun/croncopyeos/hadded/K0Nt
                       ['JetHT%i%s' % (y,x) for y in (2017,2018) for x in ('BCDEF' if y == 2017 else 'ABCD')])
 
 for xx in '', '_NoRefitDzCut':
-    _add_single_files('nr_trackmoverv27mv1' + xx.lower(), '/store/user/tucker/hadded/TrackMoverV27mv1' + xx, \
+    _add_single_files('nr_trackmoverv27mv1' + xx.lower(), '/store/user/%s/hadded/TrackMoverV27mv1' % ('shogan/croncopyeos' if not xx else 'tucker') + xx, \
                           ['qcdht%04i_%i' % (x,y) for y in (2017,2018) for x in (700,1000,1500,2000)] + \
                           ['ttbarht%04i_%i' % (x,y) for y in (2017,2018) for x in (600,800,1200,2500)] + \
                           ['JetHT%i%s' % (y,x) for y in (2017,2018) for x in ('BCDEF' if y == 2017 else 'ABCD')])
 
-    _add_single_files('nr_trackmovermctruthv27mv1' + xx.lower(), '/store/user/tucker/hadded/TrackMoverMCTruthV27mv1' + xx, \
+    _add_single_files('nr_trackmovermctruthv27mv1' + xx.lower(), '/store/user/shogan/croncopyeos/hadded/TrackMoverMCTruthV27mv1' + xx, \
                           ['mfv_%s_tau%06ium_M%04i_%i' % (a,b,c,y) for y in (2017,2018) for a in ('neu','stopdbardbar') for b in (100,300,1000,10000,30000) for c in (400,600,800,1200,1600,3000)])
 
 ################################################################################
