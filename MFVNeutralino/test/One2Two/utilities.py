@@ -23,7 +23,7 @@ def cmd_merge_bquarks_nobquarks():
 
 def cmd_merge_btags_nobtags():
     for is_data in False, True:
-        for year in ['2017', '2018']:
+        for year in ['2017', '2018', '2017p8']:
             if is_data:
                 year = 'data_%s' % year
             for sys_var in ['nom','bcjet_up','bcjet_down','ljet_up','ljet_down', 'vary_dphi', 'vary_eff']:
@@ -59,7 +59,6 @@ def cmd_merge_btags_nobtags():
                     os.system(cmd)
 
                     if sys_var == 'nom':
-                        # FIXME Note that we vary by the MC f2 ratio rather than data here
                         # f2 variation up
                         weight_btag_up   = min( float(weights.split(",")[0]) * (1.0/(1+frac_variation)*(1+2*frac_variation)), 1)
                         weight_nobtag_up = 1-weight_btag_up
@@ -68,7 +67,6 @@ def cmd_merge_btags_nobtags():
                         print cmd
                         os.system(cmd)
 
-                        # FIXME Note that we vary by the MC f2 ratio rather than data here
                         # f2 variation down
                         weight_btag_down   = min( float(weights.split(",")[0]) * (1.0/(1+frac_variation)), 1)
                         weight_nobtag_down = 1-weight_btag_down

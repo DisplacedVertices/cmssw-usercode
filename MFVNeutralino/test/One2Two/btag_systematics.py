@@ -4,9 +4,9 @@ from array import array
 ROOT.TH1.AddDirectory(0)
 import sys
 
-is_mc = True
+is_mc = False
 only_10pc = False
-version = 'V25m'
+version = 'V27m'
 
 year = sys.argv[1]
 mode = sys.argv[2]
@@ -16,34 +16,34 @@ ROOT.gStyle.SetOptFit(0)
 ps = plot_saver(plot_dir('compare_dvvc_%s_%s%s%s_%s' % (version.capitalize(), mode, '' if is_mc else '_data', '_10pc' if only_10pc else '', year)), size=(700,700), root=False, log=False)
 
 # files containing the btag corrected templates
-fn1 = ['2v_from_jets%s_%s_3track_btag_corrected_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_3track_btag_corrected_%s_%s.root' % ('' if is_mc else '_data', year, mode, version)]
-fn2 = ['2v_from_jets%s_%s_4track_btag_corrected_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_4track_btag_corrected_%s_%s.root' % ('' if is_mc else '_data', year, mode, version)]
-fn3 = ['2v_from_jets%s_%s_5track_btag_corrected_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_5track_btag_corrected_%s_%s.root' % ('' if is_mc else '_data', year, mode, version)]
+fn1 = ['2v_from_jets%s_%s_3track_btag_corrected_nom_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_3track_btag_corrected_%s_%s.root' % ('' if is_mc else '_data', year, mode, version)]
+fn2 = ['2v_from_jets%s_%s_4track_btag_corrected_nom_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_4track_btag_corrected_%s_%s.root' % ('' if is_mc else '_data', year, mode, version)]
+fn3 = ['2v_from_jets%s_%s_5track_btag_corrected_nom_%s.root' % ('' if is_mc else '_data', year, version), '2v_from_jets%s_%s_5track_btag_corrected_%s_%s.root' % ('' if is_mc else '_data', year, mode, version)]
 
 # files containing the out-of-the-box 2-vertex events (whereas the hists in the above files are scaled based on the btag correction)
 fn1_uncorr = ['2v_from_jets%s_%s_3track_default_%s.root' % ('' if is_mc else '_data', year, version)]
 fn2_uncorr = ['2v_from_jets%s_%s_4track_default_%s.root' % ('' if is_mc else '_data', year, version)]
 fn3_uncorr = ['2v_from_jets%s_%s_5track_default_%s.root' % ('' if is_mc else '_data', year, version)]
 
-if mode == 'vary_SFs_up':
+if mode == 'vary_up':
     ls = ['nominal','vary SFs up']
-if mode == 'vary_SFs_down':
+if mode == 'vary_down':
     ls = ['nominal','vary SFs down']
-if mode == 'vary_SFs_20percent_up':
+if mode == 'vary_20percent_up':
     ls = ['nominal','vary SFs up 20%']
-if mode == 'vary_SFs_20percent_down':
+if mode == 'vary_20percent_down':
     ls = ['nominal','vary SFs down 20%']
-if mode == 'vary_SFs_10percent_up':
+if mode == 'vary_10percent_up':
     ls = ['nominal','vary SFs up 10%']
-if mode == 'vary_SFs_10percent_down':
+if mode == 'vary_10percent_down':
     ls = ['nominal','vary SFs down 10%']
-if mode == 'vary_bcjet_SFs_up':
+if mode == 'bcjet_up':
     ls = ['nominal','vary bcjet SFs up']
-if mode == 'vary_bcjet_SFs_down':
+if mode == 'bcjet_down':
     ls = ['nominal','vary bcjet SFs down']
-if mode == 'vary_ljet_SFs_up':
+if mode == 'ljet_up':
     ls = ['nominal','vary ljet SFs up']
-if mode == 'vary_ljet_SFs_down':
+if mode == 'ljet_down':
     ls = ['nominal','vary ljet SFs down']
 if mode == 'vary_4trk_to_5trk_up':
     ls = ['nominal','vary 4trk to 5trk up']
@@ -55,8 +55,8 @@ fns_uncorr = [fn1_uncorr, fn2_uncorr, fn3_uncorr]
 ntk = ['3-track', '4-track', '5-track']
 names = ['3-track x 3-track', '4-track x 4-track', '#geq 5-track x #geq 5-track']
 
-n2v_2017 = [651., 2.21, 1.]
-n2v_2018 = [426., 5., 1.]
+n2v_2017 = [113., 9, 1.]
+n2v_2018 = [72., 3., 1.]
 
 if year == '2017' :
     n2v = n2v_2017

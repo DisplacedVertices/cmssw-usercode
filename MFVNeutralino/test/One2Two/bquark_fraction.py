@@ -49,7 +49,7 @@ if __name__ == '__main__':
 
     for is_data in False, True :
         for sys_var in ['nom','bcjet_up','bcjet_down','ljet_up','ljet_down', 'vary_dphi', 'vary_eff'] :
-            for year in ['2017','2018'] :
+            for year in ['2017','2018','2017p8'] :
                 f2_vals_printout = ''
 
                 year_formatted = year
