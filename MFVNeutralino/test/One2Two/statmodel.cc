@@ -60,6 +60,7 @@ template <typename T> using uptr = std::unique_ptr<T>;
 #include "TMath.h"
 #include "TRandom3.h"
 #include "TRatioPlot.h"
+#include "TStopwatch.h"
 #include "TStyle.h"
 #include "TVector2.h"
 #include "JMTucker/Tools/interface/ConfigFromEnv.h"
@@ -200,7 +201,7 @@ double func_rho_norm(double* x, double* p) {
 }
 
 double func_dphi(double* x, double*) {
-  return pow(x[0] - phi_c, phi_e) + phi_a;
+  return pow(fabs(x[0]) - phi_c, phi_e) + phi_a;
 }
 
 double throw_rho() {
@@ -249,6 +250,8 @@ TH1D* book_1v(const char* name) { return new TH1D(name, "", nbins_1v, bins_1v); 
 TH1D* book_2v(const char* name) { return new TH1D(name, "", nbins_2v, bins_2v); }
 
 int main(int, char**) {
+  TStopwatch sw; sw.Start();
+
   // Defaults and command-line configurables.
 
   for (int i = 0; i <= nbins_1v; ++i)
@@ -258,7 +261,7 @@ int main(int, char**) {
     bins_2v[0] = 0, bins_2v[1] = 0.04, bins_2v[2] = 0.07, bins_2v[3] = 0.11;
   else
     for (int i = 0; i <= nbins_2v; ++i)
-      bins_2v[i] = 0.01*i;
+      bins_2v[i] = 0.4/nbins_2v*i;
 
   jmt::ConfigFromEnv env("sm", true);
 
@@ -356,6 +359,7 @@ int main(int, char**) {
     delete f_func_rho;
     delete f_func_dphi;
     delete h_eff;
+    sw.Print();
   };
 
   /////////////////////////////////////////////
@@ -661,7 +665,8 @@ int main(int, char**) {
     jmt::interval iv = jmt::garwood_poisson(tru, pb, pb);
     if (iv.lower < 1) iv.lower = 0;
     h_2v_dvvc_bins.emplace_back(new TH1D(TString::Format("h_2v_dvvc_bins_%i", ibin), TString::Format("d_{VV}^{C} bin %i", ibin), 200, iv.lower, iv.upper));
-    printf("    %12.4f +- %12.4f", tru/n2v, h_true_2v_dvv_norm->GetBinError(ibin)/n2v);
+    if (ibin > 1 && ibin % 4 == 1) printf("\n                        ");
+    printf("    %12.4g +-f %7.2g", tru/n2v, h_true_2v_dvv_norm->GetBinError(ibin)/tru);
   }
   printf("\n");
 
