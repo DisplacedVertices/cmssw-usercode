@@ -1,12 +1,13 @@
 # NB: this module cannot depend on any local imports, except in __main__, unless you ship them with combine/submit.py
 
-raise 'dont forget: L1 EE prefiring, HEM15/16; what else?'
+for i in xrange(10):
+    print 'dont forget: L1 EE prefiring, HEM15/16; what else?'
 
 from math import hypot
 import ROOT; ROOT.gROOT.SetBatch()
 
 def trigmult(x):
-    return 0.99
+    return 0.989
 def sf20156(x, pars=(0.9784, -1128., 1444.)):
     return trigmult(x) * (2. - pars[0] * ROOT.TMath.Erf((x-pars[1])/pars[2]))
 def one(x):
@@ -41,10 +42,9 @@ class SignalEfficiencyCombiner:
     def __init__(self, simple=True):
         if simple:
             fn = simple if type(simple) == str else 'limitsinput.root'
-            #FIXME=41.527+59.973
-            self.inputs = [Input(fn=fn, int_lumi=FIXME, sf=one, include_stat=True)]
+            self.inputs = [Input(fn=fn, int_lumi=101.2, sf=one, include_stat=True)]
         else:
-            raise NotImplementedError('no non-simple yet in 2017'
+            raise NotImplementedError('no non-simple yet in 2017')
             self.inputs = [
                 Input(fn='limitsinput_nonhip.root', int_lumi= 2.62, sf=sf20156,  include_stat=False),
                 Input(fn='limitsinput_hip.root',    int_lumi=19.70, sf=trigmult, include_stat=True),

@@ -2,7 +2,7 @@ import sys, os
 from array import array
 from JMTucker.Tools.ROOTTools import *
 
-path = plot_dir('pretty_limits_1d_2017temp', make=True)
+path = plot_dir('pretty_limits_1d_2017tempv4', make=True)
 
 ts = tdr_style()
 
@@ -19,13 +19,13 @@ f = ROOT.TFile('limits_1d.root')
 kinds = [
     'multijet_M0800',
     'multijet_M1600',
-#    'multijet_M2400',
+    'multijet_M3000',
     'multijet_tau300um',
     'multijet_tau1mm',
     'multijet_tau10mm',
     'dijet_M0800',
     'dijet_M1600',
-#    'dijet_M2400',
+    'dijet_M3000',
     'dijet_tau300um',
     'dijet_tau1mm',
     'dijet_tau10mm',
@@ -123,7 +123,7 @@ for kind in kinds:
         xax.SetLimits(105, 3200)
     elif versus_tau:
         xax.SetLimits(0.068, 130)
-    yax.SetRangeUser(0.08, 100000 if (versus_tau and draw_theory) else 130)
+    yax.SetRangeUser(0.01, 100000 if (versus_tau and draw_theory) else 130)
 
     observed.SetLineWidth(2)
     expect50.SetLineWidth(2)

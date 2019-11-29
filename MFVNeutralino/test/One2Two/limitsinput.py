@@ -1,38 +1,48 @@
-import gzip
+import gzip, statmodel, JMTucker.MFVNeutralino.AnalysisConstants as ac
 from JMTucker.MFVNeutralino.MiniTreeBase import *
 
-nbins = 3
 bins = to_array(0., 0.04, 0.07, 4)
+nbins = len(bins)-1
 
-observed = [1,0,0]
+years = '2017', '2018'
+nyears = len(years)
 
-int_lumi = FIXME #41.527 + 59.973
+int_lumi = ac.scaled_int_lumi_2017, ac.scaled_int_lumi_2018
+# next 3 lines of values override what's in the 2v_from_jets output
+observed = (0,0,0), (0,0,0)
+bkg_n1v = 1303, 908
+bkg_n2v = 1, 1
+bkg_c1v = (0.709, 0.257, 0.034), (0.650, 0.313, 0.037) # these do not and are checked
 
-bkg_n1v = FIXME #703.
-bkg_n2v = 1.
+def sig_uncert(name): # JMTBAD implement different sig uncerts per trackmover study when done
+    u = 0.24
+    return (u,u,u)
 
-bkg_frac_check = [0.67, 0.20, 0.13]
-sig_uncert = [0.24, 0.24, 0.24]
-bkg_uncert = [0.25, 0.25, 0.69]
-bkg_uncert_stat = [0.02, 0.05, 0.18]
-bkg_uncert = [(a**2 + b**2)**0.5 for a,b in zip(bkg_uncert, bkg_uncert_stat)] # JMTBAD use proper gmN?
+bkg_uncert = [(0.14, 0.26, 0.42), (0.14, 0.26, 0.42)]
+bkg_uncert_stat = [statmodel.ebins['data100pc_%s_5track' % year] for year in years]
+for y in xrange(nyears):
+    bkg_uncert[y] = [(a**2 + b**2)**0.5 for a,b in zip(bkg_uncert[y], bkg_uncert_stat[y])] # JMTBAD use proper gmN?
 
-in_fn = '2v_from_jets_2017_5track_default_v21m.root'
-in_trees, in_scanpack_list = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV21m/mfv*root', None
+def bkg_fn(year, which='default'):
+    if which == 'c':
+        which = 'btag_corrected_nom'
+    else:
+        assert which == 'default'
+    return '2v_from_jets_data_%s_5track_%s_V27m.root' % (year, which)
+
+def bkg_f(year, which='default', _c={}):
+    k = year, which
+    if not _c.has_key(k):
+        _c[k] = ROOT.TFile.Open(bkg_fn(*k))
+    return _c[k]
+
+def cbkg_f(year):
+    return bkg_f(year, which='c')
+
+in_trees, in_scanpack_list = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV27m/mfv*_%s.root' % years[0], None
 #in_trees, in_scanpack_list = None, '/uscms/home/tucker/public/mfv/scanpacks/None'
 
 limitsinput_fn = 'limitsinput.root'
-
-####
-
-assert nbins == len(bins) - 1
-for l in observed, bkg_frac_check, sig_uncert, bkg_uncert, bkg_uncert_stat:
-    assert len(l) == nbins
-
-assert abs(sum(bkg_frac_check) - 1) < 0.01
-
-if '_data_' in in_fn:
-    assert abs(sum(observed) - bkg_n2v) < 0.01
 
 ####
 
@@ -43,13 +53,12 @@ def isample2ndx(isample):
 
 def name_list(f):
     return f.Get('name_list')
-
 def nsamples(f):
     return name_list(f).GetNbinsX()
 
 def details2name(kind, tau, mass):
     # same convention as scanpack: tau float:mm, mass int:GeV
-    return '%s_tau%06ium_M%04i_2017' % (kind, int(tau*1000), mass)
+    return '%s_tau%06ium_M%04i' % (kind, int(tau*1000), mass)
 def name2kind(name):
     return name.split('_tau')[0]
 def name2tau(name):
@@ -71,10 +80,10 @@ def name2isample(f, name):
 
 def isample2name(f, isample):
     h = name_list(f)
-    nbins = h.GetNbinsX()
+    nb = h.GetNbinsX()
     ibin = -isample
-    if ibin < 1 or ibin > nbins:
-        raise ValueError('isample %i wrong for name list in %r (nbins = %i)' % (isample, f, nbins))
+    if ibin < 1 or ibin > nb:
+        raise ValueError('isample %i wrong for name list in %r (nb = %i)' % (isample, f, nb))
     return h.GetXaxis().GetBinLabel(ibin)
 
 def isample_iterator(f):
@@ -105,7 +114,7 @@ def sample_iterator(f):
 
 def test_sample_iterator(f):
     kinds = 'mfv_neu', 'mfv_stopdbardbar'
-    taus = [t/1000. for t in 100, 300, 1000, 10000, 30000, 100000]
+    taus = [t/1000. for t in 100, 300, 1000, 10000, 30000]
     masses = [400, 600, 800, 1200, 1600, 3000]
 
     allowed = {name:isample for isample,name in isamplename_iterator(f)}
@@ -124,103 +133,104 @@ def sample_iterator_1d_plots(f):
     for s in sample_iterator(f):
         if s.mass in (800., 1600., 2300.) or s.tau in (0.4, 1., 10.):
             yield s
-    
+
+####
+
 def make():
     assert not os.path.exists(limitsinput_fn)
     ROOT.TH1.AddDirectory(1)
-    in_f = ROOT.TFile(in_fn)
+
     f = ROOT.TFile(limitsinput_fn, 'recreate')
+    hs = []
 
-    h_int_lumi = ROOT.TH1D('h_int_lumi', '', 1, 0, 1)
-    h_int_lumi.SetBinContent(1, int_lumi)
+    # bkg: separate histograms by year
+    for y, year in enumerate(years):
+        bkg_f(year), cbkg_f(year); f.cd()
 
-    h_observed = ROOT.TH1D('h_observed', '', nbins, bins)
-    for i,v in enumerate(observed):
-        h_observed.SetBinContent(i+1, v)
+        h_int_lumi = ROOT.TH1D('h_int_lumi_%s' % year, '', 1, 0, 1)
+        h_int_lumi.SetBinContent(1, int_lumi[y])
+
+        h_observed = ROOT.TH1D('h_observed_%s' % year, '', nbins, bins)
+        for i,v in enumerate(observed[y]):
+            h_observed.SetBinContent(i+1, v)
     
-    # bkg comes from Jen's 2v_from_hists
-    h_bkg_dbv  = to_TH1D(in_f.Get('h_1v_dbv') , 'h_bkg_dbv')
-    h_bkg_dvv  = to_TH1D(in_f.Get('h_c1v_dvv'), 'h_bkg_dvv')
+        h_bkg_dbv = to_TH1D( bkg_f(year).Get('h_1v_dbv'),  'h_bkg_dbv_%s' % year)
+        h_bkg_dvv = to_TH1D(cbkg_f(year).Get('h_c1v_dvv'), 'h_bkg_dvv_%s' % year)
 
-    h_bkg_dphi = ROOT.TH1D('h_bkg_dphi', '', 100, 0, pi)
-    f_dphi = in_f.Get('f_dphi')
-    for ibin in xrange(1, h_bkg_dphi.GetNbinsX()+1):
-        a = h_bkg_dphi.GetXaxis().GetBinLowEdge(ibin)
-        b = h_bkg_dphi.GetXaxis().GetBinLowEdge(ibin+1)
-        h_bkg_dphi.SetBinContent(ibin, f_dphi.Integral(a,b)/(b-a))
+        h_bkg_dbv.Scale(bkg_n1v[y]/get_integral(h_bkg_dbv)[0])
+        h_bkg_dvv.Scale(bkg_n2v[y]/get_integral(h_bkg_dvv)[0])
 
-    h_bkg_dbv.Scale(bkg_n1v/h_bkg_dbv.Integral())
-    for h in h_bkg_dvv, h_bkg_dphi:
-        h.Scale(bkg_n2v/h.Integral())
+        h = h_bkg_dvv_rebin = h_bkg_dvv.Rebin(nbins, 'h_bkg_dvv_rebin_%s' % year, bins)
+        move_overflow_into_last_bin(h_bkg_dvv_rebin)
+        for i in xrange(nbins):
+            if abs(bkg_c1v[y][i] - h.GetBinContent(i+1)/bkg_n2v[y]) > 0.001:
+                print y,i, bkg_c1v[y][i], h.GetBinContent(i+1)/bkg_n1v[y]
+                assert 0
 
-    h_bkg_dvv_rebin = h_bkg_dvv.Rebin(len(bins)-1, 'h_bkg_dvv_rebin', bins)
-    move_overflow_into_last_bin(h_bkg_dvv_rebin)
+        h_bkg_uncert = ROOT.TH1D('h_bkg_uncert_%s' % year, '', nbins, bins)
+        for i,v in enumerate(bkg_uncert[y]):
+            h_bkg_uncert.SetBinContent(i+1, v)
 
-    h_bkg_uncert = ROOT.TH1D('h_bkg_uncert', '', nbins, bins)
-    for i,v in enumerate(bkg_uncert):
-        h_bkg_uncert.SetBinContent(i+1, v)
+        hs += [h_int_lumi, h_observed, h_bkg_dbv, h_bkg_dvv, h_bkg_dvv_rebin, h_bkg_uncert]
 
-    # now signals. grab the printout and put in signals.h for the fitting code to pick up
+    # now signals.
     if in_trees:
         title = in_trees
-        sigs = glob(in_trees)
-        sigs = [fn for fn in sigs if not fn.endswith('hip1p0.root')]
-        sigs = \
-            sorted(x for x in sigs if '_2015' not in x and '_hip' not in x) + \
-            sorted(x for x in sigs if '_2015' not in x and '_hip' in x) + \
-            sorted(x for x in sigs if '_2015' in x)
+        sigs = sorted(glob(in_trees))
         sigs = [(os.path.basename(fn).replace('.root', ''), [fn]) for fn in sigs]
     elif in_scanpack_list:
         title = in_scanpack_list
-        if in_scanpack_list.endswith('.gz'):
-            f_scanpack_list = gzip.GzipFile(in_scanpack_list)
-        else:
-            f_scanpack_list = open(in_scanpack_list)
+        f_scanpack_list = (gzip.GzipFile if in_scanpack_list.endswith('.gz') else open)(in_scanpack_list)
         sigs = sorted(eval(f_scanpack_list.read()).items())
 
-    nsigs = len(sigs)
-    hs_sig = []
-    name_list = ROOT.TH1C('name_list', title, nsigs, 0, nsigs) # I'm too stupid to get TList of TStrings to work in python
+    name_list = ROOT.TH1C('name_list', title, len(sigs), 0, len(sigs))
 
     for isig, (name, fns) in enumerate(sigs):
         isample = ndx2isample(isig)
-        name_list.GetXaxis().SetBinLabel(-isample, name)
+        print isig, isample, name, fns, 
 
-        sig_t = ROOT.TChain('mfvMiniTree/t')
-        ngen = 0.
-        for fn in fns:
-            sig_f = ROOT.TFile.Open(fn)
-            ngen += sig_f.Get('mfvWeight/h_sums').GetBinContent(1)
-            sig_f.Close()
-            sig_t.Add(fn)
+        name_list.GetXaxis().SetBinLabel(-isample, name.replace('_' + years[0], ''))
 
-        f.cd()
+        for y, year in enumerate(years):
+            name = name.replace(years[0], year)
+            ngen = 0.
+            sig_t = ROOT.TChain('mfvMiniTree/t')
+            for fn in fns:
+                fn = fn.replace(years[0], year)
+                sig_f = ROOT.TFile.Open(fn)
+                ngen += sig_f.Get('mfvWeight/h_sums').GetBinContent(1)
+                sig_f.Close()
+                sig_t.Add(fn)
+            f.cd()
 
-        h_dbv_name = 'h_signal_%i_dbv' % isample
-        h_dbv = ROOT.TH1D(h_dbv_name, name, 1250, 0, 2.5)
-        sig_t.Draw('dist0>>%s' % h_dbv_name, 'weight*(nvtx==1)')
+            h_dbv_name = 'h_signal_%i_dbv_%s' % (isample, year)
+            h_dbv = ROOT.TH1D(h_dbv_name, name, 125, 0, 2.5)
+            sig_t.Draw('dist0>>%s' % h_dbv_name, 'weight*(nvtx==1)')
 
-        h_dvv_name = 'h_signal_%i_dvv' % isample
-        h_dvv = ROOT.TH1D(h_dvv_name, name, 4000, 0, 4)
-        sig_t.Draw('svdist>>%s' % h_dvv_name, 'weight*(nvtx>=2)')
+            h_dvv_name = 'h_signal_%i_dvv_%s' % (isample, year)
+            h_dvv = ROOT.TH1D(h_dvv_name, name, 400, 0, 4)
+            sig_t.Draw('svdist>>%s' % h_dvv_name, 'weight*(nvtx>=2)')
 
-        h_dphi_name = 'h_signal_%i_dphi' % isample
-        h_dphi = ROOT.TH1D(h_dphi_name, name, 10, -3.15, 3.15)
-        sig_t.Draw('svdphi>>%s' % h_dphi_name, 'weight*(nvtx>=2)')
+            h_dphi_name = 'h_signal_%i_dphi_%s' % (isample, year)
+            h_dphi = ROOT.TH1D(h_dphi_name, name, 10, -3.15, 3.15)
+            sig_t.Draw('svdphi>>%s' % h_dphi_name, 'weight*(nvtx>=2)')
 
-        h_norm = ROOT.TH1D('h_signal_%i_norm' % isample, name, 2, 0, 2)
-        norm = 1e-3 / ngen  # 1 fb xsec in pb / number of events read, int lumi will be added in ToyThrower
-        h_norm.SetBinContent(1, norm)
-        h_norm.SetBinContent(2, norm)
+            h_norm = ROOT.TH1D('h_signal_%i_norm_%s' % (isample, year), name, 2, 0, 2)
+            norm = 1e-3 / ngen  # 1 fb xsec in pb / number of events read, int lumi will be added later
+            h_norm.SetBinContent(1, norm)
+            h_norm.SetBinContent(2, norm)
 
-        h_dvv_rebin = h_dvv.Rebin(len(bins)-1, 'h_signal_%i_dvv_rebin' % isample, bins)
-        move_overflow_into_last_bin(h_dvv_rebin)
+            h_dvv_rebin = h_dvv.Rebin(nbins, 'h_signal_%i_dvv_rebin_%s' % (isample, year), bins)
+            move_overflow_into_last_bin(h_dvv_rebin)
+            for i in 1,2,3:
+                print 1e-3 * int_lumi[y] * h_dvv_rebin.GetBinContent(i) / ngen,
 
-        h_uncert = ROOT.TH1D('h_signal_%i_uncert' % isample, '', nbins, bins)
-        for i,v in enumerate(sig_uncert):
-            h_uncert.SetBinContent(i+1, v)
+            h_uncert = ROOT.TH1D('h_signal_%i_uncert_%s' % (isample, year), '', nbins, bins)
+            for i,v in enumerate(sig_uncert(name)):
+                h_uncert.SetBinContent(i+1, v)
 
-        hs_sig += [h_dbv, h_dvv, h_dphi, h_norm, h_dvv_rebin, h_uncert]
+            hs += [h_dbv, h_dvv, h_dphi, h_norm, h_dvv_rebin, h_uncert]
+        print
 
     f.Write()
     f.Close()
@@ -256,11 +266,6 @@ def eff1v(f, isample):
 def eff2v(f, isample):
     return _eff(i2v, f, isample)
 
-
-def signals_h():
-    f = ROOT.TFile(limitsinput_fn)
-    for isample, name in isamplename_iterator(f):
-        print 'samples.push_back({%i, "%s", 0, 0});' % (isample, name)
 
 def draw():
     ps = plot_saver(plot_dir('o2t_templates_run2'), size=(600,600))
@@ -471,8 +476,6 @@ def signal_efficiency():
 if __name__ == '__main__':
     if 'make' in sys.argv:
         make()
-    elif 'signals_h' in sys.argv:
-        signals_h()
     elif 'draw' in sys.argv:
         draw()
     elif 'compare' in sys.argv:

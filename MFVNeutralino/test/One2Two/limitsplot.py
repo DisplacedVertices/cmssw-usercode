@@ -130,10 +130,11 @@ class limits:
 
     def parse(self, sample, fn):
         p = limits.point(sample)
-        for line in open(fn):
-            p.tryset(line)
-        assert p.valid
-        self.points.append(p)
+        if os.path.isfile(fn):
+            for line in open(fn):
+                p.tryset(line)
+            assert p.valid
+            self.points.append(p)
 
     def __getitem__(self, key):
         if key == 'tau':
@@ -197,13 +198,13 @@ def save_1d_plots():
     xxx = [
         ('multijet_M0800',   lambda s: 'neu'          in sample.name and sample.mass == 800 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau',  800.)),
         ('multijet_M1600',   lambda s: 'neu'          in sample.name and sample.mass ==1600 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 1600.)),
-#        ('multijet_M2400',   lambda s: 'neu'          in sample.name and sample.mass ==2400 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 2400.)),
+        ('multijet_M3000',   lambda s: 'neu'          in sample.name and sample.mass ==3000 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 3000.)),
         ('multijet_tau300um',lambda s: 'neu'          in sample.name and sample.tau  == 0.3 and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
         ('multijet_tau1mm',  lambda s: 'neu'          in sample.name and sample.tau  == 1.  and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
         ('multijet_tau10mm', lambda s: 'neu'          in sample.name and sample.tau  == 10. and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
         ('dijet_M0800',      lambda s: 'stopdbardbar' in sample.name and sample.mass == 800 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau',  800.)),
         ('dijet_M1600',      lambda s: 'stopdbardbar' in sample.name and sample.mass ==1600 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 1600.)),
-#        ('dijet_M2400',      lambda s: 'stopdbardbar' in sample.name and sample.mass ==2400 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 2400.)),
+        ('dijet_M3000',      lambda s: 'stopdbardbar' in sample.name and sample.mass ==3000 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 3000.)),
         ('dijet_tau300um',   lambda s: 'stopdbardbar' in sample.name and sample.tau  == 0.3 and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
         ('dijet_tau1mm',     lambda s: 'stopdbardbar' in sample.name and sample.tau  == 1.  and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
         ('dijet_tau10mm',    lambda s: 'stopdbardbar' in sample.name and sample.tau  == 10. and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
