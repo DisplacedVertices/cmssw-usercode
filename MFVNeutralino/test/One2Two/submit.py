@@ -36,65 +36,72 @@ cd $WD
     echo datacard:
     python datacard.py $WHICH | tee datacard.txt
 
-#    echo "========================================================================="
-#    echo GoodnessOfFit observed
-#    combine -M GoodnessOfFit datacard.txt --algo=saturated
-#    mv higgsCombine*root gof_observed.root
-#
-#    echo "========================================================================="
-#    echo GoodnessOfFit expected
-#    combine -M GoodnessOfFit datacard.txt --algo=saturated --toys 100
-#    mv higgsCombine*root gof_expected.root
-
-#    echo "========================================================================="
-#    echo GoodnessOfFit observed, no systematics
-#    combine -S0 -M GoodnessOfFit datacard.txt --algo=saturated
-#    mv higgsCombine*root gof_S0_observed.root
-#
-#    echo "========================================================================="
-#    echo GoodnessOfFit expected, no systematics
-#    combine -S0 -M GoodnessOfFit datacard.txt --algo=saturated --toys 100
-#    mv higgsCombine*root gof_S0_expected.root
+    cmd="combine -M MarkovChainMC --noDefaultPrior=0 --tries 20 -b 200 --iteration 200000 datacard.txt"
 
     echo "========================================================================="
     echo Observed limit
-    combine -M BayesianToyMC datacard.txt
+    eval $cmd
     mv higgsCombine*root observed.root
 
     echo "========================================================================="
     echo Expected limits
-    combine -M BayesianToyMC datacard.txt --toys 5000 --saveToys
+    eval $cmd --toys 1000 --saveToys
     mv higgsCombine*root expected.root
 
-#    echo "========================================================================="
-#    echo Observed limit, no systematics
-#    combine -S0 -M BayesianToyMC datacard.txt
-#    mv higgsCombine*root observed_S0.root
+#   echo "========================================================================="
+#   echo Observed limit, no systematics
+#   eval $cmd -S0
+#   mv higgsCombine*root observed_S0.root
 #
-#    echo "========================================================================="
-#    echo Expected limits, no systematics
-#    combine -S0 -M BayesianToyMC datacard.txt --toys 100
-#    mv higgsCombine*root expected_S0.root
+#   echo "========================================================================="
+#   echo Expected limits, no systematics
+#   eval $cmd -S0 --toys 500 --saveToys
+#   mv higgsCombine*root expected_S0.root
 
-#    echo "========================================================================="
-#    echo Observed significance
-#    combine -M Significance datacard.txt
-#    mv higgsCombine*root signif_observed.root
+#   cmd="combine -M GoodnessOfFit --algo=saturated datacard.txt"
 #
-#    echo "========================================================================="
-#    echo Expected significance
-#    combine -M Significance datacard.txt --toys 100
-#    mv higgsCombine*root signif_expected.root
+#   echo "========================================================================="
+#   echo GoodnessOfFit observed
+#   eval $cmd
+#   mv higgsCombine*root gof_observed.root
+#
+#   echo "========================================================================="
+#   echo GoodnessOfFit expected
+#   eval $cmd --toys 100
+#   mv higgsCombine*root gof_expected.root
+#
+#   echo "========================================================================="
+#   echo GoodnessOfFit observed, no systematics
+#   eval $cmd -S0
+#   combine -S0 -M GoodnessOfFit datacard.txt --algo=saturated
+#   mv higgsCombine*root gof_S0_observed.root
+#
+#   echo "========================================================================="
+#   echo GoodnessOfFit expected, no systematics
+#   eval $cmd -S0 --toys 100
+#   mv higgsCombine*root gof_S0_expected.root
 
-#    echo "========================================================================="
-#    echo Observed significance, no systematics
-#    combine -S0 -M Significance datacard.txt
-#    mv higgsCombine*root signif_observed_S0.root
+#   cmd="combine -M Significance datacard.txt"
 #
-#    echo "========================================================================="
-#    echo Expected significances, no systematics
-#    combine -S0 -M Significance datacard.txt --toys 100
-#    mv higgsCombine*root signif_expected_S0.root
+#   echo "========================================================================="
+#   echo Observed significance
+#   eval $cmd
+#   mv higgsCombine*root signif_observed.root
+#
+#   echo "========================================================================="
+#   echo Expected significance
+#   eval $cmd --toys 100 -saveToys
+#   mv higgsCombine*root signif_expected.root
+#
+#   echo "========================================================================="
+#   echo Observed significance, no systematics
+#   eval $cmd -S0
+#   mv higgsCombine*root signif_observed_S0.root
+#
+#   echo "========================================================================="
+#   echo Expected significances, no systematics
+#   eval $cmd -S0 --toys 100 -saveToys
+#   mv higgsCombine*root signif_expected_S0.root
 } 2>&1 | gzip -c > combine_output.txt.gz
 
 echo run process.py
