@@ -161,35 +161,6 @@ _add_ds("nr_trackingtreerv23mv3", {
 })
 
 
-_add_ds("nr_trackmoverv25mv1", {
-'qcdht0700_2017': (45, ['/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/TrackMoverV25mv1_2017/190601_102600/0000/movedtree_%i.root' % i for i in chain(xrange(22), xrange(23,45))] + ['/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/TrackMoverV25mv1_2017/190601_114634/0000/movedtree_22.root']),
-'qcdht1000_2017': _fromnum0("/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/TrackMoverV25mv1_2017/190601_102601", 85, fnbase="movedtree"),
-'qcdht1500_2017': (249, ['/store/user/tucker/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/TrackMoverV25mv1_2017/190601_112537/0000/movedtree_63.root'] + ['/store/user/tucker/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/TrackMoverV25mv1_2017/190601_102602/0000/movedtree_%i.root' % i for i in chain(xrange(60), xrange(61,63), xrange(64,129), xrange(130,249))] + ['/store/user/tucker/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/TrackMoverV25mv1_2017/190601_162804/0000/movedtree_%i.root' % i for i in [60, 129]]),
-'qcdht2000_2017': (74, ['/store/user/tucker/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/TrackMoverV25mv1_2017/190601_102603/0000/movedtree_%i.root' % i for i in chain(xrange(61), xrange(62,74))] + ['/store/user/tucker/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/TrackMoverV25mv1_2017/190602_094630/0000/movedtree_61.root']),
-'ttbarht0600_2017': _fromnum0("/store/user/tucker/TTJets_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/TrackMoverV25mv1_2017/190601_102604", 20, fnbase="movedtree"),
-'ttbarht0800_2017': _fromnum0("/store/user/tucker/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/TrackMoverV25mv1_2017/190601_102605", 8, fnbase="movedtree"),
-'ttbarht1200_2017': _fromnum0("/store/user/tucker/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/TrackMoverV25mv1_2017/190601_102606", 2, fnbase="movedtree"),
-'ttbarht2500_2017': (1, ['/store/user/tucker/TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8/TrackMoverV25mv1_2017/190601_102607/0000/movedtree_0.root']),
-'qcdht0700_2018': _fromnum0("/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraphMLM-pythia8/TrackMoverV25mv1_2018/190601_102744", 68, fnbase="movedtree"),
-'qcdht1000_2018': (101, ['/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/TrackMoverV25mv1_2018/190601_102745/0000/movedtree_%i.root' % i for i in chain(xrange(8), xrange(9,101))] + ['/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraphMLM-pythia8/TrackMoverV25mv1_2018/190601_162802/0000/movedtree_8.root']),
-'qcdht1500_2018': _fromnum0("/store/user/tucker/QCD_HT1500to2000_TuneCP5_13TeV-madgraphMLM-pythia8/TrackMoverV25mv1_2018/190601_102746", 302, fnbase="movedtree"),
-'qcdht2000_2018': _fromnum0("/store/user/tucker/QCD_HT2000toInf_TuneCP5_13TeV-madgraphMLM-pythia8/TrackMoverV25mv1_2018/190601_102747", 83, fnbase="movedtree"),
-'ttbarht0600_2018': _fromnum0("/store/user/tucker/TTJets_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/TrackMoverV25mv1_2018/190601_102748", 25, fnbase="movedtree"),
-'ttbarht0800_2018': _fromnum0("/store/user/tucker/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/TrackMoverV25mv1_2018/190601_102749", 11, fnbase="movedtree"),
-'ttbarht1200_2018': _fromnum0("/store/user/tucker/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/TrackMoverV25mv1_2018/190601_102750", 2, fnbase="movedtree"),
-'ttbarht2500_2018': (1, ['/store/user/tucker/TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8/TrackMoverV25mv1_2018/190601_102751/0000/movedtree_0.root']),
-'JetHT2017B': _fromnum1("/store/user/tucker/JetHT/TrackMoverV25mv1_2017/190601_152412", 77, fnbase="movedtree"),
-'JetHT2017C': _fromnum1("/store/user/tucker/JetHT/TrackMoverV25mv1_2017/190601_152430", 117, fnbase="movedtree"),
-'JetHT2017D': _fromnum1("/store/user/tucker/JetHT/TrackMoverV25mv1_2017/190601_152443", 55, fnbase="movedtree"),
-'JetHT2017E': _fromnum1("/store/user/tucker/JetHT/TrackMoverV25mv1_2017/190601_152459", 128, fnbase="movedtree"),
-'JetHT2017F': _fromnum1("/store/user/tucker/JetHT/TrackMoverV25mv1_2017/190601_152514", 159, fnbase="movedtree"),
-'JetHT2018A': _fromnum1("/store/user/tucker/JetHT/TrackMoverV25mv1_2018/190601_152623", 355, fnbase="movedtree"),
-'JetHT2018B': _fromnum1("/store/user/tucker/JetHT/TrackMoverV25mv1_2018/190601_152714", 178, fnbase="movedtree"),
-'JetHT2018C': _fromnum1("/store/user/tucker/JetHT/TrackMoverV25mv1_2018/190601_152730", 134, fnbase="movedtree"),
-'JetHT2018D': _fromnum1("/store/user/tucker/JetHT/TrackMoverV25mv1_2018/190601_152743", 590, fnbase="movedtree"),
-})
-
-
 _add_ds("ntuplev27m", {
 'qcdht0700_2017': _fromnum0("/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/NtupleV27m_2017/190802_112506", 16),
 'qcdht1000_2017': _fromnum0("/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/NtupleV27m_2017/190802_112507", 31),
