@@ -137,7 +137,7 @@ config.JobType.maxMemoryMB = 3000
 
 steering_fn = 'steering.sh'
 
-config.JobType.inputFiles = ['todoify.sh', steering_fn, 'gensim.py', 'dynamicconf.py', 'modify.py', 'scanpack.py', 'rawhlt.py', 'minbias.py', 'minbias_premix.txt.gz', 'reco.py', 'fixfjr.py', 'year.txt']
+config.JobType.inputFiles = ['todoify.sh', steering_fn, 'gensim.py', 'dynamicconf.py', 'modify.py', 'scanpack.py', 'rawhlt.py', 'minbias.py', 'minbias_premix.txt.gz', 'reco.py', 'miniaod.py', 'fixfjr.py', 'year.txt']
 if output_level in ('minitree', 'ntuple'):
     config.JobType.inputFiles += ['ntuple.py', 'minitree.py']
 

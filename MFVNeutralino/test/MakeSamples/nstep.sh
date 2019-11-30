@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for fn in gensim.py rawhlt.py reco.py ntuple.py minitree.py; do
+for fn in gensim.py rawhlt.py reco.py miniaod.py ntuple.py minitree.py; do
     if [[ -e $fn ]]; then
         ./todoify.sh $fn > temp
         mv temp $fn
@@ -29,6 +29,7 @@ echo OUTPUTLEVEL: ${OUTPUTLEVEL}
 echo TODO: ${TODO}
 echo TODORAWHLT: ${TODORAWHLT}
 echo TODORECO: ${TODORECO}
+echo TODOMINIAOD: ${TODOMINIAOD}
 echo TODONTUPLE: ${TODONTUPLE}
 echo SCANPACK: ${SCANPACK}
 
@@ -88,6 +89,11 @@ function reco {
     echo $cmd at $(date) ; eval $cmd 2>&1
 }
 
+function miniaod {
+    cmd="cmsRun -j tempfjr.xml miniaod.py ${TODOMINIAOD}"
+    echo $cmd at $(date) ; eval $cmd 2>&1
+}
+
 ################################################################################
 
 if [[ $USETHISCMSSW -ne 1 ]]; then
@@ -135,9 +141,18 @@ exitbanner $? RECO
 
 ################################################################################
 
-if [[ $OUTPUTLEVEL == "ntuple" || $OUTPUTLEVEL == "minitree" ]]; then
-    exitbanner 1 ntuple\|minitree2017
+echo
+echo START MINIAOD at $(date)
+if [[ $USETHISCMSSW -eq 1 ]]; then
+    miniaod
+else
+    ( scramproj MINIAOD 9_4_6_patch1 && miniaod )
+fi
+exitbanner $? MINIAOD
 
+################################################################################
+
+if [[ $OUTPUTLEVEL == "ntuple" || $OUTPUTLEVEL == "minitree" ]]; then
     if [[ $(basename $(pwd)) == "subworkdir" ]]; then
         # if we're run via condor, handle the way CondorSubmitter sets up the working directory
         NSTEP_CMSSW_DIR=(../CMSSW*)
@@ -167,7 +182,7 @@ if [[ $OUTPUTLEVEL == "ntuple" || $OUTPUTLEVEL == "minitree" ]]; then
         return $exitcode
     }
 
-    doit ntuple.py reco.root ; exitcode=$?
+    doit ntuple.py miniaod.root ; exitcode=$?
 
     if [[ $exitcode -eq 0 ]]; then
         echo NTUPLE done at $(date) nevents $(nevents ntuple.root)
@@ -193,7 +208,7 @@ fi
 ################################################################################
 
 echo recap of events in files:
-for fn in gensim rawhlt reco ntuple; do
+for fn in gensim rawhlt reco miniaod ntuple; do
     fn=${fn}.root
     if [[ -e $fn ]]; then
         echo $(nevents $fn)
