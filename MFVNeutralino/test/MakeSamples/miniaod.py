@@ -1,12 +1,13 @@
 # https://twiki.cern.ch/twiki/bin/view/CMS/PdmVMCcampaignRunIIFall17MiniAODv2
-# https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/EXO-RunIIFall17MiniAODv2-00064
-# CMSSW_9_4_6_patch1 cmsDriver.py step1 --mc --eventcontent MINIAODSIM --runUnscheduled --datatier MINIAODSIM --conditions 94X_mc2017_realistic_v14 --step PAT --nThreads 4 --scenario pp --era Run2_2017,run2_miniAOD_94XFall17 --python_filename BPH-RunIIFall17MiniAODv2-00046_1_cfg.py --no_exec --customise Configuration/DataProcessing/Utils.addMonitoring -n 4800 --no_exec
+# https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/EXO-RunIIFall17MiniAODv2-01984
+# 9_4_7 cmsDriver.py step1 --filein "dbs:/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-300um_TuneCP2_13TeV-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM" --fileout file:EXO-RunIIFall17MiniAODv2-01984.root --mc --eventcontent MINIAODSIM --runUnscheduled --datatier MINIAODSIM --conditions 94X_mc2017_realistic_v14 --step PAT --nThreads 4 --scenario pp --era Run2_2017,run2_miniAOD_94XFall17 --python_filename EXO-RunIIFall17MiniAODv2-01984_1_cfg.py --no_exec --customise Configuration/DataProcessing/Utils.addMonitoring -n 4800
+# https://twiki.cern.ch/twiki/bin/view/CMS/PdmVCampaignRunIIAutumn18MiniAOD
+# https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/EXO-RunIIAutumn18MiniAOD-00203
+# 10_2_6 cmsDriver.py step1 --filein "dbs:/StopStopbarTo2Dbar2D_M-200_CTau-10mm_TuneCP2_13TeV_2018-pythia8/RunIIAutumn18DRPremix-102X_upgrade2018_realistic_v15-v1/AODSIM" --fileout file:EXO-RunIIAutumn18MiniAOD-00203.root --mc --eventcontent MINIAODSIM --runUnscheduled --datatier MINIAODSIM --conditions 102X_upgrade2018_realistic_v15 --step PAT --nThreads 8 --geometry DB:Extended --era Run2_2018 --python_filename EXO-RunIIAutumn18MiniAOD-00203_1_cfg.py --no_exec --customise Configuration/DataProcessing/Utils.addMonitoring -n 8597
 
-import sys, FWCore.ParameterSet.Config as cms
-from Configuration.StandardSequences.Eras import eras
-import dynamicconf
+import sys, FWCore.ParameterSet.Config as cms, dynamicconf
 
-process = cms.Process('PAT',eras.Run2_2017,eras.run2_miniAOD_94XFall17)
+process = dynamicconf.process('PAT')
 
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')

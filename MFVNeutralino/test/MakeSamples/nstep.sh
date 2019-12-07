@@ -12,6 +12,10 @@ JOBNUM=$1
 source steering.sh
 
 YEAR=$(<year.txt)
+if [[ $YEAR != 2017 && $YEAR != 2018 ]]; then
+    echo bad year $YEAR
+    exit 1
+fi
 
 INDIR=$(pwd)
 OUTDIR=$(pwd)
@@ -45,6 +49,13 @@ function scramproj {
     cd $1/src
     eval $(scram runtime -sh)
     cd ../..
+}
+
+function maybenewcmssw {
+    if [[ $USETHISCMSSW -ne 1 ]]; then
+        vers=($2 $3)
+        echo scramproj $1 ${vers[YEAR-2017]}
+    fi
 }
 
 function fixfjr {
@@ -104,11 +115,8 @@ fi
 
 echo
 echo START GENSIM at $(date)
-if [[ $USETHISCMSSW -eq 1 ]]; then
-    gensim
-else
-    ( scramproj GENSIM 9_3_9_patch1 && gensim )
-fi
+maybenewcmssw GENSIM 9_3_13 10_2_6
+gensim
 exitbanner $? GENSIM
 
 if [[ $OUTPUTLEVEL == "gensim" ]]; then
@@ -121,33 +129,24 @@ fi
 
 echo
 echo START RAWHLT at $(date)
-if [[ $USETHISCMSSW -eq 1 ]]; then
-    rawhlt
-else
-    ( scramproj RAWHLT 9_4_7 && rawhlt )
-fi
+maybenewcmssw RAWHLT 9_4_7 10_2_6
+rawhlt
 exitbanner $? RAWHLT
 
 ################################################################################
 
 echo
 echo START RECO at $(date)
-if [[ $USETHISCMSSW -eq 1 ]]; then
-    reco
-else
-    ( scramproj RECO 9_4_7 && reco )
-fi
+maybenewcmssw RECO 9_4_7 10_2_6
+reco
 exitbanner $? RECO
 
 ################################################################################
 
 echo
 echo START MINIAOD at $(date)
-if [[ $USETHISCMSSW -eq 1 ]]; then
-    miniaod
-else
-    ( scramproj MINIAOD 9_4_6_patch1 && miniaod )
-fi
+maybenewcmssw MINIAOD 9_4_7 10_2_6
+miniaod
 exitbanner $? MINIAOD
 
 ################################################################################

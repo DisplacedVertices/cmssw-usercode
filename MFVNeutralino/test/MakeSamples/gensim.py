@@ -1,9 +1,11 @@
 # https://twiki.cern.ch/twiki/bin/view/CMS/PdmVMCcampaignRunIIFall17GS
-# https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/EXO-RunIIFall17GS-00073
-# 9_3_9_patch1 cmsDriver.py Configuration/GenProduction/python/EXO-RunIIFall17GS-00073-fragment.py --fileout file:EXO-RunIIFall17GS-00073.root --mc --eventcontent RAWSIM --datatier GEN-SIM --conditions 93X_mc2017_realistic_v3 --beamspot Realistic25ns13TeVEarly2017Collision --step GEN,SIM --nThreads 8 --geometry DB:Extended --era Run2_2017 --python_filename EXO-RunIIFall17GS-00073_1_cfg.py --no_exec --customise Configuration/DataProcessing/Utils.addMonitoring -n 724 
+# https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/EXO-RunIIFall17GS-02252
+# 9_3_13 cmsDriver.py Configuration/GenProduction/python/s17.py --fileout file:EXO-RunIIFall17GS-02252.root --mc --eventcontent RAWSIM --datatier GEN-SIM --conditions 93X_mc2017_realistic_v3 --beamspot Realistic25ns13TeVEarly2017Collision --step GEN,SIM --nThreads 8 --geometry DB:Extended --era Run2_2017 --python_filename EXO-RunIIFall17GS-02252_1_cfg.py --no_exec --customise Configuration/DataProcessing/Utils.addMonitoring -n 380
+# https://twiki.cern.ch/twiki/bin/view/CMS/PdmVCampaignRunIIFall18GS
+# https://cms-pdmv.cern.ch/mcm/public/restapi/requests/get_test/EXO-RunIIFall18GS-00073
+# 10_2_6 cmsDriver.py Configuration/GenProduction/python/s18.py --fileout file:EXO-RunIIFall18GS-00073.root --mc --eventcontent RAWSIM --datatier GEN-SIM --conditions 102X_upgrade2018_realistic_v11 --beamspot Realistic25ns13TeVEarly2018Collision --step GEN,SIM --nThreads 8 --geometry DB:Extended --era Run2_2018 --python_filename EXO-RunIIFall18GS-00073_1_cfg.py --no_exec --customise Configuration/DataProcessing/Utils.addMonitoring --customise_commands process.source.numberEventsInLuminosityBlock="cms.untracked.uint32(1000)" -n 892
 
 import sys, FWCore.ParameterSet.Config as cms, dynamicconf
-from Configuration.StandardSequences.Eras import eras
 
 genonly = 'genonly' in sys.argv
 debug = 'debug' in sys.argv
@@ -27,7 +29,7 @@ for arg in sys.argv:
 
 ################################################################################
 
-process = cms.Process('SIM', eras.Run2_2017)
+process = dynamicconf.process('SIM')
 
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
@@ -38,7 +40,7 @@ process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.GeometrySimDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.Generator_cff')
-process.load('IOMC.EventVertexGenerators.VtxSmearedRealistic25ns13TeVEarly2017Collision_cfi')
+process.load('IOMC.EventVertexGenerators.VtxSmearedRealistic25ns13TeVEarly%sCollision_cfi' % dynamicconf.year)
 process.load('GeneratorInterface.Core.genFilterSummary_cff')
 process.load('Configuration.StandardSequences.SimIdeal_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -52,7 +54,7 @@ process.XMLFromDBSource.label = cms.string("Extended")
 process.genstepfilter.triggerConditions = cms.vstring('generation_step')
 
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, dynamicconf.globaltag, '')
+process.GlobalTag = GlobalTag(process.GlobalTag, dynamicconf.globaltag['gensim'], '')
 
 from Configuration.Generator.Pythia8CommonSettings_cfi import pythia8CommonSettingsBlock
 from Configuration.Generator.MCTunes2017.PythiaCP2Settings_cfi import pythia8CP2SettingsBlock

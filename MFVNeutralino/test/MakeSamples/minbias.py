@@ -1,5 +1,6 @@
 import os
 from gzip import GzipFile as gzip_open
+from dynamicconf import year
 
 def _read_gzip_file(fn):
     print 'getting minbias file list from cache', fn
@@ -28,4 +29,11 @@ def files():
     raise NotImplementedError('need non-premix minbias files')
 
 def premix_files():
-    return _from_cache_or_dbs('minbias_premix.txt.gz', '/Neutrino_E-10_gun/RunIISummer17PrePremix-MCv2_correctPU_94X_mc2017_realistic_v9-v1/GEN-SIM-DIGI-RAW')
+    if year == 2017:
+        ds = '/Neutrino_E-10_gun/RunIISummer17PrePremix-MCv2_correctPU_94X_mc2017_realistic_v9-v1/GEN-SIM-DIGI-RAW'
+    elif year == 2018:
+        ds = '/Neutrino_E-10_gun/RunIISummer17PrePremix-PUAutumn18_102X_upgrade2018_realistic_v15-v1/GEN-SIM-DIGI-RAW'
+    return _from_cache_or_dbs('minbias_premix_%s.txt.gz' % year, ds)
+
+if __name__ == '__main__':
+    fns = premix_files()
