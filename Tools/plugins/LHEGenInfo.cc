@@ -14,6 +14,7 @@ private:
   virtual void endRun(const edm::Run&, const edm::EventSetup&) override;
   virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
 
+  const bool use_lhe;
   const edm::EDGetTokenT<LHERunInfoProduct> lhe_run_token;
   const edm::EDGetTokenT<LHEEventProduct> lhe_event_token;
   const edm::EDGetTokenT<GenEventInfoProduct> gen_event_token;
@@ -21,8 +22,9 @@ private:
 };
 
 JMTLHEGenInfo::JMTLHEGenInfo(const edm::ParameterSet& cfg)
-  : lhe_run_token(consumes<LHERunInfoProduct, edm::InRun>(edm::InputTag("externalLHEProducer"))),
-    lhe_event_token(consumes<LHEEventProduct>(edm::InputTag("externalLHEProducer"))),
+  : use_lhe(cfg.getParameter<bool>("use_lhe")),
+    lhe_run_token(mayConsume<LHERunInfoProduct, edm::InRun>(edm::InputTag("externalLHEProducer"))),
+    lhe_event_token(mayConsume<LHEEventProduct>(edm::InputTag("externalLHEProducer"))),
     gen_event_token(consumes<GenEventInfoProduct>(edm::InputTag("generator"))),
     sep("\n================================================================================\n")
 {}
@@ -30,23 +32,25 @@ JMTLHEGenInfo::JMTLHEGenInfo(const edm::ParameterSet& cfg)
 void JMTLHEGenInfo::endRun(const edm::Run& run, edm::EventSetup const&) {
   std::cout << sep << "JMTLHEGenInfo::endRun run " << run.id().run() << "\n";
 
-  edm::Handle<LHERunInfoProduct> lhe;
-  run.getByToken(lhe_run_token, lhe);
+  if (use_lhe) {
+    edm::Handle<LHERunInfoProduct> lhe;
+    run.getByToken(lhe_run_token, lhe);
 
-  int count = 0;
-  for (LHERunInfoProduct::headers_const_iterator it = lhe->headers_begin(); it != lhe->headers_end(); ++it, ++count) {
-    std::cout << sep << "LHE run header #" << count << " tag " << it->tag() << " lines:\n";
-    for (auto line : it->lines())
-      std::cout << line;
-  }
+    int count = 0;
+    for (LHERunInfoProduct::headers_const_iterator it = lhe->headers_begin(); it != lhe->headers_end(); ++it, ++count) {
+      std::cout << sep << "LHE run header #" << count << " tag " << it->tag() << " lines:\n";
+      for (auto line : it->lines())
+        std::cout << line;
+    }
 
-  if (lhe->comments_size()) {
-    count = 0;
-    for (LHERunInfoProduct::comments_const_iterator it = lhe->comments_begin(); it != lhe->comments_end(); ++it, ++count)
-      std::cout << sep << "LHE run comment #" << count << " " << *it;
+    if (lhe->comments_size()) {
+      count = 0;
+      for (LHERunInfoProduct::comments_const_iterator it = lhe->comments_begin(); it != lhe->comments_end(); ++it, ++count)
+        std::cout << sep << "LHE run comment #" << count << " " << *it;
+    }
+    else
+      std::cout << sep << "LHE run comments empty\n";
   }
-  else
-    std::cout << sep << "LHE run comments empty\n";
 
   std::cout << sep << "JMTLHEGenInfo::endRun done\n";
 }
@@ -54,39 +58,41 @@ void JMTLHEGenInfo::endRun(const edm::Run& run, edm::EventSetup const&) {
 void JMTLHEGenInfo::analyze(const edm::Event& event, const edm::EventSetup&) {
   std::cout << sep << "JMTLHEGenInfo::analyze run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
 
-  edm::Handle<LHEEventProduct> lhe;
-  event.getByToken(lhe_event_token, lhe);
+  int count = 0;
+
+  if (use_lhe) {
+    edm::Handle<LHEEventProduct> lhe;
+    event.getByToken(lhe_event_token, lhe);
+
+    if (lhe->comments_size())
+      for (LHERunInfoProduct::comments_const_iterator it = lhe->comments_begin(); it != lhe->comments_end(); ++it, ++count)
+        std::cout << sep << "LHE event comment #" << count << " " << *it;
+    else
+      std::cout << sep << "LHE event comments empty\n";
+
+    std::cout << sep << "LHE event stuff:\nnpLO = " << lhe->npLO() << " npNLO = " << lhe->npNLO() << " originalXWGTUP = " << lhe->originalXWGTUP() << "\n";
+
+    if (lhe->pdf())
+      std::cout << "PDF info: id = " << lhe->pdf()->id.first << "," << lhe->pdf()->id.second
+                << " x = " << lhe->pdf()->x.first << "," << lhe->pdf()->x.second
+                << " xPDF = " << lhe->pdf()->xPDF.first << "," << lhe->pdf()->xPDF.second
+                << " scalePDF = " << lhe->pdf()->scalePDF << "\n";
+    else
+      std::cout << "PDF info empty\n";
+
+    std::cout << "scales (#=" << lhe->scales().size() << "):\n";
+    count = 0;
+    for (auto s : lhe->scales())
+      std::cout << "  s #" << std::setw(4) << count++ << ": " << s << "\n";
+
+    std::cout << "weights (#=" << lhe->weights().size() << "):\n";
+    count = 0;
+    for (auto w : lhe->weights())
+      std::cout << "  w #" << std::setw(4) << count++ << ": '" << w.id << "' = " << w.wgt << " (" << w.wgt / lhe->originalXWGTUP() << ")\n";
+  }
 
   edm::Handle<GenEventInfoProduct> gen;
   event.getByToken(gen_event_token, gen);
-
-  int count = 0;
-
-  if (lhe->comments_size())
-    for (LHERunInfoProduct::comments_const_iterator it = lhe->comments_begin(); it != lhe->comments_end(); ++it, ++count)
-      std::cout << sep << "LHE event comment #" << count << " " << *it;
-  else
-    std::cout << sep << "LHE event comments empty\n";
-
-  std::cout << sep << "LHE event stuff:\nnpLO = " << lhe->npLO() << " npNLO = " << lhe->npNLO() << " originalXWGTUP = " << lhe->originalXWGTUP() << "\n";
-
-  if (lhe->pdf())
-    std::cout << "PDF info: id = " << lhe->pdf()->id.first << "," << lhe->pdf()->id.second
-              << " x = " << lhe->pdf()->x.first << "," << lhe->pdf()->x.second
-              << " xPDF = " << lhe->pdf()->xPDF.first << "," << lhe->pdf()->xPDF.second
-              << " scalePDF = " << lhe->pdf()->scalePDF << "\n";
-  else
-    std::cout << "PDF info empty\n";
-
-  std::cout << "scales (#=" << lhe->scales().size() << "):\n";
-  count = 0;
-  for (auto s : lhe->scales())
-    std::cout << "  s #" << std::setw(4) << count++ << ": " << s << "\n";
-
-  std::cout << "weights (#=" << lhe->weights().size() << "):\n";
-  count = 0;
-  for (auto w : lhe->weights())
-    std::cout << "  w #" << std::setw(4) << count++ << ": '" << w.id << "' = " << w.wgt << " (" << w.wgt / lhe->originalXWGTUP() << ")\n";
 
   std::cout << sep << "GenEventInfo stuff:\nqScale = " << gen->qScale() << " alphaQCD = " << gen->alphaQCD() << " alphaQED = " << gen->alphaQED() << " nMEPartons = " << gen->nMEPartons() << " nMEPartonsFiltered = " << gen->nMEPartonsFiltered() << "\n";
 
