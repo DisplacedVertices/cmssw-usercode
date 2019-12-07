@@ -1,10 +1,10 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-sample_files(process, 'ttbarht0600_2017', 'miniaod', 1)
 remove_tfileservice(process)
-file_event_from_argv(process)
+cmssw_from_argv(process)
 
 add_analyzer(process, 'GenXSecAnalyzer')
+add_analyzer(process, 'JMTLHEGenInfo', use_lhe=cms.bool(False))
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
