@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
-raise ValueError('understand/backport pythia variations--see central_fragments.py for 2018 and http://home.thep.lu.se/Pythia/pythia82html/Variations.html')
-
 import os
-from JMTucker.Tools.Year import year; assert year == 2017
+from JMTucker.Tools.Year import year
 from scanpack import get_scanpack, scanpackbase
 
 condor = False
@@ -19,6 +17,7 @@ premix = True
 trig_filter = False
 hip_simulation = False
 hip_mitigation = False
+pythia8240 = False
 ex = ''
 
 meta = 'neu'
@@ -137,7 +136,9 @@ config.JobType.maxMemoryMB = 3000
 
 steering_fn = 'steering.sh'
 
-config.JobType.inputFiles = ['todoify.sh', steering_fn, 'gensim.py', 'dynamicconf.py', 'modify.py', 'scanpack.py', 'rawhlt.py', 'minbias.py', 'minbias_premix.txt.gz', 'reco.py', 'miniaod.py', 'fixfjr.py', 'year.txt']
+config.JobType.inputFiles = ['todoify.sh', steering_fn, 'gensim.py', 'dynamicconf.py', 'modify.py', 'scanpack.py', 'rawhlt.py', 'minbias.py', 'minbias_premix_%s.txt.gz' % year, 'reco.py', 'miniaod.py', 'fixfjr.py', 'year.txt']
+if pythia8240:
+    config.JobType.inputFiles += ['pythia8240.sh', 'pythia8240-GeneratorInterface.tgz']
 if output_level in ('minitree', 'ntuple'):
     config.JobType.inputFiles += ['ntuple.py', 'minitree.py']
 
@@ -210,6 +211,7 @@ def submit(config, name, scanpack_or_todo, todo_rawhlt=[], todo_reco=[], todo_nt
         'PREMIX=%i' % premix,
         'export DUMMYFORHASH=%i' % dummy_for_hash,  # exported so the python script executed in cmsRun can just get it from os.environ instead of parsing argv like we do the rest
         'OUTPUTLEVEL=%s' % output_level,
+        'PYTHIA8240=%i' % pythia8240,
         ]
 
     if todo:

@@ -59,6 +59,68 @@ process.GlobalTag = GlobalTag(process.GlobalTag, dynamicconf.globaltag['gensim']
 from Configuration.Generator.Pythia8CommonSettings_cfi import pythia8CommonSettingsBlock
 from Configuration.Generator.MCTunes2017.PythiaCP2Settings_cfi import pythia8CP2SettingsBlock
 
+# from Configuration.Generator.PSweightsPythia.PythiaPSweightsSettings_cfi import pythia8PSweightsSettingsBlock
+# ^ doesn't exist in 2017 CMSSW but the commands work in 2017 CMSSW's pythia 8230
+pythia8PSweightsSettingsBlock = cms.PSet(
+    pythia8PSweightsSettings = cms.vstring(
+        'UncertaintyBands:doVariations = on',
+# 3 sets of variations for ISR&FSR up/down
+# Reduced sqrt(2)/(1/sqrt(2)), Default 2/0.5 and Conservative 4/0.25 variations
+# 32 decorrelated variations of muR and non-singular terms (cNS) for each branching type
+        'UncertaintyBands:List = {\
+isrRedHi isr:muRfac=0.707,fsrRedHi fsr:muRfac=0.707,isrRedLo isr:muRfac=1.414,fsrRedLo fsr:muRfac=1.414,\
+isrDefHi isr:muRfac=0.5,fsrDefHi fsr:muRfac=0.5,isrDefLo isr:muRfac=2.0,fsrDefLo fsr:muRfac=2.0,\
+isrConHi isr:muRfac=0.25,fsrConHi fsr:muRfac=0.25,isrConLo isr:muRfac=4.0,fsrConLo fsr:muRfac=4.0,\
+fsr_G2GG_muR_dn fsr:G2GG:muRfac=0.5,\
+fsr_G2GG_muR_up fsr:G2GG:muRfac=2.0,\
+fsr_G2QQ_muR_dn fsr:G2QQ:muRfac=0.5,\
+fsr_G2QQ_muR_up fsr:G2QQ:muRfac=2.0,\
+fsr_Q2QG_muR_dn fsr:Q2QG:muRfac=0.5,\
+fsr_Q2QG_muR_up fsr:Q2QG:muRfac=2.0,\
+fsr_X2XG_muR_dn fsr:X2XG:muRfac=0.5,\
+fsr_X2XG_muR_up fsr:X2XG:muRfac=2.0,\
+fsr_G2GG_cNS_dn fsr:G2GG:cNS=-2.0,\
+fsr_G2GG_cNS_up fsr:G2GG:cNS=2.0,\
+fsr_G2QQ_cNS_dn fsr:G2QQ:cNS=-2.0,\
+fsr_G2QQ_cNS_up fsr:G2QQ:cNS=2.0,\
+fsr_Q2QG_cNS_dn fsr:Q2QG:cNS=-2.0,\
+fsr_Q2QG_cNS_up fsr:Q2QG:cNS=2.0,\
+fsr_X2XG_cNS_dn fsr:X2XG:cNS=-2.0,\
+fsr_X2XG_cNS_up fsr:X2XG:cNS=2.0,\
+isr_G2GG_muR_dn isr:G2GG:muRfac=0.5,\
+isr_G2GG_muR_up isr:G2GG:muRfac=2.0,\
+isr_G2QQ_muR_dn isr:G2QQ:muRfac=0.5,\
+isr_G2QQ_muR_up isr:G2QQ:muRfac=2.0,\
+isr_Q2QG_muR_dn isr:Q2QG:muRfac=0.5,\
+isr_Q2QG_muR_up isr:Q2QG:muRfac=2.0,\
+isr_X2XG_muR_dn isr:X2XG:muRfac=0.5,\
+isr_X2XG_muR_up isr:X2XG:muRfac=2.0,\
+isr_G2GG_cNS_dn isr:G2GG:cNS=-2.0,\
+isr_G2GG_cNS_up isr:G2GG:cNS=2.0,\
+isr_G2QQ_cNS_dn isr:G2QQ:cNS=-2.0,\
+isr_G2QQ_cNS_up isr:G2QQ:cNS=2.0,\
+isr_Q2QG_cNS_dn isr:Q2QG:cNS=-2.0,\
+isr_Q2QG_cNS_up isr:Q2QG:cNS=2.0,\
+isr_X2XG_cNS_dn isr:X2XG:cNS=-2.0,\
+isr_X2XG_cNS_up isr:X2XG:cNS=2.0}',
+        
+        'UncertaintyBands:nFlavQ = 4', # define X=bottom/top in X2XG variations
+        'UncertaintyBands:MPIshowers = on',
+        'UncertaintyBands:overSampleFSR = 10.0',
+        'UncertaintyBands:overSampleISR = 10.0',
+        'UncertaintyBands:FSRpTmin2Fac = 20',
+        'UncertaintyBands:ISRpTmin2Fac = 1'
+        )
+)
+
+isrfsr = pythia8PSweightsSettingsBlock.pythia8PSweightsSettings[1] # 2-45
+pdf = [
+    'pdfplus isr:PDF:plus=1', # 46
+    'pdfminus isr:PDF:minus=1', # 47
+    'pdffamily isr:PDF:family=1', # 48-147  # needs pythia >= 8240
+    ]
+pythia8PSweightsSettingsBlock.pythia8PSweightsSettings[1] = isrfsr.replace('}', ',' + ','.join(pdf) + '}')
+
 process.generator = cms.EDFilter('Pythia8GeneratorFilter',
     comEnergy = cms.double(13000.0),
     filterEfficiency = cms.untracked.double(1.0),
@@ -68,9 +130,15 @@ process.generator = cms.EDFilter('Pythia8GeneratorFilter',
     PythiaParameters = cms.PSet(
         pythia8CommonSettingsBlock,
         pythia8CP2SettingsBlock,
+        pythia8PSweightsSettingsBlock,
+        pdfSettings = cms.vstring(
+            'PDF:pSet = LHAPDF6:NNPDF31_lo_as_0130',
+            ),
         parameterSets = cms.vstring(
             'pythia8CommonSettings',
             'pythia8CP2Settings',
+            'pdfSettings',
+            'pythia8PSweightsSettings',
             'processParameters'
             ),
         processParameters = cms.vstring(),
@@ -94,7 +162,7 @@ process.RAWSIMoutput = cms.OutputModule('PoolOutputModule',
 process.RAWSIMoutput_step = cms.EndPath(process.RAWSIMoutput)
 
 if genonly:
-    sched = [process.generation_step, process.genfiltersummary_step, process.RAWSIMoutput_step]
+    sched = [process.generation_step, process.genfiltersummary_step,                          process.RAWSIMoutput_step]
 else:
     sched = [process.generation_step, process.genfiltersummary_step, process.simulation_step, process.RAWSIMoutput_step]
 
@@ -130,3 +198,5 @@ if scanpack:
 
 from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
 process = customiseEarlyDelete(process)
+
+#import modify; modify.set_stop_dbardbar(process, 1., 800); open('gensim_test.py','wt').write(process.dumpPython())

@@ -36,25 +36,33 @@ echo TODORECO: ${TODORECO}
 echo TODOMINIAOD: ${TODOMINIAOD}
 echo TODONTUPLE: ${TODONTUPLE}
 echo SCANPACK: ${SCANPACK}
+echo PYTHIA8240: ${PYTHIA8240}
 
 ################################################################################
 
 function scramproj {
+    noenv=0
+    if [[ $1 == noenv ]]; then
+        noenv=1
+        shift
+    fi
     scram project -n $1 CMSSW CMSSW_$2 >/dev/null 2>&1 
     scramexit=$?
     if [[ $scramexit -ne 0 ]]; then
         echo problem with scram project $1 $2
-        exit $scramexit
+        exit $scramexit # bail out of the whole script
     fi
-    cd $1/src
-    eval $(scram runtime -sh)
-    cd ../..
+    if [[ $noenv -ne 1 ]]; then
+        cd $1/src
+        eval $(scram runtime -sh)
+        cd ../..
+    fi
 }
 
 function maybenewcmssw {
     if [[ $USETHISCMSSW -ne 1 ]]; then
         vers=($2 $3)
-        echo scramproj $1 ${vers[YEAR-2017]}
+        scramproj $1 ${vers[YEAR-2017]}
     fi
 }
 
@@ -115,7 +123,19 @@ fi
 
 echo
 echo START GENSIM at $(date)
-maybenewcmssw GENSIM 9_3_13 10_2_6
+if [[ $PYTHIA8240 -eq 1 ]]; then
+    if [[ $YEAR != 2018 ]]; then
+        echo no PYTHIA8240 unless year is 2018
+        exit 1
+    fi
+    scramproj noenv GENSIM 10_2_6
+    cd GENSIM
+    ../pythia8240.sh || exit 1
+    eval $(scram runtime -sh)
+    cd ..
+else
+    maybenewcmssw GENSIM 9_3_13 10_2_6
+fi
 gensim
 exitbanner $? GENSIM
 
