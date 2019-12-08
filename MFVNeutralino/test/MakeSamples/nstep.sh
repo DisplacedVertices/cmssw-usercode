@@ -94,21 +94,25 @@ function exitbanner {
 }
 
 function gensim {
+    [[ -e gensim.root ]] && return 0
     cmd="cmsRun -j tempfjr.xml gensim.py salt=${SALT} jobnum=${JOBNUM} maxevents=${MAXEVENTS} ${TODO} ${SCANPACK}"
     echo $cmd at $(date) ; eval $cmd 2>&1
 }
 
 function rawhlt {
+    [[ -e rawhlt.root ]] && return 0
     cmd="cmsRun -j tempfjr.xml rawhlt.py expectedevents=${EXPECTEDEVENTS} salt=${SALT} jobnum=${JOBNUM} premix=${PREMIX} trigfilter=${TRIGFILTER} ${TODORAWHLT}"
     echo $cmd at $(date) ; eval $cmd 2>&1
 }
 
 function reco {
+    [[ -e reco.root ]] && return 0
     cmd="cmsRun -j tempfjr.xml reco.py premix=${PREMIX} ${TODORECO}"
     echo $cmd at $(date) ; eval $cmd 2>&1
 }
 
 function miniaod {
+    [[ -e miniaod.root ]] && return 0
     cmd="cmsRun -j tempfjr.xml miniaod.py ${TODOMINIAOD}"
     echo $cmd at $(date) ; eval $cmd 2>&1
 }

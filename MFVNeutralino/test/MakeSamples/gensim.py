@@ -29,7 +29,7 @@ for arg in sys.argv:
 
 ################################################################################
 
-process = dynamicconf.process('SIM')
+process = dynamicconf.process()
 
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
@@ -54,7 +54,7 @@ process.XMLFromDBSource.label = cms.string("Extended")
 process.genstepfilter.triggerConditions = cms.vstring('generation_step')
 
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, dynamicconf.globaltag['gensim'], '')
+process.GlobalTag = GlobalTag(process.GlobalTag, dynamicconf.globaltag(), '')
 
 from Configuration.Generator.Pythia8CommonSettings_cfi import pythia8CommonSettingsBlock
 from Configuration.Generator.MCTunes2017.PythiaCP2Settings_cfi import pythia8CP2SettingsBlock

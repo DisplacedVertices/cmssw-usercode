@@ -27,7 +27,7 @@ for arg in sys.argv:
     elif arg.startswith('trigfilter='):
         trigfilter = arg.replace('trigfilter=','') == '1'
 
-process = dynamicconf.process('HLT')
+process = dynamicconf.process()
 
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
@@ -38,7 +38,7 @@ process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 if premix:
     process.load('SimGeneral.MixingModule.mixNoPU_cfi')
-    if year == 2017:
+    if dynamicconf.year == 2017:
         process.load('Configuration.StandardSequences.DigiDMPreMix_cff')
         process.load('SimGeneral.MixingModule.digi_MixPreMix_cfi')
     else:
@@ -49,9 +49,9 @@ if premix:
 else:
     raise NotImplementedError('need to set up non-premix')
 
-if year == 2017:
+if dynamicconf.year == 2017:
     process.load('HLTrigger.Configuration.HLT_2e34v40_cff')
-elif year == 2018:
+elif dynamicconf.year == 2018:
     process.load('HLTrigger.Configuration.HLT_2018v32_cff')
 
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
@@ -69,7 +69,7 @@ if premix:
     output_commands = process.PREMIXRAWEventContent.outputCommands
     minbias_input = process.mixData.input
     process.mixData.input.fileNames = minbias.premix_files()
-    if year == 2017:
+    if dynamicconf.year == 2017:
         process.mix.digitizers = cms.PSet(process.theDigitizersMixPreMix)
 else:
     raise NotImplementedError('need to set up non-premix')
@@ -94,7 +94,7 @@ if not randomize or salt.startswith('fixed'):
     minbias_input.skipEvents = cms.untracked.uint32(skip)
 
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, dynamicconf.globaltag['rawhlt'], '')
+process.GlobalTag = GlobalTag(process.GlobalTag, dynamicconf.globaltag(), '')
 
 process.digitisation_step = cms.Path(process.pdigi)
 if premix:

@@ -13,7 +13,7 @@ for arg in sys.argv:
     if arg.startswith('premix='):
         premix = arg.replace('premix=','') == '1'
 
-process = dynamicconf.process('RECO')
+process = dynamicconf.process()
 
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
@@ -27,9 +27,9 @@ if premix:
     pass
 else:
     raise NotImplementedError('need to set up non-premix')
-    if year == 2017:
+    if dynamicconf.year == 2017:
         process.load('Configuration.StandardSequences.L1Reco_cff')
-if year == 2018:
+if dynamicconf.year == 2018:
     process.load('Configuration.StandardSequences.L1Reco_cff')
 process.load('Configuration.StandardSequences.Reconstruction_cff')
 process.load('Configuration.StandardSequences.RecoSim_cff')
@@ -53,14 +53,14 @@ process.AODSIMoutput = cms.OutputModule("PoolOutputModule",
                                         )
 
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, dynamicconf.globaltag['reco'], '')
+process.GlobalTag = GlobalTag(process.GlobalTag, dynamicconf.globaltag(), '')
 
 process.raw2digi_step = cms.Path(process.RawToDigi)
 if not premix:
     raise NotImplementedError('need to set up non-premix')
-    if year == 2017:
+    if dynamicconf.year == 2017:
         process.L1Reco_step = cms.Path(process.L1Reco)
-if year == 2018:
+if dynamicconf.year == 2018:
     process.L1Reco_step = cms.Path(process.L1Reco)
 process.reconstruction_step = cms.Path(process.reconstruction)
 process.recosim_step = cms.Path(process.recosim)
@@ -70,9 +70,9 @@ process.AODSIMoutput_step = cms.EndPath(process.AODSIMoutput)
 process.schedule = cms.Schedule(process.raw2digi_step)
 if not premix:
     raise NotImplementedError('need to set up non-premix')
-    if year == 2017:
+    if dynamicconf.year == 2017:
         process.schedule.append(process.L1Reco_step)
-if year == 2018:
+if dynamicconf.year == 2018:
     process.schedule.append(process.L1Reco_step)
 process.schedule.extend([process.reconstruction_step,process.recosim_step,process.eventinterpretaion_step,process.AODSIMoutput_step])
 # task?

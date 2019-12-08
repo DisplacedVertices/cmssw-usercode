@@ -24,32 +24,33 @@ if year == 2017:
 elif year == 2018:
     era = eras.Run2_2018
 
-mods = {x : (era,) for x in ('gensim','rawhlt','reco','miniaod')}
-
-if year == 2017:
-    mods['miniaod'] = (era, eras.run2_miniAOD_94XFall17)
-if year == 2018:
-    from Configuration.ProcessModifiers.premix_stage2_cff import premix_stage2
-    mods['rawhlt'] = mods['reco'] = (era, premix_stage2)
-
-def process(name):
+def process():
     caller = inspect.stack()[1][1].replace('.py','')
-    return cms.Process(name, *mods[caller])
+    name = {'gensim': 'SIM', 'rawhlt': 'HLT', 'reco': 'RECO', 'miniaod': 'PAT'}[caller]
+    mods = era,
+    if year == 2017:
+        if caller == 'miniaod':
+            mods = era, eras.run2_miniAOD_94XFall17
+    elif year == 2018 and caller in ('rawhlt','reco'):
+        from Configuration.ProcessModifiers.premix_stage2_cff import premix_stage2
+        mods = era, premix_stage2
+    return cms.Process(name, *mods)
 
-####
-
-if year == 2017:
-    globaltag = {
-        'gensim': '93X_mc2017_realistic_v3',
-        'rawhlt': '94X_mc2017_realistic_v11',
-        'reco': '94X_mc2017_realistic_v11',
-        'miniaod': '94X_mc2017_realistic_v14',
-        # ntuple globaltag value taken from CMSSWTools and dumped before submission
-        }
-elif year == 2018:
-    globaltag = {
-        'gensim': '102X_upgrade2018_realistic_v11',
-        'rawhlt': '102X_upgrade2018_realistic_v15',
-        'reco': '102X_upgrade2018_realistic_v15',
-        'miniaod': '102X_upgrade2018_realistic_v15',
-        }
+def globaltag():
+    if year == 2017:
+        d = {
+            'gensim': '93X_mc2017_realistic_v3',
+            'rawhlt': '94X_mc2017_realistic_v11',
+            'reco': '94X_mc2017_realistic_v11',
+            'miniaod': '94X_mc2017_realistic_v14',
+            # ntuple globaltag value taken from CMSSWTools and dumped before submission
+            }
+    elif year == 2018:
+        d = {
+            'gensim': '102X_upgrade2018_realistic_v11',
+            'rawhlt': '102X_upgrade2018_realistic_v15',
+            'reco': '102X_upgrade2018_realistic_v15',
+            'miniaod': '102X_upgrade2018_realistic_v15',
+            }
+    caller = inspect.stack()[1][1].replace('.py','')
+    return d[caller]
