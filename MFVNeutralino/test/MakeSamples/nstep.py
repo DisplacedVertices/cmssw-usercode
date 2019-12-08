@@ -18,7 +18,7 @@ trig_filter = False
 hip_simulation = False
 hip_mitigation = False
 pythia8240 = False
-ex = ''
+ex = '_%s' % year
 
 meta = 'neu'
 taus   = [100, 300, 1000, 10000, 30000, 100000]
@@ -173,7 +173,10 @@ config.Data.publication = output_level not in ('minitree', 'ntuple')
 config.Data.outputPrimaryDataset = 'SETME'
 if output_dataset_tag == '':
     if premix:
-        output_dataset_tag = 'RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1'
+        if year == 2017:
+            output_dataset_tag = 'RunIIFall17DRPremix-94X_mc2017_realistic_v11-v1'
+        elif year == 2018:
+            output_dataset_tag = 'RunIIAutumn18DRPremix-102X_upgrade2018_realistic_v15-v1'
     else:
         raise NotImplementedError('premix')
         output_dataset_tag = ''
