@@ -144,6 +144,9 @@ namespace mfv {
     float bs2derr1;
     float rescale_bs2derr1;
 
+    std::vector<float> misc_weights;
+    std::vector<float>* p_misc_weights;
+
     bool satisfiesTrigger(size_t trig) const;
     bool satisfiesTriggerAndOffline(size_t trig) const;
     bool satisfiesHTOrBjetOrDisplacedDijetTrigger() const;

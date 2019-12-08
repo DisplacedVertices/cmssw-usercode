@@ -143,6 +143,9 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
     mevent->gen_weight = gen_info->weight();
 
+    for (double x : gen_info->weights())
+      mevent->misc.push_back(x);
+
     edm::Handle<reco::GenJetCollection> gen_jets;
     event.getByToken(gen_jets_token, gen_jets);
 

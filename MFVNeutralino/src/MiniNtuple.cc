@@ -13,6 +13,7 @@ namespace mfv {
     p_tk0_cov = p_tk1_cov = 0;
     p_gen_daughters = p_gen_bquarks = p_gen_leptons = 0;
     p_gen_daughter_id = 0;
+    p_misc_weights = 0;
   }
 
   void MiniNtuple::clear() {
@@ -54,6 +55,7 @@ namespace mfv {
     tk1_pz.clear();
     tk1_inpv.clear();
     tk1_cov.clear();
+    misc_weights.clear();
   }
 
   float MiniNtuple::ht(float min_jet_pt) const {
@@ -507,6 +509,7 @@ namespace mfv {
     tree->Branch("z1", &nt.z1);
     tree->Branch("bs2derr1", &nt.bs2derr1);
     tree->Branch("rescale_bs2derr1", &nt.rescale_bs2derr1);
+    tree->Branch("misc_weights", &nt.misc_weights);
 
     tree->SetAlias("jetht", "Sum$((jet_pt>40)*jet_pt)");
     tree->SetAlias("dist0", "sqrt(x0**2 + y0**2)");
@@ -603,6 +606,7 @@ namespace mfv {
     tree->SetBranchAddress("z1", &nt.z1);
     tree->SetBranchAddress("bs2derr1", &nt.bs2derr1);
     tree->SetBranchAddress("rescale_bs2derr1", &nt.rescale_bs2derr1);
+    tree->SetBranchAddress("misc_weights", &nt.p_misc_weights);
   }
 
   MiniNtuple* clone(const MiniNtuple& nt) {
@@ -635,12 +639,16 @@ namespace mfv {
     if (nt.p_tk1_inpv ) nnt->tk1_inpv  = *nt.p_tk1_inpv;
     if (nt.p_tk1_cov  ) nnt->tk1_cov   = *nt.p_tk1_cov;
 
+    if (nt.p_misc_weights) nnt->misc_weights = *nt.p_misc_weights;
+
     nnt->p_gen_daughters = nnt->p_gen_bquarks = nnt->p_gen_leptons = 0;
     nnt->p_gen_daughter_id = 0;
     
     nnt->p_tk0_qchi2 = nnt->p_tk0_ndof = nnt->p_tk0_vx = nnt->p_tk0_vy = nnt->p_tk0_vz = nnt->p_tk0_px = nnt->p_tk0_py = nnt->p_tk0_pz = nnt->p_tk1_qchi2 = nnt->p_tk1_ndof = nnt->p_tk1_vx = nnt->p_tk1_vy = nnt->p_tk1_vz = nnt->p_tk1_px = nnt->p_tk1_py = nnt->p_tk1_pz = 0;
     nnt->p_tk0_inpv = nnt->p_tk1_inpv = 0;
     nnt->p_tk0_cov = nnt->p_tk1_cov = 0;
+
+    nnt->p_misc_weights = 0;
 
     return nnt;
   }
