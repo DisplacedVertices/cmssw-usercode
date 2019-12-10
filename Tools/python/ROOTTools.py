@@ -1355,12 +1355,13 @@ class draw_hist_register:
     """
     uniq = [0]
     
-    def __init__(self, tree, use_weight=False):
+    def __init__(self, tree, use_weight=False, goff=False):
         self.id = self.uniq[0]
         self.uniq[0] += 1
         self.tree = tree
         self.n = 0
         self.use_weight = use_weight
+        self.goff = goff
         self.clear()
 
     def clear(self):
@@ -1376,7 +1377,7 @@ class draw_hist_register:
             binning = '(%s)' % binning
         return draw_str + '>>' + name + binning
 
-    def draw(self, draw_str, cut='', binning='', get_n=False, tree=None, nice_name=None, goff=False):
+    def draw(self, draw_str, cut='', binning='', get_n=False, tree=None, nice_name=None, goff=None):
         if self.use_weight:
             if cut:
                 cut = 'weight*(%s)' % cut
@@ -1384,6 +1385,8 @@ class draw_hist_register:
                 cut = 'weight'
         varexp = self.name_for_draw(draw_str, binning)
         option = 'e' if self.use_weight else ''
+        if goff is None:
+            goff = self.goff
         if goff:
             option += ' goff'
         n = (tree if tree else self.tree).Draw(varexp, cut, option)
