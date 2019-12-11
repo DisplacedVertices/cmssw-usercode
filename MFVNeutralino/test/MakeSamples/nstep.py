@@ -15,22 +15,19 @@ fixed_salt = ''
 use_this_cmssw = False
 premix = True
 trig_filter = False
-hip_simulation = False
-hip_mitigation = False
-pythia8240 = False
-ex = '_%s' % year
+hip = False # 1. # scale of the effect relative to a particular inst lumi
+pythia8240 = year == 2018
+ex = ''
 
-meta = 'neu'
-taus   = [100, 300, 1000, 10000, 30000, 100000]
-masses = [200, 300, 400, 600, 800, 1200, 1600, 3000] if meta.startswith('neu') else [400, 600, 800, 1200, 1600, 3000]
-tau_masses = [] # [(1000,800),(30000,800),(1000,1600),(30000,1600),(1000,3000),(30000,3000)]
-already = []
-hip_right = False
+meta = 'neu'  #'stopdbardbar'
+masses = range(300, 600, 100) + range(600, 2601, 200)
+taus = range(100, 1000, 100) + range(1000, 4000, 1000) + range(4000, 40000, 3000) + range(40000, 100001, 3000)
+tau_masses = []
 
 if 0:
     meta = 'scan'
     output_level = 'minitree'
-    hip_right = False
+    hip = False
     scanpack = 'scanpack3_' + os.environ['USER']
 elif 0:
     meta = 'ttbar'
@@ -55,33 +52,23 @@ elif 0:
     if meta.endswith('0700'):
         nevents *= 14
     trig_filter = True
-    hip_simulation = 1.0
-    hip_mitigation = True
-    ex = ''
+    hip = True
 
 ####
 
-if hip_right:
-    hip_simulation = 1.0
-    hip_mitigation = True
-
-if hip_simulation:
+if hip:
     use_this_cmssw = True
     premix = False
-    exx = '%.1f' % hip_simulation
-    ex += '_hip' + exx.replace('.','p')
-    if hip_mitigation:
-        ex += '_mit'
-else:
-    hip_mitigation = False
+    ex += '_hip%s_mit' % ('%.1f' % hip).replace('.','p')
 
 if scanpack:
     ex += '_' + scanpack
     scanpack = get_scanpack(scanpack)
 
-#ex = '_test'
-#nevents, events_per = 5,5
-#meta, taus, masses = 'stopdbardbar', [1000], [1200]
+if 0:
+    ex = '_test'
+    nevents, events_per = 5,5
+    meta, taus, masses = 'stopdbardbar', [1000], [1200]
 
 ################################################################################
 
@@ -101,10 +88,13 @@ from JMTucker.Tools.Sample import MCSample
 from JMTucker.Tools import colors
 
 testing = 'testing' in sys.argv
-work_area = crab_dirs_root('nstep_%s%s' % (meta, ex))
-if os.path.isdir(work_area):
-    sys.exit('work_area %s exists' % work_area)
-os.makedirs(work_area)
+if ex and not ex.startswith('_'):
+    ex = '_' + ex
+work_area = crab_dirs_root('nstep%s' % ex)
+sys.exit(work_area)
+
+if not os.path.isdir(work_area):
+    os.makedirs(work_area)
 gitstatus_dir = 'gitstatus_%s' % int(time()*1000)
 if not condor:
     save_git_status(os.path.join(work_area, gitstatus_dir))
@@ -193,6 +183,9 @@ def submit(config, name, scanpack_or_todo, todo_rawhlt=[], todo_reco=[], todo_nt
     global nevents
     global events_per
 
+    if not any(name.endswith('_%s' % y) for y in (2015,2016,2017,2018)):
+        name += '_%s' % year
+
     config.General.requestName = name
     config.Data.outputPrimaryDataset = name
 
@@ -229,14 +222,11 @@ def submit(config, name, scanpack_or_todo, todo_rawhlt=[], todo_reco=[], todo_nt
         if scanpack:
             salt += ' ' + scanpack.batch_name
 
-    if hip_simulation:
-        assert type(hip_simulation) in (float,int)
+    if hip:
+        assert type(hip) in (float,int)
         todo_rawhlt.append('hip_simulation,%f' % float(hip_simulation))
-
-    if hip_mitigation:
-        assert hip_simulation
-        todo_reco  .append('hip_mitigation')
-        todo_ntuple.append('hip_mitigation')
+        for t in todo_reco, todo_ntuple:
+            t.append('hip_mitigation')
 
     todo2s = ('RAWHLT', todo_rawhlt), ('RECO', todo_reco), ('NTUPLE', todo_ntuple)
     for todo2_name, todo2 in todo2s:
