@@ -1,21 +1,28 @@
 '''Managing scanpacks
 
-We make a scanpack definition in scanpack.py and run with it twice:
-once for regular sim, once for HIP+mitigation.
+We make a scanpack definition in scanpack.py and run with it multiple times:
+- 2 for 2016: once for regular sim, once for HIP+mitigation # JMTBAD does HIP still work re non-premix and minbias files?
+- 1 for 2017
+- 1 for 2018
 
 Some fully run, some don't. try to push crab batches through fully,
-but give up when it looks like it's time to do so. Then you can make
+but you can give up at some point if crab is being ornery. Then you can make
 another scanpack to pick up the statistics.  Of course, jobs can fail
-differently for the same scanpack in regular versus hip.
+differently for the same scanpack in the different years/configurations.
 
-Convention so far: scanpackX gets missing statistics for regular run
-in scanpackXp5, and scanpackXp6 for hip. We go to scanpackY for a different
-set of points, but that set of points can include points in X. Look
-at definitions in scanpack.py.
+Previous convention: missing statistics for scanpackX go in
+scanpackXp5, scanpackXp6 for hip.
 
-If you want to redo some jobs from scanpackXp5, call the result
+Now, just let missing statistics for X -> X_* where * is
+- the year for regular configuration
+- 2016hip for 2016+hip
+
+Go to scanpackY for a different set of points, but that set of points
+can include points in X. Look at definitions in scanpack.py.
+
+(Previously: redoing some jobs from scanpackXp5, call the result
 scanpackXp55, and for scanpackXp6 go to scanpackXp66. 7 is for real
-stupid problems (see notes below).
+stupid problems (see notes below).)
 
 
 How to figure out the missing stats:
@@ -29,10 +36,11 @@ extra argument (like if you have scanpack2_hip.list, it's too stupid
 to know that's scanpack2).
 
 The missing script will give a string you can put in the definition of
-scanpackXp5, take a look at scanpack.py for how scanpack1p5 looks.
+of the followup scanpack, take a look at scanpack.py for how
+e.g. scanpack1p5 looks.
 
 
-Current status:
+2016 samples log:
 
 - scanpack1 had some crap out, made scanpack1p5.
 
@@ -62,10 +70,15 @@ Current status:
 - scanpack3p5 and 3p6_hip are for missing points from scanpack3, while
   fixing bug in "low tau" check.
 
+
+Full run-2 log:
+
+- scanpack1D is enough to make the nice 1D plots for 2017+8.
+
 '''
 
-# do not import anything that is not in the stdlib since we 
-# will run in clean environment for gensim step
+# do not import anything that is not in the stdlib or not in the curr
+# dir (e.g. modify) since we will run in clean environment in gensim
 
 import os, sys, base64, random, re, cPickle as pickle
 from collections import defaultdict
@@ -74,17 +87,17 @@ from itertools import product
 from pprint import pprint
 from modify import set_mfv_neutralino, set_gluino_ddbar, set_stop_dbardbar
 
-# !!! DO NOT CHANGE ANYTHING THAT CHANGES WHICH JOB IS WHICH SAMPLE ONCE BATCHES ARE RUN WITH THAT SCANPACK !!!
+# !!! DO NOT CHANGE ANYTHING THAT CHANGES WHICH JOB MAPS TO A PARTICULAR SAMPLE ONCE BATCHES ARE RUN WITH THAT SCANPACK !!!
 # unless you delete all the output from that scanpack.
 # Make a new subclass and go from there. E.g. scanpackbase100epj exists to just change events_per_job going forward.
 # Adding helper functions or anything that has no side effects to scanpackbase is fine.
 
 # conventions:
 # kind are one of the set_* functions from modify
-# tau are float, in mm like pythia and modify
-# mass are int, GeV
+# tau are float:mm like pythia and modify
+# mass are int:GeV
 
-scanpack_users = 'dquach jchu shogan tucker wsun'.split()
+scanpack_users = 'dquach', 'joeyr', 'shogan', 'tucker'
 
 class scanpackbase(object):
     jobs_per_batch = 5000
@@ -127,6 +140,12 @@ class scanpackbase(object):
                 d = eval(kind_name), tau, mass
                 self.samples.append(d)
                 self.__eps[d] = events
+        elif hasattr(self, 'do_1d'):
+            self.samples = []
+            for tau in getattr(self, 'tau_1d', []):
+                self.samples += list(product(self.kinds, [tau], self.masses))
+            for mass in getattr(self, 'mass_1d', []):
+                self.samples += list(product(self.kinds, self.taus, [mass]))
         else:
             self.samples = list(product(self.kinds, self.taus, self.masses))
 
@@ -193,6 +212,8 @@ class scanpackbase(object):
     @property
     def batch_name(self):
         return '%s_%s' % (self.name, self.ibatch)
+
+####
 
 class scanpacktest(scanpackbase):
     kinds = [set_mfv_neutralino, set_gluino_ddbar]
@@ -304,6 +325,16 @@ class scanpack3p6_tucker(scanpackbase100epj):
 class scanpack3p6_wsun(scanpackbase100epj):
     samples_string = 'gAJ9cQEoVRFzZXRfc3RvcF9kYmFyZGJhcnECR0A/AAAAAAAATSwBh3EDS2RoAkc/5mZmZmZmZk3oA4dxBE3wI2gCR0BIgAAAAAAATfQBh3EFS2RoAkdATQAAAAAAAE0oCodxBk0EEGgCR0BTAAAAAAAATWAJh3EHTRAnaAJHQDwAAAAAAABNLAGHcQhLZGgCRz+5mZmZmZmaTSwBh3EJTSwBaAJHQE6AAAAAAABN9AGHcQpLyGgCR0BNAAAAAAAATSwBh3ELTSBOaAJHQFAAAAAAAABNYAmHcQxNECdoAkdAUMAAAAAAAE1ABodxDU0QJ2gCR0BKAAAAAAAATUAGh3EOTRAnaAJHQFbAAAAAAABNkAGHcQ9LZGgCR0BLgAAAAAAATSADh3EQTRAnaAJHP/AAAAAAAABNkAGHcRFNhANoAkdAU8AAAAAAAE30AYdNLAFoAkc/2ZmZmZmZmk2YCIdxEk2QAWgCR0AQAAAAAAAATegDh3ETTRAnaAJHQEiAAAAAAABNIAOHcRRNECdoAkdAEAAAAAAAAE30AYdxFUtkaAJHQEcAAAAAAABNQAaHcRZNECdoAkdAS4AAAAAAAE0sAYdxF00gTmgCRz/TMzMzMzMzTUAGh3EYTRwMdS4='
 
+class scanpack1D(scanpackbase100epj):
+    kinds = [set_mfv_neutralino, set_stop_dbardbar]
+    taus = [tau/1000. for tau in range(100, 1000, 100) + range(1000, 4000, 1000) + range(4000, 40000, 3000) + range(40000, 100001, 3000)]
+    masses = range(300, 600, 100) + range(600, 3001, 200)
+    do_1d = True
+    tau_1d = [0.3, 1., 10.]
+    mass_1d = [800,1600,2400,3000]
+    def events_per_sample(self, kind, tau, mass):
+        return 10000
+
 ####
 
 def get_scanpack(x):
@@ -333,6 +364,7 @@ def get_scanpack(x):
         'scanpack3p6_shogan': scanpack3p6_shogan,
         'scanpack3p6_tucker': scanpack3p6_tucker,
         'scanpack3p6_wsun': scanpack3p6_wsun,
+        'scanpack1D': scanpack1D,
         }[x]()
 
 def do_scanpack(process, x, batch, job):
@@ -382,7 +414,7 @@ def hadd_scanpack(lst_fn):
     from JMTucker.Tools.hadd import hadd
 
     me = os.environ['USER']
-    others = scanpack_users
+    others = list(scanpack_users)
     others.remove(me)
 
     lst = read_scanpack_list(lst_fn)
@@ -506,8 +538,7 @@ if __name__ == '__main__' and len(sys.argv) > 1:
             print '    samples_string = %r' % base64.b64encode(pickle.dumps(sp, -1))
 
     elif cmd == 'test':
-        from gensim import process
-        for batch in 0,1,2,3,4,5,6,7,8:
-            for job in xrange(1000):
-                print batch, job,
-                do_scanpack(process, 'scanpack2015supplement', batch, job)
+        scanpack = get_scanpack('scanpack1D')
+        print '#samples', len(scanpack.samples), 'events_per_job', scanpack.events_per_job, 'nbatches', scanpack.nbatches
+        for _ in scanpack:
+            print scanpack.batch_name, scanpack.ibatch, scanpack.nevents, 'job 0 =', scanpack.sample(scanpack.ibatch, 0)
