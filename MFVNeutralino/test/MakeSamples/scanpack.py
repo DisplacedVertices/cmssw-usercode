@@ -335,6 +335,15 @@ class scanpack1D(scanpackbase100epj):
     def events_per_sample(self, kind, tau, mass):
         return 10000
 
+class scanpack1D_tucker(scanpack1D):
+    mass_1d = scanpack1D.mass_1d[0:1]
+class scanpack1D_dquach(scanpack1D):
+    mass_1d = scanpack1D.mass_1d[1:2]
+class scanpack1D_joeyr(scanpack1D):
+    mass_1d = scanpack1D.mass_1d[2:3]
+class scanpack1D_shogan(scanpack1D):
+    mass_1d = scanpack1D.mass_1d[3:4]
+
 ####
 
 def get_scanpack(x):
@@ -365,6 +374,10 @@ def get_scanpack(x):
         'scanpack3p6_tucker': scanpack3p6_tucker,
         'scanpack3p6_wsun': scanpack3p6_wsun,
         'scanpack1D': scanpack1D,
+        'scanpack1D_tucker': scanpack1D_tucker,
+        'scanpack1D_dquach': scanpack1D_dquach,
+        'scanpack1D_joeyr': scanpack1D_joeyr,
+        'scanpack1D_shogan': scanpack1D_shogan,
         }[x]()
 
 def do_scanpack(process, x, batch, job):
