@@ -304,7 +304,7 @@ metamap = {
 
 if meta == 'scan':
     for _ in scanpack:
-        submit(config, scanpack.batch_name + '_' + year, scanpack)
+        submit(config, '%s_%s' % (scanpack.batch_name, year), scanpack)
 
 elif meta == 'ttbar':
     from modify import DummyBeamSpots
