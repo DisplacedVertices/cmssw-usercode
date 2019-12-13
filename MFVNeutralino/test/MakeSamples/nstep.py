@@ -61,7 +61,7 @@ if hip:
     ex += '_hip%s_mit' % ('%.1f' % hip).replace('.','p')
 
 if scanpack:
-    ex += '_' + scanpack
+    ex += '_%s_%s' % (scanpack, year)
     scanpack = get_scanpack(scanpack)
 
 if 0:
@@ -90,8 +90,6 @@ testing = 'testing' in sys.argv
 if ex and not ex.startswith('_'):
     ex = '_' + ex
 work_area = crab_dirs_root('nstep%s' % ex)
-sys.exit(work_area)
-
 if not os.path.isdir(work_area):
     os.makedirs(work_area)
 gitstatus_dir = 'gitstatus_%s' % int(time()*1000)
