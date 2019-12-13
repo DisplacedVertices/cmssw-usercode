@@ -219,7 +219,7 @@ def submit(config, name, scanpack_or_todo, todo_rawhlt=[], todo_reco=[], todo_nt
     if not fixed_salt:
         salt = '%s %s' % (name, todo)
         if scanpack:
-            salt += ' ' + scanpack.batch_name
+            salt += ' %s %s' % (scanpack.batch_name, year)
 
     if hip:
         assert type(hip) in (float,int)
@@ -306,7 +306,7 @@ metamap = {
 
 if meta == 'scan':
     for _ in scanpack:
-        submit(config, scanpack.batch_name, scanpack)
+        submit(config, scanpack.batch_name + '_' + year, scanpack)
 
 elif meta == 'ttbar':
     from modify import DummyBeamSpots
