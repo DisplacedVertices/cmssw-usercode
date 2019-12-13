@@ -24,11 +24,10 @@ masses = range(300, 600, 100) + range(600, 2601, 200)
 taus = range(100, 1000, 100) + range(1000, 4000, 1000) + range(4000, 40000, 3000) + range(40000, 100001, 3000)
 tau_masses = []
 
-if 0:
+if 1:
     meta = 'scan'
     output_level = 'minitree'
-    hip = False
-    scanpack = 'scanpack3_' + os.environ['USER']
+    scanpack = 'scanpack1D_' + os.environ['USER']
 elif 0:
     meta = 'ttbar'
     nevents, events_per
