@@ -93,3 +93,5 @@ boldblue = partial(bold, fg='blue')
 boldmagenta = partial(bold, fg='magenta')
 boldcyan = partial(bold, fg='cyan')
 boldwhite = partial(bold, fg='white')
+warning = yellow
+error = boldred
