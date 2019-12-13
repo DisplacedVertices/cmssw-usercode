@@ -86,6 +86,7 @@ from gzip import GzipFile
 from itertools import product
 from pprint import pprint
 from modify import set_mfv_neutralino, set_gluino_ddbar, set_stop_dbardbar
+from dynamicconf import year
 
 # !!! DO NOT CHANGE ANYTHING THAT CHANGES WHICH JOB MAPS TO A PARTICULAR SAMPLE ONCE BATCHES ARE RUN WITH THAT SCANPACK !!!
 # unless you delete all the output from that scanpack.
@@ -140,14 +141,19 @@ class scanpackbase(object):
                 d = eval(kind_name), tau, mass
                 self.samples.append(d)
                 self.__eps[d] = events
+
         elif hasattr(self, 'do_1d'):
             self.samples = []
             for tau in getattr(self, 'tau_1d', []):
                 self.samples += list(product(self.kinds, [tau], self.masses))
             for mass in getattr(self, 'mass_1d', []):
                 self.samples += list(product(self.kinds, self.taus, [mass]))
+
         else:
             self.samples = list(product(self.kinds, self.taus, self.masses))
+
+        if hasattr(self, 'skip'):
+            self.samples = [s for s in self.samples if s not in self.skip]
 
     def events_per_sample(self, kind, tau, mass):
         assert hasattr(self, 'samples_string')
@@ -327,21 +333,27 @@ class scanpack3p6_wsun(scanpackbase100epj):
 
 class scanpack1D(scanpackbase100epj):
     kinds = [set_mfv_neutralino, set_stop_dbardbar]
-    taus = [tau/1000. for tau in range(100, 1000, 100) + range(1000, 4000, 1000) + range(4000, 40000, 3000) + range(40000, 100001, 3000)]
-    masses = range(300, 600, 100) + range(600, 3001, 200)
+    taus = [tau/1000. for tau in range(100, 1000, 200) + range(1000, 4000, 2000) + range(4000, 40000, 6000) + range(40000, 100001, 30000)]
+    masses = range(300, 600, 200) + range(800, 3001, 200)
     do_1d = True
     tau_1d = [0.3, 1., 10.]
     mass_1d = [800,1600,2400,3000]
+    already_2017 = list(product(kinds, [tau/1000. for tau in [100,300,1000,10000,30000]], [400,600,800,1200,1600,3000]))
+    skip = [] if year == 2018 else already_2017 # redoing the points for 2018 for the pdf weight study
     def events_per_sample(self, kind, tau, mass):
         return 10000
 
-class scanpack1D_tucker(scanpack1D):
-    mass_1d = scanpack1D.mass_1d[0:1]
 class scanpack1D_dquach(scanpack1D):
-    mass_1d = scanpack1D.mass_1d[1:2]
+    tau_1d  = scanpack1D.tau_1d [0:1]
+    mass_1d = scanpack1D.mass_1d[0:1]
 class scanpack1D_joeyr(scanpack1D):
-    mass_1d = scanpack1D.mass_1d[2:3]
+    tau_1d  = scanpack1D.tau_1d [1:2]
+    mass_1d = scanpack1D.mass_1d[1:2]
 class scanpack1D_shogan(scanpack1D):
+    tau_1d  = scanpack1D.tau_1d [2:3]
+    mass_1d = scanpack1D.mass_1d[2:3]
+class scanpack1D_tucker(scanpack1D):
+    tau_1d  = scanpack1D.tau_1d [3:4]
     mass_1d = scanpack1D.mass_1d[3:4]
 
 ####
@@ -551,7 +563,19 @@ if __name__ == '__main__' and len(sys.argv) > 1:
             print '    samples_string = %r' % base64.b64encode(pickle.dumps(sp, -1))
 
     elif cmd == 'test':
-        scanpack = get_scanpack('scanpack1D')
-        print '#samples', len(scanpack.samples), 'events_per_job', scanpack.events_per_job, 'nbatches', scanpack.nbatches
-        for _ in scanpack:
-            print scanpack.batch_name, scanpack.ibatch, scanpack.nevents, 'job 0 =', scanpack.sample(scanpack.ibatch, 0)
+        for user in ('',) + scanpack_users:
+            scanpack = get_scanpack('scanpack1D' + ('_' if user else '') + user)
+            print '\nuser', user, '#samples', len(scanpack.samples), 'events_per_job', scanpack.events_per_job, 'nbatches', scanpack.nbatches
+            d = defaultdict(lambda: defaultdict(list))
+            for k,t,m in scanpack.samples:
+                print 'zzz', user, k.__name__, t, m
+                d[k.__name__][m].append(t)
+            for k in sorted(d.keys()):
+                print k
+                for k2 in sorted(d[k].keys()):
+                    print k2, ':',
+                    for v in sorted(d[k][k2]):
+                        print v,
+                    print
+            for _ in scanpack:
+                print scanpack.batch_name, scanpack.ibatch, scanpack.nevents, 'job 0 =', scanpack.sample(scanpack.ibatch, 0)
