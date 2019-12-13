@@ -77,8 +77,8 @@ Full run-2 log:
 
 '''
 
-# do not import anything that is not in the stdlib or not in the curr
-# dir (e.g. modify) since we will run in clean environment in gensim
+# do not import here at the top level anything that is not in the stdlib or not in the curr
+# dir (i.e. modify, dynamicconf are fine) since we will run in clean environment in gensim
 
 import os, sys, base64, random, re, cPickle as pickle
 from collections import defaultdict
@@ -178,7 +178,7 @@ class scanpackbase(object):
         else:
             raise ValueError('dunno %s' % kind)
         tau = int(tau*1000)
-        return '%s_tau%06ium_M%04i' % (kind, tau, mass)
+        return '%s_tau%06ium_M%04i_%s' % (kind, tau, mass, year)
 
     def sample_details(self, name):
         '''inverse of sample_name'''
@@ -400,20 +400,25 @@ def do_scanpack(process, x, batch, job):
 
 def export_scanpack(crab_dirs):
     from JMTucker.Tools.CRAB3ToolsSh import crab_hadd_files as crab_files
+    from JMTucker.Tools import colors
 
     sample_files = defaultdict(list)
 
     for wd in crab_dirs:
         bwd = os.path.basename(wd)
         bwd = bwd.replace('crab_', '')
-        scanpack, batch = bwd.rsplit('_', 1)
-        batch = int(batch)
+        scanpack, batch, byear = bwd.rsplit('_', 2)
+        batch, byear = int(batch), int(byear)
+        if byear != year:
+            print colors.warning('year %i != byear %i, skipping %s' % (year, byear, wd))
+            continue
         scanpack = get_scanpack(scanpack)
 
         expected, files = crab_files(wd, True)
-        assert expected == scanpack.jobs_per_batch or expected == scanpack.jobs_in_last_batch
+        if expected not in (scanpack.jobs_per_batch, scanpack.jobs_in_last_batch):
+            sys.exit(colors.error('error: expected %i not jobs_per_batch %i or jobs_in_last_batch %i' % (expected, scanpack.jobs_per_batch, scanpack.jobs_in_last_batch)))
         if len(files) != expected:
-            print '\x1b[33mproblem: expected %i, got %i files from %s\x1b[0m' % (expected, len(files), wd)
+            print colors.warning('problem: expected %i, got %i files from %s' % (expected, len(files), wd))
 
         for fn in files:
             bn = os.path.basename(fn)
