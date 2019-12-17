@@ -16,7 +16,7 @@ parser.add_argument('--max-npu', type=int, default=1000,
 parser.add_argument('--pileupcalc-mode', default='true',
                     help='The mode for pileupCalc.py: "true" or "observed" (default %(default)s).')
 parser.add_argument('--pileupcalc-mbxsec', default=-1, type=int,
-                    help='The minbias cross section for pileupCalc.py, in microbarn (default 73500 for 2017).')
+                    help='The minbias cross section for pileupCalc.py, in microbarn (default 69200 for 13 TeV).')
 parser.add_argument('--data-fn', default='default',
                     help='The output filename for pileupCalc.py (default pileup_YYYY.root).')
 parser.add_argument('--data-path', default='pileup',
