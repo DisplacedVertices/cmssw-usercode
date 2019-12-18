@@ -99,6 +99,7 @@ from dynamicconf import year
 # mass are int:GeV
 
 scanpack_users = 'dquach', 'joeyr', 'shogan', 'tucker'
+scanpack_eosusers = 'dquach', 'jreicher', 'shogan', 'tucker'
 
 class scanpackbase(object):
     jobs_per_batch = 5000
@@ -182,7 +183,7 @@ class scanpackbase(object):
 
     def sample_details(self, name):
         '''inverse of sample_name'''
-        kind, tau, mass = name.rsplit('_',2)
+        kind, tau, mass, year = name.rsplit('_',3)
         if kind == 'mfv_neu':
             kind = set_mfv_neutralino
         elif kind == 'mfv_ddbar':
@@ -195,7 +196,7 @@ class scanpackbase(object):
         tau = int(tau[3:].replace('um','')) / 1000.
         assert mass.startswith('M')
         mass = int(mass[1:])
-        return kind, tau, mass
+        return kind, tau, mass, year
 
     def isample(self, kind, tau, mass):
         target = kind, tau, mass
@@ -338,6 +339,7 @@ class scanpack1D(scanpackbase100epj):
     do_1d = True
     tau_1d = [0.3, 1., 10.]
     mass_1d = [800,1600,2400,3000]
+    broken_1d = list(product(tau_1d, mass_1d)) # duplicated these points
     already_2017 = list(product(kinds, [tau/1000. for tau in [100,300,1000,10000,30000]], [400,600,800,1200,1600,3000]))
     skip = [] if year == 2018 else already_2017 # redoing the points for 2018 for the pdf weight study
     def events_per_sample(self, kind, tau, mass):
@@ -358,39 +360,44 @@ class scanpack1D_tucker(scanpack1D):
 
 ####
 
+scanpack_registry =  {
+    'scanpacktest': scanpacktest,
+    'scanpacktest2': scanpacktest2,
+    'scanpack1': scanpack1,
+    'scanpack1_100epj': scanpack1_100epj,
+    'scanpack1p5': scanpack1p5,
+    'scanpack2': scanpack2,
+    'scanpack2p5': scanpack2p5,
+    'scanpack2p6': scanpack2p6,
+    'scanpack2p7': scanpack2p7,
+    'scanpack2015supplement': scanpack2015supplement,
+    'scanpack3': scanpack3,
+    'scanpack3_tucker': scanpack3_tucker,
+    'scanpack3_jchu': scanpack3_jchu,
+    'scanpack3_dquach': scanpack3_dquach,
+    'scanpack3_shogan': scanpack3_shogan,
+    'scanpack3p5_dquach': scanpack3p5_dquach,
+    'scanpack3p5_jchu': scanpack3p5_jchu,
+    'scanpack3p5_shogan': scanpack3p5_shogan,
+    'scanpack3p5_tucker': scanpack3p5_tucker,
+    'scanpack3p5_wsun': scanpack3p5_wsun,
+    'scanpack3p6_dquach': scanpack3p6_dquach,
+    'scanpack3p6_jchu': scanpack3p6_jchu,
+    'scanpack3p6_shogan': scanpack3p6_shogan,
+    'scanpack3p6_tucker': scanpack3p6_tucker,
+    'scanpack3p6_wsun': scanpack3p6_wsun,
+    'scanpack1D': scanpack1D,
+    'scanpack1D_tucker': scanpack1D_tucker,
+    'scanpack1D_dquach': scanpack1D_dquach,
+    'scanpack1D_joeyr': scanpack1D_joeyr,
+    'scanpack1D_shogan': scanpack1D_shogan,
+    }
+
+def valid_scanpack(x):
+    return scanpack_registry.has_key(x)
+
 def get_scanpack(x):
-    return {
-        'scanpacktest': scanpacktest,
-        'scanpacktest2': scanpacktest2,
-        'scanpack1': scanpack1,
-        'scanpack1_100epj': scanpack1_100epj,
-        'scanpack1p5': scanpack1p5,
-        'scanpack2': scanpack2,
-        'scanpack2p5': scanpack2p5,
-        'scanpack2p6': scanpack2p6,
-        'scanpack2p7': scanpack2p7,
-        'scanpack2015supplement': scanpack2015supplement,
-        'scanpack3': scanpack3,
-        'scanpack3_tucker': scanpack3_tucker,
-        'scanpack3_jchu': scanpack3_jchu,
-        'scanpack3_dquach': scanpack3_dquach,
-        'scanpack3_shogan': scanpack3_shogan,
-        'scanpack3p5_dquach': scanpack3p5_dquach,
-        'scanpack3p5_jchu': scanpack3p5_jchu,
-        'scanpack3p5_shogan': scanpack3p5_shogan,
-        'scanpack3p5_tucker': scanpack3p5_tucker,
-        'scanpack3p5_wsun': scanpack3p5_wsun,
-        'scanpack3p6_dquach': scanpack3p6_dquach,
-        'scanpack3p6_jchu': scanpack3p6_jchu,
-        'scanpack3p6_shogan': scanpack3p6_shogan,
-        'scanpack3p6_tucker': scanpack3p6_tucker,
-        'scanpack3p6_wsun': scanpack3p6_wsun,
-        'scanpack1D': scanpack1D,
-        'scanpack1D_tucker': scanpack1D_tucker,
-        'scanpack1D_dquach': scanpack1D_dquach,
-        'scanpack1D_joeyr': scanpack1D_joeyr,
-        'scanpack1D_shogan': scanpack1D_shogan,
-        }[x]()
+    return scanpack_registry[x]()
 
 def do_scanpack(process, x, batch, job):
     sp = get_scanpack(x)
@@ -439,18 +446,20 @@ def read_scanpack_list(fn):
         f = open(fn)
     return eval(f.read())
 
-def hadd_scanpack(lst_fn):
+def hadd_scanpack(lst_fn, scanpack):
     from JMTucker.Tools import colors, eos
     from JMTucker.Tools.hadd import hadd
 
     me = os.environ['USER']
-    others = list(scanpack_users)
+    others = list(scanpack_eosusers)
+    assert me in others # code too dumb to check this
     others.remove(me)
 
     lst = read_scanpack_list(lst_fn)
     new_lst = {}
     hadds = []
     for name, fns in lst.iteritems():
+        kind, tau, mass, _ = scanpack.sample_details(name)
         fns = [str(s) for s in fns]
         out_fns = set()
         for fn in fns:
@@ -467,14 +476,22 @@ def hadd_scanpack(lst_fn):
         assert len(out_fns)
         out_fns = sorted(out_fns)
         if len(out_fns) > 1:
-            print colors.magenta('ATTENTION: more than one out_fn generated')
-            pprint(fns)
+            print colors.error('more than one out_fn (%s) generated for %s from %s fns' % (len(out_fns), name, len(fns)))
+            #pprint(fns)
             pprint(out_fns)
+            broken_1d = getattr(scanpack, 'broken_1d', [])
+            assert broken_1d
+            ok = False
+            for btau,bmass in broken_1d:
+                if btau == tau and bmass == mass:
+                    ok = True
+            if not ok:
+                raise ValueError('more than one out_fn generated')
         out_fn = out_fns[-1]
         new_lst[name] = [out_fn]
 
         if eos.exists(out_fn):
-            print colors.yellow('%s already exists' % out_fn)
+            print colors.warning('%s already exists, skipping' % out_fn)
         else:
             eos.mkdir(os.path.dirname(out_fn))
             hadd(out_fn, fns)
@@ -498,9 +515,20 @@ def merge_scanpack_lists(fns):
 if __name__ == '__main__' and len(sys.argv) > 1:
     cmd = sys.argv[1]
 
+    scanpack = None
+    for arg in sys.argv[2:]:
+        for y in 2015,2016,2017,2018:
+            ex = '_%s' % y
+            arg = arg.replace(ex,'')
+        if valid_scanpack(arg):
+            sys.argv.remove(arg)
+            scanpack = get_scanpack(arg)
+    if scanpack is None:
+        print colors.warning('could not detect scanpack name from argv')
+
     if cmd == 'export':
         from JMTucker.Tools.CRAB3ToolsSh import crab_dirs_from_argv
-        pprint(export_scanpack(crab_dirs_from_argv()))
+        pprint(export_scanpack(crab_dirs_from_argv())) # this finds the scanpack itself parsing the dir names
 
     elif cmd == 'read':
         x = read_scanpack_list(sys.argv[2])
@@ -510,7 +538,7 @@ if __name__ == '__main__' and len(sys.argv) > 1:
                 print fn
 
     elif cmd == 'hadd':
-        hadd_scanpack(sys.argv[2])
+        hadd_scanpack(sys.argv[2], scanpack)
 
     elif cmd == 'merge':
         x = merge_scanpack_lists(sys.argv[2:])
@@ -519,11 +547,9 @@ if __name__ == '__main__' and len(sys.argv) > 1:
     elif cmd == 'missing':
         fn = sys.argv[2]
         lst = read_scanpack_list(fn)
-        if len(sys.argv) >= 4:
-            scanpack_name = sys.argv[3]
-        else:
+        if scanpack is None:
             scanpack_name = os.path.basename(fn).replace('.list', '').replace('.gz', '')
-        scanpack = get_scanpack(scanpack_name)
+            scanpack = get_scanpack(scanpack_name)
         todo = {}
 
         for kind, tau, mass in scanpack.samples:
@@ -540,32 +566,40 @@ if __name__ == '__main__' and len(sys.argv) > 1:
             elif expected == nevents:
                 print 'done', name, expected
             else:
-                assert 0
+                broken_1d = getattr(scanpack, 'broken_1d', [])
+                assert broken_1d
+                ok = False
+                for btau,bmass in broken_1d:
+                    if btau == tau and bmass == mass:
+                        ok = True
+                if not ok:
+                    raise ValueError('problem: %s %s %s %s' % (name, len(files), nevents, expected))
 
-        nways = len(scanpack_users)
-        split = [{} for _ in xrange(nways)]
-        print '\n\n\n# splitting %i total %i ways' % (sum(todo.itervalues()), nways)
-        curr = 0
-        todo = todo.items()
-        for which in xrange(nways):
-            sample,nevents = todo.pop(0)
-            split[which][sample] = nevents
-        for sample, nevents in todo:
-            invweights = [sum(sp.itervalues()) for sp in split]
-            mw = max(invweights)
-            whichs = []
-            for i,iw in enumerate(invweights):
-                w = mw - iw + 1
-                whichs += [i] * w
-            which = random.choice(whichs)
-            split[which][sample] = nevents
-            curr += nevents
-        for isp, sp in enumerate(split):
-            print 'class %sXXX_%s(scanpackbase100epj):' % (scanpack_name, scanpack_users[isp])
-            print '    """user %i gets %i events:' % (isp, sum(sp.itervalues()))
-            pprint(sp)
-            print '"""'
-            print '    samples_string = %r' % base64.b64encode(pickle.dumps(sp, -1))
+        if 'summary' not in sys.argv:
+            nways = len(scanpack_users)
+            split = [{} for _ in xrange(nways)]
+            print '\n\n\n# splitting %i total %i ways' % (sum(todo.itervalues()), nways)
+            curr = 0
+            todo = todo.items()
+            for which in xrange(nways):
+                sample,nevents = todo.pop(0)
+                split[which][sample] = nevents
+            for sample, nevents in todo:
+                invweights = [sum(sp.itervalues()) for sp in split]
+                mw = max(invweights)
+                whichs = []
+                for i,iw in enumerate(invweights):
+                    w = mw - iw + 1
+                    whichs += [i] * w
+                which = random.choice(whichs)
+                split[which][sample] = nevents
+                curr += nevents
+            for isp, sp in enumerate(split):
+                print 'class %sXXX_%s(scanpackbase100epj):' % (scanpack_name, scanpack_users[isp])
+                print '    """user %i gets %i events:' % (isp, sum(sp.itervalues()))
+                pprint(sp)
+                print '"""'
+                print '    samples_string = %r' % base64.b64encode(pickle.dumps(sp, -1))
 
     elif cmd == 'test':
         for user in ('',) + scanpack_users:
