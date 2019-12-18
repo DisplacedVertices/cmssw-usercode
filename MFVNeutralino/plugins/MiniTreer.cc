@@ -107,14 +107,27 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.jet_bdisc_old[i] = mevent->jet_bdisc_old[i];
     nt.jet_bdisc[i] = mevent->jet_bdisc[i];
 
-    nt.jet_hlt_pt[i] = mevent->jet_hlt_pt[i];
-    nt.jet_hlt_eta[i] = mevent->jet_hlt_eta[i];
-    nt.jet_hlt_phi[i] = mevent->jet_hlt_phi[i];
-    nt.jet_hlt_energy[i] = mevent->jet_hlt_energy[i];
-    nt.displaced_jet_hlt_pt[i] = mevent->displaced_jet_hlt_pt[i];
-    nt.displaced_jet_hlt_eta[i] = mevent->displaced_jet_hlt_eta[i];
-    nt.displaced_jet_hlt_phi[i] = mevent->displaced_jet_hlt_phi[i];
-    nt.displaced_jet_hlt_energy[i] = mevent->displaced_jet_hlt_energy[i];
+    if (mevent->jet_hlt_pt.size() > size_t(i)) {
+      nt.jet_hlt_pt[i] = mevent->jet_hlt_pt[i];
+      nt.jet_hlt_eta[i] = mevent->jet_hlt_eta[i];
+      nt.jet_hlt_phi[i] = mevent->jet_hlt_phi[i];
+      nt.jet_hlt_energy[i] = mevent->jet_hlt_energy[i];
+      nt.displaced_jet_hlt_pt[i] = mevent->displaced_jet_hlt_pt[i];
+      nt.displaced_jet_hlt_eta[i] = mevent->displaced_jet_hlt_eta[i];
+      nt.displaced_jet_hlt_phi[i] = mevent->displaced_jet_hlt_phi[i];
+      nt.displaced_jet_hlt_energy[i] = mevent->displaced_jet_hlt_energy[i];
+    }
+    else {
+      assert(mevent->jet_hlt_pt.size() == 0);
+      nt.jet_hlt_pt[i] = -1;
+      nt.jet_hlt_eta[i] = -1;
+      nt.jet_hlt_phi[i] = -1;
+      nt.jet_hlt_energy[i] = -1;
+      nt.displaced_jet_hlt_pt[i] = -1;
+      nt.displaced_jet_hlt_eta[i] = -1;
+      nt.displaced_jet_hlt_phi[i] = -1;
+      nt.displaced_jet_hlt_energy[i] = -1;
+    }
   }
 
   for (int i = 0; i < 2; ++i) {
