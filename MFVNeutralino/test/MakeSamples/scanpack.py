@@ -399,6 +399,21 @@ def valid_scanpack(x):
 def get_scanpack(x):
     return scanpack_registry[x]()
 
+def get_scanpack_from_argv():
+    '''includes any list filenames, but later args override earlier args'''
+    scanpack = None
+    for arg in sys.argv:
+        arg0, arg = arg, os.path.basename(arg)
+        for ex in '.list','.gz','_2015','_2016','_2017','_2018':
+            arg = arg.replace(ex, '')
+        if valid_scanpack(arg):
+            if not os.path.isfile(arg0):
+                sys.argv.remove(arg0)
+            scanpack = get_scanpack(arg)
+    if scanpack is None:
+        raise ValueError('no scanpack name detected from list fn or from rest or argv: %r' % sys.argv)
+    return scanpack
+
 def do_scanpack(process, x, batch, job):
     sp = get_scanpack(x)
     set_kind, tau, mass = sp.sample(batch, job)
@@ -446,7 +461,7 @@ def read_scanpack_list(fn):
         f = open(fn)
     return eval(f.read())
 
-def hadd_scanpack(lst_fn, scanpack):
+def hadd_scanpack(lst_fn):
     from JMTucker.Tools import colors, eos
     from JMTucker.Tools.hadd import hadd
 
@@ -454,6 +469,8 @@ def hadd_scanpack(lst_fn, scanpack):
     others = list(scanpack_eosusers)
     assert me in others # code too dumb to check this
     others.remove(me)
+
+    scanpack = get_scanpack_from_argv()
 
     lst = read_scanpack_list(lst_fn)
     new_lst = {}
@@ -515,20 +532,9 @@ def merge_scanpack_lists(fns):
 if __name__ == '__main__' and len(sys.argv) > 1:
     cmd = sys.argv[1]
 
-    scanpack = None
-    for arg in sys.argv[2:]:
-        for y in 2015,2016,2017,2018:
-            ex = '_%s' % y
-            arg = arg.replace(ex,'')
-        if valid_scanpack(arg):
-            sys.argv.remove(arg)
-            scanpack = get_scanpack(arg)
-    if scanpack is None:
-        print colors.warning('could not detect scanpack name from argv')
-
     if cmd == 'export':
         from JMTucker.Tools.CRAB3ToolsSh import crab_dirs_from_argv
-        pprint(export_scanpack(crab_dirs_from_argv())) # this finds the scanpack itself parsing the dir names
+        pprint(export_scanpack(crab_dirs_from_argv()))
 
     elif cmd == 'read':
         x = read_scanpack_list(sys.argv[2])
@@ -538,7 +544,7 @@ if __name__ == '__main__' and len(sys.argv) > 1:
                 print fn
 
     elif cmd == 'hadd':
-        hadd_scanpack(sys.argv[2], scanpack)
+        hadd_scanpack(sys.argv[2])
 
     elif cmd == 'merge':
         x = merge_scanpack_lists(sys.argv[2:])
@@ -547,9 +553,7 @@ if __name__ == '__main__' and len(sys.argv) > 1:
     elif cmd == 'missing':
         fn = sys.argv[2]
         lst = read_scanpack_list(fn)
-        if scanpack is None:
-            scanpack_name = os.path.basename(fn).replace('.list', '').replace('.gz', '')
-            scanpack = get_scanpack(scanpack_name)
+        scanpack = get_scanpack_from_argv()
         todo = {}
 
         for kind, tau, mass in scanpack.samples:
@@ -575,7 +579,7 @@ if __name__ == '__main__' and len(sys.argv) > 1:
                 if not ok:
                     raise ValueError('problem: %s %s %s %s' % (name, len(files), nevents, expected))
 
-        if 'summary' not in sys.argv:
+        if 'summary' not in sys.argv and todo:
             nways = len(scanpack_users)
             split = [{} for _ in xrange(nways)]
             print '\n\n\n# splitting %i total %i ways' % (sum(todo.itervalues()), nways)
@@ -618,3 +622,6 @@ if __name__ == '__main__' and len(sys.argv) > 1:
                     print
             for _ in scanpack:
                 print scanpack.batch_name, scanpack.ibatch, scanpack.nevents, 'job 0 =', scanpack.sample(scanpack.ibatch, 0)
+
+    else:
+        sys.exit('no such cmd %r' % cmd)
