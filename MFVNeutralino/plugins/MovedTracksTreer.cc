@@ -62,7 +62,68 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
   nt_filler.fill(event);
   gentruth_filler(event);
 
-  if (!for_mctruth) {
+  auto tks_push_back = [&](const reco::Track& tk) { NtupleAdd(nt.tracks(), tk); };
+
+  if (for_mctruth) {
+    edm::Handle<std::vector<reco::TrackRef>> sel_tracks;
+    event.getByToken(sel_tracks_token, sel_tracks);
+
+    for (reco::TrackRef tk : *sel_tracks) {
+      const int whichtk = nt.tracks().n();
+      tks_push_back(*tk);
+      nt.set_tk_moved(whichtk); // not really "moved" but this is to distinguish sel tracks from tracks coming in from jets below
+
+      auto vf = nt_filler.pvs_filler();
+      const int whichpv = nt_filler.tracks_filler().which_pv(event, &vf, tk);
+      nt.tracks().set_which_pv(whichtk, whichpv);
+    }
+
+    // JMTBAD use TracksSubNtupleFiller::which_jet?
+    for (const pat::Jet& jet : nt_filler.jets_filler().jets(event)) {
+      double dist2min = 0.1;
+      int whichjet = -1;
+
+      for (int j = 0, je = nt.jets().n(); j < je; ++j) {
+        const double dist2 = mag2(jet.pt()     - nt.jets().pt(j),
+                                  jet.eta()    - nt.jets().eta(j),
+                                  jet.phi()    - nt.jets().phi(j),
+                                  jet.energy() - nt.jets().energy(j));
+        if (dist2 < dist2min) {
+          dist2min = dist2;
+          whichjet = j;
+        }
+      }
+
+      assert(whichjet != -1);
+
+      for (size_t idau = 0, idaue = jet.numberOfDaughters(); idau < idaue; ++idau) {
+        const reco::Track* tk = jetDaughterTrack(jet, idau);
+        if (tk) {
+          double dist2min = 0.1;
+          int whichtk = -1;
+          for (size_t i = 0, ie = nt.tracks().n(); i < ie; ++i) {
+            const double dist2 = mag2(tk->charge() * tk->pt() - nt.tracks().qpt(i),
+                                      tk->eta()               - nt.tracks().eta(i),
+                                      tk->phi()               - nt.tracks().phi(i));
+            if (dist2 < dist2min) {
+              dist2min = dist2;
+              whichtk = i;
+            }
+          }
+
+          if (whichtk == -1) {
+            whichtk = nt.tracks().n();
+            tks_push_back(*tk);
+          }
+          else
+            nt.set_jet_moved(whichjet);
+
+          nt.tracks().set_which_jet(whichtk, whichjet);
+        }
+      }
+    }
+  }
+  else {
     edm::Handle<reco::TrackCollection> all_tracks, moved_tracks;
     edm::Handle<std::vector<reco::TrackRef>> sel_tracks;
     edm::Handle<int> npreseljets, npreselbjets;
@@ -81,8 +142,6 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
                 (*move_vertex)[0] - nt_filler.bs().x((*move_vertex)[2]), // JMTBAD get rid of beamspot subtraction everywhere
                 (*move_vertex)[1] - nt_filler.bs().y((*move_vertex)[2]),
                 (*move_vertex)[2]);
-
-    auto tks_push_back = [&](const reco::Track& tk) { NtupleAdd(nt.tracks(), tk); };
 
     for (const reco::TrackRef& tk : *sel_tracks)
       tks_push_back(*tk);
@@ -198,32 +257,31 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
                       v.ntracks(), v.njets[0], v.bs2derr, v.rescale_bs2derr, false,
                       v.pt[mfv::PTracksPlusJetsByNtracks], v.eta[mfv::PTracksPlusJetsByNtracks], v.phi[mfv::PTracksPlusJetsByNtracks], v.mass[mfv::PTracksPlusJetsByNtracks]);
 
-    if (!for_mctruth)
-      for (size_t i = 0, ie = v.ntracks(); i < ie; ++i) {
-        jmt::MinValue m(0.1);
-        for (size_t j = 0, je = nt.tracks().n(); j < je; ++j)
-          m(j, mag2(v.track_qpt(i) - nt.tracks().qpt(j),
-                    v.track_eta[i] - nt.tracks().eta(j),
-                    v.track_phi[i] - nt.tracks().phi(j)));
+    for (size_t i = 0, ie = v.ntracks(); i < ie; ++i) {
+      jmt::MinValue m(0.1);
+      for (size_t j = 0, je = nt.tracks().n(); j < je; ++j)
+        m(j, mag2(v.track_qpt(i) - nt.tracks().qpt(j),
+                  v.track_eta[i] - nt.tracks().eta(j),
+                  v.track_phi[i] - nt.tracks().phi(j)));
 
-        assert(m.i() != -1);
-        if (nt.tracks().which_sv(m.i()) != 255) {
-          const int w = nt.tracks().which_sv(m.i());
-          cms::Exception ce("BadAssumption");
-          ce << "vertex w " << v.ntracks() << " tracks @ <" << v.x << ", " << v.y << ", " << v.z
-             << ">: track <" << v.track_qpt(i) << ", " << v.track_eta[i] << ", " << v.track_phi[i] << "> with mindist " << m.v()
-             << " to general track " << m.i() << "/" << nt.tracks().n() << ": <" << nt.tracks().qpt(m.i()) << ", " << nt.tracks().eta(m.i()) << ", " << nt.tracks().phi(m.i())
-             << "> but already found in other vertex #" << w;
-          if (nt.tracks().which_sv(m.i()) < nt.vertices().n())
-            ce << " with " << nt.vertices().ntracks(w) << " tracks @ <" << nt.vertices().x(w) << ", " << nt.vertices().y(w) << ", " << nt.vertices().z(w) << ">\n";
-          else
-            ce << "--this isn't a valid vertex number (max " << nt.vertices().n() << ")\n";
-          throw ce;
-        }
-        const size_t iv = nt.vertices().n() - 1;
-        assert(iv < 255);
-        nt.tracks().set_which_sv(m.i(), iv);
+      assert(m.i() != -1);
+      if (nt.tracks().which_sv(m.i()) != 255) {
+        const int w = nt.tracks().which_sv(m.i());
+        cms::Exception ce("BadAssumption");
+        ce << "vertex w " << v.ntracks() << " tracks @ <" << v.x << ", " << v.y << ", " << v.z
+           << ">: track <" << v.track_qpt(i) << ", " << v.track_eta[i] << ", " << v.track_phi[i] << "> with mindist " << m.v()
+           << " to general track " << m.i() << "/" << nt.tracks().n() << ": <" << nt.tracks().qpt(m.i()) << ", " << nt.tracks().eta(m.i()) << ", " << nt.tracks().phi(m.i())
+           << "> but already found in other vertex #" << w;
+        if (nt.tracks().which_sv(m.i()) < nt.vertices().n())
+          ce << " with " << nt.vertices().ntracks(w) << " tracks @ <" << nt.vertices().x(w) << ", " << nt.vertices().y(w) << ", " << nt.vertices().z(w) << ">\n";
+        else
+          ce << "--this isn't a valid vertex number (max " << nt.vertices().n() << ")\n";
+        throw ce;
       }
+      const size_t iv = nt.vertices().n() - 1;
+      assert(iv < 255);
+      nt.tracks().set_which_sv(m.i(), iv);
+    }
   }
 
   if (apply_presel) {

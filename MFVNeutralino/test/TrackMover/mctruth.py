@@ -11,14 +11,14 @@ process = ntuple_process(settings)
 remove_output_module(process)
 tfileservice(process, 'mctruth.root')
 dataset = 'miniaod' if settings.is_miniaod else 'main'
-sample_files(process, 'mfv_neu_tau010000um_M0800_2017', dataset, 1)
+sample_files(process, 'mfv_neu_tau010000um_M0800_year', dataset, 1)
 cmssw_from_argv(process)
 
 from JMTucker.Tools.NtupleFiller_cff import jmtNtupleFiller_pset
 
 process.mfvMovedTreeMCTruth = cms.EDAnalyzer('MFVMovedTracksTreer',
                                              jmtNtupleFiller_pset(settings.is_miniaod),
-                                             sel_tracks_src = cms.InputTag(''),
+                                             sel_tracks_src = cms.InputTag('mfvVertexTracks','seed'),
                                              mover_src = cms.string(''),
                                              vertices_src = cms.InputTag('mfvVerticesAux'),
                                              max_dist2move = cms.double(-1),
