@@ -154,6 +154,8 @@ namespace jmt {
     bool cut(const reco::Track&, const edm::Event&, BeamspotSubNtupleFiller* =0) const;
     const edm::Handle<reco::TrackCollection>& htracks(const edm::Event& e) { e.getByToken(token_, tracks_); return tracks_; }
     const reco::TrackCollection& tracks(const edm::Event& e) { return *htracks(e); }
+    int which_jet(const edm::Event&, JetsSubNtupleFiller*, reco::TrackRef&);
+    int which_pv(const edm::Event&, PrimaryVerticesSubNtupleFiller*, reco::TrackRef&);
     void operator()(const edm::Event&, JetsSubNtupleFiller* =0, PrimaryVerticesSubNtupleFiller* =0, BeamspotSubNtupleFiller* =0);
   };
 
