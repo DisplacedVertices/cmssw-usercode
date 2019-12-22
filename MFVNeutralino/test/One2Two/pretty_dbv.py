@@ -6,6 +6,7 @@ set_style()
 ps = plot_saver(plot_dir('pretty_dbv'), size=(700,700), pdf_log=True)
 
 f = ROOT.TFile('/uscms/home/tucker/public/mfv/limitsinput_100kevent_samples_used_for_Figs_1+3.root')
+raise ValueError('propagate change to use stored rate already normalized to int lumi')
 combiner = SignalEfficiencyCombiner()
 
 which = [

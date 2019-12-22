@@ -3,7 +3,8 @@
 import sys, os, shutil, time
 from JMTucker.Tools.general import save_git_status
 from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-from limitsinput import ROOT, name_iterator, sample_iterator, test_sample_iterator, sample_iterator_1d_plots
+import ROOT; ROOT.gROOT.SetBatch()
+import limitsinput
 
 # the combine tarball is made in a locally checked-out combine environment so the worker nodes don't have to git clone, etc.
 # take JMTucker/Tools/scripts/cmsMakeTarball.py, insert make_tarball in it so it can run standalone, then *in the combine environment* do
@@ -34,7 +35,7 @@ cd $WD
 {
     echo "========================================================================="
     echo datacard:
-    python datacard.py $WHICH | tee datacard.txt
+    python datacard.py $WHICH __DATACARDARGS__ | tee datacard.txt
 
     cmd="combine -M MarkovChainMC --noDefaultPrior=0 --tries 20 -b 200 --iteration 200000 datacard.txt"
 
@@ -110,8 +111,19 @@ python process.py . 2>&1 >results
 
 if 'save_toys' not in sys.argv:
     script_template = script_template.replace(' --saveToys', '')
-if 'bkg_fully_correlated' in sys.argv:
-    script_template = script_template.replace('python datacard.py $WHICH', 'python datacard.py $WHICH bkg_fully_correlated')
+
+datacard_args = []
+
+bkg_correlation = [x for x in ['bkg_fully_correlated', 'bkg_yearwise_correlated', 'bkg_binwise_correlated', 'bkg_fully_correlated'] if x in sys.argv]
+assert len(bkg_correlation) <= 1
+if bkg_correlation:
+    datacard_args.append(bkg_correlation[0])
+
+include_2016 = 'include_2016' in sys.argv
+if include_2016:
+    datacard_args.append('include_2016')
+
+script_template = script_template.replace('__DATACARDARGS__', ' '.join(datacard_args))
 
 jdl_template = '''universe = vanilla
 Executable = run.sh
@@ -144,18 +156,17 @@ for x in ['signal_efficiency.py', 'datacard.py', 'process.py', 'limitsinput.root
 input_files = ','.join(input_files)
 
 f = ROOT.TFile('limitsinput.root')
-names = list(name_iterator(f))
 
-if 'test_batch' in sys.argv:
-    samples = test_sample_iterator
-elif '1d_plots' in sys.argv:
-    samples = sample_iterator_1d_plots
-else:
-    samples = sample_iterator
-
+years = ('2016','2017','2018') if include_2016 else ('2017','2018')
+samples = limitsinput.sample_iterator(f,
+                                      require_years=years,
+                                      test='test_batch' in sys.argv,
+                                      slices_1d='slices_1d' in sys.argv,
+                                      )
+names = set(s.name for s in samples)
 allowed = [arg for arg in sys.argv if arg in names]
 
-for sample in samples(f):
+for sample in samples:
     if allowed and sample.name not in allowed:
         continue
 

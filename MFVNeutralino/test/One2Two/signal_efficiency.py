@@ -1,169 +1,152 @@
-# NB: this module cannot depend on any local imports, except in __main__, unless you ship them with combine/submit.py
-
-for i in xrange(10):
-    print 'dont forget: L1 EE prefiring, HEM15/16; what else?'
+# NB: this module cannot depend on any non-stdlib imports, except in __main__, unless you ship them with combine/submit.py
 
 from math import hypot
 import ROOT; ROOT.gROOT.SetBatch()
 
-def trigmult(x):
-    return 0.989
-def sf20156(x, pars=(0.9784, -1128., 1444.)):
-    return trigmult(x) * (2. - pars[0] * ROOT.TMath.Erf((x-pars[1])/pars[2]))
-def one(x):
-    return 1.
+class _reprable(object):
+    def _reprs(self):
+        return [(f, repr(getattr(self, f))) for f in sorted(dir(self)) if not f.startswith('_')]
+    def __repr__(self):
+        return '<%s.%s(%s) at 0x%x>' % (self.__module__, self.__class__.__name__, ', '.join('%s=%s' % (f,v) for f,v in self._reprs()), id(self))
+    def _dump(self):
+        maxl = max(len(f) for f,_ in self._reprs())
+        for f,v in self._reprs():
+            print f.ljust(maxl+3), v
 
-class _namedtuple:
+class _namedtuple(_reprable):
     def __init__(self, **args):
         self._fields = args.keys()[:]
         for k,v in args.iteritems():
             setattr(self, k, v)
-    def __repr__(self):
-        return '<%s.%s(%s) at 0x%x>' % (self.__module__, self.__class__.__name__, ', '.join('%s=%s' % (f, repr(getattr(self, f))) for f in dir(self) if not f.startswith('_')), id(self))
         
-class Input (_namedtuple): pass
-class Result(_namedtuple): pass
-
-def checkedset(x,y):
-    if x is not None:
-        assert x==y
-    return y
-
 class SignalEfficiencyCombiner:
-    nbins = 3
+    class Input(_reprable):
+        def __init__(self, fn, years, w=1., include_stat=True):
+            self.fn = fn
+            self.years = sorted(years)
+            self.nyears = len(self.years)
+            self.w = w
+            self.include_stat = include_stat
 
-    @classmethod
-    def _get(cls, h, offset=0., mult=1.):
-        return [offset + mult*h.GetBinContent(ibin) for ibin in xrange(1,cls.nbins+1)]
-    @classmethod
-    def _gete(cls, h):
-        return [h.GetBinError(ibin) for ibin in xrange(1,cls.nbins+1)]
+            self.f = ROOT.TFile.Open(self.fn)
 
-    def __init__(self, simple=True):
-        if simple:
-            fn = simple if type(simple) == str else 'limitsinput.root'
-            self.inputs = [Input(fn=fn, int_lumi=101.2, sf=one, include_stat=True)]
-        else:
-            raise NotImplementedError('no non-simple yet in 2017')
-            self.inputs = [
-                Input(fn='limitsinput_nonhip.root', int_lumi= 2.62, sf=sf20156,  include_stat=False),
-                Input(fn='limitsinput_hip.root',    int_lumi=19.70, sf=trigmult, include_stat=True),
-                Input(fn='limitsinput_nonhip.root', int_lumi=16.23, sf=trigmult, include_stat=True),
-                ]
+        def get(self, bn, isample):
+            n = 'h_signal_%i_%s_' % (isample, bn)
+            r = [None] * self.nyears
+            for y,year in enumerate(self.years):
+                year = str(year)
+                h = self.f.Get(n + year)
+                if not h:
+                    raise ValueError('no %s in %s for year %s' % (n[:-1], self.fn, year))
+                else:
+                    h.Scale(self.w)
+                    r[y] = h
+            return r
+                
+    def __init__(self, years=['2016','2017','2018']):
+        self.years = sorted(str(y) for y in years)
+        self.nyears = len(self.years)
 
-        self.int_lumi = 0
-        def check_names(f, last_names=[]):
-            h = f.Get('name_list')
-            names = [h.GetXaxis().GetBinLabel(ibin) for ibin in xrange(1,h.GetNbinsX()+1)]
-            if last_names:
-                if names != last_names:
-                    raise ValueError('names are different between files')
-            else:
-                last_names.extend(names)
+        self.inputs = [self.Input('limitsinput.root', self.years)]
+        self.f = self.inputs[0].f # any of the f are equivalent for name_list and bkg stuff
+        self.ninputs = len(self.inputs)
 
+        get_int_lumis = lambda inp: [inp.f.Get('h_int_lumi_%s' % year) for year in self.years]
+        self.int_lumis = get_int_lumis(self.inputs[0])
+        assert all(self.int_lumis == get_int_lumis(inp) for inp in self.inputs[1:])
+
+        sumw = sum(inp.w for inp in self.inputs)
         for inp in self.inputs:
-            self.int_lumi += inp.int_lumi
-            inp.f = ROOT.TFile(inp.fn)
-            check_names(inp.f)
+            inp.w /= sumw
 
-    def check(self, nbins, int_lumi):
-        assert self.nbins == nbins
-        assert abs(self.int_lumi - int_lumi) < 0.25 # grr
-
-    def __add_h(self, h, h2, c):
-        if h is None:
-            h = h2.Clone()
-            h.Scale(c)
-        else:
-            h.Add(h2, c)
-        return h
-
-    def combine(self, which):
+    def combine(self, isample):
         nice_name = None
-        ngens = []
-        int_lumi_sum = 0.
-        total_nsig = 0
-        sig_rate = [0.] * self.nbins
-        sig_stat_uncert = [0.] * self.nbins
-        sig_uncert = None
-        h_dbv_sum = None
-        h_dvvs = []
-        h_dvv_sum = None
+
+        ngens = [0] * self.nyears
+        hs_dbv = [None] * self.nyears
+        hs_dphi = [None] * self.nyears
+        hs_dvv = [None] * self.nyears
+        hs_dvv_rebin = [None] * self.nyears
+        hs_uncert = None # don't add these between inputs so we just set from the first input
+
+        def _deyear(n):
+            x = n.rsplit('_',1)
+            assert x[1] in self.years
+            return x[0]
+        def _cset(x,y):
+            if x is not None:
+                assert x==y
+            return y
+        def _add_h(hs):
+            h = hs[0].Clone(_deyear(hs[0].GetName()))
+            for h2 in hs[1:]:
+                h.Add(h2)
+            return h
+        def _add_hs(hs, hs2):
+            r = []
+            for h, h2 in zip(hs, hs2):
+                if h is None:
+                    h = h2.Clone()
+                else:
+                    h.Add(h2)
+                r.append(h)
+            return r
 
         for inp in self.inputs:
-            f = inp.f
-
-            int_lumi_sum += inp.int_lumi
-
-            h_norm = f.Get('h_signal_%i_norm' % which)
-            ngen = 1e-3 / h_norm.GetBinContent(2)
-            ngens.append(ngen)
-            nice_name = checkedset(nice_name, h_norm.GetTitle())
-            mass = int(nice_name.split('_M')[-1].split('_')[0])
-
-            scale = inp.int_lumi / ngen * inp.sf(mass)
-
-            h_dbv = f.Get('h_signal_%i_dbv' % which)
-            h_dvv = f.Get('h_signal_%i_dvv' % which)
-            h_dvv_rebin = f.Get('h_signal_%i_dvv_rebin' % which)
-            h_dvvs.append(h_dvv_rebin)
-            assert h_dbv.GetTitle() == nice_name
-            assert h_dvv.GetTitle() == nice_name
-            assert h_dvv_rebin.GetTitle() == nice_name
-            assert h_dvv_rebin.GetNbinsX() == self.nbins
-
-            h_dbv_sum = self.__add_h(h_dbv_sum, h_dbv, scale)
-            h_dvv_sum = self.__add_h(h_dvv_sum, h_dvv, scale)
-
-            nsig  = self._get (h_dvv_rebin)
-            nsige = self._gete(h_dvv_rebin)
-
+            hs_ngen = inp.get('ngen', isample)
+            nice_name = _cset(nice_name, _deyear(hs_ngen[0].GetTitle()))
             if inp.include_stat:
-                total_nsig += int(sum(nsig))
+                ngens = [n + int(h.GetBinContent(1)) for n, h in zip(ngens, hs_ngen)]
 
-            for i in xrange(self.nbins):
-                sig_rate[i] += nsig[i] * scale
-                if inp.include_stat:
-                    sig_stat_uncert[i] = hypot(sig_stat_uncert[i], scale * nsige[i])
+            hs_dbv       = _add_hs(hs_dbv,       inp.get('dbv',       isample))
+            hs_dphi      = _add_hs(hs_dphi,      inp.get('dphi',      isample))
+            hs_dvv       = _add_hs(hs_dvv,       inp.get('dvv',       isample))
+            hs_dvv_rebin = _add_hs(hs_dvv_rebin, inp.get('dvv_rebin', isample))
 
-            h_uncert = f.Get('h_signal_%i_uncert' % which)
-            sig_uncert = checkedset(sig_uncert, self._get(h_uncert, offset=1))
+            if hs_uncert is None:
+                hs_uncert = inp.get('uncert', isample)
 
-        total_sig_rate = sum(sig_rate)
-        total_sig_1v = h_dbv_sum.Integral(0,h_dbv_sum.GetNbinsX()+2)
+        rates = [tuple(h.GetBinContent(ib) for ib in xrange(1,h.GetNbinsX()+1)) for h in hs_dvv_rebin]
+        rate = [sum(r) for r in zip(*rates)]
+        tot_rate = sum(rate)
 
-        # NB do not confuse the three entries of h_dvvs, ngens (which
-        # are the three inputs listed above) with the three entries of
-        # sig_* (which are the three dvv bins)
-        return Result(which = which,
+        uncerts = [tuple(h.GetBinContent(ib) for ib in xrange(1,h.GetNbinsX()+1)) for h in hs_uncert]
+
+        class Result(_namedtuple): pass
+        yearit = lambda x: dict(zip(self.years, x))
+        return Result(isample = isample,
                       nice_name = nice_name,
-                      ngens = ngens,
-                      int_lumi_sum = int_lumi_sum,
-                      total_nsig = total_nsig,
-                      sig_rate = sig_rate,
-                      total_sig_rate = total_sig_rate,
-                      sig_rate_norm = [x / total_sig_rate if total_sig_rate > 0 else 0. for x in sig_rate],
-                      total_efficiency = total_sig_rate / int_lumi_sum,
-                      sig_stat_uncert = sig_stat_uncert,
-                      sig_uncert = sig_uncert,
-                      sig_uncert_rate = [x*(y-1) for x,y in zip(sig_rate, sig_uncert)],
-                      total_sig_1v = total_sig_1v,
-                      h_dbv = h_dbv_sum,
-                      h_dvvs = h_dvvs,
-                      h_dvv = h_dvv_sum)
+                      ngens = yearit(ngens),
+                      hs_dbv = yearit(hs_dbv),
+                      hs_dphi = yearit(hs_dphi),
+                      hs_dvv = yearit(hs_dvv),
+                      hs_dvv_rebin = yearit(hs_dvv_rebin),
+                      hs_uncert = yearit(hs_uncert),
+
+                      rates = yearit(rates),
+                      uncerts = yearit(uncerts),
+                      rate = yearit(rate),
+
+                      h_dbv = _add_h(hs_dbv),
+                      h_dphi = _add_h(hs_dphi),
+                      h_dvv = _add_h(hs_dvv),
+                      h_dvv_rebin = _add_h(hs_dvv_rebin),
+
+                      tot_rate = tot_rate,
+                      )
 
 if __name__ == '__main__':
-    which = None
     combiner = SignalEfficiencyCombiner()
+    isample = None
     try:
         import sys
-        which = int(sys.argv[1])
+        isample = int(sys.argv[1])
     except ValueError:
         from limitsinput import name2isample
-        which = name2isample(combiner.inputs[0].f, sys.argv[1])
+        isample = name2isample(combiner.f, sys.argv[1])
     except IndexError:
         pass
-    if which is not None:
-        r = combiner.combine(which)
-        print r
+    if isample is not None:
+        r = combiner.combine(isample)
+        r._dump()
 

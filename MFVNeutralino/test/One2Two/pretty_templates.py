@@ -9,6 +9,7 @@ ps.c.SetLeftMargin(0.13)
 ps.c.SetRightMargin(0.06)
 
 f = ROOT.TFile('/uscms/home/tucker/public/mfv/limitsinput_100kevent_samples_used_for_Figs_1+3.root')
+raise ValueError('propagate change to use stored rate already normalized to int lumi')
 combiner = SignalEfficiencyCombiner()
 
 which = [

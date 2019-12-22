@@ -37,6 +37,8 @@ ebins = {
     "data100pc_2017p8_5track"     : (0.0115, 0.0336, 0.1179),
     }
 
+ebins["data100pc_2016_5track"] = (0.02, 0.05, 0.18) # manual entry from last values used in run2_paper1--don't drop this line when pasting the output of __main__.parse
+
 def _ksort(s, o=['MCscaled', 'MCeffective', 'data10pc', 'data100pc', '2017', '2018', '2017p8']):
     s = s.replace('sm_','').split('_')
     try:

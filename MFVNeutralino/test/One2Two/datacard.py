@@ -2,152 +2,184 @@
 
 import sys
 import ROOT; ROOT.gROOT.SetBatch()
-"""from signal_efficiency import SignalEfficiencyCombiner
+from signal_efficiency import SignalEfficiencyCombiner
 
-bkg_fully_correlated = 'bkg_fully_correlated' in sys.argv
+if 'bkg_fully_correlated' in sys.argv:
+    bkg_correlation = 'fully'
+if 'bkg_yearwise_correlated' in sys.argv:
+    bkg_correlation = 'yearwise'
+elif 'bkg_binwise_correlated' in sys.argv:
+    bkg_correlation = 'binwise'
+else: #elif 'bkg_uncorrelated' in sys.argv:
+    bkg_correlation = False
 
-template = '''
-# which = {0.which}
+include_2016 = 'include_2016' in sys.argv # includes 2015
+include_sigmc = 'no_sigmc' not in sys.argv
+years = ('2016','2017','2018') if include_2016 else ('2017','2018')
+
+if include_2016:
+    template = '''
+# isample = {0.isample}
+# nice name = {0.nice_name}
+
+imax 9
+jmax 3
+kmax {0.nsyst}
+------------
+bin           b60  b61  b62      b70  b71  b72      b80  b81  b82
+observation   {0.observed_2016}  {0.observed_2017}  {0.observed_2018}
+------------
+bin           b60  b61  b62      b70  b71  b72      b80  b81  b82                b60  b61  b62      b70  b71  b72      b80  b81  b82              b60  b61  b62      b70  b71  b72      b80  b81  b82             b60  b61  b62      b70  b71  b72      b80  b81  b82
+process       sig  sig  sig      sig  sig  sig      sig  sig  sig                bk6  bk6  bk6      bk6  bk6  bk6      bk6  bk6  bk6              bk7  bk7  bk7      bk7  bk7  bk7      bk7  bk7  bk7             bk8  bk8  bk8      bk8  bk8  bk8      bk8  bk8  bk8
+process       0    0    0        0    0    0        0    0    0                  1    1    1        1    1    1        1    1    1                2    2    2        2    2    2        2    2    2               3    3    3        3    3    3        3    3    3  
+rate          {0.sig_rate_2016}  {0.sig_rate_2017}  {0.sig_rate_2018}            {0.bkg_rate_2016}  0    0    0        0    0    0                0    0    0        {0.bkg_rate_2017}  0    0    0               0    0    0        0    0    0        {0.bkg_rate_2018}
+------------
+sig6 lnN {0.sig_uncert_2016} DASH6          DASH9    DASH9    DASH9
+sig7 lnN DASH3 {0.sig_uncert_2017} DASH3    DASH9    DASH9    DASH9
+sig8 lnN DASH6 {0.sig_uncert_2018}          DASH9    DASH9    DASH9
+'''
+    if include_sigmc:
+        template += '''
+sig6MC gmN {0.ngen_2016} {0.sigmc_alpha_2016} DASH6          DASH9   DASH9   DASH9
+sig7MC gmN {0.ngen_2017} DASH3 {0.sigmc_alpha_2017} DASH3    DASH9   DASH9   DASH9
+sig8MC gmN {0.ngen_2018} DASH6 {0.sigmc_alpha_2018}          DASH9   DASH9   DASH9
+'''
+
+else:
+    template = '''
+# isample = {0.isample}
 # nice name = {0.nice_name}
 
 imax 6
 jmax 2
 kmax {0.nsyst}
 ------------
-bin           b70  b71  b72  b80  b81  b82
-observation   {0.observed_2017} {0.observed_2018}
+bin           b70  b71  b72      b80  b81  b82
+observation   {0.observed_2017}  {0.observed_2018}
 ------------
-bin           b70  b71  b72  b80  b81  b82   b70  b71  b72  b80  b81  b82   b70  b71  b72  b80  b81  b82
-process       sig  sig  sig  sig  sig  sig   bk7  bk7  bk7  bk7  bk7  bk7   bk8  bk8  bk8  bk8  bk8  bk8
-process       0    0    0    0    0    0     1    1    1    1    1    1     2    2    2    2    2    2
-rate          {0.sig_rate_2017} {0.sig_rate_2018} {0.bkg_rate_2017} 0 0 0 0 0 0 {0.bkg_rate_2018}
+bin           b70  b71  b72      b80  b81  b82                b70  b71  b72      b80  b81  b82             b70  b71  b72      b80  b81  b82
+process       sig  sig  sig      sig  sig  sig                bk7  bk7  bk7      bk7  bk7  bk7             bk8  bk8  bk8      bk8  bk8  bk8
+process       0    0    0        0    0    0                  1    1    1        1    1    1               2    2    2        2    2    2  
+rate          {0.sig_rate_2017}  {0.sig_rate_2018}            {0.bkg_rate_2017}  0    0    0               0    0    0        {0.bkg_rate_2018}
 ------------
-sig lnN {0.sig_uncert_2017} {0.sig_uncert_2018} - - -
-sigMC gmN {0.total_nsig} {0.sig_mc} - - -
+sig7 lnN {0.sig_uncert_2017} DASH3    DASH6   DASH6
+sig8 lnN DASH3 {0.sig_uncert_2018}    DASH6   DASH6
 '''
-if bkg_fully_correlated:
-    template += '''
-bkg lnN - - - {0.bkg_uncert}
+    if include_sigmc:
+        template += '''
+sig7MC gmN {0.ngen_2017} {0.sigmc_alpha_2017} DASH3    DASH6   DASH6
+sig8MC gmN {0.ngen_2018} DASH3 {0.sigmc_alpha_2018}    DASH6   DASH6
 '''
+
+
+if bkg_correlation == 'fully':
+    if include_2016:
+        template += '''
+bkg0 lnN DASH9 {0.bkg_uncert_2016} {0.bkg_uncert_2017} {0.bkg_uncert_2018}
+'''
+    else:
+        template += '''
+bkg0 lnN DASH6 {0.bkg_uncert_2017} {0.bkg_uncert_2018}
+'''
+
+elif bkg_correlation == 'yearwise':
+    if include_2016:
+        template += '''
+bkg0 lnN DASH9    {0.bkg_uncert_2016} DASH6    DASH9                              DASH9
+bkg1 lnN DASH9    DASH9                        DASH3 {0.bkg_uncert_2017} DASH3    DASH9
+bkg2 lnN DASH9    DASH9                        DASH9                              DASH6 {0.bkg_uncert_2018}
+'''
+    else:
+        template += '''
+bkg0 lnN DASH6    {0.bkg_uncert_2017} DASH3    DASH6
+bkg1 lnN DASH6    DASH6                        DASH3 {0.bkg_uncert_2018}
+'''
+
+elif bkg_correlation == 'binwise':
+    if include_2016:
+        template += '''
+bkg0 lnN DASH9    {0.bkg_uncert_2016_0} - - DASH6    DASH3 {0.bkg_uncert_2017_0} - - DASH3    DASH6 {0.bkg_uncert_2018_0} - -
+bkg1 lnN DASH9    - {0.bkg_uncert_2016_1} - DASH6    DASH3 - {0.bkg_uncert_2017_1} - DASH3    DASH6 - {0.bkg_uncert_2018_1} -
+bkg2 lnN DASH9    - - {0.bkg_uncert_2016_2} DASH6    DASH3 - - {0.bkg_uncert_2017_2} DASH3    DASH6 - - {0.bkg_uncert_2018_2}
+'''
+    else:
+        template += '''
+bkg0 lnN DASH6    {0.bkg_uncert_2017_0} - - DASH3    DASH3 {0.bkg_uncert_2018_0} - -
+bkg1 lnN DASH6    - {0.bkg_uncert_2017_1} - DASH3    DASH3 - {0.bkg_uncert_2018_1} -
+bkg2 lnN DASH6    - - {0.bkg_uncert_2017_2} DASH3    DASH3 - - {0.bkg_uncert_2018_2}
+'''
+
 else:
-    template += '''
-bkg1 lnN - - - {0.bkg_uncert_1} - -
-bkg2 lnN - - - - {0.bkg_uncert_2} -
-bkg3 lnN - - - - - {0.bkg_uncert_3}
+    if include_2016:
+        template += '''
+bkg0 lnN DASH9    {0.bkg_uncert_2016_0} - - DASH6    DASH9                                    DASH9
+bkg1 lnN DASH9    - {0.bkg_uncert_2016_1} - DASH6    DASH9                                    DASH9
+bkg2 lnN DASH9    - - {0.bkg_uncert_2016_2} DASH6    DASH9                                    DASH9
+bkg3 lnN DASH9    DASH9                              DASH3 {0.bkg_uncert_2017_0} - - DASH3    DASH9
+bkg4 lnN DASH9    DASH9                              DASH3 - {0.bkg_uncert_2017_1} - DASH3    DASH9
+bkg5 lnN DASH9    DASH9                              DASH3 - - {0.bkg_uncert_2017_2} DASH3    DASH9
+bkg6 lnN DASH9    DASH9                              DASH9                                    DASH6 {0.bkg_uncert_2018_0} - -
+bkg7 lnN DASH9    DASH9                              DASH9                                    DASH6 - {0.bkg_uncert_2018_1} -
+bkg8 lnN DASH9    DASH9                              DASH9                                    DASH6 - - {0.bkg_uncert_2018_2}
+'''
+    else:
+        template += '''
+bkg0 lnN DASH6    {0.bkg_uncert_2017_0} - - DASH3    DASH6
+bkg1 lnN DASH6    - {0.bkg_uncert_2017_1} - DASH3    DASH6
+bkg2 lnN DASH6    - - {0.bkg_uncert_2017_2} DASH3    DASH6
+bkg3 lnN DASH6    DASH6                              DASH3 {0.bkg_uncert_2018_0} - -
+bkg4 lnN DASH6    DASH6                              DASH3 - {0.bkg_uncert_2018_1} -
+bkg5 lnN DASH6    DASH6                              DASH3 - - {0.bkg_uncert_2018_2}
 '''
 
-def make(which):
-    combiner = SignalEfficiencyCombiner(simple=True)
-    r = combiner.combine(which)
+for d in 3,6,9:
+    template = template.replace('DASH%i' % d, ' '.join('-'*d))
 
-    def _strit(fmt,typ,n,offset=0,mult=1):
-        return ' '.join(fmt % typ(x) for x in combiner._get(f.Get(n), offset, mult))
-    def intstrit(n, offset=0, mult=1):
-        return _strit('%i',int,n,offset,mult)
-    def floatstrit(n, offset=0, mult=1):
-        return _strit('%.9g',float,n,offset,mult)
+def make(isample):
+    nbins = 3
 
-    f = combiner.inputs[0].f # for background/etc. all same
-    combiner.check(f.Get('h_observed').GetNbinsX(), f.Get('h_int_lumi').GetBinContent(1))
-    r.observed = intstrit('h_observed')
-    r.bkg_rate = floatstrit('h_bkg_dvv_rebin', mult=f.Get('h_observed').Integral())
-    r.bkg_uncert = floatstrit('h_bkg_uncert', offset=1.)
-    r.bkg_uncert_1, r.bkg_uncert_2, r.bkg_uncert_3 = r.bkg_uncert.split()
-    r.nsyst = 3 if bkg_fully_correlated else 5
-    r.sig_mc = ' '.join('%.9g' % (x/r.total_nsig) for x in r.sig_rate)
-    r.sig_rate = ' '.join('%.9g' % x for x in r.sig_rate)
-    r.sig_uncert = ' '.join('%.9g' % x for x in r.sig_uncert)
+    combiner = SignalEfficiencyCombiner(years)
+    r = combiner.combine(isample)
+    r.nsyst = template.count('lnN') + template.count('gmN')
+
+    def h2l(h):
+        return [h.GetBinContent(ib) for ib in xrange(1,nbins+1)]
+    def get(n):
+        return h2l(combiner.f.Get(n))
+    def st(x, typ=float):
+        if type(x) in (list,tuple):
+            l = x
+        elif type(x) == str:
+            l = get(x)
+        elif issubclass(type(x), ROOT.TH1):
+            l = h2l(x)
+        else:
+            raise ValueError('duh %r' % x)
+        fmt = '%.9g' if typ == float else '%s'
+        return ' '.join(fmt % typ(v) for v in l)
+
+    for year in years:
+        setattr(r, 'observed_%s'    % year, st('h_observed_%s'      % year))
+        setattr(r, 'bkg_rate_%s'    % year, st('h_bkg_dvv_rebin_%s' % year))
+        setattr(r, 'sig_rate_%s'    % year, st(r.hs_dvv_rebin[year]))
+        setattr(r, 'sig_uncert_%s'  % year, st(r.hs_uncert[year]))
+
+        ngen = r.ngens[year]
+        setattr(r, 'ngen_%s'        % year, str(ngen))
+        setattr(r, 'sigmc_alpha_%s' % year, st([x /ngen for x in r.rates[year]]))
+
+        bkg_uncert = get('h_bkg_uncert_%s' % year)
+        setattr(r, 'bkg_uncert_%s' % year, bkg_uncert)
+        for i,v in enumerate(bkg_uncert):
+            setattr(r, 'bkg_uncert_%s_%i' % (year, i), v)
 
     print template.format(r)
-"""
 
-def make(which):
-    template = '''
-imax 6
-jmax 2
-kmax 4
-------------
-bin           b70  b71  b72  b80  b81  b82
-observation   0    0    0    0    0    0
-------------
-bin      b70  b71  b72  b80  b81  b82   b70  b71  b72  b80  b81  b82   b70  b71  b72  b80  b81  b82
-process  sig  sig  sig  sig  sig  sig   bk7  bk7  bk7  bk7  bk7  bk7   bk8  bk8  bk8  bk8  bk8  bk8
-process  0    0    0    0    0    0     1    1    1    1    1    1     2    2    2    2    2    2
-rate     %s                             0.71 0.26 0.03 0    0    0     0    0    0    0.65 0.31 0.04
-------------
-sig lnN  1.24 1.24 1.24 1.24 1.24 1.24  -    -    -    -    -    -     -    -    -    -    -    -
-bk0 lnN  -    -    -    -    -    -     1.14 -    -    -    -    -     -    -    -    1.14 -    -
-bk1 lnN  -    -    -    -    -    -     -    1.26 -    -    -    -     -    -    -    -    1.26 -
-bk2 lnN  -    -    -    -    -    -     -    -    1.42 -    -    -     -    -    -    -    -    1.42
-'''
-    sig_rate = {
--1:[0.0285397720237, 0.0274132210488, 0.0251921535697, 0.0232045337141, 0.0187656468647, 0.0232044976019],
--2:[0.160289571734, 0.1373085995, 0.0467799475296, 0.118739016291, 0.110442209707, 0.0552771330457],
--3:[0.364571233658, 0.199510547111, 0.0526191221084, 0.279519343236, 0.19465552472, 0.0463780634542],
--4:[0.594435492184, 0.199997313531, 0.0269305390787, 0.493173064575, 0.204977656159, 0.031264392062],
--5:[0.76217247873, 0.195516065798, 0.0327165275716, 0.653518930437, 0.224451137374, 0.0325347224957],
--6:[0.8327164405, 0.09474260814, 0.00694075300527, 0.835368600469, 0.119691952768, 0.00580085590622],
--7:[0.0601880948693, 0.0872082050699, 0.333175014574, 0.0557843021164, 0.0835284127902, 0.337504625912],
--8:[0.428140328745, 0.638538605294, 1.24888812162, 0.363496517619, 0.578768359262, 1.43884793063],
--9:[1.25912683554, 1.63601753921, 1.89634043533, 1.05568530643, 1.75163761888, 2.33456978227],
--10:[2.46113878801, 2.36717994701, 1.90644548722, 2.16312072954, 2.66703690829, 2.43061715254],
--11:[3.01007320614, 2.54080842894, 1.71540838313, 2.89984976514, 2.93500877273, 2.29005949902],
--12:[4.40738957824, 2.30056003626, 0.981561722027, 4.41564041918, 2.87589693988, 1.30080249187],
--13:[0.054528125738, 0.0566237322359, 1.1832436008, 0.0481236530424, 0.06677439042, 1.25171782891],
--14:[0.349009841007, 0.468257126531, 5.24988017393, 0.318672485787, 0.47286595105, 6.44589144786],
--15:[1.12546108067, 1.6677320497, 10.8753024325, 1.09033598945, 1.84230599255, 13.7633353043],
--16:[2.49156145961, 3.37208334905, 13.7777876539, 2.34263207679, 3.91658709336, 18.090900264],
--17:[3.19219590117, 3.99053251873, 13.7788176956, 3.21375091169, 4.73833067557, 18.1382116257],
--18:[5.08881032419, 4.88465059281, 11.7114166775, 5.52451439041, 6.27447623343, 15.7007018039],
--19:[0.0200668639789, 0.00403303354134, 1.29170427988, 0.028156231482, 0.00545007944497, 1.55031512926],
--20:[0.137433018145, 0.0286772037264, 7.83043402719, 0.127162554059, 0.0306228478221, 10.1330701016],
--21:[0.36509770963, 0.137973113724, 20.8995735852, 0.35945804665, 0.155710063462, 28.0710745695],
--22:[0.709864252525, 0.361543713745, 31.9189810604, 0.675344620101, 0.439114519379, 43.6228581478],
--23:[0.858562409902, 0.425455370118, 33.6384799715, 0.883354310831, 0.539923597849, 46.0388667814],
--24:[1.12499902491, 0.676657483622, 34.7150936404, 1.25142586496, 0.786853025087, 48.5177379688],
--25:[0.0242224515963, 0.000273660574, 0.465175887619, 0.0204695611971, 0.0, 0.547043368648],
--26:[0.182708511683, 0.00743497701811, 3.48437756809, 0.146614830967, 0.0161077799676, 4.50541034595],
--27:[0.499882636179, 0.0293711859125, 12.0095042954, 0.444052512437, 0.0262292079062, 16.2046432347],
--28:[0.879840872474, 0.073488593596, 22.1571821135, 0.817805542955, 0.101045830392, 30.3100362371],
--29:[1.11034190497, 0.0971741343178, 24.3755906278, 1.01374329043, 0.112684164969, 33.8519084303],
--30:[1.45959752626, 0.142006889162, 28.2378662345, 1.42849263399, 0.171711790718, 39.7505434992],
--31:[0.0707947659078, 0.0822487515533, 0.0694770167508, 0.0363442740508, 0.0586194932628, 0.0633919540048],
--32:[0.277567447023, 0.210850283063, 0.0919656631136, 0.207245272735, 0.188786452832, 0.0950488528671],
--33:[0.450121343924, 0.278912940895, 0.0994933667301, 0.373238837024, 0.258346754567, 0.0966653805167],
--34:[0.696525974392, 0.307256597823, 0.065228132241, 0.570525630204, 0.335471140793, 0.0889516566203],
--35:[0.941422840893, 0.378928678495, 0.0637975930399, 0.804976966231, 0.393993808272, 0.0801476825274],
--36:[1.20399571722, 0.234851542403, 0.0152980733243, 1.1274972206, 0.258730495415, 0.0196985011373],
--37:[0.096416844097, 0.175000164732, 0.759081391086, 0.0806983033843, 0.157465915775, 0.727335117505],
--38:[0.595566612199, 1.06861918597, 1.99520592241, 0.535533387219, 1.0596694972, 2.19636805483],
--39:[1.3740312129, 1.86632319657, 2.56050944722, 1.15554606198, 1.90491732541, 2.85766049752],
--40:[1.9717927455, 2.43546511887, 2.83564706744, 1.81909295728, 2.65213742947, 3.24406821926],
--41:[2.59221633073, 2.79650570691, 2.93470072193, 2.46929108606, 3.10885813571, 3.57164914143],
--42:[4.22806809098, 3.4180140953, 2.11792256985, 4.32567360091, 3.9338513516, 2.61436560339],
--43:[0.0582145078044, 0.104107313841, 2.21253927899, 0.0534093402726, 0.105128047665, 2.27903565733],
--44:[0.399909583971, 0.81027114336, 8.14420294473, 0.393171605748, 0.855266951711, 9.46459088167],
--45:[1.04380156774, 2.14248125277, 12.6283000014, 1.00457202996, 2.23562994574, 14.9599869339],
--46:[1.71025241668, 2.8795228311, 14.9268032927, 1.60784859585, 3.2263642124, 18.4096966128],
--47:[1.99123681333, 3.13991012759, 15.9965794622, 1.9848479231, 3.61255062043, 19.6845105707],
--48:[3.21316096948, 3.97006355616, 16.3276656488, 3.47848457681, 4.88517844412, 20.9438225582],
--49:[0.0112628769684, 0.00330469134335, 2.04425716073, 0.00356854406213, 0.00825700644525, 2.32516240516],
--50:[0.0623056285169, 0.0527553213207, 11.7893694726, 0.0661230278292, 0.0554719415887, 14.351313495],
--51:[0.186211122817, 0.187405416886, 23.6490674561, 0.166724155137, 0.20742163547, 29.4136916628],
--52:[0.333686704946, 0.278276921377, 29.1058338215, 0.322570802645, 0.274373260868, 37.1987422707],
--53:[0.454066927039, 0.258493936465, 30.717452544, 0.448121549345, 0.335222871678, 39.6932538966],
--54:[0.647716257358, 0.208255277272, 33.5470471415, 0.76720488341, 0.253646392959, 44.3553350547],
--55:[0.00539125967737, 0.00177837687358, 0.677574353896, 0.00497804839974, 0.0, 0.765151218316],
--56:[0.0536816422116, 0.00886225080425, 5.53914473643, 0.0404121384322, 0.00935626974925, 6.59809947821],
--57:[0.163740232188, 0.041100103661, 13.9343576136, 0.117383626127, 0.0517130317419, 17.1825584847],
--58:[0.343731546552, 0.0573186804208, 18.2529138399, 0.244789334659, 0.0618099702889, 23.3861419946],
--59:[0.504296158344, 0.0526108816326, 18.9440138395, 0.393335326685, 0.0729008677211, 24.3717376688],
--60:[1.00976743998, 0.0335139515961, 20.7909886874, 0.860038832608, 0.0573757107523, 27.6256952977],
-}[which]
-    print template % (' '.join(str(x) for x in sig_rate))
 
 if __name__ == '__main__':
     try:
-        which = int(sys.argv[1])
+        isample = int(sys.argv[1])
     except ValueError:
         from limitsinput import name2isample
-        which = name2isample(ROOT.TFile('limitsinput.root'), sys.argv[1])
-    make(which)
+        isample = name2isample(ROOT.TFile('limitsinput.root'), sys.argv[1])
+    make(isample)
