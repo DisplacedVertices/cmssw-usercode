@@ -3,4 +3,4 @@
 out.*.gz
 inputfns*.txt
 scanpacks/
-year.txt
+year*.txt
