@@ -202,7 +202,7 @@ def effective_wilson_score_vpme(n_on, e_n_on, n_tot, e_n_tot, alpha=1-0.6827):
 def effective_wilson_score(n_on, e_n_on, n_tot, e_n_tot, alpha=1-0.6827):
     c, e = effective_wilson_score_vpme(n_on, e_n_on, n_tot, e_n_tot, alpha)
     return c, c-e, c+e
-    _
+
 def clopper_pearson(n_on, n_tot, alpha=1-0.6827, equal_tailed=True):
     if equal_tailed:
         alpha_min = alpha/2
