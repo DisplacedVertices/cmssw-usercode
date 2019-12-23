@@ -1,8 +1,9 @@
 import sys, os
 from array import array
 from JMTucker.Tools.ROOTTools import *
+ROOT.gErrorIgnoreLevel = 1001 # Suppress TCanvas::SaveAs messages.
 
-path = plot_dir('pretty_limits_1d_2017tempv4', make=True)
+path = plot_dir('pretty_limits_1d_scanpack1D', make=True)
 
 ts = tdr_style()
 
@@ -19,12 +20,14 @@ f = ROOT.TFile('limits_1d.root')
 kinds = [
     'multijet_M0800',
     'multijet_M1600',
+    'multijet_M2400',
     'multijet_M3000',
     'multijet_tau300um',
     'multijet_tau1mm',
     'multijet_tau10mm',
     'dijet_M0800',
     'dijet_M1600',
+    'dijet_M2400',
     'dijet_M3000',
     'dijet_tau300um',
     'dijet_tau1mm',

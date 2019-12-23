@@ -79,20 +79,24 @@ class sample_iterator(object):
         if test:
             raise NotImplementedError('test set')
         self.slices_1d = slices_1d
+
+    class Sample(object):
+        def __init__(self, isample, name):
+            self.isample = isample
+            self.name = name
+            self.kind, self.tau, self.mass = name2details(self.name)
+
     def __iter__(self):
         for ibin in xrange(1, self.h.GetNbinsX()+1):
             if isample_available(self.f, -ibin, self.require_years):
-                self.isample = -ibin
-                self.name = self.h.GetXaxis().GetBinLabel(ibin)
-                self.kind, self.tau, self.mass = name2details(self.name)
-
+                s = self.Sample(-ibin, self.h.GetXaxis().GetBinLabel(ibin))
                 if self.slices_1d:
-                    if self.mass in (800, 1600, 2400, 3000) or self.tau in (0.3, 1., 10.):
-                        yield self
+                    if s.mass in (800, 1600, 2400, 3000) or s.tau in (0.3, 1., 10.):
+                        yield s
                 elif self.test:
                     pass
                 else:
-                    yield self
+                    yield s
 
 ####
 
