@@ -586,6 +586,7 @@ mfv_neu_tau010000um_M0800_2017.add_dataset('ntuplev27m_norefitdzcut')
 for x in all_signal_samples_2017 + all_signal_samples_2018:
     x.add_dataset("nr_trackmovermctruthv27mv1")
     x.add_dataset("nr_trackmovermctruthv27mv1_norefitdzcut")
+    x.add_dataset("nr_trackmovermctruthv27mv2")
 
 ########
 # automatic condor declarations for ntuples
