@@ -146,6 +146,16 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     for (double x : gen_info->weights())
       mevent->misc.push_back(x);
 
+    if (gen_info->hasPDF()) {
+      mevent->misc.push_back(gen_info->pdf()->id.first);
+      mevent->misc.push_back(gen_info->pdf()->id.second);
+      mevent->misc.push_back(gen_info->pdf()->x.first);
+      mevent->misc.push_back(gen_info->pdf()->x.second);
+      mevent->misc.push_back(gen_info->pdf()->xPDF.first);
+      mevent->misc.push_back(gen_info->pdf()->xPDF.second);
+      mevent->misc.push_back(gen_info->pdf()->scalePDF);
+    }
+
     edm::Handle<reco::GenJetCollection> gen_jets;
     event.getByToken(gen_jets_token, gen_jets);
 
