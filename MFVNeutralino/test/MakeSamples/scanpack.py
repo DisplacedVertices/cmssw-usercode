@@ -358,6 +358,22 @@ class scanpack1D_tucker(scanpack1D):
     tau_1d  = scanpack1D.tau_1d [3:4]
     mass_1d = scanpack1D.mass_1d[3:4]
 
+class scanpackpdftest(scanpackbase100epj):
+    kinds = [set_stop_dbardbar]
+    taus = [0.3, 1., 10.]
+    masses = range(300, 1001, 100) + [1500,2000,2500,3000]
+    def events_per_sample(self, kind, tau, mass):
+        return 10000
+
+class scanpackpdftest_dquach(scanpackpdftest):
+    masses = scanpackpdftest.masses[::4]
+class scanpackpdftest_joeyr(scanpackpdftest):
+    masses = scanpackpdftest.masses[1::4]
+class scanpackpdftest_shogan(scanpackpdftest):
+    masses = scanpackpdftest.masses[2::4]
+class scanpackpdftest_tucker(scanpackpdftest):
+    masses = scanpackpdftest.masses[3::4]
+
 ####
 
 scanpack_registry =  {
@@ -391,6 +407,11 @@ scanpack_registry =  {
     'scanpack1D_dquach': scanpack1D_dquach,
     'scanpack1D_joeyr': scanpack1D_joeyr,
     'scanpack1D_shogan': scanpack1D_shogan,
+    'scanpackpdftest': scanpackpdftest,
+    'scanpackpdftest_dquach': scanpackpdftest_dquach,
+    'scanpackpdftest_joeyr': scanpackpdftest_joeyr,
+    'scanpackpdftest_shogan': scanpackpdftest_shogan,
+    'scanpackpdftest_tucker': scanpackpdftest_tucker,
     }
 
 def valid_scanpack(x):
@@ -607,7 +628,7 @@ if __name__ == '__main__' and len(sys.argv) > 1:
 
     elif cmd == 'test':
         for user in ('',) + scanpack_users:
-            scanpack = get_scanpack('scanpack1D' + ('_' if user else '') + user)
+            scanpack = get_scanpack('scanpackpdftest' + ('_' if user else '') + user)
             print '\nuser', user, '#samples', len(scanpack.samples), 'events_per_job', scanpack.events_per_job, 'nbatches', scanpack.nbatches
             d = defaultdict(lambda: defaultdict(list))
             for k,t,m in scanpack.samples:

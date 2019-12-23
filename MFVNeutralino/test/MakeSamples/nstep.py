@@ -27,7 +27,7 @@ tau_masses = []
 if 1:
     meta = 'scan'
     output_level = 'minitree'
-    scanpack = 'scanpack1D_' + os.environ['USER']
+    scanpack = 'scanpackpdftest_' + os.environ['USER']
 elif 0:
     meta = 'ttbar'
     nevents, events_per
