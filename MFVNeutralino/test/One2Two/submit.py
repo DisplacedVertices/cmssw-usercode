@@ -37,7 +37,8 @@ cd $WD
 {
     echo "========================================================================="
     echo datacard:
-    python datacard.py $WHICH __DATACARDARGS__ | tee datacard.txt
+    python datacard.py $WHICH __DATACARDARGS__ > datacard.txt
+    awk '{print "DATACARD: " $0}' datacard.txt
 
     cmd="combine -H AsymptoticLimits -M MarkovChainMC --noDefaultPrior=0 --tries 20 -b 200 --iteration 100000 datacard.txt"
 
@@ -196,3 +197,5 @@ for sample in samples:
     open(os.path.join(batch_dir, 'cs_submit.jdl'), 'wt').write(jdl_template % locals())
 
     CondorSubmitter._submit(batch_dir, 50)
+
+# zcat signal_*/combine_output* | sort | uniq | egrep -v '^median expected limit|^mean   expected limit|^Observed|^Limit: r|^Generate toy|^Done in|random number generator seed is|^   ..% expected band' >! /tmp/duh
