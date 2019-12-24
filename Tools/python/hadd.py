@@ -71,14 +71,14 @@ def hadd(output_fn, input_fns):
         open(log_fn, 'wt').write(stdout)
 
     if p.returncode != 0:
-        print colors.boldred('PROBLEM hadding %s' % output_fn)
+        print colors.error('PROBLEM hadding %s' % output_fn)
         #print p.stdout.read()
         return False
 
     max_file_num = max(int(line.split(':')[0].split(' ')[-1]) for line in stdout.split('\n') if 'Source file' in line)
     print '-> %i files merged in %s' % (max_file_num, datetime.now() - start)
     if max_file_num != l:
-        print colors.boldred('PROBLEM hadding %s' % output_fn)
+        print colors.error('PROBLEM hadding %s' % output_fn)
         return False
 
     return True
