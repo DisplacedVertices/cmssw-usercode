@@ -1,11 +1,14 @@
-import os, sys, glob, ROOT
-ROOT.gROOT.SetBatch()
+import os, sys
+from glob import glob
+from JMTucker.Tools import colors
+from JMTucker.Tools.ROOTTools import ROOT, detree
+from JMTucker.Tools.hadd import hadd
 
 def stats(fn_or_f, obs, l, header='sigma_sig_limit'):
     if type(fn_or_f) == file:
         f = fn_or_f
     else:
-        f = open(fn_or_f, 'wt')
+        f = file(fn_or_f, 'wt')
     l.sort()
     n = len(l)
     if n % 2 == 0:
@@ -26,25 +29,26 @@ def stats(fn_or_f, obs, l, header='sigma_sig_limit'):
     return median, lo68, hi68, lo95, hi95
 
 def fromtree(fn):
-    l = []
     f = ROOT.TFile(fn)
-    t = f.Get('limit')
-    for jentry in xrange(t.GetEntriesFast()):
-        if t.LoadTree(jentry) < 0: break
-        if t.GetEntry(jentry) <= 0: continue
-        l.append(t.limit)
-    return l
+    return [x[0] for x in detree(f.Get('limit'), 'limit', xform=float)]
 
 def doit(path, out_fn):
     x = fromtree(os.path.join(path, 'observed.root'))
     assert len(x) <= 1
-    if len(x) != 1:
-        print 'using observed_byhand for this!'
-        x = fromtree(os.path.join(path, 'observed_byhand.root'))
+    #if len(x) != 1:
+    #    print 'using observed_byhand for this!'
+    #    x = fromtree(os.path.join(path, 'observed_byhand.root'))
     obs = x[0]
 
-    exp = fromtree(os.path.join(path, 'expected.root'))
-    print 'num expected is', len(exp)
+    exp_fn = os.path.join(path, 'expected.root')
+    if not os.path.isfile(exp_fn):
+        exp_fns = glob(exp_fn.replace('.root','_*.root'))
+        if len(exp_fns) != 50 or not hadd(exp_fn, exp_fns):
+            raise ValueError('problem hadding %f from %i files' % len(exp_fns))
+
+    exp = fromtree(exp_fn)
+    if len(exp) != 5000:
+        raise ValueError('unexpected number of points in %s' % exp_fn)
 
     stats(out_fn, obs, exp)
 
@@ -55,11 +59,6 @@ def rrange(path):
 
 
 if __name__ == '__main__':
-    import sys
-    path = os.path.abspath(sys.argv[1])
-
-    cmd = '' if len(sys.argv) < 3 else sys.argv[2]
-    if cmd == 'rrange':
-        rrange(path)
-    else:
-        doit(path, sys.stdout)
+    for path in sys.argv[1:]:
+        print path
+        doit(path, os.path.join(path, 'results'))
