@@ -620,7 +620,7 @@ if __name__ == '__main__' and len(sys.argv) > 1:
                 split[which][sample] = nevents
                 curr += nevents
             for isp, sp in enumerate(split):
-                print 'class %sXXX_%s(scanpackbase100epj):' % (scanpack_name, scanpack_users[isp])
+                print 'class %sXXX_%s(scanpackbase100epj):' % (scanpack.name, scanpack_users[isp])
                 print '    """user %i gets %i events:' % (isp, sum(sp.itervalues()))
                 pprint(sp)
                 print '"""'
