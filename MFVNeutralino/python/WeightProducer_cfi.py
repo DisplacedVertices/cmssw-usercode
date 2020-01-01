@@ -14,7 +14,7 @@ mfvWeight = cms.EDProducer('MFVWeightProducer',
                            pileup_weights = cms.vdouble(*get_pileup_weights('default')),
                            weight_npv = cms.bool(False),
                            npv_weights = cms.vdouble(),
-                           weight_l1ecalprefiring = cms.int32(-1),
+                           misc_weight_indices = cms.vint32(),
                            )
 
 def half_mc_by_lumi(process, first=True):

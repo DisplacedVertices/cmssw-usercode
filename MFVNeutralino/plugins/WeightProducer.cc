@@ -32,7 +32,7 @@ private:
   const bool weight_npv;
   const std::vector<double> npv_weights;
   double npv_weight(int mc_npu) const;
-  const int weight_l1ecalprefiring;
+  const std::vector<int> misc_weight_indices;
 
   TH1D* h_gensign;
   TH1D* h_npu;
@@ -57,7 +57,7 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
     pileup_weights(cfg.getParameter<std::vector<double> >("pileup_weights")),
     weight_npv(cfg.getParameter<bool>("weight_npv")),
     npv_weights(cfg.getParameter<std::vector<double> >("npv_weights")),
-    weight_l1ecalprefiring(cfg.getParameter<int>("weight_l1ecalprefiring"))
+    misc_weight_indices(cfg.getParameter<std::vector<int>>("misc_weight_indices"))
 {
   if (weight_gen + weight_gen_sign_only > 1)
     throw cms::Exception("Configuration", "can only set one of weight_gen, weight_gen_sign_only");
@@ -169,12 +169,11 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
         *weight *= npv_w;
       }
 
-      if (weight_l1ecalprefiring != -1) {
-        assert(weight_l1ecalprefiring <= 2);
-        const double l1ecal_w = mevent->misc[weight_l1ecalprefiring];
+      for (int mwi : misc_weight_indices) {
+        const double w = mevent->misc[mwi];
         if (prints)
-          printf("l1 ecal prefiring weight %i: %g  ", weight_l1ecalprefiring, l1ecal_w);
-        *weight *= l1ecal_w;
+          printf("misc weight %i: %g  ", mwi, w);
+        *weight *= w;
       }
     }
   }
