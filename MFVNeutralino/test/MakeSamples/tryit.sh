@@ -5,7 +5,7 @@
 echo be sure to change year.txt and steering.sh to what you want, it was set for the last test
 owd=$(pwd)
 input_version=$CMSSW_VERSION
-tmpdir=/uscmst1b_scratch/lpc1/3DayLifetime/$USER/nstep_tryit_$(date +%s)
+tmpdir=/dev/shm/$USER/nstep_tryit_$(date +%s)
 echo $tmpdir
 mkdir $tmpdir 
 edmConfigDump dummy.py > $tmpdir/pset.py
