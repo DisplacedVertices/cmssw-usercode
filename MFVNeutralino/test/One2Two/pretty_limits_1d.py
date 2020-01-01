@@ -3,7 +3,9 @@ from array import array
 from JMTucker.Tools.ROOTTools import *
 ROOT.gErrorIgnoreLevel = 1001 # Suppress TCanvas::SaveAs messages.
 
-path = plot_dir('pretty_limits_1d_scanpack1D', make=True)
+which = 'run2' # '2017p8'
+intlumi = 140 if which == 'run2' else 101
+path = plot_dir('pretty_limits_1d_scanpack1D_%s' % which, make=True)
 
 ts = tdr_style()
 
@@ -33,6 +35,9 @@ kinds = [
     'dijet_tau1mm',
     'dijet_tau10mm',
     ]
+
+if which == 'run2':
+    kinds = [k for k in kinds if 'M3000' not in k]
 
 def tau(tau):
     if tau.endswith('um'):
@@ -170,7 +175,7 @@ for kind in kinds:
     leg.Draw()
 
     cms = write(61, 0.050, 0.142, 0.825, 'CMS')
-    lum = write(42, 0.050, 0.548, 0.913, '101 fb^{-1} (13 TeV)')
+    lum = write(42, 0.050, 0.548, 0.913, '%s fb^{-1} (13 TeV)' % intlumi)
     fn = os.path.join(path, 'limit1d_' + kind)
     c.SaveAs(fn + '.pdf')
     c.SaveAs(fn + '.png')
