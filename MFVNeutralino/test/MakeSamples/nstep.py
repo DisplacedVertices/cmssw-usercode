@@ -26,11 +26,11 @@ tau_masses = [] # [(1000,1200),(10000,1200),(1000,800),(1000,1600)]
 already = []
 hip_right = False
 
-if 0:
+if 1:
     meta = 'scan'
     output_level = 'minitree'
     hip_right = False
-    scanpack = 'scanpack3_' + os.environ['USER']
+    scanpack = 'scanpack1D2016missing'
 elif 0:
     meta = 'ttbar'
     nevents, events_per

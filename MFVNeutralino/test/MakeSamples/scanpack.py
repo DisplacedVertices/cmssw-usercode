@@ -84,7 +84,7 @@ from modify import set_mfv_neutralino, set_gluino_ddbar, set_stop_dbardbar
 # tau are float, in mm like pythia and modify
 # mass are int, GeV
 
-scanpack_users = 'dquach jchu shogan tucker wsun'.split()
+scanpack_users = 'dquach', 'joeyr', 'shogan', 'tucker'
 
 class scanpackbase(object):
     jobs_per_batch = 5000
@@ -127,6 +127,10 @@ class scanpackbase(object):
                 d = eval(kind_name), tau, mass
                 self.samples.append(d)
                 self.__eps[d] = events
+
+        elif hasattr(self, 'points'):
+            self.samples = self.points[:]
+
         else:
             self.samples = list(product(self.kinds, self.taus, self.masses))
 
@@ -304,6 +308,46 @@ class scanpack3p6_tucker(scanpackbase100epj):
 class scanpack3p6_wsun(scanpackbase100epj):
     samples_string = 'gAJ9cQEoVRFzZXRfc3RvcF9kYmFyZGJhcnECR0A/AAAAAAAATSwBh3EDS2RoAkc/5mZmZmZmZk3oA4dxBE3wI2gCR0BIgAAAAAAATfQBh3EFS2RoAkdATQAAAAAAAE0oCodxBk0EEGgCR0BTAAAAAAAATWAJh3EHTRAnaAJHQDwAAAAAAABNLAGHcQhLZGgCRz+5mZmZmZmaTSwBh3EJTSwBaAJHQE6AAAAAAABN9AGHcQpLyGgCR0BNAAAAAAAATSwBh3ELTSBOaAJHQFAAAAAAAABNYAmHcQxNECdoAkdAUMAAAAAAAE1ABodxDU0QJ2gCR0BKAAAAAAAATUAGh3EOTRAnaAJHQFbAAAAAAABNkAGHcQ9LZGgCR0BLgAAAAAAATSADh3EQTRAnaAJHP/AAAAAAAABNkAGHcRFNhANoAkdAU8AAAAAAAE30AYdNLAFoAkc/2ZmZmZmZmk2YCIdxEk2QAWgCR0AQAAAAAAAATegDh3ETTRAnaAJHQEiAAAAAAABNIAOHcRRNECdoAkdAEAAAAAAAAE30AYdxFUtkaAJHQEcAAAAAAABNQAaHcRZNECdoAkdAS4AAAAAAAE0sAYdxF00gTmgCRz/TMzMzMzMzTUAGh3EYTRwMdS4='
 
+class scanpack1D2016missing(scanpackbase100epj):
+    _n, _s = set_mfv_neutralino, set_stop_dbardbar
+    points = [
+        (_n,   1.0,  800),
+        (_n,   0.3, 2800),
+        (_n,   0.3, 3000),
+        (_n,   0.5, 3000),
+        (_n,   0.9, 3000),
+        (_n,   3.,  3000),
+        (_n,  30.,   800),
+        (_n,  30.,  1600),
+        (_n,  30.,  3000),
+        (_n,  70.,  3000),
+        (_n, 100.,  3000),
+        (_s,   0.1, 3000),
+        (_s,   0.3, 2800),
+        (_s,   0.3, 3000),
+        (_s,   0.5, 3000),
+        (_s,   0.7, 3000),
+        (_s,   0.9, 3000),
+        (_s,   1.,  2800),
+        (_s,   1.,  3000),
+        (_s,   3.,  3000),
+        (_s,   4.,  3000),
+        (_s,  10.,  2800),
+        (_s,  10.,  3000),
+        (_s,  16.,  3000),
+        (_s,  22.,  3000),
+        (_s,  28.,  3000),
+        (_s,  30.,   800),
+        (_s,  30.,  1600),
+        (_s,  30.,  3000),
+        (_s,  34.,  3000),
+        (_s,  40.,  3000),
+        (_s,  70.,  3000),
+        (_s, 100.,  3000),
+        ]
+    def events_per_sample(self, kind, tau, mass):
+        return 2500
+
 ####
 
 def get_scanpack(x):
@@ -333,6 +377,7 @@ def get_scanpack(x):
         'scanpack3p6_shogan': scanpack3p6_shogan,
         'scanpack3p6_tucker': scanpack3p6_tucker,
         'scanpack3p6_wsun': scanpack3p6_wsun,
+        'scanpack1D2016missing': scanpack1D2016missing,
         }[x]()
 
 def do_scanpack(process, x, batch, job):
@@ -506,8 +551,20 @@ if __name__ == '__main__' and len(sys.argv) > 1:
             print '    samples_string = %r' % base64.b64encode(pickle.dumps(sp, -1))
 
     elif cmd == 'test':
-        from gensim import process
-        for batch in 0,1,2,3,4,5,6,7,8:
-            for job in xrange(1000):
-                print batch, job,
-                do_scanpack(process, 'scanpack2015supplement', batch, job)
+        for user in ('',) + scanpack_users:
+            scanpack = get_scanpack('scanpack1D2016missing' + ('_' if user else '') + user)
+            print '\nuser', user, '#samples', len(scanpack.samples), 'events_per_job', scanpack.events_per_job, 'nbatches', scanpack.nbatches
+            d = defaultdict(lambda: defaultdict(list))
+            for k,t,m in scanpack.samples:
+                print 'zzz', user, k.__name__, t, m
+                d[k.__name__][m].append(t)
+            for k in sorted(d.keys()):
+                print k
+                for k2 in sorted(d[k].keys()):
+                    print k2, ':',
+                    for v in sorted(d[k][k2]):
+                        print v,
+                    print
+            for _ in scanpack:
+                print scanpack.batch_name, scanpack.ibatch, scanpack.nevents, 'job 0 =', scanpack.sample(scanpack.ibatch, 0)
+
