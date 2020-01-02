@@ -18,6 +18,7 @@ class Params(object):
         import JMTucker.MFVNeutralino.AnalysisConstants as ac
         self.int_lumis = ac.scaled_int_lumi_2015p6, ac.scaled_int_lumi_2017, ac.scaled_int_lumi_2018
         self.fn = 'limitsinput.root'
+        self.hem1516_2018 = True # whether to simulate the HEM 15/16 failure
 
 gp = Params()
 
@@ -217,6 +218,7 @@ def make_signals_2015p6(f, name_list):
         old_name = f_2016.Get(bn + 'norm').GetTitle()
         mass = name2mass(old_name) # needed in scalefactor too
         new_name = details2name(name2kind(old_name), name2tau(old_name), mass)
+
         name_list[new_name] = signalset(new_name, '2016', isample)
 
         norms = _hs(bn + 'norm')
@@ -259,6 +261,7 @@ def make_signals_2017p8(f, name_list):
 
     def sig_uncert(name): # JMTBAD implement different sig uncerts per trackmover study when done
         # must be in combine lnN convention
+        # JMTBAD don't forget 1% from HEM15/16 if it matters
         u = 1.24 
         return (u,u,u)
 
@@ -284,23 +287,31 @@ def make_signals_2017p8(f, name_list):
         n = lambda x: 'h_signal_%i_%s_%s'  % (s.isample, x, year)
 
         ngen = 0.
-        sig_t = ROOT.TChain('mfvMiniTree/t')
+        t = ROOT.TChain('mfvMiniTree/t')
         for fn in fns:
             sig_f = ROOT.TFile.Open(fn)
             ngen += sig_f.Get('mfvWeight/h_sums').GetBinContent(1)
             sig_f.Close()
-            sig_t.Add(fn)
+            t.Add(fn)
+
+        if year == '2018' and gp.hem1516_2018:
+            t.SetAlias('jet_hem1516', 'jet_eta < -1.3 && jet_phi < -0.87 && jet_phi > -1.57')
+            t.SetAlias('njets_hem1516', 'Sum$(!jet_hem1516)')
+            t.SetAlias('jetht_hem1516', 'Sum$(jet_pt * (jet_pt > 40 && !jet_hem1516))')
+            t.SetAlias('limitsinput_pass', '(njets_hem1516 >= 4 && jetht_hem1516 >= 1200) || (rndm < 0.36)') # silly way to represent effect only on 64% of the data
+        else:
+            t.SetAlias('limitsinput_pass', '1==1') # buh
 
         iyear = gp.years.index(year)
-        scale = 1e-3 * gp.int_lumis[iyear] / ngen # JMTBAD * sf for L1 EE prefiring, hem15/16, etc.
+        scale = 1e-3 * gp.int_lumis[iyear] / ngen # JMTBAD * sf for L1 EE prefiring
 
         ROOT.TH1.AddDirectory(1) # the Draw>> output goes off into the ether without this stupid crap
         h_dbv  = ROOT.TH1D(n('dbv'),  '', 125, 0, 2.5)
         h_dvv  = ROOT.TH1D(n('dvv'),  '', 400, 0, 4)
         h_dphi = ROOT.TH1D(n('dphi'), '', 10, -3.15, 3.15)
-        sig_t.Draw('dist0>>%s'  % n('dbv'),  'weight*(nvtx==1)')
-        sig_t.Draw('svdist>>%s' % n('dvv'),  'weight*(nvtx>=2)')
-        sig_t.Draw('svdphi>>%s' % n('dphi'), 'weight*(nvtx>=2)')
+        t.Draw('dist0>>%s'  % n('dbv'),  'weight*(limitsinput_pass && nvtx==1)')
+        t.Draw('svdist>>%s' % n('dvv'),  'weight*(limitsinput_pass && nvtx>=2)')
+        t.Draw('svdphi>>%s' % n('dphi'), 'weight*(limitsinput_pass && nvtx>=2)')
         ROOT.TH1.AddDirectory(0)
         for h in h_dbv, h_dvv, h_dphi:
             h.SetDirectory(0)
