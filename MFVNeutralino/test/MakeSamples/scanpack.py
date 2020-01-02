@@ -85,6 +85,7 @@ from modify import set_mfv_neutralino, set_gluino_ddbar, set_stop_dbardbar
 # mass are int, GeV
 
 scanpack_users = 'dquach', 'joeyr', 'shogan', 'tucker'
+scanpack_eosusers = 'dquach', 'jreicher', 'shogan', 'tucker'
 
 class scanpackbase(object):
     jobs_per_batch = 5000
@@ -145,7 +146,8 @@ class scanpackbase(object):
             assert job < self.jobs_in_last_batch
         return self.samples[self.job2isample[batch * self.jobs_per_batch + job]]
 
-    def sample_name(self, kind, tau, mass):
+    @classmethod
+    def sample_name(cls, kind, tau, mass, newstyle=False):
         '''Samples-style naming'''
         kind = kind.__name__
         if kind == 'set_mfv_neutralino':
@@ -157,9 +159,13 @@ class scanpackbase(object):
         else:
             raise ValueError('dunno %s' % kind)
         tau = int(tau*1000)
-        return '%s_tau%05ium_M%04i' % (kind, tau, mass)
+        if newstyle:
+            return '%s_tau%06ium_M%04i_2016' % (kind, tau, mass)
+        else:
+            return '%s_tau%05ium_M%04i' % (kind, tau, mass)
 
-    def sample_details(self, name):
+    @classmethod
+    def sample_details(cls, name):
         '''inverse of sample_name'''
         kind, tau, mass = name.rsplit('_',2)
         if kind == 'mfv_neu':
@@ -427,7 +433,8 @@ def hadd_scanpack(lst_fn):
     from JMTucker.Tools.hadd import hadd
 
     me = os.environ['USER']
-    others = scanpack_users
+    others = list(scanpack_eosusers)
+    assert me in others # code too dumb to check this
     others.remove(me)
 
     lst = read_scanpack_list(lst_fn)
@@ -491,6 +498,11 @@ if __name__ == '__main__' and len(sys.argv) > 1:
             print k
             for fn in sorted(x[k]):
                 print fn
+
+    elif cmd == 'newstyle':
+        x = read_scanpack_list(sys.argv[2])
+        x = {scanpackbase.sample_name(*scanpackbase.sample_details(k), newstyle=True) : x[k] for k in x}
+        pprint(x)
 
     elif cmd == 'hadd':
         hadd_scanpack(sys.argv[2])
