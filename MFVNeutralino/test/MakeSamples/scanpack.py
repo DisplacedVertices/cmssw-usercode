@@ -143,6 +143,9 @@ class scanpackbase(object):
                 self.samples.append(d)
                 self.__eps[d] = events
 
+        elif hasattr(self, 'points'):
+            self.samples = self.points[:]
+
         elif hasattr(self, 'do_1d'):
             self.samples = []
             for tau in getattr(self, 'tau_1d', []):
@@ -167,7 +170,8 @@ class scanpackbase(object):
             assert job < self.jobs_in_last_batch
         return self.samples[self.job2isample[batch * self.jobs_per_batch + job]]
 
-    def sample_name(self, kind, tau, mass):
+    @classmethod
+    def sample_name(cls, kind, tau, mass):
         '''Samples-style naming'''
         kind = kind.__name__
         if kind == 'set_mfv_neutralino':
@@ -181,7 +185,8 @@ class scanpackbase(object):
         tau = int(tau*1000)
         return '%s_tau%06ium_M%04i_%s' % (kind, tau, mass, year)
 
-    def sample_details(self, name):
+    @classmethod
+    def sample_details(cls, name):
         '''inverse of sample_name'''
         kind, tau, mass, year = name.rsplit('_',3)
         if kind == 'mfv_neu':
@@ -374,6 +379,46 @@ class scanpackpdftest_shogan(scanpackpdftest):
 class scanpackpdftest_tucker(scanpackpdftest):
     masses = scanpackpdftest.masses[3::4]
 
+class scanpack1D2016missing(scanpackbase100epj):
+    _n, _s = set_mfv_neutralino, set_stop_dbardbar
+    points = [
+        (_n,   1.0,  800),
+        (_n,   0.3, 2800),
+        (_n,   0.3, 3000),
+        (_n,   0.5, 3000),
+        (_n,   0.9, 3000),
+        (_n,   3.,  3000),
+        (_n,  30.,   800),
+        (_n,  30.,  1600),
+        (_n,  30.,  3000),
+        (_n,  70.,  3000),
+        (_n, 100.,  3000),
+        (_s,   0.1, 3000),
+        (_s,   0.3, 2800),
+        (_s,   0.3, 3000),
+        (_s,   0.5, 3000),
+        (_s,   0.7, 3000),
+        (_s,   0.9, 3000),
+        (_s,   1.,  2800),
+        (_s,   1.,  3000),
+        (_s,   3.,  3000),
+        (_s,   4.,  3000),
+        (_s,  10.,  2800),
+        (_s,  10.,  3000),
+        (_s,  16.,  3000),
+        (_s,  22.,  3000),
+        (_s,  28.,  3000),
+        (_s,  30.,   800),
+        (_s,  30.,  1600),
+        (_s,  30.,  3000),
+        (_s,  34.,  3000),
+        (_s,  40.,  3000),
+        (_s,  70.,  3000),
+        (_s, 100.,  3000),
+        ]
+    def events_per_sample(self, kind, tau, mass):
+        return 2500
+
 ####
 
 scanpack_registry =  {
@@ -412,6 +457,7 @@ scanpack_registry =  {
     'scanpackpdftest_joeyr': scanpackpdftest_joeyr,
     'scanpackpdftest_shogan': scanpackpdftest_shogan,
     'scanpackpdftest_tucker': scanpackpdftest_tucker,
+    'scanpack1D2016missing': scanpack1D2016missing,
     }
 
 def valid_scanpack(x):
