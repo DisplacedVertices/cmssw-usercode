@@ -506,14 +506,12 @@ def export_scanpack(crab_dirs):
         expected, files = crab_files(wd, True)
         if expected not in (scanpack.jobs_per_batch, scanpack.jobs_in_last_batch):
             sys.exit(colors.error('error: expected %i not jobs_per_batch %i or jobs_in_last_batch %i' % (expected, scanpack.jobs_per_batch, scanpack.jobs_in_last_batch)))
+        files = [fn for fn in files if os.path.basename(fn).startswith('minitree_')]
         if len(files) != expected:
             print colors.warning('problem: expected %i, got %i files from %s' % (expected, len(files), wd))
 
         for fn in files:
             bn = os.path.basename(fn)
-            if not bn.startswith('minitree'):
-                continue
-
             job = int(bn.rsplit('_',1)[-1].replace('.root', '')) - 1
             kind, tau, mass = scanpack.sample(batch, job)
             sample_name = scanpack.sample_name(kind, tau, mass)
