@@ -1350,7 +1350,7 @@ class draw_hist_register:
     expects). Use something like:
 
     hr = hist_register(tree)
-    hist = hr.draw('ordinate:abscissa', '100,0,1,100,0,5')
+    hist = hr.draw('ordinate:abscissa', binning='100,0,1,100,0,5')
     hist.SetTitle('ordinate vs. abscissa')
     """
     uniq = [0]
@@ -1377,7 +1377,7 @@ class draw_hist_register:
             binning = '(%s)' % binning
         return draw_str + '>>' + name + binning
 
-    def draw(self, draw_str, cut='', binning='', get_n=False, tree=None, nice_name=None, goff=None):
+    def draw(self, draw_str, cut='', binning='', get_n=False, tree=None, nice_name=None, goff=None, rename=None, title=None, write=False):
         if self.use_weight:
             if cut:
                 cut = 'weight*(%s)' % cut
@@ -1404,6 +1404,12 @@ class draw_hist_register:
         if nice_name is None:
             nice_name = draw_str.replace(':', '_vs_')
         h.nice_name = nice_name
+        if rename:
+            h.SetName(rename)
+        if type(title) == str:
+            h.SetTitle(title)
+        if write:
+            h.Write()
         return (h,n) if get_n else h
 
 def make_rms_hist(prof, name='', bins=None, cache={}):
