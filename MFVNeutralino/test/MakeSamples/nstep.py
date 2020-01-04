@@ -16,7 +16,7 @@ use_this_cmssw = False
 premix = True
 trig_filter = False
 hip = False # 1. # scale of the effect relative to a particular inst lumi
-pythia8240 = year == 2018
+pythia8240 = False #year == 2018
 ex = ''
 
 meta = 'neu'  #'stopdbardbar'
@@ -54,6 +54,9 @@ elif 0:
     hip = True
 
 ####
+
+if pythia8240:
+    assert year == 2018
 
 if hip:
     use_this_cmssw = True
