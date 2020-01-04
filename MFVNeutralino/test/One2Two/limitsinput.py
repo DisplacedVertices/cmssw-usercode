@@ -178,28 +178,33 @@ class signalset(object):
         self.years = set()
         assert year in gp.years and year not in self.years
         self.years.add(year)
+        self.ipair = None
 
         if isample is None:
-            isample = min(self.isamples) - 1 if self.isamples else -1
+            isample = self.next_isample()
         self.isample = isample
         self.isamples.append(isample)
 
+    @classmethod
+    def next_isample(cls):
+        return min(cls.isamples) - 1 if cls.isamples else -1
+
 def make_signals_2015p6(f, name_list):
-    # Pull 2015+6 values from previous limitsinput file.
-    # (not all 2017+8 signal points exist there, will glue in later.)
+    # Pull 2015+6 values from previous-format limitsinput file(s).
+    # (Not all 2017+8 signal points exist in the final one for the
+    # 2016 paper, but we make new ones now using the scanpack2017p8_2016 branch.)
     # Rescale+add how SignalEfficiencyCombiner did previously.  Go
     # ahead and store the rate already scaled by the integrated
     # luminosity. This makes the 2016 weighted sum situation easier
     # downstream.
 
-    fn_2016_hip = '/uscms/home/tucker/public/mfv/limitsinput_data_v15v5_scanpack_merge_hip_1_2_2p6_3_3p6_removeddbar.root'
-    fn_2016_nonhip = '/uscms/home/tucker/public/mfv/limitsinput_data_v15v5_scanpack_merge_1_1p5_2_2p5_2p7_3_3p5_removeddbar.root'
-    name_list['title'] = name_list.get('title', '') + '+%s+%s' % (fn_2016_hip, fn_2016_nonhip)
-    f_2015 = f_2016 = f_2016_nonhip = ROOT.TFile.Open(fn_2016_nonhip)
-    f_2016_hip = ROOT.TFile.Open(fn_2016_hip)
-    h_name_list_2016 = f_2016_nonhip.Get('name_list') # already checked that the two files are in sync
-    def _hs(n):
-        return [f_2015.Get(n), f_2016_hip.Get(n), f_2016_nonhip.Get(n)]
+    fnpairs = [ # (hip, nonhip)--the first pair are to be the final 2016 paper one, the rest define newly generated signal points
+        ('/uscms/home/tucker/public/mfv/limitsinput_data_v15v5_scanpack_merge_hip_1_2_2p6_3_3p6_removeddbar.root', 
+         '/uscms/home/tucker/public/mfv/limitsinput_data_v15v5_scanpack_merge_1_1p5_2_2p5_2p7_3_3p5_removeddbar.root',),
+        ('/uscms/home/tucker/public/mfv/limitsinput_scanpack1D2016missing_hip.root',
+         '/uscms/home/tucker/public/mfv/limitsinput_scanpack1D2016missing.root',),
+        ]
+
     def trigmult2016(x):
         return 1 # this was 0.99 in signal_efficiency, but now it's already in int_lumi at top
     def sf20156(x, pars=(0.9784, -1128., 1444.)):
@@ -207,50 +212,66 @@ def make_signals_2015p6(f, name_list):
     sfs = [sf20156, trigmult2016, trigmult2016]
     int_lumis = [2592.4, 19492., 16059.]
 
-    nsigs = h_name_list_2016.GetNbinsX()
-    for ibin in xrange(1, nsigs+1):
-        if (ibin-1)%(nsigs/20) == 0:
-            sys.stdout.write('\rmake_signals_2015p6: %i/%i' % (ibin-1, nsigs)); sys.stdout.flush()
-        isample = -ibin
-        bn = 'h_signal_%i_' % isample
+    for ipair, (fn_2016_hip, fn_2016_nonhip) in enumerate(fnpairs):
+        name_list['title'] = name_list.get('title', '') + '+%s+%s' % (fn_2016_hip, fn_2016_nonhip)
+        f_2015 = f_2016 = f_2016_nonhip = ROOT.TFile.Open(fn_2016_nonhip)
+        f_2016_hip = ROOT.TFile.Open(fn_2016_hip)
+        h_name_list_2016 = f_2016_nonhip.Get('name_list') # already checked that the two files are in sync
+        def _hs(n):
+            return [f_2015.Get(n), f_2016_hip.Get(n), f_2016_nonhip.Get(n)]
 
-        # convert sample name to new format--really only more digits in tau field
-        old_name = f_2016.Get(bn + 'norm').GetTitle()
-        mass = name2mass(old_name) # needed in scalefactor too
-        new_name = details2name(name2kind(old_name), name2tau(old_name), mass)
+        nsigs = h_name_list_2016.GetNbinsX()
+        for ibin in xrange(1, nsigs+1):
+            if (ibin-1)%(nsigs/20) == 0:
+                sys.stdout.write('\rmake_signals_2015p6: pair %i/%i, %i/%i' % (ipair+1, len(fnpairs), ibin, nsigs)); sys.stdout.flush()
 
-        name_list[new_name] = signalset(new_name, '2016', isample)
+            old_isample = -ibin
+            new_isample = old_isample if ipair == 0 else signalset.next_isample()
+            old_bn = 'h_signal_%i_' % old_isample
+            new_bn = 'h_signal_%i_' % new_isample
 
-        norms = _hs(bn + 'norm')
-        ngens = [1e-3/h.GetBinContent(2) for h in norms]
-        ngentot = sum(ngens[1:]) # hip/nonhip are the only independent samples, 2015 is just 2016 that we rescale
+            # convert sample name to new format--really only more digits in tau field
+            old_name = f_2016.Get(old_bn + 'norm').GetTitle()
+            mass = name2mass(old_name) # needed in scalefactor too
+            new_name = details2name(name2kind(old_name), name2tau(old_name), mass)
 
-        for n in 'dbv', 'dphi', 'dvv', 'dvv_rebin':
-            hs = _hs(bn + n)
-            for h,ng,sf,il in zip(hs, ngens, sfs, int_lumis):
-                if n != 'dvv_rebin':
-                    h.Rebin(10) # did too many bins last time
-                h.Scale(sf(mass) * 1e-3 * il / ng)
-                    
-            h = hs.pop(0)
-            for h2 in hs:
-                h.Add(h2)
+            if name_list.has_key(new_name):
+                print colors.warning('\nwarning: %s found in ipair %i with isample %i was found in previous ipair %s with isample %i, skipping' % (new_name, ipair, old_isample, name_list[new_name].ipair, name_list[new_name].isample))
+                continue
 
-            h.SetName(bn + n + '_2016')
-            h.SetTitle(new_name + '_2016')
-            f.cd(); h.Write()
+            name_list[new_name] = ss = signalset(new_name, '2016', new_isample)
+            ss.ipair = ipair
 
-        f.cd()
+            norms = _hs(old_bn + 'norm')
+            ngens = [1e-3/h.GetBinContent(2) for h in norms]
+            ngentot = sum(ngens[1:]) # hip/nonhip are the only independent samples, 2015 is just 2016 that we rescale
 
-        h = ROOT.TH1D(bn + 'uncert_2016', new_name + '_2016', gp.nbins, gp.bins)
-        for ib in xrange(1,gp.nbins+1): h.SetBinContent(ib, 1.24) # ignore old hist and just set by new convention
-        h.Write()
+            for n in 'dbv', 'dphi', 'dvv', 'dvv_rebin':
+                hs = _hs(old_bn + n)
+                for h,ng,sf,il in zip(hs, ngens, sfs, int_lumis):
+                    if n != 'dvv_rebin':
+                        h.Rebin(10) # did too many bins last time
+                    h.Scale(sf(mass) * 1e-3 * il / ng)
 
-        h = ROOT.TH1D(bn + 'ngen_2016', new_name + '_2016', 1,0,1)
-        h.SetBinContent(1, ngentot)
-        h.Write()
+                h = hs.pop(0)
+                for h2 in hs:
+                    h.Add(h2)
 
-    print '\rmake_signals_2015p6: done       '
+                h.SetName(new_bn + n + '_2016')
+                h.SetTitle(new_name + '_2016')
+                f.cd(); h.Write()
+
+            f.cd()
+
+            h = ROOT.TH1D(new_bn + 'uncert_2016', new_name + '_2016', gp.nbins, gp.bins)
+            for ib in xrange(1,gp.nbins+1): h.SetBinContent(ib, 1.24) # ignore old hist and just set by new convention
+            h.Write()
+
+            h = ROOT.TH1D(new_bn + 'ngen_2016', new_name + '_2016', 1,0,1)
+            h.SetBinContent(1, ngentot)
+            h.Write()
+
+        print '\rmake_signals_2015p6: done with pair %i             ' % (ipair+1)
 
 def make_signals_2017p8(f, name_list):
     # 2017,8 are from minitrees (the 100kevt official samples) and scanpack.
