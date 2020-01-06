@@ -5,7 +5,7 @@ ROOT.gErrorIgnoreLevel = 1001 # Suppress TCanvas::SaveAs messages.
 
 which = 'run2' # '2017p8'
 intlumi = 140 if which == 'run2' else 101
-path = plot_dir('pretty_limits_1d_scanpack1D_%s' % which, make=True)
+path = plot_dir('pretty_limits_1d_scanpack1Dplus2016missing_%s' % which, make=True)
 
 ts = tdr_style()
 
@@ -17,7 +17,7 @@ def write(font, size, x, y, text):
     w.DrawLatex(x, y, text)
     return w
 
-f = ROOT.TFile('limits_1d.root')
+f = ROOT.TFile('limits_1d_%s.root' % which)
 
 kinds = [
     'multijet_M0800',
