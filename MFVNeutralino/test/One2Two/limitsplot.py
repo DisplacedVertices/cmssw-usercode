@@ -213,20 +213,20 @@ def save_1d_plots():
         ]
     
     in_f = ROOT.TFile('limitsinput.root')
-    out_f = ROOT.TFile('limits_1d.root', 'recreate')
+    for which, years in ('run2', [2016,2017,2018]), ('2017p8', [2017,2018]):
+        out_f = ROOT.TFile('limits_1d_%s.root' % which, 'recreate')
+        for name, use, sorter, xkey in xxx:
+            d = limits()
+            for sample in sample_iterator(in_f, years, slices_1d=True):
+                if use(sample):
+                    #print sample.isample, sample.name, sample.kind, sample.tau, sample.mass
+                    d.parse(sample, 'combine_output_%s/signal_%05i/results' % (which, sample.isample))
+            d.points.sort(key=sorter)
 
-    for name, use, sorter, xkey in xxx:
-        d = limits()
-        for sample in sample_iterator(in_f, [2017,2018], slices_1d=True):
-            if use(sample):
-                #print sample.isample, sample.name, sample.kind, sample.tau, sample.mass
-                d.parse(sample, 'combine_output/signal_%05i/results' % sample.isample)
-        d.points.sort(key=sorter)
-
-        out_f.mkdir(name).cd()
-        g = make_1d_plot(d, name, xkey)
-        for gg in g:
-            gg.Write(gg.GetName())
+            out_f.mkdir(name).cd()
+            g = make_1d_plot(d, name, xkey)
+            for gg in g:
+                gg.Write(gg.GetName())
 
 def interpolate(h):
     # R + akima does a better job so don't use this
