@@ -274,18 +274,100 @@ def make_signals_2015p6(f, name_list):
 
         print '\rmake_signals_2015p6: done with pair %i             ' % (ipair+1)
 
+def sig_uncert_2017p8(name_year, debug=True):
+    name, year = name_year.rsplit('_',1)
+    kind, tau, mass = name2details(name)
+    tau = int(tau*1000) # back to um
+
+    masses = [400,600,800,1200,1600,3000]
+    taus = [100,300,1000,10000,30000]
+
+    trackmover = { # after kind and year indices, rows are masses, cols are taus, each in same order as above two lists
+        'mfv_stopdbardbar': { '2017': ( (0.2384, 0.1904, 0.1492, 0.1050, 0.1002),
+                                        (0.2496, 0.2014, 0.1604, 0.1152, 0.1104),
+                                        (0.2534, 0.2100, 0.1716, 0.1264, 0.1194),
+                                        (0.2584, 0.2142, 0.1756, 0.1278, 0.1204),
+                                        (0.2582, 0.2144, 0.1752, 0.1264, 0.1192),
+                                        (0.2684, 0.2186, 0.1760, 0.1244, 0.1158), ),
+                              '2018': ( (0.3068, 0.2600, 0.2344, 0.2010, 0.1968),
+                                        (0.3084, 0.2616, 0.2396, 0.2044, 0.1886),
+                                        (0.3084, 0.2654, 0.2438, 0.1900, 0.1910),
+                                        (0.3120, 0.2690, 0.2274, 0.1940, 0.1926),
+                                        (0.3140, 0.2594, 0.2320, 0.1974, 0.1940),
+                                        (0.3104, 0.2634, 0.2364, 0.2004, 0.1950), ), },
+        'mfv_neu':          { '2017': ( (0.2790, 0.1937, 0.1352, 0.0794, 0.0722),
+                                        (0.2493, 0.1191, 0.0686, 0.0409, 0.0335),
+                                        (0.2493, 0.1191, 0.0686, 0.0409, 0.0335),
+                                        (0.1785, 0.1183, 0.0665, 0.0244, 0.0195),
+                                        (0.1888, 0.0578, 0.0181, 0.0161, 0.0134),
+                                        (0.1888, 0.0578, 0.0181, 0.0161, 0.0134), ),
+                              '2018': ( (0.2208, 0.1851, 0.1515, 0.1140, 0.1101),
+                                        (0.1339, 0.0950, 0.0629, 0.0697, 0.0783),
+                                        (0.2759, 0.2117, 0.1472, 0.0912, 0.0856),
+                                        (0.2595, 0.1614, 0.0963, 0.0477, 0.0275),
+                                        (0.1852, 0.1366, 0.0648, 0.0340, 0.0210),
+                                        (0.1852, 0.1366, 0.0648, 0.0340, 0.0210), ), }, }
+    vtm = trackmover[kind][year]
+
+    # just do linear interpolation--could fit, but the final result in the limits won't depend strongly on this
+
+    def hlp(x,l): # find which points to interpolate between, pinning inside the ranges defined by the above lists
+        x = int(x)
+        l,n = sorted(l), len(l)
+        if x < l[0]:
+            x = l[0]
+            a = b = 0
+        elif x > l[-1]:
+            x = l[-1]
+            a = b = n-1
+        else:
+            for i,y in enumerate(l):
+                if y <= x < l[i+1]:
+                    a,b = i, i+1
+                    break
+        return x, l, a, b, l[a], l[b]
+
+    mass, ms, mia, mib, mxa, mxb = mmm = hlp(mass, masses)
+    tau,  ts, tia, tib, txa, txb = ttt = hlp(tau,  taus)
+
+    def lerp(x, x0, x1, q0, q1):
+        xd = (x - x0) / (x1 - x0)
+        return q0 * (1 - xd) + q1 * xd
+
+    def bilerp(x,y, points): # https://stackoverflow.com/questions/8661537/how-to-perform-bilinear-interpolation-in-python
+        (x1, y1, q11), (_x1, y2, q12), (x2, _y1, q21), (_x2, _y2, q22) = sorted(points)
+        if x1 != _x1 or x2 != _x2 or y1 != _y1 or y2 != _y2:
+            raise ValueError('points do not form a rectangle')
+        if not x1 <= x <= x2 or not y1 <= y <= y2:
+            raise ValueError('(x, y) not within the rectangle')
+        return (q11 * (x2 - x) * (y2 - y) +
+                q21 * (x - x1) * (y2 - y) +
+                q12 * (x2 - x) * (y - y1) +
+                q22 * (x - x1) * (y - y1)   ) / ((x2 - x1) * (y2 - y1) + 0.0)
+
+    if mia == mib and tia == tib:
+        vtm = vtm[mia][tia]
+    elif mia == mib:
+        vtm = lerp(tau,  txa, txb, vtm[mia][tia], vtm[mia][tib])
+    elif tia == tib:
+        vtm = lerp(mass, mxa, mxb, vtm[mia][tia], vtm[mib][tia])
+    else:
+        points = [(mxa, txa, vtm[mia][tia]), (mxa, txb, vtm[mia][tib]), (mxb, txa, vtm[mib][tia]), (mxb, txb, vtm[mib][tib])]
+        vtm = bilerp(mass, tau, points)
+
+    uncerts = [max(vtm, 0.1)] # we agreed to assign a minimum of 10%, which comes into play for the high-efficiency mfv_neu points
+    uncerts += [x/100. for x in (3,1,5,2,2,1)] # list from AN + the last '1' is for L1EE prefiring in 2017 and HEM15/16 in 2018
+    u = 1 + sum(x**2 for x in uncerts)**0.5 # final number must be in combine lnN convention
+    if debug:
+        print name_year, 'mmm', mmm, 'ttt', ttt, '->', vtm, '    u = %.4f' % u
+    return u,u,u
+
 def make_signals_2017p8(f, name_list):
     # 2017,8 are from minitrees (the 100kevt official samples) and scanpack.
     scanpack_list = '/uscms/home/tucker/public/mfv/scanpacks/2017p8/scanpack1D.merged.list.gz'
     trees = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV27m/mfv*.root'
     title = []
     sigs = {}
-
-    def sig_uncert(name): # JMTBAD implement different sig uncerts per trackmover study when done
-        # must be in combine lnN convention
-        # JMTBAD don't forget 1% from HEM15/16, ~1% from L1EE
-        u = 1.24 
-        return (u,u,u)
 
     if scanpack_list:
         title.append(scanpack_list)
@@ -351,7 +433,7 @@ def make_signals_2017p8(f, name_list):
         h_ngen.SetBinContent(1, ngen)
         
         h_uncert = ROOT.TH1D(n('uncert'), '', gp.nbins, gp.bins)
-        for i,v in enumerate(sig_uncert(name_year)):
+        for i,v in enumerate(sig_uncert_2017p8(name_year)):
             h_uncert.SetBinContent(i+1, v)
         
         f.cd()
@@ -364,7 +446,7 @@ def make_signals_2017p8(f, name_list):
 def make():
     def warning():
         for i in xrange(20):
-            print colors.error("don't forget:    2015/6 pileup weights     sig uncert per year/point     pythia8240 rescaling/regen     PDFs        anything else?")
+            print colors.error("don't forget:    2015/6 pileup weights     pythia8240 rescaling/regen     PDFs        anything else?")
     warning()
 
     assert not os.path.exists(gp.fn)
@@ -667,4 +749,4 @@ if __name__ == '__main__':
     elif 'signal_efficiency' in sys.argv:
         signal_efficiency()
     else:
-        print 'dunno'
+        sys.exit('no cmd recognized from argv=%r' % sys.argv[1:])
