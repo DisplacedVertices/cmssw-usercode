@@ -274,7 +274,7 @@ def make_signals_2015p6(f, name_list):
 
         print '\rmake_signals_2015p6: done with pair %i             ' % (ipair+1)
 
-def sig_uncert_2017p8(name_year, debug=True):
+def sig_uncert_2017p8(name_year, debug=False):
     name, year = name_year.rsplit('_',1)
     kind, tau, mass = name2details(name)
     tau = int(tau*1000) # back to um
@@ -317,11 +317,11 @@ def sig_uncert_2017p8(name_year, debug=True):
         if x < l[0]:
             x = l[0]
             a = b = 0
-        elif x > l[-1]:
+        elif x >= l[-1]:
             x = l[-1]
             a = b = n-1
         else:
-            for i,y in enumerate(l):
+            for i,y in enumerate(l[:-1]):
                 if y <= x < l[i+1]:
                     a,b = i, i+1
                     break
