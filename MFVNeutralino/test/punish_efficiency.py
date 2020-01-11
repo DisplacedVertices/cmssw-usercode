@@ -4,11 +4,21 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.MFVNeutralino.PerSignal import PerSignal
 
-set_style()
-ps = plot_saver(plot_dir('hem1516'), size=(600,600), pdf=True, log=False)
+mode = 'hem1516' # 'l1ee'
+print mode
+hem1516 = mode == 'hem1516'
+l1ee = mode == 'l1ee'
+assert hem1516 or l1ee
 
-multijet = Samples.mfv_signal_samples_2018
-dijet = Samples.mfv_stopdbardbar_samples_2018
+set_style()
+ps = plot_saver(plot_dir('punish4%s' % mode), size=(600,600), pdf=True, log=False)
+
+if hem1516:
+    multijet = Samples.mfv_signal_samples_2018
+    dijet = Samples.mfv_stopdbardbar_samples_2018
+elif l1ee:
+    multijet = Samples.mfv_signal_samples_2017
+    dijet = Samples.mfv_stopdbardbar_samples_2017
 
 for presel in 1,0:
     for gen in 0,1:
@@ -35,15 +45,21 @@ for presel in 1,0:
 
                 if gen:
                     t.SetAlias('gen_is_jet', 'abs(gen_daughter_id) >= 1 && abs(gen_daughter_id) <= 5 && abs(gen_daughters.Eta()) < 2.5')
-                    t.SetAlias('jet_hem1516', 'gen_is_jet && gen_daughters.Eta() < -1.3 && gen_daughters.Phi() < -0.87 && gen_daughters.Phi() > -1.57')
-                    t.SetAlias('njets_hem1516', 'Sum$(gen_is_jet && !jet_hem1516)')
-                    t.SetAlias('jetht_hem1516', 'Sum$(gen_daughters.Pt() * (gen_daughters.Pt() > 40 && gen_is_jet && !jet_hem1516))')
+                    if hem1516:
+                        t.SetAlias('jet_punish', 'gen_is_jet && gen_daughters.Eta() < -1.3 && gen_daughters.Phi() < -0.87 && gen_daughters.Phi() > -1.57')
+                    elif l1ee:
+                        t.SetAlias('jet_punish', 'gen_is_jet && abs(gen_daughters.Eta()) > 2.25 && gen_daughters.Pt() > 100')
+                    t.SetAlias('njets_punish', 'Sum$(gen_is_jet && !jet_punish)')
+                    t.SetAlias('jetht_punish', 'Sum$(gen_daughters.Pt() * (gen_daughters.Pt() > 40 && gen_is_jet && !jet_punish))')
                     t.SetAlias('njets_all', 'Sum$(!!gen_is_jet)') # !! is because ROOT is very stupid and I hate it
                     t.SetAlias('jetht_all', 'Sum$(gen_daughters.Pt() * (gen_is_jet && gen_daughters.Pt() > 40))')
                 else:
-                    t.SetAlias('jet_hem1516', 'jet_eta < -1.3 && jet_phi < -0.87 && jet_phi > -1.57')
-                    t.SetAlias('njets_hem1516', 'Sum$(!jet_hem1516)')
-                    t.SetAlias('jetht_hem1516', 'Sum$(jet_pt * (jet_pt > 40 && !jet_hem1516))')
+                    if hem1516:
+                        t.SetAlias('jet_punish', 'jet_eta < -1.3 && jet_phi < -0.87 && jet_phi > -1.57')
+                    elif l1ee:
+                        t.SetAlias('jet_punish', 'abs(jet_eta) > 2.25 && jet_pt > 100')
+                    t.SetAlias('njets_punish', 'Sum$(!jet_punish)')
+                    t.SetAlias('jetht_punish', 'Sum$(jet_pt * (jet_pt > 40 && !jet_punish))')
                     t.SetAlias('njets_all', 'njets')
                     t.SetAlias('jetht_all', 'jetht')
 
@@ -51,11 +67,11 @@ for presel in 1,0:
                 if not presel:
                     base += ' && njets_all >= 4 && jetht_all >= 1200'
                 den = n(base)
-                num = n(base + ' && njets_hem1516 >= 4 && jetht_hem1516 >= 1200')
+                num = n(base + ' && njets_punish >= 4 && jetht_punish >= 1200')
                 sample.y, sample.yl, sample.yh = clopper_pearson(num, den)
                 print '%26s: num = %.1f den = %.1f ratio = %.3f (%.3f, %.3f)' % (sample.name, num, den, sample.y, sample.yl, sample.yh)
 
-            per = PerSignal('hem1516%s/nominal' % (' (gen)' if gen else ''), y_range=(0.8,1.01), decay_paves_at_top=False)
+            per = PerSignal('punish4%s%s/nominal' % (mode, ' (gen)' if gen else ''), y_range=(0.8,1.01), decay_paves_at_top=False)
             per.add(multijet, title='#tilde{N} #rightarrow tbs')
             per.add(dijet, title='#tilde{t} #rightarrow #bar{d}#bar{d}', color=ROOT.kBlue)
             per.draw(canvas=ps.c)
