@@ -18,7 +18,8 @@ class Params(object):
         import JMTucker.MFVNeutralino.AnalysisConstants as ac
         self.int_lumis = ac.scaled_int_lumi_2015p6, ac.scaled_int_lumi_2017, ac.scaled_int_lumi_2018
         self.fn = 'limitsinput.root'
-        self.hem1516_2018 = True # whether to simulate the HEM 15/16 failure
+        self.l1eeprefiring_2017 = True # whether to simulate L1 EE prefiring in 2017
+        self.hem1516_2018 = True # whether to simulate the HEM 15/16 failure in for part of 2018
 
 gp = Params()
 
@@ -282,7 +283,7 @@ def make_signals_2017p8(f, name_list):
 
     def sig_uncert(name): # JMTBAD implement different sig uncerts per trackmover study when done
         # must be in combine lnN convention
-        # JMTBAD don't forget 1% from HEM15/16 if it matters
+        # JMTBAD don't forget 1% from HEM15/16, ~1% from L1EE
         u = 1.24 
         return (u,u,u)
 
@@ -315,16 +316,21 @@ def make_signals_2017p8(f, name_list):
             sig_f.Close()
             t.Add(fn)
 
-        if year == '2018' and gp.hem1516_2018:
+        if year == '2017' and gp.l1eeprefiring_2017:
+            t.SetAlias('jet_l1ee', 'abs(jet_eta) > 2.25 && jet_pt > 100')
+            t.SetAlias('njets_l1ee', 'Sum$(!jet_l1ee)')
+            t.SetAlias('jetht_l1ee', 'Sum$(jet_pt * (jet_pt > 40 && !jet_l1ee))')
+            t.SetAlias('limitsinput_pass', '(njets_l1ee >= 4 && jetht_l1ee >= 1200)')
+        elif year == '2018' and gp.hem1516_2018:
             t.SetAlias('jet_hem1516', 'jet_eta < -1.3 && jet_phi < -0.87 && jet_phi > -1.57')
             t.SetAlias('njets_hem1516', 'Sum$(!jet_hem1516)')
             t.SetAlias('jetht_hem1516', 'Sum$(jet_pt * (jet_pt > 40 && !jet_hem1516))')
             t.SetAlias('limitsinput_pass', '(njets_hem1516 >= 4 && jetht_hem1516 >= 1200) || (rndm < 0.36)') # silly way to represent effect only on 64% of the data
         else:
-            t.SetAlias('limitsinput_pass', '1==1') # buh
+            t.SetAlias('limitsinput_pass', '1==1')
 
         iyear = gp.years.index(year)
-        scale = 1e-3 * gp.int_lumis[iyear] / ngen # JMTBAD * sf for L1 EE prefiring
+        scale = 1e-3 * gp.int_lumis[iyear] / ngen
 
         ROOT.TH1.AddDirectory(1) # the Draw>> output goes off into the ether without this stupid crap
         h_dbv  = ROOT.TH1D(n('dbv'),  '', 125, 0, 2.5)
@@ -356,8 +362,10 @@ def make_signals_2017p8(f, name_list):
     print '\rmake_signals_2017p8: done       '
 
 def make():
-    for i in xrange(20):
-        print colors.error("don't forget:    2015/6 pileup weights     sig uncert per year/point     pythia8240 rescaling/regen     PDFs     L1 EE prefiring     HEM15/16     anything else?")
+    def warning():
+        for i in xrange(20):
+            print colors.error("don't forget:    2015/6 pileup weights     sig uncert per year/point     pythia8240 rescaling/regen     PDFs        anything else?")
+    warning()
 
     assert not os.path.exists(gp.fn)
     ROOT.TH1.AddDirectory(0)
@@ -398,6 +406,8 @@ def make():
                 for j in xrange(i, min(i+6, n)):
                     print w('    ' + l[j]),
                 print
+
+    warning()
 
 def ngen(f, isample, year):
     h = f.Get('h_signal_%i_ngen_%s' % (isample, year))
