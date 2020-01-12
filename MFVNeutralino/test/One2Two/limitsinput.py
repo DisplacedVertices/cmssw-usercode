@@ -461,7 +461,7 @@ def make_signals_2017p8(f, name_list):
 def make():
     def warning():
         for i in xrange(20):
-            print colors.error("don't forget:    2015/6 pileup weights     pythia8240 rescaling/regen       anything else?")
+            print colors.error("don't forget:        pythia8240 rescaling/regen       anything else?")
     warning()
 
     assert not os.path.exists(gp.fn)
