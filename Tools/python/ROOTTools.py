@@ -1112,6 +1112,11 @@ def detree(t, branches='run:lumi:event', cut='', xform=lambda x: tuple(int(y) fo
     if type(xform) == type(type):
         xf = xform
         xform = lambda x: tuple(xf(y) for y in x)
+    elif type(xform) in (tuple,list) and set(type(xf) for xf in xform) == set([type(type)]):
+        xform_types = xform
+        if len(xform_types) != branches.count(':')+1:
+            raise ValueError('length of xform type sequence must be the same as number of fields in branches (got xform=%r, branches=%r)' % (xform, branches))
+        xform = lambda x: tuple(xf(y) for xf,y in zip(xform_types, x))
 
     dir = None
     if os.environ['HOSTNAME'].startswith('cmslpc'):
