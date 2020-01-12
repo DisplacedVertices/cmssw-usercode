@@ -29,8 +29,29 @@ def stats(fn_or_f, obs, l, header='sigma_sig_limit'):
     return median, lo68, hi68, lo95, hi95
 
 def fromtree(fn):
+    bn = os.path.basename(fn)
     f = ROOT.TFile(fn)
-    return [x[0] for x in detree(f.Get('limit'), 'limit', xform=float)]
+    ll = [x for x in detree(f.Get('limit'), 'limit:iToy', xform=(float,int))]
+    if bn.startswith('expected'):
+        if len(ll) == 10000: # for some reason, there are two entries for every iToy when --saveToys used
+            ll2 = []
+            for mi,(l,i) in enumerate(ll):
+                assert (mi/2 % 100)+1 == i
+                if mi % 2 == 1:
+                    ll2.append(l)
+                elif mi % 200 == 0: # and the limit value saved for the first toy in each batch is ~1e-300!
+                    assert l < 1e-300
+                elif mi > 0:
+                    assert l == ll2[-1]
+                mi += 1
+            assert len(ll2) == 5000
+            return ll2
+        else:
+            assert len(ll) == 5000 and [b for _,b in ll] == range(1,101)*50
+            return [a for a,_ in ll]
+    else:
+        assert bn == 'observed.root' and len(ll) == 1 and ll[0][1] == 0
+        return [ll[0][0]]
 
 def doit(path, out_fn):
     x = fromtree(os.path.join(path, 'observed.root'))
