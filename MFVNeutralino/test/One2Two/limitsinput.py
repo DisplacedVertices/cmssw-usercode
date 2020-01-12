@@ -3,7 +3,7 @@ from collections import defaultdict
 from glob import glob
 from gzip import GzipFile
 from JMTucker.Tools import colors
-from JMTucker.Tools.ROOTTools import ROOT, to_TH1D, to_array, get_integral, move_overflow_into_last_bin, set_style
+from JMTucker.Tools.ROOTTools import ROOT, to_TH1D, to_array, get_integral, move_overflow_into_last_bin, set_style, lerp, bilerp
 
 set_style()
 
@@ -190,6 +190,34 @@ class signalset(object):
     def next_isample(cls):
         return min(cls.isamples) - 1 if cls.isamples else -1
 
+def sig_uncert_pdf(name_year):
+    name, _ = name_year.rsplit('_',1)
+    kind, tau, mass = name2details(name)
+    tau = int(tau*1000) # back to um
+
+    fcns = {
+          300: lambda x: 1.780e-07*x**2 + -0.0002978*x + 0.1333  if x < 877 else 3.109e-05*x + -0.01826,
+         1000: lambda x: 1.180e-07*x**2 + -0.0001803*x + 0.07347 if x < 873 else 2.069e-05*x + -0.01206,
+        10000: lambda x: 1.203e-07*x**2 + -0.0002023*x + 0.08985 if x < 877 else 1.413e-05*x + -0.007393,
+          }
+
+    ab = None
+    if tau <= 300:
+        p = fcns[300](mass)
+    elif tau >= 10000:
+        p = fcns[10000](mass)
+    elif 300 < tau <= 1000:
+        ab = 300,1000
+    elif 1000 < tau <= 10000:
+        ab = 1000,10000
+    if ab is not None:
+        a,b = ab
+        fa = fcns[a](mass)
+        fb = fcns[b](mass)
+        p = lerp(tau, a, b, fa, fb)
+
+    return p
+
 def make_signals_2015p6(f, name_list):
     # Pull 2015+6 values from previous-format limitsinput file(s).
     # (Not all 2017+8 signal points exist in the final one for the
@@ -265,7 +293,8 @@ def make_signals_2015p6(f, name_list):
             f.cd()
 
             h = ROOT.TH1D(new_bn + 'uncert_2016', new_name + '_2016', gp.nbins, gp.bins)
-            for ib in xrange(1,gp.nbins+1): h.SetBinContent(ib, 1.24) # ignore old hist and just set by new convention
+            uncerts = [0.24, sig_uncert_pdf(new_name + '_2016')] # ignore old hist, just use the previous total 24%
+            for ib in xrange(1,gp.nbins+1): h.SetBinContent(ib, 1+sum(x**2 for x in uncerts)**0.5)
             h.Write()
 
             h = ROOT.TH1D(new_bn + 'ngen_2016', new_name + '_2016', 1,0,1)
@@ -329,21 +358,6 @@ def sig_uncert_2017p8(name_year, debug=False):
 
     mass, ms, mia, mib, mxa, mxb = mmm = hlp(mass, masses)
     tau,  ts, tia, tib, txa, txb = ttt = hlp(tau,  taus)
-
-    def lerp(x, x0, x1, q0, q1):
-        xd = (x - x0) / (x1 - x0)
-        return q0 * (1 - xd) + q1 * xd
-
-    def bilerp(x,y, points): # https://stackoverflow.com/questions/8661537/how-to-perform-bilinear-interpolation-in-python
-        (x1, y1, q11), (_x1, y2, q12), (x2, _y1, q21), (_x2, _y2, q22) = sorted(points)
-        if x1 != _x1 or x2 != _x2 or y1 != _y1 or y2 != _y2:
-            raise ValueError('points do not form a rectangle')
-        if not x1 <= x <= x2 or not y1 <= y <= y2:
-            raise ValueError('(x, y) not within the rectangle')
-        return (q11 * (x2 - x) * (y2 - y) +
-                q21 * (x - x1) * (y2 - y) +
-                q12 * (x2 - x) * (y - y1) +
-                q22 * (x - x1) * (y - y1)   ) / ((x2 - x1) * (y2 - y1) + 0.0)
 
     if mia == mib and tia == tib:
         vtm = vtm[mia][tia]
@@ -446,7 +460,7 @@ def make_signals_2017p8(f, name_list):
 def make():
     def warning():
         for i in xrange(20):
-            print colors.error("don't forget:    2015/6 pileup weights     pythia8240 rescaling/regen     PDFs        anything else?")
+            print colors.error("don't forget:    2015/6 pileup weights     pythia8240 rescaling/regen       anything else?")
     warning()
 
     assert not os.path.exists(gp.fn)
