@@ -39,11 +39,10 @@ def fromtree(fn):
                 assert (mi/2 % 100)+1 == i
                 if mi % 2 == 1:
                     ll2.append(l)
-                elif mi % 200 == 0: # and the limit value saved for the first toy in each batch is ~1e-300!
+                elif mi % 200 == 0: # and the limit value saved in the first entry for the first toy in each batch is ~1e-300!
                     assert l < 1e-300
                 elif mi > 0:
                     assert l == ll2[-1]
-                mi += 1
             assert len(ll2) == 5000
             return ll2
         else:
