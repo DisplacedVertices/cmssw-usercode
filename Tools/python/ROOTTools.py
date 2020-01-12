@@ -2437,6 +2437,21 @@ def zgammatauwrong(x,y,tau,tau_uncert):
         z += zbi(x,y,t) * p
     return z / nz
 
+def lerp(x, x0, x1, q0, q1):
+    xd = (x - x0) / (x1 - x0)
+    return q0 * (1 - xd) + q1 * xd
+
+def bilerp(x,y, points): # https://stackoverflow.com/questions/8661537/how-to-perform-bilinear-interpolation-in-python
+    (x1, y1, q11), (_x1, y2, q12), (x2, _y1, q21), (_x2, _y2, q22) = sorted(points)
+    if x1 != _x1 or x2 != _x2 or y1 != _y1 or y2 != _y2:
+        raise ValueError('points do not form a rectangle')
+    if not x1 <= x <= x2 or not y1 <= y <= y2:
+        raise ValueError('(x, y) not within the rectangle')
+    return (q11 * (x2 - x) * (y2 - y) +
+            q21 * (x - x1) * (y2 - y) +
+            q12 * (x2 - x) * (y - y1) +
+            q22 * (x - x1) * (y - y1)   ) / ((x2 - x1) * (y2 - y1) + 0.0)
+
 __all__ = [
     'TH1EntriesProtector',
     'apply_hist_commands',
@@ -2505,6 +2520,7 @@ __all__ = [
     'zbi',
     'zgammatau',
     'zgammatauwrong',
+    'lerp','bilerp',
     'ROOT',
     'math', 'sys', 'os', 'glob', 'array', 'defaultdict', 'namedtuple'
     ]
