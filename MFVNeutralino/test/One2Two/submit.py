@@ -40,7 +40,8 @@ cd $WD
     python datacard.py $WHICH __DATACARDARGS__ > datacard.txt
     awk '{print "DATACARD: " $0}' datacard.txt
 
-    cmd="combine -H AsymptoticLimits -M MarkovChainMC --noDefaultPrior=0 --tries 20 -b 200 --iteration 100000 datacard.txt"
+    # don't use -H AsymptoticLimits, at least don't do it for low-efficiency signals, it can lead to way too low limits
+    cmd="combine -M MarkovChainMC --noDefaultPrior=0 --tries 20 -b 200 --iteration 100000 datacard.txt"
 
     if [[ $JOB == 0 ]]; then
         echo "========================================================================="
