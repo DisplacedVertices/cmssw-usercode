@@ -32,24 +32,28 @@ for ktoy in toys.GetListOfKeys():
     assert toy.startswith('toy_')
     itoy = int(toy.replace('toy_',''))
 
-    a,b,c = x = [int(ktoy.ReadObj().get()['n_obs_binb%i'%i].getVal()) for i in 0,1,2]
-    k = (sum(x), a,b,c)
+    x = tuple([int(ktoy.ReadObj().get()['n_obs_binb%i%i'%(y,i)].getVal()) for y in 6,7,8 for i in 0,1,2])
+    k = (sum(x),) + x
     limit_by_dist[k].append(limit_by_toy[itoy])
 
 dists = sorted(limit_by_dist.keys())
 
+fmt  = '%-35s' + ' %10s'*8
+fmt2 = '%-35r' + ' %10.3f'*8
+print fmt % ('dist','min','max','span','q2.5','q16','q50','q84','q97.5')
 for dist in dists:
-    l = limit_by_dist[dist]
-    mn, mx = min(l), max(l)
-    print dist, '%.3f %.3f %.3f' % (mn, mx, mx-mn)
+    l = sorted(limit_by_dist[dist])
+    n = len(l)
+    q = lambda p: l[int(n*p/100)]
+    print fmt2 % (dist, l[0], l[-1], l[-1]-l[0], q(2.5), q(16), q(50), q(84), q(97.5))
 
 hs = []
 mv = max(max(x) for x in limit_by_dist.values())
 print 'mv=',mv; mv2 = 0.8; assert mv < mv2; mv = mv2
 
 for dist in dists:
-    name = '%i:[%i,%i,%i]' % dist
-    h = ROOT.TH1D(name, 'sum=%i, [%i,%i,%i];limit (fb);toys/0.0008' % dist, 1000, 0, mv)
+    name = '%i:[%i,%i,%i],[%i,%i,%i],[%i,%i,%i]' % dist
+    h = ROOT.TH1D(name, 'sum=%i, [%i,%i,%i], [%i,%i,%i], [%i,%i,%i];limit (fb);toys/0.0008' % dist, 1000, 0, mv)
     h.jmt_dist = dist
     hs.append(h)
     for v in limit_by_dist[dist]:
@@ -63,14 +67,16 @@ for dist in dists:
 hs.sort(key=lambda h: -h.GetMaximum())
 
 base_colors = [ROOT.kRed, ROOT.kGreen, ROOT.kBlue, ROOT.kMagenta, ROOT.kOrange, ROOT.kCyan]
-color_pools = [range(3, -11, -1)+range(3, -11, -1) for c in base_colors]
+color_pools = [range(3, -11, -1) for c in base_colors]
 
 for ih, h in enumerate(hs):
     n = h.jmt_dist[-1]
     if n >= len(base_colors):
         color = ROOT.kBlack
     else:
-        color = base_colors[n] + color_pools[n].pop(0)
+        cd = color_pools[n].pop(0)
+        color_pools[n].append(cd)
+        color = base_colors[n] + cd
 
     h.SetTitle('')
     h.SetStats(0)
