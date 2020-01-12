@@ -370,6 +370,7 @@ def sig_uncert_2017p8(name_year, debug=False):
         vtm = bilerp(mass, tau, points)
 
     uncerts = [max(vtm, 0.1)] # we agreed to assign a minimum of 10%, which comes into play for the high-efficiency mfv_neu points
+    uncerts += [sig_uncert_pdf(name_year)]
     uncerts += [x/100. for x in (3,1,5,2,2,1)] # list from AN + the last '1' is for L1EE prefiring in 2017 and HEM15/16 in 2018
     u = 1 + sum(x**2 for x in uncerts)**0.5 # final number must be in combine lnN convention
     if debug:
