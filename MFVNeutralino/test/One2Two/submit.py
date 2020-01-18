@@ -76,14 +76,17 @@ cd $WD
 #       mv higgsCombine*root observed_S0.root
     fi
 
+    ntoys=100
+    seedbase=13068931
+
     echo "========================================================================="
     echo Expected limits
-    eval $cmd --toys 100 --saveToys -s $((JOB+13068931))
+    eval $cmd --toys $ntoys --saveToys -s $((JOB+seedbase))
     mv higgsCombine*root expected_${JOB}.root
 
 #   echo "========================================================================="
 #   echo Expected limits, no systematics
-#   eval $cmd -S0 --toys 100 --saveToys -s $((JOB+13068931))
+#   eval $cmd -S0 --toys $ntoys --saveToys -s $((JOB+seedbase))
 #   mv higgsCombine*root expected_S0_${JOB}.root
 
 ########################################################################
@@ -105,12 +108,12 @@ cd $WD
 #
 #   echo "========================================================================="
 #   echo GoodnessOfFit expected
-#   eval $cmd --toys 100 -s $((JOB+13068931))
+#   eval $cmd --toys $ntoys -s $((JOB+seedbase))
 #   mv higgsCombine*root gof_expected_${JOB}.root
 #
 #   echo "========================================================================="
 #   echo GoodnessOfFit expected, no systematics
-#   eval $cmd -S0 --toys 100 -s $((JOB+13068931))
+#   eval $cmd -S0 --toys ntoys -s $((JOB+seedbase))
 #   mv higgsCombine*root gof_S0_expected_${JOB}.root
 
 ########################################################################
@@ -131,12 +134,12 @@ cd $WD
 #
 #   echo "========================================================================="
 #   echo Expected significance
-#   eval $cmd --toys 100 -saveToys -s $((JOB+13068931))
+#   eval $cmd --toys $ntoys -saveToys -s $((JOB+seedbase))
 #   mv higgsCombine*root signif_expected_${JOB}.root
 #
 #   echo "========================================================================="
 #   echo Expected significances, no systematics
-#   eval $cmd -S0 --toys 100 -saveToys -s $((JOB+13068931))
+#   eval $cmd -S0 --toys $ntoys -saveToys -s $((JOB+seedbase))
 #   mv higgsCombine*root signif_expected_S0_${JOB}.root
 } 2>&1 | gzip -c > combine_output_${JOB}.txt.gz
 '''
