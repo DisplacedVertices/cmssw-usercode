@@ -74,6 +74,12 @@ e.g. scanpack1p5 looks.
 Full run-2 log:
 
 - scanpack1D is enough to make the nice 1D plots for 2017+8.
+  The 2018 files are done with pythia 8.240 to enable the pdf study.
+  The efficiencies there are 1-2% higher than our other set of samples.
+  Redo those points in scanpack4.
+
+- scanpack4 reproduces the 2D grid from 2016, but skips samples
+  already done either centrally or in scanpack1D.
 
 '''
 
@@ -419,6 +425,27 @@ class scanpack1D2016missing(scanpackbase100epj):
     def events_per_sample(self, kind, tau, mass):
         return 2500
 
+class scanpack4(scanpackbase100epj):
+    kinds = [set_mfv_neutralino, set_stop_dbardbar]
+    taus = [tau/1000. for tau in range(100, 1000, 100) + range(1000, 4000, 1000) + range(4000, 40000, 3000) + range(40000, 100001, 3000)]
+    masses = range(300, 600, 100) + range(600, 3001, 200)
+
+    skip = list(product(kinds, [tau/1000. for tau in [100,300,1000,10000,30000]], [400,600,800,1200,1600,3000])) # the central samples
+    if year == 2017:
+        skip += scanpack1D().samples
+
+    def events_per_sample(self, kind, tau, mass):
+        return 10000 if tau*1000 <= 400 else 5000
+
+class scanpack4_dquach(scanpack4):
+    masses = scanpack4.masses[::4]
+class scanpack4_joeyr(scanpack4):
+    masses = scanpack4.masses[1::4]
+class scanpack4_shogan(scanpack4):
+    masses = scanpack4.masses[2::4]
+class scanpack4_tucker(scanpack4):
+    masses = scanpackpdftest.masses[3::4]
+
 ####
 
 scanpack_registry =  {
@@ -458,6 +485,11 @@ scanpack_registry =  {
     'scanpackpdftest_shogan': scanpackpdftest_shogan,
     'scanpackpdftest_tucker': scanpackpdftest_tucker,
     'scanpack1D2016missing': scanpack1D2016missing,
+    'scanpack4': scanpack4,
+    'scanpack4_dquach': scanpack4_dquach,
+    'scanpack4_joeyr': scanpack4_joeyr,
+    'scanpack4_shogan': scanpack4_shogan,
+    'scanpack4_tucker': scanpack4_tucker,
     }
 
 def valid_scanpack(x):
@@ -672,11 +704,11 @@ if __name__ == '__main__' and len(sys.argv) > 1:
 
     elif cmd == 'test':
         for user in ('',) + scanpack_users:
-            scanpack = get_scanpack('scanpackpdftest' + ('_' if user else '') + user)
+            scanpack = get_scanpack('scanpack4' + ('_' if user else '') + user)
             print '\nuser', user, '#samples', len(scanpack.samples), 'events_per_job', scanpack.events_per_job, 'nbatches', scanpack.nbatches
             d = defaultdict(lambda: defaultdict(list))
             for k,t,m in scanpack.samples:
-                print 'zzz', user, k.__name__, t, m
+                #print 'zzz', user, k.__name__, t, m
                 d[k.__name__][m].append(t)
             for k in sorted(d.keys()):
                 print k
