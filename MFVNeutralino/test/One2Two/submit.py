@@ -6,11 +6,31 @@ from JMTucker.Tools.CondorSubmitter import CondorSubmitter
 import ROOT; ROOT.gROOT.SetBatch()
 import limitsinput
 
-# The combine tarball is made in a locally checked-out combine environment so
-# the worker nodes don't have to git clone, etc. In this environment, run
-#   cmsMakeTarball.py --standalone > /tmp/tarball.py
-# Then, *in the combine environment* do
-#   /tmp/tarball.py --include-bin combine.tgz
+# The combine tarball is made in a locally checked-out combine
+# environment so the worker nodes don't have to git clone, etc.
+#
+# In this CMSSW environment, run
+#   cmsMakeTarball.py --standalone dummyarg > ~/tarball.py
+#
+# Set up combine *on a SL7 machine* following
+# http://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/
+# Directly for this version:
+#
+#   export SCRAM_ARCH=slc7_amd64_gcc700
+#   cmsrel CMSSW_10_2_13
+#   cd CMSSW_10_2_13/src
+#   cmsenv
+#   git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
+#   cd HiggsAnalysis/CombinedLimit
+#   patch -p1 < path/to/main/cmssw/src/JMTucker/MFVNeutralino/test/One2Two/patchSetHint
+#   git fetch origin
+#   git checkout v8.0.1
+#   scram b clean; scram b
+#
+# In that same combine environment, make the tarball with:
+#   python ~/tarball.py --include-bin combine.tgz
+# Copy the tarball to eos, hopefully with a versioned name,
+# and update the url below.
 
 script_template = '''#!/bin/bash
 echo combine script starting at $(date) with args $*
@@ -26,7 +46,7 @@ cd CMSSW_10_2_13/src
 eval `scram runtime -sh`
 
 cd ..
-xrdcp -s root://cmseos.fnal.gov//store/user/tucker/combine_sl7_801.tgz combine.tgz
+xrdcp -s root://cmseos.fnal.gov//store/user/tucker/combine_sl7_801_patchSetHint.tgz combine.tgz
 tar xf combine.tgz
 scram b 2>&1 >/dev/null
 hash -r
@@ -38,10 +58,11 @@ cd $WD
     echo "========================================================================="
     echo datacard:
     python datacard.py $WHICH __DATACARDARGS__ > datacard.txt
-    awk '{print "DATACARD: " $0}' datacard.txt
+    awk '{ print "DATACARD: " $0 }' datacard.txt
 
+    hint=$(awk '/hint/ { print $NF }' datacard.txt)
     # don't use -H AsymptoticLimits, at least don't do it for low-efficiency signals, it can lead to way too low limits
-    cmd="combine -M MarkovChainMC --noDefaultPrior=0 --tries 20 -b 200 --iteration 100000 datacard.txt"
+    cmd="combine --setTheHint $hint -M MarkovChainMC --noDefaultPrior=0 --tries 20 -b 200 --iteration 100000 datacard.txt"
 
     if [[ $JOB == 0 ]]; then
         echo "========================================================================="

@@ -51,9 +51,10 @@ class SignalEfficiencyCombiner:
         self.f = self.inputs[0].f # any of the f are equivalent for name_list and bkg stuff
         self.ninputs = len(self.inputs)
 
-        get_int_lumis = lambda inp: [inp.f.Get('h_int_lumi_%s' % year) for year in self.years]
+        get_int_lumis = lambda inp: [inp.f.Get('h_int_lumi_%s' % year).GetBinContent(1) for year in self.years]
         self.int_lumis = get_int_lumis(self.inputs[0])
         assert all(self.int_lumis == get_int_lumis(inp) for inp in self.inputs[1:])
+        self.total_int_lumi = sum(self.int_lumis)
 
         sumw = sum(inp.w for inp in self.inputs)
         for inp in self.inputs:

@@ -1,0 +1,72 @@
+diff --git a/bin/combine.cpp b/bin/combine.cpp
+index ef955bf..c16e2b5 100644
+--- a/bin/combine.cpp
++++ b/bin/combine.cpp
+@@ -38,6 +38,7 @@ int main(int argc, char **argv) {
+   string datacard, dataset;
+   float iMass;
+   string whichMethod, whichHintMethod;
++  double setTheHint;
+   int runToys;
+   int    seed;
+   string toysFile;
+@@ -83,6 +84,7 @@ int main(int argc, char **argv) {
+     ("toys,t", po::value<int>(&runToys)->default_value(0), "Number of Toy MC extractions")
+     ("seed,s", po::value<int>(&seed)->default_value(123456), "Toy MC random seed")
+     ("hintMethod,H",  po::value<string>(&whichHintMethod)->default_value(""), "Run first this method to provide a hint on the result")
++    ("setTheHint", po::value<double>(&setTheHint)->default_value(-1), "set the hint manually")
+     ;
+   combiner.ioOptions().add_options()
+     ("name,n",     po::value<string>(&name)->default_value("Test"), "Name of the job, affects the name of the output tree")
+@@ -203,6 +205,12 @@ int main(int argc, char **argv) {
+       hintAlgo->applyDefaultOptions();
+       cout << ">>> method used to hint where the upper limit is " << whichHintMethod << endl;
+   }
++
++  if (setTheHint > 0) {
++    cout << ">>> manually setting hint for the upper limit at " << setTheHint << endl;
++    setHint = true;
++    hintSet = setTheHint;
++  }
+   
+   if (seed == -1) {
+     if (verbose > 0) std::cout << ">>> Using OpenSSL to get a really random seed " << std::endl;
+diff --git a/interface/Combine.h b/interface/Combine.h
+index defa522..519a62e 100644
+--- a/interface/Combine.h
++++ b/interface/Combine.h
+@@ -23,6 +23,8 @@ extern TDirectory *outputFile;
+ extern TDirectory *writeToysHere;
+ extern TDirectory *readToysFromHere;
+ extern LimitAlgo * algo, * hintAlgo ;
++extern double hintSet;
++extern bool setHint;
+ extern int verbose;
+ extern bool withSystematics;
+ extern bool doSignificance_, lowerLimit_;
+diff --git a/src/Combine.cc b/src/Combine.cc
+index 4f8c829..57ef422 100644
+--- a/src/Combine.cc
++++ b/src/Combine.cc
+@@ -69,6 +69,8 @@ using namespace RooFit;
+ using namespace std;
+ 
+ LimitAlgo * algo, * hintAlgo;
++double hintSet = 0;
++bool setHint = false;
+ 
+ Float_t t_cpu_, t_real_;
+ Float_t g_quantileExpected_ = -1.0;
+@@ -213,7 +215,11 @@ bool Combine::mklimit(RooWorkspace *w, RooStats::ModelConfig *mc_s, RooStats::Mo
+   bool ret = false;
+   try {
+     double hint = 0, hintErr = 0; bool hashint = false;
+-    if (hintAlgo) {
++    if (setHint) {
++      hint = hintSet;
++      hashint = true;
++    }
++    else if (hintAlgo) {
+         if (hintUsesStatOnly_ ) { //&& withSystematics) {
+             //withSystematics = false;
+             hashint = hintAlgo->run(w, mc_s, mc_b, data, hint, hintErr, 0);
