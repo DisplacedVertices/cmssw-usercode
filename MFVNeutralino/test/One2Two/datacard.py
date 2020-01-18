@@ -17,12 +17,14 @@ include_2016 = 'include_2016' in sys.argv # includes 2015
 include_sigmc = 'no_sigmc' not in sys.argv
 years = ('2016','2017','2018') if include_2016 else ('2017','2018')
 
-if include_2016:
-    template = '''
+template = '''
 # isample = {0.isample}
 # nice name = {0.nice_name}
 # total sig rate = {0.total_sig_rate} / {0.total_int_lumi_xsec} -> {0.avg_sig_eff} avg eff -> hint {0.limit_hint}
+'''
 
+if include_2016:
+    template += '''
 imax 9
 jmax 3
 kmax {0.nsyst}
@@ -47,10 +49,7 @@ sig8MC gmN {0.ngen_2018} DASH6 {0.sigmc_alpha_2018}          DASH9   DASH9   DAS
 '''
 
 else:
-    template = '''
-# isample = {0.isample}
-# nice name = {0.nice_name}
-
+    template += '''
 imax 6
 jmax 2
 kmax {0.nsyst}
