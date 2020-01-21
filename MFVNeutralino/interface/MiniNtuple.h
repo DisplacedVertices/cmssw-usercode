@@ -65,10 +65,14 @@ namespace mfv {
     }
     float ht(float min_jet_pt=40.) const;
     bool is_btagged(int i, float min_bdisc=jmt::BTagging::discriminator_min(jmt::BTagging::tight)) const;
-    int nbtags(std::vector<int> indices) const;
     int nbtags_(float min_bdisc, bool old) const;
     int nbtags_old(float min_bdisc) const { return nbtags_(min_bdisc, true); }
     int nbtags(float min_bdisc) const { return nbtags_(min_bdisc, false); }
+
+    int nbtags_tight() const { return nbtags(jmt::BTagging::discriminator_min(jmt::BTagging::tight)); }
+    int nbtags_medium() const { return nbtags(jmt::BTagging::discriminator_min(jmt::BTagging::medium)); }
+    int nbtags_loose() const { return nbtags(jmt::BTagging::discriminator_min(jmt::BTagging::loose)); }
+
     float gen_x[2];
     float gen_y[2];
     float gen_z[2];

@@ -70,14 +70,6 @@ namespace mfv {
     return jet_bdisc[i] >= min_bdisc;
   }
 
-  int MiniNtuple::nbtags(std::vector<int> indices) const {
-    int nbjets = 0;
-    for(int i : indices){
-      if(is_btagged(i)) ++nbjets;
-    }
-    return nbjets;
-  }
-
   int MiniNtuple::nbtags_(float min_bdisc, bool old) const {
     int sum = 0;
     const float* bdisc = old ? jet_bdisc_old : jet_bdisc;
@@ -94,6 +86,9 @@ namespace mfv {
   bool MiniNtuple::satisfiesTriggerAndOffline(size_t trig) const {
     if(!satisfiesTrigger(trig)) return false;
 
+    // note that this could be loosened if desired
+    int nbtaggedjets = nbtags_tight();
+
     // for the trigger chains where we need to do any detailed matching
     bool passed_kinematics = false;
 
@@ -103,15 +98,16 @@ namespace mfv {
       case b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33 :
       {
         if(njets < 4) return false;
+        if(nbtaggedjets < 2) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
-          if(!jet_hlt_match(j0) || jet_pt[j0] < 100) continue;
+          if(!jet_hlt_match(j0) || jet_pt[j0] < 140) continue;
 
           for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!jet_hlt_match(j1) || jet_pt[j1] < 100) continue;
+            if(!jet_hlt_match(j1) || jet_pt[j1] < 140) continue;
 
             if(fabs(jet_eta[j0] - jet_eta[j1]) < 1.6){
-              if(nbtags({j0,j1}) >= 2) passed_kinematics = true;
+              passed_kinematics = true;
             }
           }
         }
@@ -119,21 +115,22 @@ namespace mfv {
       }
       case b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0 :
       {
-        if(ht(30) < 300 || njets < 4) return false;
+        if(ht(30) < 450 || njets < 4) return false;
+        if(nbtaggedjets < 3) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
-          if(!jet_hlt_match(j0) || jet_pt[j0] < 75) continue;
+          if(!jet_hlt_match(j0) || jet_pt[j0] < 115) continue;
 
           for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!jet_hlt_match(j1) || jet_pt[j1] < 60) continue;
+            if(!jet_hlt_match(j1) || jet_pt[j1] < 100) continue;
 
             for(int j2 = j1+1; j2 < njets; ++j2){
-              if(!jet_hlt_match(j2) || jet_pt[j2] < 45) continue;
+              if(!jet_hlt_match(j2) || jet_pt[j2] < 85) continue;
 
               for(int j3 = j2+1; j3 < njets; ++j3){
-                if(!jet_hlt_match(j3) || jet_pt[j3] < 40) continue;
+                if(!jet_hlt_match(j3) || jet_pt[j3] < 80) continue;
 
-                if(nbtags({j0,j1,j2,j3}) >= 3) passed_kinematics = true;
+                passed_kinematics = true;
               }
             }
           }
@@ -142,27 +139,28 @@ namespace mfv {
       }
       case b_HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2 :
       {
-        if(ht(40) < 380 || njets < 6) return false;
+        if(ht(40) < 530 || njets < 6) return false;
+        if(nbtaggedjets < 2) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
-          if(!jet_hlt_match(j0) || jet_pt[j0] < 32) continue;
+          if(!jet_hlt_match(j0) || jet_pt[j0] < 72) continue;
 
           for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!jet_hlt_match(j1) || jet_pt[j1] < 32) continue;
+            if(!jet_hlt_match(j1) || jet_pt[j1] < 72) continue;
 
             for(int j2 = j1+1; j2 < njets; ++j2){
-              if(!jet_hlt_match(j2) || jet_pt[j2] < 32) continue;
+              if(!jet_hlt_match(j2) || jet_pt[j2] < 72) continue;
 
               for(int j3 = j2+1; j3 < njets; ++j3){
-                if(!jet_hlt_match(j3) || jet_pt[j3] < 32) continue;
+                if(!jet_hlt_match(j3) || jet_pt[j3] < 72) continue;
 
                 for(int j4 = j3+1; j4 < njets; ++j4){
-                  if(!jet_hlt_match(j4) || jet_pt[j4] < 32) continue;
+                  if(!jet_hlt_match(j4) || jet_pt[j4] < 72) continue;
 
                   for(int j5 = j4+1; j5 < njets; ++j5){
-                    if(!jet_hlt_match(j5) || jet_pt[j5] < 32) continue;
+                    if(!jet_hlt_match(j5) || jet_pt[j5] < 72) continue;
 
-                    if(nbtags({j0,j1,j2,j3,j4,j5}) >= 2) passed_kinematics = true;
+                    passed_kinematics = true;
                   }
                 }
               }
@@ -174,27 +172,28 @@ namespace mfv {
       }
       case b_HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2 :
       {
-        if(ht(40) < 380 || njets < 6) return false;
+        if(ht(40) < 530 || njets < 6) return false;
+        if(nbtaggedjets < 2) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
-          if(!jet_hlt_match(j0) || jet_pt[j0] < 32) continue;
+          if(!jet_hlt_match(j0) || jet_pt[j0] < 72) continue;
 
           for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!jet_hlt_match(j1) || jet_pt[j1] < 32) continue;
+            if(!jet_hlt_match(j1) || jet_pt[j1] < 72) continue;
 
             for(int j2 = j1+1; j2 < njets; ++j2){
-              if(!jet_hlt_match(j2) || jet_pt[j2] < 32) continue;
+              if(!jet_hlt_match(j2) || jet_pt[j2] < 72) continue;
 
               for(int j3 = j2+1; j3 < njets; ++j3){
-                if(!jet_hlt_match(j3) || jet_pt[j3] < 32) continue;
+                if(!jet_hlt_match(j3) || jet_pt[j3] < 72) continue;
 
                 for(int j4 = j3+1; j4 < njets; ++j4){
-                  if(!jet_hlt_match(j4) || jet_pt[j4] < 32) continue;
+                  if(!jet_hlt_match(j4) || jet_pt[j4] < 72) continue;
 
                   for(int j5 = j4+1; j5 < njets; ++j5){
-                    if(!jet_hlt_match(j5) || jet_pt[j5] < 32) continue;
+                    if(!jet_hlt_match(j5) || jet_pt[j5] < 72) continue;
 
-                    if(nbtags({j0,j1,j2,j3,j4,j5}) >= 2) passed_kinematics = true;
+                    passed_kinematics = true;
                   }
                 }
               }
@@ -206,27 +205,28 @@ namespace mfv {
       }
       case b_HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5 :
       {
-        if(ht(40) < 430 || njets < 6) return false;
+        if(ht(40) < 580 || njets < 6) return false;
+        if(nbtaggedjets < 1) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
-          if(!jet_hlt_match(j0) || jet_pt[j0] < 40) continue;
+          if(!jet_hlt_match(j0) || jet_pt[j0] < 80) continue;
 
           for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!jet_hlt_match(j1) || jet_pt[j1] < 40) continue;
+            if(!jet_hlt_match(j1) || jet_pt[j1] < 80) continue;
 
             for(int j2 = j1+1; j2 < njets; ++j2){
-              if(!jet_hlt_match(j2) || jet_pt[j2] < 40) continue;
+              if(!jet_hlt_match(j2) || jet_pt[j2] < 80) continue;
 
               for(int j3 = j2+1; j3 < njets; ++j3){
-                if(!jet_hlt_match(j3) || jet_pt[j3] < 40) continue;
+                if(!jet_hlt_match(j3) || jet_pt[j3] < 80) continue;
 
                 for(int j4 = j3+1; j4 < njets; ++j4){
-                  if(!jet_hlt_match(j4) || jet_pt[j4] < 40) continue;
+                  if(!jet_hlt_match(j4) || jet_pt[j4] < 80) continue;
 
                   for(int j5 = j4+1; j5 < njets; ++j5){
-                    if(!jet_hlt_match(j5) || jet_pt[j5] < 40) continue;
+                    if(!jet_hlt_match(j5) || jet_pt[j5] < 80) continue;
 
-                    if(nbtags({j0,j1,j2,j3,j4,j5}) >= 1) passed_kinematics = true;
+                    passed_kinematics = true;
                   }
                 }
               }
@@ -239,15 +239,16 @@ namespace mfv {
       case b_HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71 :
       {
         if(njets < 4) return false;
+        if(nbtaggedjets < 2) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
-          if(!jet_hlt_match(j0) || jet_pt[j0] < 116) continue;
+          if(!jet_hlt_match(j0) || jet_pt[j0] < 156) continue;
 
           for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!jet_hlt_match(j1) || jet_pt[j1] < 116) continue;
+            if(!jet_hlt_match(j1) || jet_pt[j1] < 156) continue;
 
             if(fabs(jet_eta[j0] - jet_eta[j1]) < 1.6){
-              if(nbtags({j0,j1}) >= 2) passed_kinematics = true;
+              passed_kinematics = true;
             }
           }
         }
@@ -255,21 +256,22 @@ namespace mfv {
       }
       case b_HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5 :
       {
-        if(ht(30) < 330 || njets < 4) return false;
+        if(ht(30) < 480 || njets < 4) return false;
+        if(nbtaggedjets < 3) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
-          if(!jet_hlt_match(j0) || jet_pt[j0] < 75) continue;
+          if(!jet_hlt_match(j0) || jet_pt[j0] < 115) continue;
 
           for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!jet_hlt_match(j1) || jet_pt[j1] < 60) continue;
+            if(!jet_hlt_match(j1) || jet_pt[j1] < 100) continue;
 
             for(int j2 = j1+1; j2 < njets; ++j2){
-              if(!jet_hlt_match(j2) || jet_pt[j2] < 45) continue;
+              if(!jet_hlt_match(j2) || jet_pt[j2] < 85) continue;
 
               for(int j3 = j2+1; j3 < njets; ++j3){
-                if(!jet_hlt_match(j3) || jet_pt[j3] < 40) continue;
+                if(!jet_hlt_match(j3) || jet_pt[j3] < 80) continue;
 
-                if(nbtags({j0,j1,j2,j3}) >= 3) passed_kinematics = true;
+                passed_kinematics = true;
               }
             }
           }
@@ -278,24 +280,25 @@ namespace mfv {
       }
       case b_HLT_PFHT400_FivePFJet_100_100_60_30_30_DoublePFBTagDeepCSV_4p5 :
       {
-        if(ht(40) < 400 || njets < 5) return false;
+        if(ht(40) < 550 || njets < 5) return false;
+        if(nbtaggedjets < 2) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
-          if(!jet_hlt_match(j0) || jet_pt[j0] < 100) continue;
+          if(!jet_hlt_match(j0) || jet_pt[j0] < 140) continue;
 
           for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!jet_hlt_match(j1) || jet_pt[j1] < 100) continue;
+            if(!jet_hlt_match(j1) || jet_pt[j1] < 140) continue;
 
             for(int j2 = j1+1; j2 < njets; ++j2){
-              if(!jet_hlt_match(j2) || jet_pt[j2] < 60) continue;
+              if(!jet_hlt_match(j2) || jet_pt[j2] < 100) continue;
 
               for(int j3 = j2+1; j3 < njets; ++j3){
-                if(!jet_hlt_match(j3) || jet_pt[j3] < 30) continue;
+                if(!jet_hlt_match(j3) || jet_pt[j3] < 70) continue;
 
                 for(int j4 = j3+1; j4 < njets; ++j4){
-                  if(!jet_hlt_match(j4) || jet_pt[j4] < 30) continue;
+                  if(!jet_hlt_match(j4) || jet_pt[j4] < 70) continue;
 
-                  if(nbtags({j0,j1,j2,j3,j4}) >= 2) passed_kinematics = true;
+                  passed_kinematics = true;
                 }
               }
             }
@@ -305,27 +308,28 @@ namespace mfv {
       }
       case b_HLT_PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94 :
       {
-        if(ht(40) < 400 || njets < 6) return false;
+        if(ht(40) < 150 || njets < 6) return false;
+        if(nbtaggedjets < 2) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
-          if(!jet_hlt_match(j0) || jet_pt[j0] < 32) continue;
+          if(!jet_hlt_match(j0) || jet_pt[j0] < 72) continue;
 
           for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!jet_hlt_match(j1) || jet_pt[j1] < 32) continue;
+            if(!jet_hlt_match(j1) || jet_pt[j1] < 72) continue;
 
             for(int j2 = j1+1; j2 < njets; ++j2){
-              if(!jet_hlt_match(j2) || jet_pt[j2] < 32) continue;
+              if(!jet_hlt_match(j2) || jet_pt[j2] < 72) continue;
 
               for(int j3 = j2+1; j3 < njets; ++j3){
-                if(!jet_hlt_match(j3) || jet_pt[j3] < 32) continue;
+                if(!jet_hlt_match(j3) || jet_pt[j3] < 72) continue;
 
                 for(int j4 = j3+1; j4 < njets; ++j4){
-                  if(!jet_hlt_match(j4) || jet_pt[j4] < 32) continue;
+                  if(!jet_hlt_match(j4) || jet_pt[j4] < 72) continue;
 
                   for(int j5 = j4+1; j5 < njets; ++j5){
-                    if(!jet_hlt_match(j5) || jet_pt[j5] < 32) continue;
+                    if(!jet_hlt_match(j5) || jet_pt[j5] < 72) continue;
 
-                    if(nbtags({j0,j1,j2,j3,j4,j5}) >= 2) passed_kinematics = true;
+                    passed_kinematics = true;
                   }
                 }
               }
@@ -336,27 +340,28 @@ namespace mfv {
       }
       case b_HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59 :
       {
-        if(ht(40) < 450 || njets < 6) return false;
+        if(ht(40) < 600 || njets < 6) return false;
+        if(nbtaggedjets < 1) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
-          if(!jet_hlt_match(j0) || jet_pt[j0] < 36) continue;
+          if(!jet_hlt_match(j0) || jet_pt[j0] < 76) continue;
 
           for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!jet_hlt_match(j1) || jet_pt[j1] < 36) continue;
+            if(!jet_hlt_match(j1) || jet_pt[j1] < 76) continue;
 
             for(int j2 = j1+1; j2 < njets; ++j2){
-              if(!jet_hlt_match(j2) || jet_pt[j2] < 36) continue;
+              if(!jet_hlt_match(j2) || jet_pt[j2] < 76) continue;
 
               for(int j3 = j2+1; j3 < njets; ++j3){
-                if(!jet_hlt_match(j3) || jet_pt[j3] < 36) continue;
+                if(!jet_hlt_match(j3) || jet_pt[j3] < 76) continue;
 
                 for(int j4 = j3+1; j4 < njets; ++j4){
-                  if(!jet_hlt_match(j4) || jet_pt[j4] < 36) continue;
+                  if(!jet_hlt_match(j4) || jet_pt[j4] < 76) continue;
 
                   for(int j5 = j4+1; j5 < njets; ++j5){
-                    if(!jet_hlt_match(j5) || jet_pt[j5] < 36) continue;
+                    if(!jet_hlt_match(j5) || jet_pt[j5] < 76) continue;
 
-                    if(nbtags({j0,j1,j2,j3,j4,j5}) >= 1) passed_kinematics = true;
+                    passed_kinematics = true;
                   }
                 }
               }
@@ -367,13 +372,13 @@ namespace mfv {
       }
       case b_HLT_HT430_DisplacedDijet40_DisplacedTrack :
       {
-        if(ht(40) < 430 || njets < 4) return false;
+        if(ht(40) < 580 || njets < 4) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
-          if(!displaced_jet_hlt_match(j0) || jet_pt[j0] < 40) continue;
+          if(!displaced_jet_hlt_match(j0) || jet_pt[j0] < 80) continue;
 
           for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!displaced_jet_hlt_match(j1) || jet_pt[j1] < 40) continue;
+            if(!displaced_jet_hlt_match(j1) || jet_pt[j1] < 80) continue;
             passed_kinematics = true;
           }
         }
@@ -381,13 +386,13 @@ namespace mfv {
       }
       case b_HLT_HT650_DisplacedDijet60_Inclusive :
       {
-        if(ht(40) < 650 || njets < 4) return false;
+        if(ht(40) < 800 || njets < 4) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
-          if(!displaced_jet_hlt_match(j0) || jet_pt[j0] < 60) continue;
+          if(!displaced_jet_hlt_match(j0) || jet_pt[j0] < 100) continue;
 
           for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!displaced_jet_hlt_match(j1) || jet_pt[j1] < 60) continue;
+            if(!displaced_jet_hlt_match(j1) || jet_pt[j1] < 100) continue;
             passed_kinematics = true;
           }
         }
