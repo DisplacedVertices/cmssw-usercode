@@ -10,6 +10,8 @@
 
 const bool prints = false;
 
+int year = 0;
+
 TH1D* h_num_1v = 0;
 TH1D* h_den_1v = 0;
 TH1D* h_num_2v = 0;
@@ -26,11 +28,22 @@ void formatHist(TH1& h){
   h.SetStats(0);
   h.GetXaxis()->SetLabelSize(0.035);
   h.GetXaxis()->SetBinLabel(1, "PFHT1050");
-  h.GetXaxis()->SetBinLabel(2, "DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33");
-  h.GetXaxis()->SetBinLabel(3, "PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0");
-  h.GetXaxis()->SetBinLabel(4, "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2");
-  h.GetXaxis()->SetBinLabel(5, "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2");
-  h.GetXaxis()->SetBinLabel(6, "PFHT430_SixPFJet40_PFBTagCSV_1p5");
+
+  if(year == 2017){
+    h.GetXaxis()->SetBinLabel(2, "DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33");
+    h.GetXaxis()->SetBinLabel(3, "PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0");
+    h.GetXaxis()->SetBinLabel(4, "PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2");
+    h.GetXaxis()->SetBinLabel(5, "PFHT380_SixPFJet32_DoublePFBTagCSV_2p2");
+    h.GetXaxis()->SetBinLabel(6, "PFHT430_SixPFJet40_PFBTagCSV_1p5");
+  }
+  else if(year == 2018){
+    h.GetXaxis()->SetBinLabel(2, "DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71");
+    h.GetXaxis()->SetBinLabel(3, "PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5");
+    h.GetXaxis()->SetBinLabel(4, "PFHT400_FivePFJet_100_100_60_30_30_DoublePFBTagDeepCSV_4p5");
+    h.GetXaxis()->SetBinLabel(5, "PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94");
+    h.GetXaxis()->SetBinLabel(6, "PFHT450_SixPFJet36_PFBTagDeepCSV_1p59");
+  }
+
   h.GetXaxis()->SetBinLabel(7, "HT430_DisplacedDijet40_DisplacedTrack");
   h.GetXaxis()->SetBinLabel(8, "OR of first two bjet triggers");
   h.GetXaxis()->SetBinLabel(9, "OR of all bjet triggers");
@@ -46,28 +59,29 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
 
   bool path0 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_PFHT1050);
 
-  bool path1 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33);
-      
-  bool path2 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0);
-  bool path3 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2);
-  bool path4 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2);
-  bool path5 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5);
+  bool path1, path2, path3, path4, path5, path6;
+  path1 = path2 = path3 = path4 = path5 = path6 = false;
 
-  bool path6 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack);
+  if(year == 2017){
+    path1 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33);
+    path2 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0);
+    path3 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2);
+    path4 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2);
+    path5 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5);
+    path6 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack);
+  }
+  else if(year == 2018){
+    path1 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71);
+    path2 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5);
+    path3 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_PFHT400_FivePFJet_100_100_60_30_30_DoublePFBTagDeepCSV_4p5);
+    path4 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94);
+    path5 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59);
+    path6 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack);
+  }
 
   bool path7 = path1 || path2;
   bool path8 = path1 || path2 || path3 || path4 || path5;
   bool path9 = path0 || path1 || path2 || path3 || path4 || path5 || path6;
-
-  // for efficiencies orthogonal with the HT trigger
-  //path1 = path1 && !path0;
-  //path2 = path2 && !path0;
-  //path3 = path3 && !path0;
-  //path4 = path4 && !path0;
-  //path5 = path5 && !path0;
-  //path6 = path6 && !path0;
-  //path7 = path7 && !path0;
-  //path8 = path8 && !path0;
 
   // paths to pass the trigger
   std::vector<bool> paths = {path0, path1, path2, path3, path4, path5, path6, path7, path8, path9};
@@ -129,8 +143,8 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
 }
 
 int main(int argc, char** argv) {
-  if (argc < 4) {
-    fprintf(stderr, "usage: %s in_fn out_fn ntk\n", argv[0]);
+  if (argc < 5) {
+    fprintf(stderr, "usage: %s in_fn out_fn ntk year\n", argv[0]);
     return 1;
   }
 
@@ -139,6 +153,7 @@ int main(int argc, char** argv) {
   const char* fn = argv[1];
   const char* out_fn = argv[2];
   const int ntk = atoi(argv[3]);
+  year = atoi(argv[4]);
 
   if (!(ntk == 3 || ntk == 4 || ntk == 7 || ntk == 5)) {
     fprintf(stderr, "ntk must be one of 3,4,7,5\n");
