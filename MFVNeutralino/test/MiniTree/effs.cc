@@ -44,10 +44,12 @@ void formatHist(TH1& h){
     h.GetXaxis()->SetBinLabel(6, "PFHT450_SixPFJet36_PFBTagDeepCSV_1p59");
   }
 
-  h.GetXaxis()->SetBinLabel(7, "HT430_DisplacedDijet40_DisplacedTrack");
-  h.GetXaxis()->SetBinLabel(8, "OR of first two bjet triggers");
-  h.GetXaxis()->SetBinLabel(9, "OR of all bjet triggers");
-  h.GetXaxis()->SetBinLabel(10,"OR of all triggers");
+  h.GetXaxis()->SetBinLabel(7, "OR of first two bjet triggers");
+  h.GetXaxis()->SetBinLabel(8, "OR of all bjet triggers");
+  h.GetXaxis()->SetBinLabel(9, "HT430_DisplacedDijet40_DisplacedTrack");
+  h.GetXaxis()->SetBinLabel(10,"HT650_DisplacedDijet60_Inclusive");
+  h.GetXaxis()->SetBinLabel(11,"OR of DisplacedDijet triggers");
+  h.GetXaxis()->SetBinLabel(12,"OR of all triggers");
 }
 
 // analyze method is a callback passed to MiniNtuple::loop from main that is called once per tree entry
@@ -59,8 +61,8 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
 
   bool path0 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_PFHT1050);
 
-  bool path1, path2, path3, path4, path5, path6;
-  path1 = path2 = path3 = path4 = path5 = path6 = false;
+  bool path1, path2, path3, path4, path5, path8, path9;
+  path1 = path2 = path3 = path4 = path5 = path8 = path9 = false;
 
   if(year == 2017){
     path1 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33);
@@ -68,7 +70,8 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
     path3 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2);
     path4 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2);
     path5 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5);
-    path6 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack);
+    path8 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack);
+    path9 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_HT650_DisplacedDijet60_Inclusive);
   }
   else if(year == 2018){
     path1 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71);
@@ -76,15 +79,17 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
     path3 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_PFHT400_FivePFJet_100_100_60_30_30_DoublePFBTagDeepCSV_4p5);
     path4 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94);
     path5 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59);
-    path6 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack);
+    path8 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack);
+    path9 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_HT650_DisplacedDijet60_Inclusive);
   }
 
-  bool path7 = path1 || path2;
-  bool path8 = path1 || path2 || path3 || path4 || path5;
-  bool path9 = path0 || path1 || path2 || path3 || path4 || path5 || path6;
+  bool path6 = path1 || path2;
+  bool path7 = path1 || path2 || path3 || path4 || path5;
+  bool path10 = path8 || path9;
+  bool path11 = path0 || path1 || path2 || path3 || path4 || path5 || path8 || path9;
 
   // paths to pass the trigger
-  std::vector<bool> paths = {path0, path1, path2, path3, path4, path5, path6, path7, path8, path9};
+  std::vector<bool> paths = {path0, path1, path2, path3, path4, path5, path6, path7, path8, path9, path10, path11};
 
   double w = nt.weight; // modify as needed before filling hists
 
@@ -179,10 +184,10 @@ int main(int argc, char** argv) {
   }
 
   // book hists
-  h_num_1v = new TH1D("h_num_1v", ";;Events", 10, 0, 10);
-  h_den_1v = new TH1D("h_den_1v", ";;Events", 10, 0, 10);
-  h_num_2v = new TH1D("h_num_2v", ";;Events", 10, 0, 10);
-  h_den_2v = new TH1D("h_den_2v", ";;Events", 10, 0, 10);
+  h_num_1v = new TH1D("h_num_1v", ";;Events", 12, 0, 12);
+  h_den_1v = new TH1D("h_den_1v", ";;Events", 12, 0, 12);
+  h_num_2v = new TH1D("h_num_2v", ";;Events", 12, 0, 12);
+  h_den_2v = new TH1D("h_den_2v", ";;Events", 12, 0, 12);
 
   formatHist(*h_num_1v);
   formatHist(*h_num_2v);
@@ -200,8 +205,8 @@ int main(int argc, char** argv) {
 
   out_f.cd();
 
-  h_eff_1v = new TH1D("h_eff_1v", ";;Efficiency", 10, 0, 10);
-  h_eff_2v = new TH1D("h_eff_2v", ";;Efficiency", 10, 0, 10);
+  h_eff_1v = new TH1D("h_eff_1v", ";;Efficiency", 12, 0, 12);
+  h_eff_2v = new TH1D("h_eff_2v", ";;Efficiency", 12, 0, 12);
   formatHist(*h_eff_1v);
   formatHist(*h_eff_2v);
 
@@ -214,9 +219,9 @@ int main(int argc, char** argv) {
   TString max_trig1 = "";
   TString max_trig2 = "";
 
-  // ibin = 1 is the HT trigger
-  // ibin = 7 is the last trigger that isn't an OR
-  for(int ibin = 1; ibin < 8; ++ibin){
+  // ibins for the bins that are not an OR 
+  std::vector<int> ibins = {1,2,3,4,5,6,9,10};
+  for(int ibin : ibins){
     float bin_val = h_eff_2v->GetBinContent(ibin);
     if(bin_val > max_val1){
 
