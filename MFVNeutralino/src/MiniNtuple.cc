@@ -94,7 +94,7 @@ namespace mfv {
 
     switch(trig){
       case b_HLT_PFHT1050 :
-        return ht(40) > 1200 && njets >= 4;
+        return ht(40) >= 1200 && njets >= 4;
       case b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33 :
       {
         if(njets < 4) return false;
