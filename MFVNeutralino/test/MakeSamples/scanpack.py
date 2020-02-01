@@ -556,7 +556,7 @@ def read_scanpack_list(fn):
         f = GzipFile(fn)
     else:
         f = open(fn)
-    return eval(f.read())
+    return eval('\n'.join(l for l in f.readlines() if not l.strip().startswith('#')))
 
 def hadd_scanpack(lst_fn):
     from JMTucker.Tools import colors, eos
@@ -668,7 +668,8 @@ if __name__ == '__main__' and len(sys.argv) > 1:
                 print 'done', name, expected
             else:
                 broken_1d = getattr(scanpack, 'broken_1d', [])
-                assert broken_1d
+                if not broken_1d:
+                    raise ValueError('#files = %i, expected = %i, nevents = %i for %s: problem and broken_1d not set' % (len(files), expected, nevents, name))
                 ok = False
                 for btau,bmass in broken_1d:
                     if btau == tau and bmass == mass:
