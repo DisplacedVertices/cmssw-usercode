@@ -109,6 +109,7 @@ namespace mfv {
       FS_primary_id_.push_back(primary_id);
     }
 
+    int   FS_n() const { return p_size(FS_id_, p_FS_id_); }
     int   FS_id         (int i) const { return p_get(i, FS_id_,         p_FS_id_      ); }
     float FS_pt         (int i) const { return p_get(i, FS_pt_,         p_FS_pt_      ); }
     float FS_eta        (int i) const { return p_get(i, FS_eta_,        p_FS_eta_     ); }
