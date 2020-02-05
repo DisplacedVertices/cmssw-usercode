@@ -95,6 +95,30 @@ namespace mfv {
 
     TLorentzVector bquark_p4(int i) const { return p4_m(bquark_pt(i), bquark_eta(i), bquark_phi(i), 4.18); }
 
+    // to keep track of all final state particles
+    // (primary_id = pdgid of the original parent from the MC interaction)
+    void add_FS(int id, float pt, float eta, float phi, float mass, float decay_x, float decay_y, float decay_z, int primary_id) {
+      FS_id_.push_back(id);
+      FS_pt_.push_back(pt);
+      FS_eta_.push_back(eta);
+      FS_phi_.push_back(phi);
+      FS_mass_.push_back(mass);
+      FS_decay_x_.push_back(decay_x);
+      FS_decay_y_.push_back(decay_y);
+      FS_decay_z_.push_back(decay_z);
+      FS_primary_id_.push_back(primary_id);
+    }
+
+    int   FS_id         (int i) const { return p_get(i, FS_id_,         p_FS_id_      ); }
+    float FS_pt         (int i) const { return p_get(i, FS_pt_,         p_FS_pt_      ); }
+    float FS_eta        (int i) const { return p_get(i, FS_eta_,        p_FS_eta_     ); }
+    float FS_phi        (int i) const { return p_get(i, FS_phi_,        p_FS_phi_     ); }
+    float FS_mass       (int i) const { return p_get(i, FS_mass_,       p_FS_mass_    ); }
+    float FS_decay_x    (int i) const { return p_get(i, FS_decay_x_,    p_FS_decay_x_ ); }
+    float FS_decay_y    (int i) const { return p_get(i, FS_decay_y_,    p_FS_decay_y_ ); }
+    float FS_decay_z    (int i) const { return p_get(i, FS_decay_z_,    p_FS_decay_z_ ); }
+    int   FS_primary_id (int i) const { return p_get(i, FS_primary_id_, p_FS_primary_id_); }
+
   private:
     bool valid_;
     float vx_;
@@ -117,6 +141,15 @@ namespace mfv {
     vfloat lepton_qpt_;   vfloat* p_lepton_qpt_;
     vfloat lepton_eta_;   vfloat* p_lepton_eta_;
     vfloat lepton_phi_;   vfloat* p_lepton_phi_;
+    vint   FS_id_;       vint  * p_FS_id_;
+    vfloat FS_pt_;       vfloat* p_FS_pt_;
+    vfloat FS_eta_;      vfloat* p_FS_eta_;
+    vfloat FS_phi_;      vfloat* p_FS_phi_;
+    vfloat FS_mass_;     vfloat* p_FS_mass_;
+    vfloat FS_decay_x_;     vfloat* p_FS_decay_x_;
+    vfloat FS_decay_y_;     vfloat* p_FS_decay_y_;
+    vfloat FS_decay_z_;     vfloat* p_FS_decay_z_;
+    vint FS_primary_id_; vint  * p_FS_primary_id_;
   };
 
   ////

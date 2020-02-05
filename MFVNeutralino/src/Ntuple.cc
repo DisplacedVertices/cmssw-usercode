@@ -18,6 +18,15 @@ namespace mfv {
     p_lepton_qpt_ = 0;
     p_lepton_eta_ = 0;
     p_lepton_phi_ = 0;
+    p_FS_id_ = 0;
+    p_FS_pt_ = 0;
+    p_FS_eta_ = 0;
+    p_FS_phi_ = 0;
+    p_FS_mass_ = 0;
+    p_FS_decay_x_ = 0;
+    p_FS_decay_y_ = 0;
+    p_FS_decay_z_ = 0;
+    p_FS_primary_id_ = 0;
   }
 
   void GenTruthSubNtuple::clear() {
@@ -42,6 +51,15 @@ namespace mfv {
     lepton_qpt_.clear();
     lepton_eta_.clear();
     lepton_phi_.clear();
+    FS_id_.clear();
+    FS_pt_.clear();
+    FS_eta_.clear();
+    FS_phi_.clear();
+    FS_mass_.clear();
+    FS_decay_x_.clear();
+    FS_decay_y_.clear();
+    FS_decay_z_.clear();
+    FS_primary_id_.clear();
   }
 
   void GenTruthSubNtuple::write_to_tree(TTree* t) {
@@ -66,6 +84,15 @@ namespace mfv {
     t->Branch("gen_lepton_qpt", &lepton_qpt_);
     t->Branch("gen_lepton_eta", &lepton_eta_);
     t->Branch("gen_lepton_phi", &lepton_phi_);
+    t->Branch("gen_FS_id", &FS_id_);
+    t->Branch("gen_FS_pt", &FS_pt_);
+    t->Branch("gen_FS_eta", &FS_eta_);
+    t->Branch("gen_FS_phi", &FS_phi_);
+    t->Branch("gen_FS_mass", &FS_mass_);
+    t->Branch("gen_FS_decay_x", &FS_decay_x_);
+    t->Branch("gen_FS_decay_y", &FS_decay_y_);
+    t->Branch("gen_FS_decay_z", &FS_decay_z_);
+    t->Branch("gen_FS_primary_id", &FS_primary_id_);
   }
 
   void GenTruthSubNtuple::read_from_tree(TTree* t) {
@@ -90,6 +117,15 @@ namespace mfv {
     t->SetBranchAddress("gen_lepton_qpt", &p_lepton_qpt_);
     t->SetBranchAddress("gen_lepton_eta", &p_lepton_eta_);
     t->SetBranchAddress("gen_lepton_phi", &p_lepton_phi_);
+    t->SetBranchAddress("gen_FS_id", &p_FS_id_);
+    t->SetBranchAddress("gen_FS_pt", &p_FS_pt_);
+    t->SetBranchAddress("gen_FS_eta", &p_FS_eta_);
+    t->SetBranchAddress("gen_FS_phi", &p_FS_phi_);
+    t->SetBranchAddress("gen_FS_mass", &p_FS_mass_);
+    t->SetBranchAddress("gen_FS_decay_x", &p_FS_decay_x_);
+    t->SetBranchAddress("gen_FS_decay_y", &p_FS_decay_y_);
+    t->SetBranchAddress("gen_FS_decay_z", &p_FS_decay_z_);
+    t->SetBranchAddress("gen_FS_primary_id", &p_FS_primary_id_);
   }
 
   void GenTruthSubNtuple::copy_vectors() {
@@ -108,6 +144,15 @@ namespace mfv {
     lepton_qpt_ = *p_lepton_qpt_;
     lepton_eta_ = *p_lepton_eta_;
     lepton_phi_ = *p_lepton_phi_;
+    FS_id_ = *p_FS_id_;
+    FS_pt_ = *p_FS_pt_;
+    FS_eta_ = *p_FS_eta_;
+    FS_phi_ = *p_FS_phi_;
+    FS_mass_ = *p_FS_mass_;
+    FS_decay_x_ = *p_FS_decay_x_;
+    FS_decay_y_ = *p_FS_decay_y_;
+    FS_decay_z_ = *p_FS_decay_z_;
+    FS_primary_id_ = *p_FS_primary_id_;
   }
 
   ////
