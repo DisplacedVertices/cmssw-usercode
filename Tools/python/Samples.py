@@ -588,6 +588,9 @@ for x in all_signal_samples_2017 + all_signal_samples_2018:
     x.add_dataset("nr_trackmovermctruthv27mv1_norefitdzcut")
     x.add_dataset("nr_trackmovermctruthv27mv2")
 
+mfv_neu_tau000100um_M0400_2017.add_dataset("nr_trackmovermctruthv27_genfsmv2")
+mfv_neu_tau000100um_M3000_2017.add_dataset("nr_trackmovermctruthv27_genfsmv2")
+
 ########
 # automatic condor declarations for ntuples
 ########
