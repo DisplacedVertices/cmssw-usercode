@@ -119,6 +119,7 @@ namespace mfv {
     float FS_decay_y    (int i) const { return p_get(i, FS_decay_y_,    p_FS_decay_y_ ); }
     float FS_decay_z    (int i) const { return p_get(i, FS_decay_z_,    p_FS_decay_z_ ); }
     int   FS_primary_id (int i) const { return p_get(i, FS_primary_id_, p_FS_primary_id_); }
+    TLorentzVector FS_p4(int i) const { return p4_m(FS_pt(i), FS_eta(i), FS_phi(i), FS_mass(i)); }
 
   private:
     bool valid_;
