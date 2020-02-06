@@ -27,16 +27,15 @@ namespace mfv {
           }
           nt_.add(s->pdgId(), s->pt(), s->eta(), s->phi(), s->mass(), x,y,z);
 
-          // look at all final state daughters of the secondary particles
-          for(unsigned int i_dau = 0; i_dau < s->numberOfDaughters(); ++i_dau){
-            auto dau = s->daughter(i_dau);
-            if(dau->status() == 1){
-              // FIXME we're probably double counting daughters of tops and Ws........ Could be bad if we then blindly add them to 4-vectors! One could imagine skipping tops and W's in this loop (maybe Z's and others too for futureproofing?) 
-              // FIXME do we want to keep the pdgId of the secondaries as well? Could be useful.
-              // Alternatively could change the existing gen_id, etc. to only keep FS particles, and keep track of their pdgId()
-              nt_.add_FS(dau->pdgId(), dau->pt(), dau->eta(), dau->phi(), dau->mass(), dau->vx(), dau->vy(), dau->vz(), mci_->primaries()[i]->pdgId());
-              
-              //std::cout << "parent pdgID " << s->pdgId() << ", i_dau " << i_dau << ", pdgID " << daughter->pdgId() << ", pt " << daughter->pt() << ", eta " << daughter->eta() << ", phi " << daughter->phi() << ", parent eta " << s->eta() << ", parent phi " << s->phi() << ", separated by dR = " << sqrt( (daughter->eta() - s->eta())*(daughter->eta() - s->eta()) + (daughter->phi() - s->phi())*(daughter->phi() - s->phi()) )  << std::endl;
+          // skip tops and W's to avoid adding duplicates (since they share descendants!)
+          if(abs(s->pdgId()) != 5 && abs(s->pdgId()) != 24){
+
+            // look at all final state daughters of the secondary particles
+            for(unsigned int i_dau = 0; i_dau < s->numberOfDaughters(); ++i_dau){
+              auto dau = s->daughter(i_dau);
+              if(dau->status() == 1){
+                nt_.add_FS(dau->pdgId(), dau->pt(), dau->eta(), dau->phi(), dau->mass(), dau->vx(), dau->vy(), dau->vz(), i);
+              }
             }
           }
         }
