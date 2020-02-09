@@ -278,7 +278,7 @@ def make_signals_2015p6(f, name_list):
             for n in 'dbv', 'dphi', 'dvv', 'dvv_rebin':
                 hs = _hs(old_bn + n)
                 for h,ng,sf,il in zip(hs, ngens, sfs, int_lumis):
-                    if n != 'dvv_rebin':
+                    if n == 'dbv' or n == 'dvv':
                         h.Rebin(10) # did too many bins last time
                     h.Scale(sf(mass) * 1e-3 * il / ng)
 
@@ -379,7 +379,7 @@ def sig_uncert_2017p8(name_year, debug=False):
 
 def make_signals_2017p8(f, name_list):
     # 2017,8 are from minitrees (the 100kevt official samples) and scanpack.
-    scanpack_list = '/uscms/home/tucker/public/mfv/scanpacks/2017p8/scanpack1D.merged.list.gz'
+    scanpack_list = '/uscms/home/tucker/public/mfv/scanpacks/2017p8/scanpack1D_4_4p7_4p8.merged.list.gz'
     trees = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV27m/mfv*.root'
     title = []
     sigs = {}
@@ -460,8 +460,9 @@ def make_signals_2017p8(f, name_list):
 
 def make():
     def warning():
+        return
         for i in xrange(20):
-            print colors.error("don't forget:        pythia8240 rescaling/regen       anything else?")
+            print colors.error("don't forget: anything?")
     warning()
 
     assert not os.path.exists(gp.fn)
