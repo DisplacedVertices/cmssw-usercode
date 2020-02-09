@@ -3,9 +3,9 @@ from array import array
 from JMTucker.Tools.ROOTTools import *
 ROOT.gErrorIgnoreLevel = 1001 # Suppress TCanvas::SaveAs messages.
 
-which = 'run2' # '2017p8'
+which = '2017p8' if '2017p8' in sys.argv else 'run2'
 intlumi = 140 if which == 'run2' else 101
-path = plot_dir('pretty_limits_1d_scanpack1Dplus2016missing_%s' % which, make=True)
+path = plot_dir('pretty_limits_1d_scanpack1Dplus2016missing_fixcombinefull_%s' % which, make=True)
 
 ts = tdr_style()
 
@@ -35,9 +35,6 @@ kinds = [
     'dijet_tau1mm',
     'dijet_tau10mm',
     ]
-
-if which == 'run2':
-    kinds = [k for k in kinds if 'M3000' not in k]
 
 def tau(tau):
     if tau.endswith('um'):
@@ -86,23 +83,46 @@ for kind in kinds:
     theory = f.Get('%s/theory' % kind)
 
     if 0:
-        if kind == 'dijet_tau300um':
-            for i in xrange(20):
-                print 'ugh'
-            g = expect95
-            x,y = tgraph_getpoint(g, 9)
-            assert x == 1800
-            g.SetPointEYhigh(9, (g.GetErrorYhigh(8) + g.GetErrorYhigh(10))/2)
-        elif kind == 'multijet_tau300um':
-            for i in xrange(20):
-                print 'ugh'
-            g = expect95
-            x,y = tgraph_getpoint(g, 9)
-            assert x == 1800
-            g.SetPointEYhigh(9, (g.GetErrorYhigh(8) + g.GetErrorYhigh(10))/2)
-            x,y = tgraph_getpoint(g, 11)
-            assert x == 2200
-            g.SetPointEYhigh(11, (g.GetErrorYhigh(10) + g.GetErrorYhigh(12))/2)
+        if which == 'run2':
+            for kk,vv in ('dijet_M0800',1.7),('dijet_M1600',0.9),('dijet_M2400',0.7),('dijet_M3000',0.7),('multijet_M0800',2.2),('multijet_M1600',1.2),('multijet_M2400',1),('multijet_M3000',1.3):
+                if kind == kk:
+                    for i in xrange(20): print 'ugh', which, kind
+                    g = expect95
+                    x,y = tgraph_getpoint(g, 0)
+                    assert abs(x - 0.1) < 1e-4
+                    g.SetPointEYlow(0,vv)
+            if kind == 'dijet_M3000':
+                for i in xrange(20): print 'ugh', which, kind
+                g = expect95
+                x,y = tgraph_getpoint(g, 11)
+                print x,y
+                assert abs(x - 28) < 1e-3
+                g.SetPointEYhigh(11,0.009)
+            if kind == 'dijet_M3000':
+                for i in xrange(20): print 'ugh', which, kind
+                g = expect95
+                x,y = tgraph_getpoint(g, 1)
+                assert abs(x - 0.3) < 1e-4
+                g.SetPointEYlow(1,0.12)
+            if kind == 'multijet_M2400':
+                for i in xrange(20): print 'ugh', which, kind
+                g = expect95
+                x,y = tgraph_getpoint(g, 1)
+                assert abs(x - 0.3) < 1e-4
+                g.SetPointEYlow(1,0.15)
+            if kind == 'multijet_M3000':
+                for i in xrange(20): print 'ugh', which, kind
+                g = expect95
+                x,y = tgraph_getpoint(g, 1)
+                assert abs(x - 0.3) < 1e-4
+                g.SetPointEYlow(1,0.181)
+            if kind == 'multijet_tau300um':
+                for i in xrange(20): print 'ugh', which, kind
+                g = expect95
+                #x,y = tgraph_getpoint(g, g.GetN()-1)
+                #assert abs(x - 0.3) < 1e-4
+                for jjj in 1,2,3:
+                    g.SetPointEYlow(g.GetN()-jjj,0.18+1e-3*jjj)
 
     particle = '#tilde{t}' if 'dijet' in kind else '#tilde{#chi}^{0} / #tilde{g}'
     if versus_mass:
