@@ -81,8 +81,9 @@ Full run-2 log:
 - scanpack4 reproduces the 2D grid from 2016, but skips samples
   already done either centrally or in scanpack1D.
   Some masses got skipped thanks to typo, and some jobs got lost.
+  - scanpack4p7 and 4p8 are these missing jobs.
+  - scanpack4p6 are 2800,3000 GeV points not generated in 2016.
 
-- scanpack4p7 and 4p8 are these missing jobs.
 '''
 
 # do not import here at the top level anything that is not in the stdlib or not in the curr
@@ -466,6 +467,12 @@ class scanpack4p8_shogan(scanpackbase100epj):
 class scanpack4p8_tucker(scanpackbase100epj):
     samples_string = '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'
 
+class scanpack4p6(scanpackbase100epj):
+    _n, _s = set_mfv_neutralino, set_stop_dbardbar
+    points = [(_n, 0.2, 2800), (_n, 0.2, 3000), (_n, 0.5, 2800), (_n, 0.6, 2800), (_n, 0.6, 3000), (_n, 0.8, 2800), (_n, 0.8, 3000), (_n, 0.9, 2800), (_n, 2.0, 2800), (_n, 2.0, 3000), (_n, 3.0, 2800), (_n, 43.0, 2800), (_n, 43.0, 3000), (_n, 46.0, 2800), (_n, 46.0, 3000), (_n, 49.0, 2800), (_n, 49.0, 3000), (_n, 52.0, 2800), (_n, 52.0, 3000), (_n, 55.0, 2800), (_n, 55.0, 3000), (_n, 58.0, 2800), (_n, 58.0, 3000), (_n, 61.0, 2800), (_n, 61.0, 3000), (_n, 64.0, 2800), (_n, 64.0, 3000), (_n, 67.0, 2800), (_n, 67.0, 3000), (_n, 70.0, 2800), (_n, 73.0, 2800), (_n, 73.0, 3000), (_n, 76.0, 2800), (_n, 76.0, 3000), (_n, 79.0, 2800), (_n, 79.0, 3000), (_n, 82.0, 2800), (_n, 82.0, 3000), (_n, 85.0, 2800), (_n, 85.0, 3000), (_n, 88.0, 2800), (_n, 88.0, 3000), (_n, 91.0, 2800), (_n, 91.0, 3000), (_n, 94.0, 2800), (_n, 94.0, 3000), (_n, 97.0, 2800), (_n, 97.0, 3000), (_n, 100.0, 2800), (_s, 0.1, 2800), (_s, 0.2, 2800), (_s, 0.2, 3000), (_s, 0.4, 2800), (_s, 0.4, 3000), (_s, 0.5, 2800), (_s, 0.6, 2800), (_s, 0.6, 3000), (_s, 0.7, 2800), (_s, 0.8, 2800), (_s, 0.8, 3000), (_s, 0.9, 2800), (_s, 2.0, 2800), (_s, 2.0, 3000), (_s, 3.0, 2800), (_s, 4.0, 2800), (_s, 7.0, 2800), (_s, 7.0, 3000), (_s, 13.0, 2800), (_s, 13.0, 3000), (_s, 16.0, 2800), (_s, 19.0, 2800), (_s, 19.0, 3000), (_s, 22.0, 2800), (_s, 25.0, 2800), (_s, 25.0, 3000), (_s, 28.0, 2800), (_s, 31.0, 2800), (_s, 31.0, 3000), (_s, 34.0, 2800), (_s, 37.0, 2800), (_s, 37.0, 3000), (_s, 40.0, 2800), (_s, 43.0, 2800), (_s, 43.0, 3000), (_s, 46.0, 2800), (_s, 46.0, 3000), (_s, 49.0, 2800), (_s, 49.0, 3000), (_s, 52.0, 2800), (_s, 52.0, 3000), (_s, 55.0, 2800), (_s, 55.0, 3000), (_s, 58.0, 2800), (_s, 58.0, 3000), (_s, 61.0, 2800), (_s, 61.0, 3000), (_s, 64.0, 2800), (_s, 64.0, 3000), (_s, 67.0, 2800), (_s, 67.0, 3000), (_s, 70.0, 2800), (_s, 73.0, 2800), (_s, 73.0, 3000), (_s, 76.0, 2800), (_s, 76.0, 3000), (_s, 79.0, 2800), (_s, 79.0, 3000), (_s, 82.0, 2800), (_s, 82.0, 3000), (_s, 85.0, 2800), (_s, 85.0, 3000), (_s, 88.0, 2800), (_s, 88.0, 3000), (_s, 91.0, 2800), (_s, 91.0, 3000), (_s, 94.0, 2800), (_s, 94.0, 3000), (_s, 97.0, 2800), (_s, 97.0, 3000), (_s, 100.0, 2800)]
+    def events_per_sample(self, kind, tau, mass):
+        return 2500
+
 ####
 
 scanpack_registry =  {
@@ -518,6 +525,7 @@ scanpack_registry =  {
     'scanpack4p8_joeyr': scanpack4p8_joeyr,
     'scanpack4p8_shogan': scanpack4p8_shogan,
     'scanpack4p8_tucker': scanpack4p8_tucker,
+    'scanpack4p6': scanpack4p6,
     }
 
 def valid_scanpack(x):
