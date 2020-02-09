@@ -109,9 +109,13 @@ class SignalEfficiencyCombiner:
 
         rates = [tuple(h.GetBinContent(ib) for ib in xrange(1,h.GetNbinsX()+1)) for h in hs_dvv_rebin]
         rate = [sum(r) for r in zip(*rates)]
-        tot_rate = sum(rate)
 
         uncerts = [tuple(h.GetBinContent(ib) for ib in xrange(1,h.GetNbinsX()+1)) for h in hs_uncert]
+
+        total_sig_rate = sum(rate)
+        assert total_sig_rate > 0
+        total_int_lumi = self.total_int_lumi
+        total_int_lumi_xsec = self.total_int_lumi * 1e-3  # 1 fb
 
         class Result(_namedtuple): pass
         yearit = lambda x: dict(zip(self.years, x))
@@ -133,7 +137,11 @@ class SignalEfficiencyCombiner:
                       h_dvv = _add_h(hs_dvv),
                       h_dvv_rebin = _add_h(hs_dvv_rebin),
 
-                      tot_rate = tot_rate,
+                      total_sig_rate = total_sig_rate,
+                      total_int_lumi = total_int_lumi,
+                      total_int_lumi_xsec = total_int_lumi_xsec,
+                      total_sig_eff = total_sig_rate / total_int_lumi_xsec,
+                      limit_hint = 3 / total_sig_rate, # may need to change if we see a whole bunch of events in the end
                       )
 
 if __name__ == '__main__':

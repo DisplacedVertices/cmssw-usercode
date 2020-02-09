@@ -20,7 +20,7 @@ years = ('2016','2017','2018') if include_2016 else ('2017','2018')
 template = '''
 # isample = {0.isample}
 # nice name = {0.nice_name}
-# total sig rate = {0.total_sig_rate} / {0.total_int_lumi_xsec} -> {0.avg_sig_eff} avg eff -> hint {0.limit_hint}
+# total sig rate = {0.total_sig_rate} / {0.total_int_lumi_xsec} -> {0.total_sig_eff} eff -> hint {0.limit_hint}
 '''
 
 if include_2016:
@@ -136,16 +136,13 @@ for d in 3,6,9:
     template = template.replace('DASH%i' % d, ' '.join('-'*d))
 
 def make(isample):
-    nbins = 3
-
     combiner = SignalEfficiencyCombiner(years)
     r = combiner.combine(isample)
     r.nsyst = template.count('lnN') + template.count('gmN')
-    r.total_sig_rate = 0
-    r.total_int_lumi_xsec = combiner.total_int_lumi * 1e-3
 
     def h2l(h):
-        return [h.GetBinContent(ib) for ib in xrange(1,nbins+1)]
+        assert h.GetNbinsX() == 3
+        return [h.GetBinContent(ib) for ib in xrange(1,3+1)]
     def get(n):
         return h2l(combiner.f.Get(n))
     def st(x, typ=float):
@@ -165,19 +162,15 @@ def make(isample):
         setattr(r, 'bkg_rate_%s'    % year, st('h_bkg_dvv_rebin_%s' % year))
         setattr(r, 'sig_rate_%s'    % year, st(r.hs_dvv_rebin[year]))
         setattr(r, 'sig_uncert_%s'  % year, st(r.hs_uncert[year]))
-        r.total_sig_rate += sum(h2l(r.hs_dvv_rebin[year]))
 
         ngen = r.ngens[year]
         setattr(r, 'ngen_%s'        % year, str(ngen))
-        setattr(r, 'sigmc_alpha_%s' % year, st([x /ngen for x in r.rates[year]]))
+        setattr(r, 'sigmc_alpha_%s' % year, st([x / ngen for x in r.rates[year]]))
 
         bkg_uncert = get('h_bkg_uncert_%s' % year)
         setattr(r, 'bkg_uncert_%s' % year, bkg_uncert)
         for i,v in enumerate(bkg_uncert):
             setattr(r, 'bkg_uncert_%s_%i' % (year, i), v)
-
-    r.avg_sig_eff = r.total_sig_rate / r.total_int_lumi_xsec
-    r.limit_hint = 3 / r.total_sig_rate # may need to change if we see a whole bunch of events in the end
 
     print template.format(r)
 
