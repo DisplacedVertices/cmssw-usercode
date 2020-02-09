@@ -27,7 +27,8 @@ tau_masses = []
 if 1:
     meta = 'scan'
     output_level = 'minitree'
-    scanpack = 'scanpackpdftest_' + os.environ['USER']
+    digit = year - 2010; assert digit in (7,8)
+    scanpack = 'scanpack4p%i_' % digit + os.environ['USER']
 elif 0:
     meta = 'ttbar'
     nevents, events_per
