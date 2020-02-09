@@ -1,3 +1,4 @@
+from pprint import pprint
 import FWCore.ParameterSet.Config as cms
 from JMTucker.Tools.Year import year
 from JMTucker.Tools.general import *
@@ -382,9 +383,22 @@ def output_file(process, filename, output_commands=[], select_events=[]):
         process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring(*select_events))
     process.outp = cms.EndPath(process.out)
 
-def pprint_path(path):
-    for x in repr(path).split('+'):
-        print x
+def path_split(p):
+    s = repr(p).strip()
+    for x in ('cms.Sequence', '(', ')'):
+        s = s.replace(x, '')
+    return s.split('+')
+
+def path_has(p, s):
+    return s in path_split(p)
+
+def path_print(p):
+    pprint(path_split(p))
+
+def print_all_paths(process):
+    for k, v in process.paths_().iteritems():
+        print k
+        pathprint(v)
 
 def random_service(process, seeds):
     '''Set up the RandomNumberGeneratorService. seeds is a dict taking

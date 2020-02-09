@@ -1,0 +1,37 @@
+#!/bin/bash
+
+user=$1
+if [[ -z $user ]]; then
+    user=$USER
+else
+    shift
+fi
+
+extra=''
+if [[ ! -z $1 ]]; then
+    extra=$1
+    if [[ $extra == cce ]]; then
+        extra=/croncopyeos
+    elif [[ $extra != /* ]]; then
+        extra=/$extra
+    fi
+fi
+
+mystore=/store/user/$user$extra
+myeos=/eos/uscms$mystore
+fxrd=root://cmseos.fnal.gov/
+xfn=$(mktemp -u)
+
+for x in $(eos $fxrd find -d --maxdepth 2 $mystore | sed 's@^path='${myeos}'/@@' | awk -F/ '{ if (NF == 3) print $2 }' | sort | uniq); do
+    echo $x $(eosdu -t $myeos/*/$x | grep Total)
+done | sort > $xfn
+
+echo total $(awk '{ fact=1; if ($NF == "MB") { fact=1/1000; } else if ($NF == "TB") { fact=1000; } s += fact*$(NF-1) } END { print s, "GB" } ' $xfn)
+echo
+echo by fn:
+cat $xfn
+echo
+echo by size:
+sort -nk 3 $xfn
+
+rm $xfn

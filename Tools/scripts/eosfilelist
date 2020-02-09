@@ -1,0 +1,34 @@
+#!/bin/bash
+
+findopt="-f"
+if [[ $1 == "-d" ]]; then
+    findopt="-d"
+    shift
+fi
+
+user=$1
+if [[ -z $user ]]; then
+    user=$USER
+else
+    shift
+fi
+
+extra=''
+if [[ ! -z $1 ]]; then
+    extra=$1
+    if [[ $extra == cce ]]; then
+        extra=/croncopyeos
+    elif [[ $extra != /* ]]; then
+        extra=/$extra
+    fi
+fi
+
+mystore=/store/user/$user$extra
+myeos=/eos/uscms$mystore
+fxrd=root://cmseos.fnal.gov/
+
+for x in $myeos/*; do
+    if [[ -d $x ]]; then
+        eos $fxrd find $findopt $mystore/$(basename $x)
+    fi
+done
