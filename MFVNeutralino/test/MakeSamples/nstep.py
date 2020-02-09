@@ -30,7 +30,7 @@ if 1:
     meta = 'scan'
     output_level = 'minitree'
     hip_right = False
-    scanpack = 'scanpack1D2016missing'
+    scanpack = 'scanpack4p6'
 elif 0:
     meta = 'ttbar'
     nevents, events_per
