@@ -5,7 +5,7 @@ settings.is_mc = True
 settings.is_miniaod = True
 settings.event_filter = 'jets only novtx'
 
-version = settings.version + 'v2'
+version = settings.version + 'v3'
 
 process = ntuple_process(settings)
 remove_output_module(process)
