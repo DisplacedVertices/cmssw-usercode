@@ -8,7 +8,7 @@ namespace mfv {
     event.getByToken(particles_token_, particles_);
     event.getByToken(vertex_token_, vertex_);
     event.getByToken(mci_token_, mci_);
- 
+
     if (mci_->valid()) {
       assert(mci_->primaries().size() == 2);
       for (int i = 0; i < 2; ++i) {
@@ -18,7 +18,11 @@ namespace mfv {
       }
 
       for (int i = 0; i < 2; ++i) {
-        for (const reco::GenParticleRef& s : mci_->secondaries(i)) {
+        auto secondaries = mci_->secondaries(i);
+
+        for (unsigned int i_secondary = 0; i_secondary < secondaries.size(); ++i_secondary){
+          const reco::GenParticleRef& s = secondaries[i_secondary];
+
           float x=1e9,y=1e9,z=1e9;
           if (s->numberOfDaughters()) {
             x = s->daughter(0)->vx();
@@ -30,12 +34,10 @@ namespace mfv {
           // skip tops and W's to avoid adding duplicates (since they share descendants!)
           if(abs(s->pdgId()) != 5 && abs(s->pdgId()) != 24){
 
-            // look at all final state daughters of the secondary particles
+            // look at all accessible daughters of the secondary particles (stable, unstable, etc.)
             for(unsigned int i_dau = 0; i_dau < s->numberOfDaughters(); ++i_dau){
               auto dau = s->daughter(i_dau);
-              if(dau->status() == 1){
-                nt_.add_FS(dau->pdgId(), dau->pt(), dau->eta(), dau->phi(), dau->mass(), dau->vx(), dau->vy(), dau->vz(), i);
-              }
+              nt_.add_FS(dau->pdgId(), dau->pt(), dau->eta(), dau->phi(), dau->mass(), dau->vx(), dau->vy(), dau->vz(), i, i_secondary, dau->status());
             }
           }
         }

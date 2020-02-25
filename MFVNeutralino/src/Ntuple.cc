@@ -27,6 +27,8 @@ namespace mfv {
     p_FS_decay_y_ = 0;
     p_FS_decay_z_ = 0;
     p_FS_primary_idx_ = 0;
+    p_FS_secondary_idx_ = 0;
+    p_FS_status_ = 0;
   }
 
   void GenTruthSubNtuple::clear() {
@@ -60,6 +62,8 @@ namespace mfv {
     FS_decay_y_.clear();
     FS_decay_z_.clear();
     FS_primary_idx_.clear();
+    FS_secondary_idx_.clear();
+    FS_status_.clear();
   }
 
   void GenTruthSubNtuple::write_to_tree(TTree* t) {
@@ -93,6 +97,8 @@ namespace mfv {
     t->Branch("gen_FS_decay_y", &FS_decay_y_);
     t->Branch("gen_FS_decay_z", &FS_decay_z_);
     t->Branch("gen_FS_primary_idx", &FS_primary_idx_);
+    t->Branch("gen_FS_secondary_idx", &FS_secondary_idx_);
+    t->Branch("gen_FS_status", &FS_status_);
   }
 
   void GenTruthSubNtuple::read_from_tree(TTree* t) {
@@ -126,6 +132,8 @@ namespace mfv {
     t->SetBranchAddress("gen_FS_decay_y", &p_FS_decay_y_);
     t->SetBranchAddress("gen_FS_decay_z", &p_FS_decay_z_);
     t->SetBranchAddress("gen_FS_primary_idx", &p_FS_primary_idx_);
+    t->SetBranchAddress("gen_FS_secondary_idx", &p_FS_secondary_idx_);
+    t->SetBranchAddress("gen_FS_status", &p_FS_status_);
   }
 
   void GenTruthSubNtuple::copy_vectors() {
@@ -153,6 +161,8 @@ namespace mfv {
     FS_decay_y_ = *p_FS_decay_y_;
     FS_decay_z_ = *p_FS_decay_z_;
     FS_primary_idx_ = *p_FS_primary_idx_;
+    FS_secondary_idx_ = *p_FS_secondary_idx_;
+    FS_status_ = *p_FS_status_;
   }
 
   ////

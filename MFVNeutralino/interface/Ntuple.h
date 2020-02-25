@@ -97,7 +97,9 @@ namespace mfv {
 
     // to keep track of all final state particles
     // (primary_idx = index of the original parent from the MC interaction)
-    void add_FS(int id, float pt, float eta, float phi, float mass, float decay_x, float decay_y, float decay_z, int primary_idx) {
+    // (secondary_idx = index of the secondary parent from the MC interaction, which resets to 0 for each primary parent)
+    // (status = HepMC status code)
+    void add_FS(int id, float pt, float eta, float phi, float mass, float decay_x, float decay_y, float decay_z, int primary_idx, int secondary_idx, int status) {
       FS_id_.push_back(id);
       FS_pt_.push_back(pt);
       FS_eta_.push_back(eta);
@@ -107,19 +109,23 @@ namespace mfv {
       FS_decay_y_.push_back(decay_y);
       FS_decay_z_.push_back(decay_z);
       FS_primary_idx_.push_back(primary_idx);
+      FS_secondary_idx_.push_back(secondary_idx);
+      FS_status_.push_back(status);
     }
 
     int   FS_n() const { return p_size(FS_id_, p_FS_id_); }
-    int   FS_id         (int i) const { return p_get(i, FS_id_,         p_FS_id_      ); }
-    float FS_pt         (int i) const { return p_get(i, FS_pt_,         p_FS_pt_      ); }
-    float FS_eta        (int i) const { return p_get(i, FS_eta_,        p_FS_eta_     ); }
-    float FS_phi        (int i) const { return p_get(i, FS_phi_,        p_FS_phi_     ); }
-    float FS_mass       (int i) const { return p_get(i, FS_mass_,       p_FS_mass_    ); }
-    float FS_decay_x    (int i) const { return p_get(i, FS_decay_x_,    p_FS_decay_x_ ); }
-    float FS_decay_y    (int i) const { return p_get(i, FS_decay_y_,    p_FS_decay_y_ ); }
-    float FS_decay_z    (int i) const { return p_get(i, FS_decay_z_,    p_FS_decay_z_ ); }
-    int   FS_primary_idx (int i) const { return p_get(i, FS_primary_idx_, p_FS_primary_idx_); }
-    TLorentzVector FS_p4(int i) const { return p4_m(FS_pt(i), FS_eta(i), FS_phi(i), FS_mass(i)); }
+    int   FS_id            (int i) const { return p_get(i, FS_id_,            p_FS_id_      ); }
+    float FS_pt            (int i) const { return p_get(i, FS_pt_,            p_FS_pt_      ); }
+    float FS_eta           (int i) const { return p_get(i, FS_eta_,           p_FS_eta_     ); }
+    float FS_phi           (int i) const { return p_get(i, FS_phi_,           p_FS_phi_     ); }
+    float FS_mass          (int i) const { return p_get(i, FS_mass_,          p_FS_mass_    ); }
+    float FS_decay_x       (int i) const { return p_get(i, FS_decay_x_,       p_FS_decay_x_ ); }
+    float FS_decay_y       (int i) const { return p_get(i, FS_decay_y_,       p_FS_decay_y_ ); }
+    float FS_decay_z       (int i) const { return p_get(i, FS_decay_z_,       p_FS_decay_z_ ); }
+    int   FS_primary_idx   (int i) const { return p_get(i, FS_primary_idx_,   p_FS_primary_idx_); }
+    int   FS_secondary_idx (int i) const { return p_get(i, FS_secondary_idx_, p_FS_secondary_idx_); }
+    int   FS_status        (int i) const { return p_get(i, FS_status_,        p_FS_status_); }
+    TLorentzVector FS_p4   (int i) const { return p4_m(FS_pt(i), FS_eta(i), FS_phi(i), FS_mass(i)); }
 
   private:
     bool valid_;
@@ -151,7 +157,9 @@ namespace mfv {
     vfloat FS_decay_x_;     vfloat* p_FS_decay_x_;
     vfloat FS_decay_y_;     vfloat* p_FS_decay_y_;
     vfloat FS_decay_z_;     vfloat* p_FS_decay_z_;
-    vint FS_primary_idx_; vint  * p_FS_primary_idx_;
+    vint FS_primary_idx_;   vint  * p_FS_primary_idx_;
+    vint FS_secondary_idx_; vint  * p_FS_secondary_idx_;
+    vint FS_status_;        vint  * p_FS_status_;
   };
 
   ////

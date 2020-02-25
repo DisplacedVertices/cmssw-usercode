@@ -5,13 +5,13 @@ settings.is_mc = True
 settings.is_miniaod = True
 settings.event_filter = 'jets only novtx'
 
-version = settings.version + 'v3'
+version = settings.version + 'v4'
 
 process = ntuple_process(settings)
 remove_output_module(process)
 tfileservice(process, 'mctruth.root')
 dataset = 'miniaod' if settings.is_miniaod else 'main'
-sample_files(process, 'mfv_neu_tau010000um_M0800_year', dataset, 1)
+sample_files(process, 'mfv_neu_tau001000um_M1200_2017', dataset, 1)
 cmssw_from_argv(process)
 
 from JMTucker.Tools.NtupleFiller_cff import jmtNtupleFiller_pset
