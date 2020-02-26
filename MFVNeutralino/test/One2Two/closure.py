@@ -4,7 +4,7 @@ ROOT.TH1.AddDirectory(0)
 
 do_bquark = False
 is_mc = False
-only_10pc = True
+only_10pc = False
 year = '2018'
 version = 'V27m'
 set_style()
@@ -56,11 +56,11 @@ def scale_and_draw_template(template, twovtxhist, dvvc, color) :
     template_bins = get_bin_integral_and_stat_uncert(dvvc)
 
     if 'dphi' not in template.GetName():
-        for bin in range(template.GetNbinsX() + 1):
+        for bin in range(1, template.GetNbinsX() + 1):
             stat = 0.
-            if bin <= 3:
+            if bin <= 4:
                 stat = template_bins[0][1] * (template.GetBinContent(bin) / template_bins[0][0])**0.5
-            elif bin <= 6:
+            elif bin <= 7:
                 stat = template_bins[1][1] * (template.GetBinContent(bin) / template_bins[1][0])**0.5
             else:
                 stat = template_bins[2][1] * (template.GetBinContent(bin) / template_bins[2][0])**0.5
@@ -189,8 +189,7 @@ for i, ntracks in enumerate(ntk):
 
     twovtx_bin_norm = get_norm_frac_uncert(twovtx_bins, twovtx_total)
     con_bin_norm = get_norm_frac_uncert(con_bins, con_total)
-    ratios = get_ratios(con_bin_norm, twovtx_bin_norm)
-
+    ratios = get_ratios(twovtx_bin_norm, con_bin_norm)
     twovtx = (twovtx_total, twovtx_total_err) + tuple(x for bin in twovtx_bins for x in bin)
     con = (con_total, con_total_err) + tuple(x for bin in con_bins for x in bin)
     twovtx_norm = tuple(x for bin in twovtx_bin_norm for x in bin)
@@ -207,5 +206,5 @@ for i, ntracks in enumerate(ntk):
     print ' constructed events: %7.2f +/- %5.2f, 0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % con
     print '     dVV normalized:                    0-400 um: %7.3f +/- %5.3f, 400-700 um: %6.3f +/- %5.3f, 700-40000 um: %6.3f +/- %5.3f' % twovtx_norm
     print '    dVVC normalized:                    0-400 um: %7.3f +/- %5.3f, 400-700 um: %6.3f +/- %5.3f, 700-40000 um: %6.3f +/- %5.3f' % con_norm
-    print '   ratio dVVC / dVV:                    0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % rat
+    print '   ratio dVV / dVVC:                    0-400 um: %7.2f +/- %5.2f, 400-700 um: %6.2f +/- %5.2f, 700-40000 um: %6.2f +/- %5.2f' % rat
     print '            p-value:                                                                               700-40000 um: %6.4f' % pval
