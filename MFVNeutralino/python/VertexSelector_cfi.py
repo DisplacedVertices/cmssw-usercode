@@ -113,6 +113,8 @@ mfvSelectedVerticesTightMinNtk3 = mfvSelectedVerticesTight.clone(min_ntracks = 3
 mfvSelectedVerticesTightNtk3    = mfvSelectedVerticesTight.clone(min_ntracks = 3, max_ntracks = 3)
 mfvSelectedVerticesTightNtk4    = mfvSelectedVerticesTight.clone(min_ntracks = 4, max_ntracks = 4)
 mfvSelectedVerticesTightNtk3or4 = mfvSelectedVerticesTight.clone(min_ntracks = 3, max_ntracks = 4)
+mfvSelectedVerticesTightNtk3or5 = mfvSelectedVerticesTight.clone(min_ntracks = 3, max_ntracks = 5)
+mfvSelectedVerticesTightNtk4or5 = mfvSelectedVerticesTight.clone(min_ntracks = 4, max_ntracks = 5)
 mfvSelectedVerticesTightNtk5    = mfvSelectedVerticesTight.clone() # for looping convenience
 
 mfvSelectedVerticesSeq = cms.Sequence(
