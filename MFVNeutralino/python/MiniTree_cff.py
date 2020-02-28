@@ -18,9 +18,9 @@ pMiniTree = cms.Path(mfvWeight * mfvSelectedVerticesTight * mfvAnalysisCutsGE1Vt
 mfvAnalysisCutsGE1VtxNtk3    = mfvAnalysisCutsGE1Vtx.clone(vertex_src = 'mfvSelectedVerticesTightNtk3')
 mfvAnalysisCutsGE1VtxNtk4    = mfvAnalysisCutsGE1Vtx.clone(vertex_src = 'mfvSelectedVerticesTightNtk4')
 mfvAnalysisCutsGE1VtxNtk3or4 = mfvAnalysisCutsGE1Vtx.clone(vertex_src = 'mfvSelectedVerticesTightNtk3or4')
-mfvAnalysisCutsGE1VtxNtk3or4exact = mfvAnalysisCutsGE1Vtx.clone(vertex_src = 'mfvSelectedVerticesTightNtk3or4', min_ntracks01=7, max_ntracks01=7)
-mfvAnalysisCutsGE1VtxNtk3or5exact = mfvAnalysisCutsGE1Vtx.clone(vertex_src = 'mfvSelectedVerticesTightNtk3or5', min_ntracks01=8, max_ntracks01=8)
-mfvAnalysisCutsGE1VtxNtk4or5exact = mfvAnalysisCutsGE1Vtx.clone(vertex_src = 'mfvSelectedVerticesTightNtk4or5', min_ntracks01=9, max_ntracks01=9)
+mfvAnalysisCutsGE1VtxNtk3or4exact = mfvAnalysisCutsGE1Vtx.clone(vertex_src = 'mfvSelectedVerticesTightNtk3or4', ntracks01_0=4, ntracks01_1=3)
+mfvAnalysisCutsGE1VtxNtk3or5exact = mfvAnalysisCutsGE1Vtx.clone(vertex_src = 'mfvSelectedVerticesTightNtk3or5', ntracks01_0=5, ntracks01_1=3)
+mfvAnalysisCutsGE1VtxNtk4or5exact = mfvAnalysisCutsGE1Vtx.clone(vertex_src = 'mfvSelectedVerticesTightNtk4or5', ntracks01_0=5, ntracks01_1=4)
 
 mfvMiniTreeNtk3    = mfvMiniTree.clone(vertex_src = 'mfvSelectedVerticesTightNtk3')
 mfvMiniTreeNtk4    = mfvMiniTree.clone(vertex_src = 'mfvSelectedVerticesTightNtk4')

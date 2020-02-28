@@ -57,6 +57,8 @@ private:
   const bool apply_vertex_cuts;
   const int min_nvertex;
   const int max_nvertex;
+  const int ntracks01_0;
+  const int ntracks01_1;
   const int min_ntracks01;
   const int max_ntracks01;
   const double min_maxtrackpt01;
@@ -108,6 +110,8 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     apply_vertex_cuts(cfg.getParameter<bool>("apply_vertex_cuts")),
     min_nvertex(cfg.getParameter<int>("min_nvertex")),
     max_nvertex(cfg.getParameter<int>("max_nvertex")),
+    ntracks01_0(cfg.getParameter<int>("ntracks01_0")),
+    ntracks01_1(cfg.getParameter<int>("ntracks01_1")),
     min_ntracks01(cfg.getParameter<int>("min_ntracks01")),
     max_ntracks01(cfg.getParameter<int>("max_ntracks01")),
     min_maxtrackpt01(cfg.getParameter<double>("min_maxtrackpt01")),
@@ -281,6 +285,8 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       return false;
 
     const bool two_vertex_cuts_on =
+      ntracks01_0 > 0 ||
+      ntracks01_1 > 0 ||
       min_ntracks01 > 0 ||
       max_ntracks01 < 100000 || // for ints
       min_maxtrackpt01 > 0 ||
@@ -311,6 +317,12 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       const MFVVertexAux& v0 = vertices->at(0);
       const MFVVertexAux& v1 = vertices->at(1);
 
+      if (ntracks01_0 > 0 || ntracks01_1 > 0) {
+        assert(ntracks01_0 > 0 && ntracks01_1 > 0);
+        assert(v0.ntracks() >= v1.ntracks());
+        if (v0.ntracks() != ntracks01_0 || v1.ntracks() != ntracks01_1)
+          return false;
+      }
       if (v0.ntracks() + v1.ntracks() < min_ntracks01)
         return false;
       if (v0.ntracks() + v1.ntracks() > max_ntracks01)
