@@ -18,8 +18,8 @@ bkg_uncert_stat = [0.02, 0.05, 0.18]
 bkg_uncert = [(a**2 + b**2)**0.5 for a,b in zip(bkg_uncert, bkg_uncert_stat)] # JMTBAD use proper gmN?
 
 in_fn = '/uscms/home/jchu/public/2v_from_jets_data_2015p6_5track_default_v15_v5.root'
-#limitsinput_fn, in_trees, in_scanpack_list = 'limitsinput.root', None, '/uscms/home/tucker/public/mfv/scanpacks/2017p8/scanpack1D2016missing.list.gz'
-limitsinput_fn, in_trees, in_scanpack_list = 'limitsinput_hip.root', None, '/uscms/home/tucker/public/mfv/scanpacks/2017p8/scanpack1D2016missing_hip.list.gz'
+limitsinput_fn, in_trees, in_scanpack_list = 'limitsinput.root', None, '/uscms/home/tucker/public/mfv/scanpacks/2017p8/scanpack4p6.merged.list.gz'
+#limitsinput_fn, in_trees, in_scanpack_list = 'limitsinput_hip.root', None, '/uscms/home/tucker/public/mfv/scanpacks/2017p8/scanpack4p6_hip.merged.list.gz'
 
 ####
 
