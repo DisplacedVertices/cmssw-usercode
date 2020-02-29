@@ -709,44 +709,42 @@ def nevents_plot():
     out_f.Close()
 
 def signal_efficiency():
-    include_2016 = 'include_2016' in sys.argv # includes 2015
-    years = ('2016','2017','2018') if include_2016 else ('2017','2018')
-
     from signal_efficiency import SignalEfficiencyCombiner
-    combiner = SignalEfficiencyCombiner(years)
-    in_f = combiner.inputs[0].f
-    out_f = ROOT.TFile('signal_efficiency.root', 'recreate')
+    for which, years in ('run2', [2016,2017,2018]), ('2017p8', [2017,2018]):
+        combiner = SignalEfficiencyCombiner(years)
+        in_f = combiner.inputs[0].f
+        out_f = ROOT.TFile('signal_efficiency_%s.root' % which, 'recreate')
 
-    kinds, masses, taus, nmasses, ntaus = axes(in_f)
-    taus.remove(30.)
-    ntaus -= 1
+        kinds, masses, taus, nmasses, ntaus = axes(in_f)
+        taus.remove(30.)
+        ntaus -= 1
 
-    for kind in kinds:
-        h = ROOT.TH2D('signal_efficiency_%s' % kind, ';mass (GeV);#tau (mm)', nmasses, masses, ntaus, taus)
+        for kind in kinds:
+            h = ROOT.TH2D('signal_efficiency_%s' % kind, ';mass (GeV);#tau (mm)', nmasses, masses, ntaus, taus)
 
-        for ibin in xrange(1, nmasses+1):
-            mass = h.GetXaxis().GetBinLowEdge(ibin)
-            for jbin in xrange(1, ntaus+1):
-                tau = h.GetYaxis().GetBinLowEdge(jbin)
-                pt = kind, tau, mass
+            for ibin in xrange(1, nmasses+1):
+                mass = h.GetXaxis().GetBinLowEdge(ibin)
+                for jbin in xrange(1, ntaus+1):
+                    tau = h.GetYaxis().GetBinLowEdge(jbin)
+                    pt = kind, tau, mass
 
-                isample, r = None, None
-                try:
-                    isample = name2isample(in_f, details2name(*pt))
-                    r = combiner.combine(isample)
-                except ValueError as exc:
-                    if tau < 100:
-                        print colors.warning('problem getting %r : isample %r exc %s' % (pt, isample, exc))
-                    continue # leave holes in the plot to know which samples are missing
+                    isample, r = None, None
+                    try:
+                        isample = name2isample(in_f, details2name(*pt))
+                        r = combiner.combine(isample)
+                    except ValueError as exc:
+                        if tau < 100:
+                            print colors.warning('problem getting %r : isample %r exc %s' % (pt, isample, exc))
+                        continue # leave holes in the plot to know which samples are missing
 
-                h.SetBinContent(ibin, jbin, r.total_sig_eff)
-                h.SetBinError  (ibin, jbin, 0) # JMTBAD
+                    h.SetBinContent(ibin, jbin, r.total_sig_eff)
+                    h.SetBinError  (ibin, jbin, 0) # JMTBAD
 
-        out_f.cd()
-        h.Write()
+            out_f.cd()
+            h.Write()
 
-    out_f.Write()
-    out_f.Close()
+        out_f.Write()
+        out_f.Close()
 
 if __name__ == '__main__':
     if 'make' in sys.argv:
