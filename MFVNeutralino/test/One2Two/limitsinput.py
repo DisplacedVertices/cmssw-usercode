@@ -232,6 +232,8 @@ def make_signals_2015p6(f, name_list):
          '/uscms/home/tucker/public/mfv/limitsinput_data_v15v5_scanpack_merge_1_1p5_2_2p5_2p7_3_3p5_removeddbar.root',),
         ('/uscms/home/tucker/public/mfv/limitsinput_scanpack1D2016missing_hip.root',
          '/uscms/home/tucker/public/mfv/limitsinput_scanpack1D2016missing.root',),
+        ('/uscms/home/tucker/public/mfv/limitsinput_scanpack4p6_hip.root',
+         '/uscms/home/tucker/public/mfv/limitsinput_scanpack4p6.root',),
         ]
 
     def trigmult2016(x):
@@ -749,6 +751,8 @@ def signal_efficiency():
 if __name__ == '__main__':
     if 'make' in sys.argv:
         make()
+    elif 'uncert' in sys.argv:
+        sig_uncert_2017p8(sys.argv[sys.argv.index('uncert')+1], debug=True)
     elif 'draw' in sys.argv:
         draw()
     elif 'compare' in sys.argv:
