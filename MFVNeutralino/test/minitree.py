@@ -16,8 +16,6 @@ if not is_mc and use_btag_triggers :
     del process.pMiniTreeNtk3or4
     del process.pMiniTree
 
-if not is_mc:
-    process.mfvAnalysisCutsGE1Vtx.max_nvertex = 1 # 5-track 2-vertex blind
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *

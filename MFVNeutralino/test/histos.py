@@ -103,10 +103,6 @@ process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     
             setattr(process, vtx_hst_name, vtx_hst)
             setattr(process, '%sp%iV' % (EX1, nv) + name, cms.Path(process.mfvWeight * vtx * ana * evt_hst * vtx_hst))
 
-if not is_mc:
-    for x in 'pPreSel', 'pFullSel', 'pSigReg', 'p2VBsbs2ddist', 'p2VBs2derr': # 5-track 2-vertex blind
-        delattr(process, x)
-
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
