@@ -26,7 +26,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     else :
         samples = pick_samples(dataset)
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
-    set_splitting(samples, dataset, 'minitree', data_json=json_path('ana_2017p8_10pc.json'))
+    set_splitting(samples, dataset, 'minitree', data_json=json_path('ana_2017p8.json'))
 
     cs = CondorSubmitter('MiniTree' + version,
                          ex = year,
