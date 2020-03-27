@@ -30,7 +30,7 @@ nm1s = [
     ('Bs2derr',    'max_rescale_bs2derr = 1e9'),
     ]
 
-ntks = [5,3,4,7]
+ntks = [5,3,4,7,8,9]
 nvs = [0,1,2]
 
 for ntk in ntks:
@@ -38,6 +38,10 @@ for ntk in ntks:
         EX1 = EX2 = EX3 = ''
     elif ntk == 7:
         EX1 = 'Ntk3or4'
+    elif ntk == 8:
+        EX1 = 'Ntk3or5'
+    elif ntk == 9:
+        EX1 = 'Ntk4or5'
     else:
         EX1 = 'Ntk%i' % ntk
 
@@ -45,6 +49,10 @@ for ntk in ntks:
         EX2 = "vertex_src = 'mfvSelectedVerticesTight%s', " % EX1
     if ntk == 7:
         EX3 = 'min_ntracks01 = 7, max_ntracks01 = 7, '
+    if ntk == 8:
+        EX3 = 'ntracks01_0 = 5, ntracks01_1 = 3, '
+    if ntk == 9:
+        EX3 = 'ntracks01_0 = 5, ntracks01_1 = 4, '
 
     exec '''
 process.EX1mfvAnalysisCutsOnlyOneVtx = process.mfvAnalysisCuts.clone(EX2min_nvertex = 1, max_nvertex = 1)
@@ -89,6 +97,12 @@ process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     
             ana.min_nvertex = nv
             if nv == 2 and ntk == 7:
                 ana.min_ntracks01 = ana.max_ntracks01 = 7
+            if nv == 2 and ntk == 8:
+                ana.ntracks01_0 = 5
+                ana.ntracks01_1 = 3
+            if nv == 2 and ntk == 9:
+                ana.ntracks01_0 = 5
+                ana.ntracks01_1 = 4
             ana_name = '%sana%iVNo' % (EX1, nv) + name
 
             evt_hst = process.mfvEventHistos.clone()
