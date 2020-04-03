@@ -132,7 +132,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   } else if (p.only_10pc()) {
     file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV27m";
   } else {
-    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV27m";
+    file_path = "/uscms_data/d3/dquach/crab3dirs/MiniTreeV27m_moresidebands";
   }
 
   const int nbkg = 27; //which samples?
@@ -195,9 +195,9 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   if (p.ntracks() == 3)      { tree_path = "mfvMiniTreeNtk3/t"; }
   else if (p.ntracks() == 4) { tree_path = "mfvMiniTreeNtk4/t"; }
   else if (p.ntracks() == 5) { tree_path = "mfvMiniTree/t"; }
-  else if (p.ntracks() == 7) { tree_path = "mfvMiniTreeNtk3or4exact/t"; min_ntracks0 = 4; max_ntracks0 = 4; min_ntracks1 = 3; max_ntracks1 = 3; }
-  else if (p.ntracks() == 8) { tree_path = "mfvMiniTreeNtk3or5exact/t"; min_ntracks0 = 5; max_ntracks0 = 5; min_ntracks1 = 3; max_ntracks1 = 3; }
-  else if (p.ntracks() == 9) { tree_path = "mfvMiniTreeNtk4or5exact/t"; min_ntracks0 = 5; max_ntracks0 = 5; min_ntracks1 = 4; max_ntracks1 = 4; }
+  else if (p.ntracks() == 7) { tree_path = "mfvMiniTreeNtk3or4/t"; min_ntracks0 = 4; max_ntracks0 = 4; min_ntracks1 = 3; max_ntracks1 = 3; }
+  else if (p.ntracks() == 8) { tree_path = "mfvMiniTreeNtk3or5/t"; min_ntracks0 = 5; max_ntracks0 = 5; min_ntracks1 = 3; max_ntracks1 = 3; }
+  else if (p.ntracks() == 9) { tree_path = "mfvMiniTreeNtk4or5/t"; min_ntracks0 = 5; max_ntracks0 = 5; min_ntracks1 = 4; max_ntracks1 = 4; }
   else { fprintf(stderr, "bad ntracks"); exit(1); }
 
   double dphi_pdf_c; double dphi_pdf_e = 2; double dphi_pdf_a; //deltaphi input
@@ -298,7 +298,6 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
     for (int j = 0, je = t->GetEntries(); j < je; ++j) {
       if (t->LoadTree(j) < 0) break;
       if (t->GetEntry(j) <= 0) continue;
-      //if (i == 2 && nt.run == 1 && nt.lumi == 11522 && nt.event == 132003224) continue;
       if ((p.bquarks() == 0 && nt.gen_flavor_code == 2) || (p.bquarks() == 1 && nt.gen_flavor_code != 2)) continue;
       if ((p.btags() == 0 && nt.nbtags(bdisc_cut_value) >= 1) || (p.btags() == 1 && nt.nbtags(bdisc_cut_value) < 1)) continue;
       if (nt.npu < p.min_npu() || nt.npu > p.max_npu()) continue;
@@ -638,8 +637,8 @@ int main(int argc, const char* argv[]) {
     }
   }
   */
-  for (const char* year : {"2017p8"}) {
-    for (int ntracks : {3, 7, 8, 9}) {
+  for (const char* year : {"2017", "2018", "2017p8"}) {
+    for (int ntracks : {3, 4, 5, 7, 8, 9}) {
       ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks).is_mc(false);
       construct_dvvc(pars2,                             TString::Format("2v_from_jets_data_%s_%dtrack_default_%s.root", year, ntracks, version));
       construct_dvvc(pars2.btags(1),                    TString::Format("2v_from_jets_data_%s_%dtrack_btags_%s.root", year, ntracks, version));
