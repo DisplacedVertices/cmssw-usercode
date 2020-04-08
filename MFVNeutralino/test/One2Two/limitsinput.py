@@ -106,7 +106,7 @@ def make_bkg(f):
     # the first 3 sets of values override what's in 2v_from_jets
     observed = (1,0,0), (0,0,0), (0,0,0)
     bkg_n1v  = 1183, 1303, 908
-    bkg_n2v  = 1, 1, 1 # this is not supposed to be the sum of observed, but could/should be set to the pre-fit expectation (predict2v.py)
+    bkg_n2v  = 1, 0.241, 0.111 # this is not supposed to be the sum of observed, but could/should be set to the pre-fit expectation (predict2v.py)
     # but bkg_c1v is checked against what's in 2v_from_jets
     bkg_c1v = (0.509, 0.374, 0.117), (0.709, 0.257, 0.034), (0.650, 0.313, 0.037)
 
