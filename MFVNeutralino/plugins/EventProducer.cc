@@ -161,11 +161,13 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
     for (const reco::GenJet& jet : *gen_jets) {
       if (jet.pt() > 20 && fabs(jet.eta()) < 2.5) {
-        double mue = 0;
+        double mue = 0, ele = 0;
         for (auto c : jet.getJetConstituents())
           if (abs(c->pdgId()) == 13)
             mue += c->energy();
-        if (mue / jet.energy() < 0.8)
+          else if (abs(c->pdgId()) == 11)
+            ele += c->energy();
+        if (mue / jet.energy() < 0.8 && ele / jet.energy() < 0.9)
           mevent->gen_jets.push_back(TLorentzVector(jet.px(), jet.py(), jet.pz(), jet.energy()));
       }
     }
