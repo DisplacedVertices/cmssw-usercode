@@ -148,7 +148,7 @@ def make_output_commands(process, settings):
 
     if settings.keep_gen:
         if settings.is_miniaod:
-            output_commands += ['keep *_prunedGenParticles_*_*', 'keep *_slimmedGenJets_*_*']
+            output_commands += ['keep *_prunedGenParticles_*_*', 'keep *_packedGenParticles_*_*', 'keep *_slimmedGenJets_*_*']
         else:
             output_commands += ['keep *_genParticles_*_HLT',     'keep *_ak4GenJetsNoNu_*_HLT']
 

@@ -1,22 +1,20 @@
-raise NotImplementedError("need to update for 2017 + check that jet cut without pt < 20 GeV isn't affecting anything")
-
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
-dataset = 'ntuplev16p1'
-sample_files(process, 'mfv_neu_tau01000um_M0800', dataset, 10)
+dataset = 'ntuplev27m_wgen'
+sample_files(process, 'mfv_neu_tau010000um_M1200_year', dataset, 10)
 process.TFileService.fileName = 'theorist_recipe.root'
-file_event_from_argv(process)
-#want_summary(process)
+cmssw_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 
 process.load('JMTucker.MFVNeutralino.GenParticles_cff')
 process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
-#process.mfvGenParticles.last_flag_check = False # JMTBAD need this until wgenv2
+process.mfvGenParticles.gen_particles_src = 'prunedGenParticles'
+process.mfvGenParticles.last_flag_check = False
 
 mfvTheoristRecipe = cms.EDAnalyzer('MFVTheoristRecipe',
-                                   gen_jets_src = cms.InputTag('ak4GenJetsNoNu'),
+                                   gen_jets_src = cms.InputTag('slimmedGenJets'),
                                    gen_vertex_src = cms.InputTag('mfvGenParticles', 'genVertex'),
                                    mci_src = cms.InputTag('mfvGenParticles'),
                                    mevent_src = cms.InputTag('mfvEvent'),
@@ -118,19 +116,12 @@ process.pGenDvv400um = cms.Path(process.common * process.mfvGenParticleFilterDvv
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.Year import year
-    from JMTucker.Tools import Samples
-    if year == 2015:
-        raise NotImplementedError("samples don't have dataset")
-        samples = Samples.all_signal_samples_2015
-    elif year == 2016:
-        samples = Samples.all_signal_samples
+    from JMTucker.Tools.MetaSubmitter import *
+    samples = pick_samples(dataset, all_signal='only')
+    set_splitting(samples, dataset, 'minitree')
 
-    from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    from JMTucker.Tools.MetaSubmitter import secondary_files_modifier
     cs = CondorSubmitter('TheoristRecipeV44',
                          ex = year,
                          dataset = dataset,
-                         pset_modifier = secondary_files_modifier('main')
                          )
     cs.submit_all(samples)
