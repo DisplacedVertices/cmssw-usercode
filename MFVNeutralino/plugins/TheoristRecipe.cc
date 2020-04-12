@@ -192,19 +192,24 @@ void MFVTheoristRecipe::analyze(const edm::Event& event, const edm::EventSetup&)
 
   int ngenJets = 0; float genJet_ht40 = 0;
   for (const reco::GenJet& jet : *gen_jets) {
-    double ee = 0;
-    double mue = 0;
-    for (auto c : jet.getJetConstituents()) {
-      if (abs(c->pdgId()) == 11)
-        ee += c->energy();
-      if (abs(c->pdgId()) == 13)
-        mue += c->energy();
-    }
-    h_genJet_electron_energy_fraction->Fill(ee / jet.energy());
-    h_genJet_muon_energy_fraction->Fill(mue / jet.energy());
+    if (fabs(jet.eta()) < 2.5) {
+      double mue = 0, ele = 0;
+      for (size_t i = 0, ie = jet.numberOfDaughters(); i < ie; ++i) {
+        const auto c = jet.daughter(i);
+        if (abs(c->pdgId()) == 13)
+          mue += c->energy();
+        else if (abs(c->pdgId()) == 11)
+          ele += c->energy();
+      }
 
-    if (jet.pt() > 20 && fabs(jet.eta()) < 2.5 && ee / jet.energy() < 0.9 && mue / jet.energy() < 0.8) {
-      ++ngenJets; if (jet.pt() > 40) genJet_ht40 += jet.pt();
+      h_genJet_electron_energy_fraction->Fill(ele / jet.energy());
+      h_genJet_muon_energy_fraction->Fill(mue / jet.energy());
+
+      if (jet.pt() > 20 && ele / jet.energy() < 0.9 && mue / jet.energy() < 0.8) {
+        ++ngenJets;
+        if (jet.pt() > 40)
+          genJet_ht40 += jet.pt();
+      }
     }
   }
   h_genJet_njets->Fill(ngenJets);

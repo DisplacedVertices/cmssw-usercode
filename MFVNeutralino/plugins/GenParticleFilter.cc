@@ -156,31 +156,28 @@ bool MFVGenParticleFilter::filter(edm::Event& event, const edm::EventSetup&) {
   double jet_ht = 0;
   double jet_ht40 = 0;
   for (const reco::GenJet& jet : *gen_jets) {
-    double ee = 0;
-    double mue = 0;
-    for (auto c : jet.getJetConstituents()) {
-      if (abs(c->pdgId()) == 11)
-        ee += c->energy();
-      if (abs(c->pdgId()) == 13)
-        mue += c->energy();
-    }
-    if (ee / jet.energy() >= 0.9)
-      continue;
-    if (mue / jet.energy() >= 0.8)
-      continue;
+    if (fabs(jet.eta()) < 2.5) {
+      double mue = 0, ele = 0;
+      for (size_t i = 0, ie = jet.numberOfDaughters(); i < ie; ++i) {
+        const auto c = jet.daughter(i);
+        if (abs(c->pdgId()) == 13)
+          mue += c->energy();
+        else if (abs(c->pdgId()) == 11)
+          ele += c->energy();
+      }
 
-    if (jet.pt() > min_jet_pt && fabs(jet.eta()) < 2.5)
-      ++njets_min_pt;
-    if (jet.pt() > 20 && fabs(jet.eta()) < 2.5)
-      jet_ht += jet.pt();
-    if (jet.pt() > 40 && fabs(jet.eta()) < 2.5)
-      jet_ht40 += jet.pt();
+      if (mue / jet.energy() < 0.8 && ele / jet.energy() < 0.9) {
+        if (jet.pt() > min_jet_pt)
+          ++njets_min_pt;
+        if (jet.pt() > 20)
+          jet_ht += jet.pt();
+        if (jet.pt() > 40)
+          jet_ht40 += jet.pt();
+      }
+    }
   }
-  if (njets_min_pt < min_njets)
-    return false;
-  if (jet_ht < min_jet_ht)
-    return false;
-  if (jet_ht40 < min_jet_ht40)
+
+  if (njets_min_pt < min_njets || jet_ht < min_jet_ht || jet_ht40 < min_jet_ht40)
     return false;
 
   if (required_num_leptonic >= 0) {
