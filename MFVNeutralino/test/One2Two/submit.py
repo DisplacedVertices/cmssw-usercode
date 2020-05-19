@@ -149,7 +149,7 @@ if 'save_toys' not in sys.argv:
 
 datacard_args = []
 
-bkg_correlation = [x for x in ['bkg_fully_correlated', 'bkg_yearwise_correlated', 'bkg_binwise_correlated', 'bkg_fully_correlated'] if x in sys.argv]
+bkg_correlation = [x for x in ['bkg_fully_correlated', 'bkg_yearwise_correlated', 'bkg_binwise_correlated', 'bkg_mixed_correlated', 'bkg_fully_correlated'] if x in sys.argv]
 assert len(bkg_correlation) <= 1
 if bkg_correlation:
     datacard_args.append(bkg_correlation[0])

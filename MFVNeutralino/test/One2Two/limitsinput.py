@@ -117,6 +117,9 @@ def make_bkg(f):
     for y in xrange(gp.nyears):
         bkg_uncert[y] = [(a**2 + b**2)**0.5 for a,b in zip(bkg_uncert[y], bkg_uncert_stat[y])] # JMTBAD use proper gmN?
 
+    bkg_stat_uncert = [(1.071, 1.128, 1.465), (1.173, 1.216, 1.454), (1.217, 1.238, 1.586)] # stat errors uncorrelated
+    bkg_syst_uncert = [(0.758, 1.218, 1.542), (0.743, 1.338, 1.389), (0.766, 1.315, 1.760)] # syst error anti-correlated
+
     def bkg_fn(year, which='default'):
         path = '/uscms/home/tucker/public/mfv/'
         if year == '2016':
@@ -162,11 +165,17 @@ def make_bkg(f):
                 assert 0
 
         h_bkg_uncert = ROOT.TH1D('h_bkg_uncert_%s' % year, '', gp.nbins, gp.bins)
+        h_bkg_stat_uncert = ROOT.TH1D('h_bkg_uncert_stat_%s' % year, '', gp.nbins, gp.bins)
+        h_bkg_syst_uncert = ROOT.TH1D('h_bkg_uncert_syst_%s' % year, '', gp.nbins, gp.bins)
         for i,v in enumerate(bkg_uncert[y]):
             h_bkg_uncert.SetBinContent(i+1, v)
+        for i,v in enumerate(bkg_stat_uncert[y]):
+            h_bkg_stat_uncert.SetBinContent(i+1, v)
+        for i,v in enumerate(bkg_syst_uncert[y]):
+            h_bkg_syst_uncert.SetBinContent(i+1, v)
 
         f.cd()            
-        for h in h_int_lumi, h_observed, h_bkg_dbv, h_bkg_dvv, h_bkg_dvv_rebin, h_bkg_uncert:
+        for h in h_int_lumi, h_observed, h_bkg_dbv, h_bkg_dvv, h_bkg_dvv_rebin, h_bkg_uncert, h_bkg_stat_uncert, h_bkg_syst_uncert:
             h.SetTitle('')
             h.Write()
 
@@ -305,7 +314,7 @@ def make_signals_2015p6(f, name_list):
 
         print '\rmake_signals_2015p6: done with pair %i             ' % (ipair+1)
 
-def sig_uncert_2017p8(name_year, debug=False):
+def sig_datamcSF_2017p8(name_year, debug=False):
     name, year = name_year.rsplit('_',1)
     kind, tau, mass = name2details(name)
     tau = int(tau*1000) # back to um
@@ -371,12 +380,19 @@ def sig_uncert_2017p8(name_year, debug=False):
         points = [(mxa, txa, vtm[mia][tia]), (mxa, txb, vtm[mia][tib]), (mxb, txa, vtm[mib][tia]), (mxb, txb, vtm[mib][tib])]
         vtm = bilerp(mass, tau, points)
 
+    if debug:
+        print name_year, 'mmm', mmm, 'ttt', ttt
+
+    return 1 - vtm / 2 # trackmover is in the form 2 * (1 - TM_data / TM_MC)
+
+def sig_uncert_2017p8(name_year, debug=False):
+    vtm = (1 / sig_datamcSF_2017p8(name_year, debug))**2 - 1
     uncerts = [max(vtm, 0.1)] # we agreed to assign a minimum of 10%, which comes into play for the high-efficiency mfv_neu points
     uncerts += [sig_uncert_pdf(name_year)]
     uncerts += [x/100. for x in (3,1,5,2,2,1)] # list from AN + the last '1' is for L1EE prefiring in 2017 and HEM15/16 in 2018
     u = 1 + sum(x**2 for x in uncerts)**0.5 # final number must be in combine lnN convention
     if debug:
-        print name_year, 'mmm', mmm, 'ttt', ttt, '->', vtm, '    u = %.4f' % u
+        print name_year, '->', vtm, '    u = %.4f' % u
     return u,u,u
 
 def make_signals_2017p8(f, name_list):
@@ -430,6 +446,7 @@ def make_signals_2017p8(f, name_list):
 
         iyear = gp.years.index(year)
         scale = 1e-3 * gp.int_lumis[iyear] / ngen
+        data_mc_scale = sig_datamcSF_2017p8(name_year)
 
         ROOT.TH1.AddDirectory(1) # the Draw>> output goes off into the ether without this stupid crap
         h_dbv  = ROOT.TH1D(n('dbv'),  '', 125, 0, 2.5)
@@ -442,6 +459,10 @@ def make_signals_2017p8(f, name_list):
         for h in h_dbv, h_dvv, h_dphi:
             h.SetDirectory(0)
             h.Scale(scale)
+            if 'dbv' in h.GetTitle():
+                h.Scale(data_mc_scale)
+            else:
+                h.Scale(data_mc_scale**2)
         
         h_dvv_rebin = h_dvv.Rebin(gp.nbins, n('dvv_rebin'), gp.bins)
         move_overflow_into_last_bin(h_dvv_rebin)

@@ -10,6 +10,8 @@ if 'bkg_yearwise_correlated' in sys.argv:
     bkg_correlation = 'yearwise'
 elif 'bkg_binwise_correlated' in sys.argv:
     bkg_correlation = 'binwise'
+elif 'bkg_mixed_correlated' in sys.argv:
+    bkg_correlation = 'mixed'
 else: #elif 'bkg_uncorrelated' in sys.argv:
     bkg_correlation = False
 
@@ -109,6 +111,30 @@ bkg1 lnN DASH6    - {0.bkg_uncert_2017_1} - DASH3    DASH3 - {0.bkg_uncert_2018_
 bkg2 lnN DASH6    - - {0.bkg_uncert_2017_2} DASH3    DASH3 - - {0.bkg_uncert_2018_2}
 '''
 
+elif bkg_correlation == 'mixed':
+    if include_2016:
+        template += '''
+bkg0 lnN DASH9    {0.bkg_stat_uncert_2016_0} - - DASH6    DASH9                                    DASH9
+bkg1 lnN DASH9    - {0.bkg_stat_uncert_2016_1} - DASH6    DASH9                                    DASH9
+bkg2 lnN DASH9    - - {0.bkg_stat_uncert_2016_2} DASH6    DASH9                                    DASH9
+bkg3 lnN DASH9    DASH9                              DASH3 {0.bkg_stat_uncert_2017_0} - - DASH3    DASH9
+bkg4 lnN DASH9    DASH9                              DASH3 - {0.bkg_stat_uncert_2017_1} - DASH3    DASH9
+bkg5 lnN DASH9    DASH9                              DASH3 - - {0.bkg_stat_uncert_2017_2} DASH3    DASH9
+bkg6 lnN DASH9    DASH9                              DASH9                                    DASH6 {0.bkg_stat_uncert_2018_0} - -
+bkg7 lnN DASH9    DASH9                              DASH9                                    DASH6 - {0.bkg_stat_uncert_2018_1} -
+bkg8 lnN DASH9    DASH9                              DASH9                                    DASH6 - - {0.bkg_stat_uncert_2018_2}
+bkg9 lnN DASH9 {0.bkg_syst_uncert_2016_0} {0.bkg_syst_uncert_2016_1} {0.bkg_syst_uncert_2016_2} DASH6    DASH3 {0.bkg_syst_uncert_2017_0} {0.bkg_syst_uncert_2017_1} {0.bkg_syst_uncert_2017_2} DASH3    DASH6 {0.bkg_syst_uncert_2018_0} {0.bkg_syst_uncert_2018_1} {0.bkg_syst_uncert_2018_2}
+'''
+    else:
+        template += '''
+bkg0 lnN DASH6    {0.bkg_stat_uncert_2017_0} - - DASH3    DASH6
+bkg1 lnN DASH6    - {0.bkg_stat_uncert_2017_1} - DASH3    DASH6
+bkg2 lnN DASH6    - - {0.bkg_stat_uncert_2017_2} DASH3    DASH6
+bkg3 lnN DASH6    DASH6                              DASH3 {0.bkg_stat_uncert_2018_0} - -
+bkg4 lnN DASH6    DASH6                              DASH3 - {0.bkg_stat_uncert_2018_1} -
+bkg5 lnN DASH6    DASH6                              DASH3 - - {0.bkg_stat_uncert_2018_2}
+bkg6 lnN DASH6    {0.bkg_syst_uncert_2017_0} {0.bkg_syst_uncert_2017_1} {0.bkg_syst_uncert_2017_2} DASH3    DASH3 {0.bkg_syst_uncert_2018_0} {0.bkg_syst_uncert_2018_1} {0.bkg_syst_uncert_2018_2}'''
+
 else:
     if include_2016:
         template += '''
@@ -171,6 +197,16 @@ def make(isample):
         setattr(r, 'bkg_uncert_%s' % year, bkg_uncert)
         for i,v in enumerate(bkg_uncert):
             setattr(r, 'bkg_uncert_%s_%i' % (year, i), v)
+
+        bkg_stat_uncert = get('h_bkg_uncert_stat_%s' % year)
+        setattr(r, 'bkg_stat_uncert_%s' % year, bkg_stat_uncert)
+        for i,v in enumerate(bkg_stat_uncert):
+            setattr(r, 'bkg_stat_uncert_%s_%i' % (year, i), v)
+
+        bkg_syst_uncert = get('h_bkg_uncert_syst_%s' % year)
+        setattr(r, 'bkg_syst_uncert_%s' % year, bkg_syst_uncert)
+        for i,v in enumerate(bkg_syst_uncert):
+            setattr(r, 'bkg_syst_uncert_%s_%i' % (year, i), v)
 
     print template.format(r)
 
