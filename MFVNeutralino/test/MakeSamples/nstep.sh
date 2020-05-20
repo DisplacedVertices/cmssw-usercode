@@ -17,9 +17,6 @@ if [[ $YEAR != 2017 && $YEAR != 2018 ]]; then
     exit 1
 fi
 
-INDIR=$(pwd)
-OUTDIR=$(pwd)
-
 echo YEAR: ${YEAR}
 echo JOBNUM: ${JOBNUM}
 echo MAXEVENTS: ${MAXEVENTS}

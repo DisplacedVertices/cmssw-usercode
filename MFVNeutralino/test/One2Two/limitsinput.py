@@ -78,9 +78,9 @@ class sample_iterator(object):
         self.h = name_list(self.f)
         self.require_years = require_years
         self.test = test
-        if test:
-            raise NotImplementedError('test set')
         self.slices_1d = slices_1d
+        if self.test and self.slices_1d:
+            raise ValueError('duh')
 
     class Sample(object):
         def __init__(self, isample, name):
@@ -96,7 +96,8 @@ class sample_iterator(object):
                     if s.mass in (800, 1600, 2400, 3000) or s.tau in (0.3, 1., 10.):
                         yield s
                 elif self.test:
-                    pass
+                    if s.kind == 'mfv_stopdbardbar' and s.mass == 800 and s.tau == 1.:
+                        yield s
                 else:
                     yield s
 
