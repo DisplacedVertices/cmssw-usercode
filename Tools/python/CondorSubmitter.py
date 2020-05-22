@@ -469,10 +469,10 @@ def get(i): return _l[i]
                     cluster_s = cluster
                     cluster_link = os.path.join(cls.links_dir, str(cluster))
                 print '\x1b[92msuccess!\x1b[0m %s' % cluster_s
-                if os.path.islink(cluster_link):
-                    print 'warning: clobbering old link:', os.readlink(cluster_link)
-                    os.unlink(cluster_link)
-                os.symlink(os.path.abspath(working_dir), cluster_link)
+#                if os.path.islink(cluster_link):
+ #                   print 'warning: clobbering old link:', os.readlink(cluster_link)
+  #                  os.unlink(cluster_link)
+   #             os.symlink(os.path.abspath(working_dir), cluster_link)
         finally:
             os.chdir(cwd)
 

@@ -177,7 +177,7 @@ transfer_input_files = %(input_files)s
 Queue 50
 '''
 
-batch_root = '/uscms_data/d2/tucker/crab_dirs/combine_output_%i' % time.time()
+batch_root = '/home/tucker/crab_dirs/combine_output_%i' % time.time()
 if os.path.isdir(batch_root):
     raise IOError('%s exists' % batch_root)
 print batch_root
