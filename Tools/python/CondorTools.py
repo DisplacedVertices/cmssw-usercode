@@ -89,7 +89,7 @@ def cs_output_fn(d, job, kind='stdout'):
     return os.path.join(d, '%s.%s' % (kind, job))
 
 def cs_logs(d):
-    return glob(os.path.join(d, 'log.*'))
+    return [os.path.join(d, 'log.%i' % i) for i in xrange(cs_njobs(d))]
 
 def cs_job_from_log(fn):
     return int(os.path.basename(fn).replace('log.', ''))
@@ -110,6 +110,23 @@ def cs_primaryds(d):
 def cs_published(d):
     return [line.strip() for fn in glob(os.path.join(d, 'publish_*.txt')) if os.path.isfile(fn) for line in open(fn) if line.strip()]
 
+def _cs_bn_jobify(d, bn, i):
+    a,b = os.path.splitext(bn)
+    return os.path.join(d, '%s_%i%s' % (a,i,b))
+
+def cs_outputfiles(d, jobs=None):
+    ffn = os.path.join(d, 'cs_outputfiles')
+    if not os.path.isfile(ffn):
+        return []
+    else:
+        njobs = cs_njobs(d)
+        bns = open(ffn).read().split()
+        if jobs is None:
+            jobs = list(range(njobs))
+        elif type(jobs) == int:
+            jobs = [jobs]
+        return [_cs_bn_jobify(d, bn, i) for bn in bns for i in jobs]
+
 def cs_rootfiles(d):
     return [fn for fn in glob(os.path.join(d, '*.root')) if os.path.isfile(fn)]
 
@@ -120,7 +137,7 @@ def cs_analyze(d,
                _exception_re=re.compile(r"An exception of category '(.*)' occurred while")
                ):
 
-    as_killed = lambda r: r in (-3,-4,-5)
+    as_killed = lambda r: r in (-3,-4,-5,-6,-7)
 
     class cs_analyze_result:
         def _list(self, ret):
@@ -149,28 +166,38 @@ def cs_analyze(d,
 
     for log_fn in cs_logs(d):
         job = cs_job_from_log(log_fn)
-
         ret = -1
-        for line in open(log_fn):
-            # later lines can override earlier lines, e.g. held = killed, then released -> idle
-            if 'Image size of job updated' in line:
-                ret = -2
-            elif 'Job was evicted' in line:
-                ret = -3
-            elif 'Job executing on host' in line and as_killed(ret):
-                ret = -2
-            elif 'Job was released' in line and as_killed(ret):
-                ret = -1
-            elif 'Job was aborted by the user' in line:
-                ret = -4
-            elif 'Job was held' in line:
-                ret = -5
-            else:
-                mo = _ab_re.search(line)
-                if not mo:
-                    mo = _re.search(line)
-                if mo:
-                    ret = int(mo.group(1))
+        if os.path.isfile(log_fn):
+            for line in open(log_fn):
+                # later lines can override earlier lines, e.g. held = killed, then released -> idle
+                if 'Image size of job updated' in line:
+                    ret = -2
+                elif 'Job was evicted' in line:
+                    ret = -3
+                elif 'Job executing on host' in line and as_killed(ret):
+                    ret = -2
+                elif 'Job was released' in line and as_killed(ret):
+                    ret = -1
+                elif 'Job was aborted by the user' in line:
+                    ret = -4
+                elif 'Job was held' in line:
+                    ret = -5
+                else:
+                    mo = _ab_re.search(line)
+                    if not mo:
+                        mo = _re.search(line)
+                    if mo:
+                        ret = int(mo.group(1))
+        else:
+            print log_fn, 'is missing'
+            ret = -6 # missing log file, either never started or got lost--count as killed
+
+        if ret == 0:
+            for out_fn in cs_outputfiles(d, job):
+                if not os.path.isfile(out_fn):
+                    print out_fn, 'is missing'
+                    ret = -7 # missing output file, ditto comment above
+                    break
 
         if ret == 0:
             ns[0] += 1
@@ -362,6 +389,7 @@ __all__ = [
     'cs_jobs_running',
     'cs_primaryds',
     'cs_published',
+    'cs_outputfiles',
     'cs_rootfiles',
     'cs_analyze',
     'cs_analyze_mmon',
