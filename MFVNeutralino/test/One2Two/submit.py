@@ -2,7 +2,7 @@
 
 import sys, os, shutil, time
 from JMTucker.Tools.general import save_git_status
-from JMTucker.Tools.CondorSubmitter import CondorSubmitter
+from JMTucker.Tools.CondorSubmitter import CondorSubmitter, crab_dirs_root
 import ROOT; ROOT.gROOT.SetBatch()
 import limitsinput
 
@@ -187,7 +187,7 @@ transfer_input_files = %(input_files)s,cs_jobmap
 Queue %(njobs)s
 '''
 
-batch_root = '/home/tucker/crab_dirs/combine_output_%i' % time.time()
+batch_root = crab_dirs_root('combine_output_%i' % time.time())
 if os.path.isdir(batch_root):
     raise IOError('%s exists' % batch_root)
 print batch_root
