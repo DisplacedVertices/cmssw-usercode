@@ -100,12 +100,12 @@ for wd in wds:
             if to_resubmit:
                 cl = crabify_list(l)
                 print '  resubmit these:', cl
-                os.system('cs_resubmit for_combine_jobs ignore_running %s %s' % (wd, cl))
+                os.system('cs_resubmit %s %s' % (wd, cl))
 
     if ana.nkilled and resubmit_killed:
         cl = crabify_list(ana.killed())
         print '  resubmit these:', cl
-        os.system('cs_resubmit for_combine_jobs ignore_running %s %s' % (wd, cl))
+        os.system('cs_resubmit %s %s' % (wd, cl))
 
 header()
 print colors.bold(fmt % (('totals'.ljust(ml),) + tuple(sums)))
