@@ -149,13 +149,13 @@ def get(i): return _l[i]
     batch_name_allowed = string.ascii_letters + string.digits + '_'
     links_dir = os.path.abspath(crab_dirs_root('cs_links'))
 
-    if not os.path.isdir(self.links_dir):
-        os.mkdir(self.links_dir)
+    if not os.path.isdir(links_dir):
+        os.mkdir(links_dir)
 
     if 'fnal.gov' in platform.node():
         schedds = ['lpcschedd%i.fnal.gov' % i for i in 1,2,3]
-        for schedd in self.schedds:
-            schedd_d = os.path.join(self.links_dir, schedd)
+        for schedd in schedds:
+            schedd_d = os.path.join(links_dir, schedd)
             if not os.path.isdir(schedd_d):
                 os.mkdir(schedd_d)
     else:
