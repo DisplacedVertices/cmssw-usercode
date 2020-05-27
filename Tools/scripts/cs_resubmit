@@ -46,6 +46,7 @@ while 1:
     if i == 20:
         raise RuntimeError('way too many resubmissions')
 os.mkdir(rd)
+brd = os.path.basename(rd)
 def rd_f(fn):
     return open(join(rd, fn), 'wt')
     
@@ -109,13 +110,14 @@ for ijob, job in enumerate(jobs):
             os.remove(fn)
         elif os.path.isfile(fn):
             os.rename(fn, join(orig_d, bn))
+        elif os.path.exists(fn):
+            raise IOError('wtf %s' % fn)
 
         if fn in condor_fns:
-            target = join(rd, bn.replace(djob, '.%i' % ijob))
+            target = join(brd, bn.replace(djob, '.%i' % ijob))
         elif fn in output_fns:
-            target = join(rd, bn)
-        link = join(wd, bn)
-        os.symlink(target, link)
+            target = join(brd, bn)
+        os.symlink(target, fn)
 
 if 'testing' not in sys.argv:
     CondorSubmitter._submit(rd, len(jobs))
