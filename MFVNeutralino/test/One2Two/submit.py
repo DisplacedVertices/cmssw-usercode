@@ -35,7 +35,9 @@ import limitsinput
 script_template = '''#!/bin/bash
 echo combine script starting at $(date) with args $*
 
-export JOB=$1
+REALJOB=$1
+mapfile -t JOBMAP < cs_jobmap
+export JOB=${JOBMAP[$REALJOB]}
 export WHICH=$2
 export WD=$(pwd)
 
@@ -47,6 +49,10 @@ eval `scram runtime -sh`
 
 cd ..
 xrdcp -s root://cmseos.fnal.gov//store/user/tucker/combine_sl7_801_patchSetHint.tgz combine.tgz
+if [[ ! -f combine.tgz ]]; then
+    >&2 echo could not copy combine tarball
+    exit 1
+fi
 tar xf combine.tgz
 scram b 2>&1 >/dev/null
 hash -r
@@ -75,6 +81,8 @@ cd $WD
 #       eval $cmd -S0
 #       mv higgsCombine*root observed_S0.root
     fi
+    # this lets us use cs_status to find missing files later but the _S0,, other extra files that are made by commented out lines aren't taken care of! 
+    touch observed_${JOB}.root
 
     ntoys=100
     seedbase=13068931
@@ -141,7 +149,7 @@ cd $WD
 #   echo Expected significances, no systematics
 #   eval $cmd -S0 --toys $ntoys -saveToys -s $((JOB+seedbase))
 #   mv higgsCombine*root signif_expected_S0_${JOB}.root
-} 2>&1 | gzip -c > combine_output_${JOB}.txt.gz
+} 2>&1 | gzip -c > combine_output_${JOB}.txtgz
 '''
 
 if 'save_toys' not in sys.argv:
@@ -160,6 +168,8 @@ if include_2016:
 
 script_template = script_template.replace('__DATACARDARGS__', ' '.join(datacard_args))
 
+njobs = 50
+
 jdl_template = '''universe = vanilla
 Executable = run.sh
 arguments = $(Process) %(isample)s
@@ -171,10 +181,10 @@ stream_error  = false
 notification  = never
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
-transfer_input_files = %(input_files)s
+transfer_input_files = %(input_files)s,cs_jobmap
 +REQUIRED_OS = "rhel7"
 +DesiredOS = REQUIRED_OS
-Queue 50
+Queue %(njobs)s
 '''
 
 batch_root = '/home/tucker/crab_dirs/combine_output_%i' % time.time()
@@ -208,6 +218,9 @@ for sample in samples:
     if allowed and sample.name not in allowed:
         continue
 
+    #if sample.isample < -700:
+    #    continue
+
     print sample.isample, sample.name,
     isample = sample.isample # for locals use below
 
@@ -219,8 +232,11 @@ for sample in samples:
     open(run_fn, 'wt').write(script_template % locals())
 
     open(os.path.join(batch_dir, 'cs_dir'), 'wt')
+    open(os.path.join(batch_dir, 'cs_jobmap'), 'wt').write('\n'.join(str(i) for i in xrange(njobs)) + '\n')
     open(os.path.join(batch_dir, 'cs_submit.jdl'), 'wt').write(jdl_template % locals())
+    open(os.path.join(batch_dir, 'cs_njobs'), 'wt').write(str(njobs))
+    open(os.path.join(batch_dir, 'cs_outputfiles'), 'wt').write('observed.root expected.root combine_output.txtgz')
 
-    CondorSubmitter._submit(batch_dir, 50)
+    CondorSubmitter._submit(batch_dir, njobs)
 
 # zcat signal_*/combine_output* | sort | uniq | egrep -v '^median expected limit|^mean   expected limit|^Observed|^Limit: r|^Generate toy|^Done in|random number generator seed is|^   ..% expected band|^DATACARD:' | tee /tmp/duh
