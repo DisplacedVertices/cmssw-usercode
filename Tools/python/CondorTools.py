@@ -197,7 +197,6 @@ def cs_analyze(d,
                 if not os.path.isfile(out_fn):
                     print out_fn, 'is missing'
                     ret = -7 # missing output file, ditto comment above
-                    break
 
         if ret == 0:
             ns[0] += 1
