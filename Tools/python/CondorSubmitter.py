@@ -145,21 +145,25 @@ _l = pickle.loads(zlib.decompress(base64.b64decode('__FILELIST__')))
 def get(i): return _l[i]
 '''
 
+    submit_host = platform.node()
     get_proxy = True
     batch_name_allowed = string.ascii_letters + string.digits + '_'
-    links_dir = os.path.abspath(crab_dirs_root('cs_links'))
-
-    if not os.path.isdir(links_dir):
-        os.mkdir(links_dir)
-
-    if 'fnal.gov' in platform.node():
-        schedds = ['lpcschedd%i.fnal.gov' % i for i in 1,2,3]
-        for schedd in schedds:
-            schedd_d = os.path.join(links_dir, schedd)
-            if not os.path.isdir(schedd_d):
-                os.mkdir(schedd_d)
+    if submit_host == 'login.uscms.org':
+        links_dir = None
     else:
-        schedds = []
+        links_dir = os.path.abspath(crab_dirs_root('cs_links'))
+    schedds = []
+
+    if links_dir:
+        if not os.path.isdir(links_dir):
+            os.mkdir(links_dir)
+
+        if submit_host.endswith('fnal.gov'):
+            schedds = ['lpcschedd%i.fnal.gov' % i for i in 1,2,3]
+            for schedd in schedds:
+                schedd_d = os.path.join(links_dir, schedd)
+                if not os.path.isdir(schedd_d):
+                    os.mkdir(schedd_d)
 
     def __init__(self,
                  batch_name,
@@ -468,15 +472,18 @@ def get(i): return _l[i]
             else:
                 if schedd:
                     cluster_s = '%s:%s' % (schedd, cluster)
-                    cluster_link = os.path.join(cls.links_dir, schedd, str(cluster))
+                    if cls.links_dir:
+                        cluster_link = os.path.join(cls.links_dir, schedd, str(cluster))
                 else:
                     cluster_s = cluster
-                    cluster_link = os.path.join(cls.links_dir, str(cluster))
+                    if cls.links_dir:
+                        cluster_link = os.path.join(cls.links_dir, str(cluster))
                 print '\x1b[92msuccess!\x1b[0m %s' % cluster_s
-                if os.path.islink(cluster_link):
-                    print 'warning: clobbering old link:', os.readlink(cluster_link)
-                    os.unlink(cluster_link)
-                os.symlink(os.path.abspath(working_dir), cluster_link)
+                if cls.links_dir:
+                    if os.path.islink(cluster_link):
+                        print 'warning: clobbering old link:', os.readlink(cluster_link)
+                        os.unlink(cluster_link)
+                    os.symlink(os.path.abspath(working_dir), cluster_link)
         finally:
             os.chdir(cwd)
 
