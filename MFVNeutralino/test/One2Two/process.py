@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, re
 from glob import glob
 from JMTucker.Tools import colors
 from JMTucker.Tools.ROOTTools import ROOT, detree
@@ -32,12 +32,19 @@ def stats(fn_or_f, obs, l, header='sigma_sig_limit'):
 njobs, ntoysperjob = 50, 100
 #njobs, ntoysperjob = 5, 20
 
-def fromtree(fn):
+def fromtree(fn, _jobre=re.compile(r'_(\d+)\.root$')):
     bn = os.path.basename(fn)
     f = ROOT.TFile(fn)
     ll = [x for x in detree(f.Get('limit'), 'limit:iToy', xform=(float,int))]
     if bn.startswith('expected'):
-        ntoysexp = njobs * ntoysperjob
+        mo = _jobre.search(bn)
+        if mo:
+            njobsexp = 1
+            ntoysexp = ntoysperjob
+        else:
+            njobsexp = njobs
+            ntoysexp = njobs * ntoysperjob
+
         if len(ll) == 2*ntoysexp: # for some reason, there are two entries for every iToy when --saveToys used
             ll2 = []
             for mi,(l,i) in enumerate(ll):
@@ -51,7 +58,12 @@ def fromtree(fn):
             assert len(ll2) == ntoysexp
             return ll2
         else:
-            assert len(ll) == ntoysexp and [b for _,b in ll] == range(1,ntoysperjob+1)*njobs
+            if len(ll) != ntoysexp:
+                raise ValueError('fromtree %s failed: len(ll) = %i != %i' % (fn, len(ll), ntoysexp))
+            jobordercheck = [b for _,b in ll]
+            jobordershouldbe = range(1,ntoysperjob+1)*njobsexp
+            if jobordercheck != jobordershouldbe:
+                raise ValueError('fromtree %s failed: jobordercheck %r != $r' % (fn, jobordercheck, jobordershouldbe))
             return [a for a,_ in ll]
     else:
         assert bn == 'observed.root' and len(ll) == 1 and ll[0][1] == 0
@@ -59,10 +71,9 @@ def fromtree(fn):
 
 def doit(path, out_fn):
     x = fromtree(os.path.join(path, 'observed.root'))
-    assert len(x) <= 1
-    #if len(x) != 1:
-    #    print 'using observed_byhand for this!'
-    #    x = fromtree(os.path.join(path, 'observed_byhand.root'))
+    if len(x) != 1:
+        print 'using observed_byhand for this!'
+        x = fromtree(os.path.join(path, 'observed_byhand.root'))
     obs = x[0]
 
     exp_fn = os.path.join(path, 'expected.root')

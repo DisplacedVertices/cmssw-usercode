@@ -218,9 +218,6 @@ for sample in samples:
     if allowed and sample.name not in allowed:
         continue
 
-    #if sample.isample < -700:
-    #    continue
-
     print sample.isample, sample.name,
     isample = sample.isample # for locals use below
 
