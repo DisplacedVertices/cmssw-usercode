@@ -7,7 +7,7 @@ from glob import glob
 from itertools import combinations
 import xml.etree.ElementTree as ET
 from JMTucker.Tools.LumiJSONTools import fjr2ll
-from JMTucker.Tools.general import sub_popen
+from JMTucker.Tools.general import sub_popen, touch
 from JMTucker.Tools.hadd import HaddBatchResult, hadd
 from JMTucker.Tools import colors
 
@@ -35,8 +35,14 @@ def cs_dirs(trydirs):
 def cs_dirs_from_argv():
     return cs_dirs(sys.argv)
 
-def cs_done(wd):
-    return os.path.isfile(os.path.join(wd, 'mmon_done'))
+def cs_done_fn(wd):
+    return os.path.join(wd, 'mmon_done')
+
+def is_cs_done(wd):
+    return os.path.isfile(cs_done_fn(wd))
+
+def set_cs_done(wd):
+    return touch(cs_done_fn(wd))
 
 def cs_fjrs(d):
     return glob(os.path.join(d, 'fjr_*.xml'))
@@ -380,7 +386,9 @@ __all__ = [
     'is_cs_dir',
     'cs_dirs',
     'cs_dirs_from_argv',
-    'cs_done',
+    'cs_done_fn',
+    'is_cs_done',
+    'set_cs_done',
     'cs_fjrs',
     'cs_eventsread',
     'cs_eventswritten',

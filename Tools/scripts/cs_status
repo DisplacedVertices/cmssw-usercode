@@ -31,9 +31,6 @@ wds = cs_dirs(options.condor_dir)
 ml = max(len(wd) for wd in wds) + 3
 fmt = '%' + str(ml) + 's %10s | %10s %10s %10s %10s %10s'
 
-def done_fn(wd):
-    return os.path.join(wd, 'mmon_done') # JMTBAD
-
 def safe_to_resubmit(r):
     return options.resubmit_all or \
         r in [147,84,92]  # xrdcp problem, file open error, fallback file open error
@@ -55,7 +52,7 @@ sums = [0]*6
 done = []
 
 for wd in wds:
-    if not options.include_done and cs_done(wd):
+    if not options.include_done and is_cs_done(wd):
         continue
 
     ana = cs_analyze(wd, options.outputfile_callback)
@@ -71,7 +68,7 @@ for wd in wds:
     elif ana.ndone == ana.njobs:
         done.append(wd)
         color = colors.green
-        touch(cs_done(wd))
+        set_cs_done(wd)
     
     print color(fmt % (wd.ljust(ml), z(ana.njobs), z(ana.ndone), z(ana.nidle), z(ana.nrun), z(ana.nkilled), z(ana.nprobs))), 
     if ana.nprobs:
