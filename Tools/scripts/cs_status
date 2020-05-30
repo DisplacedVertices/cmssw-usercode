@@ -1,32 +1,33 @@
 #!/usr/bin/env python
 
-import sys, os
+import sys, os, argparse, imp
 from JMTucker.Tools.CRAB3ToolsBase import crabify_list
 from JMTucker.Tools.CondorTools import *
 from JMTucker.Tools.general import touch
 from JMTucker.Tools import colors
 
-if len(sys.argv) < 2 or '-h' in sys.argv or '--help' in sys.argv:
-    print 'usage: cs_status [options] wd [wd2 ...]'
-    print '   -h   print this msg'
-    print '   -l   print list of done directories'
-    print '   -a   resubmit: resubmit any jobs that failed (no check on exit code)'
-    print '   -r   resubmit: resubmit jobs that failed because of xrdcp problems'
-    print '   -k   resubmit killed: resubmit all killed jobs (with no check on reason)'
-    print '   -d   include done: do not skip dirs with mmon_done marker file'
-    print ' -nfe   do not print files associated with opening errors'
-    print ' -tfe   test files with opening errors'
-    sys.exit(1)
+parser = argparse.ArgumentParser(description='cs_status: run cs_analyze on CondorSubmitter directories')
+parser.add_argument('condor_dir', nargs='+')
+parser.add_argument('-q', '--quiet', action='store_false', dest='verbose')
+parser.add_argument('-d', '--include-done', action='store_true', help='include done: do not skip dirs with mmon_done marker file')
+parser.add_argument('-l', '--list-done', action='store_true', help='list done dirs at end (may also want to --include-done)')
+parser.add_argument('-r', '--resubmit', action='store_true', help='resubmit jobs that failed because of xrdcp problems')
+parser.add_argument('-a', '--resubmit-all', action='store_true', help='resubmit all jobs that failed  (no check on exit code)')
+parser.add_argument('-k', '--resubmit-killed', action='store_true', help='resubmit killed: resubmit all killed jobs (with no check on reason)')
+parser.add_argument('--test-file-errors', action='store_true', help='test files with opening errors')
+parser.add_argument('--no-file-errors', action='store_false', dest='print_file_errors', help='do not print files associated with opening errors')
+parser.add_argument('--outputfile-callback', metavar='python_fn', help='%(metavar)s defines a single function named outputfile_callback(fn, jobnum), which returns whether the outputfile is valid.')
+options = parser.parse_args()
 
-resubmit_all = '-a' in sys.argv
-resubmit = resubmit_all or '-r' in sys.argv
-resubmit_killed = '-k' in sys.argv
-list_done = '-l' in sys.argv
-ignore_done = '-d' not in sys.argv
-print_file_errors = '-nfe' not in sys.argv
-test_file_errors = '-tfe' in sys.argv
-verbose = True #'-v' in sys.argv
-wds = cs_dirs_from_argv()
+if options.resubmit_all:
+    options.resubmit = True
+
+if options.outputfile_callback:
+    sys.path.insert(0, os.path.abspath(os.path.dirname(options.outputfile_callback)))
+    module = imp.load_source('dummy', options.outputfile_callback)
+    options.outputfile_callback = module.outputfile_callback
+
+wds = cs_dirs(options.condor_dir)
 ml = max(len(wd) for wd in wds) + 3
 fmt = '%' + str(ml) + 's %10s | %10s %10s %10s %10s %10s'
 
@@ -34,7 +35,7 @@ def done_fn(wd):
     return os.path.join(wd, 'mmon_done') # JMTBAD
 
 def safe_to_resubmit(r):
-    return resubmit_all or \
+    return options.resubmit_all or \
         r in [147,84,92]  # xrdcp problem, file open error, fallback file open error
 
 def return_code(r):
@@ -54,10 +55,10 @@ sums = [0]*6
 done = []
 
 for wd in wds:
-    if ignore_done and os.path.isfile(done_fn(wd)):
+    if not options.include_done and cs_done(wd):
         continue
 
-    ana = cs_analyze(wd)
+    ana = cs_analyze(wd, options.outputfile_callback)
 
     for i in xrange(6):
         sums[i] += ana.ns[i]
@@ -70,7 +71,7 @@ for wd in wds:
     elif ana.ndone == ana.njobs:
         done.append(wd)
         color = colors.green
-        touch(done_fn(wd))
+        touch(cs_done(wd))
     
     print color(fmt % (wd.ljust(ml), z(ana.njobs), z(ana.ndone), z(ana.nidle), z(ana.nrun), z(ana.nkilled), z(ana.nprobs))), 
     if ana.nprobs:
@@ -80,19 +81,19 @@ for wd in wds:
     print
 
     if ana.nprobs:
-        if verbose or resubmit:
+        if options.verbose or options.resubmit:
             for r, l in ana.by_exit.iteritems():
                 print '  %s:' % return_code(r), crabify_list(l)
             for e, l in ana.by_exception.iteritems():
                 print '  %s:' % e, crabify_list(l)
-                if print_file_errors and e in ('FileOpenError', 'FileReadError'):
+                if options.print_file_errors and e in ('FileOpenError', 'FileReadError'):
                     for j in sorted(l):
                         fn = cs_last_input_file(wd, j)
                         print '    job %3i: %s' % (j, fn)
-                        if test_file_errors:
+                        if options.test_file_errors:
                             os.system('xrdcp -f root://cmsxrootd.fnal.gov/%s /dev/null' % fn)
 
-        if resubmit:
+        if options.resubmit:
             to_resubmit = []
             for r, l in ana.by_exit.iteritems():
                 if safe_to_resubmit(r):
@@ -102,7 +103,7 @@ for wd in wds:
                 print '  resubmit these:', cl
                 os.system('cs_resubmit %s %s' % (wd, cl))
 
-    if ana.nkilled and resubmit_killed:
+    if ana.nkilled and options.resubmit_killed:
         cl = crabify_list(ana.killed())
         print '  resubmit these:', cl
         os.system('cs_resubmit %s %s' % (wd, cl))
@@ -110,7 +111,7 @@ for wd in wds:
 header()
 print colors.bold(fmt % (('totals'.ljust(ml),) + tuple(sums)))
 
-if list_done:
+if options.list_done:
     print '\nthese are done:', ' '.join(done)
 if len(done) == len(wds):
     print '\nAll done!'

@@ -17,9 +17,9 @@ class CSHelpersException(Exception):
 def is_cs_dir(d):
     return os.path.isdir(d) and os.path.isfile(os.path.join(d, 'cs_dir'))
 
-def cs_dirs_from_argv():
+def cs_dirs(trydirs):
     dirs = []
-    for arg in sys.argv:
+    for arg in trydirs:
         if is_cs_dir(arg):
             dirs.append(arg)
         elif os.path.isdir(arg):
@@ -31,6 +31,9 @@ def cs_dirs_from_argv():
         if d not in r and d is not None:
             r.append(d)
     return r
+
+def cs_dirs_from_argv():
+    return cs_dirs(sys.argv)
 
 def cs_done(wd):
     return os.path.isfile(os.path.join(wd, 'mmon_done'))
@@ -131,6 +134,7 @@ def cs_rootfiles(d):
     return [fn for fn in glob(os.path.join(d, '*.root')) if os.path.isfile(fn)]
 
 def cs_analyze(d, 
+               outputfile_callback=None,
                _re=re.compile(r'return value (\d+)'),
                _ab_re=re.compile(r'Abnormal termination \(signal (\d+)\)'),
                _cmsRun_re=re.compile(r"(?:cmsRun|meat) exited with code (\d+)"),
@@ -197,6 +201,9 @@ def cs_analyze(d,
                 if not os.path.isfile(out_fn):
                     print out_fn, 'is missing'
                     ret = -7 # missing output file, ditto comment above
+                elif outputfile_callback and not outputfile_callback(out_fn, job):
+                    print out_fn, 'failed callback'
+                    ret = -7
 
         if ret == 0:
             ns[0] += 1
@@ -371,6 +378,7 @@ def cs_filelist(wd):
 
 __all__ = [
     'is_cs_dir',
+    'cs_dirs',
     'cs_dirs_from_argv',
     'cs_done',
     'cs_fjrs',
