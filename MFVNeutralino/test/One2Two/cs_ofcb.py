@@ -2,7 +2,7 @@
 
 import os
 import ROOT; ROOT.gROOT.SetBatch()
-from process import fromtree, ntoysperjob
+from process import fromtree
 
 def outputfile_callback(fn,job):
     bn = os.path.basename(fn)
@@ -16,14 +16,15 @@ def outputfile_callback(fn,job):
             assert bn.startswith('expected_')
 
         f = ROOT.TFile.Open(fn)
-        if not f.IsOpen() or f.IsZombie():
+        if not f.IsOpen() or f.IsZombie() or not f.Get('limit'):
             return False
 
-        ft = fromtree(fn)
-        if is_obs:
-            return len(ft) == 1
+        try:
+            ft = fromtree(fn)
+        except ValueError:
+            return False
         else:
-            return len(ft) == ntoysperjob
+            return True
 
     elif bn.startswith('combine_output_'):
         return True
