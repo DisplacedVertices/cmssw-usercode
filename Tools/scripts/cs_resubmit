@@ -65,7 +65,9 @@ rd_f('cs_timestamp').write(cs_timestamp())
 orig_d = join(wd, 'originals')
 mkdirp(orig_d)
 
-had = lambda x: os.path.isfile(x) and os.stat(join(wd, x)).st_size > 0
+def had(x):
+    x = join(wd,x)
+    return os.path.isfile(x) and os.stat(x).st_size > 0
 had_outputfiles   = had('cs_outputfiles')
 had_stageoutfiles = had('cs_stageoutfiles')
 
