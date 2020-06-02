@@ -203,11 +203,29 @@ def cs_analyze(d,
             ret = -6 # missing log file, either never started or got lost--count as killed
 
         if ret == 0:
+            job_is_resub = os.path.islink(log_fn)
+            if job_is_resub:
+                resub = os.path.dirname(os.readlink(log_fn))
+                assert resub.startswith('resub')
+            else:
+                resub = None
+
             for out_fn in cs_outputfiles(d, job):
                 if not os.path.isfile(out_fn):
                     print out_fn, 'is missing'
-                    ret = -7 # missing output file, ditto comment above
-                elif outputfile_callback and not outputfile_callback(out_fn, job):
+                    if job_is_resub: # maybe the symlink was not made/broken
+                        out_bn = os.path.basename(out_fn)
+                        resub_pfn = os.path.join(resub, out_bn)
+                        try_out_fn = os.path.join(d, resub_pfn)
+                        if os.path.isfile(try_out_fn):
+                            print '... looks like the symlink was broken, %s exists, fixing/making worse mess' % try_out_fn
+                            os.symlink(resub_pfn, out_fn)
+                        else:
+                            ret = -7 # missing output file, ditto comment above
+                    else:
+                        ret = -7
+
+                if outputfile_callback and os.path.isfile(out_fn) and not outputfile_callback(out_fn, job):
                     print out_fn, 'failed callback'
                     ret = -7
 
