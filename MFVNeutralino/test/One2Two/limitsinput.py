@@ -784,6 +784,20 @@ if __name__ == '__main__':
         #nevents_plot()
     elif 'points' in sys.argv:
         print 'kinds = %r\nmasses = %r\ntaus = %r' % points()
+    elif 'iter' in sys.argv:
+        include_2016 = 'include_2016' in sys.argv
+        years = ('2016','2017','2018') if include_2016 else ('2017','2018')
+        samples = sample_iterator(ROOT.TFile('limitsinput.root'),
+                                  require_years=years,
+                                  test='test_batch' in sys.argv,
+                                  slices_1d='slices_1d' in sys.argv,
+                                  )
+        names = set(s.name for s in samples)
+        allowed = [arg for arg in sys.argv if arg in names]
+        for sample in samples:
+            if allowed and sample.name not in allowed:
+                continue
+            print sample.isample, sample.name, 'signal_%05i' % sample.isample
     elif 'signal_efficiency' in sys.argv:
         signal_efficiency()
     else:
