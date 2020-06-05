@@ -2,32 +2,34 @@ from JMTucker.Tools.ROOTTools import *
 from limitsinput import name2isample
 from signal_efficiency import SignalEfficiencyCombiner
 set_style()
-ps = plot_saver(plot_dir('pretty_templates'), size=(700,700), log=False, pdf=True)
+ps = plot_saver(plot_dir('pretty_templates_2017p8'), size=(700,700), log=False, pdf=True)
 
 ps.c.SetBottomMargin(0.11)
 ps.c.SetLeftMargin(0.13)
 ps.c.SetRightMargin(0.06)
 
-f = ROOT.TFile('/uscms/home/tucker/public/mfv/limitsinput_100kevent_samples_used_for_Figs_1+3.root')
-raise ValueError('propagate change to use stored rate already normalized to int lumi')
+f = ROOT.TFile('limitsinput.root')
+#raise ValueError('propagate change to use stored rate already normalized to int lumi')
 combiner = SignalEfficiencyCombiner()
 
 which = [
-    ('mfv_neu_tau00300um_M0800', 'c#tau = 0.3 mm', ROOT.kRed,     2), 
-    ('mfv_neu_tau01000um_M0800', 'c#tau = 1.0 mm',   ROOT.kGreen+2, 5), 
-    ('mfv_neu_tau10000um_M0800', 'c#tau = 10 mm',  ROOT.kBlue,    7), 
+    ('mfv_neu_tau000300um_M0800', 'c#tau = 0.3 mm', ROOT.kRed,     2), 
+    ('mfv_neu_tau001000um_M0800', 'c#tau = 1.0 mm',   ROOT.kGreen+2, 5), 
+    ('mfv_neu_tau010000um_M0800', 'c#tau = 10 mm',  ROOT.kBlue,    7), 
     ]
 
 def fmt(z, title, color, style, save=[]):
     if type(z) == str: # signal name
         name = z
-        h = f.Get('h_signal_%i_dvv' % name2isample(f, z))
+        h = f.Get('h_signal_%i_dvv_2017' % name2isample(f, z))
+        g = f.Get('h_signal_%i_dvv_2018' % name2isample(f, z))
+        h.Add(g)
     else: # background hist
-        name = 'bkg'
+        name = title
         h = z
 
     if '#tau' in title:
-        h.Rebin(10)
+        h.Rebin(1)
     h.Sumw2()
     h = cm2mm(h)
     h.SetStats(0)
@@ -41,23 +43,30 @@ def fmt(z, title, color, style, save=[]):
     h.GetYaxis().SetLabelSize(0.045)
     h.GetYaxis().SetTitleOffset(1.35)
     move_above_into_bin(h, 3.999)
-    if title == 'bkg': 
-        norm = 1.
+    if title == 'bkg_2017': 
+        norm = 0.241
+    elif title == 'bkg_2018': 
+        norm = 0.111
     else:
-        norm = combiner.combine(name2isample(combiner.inputs[0].f, name)).total_sig_rate
+        norm2017 =  sum(combiner.combine(name2isample(combiner.inputs[0].f, name)).rates['2017'])
+        norm2018 =  sum(combiner.combine(name2isample(combiner.inputs[0].f, name)).rates['2018'])
+        norm = (norm2017 + norm2018) * 0.3
     h.Scale(norm/h.Integral(0,h.GetNbinsX()+2))
     save.append(h)
     return h
 
-hbkg = fmt(f.Get('h_bkg_dvv'), 'bkg', ROOT.kBlack, ROOT.kSolid)
+hbkg = fmt(f.Get('h_bkg_dvv_2017'), 'bkg_2017', ROOT.kBlack, ROOT.kSolid)
+hbkg2018 = fmt(f.Get('h_bkg_dvv_2018'), 'bkg_2018', ROOT.kBlack, ROOT.kSolid)
+hbkg.Add(hbkg2018)
 hbkg.SetFillColor(ROOT.kGray)
 hbkg.SetFillStyle(3002)
 
-leg1 = ROOT.TLegend(0.400, 0.810, 0.909, 0.867)
+const = 0.05
+leg1 = ROOT.TLegend(0.400, 0.810-const, 0.909, 0.867-const)
 leg1.AddEntry(hbkg, 'Background template', 'F')
-leg2 = ROOT.TLegend(0.383, 0.698, 0.893, 0.815)
-leg2.AddEntry(0, '#kern[-0.22]{#splitline{Multijet signals,}{m = 800 GeV, #sigma = 1 fb:}}', '')
-leg3 = ROOT.TLegend(0.400, 0.572, 0.909, 0.705)
+leg2 = ROOT.TLegend(0.383, 0.698-const, 0.893, 0.815-const)
+leg2.AddEntry(0, '#kern[-0.22]{#splitline{Multijet signals,}{m = 800 GeV, #sigma = 0.3 fb:}}', '')
+leg3 = ROOT.TLegend(0.400, 0.572-const, 0.909, 0.705-const)
 legs = leg1, leg2, leg3
 
 for lg in legs:
@@ -67,7 +76,7 @@ for lg in legs:
 htobreak = None
 for zzz, (name, title, color, style) in enumerate(which):
     h = fmt(name, title, color, style)
-    if name == 'mfv_neu_tau10000um_M0800':
+    if name == 'mfv_neu_tau010000um_M0800':
         htobreak = h
     if zzz == 0:
         h.Draw('hist')
@@ -91,8 +100,8 @@ def write(font, size, x, y, text):
     w.DrawLatex(x, y, text)
     return w
 
-write(61, 0.050, 0.175, 0.825, 'CMS')
-write(42, 0.050, 0.595, 0.913, '38.5 fb^{-1} (13 TeV)')
+write(61, 0.050, 0.415, 0.825, 'CMS')
+write(42, 0.050, 0.595, 0.913, '101 fb^{-1} (13 TeV)')
 
 # do broken y-axis. replace the "1" label with "18.2" and replace the
 # last bin of that one hist's contents with 1 + contents - 18.2.
@@ -101,8 +110,9 @@ yax = htobreak.GetYaxis()
 lastibin = htobreak.FindBin(3.999)
 lastbin = htobreak.GetBinLowEdge(lastibin)
 lastbc = htobreak.GetBinContent(lastibin)
-assert abs(lastbc - 18.202475) < 1e-6
-htobreak.SetBinContent(lastibin, lastbc - 18.2 + 1)
+print lastbc
+assert abs(lastbc - 10.5544394292) < 1e-6
+htobreak.SetBinContent(lastibin, lastbc - 10.5544394292 + 1)
 boxxcenter = 0.
 boxxwidth = 0.06
 boxycenter = 0.9
@@ -123,7 +133,7 @@ for box in boxes:
     box.Draw()
 
 # draw the new end label
-lab2 = ROOT.TText(-0.408, 0.982, '18.2')
+lab2 = ROOT.TText(-0.408, 0.982, '10.6')
 lab2.SetTextFont(yax.GetLabelFont())
 lab2.SetTextSize(yax.GetLabelSize())
 lab2.Draw()
@@ -134,6 +144,17 @@ lines = [ROOT.TLine(x1, y - slantdy, x2, y + slantdy) for y in boxy1, boxy2 for 
 for line in lines:
     line.SetLineWidth(1)
     line.Draw()
+
+dvvlines = [
+        ROOT.TLine(0.4, 0, 0.4, 1.05),
+        ROOT.TLine(0.7, 0, 0.7, 1.05),
+        ]
+
+for ll in dvvlines:
+        ll.SetLineColor(ROOT.kRed)
+        ll.SetLineWidth(2)
+        ll.SetLineStyle(2)
+        ll.Draw()
 
 ps.save('templates')
 
