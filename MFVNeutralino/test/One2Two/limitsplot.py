@@ -243,29 +243,29 @@ def interpolate(h):
 
 def save_2d_plots():
     in_f = ROOT.TFile('limitsinput.root')
-    out_f = ROOT.TFile('limits.root', 'recreate')
+    for which, years in ('run2', [2016,2017,2018]), ('2017p8', [2017,2018]):
+        out_f = ROOT.TFile('limits_%s.root' % which, 'recreate')
 
-    for kind in 'mfv_stopdbardbar', 'mfv_neu':
-        d = limits()
-        for sample in sample_iterator(in_f):
-            if -sample.isample in (209,210,211,303,399,489,589,590,675,676):
-                continue
-            if sample.kind != kind:
-                continue
-            d.parse(sample, 'combine_output/signal_%05i/results' % sample.isample)
+        for kind in 'mfv_stopdbardbar', 'mfv_neu':
+            d = limits()
+            for sample in sample_iterator(in_f, years):
+                if -sample.isample in (209,210,211,303,399,489,589,590,675,676):
+                    continue
+                if sample.kind != kind:
+                    continue
+                d.parse(sample, 'combine_output_%s/signal_%05i/results' % (which, sample.isample))
 
-        taus, masses = axisize(d['tau']), axisize(d['mass'])
-        taus.remove(30.)
+            taus, masses = axisize(d['tau']), axisize(d['mass'])
+            taus.remove(30.)
 
-        out_f.mkdir(kind).cd()
+            out_f.mkdir(kind).cd()
 
-        for x in 'observed expect2p5 expect16 expect50 expect68 expect84 expect95 expect97p5'.split():
-            h = ROOT.TH2D(x, '', len(masses)-1, masses, len(taus)-1, taus)
-            h.SetStats(0)
-            for p in d.points:
-                h.SetBinContent(h.FindBin(p.sample.mass, p.sample.tau), getattr(p, x))
-            h.Write()
-
+            for x in 'observed expect2p5 expect16 expect50 expect68 expect84 expect95 expect97p5'.split():
+                h = ROOT.TH2D(x, '', len(masses)-1, masses, len(taus)-1, taus)
+                h.SetStats(0)
+                for p in d.points:
+                    h.SetBinContent(h.FindBin(p.sample.mass, p.sample.tau), getattr(p, x))
+                h.Write()
 ####
 
 def theory_exclude(which, h, opt, use_error):
