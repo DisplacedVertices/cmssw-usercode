@@ -255,6 +255,7 @@ def save_2d_plots():
             d.parse(sample, 'combine_output/signal_%05i/results' % sample.isample)
 
         taus, masses = axisize(d['tau']), axisize(d['mass'])
+        taus.remove(30.)
 
         out_f.mkdir(kind).cd()
 
