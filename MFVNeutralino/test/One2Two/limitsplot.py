@@ -272,6 +272,7 @@ def theory_exclude(which, h, opt, use_error):
     theory, htheory = make_theory_hist(which)
     theory = dict((m, (s, es)) for m, s, es in theory)
     max_mass = max(theory.keys())
+    min_mass = min(theory.keys())
 
     hexc = h.Clone(h.GetName() +'_exc_%s' % opt)
     hexc.SetStats(0)
@@ -282,6 +283,11 @@ def theory_exclude(which, h, opt, use_error):
             for iy in xrange(1, h.GetNbinsY()+1):
                 hexc.SetBinContent(ix,iy, 0)
             continue
+        elif mass <= min_mass:
+            # JMTBAD gluglu theory stopped going down so far since old limits exclude those, assume this is the only place this is hit and assume we are doing so much better
+            for iy in xrange(1, h.GetNbinsY()+1):
+                hexc.SetBinContent(ix,iy, 1)
+            continue
 
         for iy in xrange(1, h.GetNbinsY()+1):
             tau = h.GetYaxis().GetBinLowEdge(iy)
@@ -289,7 +295,7 @@ def theory_exclude(which, h, opt, use_error):
             lim = h.GetBinContent(ix, iy)
 
             bin = htheory.FindBin(mass)
-            assert bin < htheory.GetNbinsX()
+            assert 1 <= bin < htheory.GetNbinsX()
             ma = htheory.GetBinLowEdge(bin)
             mb = htheory.GetBinLowEdge(bin+1)
             sa, esa = theory[ma]
