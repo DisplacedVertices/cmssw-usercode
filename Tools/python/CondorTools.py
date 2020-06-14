@@ -205,7 +205,7 @@ def cs_analyze(d,
         if ret == 0:
             job_is_resub = os.path.islink(log_fn)
             if job_is_resub:
-                resub = os.path.dirname(os.readlink(log_fn))
+                resub = os.path.basename(os.path.dirname(os.readlink(log_fn)))
                 assert resub.startswith('resub')
             else:
                 resub = None
