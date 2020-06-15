@@ -584,6 +584,7 @@ for x in data_samples_2017 + qcd_samples_2017 + ttbar_samples_2017 + all_signal_
 mfv_neu_tau010000um_M0800_2017.add_dataset('ntuplev27m_norefitdzcut')
 
 for x in all_signal_samples_2017 + all_signal_samples_2018:
+    x.add_dataset("ntuplev27m_norescaling")
     if x not in (mfv_stopdbardbar_tau001000um_M0800_2018, mfv_neu_tau001000um_M1600_2018):
         x.add_dataset("ntuplev27m_wgen")
 
