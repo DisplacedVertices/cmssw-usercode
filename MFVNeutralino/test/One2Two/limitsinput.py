@@ -335,18 +335,19 @@ def sig_datamcSF_2017p8(name_year, debug=False):
                                         (0.3120, 0.2690, 0.2274, 0.1940, 0.1926),
                                         (0.3140, 0.2594, 0.2320, 0.1974, 0.1940),
                                         (0.3104, 0.2634, 0.2364, 0.2004, 0.1950), ), },
-        'mfv_neu':          { '2017': ( (0.2790, 0.1937, 0.1352, 0.0794, 0.0722),
-                                        (0.2790, 0.1937, 0.1352, 0.0794, 0.0722),
-                                        (0.2790, 0.1937, 0.1352, 0.0794, 0.0722),
-                                        (0.2790, 0.1937, 0.1352, 0.0794, 0.0722),
-                                        (0.2790, 0.1937, 0.1352, 0.0794, 0.0722),
-                                        (0.2790, 0.1937, 0.1352, 0.0794, 0.0722), ),
-                              '2018': ( (0.2759, 0.2117, 0.1515, 0.1140, 0.1101),
-                                        (0.2759, 0.2117, 0.1515, 0.1140, 0.1101),
-                                        (0.2759, 0.2117, 0.1515, 0.1140, 0.1101),
-                                        (0.2759, 0.2117, 0.1515, 0.1140, 0.1101),
-                                        (0.2759, 0.2117, 0.1515, 0.1140, 0.1101),
-                                        (0.2759, 0.2117, 0.1515, 0.1140, 0.1101), ), }, }
+        'mfv_neu':          { '2017': ( (0.1808, 0.1495, 0.0738, 0.0038, 0.0001),
+                                        (0.1550, 0.1279, 0.0694, 0.0095, 0.0055),
+                                        (0.1573, 0.1268, 0.0732, 0.0132, 0.0099),
+                                        (0.1610, 0.1323, 0.0797, 0.0183, 0.0151),
+                                        (0.1557, 0.1324, 0.0842, 0.0189, 0.0162),
+                                        (0.1544, 0.1261, 0.0843, 0.0215, 0.0160), ),
+                              '2018': ( (-0.1916, -0.0839, -0.0495, -0.0718, -0.0688),
+                                        (-0.1491, -0.0590, -0.0319, -0.0384, -0.0421),
+                                        (-0.1168, -0.0437, -0.0225, -0.0253, -0.0287),
+                                        (-0.0642, -0.0138, 0.0001, -0.0118, -0.0140),
+                                        (-0.0288, 0.0052, 0.0131, -0.0036, -0.0064),
+                                        (0.0264, 0.0416, 0.0383, 0.0077, 0.0041), ), }, }
+
     vtm = trackmover[kind][year]
 
     # just do linear interpolation--could fit, but the final result in the limits won't depend strongly on this
@@ -387,7 +388,7 @@ def sig_datamcSF_2017p8(name_year, debug=False):
 
 def sig_uncert_2017p8(name_year, debug=False):
     vtm = (1 / sig_datamcSF_2017p8(name_year, debug))**2 - 1
-    uncerts = [max(vtm, 0.1)] # we agreed to assign a minimum of 10%, which comes into play for the high-efficiency mfv_neu points
+    uncerts = [vtm] 
     uncerts += [sig_uncert_pdf(name_year)]
     uncerts += [x/100. for x in (3,1,5,2,2,1)] # list from AN + the last '1' is for L1EE prefiring in 2017 and HEM15/16 in 2018
     u = 1 + sum(x**2 for x in uncerts)**0.5 # final number must be in combine lnN convention
@@ -449,7 +450,7 @@ def make_signals_2017p8(f, name_list):
         data_mc_scale = sig_datamcSF_2017p8(name_year)
 
         ROOT.TH1.AddDirectory(1) # the Draw>> output goes off into the ether without this stupid crap
-        h_dbv  = ROOT.TH1D(n('dbv'),  '', 125, 0, 2.5)
+        h_dbv  = ROOT.TH1D(n('dbv'),  '', 1250, 0, 2.5)
         h_dvv  = ROOT.TH1D(n('dvv'),  '', 400, 0, 4)
         h_dphi = ROOT.TH1D(n('dphi'), '', 10, -3.15, 3.15)
         t.Draw('dist0>>%s'  % n('dbv'),  'weight*(limitsinput_pass && nvtx==1)')
