@@ -314,13 +314,31 @@ def make_signals_2015p6(f, name_list):
 
         print '\rmake_signals_2015p6: done with pair %i             ' % (ipair+1)
 
-def sig_datamcSF_2017p8(name_year, debug=False):
+
+def hlp(x,l):
+    x = int(x)
+    l,n = sorted(l), len(l)
+    if x < l[0]:
+        x = l[0]
+        a = b = 0
+    elif x >= l[-1]:
+        x = l[-1]
+        a = b = n-1
+    else:
+        for i,y in enumerate(l[:-1]):
+            if y <= x < l[i+1]:
+                a,b = i, i+1
+                break
+    return x, l, a, b, l[a], l[b]
+
+def sig_trackmover_per_event_unc(name_year, debug=False, syst=''):
     name, year = name_year.rsplit('_',1)
     kind, tau, mass = name2details(name)
     tau = int(tau*1000) # back to um
 
     masses = [400,600,800,1200,1600,3000]
     taus = [100,300,1000,10000,30000]
+    kind = kind + syst
 
     trackmover = { # after kind and year indices, rows are masses, cols are taus, each in same order as above two lists
         'mfv_stopdbardbar': { '2017': ( (0.2384, 0.1904, 0.1492, 0.1050, 0.1002),
@@ -335,38 +353,58 @@ def sig_datamcSF_2017p8(name_year, debug=False):
                                         (0.3120, 0.2690, 0.2274, 0.1940, 0.1926),
                                         (0.3140, 0.2594, 0.2320, 0.1974, 0.1940),
                                         (0.3104, 0.2634, 0.2364, 0.2004, 0.1950), ), },
-        'mfv_neu':          { '2017': ( (0.1808, 0.1495, 0.0738, 0.0038, 0.0001),
-                                        (0.1550, 0.1279, 0.0694, 0.0095, 0.0055),
-                                        (0.1573, 0.1268, 0.0732, 0.0132, 0.0099),
-                                        (0.1610, 0.1323, 0.0797, 0.0183, 0.0151),
-                                        (0.1557, 0.1324, 0.0842, 0.0189, 0.0162),
-                                        (0.1544, 0.1261, 0.0843, 0.0215, 0.0160), ),
-                              '2018': ( (-0.1916, -0.0839, -0.0495, -0.0718, -0.0688),
-                                        (-0.1491, -0.0590, -0.0319, -0.0384, -0.0421),
-                                        (-0.1168, -0.0437, -0.0225, -0.0253, -0.0287),
-                                        (-0.0642, -0.0138, 0.0001, -0.0118, -0.0140),
-                                        (-0.0288, 0.0052, 0.0131, -0.0036, -0.0064),
-                                        (0.0264, 0.0416, 0.0383, 0.0077, 0.0041), ), }, }
+        'mfv_neu':          { '2017': ( (0.276, 0.193, 0.11, 0.058, 0.059),
+                                        (0.243, 0.166, 0.093, 0.043, 0.044),
+                                        (0.22, 0.153, 0.088, 0.036, 0.037),
+                                        (0.189, 0.138, 0.081, 0.029, 0.029),
+                                        (0.163, 0.124, 0.075, 0.024, 0.024),
+                                        (0.132, 0.101, 0.063, 0.019, 0.016), ),
+                              '2018': ( (-0.054, -0.002, 0.015, 0.01, 0.008),
+                                        (-0.012, 0.019, 0.018, 0.008, 0.01),
+                                        (0.003, 0.022, 0.018, 0.009, 0.009),
+                                        (0.017, 0.028, 0.022, 0.009, 0.01),
+                                        (0.029, 0.034, 0.027, 0.01, 0.009),
+                                        (0.042, 0.043, 0.032, 0.011, 0.009), ), }, 
+        'mfv_neu_stat_unc': { '2017': ( (5.157, 2.619, 1.565, 1.108, 1.516),
+                                        (2.543, 1.175, 0.667, 0.395, 0.48),
+                                        (1.811, 0.766, 0.422, 0.218, 0.245),
+                                        (1.522, 0.592, 0.323, 0.151, 0.16),
+                                        (1.381, 0.536, 0.286, 0.128, 0.133),
+                                        (1.471, 0.486, 0.253, 0.107, 0.098), ),
+                              '2018': ( (8.097, 3.639, 2.159, 1.6, 2.058),
+                                        (3.7, 1.563, 0.836, 0.511, 0.608),
+                                        (2.675, 1.024, 0.522, 0.273, 0.31),
+                                        (2.186, 0.784, 0.399, 0.189, 0.202),
+                                        (2.036, 0.694, 0.358, 0.165, 0.166),
+                                        (1.966, 0.622, 0.313, 0.133, 0.127), ), },
+         'mfv_neu_toc_unc': { '2017': ( (4.769, 1.527, 1.973, 4.487, 4.841),
+                                        (4.752, 1.456, 1.061, 2.644, 3.087),
+                                        (2.92, 0.477, 0.324, 1.73, 2.078),
+                                        (0.176, 1.229, 0.894, 0.64, 0.972),
+                                        (1.346, 2.293, 1.784, 0.181, 0.423),
+                                        (3.692, 3.568, 2.717, 0.492, 0.182), ),
+                              '2018': ( (13.768, 8.186, 6.416, 8.13, 7.676),
+                                        (13.729, 7.804, 4.942, 4.641, 5.165),
+                                        (12.017, 6.554, 4.069, 3.446, 3.771),
+                                        (8.099, 4.175, 2.24, 2.102, 2.355),
+                                        (5.819, 2.845, 1.346, 1.337, 1.51),
+                                        (1.54, 0.141, 0.598, 0.28, 0.511), ), },
+'mfv_neu_closeseedtk_unc':  { '2017': ( (3.155, 1.88, 1.087, 0.666, 0.718),
+                                        (2.656, 1.586, 0.875, 0.481, 0.502),
+                                        (2.248, 1.424, 0.807, 0.389, 0.409),
+                                        (1.767, 1.191, 0.687, 0.291, 0.307),
+                                        (1.423, 1.003, 0.593, 0.229, 0.24),
+                                        (0.97, 0.7, 0.43, 0.156, 0.145), ),
+                              '2018': ( (4.168, 2.175, 1.178, 0.791, 0.799),
+                                        (3.21, 1.829, 0.936, 0.484, 0.497),
+                                        (2.838, 1.633, 0.858, 0.393, 0.394),
+                                        (2.2, 1.386, 0.762, 0.304, 0.296),
+                                        (1.835, 1.17, 0.667, 0.249, 0.23),
+                                        (1.182, 0.838, 0.507, 0.174, 0.159), ), }, }
 
     vtm = trackmover[kind][year]
 
     # just do linear interpolation--could fit, but the final result in the limits won't depend strongly on this
-
-    def hlp(x,l): # find which points to interpolate between, pinning inside the ranges defined by the above lists
-        x = int(x)
-        l,n = sorted(l), len(l)
-        if x < l[0]:
-            x = l[0]
-            a = b = 0
-        elif x >= l[-1]:
-            x = l[-1]
-            a = b = n-1
-        else:
-            for i,y in enumerate(l[:-1]):
-                if y <= x < l[i+1]:
-                    a,b = i, i+1
-                    break
-        return x, l, a, b, l[a], l[b]
 
     mass, ms, mia, mib, mxa, mxb = mmm = hlp(mass, masses)
     tau,  ts, tia, tib, txa, txb = ttt = hlp(tau,  taus)
@@ -384,13 +422,25 @@ def sig_datamcSF_2017p8(name_year, debug=False):
     if debug:
         print name_year, 'mmm', mmm, 'ttt', ttt
 
+    return vtm
+
+def sig_datamcSF_2017p8(name_year, debug=False):
+    vtm = sig_trackmover_per_event_unc(name_year, debug)
     return 1 - vtm / 2 # trackmover is in the form 2 * (1 - TM_data / TM_MC)
 
 def sig_uncert_2017p8(name_year, debug=False):
     vtm = (1 / sig_datamcSF_2017p8(name_year, debug))**2 - 1
     uncerts = [vtm] 
     uncerts += [sig_uncert_pdf(name_year)]
+
+    name, year = name_year.rsplit('_',1)
+    kind, tau, mass = name2details(name)
+    if kind == 'mfv_neu':
+        for unc in ('_stat_unc', '_toc_unc', '_closeseedtk_unc'):
+            uncerts += [sig_trackmover_per_event_unc(name_year, debug, unc)]
+
     uncerts += [x/100. for x in (3,1,5,2,2,1)] # list from AN + the last '1' is for L1EE prefiring in 2017 and HEM15/16 in 2018
+
     u = 1 + sum(x**2 for x in uncerts)**0.5 # final number must be in combine lnN convention
     if debug:
         print name_year, '->', vtm, '    u = %.4f' % u
