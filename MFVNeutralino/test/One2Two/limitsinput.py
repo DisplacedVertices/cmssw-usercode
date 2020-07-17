@@ -433,11 +433,9 @@ def sig_uncert_2017p8(name_year, debug=False):
     uncerts = [vtm] 
     uncerts += [sig_uncert_pdf(name_year)]
 
-    name, year = name_year.rsplit('_',1)
-    kind, tau, mass = name2details(name)
-    if kind == 'mfv_neu':
+    if 'mfv_neu' in name_year:
         for unc in ('_stat_unc', '_toc_unc', '_closeseedtk_unc'):
-            uncerts += [sig_trackmover_per_event_unc(name_year, debug, unc)]
+            uncerts += [sig_trackmover_per_event_unc(name_year, debug, unc) / 100.]
 
     uncerts += [x/100. for x in (3,1,5,2,2,1)] # list from AN + the last '1' is for L1EE prefiring in 2017 and HEM15/16 in 2018
 
