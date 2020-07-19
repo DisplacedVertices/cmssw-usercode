@@ -2,6 +2,8 @@
 
 # this script must be run from One2Two/
 
+raise NotImplementedError('this needs to be updated vs submitcommon')
+
 from submitcommon import *
 import shutil
 from JMTucker.Tools.CondorSubmitter import CondorSubmitter

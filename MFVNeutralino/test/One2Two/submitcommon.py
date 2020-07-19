@@ -10,6 +10,7 @@ import limitsinput
 class _config(object):
     def __init__(self):
         self.testing = 'testing' in sys.argv # just exercising this script
+        self.submit_test = 'submit_test' in sys.argv # submit the job but don't run combine
         self.njobs = 2 if '2jobs' in sys.argv else 50
         self.test_batch = 'test_batch' in sys.argv # passed to limitsinput.sample_iterator
         self.slices_1d = 'slices_1d' in sys.argv
@@ -32,12 +33,13 @@ class _config(object):
     def batch_dir(self, sample):
         return 'signal_%05i' % sample.isample
 
-    def steering_sh(self, sample, xrdcp_combine_tarball):
+    def steering_sh(self, job_env, sample):
         ib = lambda n,x: '%s=%i' % (n,int(bool(x)))
         steering = [
+            'JOBENV=%s' % job_env.lower(),
+            ib('TESTONLY', self.submit_test),
             'ISAMPLE=%i' % sample.isample,
             'DATACARDARGS="%s"' % self.datacard_args,
-            ib('XRDCPCOMBINETARBALL', xrdcp_combine_tarball),
             ib('SAVETOYS', self.save_toys),
             ib('EXPECTED', self.expected),
             ib('NOSYSTEMATICS', self.no_systematics),

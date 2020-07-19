@@ -8,7 +8,6 @@ del sys.argv[1:2]
 
 ################################################################################
 
-from CRABClient.ClientExceptions import ConfigException as CRABConfigException
 from JMTucker.Tools.CRAB3Tools import Config, crab_command
 from submitcommon import *
 
@@ -87,15 +86,15 @@ crab_config.Site.storageSite = 'T3_US_FNALLPC'
 crab_config.Site.whitelist = ['T2_*', 'T3_*']
 
 def callback(sample):
+    if sample.isample < -1:
+        return
+
     crab_config.General.requestName = crab_config.Data.outputDatasetTag = submit_config.batch_dir(sample)
-    steering = submit_config.steering_sh(sample, xrdcp_combine_tarball=False)
+    steering = submit_config.steering_sh('crab', sample)
     open(steering_fn, 'wt').write(steering)
 
     if not submit_config.testing:
-        try:
-            output = crab_command('submit', config=crab_config)
-        except CRABConfigException:
-            output = 'problem'
+        output = crab_command('submit', config=crab_config)
         open(os.path.join(crab_config.General.workArea, 'crab_%s' % crab_config.General.requestName, 'cs_ex'), 'wt').write(gitstatus_dir)
         print colors.boldwhite(sample.name)
         pprint(output)
@@ -105,6 +104,7 @@ def callback(sample):
         print crab_config
         print 'steering.sh:'
         os.system('cat ' + steering_fn)
+        print
 
 submit(callback)
 
