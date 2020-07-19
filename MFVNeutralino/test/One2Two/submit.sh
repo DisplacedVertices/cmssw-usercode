@@ -30,6 +30,8 @@ echo combine script starting at $(date) with args $*
 
 export WD=$(pwd)
 
+source steering.sh
+
 DOOBSERVED=0
 if [[ $JOBENV == condor ]]; then
     REALJOB=$1
@@ -48,8 +50,6 @@ else
     echo bad JOBENV $JOBENV
     exit 1
 fi
-
-source steering.sh
 
 echo JOB: ${JOB}
 echo JOBENV: ${JOBENV}
