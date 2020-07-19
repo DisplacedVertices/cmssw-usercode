@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, os, string, shutil, time, base64, zlib, imp, cPickle as pickle
+import platform, sys, os, string, shutil, time, base64, zlib, imp, cPickle as pickle
 from datetime import datetime, timedelta
 from JMTucker.Tools.CMSSWTools import make_tarball, find_output_files
 from JMTucker.Tools.CRAB3ToolsBase import crab_dirs_root, crab_renew_proxy_if_needed
@@ -145,11 +145,25 @@ _l = pickle.loads(zlib.decompress(base64.b64decode('__FILELIST__')))
 def get(i): return _l[i]
 '''
 
+    submit_host = platform.node()
     get_proxy = True
-    links_dir = os.path.abspath(crab_dirs_root('cs_links'))
     batch_name_allowed = string.ascii_letters + string.digits + '_'
+    if submit_host == 'login.uscms.org':
+        links_dir = None
+    else:
+        links_dir = os.path.abspath(crab_dirs_root('cs_links'))
+    schedds = []
 
-    schedds = ['lpcschedd%i.fnal.gov' % i for i in 1,2,3]
+    if links_dir:
+        if not os.path.isdir(links_dir):
+            os.mkdir(links_dir)
+
+        if submit_host.endswith('fnal.gov'):
+            schedds = ['lpcschedd%i.fnal.gov' % i for i in 1,2,3]
+            for schedd in schedds:
+                schedd_d = os.path.join(links_dir, schedd)
+                if not os.path.isdir(schedd_d):
+                    os.mkdir(schedd_d)
 
     def __init__(self,
                  batch_name,
@@ -227,13 +241,6 @@ def get(i): return _l[i]
         self.inputs_dir = os.path.join(self.batch_dir, self.ex_str, 'inputs')
         if os.path.exists(self.inputs_dir): # check inputs_dir instead of batch_dir since we might be from metasubmitter
             raise ValueError('batch_dir %s already exists, refusing to clobber' % self.batch_dir)
-
-        if not os.path.isdir(self.links_dir):
-            os.mkdir(self.links_dir)
-        for schedd in self.schedds:
-            schedd_d = os.path.join(self.links_dir, schedd)
-            if not os.path.isdir(schedd_d):
-                os.mkdir(schedd_d)
 
         if not testing and self.get_proxy:
             #print 'CondorSubmitter init: checking proxies, might ask for password twice (but you can skip it with ^C if you know what you are doing).'
@@ -438,10 +445,11 @@ def get(i): return _l[i]
             ok = False
             cluster = None
             schedd = None
-            for line in submit_out.split('\n'):
-                if line.startswith('Attempting to submit jobs to '):
-                    schedd = line.strip().replace('Attempting to submit jobs to ', '')
-                    assert schedd in cls.schedds
+            if cls.schedds:
+                for line in submit_out.split('\n'):
+                    if line.startswith('Attempting to submit jobs to '):
+                        schedd = line.strip().replace('Attempting to submit jobs to ', '')
+                        assert schedd in cls.schedds
             for line in submit_out.split('\n'):
                 if 'job(s) submitted to cluster' in line:
                     ok = True
@@ -464,15 +472,18 @@ def get(i): return _l[i]
             else:
                 if schedd:
                     cluster_s = '%s:%s' % (schedd, cluster)
-                    cluster_link = os.path.join(cls.links_dir, schedd, str(cluster))
+                    if cls.links_dir:
+                        cluster_link = os.path.join(cls.links_dir, schedd, str(cluster))
                 else:
                     cluster_s = cluster
-                    cluster_link = os.path.join(cls.links_dir, str(cluster))
+                    if cls.links_dir:
+                        cluster_link = os.path.join(cls.links_dir, str(cluster))
                 print '\x1b[92msuccess!\x1b[0m %s' % cluster_s
-                if os.path.islink(cluster_link):
-                    print 'warning: clobbering old link:', os.readlink(cluster_link)
-                    os.unlink(cluster_link)
-                os.symlink(os.path.abspath(working_dir), cluster_link)
+                if cls.links_dir:
+                    if os.path.islink(cluster_link):
+                        print 'warning: clobbering old link:', os.readlink(cluster_link)
+                        os.unlink(cluster_link)
+                    os.symlink(os.path.abspath(working_dir), cluster_link)
         finally:
             os.chdir(cwd)
 

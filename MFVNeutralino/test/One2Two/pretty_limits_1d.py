@@ -5,7 +5,7 @@ ROOT.gErrorIgnoreLevel = 1001 # Suppress TCanvas::SaveAs messages.
 
 which = '2017p8' if '2017p8' in sys.argv else 'run2'
 intlumi = 140 if which == 'run2' else 101
-path = plot_dir('pretty_limits_1d_scanpack1Dplus2016missing_fixcombinefull_%s' % which, make=True)
+path = plot_dir('pretty_limits_1d_scanpack1Dplus2016missing_fixcombinefull_newxsec_bkgcorr_sigscaletkmover_2_%s' % which, make=True)
 
 ts = tdr_style()
 
@@ -134,7 +134,7 @@ for kind in kinds:
     g.SetTitle(';%s;#sigma#bf{#it{#Beta}}^{2} (fb)    ' % xtitle)
     g.Draw('A3')
 
-    draw_theory = 'tau' in kind
+#    draw_theory = 'tau' in kind
 
     xax = g.GetXaxis()
     xax.SetLabelSize(0.045)
@@ -149,9 +149,10 @@ for kind in kinds:
 
     if versus_mass:
         xax.SetLimits(105, 3200)
+        yax.SetRangeUser(0.01, 100000 if versus_tau else 130) #(versus_tau and draw_theory) else 130)
     elif versus_tau:
         xax.SetLimits(0.068, 130)
-    yax.SetRangeUser(0.01, 100000 if (versus_tau and draw_theory) else 130)
+        yax.SetRangeUser(0.001, 100000 if versus_tau else 130) #(versus_tau and draw_theory) else 130)
 
     observed.SetLineWidth(2)
     expect50.SetLineWidth(2)
@@ -171,27 +172,29 @@ for kind in kinds:
 
     expect95.Draw('3')
     expect68.Draw('3')
-    if draw_theory:
-        theory.Draw('L3')
+#    if draw_theory:
+#        theory.Draw('L3')
+    theory.Draw('L3')
     expect50.Draw('L')
-#    observed.Draw('L')
+    observed.Draw('L')
 
-    if draw_theory:
-        leg = ROOT.TLegend(0.552, 0.563, 0.870, 0.867)
-    else:
-        leg = ROOT.TLegend(0.552, 0.603, 0.870, 0.867)
-
+#    if draw_theory:
+#        leg = ROOT.TLegend(0.552, 0.563, 0.870, 0.867)
+#    else:
+#        leg = ROOT.TLegend(0.552, 0.603, 0.870, 0.867)
+    leg = ROOT.TLegend(0.552, 0.563, 0.870, 0.867)
     leg.SetTextFont(42)
     leg.SetFillColor(ROOT.kWhite)
     leg.SetBorderSize(0)
     leg.AddEntry(0, '#kern[-0.22]{%s}' % nice_leg(kind), '')
     leg.AddEntry(0, '#kern[-0.22]{95% CL upper limits:}', '')
- #   leg.AddEntry(observed, 'Observed', 'L')
+    leg.AddEntry(observed, 'Observed', 'L')
     leg.AddEntry(expect50, 'Median expected', 'L')
     leg.AddEntry(expect68, '68% expected', 'F')
     leg.AddEntry(expect95, '95% expected', 'F')
-    if draw_theory:
-        leg.AddEntry(theory, nice_theory(kind) + ', #bf{#it{#Beta}}=1', 'LF')
+#    if draw_theory:
+#        leg.AddEntry(theory, nice_theory(kind) + ', #bf{#it{#Beta}}=1', 'LF')
+    leg.AddEntry(theory, nice_theory(kind) + ', #bf{#it{#Beta}}=1', 'LF')
     leg.Draw()
 
     cms = write(61, 0.050, 0.142, 0.825, 'CMS')

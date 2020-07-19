@@ -9,10 +9,13 @@ ps.c.SetBottomMargin(0.11)
 ps.c.SetLeftMargin(0.13)
 ps.c.SetRightMargin(0.06)
 
-fns = [os.path.join('/uscms/home/jchu/public/EXO-17-018', fn) for fn in ['2v_from_jets_data_2015p6_3track_default_v15_v5.root', '2v_from_jets_data_2015p6_7track_default_v15_v5.root', '2v_from_jets_data_2015p6_4track_default_v15_v5.root', '2v_from_jets_data_2015p6_5track_default_v15_v5.root']]
+default_names = ['2v_from_jets_data_2017p8_3track_default_V27m.root', '2v_from_jets_data_2017p8_7track_default_V27m.root', '2v_from_jets_data_2017p8_4track_default_V27m.root', '2v_from_jets_data_2017p8_5track_default_V27m.root']
+btag_corr_names = ['2v_from_jets_data_2017p8_3track_btag_corrected_nom_V27m.root', '2v_from_jets_data_2017p8_7track_btag_corrected_nom_V27m.root', '2v_from_jets_data_2017p8_4track_btag_corrected_nom_V27m.root', '2v_from_jets_data_2017p8_5track_btag_corrected_nom_V27m.root']
+fns = [os.path.join('/uscms/home/dquach/public', fn) for fn in default_names]
+btag_fns = [os.path.join('/uscms/home/dquach/public', fn) for fn in btag_corr_names]
 ntk = ['3track3track', '4track3track', '4track4track', '5track5track']
 names = ['3-track x 3-track', '4-track x 3-track', '4-track x 4-track', '#geq5-track x #geq5-track']
-ymax = [140, 40, 5, 4]
+ymax = [70, 35, 9, 0.3]
 
 def write(font, size, x, y, text):
     w = ROOT.TLatex()
@@ -24,8 +27,11 @@ def write(font, size, x, y, text):
 
 for i in range(4):
     hh = ROOT.TFile(fns[i]).Get('h_2v_dvv')
-    h = ROOT.TFile(fns[i]).Get('h_c1v_dvv')
-    h.Scale(hh.Integral()/h.Integral())
+    h = ROOT.TFile(btag_fns[i]).Get('h_c1v_dvv')
+    if hh.Integral() > 0:
+        h.Scale(hh.Integral()/h.Integral())
+    else:
+        h.Scale(0.34/h.Integral())
 
     hh = cm2mm(hh)
     h = cm2mm(h)
@@ -57,7 +63,7 @@ for i in range(4):
     l1.Draw()
 
     write(61, 0.050, 0.37, 0.81, 'CMS')
-    write(42, 0.050, 0.595, 0.913, '38.5 fb^{-1} (13 TeV)')
+    write(42, 0.050, 0.595, 0.913, '101 fb^{-1} (13 TeV)')
 
 
     lines = [

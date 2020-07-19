@@ -1,47 +1,48 @@
 #!/usr/bin/env python
 
-import os, sys
+import os, sys, argparse
 join = os.path.join
 from glob import glob
-from JMTucker.Tools.CRAB3ToolsBase import crabify_list, crab_jobs_from_argv
+from JMTucker.Tools.CRAB3ToolsBase import crab_jobs_from_list
 from JMTucker.Tools.CondorTools import *
-from JMTucker.Tools.general import bool_from_argv, mkdirp
 
-fns_only = bool_from_argv('-f')
-include_log = bool_from_argv('-l')
-include_stdout = not bool_from_argv('-no')
-include_stderr = bool_from_argv('-e')
-if '-le' in sys.argv:
-    include_log = include_stderr = True
-    sys.argv.remove('-le')
-    
-if len(sys.argv) < 3:
-    print 'usage: cs_resubmit condor_dir jobs_list'
-    print '    jobs_list can be space separated, or can handle a string like 1,3,5-7'
-    sys.exit(1)
+parser = argparse.ArgumentParser(description='cs_log: run less on stdout(+stderr,log) files from CondorSubmitter jobs\ndefault is to less stdout for each job supplied')
+parser.add_argument('condor_dir')
+parser.add_argument('jobs_list', nargs='+', help='jobs_list can be comma separated, or can handle multiple strings like 1,3,5-7')
+parser.add_argument('-f', '--fns-only', action='store_true', help='just print the fns')
+parser.add_argument('-l', '--include-log', action='store_true', help='include log.$job')
+parser.add_argument('-e', '--include-stderr', action='store_true', help='include stderr.$job')
+parser.add_argument('-o', '--no-include-stdout', action='store_false', dest='include_stdout', help="don't include stdout.$job")
+parser.add_argument('-s', '--ls', action='store_true', help='ls the fns + the output file patterns')
+options = parser.parse_args()
 
-wd = os.path.abspath(sys.argv[1])
+if options.ls and options.fns_only:
+    raise ValueError("doesn't make sense to do both --ls and --fns-only")
+
+wd = os.path.abspath(options.condor_dir)
 if not is_cs_dir(wd):
     raise ValueError('first arg must be a CondorSubmitter dir')
 
-jobs = crab_jobs_from_argv()
+jobs = crab_jobs_from_list(options.jobs_list)
 if not jobs:
     raise ValueError('expect a list of jobs in argv')
 
 def doit(fn):
-    if fns_only:
+    if options.fns_only:
         print fn,
     else:
         os.system('less %s' % fn)
 
 for job in jobs:
-    if include_stdout:
+    if options.ls:
+        os.system('ls --color=yes -l "%s"/{stdout,stderr,log}.%s "%s"/*_%s.* | less -r' % (wd, job, wd, job))
+    if options.include_stdout:
         doit('%s/stdout.%s' % (wd, job))
-    if include_stderr:
+    if options.include_stderr:
         doit('%s/stderr.%s' % (wd, job))
-    if include_log:
+    if options.include_log:
         doit('%s/log.%s' % (wd, job))
-
-if fns_only:
+        
+if options.fns_only:
     print
 

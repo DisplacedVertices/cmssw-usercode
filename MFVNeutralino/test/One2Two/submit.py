@@ -24,10 +24,10 @@ stream_error  = false
 notification  = never
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
-transfer_input_files = %(input_files)s
+transfer_input_files = %(input_files)s,cs_jobmap
 +REQUIRED_OS = "rhel7"
 +DesiredOS = REQUIRED_OS
-Queue 50
+Queue %(njobs)s
 '''
 
 batch_root = crab_dirs_root('combine_output_%i' % time())
@@ -58,7 +58,10 @@ def callback(config, sample):
     open(run_fn, 'wt').write(script_template % locals())
 
     open(os.path.join(batch_dir, 'cs_dir'), 'wt')
+    open(os.path.join(batch_dir, 'cs_jobmap'), 'wt').write('\n'.join(str(i) for i in xrange(njobs)) + '\n')
     open(os.path.join(batch_dir, 'cs_submit.jdl'), 'wt').write(jdl_template % locals())
+    open(os.path.join(batch_dir, 'cs_njobs'), 'wt').write(str(njobs))
+    open(os.path.join(batch_dir, 'cs_outputfiles'), 'wt').write('observed.root expected.root combine_output.txtgz')
 
     CondorSubmitter._submit(batch_dir, submit_config.njobs)
 

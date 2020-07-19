@@ -7,7 +7,7 @@ from glob import glob
 from itertools import combinations
 import xml.etree.ElementTree as ET
 from JMTucker.Tools.LumiJSONTools import fjr2ll
-from JMTucker.Tools.general import sub_popen
+from JMTucker.Tools.general import sub_popen, touch
 from JMTucker.Tools.hadd import HaddBatchResult, hadd
 from JMTucker.Tools import colors
 
@@ -17,9 +17,9 @@ class CSHelpersException(Exception):
 def is_cs_dir(d):
     return os.path.isdir(d) and os.path.isfile(os.path.join(d, 'cs_dir'))
 
-def cs_dirs_from_argv():
+def cs_dirs(trydirs):
     dirs = []
-    for arg in sys.argv:
+    for arg in trydirs:
         if is_cs_dir(arg):
             dirs.append(arg)
         elif os.path.isdir(arg):
@@ -32,8 +32,17 @@ def cs_dirs_from_argv():
             r.append(d)
     return r
 
-def cs_done(wd):
-    return os.path.isfile(os.path.join(wd, 'mmon_done'))
+def cs_dirs_from_argv():
+    return cs_dirs(sys.argv)
+
+def cs_done_fn(wd):
+    return os.path.join(wd, 'mmon_done')
+
+def is_cs_done(wd):
+    return os.path.isfile(cs_done_fn(wd))
+
+def set_cs_done(wd):
+    return touch(cs_done_fn(wd))
 
 def cs_fjrs(d):
     return glob(os.path.join(d, 'fjr_*.xml'))
@@ -89,7 +98,7 @@ def cs_output_fn(d, job, kind='stdout'):
     return os.path.join(d, '%s.%s' % (kind, job))
 
 def cs_logs(d):
-    return glob(os.path.join(d, 'log.*'))
+    return [os.path.join(d, 'log.%i' % i) for i in xrange(cs_njobs(d))]
 
 def cs_job_from_log(fn):
     return int(os.path.basename(fn).replace('log.', ''))
@@ -110,17 +119,35 @@ def cs_primaryds(d):
 def cs_published(d):
     return [line.strip() for fn in glob(os.path.join(d, 'publish_*.txt')) if os.path.isfile(fn) for line in open(fn) if line.strip()]
 
+def _cs_bn_jobify(d, bn, i):
+    a,b = os.path.splitext(bn)
+    return os.path.join(d, '%s_%i%s' % (a,i,b))
+
+def cs_outputfiles(d, jobs=None):
+    ffn = os.path.join(d, 'cs_outputfiles')
+    if not os.path.isfile(ffn):
+        return []
+    else:
+        njobs = cs_njobs(d)
+        bns = open(ffn).read().split()
+        if jobs is None:
+            jobs = list(range(njobs))
+        elif type(jobs) == int:
+            jobs = [jobs]
+        return [_cs_bn_jobify(d, bn, i) for bn in bns for i in jobs]
+
 def cs_rootfiles(d):
     return [fn for fn in glob(os.path.join(d, '*.root')) if os.path.isfile(fn)]
 
 def cs_analyze(d, 
+               outputfile_callback=None,
                _re=re.compile(r'return value (\d+)'),
                _ab_re=re.compile(r'Abnormal termination \(signal (\d+)\)'),
                _cmsRun_re=re.compile(r"(?:cmsRun|meat) exited with code (\d+)"),
                _exception_re=re.compile(r"An exception of category '(.*)' occurred while")
                ):
 
-    as_killed = lambda r: r in (-3,-4,-5)
+    as_killed = lambda r: r in (-3,-4,-5,-6,-7)
 
     class cs_analyze_result:
         def _list(self, ret):
@@ -149,28 +176,58 @@ def cs_analyze(d,
 
     for log_fn in cs_logs(d):
         job = cs_job_from_log(log_fn)
-
         ret = -1
-        for line in open(log_fn):
-            # later lines can override earlier lines, e.g. held = killed, then released -> idle
-            if 'Image size of job updated' in line:
-                ret = -2
-            elif 'Job was evicted' in line:
-                ret = -3
-            elif 'Job executing on host' in line and as_killed(ret):
-                ret = -2
-            elif 'Job was released' in line and as_killed(ret):
-                ret = -1
-            elif 'Job was aborted by the user' in line:
-                ret = -4
-            elif 'Job was held' in line:
-                ret = -5
+        if os.path.isfile(log_fn):
+            for line in open(log_fn):
+                # later lines can override earlier lines, e.g. held = killed, then released -> idle
+                if 'Image size of job updated' in line:
+                    ret = -2
+                elif 'Job was evicted' in line:
+                    ret = -3
+                elif 'Job executing on host' in line and as_killed(ret):
+                    ret = -2
+                elif 'Job was released' in line and as_killed(ret):
+                    ret = -1
+                elif 'Job was aborted by the user' in line:
+                    ret = -4
+                elif 'Job was held' in line:
+                    ret = -5
+                else:
+                    mo = _ab_re.search(line)
+                    if not mo:
+                        mo = _re.search(line)
+                    if mo:
+                        ret = int(mo.group(1))
+        else:
+            print log_fn, 'is missing'
+            ret = -6 # missing log file, either never started or got lost--count as killed
+
+        if ret == 0:
+            job_is_resub = os.path.islink(log_fn)
+            if job_is_resub:
+                resub = os.path.basename(os.path.dirname(os.readlink(log_fn)))
+                assert resub.startswith('resub')
             else:
-                mo = _ab_re.search(line)
-                if not mo:
-                    mo = _re.search(line)
-                if mo:
-                    ret = int(mo.group(1))
+                resub = None
+
+            for out_fn in cs_outputfiles(d, job):
+                if not os.path.isfile(out_fn):
+                    print out_fn, 'is missing'
+                    if job_is_resub: # maybe the symlink was not made/broken
+                        out_bn = os.path.basename(out_fn)
+                        resub_pfn = os.path.join(resub, out_bn)
+                        try_out_fn = os.path.join(d, resub_pfn)
+                        if os.path.isfile(try_out_fn):
+                            print '... looks like the symlink was broken, %s exists, fixing/making worse mess' % try_out_fn
+                            os.symlink(resub_pfn, out_fn)
+                        else:
+                            ret = -7 # missing output file, ditto comment above
+                    else:
+                        ret = -7
+
+                if outputfile_callback and os.path.isfile(out_fn) and not outputfile_callback(out_fn, job):
+                    print out_fn, 'failed callback'
+                    ret = -7
 
         if ret == 0:
             ns[0] += 1
@@ -345,8 +402,11 @@ def cs_filelist(wd):
 
 __all__ = [
     'is_cs_dir',
+    'cs_dirs',
     'cs_dirs_from_argv',
-    'cs_done',
+    'cs_done_fn',
+    'is_cs_done',
+    'set_cs_done',
     'cs_fjrs',
     'cs_eventsread',
     'cs_eventswritten',
@@ -362,6 +422,7 @@ __all__ = [
     'cs_jobs_running',
     'cs_primaryds',
     'cs_published',
+    'cs_outputfiles',
     'cs_rootfiles',
     'cs_analyze',
     'cs_analyze_mmon',
