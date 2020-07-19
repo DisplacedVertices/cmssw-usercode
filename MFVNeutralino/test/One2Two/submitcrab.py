@@ -1,43 +1,25 @@
 #!/usr/bin/env python
 
-# this script must be run from One2Two/
-
-import sys
-ex = sys.argv[1]
-del sys.argv[1:2]
-
-################################################################################
-
 from JMTucker.Tools.CRAB3Tools import Config, crab_command
 from submitcommon import *
-
-if not ex:
-    raise ValueError('must set ex')
-if not ex.startswith('_'):
-    ex = '_' + ex
-batch_name = 'combine_output%s' % ex
-work_area = crab_dirs_root(batch_name)
-if not os.path.isdir(work_area):
-    os.makedirs(work_area)
-gitstatus_dir = 'gitstatus_%s' % int(time()*1e6)
-save_git_status(os.path.join(work_area, gitstatus_dir))
 
 dummy_pset_fn = 'dummy.py'
 fjr_fn = 'FrameworkJobReport.xml'
 combine_tarball_fn = 'root://cmseos.fnal.gov//store/user/tucker/combine.tgz'
 combine_tarball_bn = os.path.basename(combine_tarball_fn)
-steering_fn = 'steering.sh'
 
-to_rm = [dummy_pset_fn, fjr_fn, combine_tarball_bn, steering_fn]
+submit_config.to_rm += [dummy_pset_fn, fjr_fn, combine_tarball_bn]
 
-open(dummy_pset_fn, 'wt').write('''import FWCore.ParameterSet.Config as cms
+open(dummy_pset_fn, 'wt').write('''
+import FWCore.ParameterSet.Config as cms
 process = cms.Process('dummy')
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(-1))
 process.maxLuminosityBlocks = cms.untracked.PSet(input = cms.untracked.int32(-1))
 process.source = cms.Source('EmptySource')
 ''')
 
-open(fjr_fn,'wt').write('''<FrameworkJobReport>
+open(fjr_fn,'wt').write('''
+<FrameworkJobReport>
 <ReadBranches>
 </ReadBranches>
 <PerformanceReport>
@@ -64,16 +46,15 @@ crab_config.General.transferOutputs = True
 crab_config.General.workArea = work_area
 crab_config.General.requestName = 'SETME'
 
+crab_config.JobType.allowUndistributedCMSSW = True
 crab_config.JobType.pluginName = 'PrivateMC'
 crab_config.JobType.psetName = 'dummy.py'
 crab_config.JobType.scriptExe = 'submit.sh'
 crab_config.JobType.scriptArgs = []
 crab_config.JobType.sendPythonFolder = True
 #crab_config.JobType.maxMemoryMB = 3000
-crab_config.JobType.inputFiles = ['limitsinput.root', 'signal_efficiency.py', 'datacard.py', fjr_fn, combine_tarball_bn, steering_fn]
-crab_config.JobType.outputFiles = ['expected.root', 'observed.root', 'combine_output.txtgz']
-if submit_config.no_systematics:
-    crab_config.JobType.outputFiles += ['expectedS0.root', 'observedS0.root']
+crab_config.JobType.inputFiles = submit_config.input_files +  [fjr_fn, combine_tarball_bn]
+crab_config.JobType.outputFiles = submit_config.output_files
 
 crab_config.Data.splitting = 'EventBased'
 crab_config.Data.unitsPerJob = 1
@@ -86,12 +67,7 @@ crab_config.Site.storageSite = 'T3_US_FNALLPC'
 crab_config.Site.whitelist = ['T2_*', 'T3_*']
 
 def callback(sample):
-    if sample.isample < -1:
-        return
-
     crab_config.General.requestName = crab_config.Data.outputDatasetTag = submit_config.batch_dir(sample)
-    steering = submit_config.steering_sh('crab', sample)
-    open(steering_fn, 'wt').write(steering)
 
     if not submit_config.testing:
         output = crab_command('submit', config=crab_config)
@@ -103,11 +79,9 @@ def callback(sample):
         print 'crab config:'
         print crab_config
         print 'steering.sh:'
-        os.system('cat ' + steering_fn)
+        os.system('cat ' + submit_config.steering_fn)
         print
 
-submit(callback)
+submit('crab', callback)
 
-if not submit_config.testing:
-    for x in to_rm:
-        os.remove(x)
+submit_finish()

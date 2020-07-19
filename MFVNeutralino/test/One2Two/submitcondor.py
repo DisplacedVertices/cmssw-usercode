@@ -1,21 +1,11 @@
 #!/usr/bin/env python
 
-# this script must be run from One2Two/
-
-raise NotImplementedError('this needs to be updated vs submitcommon')
-
-from submitcommon import *
 import shutil
 from JMTucker.Tools.CondorSubmitter import CondorSubmitter
+from submitcommon import *
 
-steering_sh = '''
-ISAMPLE=%(isample)s
-XRDCPCOMBINETARBALL=1
-DATACARDARGS="%(datacard_args)s"
-SAVETOYS=
-'''
-
-jdl_template = '''universe = vanilla
+jdl_template = '''
+universe = vanilla
 Executable = submit.sh
 arguments = $(Process)
 Output = stdout.$(Process)
@@ -32,18 +22,12 @@ transfer_input_files = %(input_files)s,cs_jobmap
 Queue %(njobs)s
 '''
 
-batch_root = crab_dirs_root('combine_output_%i' % time())
-if os.path.isdir(batch_root):
-    raise IOError('%s exists' % batch_root)
-print batch_root
-os.mkdir(batch_root)
-os.mkdir(os.path.join(batch_root, 'inputs'))
-
-save_git_status(os.path.join(batch_root, 'gitstatus'))
+inputs_path = os.path.join(submit_config.work_area, 'inputs')
+os.mkdir(inputs_path)
 
 input_files = []
-for x in ['signal_efficiency.py', 'datacard.py', 'limitsinput.root', 'submit.sh']:
-    nx = os.path.abspath(os.path.join(batch_root, 'inputs', os.path.basename(x)))
+for x in submit_config.input_files + ['submit.sh']:
+    nx = os.path.abspath(os.path.join('inputs_path', os.path.basename(x)))
     shutil.copy2(x, nx)
     input_files.append(nx)
 input_files = ','.join(input_files)
@@ -63,7 +47,7 @@ def callback(config, sample):
     open(os.path.join(batch_dir, 'cs_jobmap'), 'wt').write('\n'.join(str(i) for i in xrange(njobs)) + '\n')
     open(os.path.join(batch_dir, 'cs_submit.jdl'), 'wt').write(jdl_template % locals())
     open(os.path.join(batch_dir, 'cs_njobs'), 'wt').write(str(njobs))
-    open(os.path.join(batch_dir, 'cs_outputfiles'), 'wt').write('observed.root expected.root combine_output.txtgz')
+    open(os.path.join(batch_dir, 'cs_outputfiles'), 'wt').write(' '.join(submit_config.output_files)
 
     CondorSubmitter._submit(batch_dir, submit_config.njobs)
 

@@ -28,8 +28,26 @@
 
 echo combine script starting at $(date) with args $*
 
-export JOB=$1
 export WD=$(pwd)
+
+DOOBSERVED=0
+if [[ $JOBENV == condor ]]; then
+    REALJOB=$1
+    mapfile -t JOBMAP < cs_jobmap
+    export JOB=${JOBMAP[$REALJOB]}
+
+    if [[ $JOB == 0 ]]; then
+        DOOBSERVED=1
+    fi
+elif [[ $JOBENV == crab ]]; then
+    export JOB=$1
+    if [[ $JOB == 1 ]]; then
+        DOOBSERVED=1
+    fi
+else
+    echo bad JOBENV $JOBENV
+    exit 1
+fi
 
 source steering.sh
 
@@ -42,6 +60,7 @@ echo SAVETOYS: ${SAVETOYS}
 echo EXPECTED: ${EXPECTED}
 echo NOSYSTEMATICS: ${NOSYSTEMATICS}
 echo GOODNESSOFFIT: ${GOODNESSOFFIT}
+echo SIGNIFICANCE: ${SIGNIFICANCE}
  
 if [[ ${SAVETOYS} -eq 1 ]]; then
     SAVETOYSPAR="--saveToys"
@@ -89,18 +108,18 @@ cd $WD
 
     hint=$(awk '/hint/ { print $NF }' datacard.txt)
     if [[ $TESTONLY -eq 1 ]]; then
-        touch observed.root observedS0.root expected.root expectedS0.root
+        touch observed.root expected.root
     else
         # don't use -H AsymptoticLimits, at least don't do it for low-efficiency signals, it can lead to way too low limits
         cmd="combine --setTheHint $hint -M MarkovChainMC --noDefaultPrior=0 --tries 20 -b 200 --iteration 100000 datacard.txt"
 
-        if [[ $JOB == 0 ]]; then
+        if [[ $DOOBSERVED -eq 1 ]]; then
             echo "========================================================================="
             echo Observed limit
             eval $cmd
             mv higgsCombine*root observed.root
 
-            if [[ $NOSYSTEMATICS -eq 0 ]]; then
+            if [[ $NOSYSTEMATICS -eq 1 ]]; then
                 echo "========================================================================="
                 echo Observed limit, no systematics
                 eval $cmd -S0
@@ -108,7 +127,7 @@ cd $WD
             fi
         else
             touch observed.root
-            [[ $NOSYSTEMATICS -eq 0 ]] && touch observedS0.root
+            [[ $NOSYSTEMATICS -eq 1 ]] && touch observedS0.root
         fi
 
         ntoys=100
@@ -120,7 +139,7 @@ cd $WD
             eval $cmd --toys $ntoys ${SAVETOYSPAR} -s $((JOB+seedbase))
             mv higgsCombine*root expected.root
 
-            if [[ $NOSYSTEMATICS -eq 0 ]]; then 
+            if [[ $NOSYSTEMATICS -eq 1 ]]; then 
                 echo "========================================================================="
                 echo Expected limits, no systematics
                 eval $cmd -S0 --toys $ntoys ${SAVETOYSPAR} -s $((JOB+seedbase))
@@ -128,59 +147,70 @@ cd $WD
             fi
         fi
 
-    ########################################################################
-    
-    #   cmd="combine -M GoodnessOfFit --algo=saturated datacard.txt"
-    #
-    #   if [[ $JOB == 0 ]]; then
-    #       echo "========================================================================="
-    #       echo GoodnessOfFit observed
-    #       eval $cmd
-    #       mv higgsCombine*root gof_observed.root
-    #
-    #       echo "========================================================================="
-    #       echo GoodnessOfFit observed, no systematics
-    #       eval $cmd -S0
-    #       combine -S0 -M GoodnessOfFit datacard.txt --algo=saturated
-    #       mv higgsCombine*root gof_S0_observed.root
-    #   fi
-    #
-    #   echo "========================================================================="
-    #   echo GoodnessOfFit expected
-    #   eval $cmd --toys $ntoys -s $((JOB+seedbase))
-    #   mv higgsCombine*root gof_expected.root
-    #
-    #   echo "========================================================================="
-    #   echo GoodnessOfFit expected, no systematics
-    #   eval $cmd -S0 --toys ntoys -s $((JOB+seedbase))
-    #   mv higgsCombine*root gof_S0_expected.root
-    
-    ########################################################################
-    
-    #   cmd="combine -M Significance datacard.txt"
-    #
-    #   if [[ $JOB == 0 ]]; then
-    #       echo "========================================================================="
-    #       echo Observed significance
-    #       eval $cmd
-    #       mv higgsCombine*root signif_observed.root
-    #       
-    #       echo "========================================================================="
-    #       echo Observed significance, no systematics
-    #       eval $cmd -S0
-    #       mv higgsCombine*root signif_observed_S0.root
-    #   fi
-    #
-    #   echo "========================================================================="
-    #   echo Expected significance
-    #   eval $cmd --toys $ntoys -saveToys -s $((JOB+seedbase))
-    #   mv higgsCombine*root signif_expected.root
-    #
-    #   echo "========================================================================="
-    #   echo Expected significances, no systematics
-    #   eval $cmd -S0 --toys $ntoys -saveToys -s $((JOB+seedbase))
-    #   mv higgsCombine*root signif_expected_S0.root
-fi
+        if [[ $GOODNESSOFFIT -eq 1 ]]; then
+            cmd="combine -M GoodnessOfFit --algo=saturated datacard.txt"
+         
+            if [[ $DOOBSERVED -eq 1 ]]; then
+                echo "========================================================================="
+                echo GoodnessOfFit observed
+                eval $cmd
+                mv higgsCombine*root gof_observed.root
+
+                if [[ $NOSYSTEMATICS -eq 1 ]]; then
+                    echo "========================================================================="
+                    echo GoodnessOfFit observed, no systematics
+                    eval $cmd -S0
+                    combine -S0 -M GoodnessOfFit datacard.txt --algo=saturated
+                    mv higgsCombine*root gof_S0_observed.root
+                fi
+            fi
+
+            if [[ $EXPECTED -ne 0 ]]; then
+                echo "========================================================================="
+                echo GoodnessOfFit expected
+                eval $cmd --toys $ntoys -s $((JOB+seedbase))
+                mv higgsCombine*root gof_expected.root
+         
+                if [[ $NOSYSTEMATICS -eq 1 ]]; then
+                    echo "========================================================================="
+                    echo GoodnessOfFit expected, no systematics
+                    eval $cmd -S0 --toys ntoys -s $((JOB+seedbase))
+                    mv higgsCombine*root gof_S0_expected.root
+                fi
+        fi
+
+        if [[ $SIGNIFICANCE -eq 1 ]]; then
+            cmd="combine -M Significance datacard.txt"
+         
+            if [[ $DOOBSERVED -eq 1 ]]; then
+                echo "========================================================================="
+                echo Observed significance
+                eval $cmd
+                mv higgsCombine*root signif_observed.root
+                
+                if [[ $NOSYSTEMATICS -eq 1 ]]; then
+                    echo "========================================================================="
+                    echo Observed significance, no systematics
+                    eval $cmd -S0
+                    mv higgsCombine*root signif_S0_observed.root
+                fi
+            fi
+         
+            if [[ $EXPECTED -ne 0 ]]; then
+                echo "========================================================================="
+                echo Expected significance
+                eval $cmd --toys $ntoys -s $((JOB+seedbase))
+                mv higgsCombine*root signif_expected.root
+         
+                if [[ $NOSYSTEMATICS -eq 1 ]]; then
+                    echo "========================================================================="
+                    echo Expected significances, no systematics
+                    eval $cmd -S0 --toys $ntoys -s $((JOB+seedbase))
+                    mv higgsCombine*root signif_S0_expected.root
+                fi
+            fi
+        fi
+    fi
 } 2>&1 | gzip -c > combine_output.txtgz
 
 if [[ $JOBENV != crab ]]; then
