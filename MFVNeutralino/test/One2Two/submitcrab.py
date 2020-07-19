@@ -43,7 +43,7 @@ crab_config = Config()
 
 crab_config.General.transferLogs = False
 crab_config.General.transferOutputs = True
-crab_config.General.workArea = work_area
+crab_config.General.workArea = submit_config.work_area
 crab_config.General.requestName = 'SETME'
 
 crab_config.JobType.allowUndistributedCMSSW = True
@@ -60,7 +60,7 @@ crab_config.Data.splitting = 'EventBased'
 crab_config.Data.unitsPerJob = 1
 crab_config.Data.totalUnits = submit_config.njobs
 crab_config.Data.publication = False
-crab_config.Data.outputPrimaryDataset = batch_name
+crab_config.Data.outputPrimaryDataset = submit_config.batch_name
 crab_config.Data.outputDatasetTag = 'SETME'
 
 crab_config.Site.storageSite = 'T3_US_FNALLPC'
@@ -71,7 +71,7 @@ def callback(sample):
 
     if not submit_config.testing:
         output = crab_command('submit', config=crab_config)
-        open(os.path.join(crab_config.General.workArea, 'crab_%s' % crab_config.General.requestName, 'cs_ex'), 'wt').write(gitstatus_dir)
+        open(os.path.join(crab_config.General.workArea, 'crab_%s' % crab_config.General.requestName, 'cs_ex'), 'wt').write(submit_config.gitstatus_dir)
         print colors.boldwhite(sample.name)
         pprint(output)
         print

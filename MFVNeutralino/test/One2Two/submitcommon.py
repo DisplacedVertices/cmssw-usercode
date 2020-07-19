@@ -99,9 +99,6 @@ limitsinput_f = ROOT.TFile('limitsinput.root')
 submit_config = _config()
 
 def submit(job_env, callback):
-    steering = submit_config.steering_sh(job_env, sample)
-    open(submit_config.steering_fn, 'wt').write(steering)
-
     samples = limitsinput.sample_iterator(limitsinput_f,
                                           require_years=submit_config.years,
                                           test=submit_config.test_batch,
@@ -116,9 +113,13 @@ def submit(job_env, callback):
     for sample in samples:
         if allowed and sample.isample not in allowed:
             continue
+        steering = submit_config.steering_sh(job_env, sample)
+        open(submit_config.steering_fn, 'wt').write(steering)
         callback(sample)
 
 def submit_finish():
     if not submit_config.testing:
         for x in submit_config.to_rm:
             os.remove(x)
+
+# zcat signal_*/combine_output* | sort | uniq | egrep -v '^median expected limit|^mean   expected limit|^Observed|^Limit: r|^Generate toy|^Done in|random number generator seed is|^   ..% expected band|^DATACARD:' | tee /tmp/duh

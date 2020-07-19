@@ -51,6 +51,6 @@ def callback(config, sample):
 
     CondorSubmitter._submit(batch_dir, submit_config.njobs)
 
-submit(callback)
+submit('condor', callback)
 
-# zcat signal_*/combine_output* | sort | uniq | egrep -v '^median expected limit|^mean   expected limit|^Observed|^Limit: r|^Generate toy|^Done in|random number generator seed is|^   ..% expected band|^DATACARD:' | tee /tmp/duh
+submit_finish()
