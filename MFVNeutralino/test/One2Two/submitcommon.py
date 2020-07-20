@@ -11,11 +11,14 @@ import limitsinput
 if os.path.basename(os.getcwd()) != 'One2Two':
     raise EnvironmentError('must be in One2Two dir')
 
-class _config(object):
+class Submitter(object):
     def __init__(self):
         self.testing = bool_from_argv('testing') # just exercising this script
         self.submit_test = bool_from_argv('submit_test') # submit the job but don't run combine
-        self.njobs = 2 if bool_from_argv('2jobs') else 50
+        self.njobs_per_point = 2 if bool_from_argv('2jobs') else 50
+        self.points_per_batch = 2 if bool_from_argv('2points') else 100
+        self.njobs_per_batch = self.points_per_batch * self.njobs_per_point
+        assert self.njobs_per_batch <= 5000
         self.test_batch = bool_from_argv('test_batch') # passed to limitsinput.sample_iterator
         self.slices_1d = bool_from_argv('slices_1d')
         self.save_toys = bool_from_argv('save_toys')
@@ -41,32 +44,11 @@ class _config(object):
         self.datacard_args = ' '.join(datacard_args)
 
         self.steering_fn = 'steering.sh'
-        self.input_files = ['signal_efficiency.py', 'datacard.py', 'limitsinput.root', self.steering_fn]
-        self.to_rm = [self.steering_fn]
-
-        self.output_files = ['combine_output.txtgz', 'observed.root']
-        if not self.no_expected:
-            self.output_files += ['expected.root']
-        if self.no_systematics:
-            output_files += ['observedS0.root']
-            if not self.no_expected:
-                self.output_files += ['expectedS0.root']
-        if self.goodness_of_fit:
-            output_files += ['gof_observed.root']
-            if not self.no_expected:
-                output_files += ['gof_expected.root']
-            if self.no_systematics:
-                output_files += ['gof_S0_observed.root']
-                if not self.no_expected:
-                    output_files += ['gof_S0_expected.root']
-        if self.significance:
-            output_files += ['signif_observed.root']
-            if not self.no_expected:
-                output_files += ['signif_expected.root']
-            if self.no_systematics:
-                output_files += ['signif_S0_observed.root']
-                if not self.no_expected:
-                    output_files += ['signif_S0_expected.root']
+        self.isample_fn = 'isample.txt'
+        self.firstjob_fn = 'firstjob.txt'
+        self.tmp_fns = [self.steering_fn, self.isample_fn, self.firstjob_fn]
+        self.input_files = ['signal_efficiency.py', 'datacard.py', 'limitsinput.root'] + self.tmp_fns
+        self.output_files = ['output.txz']
 
         self.batch_name = 'combine_output' + self.ex
         self.work_area = crab_dirs_root(self.batch_name)
@@ -77,15 +59,18 @@ class _config(object):
         save_git_status(self.gitstatus_dir)
         print 'work area:', self.work_area
 
-    def batch_dir(self, sample):
-        return 'signal_%05i' % sample.isample
+    def batch_dir(self, samples):
+        isamples = [-s.isample for s in samples]
+        return 'signals_-%05i_-%05i' % (min(isamples), max(isamples))
 
-    def steering_sh(self, job_env, sample):
+    def _writeit(self, fn, l):
+        open(fn, 'wt').write('\n'.join(l) + '\n')
+
+    def steering(self, job_env):
         ib = lambda n,x: '%s=%i' % (n,int(bool(x)))
         steering = [
             'JOBENV=%s' % job_env.lower(),
             ib('TESTONLY', self.submit_test),
-            'ISAMPLE=%i' % sample.isample,
             'DATACARDARGS="%s"' % self.datacard_args,
             ib('SAVETOYS', self.save_toys),
             ib('EXPECTED', not self.no_expected),
@@ -93,33 +78,37 @@ class _config(object):
             ib('GOODNESSOFFIT', self.goodness_of_fit),
             ib('SIGNIFICANCE', self.significance),
             ]
-        return '\n'.join(steering) + '\n'
+        self._writeit(self.steering_fn, steering)
 
-limitsinput_f = ROOT.TFile('limitsinput.root')
-submit_config = _config()
+    def samplemaps(self, job_env, samples):
+        map = [str(sample.isample)    for sample in samples for j in xrange(self.njobs_per_point)]
+        self._writeit(self.isample_fn, map)
+        map = ['1' if j == 0 else '0' for sample in samples for j in xrange(self.njobs_per_point)]
+        self._writeit(self.firstjob_fn, map)
 
-def submit(job_env, callback):
-    samples = limitsinput.sample_iterator(limitsinput_f,
-                                          require_years=submit_config.years,
-                                          test=submit_config.test_batch,
-                                          slices_1d=submit_config.slices_1d
-                                          )
+    def submit(self, job_env, callback):
+        limitsinput_f = ROOT.TFile('limitsinput.root')
+        samples = limitsinput.sample_iterator(limitsinput_f,
+                                              require_years=self.years,
+                                              test=self.test_batch,
+                                              slices_1d=self.slices_1d)
 
-    allowed = []
-    allowed_fn = 'submit_isamples.py'
-    if os.path.isfile(allowed_fn):
-        allowed = eval(open(allowed_fn).read())
+        allowed = []
+        allowed_fn = 'submit_isamples.py'
+        if os.path.isfile(allowed_fn):
+            allowed = eval(open(allowed_fn).read())
 
-    for sample in samples:
-        if allowed and sample.isample not in allowed:
-            continue
-        steering = submit_config.steering_sh(job_env, sample)
-        open(submit_config.steering_fn, 'wt').write(steering)
-        callback(sample)
+        samples = [sample for sample in samples if allowed == [] or sample.isample in allowed]
+        nsamples = len(samples)
+        for i in xrange(0, nsamples, self.points_per_batch):
+            batch = samples[i:i+self.points_per_batch]
+            self.steering(job_env)
+            self.samplemaps(job_env, batch)
+            njobs = len(batch) * self.njobs_per_point
+            callback(njobs, batch)
 
-def submit_finish():
-    if not submit_config.testing:
-        for x in submit_config.to_rm:
-            os.remove(x)
+        if not self.testing:
+            for x in self.tmp_fns:
+                os.remove(x)
 
 # zcat signal_*/combine_output* | sort | uniq | egrep -v '^median expected limit|^mean   expected limit|^Observed|^Limit: r|^Generate toy|^Done in|random number generator seed is|^   ..% expected band|^DATACARD:' | tee /tmp/duh

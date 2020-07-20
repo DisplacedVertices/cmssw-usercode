@@ -32,7 +32,8 @@ for x in submit_config.input_files + ['submit.sh']:
     input_files.append(nx)
 input_files = ','.join(input_files)
 
-def callback(config, sample):
+def callback(njobs, samples):
+    raise NotImplementedError('since batching')
     print sample.isample, sample.name,
     isample = sample.isample # for locals use below
 

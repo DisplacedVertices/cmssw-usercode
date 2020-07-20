@@ -24,7 +24,7 @@
 # In that same combine environment, make the tarball with:
 #   python ~/tarball.py --include-bin combine.tgz
 # Copy the tarball to eos, hopefully with a versioned name,
-# and update the urls in both submitgrid.py and below.
+# and update the urls in both submitcrab.py and below.
 
 echo combine script starting at $(date) with args $*
 
@@ -32,35 +32,37 @@ export WD=$(pwd)
 
 source steering.sh
 
-DOOBSERVED=0
 if [[ $JOBENV == condor ]]; then
     REALJOB=$1
     mapfile -t JOBMAP < cs_jobmap
-    export JOB=${JOBMAP[$REALJOB]}
-
-    if [[ $JOB == 0 ]]; then
-        DOOBSERVED=1
-    fi
+    JOB=${JOBMAP[$REALJOB]}
+    JOB0=$JOB
 elif [[ $JOBENV == crab ]]; then
     export JOB=$1
-    if [[ $JOB == 1 ]]; then
-        DOOBSERVED=1
-    fi
+    JOB0=$((JOB-1))
 else
     echo bad JOBENV $JOBENV
     exit 1
 fi
 
 echo JOB: ${JOB}
+echo JOB0: ${JOB0}
 echo JOBENV: ${JOBENV}
 echo TESTONLY: ${TESTONLY}
-echo ISAMPLE: ${ISAMPLE}
 echo DATACARDARGS: ${DATACARDARGS}
 echo SAVETOYS: ${SAVETOYS}
 echo EXPECTED: ${EXPECTED}
 echo NOSYSTEMATICS: ${NOSYSTEMATICS}
 echo GOODNESSOFFIT: ${GOODNESSOFFIT}
 echo SIGNIFICANCE: ${SIGNIFICANCE}
+
+
+mapfile -t ISAMPLEMAP < isample.txt
+ISAMPLE=${ISAMPLEMAP[$JOB0]}
+echo ISAMPLE: ${ISAMPLE}
+mapfile -t FIRSTJOBMAP < firstjob.txt
+DOOBSERVED=${FIRSTJOBMAP[$JOB0]}
+echo DOOBSERVED: ${DOOBSERVED}
  
 if [[ ${SAVETOYS} -eq 1 ]]; then
     SAVETOYSPAR="--saveToys"
@@ -136,13 +138,13 @@ cd $WD
         if [[ $EXPECTED -ne 0 ]]; then
             echo "========================================================================="
             echo Expected limits
-            eval $cmd --toys $ntoys ${SAVETOYSPAR} -s $((JOB+seedbase))
+            eval $cmd --toys $ntoys ${SAVETOYSPAR} -s $((JOB0+seedbase))
             mv higgsCombine*root expected.root
 
             if [[ $NOSYSTEMATICS -eq 1 ]]; then 
                 echo "========================================================================="
                 echo Expected limits, no systematics
-                eval $cmd -S0 --toys $ntoys ${SAVETOYSPAR} -s $((JOB+seedbase))
+                eval $cmd -S0 --toys $ntoys ${SAVETOYSPAR} -s $((JOB0+seedbase))
                 mv higgsCombine*root expectedS0.root
             fi
         fi
@@ -168,13 +170,13 @@ cd $WD
             if [[ $EXPECTED -ne 0 ]]; then
                 echo "========================================================================="
                 echo GoodnessOfFit expected
-                eval $cmd --toys $ntoys -s $((JOB+seedbase))
+                eval $cmd --toys $ntoys -s $((JOB0+seedbase))
                 mv higgsCombine*root gof_expected.root
          
                 if [[ $NOSYSTEMATICS -eq 1 ]]; then
                     echo "========================================================================="
                     echo GoodnessOfFit expected, no systematics
-                    eval $cmd -S0 --toys ntoys -s $((JOB+seedbase))
+                    eval $cmd -S0 --toys ntoys -s $((JOB0+seedbase))
                     mv higgsCombine*root gof_S0_expected.root
                 fi
             fi
@@ -200,23 +202,21 @@ cd $WD
             if [[ $EXPECTED -ne 0 ]]; then
                 echo "========================================================================="
                 echo Expected significance
-                eval $cmd --toys $ntoys -s $((JOB+seedbase))
+                eval $cmd --toys $ntoys -s $((JOB0+seedbase))
                 mv higgsCombine*root signif_expected.root
          
                 if [[ $NOSYSTEMATICS -eq 1 ]]; then
                     echo "========================================================================="
                     echo Expected significances, no systematics
-                    eval $cmd -S0 --toys $ntoys -s $((JOB+seedbase))
+                    eval $cmd -S0 --toys $ntoys -s $((JOB0+seedbase))
                     mv higgsCombine*root signif_S0_expected.root
                 fi
             fi
         fi
     fi
-} 2>&1 | gzip -c > combine_output.txtgz
+} 2>&1 >combine_output.txt
 
-if [[ $JOBENV != crab ]]; then
-    for bn in *root combine_output.txtgz; do
-        bnnew="${bn%.*}"_${JOB}."${bn##*.}"
-        mv -v "$bn" "$bnnew"
-    done
-fi
+echo after combine, files:
+ls -l
+rm -f limitsinput.root
+tar -Jcf output.txz *root combine_output.txt
