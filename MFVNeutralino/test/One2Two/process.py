@@ -97,10 +97,40 @@ def rrange(path):
 
 
 if __name__ == '__main__':
-    remake = bool_from_argv('remake')
-    for path in sys.argv[1:]:
-        out_fn = os.path.join(path, 'results')
-        if not remake and os.path.isfile(out_fn):
-            continue
-        print path
-        doit(path, out_fn)
+    if bool_from_argv('precheck'):
+        files = ['combine_output_%i.txtgz', 'observed_%i.root', 'expected_%i.root']
+        is_crab = bool_from_argv('is_crab')
+        if is_crab:
+            jobs = list(range(1,njobs+1))
+        else:
+            jobs = list(range(njobs))
+
+        def _try(fcn,*args):
+            try:
+                fcn(*args)
+            except:
+                pass
+
+        for path in sys.argv[1:]:
+            for j in jobs:
+                for bn in files:
+                    fn = os.path.join(path, bn % j)
+                    if not os.path.isfile(fn):
+                        print 'missing file', fn
+
+            first_j = 1 if is_crab else 0
+            obs_fn_final = os.path.join(path, 'observed.root')
+            obs_fn = os.path.join(path, 'observed_%i.root' % first_j)
+            _try(os.rename, obs_fn, obs_fn_final)
+            for j in jobs:
+                if j != first_j:
+                    _try(os.remove, os.path.join(path, 'observed_%i.root' % j))
+
+    else:
+        remake = bool_from_argv('remake')
+        for path in sys.argv[1:]:
+            out_fn = os.path.join(path, 'results')
+            if not remake and os.path.isfile(out_fn):
+                continue
+            print path
+            doit(path, out_fn)
