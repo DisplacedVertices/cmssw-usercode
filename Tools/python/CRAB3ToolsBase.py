@@ -120,6 +120,7 @@ def crab_print_config(c):
         print line
 
 def crab_requestcache(working_dir):
+    import CRABClient # allows WMCore to be imported which is implicit in the unpickle
     return cPickle.load(open(os.path.join(working_dir, '.requestcache'), 'rb'))
 
 def crab_print_requestcache(working_dir):
@@ -181,12 +182,14 @@ It will not be treated securely, and may end up in the hands of anyone.
 WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING WARNING
 *******************************************************************************
 '''
+    if os.path.isfile(path):
+        os.chmod(path, 0600)
 
     while 1:
         pp = getpass.getpass('GRID passphrase:')
         pp2 = getpass.getpass('again:')
         if pp != pp2 or len(pp) < 4:
-            print 'did not match'
+            print 'did not match or too short'
         else:
             break
 
