@@ -177,11 +177,12 @@ cd $WD
                     eval $cmd -S0 --toys ntoys -s $((JOB+seedbase))
                     mv higgsCombine*root gof_S0_expected.root
                 fi
+            fi
         fi
 
         if [[ $SIGNIFICANCE -eq 1 ]]; then
             cmd="combine -M Significance datacard.txt"
-         
+
             if [[ $DOOBSERVED -eq 1 ]]; then
                 echo "========================================================================="
                 echo Observed significance
