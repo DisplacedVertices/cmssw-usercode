@@ -219,4 +219,4 @@ cd $WD
 echo after combine, files:
 ls -l
 rm -f limitsinput.root
-tar -Jcf output.txz *root combine_output.txt
+tar -Jcf output.txz datacard.txt isample.txt firstjob.txt combine_output.txt *root

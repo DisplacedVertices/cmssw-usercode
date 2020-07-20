@@ -2,6 +2,7 @@
 
 from JMTucker.Tools.CRAB3Tools import Config, crab_command
 from submitcommon import *
+
 submitter = Submitter()
 
 dummy_pset_fn = 'dummy.py'
