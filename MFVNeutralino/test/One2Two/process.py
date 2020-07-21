@@ -134,45 +134,51 @@ if __name__ == '__main__':
         if not os.path.isdir(dest):
             os.mkdir(dest)
 
-        for wd in crab_dirs_from_argv():
-            od = os.path.join('/eos/uscms', crab_get_output_dir(wd)[1:])
-            nds = glob(os.path.join(od, '000?'))
-            print wd, od, nds
-            for nd in nds:
-                fns = glob(os.path.join(nd, 'output_*.txz'))
-                for fn in fns:
-                    job = int(os.path.basename(fn).replace('.txz','').rsplit('_',1)[1])
-                    job0 = job-1
+        nds = []
+        if 0:
+            for wd in crab_dirs_from_argv():
+                od = os.path.join('/eos/uscms', crab_get_output_dir(wd)[1:])
+                nds += glob(os.path.join(od, '000?'))
+                print wd, od, nds
+        elif 1:
+            for wd in crab_dirs_from_argv():
+                nds += [wd]
+            
+        for nd in nds:
+            fns = glob(os.path.join(nd, 'output_*.txz'))
+            for fn in fns:
+                job = int(os.path.basename(fn).replace('.txz','').rsplit('_',1)[1])
+                job0 = job-1
 
-                    # argh lzma tarfile isn't avail in py2
-                    tmpdir = tempfile.mkdtemp()
-                    os.system('tar --directory=%s -xf %s' % (tmpdir, fn))
-                    #os.system('ls -l %s' % tmpdir)
-                    isample = int(open(os.path.join(tmpdir, 'isample.txt')).readlines()[job0])
+                # argh lzma tarfile isn't avail in py2
+                tmpdir = tempfile.mkdtemp()
+                os.system('tar --directory=%s -xf %s' % (tmpdir, fn))
+                #os.system('ls -l %s' % tmpdir)
+                isample = int(open(os.path.join(tmpdir, 'isample.txt')).readlines()[job0])
 
-                    sampledir = os.path.join(dest, 'crab_signal_%05i' % isample)
-                    if not os.path.isdir(sampledir):
-                        os.mkdir(sampledir)
+                sampledir = os.path.join(dest, 'crab_signal_%05i' % isample)
+                if not os.path.isdir(sampledir):
+                    os.mkdir(sampledir)
 
-                    firstjob_lines = open(os.path.join(tmpdir, 'firstjob.txt')).readlines()
-                    ijob0 = None
-                    for i in xrange(job0, -1, -1):
-                        if bool(int(firstjob_lines[i])):
-                            ijob0 = job0 - i
-                            break
-                    assert ijob0 is not None and 0 <= ijob0 < 50
-                    ijob = ijob0 + 1
-                    print fn, job, job0, isample, ijob0
+                firstjob_lines = open(os.path.join(tmpdir, 'firstjob.txt')).readlines()
+                ijob0 = None
+                for i in xrange(job0, -1, -1):
+                    if bool(int(firstjob_lines[i])):
+                        ijob0 = job0 - i
+                        break
+                assert ijob0 is not None and 0 <= ijob0 < 50
+                ijob = ijob0 + 1
+                print fn, job, job0, isample, ijob0
 
-                    if ijob0 == 0:
-                        shutil.copy2(os.path.join(tmpdir, 'observed.root'), os.path.join(sampledir, 'observed.root'))
-                    shutil.copy2(os.path.join(tmpdir, 'expected.root'), os.path.join(sampledir, 'expected_%i.root' % ijob)) # follow crab convention
-                    x = os.path.join(sampledir, 'combine_output_%i.txt' % ijob)
-                    shutil.copy2(os.path.join(tmpdir, 'combine_output.txt'), x)
-                    os.system('gzip %s' % x)
-                    
-                    shutil.rmtree(tmpdir)
-                    
+                if ijob0 == 0:
+                    shutil.copy2(os.path.join(tmpdir, 'observed.root'), os.path.join(sampledir, 'observed.root'))
+                shutil.copy2(os.path.join(tmpdir, 'expected.root'), os.path.join(sampledir, 'expected_%i.root' % ijob)) # follow crab convention
+                x = os.path.join(sampledir, 'combine_output_%i.txt' % ijob)
+                shutil.copy2(os.path.join(tmpdir, 'combine_output.txt'), x)
+                os.system('gzip %s' % x)
+
+                shutil.rmtree(tmpdir)
+
     elif bool_from_argv('precheck'):
         files = ['combine_output_%i.txtgz', 'observed_%i.root', 'expected_%i.root']
         is_crab = bool_from_argv('is_crab')
