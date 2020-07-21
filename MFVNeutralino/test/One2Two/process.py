@@ -97,19 +97,89 @@ def rrange(path):
 
 
 if __name__ == '__main__':
-    if bool_from_argv('precheck'):
+    def _try(fcn,msg,*args):
+        try:
+            fcn(*args)
+        except:
+            print msg
+
+    if bool_from_argv('copycrab'):
+        import shutil
+        from JMTucker.Tools.CRAB3ToolsBase import crab_dirs_root, crab_dirs_from_argv, crab_get_output_dir
+
+        dest = crab_dirs_root(sys.argv[1])
+        if not os.path.isdir(dest):
+            os.mkdir(dest)
+
+        for wd in crab_dirs_from_argv():
+            isample = int(os.path.basename(wd).replace('crab_signal_',''))
+            sampledir = os.path.join(dest, 'crab_signal_%05i' % isample)
+            if not os.path.isdir(sampledir):
+                os.mkdir(sampledir)
+            od = os.path.join('/eos/uscms', crab_get_output_dir(wd)[1:], '0000')
+            obs_fn = os.path.join(od, 'observed.root')
+            if not os.path.isfile(obs_fn):
+                obs_fn = os.path.join(od, 'observed_1.root')
+            _try(shutil.copy2, 'could not copy observed.root for %s' % wd, obs_fn, os.path.join(sampledir, 'observed.root'))
+            for fn in glob(os.path.join(od, 'expected_*.root')):
+                _try(shutil.copy2, 'could not copy %s for %s' % (fn, wd), fn, os.path.join(sampledir, os.path.basename(fn)))
+            #for fn in glob(os.path.join(od, 'combine_output*')):
+            #    shutil.copy2(fn, os.path.join(sampledir, os.path.basename(fn)))
+
+    elif bool_from_argv('unpackcrab'):
+        import tempfile, shutil
+        from JMTucker.Tools.CRAB3ToolsBase import crab_dirs_root, crab_dirs_from_argv, crab_get_output_dir
+
+        dest = crab_dirs_root(sys.argv[1])
+        if not os.path.isdir(dest):
+            os.mkdir(dest)
+
+        for wd in crab_dirs_from_argv():
+            od = os.path.join('/eos/uscms', crab_get_output_dir(wd)[1:])
+            nds = glob(os.path.join(od, '000?'))
+            print wd, od, nds
+            for nd in nds:
+                fns = glob(os.path.join(nd, 'output_*.txz'))
+                for fn in fns:
+                    job = int(os.path.basename(fn).replace('.txz','').rsplit('_',1)[1])
+                    job0 = job-1
+
+                    # argh lzma tarfile isn't avail in py2
+                    tmpdir = tempfile.mkdtemp()
+                    os.system('tar --directory=%s -xf %s' % (tmpdir, fn))
+                    #os.system('ls -l %s' % tmpdir)
+                    isample = int(open(os.path.join(tmpdir, 'isample.txt')).readlines()[job0])
+
+                    sampledir = os.path.join(dest, 'crab_signal_%05i' % isample)
+                    if not os.path.isdir(sampledir):
+                        os.mkdir(sampledir)
+
+                    firstjob_lines = open(os.path.join(tmpdir, 'firstjob.txt')).readlines()
+                    ijob0 = None
+                    for i in xrange(job0, -1, -1):
+                        if bool(int(firstjob_lines[i])):
+                            ijob0 = job0 - i
+                            break
+                    assert ijob0 is not None and 0 <= ijob0 < 50
+                    ijob = ijob0 + 1
+                    print fn, job, job0, isample, ijob0
+
+                    if ijob0 == 0:
+                        shutil.copy2(os.path.join(tmpdir, 'observed.root'), os.path.join(sampledir, 'observed.root'))
+                    shutil.copy2(os.path.join(tmpdir, 'expected.root'), os.path.join(sampledir, 'expected_%i.root' % ijob)) # follow crab convention
+                    x = os.path.join(sampledir, 'combine_output_%i.txt' % ijob)
+                    shutil.copy2(os.path.join(tmpdir, 'combine_output.txt'), x)
+                    os.system('gzip %s' % x)
+                    
+                    shutil.rmtree(tmpdir)
+                    
+    elif bool_from_argv('precheck'):
         files = ['combine_output_%i.txtgz', 'observed_%i.root', 'expected_%i.root']
         is_crab = bool_from_argv('is_crab')
         if is_crab:
             jobs = list(range(1,njobs+1))
         else:
             jobs = list(range(njobs))
-
-        def _try(fcn,*args):
-            try:
-                fcn(*args)
-            except:
-                pass
 
         for path in sys.argv[1:]:
             for j in jobs:
@@ -121,10 +191,11 @@ if __name__ == '__main__':
             first_j = 1 if is_crab else 0
             obs_fn_final = os.path.join(path, 'observed.root')
             obs_fn = os.path.join(path, 'observed_%i.root' % first_j)
-            _try(os.rename, obs_fn, obs_fn_final)
+            _try(os.rename, 'could not rename %s -> %s' % (obs_fn, obs_fn_final), obs_fn, obs_fn_final)
             for j in jobs:
                 if j != first_j:
-                    _try(os.remove, os.path.join(path, 'observed_%i.root' % j))
+                    p = os.path.join(path, 'observed_%i.root' % j)
+                    _try(os.remove, 'could not rm %s' % p, p)
 
     else:
         remake = bool_from_argv('remake')
