@@ -7,7 +7,7 @@ for x in "$@"; do
         j=$((i/1000))
         nd=$(printf '%04i' $j )
         echo copy root://cmseos.fnal.gov/$store/$nd/output_${i}.txz to "$x"
-#        xrdcp -sf root://cmseos.fnal.gov/$store/$nd/output_${i}.txz "$x"
+        xrdcp -sf root://cmseos.fnal.gov/$store/$nd/output_${i}.txz "$x"
     done
 
 done
