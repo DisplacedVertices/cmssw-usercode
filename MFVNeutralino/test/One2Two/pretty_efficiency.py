@@ -1,7 +1,7 @@
 import sys, os
 from JMTucker.Tools.ROOTTools import *
 
-path = plot_dir('pretty_efficiency', make=True)
+path = plot_dir('pretty_efficiency_corrected', make=True)
 
 ts = tdr_style()
 ROOT.gStyle.SetPalette(ROOT.kBird) #kColorPrintableOnGrey
@@ -38,7 +38,7 @@ for which in 'run2','2017p8':
     #    xax.SetBinLabel(xax.FindBin(1000), '1000')
     #    xax.SetBinLabel(xax.FindBin(1200), '1200')
     #    xax.SetBinLabel(xax.FindBin(1400), '1400')
-        xax.SetRangeUser(300,2800)
+        xax.SetRangeUser(300,3000)
         xax.SetLabelSize(0.045)
         xax.SetTitleSize(0.05)
         xax.SetTitleOffset(1.05)
@@ -57,7 +57,7 @@ for which in 'run2','2017p8':
     #    yax.SetBinLabel(yax.FindBin(30000), '30')
         zax = h.GetZaxis()
         zax.SetRangeUser(0., 0.85)
-        zax.SetTitle('Efficiency (full selection + d_{VV} > 0.4 mm)')
+        zax.SetTitle('Efficiency (full selection)')
         zax.SetLabelSize(0.045)
         zax.SetTitleSize(0.05)
         zax.SetTitleOffset(1.22)
@@ -69,7 +69,10 @@ for which in 'run2','2017p8':
         h.Draw('colz')
         cms = write(61, 0.050, 0.129, 0.913, 'CMS')
         sim = write(52, 0.040, 0.234, 0.912, 'Simulation')
-        lum = write(42, 0.050, 0.636, 0.913, '(13 TeV)')
+        if which == '2017p8':
+            lum = write(42, 0.050, 0.495, 0.913, '101 fb^{-1} (13 TeV)')
+        else:
+            lum = write(42, 0.050, 0.495, 0.913, '140 fb^{-1} (13 TeV)')
         bn = 'scan_eff_%s_%s' % (which, kind)
         for ext in 'pdf', 'png', 'root':
             c.SaveAs(os.path.join(path, '%s.%s' % (bn, ext)))
