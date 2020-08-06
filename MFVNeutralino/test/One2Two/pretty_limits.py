@@ -6,7 +6,7 @@ draw_pm1sigma_excl = False
 
 which = '2017p8' if '2017p8' in sys.argv else 'run2'
 intlumi = 140 if which == 'run2' else 101
-path = plot_dir('pretty_limits_%s' % which, make=True)
+path = plot_dir('pretty_limits_%s_maybefinal_logy_fixed' % which, make=True)
 
 ts = tdr_style()
 ROOT.gStyle.SetPalette(ROOT.kBird)
@@ -22,7 +22,7 @@ def write(font, size, x, y, text):
     return w
 
 f = ROOT.TFile('limits_%s.root' % which)
-#f2 = ROOT.TFile('limits_fromr.root')
+f2 = ROOT.TFile('limits_fromr_%s.root' % which)
 
 for kind in 'mfv_stopdbardbar', 'mfv_neu':
     for xxx in 'big', 'small':
@@ -43,6 +43,7 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
         c.SetLeftMargin(0.13)
         c.SetRightMargin(0.20)
         c.SetLogz()
+        c.SetLogy()
         h = f.Get('%s/observed' % kind)
         xax = h.GetXaxis()
         if kind == 'mfv_neu':
@@ -66,7 +67,7 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
         if xxx == 'small':
             yax.SetRangeUser(0.1, 1)
         else:
-            yax.SetRangeUser(1, 100)
+            yax.SetRangeUser(0.1, 100)
 #        if xxx == 'small':
 #            for tau in range(400, 801, 200):
 #                yax.SetBinLabel(yax.FindBin(tau), '%.1f' % (tau/1000.))
@@ -83,21 +84,20 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
         zax = h.GetZaxis()
 #        zax.SetTitleOffset(1.2)
         #zax.SetBinLabel(zax.FindBin(30), '30')
-#     zax.SetRangeUser(0., 0.85)
         zax.SetTitle('95% CL upper limit on #sigma#bf{#it{#Beta}}^{2} (fb)')
         zax.SetLabelSize(0.045)
         zax.SetLabelOffset(0.00005)
         zax.SetTitleSize(0.05)
-        zax.SetTitleOffset(1.12)
+        zax.SetTitleOffset(1.20)
         h.Draw('colz')
         print kind, xxx, h.GetMinimum(), h.GetMaximum()
         if xxx == 'big':
             h.SetMinimum(0.01)
-            h.SetMaximum(37)
+            h.SetMaximum(100)
         else:
             h.SetMinimum(0.01)
             h.SetMaximum(240)
-        if xxx == 'big':
+        if False and  xxx == 'big':
             tt = ROOT.TText(213.5,-1.,'1')
             tt.SetNDC(0)
             tt.SetTextColor(ROOT.kBlack)
@@ -105,24 +105,24 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
             tt.SetTextSize(38)
             tt.Draw()
 
-#        g_obs   = f2.Get('%s_observed_fromrinterp_nm_exc_g' % kind)
-#        g_obsup = f2.Get('%s_observed_fromrinterp_up_exc_g' % kind)
-#        g_obsdn = f2.Get('%s_observed_fromrinterp_dn_exc_g' % kind)
-#        g_exp   = f2.Get('%s_expect50_fromrinterp_nm_exc_g' % kind)
-#        g_expup = f2.Get('%s_expect84_fromrinterp_nm_exc_g' % kind)
-#        g_expdn = f2.Get('%s_expect16_fromrinterp_nm_exc_g' % kind)
-#        if draw_pm1sigma_excl:
-#            for g in g_obs, g_exp:
-#                g.SetLineWidth(4)
-#        else:
-#            g_obs.SetLineWidth(3)
-#        for g in g_obs, g_obsup, g_obsdn:
-#            g.SetLineColor(ROOT.kBlack)
-#        for g in g_exp, g_expup, g_expdn:
-#            g.SetLineStyle(2 if draw_pm1sigma_excl else 7)
-#            g.SetLineColor(ROOT.kRed if draw_pm1sigma_excl else 1)
-#        for g in (g_obsup, g_obsdn, g_expup, g_expdn):
-#            g.SetLineWidth(2)
+        g_obs   = f2.Get('%s_observed_fromrinterp_nm_exc_g' % kind)
+        g_obsup = f2.Get('%s_observed_fromrinterp_up_exc_g' % kind)
+        g_obsdn = f2.Get('%s_observed_fromrinterp_dn_exc_g' % kind)
+        g_exp   = f2.Get('%s_expect50_fromrinterp_nm_exc_g' % kind)
+        g_expup = f2.Get('%s_expect84_fromrinterp_nm_exc_g' % kind)
+        g_expdn = f2.Get('%s_expect16_fromrinterp_nm_exc_g' % kind)
+        if draw_pm1sigma_excl:
+            for g in g_obs, g_exp:
+                g.SetLineWidth(4)
+        else:
+            g_obs.SetLineWidth(3)
+        for g in g_obs, g_obsup, g_obsdn:
+            g.SetLineColor(ROOT.kBlack)
+        for g in g_exp, g_expup, g_expdn:
+            g.SetLineStyle(2 if draw_pm1sigma_excl else 7)
+            g.SetLineColor(ROOT.kRed if draw_pm1sigma_excl else 1)
+        for g in (g_obsup, g_obsdn, g_expup, g_expdn):
+            g.SetLineWidth(2)
 
         if False and kind == 'mfv_stopdbardbar':
             for i in xrange(20):
@@ -150,9 +150,9 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
             g_exp.SetPoint(104,2230.032336,95.94497903);
             g_exp.SetPoint(105,2226.111259,96.99275073);
 
-#        excl_to_draw = [g_exp, g_expup, g_expdn, g_obs, g_obsup, g_obsdn] if draw_pm1sigma_excl else [g_exp, g_obs]
-#        for g in excl_to_draw:
-#            g.Draw('L')
+        excl_to_draw = [g_exp, g_expup, g_expdn, g_obs, g_obsup, g_obsdn] if draw_pm1sigma_excl else [g_exp, g_obs]
+        for g in excl_to_draw:
+            g.Draw('L')
 
         c.Update()
         palette = h.GetListOfFunctions().FindObject("palette")
@@ -170,12 +170,12 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
         else:
             model = '#kern[-0.%i]{#tilde{t} #rightarrow #bar{d}#kern[0.1]{#bar{d}}}' % (52 if draw_pm1sigma_excl else 22)
         leg.AddEntry(0, model, '')
-#        if draw_pm1sigma_excl:
-#            leg.AddEntry(g_obs, 'Observed #pm 1 #sigma_{th}', 'L')
-#            leg.AddEntry(g_exp, 'Expected #pm 1 #sigma_{exp}', 'L')
-#        else:
-#            leg.AddEntry(g_obs, '#kern[-0.22]{Observed}', 'L')
-#            leg.AddEntry(g_exp, '#kern[-0.22]{Expected}', 'L')
+        if draw_pm1sigma_excl:
+            leg.AddEntry(g_obs, 'Observed #pm 1 #sigma_{th}', 'L')
+            leg.AddEntry(g_exp, 'Expected #pm 1 #sigma_{exp}', 'L')
+        else:
+            leg.AddEntry(g_obs, '#kern[-0.22]{Observed}', 'L')
+            leg.AddEntry(g_exp, '#kern[-0.22]{Expected}', 'L')
         leg.Draw()
 
         if draw_pm1sigma_excl:
