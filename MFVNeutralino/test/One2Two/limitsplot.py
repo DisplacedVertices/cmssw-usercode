@@ -44,7 +44,7 @@ def tgae(x, y, exl, exh, eyl, eyh, title, xtitle, color):
     return fmt(t, title, xtitle, color)
 
 def parse_theory(which, include_errors=True, cache={}):
-    if which not in ('gluglu', 'stopstop'):
+    if which not in ('gluglu', 'stopstop', 'higgsino_N2N1'):
         raise ValueError('bad which %r' % which)
     fn = which + '.csv'
     if not cache.has_key(fn):
@@ -56,7 +56,7 @@ def parse_theory(which, include_errors=True, cache={}):
     return cache[fn]
 
 def fmt_theory(which, g, xtitle):
-    fmt(g, '', xtitle, 9 if which == 'gluglu' else 46)
+    fmt(g, '', xtitle, 9 if which == 'gluglu' else 94 if which == 'higgsino_N2N1' else 46)
 
 def make_theory(which, include_errors=True, return_list=False):
     xsecs = parse_theory(which, include_errors)
@@ -155,7 +155,7 @@ def make_1d_plot(d, name, xkey='mass'):
 
     class G:
         def __iter__(self):
-            for x in 'observed expect50 expect68 expect95 expect2p5 expect16 expect84 expect97p5 theory'.split():
+            for x in 'observed expect50 expect68 expect95 expect2p5 expect16 expect84 expect97p5 theory theory2'.split():
                 if hasattr(self, x):
                     y = getattr(self, x)
                     y.SetName(x)
@@ -172,13 +172,19 @@ def make_1d_plot(d, name, xkey='mass'):
     g.expect84  =  tgae(d[xkey], d['expect84'],  None, None, None, None, '', xtitle, 1)
     g.expect97p5 = tgae(d[xkey], d['expect97p5'], None, None, None, None, '', xtitle, 1)
 
+    which_theory = None
+    which_theory2 = None
+
     if name.startswith('multijet'):
         which_theory = 'gluglu'
+        which_theory2 = 'higgsino_N2N1'
     elif name.startswith('dijet'):
         which_theory = 'stopstop'
 
     if xkey == 'mass':
         g.theory = make_theory(which_theory)
+        if which_theory2:
+            g.theory2 = make_theory(which_theory2)
     else:
         xsecs = parse_theory(which_theory)
         zz = [(xsec,unc) for mass, xsec, unc in xsecs if mass == which_mass]
@@ -191,6 +197,19 @@ def make_1d_plot(d, name, xkey='mass'):
         ey = [unc]*len(x)
         g.theory = tge(zip(x,y,ey))
         fmt_theory(which_theory, g.theory, xtitle)
+
+        if which_theory2:
+            xsecs = parse_theory(which_theory2)
+            zz = [(xsec,unc) for mass, xsec, unc in xsecs if mass == which_mass]
+            if zz:
+                xsec, unc = zz[0]
+            else:
+                xsec, unc = 1e-99, 1e-99
+            x = d[xkey]
+            y = [xsec]*len(x)
+            ey = [unc]*len(x)
+            g.theory2 = tge(zip(x,y,ey))
+            fmt_theory(which_theory2, g.theory2, xtitle)
 
     return g
 
@@ -509,8 +528,10 @@ if __name__ == '__main__':
             ps = plot_saver(plot_dir('limitsplot_theory'), size=(600,600))
             g1 = make_theory('gluglu')
             g2 = make_theory('stopstop')
+            g3 = make_theory('higgsino_N2N1')
             g1.Draw('A3')
             g2.Draw('3')
+            g3.Draw('3')
             ps.save('theory')
 
         elif cmd == 'save_1d_plots':

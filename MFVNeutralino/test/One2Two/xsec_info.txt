@@ -1,0 +1,7 @@
+gluinos: https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SUSYCrossSections13TeVgluglu (NNLO_approx+NNLL)
+stops: https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SUSYCrossSections13TeVstopsbottom (NNLO_approx+NNLL)
+neutralinos: https://twiki.cern.ch/twiki/bin/view/LHCPhysics/SUSYCrossSections13TeVn1n2hino (NLO+NLL for Higgsino-like mass-degenerate N2N1 production)
+
+Note for neutralinos that the Twiki only went up to 1450 GeV in mass, so we had to extend the fit range and follow their instructions to rerun it. This is done in /afs/cern.ch/user/j/jreicher/workdir/public/EWKGauginoCrossSections_13TeV/run.sh (and then parse the output + convert the uncertainties to percent to be in the same format as our other csv files)
+
+Also note for neutralinos that only the N2N1 process and Higgsinos are considered, since this process doesn't exist for winos/binos, and the other processes would include charginos (which our signal samples do not include).

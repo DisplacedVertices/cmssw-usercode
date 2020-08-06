@@ -56,9 +56,11 @@ def nice_leg(kind):
     elif kind.startswith('dijet_tau'):
         return '#tilde{t} #rightarrow #bar{d}#kern[0.1]{#bar{d}}, c#tau = ' + tau(kind.replace('dijet_tau', ''))
 
-def nice_theory(kind):
-    if kind.startswith('multijet'):
+def nice_theory(kind, idx=1):
+    if kind.startswith('multijet') and idx == 1:
         return '#tilde{g}#tilde{g} production'
+    elif kind.startswith('multijet') and idx == 2:
+        return '#tilde{#chi}^{0}#tilde{#chi}^{0} production'
     elif kind.startswith('dijet'):
         return '#tilde{t}#kern[0.9]{#tilde{t}}* production'
 
@@ -81,6 +83,12 @@ for kind in kinds:
     expect68 = f.Get('%s/expect68' % kind)
     expect95 = f.Get('%s/expect95' % kind)
     theory = f.Get('%s/theory' % kind)
+
+    # in case we want two theory curves on one limit plot
+    theory2 = None
+
+    if kind.startswith('multijet'):
+        theory2 = f.Get('%s/theory2' % kind)
 
     if 0:
         if which == 'run2':
@@ -160,10 +168,16 @@ for kind in kinds:
     theory.SetLineWidth(2)
     if kind.startswith('multijet'):
         theory_color = 9
+        theory2_color = 94
     elif kind.startswith('dijet'):
         theory_color = 46
     theory.SetLineColor(theory_color)
     theory.SetFillColorAlpha(theory_color, 0.5)
+
+    if theory2 :
+        theory2.SetLineWidth(2)
+        theory2.SetLineColor(theory2_color)
+        theory2.SetFillColorAlpha(theory2_color, 0.5)
 
     expect95.SetLineColor(ROOT.kOrange)
     expect68.SetLineColor(ROOT.kGreen+1)
@@ -175,6 +189,8 @@ for kind in kinds:
 #    if draw_theory:
 #        theory.Draw('L3')
     theory.Draw('L3')
+    if theory2 :
+        theory2.Draw('L3')
     expect50.Draw('L')
     observed.Draw('L')
 
@@ -182,7 +198,7 @@ for kind in kinds:
 #        leg = ROOT.TLegend(0.552, 0.563, 0.870, 0.867)
 #    else:
 #        leg = ROOT.TLegend(0.552, 0.603, 0.870, 0.867)
-    leg = ROOT.TLegend(0.552, 0.563, 0.870, 0.867)
+    leg = ROOT.TLegend(0.567, 0.563, 0.870, 0.867)
     leg.SetTextFont(42)
     leg.SetFillColor(ROOT.kWhite)
     leg.SetBorderSize(0)
@@ -195,6 +211,8 @@ for kind in kinds:
 #    if draw_theory:
 #        leg.AddEntry(theory, nice_theory(kind) + ', #bf{#it{#Beta}}=1', 'LF')
     leg.AddEntry(theory, nice_theory(kind) + ', #bf{#it{#Beta}}=1', 'LF')
+    if theory2 :
+        leg.AddEntry(theory2, nice_theory(kind,2) + ', #bf{#it{#Beta}}=1', 'LF')
     leg.Draw()
 
     cms = write(61, 0.050, 0.142, 0.825, 'CMS')
