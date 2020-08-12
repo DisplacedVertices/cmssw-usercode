@@ -211,7 +211,7 @@ class UserCacheHelper:
       self.proxy = proxy
 
       if user is None:
-         user = getUsernameFromSiteDB()
+         user = getUsername()
          if not user:
             raise CRABToolsException('could not get username from sitedb, returned %r' % user)
       self.user = user
