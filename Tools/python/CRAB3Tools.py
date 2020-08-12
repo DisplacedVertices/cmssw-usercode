@@ -8,7 +8,7 @@ import json
 import pycurl
 from CRABAPI.RawCommand import crabCommand
 from CRABClient.UserUtilities import config as Config
-from CRABClient.UserUtilities import getUsernameFromSiteDB
+from CRABClient.UserUtilities import getUsername
 from JMTucker.Tools.CRAB3ToolsBase import *
 
 def crab_command(*args, **kwargs):
