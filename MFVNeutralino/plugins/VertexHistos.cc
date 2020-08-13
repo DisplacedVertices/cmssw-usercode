@@ -763,7 +763,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 	    jet_index = j;
 	  }
 	}
-	std::cout << "sv: " << isv << "track: " << i << "match_threshold: " << match_threshold << "jet_index: " << jet_index << std::endl; 
+	//std::cout << "sv: " << isv << "track: " << i << "match_threshold: " << match_threshold << "jet_index: " << jet_index << std::endl; 
 	track_which_jet.push_back((int) jet_index);
       }
       sv_track_which_jet.push_back(track_which_jet);
