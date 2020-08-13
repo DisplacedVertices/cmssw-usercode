@@ -326,7 +326,7 @@ def get(i): return _l[i]
                 stageout_user = username # JMTBAD use getUsernameFromSiteDB?
                 if stageout_path:
                     stageout_path = '/' + stageout_path
-                stageout_path = 'root://eosuser.cern.ch//eos/user/' stageout_user[0] + "/" + stageout_user + stageout_path
+                stageout_path = 'root://eosuser.cern.ch//eos/user/' + stageout_user[0] + "/" + stageout_user + stageout_path
                 if not publish_name:
                     publish_name = batch_name.replace('/', '_')
                 stageout_path += '/$(<cs_primaryds)/' + publish_name + '/$(<cs_timestamp)/$(printf "%04i" $(($job/1000)) )'
