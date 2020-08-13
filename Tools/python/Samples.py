@@ -602,7 +602,8 @@ for s in registry.all():
         for ds4 in 'ntuple', 'nr_':
             if ds.startswith(ds4):
                 s.datasets[ds].condor = True
-                s.datasets[ds].xrootd_url = xrootd_sites['T3_US_FNALLPC']
+                #s.datasets[ds].xrootd_url = xrootd_sites['T3_US_FNALLPC']
+                s.datasets[ds].xrootd_url = "root://eosuser.cern.ch/"
 
 ########
 # other condor declarations, generate condorable dict with Shed/condor_list.py

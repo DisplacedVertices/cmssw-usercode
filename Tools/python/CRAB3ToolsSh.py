@@ -85,12 +85,12 @@ def crab_hadd_files(working_dir, lpc_shortcut=False, **kwargs):
     if lpc_shortcut:
         expected = crab_get_njobs_from_log(working_dir)
         path = '/eos/uscms' + crab_get_output_dir(working_dir)
-        zero_dirs = [x.strip() for x in popen('eos root://cmseos.fnal.gov ls %s' % path).split('\n') if x.strip()]
+        zero_dirs = [x.strip() for x in popen('eos root://eosuser.cern.ch ls %s' % path).split('\n') if x.strip()]
         files = []
-        dbase = path.replace('/eos/uscms', 'root://cmseos.fnal.gov/') + '/'
+        dbase = path.replace('/eos/uscms', 'root://eosuser.cern.ch/') + '/'
         for zd in zero_dirs:
             d = dbase + zd + '/'
-            files += [d + x.strip() for x in popen('eos root://cmseos.fnal.gov ls %s/%s' % (path, zd)).split() if x.strip().endswith('.root')]
+            files += [d + x.strip() for x in popen('eos root://eosuser.cern.ch ls %s/%s' % (path, zd)).split() if x.strip().endswith('.root')]
     else:
         expected = crab_get_njobs(working_dir)
         res = crab_command('out', '--xrootd', dir=working_dir)

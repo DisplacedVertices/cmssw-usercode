@@ -53,6 +53,8 @@ class EdmFileInfo(object):
             fn = 'root://cmseos.fnal.gov/' + fn
         elif fn.startswith('/store'):
             fn = 'root://cmsxrootd.fnal.gov/' + fn
+        elif fn.startswith('/eos'):
+            fn = 'root://eosuser.cern.ch/' + fn
 
         if not trees:
             trees = EdmFileInfo.event_tree_only

@@ -383,7 +383,7 @@ def cs_report(wd, partial=False):
     return ll_all
 
 def cs_last_input_file(wd, job):
-    _r = re.compile(r'(/store.*\.root)')
+    _r = re.compile(r'(/eos.*\.root)')
     for line in reversed(file(cs_output_fn(wd, job)).readlines()):
         mo = _r.search(line)
         if mo:

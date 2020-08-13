@@ -111,7 +111,7 @@ def cmssw_base(extra=''):
     return os.path.join(b, extra) if extra else b
 
 def norm_fn(fn, fs_prefix=''):
-    if not fn.startswith('/store') and not fn.startswith('root://'):
+    if not fn.startswith('/store') and not fn.startswith('root://') and not fn.startswith('/eos'):
         fn = fs_prefix + expanduservars(fn)
     return fn
 
