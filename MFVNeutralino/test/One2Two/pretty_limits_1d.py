@@ -168,7 +168,7 @@ for kind in kinds:
     theory.SetLineWidth(2)
     if kind.startswith('multijet'):
         theory_color = 9
-        theory2_color = 94
+        theory2_color = 96
     elif kind.startswith('dijet'):
         theory_color = 46
     theory.SetLineColor(theory_color)

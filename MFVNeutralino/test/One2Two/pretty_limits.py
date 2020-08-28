@@ -105,54 +105,68 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
             tt.SetTextSize(38)
             tt.Draw()
 
-        g_obs   = f2.Get('%s_observed_fromrinterp_nm_exc_g' % kind)
-        g_obsup = f2.Get('%s_observed_fromrinterp_up_exc_g' % kind)
-        g_obsdn = f2.Get('%s_observed_fromrinterp_dn_exc_g' % kind)
-        g_exp   = f2.Get('%s_expect50_fromrinterp_nm_exc_g' % kind)
-        g_expup = f2.Get('%s_expect84_fromrinterp_nm_exc_g' % kind)
-        g_expdn = f2.Get('%s_expect16_fromrinterp_nm_exc_g' % kind)
-        if draw_pm1sigma_excl:
-            for g in g_obs, g_exp:
-                g.SetLineWidth(4)
-        else:
-            g_obs.SetLineWidth(3)
-        for g in g_obs, g_obsup, g_obsdn:
-            g.SetLineColor(ROOT.kBlack)
-        for g in g_exp, g_expup, g_expdn:
-            g.SetLineStyle(2 if draw_pm1sigma_excl else 7)
-            g.SetLineColor(ROOT.kRed if draw_pm1sigma_excl else 1)
-        for g in (g_obsup, g_obsdn, g_expup, g_expdn):
-            g.SetLineWidth(2)
+        if   kind == 'mfv_stopdbardbar' :
+            theories = ['stopstop']
+        elif kind == 'mfv_neu' :
+            theories = ['gluglu', 'higgsino_N2N1']
 
-        if False and kind == 'mfv_stopdbardbar':
-            for i in xrange(20):
-                print 'ugh'
-            assert h.FindBin(1600,82) == 633
-            assert h.FindBin(1800,82) == 634
-            assert h.FindBin(2000,82) == 635
-            h.SetBinContent(634, (h.GetBinContent(633) + h.GetBinContent(635))/2)
+        for theory in theories :
 
-            assert h.FindBin(2000,0.2) == 43
-            assert h.FindBin(2200,0.2) == 44
-            assert h.FindBin(2400,0.2) == 45
-            h.SetBinContent(44, (h.GetBinContent(43) + h.GetBinContent(45))/2)
-            
-        if False and kind == 'mfv_neu':
-            for i in xrange(20):
-                print 'ugh'
-            g_exp.SetPoint(85,2273.164179,77.03205233);
-            g_exp.SetPoint(86,2269.243102,77.98952421);
-            g_exp.SetPoint(87,2265.322025,79.00331796);
-            g_exp.SetPoint(88,2261.400949,80.01711171);
-            g_exp.SetPoint(99,2233.953412,90.99987733);
-            g_exp.SetPoint(102,2233.953412,94.02491511);
-            g_exp.SetPoint(103,2230.032336,95.02334834);
-            g_exp.SetPoint(104,2230.032336,95.94497903);
-            g_exp.SetPoint(105,2226.111259,96.99275073);
+            if theory == 'gluglu' :
+                theory_color = ROOT.kMagenta-4
+            elif theory == 'higgsino_N2N1' :
+                theory_color = ROOT.kRed
+            else :
+                theory_color = ROOT.kBlack
 
-        excl_to_draw = [g_exp, g_expup, g_expdn, g_obs, g_obsup, g_obsdn] if draw_pm1sigma_excl else [g_exp, g_obs]
-        for g in excl_to_draw:
-            g.Draw('L')
+            g_obs   = f2.Get('%s_observed_fromrinterp_%s_nm_exc_g' % (kind, theory))
+            g_obsup = f2.Get('%s_observed_fromrinterp_%s_up_exc_g' % (kind, theory))
+            g_obsdn = f2.Get('%s_observed_fromrinterp_%s_dn_exc_g' % (kind, theory))
+            g_exp   = f2.Get('%s_expect50_fromrinterp_%s_nm_exc_g' % (kind, theory))
+            g_expup = f2.Get('%s_expect84_fromrinterp_%s_nm_exc_g' % (kind, theory))
+            g_expdn = f2.Get('%s_expect16_fromrinterp_%s_nm_exc_g' % (kind, theory))
+            if draw_pm1sigma_excl:
+                for g in g_obs, g_exp:
+                    g.SetLineWidth(4)
+            else:
+                g_obs.SetLineWidth(3)
+            for g in g_obs, g_obsup, g_obsdn:
+                g.SetLineColor(theory_color)
+            for g in g_exp, g_expup, g_expdn:
+                g.SetLineStyle(2 if draw_pm1sigma_excl else 7)
+                g.SetLineColor(ROOT.kRed if draw_pm1sigma_excl else theory_color)
+            for g in (g_obsup, g_obsdn, g_expup, g_expdn):
+                g.SetLineWidth(2)
+
+            if False and kind == 'mfv_stopdbardbar':
+                for i in xrange(20):
+                    print 'ugh'
+                assert h.FindBin(1600,82) == 633
+                assert h.FindBin(1800,82) == 634
+                assert h.FindBin(2000,82) == 635
+                h.SetBinContent(634, (h.GetBinContent(633) + h.GetBinContent(635))/2)
+
+                assert h.FindBin(2000,0.2) == 43
+                assert h.FindBin(2200,0.2) == 44
+                assert h.FindBin(2400,0.2) == 45
+                h.SetBinContent(44, (h.GetBinContent(43) + h.GetBinContent(45))/2)
+                
+            if False and kind == 'mfv_neu':
+                for i in xrange(20):
+                    print 'ugh'
+                g_exp.SetPoint(85,2273.164179,77.03205233);
+                g_exp.SetPoint(86,2269.243102,77.98952421);
+                g_exp.SetPoint(87,2265.322025,79.00331796);
+                g_exp.SetPoint(88,2261.400949,80.01711171);
+                g_exp.SetPoint(99,2233.953412,90.99987733);
+                g_exp.SetPoint(102,2233.953412,94.02491511);
+                g_exp.SetPoint(103,2230.032336,95.02334834);
+                g_exp.SetPoint(104,2230.032336,95.94497903);
+                g_exp.SetPoint(105,2226.111259,96.99275073);
+
+            excl_to_draw = [g_exp, g_expup, g_expdn, g_obs, g_obsup, g_obsdn] if draw_pm1sigma_excl else [g_exp, g_obs]
+            for g in excl_to_draw:
+                g.Draw('L')
 
         c.Update()
         palette = h.GetListOfFunctions().FindObject("palette")
@@ -166,7 +180,7 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
         leg.SetFillColor(ROOT.kWhite)
         leg.SetBorderSize(1)
         if kind == 'mfv_neu':
-            model = '#kern[-0.%i]{#tilde{g} #rightarrow tbs}' % (42 if draw_pm1sigma_excl else 22)
+            model = '#kern[-0.%i]{#color[2]{#tilde{#chi}^{0}} / #color[612]{#tilde{g}} #rightarrow tbs}' % (42 if draw_pm1sigma_excl else 22)
         else:
             model = '#kern[-0.%i]{#tilde{t} #rightarrow #bar{d}#kern[0.1]{#bar{d}}}' % (52 if draw_pm1sigma_excl else 22)
         leg.AddEntry(0, model, '')
@@ -174,8 +188,14 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
             leg.AddEntry(g_obs, 'Observed #pm 1 #sigma_{th}', 'L')
             leg.AddEntry(g_exp, 'Expected #pm 1 #sigma_{exp}', 'L')
         else:
-            leg.AddEntry(g_obs, '#kern[-0.22]{Observed}', 'L')
-            leg.AddEntry(g_exp, '#kern[-0.22]{Expected}', 'L')
+            # force the lines in the legend to be black
+            g_obs_clone = g_obs.Clone()
+            g_exp_clone = g_exp.Clone()
+            g_obs_clone.SetLineColor(ROOT.kBlack)
+            g_exp_clone.SetLineColor(ROOT.kBlack)
+
+            leg.AddEntry(g_obs_clone, '#kern[-0.22]{Observed}', 'L')
+            leg.AddEntry(g_exp_clone, '#kern[-0.22]{Expected}', 'L')
         leg.Draw()
 
         if draw_pm1sigma_excl:

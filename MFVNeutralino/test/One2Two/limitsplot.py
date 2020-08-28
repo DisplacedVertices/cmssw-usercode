@@ -151,7 +151,7 @@ def make_1d_plot(d, name, xkey='mass'):
     else:
         assert type(xkey) == tuple
         xkey, which_mass = xkey
-        xtitle = 'lifetime (#mum)'
+        xtitle = 'lifetime (mm)'
 
     class G:
         def __iter__(self):
@@ -293,7 +293,7 @@ def theory_exclude(which, h, opt, use_error):
     max_mass = max(theory.keys())
     min_mass = min(theory.keys())
 
-    hexc = h.Clone(h.GetName() +'_exc_%s' % opt)
+    hexc = h.Clone(h.GetName() + '_%s' % which +'_exc_%s' % opt)
     hexc.SetStats(0)
 
     for ix in xrange(1, h.GetNbinsX()+1):
@@ -459,6 +459,7 @@ env R_LIBS=~/.R R --no-save <<EOF
             h = f.Get('%s/%s' % (k,y))
             to_ascii(h, open('to_r_%s.csv' % x, 'wt'), sep=',')
             print 'h<-read.table("to_r_%s.csv", header=TRUE, sep=",")' % x
+            # note that for full run 2 higgsino_N2N1 interpolation, we used yo=c(seq(0.115,0.915,by=0.1), seq(1,100,by=1)) for plot cosmetic reasons
             print 'i<-interp(x=h\\$x, y=h\\$y, z=h\\$z, xo=seq(300, 3000, by=1), yo=c(seq(0.1,0.9,by=0.1), seq(1,100,by=1)))'
             for a in 'xyz':
                 print 'write.csv(i\\$%s, "from_r_%s_%s.csv")' % (a,x,a)
@@ -508,15 +509,18 @@ def from_r():
                 n = '%s_fromrinterp' % ex
                 h = one_from_r(ex, n)
                 if k == 'mfv_stopdbardbar':
-                    which = 'stopstop' 
+                    whichlist = ['stopstop']
                 elif k == 'mfv_neu':
-                    which = 'gluglu'
-                hexc = theory_exclude(which, h, opt, 'expect' not in ex)
-                g = exc_graph(hexc, 1, 1)
-                g.SetName(n + '_%s_exc_g' % opt)
+                    whichlist = ['gluglu', 'higgsino_N2N1']
+
+                for which in whichlist :
+                    hexc = theory_exclude(which, h, opt, 'expect' not in ex)
+                    g = exc_graph(hexc, 1, 1)
+                    g.SetName(n + '_%s' % which + '_%s_exc_g' % opt)
+                    hexc.Write()
+                    g.Write()
+
                 h.Write()
-                hexc.Write()
-                g.Write()
     f.Close()
 
 if __name__ == '__main__':
