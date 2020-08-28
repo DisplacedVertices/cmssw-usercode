@@ -10,11 +10,26 @@ settings.event_filter = 'jets only novtx'
 
 version = settings.version + 'v1'
 
+# for stat extension
+#version = settings.version + 'ext1'
+#version = settings.version + 'ext2'
+#version = settings.version + 'ext3'
+#version = settings.version + 'ext4'
+#version = settings.version + 'ext5'
+#version = settings.version + 'ext6'
+
 cfgs = named_product(njets = [2,3],
                      nbjets = [0,1,2],
                      nsigmadxy = [4.0],
                      angle = [0.2], #, 0.1, 0.3],
                      )
+
+# Only needed stat ext for (3,2) events
+#cfgs = named_product(njets = [3],
+#                     nbjets = [2],
+#                     nsigmadxy = [4.0],
+#                     angle = [0.2], #, 0.1, 0.3],
+#                     )
 
 ####
 
@@ -42,6 +57,19 @@ process.mfvWeight.throw_if_no_mcstat = False
 process.p = cms.Path(process.mfvEventFilterSequence * process.goodOfflinePrimaryVertices)
 random_dict = {'jmtRescaledTracks': 1031}
 
+if version.endswith('ext1') :
+    random_dict = {'jmtRescaledTracks': 1991}
+elif version.endswith('ext2') :
+    random_dict = {'jmtRescaledTracks': 2930}
+elif version.endswith('ext3') :
+    random_dict = {'jmtRescaledTracks': 5770}
+elif version.endswith('ext4') :
+    random_dict = {'jmtRescaledTracks': 2892}
+elif version.endswith('ext5') :
+    random_dict = {'jmtRescaledTracks': 7809}
+elif version.endswith('ext6') :
+    random_dict = {'jmtRescaledTracks': 6586}
+
 for icfg, cfg in enumerate(cfgs):
     ex = '%i%i' % (cfg.njets, cfg.nbjets)
     #ex += ('nsig%.2f' % cfg.nsigmadxy).replace('.', 'p')
@@ -53,6 +81,19 @@ for icfg, cfg in enumerate(cfgs):
     assert not any([hasattr(process, x) for x in tracks_name, auxes_name, tree_name])
 
     random_dict[tracks_name] = 13068 + icfg
+
+    if version.endswith('ext1') :
+        random_dict[tracks_name] = 12991 + icfg
+    elif version.endswith('ext2') :
+        random_dict[tracks_name] = 10675 + icfg
+    elif version.endswith('ext3') :
+        random_dict[tracks_name] = 25423 + icfg
+    elif version.endswith('ext4') :
+        random_dict[tracks_name] = 27709 + icfg
+    elif version.endswith('ext5') :
+        random_dict[tracks_name] = 14456 + icfg
+    elif version.endswith('ext6') :
+        random_dict[tracks_name] = 12670 + icfg
 
     tracks = cms.EDProducer('MFVTrackMover',
                             tracks_src = cms.InputTag('jmtRescaledTracks'),
