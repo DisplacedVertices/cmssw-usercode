@@ -56,6 +56,8 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH1F* h_sv_shared_jets;
   TH1F* h_svdist2d_shared_jets;
   TH1F* h_svdist2d_no_shared_jets;
+  TH1F* h_absdeltaphi01_shared_jets;
+  TH1F* h_absdeltaphi01_no_shared_jets;
 
   TH1F* h_sv_track_weight[sv_num_indices];
   TH1F* h_sv_track_q[sv_num_indices];
@@ -355,6 +357,8 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   h_sv_shared_jets  = fs->make<TH1F>("h_sv_shared_jets", ";SV tracks share jet?", 2, 0, 2);
   h_svdist2d_shared_jets = fs->make<TH1F>("h_svdist2d_shared_jets", ";dist2d(sv #0, #1) (cm);arb. units", 500, 0, 1);
   h_svdist2d_no_shared_jets = fs->make<TH1F>("h_svdist2d_no_shared_jets", ";dist2d(sv #0, #1) (cm);arb. units", 500, 0, 1);
+  h_absdeltaphi01_shared_jets = fs->make<TH1F>("h_absdeltaphi01_shared_jets", ";abs(delta(phi of sv #0, phi of sv #1));arb. units", 316, 0, 3.16);
+  h_absdeltaphi01_no_shared_jets = fs->make<TH1F>("h_absdeltaphi01_no_shared_jets", ";abs(delta(phi of sv #0, phi of sv #1));arb. units", 316, 0, 3.16);
 }
 
 void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
@@ -752,29 +756,33 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
       std::vector<int> track_which_jet;
       for (int i = 0; i < ntracks; ++i) {
-	double match_threshold = 1.e9;
-	int jet_index = 0;
+	double match_threshold = 1.3;
+	int jet_index = 255;
 	for (unsigned j = 0; j < mevent->jet_track_which_jet.size(); ++j) {
-	  double a = fabs(aux.track_pt(i) - fabs(mevent->jet_track_qpt[j]));
-	  double b = fabs(aux.track_eta[i] - mevent->jet_track_eta[j]);
-	  double c = fabs(aux.track_phi[i] - mevent->jet_track_phi[j]);
+	  double a = fabs(aux.track_pt(i) - fabs(mevent->jet_track_qpt[j])) + 1;
+	  double b = fabs(aux.track_eta[i] - mevent->jet_track_eta[j]) + 1;
+	  double c = fabs(aux.track_phi[i] - mevent->jet_track_phi[j]) + 1;
 	  if (a * b * c < match_threshold) {
 	    match_threshold = a * b * c;
-	    jet_index = j;
+	    jet_index = mevent->jet_track_which_jet[j];
 	  }
 	}
-	std::cout << "sv: " << isv << "track: " << i << "match_threshold: " << match_threshold << "jet_index: " << jet_index << std::endl; 
-	track_which_jet.push_back((int) jet_index);
+	if (jet_index != 255) {
+	  track_which_jet.push_back((int) jet_index);
+	}
       }
       sv_track_which_jet.push_back(track_which_jet);
     }
 
     bool shared_jet = std::find_first_of (sv_track_which_jet[0].begin(), sv_track_which_jet[0].end(), sv_track_which_jet[1].begin(), sv_track_which_jet[1].end()) != sv_track_which_jet[0].end();
     h_sv_shared_jets->Fill(shared_jet, w);
-    if (shared_jet) 
+    if (shared_jet) {
       h_svdist2d_shared_jets->Fill(svdist2d, w);
-    else
+      h_absdeltaphi01_shared_jets->Fill(fabs(reco::deltaPhi(phi0, phi1)), w);
+    } else {
       h_svdist2d_no_shared_jets->Fill(svdist2d, w);
+      h_absdeltaphi01_no_shared_jets->Fill(fabs(reco::deltaPhi(phi0, phi1)), w);
+    }
   }
 }
 
