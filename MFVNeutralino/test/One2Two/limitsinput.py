@@ -39,7 +39,10 @@ def isample_available(f, isample, years):
     
 def details2name(kind, tau, mass):
     # same convention as scanpack: tau float:mm, mass int:GeV
-    return '%s_tau%06ium_M%04i' % (kind, int(tau*1000), mass)
+    if "splitSUSY" in kind :
+        return '%s_tau%09ium_M%04i_100' % (kind, int(tau*1000), mass) # FIXME assumes the LSP is 100 GeV always
+    else :
+        return '%s_tau%06ium_M%04i' % (kind, int(tau*1000), mass)
 def _nameok(name):
     assert name.count('_tau') == 1 and name.count('um_') == 1 and name.count('_M') == 1
 def name2kind(name):
@@ -237,33 +240,35 @@ def make_signals_2015p6(f, name_list):
     # downstream.
 
     fnpairs = [ # (hip, nonhip)--the first pair are to be the final 2016 paper one, the rest define newly generated signal points
-        ('/uscms/home/tucker/public/mfv/limitsinput_data_v15v5_scanpack_merge_hip_1_2_2p6_3_3p6_removeddbar.root', 
-         '/uscms/home/tucker/public/mfv/limitsinput_data_v15v5_scanpack_merge_1_1p5_2_2p5_2p7_3_3p5_removeddbar.root',),
-        ('/uscms/home/tucker/public/mfv/limitsinput_scanpack1D2016missing_hip.root',
-         '/uscms/home/tucker/public/mfv/limitsinput_scanpack1D2016missing.root',),
-        ('/uscms/home/tucker/public/mfv/limitsinput_scanpack4p6_hip.root',
-         '/uscms/home/tucker/public/mfv/limitsinput_scanpack4p6.root',),
+        #('/uscms/home/tucker/public/mfv/limitsinput_data_v15v5_scanpack_merge_hip_1_2_2p6_3_3p6_removeddbar.root', 
+        # '/uscms/home/tucker/public/mfv/limitsinput_data_v15v5_scanpack_merge_1_1p5_2_2p5_2p7_3_3p5_removeddbar.root',),
+        #('/uscms/home/tucker/public/mfv/limitsinput_scanpack1D2016missing_hip.root',
+        # '/uscms/home/tucker/public/mfv/limitsinput_scanpack1D2016missing.root',),
+        #('/uscms/home/tucker/public/mfv/limitsinput_scanpack4p6_hip.root',
+        # '/uscms/home/tucker/public/mfv/limitsinput_scanpack4p6.root',),
+        #('/uscms/home/joeyr/work/split_susy/mfv_946p1/src/JMTucker/MFVNeutralino/test/One2Two/limitsinput_2016.root',
+        # '/uscms/home/joeyr/work/split_susy/mfv_946p1/src/JMTucker/MFVNeutralino/test/One2Two/limitsinput_2016.root',),
+         ('/uscms/home/joeyr/work/split_susy/mfv_946p1/src/JMTucker/MFVNeutralino/test/One2Two/limitsinput_2016.root',), # modified code below to only use one 2016 file (since we don't have a HIP one for this study)
         ]
 
     def trigmult2016(x):
         return 1 # this was 0.99 in signal_efficiency, but now it's already in int_lumi at top
     def sf20156(x, pars=(0.9784, -1128., 1444.)):
         return trigmult2016(x) * (2. - pars[0] * ROOT.TMath.Erf((x-pars[1])/pars[2]))
-    sfs = [sf20156, trigmult2016, trigmult2016]
-    int_lumis = [2592.4, 19492., 16059.]
+    sfs = [sf20156, trigmult2016]
+    int_lumis = [2592.4, 16059.+19492.]
 
-    for ipair, (fn_2016_hip, fn_2016_nonhip) in enumerate(fnpairs):
-        name_list['title'] = name_list.get('title', '') + '+%s+%s' % (fn_2016_hip, fn_2016_nonhip)
-        f_2015 = f_2016 = f_2016_nonhip = ROOT.TFile.Open(fn_2016_nonhip)
-        f_2016_hip = ROOT.TFile.Open(fn_2016_hip)
-        h_name_list_2016 = f_2016_nonhip.Get('name_list') # already checked that the two files are in sync
+    for ipair, (fn_2016,) in enumerate(fnpairs):
+        name_list['title'] = name_list.get('title', '') + '+%s' % (fn_2016)
+        f_2015 = f_2016 = ROOT.TFile.Open(fn_2016)
+        h_name_list_2016 = f_2016.Get('name_list') # already checked that the two files are in sync
         def _hs(n):
-            return [f_2015.Get(n), f_2016_hip.Get(n), f_2016_nonhip.Get(n)]
+            return [f_2015.Get(n), f_2016.Get(n)]
 
         nsigs = h_name_list_2016.GetNbinsX()
         for ibin in xrange(1, nsigs+1):
-            if (ibin-1)%(nsigs/20) == 0:
-                sys.stdout.write('\rmake_signals_2015p6: pair %i/%i, %i/%i' % (ipair+1, len(fnpairs), ibin, nsigs)); sys.stdout.flush()
+            #if nsigs > 20 and (ibin-1)%(nsigs/20) == 0:
+            print('\rmake_signals_2015p6: pair %i/%i, %i/%i' % (ipair+1, len(fnpairs), ibin, nsigs)); sys.stdout.flush()
 
             old_isample = -ibin
             new_isample = old_isample if ipair == 0 else signalset.next_isample()
@@ -324,6 +329,18 @@ def sig_datamcSF_2017p8(name_year, debug=False):
 
     trackmover = { # after kind and year indices, rows are masses, cols are taus, each in same order as above two lists
         'mfv_stopdbardbar': { '2017': ( (0.2384, 0.1904, 0.1492, 0.1050, 0.1002),
+                                        (0.2496, 0.2014, 0.1604, 0.1152, 0.1104),
+                                        (0.2534, 0.2100, 0.1716, 0.1264, 0.1194),
+                                        (0.2584, 0.2142, 0.1756, 0.1278, 0.1204),
+                                        (0.2582, 0.2144, 0.1752, 0.1264, 0.1192),
+                                        (0.2684, 0.2186, 0.1760, 0.1244, 0.1158), ),
+                              '2018': ( (0.3068, 0.2600, 0.2344, 0.2010, 0.1968),
+                                        (0.3084, 0.2616, 0.2396, 0.2044, 0.1886),
+                                        (0.3084, 0.2654, 0.2438, 0.1900, 0.1910),
+                                        (0.3120, 0.2690, 0.2274, 0.1940, 0.1926),
+                                        (0.3140, 0.2594, 0.2320, 0.1974, 0.1940),
+                                        (0.3104, 0.2634, 0.2364, 0.2004, 0.1950), ), },
+        'mfv_splitSUSY':    { '2017': ( (0.2384, 0.1904, 0.1492, 0.1050, 0.1002),
                                         (0.2496, 0.2014, 0.1604, 0.1152, 0.1104),
                                         (0.2534, 0.2100, 0.1716, 0.1264, 0.1194),
                                         (0.2584, 0.2142, 0.1756, 0.1278, 0.1204),
@@ -397,8 +414,9 @@ def sig_uncert_2017p8(name_year, debug=False):
 
 def make_signals_2017p8(f, name_list):
     # 2017,8 are from minitrees (the 100kevt official samples) and scanpack.
-    scanpack_list = '/uscms/home/tucker/public/mfv/scanpacks/2017p8/scanpack1D_4_4p7_4p8.merged.list.gz'
-    trees = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV27m/mfv*.root'
+    #scanpack_list = '/uscms/home/tucker/public/mfv/scanpacks/2017p8/scanpack1D_4_4p7_4p8.merged.list.gz'
+    scanpack_list = None
+    trees = '/uscms/home/joeyr/crabdirs/MiniTreeV27m/mfv*.root'
     title = []
     sigs = {}
 
@@ -412,8 +430,8 @@ def make_signals_2017p8(f, name_list):
 
     nsigs = len(sigs)
     for isig, (name_year, fns) in enumerate(sigs.iteritems()):
-        if isig%(nsigs/20) == 0:
-            sys.stdout.write('\rmake_signals_2017p8: %i/%i' % (isig, nsigs)); sys.stdout.flush()
+        #if nsigs > 20 and isig%(nsigs/20) == 0:
+        print('\rmake_signals_2017p8: %i/%i' % (isig, nsigs)); sys.stdout.flush()
 
         name, year = name_year.rsplit('_',1)
         if name_list.has_key(name):

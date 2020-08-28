@@ -172,7 +172,7 @@ def make_1d_plot(d, name, xkey='mass'):
     g.expect84  =  tgae(d[xkey], d['expect84'],  None, None, None, None, '', xtitle, 1)
     g.expect97p5 = tgae(d[xkey], d['expect97p5'], None, None, None, None, '', xtitle, 1)
 
-    if name.startswith('multijet'):
+    if name.startswith('multijet') or name.startswith('splitSUSY'):
         which_theory = 'gluglu'
     elif name.startswith('dijet'):
         which_theory = 'stopstop'
@@ -196,24 +196,33 @@ def make_1d_plot(d, name, xkey='mass'):
 
 def save_1d_plots():
     xxx = [
-        ('multijet_M0800',   lambda s: 'neu'          in sample.name and sample.mass ==  800 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau',  800.)),
-        ('multijet_M1600',   lambda s: 'neu'          in sample.name and sample.mass == 1600 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 1600.)),
-        ('multijet_M2400',   lambda s: 'neu'          in sample.name and sample.mass == 2400 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 2400.)),
-        ('multijet_M3000',   lambda s: 'neu'          in sample.name and sample.mass == 3000 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 3000.)),
-        ('multijet_tau300um',lambda s: 'neu'          in sample.name and sample.tau  ==  0.3 and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
-        ('multijet_tau1mm',  lambda s: 'neu'          in sample.name and sample.tau  ==  1.  and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
-        ('multijet_tau10mm', lambda s: 'neu'          in sample.name and sample.tau  == 10.  and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
-        ('dijet_M0800',      lambda s: 'stopdbardbar' in sample.name and sample.mass ==  800 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau',  800.)),
-        ('dijet_M1600',      lambda s: 'stopdbardbar' in sample.name and sample.mass == 1600 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 1600.)),
-        ('dijet_M2400',      lambda s: 'stopdbardbar' in sample.name and sample.mass == 2400 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 2400.)),
-        ('dijet_M3000',      lambda s: 'stopdbardbar' in sample.name and sample.mass == 3000 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 3000.)),
-        ('dijet_tau300um',   lambda s: 'stopdbardbar' in sample.name and sample.tau  ==  0.3 and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
-        ('dijet_tau1mm',     lambda s: 'stopdbardbar' in sample.name and sample.tau  ==  1.  and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
-        ('dijet_tau10mm',    lambda s: 'stopdbardbar' in sample.name and sample.tau  == 10.  and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
+        #('multijet_M0800',   lambda s: 'neu'          in sample.name and sample.mass ==  800 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau',  800.)),
+        #('multijet_M1600',   lambda s: 'neu'          in sample.name and sample.mass == 1600 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 1600.)),
+        #('multijet_M2400',   lambda s: 'neu'          in sample.name and sample.mass == 2400 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 2400.)),
+        #('multijet_M3000',   lambda s: 'neu'          in sample.name and sample.mass == 3000 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 3000.)),
+        #('multijet_tau300um',lambda s: 'neu'          in sample.name and sample.tau  ==  0.3 and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
+        #('multijet_tau1mm',  lambda s: 'neu'          in sample.name and sample.tau  ==  1.  and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
+        #('multijet_tau10mm', lambda s: 'neu'          in sample.name and sample.tau  == 10.  and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
+        #('dijet_M0800',      lambda s: 'stopdbardbar' in sample.name and sample.mass ==  800 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau',  800.)),
+        #('dijet_M1600',      lambda s: 'stopdbardbar' in sample.name and sample.mass == 1600 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 1600.)),
+        #('dijet_M2400',      lambda s: 'stopdbardbar' in sample.name and sample.mass == 2400 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 2400.)),
+        #('dijet_M3000',      lambda s: 'stopdbardbar' in sample.name and sample.mass == 3000 and sample.tau <= 100., lambda s: s.sample.tau,  ('tau', 3000.)),
+        #('dijet_tau300um',   lambda s: 'stopdbardbar' in sample.name and sample.tau  ==  0.3 and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
+        #('dijet_tau1mm',     lambda s: 'stopdbardbar' in sample.name and sample.tau  ==  1.  and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
+        #('dijet_tau10mm',    lambda s: 'stopdbardbar' in sample.name and sample.tau  == 10.  and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
+        ('splitSUSY_M2400_100',   lambda s: 'splitSUSY'          in sample.name and sample.mass == 2400, lambda s: s.sample.tau,  ('tau', 2400.)),
+        #('splitSUSY_tau100um',    lambda s: 'splitSUSY'          in sample.name and sample.tau  ==  0.1    and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
+        #('splitSUSY_tau1mm',      lambda s: 'splitSUSY'          in sample.name and sample.tau  ==  1.     and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
+        #('splitSUSY_tau10mm',     lambda s: 'splitSUSY'          in sample.name and sample.tau  == 10.     and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
+        #('splitSUSY_tau100mm',    lambda s: 'splitSUSY'          in sample.name and sample.tau  == 100.    and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
+        #('splitSUSY_tau1000mm',   lambda s: 'splitSUSY'          in sample.name and sample.tau  == 1000.   and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
+        #('splitSUSY_tau10000mm',  lambda s: 'splitSUSY'          in sample.name and sample.tau  == 10000.  and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
+        #('splitSUSY_tau100000mm', lambda s: 'splitSUSY'          in sample.name and sample.tau  == 100000. and sample.mass <= 3200, lambda s: s.sample.mass, 'mass'),
         ]
     
     in_f = ROOT.TFile('limitsinput.root')
     for which, years in ('run2', [2016,2017,2018]), ('2017p8', [2017,2018]):
+    #for which, years in ('2017p8', [2017,2018]), :
         out_f = ROOT.TFile('limits_1d_%s.root' % which, 'recreate')
         for name, use, sorter, xkey in xxx:
             d = limits()
@@ -244,9 +253,11 @@ def interpolate(h):
 def save_2d_plots():
     in_f = ROOT.TFile('limitsinput.root')
     for which, years in ('run2', [2016,2017,2018]), ('2017p8', [2017,2018]):
+    #for which, years in ('2017p8', [2017,2018]), :
         out_f = ROOT.TFile('limits_%s.root' % which, 'recreate')
 
-        for kind in 'mfv_stopdbardbar', 'mfv_neu':
+        #for kind in 'mfv_stopdbardbar', 'mfv_neu':
+        for kind in 'mfv_splitSUSY', :
             d = limits()
             for sample in sample_iterator(in_f, years):
                 if -sample.isample in (209,210,211,303,399,489,589,590,675,676):
@@ -319,16 +330,16 @@ def theory_exclude(which, h, opt, use_error):
     return hexc
 
 def simple_exclude():
-    f = ROOT.TFile('limits.root')
+    f = ROOT.TFile('limits_1d_2017p8.root')
     h = f.Get('observed')
     hi = gluglu_exclude(h, 'nm')
     c = ROOT.TCanvas('c', '', 800, 800)
     hi.SetMarkerStyle(20)
     hi.SetMarkerSize(1.5)
     hi.Draw('colz')
-    c.SaveAs('$asdf/a.png')
+    c.SaveAs('a.png')
     hi.GetYaxis().SetRangeUser(0.1,40)
-    c.SaveAs('$asdf/asml.png')
+    c.SaveAs('asml.png')
 
 def exc_graph(h, color, style):
     xax = h.GetXaxis()
@@ -393,7 +404,7 @@ def exc_graph_dumb(h, width, color, style, break_at):
     return gs
 
 def dbg_exclude():
-    f = ROOT.TFile('limits.root')
+    f = ROOT.TFile('limits_1d_2017p8.root')
 
     for interp in ('', '_interp'):
         c = ROOT.TCanvas('c', '', 1000, 800)
@@ -421,7 +432,7 @@ def dbg_exclude():
         c.SaveAs('/uscms/home/tucker/asdf/a%s.root' % interp)
 
 def to_r():
-    f = ROOT.TFile('limits.root')
+    f = ROOT.TFile('limits_1d_2017p8.root')
     print '''
 # if you didn't set up already, do this
 . /cvmfs/sft.cern.ch/lcg/views/LCG_89/x86_64-slc6-gcc62-opt/setup.sh
@@ -434,10 +445,12 @@ EOF
 env R_LIBS=~/.R R --no-save <<EOF
 '''
     print 'library(akima)'
-    for k in 'mfv_stopdbardbar', 'mfv_neu':
+    #for k in 'mfv_stopdbardbar', 'mfv_neu':
+    for k in 'splitSUSY_M2400_100', :
         for y in 'observed', 'expect2p5', 'expect16', 'expect50', 'expect68', 'expect84', 'expect95', 'expect97p5':
             x = '%s_%s' % (k,y)
             h = f.Get('%s/%s' % (k,y))
+            print h
             to_ascii(h, open('to_r_%s.csv' % x, 'wt'), sep=',')
             print 'h<-read.table("to_r_%s.csv", header=TRUE, sep=",")' % x
             print 'i<-interp(x=h\\$x, y=h\\$y, z=h\\$z, xo=seq(300, 2600, by=1), yo=c(seq(0.1,0.9,by=0.1), seq(1,100,by=1)))'
@@ -449,7 +462,7 @@ env R_LIBS=~/.R R --no-save <<EOF
 
 def one_from_r(ex, name):
     def read_csv(fn):
-        lines = [x.strip() for x in open(os.path.join('/uscms_data/d2/tucker/limits_temp',fn)).read().replace('"', '').split('\n') if x.strip()]
+        lines = [x.strip() for x in open(os.path.join('.',fn)).read().replace('"', '').split('\n') if x.strip()]
         lines.pop(0)
         vs = []
         for line in lines:
@@ -482,7 +495,8 @@ def one_from_r(ex, name):
 
 def from_r():
     f = ROOT.TFile('limits_fromr.root', 'recreate')
-    for k in 'mfv_stopdbardbar', 'mfv_neu':
+    #for k in 'mfv_stopdbardbar', 'mfv_neu', 'mfv_splitSUSY':
+    for k in 'mfv_splitSUSY',:
         for opt in 'nm', 'up', 'dn':
             for ex in 'observed', 'expect50', 'expect16', 'expect84': # expect2p5 expect68 expect95 expect97p5
                 ex = k + '_' + ex
@@ -490,7 +504,7 @@ def from_r():
                 h = one_from_r(ex, n)
                 if k == 'mfv_stopdbardbar':
                     which = 'stopstop' 
-                elif k == 'mfv_neu':
+                elif k == 'mfv_neu' or k == 'mfv_splitSUSY':
                     which = 'gluglu'
                 hexc = theory_exclude(which, h, opt, 'expect' not in ex)
                 g = exc_graph(hexc, 1, 1)

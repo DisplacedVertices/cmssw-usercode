@@ -5,7 +5,7 @@ ROOT.gErrorIgnoreLevel = 1001 # Suppress TCanvas::SaveAs messages.
 
 which = '2017p8' if '2017p8' in sys.argv else 'run2'
 intlumi = 140 if which == 'run2' else 101
-path = plot_dir('pretty_limits_1d_scanpack1Dplus2016missing_fixcombinefull_newxsec_bkgcorr_sigscaletkmover_2_%s' % which, make=True)
+path = plot_dir('pretty_limits_1d_splitSUSY_%s' % which, make=True)
 
 ts = tdr_style()
 
@@ -20,20 +20,21 @@ def write(font, size, x, y, text):
 f = ROOT.TFile('limits_1d_%s.root' % which)
 
 kinds = [
-    'multijet_M0800',
-    'multijet_M1600',
-    'multijet_M2400',
-    'multijet_M3000',
-    'multijet_tau300um',
-    'multijet_tau1mm',
-    'multijet_tau10mm',
-    'dijet_M0800',
-    'dijet_M1600',
-    'dijet_M2400',
-    'dijet_M3000',
-    'dijet_tau300um',
-    'dijet_tau1mm',
-    'dijet_tau10mm',
+    'splitSUSY_M2400_100'
+    #'multijet_M0800',
+    #'multijet_M1600',
+    #'multijet_M2400',
+    #'multijet_M3000',
+    #'multijet_tau300um',
+    #'multijet_tau1mm',
+    #'multijet_tau10mm',
+    #'dijet_M0800',
+    #'dijet_M1600',
+    #'dijet_M2400',
+    #'dijet_M3000',
+    #'dijet_tau300um',
+    #'dijet_tau1mm',
+    #'dijet_tau10mm',
     ]
 
 def tau(tau):
@@ -55,21 +56,28 @@ def nice_leg(kind):
         return '#tilde{#chi}^{0}/#tilde{g} #rightarrow tbs, c#tau = ' + tau(kind.replace('multijet_tau', ''))
     elif kind.startswith('dijet_tau'):
         return '#tilde{t} #rightarrow #bar{d}#kern[0.1]{#bar{d}}, c#tau = ' + tau(kind.replace('dijet_tau', ''))
+    elif kind.startswith('splitSUSY_M'):
+        masses = (kind.replace('splitSUSY_M', '')).split("_")
+        return 'splitSUSY #tilde{g} #rightarrow qq#tilde{#chi}, m(#tilde{g}) = %i GeV, m(#tilde{#chi}) = %i GeV' % (int(masses[0]),int(masses[1]))
 
 def nice_theory(kind):
     if kind.startswith('multijet'):
         return '#tilde{g}#tilde{g} production'
     elif kind.startswith('dijet'):
         return '#tilde{t}#kern[0.9]{#tilde{t}}* production'
+    elif kind.startswith('splitSUSY'):
+        return '#tilde{g}#tilde{g} production'
 
 for kind in kinds:
-    versus_tau = kind[-5] == 'M'
+    print kind
+    versus_tau = "_M" in kind
     versus_mass = 'tau' in kind
     assert int(versus_tau) + int(versus_mass) == 1
 
     c = ROOT.TCanvas('c', '', 800, 800)
     c.SetLogy()
-    if kind[-5] == 'M':
+    versus_tau = "_M" in kind
+    if versus_tau :
         c.SetLogx()
     c.SetTopMargin(0.1)
     c.SetBottomMargin(0.12)
@@ -124,7 +132,9 @@ for kind in kinds:
                 for jjj in 1,2,3:
                     g.SetPointEYlow(g.GetN()-jjj,0.18+1e-3*jjj)
 
-    particle = '#tilde{t}' if 'dijet' in kind else '#tilde{#chi}^{0} / #tilde{g}'
+    if       'dijet' in kind : particle = '#tilde{t}'
+    elif  'multijet' in kind : particle = '#tilde{#chi}^{0} / #tilde{g}'
+    elif 'splitSUSY' in kind : particle = '#tilde{g}'
     if versus_mass:
         xtitle = 'm_{%s} (GeV)' % particle
     elif versus_tau:
@@ -151,8 +161,12 @@ for kind in kinds:
         xax.SetLimits(105, 3200)
         yax.SetRangeUser(0.01, 100000 if versus_tau else 130) #(versus_tau and draw_theory) else 130)
     elif versus_tau:
-        xax.SetLimits(0.068, 130)
-        yax.SetRangeUser(0.001, 100000 if versus_tau else 130) #(versus_tau and draw_theory) else 130)
+        if 'splitSUSY' in kind :
+            xax.SetLimits(0.068, 1.3e4)
+            yax.SetRangeUser(0.001, 100000 if versus_tau else 130) #(versus_tau and draw_theory) else 130)
+        else :
+            xax.SetLimits(0.068, 130)
+            yax.SetRangeUser(0.001, 100000 if versus_tau else 130) #(versus_tau and draw_theory) else 130)
 
     observed.SetLineWidth(2)
     expect50.SetLineWidth(2)
@@ -162,6 +176,8 @@ for kind in kinds:
         theory_color = 9
     elif kind.startswith('dijet'):
         theory_color = 46
+    elif kind.startswith('splitSUSY'):
+        theory_color = ROOT.kBlue+3
     theory.SetLineColor(theory_color)
     theory.SetFillColorAlpha(theory_color, 0.5)
 
@@ -182,7 +198,7 @@ for kind in kinds:
 #        leg = ROOT.TLegend(0.552, 0.563, 0.870, 0.867)
 #    else:
 #        leg = ROOT.TLegend(0.552, 0.603, 0.870, 0.867)
-    leg = ROOT.TLegend(0.552, 0.563, 0.870, 0.867)
+    leg = ROOT.TLegend(0.452, 0.563, 0.770, 0.867)
     leg.SetTextFont(42)
     leg.SetFillColor(ROOT.kWhite)
     leg.SetBorderSize(0)

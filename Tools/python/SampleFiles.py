@@ -408,6 +408,20 @@ _add_ds("ntuplev27m_wgen", {
 
 
 _add_ds("ntuplev27m", {
+'mfv_splitSUSY_tau000000100um_M2400_100_2017': _fromnum0("/store/user/joeyr/mfv_splitSUSY_tau000000100um_M2400_100_2017/NtupleV27m_2017/200622_183241", 50),
+'mfv_splitSUSY_tau000001000um_M2400_100_2017': _fromnum0("/store/user/joeyr/mfv_splitSUSY_tau000001000um_M2400_100_2017/NtupleV27m_2017/200622_183242", 49),
+'mfv_splitSUSY_tau000010000um_M2400_100_2017': _fromnum0("/store/user/joeyr/mfv_splitSUSY_tau000010000um_M2400_100_2017/NtupleV27m_2017/200622_183243", 49),
+'mfv_splitSUSY_tau000100000um_M2400_100_2017': _fromnum0("/store/user/joeyr/mfv_splitSUSY_tau000100000um_M2400_100_2017/NtupleV27m_2017/200622_183244", 50),
+'mfv_splitSUSY_tau001000000um_M2400_100_2017': _fromnum0("/store/user/joeyr/mfv_splitSUSY_tau001000000um_M2400_100_2017/NtupleV27m_2017/200622_183245", 50),
+'mfv_splitSUSY_tau010000000um_M2400_100_2017': _fromnum0("/store/user/joeyr/mfv_splitSUSY_tau010000000um_M2400_100_2017/NtupleV27m_2017/200622_183246", 50),
+'mfv_splitSUSY_tau100000000um_M2400_100_2017': _fromnum0("/store/user/joeyr/mfv_splitSUSY_tau100000000um_M2400_100_2017/NtupleV27m_2017/200622_183247", 50),
+'mfv_splitSUSY_tau000000100um_M2400_100_2018': _fromnum0("/store/user/joeyr/mfv_splitSUSY_tau000000100um_M2400_100_2018/NtupleV27m_2018/200622_185921", 50),
+'mfv_splitSUSY_tau000001000um_M2400_100_2018': _fromnum0("/store/user/joeyr/mfv_splitSUSY_tau000001000um_M2400_100_2018/NtupleV27m_2018/200622_185922", 50),
+'mfv_splitSUSY_tau000010000um_M2400_100_2018': _fromnum0("/store/user/joeyr/mfv_splitSUSY_tau000010000um_M2400_100_2018/NtupleV27m_2018/200622_185923", 50),
+'mfv_splitSUSY_tau000100000um_M2400_100_2018': _fromnum0("/store/user/joeyr/mfv_splitSUSY_tau000100000um_M2400_100_2018/NtupleV27m_2018/200622_185924", 50),
+'mfv_splitSUSY_tau001000000um_M2400_100_2018': _fromnum0("/store/user/joeyr/mfv_splitSUSY_tau001000000um_M2400_100_2018/NtupleV27m_2018/200622_185925", 50),
+'mfv_splitSUSY_tau010000000um_M2400_100_2018': _fromnum0("/store/user/joeyr/mfv_splitSUSY_tau010000000um_M2400_100_2018/NtupleV27m_2018/200622_185926", 50),
+'mfv_splitSUSY_tau100000000um_M2400_100_2018': _fromnum0("/store/user/joeyr/mfv_splitSUSY_tau100000000um_M2400_100_2018/NtupleV27m_2018/200622_185927", 50),
 'qcdht0700_2017': _fromnum0("/store/user/tucker/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/NtupleV27m_2017/190802_112506", 16),
 'qcdht1000_2017': _fromnum0("/store/user/tucker/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/NtupleV27m_2017/190802_112507", 31),
 'qcdht1500_2017': _fromnum0("/store/user/tucker/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/NtupleV27m_2017/190802_112508", 63),
@@ -613,6 +627,30 @@ _add_ds("ntuplev27m_norefitdzcut", {
 'JetHT2018D': _fromnum0("/store/user/tucker/JetHT/NtupleV27m_NoRefitDzCut_2018/190819_163634", 344),
 })
 
+# splitSUSY samples for LLP summary plot
+_add_ds("miniaod", {
+    'mfv_splitSUSY_tau000000100um_M2400_100_2016': _fromnum1("/store/user/joeyr/splitSUSY/splitSUSY_M2400_100_ctau0p1_TuneCP2_13TeV_pythia8_RunIISummer16_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+    'mfv_splitSUSY_tau000001000um_M2400_100_2016': _fromnum1("/store/user/joeyr/splitSUSY/splitSUSY_M2400_100_ctau1p0_TuneCP2_13TeV_pythia8_RunIISummer16_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+    'mfv_splitSUSY_tau000010000um_M2400_100_2016': _fromnum1("/store/user/joeyr/splitSUSY/splitSUSY_M2400_100_ctau10p0_TuneCP2_13TeV_pythia8_RunIISummer16_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+    'mfv_splitSUSY_tau000100000um_M2400_100_2016': _fromnum1("/store/user/joeyr/splitSUSY/splitSUSY_M2400_100_ctau100p0_TuneCP2_13TeV_pythia8_RunIISummer16_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+    'mfv_splitSUSY_tau001000000um_M2400_100_2016': _fromnum1("/store/user/joeyr/splitSUSY/splitSUSY_M2400_100_ctau1000p0_TuneCP2_13TeV_pythia8_RunIISummer16_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+    'mfv_splitSUSY_tau010000000um_M2400_100_2016': _fromnum1("/store/user/joeyr/splitSUSY/splitSUSY_M2400_100_ctau10000p0_TuneCP2_13TeV_pythia8_RunIISummer16_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+    'mfv_splitSUSY_tau100000000um_M2400_100_2016': _fromnum1("/store/user/joeyr/splitSUSY/splitSUSY_M2400_100_ctau100000p0_TuneCP2_13TeV_pythia8_RunIISummer16_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+    'mfv_splitSUSY_tau000000100um_M2400_100_2017': _fromnum1("/store/user/joeyr/splitSUSY/splitSUSY_M2400_100_ctau0p1_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+    'mfv_splitSUSY_tau000001000um_M2400_100_2017': _fromnum1("/store/user/joeyr/splitSUSY/splitSUSY_M2400_100_ctau1p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+    'mfv_splitSUSY_tau000010000um_M2400_100_2017': _fromnum1("/store/user/joeyr/splitSUSY/splitSUSY_M2400_100_ctau10p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+    'mfv_splitSUSY_tau000100000um_M2400_100_2017': _fromnum1("/store/user/joeyr/splitSUSY/splitSUSY_M2400_100_ctau100p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+    'mfv_splitSUSY_tau001000000um_M2400_100_2017': _fromnum1("/store/user/joeyr/splitSUSY/splitSUSY_M2400_100_ctau1000p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+    'mfv_splitSUSY_tau010000000um_M2400_100_2017': _fromnum1("/store/user/joeyr/splitSUSY/splitSUSY_M2400_100_ctau10000p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+    'mfv_splitSUSY_tau100000000um_M2400_100_2017': _fromnum1("/store/user/joeyr/splitSUSY/splitSUSY_M2400_100_ctau100000p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+    'mfv_splitSUSY_tau000000100um_M2400_100_2018': _fromnum1("/store/user/joeyr/splitSUSY/splitSUSY_M2400_100_ctau0p1_TuneCP2_13TeV_pythia8_RunIIAutumn18_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+    'mfv_splitSUSY_tau000001000um_M2400_100_2018': _fromnum1("/store/user/joeyr/splitSUSY/splitSUSY_M2400_100_ctau1p0_TuneCP2_13TeV_pythia8_RunIIAutumn18_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+    'mfv_splitSUSY_tau000010000um_M2400_100_2018': _fromnum1("/store/user/joeyr/splitSUSY/splitSUSY_M2400_100_ctau10p0_TuneCP2_13TeV_pythia8_RunIIAutumn18_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+    'mfv_splitSUSY_tau000100000um_M2400_100_2018': _fromnum1("/store/user/joeyr/splitSUSY/splitSUSY_M2400_100_ctau100p0_TuneCP2_13TeV_pythia8_RunIIAutumn18_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+    'mfv_splitSUSY_tau001000000um_M2400_100_2018': _fromnum1("/store/user/joeyr/splitSUSY/splitSUSY_M2400_100_ctau1000p0_TuneCP2_13TeV_pythia8_RunIIAutumn18_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+    'mfv_splitSUSY_tau010000000um_M2400_100_2018': _fromnum1("/store/user/joeyr/splitSUSY/splitSUSY_M2400_100_ctau10000p0_TuneCP2_13TeV_pythia8_RunIIAutumn18_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+    'mfv_splitSUSY_tau100000000um_M2400_100_2018': _fromnum1("/store/user/joeyr/splitSUSY/splitSUSY_M2400_100_ctau100000p0_TuneCP2_13TeV_pythia8_RunIIAutumn18_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+})
 
 _add_single_files('nr_k0ntuplev25mv1', '/store/user/wsun/croncopyeos/hadded/K0NtupleV25mv1', \
                       ['qcdht%04i_%i' % (x,y) for y in (2017,2018) for x in (700,1000,1500,2000)] + \
