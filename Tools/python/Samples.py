@@ -43,6 +43,7 @@ def _decay(sample):
         'mfv_xxddbar': r'X \rightarrow d\bar{d}',
         'mfv_stopdbardbar': r'\tilde{t} \rightarrow \bar{d}\bar{d}',
         'mfv_stopbbarbbar': r'\tilde{t} \rightarrow \bar{b}\bar{b}',
+        'mfv_splitSUSY': r'\tilde{g} \rightarrow qq\tilde{\chi}'
         }[_model(sample)]
     if s.endswith('_2015'):
         decay += ' (2015)'
@@ -195,6 +196,28 @@ for s in xx4j_samples_2015:
     s.xsec = 1e-3
 
 all_signal_samples_2015 = mfv_signal_samples_2015 # don't use xx4j
+
+# splitSUSY samples for LLP summary plot
+mfv_splitSUSY_samples_2016 = [
+    MCSample('mfv_splitSUSY_tau000000100um_M2400_100_2016', '/mfv_splitSUSY_tau000000100um_M2400_100_2016/None/USER', 10000),
+    MCSample('mfv_splitSUSY_tau000001000um_M2400_100_2016', '/mfv_splitSUSY_tau000001000um_M2400_100_2016/None/USER', 10000),
+    MCSample('mfv_splitSUSY_tau000010000um_M2400_100_2016', '/mfv_splitSUSY_tau000010000um_M2400_100_2016/None/USER', 10000),
+    MCSample('mfv_splitSUSY_tau000100000um_M2400_100_2016', '/mfv_splitSUSY_tau000100000um_M2400_100_2016/None/USER', 10000),
+    MCSample('mfv_splitSUSY_tau001000000um_M2400_100_2016', '/mfv_splitSUSY_tau001000000um_M2400_100_2016/None/USER', 10000),
+    MCSample('mfv_splitSUSY_tau010000000um_M2400_100_2016', '/mfv_splitSUSY_tau010000000um_M2400_100_2016/None/USER', 10000),
+    MCSample('mfv_splitSUSY_tau100000000um_M2400_100_2016', '/mfv_splitSUSY_tau100000000um_M2400_100_2016/None/USER', 10000),
+]
+
+for s in mfv_splitSUSY_samples_2016 :
+    #print "JOEY mass is %s" % _mass(s) # FIXME we're dropping the LSP mass; could do something custom here to only parse that part though...
+    _set_signal_stuff(s)
+    s.xsec = 1e-3
+    s.is_private = True
+    if s.is_private:
+        s.dbs_inst = 'phys03'
+        s.condor = True
+        s.xrootd_url = xrootd_sites['T3_US_FNALLPC']
+
 
 ########
 # 2016 MC = main, so no _2016 in names
@@ -761,6 +784,7 @@ __all__ = [
     'leptonic_background_samples_sum_2015',
     'data_samples_2015',
     'auxiliary_data_samples_2015',
+    'mfv_splitSUSY_samples_2016',
 
     'registry',
     ]
@@ -866,6 +890,22 @@ for x in mfv_ddbar_samples:
     x.datasets['miniaod'].condor = True
     x.datasets['miniaod'].xrootd_url = xrootd_sites['T3_US_FNALLPC']
 
+#_adbp('miniaod', '/mfv_splitSUSY_tau000000100um_M2400_100_2016/None/USER', 10000)
+#_adbp('miniaod', '/mfv_splitSUSY_tau000001000um_M2400_100_2016/None/USER', 10000)
+#_adbp('miniaod', '/mfv_splitSUSY_tau000010000um_M2400_100_2016/None/USER', 10000)
+#_adbp('miniaod', '/mfv_splitSUSY_tau000100000um_M2400_100_2016/None/USER', 10000)
+#_adbp('miniaod', '/mfv_splitSUSY_tau001000000um_M2400_100_2016/None/USER', 10000)
+#_adbp('miniaod', '/mfv_splitSUSY_tau010000000um_M2400_100_2016/None/USER', 10000)
+#_adbp('miniaod', '/mfv_splitSUSY_tau100000000um_M2400_100_2016/None/USER', 10000)
+
+for x in mfv_splitSUSY_samples_2016:
+    #x.add_dataset('miniaod', '/%s/None/USER' % x.primary_dataset, x.nevents_orig)
+    #x.datasets['miniaod'].condor = True
+    #x.datasets['miniaod'].xrootd_url = xrootd_sites['T3_US_FNALLPC']
+    x.add_dataset('aod', '/%s/None/USER' % x.primary_dataset, x.nevents_orig)
+    x.datasets['aod'].condor = True
+    x.datasets['aod'].xrootd_url = xrootd_sites['T3_US_FNALLPC']
+
 ########
 # ntuples
 ########
@@ -900,6 +940,10 @@ for x in 'ntuplev15lep', 'ntuplev15lep_IsoMu24', 'ntuplev15lep_IsoTkMu24', 'ntup
 for x in mfv_neu_tau00100um_M0300, mfv_neu_tau01000um_M0300:
     x.add_dataset('ntuplev15_leptrigs')
 
+for x in mfv_splitSUSY_tau000000100um_M2400_100_2016, mfv_splitSUSY_tau000001000um_M2400_100_2016, mfv_splitSUSY_tau000010000um_M2400_100_2016, mfv_splitSUSY_tau000100000um_M2400_100_2016, mfv_splitSUSY_tau001000000um_M2400_100_2016, mfv_splitSUSY_tau010000000um_M2400_100_2016, mfv_splitSUSY_tau100000000um_M2400_100_2016:
+    x.add_dataset("ntuplev27m")
+
+
 ########
 # automatic condor declarations for ntuples
 ########
@@ -919,7 +963,8 @@ for s in registry.all():
 # 2018-01-23 15:45:00.239927
 condorable = {
     "T3_US_FNALLPC": {
-        "main": [JetHT2015C, mfv_neu_tau10000um_M0800, mfv_neu_tau01000um_M1600, mfv_neu_tau01000um_M0400, mfv_neu_tau00100um_M0300, mfv_neu_tau00300um_M0300, mfv_neu_tau10000um_M0300, mfv_neu_tau00100um_M0400, mfv_neu_tau00300um_M0400, mfv_neu_tau10000um_M0400, mfv_neu_tau00100um_M0800, mfv_neu_tau00300um_M0800, mfv_neu_tau01000um_M0800, mfv_neu_tau00100um_M1200, mfv_neu_tau00300um_M1200, mfv_neu_tau01000um_M1200, mfv_neu_tau10000um_M1200, mfv_neu_tau00100um_M1600, mfv_neu_tau00300um_M1600, mfv_neu_tau10000um_M1600, qcdht0500_2015, qcdht0700_2015, qcdht1000_2015, qcdht1500_2015, qcdht2000_2015, qcdht0500ext_2015, qcdht0700ext_2015, qcdht1000ext_2015, qcdht1500ext_2015, qcdht2000ext_2015, ttbar_2015, qcdht2000ext, ttbar],
+        "main": mfv_splitSUSY_samples_2016 + [JetHT2015C, mfv_neu_tau10000um_M0800, mfv_neu_tau01000um_M1600, mfv_neu_tau01000um_M0400, mfv_neu_tau00100um_M0300, mfv_neu_tau00300um_M0300, mfv_neu_tau10000um_M0300, mfv_neu_tau00100um_M0400, mfv_neu_tau00300um_M0400, mfv_neu_tau10000um_M0400, mfv_neu_tau00100um_M0800, mfv_neu_tau00300um_M0800, mfv_neu_tau01000um_M0800, mfv_neu_tau00100um_M1200, mfv_neu_tau00300um_M1200, mfv_neu_tau01000um_M1200, mfv_neu_tau10000um_M1200, mfv_neu_tau00100um_M1600, mfv_neu_tau00300um_M1600, mfv_neu_tau10000um_M1600, qcdht0500_2015, qcdht0700_2015, qcdht1000_2015, qcdht1500_2015, qcdht2000_2015, qcdht0500ext_2015, qcdht0700ext_2015, qcdht1000ext_2015, qcdht1500ext_2015, qcdht2000ext_2015, ttbar_2015, qcdht2000ext, ttbar],
+        #"miniaod": mfv_splitSUSY_samples_2016 + [SingleMuon2016B3, SingleMuon2016D, SingleMuon2016F, SingleMuon2016G, SingleMuon2016H2, SingleMuon2016H3, mfv_neu_tau10000um_M1600],
         "miniaod": [SingleMuon2016B3, SingleMuon2016D, SingleMuon2016F, SingleMuon2016G, SingleMuon2016H2, SingleMuon2016H3, mfv_neu_tau10000um_M1600],
         },
     "T1_US_FNAL_Disk": {

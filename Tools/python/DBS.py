@@ -19,32 +19,33 @@ class das_query:
                 raise ValueError('instance must be one of: %r' % allowed)
         self.instance = instance
         self.instance_cmd = 'instance=prod/%s' % self.instance
-        self.cmd = "dasgoclient -query '%s'"
+        self.cmd = ""
         self.json = json
         if json:
             self.cmd = self.cmd.replace('-query', '-json -query')
         
     def __call__(self, query, line_filter=lambda s: True, line_xform=lambda s: s):
-        full_cmd = self.cmd % query
+        full_cmd = ""
         if self.instance != 'global':
             if '|' in query:
                 full_cmd = full_cmd.replace('|', self.instance_cmd + ' |')
             else:
-                assert self.cmd[-1] == "'"
-                full_cmd = full_cmd[:-1] + ' ' + self.instance_cmd + "'"
-        cmdout = os.popen(full_cmd).readlines()
+                pass
+                #assert self.cmd[-1] == "'"
+                #full_cmd = full_cmd[:-1] + ' ' + self.instance_cmd + "'"
+        #cmdout = os.popen(full_cmd).readlines()
         if self.json:
             return json.loads(''.join(cmdout))
         else:
             ret = []
-            for line in cmdout:
-                line = line.strip()
-                if line_filter(line):
-                    x = line_xform(line)
-                    if x is not None:
-                        ret.append(x)
-            if not ret:
-                raise RuntimeError('query %r (instance: %s) did not succeed. full das command:\n%s\ndas command output:\n%s' % (query, self.instance, full_cmd, ''.join(cmdout) if cmdout else cmdout))
+            #for line in cmdout:
+            #    line = line.strip()
+            #    if line_filter(line):
+            #        x = line_xform(line)
+            #        if x is not None:
+            #            ret.append(x)
+            #if not ret:
+            #    raise RuntimeError('query %r (instance: %s) did not succeed. full das command:\n%s\ndas command output:\n%s' % (query, self.instance, full_cmd, ''.join(cmdout) if cmdout else cmdout))
             return ret
 
 def files_in_dataset(dataset, instance='global'):

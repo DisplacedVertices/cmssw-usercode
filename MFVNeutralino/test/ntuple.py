@@ -13,7 +13,7 @@ prepare_vis = not run_n_tk_seeds and False
 keep_all = prepare_vis
 keep_gen = False
 event_filter = not keep_all
-version = 'V16p1'
+version = 'V27m'
 batch_name = 'Ntuple' + version
 if minitree_only:
     batch_name = 'MiniNtuple'  + version
@@ -26,6 +26,7 @@ elif not event_filter:
 ####
 
 process = pat_tuple_process(None, is_mc, year, H, repro)
+#process.source.bypassVersionCheck = cms.untracked.bool(True)
 remove_met_filters(process)
 
 # speed up by 15%
@@ -48,6 +49,7 @@ remove_met_filters(process)
 #process.patJets.userData.userInts.src = []
 
 process.out.fileName = 'ntuple.root'
+
 output_commands = [
     'drop *',
     'keep *_mcStat_*_*',
@@ -161,10 +163,11 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
             Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015 + \
             Samples.all_signal_samples_2015
     elif year == 2016:
-        samples = \
-            Samples.data_samples + \
-            Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + Samples.qcd_hip_samples + \
-            Samples.all_signal_samples
+        samples = Samples.mfv_splitSUSY_samples_2016
+        #samples = \
+        #    Samples.data_samples + \
+        #    Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + Samples.qcd_hip_samples + \
+        #    Samples.all_signal_samples
 
     if 'validation' in sys.argv:
         batch_name += '_validation'

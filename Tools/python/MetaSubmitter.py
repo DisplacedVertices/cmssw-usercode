@@ -286,7 +286,7 @@ def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=2
             sample.set_curr_dataset(dataset)
             sample.split_by = 'files'
             n = sample.name.replace('_hip1p0_mit', '').replace('_hip1p0', '').replace('_retest', '')
-            sample.files_per = d.get(n, 20)
+            sample.files_per = d.get(n, 400)
 
     elif jobtype == 'ntuple':
         target = 5000
@@ -318,7 +318,7 @@ def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=2
             # prefer to split by file with CondorSubmitter  for these jobs to not overload xrootd aaa
             sample.set_curr_dataset(dataset)
             if sample.is_signal:
-                sample.split_by = 'events'
+                sample.split_by = 'files'
             else:
                 sample.split_by = 'files' if sample.condor else 'events'
             name = sample.name.replace('_2015', '')
@@ -328,8 +328,8 @@ def set_splitting(samples, dataset, jobtype, data_json=None, default_files_per=2
                     sample.events_per = 200
                     sample.files_per = 1
                 else:
-                    sample.events_per = 50000
-                    sample.files_per = 5
+                    sample.events_per = 200
+                    sample.files_per = 1
             else:
                 erate, frate = d[name]
                 if dataset == 'miniaod':
