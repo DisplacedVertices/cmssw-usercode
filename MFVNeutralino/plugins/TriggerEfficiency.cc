@@ -3,6 +3,7 @@
 #include "CommonTools/Utils/interface/StringCutObjectSelector.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/Electron.h"
 #include "FWCore/Common/interface/TriggerNames.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -23,17 +24,35 @@ private:
   const int use_jetpt_weights;
   const int require_bits[2]; // HLT then L1
   const bool require_muon;
+  const bool require_electron;
+  const bool do_ttbar_selection;
+  const bool require_2jets;
   const bool require_4jets;
   const bool require_6jets;
+  const double require_1stjetpt;
+  const double require_2ndjetpt;
+  const double require_3rdjetpt;
   const double require_4thjetpt;
   const double require_6thjetpt;
+  const double require_maxdeta1p6pt;
+  const double require_maxdeta1p6maxeta;
+  const double min_bjet_pt;
+  const double max_bjet_eta;
+  const bool require_2btags;
+  const bool require_3btags;
   const double require_ht;
+  const double require_ht30;
+  const bool require_trig_match_all;
+  const bool require_trig_match_nm1;
   const edm::EDGetTokenT<double> weight_token;
   const edm::EDGetTokenT<mfv::TriggerFloats> triggerfloats_token;
   const edm::EDGetTokenT<pat::MuonCollection> muons_token;
   const StringCutObjectSelector<pat::Muon> muon_selector;
+  const edm::EDGetTokenT<pat::ElectronCollection> electrons_token;
+  const StringCutObjectSelector<pat::Electron> electron_selector;
   const edm::EDGetTokenT<reco::GenJetCollection> genjets_token;
   const bool use_genjets;
+
 
   TH1D* h_w;
 
@@ -44,6 +63,19 @@ private:
   TH1D* h_muon_phi[2];
   TH1D* h_muon_iso[2];
 
+  TH1D* h_nnoselelectrons;
+  TH1D* h_nelectrons;
+  TH1D* h_electron_pt[2];
+  TH1D* h_electron_eta[2];
+  TH1D* h_electron_phi[2];
+  TH1D* h_electron_iso[2];
+
+  TH1D* h_mue_mass_nosel;
+  TH1D* h_mue_mass_OS_only;
+  TH1D* h_mue_mass_gt_90;
+  TH1D* h_mue_mass_post_sel;
+
+  // FIXME add a plot of mindeta_pt100 (and pt140 or w/e the other trig is?) to verify that the cut is done right?
   TH1D* h_nnoseljets;
   TH1D* h_njets;
   TH1D* h_jet_e[11];
@@ -53,12 +85,19 @@ private:
   TH1D* h_jet_muef[11];
   TH1D* h_jet_ht_all;
   TH1D* h_jet_ht;
+  TH1D* h_jet_ht30;
   TH1D* h_jet_ht_m_hlt_ht;
   TH2F* h_njets_v_ht;
   TH1D* h_myhtt_m_l1htt;
   TH1D* h_myhttwbug_m_l1htt;
   TH1D* h_l1jet_pt[11];
   TH2F* h_jetpt2v1;
+
+  TH1D* h_nbjets;
+  TH1D* h_bjet_e[11];
+  TH1D* h_bjet_pt[11];
+  TH1D* h_bjet_eta[11];
+  TH1D* h_bjet_phi[11];
 
   TH1D* h_ngenjets;
   TH1D* h_genjet_e[11];
@@ -72,15 +111,32 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
   : use_jetpt_weights(cfg.getParameter<int>("use_jetpt_weights")),
     require_bits{cfg.getParameter<int>("require_hlt"), cfg.getParameter<int>("require_l1")},
     require_muon(cfg.getParameter<bool>("require_muon")),
+    require_electron(cfg.getParameter<bool>("require_electron")),
+    do_ttbar_selection(cfg.getParameter<bool>("do_ttbar_selection")),
+    require_2jets(cfg.getParameter<bool>("require_2jets")),
     require_4jets(cfg.getParameter<bool>("require_4jets")),
     require_6jets(cfg.getParameter<bool>("require_6jets")),
+    require_1stjetpt(cfg.getParameter<double>("require_1stjetpt")),
+    require_2ndjetpt(cfg.getParameter<double>("require_2ndjetpt")),
+    require_3rdjetpt(cfg.getParameter<double>("require_3rdjetpt")),
     require_4thjetpt(cfg.getParameter<double>("require_4thjetpt")),
     require_6thjetpt(cfg.getParameter<double>("require_6thjetpt")),
+    require_maxdeta1p6pt(cfg.getParameter<double>("require_maxdeta1p6pt")),
+    require_maxdeta1p6maxeta(cfg.getParameter<double>("require_maxdeta1p6maxeta")),
+    min_bjet_pt(cfg.getParameter<double>("min_bjet_pt")),
+    max_bjet_eta(cfg.getParameter<double>("max_bjet_eta")),
+    require_2btags(cfg.getParameter<bool>("require_2btags")),
+    require_3btags(cfg.getParameter<bool>("require_3btags")),
     require_ht(cfg.getParameter<double>("require_ht")),
+    require_ht30(cfg.getParameter<double>("require_ht30")),
+    require_trig_match_all(cfg.getParameter<bool>("require_trig_match_all")),
+    require_trig_match_nm1(cfg.getParameter<bool>("require_trig_match_nm1")),
     weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
     triggerfloats_token(consumes<mfv::TriggerFloats>(edm::InputTag("mfvTriggerFloats"))),
     muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
     muon_selector(cfg.getParameter<std::string>("muon_cut")),
+    electrons_token(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("electrons_src"))),
+    electron_selector(cfg.getParameter<std::string>("electron_cut")),
     genjets_token(consumes<reco::GenJetCollection>(cfg.getParameter<edm::InputTag>("genjets_src"))),
     use_genjets(cfg.getParameter<edm::InputTag>("genjets_src").label() != "")
 {
@@ -97,7 +153,7 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
 
   h_w = fs->make<TH1D>("h_w", ";event weight;events", 20, 0, 10);
 
-  if (require_muon) {
+  if (require_muon || do_ttbar_selection) {
     h_nnoselmuons = fs->make<TH1D>("h_nnoselmuons", ";# all muons;events", 5, 0, 5);
     h_nmuons = fs->make<TH1D>("h_nmuons", ";# selected muons;events", 3, 0, 3);
     const char* ex[2] = {"all", "selected"};
@@ -109,19 +165,47 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
     }
   }
 
+  if (require_electron || do_ttbar_selection) {
+    h_nnoselelectrons = fs->make<TH1D>("h_nnoselelectrons", ";# all electrons;events", 5, 0, 5);
+    h_nelectrons = fs->make<TH1D>("h_nelectrons", ";# selected electrons;events", 3, 0, 3);
+    const char* ex[2] = {"all", "selected"};
+    for (int i = 0; i < 2; ++i) {
+      h_electron_pt [i] = fs->make<TH1D>(TString::Format("h_electron_pt_%i" , i), TString::Format(";%s electron p_{T} (GeV);events/5 GeV", ex[i]), 200, 0, 1000);
+      h_electron_eta[i] = fs->make<TH1D>(TString::Format("h_electron_eta_%i", i), TString::Format(";%s electron #eta;events/0.12", ex[i]), 50, -3, 3);
+      h_electron_phi[i] = fs->make<TH1D>(TString::Format("h_electron_phi_%i", i), TString::Format(";%s electron #phi;events/0.125", ex[i]), 50, -M_PI, M_PI);
+      h_electron_iso[i] = fs->make<TH1D>(TString::Format("h_electron_iso_%i", i), TString::Format(";%s electron isolation;events/0.04", ex[i]), 50, 0, 2);
+    }
+  }
+
+  h_mue_mass_nosel    = fs->make<TH1D>("h_mue_mass_nosel", "m_{#mue}", 200, 0, 200);
+  h_mue_mass_OS_only  = fs->make<TH1D>("h_mue_mass_OS_only", "m_{#mue}", 200, 0, 200);
+  h_mue_mass_gt_90    = fs->make<TH1D>("h_mue_mass_gt_90", "m_{#mue}", 200, 0, 200);
+  h_mue_mass_post_sel = fs->make<TH1D>("h_mue_mass_post_sel", "m_{#mue}", 200, 0, 200);
+
   h_nnoseljets = fs->make<TH1D>("h_nnoseljets", ";# all jets;events", 30, 0, 30);
   h_njets = fs->make<TH1D>("h_njets", ";# selected jets;events", 30, 0, 30);
+  h_nbjets = fs->make<TH1D>("h_nbjets", ";# selected bjets;events", 30, 0, 30);
   for (int i = 0; i < 11; ++i) {
     char buf[32];
-    if (i == 0)
+    char buf_bjet[32];
+    if (i == 0) {
       snprintf(buf, 32, "all jets");
-    else
+      snprintf(buf_bjet, 32, "all bjets");
+    }
+    else {
       snprintf(buf, 32, "jet %i", i);
+      snprintf(buf_bjet, 32, "bjet %i", i);
+    }
     h_jet_e[i]    = fs->make<TH1D>(TString::Format("h_jet_e_%i",   i),  TString::Format(";%s energy (GeV);events/5 GeV", buf), 200, 0, 1000);
     h_jet_pt[i]   = fs->make<TH1D>(TString::Format("h_jet_pt_%i",  i),  TString::Format(";%s p_{T} (GeV);events/5 GeV", buf), 200, 0, 1000);
     h_jet_eta[i]  = fs->make<TH1D>(TString::Format("h_jet_eta_%i", i),  TString::Format(";%s #eta;events/0.12", buf), 50, -6, 6);
     h_jet_phi[i]  = fs->make<TH1D>(TString::Format("h_jet_phi_%i", i),  TString::Format(";%s #phi;events/0.125", buf), 50, -M_PI, M_PI);
     h_jet_muef[i] = fs->make<TH1D>(TString::Format("h_jet_muef_%i", i), TString::Format(";%s #mu energy fraction;events/0.1", buf), 11, 0, 1.1);
+
+    h_bjet_e[i]    = fs->make<TH1D>(TString::Format("h_bjet_e_%i",   i),  TString::Format(";%s energy (GeV);events/5 GeV", buf_bjet), 200, 0, 1000);
+    h_bjet_pt[i]   = fs->make<TH1D>(TString::Format("h_bjet_pt_%i",  i),  TString::Format(";%s p_{T} (GeV);events/5 GeV", buf_bjet), 200, 0, 1000);
+    h_bjet_eta[i]  = fs->make<TH1D>(TString::Format("h_bjet_eta_%i", i),  TString::Format(";%s #eta;events/0.12", buf_bjet), 50, -6, 6);
+    h_bjet_phi[i]  = fs->make<TH1D>(TString::Format("h_bjet_phi_%i", i),  TString::Format(";%s #phi;events/0.125", buf_bjet), 50, -M_PI, M_PI);
 
     if (i == 0)
       snprintf(buf, 32, "all L1 jets");
@@ -131,6 +215,7 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
   }
   h_jet_ht_all = fs->make<TH1D>("h_jet_ht_all", ";jet (p_{T} > 20 GeV) H_{T} (GeV);events/20 GeV", 250, 0, 5000);
   h_jet_ht = fs->make<TH1D>("h_jet_ht", ";jet (p_{T} > 40 GeV) H_{T} (GeV);events/20 GeV", 250, 0, 5000);
+  h_jet_ht30 = fs->make<TH1D>("h_jet_ht30", ";jet (p_{T} > 30 GeV) H_{T} (GeV);events/20 GeV", 250, 0, 5000);
   h_jet_ht_m_hlt_ht = fs->make<TH1D>("h_jet_ht_m_hlt_ht", ";offline jet (p_{T} > 40 GeV) H_{T} - HLT H_{T} (GeV);events/10 GeV", 100, -500, 500);
   h_njets_v_ht = fs->make<TH2F>("h_njets_v_ht", ";jet (p_{T} > 40 GeV) H_{T} (GeV);# selected jets", 20, 0, 2000, 15, 0, 15);
 
@@ -276,7 +361,11 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
     }
   }
 
-  if (require_muon) {
+  // ttbar selection requires exactly e+mu events
+  bool require_exactly_one_muon = do_ttbar_selection;
+  bool require_exactly_one_electron = do_ttbar_selection;
+
+  if (require_muon || do_ttbar_selection) {
     edm::Handle<pat::MuonCollection> muons;
     event.getByToken(muons_token, muons);
 
@@ -298,18 +387,144 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
 
     if (nmuons[1] < 1)
       return;
+    if (require_exactly_one_muon && nmuons[1] != 1)
+      return;
   }
 
-  if ((require_4jets && triggerfloats->njets(20) < 4) ||
+  if (require_electron || do_ttbar_selection) {
+    edm::Handle<pat::ElectronCollection> electrons;
+    event.getByToken(electrons_token, electrons);
+
+    int nelectrons[2] = {0};
+    for (const pat::Electron& electron : *electrons) {
+      for (int i = 0; i < 2; ++i) {
+        if (i == 0 || electron_selector(electron)) {
+          ++nelectrons[i];
+          h_electron_pt[i]->Fill(electron.pt(), w);
+          h_electron_eta[i]->Fill(electron.eta(), w);
+          h_electron_phi[i]->Fill(electron.phi(), w);
+          h_electron_iso[i]->Fill((electron.chargedHadronIso() + electron.neutralHadronIso() + electron.photonIso() - 0.5*electron.puChargedHadronIso())/electron.pt(), w);
+        }
+      }
+    }
+
+    h_nnoselelectrons->Fill(nelectrons[0], w);
+    h_nelectrons->Fill(nelectrons[1], w);
+
+    if (nelectrons[1] < 1)
+      return;
+    if (require_exactly_one_electron && nelectrons[1] != 1)
+      return;
+  }
+
+  bool passed_ttbar_selection = false;
+
+  edm::Handle<pat::MuonCollection> muons;
+  event.getByToken(muons_token, muons);
+
+  edm::Handle<pat::ElectronCollection> electrons;
+  event.getByToken(electrons_token, electrons);
+
+  for (const pat::Muon& muon : *muons) {
+    if (!muon_selector(muon)) continue;
+
+    for( const pat::Electron& electron : *electrons) {
+      if (!electron_selector(electron)) continue;
+
+      double mue_mass = (muon.p4() + electron.p4()).M();
+      h_mue_mass_nosel->Fill(mue_mass);
+
+      // only use opposite sign events
+      if (muon.charge() == electron.charge()) continue;
+      h_mue_mass_OS_only->Fill(mue_mass);
+
+      // avoid Z->bb background
+      if(mue_mass < 90) continue;
+      h_mue_mass_gt_90->Fill(mue_mass);
+
+      passed_ttbar_selection = true;
+    }
+  }
+    
+    if (do_ttbar_selection && !passed_ttbar_selection) return;
+
+  if (
+      (require_2jets && triggerfloats->njets(20) < 2) ||
+      (require_4jets && triggerfloats->njets(20) < 4) ||
       (require_6jets && triggerfloats->njets(20) < 6) ||
+      (require_1stjetpt > 0 && (triggerfloats->njets(20) < 1 || triggerfloats->jets[0].Pt() < require_1stjetpt)) || 
+      (require_2ndjetpt > 0 && (triggerfloats->njets(20) < 2 || triggerfloats->jets[1].Pt() < require_2ndjetpt)) || 
+      (require_3rdjetpt > 0 && (triggerfloats->njets(20) < 3 || triggerfloats->jets[2].Pt() < require_3rdjetpt)) || 
       (require_4thjetpt > 0 && (triggerfloats->njets(20) < 4 || triggerfloats->jets[3].Pt() < require_4thjetpt)) || 
       (require_6thjetpt > 0 && (triggerfloats->njets(20) < 6 || triggerfloats->jets[5].Pt() < require_6thjetpt)) ||
-      (require_ht > 0 && triggerfloats->ht < require_ht))
+      (require_ht > 0 && triggerfloats->ht < require_ht) ||
+      (require_ht30 > 0 && triggerfloats->htptgt30 < require_ht30)
+    )
     return;
+
+  int nbtags = triggerfloats->nbjets(min_bjet_pt, max_bjet_eta);
+  int min_nbtags = 0;
+  if      (require_3btags) min_nbtags = 3;
+  else if (require_2btags) min_nbtags = 2;
+  if (nbtags < min_nbtags) return;
+
+  if (require_trig_match_all || require_trig_match_nm1) {
+
+    int nbtags_trigmatched = 0;
+    int min_nbtags_trigmatched = 0;
+    if      (require_trig_match_all) min_nbtags_trigmatched = min_nbtags;
+    else if (require_trig_match_nm1) min_nbtags_trigmatched = min_nbtags-1;
+
+    for (int ijet = 0; ijet < triggerfloats->njets(); ++ijet) {
+
+      if (nbtags_trigmatched >= min_nbtags_trigmatched) continue;
+
+      if (triggerfloats->jets[ijet].Pt() > min_bjet_pt && triggerfloats->tight_btag[ijet]) {
+        if (max_bjet_eta > 0 && fabs(triggerfloats->jets[ijet].Eta()) > max_bjet_eta) continue;
+
+        if (!triggerfloats->isTrigMatched[ijet]) return;
+        ++nbtags_trigmatched;
+      }
+    }
+  }
+
+  if (require_maxdeta1p6pt > 0) {
+
+    bool satisfies_maxdeta1p6 = false;
+
+    for (int ijet = 0; ijet < triggerfloats->njets(); ++ijet) {
+      if (triggerfloats->jets[ijet].Pt() < require_maxdeta1p6pt) continue;
+      if (require_maxdeta1p6maxeta > 0 && fabs(triggerfloats->jets[ijet].Eta()) > require_maxdeta1p6maxeta) continue;
+
+      for (int jjet = 0; jjet < triggerfloats->njets(); ++jjet) {
+        if (triggerfloats->jets[jjet].Pt() < require_maxdeta1p6pt) continue;
+        if (require_maxdeta1p6maxeta > 0 && fabs(triggerfloats->jets[jjet].Eta()) > require_maxdeta1p6maxeta) continue;
+
+        if (fabs(triggerfloats->jets[ijet].Eta() - triggerfloats->jets[jjet].Eta()) < 1.6) 
+          satisfies_maxdeta1p6 = true;
+      }
+    }
+
+    if (!satisfies_maxdeta1p6) return;
+  }
+
+  // Post-selection m_mue plots
+  for (const pat::Muon& muon : *muons) {
+    if (!muon_selector(muon)) continue;
+
+    for( const pat::Electron& electron : *electrons) {
+      if (!electron_selector(electron)) continue;
+
+      double mue_mass = (muon.p4() + electron.p4()).M();
+      h_mue_mass_post_sel->Fill(mue_mass);
+    }
+  }
 
   h_nnoseljets->Fill(triggerfloats->nalljets, w);
 
+  int ibjet = 0; 
   for (int ijet = 0; ijet < triggerfloats->njets(); ++ijet) {
+
     for (int i : {0, ijet+1}) {
       if (i == 0 || ijet < 10) {
         h_jet_e[i]->Fill(triggerfloats->jets[ijet].E(), w);
@@ -319,11 +534,27 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
         h_jet_muef[i]->Fill(triggerfloats->jetmuef[ijet], w);
       }
     }
+
+    if (triggerfloats->jets[ijet].Pt() > min_bjet_pt && triggerfloats->tight_btag[ijet]) {
+      if (max_bjet_eta > 0 && fabs(triggerfloats->jets[ijet].Eta()) > max_bjet_eta) continue;
+
+      for (int i : {0, ibjet+1}) {
+        if (i == 0 || ibjet < 10) {
+          h_bjet_e[i]->Fill(triggerfloats->jets[ijet].E(), w);
+          h_bjet_pt[i]->Fill(triggerfloats->jets[ijet].Pt(), w);
+          h_bjet_eta[i]->Fill(triggerfloats->jets[ijet].Eta(), w);
+          h_bjet_phi[i]->Fill(triggerfloats->jets[ijet].Phi(), w);
+        }
+      }
+      ++ibjet;
+    }
   }
 
   h_njets->Fill(triggerfloats->njets(20), w);
+  h_nbjets->Fill(triggerfloats->nbjets(min_bjet_pt, max_bjet_eta), w);
   h_jet_ht_all->Fill(triggerfloats->htall, w);
   h_jet_ht->Fill(triggerfloats->ht, w);
+  h_jet_ht30->Fill(triggerfloats->htptgt30, w);
   h_njets_v_ht->Fill(triggerfloats->ht, triggerfloats->njets(20), w);
   h_myhtt_m_l1htt->Fill(triggerfloats->myhtt - triggerfloats->l1htt, w);
   h_myhttwbug_m_l1htt->Fill(triggerfloats->myhttwbug - triggerfloats->l1htt, w);

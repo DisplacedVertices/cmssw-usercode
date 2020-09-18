@@ -5,12 +5,27 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.Tools.Samples import *
 
-version = '2017p8v4'
+version = '2017v0p4'
 zoom = False #(0.98,1.005)
 save_more = True
 data_only = False
 use_qcd = False
-num_dir, den_dir = 'num', 'den'
+#trig_path = "DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV"
+trig_path = "PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV"
+#postfix = "_inc_tight"
+postfix = "_inc_tight_meas_leg"
+
+#postfix = "_ttbar_tight"
+#postfix = "_inc"
+#postfix = "_ttbar"
+
+num_dir, den_dir = "num"+trig_path+postfix, "den"+trig_path+postfix
+#num_dir, den_dir = "num", "den"
+
+#num_dir, den_dir = 'numDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc', 'denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc'
+#num_dir, den_dir = 'numDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_ttbar', 'denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_ttbar'
+#num_dir, den_dir = 'numDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight', 'denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight'
+#num_dir, den_dir = 'numDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_ttbar_tight', 'denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_ttbar_tight'
 #num_dir, den_dir = 'numjet6pt75', 'denjet6pt75'
 
 which = typed_from_argv(int, 0)
@@ -33,13 +48,15 @@ print year, data_period, int_lumi
 
 ########################################################################
 
-root_dir = '/uscms_data/d2/tucker/crab_dirs/TrigEff%s' % version
+root_dir = '/uscms/home/joeyr/crabdirs/TrigEff%s' % version
 plot_path = 'TrigEff%s_%s_%s%s' % (version, num_dir, year, data_period)
 if zoom:
     plot_path += '_zoom'
 
 set_style()
+ROOT.gStyle.SetOptTitle(0)
 ROOT.gStyle.SetOptStat(0)
+ROOT.gStyle.SetOptFit(0)
 ps = plot_saver(plot_dir(plot_path), size=(600,600), log=False, pdf=True)
 ROOT.TH1.AddDirectory(0)
 
@@ -50,10 +67,14 @@ if data_only:
     bkg_samples, sig_samples = [], []
 else:
     if year == 2017 or year == 2018:
+        #bkg_samples = [ttbar_2017]
         bkg_samples = [ttbar_2017, wjetstolnusum_2017, dyjetstollM50sum_2017, dyjetstollM10_2017, qcdmupt15_2017]
+        #bkg_samples = [wjetstolnu_2017, dyjetstollM50_2017]
+        #bkg_samples = [mfv_neu_tau001000um_M0400_2017]
         if use_qcd:
             bkg_samples.append(qcdmupt15_2017)
-        sig_samples = [getattr(Samples, 'mfv_neu_tau001000um_M%04i_2017' % m) for m in (400, 800, 1200, 1600)] + [Samples.mfv_neu_tau010000um_M0800_2017]
+        #sig_samples = [getattr(Samples, 'mfv_neu_tau001000um_M%04i_2017' % m) for m in (400, 800, 1200, 1600)] + [Samples.mfv_neu_tau010000um_M0800_2017]
+        sig_samples = [mfv_neu_tau001000um_M0400_2017] 
 
 n_bkg_samples = len(bkg_samples)
 for samples in bkg_samples, sig_samples:
@@ -64,13 +85,18 @@ for samples in bkg_samples, sig_samples:
 ########################################################################
 
 kinds = ['']
-ns = ['h_jet_ht']
+ns = ['h_jet_ht30', 'h_jet_ht', 'h_njets', 'h_nbjets', 'h_jet_pt_1', 'h_jet_pt_2', 'h_jet_pt_3', 'h_jet_pt_4', 'h_bjet_pt_1', 'h_bjet_pt_2', 'h_bjet_pt_3', 'h_jet_eta_1', 'h_jet_eta_2', 'h_jet_eta_3', 'h_bjet_eta_1', 'h_bjet_eta_2', 'h_bjet_eta_3']
 
 lump_lower = 1200.
+fitopt = 'RQS0' # 'RQS' for no drawn fit
 
 def fit_limits(kind, n):
     if 'ht' in n:
-        return 650, 5000
+        return 100, 5000
+    elif 'njets' in n or 'nbjets' in n :
+        return 0,20
+    elif 'eta' in n :
+        return -3,3
     else:
         if 'pf' in kind:
             if 'pt_4' in n:
@@ -78,11 +104,16 @@ def fit_limits(kind, n):
             else:
                 return 75, 250
         else:
-            return 60, 250
+            #return 60, 250
+            return 0, 400
 
 def draw_limits(kind, n):
     if 'ht' in n:
-        return 500, 5000
+        return 0, 5000
+    elif 'njets' in n or 'nbjets' in n :
+        return 0,20
+    elif 'eta' in n :
+        return -3,3
     else:
         if 'pf' in kind:
             if 'pt_4' in n:
@@ -90,7 +121,8 @@ def draw_limits(kind, n):
             else:
                 return 75, 250
         else:
-            return 60, 250
+            #return 60, 250
+            return 0, 400
 
 def make_fcn(name, kind, n):
     fcn = ROOT.TF1(name, '[0] + [1]*(0.5 + 0.5 * TMath::Erf((x - [2])/[3]))', *fit_limits(kind,n))
@@ -106,11 +138,14 @@ def make_fcn(name, kind, n):
     return fcn
 
 def rebin_pt(h):
-    a = to_array(range(0, 100, 5) + range(100, 150, 10) + [150, 180, 220, 260, 370, 500])
+    #a = to_array(range(0, 100, 5) + range(100, 150, 10) + [150, 180, 220, 260, 370, 500])
+    a = to_array(range(0, 500, 50))
     return h.Rebin(len(a)-1, h.GetName() + '_rebin', a)
 
 def rebin_ht(h):
-    a = to_array(range(0, 500, 20) + range(500, 1000, 50) + range(1000, 1500, 100) + range(1500, 2000, 250) + [2000, 3000, 5000])
+    #a = to_array(range(0, 500, 20) + range(500, 1000, 50) + range(1000, 1500, 100) + range(1500, 2000, 250) + [2000, 3000, 5000])
+    #a = to_array(range(0, 1000, 20) + [2000, 3000, 5000])
+    a = to_array(range(0, 1000, 100) + [2000, 3000, 5000])
     hnew = h.Rebin(len(a)-1, h.GetName() + '_rebin', a)
     move_overflow_into_last_bin(hnew)
     return hnew
@@ -122,7 +157,14 @@ def get(f, kind, n):
         rebin = rebin_pt
     elif 'ht' in n:
         rebin = rebin_ht
-    return rebin(f.Get(kind + '%s/%s' % (num_dir, n))), rebin(f.Get(kind + '%s/%s' % (den_dir, n)))
+    #print kind + '%s/%s' % (num_dir, n)
+    #print kind + '%s/%s' % (den_dir, n)
+    num_hist = f.Get(kind + '%s/%s' % (num_dir, n))
+    den_hist = f.Get(kind + '%s/%s' % (den_dir, n))
+    if num_hist is None or den_hist is None :
+        return None, None
+
+    return rebin(num_hist), rebin(den_hist)
 
 def num_den_draw(num, den):
     x = []
@@ -155,6 +197,8 @@ for kind in kinds:
         for sample in bkg_samples:
             subsubname = subname + '_' + sample.name
 
+            print sample.name
+            print sample.f
             num, den = sample.num, sample.den = get(sample.f, kind, n)
 
             if save_more:
@@ -170,12 +214,15 @@ for kind in kinds:
                     rat.GetXaxis().SetLimits(0, draw_limits(kind,n)[1])
 
                 fcn = make_fcn('f_' + subsubname, kind, n)
-                res = rat.Fit(fcn, 'RQS')
+                res = rat.Fit(fcn, fitopt)
                 reses.append(res)
                 if save_more:
                     rat.SetTitle('')
                     ps.c.Update()
-                    move_stat_box(rat, 'inf' if zoom else (0.518, 0.133, 0.866, 0.343))
+                    # if the fit data is empty, we don't have a stat box to move
+                    if res.Get() :
+                        pass
+                        #move_stat_box(rat, 'inf' if zoom else (0.518, 0.133, 0.866, 0.343))
                     ps.save(subsubname)
             else:
                 reses.append(None)
@@ -203,12 +250,17 @@ for kind in kinds:
                 bkg_num.Add(num)
                 bkg_den.Add(den)
 
-        if reses:
+        # FIXME
+        if reses and False:
             pars = [reses[0].GetParameterName(i) for i in xrange(reses[0].NPar())]
             for ipar, parname in enumerate(pars):
                 subsubname = subname + '_' + parname
                 hpar = ROOT.TH1F(parname, '', n_bkg_samples, 0, n_bkg_samples)
                 for isam, sample in enumerate(bkg_samples):
+                    if not reses[isam] or not reses[isam].Get() : continue
+                    #print reses[isam], reses[isam].Get()
+                    #print hpar
+
                     #if sample.name == 'qcdmupt15' and 'Mu1' in kind:
                     #    continue
                     #print isam, reses[isam].Parameter(ipar), reses[isam].ParError(ipar)
@@ -219,21 +271,21 @@ for kind in kinds:
                 hpar.SetLineWidth(2)
                 fcnpar = ROOT.TF1('f_'  + subsubname, 'pol0')
                 fcnpar.SetLineWidth(1)
-                hpar.Fit(fcnpar, 'Q')
+                hpar.Fit(fcnpar, 'QS0')
                 ps.c.Update()
-                move_stat_box(hpar, (0.507, 0.664, 0.864, 0.855))
+                #move_stat_box(hpar, (0.507, 0.664, 0.864, 0.855))
                 if parname == 'floor':
                     hpar.GetYaxis().SetRangeUser(0, 0.3)
                 elif parname == 'ceil':
                     hpar.GetYaxis().SetRangeUser(0.2, 1)
-                    move_stat_box(hpar, (0.143, 0.147, 0.5, 0.339))
+                    #move_stat_box(hpar, (0.143, 0.147, 0.5, 0.339))
                 elif parname == 'turnmu':
                     hpar.GetYaxis().SetRangeUser(0, 1500)
                 elif parname == 'turnsig':
                     hpar.GetYaxis().SetRangeUser(0, 300)
                 ps.save(subsubname)
 
-        if sum_scaled_dens_var > 0 and sum_scaled_dens > 0:
+        if sum_scaled_dens_var > 0 and sum_scaled_dens > 0 and sum_scaled_nums_var > 0:
             bkg_effective_den = sum_scaled_dens**2 / sum_scaled_dens_var
             bkg_effective_num = sum_scaled_nums / sum_scaled_dens * bkg_effective_den
             print 'sum bkgs with effective n =', bkg_effective_den
@@ -259,53 +311,99 @@ for kind in kinds:
             print '   %10.4f %10.4f' % (ni/sum_scaled_nums, di/sum_scaled_dens)
             ivnum = clopper_pearson_poisson_means(ni, sum_scaled_nums)
             ivden = clopper_pearson_poisson_means(di, sum_scaled_dens)
-            print '+- %10.4f %10.4f' % ((ivnum[2] - ivnum[1])/2, (ivden[2] - ivden[1])/2)
+            # FIXME weird edge case, probably empty hist that I should protect against a better way
+            if not (ivnum[1] is None or ivnum[2] is None or ivden[1] is None or ivden[2] is None) :
+                print '+- %10.4f %10.4f' % ((ivnum[2] - ivnum[1])/2, (ivden[2] - ivden[1])/2)
+
+        if True :
+            print 'signal'
+            sig_num, sig_den = get(sig_samples[0].f, kind, n)
+            if save_more:
+                x = num_den_draw(sig_num, sig_den)
+                ps.save(subname + '_sig_num_den', log=True)
+            sig_rat = histogram_divide(sig_num, sig_den, use_effective=True) if sig_num and sig_den else None
 
         data_rat = histogram_divide(data_num, data_den)
         bkg_rat = histogram_divide(bkg_num, bkg_den, use_effective=True) if bkg_num and bkg_den else None
 
-        for r in (data_rat, bkg_rat):
+        #for r in (data_rat, bkg_rat):
+        for r in (data_rat, bkg_rat, sig_rat):
+        #for r in (bkg_rat, ):
             if not r:
                 continue
             if 'pt' in n:
-                r.GetXaxis().SetLimits(0, 260)
+                #r.GetXaxis().SetLimits(0, 260)
                 i = int(n.split('_')[-1])
-                k = 'PF' if 'pf' in kind else 'calo'
-                r.SetTitle(';%ith %s jet p_{T} (GeV);efficiency' % (i, k))
+                #k = 'PF' if 'pf' in kind else 'calo'
+                k = 'b' if 'bjet' in n else ''
+                r.SetTitle(';%i%s %sjet p_{T} (GeV);efficiency' % (i, "st" if i == 1 else "nd" if i == 2 else "rd" if i == 3 else "th", k))
             elif 'ht' in n:
-                r.GetXaxis().SetLimits(0, draw_limits(kind, n)[1])
+                r.GetXaxis().SetLimits(draw_limits(kind, n)[0],draw_limits(kind, n)[1])
                 k = ''
                 r.SetTitle(';%s H_{T} (GeV);efficiency' % k)
+            elif 'njets' in n:
+                r.GetXaxis().SetLimits(draw_limits(kind, n)[0],draw_limits(kind, n)[1])
+                k = ''
+                r.SetTitle(';%s # selected jets;efficiency' % k)
+            elif 'nbjets' in n:
+                r.GetXaxis().SetLimits(draw_limits(kind, n)[0],draw_limits(kind, n)[1])
+                k = ''
+                r.SetTitle(';%s # selected bjets;efficiency' % k)
+            elif 'eta' in n:
+                i = int(n.split('_')[-1])
+                r.GetXaxis().SetLimits(draw_limits(kind, n)[0],draw_limits(kind, n)[1])
+                k = 'b' if 'bjet' in n else ''
+                r.SetTitle(';%i%s %sjet #eta;efficiency' % (i, "st" if i == 1 else "nd" if i == 2 else "rd" if i == 3 else "th", k))
             r.GetHistogram().SetMinimum(0)
             r.GetHistogram().SetMaximum(1.05)
             r.SetLineWidth(2)
 
+        data_rat.SetMarkerStyle(20)
         data_rat.Draw('AP')
         if zoom:
             data_rat.GetYaxis().SetRangeUser(*zoom)
-        ROOT.gStyle.SetOptFit(1111)
+        #ROOT.gStyle.SetOptFit(1111)
+        ROOT.gStyle.SetOptFit(0)
         data_fcn = make_fcn('f_data', kind, n)
         data_fcn.SetLineColor(ROOT.kBlack)
-        data_res = data_rat.Fit(data_fcn, 'RQS')
+        data_res = data_rat.Fit(data_fcn, fitopt)
         print '\ndata:'
         data_res.Print()
         if bkg_rat:
             bkg_fcn = make_fcn('f_bkg', kind, n)
             bkg_fcn.SetLineColor(2)
-            bkg_res = bkg_rat.Fit(bkg_fcn, 'RQS')
+            bkg_res = bkg_rat.Fit(bkg_fcn, fitopt)
             print '\nbkg:'
             bkg_res.Print()
 
-            bkg_rat.SetFillStyle(3001)
+            bkg_rat.SetFillStyle(3004)
             bkg_rat.SetFillColor(2)
-            bkg_rat.Draw('E2 same')
+            bkg_rat.SetLineColor(2)
+            bkg_rat.SetMarkerColor(2)
+            bkg_rat.SetMarkerStyle(24)
+            bkg_rat.Draw('pE2 same')
+
+        if sig_rat:
+            sig_fcn = make_fcn('f_sig', kind, n)
+            sig_fcn.SetLineColor(4)
+            sig_res = sig_rat.Fit(sig_fcn, fitopt)
+            print '\nsig:'
+            sig_res.Print()
+
+            sig_rat.SetFillStyle(3005)
+            sig_rat.SetFillColor(4)
+            sig_rat.SetLineColor(4)
+            sig_rat.SetMarkerColor(4)
+            sig_rat.SetMarkerStyle(24)
+            sig_rat.Draw('pE2 same')
 
         ps.c.Update()
-        move_stat_box(data_rat, 'inf' if zoom else (0.518, 0.133, 0.866, 0.343))
+        #move_stat_box(data_rat, 'inf' if zoom else (0.518, 0.133, 0.866, 0.343))
         if bkg_rat:
-            s = move_stat_box(bkg_rat, 'inf' if zoom else (0.518, 0.350, 0.866, 0.560))
-            s.SetLineColor(2)
-            s.SetTextColor(2)
+            pass
+            #s = move_stat_box(bkg_rat, 'inf' if zoom else (0.518, 0.350, 0.866, 0.560))
+            #s.SetLineColor(2)
+            #s.SetTextColor(2)
 
         ps.save(subname)
 

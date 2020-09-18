@@ -15,6 +15,7 @@
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "JMTucker/Tools/interface/TriggerHelper.h"
+#include "JMTucker/Tools/interface/BTagging.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/TriggerFloats.h"
 
@@ -452,9 +453,30 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
       floats->jets.push_back(p4(pt, jet.eta(), jet.phi(), jet.energy()));
       floats->jetmuef.push_back(jet.muonEnergyFraction());
 
+      bool is_tagged = jmt::BTagging::is_tagged(jet, jmt::BTagging::tight);
+      floats->tight_btag.push_back(is_tagged);
+
       floats->htall += pt;
       if (pt > 30) floats->htptgt30 += pt;
       if (pt > 40) floats->ht += pt;
+
+      // trig matching
+      bool trig_matched = false;
+      std::vector<TLorentzVector> hltjets = floats->hltpfjets;
+
+      // use dR = 0.4 for the matching (in eta x phi)
+      double hltmatchdist2 = 0.4*0.4;
+      TLorentzVector hltmatch;
+      for (auto hlt : hltjets) {
+        const double dist2 = reco::deltaR2(jet.eta(), jet.phi(), hlt.Eta(), hlt.Phi());
+        if (dist2 < hltmatchdist2) {
+          hltmatchdist2 = dist2;
+          hltmatch = hlt;
+          trig_matched = true;
+        }
+      }
+      floats->isTrigMatched.push_back(trig_matched);
+
     }
 
   if (prints)

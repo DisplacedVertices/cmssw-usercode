@@ -25,9 +25,24 @@ namespace mfv {
     int nalljets;
     std::vector<TLorentzVector> jets;
     std::vector<float> jetmuef;
+    std::vector<int> tight_btag;
+    std::vector<int> isTrigMatched;
     int njets() const { return jets.size(); }
     int njets(float min_jet_pt) const { return std::count_if(jets.begin(), jets.end(),
                                                              [min_jet_pt](const auto& p4) { return p4.Pt() > min_jet_pt; }); }
+
+    int nbjets(float min_jet_pt, float max_jet_eta=0.) const { 
+      int n = 0;
+      for(unsigned int i = 0; i < jets.size(); ++i){
+        if(!tight_btag[i]) continue;
+        if(jets[i].Pt() < min_jet_pt) continue;
+        if(max_jet_eta > 0 && fabs(jets[i].Eta()) > max_jet_eta) continue;
+        ++n;
+      }
+      
+      return n; 
+    }
+
     float jetpt1() const { return njets() >= 1 ? jets[0].Pt() : -1; }
     float jetpt2() const { return njets() >= 2 ? jets[1].Pt() : -1; }
     float htall;

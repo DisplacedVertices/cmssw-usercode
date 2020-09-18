@@ -8,10 +8,12 @@ settings = CMSSWSettings()
 settings.is_mc = True
 settings.cross = '' # 2017to2018' # 2017to2017p8'
 
-version = '2017p8v4'
+#version = '2017p8v4'
+version = '2017v0p4'
 
 mu_thresh_hlt = 27
 mu_thresh_offline = 30
+el_thresh_offline = 30
 weight_l1ecal = ''
 
 tfileservice(process, 'eff.root')
@@ -20,7 +22,8 @@ global_tag(process, which_global_tag(settings))
 #report_every(process, 1)
 max_events(process, -1)
 dataset = 'miniaod'
-sample_files(process, 'wjetstolnu_2017', dataset, 1)
+#sample_files(process, 'wjetstolnu_2017', dataset, 1)
+sample_files(process, 'mfv_neu_tau001000um_M0400_2017', dataset, 1)
 
 process.load('JMTucker.Tools.MCStatProducer_cff')
 process.load('JMTucker.Tools.UpdatedJets_cff')
@@ -57,30 +60,76 @@ process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
                              require_hlt = cms.int32(-1),
                              require_l1 = cms.int32(-1),
                              require_muon = cms.bool(True),
+                             require_electron = cms.bool(False),
+                             do_ttbar_selection = cms.bool(False),
+                             require_2jets = cms.bool(False),
                              require_4jets = cms.bool(True),
                              require_6jets = cms.bool(False),
+                             require_1stjetpt = cms.double(0.),
+                             require_2ndjetpt = cms.double(0.),
+                             require_3rdjetpt = cms.double(0.),
                              require_4thjetpt = cms.double(0.),
                              require_6thjetpt = cms.double(0.),
+                             require_maxdeta1p6pt = cms.double(0.),
+                             require_maxdeta1p6maxeta = cms.double(0.),
+                             min_bjet_pt = cms.double(0.),
+                             max_bjet_eta = cms.double(0.),
+                             require_2btags = cms.bool(False),
+                             require_3btags = cms.bool(False),
                              require_ht = cms.double(-1),
+                             require_ht30 = cms.double(-1),
+                             require_trig_match_all = cms.bool(False),
+                             require_trig_match_nm1 = cms.bool(False),
                              weight_src = cms.InputTag('jmtWeightMiniAOD'),
                              muons_src = cms.InputTag('slimmedMuons'),
                              muon_cut = cms.string(jtupleParams.muonCut.value() + ' && pt > %i' % mu_thresh_offline),
+                             electrons_src = cms.InputTag('slimmedElectrons'),
+                             electron_cut = cms.string(jtupleParams.electronCut.value() + ' && pt > %i' % el_thresh_offline),
                              genjets_src = cms.InputTag(''), #'ak4GenJets' if is_mc else ''),
                              )
 
 process.denht1000 = process.den.clone(require_ht = 1000)
-process.denjet6pt75 = process.den.clone(require_6thjetpt = 75)
-process.denht1000jet6pt75 = process.den.clone(require_ht = 1000, require_6thjetpt = 75)
-process.p = cms.Path(process.weightSeq * process.mutrig * process.updatedJetsSeqMiniAOD * process.selectedPatJets * process.mfvTriggerFloats * process.den * process.denht1000 * process.denjet6pt75 * process.denht1000jet6pt75)
+#process.denjet6pt75 = process.den.clone(require_6thjetpt = 75)
+#process.denht1000jet6pt75 = process.den.clone(require_ht = 1000, require_6thjetpt = 75)
 
-process.dennomu = process.den.clone(require_muon = False)
-process.dennomuht1000 = process.den.clone(require_muon = False, require_ht = 1000)
-process.dennomujet6pt75 = process.den.clone(require_muon = False, require_6thjetpt = 75)
-process.dennomuht1000jet6pt75 = process.den.clone(require_muon = False, require_ht = 1000, require_6thjetpt = 75)
-process.pnomu = cms.Path(process.weightSeq * process.updatedJetsSeqMiniAOD * process.selectedPatJets * process.mfvTriggerFloats * process.dennomu * process.dennomuht1000 * process.dennomujet6pt75 * process.dennomuht1000jet6pt75)
+# FIXME probably want to require higher pt and HT. Also could require more jets for process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV?
+process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc = process.den.clone(require_4jets = False, require_2jets = True, require_2ndjetpt = 100, require_maxdeta1p6pt = 100, require_maxdeta1p6maxeta = 2.3, min_bjet_pt = 100, max_bjet_eta = 2.3, require_2btags = True)
+process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc = process.den.clone(require_ht30 = 300, require_4jets = True, require_1stjetpt = 75, require_2ndjetpt = 60, require_3rdjetpt = 45, require_4thjetpt = 40, min_bjet_pt = 30, require_3btags = True)
 
-for x in '', 'ht1000', 'jet6pt75', 'ht1000jet6pt75', 'nomu', 'nomuht1000', 'nomujet6pt75', 'nomuht1000jet6pt75':
-    num = getattr(process, 'den%s' % x).clone(require_hlt = 0)
+process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_ttbar = process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc.clone(do_ttbar_selection = True)
+process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_ttbar = process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc.clone(do_ttbar_selection = True)
+
+# FIXME changed for v0p4
+#process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight = process.den.clone(require_4jets = False, require_2jets = True, require_2ndjetpt = 140, require_maxdeta1p6pt = 140, require_maxdeta1p6maxeta = 2.3, min_bjet_pt = 140, max_bjet_eta = 2.3, require_2btags = True)
+#process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight = process.den.clone(require_ht30 = 450, require_4jets = True, require_1stjetpt = 115, require_2ndjetpt = 100, require_3rdjetpt = 85, require_4thjetpt = 80, min_bjet_pt = 70, require_3btags = True)
+
+process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight = process.den.clone(require_4jets = False, require_2jets = True, require_2ndjetpt = 140, require_maxdeta1p6pt = 140, require_maxdeta1p6maxeta = 2.3, min_bjet_pt = 100, max_bjet_eta = 2.3, require_2btags = True)
+process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight = process.den.clone(require_ht30 = 450, require_4jets = True, require_1stjetpt = 115, require_2ndjetpt = 100, require_3rdjetpt = 85, require_4thjetpt = 80, min_bjet_pt = 30, require_3btags = True)
+
+process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_ttbar_tight = process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight.clone(do_ttbar_selection = True)
+process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_ttbar_tight = process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight.clone(do_ttbar_selection = True)
+
+process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight_meas_leg = process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight.clone(require_trig_match_nm1 = True)
+process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight_meas_leg = process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight.clone(require_trig_match_nm1 = True)
+
+process.p = cms.Path(process.weightSeq * process.mutrig * process.updatedJetsSeqMiniAOD * process.selectedPatJets * process.mfvTriggerFloats * process.den * process.denht1000 * process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc * process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc * process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_ttbar * process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_ttbar * process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight * process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight * process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_ttbar_tight * process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_ttbar_tight * process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight_meas_leg * process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight_meas_leg)
+
+#process.dennomu = process.den.clone(require_muon = False)
+#process.dennomuht1000 = process.den.clone(require_muon = False, require_ht = 1000)
+#process.dennomujet6pt75 = process.den.clone(require_muon = False, require_6thjetpt = 75)
+#process.dennomuht1000jet6pt75 = process.den.clone(require_muon = False, require_ht = 1000, require_6thjetpt = 75)
+#
+#process.pnomu = cms.Path(process.weightSeq * process.updatedJetsSeqMiniAOD * process.selectedPatJets * process.mfvTriggerFloats * process.dennomu * process.dennomuht1000 * process.dennomujet6pt75 * process.dennomuht1000jet6pt75)
+
+for x in '', 'ht1000', 'DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc', 'PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc', 'DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_ttbar', 'PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_ttbar', 'DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight','PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight', 'DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_ttbar_tight', 'PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_ttbar_tight', 'DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight_meas_leg', 'PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight_meas_leg':
+
+    hlt_bit = 0
+    if 'DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV' in x:
+        hlt_bit = 8
+    elif 'PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV' in x:
+        hlt_bit = 9
+
+    num = getattr(process, 'den%s' % x).clone(require_hlt = hlt_bit, require_trig_match_all = True if 'Btag' in x else False)
     if 'separate' in weight_l1ecal:
         num.weight_src = 'jmtWeightMiniAODL1Ecal'
     setattr(process, 'num%s' % x, num)
@@ -88,6 +137,7 @@ for x in '', 'ht1000', 'jet6pt75', 'ht1000jet6pt75', 'nomu', 'nomuht1000', 'nomu
         process.pnomu *= num
     else:
         process.p *= num
+
 
 import JMTucker.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
 SimpleTriggerEfficiency.setup_endpath(process)
@@ -98,7 +148,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
     if year == 2017:
-        samples = Samples.auxiliary_data_samples_2017 + Samples.leptonic_samples_2017
+        samples = Samples.auxiliary_data_samples_2017 + Samples.leptonic_samples_2017 + [Samples.ttbar_2017]
         masses = (400, 800, 1200, 1600)
         samples += [getattr(Samples, 'mfv_neu_tau001000um_M%04i_2017' % m) for m in masses] + [Samples.mfv_neu_tau010000um_M0800_2017]
     elif year == 2018:
