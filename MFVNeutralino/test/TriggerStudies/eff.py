@@ -8,8 +8,8 @@ settings = CMSSWSettings()
 settings.is_mc = True
 settings.cross = '' # 2017to2018' # 2017to2017p8'
 
-#version = '2017p8v4'
-version = '2017v0p4'
+version = '2017v0p6'
+#version = '2017v0p6_tighterbjetpt'
 
 mu_thresh_hlt = 27
 mu_thresh_offline = 30
@@ -79,7 +79,7 @@ process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
                              require_ht = cms.double(-1),
                              require_ht30 = cms.double(-1),
                              require_trig_match_all = cms.bool(False),
-                             require_trig_match_nm1 = cms.bool(False),
+                             require_trig_match_nm1_idx = cms.int32(-1),
                              weight_src = cms.InputTag('jmtWeightMiniAOD'),
                              muons_src = cms.InputTag('slimmedMuons'),
                              muon_cut = cms.string(jtupleParams.muonCut.value() + ' && pt > %i' % mu_thresh_offline),
@@ -89,39 +89,34 @@ process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
                              )
 
 process.denht1000 = process.den.clone(require_ht = 1000)
-#process.denjet6pt75 = process.den.clone(require_6thjetpt = 75)
-#process.denht1000jet6pt75 = process.den.clone(require_ht = 1000, require_6thjetpt = 75)
 
-# FIXME probably want to require higher pt and HT. Also could require more jets for process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV?
 process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc = process.den.clone(require_4jets = False, require_2jets = True, require_2ndjetpt = 100, require_maxdeta1p6pt = 100, require_maxdeta1p6maxeta = 2.3, min_bjet_pt = 100, max_bjet_eta = 2.3, require_2btags = True)
 process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc = process.den.clone(require_ht30 = 300, require_4jets = True, require_1stjetpt = 75, require_2ndjetpt = 60, require_3rdjetpt = 45, require_4thjetpt = 40, min_bjet_pt = 30, require_3btags = True)
 
-process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_ttbar = process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc.clone(do_ttbar_selection = True)
-process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_ttbar = process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc.clone(do_ttbar_selection = True)
+# FIXME may be able to do something like nm1_pt and set the nominal pt for the other legs. Just have to be careful in the nbtag counting though!!
+dibjet_minbjetpt = 100
+tribjet_minbjetpt = 30
+if "tighterbjetpt" in version :
+    dibjet_minbjetpt = 140
+    tribjet_minbjetpt = 70
 
-# FIXME changed for v0p4
-#process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight = process.den.clone(require_4jets = False, require_2jets = True, require_2ndjetpt = 140, require_maxdeta1p6pt = 140, require_maxdeta1p6maxeta = 2.3, min_bjet_pt = 140, max_bjet_eta = 2.3, require_2btags = True)
-#process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight = process.den.clone(require_ht30 = 450, require_4jets = True, require_1stjetpt = 115, require_2ndjetpt = 100, require_3rdjetpt = 85, require_4thjetpt = 80, min_bjet_pt = 70, require_3btags = True)
+process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight = process.den.clone(require_4jets = False, require_2jets = True, require_2ndjetpt = 140, require_maxdeta1p6pt = 140, require_maxdeta1p6maxeta = 2.3, min_bjet_pt = dibjet_minbjetpt, max_bjet_eta = 2.3, require_2btags = True)
+process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight = process.den.clone(require_ht30 = 450, require_4jets = True, require_1stjetpt = 115, require_2ndjetpt = 100, require_3rdjetpt = 85, require_4thjetpt = 80, min_bjet_pt = tribjet_minbjetpt, require_3btags = True)
 
-process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight = process.den.clone(require_4jets = False, require_2jets = True, require_2ndjetpt = 140, require_maxdeta1p6pt = 140, require_maxdeta1p6maxeta = 2.3, min_bjet_pt = 100, max_bjet_eta = 2.3, require_2btags = True)
-process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight = process.den.clone(require_ht30 = 450, require_4jets = True, require_1stjetpt = 115, require_2ndjetpt = 100, require_3rdjetpt = 85, require_4thjetpt = 80, min_bjet_pt = 30, require_3btags = True)
+#process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_ttbar_tight = process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight.clone(do_ttbar_selection = True)
+#process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_ttbar_tight = process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight.clone(do_ttbar_selection = True)
 
-process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_ttbar_tight = process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight.clone(do_ttbar_selection = True)
-process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_ttbar_tight = process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight.clone(do_ttbar_selection = True)
+process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight_meas_leg0 = process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight.clone(require_trig_match_nm1_idx = 0)
+process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight_meas_leg0 = process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight.clone(require_trig_match_nm1_idx = 0)
 
-process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight_meas_leg = process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight.clone(require_trig_match_nm1 = True)
-process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight_meas_leg = process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight.clone(require_trig_match_nm1 = True)
+process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight_meas_leg1 = process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight.clone(require_trig_match_nm1_idx = 1)
+process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight_meas_leg1 = process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight.clone(require_trig_match_nm1_idx = 1)
 
-process.p = cms.Path(process.weightSeq * process.mutrig * process.updatedJetsSeqMiniAOD * process.selectedPatJets * process.mfvTriggerFloats * process.den * process.denht1000 * process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc * process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc * process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_ttbar * process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_ttbar * process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight * process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight * process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_ttbar_tight * process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_ttbar_tight * process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight_meas_leg * process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight_meas_leg)
+process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight_meas_leg2 = process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight.clone(require_trig_match_nm1_idx = 2)
 
-#process.dennomu = process.den.clone(require_muon = False)
-#process.dennomuht1000 = process.den.clone(require_muon = False, require_ht = 1000)
-#process.dennomujet6pt75 = process.den.clone(require_muon = False, require_6thjetpt = 75)
-#process.dennomuht1000jet6pt75 = process.den.clone(require_muon = False, require_ht = 1000, require_6thjetpt = 75)
-#
-#process.pnomu = cms.Path(process.weightSeq * process.updatedJetsSeqMiniAOD * process.selectedPatJets * process.mfvTriggerFloats * process.dennomu * process.dennomuht1000 * process.dennomujet6pt75 * process.dennomuht1000jet6pt75)
+process.p = cms.Path(process.weightSeq * process.mutrig * process.updatedJetsSeqMiniAOD * process.selectedPatJets * process.mfvTriggerFloats * process.den * process.denht1000 * process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc * process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc * process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight * process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight * process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight_meas_leg0 * process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight_meas_leg0 * process.denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight_meas_leg1 * process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight_meas_leg1 * process.denPFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight_meas_leg2)
 
-for x in '', 'ht1000', 'DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc', 'PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc', 'DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_ttbar', 'PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_ttbar', 'DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight','PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight', 'DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_ttbar_tight', 'PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_ttbar_tight', 'DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight_meas_leg', 'PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight_meas_leg':
+for x in '', 'ht1000', 'DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc', 'PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc', 'DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight','PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight', 'DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight_meas_leg0', 'PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight_meas_leg0', 'DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight_meas_leg1', 'PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight_meas_leg1', 'PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_inc_tight_meas_leg2' :
 
     hlt_bit = 0
     if 'DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV' in x:

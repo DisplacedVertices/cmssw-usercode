@@ -43,7 +43,7 @@ private:
   const double require_ht;
   const double require_ht30;
   const bool require_trig_match_all;
-  const bool require_trig_match_nm1;
+  const int require_trig_match_nm1_idx;
   const edm::EDGetTokenT<double> weight_token;
   const edm::EDGetTokenT<mfv::TriggerFloats> triggerfloats_token;
   const edm::EDGetTokenT<pat::MuonCollection> muons_token;
@@ -99,6 +99,13 @@ private:
   TH1D* h_bjet_eta[11];
   TH1D* h_bjet_phi[11];
 
+  TH1D* h_bjet_leg_e;
+  TH1D* h_bjet_leg_pt;
+  TH1D* h_bjet_leg_eta;
+  TH1D* h_bjet_leg_phi;
+  TH2D* h_bjet_leg_pt_eta;
+  TH2D* h_bjet_leg_phi_eta;
+
   TH1D* h_ngenjets;
   TH1D* h_genjet_e[11];
   TH1D* h_genjet_pt[11];
@@ -130,7 +137,7 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
     require_ht(cfg.getParameter<double>("require_ht")),
     require_ht30(cfg.getParameter<double>("require_ht30")),
     require_trig_match_all(cfg.getParameter<bool>("require_trig_match_all")),
-    require_trig_match_nm1(cfg.getParameter<bool>("require_trig_match_nm1")),
+    require_trig_match_nm1_idx(cfg.getParameter<int>("require_trig_match_nm1_idx")),
     weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
     triggerfloats_token(consumes<mfv::TriggerFloats>(edm::InputTag("mfvTriggerFloats"))),
     muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
@@ -213,6 +220,14 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
       snprintf(buf, 32, "L1 jet %i", i);
     h_l1jet_pt[i] = fs->make<TH1D>(TString::Format("h_l1jet_pt_%i",  i),  TString::Format(";%s p_{T} (GeV);events/5 GeV", buf), 200, 0, 1000);
   }
+  h_bjet_leg_e   = fs->make<TH1D>("h_bjet_leg_e",   ";bjet leg energy (GeV);events/5 GeV", 200, 0, 1000);
+  h_bjet_leg_pt  = fs->make<TH1D>("h_bjet_leg_pt",  ";bjet leg p_{T} (GeV);events/5 GeV", 200, 0, 1000);
+  h_bjet_leg_eta = fs->make<TH1D>("h_bjet_leg_eta", ";bjet leg #eta;events/0.12", 50, -6, 6);
+  h_bjet_leg_phi = fs->make<TH1D>("h_bjet_leg_phi", ";bjet leg #phi;events/0.125",50, -M_PI, M_PI);
+
+  h_bjet_leg_pt_eta  = fs->make<TH2D>("h_bjet_leg_pt_eta",";bjet leg p_{T} (GeV);bjet leg #eta", 200, 0, 1000, 50, -6, 6);
+  h_bjet_leg_phi_eta = fs->make<TH2D>("h_bjet_leg_phi_eta",";bjet leg #phi;bjet leg #eta", 50, -M_PI, M_PI, 50, -6, 6);
+
   h_jet_ht_all = fs->make<TH1D>("h_jet_ht_all", ";jet (p_{T} > 20 GeV) H_{T} (GeV);events/20 GeV", 250, 0, 5000);
   h_jet_ht = fs->make<TH1D>("h_jet_ht", ";jet (p_{T} > 40 GeV) H_{T} (GeV);events/20 GeV", 250, 0, 5000);
   h_jet_ht30 = fs->make<TH1D>("h_jet_ht30", ";jet (p_{T} > 30 GeV) H_{T} (GeV);events/20 GeV", 250, 0, 5000);
@@ -468,23 +483,35 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
   else if (require_2btags) min_nbtags = 2;
   if (nbtags < min_nbtags) return;
 
-  if (require_trig_match_all || require_trig_match_nm1) {
+  std::vector<int> bjet_indices = {};
+  if (require_trig_match_all || require_trig_match_nm1_idx != -1) {
 
     int nbtags_trigmatched = 0;
     int min_nbtags_trigmatched = 0;
-    if      (require_trig_match_all) min_nbtags_trigmatched = min_nbtags;
-    else if (require_trig_match_nm1) min_nbtags_trigmatched = min_nbtags-1;
+    if      (require_trig_match_all)           min_nbtags_trigmatched = min_nbtags;
+    else if (require_trig_match_nm1_idx != -1) min_nbtags_trigmatched = min_nbtags-1;
 
     for (int ijet = 0; ijet < triggerfloats->njets(); ++ijet) {
 
-      if (nbtags_trigmatched >= min_nbtags_trigmatched) continue;
-
       if (triggerfloats->jets[ijet].Pt() > min_bjet_pt && triggerfloats->tight_btag[ijet]) {
         if (max_bjet_eta > 0 && fabs(triggerfloats->jets[ijet].Eta()) > max_bjet_eta) continue;
-
-        if (!triggerfloats->isTrigMatched[ijet]) return;
-        ++nbtags_trigmatched;
+        bjet_indices.push_back(ijet);
       }
+    }
+
+    // careful! ibjet here is the bjet indexing, while ijet is the index from before
+    for (unsigned int ibjet = 0; ibjet < bjet_indices.size(); ++ibjet) {
+
+      // skip our n-1 index
+      if ( (int) ibjet == require_trig_match_nm1_idx) continue;
+
+      // stop once we have enough trigmatched bjets
+      if (nbtags_trigmatched >= min_nbtags_trigmatched) continue;
+
+      int ijet = bjet_indices.at(ibjet);
+      if (!triggerfloats->isTrigMatched[ijet]) return;
+
+      ++nbtags_trigmatched;
     }
   }
 
@@ -548,6 +575,18 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
       }
       ++ibjet;
     }
+  }
+
+  // plots for the bjet nm1 index (aka the leg we're measuring)
+  if (require_trig_match_nm1_idx != -1) {
+    int ijet = bjet_indices.at(require_trig_match_nm1_idx);
+    h_bjet_leg_e->Fill(triggerfloats->jets[ijet].E(), w);
+    h_bjet_leg_pt->Fill(triggerfloats->jets[ijet].Pt(), w);
+    h_bjet_leg_eta->Fill(triggerfloats->jets[ijet].Eta(), w);
+    h_bjet_leg_phi->Fill(triggerfloats->jets[ijet].Phi(), w);
+
+    h_bjet_leg_pt_eta->Fill(triggerfloats->jets[ijet].Pt(), triggerfloats->jets[ijet].Eta(), w);
+    h_bjet_leg_phi_eta->Fill(triggerfloats->jets[ijet].Phi(), triggerfloats->jets[ijet].Eta(), w);
   }
 
   h_njets->Fill(triggerfloats->njets(20), w);

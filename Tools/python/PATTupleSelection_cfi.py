@@ -16,6 +16,8 @@ jet_cuts = (
     '(abs(eta) >= 2.4 || (chargedEmEnergyFraction < 0.80 && chargedHadronEnergyFraction > 0. && chargedMultiplicity > 0))',
     )
 
+# no HLT-level muon ID applied until 2018, and even then no IP or isolation reqs so this should be fine...
+# https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMuonIdRun2#Trigger_Identification
 muon_cuts = (
     'isPFMuon',
     'isGlobalMuon',
@@ -24,6 +26,9 @@ muon_cuts = (
     'isGlobalMuon && globalTrack.hitPattern.numberOfValidMuonHits > 0',
     '(isGlobalMuon || isTrackerMuon) && innerTrack.hitPattern.numberOfValidPixelHits > 0',
     'numberOfMatchedStations > 1',
+    #'abs(muonBestTrack.dz) < 0.5',
+    #'abs(muonBestTrack.dxy) < 0.2',
+    #'(pfIsolationR04.sumChargedHadronPt + max(0., pfIsolationR04.sumNeutralHadronEt + pfIsolationR04.sumPhotonEt - 0.5*pfIsolationR04.sumPUPt))/pt < 0.2', # Medium PF isolation https://twiki.cern.ch/twiki/bin/view/CMS/SWGuideMuonIdRun2#Muon_Isolation
     )
 
 electron_rho95 = 43. # this is the 95% point for double_fixedGridRhoFastjetCentral__RECO.obj from one file of QCD HT2000, a wjets file wants 37 but that rho distribution has a peak at 0 (?)

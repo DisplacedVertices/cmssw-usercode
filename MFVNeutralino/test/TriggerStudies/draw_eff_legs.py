@@ -5,28 +5,19 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.Tools.Samples import *
 
-version = '2017v0p5'
-zoom = False #(0.98,1.005)
+# FIXME
+# also should be sure to look at the 2D efficiency plots (which will need to be computed here or somewhere)
+
+version = '2017v0p6'
+#version = '2017v0p6_require6jets'
+#version = '2017v0p5'
+#version = '2017v0p5_tighterbjetpt'
 save_more = True
-data_only = False
-use_qcd = False
-#trig_path = "DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV"
-trig_path = "PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV"
-#postfix = "_inc_tight"
-postfix = "_inc_tight_meas_leg0"
-
-#postfix = "_ttbar_tight"
-#postfix = "_inc"
-#postfix = "_ttbar"
-
-num_dir, den_dir = "num"+trig_path+postfix, "den"+trig_path+postfix
-#num_dir, den_dir = "num", "den"
-
-#num_dir, den_dir = 'numDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc', 'denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc'
-#num_dir, den_dir = 'numDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_ttbar', 'denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_ttbar'
-#num_dir, den_dir = 'numDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight', 'denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight'
-#num_dir, den_dir = 'numDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_ttbar_tight', 'denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_ttbar_tight'
-#num_dir, den_dir = 'numjet6pt75', 'denjet6pt75'
+use_ttV = True
+use_qcd = False # horrible statistics, as usual
+use_WZ = False # also bad stats...
+use_DYqq_WZlnuqq = False
+use_singletop = True
 
 which = typed_from_argv(int, 0)
 data_period, int_lumi = [
@@ -49,9 +40,12 @@ print year, data_period, int_lumi
 ########################################################################
 
 root_dir = '/uscms/home/joeyr/crabdirs/TrigEff%s' % version
-plot_path = 'TrigEff%s_%s_%s%s' % (version, num_dir, year, data_period)
-if zoom:
-    plot_path += '_zoom'
+plot_path = 'TrigEff%s_%s_%s%s' % (version, "legs", year, data_period)
+if use_ttV          : plot_path += '_use_ttH_ttZ'
+if use_qcd          : plot_path += '_use_qcd'
+if use_WZ           : plot_path += '_use_WZ'
+if use_DYqq_WZlnuqq : plot_path += '_use_DYqq_WZlnuqq'
+if use_singletop    : plot_path += '_use_singletop'
 
 set_style()
 ROOT.gStyle.SetOptTitle(0)
@@ -63,18 +57,21 @@ ROOT.TH1.AddDirectory(0)
 data_fn = os.path.join(root_dir, 'SingleMuon%s%s.root' % (year, data_period))
 data_f = ROOT.TFile(data_fn)
 
-if data_only:
-    bkg_samples, sig_samples = [], []
-else:
-    if year == 2017 or year == 2018:
-        #bkg_samples = [ttbar_2017]
-        bkg_samples = [ttbar_2017, wjetstolnusum_2017, dyjetstollM50sum_2017, dyjetstollM10_2017, qcdmupt15_2017]
-        #bkg_samples = [wjetstolnu_2017, dyjetstollM50_2017]
-        #bkg_samples = [mfv_neu_tau001000um_M0400_2017]
-        if use_qcd:
-            bkg_samples.append(qcdmupt15_2017)
-        #sig_samples = [getattr(Samples, 'mfv_neu_tau001000um_M%04i_2017' % m) for m in (400, 800, 1200, 1600)] + [Samples.mfv_neu_tau010000um_M0800_2017]
-        sig_samples = [mfv_neu_tau001000um_M0400_2017] 
+if year == 2017 or year == 2018:
+    bkg_samples = [ttbar_2017]
+    if use_ttV : 
+        bkg_samples += [ttHbb_2017, ttZsum_2017]
+    if use_qcd :
+        bkg_samples += [qcdmupt15_2017]
+    if use_WZ :
+        bkg_samples += [wjetstolnusum_2017, dyjetstollM50sum_2017, dyjetstollM10_2017]
+    if use_DYqq_WZlnuqq :
+        #bkg_samples += [dyjetstoqq_2017, wztolnuqq_2017]
+        bkg_samples += [dyjetstoqq_2017]
+    if use_singletop :
+        bkg_samples += [singletop_tchan_top_2017, singletop_tchan_antitop_2017]
+
+    sig_samples = [mfv_neu_tau001000um_M0400_2017] 
 
 n_bkg_samples = len(bkg_samples)
 for samples in bkg_samples, sig_samples:
@@ -83,9 +80,6 @@ for samples in bkg_samples, sig_samples:
         sample.f = ROOT.TFile(sample.fn) if os.path.isfile(sample.fn) else None
 
 ########################################################################
-
-kinds = ['']
-ns = ['h_jet_ht30', 'h_jet_ht', 'h_njets', 'h_nbjets', 'h_jet_pt_1', 'h_jet_pt_2', 'h_jet_pt_3', 'h_jet_pt_4', 'h_bjet_pt_1', 'h_bjet_pt_2', 'h_bjet_pt_3', 'h_jet_eta_1', 'h_jet_eta_2', 'h_jet_eta_3', 'h_bjet_eta_1', 'h_bjet_eta_2', 'h_bjet_eta_3', 'h_bjet_leg_pt', 'h_bjet_leg_eta']
 
 lump_lower = 1200.
 fitopt = 'RQS0' # 'RQS' for no drawn fit
@@ -122,7 +116,7 @@ def draw_limits(kind, n):
                 return 75, 250
         else:
             #return 60, 250
-            return 0, 400
+            return 0, 500
 
 def make_fcn(name, kind, n):
     fcn = ROOT.TF1(name, '[0] + [1]*(0.5 + 0.5 * TMath::Erf((x - [2])/[3]))', *fit_limits(kind,n))
@@ -140,6 +134,7 @@ def make_fcn(name, kind, n):
 def rebin_pt(h):
     #a = to_array(range(0, 100, 5) + range(100, 150, 10) + [150, 180, 220, 260, 370, 500])
     a = to_array(range(0, 500, 50))
+    #a = to_array(range(0, 500, 10))
     return h.Rebin(len(a)-1, h.GetName() + '_rebin', a)
 
 def rebin_ht(h):
@@ -157,10 +152,8 @@ def get(f, kind, n):
         rebin = rebin_pt
     elif 'ht' in n:
         rebin = rebin_ht
-    #print kind + '%s/%s' % (num_dir, n)
-    #print kind + '%s/%s' % (den_dir, n)
-    num_hist = f.Get(kind + '%s/%s' % (num_dir, n))
-    den_hist = f.Get(kind + '%s/%s' % (den_dir, n))
+    num_hist = f.Get("%s_%s_nums" % (n,kind))
+    den_hist = f.Get("%s_%s_dens" % (n,kind))
     if num_hist is None or den_hist is None :
         return None, None
 
@@ -181,36 +174,36 @@ def num_den_draw(num, den):
 
 ########################################################################
 
-for kind in kinds:
-    for n in ns:
-        print
-        print '============================================================================='
-        print kind, n
-        print '-----------------------'
-        subname = '%s_%s' % (kind, n) if kind else n
+kinds = ['dibjet', 'tribjet']
+ns = ['h_bjet_leg_pt', 'h_bjet_leg_eta']
 
+for kind in kinds :
+    print kind
+    for n in ns :
+
+        print n
+
+        subname = '%s_%s' % (kind, n) if kind else n
         bkg_num, bkg_den = None, None
         sum_scaled_nums, sum_scaled_dens = 0., 0.
         sum_scaled_nums_var, sum_scaled_dens_var = 0., 0.
-
+        
         reses = []
-        for sample in bkg_samples:
+
+        for sample in bkg_samples :
             subsubname = subname + '_' + sample.name
 
-            print sample.name
-            print sample.f
             num, den = sample.num, sample.den = get(sample.f, kind, n)
 
             if save_more:
                 x = num_den_draw(num, den)
                 ps.save(subsubname + '_num_den',log=True)
 
+
             if den.Integral():
                 rat = histogram_divide(num, den)
                 rat.Draw('AP')
-                if 'pt' in n:
-                    rat.GetXaxis().SetLimits(0, 260)
-                elif 'ht' in n:
+                if 'pt' in n or 'ht' in n:
                     rat.GetXaxis().SetLimits(0, draw_limits(kind,n)[1])
 
                 fcn = make_fcn('f_' + subsubname, kind, n)
@@ -219,10 +212,6 @@ for kind in kinds:
                 if save_more:
                     rat.SetTitle('')
                     ps.c.Update()
-                    # if the fit data is empty, we don't have a stat box to move
-                    if res.Get() :
-                        pass
-                        #move_stat_box(rat, 'inf' if zoom else (0.518, 0.133, 0.866, 0.343))
                     ps.save(subsubname)
             else:
                 reses.append(None)
@@ -231,7 +220,8 @@ for kind in kinds:
             scale = sample.partial_weight(sample.f) * int_lumi
 
             print '%s (%f)' % (sample.name, scale)
-            ib = num.FindBin(lump_lower)
+            #ib = num.FindBin(lump_lower)
+            ib = 1
             ni = num.Integral(ib, 10000)
             di = den.Integral(ib, 10000)
             sum_scaled_nums += ni*scale
@@ -250,41 +240,6 @@ for kind in kinds:
                 bkg_num.Add(num)
                 bkg_den.Add(den)
 
-        # FIXME
-        if reses and False:
-            pars = [reses[0].GetParameterName(i) for i in xrange(reses[0].NPar())]
-            for ipar, parname in enumerate(pars):
-                subsubname = subname + '_' + parname
-                hpar = ROOT.TH1F(parname, '', n_bkg_samples, 0, n_bkg_samples)
-                for isam, sample in enumerate(bkg_samples):
-                    if not reses[isam] or not reses[isam].Get() : continue
-                    #print reses[isam], reses[isam].Get()
-                    #print hpar
-
-                    #if sample.name == 'qcdmupt15' and 'Mu1' in kind:
-                    #    continue
-                    #print isam, reses[isam].Parameter(ipar), reses[isam].ParError(ipar)
-                    hpar.SetBinContent(isam+1, reses[isam].Parameter(ipar))
-                    hpar.SetBinError  (isam+1, reses[isam].ParError (ipar))
-                    hpar.GetXaxis().SetBinLabel(isam+1, sample.name)
-                hpar.Draw('hist e')
-                hpar.SetLineWidth(2)
-                fcnpar = ROOT.TF1('f_'  + subsubname, 'pol0')
-                fcnpar.SetLineWidth(1)
-                hpar.Fit(fcnpar, 'QS0')
-                ps.c.Update()
-                #move_stat_box(hpar, (0.507, 0.664, 0.864, 0.855))
-                if parname == 'floor':
-                    hpar.GetYaxis().SetRangeUser(0, 0.3)
-                elif parname == 'ceil':
-                    hpar.GetYaxis().SetRangeUser(0.2, 1)
-                    #move_stat_box(hpar, (0.143, 0.147, 0.5, 0.339))
-                elif parname == 'turnmu':
-                    hpar.GetYaxis().SetRangeUser(0, 1500)
-                elif parname == 'turnsig':
-                    hpar.GetYaxis().SetRangeUser(0, 300)
-                ps.save(subsubname)
-
         if sum_scaled_dens_var > 0 and sum_scaled_dens > 0 and sum_scaled_nums_var > 0:
             bkg_effective_den = sum_scaled_dens**2 / sum_scaled_dens_var
             bkg_effective_num = sum_scaled_nums / sum_scaled_dens * bkg_effective_den
@@ -295,13 +250,18 @@ for kind in kinds:
         if 'gen' in n:
             continue
 
+        if save_more:
+            x = num_den_draw(bkg_num, bkg_den)
+            ps.save(subname + '_bkg_num_den', log=True)
+
         print 'data' #, data_num.GetEntries(), data_den.GetEntries()
         data_num, data_den = get(data_f, kind, n)
         if save_more:
             x = num_den_draw(data_num, data_den)
             ps.save(subname + '_data_num_den', log=True)
 
-        ib = data_num.FindBin(lump_lower)
+        #ib = data_num.FindBin(lump_lower)
+        ib = 1
         ni = data_num.Integral(ib, 10000)
         di = data_den.Integral(ib, 10000)
         print '   %10i %10i %10s %10s  %.6f [%.6f, %.6f]' % ((ni, di, '', '') + clopper_pearson(ni, di))
@@ -332,14 +292,10 @@ for kind in kinds:
             if not r:
                 continue
             if 'pt' in n and not 'leg' in n:
-                #r.GetXaxis().SetLimits(0, 260)
                 i = int(n.split('_')[-1])
-                #k = 'PF' if 'pf' in kind else 'calo'
                 k = 'b' if 'bjet' in n else ''
                 r.SetTitle(';%i%s %sjet p_{T} (GeV);efficiency' % (i, "st" if i == 1 else "nd" if i == 2 else "rd" if i == 3 else "th", k))
             elif 'pt' in n and 'leg' in n:
-                #r.GetXaxis().SetLimits(0, 260)
-                #k = 'PF' if 'pf' in kind else 'calo'
                 k = 'b' if 'bjet' in n else ''
                 r.SetTitle(';%sjet leg p_{T} (GeV);efficiency' % (k))
             elif 'ht' in n:
@@ -369,8 +325,7 @@ for kind in kinds:
 
         data_rat.SetMarkerStyle(20)
         data_rat.Draw('AP')
-        if zoom:
-            data_rat.GetYaxis().SetRangeUser(*zoom)
+        
         #ROOT.gStyle.SetOptFit(1111)
         ROOT.gStyle.SetOptFit(0)
         data_fcn = make_fcn('f_data', kind, n)
@@ -407,21 +362,20 @@ for kind in kinds:
             sig_rat.Draw('pE2 same')
 
         ps.c.Update()
-        #move_stat_box(data_rat, 'inf' if zoom else (0.518, 0.133, 0.866, 0.343))
-        if bkg_rat:
-            pass
-            #s = move_stat_box(bkg_rat, 'inf' if zoom else (0.518, 0.350, 0.866, 0.560))
-            #s.SetLineColor(2)
-            #s.SetTextColor(2)
-
         ps.save(subname)
+
+        ratios_plot("ratio_"+subname, [bkg_rat, data_rat], ps, res_fit=False, res_divide_opt={'confint': propagate_ratio, 'force_le_1': False}, res_y_range=(0.5,1.5), y_range=(0,1))
+        #ratios_plot("ratio_"+subname+"_with_signal", [bkg_rat, data_rat, sig_rat], ps, res_fit=False, res_divide_opt={'confint': propagate_ratio, 'force_le_1': False}, res_y_range=(0.5,1.5))
 
         print '\nsignals'
         for sample in sig_samples:
             if sample.f:
                 sig_num, sig_den = get(sample.f, kind, n)
-                ib = sig_num.FindBin(lump_lower)
+                #ib = sig_num.FindBin(lump_lower)
+                ib = 1
                 ni = sig_num.Integral(ib, 10000)
                 di = sig_den.Integral(ib, 10000)
                 print '   %10i %10i %10s %10s  %.6f [%.6f, %.6f]' % ((ni, di, '', '') + clopper_pearson(ni, di))
                 print '+- %10.2f %10.2f' % (ni**0.5, di**0.5)
+
+
