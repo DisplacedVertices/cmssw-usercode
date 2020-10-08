@@ -90,7 +90,7 @@ def fit_limits(kind, n):
     elif 'njets' in n or 'nbjets' in n :
         return 0,20
     elif 'eta' in n :
-        return -3,3
+        return 0,3
     else:
         if 'pf' in kind:
             if 'pt_4' in n:
@@ -107,7 +107,7 @@ def draw_limits(kind, n):
     elif 'njets' in n or 'nbjets' in n :
         return 0,20
     elif 'eta' in n :
-        return -3,3
+        return 0,3
     else:
         if 'pf' in kind:
             if 'pt_4' in n:
@@ -145,6 +145,34 @@ def rebin_ht(h):
     move_overflow_into_last_bin(hnew)
     return hnew
 
+def rebin_eta(h):
+    for ibin in range(h.GetXaxis().GetNbins()) :
+        if h.GetXaxis().GetBinLowEdge(ibin) >= 0 : continue
+
+        bincontent = h.GetBinContent(ibin)
+        binerror   = h.GetBinError(ibin)
+        bincenter = h.GetXaxis().GetBinCenter(ibin)
+
+        absbincenter = abs(bincenter)
+        abs_ibin = h.GetXaxis().FindBin(absbincenter)
+
+        abs_bincontent = h.GetBinContent(abs_ibin)
+        abs_binerror   = h.GetBinError(abs_ibin)
+
+        new_bincontent = bincontent + abs_bincontent
+        new_binerror   = math.sqrt(binerror**2 + abs_binerror**2)
+
+        h.SetBinContent(ibin, 0)
+        h.SetBinError(ibin, 0)
+
+        h.SetBinContent(abs_ibin, new_bincontent)
+        h.SetBinError  (abs_ibin, new_binerror)
+
+    a = to_array([0,0.48,0.96,1.44,1.92,2.64])
+    hnew = h.Rebin(len(a)-1, h.GetName() + '_rebin', a)
+    return hnew
+
+
 def get(f, kind, n):
     def rebin(h):
         return h
@@ -152,6 +180,8 @@ def get(f, kind, n):
         rebin = rebin_pt
     elif 'ht' in n:
         rebin = rebin_ht
+    elif 'eta' in n:
+        rebin = rebin_eta
     num_hist = f.Get("%s_%s_nums" % (n,kind))
     den_hist = f.Get("%s_%s_dens" % (n,kind))
     if num_hist is None or den_hist is None :
