@@ -1,4 +1,5 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
+from JMTucker.MFVNeutralino.NtupleCommon import use_btag_triggers
 
 settings = CMSSWSettings()
 settings.is_mc = True
@@ -30,7 +31,10 @@ process.tt.track_ref_getter.tracks_maps_srcs = []
 process.p = cms.Path(process.tt)
 
 from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-setup_event_filter(process, input_is_miniaod=True, mode='jets only novtx', event_filter_jes_mult=0)
+if use_btag_triggers :
+    setup_event_filter(process, input_is_miniaod=True, mode='bjets OR displaced dijet veto HT novtx', event_filter_jes_mult=0)
+else :
+    setup_event_filter(process, input_is_miniaod=True, mode='jets only novtx', event_filter_jes_mult=0)
 
 ReferencedTagsTaskAdder(process)('p')
 
@@ -38,10 +42,16 @@ ReferencedTagsTaskAdder(process)('p')
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
-    samples = pick_samples(dataset, all_signal=False)
+    if use_btag_triggers :
+        samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, bjet=True, span_signal=True) # no data currently; no sliced ttbar since inclusive is used
+        pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier())
+    else :
+        samples = pick_samples(dataset, all_signal=False)
+        pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier())
+
     set_splitting(samples, dataset, 'default', data_json=json_path('ana_2017p8.json'), limit_ttbar=True)
 
-    ms = MetaSubmitter('TrackingTreerV23mv3', dataset='miniaod')
-    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier())
+    ms = MetaSubmitter('TrackingTreerV27p1mvTEST', dataset='miniaod')
+    ms.common.pset_modifier = pset_modifier
     ms.condor.stageout_files = 'all'
     ms.submit(samples)

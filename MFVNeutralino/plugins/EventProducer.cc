@@ -498,6 +498,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     // for njets and ht40: jet_pt vector
     // jet_id vector
     // beamspot and slopes, pvx,y,z
+    // HLT jet pt, offline bdisc, and offline jet eta information for trigger matching
 
     mevent->gen_valid = 0;
     mevent->gen_flavor_code = 0;
@@ -535,15 +536,11 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->pvsscores.clear();
     mevent->jet_pudisc.clear();
     mevent->jet_raw_pt.clear();
-    mevent->jet_bdisc.clear();
-    mevent->jet_eta.clear();
     mevent->jet_phi.clear();
     mevent->jet_energy.clear();
-    mevent->jet_hlt_pt.clear();
     mevent->jet_hlt_eta.clear();
     mevent->jet_hlt_phi.clear();
     mevent->jet_hlt_energy.clear();
-    mevent->displaced_jet_hlt_pt.clear();
     mevent->displaced_jet_hlt_eta.clear();
     mevent->displaced_jet_hlt_phi.clear();
     mevent->displaced_jet_hlt_energy.clear();

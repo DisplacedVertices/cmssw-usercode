@@ -21,7 +21,7 @@ def njets(hname):
 def btag_eff_per_jet(nvtx, jet_flavor, bdisc):
   num = njets('h_%dv_n%sjets_%s_btag' % (nvtx, jet_flavor, bdisc))
   den = njets('h_%dv_n%sjets' % (nvtx, jet_flavor))
-  return num/den
+  return num/den if den > 0 else 0
 
 def scale_factor(nvtx, jet_flavor, bdisc):
 
@@ -73,7 +73,7 @@ def btag_eff_per_event_from_btag_eff_per_jet(nvtx, event_flavor, effb, effc, eff
 
 def btag_eff_per_event(nvtx, event_flavor, bdisc):
   h = f.Get('h_%s_%dv_1%s_btag_flavor_code' % (event_flavor, nvtx, bdisc))
-  return h.GetBinContent(2) / h.Integral()
+  return h.GetBinContent(2) / h.Integral() if h.Integral() > 0 else 0
 
 # Convenient inputs for bquark_fraction.py
 bdisc = 'tight' # Tight WP
@@ -86,7 +86,7 @@ event_eff = btag_eff_per_event_from_btag_eff_per_jet(nvtx, 'bjets', effb*sfb, ef
 event_fakerate = btag_eff_per_event_from_btag_eff_per_jet(nvtx, 'nobjets', effb*sfb, effc*sfc, effl*sfl)
 
 h_1v_1tight_btag_flavor_code = f.Get('h_1v_1tight_btag_flavor_code')
-ft = h_1v_1tight_btag_flavor_code.GetBinContent(2) / h_1v_1tight_btag_flavor_code.Integral()
+ft = h_1v_1tight_btag_flavor_code.GetBinContent(2) / h_1v_1tight_btag_flavor_code.Integral() if h_1v_1tight_btag_flavor_code.Integral() > 0 else 0
 
 # for the .csv file
 variant = '%strk_1v_%s_%s' % (ntk,year,syst_var_str)
