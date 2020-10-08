@@ -50,7 +50,8 @@ for x in sys.argv[1:]:
         fns.extend(glob(x2))
 if not fns:
     from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version
-    gg = '/uscms_data/d2/tucker/crab_dirs/MiniTree%s/*.root' % version
+    #gg = '/uscms_data/d2/tucker/crab_dirs/MiniTree%s/*.root' % version
+    gg = '/uscms/home/joeyr/crabdirs/MiniTreeAllMCV27p1Bm/*.root'
     print 'using default', gg
     fns = glob(gg)
 
@@ -154,7 +155,8 @@ for ntk in ntks:
 
         is_sig = sname.startswith('mfv_')
         is_data = sname.startswith('JetHT') or sname.startswith('SingleMuon') or sname.startswith('SingleElectron')
-        is_bkg = any((sname.startswith(s) for s in ('qcdht0700', 'qcdht1000', 'qcdht1500', 'qcdht2000', 'ttbarht0600', 'ttbarht0800', 'ttbarht1200', 'ttbarht2500')))
+        #is_bkg = any((sname.startswith(s) for s in ('qcdht0700', 'qcdht1000', 'qcdht1500', 'qcdht2000', 'ttbarht0600', 'ttbarht0800', 'ttbarht1200', 'ttbarht2500')))
+        is_bkg = any((sname.startswith(s) for s in ('qcdht0300', 'qcdht0500', 'qcdht0700', 'qcdht1000', 'qcdht1500', 'qcdht2000', 'ttbar')))
         is_other = not any((is_sig, is_data, is_bkg))
         include_in_sum = sumall or (sumbkg and is_bkg)
 

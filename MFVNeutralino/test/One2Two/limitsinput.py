@@ -13,7 +13,8 @@ class Params(object):
         self.nbins = len(self.bins)-1
         # 2015 is included in 2016. We scale/sum up 2015, 2016hip, 2016nonhip below, instead of that being done separately in
         # SignalEfficiencyCombiner--this simplifies the datacard and plot making downstream.
-        self.years = '2016', '2017', '2018'
+        #self.years = '2016', '2017', '2018'
+        self.years = '2017', '2018'
         self.nyears = len(self.years)
         import JMTucker.MFVNeutralino.AnalysisConstants as ac
         self.int_lumis = ac.scaled_int_lumi_2015p6, ac.scaled_int_lumi_2017, ac.scaled_int_lumi_2018
@@ -379,8 +380,10 @@ def sig_uncert_2017p8(name_year, debug=False):
 
 def make_signals_2017p8(f, name_list):
     # 2017,8 are from minitrees (the 100kevt official samples) and scanpack.
-    scanpack_list = '/uscms/home/tucker/public/mfv/scanpacks/2017p8/scanpack1D.merged.list.gz'
-    trees = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV27m/mfv*.root'
+    #scanpack_list = '/uscms/home/tucker/public/mfv/scanpacks/2017p8/scanpack1D.merged.list.gz'
+    scanpack_list = None
+    #trees = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV27m/mfv*.root'
+    trees = '/uscms/home/joeyr/crabdirs/MiniTreeV27p1Bm/mfv*root' # FIXME note that is half of MC stats
     title = []
     sigs = {}
 
@@ -471,7 +474,7 @@ def make():
     make_bkg(f)
 
     name_list = {}
-    make_signals_2015p6(f, name_list)
+    #make_signals_2015p6(f, name_list)
     make_signals_2017p8(f, name_list)
 
     title = name_list.pop('title')

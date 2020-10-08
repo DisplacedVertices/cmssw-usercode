@@ -11,8 +11,9 @@ if len(sys.argv) > 2 :
 else :
   syst_var_str = 'nom'
 
+# FIXME these aren't the latest ones
 f_btageff = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/BTagEff%sv1/background_%s.root' % (version, year) )
-f_presel = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/PreselHistos%s/background_%s.root' % (version, year))
+f_presel = ROOT.TFile('/uscms_data/d2/tucker/crab_dirs/PreselHistos%s/background_%s.root' % ("V27m", year))
 
 def njets(hname):
   h = f_btageff.Get(hname)

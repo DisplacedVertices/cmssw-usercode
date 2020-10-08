@@ -23,14 +23,16 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
     if use_btag_triggers :
-        samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=True, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used
-        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), half_mc_modifier())
+        #samples = pick_samples(dataset, qcd=False, ttbar=False, all_signal=True, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used
+        #pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), half_mc_modifier())
+        samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used
+        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
     else :
         samples = pick_samples(dataset)
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
     set_splitting(samples, dataset, 'minitree', data_json=json_path('ana_2017p8_10pc.json'))
 
-    cs = CondorSubmitter('MiniTree' + version,
+    cs = CondorSubmitter('MiniTreeAllMC' + version,
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,

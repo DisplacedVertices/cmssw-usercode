@@ -6,38 +6,38 @@ import JMTucker.MFVNeutralino.AnalysisConstants as ac
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 
-year = '2017p8'
-version = 'V23m'
-root_file_dir = '/uscms_data/d2/tucker/crab_dirs/Histos%s' % version
+year = '2017'
+version = 'V27p1Bm'
+root_file_dir = '/uscms/home/joeyr/crabdirs/Histos%s' % version
 
 set_style()
-ps = plot_saver(plot_dir('data_mc_comp_%s_%s' % (year, version)))
+ps = plot_saver(plot_dir('signal_bkg_comp_%s_%s' % (year, version)))
 
-qcd_samples = Samples.qcd_samples_2017[1:]
-ttbar_samples = Samples.ttbar_samples_2017
-signal_sample = Samples.mfv_neu_tau001000um_M0800_2017
+qcd_samples = Samples.qcd_samples_2017 + Samples.bjet_samples_2017[:-1]
+ttbar_samples = Samples.bjet_samples_2017[-1:]
+signal_sample = Samples.mfv_neu_tau001000um_M0400_2017
 data_samples = [] # Samples.data_samples_2017
 background_samples = ttbar_samples + qcd_samples
 lumi = ac.int_lumi_2017 * ac.scale_factor_2017
 lumi_nice = ac.int_lumi_nice_2017
 
-if year == '2018':
-    qcd_samples = Samples.qcd_samples_2018
-    ttbar_samples = []
-    signal_sample = Samples.mfv_neu_tau001000um_M0800_2017
-    data_samples = [] # Samples.data_samples_2017
-    background_samples = qcd_samples
-    lumi = ac.int_lumi_2018 * ac.scale_factor_2018
-    lumi_nice = ac.int_lumi_nice_2018
-
-if year == '2017p8':
-    qcd_samples = Samples.qcd_samples_2018 + Samples.qcd_samples_2017[1:]
-    ttbar_samples = Samples.ttbar_samples_2017
-    signal_sample = Samples.mfv_neu_tau001000um_M0800_2017
-    data_samples = [] # Samples.data_samples_2017
-    background_samples = qcd_samples + ttbar_samples
-    lumi = ac.int_lumi_2017p8 * ac.scale_factor_2017p8
-    lumi_nice = ac.int_lumi_nice_2017p8
+#if year == '2018':
+#    qcd_samples = Samples.qcd_samples_2018
+#    ttbar_samples = []
+#    signal_sample = Samples.mfv_neu_tau001000um_M0800_2017
+#    data_samples = [] # Samples.data_samples_2017
+#    background_samples = qcd_samples
+#    lumi = ac.int_lumi_2018 * ac.scale_factor_2018
+#    lumi_nice = ac.int_lumi_nice_2018
+#
+#if year == '2017p8':
+#    qcd_samples = Samples.qcd_samples_2018 + Samples.qcd_samples_2017[1:]
+#    ttbar_samples = Samples.ttbar_samples_2017
+#    signal_sample = Samples.mfv_neu_tau001000um_M0800_2017
+#    data_samples = [] # Samples.data_samples_2017
+#    background_samples = qcd_samples + ttbar_samples
+#    lumi = ac.int_lumi_2017p8 * ac.scale_factor_2017p8
+#    lumi_nice = ac.int_lumi_nice_2017p8
 
 for s in qcd_samples:
     s.join_info = True, 'Multijet events', ROOT.kBlue-9
@@ -45,7 +45,7 @@ for s in ttbar_samples:
     s.join_info = True, 't#bar{t}', ROOT.kBlue-7
 
 signal_samples = [signal_sample]
-signal_sample.nice_name = 'Signal: #sigma = 1 fb, c#tau = 1 mm, M = 800 GeV'
+signal_sample.nice_name = 'Multijet Signal: #sigma = 1 fb, c#tau = 1000 um, M = 400 GeV'
 signal_sample.color = 8
 
 C = partial(data_mc_comparison,
@@ -57,7 +57,7 @@ C = partial(data_mc_comparison,
             int_lumi = lumi,
             int_lumi_nice = lumi_nice,
             canvas_top_margin = 0.08,
-            overflow_in_last = True,
+            #overflow_in_last = True,
             poisson_intervals = True,
             legend_pos = (0.48, 0.78, 0.88, 0.88),
             enable_legend = True,
@@ -85,8 +85,36 @@ C = partial(data_mc_comparison,
 #  )
 #
 C('presel_njets',
-  histogram_path = 'mfvEventHistosPreSel/h_njets',
+  histogram_path = 'mfvEventHistosPreSel/h_njets20',
   x_title = 'Number of jets',
+  y_title = 'Events',
+  y_range = (1, 1e8),
+  )
+
+C('presel_nbjets',
+  histogram_path = 'mfvEventHistosPreSel/h_nbtags_2',
+  x_title = 'Number of tight bjets',
+  y_title = 'Events',
+  y_range = (1, 1e8),
+  )
+
+C('presel_bjet_pt',
+  histogram_path = 'mfvEventHistosPreSel/h_bjet_pt',
+  x_title = 'bjet p_{T} (GeV)',
+  y_title = 'Events',
+  y_range = (1, 1e8),
+  )
+
+C('presel_bjet_eta',
+  histogram_path = 'mfvEventHistosPreSel/h_bjet_eta',
+  x_title = 'bjet #eta',
+  y_title = 'Events',
+  y_range = (1, 1e8),
+  )
+
+C('presel_bjet_phi',
+  histogram_path = 'mfvEventHistosPreSel/h_bjet_phi',
+  x_title = 'bjet #phi',
   y_title = 'Events',
   y_range = (1, 1e8),
   )
@@ -221,20 +249,20 @@ C('presel_ht40',
 #  )
 
 
-C('onevtx_ntracks',
-  histogram_path = 'vtxHst1VNoNtracks/h_sv_all_ntracks',
-  x_title = 'Number of tracks per vertex',
-  y_title = 'Vertices',
-  y_range = (0.1, 1e6),
-  cut_line = ((5, 0, 5, 2.1e6), 2, 5, 1),
-  )
+#C('onevtx_ntracks',
+#  histogram_path = 'vtxHst1VNoNtracks/h_sv_all_ntracks',
+#  x_title = 'Number of tracks per vertex',
+#  y_title = 'Vertices',
+#  y_range = (0.1, 1e4),
+#  cut_line = ((5, 0, 5, 2.1e4), 2, 5, 1),
+#  )
 
 C('onevtx_bs2derr',
   histogram_path = 'vtxHst1VNoBs2derr/h_sv_all_bs2derr',
   x_title = 'Uncertainty in d_{BV} (cm)',
   y_title = 'Vertices/5 #mum',
-  y_range = (1, 1e6),
-  cut_line = ((0.0025, 0, 0.0025, 2.1e6), 2, 5, 1),
+  y_range = (.01, 1e4),
+  cut_line = ((0.0025, 0, 0.0025, 2.1e4), 2, 5, 1),
   )
 
 C('onevtx_dbv',
@@ -242,8 +270,8 @@ C('onevtx_dbv',
   x_title = 'd_{BV} (cm)',
   y_title = 'Vertices/50 #mum',
   x_range = (0, 0.4),
-  y_range = (1, 1e6),
-  cut_line = ((0.01, 0, 0.01, 2.1e6), 2, 5, 1),
+  y_range = (.01, 1e4),
+  cut_line = ((0.01, 0, 0.01, 2.1e4), 2, 5, 1),
   )
 
 C('nsv_3track',

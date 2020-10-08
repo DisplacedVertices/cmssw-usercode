@@ -266,13 +266,13 @@ int main(int, char**) {
   jmt::ConfigFromEnv env("sm", true);
 
                                        //  2017                   2018                  2017+2018
-  const double default_n1v[4][3][3] = {{{  14349, 2258,  199 }, { 11600, 2094, 249 }, {  14349+11600, 2258+2094,  199+249 }},  // MC scaled to int. lumi.
-                                       {{   6561, 1073,   92 }, {  3427,  642,  75 }, {   6561+ 3427, 1073+ 642,   92+ 75 }},  // MC effective
+  const double default_n1v[4][3][3] = {{{  12482, 1664,   49 }, { 13342, 1639, 133 }, {  12482+13342, 1664+1639,   49+133 }},  // MC scaled to int. lumi.
+                                       {{    335,  106,   10 }, {   238,   83,   8 }, {    335+  238,  106+  83,   10+  8 }},  // MC effective
                                        {{   3203,  786,  142 }, {  3036,  689,  82 }, {   3203+ 3036,  786+ 689,  142+ 82 }},  // data 10%
                                        {{  32152, 7838, 1303 }, { 29666, 6892, 908 }, {  32152+29666, 7838+6892, 1303+908 }}   // data 100%
                                       };
-  const double default_n2v[4][3][3] = {{{     55,    1,   1 }, { 14, 1, 1 }, {  55+14,   1, 1 }},
-                                       {{     22,    3,   1 }, {  8, 1, 1 }, {  22+ 8, 3+1, 1 }},
+  const double default_n2v[4][3][3] = {{{     56,    1,   1 }, { 65, 7, 1 }, {  56+65, 0+7, 1 }},
+                                       {{      5,    1,   1 }, {  3, 1, 1 }, {  22+ 8,   1, 1 }},
                                        {{      7,    3,   1 }, { 13, 1, 1 }, {   7+13, 3+0, 1 }},
                                        {{    113,    9,   1 }, { 72, 3, 1 }, { 113+72, 9+3, 1 }}
                                       };
@@ -298,8 +298,9 @@ int main(int, char**) {
   const long ntrue_2v = env.get_long("ntrue_2v", 1000000L);
   const double oversample = env.get_double("oversample", 20);
   const std::string year_str[3] = {"2017","2018","2017p8"};
-  const std::string ntuple_version = "V27m";
-  const std::string rho_compare_fn = env.get_string("rho_compare_fn", env.get_string("rho_compare_path", "/uscms_data/d2/tucker/crab_dirs/Histos" + ntuple_version) + "/" + std::string(sample_is_mc ? "background_" : "JetHT") + year_str[year_index] + ".root");
+  const std::string ntuple_version = "V27p1Bm";
+  //const std::string rho_compare_fn = env.get_string("rho_compare_fn", env.get_string("rho_compare_path", "/uscms_data/d2/tucker/crab_dirs/Histos" + ntuple_version) + "/" + std::string(sample_is_mc ? "background_" : "JetHT") + year_str[year_index] + ".root");
+  const std::string rho_compare_fn = env.get_string("rho_compare_fn", env.get_string("rho_compare_path", "/uscms/home/joeyr/crabdirs/HistosAllMCV27p1Bm") + "/" + std::string(sample_is_mc ? "background_btagpresel_" : "JetHT") + year_str[year_index] + ".root");
   const double rho_compare_xmax = env.get_double("rho_compare_xmax", 2);
   const bool rho_compare_only = env.get_bool("rho_compare_only", false);
   phi_c = env.get_double("phi_c", 1.31);

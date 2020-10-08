@@ -2,16 +2,18 @@
 
 from JMTucker.Tools.ROOTTools import *
 
-is_mc = False
-year = '2017p8'
-version = 'V27m'
+is_mc = True
+year = '2017'
+version = 'V27p1m'
 
 set_style()
 ps = plot_saver(plot_dir('fit_jetpairdphi%s%s_%s' % (version.capitalize(), '' if is_mc else '_data', year)), size=(700,700), log=False, root=False)
 
-fn = '/uscms_data/d2/tucker/crab_dirs/Histos%s/background_%s.root' % (version.capitalize(), year)
-if not is_mc:
-  fn = '/uscms_data/d2/tucker/crab_dirs/Histos%s/100pc/JetHT%s.root' % (version.capitalize(), year)
+#fn = '/uscms/home/joeyr/crabdirs/HistosV27p1Bm/background_btagpresel_%s.root' % year
+fn = '/uscms/home/joeyr/crabdirs/HistosAllMCV27p1Bm/background_btagpresel_%s.root' % year
+#fn = '/uscms_data/d2/tucker/crab_dirs/Histos%s/background_%s.root' % (version.capitalize(), year)
+#if not is_mc:
+#  fn = '/uscms_data/d2/tucker/crab_dirs/Histos%s/100pc/JetHT%s.root' % (version.capitalize(), year)
 
 ntk = ['Ntk3', 'Ntk3or4', 'Ntk4', '']
 ntracks = ['3-track', '3-or-4-track', '4-track', '5-or-more-track']
@@ -22,12 +24,41 @@ if not is_mc:
 f = ROOT.TFile(fn)
 for i,n in enumerate(ntk):
   h = f.Get('%smfvEventHistosOnlyOneVtx/h_jet_pairdphi' % n)
+
+  for ibin in range(h.GetXaxis().GetNbins()) :
+      if h.GetXaxis().GetBinLowEdge(ibin) >= 0 : continue
+
+      bincontent = h.GetBinContent(ibin)
+      binerror   = h.GetBinError(ibin)
+      bincenter = h.GetXaxis().GetBinCenter(ibin)
+
+      absbincenter = abs(bincenter)
+      abs_ibin = h.GetXaxis().FindBin(absbincenter)
+
+      print ibin, bincenter, abs_ibin, absbincenter, bincontent
+
+      abs_bincontent = h.GetBinContent(abs_ibin)
+      abs_binerror   = h.GetBinError(abs_ibin)
+
+      new_bincontent = bincontent + abs_bincontent
+      new_binerror   = math.sqrt(binerror**2 + abs_binerror**2)
+
+      h.SetBinContent(ibin, 0)
+      h.SetBinError(ibin, 0)
+
+      h.SetBinContent(abs_ibin, new_bincontent)
+      h.SetBinError  (abs_ibin, new_binerror)
+  
+  print h.Integral()
+
   h.SetStats(0)
   h.SetLineColor(ROOT.kBlue)
   h.SetLineWidth(3)
-  h.Scale(1./h.Integral())
+  h.Scale(0.5/h.Integral())
+  #h.Scale(1.0/h.Integral())
   h.GetYaxis().SetRangeUser(0,0.02)
   f_dphi = ROOT.TF1("f_dphi", "[1]*((abs(x)-[0])**2 + [2])", 0.8, 3.15)
+  #f_dphi = ROOT.TF1("f_dphi", "[1]*((abs(x)-[0])**2 + [2])", -3.15, -0.8)
   f_dphi.SetParameters(0,0,0)
   h.Fit('f_dphi', 'R')
   h.SetTitle(';#Delta#phi;')

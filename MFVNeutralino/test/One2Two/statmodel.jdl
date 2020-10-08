@@ -8,6 +8,6 @@ stream_output = false
 stream_error  = false
 notification  = never
 should_transfer_files   = YES
-transfer_input_files = statmodel.exe,vpeffs_2017_V27m.root,vpeffs_2018_V27m.root,vpeffs_2017p8_V27m.root,vpeffs_data_2017_V27m.root,vpeffs_data_2018_V27m.root,vpeffs_data_2017p8_V27m.root,$ENV(CMSSW_BASE)/lib/slc6_amd64_gcc630/libJMTuckerTools.so,/uscms_data/d2/tucker/crab_dirs/HistosV27m/background_2017.root,/uscms_data/d2/tucker/crab_dirs/HistosV27m/background_2018.root,/uscms_data/d2/tucker/crab_dirs/HistosV27m/background_2017p8.root,/uscms_data/d2/tucker/crab_dirs/HistosV27m/JetHT2017.root,/uscms_data/d2/tucker/crab_dirs/HistosV27m/JetHT2018.root,/uscms_data/d2/tucker/crab_dirs/HistosV27m/JetHT2017p8.root
+transfer_input_files = statmodel.exe,vpeffs_2017_V27p1Bm.root,vpeffs_2018_V27p1Bm.root,/uscms/home/joeyr/work/implement_trigger/mfv_946p1/lib/slc6_amd64_gcc630/libJMTuckerTools.so,/uscms/home/joeyr/crabdirs/HistosAllMCV27p1Bm/background_btagpresel_2017.root,/uscms/home/joeyr/crabdirs/HistosAllMCV27p1Bm/background_btagpresel_2018.root
 when_to_transfer_output = ON_EXIT
-Queue 36
+Queue 12

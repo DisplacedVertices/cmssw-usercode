@@ -400,7 +400,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     for (size_t jjet = ijet+1; jjet < mevent->jet_id.size(); ++jjet) {
       if (mevent->jet_pt[jjet] < mfv::min_jet_pt)
         continue;
-      h_jet_pairdphi->Fill(reco::deltaPhi(mevent->jet_phi[ijet], mevent->jet_phi[jjet]), w);
+      h_jet_pairdphi->Fill(reco::deltaPhi(mevent->jet_phi[ijet], mevent->jet_phi[jjet]), w); // FIXME could fabs this
       h_jet_pairdr->Fill(reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->jet_eta[jjet], mevent->jet_phi[jjet]), w);
     }
   }

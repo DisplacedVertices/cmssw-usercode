@@ -1,8 +1,13 @@
 import os
 from JMTucker.Tools.ROOTTools import *
 
-version = 'V27m'
-path = '/uscms_data/d2/tucker/crab_dirs/VertexerPairEffs' + version.capitalize()
+version = 'V27p1Bm'
+#path = '/uscms_data/d2/tucker/crab_dirs/VertexerPairEffs' + version.capitalize()
+#path = '/uscms/home/joeyr/crabdirs/VertexerPairEffsV27p1Bm'
+#path = '/uscms/home/joeyr/crabdirs/VertexerPairEffsV27p1Bm_BEnrichedLowHTQCD'
+#path = '/uscms/home/joeyr/crabdirs/VertexerPairEffsWithBSamplesV27p1Bm'
+#path = '/uscms/home/joeyr/crabdirs/VertexerPairEffsWithBSamplesAllMCV27p1Bm'
+path = '/uscms/home/joeyr/crabdirs/VertexerPairEffsAllMCV27p1Bm'
 
 set_style()
 
@@ -14,9 +19,9 @@ def write(font, size, x, y, text):
     w.DrawLatex(x, y, text)
     return w
 
-for is_mc in False, True:
-    for year in 2017, 2018, '2017p8':
-        in_fn = os.path.join(path, ('background_%s.root' if is_mc else 'JetHT%s.root') % year)
+for is_mc in [True]:
+    for year in [2017,2018]:
+        in_fn = os.path.join(path, ('background_btagpresel_%s.root' if is_mc else 'JetHT%s.root') % year)
         in_f = ROOT.TFile(in_fn)
 
         for ntkseeds in True, False:
@@ -52,6 +57,11 @@ for is_mc in False, True:
                     else:
                         h.Draw('sames')
 
+                # FIXME consider replacing the plots by their erf fit (and ideally save the original as well + overlay it!)
+                #h_adds_fit = ROOT.TF1("fit_adds_maxtk%i" % itk, "[0] + 0.5*[1]*(1+TMath::Erf( (x - 0.005) / 0.2))", 0.0, 1)
+                #h_adds[itk].Fit("fit_adds_maxtk%i" % itk)
+                #h_adds_fit.Draw("sames")
+
                 l = ROOT.TLegend(0.50,0.55,0.85,0.70)
                 l.AddEntry(h_merges[itk], '1 - merge / pairs')
                 l.AddEntry(h_adds[itk], '1 - (merge + erase) / pairs')
@@ -71,9 +81,9 @@ for is_mc in False, True:
                 h.SetTitle(';d_{VV} (cm);Efficiency')
                 h.GetXaxis().SetRangeUser(0,0.4)
                 if ih == 0:
-                    h.Draw('hist')
+                    h.Draw('hist E1')
                 else:
-                    h.Draw('hist sames')
+                    h.Draw('hist E1 sames')
                 l.AddEntry(h, '%i-track' % itk)
             l.SetFillColor(0)
             l.Draw()

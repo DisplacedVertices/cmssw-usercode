@@ -3,10 +3,10 @@ from statmodel import ebins
 ROOT.TH1.AddDirectory(0)
 
 do_bquark = False
-is_mc = False
-only_10pc = True
+is_mc = True
+only_10pc = False
 year = '2018'
-version = 'V27m'
+version = 'V27p1Bm'
 set_style()
 ps = plot_saver(plot_dir('closure_%s%s%s_%s' % (version.capitalize(), '' if is_mc else '_data', '_10pc' if only_10pc else '', year)), size=(700,700), root=True, log=False)
 
@@ -48,29 +48,29 @@ def scale_and_draw_template(template, twovtxhist, dvvc, color) :
     twovtx = twovtxhist.IntegralAndError(0, twovtxhist.GetNbinsX(), twovtxerr)
 
     if twovtx > 0:
-        template.Scale(twovtx/template.Integral())
+        template.Scale(twovtx/template.Integral() if template.Integral() > 0 else 1)
     else:
-        template.Scale(1./template.Integral())
+        template.Scale(1./template.Integral() if template.Integral() > 0 else 1)
         twovtxerr = 1.
 
     template_bins = get_bin_integral_and_stat_uncert(dvvc)
 
     if 'dphi' not in template.GetName():
-        for bin in range(template.GetNbinsX() + 1):
+        for bin in range(1, template.GetNbinsX() + 1):
             stat = 0.
-            if bin <= 3:
-                stat = template_bins[0][1] * (template.GetBinContent(bin) / template_bins[0][0])**0.5
-            elif bin <= 6:
-                stat = template_bins[1][1] * (template.GetBinContent(bin) / template_bins[1][0])**0.5
+            if bin <= 4:
+                stat = template_bins[0][1] * (template.GetBinContent(bin) / template_bins[0][0] if template_bins[0][0] > 0 else 1)**0.5
+            elif bin <= 7:
+                stat = template_bins[1][1] * (template.GetBinContent(bin) / template_bins[1][0] if template_bins[1][0] > 0 else 1)**0.5
             else:
-                stat = template_bins[2][1] * (template.GetBinContent(bin) / template_bins[2][0])**0.5
+                stat = template_bins[2][1] * (template.GetBinContent(bin) / template_bins[2][0] if template_bins[2][0] > 0 else 1)**0.5
 
-            newerr = (stat**2. + (twovtxerr * template.GetBinContent(bin) / template.Integral())**2.)**0.5
+            newerr = (stat**2. + (twovtxerr * template.GetBinContent(bin) / template.Integral() if template.Integral() > 0 else 1)**2.)**0.5
             template.SetBinError(bin, newerr)
     else:
         binerr_comb = ((template_bins[0][1])**2. + (template_bins[1][1])**2 + (template_bins[2][1])**2)**0.5
         for bin in range(template.GetNbinsX() + 1):
-            newerr = (binerr_comb**2. / 5. + (twovtxerr * template.GetBinContent(bin) / template.Integral())**2)**0.5
+            newerr = (binerr_comb**2. / 5. + (twovtxerr * template.GetBinContent(bin) / template.Integral() if template.Integral() > 0 else 1)**2)**0.5
             template.SetBinError(bin, newerr)
     template.Draw('hist sames')
 
@@ -177,9 +177,9 @@ for i, ntracks in enumerate(ntk):
     constructed = ROOT.TFile(fns_btag[i]).Get('h_c1v_dvv')
 
     if twovtx.Integral() > 0:
-        constructed.Scale(twovtx.Integral()/constructed.Integral())
+        constructed.Scale(twovtx.Integral()/constructed.Integral() if constructed.Integral() > 0 else 1)
     else:
-        constructed.Scale(1./constructed.Integral())
+        constructed.Scale(1./constructed.Integral() if constructed.Integral() > 0 else 1)
 
     twovtx_total, twovtx_total_err = get_integral(twovtx)
     twovtx_bins = get_bin_integral_and_stat_uncert(twovtx)

@@ -47,9 +47,11 @@ if __name__ == '__main__':
 
     ntk_list = [3,4,5,7]
 
-    for is_data in False, True :
+    #for is_data in False, True :
+    for is_data in False, :
         for sys_var in ['nom','bcjet_up','bcjet_down','ljet_up','ljet_down', 'vary_dphi', 'vary_eff'] :
-            for year in ['2017','2018','2017p8'] :
+            #for year in ['2017','2018','2017p8'] :
+            for year in ['2017'] :
                 f2_vals_printout = ''
 
                 year_formatted = year

@@ -245,7 +245,8 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
                 name = 'signal'
                 sample.split_by = 'events'
 
-            sample.files_per, sample.events_per = d[dataset].get(name, (50, 100000))
+            #sample.files_per, sample.events_per = d[dataset].get(name, (50, 100000))
+            sample.files_per, sample.events_per = d[dataset].get(name, (10, 100000))
 
             if jobtype == 'trackmover':
                 if name.startswith('ttbarht'):

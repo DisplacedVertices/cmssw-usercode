@@ -1,8 +1,9 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version_ = 'V27'
-use_btag_triggers = False
+ntuple_version_ = 'V27p1' # used veto of HT triggers
+#ntuple_version_ = 'V27' # used logical OR of HT and Bjet triggers
+use_btag_triggers = True
 if use_btag_triggers : 
     ntuple_version_ += "B" # for "Btag triggers"; also includes DisplacedDijet triggers
 ntuple_version_use = ntuple_version_ + 'm'

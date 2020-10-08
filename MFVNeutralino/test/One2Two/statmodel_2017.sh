@@ -10,12 +10,12 @@ cd $wd
 
 export LD_LIBRARY_PATH=$(pwd):${LD_LIBRARY_PATH}
 
-samples_index=$((job/6))
-year_index=$(((job%6)/3))
+samples_index=$((job/3))
+year_index=0
 ntracks=$((3+job%3))
 
 samples_name=(MCscaled MCeffective)
-year_name=(2017 2018)
+year_name=(2017)
 
 out_fn=sm_${samples_name[samples_index]}_${year_name[year_index]}_${ntracks}track
 

@@ -1,5 +1,6 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
+from JMTucker.MFVNeutralino.NtupleCommon import use_btag_triggers
 
 settings = CMSSWSettings()
 settings.is_mc = True
@@ -9,7 +10,7 @@ max_events(process, 1000)
 report_every(process, 1000000)
 geometry_etc(process, which_global_tag(settings))
 tfileservice(process, 'tracker_mapper.root')
-sample_files(process, 'qcdht2000_2017', 'miniaod')
+sample_files(process, 'ttbar_2017', 'miniaod')
 file_event_from_argv(process)
 #want_summary(process)
 
@@ -40,7 +41,17 @@ process.TrackerMapper = cms.EDAnalyzer('TrackerMapper',
                                        )
 
 from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-jetsOnly = setup_event_filter(process,
+if use_btag_triggers :
+    event_filter = setup_event_filter(process,
+                              path_name = '',
+                              trigger_filter = 'bjets OR displaced dijet veto HT',
+                              event_filter = 'bjets OR displaced dijet veto HT',
+                              event_filter_jes_mult = 0,
+                              event_filter_require_vertex = False,
+                              input_is_miniaod = True)
+
+else :
+    event_filter = setup_event_filter(process,
                               path_name = '',
                               trigger_filter = 'jets only',
                               event_filter = 'jets only',
@@ -48,7 +59,7 @@ jetsOnly = setup_event_filter(process,
                               event_filter_require_vertex = False,
                               input_is_miniaod = True)
 
-common = cms.Sequence(jetsOnly * process.goodOfflinePrimaryVertices * process.jmtUnpackedCandidateTracks * process.jmtWeightMiniAOD)
+common = cms.Sequence(event_filter * process.goodOfflinePrimaryVertices * process.jmtUnpackedCandidateTracks * process.jmtWeightMiniAOD)
 
 if False:
     process.load('JMTucker.Tools.RescaledTracks_cfi')
@@ -71,14 +82,22 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     import JMTucker.Tools.Samples as Samples
     from JMTucker.Tools.Year import year
 
-    if year == 2017:
-        samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.all_signal_samples_2017 + Samples.data_samples_2017
-    elif year == 2018:
-        samples = Samples.qcd_samples_2018 + Samples.data_samples_2018
+    dataset = 'miniaod'
+
+    if use_btag_triggers :
+        samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, bjet=False, span_signal=True) # no data currently; no sliced ttbar since inclusive is used
+        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
+    else :
+        samples = pick_samples(dataset, all_signal=False)
+        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
 
     set_splitting(samples, 'miniaod', 'default', json_path('ana_2017_1pc.json'), 16)
 
-    ms = MetaSubmitter('TrackerMapperV3', dataset='miniaod')
-    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(cross=settings.cross))
+    outputname = 'TrackerMapper'
+    if use_btag_triggers :
+        outputname += 'BtagTriggered'
+    outputname += 'V1'
+    ms = MetaSubmitter(outputname, dataset=dataset)
+    ms.common.pset_modifier = pset_modifier
     ms.condor.stageout_files = 'all'
     ms.submit(samples)

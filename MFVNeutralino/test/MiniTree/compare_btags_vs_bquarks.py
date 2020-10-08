@@ -1,7 +1,7 @@
 from JMTucker.Tools.ROOTTools import *
 import sys
 
-version = 'V25m'
+version = 'V27p1Bm'
 year = int(sys.argv[1])
 ntk = int(sys.argv[2])
 
@@ -18,7 +18,7 @@ for nvtx in [1,2]:
   h_jet_bdisc.SetStats(0)
   h_jet_bdisc.SetLineColor(ROOT.kBlack)
   h_jet_bdisc.SetLineWidth(3)
-  h_jet_bdisc.Scale(1./h_jet_bdisc.Integral())
+  h_jet_bdisc.Scale(1./h_jet_bdisc.Integral() if h_jet_bdisc.Integral() > 0 else 1)
   h_jet_bdisc.GetYaxis().SetRangeUser(1e-9,0.045)
   h_jet_bdisc.GetYaxis().SetTitleOffset(1.55)
   h_jet_bdisc.Draw('hist')
@@ -64,7 +64,7 @@ for nvtx in [1,2]:
   for i,btag in enumerate(btags):
     h = f.Get('h_%dv_%s_btag_flavor_code' % (nvtx,btag))
     x.append(i+1)
-    y.append(h.GetBinContent(2)/h.Integral())
+    y.append(h.GetBinContent(2)/h.Integral() if h.Integral() > 0 else 0)
 
   g = ROOT.TGraph(len(btags), array('d',x), array('d',y))
   g.SetTitle('%s-track %s-vertex events;;fraction with btag' % (ntk, 'one' if nvtx==1 else 'two' if nvtx==2 else ''))
@@ -75,7 +75,7 @@ for nvtx in [1,2]:
   g.SetMarkerStyle(21)
   g.Draw('AP')
   h = f.Get('h_%dv_bquark_flavor_code' % nvtx)
-  bquark_fraction = h.GetBinContent(2)/h.Integral()
+  bquark_fraction = h.GetBinContent(2)/h.Integral() if h.Integral() > 0 else 1
   line = ROOT.TLine(x[0]-0.5, bquark_fraction, x[-1]+0.5, bquark_fraction)
   line.SetLineStyle(2)
   line.SetLineWidth(2)
@@ -94,8 +94,8 @@ for nvtx in [1,2]:
   for i,btag in enumerate(btags):
     h1 = f.Get('h_bquarks_%dv_%s_btag_flavor_code' % (nvtx,btag))
     h2 = f.Get('h_nobquarks_%dv_%s_btag_flavor_code' % (nvtx,btag))
-    x.append(h1.GetBinContent(2)/h1.Integral())
-    y.append(h2.GetBinContent(2)/h2.Integral())
+    x.append(h1.GetBinContent(2)/h1.Integral() if h1.Integral() > 0 else 0)
+    y.append(h2.GetBinContent(2)/h2.Integral() if h2.Integral() > 0 else 0)
 
   g = ROOT.TGraph(len(btags), array('d',x), array('d',y))
   g.SetTitle('%s-track %s-vertex events;btag efficiency;fake rate' % (ntk, 'one' if nvtx==1 else 'two' if nvtx==2 else ''))
@@ -199,7 +199,7 @@ for nvtx in [1,2]:
     h_dbv.SetStats(0)
     h_dbv.SetLineColor(ROOT.kBlack)
     h_dbv.SetLineWidth(3)
-    h_dbv.Scale(1./h_dbv.Integral())
+    h_dbv.Scale(1./h_dbv.Integral() if h_dbv.Integral() > 0 else 1)
     h_dbv.GetYaxis().SetRangeUser(1e-5,0.4)
     if ntk == 5 or nvtx == 2:
       h_dbv.GetYaxis().SetRangeUser(1e-5,0.8)

@@ -154,29 +154,35 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   const char* samples[nbkg];
   float       weights[nbkg];
   samples[0]  = "mfv_neu_tau001000um_M0800_2017"; weights[0]  = 0.00083; //FIXME
-  samples[1]  = "qcdht0700_2017";                 weights[1]  = 5.46;
-  samples[2]  = "qcdht1000_2017";                 weights[2]  = 2.67;
-  samples[3]  = "qcdht1500_2017";                 weights[3]  = 0.349;
-  samples[4]  = "qcdht2000_2017";                 weights[4]  = 0.14;
-  samples[5]  = "qcdht0300_2017";                 weights[5]  = 222;
-  samples[6]  = "qcdht0500_2017";                 weights[6]  = 21.9;
-  samples[7]  = "ttbar_2017";                     weights[7]  = 0.221;
-  samples[8]  = "NULL_2017";                      weights[8]  = -1;
+  samples[1] = "qcdbenrichedht0300_2017";     weights[1] = 108; 
+  samples[2] = "qcdbenrichedht0300ext_2017";  weights[2] = 108; 
+  samples[3] = "qcdbenrichedht0500_2017";     weights[3] = 1.9; 
+  samples[4] = "qcdbenrichedht0500ext_2017";  weights[4] = 1.9; 
+  samples[5] = "qcdbenrichedht0700_2017";     weights[5] = 3.3; 
+  samples[6] = "qcdbenrichedht0700ext_2017";  weights[6] = 3.3; 
+  samples[7] = "qcdbenrichedht1000_2017";     weights[7] = .16; 
+  samples[8] = "qcdbenrichedht1000ext_2017";  weights[8] = .16; 
+  samples[9] = "qcdbgenfilterht0300_2017";    weights[9] = 208; 
+  samples[10] = "qcdbgenfilterht0500_2017";    weights[10] = 2.3; 
+  samples[11] = "qcdbgenfilterht0700_2017";    weights[11] = 3.4; 
+  samples[12] = "qcdbgenfilterht0700ext_2017"; weights[12] = .73; 
+  samples[13] = "qcdbgenfilterht1000_2017";    weights[13] = .16; 
+  samples[14]  = "ttbar_2017";                 weights[14]  = 0.221;
   //samples[5]  = "ttbarht0600_2017";               weights[5]  = 0.123;
   //samples[6]  = "ttbarht0800_2017";               weights[6]  = 0.0959;
   //samples[7]  = "ttbarht1200_2017";               weights[7]  = 0.0664;
   //samples[8]  = "ttbarht2500_2017";               weights[8]  = 0.0339;
-  samples[9]  = "qcdht0700_2018";                 weights[9]  = 8.61; 
-  samples[10] = "qcdht1000_2018";                 weights[10] = 4.18; 
-  samples[11] = "qcdht1500_2018";                 weights[11] = 0.534; 
-  samples[12] = "qcdht2000_2018";                 weights[12] = 0.218; 
+  samples[15]  = "qcdht0700_2018";                 weights[15]  = 8.71; //FIXME
+  samples[15] = "qcdht1000_2018";                 weights[15] = 4.34; //FIXME
+  samples[15] = "qcdht1500_2018";                 weights[15] = 0.539; //FIXME
+  samples[15] = "qcdht2000_2018";                 weights[15] = 0.22; //FIXME
   //samples[13] = "ttbarht0600_2018";               weights[13] = 0.151;
   //samples[14] = "ttbarht0800_2018";               weights[14] = 0.134;
   //samples[15] = "ttbarht1200_2018";               weights[15] = 0.163;
   //samples[16] = "ttbarht2500_2018";               weights[16] = 0.0136;
-  samples[13] = "qcdht0300_2018";                 weights[13]  = 348; 
-  samples[14] = "qcdht0500_2018";                 weights[14]  = 32.1; 
-  samples[15] = "ttbar_2018";                     weights[15]  = 0.346; 
+  samples[15] = "qcdht0300_2018";                 weights[15]  = -1; //FIXME
+  samples[15] = "qcdht0500_2018";                 weights[15]  = -1; //FIXME
+  samples[15] = "ttbar_2018";                     weights[15]  = -1; //FIXME
   samples[16] = "NULL_2018";                      weights[16]  = -1;
   samples[17] = "mfv_neu_tau001000um_M0400_2018"; weights[17] = 0.00119; //FIXME
   samples[18] = "JetHT2017B";                     weights[18] = 1;
@@ -191,7 +197,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   int ibkg_begin; int ibkg_end;
   if (p.is_mc()) {
-    if (p.year() == "2017")         { ibkg_begin =  1; ibkg_end =  7; if (p.inject_signal()) ibkg_begin = 0; }
+    if (p.year() == "2017")         { ibkg_begin =  1; ibkg_end = 14; if (p.inject_signal()) ibkg_begin = 0; }
     else if (p.year() == "2018")    { ibkg_begin =  9; ibkg_end = 15; if (p.inject_signal()) ibkg_end = 17; }
     //else if (p.year() == "2017p8")  { ibkg_begin =  1; ibkg_end = 16; if (p.inject_signal()) {ibkg_begin = 0; ibkg_end = 17;} } // FIXME need to adjust since sample 8 and 16 should be skipped (or just change the damn indices)
     else { fprintf(stderr, "bad year"); exit(1); }
@@ -223,8 +229,8 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   double dphi_pdf_c; double dphi_pdf_e = 2; double dphi_pdf_a; //deltaphi input
   if (p.is_mc()) {
-    if (p.year() == "2017")         { dphi_pdf_c = 0.84; dphi_pdf_a = 5.29; }
-    else if (p.year() == "2018")    { dphi_pdf_c = 1.06; dphi_pdf_a = 4.50; }
+    if (p.year() == "2017")         { dphi_pdf_c = 1.15; dphi_pdf_a = 3.79; }
+    else if (p.year() == "2018")    { dphi_pdf_c = 1.38; dphi_pdf_a = 3.77; }
     else if (p.year() == "2017p8")  { dphi_pdf_c = 1.34; dphi_pdf_a = 4.18; }
     else { fprintf(stderr, "bad year"); exit(1); }
   } else if (p.only_10pc()) {
@@ -696,7 +702,7 @@ int main(int argc, const char* argv[]) {
   const char* version = "V27p1Bm";
 
   //for (const char* year : {"2017","2018","2017p8"}) {
-  for (const char* year : {"2017", "2018"}) {
+  for (const char* year : {"2017"}) {
     for (int ntracks : {3, 4, 5, 7}) {
       ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks);
 //      construct_dvvc(pars2.correct_bquarks(false),              TString::Format("2v_from_jets_%s_%dtrack_bquark_uncorrected_%s.root", year, ntracks, version));

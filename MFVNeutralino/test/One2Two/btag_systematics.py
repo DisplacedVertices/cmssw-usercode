@@ -4,9 +4,9 @@ from array import array
 ROOT.TH1.AddDirectory(0)
 import sys
 
-is_mc = False
+is_mc = True
 only_10pc = False
-version = 'V27m'
+version = 'V27p1Bm'
 
 year = sys.argv[1]
 mode = sys.argv[2]
