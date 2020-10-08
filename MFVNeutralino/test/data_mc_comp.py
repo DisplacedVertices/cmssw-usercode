@@ -57,7 +57,6 @@ C = partial(data_mc_comparison,
             int_lumi = lumi,
             int_lumi_nice = lumi_nice,
             canvas_top_margin = 0.08,
-            overflow_in_last = True,
             poisson_intervals = True,
             legend_pos = (0.48, 0.78, 0.88, 0.88),
             enable_legend = True,
@@ -87,6 +86,34 @@ C = partial(data_mc_comparison,
 C('presel_njets',
   histogram_path = 'mfvEventHistosPreSel/h_njets',
   x_title = 'Number of jets',
+  y_title = 'Events',
+  y_range = (1, 1e8),
+  )
+
+C('presel_nbjets',
+  histogram_path = 'mfvEventHistosPreSel/h_nbtags_2',
+  x_title = 'Number of tight bjets',
+  y_title = 'Events',
+  y_range = (1, 1e8),
+  )
+
+C('presel_bjet_pt',
+  histogram_path = 'mfvEventHistosPreSel/h_bjet_pt',
+  x_title = 'bjet p_{T} (GeV)',
+  y_title = 'Events',
+  y_range = (1, 1e8),
+  )
+
+C('presel_bjet_eta',
+  histogram_path = 'mfvEventHistosPreSel/h_bjet_eta',
+  x_title = 'bjet #eta',
+  y_title = 'Events',
+  y_range = (1, 1e8),
+  )
+
+C('presel_bjet_phi',
+  histogram_path = 'mfvEventHistosPreSel/h_bjet_phi',
+  x_title = 'bjet #phi',
   y_title = 'Events',
   y_range = (1, 1e8),
   )

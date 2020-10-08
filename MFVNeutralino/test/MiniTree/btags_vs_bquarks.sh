@@ -4,10 +4,13 @@ version=V25mv3
 
 indir=/uscms_data/d2/tucker/crab_dirs/MiniTree${version}
 files2017=(
+    qcdht0300_2017.root
+    qcdht0500_2017.root
     qcdht0700_2017.root
     qcdht1000_2017.root
     qcdht1500_2017.root
     qcdht2000_2017.root
+    ttbar_2017.root
     ttbarht0600_2017.root
     ttbarht0800_2017.root
     ttbarht1200_2017.root
@@ -27,10 +30,13 @@ files2017=(
 )
 
 files2018=(
+    qcdht0300_2018.root
+    qcdht0500_2018.root
     qcdht0700_2018.root
     qcdht1000_2018.root
     qcdht1500_2018.root
     qcdht2000_2018.root
+    ttbar_2018.root
     ttbarht0600_2018.root
     ttbarht0800_2018.root
     ttbarht1200_2018.root
@@ -90,7 +96,7 @@ do
         fout=$outdir/$x
         if [[ ! -e $fin ]]; then
             echo $fin missing
-            exit 1
+            continue
         fi
 
         echo $x
