@@ -5,15 +5,15 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.Tools.Samples import *
 
-version = '2017v0p5'
+version = '2017v0p7'
 zoom = False #(0.98,1.005)
 save_more = True
 data_only = False
 use_qcd = False
 #trig_path = "DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV"
 trig_path = "PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV"
-#postfix = "_inc_tight"
-postfix = "_inc_tight_meas_leg0"
+postfix = "_inc_tight"
+#postfix = "_inc_tight_meas_leg0"
 
 #postfix = "_ttbar_tight"
 #postfix = "_inc"
@@ -68,6 +68,7 @@ if data_only:
 else:
     if year == 2017 or year == 2018:
         #bkg_samples = [ttbar_2017]
+        # FIXME add the other samples now...
         bkg_samples = [ttbar_2017, wjetstolnusum_2017, dyjetstollM50sum_2017, dyjetstollM10_2017, qcdmupt15_2017]
         #bkg_samples = [wjetstolnu_2017, dyjetstollM50_2017]
         #bkg_samples = [mfv_neu_tau001000um_M0400_2017]
