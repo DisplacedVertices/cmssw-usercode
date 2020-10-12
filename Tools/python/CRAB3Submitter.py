@@ -11,6 +11,7 @@ from pprint import pprint
 from StringIO import StringIO
 from CRAB3Tools import Config, crab_global_options, crab_dirs_root, crab_renew_proxy_if_needed, crab_command
 from general import mkdirs_if_needed, popen, save_git_status
+from multiprocessing import Process
 
 class CRABSubmitter:
     batch_name_allowed = string.ascii_letters + string.digits + '_'
@@ -134,6 +135,7 @@ class CRABSubmitter:
         self.cfg_template.General.transferOutputs = transfer_outputs
         self.cfg_template.General.workArea = self.batch_dir
         self.cfg_template.JobType.pluginName = 'Analysis' # JMTBAD PrivateMC -- also needs cfg.Data.primaryDataset, splitting EventBased, unitsPerJob, totalUnits
+        self.cfg_template.JobType.allowUndistributedCMSSW = True
 
         if input_files:
             if type(input_files) == str:
@@ -337,6 +339,23 @@ class CRABSubmitter:
 
         return result
 
+    # needed for the Multicrab submission
+    # see https://twiki.cern.ch/twiki/bin/view/CMSPublic/CRAB3FAQ#Multiple_submission_fails_with_a
+    def do_the_submit(self, sample, dbg_f, kwargs) :
+        result = self.submit(sample, **kwargs)
+        dbg_f.write('("%s", "%s", %r) + \n' % (self.batch_name, sample.name, result))
+        stdout = result['stdout']
+        del result['stdout']
+        if 'Success' in stdout:
+            print 'submit %s %s' % (self.batch_name, sample.name), '\x1b[92msuccess!\x1b[0m', result['uniquerequestname']
+        else:
+            print '================================================='
+            print 'submit %s %s' % (self.batch_name, sample.name)
+            print stdout
+            pprint(result)
+            print '================================================='
+        return
+
     def submit_all(self, samples, **kwargs):
         if True or self.testing: # JMTBAD
             if self.testing:
@@ -344,18 +363,9 @@ class CRABSubmitter:
             dbg_f = open(os.path.join(os.environ['HOME'], '.jmtct_csdbg'), 'at')
             dbg_f.write(str(datetime.now()) + '\n')
             for sample in samples:
-                result = self.submit(sample, **kwargs)
-                dbg_f.write('("%s", "%s", %r) + \n' % (self.batch_name, sample.name, result))
-                stdout = result['stdout']
-                del result['stdout']
-                if 'Success' in stdout:
-                    print 'submit %s %s' % (self.batch_name, sample.name), '\x1b[92msuccess!\x1b[0m', result['uniquerequestname']
-                else:
-                    print '================================================='
-                    print 'submit %s %s' % (self.batch_name, sample.name)
-                    print stdout
-                    pprint(result)
-                    print '================================================='
+                p = Process(target=self.do_the_submit, args=(sample, dbg_f, kwargs))
+                p.start()
+                p.join()
             return
 
         raise NotImplementedError('multithreading -> multiprocessing')
