@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import datetime, optparse, os, sys, time
+import datetime, optparse, os, sys, time, shutil
 from collections import defaultdict
 from CRABClient.ClientExceptions import ConfigurationException as CRABConfigurationException
 from JMTucker.Tools.CRAB3Tools import *
@@ -49,6 +49,8 @@ parser.add_option('-a', '--hadd', action='store_true', default=False,
                   help='At the end of each iteration, hadd the done dirs. The destination path for the output file is next to the dir.')
 parser.add_option('-b', '--hadd-rm', action='store_true', default=False,
                   help='Like --hadd, but remove the originals (passes -r to mhadd).')
+parser.add_option('-p', '--publicweb', action='store_true', default=False,
+                  help='Write results of continuous mmon to publicweb area (if it is set up properly!)')
 options, args = parser.parse_args()
 #print options ; print args ; import sys ; print sys.argv ; raise 1
 
@@ -99,9 +101,10 @@ def timestamp():
     return str(int(time.time()*1e6))
 
 backdoor_time = timestamp()
+uname = os.environ['USER']
 
 def backdoor_file(filename):
-    fn = '/tmp/%s/mmon_%s_%s' % (os.environ['USER'], backdoor_time, filename)
+    fn = '/tmp/%s/mmon_%s_%s' % (uname, backdoor_time, filename)
     return fn, open(fn, 'wt')
 
 def backdoor_print(filename, l):
@@ -121,6 +124,17 @@ def make_script(filename, cmd):
     fn, f = backdoor_file(filename)
     f.write(cmd)
     return fn
+
+def copy_log_file(tmp_logfile_path, publicweb_logfile_path, uname) :
+    try :
+        shutil.copy(tmp_logfile_path, publicweb_logfile_path)
+    except IOError :
+        # likely the Kerberos ticket is gone, so do a kinit via keytabs, set up with:
+        # https://stackoverflow.com/questions/8144596/kerberos-kinit-enter-password-without-prompt/55826172#55826172
+        print "IOError in shutil.copy, retrying with new kerberos ticket"
+        os.system("kinit -kt /uscms/home/%s/.keytabs/%s.keytab %s@FNAL.GOV" % (uname, uname, uname) )
+        shutil.copy(tmp_logfile_path, publicweb_logfile_path)
+    return
 
 dirs = crab_dirs_from_argv() + cs_dirs_from_argv()
 
@@ -169,8 +183,17 @@ while 1:
         last_proxy_check = the_time
 
     pass_string = str(int(time.time()))
+
+    # logfile in tmp area, to be copied to publicweb after each iteration
+    if options.publicweb :
+        publicweb_logfile_path = "/publicweb/%s/%s/" % (uname[0], uname)
+        tmp_logfile_path = "/tmp/%s/mmon_log.txt" % uname
+        os.system('mkdir -p /tmp/%s' % uname)
+        logfile = open(tmp_logfile_path,"w")
+
     if options.continuous:
         print '\n*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*=*\nmaking a pass (#%i string %s):\n' % (pass_count, pass_string)
+
     if options.fake_results:
         # Fake statuses for debugging the table printing below.
         print 'fake_results dict:'
@@ -189,8 +212,8 @@ while 1:
         if condor_dirs:
             results.update(cs_analyze_mmon(condor_dirs))
 
-        os.system('mkdir -p /tmp/%s' % os.environ['USER'])
-        open('/tmp/%s/mmontmp' % os.environ['USER'], 'wt').write(repr(results))
+        os.system('mkdir -p /tmp/%s' % uname)
+        open('/tmp/%s/mmontmp' % uname, 'wt').write(repr(results))
         #pprint(results)
 
         # get last status from our special file and save this one
@@ -319,6 +342,8 @@ while 1:
     # Header.
     header = ['directory', 'S?', 'total |'] + status_columns
     print_header(table_format % tuple(header))
+    if options.publicweb :
+        logfile.write(table_format % tuple(header)+"\n")
 
     class StatusCounter:
         def __init__(self, statuses):
@@ -367,12 +392,17 @@ while 1:
             color = colors.cyan
 
         print color(table_format % row)
+        if options.publicweb :
+            logfile.write(table_format % row + "\n")
 
     sums[0] = '%s |' % sums[0]
     sums = tuple(['totals', ''] + sums)
     sum_row = table_format % sums
     print colors.bold(sum_row)
     print
+
+    if options.publicweb :
+        logfile.write(sum_row + "\n")
 
     # Figure out which directories are done, and remove them from the
     # list of dirs to check next time. Also print out a new mmon
@@ -435,6 +465,10 @@ while 1:
 
     if not dirs:
         print_header('All done!')
+        if options.publicweb :
+            logfile.write('All done!')
+            logfile.close()
+            copy_log_file(tmp_logfile_path, publicweb_logfile_path, uname)
         break
 
     if not options.continuous:
@@ -444,7 +478,7 @@ while 1:
     # terminal when a very long iteration finishes. Look for a special
     # file in /tmp/$USER that signals we should break.
 
-    break_fn =  '/tmp/%s/break_mmon' % os.environ['USER']
+    break_fn =  '/tmp/%s/break_mmon' % uname
     if os.path.isfile(break_fn):
         os.remove(break_fn)
         print_header('break file spotted, quitting.')
@@ -456,6 +490,11 @@ while 1:
     then = now + datetime.timedelta(seconds=options.wait_time)
     print colors.bold('That was pass #%i string %s. Going to sleep for %i seconds at %s. Will wake up at %s.' % (pass_count, pass_string, options.wait_time, now, then))
     print '(Hit Ctrl-C, then enter to immediately start the next iteration. Or, hit Ctrl-C, then Ctrl-C to quit.)'
+
+    if options.publicweb :
+        logfile.write('That was pass #%i string %s. Going to sleep for %i seconds at %s. Will wake up at %s.' % (pass_count, pass_string, options.wait_time, now, then))
+        logfile.close()
+        copy_log_file(tmp_logfile_path, publicweb_logfile_path, uname)
 
     pass_count += 1
 
