@@ -356,6 +356,7 @@ __all__ = [
     'qcd_samples_2017',
     'ttbar_samples_2017',
     'bjet_samples_2017',
+    'bjet_samples_sum_2017',
     'leptonic_samples_2017',
     'leptonic_samples_sum_2017',
     'mfv_signal_samples_2017',

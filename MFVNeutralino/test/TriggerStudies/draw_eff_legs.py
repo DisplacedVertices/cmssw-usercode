@@ -8,15 +8,12 @@ from JMTucker.Tools.Samples import *
 # FIXME
 # also should be sure to look at the 2D efficiency plots (which will need to be computed here or somewhere)
 
-version = '2017v0p6'
-#version = '2017v0p6_require6jets'
-#version = '2017v0p5'
-#version = '2017v0p5_tighterbjetpt'
+#version = '2017v0p7'
+version = '2017v0p7_tighterbjetpt'
 save_more = True
 use_ttV = True
 use_qcd = False # horrible statistics, as usual
 use_WZ = False # also bad stats...
-use_DYqq_WZlnuqq = False
 use_singletop = True
 
 which = typed_from_argv(int, 0)
@@ -44,7 +41,6 @@ plot_path = 'TrigEff%s_%s_%s%s' % (version, "legs", year, data_period)
 if use_ttV          : plot_path += '_use_ttH_ttZ'
 if use_qcd          : plot_path += '_use_qcd'
 if use_WZ           : plot_path += '_use_WZ'
-if use_DYqq_WZlnuqq : plot_path += '_use_DYqq_WZlnuqq'
 if use_singletop    : plot_path += '_use_singletop'
 
 set_style()
@@ -65,9 +61,6 @@ if year == 2017 or year == 2018:
         bkg_samples += [qcdmupt15_2017]
     if use_WZ :
         bkg_samples += [wjetstolnusum_2017, dyjetstollM50sum_2017, dyjetstollM10_2017]
-    if use_DYqq_WZlnuqq :
-        #bkg_samples += [dyjetstoqq_2017, wztolnuqq_2017]
-        bkg_samples += [dyjetstoqq_2017]
     if use_singletop :
         bkg_samples += [singletop_tchan_top_2017, singletop_tchan_antitop_2017]
 

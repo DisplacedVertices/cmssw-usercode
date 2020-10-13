@@ -1,9 +1,8 @@
 import os,sys
 import ROOT
 
-dirpath = "/uscms/home/joeyr/crabdirs/TrigEff2017v0p6/"
-#dirpath = "/uscms/home/joeyr/crabdirs/TrigEff2017v0p6_require6jets/"
-#dirpath = "/uscms/home/joeyr/crabdirs/TrigEff2017v0p5_tighterbjetpt/"
+dirpath = "/uscms/home/joeyr/crabdirs/TrigEff2017v0p7/"
+#dirpath = "/uscms/home/joeyr/crabdirs/TrigEff2017v0p7_tighterbjetpt/"
 
 dibjet_nums = [
 "numDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight_meas_leg0",

@@ -5,30 +5,29 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.Tools.Samples import *
 
-version = '2017v0p7'
+# example versions are:
+# 2017v0p7
+# 2017v0p7_tighterbjetpt
+version = typed_from_argv(str, "2017v0p7", name='version')
+#version = '2017v0p7_tighterbjetpt'
 zoom = False #(0.98,1.005)
 save_more = True
 data_only = False
-use_qcd = False
-#trig_path = "DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV"
-trig_path = "PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV"
-postfix = "_inc_tight"
-#postfix = "_inc_tight_meas_leg0"
+use_ttV = True
+use_qcd = False # horrible statistics, as usual
+use_WZ = False # also bad stats...
+use_singletop = True
 
-#postfix = "_ttbar_tight"
-#postfix = "_inc"
-#postfix = "_ttbar"
+# bjet trig paths are:
+# DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV
+# PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV
+trig_path = typed_from_argv(str, "PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV", name='trig_path')
+postfix = "_inc_tight"
 
 num_dir, den_dir = "num"+trig_path+postfix, "den"+trig_path+postfix
-#num_dir, den_dir = "num", "den"
 
-#num_dir, den_dir = 'numDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc', 'denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc'
-#num_dir, den_dir = 'numDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_ttbar', 'denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_ttbar'
-#num_dir, den_dir = 'numDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight', 'denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_inc_tight'
-#num_dir, den_dir = 'numDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_ttbar_tight', 'denDoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_ttbar_tight'
-#num_dir, den_dir = 'numjet6pt75', 'denjet6pt75'
-
-which = typed_from_argv(int, 0)
+# which should be an integer corresponding to the data periods enumerated in the list below
+which = typed_from_argv(int, 0, name='which')
 data_period, int_lumi = [
     ('p8',101037.),
     ('',   41525.),
@@ -50,6 +49,11 @@ print year, data_period, int_lumi
 
 root_dir = '/uscms/home/joeyr/crabdirs/TrigEff%s' % version
 plot_path = 'TrigEff%s_%s_%s%s' % (version, num_dir, year, data_period)
+if use_ttV          : plot_path += '_use_ttH_ttZ'
+if use_qcd          : plot_path += '_use_qcd'
+if use_WZ           : plot_path += '_use_WZ'
+if use_singletop    : plot_path += '_use_singletop'
+
 if zoom:
     plot_path += '_zoom'
 
@@ -67,15 +71,17 @@ if data_only:
     bkg_samples, sig_samples = [], []
 else:
     if year == 2017 or year == 2018:
-        #bkg_samples = [ttbar_2017]
-        # FIXME add the other samples now...
-        bkg_samples = [ttbar_2017, wjetstolnusum_2017, dyjetstollM50sum_2017, dyjetstollM10_2017, qcdmupt15_2017]
-        #bkg_samples = [wjetstolnu_2017, dyjetstollM50_2017]
-        #bkg_samples = [mfv_neu_tau001000um_M0400_2017]
-        if use_qcd:
-            bkg_samples.append(qcdmupt15_2017)
-        #sig_samples = [getattr(Samples, 'mfv_neu_tau001000um_M%04i_2017' % m) for m in (400, 800, 1200, 1600)] + [Samples.mfv_neu_tau010000um_M0800_2017]
-        sig_samples = [mfv_neu_tau001000um_M0400_2017] 
+        bkg_samples = [ttbar_2017]
+        if use_ttV : 
+            bkg_samples += [ttHbb_2017, ttZsum_2017]
+        if use_qcd :
+            bkg_samples += [qcdmupt15_2017]
+        if use_WZ :
+            bkg_samples += [wjetstolnusum_2017, dyjetstollM50sum_2017, dyjetstollM10_2017]
+        if use_singletop :
+            bkg_samples += [singletop_tchan_top_2017, singletop_tchan_antitop_2017]
+
+    sig_samples = [mfv_neu_tau001000um_M0400_2017] 
 
 n_bkg_samples = len(bkg_samples)
 for samples in bkg_samples, sig_samples:
@@ -86,7 +92,7 @@ for samples in bkg_samples, sig_samples:
 ########################################################################
 
 kinds = ['']
-ns = ['h_jet_ht30', 'h_jet_ht', 'h_njets', 'h_nbjets', 'h_jet_pt_1', 'h_jet_pt_2', 'h_jet_pt_3', 'h_jet_pt_4', 'h_bjet_pt_1', 'h_bjet_pt_2', 'h_bjet_pt_3', 'h_jet_eta_1', 'h_jet_eta_2', 'h_jet_eta_3', 'h_bjet_eta_1', 'h_bjet_eta_2', 'h_bjet_eta_3', 'h_bjet_leg_pt', 'h_bjet_leg_eta']
+ns = ['h_jet_ht30', 'h_jet_ht', 'h_njets', 'h_nbjets', 'h_jet_pt_1', 'h_jet_pt_2', 'h_jet_pt_3', 'h_jet_pt_4', 'h_bjet_pt_1', 'h_bjet_pt_2', 'h_bjet_pt_3', 'h_jet_eta_1', 'h_jet_eta_2', 'h_jet_eta_3', 'h_bjet_eta_1', 'h_bjet_eta_2', 'h_bjet_eta_3']
 
 lump_lower = 1200.
 fitopt = 'RQS0' # 'RQS' for no drawn fit
@@ -198,8 +204,6 @@ for kind in kinds:
         for sample in bkg_samples:
             subsubname = subname + '_' + sample.name
 
-            print sample.name
-            print sample.f
             num, den = sample.num, sample.den = get(sample.f, kind, n)
 
             if save_more:
