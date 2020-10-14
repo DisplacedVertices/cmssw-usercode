@@ -613,6 +613,37 @@ _add_ds("ntuplev27m_norefitdzcut", {
 'JetHT2018D': _fromnum0("/store/user/tucker/JetHT/NtupleV27m_NoRefitDzCut_2018/190819_163634", 344),
 })
 
+_add_ds("miniaod", {
+  'mfv_splitSUSY_tau000000000um_M2000_1800_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2000_1800_ctau0p1_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+  'mfv_splitSUSY_tau100000000um_M2000_1800_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2000_1800_ctau100000p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+  'mfv_splitSUSY_tau010000000um_M2000_1800_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2000_1800_ctau10000p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+  'mfv_splitSUSY_tau001000000um_M2000_1800_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2000_1800_ctau1000p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+  'mfv_splitSUSY_tau000100000um_M2000_1800_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2000_1800_ctau100p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+  'mfv_splitSUSY_tau000010000um_M2000_1800_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2000_1800_ctau10p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+  'mfv_splitSUSY_tau000001000um_M2000_1800_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2000_1800_ctau1p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+  'mfv_splitSUSY_tau000000000um_M2000_1900_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2000_1900_ctau0p1_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+  'mfv_splitSUSY_tau100000000um_M2000_1900_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2000_1900_ctau100000p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+  'mfv_splitSUSY_tau010000000um_M2000_1900_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2000_1900_ctau10000p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 39, fnbase="output", numbereddirs=False),
+  'mfv_splitSUSY_tau001000000um_M2000_1900_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2000_1900_ctau1000p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 39, fnbase="output", numbereddirs=False),
+  'mfv_splitSUSY_tau000100000um_M2000_1900_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2000_1900_ctau100p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 39, fnbase="output", numbereddirs=False),
+  'mfv_splitSUSY_tau000010000um_M2000_1900_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2000_1900_ctau10p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 39, fnbase="output", numbereddirs=False),
+  'mfv_splitSUSY_tau000001000um_M2000_1900_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2000_1900_ctau1p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 39, fnbase="output", numbereddirs=False),
+
+  'mfv_splitSUSY_tau000000000um_M2400_100_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2400_100_ctau0p1_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+  'mfv_splitSUSY_tau100000000um_M2400_100_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2400_100_ctau100000p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+  'mfv_splitSUSY_tau010000000um_M2400_100_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2400_100_ctau10000p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+  'mfv_splitSUSY_tau001000000um_M2400_100_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2400_100_ctau1000p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+  'mfv_splitSUSY_tau000100000um_M2400_100_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2400_100_ctau100p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+  'mfv_splitSUSY_tau000010000um_M2400_100_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2400_100_ctau10p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+  'mfv_splitSUSY_tau000001000um_M2400_100_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2400_100_ctau1p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+  'mfv_splitSUSY_tau000000000um_M2400_2300_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2400_2300_ctau0p1_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+  'mfv_splitSUSY_tau100000000um_M2400_2300_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2400_2300_ctau100000p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 39, fnbase="output", numbereddirs=False),
+  'mfv_splitSUSY_tau010000000um_M2400_2300_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2400_2300_ctau10000p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+  'mfv_splitSUSY_tau001000000um_M2400_2300_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2400_2300_ctau1000p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+  'mfv_splitSUSY_tau000100000um_M2400_2300_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2400_2300_ctau100p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 39, fnbase="output", numbereddirs=False),
+  'mfv_splitSUSY_tau000010000um_M2400_2300_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2400_2300_ctau10p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 39, fnbase="output", numbereddirs=False),
+  'mfv_splitSUSY_tau000001000um_M2400_2300_2017':_fromnum1("/store/user/ali/splitSUSY/splitSUSY_M2400_2300_ctau1p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd", 40, fnbase="output", numbereddirs=False),
+})
 
 _add_single_files('nr_k0ntuplev25mv1', '/store/user/wsun/croncopyeos/hadded/K0NtupleV25mv1', \
                       ['qcdht%04i_%i' % (x,y) for y in (2017,2018) for x in (700,1000,1500,2000)] + \

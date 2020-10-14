@@ -6,7 +6,8 @@ settings.is_mc = True
 geometry_etc(process, which_global_tag(settings))
 tfileservice(process, 'trackingtreer.root')
 dataset = 'miniaod'
-sample_files(process, 'qcdht2000_2017', dataset)
+#sample_files(process, 'qcdht2000_2017', dataset)
+sample_files(process, 'mfv_neu_tau001000um_M0800_2017', dataset)
 cmssw_from_argv(process)
 
 process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
@@ -22,7 +23,7 @@ process.selectedPatJets.cut = process.jtupleParams.jetCut
 
 process.tt = cms.EDAnalyzer('TrackingTreer',
                             process.jmtNtupleFillerMiniAOD,
-                            track_cut_level = cms.int32(0), # -1 = all, 0 = pt & pix & strip, 1 = 0 + min_r, 2 = 1 + nsigmadxybs
+                            track_cut_level = cms.int32(-1), # -1 = all, 0 = pt & pix & strip, 1 = 0 + min_r, 2 = 1 + nsigmadxybs
                             )
 
 process.tt.track_ref_getter.tracks_maps_srcs = []
