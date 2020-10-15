@@ -630,7 +630,7 @@ for xx in '', '_NoRefitDzCut':
 _add_single_files('nr_trackmovermctruthv27mv2', '/store/user/tucker/hadded/TrackMoverMCTruthV27mv2', \
                       ['mfv_%s_tau%06ium_M%04i_%i' % (a,b,c,y) for y in (2017,2018) for a in ('neu','stopdbardbar') for b in (100,300,1000,10000,30000) for c in (400,600,800,1200,1600,3000)])
 
-_add_ds("NtupleV28Bm", {
+_add_ds("ntuplev28bm", {
 'qcdht0700_2017': _fromnum0("/store/user/joeyr/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/NtupleV28Bm_2017/201011_185109", 16),
 'qcdht1000_2017': _fromnum0("/store/user/joeyr/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/NtupleV28Bm_2017/201009_175424", 31),
 'qcdht1500_2017': _fromnum0("/store/user/joeyr/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/NtupleV28Bm_2017/201009_175425", 63),
@@ -705,7 +705,7 @@ _add_ds("NtupleV28Bm", {
 'mfv_stopdbardbar_tau030000um_M3000_2017': _fromnum0("/store/user/joeyr/StopStopbarTo2Dbar2D_M-3000_CTau-30mm_TuneCP2_13TeV-pythia8/NtupleV28Bm_2017/201009_175526", 500),
 })
 
-_add_ds("NtupleV28Bm_NTKSeeds", {
+_add_ds("ntuplev28bm_ntkseeds", {
 'qcdht0700_2017': (16, ['/store/user/joeyr/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/NtupleV28Bm_NTkSeeds_2017/201013_094444/0000/ntkseeds_%i.root' % i for i in [8, 13]] + ['/store/user/joeyr/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/NtupleV28Bm_NTkSeeds_2017/201011_185037/0000/ntkseeds_%i.root' % i for i in chain(xrange(8), xrange(9,13), xrange(14,16))]),
 'qcdht1000_2017': (30, ['/store/user/joeyr/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/NtupleV28Bm_NTkSeeds_2017/201009_180012/0000/ntkseeds_%i.root' % i for i in chain(xrange(12), xrange(13,31))]),
 'qcdht1500_2017': _fromnum0("/store/user/joeyr/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/NtupleV28Bm_NTkSeeds_2017/201009_180013", 63, fnbase="ntkseeds"),
