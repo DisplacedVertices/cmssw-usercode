@@ -206,6 +206,12 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       if(!success) return false;
     }
 
+    // MET trigger
+
+    if (apply_presel == 5) {
+      return satisfiesTrigger(mevent, mfv::b_HLT_PFMET120_PFMHT120_IDTight);
+    }
+
     if (require_bquarks && mevent->gen_flavor_code != 2)
       return false;
 
@@ -517,6 +523,11 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
           }
         }
         return passed_kinematics;
+      }
+      case mfv::b_HLT_PFMET120_PFMHT120_IDTight :
+      {
+        if(mevent->met() < 200 || njets < 4) return false; // cut on MET to avoid turn-on region, maybe cut value need to be determined
+        return true;
       }
       default :
       {

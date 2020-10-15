@@ -22,6 +22,8 @@ TH1D* h_dbv_Bjet = 0;
 TH1D* h_dbv_Bjet_coarse = 0;
 TH1D* h_dbv_DisplacedDijet = 0;
 TH1D* h_dbv_DisplacedDijet_coarse = 0;
+TH1D* h_dbv_MET = 0;
+TH1D* h_dbv_MET_coarse = 0;
 TH1D* h_dbv_passHT_failBjet = 0;
 TH1D* h_dbv_passHT_failBjet_coarse = 0;
 TH1D* h_dbv_failHT_passBjet = 0;
@@ -35,6 +37,8 @@ TH1D* h_dvv_Bjet = 0;
 TH1D* h_dvv_Bjet_coarse = 0;
 TH1D* h_dvv_DisplacedDijet = 0;
 TH1D* h_dvv_DisplacedDijet_coarse = 0;
+TH1D* h_dvv_MET = 0;
+TH1D* h_dvv_MET_coarse = 0;
 TH1D* h_dvv_passHT_failBjet = 0;
 TH1D* h_dvv_passHT_failBjet_coarse = 0;
 TH1D* h_dvv_failHT_passBjet = 0;
@@ -81,6 +85,8 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
   */
 
   bool passesDisplacedDijetTrigger = pass_hlt(nt, mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack); // ignore the other one with a higher HT threshold for now...
+
+  bool passesMETTrigger = pass_hlt(nt, mfv::b_HLT_PFMET120_PFMHT120_IDTight);
 
   double w = nt.weight; // modify as needed before filling hists
 
@@ -136,6 +142,11 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
       h_dbv_DisplacedDijet->Fill(dbvs[0], w);
       h_dbv_DisplacedDijet_coarse->Fill(dbvs[0], w);
     }
+    // MET trigger
+    if(passesMETTrigger && nt.njets >= 4 && nt.met() > 200){
+      h_dbv_MET->Fill(dbvs[0], w);
+      h_dbv_MET_coarse->Fill(dbvs[0], w);
+    }
     // pass HT trigger fail Bjet trigger (to study the shape differences)
     if(passesHTTrigger && !passesBjetTrigger && nt.njets >= 4 && nt.ht() > 1200){
       h_dbv_passHT_failBjet->Fill(dbvs[0], w);
@@ -166,6 +177,11 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
     if(passesDisplacedDijetTrigger && nt.njets >= 4 && nt.ht() > 600){
       h_dvv_DisplacedDijet->Fill(dvv, w);
       h_dvv_DisplacedDijet_coarse->Fill(dvv, w);
+    }
+    // MET trigger
+    if(passesMETTrigger && nt.njets >= 4 && nt.met() > 200){
+      h_dvv_MET->Fill(dvv, w);
+      h_dvv_MET_coarse->Fill(dvv, w);
     }
     // pass HT trigger fail Bjet trigger (to study the shape differences)
     if(passesHTTrigger && !passesBjetTrigger && nt.njets >= 4 && nt.ht() > 1200){
@@ -229,6 +245,8 @@ int main(int argc, char** argv) {
   h_dbv_Bjet_coarse = new TH1D("h_dbv_Bjet_coarse", ";d_{BV} (cm);Events/100 #mum", 40, 0, 0.4);
   h_dbv_DisplacedDijet = new TH1D("h_dbv_DisplacedDijet", ";d_{BV} (cm);Events/1000 #mum", 50, 0, 5.);
   h_dbv_DisplacedDijet_coarse = new TH1D("h_dbv_DisplacedDijet_coarse", ";d_{BV} (cm);Events/100 #mum", 40, 0, 0.4);
+  h_dbv_MET = new TH1D("h_dbv_MET", ";d_{BV} (cm);Events/1000 #mum", 50, 0, 5.);
+  h_dbv_MET_coarse = new TH1D("h_dbv_MET_coarse", ";d_{BV} (cm);Events/100 #mum", 40, 0, 0.4);
   h_dbv_passHT_failBjet = new TH1D("h_dbv_passHT_failBjet", ";d_{BV} (cm);Events/1000 #mum", 50, 0, 5.);
   h_dbv_passHT_failBjet_coarse = new TH1D("h_dbv_passHT_failBjet_coarse", ";d_{BV} (cm);Events/100 #mum", 40, 0, 0.4);
   h_dbv_failHT_passBjet = new TH1D("h_dbv_failHT_passBjet", ";d_{BV} (cm);Events/1000 #mum", 50, 0, 5.);
@@ -242,6 +260,8 @@ int main(int argc, char** argv) {
   h_dvv_Bjet_coarse = new TH1D("h_dvv_Bjet_coarse", ";d_{VV} (cm);Events/100 #mum", 40, 0, 0.4);
   h_dvv_DisplacedDijet = new TH1D("h_dvv_DisplacedDijet", ";d_{VV} (cm);Events/1000 #mum", 50, 0, 5.);
   h_dvv_DisplacedDijet_coarse = new TH1D("h_dvv_DisplacedDijet_coarse", ";d_{VV} (cm);Events/100 #mum", 40, 0, 0.4);
+  h_dvv_MET = new TH1D("h_dvv_MET", ";d_{VV} (cm);Events/1000 #mum", 50, 0, 5.);
+  h_dvv_MET_coarse = new TH1D("h_dvv_MET_coarse", ";d_{VV} (cm);Events/100 #mum", 40, 0, 0.4);
   h_dvv_passHT_failBjet = new TH1D("h_dvv_passHT_failBjet", ";d_{VV} (cm);Events/1000 #mum", 50, 0, 5.);
   h_dvv_passHT_failBjet_coarse = new TH1D("h_dvv_passHT_failBjet_coarse", ";d_{VV} (cm);Events/100 #mum", 40, 0, 0.4);
   h_dvv_failHT_passBjet = new TH1D("h_dvv_failHT_passBjet", ";d_{VV} (cm);Events/1000 #mum", 50, 0, 5.);

@@ -16,7 +16,8 @@ namespace mfv {
     b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33, b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0, b_HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2, b_HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2, b_HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5, // 2017 bjet triggers
     b_HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71, b_HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5, b_HLT_PFHT400_FivePFJet_100_100_60_30_30_DoublePFBTagDeepCSV_4p5, b_HLT_PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94, b_HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59, // 2018 bjet triggers
     b_HLT_HT430_DisplacedDijet40_DisplacedTrack, b_HLT_HT650_DisplacedDijet60_Inclusive, // displaced dijet triggers
-    n_hlt_paths, // = 20
+    b_HLT_PFMET120_PFMHT120_IDTight, //MET trigger
+    n_hlt_paths, // = 21
     // seeding PFHT1050, the bjet triggers, and the displaced dijet triggers
     b_L1_HTT120er=0, b_L1_HTT160er, b_L1_HTT200er, b_L1_HTT220er, b_L1_HTT240er, b_L1_HTT255er, b_L1_HTT270er, b_L1_HTT280er, b_L1_HTT300er, b_L1_HTT320er, b_L1_HTT340er, b_L1_HTT360er, b_L1_HTT380er, b_L1_HTT400er, b_L1_HTT450er, b_L1_HTT500er, b_L1_HTT250er_QuadJet_70_55_40_35_er2p5, b_L1_HTT280er_QuadJet_70_55_40_35_er2p5, b_L1_HTT300er_QuadJet_70_55_40_35_er2p5, b_L1_HTT320er_QuadJet_70_55_40_40_er2p4, b_L1_DoubleJet100er2p3_dEta_Max1p6, b_L1_DoubleJet112er2p3_dEta_Max1p6,
     // the rest of Ele115+Ele50_PFJet165

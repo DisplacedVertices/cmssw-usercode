@@ -29,6 +29,7 @@ namespace mfv {
     // Displaced Dijet triggers
     "HLT_HT430_DisplacedDijet40_DisplacedTrack_v",
     "HLT_HT650_DisplacedDijet60_Inclusive_v",
+    "HLT_PFMET120_PFMHT120_IDTight_v",
 
   };
 

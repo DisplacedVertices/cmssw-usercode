@@ -398,6 +398,11 @@ namespace mfv {
         }
         return passed_kinematics;
       }
+      case b_HLT_PFMET120_PFMHT120_IDTight : 
+      {
+        if((met) < 200 || njets < 4) return false;
+        return true;
+      }
       default :
       {
         throw std::invalid_argument(std::string(hlt_paths[trig]) + " not implemented in satisfiesTrigger");
