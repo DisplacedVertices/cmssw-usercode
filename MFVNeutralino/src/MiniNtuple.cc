@@ -400,7 +400,7 @@ namespace mfv {
       }
       case b_HLT_PFMET120_PFMHT120_IDTight : 
       {
-        if((met) < 200 || njets < 4) return false;
+        if((met) < 200 || njets < 2) return false;
         return true;
       }
       default :
