@@ -1,7 +1,7 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version_ = 'V27'
+ntuple_version_ = 'V28B'
 #ntuple_version_ = 'Vtestrun'
 use_btag_triggers = False
 if use_btag_triggers : 
