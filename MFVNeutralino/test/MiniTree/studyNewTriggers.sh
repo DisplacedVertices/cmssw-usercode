@@ -1,6 +1,7 @@
 #!/bin/bash
 
-indir=/uscms/home/joeyr/crabdirs/MiniTreeV27Bm
+indir=/uscms/home/ali/nobackup/LLP/crabdir/MiniTreeV28Bm/
+#indir=/uscms/home/joeyr/crabdirs/MiniTreeV27Bm
 #indir=/uscms_data/d2/tucker/crab_dirs/MiniTreeV27m
 
 files2017=(
@@ -82,7 +83,7 @@ for ntk in 3 4 5
 do
   for year in 2017
   do
-    outdir=myOutput/output_studyNewTriggers_ntk${ntk}_${year}
+    outdir=METstudy/output_studyNewTriggers_ntk${ntk}_${year}
 
     if [[ $year -eq 2017 ]]; then
       echo "Year is: $year"

@@ -88,7 +88,7 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
   bool path7 = path1 || path2 || path3 || path4 || path5;
   bool path10 = path8 || path9;
   bool path11 = path0 || path1 || path2 || path3 || path4 || path5 || path8 || path9;
-  bool path12 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_PFMET120_PFMHT120_IDTight)
+  bool path12 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_PFMET120_PFMHT120_IDTight);
 
   // paths to pass the trigger
   std::vector<bool> paths = {path0, path1, path2, path3, path4, path5, path6, path7, path8, path9, path10, path11, path12};
