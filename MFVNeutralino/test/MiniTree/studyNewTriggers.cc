@@ -10,6 +10,7 @@
 
 const bool prints = false;
 
+TH1D* h_MET = 0;
 TH1D* h_nvtx = 0;
 TH1D* h_dbv = 0;
 
@@ -93,6 +94,9 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
   // minitree is stupid and doesn't store past the first two vertices
   // can tighten cuts, but you won't ever be able to pull out the vertices past 2 in 3-vertex events
   // on background this should be negliglble, but this attempts to handle it as best as we can at this point
+
+  //Fill MET
+  h_MET->Fill(nt.met,w);
 
   std::vector<double> dbvs;
   const int ivtxe = std::min(int(nt.nvtx), 2);
@@ -234,6 +238,7 @@ int main(int argc, char** argv) {
   }
 
   // book hists
+  h_MET = new TH1D("h_MET", ";MET (GeV);Events",200,0,2000);
   h_nvtx = new TH1D("h_nvtx", ";# of vertices;Events", 10, 0, 10);
   h_dbv = new TH1D("h_dbv", ";d_{BV} (cm);Events/20 #mum", 1250, 0, 2.5);
 

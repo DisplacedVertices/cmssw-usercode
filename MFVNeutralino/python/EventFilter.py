@@ -39,6 +39,8 @@ def setup_event_filter(process,
         trigger_filter = event_filter = 'jets only'
     elif mode == 'leptons only':
         trigger_filter = event_filter = 'leptons only'
+    elif mode == 'met only':
+        trigger_filter = event_filter = 'met only'
     elif mode == 'HT OR bjets OR displaced dijet':
         trigger_filter = event_filter = 'HT OR bjets OR displaced dijet'
     elif mode == 'bjets OR displaced dijet veto HT':
@@ -92,7 +94,7 @@ def setup_event_filter(process,
             from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterHTORBjetsORDisplacedDijet as eventFilter
         elif event_filter == 'bjets OR displaced dijet veto HT':
             from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterBjetsORDisplacedDijetVetoHT as eventFilter
-        elif event_filter == 'MET only':
+        elif event_filter == 'met only':
             from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterMETOnly as eventFilter
         elif event_filter is True:
             from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilter as eventFilter

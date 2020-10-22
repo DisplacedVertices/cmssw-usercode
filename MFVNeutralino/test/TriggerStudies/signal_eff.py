@@ -6,7 +6,7 @@ from JMTucker.Tools import Samples
 from JMTucker.MFVNeutralino.PerSignal import PerSignal
 
 set_style()
-ps = plot_saver(plot_dir('sigeff_trig'), size=(600,600), log=False)
+ps = plot_saver(plot_dir('sigeff_trig'), size=(600,600), log=False, pdf=True)
 
 # where "new" triggers = bjet and displaced dijet triggers
 study_new_triggers = True
@@ -26,7 +26,7 @@ def sample_ok(s):
     return True #s.mass not in (500,3000)
 #multijet = [s for s in Samples.mfv_signal_samples_2018 if sample_ok(s)]
 #dijet = [s for s in Samples.mfv_stopdbardbar_samples_2018 if sample_ok(s)]
-splitSUSY = Samples.mfv_splitSUSY_samples_M2400_2017
+splitSUSY = Samples.mfv_splitSUSY_samples_M2000_2017
 
 def getit(f, n):
     hnum = f.Get('SimpleTriggerEfficiency/triggers_pass_num')
@@ -48,7 +48,7 @@ for sample in splitSUSY:
     if not os.path.exists(fn):
         continue
     f = ROOT.TFile(fn)
-    sample.mass = 2300 if sample.name.find('2300')>=0 else 100
+    sample.mass = 1900 if sample.name.find('1900')>=0 else 1800
     sample.ys = {n: getit(f,'p'+n) for n in trigs}
 
 if len(trigs) > 1:

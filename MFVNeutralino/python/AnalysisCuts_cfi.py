@@ -1,10 +1,17 @@
 import FWCore.ParameterSet.Config as cms
-from JMTucker.MFVNeutralino.NtupleCommon import use_btag_triggers
+from JMTucker.MFVNeutralino.NtupleCommon import use_btag_triggers, use_MET_triggers
+
+if use_btag_triggers:
+  apply_presel = cms.int32(4)
+elif use_MET_triggers:
+  apply_presel = cms.int32(5)
+else:
+  apply_presel = cms.int32(1)
 
 mfvAnalysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                mevent_src = cms.InputTag('mfvEvent'),
                                #apply_presel = cms.int32(4) if use_btag_triggers else cms.int32(1),  # 1 = jets, 2 = el/mu, 3 = jets OR bjet/displaced dijet triggers, 4 = bjet/displaced dijet triggers veto HT trigger
-                               apply_presel = cms.int32(5),  # 1 = jets, 2 = el/mu, 3 = jets OR bjet/displaced dijet triggers, 4 = bjet/displaced dijet triggers veto HT trigger, 5 = MET trigger
+                               apply_presel = apply_presel,  # 1 = jets, 2 = el/mu, 3 = jets OR bjet/displaced dijet triggers, 4 = bjet/displaced dijet triggers veto HT trigger, 5 = MET trigger
                                require_bquarks = cms.bool(False),
                                # to make any of the next 3 trigger cuts work, or min/max_njets/ht, you have to set apply_presel = 0 above
                                l1_bit = cms.int32(-1),
