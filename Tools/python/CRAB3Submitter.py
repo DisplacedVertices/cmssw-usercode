@@ -134,6 +134,7 @@ class CRABSubmitter:
         self.cfg_template.General.transferOutputs = transfer_outputs
         self.cfg_template.General.workArea = self.batch_dir
         self.cfg_template.JobType.pluginName = 'Analysis' # JMTBAD PrivateMC -- also needs cfg.Data.primaryDataset, splitting EventBased, unitsPerJob, totalUnits
+        self.cfg_template.JobType.allowUndistributedCMSSW = True
 
         if input_files:
             if type(input_files) == str:

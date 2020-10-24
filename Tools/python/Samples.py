@@ -83,6 +83,8 @@ def _set_signal_stuff(sample):
 ########
 
 qcd_samples_2017 = [
+    #MCSample('qcdht0300_2017', '/QCD_HT300to500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 59569132, nice='QCD, 300 < H_{T} < 500 GeV',  color=803, syst_frac=0.20, xsec=3.226e5),
+    #MCSample('qcdht0500_2017', '/QCD_HT500to700_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v2/AODSIM', 56854504, nice='QCD, 500 < H_{T} < 700 GeV', color=804, syst_frac=0.20, xsec=2.998e4),
     MCSample('qcdht0700_2017', '/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17DRPremix-94X_mc2017_realistic_v10-v1/AODSIM',                 48042655, nice='QCD, 700 < H_{T} < 1000 GeV',  color=805, syst_frac=0.20, xsec=6.351e3),
     MCSample('qcdht1000_2017', '/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17DRPremix-PU2017_new_pmx_94X_mc2017_realistic_v11-v1/AODSIM', 16882838, nice='QCD, 1000 < H_{T} < 1500 GeV', color=806, syst_frac=0.20, xsec=1.096e3),
     MCSample('qcdht1500_2017', '/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v2/AODSIM',         11634434, nice='QCD, 1500 < H_{T} < 2000 GeV', color=807, syst_frac=0.20, xsec=99.0),
@@ -90,6 +92,7 @@ qcd_samples_2017 = [
     ]
 
 ttbar_samples_2017 = [
+    #MCSample('ttbar_2017',     '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM',    155582358, nice='t#bar{t}',                   color=4,   syst_frac=0.15, xsec=832.),
     MCSample('ttbarht0600_2017', '/TTJets_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM',   81565576, nice='t#bar{t}, 600 < H_{T} < 800 GeV',   color=600, syst_frac=0.15, xsec=1.817),
     MCSample('ttbarht0800_2017', '/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM',  40248127, nice='t#bar{t}, 800 < H_{T} < 1200 GeV',  color=601, syst_frac=0.15, xsec=0.7520),
     MCSample('ttbarht1200_2017', '/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 13214871, nice='t#bar{t}, 1200 < H_{T} < 2500 GeV', color=602, syst_frac=0.15, xsec=0.1313),
@@ -97,6 +100,7 @@ ttbar_samples_2017 = [
     ]
 
 bjet_samples_2017 = [
+    MCSample('qcdht0200_2017', '/QCD_HT200to300_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 59427619, nice='QCD, 200 < H_{T} < 300 GeV',  color=802, syst_frac=0.20, xsec=1.547e6),
     MCSample('qcdht0300_2017', '/QCD_HT300to500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 59569132, nice='QCD, 300 < H_{T} < 500 GeV',  color=803, syst_frac=0.20, xsec=3.226e5),
     MCSample('qcdht0500_2017', '/QCD_HT500to700_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v2/AODSIM', 56854504, nice='QCD, 500 < H_{T} < 700 GeV', color=804, syst_frac=0.20, xsec=2.998e4),
     MCSample('ttbar_2017',     '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM',    155582358, nice='t#bar{t}',                   color=4,   syst_frac=0.15, xsec=832.),
@@ -139,6 +143,16 @@ leptonic_samples_sum_2017 = [
     SumSample('wjetstolnusum_2017',    leptonic_samples_2017[ :2]),
    #SumSample('dyjetstollM10sum_2017', leptonic_samples_2017[2:4]),
     SumSample('dyjetstollM50sum_2017', leptonic_samples_2017[3:5]),
+    ]
+
+Zvv_samples_2017 = [
+    MCSample('zjetstonunuht0100_2017', '/ZJetsToNuNu_HT-100To200_13TeV-madgraph/RunIIFall17DRPremix-94X_mc2017_realistic_v10-v1/AODSIM', 22880098, nice='Z + jets #rightarrow #nu #nu 100 < H_{T} < 200 GeV', color=1, syst_frac=0.20, xsec=302.8),
+    MCSample('zjetstonunuht0200_2017', '/ZJetsToNuNu_HT-200To400_13TeV-madgraph/RunIIFall17DRPremix-94X_mc2017_realistic_v10-v1/AODSIM', 21675916, nice='Z + jets #rightarrow #nu #nu 200 < H_{T} < 400 GeV', color=1, syst_frac=0.20, xsec=92.59),
+    MCSample('zjetstonunuht0400_2017', '/ZJetsToNuNu_HT-400To600_13TeV-madgraph/RunIIFall17DRPremix-94X_mc2017_realistic_v10-v1/AODSIM', 9134120, nice='Z + jets #rightarrow #nu #nu 400 < H_{T} < 600 GeV', color=1, syst_frac=0.20, xsec=13.18),
+    MCSample('zjetstonunuht0600_2017', '/ZJetsToNuNu_HT-600To800_13TeV-madgraph/RunIIFall17DRPremix-94X_mc2017_realistic_v10-v1/AODSIM', 5697594, nice='Z + jets #rightarrow #nu #nu 600 < H_{T} < 800 GeV', color=1, syst_frac=0.20, xsec=3.257),
+    MCSample('zjetstonunuht0800_2017', '/ZJetsToNuNu_HT-800To1200_13TeV-madgraph/RunIIFall17DRPremix-94X_mc2017_realistic_v10-v1/AODSIM', 2058077, nice='Z + jets #rightarrow #nu #nu 800 < H_{T} < 1200 GeV', color=1, syst_frac=0.20, xsec=1.49),
+    MCSample('zjetstonunuht1200_2017', '/ZJetsToNuNu_HT-1200To2500_13TeV-madgraph/RunIIFall17DRPremix-94X_mc2017_realistic_v10-v1/AODSIM', 338948, nice='Z + jets #rightarrow #nu #nu 1200 < H_{T} < 2500 GeV', color=1, syst_frac=0.20, xsec=0.3419),
+    MCSample('zjetstonunuht2500_2017', '/ZJetsToNuNu_HT-2500ToInf_13TeV-madgraph/RunIIFall17DRPremix-94X_mc2017_realistic_v10-v1/AODSIM', 6734, nice='Z + jets #rightarrow #nu #nu H_{T} > 2500 GeV', color=1, syst_frac=0.20, xsec=0.005146),
     ]
 
 mfv_signal_samples_2017 = [
@@ -402,6 +416,7 @@ __all__ = [
     'bjet_samples_2017',
     'leptonic_samples_2017',
     'leptonic_samples_sum_2017',
+    'Zvv_samples_2017',
     'mfv_signal_samples_2017',
     'mfv_stopdbardbar_samples_2017',
     'qcd_samples_2018',
@@ -455,6 +470,7 @@ for sample in data_samples_2017 + auxiliary_data_samples_2017:
 for sample in data_samples_2018 + auxiliary_data_samples_2018:
     sample.add_dataset('miniaod', sample.dataset.replace('AOD', 'MINIAOD'))
 
+_adbp('miniaod', '/QCD_HT200to300_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14-v2/MINIAODSIM', 59427619)
 _adbp('miniaod', '/QCD_HT300to500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14-v1/MINIAODSIM',   59569132)
 _adbp('miniaod', '/QCD_HT500to700_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/MINIAODSIM',           56207744)
 _adbp('miniaod', '/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM',          47724800)
@@ -477,6 +493,15 @@ ttZ_2017.add_dataset('miniaod', '/ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8/RunI
 ttZext_2017.add_dataset('miniaod', '/ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14_ext1-v3/MINIAODSIM', 8536618)
 singletop_tchan_top_2017.add_dataset('miniaod', '/ST_t-channel_top_4f_inclusiveDecays_TuneCP5_13TeV-powhegV2-madspin-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_new_pmx_94X_mc2017_realistic_v14-v1/MINIAODSIM', 5982064)
 singletop_tchan_antitop_2017.add_dataset('miniaod', '/ST_t-channel_antitop_4f_inclusiveDecays_TuneCP5_13TeV-powhegV2-madspin-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v2/MINIAODSIM', 3675910)
+
+zjetstonunuht0100_2017.add_dataset('miniaod', '/ZJetsToNuNu_HT-100To200_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 22737266)
+zjetstonunuht0200_2017.add_dataset('miniaod', '/ZJetsToNuNu_HT-200To400_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 21675916)
+zjetstonunuht0400_2017.add_dataset('miniaod', '/ZJetsToNuNu_HT-400To600_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 9134120)
+zjetstonunuht0600_2017.add_dataset('miniaod', '/ZJetsToNuNu_HT-600To800_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 5697594)
+zjetstonunuht0800_2017.add_dataset('miniaod', '/ZJetsToNuNu_HT-800To1200_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 2058077)
+zjetstonunuht1200_2017.add_dataset('miniaod', '/ZJetsToNuNu_HT-1200To2500_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 338948)
+zjetstonunuht2500_2017.add_dataset('miniaod', '/ZJetsToNuNu_HT-2500ToInf_13TeV-madgraph/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 6734)
+
 
 
 _adbp('miniaod', '/QCD_Pt-20toInf_MuEnrichedPt15_TuneCP5_13TeV_pythia8/RunIIFall17MiniAODv2-PU2017RECOSIMstep_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM',  21799788)
@@ -726,26 +751,36 @@ for s in registry.all():
 
 condorable = {
     "T3_US_FNALLPC": {
-        "miniaod": mfv_splitSUSY_samples_2017 + ttbar_samples_2017 + [qcdht1000_2017, qcdht1500_2018, qcdht2000_2018, ttbarht0600_2018, ttbarht1200_2018, ttbarht2500_2018,
-                                         mfv_neu_tau000100um_M0400_2017, mfv_neu_tau000100um_M0800_2017, mfv_neu_tau000100um_M1200_2017, mfv_neu_tau000100um_M1600_2017, mfv_neu_tau000100um_M3000_2017, mfv_neu_tau000300um_M0600_2017, mfv_neu_tau000300um_M1200_2017, mfv_neu_tau000300um_M1600_2017, mfv_neu_tau001000um_M0400_2017, mfv_neu_tau001000um_M0600_2017, mfv_neu_tau001000um_M0800_2017, mfv_neu_tau001000um_M1200_2017, mfv_neu_tau001000um_M1600_2017, mfv_neu_tau001000um_M3000_2017, mfv_neu_tau010000um_M0600_2017, mfv_neu_tau010000um_M1200_2017, mfv_neu_tau010000um_M3000_2017, mfv_neu_tau030000um_M0400_2017, mfv_neu_tau030000um_M0600_2017, mfv_neu_tau030000um_M1200_2017, mfv_neu_tau030000um_M1600_2017, mfv_stopdbardbar_tau000100um_M0400_2017, mfv_stopdbardbar_tau000100um_M0800_2017, mfv_stopdbardbar_tau000100um_M1200_2017, mfv_stopdbardbar_tau000100um_M3000_2017, mfv_stopdbardbar_tau000300um_M0400_2017, mfv_stopdbardbar_tau000300um_M0600_2017, mfv_stopdbardbar_tau000300um_M0800_2017, mfv_stopdbardbar_tau000300um_M1600_2017, mfv_stopdbardbar_tau000300um_M3000_2017, mfv_stopdbardbar_tau001000um_M0600_2017, mfv_stopdbardbar_tau001000um_M0800_2017, mfv_stopdbardbar_tau001000um_M1600_2017, mfv_stopdbardbar_tau010000um_M0400_2017, mfv_stopdbardbar_tau010000um_M0600_2017, mfv_stopdbardbar_tau010000um_M1200_2017, mfv_stopdbardbar_tau010000um_M1600_2017, mfv_stopdbardbar_tau030000um_M0400_2017, mfv_stopdbardbar_tau030000um_M0600_2017, mfv_stopdbardbar_tau030000um_M0800_2017, mfv_stopdbardbar_tau030000um_M3000_2017,
+        "miniaod": ttbar_samples_2017 + [qcdht1000_2017, qcdht1500_2018, qcdht2000_2018, ttbarht0600_2018, ttbarht1200_2018, ttbarht2500_2018,
+                                         mfv_neu_tau000100um_M0400_2017, mfv_neu_tau000100um_M0800_2017, mfv_neu_tau000100um_M1200_2017, mfv_neu_tau000100um_M1600_2017, mfv_neu_tau000100um_M3000_2017, mfv_neu_tau000300um_M0600_2017, mfv_neu_tau000300um_M1200_2017, mfv_neu_tau000300um_M1600_2017, mfv_neu_tau001000um_M0400_2017, mfv_neu_tau001000um_M0600_2017, mfv_neu_tau001000um_M0800_2017, mfv_neu_tau001000um_M1200_2017, mfv_neu_tau001000um_M1600_2017, mfv_neu_tau001000um_M3000_2017, mfv_neu_tau010000um_M0600_2017, mfv_neu_tau010000um_M1200_2017, mfv_neu_tau010000um_M3000_2017, mfv_neu_tau030000um_M0400_2017, mfv_neu_tau030000um_M0600_2017, mfv_neu_tau030000um_M1200_2017, mfv_stopdbardbar_tau000100um_M0400_2017, mfv_stopdbardbar_tau000100um_M0800_2017, mfv_stopdbardbar_tau000100um_M3000_2017, mfv_stopdbardbar_tau000300um_M0400_2017, mfv_stopdbardbar_tau000300um_M0800_2017, mfv_stopdbardbar_tau000300um_M1600_2017, mfv_stopdbardbar_tau000300um_M3000_2017, mfv_stopdbardbar_tau001000um_M0600_2017, mfv_stopdbardbar_tau001000um_M0800_2017, mfv_stopdbardbar_tau001000um_M1600_2017, mfv_stopdbardbar_tau010000um_M0400_2017, mfv_stopdbardbar_tau010000um_M0600_2017, mfv_stopdbardbar_tau010000um_M1200_2017, mfv_stopdbardbar_tau010000um_M1600_2017, mfv_stopdbardbar_tau030000um_M0400_2017, mfv_stopdbardbar_tau030000um_M0600_2017, mfv_stopdbardbar_tau030000um_M0800_2017, mfv_stopdbardbar_tau030000um_M3000_2017,
                                          mfv_neu_tau000100um_M0400_2018, mfv_neu_tau000100um_M0600_2018, mfv_neu_tau000100um_M0800_2018, mfv_neu_tau000100um_M1200_2018, mfv_neu_tau000100um_M1600_2018, mfv_neu_tau000100um_M3000_2018, mfv_neu_tau000300um_M0400_2018, mfv_neu_tau000300um_M0600_2018, mfv_neu_tau000300um_M0800_2018, mfv_neu_tau000300um_M1200_2018, mfv_neu_tau000300um_M1600_2018, mfv_neu_tau000300um_M3000_2018, mfv_neu_tau001000um_M0400_2018, mfv_neu_tau001000um_M0600_2018, mfv_neu_tau001000um_M1200_2018, mfv_neu_tau001000um_M1600_2018, mfv_neu_tau001000um_M3000_2018, mfv_neu_tau010000um_M0400_2018, mfv_neu_tau010000um_M0600_2018, mfv_neu_tau010000um_M0800_2018, mfv_neu_tau010000um_M1200_2018, mfv_neu_tau010000um_M1600_2018, mfv_neu_tau010000um_M3000_2018, mfv_neu_tau030000um_M0400_2018, mfv_neu_tau030000um_M0600_2018, mfv_neu_tau030000um_M0800_2018, mfv_neu_tau030000um_M1200_2018, mfv_neu_tau030000um_M1600_2018, mfv_neu_tau030000um_M3000_2018, mfv_stopdbardbar_tau000100um_M0400_2018, mfv_stopdbardbar_tau000100um_M0600_2018, mfv_stopdbardbar_tau000100um_M0800_2018, mfv_stopdbardbar_tau000100um_M1200_2018, mfv_stopdbardbar_tau000100um_M3000_2018, mfv_stopdbardbar_tau000300um_M0600_2018, mfv_stopdbardbar_tau000300um_M0800_2018, mfv_stopdbardbar_tau000300um_M1200_2018, mfv_stopdbardbar_tau000300um_M3000_2018, mfv_stopdbardbar_tau001000um_M0400_2018, mfv_stopdbardbar_tau001000um_M0600_2018, mfv_stopdbardbar_tau001000um_M0800_2018, mfv_stopdbardbar_tau001000um_M1200_2018, mfv_stopdbardbar_tau001000um_M1600_2018, mfv_stopdbardbar_tau001000um_M3000_2018, mfv_stopdbardbar_tau010000um_M0400_2018, mfv_stopdbardbar_tau010000um_M0600_2018, mfv_stopdbardbar_tau010000um_M0800_2018, mfv_stopdbardbar_tau010000um_M1600_2018, mfv_stopdbardbar_tau030000um_M0400_2018, mfv_stopdbardbar_tau030000um_M0600_2018, mfv_stopdbardbar_tau030000um_M0800_2018, mfv_stopdbardbar_tau030000um_M1200_2018, mfv_stopdbardbar_tau030000um_M3000_2018],
         },
     "T1_US_FNAL_Disk": {
-        "miniaod": [qcdht0300_2017, qcdht0500_2017, qcdht1500_2017, qcdht2000_2017, ttbar_2017, dyjetstollM10_2017, qcdmupt15_2017, qcdht0300_2018, qcdht0700_2018, ttbarht0800_2018,
+        "miniaod": [qcdht0200_2017, zjetstonunuht0200_2017, zjetstonunuht1200_2017, qcdht1500_2017, qcdht2000_2017, dyjetstollM10_2017, qcdmupt15_2017, qcdht0300_2018, qcdht0700_2018, ttbarht0800_2018,
                     JetHT2017B, JetHT2017D, JetHT2017F, JetHT2018A, JetHT2018B, JetHT2018D,
                     mfv_neu_tau000100um_M0600_2017, mfv_neu_tau000300um_M0400_2017, mfv_neu_tau000300um_M0800_2017, mfv_neu_tau000300um_M3000_2017, mfv_neu_tau010000um_M0400_2017, mfv_neu_tau010000um_M0800_2017, mfv_neu_tau010000um_M1600_2017, mfv_neu_tau030000um_M0800_2017, mfv_neu_tau030000um_M3000_2017, mfv_stopdbardbar_tau000100um_M0600_2017, mfv_stopdbardbar_tau000100um_M1600_2017, mfv_stopdbardbar_tau000300um_M1200_2017, mfv_stopdbardbar_tau001000um_M0400_2017, mfv_stopdbardbar_tau001000um_M1200_2017, mfv_stopdbardbar_tau001000um_M3000_2017, mfv_stopdbardbar_tau010000um_M0800_2017, mfv_stopdbardbar_tau010000um_M3000_2017, mfv_stopdbardbar_tau030000um_M1200_2017, mfv_stopdbardbar_tau030000um_M1600_2017,
-                    mfv_neu_tau001000um_M0800_2018, mfv_stopdbardbar_tau000100um_M1600_2018, mfv_stopdbardbar_tau000300um_M0400_2018, mfv_stopdbardbar_tau000300um_M1600_2018, mfv_stopdbardbar_tau010000um_M1200_2018, mfv_stopdbardbar_tau010000um_M3000_2018, mfv_stopdbardbar_tau030000um_M1600_2018],
+                    mfv_neu_tau001000um_M0800_2018, mfv_stopdbardbar_tau000100um_M1600_2018, mfv_stopdbardbar_tau000300um_M0400_2018, mfv_stopdbardbar_tau000300um_M1600_2018, mfv_stopdbardbar_tau010000um_M1200_2018, mfv_stopdbardbar_tau010000um_M3000_2018, mfv_stopdbardbar_tau030000um_M1600_2018, SingleMuon2017F],
         },
     "T2_DE_DESY": {
-        "miniaod": [JetHT2017C, JetHT2017E, JetHT2018C],
+        "miniaod": [JetHT2017C, JetHT2017E, JetHT2018C, SingleMuon2017D],
         },
     "T2_US_MIT": {
-        "miniaod": [qcdht0500_2018],
+        "miniaod": [qcdht0500_2018, ttHbb_2017, zjetstonunuht0800_2017],
         },
     "T2_US_Florida": {
-        "miniaod": [qcdht0700_2017, ttbar_2018],
+        "miniaod": [ttbar_2018, ttZext_2017, qcdht0700_2017, qcdht0500_2017, zjetstonunuht2500_2017],
+        },
+    "T2_US_Nebraska": {
+        "miniaod": [SingleMuon2017C, ttbar_2017, qcdht0300_2017, mfv_neu_tau030000um_M1600_2017],
+        },
+    "T2_US_Purdue": {
+        "miniaod": [mfv_stopdbardbar_tau000100um_M1200_2017, zjetstonunuht0100_2017, zjetstonunuht0600_2017, wjetstolnu_2017],
+        },
+    "T2_US_Wisconsin" : {
+        "miniaod": [ttZ_2017, mfv_stopdbardbar_tau000300um_M0600_2017, zjetstonunuht0400_2017, wjetstolnuext_2017],
         },
     }
+
 
 _seen = set()
 for site, d in condorable.iteritems():

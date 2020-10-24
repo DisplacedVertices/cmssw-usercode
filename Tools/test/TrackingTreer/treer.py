@@ -39,10 +39,10 @@ ReferencedTagsTaskAdder(process)('p')
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
-    samples = pick_samples(dataset, all_signal=False)
+    samples = pick_samples(dataset, all_signal=True)
     set_splitting(samples, dataset, 'default', data_json=json_path('ana_2017p8.json'), limit_ttbar=True)
 
-    ms = MetaSubmitter('TrackingTreerV23mv3', dataset='miniaod')
+    ms = MetaSubmitter('TrackingTreerV23mv4', dataset='miniaod')
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier())
     ms.condor.stageout_files = 'all'
     ms.submit(samples)
