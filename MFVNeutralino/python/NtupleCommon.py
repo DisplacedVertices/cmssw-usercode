@@ -1,10 +1,10 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version_ = 'V34'
+ntuple_version_ = 'V36'
 #ntuple_version_ = 'Vtestrun'
 use_btag_triggers = False
-use_MET_triggers = False
+use_MET_triggers = True
 if use_btag_triggers : 
     ntuple_version_ += "B" # for "Btag triggers"; also includes DisplacedDijet triggers
 elif use_MET_triggers :

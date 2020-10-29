@@ -1,18 +1,30 @@
 #!/bin/bash
 
-indir=/uscms/home/ali/nobackup/LLP/crabdir/MiniTreeV33METm/
+indir=/uscms/home/ali/nobackup/LLP/crabdir/MiniTreeV36METm/
 #indir=/uscms/home/joeyr/crabdirs/MiniTreeV27Bm
 #indir=/uscms_data/d2/tucker/crab_dirs/MiniTreeV27m
 
 splitSUSY2017=(
+    qcdht0200_2017.root
+    qcdht0300_2017.root
+    qcdht0500_2017.root
     qcdht0700_2017.root
     qcdht1000_2017.root
     qcdht1500_2017.root
     qcdht2000_2017.root
-    ttbarht0600_2017.root
-    ttbarht0800_2017.root
-    ttbarht1200_2017.root
-    ttbarht2500_2017.root
+    ttbar_2017.root
+    #ttbarht0600_2017.root
+    #ttbarht0800_2017.root
+    #ttbarht1200_2017.root
+    #ttbarht2500_2017.root
+    zjetstonunuht0100_2017.root
+    zjetstonunuht0200_2017.root
+    zjetstonunuht0400_2017.root
+    zjetstonunuht0600_2017.root
+    zjetstonunuht0800_2017.root
+    zjetstonunuht1200_2017.root
+    zjetstonunuht2500_2017.root
+    wjetstolnu_2017.root
     mfv_splitSUSY_tau000000000um_M2000_1800_2017.root
     mfv_splitSUSY_tau000000000um_M2000_1900_2017.root
     mfv_splitSUSY_tau000000000um_M2400_100_2017.root

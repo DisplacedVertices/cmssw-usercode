@@ -5,7 +5,8 @@ from JMTucker.MFVNeutralino.UtilitiesBase import *
 ####
 
 _leptonpresel = bool_from_argv('leptonpresel')
-_presel_s = '_leptonpresel' if _leptonpresel else ''
+_metpresel = bool_from_argv('metpresel')
+_presel_s = '_leptonpresel' if _leptonpresel else '_metpresel' if _metpresel else ''
 
 ####
 
@@ -120,20 +121,61 @@ def _background_samples(trigeff=False, year=2017):
         if not trigeff:
             x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]]
             x += ['qcdbctoept%03i' % x for x in [15,20,30,80,170,250]]
+    elif _metpresel:
+        x = ['ttbar', 'wjetstolnu']
+        x += ['qcdht%04i' % x for x in [200, 300, 500, 700, 1000, 1500, 2000]]
+        x += ['zjetstonunuht%04i' % x for x in [100, 200, 400, 600, 800, 1200, 2500]]
     else:
         x = ['qcdht%04i' % x for x in [700, 1000, 1500, 2000]]
         x += ['ttbarht%04i' % x for x in [600, 800, 1200, 2500]]
     return x
 
-def cmd_merge_background(permissive=bool_from_argv('permissive')):
+def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=2017):
     cwd = os.getcwd()
     ok = True
-    for year_s, scale in [('_2017', -AnalysisConstants.int_lumi_2017 * AnalysisConstants.scale_factor_2017),
-                          ('_2018', -AnalysisConstants.int_lumi_2018 * AnalysisConstants.scale_factor_2018)]:
+    if year_to_use==-1:
+      for year_s, scale in [('_2017', -AnalysisConstants.int_lumi_2017 * AnalysisConstants.scale_factor_2017),
+                            ('_2018', -AnalysisConstants.int_lumi_2018 * AnalysisConstants.scale_factor_2018)]:
+  
+          year = int(year_s[1:])
+          print 'scaling to', year, scale
+  
+          files = _background_samples(year=year)
+          files = ['%s%s.root' % (x, year_s) for x in files]
+          files2 = []
+          for fn in files:
+              if not os.path.isfile(fn):
+                  msg = '%s not found' % fn
+                  if permissive:
+                      print msg
+                  else:
+                      raise RuntimeError(msg)
+              else:
+                  files2.append(fn)
+          if files2:
+              cmd = 'samples merge %f background%s%s.root ' % (scale, _presel_s, year_s)
+              cmd += ' '.join(files2)
+              print cmd
+              if os.system(cmd) != 0:
+                  ok = False
+      if ok:
+          cmd = 'hadd.py background_2017p8.root background_2017.root background_2018.root'
+          print cmd
+          os.system(cmd)
 
+    else:
+        if year_to_use==2017:
+            year_s = '_2017'
+            scale = -AnalysisConstants.int_lumi_2017 * AnalysisConstants.scale_factor_2017
+        elif year_to_use==2018:
+            year_s = '_2018'
+            scale = -AnalysisConstants.int_lumi_2018 * AnalysisConstants.scale_factor_2018
+        else:
+            raise RuntimeError("Year {0} not available!".format(year_to_use))
+  
         year = int(year_s[1:])
         print 'scaling to', year, scale
-
+  
         files = _background_samples(year=year)
         files = ['%s%s.root' % (x, year_s) for x in files]
         files2 = []
@@ -152,13 +194,37 @@ def cmd_merge_background(permissive=bool_from_argv('permissive')):
             print cmd
             if os.system(cmd) != 0:
                 ok = False
-    if ok:
-        cmd = 'hadd.py background_2017p8.root background_2017.root background_2018.root'
-        print cmd
-        os.system(cmd)
+        if ok:
+            print ("{0} background merged!".format(year))
 
-def cmd_effsprint():
-    for year in 2017, 2018:
+
+def cmd_effsprint(year_to_use=2017):
+    if year_to_use==-1:
+        for year in 2017, 2018:
+            background_fns = ' '.join('%s_%s.root' % (x, year) for x in _background_samples(year=year))
+            todo = [('background', background_fns), ('signals', 'mfv*%s.root' % year)]
+            def do(cmd, outfn):
+                cmd = 'python %s %s %s' % (cmssw_base('src/JMTucker/MFVNeutralino/test/effsprint.py'), cmd, year)
+                print cmd
+                os.system('%s | tee %s' % (cmd, outfn))
+                print
+            for which, which_files in todo:
+                for ntk in 3,4,'3or4',5:
+                    for vtx in 1,2:
+                        cmd = 'ntk%s' % ntk
+                        if which == 'background':
+                            cmd += ' sum'
+                        if vtx == 1:
+                            cmd += ' one'
+                        cmd += ' ' + which_files
+                        outfn = 'effsprint_%s%s_%s_ntk%s_%iv' % (which, _presel_s, year, ntk, vtx)
+                        do(cmd, outfn)
+            do('presel sum ' + background_fns, 'effsprint_presel_%s' % year)
+            do('nocuts sum ' + background_fns, 'effsprint_nocuts_%s' % year)
+    else:
+        if year_to_use!=2017 and year_to_use!=2018:
+            raise RuntimeError("Year {0} not available!".format(year_to_use))
+        year = year_to_use
         background_fns = ' '.join('%s_%s.root' % (x, year) for x in _background_samples(year=year))
         todo = [('background', background_fns), ('signals', 'mfv*%s.root' % year)]
         def do(cmd, outfn):
@@ -179,6 +245,7 @@ def cmd_effsprint():
                     do(cmd, outfn)
         do('presel sum ' + background_fns, 'effsprint_presel_%s' % year)
         do('nocuts sum ' + background_fns, 'effsprint_nocuts_%s' % year)
+
 
 def cmd_histos():
     cmd_report_data()

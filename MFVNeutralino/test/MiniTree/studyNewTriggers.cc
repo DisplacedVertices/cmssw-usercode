@@ -147,7 +147,7 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
       h_dbv_DisplacedDijet_coarse->Fill(dbvs[0], w);
     }
     // MET trigger
-    if(passesMETTrigger && nt.njets >= 2 && nt.met > 200){
+    if(passesMETTrigger && nt.njets >= 2 ){
       h_dbv_MET->Fill(dbvs[0], w);
       h_dbv_MET_coarse->Fill(dbvs[0], w);
     }
@@ -183,7 +183,7 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
       h_dvv_DisplacedDijet_coarse->Fill(dvv, w);
     }
     // MET trigger
-    if(passesMETTrigger && nt.njets >= 2 && nt.met > 200){
+    if(passesMETTrigger && nt.njets >= 2 ){
       h_dvv_MET->Fill(dvv, w);
       h_dvv_MET_coarse->Fill(dvv, w);
     }
