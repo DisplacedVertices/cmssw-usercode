@@ -52,7 +52,7 @@ def effs(fn):
 
     def get_n(dir_name):
         h = f.Get('%s/h_npv' % dir_name)
-        return h.Integral(0,1000000) if integral else h.GetEntries()
+        return h.Integral(0,1000000) if integral else h.GetEntries(), h.GetEntries()
 
     den = norm_from_file(fn)
     sname = os.path.basename(fn).replace('.root','')
@@ -84,7 +84,7 @@ def effs(fn):
     if namenumvtx:
         namenumvtx = ntk + namenumvtx
 
-    numall = get_n(namenumall)
+    numall, numall_unweighted = get_n(namenumall)
     if namenumvtx is not None:
         h = f.Get(namenumvtx)
         numvtx = h.Integral(h.FindBin(nvtx), 1000000)
@@ -96,7 +96,7 @@ def effs(fn):
     if csv:
         print '%s,%e,%f,%f,%f,%f,%f' % (sname, weight, den, numall, float(numall)/den, numall*weight, numall**0.5 * weight)
     else:
-        print '%s (w = %.3e): # ev: %10.1f  pass evt+vtx: %5.1f -> %5.3e  pass vtx only: %5.1f -> %5.3e' % (sname.ljust(30), weight, den, numall, float(numall)/den, numvtx, float(numvtx)/den)
+        print '%s (w = %.3e): # ev: %10.1f  pass evt+vtx: %5.1f -> %5.3e unweighted: %5.1f  pass vtx only: %5.1f -> %5.3e' % (sname.ljust(30), weight, den, numall, float(numall)/den, numall_unweighted, numvtx, float(numvtx)/den)
         if weighted:
             print '  weighted to %.1f/pb: %5.2f +/- %5.2f' % (int_lumi, numall*weight, numall**0.5 * weight)
         else:
@@ -108,7 +108,7 @@ def effs(fn):
             for icut, cut in enumerate(cuts):
                 h_nm1_abs.GetXaxis().SetBinLabel(icut+1, cut)
                 h_nm1_rel.GetXaxis().SetBinLabel(icut+1, cut)
-                nm1 = get_n('evtHst%sVNo%s' % (nvtx, cut))
+                nm1, nm1_unweighted = get_n('evtHst%sVNo%s' % (nvtx, cut))
                 nm1_abs = float(nm1)/den
                 nm1_rel = float(numall)/nm1 if nm1 > 0 else -1
                 h_nm1_abs.SetBinContent(icut+1, nm1_abs)

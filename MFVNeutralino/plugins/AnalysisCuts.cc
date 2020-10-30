@@ -209,7 +209,9 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     // MET trigger
 
     if (apply_presel == 5) {
-      return satisfiesTrigger(mevent, mfv::b_HLT_PFMET120_PFMHT120_IDTight);
+      if ( !satisfiesTrigger(mevent, mfv::b_HLT_PFMET120_PFMHT120_IDTight) ){
+        return false;
+      }
     }
 
     if (require_bquarks && mevent->gen_flavor_code != 2)
