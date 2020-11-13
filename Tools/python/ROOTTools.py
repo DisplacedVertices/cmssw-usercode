@@ -479,6 +479,7 @@ def compare_hists(ps, samples, **kwargs):
     scaling        = _get('scaling',        1.)
     ratio          = _get('ratio',          True)
     x_range        = _get('x_range',        None)
+    y_range        = _get('y_range',        None)
     move_overflows = _get('move_overflows', 'under over')
     profile        = _get('profile',        None)
 
@@ -583,6 +584,7 @@ def compare_hists(ps, samples, **kwargs):
             hists_sorted.sort(key=lambda hist: hist.GetMaximum(), reverse=True)
 
         x_r = x_range(name, hist_list, None)
+        y_r = y_range(name, hist_list, None)
         m_o = False if (is2d or profiled) else move_overflows(name, hist_list, None)
 
         if len(hists) > 1 and ratio(name, hist_list, None) and (not is2d or profiled):
@@ -606,6 +608,11 @@ def compare_hists(ps, samples, **kwargs):
                     if x_r:
                         hist.GetXaxis().SetRangeUser(*x_r)
                     move_overflows_into_visible_bins(hist, m_o)
+                elif is2d:
+                    if x_r:
+                        hist.GetXaxis().SetRangeUser(*x_r)
+                    if y_r:
+                        hist.GetYaxis().SetRangeUser(*y_r)
 
             ps.c.Update()
             if not no_stats(name, hist_list, None):
