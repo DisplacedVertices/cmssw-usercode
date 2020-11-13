@@ -114,6 +114,7 @@ def effs(fn):
                 h_nm1_abs.SetBinContent(icut+1, nm1_abs)
                 h_nm1_rel.SetBinContent(icut+1, nm1_rel)
                 print '    remove %s cut: %5i -> %5.3e (n-1: %5.3e)' % (cut.ljust(max_cut_name_len), nm1, nm1_abs, nm1_rel)
+                print '    weighted to %.1f/pb: %5.2f +/- %5.2f' % (int_lumi, nm1*weight, abs(nm1)**0.5 * weight)
             h_nm1_abs.GetXaxis().SetBinLabel(len(cuts)+1, 'all')
             h_nm1_abs.SetBinContent(len(cuts)+1, float(numall)/den)
             def draw(h):
