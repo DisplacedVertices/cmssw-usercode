@@ -41,6 +41,17 @@ class MFVVertexHistos : public edm::EDAnalyzer {
 
   TH1F* h_w;
   TH1F* h_nsv;
+  TH1F* h_genbs2ddist;
+  TH1F* h_sv_gen2ddist_signed;
+  TH1F* h_sv_genbs2ddist_ntk5;
+  TH1F* h_sv_genbs2ddist_ntk10;
+  TH1F* h_sv_genbs2ddist_ntk20;
+  TH1F* h_sv_bs2ddist_ntk5;
+  TH1F* h_sv_bs2ddist_ntk10;
+  TH1F* h_sv_bs2ddist_ntk20;
+  TH2F* h_sv_ntk_genbs2ddist;
+  TH2F* h_sv_ntk_bs2ddist;
+  TH2F* h_sv_ntk_gen2ddist;
   TH2F* h_sv_xy;
   TH2F* h_sv_yz;
   TH2F* h_sv_xz;
@@ -342,6 +353,17 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
     h_sv_track_inpv[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_inpv", exc), TString::Format(";%s SV tracks in-PV?", exc), 10, -1, 9);
   }
 
+  h_genbs2ddist = fs->make<TH1F>("h_genbs2ddist", ";dist2d(gen vtx, beamspot) (cm);arb. units", 500, 0, 2.5);
+  h_sv_bs2ddist_ntk5 = fs->make<TH1F>("h_sv_bs2ddist_ntk5", "ntracks<10;dist2d(SV, beamspot) (cm);arb. units", 500, 0, 2.5);
+  h_sv_bs2ddist_ntk10 = fs->make<TH1F>("h_sv_bs2ddist_ntk10", "10<=ntracks<20;dist2d(SV, beamspot) (cm);arb. units", 500, 0, 2.5);
+  h_sv_bs2ddist_ntk20 = fs->make<TH1F>("h_sv_bs2ddist_ntk20", "20<=ntracks;dist2d(SV, beamspot) (cm);arb. units", 500, 0, 2.5);
+  h_sv_genbs2ddist_ntk5 = fs->make<TH1F>("h_sv_genbs2ddist_ntk5", "ntracks<10;dist2d(gen vtx, beamspot) (cm);arb. units", 500, 0, 2.5);
+  h_sv_genbs2ddist_ntk10 = fs->make<TH1F>("h_sv_genbs2ddist_ntk10", "10<=ntracks<20;dist2d(gen vtx, beamspot) (cm);arb. units", 500, 0, 2.5);
+  h_sv_genbs2ddist_ntk20 = fs->make<TH1F>("h_sv_genbs2ddist_ntk20", "20<=ntracks;dist2d(gen vtx, beamspot) (cm);arb. units", 500, 0, 2.5);
+  h_sv_gen2ddist_signed = fs->make<TH1F>("h_sv_gen2ddist_signed", ";dist2d(SV, closest gen vtx) (cm);arb. units", 400,-0.2,0.2);
+  h_sv_ntk_genbs2ddist = fs->make<TH2F>("h_sv_ntk_genbs2ddist", ";# tracks of SV;dist2d(gen vtx, beamspot) (cm)",40,0,40,500,0,2.5);
+  h_sv_ntk_bs2ddist = fs->make<TH2F>("h_sv_ntk_bs2ddist", ";# tracks of SV;dist2d(SV, beamspot) (cm)",40,0,40,500,0,2.5);
+  h_sv_ntk_gen2ddist = fs->make<TH2F>("h_sv_ntk_gen2ddist", ";# tracks of SV;dist2d(SV, closest gen vtx) (cm)",40,0,40,200,0,0.2);
   h_sv_xy = fs->make<TH2F>("h_sv_xy", ";SV x (cm);SV y (cm)", 100, -4, 4, 100, -4, 4);
   h_sv_xz = fs->make<TH2F>("h_sv_xz", ";SV x (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
   h_sv_yz = fs->make<TH2F>("h_sv_yz", ";SV y (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
@@ -382,10 +404,52 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   const int nsv = int(auxes->size());
   h_nsv->Fill(nsv, w);
 
+  for (int igenv = 0; igenv < 2; ++igenv) {
+    double genx = mevent->gen_lsp_decay[igenv*3+0];
+    double geny = mevent->gen_lsp_decay[igenv*3+1];
+    double genz = mevent->gen_lsp_decay[igenv*3+2];
+    double genbs2ddist = mevent->mag(genx - mevent->bsx_at_z(genz),
+                                     geny - mevent->bsy_at_z(genz) 
+        );
+    h_genbs2ddist->Fill(genbs2ddist, w);
+  }
+
   for (int isv = 0; isv < nsv; ++isv) {
     const MFVVertexAux& aux = auxes->at(isv);
     const int ntracks = aux.ntracks();
 
+    jmt::MinValue d;
+    double sv_gen2ddist_sign = 1;
+    for (int igenv = 0; igenv < 2; ++igenv) {
+      double genx = mevent->gen_lsp_decay[igenv*3+0];
+      double geny = mevent->gen_lsp_decay[igenv*3+1];
+      d(igenv, mag(aux.x-genx,
+                   aux.y-geny));
+    }
+    const int genvtx_2d = d.i();
+    double genbs2ddist = mevent->mag(mevent->gen_lsp_decay[genvtx_2d*3+0] - mevent->bsx_at_z(mevent->gen_lsp_decay[genvtx_2d*3+2]),
+                                     mevent->gen_lsp_decay[genvtx_2d*3+1] - mevent->bsy_at_z(mevent->gen_lsp_decay[genvtx_2d*3+2]) 
+          );
+    h_sv_ntk_genbs2ddist->Fill(ntracks, genbs2ddist, w);
+    if (genbs2ddist<mevent->bs2ddist(aux))
+      sv_gen2ddist_sign = -1;
+
+    if (ntracks<10){
+      h_sv_bs2ddist_ntk5->Fill(mevent->bs2ddist(aux), w);
+      h_sv_genbs2ddist_ntk5->Fill(genbs2ddist, w);
+    }
+    else if (ntracks<20){
+      h_sv_bs2ddist_ntk10->Fill(mevent->bs2ddist(aux), w);
+      h_sv_genbs2ddist_ntk10->Fill(genbs2ddist, w);
+    }
+    else{
+      h_sv_bs2ddist_ntk20->Fill(mevent->bs2ddist(aux), w);
+      h_sv_genbs2ddist_ntk20->Fill(genbs2ddist, w);
+    }
+    h_sv_gen2ddist_signed->Fill(sv_gen2ddist_sign*aux.gen2ddist, w);
+
+    h_sv_ntk_bs2ddist->Fill(ntracks, mevent->bs2ddist(aux), w);
+    h_sv_ntk_gen2ddist->Fill(ntracks, aux.gen2ddist, w);
     h_sv_xy->Fill(aux.x - mevent->bsx_at_z(aux.z), aux.y - mevent->bsy_at_z(aux.z), w);
     h_sv_xz->Fill(aux.x - mevent->bsx_at_z(aux.z), aux.z - bsz, w);
     h_sv_yz->Fill(aux.y - mevent->bsy_at_z(aux.z), aux.z - bsz, w);

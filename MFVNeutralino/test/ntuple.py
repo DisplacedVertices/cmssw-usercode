@@ -8,7 +8,7 @@ settings.is_miniaod = True
 
 settings.run_n_tk_seeds = False
 settings.minitree_only = False
-settings.prepare_vis = False
+settings.prepare_vis = True
 settings.keep_all = False
 settings.keep_gen = False
 if use_btag_triggers :
@@ -20,9 +20,40 @@ else :
 
 process = ntuple_process(settings)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
-sample_files(process, 'qcdht2000_year', dataset, 1)
+#sample_files(process, 'mfv_splitSUSY_tau000001000um_M2000_1800_2017', dataset, 1)
+#sample_files(process, 'mfv_neu_tau001000um_M0800_year', dataset, 1)
+#sample_files(process, 'qcdht2000_year', dataset, 1)
 #sample_files(process, 'zjetstonunuht0100_2017', dataset, 1)
 #sample_files(process, 'dyjetstollM50_year', dataset, 1)
+
+input_files(process,[
+                    #'/store/mc/RunIIFall17MiniAODv2/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-1mm_TuneCP2_13TeV-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/10000/2E6A7CCF-6606-E911-B184-AC1F6B0DE490.root',
+                    #'/store/mc/RunIIFall17MiniAODv2/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-1mm_TuneCP2_13TeV-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/10000/8AFAF178-4206-E911-A85F-008CFA1112CC.root',
+                    #'/store/mc/RunIIFall17MiniAODv2/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-1mm_TuneCP2_13TeV-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/10000/EE806BFB-9AFE-E811-995A-0025905C3E38.root',
+                    '/store/mc/RunIIFall17MiniAODv2/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-1mm_TuneCP2_13TeV-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/10000/EE806BFB-9AFE-E811-995A-0025905C3E38.root',
+                    ])
+set_events(process, [
+      #(1, 32, 31320),
+      #(1, 32, 31759),
+      #(1, 33, 32085),
+      #(1, 33, 32969),
+      #(1, 34, 33654),
+      #(1, 51, 50407),
+      #(1, 67, 66199),
+      #(1, 67, 66255),
+      #(1, 67, 66692),
+      #(1, 67, 66679),
+      (1,28,27039),
+      (1,28,27003),
+      (1,28,27168),
+      (1,28,27265),
+      (1,28,27400),
+      (1,28,27633),
+      (1,28,27652),
+      (1,28,27694),
+      (1,28,27701),
+      (1,28,27754),
+      ])
 max_events(process, 1000)
 cmssw_from_argv(process)
 
