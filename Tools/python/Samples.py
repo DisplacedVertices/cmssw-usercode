@@ -100,10 +100,10 @@ ttbar_samples_2017 = [
     ]
 
 bjet_samples_2017 = [
-    MCSample('qcdht0200_2017', '/QCD_HT200to300_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 59427619, nice='QCD, 200 < H_{T} < 300 GeV',  color=802, syst_frac=0.20, xsec=1.547e6),
-    MCSample('qcdht0300_2017', '/QCD_HT300to500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 59569132, nice='QCD, 300 < H_{T} < 500 GeV',  color=803, syst_frac=0.20, xsec=3.226e5),
-    MCSample('qcdht0500_2017', '/QCD_HT500to700_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v2/AODSIM', 56854504, nice='QCD, 500 < H_{T} < 700 GeV', color=804, syst_frac=0.20, xsec=2.998e4),
-    MCSample('ttbar_2017',     '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM',    155582358, nice='t#bar{t}',                   color=4,   syst_frac=0.15, xsec=832.),
+    #MCSample('qcdht0200_2017', '/QCD_HT200to300_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 59427619, nice='QCD, 200 < H_{T} < 300 GeV',  color=802, syst_frac=0.20, xsec=1.547e6),
+    #MCSample('qcdht0300_2017', '/QCD_HT300to500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 59569132, nice='QCD, 300 < H_{T} < 500 GeV',  color=803, syst_frac=0.20, xsec=3.226e5),
+    #MCSample('qcdht0500_2017', '/QCD_HT500to700_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v2/AODSIM', 56854504, nice='QCD, 500 < H_{T} < 700 GeV', color=804, syst_frac=0.20, xsec=2.998e4),
+    #MCSample('ttbar_2017',     '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM',    155582358, nice='t#bar{t}',                   color=4,   syst_frac=0.15, xsec=832.),
     MCSample('ttHbb_2017',     '/ttHJetTobb_M125_TuneCP5_13TeV_amcatnloFXFX_madspin_pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM',      10055168, nice='ttHbb', color=1, syst_frac=0.20, xsec=0.5269), # FIXME note syst_frac here isn't correct here or below, but is probably irrelevant
     MCSample('ttZ_2017',       '/ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM',                        9771320, nice='ttZ', color=1, syst_frac=0.20, xsec=0.5407),
     MCSample('ttZext_2017',    '/ttZJets_TuneCP5_13TeV_madgraphMLM_pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11_ext1-v3/AODSIM',                   8536618, nice='ttZ', color=1, syst_frac=0.20, xsec=0.5407),
@@ -116,8 +116,8 @@ bjet_samples_sum_2017 = [
 
 leptonic_samples_2017 = [
     #MCSample('ttbar_2017',            '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 155582358, nice='t#bar{t}', color=4, syst_frac=0.15, xsec=832.), # inclusive ttbar sample has been moved to bjet_samples_2017
-    MCSample('wjetstolnu_2017',       '/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v2/AODSIM',                    33073306, nice='W + jets #rightarrow l#nu', color=  9, syst_frac=0.10, xsec=5.28e4),
-    MCSample('wjetstolnuext_2017',    '/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11_ext1-v2/AODSIM',               44652002, nice='W + jets #rightarrow l#nu', color=  9, syst_frac=0.10, xsec=5.28e4),
+    #MCSample('wjetstolnu_2017',       '/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v2/AODSIM',                    33073306, nice='W + jets #rightarrow l#nu', color=  9, syst_frac=0.10, xsec=5.28e4),
+    #MCSample('wjetstolnuext_2017',    '/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11_ext1-v2/AODSIM',               44652002, nice='W + jets #rightarrow l#nu', color=  9, syst_frac=0.10, xsec=5.28e4),
     MCSample('dyjetstollM10_2017',    '/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-94X_mc2017_realistic_v10-v2/AODSIM',                  39521230, nice='DY + jets #rightarrow ll, 10 < M < 50 GeV', color= 29, syst_frac=0.10, xsec=1.58e4),
    #MCSample('dyjetstollM10ext_2017', '/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11_ext1-v1/AODSIM',      39536839, nice='DY + jets #rightarrow ll, 10 < M < 50 GeV', color= 29, syst_frac=0.10, xsec=1.58e4),
     MCSample('dyjetstollM50_2017',    '/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-RECOSIMstep_94X_mc2017_realistic_v10-v1/AODSIM',          48675378, nice='DY + jets #rightarrow ll, M > 50 GeV', color= 32, syst_frac=0.10, xsec=5.34e3),
@@ -143,6 +143,16 @@ leptonic_samples_sum_2017 = [
     SumSample('wjetstolnusum_2017',    leptonic_samples_2017[ :2]),
    #SumSample('dyjetstollM10sum_2017', leptonic_samples_2017[2:4]),
     SumSample('dyjetstollM50sum_2017', leptonic_samples_2017[3:5]),
+    ]
+
+met_samples_2017 = [
+    MCSample('wjetstolnu_2017',       '/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v2/AODSIM',                    33073306, nice='W + jets #rightarrow l#nu', color=  9, syst_frac=0.10, xsec=5.28e4),
+    MCSample('wjetstolnuext_2017',    '/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11_ext1-v2/AODSIM',               44652002, nice='W + jets #rightarrow l#nu', color=  9, syst_frac=0.10, xsec=5.28e4),
+    MCSample('qcdht0200_2017', '/QCD_HT200to300_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 59427619, nice='QCD, 200 < H_{T} < 300 GeV',  color=802, syst_frac=0.20, xsec=1.547e6),
+    MCSample('qcdht0300_2017', '/QCD_HT300to500_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 59569132, nice='QCD, 300 < H_{T} < 500 GeV',  color=803, syst_frac=0.20, xsec=3.226e5),
+    MCSample('qcdht0500_2017', '/QCD_HT500to700_TuneCP5_13TeV-madgraph-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v2/AODSIM', 56854504, nice='QCD, 500 < H_{T} < 700 GeV', color=804, syst_frac=0.20, xsec=2.998e4),
+    MCSample('ttbar_2017',     '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM',    155582358, nice='t#bar{t}',                   color=4,   syst_frac=0.15, xsec=832.),
+
     ]
 
 Zvv_samples_2017 = [
@@ -353,6 +363,7 @@ mfv_splitSUSY_samples_M2400_2017 = [
 
 ]
 
+
 mfv_splitSUSY_samples_2017 = mfv_splitSUSY_samples_M2000_2017 + mfv_splitSUSY_samples_M2400_2017
 
 for s in mfv_splitSUSY_samples_2017:
@@ -416,6 +427,7 @@ __all__ = [
     'bjet_samples_2017',
     'leptonic_samples_2017',
     'leptonic_samples_sum_2017',
+    'met_samples_2017',
     'Zvv_samples_2017',
     'mfv_signal_samples_2017',
     'mfv_stopdbardbar_samples_2017',
@@ -442,7 +454,14 @@ for x in __all__:
             exec '%s = sample' % sample.name
             __all__.append(sample.name)
 
-span_signal_samples_2017 = [eval('mfv_%s_tau%06ium_M%04i_2017' % (a,b,c)) for a in ('neu','stopdbardbar') for b in (300,1000,10000) for c in (800,1600,3000)]
+
+#span_signal_samples_2017 = [eval('mfv_%s_tau%06ium_M%04i_2017' % (a,b,c)) for a in ('neu','stopdbardbar') for b in (300,1000,10000) for c in (800,1600,3000)]
+span_signal_samples_2017 = [
+  eval('mfv_splitSUSY_tau000000000um_M2000_1800_2017'),
+  eval('mfv_splitSUSY_tau000000000um_M2000_1900_2017'),
+  eval('mfv_splitSUSY_tau000000000um_M2400_100_2017'),
+  eval('mfv_splitSUSY_tau000000000um_M2400_2300_2017'),
+]
 span_signal_samples_2018 = [eval('mfv_%s_tau%06ium_M%04i_2018' % (a,b,c)) for a in ('neu','stopdbardbar') for b in (300,1000,10000) for c in (800,1600,3000)]
 
 _alls = [
@@ -740,6 +759,15 @@ dyjetstollM50ext_2017.add_dataset('ntuplev36metm', '/DYJetsToLL_M-50_TuneCP5_13T
 for x in qcdht0700_2017, qcdht1000_2017, qcdht1500_2017, qcdht2000_2017, ttbarht0600_2017, ttbarht0800_2017, ttbarht1200_2017, ttbarht2500_2017, qcdht0200_2017, qcdht0300_2017, qcdht0500_2017, ttbar_2017, ttHbb_2017, ttZ_2017, ttZext_2017, wjetstolnu_2017, wjetstolnuext_2017, dyjetstollM10_2017, qcdmupt15_2017, zjetstonunuht0100_2017, zjetstonunuht0200_2017, zjetstonunuht0400_2017, zjetstonunuht0600_2017, zjetstonunuht0800_2017, zjetstonunuht1200_2017, zjetstonunuht2500_2017, mfv_neu_tau000100um_M0400_2017, mfv_neu_tau000100um_M0600_2017, mfv_neu_tau000100um_M0800_2017, mfv_neu_tau000100um_M1200_2017, mfv_neu_tau000100um_M1600_2017, mfv_neu_tau000100um_M3000_2017, mfv_neu_tau000300um_M0400_2017, mfv_neu_tau000300um_M0600_2017, mfv_neu_tau000300um_M0800_2017, mfv_neu_tau000300um_M1200_2017, mfv_neu_tau000300um_M1600_2017, mfv_neu_tau000300um_M3000_2017, mfv_neu_tau001000um_M0400_2017, mfv_neu_tau001000um_M0600_2017, mfv_neu_tau001000um_M0800_2017, mfv_neu_tau001000um_M1200_2017, mfv_neu_tau001000um_M1600_2017, mfv_neu_tau001000um_M3000_2017, mfv_neu_tau010000um_M0400_2017, mfv_neu_tau010000um_M0600_2017, mfv_neu_tau010000um_M0800_2017, mfv_neu_tau010000um_M1200_2017, mfv_neu_tau010000um_M1600_2017, mfv_neu_tau010000um_M3000_2017, mfv_neu_tau030000um_M0400_2017, mfv_neu_tau030000um_M0600_2017, mfv_neu_tau030000um_M0800_2017, mfv_neu_tau030000um_M1200_2017, mfv_neu_tau030000um_M1600_2017, mfv_neu_tau030000um_M3000_2017, mfv_stopdbardbar_tau000100um_M0400_2017, mfv_stopdbardbar_tau000100um_M0600_2017, mfv_stopdbardbar_tau000100um_M0800_2017, mfv_stopdbardbar_tau000100um_M1200_2017, mfv_stopdbardbar_tau000100um_M1600_2017, mfv_stopdbardbar_tau000100um_M3000_2017, mfv_stopdbardbar_tau000300um_M0400_2017, mfv_stopdbardbar_tau000300um_M0600_2017, mfv_stopdbardbar_tau000300um_M0800_2017, mfv_stopdbardbar_tau000300um_M1200_2017, mfv_stopdbardbar_tau000300um_M1600_2017, mfv_stopdbardbar_tau000300um_M3000_2017, mfv_stopdbardbar_tau001000um_M0400_2017, mfv_stopdbardbar_tau001000um_M0600_2017, mfv_stopdbardbar_tau001000um_M0800_2017, mfv_stopdbardbar_tau001000um_M1200_2017, mfv_stopdbardbar_tau001000um_M1600_2017, mfv_stopdbardbar_tau001000um_M3000_2017, mfv_stopdbardbar_tau010000um_M0400_2017, mfv_stopdbardbar_tau010000um_M0600_2017, mfv_stopdbardbar_tau010000um_M0800_2017, mfv_stopdbardbar_tau010000um_M1200_2017, mfv_stopdbardbar_tau010000um_M1600_2017, mfv_stopdbardbar_tau010000um_M3000_2017, mfv_stopdbardbar_tau030000um_M0400_2017, mfv_stopdbardbar_tau030000um_M0600_2017, mfv_stopdbardbar_tau030000um_M0800_2017, mfv_stopdbardbar_tau030000um_M1200_2017, mfv_stopdbardbar_tau030000um_M1600_2017, mfv_stopdbardbar_tau030000um_M3000_2017, mfv_splitSUSY_tau000000000um_M2000_1800_2017, mfv_splitSUSY_tau100000000um_M2000_1800_2017, mfv_splitSUSY_tau010000000um_M2000_1800_2017, mfv_splitSUSY_tau001000000um_M2000_1800_2017, mfv_splitSUSY_tau000100000um_M2000_1800_2017, mfv_splitSUSY_tau000010000um_M2000_1800_2017, mfv_splitSUSY_tau000001000um_M2000_1800_2017, mfv_splitSUSY_tau000000000um_M2000_1900_2017, mfv_splitSUSY_tau100000000um_M2000_1900_2017, mfv_splitSUSY_tau010000000um_M2000_1900_2017, mfv_splitSUSY_tau001000000um_M2000_1900_2017, mfv_splitSUSY_tau000100000um_M2000_1900_2017, mfv_splitSUSY_tau000010000um_M2000_1900_2017, mfv_splitSUSY_tau000001000um_M2000_1900_2017, mfv_splitSUSY_tau000000000um_M2400_100_2017, mfv_splitSUSY_tau100000000um_M2400_100_2017, mfv_splitSUSY_tau010000000um_M2400_100_2017, mfv_splitSUSY_tau001000000um_M2400_100_2017, mfv_splitSUSY_tau000100000um_M2400_100_2017, mfv_splitSUSY_tau000010000um_M2400_100_2017, mfv_splitSUSY_tau000001000um_M2400_100_2017, mfv_splitSUSY_tau000000000um_M2400_2300_2017, mfv_splitSUSY_tau100000000um_M2400_2300_2017, mfv_splitSUSY_tau010000000um_M2400_2300_2017, mfv_splitSUSY_tau001000000um_M2400_2300_2017, mfv_splitSUSY_tau000100000um_M2400_2300_2017, mfv_splitSUSY_tau000010000um_M2400_2300_2017, mfv_splitSUSY_tau000001000um_M2400_2300_2017:
     x.add_dataset("ntuplev36metm")
 
+for x in mfv_splitSUSY_tau000000000um_M2000_1800_2017, mfv_splitSUSY_tau100000000um_M2000_1800_2017, mfv_splitSUSY_tau010000000um_M2000_1800_2017, mfv_splitSUSY_tau001000000um_M2000_1800_2017, mfv_splitSUSY_tau000100000um_M2000_1800_2017, mfv_splitSUSY_tau000010000um_M2000_1800_2017, mfv_splitSUSY_tau000001000um_M2000_1800_2017, mfv_splitSUSY_tau000000000um_M2000_1900_2017, mfv_splitSUSY_tau100000000um_M2000_1900_2017, mfv_splitSUSY_tau010000000um_M2000_1900_2017, mfv_splitSUSY_tau001000000um_M2000_1900_2017, mfv_splitSUSY_tau000100000um_M2000_1900_2017, mfv_splitSUSY_tau000010000um_M2000_1900_2017, mfv_splitSUSY_tau000001000um_M2000_1900_2017, mfv_splitSUSY_tau000000000um_M2400_100_2017, mfv_splitSUSY_tau100000000um_M2400_100_2017, mfv_splitSUSY_tau010000000um_M2400_100_2017, mfv_splitSUSY_tau001000000um_M2400_100_2017, mfv_splitSUSY_tau000100000um_M2400_100_2017, mfv_splitSUSY_tau000010000um_M2400_100_2017, mfv_splitSUSY_tau000001000um_M2400_100_2017, mfv_splitSUSY_tau000000000um_M2400_2300_2017, mfv_splitSUSY_tau100000000um_M2400_2300_2017, mfv_splitSUSY_tau010000000um_M2400_2300_2017, mfv_splitSUSY_tau001000000um_M2400_2300_2017, mfv_splitSUSY_tau000100000um_M2400_2300_2017, mfv_splitSUSY_tau000010000um_M2400_2300_2017, mfv_splitSUSY_tau000001000um_M2400_2300_2017:
+    x.add_dataset("ntuplevvtxplotmetm")
+
+for x in qcdht0700_2017, qcdht1000_2017, qcdht1500_2017, qcdht2000_2017, wjetstolnu_2017, wjetstolnuext_2017, qcdht0200_2017, qcdht0300_2017, qcdht0500_2017, ttbar_2017, zjetstonunuht0100_2017, zjetstonunuht0200_2017, zjetstonunuht0400_2017, zjetstonunuht0600_2017, zjetstonunuht0800_2017, zjetstonunuht1200_2017, zjetstonunuht2500_2017, mfv_splitSUSY_tau000000000um_M2000_1800_2017, mfv_splitSUSY_tau100000000um_M2000_1800_2017, mfv_splitSUSY_tau010000000um_M2000_1800_2017, mfv_splitSUSY_tau001000000um_M2000_1800_2017, mfv_splitSUSY_tau000100000um_M2000_1800_2017, mfv_splitSUSY_tau000010000um_M2000_1800_2017, mfv_splitSUSY_tau000001000um_M2000_1800_2017, mfv_splitSUSY_tau000000000um_M2000_1900_2017, mfv_splitSUSY_tau100000000um_M2000_1900_2017, mfv_splitSUSY_tau010000000um_M2000_1900_2017, mfv_splitSUSY_tau001000000um_M2000_1900_2017, mfv_splitSUSY_tau000100000um_M2000_1900_2017, mfv_splitSUSY_tau000010000um_M2000_1900_2017, mfv_splitSUSY_tau000001000um_M2000_1900_2017, mfv_splitSUSY_tau000000000um_M2400_100_2017, mfv_splitSUSY_tau100000000um_M2400_100_2017, mfv_splitSUSY_tau010000000um_M2400_100_2017, mfv_splitSUSY_tau001000000um_M2400_100_2017, mfv_splitSUSY_tau000100000um_M2400_100_2017, mfv_splitSUSY_tau000010000um_M2400_100_2017, mfv_splitSUSY_tau000001000um_M2400_100_2017, mfv_splitSUSY_tau000000000um_M2400_2300_2017, mfv_splitSUSY_tau100000000um_M2400_2300_2017, mfv_splitSUSY_tau010000000um_M2400_2300_2017, mfv_splitSUSY_tau001000000um_M2400_2300_2017, mfv_splitSUSY_tau000100000um_M2400_2300_2017, mfv_splitSUSY_tau000010000um_M2400_2300_2017, mfv_splitSUSY_tau000001000um_M2400_2300_2017:
+    x.add_dataset("ntuplevnsigmadxy2_v2metm")
+
+for x in mfv_splitSUSY_tau000000000um_M2000_1800_2017, mfv_splitSUSY_tau000000000um_M2000_1900_2017, mfv_splitSUSY_tau000000000um_M2400_100_2017, mfv_splitSUSY_tau000000000um_M2400_2300_2017:
+    x.add_dataset("ntuplevnsigmadxy_1_100ummetm")
+
 ########
 # automatic condor declarations for ntuples
 ########
@@ -774,7 +802,7 @@ condorable = {
         "miniaod": [qcdht0500_2018, ttHbb_2017, zjetstonunuht0800_2017],
         },
     "T2_US_Florida": {
-        "miniaod": [ttbar_2018, ttZext_2017, qcdht0700_2017, qcdht0500_2017, zjetstonunuht2500_2017],
+        "miniaod": [ttbar_2018, ttZext_2017],
         },
     "T2_US_Nebraska": {
         "miniaod": [SingleMuon2017C, ttbar_2017, qcdht0300_2017, mfv_neu_tau030000um_M1600_2017],
@@ -784,6 +812,9 @@ condorable = {
         },
     "T2_US_Wisconsin" : {
         "miniaod": [ttZ_2017, mfv_stopdbardbar_tau000300um_M0600_2017, zjetstonunuht0400_2017, wjetstolnuext_2017],
+        },
+    "global_redirect" : {
+        "miniaod": [qcdht0700_2017, qcdht0500_2017, zjetstonunuht2500_2017],
         },
     }
 

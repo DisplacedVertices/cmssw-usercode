@@ -69,6 +69,10 @@ private:
   TH1F* h_n_all_tracks;
   TH1F* h_all_track_pars[6];
   TH1F* h_all_track_errs[6];
+  TH1F* h_all_track_p;
+  TH1F* h_all_track_pt_barrel;
+  TH1F* h_all_track_pt_endcap;
+  TH1F* h_all_track_errdxybs;
   TH1F* h_all_track_sigmadxybs;
   TH1F* h_all_track_sigmadxypv;
   TH1F* h_all_track_nhits;
@@ -79,6 +83,10 @@ private:
   TH1F* h_n_seed_tracks;
   TH1F* h_seed_track_pars[6];
   TH1F* h_seed_track_errs[6];
+  TH1F* h_seed_track_p;
+  TH1F* h_seed_track_pt_barrel;
+  TH1F* h_seed_track_pt_endcap;
+  TH1F* h_seed_track_errdxybs;
   TH1F* h_seed_track_sigmadxybs;
   TH1F* h_seed_track_sigmadxypv;
   TH1F* h_seed_track_nhits;
@@ -165,6 +173,9 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
       h_all_track_errs[i] = fs->make<TH1F>(TString::Format("h_all_track_err%s", par_names[i]), "", par_nbins[i], err_lo[i], err_hi[i]);
     }
 
+    h_all_track_p = fs->make<TH1F>("h_all_track_p", "", 50, 0, 10);
+    h_all_track_pt_barrel = fs->make<TH1F>("h_all_track_pt_barrel", "", 50, 0, 10);
+    h_all_track_pt_endcap = fs->make<TH1F>("h_all_track_pt_endcap", "", 50, 0, 10);
     h_all_track_sigmadxybs = fs->make<TH1F>("h_all_track_sigmadxybs", "", 40, -10, 10);
     h_all_track_sigmadxypv = fs->make<TH1F>("h_all_track_sigmadxypv", "", 40, -10, 10);
     h_all_track_nhits      = fs->make<TH1F>("h_all_track_nhits",      "", 40,   0, 40);
@@ -178,6 +189,9 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
       h_seed_track_errs[i] = fs->make<TH1F>(TString::Format("h_seed_track_err%s", par_names[i]), "", par_nbins[i], err_lo[i], err_hi[i]);
     }
 
+    h_seed_track_p = fs->make<TH1F>("h_seed_track_p", "", 50, 0, 10);
+    h_seed_track_pt_barrel = fs->make<TH1F>("h_seed_track_pt_barrel", "", 50, 0, 10);
+    h_seed_track_pt_endcap = fs->make<TH1F>("h_seed_track_pt_endcap", "", 50, 0, 10);
     h_seed_track_sigmadxybs = fs->make<TH1F>("h_seed_track_sigmadxybs", "", 40, -10, 10);
     h_seed_track_sigmadxypv = fs->make<TH1F>("h_seed_track_sigmadxypv", "", 40, -10, 10);
     h_seed_track_nhits      = fs->make<TH1F>("h_seed_track_nhits",      "", 40,   0, 40);
@@ -317,6 +331,7 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
     const bool is_second_track = i >= second_tracks_start_at;
 
     // copy/calculate cheap things, which may be used later in histos
+    const double p = tk->p();
     const double pt = tk->pt();
     const double dxybs = tk->dxy(*beamspot);
     const double dxypv = primary_vertex ? tk->dxy(primary_vertex->position()) : 1e99;
@@ -437,6 +452,13 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
         h_all_track_errs[i]->Fill(errs[i]);
       }
 
+      h_all_track_p->Fill(p);
+      if (abs(tk->eta())<1.4){
+        h_all_track_pt_barrel->Fill(pt);
+      }
+      else{
+        h_all_track_pt_endcap->Fill(pt);
+      }
       h_all_track_sigmadxybs->Fill(sigmadxybs);
       h_all_track_sigmadxypv->Fill(sigmadxypv);
       h_all_track_nhits->Fill(nhits);
@@ -463,13 +485,20 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
           h_seed_track_errs[i]->Fill(errs[i]);
         }
 
-	h_seed_track_sigmadxybs->Fill(sigmadxybs);
-	h_seed_track_sigmadxypv->Fill(sigmadxypv);
+        h_seed_track_p->Fill(p);
+        if (abs(tk->eta())<1.4){
+          h_seed_track_pt_barrel->Fill(pt);
+        }
+        else{
+          h_seed_track_pt_endcap->Fill(pt);
+        }
+        h_seed_track_sigmadxybs->Fill(sigmadxybs);
+        h_seed_track_sigmadxypv->Fill(sigmadxypv);
         h_seed_track_nhits->Fill(nhits);
         h_seed_track_npxhits->Fill(npxhits);
         h_seed_track_nsthits->Fill(nsthits);
-	h_seed_track_npxlayers->Fill(npxlayers);
-	h_seed_track_nstlayers->Fill(nstlayers);
+        h_seed_track_npxlayers->Fill(npxlayers);
+        h_seed_track_nstlayers->Fill(nstlayers);
       }
     }
   }
