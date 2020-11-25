@@ -37,6 +37,7 @@ private:
   bool try_MFVdijet    (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&, int quark) const;
   bool try_stopdbardbar(mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&, int quark) const;
   bool try_MFVlq       (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
+  bool try_splitSUSY   (mfv::MCInteraction&, const edm::Handle<reco::GenParticleCollection>&) const;
 
   TH1F* h_valid;
   TH1F* h_pos_check;
@@ -48,7 +49,7 @@ MFVGenParticles::MFVGenParticles(const edm::ParameterSet& cfg)
     last_flag_check(cfg.getParameter<bool>("last_flag_check")),
     debug(cfg.getUntrackedParameter<bool>("debug", false)),
     histos(cfg.getUntrackedParameter<bool>("histos", false)),
-    lsp_id(-1)
+    lsp_id(cfg.getUntrackedParameter<int>("lsp_id", -1))
 {
   produces<mfv::MCInteraction>();
   produces<std::vector<double>>("genVertex"); // generated primary vertex
@@ -677,6 +678,87 @@ bool MFVGenParticles::try_MFVlq(mfv::MCInteraction& mc, const edm::Handle<reco::
     return false;
 }
 
+bool MFVGenParticles::try_splitSUSY(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles) const {
+  if (debug) printf("MFVGenParticles::try_splitSUSY");
+
+  mfv::MCInteractionHolderThruple h;
+
+  GenParticlePrinter gpp(*gen_particles);
+  if (debug)
+    gpp.PrintHeader();
+
+  for (size_t i = 0; i < gen_particles->size(); ++i) {
+    const reco::GenParticle& gen = gen_particles->at(i);
+    reco::GenParticleRef ref(gen_particles, i);
+    if (gen.pdgId() == lsp_id && gen.numberOfDaughters() == 3) {
+      if (!gen.isLastCopy()) continue;
+      bool found = false;
+
+      for (size_t j = 0; j<gen.numberOfDaughters(); ++j){
+        if (gen.daughter(j)->pdgId()==1000022) found = true;
+      }
+      if (!found) continue;
+
+      size_t which = 0;
+      if (h.p[0].isNull())
+        h.p[0] = ref;
+      else {
+        if (reco::deltaR(*h.p[0], gen) < 0.001)
+          throw cms::Exception("BadAssumption", "may have found same LSP twice based on deltaR < 0.001");
+        which = 1;
+        h.p[1] = ref;
+      }
+
+      if (debug) {
+        char lspname[16];
+        snprintf(lspname, 16, "primary #%lu", which);
+        gpp.Print(&*h.p[which], lspname);
+      }
+
+      if ((h.s[which][0] = gen_ref(gen.daughter(0), gen_particles)).isNull() ||
+          (h.s[which][1] = gen_ref(gen.daughter(1), gen_particles)).isNull() ||
+          (h.s[which][2] = gen_ref(gen.daughter(2), gen_particles)).isNull()) {
+        printf("HUH??? %i %i %i\n", h.s[which][0].isNull(), h.s[which][1].isNull(), h.s[which][2].isNull());
+        return false;
+      }
+
+      if (debug) {
+        gpp.Print(h.s[which][0], "s0temp");
+        gpp.Print(h.s[which][1], "s1temp");
+        gpp.Print(h.s[which][2], "s2temp");
+      }
+
+      h.s[which][0] = gen_ref(final_candidate(h.s[which][0], 3), gen_particles);
+      h.s[which][1] = gen_ref(final_candidate(h.s[which][1], 3), gen_particles);
+      h.s[which][2] = gen_ref(final_candidate(h.s[which][2], 3), gen_particles);
+
+      if (debug) {
+        gpp.Print(h.s[which][0], "s0");
+        gpp.Print(h.s[which][1], "s1");
+        gpp.Print(h.s[which][2], "s2");
+      }
+
+//        if (last_flag_check) {
+//          assert(h.p[which]   ->statusFlags().isLastCopy());
+//          assert(h.s[which][0]->statusFlags().isLastCopy());
+//          assert(h.s[which][1]->statusFlags().isLastCopy());
+//        }
+    }
+  }
+
+//  printf("h valid?? %i why? %i %i %i %i %i %i\n", h.valid(),
+//         h.p[0].isNonnull(), h.p[1].isNonnull(),
+//         h.s[0][0].isNonnull(), h.s[0][1].isNonnull(),
+//         h.s[1][0].isNonnull(), h.s[1][1].isNonnull());
+
+  if (h.valid()) {
+    mfv::MCInteractions_t type = mfv::mci_MFVsplitsusy;
+    mc.set(h, type);
+    return true;
+  }
+  else
+    return false;
+}
 void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
   std::unique_ptr<mfv::MCInteraction> mc(new mfv::MCInteraction);
   std::unique_ptr<std::vector<double> > primary_vertex(new std::vector<double>(3,0.));
@@ -711,6 +793,7 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
     if (debug) printf("MFVGenParticles::analyze: lsp_id %i\n", lsp_id);
 
     // the order of these tries is important, at least that MFVtbses come before Ttbar
+    try_splitSUSY(*mc,gen_particles) || //splitSUSY gluino  -> qqbar neu
     try_MFVtbs  (*mc, gen_particles, 5, 3) || // tbs
     try_MFVtbs  (*mc, gen_particles, 1, 3) || // tds
     try_MFVtbs  (*mc, gen_particles, 5, 5) || // tbb

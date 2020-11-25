@@ -4,6 +4,7 @@ mfvGenParticles = cms.EDProducer('MFVGenParticles',
                                  gen_particles_src = cms.InputTag('genParticles'),
                                  beamspot_src = cms.InputTag('offlineBeamSpot'),
                                  last_flag_check = cms.bool(True),
-                                 debug = cms.untracked.bool(False),
+                                 debug = cms.untracked.bool(True),
                                  histos = cms.untracked.bool(False),
+                                 lsp_id = cms.untracked.int32(1000021)
                                  )
