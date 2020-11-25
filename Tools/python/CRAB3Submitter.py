@@ -356,7 +356,6 @@ class CRABSubmitter:
             print '================================================='
         return
 
-
     def submit_all(self, samples, **kwargs):
         if True or self.testing: # JMTBAD
             if self.testing:

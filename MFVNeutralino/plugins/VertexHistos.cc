@@ -412,6 +412,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
                                      geny - mevent->bsy_at_z(genz) 
         );
     h_genbs2ddist->Fill(genbs2ddist, w);
+    std::cout << "genx: " << genx << " geny: " << geny << " genz: " << genz << " genbs: " << genbs2ddist << std::endl;
   }
 
   for (int isv = 0; isv < nsv; ++isv) {

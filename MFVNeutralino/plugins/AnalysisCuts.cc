@@ -19,12 +19,12 @@ private:
   bool jet_hlt_match(edm::Handle<MFVEvent> mevent, int i, float min_jet_pt=20.) const {
     // an offline jet with a successful HLT match will have a nonzero jet_hlt_pt;
     // all others have the default value of 0
-    return mevent->jet_hlt_pt[i] > min_jet_pt;
+    return mevent->jet_hlt_pt.at(i) > min_jet_pt;
   }
   bool displaced_jet_hlt_match(edm::Handle<MFVEvent> mevent, int i, float min_jet_pt=20.) const {
     // an offline jet with a successful HLT match will have a nonzero displaced_jet_hlt_pt;
     // all others have the default value of 0
-    return mevent->displaced_jet_hlt_pt[i] > min_jet_pt;
+    return mevent->displaced_jet_hlt_pt.at(i) > min_jet_pt;
   }
 
   const edm::InputTag mevent_src;

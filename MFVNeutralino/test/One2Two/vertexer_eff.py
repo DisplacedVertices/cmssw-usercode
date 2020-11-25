@@ -71,9 +71,9 @@ for is_mc in False, True:
                 h.SetTitle(';d_{VV} (cm);Efficiency')
                 h.GetXaxis().SetRangeUser(0,0.4)
                 if ih == 0:
-                    h.Draw('hist')
+                    h.Draw('hist E1')
                 else:
-                    h.Draw('hist sames')
+                    h.Draw('hist E1 sames')
                 l.AddEntry(h, '%i-track' % itk)
             l.SetFillColor(0)
             l.Draw()

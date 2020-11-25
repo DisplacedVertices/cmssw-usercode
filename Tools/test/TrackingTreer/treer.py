@@ -1,4 +1,5 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
+from JMTucker.MFVNeutralino.NtupleCommon import use_btag_triggers
 
 settings = CMSSWSettings()
 settings.is_mc = True
@@ -31,7 +32,10 @@ process.tt.track_ref_getter.tracks_maps_srcs = []
 process.p = cms.Path(process.tt)
 
 from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-setup_event_filter(process, input_is_miniaod=True, mode='jets only novtx', event_filter_jes_mult=0)
+if use_btag_triggers :
+    setup_event_filter(process, input_is_miniaod=True, mode='bjets OR displaced dijet veto HT novtx', event_filter_jes_mult=0)
+else :
+    setup_event_filter(process, input_is_miniaod=True, mode='jets only novtx', event_filter_jes_mult=0)
 
 ReferencedTagsTaskAdder(process)('p')
 

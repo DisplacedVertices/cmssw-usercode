@@ -197,6 +197,11 @@ def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=20
         if ok:
             print ("{0} background merged!".format(year))
 
+    #only work for 2017 data now
+    #if ok:
+    #    cmd = 'hadd.py background%s_2017p8.root background%s_2017.root background%s_2018.root' % (_presel_s, _presel_s, _presel_s)
+    #    print cmd
+    #    os.system(cmd)
 
 def cmd_effsprint(year_to_use=2017):
     if year_to_use==-1:
