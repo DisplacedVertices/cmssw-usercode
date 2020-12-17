@@ -231,6 +231,11 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("trackphierravg", "SV avg{frac. #sigma trk_{i} #phi}", 32, 0, 0.002);
   hs.add("trackphierrrms", "SV rms{frac. #sigma trk_{i} #phi}", 32, 0, 0.002);
 
+  hs.add("trackdxynsigmamin", "SV min{N #sigma trk_{i} dxy(BS)} (cm)", 50, 0, 10);
+  hs.add("trackdxynsigmamax", "SV max{N #sigma trk_{i} dxy(BS)} (cm)", 50, 0, 10);
+  hs.add("trackdxynsigmaavg", "SV avg{N #sigma trk_{i} dxy(BS)} (cm)", 50, 0, 10);
+  hs.add("trackdxynsigmarms", "SV rms{N #sigma trk_{i} dxy(BS)} (cm)", 50, 0, 10);
+
   hs.add("trackdxyerrmin", "SV min{#sigma trk_{i} dxy(BS)} (cm)", 32, 0, 0.004);
   hs.add("trackdxyerrmax", "SV max{#sigma trk_{i} dxy(BS)} (cm)", 32, 0, 0.1);
   hs.add("trackdxyerravg", "SV avg{#sigma trk_{i} dxy(BS)} (cm)", 32, 0, 0.1);
@@ -412,12 +417,21 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
                                      geny - mevent->bsy_at_z(genz) 
         );
     h_genbs2ddist->Fill(genbs2ddist, w);
-    std::cout << "genx: " << genx << " geny: " << geny << " genz: " << genz << " genbs: " << genbs2ddist << std::endl;
   }
 
   for (int isv = 0; isv < nsv; ++isv) {
     const MFVVertexAux& aux = auxes->at(isv);
     const int ntracks = aux.ntracks();
+    //std::cout << "sv " << isv << " tracks min " << aux.trackdxynsigmamin() << " max " << aux.trackdxynsigmamax() << std::endl;
+    //auto trackdxynsigmavector = aux.track_dxy_nsigmas();
+    //auto trackdxyerrvector = aux.track_dxy_errs();
+    //for (int itk = 0; itk<ntracks; ++itk) {
+    //  std::cout << "  dxy: " << aux.track_dxy[itk]
+    //            << " dxyerr: " << trackdxyerrvector[itk]
+    //            << " dxynsig: " << trackdxynsigmavector[itk]
+    //            << std::endl;
+    //}
+
 
     jmt::MinValue d;
     double sv_gen2ddist_sign = 1;
@@ -601,6 +615,11 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         {"trackdxyerrmax", aux.trackdxyerrmax()},
         {"trackdxyerravg", aux.trackdxyerravg()},
         {"trackdxyerrrms", aux.trackdxyerrrms()},
+
+        {"trackdxynsigmamin", aux.trackdxynsigmamin()},
+        {"trackdxynsigmamax", aux.trackdxynsigmamax()},
+        {"trackdxynsigmaavg", aux.trackdxynsigmaavg()},
+        {"trackdxynsigmarms", aux.trackdxynsigmarms()},
 
         {"trackdzerrmin", aux.trackdzerrmin()},
         {"trackdzerrmax", aux.trackdzerrmax()},
