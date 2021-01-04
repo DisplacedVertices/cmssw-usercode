@@ -60,6 +60,8 @@ private:
   TH1D* h_l1jet_pt[11];
   TH2F* h_jetpt2v1;
 
+  TH1D* h_metpt;
+
   TH1D* h_ngenjets;
   TH1D* h_genjet_e[11];
   TH1D* h_genjet_pt[11];
@@ -144,6 +146,8 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
     const float ybins[ny+1] = {0, 150, 250, 400, 600, 1000};
     h_jetpt2v1 = fs->make<TH2F>("h_jetpt2v1", ";jet 1 p_{T} (GeV);jet 2 p_{T} (GeV)", nx, xbins, ny, ybins);
   }
+
+  h_metpt = fs->make<TH1D>("h_metpt", ";MET pT (GeV);events",150,0,1500);
 
   if (use_genjets) {
     h_ngenjets = fs->make<TH1D>("h_ngenjets", ";# gen jets;events", 30, 0, 30);
@@ -329,6 +333,8 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
   h_myhttwbug_m_l1htt->Fill(triggerfloats->myhttwbug - triggerfloats->l1htt, w);
   h_jetpt2v1->Fill(triggerfloats->jetpt1(), triggerfloats->jetpt2(), w);
   h_jet_ht_m_hlt_ht->Fill(triggerfloats->ht - triggerfloats->hltht, w); 
+
+  h_metpt->Fill(triggerfloats->met_pt, w);
 
   for (int il1jet = 0; il1jet < triggerfloats->nl1jets(); ++il1jet)
     for (int i : {0, il1jet+1})

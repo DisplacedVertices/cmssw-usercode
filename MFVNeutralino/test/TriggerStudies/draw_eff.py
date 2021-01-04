@@ -33,7 +33,7 @@ print year, data_period, int_lumi
 
 ########################################################################
 
-root_dir = '/uscms_data/d2/tucker/crab_dirs/TrigEff%s' % version
+root_dir = '/uscms/home/ali/nobackup/LLP/crabdir/TrigEff%s_MET' % version
 plot_path = 'TrigEff%s_%s_%s%s' % (version, num_dir, year, data_period)
 if zoom:
     plot_path += '_zoom'
@@ -53,24 +53,31 @@ else:
         bkg_samples = [ttbar_2017, wjetstolnusum_2017, dyjetstollM50sum_2017, dyjetstollM10_2017, qcdmupt15_2017]
         if use_qcd:
             bkg_samples.append(qcdmupt15_2017)
-        sig_samples = [getattr(Samples, 'mfv_neu_tau001000um_M%04i_2017' % m) for m in (400, 800, 1200, 1600)] + [Samples.mfv_neu_tau010000um_M0800_2017]
+        sig_samples = Samples.mfv_splitSUSY_samples_2017
+        #sig_samples = [getattr(Samples, 'mfv_neu_tau001000um_M%04i_2017' % m) for m in (400, 800, 1200, 1600)] + [Samples.mfv_neu_tau010000um_M0800_2017]
 
 n_bkg_samples = len(bkg_samples)
 for samples in bkg_samples, sig_samples:
     for sample in samples:
         sample.fn = os.path.join(root_dir, sample.name + '.root')
         sample.f = ROOT.TFile(sample.fn) if os.path.isfile(sample.fn) else None
+        if not os.path.isfile(sample.fn):
+          print("{} not found!".format(sample.fn))
 
 ########################################################################
 
 kinds = ['']
-ns = ['h_jet_ht']
+#ns = ['h_jet_ht']
+ns = ['h_metpt']
 
-lump_lower = 1200.
+lump_lower = 0.
+#lump_lower = 1200.
 
 def fit_limits(kind, n):
     if 'ht' in n:
         return 650, 5000
+    elif 'met' in n:
+        return 50, 500
     else:
         if 'pf' in kind:
             if 'pt_4' in n:
@@ -164,7 +171,9 @@ for kind in kinds:
             if den.Integral():
                 rat = histogram_divide(num, den)
                 rat.Draw('AP')
-                if 'pt' in n:
+                if 'met' in n:
+                    rat.GetXaxis().SetLimits(0, 500)
+                elif 'pt' in n:
                     rat.GetXaxis().SetLimits(0, 260)
                 elif 'ht' in n:
                     rat.GetXaxis().SetLimits(0, draw_limits(kind,n)[1])
@@ -267,7 +276,10 @@ for kind in kinds:
         for r in (data_rat, bkg_rat):
             if not r:
                 continue
-            if 'pt' in n:
+            if 'met' in n:
+                r.GetXaxis().SetLimits(0, 500)
+                r.SetTitle('; MET p_{T} (GeV);efficiency')
+            elif 'pt' in n:
                 r.GetXaxis().SetLimits(0, 260)
                 i = int(n.split('_')[-1])
                 k = 'PF' if 'pf' in kind else 'calo'

@@ -8,7 +8,7 @@ settings = CMSSWSettings()
 settings.is_mc = True
 settings.cross = '' # 2017to2018' # 2017to2017p8'
 
-version = '2017p8v4'
+version = '2017p8v4_MET'
 
 mu_thresh_hlt = 27
 mu_thresh_offline = 30
@@ -57,7 +57,7 @@ process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
                              require_hlt = cms.int32(-1),
                              require_l1 = cms.int32(-1),
                              require_muon = cms.bool(True),
-                             require_4jets = cms.bool(True),
+                             require_4jets = cms.bool(False),#for MET trigger
                              require_6jets = cms.bool(False),
                              require_4thjetpt = cms.double(0.),
                              require_6thjetpt = cms.double(0.),
@@ -80,7 +80,7 @@ process.dennomuht1000jet6pt75 = process.den.clone(require_muon = False, require_
 process.pnomu = cms.Path(process.weightSeq * process.updatedJetsSeqMiniAOD * process.selectedPatJets * process.mfvTriggerFloats * process.dennomu * process.dennomuht1000 * process.dennomujet6pt75 * process.dennomuht1000jet6pt75)
 
 for x in '', 'ht1000', 'jet6pt75', 'ht1000jet6pt75', 'nomu', 'nomuht1000', 'nomujet6pt75', 'nomuht1000jet6pt75':
-    num = getattr(process, 'den%s' % x).clone(require_hlt = 0)
+    num = getattr(process, 'den%s' % x).clone(require_hlt = 20)
     if 'separate' in weight_l1ecal:
         num.weight_src = 'jmtWeightMiniAODL1Ecal'
     setattr(process, 'num%s' % x, num)
@@ -98,9 +98,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
     if year == 2017:
-        samples = Samples.auxiliary_data_samples_2017 + Samples.leptonic_samples_2017
-        masses = (400, 800, 1200, 1600)
-        samples += [getattr(Samples, 'mfv_neu_tau001000um_M%04i_2017' % m) for m in masses] + [Samples.mfv_neu_tau010000um_M0800_2017]
+      samples = Samples.auxiliary_data_samples_2017 + Samples.leptonic_samples_2017 + Samples.met_samples_2017[0:2]
+        samples += Samples.mfv_splitSUSY_samples_2017
+        #masses = (400, 800, 1200, 1600)
+        #samples += [getattr(Samples, 'mfv_neu_tau001000um_M%04i_2017' % m) for m in masses] + [Samples.mfv_neu_tau010000um_M0800_2017]
     elif year == 2018:
         samples = Samples.auxiliary_data_samples_2018
     

@@ -8,6 +8,7 @@
 #include "DataFormats/L1Trigger/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
+#include "DataFormats/PatCandidates/interface/MET.h"
 #include "FWCore/Common/interface/TriggerNames.h"
 #include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -34,6 +35,8 @@ private:
   const edm::EDGetTokenT<pat::JetCollection> jets_token;
   const StringCutObjectSelector<pat::Jet> jet_selector;
 
+  const edm::EDGetTokenT<pat::METCollection> met_token;
+
   const int prints;
 };
 
@@ -45,6 +48,7 @@ MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
     trigger_objects_token(consumes<pat::TriggerObjectStandAloneCollection>(cfg.getParameter<edm::InputTag>("trigger_objects_src"))),
     jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
     jet_selector(cfg.getParameter<std::string>("jet_cut")),
+    met_token(consumes<pat::METCollection>(cfg.getParameter<edm::InputTag>("met_src"))),
     prints(cfg.getUntrackedParameter<int>("prints", 0))
 {
   produces<mfv::TriggerFloats>();
@@ -71,6 +75,11 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   edm::Handle<l1t::JetBxCollection> l1_jets;
   event.getByToken(l1_jets_token, l1_jets);
+
+  edm::Handle<pat::METCollection> mets;
+  event.getByToken(met_token, mets);
+  const pat::MET& met = mets->at(0);
+  double met_pt = met.pt();
 
   int i2pt_first[2] = {0};
   int i2htt[2] = {0};
@@ -401,6 +410,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   floats->l1htt = etsumhelper.TotalHt();
   floats->myhtt = my_htt;
   floats->myhttwbug = my_htt_wbug;
+  floats->met_pt = met_pt;
 
   if (prints)
     printf("TriggerFloats: hltht = %f\n", floats->hltht);

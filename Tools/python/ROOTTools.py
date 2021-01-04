@@ -1590,7 +1590,7 @@ def plot_dir(x='', make=False, temp=False):
     elif 'fnal.gov' in hostname and username == 'joeyr':
         d = '/publicweb/j/joeyr/plots'
     elif 'fnal.gov' in hostname and username == 'ali':
-        d = '/uscms/home/ali/nobackup/LLP/CornellCode/mfv_946p1/src/JMTucker/Tools/test/crab'
+        d = '/publicweb/a/ali/'
     if d:
         x = os.path.join(d,x)
     else:

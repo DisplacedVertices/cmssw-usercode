@@ -1,10 +1,10 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version_ = 'vnsigmadxy_2_ml_gen'
+#ntuple_version_ = 'Vnsigmadxy_1_ML_gen'
 #ntuple_version_ = 'Vnsigmadxy_no_100um_gen'
 #ntuple_version_ = 'Vnsigmadxy2_v2'
-#ntuple_version_ = 'Vtestrun'
+ntuple_version_ = 'V36'
 use_btag_triggers = False
 use_MET_triggers = True
 if use_btag_triggers : 
@@ -269,7 +269,7 @@ def miniaod_ntuple_process(settings):
     process.mfvGenParticles.lsp_id = 1000021
     process.mfvGenParticles.debug = False
 
-    process.mfvVertexTracks.min_track_rescaled_sigmadxy = 2
+    process.mfvVertexTracks.min_track_rescaled_sigmadxy = 4
 
     process.jmtRescaledTracks.tracks_src = 'jmtUnpackedCandidateTracks'
 

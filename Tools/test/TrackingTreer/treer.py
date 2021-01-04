@@ -1,5 +1,5 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
-from JMTucker.MFVNeutralino.NtupleCommon import use_btag_triggers
+from JMTucker.MFVNeutralino.NtupleCommon import use_btag_triggers, use_MET_triggers
 
 settings = CMSSWSettings()
 settings.is_mc = True
@@ -24,7 +24,7 @@ process.selectedPatJets.cut = process.jtupleParams.jetCut
 
 process.tt = cms.EDAnalyzer('TrackingTreer',
                             process.jmtNtupleFillerMiniAOD,
-                            track_cut_level = cms.int32(-1), # -1 = all, 0 = pt & pix & strip, 1 = 0 + min_r, 2 = 1 + nsigmadxybs
+                            track_cut_level = cms.int32(1), # -1 = all, 0 = pt & pix & strip, 1 = 0 + min_r, 2 = 1 + nsigmadxybs
                             )
 
 process.tt.track_ref_getter.tracks_maps_srcs = []
@@ -34,6 +34,9 @@ process.p = cms.Path(process.tt)
 from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
 if use_btag_triggers :
     setup_event_filter(process, input_is_miniaod=True, mode='bjets OR displaced dijet veto HT novtx', event_filter_jes_mult=0)
+elif use_MET_triggers :
+    setup_event_filter(process, input_is_miniaod=True, mode='met only', event_filter_jes_mult=0, event_filter_require_vertex = False)
+    #setup_event_filter(process, input_is_miniaod=True, mode='jets only novtx', event_filter_jes_mult=0)
 else :
     setup_event_filter(process, input_is_miniaod=True, mode='jets only novtx', event_filter_jes_mult=0)
 
@@ -43,10 +46,11 @@ ReferencedTagsTaskAdder(process)('p')
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
-    samples = pick_samples(dataset, all_signal=True)
+    #samples = pick_samples(dataset, all_signal=True)
+    samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, leptonic=False, bjet=False, splitSUSY=True, Zvv=True, met=True)
     set_splitting(samples, dataset, 'default', data_json=json_path('ana_2017p8.json'), limit_ttbar=True)
 
-    ms = MetaSubmitter('TrackingTreerV23mv4', dataset='miniaod')
+    ms = MetaSubmitter('TrackingTreerV23mv6', dataset='miniaod')
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier())
     ms.condor.stageout_files = 'all'
     ms.submit(samples)
