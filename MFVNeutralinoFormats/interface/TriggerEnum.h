@@ -16,6 +16,7 @@ namespace mfv {
     b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33, b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0, b_HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2, b_HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2, b_HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5, // 2017 bjet triggers
     b_HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71, b_HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5, b_HLT_PFHT400_FivePFJet_100_100_60_30_30_DoublePFBTagDeepCSV_4p5, b_HLT_PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94, b_HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59, // 2018 bjet triggers
     b_HLT_HT430_DisplacedDijet40_DisplacedTrack, b_HLT_HT650_DisplacedDijet60_Inclusive, // displaced dijet triggers
+    //b_HLT_PFMETNoMu120_PFMHTNoMu120_IDTight,
     b_HLT_PFMET120_PFMHT120_IDTight, //MET trigger
     n_hlt_paths, // = 21
     // seeding PFHT1050, the bjet triggers, and the displaced dijet triggers
