@@ -9,6 +9,7 @@
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
 #include "DataFormats/PatCandidates/interface/MET.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
 #include "FWCore/Common/interface/TriggerNames.h"
 #include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -36,6 +37,7 @@ private:
   const StringCutObjectSelector<pat::Jet> jet_selector;
 
   const edm::EDGetTokenT<pat::METCollection> met_token;
+  const edm::EDGetTokenT<pat::MuonCollection> muons_token;
 
   const int prints;
 };
@@ -49,6 +51,7 @@ MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
     jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
     jet_selector(cfg.getParameter<std::string>("jet_cut")),
     met_token(consumes<pat::METCollection>(cfg.getParameter<edm::InputTag>("met_src"))),
+    muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
     prints(cfg.getUntrackedParameter<int>("prints", 0))
 {
   produces<mfv::TriggerFloats>();
@@ -78,8 +81,21 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   edm::Handle<pat::METCollection> mets;
   event.getByToken(met_token, mets);
+
+  edm::Handle<pat::MuonCollection> muons;
+  event.getByToken(muons_token, muons);
+
   const pat::MET& met = mets->at(0);
   double met_pt = met.pt();
+  double met_px = met.px();
+  double met_py = met.py();
+  for (const pat::Muon& muon : *muons) {
+    double muon_px = muon.px();
+    double muon_py = muon.py();
+    met_px = met_px + muon_px;
+    met_py = met_py + muon_py;
+  }
+  double met_nomu_pt = hypotf(met_px,met_py);
 
   int i2pt_first[2] = {0};
   int i2htt[2] = {0};
@@ -411,6 +427,8 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   floats->myhtt = my_htt;
   floats->myhttwbug = my_htt_wbug;
   floats->met_pt = met_pt;
+  floats->met_pt_calo = met.caloMETPt();
+  floats->met_pt_nomu = met_nomu_pt;
 
   if (prints)
     printf("TriggerFloats: hltht = %f\n", floats->hltht);

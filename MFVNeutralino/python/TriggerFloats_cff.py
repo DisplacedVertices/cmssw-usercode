@@ -9,5 +9,6 @@ mfvTriggerFloats = cms.EDProducer('MFVTriggerFloats',
                                   jets_src = cms.InputTag('selectedPatJets'), # slimmedJets when running directly on miniaod
                                   jet_cut = jtupleParams.jetCut,
                                   met_src = cms.InputTag('slimmedMETs'),
+                                  muons_src = cms.InputTag('slimmedMuons'),
                                   prints = cms.untracked.int32(0),
                                   )

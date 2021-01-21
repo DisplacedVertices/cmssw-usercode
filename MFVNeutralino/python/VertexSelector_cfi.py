@@ -94,6 +94,13 @@ mfvSelectedVertices = cms.EDProducer('MFVVertexSelector',
                                      sort_by = cms.string('ntracks_then_mass'),
                                      )
 
+mfvSelectedVerticesExtraLoose = mfvSelectedVertices.clone(
+    mevent_src = 'mfvEvent',
+    min_ntracks = 3,
+    #min_bsbs2ddist = 0.005,
+    #max_rescale_bs2derr = 0.05,
+    )
+
 mfvSelectedVerticesLoose = mfvSelectedVertices.clone(
     mevent_src = 'mfvEvent',
     min_ntracks = 3,
@@ -118,6 +125,7 @@ mfvSelectedVerticesTightNtk4or5 = mfvSelectedVerticesTight.clone(min_ntracks = 4
 mfvSelectedVerticesTightNtk5    = mfvSelectedVerticesTight.clone() # for looping convenience
 
 mfvSelectedVerticesSeq = cms.Sequence(
+    mfvSelectedVerticesExtraLoose *
     mfvSelectedVerticesTight *
     mfvSelectedVerticesTightNtk3 *
     mfvSelectedVerticesTightNtk4 *

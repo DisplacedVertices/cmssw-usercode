@@ -5,7 +5,7 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.Tools.Samples import *
 
-version = '2017p8v4'
+version = '2017p8v6'
 zoom = False #(0.98,1.005)
 save_more = True
 data_only = False
@@ -33,7 +33,7 @@ print year, data_period, int_lumi
 
 ########################################################################
 
-root_dir = '/uscms/home/ali/nobackup/LLP/crabdir/TrigEff%s_MET' % version
+root_dir = '/uscms/home/ali/nobackup/LLP/crabdir/TrigEff%s_METnoMu' % version
 plot_path = 'TrigEff%s_%s_%s%s' % (version, num_dir, year, data_period)
 if zoom:
     plot_path += '_zoom'
@@ -68,7 +68,8 @@ for samples in bkg_samples, sig_samples:
 
 kinds = ['']
 #ns = ['h_jet_ht']
-ns = ['h_metpt']
+ns = ['h_metpt_nomu']
+#ns = ['h_metpt']
 
 lump_lower = 0.
 #lump_lower = 1200.
@@ -77,7 +78,7 @@ def fit_limits(kind, n):
     if 'ht' in n:
         return 650, 5000
     elif 'met' in n:
-        return 50, 500
+        return 50, 1000
     else:
         if 'pf' in kind:
             if 'pt_4' in n:
@@ -112,6 +113,10 @@ def make_fcn(name, kind, n):
     
     return fcn
 
+def rebin_met(h):
+    a = to_array(range(0, 100, 5) + range(100, 150, 10) + [150, 180, 220, 260, 370, 500, 600, 700, 800, 1000])
+    return h.Rebin(len(a)-1, h.GetName() + '_rebin', a)
+
 def rebin_pt(h):
     a = to_array(range(0, 100, 5) + range(100, 150, 10) + [150, 180, 220, 260, 370, 500])
     return h.Rebin(len(a)-1, h.GetName() + '_rebin', a)
@@ -125,7 +130,9 @@ def rebin_ht(h):
 def get(f, kind, n):
     def rebin(h):
         return h
-    if 'pt' in n:
+    if 'met' in n:
+      rebin = rebin_met
+    elif 'pt' in n:
         rebin = rebin_pt
     elif 'ht' in n:
         rebin = rebin_ht
@@ -172,7 +179,7 @@ for kind in kinds:
                 rat = histogram_divide(num, den)
                 rat.Draw('AP')
                 if 'met' in n:
-                    rat.GetXaxis().SetLimits(0, 500)
+                    rat.GetXaxis().SetLimits(0, 1000)
                 elif 'pt' in n:
                     rat.GetXaxis().SetLimits(0, 260)
                 elif 'ht' in n:
@@ -277,8 +284,8 @@ for kind in kinds:
             if not r:
                 continue
             if 'met' in n:
-                r.GetXaxis().SetLimits(0, 500)
-                r.SetTitle('; MET p_{T} (GeV);efficiency')
+                r.GetXaxis().SetLimits(0, 1000)
+                r.SetTitle('; METnoMu p_{T} (GeV);efficiency')
             elif 'pt' in n:
                 r.GetXaxis().SetLimits(0, 260)
                 i = int(n.split('_')[-1])

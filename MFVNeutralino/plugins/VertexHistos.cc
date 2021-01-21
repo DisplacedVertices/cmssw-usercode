@@ -52,6 +52,7 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH2F* h_sv_ntk_genbs2ddist;
   TH2F* h_sv_ntk_bs2ddist;
   TH2F* h_sv_ntk_gen2ddist;
+  TH2F* h_sv_ntk_njet;
   TH2F* h_sv_xy;
   TH2F* h_sv_yz;
   TH2F* h_sv_xz;
@@ -141,7 +142,7 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("rescale_d2_big", "rescaled-fit - nominal SV (2D) (cm)", 100, 0, 4);
   hs.add("rescale_d3", "rescaled-fit - nominal SV (3D) (cm)", 100, 0, 1e-3);
   hs.add("rescale_d3_big", "rescaled-fit - nominal SV (3D) (cm)", 100, 0, 4);
-  hs.add("rescale_bsbs2ddist", "rescaled-fit d_{BV} (cm)", 500, 0, 2.5);
+  hs.add("rescale_bsbs2ddist", "rescaled-fit d_{BV} (cm)", 1000, 0, 2.5);
   hs.add("rescale_bs2derr", "rescaled-fit #sigma(dist2d(SV, beamspot)) (cm)", 1000, 0, 0.05);
 
   hs.add("max_nm1_refit_dist3_wbad", "maximum n-1 refit distance (3D) (cm)", 1001, -0.001, 1);
@@ -279,8 +280,8 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("gen3ddist",                     "dist3d(SV, closest gen vtx) (cm)",                                            200,    0,       0.2);
   hs.add("gen3derr",                      "#sigma(dist3d(SV, closest gen vtx)) (cm)",                                    200,    0,       0.2);
   hs.add("gen3dsig",                      "N#sigma(dist3d(SV, closest gen vtx)) (cm)",                                   200,    0,     100);
-  hs.add("bs2ddist",                      "dist2d(SV, beamspot) (cm)",                                                   500,    0,      2.5);
-  hs.add("bsbs2ddist",                    "dist2d(SV, beamspot) (cm)",                                                   500,    0,      2.5);
+  hs.add("bs2ddist",                      "dist2d(SV, beamspot) (cm)",                                                  1000,    0,      2.5);
+  hs.add("bsbs2ddist",                    "dist2d(SV, beamspot) (cm)",                                                  1000,    0,      2.5);
   hs.add("bs2derr",                       "#sigma(dist2d(SV, beamspot)) (cm)",                                           1000,    0,       0.05);
   hs.add("bs2dsig",                       "N#sigma(dist2d(SV, beamspot))",                                               100,    0,     100);
   hs.add("pv2ddist",                      "dist2d(SV, PV) (cm)",                                                         100,    0,       0.5);
@@ -292,6 +293,7 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("pvdz",                          "dz(SV, PV) (cm)",                                                             100,    0,       0.5);
   hs.add("pvdzerr",                       "#sigma(dz(SV, PV)) (cm)",                                                     100,    0,       0.1);
   hs.add("pvdzsig",                       "N#sigma(dz(SV, PV))",                                                         100,    0,     100);
+
 
   const char* lmt_ex[4] = {"", "loose b-", "medium b-", "tight b-"};
   for (int i = 0; i < 4; ++i) {
@@ -369,6 +371,7 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   h_sv_ntk_genbs2ddist = fs->make<TH2F>("h_sv_ntk_genbs2ddist", ";# tracks of SV;dist2d(gen vtx, beamspot) (cm)",40,0,40,500,0,2.5);
   h_sv_ntk_bs2ddist = fs->make<TH2F>("h_sv_ntk_bs2ddist", ";# tracks of SV;dist2d(SV, beamspot) (cm)",40,0,40,500,0,2.5);
   h_sv_ntk_gen2ddist = fs->make<TH2F>("h_sv_ntk_gen2ddist", ";# tracks of SV;dist2d(SV, closest gen vtx) (cm)",40,0,40,200,0,0.2);
+  h_sv_ntk_njet = fs->make<TH2F>("h_sv_ntk_njet", "; # tracks of SV; # associated jets of SV", 40,0,40,10,0,10);
   h_sv_xy = fs->make<TH2F>("h_sv_xy", ";SV x (cm);SV y (cm)", 100, -4, 4, 100, -4, 4);
   h_sv_xz = fs->make<TH2F>("h_sv_xz", ";SV x (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
   h_sv_yz = fs->make<TH2F>("h_sv_yz", ";SV y (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
@@ -837,27 +840,27 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     for (int isv = 0; isv < nsv; ++isv) {
       const MFVVertexAux& aux = auxes->at(isv);
       const int ntracks = aux.ntracks();
-
+  
       std::vector<int> track_which_jet;
       for (int i = 0; i < ntracks; ++i) {
-	double match_threshold = 1.3;
-	int jet_index = 255;
-	for (unsigned j = 0; j < mevent->jet_track_which_jet.size(); ++j) {
-	  double a = fabs(aux.track_pt(i) - fabs(mevent->jet_track_qpt[j])) + 1;
-	  double b = fabs(aux.track_eta[i] - mevent->jet_track_eta[j]) + 1;
-	  double c = fabs(aux.track_phi[i] - mevent->jet_track_phi[j]) + 1;
-	  if (a * b * c < match_threshold) {
-	    match_threshold = a * b * c;
-	    jet_index = mevent->jet_track_which_jet[j];
-	  }
-	}
-	if (jet_index != 255) {
-	  track_which_jet.push_back((int) jet_index);
-	}
+        double match_threshold = 1.3;
+        int jet_index = 255;
+        for (unsigned j = 0; j < mevent->jet_track_which_jet.size(); ++j) {
+          double a = fabs(aux.track_pt(i) - fabs(mevent->jet_track_qpt[j])) + 1;
+          double b = fabs(aux.track_eta[i] - mevent->jet_track_eta[j]) + 1;
+          double c = fabs(aux.track_phi[i] - mevent->jet_track_phi[j]) + 1;
+          if (a * b * c < match_threshold) {
+            match_threshold = a * b * c;
+            jet_index = mevent->jet_track_which_jet[j];
+          }
+        }
+        if (jet_index != 255) {
+          track_which_jet.push_back((int) jet_index);
+        }
       }
       sv_track_which_jet.push_back(track_which_jet);
     }
-
+  
     bool shared_jet = std::find_first_of (sv_track_which_jet[0].begin(), sv_track_which_jet[0].end(), sv_track_which_jet[1].begin(), sv_track_which_jet[1].end()) != sv_track_which_jet[0].end();
     h_sv_shared_jets->Fill(shared_jet, w);
     if (shared_jet) {
@@ -867,6 +870,29 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       h_svdist2d_no_shared_jets->Fill(svdist2d, w);
       h_absdeltaphi01_no_shared_jets->Fill(fabs(reco::deltaPhi(phi0, phi1)), w);
     }
+  }
+
+  for (int isv = 0; isv < nsv; ++isv) {
+    const MFVVertexAux& aux = auxes->at(isv);
+    const int ntracks = aux.ntracks();
+    std::set<int> sv_jetasso;
+    for (int i = 0; i < ntracks; ++i) {
+	    double match_threshold = 1.3;
+	    int jet_index = 255;
+	    for (unsigned j = 0; j < mevent->jet_track_which_jet.size(); ++j) {
+	      double a = fabs(aux.track_pt(i) - fabs(mevent->jet_track_qpt[j])) + 1;
+	      double b = fabs(aux.track_eta[i] - mevent->jet_track_eta[j]) + 1;
+	      double c = fabs(aux.track_phi[i] - mevent->jet_track_phi[j]) + 1;
+	      if (a * b * c < match_threshold) {
+	        match_threshold = a * b * c;
+	        jet_index = mevent->jet_track_which_jet[j];
+	      }
+	    }
+	    if (jet_index != 255) {
+        sv_jetasso.insert((int) jet_index);
+	    }
+    }
+    h_sv_ntk_njet->Fill(ntracks, sv_jetasso.size(), w);
   }
 }
 

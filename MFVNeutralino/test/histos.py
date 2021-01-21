@@ -26,6 +26,13 @@ common = cms.Sequence(process.mfvSelectedVerticesSeq * process.mfvWeight)
 process.mfvEventHistosNoCuts = process.mfvEventHistos.clone()
 process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts) # just trigger for now
 
+process.mfvEventHistosExtraLoose = process.mfvEventHistos.clone()
+process.mfvAnalysisCutsExtraLoose = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)
+process.mfvVertexHistosExtraLoose = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesExtraLoose')
+process.pEventExtraLoose = cms.Path(common * process.mfvAnalysisCutsExtraLoose * process.mfvEventHistosExtraLoose)
+process.pExtraLoose = cms.Path(common * process.mfvAnalysisCutsExtraLoose * process.mfvVertexHistosExtraLoose)
+
+
 process.mfvEventHistosPreSel = process.mfvEventHistos.clone()
 process.mfvAnalysisCutsPreSel = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)
 process.pEventPreSel = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvEventHistosPreSel)
@@ -131,7 +138,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), half_mc_modifier())
     elif use_MET_triggers:
         samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, leptonic=False, bjet=False, splitSUSY=True, Zvv=True, met=True)
-        #samples = pick_samples(dataset, qcd=False, ttbar=False, all_signal=False, data=False, leptonic=False, bjet=False, splitSUSY=False, Zvv=False, met=False, span_signal=True)
+        #samples = pick_samples(dataset, qcd=False, ttbar=False, all_signal=False, data=False, leptonic=False, bjet=False, splitSUSY=True, Zvv=False, met=False, span_signal=False)
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), half_mc_modifier())
     else :
         samples = pick_samples(dataset)

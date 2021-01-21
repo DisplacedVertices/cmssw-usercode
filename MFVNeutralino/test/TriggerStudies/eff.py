@@ -8,10 +8,10 @@ settings = CMSSWSettings()
 settings.is_mc = True
 settings.cross = '' # 2017to2018' # 2017to2017p8'
 
-version = '2017p8v5_METnoMu'
+version = '2017p8v6_METnoMu'
 
 mu_thresh_hlt = 27
-mu_thresh_offline = 30
+mu_thresh_offline = 35
 weight_l1ecal = ''
 
 tfileservice(process, 'eff.root')
@@ -57,8 +57,10 @@ process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
                              require_hlt = cms.int32(-1),
                              require_l1 = cms.int32(-1),
                              require_muon = cms.bool(True),
+                             require_1jet = cms.bool(True),#for MET trigger
                              require_4jets = cms.bool(False),#for MET trigger
                              require_6jets = cms.bool(False),
+                             require_1stjetpt = cms.double(80.),
                              require_4thjetpt = cms.double(0.),
                              require_6thjetpt = cms.double(0.),
                              require_ht = cms.double(-1),
@@ -98,7 +100,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
     if year == 2017:
-        samples = Samples.auxiliary_data_samples_2017 + Samples.leptonic_samples_2017 + Samples.met_samples_2017[0:2]
+        samples = Samples.auxiliary_data_samples_2017 + Samples.leptonic_samples_2017 + Samples.met_samples_2017[0:2] + [Samples.met_samples_2017[-1]]
         samples += Samples.mfv_splitSUSY_samples_2017
         #masses = (400, 800, 1200, 1600)
         #samples += [getattr(Samples, 'mfv_neu_tau001000um_M%04i_2017' % m) for m in masses] + [Samples.mfv_neu_tau010000um_M0800_2017]

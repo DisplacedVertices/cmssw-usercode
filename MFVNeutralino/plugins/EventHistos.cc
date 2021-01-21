@@ -85,6 +85,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_jet_pt[MAX_NJETS+1];
   TH1F* h_jet_eta[MAX_NJETS+1];
   TH1F* h_jet_phi[MAX_NJETS+1];
+  TH1F* h_jet_nseedtrack[MAX_NJETS+1];
   TH1F* h_jet_energy;
   TH1F* h_jet_ht;
   TH1F* h_jet_ht_40;
@@ -224,6 +225,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
     h_jet_pt[i] = fs->make<TH1F>(TString::Format("h_jet_pt_%s", ijet.Data()), TString::Format(";p_{T} of jet #%s (GeV);events/10 GeV", ijet.Data()), 200, 0, 2000);
     h_jet_eta[i] = fs->make<TH1F>(TString::Format("h_jet_eta_%s", ijet.Data()), TString::Format(";#eta of jet #%s (GeV);events/0.05", ijet.Data()), 120, -3, 3);
     h_jet_phi[i] = fs->make<TH1F>(TString::Format("h_jet_phi_%s", ijet.Data()), TString::Format(";#phi of jet #%s (GeV);events/0.063", ijet.Data()), 100, -3.1416, 3.1416);
+    h_jet_nseedtrack[i] = fs->make<TH1F>(TString::Format("h_jet_nseedtrack_%s", ijet.Data()), TString::Format(";jet #%s number of seed tracks;arb. units", ijet.Data()), 50, 0, 50);
   }
   h_jet_energy = fs->make<TH1F>("h_jet_energy", ";jets energy (GeV);jets/10 GeV", 200, 0, 2000);
   h_jet_ht = fs->make<TH1F>("h_jet_ht", ";H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
@@ -462,6 +464,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   //////////////////////////////////////////////////////////////////////////////
 
   const size_t n_vertex_seed_tracks = mevent->n_vertex_seed_tracks();
+  std::vector<int> track_which_jet;
   h_n_vertex_seed_tracks->Fill(n_vertex_seed_tracks, w);
   for (size_t i = 0; i < n_vertex_seed_tracks; ++i) {
     h_vertex_seed_track_chi2dof->Fill(mevent->vertex_seed_track_chi2dof[i], w);
@@ -493,7 +496,30 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_vertex_seed_track_npxlayers->Fill(mevent->vertex_seed_track_npxlayers(i), w);
     h_vertex_seed_track_nstlayers->Fill(mevent->vertex_seed_track_nstlayers(i), w);
     h_vertex_seed_track_nlayers->Fill(mevent->vertex_seed_track_nlayers(i), w);
+
+    double match_threshold = 1.3;
+    int jet_index = 255;
+    for (unsigned j = 0; j < mevent->jet_track_which_jet.size(); ++j) {
+      double a = fabs(mevent->vertex_seed_track_pt(i) - fabs(mevent->jet_track_qpt[j])) + 1;
+      double b = fabs(mevent->vertex_seed_track_eta[i] - mevent->jet_track_eta[j]) + 1;
+      double c = fabs(mevent->vertex_seed_track_phi[i] - mevent->jet_track_phi[j]) + 1;
+      if (a * b * c < match_threshold) {
+        match_threshold = a * b * c;
+        jet_index = mevent->jet_track_which_jet[j];
+      }
+    }
+    if (jet_index != 255) {
+      track_which_jet.push_back((int) jet_index);
+    }
   }
+  int njet_seedtrack = 0;
+  for (size_t i = 0; i<mevent->jet_id.size(); ++i){
+    int n_seedtrack = std::count(track_which_jet.begin(), track_which_jet.end(), i);
+    njet_seedtrack += n_seedtrack;
+    if (i<MAX_NJETS)
+      h_jet_nseedtrack[i]->Fill(n_seedtrack, w);
+  }
+  h_jet_nseedtrack[MAX_NJETS]->Fill(njet_seedtrack, w);
 }
 
 DEFINE_FWK_MODULE(MFVEventHistos);

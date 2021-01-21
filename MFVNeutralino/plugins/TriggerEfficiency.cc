@@ -23,8 +23,10 @@ private:
   const int use_jetpt_weights;
   const int require_bits[2]; // HLT then L1
   const bool require_muon;
+  const bool require_1jet;
   const bool require_4jets;
   const bool require_6jets;
+  const double require_1stjetpt;
   const double require_4thjetpt;
   const double require_6thjetpt;
   const double require_ht;
@@ -61,6 +63,7 @@ private:
   TH2F* h_jetpt2v1;
 
   TH1D* h_metpt;
+  TH1D* h_metpt_nomu;
 
   TH1D* h_ngenjets;
   TH1D* h_genjet_e[11];
@@ -74,8 +77,10 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
   : use_jetpt_weights(cfg.getParameter<int>("use_jetpt_weights")),
     require_bits{cfg.getParameter<int>("require_hlt"), cfg.getParameter<int>("require_l1")},
     require_muon(cfg.getParameter<bool>("require_muon")),
+    require_1jet(cfg.getParameter<bool>("require_1jet")),
     require_4jets(cfg.getParameter<bool>("require_4jets")),
     require_6jets(cfg.getParameter<bool>("require_6jets")),
+    require_1stjetpt(cfg.getParameter<double>("require_1stjetpt")),
     require_4thjetpt(cfg.getParameter<double>("require_4thjetpt")),
     require_6thjetpt(cfg.getParameter<double>("require_6thjetpt")),
     require_ht(cfg.getParameter<double>("require_ht")),
@@ -148,6 +153,7 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
   }
 
   h_metpt = fs->make<TH1D>("h_metpt", ";MET pT (GeV);events",150,0,1500);
+  h_metpt_nomu = fs->make<TH1D>("h_metpt_nomu", ";METnoMu pT (GeV);events",150,0,1500);
 
   if (use_genjets) {
     h_ngenjets = fs->make<TH1D>("h_ngenjets", ";# gen jets;events", 30, 0, 30);
@@ -304,6 +310,10 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
       return;
   }
 
+  if (require_1jet && triggerfloats->njets(require_1stjetpt) < 1){
+    return;
+  }
+
   if ((require_4jets && triggerfloats->njets(20) < 4) ||
       (require_6jets && triggerfloats->njets(20) < 6) ||
       (require_4thjetpt > 0 && (triggerfloats->njets(20) < 4 || triggerfloats->jets[3].Pt() < require_4thjetpt)) || 
@@ -334,7 +344,10 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
   h_jetpt2v1->Fill(triggerfloats->jetpt1(), triggerfloats->jetpt2(), w);
   h_jet_ht_m_hlt_ht->Fill(triggerfloats->ht - triggerfloats->hltht, w); 
 
-  h_metpt->Fill(triggerfloats->met_pt, w);
+  if (abs(triggerfloats->met_pt-triggerfloats->met_pt_calo)/triggerfloats->met_pt_calo<0.5){
+    h_metpt->Fill(triggerfloats->met_pt, w);
+    h_metpt_nomu->Fill(triggerfloats->met_pt_nomu, w);
+  }
 
   for (int il1jet = 0; il1jet < triggerfloats->nl1jets(); ++il1jet)
     for (int i : {0, il1jet+1})

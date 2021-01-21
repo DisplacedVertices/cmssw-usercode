@@ -2,9 +2,9 @@ from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
 #ntuple_version_ = 'Vnsigmadxy_1_ML_gen'
-ntuple_version_ = 'Vtrackpt0p5_dxy2_1'
-#ntuple_version_ = 'Vtracktreev1'
-#ntuple_version_ = 'V36'
+#ntuple_version_ = 'Vtrackpt0p5_dxy2_2'
+#ntuple_version_ = 'Vtracktreev4'
+ntuple_version_ = 'V36'
 use_btag_triggers = False
 use_MET_triggers = True
 if use_btag_triggers : 
@@ -89,7 +89,7 @@ def minitree_only(process, mode, settings, output_commands):
 def event_filter(process, mode, settings, output_commands, **kwargs):
     if mode:
         from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-        setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode, event_filter_require_vertex=False, **kwargs)
+        setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode, **kwargs)
 
 ########################################################################
 
@@ -270,8 +270,8 @@ def miniaod_ntuple_process(settings):
     process.mfvGenParticles.lsp_id = 1000021
     process.mfvGenParticles.debug = False
 
-    process.mfvVertexTracks.min_track_rescaled_sigmadxy = 2
-    process.mfvVertexTracks.min_track_pt = 0.5
+    process.mfvVertexTracks.min_track_rescaled_sigmadxy = 4
+    process.mfvVertexTracks.min_track_pt = 1.0
 
     process.jmtRescaledTracks.tracks_src = 'jmtUnpackedCandidateTracks'
 
@@ -292,7 +292,7 @@ def miniaod_ntuple_process(settings):
                          process.mfvTriggerFloats *
                          process.jmtUnpackedCandidateTracks *
                          process.mfvVertexSequence *
-                         #process.mfvTrackTree *
+                         process.mfvTrackTree *
                          process.prefiringweight *
                          process.mfvEvent)
 

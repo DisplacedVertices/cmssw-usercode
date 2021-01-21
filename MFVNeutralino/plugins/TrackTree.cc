@@ -43,6 +43,10 @@ struct eventInfo
   std::vector <double> tk_ip3D_genvtx_1;
   std::vector <double> tk_ip2D_genvtx_0;
   std::vector <double> tk_ip2D_genvtx_1;
+  std::vector <double> tk_ip3D_err_genvtx_0;
+  std::vector <double> tk_ip3D_err_genvtx_1;
+  std::vector <double> tk_ip2D_err_genvtx_0;
+  std::vector <double> tk_ip2D_err_genvtx_1;
   std::vector <double> tk_is_seed;
 
 };
@@ -232,27 +236,35 @@ void MFVTrackTree::analyze(const edm::Event& event, const edm::EventSetup& setup
     evInfo->tk_min_r.push_back(min_r);
     if (d3d_gen0.first){
       evInfo->tk_ip3D_genvtx_0.push_back(d3d_gen0.second.value());
+      evInfo->tk_ip3D_err_genvtx_0.push_back(d3d_gen0.second.error());
     }
     else {
       evInfo->tk_ip3D_genvtx_0.push_back(-1);
+      evInfo->tk_ip3D_err_genvtx_0.push_back(-1);
     }
     if (d3d_gen1.first){
       evInfo->tk_ip3D_genvtx_1.push_back(d3d_gen1.second.value());
+      evInfo->tk_ip3D_err_genvtx_1.push_back(d3d_gen1.second.error());
     }
     else {
       evInfo->tk_ip3D_genvtx_1.push_back(-1);
+      evInfo->tk_ip3D_err_genvtx_1.push_back(-1);
     }
     if (dxy_gen0.first){
       evInfo->tk_ip2D_genvtx_0.push_back(dxy_gen0.second.value());
+      evInfo->tk_ip2D_err_genvtx_0.push_back(dxy_gen0.second.error());
     }
     else {
       evInfo->tk_ip2D_genvtx_0.push_back(-1);
+      evInfo->tk_ip2D_err_genvtx_0.push_back(-1);
     }
     if (dxy_gen1.first){
       evInfo->tk_ip2D_genvtx_1.push_back(dxy_gen1.second.value());
+      evInfo->tk_ip2D_err_genvtx_1.push_back(dxy_gen1.second.error());
     }
     else {
       evInfo->tk_ip2D_genvtx_1.push_back(-1);
+      evInfo->tk_ip2D_err_genvtx_1.push_back(-1);
     }
   }
   eventTree->Fill(); 
@@ -283,6 +295,10 @@ void MFVTrackTree::beginJob()
   eventTree->Branch("tk_ip3D_genvtx_1", &evInfo->tk_ip3D_genvtx_1);
   eventTree->Branch("tk_ip2D_genvtx_0", &evInfo->tk_ip2D_genvtx_0);
   eventTree->Branch("tk_ip2D_genvtx_1", &evInfo->tk_ip2D_genvtx_1);
+  eventTree->Branch("tk_ip3D_err_genvtx_0", &evInfo->tk_ip3D_err_genvtx_0);
+  eventTree->Branch("tk_ip3D_err_genvtx_1", &evInfo->tk_ip3D_err_genvtx_1);
+  eventTree->Branch("tk_ip2D_err_genvtx_0", &evInfo->tk_ip2D_err_genvtx_0);
+  eventTree->Branch("tk_ip2D_err_genvtx_1", &evInfo->tk_ip2D_err_genvtx_1);
   eventTree->Branch("tk_is_seed",       &evInfo->tk_is_seed);
   
 }
@@ -312,6 +328,10 @@ void MFVTrackTree::initEventStructure()
   evInfo->tk_ip3D_genvtx_1.clear();
   evInfo->tk_ip2D_genvtx_0.clear();
   evInfo->tk_ip2D_genvtx_1.clear();
+  evInfo->tk_ip3D_err_genvtx_0.clear();
+  evInfo->tk_ip3D_err_genvtx_1.clear();
+  evInfo->tk_ip2D_err_genvtx_0.clear();
+  evInfo->tk_ip2D_err_genvtx_1.clear();
   evInfo->tk_is_seed.clear();
 }
 DEFINE_FWK_MODULE(MFVTrackTree);
