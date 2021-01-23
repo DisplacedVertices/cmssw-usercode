@@ -3,7 +3,7 @@ from limitsinput import name2isample
 from signal_efficiency import SignalEfficiencyCombiner
 
 set_style()
-ps = plot_saver(plot_dir('pretty_dbv_2017p8'), size=(700,700), pdf_log=True)
+ps = plot_saver(plot_dir('pretty_dbv_2017p8_2'), size=(700,700), pdf_log=True)
 
 f = ROOT.TFile('limitsinput.root')
 #raise ValueError('propagate change to use stored rate already normalized to int lumi')
@@ -103,6 +103,6 @@ ps.c.SetRightMargin(0.06)
 
 ps.save('dbv')
 
-write(52, 0.047, 0.43, 0.82, 'Preliminary')
+write(52, 0.047, 0.175, 0.75, 'Preliminary')
 
 ps.save('dbv_prelim')

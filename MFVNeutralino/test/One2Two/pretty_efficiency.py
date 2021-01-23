@@ -1,7 +1,7 @@
 import sys, os
 from JMTucker.Tools.ROOTTools import *
 
-path = plot_dir('pretty_efficiency_corrected', make=True)
+path = plot_dir('pretty_efficiency_corrected_2', make=True)
 
 ts = tdr_style()
 ROOT.gStyle.SetPalette(ROOT.kBird) #kColorPrintableOnGrey
@@ -69,10 +69,6 @@ for which in 'run2','2017p8':
         h.Draw('colz')
         cms = write(61, 0.050, 0.129, 0.913, 'CMS')
         sim = write(52, 0.040, 0.234, 0.912, 'Simulation')
-        if which == '2017p8':
-            lum = write(42, 0.050, 0.495, 0.913, '101 fb^{-1} (13 TeV)')
-        else:
-            lum = write(42, 0.050, 0.495, 0.913, '140 fb^{-1} (13 TeV)')
         bn = 'scan_eff_%s_%s' % (which, kind)
         for ext in 'pdf', 'png', 'root':
             c.SaveAs(os.path.join(path, '%s.%s' % (bn, ext)))

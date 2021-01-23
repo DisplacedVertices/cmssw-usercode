@@ -5,7 +5,7 @@ ROOT.gErrorIgnoreLevel = 1001 # Suppress TCanvas::SaveAs messages.
 
 which = '2017p8' if '2017p8' in sys.argv else 'run2'
 intlumi = 140 if which == 'run2' else 101
-path = plot_dir('pretty_limits_1d_scanpack1Dplus2016missing_fixcombinefull_newxsec_bkgcorr_sigscaletkmover_2_%s' % which, make=True)
+path = plot_dir('pretty_limits_1d_movecms_%s' % which, make=True)
 
 ts = tdr_style()
 
@@ -215,14 +215,14 @@ for kind in kinds:
         leg.AddEntry(theory2, nice_theory(kind,2) + ', #bf{#it{#Beta}}=1', 'LF')
     leg.Draw()
 
-    cms = write(61, 0.050, 0.142, 0.825, 'CMS')
+    cms = write(61, 0.050, 0.11, 0.913, 'CMS')
     lum = write(42, 0.050, 0.548, 0.913, '%s fb^{-1} (13 TeV)' % intlumi)
     fn = os.path.join(path, 'limit1d_' + kind)
     c.SaveAs(fn + '.pdf')
     c.SaveAs(fn + '.png')
     c.SaveAs(fn + '.root')
 
-    pre = write(52, 0.037, 0.145, 0.785, 'Preliminary')
+    pre = write(52, 0.047, 0.215, 0.913, 'Preliminary')
     c.SaveAs(fn + '_prelim.pdf')
     c.SaveAs(fn + '_prelim.png')
     c.SaveAs(fn + '_prelim.root')
