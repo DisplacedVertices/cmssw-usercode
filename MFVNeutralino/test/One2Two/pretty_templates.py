@@ -52,7 +52,6 @@ def fmt(z, title, color, style, save=[]):
     elif title == 'bkg_2018': 
         norm = 0.111
     else:
-        # FIXME need to confirm all of these!!
         rate_per_bin_2017 = combiner.combine(name2isample(combiner.inputs[0].f, name)).rates['2017']
         rate_per_bin_2018 = combiner.combine(name2isample(combiner.inputs[0].f, name)).rates['2018']
 
@@ -71,13 +70,15 @@ def fmt(z, title, color, style, save=[]):
         yield_per_bin_tot = tuple(map(lambda val17, val18 : val17 + val18, yield_per_bin_2017, yield_per_bin_2018))
         norm = sum(yield_per_bin_tot)
 
+        # turn the 1+x uncertainties into the actual abs uncertainties on the yield
         abs_err_per_bin_2017 = tuple(map(lambda val, err : val*(err-1), yield_per_bin_2017, uncert_per_bin_2017))
         abs_err_per_bin_2018 = tuple(map(lambda val, err : val*(err-1), yield_per_bin_2018, uncert_per_bin_2018))
 
-        abs_err_per_bin_tot = tuple(map(lambda err17, err18 : math.sqrt(err17**2 + err18**2), abs_err_per_bin_2017, abs_err_per_bin_2018))
+        # years are correlated ==> add errors linearly rather than adding in quadrature
+        abs_err_per_bin_tot = tuple(map(lambda err17, err18 : err17 + err18, abs_err_per_bin_2017, abs_err_per_bin_2018))
 
-        for val, err in zip(yield_per_bin_tot, abs_err_per_bin_tot) :
-            print("%.2f \pm %.2f" % (val, err))
+        for ibin, (val, err) in enumerate(zip(yield_per_bin_tot, abs_err_per_bin_tot)) :
+            print("bin %i: %.2f \pm %.2f" % (ibin, val, round(err,2)))
 
     h.Scale(norm/h.Integral(0,h.GetNbinsX()+2))
     save.append(h)
