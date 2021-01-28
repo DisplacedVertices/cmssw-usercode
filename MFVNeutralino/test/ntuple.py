@@ -20,10 +20,9 @@ else :
 
 process = ntuple_process(settings)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
-sample_files(process, 'mfv_splitSUSY_tau000100000um_M2000_1800_2017', dataset, -1)
-#sample_files(process, 'mfv_neu_tau001000um_M0800_year', dataset, 1)
+sample_files(process, 'mfv_splitSUSY_tau000001000um_M2000_1800_2017', dataset, 10)
+#sample_files(process, 'mfv_neu_tau001000um_M1600_year', dataset, 1)
 #sample_files(process, 'qcdht1000_year', dataset, 1)
-#sample_files(process, 'zjetstonunuht0100_2017', dataset, 1)
 #sample_files(process, 'dyjetstollM50_year', dataset, 1)
 
 #input_files(process,[
@@ -35,28 +34,28 @@ sample_files(process, 'mfv_splitSUSY_tau000100000um_M2000_1800_2017', dataset, -
 #                    '/store/mc/RunIIFall17MiniAODv2/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-1mm_TuneCP2_13TeV-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/10000/EE806BFB-9AFE-E811-995A-0025905C3E38.root',
 #                   ])
 #set_events(process, [
-#      #(1, 32, 31320),
-#      #(1, 32, 31759),
-#      #(1, 33, 32085),
-#      #(1, 33, 32969),
-#      #(1, 34, 33654),
-#      #(1, 51, 50407),
-#      #(1, 67, 66199),
-#      #(1, 67, 66255),
-#      #(1, 67, 66692),
-#      #(1, 67, 66679),
-#      (1,28,27039),
-#      (1,28,27003),
-#      (1,28,27168),
-#      (1,28,27265),
-#      (1,28,27400),
-#      (1,28,27633),
-#      (1,28,27652),
-#      (1,28,27694),
-#      (1,28,27701),
-#      (1,28,27754),
+#      #(1,1,5022),
+#      #(1,1,5023),
+#      #(1,1,5071),
+#      #(1,1,5075),
+#      #(1,1,5100),
+#      #(1,1,5121),
+#      #(1,1,5131),
+#      #(1,1,5134),
+#      #(1,1,5210),
+#      #(1,1,5216),
+#      (1,1,5002),
+#      (1,1,5003),
+#      (1,1,5011),
+#      (1,1,5012),
+#      (1,1,5014),
+#      (1,1,5020),
+#      (1,1,5037),
+#      (1,1,5038),
+#      (1,1,5046),
+#      (1,1,5047),
 #      ])
-max_events(process, 10000)
+max_events(process,10000)
 cmssw_from_argv(process)
 
 

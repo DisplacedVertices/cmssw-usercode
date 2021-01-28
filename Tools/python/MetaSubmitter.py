@@ -209,7 +209,7 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
                 'signal':           ( 1,     200),
                 'JetHT':            (15, 1350000),
                 'qcdht0300_2017':   (10, 3130000),
-                'qcdht0500_2017':   (10, 3130000),
+                'qcdht0500_2017':   (5, 3130000),
                 'qcdht0700_2017':   (10, 3130000),
                 'qcdht1000_2017':   ( 3,  551000),
                 'qcdht1500_2017':   ( 1,  186000),

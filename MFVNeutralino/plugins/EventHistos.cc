@@ -36,6 +36,15 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_minlspdist2d;
   TH1F* h_lspdist2d;
   TH1F* h_lspdist3d;
+  TH1F* h_gen_bs2ddist;
+  TH1F* h_llp_dphi;
+  TH1F* h_nmatchjet_llp;
+  TH1F* h_llp_pt_vecsum;
+
+  TH2F* h_llp0pt_llp1pt;
+  TH2F* h_decay_lsp0pt_lsp1pt;
+  TH2F* h_decay_llp0_llp1_quark_sumpt;
+  TH2F* h_sum_matched_jetpt_llp;
 
   TH1F* h_hlt_bits;
   TH1F* h_l1_bits;
@@ -164,6 +173,16 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_minlspdist2d = fs->make<TH1F>("h_minlspdist2d", ";min dist2d(gen vtx #i) (cm);events/0.1 mm", 200, 0, 2);
   h_lspdist2d = fs->make<TH1F>("h_lspdist2d", ";dist2d(gen vtx #0, #1) (cm);events/0.1 mm", 200, 0, 2);
   h_lspdist3d = fs->make<TH1F>("h_lspdist3d", ";dist3d(gen vtx #0, #1) (cm);events/0.1 mm", 200, 0, 2);
+  h_gen_bs2ddist = fs->make<TH1F>("h_gen_bs2ddist", ";dist2d(gen vtx, beamspot) (cm);arb. units", 500, 0, 2.5);
+  h_llp_dphi = fs->make<TH1F>("h_llp_dphi", ";delta #phi (rad); arb. unit", 100, -3.1416, 3.1416);
+  h_nmatchjet_llp = fs->make<TH1F>("h_nmatchjet_llp", ";# matched jet/LLP; arb. unit", 10,0,10);
+  h_llp_pt_vecsum = fs->make<TH1F>("h_llp_pt_vecsum", ";vecror sum of LLP p_{T}; arb. unit", 100, 0, 1000);
+
+  h_llp0pt_llp1pt = fs->make<TH2F>("h_llp0pt_llp1pt", ";max llp p_{T} (GeV);min llp p_{T} (GeV)", 300, 0, 3000, 300, 0, 3000);
+  h_decay_lsp0pt_lsp1pt = fs->make<TH2F>("h_decay_lsp0pt_lsp1pt", ";max Neutralino p_{T} (GeV);min Neutralino p_{T} (GeV)", 300, 0, 3000, 300, 0, 3000);
+  h_decay_llp0_llp1_quark_sumpt = fs->make<TH2F>("h_decay_llp0_llp1_quark_sumpt", ";max sum p_{T} of quarks from LLP (GeV);min sum p_{T} of quarks from LLP (GeV)", 100, 0, 1000, 100, 0, 1000);
+  h_sum_matched_jetpt_llp = fs->make<TH2F>("h_sum_matched_jetpt_llp", ";max sum p_{T} of LLP-matched jets (GeV);min sum p_{T} of LLP-matched jets (GeV)", 100, 0, 1000, 100, 0, 1000);
+
 
   h_hlt_bits = fs->make<TH1F>("h_hlt_bits", ";;events", 2*mfv::n_hlt_paths+1, 0, 2*mfv::n_hlt_paths+1);
   h_l1_bits  = fs->make<TH1F>("h_l1_bits",  ";;events", 2*mfv::n_l1_paths +1, 0, 2*mfv::n_l1_paths +1);
@@ -317,9 +336,85 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       h_bquark_pairdphi->Fill(reco::deltaPhi(mevent->gen_bquarks[i].Phi(), mevent->gen_bquarks[j].Phi()), w);
   }
 
+  for (int igenv = 0; igenv < 2; ++igenv) {
+    double genx = mevent->gen_lsp_decay[igenv*3+0];
+    double geny = mevent->gen_lsp_decay[igenv*3+1];
+    double genz = mevent->gen_lsp_decay[igenv*3+2];
+    double genbs2ddist = mevent->mag(genx - mevent->bsx_at_z(genz),
+                                     geny - mevent->bsy_at_z(genz) 
+        );
+    h_gen_bs2ddist->Fill(genbs2ddist, w);
+  }
+
   h_minlspdist2d->Fill(mevent->minlspdist2d(), w);
   h_lspdist2d->Fill(mevent->lspdist2d(), w);
   h_lspdist3d->Fill(mevent->lspdist3d(), w);
+  h_llp_dphi->Fill(mevent->gen_lsp_phi[0]-mevent->gen_lsp_phi[1], w);
+
+  h_llp_pt_vecsum->Fill((mevent->gen_lsp_p4(0)+mevent->gen_lsp_p4(1)).Pt(), w);
+  h_llp0pt_llp1pt->Fill(std::max(mevent->gen_lsp_pt[0], mevent->gen_lsp_pt[1]), std::min(mevent->gen_lsp_pt[0], mevent->gen_lsp_pt[1]), w);
+  double decay_quarks0_pt[2] = {-1,-1};
+  double decay_quarks1_pt[2] = {-1,-1};
+  double decaylsp0_pt = -1;
+  double decaylsp1_pt = -1;
+  double decay_jets0_pt[2] = {-1,-1};
+  double decay_jets1_pt[2] = {-1,-1};
+  double nmatched_0 = 0;
+  double nmatched_1 = 0;
+  for (size_t i=0; i<mevent->gen_daughters.size(); ++i){
+    if (abs(mevent->gen_daughter_id[i])==1000022){
+      if (decaylsp0_pt>0){
+        decaylsp1_pt = mevent->gen_daughters[i].Pt();
+      }
+      else{
+        decaylsp0_pt = mevent->gen_daughters[i].Pt();
+      }
+    }
+    else{
+      double gd_eta = mevent->gen_daughters[i].Eta();
+      double gd_phi = mevent->gen_daughters[i].Phi();
+      //double dR2_min = 999;
+      int n_matched = 0;
+      double pt_sum = 0;
+      for (int ij = 0; ij<MAX_NJETS; ++ij){
+        double dR2 = (mevent->nth_jet_eta(ij)-gd_eta)*(mevent->nth_jet_eta(ij)-gd_eta)+(mevent->nth_jet_phi(ij)-gd_phi)*(mevent->nth_jet_phi(ij)-gd_phi);
+        //if (dR2_min>dR2){
+        //  dR2_min = dR2;
+        //}
+        if (dR2<0.16){
+          n_matched += 1;
+          pt_sum += mevent->nth_jet_pt(ij);
+        }
+      }
+      if (i<3){
+        nmatched_0 += n_matched;
+        if (decay_quarks0_pt[0]>=0){
+          decay_quarks0_pt[1] = mevent->gen_daughters[i].Pt();
+          decay_jets0_pt[1] = pt_sum;
+        }
+        else{
+          decay_quarks0_pt[0] = mevent->gen_daughters[i].Pt();
+          decay_jets0_pt[0] = pt_sum;
+        }
+      }
+      else{
+        nmatched_1 += n_matched;
+        if (decay_quarks1_pt[0]>=0){
+          decay_quarks1_pt[1] = mevent->gen_daughters[i].Pt();
+          decay_jets1_pt[1] = pt_sum;
+        }
+        else{
+          decay_quarks1_pt[0] = mevent->gen_daughters[i].Pt();
+          decay_jets1_pt[0] = pt_sum;
+        }
+      }
+    }
+  }
+  h_decay_lsp0pt_lsp1pt->Fill(std::max(decaylsp0_pt, decaylsp1_pt), std::min(decaylsp0_pt, decaylsp1_pt), w);
+  h_decay_llp0_llp1_quark_sumpt->Fill(std::max(decay_quarks0_pt[0]+decay_quarks0_pt[1], decay_quarks1_pt[0]+decay_quarks1_pt[1]), std::min(decay_quarks0_pt[0]+decay_quarks0_pt[1], decay_quarks1_pt[0]+decay_quarks1_pt[1]), w);
+  h_nmatchjet_llp->Fill(nmatched_0, w);
+  h_nmatchjet_llp->Fill(nmatched_1, w);
+  h_sum_matched_jetpt_llp->Fill(std::max(decay_jets0_pt[0]+decay_jets0_pt[1], decay_jets1_pt[0]+decay_jets1_pt[1]), std::min(decay_jets0_pt[0]+decay_jets0_pt[1], decay_jets1_pt[0]+decay_jets1_pt[1]), w);
 
   //////////////////////////////////////////////////////////////////////////////
 

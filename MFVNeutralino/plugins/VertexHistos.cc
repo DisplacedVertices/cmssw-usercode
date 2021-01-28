@@ -49,10 +49,17 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH1F* h_sv_bs2ddist_ntk5;
   TH1F* h_sv_bs2ddist_ntk10;
   TH1F* h_sv_bs2ddist_ntk20;
+  TH1F* h_sv_ntk_pass4sigmadxybs;
+  TH1F* h_sv_ntk_pass5sigmadxybs;
+  TH1F* h_sv_ntk_pass4sigmadxybs_fraction;
+  TH1F* h_sv_ntk_pass5sigmadxybs_fraction;
+  TH2F* h_sv_ntk_pass4;
+  TH2F* h_sv_ntk_pass5;
   TH2F* h_sv_ntk_genbs2ddist;
   TH2F* h_sv_ntk_bs2ddist;
   TH2F* h_sv_ntk_gen2ddist;
   TH2F* h_sv_ntk_njet;
+  TH2F* h_sv_ntk0_ntk1;
   TH2F* h_sv_xy;
   TH2F* h_sv_yz;
   TH2F* h_sv_xz;
@@ -368,10 +375,17 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   h_sv_genbs2ddist_ntk10 = fs->make<TH1F>("h_sv_genbs2ddist_ntk10", "10<=ntracks<20;dist2d(gen vtx, beamspot) (cm);arb. units", 500, 0, 2.5);
   h_sv_genbs2ddist_ntk20 = fs->make<TH1F>("h_sv_genbs2ddist_ntk20", "20<=ntracks;dist2d(gen vtx, beamspot) (cm);arb. units", 500, 0, 2.5);
   h_sv_gen2ddist_signed = fs->make<TH1F>("h_sv_gen2ddist_signed", ";dist2d(SV, closest gen vtx) (cm);arb. units", 400,-0.2,0.2);
+  h_sv_ntk_pass4sigmadxybs = fs->make<TH1F>("h_sv_ntk_pass4sigmadxybs", ";# tracks passing  N#sigma (dxybs)>=4 /SV;arb.units", 40,0,40);
+  h_sv_ntk_pass5sigmadxybs = fs->make<TH1F>("h_sv_ntk_pass5sigmadxybs", ";# tracks passing  N#sigma (dxybs)>=5 /SV;arb.units", 40,0,40);
+  h_sv_ntk_pass4sigmadxybs_fraction = fs->make<TH1F>("h_sv_ntk_pass4sigmadxybs_fraction", ";SV # tracks passing  N#sigma (dxybs)>=4/ntracks;arb.units", 20,0,1);
+  h_sv_ntk_pass5sigmadxybs_fraction = fs->make<TH1F>("h_sv_ntk_pass5sigmadxybs_fraction", ";SV # tracks passing  N#sigma (dxybs)>=5/ntracks;arb.units", 20,0,1);
+  h_sv_ntk_pass4 = fs->make<TH2F>("h_sv_ntk_pass4", ";SV # tracks passing  N#sigma (dxybs)>=4/ntracks; SV # tracks", 40,0,40,40,0,40);
+  h_sv_ntk_pass5 = fs->make<TH2F>("h_sv_ntk_pass5", ";SV # tracks passing  N#sigma (dxybs)>=5/ntracks; SV # tracks", 40,0,40,40,0,40);
   h_sv_ntk_genbs2ddist = fs->make<TH2F>("h_sv_ntk_genbs2ddist", ";# tracks of SV;dist2d(gen vtx, beamspot) (cm)",40,0,40,500,0,2.5);
   h_sv_ntk_bs2ddist = fs->make<TH2F>("h_sv_ntk_bs2ddist", ";# tracks of SV;dist2d(SV, beamspot) (cm)",40,0,40,500,0,2.5);
   h_sv_ntk_gen2ddist = fs->make<TH2F>("h_sv_ntk_gen2ddist", ";# tracks of SV;dist2d(SV, closest gen vtx) (cm)",40,0,40,200,0,0.2);
   h_sv_ntk_njet = fs->make<TH2F>("h_sv_ntk_njet", "; # tracks of SV; # associated jets of SV", 40,0,40,10,0,10);
+  h_sv_ntk0_ntk1 = fs->make<TH2F>("h_sv_ntk0_ntk1", "; # tracks of SV0; # tracks of SV1", 40,0,40,40,0,40);
   h_sv_xy = fs->make<TH2F>("h_sv_xy", ";SV x (cm);SV y (cm)", 100, -4, 4, 100, -4, 4);
   h_sv_xz = fs->make<TH2F>("h_sv_xz", ";SV x (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
   h_sv_yz = fs->make<TH2F>("h_sv_yz", ";SV y (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
@@ -425,16 +439,23 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   for (int isv = 0; isv < nsv; ++isv) {
     const MFVVertexAux& aux = auxes->at(isv);
     const int ntracks = aux.ntracks();
-    //std::cout << "sv " << isv << " tracks min " << aux.trackdxynsigmamin() << " max " << aux.trackdxynsigmamax() << std::endl;
-    //auto trackdxynsigmavector = aux.track_dxy_nsigmas();
-    //auto trackdxyerrvector = aux.track_dxy_errs();
-    //for (int itk = 0; itk<ntracks; ++itk) {
-    //  std::cout << "  dxy: " << aux.track_dxy[itk]
-    //            << " dxyerr: " << trackdxyerrvector[itk]
-    //            << " dxynsig: " << trackdxynsigmavector[itk]
-    //            << std::endl;
-    //}
 
+    const auto nsigmadxybss = aux.track_dxy_nsigmas();
+    int pass4 = std::count_if(nsigmadxybss.begin(),nsigmadxybss.end(), [&](float const& val){return val>=4;});
+    int pass5 = std::count_if(nsigmadxybss.begin(),nsigmadxybss.end(), [&](float const& val){return val>=5;});
+    h_sv_ntk_pass4sigmadxybs->Fill(pass4, w);
+    h_sv_ntk_pass5sigmadxybs->Fill(pass5, w);
+    h_sv_ntk_pass4sigmadxybs_fraction->Fill((1.0*pass4)/ntracks, w);
+    h_sv_ntk_pass5sigmadxybs_fraction->Fill((1.0*pass5)/ntracks, w);
+    h_sv_ntk_pass4->Fill(pass4, ntracks, w);
+    h_sv_ntk_pass5->Fill(pass5, ntracks, w);
+
+    //std::cout << "sv " << isv << " pass 4 " << std::count_if(nsigmadxybss.begin(),nsigmadxybss.end(), [&](float const& val){return val>=4;}) << " pass 5 " << std::count_if(nsigmadxybss.begin(),nsigmadxybss.end(), [&](float const& val){return val>=5;}) << std::endl;
+    //std::cout << "nsigmadxybs: ";
+    //for (int itk = 0; itk<ntracks; ++itk) {
+    //  std::cout << " " << nsigmadxybss[itk];
+    //}
+    //std::cout << std::endl;
 
     jmt::MinValue d;
     double sv_gen2ddist_sign = 1;
@@ -820,6 +841,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   if (nsv >= 2) {
     const MFVVertexAux& sv0 = auxes->at(0);
     const MFVVertexAux& sv1 = auxes->at(1);
+    h_sv_ntk0_ntk1->Fill(sv0.ntracks(), sv1.ntracks(), w);
     double svdist2d = mag(sv0.x - sv1.x, sv0.y - sv1.y);
     double svdist3d = mag(sv0.x - sv1.x, sv0.y - sv1.y, sv0.z - sv1.z);
     h_svdist2d->Fill(svdist2d, w);

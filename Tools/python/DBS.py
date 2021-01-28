@@ -215,31 +215,21 @@ if __name__ == '__main__':
     from Samples import * 
 
     events = [
-      #(1, 32, 31320),
-      #(1, 32, 31759),
-      #(1, 33, 32085),
-      #(1, 33, 32969),
-      #(1, 34, 33654),
-      #(1, 51, 50407),
-      #(1, 67, 66199),
-      #(1, 67, 66255),
-      #(1, 67, 66692),
-      #(1, 67, 66679),
-      (1,28,27039),
-      (1,28,27003),
-      (1,28,27168),
-      (1,28,27265),
-      (1,28,27400),
-      (1,28,27633),
-      (1,28,27652),
-      (1,28,27694),
-      (1,28,27701),
-      (1,28,27754),
+      (1,1,5964),
+      (1,1,5974),
+      (1,1,5978),
+      (1,1,5986),
+      (1,1,5988),
+      (1,1,5993),
+      (1,1,6000),
+      (1,1,6003),
+      (1,1,6013),
+      (1,1,6034),
     ]
 
-    mfv_neu_tau001000um_M0800_2017.set_curr_dataset('miniaod') 
+    mfv_splitSUSY_tau000001000um_M2000_1800_2017.set_curr_dataset('miniaod') 
     for event in events:
-        print files_for_events([event],mfv_neu_tau001000um_M0800_2017.dataset)
+        print files_for_events([event],mfv_splitSUSY_tau000001000um_M2000_1800_2017.dataset)
 
     #ds = '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/AODSIM'
     #all_files = files_in_dataset(ds)

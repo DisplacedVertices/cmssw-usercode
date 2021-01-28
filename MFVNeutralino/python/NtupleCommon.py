@@ -1,10 +1,9 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-#ntuple_version_ = 'Vnsigmadxy_1_ML_gen'
 #ntuple_version_ = 'Vtrackpt0p5_dxy2_2'
 #ntuple_version_ = 'Vtracktreev4'
-ntuple_version_ = 'V36'
+ntuple_version_ = 'V37_ntkseed_5'
 use_btag_triggers = False
 use_MET_triggers = True
 if use_btag_triggers : 
@@ -34,7 +33,7 @@ def prepare_vis(process, mode, settings, output_commands):
         process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
         process.p *= process.mfvSelectedVerticesSeq
 
-        for x in process.mfvSelectedVerticesTight, process.mfvSelectedVerticesTightNtk3, process.mfvSelectedVerticesTightNtk4:
+        for x in process.mfvSelectedVerticesTight, process.mfvSelectedVerticesTightNtk3, process.mfvSelectedVerticesTightNtk4, process.mfvSelectedVerticesExtraLoose:
             x.produce_vertices = True
             x.produce_tracks = True
             x.vertex_src = 'mfvVertices'
@@ -50,6 +49,8 @@ def prepare_vis(process, mode, settings, output_commands):
             'keep *_mfvVertexRefits_*_*',
             'keep *_mfvVertexRefitsDrop2_*_*',
             'keep *_mfvVertexRefitsDrop0_*_*',
+            'keep *_mfvVertexTracks_*_*',
+            'keep *_mfvSelectedVerticesExtraLoose_*_*',
             ]
 
         if settings.is_mc:
@@ -233,6 +234,7 @@ def miniaod_ntuple_process(settings):
     process = basic_process('Ntuple')
     registration_warnings(process)
     report_every(process, 1000000)
+    #report_every(process, 1)
     geometry_etc(process, which_global_tag(settings))
     random_service(process, {'mfvVertexTracks': 1222})
     tfileservice(process, 'vertex_histos.root')
@@ -270,8 +272,10 @@ def miniaod_ntuple_process(settings):
     process.mfvGenParticles.lsp_id = 1000021
     process.mfvGenParticles.debug = False
 
-    process.mfvVertexTracks.min_track_rescaled_sigmadxy = 4
+    process.mfvVertexTracks.min_track_rescaled_sigmadxy = 4.0
     process.mfvVertexTracks.min_track_pt = 1.0
+
+    #process.mfvVertices.n_tracks_per_seed_vertex = 4
 
     process.jmtRescaledTracks.tracks_src = 'jmtUnpackedCandidateTracks'
 
@@ -292,7 +296,7 @@ def miniaod_ntuple_process(settings):
                          process.mfvTriggerFloats *
                          process.jmtUnpackedCandidateTracks *
                          process.mfvVertexSequence *
-                         process.mfvTrackTree *
+                         #process.mfvTrackTree *
                          process.prefiringweight *
                          process.mfvEvent)
 
