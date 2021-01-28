@@ -2,7 +2,7 @@ from JMTucker.Tools.ROOTTools import *
 from limitsinput import name2isample
 from signal_efficiency import SignalEfficiencyCombiner
 set_style()
-ps = plot_saver(plot_dir('pretty_templates_2017p8_2'), size=(700,700), log=True, pdf=True, pdf_log=True)
+ps = plot_saver(plot_dir('pretty_templates_2017p8_latest'), size=(700,700), log=True, pdf=True, pdf_log=True)
 
 ps.c.SetBottomMargin(0.11)
 ps.c.SetLeftMargin(0.13)
@@ -52,9 +52,33 @@ def fmt(z, title, color, style, save=[]):
     elif title == 'bkg_2018': 
         norm = 0.111
     else:
-        norm2017 =  sum(combiner.combine(name2isample(combiner.inputs[0].f, name)).rates['2017'])
-        norm2018 =  sum(combiner.combine(name2isample(combiner.inputs[0].f, name)).rates['2018'])
-        norm = (norm2017 + norm2018) * xsec
+        # FIXME need to confirm all of these!!
+        rate_per_bin_2017 = combiner.combine(name2isample(combiner.inputs[0].f, name)).rates['2017']
+        rate_per_bin_2018 = combiner.combine(name2isample(combiner.inputs[0].f, name)).rates['2018']
+
+        uncert_per_bin_2017 = combiner.combine(name2isample(combiner.inputs[0].f, name)).uncerts['2017']
+        uncert_per_bin_2018 = combiner.combine(name2isample(combiner.inputs[0].f, name)).uncerts['2018']
+
+        # just to be safe
+        assert(len(rate_per_bin_2017) == len(uncert_per_bin_2017))
+        assert(len(rate_per_bin_2018) == len(uncert_per_bin_2018))
+        assert(len(rate_per_bin_2017) == len(rate_per_bin_2018))
+
+        # scale rate by the xsec of interest
+        yield_per_bin_2017 = tuple([rate*xsec for rate in rate_per_bin_2017])
+        yield_per_bin_2018 = tuple([rate*xsec for rate in rate_per_bin_2018])
+
+        yield_per_bin_tot = tuple(map(lambda val17, val18 : val17 + val18, yield_per_bin_2017, yield_per_bin_2018))
+        norm = sum(yield_per_bin_tot)
+
+        abs_err_per_bin_2017 = tuple(map(lambda val, err : val*(err-1), yield_per_bin_2017, uncert_per_bin_2017))
+        abs_err_per_bin_2018 = tuple(map(lambda val, err : val*(err-1), yield_per_bin_2018, uncert_per_bin_2018))
+
+        abs_err_per_bin_tot = tuple(map(lambda err17, err18 : math.sqrt(err17**2 + err18**2), abs_err_per_bin_2017, abs_err_per_bin_2018))
+
+        for val, err in zip(yield_per_bin_tot, abs_err_per_bin_tot) :
+            print("%.2f \pm %.2f" % (val, err))
+
     h.Scale(norm/h.Integral(0,h.GetNbinsX()+2))
     save.append(h)
     return h
@@ -80,7 +104,7 @@ for lg in legs:
     lg.SetFillStyle(0)
 
 htobreak = None
-ymax = 10
+ymax = 20
 for zzz, (name, title, color, style) in enumerate(which):
     h = fmt(name, title, color, style)
     if name == 'mfv_neu_tau010000um_M0800':
