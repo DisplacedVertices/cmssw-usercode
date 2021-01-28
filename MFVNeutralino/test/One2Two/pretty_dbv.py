@@ -3,11 +3,14 @@ from limitsinput import name2isample
 from signal_efficiency import SignalEfficiencyCombiner
 
 set_style()
-ps = plot_saver(plot_dir('pretty_dbv_2017p8_2'), size=(700,700), pdf_log=True)
+ps = plot_saver(plot_dir('pretty_dbv_2017p8_latest'), size=(700,700), pdf_log=True)
 
 f = ROOT.TFile('limitsinput.root')
 #raise ValueError('propagate change to use stored rate already normalized to int lumi')
 combiner = SignalEfficiencyCombiner()
+
+#xsec = 0.25 # fb -- use this when moving to a new mass point
+xsec = 0.3 # fb -- use this for the old mass point of 800 GeV...
 
 which = [
     ('mfv_neu_tau000300um_M0800', 'c#tau = 0.3 mm', ROOT.kRed,     2), 
@@ -31,7 +34,7 @@ def fmt(z, title, color, style, save=[]):
     h.SetLineStyle(style)
     h.SetLineWidth(3 if name == 'bkg' else 4)
     h.SetLineColor(color)
-    h.Rebin(1)
+    h.Rebin(5)
     h.SetTitle(';d_{BV} (mm);Events/0.1 mm')
     h.GetXaxis().SetTitleSize(0.05)
     h.GetXaxis().SetLabelSize(0.045)
@@ -44,7 +47,7 @@ def fmt(z, title, color, style, save=[]):
         h_dbv_2018 = combiner.combine(name2isample(combiner.inputs[0].f, name)).hs_dbv['2018']
         total_sig_1v = h_dbv_2017.Integral(0,h_dbv_2017.GetNbinsX()+2)
         total_sig_1v += h_dbv_2018.Integral(0,h_dbv_2018.GetNbinsX()+2)
-        norm = total_sig_1v * 0.3
+        norm = total_sig_1v * xsec
         h.Scale(norm/h.Integral(0,h.GetNbinsX()+2))
     save.append(h)
     return h
@@ -52,7 +55,6 @@ def fmt(z, title, color, style, save=[]):
 hbkg = fmt(f.Get('h_bkg_dbv_2017'), 'bkg', ROOT.kBlack, ROOT.kSolid)
 hbkg2 = fmt(f.Get('h_bkg_dbv_2018'), 'bkg', ROOT.kBlack, ROOT.kSolid)
 hbkg.Add(hbkg2)
-hbkg.Rebin(2)
 print hbkg.Integral()
 hbkg = poisson_intervalize(hbkg, zero_x=True) #, include_zero_bins='surrounded')
 hbkg.SetMarkerStyle(20)
@@ -62,7 +64,7 @@ hbkg.SetLineWidth(3)
 leg1 = ROOT.TLegend(0.400, 0.810, 0.909, 0.867)
 leg1.AddEntry(hbkg, 'Data', 'PE')
 leg2 = ROOT.TLegend(0.383, 0.698, 0.893, 0.815)
-leg2.AddEntry(0, '#kern[-0.22]{#splitline{Multijet signals,}{m = 800 GeV, #sigma = 0.3 fb:}}', '')
+leg2.AddEntry(0, '#kern[-0.22]{#splitline{Multijet signals,}{m = 800 GeV, #sigma = %s fb:}}' % xsec, '')
 leg3 = ROOT.TLegend(0.400, 0.572, 0.909, 0.705)
 legs = leg1, leg2, leg3
 
@@ -77,7 +79,7 @@ for zzz, (name, title, color, style) in enumerate(which):
     else:
         h.Draw('hist same')
     h.GetXaxis().SetRangeUser(0,4)
-    h.GetYaxis().SetRangeUser(6e-2,3e3)
+    h.GetYaxis().SetRangeUser(2e-2,3e4)
     leg3.AddEntry(h, title, 'L')
     print name, h.Integral(0,h.GetNbinsX()+2)
 

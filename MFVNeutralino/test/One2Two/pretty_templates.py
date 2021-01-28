@@ -13,18 +13,32 @@ f = ROOT.TFile('limitsinput.root')
 #raise ValueError('propagate change to use stored rate already normalized to int lumi')
 combiner = SignalEfficiencyCombiner()
 
+#xsec = 0.25 # fb FIXME when moving to larger mass point!!
+xsec = 0.3 # fb
+
 which = [
     ('mfv_neu_tau000300um_M0800', 'c#tau = 0.3 mm', ROOT.kRed,     2), 
     ('mfv_neu_tau001000um_M0800', 'c#tau = 1.0 mm',   ROOT.kGreen+2, 5), 
     ('mfv_neu_tau010000um_M0800', 'c#tau = 10 mm',  ROOT.kBlue,    7), 
     ]
 
+# FIXME we should read these out from a more global dict rather than transcribe in each file in the future
+# FIXME actually I think these are already applied! otherwise this is also wrong in e.g. the dBV plot
 TM_rescale = {'2017':  {'mfv_neu_tau000300um_M0800': 0.1937, 'mfv_neu_tau001000um_M0800': 0.1352, 'mfv_neu_tau010000um_M0800': 0.0794},
               '2018':  {'mfv_neu_tau000300um_M0800': 0.2117, 'mfv_neu_tau001000um_M0800': 0.1515, 'mfv_neu_tau010000um_M0800': 0.1140}
               }
 
+#TM_rescale = {'2017':  {'mfv_neu_tau000300um_M0800': 0.153, 'mfv_neu_tau001000um_M0800': 0.088, 'mfv_neu_tau010000um_M0800': 0.036},
+#              '2018':  {'mfv_neu_tau000300um_M0800': 0.022, 'mfv_neu_tau001000um_M0800': 0.018, 'mfv_neu_tau010000um_M0800': 0.009}
+#              }
+#TM_rescale = {'2017':  {'mfv_neu_tau000300um_M0800': , 'mfv_neu_tau001000um_M0800': , 'mfv_neu_tau010000um_M0800': },
+#              '2018':  {'mfv_neu_tau000300um_M0800': , 'mfv_neu_tau001000um_M0800': , 'mfv_neu_tau010000um_M0800': }
+#              }
+
+# FIXME actually I think these are already applied! otherwise this is also wrong in e.g. the dBV plot
 def dataMC_SF(year, signal):
     return 1 - TM_rescale[year][signal] / 2
+    #return 1
 
 def fmt(z, title, color, style, save=[]):
     if type(z) == str: # signal name
@@ -58,7 +72,7 @@ def fmt(z, title, color, style, save=[]):
     else:
         norm2017 =  sum(combiner.combine(name2isample(combiner.inputs[0].f, name)).rates['2017']) * dataMC_SF('2017', z)**2
         norm2018 =  sum(combiner.combine(name2isample(combiner.inputs[0].f, name)).rates['2018']) * dataMC_SF('2018', z)**2
-        norm = (norm2017 + norm2018) * 0.3
+        norm = (norm2017 + norm2018) * xsec
     h.Scale(norm/h.Integral(0,h.GetNbinsX()+2))
     save.append(h)
     return h
@@ -74,7 +88,7 @@ const = 0.05
 leg1 = ROOT.TLegend(0.400+xoffset, 0.810-const, 0.909+xoffset, 0.867-const)
 leg1.AddEntry(hbkg, 'Background template', 'F')
 leg2 = ROOT.TLegend(0.383+xoffset, 0.698-const, 0.893+xoffset, 0.815-const)
-leg2.AddEntry(0, '#kern[-0.22]{#splitline{Multijet signals,}{m = 800 GeV, #sigma = 0.3 fb:}}', '')
+leg2.AddEntry(0, '#kern[-0.22]{#splitline{Multijet signals,}{m = 800 GeV, #sigma = %s fb:}}' % xsec, '')
 leg3 = ROOT.TLegend(0.400+xoffset, 0.572-const, 0.909+xoffset, 0.705-const)
 legs = leg1, leg2, leg3
 
