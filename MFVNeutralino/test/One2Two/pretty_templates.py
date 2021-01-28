@@ -2,7 +2,7 @@ from JMTucker.Tools.ROOTTools import *
 from limitsinput import name2isample
 from signal_efficiency import SignalEfficiencyCombiner
 set_style()
-ps = plot_saver(plot_dir('pretty_templates_2017p8_latest'), size=(700,700), log=True, pdf=True, pdf_log=True)
+ps = plot_saver(plot_dir('pretty_templates_2017p8_bkgfirst'), size=(700,700), log=True, pdf=True, pdf_log=True)
 
 ps.c.SetBottomMargin(0.11)
 ps.c.SetLeftMargin(0.13)
@@ -104,23 +104,19 @@ for lg in legs:
     lg.SetTextSize(0.04)
     lg.SetFillStyle(0)
 
-htobreak = None
+hbkg.Draw('hist')
 ymax = 20
+hbkg.GetXaxis().SetRangeUser(0,4)
+hbkg.GetYaxis().SetRangeUser(4e-3,ymax)
+
+htobreak = None
 for zzz, (name, title, color, style) in enumerate(which):
     h = fmt(name, title, color, style)
     if name == 'mfv_neu_tau010000um_M0800':
         htobreak = h
-    if zzz == 0:
-        h.Draw('hist')
-    else:
-        h.Draw('hist same')
-    h.GetXaxis().SetRangeUser(0,4)
-    #h.GetYaxis().SetRangeUser(0,1.05)
-    h.GetYaxis().SetRangeUser(4e-3,ymax)
+    h.Draw('hist ][ same')
     leg3.AddEntry(h, title, 'L')
     print name, h.Integral(0,h.GetNbinsX()+2)
-
-hbkg.Draw('hist same')
 
 for lg in legs:
     lg.Draw()
@@ -179,8 +175,6 @@ write(42, 0.050, 0.595, 0.913, '101 fb^{-1} (13 TeV)')
 #########    line.Draw()
 
 dvvlines = [
-        #ROOT.TLine(0.4, 0, 0.4, 1.05),
-        #ROOT.TLine(0.7, 0, 0.7, 1.05),
         ROOT.TLine(0.4, 0, 0.4, ymax),
         ROOT.TLine(0.7, 0, 0.7, ymax),
         ]
