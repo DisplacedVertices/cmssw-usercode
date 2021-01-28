@@ -22,24 +22,6 @@ which = [
     ('mfv_neu_tau010000um_M0800', 'c#tau = 10 mm',  ROOT.kBlue,    7), 
     ]
 
-# FIXME we should read these out from a more global dict rather than transcribe in each file in the future
-# FIXME actually I think these are already applied! otherwise this is also wrong in e.g. the dBV plot
-TM_rescale = {'2017':  {'mfv_neu_tau000300um_M0800': 0.1937, 'mfv_neu_tau001000um_M0800': 0.1352, 'mfv_neu_tau010000um_M0800': 0.0794},
-              '2018':  {'mfv_neu_tau000300um_M0800': 0.2117, 'mfv_neu_tau001000um_M0800': 0.1515, 'mfv_neu_tau010000um_M0800': 0.1140}
-              }
-
-#TM_rescale = {'2017':  {'mfv_neu_tau000300um_M0800': 0.153, 'mfv_neu_tau001000um_M0800': 0.088, 'mfv_neu_tau010000um_M0800': 0.036},
-#              '2018':  {'mfv_neu_tau000300um_M0800': 0.022, 'mfv_neu_tau001000um_M0800': 0.018, 'mfv_neu_tau010000um_M0800': 0.009}
-#              }
-#TM_rescale = {'2017':  {'mfv_neu_tau000300um_M0800': , 'mfv_neu_tau001000um_M0800': , 'mfv_neu_tau010000um_M0800': },
-#              '2018':  {'mfv_neu_tau000300um_M0800': , 'mfv_neu_tau001000um_M0800': , 'mfv_neu_tau010000um_M0800': }
-#              }
-
-# FIXME actually I think these are already applied! otherwise this is also wrong in e.g. the dBV plot
-def dataMC_SF(year, signal):
-    return 1 - TM_rescale[year][signal] / 2
-    #return 1
-
 def fmt(z, title, color, style, save=[]):
     if type(z) == str: # signal name
         name = z
@@ -70,8 +52,8 @@ def fmt(z, title, color, style, save=[]):
     elif title == 'bkg_2018': 
         norm = 0.111
     else:
-        norm2017 =  sum(combiner.combine(name2isample(combiner.inputs[0].f, name)).rates['2017']) * dataMC_SF('2017', z)**2
-        norm2018 =  sum(combiner.combine(name2isample(combiner.inputs[0].f, name)).rates['2018']) * dataMC_SF('2018', z)**2
+        norm2017 =  sum(combiner.combine(name2isample(combiner.inputs[0].f, name)).rates['2017'])
+        norm2018 =  sum(combiner.combine(name2isample(combiner.inputs[0].f, name)).rates['2018'])
         norm = (norm2017 + norm2018) * xsec
     h.Scale(norm/h.Integral(0,h.GetNbinsX()+2))
     save.append(h)
