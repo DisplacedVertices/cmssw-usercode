@@ -3,7 +3,7 @@ from JMTucker.Tools.ROOTTools import *
 ROOT.TH1.AddDirectory(0)
 
 set_style()
-ps = plot_saver(plot_dir('pretty_closure_fixed'), size=(700,700), log=False, pdf=True)
+ps = plot_saver(plot_dir('pretty_closure_dphi_fixed'), size=(700,700), log=False, pdf=True)
 
 ps.c.SetBottomMargin(0.11)
 ps.c.SetLeftMargin(0.13)
@@ -22,7 +22,7 @@ btag_fns_2017 = [os.path.join('/uscms/home/dquach/public', fn) for fn in btag_co
 btag_fns_2018 = [os.path.join('/uscms/home/dquach/public', fn) for fn in btag_corr_names_2018]
 ntk = ['3track3track', '4track3track', '4track4track', '5track5track']
 names = ['3-track x 3-track', '4-track x 3-track', '4-track x 4-track', '#geq5-track x #geq5-track']
-ymax = [75, 45, 10, 0.4]
+#ymax = [75, 45, 10, 0.4]
 
 def write(font, size, x, y, text):
     w = ROOT.TLatex()
@@ -60,7 +60,8 @@ for i in range(4):
     h.GetYaxis().SetTitleSize(0.05)
     h.GetYaxis().SetLabelSize(0.045)
     h.GetYaxis().SetTitleOffset(1.2)
-    h.GetYaxis().SetRangeUser(0,ymax[i])
+    #h.GetYaxis().SetRangeUser(0,ymax[i])
+    h.GetYaxis().SetRangeUser(0, h.GetBinContent(h.GetNbinsX())*2.5)
     h.SetStats(0)
     h.SetLineColor(ROOT.kBlue)
     h.SetLineWidth(3)
