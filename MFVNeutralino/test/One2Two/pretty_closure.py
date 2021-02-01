@@ -71,7 +71,7 @@ for i in range(4):
     print h.Integral()
     print h.Integral(0,h.FindBin(0.4)-1)
     print h.Integral(h.FindBin(0.4),h.FindBin(0.7)-1)
-    print h.Integral(h.FindBin(0.7),99999999)
+    print h.Integral(h.FindBin(0.7),h.GetNbinsX()+2)
 
     hh = poisson_intervalize(hh, zero_x=True, include_zero_bins='surrounded')
     hh.SetLineWidth(3)
