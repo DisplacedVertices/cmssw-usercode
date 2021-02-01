@@ -3,22 +3,22 @@ from limitsinput import name2isample
 from signal_efficiency import SignalEfficiencyCombiner
 
 set_style()
-ps = plot_saver(plot_dir('pretty_dbv_2017p8_latest'), size=(700,700), pdf_log=True)
+ps = plot_saver(plot_dir('pretty_dbv_2017p8_diff_xsecs'), size=(700,700), pdf_log=True)
 
 f = ROOT.TFile('limitsinput.root')
 #raise ValueError('propagate change to use stored rate already normalized to int lumi')
 combiner = SignalEfficiencyCombiner()
 
-#xsec = 0.25 # fb -- use this when moving to a new mass point
-xsec = 0.3 # fb -- use this for the old mass point of 800 GeV...
+# excluded xsec from previous analysis (2016) is:
+# 0.8 at 300 microns, 0.25 at 1mm, 0.15 at 10mm
 
 which = [
-    ('mfv_neu_tau000300um_M0800', 'c#tau = 0.3 mm', ROOT.kRed,     2), 
-    ('mfv_neu_tau001000um_M0800', 'c#tau = 1.0 mm',   ROOT.kGreen+2, 5), 
-    ('mfv_neu_tau010000um_M0800', 'c#tau = 10 mm',  ROOT.kBlue,    7), 
+    ('mfv_neu_tau000300um_M1600', 'c#tau = 0.3 mm', ROOT.kRed,     2, 0.8), 
+    ('mfv_neu_tau001000um_M1600', 'c#tau = 1.0 mm', ROOT.kGreen+2, 5, 0.25), 
+    ('mfv_neu_tau010000um_M1600', 'c#tau = 10 mm',  ROOT.kBlue,    7, 0.15), 
     ]
 
-def fmt(z, title, color, style, save=[]):
+def fmt(z, title, color, style, xsec=None, save=[]):
     if type(z) == str: # signal name
         name = z
         h = f.Get('h_signal_%i_dbv_2017' % name2isample(f, z))
@@ -61,25 +61,32 @@ hbkg.SetMarkerStyle(20)
 hbkg.SetMarkerSize(1.3)
 hbkg.SetLineWidth(3)
 
-leg1 = ROOT.TLegend(0.400, 0.810, 0.909, 0.867)
+xoffset = -0.01
+yoffset = -0.05
+leg1 = ROOT.TLegend(0.400+xoffset, 0.805+yoffset, 0.909+xoffset, 0.862+yoffset)
 leg1.AddEntry(hbkg, 'Data', 'PE')
-leg2 = ROOT.TLegend(0.383, 0.698, 0.893, 0.815)
-leg2.AddEntry(0, '#kern[-0.22]{#splitline{Multijet signals,}{m = 800 GeV, #sigma = %s fb:}}' % xsec, '')
-leg3 = ROOT.TLegend(0.400, 0.572, 0.909, 0.705)
+leg2 = ROOT.TLegend(0.400+xoffset, 0.748+yoffset, 0.909+xoffset, 0.815+yoffset)
+leg2.AddEntry(0, '#kern[-0.22]{Multijet signals, m = 1600 GeV}', '')
+leg3 = ROOT.TLegend(0.400+xoffset, 0.612+yoffset, 0.909+xoffset, 0.745+yoffset)
 legs = leg1, leg2, leg3
 
 for lg in legs:
     lg.SetBorderSize(0)
     lg.SetTextSize(0.04)
+    lg.SetFillStyle(0)
 
-for zzz, (name, title, color, style) in enumerate(which):
-    h = fmt(name, title, color, style)
+for zzz, (name, title, color, style, xsec) in enumerate(which):
+    h = fmt(name, title, color, style, xsec)
     if zzz == 0:
         h.Draw('hist')
     else:
         h.Draw('hist same')
     h.GetXaxis().SetRangeUser(0,4)
-    h.GetYaxis().SetRangeUser(2e-2,3e4)
+    h.GetYaxis().SetRangeUser(2e-2,5e3)
+
+    if xsec :
+        print "assuming xsec = %s fb for %s" % (xsec, name)
+
     leg3.AddEntry(h, title, 'L')
     print name, h.Integral(0,h.GetNbinsX()+2)
 
@@ -96,7 +103,8 @@ def write(font, size, x, y, text):
     w.DrawLatex(x, y, text)
     return w
 
-write(61, 0.050, 0.175, 0.825, 'CMS')
+#write(61, 0.050, 0.175, 0.825, 'CMS')
+write(61, 0.050, 0.415+xoffset, 0.825, 'CMS')
 write(42, 0.050, 0.595, 0.913, '101 fb^{-1} (13 TeV)')
 
 ps.c.SetBottomMargin(0.11)
@@ -105,6 +113,6 @@ ps.c.SetRightMargin(0.06)
 
 ps.save('dbv')
 
-write(52, 0.047, 0.175, 0.75, 'Preliminary')
+write(52, 0.047, 0.52+xoffset, 0.825, 'Preliminary')
 
 ps.save('dbv_prelim')
