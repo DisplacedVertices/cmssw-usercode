@@ -144,9 +144,9 @@ def print_bkg_table(h17,h18) :
     bin1_syst = math.sqrt(bin1_syst_uncorr**2 + bin1_syst_corr**2)
     bin2_syst = math.sqrt(bin2_syst_uncorr**2 + bin2_syst_corr**2)
 
-    print "0-400 um:   %.3f \pm %.3f (stat) \pm %.3f (syst)" % (round(bin0_tot,3), round(bin0_stat,3), round(bin0_syst,3))
-    print "400-700 um: %.3f \pm %.3f (stat) \pm %.3f (syst)" % (round(bin1_tot,3), round(bin1_stat,3), round(bin1_syst,3))
-    print "700-40 m:   %.3f \pm %.3f (stat) \pm %.3f (syst)" % (round(bin2_tot,3), round(bin2_stat,3), round(bin2_syst,3))
+    print "0-400 um:   %.3f \pm %.3f\stat \pm %.3f\syst" % (round(bin0_tot,3), round(bin0_stat,3), round(bin0_syst,3))
+    print "400-700 um: %.3f \pm %.3f\stat \pm %.3f\syst" % (round(bin1_tot,3), round(bin1_stat,3), round(bin1_syst,3))
+    print "700-40 mm:  %.3f \pm %.3f\stat \pm %.3f\syst" % (round(bin2_tot,3), round(bin2_stat,3), round(bin2_syst,3))
     print ""
 
 

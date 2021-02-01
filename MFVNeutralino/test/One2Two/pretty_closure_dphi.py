@@ -61,7 +61,7 @@ for i in range(4):
     h.GetYaxis().SetLabelSize(0.045)
     h.GetYaxis().SetTitleOffset(1.2)
     #h.GetYaxis().SetRangeUser(0,ymax[i])
-    h.GetYaxis().SetRangeUser(0, h.GetBinContent(h.GetNbinsX())*2.5)
+    h.GetYaxis().SetRangeUser(0, h.GetBinContent(h.GetNbinsX())*2.6)
     h.SetStats(0)
     h.SetLineColor(ROOT.kBlue)
     h.SetLineWidth(3)
