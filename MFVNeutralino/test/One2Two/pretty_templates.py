@@ -2,7 +2,7 @@ from JMTucker.Tools.ROOTTools import *
 from limitsinput import name2isample
 from signal_efficiency import SignalEfficiencyCombiner
 set_style()
-ps = plot_saver(plot_dir('pretty_templates_2017p8_bkgfirst'), size=(700,700), log=True, pdf=True, pdf_log=True)
+ps = plot_saver(plot_dir('pretty_templates_2017p8_diff_xsecs'), size=(700,700), log=True, pdf=True, pdf_log=True)
 
 ps.c.SetBottomMargin(0.11)
 ps.c.SetLeftMargin(0.13)
@@ -13,16 +13,16 @@ f = ROOT.TFile('limitsinput.root')
 #raise ValueError('propagate change to use stored rate already normalized to int lumi')
 combiner = SignalEfficiencyCombiner()
 
-#xsec = 0.25 # fb FIXME when moving to larger mass point!!
-xsec = 0.3 # fb
+# excluded xsec from previous analysis (2016) is:
+# 0.8 at 300 microns, 0.25 at 1mm, 0.15 at 10mm
 
 which = [
-    ('mfv_neu_tau000300um_M0800', 'c#tau = 0.3 mm', ROOT.kRed,     2), 
-    ('mfv_neu_tau001000um_M0800', 'c#tau = 1.0 mm',   ROOT.kGreen+2, 5), 
-    ('mfv_neu_tau010000um_M0800', 'c#tau = 10 mm',  ROOT.kBlue,    7), 
+    ('mfv_neu_tau000300um_M1600', 'c#tau = 0.3 mm', ROOT.kRed,     2, 0.8), 
+    ('mfv_neu_tau001000um_M1600', 'c#tau = 1.0 mm', ROOT.kGreen+2, 5, 0.25), 
+    ('mfv_neu_tau010000um_M1600', 'c#tau = 10 mm',  ROOT.kBlue,    7, 0.15), 
     ]
 
-def fmt(z, title, color, style, save=[]):
+def fmt(z, title, color, style, xsec=None, save=[]):
     if type(z) == str: # signal name
         name = z
         h = f.Get('h_signal_%i_dvv_2017' % name2isample(f, z))
@@ -90,13 +90,13 @@ hbkg.Add(hbkg2018)
 hbkg.SetFillColor(ROOT.kGray)
 hbkg.SetFillStyle(3002)
 
-xoffset = 0.04
-const = 0.05
-leg1 = ROOT.TLegend(0.400+xoffset, 0.810-const, 0.909+xoffset, 0.867-const)
+xoffset = -0.01
+yoffset = -0.05
+leg1 = ROOT.TLegend(0.400+xoffset, 0.805+yoffset, 0.909+xoffset, 0.862+yoffset)
 leg1.AddEntry(hbkg, 'Background template', 'F')
-leg2 = ROOT.TLegend(0.383+xoffset, 0.698-const, 0.893+xoffset, 0.815-const)
-leg2.AddEntry(0, '#kern[-0.22]{#splitline{Multijet signals,}{m = 800 GeV, #sigma = %s fb:}}' % xsec, '')
-leg3 = ROOT.TLegend(0.400+xoffset, 0.572-const, 0.909+xoffset, 0.705-const)
+leg2 = ROOT.TLegend(0.400+xoffset, 0.748+yoffset, 0.909+xoffset, 0.815+yoffset)
+leg2.AddEntry(0, '#kern[-0.22]{Multijet signals, m = 1600 GeV}', '')
+leg3 = ROOT.TLegend(0.400+xoffset, 0.612+yoffset, 0.909+xoffset, 0.745+yoffset)
 legs = leg1, leg2, leg3
 
 for lg in legs:
@@ -105,16 +105,25 @@ for lg in legs:
     lg.SetFillStyle(0)
 
 hbkg.Draw('hist')
+ymin = 4e-3
 ymax = 20
-hbkg.GetXaxis().SetRangeUser(0,4)
-hbkg.GetYaxis().SetRangeUser(4e-3,ymax)
+xmax = 4
+hbkg.GetXaxis().SetRangeUser(0,xmax)
+hbkg.GetYaxis().SetRangeUser(ymin,ymax)
 
-htobreak = None
-for zzz, (name, title, color, style) in enumerate(which):
-    h = fmt(name, title, color, style)
-    if name == 'mfv_neu_tau010000um_M0800':
-        htobreak = h
-    h.Draw('hist ][ same')
+for zzz, (name, title, color, style, xsec) in enumerate(which):
+    h = fmt(name, title, color, style, xsec)
+
+    # Sort of hacky way to not have the vertical line drawn for the signals w/ many entries in last bin
+    # while keeping the other signal's cosmetics looking okay. Should revisit someday.
+    if h.GetBinContent(h.FindBin(xmax)-1) < ymin :
+        h.Draw('hist same')
+    else :
+        h.Draw('hist ][ same')
+
+    if xsec :
+        print "assuming xsec = %s fb for %s" % (xsec, name)
+
     leg3.AddEntry(h, title, 'L')
     print name, h.Integral(0,h.GetNbinsX()+2)
 
@@ -131,48 +140,6 @@ def write(font, size, x, y, text):
 
 write(61, 0.050, 0.415+xoffset, 0.825, 'CMS')
 write(42, 0.050, 0.595, 0.913, '101 fb^{-1} (13 TeV)')
-
-# do broken y-axis. replace the "1" label with "18.2" and replace the
-# last bin of that one hist's contents with 1 + contents - 18.2.
-
-#########yax = htobreak.GetYaxis()
-#########lastibin = htobreak.FindBin(3.999)
-#########lastbin = htobreak.GetBinLowEdge(lastibin)
-#########lastbc = htobreak.GetBinContent(lastibin)
-#########print lastbc
-#########assert abs(lastbc - 9.53697440144) < 1e-6
-#########htobreak.SetBinContent(lastibin, lastbc - 9.53697440144 + 1)
-#########boxxcenter = 0.
-#########boxxwidth = 0.06
-#########boxycenter = 0.9
-#########boxywidth = 0.0205
-#########boxx1, boxx2 = boxxcenter - boxxwidth, boxxcenter + boxxwidth
-#########boxy1, boxy2 = boxycenter - boxywidth, boxycenter + boxywidth
-#########boxxcenter2 = 4.
-#########boxx21, boxx22 = boxxcenter2 - boxxwidth, boxxcenter2 + boxxwidth
-#########boxes = [
-#########    ROOT.TBox(boxx1, boxy1, boxx2, boxy2), # this does the break in the left x-axis
-#########    ROOT.TBox(boxx21,boxy1, boxx22,boxy2), # ditto right x-axis
-#########    ROOT.TBox(lastbin-0.02,boxy1,lastbin+0.02,boxy2), # wipes the part of the curve
-#########    ROOT.TBox(-0.3, 0.95, -0.018, 1.05) # this wipes the end "1" label
-#########    ]
-#########for box in boxes:
-#########    box.SetLineColor(ROOT.kWhite)
-#########    box.SetFillColor(ROOT.kWhite)
-#########    box.Draw()
-
-########## draw the new end label
-#########lab2 = ROOT.TText(-0.408, 0.982, '9.5')
-#########lab2.SetTextFont(yax.GetLabelFont())
-#########lab2.SetTextSize(yax.GetLabelSize())
-#########lab2.Draw()
-
-########## draw the break lines
-#########slantdy = 0.005
-#########lines = [ROOT.TLine(x1, y - slantdy, x2, y + slantdy) for y in boxy1, boxy2 for x1,x2 in (boxx1, boxx2), (boxx21, boxx22)]
-#########for line in lines:
-#########    line.SetLineWidth(1)
-#########    line.Draw()
 
 dvvlines = [
         ROOT.TLine(0.4, 0, 0.4, ymax),
