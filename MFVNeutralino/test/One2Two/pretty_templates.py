@@ -96,36 +96,53 @@ def print_bkg_table(h17,h18) :
     bin1_range = (h17.FindBin(0.4),h17.FindBin(0.7)-1)
     bin2_range = (h17.FindBin(0.7),h17.GetNbinsX()+2)
 
-    # All uncertainties taken from the combine card, with stat uncs fully uncorrelated across years
-    # and syst shift fully correlated across years within a single bin.
-    # Note bin 1 syst was anticorrelated with the others, hence <1 and the "1-"
-    bin0_2017_stat = 0.173*h17.Integral(*bin0_range)
-    bin1_2017_stat = 0.216*h17.Integral(*bin1_range)
-    bin2_2017_stat = 0.454*h17.Integral(*bin2_range)
+    # rel stat errs come from statmodel.py
+    bin0_2017_stat = 0.0148*h17.Integral(*bin0_range)
+    bin1_2017_stat = 0.0431*h17.Integral(*bin1_range)
+    bin2_2017_stat = 0.1546*h17.Integral(*bin2_range)
 
-    bin0_2017_syst = (1-0.743)*h17.Integral(*bin0_range)
-    bin1_2017_syst = 0.338*h17.Integral(*bin1_range)
-    bin2_2017_syst = 0.389*h17.Integral(*bin2_range)
-
-    bin0_2018_stat = 0.217*h18.Integral(*bin0_range)
-    bin1_2018_stat = 0.238*h18.Integral(*bin1_range)
-    bin2_2018_stat = 0.586*h18.Integral(*bin2_range)
-
-    bin0_2018_syst = (1-0.766)*h18.Integral(*bin0_range)
-    bin1_2018_syst = 0.315*h18.Integral(*bin1_range)
-    bin2_2018_syst = 0.760*h18.Integral(*bin2_range)
-
-    bin0_tot = h17.Integral(*bin0_range) + h18.Integral(*bin0_range)
-    bin1_tot = h17.Integral(*bin1_range) + h18.Integral(*bin1_range)
-    bin2_tot = h17.Integral(*bin2_range) + h18.Integral(*bin2_range)
+    bin0_2018_stat = 0.0175*h18.Integral(*bin0_range)
+    bin1_2018_stat = 0.0508*h18.Integral(*bin1_range)
+    bin2_2018_stat = 0.1854*h18.Integral(*bin2_range)
 
     bin0_stat = math.sqrt(bin0_2017_stat**2 + bin0_2018_stat**2)
     bin1_stat = math.sqrt(bin1_2017_stat**2 + bin1_2018_stat**2)
     bin2_stat = math.sqrt(bin2_2017_stat**2 + bin2_2018_stat**2)
 
-    bin0_syst = bin0_2017_syst + bin0_2018_syst
-    bin1_syst = bin1_2017_syst + bin1_2018_syst
-    bin2_syst = bin2_2017_syst + bin2_2018_syst
+    # All rel syst uncertainties taken from the combine card, with stat uncs fully uncorrelated across years
+    # and syst shift fully correlated across years within a single bin.
+    # Note bin 1 syst was anticorrelated with the others, hence <1 and the "1-"
+    bin0_2017_syst_uncorr = 0.173*h17.Integral(*bin0_range)
+    bin1_2017_syst_uncorr = 0.216*h17.Integral(*bin1_range)
+    bin2_2017_syst_uncorr = 0.454*h17.Integral(*bin2_range)
+
+    bin0_2017_syst_corr = (1-0.743)*h17.Integral(*bin0_range)
+    bin1_2017_syst_corr = 0.338*h17.Integral(*bin1_range)
+    bin2_2017_syst_corr = 0.389*h17.Integral(*bin2_range)
+
+    bin0_2018_syst_uncorr = 0.217*h18.Integral(*bin0_range)
+    bin1_2018_syst_uncorr = 0.238*h18.Integral(*bin1_range)
+    bin2_2018_syst_uncorr = 0.586*h18.Integral(*bin2_range)
+
+    bin0_2018_syst_corr = (1-0.766)*h18.Integral(*bin0_range)
+    bin1_2018_syst_corr = 0.315*h18.Integral(*bin1_range)
+    bin2_2018_syst_corr = 0.760*h18.Integral(*bin2_range)
+
+    bin0_tot = h17.Integral(*bin0_range) + h18.Integral(*bin0_range)
+    bin1_tot = h17.Integral(*bin1_range) + h18.Integral(*bin1_range)
+    bin2_tot = h17.Integral(*bin2_range) + h18.Integral(*bin2_range)
+
+    bin0_syst_uncorr = math.sqrt(bin0_2017_stat**2 + bin0_2018_stat**2)
+    bin1_syst_uncorr = math.sqrt(bin1_2017_stat**2 + bin1_2018_stat**2)
+    bin2_syst_uncorr = math.sqrt(bin2_2017_stat**2 + bin2_2018_stat**2)
+
+    bin0_syst_corr = bin0_2017_syst_corr + bin0_2018_syst_corr
+    bin1_syst_corr = bin1_2017_syst_corr + bin1_2018_syst_corr
+    bin2_syst_corr = bin2_2017_syst_corr + bin2_2018_syst_corr
+
+    bin0_syst = math.sqrt(bin0_syst_uncorr**2 + bin0_syst_corr**2)
+    bin1_syst = math.sqrt(bin1_syst_uncorr**2 + bin1_syst_corr**2)
+    bin2_syst = math.sqrt(bin2_syst_uncorr**2 + bin2_syst_corr**2)
 
     print "0-400 um:   %.3f \pm %.3f (stat) \pm %.3f (syst)" % (round(bin0_tot,3), round(bin0_stat,3), round(bin0_syst,3))
     print "400-700 um: %.3f \pm %.3f (stat) \pm %.3f (syst)" % (round(bin1_tot,3), round(bin1_stat,3), round(bin1_syst,3))
