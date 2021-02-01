@@ -77,6 +77,8 @@ def fmt(z, title, color, style, xsec=None, save=[]):
         # years are correlated ==> add errors linearly rather than adding in quadrature
         abs_err_per_bin_tot = tuple(map(lambda err17, err18 : err17 + err18, abs_err_per_bin_2017, abs_err_per_bin_2018))
 
+        print ""
+        print name
         for ibin, (val, err) in enumerate(zip(yield_per_bin_tot, abs_err_per_bin_tot)) :
             print("bin %i: %.2f \pm %.2f" % (ibin, val, round(err,2)))
 
@@ -84,8 +86,59 @@ def fmt(z, title, color, style, xsec=None, save=[]):
     save.append(h)
     return h
 
-hbkg = fmt(f.Get('h_bkg_dvv_2017'), 'bkg_2017', ROOT.kBlack, ROOT.kSolid)
+def print_bkg_table(h17,h18) :
+    print ""
+    print "2017 bkg: total of %.3f events" % round(h17.Integral(0,h17.GetNbinsX()+2),3)
+    print "2018 bkg: total of %.3f events" % round(h18.Integral(0,h18.GetNbinsX()+2),3)
+    print ""
+
+    bin0_range = (0,h17.FindBin(0.4)-1)
+    bin1_range = (h17.FindBin(0.4),h17.FindBin(0.7)-1)
+    bin2_range = (h17.FindBin(0.7),h17.GetNbinsX()+2)
+
+    # All uncertainties taken from the combine card, with stat uncs fully uncorrelated across years
+    # and syst shift fully correlated across years within a single bin.
+    # Note bin 1 syst was anticorrelated with the others, hence <1 and the "1-"
+    bin0_2017_stat = 0.173*h17.Integral(*bin0_range)
+    bin1_2017_stat = 0.216*h17.Integral(*bin1_range)
+    bin2_2017_stat = 0.454*h17.Integral(*bin2_range)
+
+    bin0_2017_syst = (1-0.743)*h17.Integral(*bin0_range)
+    bin1_2017_syst = 0.338*h17.Integral(*bin1_range)
+    bin2_2017_syst = 0.389*h17.Integral(*bin2_range)
+
+    bin0_2018_stat = 0.217*h18.Integral(*bin0_range)
+    bin1_2018_stat = 0.238*h18.Integral(*bin1_range)
+    bin2_2018_stat = 0.586*h18.Integral(*bin2_range)
+
+    bin0_2018_syst = (1-0.766)*h18.Integral(*bin0_range)
+    bin1_2018_syst = 0.315*h18.Integral(*bin1_range)
+    bin2_2018_syst = 0.760*h18.Integral(*bin2_range)
+
+    bin0_tot = h17.Integral(*bin0_range) + h18.Integral(*bin0_range)
+    bin1_tot = h17.Integral(*bin1_range) + h18.Integral(*bin1_range)
+    bin2_tot = h17.Integral(*bin2_range) + h18.Integral(*bin2_range)
+
+    bin0_stat = math.sqrt(bin0_2017_stat**2 + bin0_2018_stat**2)
+    bin1_stat = math.sqrt(bin1_2017_stat**2 + bin1_2018_stat**2)
+    bin2_stat = math.sqrt(bin2_2017_stat**2 + bin2_2018_stat**2)
+
+    bin0_syst = bin0_2017_syst + bin0_2018_syst
+    bin1_syst = bin1_2017_syst + bin1_2018_syst
+    bin2_syst = bin2_2017_syst + bin2_2018_syst
+
+    print "0-400 um:   %.3f \pm %.3f (stat) \pm %.3f (syst)" % (round(bin0_tot,3), round(bin0_stat,3), round(bin0_syst,3))
+    print "400-700 um: %.3f \pm %.3f (stat) \pm %.3f (syst)" % (round(bin1_tot,3), round(bin1_stat,3), round(bin1_syst,3))
+    print "700-40 m:   %.3f \pm %.3f (stat) \pm %.3f (syst)" % (round(bin2_tot,3), round(bin2_stat,3), round(bin2_syst,3))
+    print ""
+
+
+
+hbkg2017 = fmt(f.Get('h_bkg_dvv_2017'), 'bkg_2017', ROOT.kBlack, ROOT.kSolid)
 hbkg2018 = fmt(f.Get('h_bkg_dvv_2018'), 'bkg_2018', ROOT.kBlack, ROOT.kSolid)
+print_bkg_table(hbkg2017, hbkg2018)
+
+hbkg = hbkg2017
 hbkg.Add(hbkg2018)
 hbkg.SetFillColor(ROOT.kGray)
 hbkg.SetFillStyle(3002)

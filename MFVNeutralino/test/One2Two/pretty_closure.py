@@ -68,10 +68,12 @@ for i in range(4):
     h.SetLineColor(ROOT.kBlue)
     h.SetLineWidth(3)
     h.Draw('hist')
-    print h.Integral()
-    print h.Integral(0,h.FindBin(0.4)-1)
-    print h.Integral(h.FindBin(0.4),h.FindBin(0.7)-1)
-    print h.Integral(h.FindBin(0.7),h.GetNbinsX()+2)
+
+    print "%s: total of %.3f events" % (ntk[i], round(h.Integral(0,h.GetNbinsX()+2),3))
+    print "0-400 um: %.3f" % round(h.Integral(0,h.FindBin(0.4)-1),3)
+    print "400-700 um: %.3f" % round(h.Integral(h.FindBin(0.4),h.FindBin(0.7)-1),3)
+    print "700 um - 40 mm: %.3f" % round(h.Integral(h.FindBin(0.7),h.GetNbinsX()+2),3)
+    print ""
 
     hh = poisson_intervalize(hh, zero_x=True, include_zero_bins='surrounded')
     hh.SetLineWidth(3)
