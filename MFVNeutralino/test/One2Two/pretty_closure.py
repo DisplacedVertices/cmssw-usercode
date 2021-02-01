@@ -3,16 +3,23 @@ from JMTucker.Tools.ROOTTools import *
 ROOT.TH1.AddDirectory(0)
 
 set_style()
-ps = plot_saver(plot_dir('pretty_closure'), size=(700,700), log=False, pdf=True)
+ps = plot_saver(plot_dir('pretty_closure_fixed'), size=(700,700), log=False, pdf=True)
 
 ps.c.SetBottomMargin(0.11)
 ps.c.SetLeftMargin(0.13)
 ps.c.SetRightMargin(0.06)
 
-default_names = ['2v_from_jets_data_2017p8_3track_default_V27m.root', '2v_from_jets_data_2017p8_7track_default_V27m.root', '2v_from_jets_data_2017p8_4track_default_V27m.root', '2v_from_jets_data_2017p8_5track_default_V27m.root']
-btag_corr_names = ['2v_from_jets_data_2017p8_3track_btag_corrected_nom_V27m.root', '2v_from_jets_data_2017p8_7track_btag_corrected_nom_V27m.root', '2v_from_jets_data_2017p8_4track_btag_corrected_nom_V27m.root', '2v_from_jets_data_2017p8_5track_btag_corrected_nom_V27m.root']
-fns = [os.path.join('/uscms/home/dquach/public', fn) for fn in default_names]
-btag_fns = [os.path.join('/uscms/home/dquach/public', fn) for fn in btag_corr_names]
+# "default" is used to get the data observation, which doesn't care about template construction,
+# while the "btag_corr" has our corrected template, and needs to be added properly
+default_names_2017 = ['2v_from_jets_data_2017_3track_default_V27m.root', '2v_from_jets_data_2017_7track_default_V27m.root', '2v_from_jets_data_2017_4track_default_V27m.root', '2v_from_jets_data_2017_5track_default_V27m.root']
+default_names_2018 = ['2v_from_jets_data_2018_3track_default_V27m.root', '2v_from_jets_data_2018_7track_default_V27m.root', '2v_from_jets_data_2018_4track_default_V27m.root', '2v_from_jets_data_2018_5track_default_V27m.root']
+btag_corr_names_2017 = ['2v_from_jets_data_2017_3track_btag_corrected_nom_V27m.root', '2v_from_jets_data_2017_7track_btag_corrected_nom_V27m.root', '2v_from_jets_data_2017_4track_btag_corrected_nom_V27m.root', '2v_from_jets_data_2017_5track_btag_corrected_nom_V27m.root']
+btag_corr_names_2018 = ['2v_from_jets_data_2018_3track_btag_corrected_nom_V27m.root', '2v_from_jets_data_2018_7track_btag_corrected_nom_V27m.root', '2v_from_jets_data_2018_4track_btag_corrected_nom_V27m.root', '2v_from_jets_data_2018_5track_btag_corrected_nom_V27m.root']
+
+fns_2017 = [os.path.join('/uscms/home/dquach/public', fn) for fn in default_names_2017]
+fns_2018 = [os.path.join('/uscms/home/dquach/public', fn) for fn in default_names_2018]
+btag_fns_2017 = [os.path.join('/uscms/home/dquach/public', fn) for fn in btag_corr_names_2017]
+btag_fns_2018 = [os.path.join('/uscms/home/dquach/public', fn) for fn in btag_corr_names_2018]
 ntk = ['3track3track', '4track3track', '4track4track', '5track5track']
 names = ['3-track x 3-track', '4-track x 3-track', '4-track x 4-track', '#geq5-track x #geq5-track']
 ymax = [70, 35, 9, 0.3]
@@ -26,12 +33,26 @@ def write(font, size, x, y, text):
     return w
 
 for i in range(4):
-    hh = ROOT.TFile(fns[i]).Get('h_2v_dvv')
-    h = ROOT.TFile(btag_fns[i]).Get('h_c1v_dvv')
-    if hh.Integral() > 0:
-        h.Scale(hh.Integral()/h.Integral())
+    hh_2017 = ROOT.TFile(fns_2017[i]).Get('h_2v_dvv')
+    hh_2018 = ROOT.TFile(fns_2018[i]).Get('h_2v_dvv')
+    h_2017 = ROOT.TFile(btag_fns_2017[i]).Get('h_c1v_dvv')
+    h_2018 = ROOT.TFile(btag_fns_2018[i]).Get('h_c1v_dvv')
+
+    if hh_2017.Integral() > 0:
+        h_2017.Scale(hh_2017.Integral()/h_2017.Integral())
     else:
-        h.Scale(0.342/h.Integral())
+        h_2017.Scale(0.241/h_2017.Integral()) # predicted 5x5 value for 2017
+
+    if hh_2018.Integral() > 0:
+        h_2018.Scale(hh_2018.Integral()/h_2018.Integral())
+    else:
+        h_2018.Scale(0.111/h_2018.Integral()) # predicted 5x5 value for 2018
+
+    # now add the 2017 and 2018 components together
+    h = h_2017
+    h.Add(h_2018)
+    hh = hh_2017
+    hh.Add(hh_2018)
 
     hh = cm2mm(hh)
     h = cm2mm(h)
