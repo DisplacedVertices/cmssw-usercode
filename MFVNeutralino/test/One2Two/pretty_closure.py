@@ -31,7 +31,7 @@ for i in range(4):
     if hh.Integral() > 0:
         h.Scale(hh.Integral()/h.Integral())
     else:
-        h.Scale(0.34/h.Integral())
+        h.Scale(0.342/h.Integral())
 
     hh = cm2mm(hh)
     h = cm2mm(h)
@@ -47,6 +47,10 @@ for i in range(4):
     h.SetLineColor(ROOT.kBlue)
     h.SetLineWidth(3)
     h.Draw('hist')
+    print h.Integral()
+    print h.Integral(0,h.FindBin(0.4)-1)
+    print h.Integral(h.FindBin(0.4),h.FindBin(0.7)-1)
+    print h.Integral(h.FindBin(0.7),99999999)
 
     hh = poisson_intervalize(hh, zero_x=True, include_zero_bins='surrounded')
     hh.SetLineWidth(3)
