@@ -24,9 +24,9 @@ def do_swap_axes(obj) :
         ybins = obj.GetYaxis().GetXbins().GetArray()
 
         hnew = ROOT.TH2D("swap","swap",nbiny,ybins,nbinx,xbins)
-        # FIXME I always forget if it's nbins+1 or +2, so fix it before sending it off
-        for ibinx in xrange(1,nbinx+1) :
-            for ibiny in xrange(1,nbiny+1) :
+        
+        for ibinx in xrange(1,nbinx+2) :
+            for ibiny in xrange(1,nbiny+2) :
                 content = obj.GetBinContent(ibinx, ibiny)
                 hnew.SetBinContent(ibiny, ibinx, content)
 

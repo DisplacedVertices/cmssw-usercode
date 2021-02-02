@@ -6,7 +6,7 @@ from JMTucker.Tools import Samples
 from JMTucker.MFVNeutralino.PerSignal import PerSignal
 
 set_style()
-version = 'V23m'
+version = 'V27m'
 ps = plot_saver(plot_dir('sigeff_%s' % version), size=(600,600), pdf=True, log=False)
 
 multijet = Samples.mfv_signal_samples_2017
