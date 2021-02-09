@@ -3,7 +3,7 @@ from JMTucker.Tools.ROOTTools import *
 ROOT.TH1.AddDirectory(0)
 
 set_style()
-ps = plot_saver(plot_dir('pretty_closure_fixed'), size=(700,700), log=False, pdf=True)
+ps = plot_saver(plot_dir('pretty_closure_fixed_ytitleoffset'), size=(700,700), log=False, pdf=True)
 
 ps.c.SetBottomMargin(0.11)
 ps.c.SetLeftMargin(0.13)
@@ -62,7 +62,7 @@ for i in range(4):
     h.GetXaxis().SetLabelSize(0.045)
     h.GetYaxis().SetTitleSize(0.05)
     h.GetYaxis().SetLabelSize(0.045)
-    h.GetYaxis().SetTitleOffset(1.2)
+    h.GetYaxis().SetTitleOffset(1.3)
     h.GetYaxis().SetRangeUser(0,ymax[i])
     h.SetStats(0)
     h.SetLineColor(ROOT.kBlue)
