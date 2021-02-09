@@ -75,8 +75,8 @@ for kind in kinds:
         c.SetLogx()
     c.SetTopMargin(0.1)
     c.SetBottomMargin(0.12)
-    c.SetLeftMargin(0.11)
-    c.SetRightMargin(0.1)
+    c.SetLeftMargin(0.125)
+    c.SetRightMargin(0.085)
 
     observed = f.Get('%s/observed' % kind)
     expect50 = f.Get('%s/expect50' % kind)
@@ -151,7 +151,7 @@ for kind in kinds:
         xax.SetLabelOffset(0.002)
     xax.SetTitleOffset(1.1)
     yax = g.GetYaxis()
-    yax.SetTitleOffset(1.03)
+    yax.SetTitleOffset(1.18)
     yax.SetTitleSize(0.05)
     yax.SetLabelSize(0.045)
 
@@ -198,7 +198,8 @@ for kind in kinds:
 #        leg = ROOT.TLegend(0.552, 0.563, 0.870, 0.867)
 #    else:
 #        leg = ROOT.TLegend(0.552, 0.603, 0.870, 0.867)
-    leg = ROOT.TLegend(0.567, 0.563, 0.870, 0.867)
+    xoffset = 0.015
+    leg = ROOT.TLegend(0.567+xoffset, 0.565, 0.870+xoffset, 0.869)
     leg.SetTextFont(42)
     leg.SetFillColor(ROOT.kWhite)
     leg.SetBorderSize(0)
@@ -215,14 +216,14 @@ for kind in kinds:
         leg.AddEntry(theory2, nice_theory(kind,2) + ', #bf{#it{#Beta}}=1', 'LF')
     leg.Draw()
 
-    cms = write(61, 0.050, 0.11, 0.913, 'CMS')
-    lum = write(42, 0.050, 0.548, 0.913, '%s fb^{-1} (13 TeV)' % intlumi)
+    cms = write(61, 0.050, 0.11+xoffset, 0.913, 'CMS')
+    lum = write(42, 0.050, 0.548+xoffset, 0.913, '%s fb^{-1} (13 TeV)' % intlumi)
     fn = os.path.join(path, 'limit1d_' + kind)
     c.SaveAs(fn + '.pdf')
     c.SaveAs(fn + '.png')
     c.SaveAs(fn + '.root')
 
-    pre = write(52, 0.047, 0.215, 0.913, 'Preliminary')
+    pre = write(52, 0.047, 0.215+xoffset, 0.913, 'Preliminary')
     c.SaveAs(fn + '_prelim.pdf')
     c.SaveAs(fn + '_prelim.png')
     c.SaveAs(fn + '_prelim.root')
