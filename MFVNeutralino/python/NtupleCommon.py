@@ -3,7 +3,7 @@ from JMTucker.Tools.Year import year
 
 #ntuple_version_ = 'Vtrackpt0p5_dxy2_2'
 #ntuple_version_ = 'Vtracktreev4'
-ntuple_version_ = 'V37_ntkseed_5'
+ntuple_version_ = 'V38'
 use_btag_triggers = False
 use_MET_triggers = True
 if use_btag_triggers : 
@@ -51,6 +51,7 @@ def prepare_vis(process, mode, settings, output_commands):
             'keep *_mfvVertexRefitsDrop0_*_*',
             'keep *_mfvVertexTracks_*_*',
             'keep *_mfvSelectedVerticesExtraLoose_*_*',
+            'keep *_mfvGenParticles_*_*',
             ]
 
         if settings.is_mc:
@@ -90,7 +91,7 @@ def minitree_only(process, mode, settings, output_commands):
 def event_filter(process, mode, settings, output_commands, **kwargs):
     if mode:
         from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-        setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode, **kwargs)
+        setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode, event_filter_require_vertex = False, **kwargs)
 
 ########################################################################
 
@@ -296,7 +297,7 @@ def miniaod_ntuple_process(settings):
                          process.mfvTriggerFloats *
                          process.jmtUnpackedCandidateTracks *
                          process.mfvVertexSequence *
-                         #process.mfvTrackTree *
+                         process.mfvTrackTree *
                          process.prefiringweight *
                          process.mfvEvent)
 

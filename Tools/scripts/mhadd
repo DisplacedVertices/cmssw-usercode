@@ -12,7 +12,7 @@ parser = argparse.ArgumentParser(description = 'mhadd: hadd the files from condo
 
 parser.add_argument('positional', nargs='*', help='The condor/crab directories.')
 
-parser.add_argument('--chunk-size', default=900, type=int,
+parser.add_argument('--chunk_size', default=900, type=int,
                     help='The maximum number files hadded at once.')
 parser.add_argument('--pattern',
                     help='Glob-style pattern to filter the files, useful if there are multiple files output per job.')

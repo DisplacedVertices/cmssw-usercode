@@ -2,8 +2,10 @@
 #include "CLHEP/Random/RandBinomial.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
+#include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/PatCandidates/interface/PackedCandidate.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -26,12 +28,15 @@ public:
   virtual bool filter(edm::Event&, const edm::EventSetup&);
 
 private:
+  bool match_track_jet(const reco::Track& tk, const pat::Jet& jet);
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const bool use_primary_vertices;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
   const bool disregard_event;
   const bool use_tracks;
   const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
+  const bool match_jets;
+  const edm::EDGetTokenT<pat::JetCollection> match_jet_token;
   const bool use_non_pv_tracks;
   const bool use_non_pvs_tracks;
   const bool use_pf_candidates;
@@ -46,9 +51,11 @@ private:
   const bool no_track_cuts;
   const double min_seed_jet_pt;
   const double min_track_pt;
+  const double min_track_pt_loose;
   const double min_track_dxy;
   const double min_track_sigmadxy;
   const double min_track_rescaled_sigmadxy;
+  const double min_track_rescaled_sigmadxy_loose;
   const double min_track_sigmadxypv;
   const int min_track_hit_r;
   const int min_track_nhits;
@@ -107,6 +114,8 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
     disregard_event(cfg.getParameter<bool>("disregard_event")),
     use_tracks(cfg.getParameter<bool>("use_tracks")),
     tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("tracks_src"))),
+    match_jets(cfg.getParameter<bool>("match_jets")),
+    match_jet_token(match_jets ? consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("match_jet_src")) : edm::EDGetTokenT<pat::JetCollection>()),
     use_non_pv_tracks(cfg.getParameter<bool>("use_non_pv_tracks")),
     use_non_pvs_tracks(cfg.getParameter<bool>("use_non_pvs_tracks")),
     use_pf_candidates(cfg.getParameter<bool>("use_pf_candidates")),
@@ -121,9 +130,11 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
     no_track_cuts(cfg.getParameter<bool>("no_track_cuts")),
     min_seed_jet_pt(cfg.getParameter<double>("min_seed_jet_pt")),
     min_track_pt(cfg.getParameter<double>("min_track_pt")),
+    min_track_pt_loose(cfg.getParameter<double>("min_track_pt_loose")),
     min_track_dxy(cfg.getParameter<double>("min_track_dxy")),
     min_track_sigmadxy(cfg.getParameter<double>("min_track_sigmadxy")),
     min_track_rescaled_sigmadxy(cfg.getParameter<double>("min_track_rescaled_sigmadxy")),
+    min_track_rescaled_sigmadxy_loose(cfg.getParameter<double>("min_track_rescaled_sigmadxy_loose")),
     min_track_sigmadxypv(cfg.getParameter<double>("min_track_sigmadxypv")),
     min_track_hit_r(cfg.getParameter<int>("min_track_hit_r")),
     min_track_nhits(cfg.getParameter<int>("min_track_nhits")),
@@ -233,6 +244,7 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
   std::unique_ptr<std::vector<reco::TrackRef>> all_tracks (new std::vector<reco::TrackRef>);
   std::unique_ptr<std::vector<reco::TrackRef>> seed_tracks(new std::vector<reco::TrackRef>);
   std::unique_ptr<reco::TrackCollection> seed_tracks_copy(new reco::TrackCollection);
+  std::vector<reco::TrackRef> seed_track_loose;
 
   if (!disregard_event) {
     if (use_tracks) {
@@ -435,6 +447,23 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
       seed_tracks->push_back(tk);
       seed_tracks_copy->push_back(*tk);
     }
+    else if (match_jets){
+      const bool use_loose =
+        pt > min_track_pt_loose &&
+        fabs(dxybs) > min_track_dxy &&
+        dxyerr < max_track_dxyerr &&
+        fabs(sigmadxybs) > min_track_sigmadxy &&
+        fabs(rescaled_sigmadxybs) > min_track_rescaled_sigmadxy_loose &&
+        fabs(sigmadxypv) > min_track_sigmadxypv &&
+        nhits >= min_track_nhits &&
+        npxhits >= min_track_npxhits &&
+        npxlayers >= min_track_npxlayers &&
+        nstlayers >= min_track_nstlayers &&
+        (min_track_hit_r == 999 || min_r <= min_track_hit_r);
+      if (use_loose){
+        seed_track_loose.push_back(tk);
+      }
+    }
 
     if (verbose) {
       printf("track %5lu: pt: %10.3f +- %10.3f eta: %10.3f +- %10.3f phi: %10.3f +- %10.3f dxy: %10.5f +- %10.5f (-> nsig %5.3f, rescaled: %10.5f +- %10.5f -> nsig %10.3f) dz: %10.3f +- %10.3f nhits: %3i/%3i/%3i nlayers: %3i/%3i/%3i ", i, pt, tk->ptError(), tk->eta(), tk->etaError(), tk->phi(), tk->phiError(), dxybs, dxyerr, fabs(sigmadxybs), dxybs, rescaled_dxyerr, fabs(rescaled_sigmadxybs), tk->dz(), tk->dzError(), npxhits, nsthits, nhits, npxlayers, nstlayers, npxlayers + nstlayers);
@@ -502,6 +531,47 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
       }
     }
   }
+  if (match_jets){
+    if(verbose){
+      std::cout << "seed tracks before matching with jets: ";
+      for (const auto& tk:*seed_tracks){
+        std::cout << " " << tk.key();
+      }
+      std::cout << std::endl;
+    }
+    edm::Handle<pat::JetCollection> jets;
+    event.getByToken(match_jet_token, jets);
+    std::set<size_t> decay_jets;
+    for (size_t itk=0; itk<seed_tracks->size(); ++itk){
+      for (size_t j=0; j<jets->size(); ++j){
+        if (match_track_jet(*(*seed_tracks)[itk], (*jets)[j])){
+          decay_jets.insert(j);
+          if(verbose)
+            std::cout << "track " << (*seed_tracks)[itk].key() << " matched with jet " << j << std::endl;
+        }
+      }
+    }
+    if(verbose){
+      std::cout << "matched jets: ";
+      for (const auto& j:decay_jets){
+        std::cout << " " << j;
+      }
+      std::cout << std::endl;
+    }
+    for (const reco::TrackRef& itk:seed_track_loose){
+      for (size_t j:decay_jets){
+        if(verbose)
+          std::cout << "trying to match track " << itk.key() << " with jet " << j << std::endl;
+        if (match_track_jet(*itk, (*jets)[j])){
+          if(verbose)
+            std::cout << "  track matched, adding to seed tracks: " << itk.key() << std::endl;
+          seed_tracks->push_back(itk);
+          seed_tracks_copy->push_back(*itk);
+          break;
+        }
+      }
+    }
+  }
 
   if (verbose)
     printf("n_all_tracks: %5lu   n_seed_tracks: %5lu\n", all_tracks->size(), seed_tracks->size());
@@ -517,6 +587,43 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
   event.put(std::move(seed_tracks_copy), "seed");
 
   return pass_min_n_seed_tracks;
+}
+
+bool MFVVertexTracks::match_track_jet(const reco::Track& tk, const pat::Jet& jet){
+  //if (reco::deltaR2(tk, jet)>0.16) return false;
+  if (verbose){
+    std::cout << "jet track matching..." << std::endl;
+    std::cout << "  target track pt " << tk.pt() << " eta " << tk.eta() << " phi " << tk.phi() << std::endl;
+  }
+  double match_thres = 1.3;
+  for (size_t idau = 0, idaue = jet.numberOfDaughters(); idau < idaue; ++idau) {
+    const reco::Candidate* dau = jet.daughter(idau);
+    if (dau->charge() == 0)
+      continue;
+    const reco::Track* jtk = 0;
+    const reco::PFCandidate* pf = dynamic_cast<const reco::PFCandidate*>(dau);
+    if (pf) {
+      const reco::TrackRef& r = pf->trackRef();
+      if (r.isNonnull())
+        jtk = &*r;
+    }
+    else {
+      const pat::PackedCandidate* pk = dynamic_cast<const pat::PackedCandidate*>(dau);
+      if (pk && pk->charge() && pk->hasTrackDetails())
+        jtk = &pk->pseudoTrack();
+    }
+    if (jtk){
+      double a = fabs(tk.pt()-jtk->pt())+1;
+      double b = fabs(tk.eta()-jtk->eta())+1;
+      double c = fabs(tk.phi()-jtk->phi())+1;
+      if (verbose)
+        std::cout << "  jet track pt " << jtk->pt() << " eta " << jtk->eta() << " phi " << jtk->phi() << " match abc " << a*b*c << std::endl;
+      if (a*b*c < match_thres){
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 DEFINE_FWK_MODULE(MFVVertexTracks);

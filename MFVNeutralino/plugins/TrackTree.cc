@@ -4,6 +4,7 @@
 #include "CLHEP/Random/RandomEngine.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
+#include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
@@ -20,6 +21,7 @@
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "JMTucker/Tools/interface/AnalysisEras.h"
 #include "JMTucker/Tools/interface/TrackRescaler.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/MCInteractions.h"
 
 struct eventInfo
 {
@@ -48,6 +50,7 @@ struct eventInfo
   std::vector <double> tk_ip2D_err_genvtx_0;
   std::vector <double> tk_ip2D_err_genvtx_1;
   std::vector <double> tk_is_seed;
+  std::vector <int> tk_whichLLP;
 
 };
 
@@ -57,6 +60,25 @@ class MFVTrackTree : public edm::EDAnalyzer {
     void analyze(const edm::Event&, const edm::EventSetup&);
 
   private:
+    void visitdaughters(const reco::Candidate* dau, int whichLLP, int rank=0){
+      if(verbose)
+        std::cout << "  rank "<<rank<<"  id " << dau->pdgId() << " status " << dau->status() << " isjet " << dau->isJet() << " pt " << dau->pt() << " eta " << dau->eta() << " phi " << dau->phi() << std::endl;
+      if (dau->numberOfDaughters()){
+        if(verbose)
+          std::cout << "daughter of " << dau->pdgId() << std::endl;
+        for (size_t i=0; i<dau->numberOfDaughters(); ++i){
+          visitdaughters(dau->daughter(i), whichLLP, rank+1);
+        }
+      }
+      else{
+        if (verbose)
+          std::cout << "final particle" << std::endl;
+        if ( (dau->status()<=3) || ( (dau->status()>=21) && (dau->status()<=29) ) || ( (dau->status()>=11) && (dau->status()<=19) ) )
+          LLP_daus[whichLLP].insert(dau);
+      }
+    }
+
+
     virtual void beginJob() override;
     virtual void endJob() override;
     void initEventStructure();
@@ -69,6 +91,7 @@ class MFVTrackTree : public edm::EDAnalyzer {
     const bool use_primary_vertices;
     const edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
     const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
+    const edm::EDGetTokenT<mfv::MCInteraction> mci_token;
     const bool no_track_cuts;
     const double min_track_pt;
     const double min_track_dxy;
@@ -83,8 +106,10 @@ class MFVTrackTree : public edm::EDAnalyzer {
     const double max_track_dxyerr;
     const double max_track_dxyipverr;
     const double max_track_d3dipverr;
+    std::set<const reco::Candidate*> LLP_daus[2];
 
     jmt::TrackRescaler track_rescaler;
+    bool verbose;
 
 };
 
@@ -94,6 +119,7 @@ MFVTrackTree::MFVTrackTree(const edm::ParameterSet& cfg)
     use_primary_vertices(cfg.getParameter<edm::InputTag>("primary_vertices_src").label() != ""),
     primary_vertices_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertices_src"))),
     tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("tracks_src"))),
+    mci_token(consumes<mfv::MCInteraction>(cfg.getParameter<edm::InputTag>("mci_src"))),
     no_track_cuts(cfg.getParameter<bool>("no_track_cuts")),
     min_track_pt(cfg.getParameter<double>("min_track_pt")),
     min_track_dxy(cfg.getParameter<double>("min_track_dxy")),
@@ -107,14 +133,19 @@ MFVTrackTree::MFVTrackTree(const edm::ParameterSet& cfg)
     min_track_nstlayers(cfg.getParameter<int>("min_track_nstlayers")),
     max_track_dxyerr(cfg.getParameter<double>("max_track_dxyerr")),
     max_track_dxyipverr(cfg.getParameter<double>("max_track_dxyipverr")),
-    max_track_d3dipverr(cfg.getParameter<double>("max_track_d3dipverr"))
+    max_track_d3dipverr(cfg.getParameter<double>("max_track_d3dipverr")),
+    verbose(cfg.getParameter<bool>("verbose"))
 {
   evInfo = new eventInfo;
 }
 
 void MFVTrackTree::analyze(const edm::Event& event, const edm::EventSetup& setup) {
+  if (verbose)
+    std::cout << "MFVTrackTree:: event id: " << event.id().event() << std::endl;
   
   initEventStructure();
+  LLP_daus[0].clear();
+  LLP_daus[1].clear();
 
   const int track_rescaler_which = jmt::TrackRescaler::w_JetHT; // JMTBAD which rescaling if ever a different one
   track_rescaler.setup(!event.isRealData() && track_rescaler_which != -1 && min_track_rescaled_sigmadxy > 0,
@@ -151,6 +182,40 @@ void MFVTrackTree::analyze(const edm::Event& event, const edm::EventSetup& setup
   edm::ESHandle<TransientTrackBuilder> tt_builder;
   setup.get<TransientTrackRecord>().get("TransientTrackBuilder", tt_builder);
 
+  edm::Handle<mfv::MCInteraction> mci;
+  event.getByToken(mci_token, mci);
+  if (mci->valid()){
+    assert(mci->primaries().size() == 2);
+    for (int i=0; i<2; ++i){
+      auto secondaries = mci->secondaries(i);
+      if(verbose)
+        std::cout << "LLP" << i << std::endl;
+      for (unsigned int i_secondary = 0; i_secondary < secondaries.size(); ++i_secondary){
+        const reco::GenParticleRef& s = secondaries[i_secondary];
+        if (s->pdgId()!=1000022)
+          LLP_daus[i].insert(&*s);
+        if (verbose)
+          std::cout << "LLP secondary " << s->pdgId() << " status " << s->status() << " isJet " << s->isJet() << " pt " << s->pt() << " eta " << s->eta() << " phi " << s->phi() << std::endl;
+        //if(abs(s->pdgId()) != 5 && abs(s->pdgId()) != 24){
+        if (1){
+          for(unsigned int i_dau = 0; i_dau < s->numberOfDaughters(); ++i_dau){
+            auto dau = s->daughter(i_dau);
+            visitdaughters(dau,i);
+          }
+        }
+      }
+    }
+  }
+  if(1){
+    std::cout << "LLP0 final daughter:" << LLP_daus[0].size()<<std::endl;
+    for (const auto&dau:LLP_daus[0]){
+      std::cout << " pdgid " << dau->pdgId() << " pt " << dau->pt() << " eta " << dau->eta() << " phi " << dau->phi() << std::endl;
+    }
+    std::cout << "LLP final daughter:" << LLP_daus[1].size()<<std::endl;
+    for (const auto&dau:LLP_daus[1]){
+      std::cout << " pdgid " << dau->pdgId() << " pt " << dau->pt() << " eta " << dau->eta() << " phi " << dau->phi() << std::endl;
+    }
+  }
 
   edm::Handle<reco::TrackCollection> tracks;
   event.getByToken(tracks_token, tracks);
@@ -217,9 +282,48 @@ void MFVTrackTree::analyze(const edm::Event& event, const edm::EventSetup& setup
 
     if (use) {
       evInfo->tk_is_seed.push_back(1);
+      double mindr = 999;
+      for (int illp=0; illp<2; ++illp){
+        for(const auto& dau:LLP_daus[illp]){
+          double dr2 = reco::deltaR2(tk->eta(), tk->phi(), dau->eta(), dau->phi());
+          if (dr2<mindr){
+            mindr = dr2;
+            
+          }
+        }
+      }
+      std::cout << "seed tracks matched with dr2 " << mindr <<" eta " << tk->eta() << " phi " << tk->phi()<< std::endl;
     }
     else
       evInfo->tk_is_seed.push_back(0);
+
+    double match_thres = 0.16;
+    bool match[2] = {false, false};
+    for (int illp=0; illp<2; ++illp){
+      for(const auto& dau:LLP_daus[illp]){
+        if ((dau->pdgId()!=21)&&(dau->pdgId()>=10))
+          continue;
+        double dr2 = reco::deltaR2(tk->eta(), tk->phi(), dau->eta(), dau->phi());
+        if (dr2<match_thres){
+          match[illp] = true;
+          break;
+        }
+      }
+    }
+    if (match[0]&match[1]){
+      evInfo->tk_whichLLP.push_back(2);
+    }
+    else if (match[0]){
+      evInfo->tk_whichLLP.push_back(0);
+    }
+    else if (match[1]){
+      evInfo->tk_whichLLP.push_back(1);
+    }
+    else{
+      evInfo->tk_whichLLP.push_back(-1);
+      if (use)
+        std::cout << "  track not matched " << std::endl;
+    }
 
     evInfo->tk_p.push_back(p);
     evInfo->tk_pt.push_back(pt);
@@ -300,6 +404,7 @@ void MFVTrackTree::beginJob()
   eventTree->Branch("tk_ip2D_err_genvtx_0", &evInfo->tk_ip2D_err_genvtx_0);
   eventTree->Branch("tk_ip2D_err_genvtx_1", &evInfo->tk_ip2D_err_genvtx_1);
   eventTree->Branch("tk_is_seed",       &evInfo->tk_is_seed);
+  eventTree->Branch("tk_whichLLP",      &evInfo->tk_whichLLP);
   
 }
 
@@ -333,5 +438,6 @@ void MFVTrackTree::initEventStructure()
   evInfo->tk_ip2D_err_genvtx_0.clear();
   evInfo->tk_ip2D_err_genvtx_1.clear();
   evInfo->tk_is_seed.clear();
+  evInfo->tk_whichLLP.clear();
 }
 DEFINE_FWK_MODULE(MFVTrackTree);
