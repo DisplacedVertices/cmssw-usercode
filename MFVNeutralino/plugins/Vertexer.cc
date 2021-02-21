@@ -709,96 +709,96 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       //  throw "I'm dumb";
     }
   }
-  track_set track_discard;
-  for (const reco::TrackRef& itk:all_seed_tracks){
-    bool used = false;
-    for (size_t i=0; i<vertices->size(); ++i){
-      const reco::Vertex& v = vertices->at(i);
-      const track_set vtk = vertex_track_set(v);
-      if (vtk.find(itk)!=vtk.end()){
-        used = true;
-        break;
-      }
-    }
-    if (!used){
-      track_discard.insert(itk);
-    }
-  }
-  if (false){
-  bool useful_tracks = true;
-  while (useful_tracks){
-    if (verbose){
-      std::cout << "discarded tracks: ";
-      print_track_set(track_discard);
-      std::cout << std::endl;
-    }
-    useful_tracks = false;
-    for (const reco::TrackRef& itk:track_discard){
-      const reco::TransientTrack& ttk = seed_tracks[seed_track_ref_map[itk]];
-      int v_assign = -1;
-      double v_assign_dist_sig = 999;
-      unsigned int v_assign_ntk = 0;
-      if (verbose){
-        std::cout << "For track " << itk.key() << std::endl;
-      }
-      for (size_t i=0; i<vertices->size(); ++i){
-        const reco::Vertex& v = vertices->at(i);
-        std::pair<bool, Measurement1D> t_dist = track_dist(ttk, v);
-        t_dist.first = t_dist.first && (t_dist.second.value() < max_track_vertex_dist || t_dist.second.significance() < max_track_vertex_sig); // whether it is too far away from the vtx
-        if (t_dist.first) {
-          if (t_dist.second.significance()<min_track_vertex_sig_to_remove){
-            if (v_assign_ntk<v.nTracks()){
-              v_assign = i;
-              v_assign_dist_sig = t_dist.second.significance();
-              v_assign_ntk = v.nTracks();
-            }
-          }
-          else if (t_dist.second.significance()<v_assign_dist_sig){
-            v_assign = i;
-            v_assign_dist_sig = t_dist.second.significance();
-            v_assign_ntk = v.nTracks();
-          }
-        }
-        
-        if (verbose){
-          std::cout << "  Track-vertex " << i << " " << t_dist.first << " dist: " << t_dist.second.value() << " sig: " << t_dist.second.significance() << std::endl;
-        }
-      }
-      if (verbose)
-        std::cout << "Track " << itk.key() << " assigned to " << v_assign << std::endl;
-      if (v_assign>=0){
-        useful_tracks = true;
-        track_discard.erase(itk);
-        if (verbose){
-          std::cout << "Fitting vertex " << v_assign << " with tracks: ";
-          print_track_set((*vertices)[v_assign]);
-          std::cout << " with added track " << itk.key() << std::endl;
-        }
-        std::vector<reco::TransientTrack> ttks;
-        for (auto tk:vertex_track_set((*vertices)[v_assign])){
-          ttks.push_back(seed_tracks[seed_track_ref_map[tk]]);
-        }
-        ttks.push_back(ttk);
-        reco::VertexCollection new_vertices;
-        for (const TransientVertex& tv : kv_reco_dropin(ttks))
-          new_vertices.push_back(reco::Vertex(tv));
-        if (verbose) {
-          printf("      got %lu new vertices out of the av fit for v%i\n", new_vertices.size(), v_assign);
-          printf("      these track sets:");
-          for (const auto& nv : new_vertices) {
-            printf(" (");
-            print_track_set(nv);
-            printf(" ),");
-          }
-          printf("\n");
-        }
-        if (new_vertices.size() == 1)
-          (*vertices)[v_assign] = new_vertices[0];
-        break;
-      }
-    }
-  }
-  }
+  //track_set track_discard;
+  //for (const reco::TrackRef& itk:all_seed_tracks){
+  //  bool used = false;
+  //  for (size_t i=0; i<vertices->size(); ++i){
+  //    const reco::Vertex& v = vertices->at(i);
+  //    const track_set vtk = vertex_track_set(v);
+  //    if (vtk.find(itk)!=vtk.end()){
+  //      used = true;
+  //      break;
+  //    }
+  //  }
+  //  if (!used){
+  //    track_discard.insert(itk);
+  //  }
+  //}
+  //if (false){
+  //bool useful_tracks = true;
+  //while (useful_tracks){
+  //  if (verbose){
+  //    std::cout << "discarded tracks: ";
+  //    print_track_set(track_discard);
+  //    std::cout << std::endl;
+  //  }
+  //  useful_tracks = false;
+  //  for (const reco::TrackRef& itk:track_discard){
+  //    const reco::TransientTrack& ttk = seed_tracks[seed_track_ref_map[itk]];
+  //    int v_assign = -1;
+  //    double v_assign_dist_sig = 999;
+  //    unsigned int v_assign_ntk = 0;
+  //    if (verbose){
+  //      std::cout << "For track " << itk.key() << std::endl;
+  //    }
+  //    for (size_t i=0; i<vertices->size(); ++i){
+  //      const reco::Vertex& v = vertices->at(i);
+  //      std::pair<bool, Measurement1D> t_dist = track_dist(ttk, v);
+  //      t_dist.first = t_dist.first && (t_dist.second.value() < max_track_vertex_dist || t_dist.second.significance() < max_track_vertex_sig); // whether it is too far away from the vtx
+  //      if (t_dist.first) {
+  //        if (t_dist.second.significance()<min_track_vertex_sig_to_remove){
+  //          if (v_assign_ntk<v.nTracks()){
+  //            v_assign = i;
+  //            v_assign_dist_sig = t_dist.second.significance();
+  //            v_assign_ntk = v.nTracks();
+  //          }
+  //        }
+  //        else if (t_dist.second.significance()<v_assign_dist_sig){
+  //          v_assign = i;
+  //          v_assign_dist_sig = t_dist.second.significance();
+  //          v_assign_ntk = v.nTracks();
+  //        }
+  //      }
+  //      
+  //      if (verbose){
+  //        std::cout << "  Track-vertex " << i << " " << t_dist.first << " dist: " << t_dist.second.value() << " sig: " << t_dist.second.significance() << std::endl;
+  //      }
+  //    }
+  //    if (verbose)
+  //      std::cout << "Track " << itk.key() << " assigned to " << v_assign << std::endl;
+  //    if (v_assign>=0){
+  //      useful_tracks = true;
+  //      track_discard.erase(itk);
+  //      if (verbose){
+  //        std::cout << "Fitting vertex " << v_assign << " with tracks: ";
+  //        print_track_set((*vertices)[v_assign]);
+  //        std::cout << " with added track " << itk.key() << std::endl;
+  //      }
+  //      std::vector<reco::TransientTrack> ttks;
+  //      for (auto tk:vertex_track_set((*vertices)[v_assign])){
+  //        ttks.push_back(seed_tracks[seed_track_ref_map[tk]]);
+  //      }
+  //      ttks.push_back(ttk);
+  //      reco::VertexCollection new_vertices;
+  //      for (const TransientVertex& tv : kv_reco_dropin(ttks))
+  //        new_vertices.push_back(reco::Vertex(tv));
+  //      if (verbose) {
+  //        printf("      got %lu new vertices out of the av fit for v%i\n", new_vertices.size(), v_assign);
+  //        printf("      these track sets:");
+  //        for (const auto& nv : new_vertices) {
+  //          printf(" (");
+  //          print_track_set(nv);
+  //          printf(" ),");
+  //        }
+  //        printf("\n");
+  //      }
+  //      if (new_vertices.size() == 1)
+  //        (*vertices)[v_assign] = new_vertices[0];
+  //      break;
+  //    }
+  //  }
+  //}
+  //}
 
 
   if (verbose)
@@ -959,7 +959,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   // Drop tracks that "move" the vertex too much by refitting without each track.
   //////////////////////////////////////////////////////////////////////
 
-  if (max_nm1_refit_dist3 > 0 || max_nm1_refit_distz > 0 || max_nm1_refit_distz_sig > 0) {
+  if (max_nm1_refit_dist3 > 0 || max_nm1_refit_distz > 0) {
+  //if (max_nm1_refit_dist3 > 0 || max_nm1_refit_distz > 0 || max_nm1_refit_distz_sig > 0) {
     std::vector<int> refit_count(vertices->size(), 0);
 
     int iv = 0;
@@ -987,21 +988,22 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         reco::Vertex vnm1(TransientVertex(kv_reco->vertex(ttks)));
         const double dist3_2 = mag2(vnm1.x() - v[0]->x(), vnm1.y() - v[0]->y(), vnm1.z() - v[0]->z());
         const double distz = mag(vnm1.z() - v[0]->z());
-        const double distz_error = sqrt(vnm1.covariance(2, 2) + v[0]->covariance(2, 2));
-        const double distz_sig = distz/distz_error;
-        if (histos){
-          h_noshare_nm1refit_dz->Fill(distz);
-          h_noshare_nm1refit_dz_err->Fill(distz_error);
-          h_noshare_nm1refit_dz_sig->Fill(distz_sig);
-          h_noshare_nm1refit_dz_dzerr->Fill(distz, distz_error);
-        }
-        if (verbose) printf("  refit %lu chi2 %7.4f vtx %7.4f %7.4f %7.4f dist3 %7.4f distz %7.4f distz_sig %7.4f\n", i, vnm1.chi2(), vnm1.x(), vnm1.y(), vnm1.z(), sqrt(dist3_2), distz, distz_sig);
+        //const double distz_error = sqrt(vnm1.covariance(2, 2) + v[0]->covariance(2, 2));
+        //const double distz_sig = distz/distz_error;
+        //if (histos){
+        //  h_noshare_nm1refit_dz->Fill(distz);
+        //  h_noshare_nm1refit_dz_err->Fill(distz_error);
+        //  h_noshare_nm1refit_dz_sig->Fill(distz_sig);
+        //  h_noshare_nm1refit_dz_dzerr->Fill(distz, distz_error);
+        //}
+        if (verbose) printf("  refit %lu chi2 %7.4f vtx %7.4f %7.4f %7.4f dist3 %7.4f distz %7.4f \n", i, vnm1.chi2(), vnm1.x(), vnm1.y(), vnm1.z(), sqrt(dist3_2), distz);
 
         if (vnm1.chi2() < 0 ||
             (max_nm1_refit_dist3 > 0 && mag2(vnm1.x() - v[0]->x(), vnm1.y() - v[0]->y(), vnm1.z() - v[0]->z()) > pow(max_nm1_refit_dist3, 2)) ||
-            (max_nm1_refit_distz > 0 && distz > max_nm1_refit_distz) || 
-            (max_nm1_refit_distz_error > 0 && distz_error > max_nm1_refit_distz_error) ||
-            (max_nm1_refit_distz_sig > 0 && distz_sig > max_nm1_refit_distz_sig)) {
+            (max_nm1_refit_distz > 0 && distz > max_nm1_refit_distz)) {
+            //(max_nm1_refit_distz > 0 && distz > max_nm1_refit_distz) || 
+            //(max_nm1_refit_distz_error > 0 && distz_error > max_nm1_refit_distz_error) ||
+            //(max_nm1_refit_distz_sig > 0 && distz_sig > max_nm1_refit_distz_sig)) {
           if (verbose) {
             printf("    replacing");
             if (refit_count[iv] < max_nm1_refit_count - 1)

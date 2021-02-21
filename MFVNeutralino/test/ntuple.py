@@ -20,7 +20,7 @@ else :
 
 process = ntuple_process(settings)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
-sample_files(process, 'mfv_splitSUSY_tau000010000um_M1400_1200_2017', dataset, 1)
+sample_files(process, 'mfv_splitSUSY_tau000001000um_M2000_1800_2017', dataset, -1)
 #sample_files(process, 'mfv_neu_tau001000um_M1600_year', dataset, 1)
 #sample_files(process, 'ttbar_year', dataset, 10)
 #sample_files(process, 'dyjetstollM50_year', dataset, 1)
