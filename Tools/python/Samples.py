@@ -331,6 +331,11 @@ mfv_stopdbardbar_samples_2018 = [
     MCSample('mfv_stopdbardbar_tau030000um_M3000_2018', '/StopStopbarTo2Dbar2D_M-3000_CTau-30mm_TuneCP2_13TeV_2018-pythia8/RunIIAutumn18DRPremix-102X_upgrade2018_realistic_v15-v1/AODSIM', 100000),
     ]
 
+mfv_splitSUSY_samples_sup_2017 = [
+  MCSample('mfv_splitSUSY_tau000001000um_M1400_1200_2017', '/mfv_splitSUSY_tau000001000um_M1400_1200_2017/None/USER', 10000),
+  MCSample('mfv_splitSUSY_tau000010000um_M1400_1200_2017', '/mfv_splitSUSY_tau000010000um_M1400_1200_2017/None/USER', 10000),
+]
+
 mfv_splitSUSY_samples_M2000_2017 = [
   MCSample('mfv_splitSUSY_tau000000000um_M2000_1800_2017', '/mfv_splitSUSY_tau000000000um_M2000_1800_2017/None/USER', 10000),
   MCSample('mfv_splitSUSY_tau000000300um_M2000_1800_2017', '/mfv_splitSUSY_tau000000300um_M2000_1800_2017/None/USER', 10000),
@@ -372,7 +377,7 @@ mfv_splitSUSY_samples_M2400_2017 = [
 ]
 
 
-mfv_splitSUSY_samples_2017 = mfv_splitSUSY_samples_M2000_2017 + mfv_splitSUSY_samples_M2400_2017
+mfv_splitSUSY_samples_2017 = mfv_splitSUSY_samples_M2000_2017 + mfv_splitSUSY_samples_M2400_2017 + mfv_splitSUSY_samples_sup_2017
 
 for s in mfv_splitSUSY_samples_2017:
     _set_signal_stuff(s)
@@ -683,6 +688,9 @@ _adbp('miniaod', '/StopStopbarTo2Dbar2D_M-1200_CTau-30mm_TuneCP2_13TeV_2018-pyth
 _adbp('miniaod', '/StopStopbarTo2Dbar2D_M-1600_CTau-30mm_TuneCP2_13TeV_2018-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM', 100000)
 _adbp('miniaod', '/StopStopbarTo2Dbar2D_M-3000_CTau-30mm_TuneCP2_13TeV_2018-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM', 100000)
 
+_adbp('miniaod', '/mfv_splitSUSY_tau000001000um_M1400_1200_2017/None/USER', 10000)
+_adbp('miniaod', '/mfv_splitSUSY_tau000010000um_M1400_1200_2017/None/USER', 10000)
+
 _adbp('miniaod', '/mfv_splitSUSY_tau000000000um_M2000_1800_2017/None/USER', 10000)
 _adbp('miniaod', '/mfv_splitSUSY_tau000000300um_M2000_1800_2017/None/USER', 10000)
 _adbp('miniaod', '/mfv_splitSUSY_tau100000000um_M2000_1800_2017/None/USER', 10000)
@@ -826,6 +834,9 @@ for x in qcdht0700_2017, qcdht1000_2017, qcdht1500_2017, qcdht2000_2017, wjetsto
 
 for x in qcdht0700_2017, qcdht1000_2017, qcdht1500_2017, qcdht2000_2017, wjetstolnu_2017, wjetstolnuext_2017, qcdht0200_2017, qcdht0300_2017, qcdht0500_2017, ttbar_2017, zjetstonunuht0100_2017, zjetstonunuht0200_2017, zjetstonunuht0400_2017, zjetstonunuht0600_2017, zjetstonunuht0800_2017, zjetstonunuht1200_2017, zjetstonunuht2500_2017, mfv_splitSUSY_tau000000000um_M2000_1800_2017, mfv_splitSUSY_tau000000300um_M2000_1800_2017, mfv_splitSUSY_tau100000000um_M2000_1800_2017, mfv_splitSUSY_tau010000000um_M2000_1800_2017, mfv_splitSUSY_tau001000000um_M2000_1800_2017, mfv_splitSUSY_tau000100000um_M2000_1800_2017, mfv_splitSUSY_tau000010000um_M2000_1800_2017, mfv_splitSUSY_tau000001000um_M2000_1800_2017, mfv_splitSUSY_tau000000000um_M2000_1900_2017, mfv_splitSUSY_tau000000300um_M2000_1900_2017, mfv_splitSUSY_tau100000000um_M2000_1900_2017, mfv_splitSUSY_tau010000000um_M2000_1900_2017, mfv_splitSUSY_tau001000000um_M2000_1900_2017, mfv_splitSUSY_tau000100000um_M2000_1900_2017, mfv_splitSUSY_tau000010000um_M2000_1900_2017, mfv_splitSUSY_tau000001000um_M2000_1900_2017, mfv_splitSUSY_tau000000000um_M2400_100_2017, mfv_splitSUSY_tau000000300um_M2400_100_2017, mfv_splitSUSY_tau100000000um_M2400_100_2017, mfv_splitSUSY_tau010000000um_M2400_100_2017, mfv_splitSUSY_tau001000000um_M2400_100_2017, mfv_splitSUSY_tau000100000um_M2400_100_2017, mfv_splitSUSY_tau000010000um_M2400_100_2017, mfv_splitSUSY_tau000001000um_M2400_100_2017, mfv_splitSUSY_tau000000000um_M2400_2300_2017, mfv_splitSUSY_tau000000300um_M2400_2300_2017, mfv_splitSUSY_tau100000000um_M2400_2300_2017, mfv_splitSUSY_tau010000000um_M2400_2300_2017, mfv_splitSUSY_tau001000000um_M2400_2300_2017, mfv_splitSUSY_tau000100000um_M2400_2300_2017, mfv_splitSUSY_tau000010000um_M2400_2300_2017, mfv_splitSUSY_tau000001000um_M2400_2300_2017:
     x.add_dataset("ntuplev38metm")
+
+for x in mfv_splitSUSY_tau000001000um_M1400_1200_2017, mfv_splitSUSY_tau000010000um_M1400_1200_2017, mfv_splitSUSY_tau000000000um_M2000_1800_2017, mfv_splitSUSY_tau000000300um_M2000_1800_2017, mfv_splitSUSY_tau100000000um_M2000_1800_2017, mfv_splitSUSY_tau010000000um_M2000_1800_2017, mfv_splitSUSY_tau001000000um_M2000_1800_2017, mfv_splitSUSY_tau000100000um_M2000_1800_2017, mfv_splitSUSY_tau000010000um_M2000_1800_2017, mfv_splitSUSY_tau000001000um_M2000_1800_2017, mfv_splitSUSY_tau000000000um_M2000_1900_2017, mfv_splitSUSY_tau000000300um_M2000_1900_2017, mfv_splitSUSY_tau100000000um_M2000_1900_2017, mfv_splitSUSY_tau010000000um_M2000_1900_2017, mfv_splitSUSY_tau001000000um_M2000_1900_2017, mfv_splitSUSY_tau000100000um_M2000_1900_2017, mfv_splitSUSY_tau000010000um_M2000_1900_2017, mfv_splitSUSY_tau000001000um_M2000_1900_2017, mfv_splitSUSY_tau000000000um_M2400_100_2017, mfv_splitSUSY_tau000000300um_M2400_100_2017, mfv_splitSUSY_tau100000000um_M2400_100_2017, mfv_splitSUSY_tau010000000um_M2400_100_2017, mfv_splitSUSY_tau001000000um_M2400_100_2017, mfv_splitSUSY_tau000100000um_M2400_100_2017, mfv_splitSUSY_tau000010000um_M2400_100_2017, mfv_splitSUSY_tau000001000um_M2400_100_2017, mfv_splitSUSY_tau000000000um_M2400_2300_2017, mfv_splitSUSY_tau000000300um_M2400_2300_2017, mfv_splitSUSY_tau100000000um_M2400_2300_2017, mfv_splitSUSY_tau010000000um_M2400_2300_2017, mfv_splitSUSY_tau001000000um_M2400_2300_2017, mfv_splitSUSY_tau000100000um_M2400_2300_2017, mfv_splitSUSY_tau000010000um_M2400_2300_2017, mfv_splitSUSY_tau000001000um_M2400_2300_2017:
+    x.add_dataset("ntuplev39metm")
 
 ########
 # automatic condor declarations for ntuples

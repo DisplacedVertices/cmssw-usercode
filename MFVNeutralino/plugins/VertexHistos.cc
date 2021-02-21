@@ -60,6 +60,7 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH2F* h_sv_ntk_gen2ddist;
   TH2F* h_sv_ntk_njet;
   TH2F* h_sv_ntk0_ntk1;
+  TH2F* h_sv_nsv_nmatchjet;
   TH2F* h_sv_xy;
   TH2F* h_sv_yz;
   TH2F* h_sv_xz;
@@ -384,6 +385,7 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   h_sv_ntk_genbs2ddist = fs->make<TH2F>("h_sv_ntk_genbs2ddist", ";# tracks of SV;dist2d(gen vtx, beamspot) (cm)",40,0,40,500,0,2.5);
   h_sv_ntk_bs2ddist = fs->make<TH2F>("h_sv_ntk_bs2ddist", ";# tracks of SV;dist2d(SV, beamspot) (cm)",40,0,40,500,0,2.5);
   h_sv_ntk_gen2ddist = fs->make<TH2F>("h_sv_ntk_gen2ddist", ";# tracks of SV;dist2d(SV, closest gen vtx) (cm)",40,0,40,200,0,0.2);
+  h_sv_nsv_nmatchjet = fs->make<TH2F>("h_sv_nsv_nmatchjet", ";# jets matched with gen quarks;# SV", 10, 0, 10, 10, 0, 10);
   h_sv_ntk_njet = fs->make<TH2F>("h_sv_ntk_njet", "; # tracks of SV; # associated jets of SV", 40,0,40,10,0,10);
   h_sv_ntk0_ntk1 = fs->make<TH2F>("h_sv_ntk0_ntk1", "; # tracks of SV0; # tracks of SV1", 40,0,40,40,0,40);
   h_sv_xy = fs->make<TH2F>("h_sv_xy", ";SV x (cm);SV y (cm)", 100, -4, 4, 100, -4, 4);
@@ -435,6 +437,68 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         );
     h_genbs2ddist->Fill(genbs2ddist, w);
   }
+
+  // matching jets with gen quarks from LLPs
+  //double decay_quarks0_pt[2] = {-1,-1};
+  //double decay_quarks1_pt[2] = {-1,-1};
+  //double decaylsp0_pt = -1;
+  //double decaylsp1_pt = -1;
+  //double decay_jets0_pt[2] = {-1,-1};
+  //double decay_jets1_pt[2] = {-1,-1};
+  double nmatched_0 = 0;
+  double nmatched_1 = 0;
+  for (size_t i=0; i<mevent->gen_daughters.size(); ++i){
+    if (abs(mevent->gen_daughter_id[i])==1000022){
+      continue;
+      //if (decaylsp0_pt>0){
+      //  decaylsp1_pt = mevent->gen_daughters[i].Pt();
+      //}
+      //else{
+      //  decaylsp0_pt = mevent->gen_daughters[i].Pt();
+      //}
+    }
+    else{
+      double gd_eta = mevent->gen_daughters[i].Eta();
+      double gd_phi = mevent->gen_daughters[i].Phi();
+      //double dR2_min = 999;
+      int n_matched = 0;
+      //double pt_sum = 0;
+      for (int ij = 0; ij<mevent->njets(); ++ij){
+        double dR2 = reco::deltaR2(mevent->nth_jet_eta(ij), mevent->nth_jet_phi(ij), gd_eta, gd_phi);
+        //double dR2 = (mevent->nth_jet_eta(ij)-gd_eta)*(mevent->nth_jet_eta(ij)-gd_eta)+(mevent->nth_jet_phi(ij)-gd_phi)*(mevent->nth_jet_phi(ij)-gd_phi);
+        //if (dR2_min>dR2){
+        //  dR2_min = dR2;
+        //}
+        if (dR2<0.16){
+          n_matched += 1;
+          //pt_sum += mevent->nth_jet_pt(ij);
+        }
+      }
+      if (i<3){
+        nmatched_0 += n_matched;
+        //if (decay_quarks0_pt[0]>=0){
+        //  decay_quarks0_pt[1] = mevent->gen_daughters[i].Pt();
+        //  decay_jets0_pt[1] = pt_sum;
+        //}
+        //else{
+        //  decay_quarks0_pt[0] = mevent->gen_daughters[i].Pt();
+        //  decay_jets0_pt[0] = pt_sum;
+        //}
+      }
+      else{
+        nmatched_1 += n_matched;
+        //if (decay_quarks1_pt[0]>=0){
+        //  decay_quarks1_pt[1] = mevent->gen_daughters[i].Pt();
+        //  decay_jets1_pt[1] = pt_sum;
+        //}
+        //else{
+        //  decay_quarks1_pt[0] = mevent->gen_daughters[i].Pt();
+        //  decay_jets1_pt[0] = pt_sum;
+        //}
+      }
+    }
+  }
+  h_sv_nsv_nmatchjet->Fill(nmatched_0+nmatched_1, nsv, w);
 
   for (int isv = 0; isv < nsv; ++isv) {
     const MFVVertexAux& aux = auxes->at(isv);

@@ -206,7 +206,7 @@ void MFVTrackTree::analyze(const edm::Event& event, const edm::EventSetup& setup
       }
     }
   }
-  if(1){
+  if(verbose){
     std::cout << "LLP0 final daughter:" << LLP_daus[0].size()<<std::endl;
     for (const auto&dau:LLP_daus[0]){
       std::cout << " pdgid " << dau->pdgId() << " pt " << dau->pt() << " eta " << dau->eta() << " phi " << dau->phi() << std::endl;
@@ -292,7 +292,6 @@ void MFVTrackTree::analyze(const edm::Event& event, const edm::EventSetup& setup
           }
         }
       }
-      std::cout << "seed tracks matched with dr2 " << mindr <<" eta " << tk->eta() << " phi " << tk->phi()<< std::endl;
     }
     else
       evInfo->tk_is_seed.push_back(0);
@@ -321,8 +320,6 @@ void MFVTrackTree::analyze(const edm::Event& event, const edm::EventSetup& setup
     }
     else{
       evInfo->tk_whichLLP.push_back(-1);
-      if (use)
-        std::cout << "  track not matched " << std::endl;
     }
 
     evInfo->tk_p.push_back(p);

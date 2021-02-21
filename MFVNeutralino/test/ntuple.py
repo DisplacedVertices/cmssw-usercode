@@ -8,7 +8,7 @@ settings.is_miniaod = True
 
 settings.run_n_tk_seeds = False
 settings.minitree_only = False
-settings.prepare_vis = True
+settings.prepare_vis = False
 settings.keep_all = False
 settings.keep_gen = False
 if use_btag_triggers :
@@ -20,7 +20,7 @@ else :
 
 process = ntuple_process(settings)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
-sample_files(process, 'mfv_splitSUSY_tau000100000um_M2000_1800_2017', dataset, 1)
+sample_files(process, 'mfv_splitSUSY_tau000010000um_M1400_1200_2017', dataset, 1)
 #sample_files(process, 'mfv_neu_tau001000um_M1600_year', dataset, 1)
 #sample_files(process, 'ttbar_year', dataset, 10)
 #sample_files(process, 'dyjetstollM50_year', dataset, 1)
@@ -33,8 +33,8 @@ sample_files(process, 'mfv_splitSUSY_tau000100000um_M2000_1800_2017', dataset, 1
 #                    #'/store/mc/RunIIFall17MiniAODv2/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-1mm_TuneCP2_13TeV-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/10000/EE806BFB-9AFE-E811-995A-0025905C3E38.root',
 #                    '/store/mc/RunIIFall17MiniAODv2/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-1mm_TuneCP2_13TeV-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/10000/EE806BFB-9AFE-E811-995A-0025905C3E38.root',
 #                   ])
-set_events(process, [
-      (1,1,5504),
+#set_events(process, [
+#      (1,1,5504),
 #       (1,1,9424),
 #      #(1,1,5071),
 #      #(1,1,5075),
@@ -58,7 +58,7 @@ set_events(process, [
 #      (1,1,),
 #      (1,1,),
 #      (1,1,),
-      ])
+#      ])
 max_events(process,50000)
 cmssw_from_argv(process)
 
@@ -69,8 +69,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if use_btag_triggers :
         samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=not settings.run_n_tk_seeds, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used
     elif use_MET_triggers :
-        samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, leptonic=False, bjet=False, splitSUSY=True, Zvv=True, met=True)
-        #samples = pick_samples(dataset, qcd=False, ttbar=False, all_signal=False, data=False, leptonic=False, bjet=False, splitSUSY=True, Zvv=False, span_signal=False)
+        #samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, leptonic=False, bjet=False, splitSUSY=True, Zvv=True, met=True)
+        samples = pick_samples(dataset, qcd=False, ttbar=False, all_signal=False, data=False, leptonic=False, bjet=False, splitSUSY=True, Zvv=False, span_signal=False)
     else :
         samples = pick_samples(dataset, qcd=True, ttbar=True, all_signal=False, data=False, leptonic=True, bjet=True, splitSUSY=True, Zvv=True)
         #samples = pick_samples(dataset, all_signal=not settings.run_n_tk_seeds)
