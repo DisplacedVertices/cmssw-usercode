@@ -2,8 +2,8 @@ from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
 #ntuple_version_ = 'Vtrackpt0p5_dxy2_2'
-#ntuple_version_ = 'Vtracktreev4'
-ntuple_version_ = 'V39'
+#ntuple_version_ = 'V40'
+ntuple_version_ = 'Vtrackattach_3p5'
 use_btag_triggers = False
 use_MET_triggers = True
 if use_btag_triggers : 

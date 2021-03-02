@@ -35,6 +35,7 @@ private:
   const bool disregard_event;
   const bool use_tracks;
   const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
+  const bool save_quality_tracks;
   const bool match_jets;
   const edm::EDGetTokenT<pat::JetCollection> match_jet_token;
   const bool use_non_pv_tracks;
@@ -114,6 +115,7 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
     disregard_event(cfg.getParameter<bool>("disregard_event")),
     use_tracks(cfg.getParameter<bool>("use_tracks")),
     tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("tracks_src"))),
+    save_quality_tracks(cfg.getParameter<bool>("save_quality_tracks")),
     match_jets(cfg.getParameter<bool>("match_jets")),
     match_jet_token(match_jets ? consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("match_jet_src")) : edm::EDGetTokenT<pat::JetCollection>()),
     use_non_pv_tracks(cfg.getParameter<bool>("use_non_pv_tracks")),
@@ -166,6 +168,8 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
   produces<std::vector<reco::TrackRef>>("all");
   produces<std::vector<reco::TrackRef>>("seed");
   produces<reco::TrackCollection>("seed");
+  produces<std::vector<reco::TrackRef>>("quality");
+  produces<reco::TrackCollection>("quality");
 
   if (histos) {
     edm::Service<TFileService> fs;
@@ -244,6 +248,8 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
   std::unique_ptr<std::vector<reco::TrackRef>> all_tracks (new std::vector<reco::TrackRef>);
   std::unique_ptr<std::vector<reco::TrackRef>> seed_tracks(new std::vector<reco::TrackRef>);
   std::unique_ptr<reco::TrackCollection> seed_tracks_copy(new reco::TrackCollection);
+  std::unique_ptr<std::vector<reco::TrackRef>> quality_tracks(new std::vector<reco::TrackRef>);
+  std::unique_ptr<reco::TrackCollection> quality_tracks_copy(new reco::TrackCollection);
   std::vector<reco::TrackRef> seed_track_loose;
 
   if (!disregard_event) {
@@ -464,6 +470,24 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
         seed_track_loose.push_back(tk);
       }
     }
+    else if (save_quality_tracks){
+      const bool use_loose =
+        pt > min_track_pt &&
+        fabs(dxybs) > min_track_dxy &&
+        dxyerr < max_track_dxyerr &&
+        fabs(sigmadxybs) > min_track_sigmadxy &&
+        fabs(rescaled_sigmadxybs) > min_track_rescaled_sigmadxy_loose &&
+        fabs(sigmadxypv) > min_track_sigmadxypv &&
+        nhits >= min_track_nhits &&
+        npxhits >= min_track_npxhits &&
+        npxlayers >= min_track_npxlayers &&
+        nstlayers >= min_track_nstlayers &&
+        (min_track_hit_r == 999 || min_r <= min_track_hit_r);
+      if (use_loose){
+        quality_tracks->push_back(tk);
+        quality_tracks_copy->push_back(*tk);
+      }
+    }
 
     if (verbose) {
       printf("track %5lu: pt: %10.3f +- %10.3f eta: %10.3f +- %10.3f phi: %10.3f +- %10.3f dxy: %10.5f +- %10.5f (-> nsig %5.3f, rescaled: %10.5f +- %10.5f -> nsig %10.3f) dz: %10.3f +- %10.3f nhits: %3i/%3i/%3i nlayers: %3i/%3i/%3i ", i, pt, tk->ptError(), tk->eta(), tk->etaError(), tk->phi(), tk->phiError(), dxybs, dxyerr, fabs(sigmadxybs), dxybs, rescaled_dxyerr, fabs(rescaled_sigmadxybs), tk->dz(), tk->dzError(), npxhits, nsthits, nhits, npxlayers, nstlayers, npxlayers + nstlayers);
@@ -585,6 +609,8 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
   event.put(std::move(all_tracks), "all");
   event.put(std::move(seed_tracks), "seed");
   event.put(std::move(seed_tracks_copy), "seed");
+  event.put(std::move(quality_tracks), "quality");
+  event.put(std::move(quality_tracks_copy), "quality");
 
   return pass_min_n_seed_tracks;
 }
