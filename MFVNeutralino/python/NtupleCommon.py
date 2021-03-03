@@ -2,8 +2,8 @@ from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
 #ntuple_version_ = 'Vtrackpt0p5_dxy2_2'
-#ntuple_version_ = 'V40'
-ntuple_version_ = 'Vtrackattach_3p5'
+ntuple_version_ = 'V41'
+#ntuple_version_ = 'Vtrackattach_3p5'
 use_btag_triggers = False
 use_MET_triggers = True
 if use_btag_triggers : 
@@ -91,7 +91,7 @@ def minitree_only(process, mode, settings, output_commands):
 def event_filter(process, mode, settings, output_commands, **kwargs):
     if mode:
         from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-        setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode, event_filter_require_vertex = True, **kwargs)
+        setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode, trigger_filter = False, event_filter = False, event_filter_require_vertex = False, **kwargs)
 
 ########################################################################
 

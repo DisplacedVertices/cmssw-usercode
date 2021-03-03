@@ -218,6 +218,13 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       }
     }
 
+    // Events not passing MET trigger ans have MET lower than threshold
+    if (apply_presel == 6) {
+      if(satisfiesTrigger(mevent, mfv::b_HLT_PFHT1050)) return false;
+
+      if (mevent->met()>=150) return false;
+    }
+
     if (require_bquarks && mevent->gen_flavor_code != 2)
       return false;
 
@@ -532,8 +539,8 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
       }
       case mfv::b_HLT_PFMET120_PFMHT120_IDTight :
       {
-        //if(mevent->met() < 200 || njets < 2) return false; // cut on MET to avoid turn-on region, maybe cut value need to be determined
-        if (njets < 2) return false;
+        if(mevent->met() < 150 || njets < 2) return false; // cut on MET to avoid turn-on region, maybe cut value need to be determined
+        //if (njets < 2) return false;
         return true;
       }
       default :

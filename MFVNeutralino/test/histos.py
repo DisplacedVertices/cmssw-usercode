@@ -5,10 +5,10 @@ is_mc = True # for blinding
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_MET_triggers
 #sample_files(process, 'qcdht2000_2017' if is_mc else 'JetHT2017B', dataset, 1)
 #sample_files(process, 'mfv_neu_tau001000um_M0800_2017' if is_mc else 'JetHT2017B', dataset, 10)
-sample_files(process, 'mfv_splitSUSY_tau000001000um_M2000_1800_2017' if is_mc else 'JetHT2017B', dataset, -1)
-#input_files(process,[
-#                    '/uscms/home/ali/nobackup/LLP/CornellCode/mfv_946p1/src/JMTucker/MFVNeutralino/test/TestRuns/ntuple.root'
-#            ])
+#sample_files(process, 'mfv_splitSUSY_tau000001000um_M2000_1800_2017' if is_mc else 'JetHT2017B', dataset, -1)
+input_files(process,[
+                    '/uscms/home/ali/nobackup/LLP/CornellCode/mfv_946p1/src/JMTucker/MFVNeutralino/test/TestRuns/ntuple.root'
+            ])
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
 
@@ -37,6 +37,34 @@ process.mfvAnalysisCutsExtraLooseOnlyOneVtx = process.mfvAnalysisCuts.clone(vert
 process.mfvVertexHistosExtraLooseOnlyOneVtx = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesExtraLoose')
 process.pEventExtraLooseOnlyOneVtx = cms.Path(common * process.mfvAnalysisCutsExtraLooseOnlyOneVtx * process.mfvEventHistosExtraLooseOnlyOneVtx)
 process.pExtraLooseOnlyOneVtx = cms.Path(common * process.mfvAnalysisCutsExtraLooseOnlyOneVtx * process.mfvVertexHistosExtraLooseOnlyOneVtx)
+
+#A events with at least 1 Tight SV and pass MET trigger and cut
+process.mfvEventHistosMETCutTightVtx = process.mfvEventHistos.clone()
+process.mfvAnalysisCutsMETCutTightVtx = process.mfvAnalysisCuts.clone(min_nvertex = 1)
+process.mfvVertexHistosMETCutTightVtx = process.mfvVertexHistos.clone()
+process.pEventMETCutTightVtx = cms.Path(common * process.mfvAnalysisCutsMETCutTightVtx * process.mfvEventHistosMETCutTightVtx)
+process.pMETCutTightVtx = cms.Path(common * process.mfvAnalysisCutsMETCutTightVtx * process.mfvVertexHistosMETCutTightVtx)
+
+#B events with at least 1 Tight SV and not pass MET trigger and cut
+process.mfvEventHistosNoMETCutTightVtx = process.mfvEventHistos.clone()
+process.mfvAnalysisCutsNoMETCutTightVtx = process.mfvAnalysisCuts.clone(min_nvertex = 1, apply_presel = 6)
+process.mfvVertexHistosNoMETCutTightVtx = process.mfvVertexHistos.clone()
+process.pEventNoMETCutTightVtx = cms.Path(common * process.mfvAnalysisCutsNoMETCutTightVtx * process.mfvEventHistosNoMETCutTightVtx)
+process.pNoMETCutTightVtx = cms.Path(common * process.mfvAnalysisCutsNoMETCutTightVtx * process.mfvVertexHistosNoMETCutTightVtx)
+
+#C events with at least 1 Loose SV and pass MET trigger and cut
+process.mfvEventHistosMETCutLooseVtx = process.mfvEventHistos.clone()
+process.mfvAnalysisCutsMETCutLooseVtx = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesTightNtk3or4', min_nvertex = 1)
+process.mfvVertexHistosMETCutLooseVtx = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesTightNtk3or4')
+process.pEventMETCutLooseVtx = cms.Path(common * process.mfvAnalysisCutsMETCutLooseVtx * process.mfvEventHistosMETCutLooseVtx)
+process.pMETCutLooseVtx = cms.Path(common * process.mfvAnalysisCutsMETCutLooseVtx * process.mfvVertexHistosMETCutLooseVtx)
+
+#D events with at least 1 Loose SV and not pass MET trigger and cut
+process.mfvEventHistosNoMETCutLooseVtx = process.mfvEventHistos.clone()
+process.mfvAnalysisCutsNoMETCutLooseVtx = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesTightNtk3or4', min_nvertex = 1, apply_presel = 6)
+process.mfvVertexHistosNoMETCutLooseVtx = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesTightNtk3or4')
+process.pEventNoMETCutLooseVtx = cms.Path(common * process.mfvAnalysisCutsNoMETCutLooseVtx * process.mfvEventHistosNoMETCutLooseVtx)
+process.pNoMETCutLooseVtx = cms.Path(common * process.mfvAnalysisCutsNoMETCutLooseVtx * process.mfvVertexHistosNoMETCutLooseVtx)
 
 process.mfvEventHistosPreSel = process.mfvEventHistos.clone()
 process.mfvAnalysisCutsPreSel = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)
