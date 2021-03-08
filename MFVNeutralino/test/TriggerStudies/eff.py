@@ -3,12 +3,13 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 from JMTucker.Tools.PATTupleSelection_cfi import jtupleParams
 from JMTucker.Tools.Year import year
+from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
 
 settings = CMSSWSettings()
 settings.is_mc = True
 settings.cross = '' # 2017to2018' # 2017to2017p8'
 
-version = '2017v6_MET'
+version = '2017v10_METnoMu'
 
 mu_thresh_hlt = 27
 mu_thresh_offline = 35
@@ -27,6 +28,7 @@ process.load('JMTucker.Tools.UpdatedJets_cff')
 process.load('JMTucker.Tools.WeightProducer_cfi')
 process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
 process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
+process.load("Configuration.StandardSequences.GeometryRecoDB_cff") 
 
 process.selectedPatJets.src = 'updatedJetsMiniAOD'
 process.selectedPatJets.cut = jtupleParams.jetCut
@@ -52,11 +54,37 @@ if weight_l1ecal and settings.is_mc and settings.year == 2017 and settings.cross
     w.weight_misc = True
     w.misc_srcs = cms.VInputTag(cms.InputTag('prefiringweight', which))
 
+# MET correction
+runMetCorAndUncFromMiniAOD(process,
+                           isData = not settings.is_mc,
+                           )
+
+process.load('RecoMET.METFilters.ecalBadCalibFilter_cfi')
+
+baddetEcallist = cms.vuint32(
+    [872439604,872422825,872420274,872423218,872423215,872416066,872435036,872439336,
+    872420273,872436907,872420147,872439731,872436657,872420397,872439732,872439339,
+    872439603,872422436,872439861,872437051,872437052,872420649,872421950,872437185,
+    872422564,872421566,872421695,872421955,872421567,872437184,872421951,872421694,
+    872437056,872437057,872437313,872438182,872438951,872439990,872439864,872439609,
+    872437181,872437182,872437053,872436794,872436667,872436536,872421541,872421413,
+    872421414,872421031,872423083,872421439])
+
+process.ecalBadCalibReducedMINIAODFilter = cms.EDFilter(
+    "EcalBadCalibFilter",
+    EcalRecHitSource = cms.InputTag("reducedEgamma:reducedEERecHits"),
+    ecalMinEt        = cms.double(50.),
+    baddetEcal    = baddetEcallist, 
+    taggingMode = cms.bool(True),
+    debug = cms.bool(False)
+    )
+
 process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
                              use_jetpt_weights = cms.int32(0),
                              require_hlt = cms.int32(-1),
                              require_l1 = cms.int32(-1),
                              require_muon = cms.bool(True),
+                             require_metfilters = cms.bool(True),
                              require_1jet = cms.bool(True),#for MET trigger
                              require_4jets = cms.bool(False),#for MET trigger
                              require_6jets = cms.bool(False),
@@ -73,15 +101,17 @@ process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
 process.denht1000 = process.den.clone(require_ht = 1000)
 process.denjet6pt75 = process.den.clone(require_6thjetpt = 75)
 process.denht1000jet6pt75 = process.den.clone(require_ht = 1000, require_6thjetpt = 75)
-process.p = cms.Path(process.weightSeq * process.mutrig * process.updatedJetsSeqMiniAOD * process.selectedPatJets * process.mfvTriggerFloats * process.den * process.denht1000 * process.denjet6pt75 * process.denht1000jet6pt75)
+#process.p = cms.Path(process.weightSeq * process.mutrig * process.updatedJetsSeqMiniAOD * process.selectedPatJets * process.mfvTriggerFloats * process.den * process.denht1000 * process.denjet6pt75 * process.denht1000jet6pt75)
+process.p = cms.Path(process.ecalBadCalibReducedMINIAODFilter * process.weightSeq * process.mutrig * process.updatedJetsSeqMiniAOD * process.fullPatMetSequence * process.selectedPatJets * process.mfvTriggerFloats * process.den)
 
-process.dennomu = process.den.clone(require_muon = False)
-process.dennomuht1000 = process.den.clone(require_muon = False, require_ht = 1000)
-process.dennomujet6pt75 = process.den.clone(require_muon = False, require_6thjetpt = 75)
-process.dennomuht1000jet6pt75 = process.den.clone(require_muon = False, require_ht = 1000, require_6thjetpt = 75)
-process.pnomu = cms.Path(process.weightSeq * process.updatedJetsSeqMiniAOD * process.selectedPatJets * process.mfvTriggerFloats * process.dennomu * process.dennomuht1000 * process.dennomujet6pt75 * process.dennomuht1000jet6pt75)
+#process.dennomu = process.den.clone(require_muon = False)
+#process.dennomuht1000 = process.den.clone(require_muon = False, require_ht = 1000)
+#process.dennomujet6pt75 = process.den.clone(require_muon = False, require_6thjetpt = 75)
+#process.dennomuht1000jet6pt75 = process.den.clone(require_muon = False, require_ht = 1000, require_6thjetpt = 75)
+#process.pnomu = cms.Path(process.weightSeq * process.updatedJetsSeqMiniAOD * process.selectedPatJets * process.mfvTriggerFloats * process.dennomu * process.dennomuht1000 * process.dennomujet6pt75 * process.dennomuht1000jet6pt75)
 
-for x in '', 'ht1000', 'jet6pt75', 'ht1000jet6pt75', 'nomu', 'nomuht1000', 'nomujet6pt75', 'nomuht1000jet6pt75':
+#for x in '', 'ht1000', 'jet6pt75', 'ht1000jet6pt75', 'nomu', 'nomuht1000', 'nomujet6pt75', 'nomuht1000jet6pt75':
+for x in ['']:
     num = getattr(process, 'den%s' % x).clone(require_hlt = 20)
     if 'separate' in weight_l1ecal:
         num.weight_src = 'jmtWeightMiniAODL1Ecal'
@@ -108,7 +138,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = Samples.auxiliary_data_samples_2018
     
     samples = [s for s in samples if s.has_dataset(dataset) and (s.is_mc or not settings.cross)]
-    set_splitting(samples, dataset, 'default', json_path('ana_2017p8.json'), 50)
+    set_splitting(samples, dataset, 'default', json_path('ana_2017p8.json'), 5)
 
     ms = MetaSubmitter('TrigEff%s%s' % (version, '_' + settings.cross if settings.cross else ''), dataset=dataset)
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier(cross=settings.cross))

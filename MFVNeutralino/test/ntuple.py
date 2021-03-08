@@ -14,15 +14,17 @@ settings.keep_gen = False
 if use_btag_triggers :
     settings.event_filter = 'bjets OR displaced dijet veto HT' # for new trigger studies
 elif use_MET_triggers :
-    settings.event_filter = 'met only'
+    #settings.event_filter = 'met only'
+    settings.event_filter = 'met trigger or low met'
+    #settings.event_filter = False
 else :
     settings.event_filter = 'jets only'
 
 process = ntuple_process(settings)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
-#sample_files(process, 'mfv_splitSUSY_tau000001000um_M2000_1800_2017', dataset, 1)
+sample_files(process, 'mfv_splitSUSY_tau000001000um_M2000_1800_2017', dataset, 10)
 #sample_files(process, 'mfv_neu_tau001000um_M1600_year', dataset, 1)
-sample_files(process, 'ttbar_year', dataset, 10)
+#sample_files(process, 'ttbar_year', dataset, 1)
 #sample_files(process, 'dyjetstollM50_year', dataset, 1)
 
 #input_files(process,[
@@ -59,7 +61,7 @@ sample_files(process, 'ttbar_year', dataset, 10)
 #      (1,1,),
 #      (1,1,),
 #      ])
-max_events(process,50000)
+max_events(process,1000)
 cmssw_from_argv(process)
 
 

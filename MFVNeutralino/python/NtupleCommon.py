@@ -2,7 +2,7 @@ from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
 #ntuple_version_ = 'Vtrackpt0p5_dxy2_2'
-ntuple_version_ = 'V41'
+ntuple_version_ = 'Vmetthresv1'
 #ntuple_version_ = 'Vtrackattach_3p5'
 use_btag_triggers = False
 use_MET_triggers = True
@@ -175,6 +175,7 @@ def make_output_commands(process, settings):
 def set_output_commands(process, cmds):
     if hasattr(process, 'out'):
         process.out.outputCommands = cmds
+        #process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('p'))
 
 def aod_ntuple_process(settings):
     settings.normalize()
@@ -239,7 +240,7 @@ def miniaod_ntuple_process(settings):
     geometry_etc(process, which_global_tag(settings))
     random_service(process, {'mfvVertexTracks': 1222})
     tfileservice(process, 'vertex_histos.root')
-    output_file(process, 'ntuple.root', [])
+    output_file(process, 'ntuple.root', []) # ['p']
 
     process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
     process.load('PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi')
@@ -257,6 +258,8 @@ def miniaod_ntuple_process(settings):
     process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
     process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
     process.load('JMTucker.MFVNeutralino.TrackTree_cfi')
+    # temporarily add this module to select event passing MET trigger or event with MET<threshold
+    process.load('JMTucker.MFVNeutralino.METTrigFilter_cfi')
 
     process.goodOfflinePrimaryVertices.input_is_miniaod = True
     process.selectedPatJets.src = 'updatedJetsMiniAOD'
@@ -265,6 +268,10 @@ def miniaod_ntuple_process(settings):
     process.selectedPatJets.cut = process.jtupleParams.jetCut
     #process.selectedPatMuons.cut = '' # process.jtupleParams.muonCut
     #process.selectedPatElectrons.cut = '' # process.jtupleParams.electronCut
+
+    # change made to use corrected MET
+    process.mfvTriggerFloats.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple')
+    process.mfvMETTrigFilter.pfMetInputTag_ = cms.untracked.InputTag('slimmedMETs', '', 'Ntuple')
 
     process.mfvGenParticles.gen_particles_src = 'prunedGenParticles'
     process.mfvGenParticles.last_flag_check = False
@@ -276,8 +283,6 @@ def miniaod_ntuple_process(settings):
     process.mfvVertexTracks.min_track_rescaled_sigmadxy = 4.0
     process.mfvVertexTracks.min_track_pt = 1.0
 
-    #process.mfvVertices.n_tracks_per_seed_vertex = 4
-
     process.jmtRescaledTracks.tracks_src = 'jmtUnpackedCandidateTracks'
 
     for x in process.mfvVerticesToJets, process.mfvVerticesAuxTmp, process.mfvVerticesAuxPresel:
@@ -287,10 +292,42 @@ def miniaod_ntuple_process(settings):
     process.mfvEvent.gen_particles_src = 'prunedGenParticles' # no idea if this lets gen_bquarks, gen_leptons work--may want the packed ones that have status 1 particles
     process.mfvEvent.gen_jets_src = 'slimmedGenJets'
     process.mfvEvent.pileup_info_src = 'slimmedAddPileupInfo'
-    process.mfvEvent.met_src = 'slimmedMETs'
+    # use corrected MET
+    process.mfvEvent.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple')
+
+    # MET correction and filters
+    from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
+    process.load("Configuration.StandardSequences.GeometryRecoDB_cff") 
+    runMetCorAndUncFromMiniAOD(process,
+                               isData = not settings.is_mc,
+                               )
+    
+    process.load('RecoMET.METFilters.ecalBadCalibFilter_cfi')
+    
+    baddetEcallist = cms.vuint32(
+        [872439604,872422825,872420274,872423218,872423215,872416066,872435036,872439336,
+        872420273,872436907,872420147,872439731,872436657,872420397,872439732,872439339,
+        872439603,872422436,872439861,872437051,872437052,872420649,872421950,872437185,
+        872422564,872421566,872421695,872421955,872421567,872437184,872421951,872421694,
+        872437056,872437057,872437313,872438182,872438951,872439990,872439864,872439609,
+        872437181,872437182,872437053,872436794,872436667,872436536,872421541,872421413,
+        872421414,872421031,872423083,872421439])
+    
+    process.ecalBadCalibReducedMINIAODFilter = cms.EDFilter(
+        "EcalBadCalibFilter",
+        EcalRecHitSource = cms.InputTag("reducedEgamma:reducedEERecHits"),
+        ecalMinEt        = cms.double(50.),
+        baddetEcal    = baddetEcallist, 
+        taggingMode = cms.bool(True),
+        debug = cms.bool(False)
+        )
+    
 
     process.p = cms.Path(process.goodOfflinePrimaryVertices *
                          process.updatedJetsSeqMiniAOD *
+                         process.ecalBadCalibReducedMINIAODFilter * 
+                         process.fullPatMetSequence *
+                         #process.mfvMETTrigFilter *
                          process.selectedPatJets *
                          process.selectedPatMuons *
                          process.selectedPatElectrons *

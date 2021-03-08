@@ -23,6 +23,7 @@ private:
   const int use_jetpt_weights;
   const int require_bits[2]; // HLT then L1
   const bool require_muon;
+  const bool require_metfilters;
   const bool require_1jet;
   const bool require_4jets;
   const bool require_6jets;
@@ -77,6 +78,7 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
   : use_jetpt_weights(cfg.getParameter<int>("use_jetpt_weights")),
     require_bits{cfg.getParameter<int>("require_hlt"), cfg.getParameter<int>("require_l1")},
     require_muon(cfg.getParameter<bool>("require_muon")),
+    require_metfilters(cfg.getParameter<bool>("require_metfilters")),
     require_1jet(cfg.getParameter<bool>("require_1jet")),
     require_4jets(cfg.getParameter<bool>("require_4jets")),
     require_6jets(cfg.getParameter<bool>("require_6jets")),
@@ -286,6 +288,11 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
     }
   }
 
+  if (require_metfilters) {
+    if ( ! triggerfloats->pass_metfilters ){
+      return;
+    }
+  }
   if (require_muon) {
     edm::Handle<pat::MuonCollection> muons;
     event.getByToken(muons_token, muons);

@@ -32,6 +32,8 @@ private:
   const edm::EDGetTokenT<GlobalAlgBlkBxCollection> l1_results_token;
   const edm::EDGetTokenT<edm::TriggerResults> trigger_results_token;
   const edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> trigger_objects_token;
+  const edm::EDGetTokenT<edm::TriggerResults> met_filters_token;
+  const edm::EDGetTokenT<bool> ecalBadCalibFilterUpdate_token;
 
   const edm::EDGetTokenT<pat::JetCollection> jets_token;
   const StringCutObjectSelector<pat::Jet> jet_selector;
@@ -48,6 +50,8 @@ MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
     l1_results_token(consumes<GlobalAlgBlkBxCollection>(cfg.getParameter<edm::InputTag>("l1_results_src"))),
     trigger_results_token(consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("trigger_results_src"))),
     trigger_objects_token(consumes<pat::TriggerObjectStandAloneCollection>(cfg.getParameter<edm::InputTag>("trigger_objects_src"))),
+    met_filters_token(consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("met_filters_src"))),
+    ecalBadCalibFilterUpdate_token(consumes<bool>(edm::InputTag("ecalBadCalibReducedMINIAODFilter"))),
     jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
     jet_selector(cfg.getParameter<std::string>("jet_cut")),
     met_token(consumes<pat::METCollection>(cfg.getParameter<edm::InputTag>("met_src"))),
@@ -67,6 +71,11 @@ namespace {
 
 void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) {
   if (prints) std::cout << "TriggerFloats run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
+
+  std::vector<std::string> metfilternames = {"Flag_goodVertices", "Flag_globalSuperTightHalo2016Filter", "Flag_HBHENoiseFilter", "Flag_HBHENoiseIsoFilter", "Flag_EcalDeadCellTriggerPrimitiveFilter", "Flag_BadPFMuonFilter", "Flag_eeBadScFilter"};
+  edm::Handle<edm::TriggerResults> metFilters;
+  event.getByToken(met_filters_token, metFilters);
+  const edm::TriggerNames &names = event.triggerNames(*metFilters);
 
   edm::Handle<edm::TriggerResults> trigger_results;
   event.getByToken(trigger_results_token, trigger_results);
@@ -92,10 +101,40 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   for (const pat::Muon& muon : *muons) {
     double muon_px = muon.px();
     double muon_py = muon.py();
+    // use subtraction to see effects
+    // now changed back to add
     met_px = met_px + muon_px;
     met_py = met_py + muon_py;
   }
   double met_nomu_pt = hypotf(met_px,met_py);
+
+  // check met filters
+  std::vector<bool> pass_met_filters(metfilternames.size(), false);
+  for (unsigned int i = 0, n = metFilters->size(); i < n; ++i) {
+    //std::cout << "trigger name: " << names.triggerName(i) << std::endl;
+    for (unsigned int j = 0; j<metfilternames.size(); ++j){
+      if ( names.triggerName(i) == metfilternames[j] ){
+        pass_met_filters[j] = metFilters->accept(i);
+        if (prints)
+          std::cout << metfilternames[j] << " " << metFilters->accept(i) <<std::endl;
+      }
+    }
+  }
+  edm::Handle<bool> passecalBadCalibFilterUpdate;
+  event.getByToken(ecalBadCalibFilterUpdate_token,passecalBadCalibFilterUpdate);
+  bool _passecalBadCalibFilterUpdate = (*passecalBadCalibFilterUpdate );
+  bool pass_all_metfilters = _passecalBadCalibFilterUpdate;
+  for (const auto& pf:pass_met_filters){
+    pass_all_metfilters = pass_all_metfilters && pf;
+  }
+  if (prints){
+    std::cout << "Total results: ";
+    for (const auto& fr:pass_met_filters){
+      std::cout << fr << " ";
+    }
+    std::cout << _passecalBadCalibFilterUpdate << std::endl;
+    std::cout << std::endl;
+  }
 
   int i2pt_first[2] = {0};
   int i2htt[2] = {0};
@@ -429,6 +468,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   floats->met_pt = met_pt;
   floats->met_pt_calo = met.caloMETPt();
   floats->met_pt_nomu = met_nomu_pt;
+  floats->pass_metfilters = pass_all_metfilters;
 
   if (prints)
     printf("TriggerFloats: hltht = %f\n", floats->hltht);

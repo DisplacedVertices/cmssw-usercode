@@ -57,6 +57,10 @@ def setup_event_filter(process,
     elif mode == 'novtx':
         event_filter = True
         event_filter_require_vertex = False
+    elif mode == 'met trigger or low met':
+        event_filter = 'met only'
+        trigger_filter = False
+        event_filter_require_vertex = True
     elif mode:
         if mode is not True:
             raise ValueError('bad mode %r' % mode)

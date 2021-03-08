@@ -5,7 +5,7 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.Tools.Samples import *
 
-version = '2017p8v6'
+version = '2017v9'
 zoom = False #(0.98,1.005)
 save_more = True
 data_only = False
@@ -285,7 +285,7 @@ for kind in kinds:
                 continue
             if 'met' in n:
                 r.GetXaxis().SetLimits(0, 1000)
-                r.SetTitle('; METnoMu p_{T} (GeV);efficiency')
+                r.SetTitle('; MET p_{T} (GeV);efficiency')
             elif 'pt' in n:
                 r.GetXaxis().SetLimits(0, 260)
                 i = int(n.split('_')[-1])

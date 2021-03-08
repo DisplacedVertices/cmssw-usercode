@@ -222,6 +222,9 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (apply_presel == 6) {
       if(satisfiesTrigger(mevent, mfv::b_HLT_PFHT1050)) return false;
 
+      //if ( !satisfiesTrigger(mevent, mfv::b_HLT_PFMET120_PFMHT120_IDTight) ){
+      //  std::cout << "MET trigger not fired" << std::endl;
+      //}
       if (mevent->met()>=150) return false;
     }
 
