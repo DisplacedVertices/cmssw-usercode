@@ -23,7 +23,7 @@ private:
   const bool prints;
   const bool histos;
 
-  const double half_mc_weight;
+  const double partial_mc_stats_weight;
   const bool weight_gen;
   const bool weight_gen_sign_only;
   const bool weight_pileup;
@@ -50,7 +50,7 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
     enable(cfg.getParameter<bool>("enable")),
     prints(cfg.getUntrackedParameter<bool>("prints", false)),
     histos(cfg.getUntrackedParameter<bool>("histos", true)),
-    half_mc_weight(cfg.getParameter<double>("half_mc_weight")),
+    partial_mc_stats_weight(cfg.getParameter<double>("partial_mc_stats_weight")),
     weight_gen(cfg.getParameter<bool>("weight_gen")),
     weight_gen_sign_only(cfg.getParameter<bool>("weight_gen_sign_only")),
     weight_pileup(cfg.getParameter<bool>("weight_pileup")),
@@ -72,7 +72,7 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
     h_npu = fs->make<TH1D>("h_npu", ";number of pileup interactions;events", 100, 0, 100);
     h_npv = fs->make<TH1D>("h_npv", ";number of primary vertices;events", 100, 0, 100);
 
-    h_sums = fs->make<TH1D>("h_sums", TString::Format("half_mc_weight = %.3f", half_mc_weight), n_sums+1, 0, n_sums+1);
+    h_sums = fs->make<TH1D>("h_sums", TString::Format("partial_mc_stats_weight = %.3f", partial_mc_stats_weight), n_sums+1, 0, n_sums+1);
     int ibin = 1;
     for (const char* x : { "sum_nevents_total", "sum_gen_weight_total", "sum_gen_weight", "sum_pileup_weight", "sum_npv_weight", "sum_weight", "yearcode_x_nfiles", "n_sums" })
       h_sums->GetXaxis()->SetBinLabel(ibin++, x);
@@ -92,8 +92,8 @@ void MFVWeightProducer::endLuminosityBlock(const edm::LuminosityBlock& lumi, con
         printf("MFVWeight::beginLuminosityBlock r: %u l: %u nEvents: %i  sumWeight: %f\n", lumi.run(), lumi.luminosityBlock(), nEvents->get(), sumWeight->get());
       
       if (histos) {
-        h_sums->Fill(sum_nevents_total,        half_mc_weight * nEvents->get());
-        h_sums->Fill(sum_gen_weight_total,     half_mc_weight * sumWeight->get());
+        h_sums->Fill(sum_nevents_total,        partial_mc_stats_weight * nEvents->get());
+        h_sums->Fill(sum_gen_weight_total,     partial_mc_stats_weight * sumWeight->get());
       }
     }
     else if (throw_if_no_mcstat)
