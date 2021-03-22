@@ -816,6 +816,60 @@ def signal_efficiency():
         out_f.Write()
         out_f.Close()
 
+def event_scale_factors():
+    from signal_efficiency import SignalEfficiencyCombiner
+    for which, years in ('2017p8', [2017,2018]), :
+        combiner = SignalEfficiencyCombiner(years)
+        in_f = combiner.inputs[0].f
+        out_f = ROOT.TFile('event_TrackMover_scale_factors_%s.root' % which, 'recreate')
+
+        kinds, masses, taus, nmasses, ntaus = axes(in_f)
+        taus.remove(30.)
+        ntaus -= 1
+
+        for kind in kinds:
+            h = ROOT.TH2D('event_TrackMover_scale_factors_%s' % kind, ';mass (GeV);#tau (mm)', nmasses, masses, ntaus, taus)
+
+            for ibin in xrange(1, nmasses+1):
+                mass = h.GetXaxis().GetBinLowEdge(ibin)
+                for jbin in xrange(1, ntaus+1):
+                    tau = h.GetYaxis().GetBinLowEdge(jbin)
+                    pt = kind, tau, mass
+
+                    try:
+                        name = details2name(*pt)
+                        isample = name2isample(in_f, name)
+                    except ValueError as exc:
+                        if tau < 100:
+                            print colors.warning('problem getting %r : isample %r exc %s' % (pt, isample, exc))
+                        continue # leave holes in the plot to know which samples are missing
+
+                    event_SF = None
+                    if which == '2017p8' :
+                        vtx_SF_2017 = sig_datamcSF_2017p8(name+"_2017")
+                        vtx_SF_2018 = sig_datamcSF_2017p8(name+"_2018")
+                        event_SF_2017 = vtx_SF_2017**2
+                        event_SF_2018 = vtx_SF_2018**2
+                        lumi2017 = gp.int_lumis[gp.years.index("2017")]
+                        lumi2018 = gp.int_lumis[gp.years.index("2018")]
+                        event_SF = (event_SF_2017*lumi2017 + event_SF_2018*lumi2018) / (lumi2017+lumi2018)
+                        
+                        if mass == 1600 :
+                            if tau == 0.1 or tau == 0.3 or tau == 1 or tau == 10 :
+                                print name, round(event_SF, 2)
+
+                    else : 
+                        sys.exit('event_scale_factors not set up to handle %s! Exiting.' % which)
+
+                    h.SetBinContent(ibin, jbin, event_SF)
+                    h.SetBinError  (ibin, jbin, 0) # JMTBAD
+
+            out_f.cd()
+            h.Write()
+
+        out_f.Write()
+        out_f.Close()
+
 if __name__ == '__main__':
     if 'make' in sys.argv:
         make()
@@ -849,5 +903,7 @@ if __name__ == '__main__':
             print sample.isample, sample.name, 'signal_%05i' % sample.isample
     elif 'signal_efficiency' in sys.argv:
         signal_efficiency()
+    elif 'event_scale_factors' in sys.argv:
+        event_scale_factors()
     else:
         sys.exit('no cmd recognized from argv=%r' % sys.argv[1:])

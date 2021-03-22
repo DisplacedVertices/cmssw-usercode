@@ -146,6 +146,13 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
             g_expup = do_swap_axes(g_expup)
             g_expdn = do_swap_axes(g_expdn)
 
+        g_obs.SetName("g_obs_%s" % theory)
+        g_obsup.SetName("g_obsup_%s" % theory)
+        g_obsdn.SetName("g_obsdn_%s" % theory)
+        g_exp.SetName("g_exp_%s" % theory)
+        g_expup.SetName("g_expup_%s" % theory)
+        g_expdn.SetName("g_expdn_%s" % theory)
+
         if draw_pm1sigma_excl:
             for g in g_obs, g_exp:
                 g.SetLineWidth(3)
@@ -167,6 +174,7 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
         g_dispjet_excl = ROOT.TGraph(len(ys), disp_jet_excl, ys)
         if swap_axes :
             g_dispjet_excl = do_swap_axes(g_dispjet_excl)
+        g_dispjet_excl.SetName("g_dispjet_excl")
         g_dispjet_excl.SetLineColor(ROOT.kTeal+2)
         g_dispjet_excl.SetLineWidth(3)
         g_dispjet_excl.SetLineStyle(4)
