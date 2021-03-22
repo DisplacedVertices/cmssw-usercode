@@ -854,9 +854,11 @@ def event_scale_factors():
                         lumi2018 = gp.int_lumis[gp.years.index("2018")]
                         event_SF = (event_SF_2017*lumi2017 + event_SF_2018*lumi2018) / (lumi2017+lumi2018)
                         
+                        # for table of SFs, with bins 0.1--0.3\mm & 0.3--1\mm & 1--10\mm & 10--100\mm,
+                        # take the ~midpoint of each bin and put its SF in the table (averaged where necessary)
                         if mass == 1600 :
-                            if tau == 0.1 or tau == 0.3 or tau == 1 or tau == 10 :
-                                print name, round(event_SF, 2)
+                            if tau == 0.2 or tau == 0.6 or tau == 0.7 or tau == 4 or tau == 7 or tau == 55 :
+                                print("for SF table:",name, round(event_SF, 4))
 
                     else : 
                         sys.exit('event_scale_factors not set up to handle %s! Exiting.' % which)
