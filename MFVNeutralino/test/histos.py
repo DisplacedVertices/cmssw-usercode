@@ -3,12 +3,12 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 is_mc = True # for blinding
 
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_MET_triggers
-#sample_files(process, 'qcdht1000_2017' if is_mc else 'JetHT2017B', dataset, 20)
+sample_files(process, 'ttbar_2017' if is_mc else 'JetHT2017B', dataset, 1)
 #sample_files(process, 'mfv_neu_tau001000um_M0800_2017' if is_mc else 'JetHT2017B', dataset, 10)
 #sample_files(process, 'mfv_splitSUSY_tau000001000um_M2000_1800_2017' if is_mc else 'JetHT2017B', dataset, -1)
-input_files(process,[
-                    '/uscms/home/ali/nobackup/LLP/CornellCode/mfv_946p1/src/JMTucker/MFVNeutralino/test/TestRuns/ntuple.root'
-            ])
+#input_files(process,[
+#                    '/uscms/home/ali/nobackup/LLP/CornellCode/mfv_946p1/src/JMTucker/MFVNeutralino/test/TestRuns/ntuple.root'
+#            ])
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
 
@@ -25,6 +25,17 @@ common = cms.Sequence(process.mfvSelectedVerticesSeq * process.mfvWeight)
 
 process.mfvEventHistosNoCuts = process.mfvEventHistos.clone()
 process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts) # just trigger for now
+
+# make nm1 plots
+process.mfvEventHistosnm1 = process.mfvEventHistos.clone()
+process.mfvAnalysisCutsnm1 = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)
+process.mfvVertexHistosNoBeamPipe = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesTightNoBeamPipe')
+process.mfvVertexHistosNoDBS = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesTightNoDBS')
+process.mfvVertexHistosNoNtk = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesTightNoNtk')
+process.mfvVertexHistosNoDBSerr = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesTightNoDBSerr')
+process.pEventnm1 = cms.Path(common * process.mfvAnalysisCutsnm1 * process.mfvEventHistosnm1)
+process.pnm1 = cms.Path(common * process.mfvAnalysisCutsnm1 * process.mfvVertexHistosNoBeamPipe * process.mfvVertexHistosNoDBS * process.mfvVertexHistosNoNtk * process.mfvVertexHistosNoDBSerr)
+
 
 process.mfvEventHistosExtraLoose = process.mfvEventHistos.clone()
 process.mfvAnalysisCutsExtraLoose = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)

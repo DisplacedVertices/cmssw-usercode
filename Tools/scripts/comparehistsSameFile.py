@@ -13,6 +13,7 @@ parser.add_argument("--plots", nargs='+')
 parser.add_argument("--color", nargs='+', type=int)
 parser.add_argument("--legend", nargs='+')
 parser.add_argument("--norm", action='store_true')
+parser.add_argument("--x_range", nargs='+', type=float)
 parser.add_argument("--output")
 args = parser.parse_args()
 
@@ -31,6 +32,9 @@ for ih in range(len(h_list)):
   if ih==0:
     h_list[ih].SetTitle("");
     h_list[ih].Draw()
+    if not len(args.x_range)==0:
+      assert(len(args.x_range)==2)
+      h_list[ih].GetXaxis().SetRangeUser(args.x_range[0], args.x_range[1])
   else:
     h_list[ih].Draw("sames")
   R.gPad.Update()

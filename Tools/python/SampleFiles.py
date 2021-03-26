@@ -2047,6 +2047,48 @@ _add_ds("ntuplev41metm", {
 'mfv_splitSUSY_tau000001000um_M2400_2300_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000001000um_M2400_2300_2017/NtupleV41METm_2017/210302_145052", 50),
 })
 
+_add_ds("ntuplevmetthresv1metm", {
+'qcdht0700_2017': (153, ['/store/user/ali/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/NtupleVmetthresv1METm_2017/210308_081815/0000/ntuple_82.root'] + ['/store/user/ali/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/NtupleVmetthresv1METm_2017/210307_213850/0000/ntuple_%i.root' % i for i in chain(xrange(82), xrange(83,153))]),
+'qcdht1000_2017': _fromnum0("/store/user/ali/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/NtupleVmetthresv1METm_2017/210307_213851", 113),
+'qcdht1500_2017': _fromnum0("/store/user/ali/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/NtupleVmetthresv1METm_2017/210307_213852", 250),
+'qcdht2000_2017': _fromnum0("/store/user/ali/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/NtupleVmetthresv1METm_2017/210307_213853", 147),
+'wjetstolnu_2017': _fromnum0("/store/user/ali/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleVmetthresv1METm_2017/210307_213923", 52),
+'wjetstolnuext_2017': _fromnum0("/store/user/ali/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleVmetthresv1METm_2017/210307_213924", 74),
+'qcdht0200_2017': _fromnum0("/store/user/ali/QCD_HT200to300_TuneCP5_13TeV-madgraph-pythia8/NtupleVmetthresv1METm_2017/210307_213925", 75),
+'qcdht0300_2017': _fromnum0("/store/user/ali/QCD_HT300to500_TuneCP5_13TeV-madgraph-pythia8/NtupleVmetthresv1METm_2017/210307_213926", 187),
+'qcdht0500_2017': (345, ['/store/user/ali/QCD_HT500to700_TuneCP5_13TeV-madgraph-pythia8/NtupleVmetthresv1METm_2017/210308_105219/0000/ntuple_258.root'] + ['/store/user/ali/QCD_HT500to700_TuneCP5_13TeV-madgraph-pythia8/NtupleVmetthresv1METm_2017/210307_213927/0000/ntuple_%i.root' % i for i in chain(xrange(117), xrange(118,131), xrange(132,169), xrange(170,248), xrange(249,253), xrange(254,257), xrange(259,289), xrange(290,307), xrange(308,318), xrange(321,330), xrange(331,341), xrange(342,347), [319])] + ['/store/user/ali/QCD_HT500to700_TuneCP5_13TeV-madgraph-pythia8/NtupleVmetthresv1METm_2017/210308_081812/0000/ntuple_%i.root' % i for i in [117, 248, 253, 257, 289, 307, 318, 320, 330, 341]]),
+'ttbar_2017': (508, ['/store/user/ali/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleVmetthresv1METm_2017/210307_213928/0000/ntuple_%i.root' % i for i in chain(xrange(1,5), xrange(6,9), xrange(10,20), xrange(21,30), xrange(31,33), xrange(34,44), xrange(50,55), xrange(56,58), xrange(64,76), xrange(78,81), xrange(82,85), xrange(86,94), xrange(96,98), xrange(99,101), xrange(102,105), xrange(106,114), xrange(115,137), xrange(142,144), xrange(145,147), xrange(148,152), xrange(153,157), xrange(158,161), xrange(164,171), xrange(172,175), xrange(177,179), xrange(180,185), xrange(186,191), xrange(192,204), xrange(205,220), xrange(221,235), xrange(236,257), xrange(258,283), xrange(284,287), xrange(288,309), xrange(312,317), xrange(318,322), xrange(323,333), xrange(336,354), xrange(355,363), xrange(364,375), xrange(378,397), xrange(398,421), xrange(422,439), xrange(442,451), xrange(452,457), xrange(458,483), xrange(484,496), xrange(497,500), xrange(505,507), [45, 48, 59, 61, 138, 140, 310, 334, 376, 440, 501, 503])] + ['/store/user/ali/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleVmetthresv1METm_2017/210308_081809/0000/ntuple_%i.root' % i for i in chain(xrange(46,48), xrange(62,64), xrange(76,78), xrange(94,96), xrange(161,164), xrange(175,177), [0, 5, 9, 20, 30, 33, 44, 49, 55, 58, 60, 81, 85, 98, 101, 105, 114, 137, 139, 141, 144, 147, 152, 157, 171, 179, 185, 191, 204, 220, 235, 257, 283, 287, 309, 311, 317, 322, 333, 335, 354, 363, 375, 377, 397, 421, 439, 441, 451, 457, 483, 496, 500, 502, 504, 507])]),
+'zjetstonunuht0100_2017': (29, ['/store/user/ali/ZJetsToNuNu_HT-100To200_13TeV-madgraph/NtupleVmetthresv1METm_2017/210308_081808/0000/ntuple_20.root'] + ['/store/user/ali/ZJetsToNuNu_HT-100To200_13TeV-madgraph/NtupleVmetthresv1METm_2017/210307_213916/0000/ntuple_%i.root' % i for i in chain(xrange(20), xrange(21,29))]),
+'zjetstonunuht0200_2017': _fromnum0("/store/user/ali/ZJetsToNuNu_HT-200To400_13TeV-madgraph/NtupleVmetthresv1METm_2017/210307_213917", 30),
+'zjetstonunuht0400_2017': _fromnum0("/store/user/ali/ZJetsToNuNu_HT-400To600_13TeV-madgraph/NtupleVmetthresv1METm_2017/210307_213918", 16),
+'zjetstonunuht0600_2017': _fromnum0("/store/user/ali/ZJetsToNuNu_HT-600To800_13TeV-madgraph/NtupleVmetthresv1METm_2017/210307_213919", 9),
+'zjetstonunuht0800_2017': _fromnum0("/store/user/ali/ZJetsToNuNu_HT-800To1200_13TeV-madgraph/NtupleVmetthresv1METm_2017/210307_213920", 5),
+'zjetstonunuht1200_2017': _fromnum0("/store/user/ali/ZJetsToNuNu_HT-1200To2500_13TeV-madgraph/NtupleVmetthresv1METm_2017/210307_213921", 4),
+'zjetstonunuht2500_2017': _fromnum0("/store/user/ali/ZJetsToNuNu_HT-2500ToInf_13TeV-madgraph/NtupleVmetthresv1METm_2017/210307_213922", 2),
+'mfv_splitSUSY_tau000001000um_M1400_1200_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000001000um_M1400_1200_2017/NtupleVmetthresv1METm_2017/210307_213910", 50),
+'mfv_splitSUSY_tau000010000um_M1400_1200_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000010000um_M1400_1200_2017/NtupleVmetthresv1METm_2017/210307_213913", 50),
+'mfv_splitSUSY_tau000001000um_M1200_1100_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000001000um_M1200_1100_2017/NtupleVmetthresv1METm_2017/210307_213912", 50),
+'mfv_splitSUSY_tau000010000um_M1200_1100_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000010000um_M1200_1100_2017/NtupleVmetthresv1METm_2017/210307_213915", 50),
+'mfv_splitSUSY_tau000001000um_M1200_1200_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000001000um_M1200_1200_2017/NtupleVmetthresv1METm_2017/210307_213911", 50),
+'mfv_splitSUSY_tau000010000um_M1200_1200_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000010000um_M1200_1200_2017/NtupleVmetthresv1METm_2017/210307_213914", 50),
+'mfv_splitSUSY_tau000000000um_M2000_1800_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000000000um_M2000_1800_2017/NtupleVmetthresv1METm_2017/210307_213854", 50),
+'mfv_splitSUSY_tau000000300um_M2000_1800_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000000300um_M2000_1800_2017/NtupleVmetthresv1METm_2017/210307_213858", 50),
+'mfv_splitSUSY_tau000010000um_M2000_1800_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000010000um_M2000_1800_2017/NtupleVmetthresv1METm_2017/210307_213906", 50),
+'mfv_splitSUSY_tau000001000um_M2000_1800_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000001000um_M2000_1800_2017/NtupleVmetthresv1METm_2017/210307_213902", 50),
+'mfv_splitSUSY_tau000000000um_M2000_1900_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000000000um_M2000_1900_2017/NtupleVmetthresv1METm_2017/210307_213855", 50),
+'mfv_splitSUSY_tau000000300um_M2000_1900_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000000300um_M2000_1900_2017/NtupleVmetthresv1METm_2017/210307_213859", 50),
+'mfv_splitSUSY_tau000010000um_M2000_1900_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000010000um_M2000_1900_2017/NtupleVmetthresv1METm_2017/210307_213907", 49),
+'mfv_splitSUSY_tau000001000um_M2000_1900_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000001000um_M2000_1900_2017/NtupleVmetthresv1METm_2017/210307_213903", 49),
+'mfv_splitSUSY_tau000000000um_M2400_100_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000000000um_M2400_100_2017/NtupleVmetthresv1METm_2017/210307_213856", 50),
+'mfv_splitSUSY_tau000000300um_M2400_100_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000000300um_M2400_100_2017/NtupleVmetthresv1METm_2017/210307_213900", 50),
+'mfv_splitSUSY_tau000010000um_M2400_100_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000010000um_M2400_100_2017/NtupleVmetthresv1METm_2017/210307_213908", 49),
+'mfv_splitSUSY_tau000001000um_M2400_100_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000001000um_M2400_100_2017/NtupleVmetthresv1METm_2017/210307_213904", 49),
+'mfv_splitSUSY_tau000000000um_M2400_2300_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000000000um_M2400_2300_2017/NtupleVmetthresv1METm_2017/210307_213857", 50),
+'mfv_splitSUSY_tau000000300um_M2400_2300_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000000300um_M2400_2300_2017/NtupleVmetthresv1METm_2017/210307_213901", 50),
+'mfv_splitSUSY_tau000010000um_M2400_2300_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000010000um_M2400_2300_2017/NtupleVmetthresv1METm_2017/210307_213909", 49),
+'mfv_splitSUSY_tau000001000um_M2400_2300_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000001000um_M2400_2300_2017/NtupleVmetthresv1METm_2017/210307_213905", 50),
+})
+
 ################################################################################
 
 if __name__ == '__main__':

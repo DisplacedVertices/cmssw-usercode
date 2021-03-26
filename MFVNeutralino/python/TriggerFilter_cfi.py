@@ -6,8 +6,8 @@ jet_paths = [
     ]
 
 MET_paths = [
-    #"HLT_PFMET120_PFMHT120_IDTight_v*",
-    "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v*",
+    "HLT_PFMET120_PFMHT120_IDTight_v*",
+    #"HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v*",
     ]
 
 bjet_paths = [

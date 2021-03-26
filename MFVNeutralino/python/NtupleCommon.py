@@ -1,8 +1,8 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-#ntuple_version_ = 'Vtrackpt0p5_dxy2_2'
-ntuple_version_ = 'Vmetthresv1'
+ntuple_version_ = 'V36'
+#ntuple_version_ = 'Vmetthresv1'
 #ntuple_version_ = 'Vtrackattach_3p5'
 use_btag_triggers = False
 use_MET_triggers = True
@@ -259,7 +259,7 @@ def miniaod_ntuple_process(settings):
     process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
     process.load('JMTucker.MFVNeutralino.TrackTree_cfi')
     # temporarily add this module to select event passing MET trigger or event with MET<threshold
-    process.load('JMTucker.MFVNeutralino.METTrigFilter_cfi')
+    #process.load('JMTucker.MFVNeutralino.METTrigFilter_cfi')
 
     process.goodOfflinePrimaryVertices.input_is_miniaod = True
     process.selectedPatJets.src = 'updatedJetsMiniAOD'
@@ -271,7 +271,8 @@ def miniaod_ntuple_process(settings):
 
     # change made to use corrected MET
     process.mfvTriggerFloats.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple')
-    process.mfvMETTrigFilter.pfMetInputTag_ = cms.untracked.InputTag('slimmedMETs', '', 'Ntuple')
+    process.mfvTriggerFloats.isMC = settings.is_mc
+    #process.mfvMETTrigFilter.pfMetInputTag_ = cms.untracked.InputTag('slimmedMETs', '', 'Ntuple')
 
     process.mfvGenParticles.gen_particles_src = 'prunedGenParticles'
     process.mfvGenParticles.last_flag_check = False
@@ -293,6 +294,7 @@ def miniaod_ntuple_process(settings):
     process.mfvEvent.gen_jets_src = 'slimmedGenJets'
     process.mfvEvent.pileup_info_src = 'slimmedAddPileupInfo'
     # use corrected MET
+    #need to be changed to use TriggerFloats corrected MET
     process.mfvEvent.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple')
 
     # MET correction and filters

@@ -17,8 +17,10 @@
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "JMTucker/Tools/interface/TriggerHelper.h"
+#include "JMTucker/Tools/interface/METxyCorrection.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/TriggerFloats.h"
+#include <cmath>
 
 class MFVTriggerFloats : public edm::EDProducer {
 public:
@@ -40,6 +42,9 @@ private:
 
   const edm::EDGetTokenT<pat::METCollection> met_token;
   const edm::EDGetTokenT<pat::MuonCollection> muons_token;
+  const StringCutObjectSelector<pat::Muon> muon_selector;
+  const edm::EDGetTokenT<reco::VertexCollection> primary_vertex_token;
+  const bool isMC;
 
   const int prints;
 };
@@ -56,6 +61,9 @@ MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
     jet_selector(cfg.getParameter<std::string>("jet_cut")),
     met_token(consumes<pat::METCollection>(cfg.getParameter<edm::InputTag>("met_src"))),
     muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
+    muon_selector(cfg.getParameter<std::string>("muon_cut")),
+    primary_vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertex_src"))),
+    isMC(cfg.getParameter<bool>("isMC")),
     prints(cfg.getUntrackedParameter<int>("prints", 0))
 {
   produces<mfv::TriggerFloats>();
@@ -94,19 +102,50 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   edm::Handle<pat::MuonCollection> muons;
   event.getByToken(muons_token, muons);
 
+  edm::Handle<reco::VertexCollection> primary_vertices;
+  event.getByToken(primary_vertex_token, primary_vertices);
+
   const pat::MET& met = mets->at(0);
-  double met_pt = met.pt();
-  double met_px = met.px();
-  double met_py = met.py();
+  double met_pt_origin = met.pt();
+  double met_phi_origin = met.phi();
+  //std::cout << "npv " << primary_vertices->size() << std::endl;
+  std::pair<double,double> met_corrected = jmt::METXYCorr_Met_MetPhi(met_pt_origin, met_phi_origin, event.id().event(), 2017, isMC, primary_vertices->size()); // year and isMC need to be modified
+  double met_pt = met_corrected.first;
+  double met_phi = met_corrected.second;
+  //std::cout << "original: pt " << met_pt_origin << " phi " << met_phi_origin << std::endl;
+  //std::cout << "recorrect: pt " << met_pt << " phi " << met_phi << std::endl;
+  double met_px = met_pt*std::cos(met_phi);
+  double met_py = met_pt*std::sin(met_phi);
+  //std::cout << "met px " << met_px << " py " << met_py << std::endl;
   for (const pat::Muon& muon : *muons) {
     double muon_px = muon.px();
     double muon_py = muon.py();
+    //std::cout << "  mu px " << muon_px << " py " << muon_py << std::endl;
     // use subtraction to see effects
     // now changed back to add
-    met_px = met_px + muon_px;
-    met_py = met_py + muon_py;
+    if (muon_selector(muon)){
+      met_px = met_px + muon_px;
+      met_py = met_py + muon_py;
+    }
   }
   double met_nomu_pt = hypotf(met_px,met_py);
+  //if (met_nomu_pt>400){
+  //  std::cout << "MET pt, phi: "
+  //  << met_pt << " , " << met_phi << std::endl;
+  //  std::cout << "METnoMu pt, px, py: "
+  //  << met_nomu_pt << " , " << met_px << " , " << met_py << std::endl;
+  //  //Accessing the trigger objects
+  //  for (pat::TriggerObjectStandAlone obj : *trigger_objects) {
+  //    obj.unpackFilterLabels(event, *trigger_results);
+  //    obj.unpackPathNames(trigger_names);
+  //    for (unsigned h = 0; h < obj.filterLabels().size(); ++h){
+  //      string myfillabl=obj.filterLabels()[h];
+  //      //cout << "trigger object name, pt, eta, phi: "
+  //      //<< myfillabl<<", " << obj.pt()<<", "<<obj.eta()<<", "<<obj.phi() << endl;
+  //    }
+  //  }
+  //  
+  //}
 
   // check met filters
   std::vector<bool> pass_met_filters(metfilternames.size(), false);
@@ -466,6 +505,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   floats->myhtt = my_htt;
   floats->myhttwbug = my_htt_wbug;
   floats->met_pt = met_pt;
+  floats->met_phi = met_phi;
   floats->met_pt_calo = met.caloMETPt();
   floats->met_pt_nomu = met_nomu_pt;
   floats->pass_metfilters = pass_all_metfilters;

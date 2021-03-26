@@ -64,6 +64,7 @@ private:
   TH2F* h_jetpt2v1;
 
   TH1D* h_metpt;
+  TH1D* h_met_phi;
   TH1D* h_metpt_nomu;
 
   TH1D* h_ngenjets;
@@ -155,6 +156,7 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
   }
 
   h_metpt = fs->make<TH1D>("h_metpt", ";MET pT (GeV);events",150,0,1500);
+  h_met_phi = fs->make<TH1D>("h_met_phi", ";MET phi;events",320,-3.2,3.2);
   h_metpt_nomu = fs->make<TH1D>("h_metpt_nomu", ";METnoMu pT (GeV);events",150,0,1500);
 
   if (use_genjets) {
@@ -353,6 +355,7 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
 
   if (abs(triggerfloats->met_pt-triggerfloats->met_pt_calo)/triggerfloats->met_pt_calo<0.5){
     h_metpt->Fill(triggerfloats->met_pt, w);
+    h_met_phi->Fill(triggerfloats->met_phi, w);
     h_metpt_nomu->Fill(triggerfloats->met_pt_nomu, w);
   }
 

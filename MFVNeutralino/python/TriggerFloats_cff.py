@@ -12,5 +12,9 @@ mfvTriggerFloats = cms.EDProducer('MFVTriggerFloats',
                                   met_src = cms.InputTag('slimmedMETs', '', 'BasicAnalyzer'),
                                   #met_src = cms.InputTag('slimmedMETs'),
                                   muons_src = cms.InputTag('slimmedMuons'),
+                                  muon_cut = cms.string(jtupleParams.muonCut.value()),
+                                  primary_vertex_src = cms.InputTag('offlineSlimmedPrimaryVertices'), #goodOfflinePrimaryVertices
+                                  #primary_vertex_src = cms.InputTag('goodOfflinePrimaryVertices'), #goodOfflinePrimaryVertices
+                                  isMC = cms.bool(True),
                                   prints = cms.untracked.int32(0),
                                   )

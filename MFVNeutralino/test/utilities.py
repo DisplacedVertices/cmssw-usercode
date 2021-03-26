@@ -12,11 +12,14 @@ _presel_s = '_leptonpresel' if _leptonpresel else '_metpresel' if _metpresel els
 
 def cmd_hadd_vertexer_histos():
     ntuple = sys.argv[2]
+    print(ntuple)
     samples = Samples.registry.from_argv(
-            Samples.data_samples_2015 + \
-            Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015 + \
-            Samples.data_samples + \
-            Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext)
+            Samples.qcd_samples_2017 + Samples.met_samples_2017 + Samples.Zvv_samples_2017 + Samples.mfv_splitSUSY_samples_M2000_2017
+            #Samples.data_samples_2015 + \
+            #Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015 + \
+            #Samples.data_samples + \
+            #Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext
+    )
     for s in samples:
         s.set_curr_dataset(ntuple)
         hadd(s.name + '.root', ['root://cmseos.fnal.gov/' + fn.replace('ntuple', 'vertex_histos') for fn in s.filenames])
@@ -248,6 +251,16 @@ def cmd_effsprint(year_to_use=2017):
                     cmd += ' ' + which_files
                     outfn = 'effsprint_%s%s_%s_ntk%s_%iv' % (which, _presel_s, year, ntk, vtx)
                     do(cmd, outfn)
+            # A B C D region effsprint
+            for reg in ['A', 'B', 'C', 'D']:
+                cmd = 'ntk5 '
+                cmd += reg
+                if which == 'background':
+                    cmd += ' sum'
+                cmd += ' ' + which_files
+                outfn = 'effsprint_%s%s_%s_region%s' % (which, _presel_s, year, reg)
+                do(cmd, outfn)
+                
         do('presel sum ' + background_fns, 'effsprint_presel_%s' % year)
         do('nocuts sum ' + background_fns, 'effsprint_nocuts_%s' % year)
 

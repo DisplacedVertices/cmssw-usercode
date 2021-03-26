@@ -5,7 +5,7 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.Tools.Samples import *
 
-version = '2017v9'
+version = '2017v11_MET'
 zoom = False #(0.98,1.005)
 save_more = True
 data_only = False
@@ -33,7 +33,8 @@ print year, data_period, int_lumi
 
 ########################################################################
 
-root_dir = '/uscms/home/ali/nobackup/LLP/crabdir/TrigEff%s_METnoMu' % version
+root_dir = '/uscms/home/ali/nobackup/LLP/crabdir/TrigEff%s' % version
+#root_dir = '/uscms/home/ali/nobackup/LLP/crabdir/TrigEff2017v10_WJets_xycorrMET_METnoMu_v3'
 plot_path = 'TrigEff%s_%s_%s%s' % (version, num_dir, year, data_period)
 if zoom:
     plot_path += '_zoom'
@@ -50,6 +51,8 @@ if data_only:
     bkg_samples, sig_samples = [], []
 else:
     if year == 2017 or year == 2018:
+        #bkg_samples = [wjetstolnu_2017]
+        #sig_samples = []
         bkg_samples = [ttbar_2017, wjetstolnusum_2017, dyjetstollM50sum_2017, dyjetstollM10_2017, qcdmupt15_2017]
         if use_qcd:
             bkg_samples.append(qcdmupt15_2017)
@@ -68,8 +71,8 @@ for samples in bkg_samples, sig_samples:
 
 kinds = ['']
 #ns = ['h_jet_ht']
-ns = ['h_metpt_nomu']
-#ns = ['h_metpt']
+#ns = ['h_metpt_nomu']
+ns = ['h_metpt']
 
 lump_lower = 0.
 #lump_lower = 1200.
