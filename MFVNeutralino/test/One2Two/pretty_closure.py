@@ -1,5 +1,6 @@
 import os
 from JMTucker.Tools.ROOTTools import *
+from statmodel import ebins
 ROOT.TH1.AddDirectory(0)
 
 set_style()
@@ -32,6 +33,46 @@ def write(font, size, x, y, text):
     w.DrawLatex(x, y, text)
     return w
 
+def get_bin_integral_and_stat_uncert(hist, i, year):
+    sample = 'data100pc'
+    if "5" in ntk[i] :
+        ntracks = 5
+    elif "4" in ntk[i] :
+        ntracks = 4 # including for 4x3
+    elif "3" in ntk[i] :
+        ntracks = 3
+    ebin = ebins['%s_%s_%dtrack' % (sample, year, ntracks)]
+
+    bin1 = bin1_err = bin2 = bin2_err = bin3 = bin3_err = 0.
+
+    if 'c1v' not in hist.GetName():
+        bin1, bin1_err = get_integral(hist, xhi=0.04, include_last_bin=False)
+        bin2, bin2_err = get_integral(hist, xlo=0.04, xhi=0.07, include_last_bin=False)
+        bin3, bin3_err = get_integral(hist, xlo=0.07, xhi=0.4, include_last_bin=False)
+    else:
+        bin1 = get_integral(hist, 0., 0.04, integral_only=True, include_last_bin=False)
+        bin1_err = bin1 * ebin[0]
+        bin2 = get_integral(hist, 0.04, 0.07, integral_only=True, include_last_bin=False)
+        bin2_err = bin2 * ebin[1]
+        bin3 = get_integral(hist, 0.07, 0.4, integral_only=True, include_last_bin=False)
+        bin3_err = bin3 * ebin[2]
+    return [(bin1, bin1_err), (bin2, bin2_err), (bin3, bin3_err)]
+
+def set_bin_errors(template, twovtxerr, i, year) :
+    template_bins = get_bin_integral_and_stat_uncert(template, i, year)
+    for bin in range(1, template.GetNbinsX() + 1):
+        stat = 0.
+        if bin <= 4:
+            stat = template_bins[0][1] * (template.GetBinContent(bin) / template_bins[0][0])**0.5
+        elif bin <= 7:
+            stat = template_bins[1][1] * (template.GetBinContent(bin) / template_bins[1][0])**0.5
+        else:
+            stat = template_bins[2][1] * (template.GetBinContent(bin) / template_bins[2][0])**0.5
+
+        newerr = (stat**2. + (twovtxerr * template.GetBinContent(bin) / template.Integral())**2.)**0.5
+        template.SetBinError(bin, newerr)
+    return template
+
 for i in range(4):
     hh_2017 = ROOT.TFile(fns_2017[i]).Get('h_2v_dvv')
     hh_2018 = ROOT.TFile(fns_2018[i]).Get('h_2v_dvv')
@@ -53,6 +94,15 @@ for i in range(4):
     h.Add(h_2018)
     hh = hh_2017
     hh.Add(hh_2018)
+
+    # note that all of the twovtxerr and set_bin_errors are strictly for HEPData!
+    twovtxerr = ROOT.Double(0)
+    twovtx = hh.IntegralAndError(0, hh.GetNbinsX(), twovtxerr)
+
+    if hh.Integral() == 0 :
+        twovtxerr = 0.352
+
+    h = set_bin_errors(h, twovtxerr, i, "2017p8")
 
     hh = cm2mm(hh)
     h = cm2mm(h)
