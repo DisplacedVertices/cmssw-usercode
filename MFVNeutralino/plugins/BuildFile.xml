@@ -12,6 +12,7 @@
   <use name="HLTrigger/HLTcore"/>
   <use name="PhysicsTools/CandUtils"/>
   <use name="PhysicsTools/SelectorUtils"/>
+  <use name="DNN/TensorFlow" />
   <use name="RecoBTag/SecondaryVertex"/>
   <use name="RecoEgamma/EgammaTools"/>
   <use name="RecoParticleFlow/PFTracking"/>

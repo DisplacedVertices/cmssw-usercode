@@ -2089,6 +2089,48 @@ _add_ds("ntuplevmetthresv1metm", {
 'mfv_splitSUSY_tau000001000um_M2400_2300_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000001000um_M2400_2300_2017/NtupleVmetthresv1METm_2017/210307_213905", 50),
 })
 
+_add_ds("ntuplevkeeptk_v1metm", {
+'qcdht0700_2017': (153, ['/store/user/ali/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/NtupleVkeeptk_v1METm_2017/210407_223510/0000/ntuple_%i.root' % i for i in chain(xrange(2), xrange(3,18), xrange(19,24), xrange(25,45), xrange(46,50), xrange(51,55), xrange(56,58), xrange(59,74), xrange(75,80), xrange(82,91), xrange(92,101), xrange(104,113), xrange(114,121), xrange(122,128), xrange(129,135), xrange(136,141), xrange(147,153), [102, 142, 144])] + ['/store/user/ali/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/NtupleVkeeptk_v1METm_2017/210408_112650/0000/ntuple_%i.root' % i for i in chain(xrange(80,82), xrange(145,147), [2, 18, 24, 45, 50, 55, 58, 74, 91, 101, 103, 113, 121, 128, 135, 141, 143])]),
+'qcdht1000_2017': _fromnum0("/store/user/ali/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/NtupleVkeeptk_v1METm_2017/210407_223511", 113),
+'qcdht1500_2017': _fromnum0("/store/user/ali/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/NtupleVkeeptk_v1METm_2017/210407_223512", 250),
+'qcdht2000_2017': _fromnum0("/store/user/ali/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/NtupleVkeeptk_v1METm_2017/210407_223513", 147),
+'wjetstolnu_2017': _fromnum0("/store/user/ali/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleVkeeptk_v1METm_2017/210407_223543", 52),
+'wjetstolnuext_2017': _fromnum0("/store/user/ali/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleVkeeptk_v1METm_2017/210407_223544", 74),
+'qcdht0200_2017': _fromnum0("/store/user/ali/QCD_HT200to300_TuneCP5_13TeV-madgraph-pythia8/NtupleVkeeptk_v1METm_2017/210407_223545", 75),
+'qcdht0300_2017': _fromnum0("/store/user/ali/QCD_HT300to500_TuneCP5_13TeV-madgraph-pythia8/NtupleVkeeptk_v1METm_2017/210407_223546", 187),
+'qcdht0500_2017': (347, ['/store/user/ali/QCD_HT500to700_TuneCP5_13TeV-madgraph-pythia8/NtupleVkeeptk_v1METm_2017/210407_223547/0000/ntuple_%i.root' % i for i in chain(xrange(3), xrange(4,13), xrange(17,21), xrange(22,27), xrange(31,36), xrange(37,60), xrange(63,65), xrange(66,73), xrange(76,83), xrange(84,92), xrange(93,98), xrange(99,123), xrange(124,126), xrange(127,132), xrange(133,142), xrange(143,178), xrange(179,189), xrange(190,192), xrange(193,197), xrange(198,210), xrange(211,213), xrange(215,218), xrange(219,221), xrange(222,227), xrange(232,243), xrange(249,253), xrange(254,257), xrange(259,262), xrange(263,265), xrange(268,272), xrange(273,276), xrange(280,282), xrange(285,288), xrange(294,302), xrange(304,307), xrange(308,310), xrange(311,314), xrange(315,320), xrange(321,324), xrange(325,329), xrange(332,334), xrange(337,341), [14, 29, 61, 74, 230, 245, 247, 278, 283, 290, 292, 335, 344])] + ['/store/user/ali/QCD_HT500to700_TuneCP5_13TeV-madgraph-pythia8/NtupleVkeeptk_v1METm_2017/210408_112646/0000/ntuple_%i.root' % i for i in chain(xrange(15,17), xrange(27,29), xrange(213,215), xrange(227,230), xrange(243,245), xrange(257,259), xrange(265,268), xrange(276,278), xrange(288,290), xrange(302,304), xrange(329,332), xrange(341,344), xrange(345,347), [3, 13, 21, 30, 36, 60, 62, 65, 73, 75, 83, 92, 98, 123, 126, 132, 142, 178, 189, 192, 197, 210, 218, 221, 231, 246, 248, 253, 262, 272, 279, 282, 284, 291, 293, 307, 310, 314, 320, 324, 334, 336])]),
+'ttbar_2017': (507, ['/store/user/ali/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleVkeeptk_v1METm_2017/210408_143620/0000/ntuple_%i.root' % i for i in chain(xrange(192,194), xrange(239,241), xrange(417,419), xrange(424,426), [3, 25, 28, 63, 66, 85, 94, 103, 107, 118, 143, 147, 157, 166, 170, 180, 208, 211, 255, 272, 274, 278, 314, 320, 340, 356, 381, 383, 411, 434, 455, 493])] + ['/store/user/ali/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleVkeeptk_v1METm_2017/210407_223548/0000/ntuple_%i.root' % i for i in chain(xrange(3), xrange(4,25), xrange(26,28), xrange(29,50), xrange(51,63), xrange(64,66), xrange(67,85), xrange(86,94), xrange(95,103), xrange(104,107), xrange(108,118), xrange(119,143), xrange(144,147), xrange(148,157), xrange(158,166), xrange(167,170), xrange(171,180), xrange(181,192), xrange(194,208), xrange(209,211), xrange(212,239), xrange(241,255), xrange(256,272), xrange(275,278), xrange(279,314), xrange(315,320), xrange(321,340), xrange(341,356), xrange(357,381), xrange(384,411), xrange(412,417), xrange(419,424), xrange(426,434), xrange(435,455), xrange(456,493), xrange(494,508), [273, 382])]),
+'zjetstonunuht0100_2017': _fromnum0("/store/user/ali/ZJetsToNuNu_HT-100To200_13TeV-madgraph/NtupleVkeeptk_v1METm_2017/210407_223536", 29),
+'zjetstonunuht0200_2017': _fromnum0("/store/user/ali/ZJetsToNuNu_HT-200To400_13TeV-madgraph/NtupleVkeeptk_v1METm_2017/210407_223537", 30),
+'zjetstonunuht0400_2017': _fromnum0("/store/user/ali/ZJetsToNuNu_HT-400To600_13TeV-madgraph/NtupleVkeeptk_v1METm_2017/210407_223538", 16),
+'zjetstonunuht0600_2017': _fromnum0("/store/user/ali/ZJetsToNuNu_HT-600To800_13TeV-madgraph/NtupleVkeeptk_v1METm_2017/210407_223539", 9),
+'zjetstonunuht0800_2017': _fromnum0("/store/user/ali/ZJetsToNuNu_HT-800To1200_13TeV-madgraph/NtupleVkeeptk_v1METm_2017/210407_223540", 5),
+'zjetstonunuht1200_2017': _fromnum0("/store/user/ali/ZJetsToNuNu_HT-1200To2500_13TeV-madgraph/NtupleVkeeptk_v1METm_2017/210407_223541", 4),
+'zjetstonunuht2500_2017': _fromnum0("/store/user/ali/ZJetsToNuNu_HT-2500ToInf_13TeV-madgraph/NtupleVkeeptk_v1METm_2017/210407_223542", 2),
+'mfv_splitSUSY_tau000001000um_M1400_1200_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000001000um_M1400_1200_2017/NtupleVkeeptk_v1METm_2017/210407_223530", 50),
+'mfv_splitSUSY_tau000010000um_M1400_1200_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000010000um_M1400_1200_2017/NtupleVkeeptk_v1METm_2017/210407_223533", 50),
+'mfv_splitSUSY_tau000001000um_M1200_1100_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000001000um_M1200_1100_2017/NtupleVkeeptk_v1METm_2017/210407_223532", 50),
+'mfv_splitSUSY_tau000010000um_M1200_1100_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000010000um_M1200_1100_2017/NtupleVkeeptk_v1METm_2017/210407_223535", 50),
+'mfv_splitSUSY_tau000001000um_M1200_1200_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000001000um_M1200_1200_2017/NtupleVkeeptk_v1METm_2017/210407_223531", 50),
+'mfv_splitSUSY_tau000010000um_M1200_1200_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000010000um_M1200_1200_2017/NtupleVkeeptk_v1METm_2017/210407_223534", 50),
+'mfv_splitSUSY_tau000000000um_M2000_1800_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000000000um_M2000_1800_2017/NtupleVkeeptk_v1METm_2017/210407_223514", 50),
+'mfv_splitSUSY_tau000000300um_M2000_1800_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000000300um_M2000_1800_2017/NtupleVkeeptk_v1METm_2017/210407_223518", 50),
+'mfv_splitSUSY_tau000010000um_M2000_1800_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000010000um_M2000_1800_2017/NtupleVkeeptk_v1METm_2017/210407_223526", 50),
+'mfv_splitSUSY_tau000001000um_M2000_1800_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000001000um_M2000_1800_2017/NtupleVkeeptk_v1METm_2017/210407_223522", 50),
+'mfv_splitSUSY_tau000000000um_M2000_1900_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000000000um_M2000_1900_2017/NtupleVkeeptk_v1METm_2017/210407_223515", 50),
+'mfv_splitSUSY_tau000000300um_M2000_1900_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000000300um_M2000_1900_2017/NtupleVkeeptk_v1METm_2017/210407_223519", 50),
+'mfv_splitSUSY_tau000010000um_M2000_1900_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000010000um_M2000_1900_2017/NtupleVkeeptk_v1METm_2017/210407_223527", 49),
+'mfv_splitSUSY_tau000001000um_M2000_1900_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000001000um_M2000_1900_2017/NtupleVkeeptk_v1METm_2017/210407_223523", 49),
+'mfv_splitSUSY_tau000000000um_M2400_100_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000000000um_M2400_100_2017/NtupleVkeeptk_v1METm_2017/210407_223516", 50),
+'mfv_splitSUSY_tau000000300um_M2400_100_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000000300um_M2400_100_2017/NtupleVkeeptk_v1METm_2017/210407_223520", 50),
+'mfv_splitSUSY_tau000010000um_M2400_100_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000010000um_M2400_100_2017/NtupleVkeeptk_v1METm_2017/210407_223528", 49),
+'mfv_splitSUSY_tau000001000um_M2400_100_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000001000um_M2400_100_2017/NtupleVkeeptk_v1METm_2017/210407_223524", 49),
+'mfv_splitSUSY_tau000000000um_M2400_2300_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000000000um_M2400_2300_2017/NtupleVkeeptk_v1METm_2017/210407_223517", 50),
+'mfv_splitSUSY_tau000000300um_M2400_2300_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000000300um_M2400_2300_2017/NtupleVkeeptk_v1METm_2017/210407_223521", 50),
+'mfv_splitSUSY_tau000010000um_M2400_2300_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000010000um_M2400_2300_2017/NtupleVkeeptk_v1METm_2017/210407_223529", 49),
+'mfv_splitSUSY_tau000001000um_M2400_2300_2017': _fromnum0("/store/user/ali/mfv_splitSUSY_tau000001000um_M2400_2300_2017/NtupleVkeeptk_v1METm_2017/210407_223525", 50),
+})
+
 ################################################################################
 
 if __name__ == '__main__':

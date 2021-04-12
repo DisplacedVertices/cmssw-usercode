@@ -16,5 +16,6 @@ mfvTriggerFloats = cms.EDProducer('MFVTriggerFloats',
                                   primary_vertex_src = cms.InputTag('offlineSlimmedPrimaryVertices'), #goodOfflinePrimaryVertices
                                   #primary_vertex_src = cms.InputTag('goodOfflinePrimaryVertices'), #goodOfflinePrimaryVertices
                                   isMC = cms.bool(True),
+                                  year = cms.int32(-1),
                                   prints = cms.untracked.int32(0),
                                   )

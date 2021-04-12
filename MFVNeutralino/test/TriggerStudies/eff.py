@@ -41,6 +41,7 @@ process.selectedPatJets.src = 'updatedJetsMiniAOD'
 process.selectedPatJets.cut = jtupleParams.jetCut
 process.mfvTriggerFloats.met_src = cms.InputTag('slimmedMETs', '', 'BasicAnalyzer') # BasicAnalyzer
 process.mfvTriggerFloats.isMC = settings.is_mc
+process.mfvTriggerFloats.year = settings.year
 
 
 from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel

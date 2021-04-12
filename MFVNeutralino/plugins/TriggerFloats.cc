@@ -45,6 +45,7 @@ private:
   const StringCutObjectSelector<pat::Muon> muon_selector;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertex_token;
   const bool isMC;
+  const int year;
 
   const int prints;
 };
@@ -64,6 +65,7 @@ MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
     muon_selector(cfg.getParameter<std::string>("muon_cut")),
     primary_vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertex_src"))),
     isMC(cfg.getParameter<bool>("isMC")),
+    year(cfg.getParameter<int>("year")),
     prints(cfg.getUntrackedParameter<int>("prints", 0))
 {
   produces<mfv::TriggerFloats>();
@@ -108,49 +110,24 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   const pat::MET& met = mets->at(0);
   double met_pt_origin = met.pt();
   double met_phi_origin = met.phi();
-  //std::cout << "npv " << primary_vertices->size() << std::endl;
-  std::pair<double,double> met_corrected = jmt::METXYCorr_Met_MetPhi(met_pt_origin, met_phi_origin, event.id().event(), 2017, isMC, primary_vertices->size()); // year and isMC need to be modified
+  std::pair<double,double> met_corrected = jmt::METXYCorr_Met_MetPhi(met_pt_origin, met_phi_origin, event.id().event(), year, isMC, primary_vertices->size()); // year and isMC need to be modified
   double met_pt = met_corrected.first;
   double met_phi = met_corrected.second;
-  //std::cout << "original: pt " << met_pt_origin << " phi " << met_phi_origin << std::endl;
-  //std::cout << "recorrect: pt " << met_pt << " phi " << met_phi << std::endl;
   double met_px = met_pt*std::cos(met_phi);
   double met_py = met_pt*std::sin(met_phi);
-  //std::cout << "met px " << met_px << " py " << met_py << std::endl;
   for (const pat::Muon& muon : *muons) {
     double muon_px = muon.px();
     double muon_py = muon.py();
-    //std::cout << "  mu px " << muon_px << " py " << muon_py << std::endl;
-    // use subtraction to see effects
-    // now changed back to add
     if (muon_selector(muon)){
       met_px = met_px + muon_px;
       met_py = met_py + muon_py;
     }
   }
   double met_nomu_pt = hypotf(met_px,met_py);
-  //if (met_nomu_pt>400){
-  //  std::cout << "MET pt, phi: "
-  //  << met_pt << " , " << met_phi << std::endl;
-  //  std::cout << "METnoMu pt, px, py: "
-  //  << met_nomu_pt << " , " << met_px << " , " << met_py << std::endl;
-  //  //Accessing the trigger objects
-  //  for (pat::TriggerObjectStandAlone obj : *trigger_objects) {
-  //    obj.unpackFilterLabels(event, *trigger_results);
-  //    obj.unpackPathNames(trigger_names);
-  //    for (unsigned h = 0; h < obj.filterLabels().size(); ++h){
-  //      string myfillabl=obj.filterLabels()[h];
-  //      //cout << "trigger object name, pt, eta, phi: "
-  //      //<< myfillabl<<", " << obj.pt()<<", "<<obj.eta()<<", "<<obj.phi() << endl;
-  //    }
-  //  }
-  //  
-  //}
 
   // check met filters
   std::vector<bool> pass_met_filters(metfilternames.size(), false);
   for (unsigned int i = 0, n = metFilters->size(); i < n; ++i) {
-    //std::cout << "trigger name: " << names.triggerName(i) << std::endl;
     for (unsigned int j = 0; j<metfilternames.size(); ++j){
       if ( names.triggerName(i) == metfilternames[j] ){
         pass_met_filters[j] = metFilters->accept(i);

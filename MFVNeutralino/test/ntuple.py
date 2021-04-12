@@ -11,6 +11,7 @@ settings.minitree_only = False
 settings.prepare_vis = False
 settings.keep_all = False
 settings.keep_gen = False
+settings.keep_tk = True
 if use_btag_triggers :
     settings.event_filter = 'bjets OR displaced dijet veto HT' # for new trigger studies
 elif use_MET_triggers :
@@ -22,7 +23,7 @@ else :
 
 process = ntuple_process(settings)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
-sample_files(process, 'mfv_splitSUSY_tau000001000um_M2000_1800_2017', dataset, 10)
+sample_files(process, 'mfv_splitSUSY_tau000001000um_M2000_1800_2017', dataset, 1)
 #sample_files(process, 'mfv_neu_tau001000um_M1600_year', dataset, 1)
 #sample_files(process, 'ttbar_year', dataset, 1)
 #sample_files(process, 'dyjetstollM50_year', dataset, 1)

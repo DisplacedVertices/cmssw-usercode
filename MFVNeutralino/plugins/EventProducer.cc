@@ -331,11 +331,18 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   //////////////////////////////////////////////////////////////////////
 
   if (use_met) {
-    edm::Handle<pat::METCollection> mets;
-    event.getByToken(met_token, mets);
-    const pat::MET& met = mets->at(0);
-    mevent->metx = met.px();
-    mevent->mety = met.py();
+    // getting MET using original source
+    //edm::Handle<pat::METCollection> mets;
+    //event.getByToken(met_token, mets);
+    //const pat::MET& met = mets->at(0);
+    //mevent->metx = met.px();
+    //mevent->mety = met.py();
+
+    // getting corrected MET from TriggerFloats
+    double met_pt = triggerfloats->met_pt;
+    double met_phi = triggerfloats->met_phi;
+    mevent->metx = met_pt*std::cos(met_phi);
+    mevent->mety = met_pt*std::sin(met_phi);
   }
 
   //////////////////////////////////////////////////////////////////////

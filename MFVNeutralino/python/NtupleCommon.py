@@ -1,9 +1,10 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version_ = 'V36'
+#ntuple_version_ = 'V36'
 #ntuple_version_ = 'Vmetthresv1'
 #ntuple_version_ = 'Vtrackattach_3p5'
+ntuple_version_ = 'Vkeeptk_v1'
 use_btag_triggers = False
 use_MET_triggers = True
 if use_btag_triggers : 
@@ -91,7 +92,9 @@ def minitree_only(process, mode, settings, output_commands):
 def event_filter(process, mode, settings, output_commands, **kwargs):
     if mode:
         from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-        setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode, trigger_filter = False, event_filter = False, event_filter_require_vertex = False, **kwargs)
+        # for temp including events that don't pass MET trigger and MET lower than 150
+        #setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode, trigger_filter = False, event_filter = False, event_filter_require_vertex = False, **kwargs)
+        setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode, event_filter_require_vertex = True, **kwargs)
 
 ########################################################################
 
@@ -104,6 +107,7 @@ class NtupleSettings(CMSSWSettings):
         self.prepare_vis = False
         self.keep_all = False
         self.keep_gen = False
+        self.kee_tk = False
         self.event_filter = True
 
     @property
@@ -159,6 +163,9 @@ def make_output_commands(process, settings):
             output_commands += ['keep *_prunedGenParticles_*_*', 'keep *_packedGenParticles_*_*', 'keep *_slimmedGenJets_*_*']
         else:
             output_commands += ['keep *_genParticles_*_HLT',     'keep *_ak4GenJetsNoNu_*_HLT']
+
+    if settings.keep_tk:
+        output_commands += ['keep *_jmtRescaledTracks_*_*']
 
     if settings.keep_all:
         def dedrop(l):
@@ -272,7 +279,7 @@ def miniaod_ntuple_process(settings):
     # change made to use corrected MET
     process.mfvTriggerFloats.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple')
     process.mfvTriggerFloats.isMC = settings.is_mc
-    #process.mfvMETTrigFilter.pfMetInputTag_ = cms.untracked.InputTag('slimmedMETs', '', 'Ntuple')
+    process.mfvTriggerFloats.year = settings.year
 
     process.mfvGenParticles.gen_particles_src = 'prunedGenParticles'
     process.mfvGenParticles.last_flag_check = False
