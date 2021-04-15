@@ -217,9 +217,9 @@ dvvlines = [
         ]
 
 for ll in dvvlines:
-        ll.SetLineColor(ROOT.kRed)
+        ll.SetLineColor(ROOT.kMagenta)
         ll.SetLineWidth(2)
-        ll.SetLineStyle(2)
+        ll.SetLineStyle(3)
         ll.Draw()
 
 ps.save('templates')

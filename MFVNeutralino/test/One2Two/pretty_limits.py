@@ -7,7 +7,7 @@ swap_axes = True
 
 which = '2017p8' if '2017p8' in sys.argv else 'run2'
 intlumi = 140 if which == 'run2' else 101
-path = plot_dir('pretty_limits_%s_pm1sigma_switchaxes' % which, make=True)
+path = plot_dir('pretty_limits_%s_pm1sigma_switchaxes_diff_color' % which, make=True)
 
 ts = tdr_style()
 ROOT.gStyle.SetPalette(ROOT.kBird)
@@ -175,7 +175,7 @@ for kind in 'mfv_stopdbardbar', 'mfv_neu':
         if swap_axes :
             g_dispjet_excl = do_swap_axes(g_dispjet_excl)
         g_dispjet_excl.SetName("g_dispjet_excl")
-        g_dispjet_excl.SetLineColor(ROOT.kTeal+2)
+        g_dispjet_excl.SetLineColor(ROOT.kTeal)
         g_dispjet_excl.SetLineWidth(3)
         g_dispjet_excl.SetLineStyle(4)
 
