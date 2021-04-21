@@ -115,6 +115,7 @@ for which in 'run2','2017p8':
     #    h.SetMarkerColor(ROOT.kWhite)
     #    h.Draw('colz text')
         h.Draw('colz')
+        h.GetXaxis().SetNoExponent()
         xshift=0.04
         cms = write(61, 0.050, 0.129+xshift, 0.913, 'CMS')
         sim = write(52, 0.040, 0.234+xshift, 0.912, 'Simulation')

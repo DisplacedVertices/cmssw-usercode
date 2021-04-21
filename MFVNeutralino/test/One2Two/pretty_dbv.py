@@ -43,6 +43,7 @@ def fmt(z, title, color, style, xsec=None, save=[]):
     h.GetYaxis().SetTitleOffset(1.15)
     move_above_into_bin(h, 3.999)
     if title != 'bkg':
+        print name2isample(combiner.inputs[0].f, name)
         h_dbv_2017 = combiner.combine(name2isample(combiner.inputs[0].f, name)).hs_dbv['2017']
         h_dbv_2018 = combiner.combine(name2isample(combiner.inputs[0].f, name)).hs_dbv['2018']
         total_sig_1v = h_dbv_2017.Integral(0,h_dbv_2017.GetNbinsX()+2)
@@ -62,7 +63,7 @@ hbkg.SetMarkerSize(1.3)
 hbkg.SetLineWidth(3)
 
 xoffset = -0.01
-yoffset = -0.05
+yoffset = 0.007
 leg1 = ROOT.TLegend(0.400+xoffset, 0.805+yoffset, 0.909+xoffset, 0.862+yoffset)
 leg1.AddEntry(hbkg, 'Data', 'PE')
 leg2 = ROOT.TLegend(0.400+xoffset, 0.748+yoffset, 0.909+xoffset, 0.815+yoffset)
@@ -103,8 +104,9 @@ def write(font, size, x, y, text):
     w.DrawLatex(x, y, text)
     return w
 
+xcms = 0.23
 #write(61, 0.050, 0.175, 0.825, 'CMS')
-write(61, 0.050, 0.415+xoffset, 0.825, 'CMS')
+write(61, 0.050, xcms, 0.825, 'CMS')
 write(42, 0.050, 0.595, 0.913, '101 fb^{-1} (13 TeV)')
 
 ps.c.SetBottomMargin(0.11)
@@ -113,6 +115,7 @@ ps.c.SetRightMargin(0.06)
 
 ps.save('dbv')
 
-write(52, 0.047, 0.52+xoffset, 0.825, 'Preliminary')
+xoffset_prelim = 0.105
+write(52, 0.047, xcms+xoffset_prelim, 0.825, 'Preliminary')
 
 ps.save('dbv_prelim')

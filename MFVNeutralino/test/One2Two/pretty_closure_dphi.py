@@ -100,10 +100,11 @@ for i in range(4):
     h.SetTitle(';|#Delta#phi_{VV}|;Events/0.63 radians')
     h.GetXaxis().SetTitleSize(0.05)
     h.GetXaxis().SetLabelSize(0.045)
+    h.GetXaxis().SetLabelOffset(0.008)
     h.GetYaxis().SetTitleSize(0.05)
     h.GetYaxis().SetLabelSize(0.045)
-    h.GetYaxis().SetTitleOffset(1.3)
-    #h.GetYaxis().SetRangeUser(0,ymax[i])
+    h.GetYaxis().SetLabelOffset(0.008)
+    h.GetYaxis().SetTitleOffset(1.38)
     h.GetYaxis().SetRangeUser(0, h.GetBinContent(h.GetNbinsX())*2.6)
     h.SetStats(0)
     h.SetLineColor(ROOT.kBlue)
@@ -116,21 +117,21 @@ for i in range(4):
     hh.SetMarkerSize(1.3)
     hh.Draw('PE')
 
-    xoffset = -0.175
-    write(42, 0.040, 0.370+xoffset, 0.750, names[i])
+    write(42, 0.040, 0.2, 0.750, names[i])
 
-    l1 = ROOT.TLegend(0.35+xoffset, 0.60, 0.85+xoffset, 0.73)
+    l1 = ROOT.TLegend(0.60, 0.695, 1.04, 0.865)
     l1.AddEntry(hh, 'Data', 'PE')
-    l1.AddEntry(h, 'Background template')
+    l1.AddEntry(h, '#splitline{Background}{template}')
+    l1.SetTextSize(0.040)
     l1.SetBorderSize(0)
     l1.SetFillStyle(0)
     l1.Draw()
 
-    write(61, 0.050, 0.37+xoffset, 0.81, 'CMS')
+    write(61, 0.050, 0.2, 0.81, 'CMS')
     write(42, 0.050, 0.595, 0.913, '101 fb^{-1} (13 TeV)')
 
     outfn = 'closure_dphi_%s' % ntk[i]
     ps.save(outfn)
 
-    write(52, 0.047, 0.48+xoffset, 0.81, 'Preliminary')
+    write(52, 0.047, 0.32, 0.81, 'Preliminary')
     ps.save(outfn + '_prelim')
