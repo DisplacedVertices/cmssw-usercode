@@ -109,13 +109,20 @@ for zzz, (name, title, color, style, xsec) in enumerate(which):
             horiz_line.DrawLine(2.4+magic, ymin, 3.9-magic, ymin)
             horiz_line.DrawLine(2.38, ymin*.95, 2.42, ymin*.95)
         elif zzz == 2 :
-            horiz_line.DrawLine(-0.000025, ymin, 0.1-magic, ymin) # for 0 to 0.1
-            horiz_line.DrawLine(0.08, ymin*.95, 0.12, ymin*.95) # for 0 to 0.1
+            # for 0 to 0.1
+            horiz_line.DrawLine(-0.000025, ymin, 0.1-magic, ymin)
+            horiz_line.DrawLine(0.08, ymin*.95, 0.12, ymin*.95)
 
+            # for the plot itself
             horiz_line.DrawLine(3.5+magic, ymin, 3.9-magic, ymin)
             horiz_line.DrawLine(3.48, ymin*.95, 3.52, ymin*.95)
 
+            # for the entries above ymin whose lines go beyond it
             horiz_line.DrawLine(3.28, ymin*.95, 3.42, ymin*.95)
+            
+            # for the weird single-pixel-wide lines that stubbornly remain
+            horiz_line.DrawLine(3.98, ymin*.937, 4.02, ymin*.937)
+            horiz_line.DrawLine(-0.02, ymin*.937, 0.02, ymin*.937)
 
 hbkg.Draw('PE')
 

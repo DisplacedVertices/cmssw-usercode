@@ -241,6 +241,9 @@ if hide_overlap_with_x_axis :
     horiz_line.DrawLine(2.68, ymin*.96, 2.72, ymin*.96)
     horiz_line.DrawLine(2.78, ymin*.96, 2.82, ymin*.96)
 
+    # for the weird single-pixel-wide lines that stubbornly remain
+    horiz_line.DrawLine(3.98, ymin*.955, 4.02, ymin*.955)
+
     hbkg.Draw('axis same')
 
 ps.save('templates')
