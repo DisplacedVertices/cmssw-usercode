@@ -135,13 +135,20 @@ for i in range(4):
 
     write(42, 0.040, 0.285, 0.750, names[i])
 
-    l1 = ROOT.TLegend(0.60, 0.695, 1.04, 0.865)
+    l1 = ROOT.TLegend(0.60, 0.725, 1.04, 0.865)
     l1.AddEntry(hh, 'Data', 'PE')
-    l1.AddEntry(h, '#splitline{Background}{template}')
+    l1.AddEntry(h, 'Background')
     l1.SetTextSize(0.040)
     l1.SetBorderSize(0)
     l1.SetFillStyle(0)
     l1.Draw()
+
+    l2 = ROOT.TLegend(0.60, 0.695, 1.04, 0.725)
+    l2.AddEntry(0,'template','')
+    l2.SetTextSize(0.040)
+    l2.SetBorderSize(0)
+    l2.SetFillStyle(0)
+    l2.Draw()
 
     write(61, 0.050, 0.285, 0.81, 'CMS')
     write(42, 0.050, 0.595, 0.913, '101 fb^{-1} (13 TeV)')
