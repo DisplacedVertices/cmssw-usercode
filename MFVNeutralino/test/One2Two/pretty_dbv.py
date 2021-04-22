@@ -5,6 +5,8 @@ from signal_efficiency import SignalEfficiencyCombiner
 set_style()
 ps = plot_saver(plot_dir('pretty_dbv_2017p8_diff_xsecs'), size=(700,700), pdf_log=True)
 
+hide_overlap_with_x_axis = True
+
 f = ROOT.TFile('limitsinput.root')
 #raise ValueError('propagate change to use stored rate already normalized to int lumi')
 combiner = SignalEfficiencyCombiner()
@@ -76,14 +78,18 @@ for lg in legs:
     lg.SetTextSize(0.04)
     lg.SetFillStyle(0)
 
+firsthist = None
+
 for zzz, (name, title, color, style, xsec) in enumerate(which):
     h = fmt(name, title, color, style, xsec)
     if zzz == 0:
         h.Draw('hist')
+        firsthist = h
     else:
         h.Draw('hist same')
     h.GetXaxis().SetRangeUser(0,4)
-    h.GetYaxis().SetRangeUser(2e-2,5e3)
+    ymin = 2e-2
+    h.GetYaxis().SetRangeUser(ymin,5e3)
 
     if xsec :
         print "assuming xsec = %s fb for %s" % (xsec, name)
@@ -91,7 +97,30 @@ for zzz, (name, title, color, style, xsec) in enumerate(which):
     leg3.AddEntry(h, title, 'L')
     print name, h.Integral(0,h.GetNbinsX()+2)
 
+    if hide_overlap_with_x_axis :
+        magic = 0.0131 # fun magic number for covering over bold lines on x-axis
+        horiz_line = ROOT.TLine()
+        horiz_line.SetLineColor(ROOT.kWhite)
+        horiz_line.SetLineWidth(5)
+        horiz_line.SetLineStyle(1)
+        if zzz == 0 :
+            horiz_line.DrawLine(1.4+magic, ymin, 4, ymin)
+        elif zzz == 1 :
+            horiz_line.DrawLine(2.4+magic, ymin, 3.9-magic, ymin)
+            horiz_line.DrawLine(2.38, ymin*.95, 2.42, ymin*.95)
+        elif zzz == 2 :
+            horiz_line.DrawLine(-0.000025, ymin, 0.1-magic, ymin) # for 0 to 0.1
+            horiz_line.DrawLine(0.08, ymin*.95, 0.12, ymin*.95) # for 0 to 0.1
+
+            horiz_line.DrawLine(3.5+magic, ymin, 3.9-magic, ymin)
+            horiz_line.DrawLine(3.48, ymin*.95, 3.52, ymin*.95)
+
+            horiz_line.DrawLine(3.28, ymin*.95, 3.42, ymin*.95)
+
 hbkg.Draw('PE')
+
+if hide_overlap_with_x_axis and firsthist : 
+    firsthist.Draw('axis same')
 
 for lg in legs:
     lg.Draw()
