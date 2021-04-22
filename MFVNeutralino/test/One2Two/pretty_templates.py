@@ -4,6 +4,8 @@ from signal_efficiency import SignalEfficiencyCombiner
 set_style()
 ps = plot_saver(plot_dir('pretty_templates_2017p8_diff_xsecs'), size=(700,700), log=True, pdf=True, pdf_log=True)
 
+hide_overlap_with_x_axis = True
+
 ps.c.SetBottomMargin(0.11)
 ps.c.SetLeftMargin(0.13)
 ps.c.SetRightMargin(0.06)
@@ -181,6 +183,14 @@ xmax = 4
 hbkg.GetXaxis().SetRangeUser(0,xmax)
 hbkg.GetYaxis().SetRangeUser(ymin,ymax)
 
+if hide_overlap_with_x_axis :
+    horiz_line = ROOT.TLine()
+    horiz_line.SetLineColor(ROOT.kWhite)
+    horiz_line.SetLineWidth(5)
+    horiz_line.SetLineStyle(1)
+    horiz_line.DrawLine(0.8131, ymin, 4, ymin)
+    horiz_line.DrawLine(0.78, ymin*.96, 0.82, ymin*.96)
+
 for zzz, (name, title, color, style, xsec) in enumerate(which):
     h = fmt(name, title, color, style, xsec)
 
@@ -221,6 +231,16 @@ for ll in dvvlines:
         ll.SetLineWidth(2)
         ll.SetLineStyle(3)
         ll.Draw()
+
+if hide_overlap_with_x_axis :
+    horiz_line.SetLineStyle(1)
+    horiz_line.DrawLine(2.5131, ymin, 2.6869, ymin)
+    horiz_line.DrawLine(2.48, ymin*.96, 2.52, ymin*.96)
+    horiz_line.DrawLine(2.8131, ymin, 4, ymin)
+    horiz_line.DrawLine(2.68, ymin*.96, 2.72, ymin*.96)
+    horiz_line.DrawLine(2.78, ymin*.96, 2.82, ymin*.96)
+
+    hbkg.Draw('axis same')
 
 ps.save('templates')
 
