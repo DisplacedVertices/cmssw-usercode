@@ -48,13 +48,13 @@ def tau(tau):
 
 def nice_leg(kind):
     if kind.startswith('multijet_M'):
-        return '#tilde{#chi}^{0}/#tilde{g} #rightarrow tbs, m = %i GeV' % int(kind.replace('multijet_M', ''))
+        return '#tilde{#chi}^{0}/#tilde{g} #rightarrow tbs', 'm = %i GeV' % int(kind.replace('multijet_M', ''))
     elif kind.startswith('dijet_M'):
-        return '#tilde{t} #rightarrow #bar{d}#kern[0.1]{#bar{d}}, m = %i GeV' % int(kind.replace('dijet_M', ''))
+        return '#tilde{t} #rightarrow #bar{d}#kern[0.1]{#bar{d}}', 'm = %i GeV' % int(kind.replace('dijet_M', ''))
     elif kind.startswith('multijet_tau'):
-        return '#tilde{#chi}^{0}/#tilde{g} #rightarrow tbs, c#tau = ' + tau(kind.replace('multijet_tau', ''))
+        return '#tilde{#chi}^{0}/#tilde{g} #rightarrow tbs', 'c#tau = ' + tau(kind.replace('multijet_tau', ''))
     elif kind.startswith('dijet_tau'):
-        return '#tilde{t} #rightarrow #bar{d}#kern[0.1]{#bar{d}}, c#tau = ' + tau(kind.replace('dijet_tau', ''))
+        return '#tilde{t} #rightarrow #bar{d}#kern[0.1]{#bar{d}}', 'c#tau = ' + tau(kind.replace('dijet_tau', ''))
 
 def nice_theory(kind, idx=1):
     if kind.startswith('multijet') and idx == 1:
@@ -145,6 +145,7 @@ for kind in kinds:
 #    draw_theory = 'tau' in kind
 
     xax = g.GetXaxis()
+    xax.SetNoExponent()
     xax.SetLabelSize(0.045)
     xax.SetTitleSize(0.05)
     if versus_tau:
@@ -199,11 +200,14 @@ for kind in kinds:
 #    else:
 #        leg = ROOT.TLegend(0.552, 0.603, 0.870, 0.867)
     xoffset = 0.015
-    leg = ROOT.TLegend(0.567+xoffset, 0.565, 0.870+xoffset, 0.869)
+    if kind == 'multijet_M0800' :
+        yoffset = -0.15
+        leg = ROOT.TLegend(0.567+xoffset, 0.565+yoffset, 0.870+xoffset, 0.869+yoffset)
+    else :
+        leg = ROOT.TLegend(0.567+xoffset, 0.565, 0.870+xoffset, 0.869)
     leg.SetTextFont(42)
     leg.SetFillColor(ROOT.kWhite)
     leg.SetBorderSize(0)
-    leg.AddEntry(0, '#kern[-0.22]{%s}' % nice_leg(kind), '')
     leg.AddEntry(0, '#kern[-0.22]{95% CL upper limits:}', '')
     leg.AddEntry(observed, 'Observed', 'L')
     leg.AddEntry(expect50, 'Median expected', 'L')
@@ -216,14 +220,36 @@ for kind in kinds:
         leg.AddEntry(theory2, nice_theory(kind,2) + ', #bf{#it{#Beta}}=1', 'LF')
     leg.Draw()
 
-    cms = write(61, 0.050, 0.11+xoffset, 0.913, 'CMS')
-    lum = write(42, 0.050, 0.548+xoffset, 0.913, '%s fb^{-1} (13 TeV)' % intlumi)
+    labels = nice_leg(kind)
+
+    if "dijet_M" in kind :
+        sig_text         = write(42, 0.04, 0.17, 0.655, labels[0])
+        mass_or_tau_text = write(42, 0.04, 0.17, 0.605, labels[1])
+        cms = write(61, 0.050, 0.16, 0.825, 'CMS')
+    elif "dijet_tau" in kind :
+        sig_text         = write(42, 0.04, 0.17, 0.215, labels[0])
+        mass_or_tau_text = write(42, 0.04, 0.17, 0.165, labels[1])
+        cms = write(61, 0.050, 0.16, 0.825, 'CMS')
+    elif "multijet_M" in kind :
+        sig_text         = write(42, 0.04, 0.17, 0.655, labels[0])
+        mass_or_tau_text = write(42, 0.04, 0.17, 0.605, labels[1])
+        cms = write(61, 0.050, 0.16, 0.825, 'CMS')
+    else : # "multijet_tau"
+        sig_text         = write(42, 0.04, 0.155, 0.20, labels[0])
+        mass_or_tau_text = write(42, 0.04, 0.155, 0.15, labels[1])
+        cms = write(61, 0.050, 0.20, 0.825, 'CMS')
+
+    lum = write(42, 0.050, 0.563, 0.913, '%s fb^{-1} (13 TeV)' % intlumi)
     fn = os.path.join(path, 'limit1d_' + kind)
     c.SaveAs(fn + '.pdf')
     c.SaveAs(fn + '.png')
     c.SaveAs(fn + '.root')
 
-    pre = write(52, 0.047, 0.215+xoffset, 0.913, 'Preliminary')
+    if "_M" in kind or 'dijet' in kind :
+        pre = write(52, 0.047, 0.265, 0.825, 'Preliminary')
+    else :
+        pre = write(52, 0.047, 0.230, 0.913, 'Preliminary')
+
     c.SaveAs(fn + '_prelim.pdf')
     c.SaveAs(fn + '_prelim.png')
     c.SaveAs(fn + '_prelim.root')
