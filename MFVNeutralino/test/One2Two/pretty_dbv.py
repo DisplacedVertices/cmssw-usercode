@@ -155,3 +155,6 @@ xoffset_prelim = 0.105
 write(52, 0.047, xcms+xoffset_prelim, 0.825, 'Preliminary')
 
 ps.save('dbv_prelim')
+
+if hide_overlap_with_x_axis :
+    print "NOTE! hide_overlap_with_x_axis = True, so some cosmetic magic has been applied (only relevant for EXO-19-013, and should be removed/adjusted in future analyses)"

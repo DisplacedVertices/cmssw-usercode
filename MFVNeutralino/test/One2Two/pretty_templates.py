@@ -251,3 +251,6 @@ ps.save('templates')
 write(52, 0.047, 0.52+xoffset, 0.825, 'Preliminary')
 
 ps.save('templates_prelim')
+
+if hide_overlap_with_x_axis :
+    print "NOTE! hide_overlap_with_x_axis = True, so some cosmetic magic has been applied (only relevant for EXO-19-013, and should be removed/adjusted in future analyses)"
