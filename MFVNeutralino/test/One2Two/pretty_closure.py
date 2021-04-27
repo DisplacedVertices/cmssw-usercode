@@ -22,7 +22,7 @@ fns_2018 = [os.path.join('/uscms/home/dquach/public', fn) for fn in default_name
 btag_fns_2017 = [os.path.join('/uscms/home/dquach/public', fn) for fn in btag_corr_names_2017]
 btag_fns_2018 = [os.path.join('/uscms/home/dquach/public', fn) for fn in btag_corr_names_2018]
 ntk = ['3track3track', '4track3track', '4track4track', '5track5track']
-names = ['3-track x 3-track', '4-track x 3-track', '4-track x 4-track', '#geq5-track x #geq5-track']
+names = ['3-track + 3-track', '4-track + 3-track', '4-track + 4-track', '#geq5-track + #geq5-track']
 ymax = [70, 35, 9, 0.3]
 
 def write(font, size, x, y, text):
