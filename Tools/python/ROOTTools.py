@@ -1986,7 +1986,7 @@ def ratios_plot(name,
             if rs:
                 min_r = min(min_r, min(rs))
                 max_r = max(max_r, max(rs))
-        res_y_range = min_r*(1-res_y_range), max_r*(1+res_y_range)
+        res_y_range = max(min_r*(1-res_y_range),-2.5), min(max_r*(1+res_y_range),2.5)
 
     for i,(h0,h) in enumerate(pairs_for_ratios):
         r = histogram_divide(h, h0, **res_divide_opt)

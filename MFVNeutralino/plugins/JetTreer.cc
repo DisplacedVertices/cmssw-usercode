@@ -37,14 +37,22 @@ struct eventInfo
   std::vector <double> tk_phi;
   std::vector <double> tk_dxybs;
   std::vector <double> tk_dxybs_sig;
+  std::vector <double> tk_dxybs_err;
   std::vector <double> tk_dz;
   std::vector <double> tk_dz_sig;
+  std::vector <double> tk_dz_err;
   std::vector <int> vtx_ntk;
   std::vector <double> vtx_dBV;
   std::vector <double> vtx_dBVerr;
   std::vector < std::vector<float> > vtx_tk_pt;
   std::vector < std::vector<float> > vtx_tk_eta;
+  std::vector < std::vector<float> > vtx_tk_phi;
+  std::vector < std::vector<float> > vtx_tk_dxy;
+  std::vector < std::vector<float> > vtx_tk_dxy_err;
   std::vector < std::vector<float> > vtx_tk_nsigmadxy;
+  std::vector < std::vector<float> > vtx_tk_dz;
+  std::vector < std::vector<float> > vtx_tk_dz_err;
+  std::vector < std::vector<float> > vtx_tk_nsigmadz;
 };
 
 class MFVJetTreer : public edm::EDAnalyzer {
@@ -65,6 +73,10 @@ class MFVJetTreer : public edm::EDAnalyzer {
     const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
     const edm::EDGetTokenT<MFVVertexAuxCollection> vertextight_token;
     const edm::EDGetTokenT<MFVVertexAuxCollection> vertexloose_token;
+    const edm::EDGetTokenT<MFVVertexAuxCollection> vertexextraloose_token;
+
+    const bool use_vtx_tight;
+    const bool use_vtx_othogonal;
 
     jmt::TrackRescaler track_rescaler;
 
@@ -77,8 +89,14 @@ MFVJetTreer::MFVJetTreer(const edm::ParameterSet& cfg)
     weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
     tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("tracks_src"))),
     vertextight_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertextight_src"))),
-    vertexloose_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertexloose_src")))
+    vertexloose_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertexloose_src"))),
+    vertexextraloose_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertexextraloose_src"))),
+    use_vtx_tight(cfg.getParameter<bool>("use_vtx_tight")),         // whether to use vertices passing dBV and dBVerr cut
+    use_vtx_othogonal(cfg.getParameter<bool>("use_vtx_othogonal"))  // whether to use vertices othogonal to tight vertices (not passing dBV or not passing dBVerr)
 {
+  if (!(use_vtx_tight || use_vtx_othogonal))
+    throw cms::Exception("MFVJetTreer") << "One and only one of use_vtx_tight and use_vtx_othogonal must be true";
+
   evInfo = new eventInfo;
 }
 
@@ -94,44 +112,49 @@ void MFVJetTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   edm::Handle<reco::TrackCollection> tracks;
   event.getByToken(tracks_token, tracks);
 
-  edm::Handle<MFVVertexAuxCollection> auxes_tight;
-  event.getByToken(vertextight_token, auxes_tight);
-
-  edm::Handle<MFVVertexAuxCollection> auxes_loose;
-  event.getByToken(vertexloose_token, auxes_loose);
-
-  const int nsv_tight = int(auxes_tight->size());
-  const int nsv_loose = int(auxes_loose->size());
   int nsv = 0;
   edm::Handle<MFVVertexAuxCollection> auxes;
-  if (nsv_tight==0){
-    nsv = nsv_loose;
-    auxes = auxes_loose;
+
+  if (use_vtx_tight){
+    edm::Handle<MFVVertexAuxCollection> auxes_tight;
+    event.getByToken(vertextight_token, auxes_tight);
+
+    edm::Handle<MFVVertexAuxCollection> auxes_loose;
+    event.getByToken(vertexloose_token, auxes_loose);
+
+    const int nsv_tight = int(auxes_tight->size());
+    const int nsv_loose = int(auxes_loose->size());
+    if (nsv_tight==0){
+      nsv = nsv_loose;
+      auxes = auxes_loose;
+    }
+    else{
+      nsv = nsv_tight;
+      auxes = auxes_tight;
+    }
   }
-  else{
-    nsv = nsv_tight;
-    auxes = auxes_tight;
+  else if (use_vtx_othogonal){
+    edm::Handle<MFVVertexAuxCollection> auxes_extraloose;
+    event.getByToken(vertexextraloose_token, auxes_extraloose);
+    auxes = auxes_extraloose;
+    for (size_t isv = 0; isv < auxes->size(); ++isv) {
+      const MFVVertexAux& aux = auxes->at(isv);
+      if ((aux.bs2ddist>=0.01) and (aux.bs2derr<=0.0025) )
+        continue;
+      ++nsv;
+    }
   }
 
-  if (nsv_tight == 0 && nsv_loose == 0) return;
-  if (mevent->met()<150) return;
-  //if (mevent->met()>=150) return;
+  //if (nsv_tight == 0 && nsv_loose == 0) return;
+  if (nsv==0) return;
+  //if (mevent->met()<150) return;
+  if (mevent->met()>=150) return;
   h_events->Fill(1);
 
   int n_evt = event.id().event();
   evInfo->evt = n_evt;
   evInfo->weight = w;
   evInfo->nsv = nsv;
-
-  double max_ntrack = 0;
-  for (int isv = 0; isv < nsv; ++isv) {
-    const MFVVertexAux& aux = auxes->at(isv);
-    const int ntracks = aux.ntracks();
-    if (ntracks>max_ntrack){
-      max_ntrack = ntracks;
-    }
-  }
-  evInfo->max_SV_ntracks = max_ntrack;
 
   for (int ij=0; ij<mevent->njets(); ij++){
     evInfo->jet_pt.push_back(mevent->jet_pt[ij]);
@@ -143,16 +166,34 @@ void MFVJetTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   evInfo->met_pt = mevent->met();
   evInfo->met_phi = mevent->metphi();
 
+  double max_ntrack = 0;
+
   for (int isv = 0; isv < nsv; ++isv) {
     const MFVVertexAux& aux = auxes->at(isv);
     const int ntracks = aux.ntracks();
+    if ((aux.bs2ddist>=0.01) and (aux.bs2derr<=0.0025) )
+      continue;
+    if (ntracks>max_ntrack){
+      max_ntrack = ntracks;
+    }
     evInfo->vtx_ntk.push_back(ntracks);
     evInfo->vtx_dBV.push_back(aux.bs2ddist);
     evInfo->vtx_dBVerr.push_back(aux.bs2derr);
     evInfo->vtx_tk_pt.push_back(aux.track_pts());
     evInfo->vtx_tk_eta.push_back(aux.track_eta);
+    evInfo->vtx_tk_phi.push_back(aux.track_phi);
+    evInfo->vtx_tk_dxy.push_back(aux.track_dxy);
+    evInfo->vtx_tk_dxy_err.push_back(aux.track_dxy_errs());
     evInfo->vtx_tk_nsigmadxy.push_back(aux.track_dxy_nsigmas());
+    evInfo->vtx_tk_dz.push_back(aux.track_dz);
+    evInfo->vtx_tk_dz_err.push_back(aux.track_dz_errs());
+    std::vector<float> vtx_tk_dz_sig ({});
+    for (int itk=0; itk<ntracks; ++itk){
+      vtx_tk_dz_sig.push_back(aux.track_dz[itk] / aux.track_dz_err(itk) );
+    }
+    evInfo->vtx_tk_nsigmadz.push_back(vtx_tk_dz_sig);
   }
+  evInfo->max_SV_ntracks = max_ntrack;
 
   double bsx = mevent->bsx;
   double bsy = mevent->bsy;
@@ -208,8 +249,10 @@ void MFVJetTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
       evInfo->tk_eta.push_back(tk->eta());
       evInfo->tk_phi.push_back(tk->phi());
       evInfo->tk_dxybs.push_back(dxybs);
+      evInfo->tk_dxybs_err.push_back(rescaled_dxyerr);
       evInfo->tk_dxybs_sig.push_back(rescaled_sigmadxybs);
       evInfo->tk_dz.push_back(dzbs);
+      evInfo->tk_dz_err.push_back(rescaled_dzerr);
       evInfo->tk_dz_sig.push_back(rescaled_sigmadzbs);
     }
   }
@@ -240,14 +283,22 @@ MFVJetTreer::beginJob()
   eventTree->Branch( "tk_phi",               &evInfo->tk_phi);
   eventTree->Branch( "tk_dxybs",             &evInfo->tk_dxybs);
   eventTree->Branch( "tk_dxybs_sig",         &evInfo->tk_dxybs_sig);
+  eventTree->Branch( "tk_dxybs_err",         &evInfo->tk_dxybs_err);
   eventTree->Branch( "tk_dz",                &evInfo->tk_dz);
   eventTree->Branch( "tk_dz_sig",            &evInfo->tk_dz_sig);
+  eventTree->Branch( "tk_dz_err",            &evInfo->tk_dz_err);
   eventTree->Branch( "vtx_ntk",              &evInfo->vtx_ntk);
   eventTree->Branch( "vtx_dBV",              &evInfo->vtx_dBV);
   eventTree->Branch( "vtx_dBVerr",           &evInfo->vtx_dBVerr);
   eventTree->Branch( "vtx_tk_pt",            &evInfo->vtx_tk_pt);
   eventTree->Branch( "vtx_tk_eta",           &evInfo->vtx_tk_eta);
+  eventTree->Branch( "vtx_tk_phi",           &evInfo->vtx_tk_phi);
+  eventTree->Branch( "vtx_tk_dxy",           &evInfo->vtx_tk_dxy);
+  eventTree->Branch( "vtx_tk_dxy_err",           &evInfo->vtx_tk_dxy_err);
   eventTree->Branch( "vtx_tk_nsigmadxy",     &evInfo->vtx_tk_nsigmadxy);
+  eventTree->Branch( "vtx_tk_dz",           &evInfo->vtx_tk_dz);
+  eventTree->Branch( "vtx_tk_dz_err",           &evInfo->vtx_tk_dz_err);
+  eventTree->Branch( "vtx_tk_nsigmadz",     &evInfo->vtx_tk_nsigmadz);
 
 }
 
@@ -273,13 +324,21 @@ void MFVJetTreer::initEventStructure()
   evInfo->tk_phi.clear();
   evInfo->tk_dxybs.clear();
   evInfo->tk_dxybs_sig.clear();
+  evInfo->tk_dxybs_err.clear();
   evInfo->tk_dz.clear();
   evInfo->tk_dz_sig.clear();
+  evInfo->tk_dz_err.clear();
   evInfo->vtx_ntk.clear();
   evInfo->vtx_dBV.clear();
   evInfo->vtx_dBVerr.clear();
   evInfo->vtx_tk_pt.clear();
   evInfo->vtx_tk_eta.clear();
+  evInfo->vtx_tk_phi.clear();
+  evInfo->vtx_tk_dxy.clear();
+  evInfo->vtx_tk_dxy_err.clear();
   evInfo->vtx_tk_nsigmadxy.clear();
+  evInfo->vtx_tk_dz.clear();
+  evInfo->vtx_tk_dz_err.clear();
+  evInfo->vtx_tk_nsigmadz.clear();
 }
 DEFINE_FWK_MODULE(MFVJetTreer);
