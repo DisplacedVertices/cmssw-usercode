@@ -168,7 +168,7 @@ void MFVJetTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   double max_ntrack = 0;
 
-  for (int isv = 0; isv < nsv; ++isv) {
+  for (size_t isv = 0; isv < auxes->size(); ++isv) {
     const MFVVertexAux& aux = auxes->at(isv);
     const int ntracks = aux.ntracks();
     if ((aux.bs2ddist>=0.01) and (aux.bs2derr<=0.0025) )
