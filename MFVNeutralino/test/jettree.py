@@ -21,8 +21,8 @@ process.mfvJetTreer = cms.EDAnalyzer('MFVJetTreer',
                              vertextight_src = cms.InputTag('mfvSelectedVerticesTight'),
                              vertexloose_src = cms.InputTag('mfvSelectedVerticesTightNtk3or4'),
                              vertexextraloose_src = cms.InputTag('mfvSelectedVerticesExtraLoose'),
-                             use_vtx_tight = cms.bool(False),
-                             use_vtx_othogonal = cms.bool(True),
+                             use_vtx_tight = cms.bool(True),
+                             use_vtx_othogonal = cms.bool(False),
                              )
 
 process.pJetTreer = cms.Path(process.mfvWeight * process.mfvSelectedVerticesSeq * process.mfvJetTreer)
@@ -44,7 +44,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
 
-    cs = CondorSubmitter('JetTreelowMETothogonalVTX' + version,
+    cs = CondorSubmitter('JetTreehighMETwmass' + version,
                          ex = year,
                          dataset = dataset,
                          stageout_files = 'all',

@@ -16,6 +16,7 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/Tools/interface/TrackRescaler.h"
 #include "JMTucker/Tools/interface/AnalysisEras.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/JetVertexAssociation.h"
 #include "TLorentzVector.h"
 #include "TTree.h"
 #include "TH1.h"
@@ -44,6 +45,9 @@ struct eventInfo
   std::vector <int> vtx_ntk;
   std::vector <double> vtx_dBV;
   std::vector <double> vtx_dBVerr;
+  std::vector <double> vtx_mass_track;
+  std::vector <double> vtx_mass_jet;
+  std::vector <double> vtx_mass_trackjet;
   std::vector < std::vector<float> > vtx_tk_pt;
   std::vector < std::vector<float> > vtx_tk_eta;
   std::vector < std::vector<float> > vtx_tk_phi;
@@ -147,8 +151,8 @@ void MFVJetTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   //if (nsv_tight == 0 && nsv_loose == 0) return;
   if (nsv==0) return;
-  //if (mevent->met()<150) return;
-  if (mevent->met()>=150) return;
+  if (mevent->met()<150) return;
+  //if (mevent->met()>=150) return;
   h_events->Fill(1);
 
   int n_evt = event.id().event();
@@ -171,14 +175,18 @@ void MFVJetTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   for (size_t isv = 0; isv < auxes->size(); ++isv) {
     const MFVVertexAux& aux = auxes->at(isv);
     const int ntracks = aux.ntracks();
-    if ((aux.bs2ddist>=0.01) and (aux.bs2derr<=0.0025) )
-      continue;
+    if (use_vtx_othogonal)
+      if ((aux.bs2ddist>=0.01) and (aux.bs2derr<=0.0025) )
+        continue;
     if (ntracks>max_ntrack){
       max_ntrack = ntracks;
     }
     evInfo->vtx_ntk.push_back(ntracks);
     evInfo->vtx_dBV.push_back(aux.bs2ddist);
     evInfo->vtx_dBVerr.push_back(aux.bs2derr);
+    evInfo->vtx_mass_track.push_back(aux.mass[mfv::PTracksOnly]);
+    evInfo->vtx_mass_jet.push_back(aux.mass[mfv::PJetsByNtracks]);
+    evInfo->vtx_mass_trackjet.push_back(aux.mass[mfv::PTracksPlusJetsByNtracks]);
     evInfo->vtx_tk_pt.push_back(aux.track_pts());
     evInfo->vtx_tk_eta.push_back(aux.track_eta);
     evInfo->vtx_tk_phi.push_back(aux.track_phi);
@@ -290,6 +298,9 @@ MFVJetTreer::beginJob()
   eventTree->Branch( "vtx_ntk",              &evInfo->vtx_ntk);
   eventTree->Branch( "vtx_dBV",              &evInfo->vtx_dBV);
   eventTree->Branch( "vtx_dBVerr",           &evInfo->vtx_dBVerr);
+  eventTree->Branch( "vtx_mass_track",       &evInfo->vtx_mass_track);
+  eventTree->Branch( "vtx_mass_jet",         &evInfo->vtx_mass_jet);
+  eventTree->Branch( "vtx_mass_trackjet",    &evInfo->vtx_mass_trackjet);
   eventTree->Branch( "vtx_tk_pt",            &evInfo->vtx_tk_pt);
   eventTree->Branch( "vtx_tk_eta",           &evInfo->vtx_tk_eta);
   eventTree->Branch( "vtx_tk_phi",           &evInfo->vtx_tk_phi);
@@ -331,6 +342,9 @@ void MFVJetTreer::initEventStructure()
   evInfo->vtx_ntk.clear();
   evInfo->vtx_dBV.clear();
   evInfo->vtx_dBVerr.clear();
+  evInfo->vtx_mass_track.clear();
+  evInfo->vtx_mass_jet.clear();
+  evInfo->vtx_mass_trackjet.clear();
   evInfo->vtx_tk_pt.clear();
   evInfo->vtx_tk_eta.clear();
   evInfo->vtx_tk_phi.clear();
