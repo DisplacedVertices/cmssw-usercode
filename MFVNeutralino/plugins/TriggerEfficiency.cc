@@ -3,6 +3,7 @@
 #include "CommonTools/Utils/interface/StringCutObjectSelector.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/Electron.h"
 #include "FWCore/Common/interface/TriggerNames.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -23,6 +24,7 @@ private:
   const int use_jetpt_weights;
   const int require_bits[2]; // HLT then L1
   const bool require_muon;
+  const bool require_electron;
   const bool require_metfilters;
   const bool require_1jet;
   const bool require_4jets;
@@ -35,6 +37,8 @@ private:
   const edm::EDGetTokenT<mfv::TriggerFloats> triggerfloats_token;
   const edm::EDGetTokenT<pat::MuonCollection> muons_token;
   const StringCutObjectSelector<pat::Muon> muon_selector;
+  const edm::EDGetTokenT<pat::ElectronCollection> electrons_token;
+  const StringCutObjectSelector<pat::Electron> electron_selector;
   const edm::EDGetTokenT<reco::GenJetCollection> genjets_token;
   const bool use_genjets;
 
@@ -46,6 +50,13 @@ private:
   TH1D* h_muon_eta[2];
   TH1D* h_muon_phi[2];
   TH1D* h_muon_iso[2];
+
+  TH1D* h_nnoselelectrons;
+  TH1D* h_nelectrons;
+  TH1D* h_electron_pt[2];
+  TH1D* h_electron_eta[2];
+  TH1D* h_electron_phi[2];
+  TH1D* h_electron_iso[2];
 
   TH1D* h_nnoseljets;
   TH1D* h_njets;
@@ -79,6 +90,7 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
   : use_jetpt_weights(cfg.getParameter<int>("use_jetpt_weights")),
     require_bits{cfg.getParameter<int>("require_hlt"), cfg.getParameter<int>("require_l1")},
     require_muon(cfg.getParameter<bool>("require_muon")),
+    require_electron(cfg.getParameter<bool>("require_electron")),
     require_metfilters(cfg.getParameter<bool>("require_metfilters")),
     require_1jet(cfg.getParameter<bool>("require_1jet")),
     require_4jets(cfg.getParameter<bool>("require_4jets")),
@@ -91,6 +103,8 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
     triggerfloats_token(consumes<mfv::TriggerFloats>(edm::InputTag("mfvTriggerFloats"))),
     muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
     muon_selector(cfg.getParameter<std::string>("muon_cut")),
+    electrons_token(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("electrons_src"))),
+    electron_selector(cfg.getParameter<std::string>("electron_cut")),
     genjets_token(consumes<reco::GenJetCollection>(cfg.getParameter<edm::InputTag>("genjets_src"))),
     use_genjets(cfg.getParameter<edm::InputTag>("genjets_src").label() != "")
 {
@@ -116,6 +130,18 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
       h_muon_eta[i] = fs->make<TH1D>(TString::Format("h_muon_eta_%i", i), TString::Format(";%s muon #eta;events/0.12", ex[i]), 50, -3, 3);
       h_muon_phi[i] = fs->make<TH1D>(TString::Format("h_muon_phi_%i", i), TString::Format(";%s muon #phi;events/0.125", ex[i]), 50, -M_PI, M_PI);
       h_muon_iso[i] = fs->make<TH1D>(TString::Format("h_muon_iso_%i", i), TString::Format(";%s muon isolation;events/0.04", ex[i]), 50, 0, 2);
+    }
+  }
+
+  if (require_electron) {
+    h_nnoselelectrons = fs->make<TH1D>("h_nnoselelectrons", ";# all electrons;events", 5, 0, 5);
+    h_nelectrons = fs->make<TH1D>("h_nelectrons", ";# selected electrons;events", 3, 0, 3);
+    const char* ex[2] = {"all", "selected"};
+    for (int i = 0; i < 2; ++i) {
+      h_electron_pt [i] = fs->make<TH1D>(TString::Format("h_electron_pt_%i" , i), TString::Format(";%s electron p_{T} (GeV);events/5 GeV", ex[i]), 200, 0, 1000);
+      h_electron_eta[i] = fs->make<TH1D>(TString::Format("h_electron_eta_%i", i), TString::Format(";%s electron #eta;events/0.12", ex[i]), 50, -3, 3);
+      h_electron_phi[i] = fs->make<TH1D>(TString::Format("h_electron_phi_%i", i), TString::Format(";%s electron #phi;events/0.125", ex[i]), 50, -M_PI, M_PI);
+      h_electron_iso[i] = fs->make<TH1D>(TString::Format("h_electron_iso_%i", i), TString::Format(";%s electron isolation;events/0.04", ex[i]), 50, 0, 2);
     }
   }
 
@@ -316,6 +342,31 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
     h_nmuons->Fill(nmuons[1], w);
 
     if (nmuons[1] < 1)
+      return;
+  }
+
+  if (require_electron) {
+    edm::Handle<pat::ElectronCollection> electrons;
+    event.getByToken(electrons_token, electrons);
+
+    int nelectrons[2] = {0};
+    for (const pat::Electron& electron : *electrons) {
+      bool use_electron = electron.electronID("cutBasedElectronID-Fall17-94X-V2-veto") && electron_selector(electron);
+      for (int i = 0; i < 2; ++i) {
+        if (i == 0 || use_electron) {
+          ++nelectrons[i];
+          h_electron_pt[i]->Fill(electron.pt(), w);
+          h_electron_eta[i]->Fill(electron.eta(), w);
+          h_electron_phi[i]->Fill(electron.phi(), w);
+          h_electron_iso[i]->Fill((electron.chargedHadronIso() + electron.neutralHadronIso() + electron.photonIso() - 0.5*electron.puChargedHadronIso())/electron.pt(), w);
+        }
+      }
+    }
+
+    h_nnoselelectrons->Fill(nelectrons[0], w);
+    h_nelectrons->Fill(nelectrons[1], w);
+
+    if (nelectrons[1] < 1)
       return;
   }
 
