@@ -415,6 +415,14 @@ auxiliary_data_samples_2017 = [
     DataSample('SingleMuon2017F', '/SingleMuon/Run2017F-17Nov2017-v1/AOD'),
     ]
 
+singleelectron_data_samples_2017 = [
+    DataSample('SingleElectron2017B', '/SingleElectron/Run2017B-17Nov2017-v1/AOD'),
+    DataSample('SingleElectron2017C', '/SingleElectron/Run2017B-17Nov2017-v1/AOD'),
+    DataSample('SingleElectron2017D', '/SingleElectron/Run2017B-17Nov2017-v1/AOD'),
+    DataSample('SingleElectron2017E', '/SingleElectron/Run2017B-17Nov2017-v1/AOD'),
+    DataSample('SingleElectron2017F', '/SingleElectron/Run2017B-17Nov2017-v1/AOD'),
+]
+
 data_samples_2018 = [
     DataSample('JetHT2018A', '/JetHT/Run2018A-17Sep2018-v1/AOD'),  # 315257 316995   315257 316995   14.028
     DataSample('JetHT2018B', '/JetHT/Run2018B-17Sep2018-v1/AOD'),  # 317080 319310   317080 319077    7.067
@@ -458,6 +466,7 @@ __all__ = [
     'mfv_splitSUSY_samples_2017',
     'data_samples_2017',
     'auxiliary_data_samples_2017',
+    'singleelectron_data_samples_2017',
     'data_samples_2018',
     'auxiliary_data_samples_2018',
 
@@ -521,7 +530,7 @@ for x in _alls:
 # miniaod
 ########
 
-for sample in data_samples_2017 + auxiliary_data_samples_2017:
+for sample in data_samples_2017 + auxiliary_data_samples_2017 + singleelectron_data_samples_2017:
     sample.add_dataset('miniaod', sample.dataset.replace('17Nov2017-v1/AOD', '31Mar2018-v1/MINIAOD'))
 for sample in data_samples_2018 + auxiliary_data_samples_2018:
     sample.add_dataset('miniaod', sample.dataset.replace('AOD', 'MINIAOD'))
@@ -935,7 +944,7 @@ condorable = {
         "miniaod": [ttZ_2017, mfv_stopdbardbar_tau000300um_M0600_2017, zjetstonunuht0400_2017, wjetstolnuext_2017],
         },
     "global_redirect" : {
-        "miniaod": [qcdht0700_2017, qcdht0500_2017, zjetstonunuht2500_2017],
+        "miniaod": [qcdht0700_2017, qcdht0500_2017, zjetstonunuht2500_2017, SingleElectron2017B, SingleElectron2017C, SingleElectron2017D, SingleElectron2017E, SingleElectron2017F, dyjetstollM50_2017, dyjetstollM50ext_2017],
         },
     }
 

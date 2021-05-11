@@ -9,7 +9,7 @@ settings = CMSSWSettings()
 settings.is_mc = True
 settings.cross = '' # 2017to2018' # 2017to2017p8'
 
-version = '2017v11_MET'
+version = '2017v12_ele_METnoMu'
 
 mu_thresh_hlt = 27
 mu_thresh_offline = 35
@@ -23,7 +23,8 @@ global_tag(process, which_global_tag(settings))
 #report_every(process, 1)
 max_events(process, -1)
 dataset = 'miniaod'
-sample_files(process, 'wjetstolnu_2017', dataset, 1)
+#sample_files(process, 'wjetstolnu_2017', dataset, 1)
+sample_files(process, 'dyjetstollM50_2017', dataset, 1)
 #input_files(process,[
 #                    '/store/mc/RunIIFall17MiniAODv2/TTJets_DiLept_genMET-150_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/00000/028BAF0D-85A0-E811-8B96-D4AE526A0C89.root',
 #                    '/store/mc/RunIIFall17MiniAODv2/TTJets_DiLept_genMET-150_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/00000/242B88DC-84A0-E811-8028-B083FED43140.root',
@@ -153,7 +154,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     if year == 2017:
         #samples = [Samples.met_samples_2017[0]]
-        samples = Samples.auxiliary_data_samples_2017 + Samples.leptonic_samples_2017 + Samples.met_samples_2017[0:2] + [Samples.met_samples_2017[-1]]
+        #samples = Samples.auxiliary_data_samples_2017 + Samples.leptonic_samples_2017 + Samples.met_samples_2017[0:2] + [Samples.met_samples_2017[-1]]
+        samples = Samples.singleelectron_data_samples_2017 + Samples.leptonic_samples_2017 + Samples.met_samples_2017[0:2] + [Samples.met_samples_2017[-1]]
         samples += Samples.mfv_splitSUSY_samples_2017
         #masses = (400, 800, 1200, 1600)
         #samples += [getattr(Samples, 'mfv_neu_tau001000um_M%04i_2017' % m) for m in masses] + [Samples.mfv_neu_tau010000um_M0800_2017]

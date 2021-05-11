@@ -299,7 +299,7 @@ def cmd_k0hists():
 
 def cmd_trigeff():
     cmd_hadd_mc_sums()
-    if glob('*SingleMuon*'):
+    if glob('*SingleMuon*') or glob('*SingleElectron*'):
         cmd_report_data()
         cmd_hadd_data()
     cmd_trigeff_merge()

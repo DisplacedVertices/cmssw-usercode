@@ -352,6 +352,8 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
     int nelectrons[2] = {0};
     for (const pat::Electron& electron : *electrons) {
       bool use_electron = electron.electronID("cutBasedElectronID-Fall17-94X-V2-veto") && electron_selector(electron);
+      //bool use_electron = electron.electronID("cutBasedElectronID_Fall17_94X_V2_veto") && electron_selector(electron);
+      //bool use_electron = electron.electronID("cutBasedElectronID-Fall17-94X-V2-veto");
       for (int i = 0; i < 2; ++i) {
         if (i == 0 || use_electron) {
           ++nelectrons[i];

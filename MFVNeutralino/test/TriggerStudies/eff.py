@@ -13,6 +13,8 @@ version = '2017v11_MET'
 
 mu_thresh_hlt = 27
 mu_thresh_offline = 35
+ele_thresh_hlt = 27
+ele_thresh_offline = 35
 weight_l1ecal = ''
 
 tfileservice(process, 'eff.root')
@@ -95,6 +97,7 @@ process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
                              require_hlt = cms.int32(-1),
                              require_l1 = cms.int32(-1),
                              require_muon = cms.bool(True),
+                             require_electron = cms.bool(False),
                              require_metfilters = cms.bool(True),
                              require_1jet = cms.bool(True),#for MET trigger
                              require_4jets = cms.bool(False),#for MET trigger
@@ -106,6 +109,8 @@ process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
                              weight_src = cms.InputTag('jmtWeightMiniAOD'),
                              muons_src = cms.InputTag('slimmedMuons'),
                              muon_cut = cms.string(jtupleParams.muonCut.value() + ' && pt > %i' % mu_thresh_offline),
+                             electrons_src = cms.InputTag('slimmedElectrons'),
+                             electron_cut = cms.string('pt > %i && abs(eta) < 2.5' % ele_thresh_offline),
                              genjets_src = cms.InputTag(''), #'ak4GenJets' if is_mc else ''),
                              )
 
