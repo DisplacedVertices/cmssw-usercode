@@ -25,7 +25,7 @@ def cmd_hadd_vertexer_histos():
         hadd(s.name + '.root', ['root://cmseos.fnal.gov/' + fn.replace('ntuple', 'vertex_histos') for fn in s.filenames])
 
 def cmd_report_data():
-    for ds, ex in ('SingleMuon', '_mu'), ('JetHT', ''):
+    for ds, ex in ('SingleMuon', '_mu'), ('JetHT', ''), ('SingleElectron', '_ele'):
         maod = 'miniaod' if 'miniaod' in sys.argv else ''
         pc = ''
         if '10pc' in sys.argv:
@@ -64,7 +64,7 @@ def cmd_report_data():
 
 def cmd_hadd_data():
     permissive = bool_from_argv('permissive')
-    for ds in 'SingleMuon', 'JetHT', 'ZeroBias':
+    for ds in 'SingleMuon', 'JetHT', 'ZeroBias', 'SingleElectron':
         print ds
         files = set(glob(ds + '*.root'))
         if not files:

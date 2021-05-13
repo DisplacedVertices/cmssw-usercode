@@ -5,7 +5,7 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.Tools.Samples import *
 
-version = '2017v11_MET'
+version = '2017v12_ele_METnoMu'
 zoom = False #(0.98,1.005)
 save_more = True
 data_only = False
@@ -44,7 +44,8 @@ ROOT.gStyle.SetOptStat(0)
 ps = plot_saver(plot_dir(plot_path), size=(600,600), log=False, pdf=True)
 ROOT.TH1.AddDirectory(0)
 
-data_fn = os.path.join(root_dir, 'SingleMuon%s%s.root' % (year, data_period))
+#data_fn = os.path.join(root_dir, 'SingleMuon%s%s.root' % (year, data_period))
+data_fn = os.path.join(root_dir, 'SingleElectron%s%s.root' % (year, data_period))
 data_f = ROOT.TFile(data_fn)
 
 if data_only:
@@ -71,8 +72,8 @@ for samples in bkg_samples, sig_samples:
 
 kinds = ['']
 #ns = ['h_jet_ht']
-#ns = ['h_metpt_nomu']
-ns = ['h_metpt']
+ns = ['h_metpt_nomu']
+#ns = ['h_metpt']
 
 lump_lower = 0.
 #lump_lower = 1200.
@@ -288,7 +289,7 @@ for kind in kinds:
                 continue
             if 'met' in n:
                 r.GetXaxis().SetLimits(0, 1000)
-                r.SetTitle('; MET p_{T} (GeV);efficiency')
+                r.SetTitle('; METnoMu p_{T} (GeV);efficiency')
             elif 'pt' in n:
                 r.GetXaxis().SetLimits(0, 260)
                 i = int(n.split('_')[-1])
@@ -308,13 +309,13 @@ for kind in kinds:
         ROOT.gStyle.SetOptFit(1111)
         data_fcn = make_fcn('f_data', kind, n)
         data_fcn.SetLineColor(ROOT.kBlack)
-        data_res = data_rat.Fit(data_fcn, 'RQS')
+        data_res = data_rat.Fit(data_fcn, 'RQS',"",0,600)
         print '\ndata:'
         data_res.Print()
         if bkg_rat:
             bkg_fcn = make_fcn('f_bkg', kind, n)
             bkg_fcn.SetLineColor(2)
-            bkg_res = bkg_rat.Fit(bkg_fcn, 'RQS')
+            bkg_res = bkg_rat.Fit(bkg_fcn, 'RQS',"",0,600)
             print '\nbkg:'
             bkg_res.Print()
 
