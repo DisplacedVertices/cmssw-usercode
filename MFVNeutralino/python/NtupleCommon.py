@@ -305,12 +305,16 @@ def miniaod_ntuple_process(settings):
     process.mfvEvent.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple')
 
     # MET correction and filters
+    # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETUncertaintyPrescription#PF_MET
     from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
     process.load("Configuration.StandardSequences.GeometryRecoDB_cff") 
     runMetCorAndUncFromMiniAOD(process,
                                isData = not settings.is_mc,
                                )
     
+    # MET filter:
+    # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFiltersRun2#Analysis_Recommendations_for_ana
+    # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETOptionalFiltersRun2#How_to_run_ecal_BadCalibReducedM
     process.load('RecoMET.METFilters.ecalBadCalibFilter_cfi')
     
     baddetEcallist = cms.vuint32(
