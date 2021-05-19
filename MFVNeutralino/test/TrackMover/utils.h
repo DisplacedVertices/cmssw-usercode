@@ -45,12 +45,27 @@ struct numdens {
   void setw(double w) { for (auto& p : m) p.second.w = w; }
   void fill(int key, bool usenum, double x)           { (*this)(key).fill(usenum, x); }
   void fill(int key, bool usenum, double x, double y) { (*this)(key).fill(usenum, x, y); }
+  void vecfill(int key, bool usenum, std::vector<double> xvec) { for (double x : xvec) (*this)(key).fill(usenum, x); }
+  void vecfill(int key, bool usenum, std::vector<double> xvec, std::vector<double> yvec) { 
+       for (int i=0, ie=xvec.size(); i < ie; i++) {
+            (*this)(key).fill(usenum, xvec[i], yvec[i]);
+       }
+  }
+  void vecfill(int key, bool usenum, std::vector<int> xvec)    { for (double x : xvec) (*this)(key).fill(usenum, x); }
   void den(int key, double x)            { fill(key, false, x); }
   void den(int key, double x, double y ) { fill(key, false, x, y); }
+  void den(int key, std::vector<double> xvec) { vecfill(key, false, xvec); }
+  void den(int key, std::vector<double> xvec, std::vector<double> yvec) { vecfill(key, false, xvec, yvec); }
+  void den(int key, std::vector<int> xvec)    { vecfill(key, false, xvec); }
   void num(int key, double x)            { fill(key, true,  x); }
   void num(int key, double x, double y ) { fill(key, true,  x, y); }
+  void num(int key, std::vector<double> xvec) { vecfill(key, true,  xvec); }
+  void num(int key, std::vector<double> xvec, std::vector<double> yvec) { vecfill(key, true, xvec, yvec); }
+  void num(int key, std::vector<int> xvec)    { vecfill(key, true,  xvec); }
   std::string common;
   std::map<int, numden> m;
 };
+
+
 
 #endif
