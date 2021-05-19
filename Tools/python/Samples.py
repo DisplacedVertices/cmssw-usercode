@@ -569,6 +569,21 @@ _adbp('miniaod', '/StopStopbarTo2Dbar2D_M-3000_CTau-30mm_TuneCP2_13TeV_2018-pyth
 # ntuples
 ########
 
+
+# Shaun
+for x in qcdht0700_2017, qcdht1000_2017, qcdht1500_2017, qcdht2000_2017, ttbarht0600_2017, ttbarht0800_2017, ttbarht1200_2017, ttbarht2500_2017, qcdht0700_2018, qcdht1000_2018, qcdht1500_2018, qcdht2000_2018, ttbarht0600_2018, ttbarht0800_2018, ttbarht1200_2018, ttbarht2500_2018, JetHT2017B, JetHT2017C, JetHT2017D, JetHT2017E, JetHT2017F, JetHT2018A, JetHT2018B, JetHT2018C, JetHT2018D:
+    x.add_dataset("multijet_32_exstats_c4")
+    x.add_dataset("multijet_32_exstats_c3")
+    x.add_dataset("multijet_32_exstats_c2")
+    x.add_dataset("multijet_32_exstats_c1")
+    x.add_dataset("multijet_32_exstats_c0")
+    x.add_dataset("multijet_32_exstats_j5")
+    x.add_dataset("multijet_32_exstats_j4")
+    x.add_dataset("multijet_32_exstats_j3")
+    x.add_dataset("multijet_32_exstats_j2")
+    x.add_dataset("multijet_32_exstats_j1")
+    x.add_dataset("multijet_32_exstats_j0")
+
 for x in data_samples_2017 + qcd_samples_2017 + data_samples_2018 + qcd_samples_2018:
     x.add_dataset("nr_trackingtreerv23mv3")
     x.add_dataset("nr_k0ntuplev25mv1")
