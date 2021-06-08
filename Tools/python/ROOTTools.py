@@ -2450,7 +2450,7 @@ def zgammatauwrong(x,y,tau,tau_uncert):
     return z / nz
 
 def lerp(x, x0, x1, q0, q1):
-    xd = (x - x0) / (x1 - x0)
+    xd = (x - x0) / float(x1 - x0)
     return q0 * (1 - xd) + q1 * xd
 
 def bilerp(x,y, points): # https://stackoverflow.com/questions/8661537/how-to-perform-bilinear-interpolation-in-python
