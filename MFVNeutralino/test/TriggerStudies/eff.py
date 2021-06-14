@@ -9,7 +9,7 @@ settings = CMSSWSettings()
 settings.is_mc = True
 settings.cross = '' # 2017to2018' # 2017to2017p8'
 
-version = '2017v11_MET'
+version = '2017v16_mu_MET'
 
 mu_thresh_hlt = 27
 mu_thresh_offline = 35

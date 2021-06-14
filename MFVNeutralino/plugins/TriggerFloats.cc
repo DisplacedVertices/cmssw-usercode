@@ -118,7 +118,8 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   for (const pat::Muon& muon : *muons) {
     double muon_px = muon.px();
     double muon_py = muon.py();
-    if (muon_selector(muon)){
+    //if (muon_selector(muon)){
+    if (muon.passed(reco::Muon::CutBasedIdTight)) {
       met_px = met_px + muon_px;
       met_py = met_py + muon_py;
     }

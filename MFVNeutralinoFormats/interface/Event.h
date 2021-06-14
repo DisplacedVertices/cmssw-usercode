@@ -26,7 +26,7 @@ struct MFVEvent {
     gen_valid = 0;
     npv = pv_ntracks = pv_ntracksloose = 0;
     gen_flavor_code = 0;
-    gen_weight = l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = npu = bsx = bsy = bsz = bsdxdz = bsdydz = bswidthx = bswidthy = pvx = pvy = pvz = pvcxx = pvcxy = pvcxz = pvcyy = pvcyz = pvczz = pv_score = metx = mety = 0;
+    gen_weight = l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = npu = bsx = bsy = bsz = bsdxdz = bsdydz = bswidthx = bswidthy = pvx = pvy = pvz = pvcxx = pvcxy = pvcxz = pvcyy = pvcyz = pvczz = pv_score = metx = mety = metNoMux = metNoMuy = 0;
     for (int i = 0; i < 2; ++i) {
       gen_lsp_pt[i] = gen_lsp_eta[i] = gen_lsp_phi[i] = gen_lsp_mass[i] = 0;
       gen_decay_type[i] = 0;
@@ -311,6 +311,11 @@ struct MFVEvent {
   float mety;
   float met() const { return mag(metx, mety); }
   float metphi() const { return atan2(mety, metx); }
+
+  float metNoMux;
+  float metNoMuy;
+  float metNoMu() const { return mag(metNoMux, metNoMuy); }
+  float metNoMuphi() const { return atan2(metNoMuy, metNoMux); }
 
   typedef ushort lep_id_t;
   enum { lep_mu, lep_el };

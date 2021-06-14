@@ -5,7 +5,12 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.Tools.Samples import *
 
-version = '2017v12_ele_METnoMu'
+useElectron = False
+useMETNoMu = False
+version = '2017v16_mu_MET'
+#version = '2017v11_MET'
+if useMETNoMu:
+  version+='NoMu'
 zoom = False #(0.98,1.005)
 save_more = True
 data_only = False
@@ -35,7 +40,7 @@ print year, data_period, int_lumi
 
 root_dir = '/uscms/home/ali/nobackup/LLP/crabdir/TrigEff%s' % version
 #root_dir = '/uscms/home/ali/nobackup/LLP/crabdir/TrigEff2017v10_WJets_xycorrMET_METnoMu_v3'
-plot_path = 'TrigEff%s_%s_%s%s' % (version, num_dir, year, data_period)
+plot_path = 'TrigEff%s_%s_%s%sERF' % (version, num_dir, year, data_period)
 if zoom:
     plot_path += '_zoom'
 
@@ -44,8 +49,11 @@ ROOT.gStyle.SetOptStat(0)
 ps = plot_saver(plot_dir(plot_path), size=(600,600), log=False, pdf=True)
 ROOT.TH1.AddDirectory(0)
 
-#data_fn = os.path.join(root_dir, 'SingleMuon%s%s.root' % (year, data_period))
-data_fn = os.path.join(root_dir, 'SingleElectron%s%s.root' % (year, data_period))
+if useElectron:
+  data_fn = os.path.join(root_dir, 'SingleElectron%s%s.root' % (year, data_period))
+else:
+  data_fn = os.path.join(root_dir, 'SingleMuon%s%s.root' % (year, data_period))
+
 data_f = ROOT.TFile(data_fn)
 
 if data_only:
@@ -54,7 +62,10 @@ else:
     if year == 2017 or year == 2018:
         #bkg_samples = [wjetstolnu_2017]
         #sig_samples = []
-        bkg_samples = [ttbar_2017, wjetstolnusum_2017, dyjetstollM50sum_2017, dyjetstollM10_2017, qcdmupt15_2017]
+        if useElectron:
+          bkg_samples = [ttbar_2017, wjetstolnusum_2017, dyjetstollM50sum_2017]
+        else:
+          bkg_samples = [ttbar_2017, wjetstolnusum_2017, dyjetstollM50sum_2017, dyjetstollM10_2017, qcdmupt15_2017]
         if use_qcd:
             bkg_samples.append(qcdmupt15_2017)
         sig_samples = Samples.mfv_splitSUSY_samples_2017
@@ -72,8 +83,10 @@ for samples in bkg_samples, sig_samples:
 
 kinds = ['']
 #ns = ['h_jet_ht']
-ns = ['h_metpt_nomu']
-#ns = ['h_metpt']
+if useMETNoMu:
+  ns = ['h_metpt_nomu']
+else:
+  ns = ['h_metpt']
 
 lump_lower = 0.
 #lump_lower = 1200.
@@ -106,11 +119,12 @@ def draw_limits(kind, n):
 
 def make_fcn(name, kind, n):
     fcn = ROOT.TF1(name, '[0] + [1]*(0.5 + 0.5 * TMath::Erf((x - [2])/[3]))', *fit_limits(kind,n))
+    #fcn = ROOT.TF1(name, '[0] + [1]*(0.5 + 0.5 * TMath::TanH((x - [2])/[3]))', *fit_limits(kind,n))
     fcn.SetParNames('floor', 'ceil', 'turnmu', 'turnsig')
     if 'ht' in n:
         fcn.SetParameters(0, 1, 900, 100)
     else:
-        fcn.SetParameters(0, 1, 48, 5)
+        fcn.SetParameters(0, 1, 150, 50)
     fcn.SetParLimits(1, 0, 1)
     fcn.SetLineWidth(2)
     fcn.SetLineStyle(2)
@@ -118,7 +132,7 @@ def make_fcn(name, kind, n):
     return fcn
 
 def rebin_met(h):
-    a = to_array(range(0, 100, 5) + range(100, 150, 10) + [150, 180, 220, 260, 370, 500, 600, 700, 800, 1000])
+    a = to_array(range(0, 100, 5) + range(100, 200, 10) + [200, 225, 250, 275, 300, 350, 400, 450, 500, 600, 700, 800, 1000])
     return h.Rebin(len(a)-1, h.GetName() + '_rebin', a)
 
 def rebin_pt(h):
@@ -289,7 +303,9 @@ for kind in kinds:
                 continue
             if 'met' in n:
                 r.GetXaxis().SetLimits(0, 1000)
-                r.SetTitle('; METnoMu p_{T} (GeV);efficiency')
+                r.SetTitle('; MET p_{T} (GeV);efficiency')
+                if 'nomu' in n:
+                  r.SetTitle('; METnoMu p_{T} (GeV);efficiency')
             elif 'pt' in n:
                 r.GetXaxis().SetLimits(0, 260)
                 i = int(n.split('_')[-1])
@@ -309,13 +325,13 @@ for kind in kinds:
         ROOT.gStyle.SetOptFit(1111)
         data_fcn = make_fcn('f_data', kind, n)
         data_fcn.SetLineColor(ROOT.kBlack)
-        data_res = data_rat.Fit(data_fcn, 'RQS',"",0,600)
+        data_res = data_rat.Fit(data_fcn, 'RQS',"",0,1000)
         print '\ndata:'
         data_res.Print()
         if bkg_rat:
             bkg_fcn = make_fcn('f_bkg', kind, n)
             bkg_fcn.SetLineColor(2)
-            bkg_res = bkg_rat.Fit(bkg_fcn, 'RQS',"",0,600)
+            bkg_res = bkg_rat.Fit(bkg_fcn, 'RQS',"",0,1000)
             print '\nbkg:'
             bkg_res.Print()
 

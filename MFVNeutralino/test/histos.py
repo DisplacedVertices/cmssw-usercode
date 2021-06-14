@@ -184,7 +184,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=True, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), half_mc_modifier())
     elif use_MET_triggers:
-        samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, leptonic=False, bjet=False, splitSUSY=False, Zvv=True, met=True, span_signal=True)
+        samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, leptonic=False, bjet=False, splitSUSY=True, Zvv=True, met=True, span_signal=False)
         #samples = pick_samples(dataset, qcd=False, ttbar=False, all_signal=False, data=False, leptonic=False, bjet=False, splitSUSY=True, Zvv=False, met=False, span_signal=False)
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), half_mc_modifier())
     else :
@@ -193,7 +193,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
 
-    cs = CondorSubmitter('Histos' + version,
+    cs = CondorSubmitter('Histos_dbverrcut_' + version,
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,

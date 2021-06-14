@@ -2,6 +2,7 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "CommonTools/Utils/interface/StringCutObjectSelector.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
+#include "DataFormats/Math/interface/deltaPhi.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "FWCore/Common/interface/TriggerNames.h"
@@ -57,6 +58,8 @@ private:
   TH1D* h_electron_eta[2];
   TH1D* h_electron_phi[2];
   TH1D* h_electron_iso[2];
+  TH1D* h_Wmass_mu;
+  TH1D* h_Wmass_ele;
 
   TH1D* h_nnoseljets;
   TH1D* h_njets;
@@ -121,6 +124,8 @@ MFVTriggerEfficiency::MFVTriggerEfficiency(const edm::ParameterSet& cfg)
 
   h_w = fs->make<TH1D>("h_w", ";event weight;events", 20, 0, 10);
 
+  h_Wmass_mu = fs->make<TH1D>("h_Wmass_mu", ";W mass(GeV);events", 40, 0, 200);
+  h_Wmass_ele = fs->make<TH1D>("h_Wmass_ele", ";W mass(GeV);events", 40, 0, 200);
   if (require_muon) {
     h_nnoselmuons = fs->make<TH1D>("h_nnoselmuons", ";# all muons;events", 5, 0, 5);
     h_nmuons = fs->make<TH1D>("h_nmuons", ";# selected muons;events", 3, 0, 3);
@@ -321,25 +326,35 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
       return;
     }
   }
+  double Wmass = 0;
   if (require_muon) {
     edm::Handle<pat::MuonCollection> muons;
     event.getByToken(muons_token, muons);
 
     int nmuons[2] = {0};
+    double mu_pt = -999;
+    double mu_phi = -999;
     for (const pat::Muon& muon : *muons) {
       for (int i = 0; i < 2; ++i) {
-        if (i == 0 || muon_selector(muon)) {
+        //if (i == 0 || (muon_selector(muon) && muon.passed(reco::Muon::CutBasedIdTight))) { //&& muon.passed(reco::Muon::CutBasedIdTight)
+        if (i == 0 || (muon.passed(reco::Muon::CutBasedIdTight) && muon_selector(muon))) {
           ++nmuons[i];
           h_muon_pt[i]->Fill(muon.pt(), w);
           h_muon_eta[i]->Fill(muon.eta(), w);
           h_muon_phi[i]->Fill(muon.phi(), w);
           h_muon_iso[i]->Fill((muon.chargedHadronIso() + muon.neutralHadronIso() + muon.photonIso() - 0.5*muon.puChargedHadronIso())/muon.pt(), w);
+          if (i==1){
+            mu_pt = muon.pt();
+            mu_phi = muon.phi();
+          }
         }
       }
     }
 
     h_nnoselmuons->Fill(nmuons[0], w);
     h_nmuons->Fill(nmuons[1], w);
+    Wmass = std::sqrt(2*mu_pt*triggerfloats->met_pt*(1-std::cos(deltaPhi(mu_phi, triggerfloats->met_phi))));
+    h_Wmass_mu->Fill(Wmass, w);
 
     if (nmuons[1] < 1)
       return;
@@ -349,11 +364,14 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
     edm::Handle<pat::ElectronCollection> electrons;
     event.getByToken(electrons_token, electrons);
 
+    double ele_pt = -999;
+    double ele_phi = -999;
     int nelectrons[2] = {0};
     for (const pat::Electron& electron : *electrons) {
-      bool use_electron = electron.electronID("cutBasedElectronID-Fall17-94X-V2-veto") && electron_selector(electron);
-      //bool use_electron = electron.electronID("cutBasedElectronID_Fall17_94X_V2_veto") && electron_selector(electron);
-      //bool use_electron = electron.electronID("cutBasedElectronID-Fall17-94X-V2-veto");
+      bool use_electron = electron.electronID("cutBasedElectronID-Fall17-94X-V2-tight") && electron_selector(electron);
+      //use_electron = use_electron && 
+      //  ( (electron.isEB() && electron.dB(0)<=0.05 && electron.dB(4)<=0.1) ||
+      //    (electron.isEE() && electron.dB(0)<=0.10 && electron.dB(4)<=0.2) )
       for (int i = 0; i < 2; ++i) {
         if (i == 0 || use_electron) {
           ++nelectrons[i];
@@ -361,6 +379,10 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
           h_electron_eta[i]->Fill(electron.eta(), w);
           h_electron_phi[i]->Fill(electron.phi(), w);
           h_electron_iso[i]->Fill((electron.chargedHadronIso() + electron.neutralHadronIso() + electron.photonIso() - 0.5*electron.puChargedHadronIso())/electron.pt(), w);
+          if (i==1){
+            ele_pt = electron.pt();
+            ele_phi = electron.phi();
+          }
         }
       }
     }
@@ -370,6 +392,10 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
 
     if (nelectrons[1] < 1)
       return;
+    Wmass = std::sqrt(2*ele_pt*triggerfloats->met_pt*(1-std::cos(deltaPhi(ele_phi, triggerfloats->met_phi))));
+    h_Wmass_ele->Fill(Wmass, w);
+    //if (Wmass<50)
+    //  return;
   }
 
   if (require_1jet && triggerfloats->njets(require_1stjetpt) < 1){

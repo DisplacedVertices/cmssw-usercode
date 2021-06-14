@@ -9,12 +9,12 @@ settings = CMSSWSettings()
 settings.is_mc = True
 settings.cross = '' # 2017to2018' # 2017to2017p8'
 
-version = '2017v12_ele_MET'
+version = '2017v16_ele_MET'
 
 mu_thresh_hlt = 27
-mu_thresh_offline = 35
-ele_thresh_hlt = 27
-ele_thresh_offline = 35
+mu_thresh_offline = 5
+ele_thresh_hlt = 35
+ele_thresh_offline = 38
 weight_l1ecal = ''
 
 tfileservice(process, 'eff.root')
@@ -23,12 +23,11 @@ global_tag(process, which_global_tag(settings))
 #report_every(process, 1)
 max_events(process, -1)
 dataset = 'miniaod'
-#sample_files(process, 'wjetstolnu_2017', dataset, 1)
-sample_files(process, 'dyjetstollM50_2017', dataset, 1)
+sample_files(process, 'wjetstolnu_2017', dataset, 1)
+#sample_files(process, 'ttbar_2017', dataset, 10)
 #input_files(process,[
-#                    '/store/mc/RunIIFall17MiniAODv2/TTJets_DiLept_genMET-150_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/00000/028BAF0D-85A0-E811-8B96-D4AE526A0C89.root',
-#                    '/store/mc/RunIIFall17MiniAODv2/TTJets_DiLept_genMET-150_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/00000/242B88DC-84A0-E811-8028-B083FED43140.root',
-#                    '/store/mc/RunIIFall17MiniAODv2/TTJets_DiLept_genMET-150_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/00000/5AFC83DA-83A0-E811-99CC-0025905A48C0.root',
+#                    '/store/data/Run2017B/SingleElectron/MINIAOD/31Mar2018-v1/60000/46D12260-9E37-E811-846B-008CFAC93ED0.root',
+#                    '/store/data/Run2017B/SingleElectron/MINIAOD/31Mar2018-v1/60000/EE670599-9E37-E811-853E-008CFAE453D4.root',
 #            ])
 
 from RecoEgamma.EgammaTools.EgammaPostRecoTools import setupEgammaPostRecoSeq
@@ -125,7 +124,7 @@ process.denht1000 = process.den.clone(require_ht = 1000)
 process.denjet6pt75 = process.den.clone(require_6thjetpt = 75)
 process.denht1000jet6pt75 = process.den.clone(require_ht = 1000, require_6thjetpt = 75)
 #process.p = cms.Path(process.weightSeq * process.mutrig * process.updatedJetsSeqMiniAOD * process.selectedPatJets * process.mfvTriggerFloats * process.den * process.denht1000 * process.denjet6pt75 * process.denht1000jet6pt75)
-process.p = cms.Path(process.egammaPostRecoSeq * process.ecalBadCalibReducedMINIAODFilter * process.weightSeq * process.mutrig * process.updatedJetsSeqMiniAOD * process.fullPatMetSequence * process.selectedPatJets * process.mfvTriggerFloats * process.den)
+process.p = cms.Path(process.egammaPostRecoSeq * process.ecalBadCalibReducedMINIAODFilter * process.weightSeq * process.eletrig * process.updatedJetsSeqMiniAOD * process.fullPatMetSequence * process.selectedPatJets * process.mfvTriggerFloats * process.den)
 
 #process.dennomu = process.den.clone(require_muon = False)
 #process.dennomuht1000 = process.den.clone(require_muon = False, require_ht = 1000)
@@ -167,5 +166,5 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     ms = MetaSubmitter('TrigEff%s%s' % (version, '_' + settings.cross if settings.cross else ''), dataset=dataset)
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier(cross=settings.cross))
-    ms.condor.stageout_files = 'all'
+    #ms.condor.stageout_files = 'all'
     ms.submit(samples)
