@@ -4,7 +4,7 @@ from JMTucker.Tools.Year import year
 #ntuple_version_ = 'V36'
 #ntuple_version_ = 'Vmetthresv1'
 #ntuple_version_ = 'Vtrackattach_3p5'
-ntuple_version_ = 'Vkeeptk_v1'
+ntuple_version_ = 'Vkeeptk_v2_met'
 use_btag_triggers = False
 use_MET_triggers = True
 if use_btag_triggers : 

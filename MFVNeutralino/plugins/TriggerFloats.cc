@@ -125,6 +125,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
     }
   }
   double met_nomu_pt = hypotf(met_px,met_py);
+  double met_nomu_phi = atan2(met_px,met_py);
 
   // check met filters
   std::vector<bool> pass_met_filters(metfilternames.size(), false);
@@ -486,6 +487,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   floats->met_phi = met_phi;
   floats->met_pt_calo = met.caloMETPt();
   floats->met_pt_nomu = met_nomu_pt;
+  floats->met_phi_nomu = met_nomu_phi;
   floats->pass_metfilters = pass_all_metfilters;
 
   if (prints)

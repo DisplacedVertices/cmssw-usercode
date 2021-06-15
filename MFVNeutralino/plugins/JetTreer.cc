@@ -27,6 +27,8 @@ struct eventInfo
   double weight;
   double met_pt;
   double met_phi;
+  double metnomu_pt;
+  double metnomu_phi;
   int nsv;
   int vtx_ntk;
   double vtx_dBV;
@@ -150,7 +152,7 @@ void MFVJetTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   //if (nsv_tight == 0 && nsv_loose == 0) return;
   if (nsv==0) return;
-  if (mevent->met()<150) return;
+  //if (mevent->met()<150) return;
   //if (mevent->met()<150) return;
   //if (mevent->met()>=150) return;
 
@@ -168,6 +170,8 @@ void MFVJetTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   evInfo->met_pt = mevent->met();
   evInfo->met_phi = mevent->metphi();
+  evInfo->metnomu_pt = mevent->metNoMu();
+  evInfo->metnomu_phi = mevent->metNoMuphi();
 
   double max_ntrack = 0;
   size_t best_SV_idx = -1;
@@ -282,6 +286,8 @@ MFVJetTreer::beginJob()
   eventTree->Branch( "weight",               &evInfo->weight);
   eventTree->Branch( "met_pt",               &evInfo->met_pt);
   eventTree->Branch( "met_phi",              &evInfo->met_phi);
+  eventTree->Branch( "metnomu_pt",           &evInfo->metnomu_pt);
+  eventTree->Branch( "metnomu_phi",          &evInfo->metnomu_phi);
   eventTree->Branch( "nsv",                  &evInfo->nsv);
   eventTree->Branch( "vtx_ntk",              &evInfo->vtx_ntk);
   eventTree->Branch( "vtx_dBV",              &evInfo->vtx_dBV);
@@ -293,11 +299,11 @@ MFVJetTreer::beginJob()
   eventTree->Branch( "vtx_tk_eta",           &evInfo->vtx_tk_eta);
   eventTree->Branch( "vtx_tk_phi",           &evInfo->vtx_tk_phi);
   eventTree->Branch( "vtx_tk_dxy",           &evInfo->vtx_tk_dxy);
-  eventTree->Branch( "vtx_tk_dxy_err",           &evInfo->vtx_tk_dxy_err);
+  eventTree->Branch( "vtx_tk_dxy_err",       &evInfo->vtx_tk_dxy_err);
   eventTree->Branch( "vtx_tk_nsigmadxy",     &evInfo->vtx_tk_nsigmadxy);
-  eventTree->Branch( "vtx_tk_dz",           &evInfo->vtx_tk_dz);
-  eventTree->Branch( "vtx_tk_dz_err",           &evInfo->vtx_tk_dz_err);
-  eventTree->Branch( "vtx_tk_nsigmadz",     &evInfo->vtx_tk_nsigmadz);
+  eventTree->Branch( "vtx_tk_dz",            &evInfo->vtx_tk_dz);
+  eventTree->Branch( "vtx_tk_dz_err",        &evInfo->vtx_tk_dz_err);
+  eventTree->Branch( "vtx_tk_nsigmadz",      &evInfo->vtx_tk_nsigmadz);
   eventTree->Branch( "jet_pt",               &evInfo->jet_pt);
   eventTree->Branch( "jet_eta",              &evInfo->jet_eta);
   eventTree->Branch( "jet_phi",              &evInfo->jet_phi);
@@ -325,6 +331,8 @@ void MFVJetTreer::initEventStructure()
   evInfo->weight=-1;
   evInfo->met_pt=-1;
   evInfo->met_phi=-1;
+  evInfo->metnomu_pt=-1;
+  evInfo->metnomu_phi=-1;
   evInfo->nsv=-1;
   evInfo->vtx_ntk=-1;
   evInfo->vtx_dBV=-1;

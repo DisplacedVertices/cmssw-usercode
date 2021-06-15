@@ -16,6 +16,7 @@ namespace mfv {
     float met_phi;
     float met_pt_calo;
     float met_pt_nomu;
+    float met_phi_nomu;
     bool pass_metfilters;
     std::vector<TLorentzVector> hltpfjets;
     int nhltpfjets() const { return hltpfjets.size(); }
@@ -41,7 +42,7 @@ namespace mfv {
 
     TriggerFloats()
     : l1htt(-1), myhtt(-1), myhttwbug(-1), hltht(-1), met_pt(-1), 
-      met_pt_calo(-1), met_pt_nomu(-1), pass_metfilters(false),
+      met_pt_calo(-1), met_pt_nomu(-1), met_phi_nomu(-1), pass_metfilters(false),
       L1decisions(n_l1_paths, -1),
       HLTdecisions(n_hlt_paths, -1),
       nalljets(0), htall(0), ht(0), htptgt30(0)
