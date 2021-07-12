@@ -1,11 +1,11 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version_ = 'V27'
+ntuple_version_ = 'V27lhapdf'
 use_btag_triggers = False
 if use_btag_triggers : 
     ntuple_version_ += "B" # for "Btag triggers"; also includes DisplacedDijet triggers
-ntuple_version_use = ntuple_version_ + 'm_lhapdf'
+ntuple_version_use = ntuple_version_ + 'm'
 dataset = 'ntuple' + ntuple_version_use.lower()
 
 def run_n_tk_seeds(process, mode, settings, output_commands):
