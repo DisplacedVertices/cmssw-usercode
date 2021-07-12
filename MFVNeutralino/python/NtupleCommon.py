@@ -5,7 +5,7 @@ ntuple_version_ = 'V27'
 use_btag_triggers = False
 if use_btag_triggers : 
     ntuple_version_ += "B" # for "Btag triggers"; also includes DisplacedDijet triggers
-ntuple_version_use = ntuple_version_ + 'm'
+ntuple_version_use = ntuple_version_ + 'm_lhapdf'
 dataset = 'ntuple' + ntuple_version_use.lower()
 
 def run_n_tk_seeds(process, mode, settings, output_commands):
