@@ -38,7 +38,7 @@ private:
   TH1D* h_npu;
   TH1D* h_npv;
 
-  enum { sum_nevents_total, sum_gen_weight_total, sum_gen_weight, sum_pileup_weight, sum_npv_weight, sum_weight, yearcode_x_nfiles, n_sums };
+  enum { sum_nevents_total, sum_gen_weight_total, sum_gen_weight, sum_pileup_weight, sum_npv_weight, sum_weight, yearcode_x_nfiles, sum_weight_ren_up, sum_weight_ren_dn, sum_weight_fac_up, sum_weight_fac_dn, sum_weight_ren_fac_up, sum_weight_ren_fac_dn, n_sums };
   TH1D* h_sums;
 };
 
@@ -74,7 +74,7 @@ MFVWeightProducer::MFVWeightProducer(const edm::ParameterSet& cfg)
 
     h_sums = fs->make<TH1D>("h_sums", TString::Format("partial_mc_stats_weight = %.3f", partial_mc_stats_weight), n_sums+1, 0, n_sums+1);
     int ibin = 1;
-    for (const char* x : { "sum_nevents_total", "sum_gen_weight_total", "sum_gen_weight", "sum_pileup_weight", "sum_npv_weight", "sum_weight", "yearcode_x_nfiles", "n_sums" })
+    for (const char* x : { "sum_nevents_total", "sum_gen_weight_total", "sum_gen_weight", "sum_pileup_weight", "sum_npv_weight", "sum_weight", "yearcode_x_nfiles", "sum_weight_ren_up", "sum_weight_ren_dn", "sum_weight_fac_up", "sum_weight_fac_dn", "sum_weight_ren_fac_up", "sum_weight_ren_fac_dn", "n_sums" })
       h_sums->GetXaxis()->SetBinLabel(ibin++, x);
     h_sums->Fill(yearcode_x_nfiles, MFVNEUTRALINO_YEARCODE);
   }
@@ -175,6 +175,23 @@ void MFVWeightProducer::produce(edm::Event& event, const edm::EventSetup&) {
           printf("misc weight %i: %g  ", mwi, w);
         *weight *= w;
       }
+      
+      // Fill in sumw entries for renormalization / factorization scale uncertainty
+      if (histos) {
+
+        double weight_ren_up = mevent->ren_weight_up;
+        double weight_ren_dn = mevent->ren_weight_dn;
+        double weight_fac_up = mevent->fac_weight_up;
+        double weight_fac_dn = mevent->fac_weight_dn;
+
+        h_sums->Fill(sum_weight_ren_up, *weight*weight_ren_up);
+        h_sums->Fill(sum_weight_ren_dn, *weight*weight_ren_dn);
+        h_sums->Fill(sum_weight_fac_up, *weight*weight_fac_up);
+        h_sums->Fill(sum_weight_fac_dn, *weight*weight_fac_dn);
+        h_sums->Fill(sum_weight_ren_fac_up, *weight*weight_ren_up*weight_fac_up);
+        h_sums->Fill(sum_weight_ren_fac_dn, *weight*weight_ren_dn*weight_fac_dn);
+      }
+
     }
   }
 

@@ -1,7 +1,7 @@
 import sys, os
 from JMTucker.Tools.ROOTTools import *
 
-path = plot_dir('pretty_efficiency_corrected_latest', make=True)
+path = plot_dir('pretty_efficiency_final', make=True)
 swap_axes = True
 
 ts = tdr_style()

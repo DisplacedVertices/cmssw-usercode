@@ -494,6 +494,9 @@ class sums_from_file(object):
             self._norm = self._get('sum_nevents_total')
         return self._norm
 
+    def norm_weight(self, weight_name):
+        return self._get(weight_name)
+
     def yearcode(self):
         if self._yearcode is None:
             c = self._get('yearcode_x_nfiles')
@@ -521,6 +524,9 @@ class sums_from_file(object):
 
 def norm_from_file(f_or_fn, path=None):
     return sums_from_file(f_or_fn, path).norm()
+
+def norm_from_file_weight(f_or_fn, path=None, weight_name=""):
+    return sums_from_file(f_or_fn, path).norm_weight(weight_name)
 
 def merge(samples, output='merge.root', norm_to=1., norm_path=''):
     if norm_to > 0:
@@ -672,6 +678,7 @@ __all__ = [
     'SamplesRegistry',
     'anon_samples',
     'norm_from_file',
+    'norm_from_file_weight',
     'merge',
     'sample_from_end_string',
     'main',

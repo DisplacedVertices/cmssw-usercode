@@ -449,6 +449,12 @@ struct MFVEvent {
 
   // stuff we aren't sure should be permanently in ntuple; the meaning of the entries is version-dependent
   std::vector<float> misc;
+
+  // scale uncertainty weights
+  double ren_weight_up;
+  double ren_weight_dn;
+  double fac_weight_up;
+  double fac_weight_dn;
 };
 
 #endif

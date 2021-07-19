@@ -7,7 +7,7 @@ swap_axes = True
 
 which = '2017p8' if '2017p8' in sys.argv else 'run2'
 intlumi = 140 if which == 'run2' else 101
-path = plot_dir('pretty_limits_%s_pm1sigma_switchaxes_diff_color' % which, make=True)
+path = plot_dir('pretty_limits_%s_June2021' % which, make=True)
 
 ts = tdr_style()
 ROOT.gStyle.SetPalette(ROOT.kBird)
