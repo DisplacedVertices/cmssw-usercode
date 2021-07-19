@@ -494,7 +494,7 @@ class sums_from_file(object):
             self._norm = self._get('sum_nevents_total')
         return self._norm
 
-    def norm_weight(weight_name):
+    def norm_weight(self, weight_name):
         return self._get(weight_name)
 
     def yearcode(self):
