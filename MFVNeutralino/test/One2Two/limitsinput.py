@@ -227,7 +227,7 @@ def sig_uncert_pdf(name_year):
 
     return p
 
-def sig_uncert_scale(name_year):
+def sig_uncert_alphas(name_year):
     name, year = name_year.rsplit('_',1)
     kind, tau, mass = name2details(name)
     tau = int(tau*1000) # back to um
@@ -467,9 +467,9 @@ def sig_datamcSF_2017p8(name_year, debug=False):
 
 def sig_uncert_2017p8(name_year, debug=False):
     vtm = (1 / sig_datamcSF_2017p8(name_year, debug))**2 - 1
-    uncerts = [vtm] 
+    uncerts = [vtm]
     uncerts += [sig_uncert_pdf(name_year)]
-    uncerts += [sig_uncert_scale(name_year)]
+    uncerts += [sig_uncert_alphas(name_year)]
 
     if 'mfv_neu' in name_year:
         for unc in ('_stat_unc', '_toc_unc', '_closeseedtk_unc'):
