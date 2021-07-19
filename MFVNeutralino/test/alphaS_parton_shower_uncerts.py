@@ -94,17 +94,15 @@ def analyze(plots=False):
         else :
             print "invalid range!!!!!!!!!!!!!!!!!"
 
-
-    to_pickle(ss, 'scaleuncerts.gzpickle')
+    to_pickle(ss, 'alphaS_parton_shower_uncerts.gzpickle')
 
 def plot():
     set_style()
-    ps = plot_saver(plot_dir('scaleuncerts_decorrelated_processes_%s' % year), size=(600,600), log=False)
-    #ps = plot_saver(plot_dir('scaleuncerts_simple_up_dn_2x_%s' % year), size=(600,600), log=False)
+    ps = plot_saver(plot_dir('alphaS_parton_shower_uncerts_decorrelated_processes_%s' % year), size=(600,600), log=False)
     ps.c.SetLeftMargin(0.11)
 
     samples = defaultdict(list)
-    for s in from_pickle('scaleuncerts.gzpickle'):
+    for s in from_pickle('alphaS_parton_shower_uncerts.gzpickle'):
         tau = int(s.name.split('tau')[1].split('um')[0])
         samples[tau].append(s)
     
