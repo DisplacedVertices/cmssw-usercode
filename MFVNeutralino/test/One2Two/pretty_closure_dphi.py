@@ -4,7 +4,7 @@ from statmodel import ebins
 ROOT.TH1.AddDirectory(0)
 
 set_style()
-ps = plot_saver(plot_dir('pretty_closure_dphi_fixed_ytitleoffset'), size=(700,700), log=False, pdf=True)
+ps = plot_saver(plot_dir('pretty_closure_dphi_supplementary'), size=(700,700), log=False, pdf=True)
 
 ps.c.SetBottomMargin(0.11)
 ps.c.SetLeftMargin(0.13)
@@ -117,7 +117,7 @@ for i in range(4):
     hh.SetMarkerSize(1.3)
     hh.Draw('PE')
 
-    write(42, 0.040, 0.2, 0.750, names[i])
+    write(42, 0.040, 0.16, 0.750, names[i])
 
     xoffset = -0.06
     l1 = ROOT.TLegend(0.60+xoffset, 0.725, 1.04+xoffset, 0.865)
@@ -135,7 +135,8 @@ for i in range(4):
     l2.SetFillStyle(0)
     l2.Draw()
 
-    write(61, 0.050, 0.2, 0.81, 'CMS')
+    write(61, 0.050, 0.16, 0.81, 'CMS')
+    write(52, 0.047, 0.27, 0.81, 'Supplementary')
     write(42, 0.050, 0.595, 0.913, '101 fb^{-1} (13 TeV)')
 
     outfn = 'closure_dphi_%s' % ntk[i]
