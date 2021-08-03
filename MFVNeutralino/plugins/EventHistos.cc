@@ -105,6 +105,8 @@ class MFVEventHistos : public edm::EDAnalyzer {
 
   TH1F* h_met;
   TH1F* h_metphi;
+  TH1F* h_metnomu;
+  TH1F* h_metnomuphi;
 
   TH1F* h_nbtags[3];
   TH2F* h_nbtags_v_bquark_code[3];
@@ -281,6 +283,8 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
 
   h_met = fs->make<TH1F>("h_met", ";MET (GeV);events/5 GeV", 500, 0, 2500);
   h_metphi = fs->make<TH1F>("h_metphi", ";MET #phi (rad);events/.063", 100, -3.1416, 3.1416);
+  h_metnomu = fs->make<TH1F>("h_metnomu", ";METNoMu (GeV);events/5 GeV", 500, 0, 2500);
+  h_metnomuphi = fs->make<TH1F>("h_metnomuphi", ";METNoMu #phi (rad);events/.063", 100, -3.1416, 3.1416);
 
   const char* lmt_ex[3] = {"loose", "medium", "tight"};
   const char* lep_kind[2] = {"muon", "electron"};
@@ -533,6 +537,8 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   h_met->Fill(mevent->met(), w);
   h_metphi->Fill(mevent->metphi(), w);
+  h_metnomu->Fill(mevent->metNoMu(), w);
+  h_metnomuphi->Fill(mevent->metNoMuphi(), w);
 
   for (int i = 0; i < 3; ++i) {
     h_nbtags[i]->Fill(mevent->nbtags(i), w);

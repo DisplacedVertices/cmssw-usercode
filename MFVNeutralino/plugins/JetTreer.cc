@@ -30,7 +30,10 @@ struct eventInfo
   double metnomu_pt;
   double metnomu_phi;
   int nsv;
+  int nbtag_jet;
   int vtx_ntk;
+  std::vector <float> vtx_eta_tkonly;
+  std::vector <float> vtx_phi_tkonly;
   double vtx_dBV;
   double vtx_dBVerr;
   double vtx_mass_track;
@@ -49,6 +52,13 @@ struct eventInfo
   std::vector <double> jet_eta;
   std::vector <double> jet_phi;
   std::vector <double> jet_energy;
+  std::vector <size_t> jet_ntrack;
+  std::vector <bool> jet_btag;
+  std::vector <int> jet_flavor;
+  int n_gen_bquarks;
+  std::vector <double> gen_bquarks_pt;
+  std::vector <double> gen_bquarks_eta;
+  std::vector <double> gen_bquarks_phi;
   std::vector <double> tk_pt;
   std::vector <double> tk_eta;
   std::vector <double> tk_phi;
@@ -160,12 +170,23 @@ void MFVJetTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   evInfo->evt = n_evt;
   evInfo->weight = w;
   evInfo->nsv = nsv;
+  evInfo->nbtag_jet = mevent->nbtags(2);
+
+  evInfo->n_gen_bquarks = mevent->gen_bquarks.size();
+  for (auto ib:mevent->gen_bquarks){
+    evInfo->gen_bquarks_pt.push_back(ib.Pt());
+    evInfo->gen_bquarks_eta.push_back(ib.Eta());
+    evInfo->gen_bquarks_phi.push_back(ib.Phi());
+  }
 
   for (int ij=0; ij<mevent->njets(); ij++){
     evInfo->jet_pt.push_back(mevent->jet_pt[ij]);
     evInfo->jet_eta.push_back(mevent->jet_eta[ij]);
     evInfo->jet_phi.push_back(mevent->jet_phi[ij]);
     evInfo->jet_energy.push_back(mevent->jet_energy[ij]);
+    evInfo->jet_ntrack.push_back(mevent->n_jet_tracks(ij));
+    evInfo->jet_btag.push_back(mevent->is_btagged(ij, 2)); //tight b tag
+    evInfo->jet_flavor.push_back(mevent->jet_id[ij] >> 4);
   }
 
   evInfo->met_pt = mevent->met();
@@ -190,6 +211,8 @@ void MFVJetTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_events->Fill(best_SV_idx);
   const MFVVertexAux& aux = auxes->at(best_SV_idx);
   evInfo->vtx_ntk = aux.ntracks();
+  evInfo->vtx_eta_tkonly.push_back(aux.eta[mfv::PTracksOnly]);
+  evInfo->vtx_phi_tkonly.push_back(aux.phi[mfv::PTracksOnly]);
   evInfo->vtx_dBV = aux.bs2ddist;
   evInfo->vtx_dBVerr = aux.bs2derr;
   evInfo->vtx_mass_track = aux.mass[mfv::PTracksOnly];
@@ -289,7 +312,10 @@ MFVJetTreer::beginJob()
   eventTree->Branch( "metnomu_pt",           &evInfo->metnomu_pt);
   eventTree->Branch( "metnomu_phi",          &evInfo->metnomu_phi);
   eventTree->Branch( "nsv",                  &evInfo->nsv);
+  eventTree->Branch( "nbtag_jet",            &evInfo->nbtag_jet);
   eventTree->Branch( "vtx_ntk",              &evInfo->vtx_ntk);
+  eventTree->Branch( "vtx_eta_tkonly",       &evInfo->vtx_eta_tkonly);
+  eventTree->Branch( "vtx_phi_tkonly",       &evInfo->vtx_phi_tkonly);
   eventTree->Branch( "vtx_dBV",              &evInfo->vtx_dBV);
   eventTree->Branch( "vtx_dBVerr",           &evInfo->vtx_dBVerr);
   eventTree->Branch( "vtx_mass_track",       &evInfo->vtx_mass_track);
@@ -308,6 +334,13 @@ MFVJetTreer::beginJob()
   eventTree->Branch( "jet_eta",              &evInfo->jet_eta);
   eventTree->Branch( "jet_phi",              &evInfo->jet_phi);
   eventTree->Branch( "jet_energy",           &evInfo->jet_energy);
+  eventTree->Branch( "jet_ntrack",           &evInfo->jet_ntrack);
+  eventTree->Branch( "jet_btag",             &evInfo->jet_btag);
+  eventTree->Branch( "jet_flavor",           &evInfo->jet_flavor);
+  eventTree->Branch( "n_gen_bquarks",        &evInfo->n_gen_bquarks);
+  eventTree->Branch( "gen_bquarks_pt",       &evInfo->gen_bquarks_pt);
+  eventTree->Branch( "gen_bquarks_eta",      &evInfo->gen_bquarks_eta);
+  eventTree->Branch( "gen_bquarks_phi",      &evInfo->gen_bquarks_phi);
   eventTree->Branch( "tk_pt",                &evInfo->tk_pt);
   eventTree->Branch( "tk_eta",               &evInfo->tk_eta);
   eventTree->Branch( "tk_phi",               &evInfo->tk_phi);
@@ -334,7 +367,10 @@ void MFVJetTreer::initEventStructure()
   evInfo->metnomu_pt=-1;
   evInfo->metnomu_phi=-1;
   evInfo->nsv=-1;
+  evInfo->nbtag_jet=-1;
   evInfo->vtx_ntk=-1;
+  evInfo->vtx_eta_tkonly.clear();
+  evInfo->vtx_phi_tkonly.clear();
   evInfo->vtx_dBV=-1;
   evInfo->vtx_dBVerr=-1;
   evInfo->vtx_mass_track=-1;
@@ -353,6 +389,13 @@ void MFVJetTreer::initEventStructure()
   evInfo->jet_eta.clear();
   evInfo->jet_phi.clear();
   evInfo->jet_energy.clear();
+  evInfo->jet_ntrack.clear();
+  evInfo->jet_btag.clear();
+  evInfo->jet_flavor.clear();
+  evInfo->n_gen_bquarks = -1;
+  evInfo->gen_bquarks_pt.clear();
+  evInfo->gen_bquarks_eta.clear();
+  evInfo->gen_bquarks_phi.clear();
   evInfo->tk_pt.clear();
   evInfo->tk_eta.clear();
   evInfo->tk_phi.clear();

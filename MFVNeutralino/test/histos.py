@@ -3,9 +3,9 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 is_mc = True # for blinding
 
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_MET_triggers
-sample_files(process, 'ttbar_2017' if is_mc else 'JetHT2017B', dataset, 1)
+#sample_files(process, 'ttbar_2017' if is_mc else 'JetHT2017B', dataset, 1)
 #sample_files(process, 'mfv_neu_tau001000um_M0800_2017' if is_mc else 'JetHT2017B', dataset, 10)
-#sample_files(process, 'mfv_splitSUSY_tau000001000um_M2000_1800_2017' if is_mc else 'JetHT2017B', dataset, -1)
+sample_files(process, 'mfv_splitSUSY_tau000001000um_M2000_1800_2017' if is_mc else 'JetHT2017B', dataset, 10)
 #input_files(process,[
 #                    '/uscms/home/ali/nobackup/LLP/CornellCode/mfv_946p1/src/JMTucker/MFVNeutralino/test/TestRuns/ntuple.root'
 #            ])
@@ -49,6 +49,12 @@ process.mfvAnalysisCutsExtraLooseOnlyOneVtx = process.mfvAnalysisCuts.clone(vert
 process.mfvVertexHistosExtraLooseOnlyOneVtx = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesExtraLoose')
 process.pEventExtraLooseOnlyOneVtx = cms.Path(common * process.mfvAnalysisCutsExtraLooseOnlyOneVtx * process.mfvEventHistosExtraLooseOnlyOneVtx)
 process.pExtraLooseOnlyOneVtx = cms.Path(common * process.mfvAnalysisCutsExtraLooseOnlyOneVtx * process.mfvVertexHistosExtraLooseOnlyOneVtx)
+
+process.mfvEventHistosMLregionAB = process.mfvEventHistos.clone()
+process.mfvAnalysisCutsMLregionAB = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesTightNoDBS', min_nvertex = 1)
+process.mfvVertexHistosMLregionAB = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesTightNoDBS')
+process.pEventMLregionAB = cms.Path(common * process.mfvAnalysisCutsMLregionAB * process.mfvEventHistosMLregionAB)
+process.pMLregionAB = cms.Path(common * process.mfvAnalysisCutsMLregionAB * process.mfvVertexHistosMLregionAB)
 
 #A events with at least 1 Tight SV and pass MET trigger and cut
 process.mfvEventHistosMETCutTightVtx = process.mfvEventHistos.clone()
@@ -193,7 +199,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
 
-    cs = CondorSubmitter('Histos_dbverrcut_' + version,
+    cs = CondorSubmitter('Histos' + version,
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,

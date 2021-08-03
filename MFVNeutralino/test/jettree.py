@@ -3,12 +3,13 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 is_mc = True # for blinding
 
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_MET_triggers
-#sample_files(process, 'qcdht2000_2017' if is_mc else 'JetHT2017B', dataset, 1)
+#sample_files(process, 'ttbarht0600_2017' if is_mc else 'JetHT2017B', dataset, 1)
+#sample_files(process, 'ttbarht0600_2017' if is_mc else 'JetHT2017B', dataset, 1)
 #sample_files(process, 'mfv_neu_tau010000um_M0800_2017' if is_mc else 'JetHT2017B', dataset, 10)
-#sample_files(process, 'mfv_splitSUSY_tau000001000um_M2000_1800_2017' if is_mc else 'JetHT2017B', dataset, 10)
-input_files(process,[
-                    '/uscms/home/ali/nobackup/LLP/CornellCode/mfv_9417/src/JMTucker/MFVNeutralino/test/TestRun/ntuple.root'
-            ])
+sample_files(process, 'mfv_splitSUSY_tau000001000um_M2000_1800_2017' if is_mc else 'JetHT2017B', dataset, 10)
+#input_files(process,[
+#                    '/uscms/home/ali/nobackup/LLP/CornellCode/mfv_9417/src/JMTucker/MFVNeutralino/test/TestRun/ntuple.root'
+#            ])
 tfileservice(process, 'jettree.root')
 cmssw_from_argv(process)
 
@@ -38,7 +39,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     elif use_MET_triggers :
         #samples = pick_samples(dataset, qcd=True, ttbar=True, all_signal=True, data=False, leptonic=True, bjet=True, splitSUSY=True, Zvv=True)
         #samples = pick_samples(dataset, qcd=False, ttbar=False, all_signal=False, data=False, leptonic=False, bjet=False, splitSUSY=False, Zvv=False, span_signal=True)
-        samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, leptonic=False, bjet=False, splitSUSY=True, Zvv=True, met=True)
+        samples = pick_samples(dataset, qcd=True, ttbar=True, all_signal=False, data=False, leptonic=False, bjet=False, splitSUSY=True, Zvv=True, met=True)
         #pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), half_mc_modifier())
     else :
         samples = pick_samples(dataset, qcd=True, ttbar=True, all_signal=False, data=False, splitSUSY=True)
@@ -46,7 +47,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
 
-    cs = CondorSubmitter('MLTreeHighMETAllVtx' + version,
+    cs = CondorSubmitter('MLTreeAllVtxBInfo' + version,
                          ex = year,
                          dataset = dataset,
                          stageout_files = 'all',

@@ -5,9 +5,9 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.Tools.Samples import *
 
-useElectron = False
+useElectron = True
 useMETNoMu = False
-version = '2017v16_mu_MET'
+version = '2017v16_ele_MET'
 #version = '2017v11_MET'
 if useMETNoMu:
   version+='NoMu'
@@ -40,7 +40,7 @@ print year, data_period, int_lumi
 
 root_dir = '/uscms/home/ali/nobackup/LLP/crabdir/TrigEff%s' % version
 #root_dir = '/uscms/home/ali/nobackup/LLP/crabdir/TrigEff2017v10_WJets_xycorrMET_METnoMu_v3'
-plot_path = 'TrigEff%s_%s_%s%sERF' % (version, num_dir, year, data_period)
+plot_path = 'TrigEff%s_%s_%s%sincl' % (version, num_dir, year, data_period)
 if zoom:
     plot_path += '_zoom'
 
@@ -83,10 +83,11 @@ for samples in bkg_samples, sig_samples:
 
 kinds = ['']
 #ns = ['h_jet_ht']
-if useMETNoMu:
-  ns = ['h_metpt_nomu']
-else:
-  ns = ['h_metpt']
+ns = ['h_metpt','h_metpt_nomu']
+#if useMETNoMu:
+#  ns = ['h_metpt_nomu']
+#else:
+#  ns = ['h_metpt']
 
 lump_lower = 0.
 #lump_lower = 1200.

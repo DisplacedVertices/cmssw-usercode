@@ -15,17 +15,17 @@ settings.keep_tk = True
 if use_btag_triggers :
     settings.event_filter = 'bjets OR displaced dijet veto HT' # for new trigger studies
 elif use_MET_triggers :
-    settings.event_filter = 'met only'
-    #settings.event_filter = 'met trigger or low met'
+    #settings.event_filter = 'met only'
+    settings.event_filter = 'met trigger or low met'
     #settings.event_filter = False
 else :
     settings.event_filter = 'jets only'
 
 process = ntuple_process(settings)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
-sample_files(process, 'mfv_splitSUSY_tau000001000um_M2000_1800_2017', dataset, 1)
+#sample_files(process, 'mfv_splitSUSY_tau000001000um_M2000_1800_2017', dataset, 1)
 #sample_files(process, 'mfv_neu_tau001000um_M1600_year', dataset, 1)
-#sample_files(process, 'ttbar_year', dataset, 1)
+sample_files(process, 'ttbar_year', dataset, 1)
 #sample_files(process, 'dyjetstollM50_year', dataset, 1)
 
 #input_files(process,[
@@ -72,8 +72,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if use_btag_triggers :
         samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=not settings.run_n_tk_seeds, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used
     elif use_MET_triggers :
-        samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, leptonic=False, bjet=False, splitSUSY=True, Zvv=True, met=True, span_signal=False)
+        #samples = pick_samples(dataset, qcd=True, ttbar=True, all_signal=False, data=False, leptonic=False, bjet=False, splitSUSY=True, Zvv=True, met=True, span_signal=False)
         #samples = pick_samples(dataset, qcd=False, ttbar=False, all_signal=False, data=False, leptonic=False, bjet=False, splitSUSY=True, Zvv=False, span_signal=False)
+        samples = pick_samples(dataset, qcd=False, ttbar=True, all_signal=False, data=False, leptonic=False, bjet=False, splitSUSY=False, Zvv=False, span_signal=False)
     else :
         samples = pick_samples(dataset, qcd=True, ttbar=True, all_signal=False, data=False, leptonic=True, bjet=True, splitSUSY=True, Zvv=True)
         #samples = pick_samples(dataset, all_signal=not settings.run_n_tk_seeds)

@@ -269,14 +269,18 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
 
     if limit_ttbar:
         d = { # get ~400/fb
-            'ttbarht0600_2017':  (20, 726800),
-            'ttbarht0800_2017':  ( 8, 300800),
-            'ttbarht1200_2017':  ( 2,  52500),
-            'ttbarht2500_2017':  ( 1,   1000),
+            #'ttbarht0600_2017':  (20, 726800),
+            #'ttbarht0800_2017':  ( 8, 300800),
+            #'ttbarht1200_2017':  ( 2,  52500),
+            #'ttbarht2500_2017':  ( 1,   1000),
             'ttbarht0600_2018':  (25, 726800),
             'ttbarht0800_2018':  (11, 300800),
             'ttbarht1200_2018':  ( 2,  52500),
             'ttbarht2500_2018':  ( 1,   1000),
+            'ttbarht0600_2017':  (200, 7268000),
+            'ttbarht0800_2017':  ( 80, 3008000),
+            'ttbarht1200_2017':  ( 20,  525000),
+            'ttbarht2500_2017':  ( 10,   10000),
             }
         for sample in samples:
             n = d.get(sample.name)
