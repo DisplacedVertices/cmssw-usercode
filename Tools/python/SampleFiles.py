@@ -128,7 +128,7 @@ __all__ = [
 
 ################################################################################
 
-execfile(cmssw_base('src/JMTucker/Tools/python/enc_SampleFiles.py'))
+#execfile(cmssw_base('src/JMTucker/Tools/python/enc_SampleFiles.py'))
 
 _removed = [
     ]
