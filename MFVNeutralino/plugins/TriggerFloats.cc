@@ -35,7 +35,6 @@ private:
   const edm::EDGetTokenT<edm::TriggerResults> trigger_results_token;
   const edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> trigger_objects_token;
   const edm::EDGetTokenT<edm::TriggerResults> met_filters_token;
-  const edm::EDGetTokenT<bool> ecalBadCalibFilterUpdate_token;
 
   const edm::EDGetTokenT<pat::JetCollection> jets_token;
   const StringCutObjectSelector<pat::Jet> jet_selector;
@@ -57,7 +56,6 @@ MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
     trigger_results_token(consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("trigger_results_src"))),
     trigger_objects_token(consumes<pat::TriggerObjectStandAloneCollection>(cfg.getParameter<edm::InputTag>("trigger_objects_src"))),
     met_filters_token(consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("met_filters_src"))),
-    ecalBadCalibFilterUpdate_token(consumes<bool>(edm::InputTag("ecalBadCalibReducedMINIAODFilter"))),
     jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
     jet_selector(cfg.getParameter<std::string>("jet_cut")),
     met_token(consumes<pat::METCollection>(cfg.getParameter<edm::InputTag>("met_src"))),
@@ -82,7 +80,7 @@ namespace {
 void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) {
   if (prints) std::cout << "TriggerFloats run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
 
-  std::vector<std::string> metfilternames = {"Flag_goodVertices", "Flag_globalSuperTightHalo2016Filter", "Flag_HBHENoiseFilter", "Flag_HBHENoiseIsoFilter", "Flag_EcalDeadCellTriggerPrimitiveFilter", "Flag_BadPFMuonFilter", "Flag_eeBadScFilter"};
+  std::vector<std::string> metfilternames = {"Flag_goodVertices", "Flag_globalSuperTightHalo2016Filter", "Flag_HBHENoiseFilter", "Flag_HBHENoiseIsoFilter", "Flag_EcalDeadCellTriggerPrimitiveFilter", "Flag_BadPFMuonFilter", "Flag_BadPFMuonDzFilter", "Flag_eeBadScFilter", "Flag_ecalBadCalibFilter"};
   edm::Handle<edm::TriggerResults> metFilters;
   event.getByToken(met_filters_token, metFilters);
   const edm::TriggerNames &names = event.triggerNames(*metFilters);
@@ -138,10 +136,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
       }
     }
   }
-  edm::Handle<bool> passecalBadCalibFilterUpdate;
-  event.getByToken(ecalBadCalibFilterUpdate_token,passecalBadCalibFilterUpdate);
-  bool _passecalBadCalibFilterUpdate = (*passecalBadCalibFilterUpdate );
-  bool pass_all_metfilters = _passecalBadCalibFilterUpdate;
+  bool pass_all_metfilters = false;
   for (const auto& pf:pass_met_filters){
     pass_all_metfilters = pass_all_metfilters && pf;
   }
@@ -150,7 +145,6 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
     for (const auto& fr:pass_met_filters){
       std::cout << fr << " ";
     }
-    std::cout << _passecalBadCalibFilterUpdate << std::endl;
     std::cout << std::endl;
   }
 
