@@ -70,7 +70,7 @@ def _set_signal_stuff(sample):
     sample.mass = _mass(sample)
     sample.latex = _latex(sample)
     sample.xsec = 1e-3
-    sample.is_private = sample.dataset.startswith('/mfv_')
+    sample.is_private = sample.dataset.startswith('/mfv_') and sample.dataset.endswith('/USER')
     if sample.is_private:
         sample.dbs_inst = 'phys03'
         sample.condor = True
@@ -135,38 +135,20 @@ mfv_splitSUSY_samples_2017 = [
   MCSample('mfv_splitSUSY_tau000010000um_M1400_1200_2017', '/mfv_splitSUSY_tau000010000um_M1400_1200_2017/None/USER', 10000),
   MCSample('mfv_splitSUSY_tau000001000um_M1200_1100_2017', '/mfv_splitSUSY_tau000001000um_M1200_1100_2017/None/USER', 10000),
   MCSample('mfv_splitSUSY_tau000010000um_M1200_1100_2017', '/mfv_splitSUSY_tau000010000um_M1200_1100_2017/None/USER', 10000),
-  MCSample('mfv_splitSUSY_tau000001000um_M1200_1200_2017', '/mfv_splitSUSY_tau000001000um_M1200_1200_2017/None/USER', 10000),
-  MCSample('mfv_splitSUSY_tau000010000um_M1200_1200_2017', '/mfv_splitSUSY_tau000010000um_M1200_1200_2017/None/USER', 10000),
-  MCSample('mfv_splitSUSY_tau000000000um_M2000_1800_2017', '/mfv_splitSUSY_tau000000000um_M2000_1800_2017/None/USER', 10000),
+  MCSample('mfv_splitSUSY_tau000000100um_M2000_1800_2017', '/mfv_splitSUSY_tau000000100um_M2000_1800_2017/None/USER', 10000),
   MCSample('mfv_splitSUSY_tau000000300um_M2000_1800_2017', '/mfv_splitSUSY_tau000000300um_M2000_1800_2017/None/USER', 10000),
-  MCSample('mfv_splitSUSY_tau100000000um_M2000_1800_2017', '/mfv_splitSUSY_tau100000000um_M2000_1800_2017/None/USER', 10000),
-  MCSample('mfv_splitSUSY_tau010000000um_M2000_1800_2017', '/mfv_splitSUSY_tau010000000um_M2000_1800_2017/None/USER', 10000),
-  MCSample('mfv_splitSUSY_tau001000000um_M2000_1800_2017', '/mfv_splitSUSY_tau001000000um_M2000_1800_2017/None/USER', 10000),
-  MCSample('mfv_splitSUSY_tau000100000um_M2000_1800_2017', '/mfv_splitSUSY_tau000100000um_M2000_1800_2017/None/USER', 10000),
   MCSample('mfv_splitSUSY_tau000010000um_M2000_1800_2017', '/mfv_splitSUSY_tau000010000um_M2000_1800_2017/None/USER', 10000),
   MCSample('mfv_splitSUSY_tau000001000um_M2000_1800_2017', '/mfv_splitSUSY_tau000001000um_M2000_1800_2017/None/USER', 10000),
-  MCSample('mfv_splitSUSY_tau000000000um_M2000_1900_2017', '/mfv_splitSUSY_tau000000000um_M2000_1900_2017/None/USER', 10000),
+  MCSample('mfv_splitSUSY_tau000000100um_M2000_1900_2017', '/mfv_splitSUSY_tau000000100um_M2000_1900_2017/None/USER', 10000),
   MCSample('mfv_splitSUSY_tau000000300um_M2000_1900_2017', '/mfv_splitSUSY_tau000000300um_M2000_1900_2017/None/USER', 10000),
-  MCSample('mfv_splitSUSY_tau100000000um_M2000_1900_2017', '/mfv_splitSUSY_tau100000000um_M2000_1900_2017/None/USER', 10000),
-  MCSample('mfv_splitSUSY_tau010000000um_M2000_1900_2017', '/mfv_splitSUSY_tau010000000um_M2000_1900_2017/None/USER', 10000),
-  MCSample('mfv_splitSUSY_tau001000000um_M2000_1900_2017', '/mfv_splitSUSY_tau001000000um_M2000_1900_2017/None/USER', 10000),
-  MCSample('mfv_splitSUSY_tau000100000um_M2000_1900_2017', '/mfv_splitSUSY_tau000100000um_M2000_1900_2017/None/USER', 10000),
   MCSample('mfv_splitSUSY_tau000010000um_M2000_1900_2017', '/mfv_splitSUSY_tau000010000um_M2000_1900_2017/None/USER', 10000),
   MCSample('mfv_splitSUSY_tau000001000um_M2000_1900_2017', '/mfv_splitSUSY_tau000001000um_M2000_1900_2017/None/USER', 10000),
-  MCSample('mfv_splitSUSY_tau000000000um_M2400_100_2017', '/mfv_splitSUSY_tau000000000um_M2400_100_2017/None/USER', 10000),
+  MCSample('mfv_splitSUSY_tau000000100um_M2400_100_2017', '/mfv_splitSUSY_tau000000100um_M2400_100_2017/None/USER', 10000),
   MCSample('mfv_splitSUSY_tau000000300um_M2400_100_2017', '/mfv_splitSUSY_tau000000300um_M2400_100_2017/None/USER', 10000),
-  MCSample('mfv_splitSUSY_tau100000000um_M2400_100_2017', '/mfv_splitSUSY_tau100000000um_M2400_100_2017/None/USER', 10000),
-  MCSample('mfv_splitSUSY_tau010000000um_M2400_100_2017', '/mfv_splitSUSY_tau010000000um_M2400_100_2017/None/USER', 10000),
-  MCSample('mfv_splitSUSY_tau001000000um_M2400_100_2017', '/mfv_splitSUSY_tau001000000um_M2400_100_2017/None/USER', 10000),
-  MCSample('mfv_splitSUSY_tau000100000um_M2400_100_2017', '/mfv_splitSUSY_tau000100000um_M2400_100_2017/None/USER', 10000),
   MCSample('mfv_splitSUSY_tau000010000um_M2400_100_2017', '/mfv_splitSUSY_tau000010000um_M2400_100_2017/None/USER', 10000),
   MCSample('mfv_splitSUSY_tau000001000um_M2400_100_2017', '/mfv_splitSUSY_tau000001000um_M2400_100_2017/None/USER', 10000),
-  MCSample('mfv_splitSUSY_tau000000000um_M2400_2300_2017', '/mfv_splitSUSY_tau000000000um_M2400_2300_2017/None/USER', 10000),
+  MCSample('mfv_splitSUSY_tau000000100um_M2400_2300_2017', '/mfv_splitSUSY_tau000000100um_M2400_2300_2017/None/USER', 10000),
   MCSample('mfv_splitSUSY_tau000000300um_M2400_2300_2017', '/mfv_splitSUSY_tau000000300um_M2400_2300_2017/None/USER', 10000),
-  MCSample('mfv_splitSUSY_tau100000000um_M2400_2300_2017', '/mfv_splitSUSY_tau100000000um_M2400_2300_2017/None/USER', 10000),
-  MCSample('mfv_splitSUSY_tau010000000um_M2400_2300_2017', '/mfv_splitSUSY_tau010000000um_M2400_2300_2017/None/USER', 10000),
-  MCSample('mfv_splitSUSY_tau001000000um_M2400_2300_2017', '/mfv_splitSUSY_tau001000000um_M2400_2300_2017/None/USER', 10000),
-  MCSample('mfv_splitSUSY_tau000100000um_M2400_2300_2017', '/mfv_splitSUSY_tau000100000um_M2400_2300_2017/None/USER', 10000),
   MCSample('mfv_splitSUSY_tau000010000um_M2400_2300_2017', '/mfv_splitSUSY_tau000010000um_M2400_2300_2017/None/USER', 10000),
   MCSample('mfv_splitSUSY_tau000001000um_M2400_2300_2017', '/mfv_splitSUSY_tau000001000um_M2400_2300_2017/None/USER', 10000),
 ]
@@ -325,28 +307,6 @@ for x in __all__:
 
 #span_signal_samples_2017 = [eval('mfv_%s_tau%06ium_M%04i_2017' % (a,b,c)) for a in ('neu','stopdbardbar') for b in (300,1000,10000) for c in (800,1600,3000)]
 span_signal_samples_2017 = [
-  eval('mfv_splitSUSY_tau000000000um_M2000_1800_2017'),
-  eval('mfv_splitSUSY_tau000000000um_M2000_1900_2017'),
-  eval('mfv_splitSUSY_tau000000000um_M2400_100_2017'),
-  eval('mfv_splitSUSY_tau000000000um_M2400_2300_2017'),
-  eval('mfv_splitSUSY_tau000000300um_M2000_1800_2017'),
-  eval('mfv_splitSUSY_tau000000300um_M2000_1900_2017'),
-  eval('mfv_splitSUSY_tau000000300um_M2400_100_2017'),
-  eval('mfv_splitSUSY_tau000000300um_M2400_2300_2017'),
-  eval('mfv_splitSUSY_tau000001000um_M2000_1800_2017'),
-  eval('mfv_splitSUSY_tau000001000um_M2000_1900_2017'),
-  eval('mfv_splitSUSY_tau000001000um_M2400_100_2017'),
-  eval('mfv_splitSUSY_tau000001000um_M2400_2300_2017'),
-  eval('mfv_splitSUSY_tau000010000um_M2000_1800_2017'),
-  eval('mfv_splitSUSY_tau000010000um_M2000_1900_2017'),
-  eval('mfv_splitSUSY_tau000010000um_M2400_100_2017'),
-  eval('mfv_splitSUSY_tau000010000um_M2400_2300_2017'),
-  eval('mfv_splitSUSY_tau000001000um_M1400_1200_2017'),
-  eval('mfv_splitSUSY_tau000001000um_M1200_1200_2017'),
-  eval('mfv_splitSUSY_tau000001000um_M1200_1100_2017'),
-  eval('mfv_splitSUSY_tau000010000um_M1400_1200_2017'),
-  eval('mfv_splitSUSY_tau000010000um_M1200_1200_2017'),
-  eval('mfv_splitSUSY_tau000010000um_M1200_1100_2017'),
 ]
 span_signal_samples_2018 = [eval('mfv_%s_tau%06ium_M%04i_2018' % (a,b,c)) for a in ('neu','stopdbardbar') for b in (300,1000,10000) for c in (800,1600,3000)]
 
@@ -428,46 +388,26 @@ zjetstonunuht2500_2018.add_dataset('miniaod', '/ZJetsToNuNu_HT-2500ToInf_TuneCP5
 #ttbarht1200_2018.add_dataset('miniaod', '/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM', 2779427)
 #ttbarht2500_2018.add_dataset('miniaod', '/TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM',  1451104)
 
-_adbp('miniaod', '/mfv_splitSUSY_tau000001000um_M1400_1200_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau000010000um_M1400_1200_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau000001000um_M1200_1100_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau000010000um_M1200_1100_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau000001000um_M1200_1200_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau000010000um_M1200_1200_2017/None/USER', 10000)
-
-_adbp('miniaod', '/mfv_splitSUSY_tau000000000um_M2000_1800_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau000000300um_M2000_1800_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau100000000um_M2000_1800_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau010000000um_M2000_1800_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau001000000um_M2000_1800_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau000100000um_M2000_1800_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau000010000um_M2000_1800_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau000001000um_M2000_1800_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau000000000um_M2000_1900_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau000000300um_M2000_1900_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau100000000um_M2000_1900_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau010000000um_M2000_1900_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau001000000um_M2000_1900_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau000100000um_M2000_1900_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau000010000um_M2000_1900_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau000001000um_M2000_1900_2017/None/USER', 10000)
-
-_adbp('miniaod', '/mfv_splitSUSY_tau000000000um_M2400_100_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau000000300um_M2400_100_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau100000000um_M2400_100_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau010000000um_M2400_100_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau001000000um_M2400_100_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau000100000um_M2400_100_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau000010000um_M2400_100_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau000001000um_M2400_100_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau000000000um_M2400_2300_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau000000300um_M2400_2300_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau100000000um_M2400_2300_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau010000000um_M2400_2300_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau001000000um_M2400_2300_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau000100000um_M2400_2300_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau000010000um_M2400_2300_2017/None/USER', 10000)
-_adbp('miniaod', '/mfv_splitSUSY_tau000001000um_M2400_2300_2017/None/USER', 10000)
+mfv_splitSUSY_tau000010000um_M1200_1100_2017.add_dataset('miniaod', '/splitSUSY_M1200_1100_ctau10p0_TuneCP2_13TeV_pythia8/lian-RunIISummer20UL17_MiniAOD-e67f9b5d033cede4d000433a2a96d4fb/USER', 10000)
+mfv_splitSUSY_tau000001000um_M1200_1100_2017.add_dataset('miniaod', '/splitSUSY_M1200_1100_ctau1p0_TuneCP2_13TeV_pythia8/lian-RunIISummer20UL17_MiniAOD-e67f9b5d033cede4d000433a2a96d4fb/USER', 10000)
+mfv_splitSUSY_tau000010000um_M1400_1200_2017.add_dataset('miniaod', '/splitSUSY_M1400_1200_ctau10p0_TuneCP2_13TeV_pythia8/lian-RunIISummer20UL17_MiniAOD-e67f9b5d033cede4d000433a2a96d4fb/USER', 10000)
+mfv_splitSUSY_tau000001000um_M1400_1200_2017.add_dataset('miniaod', '/splitSUSY_M1400_1200_ctau1p0_TuneCP2_13TeV_pythia8/lian-RunIISummer20UL17_MiniAOD-e67f9b5d033cede4d000433a2a96d4fb/USER', 10000)
+mfv_splitSUSY_tau000000100um_M2000_1800_2017.add_dataset('miniaod', '/splitSUSY_M2000_1800_ctau0p1_TuneCP2_13TeV_pythia8/lian-RunIISummer20UL17_MiniAOD-e67f9b5d033cede4d000433a2a96d4fb/USER', 10000)
+mfv_splitSUSY_tau000000300um_M2000_1800_2017.add_dataset('miniaod', '/splitSUSY_M2000_1800_ctau0p3_TuneCP2_13TeV_pythia8/lian-RunIISummer20UL17_MiniAOD-e67f9b5d033cede4d000433a2a96d4fb/USER', 10000)
+mfv_splitSUSY_tau000010000um_M2000_1800_2017.add_dataset('miniaod', '/splitSUSY_M2000_1800_ctau10p0_TuneCP2_13TeV_pythia8/lian-RunIISummer20UL17_MiniAOD-e67f9b5d033cede4d000433a2a96d4fb/USER', 10000)
+mfv_splitSUSY_tau000001000um_M2000_1800_2017.add_dataset('miniaod', '/splitSUSY_M2000_1800_ctau1p0_TuneCP2_13TeV_pythia8/lian-RunIISummer20UL17_MiniAOD-e67f9b5d033cede4d000433a2a96d4fb/USER', 10000)
+mfv_splitSUSY_tau000000100um_M2000_1900_2017.add_dataset('miniaod', '/splitSUSY_M2000_1900_ctau0p1_TuneCP2_13TeV_pythia8/lian-RunIISummer20UL17_MiniAOD-e67f9b5d033cede4d000433a2a96d4fb/USER', 10000)
+mfv_splitSUSY_tau000000300um_M2000_1900_2017.add_dataset('miniaod', '/splitSUSY_M2000_1900_ctau0p3_TuneCP2_13TeV_pythia8/lian-RunIISummer20UL17_MiniAOD-e67f9b5d033cede4d000433a2a96d4fb/USER', 10000)
+mfv_splitSUSY_tau000010000um_M2000_1900_2017.add_dataset('miniaod', '/splitSUSY_M2000_1900_ctau10p0_TuneCP2_13TeV_pythia8/lian-RunIISummer20UL17_MiniAOD-e67f9b5d033cede4d000433a2a96d4fb/USER', 10000)
+mfv_splitSUSY_tau000001000um_M2000_1900_2017.add_dataset('miniaod', '/splitSUSY_M2000_1900_ctau1p0_TuneCP2_13TeV_pythia8/lian-RunIISummer20UL17_MiniAOD-e67f9b5d033cede4d000433a2a96d4fb/USER', 10000)
+mfv_splitSUSY_tau000000100um_M2400_100_2017.add_dataset('miniaod', '/splitSUSY_M2400_100_ctau0p1_TuneCP2_13TeV_pythia8/lian-RunIISummer20UL17_MiniAOD-e67f9b5d033cede4d000433a2a96d4fb/USER', 10000)
+mfv_splitSUSY_tau000000300um_M2400_100_2017.add_dataset('miniaod', '/splitSUSY_M2400_100_ctau0p3_TuneCP2_13TeV_pythia8/lian-RunIISummer20UL17_MiniAOD-e67f9b5d033cede4d000433a2a96d4fb/USER', 10000)
+mfv_splitSUSY_tau000010000um_M2400_100_2017.add_dataset('miniaod', '/splitSUSY_M2400_100_ctau10p0_TuneCP2_13TeV_pythia8/lian-RunIISummer20UL17_MiniAOD-e67f9b5d033cede4d000433a2a96d4fb/USER', 10000)
+mfv_splitSUSY_tau000001000um_M2400_100_2017.add_dataset('miniaod', '/splitSUSY_M2400_100_ctau1p0_TuneCP2_13TeV_pythia8/lian-RunIISummer20UL17_MiniAOD-e67f9b5d033cede4d000433a2a96d4fb/USER', 10000)
+mfv_splitSUSY_tau000000100um_M2400_2300_2017.add_dataset('miniaod', '/splitSUSY_M2400_2300_ctau0p1_TuneCP2_13TeV_pythia8/lian-RunIISummer20UL17_MiniAOD-e67f9b5d033cede4d000433a2a96d4fb/USER', 10000)
+mfv_splitSUSY_tau000000300um_M2400_2300_2017.add_dataset('miniaod', '/splitSUSY_M2400_2300_ctau0p3_TuneCP2_13TeV_pythia8/lian-RunIISummer20UL17_MiniAOD-e67f9b5d033cede4d000433a2a96d4fb/USER', 10000)
+mfv_splitSUSY_tau000010000um_M2400_2300_2017.add_dataset('miniaod', '/splitSUSY_M2400_2300_ctau10p0_TuneCP2_13TeV_pythia8/lian-RunIISummer20UL17_MiniAOD-e67f9b5d033cede4d000433a2a96d4fb/USER', 10000)
+mfv_splitSUSY_tau000001000um_M2400_2300_2017.add_dataset('miniaod', '/splitSUSY_M2400_2300_ctau1p0_TuneCP2_13TeV_pythia8/lian-RunIISummer20UL17_MiniAOD-e67f9b5d033cede4d000433a2a96d4fb/USER', 10000)
 
 
 ########
