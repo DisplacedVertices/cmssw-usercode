@@ -9,10 +9,10 @@ settings = CMSSWSettings()
 settings.is_mc = True
 settings.cross = '' # 2017to2018' # 2017to2017p8'
 
-version = '2017v16_ele_MET'
+version = '2017ULv0_ele_MET'
 
 mu_thresh_hlt = 27
-mu_thresh_offline = 5
+mu_thresh_offline = 35
 ele_thresh_hlt = 35
 ele_thresh_offline = 38
 weight_l1ecal = ''
@@ -23,18 +23,11 @@ global_tag(process, which_global_tag(settings))
 #report_every(process, 1)
 max_events(process, -1)
 dataset = 'miniaod'
-sample_files(process, 'wjetstolnu_2017', dataset, 1)
-#sample_files(process, 'ttbar_2017', dataset, 10)
-#input_files(process,[
-#                    '/store/data/Run2017B/SingleElectron/MINIAOD/31Mar2018-v1/60000/46D12260-9E37-E811-846B-008CFAC93ED0.root',
-#                    '/store/data/Run2017B/SingleElectron/MINIAOD/31Mar2018-v1/60000/EE670599-9E37-E811-853E-008CFAE453D4.root',
-#            ])
+#sample_files(process, 'wjetstolnu_2017', dataset, 1)
+input_files(process,[
+                    '/store/mc/RunIISummer20UL17MiniAOD/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v1/260000/07B5521B-4BD8-CF46-B11D-E220B439B5C1.root',
+            ])
 
-from RecoEgamma.EgammaTools.EgammaPostRecoTools import setupEgammaPostRecoSeq
-setupEgammaPostRecoSeq(process,
-                       runVID=True, #saves CPU time by not needlessly re-running VID, if you want the Fall17V2 IDs, set this to True or remove (default is True)
-                       era='2017-Nov17ReReco')  
-#a sequence egammaPostRecoSeq has now been created and should be added to your path, eg process.p=cms.Path(process.egammaPostRecoSeq)
 process.load('JMTucker.Tools.MCStatProducer_cff')
 process.load('JMTucker.Tools.UpdatedJets_cff')
 process.load('JMTucker.Tools.WeightProducer_cfi')
@@ -65,7 +58,7 @@ if weight_l1ecal and settings.is_mc and settings.year == 2017 and settings.cross
         process.weightSeq.insert(0, process.prefiringweight * process.jmtWeightMiniAODL1Ecal)
     else:
         w = process.jmtWeightMiniAOD
-    which = 'NonPrefiringProb'
+    which = 'nonPrefiringProb'
     if 'up' in weight_l1ecal:
         which += 'Up'
     elif 'down' in weight_l1ecal:
@@ -78,26 +71,7 @@ runMetCorAndUncFromMiniAOD(process,
                            isData = not settings.is_mc,
                            )
 
-process.load('RecoMET.METFilters.ecalBadCalibFilter_cfi')
-
-baddetEcallist = cms.vuint32(
-    [872439604,872422825,872420274,872423218,872423215,872416066,872435036,872439336,
-    872420273,872436907,872420147,872439731,872436657,872420397,872439732,872439339,
-    872439603,872422436,872439861,872437051,872437052,872420649,872421950,872437185,
-    872422564,872421566,872421695,872421955,872421567,872437184,872421951,872421694,
-    872437056,872437057,872437313,872438182,872438951,872439990,872439864,872439609,
-    872437181,872437182,872437053,872436794,872436667,872436536,872421541,872421413,
-    872421414,872421031,872423083,872421439])
-
-process.ecalBadCalibReducedMINIAODFilter = cms.EDFilter(
-    "EcalBadCalibFilter",
-    EcalRecHitSource = cms.InputTag("reducedEgamma:reducedEERecHits"),
-    ecalMinEt        = cms.double(50.),
-    baddetEcal    = baddetEcallist, 
-    taggingMode = cms.bool(True),
-    debug = cms.bool(False)
-    )
-
+process.load('JMTucker.Tools.METBadPFMuonDzFilter_cfi')
 process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
                              use_jetpt_weights = cms.int32(0),
                              require_hlt = cms.int32(-1),
@@ -123,8 +97,7 @@ process.den = cms.EDAnalyzer('MFVTriggerEfficiency',
 process.denht1000 = process.den.clone(require_ht = 1000)
 process.denjet6pt75 = process.den.clone(require_6thjetpt = 75)
 process.denht1000jet6pt75 = process.den.clone(require_ht = 1000, require_6thjetpt = 75)
-#process.p = cms.Path(process.weightSeq * process.mutrig * process.updatedJetsSeqMiniAOD * process.selectedPatJets * process.mfvTriggerFloats * process.den * process.denht1000 * process.denjet6pt75 * process.denht1000jet6pt75)
-process.p = cms.Path(process.egammaPostRecoSeq * process.ecalBadCalibReducedMINIAODFilter * process.weightSeq * process.eletrig * process.updatedJetsSeqMiniAOD * process.fullPatMetSequence * process.selectedPatJets * process.mfvTriggerFloats * process.den)
+process.p = cms.Path(process.weightSeq * process.eletrig * process.updatedJetsSeqMiniAOD * process.BadPFMuonFilterUpdateDz * process.fullPatMetSequence * process.selectedPatJets * process.mfvTriggerFloats * process.den)
 
 #process.dennomu = process.den.clone(require_muon = False)
 #process.dennomuht1000 = process.den.clone(require_muon = False, require_ht = 1000)
@@ -152,14 +125,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
     if year == 2017:
-        #samples = [Samples.met_samples_2017[0]]
-        #samples = Samples.auxiliary_data_samples_2017 + Samples.leptonic_samples_2017 + Samples.met_samples_2017[0:2] + [Samples.met_samples_2017[-1]]
-        samples = Samples.singleelectron_data_samples_2017 + Samples.leptonic_samples_2017 + Samples.met_samples_2017[0:2] + [Samples.met_samples_2017[-1]]
+        samples = Samples.singleelectron_data_samples_2017 + Samples.leptonic_samples_2017 + Samples.met_samples_2017
         samples += Samples.mfv_splitSUSY_samples_2017
-        #masses = (400, 800, 1200, 1600)
-        #samples += [getattr(Samples, 'mfv_neu_tau001000um_M%04i_2017' % m) for m in masses] + [Samples.mfv_neu_tau010000um_M0800_2017]
     elif year == 2018:
-        samples = Samples.auxiliary_data_samples_2018
+        samples = Samples.egamma_data_samples_2018 + Samples.leptonic_samples_2018 + Samples.met_samples_2018
     
     samples = [s for s in samples if s.has_dataset(dataset) and (s.is_mc or not settings.cross)]
     set_splitting(samples, dataset, 'default', json_path('ana_2017p8.json'), 5)
