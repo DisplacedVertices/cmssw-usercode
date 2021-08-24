@@ -232,10 +232,10 @@ auxiliary_data_samples_2017 = [
 
 singleelectron_data_samples_2017 = [
     DataSample('SingleElectron2017B', '/SingleElectron/Run2017B-09Aug2019_UL2017-v1/AOD'),
-    DataSample('SingleElectron2017C', '/SingleElectron/Run2017B-09Aug2019_UL2017-v1/AOD'),
-    DataSample('SingleElectron2017D', '/SingleElectron/Run2017B-09Aug2019_UL2017-v1/AOD'),
-    DataSample('SingleElectron2017E', '/SingleElectron/Run2017B-09Aug2019_UL2017-v1/AOD'),
-    DataSample('SingleElectron2017F', '/SingleElectron/Run2017B-09Aug2019_UL2017_rsb-v2/AOD'),
+    DataSample('SingleElectron2017C', '/SingleElectron/Run2017C-09Aug2019_UL2017-v1/AOD'),
+    DataSample('SingleElectron2017D', '/SingleElectron/Run2017D-09Aug2019_UL2017-v1/AOD'),
+    DataSample('SingleElectron2017E', '/SingleElectron/Run2017E-09Aug2019_UL2017-v1/AOD'),
+    DataSample('SingleElectron2017F', '/SingleElectron/Run2017F-09Aug2019_UL2017_rsb-v2/AOD'),
 ]
 
 data_samples_2018 = [
@@ -434,13 +434,16 @@ for s in registry.all():
 ########
 
 condorable = {
+    "T2_DE_DESY": {
+        "miniaod": [EGamma2018D, MET2017E, SingleMuon2017E, MET2018A, MET2018B, SingleMuon2018A, SingleMuon2018B, SingleMuon2018C, SingleMuon2018D, wjetstolnu_2018, dyjetstollM10_2018, dyjetstollM50_2018, ttbar_2018, zjetstonunuht0100_2018, zjetstonunuht0200_2018, zjetstonunuht0400_2018, zjetstonunuht0600_2018, zjetstonunuht0800_2018, zjetstonunuht1200_2018, dyjetstollM10_2017, dyjetstollM50_2017, ttbar_2017, zjetstonunuht0100_2017, zjetstonunuht0200_2017, zjetstonunuht0400_2017, zjetstonunuht0600_2017, zjetstonunuht1200_2017, zjetstonunuht2500_2017, zjetstonunuht0800_2017, qcdht1500_2017, wjetstolnu_2017],
+        },
     "T3_US_FNALLPC": {
         "miniaod": mfv_splitSUSY_samples_2017,
         },
-    "global_redirect" : {
-        "miniaod": qcd_samples_2017 + ttbar_samples_2017 + leptonic_samples_2017 + met_samples_2017 + Zvv_samples_2017 + leptonic_samples_2018 + met_samples_2018 + Zvv_samples_2018 + ttbar_samples_2018 + data_samples_2017 + auxiliary_data_samples_2017 + singleelectron_data_samples_2017 + data_samples_2018 + auxiliary_data_samples_2018 + egamma_data_samples_2018,
+    "T1_US_FNAL_Disk": {
+        "miniaod": [EGamma2018A, EGamma2018B, SingleMuon2017B, SingleMuon2017D, SingleElectron2017B, SingleElectron2017D, SingleElectron2017E, MET2018D, qcdht0300_2018, qcdht0700_2018, qcdht1000_2018, qcdht1500_2018, zjetstonunuht2500_2018, qcdht0200_2017, qcdht0500_2017, qcdht0700_2017, qcdht0300_2017],
         },
-    }
+}
 
 
 _seen = set()
