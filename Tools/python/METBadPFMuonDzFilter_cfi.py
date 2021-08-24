@@ -1,3 +1,4 @@
+import FWCore.ParameterSet.Config as cms
 from RecoMET.METFilters.BadPFMuonDzFilter_cfi import BadPFMuonDzFilter
 
 # MET filter:
