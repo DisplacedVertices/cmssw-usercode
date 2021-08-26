@@ -491,14 +491,14 @@ bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<rec
   //GenParticlePrinter gpp(*gen_particles);
   //gpp.PrintHeader();
 
-  // Find the LSPs (e.g. gluinos or neutralinos). Since this is
+  // Find the LLPs (e.g. gluinos, neutralinos, LL scalar). Since this is
   // PYTHIA8 there are lots of copies -- try to get the ones that
-  // decay to the three quarks.
+  // decay to the correct two quarks.
   int found = 0;
   for (int i = int(gen_particles->size()) - 1; i >= 0 && found < 2; --i) {
     const reco::GenParticle& gen = gen_particles->at(i);
     reco::GenParticleRef ref(gen_particles, i);
-    if (gen.pdgId() != lsp_id || gen.numberOfDaughters() != 2)
+    if (abs(gen.pdgId()) != lsp_id || gen.numberOfDaughters() != 2)
       continue;
     ++found;
 
@@ -519,7 +519,7 @@ bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<rec
     // Get the immediate daughters. 
     if ((h.s[which][0] = gen_ref(daughter_with_id(&gen,  quark, false), gen_particles)).isNull() ||
         (h.s[which][1] = gen_ref(daughter_with_id(&gen, -quark, false), gen_particles)).isNull()) {
-      printf("WEIRD GLUBALL CRAP??? %i %i\n", h.s[which][0].isNull(), h.s[which][1].isNull());
+      //printf("WEIRD GLUBALL CRAP??? %i %i\n", h.s[which][0].isNull(), h.s[which][1].isNull()); // or the wrong quark flavor! should handle msg better here
       return false;
     }
 
@@ -706,6 +706,7 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
       for (int i = 0, ie = int(gen_particles->size()); i < ie; ++i)
         if      (gen_particles->at(i).pdgId() == 1000022) { lsp_id = 1000022; break; }
         else if (gen_particles->at(i).pdgId() == 1000006) { lsp_id = 1000006; break; }
+        else if (gen_particles->at(i).pdgId() == 9000006) { lsp_id = 9000006; break; }
     }
 
     if (debug) printf("MFVGenParticles::analyze: lsp_id %i\n", lsp_id);
