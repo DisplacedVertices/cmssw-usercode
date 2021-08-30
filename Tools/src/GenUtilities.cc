@@ -318,7 +318,8 @@ void print_gen_and_daus(const reco::GenParticleRef c, const char* name, const re
 
 int gen_jet_id(const reco::GenJet& jet) {
   int id = 0;
-  for (const reco::GenParticle* g : jet.getGenConstituents()) {
+  for (unsigned int idx = 0; idx < jet.numberOfDaughters(); ++idx) {
+    const reco::GenParticle* g = dynamic_cast<const reco::GenParticle*>(jet.daughter(idx));
     if (id == 0) {
       if (has_any_ancestor_such_that(g, [](const reco::Candidate* c) { return is_bhadron(c); }))
         id = 5;

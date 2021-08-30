@@ -562,7 +562,6 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     h_npartons_in_acc->Fill(npartons_in_acc);
     h_npartons_60->Fill(npartons_60);
     
-
     if (mci->type() == mfv::mci_MFVtbs) { // || mci->type() == mci_Ttbar) {
       for (int i = 0; i < 2; ++i) {
         fill(Lsps           [i], &*mci->lsp(i));
@@ -610,9 +609,11 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
           else {
             for (const reco::GenJet& jet : *gen_jets) {
               if (reco::deltaR(*lsp_daughters[j], jet) < 0.4) {
-                for (const reco::GenParticle* g : jet.getGenConstituents())
+                for (unsigned int idx = 0; idx < jet.numberOfDaughters(); ++idx) {
+                  const reco::GenParticle* g = dynamic_cast<const reco::GenParticle*>(jet.daughter(idx));
                   if (g->charge())
                     ++lsp_ntracks;
+                }
               }
             }
           }
@@ -724,7 +725,6 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     h_bquarks_dR_dphi->Fill(dphi, dR);
   }
 
-
   int njets = 0;
   int nbjets = 0;
   int njets60 = 0;
@@ -743,10 +743,11 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     int nchg = 0;
     int id = gen_jet_id(jet);
     int ntracksptgt3 = 0;
-    for (const reco::GenParticle* g : jet.getGenConstituents()) {
-      if (g->charge())
+    for (unsigned int idx = 0; idx < jet.numberOfDaughters(); ++idx) {
+      const reco::GenParticle* g = dynamic_cast<const reco::GenParticle*>(jet.daughter(idx));
+      if (g && g->charge())
         ++nchg;
-      if (g->charge() && g->pt() > 3)
+      if (g && g->charge() && g->pt() > 3)
         ++ntracksptgt3;
     }
 

@@ -13,8 +13,8 @@ process.load('JMTucker.MFVNeutralino.GenParticles_cff')
 
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 process.mfvGenHistos = cms.EDAnalyzer('MFVGenHistos',
-                                      gen_src = cms.InputTag('genParticles'),
-                                      gen_jet_src = cms.InputTag('ak4GenJetsNoNu'),
+                                      gen_src = cms.InputTag('prunedGenParticles'),
+                                      gen_jet_src = cms.InputTag('slimmedGenJets'),
                                       gen_vertex_src = cms.InputTag('mfvGenParticles', 'genVertex'),
                                       mci_src = cms.InputTag('mfvGenParticles'),
                                       )
