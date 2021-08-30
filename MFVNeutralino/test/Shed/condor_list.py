@@ -14,6 +14,8 @@ else:
 for ds in dses:
     print colors.bold(ds)
     for sample in Samples.registry.all():
+        equally_good = []
+
         if not sample.has_dataset(ds):
             continue
 
@@ -51,9 +53,11 @@ for ds in dses:
             if is_good_as_possible:
                 for at_site in at_sites:
                     if site['name'] == at_site:
-                        at[site['name']][ds].append(sample.name)
-                        found = True
-            if found:
+                        equally_good.append(at_site)
+
+        for at_site in at_sites : 
+            if at_site in equally_good :
+                at[at_site][ds].append(sample.name)
                 break
         print
 
