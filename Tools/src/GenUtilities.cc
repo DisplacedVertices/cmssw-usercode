@@ -1,4 +1,5 @@
 #include "JMTucker/Tools/interface/GenUtilities.h"
+#include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
 
 double track_qoverp(const reco::Candidate* c) {
   return c->p() > 0 ? c->charge()/c->p() : 1e99;
@@ -319,7 +320,7 @@ void print_gen_and_daus(const reco::GenParticleRef c, const char* name, const re
 int gen_jet_id(const reco::GenJet& jet) {
   int id = 0;
   for (unsigned int idx = 0; idx < jet.numberOfDaughters(); ++idx) {
-    const reco::GenParticle* g = dynamic_cast<const reco::GenParticle*>(jet.daughter(idx));
+    const pat::PackedGenParticle* g = dynamic_cast<const pat::PackedGenParticle*>(jet.daughter(idx));
     if (id == 0) {
       if (has_any_ancestor_such_that(g, [](const reco::Candidate* c) { return is_bhadron(c); }))
         id = 5;

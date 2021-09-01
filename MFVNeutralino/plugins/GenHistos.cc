@@ -3,6 +3,7 @@
 #include "TLorentzVector.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -69,6 +70,10 @@ private:
   TH2F* h_r3d_bhadron_v_bquark;
   TH1F* h_lspbeta;
   TH1F* h_lspbetagamma;
+  TH1F* h_max_deta;
+  TH1F* h_min_deta;
+  TH1F* h_max_dphi;
+  TH1F* h_min_dphi;
   TH1F* h_max_dR;
   TH1F* h_min_dR;
   TH2F* h_max_dR_vs_lspbeta;
@@ -363,6 +368,10 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   h_lspbeta = fs->make<TH1F>("h_lspbeta", ";LSP #beta;Events/0.01", 100, 0, 1);
   h_lspbetagamma = fs->make<TH1F>("h_lspbetagamma", ";LSP #beta#gamma;Events/0.1", 100, 0, 10);
 
+  h_max_dphi = fs->make<TH1F>("h_max_dphi", ";max |#Delta#phi| between partons;Events/0.05", 100, 0, 5);
+  h_min_dphi = fs->make<TH1F>("h_min_dphi", ";min |#Delta#phi| between partons;Events/0.05", 100, 0, 5);
+  h_max_deta = fs->make<TH1F>("h_max_deta", ";max |#Delta#eta| between partons;Events/0.05", 100, 0, 5);
+  h_min_deta = fs->make<TH1F>("h_min_deta", ";min |#Delta#eta| between partons;Events/0.05", 100, 0, 5);
   h_max_dR = fs->make<TH1F>("h_max_dR", ";max #DeltaR between partons;Events/0.05", 100, 0, 5);
   h_min_dR = fs->make<TH1F>("h_min_dR", ";min #DeltaR between partons;Events/0.05", 100, 0, 5);
   h_max_dR_vs_lspbeta = fs->make<TH2F>("h_max_dR_vs_lspbeta", ";LSP #beta;max #DeltaR between partons", 100, 0, 1, 100, 0, 5);
@@ -512,6 +521,11 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
         dz [j] = particles[j]->vz() - z0;
         r2d[j] = mag(dx[j], dy[j]);
         r3d[j] = mag(dx[j], dy[j], dz[j]);
+
+        // don't fill most of the plots for cases w/ two visible particles; the plots assume the visible particles are ordered according to names[9] above.
+        // certainly not true for e.g. H->LLPs, LLP->b bbar. The LLP decay positions are correct, so only fill for j == 0
+        // FIXME consider improving!
+        if (j > 0 && npar == 2) continue;
         h_vtx[j]->Fill(dx[j], dy[j]);
         h_r2d[j]->Fill(r2d[j]);
         h_r3d[j]->Fill(r3d[j]);
@@ -521,11 +535,25 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
       h_ctau->Fill(ctau);
       h_ctaubig->Fill(ctau);
 
+      float min_deta =  1e99;
+      float max_deta = -1e99;
+      float min_dphi =  1e99;
+      float max_dphi = -1e99;
       float min_dR =  1e99;
       float max_dR = -1e99;
       for (int j = 0; j < npar; ++j) {
         for (int k = j+1; k < npar; ++k) {
+          float deta = fabs(particles[j]->eta() - particles[k]->eta());
+          float dphi = fabs(reco::deltaPhi(particles[j]->phi(), particles[k]->phi()));
           float dR = reco::deltaR(*particles[j], *particles[k]);
+          if (deta < min_deta)
+            min_deta = deta;
+          if (deta > max_deta)
+            max_deta = deta;
+          if (dphi < min_dphi)
+            min_dphi = dphi;
+          if (dphi > max_dphi)
+            max_dphi = dphi;
           if (dR < min_dR)
             min_dR = dR;
           if (dR > max_dR)
@@ -533,6 +561,10 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
         }
       }
 
+      h_min_deta->Fill(min_deta);
+      h_max_deta->Fill(max_deta);
+      h_min_dphi->Fill(min_dphi);
+      h_max_dphi->Fill(max_dphi);
       h_min_dR->Fill(min_dR);
       h_max_dR->Fill(max_dR);
       h_min_dR_vs_lspbeta->Fill(lspbeta, min_dR);
@@ -610,7 +642,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
             for (const reco::GenJet& jet : *gen_jets) {
               if (reco::deltaR(*lsp_daughters[j], jet) < 0.4) {
                 for (unsigned int idx = 0; idx < jet.numberOfDaughters(); ++idx) {
-                  const reco::GenParticle* g = dynamic_cast<const reco::GenParticle*>(jet.daughter(idx));
+                  const pat::PackedGenParticle* g = dynamic_cast<const pat::PackedGenParticle*>(jet.daughter(idx));
                   if (g->charge())
                     ++lsp_ntracks;
                 }
@@ -744,7 +776,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     int id = gen_jet_id(jet);
     int ntracksptgt3 = 0;
     for (unsigned int idx = 0; idx < jet.numberOfDaughters(); ++idx) {
-      const reco::GenParticle* g = dynamic_cast<const reco::GenParticle*>(jet.daughter(idx));
+      const pat::PackedGenParticle* g = dynamic_cast<const pat::PackedGenParticle*>(jet.daughter(idx));
       if (g && g->charge())
         ++nchg;
       if (g && g->charge() && g->pt() > 3)
