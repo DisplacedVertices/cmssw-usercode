@@ -119,6 +119,7 @@ private:
   TH1F* h_njets_60;
   TH1F* h_njets_40;
   TH1F* h_njets_30;
+  TH1F* h_njets_20;
   TH1F* h_ht;
   TH1F* h_ht40;
 
@@ -431,6 +432,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   h_njets_60 = fs->make<TH1F>("h_njets_60", ";number of jets with E_{T} > 60 GeV;Events", 20, 0, 20);
   h_njets_40 = fs->make<TH1F>("h_njets_40", ";number of jets with E_{T} > 40 GeV;Events", 20, 0, 20); 
   h_njets_30 = fs->make<TH1F>("h_njets_30", ";number of jets with E_{T} > 30 GeV;Events", 20, 0, 20);
+  h_njets_20 = fs->make<TH1F>("h_njets_20", ";number of jets with E_{T} > 20 GeV;Events", 20, 0, 20);
   h_ht = fs->make<TH1F>("h_ht", ";#SigmaH_{T} of jets with E_{T} > 20 GeV;Events/100 GeV", 100, 0, 2000);
   h_ht40 = fs->make<TH1F>("h_ht40", ";#SigmaH_{T} of jets with E_{T} > 40 GeV;Events/100 GeV", 100, 0, 2000);
 
@@ -781,7 +783,8 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   int nbjets = 0;
   int njets60 = 0;
   int njets40 = 0;
-  int njets30 = 0; 
+  int njets30 = 0;
+  int njets20 = 0; 
   float ht = 0, ht40 = 0;
   for (const reco::GenJet& jet : *gen_jets) {
     if (jet.pt() < 20 || fabs(jet.eta()) > 2.5)
@@ -789,6 +792,8 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 
     ++njets;
     ht += jet.pt();
+    if (jet.pt() > 20)
+      ++njets20;
     if (jet.pt() > 30)
       ++njets30;
     if (jet.pt() > 40){
@@ -841,7 +846,8 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   NBJets->Fill(nbjets);
   h_njets_60->Fill(njets60);
   h_njets_40->Fill(njets40); 
-  h_njets_30->Fill(njets30); 
+  h_njets_30->Fill(njets30);
+  h_njets_20->Fill(njets20); 
   h_ht->Fill(ht);
   h_ht40->Fill(ht40);
 }
