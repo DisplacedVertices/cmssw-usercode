@@ -1,10 +1,10 @@
-#ifndef JMTucker_Tools_Eras_h
-#define JMTucker_Tools_Eras_h
+#ifndef DVCode_Tools_Eras_h
+#define DVCode_Tools_Eras_h
 
 #include <random>
 #include <vector>
 #ifndef JMT_STANDALONE
-#include "JMTucker/Tools/interface/Framework.h"
+#include "DVCode/Tools/interface/Framework.h"
 #endif
 
 namespace jmt {

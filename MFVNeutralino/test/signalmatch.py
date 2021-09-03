@@ -1,13 +1,13 @@
 import sys
-from JMTucker.Tools.BasicAnalyzer_cfg import *
+from DVCode.Tools.BasicAnalyzer_cfg import *
 
 dataset = 'ntuplev16'
 sample_files(process, 'mfv_neu_tau01000um_M0800', dataset, -1)
 process.TFileService.fileName = 'signalmatch.root'
 file_event_from_argv(process)
 
-process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
-process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
+process.load('DVCode.MFVNeutralino.VertexSelector_cfi')
+process.load('DVCode.MFVNeutralino.AnalysisCuts_cfi')
 
 process.mfvAnalysisCuts.apply_vertex_cuts = False
 
@@ -24,12 +24,12 @@ process.p = cms.Path(process.mfvSelectedVerticesSeq * process.mfvAnalysisCuts * 
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    import JMTucker.Tools.Samples as Samples
+    import DVCode.Tools.Samples as Samples
     samples = Samples.mfv_signal_samples + Samples.mfv_ddbar_samples
 
     for sample in samples:
         sample.datasets[dataset].files_per = 1000
 
-    from JMTucker.Tools.CondorSubmitter import CondorSubmitter
+    from DVCode.Tools.CondorSubmitter import CondorSubmitter
     cs = CondorSubmitter('SignalMatch', dataset = dataset)
     cs.submit_all(samples)

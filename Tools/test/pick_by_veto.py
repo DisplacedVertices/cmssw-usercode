@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from JMTucker.Tools.CMSSWTools import *
+from DVCode.Tools.CMSSWTools import *
 process = basic_process('PickByVeto')
 report_every(process, 1000000)
 
@@ -68,8 +68,8 @@ else:
 ####
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.Year import year
-    import JMTucker.Tools.Samples as Samples 
+    from DVCode.Tools.Year import year
+    import DVCode.Tools.Samples as Samples 
     if year == 2015:
         samples = Samples.data_samples_2015 + Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015
     elif year == 2016:
@@ -95,7 +95,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         cfg.JobType.inputFiles = [vetolist_fn(sample)]
         cfg.Data.lumiMask = 'json.%s' % sample.name
 
-    from JMTucker.Tools.MetaSubmitter import *
+    from DVCode.Tools.MetaSubmitter import *
     ms = MetaSubmitter('Pick1VtxV1')
     ms.common.pset_modifier = pset_modifier
     ms.crab.cfg_modifier = cfg_modifier

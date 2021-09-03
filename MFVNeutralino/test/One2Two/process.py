@@ -1,9 +1,9 @@
 import os, sys, re
 from glob import glob
-from JMTucker.Tools import colors
-from JMTucker.Tools.ROOTTools import ROOT, detree
-from JMTucker.Tools.general import bool_from_argv
-from JMTucker.Tools.hadd import hadd
+from DVCode.Tools import colors
+from DVCode.Tools.ROOTTools import ROOT, detree
+from DVCode.Tools.general import bool_from_argv
+from DVCode.Tools.hadd import hadd
 
 def stats(fn_or_f, obs, l, header='sigma_sig_limit'):
     if type(fn_or_f) == file:

@@ -1,5 +1,5 @@
-from JMTucker.Tools.ROOTTools import *
-import JMTucker.MFVNeutralino.AnalysisConstants as ac
+from DVCode.Tools.ROOTTools import *
+import DVCode.MFVNeutralino.AnalysisConstants as ac
 
 year = '2017p8'
 version = 'V23m'

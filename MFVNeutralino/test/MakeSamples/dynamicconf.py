@@ -3,7 +3,7 @@
 import os, inspect, FWCore.ParameterSet.Config as cms
 
 if not os.path.isfile('year.txt'):
-    from JMTucker.Tools.Year import year # this doesn't exist on remote jobs but this should get triggered when testing interactively first
+    from DVCode.Tools.Year import year # this doesn't exist on remote jobs but this should get triggered when testing interactively first
     open('year.txt','wt').write('%s\n' % year)
 
 year = int(open('year.txt').read().strip())

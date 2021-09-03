@@ -1,5 +1,5 @@
-#ifndef JMTucker_MFVNeutralino_interface_EventTools_h
-#define JMTucker_MFVNeutralino_interface_EventTools_h
+#ifndef DVCode_MFVNeutralino_interface_EventTools_h
+#define DVCode_MFVNeutralino_interface_EventTools_h
 
 #include "LHAPDF/LHAPDF.h"
 #include "LHAPDF/Info.h"

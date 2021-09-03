@@ -2,7 +2,7 @@ import sys
 from array import array
 
 def find_binning(fn):
-    from JMTucker.Tools.ROOTTools import ROOT, get_integral
+    from DVCode.Tools.ROOTTools import ROOT, get_integral
 
     f = ROOT.TFile(fn)
     h = f.Get('mfvOverlayHistos/h_dvv_true')

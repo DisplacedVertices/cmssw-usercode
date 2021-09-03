@@ -1,6 +1,6 @@
 import sys
-from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
-from JMTucker.Tools import SampleFiles
+from DVCode.Tools.BasicAnalyzer_cfg import cms, process
+from DVCode.Tools import SampleFiles
 
 raise NotImplementedError('V15 samples have trigger selection already')
 
@@ -10,7 +10,7 @@ process.options.wantSummary = True
 SampleFiles.setup(process, 'MFVNtupleV15', 'qcdht0250', 10000)
 process.TFileService.fileName = 'events_cutplay.root'
 
-from JMTucker.MFVNeutralino.AnalysisCuts_cfi import mfvAnalysisCuts as cuts
+from DVCode.MFVNeutralino.AnalysisCuts_cfi import mfvAnalysisCuts as cuts
 cuts.apply_vertex_cuts = False
 
 process.trignjets = cuts.clone()
@@ -28,18 +28,18 @@ for name in process.filters.keys():
     setattr(process, 'p' + name, cms.Path(getattr(process,name)))
 
 if use_weights:
-    process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
+    process.load('DVCode.MFVNeutralino.WeightProducer_cfi')
 
-import JMTucker.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
+import DVCode.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
 SimpleTriggerEfficiency.setup_endpath(process, weight_src='mfvWeight' if use_weights else '')
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    import JMTucker.Tools.Samples as Samples
+    import DVCode.Tools.Samples as Samples
     samples = Samples.qcd_samples + Samples.ttbar_samples + Samples.mfv_signal_samples + Samples.leptonic_background_samples
 
-    from JMTucker.Tools.CRABSubmitter import CRABSubmitter
-    from JMTucker.Tools.SampleFiles import SampleFiles
+    from DVCode.Tools.CRABSubmitter import CRABSubmitter
+    from DVCode.Tools.SampleFiles import SampleFiles
 
     cs = CRABSubmitter('EventsCutplay',
                        total_number_of_events = 1000000,

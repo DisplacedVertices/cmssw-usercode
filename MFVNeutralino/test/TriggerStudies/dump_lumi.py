@@ -1,4 +1,4 @@
-from JMTucker.Tools.LumiLines import *
+from DVCode.Tools.LumiLines import *
 lls = LumiLines('/uscms/home/tucker/mfvrecipe/lumi.gzpickle')
 f = open('fafa', 'wt')
 s = 0.

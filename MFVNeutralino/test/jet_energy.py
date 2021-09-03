@@ -1,17 +1,17 @@
-from JMTucker.Tools.BasicAnalyzer_cfg import *
+from DVCode.Tools.BasicAnalyzer_cfg import *
 
-from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset
+from DVCode.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset
 dataset+='_genjetenergy'
 sample_files(process, 'mfv_neu_tau001000um_M0600_2017', dataset, 10)
 tfileservice(process, 'jet_energy.root')
 global_tag(process)
 cmssw_from_argv(process)
 
-process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
-process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
-process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
+process.load('DVCode.MFVNeutralino.VertexSelector_cfi')
+process.load('DVCode.MFVNeutralino.AnalysisCuts_cfi')
+process.load('DVCode.MFVNeutralino.WeightProducer_cfi')
 
-import JMTucker.Tools.SimpleTriggerResults_cfi as SimpleTriggerResults
+import DVCode.Tools.SimpleTriggerResults_cfi as SimpleTriggerResults
 SimpleTriggerResults.setup_endpath(process, weight_src='mfvWeight')
 
 process.mfvAnalysisCuts.apply_presel = 0
@@ -31,7 +31,7 @@ process.p = cms.Path(process.mfvSelectedVerticesTight * process.mfvAnalysisCuts 
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.MetaSubmitter import *
+    from DVCode.Tools.MetaSubmitter import *
 
     samples = pick_samples(dataset, all_signal='only')
     set_splitting(samples, dataset, 'histos')

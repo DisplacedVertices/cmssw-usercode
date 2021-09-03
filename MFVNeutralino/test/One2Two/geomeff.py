@@ -1,6 +1,6 @@
 import numpy as np
 from bigsigscan import *
-from JMTucker.Tools.ROOTTools import *
+from DVCode.Tools.ROOTTools import *
 ROOT.TH1.AddDirectory(0)
 
 class costheta_helper:

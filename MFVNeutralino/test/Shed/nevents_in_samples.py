@@ -2,8 +2,8 @@ import sys, os, re, random
 from collections import Counter
 from fnmatch import fnmatch
 from pprint import pprint
-from JMTucker.Tools import eos, SampleFiles
-from JMTucker.Tools.ROOTTools import ROOT
+from DVCode.Tools import eos, SampleFiles
+from DVCode.Tools.ROOTTools import ROOT
 
 if len(sys.argv) < 3:
     sys.exit('usage: %s dataset sample\n  where dataset and sample are as registered in SampleFiles. sample can be "*" to mean all samples having the dataset.' % sys.argv[0])

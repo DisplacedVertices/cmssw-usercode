@@ -3,10 +3,10 @@
 import datetime, optparse, os, sys, time, shutil
 from collections import defaultdict
 from CRABClient.ClientExceptions import ConfigurationException as CRABConfigurationException
-from JMTucker.Tools.CRAB3Tools import *
-from JMTucker.Tools.CondorTools import *
-from JMTucker.Tools.general import print_if_nonempty, touch
-from JMTucker.Tools import colors
+from DVCode.Tools.CRAB3Tools import *
+from DVCode.Tools.CondorTools import *
+from DVCode.Tools.general import print_if_nonempty, touch
+from DVCode.Tools import colors
 
 parser = optparse.OptionParser(usage='%prog [options] <space-separated list of crab dirs>')
 parser.add_option('-v', '--verbose', action='store_true', default=False,

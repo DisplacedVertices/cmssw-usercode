@@ -1,4 +1,4 @@
-from JMTucker.MFVNeutralino.MiniTreeBase import *
+from DVCode.MFVNeutralino.MiniTreeBase import *
 
 ps = plot_saver(plot_dir('ht_nm1'), size=(600,600))
 

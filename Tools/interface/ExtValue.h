@@ -1,5 +1,5 @@
-#ifndef JMTucker_Tools_ExtValue
-#define JMTucker_Tools_ExtValue
+#ifndef DVCode_Tools_ExtValue
+#define DVCode_Tools_ExtValue
 
 #include <limits>
 

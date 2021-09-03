@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 from os.path import join, isfile
-from JMTucker.Tools.ROOTTools import *
-from JMTucker.Tools import Samples
-from JMTucker.MFVNeutralino.PerSignal import PerSignal
+from DVCode.Tools.ROOTTools import *
+from DVCode.Tools import Samples
+from DVCode.MFVNeutralino.PerSignal import PerSignal
 
 titles = 'default', 'mbxsecm5pc', 'mbxsecp5pc'
 paths = ('/uscms_data/d2/tucker/crab_dirs/MiniTreeV23m',

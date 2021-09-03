@@ -1,9 +1,9 @@
 import sys, os
 from array import array
-from JMTucker.Tools.general import typed_from_argv
-from JMTucker.Tools.ROOTTools import *
-from JMTucker.Tools import Samples
-from JMTucker.Tools.Samples import *
+from DVCode.Tools.general import typed_from_argv
+from DVCode.Tools.ROOTTools import *
+from DVCode.Tools import Samples
+from DVCode.Tools.Samples import *
 
 version = '2017p8v4'
 zoom = False #(0.98,1.005)

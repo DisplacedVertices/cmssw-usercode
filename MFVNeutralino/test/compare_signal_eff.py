@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 import os
-from JMTucker.Tools.ROOTTools import *
-from JMTucker.Tools import Samples
-from JMTucker.MFVNeutralino.PerSignal import PerSignal
+from DVCode.Tools.ROOTTools import *
+from DVCode.Tools import Samples
+from DVCode.MFVNeutralino.PerSignal import PerSignal
 
 #mode = 'vary_pileup'
 #mode = 'vary_jes'

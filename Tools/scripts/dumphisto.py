@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys
-from JMTucker.Tools.ROOTTools import ROOT
+from DVCode.Tools.ROOTTools import ROOT
 
 fn = sys.argv[1]
 try:

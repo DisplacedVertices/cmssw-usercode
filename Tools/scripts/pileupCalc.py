@@ -165,7 +165,7 @@ def fillPileupHistogram (lumiInfo, calcOption, hist, minbXsec, Nbins):
 ##############################
 
 if __name__ == '__main__':
-    from JMTucker.Tools import colors
+    from DVCode.Tools import colors
     print colors.boldred('get rid of local pileupCalc.py once typo fixed upstream')
 
     parser = optparse.OptionParser ("Usage: %prog [--options] output.root",

@@ -1,5 +1,5 @@
-#ifndef JMTucker_Tools_TrackRescaler_h
-#define JMTucker_Tools_TrackRescaler_h
+#ifndef DVCode_Tools_TrackRescaler_h
+#define DVCode_Tools_TrackRescaler_h
 
 #ifndef JMT_STANDALONE
 #include "DataFormats/TrackReco/interface/Track.h"

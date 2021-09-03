@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 import sys
-from JMTucker.Tools.CMSSWTools import cmssw_base
-from JMTucker.Tools.CondorSubmitter import CondorSubmitter
+from DVCode.Tools.CMSSWTools import cmssw_base
+from DVCode.Tools.CondorSubmitter import CondorSubmitter
 
 def phadd(batch_name, dataset, samples, output_fn='phadd.root'):
     meat = '''
@@ -24,7 +24,7 @@ fi
                          dataset = dataset,
                          meat = meat,
                          pset_template_fn = '',
-                         input_files = [cmssw_base('src/JMTucker/Tools/scripts/hadd.py')],
+                         input_files = [cmssw_base('src/DVCode/Tools/scripts/hadd.py')],
                          output_files = [output_fn, output_fn + '.haddlog'],
                          stageout_files = 'all',
                          )
@@ -32,8 +32,8 @@ fi
 
 
 if __name__ == '__main__':
-    from JMTucker.Tools import Samples, SampleFiles
-    from JMTucker.Tools.general import int_ceil, typed_from_argv
+    from DVCode.Tools import Samples, SampleFiles
+    from DVCode.Tools.general import int_ceil, typed_from_argv
 
     def usage():
         sys.exit('''usage: phadd.py batch_name dataset <samples list parseable by registry> [nfiles1=1 ...] [output_fn=phadd.root]

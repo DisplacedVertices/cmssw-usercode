@@ -1,6 +1,6 @@
 import random, sys, gzip
 from FWCore.PythonUtilities.LumiList import LumiList
-from JMTucker.Tools.general import intlumi_from_brilcalc_csv
+from DVCode.Tools.general import intlumi_from_brilcalc_csv
 
 def doit(*x):
     print x

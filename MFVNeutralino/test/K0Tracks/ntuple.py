@@ -1,4 +1,4 @@
-from JMTucker.MFVNeutralino.NtupleCommon import *
+from DVCode.MFVNeutralino.NtupleCommon import *
 
 settings = NtupleSettings()
 settings.is_mc = True
@@ -20,12 +20,12 @@ cmssw_from_argv(process)
 
 ####
 
-from JMTucker.Tools.NtupleFiller_cff import jmtNtupleFiller_pset
+from DVCode.Tools.NtupleFiller_cff import jmtNtupleFiller_pset
 
 #process.jmtUnpackedCandidateTracks.debug = debug
 process.jmtUnpackedCandidateTracks.cut_level = 1
 
-from JMTucker.MFVNeutralino.Vertexer_cfi import kvr_params
+from DVCode.MFVNeutralino.Vertexer_cfi import kvr_params
 process.mfvK0s = cms.EDAnalyzer('MFVK0Treer',
                                 jmtNtupleFiller_pset(settings.is_miniaod),
                                 kvr_params = kvr_params,
@@ -37,7 +37,7 @@ ReferencedTagsTaskAdder(process)('p')
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.MetaSubmitter import *
+    from DVCode.Tools.MetaSubmitter import *
 
     samples = pick_samples(dataset, ttbar=False, all_signal=False)
     set_splitting(samples, dataset, 'default', json_path('ana_2017p8.json'), 4)

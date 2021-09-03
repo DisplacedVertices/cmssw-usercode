@@ -5,7 +5,7 @@
 # (there are usually just small tweaks, but good to look at this to confirm)
 
 import imp, tempfile, gzip, os, sys
-from JMTucker.Tools import colors
+from DVCode.Tools import colors
 
 wanted_path = None
 

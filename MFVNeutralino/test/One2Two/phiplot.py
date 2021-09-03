@@ -1,4 +1,4 @@
-from JMTucker.MFVNeutralino.MiniTreeBase import *
+from DVCode.MFVNeutralino.MiniTreeBase import *
 ps = plot_saver('plots/phiplot_zzz', size=(800,800))
 
 bad = [1,3,7,67,177]

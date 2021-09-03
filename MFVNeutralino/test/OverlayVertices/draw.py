@@ -1,7 +1,7 @@
 # for x in $nobackup/overlay/ntk* ; py draw.py $x/merge.root $(basename $x)
 
 import sys, os
-from JMTucker.Tools.ROOTTools import *
+from DVCode.Tools.ROOTTools import *
 from binning import binning
 
 fn = sys.argv[1]

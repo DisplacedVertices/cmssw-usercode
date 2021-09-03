@@ -2,7 +2,7 @@
 
 import gzip, time, sys
 from collections import defaultdict
-from JMTucker.Tools.general import from_pickle, to_pickle
+from DVCode.Tools.general import from_pickle, to_pickle
 from FWCore.PythonUtilities.LumiList import LumiList
 
 class LumiLine:

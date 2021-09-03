@@ -2,7 +2,7 @@ import csv
 from pprint import pprint
 from itertools import izip
 from collections import defaultdict
-from JMTucker.Tools.LumiJSONTools import LumiList
+from DVCode.Tools.LumiJSONTools import LumiList
 
 name, csv_fn, json_fn, hlt_path_base, l1_path_base, l1_thresholds_possible = 'PFHT800_2015', 'PFHT800_2015.txt', '../2015.json', 'HLT_PFHT800_v', 'L1_HTT', lambda x: x == [100, 125, 150, 175] or x == [150, 175]
 name, csv_fn, json_fn, hlt_path_base, l1_path_base, l1_thresholds_possible = 'PFHT800_2016', 'PFHT800_2016.txt', '../2016.json', 'HLT_PFHT800_v', 'L1_HTT', lambda x: x == [160, 200, 220, 240, 255, 270, 280, 300, 320]

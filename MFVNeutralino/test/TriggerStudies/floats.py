@@ -1,6 +1,6 @@
 import sys
-from JMTucker.Tools.BasicAnalyzer_cfg import *
-from JMTucker.Tools.Year import year
+from DVCode.Tools.BasicAnalyzer_cfg import *
+from DVCode.Tools.Year import year
 
 cmssw_settings = CMSSWSettings()
 cmssw_settings.is_mc = True
@@ -17,10 +17,10 @@ input_files(process, {
     (2018,False):'/uscmst1b_scratch/lpc1/3DayLifetime/tucker/itch/store/data/Run2018A/SingleMuon/MINIAOD/06Jun2018-v1/40000/60A09696-AD76-E811-BA6E-E0071B6CAD20.root',
     }[(year, cmssw_settings.is_mc)])
 
-process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
-process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
+process.load('DVCode.MFVNeutralino.TriggerFilter_cfi')
+process.load('DVCode.MFVNeutralino.TriggerFloats_cff')
 
-process.load('JMTucker.Tools.UpdatedJets_cff')
+process.load('DVCode.Tools.UpdatedJets_cff')
 process.mfvTriggerFloats.jets_src = 'updatedJetsMiniAOD'
 process.mfvTriggerFloats.prints = 1
 
@@ -28,8 +28,8 @@ process.p = cms.Path(process.mfvTriggerFilterJetsOnly * process.mfvTriggerFloats
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    import JMTucker.Tools.Samples as Samples 
-    from JMTucker.Tools.MetaSubmitter import *
+    import DVCode.Tools.Samples as Samples 
+    from DVCode.Tools.MetaSubmitter import *
 
     if year == 2017:
         samples = Samples.data_samples_2017

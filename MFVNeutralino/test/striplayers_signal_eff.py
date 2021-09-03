@@ -1,8 +1,8 @@
 import sys, os
 from pprint import pprint
 from collections import defaultdict
-from JMTucker.Tools.Sample import norm_from_file
-from JMTucker.Tools.ROOTTools import *
+from DVCode.Tools.Sample import norm_from_file
+from DVCode.Tools.ROOTTools import *
 set_style()
 ps = plot_saver(plot_dir('stleff'), size=(900,400))
 

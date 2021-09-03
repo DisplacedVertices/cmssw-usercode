@@ -1,7 +1,7 @@
 from pprint import pprint
 import FWCore.ParameterSet.Config as cms
-from JMTucker.Tools.Year import year
-from JMTucker.Tools.general import *
+from DVCode.Tools.Year import year
+from DVCode.Tools.general import *
 
 class CMSSWSettings(object):
     def __init__(self):
@@ -303,11 +303,11 @@ def is_edm_file(fn):
     return os.system('edmFileUtil %s >/dev/null 2>&1' % fn) == 0
 
 def json_path(bn):
-    return os.path.join(os.environ['CMSSW_BASE'], 'src/JMTucker/MFVNeutralino/test/jsons', bn)
+    return os.path.join(os.environ['CMSSW_BASE'], 'src/DVCode/MFVNeutralino/test/jsons', bn)
 
 def merge_edm_files(out_fn, fns):
     print 'merging %i edm files to %s' % (len(fns), out_fn)
-    cmd = 'cmsRun $CMSSW_BASE/src/JMTucker/Tools/python/Merge_cfg.py %s pool=%s >%s.mergelog 2>&1' % (' '.join(fns), out_fn, out_fn)
+    cmd = 'cmsRun $CMSSW_BASE/src/DVCode/Tools/python/Merge_cfg.py %s pool=%s >%s.mergelog 2>&1' % (' '.join(fns), out_fn, out_fn)
     #print cmd
     return os.system(cmd) == 0
 
@@ -445,7 +445,7 @@ def report_every(process, i):
 def sample_files(process, sample, dataset, n=-1):
     if sample.endswith('_year'):
         sample = sample[:-4] + str(year)
-    import JMTucker.Tools.SampleFiles as sf
+    import DVCode.Tools.SampleFiles as sf
     sf.set_process(process, sample, dataset, n)
 
 def set_events(process, events, run=None):

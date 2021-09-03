@@ -1,5 +1,5 @@
-#ifndef JMTucker_Tools_Math_h
-#define JMTucker_Tools_Math_h
+#ifndef DVCode_Tools_Math_h
+#define DVCode_Tools_Math_h
 
 namespace jmt {
   template <typename T> int sgn(T x) { return x >= 0 ? 1 : -1; }

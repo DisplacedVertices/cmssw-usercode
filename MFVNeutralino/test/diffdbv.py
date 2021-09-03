@@ -16,7 +16,7 @@ for x in args1 + args2:
 
 ########################################################################
 
-from JMTucker.MFVNeutralino.MiniTreeBase import *
+from DVCode.MFVNeutralino.MiniTreeBase import *
 
 set_style()
 ps = plot_saver(plot_dir('diffdbv'), size=(350,500), log=False)

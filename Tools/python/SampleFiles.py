@@ -3,8 +3,8 @@ from collections import defaultdict
 from fnmatch import fnmatch
 from itertools import chain
 from pprint import pprint
-from JMTucker.Tools.CRAB3ToolsBase import decrabify_list
-from JMTucker.Tools.CMSSWTools import cmssw_base
+from DVCode.Tools.CRAB3ToolsBase import decrabify_list
+from DVCode.Tools.CMSSWTools import cmssw_base
 
 _d = {}
 _added_from_enc = {}
@@ -127,7 +127,7 @@ __all__ = [
 
 ################################################################################
 
-execfile(cmssw_base('src/JMTucker/Tools/python/enc_SampleFiles.py'))
+execfile(cmssw_base('src/DVCode/Tools/python/enc_SampleFiles.py'))
 
 _removed = [
     ('ttbarht0800_2017', 'miniaod', ['/store/mc/RunIIFall17MiniAODv2/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/40000/225CD078-B3A4-E811-AA74-001E67DDC254.root',
@@ -811,7 +811,7 @@ if __name__ == '__main__':
     elif 'testfiles' in sys.argv:
         dataset, sample = _args('testfiles', 'dataset','sample')
         is_ntuple = dataset.startswith('ntuple')
-        from JMTucker.Tools.ROOTTools import ROOT
+        from DVCode.Tools.ROOTTools import ROOT
         print sample, dataset
         nev, nev2 = 0, 0
         def get_n(f,p):
@@ -838,7 +838,7 @@ if __name__ == '__main__':
         if not has(sample, dataset):
             raise KeyError('no key sample = %s dataset = %s' % (sample, dataset))
         print sample, dataset
-        from JMTucker.Tools import eos
+        from DVCode.Tools import eos
         out_fn = '%s_%s' % (sample, dataset)
         out_f = open(out_fn, 'wt')
         out_f.write('copy\n')
@@ -854,7 +854,7 @@ if __name__ == '__main__':
         if not has(sample, dataset):
             raise KeyError('no key sample = %s dataset = %s' % (sample, dataset))
         print sample, dataset
-        from JMTucker.Tools import eos
+        from DVCode.Tools import eos
         out_fn = '%s_%s' % (sample, dataset)
         out_f = open(out_fn, 'wt')
         out_f.write('delete\n%s\n' % '\n'.join(get(sample, dataset)[1]))
@@ -925,7 +925,7 @@ if __name__ == '__main__':
         print ' + '.join(who(sample, dataset))
 
     elif 'sync' in sys.argv:
-        from JMTucker.Tools import Samples
+        from DVCode.Tools import Samples
         in_sf_not_s = []
         in_s_not_sf = []
 

@@ -1,4 +1,4 @@
-from JMTucker.Tools.BasicAnalyzer_cfg import *
+from DVCode.Tools.BasicAnalyzer_cfg import *
 
 process.source.duplicateCheckMode = cms.untracked.string('noDuplicateCheck')
 
@@ -11,7 +11,7 @@ add_analyzer(process, 'EventIdRecorder', prints = cms.untracked.bool('prints' in
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.MetaSubmitter import *
+    from DVCode.Tools.MetaSubmitter import *
 
     samples = pick_samples(dataset, data=False, all_signal=False)
     set_splitting(samples, dataset, 'default', default_files_per=50)

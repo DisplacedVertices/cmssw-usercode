@@ -1,5 +1,5 @@
-#ifndef JMTucker_MFVNeutralinoFormats_VertexerPairEff_h
-#define JMTucker_MFVNeutralinoFormats_VertexerPairEff_h
+#ifndef DVCode_MFVNeutralinoFormats_VertexerPairEff_h
+#define DVCode_MFVNeutralinoFormats_VertexerPairEff_h
 
 #include <algorithm>
 #include <limits>

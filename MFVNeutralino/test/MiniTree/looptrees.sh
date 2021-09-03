@@ -25,7 +25,7 @@ files=(
 #    mfv_stopdbardbar_tau030000um_M0800_2017.root
 #    mfv_stopdbardbar_tau100000um_M0800_2017.root
 )
-intlumi=$(python -c 'import JMTucker.MFVNeutralino.AnalysisConstants as ac; print ac.int_lumi_2017 * ac.scale_factor_2017')
+intlumi=$(python -c 'import DVCode.MFVNeutralino.AnalysisConstants as ac; print ac.int_lumi_2017 * ac.scale_factor_2017')
 
 ########################################################################
 

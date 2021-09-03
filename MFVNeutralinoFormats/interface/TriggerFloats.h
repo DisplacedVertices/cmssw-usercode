@@ -1,8 +1,8 @@
-#ifndef JMTucker_MFVNeutralinoFormats_interface_TriggerFloats_h
-#define JMTucker_MFVNeutralinoFormats_interface_TriggerFloats_h
+#ifndef DVCode_MFVNeutralinoFormats_interface_TriggerFloats_h
+#define DVCode_MFVNeutralinoFormats_interface_TriggerFloats_h
 
 #include "TLorentzVector.h"
-#include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
+#include "DVCode/MFVNeutralinoFormats/interface/Event.h"
 
 namespace mfv {
   struct TriggerFloats {

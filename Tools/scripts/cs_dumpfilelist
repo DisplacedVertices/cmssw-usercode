@@ -2,8 +2,8 @@
 
 import os, sys
 from pprint import pprint
-from JMTucker.Tools.general import bool_from_argv
-from JMTucker.Tools.CondorTools import cs_dirs_from_argv
+from DVCode.Tools.general import bool_from_argv
+from DVCode.Tools.CondorTools import cs_dirs_from_argv
 
 stdout = bool_from_argv('stdout')
 edit = bool_from_argv('edit')

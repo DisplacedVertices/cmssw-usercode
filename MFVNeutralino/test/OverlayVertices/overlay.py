@@ -2,9 +2,9 @@
 
 raise NotImplementedError('needs to be updated to 2017 workflow: miniaod, track/vertexing factorization')
 
-from JMTucker.Tools.CMSSWTools import *
-from JMTucker.Tools import SampleFiles, Samples
-from JMTucker.Tools.Year import year
+from DVCode.Tools.CMSSWTools import *
+from DVCode.Tools import SampleFiles, Samples
+from DVCode.Tools.Year import year
 
 allowed_samples = Samples.ttbar_samples + Samples.qcd_samples_sum + Samples.ttbar_samples_2015 + Samples.qcd_samples_sum_2015
 
@@ -75,7 +75,7 @@ tfileservice(process, args.out_fn)
 random_service(process, {'mfvVertices':      12179 + args.which_event,
                          'mfvOverlayTracks': 12180 + args.which_event})
 
-process.load('JMTucker.MFVNeutralino.Vertexer_cfi')
+process.load('DVCode.MFVNeutralino.Vertexer_cfi')
 process.mfvVertices.histos = False
 process.mfvVertices.verbose = args.debug
 process.mfvVertices.track_src = 'mfvSkimmedTracks'

@@ -1,6 +1,6 @@
 import sys, os
-from JMTucker.Tools.ROOTTools import *
-from JMTucker.Tools import colors
+from DVCode.Tools.ROOTTools import *
+from DVCode.Tools import colors
 set_style()
 
 ps = plot_saver(plot_dir('lumimodn'), size=(600,600), log=False)

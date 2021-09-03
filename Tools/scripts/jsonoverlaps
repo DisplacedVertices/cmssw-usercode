@@ -3,7 +3,7 @@
 import sys
 from itertools import combinations
 from FWCore.PythonUtilities.LumiList import LumiList
-from JMTucker.Tools import colors
+from DVCode.Tools import colors
 
 ret = 0
 

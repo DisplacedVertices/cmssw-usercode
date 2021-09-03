@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-from JMTucker.Tools.TrackRefGetter_cff import jmtTrackRefGetter
+from DVCode.Tools.TrackRefGetter_cff import jmtTrackRefGetter
 
 mfvVerticesToJets = cms.EDProducer('MFVJetVertexAssociator',
                                    enable = cms.bool(True),

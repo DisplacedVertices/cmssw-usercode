@@ -3,8 +3,8 @@
 import os, sys
 from collections import defaultdict
 from pprint import pprint
-from JMTucker.Tools.DBS import files_in_dataset
-from JMTucker.Tools.general import typed_from_argv
+from DVCode.Tools.DBS import files_in_dataset
+from DVCode.Tools.general import typed_from_argv
 
 instance = typed_from_argv(int)
 if instance is None:

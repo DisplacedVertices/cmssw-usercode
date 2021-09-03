@@ -4,10 +4,10 @@
 # py $tmain/effsprint.py csv one . > effsprint.one.csv ; py $tmain/effsprint.py csv . > effsprint.csv ; py $tmain/effsprint.py csv . sigreg > effsprint.sigreg.csv ; py $tmain/effsprint.py csv mfv*root xx4*root sigreg > effsprint.sigreg.sigs.csv ;   py $tmain/effsprint.py csv mfv*root xx4*root  > effsprint.sigs.csv
 
 import sys, os
-from JMTucker.Tools.ROOTTools import *
-from JMTucker.Tools.Sample import norm_from_file
-import JMTucker.Tools.Samples as Samples
-import JMTucker.MFVNeutralino.AnalysisConstants as ac
+from DVCode.Tools.ROOTTools import *
+from DVCode.Tools.Sample import norm_from_file
+import DVCode.Tools.Samples as Samples
+import DVCode.MFVNeutralino.AnalysisConstants as ac
 
 csv = 'csv' in sys.argv
 plots = 'plots' in sys.argv

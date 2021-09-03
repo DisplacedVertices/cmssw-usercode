@@ -1,5 +1,5 @@
 import os
-from JMTucker.Tools.CondorTools import *
+from DVCode.Tools.CondorTools import *
 
 for wd in cs_dirs_from_argv():
     al = set()

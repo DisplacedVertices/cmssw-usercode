@@ -1,6 +1,6 @@
 import gzip
 from FWCore.PythonUtilities.LumiList import LumiList
-from JMTucker.Tools.general import intlumi_from_brilcalc_csv as parse
+from DVCode.Tools.general import intlumi_from_brilcalc_csv as parse
 
 # brilcalc lumi -i 2015.json -o 2015.byls.csv --byls --normtag=normtag_2015.json ; gzip 2015.byls.csv
 # brilcalc lumi -i 2015.json -o 2015.byls.HLT_PFHT800.csv --byls --normtag=normtag_2015.json --hltpath=HLT_PFHT800_v\* ; gzip 2015.byls.HLT_PFHT800.csv

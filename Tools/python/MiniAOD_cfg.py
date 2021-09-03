@@ -1,5 +1,5 @@
 import FWCore.ParameterSet.Config as cms
-from JMTucker.Tools.CMSSWTools import CMSSWSettings, output_file, registration_warnings, report_every, silence_messages, which_global_tag
+from DVCode.Tools.CMSSWTools import CMSSWSettings, output_file, registration_warnings, report_every, silence_messages, which_global_tag
 
 def pat_tuple_process(settings, customize_before_unscheduled=None): #, paths=[]):
     '''Need to call associate_paths_to_task after defining the paths.'''
@@ -59,9 +59,9 @@ def pat_tuple_process(settings, customize_before_unscheduled=None): #, paths=[])
     from Configuration.StandardSequences.earlyDeleteSettings_cff import customiseEarlyDelete
     process = customiseEarlyDelete(process)
 
-    process.load('JMTucker.Tools.MCStatProducer_cff')
+    process.load('DVCode.Tools.MCStatProducer_cff')
 
-    process.load('JMTucker.Tools.PATTupleSelection_cfi')
+    process.load('DVCode.Tools.PATTupleSelection_cfi')
     process.selectedPatJets.cut = process.jtupleParams.jetCut
     process.selectedPatMuons.cut = '' #process.jtupleParams.muonCut
     process.selectedPatElectrons.cut = '' #process.jtupleParams.electronCut

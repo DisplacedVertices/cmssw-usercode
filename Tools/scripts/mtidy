@@ -4,10 +4,10 @@
 
 import os, sys
 from glob import glob
-from JMTucker.Tools.general import bool_from_argv, touch
-from JMTucker.Tools.CondorTools import cs_dirs_from_argv
-from JMTucker.Tools.CRAB3ToolsBase import crab_dirs_from_argv
-from JMTucker.Tools import colors
+from DVCode.Tools.general import bool_from_argv, touch
+from DVCode.Tools.CondorTools import cs_dirs_from_argv
+from DVCode.Tools.CRAB3ToolsBase import crab_dirs_from_argv
+from DVCode.Tools import colors
 
 if len(sys.argv) < 2:
     print 'usage: mtidy wd [wd2 ...]'

@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-from JMTucker.MFVNeutralino.Vertexer_cfi import kvr_params
+from DVCode.MFVNeutralino.Vertexer_cfi import kvr_params
 
 mfvVertexRefits = cms.EDProducer('MFVVertexRefitter',
                                  kvr_params = kvr_params,

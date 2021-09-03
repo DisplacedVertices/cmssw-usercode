@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
-from JMTucker.Tools.TrackRefGetter_cff import jmtTrackRefGetter
-from JMTucker.MFVNeutralino.Vertexer_cfi import kvr_params
+from DVCode.Tools.TrackRefGetter_cff import jmtTrackRefGetter
+from DVCode.MFVNeutralino.Vertexer_cfi import kvr_params
 
 mfvVerticesAuxTmp = cms.EDProducer('MFVVertexAuxProducer',
                                    kvr_params = kvr_params,

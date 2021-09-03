@@ -1,13 +1,13 @@
-from JMTucker.Tools.BasicAnalyzer_cfg import *
+from DVCode.Tools.BasicAnalyzer_cfg import *
 
 is_mc = True # for blinding
 
-from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers
+from DVCode.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers
 sample_files(process, 'qcdht2000_2017' if is_mc else 'JetHT2017B', dataset, 1)
 tfileservice(process, 'minitree.root')
 cmssw_from_argv(process)
 
-process.load('JMTucker.MFVNeutralino.MiniTree_cff')
+process.load('DVCode.MFVNeutralino.MiniTree_cff')
 
 # blind btag triggered events
 if not is_mc and use_btag_triggers :
@@ -18,7 +18,7 @@ if not is_mc and use_btag_triggers :
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.MetaSubmitter import *
+    from DVCode.Tools.MetaSubmitter import *
 
     if use_btag_triggers :
         samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=True, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used

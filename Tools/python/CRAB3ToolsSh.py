@@ -3,11 +3,11 @@
 # author: J. Tucker
 
 import re
-from JMTucker.Tools.CRAB3ToolsBase import *
-from JMTucker.Tools.hadd import HaddBatchResult, hadd
+from DVCode.Tools.CRAB3ToolsBase import *
+from DVCode.Tools.hadd import HaddBatchResult, hadd
 if crab_global_options.support_automatic_splitting:
-    from JMTucker.Tools.Sample import fn_to_sample, norm_from_file
-    from JMTucker.Tools import Samples, colors
+    from DVCode.Tools.Sample import fn_to_sample, norm_from_file
+    from DVCode.Tools import Samples, colors
 
 def crab_command(*args, **kwargs):
     if kwargs and kwargs.keys() != ['dir']:

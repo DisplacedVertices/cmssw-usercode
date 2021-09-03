@@ -1,5 +1,5 @@
-#ifndef JMTucker_Tools_Prob_h
-#define JMTucker_Tools_Prob_h
+#ifndef DVCode_Tools_Prob_h
+#define DVCode_Tools_Prob_h
 
 class TRandom;
 

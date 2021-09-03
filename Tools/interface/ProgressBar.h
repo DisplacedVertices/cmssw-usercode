@@ -1,5 +1,5 @@
-#ifndef JMTucker_MFVNeutralino_One2Two_ProgressBar_h
-#define JMTucker_MFVNeutralino_One2Two_ProgressBar_h
+#ifndef DVCode_MFVNeutralino_One2Two_ProgressBar_h
+#define DVCode_MFVNeutralino_One2Two_ProgressBar_h
 
 #include <string>
 

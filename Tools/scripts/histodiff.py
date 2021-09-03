@@ -2,7 +2,7 @@
 
 import sys
 from pprint import pprint
-from JMTucker.Tools.ROOTTools import ROOT, flatten_directory, check_consistency
+from DVCode.Tools.ROOTTools import ROOT, flatten_directory, check_consistency
 
 ROOT.TH1.AddDirectory(0)
 

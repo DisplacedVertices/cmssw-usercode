@@ -4,8 +4,8 @@
 
 import sys, os
 from pprint import pprint
-from JMTucker.Tools import eos, SampleFiles
-from JMTucker.Tools.ROOTTools import ROOT, detree
+from DVCode.Tools import eos, SampleFiles
+from DVCode.Tools.ROOTTools import ROOT, detree
 
 if len(sys.argv) < 6:
     sys.exit('usage: %s dataset sample run lumi event\n  where dataset and sample are as registered in SampleFiles. sample can be "*" to mean all samples having the dataset.' % sys.argv[0])

@@ -1,5 +1,5 @@
-#ifndef JMTucker_MFVNeutralino_AnalysisConstants_h
-#define JMTucker_MFVNeutralino_AnalysisConstants_h
+#ifndef DVCode_MFVNeutralino_AnalysisConstants_h
+#define DVCode_MFVNeutralino_AnalysisConstants_h
 
 // This file is special, intended to be easily (read: hackily)
 // parsable by a dumb python script later. Don't mess with the

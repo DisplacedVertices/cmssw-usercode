@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from JMTucker.Tools.Year import year
+from DVCode.Tools.Year import year
 from scanpack import get_scanpack, scanpackbase
 
 condor = False
@@ -84,11 +84,11 @@ from pprint import pprint
 from textwrap import dedent
 from time import time
 from CRABClient.ClientExceptions import ConfigException as CRABConfigException
-from JMTucker.Tools.CRAB3Tools import Config, crab_dirs_root, crab_command
-from JMTucker.Tools.general import index_startswith, save_git_status
-from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-from JMTucker.Tools.Sample import MCSample
-from JMTucker.Tools import colors
+from DVCode.Tools.CRAB3Tools import Config, crab_dirs_root, crab_command
+from DVCode.Tools.general import index_startswith, save_git_status
+from DVCode.Tools.CondorSubmitter import CondorSubmitter
+from DVCode.Tools.Sample import MCSample
+from DVCode.Tools import colors
 
 testing = 'testing' in sys.argv
 if ex and not ex.startswith('_'):

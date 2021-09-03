@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 import os
-from JMTucker.Tools.ROOTTools import *
-from JMTucker.Tools import Samples
-from JMTucker.MFVNeutralino.PerSignal import PerSignal
+from DVCode.Tools.ROOTTools import *
+from DVCode.Tools import Samples
+from DVCode.MFVNeutralino.PerSignal import PerSignal
 
 set_style()
 ps = plot_saver(plot_dir('sigeff_trig'), size=(600,600), log=False)

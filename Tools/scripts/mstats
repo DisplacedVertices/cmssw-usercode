@@ -3,10 +3,10 @@
 import argparse, re
 from collections import defaultdict
 from pprint import pprint
-from JMTucker.Tools.CondorTools import cs_dirs_from_argv
-from JMTucker.Tools.CRAB3Tools import crab_dirs_from_argv, crab_status
-from JMTucker.Tools.general import from_pickle
-from JMTucker.Tools import colors
+from DVCode.Tools.CondorTools import cs_dirs_from_argv
+from DVCode.Tools.CRAB3Tools import crab_dirs_from_argv, crab_status
+from DVCode.Tools.general import from_pickle
+from DVCode.Tools import colors
 
 parser = argparse.ArgumentParser(description = 'mstats: print out run times and number of retries statistics for condor and crab dirs',
                                  usage = '%(prog)s [options] mjson.gzpickle')

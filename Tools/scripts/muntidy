@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 import os, sys
-from JMTucker.Tools.CondorTools import cs_dirs_from_argv
-from JMTucker.Tools.CRAB3ToolsBase import crab_dirs_from_argv
-from JMTucker.Tools import colors
+from DVCode.Tools.CondorTools import cs_dirs_from_argv
+from DVCode.Tools.CRAB3ToolsBase import crab_dirs_from_argv
+from DVCode.Tools import colors
 
 cr_dirs = crab_dirs_from_argv()
 wds = cr_dirs + cs_dirs_from_argv()

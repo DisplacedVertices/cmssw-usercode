@@ -1,5 +1,5 @@
-#ifndef JMTucker_Tools_interface_PileupWeights_h
-#define JMTucker_Tools_interface_PileupWeights_h
+#ifndef DVCode_Tools_interface_PileupWeights_h
+#define DVCode_Tools_interface_PileupWeights_h
 
 #include <stdexcept>
 

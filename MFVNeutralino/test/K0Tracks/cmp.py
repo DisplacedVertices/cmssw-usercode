@@ -1,7 +1,7 @@
 import sys, os
-from JMTucker.Tools.ROOTTools import *
-from JMTucker.Tools.Sample import norm_from_file
-from JMTucker.Tools import Samples
+from DVCode.Tools.ROOTTools import *
+from DVCode.Tools.Sample import norm_from_file
+from DVCode.Tools import Samples
 set_style()
 
 integ = lambda h: h.Integral(0,h.GetNbinsX()+2)

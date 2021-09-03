@@ -1,13 +1,13 @@
 import sys
-from JMTucker.Tools.BasicAnalyzer_cfg import *
+from DVCode.Tools.BasicAnalyzer_cfg import *
 
 dataset = 'ntuplev16'
 sample_files(process, 'mfv_neu_tau01000um_M0800', dataset, -1)
 process.TFileService.fileName = 'resolutions.root'
 file_event_from_argv(process)
 
-process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
-process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
+process.load('DVCode.MFVNeutralino.VertexSelector_cfi')
+process.load('DVCode.MFVNeutralino.AnalysisCuts_cfi')
 
 mfvResolutions = cms.EDAnalyzer('MFVResolutions',
                                 vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
@@ -43,19 +43,19 @@ process.p *= process.mfvResolutionsFullSelByDistCutTrksJets
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    import JMTucker.Tools.Samples as Samples
+    import DVCode.Tools.Samples as Samples
     samples = Samples.mfv_signal_samples + Samples.mfv_ddbar_samples
 
     for sample in samples:
         sample.datasets[dataset].files_per = 1000
 
-    from JMTucker.Tools.CondorSubmitter import CondorSubmitter
+    from DVCode.Tools.CondorSubmitter import CondorSubmitter
     cs = CondorSubmitter('ResolutionsV16', dataset = dataset)
     cs.submit_all(samples)
 
 elif __name__ == '__main__' and hasattr(sys, 'argv') and 'derivecut' in sys.argv:
     from math import pi
-    from JMTucker.Tools.ROOTTools import *
+    from DVCode.Tools.ROOTTools import *
     set_style()
     ps = plot_saver(plot_dir('resolutionsv14'), size=(800,500))
     for fn in sys.argv[1:]:

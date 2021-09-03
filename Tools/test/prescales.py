@@ -31,7 +31,7 @@ from pprint import pprint
 from collections import defaultdict
 from FWCore.PythonUtilities.LumiList import LumiList
 from RecoLuminosity.LumiDB import sessionManager, lumiCalcAPI, revisionDML
-from JMTucker.Tools.general import from_pickle, to_pickle
+from DVCode.Tools.general import from_pickle, to_pickle
 
 os.system('mkdir -p prescales_temp')
 

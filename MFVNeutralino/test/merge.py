@@ -1,12 +1,12 @@
-from JMTucker.Tools.Merge_cfg import *
+from DVCode.Tools.Merge_cfg import *
 
 process.out.maxSize = cms.untracked.int32(2**19) # in kB, ~537 MB
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.MetaSubmitter import *
+    from DVCode.Tools.MetaSubmitter import *
 
-    from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset
+    from DVCode.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset
     batch_name = 'Ntuple%s_sigs_merge' % version
     publish_name = 'Ntuple%s_%s' % (version, year)
 
@@ -17,7 +17,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         sample.split_by = 'files'
         sample.files_per = -1000000 # hope we never have more than 1M files
 
-    from JMTucker.Tools.CondorSubmitter import CondorSubmitter
+    from DVCode.Tools.CondorSubmitter import CondorSubmitter
     cs = CondorSubmitter(batch_name,
                          ex = year,
                          dataset = dataset,

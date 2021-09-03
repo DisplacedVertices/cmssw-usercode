@@ -1,19 +1,19 @@
-from JMTucker.Tools.BasicAnalyzer_cfg import *
+from DVCode.Tools.BasicAnalyzer_cfg import *
 
 is_mc = True # for blinding
 
-from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers
+from DVCode.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers
 sample_files(process, 'qcdht2000_2017' if is_mc else 'JetHT2017B', dataset, 1)
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
 
-process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
-process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
-process.load('JMTucker.MFVNeutralino.VertexHistos_cfi')
-process.load('JMTucker.MFVNeutralino.EventHistos_cfi')
-process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
+process.load('DVCode.MFVNeutralino.VertexSelector_cfi')
+process.load('DVCode.MFVNeutralino.WeightProducer_cfi')
+process.load('DVCode.MFVNeutralino.VertexHistos_cfi')
+process.load('DVCode.MFVNeutralino.EventHistos_cfi')
+process.load('DVCode.MFVNeutralino.AnalysisCuts_cfi')
 
-import JMTucker.Tools.SimpleTriggerResults_cfi as SimpleTriggerResults
+import DVCode.Tools.SimpleTriggerResults_cfi as SimpleTriggerResults
 SimpleTriggerResults.setup_endpath(process, weight_src='mfvWeight')
 
 common = cms.Sequence(process.mfvSelectedVerticesSeq * process.mfvWeight)
@@ -119,7 +119,7 @@ process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.MetaSubmitter import *
+    from DVCode.Tools.MetaSubmitter import *
 
     if use_btag_triggers :
         samples = pick_samples(dataset, qcd=True, ttbar=False, span_signal=True, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used

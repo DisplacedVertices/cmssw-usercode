@@ -1,12 +1,12 @@
-#ifndef JMTucker_MFVNeutralino_interface_MiniNtuple_h
-#define JMTucker_MFVNeutralino_interface_MiniNtuple_h
+#ifndef DVCode_MFVNeutralino_interface_MiniNtuple_h
+#define DVCode_MFVNeutralino_interface_MiniNtuple_h
 
 #include "Math/SMatrix.h"
 #include "TLorentzVector.h"
 #include "TTree.h"
 
 #define JMT_STANDALONE_BTAGGING
-#include "JMTucker/Tools/interface/BTagging.h"
+#include "DVCode/Tools/interface/BTagging.h"
 
 namespace mfv {
   typedef ROOT::Math::SMatrix<double, 5, 5, ROOT::Math::MatRepSym<double, 5> >  TrackCovarianceMatrix;

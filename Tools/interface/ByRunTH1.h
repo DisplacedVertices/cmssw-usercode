@@ -1,5 +1,5 @@
-#ifndef JMTucker_Tools_ByRunTH1_h
-#define JMTucker_Tools_ByRunTH1_h
+#ifndef DVCode_Tools_ByRunTH1_h
+#define DVCode_Tools_ByRunTH1_h
 
 #include <map>
 #include "CommonTools/UtilAlgos/interface/TFileService.h"

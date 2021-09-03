@@ -2,9 +2,9 @@
 
 import os
 from functools import partial
-import JMTucker.Tools.Samples as Samples
-import JMTucker.MFVNeutralino.AnalysisConstants as ac
-from JMTucker.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, plot_saver, plot_dir
+import DVCode.Tools.Samples as Samples
+import DVCode.MFVNeutralino.AnalysisConstants as ac
+from DVCode.Tools.ROOTTools import ROOT, data_mc_comparison, set_style, plot_saver, plot_dir
 
 year = '2017p8'
 version = 'V23m'

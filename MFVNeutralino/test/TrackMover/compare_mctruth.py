@@ -1,9 +1,9 @@
 # for x in $crd/TrackMoverMCTruthV16/*.root ; do echo $(printf "%-50s" $(basename $x .root)) $(./mctruth.exe $x $(basename $x) 0.0252 ); done | tee mctruths.txt
 
 import sys
-from JMTucker.Tools.ROOTTools import *
-from JMTucker.Tools import Samples
-from JMTucker.MFVNeutralino.PerSignal import PerSignal
+from DVCode.Tools.ROOTTools import *
+from DVCode.Tools import Samples
+from DVCode.MFVNeutralino.PerSignal import PerSignal
 
 mctruths_fn = 'mctruths.txt'
 

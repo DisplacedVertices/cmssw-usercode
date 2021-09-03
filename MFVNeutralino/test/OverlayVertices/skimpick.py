@@ -1,12 +1,12 @@
 import sys, os, gzip
-from JMTucker.Tools.CMSSWTools import *
+from DVCode.Tools.CMSSWTools import *
 
 process = basic_process('SkimPick')
 #want_summary(process)
 #process.maxEvents.input = 100
 report_every(process, 1000000)
 
-process.load('JMTucker.MFVNeutralino.SkimmedTracks_cfi')
+process.load('DVCode.MFVNeutralino.SkimmedTracks_cfi')
 process.mfvSkimmedTracks.apply_sigmadxybs = True
 process.p = cms.Path(process.mfvSkimmedTracks)
 
@@ -18,8 +18,8 @@ output_file(process, 'skimpick.root', [
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.Year import year
-    import JMTucker.Tools.Samples as Samples 
+    from DVCode.Tools.Year import year
+    import DVCode.Tools.Samples as Samples 
     if year == 2015:
         samples = Samples.data_samples_2015 + Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015
     elif year == 2016:
@@ -42,15 +42,15 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         to_add = ['set_events(process, [%s]%s)' % (l, r)]
         return to_add, []
 
-    from JMTucker.Tools.MetaSubmitter import *
+    from DVCode.Tools.MetaSubmitter import *
     ms = MetaSubmitter('Pick1VtxV14')
     ms.common.pset_modifier = pset_modifier
     ms.condor.stageout_files = 'all'
     ms.submit(samples)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submitmerge' in sys.argv:
-    from JMTucker.Tools.Year import year
-    import JMTucker.Tools.Samples as Samples 
+    from DVCode.Tools.Year import year
+    import DVCode.Tools.Samples as Samples 
     if year == 2015:
         samples = Samples.data_samples_2015 + Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015
     elif year == 2016:
@@ -60,9 +60,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submitmerge' in sys.argv
     for sample in samples:
         sample.datasets[dataset].files_per = 100000
 
-    from JMTucker.Tools.CondorSubmitter import CondorSubmitter
+    from DVCode.Tools.CondorSubmitter import CondorSubmitter
     cs = CondorSubmitter('Pick1VtxV14_merge',
-                         pset_template_fn = '$CMSSW_BASE/src/JMTucker/Tools/python/Merge_cfg.py',
+                         pset_template_fn = '$CMSSW_BASE/src/DVCode/Tools/python/Merge_cfg.py',
                          ex = year,
                          dataset = dataset,
                          publish_name = 'pick1vtxv14_merge',

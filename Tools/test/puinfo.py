@@ -32,7 +32,7 @@ return_data = 1
 
     just_testing = 'testing' in sys.argv
 
-    from JMTucker.Tools.Samples import background_samples, stop_signal_samples
+    from DVCode.Tools.Samples import background_samples, stop_signal_samples
     for sample in background_samples + stop_signal_samples:
         if sample.name not in 'pythiastopm200':
             continue

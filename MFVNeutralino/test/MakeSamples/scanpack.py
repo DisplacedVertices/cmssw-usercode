@@ -556,8 +556,8 @@ def do_scanpack(process, x, batch, job):
     set_kind(process, tau, mass)
 
 def export_scanpack(crab_dirs):
-    from JMTucker.Tools.CRAB3ToolsSh import crab_hadd_files as crab_files
-    from JMTucker.Tools import colors
+    from DVCode.Tools.CRAB3ToolsSh import crab_hadd_files as crab_files
+    from DVCode.Tools import colors
 
     sample_files = defaultdict(list)
 
@@ -595,8 +595,8 @@ def read_scanpack_list(fn):
     return eval('\n'.join(l for l in f.readlines() if not l.strip().startswith('#')))
 
 def hadd_scanpack(lst_fn):
-    from JMTucker.Tools import colors, eos
-    from JMTucker.Tools.hadd import hadd
+    from DVCode.Tools import colors, eos
+    from DVCode.Tools.hadd import hadd
 
     me = os.environ['USER']
     others = list(scanpack_eosusers)
@@ -666,7 +666,7 @@ if __name__ == '__main__' and len(sys.argv) > 1:
     cmd = sys.argv[1]
 
     if cmd == 'export':
-        from JMTucker.Tools.CRAB3ToolsSh import crab_dirs_from_argv
+        from DVCode.Tools.CRAB3ToolsSh import crab_dirs_from_argv
         pprint(export_scanpack(crab_dirs_from_argv()))
 
     elif cmd == 'read':

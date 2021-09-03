@@ -1,6 +1,6 @@
 mass = 800
 
-from JMTucker.Tools.ROOTTools import *
+from DVCode.Tools.ROOTTools import *
 set_style()
 ps = plot_saver(plot_dir('trigeff_weights_M%i' % mass))
 

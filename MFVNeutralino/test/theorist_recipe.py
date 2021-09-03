@@ -1,15 +1,15 @@
-from JMTucker.Tools.BasicAnalyzer_cfg import *
+from DVCode.Tools.BasicAnalyzer_cfg import *
 
 dataset = 'ntuplev27m_wgen'
 sample_files(process, 'mfv_neu_tau010000um_M1200_year', dataset, 10)
 process.TFileService.fileName = 'theorist_recipe.root'
 cmssw_from_argv(process)
 
-process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
-process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
+process.load('DVCode.MFVNeutralino.VertexSelector_cfi')
+process.load('DVCode.MFVNeutralino.AnalysisCuts_cfi')
 
-process.load('JMTucker.MFVNeutralino.GenParticles_cff')
-process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
+process.load('DVCode.MFVNeutralino.GenParticles_cff')
+process.load('DVCode.MFVNeutralino.GenParticleFilter_cfi')
 process.mfvGenParticles.gen_particles_src = 'prunedGenParticles'
 process.mfvGenParticles.last_flag_check = False
 
@@ -28,7 +28,7 @@ process.common = cms.Sequence(process.mfvSelectedVertices * process.mfvGenPartic
 if False:
     #set_events(process, [(1,5,65)])
     report_every(process, 1)
-    process.load('JMTucker.Tools.ParticleListDrawer_cff')
+    process.load('DVCode.Tools.ParticleListDrawer_cff')
     process.ParticleListDrawer.maxEventsToPrint = 10000
     process.common = process.ParticleListDrawer * process.common
 
@@ -116,7 +116,7 @@ process.pGenDvv400um = cms.Path(process.common * process.mfvGenParticleFilterDvv
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.MetaSubmitter import *
+    from DVCode.Tools.MetaSubmitter import *
     samples = pick_samples(dataset, all_signal='only')
     set_splitting(samples, dataset, 'minitree')
 

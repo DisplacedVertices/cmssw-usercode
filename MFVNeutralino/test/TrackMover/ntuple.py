@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from JMTucker.Tools.general import named_product
-from JMTucker.MFVNeutralino.NtupleCommon import *
+from DVCode.Tools.general import named_product
+from DVCode.MFVNeutralino.NtupleCommon import *
 
 settings = NtupleSettings()
 settings.is_mc = True
@@ -29,14 +29,14 @@ cmssw_from_argv(process)
 
 remove_output_module(process)
 
-from JMTucker.MFVNeutralino.Vertexer_cff import modifiedVertexSequence
-from JMTucker.Tools.NtupleFiller_cff import jmtNtupleFiller_pset
-from JMTucker.Tools.TrackRefGetter_cff import jmtTrackRefGetter
+from DVCode.MFVNeutralino.Vertexer_cff import modifiedVertexSequence
+from DVCode.Tools.NtupleFiller_cff import jmtNtupleFiller_pset
+from DVCode.Tools.TrackRefGetter_cff import jmtTrackRefGetter
 jmtTrackRefGetter.input_is_miniaod = settings.is_miniaod
 
 process.mfvEvent.vertex_seed_tracks_src = ''
-process.load('JMTucker.Tools.WeightProducer_cfi')
-process.load('JMTucker.MFVNeutralino.WeightProducer_cfi') # JMTBAD
+process.load('DVCode.Tools.WeightProducer_cfi')
+process.load('DVCode.MFVNeutralino.WeightProducer_cfi') # JMTBAD
 process.mfvWeight.throw_if_no_mcstat = False
 
 process.p = cms.Path(process.mfvEventFilterSequence * process.goodOfflinePrimaryVertices)
@@ -98,7 +98,7 @@ random_service(process, random_dict)
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.MetaSubmitter import *
+    from DVCode.Tools.MetaSubmitter import *
 
     samples = pick_samples(dataset, all_signal=False)
     set_splitting(samples, dataset, 'trackmover', data_json=json_path('ana_2017p8.json'), limit_ttbar=True)

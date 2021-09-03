@@ -4,7 +4,7 @@ import math, sys, os, tempfile
 from array import array
 from glob import glob
 from collections import defaultdict, namedtuple
-from JMTucker.Tools.general import chunks, int_ceil
+from DVCode.Tools.general import chunks, int_ceil
 
 if os.environ.has_key('JMT_ROOTTOOLS_NOBATCHMODE'):
     import ROOT

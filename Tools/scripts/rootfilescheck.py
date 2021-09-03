@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys, os
-from JMTucker.Tools.ROOTTools import ROOT
+from DVCode.Tools.ROOTTools import ROOT
 
 fns = [x for x in sys.argv if x.endswith('.root')]
 nofile = []

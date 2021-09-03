@@ -1,5 +1,5 @@
-#ifndef JMTucker_Tools_MergeablePOD_h
-#define JMTucker_Tools_MergeablePOD_h
+#ifndef DVCode_Tools_MergeablePOD_h
+#define DVCode_Tools_MergeablePOD_h
 
 namespace jmt {
   template <typename T>

@@ -14,7 +14,7 @@ def _read_gzip_file(fn):
 
 def _from_dbs_and_cache(fn, ds):
     print 'hitting DBS %s for %s' % (ds, fn)
-    from JMTucker.Tools.DBS import files_in_dataset
+    from DVCode.Tools.DBS import files_in_dataset
     files = files_in_dataset(ds, instance='phys03' if ds.endswith('/USER') else 'global')
     with gzip_open(fn, 'w') as f:
         for file in files:

@@ -1,8 +1,8 @@
 # this script must be run from One2Two/
 
 import sys, os, shutil, time
-from JMTucker.Tools.general import save_git_status
-from JMTucker.Tools.CondorSubmitter import CondorSubmitter, crab_dirs_root
+from DVCode.Tools.general import save_git_status
+from DVCode.Tools.CondorSubmitter import CondorSubmitter, crab_dirs_root
 import ROOT; ROOT.gROOT.SetBatch()
 import limitsinput
 
@@ -22,7 +22,7 @@ import limitsinput
 #   cmsenv
 #   git clone https://github.com/cms-analysis/HiggsAnalysis-CombinedLimit.git HiggsAnalysis/CombinedLimit
 #   cd HiggsAnalysis/CombinedLimit
-#   patch -p1 < path/to/main/cmssw/src/JMTucker/MFVNeutralino/test/One2Two/patchSetHint
+#   patch -p1 < path/to/main/cmssw/src/DVCode/MFVNeutralino/test/One2Two/patchSetHint
 #   git fetch origin
 #   git checkout v8.0.1
 #   scram b clean; scram b

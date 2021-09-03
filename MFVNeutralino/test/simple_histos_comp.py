@@ -2,7 +2,7 @@
 
 # for when hadding takes too long and you want a plot now
 
-from JMTucker.Tools.ROOTTools import *
+from DVCode.Tools.ROOTTools import *
 
 ROOT.TH1.AddDirectory(0)
 

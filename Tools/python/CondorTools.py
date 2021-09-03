@@ -6,10 +6,10 @@ from datetime import datetime
 from glob import glob
 from itertools import combinations
 import xml.etree.ElementTree as ET
-from JMTucker.Tools.LumiJSONTools import fjr2ll
-from JMTucker.Tools.general import sub_popen, touch
-from JMTucker.Tools.hadd import HaddBatchResult, hadd
-from JMTucker.Tools import colors
+from DVCode.Tools.LumiJSONTools import fjr2ll
+from DVCode.Tools.general import sub_popen, touch
+from DVCode.Tools.hadd import HaddBatchResult, hadd
+from DVCode.Tools import colors
 
 class CSHelpersException(Exception):
     pass

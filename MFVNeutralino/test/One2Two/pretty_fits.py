@@ -1,7 +1,7 @@
 import sys
 from array import array
-from JMTucker.Tools.ROOTTools import *
-import JMTucker.MFVNeutralino.AnalysisConstants as ac
+from DVCode.Tools.ROOTTools import *
+import DVCode.MFVNeutralino.AnalysisConstants as ac
 
 def write(font, size, x, y, text):
     w = ROOT.TLatex()

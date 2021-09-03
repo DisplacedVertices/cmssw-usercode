@@ -2,9 +2,9 @@
 
 import os
 from pprint import pprint
-from JMTucker.Tools.CondorTools import cs_dirs_from_argv
-from JMTucker.Tools.CRAB3Tools import crab_dirs_from_argv, crab_status
-from JMTucker.Tools.general import to_pickle
+from DVCode.Tools.CondorTools import cs_dirs_from_argv
+from DVCode.Tools.CRAB3Tools import crab_dirs_from_argv, crab_status
+from DVCode.Tools.general import to_pickle
 
 cr_dirs = crab_dirs_from_argv()
 cs_dirs = cs_dirs_from_argv()

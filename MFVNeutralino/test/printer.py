@@ -1,6 +1,6 @@
 import sys, os
-from JMTucker.Tools.BasicAnalyzer_cfg import *
-from JMTucker.Tools.Year import year
+from DVCode.Tools.BasicAnalyzer_cfg import *
+from DVCode.Tools.Year import year
 
 simple = False
 
@@ -12,8 +12,8 @@ geometry_etc(process)
 remove_tfileservice(process)
 report_every(process, 1)
 
-process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
-process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
+process.load('DVCode.MFVNeutralino.VertexSelector_cfi')
+process.load('DVCode.MFVNeutralino.AnalysisCuts_cfi')
 
 printer = cms.EDAnalyzer('MFVPrinter',
                          print_vertex = cms.bool(False),

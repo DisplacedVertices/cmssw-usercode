@@ -68,7 +68,7 @@ if options.run_pileupcalc:
 
 ################################################################################
 
-from JMTucker.Tools.PileupWeights import derive_weights
+from DVCode.Tools.PileupWeights import derive_weights
 ww = derive_weights(options.data_fn, options.mc_fn, options.data_path, options.mc_path, options.tol)
 
 print 'average weight =', sum(ww.weights)/len(ww.weights)
@@ -78,7 +78,7 @@ for w in ww.weights:
 print '});'
 
 if options.plots:
-    from JMTucker.Tools.ROOTTools import *
+    from DVCode.Tools.ROOTTools import *
     set_style()
     ps = plot_saver(options.plots, size=(600,600))
 

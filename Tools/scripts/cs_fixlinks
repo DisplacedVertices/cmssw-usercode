@@ -2,8 +2,8 @@
 
 import os
 from glob import glob
-from JMTucker.Tools.CondorTools import *
-from JMTucker.Tools import colors
+from DVCode.Tools.CondorTools import *
+from DVCode.Tools import colors
 
 for wd in cs_dirs_from_argv():
     wd = os.path.abspath(wd)

@@ -1,4 +1,4 @@
-from JMTucker.MFVNeutralino.NtupleCommon import *
+from DVCode.MFVNeutralino.NtupleCommon import *
 
 settings = NtupleSettings()
 settings.is_mc = True
@@ -14,10 +14,10 @@ dataset = 'miniaod' if settings.is_miniaod else 'main'
 sample_files(process, 'qcdht2000_2017' if settings.is_mc else 'JetHT2017F', dataset, 1)
 cmssw_from_argv(process)
 
-process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
-process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
-process.load('JMTucker.MFVNeutralino.EventHistos_cfi')
-process.load('JMTucker.MFVNeutralino.ByX_cfi')
+process.load('DVCode.MFVNeutralino.WeightProducer_cfi')
+process.load('DVCode.MFVNeutralino.AnalysisCuts_cfi')
+process.load('DVCode.MFVNeutralino.EventHistos_cfi')
+process.load('DVCode.MFVNeutralino.ByX_cfi')
 
 process.mfvEvent.vertex_seed_tracks_src = cms.InputTag('mfvVertexTracks', 'seed')
 process.mfvWeight.throw_if_no_mcstat = False
@@ -58,7 +58,7 @@ if not settings.is_mc:
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.MetaSubmitter import *
+    from DVCode.Tools.MetaSubmitter import *
 
     if use_btag_triggers :
         samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used

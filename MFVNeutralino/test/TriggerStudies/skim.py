@@ -1,7 +1,7 @@
 import sys
-from JMTucker.Tools.CMSSWTools import global_tag
-from JMTucker.Tools.Merge_cfg import cms, process
-from JMTucker.Tools.CMSSWTools import which_global_tag
+from DVCode.Tools.CMSSWTools import global_tag
+from DVCode.Tools.Merge_cfg import cms, process
+from DVCode.Tools.CMSSWTools import which_global_tag
 
 H = False
 repro = False
@@ -18,9 +18,9 @@ process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring())
 from Configuration.EventContent.EventContent_cff import MINIAODSIMEventContent as miniaod
 process.out.outputCommands = miniaod.outputCommands.value() + process.out.outputCommands.value()[1:]
 
-process.load('JMTucker.Tools.UpdatedJets_cff')
-process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
-process.load('JMTucker.MFVNeutralino.TriggerFloatsFilter_cfi')
+process.load('DVCode.Tools.UpdatedJets_cff')
+process.load('DVCode.MFVNeutralino.TriggerFloats_cff')
+process.load('DVCode.MFVNeutralino.TriggerFloatsFilter_cfi')
 process.mfvTriggerFloats.jets_src = 'updatedJetsMiniAOD'
 
 def a(name, **kwargs):
@@ -37,14 +37,14 @@ a('myhttwbug', ht_cut = 1000, myhttwbug_m_l1htt_cut = 0.4)
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    import JMTucker.Tools.Samples as Samples
+    import DVCode.Tools.Samples as Samples
     samples = [s for s in Samples.auxiliary_data_samples if s.name.startswith('SingleMuon')]
 
     for sample in samples:
         sample.json = '../jsons/ana_2015p6.json'
 
-    from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
-    from JMTucker.Tools.MetaSubmitter import *
+    from DVCode.Tools.CRAB3Submitter import CRABSubmitter
+    from DVCode.Tools.MetaSubmitter import *
     batch_name = 'TrigSkimV1'
     cs = CRABSubmitter(batch_name,
                        pset_modifier = chain_modifiers(H_modifier, repro_modifier),

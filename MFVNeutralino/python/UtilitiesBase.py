@@ -4,11 +4,11 @@ import sys, os, shutil
 from pprint import pprint
 from glob import glob
 from time import time
-from JMTucker.Tools import Samples, SampleFiles, colors
-from JMTucker.Tools.general import bool_from_argv
-from JMTucker.Tools.hadd import hadd
-from JMTucker.Tools.CMSSWTools import is_edm_file, merge_edm_files, cmssw_base, json_path
-from JMTucker.MFVNeutralino import AnalysisConstants
+from DVCode.Tools import Samples, SampleFiles, colors
+from DVCode.Tools.general import bool_from_argv
+from DVCode.Tools.hadd import hadd
+from DVCode.Tools.CMSSWTools import is_edm_file, merge_edm_files, cmssw_base, json_path
+from DVCode.MFVNeutralino import AnalysisConstants
 
 def hadd_or_merge(out_fn, files):
     files = [fn for fn in files if os.path.exists(fn)]

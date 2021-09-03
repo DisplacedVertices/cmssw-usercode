@@ -5,8 +5,8 @@
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
-#include "JMTucker/MFVNeutralinoFormats/interface/MCInteractions.h"
-#include "JMTucker/Tools/interface/GenUtilities.h"
+#include "DVCode/MFVNeutralinoFormats/interface/MCInteractions.h"
+#include "DVCode/Tools/interface/GenUtilities.h"
 
 class MFVGenParticleFilter : public edm::EDFilter {
 public:

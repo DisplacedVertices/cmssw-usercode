@@ -1,5 +1,5 @@
-#ifndef JMTucker_MFVNeutralinoFormats_interface_TriggerEnum_h
-#define JMTucker_MFVNeutralinoFormats_interface_TriggerEnum_h
+#ifndef DVCode_MFVNeutralinoFormats_interface_TriggerEnum_h
+#define DVCode_MFVNeutralinoFormats_interface_TriggerEnum_h
 
 #include <cassert>
 #include <numeric>

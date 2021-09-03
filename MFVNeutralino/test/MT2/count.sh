@@ -26,6 +26,6 @@ done
 echo -e '\nhadding data and background:'
 cd $outpath
 for cmd in hadd_data merge_background; do
-    python $CMSSW_BASE/src/JMTucker/MFVNeutralino/test/utilities.py $cmd
+    python $CMSSW_BASE/src/DVCode/MFVNeutralino/test/utilities.py $cmd
 done
 cd -

@@ -1,5 +1,5 @@
-#ifndef JMTucker_Tools_Framework_h
-#define JMTucker_Tools_Framework_h
+#ifndef DVCode_Tools_Framework_h
+#define DVCode_Tools_Framework_h
 
 #include <sstream>
 #include "DataFormats/Common/interface/Ref.h"

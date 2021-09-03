@@ -5,7 +5,7 @@ from collections import defaultdict
 from itertools import izip
 from pprint import pprint
 from FWCore.PythonUtilities.LumiList import LumiList
-from JMTucker.Tools.general import popen
+from DVCode.Tools.general import popen
 
 # could use DBSAPI or DASAPI or whatever, but I'm lazy
 
@@ -244,7 +244,7 @@ if __name__ == '__main__':
     #execfile('events_to_debug.txt')
     #pprint(files_for_events(duh, 'fuh'))
     #pprint(files_for_events(duh, '/Cosmics/Commissioning2015-CosmicSP-CosmicsSP_07Feb2015-v2/RAW-RECO'))
-    #from JMTucker.Tools.Samples import *
+    #from DVCode.Tools.Samples import *
     #for s in data_samples[:5]:
     #    pprint(files_for_events(duh, s.dataset))
 

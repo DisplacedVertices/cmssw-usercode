@@ -51,7 +51,7 @@ if __name__ == '__main__':
     import sys
 
     if 'parse' in sys.argv:
-        from JMTucker.Tools.ROOTTools import *
+        from DVCode.Tools.ROOTTools import *
         print 'ebins2 = {'
         for fn in sorted([s for s in sys.argv[1:] if s.endswith('.root')], key=_ksort):
             f = ROOT.TFile(fn)
@@ -63,7 +63,7 @@ if __name__ == '__main__':
         print '}'
 
     elif 'compare' in sys.argv:
-        from JMTucker.Tools import colors
+        from DVCode.Tools import colors
         from ebins2 import ebins2
         for k in sorted(ebins.keys(), key=_ksort):
             e  = ebins .get(k, (-1,-1,-1))

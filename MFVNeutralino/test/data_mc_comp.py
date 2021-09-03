@@ -2,9 +2,9 @@
 
 import os
 from functools import partial
-import JMTucker.MFVNeutralino.AnalysisConstants as ac
-from JMTucker.Tools.ROOTTools import *
-from JMTucker.Tools import Samples
+import DVCode.MFVNeutralino.AnalysisConstants as ac
+from DVCode.Tools.ROOTTools import *
+from DVCode.Tools import Samples
 
 year = '2017p8'
 version = 'V23m'

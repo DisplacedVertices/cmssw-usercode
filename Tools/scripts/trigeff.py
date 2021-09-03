@@ -53,7 +53,7 @@ if options.table_apply_prescales_in_sort:
 ################################################################################
 
 from math import log10
-from JMTucker.Tools.ROOTTools import *
+from DVCode.Tools.ROOTTools import *
 
 input_f = ROOT.TFile(options.input_fn)
 

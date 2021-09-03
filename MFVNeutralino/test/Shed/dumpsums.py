@@ -1,6 +1,6 @@
 import sys, os
-from JMTucker.Tools.ROOTTools import ROOT
-import JMTucker.Tools.Samples as Samples
+from DVCode.Tools.ROOTTools import ROOT
+import DVCode.Tools.Samples as Samples
 
 for i, fn in enumerate(sys.argv[1:]):
     if not fn.endswith('.root') or not os.path.isfile(fn):

@@ -2,10 +2,10 @@
 
 import platform, sys, os, string, shutil, time, base64, zlib, imp, cPickle as pickle
 from datetime import datetime, timedelta
-from JMTucker.Tools.CMSSWTools import make_tarball, find_output_files
-from JMTucker.Tools.CRAB3ToolsBase import crab_dirs_root, crab_renew_proxy_if_needed
-from JMTucker.Tools.CondorTools import cs_timestamp
-from JMTucker.Tools.general import mkdirs_if_needed, popen, save_git_status, int_ceil, touch
+from DVCode.Tools.CMSSWTools import make_tarball, find_output_files
+from DVCode.Tools.CRAB3ToolsBase import crab_dirs_root, crab_renew_proxy_if_needed
+from DVCode.Tools.CondorTools import cs_timestamp
+from DVCode.Tools.general import mkdirs_if_needed, popen, save_git_status, int_ceil, touch
 
 if not os.environ.has_key('SCRAM_ARCH') or not os.environ.has_key('CMSSW_VERSION'):
     raise EnvironmentError('CMSSW environment not set?')

@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 
 import os
-from JMTucker.Tools.ROOTTools import *
-from JMTucker.Tools.Sample import norm_from_file
-from JMTucker.Tools import Samples
-from JMTucker.MFVNeutralino.PerSignal import PerSignal
+from DVCode.Tools.ROOTTools import *
+from DVCode.Tools.Sample import norm_from_file
+from DVCode.Tools import Samples
+from DVCode.MFVNeutralino.PerSignal import PerSignal
 
 set_style()
 ps = plot_saver(plot_dir('rmtracks_v15'), size=(1000,500), log=False)

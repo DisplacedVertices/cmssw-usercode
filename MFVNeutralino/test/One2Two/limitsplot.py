@@ -5,8 +5,8 @@ from array import array
 from collections import defaultdict
 from itertools import izip
 from pprint import pprint
-from JMTucker.Tools.ROOTTools import *
-from JMTucker.Tools.general import from_pickle
+from DVCode.Tools.ROOTTools import *
+from DVCode.Tools.general import from_pickle
 from limitsinput import sample_iterator, axisize
 
 def fmt(t, title, xtitle, color):

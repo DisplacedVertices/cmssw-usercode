@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from JMTucker.Tools.BasicAnalyzer_cfg import *
-from JMTucker.Tools.Year import year
+from DVCode.Tools.BasicAnalyzer_cfg import *
+from DVCode.Tools.Year import year
 
 settings = CMSSWSettings()
 settings.is_mc = True
@@ -12,10 +12,10 @@ sample_files(process, 'qcdht2000_%s' % year, 'miniaod', 1)
 cmssw_from_argv(process)
 
 process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
-process.load('JMTucker.Tools.MCStatProducer_cff')
-process.load('JMTucker.Tools.PATTupleSelection_cfi')
-process.load('JMTucker.Tools.UpdatedJets_cff')
-process.load('JMTucker.Tools.WeightProducer_cfi')
+process.load('DVCode.Tools.MCStatProducer_cff')
+process.load('DVCode.Tools.PATTupleSelection_cfi')
+process.load('DVCode.Tools.UpdatedJets_cff')
+process.load('DVCode.Tools.WeightProducer_cfi')
 
 process.selectedPatJets.src = 'updatedJetsMiniAOD'
 process.selectedPatJets.cut = process.jtupleParams.jetCut
@@ -33,15 +33,15 @@ if year == 2017:
     process.JMTBTagEfficiencyOld = process.JMTBTagEfficiency.clone(old = True)
     process.p *= process.JMTBTagEfficiencyOld
 
-from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
+from DVCode.MFVNeutralino.EventFilter import setup_event_filter
 setup_event_filter(process, input_is_miniaod=True, mode='jets only novtx', event_filter_jes_mult=0)
 
 ReferencedTagsTaskAdder(process)('p')
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.MetaSubmitter import *
-    import JMTucker.Tools.Samples as Samples 
+    from DVCode.Tools.MetaSubmitter import *
+    import DVCode.Tools.Samples as Samples 
 
     if year == 2017:
         samples = Samples.qcd_samples_2017 + Samples.ttbar_samples_2017
@@ -55,7 +55,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     ms.submit(samples)
 
 elif __name__ == '__main__' and hasattr(sys, 'argv') and 'ana' in sys.argv:
-    from JMTucker.Tools.ROOTTools import *
+    from DVCode.Tools.ROOTTools import *
     fn = root_fns_from_argv()[0]
     f = ROOT.TFile(fn, 'update')
     d = f.GetDirectory('JMTBTagEfficiency')

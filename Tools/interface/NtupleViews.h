@@ -1,9 +1,9 @@
-#ifndef JMTucker_Tools_NtupleTrackRescaler_h
-#define JMTucker_Tools_NtupleTrackRescaler_h
+#ifndef DVCode_Tools_NtupleTrackRescaler_h
+#define DVCode_Tools_NtupleTrackRescaler_h
 
 #define JMT_STANDALONE
-#include "JMTucker/Tools/interface/AnalysisEras.h"
-#include "JMTucker/Tools/interface/TrackRescaler.h"
+#include "DVCode/Tools/interface/AnalysisEras.h"
+#include "DVCode/Tools/interface/TrackRescaler.h"
 
 namespace jmt {
   class RescaledTracksSubNtupleView : public TracksSubNtuple {

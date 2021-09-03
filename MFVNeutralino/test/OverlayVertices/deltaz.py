@@ -1,4 +1,4 @@
-from JMTucker.MFVNeutralino.MiniTreeBase import *
+from DVCode.MFVNeutralino.MiniTreeBase import *
 
 ROOT.gStyle.SetOptStat('ourm')
 

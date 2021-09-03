@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys
-from JMTucker.Tools.ROOTTools import *
+from DVCode.Tools.ROOTTools import *
 cmssw_setup()
 
 fn = sys.argv[1]

@@ -1,7 +1,7 @@
-from JMTucker.MFVNeutralino.NtupleCommon import dataset
-from JMTucker.Tools import colors
-from JMTucker.Tools.ROOTTools import *
-from JMTucker.Tools.SampleFiles import get_local_fns
+from DVCode.MFVNeutralino.NtupleCommon import dataset
+from DVCode.Tools import colors
+from DVCode.Tools.ROOTTools import *
+from DVCode.Tools.SampleFiles import get_local_fns
 
 cmssw_setup()
 set_style()

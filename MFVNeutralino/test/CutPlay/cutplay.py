@@ -1,4 +1,4 @@
-from JMTucker.Tools.BasicAnalyzer_cfg import *
+from DVCode.Tools.BasicAnalyzer_cfg import *
 
 use_weights = True
 ntracks, nvtx = ntracks_nvtx = 5,2 #3,1
@@ -15,8 +15,8 @@ sample_files(process, 'qcdht2000_2017', dataset, 1)
 process.TFileService.fileName = 'cutplay.root'
 cmssw_from_argv(process)
 
-process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
-process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
+process.load('DVCode.MFVNeutralino.VertexSelector_cfi')
+process.load('DVCode.MFVNeutralino.AnalysisCuts_cfi')
 vtx_sel = process.mfvSelectedVerticesTight
 ana_sel = process.mfvAnalysisCuts
 
@@ -117,14 +117,14 @@ for name, vtx_change, ana_change in changes:
 
 
 if use_weights:
-    process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
+    process.load('DVCode.MFVNeutralino.WeightProducer_cfi')
 
-import JMTucker.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
+import DVCode.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
 SimpleTriggerEfficiency.setup_endpath(process, weight_src='mfvWeight' if use_weights else '')
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.MetaSubmitter import *
+    from DVCode.Tools.MetaSubmitter import *
 
     samples = pick_samples(dataset, all_signal=(ntracks == 5 and nvtx == 2), data=False)
     set_splitting(samples, dataset, 'minitree', data_json=json_path('ana_2017p8_1pc.json'))

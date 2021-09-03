@@ -1,5 +1,5 @@
-#include "JMTucker/MFVNeutralino/interface/Ntuple.h"
-#include "JMTucker/Tools/interface/NtupleReader.h"
+#include "DVCode/MFVNeutralino/interface/Ntuple.h"
+#include "DVCode/Tools/interface/NtupleReader.h"
 
 int main(int argc, char** argv) {
   jmt::NtupleReader<mfv::MiniNtuple2> nr;

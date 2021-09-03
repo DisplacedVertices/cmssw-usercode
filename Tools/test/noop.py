@@ -1,4 +1,4 @@
-from JMTucker.Tools.BasicAnalyzer_cfg import *
+from DVCode.Tools.BasicAnalyzer_cfg import *
 
 dataset = 'ntuplev22m' # 'miniaod'
 sample_files(process, 'qcdht0700_2017', dataset, 1)
@@ -9,9 +9,9 @@ add_analyzer(process, 'NoOP')
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.MetaSubmitter import *
-    from JMTucker.Tools.Year import year
-    from JMTucker.Tools import Samples
+    from DVCode.Tools.MetaSubmitter import *
+    from DVCode.Tools.Year import year
+    from DVCode.Tools import Samples
 
     if year == 2017:
         samples = Samples.qcd_samples_2017 + Samples.ttbar_samples_2017 + Samples.leptonic_samples_2017 + Samples.all_signal_samples_2017 + Samples.data_samples_2017

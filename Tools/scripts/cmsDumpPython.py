@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os, sys, tempfile
-from JMTucker.Tools.general import bool_from_argv
+from DVCode.Tools.general import bool_from_argv
 
 remove_newlines = bool_from_argv('remove_newlines')
 remove_blanks = bool_from_argv('remove_blanks')

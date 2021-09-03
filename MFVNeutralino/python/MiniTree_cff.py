@@ -1,8 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 
-from JMTucker.MFVNeutralino.VertexSelector_cfi import *
-from JMTucker.MFVNeutralino.AnalysisCuts_cfi import *
-from JMTucker.MFVNeutralino.WeightProducer_cfi import *
+from DVCode.MFVNeutralino.VertexSelector_cfi import *
+from DVCode.MFVNeutralino.AnalysisCuts_cfi import *
+from DVCode.MFVNeutralino.WeightProducer_cfi import *
 
 mfvAnalysisCutsGE1Vtx = mfvAnalysisCuts.clone(min_nvertex = 1)
 

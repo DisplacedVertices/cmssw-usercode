@@ -59,19 +59,19 @@ def setup_event_filter(process,
         event_filter = True
 
     if trigger_filter == 'jets only':
-        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterJetsOnly as triggerFilter
+        from DVCode.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterJetsOnly as triggerFilter
     elif trigger_filter == 'bjets only':
-        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterBJetsOnly as triggerFilter
+        from DVCode.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterBJetsOnly as triggerFilter
     elif trigger_filter == 'displaced dijet only':
-        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterDisplacedDijetOnly as triggerFilter
+        from DVCode.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterDisplacedDijetOnly as triggerFilter
     elif trigger_filter == 'HT OR bjets OR displaced dijet':
-        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterHTORBjetsORDisplacedDijet as triggerFilter
+        from DVCode.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterHTORBjetsORDisplacedDijet as triggerFilter
     elif trigger_filter == 'bjets OR displaced dijet veto HT':
-        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterBjetsORDisplacedDijetVetoHT as triggerFilter
+        from DVCode.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterBjetsORDisplacedDijetVetoHT as triggerFilter
     elif trigger_filter == 'leptons only':
-        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterLeptonsOnly as triggerFilter
+        from DVCode.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterLeptonsOnly as triggerFilter
     elif trigger_filter is True:
-        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilter as triggerFilter
+        from DVCode.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilter as triggerFilter
     elif trigger_filter is not False:
         raise ValueError('trigger_filter %r bad: must be one of ("jets only", "leptons only", "bjets only", "displaced dijet only", "HT OR bjets OR displaced dijet", "bjets OR displaced dijet veto HT", True, False)' % trigger_filter)
 
@@ -84,21 +84,21 @@ def setup_event_filter(process,
 
     if event_filter:
         if event_filter == 'jets only':
-            from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterJetsOnly as eventFilter
+            from DVCode.MFVNeutralino.EventFilter_cfi import mfvEventFilterJetsOnly as eventFilter
         elif event_filter == 'leptons only':
-            from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterLeptonsOnly as eventFilter
+            from DVCode.MFVNeutralino.EventFilter_cfi import mfvEventFilterLeptonsOnly as eventFilter
         elif event_filter == 'HT OR bjets OR displaced dijet':
-            from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterHTORBjetsORDisplacedDijet as eventFilter
+            from DVCode.MFVNeutralino.EventFilter_cfi import mfvEventFilterHTORBjetsORDisplacedDijet as eventFilter
         elif event_filter == 'bjets OR displaced dijet veto HT':
-            from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterBjetsORDisplacedDijetVetoHT as eventFilter
+            from DVCode.MFVNeutralino.EventFilter_cfi import mfvEventFilterBjetsORDisplacedDijetVetoHT as eventFilter
         elif event_filter is True:
-            from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilter as eventFilter
+            from DVCode.MFVNeutralino.EventFilter_cfi import mfvEventFilter as eventFilter
         elif event_filter is not False:
             raise ValueError('event_filter must be one of ("jets only", "leptons only", "HT OR bjets OR displaced dijet", "bjets OR displaced dijet veto HT", True, False)')
 
         eventFilter = eventFilter.clone()
         if input_is_miniaod:
-            process.load('JMTucker.Tools.UpdatedJets_cff')
+            process.load('DVCode.Tools.UpdatedJets_cff')
             overall *= process.updatedJetsSeqMiniAOD
             eventFilter.jets_src = 'updatedJetsMiniAOD'
             eventFilter.muons_src = 'slimmedMuons'
@@ -106,7 +106,7 @@ def setup_event_filter(process,
         setattr(process, event_filter_name, eventFilter)
 
         if event_filter_jes_mult > 0:
-            from JMTucker.Tools.JetShifter_cfi import jmtJetShifter as jetShifter
+            from DVCode.Tools.JetShifter_cfi import jmtJetShifter as jetShifter
             jetShifter = jetShifter.clone()
             if input_is_miniaod:
                 jetShifter.jets_src = 'updatedJetsMiniAOD'
@@ -122,10 +122,10 @@ def setup_event_filter(process,
             if not hasattr(process, 'mfvVertices'):
                 # assume if mfvVertices is set up, then the rest of this is too
                 process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
-                process.load('JMTucker.MFVNeutralino.Vertexer_cff')
+                process.load('DVCode.MFVNeutralino.Vertexer_cff')
                 if input_is_miniaod:
                     process.goodOfflinePrimaryVertices.src = 'offlineSlimmedPrimaryVertices'
-                    process.load('JMTucker.Tools.UnpackedCandidateTracks_cfi')
+                    process.load('DVCode.Tools.UnpackedCandidateTracks_cfi')
                     process.mfvVertexTracks.tracks_src = 'jmtUnpackedCandidateTracks'
                     process.jmtRescaledTracks.tracks_src = 'jmtUnpackedCandidateTracks' # JMTBAD use rescaled tracks
             vertexFilter = cms.EDFilter('VertexSelector', src = cms.InputTag('mfvVertices'), cut = cms.string('nTracks > 2'), filter = cms.bool(True))

@@ -3,8 +3,8 @@
 import os, sys, argparse
 join = os.path.join
 from glob import glob
-from JMTucker.Tools.CRAB3ToolsBase import crab_jobs_from_list
-from JMTucker.Tools.CondorTools import *
+from DVCode.Tools.CRAB3ToolsBase import crab_jobs_from_list
+from DVCode.Tools.CondorTools import *
 
 parser = argparse.ArgumentParser(description='cs_log: run less on stdout(+stderr,log) files from CondorSubmitter jobs\ndefault is to less stdout for each job supplied')
 parser.add_argument('condor_dir')

@@ -1,5 +1,5 @@
-#ifndef JMTucker_MFVNeutralinoFormats_JetVertexAssociation_h
-#define JMTucker_MFVNeutralinoFormats_JetVertexAssociation_h
+#ifndef DVCode_MFVNeutralinoFormats_JetVertexAssociation_h
+#define DVCode_MFVNeutralinoFormats_JetVertexAssociation_h
 
 #include "DataFormats/Common/interface/AssociationMap.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"

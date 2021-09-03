@@ -2,7 +2,7 @@
 
 import os, subprocess, tempfile, re
 from datetime import datetime
-from JMTucker.Tools import colors, eos
+from DVCode.Tools import colors, eos
 
 class HaddBatchResult(object):
     def __init__(self, kind, working_dir, new_name, new_dir, expected, files):

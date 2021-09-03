@@ -1,4 +1,4 @@
-from JMTucker.MFVNeutralino.NtupleCommon import *
+from DVCode.MFVNeutralino.NtupleCommon import *
 
 settings = NtupleSettings()
 settings.is_mc = True
@@ -29,8 +29,8 @@ else:
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.MetaSubmitter import *
-    from JMTucker.Tools import Samples
+    from DVCode.Tools.MetaSubmitter import *
+    from DVCode.Tools import Samples
 
     if year == 2017:
         samples = Samples.data_samples_2017 #+ Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.all_signal_samples_2017

@@ -4,8 +4,8 @@ import os, sys, shutil, re
 from fnmatch import fnmatch
 from pprint import pprint
 from collections import defaultdict
-from JMTucker.Tools.ROOTTools import *
-from JMTucker.Tools.general import bool_from_argv
+from DVCode.Tools.ROOTTools import *
+from DVCode.Tools.general import bool_from_argv
 
 if len(sys.argv) < 5:
     print 'usage: mergeByRunTH1.py in_fn out_fn min_run max_run [glob_pattern_1 ...]'

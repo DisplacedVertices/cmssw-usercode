@@ -1,5 +1,5 @@
 import sys
-from JMTucker.Tools.BasicAnalyzer_cfg import *
+from DVCode.Tools.BasicAnalyzer_cfg import *
 
 settings = CMSSWSettings()
 settings.is_mc = True
@@ -11,7 +11,7 @@ geometry_etc(process, settings)
 tfileservice(process, 'filtercheck.root')
 cmssw_from_argv(process)
 
-from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
+from DVCode.MFVNeutralino.EventFilter import setup_event_filter
 sef = lambda *a,**kwa: setup_event_filter(process, *a, input_is_miniaod=True, **kwa)
 sef('pTrigger', mode = 'trigger jets only')
 sef('pTriggerBjets', mode = 'trigger bjets only',name_ex = 'bjets')
@@ -27,13 +27,13 @@ if len(process.mfvTriggerFilter.HLTPaths) > 1:
         sef('p%s' % filt_name, name_ex=x)
         getattr(process, filt_name).HLTPaths = [x]
 
-import JMTucker.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
+import DVCode.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
 SimpleTriggerEfficiency.setup_endpath(process)
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.MetaSubmitter import *
-    from JMTucker.Tools import Samples
+    from DVCode.Tools.MetaSubmitter import *
+    from DVCode.Tools import Samples
 
     if year == 2017:
         samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.all_signal_samples_2017 + Samples.data_samples_2017

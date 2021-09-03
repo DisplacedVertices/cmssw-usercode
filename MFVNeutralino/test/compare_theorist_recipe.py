@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from JMTucker.Tools.ROOTTools import *
-import JMTucker.Tools.Samples as Samples
+from DVCode.Tools.ROOTTools import *
+import DVCode.Tools.Samples as Samples
 
 set_style()
 ps = plot_saver('plots/theorist_recipe/compare_theorist_recipe', size=(700,700), root=False)

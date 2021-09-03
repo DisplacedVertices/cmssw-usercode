@@ -1,5 +1,5 @@
 import FWCore.ParameterSet.Config as cms
-from JMTucker.MFVNeutralino.NtupleCommon import use_btag_triggers
+from DVCode.MFVNeutralino.NtupleCommon import use_btag_triggers
 
 mfvAnalysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                mevent_src = cms.InputTag('mfvEvent'),

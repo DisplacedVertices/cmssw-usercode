@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from JMTucker.MFVNeutralino.UtilitiesBase import *
+from DVCode.MFVNeutralino.UtilitiesBase import *
 
 ####
 
@@ -166,7 +166,7 @@ def cmd_effsprint():
         background_fns = ' '.join('%s_%s.root' % (x, year) for x in _background_samples(year=year))
         todo = [('background', background_fns), ('signals', 'mfv*%s.root' % year)]
         def do(cmd, outfn):
-            cmd = 'python %s %s %s' % (cmssw_base('src/JMTucker/MFVNeutralino/test/effsprint.py'), cmd, year)
+            cmd = 'python %s %s %s' % (cmssw_base('src/DVCode/MFVNeutralino/test/effsprint.py'), cmd, year)
             print cmd
             os.system('%s | tee %s' % (cmd, outfn))
             print

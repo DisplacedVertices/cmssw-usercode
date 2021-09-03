@@ -2,8 +2,8 @@ import sys, os
 from collections import defaultdict
 from glob import glob
 from gzip import GzipFile
-from JMTucker.Tools import colors
-from JMTucker.Tools.ROOTTools import ROOT, to_TH1D, to_array, get_integral, move_overflow_into_last_bin, set_style, lerp, bilerp
+from DVCode.Tools import colors
+from DVCode.Tools.ROOTTools import ROOT, to_TH1D, to_array, get_integral, move_overflow_into_last_bin, set_style, lerp, bilerp
 
 set_style()
 
@@ -15,7 +15,7 @@ class Params(object):
         # SignalEfficiencyCombiner--this simplifies the datacard and plot making downstream.
         self.years = '2016', '2017', '2018'
         self.nyears = len(self.years)
-        import JMTucker.MFVNeutralino.AnalysisConstants as ac
+        import DVCode.MFVNeutralino.AnalysisConstants as ac
         self.int_lumis = ac.scaled_int_lumi_2015p6, ac.scaled_int_lumi_2017, ac.scaled_int_lumi_2018
         self.fn = 'limitsinput.root'
         self.l1eeprefiring_2017 = True # whether to simulate L1 EE prefiring in 2017

@@ -1,7 +1,7 @@
 import sys, os
-from JMTucker.Tools.ROOTTools import ROOT
-import JMTucker.Tools.Samples as Samples
-from JMTucker.Tools.Sample import norm_from_file
+from DVCode.Tools.ROOTTools import ROOT
+import DVCode.Tools.Samples as Samples
+from DVCode.Tools.Sample import norm_from_file
 
 def depize(s):
     return float(s.replace('p','.').replace('n','-'))

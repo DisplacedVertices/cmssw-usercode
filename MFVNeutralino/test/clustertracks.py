@@ -1,14 +1,14 @@
 import sys
-from JMTucker.Tools.BasicAnalyzer_cfg import *
+from DVCode.Tools.BasicAnalyzer_cfg import *
 
 process.source.fileNames = ['/store/user/tucker/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/ntuplev9/161019_211934/0000/ntuple_1.root']
 process.TFileService.fileName = 'clustertracks.root'
 process.maxEvents.input = -1
 file_event_from_argv(process)
 
-process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
-process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
-process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
+process.load('DVCode.MFVNeutralino.VertexSelector_cfi')
+process.load('DVCode.MFVNeutralino.AnalysisCuts_cfi')
+process.load('DVCode.MFVNeutralino.WeightProducer_cfi')
 process.mfvAnalysisCuts.min_nvertex = 1
 
 process.p = cms.Path(process.mfvWeight * process.mfvSelectedVerticesTight * process.mfvAnalysisCuts)
@@ -25,8 +25,8 @@ for min_dbv in [0., 0.02, 0.05, 0.1]:
     process.p *= ana
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    import JMTucker.Tools.Samples as Samples 
+    from DVCode.Tools.CondorSubmitter import CondorSubmitter
+    import DVCode.Tools.Samples as Samples 
 
     samples = Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext + \
         [Samples.mfv_neu_tau00100um_M0800, Samples.mfv_neu_tau00300um_M0800, Samples.mfv_neu_tau01000um_M0800, Samples.mfv_neu_tau10000um_M0800] + \

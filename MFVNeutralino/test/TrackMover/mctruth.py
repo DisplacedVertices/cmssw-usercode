@@ -1,4 +1,4 @@
-from JMTucker.MFVNeutralino.NtupleCommon import *
+from DVCode.MFVNeutralino.NtupleCommon import *
 
 settings = NtupleSettings()
 settings.is_mc = True
@@ -14,7 +14,7 @@ dataset = 'miniaod' if settings.is_miniaod else 'main'
 sample_files(process, 'mfv_neu_tau010000um_M0800_year', dataset, 1)
 cmssw_from_argv(process)
 
-from JMTucker.Tools.NtupleFiller_cff import jmtNtupleFiller_pset
+from DVCode.Tools.NtupleFiller_cff import jmtNtupleFiller_pset
 
 process.mfvMovedTreeMCTruth = cms.EDAnalyzer('MFVMovedTracksTreer',
                                              jmtNtupleFiller_pset(settings.is_miniaod),
@@ -33,7 +33,7 @@ ReferencedTagsTaskAdder(process)('p')
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.MetaSubmitter import *
+    from DVCode.Tools.MetaSubmitter import *
 
     samples = pick_samples(dataset, all_signal='only')
     set_splitting(samples, dataset, 'ntuple')

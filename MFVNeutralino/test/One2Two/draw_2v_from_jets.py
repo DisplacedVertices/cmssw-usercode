@@ -3,7 +3,7 @@
 # why doesn't comparehists work on 2v_from_jets output?
 
 import sys, os
-from JMTucker.Tools.ROOTTools import *
+from DVCode.Tools.ROOTTools import *
 set_style()
 
 output_dir = sys.argv[1]

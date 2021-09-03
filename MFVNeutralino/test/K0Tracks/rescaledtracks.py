@@ -1,6 +1,6 @@
 import sys, os
-from JMTucker.Tools.ROOTTools import *
-from JMTucker.Tools.TrackRescaler import fcns
+from DVCode.Tools.ROOTTools import *
+from DVCode.Tools.TrackRescaler import fcns
 set_style()
 
 batch = sys.argv[1]

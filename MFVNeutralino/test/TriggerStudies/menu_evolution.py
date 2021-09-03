@@ -1,5 +1,5 @@
 import imp, tempfile, gzip, os, sys
-from JMTucker.Tools import colors
+from DVCode.Tools import colors
 
 wanted_path = 'HLT_PFHT1050_v'
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys, argparse
-from JMTucker.Tools.hadd import hadd
+from DVCode.Tools.hadd import hadd
 
 parser = argparse.ArgumentParser(description = 'hadd.py: run hadd wrapper',
                                  usage = '''

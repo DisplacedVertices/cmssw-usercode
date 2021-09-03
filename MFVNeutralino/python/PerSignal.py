@@ -1,4 +1,4 @@
-from JMTucker.Tools.ROOTTools import *
+from DVCode.Tools.ROOTTools import *
 
 class PerSignal:
     tau_names = {100: '100 #mum', 300: '300 #mum', 1000: '1 mm', 10000: '10 mm', 30000: '30 mm', 100000: '100 mm'}
@@ -221,7 +221,7 @@ if __name__ == '__main__':
     set_style()
     ps = plot_saver(options.plotpath, size=(600,600))
     
-    from JMTucker.Tools import Samples
+    from DVCode.Tools import Samples
 
     multijet = [s for s in Samples.mfv_signal_samples]
     dijet = Samples.mfv_ddbar_samples

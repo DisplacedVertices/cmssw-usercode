@@ -1,5 +1,5 @@
 import FWCore.ParameterSet.Config as cms
-from JMTucker.Tools.PATTupleSelection_cfi import jtupleParams
+from DVCode.Tools.PATTupleSelection_cfi import jtupleParams
 
 mfvEventFilter = cms.EDFilter('MFVEventFilter',
                               mode = cms.string('either'),

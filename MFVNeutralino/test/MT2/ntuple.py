@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from JMTucker.MFVNeutralino.NtupleCommon import *
+from DVCode.MFVNeutralino.NtupleCommon import *
 
 settings = NtupleSettings()
 settings.is_mc = True
@@ -21,7 +21,7 @@ cmssw_from_argv(process)
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.MetaSubmitter import *
+    from DVCode.Tools.MetaSubmitter import *
 
     samples = pick_samples(dataset, ttbar=False, all_signal=False)
     samples += [Samples.mfv_neu_tau010000um_M0800_2017]

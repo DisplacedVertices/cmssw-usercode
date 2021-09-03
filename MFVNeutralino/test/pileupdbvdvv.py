@@ -1,4 +1,4 @@
-from JMTucker.MFVNeutralino.MiniTreeBase import *
+from DVCode.MFVNeutralino.MiniTreeBase import *
 ROOT.gStyle.SetOptStat(2211)
 
 min_ntracks, tree_path = 3, '/uscms_data/d2/tucker/crab_dirs/MiniTreeV23m'

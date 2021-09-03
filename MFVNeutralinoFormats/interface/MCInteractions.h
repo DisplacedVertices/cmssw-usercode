@@ -1,5 +1,5 @@
-#ifndef JMTucker_MFVNeutralinoFormats_MCInteractions_h
-#define JMTucker_MFVNeutralinoFormats_MCInteractions_h
+#ifndef DVCode_MFVNeutralinoFormats_MCInteractions_h
+#define DVCode_MFVNeutralinoFormats_MCInteractions_h
 
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 

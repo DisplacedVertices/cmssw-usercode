@@ -1,4 +1,4 @@
-from JMTucker.Tools.BasicAnalyzer_cfg import *
+from DVCode.Tools.BasicAnalyzer_cfg import *
 
 debug = 'debug' in sys.argv
 dataset = 'miniaod' if 'miniaod' in sys.argv else 'main'
@@ -8,7 +8,7 @@ sample_files(process, 'mfv_ddbar_tau01000um_M1600', dataset)
 max_events(process, 1000)
 file_event_from_argv(process)
 
-process.load('JMTucker.MFVNeutralino.GenParticles_cff')
+process.load('DVCode.MFVNeutralino.GenParticles_cff')
 process.mfvGenParticles.debug = debug
 process.mfvGenParticles.histos = True
 #process.mfvGenParticles.last_flag_check = False
@@ -18,7 +18,7 @@ if dataset == 'miniaod':
 
 if debug:
     report_every(process, 1)
-    process.load('JMTucker.Tools.ParticleListDrawer_cff')
+    process.load('DVCode.Tools.ParticleListDrawer_cff')
     if dataset == 'miniaod':
         process.ParticleListDrawer.src = 'prunedGenParticles'
     process.primaries   = process.ParticleListDrawer.clone(src = cms.InputTag('mfvGenParticles', 'primaries'))
@@ -30,8 +30,8 @@ else:
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.MetaSubmitter import *
-    import JMTucker.Tools.Samples as Samples
+    from DVCode.Tools.MetaSubmitter import *
+    import DVCode.Tools.Samples as Samples
 
     samples = Samples.mfv_signal_samples + Samples.mfv_ddbar_samples + Samples.mfv_bbbar_samples
     samples = [s for s in samples if s.has_dataset(dataset)]

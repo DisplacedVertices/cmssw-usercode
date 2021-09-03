@@ -1,4 +1,4 @@
-from JMTucker.Tools.BasicAnalyzer_cfg import *
+from DVCode.Tools.BasicAnalyzer_cfg import *
 
 prints = 1
 
@@ -19,25 +19,25 @@ process.mfvPackedCands = cms.EDAnalyzer('MFVPackedCandidates',
                                         prints = cms.int32(prints),
                                         )
 
-process.load('JMTucker.Tools.UnpackedCandidateTracks_cfi')
+process.load('DVCode.Tools.UnpackedCandidateTracks_cfi')
 process.jmtUnpackedCandidateTracks.debug = prints
 #process.mfvPackedCands.tracks_src = 'jmtUnpackedCandidateTracks'
 process.p = cms.Path(process.goodOfflinePrimaryVertices * process.jmtUnpackedCandidateTracks * process.mfvPackedCands)
 
-import JMTucker.MFVNeutralino.EventFilter
-JMTucker.MFVNeutralino.EventFilter.setup_event_filter(process, path_name='p')
+import DVCode.MFVNeutralino.EventFilter
+DVCode.MFVNeutralino.EventFilter.setup_event_filter(process, path_name='p')
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.Year import year
-    import JMTucker.Tools.Samples as Samples
+    from DVCode.Tools.Year import year
+    import DVCode.Tools.Samples as Samples
     samples = [Samples.mfv_neu_tau10000um_M1600]
     for sample in samples:
         sample.set_curr_dataset('miniaod')
         sample.split_by = 'events'
         sample.events_per = 3000
 
-    from JMTucker.Tools.MetaSubmitter import *
+    from DVCode.Tools.MetaSubmitter import *
     ms = MetaSubmitter('PackedCandsV2', dataset='miniaod')
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, H_modifier, repro_modifier, secondary_files_modifier('main'))
     ms.submit(samples)

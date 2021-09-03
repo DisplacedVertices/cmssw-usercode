@@ -1,9 +1,9 @@
 import sys, os, re
 from collections import Counter
 from pprint import pprint
-from JMTucker.Tools import eos, SampleFiles
-from JMTucker.Tools.general import bool_from_argv
-from JMTucker.Tools.hadd import hadd
+from DVCode.Tools import eos, SampleFiles
+from DVCode.Tools.general import bool_from_argv
+from DVCode.Tools.hadd import hadd
 
 if len(sys.argv) < 3:
     sys.exit('usage: %s dataset sample\n  where dataset and sample are as registered in SampleFiles. sample can be "*" to mean all samples having the dataset.' % sys.argv[0])

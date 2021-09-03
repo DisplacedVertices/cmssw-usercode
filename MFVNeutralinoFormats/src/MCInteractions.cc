@@ -1,5 +1,5 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
-#include "JMTucker/MFVNeutralinoFormats/interface/MCInteractions.h"
+#include "DVCode/MFVNeutralinoFormats/interface/MCInteractions.h"
 
 namespace mfv {
   bool MCInteractionHolderTtbar::valid() const {

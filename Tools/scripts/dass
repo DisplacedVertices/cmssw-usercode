@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 import sys
-from JMTucker.Tools.general import typed_from_argv
-from JMTucker.Tools.DBS import das_query
+from DVCode.Tools.general import typed_from_argv
+from DVCode.Tools.DBS import das_query
 
 instance = typed_from_argv(int)
 if instance is None:

@@ -65,7 +65,7 @@ if len(options.positional) < 3:
     parser.print_help()
     sys.exit(1)
 
-from JMTucker.Tools.ROOTTools import *
+from DVCode.Tools.ROOTTools import *
 
 options.file_dirs = []
 options.files = []

@@ -1,12 +1,12 @@
 import os, sys
-from JMTucker.Tools.BasicAnalyzer_cfg import *
-from JMTucker.Tools.PATTupleSelection_cfi import jtupleParams
+from DVCode.Tools.BasicAnalyzer_cfg import *
+from DVCode.Tools.PATTupleSelection_cfi import jtupleParams
 
 input_files(process, '/store/mc/RunIIFall17MiniAOD/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/94X_mc2017_realistic_v10-v1/20000/32C049AF-E201-E811-AA77-34E6D7BEAF01.root')
 max_events(process, 100)
 tfileservice(process, 'resolutions_histos.root')
 
-process.load('JMTucker.Tools.MCStatProducer_cff')
+process.load('DVCode.Tools.MCStatProducer_cff')
 process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
 process.load('HLTrigger.HLTfilters.hltHighLevel_cfi')
 

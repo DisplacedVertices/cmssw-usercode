@@ -1,5 +1,5 @@
-#ifndef JMTucker_Tools_Ntuple_h
-#define JMTucker_Tools_Ntuple_h
+#ifndef DVCode_Tools_Ntuple_h
+#define DVCode_Tools_Ntuple_h
 
 #include <cassert>
 #include <numeric>

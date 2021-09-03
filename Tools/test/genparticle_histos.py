@@ -1,6 +1,6 @@
-from JMTucker.Tools.BasicAnalyzer_cfg import *
+from DVCode.Tools.BasicAnalyzer_cfg import *
 
-import JMTucker.Tools.SampleFiles as sf
+import DVCode.Tools.SampleFiles as sf
 #sf.set_process(process, 'qcdht2000', 'main', 4)
 sf.set_process(process, 'testqcdht2000', 'main')
 process.TFileService.fileName = 'genparticle_histos.root'

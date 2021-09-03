@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
-from JMTucker.Tools.Sample import *
-from JMTucker.Tools.CMSSWTools import json_path
+from DVCode.Tools.Sample import *
+from DVCode.Tools.CMSSWTools import json_path
 
 ########################################################################
 
@@ -753,8 +753,8 @@ if __name__ == '__main__':
 
     import sys, re
     from pprint import pprint
-    from JMTucker.Tools import DBS, colors
-    from JMTucker.Tools.general import popen
+    from DVCode.Tools import DBS, colors
+    from DVCode.Tools.general import popen
 
     if 0:
         for year in 2017, 2018:

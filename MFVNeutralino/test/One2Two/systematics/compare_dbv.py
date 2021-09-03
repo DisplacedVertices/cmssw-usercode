@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-from JMTucker.Tools.ROOTTools import *
-import JMTucker.Tools.Samples as Samples
-import JMTucker.MFVNeutralino.AnalysisConstants as ac
+from DVCode.Tools.ROOTTools import *
+import DVCode.Tools.Samples as Samples
+import DVCode.MFVNeutralino.AnalysisConstants as ac
 
 set_style()
 ROOT.TH1.SetDefaultSumw2()

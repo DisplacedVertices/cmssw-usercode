@@ -1,7 +1,7 @@
 import sys, os
 from math import ceil
-from JMTucker.Tools.ROOTTools import *
-from JMTucker.Tools import SampleFiles as sf
+from DVCode.Tools.ROOTTools import *
+from DVCode.Tools import SampleFiles as sf
 
 used_half_mc = False
 target_nevents = 50000 # the number of presel events that make it to the vertexer per job

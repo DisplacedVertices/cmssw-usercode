@@ -1,7 +1,7 @@
 from array import array
-from JMTucker.Tools.ROOTTools import *
-from JMTucker.Tools.Samples import ttbar
-import JMTucker.MFVNeutralino.AnalysisConstants as ac 
+from DVCode.Tools.ROOTTools import *
+from DVCode.Tools.Samples import ttbar
+import DVCode.MFVNeutralino.AnalysisConstants as ac 
 
 set_style()
 ps = plot_saver('plots/negweights', size=(600,600))

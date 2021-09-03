@@ -1,5 +1,5 @@
-#ifndef JMTucker_Tools_StatCalculator_h
-#define JMTucker_Tools_StatCalculator_h
+#ifndef DVCode_Tools_StatCalculator_h
+#define DVCode_Tools_StatCalculator_h
 
 #include <vector>
 

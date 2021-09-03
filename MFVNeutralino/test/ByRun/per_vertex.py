@@ -1,13 +1,13 @@
-from JMTucker.Tools.BasicAnalyzer_cfg import *
+from DVCode.Tools.BasicAnalyzer_cfg import *
 
-from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset
+from DVCode.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset
 sample_files(process, 'JetHT2017F', dataset, 1)
 tfileservice(process, 'per_vertex.root')
 cmssw_from_argv(process)
 
-process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
-process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
-process.load('JMTucker.MFVNeutralino.ByX_cfi')
+process.load('DVCode.MFVNeutralino.VertexSelector_cfi')
+process.load('DVCode.MFVNeutralino.AnalysisCuts_cfi')
+process.load('DVCode.MFVNeutralino.ByX_cfi')
 
 process.mfvAnalysisCuts.min_nvertex = 1
 process.mfvAnalysisCuts.max_nvertex = 1 # nsv >= 2 blinded in ByX but set this anyway
@@ -23,7 +23,7 @@ for ntk in 3,4: #,5:
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.MetaSubmitter import *
+    from DVCode.Tools.MetaSubmitter import *
 
     samples = pick_samples(dataset, data='only')
     set_splitting(samples, dataset, 'minitree', data_json=json_path('ana_2017p8.json'))

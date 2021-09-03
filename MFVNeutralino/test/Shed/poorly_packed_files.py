@@ -2,8 +2,8 @@ import sys, os, re, random
 from collections import Counter
 from fnmatch import fnmatch
 from pprint import pprint
-from JMTucker.Tools import eos, SampleFiles
-from JMTucker.Tools.EdmFileInfo import EdmFileInfo
+from DVCode.Tools import eos, SampleFiles
+from DVCode.Tools.EdmFileInfo import EdmFileInfo
 
 if len(sys.argv) < 4:
     sys.exit('usage: %s dataset sample pattern nfiles\n  where dataset and sample are as registered in SampleFiles, and pattern is a file pattern like "ntuple_*", and nfiles is the number of randomly sampled files. sample can be "*" to mean all samples having the dataset.' % sys.argv[0])

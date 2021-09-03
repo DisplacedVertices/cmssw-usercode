@@ -1,5 +1,5 @@
-from JMTucker.Tools.CMSSWTools import cmssw_base
-from JMTucker.Tools.ROOTTools import ROOT
+from DVCode.Tools.CMSSWTools import cmssw_base
+from DVCode.Tools.ROOTTools import ROOT
 
 class TrackRescalerFcnsHelper(object):
     debug = False
@@ -9,7 +9,7 @@ class TrackRescalerFcnsHelper(object):
     etas = ['lt1p5','gt1p5']
     def __init__(self):
         if not self.lines:
-            self.lines = [x for x in file(cmssw_base('src/JMTucker/Tools/src/TrackRescaler.cc')) if ('p_dxy' in x or 'dxyerr' in x) and ' = ' in x and 'dsz' not in x]
+            self.lines = [x for x in file(cmssw_base('src/DVCode/Tools/src/TrackRescaler.cc')) if ('p_dxy' in x or 'dxyerr' in x) and ' = ' in x and 'dsz' not in x]
             assert len(self.lines) == 32
             if self.debug:
                 for i,l in enumerate(self.lines):

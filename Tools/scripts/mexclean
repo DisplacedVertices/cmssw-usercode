@@ -2,9 +2,9 @@
 
 import os, sys, shutil
 from collections import defaultdict 
-from JMTucker.Tools.CondorTools import is_cs_dir
-from JMTucker.Tools.CRAB3ToolsBase import is_crab_working_dir
-from JMTucker.Tools.general import bool_from_argv
+from DVCode.Tools.CondorTools import is_cs_dir
+from DVCode.Tools.CRAB3ToolsBase import is_crab_working_dir
+from DVCode.Tools.general import bool_from_argv
 
 if len(sys.argv) < 2:
     print 'usage: mexclean [-d|--dry-run] dir_of_wds [dir_of_wds2 ...]'

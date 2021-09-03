@@ -1,5 +1,5 @@
-#ifndef JMTucker_Tools_NtupleReader_h
-#define JMTucker_Tools_NtupleReader_h
+#ifndef DVCode_Tools_NtupleReader_h
+#define DVCode_Tools_NtupleReader_h
 
 #include <cmath>
 #include <cstdlib>
@@ -12,13 +12,13 @@
 #include "TStopwatch.h"
 #include "TTree.h"
 #define JMT_STANDALONE
-#include "JMTucker/Tools/interface/AnalysisEras.h"
-#include "JMTucker/Tools/interface/ExtValue.h"
-#include "JMTucker/Tools/interface/LumiList.h"
-#include "JMTucker/Tools/interface/PileupWeights.h"
-#include "JMTucker/Tools/interface/Prob.h"
-#include "JMTucker/Tools/interface/ROOTTools.h"
-#include "JMTucker/Tools/interface/Year.h"
+#include "DVCode/Tools/interface/AnalysisEras.h"
+#include "DVCode/Tools/interface/ExtValue.h"
+#include "DVCode/Tools/interface/LumiList.h"
+#include "DVCode/Tools/interface/PileupWeights.h"
+#include "DVCode/Tools/interface/Prob.h"
+#include "DVCode/Tools/interface/ROOTTools.h"
+#include "DVCode/Tools/interface/Year.h"
 
 #define NR_loop_continue return std::make_pair(true, nr.weight())
 #define NR_loop_cont(w) return std::make_pair(true, (w))
@@ -160,7 +160,7 @@ namespace jmt {
     bool init(bool for_copy=false) {
       if (submit_) {
         std::ostringstream o;
-        o << "from JMTucker.Tools.MetaSubmitter import *\n"
+        o << "from DVCode.Tools.MetaSubmitter import *\n"
           << "dataset = '" << submit_dataset_ << "'\n"
           << "samples = pick_samples(dataset, both_years=True, " << submit_samples_ << ")\n"
           << "NtupleReader_submit('" << submit_batch_ << "', dataset, samples, exe_fn='" << submit_exe_ << "', output_fn='" << out_fn_ << "')\n";

@@ -1,4 +1,4 @@
-from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
+from DVCode.Tools.BasicAnalyzer_cfg import cms, process
 
 process.source.fileNames = ['/store/user/tucker/sstop_genfsimreco_test/sstop_genfsimreco_test//15c4250952b10a469cc6da8beaecd65e/fastsim_9_1_Ziq.root']
 process.MessageLogger.cerr.FwkReport.reportEvery = 1

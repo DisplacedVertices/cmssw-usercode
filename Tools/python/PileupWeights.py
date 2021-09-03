@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 import re
-from JMTucker.Tools.CMSSWTools import cmssw_base
+from DVCode.Tools.CMSSWTools import cmssw_base
 
 def _parse(_r=re.compile(r'w_\["(.*)"\] = std::vector<double>\(\{(.*)\}\);')):
     w = {}
-    for line in open(cmssw_base('src/JMTucker/Tools/interface/PileupWeights.h')):
+    for line in open(cmssw_base('src/DVCode/Tools/interface/PileupWeights.h')):
         mo = _r.search(line)
         if mo:
             k, v = mo.groups()
@@ -20,7 +20,7 @@ def _parse(_r=re.compile(r'w_\["(.*)"\] = std::vector<double>\(\{(.*)\}\);')):
 pileup_weights = _parse()
 
 def get_pileup_weights(sample, cross=None):
-    from JMTucker.Tools.Year import year
+    from DVCode.Tools.Year import year
     weights = pileup_weights.get(sample, pileup_weights[year])
     if cross:
         cross = 'cross_%s' % cross
@@ -31,7 +31,7 @@ def get_pileup_weights(sample, cross=None):
 
 class derive_weights(object):
     def __init__(self, data_fn, mc_fn, data_path='pileup', mc_path='PileupDist/h_npu', tol=1e-9, raise_tol=True):
-        from JMTucker.Tools.ROOTTools import ROOT
+        from DVCode.Tools.ROOTTools import ROOT
 
         self.data_f = ROOT.TFile(data_fn)
         self.mc_f   = ROOT.TFile(mc_fn)
@@ -75,7 +75,7 @@ class derive_weights(object):
             self.weights.pop()
 
     def draw(self, fn):
-        from JMTucker.Tools.ROOTTools import ROOT, draw_in_order, differentiate_stat_box
+        from DVCode.Tools.ROOTTools import ROOT, draw_in_order, differentiate_stat_box
         self.data_h.SetLineColor(ROOT.kBlack)
         self.mc_h.SetLineColor(ROOT.kRed)
         self.data_h.SetLineWidth(2)

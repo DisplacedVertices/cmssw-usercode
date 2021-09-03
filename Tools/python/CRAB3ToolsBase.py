@@ -17,8 +17,8 @@ from collections import defaultdict
 from cStringIO import StringIO
 from pprint import pprint
 from FWCore.PythonUtilities.LumiList import LumiList
-from JMTucker.Tools import colors
-from JMTucker.Tools.general import bool_from_argv, typed_from_argv, popen
+from DVCode.Tools import colors
+from DVCode.Tools.general import bool_from_argv, typed_from_argv, popen
 
 class CRABToolsException(Exception):
     pass

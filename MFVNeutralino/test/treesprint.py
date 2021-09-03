@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-from JMTucker.Tools.ROOTTools import *
-from JMTucker.Tools.Sample import norm_from_file
-from JMTucker.Tools.Year import year
-from JMTucker.Tools.general import typed_from_argv, bool_from_argv
-from JMTucker.Tools import Samples
-import JMTucker.MFVNeutralino.AnalysisConstants as ac
+from DVCode.Tools.ROOTTools import *
+from DVCode.Tools.Sample import norm_from_file
+from DVCode.Tools.Year import year
+from DVCode.Tools.general import typed_from_argv, bool_from_argv
+from DVCode.Tools import Samples
+import DVCode.MFVNeutralino.AnalysisConstants as ac
 
 year = typed_from_argv(int, year, name='year')
 yearcheck = not bool_from_argv('noyearcheck')
@@ -49,7 +49,7 @@ for x in sys.argv[1:]:
         print 'using', x2
         fns.extend(glob(x2))
 if not fns:
-    from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version
+    from DVCode.MFVNeutralino.NtupleCommon import ntuple_version_use as version
     gg = '/uscms_data/d2/tucker/crab_dirs/MiniTree%s/*.root' % version
     print 'using default', gg
     fns = glob(gg)

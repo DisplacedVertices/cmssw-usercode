@@ -1,5 +1,5 @@
 import FWCore.ParameterSet.Config as cms
-from JMTucker.Tools.PileupWeights import get_pileup_weights
+from DVCode.Tools.PileupWeights import get_pileup_weights
 
 jmtWeight = cms.EDProducer('JMTWeightProducer',
                            enable = cms.bool(True),

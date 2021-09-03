@@ -1,4 +1,4 @@
-from JMTucker.MFVNeutralino.MiniTreeBase import *
+from DVCode.MFVNeutralino.MiniTreeBase import *
 
 set_style()
 ps = plot_saver(plot_dir('hip_simulation_templates'), size=(600,600))

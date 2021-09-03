@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import sys, os, argparse
-from JMTucker.Tools.CMSSWTools import make_tarball
+from DVCode.Tools.CMSSWTools import make_tarball
 
 parser = argparse.ArgumentParser(description = 'cmsMakeTarball.py: make a tarball suitable for distribution to grid sites a la crab')
 parser.add_argument('tarball_fn', help='The desired tarball fn.')
@@ -16,7 +16,7 @@ if options.standalone:
     import inspect
     script = inspect.getsource(inspect.getmodule(inspect.currentframe()))
     fcn = inspect.getsource(make_tarball)
-    print script.replace('from JMTucker.Tools.CMSSWTools import make_tarball\n', fcn)
+    print script.replace('from DVCode.Tools.CMSSWTools import make_tarball\n', fcn)
 else:
     if os.path.exists(options.tarball_fn):
         raise IOError('refusing to clobber %s' % options.tarball_fn)

@@ -108,8 +108,8 @@ process = customiseEarlyDelete(process)
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.MetaSubmitter import *
-    import JMTucker.Tools.Samples as Samples
+    from DVCode.Tools.MetaSubmitter import *
+    import DVCode.Tools.Samples as Samples
 
     samples = Samples.all_signal_samples_2017
     for s in samples:

@@ -1,5 +1,5 @@
 import sys
-from JMTucker.Tools.ROOTTools import *
+from DVCode.Tools.ROOTTools import *
 
 fn = sys.argv[1]
 f = ROOT.TFile(fn)

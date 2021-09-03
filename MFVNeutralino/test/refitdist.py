@@ -1,14 +1,14 @@
-from JMTucker.Tools.BasicAnalyzer_cfg import *
+from DVCode.Tools.BasicAnalyzer_cfg import *
 
-from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset
+from DVCode.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset
 dataset += '_nm1refits'
 sample_files(process, 'qcdht2000_2017', dataset, 1)
 tfileservice(process, 'refitdist.root')
 cmssw_from_argv(process)
 
-process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
-process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
-process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
+process.load('DVCode.MFVNeutralino.WeightProducer_cfi')
+process.load('DVCode.MFVNeutralino.AnalysisCuts_cfi')
+process.load('DVCode.MFVNeutralino.VertexSelector_cfi')
 process.mfvAnalysisCuts.apply_vertex_cuts = False
 process.p = cms.Path(process.mfvWeight * process.mfvAnalysisCuts)
 
@@ -35,7 +35,7 @@ for mindbv_s, mindbv in ('', None), ('mindbv0p035', 0.035), ('mindbv0p07', 0.07)
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.MetaSubmitter import *
+    from DVCode.Tools.MetaSubmitter import *
 
     samples = pick_samples(dataset, ttbar=False, data=True)
     set_splitting(samples, dataset, 'minitree', data_json=json_path('ana_2017p8_10pc.json'))

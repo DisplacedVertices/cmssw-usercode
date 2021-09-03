@@ -1,8 +1,8 @@
 import sys, re
-from JMTucker.Tools.CRAB3Submitter import CRABSubmitter
-from JMTucker.Tools.CondorSubmitter import CondorSubmitter, NtupleReader_submit
-from JMTucker.Tools.Year import year
-from JMTucker.Tools import Samples
+from DVCode.Tools.CRAB3Submitter import CRABSubmitter
+from DVCode.Tools.CondorSubmitter import CondorSubmitter, NtupleReader_submit
+from DVCode.Tools.Year import year
+from DVCode.Tools import Samples
 
 class max_output_modifier:
     def __init__(self, n):
@@ -48,7 +48,7 @@ class half_mc_modifier:
     def __call__(self, sample):
         if sample.is_mc:
             x = '''
-from JMTucker.MFVNeutralino.WeightProducer_cfi import half_mc_by_lumi
+from DVCode.MFVNeutralino.WeightProducer_cfi import half_mc_by_lumi
 half_mc_by_lumi(process, %r)
 ''' % self.first
             return [x], []
@@ -64,7 +64,7 @@ class quarter_mc_modifier:
     def __call__(self, sample):
         if sample.is_mc:
             x = '''
-from JMTucker.MFVNeutralino.WeightProducer_cfi import quarter_mc_by_lumi
+from DVCode.MFVNeutralino.WeightProducer_cfi import quarter_mc_by_lumi
 quarter_mc_by_lumi(process, %r, %r, %r, %r)
 ''' % (self.first, self.second, self.third, self.fourth)
             return [x], []
@@ -82,7 +82,7 @@ class npu_filter_modifier:
             max_npu = self.samples[sample.name]
             paths_to_skip = self.paths_to_skip
             x = '''
-process.load('JMTucker.Tools.NpuFilter_cfi')
+process.load('DVCode.Tools.NpuFilter_cfi')
 process.jmtNpuFilter%(which)s.max_npu = %(max_npu)i
 for n,p in process.paths.iteritems():
     if n not in %(paths_to_skip)r:
@@ -104,7 +104,7 @@ class per_sample_pileup_weights_modifier:
             if sample.is_signal and sample.is_private:
                 which = 'mfv_signals'
             x = '''
-from JMTucker.Tools.PileupWeights import get_pileup_weights
+from DVCode.Tools.PileupWeights import get_pileup_weights
 weights = get_pileup_weights(%r, %r)
 ''' % (which, self.cross)
             if self.module_names == 'auto':

@@ -3,10 +3,10 @@
 import sys, re, os
 from pprint import pprint
 from fnmatch import fnmatch
-from JMTucker.Tools.general import bool_from_argv, touch
-from JMTucker.Tools.CondorTools import cs_dirs_from_argv, cs_published
-from JMTucker.Tools.CRAB3Tools import crab_dirs_from_argv, crab_get_output_dir, crab_output_files
-from JMTucker.Tools import colors, eos
+from DVCode.Tools.general import bool_from_argv, touch
+from DVCode.Tools.CondorTools import cs_dirs_from_argv, cs_published
+from DVCode.Tools.CRAB3Tools import crab_dirs_from_argv, crab_get_output_dir, crab_output_files
+from DVCode.Tools import colors, eos
 
 forget_logs = bool_from_argv('forget_logs')
 

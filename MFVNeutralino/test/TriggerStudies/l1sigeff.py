@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 import sys
-from JMTucker.Tools.BasicAnalyzer_cfg import *
+from DVCode.Tools.BasicAnalyzer_cfg import *
 
-import JMTucker.Tools.SampleFiles as sf
+import DVCode.Tools.SampleFiles as sf
 process.source.fileNames = sf.get('mfv_neu_tau01000um_M0300', 'main')[1][:1]
 
 process.TFileService.fileName = 'l1sigeff.root'
@@ -18,12 +18,12 @@ for ht in hts:
     setattr(process, 'l1%i' % ht, l1)
     setattr(process, 'p%i'  % ht, p)
 
-import JMTucker.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
+import DVCode.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
 SimpleTriggerEfficiency.setup_endpath(process)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-    import JMTucker.Tools.Samples as Samples 
+    from DVCode.Tools.CondorSubmitter import CondorSubmitter
+    import DVCode.Tools.Samples as Samples 
 
     samples = Samples.mfv_signal_samples + \
         Samples.mfv_signal_samples_glu + \
@@ -36,7 +36,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     CondorSubmitter('L1SigEff').submit_all(samples)
 
 elif __name__ == '__main__' and hasattr(sys, 'argv') and 'ana' in sys.argv:
-    from JMTucker.Tools.ROOTTools import ROOT
+    from DVCode.Tools.ROOTTools import ROOT
     for fn in sys.argv[1:]:
         f = ROOT.TFile(fn)
         h = f.Get('SimpleTriggerEfficiency/triggers_pass_num')

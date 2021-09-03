@@ -1,6 +1,6 @@
 import sys, glob, os
-from JMTucker.Tools.Sample import norm_from_file
-from JMTucker.Tools import Samples, colors
+from DVCode.Tools.Sample import norm_from_file
+from DVCode.Tools import Samples, colors
 
 path = sys.argv[1]
 dataset = sys.argv[2]

@@ -1,8 +1,8 @@
 import os
 from collections import defaultdict
 from FWCore.PythonUtilities.LumiList import LumiList
-from JMTucker.Tools.ROOTTools import *
-from JMTucker.Tools.Samples import *
+from DVCode.Tools.ROOTTools import *
+from DVCode.Tools.Samples import *
 
 tree_path = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV14_forpick_Jendontlook'
 

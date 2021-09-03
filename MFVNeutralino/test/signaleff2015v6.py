@@ -1,8 +1,8 @@
 import gzip
 from collections import defaultdict
-from JMTucker.Tools.ROOTTools import *
-from JMTucker.Tools.Sample import norm_from_file
-from JMTucker.Tools.Samples import *
+from DVCode.Tools.ROOTTools import *
+from DVCode.Tools.Sample import norm_from_file
+from DVCode.Tools.Samples import *
 
 set_style()
 ps = plot_saver(plot_dir('sigeff_2015v6_new'), size=(600,600), log=False)

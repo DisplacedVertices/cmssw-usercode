@@ -1,5 +1,5 @@
-from JMTucker.Tools.CMSSWTools import *
-from JMTucker.Tools.Year import year
+from DVCode.Tools.CMSSWTools import *
+from DVCode.Tools.Year import year
 
 ntuple_version_ = 'V27'
 use_btag_triggers = False
@@ -14,7 +14,7 @@ def run_n_tk_seeds(process, mode, settings, output_commands):
         process.out.fileName = 'ntkseeds.root'
         if mode != 'full':
             output_commands.remove('keep MFVVertexAuxs_mfvVerticesAux_*_*')
-        from JMTucker.MFVNeutralino.Vertexer_cff import modifiedVertexSequence
+        from DVCode.MFVNeutralino.Vertexer_cff import modifiedVertexSequence
         output_commands += ['keep VertexerPairEffs_mfvVertices_*_*']
         for n_tk_seed in 3,4,5:
             ex = '%iTkSeed' % n_tk_seed
@@ -25,7 +25,7 @@ def run_n_tk_seeds(process, mode, settings, output_commands):
 
 def prepare_vis(process, mode, settings, output_commands):
     if mode:
-        process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
+        process.load('DVCode.MFVNeutralino.VertexSelector_cfi')
         process.p *= process.mfvSelectedVerticesSeq
 
         for x in process.mfvSelectedVerticesTight, process.mfvSelectedVerticesTightNtk3, process.mfvSelectedVerticesTightNtk4:
@@ -33,7 +33,7 @@ def prepare_vis(process, mode, settings, output_commands):
             x.produce_tracks = True
             x.vertex_src = 'mfvVertices'
 
-        process.load('JMTucker.MFVNeutralino.VertexRefitter_cfi')
+        process.load('DVCode.MFVNeutralino.VertexRefitter_cfi')
         process.mfvVertexRefitsDrop0 = process.mfvVertexRefits.clone(n_tracks_to_drop = 0)
         process.mfvVertexRefitsDrop2 = process.mfvVertexRefits.clone(n_tracks_to_drop = 2)
         process.p *= process.mfvVertexRefits * process.mfvVertexRefitsDrop2 *  process.mfvVertexRefitsDrop0
@@ -58,10 +58,10 @@ def minitree_only(process, mode, settings, output_commands):
             del process.outp
 
         if '2' in mode:
-            from JMTucker.Tools.NtupleFiller_cff import jmtNtupleFiller_pset
-            process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
-            process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
-            from JMTucker.MFVNeutralino.Vertexer_cfi import kvr_params
+            from DVCode.Tools.NtupleFiller_cff import jmtNtupleFiller_pset
+            process.load('DVCode.MFVNeutralino.VertexSelector_cfi')
+            process.load('DVCode.MFVNeutralino.AnalysisCuts_cfi')
+            from DVCode.MFVNeutralino.Vertexer_cfi import kvr_params
             process.mfvMiniTree2 = cms.EDAnalyzer('MFVMiniTreer2',
                                                   jmtNtupleFiller_pset(settings.is_miniaod, True),
                                                   kvr_params = kvr_params,
@@ -72,7 +72,7 @@ def minitree_only(process, mode, settings, output_commands):
             weight_obj = process.jmtWeightMiniAOD if settings.is_miniaod else process.jmtWeight
             process.p *= weight_obj * process.mfvMiniTree2
         else:
-            process.load('JMTucker.MFVNeutralino.MiniTree_cff')
+            process.load('DVCode.MFVNeutralino.MiniTree_cff')
             process.mfvWeight.throw_if_no_mcstat = False
             for p in process.pMiniTree, process.pMiniTreeNtk3, process.pMiniTreeNtk4, process.pMiniTreeNtk3or4:
                 p.insert(0, process.pmcStat._seq)
@@ -82,7 +82,7 @@ def minitree_only(process, mode, settings, output_commands):
 
 def event_filter(process, mode, settings, output_commands, **kwargs):
     if mode:
-        from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
+        from DVCode.MFVNeutralino.EventFilter import setup_event_filter
         setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode, **kwargs)
 
 ########################################################################
@@ -171,7 +171,7 @@ def set_output_commands(process, cmds):
 def aod_ntuple_process(settings):
     settings.normalize()
 
-    from JMTucker.Tools import MiniAOD_cfg as mcfg
+    from DVCode.Tools import MiniAOD_cfg as mcfg
     process = mcfg.pat_tuple_process(settings)
     mcfg.remove_met_filters(process)
     process.out.fileName = 'ntuple.root'
@@ -184,13 +184,13 @@ def aod_ntuple_process(settings):
 
     for x in process.patAlgosToolsTask, process.slimmingTask, process.packedPFCandidatesTask, process.patTask, process.pfNoPileUpJMETask:
         x.remove(process.goodOfflinePrimaryVertices)
-    process.load('JMTucker.Tools.AnalysisEras_cff')
-    process.load('JMTucker.Tools.GoodPrimaryVertices_cfi')
-    process.load('JMTucker.Tools.WeightProducer_cfi')
-    process.load('JMTucker.MFVNeutralino.Vertexer_cff')
-    process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
-    process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
-    process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
+    process.load('DVCode.Tools.AnalysisEras_cff')
+    process.load('DVCode.Tools.GoodPrimaryVertices_cfi')
+    process.load('DVCode.Tools.WeightProducer_cfi')
+    process.load('DVCode.MFVNeutralino.Vertexer_cff')
+    process.load('DVCode.MFVNeutralino.TriggerFilter_cfi')
+    process.load('DVCode.MFVNeutralino.TriggerFloats_cff')
+    process.load('DVCode.MFVNeutralino.EventProducer_cfi')
 
     process.p = cms.Path(process.goodOfflinePrimaryVertices *
                          process.mfvVertexSequence *
@@ -235,18 +235,18 @@ def miniaod_ntuple_process(settings):
     process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
     process.load('PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi')
     process.load('PhysicsTools.PatAlgos.selectionLayer1.electronSelector_cfi')
-    process.load('JMTucker.Tools.AnalysisEras_cff')
-    process.load('JMTucker.Tools.GoodPrimaryVertices_cfi')
-    process.load('JMTucker.Tools.L1ECALPrefiringWeightProducer_cfi')
-    process.load('JMTucker.Tools.MCStatProducer_cff')
-    process.load('JMTucker.Tools.UpdatedJets_cff')
-    process.load('JMTucker.Tools.PATTupleSelection_cfi')
-    process.load('JMTucker.Tools.WeightProducer_cfi')
-    process.load('JMTucker.Tools.UnpackedCandidateTracks_cfi')
-    process.load('JMTucker.MFVNeutralino.Vertexer_cff')
-    process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
-    process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
-    process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
+    process.load('DVCode.Tools.AnalysisEras_cff')
+    process.load('DVCode.Tools.GoodPrimaryVertices_cfi')
+    process.load('DVCode.Tools.L1ECALPrefiringWeightProducer_cfi')
+    process.load('DVCode.Tools.MCStatProducer_cff')
+    process.load('DVCode.Tools.UpdatedJets_cff')
+    process.load('DVCode.Tools.PATTupleSelection_cfi')
+    process.load('DVCode.Tools.WeightProducer_cfi')
+    process.load('DVCode.Tools.UnpackedCandidateTracks_cfi')
+    process.load('DVCode.MFVNeutralino.Vertexer_cff')
+    process.load('DVCode.MFVNeutralino.TriggerFilter_cfi')
+    process.load('DVCode.MFVNeutralino.TriggerFloats_cff')
+    process.load('DVCode.MFVNeutralino.EventProducer_cfi')
 
     process.goodOfflinePrimaryVertices.input_is_miniaod = True
     process.selectedPatJets.src = 'updatedJetsMiniAOD'

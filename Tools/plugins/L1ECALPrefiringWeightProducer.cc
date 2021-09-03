@@ -3,7 +3,7 @@
 // convert root file to included chunk with this script:
 /*
 import os
-from JMTucker.Tools.ROOTTools import *
+from DVCode.Tools.ROOTTools import *
 z = []
 for _,_,f in tdirectory_walk(ROOT.TFile.Open('L1PrefiringMaps_new.root')):
     for x in f:
@@ -11,7 +11,7 @@ for _,_,f in tdirectory_walk(ROOT.TFile.Open('L1PrefiringMaps_new.root')):
         assert not os.path.exists(fn)
         z.append((x.GetName(), fn))
         x.SaveAs(fn)
-newfn = os.environ['CMSSW_BASE'] + '/src/JMTucker/Tools/plugins/L1ECALPrefiringWeightMaps.h'
+newfn = os.environ['CMSSW_BASE'] + '/src/DVCode/Tools/plugins/L1ECALPrefiringWeightMaps.h'
 f = open(newfn, 'wt')
 for hn,fn in z:
    f.write('std::unique_ptr<TH2F> %s;\n' % hn)

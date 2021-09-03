@@ -1,5 +1,5 @@
 import FWCore.ParameterSet.Config as cms
-from JMTucker.Tools.PileupWeights import get_pileup_weights
+from DVCode.Tools.PileupWeights import get_pileup_weights
 
 mfvWeight = cms.EDProducer('MFVWeightProducer',
                            throw_if_no_mcstat = cms.bool(True),
@@ -19,7 +19,7 @@ mfvWeight = cms.EDProducer('MFVWeightProducer',
 
 def half_mc_by_lumi(process, first=True):
     assert hasattr(process, 'mfvWeight')
-    process.load('JMTucker.Tools.HalfMCByLumi_cfi')
+    process.load('DVCode.Tools.HalfMCByLumi_cfi')
     process.HalfMCByLumi.first = first
     for p in process.paths.itervalues():
         p.replace(process.mfvWeight, process.HalfMCByLumi * process.mfvWeight)
@@ -27,7 +27,7 @@ def half_mc_by_lumi(process, first=True):
 
 def quarter_mc_by_lumi(process, first=True, second=False, third=False, fourth=False):
     assert hasattr(process, 'mfvWeight')
-    process.load('JMTucker.Tools.QuarterMCByLumi_cfi')
+    process.load('DVCode.Tools.QuarterMCByLumi_cfi')
     process.QuarterMCByLumi.first = first
     process.QuarterMCByLumi.second = second
     process.QuarterMCByLumi.third = third

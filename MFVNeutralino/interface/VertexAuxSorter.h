@@ -1,7 +1,7 @@
-#ifndef JMTucker_MFVNeutralino_VertexAuxSorter_h
-#define JMTucker_MFVNeutralino_VertexAuxSorter_h
+#ifndef DVCode_MFVNeutralino_VertexAuxSorter_h
+#define DVCode_MFVNeutralino_VertexAuxSorter_h
 
-#include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
+#include "DVCode/MFVNeutralinoFormats/interface/VertexAux.h"
 
 namespace mfv {
   class VertexAuxSorter {

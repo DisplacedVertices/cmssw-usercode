@@ -6,6 +6,6 @@ interactive = ''
 if '-i' in argv:
     interactive = '-i'
     argv.remove('-i')
-cmd = 'python %s $CMSSW_BASE/src/JMTucker/Tools/python/Samples.py ' % interactive + ' '.join(argv)
+cmd = 'python %s $CMSSW_BASE/src/DVCode/Tools/python/Samples.py ' % interactive + ' '.join(argv)
 #print cmd
 os.system(cmd)

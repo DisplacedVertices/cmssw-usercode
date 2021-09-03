@@ -4,7 +4,7 @@ import os, sys, time
 from math import log, ceil, floor
 
 os.environ['JMT_ROOTTOOLS_NOBATCHMODE'] = '1'
-from JMTucker.Tools.ROOTTools import *
+from DVCode.Tools.ROOTTools import *
 set_style()
 
 binning = []

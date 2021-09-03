@@ -400,7 +400,7 @@ class CRABSubmitter:
 
 if __name__ == '__main__':
     cs = CRABSubmitter('abalone')
-    from JMTucker.Tools.Samples import ttbarincl, mfv_neutralino_tau1000um_M0400
+    from DVCode.Tools.Samples import ttbarincl, mfv_neutralino_tau1000um_M0400
     print
     print cs.crab_cfg(ttbarincl)
     print

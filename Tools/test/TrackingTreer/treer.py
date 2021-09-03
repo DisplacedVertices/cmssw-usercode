@@ -1,5 +1,5 @@
-from JMTucker.Tools.BasicAnalyzer_cfg import *
-from JMTucker.MFVNeutralino.NtupleCommon import use_btag_triggers
+from DVCode.Tools.BasicAnalyzer_cfg import *
+from DVCode.MFVNeutralino.NtupleCommon import use_btag_triggers
 
 settings = CMSSWSettings()
 settings.is_mc = True
@@ -11,12 +11,12 @@ sample_files(process, 'qcdht2000_2017', dataset)
 cmssw_from_argv(process)
 
 process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
-process.load('JMTucker.Tools.MCStatProducer_cff')
-process.load('JMTucker.Tools.NtupleFiller_cff')
-process.load('JMTucker.Tools.PATTupleSelection_cfi')
-process.load('JMTucker.Tools.UnpackedCandidateTracks_cfi')
-process.load('JMTucker.Tools.UpdatedJets_cff')
-process.load('JMTucker.Tools.WeightProducer_cfi')
+process.load('DVCode.Tools.MCStatProducer_cff')
+process.load('DVCode.Tools.NtupleFiller_cff')
+process.load('DVCode.Tools.PATTupleSelection_cfi')
+process.load('DVCode.Tools.UnpackedCandidateTracks_cfi')
+process.load('DVCode.Tools.UpdatedJets_cff')
+process.load('DVCode.Tools.WeightProducer_cfi')
 
 process.selectedPatJets.src = 'updatedJetsMiniAOD'
 process.selectedPatJets.cut = process.jtupleParams.jetCut
@@ -30,7 +30,7 @@ process.tt.track_ref_getter.tracks_maps_srcs = []
 
 process.p = cms.Path(process.tt)
 
-from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
+from DVCode.MFVNeutralino.EventFilter import setup_event_filter
 if use_btag_triggers :
     setup_event_filter(process, input_is_miniaod=True, mode='bjets OR displaced dijet veto HT novtx', event_filter_jes_mult=0)
 else :
@@ -40,7 +40,7 @@ ReferencedTagsTaskAdder(process)('p')
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.MetaSubmitter import *
+    from DVCode.Tools.MetaSubmitter import *
 
     if use_btag_triggers :
         samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, bjet=True, span_signal=True) # no data currently; no sliced ttbar since inclusive is used

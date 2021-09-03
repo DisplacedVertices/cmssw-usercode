@@ -1,7 +1,7 @@
 <use name="FWCore/Framework"/>
 <use name="FWCore/ParameterSet"/>
 
-<library file="*.cc" name="JMTuckerToolsPlugins">
+<library file="*.cc" name="DVCodeToolsPlugins">
   <use name="clhep"/>
   <use name="CommonTools/UtilAlgos"/>
   <use name="CondFormats/JetMETObjects"/>
@@ -12,5 +12,5 @@
   <use name="SimGeneral/HepPDTRecord"/>
   <use name="TrackingTools/Records"/>
   <use name="TrackingTools/TransientTrack"/>
-  <use name="JMTucker/Tools"/>
+  <use name="DVCode/Tools"/>
 </library>

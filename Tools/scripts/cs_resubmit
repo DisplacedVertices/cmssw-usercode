@@ -3,10 +3,10 @@
 import os, sys
 join = os.path.join
 from glob import glob
-from JMTucker.Tools.CRAB3ToolsBase import crabify_list, crab_jobs_from_argv
-from JMTucker.Tools.CondorSubmitter import CondorSubmitter
-from JMTucker.Tools.CondorTools import *
-from JMTucker.Tools.general import mkdirp
+from DVCode.Tools.CRAB3ToolsBase import crabify_list, crab_jobs_from_argv
+from DVCode.Tools.CondorSubmitter import CondorSubmitter
+from DVCode.Tools.CondorTools import *
+from DVCode.Tools.general import mkdirp
 
 if len(sys.argv) < 3:
     print 'usage: cs_resubmit condor_dir jobs_list'

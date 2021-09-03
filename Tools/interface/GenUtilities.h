@@ -1,5 +1,5 @@
-#ifndef JMTucker_Tools_GenUtilities
-#define JMTucker_Tools_GenUtilities
+#ifndef DVCode_Tools_GenUtilities
+#define DVCode_Tools_GenUtilities
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"

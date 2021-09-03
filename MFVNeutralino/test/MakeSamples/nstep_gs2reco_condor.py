@@ -35,10 +35,10 @@ if os.path.exists(full_output_dir):
 
 ####
 
-from JMTucker.Tools.CRAB3ToolsBase import crab_dirs_root
-from JMTucker.Tools.Year import year; assert year == 2017
-from JMTucker.Tools.general import save_git_status
-from JMTucker.Tools import colors
+from DVCode.Tools.CRAB3ToolsBase import crab_dirs_root
+from DVCode.Tools.Year import year; assert year == 2017
+from DVCode.Tools.general import save_git_status
+from DVCode.Tools import colors
 
 testing = 'testing' in sys.argv
 work_area = crab_dirs_root('nstep_gs2reco_condor_%s' % which)

@@ -3,7 +3,7 @@
 import os, sys
 from collections import defaultdict
 from fnmatch import fnmatch
-from JMTucker.Tools import DBS
+from DVCode.Tools import DBS
 
 ########################################################################
 
@@ -236,12 +236,12 @@ class Sample(object):
         fns = self.datasets[self.curr_dataset].filenames
         if not fns:
             try:
-                import JMTucker.Tools.SampleFiles as sfns
+                import DVCode.Tools.SampleFiles as sfns
                 x = sfns.get(self.name, self.curr_dataset)
                 if x is not None:
                     nfns, fns = x
                     if len(fns) != nfns:
-                        raise ValueError('problem with JMTucker.Tools.SampleFiles')
+                        raise ValueError('problem with DVCode.Tools.SampleFiles')
             except ImportError:
                 pass
 
@@ -464,7 +464,7 @@ def fn_to_sample(Samples, fn):
 class sums_from_file(object):
     def __init__(self, f_or_fn, path=None):
         if type(f_or_fn) == str:
-            from JMTucker.Tools.ROOTTools import ROOT
+            from DVCode.Tools.ROOTTools import ROOT
             self._f = ROOT.TFile.Open(f_or_fn)
         else:
             self._f = f_or_fn
@@ -568,8 +568,8 @@ def main(samples_registry):
     from glob import glob
     from sys import argv
     from pprint import pprint
-    from JMTucker.Tools import colors
-    from JMTucker.Tools.general import chunks, typed_from_argv
+    from DVCode.Tools import colors
+    from DVCode.Tools.general import chunks, typed_from_argv
 
     samples = samples_registry.from_argv()
     datasets = samples_registry.datasets_from_argv()

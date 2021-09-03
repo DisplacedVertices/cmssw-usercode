@@ -1,4 +1,4 @@
-from JMTucker.Tools.MetaSubmitter import *
+from DVCode.Tools.MetaSubmitter import *
 
 dataset = 'nr_k0ntuplev25mv1'
 samples = pick_samples(dataset, both_years=True, ttbar=False, all_signal=False)

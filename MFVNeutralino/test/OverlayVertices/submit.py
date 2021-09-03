@@ -7,10 +7,10 @@ per = 250
 
 import sys, os, shutil
 from pprint import pprint
-from JMTucker.Tools.CRAB3Tools import Config, crab_command
-from JMTucker.Tools.general import int_ceil, save_git_status, popen, touch
-from JMTucker.Tools import colors
-from JMTucker.Tools.Year import year
+from DVCode.Tools.CRAB3Tools import Config, crab_command
+from DVCode.Tools.general import int_ceil, save_git_status, popen, touch
+from DVCode.Tools import colors
+from DVCode.Tools.Year import year
 
 max_njobs = dict([(x, (int_ceil(y, per), per if y%per == 0 else y%per)) for x,y in [
             (('JetHT2016B3', 3), 19521),
@@ -185,7 +185,7 @@ def submit(samples, ntracks, overlay_args, batch_name_ex=''):
     cmssw_py_fn = os.path.join(inputs_dir, cmssw_py)
     shutil.copy2(cmssw_py, cmssw_py_fn)
     
-    tool_path = os.path.join(os.environ['CMSSW_BASE'], 'src/JMTucker/MFVNeutralino/test/MakeSamples') # JMTBAD put dummy.py and fixfjr.py somewhere better
+    tool_path = os.path.join(os.environ['CMSSW_BASE'], 'src/DVCode/MFVNeutralino/test/MakeSamples') # JMTBAD put dummy.py and fixfjr.py somewhere better
 
     config = Config()
     config.General.transferLogs = True

@@ -1,4 +1,4 @@
-from JMTucker.Tools.BasicAnalyzer_cfg import *
+from DVCode.Tools.BasicAnalyzer_cfg import *
 
 process.TFileService.fileName = 'duplicate_gens.root'
 file_event_from_argv(process)

@@ -1,6 +1,6 @@
 import sys
-from JMTucker.Tools.BasicAnalyzer_cfg import *
-from JMTucker.MFVNeutralino.NtupleCommon import use_btag_triggers
+from DVCode.Tools.BasicAnalyzer_cfg import *
+from DVCode.MFVNeutralino.NtupleCommon import use_btag_triggers
 
 settings = CMSSWSettings()
 settings.is_mc = True
@@ -15,10 +15,10 @@ file_event_from_argv(process)
 #want_summary(process)
 
 process.load('CommonTools.ParticleFlow.goodOfflinePrimaryVertices_cfi')
-process.load('JMTucker.Tools.GenParticleFilter_cfi')
-process.load('JMTucker.Tools.MCStatProducer_cff')
-process.load('JMTucker.Tools.UnpackedCandidateTracks_cfi')
-process.load('JMTucker.Tools.WeightProducer_cfi')
+process.load('DVCode.Tools.GenParticleFilter_cfi')
+process.load('DVCode.Tools.MCStatProducer_cff')
+process.load('DVCode.Tools.UnpackedCandidateTracks_cfi')
+process.load('DVCode.Tools.WeightProducer_cfi')
 
 process.goodOfflinePrimaryVertices.src = 'offlineSlimmedPrimaryVertices'
 process.goodOfflinePrimaryVertices.filter = True
@@ -40,7 +40,7 @@ process.TrackerMapper = cms.EDAnalyzer('TrackerMapper',
                                        old_stlayers_cut = cms.bool(False),
                                        )
 
-from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
+from DVCode.MFVNeutralino.EventFilter import setup_event_filter
 if use_btag_triggers :
     event_filter = setup_event_filter(process,
                               path_name = '',
@@ -62,7 +62,7 @@ else :
 common = cms.Sequence(event_filter * process.goodOfflinePrimaryVertices * process.jmtUnpackedCandidateTracks * process.jmtWeightMiniAOD)
 
 if False:
-    process.load('JMTucker.Tools.RescaledTracks_cfi')
+    process.load('DVCode.Tools.RescaledTracks_cfi')
     process.jmtRescaledTracks.tracks_src = 'jmtUnpackedCandidateTracks'
     common *= process.jmtRescaledTracks
     process.TrackerMapper.track_src = 'jmtRescaledTracks'
@@ -78,9 +78,9 @@ for name, filt in ('LightFlavor', process.lightFlavor), ('HeavyFlavor', process.
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.MetaSubmitter import *
-    import JMTucker.Tools.Samples as Samples
-    from JMTucker.Tools.Year import year
+    from DVCode.Tools.MetaSubmitter import *
+    import DVCode.Tools.Samples as Samples
+    from DVCode.Tools.Year import year
 
     dataset = 'miniaod'
 

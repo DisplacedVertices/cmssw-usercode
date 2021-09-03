@@ -1,12 +1,12 @@
-#ifndef JMTucker_MFVNeutralinoFormats_interface_Event_h
-#define JMTucker_MFVNeutralinoFormats_interface_Event_h
+#ifndef DVCode_MFVNeutralinoFormats_interface_Event_h
+#define DVCode_MFVNeutralinoFormats_interface_Event_h
 
 #include <cassert>
 #include <numeric>
 #include "TLorentzVector.h"
 #include "DataFormats/Math/interface/Point3D.h"
-#include "JMTucker/MFVNeutralinoFormats/interface/HitPattern.h"
-#include "JMTucker/MFVNeutralinoFormats/interface/TriggerEnum.h"
+#include "DVCode/MFVNeutralinoFormats/interface/HitPattern.h"
+#include "DVCode/MFVNeutralinoFormats/interface/TriggerEnum.h"
 
 namespace reco { class Track; class Candidate; }
 

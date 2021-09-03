@@ -1,5 +1,5 @@
 import sys
-from JMTucker.Tools.BasicAnalyzer_cfg import *
+from DVCode.Tools.BasicAnalyzer_cfg import *
 
 debug = 'debug' in sys.argv
 
@@ -7,8 +7,8 @@ sample_files(process, 'mfv_neu_tau010000um_M1200_2017', 'main', 1)
 tfileservice(process, 'gen_histos.root')
 file_event_from_argv(process)
 
-process.load('JMTucker.MFVNeutralino.GenParticles_cff')
-#process.load('JMTucker.MFVNeutralino.GenParticleFilter_cfi')
+process.load('DVCode.MFVNeutralino.GenParticles_cff')
+#process.load('DVCode.MFVNeutralino.GenParticleFilter_cfi')
 #process.mfvGenParticleFilter.required_num_leptonic = 0
 
 process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
@@ -32,9 +32,9 @@ if debug:
     process.p.insert(0, process.printList)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    from JMTucker.Tools.Sample import anon_samples
-    from JMTucker.Tools.MetaSubmitter import *
-    from JMTucker.Tools.Year import year
+    from DVCode.Tools.Sample import anon_samples
+    from DVCode.Tools.MetaSubmitter import *
+    from DVCode.Tools.Year import year
 
     samples = anon_samples('''
 GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M_1200_CTau_100um /store/user/tucker/cfgtest/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M_1200_CTau_100um.root 10000
@@ -135,8 +135,8 @@ StopStopTo2Dbar2Dbar_M_800_CTau_30mm /store/user/tucker/cfgtest/StopStopTo2Dbar2
 elif __name__ == '__main__' and hasattr(sys, 'argv') and 'validate' in sys.argv:
     import os, re
     from math import exp
-    from JMTucker.Tools.ROOTTools import ROOT
-    from JMTucker.Tools import colors
+    from DVCode.Tools.ROOTTools import ROOT
+    from DVCode.Tools import colors
 
     fn_re = re.compile(r'(GluinoGluinoToNeutralinoNeutralinoTo2T2B2S|StopStopTo2Dbar2Dbar)_M_(\d+)_CTau_(\d+[um]m).root')
 

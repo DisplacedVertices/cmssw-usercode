@@ -36,8 +36,8 @@ syms_replaces = [
 
 ########################################################################
 
-from JMTucker.Tools import colors
-from JMTucker.Tools.ROOTTools import ROOT
+from DVCode.Tools import colors
+from DVCode.Tools.ROOTTools import ROOT
 import os, string, textwrap, hepdata_lib as hepdata
 from copy import deepcopy
 from math import hypot

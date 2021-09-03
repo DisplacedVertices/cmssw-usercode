@@ -1,9 +1,9 @@
 import gzip
 from functools import partial
-from JMTucker.Tools.ROOTTools import *
-from JMTucker.Tools.Sample import norm_from_file
-from JMTucker.Tools.general import to_pickle, from_pickle
-import JMTucker.MFVNeutralino.AnalysisConstants as ac
+from DVCode.Tools.ROOTTools import *
+from DVCode.Tools.Sample import norm_from_file
+from DVCode.Tools.general import to_pickle, from_pickle
+import DVCode.MFVNeutralino.AnalysisConstants as ac
 
 class Sample(object):
     def __init__(self, name, fns):

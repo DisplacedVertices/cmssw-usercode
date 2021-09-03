@@ -1,5 +1,5 @@
-#ifndef JMTucker_Tools_ROOTTools_h
-#define JMTucker_Tools_ROOTTools_h
+#ifndef DVCode_Tools_ROOTTools_h
+#define DVCode_Tools_ROOTTools_h
 
 class TGraphAsymmErrors;
 class TH1;

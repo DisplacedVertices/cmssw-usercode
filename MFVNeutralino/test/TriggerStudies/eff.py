@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-from JMTucker.Tools.BasicAnalyzer_cfg import *
-from JMTucker.Tools.PATTupleSelection_cfi import jtupleParams
-from JMTucker.Tools.Year import year
+from DVCode.Tools.BasicAnalyzer_cfg import *
+from DVCode.Tools.PATTupleSelection_cfi import jtupleParams
+from DVCode.Tools.Year import year
 
 settings = CMSSWSettings()
 settings.is_mc = True
@@ -22,11 +22,11 @@ max_events(process, -1)
 dataset = 'miniaod'
 sample_files(process, 'wjetstolnu_2017', dataset, 1)
 
-process.load('JMTucker.Tools.MCStatProducer_cff')
-process.load('JMTucker.Tools.UpdatedJets_cff')
-process.load('JMTucker.Tools.WeightProducer_cfi')
+process.load('DVCode.Tools.MCStatProducer_cff')
+process.load('DVCode.Tools.UpdatedJets_cff')
+process.load('DVCode.Tools.WeightProducer_cfi')
 process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
-process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
+process.load('DVCode.MFVNeutralino.TriggerFloats_cff')
 
 process.selectedPatJets.src = 'updatedJetsMiniAOD'
 process.selectedPatJets.cut = jtupleParams.jetCut
@@ -38,7 +38,7 @@ process.mutrig.HLTPaths = ['HLT_IsoMu%i_v*' % mu_thresh_hlt]
 process.weightSeq = cms.Sequence(process.jmtWeightMiniAOD)
 
 if weight_l1ecal and settings.is_mc and settings.year == 2017 and settings.cross == '':
-    process.load('JMTucker.Tools.L1ECALPrefiringWeightProducer_cfi')
+    process.load('DVCode.Tools.L1ECALPrefiringWeightProducer_cfi')
     if 'separate' in weight_l1ecal:
         w = process.jmtWeightMiniAODL1Ecal = process.jmtWeightMiniAOD.clone()
         process.weightSeq.insert(0, process.prefiringweight * process.jmtWeightMiniAODL1Ecal)
@@ -89,13 +89,13 @@ for x in '', 'ht1000', 'jet6pt75', 'ht1000jet6pt75', 'nomu', 'nomuht1000', 'nomu
     else:
         process.p *= num
 
-import JMTucker.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
+import DVCode.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
 SimpleTriggerEfficiency.setup_endpath(process)
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    import JMTucker.Tools.Samples as Samples
-    from JMTucker.Tools.MetaSubmitter import *
+    import DVCode.Tools.Samples as Samples
+    from DVCode.Tools.MetaSubmitter import *
 
     if year == 2017:
         samples = Samples.auxiliary_data_samples_2017 + Samples.leptonic_samples_2017

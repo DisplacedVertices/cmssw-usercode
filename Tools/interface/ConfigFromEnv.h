@@ -1,5 +1,5 @@
-#ifndef JMTucker_MFVNeutralino_One2Two_ConfigFromEnv
-#define JMTucker_MFVNeutralino_One2Two_ConfigFromEnv
+#ifndef DVCode_MFVNeutralino_One2Two_ConfigFromEnv
+#define DVCode_MFVNeutralino_One2Two_ConfigFromEnv
 
 #include <algorithm>
 #include <iostream>

@@ -4,12 +4,12 @@ import os, sys
 from itertools import combinations
 from pprint import pprint
 from FWCore.PythonUtilities.LumiList import LumiList
-from JMTucker.Tools.CMSSWTools import json_path
-from JMTucker.Tools.CRAB3Tools import crab_command, crab_dirs_from_argv
-from JMTucker.Tools.CondorTools import cs_dirs_from_argv, cs_report
-from JMTucker.Tools.DBS import ll_for_dataset
-from JMTucker.Tools import Samples
-from JMTucker.Tools import colors
+from DVCode.Tools.CMSSWTools import json_path
+from DVCode.Tools.CRAB3Tools import crab_command, crab_dirs_from_argv
+from DVCode.Tools.CondorTools import cs_dirs_from_argv, cs_report
+from DVCode.Tools.DBS import ll_for_dataset
+from DVCode.Tools import Samples
+from DVCode.Tools import colors
 
 partial = 'partial' in sys.argv
 

@@ -1,5 +1,5 @@
-#ifndef JMTucker_Tools_TriggerHelper_h
-#define JMTucker_Tools_TriggerHelper_h
+#ifndef DVCode_Tools_TriggerHelper_h
+#define DVCode_Tools_TriggerHelper_h
 
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "FWCore/Common/interface/TriggerNames.h"

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import FWCore.ParameterSet.Config as cms
-from JMTucker.Tools.CMSSWTools import *
+from DVCode.Tools.CMSSWTools import *
 
 process = basic_process('BasicAnalyzer')
 report_every(process, 1000000)

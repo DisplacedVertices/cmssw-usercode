@@ -2,8 +2,8 @@
 
 import os
 from sys import argv, exit
-from JMTucker.Tools.CRAB3ToolsBase import crab_dirs_from_argv, crab_get_output_dir, crab_print_requestcache
-from JMTucker.Tools import colors
+from DVCode.Tools.CRAB3ToolsBase import crab_dirs_from_argv, crab_get_output_dir, crab_print_requestcache
+from DVCode.Tools import colors
 
 dirs = crab_dirs_from_argv()
 verbose = True

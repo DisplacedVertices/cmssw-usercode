@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from JMTucker.MFVNeutralino.UtilitiesBase import *
+from DVCode.MFVNeutralino.UtilitiesBase import *
 from f2_vals import dict_of_f2_tuples
 ####
 

@@ -1,6 +1,6 @@
 import os, sys
 from itertools import *
-from JMTucker.Tools.BasicAnalyzer_cfg import cms, process
+from DVCode.Tools.BasicAnalyzer_cfg import cms, process
 
 process.source.fileNames = ['/store/user/tucker/mfv_neutralino_tau1000um_M0400/mfvntuple_v20/aaaa7d7d2dcfa08aa71c1469df6ebf05/ntuple_1_1_NQ9.root']
 process.TFileService.fileName = 'nmx.root'
@@ -19,15 +19,15 @@ cuts = {
 
 all_cuts = ''.join(sorted(cuts.keys()))
 
-process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
+process.load('DVCode.MFVNeutralino.AnalysisCuts_cfi')
 process.ana = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)
 
-process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
+process.load('DVCode.MFVNeutralino.VertexSelector_cfi')
 vtx_sel = process.mfvSelectedVertices
 
 process.p = cms.Path(process.ana)
 
-process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
+process.load('DVCode.MFVNeutralino.WeightProducer_cfi')
 process.p *= process.mfvWeight
 
 vtx_srcs = []
@@ -53,7 +53,7 @@ process.nmx = cms.EDAnalyzer('NmxHistos',
 process.p *= process.nmx
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
-    import JMTucker.Tools.Samples as Samples
+    import DVCode.Tools.Samples as Samples
     samples = Samples.from_argv([Samples.mfv_neutralino_tau0100um_M0400,
                                  Samples.mfv_neutralino_tau1000um_M0400,
                                  Samples.mfv_neutralino_tau0300um_M0400,
@@ -62,7 +62,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     for s in Samples.data_samples:
         s.json = 'ana_all.json'
 
-    from JMTucker.Tools.CRABSubmitter import CRABSubmitter
+    from DVCode.Tools.CRABSubmitter import CRABSubmitter
     cs = CRABSubmitter('NmxV20',
                        job_control_from_sample = True,
                        use_ana_dataset = True,

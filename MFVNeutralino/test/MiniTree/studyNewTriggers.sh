@@ -96,7 +96,7 @@ do
       exit 1
     fi
 
-    intlumi=$(python -c 'import JMTucker.MFVNeutralino.AnalysisConstants as ac; print ac.int_lumi_'${year}' * ac.scale_factor_'${year})
+    intlumi=$(python -c 'import DVCode.MFVNeutralino.AnalysisConstants as ac; print ac.int_lumi_'${year}' * ac.scale_factor_'${year})
 
     ########################################################################
 
