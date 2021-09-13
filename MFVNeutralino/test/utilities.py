@@ -92,12 +92,16 @@ def cmd_hadd_data():
 cmd_merge_data = cmd_hadd_data
 
 def _mc_parts():
-    for year in 2017,:
-        for base in 'dyjetstollM50', 'wjetstolnu':
-            a = '%s_%s.root' % (base, year)
-            b = '%sext_%s.root' % (base, year)
-            c = '%ssum_%s.root' % (base, year)
-            yield (year,base), (a,b,c)
+  for year in [2017,2018]:
+    if year == 2017:
+        #for base in 'dyjetstollM50', 'wjetstolnu':
+        base = 'qcdht0500'
+    elif year == 2018:
+        base == 'qcdht0200'
+    a = '%s_%s.root' % (base, year)
+    b = '%sext_%s.root' % (base, year)
+    c = '%ssum_%s.root' % (base, year)
+    yield (year,base), (a,b,c)
 
 def cmd_hadd_mc_sums():
     for (year,base), (a,b,c) in _mc_parts():
@@ -120,7 +124,8 @@ def cmd_rm_mc_parts():
 
 def _background_samples(trigeff=False, year=2017):
     if _leptonpresel or trigeff:
-        x = ['ttbar', 'wjetstolnusum', 'dyjetstollM10', 'dyjetstollM50sum', 'qcdmupt15']
+        #x = ['ttbar', 'wjetstolnu', 'dyjetstollM10', 'dyjetstollM50', 'qcdmupt15']
+        x = ['ttbar', 'wjetstolnu', 'dyjetstollM10', 'dyjetstollM50']
         if not trigeff:
             x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]]
             x += ['qcdbctoept%03i' % x for x in [15,20,30,80,170,250]]
@@ -128,6 +133,10 @@ def _background_samples(trigeff=False, year=2017):
         x = ['ttbar', 'wjetstolnu']
         x += ['qcdht%04i' % x for x in [200, 300, 500, 700, 1000, 1500, 2000]]
         x += ['zjetstonunuht%04i' % x for x in [100, 200, 400, 600, 800, 1200, 2500]]
+        if year==2017:
+          x += ['qcdht0200', 'qcdht0500sum']
+        elif year==2018:
+          x += ['qcdht0200sum', 'qcdht0500']
     else:
         x = ['qcdht%04i' % x for x in [700, 1000, 1500, 2000]]
         x += ['ttbarht%04i' % x for x in [600, 800, 1200, 2500]]
@@ -310,8 +319,8 @@ def cmd_trigeff_merge():
     for year_s, scale in ('_2017', -AnalysisConstants.int_lumi_2017), ('_2018', -AnalysisConstants.int_lumi_2018):
         for wqcd_s in '', '_wqcd':
             files = _background_samples(trigeff=True)
-            if not wqcd_s:
-                files.remove('qcdmupt15')
+            #if not wqcd_s:
+            #    files.remove('qcdmupt15')
             files = ['%s%s.root' % (x, '_2017') for x in files]
             files2 = []
             for fn in files:

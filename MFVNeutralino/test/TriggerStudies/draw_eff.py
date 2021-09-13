@@ -6,8 +6,8 @@ from JMTucker.Tools import Samples
 from JMTucker.Tools.Samples import *
 
 useElectron = True
-useMETNoMu = False
-version = '2017v16_ele_MET'
+useMETNoMu = True
+version = '2017ULv0_ele_MET'
 #version = '2017v11_MET'
 if useMETNoMu:
   version+='NoMu'
@@ -63,9 +63,10 @@ else:
         #bkg_samples = [wjetstolnu_2017]
         #sig_samples = []
         if useElectron:
-          bkg_samples = [ttbar_2017, wjetstolnusum_2017, dyjetstollM50sum_2017]
+          bkg_samples = [ttbar_2017, wjetstolnu_2017, dyjetstollM50_2017, dyjetstollM10_2017]
         else:
-          bkg_samples = [ttbar_2017, wjetstolnusum_2017, dyjetstollM50sum_2017, dyjetstollM10_2017, qcdmupt15_2017]
+          #bkg_samples = [ttbar_2017, wjetstolnusum_2017, dyjetstollM50sum_2017, dyjetstollM10_2017, qcdmupt15_2017]
+          bkg_samples = [ttbar_2017, wjetstolnu_2017, dyjetstollM50_2017, dyjetstollM10_2017]
         if use_qcd:
             bkg_samples.append(qcdmupt15_2017)
         sig_samples = Samples.mfv_splitSUSY_samples_2017
@@ -133,7 +134,7 @@ def make_fcn(name, kind, n):
     return fcn
 
 def rebin_met(h):
-    a = to_array(range(0, 100, 5) + range(100, 200, 10) + [200, 225, 250, 275, 300, 350, 400, 450, 500, 600, 700, 800, 1000])
+    a = to_array(range(0, 100, 10) + range(100, 200, 10) + [200, 220, 240, 270, 300, 350, 400, 450, 500, 600, 700, 800, 1000])
     return h.Rebin(len(a)-1, h.GetName() + '_rebin', a)
 
 def rebin_pt(h):

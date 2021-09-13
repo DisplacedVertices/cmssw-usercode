@@ -9,7 +9,7 @@ settings = CMSSWSettings()
 settings.is_mc = True
 settings.cross = '' # 2017to2018' # 2017to2017p8'
 
-version = '2017ULv0_ele_MET'
+version = '2017ULv0_ele_METNoMu'
 
 mu_thresh_hlt = 27
 mu_thresh_offline = 35
@@ -21,11 +21,12 @@ tfileservice(process, 'eff.root')
 global_tag(process, which_global_tag(settings))
 #want_summary(process)
 #report_every(process, 1)
-max_events(process, -1)
+max_events(process, 10000)
 dataset = 'miniaod'
 #sample_files(process, 'wjetstolnu_2017', dataset, 1)
 input_files(process,[
                     '/store/mc/RunIISummer20UL17MiniAOD/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v1/260000/07B5521B-4BD8-CF46-B11D-E220B439B5C1.root',
+                    #'/store/data/Run2017B/SingleElectron/MINIAOD/09Aug2019_UL2017-v1/130000/23894CA5-7558-5643-825E-42B97830F10F.root'
             ])
 
 process.load('JMTucker.Tools.MCStatProducer_cff')
@@ -40,6 +41,8 @@ process.selectedPatJets.cut = jtupleParams.jetCut
 process.mfvTriggerFloats.met_src = cms.InputTag('slimmedMETs', '', 'BasicAnalyzer') # BasicAnalyzer
 process.mfvTriggerFloats.isMC = settings.is_mc
 process.mfvTriggerFloats.year = settings.year
+if not settings.is_mc:
+  process.mfvTriggerFloats.met_filters_src = cms.InputTag('TriggerResults', '', 'RECO')
 
 
 from HLTrigger.HLTfilters.hltHighLevel_cfi import hltHighLevel
@@ -64,7 +67,7 @@ if weight_l1ecal and settings.is_mc and settings.year == 2017 and settings.cross
     elif 'down' in weight_l1ecal:
         which += 'Down'
     w.weight_misc = True
-    w.misc_srcs = cms.VInputTag(cms.InputTag('prefiringweight', which))
+    w.misc_srcs = cms.VInputTag(cms.InputTag('prefiringweight', which, 'BasicAnalyzer'))
 
 # MET correction
 runMetCorAndUncFromMiniAOD(process,
@@ -135,5 +138,5 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     ms = MetaSubmitter('TrigEff%s%s' % (version, '_' + settings.cross if settings.cross else ''), dataset=dataset)
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier(cross=settings.cross))
-    #ms.condor.stageout_files = 'all'
+    ms.condor.stageout_files = 'all'
     ms.submit(samples)

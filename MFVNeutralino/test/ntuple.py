@@ -23,19 +23,14 @@ else :
 
 process = ntuple_process(settings)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
-sample_files(process, 'mfv_splitSUSY_tau000001000um_M2000_1800_2017', dataset, 1)
+#sample_files(process, 'mfv_splitSUSY_tau000001000um_M2000_1800_2017', dataset, 1)
 #sample_files(process, 'mfv_neu_tau001000um_M1600_year', dataset, 1)
-#sample_files(process, 'ttbar_year', dataset, 1)
+#sample_files(process, 'qcdht0700_year', dataset, 1)
 #sample_files(process, 'dyjetstollM50_year', dataset, 1)
 
-#input_files(process,[
-#                     'root://cmseos.fnal.gov//store/user/ali/splitSUSY/splitSUSY_M2000_1800_ctau100p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd/output_8.root',
-#                     'root://cmseos.fnal.gov//store/user/ali/splitSUSY/splitSUSY_M2000_1800_ctau100p0_TuneCP2_13TeV_pythia8_RunIIFall17_MINIAODSIM_v2_summaryProd/output_9.root',
-#                    #'/store/mc/RunIIFall17MiniAODv2/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-1mm_TuneCP2_13TeV-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/10000/2E6A7CCF-6606-E911-B184-AC1F6B0DE490.root',
-#                    #'/store/mc/RunIIFall17MiniAODv2/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-1mm_TuneCP2_13TeV-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/10000/8AFAF178-4206-E911-A85F-008CFA1112CC.root',
-#                    #'/store/mc/RunIIFall17MiniAODv2/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-1mm_TuneCP2_13TeV-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/10000/EE806BFB-9AFE-E811-995A-0025905C3E38.root',
-#                    '/store/mc/RunIIFall17MiniAODv2/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-1mm_TuneCP2_13TeV-pythia8/MINIAODSIM/PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/10000/EE806BFB-9AFE-E811-995A-0025905C3E38.root',
-#                   ])
+input_files(process,[
+                    '/store/mc/RunIISummer19UL17MiniAOD/QCD_HT700to1000_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v2/280000/97BABC30-6733-4C4F-B95A-B77A1756777D.root',
+                   ])
 #set_events(process, [
 #      (1,1,5504),
 #       (1,1,9424),
@@ -62,7 +57,7 @@ sample_files(process, 'mfv_splitSUSY_tau000001000um_M2000_1800_2017', dataset, 1
 #      (1,1,),
 #      (1,1,),
 #      ])
-max_events(process,1000)
+max_events(process,-1)
 cmssw_from_argv(process)
 
 
