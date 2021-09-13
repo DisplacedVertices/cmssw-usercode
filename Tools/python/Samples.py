@@ -417,6 +417,8 @@ for s in mfv_splitSUSY_samples_2017:
 ########
 # ntuples
 ########
+for x in qcdht0200_2017, qcdht0300_2017, qcdht0500_2017, qcdht0500ext_2017, qcdht0700_2017, qcdht1000_2017, qcdht1500_2017, qcdht2000_2017, wjetstolnu_2017, dyjetstollM10_2017, dyjetstollM50_2017, ttbar_2017, zjetstonunuht0100_2017, zjetstonunuht0200_2017, zjetstonunuht0400_2017, zjetstonunuht0600_2017, zjetstonunuht0800_2017, zjetstonunuht1200_2017, zjetstonunuht2500_2017, mfv_splitSUSY_tau000001000um_M1400_1200_2017, mfv_splitSUSY_tau000010000um_M1400_1200_2017, mfv_splitSUSY_tau000001000um_M1200_1100_2017, mfv_splitSUSY_tau000010000um_M1200_1100_2017, mfv_splitSUSY_tau000000100um_M2000_1800_2017, mfv_splitSUSY_tau000000300um_M2000_1800_2017, mfv_splitSUSY_tau000010000um_M2000_1800_2017, mfv_splitSUSY_tau000001000um_M2000_1800_2017, mfv_splitSUSY_tau000000100um_M2000_1900_2017, mfv_splitSUSY_tau000000300um_M2000_1900_2017, mfv_splitSUSY_tau000010000um_M2000_1900_2017, mfv_splitSUSY_tau000001000um_M2000_1900_2017, mfv_splitSUSY_tau000000100um_M2400_100_2017, mfv_splitSUSY_tau000000300um_M2400_100_2017, mfv_splitSUSY_tau000010000um_M2400_100_2017, mfv_splitSUSY_tau000001000um_M2400_100_2017, mfv_splitSUSY_tau000000100um_M2400_2300_2017, mfv_splitSUSY_tau000000300um_M2400_2300_2017, mfv_splitSUSY_tau000010000um_M2400_2300_2017, mfv_splitSUSY_tau000001000um_M2400_2300_2017:
+    x.add_dataset("ntupleulv0metm")
 
 ########
 # automatic condor declarations for ntuples
@@ -432,16 +434,16 @@ for s in registry.all():
 ########
 # other condor declarations, generate condorable dict with Shed/condor_list.py
 ########
-
+# be careful about the list, some samples are distributed at different samples so it won't work
 condorable = {
     "T2_DE_DESY": {
-        "miniaod": [EGamma2018D, MET2017E, SingleMuon2017E, MET2018A, MET2018B, SingleMuon2018A, SingleMuon2018B, SingleMuon2018C, SingleMuon2018D, wjetstolnu_2018, dyjetstollM10_2018, dyjetstollM50_2018, ttbar_2018, zjetstonunuht0100_2018, zjetstonunuht0200_2018, zjetstonunuht0400_2018, zjetstonunuht0600_2018, zjetstonunuht0800_2018, zjetstonunuht1200_2018, dyjetstollM10_2017, dyjetstollM50_2017, ttbar_2017, zjetstonunuht0100_2017, zjetstonunuht0200_2017, zjetstonunuht0400_2017, zjetstonunuht0600_2017, zjetstonunuht1200_2017, zjetstonunuht2500_2017, zjetstonunuht0800_2017, qcdht1500_2017, wjetstolnu_2017],
+        "miniaod": [EGamma2018D, MET2017E, MET2018A, MET2018B, SingleMuon2018A, SingleMuon2018B, SingleMuon2018C, SingleMuon2018D, wjetstolnu_2018, dyjetstollM10_2018, dyjetstollM50_2018, ttbar_2018, zjetstonunuht0100_2018, zjetstonunuht0200_2018, zjetstonunuht0400_2018, zjetstonunuht0600_2018, zjetstonunuht0800_2018, zjetstonunuht1200_2018, zjetstonunuht0100_2017, zjetstonunuht0200_2017, zjetstonunuht0400_2017, zjetstonunuht0600_2017, zjetstonunuht1200_2017, zjetstonunuht2500_2017, zjetstonunuht0800_2017, qcdht1500_2017],
         },
     "T3_US_FNALLPC": {
         "miniaod": mfv_splitSUSY_samples_2017,
         },
     "T1_US_FNAL_Disk": {
-        "miniaod": [EGamma2018A, EGamma2018B, SingleMuon2017B, SingleMuon2017D, SingleElectron2017B, SingleElectron2017D, SingleElectron2017E, MET2018D, qcdht0300_2018, qcdht0700_2018, qcdht1000_2018, qcdht1500_2018, zjetstonunuht2500_2018, qcdht0200_2017, qcdht0500_2017, qcdht0700_2017, qcdht0300_2017],
+        "miniaod": [EGamma2018A, EGamma2018B, SingleMuon2017B, SingleMuon2017D, SingleElectron2017B, SingleElectron2017D, SingleElectron2017E, MET2018D, qcdht0300_2018, qcdht0700_2018, qcdht1000_2018, qcdht1500_2018, zjetstonunuht2500_2018, qcdht0200_2017, qcdht0500_2017, qcdht0700_2017, qcdht0300_2017, ttbar_2017],
         },
 }
 
