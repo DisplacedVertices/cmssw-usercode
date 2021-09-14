@@ -27,6 +27,7 @@ struct MFVEvent {
     npv = pv_ntracks = pv_ntracksloose = 0;
     gen_flavor_code = 0;
     gen_weight = l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = npu = bsx = bsy = bsz = bsdxdz = bsdydz = bswidthx = bswidthy = pvx = pvy = pvz = pvcxx = pvcxy = pvcxz = pvcyy = pvcyz = pvczz = pv_score = metx = mety = metNoMux = metNoMuy = 0;
+    pass_metfilters = false;
     for (int i = 0; i < 2; ++i) {
       gen_lsp_pt[i] = gen_lsp_eta[i] = gen_lsp_phi[i] = gen_lsp_mass[i] = 0;
       gen_decay_type[i] = 0;
@@ -306,6 +307,8 @@ struct MFVEvent {
         ++c;
     return c;
   }
+
+  bool pass_metfilters;
 
   float metx;
   float mety;

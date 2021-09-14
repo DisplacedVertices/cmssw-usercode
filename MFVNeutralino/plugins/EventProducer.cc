@@ -339,6 +339,8 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     //mevent->mety = met.py();
 
     // getting corrected MET from TriggerFloats
+    mevent->pass_metfilters = triggerfloats->pass_metfilters;
+
     double met_pt = triggerfloats->met_pt;
     double met_phi = triggerfloats->met_phi;
     mevent->metx = met_pt*std::cos(met_phi);
