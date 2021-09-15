@@ -173,6 +173,13 @@ private:
   TH2F* h_noshare_nm1refit_dz_dzerr;
   TH1F* h_max_noshare_track_multiplicity;
   TH1F* h_n_output_vertices;
+  TH1F* h_output_vertex_ntracks;
+  TH1F* h_output_vertex_chi2;
+  TH1F* h_output_vertex_ndof;
+  TH1F* h_output_vertex_normchi2;
+  TH1F* h_output_vertex_x;
+  TH1F* h_output_vertex_y;
+  TH1F* h_output_vertex_z;
 };
 
 MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
@@ -252,7 +259,14 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_noshare_nm1refit_dz_sig        = fs->make<TH1F>("h_noshare_nm1refit_dz_sig",        "", 50, 0, 10);
     h_noshare_nm1refit_dz_dzerr      = fs->make<TH2F>("h_noshare_nm1refit_dz_dzerr",      "", 100, 0, 0.1, 100, 0, 0.1);
     h_max_noshare_track_multiplicity = fs->make<TH1F>("h_max_noshare_track_multiplicity", "",  40,   0,     40);
-    h_n_output_vertices           = fs->make<TH1F>("h_n_output_vertices",           "", 50, 0, 50);
+    h_n_output_vertices              = fs->make<TH1F>("h_n_output_vertices",              "", 50, 0, 50);
+    h_output_vertex_ntracks          = fs->make<TH1F>("h_output_vertex_ntracks",          "",  30,  0, 30);
+    h_output_vertex_chi2             = fs->make<TH1F>("h_output_vertex_chi2",             "", 20,   0, max_seed_vertex_chi2);
+    h_output_vertex_ndof             = fs->make<TH1F>("h_output_vertex_ndof",             "", 10,   0,     20);
+    h_output_vertex_normchi2         = fs->make<TH1F>("h_output_vertex_normchi2",         "", 50,   0, max_seed_vertex_chi2);
+    h_output_vertex_x                = fs->make<TH1F>("h_output_vertex_x",                "", 100,  -1,      1);
+    h_output_vertex_y                = fs->make<TH1F>("h_output_vertex_y",                "", 100,  -1,      1);
+    h_output_vertex_z                = fs->make<TH1F>("h_output_vertex_z",                "", 40, -20,     20);
   }
 }
 
@@ -1129,6 +1143,17 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   // Put the output.
   //////////////////////////////////////////////////////////////////////
 
+  if (histos) {
+    for (const reco::Vertex& v : *vertices) {
+      h_output_vertex_ntracks->Fill(v.tracksSize());
+      h_output_vertex_chi2->Fill(v.chi2());
+      h_output_vertex_ndof->Fill(v.ndof());
+      h_output_vertex_normchi2->Fill(v.normalizedChi2());
+      h_output_vertex_x->Fill(v.x());
+      h_output_vertex_y->Fill(v.y());
+      h_output_vertex_z->Fill(v.z());
+    }
+  }
   finish(event, seed_tracks, std::move(vertices), std::move(vpeffs), vpeffs_tracks);
 }
 

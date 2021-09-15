@@ -92,7 +92,7 @@ def event_filter(process, mode, settings, output_commands, **kwargs):
         from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
         # for temp including events that don't pass MET trigger and MET lower than 150
         #setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode, trigger_filter = False, event_filter = False, event_filter_require_vertex = False, **kwargs)
-        setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode, event_filter_require_vertex = False, **kwargs)
+        setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode, event_filter_require_vertex = True, **kwargs)
 
 ########################################################################
 
