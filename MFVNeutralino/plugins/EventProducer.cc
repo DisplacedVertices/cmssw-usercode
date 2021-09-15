@@ -345,6 +345,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     double met_phi = triggerfloats->met_phi;
     mevent->metx = met_pt*std::cos(met_phi);
     mevent->mety = met_pt*std::sin(met_phi);
+    mevent->met_calo = triggerfloats->met_pt_calo;
 
     double metNoMu_pt = triggerfloats->met_pt_nomu;
     double metNoMu_phi = triggerfloats->met_phi_nomu;
