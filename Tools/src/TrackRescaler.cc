@@ -1,6 +1,7 @@
 #include "JMTucker/Tools/interface/AnalysisEras.h"
 #include "JMTucker/Tools/interface/TrackRescaler.h"
 
+//FIXME: need further study to see whether this need to be changed
 namespace jmt {
   void TrackRescaler::set_JetHT2017B(double x, double eta) {
     if (fabs(eta) < 1.5) {

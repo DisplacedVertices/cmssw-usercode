@@ -6,6 +6,7 @@ namespace jmt {
   namespace BTagging {
     float discriminator_min(int wp, bool old) {
       assert(wp >= 0 && wp <= 2);
+      // FIXME: check whether this need to be changed for UL
       const float old_mins[3] = {0.5803, 0.8838, 0.9693}; // JMTBAD drop
       const float mins[2][3] = { {0.0521, 0.3033, 0.7489}, {0.0494, 0.2770, 0.7264} };
       return (old ? old_mins : mins[jmt::Year::get()-2017])[wp];

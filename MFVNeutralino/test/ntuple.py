@@ -23,12 +23,18 @@ else :
 
 process = ntuple_process(settings)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
-#sample_files(process, 'mfv_splitSUSY_tau000001000um_M2000_1800_2017', dataset, 1)
+#sample_files(process, 'mfv_splitSUSY_tau000001000um_M2000_1800_2017', dataset, -1)
 #sample_files(process, 'mfv_neu_tau001000um_M1600_year', dataset, 1)
 #sample_files(process, 'qcdht0700_year', dataset, 1)
 #sample_files(process, 'dyjetstollM50_year', dataset, 1)
 
 input_files(process,[
+                    '/store/mc/RunIISummer19UL17MiniAOD/QCD_HT700to1000_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v2/280000/59AFF5D0-8499-844A-96D6-2EE5BFCDD09D.root',
+                    '/store/mc/RunIISummer19UL17MiniAOD/QCD_HT700to1000_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v2/280000/958303DA-D6A9-5D47-8A71-4D8F39FFC221.root',
+                    '/store/mc/RunIISummer19UL17MiniAOD/QCD_HT700to1000_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v2/280000/86EA5386-77F7-3F40-875C-9F885C1537E4.root',
+                    '/store/mc/RunIISummer19UL17MiniAOD/QCD_HT700to1000_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v2/280000/69DAA8C5-56EA-934F-A93D-D5148A987DA7.root',
+                    '/store/mc/RunIISummer19UL17MiniAOD/QCD_HT700to1000_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v2/280000/7E1780E0-B198-2C4C-A6BE-07461D196965.root',
+                    '/store/mc/RunIISummer19UL17MiniAOD/QCD_HT700to1000_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v2/280000/E436786C-D2CD-094A-99B3-8C367869AF0D.root',
                     '/store/mc/RunIISummer19UL17MiniAOD/QCD_HT700to1000_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v2/280000/97BABC30-6733-4C4F-B95A-B77A1756777D.root',
                    ])
 #set_events(process, [

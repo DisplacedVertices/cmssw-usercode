@@ -35,7 +35,7 @@ parser.add_argument('--plots', default='',
 options = parser.parse_args()
 
 if options.pileup_json == 'default':
-    options.pileup_json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions%i/13TeV/PileUp/pileup_latest.txt' % (options.year-2000)
+    options.pileup_json = '/afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions%i/13TeV/PileUp/UltraLegacy/pileup_latest.txt' % (options.year-2000)
 if options.pileupcalc_mbxsec == -1:
     options.pileupcalc_mbxsec = 69200
 if options.data_fn == 'default':

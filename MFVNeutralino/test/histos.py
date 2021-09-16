@@ -5,10 +5,10 @@ is_mc = True # for blinding
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_MET_triggers
 #sample_files(process, 'ttbar_2017' if is_mc else 'JetHT2017B', dataset, 1)
 #sample_files(process, 'mfv_neu_tau001000um_M0800_2017' if is_mc else 'JetHT2017B', dataset, 10)
-sample_files(process, 'mfv_splitSUSY_tau000001000um_M2000_1800_2017' if is_mc else 'JetHT2017B', dataset, -1)
-#input_files(process,[
-#                    '/uscms_data/d3/ali/LLP/CornellCode/mfv_10_6_20/src/JMTucker/MFVNeutralino/test/TestRun/ntuple.root'
-#            ])
+#sample_files(process, 'mfv_splitSUSY_tau000001000um_M2000_1800_2017' if is_mc else 'JetHT2017B', dataset, -1)
+input_files(process,[
+                    '/uscms_data/d3/ali/LLP/CornellCode/mfv_10_6_20/src/JMTucker/MFVNeutralino/test/TestRun/ntuple.root'
+            ])
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
 

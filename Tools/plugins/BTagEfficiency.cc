@@ -84,6 +84,7 @@ void JMTBTagEfficiency::analyze(const edm::Event& event, const edm::EventSetup&)
     // JMTBAD move to BTagging class?
     double x = jet.pt(); 
     assert(x >= 20); if (x > 1000) x = 1000;
+    // FIXME: update the B tagging efficiency for UL
 #ifdef MFVNEUTRALINO_2017
     if (old) { // https://twiki.cern.ch/twiki/pub/CMS/BtagRecommendation94X/CSVv2_94XSF_WP_V2_B_F.csv
       if (kind == 2) {

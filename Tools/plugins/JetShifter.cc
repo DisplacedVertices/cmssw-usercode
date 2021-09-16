@@ -61,6 +61,7 @@ void JMTJetShifter::produce(edm::Event& event, const edm::EventSetup& setup) {
         //printf("JetShifter jet pt %f eta %f unc %f up? %i scale %f\n", jet.pt(), jet.eta(), unc, up, scale);
       }
       else {
+        // FIXME: check whether factor need to be change for UL
         double factor = 1;
         assert(fabs(mult-1) < 1e-3);
         const float aeta = fabs(jet.eta());
