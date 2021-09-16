@@ -12,10 +12,10 @@ from JMTucker.Tools.general import intlumi_from_brilcalc_csv as parse
 # brilcalc lumi -i 2018.json -o 2018.byls.HLT_PFHT1050.csv --byls --normtag=normtag_2018.json --hltpath=HLT_PFHT1050_v\* ; gzip 2018.byls.HLT_PFHT1050.csv
 
 ils = [
-    (2017, (parse('/uscms/home/tucker/public/mfv/lumi/2017.byls.csv.gz',              False),
-            parse('/uscms/home/tucker/public/mfv/lumi/2017.byls.HLT_PFHT1050.csv.gz', True))),
-    (2018, (parse('/uscms/home/tucker/public/mfv/lumi/2018.byls.csv.gz',              False),
-            parse('/uscms/home/tucker/public/mfv/lumi/2018.byls.HLT_PFHT1050.csv.gz', True))),
+    (2017, (parse('/uscms/home/ali/nobackup/LLP/CornellCode/mfv_10_6_20/src/JMTucker/MFVNeutralino/test/jsons/json_UL/2017.byls.csv.gz',              False),
+            parse('/uscms/home/ali/nobackup/LLP/CornellCode/mfv_10_6_20/src/JMTucker/MFVNeutralino/test/jsons/json_UL/2017.byls.HLT_PFMETNoMu120_PFMHTNoMu120_IDTight.csv.gz', True))),
+    (2018, (parse('/uscms/home/ali/nobackup/LLP/CornellCode/mfv_10_6_20/src/JMTucker/MFVNeutralino/test/jsons/json_UL/2018.byls.csv.gz',              False),
+            parse('/uscms/home/ali/nobackup/LLP/CornellCode/mfv_10_6_20/src/JMTucker/MFVNeutralino/test/jsons/json_UL/2018.byls.HLT_PFMETNoMu120_PFMHTNoMu120_IDTight.csv.gz', True))),
     ]
 
 for year, ((wohlt, wohlt_sum), (whlt, whlt_sum)) in ils:

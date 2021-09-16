@@ -4,12 +4,12 @@
   and git for my working dir with scripts:
   https://github.com/jordantucker/mybrilcalc
 
-- since /afs was unmounted @ lpc, symlinks replaced with copies:
+- since /afs was unmounted @ lpc, symlinks replaced with copies (2017 and 2018 are UL now):
 
   2015.json -> /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions15/13TeV/Reprocessing/Cert_13TeV_16Dec2015ReReco_Collisions15_25ns_JSON_Silver_v2.txt
   2016.json -> /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions16/13TeV/ReReco/Final/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt
-  2017.json -> /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/ReReco/Cert_294927-306462_13TeV_EOY2017ReReco_Collisions17_JSON_v1.txt
-  2018.json -> /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/ReReco/Cert_314472-325175_13TeV_17SeptEarlyReReco2018ABC_PromptEraD_Collisions18_JSON.txt
+  2017.json -> /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions17/13TeV/Legacy_2017/Cert_294927-306462_13TeV_UL2017_Collisions17_GoldenJSON.txt
+  2018.json -> /afs/cern.ch/cms/CAF/CMSCOMM/COMM_DQM/certification/Collisions18/13TeV/PromptReco/Cert_314472-325175_13TeV_PromptReco_Collisions18_JSON.txt
 
 - By hand, remove these:
 
@@ -27,7 +27,7 @@
   HLT filter, since brilcalc applies prescales in the former case.
 
   (The "official" versions of the by-lumi csv files currently live in
-  /uscms/home/tucker/public/mfv/lumi . They can change with new
+  /uscms/home/ali/nobackup/LLP/CornellCode/mfv_10_6_20/src/JMTucker/MFVNeutralino/test/jsons/json_UL/ . They can change with new
   versions of the brilcalc normtag, but this is more stable lately.)
 
 - "_10pc" or "_1pc" are 10% or 1% slices. They are produced with
@@ -35,7 +35,7 @@
 
 - "ana_avail_" are what condor/crab report say they were able to run
   on.  This is made after the first time condor/crab ntuple is run on
-  the default set of datasets (currently JetHT) and the report is
+  the default set of datasets (currently MET) and the report is
   scrutinized.  (Can run Tools/test/noop.py for this.)
   Thereafter, compare subsequent runs' reports to this
   file. (See utilities.py.)  For a different set of datasets,
@@ -49,3 +49,4 @@
   When done, use jsonoverlaps to find out if the datasets have
   overlaps. (Has happened before, e.g. for 2018A2 and 3 PromptReco
   https://hypernews.cern.ch/HyperNews/CMS/get/physTools/3610.html .)
+  Current JSON files are checked without overlaps.
