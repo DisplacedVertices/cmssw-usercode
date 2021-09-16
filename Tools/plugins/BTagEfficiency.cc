@@ -84,52 +84,51 @@ void JMTBTagEfficiency::analyze(const edm::Event& event, const edm::EventSetup&)
     // JMTBAD move to BTagging class?
     double x = jet.pt(); 
     assert(x >= 20); if (x > 1000) x = 1000;
-    // FIXME: update the B tagging efficiency for UL
 #ifdef MFVNEUTRALINO_2017
-    if (old) { // https://twiki.cern.ch/twiki/pub/CMS/BtagRecommendation94X/CSVv2_94XSF_WP_V2_B_F.csv
+    if (old) { // https://twiki.cern.ch/twiki/pub/CMS/BtagRecommendation106XUL17/DeepCSV_106XUL17SF_WPonly_V2p1.csv
       if (kind == 2) {
-        h_scalefactor[kind][0]->Fill(0.986369+(-(4.21155e-05*(log(x+19)*(log(x+18)*(3-(-(6.02128*log(x+18)))))))), *w);
-        h_scalefactor[kind][1]->Fill(1.09079*((1.+(0.180764*x))/(1.+(0.216797*x))), *w);
-        h_scalefactor[kind][2]->Fill(0.91423*((1.+(0.00958053*x))/(1.+(0.010132*x))), *w);
+        h_scalefactor[kind][0]->Fill(0.947762+(0.000950836*(log(x+19)*(log(x+18)*(3-(0.26089*log(x+18)))))), *w);
+        h_scalefactor[kind][1]->Fill(0.92801+(6.63609e-05*(log(x+19)*(log(x+18)*(3-(-(4.49722*log(x+18))))))), *w);
+        h_scalefactor[kind][2]->Fill(0.698099+(0.00876337*(log(x+19)*(log(x+18)*(3-(0.371033*log(x+18)))))), *w);
       } else if (kind == 1) {
-        h_scalefactor[kind][0]->Fill(0.986369+(-(4.21155e-05*(log(x+19)*(log(x+18)*(3-(-(6.02128*log(x+18)))))))), *w);
-        h_scalefactor[kind][1]->Fill(1.09079*((1.+(0.180764*x))/(1.+(0.216797*x))), *w);
-        h_scalefactor[kind][2]->Fill(0.91423*((1.+(0.00958053*x))/(1.+(0.010132*x))), *w);
+        h_scalefactor[kind][0]->Fill(0.947762+(0.000950836*(log(x+19)*(log(x+18)*(3-(0.26089*log(x+18)))))), *w);
+        h_scalefactor[kind][1]->Fill(0.92801+(6.63609e-05*(log(x+19)*(log(x+18)*(3-(-(4.49722*log(x+18))))))), *w);
+        h_scalefactor[kind][2]->Fill(0.698099+(0.00876337*(log(x+19)*(log(x+18)*(3-(0.371033*log(x+18)))))), *w);
       } else {
-        h_scalefactor[kind][0]->Fill(0.948763+0.000459508*x+-2.36079e-07*x*x+4.13462/x, *w);
-        h_scalefactor[kind][1]->Fill(0.949449+0.000516201*x+7.13398e-08*x*x+-3.55644e-10*x*x*x, *w);
-        h_scalefactor[kind][2]->Fill(0.943355+8.95816/(x*x)+0.000240703*x, *w);
+        h_scalefactor[kind][0]->Fill(1.02103+0.00020673*x+-1.37579e-07*x*x+5.45282/x, *w);
+        h_scalefactor[kind][1]->Fill(1.09411+-0.000277731*x+2.47948e-07*x*x+-0.65943/x, *w);
+        h_scalefactor[kind][2]->Fill(0.817821+1.44089/sqrt(x), *w);
       }
     }
-    else { // https://twiki.cern.ch/twiki/pub/CMS/BtagRecommendation94X/DeepFlavour_94XSF_WP_V2_B_F.csv
+    else { // https://twiki.cern.ch/twiki/pub/CMS/BtagRecommendation106XUL17/DeepJet_106XUL17SF_WPonly_V2p1.csv
       if (kind == 2) {
-        h_scalefactor[kind][0]->Fill(1.04891*((1.+(0.0145976*x))/(1.+(0.0165274*x))), *w);
-        h_scalefactor[kind][1]->Fill(0.991757*((1.+(0.0209615*x))/(1.+(0.0234962*x))), *w);
-        h_scalefactor[kind][2]->Fill(0.908648*((1.+(0.00516407*x))/(1.+(0.00564675*x))), *w);
+        h_scalefactor[kind][0]->Fill(0.932707+(0.00201163*(log(x+19)*(log(x+18)*(3-(0.36597*log(x+18)))))), *w);
+        h_scalefactor[kind][1]->Fill(0.921599+(0.000862106*(log(x+19)*(log(x+18)*(3-(0.139754*log(x+18)))))), *w);
+        h_scalefactor[kind][2]->Fill(0.868894+(0.00108176*(log(x+19)*(log(x+18)*(3-(-(0.00273954*log(x+18))))))), *w);
       } else if (kind == 1) {
-        h_scalefactor[kind][0]->Fill(1.04891*((1.+(0.0145976*x))/(1.+(0.0165274*x))), *w);
-        h_scalefactor[kind][1]->Fill(0.991757*((1.+(0.0209615*x))/(1.+(0.0234962*x))), *w);
-        h_scalefactor[kind][2]->Fill(0.908648*((1.+(0.00516407*x))/(1.+(0.00564675*x))), *w);
+        h_scalefactor[kind][0]->Fill(0.932707+(0.00201163*(log(x+19)*(log(x+18)*(3-(0.36597*log(x+18)))))), *w);
+        h_scalefactor[kind][1]->Fill(0.921599+(0.000862106*(log(x+19)*(log(x+18)*(3-(0.139754*log(x+18)))))), *w);
+        h_scalefactor[kind][2]->Fill(0.868894+(0.00108176*(log(x+19)*(log(x+18)*(3-(-(0.00273954*log(x+18))))))), *w);
       } else {
-        h_scalefactor[kind][0]->Fill(1.43763+-0.000337048*x+2.22072e-07*x*x+-4.85489/x, *w);
-        h_scalefactor[kind][1]->Fill(1.40779+-0.00094558*x+8.74982e-07*x*x+-4.67814/x, *w);
-        h_scalefactor[kind][2]->Fill(0.952956+0.000569069*x+-1.88872e-06*x*x+1.25729e-09*x*x*x, *w);
+        h_scalefactor[kind][0]->Fill(1.34198+-0.000555031*x+3.20633e-07*x*x+0.888495/x, *w);
+        h_scalefactor[kind][1]->Fill(1.35875+-0.000916722*x+6.33425e-07*x*x+-2.07301/x, *w);
+        h_scalefactor[kind][2]->Fill(0.850069+1.99726/sqrt(x), *w);
       }
     }
 #elif defined(MFVNEUTRALINO_2018)
-    {
+    { // https://twiki.cern.ch/twiki/pub/CMS/BtagRecommendation106XUL18/DeepJet_106XUL18SF_WPonly_V1p1.csv
       if (kind == 2) {
-        h_scalefactor[kind][0]->Fill(0.873139+(0.00420739*(log(x+19)*(log(x+18)*(3-(0.380932*log(x+18)))))), *w);
-        h_scalefactor[kind][1]->Fill(1.0097+(-(2.89663e-06*(log(x+19)*(log(x+18)*(3-(-(110.381*log(x+18)))))))), *w);
-        h_scalefactor[kind][2]->Fill(0.818896+(0.00682971*(log(x+19)*(log(x+18)*(3-(0.440998*log(x+18)))))), *w);
+        h_scalefactor[kind][0]->Fill(0.882297+0.00426142*log(x+19)*log(x+18)*(3-0.411195*log(x+18)), *w);
+        h_scalefactor[kind][1]->Fill(0.763354+0.0081767*log(x+19)*log(x+18)*(3-0.399925*log(x+18)), *w);
+        h_scalefactor[kind][2]->Fill(0.716648+0.00833545*log(x+19)*log(x+18)*(3-0.370069*log(x+18)), *w);
       } else if (kind == 1) {
-        h_scalefactor[kind][0]->Fill(0.873139+(0.00420739*(log(x+19)*(log(x+18)*(3-(0.380932*log(x+18)))))), *w);
-        h_scalefactor[kind][1]->Fill(1.0097+(-(2.89663e-06*(log(x+19)*(log(x+18)*(3-(-(110.381*log(x+18)))))))), *w);
-        h_scalefactor[kind][2]->Fill(0.818896+(0.00682971*(log(x+19)*(log(x+18)*(3-(0.440998*log(x+18)))))), *w);
+        h_scalefactor[kind][0]->Fill(0.882297+0.00426142*log(x+19)*log(x+18)*(3-0.411195*log(x+18)), *w);
+        h_scalefactor[kind][1]->Fill(0.763354+0.0081767*log(x+19)*log(x+18)*(3-0.399925*log(x+18)), *w);
+        h_scalefactor[kind][2]->Fill(0.716648+0.00833545*log(x+19)*log(x+18)*(3-0.370069*log(x+18)), *w);
       } else {
-        h_scalefactor[kind][0]->Fill(1.61341+-0.000566321*x+1.99464e-07*x*x+-5.09199/x, *w);
-        h_scalefactor[kind][1]->Fill(1.59373+-0.00113028*x+8.66631e-07*x*x+-1.10505/x, *w);
-        h_scalefactor[kind][2]->Fill(1.77088+-0.00371551*x+5.86489e-06*x*x+-3.01178e-09*x*x*x, *w);
+        h_scalefactor[kind][0]->Fill(1.46193+-0.000605595*x+3.30224e-07*x*x+-0.367873/x, *w);
+        h_scalefactor[kind][1]->Fill(1.46818+-0.00104385*x+8.01998e-07*x*x+-2.02643/x, *w);
+        h_scalefactor[kind][2]->Fill(0.864506+2.79354/sqrt(x), *w);
       }
     }
 #else
