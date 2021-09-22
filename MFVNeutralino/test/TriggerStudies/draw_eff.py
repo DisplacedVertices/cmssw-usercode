@@ -7,7 +7,7 @@ from JMTucker.Tools.Samples import *
 
 useElectron = True
 useMETNoMu = True
-version = '2017ULv0_ele_MET'
+version = '2017ULv1_ele_MET'
 #version = '2017v11_MET'
 if useMETNoMu:
   version+='NoMu'
@@ -299,6 +299,11 @@ for kind in kinds:
 
         data_rat = histogram_divide(data_num, data_den)
         bkg_rat = histogram_divide(bkg_num, bkg_den, use_effective=True) if bkg_num and bkg_den else None
+        #ratio_file = ROOT.TFile(subname+'_data_bkg.root', "RECREATE")
+        #data_bkg_rat = histogram_divide(data_rat, bkg_rat, confint=propagate_ratio, force_le_1=False)
+        #data_bkg_rat.GetYaxis().SetTitle("data/MC")
+        #data_bkg_rat.Write()
+        #ratio_file.Close()
 
         for r in (data_rat, bkg_rat):
             if not r:
@@ -342,13 +347,15 @@ for kind in kinds:
             bkg_rat.Draw('E2 same')
 
         ps.c.Update()
-        move_stat_box(data_rat, 'inf' if zoom else (0.518, 0.133, 0.866, 0.343))
+        move_stat_box(data_rat, 'inf' if zoom else (0.518, 0.320, 0.866, 0.500))
         if bkg_rat:
-            s = move_stat_box(bkg_rat, 'inf' if zoom else (0.518, 0.350, 0.866, 0.560))
+            s = move_stat_box(bkg_rat, 'inf' if zoom else (0.518, 0.510, 0.866, 0.690))
             s.SetLineColor(2)
             s.SetTextColor(2)
 
         ps.save(subname)
+        bkg_rat.SetLineColor(2)
+        ratios_plot(subname+'rt',[data_rat,bkg_rat],ps,canvas_size = (600, 650),res_fit=False,res_divide_opt={'confint': propagate_ratio, 'force_le_1': False})
 
         print '\nsignals'
         for sample in sig_samples:
