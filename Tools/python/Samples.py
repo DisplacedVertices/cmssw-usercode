@@ -420,6 +420,23 @@ for s in mfv_splitSUSY_samples_2017:
 for x in qcdht0200_2017, qcdht0300_2017, qcdht0500_2017, qcdht0500ext_2017, qcdht0700_2017, qcdht1000_2017, qcdht1500_2017, qcdht2000_2017, wjetstolnu_2017, dyjetstollM10_2017, dyjetstollM50_2017, ttbar_2017, zjetstonunuht0100_2017, zjetstonunuht0200_2017, zjetstonunuht0400_2017, zjetstonunuht0600_2017, zjetstonunuht0800_2017, zjetstonunuht1200_2017, zjetstonunuht2500_2017, mfv_splitSUSY_tau000001000um_M1400_1200_2017, mfv_splitSUSY_tau000010000um_M1400_1200_2017, mfv_splitSUSY_tau000001000um_M1200_1100_2017, mfv_splitSUSY_tau000010000um_M1200_1100_2017, mfv_splitSUSY_tau000000100um_M2000_1800_2017, mfv_splitSUSY_tau000000300um_M2000_1800_2017, mfv_splitSUSY_tau000010000um_M2000_1800_2017, mfv_splitSUSY_tau000001000um_M2000_1800_2017, mfv_splitSUSY_tau000000100um_M2000_1900_2017, mfv_splitSUSY_tau000000300um_M2000_1900_2017, mfv_splitSUSY_tau000010000um_M2000_1900_2017, mfv_splitSUSY_tau000001000um_M2000_1900_2017, mfv_splitSUSY_tau000000100um_M2400_100_2017, mfv_splitSUSY_tau000000300um_M2400_100_2017, mfv_splitSUSY_tau000010000um_M2400_100_2017, mfv_splitSUSY_tau000001000um_M2400_100_2017, mfv_splitSUSY_tau000000100um_M2400_2300_2017, mfv_splitSUSY_tau000000300um_M2400_2300_2017, mfv_splitSUSY_tau000010000um_M2400_2300_2017, mfv_splitSUSY_tau000001000um_M2400_2300_2017:
     x.add_dataset("ntupleulv0metm")
 
+qcdht0500ext_2017.add_dataset('ntupleulv1_keeptkmetm', '/QCD_HT500to700_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/lian-NtupleULV1_keeptkMETm_2017-7ffd4a92b2869481038f6a448f4f3281/USER', 2812)
+qcdht1000_2017.add_dataset('ntupleulv1_keeptkmetm', '/QCD_HT1000to1500_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/lian-NtupleULV1_keeptkMETm_2017-49ac0acfc3e837efa45b48ba836d3077/USER', 10804)
+qcdht1500_2017.add_dataset('ntupleulv1_keeptkmetm', '/QCD_HT1500to2000_TuneCP5_PSWeights_13TeV-madgraph-pythia8/lian-NtupleULV1_keeptkMETm_2017-6fb877599c89a40ad5813464c4ada95e/USER', 17004)
+qcdht2000_2017.add_dataset('ntupleulv1_keeptkmetm', '/QCD_HT2000toInf_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/lian-NtupleULV1_keeptkMETm_2017-a99993ea68aae8e6a348ee6f9406b734/USER', 30807)
+wjetstolnu_2017.add_dataset('ntupleulv1_keeptkmetm', '/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/lian-NtupleULV1_keeptkMETm_2017-c2559adefd5aa01e4b5a4acd97e91dcb/USER', 697)
+dyjetstollM10_2017.add_dataset('ntupleulv1_keeptkmetm', '/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/lian-NtupleULV1_keeptkMETm_2017-473e3d5fb01cc76949eeb4344abdb5d7/USER', 20)
+dyjetstollM50_2017.add_dataset('ntupleulv1_keeptkmetm', '/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/lian-NtupleULV1_keeptkMETm_2017-88141c35f4bc4432116c5465705e956d/USER', 1015)
+zjetstonunuht0100_2017.add_dataset('ntupleulv1_keeptkmetm', '/ZJetsToNuNu_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/lian-NtupleULV1_keeptkMETm_2017-d8afebdd5ab3d3275388a8c31fea9b08/USER', 4973)
+zjetstonunuht0200_2017.add_dataset('ntupleulv1_keeptkmetm', '/ZJetsToNuNu_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8/lian-NtupleULV1_keeptkMETm_2017-cd167c206fd3a168275d18f04f82bfd2/USER', 22780)
+zjetstonunuht0400_2017.add_dataset('ntupleulv1_keeptkmetm', '/ZJetsToNuNu_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8/lian-NtupleULV1_keeptkMETm_2017-37454fcf95a9e443c40f1f3fcc7ae570/USER', 40491)
+zjetstonunuht0600_2017.add_dataset('ntupleulv1_keeptkmetm', '/ZJetsToNuNu_HT-600To800_TuneCP5_13TeV-madgraphMLM-pythia8/lian-NtupleULV1_keeptkMETm_2017-c7a85ec8a29abfc6ec75982ba16fa3bc/USER', 19116)
+zjetstonunuht0800_2017.add_dataset('ntupleulv1_keeptkmetm', '/ZJetsToNuNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8/lian-NtupleULV1_keeptkMETm_2017-535aef042b8d1540f2643f0a1a4d3825/USER', 8728)
+zjetstonunuht1200_2017.add_dataset('ntupleulv1_keeptkmetm', '/ZJetsToNuNu_HT-1200To2500_TuneCP5_13TeV-madgraphMLM-pythia8/lian-NtupleULV1_keeptkMETm_2017-f4b51a3db4d72ed8188e8d8ba6509bc6/USER', 2796)
+zjetstonunuht2500_2017.add_dataset('ntupleulv1_keeptkmetm', '/ZJetsToNuNu_HT-2500ToInf_TuneCP5_13TeV-madgraphMLM-pythia8/lian-NtupleULV1_keeptkMETm_2017-0c4c227817089244edae29d5341fd3b7/USER', 3707)
+for x in qcdht0200_2017, qcdht0300_2017, qcdht0500_2017, qcdht0700_2017, ttbar_2017, mfv_splitSUSY_tau000001000um_M1400_1200_2017, mfv_splitSUSY_tau000010000um_M1400_1200_2017, mfv_splitSUSY_tau000001000um_M1200_1100_2017, mfv_splitSUSY_tau000010000um_M1200_1100_2017, mfv_splitSUSY_tau000000100um_M2000_1800_2017, mfv_splitSUSY_tau000000300um_M2000_1800_2017, mfv_splitSUSY_tau000010000um_M2000_1800_2017, mfv_splitSUSY_tau000001000um_M2000_1800_2017, mfv_splitSUSY_tau000000100um_M2000_1900_2017, mfv_splitSUSY_tau000000300um_M2000_1900_2017, mfv_splitSUSY_tau000010000um_M2000_1900_2017, mfv_splitSUSY_tau000001000um_M2000_1900_2017, mfv_splitSUSY_tau000000100um_M2400_100_2017, mfv_splitSUSY_tau000000300um_M2400_100_2017, mfv_splitSUSY_tau000010000um_M2400_100_2017, mfv_splitSUSY_tau000001000um_M2400_100_2017, mfv_splitSUSY_tau000000100um_M2400_2300_2017, mfv_splitSUSY_tau000000300um_M2400_2300_2017, mfv_splitSUSY_tau000010000um_M2400_2300_2017, mfv_splitSUSY_tau000001000um_M2400_2300_2017:
+    x.add_dataset("ntupleulv1_keeptkmetm")
+
 ########
 # automatic condor declarations for ntuples
 ########
@@ -437,7 +454,7 @@ for s in registry.all():
 # be careful about the list, some samples are distributed at different samples so it won't work
 condorable = {
     "T2_DE_DESY": {
-        "miniaod": [EGamma2018D, MET2017E, MET2018A, MET2018B, SingleMuon2018A, SingleMuon2018B, SingleMuon2018C, SingleMuon2018D, wjetstolnu_2018, dyjetstollM10_2018, dyjetstollM50_2018, ttbar_2018, zjetstonunuht0100_2018, zjetstonunuht0200_2018, zjetstonunuht0400_2018, zjetstonunuht0600_2018, zjetstonunuht0800_2018, zjetstonunuht1200_2018, zjetstonunuht0100_2017, zjetstonunuht0200_2017, zjetstonunuht0400_2017, zjetstonunuht0600_2017, zjetstonunuht1200_2017, zjetstonunuht2500_2017, zjetstonunuht0800_2017, qcdht1500_2017],
+        "miniaod": [EGamma2018D, MET2017E, MET2018A, MET2018B, SingleMuon2018A, SingleMuon2018B, SingleMuon2018C, SingleMuon2018D, wjetstolnu_2018, dyjetstollM10_2018, dyjetstollM50_2018, ttbar_2018, zjetstonunuht0100_2018, zjetstonunuht0200_2018, zjetstonunuht0400_2018, zjetstonunuht0600_2018, zjetstonunuht0800_2018, zjetstonunuht1200_2018],
         },
     "T3_US_FNALLPC": {
         "miniaod": mfv_splitSUSY_samples_2017,
