@@ -1,7 +1,7 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version_ = 'ULV0'
+ntuple_version_ = 'ULV1_keeptk'
 #ntuple_version_ = 'Vkeeptk_v1'
 use_btag_triggers = False
 use_MET_triggers = True
@@ -105,7 +105,7 @@ class NtupleSettings(CMSSWSettings):
         self.prepare_vis = False
         self.keep_all = False
         self.keep_gen = False
-        self.kee_tk = False
+        self.keep_tk = False
         self.event_filter = True
 
     @property
