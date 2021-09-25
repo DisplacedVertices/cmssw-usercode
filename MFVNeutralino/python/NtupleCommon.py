@@ -277,6 +277,8 @@ def miniaod_ntuple_process(settings):
 
     # change made to use corrected MET
     process.mfvTriggerFloats.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple')
+    if not settings.is_mc:
+      process.mfvTriggerFloats.met_filters_src = cms.InputTag('TriggerResults', '', 'RECO')
     process.mfvTriggerFloats.isMC = settings.is_mc
     process.mfvTriggerFloats.year = settings.year
 
