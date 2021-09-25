@@ -5,9 +5,9 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.Tools.Samples import *
 
-useElectron = True
+useElectron = False
 useMETNoMu = True
-version = '2017ULv1_ele_MET'
+version = '2017ULv1_mu_MET'
 #version = '2017v11_MET'
 if useMETNoMu:
   version+='NoMu'
@@ -40,7 +40,7 @@ print year, data_period, int_lumi
 
 root_dir = '/uscms/home/ali/nobackup/LLP/crabdir/TrigEff%s' % version
 #root_dir = '/uscms/home/ali/nobackup/LLP/crabdir/TrigEff2017v10_WJets_xycorrMET_METnoMu_v3'
-plot_path = 'TrigEff%s_%s_%s%sincl' % (version, num_dir, year, data_period)
+plot_path = 'TrigEff%s_%s_%s%sincl_test' % (version, num_dir, year, data_period)
 if zoom:
     plot_path += '_zoom'
 
@@ -134,7 +134,8 @@ def make_fcn(name, kind, n):
     return fcn
 
 def rebin_met(h):
-    a = to_array(range(0, 100, 10) + range(100, 200, 10) + [200, 220, 240, 270, 300, 350, 400, 450, 500, 600, 700, 800, 1000])
+    #a = to_array(range(0, 100, 10) + range(100, 200, 10) + [200, 220, 240, 270, 300, 350, 400, 450, 500, 600, 700, 800, 1000])
+    a = to_array(range(0, 1000, 10)) 
     return h.Rebin(len(a)-1, h.GetName() + '_rebin', a)
 
 def rebin_pt(h):
@@ -299,11 +300,17 @@ for kind in kinds:
 
         data_rat = histogram_divide(data_num, data_den)
         bkg_rat = histogram_divide(bkg_num, bkg_den, use_effective=True) if bkg_num and bkg_den else None
-        #ratio_file = ROOT.TFile(subname+'_data_bkg.root', "RECREATE")
-        #data_bkg_rat = histogram_divide(data_rat, bkg_rat, confint=propagate_ratio, force_le_1=False)
-        #data_bkg_rat.GetYaxis().SetTitle("data/MC")
-        #data_bkg_rat.Write()
-        #ratio_file.Close()
+        tag = '_ele' if useElectron else '_mu'
+        ratio_file = ROOT.TFile(subname+tag+'_data_bkg.root', "RECREATE")
+        data_bkg_rat = histogram_divide(data_rat, bkg_rat, confint=propagate_ratio, force_le_1=False)
+        data_bkg_rat.GetYaxis().SetTitle("data/MC")
+        if 'met' in n:
+          data_bkg_rat.GetXaxis().SetLimits(0, 1000)
+          data_bkg_rat.SetTitle('; MET p_{T} (GeV);data/MC')
+          if 'nomu' in n:
+            data_bkg_rat.SetTitle('; METNoMu p_{T} (GeV);data/MC')
+        data_bkg_rat.Write()
+        ratio_file.Close()
 
         for r in (data_rat, bkg_rat):
             if not r:
@@ -355,7 +362,7 @@ for kind in kinds:
 
         ps.save(subname)
         bkg_rat.SetLineColor(2)
-        ratios_plot(subname+'rt',[data_rat,bkg_rat],ps,canvas_size = (600, 650),res_fit=False,res_divide_opt={'confint': propagate_ratio, 'force_le_1': False})
+        ratios_plot(subname+'rt',[bkg_rat,data_rat],ps,canvas_size = (600, 650),res_fit=False,res_divide_opt={'confint': propagate_ratio, 'force_le_1': False})
 
         print '\nsignals'
         for sample in sig_samples:
