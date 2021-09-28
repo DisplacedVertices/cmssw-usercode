@@ -77,41 +77,41 @@ sum_n2v = 0 #total input(MC or observed) 2-vtx events
 sum2_en2v =0 #the quadratic sum of errors due each 2-vtx input(MC or observed) 
 sum2_en1v = 0 #the quadratic sum of errors due each 1-vtx input(MC or observed) 
 for ntk in 3,4,5:
-   n1v, en1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
-   n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
-   sum_n1v += n1v
-   f1 = fracdict[ntk]['1v']
-   alpha = ((f0 - f1)*(f0 - f1)) - (f0*(f0-1)) #simplified alphas by assume Cb and Cbbar are about the same for all track multiplicities  
-   alpha_nn[ntk] = alpha
-   sum_rest += (n2v/alpha)
-   sum2_erest += (en2v/alpha)**2 
-   sum_n2v += n2v 
-   sum2_en2v += (en2v**2)
-   sum2_en1v += (en1v**2)
+    n1v, en1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
+    n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
+    sum_n1v += n1v
+    f1 = fracdict[ntk]['1v']
+    alpha = ((f0 - f1)*(f0 - f1)) - (f0*(f0-1)) #simplified alphas by assume Cb and Cbbar are about the same for all track multiplicities  
+    alpha_nn[ntk] = alpha
+    sum_rest += (n2v/alpha)
+    sum2_erest += (en2v/alpha)**2 
+    sum_n2v += n2v 
+    sum2_en2v += (en2v**2)
+    sum2_en1v += (en1v**2)
 print 'n1 = %8.0f'%(sum_n1v)
 print 'en1 = %f'%(math.sqrt(sum2_en1v)) 
 
 alpha_nm = {} #a dict of alpha constants with non-equal track multiplicities of the two vertices
 for ntk in 'Ntk3or4','Ntk3or5', 'Ntk4or5':
-   tracks = [int(i) for i in ntk if i.isdigit()]
-   ntktot = sum(tracks)
-   f1 = []
-   for i, n in enumerate(tracks):
-	if n == 5:
-	    tracks[i] = ''
-	    f1.append(fracdict[5]['1v'])
-	else:
-	    tracks[i] = 'Ntk%s' % n
-	    f1.append(fracdict[n]['1v'])
-   n1v0, en1v0 = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % tracks[0]))
-   n1v1, en1v1 = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % tracks[1]))
-   n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ntk))
-   alpha = ((f0 - f1[0])*(f0 - f1[1])) - (f0*(f0-1)) #simplified alphas by assume Cb and Cbbar are about the same for all track multiplicities     
-   alpha_nm[ntk] = alpha
-   sum_rest += (n2v/alpha)
-   sum2_erest += (en2v/alpha)**2
-   sum_n2v += n2v
-   sum2_en2v += (en2v**2) 
+    tracks = [int(i) for i in ntk if i.isdigit()]
+    ntktot = sum(tracks)
+    f1 = []
+    for i, n in enumerate(tracks):
+        if n == 5:
+            tracks[i] = ''
+            f1.append(fracdict[5]['1v'])
+        else:
+            tracks[i] = 'Ntk%s' % n
+            f1.append(fracdict[n]['1v'])
+    n1v0, en1v0 = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % tracks[0]))
+    n1v1, en1v1 = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % tracks[1]))
+    n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ntk))
+    alpha = ((f0 - f1[0])*(f0 - f1[1])) - (f0*(f0-1)) #simplified alphas by assume Cb and Cbbar are about the same for all track multiplicities     
+    alpha_nm[ntk] = alpha
+    sum_rest += (n2v/alpha)
+    sum2_erest += (en2v/alpha)**2
+    sum_n2v += n2v
+    sum2_en2v += (en2v**2) 
 
 for ntk in 3,4,5:
     n1v, en1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
