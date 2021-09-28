@@ -4,7 +4,7 @@ import pandas as pd
 
 presel_path = '/uscms_data/d2/tucker/crab_dirs/PreselHistosV27m'
 #sel_path = '/uscms_data/d3/dquach/crab3dirs/HistosV27m_moresidebands'
-sel_path = '/uscms/home/pkotamni/nobackup/crabdirs/Histos2trkmergedV27m'
+sel_path = '/uscms/home/pkotamni/nobackup/crabdirs/Histos2trkmergedV27m' 
 data = bool_from_argv('data')
 year = '2017' if len(sys.argv) < 2 else sys.argv[1]
 varname = 'nom' if len(sys.argv) < 3 else sys.argv[2] # use the BTV variations to compute syst shifts on pred2v
@@ -30,7 +30,7 @@ def fb(ft,efft,frt):
 presel_f = ROOT.TFile(os.path.join(presel_path, fn))
 sel_f = ROOT.TFile(os.path.join(sel_path, fn))
 effs = pd.read_csv('MiniTree/efficiencies/all_effs.csv',index_col='variant')
-cb_vals = pd.read_csv('One2Two/cb_vals/cb_vals.csv',index_col='variant')
+cb_vals = pd.read_csv('One2Two/cb_vals/cb_vals_for_predict2v.csv',index_col='variant') #unused file for this method of calculating predict2v 
 
 fracdict = {}
 cdict = {}
@@ -68,13 +68,14 @@ print 'presel events: %8.0f +- %4.0f' % (npresel, enpresel)
 print 'fraction of presel events with b-quarks: %.3f' % f0
 print '%16s %8s %8s %8s %19s %15s %35s' % ('n1v', 'f1', 'cb', 'cbbar', 'pred n2v', 'n2v', 'ratio')
 
-sum_n1v = 0
-alpha_nn = {}
-sum_rest = 0
-sum2_erest = 0
-sum_n2v = 0
-sum2_en2v =0
-sum2_en1v = 0
+#See these evernotes(https://www.evernote.com/shard/s376/nl/66335180/7657f560-7151-4de9-b495-10ffb4cd3b74 and https://www.evernote.com/shard/s376/nl/66335180/aedb1579-5f71-4313-8730-bc43a2ef4579) for the details of this new-simplified calculation 
+sum_n1v = 0 #total input(MC or observed) 1-vtx events
+alpha_nn = {} #a dict of alpha constants with equal track multiplicities of the two vertices 
+sum_rest = 0 #the sum term of all 2-vtx categories written as sigma_{l<=p} (N_l,p/alpha_l,p) where N_l,p is the input(MC or observed) 2-vtx l-trk p-trk events
+sum2_erest = 0 # the quadratic sum of errors due to each N_l,p/alpha_l,p
+sum_n2v = 0 #total input(MC or observed) 2-vtx events
+sum2_en2v =0 #the quadratic sum of errors due each 2-vtx input(MC or observed) 
+sum2_en1v = 0 #the quadratic sum of errors due each 1-vtx input(MC or observed) 
 for ntk in 3,4,5:
    n1v, en1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
    n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
