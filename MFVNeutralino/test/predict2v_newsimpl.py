@@ -91,13 +91,13 @@ for ntk in 3,4,5:
 print 'n1 = %8.0f'%(sum_n1v)
 print 'en1 = %f'%(math.sqrt(sum2_en1v)) 
 
-alpha_nm = {}
+alpha_nm = {} #a dict of alpha constants with non-equal track multiplicities of the two vertices
 for ntk in 'Ntk3or4','Ntk3or5', 'Ntk4or5':
    tracks = [int(i) for i in ntk if i.isdigit()]
    ntktot = sum(tracks)
    f1 = []
    for i, n in enumerate(tracks):
-        if n == 5:
+	if n == 5:
 	    tracks[i] = ''
 	    f1.append(fracdict[5]['1v'])
 	else:
