@@ -10,7 +10,7 @@ settings.is_mc = True
 #settings.is_mc = False
 settings.cross = '' # 2017to2018' # 2017to2017p8'
 
-version = '2017ULv0_mu_METNoMu'
+version = '2017ULv1_mu_METNoMu'
 
 mu_thresh_hlt = 27
 mu_thresh_offline = 35
