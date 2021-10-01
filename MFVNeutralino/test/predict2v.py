@@ -3,7 +3,8 @@ from JMTucker.Tools.general import *
 import pandas as pd
 
 presel_path = '/uscms_data/d2/tucker/crab_dirs/PreselHistosV27m'
-sel_path = '/uscms_data/d3/dquach/crab3dirs/HistosV27m_moresidebands'
+#sel_path = '/uscms_data/d3/dquach/crab3dirs/HistosV27m_moresidebands'
+sel_path = '/uscms/home/pkotamni/nobackup/crabdirs/HistosV27m' 
 data = bool_from_argv('data')
 year = '2017' if len(sys.argv) < 2 else sys.argv[1]
 varname = 'nom' if len(sys.argv) < 3 else sys.argv[2] # use the BTV variations to compute syst shifts on pred2v

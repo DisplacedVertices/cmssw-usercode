@@ -19,7 +19,7 @@ else :
 process = ntuple_process(settings)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
 sample_files(process, 'mfv_neu_tau001000um_M1200_2017', dataset, 1)
-max_events(process, 1000)
+max_events(process, 100) # PK: used to be 1000
 cmssw_from_argv(process)
 
 

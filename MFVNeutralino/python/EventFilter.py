@@ -4,10 +4,10 @@ def setup_event_filter(process,
                        path_name='p',
                        trigger_filter = True,
                        trigger_filter_name = 'mfvTriggerFilter',
-                       event_filter = False,
+                       event_filter = True, #PK: used to be False
                        event_filter_jes_mult = 2,
                        event_filter_name = 'mfvEventFilter',
-                       event_filter_require_vertex = True,
+                       event_filter_require_vertex = False, #PK: used to be True
                        input_is_miniaod = False,
                        mode = None,
                        sequence_name = 'mfvEventFilterSequence',
@@ -128,7 +128,7 @@ def setup_event_filter(process,
                     process.load('JMTucker.Tools.UnpackedCandidateTracks_cfi')
                     process.mfvVertexTracks.tracks_src = 'jmtUnpackedCandidateTracks'
                     process.jmtRescaledTracks.tracks_src = 'jmtUnpackedCandidateTracks' # JMTBAD use rescaled tracks
-            vertexFilter = cms.EDFilter('VertexSelector', src = cms.InputTag('mfvVertices'), cut = cms.string('nTracks > 2'), filter = cms.bool(True))
+            vertexFilter = cms.EDFilter('VertexSelector', src = cms.InputTag('mfvVertices'), cut = cms.string('nTracks > 2'), filter = cms.bool(False)) #PK: used to be True
             setattr(process, event_filter_name + 'W1Vtx', vertexFilter)
             if input_is_miniaod:
                 overall *= process.goodOfflinePrimaryVertices * process.jmtUnpackedCandidateTracks * process.mfvVertexSequenceBare * vertexFilter
