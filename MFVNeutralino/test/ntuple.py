@@ -3,7 +3,7 @@
 from JMTucker.MFVNeutralino.NtupleCommon import *
 
 settings = NtupleSettings()
-settings.is_mc = False
+settings.is_mc = True
 settings.is_miniaod = True
 
 settings.run_n_tk_seeds = False

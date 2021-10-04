@@ -212,24 +212,16 @@ if __name__ == '__main__':
         else:
             sys.exit('unrecognized cmd %s' % cmd)
 
-    from Samples import * 
+    # example of how to print the files including given events
+    #from Samples import * 
 
-    events = [
-      (1,1,5964),
-      (1,1,5974),
-      (1,1,5978),
-      (1,1,5986),
-      (1,1,5988),
-      (1,1,5993),
-      (1,1,6000),
-      (1,1,6003),
-      (1,1,6013),
-      (1,1,6034),
-    ]
+    #events = [
+    #  (1,1,5964),
+    #]
 
-    mfv_splitSUSY_tau000001000um_M2000_1800_2017.set_curr_dataset('miniaod') 
-    for event in events:
-        print files_for_events([event],mfv_splitSUSY_tau000001000um_M2000_1800_2017.dataset)
+    #mfv_splitSUSY_tau000001000um_M2000_1800_2017.set_curr_dataset('miniaod') 
+    #for event in events:
+    #    print files_for_events([event],mfv_splitSUSY_tau000001000um_M2000_1800_2017.dataset)
 
     #ds = '/QCD_HT2000toInf_TuneCUETP8M1_13TeV-madgraphMLM-pythia8/RunIISummer16DR80Premix-PUMoriond17_80X_mcRun2_asymptotic_2016_TrancheIV_v6_ext1-v1/AODSIM'
     #all_files = files_in_dataset(ds)

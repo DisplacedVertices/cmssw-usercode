@@ -32,10 +32,6 @@ elif 'ntk3or4' in sys.argv:
 sigreg = 'sigreg' in sys.argv
 presel = 'presel' in sys.argv
 nocuts = 'nocuts' in sys.argv
-A = 'A' in sys.argv
-B = 'B' in sys.argv
-C = 'C' in sys.argv
-D = 'D' in sys.argv
 if sum([sigreg, nvtx == 1, presel, nocuts]) > 1:
     raise ValueError("can only do one of onevtx, sigreg, presel, nocuts")
 if any([sigreg,presel,nocuts]):
@@ -80,22 +76,6 @@ def effs(fn):
     elif nocuts:
         namenumall = 'mfvEventHistosNoCuts'
         namenumvtx = None
-    elif A:
-        namenumall = 'mfvEventHistosMETCutTightVtx'
-        namenumvtx = None
-        #namenumvtx = 'mfvVertexHistosMETCutTightVtx/h_nsv'
-    elif B:
-        namenumall = 'mfvEventHistosNoMETCutTightVtx'
-        namenumvtx = None
-        #namenumvtx = 'mfvVertexHistosNoMETCutTightVtx/h_nsv'
-    elif C:
-        namenumall = 'mfvEventHistosMETCutLooseVtx'
-        namenumvtx = None
-        #namenumvtx = 'mfvVertexHistosMETCutLooseVtx/h_nsv'
-    elif D:
-        namenumall = 'mfvEventHistosNoMETCutLooseVtx'
-        namenumvtx = None
-        #namenumvtx = 'mfvVertexHistosNoMETCutLooseVtx/h_nsv'
     else:
         namenumall = 'mfvEventHistosFullSel'
         namenumvtx = None
