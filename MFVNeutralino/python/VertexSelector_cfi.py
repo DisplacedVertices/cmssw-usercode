@@ -116,34 +116,6 @@ mfvSelectedVerticesTight = mfvSelectedVertices.clone(
     max_rescale_bs2derr = 0.0025,
     )
 
-mfvSelectedVerticesTightNoBeamPipe = mfvSelectedVertices.clone(
-    mevent_src = 'mfvEvent',
-    exclude_beampipe = cms.bool(False),
-    min_ntracks = 3,
-    #min_bsbs2ddist = 0.01,
-    #max_rescale_bs2derr = 0.0025,
-    )
-mfvSelectedVerticesTightNoNtk = mfvSelectedVertices.clone(
-    mevent_src = 'mfvEvent',
-    exclude_beampipe = True,
-    min_ntracks = 3,
-    min_bsbs2ddist = 0.01,
-    max_rescale_bs2derr = 0.0025,
-    )
-mfvSelectedVerticesTightNoDBS = mfvSelectedVertices.clone(
-    mevent_src = 'mfvEvent',
-    exclude_beampipe = True,
-    min_ntracks = 5,
-    #min_bsbs2ddist = 0.01,
-    max_rescale_bs2derr = 0.0025,
-    )
-mfvSelectedVerticesTightNoDBSerr = mfvSelectedVertices.clone(
-    mevent_src = 'mfvEvent',
-    exclude_beampipe = True,
-    min_ntracks = 5,
-    min_bsbs2ddist = 0.01,
-    #max_rescale_bs2derr = 0.0025,
-    )
 mfvSelectedVerticesTightMinNtk3 = mfvSelectedVerticesTight.clone(min_ntracks = 3)
 mfvSelectedVerticesTightNtk3    = mfvSelectedVerticesTight.clone(min_ntracks = 3, max_ntracks = 3)
 mfvSelectedVerticesTightNtk4    = mfvSelectedVerticesTight.clone(min_ntracks = 4, max_ntracks = 4)
@@ -153,10 +125,6 @@ mfvSelectedVerticesTightNtk4or5 = mfvSelectedVerticesTight.clone(min_ntracks = 4
 mfvSelectedVerticesTightNtk5    = mfvSelectedVerticesTight.clone() # for looping convenience
 
 mfvSelectedVerticesSeq = cms.Sequence(
-    mfvSelectedVerticesTightNoBeamPipe *
-    mfvSelectedVerticesTightNoDBS *
-    mfvSelectedVerticesTightNoNtk *
-    mfvSelectedVerticesTightNoDBSerr *
     mfvSelectedVerticesExtraLoose *
     mfvSelectedVerticesTight *
     mfvSelectedVerticesTightNtk3 *

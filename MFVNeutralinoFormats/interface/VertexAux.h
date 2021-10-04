@@ -283,7 +283,7 @@ struct MFVVertexAux {
   double track_eta_err(int i) const { return track_err(i, reco::TrackBase::i_lambda) * track_p(i) / track_pt(i); }
   double track_phi_err(int i) const { return track_err(i, reco::TrackBase::i_phi); }
   double track_dxy_err(int i) const { return track_err(i, reco::TrackBase::i_dxy); }
-  double track_dxy_nsigma(int i) const {return track_dxy[i] / track_dxy_err(i); }
+  double track_dxy_nsigma(int i) const { return fabs(track_dxy[i] / track_dxy_err(i)); }
   double track_dz_err(int i) const { return track_err(i, reco::TrackBase::i_dsz) * track_p(i) / track_pt(i); }
 
   double track_chi2dof(int i) const { return track_chi2[i] / track_ndof[i]; }

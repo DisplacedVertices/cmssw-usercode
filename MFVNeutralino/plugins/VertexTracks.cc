@@ -178,7 +178,7 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
     h_n_seed_tracks = fs->make<TH1F>("h_n_seed_tracks", "", 200, 0,  200);
 
     const char* par_names[6] = {"pt", "eta", "phi", "dxybs", "dxypv", "dz"};
-    const int par_nbins[6] = {  50, 50, 50, 100, 100, 80 };
+    const int par_nbins[6] = {  50, 50, 50, 500, 100, 80 };
     const double par_lo[6] = {   0, -2.5, -3.15, -0.2, -0.2, -20 };
     const double par_hi[6] = {  10,  2.5,  3.15,  0.2,  0.2,  20 };
     const double err_lo[6] = { 0 };

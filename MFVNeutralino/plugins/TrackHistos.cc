@@ -37,7 +37,8 @@ class MFVTrackHistos : public edm::EDAnalyzer {
     TH1F* h_all_track_eta;
     TH1F* h_all_track_phi;
     TH1F* h_all_track_dxybs;
-    TH1F* h_all_track_dxybe_sig;
+    TH1F* h_all_track_dxybs_err;
+    TH1F* h_all_track_dxybs_sig;
     TH1F* h_all_track_dz;
     TH1F* h_all_track_dz_sig;
     TH1F* h_leading_track_n;
@@ -45,7 +46,8 @@ class MFVTrackHistos : public edm::EDAnalyzer {
     TH1F* h_leading_track_eta;
     TH1F* h_leading_track_phi;
     TH1F* h_leading_track_dxybs;
-    TH1F* h_leading_track_dxybe_sig;
+    TH1F* h_leading_track_dxybs_err;
+    TH1F* h_leading_track_dxybs_sig;
     TH1F* h_leading_track_dz;
     TH1F* h_leading_track_dz_sig;
 
@@ -67,18 +69,20 @@ MFVTrackHistos::MFVTrackHistos(const edm::ParameterSet& cfg)
   h_all_track_eta = fs->make<TH1F>("h_all_track_eta", ";all track #eta; events",50,-4,4);
   h_all_track_phi = fs->make<TH1F>("h_all_track_phi", ";all track #phi; events", 50, -3.15, 3.15);
   h_all_track_dxybs = fs->make<TH1F>("h_all_track_dxybs", ";all track dxybs (cm)", 100, -1, 1);
-  h_all_track_dxybe_sig = fs->make<TH1F>("h_all_track_dxybe_sig", "; all track #sigma(dxybs); events", 400, -40, 40);
+  h_all_track_dxybs_err = fs->make<TH1F>("h_all_track_dxybs_err", ";all track dxybs err (cm)", 500,0,0.2);
+  h_all_track_dxybs_sig = fs->make<TH1F>("h_all_track_dxybs_sig", "; all track #sigma(dxybs); events", 400, -40, 40);
   h_all_track_dz = fs->make<TH1F>("h_all_track_dz", ";all track dz (cm); events", 500, -35, 35);
   h_all_track_dz_sig = fs->make<TH1F>("h_all_track_dz_sig", ";all track #sigma(dz);events",200,-20000,20000);
 
   h_leading_track_n = fs->make<TH1F>("h_leading_track_n", ";# tracks;events",200,0,200);
-  h_leading_track_pt = fs->make<TH1F>("h_leading_track_pt", ";all track p_{T} (GeV); events",2000,0,2000);
-  h_leading_track_eta = fs->make<TH1F>("h_leading_track_eta", ";all track #eta; events",50,-4,4);
-  h_leading_track_phi = fs->make<TH1F>("h_leading_track_phi", ";all track #phi; events", 50, -3.15, 3.15);
-  h_leading_track_dxybs = fs->make<TH1F>("h_leading_track_dxybs", ";all track dxybs (cm)", 100, -1, 1);
-  h_leading_track_dxybe_sig = fs->make<TH1F>("h_leading_track_dxybe_sig", "; all track #sigma(dxybs); events", 400, -40, 40);
-  h_leading_track_dz = fs->make<TH1F>("h_leading_track_dz", ";all track dz (cm); events", 500, -35, 35);
-  h_leading_track_dz_sig = fs->make<TH1F>("h_leading_track_dz_sig", ";all track #sigma(dz);events",200,-20000,20000);
+  h_leading_track_pt = fs->make<TH1F>("h_leading_track_pt", TString::Format(";first %d track p_{T} (GeV); events",max_ntrack),2000,0,2000);
+  h_leading_track_eta = fs->make<TH1F>("h_leading_track_eta", TString::Format(";first %d track #eta; events",max_ntrack),50,-4,4);
+  h_leading_track_phi = fs->make<TH1F>("h_leading_track_phi", TString::Format(";first %d track #phi; events",max_ntrack), 50, -3.15, 3.15);
+  h_leading_track_dxybs = fs->make<TH1F>("h_leading_track_dxybs", TString::Format(";first %d track dxybs (cm)",max_ntrack), 100, -1, 1);
+  h_leading_track_dxybs_err = fs->make<TH1F>("h_leading_track_dxybs_err", TString::Format(";first %d track dxybs err (cm)",max_ntrack), 500,0,0.2);
+  h_leading_track_dxybs_sig = fs->make<TH1F>("h_leading_track_dxybs_sig", TString::Format("; first %d track #sigma(dxybs); events",max_ntrack), 400, -40, 40);
+  h_leading_track_dz = fs->make<TH1F>("h_leading_track_dz", TString::Format(";first %d track dz (cm); events",max_ntrack), 500, -35, 35);
+  h_leading_track_dz_sig = fs->make<TH1F>("h_leading_track_dz_sig", TString::Format(";first %d track #sigma(dz);events",max_ntrack),200,-20000,20000);
 }
 
 void MFVTrackHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
@@ -149,7 +153,8 @@ void MFVTrackHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       h_all_track_eta->Fill(tk->eta(), w);
       h_all_track_phi->Fill(tk->phi(), w);
       h_all_track_dxybs->Fill(dxybs, w);
-      h_all_track_dxybe_sig->Fill(rescaled_sigmadxybs, w);
+      h_all_track_dxybs_err->Fill(rescaled_dxyerr, w);
+      h_all_track_dxybs_sig->Fill(rescaled_sigmadxybs, w);
       h_all_track_dz->Fill(dzbs, w);
       h_all_track_dz_sig->Fill(rescaled_sigmadzbs, w);
       if (ntracks<max_ntrack){
@@ -157,7 +162,8 @@ void MFVTrackHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         h_leading_track_eta->Fill(tk->eta(), w);
         h_leading_track_phi->Fill(tk->phi(), w);
         h_leading_track_dxybs->Fill(dxybs, w);
-        h_leading_track_dxybe_sig->Fill(rescaled_sigmadxybs, w);
+        h_leading_track_dxybs_err->Fill(rescaled_dxyerr, w);
+        h_leading_track_dxybs_sig->Fill(rescaled_sigmadxybs, w);
         h_leading_track_dz->Fill(dzbs, w);
         h_leading_track_dz_sig->Fill(rescaled_sigmadzbs, w);
       }

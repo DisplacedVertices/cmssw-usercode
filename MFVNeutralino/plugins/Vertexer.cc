@@ -829,7 +829,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     }
   }
 
-  // track attachment
+  // track attachment : https://cds.cern.ch/record/2669425 (chapter 4.5)
   if (track_attachment){
     // build transient tracks from quality tracks (not included in seed tracks)
     std::vector<reco::TransientTrack> quality_tracks;
@@ -1054,6 +1054,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   }
 
   if (verbose){
+    // investigate how tracks are dropped during nm1 process
     for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
       const track_vec tks = vertex_track_vec(*v[0]);
       const size_t ntks = tks.size();
@@ -1107,22 +1108,11 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         reco::Vertex vnm1(TransientVertex(kv_reco->vertex(ttks)));
         const double dist3_2 = mag2(vnm1.x() - v[0]->x(), vnm1.y() - v[0]->y(), vnm1.z() - v[0]->z());
         const double distz = mag(vnm1.z() - v[0]->z());
-        //const double distz_error = sqrt(vnm1.covariance(2, 2) + v[0]->covariance(2, 2));
-        //const double distz_sig = distz/distz_error;
-        //if (histos){
-        //  h_noshare_nm1refit_dz->Fill(distz);
-        //  h_noshare_nm1refit_dz_err->Fill(distz_error);
-        //  h_noshare_nm1refit_dz_sig->Fill(distz_sig);
-        //  h_noshare_nm1refit_dz_dzerr->Fill(distz, distz_error);
-        //}
         if (verbose) printf("  refit %lu chi2 %7.4f vtx %7.4f %7.4f %7.4f dist3 %7.4f distz %7.4f \n", i, vnm1.chi2(), vnm1.x(), vnm1.y(), vnm1.z(), sqrt(dist3_2), distz);
 
         if (vnm1.chi2() < 0 ||
             (max_nm1_refit_dist3 > 0 && mag2(vnm1.x() - v[0]->x(), vnm1.y() - v[0]->y(), vnm1.z() - v[0]->z()) > pow(max_nm1_refit_dist3, 2)) ||
             (max_nm1_refit_distz > 0 && distz > max_nm1_refit_distz)) {
-            //(max_nm1_refit_distz > 0 && distz > max_nm1_refit_distz) || 
-            //(max_nm1_refit_distz_error > 0 && distz_error > max_nm1_refit_distz_error) ||
-            //(max_nm1_refit_distz_sig > 0 && distz_sig > max_nm1_refit_distz_sig)) {
           if (verbose) {
             printf("    replacing");
             if (refit_count[iv] < max_nm1_refit_count - 1)

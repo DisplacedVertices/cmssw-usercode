@@ -336,8 +336,7 @@ void MFVTriggerEfficiency::analyze(const edm::Event& event, const edm::EventSetu
     double mu_phi = -999;
     for (const pat::Muon& muon : *muons) {
       for (int i = 0; i < 2; ++i) {
-        //if (i == 0 || (muon_selector(muon) && muon.passed(reco::Muon::CutBasedIdTight))) { //&& muon.passed(reco::Muon::CutBasedIdTight)
-        if (i == 0 || (muon.passed(reco::Muon::CutBasedIdTight) && muon_selector(muon))) {
+        if (i == 0 || muon.passed(reco::Muon::CutBasedIdTight)) {
           ++nmuons[i];
           h_muon_pt[i]->Fill(muon.pt(), w);
           h_muon_eta[i]->Fill(muon.eta(), w);

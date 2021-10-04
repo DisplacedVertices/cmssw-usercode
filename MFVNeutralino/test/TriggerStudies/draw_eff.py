@@ -8,7 +8,6 @@ from JMTucker.Tools.Samples import *
 useElectron = False
 useMETNoMu = True
 version = '2017ULv1_mu_MET'
-#version = '2017v11_MET'
 if useMETNoMu:
   version+='NoMu'
 zoom = False #(0.98,1.005)
@@ -20,6 +19,7 @@ num_dir, den_dir = 'num', 'den'
 
 which = typed_from_argv(int, 0)
 data_period, int_lumi = [
+    #FIXME: currently using jsong files from METNoMu trigger but should change that to ele/mu 
     ('p8',100293.),
     ('',   40610.),
     ('B',   4803.),
@@ -39,8 +39,7 @@ print year, data_period, int_lumi
 ########################################################################
 
 root_dir = '/uscms/home/ali/nobackup/LLP/crabdir/TrigEff%s' % version
-#root_dir = '/uscms/home/ali/nobackup/LLP/crabdir/TrigEff2017v10_WJets_xycorrMET_METnoMu_v3'
-plot_path = 'TrigEff%s_%s_%s%sincl_test' % (version, num_dir, year, data_period)
+plot_path = 'TrigEff%s_%s_%s%s' % (version, num_dir, year, data_period)
 if zoom:
     plot_path += '_zoom'
 
@@ -60,17 +59,13 @@ if data_only:
     bkg_samples, sig_samples = [], []
 else:
     if year == 2017 or year == 2018:
-        #bkg_samples = [wjetstolnu_2017]
-        #sig_samples = []
         if useElectron:
           bkg_samples = [ttbar_2017, wjetstolnu_2017, dyjetstollM50_2017, dyjetstollM10_2017]
         else:
-          #bkg_samples = [ttbar_2017, wjetstolnusum_2017, dyjetstollM50sum_2017, dyjetstollM10_2017, qcdmupt15_2017]
           bkg_samples = [ttbar_2017, wjetstolnu_2017, dyjetstollM50_2017, dyjetstollM10_2017]
         if use_qcd:
             bkg_samples.append(qcdmupt15_2017)
         sig_samples = Samples.mfv_splitSUSY_samples_2017
-        #sig_samples = [getattr(Samples, 'mfv_neu_tau001000um_M%04i_2017' % m) for m in (400, 800, 1200, 1600)] + [Samples.mfv_neu_tau010000um_M0800_2017]
 
 n_bkg_samples = len(bkg_samples)
 for samples in bkg_samples, sig_samples:
@@ -83,12 +78,7 @@ for samples in bkg_samples, sig_samples:
 ########################################################################
 
 kinds = ['']
-#ns = ['h_jet_ht']
 ns = ['h_metpt','h_metpt_nomu']
-#if useMETNoMu:
-#  ns = ['h_metpt_nomu']
-#else:
-#  ns = ['h_metpt']
 
 lump_lower = 0.
 #lump_lower = 1200.

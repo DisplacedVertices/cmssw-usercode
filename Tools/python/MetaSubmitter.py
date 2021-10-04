@@ -207,7 +207,8 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
         # Shed/presel_splitting.py
         d = {'miniaod': {
                 'signal':           ( 1,     200),
-                'MET':            (15, 1350000),
+                'JetHT':            (15, 1350000),
+                'MET':              (15, 1350000),
                 'qcdht0300_2017':   (5, 3130000),
                 'qcdht0500_2017':   (3, 3130000),
                 'qcdht0700_2017':   (5, 3130000),
@@ -241,7 +242,9 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
             sample.split_by = 'files'
             name = sample.name
 
-            if 'MET' in name:
+            if 'JetHT' in name:
+                name = 'JetHT'
+            elif 'MET' in name:
                 name = 'MET'
             elif sample.is_signal:
                 name = 'signal'
@@ -269,18 +272,14 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
 
     if limit_ttbar:
         d = { # get ~400/fb
-            #'ttbarht0600_2017':  (20, 726800),
-            #'ttbarht0800_2017':  ( 8, 300800),
-            #'ttbarht1200_2017':  ( 2,  52500),
-            #'ttbarht2500_2017':  ( 1,   1000),
+            'ttbarht0600_2017':  (20, 726800),
+            'ttbarht0800_2017':  ( 8, 300800),
+            'ttbarht1200_2017':  ( 2,  52500),
+            'ttbarht2500_2017':  ( 1,   1000),
             'ttbarht0600_2018':  (25, 726800),
             'ttbarht0800_2018':  (11, 300800),
             'ttbarht1200_2018':  ( 2,  52500),
             'ttbarht2500_2018':  ( 1,   1000),
-            'ttbarht0600_2017':  (200, 7268000),
-            'ttbarht0800_2017':  ( 80, 3008000),
-            'ttbarht1200_2017':  ( 20,  525000),
-            'ttbarht2500_2017':  ( 10,   10000),
             }
         for sample in samples:
             n = d.get(sample.name)
@@ -295,14 +294,15 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
 ####
 
 def pick_samples(dataset, both_years=False,
-                 qcd=True, ttbar=True, data=True, leptonic=False, splitSUSY=False, Zvv=False, met=False,
+                 qcd=False, ttbar=False, all_signal=False, data=False, leptonic=False, bjet=False,  
+                 splitSUSY=False, Zvv=False, met=False,
                  span_signal=False):
 
     if span_signal:
         print 'cannot use both span and all_signal, turning off the latter'
         all_signal = False
 
-    argnames = 'qcd', 'ttbar', 'span_signal', 'data', 'leptonic', 'splitSUSY', 'Zvv', 'met'
+    argnames = 'qcd', 'ttbar', 'all_signal', 'span_signal', 'data', 'leptonic', 'bjet', 'splitSUSY', 'Zvv', 'met'
     args = dict([(a,eval(a)) for a in argnames])
     if not set(args.values()).issubset([True, False, 'only']):
         raise ValueError('arg must be one of True, False, "only"')

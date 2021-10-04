@@ -43,18 +43,6 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH1F* h_nsv;
   TH1F* h_genbs2ddist;
   TH1F* h_sv_gen2ddist_signed;
-  TH1F* h_sv_genbs2ddist_ntk5;
-  TH1F* h_sv_genbs2ddist_ntk10;
-  TH1F* h_sv_genbs2ddist_ntk20;
-  TH1F* h_sv_bs2ddist_ntk5;
-  TH1F* h_sv_bs2ddist_ntk10;
-  TH1F* h_sv_bs2ddist_ntk20;
-  TH1F* h_sv_ntk_pass4sigmadxybs;
-  TH1F* h_sv_ntk_pass5sigmadxybs;
-  TH1F* h_sv_ntk_pass4sigmadxybs_fraction;
-  TH1F* h_sv_ntk_pass5sigmadxybs_fraction;
-  TH2F* h_sv_ntk_pass4;
-  TH2F* h_sv_ntk_pass5;
   TH2F* h_sv_ntk_genbs2ddist;
   TH2F* h_sv_ntk_bs2ddist;
   TH2F* h_sv_ntk_gen2ddist;
@@ -369,19 +357,7 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   }
 
   h_genbs2ddist = fs->make<TH1F>("h_genbs2ddist", ";dist2d(gen vtx, beamspot) (cm);arb. units", 500, 0, 2.5);
-  h_sv_bs2ddist_ntk5 = fs->make<TH1F>("h_sv_bs2ddist_ntk5", "ntracks<10;dist2d(SV, beamspot) (cm);arb. units", 500, 0, 2.5);
-  h_sv_bs2ddist_ntk10 = fs->make<TH1F>("h_sv_bs2ddist_ntk10", "10<=ntracks<20;dist2d(SV, beamspot) (cm);arb. units", 500, 0, 2.5);
-  h_sv_bs2ddist_ntk20 = fs->make<TH1F>("h_sv_bs2ddist_ntk20", "20<=ntracks;dist2d(SV, beamspot) (cm);arb. units", 500, 0, 2.5);
-  h_sv_genbs2ddist_ntk5 = fs->make<TH1F>("h_sv_genbs2ddist_ntk5", "ntracks<10;dist2d(gen vtx, beamspot) (cm);arb. units", 500, 0, 2.5);
-  h_sv_genbs2ddist_ntk10 = fs->make<TH1F>("h_sv_genbs2ddist_ntk10", "10<=ntracks<20;dist2d(gen vtx, beamspot) (cm);arb. units", 500, 0, 2.5);
-  h_sv_genbs2ddist_ntk20 = fs->make<TH1F>("h_sv_genbs2ddist_ntk20", "20<=ntracks;dist2d(gen vtx, beamspot) (cm);arb. units", 500, 0, 2.5);
   h_sv_gen2ddist_signed = fs->make<TH1F>("h_sv_gen2ddist_signed", ";dist2d(SV, closest gen vtx) (cm);arb. units", 400,-0.2,0.2);
-  h_sv_ntk_pass4sigmadxybs = fs->make<TH1F>("h_sv_ntk_pass4sigmadxybs", ";# tracks passing  N#sigma (dxybs)>=4 /SV;arb.units", 40,0,40);
-  h_sv_ntk_pass5sigmadxybs = fs->make<TH1F>("h_sv_ntk_pass5sigmadxybs", ";# tracks passing  N#sigma (dxybs)>=5 /SV;arb.units", 40,0,40);
-  h_sv_ntk_pass4sigmadxybs_fraction = fs->make<TH1F>("h_sv_ntk_pass4sigmadxybs_fraction", ";SV # tracks passing  N#sigma (dxybs)>=4/ntracks;arb.units", 20,0,1);
-  h_sv_ntk_pass5sigmadxybs_fraction = fs->make<TH1F>("h_sv_ntk_pass5sigmadxybs_fraction", ";SV # tracks passing  N#sigma (dxybs)>=5/ntracks;arb.units", 20,0,1);
-  h_sv_ntk_pass4 = fs->make<TH2F>("h_sv_ntk_pass4", ";SV # tracks passing  N#sigma (dxybs)>=4/ntracks; SV # tracks", 40,0,40,40,0,40);
-  h_sv_ntk_pass5 = fs->make<TH2F>("h_sv_ntk_pass5", ";SV # tracks passing  N#sigma (dxybs)>=5/ntracks; SV # tracks", 40,0,40,40,0,40);
   h_sv_ntk_genbs2ddist = fs->make<TH2F>("h_sv_ntk_genbs2ddist", ";# tracks of SV;dist2d(gen vtx, beamspot) (cm)",40,0,40,500,0,2.5);
   h_sv_ntk_bs2ddist = fs->make<TH2F>("h_sv_ntk_bs2ddist", ";# tracks of SV;dist2d(SV, beamspot) (cm)",40,0,40,500,0,2.5);
   h_sv_ntk_gen2ddist = fs->make<TH2F>("h_sv_ntk_gen2ddist", ";# tracks of SV;dist2d(SV, closest gen vtx) (cm)",40,0,40,200,0,0.2);
@@ -438,63 +414,30 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_genbs2ddist->Fill(genbs2ddist, w);
   }
 
-  // matching jets with gen quarks from LLPs
-  //double decay_quarks0_pt[2] = {-1,-1};
-  //double decay_quarks1_pt[2] = {-1,-1};
-  //double decaylsp0_pt = -1;
-  //double decaylsp1_pt = -1;
-  //double decay_jets0_pt[2] = {-1,-1};
-  //double decay_jets1_pt[2] = {-1,-1};
+  // matching jets with gen quarks from LLPs and fill a 2D histogram with nsv vs. # total number of jets matched to LLPs
   double nmatched_0 = 0;
   double nmatched_1 = 0;
   for (size_t i=0; i<mevent->gen_daughters.size(); ++i){
+    // skip neutralinos and only look at quarks
+    // FIXME: this only works for splitSUSY samples
     if (abs(mevent->gen_daughter_id[i])==1000022){
       continue;
-      //if (decaylsp0_pt>0){
-      //  decaylsp1_pt = mevent->gen_daughters[i].Pt();
-      //}
-      //else{
-      //  decaylsp0_pt = mevent->gen_daughters[i].Pt();
-      //}
     }
     else{
       double gd_eta = mevent->gen_daughters[i].Eta();
       double gd_phi = mevent->gen_daughters[i].Phi();
-      //double dR2_min = 999;
       int n_matched = 0;
-      //double pt_sum = 0;
       for (int ij = 0; ij<mevent->njets(); ++ij){
         double dR2 = reco::deltaR2(mevent->nth_jet_eta(ij), mevent->nth_jet_phi(ij), gd_eta, gd_phi);
-        //double dR2 = (mevent->nth_jet_eta(ij)-gd_eta)*(mevent->nth_jet_eta(ij)-gd_eta)+(mevent->nth_jet_phi(ij)-gd_phi)*(mevent->nth_jet_phi(ij)-gd_phi);
-        //if (dR2_min>dR2){
-        //  dR2_min = dR2;
-        //}
         if (dR2<0.16){
           n_matched += 1;
-          //pt_sum += mevent->nth_jet_pt(ij);
         }
       }
       if (i<3){
         nmatched_0 += n_matched;
-        //if (decay_quarks0_pt[0]>=0){
-        //  decay_quarks0_pt[1] = mevent->gen_daughters[i].Pt();
-        //  decay_jets0_pt[1] = pt_sum;
-        //}
-        //else{
-        //  decay_quarks0_pt[0] = mevent->gen_daughters[i].Pt();
-        //  decay_jets0_pt[0] = pt_sum;
-        //}
       }
       else{
         nmatched_1 += n_matched;
-        //if (decay_quarks1_pt[0]>=0){
-        //  decay_quarks1_pt[1] = mevent->gen_daughters[i].Pt();
-        //  decay_jets1_pt[1] = pt_sum;
-        //}
-        //else{
-        //  decay_quarks1_pt[0] = mevent->gen_daughters[i].Pt();
-        //  decay_jets1_pt[0] = pt_sum;
-        //}
       }
     }
   }
@@ -503,23 +446,6 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   for (int isv = 0; isv < nsv; ++isv) {
     const MFVVertexAux& aux = auxes->at(isv);
     const int ntracks = aux.ntracks();
-
-    const auto nsigmadxybss = aux.track_dxy_nsigmas();
-    int pass4 = std::count_if(nsigmadxybss.begin(),nsigmadxybss.end(), [&](float const& val){return val>=4;});
-    int pass5 = std::count_if(nsigmadxybss.begin(),nsigmadxybss.end(), [&](float const& val){return val>=5;});
-    h_sv_ntk_pass4sigmadxybs->Fill(pass4, w);
-    h_sv_ntk_pass5sigmadxybs->Fill(pass5, w);
-    h_sv_ntk_pass4sigmadxybs_fraction->Fill((1.0*pass4)/ntracks, w);
-    h_sv_ntk_pass5sigmadxybs_fraction->Fill((1.0*pass5)/ntracks, w);
-    h_sv_ntk_pass4->Fill(pass4, ntracks, w);
-    h_sv_ntk_pass5->Fill(pass5, ntracks, w);
-
-    //std::cout << "sv " << isv << " pass 4 " << std::count_if(nsigmadxybss.begin(),nsigmadxybss.end(), [&](float const& val){return val>=4;}) << " pass 5 " << std::count_if(nsigmadxybss.begin(),nsigmadxybss.end(), [&](float const& val){return val>=5;}) << std::endl;
-    //std::cout << "nsigmadxybs: ";
-    //for (int itk = 0; itk<ntracks; ++itk) {
-    //  std::cout << " " << nsigmadxybss[itk];
-    //}
-    //std::cout << std::endl;
 
     jmt::MinValue d;
     double sv_gen2ddist_sign = 1;
@@ -537,18 +463,6 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     if (genbs2ddist<mevent->bs2ddist(aux))
       sv_gen2ddist_sign = -1;
 
-    if (ntracks<10){
-      h_sv_bs2ddist_ntk5->Fill(mevent->bs2ddist(aux), w);
-      h_sv_genbs2ddist_ntk5->Fill(genbs2ddist, w);
-    }
-    else if (ntracks<20){
-      h_sv_bs2ddist_ntk10->Fill(mevent->bs2ddist(aux), w);
-      h_sv_genbs2ddist_ntk10->Fill(genbs2ddist, w);
-    }
-    else{
-      h_sv_bs2ddist_ntk20->Fill(mevent->bs2ddist(aux), w);
-      h_sv_genbs2ddist_ntk20->Fill(genbs2ddist, w);
-    }
     h_sv_gen2ddist_signed->Fill(sv_gen2ddist_sign*aux.gen2ddist, w);
 
     h_sv_ntk_bs2ddist->Fill(ntracks, mevent->bs2ddist(aux), w);
@@ -958,6 +872,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     }
   }
 
+  // number of jets associated with SVs
   for (int isv = 0; isv < nsv; ++isv) {
     const MFVVertexAux& aux = auxes->at(isv);
     const int ntracks = aux.ntracks();

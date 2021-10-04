@@ -5,8 +5,9 @@ from JMTucker.MFVNeutralino.UtilitiesBase import *
 ####
 
 _leptonpresel = bool_from_argv('leptonpresel')
+_btagpresel = bool_from_argv('btagpresel')
 _metpresel = bool_from_argv('metpresel')
-_presel_s = '_leptonpresel' if _leptonpresel else '_metpresel' if _metpresel else ''
+_presel_s = '_leptonpresel' if _leptonpresel else '_metpresel' if _metpresel else '_btagpresel' if _btagpresel else ''
 
 ####
 
@@ -129,6 +130,9 @@ def _background_samples(trigeff=False, year=2017):
         if not trigeff:
             x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]]
             x += ['qcdbctoept%03i' % x for x in [15,20,30,80,170,250]]
+    elif _btagpresel:
+        x = ['qcdht%04i' % x for x in [300, 500, 700, 1000, 1500, 2000]]
+        x += ['ttbar']
     elif _metpresel:
         x = ['ttbar', 'wjetstolnu']
         x += ['qcdht%04i' % x for x in [200, 300, 500, 700, 1000, 1500, 2000]]
@@ -260,15 +264,6 @@ def cmd_effsprint(year_to_use=2017):
                     cmd += ' ' + which_files
                     outfn = 'effsprint_%s%s_%s_ntk%s_%iv' % (which, _presel_s, year, ntk, vtx)
                     do(cmd, outfn)
-            # A B C D region effsprint
-            for reg in ['A', 'B', 'C', 'D']:
-                cmd = 'ntk5 '
-                cmd += reg
-                if which == 'background':
-                    cmd += ' sum'
-                cmd += ' ' + which_files
-                outfn = 'effsprint_%s%s_%s_region%s' % (which, _presel_s, year, reg)
-                do(cmd, outfn)
                 
         do('presel sum ' + background_fns, 'effsprint_presel_%s' % year)
         do('nocuts sum ' + background_fns, 'effsprint_nocuts_%s' % year)

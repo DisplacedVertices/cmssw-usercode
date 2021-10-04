@@ -90,8 +90,6 @@ def minitree_only(process, mode, settings, output_commands):
 def event_filter(process, mode, settings, output_commands, **kwargs):
     if mode:
         from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-        # for temp including events that don't pass MET trigger and MET lower than 150
-        #setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode, trigger_filter = False, event_filter = False, event_filter_require_vertex = False, **kwargs)
         setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode, event_filter_require_vertex = True, **kwargs)
 
 ########################################################################
@@ -264,8 +262,6 @@ def miniaod_ntuple_process(settings):
     process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
     process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
     process.load('JMTucker.MFVNeutralino.TrackTree_cfi')
-    # temporarily add this module to select event passing MET trigger or event with MET<threshold
-    #process.load('JMTucker.MFVNeutralino.METTrigFilter_cfi')
 
     process.goodOfflinePrimaryVertices.input_is_miniaod = True
     process.selectedPatJets.src = 'updatedJetsMiniAOD'
@@ -301,8 +297,6 @@ def miniaod_ntuple_process(settings):
     process.mfvEvent.gen_particles_src = 'prunedGenParticles' # no idea if this lets gen_bquarks, gen_leptons work--may want the packed ones that have status 1 particles
     process.mfvEvent.gen_jets_src = 'slimmedGenJets'
     process.mfvEvent.pileup_info_src = 'slimmedAddPileupInfo'
-    # use corrected MET
-    #need to be changed to use TriggerFloats corrected MET
     process.mfvEvent.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple')
 
     # MET correction and filters
@@ -317,14 +311,12 @@ def miniaod_ntuple_process(settings):
                          process.updatedJetsSeqMiniAOD *
                          process.BadPFMuonFilterUpdateDz *
                          process.fullPatMetSequence *
-                         #process.mfvMETTrigFilter *
                          process.selectedPatJets *
                          process.selectedPatMuons *
                          process.selectedPatElectrons *
                          process.mfvTriggerFloats *
                          process.jmtUnpackedCandidateTracks *
                          process.mfvVertexSequence *
-                         #process.mfvTrackTree *
                          process.prefiringweight *
                          process.mfvEvent)
 

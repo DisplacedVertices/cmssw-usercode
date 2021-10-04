@@ -1,15 +1,10 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 is_mc = True # for blinding
-do_track = True
+do_track = True # this can onlky be used for ntuple with keep_tk=True
 
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_MET_triggers
-sample_files(process, 'ttbar_2017' if is_mc else 'JetHT2017B', dataset, 1)
-#sample_files(process, 'mfv_neu_tau001000um_M0800_2017' if is_mc else 'JetHT2017B', dataset, 10)
-#sample_files(process, 'mfv_splitSUSY_tau000001000um_M2000_1800_2017' if is_mc else 'JetHT2017B', dataset, -1)
-#input_files(process,[
-#                    '/uscms_data/d3/ali/LLP/CornellCode/mfv_10_6_20/src/JMTucker/MFVNeutralino/test/TestRun/ntuple.root'
-#            ])
+sample_files(process, 'qcdht2000_2017' if is_mc else 'JetHT2017B', dataset, 1)
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
 
@@ -29,17 +24,9 @@ process.mfvEventHistosNoCuts = process.mfvEventHistos.clone()
 process.mfvVertexHistosNoCuts = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesExtraLoose')
 process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts) # just trigger for now
 process.pSkimSelVtx = cms.Path(common * process.mfvVertexHistosNoCuts)
-
-# make nm1 plots
-process.mfvEventHistosnm1 = process.mfvEventHistos.clone()
-process.mfvAnalysisCutsnm1 = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)
-process.mfvVertexHistosNoBeamPipe = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesTightNoBeamPipe')
-process.mfvVertexHistosNoDBS = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesTightNoDBS')
-process.mfvVertexHistosNoNtk = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesTightNoNtk')
-process.mfvVertexHistosNoDBSerr = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesTightNoDBSerr')
-process.pEventnm1 = cms.Path(common * process.mfvAnalysisCutsnm1 * process.mfvEventHistosnm1)
-process.pnm1 = cms.Path(common * process.mfvAnalysisCutsnm1 * process.mfvVertexHistosNoBeamPipe * process.mfvVertexHistosNoDBS * process.mfvVertexHistosNoNtk * process.mfvVertexHistosNoDBSerr)
-
+if do_track:
+  process.mfvTrackHistosNoCuts = process.mfvTrackHistos.clone()
+  process.pTrackNoCut = cms.Path(common * process.mfvTrackHistos)
 
 process.mfvEventHistosExtraLoose = process.mfvEventHistos.clone()
 process.mfvAnalysisCutsExtraLoose = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesExtraLoose', min_nvertex = 1)
@@ -55,42 +42,6 @@ process.mfvAnalysisCutsExtraLooseOnlyOneVtx = process.mfvAnalysisCuts.clone(vert
 process.mfvVertexHistosExtraLooseOnlyOneVtx = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesExtraLoose')
 process.pEventExtraLooseOnlyOneVtx = cms.Path(common * process.mfvAnalysisCutsExtraLooseOnlyOneVtx * process.mfvEventHistosExtraLooseOnlyOneVtx)
 process.pExtraLooseOnlyOneVtx = cms.Path(common * process.mfvAnalysisCutsExtraLooseOnlyOneVtx * process.mfvVertexHistosExtraLooseOnlyOneVtx)
-
-process.mfvEventHistosMLregionAB = process.mfvEventHistos.clone()
-process.mfvAnalysisCutsMLregionAB = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesTightNoDBS', min_nvertex = 1)
-process.mfvVertexHistosMLregionAB = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesTightNoDBS')
-process.pEventMLregionAB = cms.Path(common * process.mfvAnalysisCutsMLregionAB * process.mfvEventHistosMLregionAB)
-process.pMLregionAB = cms.Path(common * process.mfvAnalysisCutsMLregionAB * process.mfvVertexHistosMLregionAB)
-
-#A events with at least 1 Tight SV and pass MET trigger and cut
-process.mfvEventHistosMETCutTightVtx = process.mfvEventHistos.clone()
-process.mfvAnalysisCutsMETCutTightVtx = process.mfvAnalysisCuts.clone(min_nvertex = 1)
-process.mfvVertexHistosMETCutTightVtx = process.mfvVertexHistos.clone()
-process.pEventMETCutTightVtx = cms.Path(common * process.mfvAnalysisCutsMETCutTightVtx * process.mfvEventHistosMETCutTightVtx)
-process.pMETCutTightVtx = cms.Path(common * process.mfvAnalysisCutsMETCutTightVtx * process.mfvVertexHistosMETCutTightVtx)
-
-#B events with at least 1 Tight SV and not pass MET trigger and cut
-process.mfvEventHistosNoMETCutTightVtx = process.mfvEventHistos.clone()
-process.mfvAnalysisCutsNoMETCutTightVtx = process.mfvAnalysisCuts.clone(min_nvertex = 1, apply_presel = 6)
-process.mfvVertexHistosNoMETCutTightVtx = process.mfvVertexHistos.clone()
-process.pEventNoMETCutTightVtx = cms.Path(common * process.mfvAnalysisCutsNoMETCutTightVtx * process.mfvEventHistosNoMETCutTightVtx)
-process.pNoMETCutTightVtx = cms.Path(common * process.mfvAnalysisCutsNoMETCutTightVtx * process.mfvVertexHistosNoMETCutTightVtx)
-
-#C events with at least 1 Loose SV and pass MET trigger and cut
-process.mfvEventHistosMETCutLooseVtx = process.mfvEventHistos.clone()
-process.mfvAnalysisCutsMETCutLooseVtxTightCheck = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesTight', min_nvertex = 0, max_nvertex = 0) # make sure no tight Vtx survived
-process.mfvAnalysisCutsMETCutLooseVtx = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesTightNtk3or4', min_nvertex = 1, max_nvertex = 100000)
-process.mfvVertexHistosMETCutLooseVtx = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesTightNtk3or4')
-process.pEventMETCutLooseVtx = cms.Path(common * process.mfvAnalysisCutsMETCutLooseVtxTightCheck * process.mfvAnalysisCutsMETCutLooseVtx * process.mfvEventHistosMETCutLooseVtx)
-process.pMETCutLooseVtx = cms.Path(common * process.mfvAnalysisCutsMETCutLooseVtxTightCheck * process.mfvAnalysisCutsMETCutLooseVtx * process.mfvVertexHistosMETCutLooseVtx)
-
-#D events with at least 1 Loose SV and not pass MET trigger and cut
-process.mfvEventHistosNoMETCutLooseVtx = process.mfvEventHistos.clone()
-process.mfvAnalysisCutsNoMETCutLooseVtxTightCheck = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesTight', min_nvertex = 0, max_nvertex = 0, apply_presel = 6) # make sure no tight Vtx survived
-process.mfvAnalysisCutsNoMETCutLooseVtx = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesTightNtk3or4', min_nvertex = 1, max_nvertex = 100000, apply_presel = 6)
-process.mfvVertexHistosNoMETCutLooseVtx = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesTightNtk3or4')
-process.pEventNoMETCutLooseVtx = cms.Path(common * process.mfvAnalysisCutsNoMETCutLooseVtxTightCheck * process.mfvAnalysisCutsNoMETCutLooseVtx * process.mfvEventHistosNoMETCutLooseVtx)
-process.pNoMETCutLooseVtx = cms.Path(common * process.mfvAnalysisCutsNoMETCutLooseVtxTightCheck * process.mfvAnalysisCutsNoMETCutLooseVtx * process.mfvVertexHistosNoMETCutLooseVtx)
 
 process.mfvEventHistosPreSel = process.mfvEventHistos.clone()
 process.mfvAnalysisCutsPreSel = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)

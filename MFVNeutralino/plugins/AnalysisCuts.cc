@@ -213,20 +213,18 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (apply_presel == 5) {
 
       // Veto events which pass HT trigger and offline HT > 1200 GeV, to keep orthogonal with apply_presel == 1
-      //if(satisfiesTrigger(mevent, mfv::b_HLT_PFHT1050)) return false;
+      if(satisfiesTrigger(mevent, mfv::b_HLT_PFHT1050)) return false;
 
       if ( !satisfiesTrigger(mevent, mfv::b_HLT_PFMET120_PFMHT120_IDTight) ){
         return false;
       }
     }
 
-    // Events not passing MET trigger ans have MET lower than threshold
+    // Events with MET lower than threshold
     if (apply_presel == 6) {
-      //if(satisfiesTrigger(mevent, mfv::b_HLT_PFHT1050)) return false;
+      // Veto events which pass HT trigger and offline HT > 1200 GeV, to keep orthogonal with apply_presel == 1
+      if(satisfiesTrigger(mevent, mfv::b_HLT_PFHT1050)) return false;
 
-      //if ( !satisfiesTrigger(mevent, mfv::b_HLT_PFMET120_PFMHT120_IDTight) ){
-      //  std::cout << "MET trigger not fired" << std::endl;
-      //}
       if (mevent->met()>=150) return false;
     }
 

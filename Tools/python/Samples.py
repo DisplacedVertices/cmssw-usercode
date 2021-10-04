@@ -98,23 +98,15 @@ qcd_samples_sum_2017 = [
 
 # ttbar with HT slices not available for UL now
 ttbar_samples_2017 = [
-    #MCSample('ttbarht0600_2017', '/TTJets_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM',   81565576, nice='t#bar{t}, 600 < H_{T} < 800 GeV',   color=600, syst_frac=0.15, xsec=1.817),
-    #MCSample('ttbarht0800_2017', '/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM',  40248127, nice='t#bar{t}, 800 < H_{T} < 1200 GeV',  color=601, syst_frac=0.15, xsec=0.7520),
-    #MCSample('ttbarht1200_2017', '/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v1/AODSIM', 13214871, nice='t#bar{t}, 1200 < H_{T} < 2500 GeV', color=602, syst_frac=0.15, xsec=0.1313),
-    #MCSample('ttbarht2500_2017', '/TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17DRPremix-PU2017_94X_mc2017_realistic_v11-v3/AODSIM',   5155687, nice='t#bar{t}, H_{T} > 2500 GeV',        color=603, syst_frac=0.15, xsec=1.41e-3),
+    ]
+bjet_samples_2017 = [
     ]
 
 leptonic_samples_2017 = [
     MCSample('wjetstolnu_2017',       '/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v1/AODSIM', 81551529, nice='W + jets #rightarrow l#nu', color=  9, syst_frac=0.10, xsec=5.294e4),
     MCSample('dyjetstollM10_2017',    '/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM',                  70516252, nice='DY + jets #rightarrow ll, 10 < M < 50 GeV', color= 29, syst_frac=0.10, xsec=1.58e4),
     MCSample('dyjetstollM50_2017',    '/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v1/AODSIM',          103599638, nice='DY + jets #rightarrow ll, M > 50 GeV', color= 32, syst_frac=0.10, xsec=5.34e3),
-    #MCSample('dyjetstollM50ext_2017', '/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6_ext1-v1/AODSIM',     101893848, nice='DY + jets #rightarrow ll, M > 50 GeV', color= 32, syst_frac=0.10, xsec=5.34e3),
-    #MCSample('qcdmupt15_2017',        '/QCD_Pt-20toInf_MuEnrichedPt15_TuneCP5_13TeV_pythia8/RunIIFall17DRPremix-PU2017RECOSIMstep_94X_mc2017_realistic_v11-v1/AODSIM',  21833984, nice='QCD, #hat{p}_{T} > 20 GeV, #mu p_{T} > 15 GeV', color=801, syst_frac=0.20, xsec=5.23e8*4.57e-4), # not available for UL
     ]
-
-#leptonic_samples_sum_2017 = [
-#    SumSample('dyjetstollM50sum_2017', leptonic_samples_2017[2:4]),
-#    ]
 
 met_samples_2017 = [
     MCSample('ttbar_2017',     '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM',    249133364, nice='t#bar{t}',                   color=4,   syst_frac=0.15, xsec=831.76),
@@ -153,10 +145,8 @@ mfv_splitSUSY_samples_2017 = [
   MCSample('mfv_splitSUSY_tau000001000um_M2400_2300_2017', '/mfv_splitSUSY_tau000001000um_M2400_2300_2017/None/USER', 10000),
 ]
 
-#for s in mfv_splitSUSY_samples_2017:
-#    _set_signal_stuff(s)
-
 splitSUSY_samples_2017 = mfv_splitSUSY_samples_2017
+all_signal_samples_2017 = mfv_splitSUSY_samples_2017
 
 ########
 # 2018 MC
@@ -176,17 +166,15 @@ qcd_samples_sum_2018 = [
     SumSample('qcdht0200sum_2018', qcd_samples_2017[0:2]),
     ]
 
+ttbar_samples_2018 = []
+
+bjet_samples_2018 = []
+
 leptonic_samples_2018 = [
     MCSample('wjetstolnu_2018',       '/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18RECO-106X_upgrade2018_realistic_v11_L1v1-v1/AODSIM',          83115836, nice='W + jets #rightarrow l#nu', color=  9, syst_frac=0.10, xsec=5.294e4),
     MCSample('dyjetstollM10_2018',    '/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18RECO-106X_upgrade2018_realistic_v11_L1v1-v2/AODSIM', 99573483, nice='DY + jets #rightarrow ll, 10 < M < 50 GeV', color= 29, syst_frac=0.10, xsec=1.58e4),
     MCSample('dyjetstollM50_2018',    '/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18RECO-106X_upgrade2018_realistic_v11_L1v1-v1/AODSIM',     98594572, nice='DY + jets #rightarrow ll, M > 50 GeV', color= 32, syst_frac=0.10, xsec=5.34e3),
-    #MCSample('dyjetstollM50ext_2018', '/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18RECO-106X_upgrade2018_realistic_v11_L1v1_ext1-v1/AODSIM',101595702, nice='DY + jets #rightarrow ll, M > 50 GeV', color= 32, syst_frac=0.10, xsec=5.34e3),
-    #MCSample('qcdmupt15_2017',        '/QCD_Pt-20toInf_MuEnrichedPt15_TuneCP5_13TeV_pythia8/RunIIFall17DRPremix-PU2017RECOSIMstep_94X_mc2017_realistic_v11-v1/AODSIM',  21833984, nice='QCD, #hat{p}_{T} > 20 GeV, #mu p_{T} > 15 GeV', color=801, syst_frac=0.20, xsec=5.23e8*4.57e-4), # not available for UL
     ]
-
-#leptonic_samples_sum_2018 = [
-#    SumSample('dyjetstollM50sum_2018', leptonic_samples_2018[2:4]),
-#    ]
 
 met_samples_2018 = [
     MCSample('ttbar_2018',     '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL18RECO-106X_upgrade2018_realistic_v11_L1v1-v1/AODSIM',  341248786, nice='t#bar{t}',                   color=4,   syst_frac=0.15, xsec=831.76),
@@ -202,14 +190,9 @@ Zvv_samples_2018 = [
     MCSample('zjetstonunuht2500_2018', '/ZJetsToNuNu_HT-2500ToInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL18RECO-106X_upgrade2018_realistic_v11_L1v1-v1/AODSIM',  268224, nice='Z + jets #rightarrow #nu #nu H_{T} > 2500 GeV', color=1, syst_frac=0.20, xsec=0.005146),
     ]
 
-ttbar_samples_2018 = [
-    #MCSample('ttbarht0600_2018', '/TTJets_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18DRPremix-102X_upgrade2018_realistic_v15-v1/AODSIM',   14363689, nice='t#bar{t}, 600 < H_{T} < 800 GeV',   color=600, syst_frac=0.15, xsec=1.817),
-    #MCSample('ttbarht0800_2018', '/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18DRPremix-102X_upgrade2018_realistic_v15-v1/AODSIM',  10462756, nice='t#bar{t}, 800 < H_{T} < 1200 GeV',  color=601, syst_frac=0.15, xsec=0.7520),
-    #MCSample('ttbarht1200_2018', '/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18DRPremix-102X_upgrade2018_realistic_v15-v1/AODSIM',  2897601, nice='t#bar{t}, 1200 < H_{T} < 2500 GeV', color=602, syst_frac=0.15, xsec=0.1313),
-    #MCSample('ttbarht2500_2018', '/TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIAutumn18DRPremix-102X_upgrade2018_realistic_v15-v1/AODSIM',   1451104, nice='t#bar{t}, H_{T} > 2500 GeV',        color=603, syst_frac=0.15, xsec=1.41e-3),
-    ]
+mfv_splitSUSY_samples_2018 = []
 
-
+all_signal_samples_2018 = mfv_splitSUSY_samples_2018
 ########
 # data
 ########
@@ -221,6 +204,9 @@ data_samples_2017 = [                                                       # in
     DataSample('MET2017E', '/MET/Run2017E-09Aug2019_UL2017_rsb-v1/AOD'),  
     DataSample('MET2017F', '/MET/Run2017F-09Aug2019_UL2017_rsb-v1/AOD'),  
     ]
+
+#FIXME: may need to reorganize how data is loaded for different cases
+JetHT_data_samples_2017 = []
 
 auxiliary_data_samples_2017 = [
     DataSample('SingleMuon2017B', '/SingleMuon/Run2017B-09Aug2019_UL2017-v1/AOD'),
@@ -244,6 +230,9 @@ data_samples_2018 = [
     DataSample('MET2018C', '/MET/Run2018C-12Nov2019_UL2018_rsb-v1/AOD'), 
     DataSample('MET2018D', '/MET/Run2018D-12Nov2019_UL2018_rsb-v2/AOD'), 
     ]
+
+#FIXME: may need to reorganize how data is loaded for different cases
+JetHT_data_samples_2018 = []
 
 auxiliary_data_samples_2018 = [
     DataSample('SingleMuon2018A', '/SingleMuon/Run2018A-12Nov2019_UL2018-v3/AOD'),
@@ -273,22 +262,25 @@ __all__ = [
     'qcd_samples_2017',
     'qcd_samples_sum_2017',
     'ttbar_samples_2017',
+    'bjet_samples_2017',
     'leptonic_samples_2017',
-    #'leptonic_samples_sum_2017',
     'met_samples_2017',
     'Zvv_samples_2017',
     'mfv_splitSUSY_samples_2017',
     'qcd_samples_2018',
     'qcd_samples_sum_2018',
+    'ttbar_samples_2018',
+    'bjet_samples_2018',
     'leptonic_samples_2018',
-    #'leptonic_samples_sum_2018',
     'met_samples_2018',
     'Zvv_samples_2018',
-    'ttbar_samples_2018',
+    'mfv_splitSUSY_samples_2018',
     'data_samples_2017',
+    'JetHT_data_samples_2017',
     'auxiliary_data_samples_2017',
     'singleelectron_data_samples_2017',
     'data_samples_2018',
+    'JetHT_data_samples_2018',
     'auxiliary_data_samples_2018',
     'egamma_data_samples_2018',
 
@@ -313,8 +305,8 @@ span_signal_samples_2018 = [
 ]
 
 _alls = [
-    #'all_signal_samples_2017',
-    #'all_signal_samples_2018',
+    'all_signal_samples_2017',
+    'all_signal_samples_2018',
     'span_signal_samples_2017',
     'span_signal_samples_2018',
     ]
@@ -411,7 +403,9 @@ mfv_splitSUSY_tau000010000um_M2400_2300_2017.add_dataset('miniaod', '/splitSUSY_
 mfv_splitSUSY_tau000001000um_M2400_2300_2017.add_dataset('miniaod', '/splitSUSY_M2400_2300_ctau1p0_TuneCP2_13TeV_pythia8/lian-RunIISummer20UL17_MiniAOD-e67f9b5d033cede4d000433a2a96d4fb/USER', 10000)
 
 
-for s in mfv_splitSUSY_samples_2017:
+for s in all_signal_samples_2017:
+    _set_signal_stuff(s)
+for s in all_signal_samples_2018:
     _set_signal_stuff(s)
 
 ########

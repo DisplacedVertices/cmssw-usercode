@@ -180,7 +180,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_gen_bs2ddist = fs->make<TH1F>("h_gen_bs2ddist", ";dist2d(gen vtx, beamspot) (cm);arb. units", 500, 0, 2.5);
   h_llp_dphi = fs->make<TH1F>("h_llp_dphi", ";delta #phi (rad); arb. unit", 100, -3.1416, 3.1416);
   h_nmatchjet_llp = fs->make<TH1F>("h_nmatchjet_llp", ";# matched jet/LLP; arb. unit", 10,0,10);
-  h_llp_pt_vecsum = fs->make<TH1F>("h_llp_pt_vecsum", ";vecror sum of LLP p_{T}; arb. unit", 100, 0, 1000);
+  h_llp_pt_vecsum = fs->make<TH1F>("h_llp_pt_vecsum", ";vector sum of LLP p_{T}; arb. unit", 100, 0, 1000);
 
   h_llp0pt_llp1pt = fs->make<TH2F>("h_llp0pt_llp1pt", ";max llp p_{T} (GeV);min llp p_{T} (GeV)", 300, 0, 3000, 300, 0, 3000);
   h_decay_lsp0pt_lsp1pt = fs->make<TH2F>("h_decay_lsp0pt_lsp1pt", ";max Neutralino p_{T} (GeV);min Neutralino p_{T} (GeV)", 300, 0, 3000, 300, 0, 3000);
@@ -370,6 +370,9 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   double nmatched_1 = 0;
   for (size_t i=0; i<mevent->gen_daughters.size(); ++i){
     if (abs(mevent->gen_daughter_id[i])==1000022){
+      // FIXME: this part only works for splitSUSY because of the pdgID and the number of daughters from each LLP
+      // get pT for neutralinos from the decay of gluino
+      // this only works for splitSUSY samples because it's looking for neutralino(1000022) as gen_daughter
       if (decaylsp0_pt>0){
         decaylsp1_pt = mevent->gen_daughters[i].Pt();
       }
@@ -378,6 +381,8 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       }
     }
     else{
+      // In splitSUSY model, if a decayed daughter is not neutralino, then it will be a quark
+      // match jets to gen quarks from LLP decay
       double gd_eta = mevent->gen_daughters[i].Eta();
       double gd_phi = mevent->gen_daughters[i].Phi();
       //double dR2_min = 999;
@@ -394,6 +399,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         }
       }
       if (i<3){
+        // daughter from the first LLP
         nmatched_0 += n_matched;
         if (decay_quarks0_pt[0]>=0){
           decay_quarks0_pt[1] = mevent->gen_daughters[i].Pt();
@@ -405,6 +411,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         }
       }
       else{
+        // daughters from the second LLP
         nmatched_1 += n_matched;
         if (decay_quarks1_pt[0]>=0){
           decay_quarks1_pt[1] = mevent->gen_daughters[i].Pt();
