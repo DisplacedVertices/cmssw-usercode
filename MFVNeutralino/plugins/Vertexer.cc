@@ -12,6 +12,8 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
 #include "RecoVertex/VertexTools/interface/VertexDistance3D.h"
+#include "RecoVertex/GhostTrackFitter/interface/GhostTrackFitter.h"
+#include "RecoVertex/VertexPrimitives/interface/ConvertToFromReco.h"
 #include "TrackingTools/IPTools/interface/IPTools.h"
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
@@ -28,6 +30,7 @@ public:
 private:
   typedef std::set<reco::TrackRef> track_set;
   typedef std::vector<reco::TrackRef> track_vec;
+  typedef math::Error<5>::type CovarianceMatrix;
 
   void finish(edm::Event&, const std::vector<reco::TransientTrack>&, std::unique_ptr<reco::VertexCollection>, std::unique_ptr<VertexerPairEffs>, const std::vector<std::pair<track_set, track_set>>&);
 
@@ -99,6 +102,7 @@ private:
   VertexDistanceXY vertex_dist_2d;
   VertexDistance3D vertex_dist_3d;
   std::unique_ptr<KalmanVertexFitter> kv_reco;
+  std::unique_ptr<reco::GhostTrackFitter> ghostTrackFitter;
 
   std::vector<TransientVertex> kv_reco_dropin(std::vector<reco::TransientTrack>& ttks) {
     if (ttks.size() < 2)
@@ -167,6 +171,7 @@ private:
 
 MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
   : kv_reco(new KalmanVertexFitter(cfg.getParameter<edm::ParameterSet>("kvr_params"), cfg.getParameter<edm::ParameterSet>("kvr_params").getParameter<bool>("doSmoothing"))),
+    ghostTrackFitter(new reco::GhostTrackFitter()),
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     seed_tracks_token(consumes<std::vector<reco::TrackRef>>(cfg.getParameter<edm::InputTag>("seed_tracks_src"))),
     n_tracks_per_seed_vertex(cfg.getParameter<int>("n_tracks_per_seed_vertex")),
@@ -290,6 +295,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   const double bsx = beamspot->position().x();
   const double bsy = beamspot->position().y();
   const double bsz = beamspot->position().z();
+  const reco::Vertex fake_bs_vtx(beamspot->position(), beamspot->covariance3D());
 
   edm::ESHandle<TransientTrackBuilder> tt_builder;
   setup.get<TransientTrackRecord>().get("TransientTrackBuilder", tt_builder);
@@ -876,6 +882,155 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           ++refit_count[iv];
           --v[0], --iv;
           break;
+        }
+      }
+    }
+  }
+
+  bool vertex_the_vertices = true;
+  if(vertex_the_vertices) {
+
+    int iv = 0;
+
+    for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0], ++iv) {
+
+      const double v0x = v[0]->position().x() - bsx;
+      const double v0y = v[0]->position().y() - bsy;
+      const double phi0 = atan2(v0y, v0x);
+      const double dbv0 = mag(v0x, v0y);
+
+      // skip this below 0.01 cm, i.e. 100 microns
+      if(dbv0 < 0.01) 
+        continue;
+
+      for (v[1] = v[0] + 1; v[1] != vertices->end(); ++v[1]) {
+        ivtx[1] = v[1] - vertices->begin();
+
+        const double v1x = v[1]->position().x() - bsx;
+        const double v1y = v[1]->position().y() - bsy;
+        const double phi1 = atan2(v1y, v1x);
+        const double dbv1 = mag(v1x, v1y);
+
+        // skip this below 0.01 cm, i.e. 100 microns
+        if(dbv1 < 0.01) 
+          continue;
+
+        // only consider re-vertexing when nearby in dphi
+        if(fabs(reco::deltaPhi(phi0, phi1)) > 0.3) continue;
+
+        // FIXME 9/23 @ 2:12pm
+        // now: trace the trajectories back. do a Kalman fit of the trajectories, and see if they:
+        // a) have a nice chi2 (based on some loose criteria, and based on some error model...)
+        // b) form a vertex with dBV > 100 microns
+        //
+        // if both are satisfied (and perhaps more), then vertex all of the tracks together. 
+        // potentially use the b-quark trajectory-based vertex for the position (such as dBV) and chi2, and use the track-based vertex for the bs2derr. Or, since I think this will only enhance the displacement of the vertex, we could say to hell with the b-quark trajectory-based vertex for the position and only use it for a chi2 to decide whether to use this super-vertex
+        //
+        // Hoping the ghost track stuff has nice examples of similarity among covariance matrices, etc to help come up with an estimate for the error
+        // may be able to do something similar to https://github.com/cms-sw/cmssw/blob/01a879ae0518ceba36a1ce5f3b199e31a27673f0/RecoBTag/SecondaryVertex/plugins/TemplatedSecondaryVertexProducer.cc#L784-L794, but using our SVs instead of the PV, and potentially even considering the trajectory to go backwards if need be (i.e. if it requires the track to emanate from the vtx, but prob doesn't care)...
+        // only catch being that "ghost track" from the jet isn't super clear, so may need to think more, or come up with an alternative. but we're getting close.
+
+
+        track_set tracks[2];
+        tracks[0] = vertex_track_set(*v[0]);
+        tracks[1] = vertex_track_set(*v[1]);
+        GlobalVector trajectory_sv[2];
+        std::vector<reco::TransientTrack> ttks[2];
+
+        // for the ghosts
+        std::vector<reco::TransientTrack> gttks;
+
+        for(int i = 0; i < 2; ++i) {
+          for(auto trkref : tracks[i]) {
+            GlobalVector trajectory_trk = GlobalVector(trkref->px(), trkref->py(), trkref->pz());
+            trajectory_sv[i] += trajectory_trk;
+            ttks[i].push_back(tt_builder->build(trkref));
+          }
+
+          // FIXME be sure to debug and check all these!
+          reco::GhostTrack ghost = ghostTrackFitter->fit(RecoVertex::convertPos(v[i]->position()), RecoVertex::convertError(v[i]->error()), trajectory_sv[i], 0.05, ttks[i]);
+          std::cout << "chi2, ndof: " << ghost.chi2() << ", " << ghost.ndof() << std::endl;
+          reco::Track gt = reco::Track(ghost);
+          std::cout << "px,py,pz: " << gt.px() << ", " << gt.py() << ", " << gt.pz() << std::endl;
+          gttks.push_back(tt_builder->build(gt));
+        }
+
+        std::vector<TransientVertex> ghost_vertices(1, kv_reco->vertex(gttks));
+        std::cout << "ghost_vertices.size() " << ghost_vertices.size() << std::endl;
+        // FIXME note can cast the TransientVertex to reco::Vertex
+        for(auto gvtx : ghost_vertices) {
+          std::cout << "sv0 chi2 " << v[0]->normalizedChi2() << ", sv1 chi2 " << v[1]->normalizedChi2() << std::endl;
+          std::cout << "gvtx chi2 " << gvtx.normalisedChiSquared() << std::endl;
+          if(gvtx.normalisedChiSquared() < 0) continue;
+          std::cout << "sv0 dBV " << dbv0 << ", sv1 dBV " << dbv1 << std::endl;
+          std::cout << "gvtx dBV " << mag(gvtx.position().x() - bsx, gvtx.position().y() - bsy) << std::endl;
+
+          reco::Vertex reco_gvtx = reco::Vertex(gvtx);
+
+          const auto d_sv0 = vertex_dist_2d.distance(*v[0], fake_bs_vtx);
+          const auto d_sv1 = vertex_dist_2d.distance(*v[1], fake_bs_vtx);
+          const auto d_gvtx = vertex_dist_2d.distance(reco_gvtx, fake_bs_vtx);
+
+          std::cout << "sv0 dBV " << d_sv0.value() << ", sv1 dBV " << d_sv1.value() << " (confirmation)" << std::endl;
+          std::cout << "gvtx dBV " << d_gvtx.value() << " (confirmation)" << std::endl;
+
+          std::cout << "sv0 bs2derr " << d_sv0.error() << ", sv1 bs2derr " << d_sv1.error() << std::endl;
+          std::cout << "gvtx bs2derr " << d_gvtx.error() << std::endl;
+
+          std::cout << "sv0 ntk " << v[0]->tracksSize() << "sv1 ntk " << v[1]->tracksSize() << std::endl;
+          std::cout << "gvtx ntk " << reco_gvtx.tracksSize() << std::endl;
+
+          std::cout << "sv0 valid " << v[0]->isValid() << "sv1 valid " << v[1]->isValid() << std::endl;
+          std::cout << "gvtx valid " << reco_gvtx.isValid() << std::endl;
+
+          reco_gvtx.removeTracks();
+          std::cout << "gvtx removed ntk " << reco_gvtx.tracksSize() << std::endl;
+          std::cout << "gvtx removed valid " << reco_gvtx.isValid() << std::endl;
+
+          for(int i = 0; i < 2; ++i) {
+            for(auto it = v[i]->tracks_begin(), ite = v[i]->tracks_end(); it != ite; ++it) {
+              const reco::TrackBaseRef& baseref = *it;
+              // FIXME may need to veto tracks with small weights? or maybe already done?
+              float w = v[i]->trackWeight(baseref);
+              reco_gvtx.add(baseref, w);
+            }
+          }
+
+          // FIXME note vtx may no longer say that it is "valid", so should make sure we don't rely on that (we very well may!!!!)
+          std::cout << "gvtx added ntk " << reco_gvtx.tracksSize() << std::endl;
+          std::cout << "gvtx added valid " << reco_gvtx.isValid() << std::endl;
+          const auto d_gvtx_new = vertex_dist_2d.distance(reco_gvtx, fake_bs_vtx);
+          std::cout << "gvtx added dBV " << d_gvtx_new.value() << std::endl;
+          std::cout << "gvtx added bs2derr " << d_gvtx_new.error() << std::endl;
+          // FIXME 9/30 @7:25pm now the problem is bs2derr remains too large to be useful. Hmmm
+          // 8:08pm well, OR we could not even need bs2derr for these types of vertices???????????????????
+
+          std::vector<reco::TransientTrack> combined_ttks;
+          for(int i = 0; i < 2; ++i) {
+            for(auto ttk : ttks[i]) {
+              combined_ttks.push_back(ttk);
+            }
+          }
+
+          // FIXME the below rarely succeeds, probably because they're so separated that no vtx is formed.
+          std::vector<TransientVertex> combined_vertices = kv_reco_dropin(combined_ttks);
+          std::cout << "combined_vertices.size() " << combined_vertices.size() << std::endl;
+          for (auto comb : combined_vertices) {
+            std::cout << "comb chi2 " << comb.normalisedChiSquared() << std::endl;
+            if(comb.normalisedChiSquared() < 0) continue;
+            std::cout << "comb dBV " << mag(comb.position().x() - bsx, comb.position().y() - bsy) << std::endl;
+
+            reco::Vertex reco_comb = reco::Vertex(comb);
+
+            const auto d_comb = vertex_dist_2d.distance(reco_comb, fake_bs_vtx);
+            std::cout << "comb dBV " << d_comb.value() << " (confirmation)" << std::endl;
+            std::cout << "comb bs2derr " << d_comb.error() << std::endl;
+            
+          }
+
+          // FIXME now need to compute and print the bs2derr values! this will be the nontrivial part, that we may need to improve... esp since we're only using two ghost tracks here (though they may be very precise). At the very least we need to associate all of the other tracks to this new vtx for ntracks!
+          // FIXME may even want to retain the orig vertices as "sub-vertices"? FIXME 9/30/2021 @ 4:52pm
+          // FIXME oh the other option would be to use this to assess the chi2, and then vertex ALL of the tracks from the two vertices. Then ntk and bs2derr come for free, and even if the chi2 fit on the combined vtx is poor, we at least have a sensible value to compare with. But I bet this would be less precise, given that the b-quarks could decay quite far ==> the tracks may not form a nice vertex at all ==> bs2derr could actually be large. Also, I think this by definition would decrease the dBV. 
         }
       }
     }
