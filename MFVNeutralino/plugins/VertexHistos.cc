@@ -404,16 +404,6 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   const int nsv = int(auxes->size());
   h_nsv->Fill(nsv, w);
 
-  for (int igenv = 0; igenv < 2; ++igenv) {
-    double genx = mevent->gen_lsp_decay[igenv*3+0];
-    double geny = mevent->gen_lsp_decay[igenv*3+1];
-    double genz = mevent->gen_lsp_decay[igenv*3+2];
-    double genbs2ddist = mevent->mag(genx - mevent->bsx_at_z(genz),
-                                     geny - mevent->bsy_at_z(genz) 
-        );
-    h_genbs2ddist->Fill(genbs2ddist, w);
-  }
-
   // matching jets with gen quarks from LLPs and fill a 2D histogram with nsv vs. # total number of jets matched to LLPs
   double nmatched_0 = 0;
   double nmatched_1 = 0;

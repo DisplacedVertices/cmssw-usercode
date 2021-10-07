@@ -2,7 +2,7 @@ from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
 ntuple_version_ = 'ULV1_keeptk'
-#ntuple_version_ = 'Vkeeptk_v1'
+lsp_id = 1000021 # should do that in a smarter way
 use_btag_triggers = False
 use_MET_triggers = True
 if use_btag_triggers : 
@@ -282,7 +282,7 @@ def miniaod_ntuple_process(settings):
     process.mfvGenParticles.last_flag_check = False
 
     #for splitSUSY
-    process.mfvGenParticles.lsp_id = 1000021
+    process.mfvGenParticles.lsp_id = lsp_id
     process.mfvGenParticles.debug = False
 
     process.mfvVertexTracks.min_track_rescaled_sigmadxy = 4.0

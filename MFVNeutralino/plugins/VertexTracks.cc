@@ -75,12 +75,14 @@ private:
   jmt::TrackRescaler track_rescaler;
 
   TH1F* h_n_all_tracks;
-  TH1F* h_all_track_pars[6];
-  TH1F* h_all_track_errs[6];
+  TH1F* h_all_track_pars[7];
+  TH1F* h_all_track_errs[7];
   TH1F* h_all_track_p;
   TH1F* h_all_track_pt_barrel;
   TH1F* h_all_track_pt_endcap;
   TH1F* h_all_track_errdxybs;
+  TH2F* h_all_track_pt_errdxybs;
+  TH2F* h_all_track_pt_dxybs;
   TH1F* h_all_track_sigmadxybs;
   TH1F* h_all_track_sigmadxypv;
   TH1F* h_all_track_nhits;
@@ -89,12 +91,14 @@ private:
   TH1F* h_all_track_npxlayers;
   TH1F* h_all_track_nstlayers;
   TH1F* h_n_seed_tracks;
-  TH1F* h_seed_track_pars[6];
-  TH1F* h_seed_track_errs[6];
+  TH1F* h_seed_track_pars[7];
+  TH1F* h_seed_track_errs[7];
   TH1F* h_seed_track_p;
   TH1F* h_seed_track_pt_barrel;
   TH1F* h_seed_track_pt_endcap;
   TH1F* h_seed_track_errdxybs;
+  TH2F* h_seed_track_pt_errdxybs;
+  TH2F* h_seed_track_pt_dxybs;
   TH1F* h_seed_track_sigmadxybs;
   TH1F* h_seed_track_sigmadxypv;
   TH1F* h_seed_track_nhits;
@@ -177,13 +181,13 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
     h_n_all_tracks  = fs->make<TH1F>("h_n_all_tracks",  "", 200, 0, 2000);
     h_n_seed_tracks = fs->make<TH1F>("h_n_seed_tracks", "", 200, 0,  200);
 
-    const char* par_names[6] = {"pt", "eta", "phi", "dxybs", "dxypv", "dz"};
-    const int par_nbins[6] = {  50, 50, 50, 500, 100, 80 };
-    const double par_lo[6] = {   0, -2.5, -3.15, -0.2, -0.2, -20 };
-    const double par_hi[6] = {  10,  2.5,  3.15,  0.2,  0.2,  20 };
-    const double err_lo[6] = { 0 };
-    const double err_hi[6] = { 0.15, 0.01, 0.01, 0.2, 0.2, 0.4 };
-    for (int i = 0; i < 6; ++i) {
+    const char* par_names[7] = {"pt", "eta", "phi", "dxybs", "rescale_dxybs", "dxypv", "dz"};
+    const int par_nbins[7] = {  50, 50, 50, 500, 500, 100, 80 };
+    const double par_lo[7] = {   0, -2.5, -3.15, -0.2, -0.2, -0.2, -20 };
+    const double par_hi[7] = {  10,  2.5,  3.15,  0.2,  0.2,  0.2,  20 };
+    const double err_lo[7] = { 0 };
+    const double err_hi[7] = { 0.15, 0.01, 0.01, 0.2, 0.2, 0.2, 0.4 };
+    for (int i = 0; i < 7; ++i) {
       h_all_track_pars[i] = fs->make<TH1F>(TString::Format("h_all_track_%s",    par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i]);
       h_all_track_errs[i] = fs->make<TH1F>(TString::Format("h_all_track_err%s", par_names[i]), "", par_nbins[i], err_lo[i], err_hi[i]);
     }
@@ -192,6 +196,8 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
     h_all_track_pt_barrel = fs->make<TH1F>("h_all_track_pt_barrel", "", 50, 0, 10);
     h_all_track_pt_endcap = fs->make<TH1F>("h_all_track_pt_endcap", "", 50, 0, 10);
     h_all_track_sigmadxybs = fs->make<TH1F>("h_all_track_sigmadxybs", "", 40, -10, 10);
+    h_all_track_pt_dxybs = fs->make<TH2F>("h_all_track_pt_dxybs", "", 500, 0, 100, 500, -0.2, 0.2);
+    h_all_track_pt_errdxybs = fs->make<TH2F>("h_all_track_pt_errdxybs", "", 500, 0, 100, 500, 0, 0.2);
     h_all_track_sigmadxypv = fs->make<TH1F>("h_all_track_sigmadxypv", "", 40, -10, 10);
     h_all_track_nhits      = fs->make<TH1F>("h_all_track_nhits",      "", 40,   0, 40);
     h_all_track_npxhits    = fs->make<TH1F>("h_all_track_npxhits",    "", 12,   0, 12);
@@ -199,7 +205,7 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
     h_all_track_npxlayers  = fs->make<TH1F>("h_all_track_npxlayers",  "", 10,   0, 10);
     h_all_track_nstlayers  = fs->make<TH1F>("h_all_track_nstlayers",  "", 30,   0, 30);
 
-    for (int i = 0; i < 6; ++i) {
+    for (int i = 0; i < 7; ++i) {
       h_seed_track_pars[i] = fs->make<TH1F>(TString::Format("h_seed_track_%s",    par_names[i]), "", par_nbins[i], par_lo[i], par_hi[i]);
       h_seed_track_errs[i] = fs->make<TH1F>(TString::Format("h_seed_track_err%s", par_names[i]), "", par_nbins[i], err_lo[i], err_hi[i]);
     }
@@ -209,6 +215,8 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
     h_seed_track_pt_endcap = fs->make<TH1F>("h_seed_track_pt_endcap", "", 50, 0, 10);
     h_seed_track_sigmadxybs = fs->make<TH1F>("h_seed_track_sigmadxybs", "", 40, -10, 10);
     h_seed_track_sigmadxypv = fs->make<TH1F>("h_seed_track_sigmadxypv", "", 40, -10, 10);
+    h_seed_track_pt_dxybs = fs->make<TH2F>("h_seed_track_pt_dxybs", "", 500, 0, 100, 500, -0.2, 0.2);
+    h_seed_track_pt_errdxybs = fs->make<TH2F>("h_seed_track_pt_errdxybs", "", 500, 0, 100, 500, 0, 0.2);
     h_seed_track_nhits      = fs->make<TH1F>("h_seed_track_nhits",      "", 40,   0, 40);
     h_seed_track_npxhits    = fs->make<TH1F>("h_seed_track_npxhits",    "", 12,   0, 12);
     h_seed_track_nsthits    = fs->make<TH1F>("h_seed_track_nsthits",    "", 28,   0, 28);
@@ -497,10 +505,10 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
     }
 
     if (histos) {
-      const double pars[6] = {pt, tk->eta(), tk->phi(), dxybs, dxypv, tk->dz(beamspot->position()) };
-      const double errs[6] = { tk->ptError(), tk->etaError(), tk->phiError(), tk->dxyError(), tk->dxyError(), tk->dzError() };
+      const double pars[7] = {pt, tk->eta(), tk->phi(), dxybs, dxybs, dxypv, tk->dz(beamspot->position()) };
+      const double errs[7] = { tk->ptError(), tk->etaError(), tk->phiError(), tk->dxyError(), rescaled_dxyerr, tk->dxyError(), tk->dzError() };
 
-      for (int i = 0; i < 6; ++i) {
+      for (int i = 0; i < 7; ++i) {
         h_all_track_pars[i]->Fill(pars[i]);
         h_all_track_errs[i]->Fill(errs[i]);
       }
@@ -514,6 +522,8 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
       }
       h_all_track_sigmadxybs->Fill(sigmadxybs);
       h_all_track_sigmadxypv->Fill(sigmadxypv);
+      h_all_track_pt_dxybs->Fill(pt, dxybs);
+      h_all_track_pt_errdxybs->Fill(pt, tk->dxyError());
       h_all_track_nhits->Fill(nhits);
       h_all_track_npxhits->Fill(npxhits);
       h_all_track_nsthits->Fill(nsthits);
@@ -533,7 +543,7 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
       if (nm1[0] && nm1[1] && nm1[2]) h_seed_nm1_sigmadxybs->Fill(sigmadxybs);
 
       if (use) {
-        for (int i = 0; i < 6; ++i) {
+        for (int i = 0; i < 7; ++i) {
           h_seed_track_pars[i]->Fill(pars[i]);
           h_seed_track_errs[i]->Fill(errs[i]);
         }
@@ -547,6 +557,8 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
         }
         h_seed_track_sigmadxybs->Fill(sigmadxybs);
         h_seed_track_sigmadxypv->Fill(sigmadxypv);
+        h_seed_track_pt_dxybs->Fill(pt, dxybs);
+        h_seed_track_pt_errdxybs->Fill(pt, tk->dxyError());
         h_seed_track_nhits->Fill(nhits);
         h_seed_track_npxhits->Fill(npxhits);
         h_seed_track_nsthits->Fill(nsthits);
