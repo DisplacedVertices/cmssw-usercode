@@ -3,6 +3,7 @@
 #include "TLorentzVector.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/PatCandidates/interface/PackedGenParticle.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/ESHandle.h"
@@ -69,20 +70,28 @@ private:
   TH2F* h_r3d_bhadron_v_bquark;
   TH1F* h_lspbeta;
   TH1F* h_lspbetagamma;
+  TH1F* h_max_deta;
+  TH1F* h_min_deta;
+  TH1F* h_max_dphi;
+  TH1F* h_min_dphi;
   TH1F* h_max_dR;
   TH1F* h_min_dR;
   TH2F* h_max_dR_vs_lspbeta;
   TH2F* h_min_dR_vs_lspbeta;
   TH2F* h_max_dR_vs_lspbetagamma;
   TH2F* h_min_dR_vs_lspbetagamma;
-  TH1F* h_lsp_daughters_pt;
-  TH1F* h_lsp_daughters_eta;
-  TH1F* h_lsp_daughters_dxy;
-  TH2F* h_lsp_daughters_dxy_dBV;
+  TH1F* h_neutralino_daughters_pt;
+  TH1F* h_llp_daughters_pt;
+  TH1F* h_neutralino_daughters_eta;
+  TH1F* h_llp_daughters_eta;
+  TH1F* h_neutralino_daughters_dxy;
+  TH2F* h_neutralino_daughters_dxy_dBV;
+  TH1F* h_llp_daughters_phi;
+  TH1F* h_llp_daughters_mass;
   TH1F* h_lsp_max_dR;
   TH1F* h_lsp_min_dR;
-  TH1F* h_lsp_daughters_jets_dR;
-  TH1F* h_lsp_daughters_jets_nmatch;
+  TH1F* h_neutralino_daughters_jets_dR;
+  TH1F* h_neutralino_daughters_jets_nmatch;
   TH1F* h_lsp_ntracks;
 
   TH1F* h_status1origins;
@@ -108,6 +117,9 @@ private:
 
   TH1F* h_npartons_60;
   TH1F* h_njets_60;
+  TH1F* h_njets_40;
+  TH1F* h_njets_30;
+  TH1F* h_njets_20;
   TH1F* h_ht;
   TH1F* h_ht40;
 
@@ -344,8 +356,8 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   Leptons->BookDz (200, -2, 2, "0.02");
   Leptons->BookQ();
 
-  h_lsp_dist2d = fs->make<TH1F>("h_lsp_dist2d", ";2D distance between LSP decay positions (cm);Events/0.0025 cm", 4000, 0, 10);
-  h_lsp_dist3d = fs->make<TH1F>("h_lsp_dist3d", ";3D distance between LSP decay positions (cm);Events/0.0025 cm", 4000, 0, 10);
+  h_lsp_dist2d = fs->make<TH1F>("h_lsp_dist2d", ";2D distance between LSP decay positions (cm);Events/0.0025 cm", 500, 0, 1);
+  h_lsp_dist3d = fs->make<TH1F>("h_lsp_dist3d", ";3D distance between LSP decay positions (cm);Events/0.0025 cm", 500, 0, 1);
 
   h_lsp_angle2 = fs->make<TH1F>("h_lsp_angle2", ";cos(angle in r-#phi plane) between LSP momenta;Events/0.01", 202, -1.01, 1.01);
   h_lsp_angle3 = fs->make<TH1F>("h_lsp_angle3", ";cos(3D angle) between LSP momenta;Events/0.01", 202, -1.01, 1.01);
@@ -363,20 +375,28 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   h_lspbeta = fs->make<TH1F>("h_lspbeta", ";LSP #beta;Events/0.01", 100, 0, 1);
   h_lspbetagamma = fs->make<TH1F>("h_lspbetagamma", ";LSP #beta#gamma;Events/0.1", 100, 0, 10);
 
+  h_max_dphi = fs->make<TH1F>("h_max_dphi", ";max |#Delta#phi| between partons;Events/0.05", 100, 0, 5);
+  h_min_dphi = fs->make<TH1F>("h_min_dphi", ";min |#Delta#phi| between partons;Events/0.05", 100, 0, 5);
+  h_max_deta = fs->make<TH1F>("h_max_deta", ";max |#Delta#eta| between partons;Events/0.05", 100, 0, 5);
+  h_min_deta = fs->make<TH1F>("h_min_deta", ";min |#Delta#eta| between partons;Events/0.05", 100, 0, 5);
   h_max_dR = fs->make<TH1F>("h_max_dR", ";max #DeltaR between partons;Events/0.05", 100, 0, 5);
   h_min_dR = fs->make<TH1F>("h_min_dR", ";min #DeltaR between partons;Events/0.05", 100, 0, 5);
   h_max_dR_vs_lspbeta = fs->make<TH2F>("h_max_dR_vs_lspbeta", ";LSP #beta;max #DeltaR between partons", 100, 0, 1, 100, 0, 5);
   h_min_dR_vs_lspbeta = fs->make<TH2F>("h_min_dR_vs_lspbeta", ";LSP #beta;min #DeltaR between partons", 100, 0, 1, 100, 0, 5);
   h_max_dR_vs_lspbetagamma = fs->make<TH2F>("h_max_dR_vs_lspbetagamma", ";LSP #beta#gamma;max #DeltaR between partons", 100, 0, 10, 100, 0, 5);
   h_min_dR_vs_lspbetagamma = fs->make<TH2F>("h_min_dR_vs_lspbetagamma", ";LSP #beta#gamma;min #DeltaR between partons", 100, 0, 10, 100, 0, 5);
-  h_lsp_daughters_pt = fs->make<TH1F>("h_lsp_daughters_pt", ";p_{T} of partons (GeV);LSP daughter partons/1 GeV", 500, 0, 500);
-  h_lsp_daughters_eta = fs->make<TH1F>("h_lsp_daughters_eta", ";#eta of partons;LSP daughter partons/0.16", 50, -4, 4);
-  h_lsp_daughters_dxy = fs->make<TH1F>("h_lsp_daughters_dxy", ";dxy of partons;LSP daughter partons/10 #mum", 400, -0.2, 0.2);
-  h_lsp_daughters_dxy_dBV = fs->make<TH2F>("h_lsp_daughters_dxy_dBV", ";LSP 2D distance;dxy of partons", 500, 0, 5, 400, -0.2, 0.2);
+  h_neutralino_daughters_pt = fs->make<TH1F>("h_neutralino_daughters_pt", ";p_{T} of partons (GeV);LSP daughter partons/1 GeV", 100, 0, 500);
+  h_llp_daughters_pt = fs->make<TH1F>("h_llp_daughters_pt", ";p_{T} of partons (GeV);fraction of LLP daughter partons", 100, 0, 500);
+  h_neutralino_daughters_eta = fs->make<TH1F>("h_neutralino_daughters_eta", ";#eta of partons;LSP daughter partons/0.16", 50, -4, 4);
+  h_llp_daughters_eta = fs->make<TH1F>("h_llp_daughters_eta", ";#eta of partons;fraction of LLP daughter partons", 50, -4, 4);
+  h_neutralino_daughters_dxy = fs->make<TH1F>("h_neutralino_daughters_dxy", ";dxy of partons;LSP daughter partons/10 #mum", 400, -0.2, 0.2);
+  h_neutralino_daughters_dxy_dBV = fs->make<TH2F>("h_neutralino_daughters_dxy_dBV", ";LSP 2D distance;dxy of partons", 500, 0, 5, 400, -0.2, 0.2);
+  h_llp_daughters_phi = fs->make<TH1F>("h_llp_daughters_phi", ";#phi of partons;fraction of LLP daughter partons", 50, -4, 4);
+  h_llp_daughters_mass = fs->make<TH1F>("h_llp_daughters_mass", ";#mass of partons;fraction of LLP daughter partons", 50, 0, 100);
   h_lsp_max_dR = fs->make<TH1F>("h_lsp_max_dR", ";max #DeltaR between partons;Events/0.05", 100, 0, 5);
   h_lsp_min_dR = fs->make<TH1F>("h_lsp_min_dR", ";min #DeltaR between partons;Events/0.05", 100, 0, 5);
-  h_lsp_daughters_jets_dR = fs->make<TH1F>("h_lsp_daughters_jets_dR", ";#DeltaR between partons and jets;parton-jet pairs/0.05", 100, 0, 5);
-  h_lsp_daughters_jets_nmatch = fs->make<TH1F>("h_lsp_daughters_jets_nmatch", ";number of genJets w/ #DeltaR < 0.4;LSP daughter partons", 10, 0, 10);
+  h_neutralino_daughters_jets_dR = fs->make<TH1F>("h_neutralino_daughters_jets_dR", ";#DeltaR between partons and jets;parton-jet pairs/0.05", 100, 0, 5);
+  h_neutralino_daughters_jets_nmatch = fs->make<TH1F>("h_neutralino_daughters_jets_nmatch", ";number of genJets w/ #DeltaR < 0.4;LSP daughter partons", 10, 0, 10);
   h_lsp_ntracks = fs->make<TH1F>("h_lsp_ntracks", ";total number of constituents in genJets w/ #DeltaR < 0.4;LSPs", 300, 0, 300);
 
   h_status1origins = fs->make<TH1F>("status1origins", "", 8, 0, 8);
@@ -393,7 +413,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   h_nbhadronsvsbquarks = fs->make<TH2F>("h_nbhadronsvsbquarks", ";number of b quarks;number of b hadrons", 20, 0, 20, 20, 0, 20);
   h_nbhadronsvsbquarks_wcuts = fs->make<TH2F>("h_nbhadronsvsbquarks_wcuts", "", 20, 0, 20, 20, 0, 20);
   h_nbquarks = fs->make<TH1F>("h_nbquarks", ";number of b quarks;Events", 20, 0, 20);
-  h_bquarks_pt = fs->make<TH1F>("h_bquarks_pt", ";b quarks p_{T} (GeV);arb. units", 200, 0, 2000);
+  h_bquarks_pt = fs->make<TH1F>("h_bquarks_pt", ";b quarks p_{T} (GeV);arb. units", 100, 0, 500);
   h_bquarks_eta = fs->make<TH1F>("h_bquarks_eta", ";b quarks #eta;arb. units", 50, -4, 4);
   h_bquarks_phi = fs->make<TH1F>("h_bquarks_phi", ";b quarks #phi;arb. units", 50, -3.15, 3.15);
   h_bquarks_energy = fs->make<TH1F>("h_bquarks_energy", ";b quarks energy (GeV);arb. units", 200, 0, 2000);
@@ -409,11 +429,14 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
 
   h_npartons_in_acc = fs->make<TH1F>("h_npartons_in_acc", ";number of LSP daughters in acceptance;Events", 40, 0, 40);
   h_npartons_60 = fs->make<TH1F>("h_npartons_60", ";number of partons with E_{T} > 60 GeV;Events", 40, 0, 40);
-  h_njets_60 = fs->make<TH1F>("h_njets_60", ";number of jets with E_{T} > 60 GeV;Events", 40, 0, 40);
-  h_ht = fs->make<TH1F>("h_ht", ";#SigmaH_{T} of jets with E_{T} > 20 GeV;Events/100 GeV", 100, 0, 10000);
-  h_ht40 = fs->make<TH1F>("h_ht40", ";#SigmaH_{T} of jets with E_{T} > 40 GeV;Events/100 GeV", 100, 0, 10000);
+  h_njets_60 = fs->make<TH1F>("h_njets_60", ";number of jets with E_{T} > 60 GeV;Events", 20, 0, 20);
+  h_njets_40 = fs->make<TH1F>("h_njets_40", ";number of jets with E_{T} > 40 GeV;Events", 20, 0, 20); 
+  h_njets_30 = fs->make<TH1F>("h_njets_30", ";number of jets with E_{T} > 30 GeV;Events", 20, 0, 20);
+  h_njets_20 = fs->make<TH1F>("h_njets_20", ";number of jets with E_{T} > 20 GeV;Events", 20, 0, 20);
+  h_ht = fs->make<TH1F>("h_ht", ";#SigmaH_{T} of jets with E_{T} > 20 GeV;Events/100 GeV", 100, 0, 2000);
+  h_ht40 = fs->make<TH1F>("h_ht40", ";#SigmaH_{T} of jets with E_{T} > 40 GeV;Events/100 GeV", 100, 0, 2000);
 
-  NJets = fs->make<TH1F>("NJets", ";number of jets;Events", 40, 0, 40);
+  NJets = fs->make<TH1F>("NJets", ";number of jets;Events", 20, 0, 20);
   Jets = bkh_factory->make("Jets", "gen jets");
   Jets->BookE (200, 0, 2000, "10");
   Jets->BookP (200, 0, 2000, "10");
@@ -512,6 +535,11 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
         dz [j] = particles[j]->vz() - z0;
         r2d[j] = mag(dx[j], dy[j]);
         r3d[j] = mag(dx[j], dy[j], dz[j]);
+
+        // don't fill most of the plots for cases w/ two visible particles; the plots assume the visible particles are ordered according to names[9] above.
+        // certainly not true for e.g. H->LLPs, LLP->b bbar. The LLP decay positions are correct, so only fill for j == 0
+        // FIXME consider improving!
+        if (j > 0 && npar == 2) continue;
         h_vtx[j]->Fill(dx[j], dy[j]);
         h_r2d[j]->Fill(r2d[j]);
         h_r3d[j]->Fill(r3d[j]);
@@ -521,18 +549,44 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
       h_ctau->Fill(ctau);
       h_ctaubig->Fill(ctau);
 
+      float min_deta =  1e99;
+      float max_deta = -1e99;
+      float min_dphi =  1e99;
+      float max_dphi = -1e99;
       float min_dR =  1e99;
       float max_dR = -1e99;
       for (int j = 0; j < npar; ++j) {
+        float pT = particles[j]->pt();
+        float mass = particles[j]->mass();
+        float phi = particles[j]->phi();
+        float eta = particles[j]->eta();
         for (int k = j+1; k < npar; ++k) {
+          float deta = fabs(particles[j]->eta() - particles[k]->eta());
+          float dphi = fabs(reco::deltaPhi(particles[j]->phi(), particles[k]->phi()));
           float dR = reco::deltaR(*particles[j], *particles[k]);
+          if (deta < min_deta)
+            min_deta = deta;
+          if (deta > max_deta)
+            max_deta = deta;
+          if (dphi < min_dphi)
+            min_dphi = dphi;
+          if (dphi > max_dphi)
+            max_dphi = dphi;
           if (dR < min_dR)
             min_dR = dR;
           if (dR > max_dR)
             max_dR = dR;
         }
+        h_llp_daughters_pt->Fill(pT);
+        h_llp_daughters_mass->Fill(mass);
+        h_llp_daughters_phi->Fill(phi);
+        h_llp_daughters_eta->Fill(eta);
       }
 
+      h_min_deta->Fill(min_deta);
+      h_max_deta->Fill(max_deta);
+      h_min_dphi->Fill(min_dphi);
+      h_max_dphi->Fill(max_dphi);
       h_min_dR->Fill(min_dR);
       h_max_dR->Fill(max_dR);
       h_min_dR_vs_lspbeta->Fill(lspbeta, min_dR);
@@ -562,7 +616,6 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     h_npartons_in_acc->Fill(npartons_in_acc);
     h_npartons_60->Fill(npartons_60);
     
-
     if (mci->type() == mfv::mci_MFVtbs) { // || mci->type() == mci_Ttbar) {
       for (int i = 0; i < 2; ++i) {
         fill(Lsps           [i], &*mci->lsp(i));
@@ -589,19 +642,19 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
         float lsp_min_dR =  1e99;
         float lsp_max_dR = -1e99;
         for (int j = 0; j < lsp_ndau; ++j) {
-          h_lsp_daughters_pt->Fill(lsp_daughters[j]->pt());
-          h_lsp_daughters_eta->Fill(lsp_daughters[j]->eta());
-          h_lsp_daughters_dxy->Fill(mag(mci->strange(i)->vx() - mci->lsp(i)->vx(), mci->strange(i)->vy() - mci->lsp(i)->vy()) * sin(lsp_daughters[j]->phi() - atan2(mci->strange(i)->vy() - mci->lsp(i)->vy(), mci->strange(i)->vx() - mci->lsp(i)->vx())));
-          h_lsp_daughters_dxy_dBV->Fill(mag(mci->strange(i)->vx() - mci->lsp(i)->vx(), mci->strange(i)->vy() - mci->lsp(i)->vy()), mag(mci->strange(i)->vx() - mci->lsp(i)->vx(), mci->strange(i)->vy() - mci->lsp(i)->vy()) * sin(lsp_daughters[j]->phi() - atan2(mci->strange(i)->vy() - mci->lsp(i)->vy(), mci->strange(i)->vx() - mci->lsp(i)->vx())));
+          h_neutralino_daughters_pt->Fill(lsp_daughters[j]->pt());
+          h_neutralino_daughters_eta->Fill(lsp_daughters[j]->eta());
+          h_neutralino_daughters_dxy->Fill(mag(mci->strange(i)->vx() - mci->lsp(i)->vx(), mci->strange(i)->vy() - mci->lsp(i)->vy()) * sin(lsp_daughters[j]->phi() - atan2(mci->strange(i)->vy() - mci->lsp(i)->vy(), mci->strange(i)->vx() - mci->lsp(i)->vx())));
+          h_neutralino_daughters_dxy_dBV->Fill(mag(mci->strange(i)->vx() - mci->lsp(i)->vx(), mci->strange(i)->vy() - mci->lsp(i)->vy()), mag(mci->strange(i)->vx() - mci->lsp(i)->vx(), mci->strange(i)->vy() - mci->lsp(i)->vy()) * sin(lsp_daughters[j]->phi() - atan2(mci->strange(i)->vy() - mci->lsp(i)->vy(), mci->strange(i)->vx() - mci->lsp(i)->vx())));
 
           int nmatch = 0;
           for (const reco::GenJet& jet : *gen_jets) {
-            h_lsp_daughters_jets_dR->Fill(reco::deltaR(*lsp_daughters[j], jet));
+            h_neutralino_daughters_jets_dR->Fill(reco::deltaR(*lsp_daughters[j], jet));
             if (reco::deltaR(*lsp_daughters[j], jet) < 0.4) {
               ++nmatch;
             }
           }
-          h_lsp_daughters_jets_nmatch->Fill(nmatch);
+          h_neutralino_daughters_jets_nmatch->Fill(nmatch);
 
           if (is_neutrino(lsp_daughters[j]) || fabs(lsp_daughters[j]->eta()) > 2.5) continue;
 
@@ -610,9 +663,11 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
           else {
             for (const reco::GenJet& jet : *gen_jets) {
               if (reco::deltaR(*lsp_daughters[j], jet) < 0.4) {
-                for (const reco::GenParticle* g : jet.getGenConstituents())
+                for (unsigned int idx = 0; idx < jet.numberOfDaughters(); ++idx) {
+                  const pat::PackedGenParticle* g = dynamic_cast<const pat::PackedGenParticle*>(jet.daughter(idx));
                   if (g->charge())
                     ++lsp_ntracks;
+                }
               }
             }
           }
@@ -724,10 +779,12 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     h_bquarks_dR_dphi->Fill(dphi, dR);
   }
 
-
   int njets = 0;
   int nbjets = 0;
   int njets60 = 0;
+  int njets40 = 0;
+  int njets30 = 0;
+  int njets20 = 0; 
   float ht = 0, ht40 = 0;
   for (const reco::GenJet& jet : *gen_jets) {
     if (jet.pt() < 20 || fabs(jet.eta()) > 2.5)
@@ -735,18 +792,25 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 
     ++njets;
     ht += jet.pt();
-    if (jet.pt() > 40)
+    if (jet.pt() > 20)
+      ++njets20;
+    if (jet.pt() > 30)
+      ++njets30;
+    if (jet.pt() > 40){
       ht40 += jet.pt();
+      ++njets40;
+    }
     if (jet.pt() > 60)
       ++njets60;
 
     int nchg = 0;
     int id = gen_jet_id(jet);
     int ntracksptgt3 = 0;
-    for (const reco::GenParticle* g : jet.getGenConstituents()) {
-      if (g->charge())
+    for (unsigned int idx = 0; idx < jet.numberOfDaughters(); ++idx) {
+      const pat::PackedGenParticle* g = dynamic_cast<const pat::PackedGenParticle*>(jet.daughter(idx));
+      if (g && g->charge())
         ++nchg;
-      if (g->charge() && g->pt() > 3)
+      if (g && g->charge() && g->pt() > 3)
         ++ntracksptgt3;
     }
 
@@ -781,6 +845,9 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   NJets->Fill(njets);
   NBJets->Fill(nbjets);
   h_njets_60->Fill(njets60);
+  h_njets_40->Fill(njets40); 
+  h_njets_30->Fill(njets30);
+  h_njets_20->Fill(njets20); 
   h_ht->Fill(ht);
   h_ht40->Fill(ht40);
 }

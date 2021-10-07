@@ -7,23 +7,26 @@ from JMTucker.MFVNeutralino.PerSignal import PerSignal
 
 set_style()
 version = 'V27m'
-ps = plot_saver(plot_dir('sigeff_%s' % version), size=(600,600), pdf=True, log=False)
+ps = plot_saver(plot_dir('sigeff_wrt_presel_beampipe_origin_%s_correct_release_2018' % version), size=(600,600), pdf=True, log=False)
 
-multijet = Samples.mfv_signal_samples_2017
-dijet = Samples.mfv_stopdbardbar_samples_2017
+multijet = Samples.mfv_signal_samples_2018
+dijet = Samples.mfv_stopdbardbar_samples_2018
 
 for sample in multijet + dijet:
-    fn = os.path.join('/uscms_data/d2/tucker/crab_dirs/MiniTree%s' % version, sample.name + '.root')
+    fn = os.path.join('/uscms/home/joeyr/crabdirs/Histos_within_fiducial_fixed_beampipe_wrt_origin_correct_release%s' % version, sample.name + '.root')
     if not os.path.exists(fn):
         print 'no', sample.name
         continue
     f = ROOT.TFile(fn)
-    t = f.Get('mfvMiniTree/t')
+    t = f.Get('SimpleTriggerResults/t')
     hr = draw_hist_register(t, True)
-    cut = 'nvtx>=2' # && svdist > 0.04'
-    h = hr.draw('weight', cut, binning='1,0,1', goff=True)
-    num, _ = get_integral(h)
-    den = Samples.norm_from_file(f)
+    cut_den = 'pEventPreSel'
+    h_den = hr.draw('weight', cut_den, binning='1,0,1', goff=True)
+    cut_num = 'pFullSel'
+    h_num = hr.draw('weight', cut_num, binning='1,0,1', goff=True)
+
+    den, _ = get_integral(h_den)
+    num, _ = get_integral(h_num)
     sample.y, sample.yl, sample.yh = clopper_pearson(num, den) # ignore integral != entries, just get central value right
     print '%26s: efficiency = %.3f (%.3f, %.3f)' % (sample.name, sample.y, sample.yl, sample.yh)
 

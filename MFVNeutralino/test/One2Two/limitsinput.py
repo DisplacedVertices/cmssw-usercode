@@ -227,6 +227,43 @@ def sig_uncert_pdf(name_year):
 
     return p
 
+def sig_uncert_alphas(name_year):
+    name, year = name_year.rsplit('_',1)
+    kind, tau, mass = name2details(name)
+    tau = int(tau*1000) # back to um
+
+    fcns = {
+            ('mfv_neu', 300, '2017') : lambda x: 8.412357E-02 + -1.492608E-04*x if x < 500 else 1.366428E-02 + -8.342191E-06*x if x < 1000 else 5.163025E-03,
+            ('mfv_stopdbardbar', 300, '2017') : lambda x: 4.162419E-02 + -6.643979E-05*x if x < 500 else 1.544804E-02 + -1.408750E-05*x if x < 1000 else 2.704658E-03,
+            ('mfv_neu', 1000, '2017') : lambda x: 2.482616E-02 + -1.677113E-05*x if x < 500 else 2.930580E-02 + -2.573041E-05*x if x < 1000 else 3.386116E-03,
+            ('mfv_stopdbardbar', 1000, '2017') : lambda x: 2.941164E-02 + -4.224396E-05*x if x < 500 else 1.485796E-02 + -1.313661E-05*x if x < 1000 else 1.379749E-03,
+            ('mfv_neu', 10000, '2017') : lambda x: 7.566047E-02 + -1.147594E-04*x if x < 500 else 3.476814E-02 + -3.297473E-05*x if x < 1000 else 1.611145E-03,
+            ('mfv_stopdbardbar', 10000, '2017') : lambda x: 3.286446E-02 + -4.490090E-05*x if x < 500 else 1.932494E-02 + -1.782184E-05*x if x < 1000 else 1.427578E-03,
+            ('mfv_neu', 300, '2018') : lambda x: 3.826184E-02 + -3.562455E-05*x if x < 500 else 3.727006E-02 + -3.570847E-05*x if x < 1000 else 4.543582E-03,
+            ('mfv_stopdbardbar', 300, '2018') : lambda x: 5.826609E-02 + -9.844897E-05*x if x < 500 else 1.450902E-02 + -1.250891E-05*x if x < 1000 else 2.639510E-03,
+            ('mfv_neu', 1000, '2018') : lambda x: 1.381364E-01 + -2.434682E-04*x if x < 500 else 3.364486E-02 + -3.615300E-05*x if x < 1000 else 2.315426E-03,
+            ('mfv_stopdbardbar', 1000, '2018') : lambda x: 4.604910E-02 + -6.757893E-05*x if x < 500 else 2.369948E-02 + -2.466162E-05*x if x < 1000 else 1.553165E-03,
+            ('mfv_neu', 10000, '2018') : lambda x: 1.395761E-01 + -2.494418E-04*x if x < 500 else 2.779135E-02 + -2.693736E-05*x if x < 1000 else 1.683538E-03,
+            ('mfv_stopdbardbar', 10000, '2018') : lambda x: 6.065365E-02 + -1.067197E-04*x if x < 500 else 1.328695E-02 + -1.332486E-05*x if x < 1000 else 1.429334E-03,
+          }
+
+    ab = None
+    if tau <= 300:
+        p = fcns[(kind, 300, year)](mass)
+    elif tau >= 10000:
+        p = fcns[(kind, 10000, year)](mass)
+    elif 300 < tau <= 1000:
+        ab = 300,1000
+    elif 1000 < tau <= 10000:
+        ab = 1000,10000
+    if ab is not None:
+        a,b = ab
+        fa = fcns[(kind, a, year)](mass)
+        fb = fcns[(kind, b, year)](mass)
+        p = lerp(tau, a, b, fa, fb)
+
+    return p
+
 def make_signals_2015p6(f, name_list):
     # Pull 2015+6 values from previous-format limitsinput file(s).
     # (Not all 2017+8 signal points exist in the final one for the
@@ -430,8 +467,9 @@ def sig_datamcSF_2017p8(name_year, debug=False):
 
 def sig_uncert_2017p8(name_year, debug=False):
     vtm = (1 / sig_datamcSF_2017p8(name_year, debug))**2 - 1
-    uncerts = [vtm] 
+    uncerts = [vtm]
     uncerts += [sig_uncert_pdf(name_year)]
+    uncerts += [sig_uncert_alphas(name_year)]
 
     if 'mfv_neu' in name_year:
         for unc in ('_stat_unc', '_toc_unc', '_closeseedtk_unc'):
@@ -816,6 +854,62 @@ def signal_efficiency():
         out_f.Write()
         out_f.Close()
 
+def event_scale_factors():
+    from signal_efficiency import SignalEfficiencyCombiner
+    for which, years in ('2017p8', [2017,2018]), :
+        combiner = SignalEfficiencyCombiner(years)
+        in_f = combiner.inputs[0].f
+        out_f = ROOT.TFile('event_TrackMover_scale_factors_%s.root' % which, 'recreate')
+
+        kinds, masses, taus, nmasses, ntaus = axes(in_f)
+        taus.remove(30.)
+        ntaus -= 1
+
+        for kind in kinds:
+            h = ROOT.TH2D('event_TrackMover_scale_factors_%s' % kind, ';mass (GeV);#tau (mm)', nmasses, masses, ntaus, taus)
+
+            for ibin in xrange(1, nmasses+1):
+                mass = h.GetXaxis().GetBinLowEdge(ibin)
+                for jbin in xrange(1, ntaus+1):
+                    tau = h.GetYaxis().GetBinLowEdge(jbin)
+                    pt = kind, tau, mass
+
+                    try:
+                        name = details2name(*pt)
+                        isample = name2isample(in_f, name)
+                    except ValueError as exc:
+                        if tau < 100:
+                            print colors.warning('problem getting %r : isample %r exc %s' % (pt, isample, exc))
+                        continue # leave holes in the plot to know which samples are missing
+
+                    event_SF = None
+                    if which == '2017p8' :
+                        vtx_SF_2017 = sig_datamcSF_2017p8(name+"_2017")
+                        vtx_SF_2018 = sig_datamcSF_2017p8(name+"_2018")
+                        event_SF_2017 = vtx_SF_2017**2
+                        event_SF_2018 = vtx_SF_2018**2
+                        lumi2017 = gp.int_lumis[gp.years.index("2017")]
+                        lumi2018 = gp.int_lumis[gp.years.index("2018")]
+                        event_SF = (event_SF_2017*lumi2017 + event_SF_2018*lumi2018) / (lumi2017+lumi2018)
+                        
+                        # for table of SFs, with bins 0.1--0.3\mm & 0.3--1\mm & 1--10\mm & 10--100\mm,
+                        # take the ~midpoint of each bin and put its SF in the table (averaged where necessary)
+                        if mass == 1600 :
+                            if tau == 0.2 or tau == 0.6 or tau == 0.7 or tau == 4 or tau == 7 or tau == 55 :
+                                print("for SF table:",name, round(event_SF, 4))
+
+                    else : 
+                        sys.exit('event_scale_factors not set up to handle %s! Exiting.' % which)
+
+                    h.SetBinContent(ibin, jbin, event_SF)
+                    h.SetBinError  (ibin, jbin, 0) # JMTBAD
+
+            out_f.cd()
+            h.Write()
+
+        out_f.Write()
+        out_f.Close()
+
 if __name__ == '__main__':
     if 'make' in sys.argv:
         make()
@@ -849,5 +943,7 @@ if __name__ == '__main__':
             print sample.isample, sample.name, 'signal_%05i' % sample.isample
     elif 'signal_efficiency' in sys.argv:
         signal_efficiency()
+    elif 'event_scale_factors' in sys.argv:
+        event_scale_factors()
     else:
         sys.exit('no cmd recognized from argv=%r' % sys.argv[1:])

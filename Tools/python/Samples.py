@@ -46,7 +46,9 @@ def _decay(sample):
         'mfv_xxddbar': r'X \rightarrow d\bar{d}',
         'mfv_stopdbardbar': r'\tilde{t} \rightarrow \bar{d}\bar{d}',
         'mfv_stopbbarbbar': r'\tilde{t} \rightarrow \bar{b}\bar{b}',
-        'mfv_splitSUSY': r'\tilde{g} \rightarrow qq\tilde{\chi}'
+        'mfv_splitSUSY': r'\tilde{g} \rightarrow qq\tilde{\chi}',
+        'ggHToSSTobbbb' : r'ggH \rightarrow SS \rightarrow b\bar{b}b\bar{b}',
+        'ggHToSSTodddd' : r'ggH \rightarrow SS \rightarrow d\bar{d}d\bar{d}',
         }[_model(s)]
     year = int(s.rsplit('_')[-1])
     assert 2015 <= year <= 2018
@@ -145,8 +147,44 @@ mfv_splitSUSY_samples_2017 = [
   MCSample('mfv_splitSUSY_tau000001000um_M2400_2300_2017', '/mfv_splitSUSY_tau000001000um_M2400_2300_2017/None/USER', 10000),
 ]
 
+#FIXME: those files are EOY, should change for UL
+mfv_stopdbardbar_samples_2017 = []
+
+mfv_signal_samples_2017 = []
+
+HToSSTobbbb_samples_2017 = [
+    MCSample('ggHToSSTobbbb_tau1000mm_M15_2017', '/ggH_HToSSTobbbb_MH-125_MS-15_ctauS-1000_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 159693),
+    MCSample('ggHToSSTobbbb_tau100mm_M15_2017',  '/ggH_HToSSTobbbb_MH-125_MS-15_ctauS-100_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 159747),
+    MCSample('ggHToSSTobbbb_tau10mm_M15_2017',   '/ggH_HToSSTobbbb_MH-125_MS-15_ctauS-10_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 157205),
+    MCSample('ggHToSSTobbbb_tau1mm_M15_2017',    '/ggH_HToSSTobbbb_MH-125_MS-15_ctauS-1_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 168529),
+    MCSample('ggHToSSTobbbb_tau1000mm_M40_2017', '/ggH_HToSSTobbbb_MH-125_MS-40_ctauS-1000_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 168492),
+    MCSample('ggHToSSTobbbb_tau100mm_M40_2017',  '/ggH_HToSSTobbbb_MH-125_MS-40_ctauS-100_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 161541),
+    MCSample('ggHToSSTobbbb_tau10mm_M40_2017',   '/ggH_HToSSTobbbb_MH-125_MS-40_ctauS-10_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 174041),
+    MCSample('ggHToSSTobbbb_tau1mm_M40_2017',    '/ggH_HToSSTobbbb_MH-125_MS-40_ctauS-1_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 155202),
+    MCSample('ggHToSSTobbbb_tau1000mm_M55_2017', '/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-1000_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 200804),
+    MCSample('ggHToSSTobbbb_tau100mm_M55_2017',  '/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-100_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 174229),
+    MCSample('ggHToSSTobbbb_tau10mm_M55_2017',   '/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-10_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 163136),
+    MCSample('ggHToSSTobbbb_tau1mm_M55_2017',    '/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-1_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 182247),
+]
+
+HToSSTodddd_samples_2017 = [
+    MCSample('ggHToSSTodddd_tau1000mm_M15_2017', '/ggH_HToSSTodddd_MH-125_MS-15_ctauS-1000_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 164515),
+    MCSample('ggHToSSTodddd_tau100mm_M15_2017',  '/ggH_HToSSTodddd_MH-125_MS-15_ctauS-100_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 160691),
+    MCSample('ggHToSSTodddd_tau10mm_M15_2017',   '/ggH_HToSSTodddd_MH-125_MS-15_ctauS-10_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 202418),
+    MCSample('ggHToSSTodddd_tau1mm_M15_2017',    '/ggH_HToSSTodddd_MH-125_MS-15_ctauS-1_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 170288),
+    MCSample('ggHToSSTodddd_tau1000mm_M40_2017', '/ggH_HToSSTodddd_MH-125_MS-40_ctauS-1000_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 200772),
+    MCSample('ggHToSSTodddd_tau100mm_M40_2017',  '/ggH_HToSSTodddd_MH-125_MS-40_ctauS-100_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 178325),
+    MCSample('ggHToSSTodddd_tau10mm_M40_2017',   '/ggH_HToSSTodddd_MH-125_MS-40_ctauS-10_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 191158),
+    MCSample('ggHToSSTodddd_tau1mm_M40_2017',    '/ggH_HToSSTodddd_MH-125_MS-40_ctauS-1_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 176899),
+    MCSample('ggHToSSTodddd_tau1000mm_M55_2017', '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-1000_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 233111),
+    MCSample('ggHToSSTodddd_tau100mm_M55_2017',  '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-100_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 186454),
+    MCSample('ggHToSSTodddd_tau10mm_M55_2017',   '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-10_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 171704),
+    MCSample('ggHToSSTodddd_tau1mm_M55_2017',    '/ggH_HToSSTodddd_MH-125_MS-55_ctauS-1_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM', 186554),
+]
+
+all_signal_samples_2017 = mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + HToSSTobbbb_samples_2017 + HToSSTodddd_samples_2017 + mfv_splitSUSY_samples_2017
+
 splitSUSY_samples_2017 = mfv_splitSUSY_samples_2017
-all_signal_samples_2017 = mfv_splitSUSY_samples_2017
 
 ########
 # 2018 MC
@@ -267,6 +305,10 @@ __all__ = [
     'met_samples_2017',
     'Zvv_samples_2017',
     'mfv_splitSUSY_samples_2017',
+    'mfv_signal_samples_2017',
+    'mfv_stopdbardbar_samples_2017',
+    'HToSSTobbbb_samples_2017',
+    'HToSSTodddd_samples_2017',
     'qcd_samples_2018',
     'qcd_samples_sum_2018',
     'ttbar_samples_2018',
@@ -408,28 +450,14 @@ for s in all_signal_samples_2017:
 for s in all_signal_samples_2018:
     _set_signal_stuff(s)
 
+for sample in HToSSTobbbb_samples_2017 :
+    sample.add_dataset('miniaod', sample.dataset, sample.nevents_orig)
+for sample in HToSSTodddd_samples_2017 :
+    sample.add_dataset('miniaod', sample.dataset, sample.nevents_orig)
+
 ########
 # ntuples
 ########
-for x in qcdht0200_2017, qcdht0300_2017, qcdht0500_2017, qcdht0500ext_2017, qcdht0700_2017, qcdht1000_2017, qcdht1500_2017, qcdht2000_2017, wjetstolnu_2017, dyjetstollM10_2017, dyjetstollM50_2017, ttbar_2017, zjetstonunuht0100_2017, zjetstonunuht0200_2017, zjetstonunuht0400_2017, zjetstonunuht0600_2017, zjetstonunuht0800_2017, zjetstonunuht1200_2017, zjetstonunuht2500_2017, mfv_splitSUSY_tau000001000um_M1400_1200_2017, mfv_splitSUSY_tau000010000um_M1400_1200_2017, mfv_splitSUSY_tau000001000um_M1200_1100_2017, mfv_splitSUSY_tau000010000um_M1200_1100_2017, mfv_splitSUSY_tau000000100um_M2000_1800_2017, mfv_splitSUSY_tau000000300um_M2000_1800_2017, mfv_splitSUSY_tau000010000um_M2000_1800_2017, mfv_splitSUSY_tau000001000um_M2000_1800_2017, mfv_splitSUSY_tau000000100um_M2000_1900_2017, mfv_splitSUSY_tau000000300um_M2000_1900_2017, mfv_splitSUSY_tau000010000um_M2000_1900_2017, mfv_splitSUSY_tau000001000um_M2000_1900_2017, mfv_splitSUSY_tau000000100um_M2400_100_2017, mfv_splitSUSY_tau000000300um_M2400_100_2017, mfv_splitSUSY_tau000010000um_M2400_100_2017, mfv_splitSUSY_tau000001000um_M2400_100_2017, mfv_splitSUSY_tau000000100um_M2400_2300_2017, mfv_splitSUSY_tau000000300um_M2400_2300_2017, mfv_splitSUSY_tau000010000um_M2400_2300_2017, mfv_splitSUSY_tau000001000um_M2400_2300_2017:
-    x.add_dataset("ntupleulv0metm")
-
-qcdht0500ext_2017.add_dataset('ntupleulv1_keeptkmetm', '/QCD_HT500to700_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/lian-NtupleULV1_keeptkMETm_2017-7ffd4a92b2869481038f6a448f4f3281/USER', 2812)
-qcdht1000_2017.add_dataset('ntupleulv1_keeptkmetm', '/QCD_HT1000to1500_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/lian-NtupleULV1_keeptkMETm_2017-49ac0acfc3e837efa45b48ba836d3077/USER', 10804)
-qcdht1500_2017.add_dataset('ntupleulv1_keeptkmetm', '/QCD_HT1500to2000_TuneCP5_PSWeights_13TeV-madgraph-pythia8/lian-NtupleULV1_keeptkMETm_2017-6fb877599c89a40ad5813464c4ada95e/USER', 17004)
-qcdht2000_2017.add_dataset('ntupleulv1_keeptkmetm', '/QCD_HT2000toInf_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/lian-NtupleULV1_keeptkMETm_2017-a99993ea68aae8e6a348ee6f9406b734/USER', 30807)
-wjetstolnu_2017.add_dataset('ntupleulv1_keeptkmetm', '/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/lian-NtupleULV1_keeptkMETm_2017-c2559adefd5aa01e4b5a4acd97e91dcb/USER', 697)
-dyjetstollM10_2017.add_dataset('ntupleulv1_keeptkmetm', '/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/lian-NtupleULV1_keeptkMETm_2017-473e3d5fb01cc76949eeb4344abdb5d7/USER', 20)
-dyjetstollM50_2017.add_dataset('ntupleulv1_keeptkmetm', '/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/lian-NtupleULV1_keeptkMETm_2017-88141c35f4bc4432116c5465705e956d/USER', 1015)
-zjetstonunuht0100_2017.add_dataset('ntupleulv1_keeptkmetm', '/ZJetsToNuNu_HT-100To200_TuneCP5_13TeV-madgraphMLM-pythia8/lian-NtupleULV1_keeptkMETm_2017-d8afebdd5ab3d3275388a8c31fea9b08/USER', 4973)
-zjetstonunuht0200_2017.add_dataset('ntupleulv1_keeptkmetm', '/ZJetsToNuNu_HT-200To400_TuneCP5_13TeV-madgraphMLM-pythia8/lian-NtupleULV1_keeptkMETm_2017-cd167c206fd3a168275d18f04f82bfd2/USER', 22780)
-zjetstonunuht0400_2017.add_dataset('ntupleulv1_keeptkmetm', '/ZJetsToNuNu_HT-400To600_TuneCP5_13TeV-madgraphMLM-pythia8/lian-NtupleULV1_keeptkMETm_2017-37454fcf95a9e443c40f1f3fcc7ae570/USER', 40491)
-zjetstonunuht0600_2017.add_dataset('ntupleulv1_keeptkmetm', '/ZJetsToNuNu_HT-600To800_TuneCP5_13TeV-madgraphMLM-pythia8/lian-NtupleULV1_keeptkMETm_2017-c7a85ec8a29abfc6ec75982ba16fa3bc/USER', 19116)
-zjetstonunuht0800_2017.add_dataset('ntupleulv1_keeptkmetm', '/ZJetsToNuNu_HT-800To1200_TuneCP5_13TeV-madgraphMLM-pythia8/lian-NtupleULV1_keeptkMETm_2017-535aef042b8d1540f2643f0a1a4d3825/USER', 8728)
-zjetstonunuht1200_2017.add_dataset('ntupleulv1_keeptkmetm', '/ZJetsToNuNu_HT-1200To2500_TuneCP5_13TeV-madgraphMLM-pythia8/lian-NtupleULV1_keeptkMETm_2017-f4b51a3db4d72ed8188e8d8ba6509bc6/USER', 2796)
-zjetstonunuht2500_2017.add_dataset('ntupleulv1_keeptkmetm', '/ZJetsToNuNu_HT-2500ToInf_TuneCP5_13TeV-madgraphMLM-pythia8/lian-NtupleULV1_keeptkMETm_2017-0c4c227817089244edae29d5341fd3b7/USER', 3707)
-for x in qcdht0200_2017, qcdht0300_2017, qcdht0500_2017, qcdht0700_2017, ttbar_2017, mfv_splitSUSY_tau000001000um_M1400_1200_2017, mfv_splitSUSY_tau000010000um_M1400_1200_2017, mfv_splitSUSY_tau000001000um_M1200_1100_2017, mfv_splitSUSY_tau000010000um_M1200_1100_2017, mfv_splitSUSY_tau000000100um_M2000_1800_2017, mfv_splitSUSY_tau000000300um_M2000_1800_2017, mfv_splitSUSY_tau000010000um_M2000_1800_2017, mfv_splitSUSY_tau000001000um_M2000_1800_2017, mfv_splitSUSY_tau000000100um_M2000_1900_2017, mfv_splitSUSY_tau000000300um_M2000_1900_2017, mfv_splitSUSY_tau000010000um_M2000_1900_2017, mfv_splitSUSY_tau000001000um_M2000_1900_2017, mfv_splitSUSY_tau000000100um_M2400_100_2017, mfv_splitSUSY_tau000000300um_M2400_100_2017, mfv_splitSUSY_tau000010000um_M2400_100_2017, mfv_splitSUSY_tau000001000um_M2400_100_2017, mfv_splitSUSY_tau000000100um_M2400_2300_2017, mfv_splitSUSY_tau000000300um_M2400_2300_2017, mfv_splitSUSY_tau000010000um_M2400_2300_2017, mfv_splitSUSY_tau000001000um_M2400_2300_2017:
-    x.add_dataset("ntupleulv1_keeptkmetm")
 
 ########
 # automatic condor declarations for ntuples

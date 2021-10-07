@@ -38,6 +38,10 @@ namespace mfv {
     float pvz;
     unsigned char npu;
     float weight;
+    float ren_weight_up;
+    float ren_weight_dn;
+    float fac_weight_up;
+    float fac_weight_dn;
     unsigned char njets;
     float jet_pt[50];
     float jet_eta[50];

@@ -1,7 +1,7 @@
 import sys, os
 from JMTucker.Tools.ROOTTools import *
 
-path = plot_dir('pretty_efficiency_final', make=True)
+path = plot_dir('pretty_SFs_final', make=True)
 swap_axes = True
 
 ts = tdr_style()
@@ -51,8 +51,8 @@ def do_swap_axes(obj) :
     return obj
 
 
-for which in 'run2','2017p8':
-    f = ROOT.TFile('signal_efficiency_%s.root' % which)
+for which in '2017p8',:
+    f = ROOT.TFile('event_TrackMover_scale_factors_%s.root' % which)
     for kind in 'mfv_stopdbardbar', 'mfv_neu':
         c = ROOT.TCanvas('c', '', 950, 900)
         c.SetTopMargin(0.1)
@@ -65,7 +65,7 @@ for which in 'run2','2017p8':
         else :
             c.SetLogy()
 
-        h = f.Get('signal_efficiency_%s' % kind)
+        h = f.Get('event_TrackMover_scale_factors_%s' % kind)
 
         xax = h.GetXaxis()
         yax = h.GetYaxis()
@@ -104,26 +104,30 @@ for which in 'run2','2017p8':
     #    yax.SetBinLabel(yax.FindBin(20000), '20')
     #    yax.SetBinLabel(yax.FindBin(30000), '30')
         zax = h.GetZaxis()
-        zax.SetRangeUser(0., 0.85)
-        zax.SetTitle('Efficiency (full selection)')
+        zax_min = h.GetBinContent(h.GetMinimumBin())
+        zax_max = h.GetBinContent(h.GetMaximumBin())
+        zax_min_truncated_down = int(zax_min * 10) / 10.
+        zax_max_rounded_up = ( 1 + int(zax_max * 20) ) / 20.
+        #zax.SetRangeUser(0.7, zax_max_rounded_up)
+        zax.SetRangeUser(zax_min_truncated_down, zax_max_rounded_up)
+        zax.SetTitle('Event data/simulation correction factors')
         zax.SetLabelSize(0.045)
         zax.SetTitleSize(0.05)
-        zax.SetTitleOffset(1.22)
+        zax.SetTitleOffset(1.45)
         #zax.SetTitleSize()
     #    ROOT.gStyle.SetPaintTextFormat(".1g")
     #    c.SetLogy()
     #    h.SetMarkerColor(ROOT.kWhite)
     #    h.Draw('colz text')
         h.Draw('colz')
-        h.GetXaxis().SetNoExponent()
         xshift=0.04
         cms = write(61, 0.050, 0.129+xshift, 0.913, 'CMS')
-        sim = write(52, 0.040, 0.234+xshift, 0.912, 'Simulation')
+        #sim = write(52, 0.040, 0.234+xshift, 0.912, 'Simulation') # it's data/MC, so no Simulation label
         if which == '2017p8':   
             lum = write(42, 0.050, 0.495, 0.913, '101 fb^{-1} (13 TeV)')        
         else:   
             lum = write(42, 0.050, 0.495, 0.913, '140 fb^{-1} (13 TeV)')        
-        bn = 'scan_eff_%s_%s' % (which, kind)
+        bn = 'scan_SF_%s_%s' % (which, kind)
         for ext in 'pdf', 'png', 'root':
             c.SaveAs(os.path.join(path, '%s.%s' % (bn, ext)))
         pre = write(52, 0.040, 0.406+xshift, 0.912, 'Preliminary')

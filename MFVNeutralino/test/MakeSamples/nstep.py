@@ -4,12 +4,12 @@ import os
 from JMTucker.Tools.Year import year
 from scanpack import get_scanpack, scanpackbase
 
-condor = False
+condor = True
 nevents = 10000
 events_per = 100
 expected_events_frac = 1.
 scanpack = None
-output_level = 'reco'
+output_level = 'miniaod'
 output_dataset_tag = ''
 fixed_salt = ''
 use_this_cmssw = False
@@ -19,12 +19,11 @@ hip = False # 1. # scale of the effect relative to a particular inst lumi
 pythia8240 = False #year == 2018
 ex = ''
 
-meta = 'neu'  #'stopdbardbar'
+meta = 'stopbbarbbar'
 masses = range(300, 600, 100) + range(600, 2601, 200)
 taus = range(100, 1000, 100) + range(1000, 4000, 1000) + range(4000, 40000, 3000) + range(40000, 100001, 3000)
-tau_masses = []
 
-if 1:
+if 0:
     meta = 'scan'
     output_level = 'minitree'
     digit = year - 2010; assert digit in (7,8)
@@ -75,7 +74,7 @@ if 0:
 
 ################################################################################
 
-if output_level not in ('reco', 'ntuple', 'minitree', 'gensim'):
+if output_level not in ('reco', 'ntuple', 'minitree', 'gensim', 'miniaod'):
     raise ValueError('output_level %s not supported' % output_level)
 
 import sys, os
@@ -138,6 +137,8 @@ if output_level == 'reco':
     output_fn = 'reco.root'
 elif output_level == 'gensim':
     output_fn = 'gensim.root'
+elif output_level == 'miniaod':
+    output_fn = 'miniaod.root'
 elif output_level == 'ntuple':
     output_fn = 'ntuple.root'
 elif output_level == 'minitree':
@@ -357,7 +358,6 @@ elif meta in metamap:
                     if tm in already:
                         continue
                     yield tm
-
     name_prefix, todo_fcn = metamap[meta]
     for tau, mass in signal_point_iterator():
         name = '%s_tau%06ium_M%04i' % (name_prefix, tau, mass)

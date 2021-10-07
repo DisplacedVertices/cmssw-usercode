@@ -40,6 +40,7 @@ def tgae(x, y, exl, exh, eyl, eyh, title, xtitle, color):
     if eyh is None:
         eyh = [0]*l
     eyh = array('f', eyh)
+    #print l, x, y, exl, exh, eyl, eyh
     t = ROOT.TGraphAsymmErrors(l, x, y, exl, exh, eyl, eyh)
     return fmt(t, title, xtitle, color)
 
@@ -239,7 +240,8 @@ def save_1d_plots():
             for sample in sample_iterator(in_f, years, slices_1d=True):
                 if use(sample):
                     #print sample.isample, sample.name, sample.kind, sample.tau, sample.mass
-                    d.parse(sample, 'combine_output_%s/signal_%05i/results' % (which, sample.isample))
+                    #d.parse(sample, 'combine_output_%s/signal_%05i/results' % (which, sample.isample)) # condor
+                    d.parse(sample, 'combine_output_%s/crab_signal_%05i/results' % (which, sample.isample)) # crab
             d.points.sort(key=sorter)
 
             out_f.mkdir(name).cd()
@@ -272,7 +274,8 @@ def save_2d_plots():
                     continue
                 if sample.kind != kind:
                     continue
-                d.parse(sample, 'combine_output_%s/signal_%05i/results' % (which, sample.isample))
+                #d.parse(sample, 'combine_output_%s/signal_%05i/results' % (which, sample.isample)) # condor
+                d.parse(sample, 'combine_output_%s/crab_signal_%05i/results' % (which, sample.isample)) # crab
 
             taus, masses = axisize(d['tau']), axisize(d['mass'])
             taus.remove(30.)
@@ -440,7 +443,7 @@ def dbg_exclude():
         c.SaveAs('/uscms/home/tucker/asdf/a%s.root' % interp)
 
 def to_r():
-    f = ROOT.TFile('limits_2017p8.root')
+    f = ROOT.TFile('limits_run2.root')
     print '''
 # if you didn't set up already, do this
 . /cvmfs/sft.cern.ch/lcg/views/LCG_89/x86_64-slc6-gcc62-opt/setup.sh
@@ -459,8 +462,8 @@ env R_LIBS=~/.R R --no-save <<EOF
             h = f.Get('%s/%s' % (k,y))
             to_ascii(h, open('to_r_%s.csv' % x, 'wt'), sep=',')
             print 'h<-read.table("to_r_%s.csv", header=TRUE, sep=",")' % x
-            # note that for full run 2 higgsino_N2N1 interpolation, we used yo=c(seq(0.115,0.915,by=0.1), seq(1,100,by=1)) for plot cosmetic reasons
-            print 'i<-interp(x=h\\$x, y=h\\$y, z=h\\$z, xo=seq(300, 3000, by=1), yo=c(seq(0.1,0.9,by=0.1), seq(1,100,by=1)))'
+            print 'i<-interp(x=h\\$x, y=h\\$y, z=h\\$z, xo=seq(300, 3000, by=1), yo=c(seq(0.1,0.9,by=0.1), seq(1,19,by=1), seq(20,100,by=10)))' # gluino interpretation
+            #print 'i<-interp(x=h\\$x, y=h\\$y, z=h\\$z, xo=seq(300, 3000, by=1), yo=c(seq(0.16,0.915,by=0.1), seq(1,19,by=1), seq(20,100,by=5)))' # higgsino interpretation, for plot cosmetic reasons
             for a in 'xyz':
                 print 'write.csv(i\\$%s, "from_r_%s_%s.csv")' % (a,x,a)
     print 'EOF'
@@ -469,7 +472,7 @@ env R_LIBS=~/.R R --no-save <<EOF
 
 def one_from_r(ex, name):
     def read_csv(fn):
-        lines = [x.strip() for x in open(os.path.join('/uscms/home/dquach/scratch/to_r/2017p8',fn)).read().replace('"', '').split('\n') if x.strip()]
+        lines = [x.strip() for x in open(os.path.join('/uscms/home/joeyr/public/to_r/run2',fn)).read().replace('"', '').split('\n') if x.strip()]
         lines.pop(0)
         vs = []
         for line in lines:

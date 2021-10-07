@@ -91,6 +91,11 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   event.getByToken(weight_token, weight);
   nt.weight = *weight;
 
+  nt.ren_weight_up = mevent->ren_weight_up;
+  nt.ren_weight_dn = mevent->ren_weight_dn;
+  nt.fac_weight_up = mevent->fac_weight_up;
+  nt.fac_weight_dn = mevent->fac_weight_dn;
+
   nt.misc_weights.assign(mevent->misc.begin(), mevent->misc.end());
 
   nt.njets = int2uchar(mevent->njets(mfv::min_jet_pt));

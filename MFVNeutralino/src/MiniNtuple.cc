@@ -20,7 +20,7 @@ namespace mfv {
     run = lumi = 0;
     event = 0;
     gen_flavor_code = pass_hlt = npv = npu = njets = nvtx = ntk0 = ntk1 = 0;
-    l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = met = bsx = bsy = bsz = bsdxdz = bsdydz = pvx = pvy = pvz = weight = x0 = y0 = z0 = bs2derr0 = rescale_bs2derr0 = x1 = y1 = z1 = bs2derr1 = rescale_bs2derr1 = 0;
+    l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = bsx = bsy = bsz = bsdxdz = bsdydz = pvx = pvy = pvz = weight = ren_weight_up = ren_weight_dn = fac_weight_up = fac_weight_dn = x0 = y0 = z0 = bs2derr0 = rescale_bs2derr0 = x1 = y1 = z1 = bs2derr1 = rescale_bs2derr1 = 0;
     genmatch0 = genmatch1 = 0;
     for (int i = 0; i < 2; ++i)
       gen_x[i] = gen_y[i] = gen_z[i] = gen_lsp_pt[i] = gen_lsp_eta[i] = gen_lsp_phi[i] = gen_lsp_mass[i] = 0;
@@ -457,6 +457,10 @@ namespace mfv {
     tree->Branch("pvz", &nt.pvz);
     tree->Branch("npu", &nt.npu);
     tree->Branch("weight", &nt.weight);
+    tree->Branch("ren_weight_up", &nt.ren_weight_up);
+    tree->Branch("ren_weight_dn", &nt.ren_weight_dn);
+    tree->Branch("fac_weight_up", &nt.fac_weight_up);
+    tree->Branch("fac_weight_dn", &nt.fac_weight_dn);
     tree->Branch("njets", &nt.njets);
     tree->Branch("jet_pt", nt.jet_pt, "jet_pt[njets]/F");
     tree->Branch("jet_eta", nt.jet_eta, "jet_eta[njets]/F");
@@ -555,6 +559,10 @@ namespace mfv {
     tree->SetBranchAddress("pvz", &nt.pvz);
     tree->SetBranchAddress("npu", &nt.npu);
     tree->SetBranchAddress("weight", &nt.weight);
+    tree->SetBranchAddress("ren_weight_up", &nt.ren_weight_up);
+    tree->SetBranchAddress("ren_weight_dn", &nt.ren_weight_dn);
+    tree->SetBranchAddress("fac_weight_up", &nt.fac_weight_up);
+    tree->SetBranchAddress("fac_weight_dn", &nt.fac_weight_dn);
     tree->SetBranchAddress("njets", &nt.njets);
     tree->SetBranchAddress("jet_pt", nt.jet_pt);
     tree->SetBranchAddress("jet_eta", nt.jet_eta);

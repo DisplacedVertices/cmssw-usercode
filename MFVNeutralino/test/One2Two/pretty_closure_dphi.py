@@ -4,7 +4,7 @@ from statmodel import ebins
 ROOT.TH1.AddDirectory(0)
 
 set_style()
-ps = plot_saver(plot_dir('pretty_closure_fixed_ytitleoffset'), size=(700,700), log=False, pdf=True)
+ps = plot_saver(plot_dir('pretty_closure_dphi_supplementary'), size=(700,700), log=False, pdf=True)
 
 ps.c.SetBottomMargin(0.11)
 ps.c.SetLeftMargin(0.13)
@@ -23,7 +23,7 @@ btag_fns_2017 = [os.path.join('/uscms/home/dquach/public', fn) for fn in btag_co
 btag_fns_2018 = [os.path.join('/uscms/home/dquach/public', fn) for fn in btag_corr_names_2018]
 ntk = ['3track3track', '4track3track', '4track4track', '5track5track']
 names = ['3-track + 3-track', '4-track + 3-track', '4-track + 4-track', '#geq5-track + #geq5-track']
-ymax = [70, 35, 9, 0.3]
+#ymax = [75, 45, 10, 0.4]
 
 def write(font, size, x, y, text):
     w = ROOT.TLatex()
@@ -60,24 +60,17 @@ def get_bin_integral_and_stat_uncert(hist, i, year):
 
 def set_bin_errors(template, twovtxerr, i, year) :
     template_bins = get_bin_integral_and_stat_uncert(template, i, year)
-    for bin in range(1, template.GetNbinsX() + 1):
-        stat = 0.
-        if bin <= 4:
-            stat = template_bins[0][1] * (template.GetBinContent(bin) / template_bins[0][0])**0.5
-        elif bin <= 7:
-            stat = template_bins[1][1] * (template.GetBinContent(bin) / template_bins[1][0])**0.5
-        else:
-            stat = template_bins[2][1] * (template.GetBinContent(bin) / template_bins[2][0])**0.5
-
-        newerr = (stat**2. + (twovtxerr * template.GetBinContent(bin) / template.Integral())**2.)**0.5
+    binerr_comb = ((template_bins[0][1])**2. + (template_bins[1][1])**2 + (template_bins[2][1])**2)**0.5
+    for bin in range(template.GetNbinsX() + 1):
+        newerr = (binerr_comb**2. / 5. + (twovtxerr * template.GetBinContent(bin) / template.Integral())**2)**0.5
         template.SetBinError(bin, newerr)
     return template
 
 for i in range(4):
-    hh_2017 = ROOT.TFile(fns_2017[i]).Get('h_2v_dvv')
-    hh_2018 = ROOT.TFile(fns_2018[i]).Get('h_2v_dvv')
-    h_2017 = ROOT.TFile(btag_fns_2017[i]).Get('h_c1v_dvv')
-    h_2018 = ROOT.TFile(btag_fns_2018[i]).Get('h_c1v_dvv')
+    hh_2017 = ROOT.TFile(fns_2017[i]).Get('h_2v_absdphivv')
+    hh_2018 = ROOT.TFile(fns_2018[i]).Get('h_2v_absdphivv')
+    h_2017 = ROOT.TFile(btag_fns_2017[i]).Get('h_c1v_absdphivv')
+    h_2018 = ROOT.TFile(btag_fns_2018[i]).Get('h_c1v_absdphivv')
 
     if hh_2017.Integral() > 0:
         h_2017.Scale(hh_2017.Integral()/h_2017.Integral())
@@ -104,10 +97,7 @@ for i in range(4):
 
     h = set_bin_errors(h, twovtxerr, i, "2017p8")
 
-    hh = cm2mm(hh)
-    h = cm2mm(h)
-
-    h.SetTitle(';d_{VV} (mm);Events/0.1 mm')
+    h.SetTitle(';|#Delta#phi_{VV}|;Events/0.63 radians')
     h.GetXaxis().SetTitleSize(0.05)
     h.GetXaxis().SetLabelSize(0.045)
     h.GetXaxis().SetLabelOffset(0.008)
@@ -115,17 +105,11 @@ for i in range(4):
     h.GetYaxis().SetLabelSize(0.045)
     h.GetYaxis().SetLabelOffset(0.008)
     h.GetYaxis().SetTitleOffset(1.38)
-    h.GetYaxis().SetRangeUser(0,ymax[i])
+    h.GetYaxis().SetRangeUser(0, h.GetBinContent(h.GetNbinsX())*2.6)
     h.SetStats(0)
     h.SetLineColor(ROOT.kBlue)
     h.SetLineWidth(3)
     h.Draw('hist')
-
-    print "%s: total of %.3f events" % (ntk[i], round(h.Integral(0,h.GetNbinsX()+2),3))
-    print "0-400 um: %.3f" % round(h.Integral(0,h.FindBin(0.4)-1),3)
-    print "400-700 um: %.3f" % round(h.Integral(h.FindBin(0.4),h.FindBin(0.7)-1),3)
-    print "700 um - 40 mm: %.3f" % round(h.Integral(h.FindBin(0.7),h.GetNbinsX()+2),3)
-    print ""
 
     hh = poisson_intervalize(hh, zero_x=True, include_zero_bins='surrounded')
     hh.SetLineWidth(3)
@@ -133,9 +117,10 @@ for i in range(4):
     hh.SetMarkerSize(1.3)
     hh.Draw('PE')
 
-    write(42, 0.040, 0.285, 0.750, names[i])
+    write(42, 0.040, 0.16, 0.750, names[i])
 
-    l1 = ROOT.TLegend(0.60, 0.725, 1.04, 0.865)
+    xoffset = -0.06
+    l1 = ROOT.TLegend(0.60+xoffset, 0.725, 1.04+xoffset, 0.865)
     l1.AddEntry(hh, 'Data', 'PE')
     l1.AddEntry(h, 'Background')
     l1.SetTextSize(0.040)
@@ -143,30 +128,19 @@ for i in range(4):
     l1.SetFillStyle(0)
     l1.Draw()
 
-    l2 = ROOT.TLegend(0.60, 0.695, 1.04, 0.725)
+    l2 = ROOT.TLegend(0.60+xoffset, 0.695, 1.04+xoffset, 0.725)
     l2.AddEntry(0,'template','')
     l2.SetTextSize(0.040)
     l2.SetBorderSize(0)
     l2.SetFillStyle(0)
     l2.Draw()
 
-    write(61, 0.050, 0.285, 0.81, 'CMS')
+    write(61, 0.050, 0.16, 0.81, 'CMS')
+    write(52, 0.047, 0.27, 0.81, 'Supplementary')
     write(42, 0.050, 0.595, 0.913, '101 fb^{-1} (13 TeV)')
 
-
-    lines = [
-        ROOT.TLine(0.4, 0, 0.4, ymax[i]),
-        ROOT.TLine(0.7, 0, 0.7, ymax[i]),
-        ]
-
-    for ll in lines:
-        ll.SetLineColor(ROOT.kRed)
-        ll.SetLineWidth(2)
-        ll.SetLineStyle(2)
-        ll.Draw()
-
-    outfn = 'closure_%s' % ntk[i]
+    outfn = 'closure_dphi_%s' % ntk[i]
     ps.save(outfn)
 
-    write(52, 0.047, 0.395, 0.81, 'Preliminary')
+    write(52, 0.047, 0.32, 0.81, 'Preliminary')
     ps.save(outfn + '_prelim')

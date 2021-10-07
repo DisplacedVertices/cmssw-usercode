@@ -43,7 +43,7 @@ for arg in args:
         raise ValueError('proper escaping of a character in "%s" not handled; refusing to run' % arg)
 args = ' '.join(args)
 
-tmp_log_fn = tempfile.mktemp()
+tmp_log_fn = tempfile.mktemp(dir='/uscmst1b_scratch/lpc1/3DayLifetime/%s/' % os.environ['USER'])
 uniq = tmp_log_fn[-4:]
 shell_line = 'cmsRun %s >& %s' % (args, tmp_log_fn)
 print shell_line

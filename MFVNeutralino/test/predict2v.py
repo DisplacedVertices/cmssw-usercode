@@ -29,7 +29,7 @@ def fb(ft,efft,frt):
 presel_f = ROOT.TFile(os.path.join(presel_path, fn))
 sel_f = ROOT.TFile(os.path.join(sel_path, fn))
 effs = pd.read_csv('MiniTree/efficiencies/all_effs.csv',index_col='variant')
-cb_vals = pd.read_csv('One2Two/cb_vals/cb_vals.csv',index_col='variant')
+cb_vals = pd.read_csv('One2Two/cb_vals/cb_vals_for_predict2v.csv',index_col='variant')
 
 fracdict = {}
 cdict = {}
@@ -44,12 +44,18 @@ for ntk in 3,4,5,7,8,9:
     try:
         fracdict[ntk]['1v'] = fb(effs.at[var,'ft'], effs.at[var,'efft'], effs.at[var,'frt'])
     except:
+        print "Warning: did not find effs for",ntk
         fracdict[ntk]['1v'] = 0
 
     year_formatted = year if not data else "data_%s" % year
     cb_label = '%s_%strk' % (year_formatted, ntk)
-    cdict[ntk]['cb'] = cb_vals.at[cb_label+'_cb','cb_val']
-    cdict[ntk]['cbbar'] = cb_vals.at[cb_label+'_cbbar','cb_val']
+    try:
+        cdict[ntk]['cb'] = cb_vals.at[cb_label+'_cb','cb_val']
+        cdict[ntk]['cbbar'] = cb_vals.at[cb_label+'_cbbar','cb_val']
+    except:
+        print "Warning: did not find cb/cbbar for",ntk
+        cdict[ntk]['cb'] = 0
+        cdict[ntk]['cbbar'] = 0
 
 npresel, enpresel = get_integral(presel_f.Get('mfvEventHistosJetPreSel/h_npu'))
 npresel  *= presel_scale

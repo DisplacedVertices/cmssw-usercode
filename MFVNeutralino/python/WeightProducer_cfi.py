@@ -7,7 +7,7 @@ mfvWeight = cms.EDProducer('MFVWeightProducer',
                            enable = cms.bool(True),
                            prints = cms.untracked.bool(False),
                            histos = cms.untracked.bool(True),
-                           half_mc_weight = cms.double(1),
+                           partial_mc_stats_weight = cms.double(1),
                            weight_gen = cms.bool(False),
                            weight_gen_sign_only = cms.bool(True),
                            weight_pileup = cms.bool(True),
@@ -23,4 +23,16 @@ def half_mc_by_lumi(process, first=True):
     process.HalfMCByLumi.first = first
     for p in process.paths.itervalues():
         p.replace(process.mfvWeight, process.HalfMCByLumi * process.mfvWeight)
-    process.mfvWeight.half_mc_weight = 0.5 # generally not different by more than 0.1%
+    process.mfvWeight.partial_mc_stats_weight = 0.5 # generally not different by more than 0.1%
+
+def quarter_mc_by_lumi(process, first=True, second=False, third=False, fourth=False):
+    assert hasattr(process, 'mfvWeight')
+    process.load('JMTucker.Tools.QuarterMCByLumi_cfi')
+    process.QuarterMCByLumi.first = first
+    process.QuarterMCByLumi.second = second
+    process.QuarterMCByLumi.third = third
+    process.QuarterMCByLumi.fourth = fourth
+    nquarters = [first,second,third,fourth].count(True)
+    for p in process.paths.itervalues():
+        p.replace(process.mfvWeight, process.QuarterMCByLumi * process.mfvWeight)
+    process.mfvWeight.partial_mc_stats_weight = 0.25 * nquarters 

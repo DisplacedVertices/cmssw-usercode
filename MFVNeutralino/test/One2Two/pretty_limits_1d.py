@@ -5,7 +5,7 @@ ROOT.gErrorIgnoreLevel = 1001 # Suppress TCanvas::SaveAs messages.
 
 which = '2017p8' if '2017p8' in sys.argv else 'run2'
 intlumi = 140 if which == 'run2' else 101
-path = plot_dir('pretty_limits_1d_scanpack1Dplus2016missing_fixcombinefull_newxsec_bkgcorr_sigscaletkmover_2_%s' % which, make=True)
+path = plot_dir('pretty_limits_1d_June2021_%s' % which, make=True)
 
 ts = tdr_style()
 
@@ -48,13 +48,13 @@ def tau(tau):
 
 def nice_leg(kind):
     if kind.startswith('multijet_M'):
-        return '#tilde{#chi}^{0}/#tilde{g} #rightarrow tbs, m = %i GeV' % int(kind.replace('multijet_M', ''))
+        return '#tilde{#chi}^{0}/#tilde{g} #rightarrow tbs', 'm = %i GeV' % int(kind.replace('multijet_M', ''))
     elif kind.startswith('dijet_M'):
-        return '#tilde{t} #rightarrow #bar{d}#kern[0.1]{#bar{d}}, m = %i GeV' % int(kind.replace('dijet_M', ''))
+        return '#tilde{t} #rightarrow #bar{d}#kern[0.1]{#bar{d}}', 'm = %i GeV' % int(kind.replace('dijet_M', ''))
     elif kind.startswith('multijet_tau'):
-        return '#tilde{#chi}^{0}/#tilde{g} #rightarrow tbs, c#tau = ' + tau(kind.replace('multijet_tau', ''))
+        return '#tilde{#chi}^{0}/#tilde{g} #rightarrow tbs', 'c#tau = ' + tau(kind.replace('multijet_tau', ''))
     elif kind.startswith('dijet_tau'):
-        return '#tilde{t} #rightarrow #bar{d}#kern[0.1]{#bar{d}}, c#tau = ' + tau(kind.replace('dijet_tau', ''))
+        return '#tilde{t} #rightarrow #bar{d}#kern[0.1]{#bar{d}}', 'c#tau = ' + tau(kind.replace('dijet_tau', ''))
 
 def nice_theory(kind, idx=1):
     if kind.startswith('multijet') and idx == 1:
@@ -75,8 +75,8 @@ for kind in kinds:
         c.SetLogx()
     c.SetTopMargin(0.1)
     c.SetBottomMargin(0.12)
-    c.SetLeftMargin(0.11)
-    c.SetRightMargin(0.1)
+    c.SetLeftMargin(0.125)
+    c.SetRightMargin(0.085)
 
     observed = f.Get('%s/observed' % kind)
     expect50 = f.Get('%s/expect50' % kind)
@@ -145,13 +145,14 @@ for kind in kinds:
 #    draw_theory = 'tau' in kind
 
     xax = g.GetXaxis()
+    xax.SetNoExponent()
     xax.SetLabelSize(0.045)
     xax.SetTitleSize(0.05)
     if versus_tau:
         xax.SetLabelOffset(0.002)
     xax.SetTitleOffset(1.1)
     yax = g.GetYaxis()
-    yax.SetTitleOffset(1.03)
+    yax.SetTitleOffset(1.18)
     yax.SetTitleSize(0.05)
     yax.SetLabelSize(0.045)
 
@@ -198,11 +199,15 @@ for kind in kinds:
 #        leg = ROOT.TLegend(0.552, 0.563, 0.870, 0.867)
 #    else:
 #        leg = ROOT.TLegend(0.552, 0.603, 0.870, 0.867)
-    leg = ROOT.TLegend(0.567, 0.563, 0.870, 0.867)
+    xoffset = 0.015
+    if kind == 'multijet_M0800' :
+        yoffset = -0.15
+        leg = ROOT.TLegend(0.567+xoffset, 0.565+yoffset, 0.870+xoffset, 0.869+yoffset)
+    else :
+        leg = ROOT.TLegend(0.567+xoffset, 0.565, 0.870+xoffset, 0.869)
     leg.SetTextFont(42)
     leg.SetFillColor(ROOT.kWhite)
     leg.SetBorderSize(0)
-    leg.AddEntry(0, '#kern[-0.22]{%s}' % nice_leg(kind), '')
     leg.AddEntry(0, '#kern[-0.22]{95% CL upper limits:}', '')
     leg.AddEntry(observed, 'Observed', 'L')
     leg.AddEntry(expect50, 'Median expected', 'L')
@@ -215,14 +220,36 @@ for kind in kinds:
         leg.AddEntry(theory2, nice_theory(kind,2) + ', #bf{#it{#Beta}}=1', 'LF')
     leg.Draw()
 
-    cms = write(61, 0.050, 0.142, 0.825, 'CMS')
-    lum = write(42, 0.050, 0.548, 0.913, '%s fb^{-1} (13 TeV)' % intlumi)
+    labels = nice_leg(kind)
+
+    if "dijet_M" in kind :
+        sig_text         = write(42, 0.04, 0.17, 0.655, labels[0])
+        mass_or_tau_text = write(42, 0.04, 0.17, 0.605, labels[1])
+        cms = write(61, 0.050, 0.16, 0.825, 'CMS')
+    elif "dijet_tau" in kind :
+        sig_text         = write(42, 0.04, 0.17, 0.215, labels[0])
+        mass_or_tau_text = write(42, 0.04, 0.17, 0.165, labels[1])
+        cms = write(61, 0.050, 0.16, 0.825, 'CMS')
+    elif "multijet_M" in kind :
+        sig_text         = write(42, 0.04, 0.17, 0.655, labels[0])
+        mass_or_tau_text = write(42, 0.04, 0.17, 0.605, labels[1])
+        cms = write(61, 0.050, 0.16, 0.825, 'CMS')
+    else : # "multijet_tau"
+        sig_text         = write(42, 0.04, 0.155, 0.20, labels[0])
+        mass_or_tau_text = write(42, 0.04, 0.155, 0.15, labels[1])
+        cms = write(61, 0.050, 0.20, 0.825, 'CMS')
+
+    lum = write(42, 0.050, 0.563, 0.913, '%s fb^{-1} (13 TeV)' % intlumi)
     fn = os.path.join(path, 'limit1d_' + kind)
     c.SaveAs(fn + '.pdf')
     c.SaveAs(fn + '.png')
     c.SaveAs(fn + '.root')
 
-    pre = write(52, 0.037, 0.145, 0.785, 'Preliminary')
+    if "_M" in kind or 'dijet' in kind :
+        pre = write(52, 0.047, 0.265, 0.825, 'Preliminary')
+    else :
+        pre = write(52, 0.047, 0.230, 0.913, 'Preliminary')
+
     c.SaveAs(fn + '_prelim.pdf')
     c.SaveAs(fn + '_prelim.png')
     c.SaveAs(fn + '_prelim.root')

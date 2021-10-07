@@ -55,6 +55,22 @@ half_mc_by_lumi(process, %r)
         else:
             return [], []
 
+class quarter_mc_modifier:
+    def __init__(self, first=True, second=False, third=False, fourth=False):
+        self.first = first
+        self.second = second
+        self.third = third
+        self.fourth = fourth
+    def __call__(self, sample):
+        if sample.is_mc:
+            x = '''
+from JMTucker.MFVNeutralino.WeightProducer_cfi import quarter_mc_by_lumi
+quarter_mc_by_lumi(process, %r, %r, %r, %r)
+''' % (self.first, self.second, self.third, self.fourth)
+            return [x], []
+        else:
+            return [], []
+
 class npu_filter_modifier:
     def __init__(self, is_miniaod=False, samples={'qcdht0700_2017': 131, 'dyjetstollM10_2017': 126, 'dyjetstollM50_2017': 131, 'dyjetstollM50ext_2017': 129}, paths_to_skip=['pmcStat']):
         self.is_miniaod = is_miniaod
@@ -396,6 +412,7 @@ __all__ = [
     'era_modifier',
     'repro_modifier',
     'half_mc_modifier',
+    'quarter_mc_modifier',
     'npu_filter_modifier',
     'per_sample_pileup_weights_modifier',
     'event_veto_modifier',
