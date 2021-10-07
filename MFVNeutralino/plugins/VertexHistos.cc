@@ -41,7 +41,6 @@ class MFVVertexHistos : public edm::EDAnalyzer {
 
   TH1F* h_w;
   TH1F* h_nsv;
-  TH1F* h_genbs2ddist;
   TH1F* h_sv_gen2ddist_signed;
   TH2F* h_sv_ntk_genbs2ddist;
   TH2F* h_sv_ntk_bs2ddist;
@@ -356,7 +355,6 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
     h_sv_track_inpv[j] = fs->make<TH1F>(TString::Format("h_sv_%s_track_inpv", exc), TString::Format(";%s SV tracks in-PV?", exc), 10, -1, 9);
   }
 
-  h_genbs2ddist = fs->make<TH1F>("h_genbs2ddist", ";dist2d(gen vtx, beamspot) (cm);arb. units", 500, 0, 2.5);
   h_sv_gen2ddist_signed = fs->make<TH1F>("h_sv_gen2ddist_signed", ";dist2d(SV, closest gen vtx) (cm);arb. units", 400,-0.2,0.2);
   h_sv_ntk_genbs2ddist = fs->make<TH2F>("h_sv_ntk_genbs2ddist", ";# tracks of SV;dist2d(gen vtx, beamspot) (cm)",40,0,40,500,0,2.5);
   h_sv_ntk_bs2ddist = fs->make<TH2F>("h_sv_ntk_bs2ddist", ";# tracks of SV;dist2d(SV, beamspot) (cm)",40,0,40,500,0,2.5);
