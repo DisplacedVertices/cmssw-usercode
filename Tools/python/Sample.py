@@ -17,6 +17,7 @@ xrootd_sites = {
     'T2_US_Florida': 'root://cmsio5.rc.ufl.edu/',
     'T2_US_MIT': 'root://xrootd.cmsaf.mit.edu/',
     'T2_US_UCSD': 'root://redirector.t2.ucsd.edu/',
+    'global_redirect': 'root://cmsxrootd.fnal.gov/',
     }
 
 ########################################################################

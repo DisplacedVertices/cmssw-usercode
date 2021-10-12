@@ -5,6 +5,11 @@ jet_paths = [
     "HLT_PFHT1050_v*",
     ]
 
+MET_paths = [
+    #"HLT_PFMET120_PFMHT120_IDTight_v*",
+    "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v*",
+    ]
+
 bjet_paths = [
     # bjet triggers 2017 - only use the first two, since they contribute most of the efficiency
     "HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33_v*",
@@ -45,6 +50,7 @@ mfvTriggerFilter = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone(
     )
 
 mfvTriggerFilterJetsOnly = mfvTriggerFilter.clone(HLTPaths = jet_paths)
+mfvTriggerFilterMETOnly = mfvTriggerFilter.clone(HLTPaths = MET_paths)
 mfvTriggerFilterBJetsOnly = mfvTriggerFilter.clone(HLTPaths = bjet_paths)
 mfvTriggerFilterDisplacedDijetOnly = mfvTriggerFilter.clone(HLTPaths = displaced_dijet_paths)
 mfvTriggerFilterLeptonsOnly = mfvTriggerFilter.clone(HLTPaths = lepton_paths)

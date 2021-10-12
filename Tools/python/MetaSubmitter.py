@@ -224,17 +224,20 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
         d = {'miniaod': {
                 'signal':           ( 1,     200),
                 'JetHT':            (15, 1350000),
-                'qcdht0300_2017':   (50, 3130000),
-                'qcdht0500_2017':   (50, 3130000),
-                'qcdht0700_2017':   (50, 3130000),
-                'qcdht1000_2017':   (11,  551000),
-                'qcdht1500_2017':   ( 4,  186000),
-                'qcdht2000_2017':   ( 5,  202000),
-                'ttbar_2017':       (50, 3040000),
+                'MET':              (15, 1350000),
+                'qcdht0300_2017':   (5, 3130000),
+                'qcdht0500_2017':   (3, 3130000),
+                'qcdht0700_2017':   (5, 3130000),
+                'qcdht1000_2017':   ( 3,  551000),
+                'qcdht1500_2017':   ( 1,  186000),
+                'qcdht2000_2017':   ( 1,  202000),
+                'ttbar_2017':       ( 5, 3040000),
                 'ttbarht0600_2017': ( 5,   71500),
                 'ttbarht0800_2017': ( 3,   45000),
                 'ttbarht1200_2017': ( 3,   32500),
                 'ttbarht2500_2017': ( 3,   27500),
+                'zjetstonunuht1200_2017': ( 2, 338948),
+                'zjetstonunuht2500_2017': ( 1, 6734),
                 'qcdht0300_2018':   (50, 3130000),
                 'qcdht0500_2018':   (50, 3130000),
                 'qcdht0700_2018':   (50, 3130000),
@@ -257,11 +260,13 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
 
             if 'JetHT' in name:
                 name = 'JetHT'
+            elif 'MET' in name:
+                name = 'MET'
             elif sample.is_signal:
                 name = 'signal'
                 sample.split_by = 'events'
 
-            sample.files_per, sample.events_per = d[dataset].get(name, (50, 100000))
+            sample.files_per, sample.events_per = d[dataset].get(name, (10, 100000))
 
             if jobtype == 'trackmover':
                 if name.startswith('ttbarht'):
@@ -305,14 +310,15 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
 ####
 
 def pick_samples(dataset, both_years=False,
-                 qcd=True, ttbar=True, all_signal=True, data=True, leptonic=False, bjet=False,
+                 qcd=False, ttbar=False, all_signal=False, data=False, leptonic=False, bjet=False,  
+                 splitSUSY=False, Zvv=False, met=False,
                  span_signal=False):
 
     if span_signal:
         print 'cannot use both span and all_signal, turning off the latter'
         all_signal = False
 
-    argnames = 'qcd', 'ttbar', 'all_signal', 'span_signal', 'data', 'leptonic', 'bjet'
+    argnames = 'qcd', 'ttbar', 'all_signal', 'span_signal', 'data', 'leptonic', 'bjet', 'splitSUSY', 'Zvv', 'met'
     args = dict([(a,eval(a)) for a in argnames])
     if not set(args.values()).issubset([True, False, 'only']):
         raise ValueError('arg must be one of True, False, "only"')

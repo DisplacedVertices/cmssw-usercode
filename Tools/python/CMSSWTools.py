@@ -528,18 +528,13 @@ def which_global_tag(settings=None):
         settings = CMSSWSettings()
     if settings.year == 2017:
         if settings.is_mc:
-            return '94X_mc2017_realistic_v17'
+            return '106X_mc2017_realistic_v8'
         else:
-            return '94X_dataRun2_v11'
+            return '106X_dataRun2_v32'
     elif settings.year == 2018:
         if settings.is_mc:
-            return '102X_upgrade2018_realistic_v19'
+            return '106X_upgrade2018_realistic_v15_L1v1'
         else:
-            eras = tuple('ABCD')
-            assert settings.era in eras
-            if settings.era in eras[:3]:
-                return '102X_dataRun2_v11'
-            else:
-                return '102X_dataRun2_Prompt_v14'
+            return '106X_dataRun2_v32'
     else:
         raise ValueError('what year is it')

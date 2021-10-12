@@ -1,8 +1,9 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 is_mc = True # for blinding
+do_track = True # this can onlky be used for ntuple with keep_tk=True
 
-from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers
+from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_MET_triggers
 sample_files(process, 'qcdht2000_2017' if is_mc else 'JetHT2017B', dataset, 1)
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
@@ -11,6 +12,7 @@ process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
 process.load('JMTucker.MFVNeutralino.VertexHistos_cfi')
 process.load('JMTucker.MFVNeutralino.EventHistos_cfi')
+process.load('JMTucker.MFVNeutralino.TrackHistos_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 
 import JMTucker.Tools.SimpleTriggerResults_cfi as SimpleTriggerResults
@@ -19,7 +21,27 @@ SimpleTriggerResults.setup_endpath(process, weight_src='mfvWeight')
 common = cms.Sequence(process.mfvSelectedVerticesSeq * process.mfvWeight)
 
 process.mfvEventHistosNoCuts = process.mfvEventHistos.clone()
+process.mfvVertexHistosNoCuts = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesExtraLoose')
 process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts) # just trigger for now
+process.pSkimSelVtx = cms.Path(common * process.mfvVertexHistosNoCuts)
+if do_track:
+  process.mfvTrackHistosNoCuts = process.mfvTrackHistos.clone()
+  process.pTrackNoCut = cms.Path(common * process.mfvTrackHistos)
+
+process.mfvEventHistosExtraLoose = process.mfvEventHistos.clone()
+process.mfvAnalysisCutsExtraLoose = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesExtraLoose', min_nvertex = 1)
+process.mfvVertexHistosExtraLoose = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesExtraLoose')
+process.pEventExtraLoose = cms.Path(common * process.mfvAnalysisCutsExtraLoose * process.mfvEventHistosExtraLoose)
+process.pExtraLoose = cms.Path(common * process.mfvAnalysisCutsExtraLoose * process.mfvVertexHistosExtraLoose)
+if do_track:
+  process.mfvTrackHistosExtraLoose = process.mfvTrackHistos.clone()
+  process.pTrackExtraLoose = cms.Path(common * process.mfvAnalysisCutsExtraLoose * process.mfvTrackHistosExtraLoose)
+
+process.mfvEventHistosExtraLooseOnlyOneVtx = process.mfvEventHistos.clone()
+process.mfvAnalysisCutsExtraLooseOnlyOneVtx = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesExtraLoose', min_nvertex = 1, max_nvertex = 1)
+process.mfvVertexHistosExtraLooseOnlyOneVtx = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesExtraLoose')
+process.pEventExtraLooseOnlyOneVtx = cms.Path(common * process.mfvAnalysisCutsExtraLooseOnlyOneVtx * process.mfvEventHistosExtraLooseOnlyOneVtx)
+process.pExtraLooseOnlyOneVtx = cms.Path(common * process.mfvAnalysisCutsExtraLooseOnlyOneVtx * process.mfvVertexHistosExtraLooseOnlyOneVtx)
 
 process.mfvEventHistosPreSel = process.mfvEventHistos.clone()
 process.mfvAnalysisCutsPreSel = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)
@@ -122,8 +144,12 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
     if use_btag_triggers :
-        samples = pick_samples(dataset, qcd=True, ttbar=False, span_signal=True, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used
-        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
+        samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=True, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used
+        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), half_mc_modifier())
+    elif use_MET_triggers:
+        samples = pick_samples(dataset, qcd=True, ttbar=False, data=False, leptonic=True, splitSUSY=True, Zvv=True, met=True, span_signal=False)
+        #samples = pick_samples(dataset, qcd=False, ttbar=False, data=False, leptonic=False, splitSUSY=True, Zvv=False, met=False, span_signal=False)
+        pset_modifier = chain_modifiers(is_mc_modifier)
     else :
         samples = pick_samples(dataset)
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())

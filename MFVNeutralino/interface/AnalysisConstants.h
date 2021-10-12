@@ -50,11 +50,12 @@ namespace mfv {
     //
 
     const double
-    int_lumi_2017 = 41521.;
+    int_lumi_2017 = 40610.;
 
     const char*
-    int_lumi_nice_2017 = "  41.5 fb^{-1} (13 TeV)";
+    int_lumi_nice_2017 = "  40.6 fb^{-1} (13 TeV)";
 
+    //FIXME: check whether scale factor needs to change
     const double
     scale_factor_2017 = 0.989;
 
@@ -64,7 +65,7 @@ namespace mfv {
     //
 
     const double
-    int_lumi_2018 = 59693.;
+    int_lumi_2018 = 59683.;
 
     const char*
     int_lumi_nice_2018 = "  59.7 fb^{-1} (13 TeV)";
@@ -81,7 +82,7 @@ namespace mfv {
     int_lumi_2017p8 = int_lumi_2017 + int_lumi_2018;
 
     const char*
-    int_lumi_nice_2017p8 = "  101 fb^{-1} (13 TeV)";
+    int_lumi_nice_2017p8 = "  100 fb^{-1} (13 TeV)";
 
     const double
     scale_factor_2017p8 = 0.989;

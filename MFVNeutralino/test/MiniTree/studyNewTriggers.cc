@@ -10,6 +10,7 @@
 
 const bool prints = false;
 
+TH1D* h_MET = 0;
 TH1D* h_nvtx = 0;
 TH1D* h_dbv = 0;
 
@@ -22,6 +23,12 @@ TH1D* h_dbv_Bjet = 0;
 TH1D* h_dbv_Bjet_coarse = 0;
 TH1D* h_dbv_DisplacedDijet = 0;
 TH1D* h_dbv_DisplacedDijet_coarse = 0;
+TH1D* h_dbv_MET = 0;
+TH1D* h_dbv_MET_coarse = 0;
+TH1D* h_dbv_passHT_failBjet = 0;
+TH1D* h_dbv_passHT_failBjet_coarse = 0;
+TH1D* h_dbv_failHT_passBjet = 0;
+TH1D* h_dbv_failHT_passBjet_coarse = 0;
 TH1D* h_dbv_passDisplacedDijet_failBjet = 0;
 TH1D* h_dbv_passDisplacedDijet_failBjet_coarse = 0;
 TH1D* h_dbv_failDisplacedDijet_passBjet = 0;
@@ -35,6 +42,12 @@ TH1D* h_dvv_Bjet = 0;
 TH1D* h_dvv_Bjet_coarse = 0;
 TH1D* h_dvv_DisplacedDijet = 0;
 TH1D* h_dvv_DisplacedDijet_coarse = 0;
+TH1D* h_dvv_MET = 0;
+TH1D* h_dvv_MET_coarse = 0;
+TH1D* h_dvv_passHT_failBjet = 0;
+TH1D* h_dvv_passHT_failBjet_coarse = 0;
+TH1D* h_dvv_failHT_passBjet = 0;
+TH1D* h_dvv_failHT_passBjet_coarse = 0;
 TH1D* h_dvv_passDisplacedDijet_failBjet = 0;
 TH1D* h_dvv_passDisplacedDijet_failBjet_coarse = 0;
 TH1D* h_dvv_failDisplacedDijet_passBjet = 0;
@@ -61,11 +74,16 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
 
   bool passesDisplacedDijetTrigger = nt.satisfiesTriggerAndOffline(mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack) || nt.satisfiesTriggerAndOffline(mfv::b_HLT_HT650_DisplacedDijet60_Inclusive);
 
+  bool passesMETTrigger = pass_hlt(nt, mfv::b_HLT_PFMET120_PFMHT120_IDTight);
+
   double w = nt.weight; // modify as needed before filling hists
 
   // minitree is stupid and doesn't store past the first two vertices
   // can tighten cuts, but you won't ever be able to pull out the vertices past 2 in 3-vertex events
   // on background this should be negliglble, but this attempts to handle it as best as we can at this point
+
+  //Fill MET
+  h_MET->Fill(nt.met,w);
 
   std::vector<double> dbvs;
   const int ivtxe = std::min(int(nt.nvtx), 2);
@@ -115,6 +133,15 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
       h_dbv_DisplacedDijet->Fill(dbvs[0], w);
       h_dbv_DisplacedDijet_coarse->Fill(dbvs[0], w);
     }
+    // MET trigger
+    if(passesMETTrigger && nt.njets >= 2 ){
+      h_dbv_MET->Fill(dbvs[0], w);
+      h_dbv_MET_coarse->Fill(dbvs[0], w);
+    }
+    // pass HT trigger fail Bjet trigger (to study the shape differences)
+    if(passesHTTrigger && !passesBjetTrigger && nt.njets >= 4 && nt.ht() > 1200){
+      h_dbv_passHT_failBjet->Fill(dbvs[0], w);
+      h_dbv_passHT_failBjet_coarse->Fill(dbvs[0], w);
     // pass DisplacedDijet trigger fail Bjet trigger (to study the shape differences)
     if(passesDisplacedDijetTrigger && !passesBjetTrigger){
       h_dbv_passDisplacedDijet_failBjet->Fill(dbvs[0], w);
@@ -146,6 +173,15 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
       h_dvv_DisplacedDijet->Fill(dvv, w);
       h_dvv_DisplacedDijet_coarse->Fill(dvv, w);
     }
+    // MET trigger
+    if(passesMETTrigger && nt.njets >= 2 ){
+      h_dvv_MET->Fill(dvv, w);
+      h_dvv_MET_coarse->Fill(dvv, w);
+    }
+    // pass HT trigger fail Bjet trigger (to study the shape differences)
+    if(passesHTTrigger && !passesBjetTrigger && nt.njets >= 4 && nt.ht() > 1200){
+      h_dvv_passHT_failBjet->Fill(dvv, w);
+      h_dvv_passHT_failBjet_coarse->Fill(dvv, w);
     // pass DisplacedDijet trigger fail Bjet trigger (to study the shape differences)
     if(passesDisplacedDijetTrigger && !passesBjetTrigger){
       h_dvv_passDisplacedDijet_failBjet->Fill(dvv, w);
@@ -197,6 +233,7 @@ int main(int argc, char** argv) {
   }
 
   // book hists
+  h_MET = new TH1D("h_MET", ";MET (GeV);Events",200,0,2000);
   h_nvtx = new TH1D("h_nvtx", ";# of vertices;Events", 10, 0, 10);
   h_dbv = new TH1D("h_dbv", ";d_{BV} (cm);Events/20 #mum", 1250, 0, 2.5);
 
@@ -208,6 +245,12 @@ int main(int argc, char** argv) {
   h_dbv_Bjet_coarse = new TH1D("h_dbv_Bjet_coarse", ";d_{BV} (cm);Events/100 #mum", 40, 0, 0.4);
   h_dbv_DisplacedDijet = new TH1D("h_dbv_DisplacedDijet", ";d_{BV} (cm);Events/1000 #mum", 50, 0, 5.);
   h_dbv_DisplacedDijet_coarse = new TH1D("h_dbv_DisplacedDijet_coarse", ";d_{BV} (cm);Events/100 #mum", 40, 0, 0.4);
+  h_dbv_MET = new TH1D("h_dbv_MET", ";d_{BV} (cm);Events/1000 #mum", 50, 0, 5.);
+  h_dbv_MET_coarse = new TH1D("h_dbv_MET_coarse", ";d_{BV} (cm);Events/100 #mum", 40, 0, 0.4);
+  h_dbv_passHT_failBjet = new TH1D("h_dbv_passHT_failBjet", ";d_{BV} (cm);Events/1000 #mum", 50, 0, 5.);
+  h_dbv_passHT_failBjet_coarse = new TH1D("h_dbv_passHT_failBjet_coarse", ";d_{BV} (cm);Events/100 #mum", 40, 0, 0.4);
+  h_dbv_failHT_passBjet = new TH1D("h_dbv_failHT_passBjet", ";d_{BV} (cm);Events/1000 #mum", 50, 0, 5.);
+  h_dbv_failHT_passBjet_coarse = new TH1D("h_dbv_failHT_passBjet_coarse", ";d_{BV} (cm);Events/100 #mum", 40, 0, 0.4);
   h_dbv_passDisplacedDijet_failBjet = new TH1D("h_dbv_passDisplacedDijet_failBjet", ";d_{BV} (cm);Events/1000 #mum", 50, 0, 5.);
   h_dbv_passDisplacedDijet_failBjet_coarse = new TH1D("h_dbv_passDisplacedDijet_failBjet_coarse", ";d_{BV} (cm);Events/100 #mum", 40, 0, 0.4);
   h_dbv_failDisplacedDijet_passBjet = new TH1D("h_dbv_failDisplacedDijet_passBjet", ";d_{BV} (cm);Events/1000 #mum", 50, 0, 5.);
@@ -221,6 +264,12 @@ int main(int argc, char** argv) {
   h_dvv_Bjet_coarse = new TH1D("h_dvv_Bjet_coarse", ";d_{VV} (cm);Events/100 #mum", 40, 0, 0.4);
   h_dvv_DisplacedDijet = new TH1D("h_dvv_DisplacedDijet", ";d_{VV} (cm);Events/1000 #mum", 50, 0, 5.);
   h_dvv_DisplacedDijet_coarse = new TH1D("h_dvv_DisplacedDijet_coarse", ";d_{VV} (cm);Events/100 #mum", 40, 0, 0.4);
+  h_dvv_MET = new TH1D("h_dvv_MET", ";d_{VV} (cm);Events/1000 #mum", 50, 0, 5.);
+  h_dvv_MET_coarse = new TH1D("h_dvv_MET_coarse", ";d_{VV} (cm);Events/100 #mum", 40, 0, 0.4);
+  h_dvv_passHT_failBjet = new TH1D("h_dvv_passHT_failBjet", ";d_{VV} (cm);Events/1000 #mum", 50, 0, 5.);
+  h_dvv_passHT_failBjet_coarse = new TH1D("h_dvv_passHT_failBjet_coarse", ";d_{VV} (cm);Events/100 #mum", 40, 0, 0.4);
+  h_dvv_failHT_passBjet = new TH1D("h_dvv_failHT_passBjet", ";d_{VV} (cm);Events/1000 #mum", 50, 0, 5.);
+  h_dvv_failHT_passBjet_coarse = new TH1D("h_dvv_failHT_passBjet_coarse", ";d_{VV} (cm);Events/100 #mum", 40, 0, 0.4);
   h_dvv_passDisplacedDijet_failBjet = new TH1D("h_dvv_passDisplacedDijet_failBjet", ";d_{VV} (cm);Events/1000 #mum", 50, 0, 5.);
   h_dvv_passDisplacedDijet_failBjet_coarse = new TH1D("h_dvv_passDisplacedDijet_failBjet_coarse", ";d_{VV} (cm);Events/100 #mum", 40, 0, 0.4);
   h_dvv_failDisplacedDijet_passBjet = new TH1D("h_dvv_failDisplacedDijet_passBjet", ";d_{VV} (cm);Events/1000 #mum", 50, 0, 5.);

@@ -73,6 +73,7 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   nt.l1_myhtt = mevent->l1_myhtt;
   nt.l1_myhttwbug = mevent->l1_myhttwbug;
   nt.hlt_ht = mevent->hlt_ht;
+  nt.met = mevent->met();
 
   nt.bsx = mevent->bsx;
   nt.bsy = mevent->bsy;

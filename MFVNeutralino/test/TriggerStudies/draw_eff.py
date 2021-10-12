@@ -5,7 +5,11 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples
 from JMTucker.Tools.Samples import *
 
-version = '2017p8v4'
+useElectron = False
+useMETNoMu = True
+version = '2017ULv1_mu_MET'
+if useMETNoMu:
+  version+='NoMu'
 zoom = False #(0.98,1.005)
 save_more = True
 data_only = False
@@ -15,25 +19,26 @@ num_dir, den_dir = 'num', 'den'
 
 which = typed_from_argv(int, 0)
 data_period, int_lumi = [
-    ('p8',101037.),
-    ('',   41525.),
-    ('B',   4794.),
-    ('C',   9631.),
+    #FIXME: currently using jsong files from METNoMu trigger but should change that to ele/mu 
+    ('p8',100293.),
+    ('',   40610.),
+    ('B',   4803.),
+    ('C',   9573.),
     ('D',   4248.),
-    ('E',   9314.),
-    ('F',  13538.),
-    ('',   59512.),
-    ('A',  14002.),
-    ('B',   7091.),
-    ('C',   6937.),
-    ('D',  31482.),
+    ('E',   9315.),
+    ('F',  12671.),
+    ('',   59683.),
+    ('A',  13978.),
+    ('B',   7064.),
+    ('C',   6895.),
+    ('D',  31747.),
     ][which]
 year = 2017 if which < 7 else 2018
 print year, data_period, int_lumi
 
 ########################################################################
 
-root_dir = '/uscms_data/d2/tucker/crab_dirs/TrigEff%s' % version
+root_dir = '/uscms/home/ali/nobackup/LLP/crabdir/TrigEff%s' % version
 plot_path = 'TrigEff%s_%s_%s%s' % (version, num_dir, year, data_period)
 if zoom:
     plot_path += '_zoom'
@@ -43,34 +48,46 @@ ROOT.gStyle.SetOptStat(0)
 ps = plot_saver(plot_dir(plot_path), size=(600,600), log=False, pdf=True)
 ROOT.TH1.AddDirectory(0)
 
-data_fn = os.path.join(root_dir, 'SingleMuon%s%s.root' % (year, data_period))
+if useElectron:
+  data_fn = os.path.join(root_dir, 'SingleElectron%s%s.root' % (year, data_period))
+else:
+  data_fn = os.path.join(root_dir, 'SingleMuon%s%s.root' % (year, data_period))
+
 data_f = ROOT.TFile(data_fn)
 
 if data_only:
     bkg_samples, sig_samples = [], []
 else:
     if year == 2017 or year == 2018:
-        bkg_samples = [ttbar_2017, wjetstolnusum_2017, dyjetstollM50sum_2017, dyjetstollM10_2017, qcdmupt15_2017]
+        if useElectron:
+          bkg_samples = [ttbar_2017, wjetstolnu_2017, dyjetstollM50_2017, dyjetstollM10_2017]
+        else:
+          bkg_samples = [ttbar_2017, wjetstolnu_2017, dyjetstollM50_2017, dyjetstollM10_2017]
         if use_qcd:
             bkg_samples.append(qcdmupt15_2017)
-        sig_samples = [getattr(Samples, 'mfv_neu_tau001000um_M%04i_2017' % m) for m in (400, 800, 1200, 1600)] + [Samples.mfv_neu_tau010000um_M0800_2017]
+        sig_samples = Samples.mfv_splitSUSY_samples_2017
 
 n_bkg_samples = len(bkg_samples)
 for samples in bkg_samples, sig_samples:
     for sample in samples:
         sample.fn = os.path.join(root_dir, sample.name + '.root')
         sample.f = ROOT.TFile(sample.fn) if os.path.isfile(sample.fn) else None
+        if not os.path.isfile(sample.fn):
+          print("{} not found!".format(sample.fn))
 
 ########################################################################
 
 kinds = ['']
-ns = ['h_jet_ht']
+ns = ['h_metpt','h_metpt_nomu']
 
-lump_lower = 1200.
+lump_lower = 0.
+#lump_lower = 1200.
 
 def fit_limits(kind, n):
     if 'ht' in n:
         return 650, 5000
+    elif 'met' in n:
+        return 50, 1000
     else:
         if 'pf' in kind:
             if 'pt_4' in n:
@@ -94,16 +111,22 @@ def draw_limits(kind, n):
 
 def make_fcn(name, kind, n):
     fcn = ROOT.TF1(name, '[0] + [1]*(0.5 + 0.5 * TMath::Erf((x - [2])/[3]))', *fit_limits(kind,n))
+    #fcn = ROOT.TF1(name, '[0] + [1]*(0.5 + 0.5 * TMath::TanH((x - [2])/[3]))', *fit_limits(kind,n))
     fcn.SetParNames('floor', 'ceil', 'turnmu', 'turnsig')
     if 'ht' in n:
         fcn.SetParameters(0, 1, 900, 100)
     else:
-        fcn.SetParameters(0, 1, 48, 5)
+        fcn.SetParameters(0, 1, 150, 50)
     fcn.SetParLimits(1, 0, 1)
     fcn.SetLineWidth(2)
     fcn.SetLineStyle(2)
     
     return fcn
+
+def rebin_met(h):
+    #a = to_array(range(0, 100, 10) + range(100, 200, 10) + [200, 220, 240, 270, 300, 350, 400, 450, 500, 600, 700, 800, 1000])
+    a = to_array(range(0, 1000, 10)) 
+    return h.Rebin(len(a)-1, h.GetName() + '_rebin', a)
 
 def rebin_pt(h):
     a = to_array(range(0, 100, 5) + range(100, 150, 10) + [150, 180, 220, 260, 370, 500])
@@ -118,7 +141,9 @@ def rebin_ht(h):
 def get(f, kind, n):
     def rebin(h):
         return h
-    if 'pt' in n:
+    if 'met' in n:
+      rebin = rebin_met
+    elif 'pt' in n:
         rebin = rebin_pt
     elif 'ht' in n:
         rebin = rebin_ht
@@ -164,7 +189,9 @@ for kind in kinds:
             if den.Integral():
                 rat = histogram_divide(num, den)
                 rat.Draw('AP')
-                if 'pt' in n:
+                if 'met' in n:
+                    rat.GetXaxis().SetLimits(0, 1000)
+                elif 'pt' in n:
                     rat.GetXaxis().SetLimits(0, 260)
                 elif 'ht' in n:
                     rat.GetXaxis().SetLimits(0, draw_limits(kind,n)[1])
@@ -263,11 +290,27 @@ for kind in kinds:
 
         data_rat = histogram_divide(data_num, data_den)
         bkg_rat = histogram_divide(bkg_num, bkg_den, use_effective=True) if bkg_num and bkg_den else None
+        tag = '_ele' if useElectron else '_mu'
+        ratio_file = ROOT.TFile(subname+tag+'_data_bkg.root', "RECREATE")
+        data_bkg_rat = histogram_divide(data_rat, bkg_rat, confint=propagate_ratio, force_le_1=False)
+        data_bkg_rat.GetYaxis().SetTitle("data/MC")
+        if 'met' in n:
+          data_bkg_rat.GetXaxis().SetLimits(0, 1000)
+          data_bkg_rat.SetTitle('; MET p_{T} (GeV);data/MC')
+          if 'nomu' in n:
+            data_bkg_rat.SetTitle('; METNoMu p_{T} (GeV);data/MC')
+        data_bkg_rat.Write()
+        ratio_file.Close()
 
         for r in (data_rat, bkg_rat):
             if not r:
                 continue
-            if 'pt' in n:
+            if 'met' in n:
+                r.GetXaxis().SetLimits(0, 1000)
+                r.SetTitle('; MET p_{T} (GeV);efficiency')
+                if 'nomu' in n:
+                  r.SetTitle('; METnoMu p_{T} (GeV);efficiency')
+            elif 'pt' in n:
                 r.GetXaxis().SetLimits(0, 260)
                 i = int(n.split('_')[-1])
                 k = 'PF' if 'pf' in kind else 'calo'
@@ -286,13 +329,13 @@ for kind in kinds:
         ROOT.gStyle.SetOptFit(1111)
         data_fcn = make_fcn('f_data', kind, n)
         data_fcn.SetLineColor(ROOT.kBlack)
-        data_res = data_rat.Fit(data_fcn, 'RQS')
+        data_res = data_rat.Fit(data_fcn, 'RQS',"",0,1000)
         print '\ndata:'
         data_res.Print()
         if bkg_rat:
             bkg_fcn = make_fcn('f_bkg', kind, n)
             bkg_fcn.SetLineColor(2)
-            bkg_res = bkg_rat.Fit(bkg_fcn, 'RQS')
+            bkg_res = bkg_rat.Fit(bkg_fcn, 'RQS',"",0,1000)
             print '\nbkg:'
             bkg_res.Print()
 
@@ -301,13 +344,15 @@ for kind in kinds:
             bkg_rat.Draw('E2 same')
 
         ps.c.Update()
-        move_stat_box(data_rat, 'inf' if zoom else (0.518, 0.133, 0.866, 0.343))
+        move_stat_box(data_rat, 'inf' if zoom else (0.518, 0.320, 0.866, 0.500))
         if bkg_rat:
-            s = move_stat_box(bkg_rat, 'inf' if zoom else (0.518, 0.350, 0.866, 0.560))
+            s = move_stat_box(bkg_rat, 'inf' if zoom else (0.518, 0.510, 0.866, 0.690))
             s.SetLineColor(2)
             s.SetTextColor(2)
 
         ps.save(subname)
+        bkg_rat.SetLineColor(2)
+        ratios_plot(subname+'rt',[bkg_rat,data_rat],ps,canvas_size = (600, 650),res_fit=False,res_divide_opt={'confint': propagate_ratio, 'force_le_1': False})
 
         print '\nsignals'
         for sample in sig_samples:

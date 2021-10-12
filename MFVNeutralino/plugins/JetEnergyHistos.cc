@@ -158,6 +158,7 @@ void MFVJetEnergyHistos::analyze(const edm::Event& event, const edm::EventSetup&
 	throw cms::Exception("BadJet") << "JER jet with pt " << mevent->jet_pt[i] << " eta " << mevent->jet_eta[i] << " out of range?";
 
       // https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution
+      // FIXME: not using it now, but need to change for UL in used
 #ifdef MFVNEUTRALINO_2017
       const double sf[13] = {1.1432, 1.1815, 1.0989, 1.1137, 1.1307, 1.1600, 1.2393, 1.2604, 1.4085, 1.9909, 2.2923, 1.2696, 1.1542};
       const double un[13] = {0.0222, 0.0484, 0.0456, 0.1397, 0.1470, 0.0976, 0.1909, 0.1501, 0.2020, 0.5684, 0.3743, 0.1089, 0.1524};

@@ -55,5 +55,5 @@ jtupleParams = cms.PSet(
 
     electronEBCuts = cms.vstring(*electron_EB_cuts),
     electronEECuts = cms.vstring(*electron_EE_cuts),
-    electronCut = cms.string('pt > 5 && abs(eta) < 2.5 && ' + '(isEB && %s) || (isEE && %s)' % (' && '.join(electron_EB_cuts), ' && '.join(electron_EE_cuts))),
+    electronCut = cms.string('pt > 5 && abs(eta) < 2.5 && ' + '((isEB && %s) || (isEE && %s))' % (' && '.join(electron_EB_cuts), ' && '.join(electron_EE_cuts))),
     )

@@ -6,4 +6,5 @@ mfvGenParticles = cms.EDProducer('MFVGenParticles',
                                  last_flag_check = cms.bool(False), # needs to be false now that we're using MiniAOD
                                  debug = cms.untracked.bool(False),
                                  histos = cms.untracked.bool(False),
+                                 lsp_id = cms.untracked.int32(-1)
                                  )

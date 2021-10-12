@@ -50,6 +50,7 @@ void formatHist(TH1& h){
   h.GetXaxis()->SetBinLabel(10,"HT650_DisplacedDijet60_Inclusive");
   h.GetXaxis()->SetBinLabel(11,"OR of DisplacedDijet triggers");
   h.GetXaxis()->SetBinLabel(12,"OR of all triggers");
+  h.GetXaxis()->SetBinLabel(13,"HLT_PFMET120_PFMHT120_IDTight");
 }
 
 // analyze method is a callback passed to MiniNtuple::loop from main that is called once per tree entry
@@ -87,9 +88,10 @@ bool analyze(long long j, long long je, const mfv::MiniNtuple& nt) {
   bool path7 = path1 || path2 || path3 || path4 || path5;
   bool path10 = path8 || path9;
   bool path11 = path0 || path1 || path2 || path3 || path4 || path5 || path8 || path9;
+  bool path12 = nt.satisfiesTriggerAndOffline(mfv::b_HLT_PFMET120_PFMHT120_IDTight);
 
   // paths to pass the trigger
-  std::vector<bool> paths = {path0, path1, path2, path3, path4, path5, path6, path7, path8, path9, path10, path11};
+  std::vector<bool> paths = {path0, path1, path2, path3, path4, path5, path6, path7, path8, path9, path10, path11, path12};
 
   double w = nt.weight; // modify as needed before filling hists
 

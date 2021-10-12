@@ -1,10 +1,14 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version_ = 'V27'
+ntuple_version_ = 'ULV1_keeptk'
+lsp_id = 1000021 # should do that in a smarter way
 use_btag_triggers = False
+use_MET_triggers = True
 if use_btag_triggers : 
     ntuple_version_ += "B" # for "Btag triggers"; also includes DisplacedDijet triggers
+elif use_MET_triggers :
+    ntuple_version_ += "MET"
 ntuple_version_use = ntuple_version_ + 'm'
 dataset = 'ntuple' + ntuple_version_use.lower()
 
@@ -28,7 +32,7 @@ def prepare_vis(process, mode, settings, output_commands):
         process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
         process.p *= process.mfvSelectedVerticesSeq
 
-        for x in process.mfvSelectedVerticesTight, process.mfvSelectedVerticesTightNtk3, process.mfvSelectedVerticesTightNtk4:
+        for x in process.mfvSelectedVerticesTight, process.mfvSelectedVerticesTightNtk3, process.mfvSelectedVerticesTightNtk4, process.mfvSelectedVerticesExtraLoose:
             x.produce_vertices = True
             x.produce_tracks = True
             x.vertex_src = 'mfvVertices'
@@ -44,6 +48,9 @@ def prepare_vis(process, mode, settings, output_commands):
             'keep *_mfvVertexRefits_*_*',
             'keep *_mfvVertexRefitsDrop2_*_*',
             'keep *_mfvVertexRefitsDrop0_*_*',
+            'keep *_mfvVertexTracks*_*_*',
+            'keep *_mfvSelectedVerticesExtraLoose_*_*',
+            'keep *_mfvGenParticles_*_*',
             ]
 
         if settings.is_mc:
@@ -83,7 +90,7 @@ def minitree_only(process, mode, settings, output_commands):
 def event_filter(process, mode, settings, output_commands, **kwargs):
     if mode:
         from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-        setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode, **kwargs)
+        setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode, event_filter_require_vertex = True, **kwargs)
 
 ########################################################################
 
@@ -96,6 +103,7 @@ class NtupleSettings(CMSSWSettings):
         self.prepare_vis = False
         self.keep_all = False
         self.keep_gen = False
+        self.keep_tk = False
         self.event_filter = True
 
     @property
@@ -152,6 +160,9 @@ def make_output_commands(process, settings):
         else:
             output_commands += ['keep *_genParticles_*_HLT',     'keep *_ak4GenJetsNoNu_*_HLT']
 
+    if settings.keep_tk:
+        output_commands += ['keep *_jmtRescaledTracks_*_*']
+
     if settings.keep_all:
         def dedrop(l):
             return [x for x in l if not x.strip().startswith('drop')]
@@ -167,6 +178,7 @@ def make_output_commands(process, settings):
 def set_output_commands(process, cmds):
     if hasattr(process, 'out'):
         process.out.outputCommands = cmds
+        #process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring('p'))
 
 def aod_ntuple_process(settings):
     settings.normalize()
@@ -227,10 +239,11 @@ def miniaod_ntuple_process(settings):
     process = basic_process('Ntuple')
     registration_warnings(process)
     report_every(process, 1000000)
+    #report_every(process, 1)
     geometry_etc(process, which_global_tag(settings))
     random_service(process, {'mfvVertexTracks': 1222})
     tfileservice(process, 'vertex_histos.root')
-    output_file(process, 'ntuple.root', [])
+    output_file(process, 'ntuple.root', []) # ['p']
 
     process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
     process.load('PhysicsTools.PatAlgos.selectionLayer1.muonSelector_cfi')
@@ -243,10 +256,12 @@ def miniaod_ntuple_process(settings):
     process.load('JMTucker.Tools.PATTupleSelection_cfi')
     process.load('JMTucker.Tools.WeightProducer_cfi')
     process.load('JMTucker.Tools.UnpackedCandidateTracks_cfi')
+    process.load('JMTucker.Tools.METBadPFMuonDzFilter_cfi')
     process.load('JMTucker.MFVNeutralino.Vertexer_cff')
     process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
     process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
     process.load('JMTucker.MFVNeutralino.EventProducer_cfi')
+    process.load('JMTucker.MFVNeutralino.TrackTree_cfi')
 
     process.goodOfflinePrimaryVertices.input_is_miniaod = True
     process.selectedPatJets.src = 'updatedJetsMiniAOD'
@@ -256,8 +271,22 @@ def miniaod_ntuple_process(settings):
     #process.selectedPatMuons.cut = '' # process.jtupleParams.muonCut
     #process.selectedPatElectrons.cut = '' # process.jtupleParams.electronCut
 
+    # change made to use corrected MET
+    process.mfvTriggerFloats.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple')
+    if not settings.is_mc:
+      process.mfvTriggerFloats.met_filters_src = cms.InputTag('TriggerResults', '', 'RECO')
+    process.mfvTriggerFloats.isMC = settings.is_mc
+    process.mfvTriggerFloats.year = settings.year
+
     process.mfvGenParticles.gen_particles_src = 'prunedGenParticles'
     process.mfvGenParticles.last_flag_check = False
+
+    #for splitSUSY
+    process.mfvGenParticles.lsp_id = lsp_id
+    process.mfvGenParticles.debug = False
+
+    process.mfvVertexTracks.min_track_rescaled_sigmadxy = 4.0
+    process.mfvVertexTracks.min_track_pt = 1.0
 
     process.jmtRescaledTracks.tracks_src = 'jmtUnpackedCandidateTracks'
 
@@ -268,10 +297,20 @@ def miniaod_ntuple_process(settings):
     process.mfvEvent.gen_particles_src = 'prunedGenParticles' # no idea if this lets gen_bquarks, gen_leptons work--may want the packed ones that have status 1 particles
     process.mfvEvent.gen_jets_src = 'slimmedGenJets'
     process.mfvEvent.pileup_info_src = 'slimmedAddPileupInfo'
-    process.mfvEvent.met_src = 'slimmedMETs'
+    process.mfvEvent.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple')
+
+    # MET correction and filters
+    # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETUncertaintyPrescription#PF_MET
+    from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
+    process.load("Configuration.StandardSequences.GeometryRecoDB_cff") 
+    runMetCorAndUncFromMiniAOD(process,
+                               isData = not settings.is_mc,
+                               )
 
     process.p = cms.Path(process.goodOfflinePrimaryVertices *
                          process.updatedJetsSeqMiniAOD *
+                         process.BadPFMuonFilterUpdateDz *
+                         process.fullPatMetSequence *
                          process.selectedPatJets *
                          process.selectedPatMuons *
                          process.selectedPatElectrons *

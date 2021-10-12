@@ -20,7 +20,7 @@ namespace mfv {
     run = lumi = 0;
     event = 0;
     gen_flavor_code = pass_hlt = npv = npu = njets = nvtx = ntk0 = ntk1 = 0;
-    l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = bsx = bsy = bsz = bsdxdz = bsdydz = pvx = pvy = pvz = weight = ren_weight_up = ren_weight_dn = fac_weight_up = fac_weight_dn = x0 = y0 = z0 = bs2derr0 = rescale_bs2derr0 = x1 = y1 = z1 = bs2derr1 = rescale_bs2derr1 = 0;
+    l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = bsx = bsy = bsz = bsdxdz = bsdydz = pvx = pvy = pvz = weight = ren_weight_up = ren_weight_dn = fac_weight_up = fac_weight_dn = x0 = y0 = z0 = bs2derr0 = rescale_bs2derr0 = x1 = y1 = z1 = bs2derr1 = rescale_bs2derr1 = met = 0;
     genmatch0 = genmatch1 = 0;
     for (int i = 0; i < 2; ++i)
       gen_x[i] = gen_y[i] = gen_z[i] = gen_lsp_pt[i] = gen_lsp_eta[i] = gen_lsp_phi[i] = gen_lsp_mass[i] = 0;
@@ -398,6 +398,12 @@ namespace mfv {
         }
         return passed_kinematics;
       }
+      case b_HLT_PFMET120_PFMHT120_IDTight : 
+      {
+        //if((met) < 200 || njets < 2) return false;
+        if ( njets < 2 ) return false;
+        return true;
+      }
       default :
       {
         throw std::invalid_argument(std::string(hlt_paths[trig]) + " not implemented in satisfiesTrigger");
@@ -439,6 +445,7 @@ namespace mfv {
     tree->Branch("l1_myhtt", &nt.l1_myhtt);
     tree->Branch("l1_myhttwbug", &nt.l1_myhttwbug);
     tree->Branch("hlt_ht", &nt.hlt_ht);
+    tree->Branch("met", &nt.met);
     tree->Branch("bsx", &nt.bsx);
     tree->Branch("bsy", &nt.bsy);
     tree->Branch("bsz", &nt.bsz);
@@ -540,6 +547,7 @@ namespace mfv {
     tree->SetBranchAddress("l1_myhtt", &nt.l1_myhtt);
     tree->SetBranchAddress("l1_myhttwbug", &nt.l1_myhttwbug);
     tree->SetBranchAddress("hlt_ht", &nt.hlt_ht);
+    tree->SetBranchAddress("met", &nt.met);
     tree->SetBranchAddress("bsx", &nt.bsx);
     tree->SetBranchAddress("bsy", &nt.bsy);
     tree->SetBranchAddress("bsz", &nt.bsz);
