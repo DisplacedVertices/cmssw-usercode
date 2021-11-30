@@ -5,6 +5,8 @@
 #include "FWCore/Framework/interface/EDFilter.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenLumiInfoHeader.h"
+#include "FWCore/Framework/interface/LuminosityBlock.h"
 
 class MFVEventFilter : public edm::EDFilter {
 public:
@@ -21,6 +23,7 @@ private:
   const Mode mode;
 
   const edm::EDGetTokenT<pat::JetCollection> jets_token;
+  const edm::EDGetTokenT<GenLumiInfoHeader> gen_lumi_header_token; // for randpar parsing
   const StringCutObjectSelector<pat::Jet> jet_selector;
   const int min_njets;
   const double min_pt_for_ht;
@@ -32,12 +35,18 @@ private:
   const StringCutObjectSelector<pat::Electron> electron_selector;
   const double min_electron_pt;
   const int min_nleptons;
+  const bool parse_randpars;
+  const int  randpar_mass;
+  const int  randpar_ctau;
   const bool debug;
+
+
 };
 
 MFVEventFilter::MFVEventFilter(const edm::ParameterSet& cfg)
   : mode(cfg.getParameter<std::string>("mode")),
     jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
+    gen_lumi_header_token(consumes<GenLumiInfoHeader, edm::InLumi>(edm::InputTag("generator"))),
     jet_selector(cfg.getParameter<std::string>("jet_cut")),
     min_njets(cfg.getParameter<int>("min_njets")),
     min_pt_for_ht(cfg.getParameter<double>("min_pt_for_ht")),
@@ -49,6 +58,9 @@ MFVEventFilter::MFVEventFilter(const edm::ParameterSet& cfg)
     electron_selector(cfg.getParameter<std::string>("electron_cut")),
     min_electron_pt(cfg.getParameter<double>("min_electron_pt")),
     min_nleptons(cfg.getParameter<int>("min_nleptons")),
+    parse_randpars(cfg.getParameter<bool>("parse_randpars")),
+    randpar_mass(cfg.getParameter<int>("randpar_mass")),
+    randpar_ctau(cfg.getParameter<int>("randpar_ctau")),
     debug(cfg.getUntrackedParameter<bool>("debug", false))
 {
 }
@@ -56,6 +68,27 @@ MFVEventFilter::MFVEventFilter(const edm::ParameterSet& cfg)
 bool MFVEventFilter::filter(edm::Event& event, const edm::EventSetup&) {
   edm::Handle<pat::JetCollection> jets;
   event.getByToken(jets_token, jets);
+
+  const edm::LuminosityBlock& lumi = event.getLuminosityBlock();
+
+
+  // If pertinent, parse randpar configuration
+  if (parse_randpars) {
+      edm::Handle<GenLumiInfoHeader> gen_header;
+      lumi.getByToken(gen_lumi_header_token, gen_header);
+
+      std::string rp_config_desc = gen_header->configDescription();
+      std::string str_mass = "MS-" + std::to_string(randpar_mass);
+      std::string str_ctau = "ctauS-" + std::to_string(randpar_ctau);
+      std::string comp_string_Zn = "ZH_HToSSTodddd_ZToLL_MH-125_" + str_mass + "_" + str_ctau + "_TuneCP5_13TeV-powheg-pythia8";
+      std::string comp_string_Wp = "WplusH_HToSSTodddd_WToLNu_MH-125_" + str_mass + "_" + str_ctau + "_TuneCP5_13TeV-powheg-pythia8";
+      if (not ((comp_string_Wp == rp_config_desc) or (comp_string_Zn == rp_config_desc))) {
+        return false;
+      }
+      else {
+       return true;
+      }
+  }
 
   int njets = 0;
   double ht = 0;

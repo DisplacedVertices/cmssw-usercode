@@ -8,6 +8,10 @@ def setup_event_filter(process,
                        event_filter_jes_mult = 2,
                        event_filter_name = 'mfvEventFilter',
                        event_filter_require_vertex = True,
+                       rp_filter = False,
+                       rp_mode = 'None',
+                       rp_mass = -1,
+                       rp_ctau = -1,
                        input_is_miniaod = False,
                        mode = None,
                        sequence_name = 'mfvEventFilterSequence',
@@ -33,10 +37,14 @@ def setup_event_filter(process,
         trigger_filter = 'bjets OR displaced dijet veto HT'
     elif mode == 'trigger leptons only':
         trigger_filter = 'leptons only'
+    elif mode == 'trigger dileptons only':
+        trigger_filter = 'dileptons only'
+    elif mode == 'trigger disp dileptons only':
+        trigger_filter = 'disp dileptons only'
+    elif mode == 'trigger leptons OR dileptons OR disp dileptons':
+        trigger_filter = 'leptons OR dileptons OR disp dileptons'
     elif mode == 'jets only':
         trigger_filter = event_filter = 'jets only'
-    elif mode == 'leptons only':
-        trigger_filter = event_filter = 'leptons only'
     elif mode == 'HT OR bjets OR displaced dijet':
         trigger_filter = event_filter = 'HT OR bjets OR displaced dijet'
     elif mode == 'bjets OR displaced dijet veto HT':
@@ -53,10 +61,21 @@ def setup_event_filter(process,
     elif mode == 'novtx':
         event_filter = True
         event_filter_require_vertex = False
+    elif rp_mode.startswith('randpar') or (isinstance(mode, str) and mode.startswith('randpar')):
+        tmp_mode = rp_mode if rp_mode.startswith('randpar') else mode
+        event_filter = True
+        event_filter_require_vertex = False
+        event_filter_jes_mult = 0
+        rp_filter = True
+        rp_mass = (int)(tmp_mode[tmp_mode.find('M')+1 : tmp_mode.find('_')])
+        rp_ctau = (int)(tmp_mode[tmp_mode.find('t')+1 : tmp_mode.find('-')])
+        print(rp_mass, rp_ctau)
     elif mode:
         if mode is not True:
             raise ValueError('bad mode %r' % mode)
         event_filter = True
+
+
 
     if trigger_filter == 'jets only':
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterJetsOnly as triggerFilter
@@ -70,6 +89,12 @@ def setup_event_filter(process,
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterBjetsORDisplacedDijetVetoHT as triggerFilter
     elif trigger_filter == 'leptons only':
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterLeptonsOnly as triggerFilter
+    elif trigger_filter == 'dileptons only':
+        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterDileptonOnly as triggerFilter
+    elif trigger_filter == 'disp dileptons only':
+        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterDispDileptonOnly as triggerFilter
+    elif trigger_filter == 'leptons OR dileptons OR disp dileptons':
+        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterLeptonsORDileptonsORDispDileptons as triggerFilter
     elif trigger_filter is True:
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilter as triggerFilter
     elif trigger_filter is not False:
@@ -104,6 +129,12 @@ def setup_event_filter(process,
             eventFilter.muons_src = 'slimmedMuons'
             eventFilter.electrons_src = 'slimmedElectrons'
         setattr(process, event_filter_name, eventFilter)
+
+        if rp_filter:
+            print "In EventFilter.py conditional"
+            eventFilter.randpar_mass = rp_mass
+            eventFilter.randpar_ctau = rp_ctau
+            eventFilter.parse_randpars = True
 
         if event_filter_jes_mult > 0:
             from JMTucker.Tools.JetShifter_cfi import jmtJetShifter as jetShifter

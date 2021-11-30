@@ -15,6 +15,9 @@ mfvEventFilter = cms.EDFilter('MFVEventFilter',
                               electron_cut = jtupleParams.electronCut,
                               min_electron_pt = cms.double(35),
                               min_nleptons = cms.int32(1),
+                              parse_randpars = cms.bool(False), 
+                              randpar_mass = cms.int32(-1),
+                              randpar_ctau = cms.int32(-1),
                               debug = cms.untracked.bool(False),
                               )
 
@@ -22,3 +25,6 @@ mfvEventFilterJetsOnly = mfvEventFilter.clone(mode = 'jets only')
 mfvEventFilterLeptonsOnly = mfvEventFilter.clone(mode = 'leptons only')
 mfvEventFilterHTORBjetsORDisplacedDijet = mfvEventFilter.clone(mode = 'HT OR bjets OR displaced dijet', min_ht = cms.double(-1))
 mfvEventFilterBjetsORDisplacedDijetVetoHT = mfvEventFilter.clone(mode = 'bjets OR displaced dijet veto HT', min_ht = cms.double(-1))
+
+mfvEventFilterRandomParameters = mfvEventFilter.clone(min_pt_for_ht = cms.int32(-1), min_ht = cms.double(-1), min_njets = cms.int32(0),
+                                                      min_electron_pt = cms.int32(-1), min_muon_pt = cms.double(-1), min_nleptons = cms.int32(0))
