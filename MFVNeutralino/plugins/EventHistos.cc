@@ -32,6 +32,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_bquark_phi;
   TH1F* h_bquark_energy;
   TH1F* h_bquark_pairdphi;
+  TH1F* h_bquark_pairdeta;
 
   TH1F* h_minlspdist2d;
   TH1F* h_lspdist2d;
@@ -39,6 +40,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
 
   TH1F* h_hlt_bits;
   TH1F* h_l1_bits;
+  TH1F* h_filter_bits;
 
   TH1F* h_npu;
 
@@ -90,6 +92,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_jet_ht_40;
 
   TH1F* h_jet_pairdphi;
+  TH1F* h_jet_pairdeta;
   TH1F* h_jet_pairdr;
 
   TH1F* h_met;
@@ -104,6 +107,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_bjet_phi;
   TH1F* h_bjet_energy;
   TH1F* h_bjet_pairdphi;
+  TH1F* h_bjet_pairdeta;
 
   TH1F* h_nmuons[2];
   TH1F* h_nelectrons[2];
@@ -156,6 +160,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_bquark_phi = fs->make<TH1F>("h_bquark_phi", ";bquarks #phi (rad);bquarks/.063", 100, -3.1416, 3.1416);
   h_bquark_energy = fs->make<TH1F>("h_bquark_energy", ";bquarks energy (GeV);bquarks/10 GeV", 100, 0, 1000);
   h_bquark_pairdphi = fs->make<TH1F>("h_bquark_pairdphi", ";bquark pair #Delta#phi (rad);bquark pairs/.063", 100, -3.1416, 3.1416);
+  h_bquark_pairdeta = fs->make<TH1F>("h_bquark_pairdeta", ";bquark pair #Delta#eta (rad);bquark pairs/.1", 100, -5.0, 5.0);
 
   h_minlspdist2d = fs->make<TH1F>("h_minlspdist2d", ";min dist2d(gen vtx #i) (cm);events/0.1 mm", 200, 0, 2);
   h_lspdist2d = fs->make<TH1F>("h_lspdist2d", ";dist2d(gen vtx #0, #1) (cm);events/0.1 mm", 200, 0, 2);
@@ -163,6 +168,8 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
 
   h_hlt_bits = fs->make<TH1F>("h_hlt_bits", ";;events", 2*mfv::n_hlt_paths+1, 0, 2*mfv::n_hlt_paths+1);
   h_l1_bits  = fs->make<TH1F>("h_l1_bits",  ";;events", 2*mfv::n_l1_paths +1, 0, 2*mfv::n_l1_paths +1);
+  //h_filter_bits  = fs->make<TH1F>("h_filter_bits",  ";;events", 2*mfv::n_filter_paths +1, 0, 2*mfv::n_filter_paths +1);
+  h_filter_bits  = fs->make<TH1F>("h_filter_bits",  ";;events", mfv::n_filter_paths +1, 0, mfv::n_filter_paths +1);
 
   h_hlt_bits->GetXaxis()->SetBinLabel(1, "nevents");
   for (int i = 0; i < mfv::n_hlt_paths; ++i) {
@@ -173,6 +180,11 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   for (int i = 0; i < mfv::n_l1_paths; ++i) {
     h_l1_bits->GetXaxis()->SetBinLabel(1+2*i+1, TString::Format("found %s", mfv::l1_paths[i]));
     h_l1_bits->GetXaxis()->SetBinLabel(1+2*i+2, TString::Format(" pass %s", mfv::l1_paths[i]));
+  }
+
+  h_filter_bits->GetXaxis()->SetBinLabel(1, "nevents");
+  for (int i = 0; i < mfv::n_filter_paths; ++i) {
+    h_filter_bits->GetXaxis()->SetBinLabel(i+2, TString::Format(" pass %s", mfv::filter_paths[i]));
   }
 
   h_npu = fs->make<TH1F>("h_npu", ";true nPU;events", 120, 0, 120);
@@ -227,6 +239,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_jet_ht_40 = fs->make<TH1F>("h_jet_ht_40", ";H_{T} of jets with p_{T} > 40 GeV;events/25 GeV", 200, 0, 5000);
 
   h_jet_pairdphi = fs->make<TH1F>("h_jet_pairdphi", ";jet pair #Delta#phi (rad);jet pairs/.063", 100, -3.1416, 3.1416);
+  h_jet_pairdeta = fs->make<TH1F>("h_jet_pairdeta", ";jet pair #Delta#eta ;jet pairs/.1", 100, -5.0, 5.0);
   h_jet_pairdr = fs->make<TH1F>("h_jet_pairdr", ";jet pair #DeltaR (rad);jet pairs/.063", 100, 0, 6.3);
 
   h_n_vertex_seed_tracks = fs->make<TH1F>("h_n_vertex_seed_tracks", ";# vertex seed tracks;events", 100, 0, 100);
@@ -266,6 +279,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_bjet_phi = fs->make<TH1F>("h_bjet_phi", ";bjets #phi (rad);bjets/.063", 100, -3.1416, 3.1416);
   h_bjet_energy = fs->make<TH1F>("h_bjet_energy", ";bjets E (GeV);bjets/10 GeV", 150, 0, 1500);
   h_bjet_pairdphi = fs->make<TH1F>("h_bjet_pairdphi", ";bjet pair #Delta#phi (rad);bjet pairs/.063", 100, -3.1416, 3.1416);
+  h_bjet_pairdeta = fs->make<TH1F>("h_bjet_pairdeta", ";bjet pair #Delta#eta;bjet pairs/.1", 100, -5.0, 5.0);
 
   const char* lep_ex[2] = {"any", "selected"};
   for (int i = 0; i < 2; ++i) {
@@ -305,8 +319,10 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_bquark_eta->Fill(mevent->gen_bquarks[i].Eta(), w);
     h_bquark_phi->Fill(mevent->gen_bquarks[i].Phi(), w);
     h_bquark_energy->Fill(mevent->gen_bquarks[i].E(), w);
-    for (size_t j = i+1; j < nbquarks; ++j)
+    for (size_t j = i+1; j < nbquarks; ++j) {
       h_bquark_pairdphi->Fill(reco::deltaPhi(mevent->gen_bquarks[i].Phi(), mevent->gen_bquarks[j].Phi()), w);
+      h_bquark_pairdeta->Fill(std::max(mevent->gen_bquarks[i].Eta(), mevent->gen_bquarks[j].Eta()) - std::min(mevent->gen_bquarks[i].Eta(),  mevent->gen_bquarks[j].Eta()), w);
+    }
   }
 
   h_minlspdist2d->Fill(mevent->minlspdist2d(), w);
@@ -317,6 +333,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   h_hlt_bits->Fill(0., w);
   h_l1_bits->Fill(0., w);
+  h_filter_bits->Fill(0., w);
   for (int i = 0; i < mfv::n_hlt_paths; ++i) {
     if (mevent->found_hlt(i)) h_hlt_bits->Fill(1+2*i,   w);
     if (mevent->pass_hlt (i)) h_hlt_bits->Fill(1+2*i+1, w);
@@ -324,6 +341,9 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   for (int i = 0; i < mfv::n_l1_paths; ++i) {
     if (mevent->found_l1(i)) h_l1_bits->Fill(1+2*i,   w);
     if (mevent->pass_l1 (i)) h_l1_bits->Fill(1+2*i+1, w);
+  }
+  for (int i = 0; i < mfv::n_filter_paths; ++i) {
+    if (mevent->pass_filter (i)) h_filter_bits->Fill(i+1, w);
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -401,6 +421,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       if (mevent->jet_pt[jjet] < mfv::min_jet_pt)
         continue;
       h_jet_pairdphi->Fill(reco::deltaPhi(mevent->jet_phi[ijet], mevent->jet_phi[jjet]), w);
+      h_jet_pairdeta->Fill(std::max(mevent->jet_eta[ijet], mevent->jet_eta[jjet]) - std::min(mevent->jet_eta[ijet], mevent->jet_eta[jjet]), w);
       h_jet_pairdr->Fill(reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->jet_eta[jjet], mevent->jet_phi[jjet]), w);
     }
   }
@@ -448,6 +469,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
           continue;
         if (mevent->is_btagged(jjet, ibtag)) {
           h_bjet_pairdphi->Fill(reco::deltaPhi(mevent->jet_phi[ijet], mevent->jet_phi[jjet]), w);
+          h_bjet_pairdeta->Fill(std::max(mevent->jet_eta[ijet], mevent->jet_eta[jjet]) - std::min(mevent->jet_eta[ijet], mevent->jet_eta[jjet]), w);
         }
       }
     }

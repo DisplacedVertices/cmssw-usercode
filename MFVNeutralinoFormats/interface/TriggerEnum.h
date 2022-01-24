@@ -26,11 +26,19 @@ namespace mfv {
     n_l1_paths // = 29
   };
 
+    enum {
+      b_hltDoubleCaloBJets100eta2p3, b_hltBTagCalo80x6CSVp0p92DoubleWithMatching, b_hltDoublePFJets100Eta2p3, b_hltDoublePFJets100Eta2p3MaxDeta1p6, // Filters for 2017 di-bjet trigger
+      n_filter_paths // = 4
+    };
+      
+
   static_assert(n_hlt_paths + n_l1_paths <= 64, "too many paths");
 
   extern const char* hlt_paths[n_hlt_paths];
   extern const char* l1_paths[n_l1_paths];
   extern const char* clean_paths[n_clean_paths];
+  extern const char* filter_paths[n_filter_paths];
+  extern const int   filter_nreqs[n_filter_paths];
 
   // For use in the Bjet/DisplacedDijet trigger studies
   static const std::vector<size_t> HTOrBjetOrDisplacedDijetTriggers = {

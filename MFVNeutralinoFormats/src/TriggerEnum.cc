@@ -73,4 +73,19 @@ namespace mfv {
     "Flag_globalTightHalo2016Filter",
     "Flag_CSCTightHalo2015Filter"
   };
+
+  const char* filter_paths[mfv::n_filter_paths] = {
+    "hltDoubleCaloBJets100eta2p3",
+    "hltBTagCalo80x6CSVp0p92DoubleWithMatching",
+    "hltDoublePFJets100Eta2p3",
+    "hltDoublePFJets100Eta2p3MaxDeta1p6"
+  };
+
+  const int filter_nreqs[mfv::n_filter_paths] = {
+    2,
+    2,
+    2,
+    1
+  };
+
 }

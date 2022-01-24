@@ -72,6 +72,8 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   edm::Handle<l1t::JetBxCollection> l1_jets;
   event.getByToken(l1_jets_token, l1_jets);
 
+  short int npass_filter[mfv::n_filter_paths] = {0};
+
   int i2pt_first[2] = {0};
   int i2htt[2] = {0};
   for (size_t i = 0, ie = l1_jets->size(0); i < ie; ++i) {
@@ -166,8 +168,10 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
         std::cout << " " << obj.filterIds()[h] ;
       std::cout << "\n";
       std::cout << "\t   Filters:    ";
-      for (unsigned h = 0; h < obj.filterLabels().size(); ++h)
+      for (unsigned h = 0; h < obj.filterLabels().size(); ++h){
         std::cout << " " << obj.filterLabels()[h];
+      }        
+
       std::cout << "\n";
       const std::vector<std::string>& pathNamesAll  = obj.pathNames(false);
       const std::vector<std::string>& pathNamesLast = obj.pathNames(true);
@@ -299,7 +303,17 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
         is_muon = true;
       else if (id == trigger::TriggerBJet || id == trigger::TriggerJet)
         is_jet = true;
-    }
+    
+}
+
+
+    obj.unpackNamesAndLabels(event, *trigger_results);
+    for (unsigned h = 0; h < obj.filterLabels().size(); ++h){
+      for (unsigned j = 0; j < mfv::n_filter_paths; ++j) {
+        if (mfv::filter_paths[j] == obj.filterLabels()[h])
+          npass_filter[j]++;
+      }
+    }        
 
     if (prints) printf(" is_l1 %i is_ht %i is_cluster %i is_photon %i is_muon %i is_jet %i\n", is_l1, is_ht, is_cluster, is_photon, is_muon, is_jet);
 
@@ -378,6 +392,9 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
         else if(obj.collection() == "hltDisplacedHLTCaloJetCollectionProducerLowPt::HLT" || obj.collection() == "hltDisplacedHLTCaloJetCollectionProducerMidPt::HLT"){
           floats->hltdisplacedcalojets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
         }
+        else if(obj.collection() == "hltAK4CaloJetsCorrectedIDPassed::HLT") {
+          floats->hltidpassedcalojets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
+        }
 
         if (prints) {
           std::cout << "TriggerFloats jet object for path " << mfv::hlt_paths[ipath]
@@ -441,6 +458,13 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
       printf("L1  bit %2i %20s: %2i\n", i, mfv::l1_paths[i], floats->L1decisions[i]);
   }
 
+  for (int i = 0; i < mfv::n_filter_paths; ++i) { 
+    if (npass_filter[i] >= mfv::filter_nreqs[i])
+      floats->FLTdecisions[i] = true;
+    else
+      floats->FLTdecisions[i] = false;
+  }
+
   edm::Handle<pat::JetCollection> jets;
   event.getByToken(jets_token, jets);
 
@@ -457,8 +481,11 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
       if (pt > 40) floats->ht += pt;
     }
 
-  if (prints)
+  if (prints) {
     printf("# all jets: %lu  selected: %i (>20GeV: %i) jetpt1: %f  2: %f  ht: %f\n", jets->size(), floats->njets(), floats->njets(20), floats->jetpt1(), floats->jetpt2(), floats->ht);
+    for (int i = 0; i < mfv::n_filter_paths; ++i)
+      printf("%s,  npass: %i   Trigger Passed: %i \n", mfv::filter_paths[i], npass_filter[i], floats->FLTdecisions[i]);
+  }
 
   event.put(std::move(floats));
 }

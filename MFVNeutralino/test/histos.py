@@ -11,6 +11,7 @@ process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
 process.load('JMTucker.MFVNeutralino.VertexHistos_cfi')
 process.load('JMTucker.MFVNeutralino.EventHistos_cfi')
+process.load('JMTucker.MFVNeutralino.FilterHistos_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 
 import JMTucker.Tools.SimpleTriggerResults_cfi as SimpleTriggerResults
@@ -18,8 +19,10 @@ SimpleTriggerResults.setup_endpath(process, weight_src='mfvWeight')
 
 common = cms.Sequence(process.mfvSelectedVerticesSeq * process.mfvWeight)
 
+process.mfvFilterHistosNoCuts = process.mfvFilterHistos.clone()
+
 process.mfvEventHistosNoCuts = process.mfvEventHistos.clone()
-process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts) # just trigger for now
+process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts * process.mfvFilterHistosNoCuts) # just trigger for now
 
 process.mfvEventHistosPreSel = process.mfvEventHistos.clone()
 process.mfvAnalysisCutsPreSel = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)

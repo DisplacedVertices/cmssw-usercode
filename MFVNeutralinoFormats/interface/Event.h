@@ -166,6 +166,10 @@ struct MFVEvent {
   void pass_l1(size_t i, bool x)          { assert(i < mfv::n_l1_paths);    i += 2*mfv::n_hlt_paths;                             set_bit(pass_, i, x); }
   bool found_l1(size_t i)           const { assert(i < mfv::n_l1_paths);    i += 2*mfv::n_hlt_paths + mfv::n_l1_paths;   return test_bit(pass_, i   ); }
   void found_l1(size_t i, bool x)         { assert(i < mfv::n_l1_paths);    i += 2*mfv::n_hlt_paths + mfv::n_l1_paths;           set_bit(pass_, i, x); }
+  bool pass_filter(size_t i)            const { assert(i < mfv::n_filter_paths);    i += 2*mfv::n_filter_paths;                     return test_bit(pass_, i   ); }
+  void pass_filter(size_t i, bool x)          { assert(i < mfv::n_filter_paths);    i += 2*mfv::n_filter_paths;                             set_bit(pass_, i, x); }
+  bool found_filter(size_t i)           const { assert(i < mfv::n_filter_paths);    i += 2*mfv::n_filter_paths;   return test_bit(pass_, i   ); }
+  void found_filter(size_t i, bool x)         { assert(i < mfv::n_filter_paths);    i += 2*mfv::n_filter_paths;           set_bit(pass_, i, x); }
 
   float npu;
 

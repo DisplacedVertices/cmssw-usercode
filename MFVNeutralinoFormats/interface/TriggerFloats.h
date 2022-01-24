@@ -16,10 +16,13 @@ namespace mfv {
     int nhltpfjets() const { return hltpfjets.size(); }
     std::vector<TLorentzVector> hltdisplacedcalojets;
     int nhltdisplacedcalojets() const { return hltdisplacedcalojets.size(); }
+    std::vector<TLorentzVector> hltidpassedcalojets;
+    int nhltidpassedcalojets() const { return hltidpassedcalojets.size(); }
     std::vector<TLorentzVector> hltelectrons;
     std::vector<TLorentzVector> hltmuons;
     std::vector<int> L1decisions;
     std::vector<int> HLTdecisions;
+    std::vector<int> FLTdecisions;
 
     // related offline stuff 
     int nalljets;
@@ -38,6 +41,7 @@ namespace mfv {
     : l1htt(-1), myhtt(-1), myhttwbug(-1), hltht(-1),
       L1decisions(n_l1_paths, -1),
       HLTdecisions(n_hlt_paths, -1),
+      FLTdecisions(n_filter_paths, -1),
       nalljets(0), htall(0), ht(0), htptgt30(0)
     {}
   };
