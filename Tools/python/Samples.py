@@ -622,6 +622,8 @@ for sample in HToSSTodddd_samples_2017 :
 
 ########
 # ntuples
+for x in qcdht1000_2017, qcdht1500_2017, qcdht2000_2017, ttbarht0600_2017, ttbarht0800_2017, ttbarht1200_2017, ttbarht2500_2017, mfv_neu_tau001000um_M1600_2017, mfv_stopdbardbar_tau001000um_M1600_2017:
+    x.add_dataset("ntupledefaultxyzdrqualitym") 
 ########
 
 for x in data_samples_2017 + qcd_samples_2017 + data_samples_2018 + qcd_samples_2018:

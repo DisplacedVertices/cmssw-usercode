@@ -8,7 +8,7 @@ from JMTucker.Tools import DBS
 ########################################################################
 
 xrootd_sites = {
-    'T3_US_FNALLPC': 'root://cmseos.fnal.gov/',
+    'T3_US_FNALLPC': 'root://cmsxrootd.fnal.gov/', # 'root://cmsxrootd.fnal.gov/' or 'root://xrootd-local.unl.edu:1094/', #'root://cmseos.fnal.gov/', #PK: modified 11/17 cause unreachable
     'T1_US_FNAL_Disk': 'root://cmsxrootd-site.fnal.gov/',
     'T2_US_Nebraska': 'root://cmsxrootd.fnal.gov/',
     'T2_US_Wisconsin': 'root://pubxrootd.hep.wisc.edu/',

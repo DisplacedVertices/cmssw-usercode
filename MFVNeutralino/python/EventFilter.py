@@ -2,9 +2,9 @@ import FWCore.ParameterSet.Config as cms
 
 def setup_event_filter(process,
                        path_name='p',
-                       trigger_filter = True,
+                       trigger_filter = True, #PK for Joey's Higgs sample (10/15)
                        trigger_filter_name = 'mfvTriggerFilter',
-                       event_filter = True, #PK: used to be False
+                       event_filter = True, #PK: used to be False for Joey's Higgs sample (10/15)
                        event_filter_jes_mult = 2,
                        event_filter_name = 'mfvEventFilter',
                        event_filter_require_vertex = False, #PK: used to be True

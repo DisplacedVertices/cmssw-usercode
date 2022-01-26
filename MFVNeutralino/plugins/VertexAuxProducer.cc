@@ -396,7 +396,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       const reco::TrackRef& trref = tri.castTo<reco::TrackRef>();
       const math::XYZTLorentzVector tri_p4(tri->px(), tri->py(), tri->pz(), tri->p());
 
-      if (trackicity.count(tri.key()) > 0)
+      if (trackicity.count(tri.key()) > 0)  
         throw cms::Exception("VertexAuxProducer") << "trackicity > 1";
       else
         trackicity.insert(tri.key());

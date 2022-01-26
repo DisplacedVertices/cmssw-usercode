@@ -3,7 +3,6 @@
 from JMTucker.MFVNeutralino.UtilitiesBase import *
 
 ####
-
 _leptonpresel = bool_from_argv('leptonpresel')
 _btagpresel = bool_from_argv('btagpresel')
 _presel_s = '_leptonpresel' if _leptonpresel else '_btagpresel' if _btagpresel else ''
@@ -12,11 +11,11 @@ _presel_s = '_leptonpresel' if _leptonpresel else '_btagpresel' if _btagpresel e
 
 def cmd_hadd_vertexer_histos():
     ntuple = sys.argv[2]
-    samples = Samples.registry.from_argv(
-            Samples.data_samples_2015 + \
-            Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015 + \
-            Samples.data_samples + \
-            Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext)
+    samples = Samples.registry.from_argv(Samples.ttbar_samples_2017)
+            #Samples.data_samples_2017 + \
+            #Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.qcd_samples_ext_2017 + \
+            #Samples.data_samples + \
+            #Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext)
     for s in samples:
         s.set_curr_dataset(ntuple)
         hadd(s.name + '.root', ['root://cmseos.fnal.gov/' + fn.replace('ntuple', 'vertex_histos') for fn in s.filenames])
@@ -122,11 +121,11 @@ def _background_samples(trigeff=False, year=2017):
             x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]]
             x += ['qcdbctoept%03i' % x for x in [15,20,30,80,170,250]]
     elif _btagpresel:
-        x = ['qcdht%04i' % x for x in [300, 500, 700, 1000, 1500, 2000]]
+        x = ['qcdht%04i' % x for x in [300, 500, 1500, 2000]] #remove 700 (not done yet 09/22/21) #1000
         x += ['ttbar']
     else:
-        x = ['qcdht%04i' % x for x in [700, 1000, 1500, 2000]]
-        x += ['ttbarht%04i' % x for x in [600, 800, 1200, 2500]]
+        x = ['qcdht%04i' % x for x in [ 1000, 1500, 2000]] #remove 700 (not done yet 09/22/21) #1000 
+        x += ['ttbarht%04i' % x for x in [600, 800, 1200, 2500]] #remove 800 
     return x
 
 def cmd_merge_background(permissive=bool_from_argv('permissive')):
@@ -162,7 +161,7 @@ def cmd_merge_background(permissive=bool_from_argv('permissive')):
         os.system(cmd)
 
 def cmd_effsprint():
-    for year in 2017, 2018:
+    for year in [2017]:
         background_fns = ' '.join('%s_%s.root' % (x, year) for x in _background_samples(year=year))
         todo = [('background', background_fns), ('signals', 'mfv*%s.root' % year)]
         def do(cmd, outfn):
