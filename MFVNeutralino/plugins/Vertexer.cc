@@ -128,7 +128,7 @@ private:
     if (ttks.size() < 2)
       return std::vector<TransientVertex>();
     std::vector<TransientVertex> v(1, kv_reco->vertex(ttks));
-    if (v[0].normalisedChiSquared() > 8) //PK: need to change for new config
+    if (v[0].normalisedChiSquared() > 5) //PK: we used to try different values {8 or 4} 
       return std::vector<TransientVertex>();
     return v;
   }
