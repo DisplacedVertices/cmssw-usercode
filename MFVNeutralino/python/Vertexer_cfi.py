@@ -50,7 +50,7 @@ mfvVertexTracks = cms.EDFilter('MFVVertexTracks',
 
 mfvVertices = cms.EDProducer('MFVVertexer',
                              kvr_params = kvr_params,
-                             do_track_refinement = cms.bool(True), # PK: track refinement 
+                             do_track_refinement = cms.bool(False), # PK: track refinement 
                              resolve_split_vertices_loose = cms.bool(False), # PK: Jordan merging criteria 
                              resolve_split_vertices_tight = cms.bool(True), # PK: New merging criteria 
                              investigate_merged_vertices = cms.bool(True), # PK: investigate quality cuts on merged vertices  
