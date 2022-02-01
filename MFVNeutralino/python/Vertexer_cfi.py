@@ -53,8 +53,7 @@ mfvVertices = cms.EDProducer('MFVVertexer',
                              do_track_refinement = cms.bool(False), # PK: track refinement 
                              resolve_split_vertices_loose = cms.bool(False), # PK: Jordan merging criteria 
                              resolve_split_vertices_tight = cms.bool(True), # PK: New merging criteria 
-                             investigate_merged_vertices = cms.bool(True), # PK: investigate quality cuts on merged vertices  
-                             resolve_shared_jets = cms.bool(True),       # PK: share-jet part
+                             resolve_shared_jets = cms.bool(False),       # PK: share-jet part
                              resolve_shared_jets_src = cms.InputTag('selectedPatJets'), # PK: jets for share-jet part
                              beamspot_src = cms.InputTag('offlineBeamSpot'),
                              seed_tracks_src = cms.InputTag('mfvVertexTracks', 'seed'),
@@ -79,6 +78,6 @@ mfvVertices = cms.EDProducer('MFVVertexer',
                              histos_noshare = cms.untracked.bool(True),   # PK: make plots of no shared-track vertices 
                              histos_output0 = cms.untracked.bool(True),   # PK: make plots of output vertices after the default vertexing 
                              histos_output1 = cms.untracked.bool(True),   # PK: make plots of output vertices after the default vertexing  + resolve split vertices turned on
-                             histos_output2 = cms.untracked.bool(True),   # PK: make plots of output vertices after the default vertexing  + resolve split vertices turned on  + resolve shared jets turned on 
+                             histos_output2 = cms.untracked.bool(False),   # PK: make plots of output vertices after the default vertexing  + resolve split vertices turned on  + resolve shared jets turned on 
                              verbose = cms.untracked.bool(False),
                              )
