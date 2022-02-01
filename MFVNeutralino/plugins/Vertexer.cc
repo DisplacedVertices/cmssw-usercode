@@ -128,7 +128,7 @@ private:
     if (ttks.size() < 2)
       return std::vector<TransientVertex>();
     std::vector<TransientVertex> v(1, kv_reco->vertex(ttks));
-    if (v[0].normalisedChiSquared() > 5) //PK: we used to try different values {8 or 4} 
+    if (v[0].normalisedChiSquared() > 5)  
       return std::vector<TransientVertex>();
     return v;
   }
@@ -1179,7 +1179,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 								printf(" |dPhi(vtx0,vtx1) between a merging pair is %4.3f \n", fabs(reco::deltaPhi(phi0, phi1)));
 								printf(" # of tracks per vtx0 is %u \n", v[0]->nTracks());
 								printf(" # of tracks per vtx1 is %u \n", v[1]->nTracks());
-								printf(" ---------------- merge the two vertices if chi2/dof < 8 ----------------- \n");
+								printf(" ---------------- merge the two vertices if chi2/dof < 5 ----------------- \n");
 								printf(" # of tracks per a new merged vertex is %u \n", merged_vertices[0].nTracks());
 							}
 
@@ -1352,7 +1352,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 	//   - dBV > 100 um
 	//   - |dPhi(vtx0,vtx1)| < 0.5 
 	//   - svdist2d < 300 um
-	// Note that the merged vertex must pass chi2/dof < 8 (applied to all vertices in this code (above and beyond) -- it's used to be chi2/dof < 5)
+	// Note that the merged vertex must pass chi2/dof < 5 
 	//////////////////////////////////////////////////////////////////////
 
 	if (resolve_split_vertices_tight) {
@@ -1412,7 +1412,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 									printf(" |dPhi(vtx0,vtx1) between a merging pair is %4.3f \n", fabs(reco::deltaPhi(phi0, phi1)));
 									printf(" # of tracks per vtx0 is %u \n", v[0]->nTracks());
 									printf(" # of tracks per vtx1 is %u \n", v[1]->nTracks());
-									printf(" ---------------- merge the two vertices if chi2/dof < 8 ----------------- \n");
+									printf(" ---------------- merge the two vertices if chi2/dof < 5 ----------------- \n");
 									printf(" # of tracks per a new merged vertex is %u \n", merged_vertices[0].nTracks());
 								}
 
