@@ -35,6 +35,7 @@ private:
   typedef std::set<reco::TrackRef> track_set;
   typedef std::vector<reco::TrackRef> track_vec;
 
+  std::pair<bool, std::vector<std::vector<size_t>>> sharedjets(const int vtx0idx, const int vtx1idx, const std::vector < std::vector<int>>& sv_match_tracktojet_which_jetidx, const std::vector < std::vector<int>>& sv_match_tracktojet_which_trkidx);
   bool match_track_jet(const reco::Track& tk, const pat::Jet& jet, const pat::JetCollection& jets, const int& idx);
 
   void finish(edm::Event&, const std::vector<reco::TransientTrack>&, std::unique_ptr<reco::VertexCollection>, std::unique_ptr<VertexerPairEffs>, const std::vector<std::pair<track_set, track_set>>&);
@@ -269,316 +270,11 @@ private:
   TH1F* h_output1_after_merged_criteria_vertex_bs2derr;
   TH1F* h_output1_after_merged_criteria_vertex_dBV;
 
-   
-  TH1F* h_output1_most_track_vertices_shared_jets_or_not; 
-  
-  //PK: study of tracks and chi2
-  TH2F* h_2D_at_least_5trk_output1_no_shared_tracks_pair_ntrack_unnorm_chi2;
-  //TProfile* h_2Dpfx_at_least_5trk_output1_no_shared_tracks_pair_ntrack_unnorm_chi2;
-  TH1F* h_at_least_5trk_output1_no_shared_tracks_pair_shift_unnorm_chi2;
-  //PK: XYZ mitigation starts here
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_XYZ_nsv_by_sumpT_YandX;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_XYZ_nsv_by_shared_ntrack_YandX;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_XYZ_nsv_by_sumpT_Y;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_XYZ_nsv_by_shared_ntrack_Y;
-  // case X {1,1} 
-
-  TH1F* h_qualify_most_track_vertices_nsharedjet;
-  TH1F* h_qualify_most_track_vertices_X_nsharedjet;
-  TH1F* h_qualify_most_5trk_track_vertices_Xa_nsharedjet;
-  TH1F* h_qualify_most_5trk_track_vertices_Xb_nsharedjet;
-  TH1F* h_qualify_most_5trk_track_vertices_Xc_nsharedjet;
-  TH1F* h_qualify_most_track_vertices_Y_nsharedjet;
-  TH2F* h_2D_qualify_most_track_vertices_XandY_nsharedjet;
-
-  
-  TH2F* h_2D_most_5trk_track_vertices_X_Deltachi2_SV0_SV1;
-  TH2F* h_2D_most_5trk_track_vertices_Xa_Deltachi2_SV0_SV1;
-  TH2F* h_2D_most_5trk_track_vertices_Xb_Deltachi2_SV0_SV1;
-  TH2F* h_2D_most_5trk_track_vertices_Xc_Deltachi2_SV0_SV1;
-
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_X;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_X;
-  
-  
-
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_XdRinjet;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_XdRinjet;
-  
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_XdRoutjet;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_XdRoutjet;
-  
-
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_dR_sig_X;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_dR_X;
-  
-
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_X;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_X;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_X;
-  
-
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_XdRinjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_XdRinjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_XdRinjet;
-  
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_XdRoutjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_XdRoutjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_XdRoutjet;
-  
-
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_dR_sig_X;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_dR_X;
-
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_X_nsv_X;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_shift_unnorm_chi2_X;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_old_unnorm_chi2_X;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_new_unnorm_chi2_X;
-
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_dPhi_X;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_closevtxjet_dPhi_X;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_vtx01_dPhi_X;
-  TH2F* h_2D_at_least_5trk_output1_shared_track_vtx0_shared_track_vtx1_dPhi_X;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_dPhi_Xa;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_closevtxjet_dPhi_Xa;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_vtx01_dPhi_Xa;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_dPhi_Xb;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_closevtxjet_dPhi_Xb;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_vtx01_dPhi_Xb;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_dPhi_Xc;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_closevtxjet_dPhi_Xc;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_vtx01_dPhi_Xc;
-  
-
-  // case Y {1,n>1} 
-
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_Y;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_Y;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_Y;
-  
-
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_YdRinjet;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YdRinjet;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_YdRinjet;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_YdRoutjet;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YdRoutjet;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_YdRoutjet;
-
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_dR_sig_Y;
-  TH2F* h_2D_at_least_3trk_output1_shared_tracks_pair_dR_sig_shared_tracks_Y;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_dR_Y;
-  TH2F* h_2D_at_least_3trk_output1_shared_tracks_pair_dR_shared_tracks_Y;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_dR_err_Y;
-  TH2F* h_2D_at_least_3trk_output1_shared_tracks_pair_dR_err_shared_tracks_Y;
-
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_Y;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_Y;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_Y;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_Y;
-  
-
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YAdRinjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YAdRinjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YAdRinjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YAdRinjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YAdRoutjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YAdRoutjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YAdRoutjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YAdRoutjet;
-
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YBdRinjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YBdRinjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YBdRinjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YBdRinjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YBdRoutjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YBdRoutjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YBdRoutjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YBdRoutjet;
-
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YdRinjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YdRinjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YdRinjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YdRinjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YdRoutjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YdRoutjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YdRoutjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YdRoutjet;
-
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_dR_sig_Y;
-  TH2F* h_2D_at_least_5trk_output1_shared_tracks_pair_dR_sig_shared_tracks_Y;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_dR_Y;
-  TH2F* h_2D_at_least_5trk_output1_shared_tracks_pair_dR_shared_tracks_Y;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_dR_err_Y;
-  TH2F* h_2D_at_least_5trk_output1_shared_tracks_pair_dR_err_shared_tracks_Y;
-
-  
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_shift_unnorm_chi2_by_sumpT_Y;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_shift_unnorm_chi2_by_shared_ntrack_Y;
-
-  //TH1F* h_at_least_5trk_output1_shared_tracks_pair_shift_unnorm_chi2_onejet_by_sumpT_Y;
-  //TH1F* h_at_least_5trk_output1_shared_tracks_pair_shift_unnorm_chi2_onejet_by_shared_ntrack_Y;
-
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_Y_nsv_by_sumpT_Y;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_Y_nsv_by_shared_ntrack_Y;
+  TH1F* h_resolve_shared_jets_lonetrk_dPhi;
+  TH1F* h_resolve_shared_jets_removedtrk_dPhi;
+  TH2F* h2D_vtx_ntrack_resolve_shared_jets_removedtrk_dPhi;
 
 
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_old_unnorm_chi2_by_sumpT_Y;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_new_unnorm_chi2_by_sumpT_Y;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_old_unnorm_chi2_by_shared_ntrack_Y;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_new_unnorm_chi2_by_shared_ntrack_Y;
-
-  // case Z {n>1,m>1}
-
-  
-
-
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZC;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZC;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_shared_tracks_ZC;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZnonC;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZnonC;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_ZnonC;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_shared_tracks_ZnonC;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZCdRinjet;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZCdRinjet;
-
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZCdRoutjet;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZCdRoutjet;
-
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZO;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZO;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_ZO;
-  TH2F* h_2D_at_least_3trk_output1_shared_tracks_pair_shared_tracks_ZO;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZOdRinjet;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZOdRinjet;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_ZOdRinjet;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZOdRoutjet;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZOdRoutjet;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_ZOdRoutjet;
-  
-  
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZnonCdRinjet;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZnonCdRinjet;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_ZnonCdRinjet;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZnonCdRoutjet;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZnonCdRoutjet;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_ZnonCdRoutjet;
-
-
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_dR_sig_ZnonC;
-  TH2F* h_2D_at_least_3trk_output1_shared_tracks_pair_dR_sig_diff_shared_tracks_ZnonC;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_dR_ZnonC;
-  TH2F* h_2D_at_least_3trk_output1_shared_tracks_pair_dR_diff_shared_tracks_ZnonC;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_dR_err_ZnonC;
-  TH2F* h_2D_at_least_3trk_output1_shared_tracks_pair_dR_err_diff_shared_tracks_ZnonC;
-
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_dR_sig_ZC;
-  TH2F* h_2D_at_least_3trk_output1_shared_tracks_pair_dR_sig_shared_tracks_ZC;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_dR_ZC;
-  TH2F* h_2D_at_least_3trk_output1_shared_tracks_pair_dR_shared_tracks_ZC;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_dR_err_ZC;
-  TH2F* h_2D_at_least_3trk_output1_shared_tracks_pair_dR_err_shared_tracks_ZC;
-
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_dR_sig_ZO;
-  TH2F* h_2D_at_least_3trk_output1_shared_tracks_pair_dR_sig_2x_shared_tracks_ZO;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_dR_ZO;
-  TH2F* h_2D_at_least_3trk_output1_shared_tracks_pair_dR_2x_shared_tracks_ZO;
-  TH1F* h_at_least_3trk_output1_shared_tracks_pair_dR_err_ZO;
-  TH2F* h_2D_at_least_3trk_output1_shared_tracks_pair_dR_err_2x_shared_tracks_ZO;
-
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZOdRinjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_ZOdRinjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZOdRinjet;
-
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZOdRoutjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_ZOdRoutjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZOdRoutjet;
-
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZA;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZA;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZA;
-  TH2F* h_2D_at_least_5trk_output1_shared_tracks_pair_shared_tracks_ZA;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZAdRinjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZAdRinjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZAdRinjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZAdRoutjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZAdRoutjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZAdRoutjet;
-  
-
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZB;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZB;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZB;
-  TH2F* h_2D_at_least_5trk_output1_shared_tracks_pair_shared_tracks_ZB;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZBdRinjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZBdRinjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZBdRinjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZBdRoutjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZBdRoutjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZBdRoutjet;
-  
-
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZC;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZC;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_shared_tracks_ZC;
-
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZCdRinjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZCdRinjet;
-
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZCdRoutjet;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZCdRoutjet;
-
-
-
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZO;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_ZO;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZO;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZO;
-  TH2F* h_2D_at_least_5trk_output1_shared_tracks_pair_shared_tracks_ZO;
-  
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZOdRinjet;
-  
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZOdRoutjet;
- 
-
-
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_dR_sig_ZA;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_dR_ZA;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_dR_err_ZA;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_dR_sig_ZB;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_dR_ZB;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_dR_err_ZB;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_dR_sig_ZC;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_dR_ZC;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_dR_err_ZC;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_dR_sig_ZO;
-  TH2F* h_2D_at_least_5trk_output1_shared_tracks_pair_dR_sig_2x_shared_tracks_ZO;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_dR_ZO;
-  TH2F* h_2D_at_least_5trk_output1_shared_tracks_pair_dR_2x_shared_tracks_ZO;
-  TH1F* h_at_least_5trk_output1_shared_tracks_pair_dR_err_ZO;
-  TH2F* h_2D_at_least_5trk_output1_shared_tracks_pair_dR_err_2x_shared_tracks_ZO;
-
- 
- 
-
-
-  
-
-
-
-  
-  // : all of these have applied all three cuts 
-  Double_t edges[4] = { 0.0, 0.0400, 0.0700, 0.1 };
-  TH1F* h_qualify_svdist2d_three_bins;
-  TH1F* h_qualify_by_sum_pT_svdist2d_three_bins;
-  TH1F* h_qualify_only_small_dR_by_sum_pT_svdist2d_three_bins;
-  TH1F* h_qualify_by_median_tkvtxdist_svdist2d_three_bins;
-  TH1F* h_qualify_only_small_dR_by_median_tkvtxdist_svdist2d_three_bins;
-  TH1F* h_qualify_by_median_tkvtxdistsig_svdist2d_three_bins;
-  TH1F* h_qualify_only_small_dR_by_median_tkvtxdistsig_svdist2d_three_bins;
-  TH1F* h_qualify_only_small_dR_by_2sigma_median_tkvtxdistsig_svdist2d_three_bins;
-  
-  
   TH1F* h_output2_vertex_tkvtxdist;
   TH1F* h_output2_vertex_tkvtxdisterr;
   TH1F* h_output2_vertex_tkvtxdistsig;
@@ -599,6 +295,8 @@ private:
   TH1F* h_output2_vertex_paird2d;
   TH1F* h_output2_vertex_paird2dsig;
   TH1F* h_output2_vertex_pairdphi;
+
+  TH1F* h_output2_n_onetracks;
 
   
 
@@ -750,299 +448,11 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 	h_output1_after_merged_criteria_vertex_bs2derr = fs->make<TH1F>("h_output1_after_merged_criteria_vertex_bs2derr", ";bs2derr (cm.) w/ n-1 cuts applied", 20, 0, 0.05);
 	h_output1_after_merged_criteria_vertex_dBV = fs->make<TH1F>("h_output1_after_merged_criteria_vertex_dBV", ";dBV (cm.) w/ n-1 cuts applied", 100, 0, 1.0);
 
-	h_output1_most_track_vertices_shared_jets_or_not = fs->make<TH1F>("h_output1_most_track_vertices_shared_jets_or_not", ";two most-track vertices share jet?", 2, 0, 2);
-	
-	//case X {1,1}
 
-    h_qualify_most_track_vertices_nsharedjet = fs->make<TH1F>("h_qualify_most_track_vertices_nsharedjet", ";nsharedjet/two qualify most-track vertices", 20, 0, 20);
-	h_qualify_most_track_vertices_X_nsharedjet = fs->make<TH1F>("h_qualify_most_track_vertices_X_nsharedjet", "only {1,1} events; {1,1} nsharedjet", 20, 0, 20);
-	h_qualify_most_5trk_track_vertices_Xa_nsharedjet = fs->make<TH1F>("h_qualify_most_5trk_track_vertices_Xa_nsharedjet", "only {1,1} events w/ (a) 5-trk x 5-trk; {1,1} nsharedjet", 20, 0, 20);
-	h_qualify_most_5trk_track_vertices_Xb_nsharedjet = fs->make<TH1F>("h_qualify_most_5trk_track_vertices_Xb_nsharedjet", "only {1,1} events w/ (b) 5-trk x >5-trk;{1,1} nsharedjet", 20, 0, 20);
-	h_qualify_most_5trk_track_vertices_Xc_nsharedjet = fs->make<TH1F>("h_qualify_most_5trk_track_vertices_Xc_nsharedjet", "only {1,1} events w/ (c) >5-trk x >5-trk;{1,1} nsharedjet", 20, 0, 20);
-	h_qualify_most_track_vertices_Y_nsharedjet = fs->make<TH1F>("h_qualify_most_track_vertices_Y_nsharedjet", "only {1,n>1} events ;{1,n>1} nsharedjet", 20, 0, 20);
-	h_2D_qualify_most_track_vertices_XandY_nsharedjet = fs->make<TH2F>("h_2D_qualify_most_track_vertices_XandY_nsharedjet", "only {1,1}+{1,n>1} events ;{1,1} nsharedjet;{1,n>1} nsharedjet", 20, 0, 20, 20, 0, 20);
+	h_resolve_shared_jets_removedtrk_dPhi = fs->make<TH1F>("h_resolve_shared_jets_removedtrk_dPhi", ";|dPhi(vtx,a removed lone track)|", 20, 0, 3.15);
+	h_resolve_shared_jets_lonetrk_dPhi = fs->make<TH1F>("h_resolve_shared_jets_lonetrk_dPhi", ";|dPhi(vtx,a lone track)|", 20, 0, 3.15);
+	h2D_vtx_ntrack_resolve_shared_jets_removedtrk_dPhi = fs->make<TH2F>("h2D_vtx_ntrack_resolve_shared_jets_removedtrk_dPhi", "; ntrack/vtx ;|dPhi(vtx,a lone track)|", 30 , 0, 30, 20, 0, 3.15);
 
-	h_2D_most_5trk_track_vertices_X_Deltachi2_SV0_SV1 = fs->make<TH2F>("h_2D_most_5trk_track_vertices_X_Deltachi2_SV0_SV1", "only {1,1} events;Delta-non-normalized-chi2(SV0);Delta-non-normalized-chi2(SV1)",200, -200, 0, 200, -200, 0);
-	h_2D_most_5trk_track_vertices_Xa_Deltachi2_SV0_SV1 = fs->make<TH2F>("h_2D_most_5trk_track_vertices_Xa_Deltachi2_SV0_SV1", "only {1,1} events w/ (a) 5-trk x 5-trk ;Delta-non-normalized-chi2(SV0);Delta-non-normalized-chi2(SV1)", 200, -200, 0, 200, -200, 0);
-	h_2D_most_5trk_track_vertices_Xb_Deltachi2_SV0_SV1 = fs->make<TH2F>("h_2D_most_5trk_track_vertices_Xb_Deltachi2_SV0_SV1", "only {1,1} events w/ (b) 5-trk x >5-trk ;Delta-non-normalized-chi2(SV0);Delta-non-normalized-chi2(SV1)", 200, -200, 0, 200, -200, 0);
-	h_2D_most_5trk_track_vertices_Xc_Deltachi2_SV0_SV1 = fs->make<TH2F>("h_2D_most_5trk_track_vertices_Xc_Deltachi2_SV0_SV1", "only {1,1} events w/ (c) >5-trk x >5-trk ;Delta-non-normalized-chi2(SV0);Delta-non-normalized-chi2(SV1)", 200, -200, 0, 200, -200, 0);
-
-
-	h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_X = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_X", "{1,1} shared jets w/ >=3trk/vtx; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	
-	h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_XdRinjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_XdRinjet", "{1,1} shared jets w/ >=3trk/vtx && dR < 0.2; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_XdRoutjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_XdRoutjet", "{1,1} shared jets w/ >=3trk/vtx && 0.2 < dR ; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-
-	h_at_least_3trk_output1_shared_tracks_pair_dR_sig_X = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_dR_sig_X", "{1,1} shared jets w/ >=3trk/vtx; dR significance of a shared-track pair", 50, 0, 10);
-	h_at_least_3trk_output1_shared_tracks_pair_dR_X = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_dR_X", "{1,1} shared jets w/ >=3trk/vtx; dR of a shared-track pair", 500, 0, 1);
-	
-	h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_X = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_X", "{1,1} shared jets w/ >=3trk/vtx; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-	
-	h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_XdRinjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_XdRinjet", "{1,1} shared jets w/ >=3trk/vtx && dR < 0.2; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-	h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_XdRoutjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_XdRoutjet", "{1,1} shared jets w/ >=3trk/vtx && 0.2 < dR; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_X = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_X", "{1,1} shared jets w/ >=5trk/vtx; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_X = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_X", "{1,1} shared jets w/ >=5trk/vtx && |diff MDS| > 4; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_XdRinjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_XdRinjet", "{1,1} shared jets w/ >=5trk/vtx && dR < 0.2; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_XdRinjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_XdRinjet", "{1,1} shared jets w/ >=5trk/vtx && dR < 0.2 && |diff MDS| > 4; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_XdRoutjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_XdRoutjet", "{1,1} shared jets w/ >=5trk/vtx && 0.2 < dR ; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_XdRoutjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_XdRoutjet", "{1,1} shared jets w/ >=5trk/vtx && 0.2 < dR && |diff MDS| > 4; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-
-	h_at_least_5trk_output1_shared_tracks_pair_dR_sig_X = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_dR_sig_X", "{1,1} shared jets w/ >=5trk/vtx; dR significance of a shared-track pair", 50, 0, 10);
-	h_at_least_5trk_output1_shared_tracks_pair_dR_X = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_dR_X", "{1,1} shared jets w/ >=5trk/vtx; dR of a shared-track pair", 500, 0, 1);
-	
-	h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_X = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_X", "{1,1} shared jets w/ >=5trk/vtx; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-
-	h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_XdRinjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_XdRinjet", "{1,1} shared jets w/ >=5trk/vtx && dR < 0.2; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-	h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_XdRoutjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_XdRoutjet", "{1,1} shared jets w/ >=5trk/vtx && 0.2 < dR; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-
-	h_at_least_5trk_output1_shared_tracks_pair_shift_unnorm_chi2_X = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_shift_unnorm_chi2_X", "remove {1,1} shared jets by non-normalized chi2;shift in non-normalized chi2", 2000, -200, 0);
-	h_at_least_5trk_output1_shared_tracks_pair_X_nsv_X = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_X_nsv_X", "remove {1,1} shared jets by non-normalized chi2;nsv(only {1,1} events)", 3, 0, 3);
-	h_at_least_5trk_output1_shared_tracks_pair_old_unnorm_chi2_X = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_old_unnorm_chi2_X", "only {1,1} events ;old non-normalized chi2 ", 2000, 0, 200);
-	h_at_least_5trk_output1_shared_tracks_pair_new_unnorm_chi2_X = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_new_unnorm_chi2_X", "only {1,1} events ;new non-normalized chi2 ", 2000, 0, 200);
-    
-	h_at_least_5trk_output1_shared_tracks_pair_vtx01_dPhi_X = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_vtx01_dPhi_X", "only {1,1} events;|dPhi(vtx0,vtx1)|", 200, 0, 3.15);
-	h_at_least_5trk_output1_shared_tracks_pair_dPhi_X = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_dPhi_X", "only {1,1} events;|dPhi of two lone shared tracks|", 200, 0, 3.15);
-	h_at_least_5trk_output1_shared_tracks_pair_closevtxjet_dPhi_X = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_closevtxjet_dPhi_X", "only {1,1} events;|dPhi(jet,closest-vtx)|", 200, 0, 3.15);
-
-	h_at_least_5trk_output1_shared_tracks_pair_dPhi_Xa = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_dPhi_Xa", "only {1,1} events w/ (a) 5-trk x 5-trk;|dPhi of two lone shared tracks|", 200, 0, 3.15);
-	h_at_least_5trk_output1_shared_tracks_pair_dPhi_Xb = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_dPhi_Xb", "only {1,1} events w/ (b) >5-trk x 5-trk;|dPhi of two lone shared tracks|", 200, 0, 3.15);
-	h_at_least_5trk_output1_shared_tracks_pair_dPhi_Xc = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_dPhi_Xc", "only {1,1} events w/ (c) >5-trk x >5-trk;|dPhi of two lone shared tracks|", 200, 0, 3.15);
-
-	h_2D_at_least_5trk_output1_shared_track_vtx0_shared_track_vtx1_dPhi_X = fs->make<TH2F>("h_2D_at_least_5trk_output1_shared_track_vtx0_shared_track_vtx1_dPhi_X", "only {1,1} events;|dPhi(SV0,its lone shared track)|;|dPhi(SV1,its lone shared track)|", 200, 0, 3.15, 200, 0, 3.15);
-	
-	h_at_least_5trk_output1_shared_tracks_pair_vtx01_dPhi_Xa = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_vtx01_dPhi_Xa", "only {1,1} events w/ (a) 5-trk x 5-trk;|dPhi(vtx0,vtx1)|", 200, 0, 3.15);
-	h_at_least_5trk_output1_shared_tracks_pair_vtx01_dPhi_Xb = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_vtx01_dPhi_Xb", "only {1,1} events w/ (b) >5-trk x 5-trk;|dPhi(vtx0,vtx1)|", 200, 0, 3.15);
-	h_at_least_5trk_output1_shared_tracks_pair_vtx01_dPhi_Xc = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_vtx01_dPhi_Xc", "only {1,1} events w/ (c) >5-trk x >5-trk;|dPhi(vtx0,vtx1)|", 200, 0, 3.15);
-
-	h_at_least_5trk_output1_shared_tracks_pair_closevtxjet_dPhi_Xa = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_closevtxjet_dPhi_Xa", "only {1,1} events w/ (a) 5-trk x 5-trk;|dPhi(jet,closest-vtx)|", 200, 0, 3.15);
-	h_at_least_5trk_output1_shared_tracks_pair_closevtxjet_dPhi_Xb = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_closevtxjet_dPhi_Xb", "only {1,1} events w/ (b) >5-trk x 5-trk;|dPhi(jet,closest-vtx)|", 200, 0, 3.15);
-	h_at_least_5trk_output1_shared_tracks_pair_closevtxjet_dPhi_Xc = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_closevtxjet_dPhi_Xc", "only {1,1} events w/ (c) >5-trk x >5-trk;|dPhi(jet,closest-vtx)|", 200, 0, 3.15);
-
-
-	//case Y {1,n>1} 
-
-	h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_Y = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_Y", "{1,n>1} shared jets w/ >=3trk/vtx; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_YdRinjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_YdRinjet", "{1,n>1} shared jets w/ >=3trk/vtx && dR < 0.2; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_YdRoutjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_YdRoutjet", "{1,n>1} shared jets w/ >=3trk/vtx && 0.2 < dR ; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	
-	h_at_least_3trk_output1_shared_tracks_pair_dR_sig_Y = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_dR_sig_Y", "{1,n>1} shared jets w/ >=3trk/vtx; dR significance of a shared-track pair", 50, 0, 10);
-	h_2D_at_least_3trk_output1_shared_tracks_pair_dR_sig_shared_tracks_Y = fs->make<TH2F>("h_2D_at_least_3trk_output1_shared_tracks_pair_dR_sig_shared_tracks_Y", "{1,n>1} shared jets w/ >=3trk/vtx; dR significance of a shared-track pair; SV0(1)'s shared ntrack", 50, 0, 10, 30, 0, 30);
-	h_at_least_3trk_output1_shared_tracks_pair_dR_Y = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_dR_Y", "{1,n>1} shared jets w/ >=3trk/vtx; dR of a shared-track pair", 500, 0, 1);
-	h_2D_at_least_3trk_output1_shared_tracks_pair_dR_shared_tracks_Y = fs->make<TH2F>("h_2D_at_least_3trk_output1_shared_tracks_pair_dR_shared_tracks_Y", "{1,n>1} shared jets w/ >=3trk/vtx; dR of a shared-track pair; SV0(1)'s shared ntrack", 500, 0, 1, 30, 0, 30);
-	h_at_least_3trk_output1_shared_tracks_pair_dR_err_Y = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_dR_err_Y", "{1,n>1} shared jets w/ >=3trk/vtx; dR err of the n-shared tracks", 500, 0, 1);
-	h_2D_at_least_3trk_output1_shared_tracks_pair_dR_err_shared_tracks_Y = fs->make<TH2F>("h_2D_at_least_3trk_output1_shared_tracks_pair_dR_err_shared_tracks_Y", "{1,n>1} shared jets w/ >=3trk/vtx; dR err of the n-shared tracks; SV0(1)'s shared ntrack", 500, 0, 1, 30, 0, 30);
-
-	h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_Y = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_Y", "{1,n>1} shared jets w/ >=3trk/vtx; SV0's shared ntrack - SV1's shared ntrack", 60, -30, 30);
-	h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_YdRinjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_YdRinjet", "{1,n>1} shared jets w/ >=3trk/vtx && dR < 0.2; SV0's shared ntrack - SV1's shared ntrack", 60, -30, 30);
-	h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_YdRoutjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_YdRoutjet", "{1,n>1} shared jets w/ >=3trk/vtx && 0.2 < dR ; SV0's shared ntrack - SV1's shared ntrack", 60, -30, 30);
-	
-
-	h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_Y = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_Y", "{1,n>1} shared jets w/ >=3trk/vtx; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-	h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YdRinjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YdRinjet", "{1,n>1} shared jets w/ >=3trk/vtx && dR < 0.2; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-	h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YdRoutjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YdRoutjet", "{1,n>1} shared jets w/ >=3trk/vtx && 0.2 < dR; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-	
-	h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YdRinjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YdRinjet", "{1,n>1} shared jets w/ >=3trk/vtx && dR < 0.2; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-	h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YdRoutjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YdRoutjet", "{1,n>1} shared jets w/ >=3trk/vtx && 0.2 < dR; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-	
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_Y = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_Y", "{1,n>1} shared jets w/ >=5trk/vtx; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_Y = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_Y", "{1,n>1} shared jets w/ >=5trk/vtx && |diff MDS| > 4; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-    h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YdRinjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YdRinjet", "{1,n>1} shared jets w/ >=5trk/vtx && dR < 0.2; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YdRinjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YdRinjet", "{1,n>1} shared jets w/ >=5trk/vtx && dR < 0.2 && |diff MDS| > 4; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YdRoutjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YdRoutjet", "{1,n>1} shared jets w/ >=5trk/vtx && 0.2 < dR ; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YdRoutjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YdRoutjet", "{1,n>1} shared jets w/ >=5trk/vtx && 0.2 < dR && |diff MDS| > 4 ; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YAdRinjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YAdRinjet", "{1,n>1} case A: w/ >=5trk/vtx && dR < 0.2; #frac{tight SVa's sum pT - tight SVb's sum pT}{tight SVa's sum pT + tight SVb's sum pT}", 20, -1, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YAdRinjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YAdRinjet", "{1,n>1} case A: w/ >=5trk/vtx && dR < 0.2 && diff MDS < -4; #frac{tight SVa's sum pT - tight SVb's sum pT}{tight SVa's sum pT + tight SVb's sum pT}", 20, -1, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YAdRoutjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YAdRoutjet", "{1,n>1} case A: w/ >=5trk/vtx && 0.2 < dR ; #frac{tight SVa's sum pT - tight SVb's sum pT}{tight SVa's sum pT + tight SVb's sum pT}", 20, -1, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YAdRoutjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YAdRoutjet", "{1,n>1} case A: w/ >=5trk/vtx && 0.2 < dR && diff MDS < -4; #frac{tight SVa's sum pT - tight SVb's sum pT}{tight SVa's sum pT + tight SVb's sum pT}", 20, -1, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YBdRinjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YBdRinjet", "{1,n>1} case B: w/ >=5trk/vtx && dR < 0.2; #frac{loose SVa's sum pT - loose SVb's sum pT}{loose SVa's sum pT + loose SVb's sum pT}", 20, -1, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YBdRinjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YBdRinjet", "{1,n>1} case B: w/ >=5trk/vtx && dR < 0.2 && diff MDS < -4; #frac{loose SVa's sum pT - loose SVb's sum pT}{loose SVa's sum pT + loose SVb's sum pT}", 20, -1, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YBdRoutjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YBdRoutjet", "{1,n>1} case B: w/ >=5trk/vtx && 0.2 < dR ; #frac{loose SVa's sum pT - loose SVb's sum pT}{loose SVa's sum pT + loose SVb's sum pT}", 20, -1, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YBdRoutjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YBdRoutjet", "{1,n>1} case B: w/ >=5trk/vtx && 0.2 < dR && diff MDS < -4; #frac{loose SVa's sum pT - loose SVb's sum pT}{loose SVa's sum pT + loose SVb's sum pT}", 20, -1, 1);
-
-	h_at_least_5trk_output1_shared_tracks_pair_dR_sig_Y = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_dR_sig_Y", "{1,n>1} shared jets w/ >=5trk/vtx; dR significance of a shared-track pair", 50, 0, 10);
-	h_2D_at_least_5trk_output1_shared_tracks_pair_dR_sig_shared_tracks_Y = fs->make<TH2F>("h_2D_at_least_5trk_output1_shared_tracks_pair_dR_sig_shared_tracks_Y", "{1,n>1} shared jets w/ >=5trk/vtx; dR significance of a shared-track pair; SV0(1)'s shared ntrack", 50, 0, 10, 30, 0, 30);
-	h_at_least_5trk_output1_shared_tracks_pair_dR_Y = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_dR_Y", "{1,n>1} shared jets w/ >=5trk/vtx; dR of a shared-track pair", 500, 0, 1);
-	h_2D_at_least_5trk_output1_shared_tracks_pair_dR_shared_tracks_Y = fs->make<TH2F>("h_2D_at_least_5trk_output1_shared_tracks_pair_dR_shared_tracks_Y", "{1,n>1} shared jets w/ >=5trk/vtx; dR of a shared-track pair; SV0(1)'s shared ntrack", 500, 0, 1, 30, 0, 30);
-	h_at_least_5trk_output1_shared_tracks_pair_dR_err_Y = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_dR_err_Y", "{1,n>1} shared jets w/ >=5trk/vtx; dR err of the n-shared tracks", 500, 0, 1);
-	h_2D_at_least_5trk_output1_shared_tracks_pair_dR_err_shared_tracks_Y = fs->make<TH2F>("h_2D_at_least_5trk_output1_shared_tracks_pair_dR_err_shared_tracks_Y", "{1,n>1} shared jets w/ >=5trk/vtx; dR err of the n-shared tracks; SV0(1)'s shared ntrack", 500, 0, 1, 30, 0, 30);
-
-	h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_Y = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_Y", "{1,n>1} shared jets w/ >=5trk/vtx; SV0's shared ntrack - SV1's shared ntrack", 60, -30, 30);
-	h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YdRinjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YdRinjet", "{1,n>1} shared jets w/ >=5trk/vtx && 0.2 < dR; SV0's shared ntrack - SV1's shared ntrack", 60, -30, 30);
-	h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YdRoutjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YdRoutjet", "{1,n>1} shared jets w/ >=5trk/vtx && 0.2 < dR ; SV0's shared ntrack - SV1's shared ntrack", 60, -30, 30);
-	h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YAdRinjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YAdRinjet", "{1,n>1} case A: w/ >=5trk/vtx && dR < 0.2; tight SVa's shared ntrack - tight SVb's shared ntrack", 60, -30, 30);
-	h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YAdRoutjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YAdRoutjet", "{1,n>1} case A: w/ >=5trk/vtx && 0.2 < dR ; tight SVa's shared ntrack - tight SVb's shared ntrack", 60, -30, 30);
-	h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YBdRinjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YBdRinjet", "{1,n>1} case B: w/ >=5trk/vtx && dR < 0.2; loose SVa's shared ntrack - loose SVb's shared ntrack", 60, -30, 30);
-	h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YBdRoutjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YBdRoutjet", "{1,n>1} case B: w/ >=5trk/vtx && 0.2 < dR ; loose SVa's shared ntrack - loose SVb's shared ntrack", 60, -30, 30);
-
-	h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_Y = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_Y", "{1,n>1} shared jets w/ >=5trk/vtx; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-	h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YdRinjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YdRinjet", "{1,n>1} shared jets w/ >=5trk/vtx && dR < 0.2; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-	h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YdRoutjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YdRoutjet", "{1,n>1} shared jets w/ >=5trk/vtx && 0.2 < dR; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-	h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YAdRinjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YAdRinjet", "{1,n>1} case A: w/ >=5trk/vtx && dR < 0.2; tight SVa's median miss-dist sig - tight SVb's median miss-dist sig", 30, -6, 6);
-	h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YAdRoutjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YAdRoutjet", "{1,n>1} case A: w/ >=5trk/vtx && 0.2 < dR; tight SVa's median miss-dist sig - tight SVb's median miss-dist sig", 30, -6, 6);
-    h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YBdRinjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YBdRinjet", "{1,n>1} case B: w/ >=5trk/vtx && dR < 0.2; loose SVa's median miss-dist sig - loose SVb's median miss-dist sig", 30, -6, 6);
-    h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YBdRoutjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YBdRoutjet", "{1,n>1} case B: w/ >=5trk/vtx && 0.2 < dR; loose SVa's median miss-dist sig - loose SVb's median miss-dist sig", 30, -6, 6);
-          
-	h_at_least_5trk_output1_shared_tracks_pair_shift_unnorm_chi2_by_sumpT_Y = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_shift_unnorm_chi2_by_sumpT_Y", "remove {1,n} shared jets by sum pT;shift in non-normalized chi2", 2000, -200, 0);
-	h_at_least_5trk_output1_shared_tracks_pair_shift_unnorm_chi2_by_shared_ntrack_Y = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_shift_unnorm_chi2_by_shared_ntrack_Y", "remove {1,n} shared jets by a single shared ntrack;shift in non-normalized chi2", 2000, -200, 0);
-	
-	h_2D_at_least_5trk_output1_no_shared_tracks_pair_ntrack_unnorm_chi2 = fs->make<TH2F>("h_2D_at_least_5trk_output1_no_shared_tracks_pair_ntrack_unnorm_chi2", "two-most track vertices w/o shared jets; ntrack; non-normalized chi2", 50,0,50, 2000, 0, 200);
-	//h_2Dpfx_at_least_5trk_output1_no_shared_tracks_pair_ntrack_unnorm_chi2 = fs->make<TH2F>("h_2Dpfx_at_least_5trk_output1_no_shared_tracks_pair_ntrack_unnorm_chi2", "remove the first track of two-most track vertices w/o shared jets; ntrack; mean non-normalized chi2", 50, 0, 50, 0, 100,"h");
-	h_at_least_5trk_output1_no_shared_tracks_pair_shift_unnorm_chi2 = fs->make<TH1F>("h_at_least_5trk_output1_no_shared_tracks_pair_shift_unnorm_chi2", "remove the first track of two-most track vertices w/o shared jets;shift in non-normalized chi2", 1000, -100, 0);
-	//h_at_least_5trk_output1_shared_tracks_pair_shift_unnorm_chi2_onejet_by_sumpT_Y = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_shift_unnorm_chi2_onejet_by_sumpT_Y", "remove only one {1,n} shared jets by sum pT;shift in non-normalized chi2", 20, -200, 0);
-	//h_at_least_5trk_output1_shared_tracks_pair_shift_unnorm_chi2_onejet_by_shared_ntrack_Y = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_shift_unnorm_chi2_onejet_by_shared_ntrack_Y", "remove only one {1,n} shared jets by a single shared ntrack;shift in non-normalized chi2", 20, -200, 0);
-
-
-	h_at_least_5trk_output1_shared_tracks_pair_XYZ_nsv_by_sumpT_Y = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_XYZ_nsv_by_sumpT_Y", "remove {1,n>1} shared jets by sum pT;nsv", 3, 0, 3);
-	h_at_least_5trk_output1_shared_tracks_pair_XYZ_nsv_by_shared_ntrack_Y = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_XYZ_nsv_by_shared_ntrack_Y", "remove {1,n>1} shared jets by a single shared ntrack;nsv", 3, 0, 3);
-	h_at_least_5trk_output1_shared_tracks_pair_XYZ_nsv_by_sumpT_YandX = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_XYZ_nsv_by_sumpT_YandX", "remove {1,1} && {1,n>1} shared jets by sum pT;nsv", 3, 0, 3);
-	h_at_least_5trk_output1_shared_tracks_pair_XYZ_nsv_by_shared_ntrack_YandX = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_XYZ_nsv_by_shared_ntrack_YandX", "remove {1,1} && {1,n>1} shared jets by a single shared ntrack;nsv", 3, 0, 3);
-
-	h_at_least_5trk_output1_shared_tracks_pair_Y_nsv_by_sumpT_Y = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_Y_nsv_by_sumpT_Y", "remove {1,n>1} shared jets by sum pT;nsv(only {1,n>1} events)", 3, 0, 3);
-	h_at_least_5trk_output1_shared_tracks_pair_Y_nsv_by_shared_ntrack_Y = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_Y_nsv_by_shared_ntrack_Y", "remove {1,n>1} shared jets by a single shared ntrack;nsv(only {1,n>1} events)", 3, 0, 3);
-
-
-	h_at_least_5trk_output1_shared_tracks_pair_old_unnorm_chi2_by_sumpT_Y = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_old_unnorm_chi2_by_sumpT_Y", "only {1,n>1} events to be resolved by sum pT;old non-normalized chi2", 2000, 0, 200);
-	h_at_least_5trk_output1_shared_tracks_pair_new_unnorm_chi2_by_sumpT_Y = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_new_unnorm_chi2_by_sumpT_Y", "only {1,n>1} events to be resolved by sum pT;new non-normalized chi2", 2000, 0, 200);
-	h_at_least_5trk_output1_shared_tracks_pair_old_unnorm_chi2_by_shared_ntrack_Y = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_old_unnorm_chi2_by_ntrack_Y", "only {1,n>1} events to be resolved by a lone shared trk;old non-normalized chi2", 2000, 0, 200);
-	h_at_least_5trk_output1_shared_tracks_pair_new_unnorm_chi2_by_shared_ntrack_Y = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_new_unnorm_chi2_by_ntrack_Y", "only {1,n>1} events to be resolved by a lone shared trk;new non-normalized chi2", 2000, 0, 200);
-	//case Z {n>1,m>1}
-	
-
-	
-	h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZC = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZC", "{n>1,m>1} case equal shared trk: w/ >=3trk/vtx; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZCdRinjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZCdRinjet", "{n>1,m>1} case equal shared trk: w/ >=3trk/vtx && dR < 0.2; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZCdRoutjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZCdRoutjet", "{n>1,m>1} case equal shared trk: w/ >=3trk/vtx && 0.2 < dR; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZnonC = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZnonC", "{n>1,m>1} case non-equal shared trk: w/ >=3trk/vtx; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-        h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZnonCdRinjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZnonCdRinjet", "{n>1,m>1} case non-equal shared trk: w/ >=3trk/vtx && dR < 0.2; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZnonCdRoutjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZnonCdRoutjet", "{n>1,m>1} case non-equal shared trk: w/ >=3trk/vtx && 0.2 < dR; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-
-	h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZO = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZO", "{n>1,m>1} shared jets w/ >=3trk/vtx; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZOdRinjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZOdRinjet", "{n>1,m>1} shared jets w/ >=3trk/vtx && dR < 0.2; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZOdRoutjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZOdRoutjet", "{n>1,m>1} shared jets w/ >=3trk/vtx && 0.2 < dR; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	
-	h_at_least_3trk_output1_shared_tracks_pair_dR_sig_ZnonC = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_dR_sig_ZnonC", "{n>1,m>1} case non-equal shared trk: w/ >=3trk/vtx; dR significance of a shared-track pair", 50, 0, 10);
-	h_2D_at_least_3trk_output1_shared_tracks_pair_dR_sig_diff_shared_tracks_ZnonC = fs->make<TH2F>("h_2D_at_least_3trk_output1_shared_tracks_pair_dR_sig_diff_shared_tracks_ZnonC", "{n>1,m>1} case non-equal shared trk: w/ >=3trk/vtx; dR significance of a shared-track pair; SVa's shared ntrack - SVb's shared ntrack", 50, 0, 10, 30, 0, 30);
-	h_at_least_3trk_output1_shared_tracks_pair_dR_ZnonC = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_dR_ZnonC", "{n>1,m>1} case non-equal shared trk: w/ >=3trk/vtx; dR of a shared-track pair", 500, 0, 1);
-	h_2D_at_least_3trk_output1_shared_tracks_pair_dR_diff_shared_tracks_ZnonC = fs->make<TH2F>("h_2D_at_least_3trk_output1_shared_tracks_pair_dR_diff_shared_tracks_ZnonC", "{n>1,m>1} case non-equal shared trk: w/ >=3trk/vtx; dR of a shared-track pair; SVa's shared ntrack - SVb's shared ntrack", 500, 0, 1, 30, 0, 30);
-	h_at_least_3trk_output1_shared_tracks_pair_dR_err_ZnonC = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_dR_err_ZnonC", "{n>1,m>1} case non-equal shared trk: w/ >=3trk/vtx; dR err of a shared-track pair", 500, 0, 1);
-	h_2D_at_least_3trk_output1_shared_tracks_pair_dR_err_diff_shared_tracks_ZnonC = fs->make<TH2F>("h_2D_at_least_3trk_output1_shared_tracks_pair_dR_err_diff_shared_tracks_ZnonC", "{n>1,m>1} case non-equal shared trk: w/ >=3trk/vtx; dR err of a shared-track pair; SVa's shared ntrack - SVb's shared ntrack", 500, 0, 1, 30, 0, 30);
-	h_at_least_3trk_output1_shared_tracks_pair_dR_sig_ZC = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_dR_sig_ZC", "{n>1,m>1} case equal shared trk: w/ >=3trk/vtx; dR significance of a shared-track pair", 50, 0, 10);
-	h_2D_at_least_3trk_output1_shared_tracks_pair_dR_sig_shared_tracks_ZC = fs->make<TH2F>("h_2D_at_least_3trk_output1_shared_tracks_pair_dR_sig_shared_tracks_ZC", "{n>1,m>1} case equal shared trk: w/ >=3trk/vtx; dR significance of a shared-track pair; SV0(1)'s shared ntrack", 50, 0, 10, 30, 0, 30);
-	h_at_least_3trk_output1_shared_tracks_pair_dR_ZC = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_dR_ZC", "{n>1,m>1} case equal shared trk: w/ >=3trk/vtx; dR of a shared-track pair", 500, 0, 1);
-	h_2D_at_least_3trk_output1_shared_tracks_pair_dR_shared_tracks_ZC = fs->make<TH2F>("h_2D_at_least_3trk_output1_shared_tracks_pair_dR_shared_tracks_ZC", "{n>1,m>1} case equal shared trk: w/ >=3trk/vtx; dR of a shared-track pair; SV0(1)'s shared ntrack", 500, 0, 1, 30, 0, 30);
-	h_at_least_3trk_output1_shared_tracks_pair_dR_err_ZC = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_dR_err_ZC", "{n>1,m>1} case equal shared trk: w/ >=3trk/vtx; dR err of a shared-track pair", 500, 0, 1);
-	h_2D_at_least_3trk_output1_shared_tracks_pair_dR_err_shared_tracks_ZC = fs->make<TH2F>("h_2D_at_least_3trk_output1_shared_tracks_pair_dR_err_shared_tracks_ZC", "{n>1,m>1} case equal shared trk: w/ >=3trk/vtx; dR err of a shared-track pair; SV0(1)'s shared ntrack", 500, 0, 1, 30, 0, 30);
-	h_at_least_3trk_output1_shared_tracks_pair_dR_sig_ZO = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_dR_sig_ZO", "{n>1,m>1} shared jets w/ >=3trk/vtx; dR significance of a shared-track pair", 50, 0, 10);
-	h_2D_at_least_3trk_output1_shared_tracks_pair_dR_sig_2x_shared_tracks_ZO = fs->make<TH2F>("h_2D_at_least_3trk_output1_shared_tracks_pair_dR_sig_2x_shared_tracks_ZO", "{n>1,m>1} shared jets w/ >=3trk/vtx; dR significance of a shared-track pair; [2x] SV0(1)'s shared ntrack", 50, 0, 10, 30, 0, 30);
-	h_at_least_3trk_output1_shared_tracks_pair_dR_ZO = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_dR_ZO", "{n>1,m>1} shared jets w/ >=3trk/vtx; dR of a shared-track pair", 500, 0, 1);
-	h_2D_at_least_3trk_output1_shared_tracks_pair_dR_2x_shared_tracks_ZO = fs->make<TH2F>("h_2D_at_least_3trk_output1_shared_tracks_pair_dR_2x_shared_tracks_ZO", "{n>1,m>1} case shared jets trk: w/ >=3trk/vtx; dR of a shared-track pair; [2x] SV0(1)'s shared ntrack", 500, 0, 1, 30, 0, 30);
-	h_at_least_3trk_output1_shared_tracks_pair_dR_err_ZO = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_dR_err_ZO", "{n>1,m>1} shared jets w/ >=3trk/vtx; dR err of a shared-track pair", 500, 0, 1);
-	h_2D_at_least_3trk_output1_shared_tracks_pair_dR_err_2x_shared_tracks_ZO = fs->make<TH2F>("h_2D_at_least_3trk_output1_shared_tracks_pair_dR_err_2x_shared_tracks_ZO", "{n>1,m>1} case equal shared trk: w/ >=3trk/vtx; dR err of a shared-track pair; [2x] SV0(1)'s shared ntrack", 500, 0, 1, 30, 0, 30);
-
-	h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZO = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZO", "{n>1,m>1} shared jets w/ >=3trk/vtx; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-	h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZOdRinjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZOdRinjet", "{n>1,m>1} shared jets w/ >=3trk/vtx && dR < 0.2; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-	h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZOdRoutjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZOdRoutjet", "{n>1,m>1} shared jets w/ >=3trk/vtx && 0.2 < dR; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-	h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZC = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZC", "{n>1,m>1} case equal shared trk: w/ >=3trk/vtx; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-	h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZCdRinjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZCdRinjet", "{n>1,m>1} case equal shared trk: w/ >=3trk/vtx && dR < 0.2; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-          h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZCdRoutjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZCdRoutjet", "{n>1,m>1} case equal shared trk: w/ >=3trk/vtx && 0.2 < dR; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-        h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZnonC = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZnonC", "{n>1,m>1} case non-equal shared trk: w/ >=3trk/vtx; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-        h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZnonCdRinjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZnonCdRinjet", "{n>1,m>1} case non-equal shared trk: w/ >=3trk/vtx && dR < 0.2; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-	h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZnonCdRoutjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZnonCdRoutjet", "{n>1,m>1} case non-equal shared trk: w/ >=3trk/vtx && 0.2 < dR; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-
-
-	h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_ZO = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_ZO", "{n>1,m>1} shared jets w/ >=3trk/vtx; SV0's median shared ntrack - SV1's shared ntrack", 60, -30, 30);
-	h_2D_at_least_3trk_output1_shared_tracks_pair_shared_tracks_ZO = fs->make<TH2F>("h_2D_at_least_3trk_output1_shared_tracks_pair_shared_tracks_ZO", "{n>1,m>1} shared jets w/ >=3trk/vtx; SV0's shared ntrack; SV1's shared ntrack", 30, 0, 30, 30, 0, 30);
-	h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_ZOdRinjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_ZOdRinjet", "{n>1,m>1} shared jets w/ >=3trk/vtx && dR < 0.2; SV0's shared ntrack - SV1's shared ntrack", 60, -30, 30);
-	h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_ZOdRoutjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_ZOdRoutjet", "{n>1,m>1} shared jets w/ >=3trk/vtx && 0.2 < dR; SV0's shared ntrack - SV1's shared ntrack", 60, -30, 30);
-	h_at_least_3trk_output1_shared_tracks_pair_shared_tracks_ZC = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_shared_tracks_ZC", "{n>1,m>1} case equal shared trk: w/ >=3trk/vtx; SV0(1)'s shared ntrack ", 30, 0, 30);
-	h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_ZnonC = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_ZnonC", "{n>1,m>1} non-equal shared jets w/ >=3trk/vtx; SV0's shared ntrack - SV1's shared ntrack", 60, -30, 30);
-	h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_ZnonCdRinjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_ZnonCdRinjet", "{n>1,m>1} non-equal shared jets w/ >=3trk/vtx && dR < 0.2; SV0's shared ntrack - SV1's shared ntrack", 60, -30, 30);
-	h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_ZnonCdRoutjet = fs->make<TH1F>("h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_ZnonCdRoutjet", "{n>1,m>1} non-equal shared jets w/ >=3trk/vtx && 0.2 < dR; SV0's shared ntrack - SV1's shared ntrack", 60, -30, 30);
-
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZOdRinjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZOdRinjet", "{n>1,m>1} shared jets w/ >=5trk/vtx && dR < 0.2; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_ZOdRinjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_ZOdRinjet", "{n>1,m>1} shared jets w/ >=5trk/vtx && dR < 0.2 && |diff MDS| > 4; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZOdRoutjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZOdRoutjet", "{n>1,m>1} shared jets w/ >=5trk/vtx && 0.2 < dR ; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_ZOdRoutjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_ZOdRoutjet", "{n>1,m>1} shared jets w/ >=5trk/vtx && 0.2 < dR && |diff MDS| > 4; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-
-	h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZOdRinjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZOdRinjet", "{n>1,m>1} shared jets w/ >=5trk/vtx && dR < 0.2; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-	h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZOdRoutjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZOdRoutjet", "{n>1,m>1} shared jets w/ >=5trk/vtx && 0.2 < dR; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-
-
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZA = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZA", "{n>1,m>1} case A: w/ >=5trk/vtx; #frac{tight SVa's sum pT - tight SVb's sum pT}{tight SVa's sum pT + tight SVb's sum pT}", 20, -1, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZAdRinjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZAdRinjet", "{n>1,m>1} case A: w/ >=5trk/vtx && dR < 0.2; #frac{tight SVa's sum pT - tight SVb's sum pT}{tight SVa's sum pT + tight SVb's sum pT}", 20, -1, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZAdRoutjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZAdRoutjet", "{n>1,m>1} case A: w/ >=5trk/vtx && 0.2 < dR; #frac{tight SVa's sum pT - tight SVb's sum pT}{tight SVa's sum pT + tight SVb's sum pT}", 20, -1, 1);
-	
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZB = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZB", "{n>1,m>1} case B: w/ >=5trk/vtx; #frac{loose SVa's sum pT - loose SVb's sum pT}{loose SVa's sum pT + loose SVb's sum pT}", 20, -1, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZBdRinjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZBdRinjet", "{n>1,m>1} case B: w/ >=5trk/vtx && dR < 0.2; #frac{loose SVa's sum pT - loose SVb's sum pT}{loose SVa's sum pT + loose SVb's sum pT}", 20, -1, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZBdRoutjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZBdRoutjet", "{n>1,m>1} case B: w/ >=5trk/vtx && 0.2 < dR ; #frac{loose SVa's sum pT - loose SVb's sum pT}{loose SVa's sum pT + loose SVb's sum pT}", 20, -1, 1);
-	
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZC = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZC", "{n>1,m>1} case C: w/ >=5trk/vtx; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZCdRinjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZCdRinjet", "{n>1,m>1} case C: w/ >=5trk/vtx && dR < 0.2; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZCdRoutjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZCdRoutjet", "{n>1,m>1} case C: w/ >=5trk/vtx && 0.2 < dR; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZO = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZO", "{n>1,m>1} shared jets w/ >=5trk/vtx; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_ZO = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_ZO", "{n>1,m>1} shared jets w/ >=5trk/vtx && dR < 0.2 && |diff MDS| > 4; #frac{SV0's sum pT - SV1's sum pT}{SV0's sum pT + SV1's sum pT}", 20, -1, 1);
-	
-	h_at_least_5trk_output1_shared_tracks_pair_dR_sig_ZA = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_dR_sig_ZA", "{n>1,m>1} case A: w/ >=5trk/vtx; dR significance of a shared-track pair", 50, 0, 10);
-	h_at_least_5trk_output1_shared_tracks_pair_dR_ZA = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_dR_ZA", "{n>1,m>1} case A: w/ >=5trk/vtx; dR of a shared-track pair", 500, 0, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_dR_err_ZA = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_dR_err_ZA", "{n>1,m>1} case A: w/ >=5trk/vtx; dR err of a shared-track pair", 500, 0, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_dR_sig_ZB = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_dR_sig_ZB", "{n>1,m>1} case B: w/ >=5trk/vtx; dR significance of a shared-track pair", 50, 0, 10);
-	h_at_least_5trk_output1_shared_tracks_pair_dR_ZB = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_dR_ZB", "{n>1,m>1} case B: w/ >=5trk/vtx; dR of a shared-track pair", 500, 0, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_dR_err_ZB = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_dR_err_ZB", "{n>1,m>1} case B: w/ >=5trk/vtx; dR err of a shared-track pair", 500, 0, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_dR_sig_ZC = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_dR_sig_ZC", "{n>1,m>1} case C: w/ >=5trk/vtx; dR significance of a shared-track pair", 50, 0, 10);
-	h_at_least_5trk_output1_shared_tracks_pair_dR_ZC = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_dR_ZC", "{n>1,m>1} case C: w/ >=5trk/vtx; dR of a shared-track pair", 500, 0, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_dR_err_ZC = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_dR_err_ZC", "{n>1,m>1} case C: w/ >=5trk/vtx; dR err of a shared-track pair", 500, 0, 1);
-	h_at_least_5trk_output1_shared_tracks_pair_dR_sig_ZO = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_dR_sig_ZO", "{n>1,m>1} shared jets w/ >=5trk/vtx; dR significance of a shared-track pair", 50, 0, 10);
-	h_2D_at_least_5trk_output1_shared_tracks_pair_dR_sig_2x_shared_tracks_ZO = fs->make<TH2F>("h_2D_at_least_5trk_output1_shared_tracks_pair_dR_sig_2x_shared_tracks_ZO", "{n>1,m>1} shared jets w/ >=5trk/vtx; dR significance of a shared-track pair; [2x] SV0(1)'s shared ntrack", 50, 0, 10, 30, 0, 30);
-	h_at_least_5trk_output1_shared_tracks_pair_dR_ZO = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_dR_ZO", "{n>1,m>1} shared jets w/ >=5trk/vtx; dR of a shared-track pair", 500, 0, 1);
-	h_2D_at_least_5trk_output1_shared_tracks_pair_dR_2x_shared_tracks_ZO = fs->make<TH2F>("h_2D_at_least_5trk_output1_shared_tracks_pair_dR_2x_shared_tracks_ZO", "{n>1,m>1} case shared jets trk: w/ >=5trk/vtx; dR of a shared-track pair; [2x] SV0(1)'s shared ntrack", 500, 0, 1, 30, 0, 30);
-	h_at_least_5trk_output1_shared_tracks_pair_dR_err_ZO = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_dR_err_ZO", "{n>1,m>1} shared jets w/ >=5trk/vtx; dR err of a shared-track pair", 500, 0, 1);
-	h_2D_at_least_5trk_output1_shared_tracks_pair_dR_err_2x_shared_tracks_ZO = fs->make<TH2F>("h_2D_at_least_5trk_output1_shared_tracks_pair_dR_err_2x_shared_tracks_ZO", "{n>1,m>1} case equal shared trk: w/ >=5trk/vtx; dR err of a shared-track pair; [2x] SV0(1)'s shared ntrack", 500, 0, 1, 30, 0, 30);
-
-	h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZO = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZO", "{n>1,m>1} shared jets w/ >=5trk/vtx; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-	h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZA = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZA", "{n>1,m>1} case A: w/ >=5trk/vtx; tight SVa's median miss-dist sig - tight SVb's median miss-dist sig", 30, -6, 6);
-	h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZAdRinjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZAdRinjet", "{n>1,m>1} case A: w/ >=5trk/vtx && dR < 0.2; tight SVa's median miss-dist sig - tight SVb's median miss-dist sig", 30, -6, 6);
-	h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZAdRoutjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZAdRoutjet", "{n>1,m>1} case A: w/ >=5trk/vtx && 0.2 < dR; tight SVa's median miss-dist sig - tight SVb's median miss-dist sig", 30, -6, 6);
-	
-	h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZB = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZB", "{n>1,m>1} case B: w/ >=5trk/vtx; loose SVa's median miss-dist sig - loose SVb's median miss-dist sig", 30, -6, 6);
-	h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZBdRinjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZBdRinjet", "{n>1,m>1} case B: w/ >=5trk/vtx && dR < 0.2; loose SVa's median miss-dist sig - loose SVb's median miss-dist sig", 30, -6, 6);
-	h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZBdRoutjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZBdRoutjet", "{n>1,m>1} case B: w/ >=5trk/vtx && 0.2 < dR; loose SVa's median miss-dist sig - loose SVb's median miss-dist sig", 30, -6, 6);
-	h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZC = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZC", "{n>1,m>1} case C: w/ >=5trk/vtx; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-	h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZCdRinjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZCdRinjet", "{n>1,m>1} case C: w/ >=5trk/vtx && dRsig < 1; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-	h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZCdRoutjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZCdRoutjet", "{n>1,m>1} case C: w/ >=5trk/vtx && 1 < dRsig < 1.5; SV0's median miss-dist sig - SV1's median miss-dist sig", 30, -6, 6);
-	
-	h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZO = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZO", "{n>1,m>1} shared jets w/ >=5trk/vtx; SV0's shared ntrack - SV1's shared ntrack", 60, -30, 30);
-	h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZOdRinjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZOdRinjet", "{n>1,m>1} shared jets w/ >=5trk/vtx && dR < 0.2; SV0's shared ntrack - SV1's shared ntrack", 60, -30, 30);
-          h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZOdRoutjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZOdRoutjet", "{n>1,m>1} shared jets w/ >=5trk/vtx && 0.2 < dR; SV0's shared ntrack - SV1's shared ntrack", 60, -30, 30);
-        
-        h_2D_at_least_5trk_output1_shared_tracks_pair_shared_tracks_ZO = fs->make<TH2F>("h_2D_at_least_5trk_output1_shared_tracks_pair_shared_tracks_ZO", "{n>1,m>1} shared jets w/ >=5trk/vtx; SV0's shared ntrack; SV1's shared ntrack", 30, 0, 30, 30, 0, 30);
-	h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZA = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZA", "{n>1,m>1} case A: w/ >=5trk/vtx; tight SVa's shared ntrack - tight SVb's shared ntrack", 60, -30, 30);
-	h_2D_at_least_5trk_output1_shared_tracks_pair_shared_tracks_ZA = fs->make<TH2F>("h_2D_at_least_5trk_output1_shared_tracks_pair_shared_tracks_ZA", "{n>1,m>1} case A: w/ >=5trk/vtx; tight SVa's shared ntrack; tight SVb's shared ntrack", 30, 0, 30, 30, 0, 30);
-	h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZAdRinjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZAdRinjet", "{n>1,m>1} case A: w/ >=5trk/vtx && dR < 0.2; tight SVa's shared ntrack - tight SVb's shared ntrack", 30, 0, 30);
-	h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZAdRoutjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZAdRoutjet", "{n>1,m>1} case A: w/ >=5trk/vtx && 0.2 < dR; tight SVa's shared ntrack - tight SVb's shared ntrack", 30, 0, 30);
-	
-	h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZB = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZB", "{n>1,m>1} case B: w/ >=5trk/vtx; loose SVa's shared ntrack - loose SVb's shared ntrack", 30, 0, 30);
-	h_2D_at_least_5trk_output1_shared_tracks_pair_shared_tracks_ZB = fs->make<TH2F>("h_2D_at_least_5trk_output1_shared_tracks_pair_shared_tracks_ZB", "{n>1,m>1} case B: w/ >=5trk/vtx; loose SVa's shared ntrack; loose SVb's shared ntrack", 30, 0, 30, 30, 0, 30);
-	h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZBdRinjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZBdRinjet", "{n>1,m>1} case B: w/ >=5trk/vtx && dR < 0.2; loose SVa's shared ntrack - loose SVb's shared ntrack", 30, 0, 30);
-	h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZBdRoutjet = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZBdRoutjet", "{n>1,m>1} case B: w/ >=5trk/vtx && 0.2 < dR; loose SVa's shared ntrack - loose SVb's shared ntrack", 30, 0, 30);
-	h_at_least_5trk_output1_shared_tracks_pair_shared_tracks_ZC = fs->make<TH1F>("h_at_least_5trk_output1_shared_tracks_pair_shared_tracks_ZC", "{n>1,m>1} case C: w/ >=5trk/vtx; SV0(1)'s shared ntrack ", 30, 0, 30);
-
-
-	
-
-	h_qualify_svdist2d_three_bins = fs->make<TH1F>("h_qualify_svdist2d_three_bins", "no shared-jet mitigation;dist2d(sv #0, #1) (cm);arb. units", 3, edges);
-	h_qualify_by_sum_pT_svdist2d_three_bins = fs->make<TH1F>("h_qualify_by_sum_pT_svdist2d_three_bins", "shared-jet mitigation w/ sum pT;dist2d(sv #0, #1) (cm);arb. units", 3, edges);
-	h_qualify_only_small_dR_by_sum_pT_svdist2d_three_bins = fs->make<TH1F>("h_qualify_only_small_dR_by_sum_pT_svdist2d_three_bins", "shared-jet mitigation w/ sum pT (only events dR sig <1);dist2d(sv #0, #1) (cm);arb. units", 3, edges);
-	h_qualify_by_median_tkvtxdist_svdist2d_three_bins = fs->make<TH1F>("h_qualify_by_median_tkvtxdist_svdist2d_three_bins", "shared-jet mitigation w/ median_tkvtxdist;dist2d(sv #0, #1) (cm);arb. units", 3, edges);
-	h_qualify_only_small_dR_by_median_tkvtxdist_svdist2d_three_bins = fs->make<TH1F>("h_qualify_only_small_dR_by_median_tkvtxdist_svdist2d_three_bins", "shared-jet mitigation w/ median tkvtxdist (only events dR sig <1);dist2d(sv #0, #1) (cm);arb. units", 3, edges);
-	h_qualify_by_median_tkvtxdistsig_svdist2d_three_bins = fs->make<TH1F>("h_qualify_by_median_tkvtxdistsig_svdist2d_three_bins", "shared-jet mitigation w/ median_tkvtxdistsig;dist2d(sv #0, #1) (cm);arb. units", 3, edges);
-	h_qualify_only_small_dR_by_median_tkvtxdistsig_svdist2d_three_bins = fs->make<TH1F>("h_qualify_only_small_dR_by_median_tkvtxdistsig_svdist2d_three_bins", "shared-jet mitigation w/ median tkvtxdistsig (only events dR sig <1);dist2d(sv #0, #1) (cm);arb. units", 3, edges);
-	h_qualify_only_small_dR_by_2sigma_median_tkvtxdistsig_svdist2d_three_bins = fs->make<TH1F>("h_qualify_only_small_dR_by_2sigma_median_tkvtxdistsig_svdist2d_three_bins", "shared-jet mitigation w/ 2#sigma median tkvtxdistsig (only events dR sig <1);dist2d(sv #0, #1) (cm);arb. units", 3, edges);
-
-	
 	h_n_at_least_5trk_output2_vertices = fs->make<TH1F>("h_n_at_least_5trk_output2_vertices", ";# of >=5trk-vertices", 20, 0, 20);
 	h_at_least_5trk_output2_vertex_dBV = fs->make<TH1F>("h_at_least_5trk_output2_vertex_dBV", ";dBV (cm.) of >=5trk-vertex", 100, 0, 1.0);
 	h_at_least_5trk_output2_vertex_bs2derr = fs->make<TH1F>("h_at_least_5trk_output2_vertex_bs2derr", ";bs2derr (cm.) of >=5trk-vertex", 20, 0, 0.05);
@@ -1063,6 +473,8 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 	h_output2_vertex_paird2d = fs->make<TH1F>("h_output2_vertex_paird2d", ";svdist2d (cm.) every pair", 20, 0, 0.2);
 	h_output2_vertex_paird2dsig = fs->make<TH1F>("h_output2_vertex_paird2dsig", ";svdist2d significance every pair", 20, 0, 20);
 	h_output2_vertex_pairdphi = fs->make<TH1F>("h_output2_vertex_pairdphi", ";|dPhi(vtx0,vtx1)| every pair", 20, 0, 3.15);
+
+	h_output2_n_onetracks = fs->make<TH1F>("h_output2_n_onetracks", "", 5, 0, 5);
 }
 }
 
@@ -1955,7 +1367,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 				else
 					track_use[r] = 1;
 			}
-
 			h_output0_vertex_ntracks->Fill(ntracks);
 			vertex_ntracks.push_back(ntracks);	 //// PK:shared-jet 
 			if (ntracks >= 5) {
@@ -2113,13 +1524,13 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 					if (ntracks >= 5 && dBV > 0.01 && bs2derr < 0.0025) {
 						h_output1_after_merged_criteria_vertex_chi2->Fill(vchi2);
 					}
-					if (vchi2 < 8 && dBV > 0.01 && bs2derr < 0.0025) {
+					if (vchi2 < 5 && dBV > 0.01 && bs2derr < 0.0025) {
 						h_output1_after_merged_criteria_vertex_ntracks->Fill(ntracks);
 					}
-					if (vchi2 < 8 && ntracks >= 5 && bs2derr < 0.0025) {
+					if (vchi2 < 5 && ntracks >= 5 && bs2derr < 0.0025) {
 						h_output1_after_merged_criteria_vertex_dBV->Fill(dBV);
 					}
-					if (vchi2 < 8 && ntracks >= 5 && dBV > 0.01) {
+					if (vchi2 < 5 && ntracks >= 5 && dBV > 0.01) {
 						h_output1_after_merged_criteria_vertex_bs2derr->Fill(bs2derr);
 					}
 
@@ -2209,1982 +1620,252 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 	// Note that 
 	//////////////////////////////////////////////////////////////////////
 
+	
+	int n_output2_onetracks = 0;
+
 	if (resolve_shared_jets) {
-                //std::cout << "yes resolve shared-jet" << std::endl;
 		edm::Handle<pat::JetCollection> jets;
 		event.getByToken(shared_jet_token, jets);
 
-		std::vector<std::vector<int> > sv_total_track_which_idx;
+		//std::cout << " run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
 
-		std::vector<std::vector<int> > sv_match_track_which_idx;
-		std::vector<std::vector<int> > sv_match_track_which_jet;
+
+		std::vector<std::vector<size_t> > sv_total_track_which_trkidx;
+		std::vector<unsigned int> sv_total_ntrack;
+		std::vector<unsigned int> sv_ascending_total_ntrack;
+		std::vector<size_t> sv_ascending_vtxidx;
+		
+		std::vector<std::vector<int> > sv_match_tracktojet_which_trkidx;
+		std::vector<std::vector<int> > sv_match_tracktojet_which_jetidx;
 
 		typedef std::vector<reco::TrackRef> track_vec;
 		const reco::Vertex fake_bs_vtx(beamspot->position(), beamspot->covariance3D());
 
-		std::vector<size_t> vertex_ntracks;
+		std::vector<track_vec> sv_total_track_which_trk_vec;
 
+		std::vector<int> vertex_ntracks;
+		size_t vtxidx = 0;
 		for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
-			std::vector<int> track_idx;
-			std::vector<int> track_which_idx;
-			std::vector<int> track_which_jet;
+			std::vector<size_t> track_idx;
+			std::vector<int> tracktojet_which_trkidx;
+			std::vector<int> tracktojet_which_jetidx;
 			track_vec tks = vertex_track_vec(*v[0]);
-                        const int ntracks = v[0]->nTracks();
-                        vertex_ntracks.push_back(ntracks);
-                        //std::cout << "before ntrack/vtx: " << ntracks << std::endl;
-			int i = 0;
+			sv_total_track_which_trk_vec.push_back(tks);
+			size_t i = 0;
 			for (const reco::TrackRef& itk : tks) {
-				i++;
+				//std::cout << "constructing set of track idx" << std::endl;
+				//std::cout << i << std::endl;
 				track_idx.push_back(i);
 				for (size_t j = 0; j < jets->size(); ++j) {
 					int jet_index = static_cast<int>(j);
 					if (match_track_jet(*itk, (*jets)[j], *jets, jet_index)) {
-						track_which_idx.push_back(i);
-						track_which_jet.push_back(j);
+						tracktojet_which_trkidx.push_back(i);
+						tracktojet_which_jetidx.push_back(j);
 						if (verbose)
 							printf(" track %u matched with a jet %lu \n", tks[i].key(), j);
 					}
 
 				}
+				i++;
 			}
-                        //std::cout << "after ntrack/vtx: " << track_which_idx.size() << std::endl;
-						//std::cout << "(corrected)after ntrack/vtx: " << track_idx.size() << std::endl;
-			sv_total_track_which_idx.push_back(track_idx);
-			sv_match_track_which_idx.push_back(track_which_idx);
-			sv_match_track_which_jet.push_back(track_which_jet);
 
-
-		}
-                //std::cout << vertex_ntracks.size() << std::endl;
-		if (vertex_ntracks.size() >= 2) {
-
-			int first_ntracks_vtxidx = std::distance(vertex_ntracks.begin(), std::max_element(vertex_ntracks.begin(), vertex_ntracks.end()));
-			reco::Vertex& v0 = vertices->at(first_ntracks_vtxidx);
-			vertex_ntracks[first_ntracks_vtxidx] = 0;
-			int second_ntracks_vtxidx = std::distance(vertex_ntracks.begin(), std::max_element(vertex_ntracks.begin(), vertex_ntracks.end()));
-			reco::Vertex& v1 = vertices->at(second_ntracks_vtxidx);
-
-			Measurement1D v_dist = vertex_dist_2d.distance(v0, v1);
-			Measurement1D dBV0_Meas1D = vertex_dist_2d.distance(v0, fake_bs_vtx);
-			double dBV0 = dBV0_Meas1D.value();
-			double bs2derr0 = dBV0_Meas1D.error();
-
-			Measurement1D dBV1_Meas1D = vertex_dist_2d.distance(v1, fake_bs_vtx);
-			double dBV1 = dBV1_Meas1D.value();
-			double bs2derr1 = dBV1_Meas1D.error();
-
-			double v0x = v0.x() - bsx;
-			double v0y = v0.y() - bsy;
-
-			double phi0 = atan2(v0y, v0x);
-
-			double v1x = v1.x() - bsx;
-			double v1y = v1.y() - bsy;
-
-			double phi1 = atan2(v1y, v1x);
-
-			bool shared_jet = std::find_first_of(sv_match_track_which_jet[first_ntracks_vtxidx].begin(), sv_match_track_which_jet[first_ntracks_vtxidx].end(), sv_match_track_which_jet[second_ntracks_vtxidx].begin(), sv_match_track_which_jet[second_ntracks_vtxidx].end()) != sv_match_track_which_jet[first_ntracks_vtxidx].end();
-
-			h_output1_most_track_vertices_shared_jets_or_not->Fill(shared_jet);
-
-		
-			if (shared_jet) {
-
-				//std::cout << "shared-jet event id: " << " run: " << event.id().run() << " lumi: " << event.luminosityBlock() << " event: " << event.id().event() << std::endl;
-                                //std::cout << "yes shared-jet" << std::endl;
-				int nsharedjets = 0;
-
-				std::vector<size_t> nsharedjet_jet_index;
-				std::vector<std::vector<int>> sv_match_track_which_jet_copy = sv_match_track_which_jet;
-
-				std::vector<int> nsharedjet_tracks_sv0;
-				std::vector<int> nsharedjet_tracks_sv1;
-				std::vector<std::vector<int> >sv0_sharedjet_which_idx;
-				std::vector<std::vector<int> >sv1_sharedjet_which_idx;
-
-				std::vector<int> sv0_total_track_which_idx = sv_total_track_which_idx[first_ntracks_vtxidx];
-				std::vector<int> sv0_match_track_which_jet = sv_match_track_which_jet[first_ntracks_vtxidx];
-				std::vector<int> sv0_match_track_which_idx = sv_match_track_which_idx[first_ntracks_vtxidx];
-				std::vector<int> sv0_match_track_which_temp_idx;
-
-				std::vector<int> sv1_total_track_which_idx = sv_total_track_which_idx[second_ntracks_vtxidx];
-				std::vector<int> sv1_match_track_which_jet = sv_match_track_which_jet[second_ntracks_vtxidx];
-				std::vector<int> sv1_match_track_which_idx = sv_match_track_which_idx[second_ntracks_vtxidx];
-				std::vector<int> sv1_track_which_temp_idx;
-
-				//std::cout << "vtx0 ntracks: " << sv0_total_track_which_idx.size() << std::endl;
-				//std::cout << "vtx1 ntracks: " << sv1_total_track_which_idx.size() << std::endl;
-
-
-				while (std::find_first_of(sv_match_track_which_jet_copy[first_ntracks_vtxidx].begin(), sv_match_track_which_jet_copy[first_ntracks_vtxidx].end(), sv_match_track_which_jet_copy[second_ntracks_vtxidx].begin(), sv_match_track_which_jet_copy[second_ntracks_vtxidx].end()) != sv_match_track_which_jet_copy[first_ntracks_vtxidx].end()) {
-					nsharedjets++;
-					std::vector<int> sv0_non_shared_track_which_idx = sv0_total_track_which_idx;
-					std::vector<int> sv1_non_shared_track_which_idx = sv1_total_track_which_idx;
-					std::vector<int>::iterator it = std::find_first_of(sv_match_track_which_jet_copy[first_ntracks_vtxidx].begin(), sv_match_track_which_jet_copy[first_ntracks_vtxidx].end(), sv_match_track_which_jet_copy[second_ntracks_vtxidx].begin(), sv_match_track_which_jet_copy[second_ntracks_vtxidx].end());
-					int idx = std::distance(sv_match_track_which_jet_copy[first_ntracks_vtxidx].begin(), it);
-					int jet_index = sv_match_track_which_jet_copy[first_ntracks_vtxidx].at(idx);
-					nsharedjet_jet_index.push_back(sv_match_track_which_jet_copy[first_ntracks_vtxidx].at(idx));
-					sv_match_track_which_jet_copy[first_ntracks_vtxidx].erase(std::remove(sv_match_track_which_jet_copy[first_ntracks_vtxidx].begin(), sv_match_track_which_jet_copy[first_ntracks_vtxidx].end(), jet_index), sv_match_track_which_jet_copy[first_ntracks_vtxidx].end());
-					sv_match_track_which_jet_copy[second_ntracks_vtxidx].erase(std::remove(sv_match_track_which_jet_copy[second_ntracks_vtxidx].begin(), sv_match_track_which_jet_copy[second_ntracks_vtxidx].end(), jet_index), sv_match_track_which_jet_copy[second_ntracks_vtxidx].end());
-
-					// start counting shared tracks of sv0 for each shared jet
-					nsharedjet_tracks_sv0.push_back(std::count(sv0_match_track_which_jet.begin(), sv0_match_track_which_jet.end(), jet_index));
-					std::multimap<int, size_t> sv0_m;
-					for (size_t k = 0; k < sv0_match_track_which_jet.size(); k++) if (sv0_match_track_which_jet[k] == jet_index) { sv0_m.insert({ sv0_match_track_which_jet[k], k }); }
-
-					for (auto it = sv0_m.begin(); it != sv0_m.end(); )
-					{
-						auto p = sv0_m.equal_range(it->first);
-
-						while (p.first != p.second)
-						{
-
-							sv0_match_track_which_temp_idx.push_back(sv0_match_track_which_idx[p.first++->second]);
-							//std::cout << "with jet index: " << jet_index << "idx is appended to a sv0 temp list: " << sv0_track_which_temp_idx.back() << std::endl;
-						}
-						it = p.second;
-
-					}
-
-					sv0_sharedjet_which_idx.push_back(sv0_match_track_which_temp_idx);
-					for (size_t k = 0; k < sv0_match_track_which_temp_idx.size(); k++) {
-						int track_index = sv0_match_track_which_temp_idx[k];
-						 //std::cout << "sv0 w/ shared track's idx: " << track_index << std::endl;
-						sv0_non_shared_track_which_idx.erase(std::remove(sv0_non_shared_track_which_idx.begin(), sv0_non_shared_track_which_idx.end(), track_index), sv0_non_shared_track_which_idx.end());
-
-					}
-
-
-					sv0_match_track_which_temp_idx = {};
-
-
-					// start counting shared tracks of sv1 for each shared jet
-					nsharedjet_tracks_sv1.push_back(std::count(sv1_match_track_which_jet.begin(), sv1_match_track_which_jet.end(), jet_index));
-					std::multimap<int, size_t> sv1_m;
-					for (size_t k = 0; k < sv1_match_track_which_jet.size(); k++) if (sv1_match_track_which_jet[k] == jet_index) { sv1_m.insert({ sv1_match_track_which_jet[k], k }); }
-
-					for (auto it = sv1_m.begin(); it != sv1_m.end(); )
-					{
-						auto p = sv1_m.equal_range(it->first);
-
-						while (p.first != p.second)
-						{
-							sv1_track_which_temp_idx.push_back(sv1_match_track_which_idx[p.first++->second]);
-							//std::cout << "with jet index: " << jet_index << "idx is appended to a sv1 temp list: " << sv1_track_which_temp_idx.back() << std::endl;
-						}
-						it = p.second;
-
-					}
-
-					sv1_sharedjet_which_idx.push_back(sv1_track_which_temp_idx);
-					for (size_t k = 0; k < sv1_track_which_temp_idx.size(); k++) {
-						int track_index = sv1_track_which_temp_idx[k];
-                                                //std::cout << "sv1 w/ shared track's idx: " << track_index << std::endl;
-						sv1_non_shared_track_which_idx.erase(std::remove(sv1_non_shared_track_which_idx.begin(), sv1_non_shared_track_which_idx.end(), track_index), sv1_non_shared_track_which_idx.end());
-
-					}
-
-					sv1_track_which_temp_idx = {};
-
-
-
+			unsigned int ntracks = static_cast<unsigned int>(track_idx.size());
+			vertex_ntracks.push_back(ntracks);
+            
+			if (vtxidx == 0) {
+				sv_ascending_total_ntrack.push_back(ntracks);
+				sv_ascending_vtxidx.push_back(vtxidx);
+			}
+			else {
+				
+				std::vector<unsigned int>::iterator it_ntracks = sv_ascending_total_ntrack.end();
+				std::vector<size_t>::iterator it_vtx = sv_ascending_vtxidx.end();
+				while (it_ntracks != sv_ascending_total_ntrack.begin() && ntracks <= sv_ascending_total_ntrack[std::distance(sv_ascending_total_ntrack.begin(), it_ntracks)-1])
+				{
+					--it_ntracks;
+					--it_vtx;
 				}
 
-				std::vector<int> sv0_sum_pt_track_which_idx = sv0_total_track_which_idx;
-				std::vector<int> sv0_sum_pt_only_dR_track_which_idx = sv0_total_track_which_idx;
-				//std::vector<int> sv0_median_tk_vtx_dist_track_which_idx = sv0_total_track_which_idx;
-				//std::vector<int> sv0_median_tk_vtx_dist_only_dR_track_which_idx = sv0_total_track_which_idx;
-				std::vector<int> sv0_only_X_track_which_idx = sv0_total_track_which_idx;
-				std::vector<int> sv0_sum_pT_only_Y_track_which_idx = sv0_total_track_which_idx;
-				std::vector<int> sv0_shared_ntrack_only_Y_track_which_idx = sv0_total_track_which_idx;
-				std::vector<int> sv0_median_tk_vtx_dist_sig_track_which_idx = sv0_total_track_which_idx;
-				std::vector<int> sv0_median_tk_vtx_dist_sig_only_dR_track_which_idx = sv0_total_track_which_idx;
-				std::vector<int> sv0_median_tk_vtx_dist_2sig_only_dR_track_which_idx = sv0_total_track_which_idx;		
-				std::vector<int> sv0_no_shared_track_which_idx;
-				track_vec tks_v0 = vertex_track_vec(v0);
-				std::vector<int> sv1_sum_pt_track_which_idx = sv1_total_track_which_idx;
-				std::vector<int> sv1_sum_pt_only_dR_track_which_idx = sv1_total_track_which_idx;
-				//std::vector<int> sv1_median_tk_vtx_dist_track_which_idx = sv1_total_track_which_idx;
-				//std::vector<int> sv1_median_tk_vtx_dist_only_dR_track_which_idx = sv1_total_track_which_idx;
-				std::vector<int> sv1_only_X_track_which_idx = sv1_total_track_which_idx;
-				std::vector<int> sv1_sum_pT_only_Y_track_which_idx = sv1_total_track_which_idx;
-				std::vector<int> sv1_shared_ntrack_only_Y_track_which_idx = sv1_total_track_which_idx;
-				std::vector<int> sv1_median_tk_vtx_dist_sig_track_which_idx = sv1_total_track_which_idx;
-				std::vector<int> sv1_median_tk_vtx_dist_sig_only_dR_track_which_idx = sv1_total_track_which_idx;
-				std::vector<int> sv1_median_tk_vtx_dist_2sig_only_dR_track_which_idx = sv1_total_track_which_idx;
-				std::vector<int> sv1_no_shared_track_which_idx;
-				track_vec tks_v1 = vertex_track_vec(v1);
-
-
-				//std::cout << "the number of shared-jets is " << nsharedjets << std::endl;
-				//std::cout << "sv0's phi = " << phi0 << " and " << "sv1's phi = " << phi1 << std::endl;                                  
-                                //std::cout << "|dphi(sv0,jet)|: " << fabs(reco::deltaPhi((*jets)[jet_index].phi(), phi0)) << std::endl;
-                                //std::cout << "|dphi(sv1,jet)|: " << fabs(reco::deltaPhi((*jets)[jet_index].phi(), phi1)) << std::endl;
-                                double vtx_sum_pt_i_sv0 = 0;
-				for (unsigned int j = 0; j < sv0_total_track_which_idx.size(); j++) {
-					int idx = sv0_total_track_which_idx[j] - 1;
-					vtx_sum_pt_i_sv0 = vtx_sum_pt_i_sv0 + tks_v0[idx]->pt();
-				}
-				double vtx_sum_pt_i_sv1 = 0;
-				for (unsigned int j = 0; j < sv1_total_track_which_idx.size(); j++) {
-					int idx = sv1_total_track_which_idx[j] - 1;
-					vtx_sum_pt_i_sv1 = vtx_sum_pt_i_sv1 + tks_v1[idx]->pt();
+				if (it_ntracks == sv_ascending_total_ntrack.end() && ntracks > sv_ascending_total_ntrack[std::distance(sv_ascending_total_ntrack.begin(), it_ntracks)]) {
+					sv_ascending_total_ntrack.push_back(ntracks);
+					sv_ascending_vtxidx.push_back(vtxidx);
 				}
 				
-				int nsv_onlyX = -1;
-				int nsv_sumpT_onlyY = -1;
-				int nsv_lonetrk_onlyY = -1;
-				int nsv_sumpT = -1;
-				int nsv_lonetrk = -1;
-				int nsv_sumpTandX = -1;
-				int nsv_lonetrkandX = -1;
-				int sv0_sumpTandX = -1;
-				int sv0_lonetrkandX = -1;
-				int sv1_sumpTandX = -1;
-				int sv1_lonetrkandX = -1;
-				int X_nsharedjets = 0;
-				int Xa_nsharedjets = 0;
-				int Xb_nsharedjets = 0;
-				int Xc_nsharedjets = 0;
-				int Y_nsharedjets = 0;
-				
-				std::vector<double> X_i_sharedjet_lone_tk_vtx0_dist;
-				std::vector<double> X_i_sharedjet_lone_tk_vtx0_dist_sig;
-				std::vector<double> X_i_sharedjet_lone_tk_vtx0_dist_err;
-
-				std::vector<double> X_i_sharedjet_lone_tk_vtx1_dist;
-				std::vector<double> X_i_sharedjet_lone_tk_vtx1_dist_sig;
-				std::vector<double> X_i_sharedjet_lone_tk_vtx1_dist_err;
-				
-
-				for (int i = 0; i < nsharedjets; i++) {
-
-					size_t jet_index = nsharedjet_jet_index[i];
-                                        //std::cout << "|dphi(sv0,jet)|: " << fabs(reco::deltaPhi((*jets)[jet_index].phi(), phi0)) << std::endl;                                                                              //std::cout << "|dphi(sv1,jet)|: " << fabs(reco::deltaPhi((*jets)[jet_index].phi(), phi1)) << std::endl;
-
-					std::vector<int> sv0_i_sharedjet_which_idx = sv0_sharedjet_which_idx[i];
-					std::vector<double> sv0_i_sharedjet_tk_vtx_dist_copy;
-					std::vector<double> sv0_i_sharedjet_tk_vtx_dist;
-					std::vector<double> sv0_i_sharedjet_tk_vtx_dist_sig_copy;
-					std::vector<double> sv0_i_sharedjet_tk_vtx_dist_sig;
-					std::vector<double> sv0_i_sharedjet_tk_vtx_dist_err;
-					std::vector<double> sv0_i_sharedjet_tk_pT;
-					std::vector<double> sv0_i_sharedjet_tk_eta;
-					std::vector<double> sv0_i_sharedjet_tk_phi;
-
-					double sum_dR_i_sv0 = 0;
-					double sum_eta_i_sv0 = 0;
-					double sum_x_i_sv0 = 0;
-					double sum_y_i_sv0 = 0;
-					double sum_pt_i_sv0 = 0;
-					
-
-
-					//std::cout << " shared-jet index: " << jet_index << std::endl;
-					for (unsigned int j = 0; j < sv0_i_sharedjet_which_idx.size(); j++) {
-						int idx = sv0_i_sharedjet_which_idx[j] - 1;
-						//std::cout << "vtx0's only shared tracks w/ idx: " << idx << std::endl;
-						sum_pt_i_sv0 = sum_pt_i_sv0 + tks_v0[idx]->pt();
-						reco::TransientTrack v0_track;
-						v0_track = tt_builder->build(tks_v0[idx]);
-						std::pair<bool, Measurement1D> tk_vtx_dist = track_dist(v0_track, v0);
-						sv0_i_sharedjet_tk_vtx_dist.push_back(tk_vtx_dist.second.value());
-                                                //std::cout << "check MD" << std::endl;
-                                                //std::cout << "tkvtx dist: " << tk_vtx_dist.second.value() << std::endl;
-						sv0_i_sharedjet_tk_vtx_dist_sig.push_back(tk_vtx_dist.second.significance());
-						sv0_i_sharedjet_tk_vtx_dist_err.push_back(tk_vtx_dist.second.error());
-						sv0_i_sharedjet_tk_pT.push_back(tks_v0[idx]->pt());
-						sv0_i_sharedjet_tk_eta.push_back(tks_v0[idx]->eta());
-						sv0_i_sharedjet_tk_phi.push_back(tks_v0[idx]->phi());
-
-						double dR = reco::deltaR((*jets)[jet_index].eta(), (*jets)[jet_index].phi(), tks_v0[idx]->eta(), tks_v0[idx]->phi());
-						sum_dR_i_sv0 = sum_dR_i_sv0 + dR;
-						sum_eta_i_sv0 = sum_eta_i_sv0 + tks_v0[idx]->eta();
-						sum_x_i_sv0 = sum_x_i_sv0 + cos(tks_v0[idx]->phi());
-						sum_y_i_sv0 = sum_y_i_sv0 + sin(tks_v0[idx]->phi());
-                                                //std::cout << "  " << j + 1 << " shared track's phi: " << tks_v0[idx]->phi() << " shared track's eta: " << tks_v0[idx]->eta() << " shared track's pt: " << tks_v0[idx]->pt() << " shared track's sig_dxy: " << tk_vtx_dist.second.significance() << std::endl; 
-					}
-
-					/*
-					double median_tk_vtx_dist_sv0;
-					
-					
-					sv0_i_sharedjet_tk_vtx_dist_copy = sv0_i_sharedjet_tk_vtx_dist;
-					std::sort(sv0_i_sharedjet_tk_vtx_dist.begin(), sv0_i_sharedjet_tk_vtx_dist.end());
-					
-                                        //std::cout << "division by 2 of a set: " << sv0_i_sharedjet_tk_vtx_dist.size() / 2 << std::endl;
-
-					if (fmod(sv0_i_sharedjet_tk_vtx_dist.size(), 2) == 1.0) {
-						median_tk_vtx_dist_sv0 = sv0_i_sharedjet_tk_vtx_dist[sv0_i_sharedjet_tk_vtx_dist.size() / 2];
-						}
-					else {
-						median_tk_vtx_dist_sv0 = (sv0_i_sharedjet_tk_vtx_dist[sv0_i_sharedjet_tk_vtx_dist.size() / 2] + sv0_i_sharedjet_tk_vtx_dist[(sv0_i_sharedjet_tk_vtx_dist.size() / 2) - 1]) / 2;
-					}
-					*/
-					
-
-					double median_tk_vtx_dist_sig_sv0;
-					
-					
-                                        //double median_tk_vtx_dist_sig_its_value_sv0;
-					sv0_i_sharedjet_tk_vtx_dist_sig_copy = sv0_i_sharedjet_tk_vtx_dist_sig;
-					std::sort(sv0_i_sharedjet_tk_vtx_dist_sig.begin(), sv0_i_sharedjet_tk_vtx_dist_sig.end());
-					
-					if (fmod(sv0_i_sharedjet_tk_vtx_dist_sig.size(), 2) == 1.0) {
-						median_tk_vtx_dist_sig_sv0 = sv0_i_sharedjet_tk_vtx_dist_sig[sv0_i_sharedjet_tk_vtx_dist_sig.size() / 2];
-                                                //std::cout << "MDS index: " << pT_idx0_odd << std::endl;
-                                                //std::cout << "correct MDS: " << median_tk_vtx_dist_sig_sv0 << std::endl;
-                                                //std::cout << "MDS index to MDS: " << sv0_i_sharedjet_tk_vtx_dist_sig_copy[pT_idx0_odd] << std::endl;
-
-						
-						}
-					else {
-						median_tk_vtx_dist_sig_sv0 = (sv0_i_sharedjet_tk_vtx_dist_sig[sv0_i_sharedjet_tk_vtx_dist_sig.size() / 2] + sv0_i_sharedjet_tk_vtx_dist_sig[(sv0_i_sharedjet_tk_vtx_dist_sig.size() / 2) - 1]) / 2;
-						
-					}
-
-					
-				
-					//.....................................................
-
-					std::vector<int> sv1_i_sharedjet_which_idx = sv1_sharedjet_which_idx[i];
-					std::vector<double> sv1_i_sharedjet_tk_pT;
-					std::vector<double> sv1_i_sharedjet_tk_vtx_dist_copy;
-					std::vector<double> sv1_i_sharedjet_tk_vtx_dist;
-					std::vector<double> sv1_i_sharedjet_tk_vtx_dist_sig_copy;
-					std::vector<double> sv1_i_sharedjet_tk_vtx_dist_sig;
-					std::vector<double> sv1_i_sharedjet_tk_vtx_dist_err;
-					std::vector<double> sv1_i_sharedjet_tk_eta;
-					std::vector<double> sv1_i_sharedjet_tk_phi;
-
-					double sum_dR_i_sv1 = 0;
-					double sum_eta_i_sv1 = 0;
-					double sum_x_i_sv1 = 0;
-					double sum_y_i_sv1 = 0;
-					double sum_pt_i_sv1 = 0;
-					
-
-					for (unsigned int j = 0; j < sv1_i_sharedjet_which_idx.size(); j++) {
-						int idx = sv1_i_sharedjet_which_idx[j] - 1;
-						sum_pt_i_sv1 = sum_pt_i_sv1 + tks_v1[idx]->pt();
-						reco::TransientTrack v1_track;
-						v1_track = tt_builder->build(tks_v1[idx]);
-						std::pair<bool, Measurement1D> tk_vtx_dist = track_dist(v1_track, v1);
-						sv1_i_sharedjet_tk_vtx_dist_sig.push_back(tk_vtx_dist.second.significance());
-						sv1_i_sharedjet_tk_vtx_dist.push_back(tk_vtx_dist.second.value());
-						sv1_i_sharedjet_tk_vtx_dist_err.push_back(tk_vtx_dist.second.error());
-						sv1_i_sharedjet_tk_pT.push_back(tks_v1[idx]->pt());
-						sv1_i_sharedjet_tk_eta.push_back(tks_v1[idx]->eta());
-						sv1_i_sharedjet_tk_phi.push_back(tks_v1[idx]->phi());
-
-						double dR = reco::deltaR((*jets)[jet_index].eta(), (*jets)[jet_index].phi(), tks_v1[idx]->eta(), tks_v1[idx]->phi());
-						sum_dR_i_sv1 = sum_dR_i_sv1 + dR;
-						sum_eta_i_sv1 = sum_eta_i_sv1 + tks_v1[idx]->eta();
-						sum_x_i_sv1 = sum_x_i_sv1 + cos(tks_v1[idx]->phi());
-						sum_y_i_sv1 = sum_y_i_sv1 + sin(tks_v1[idx]->phi());
-                                                //std::cout << "  " << j + 1 << " shared track's phi: " << tks_v1[idx]->phi() << " shared track's eta: " << tks_v1[idx]->eta() << " shared track's pt: " << tks_v1[idx]->pt() << " shared track's sig_dxy: " << tk_vtx_dist.second.significance() << std::endl; 
-					}
-
-					/*
-					double median_tk_vtx_dist_sv1;
-					
-					sv1_i_sharedjet_tk_vtx_dist_copy = sv1_i_sharedjet_tk_vtx_dist;
-					std::sort(sv1_i_sharedjet_tk_vtx_dist.begin(), sv1_i_sharedjet_tk_vtx_dist.end());
-					std::vector<double>::iterator it1_odd = find(sv1_i_sharedjet_tk_vtx_dist_copy.begin(), sv1_i_sharedjet_tk_vtx_dist_copy.end(), sv1_i_sharedjet_tk_vtx_dist[sv1_i_sharedjet_tk_vtx_dist.size() / 2]);
-                                        //std::cout << "division by 2 of a set: " << sv1_i_sharedjet_tk_vtx_dist.size() / 2 << std::endl; 
-					
-					if (fmod(sv1_i_sharedjet_tk_vtx_dist.size(), 2) == 1.0) {
-						median_tk_vtx_dist_sv1 = sv1_i_sharedjet_tk_vtx_dist[sv1_i_sharedjet_tk_vtx_dist.size() / 2];
-						}
-					else {
-						median_tk_vtx_dist_sv1 = (sv1_i_sharedjet_tk_vtx_dist[sv1_i_sharedjet_tk_vtx_dist.size() / 2] + sv1_i_sharedjet_tk_vtx_dist[(sv1_i_sharedjet_tk_vtx_dist.size() / 2) - 1]) / 2;
-					}
-					*/
-
-					double median_tk_vtx_dist_sig_sv1;
-					
-                                        //double median_tk_vtx_dist_sig_its_value_sv1;
-
-					sv1_i_sharedjet_tk_vtx_dist_sig_copy = sv1_i_sharedjet_tk_vtx_dist_sig;
-					std::sort(sv1_i_sharedjet_tk_vtx_dist_sig.begin(), sv1_i_sharedjet_tk_vtx_dist_sig.end());
-					
-					if (fmod(sv1_i_sharedjet_tk_vtx_dist_sig.size(), 2) == 1.0) {
-						median_tk_vtx_dist_sig_sv1 = sv1_i_sharedjet_tk_vtx_dist_sig[sv1_i_sharedjet_tk_vtx_dist_sig.size() / 2];
-                                                //std::cout << "MDS index: " << pT_idx1_odd << std::endl;                                                                                                                             std::cout << "correct MDS: " << median_tk_vtx_dist_sig_sv1 << std::endl;                                                                                                            std::cout << "MDS index to MDS: " << sv1_i_sharedjet_tk_vtx_dist_sig_copy[pT_idx1_odd] << std::endl; 
-						}
-					else {
-						median_tk_vtx_dist_sig_sv1 = (sv1_i_sharedjet_tk_vtx_dist_sig[sv1_i_sharedjet_tk_vtx_dist_sig.size() / 2] + sv1_i_sharedjet_tk_vtx_dist_sig[(sv1_i_sharedjet_tk_vtx_dist_sig.size() / 2) - 1]) / 2;
-						
-					}
-
-					
-					//......................................................
-
-					double mean_x_sv0 = sum_x_i_sv0 / sv0_i_sharedjet_which_idx.size();
-					double mean_y_sv0 = sum_y_i_sv0 / sv0_i_sharedjet_which_idx.size();
-					double mean_x_sv1 = sum_x_i_sv1 / sv1_i_sharedjet_which_idx.size();
-					double mean_y_sv1 = sum_y_i_sv1 / sv1_i_sharedjet_which_idx.size();
-
-					double mean_eta_sv0 = sum_eta_i_sv0 / sv0_i_sharedjet_which_idx.size();
-					double mean_phi_sv0 = atan2(mean_y_sv0, mean_x_sv0);
-					double mean_eta_sv1 = sum_eta_i_sv1 / sv1_i_sharedjet_which_idx.size();
-					double mean_phi_sv1 = atan2(mean_y_sv1, mean_x_sv1);
-
-					double avg_dR_track_pair = reco::deltaR(mean_eta_sv0, mean_phi_sv0, mean_eta_sv1, mean_phi_sv1);
-					//std::cout << "mean eta sv0: " << mean_eta_sv0 << std::endl;
-					//std::cout << "mean phi sv0: " << mean_phi_sv0 << std::endl;
-					//std::cout << "mean eta sv1: " << mean_eta_sv1 << std::endl;
-					//std::cout << "mean phi sv1: " << mean_phi_sv1 << std::endl;
-                                         
-
-					double sum_pow2_dR_spread_i_sv0 = 0;
-					for (unsigned int j = 0; j < sv0_i_sharedjet_which_idx.size(); j++) {
-						if (sv0_i_sharedjet_which_idx.size() == 1) {
-							sum_pow2_dR_spread_i_sv0 = pow(0.1, 2);
-						}
-						else {
-							sum_pow2_dR_spread_i_sv0 = sum_pow2_dR_spread_i_sv0 + pow(reco::deltaR(mean_eta_sv0, mean_phi_sv0, sv0_i_sharedjet_tk_eta[j], sv0_i_sharedjet_tk_phi[j]), 2);
-						}
-					}
-
-					double sum_pow2_dR_spread_i_sv1 = 0;
-					for (unsigned int j = 0; j < sv1_i_sharedjet_which_idx.size(); j++) {
-						if (sv1_i_sharedjet_which_idx.size() == 1) {
-							sum_pow2_dR_spread_i_sv1 = pow(0.1, 2);
-						}
-						else {
-							sum_pow2_dR_spread_i_sv1 = sum_pow2_dR_spread_i_sv1 + pow(reco::deltaR(mean_eta_sv1, mean_phi_sv1, sv1_i_sharedjet_tk_eta[j], sv1_i_sharedjet_tk_phi[j]), 2);
-						}
-					}
-
-					double avg_dR_spread_track_pair = sqrt((sum_pow2_dR_spread_i_sv0 / sv0_i_sharedjet_which_idx.size()) + (sum_pow2_dR_spread_i_sv1 / sv1_i_sharedjet_which_idx.size()));	// is this the correct rms of the two track spreads combined? need a division by 2? 
-                    //{1,1}
-					if (dBV1 > 0.0100 && dBV0 > 0.0100 && bs2derr0 < 0.0025 && bs2derr1 < 0.0025 && sv0_i_sharedjet_which_idx.size() == 1 && sv1_i_sharedjet_which_idx.size() == 1) {
-						//case X
-
-						if (sv0_total_track_which_idx.size() >= 5 && sv1_total_track_which_idx.size() >= 5) {
-							//PK: tbs<->bkg
-							X_nsharedjets++;  
-							h_at_least_5trk_output1_shared_tracks_pair_dPhi_X->Fill(fabs(reco::deltaPhi(sv0_i_sharedjet_tk_phi[0], sv1_i_sharedjet_tk_phi[0])));
-							h_2D_at_least_5trk_output1_shared_track_vtx0_shared_track_vtx1_dPhi_X->Fill(fabs(reco::deltaPhi(sv0_i_sharedjet_tk_phi[0], phi0)), fabs(reco::deltaPhi(sv1_i_sharedjet_tk_phi[0], phi1)));
-							if (fabs(reco::deltaPhi((*jets)[jet_index].phi(), phi0))> fabs(reco::deltaPhi((*jets)[jet_index].phi(), phi1))) {
-								h_at_least_5trk_output1_shared_tracks_pair_closevtxjet_dPhi_X->Fill(fabs(reco::deltaPhi((*jets)[jet_index].phi(), phi1)));
-							}
-							else {
-								h_at_least_5trk_output1_shared_tracks_pair_closevtxjet_dPhi_X->Fill(fabs(reco::deltaPhi((*jets)[jet_index].phi(), phi0)));
-							}
-							//PK
-							h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_X->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-							if (median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1 < -4.0 || median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1 > 4.0) {
-								h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_X->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-							}
-							h_at_least_5trk_output1_shared_tracks_pair_dR_sig_X->Fill(avg_dR_track_pair / avg_dR_spread_track_pair);
-							h_at_least_5trk_output1_shared_tracks_pair_dR_X->Fill(avg_dR_track_pair);
-							
-							h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_X->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-							
-							
-							if (avg_dR_track_pair < 0.2) {
-								h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_XdRinjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-								if (median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1 < -4.0 || median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1 > 4.0) {
-									h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_XdRinjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-								}
-								h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_XdRinjet->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-								
-							}
-							else {
-								h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_XdRoutjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-								if (median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1 < -4.0 || median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1 > 4.0) {
-									h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_XdRoutjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-								}
-								h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_XdRoutjet->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-								
-							}
-							
-							
-							// case Xa
-							if (sv0_total_track_which_idx.size() == 5 && sv1_total_track_which_idx.size() == 5) {
-								Xa_nsharedjets++;
-								h_at_least_5trk_output1_shared_tracks_pair_dPhi_Xa->Fill(fabs(reco::deltaPhi(sv0_i_sharedjet_tk_phi[0], sv1_i_sharedjet_tk_phi[0])));
-								if (fabs(reco::deltaPhi((*jets)[jet_index].phi(), phi0)) > fabs(reco::deltaPhi((*jets)[jet_index].phi(), phi1))) {
-									h_at_least_5trk_output1_shared_tracks_pair_closevtxjet_dPhi_Xa->Fill(fabs(reco::deltaPhi((*jets)[jet_index].phi(), phi1)));
-								}
-								else {
-									h_at_least_5trk_output1_shared_tracks_pair_closevtxjet_dPhi_Xa->Fill(fabs(reco::deltaPhi((*jets)[jet_index].phi(), phi0)));
-								}
-
-							}
-							//case Xc
-							else if (sv0_total_track_which_idx.size() > 5 && sv1_total_track_which_idx.size() > 5) {
-								Xc_nsharedjets++;
-								h_at_least_5trk_output1_shared_tracks_pair_dPhi_Xc->Fill(fabs(reco::deltaPhi(sv0_i_sharedjet_tk_phi[0], sv1_i_sharedjet_tk_phi[0])));
-								if (fabs(reco::deltaPhi((*jets)[jet_index].phi(), phi0)) > fabs(reco::deltaPhi((*jets)[jet_index].phi(), phi1))) {
-									h_at_least_5trk_output1_shared_tracks_pair_closevtxjet_dPhi_Xc->Fill(fabs(reco::deltaPhi((*jets)[jet_index].phi(), phi1)));
-								}
-								else {
-									h_at_least_5trk_output1_shared_tracks_pair_closevtxjet_dPhi_Xc->Fill(fabs(reco::deltaPhi((*jets)[jet_index].phi(), phi0)));
-								}
-
-							}
-							//case Xb
-							else {
-								Xb_nsharedjets++;
-								h_at_least_5trk_output1_shared_tracks_pair_dPhi_Xb->Fill(fabs(reco::deltaPhi(sv0_i_sharedjet_tk_phi[0], sv1_i_sharedjet_tk_phi[0])));
-								if (fabs(reco::deltaPhi((*jets)[jet_index].phi(), phi0)) > fabs(reco::deltaPhi((*jets)[jet_index].phi(), phi1))) {
-									h_at_least_5trk_output1_shared_tracks_pair_closevtxjet_dPhi_Xb->Fill(fabs(reco::deltaPhi((*jets)[jet_index].phi(), phi1)));
-								}
-								else {
-									h_at_least_5trk_output1_shared_tracks_pair_closevtxjet_dPhi_Xb->Fill(fabs(reco::deltaPhi((*jets)[jet_index].phi(), phi0)));
-								}
-
-							}
-							
-						}
-
-						if (sv0_total_track_which_idx.size() >= 3 && sv1_total_track_which_idx.size() >= 3) {
-
-							//PK: tbs<->bkg
-							//X_nsharedjets++;  
-							//h_at_least_5trk_output1_shared_tracks_pair_dPhi_X->Fill(fabs(reco::deltaPhi(sv0_i_sharedjet_tk_phi[0], sv1_i_sharedjet_tk_phi[0])));
-							//h_2D_at_least_5trk_output1_shared_track_vtx0_shared_track_vtx1_dPhi_X->Fill(fabs(reco::deltaPhi(sv0_i_sharedjet_tk_phi[0], phi0)), fabs(reco::deltaPhi(sv1_i_sharedjet_tk_phi[0], phi1)));
-							//if (fabs(reco::deltaPhi((*jets)[jet_index].phi(), phi0)) > fabs(reco::deltaPhi((*jets)[jet_index].phi(), phi1))) {
-							//	h_at_least_5trk_output1_shared_tracks_pair_closevtxjet_dPhi_X->Fill(fabs(reco::deltaPhi((*jets)[jet_index].phi(), phi1)));
-							//}
-							//else {
-							//	h_at_least_5trk_output1_shared_tracks_pair_closevtxjet_dPhi_X->Fill(fabs(reco::deltaPhi((*jets)[jet_index].phi(), phi0)));
-							//}
-							//PK
-							h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_X->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-							h_at_least_3trk_output1_shared_tracks_pair_dR_sig_X->Fill(avg_dR_track_pair / avg_dR_spread_track_pair);
-							h_at_least_3trk_output1_shared_tracks_pair_dR_X->Fill(avg_dR_track_pair);
-							
-							h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_X->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-							
-							if (avg_dR_track_pair < 0.2) {
-								h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_XdRinjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-								h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_XdRinjet->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-								
-							}
-							else {
-								h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_XdRoutjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-								h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_XdRoutjet->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-								
-							}
-						}
-					}
-					//{n>1,1}
-					if ((dBV1 > 0.0100 && dBV0 > 0.0100 && bs2derr0 < 0.0025 && bs2derr1 < 0.0025 && sv0_i_sharedjet_which_idx.size() > 1 && sv1_i_sharedjet_which_idx.size() == 1) || (dBV1 > 0.0100 && dBV0 > 0.0100 && bs2derr0 < 0.0025 && bs2derr1 < 0.0025 && sv1_i_sharedjet_which_idx.size() > 1 && sv0_i_sharedjet_which_idx.size() == 1)) {
-						//case Y 
-
-						if (sv0_total_track_which_idx.size() >= 5 && sv1_total_track_which_idx.size() >= 5) {
-							Y_nsharedjets++;  //PK: tbs<->bkg
-							if (int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()) >= 4) {
-                                                               //std::cout << __LINE__ << std::endl; 
-								if (avg_dR_track_pair < 0.2) {
-									h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YAdRinjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-									if (median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1 < -4.0) {
-										h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YAdRinjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-									}
-									h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YAdRinjet->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-									h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YAdRinjet->Fill(int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-
-								}
-								else {
-									h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YAdRoutjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-									if (median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1 < -4.0) {
-										h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YAdRoutjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-									}
-									h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YAdRoutjet->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-									h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YAdRoutjet->Fill(int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-
-								}
-
-							}
-                                                        //std::cout << __LINE__ << std::endl; 
-							if (int(sv1_i_sharedjet_which_idx.size()) - int(sv0_i_sharedjet_which_idx.size()) >= 4) {
-                                                                //std::cout << __LINE__ << std::endl; 
-								if (avg_dR_track_pair < 0.2) {
-									h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YAdRinjet->Fill((sum_pt_i_sv1 - sum_pt_i_sv0) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-									if (median_tk_vtx_dist_sig_sv1 - median_tk_vtx_dist_sig_sv0 < -4.0 ) {
-										h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YAdRinjet->Fill((sum_pt_i_sv1 - sum_pt_i_sv0) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-									}
-									h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YAdRinjet->Fill(median_tk_vtx_dist_sig_sv1 - median_tk_vtx_dist_sig_sv0);
-									h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YAdRinjet->Fill(int(sv1_i_sharedjet_which_idx.size()) - int(sv0_i_sharedjet_which_idx.size()));
-
-								}
-								else {
-									h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YAdRoutjet->Fill((sum_pt_i_sv1 - sum_pt_i_sv0) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-									if (median_tk_vtx_dist_sig_sv1 - median_tk_vtx_dist_sig_sv0 < -4.0) {
-										h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YAdRoutjet->Fill((sum_pt_i_sv1 - sum_pt_i_sv0) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-									}
-									h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YAdRoutjet->Fill(median_tk_vtx_dist_sig_sv1 - median_tk_vtx_dist_sig_sv0);
-									h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YAdRoutjet->Fill(int(sv1_i_sharedjet_which_idx.size()) - int(sv0_i_sharedjet_which_idx.size()));
-
-								}
-
-							}
-                                                        //std::cout << __LINE__ << std::endl; 
-							if (0 < int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()) && int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()) <= 3) {
-
-                                                                //std::cout << __LINE__ << std::endl; 
-								if (avg_dR_track_pair < 0.2) {
-									h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YBdRinjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-									if (median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1 < -4.0) {
-										h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YBdRinjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-									}
-									h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YBdRinjet->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-									h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YBdRinjet->Fill(int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-
-								}
-								else {
-									h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YBdRoutjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-									if (median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1 < -4.0) {
-										h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YBdRoutjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-									}
-									h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YBdRoutjet->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-									h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YBdRoutjet->Fill(int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-
-								}
-
-							}
-                                                        //std::cout << __LINE__ << std::endl; 
-							if (0 < int(sv1_i_sharedjet_which_idx.size()) - int(sv0_i_sharedjet_which_idx.size()) && int(sv1_i_sharedjet_which_idx.size()) - int(sv0_i_sharedjet_which_idx.size()) <= 3) {
-
-                                                                //std::cout << __LINE__ << std::endl; 
-								if (avg_dR_track_pair < 0.2) {
-									h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YBdRinjet->Fill((sum_pt_i_sv1 - sum_pt_i_sv0) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-									if (median_tk_vtx_dist_sig_sv1 - median_tk_vtx_dist_sig_sv0 < -4.0) {
-										h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YBdRinjet->Fill((sum_pt_i_sv1 - sum_pt_i_sv0) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-									}
-									h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YBdRinjet->Fill(median_tk_vtx_dist_sig_sv1 - median_tk_vtx_dist_sig_sv0);
-									h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YBdRinjet->Fill(int(sv1_i_sharedjet_which_idx.size()) - int(sv0_i_sharedjet_which_idx.size()));
-
-								}
-                                                              
-								else {
-									h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YBdRoutjet->Fill((sum_pt_i_sv1 - sum_pt_i_sv0) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-									if (median_tk_vtx_dist_sig_sv1 - median_tk_vtx_dist_sig_sv0 < -4.0) {
-										h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YBdRoutjet->Fill((sum_pt_i_sv1 - sum_pt_i_sv0) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-									}
-									h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YBdRoutjet->Fill(median_tk_vtx_dist_sig_sv1 - median_tk_vtx_dist_sig_sv0);
-									h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YBdRoutjet->Fill(int(sv1_i_sharedjet_which_idx.size()) - int(sv0_i_sharedjet_which_idx.size()));
-
-								}
-
-							}
-
-                                                        //std::cout << __LINE__ << std::endl;
-							h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_Y->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-							if (median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1 < -4.0 || median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1 > 4.0) {
-								h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_Y->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-							}
-							h_at_least_5trk_output1_shared_tracks_pair_dR_sig_Y->Fill(avg_dR_track_pair / avg_dR_spread_track_pair);
-							if (sv1_i_sharedjet_which_idx.size() == 1) {
-								h_2D_at_least_5trk_output1_shared_tracks_pair_dR_sig_shared_tracks_Y->Fill(avg_dR_track_pair / avg_dR_spread_track_pair, sv0_i_sharedjet_which_idx.size());
-								h_2D_at_least_5trk_output1_shared_tracks_pair_dR_shared_tracks_Y->Fill(avg_dR_track_pair, sv0_i_sharedjet_which_idx.size());
-								h_2D_at_least_5trk_output1_shared_tracks_pair_dR_err_shared_tracks_Y->Fill(sqrt(pow(avg_dR_spread_track_pair, 2) - pow(0.1, 2)), sv0_i_sharedjet_which_idx.size());
-							}
-							else {
-								h_2D_at_least_5trk_output1_shared_tracks_pair_dR_sig_shared_tracks_Y->Fill(avg_dR_track_pair / avg_dR_spread_track_pair, sv1_i_sharedjet_which_idx.size());
-								h_2D_at_least_5trk_output1_shared_tracks_pair_dR_shared_tracks_Y->Fill(avg_dR_track_pair, sv1_i_sharedjet_which_idx.size());
-								h_2D_at_least_5trk_output1_shared_tracks_pair_dR_err_shared_tracks_Y->Fill(sqrt(pow(avg_dR_spread_track_pair, 2) - pow(0.1, 2)), sv1_i_sharedjet_which_idx.size());
-
-							}
-							
-							h_at_least_5trk_output1_shared_tracks_pair_dR_Y->Fill(avg_dR_track_pair);
-							h_at_least_5trk_output1_shared_tracks_pair_dR_err_Y->Fill(sqrt(pow(avg_dR_spread_track_pair, 2) - pow(0.1, 2)));
-							h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_Y->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-							h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_Y->Fill(int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-							
-							
-
-							if (avg_dR_track_pair < 0.2) {
-								h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YdRinjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-								if (median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1 < -4.0 || median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1 > 4.0) {
-									h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YdRinjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-								}
-								h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YdRinjet->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-								h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YdRinjet->Fill(int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-
-							}
-							else {
-								h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_YdRoutjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-								if (median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1 < -4.0 || median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1 > 4.0) {
-									h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_YdRoutjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-								}
-								h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YdRoutjet->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-								h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_YdRoutjet->Fill(int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-
-							}
-						}
-
-						if (sv0_total_track_which_idx.size() >= 3 && sv1_total_track_which_idx.size() >= 3) {
-
-							//Y_nsharedjets++;  //PK: tbs<->bkg
-							h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_Y->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-							h_at_least_3trk_output1_shared_tracks_pair_dR_sig_Y->Fill(avg_dR_track_pair / avg_dR_spread_track_pair);
-							if (sv1_i_sharedjet_which_idx.size() == 1) {
-								h_2D_at_least_3trk_output1_shared_tracks_pair_dR_sig_shared_tracks_Y->Fill(avg_dR_track_pair / avg_dR_spread_track_pair, sv0_i_sharedjet_which_idx.size());
-								h_2D_at_least_3trk_output1_shared_tracks_pair_dR_shared_tracks_Y->Fill(avg_dR_track_pair, sv0_i_sharedjet_which_idx.size());
-								h_2D_at_least_3trk_output1_shared_tracks_pair_dR_err_shared_tracks_Y->Fill(sqrt(pow(avg_dR_spread_track_pair, 2) - pow(0.1, 2)), sv0_i_sharedjet_which_idx.size());
-							}
-							else {
-								h_2D_at_least_3trk_output1_shared_tracks_pair_dR_sig_shared_tracks_Y->Fill(avg_dR_track_pair / avg_dR_spread_track_pair, sv1_i_sharedjet_which_idx.size());
-								h_2D_at_least_3trk_output1_shared_tracks_pair_dR_shared_tracks_Y->Fill(avg_dR_track_pair, sv1_i_sharedjet_which_idx.size());
-								h_2D_at_least_3trk_output1_shared_tracks_pair_dR_err_shared_tracks_Y->Fill(sqrt(pow(avg_dR_spread_track_pair, 2) - pow(0.1, 2)), sv1_i_sharedjet_which_idx.size());
-
-							}
-							h_at_least_3trk_output1_shared_tracks_pair_dR_Y->Fill(avg_dR_track_pair);
-							h_at_least_3trk_output1_shared_tracks_pair_dR_err_Y->Fill(sqrt(pow(avg_dR_spread_track_pair, 2) - pow(0.1, 2)));
-							h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_Y->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-							h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_Y->Fill(int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-							
-
-							if (avg_dR_track_pair < 0.2) {
-								h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_YdRinjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-								h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YdRinjet->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-								h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_YdRinjet->Fill(int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-
-							}
-							else {
-								h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_YdRoutjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-								h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_YdRoutjet->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-								h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_YdRoutjet->Fill(int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-
-							}
-						}
-					}
-					//{n>1,m>1} 
-					if (dBV1 > 0.0100 && dBV0 > 0.0100 && bs2derr0 < 0.0025 && bs2derr1 < 0.0025 && sv0_i_sharedjet_which_idx.size() > 1 && sv1_i_sharedjet_which_idx.size() > 1) {
-						if (sv0_total_track_which_idx.size() >= 5 && sv1_total_track_which_idx.size() >= 5) {
-                                                        //std::cout << __LINE__ << std::endl;
-							//case ZA: tight SVa/b
-							if (int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()) >= 4) {
-								h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZA->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-								h_at_least_5trk_output1_shared_tracks_pair_dR_sig_ZA->Fill(avg_dR_track_pair / avg_dR_spread_track_pair);
-								h_at_least_5trk_output1_shared_tracks_pair_dR_ZA->Fill(avg_dR_track_pair);
-								h_at_least_5trk_output1_shared_tracks_pair_dR_err_ZA->Fill(avg_dR_spread_track_pair);
-								h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZA->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-								h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZA->Fill(int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-								h_2D_at_least_5trk_output1_shared_tracks_pair_shared_tracks_ZA->Fill(int(sv0_i_sharedjet_which_idx.size()), int(sv1_i_sharedjet_which_idx.size()));
-                                                                //std::cout << __LINE__ << std::endl;
-								if (avg_dR_track_pair < 0.2) {
-									h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZAdRinjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-									h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZAdRinjet->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-									h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZAdRinjet->Fill(int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-
-								}
-
-								else {
-									h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZAdRoutjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-									h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZAdRoutjet->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-									h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZAdRoutjet->Fill(int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-
-								}
-							        //std::cout << __LINE__ << std::endl;	
-
-
-							}
-
-							if (int(sv1_i_sharedjet_which_idx.size()) - int(sv0_i_sharedjet_which_idx.size()) >= 4) {
-								h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZA->Fill((sum_pt_i_sv1 - sum_pt_i_sv0) / (sum_pt_i_sv1 + sum_pt_i_sv0));
-								h_at_least_5trk_output1_shared_tracks_pair_dR_sig_ZA->Fill(avg_dR_track_pair / avg_dR_spread_track_pair);
-								h_at_least_5trk_output1_shared_tracks_pair_dR_ZA->Fill(avg_dR_track_pair);
-								h_at_least_5trk_output1_shared_tracks_pair_dR_err_ZA->Fill(avg_dR_spread_track_pair);
-								h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZA->Fill(median_tk_vtx_dist_sig_sv1 - median_tk_vtx_dist_sig_sv0);
-								h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZA->Fill(int(sv1_i_sharedjet_which_idx.size()) - int(sv0_i_sharedjet_which_idx.size()));
-								h_2D_at_least_5trk_output1_shared_tracks_pair_shared_tracks_ZA->Fill(int(sv1_i_sharedjet_which_idx.size()), int(sv0_i_sharedjet_which_idx.size()));
-                                                                //std::cout << __LINE__ << std::endl;
-								if (avg_dR_track_pair < 0.2) {
-									h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZAdRinjet->Fill((sum_pt_i_sv1 - sum_pt_i_sv0) / (sum_pt_i_sv1 + sum_pt_i_sv0));
-									h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZAdRinjet->Fill(median_tk_vtx_dist_sig_sv1 - median_tk_vtx_dist_sig_sv0);
-									h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZAdRinjet->Fill(int(sv1_i_sharedjet_which_idx.size()) - int(sv0_i_sharedjet_which_idx.size()));
-
-								}
-								else  {
-									h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZAdRoutjet->Fill((sum_pt_i_sv1 - sum_pt_i_sv0) / (sum_pt_i_sv1 + sum_pt_i_sv0));
-									h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZAdRoutjet->Fill(median_tk_vtx_dist_sig_sv1 - median_tk_vtx_dist_sig_sv0);
-									h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZAdRoutjet->Fill(int(sv1_i_sharedjet_which_idx.size()) - int(sv0_i_sharedjet_which_idx.size()));
-
-								}
-                                                                //std::cout << __LINE__ << std::endl;
-
-							}
-
-							//case ZB: loose SVa/b 
-							if (0 < int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()) && int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()) <= 3) {
-								h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZB->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-								h_at_least_5trk_output1_shared_tracks_pair_dR_sig_ZB->Fill(avg_dR_track_pair / avg_dR_spread_track_pair);
-								h_at_least_5trk_output1_shared_tracks_pair_dR_ZB->Fill(avg_dR_track_pair);
-								h_at_least_5trk_output1_shared_tracks_pair_dR_err_ZB->Fill(avg_dR_spread_track_pair);
-								h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZB->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-								h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZB->Fill(int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-								h_2D_at_least_5trk_output1_shared_tracks_pair_shared_tracks_ZB->Fill(int(sv0_i_sharedjet_which_idx.size()), int(sv1_i_sharedjet_which_idx.size()));
-
-								if (avg_dR_track_pair < 0.2) {
-									h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZBdRinjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-									h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZBdRinjet->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-									h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZBdRinjet->Fill(int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-
-									
-
-								}
-								else {
-									h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZBdRoutjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-									h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZBdRoutjet->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-									h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZBdRoutjet->Fill(int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-
-								}
-
-							}
-
-							if (0 < int(sv1_i_sharedjet_which_idx.size()) - int(sv0_i_sharedjet_which_idx.size()) && int(sv1_i_sharedjet_which_idx.size()) - int(sv0_i_sharedjet_which_idx.size()) <= 3) {
-								h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZB->Fill((sum_pt_i_sv1 - sum_pt_i_sv0) / (sum_pt_i_sv1 + sum_pt_i_sv0));
-								h_at_least_5trk_output1_shared_tracks_pair_dR_sig_ZB->Fill(avg_dR_track_pair / avg_dR_spread_track_pair);
-								h_at_least_5trk_output1_shared_tracks_pair_dR_ZB->Fill(avg_dR_track_pair);
-								h_at_least_5trk_output1_shared_tracks_pair_dR_err_ZB->Fill(avg_dR_spread_track_pair);
-								h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZB->Fill(median_tk_vtx_dist_sig_sv1 - median_tk_vtx_dist_sig_sv0);
-								h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZB->Fill(int(sv1_i_sharedjet_which_idx.size()) - int(sv0_i_sharedjet_which_idx.size()));
-								h_2D_at_least_5trk_output1_shared_tracks_pair_shared_tracks_ZB->Fill(int(sv1_i_sharedjet_which_idx.size()), int(sv0_i_sharedjet_which_idx.size()));
-
-								if (avg_dR_track_pair < 0.2) {
-									h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZBdRinjet->Fill((sum_pt_i_sv1 - sum_pt_i_sv0) / (sum_pt_i_sv1 + sum_pt_i_sv0));
-									h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZBdRinjet->Fill(median_tk_vtx_dist_sig_sv1 - median_tk_vtx_dist_sig_sv0);
-									h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZBdRinjet->Fill(int(sv1_i_sharedjet_which_idx.size()) - int(sv0_i_sharedjet_which_idx.size()));
-
-									
-								}
-								else {
-									h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZBdRoutjet->Fill((sum_pt_i_sv1 - sum_pt_i_sv0) / (sum_pt_i_sv1 + sum_pt_i_sv0));
-									h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZBdRoutjet->Fill(median_tk_vtx_dist_sig_sv1 - median_tk_vtx_dist_sig_sv0);
-									h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZBdRoutjet->Fill(int(sv1_i_sharedjet_which_idx.size()) - int(sv0_i_sharedjet_which_idx.size()));
-
-									
-								}
-
-							}
-
-							//case ZC: equal SVa/b 	 (SV0 - SV1)
-							if (int(sv0_i_sharedjet_which_idx.size()) == int(sv1_i_sharedjet_which_idx.size())) {
-								h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZC->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-								h_at_least_5trk_output1_shared_tracks_pair_dR_sig_ZC->Fill(avg_dR_track_pair / avg_dR_spread_track_pair);
-								h_at_least_5trk_output1_shared_tracks_pair_dR_ZC->Fill(avg_dR_track_pair);
-								h_at_least_5trk_output1_shared_tracks_pair_dR_err_ZC->Fill(avg_dR_spread_track_pair);
-								h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZC->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-								h_at_least_5trk_output1_shared_tracks_pair_shared_tracks_ZC->Fill(int(sv0_i_sharedjet_which_idx.size()));
-								
-								if (avg_dR_track_pair < 0.2) {
-									h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZCdRinjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-									h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZCdRinjet->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-
-								}
-								
-								else {
-									h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZCdRoutjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-									h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZCdRoutjet->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-
-								}
-
-							}
-
-							//case ZO: every shared-jets	 (SV0 - SV1)
-							h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZO->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-							if (median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1 < -4.0 || median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1 > 4.0) {
-								h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_ZO->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-							}
-							h_at_least_5trk_output1_shared_tracks_pair_dR_sig_ZO->Fill(avg_dR_track_pair / avg_dR_spread_track_pair);
-							h_2D_at_least_5trk_output1_shared_tracks_pair_dR_sig_2x_shared_tracks_ZO->Fill(avg_dR_track_pair / avg_dR_spread_track_pair, int(sv0_i_sharedjet_which_idx.size()));
-							h_2D_at_least_5trk_output1_shared_tracks_pair_dR_sig_2x_shared_tracks_ZO->Fill(avg_dR_track_pair / avg_dR_spread_track_pair, int(sv1_i_sharedjet_which_idx.size()));
-							h_at_least_5trk_output1_shared_tracks_pair_dR_ZO->Fill(avg_dR_track_pair);
-							h_2D_at_least_5trk_output1_shared_tracks_pair_dR_2x_shared_tracks_ZO->Fill(avg_dR_track_pair, int(sv0_i_sharedjet_which_idx.size()));
-							h_2D_at_least_5trk_output1_shared_tracks_pair_dR_2x_shared_tracks_ZO->Fill(avg_dR_track_pair, int(sv1_i_sharedjet_which_idx.size()));
-							h_at_least_5trk_output1_shared_tracks_pair_dR_err_ZO->Fill(avg_dR_spread_track_pair);
-							h_2D_at_least_5trk_output1_shared_tracks_pair_dR_err_2x_shared_tracks_ZO->Fill(avg_dR_spread_track_pair, int(sv0_i_sharedjet_which_idx.size()));
-							h_2D_at_least_5trk_output1_shared_tracks_pair_dR_err_2x_shared_tracks_ZO->Fill(avg_dR_spread_track_pair, int(sv1_i_sharedjet_which_idx.size()));
-							h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZO->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-							h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZO->Fill(int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-							h_2D_at_least_5trk_output1_shared_tracks_pair_shared_tracks_ZO->Fill(int(sv0_i_sharedjet_which_idx.size()), int(sv1_i_sharedjet_which_idx.size()));
-
-                                                        //std::cout << __LINE__ << std::endl;
-							if (avg_dR_track_pair < 0.2) {
-								h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZOdRinjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-								h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZOdRinjet->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-								h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZOdRinjet->Fill(int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-								if (median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1 < -4.0 || median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1 > 4.0) {
-									h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_ZOdRinjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-								}
-							
-							}
-							
-							else {
-								h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_ZOdRoutjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-								h_at_least_5trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZOdRoutjet->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-								h_at_least_5trk_output1_shared_tracks_pair_diff_shared_tracks_ZOdRoutjet->Fill(int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-								if (median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1 < -4.0 || median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1 > 4.0) {
-									h_at_least_5trk_output1_shared_tracks_pair_asym_sum_pT_of_large_MDS_ZOdRoutjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-								}
-							}
-
-						        //std::cout << __LINE__ << std::endl; 	
-						}
-						                                 
-						if (sv0_total_track_which_idx.size() >= 3 && sv1_total_track_which_idx.size() >= 3) {
-							//case Znon-C: SVa/b
-                                                  //std::cout << __LINE__ << std::endl;
-							if (0 < int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size())) {
-								h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZnonC->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-								h_at_least_3trk_output1_shared_tracks_pair_dR_sig_ZnonC->Fill(avg_dR_track_pair / avg_dR_spread_track_pair);
-								h_2D_at_least_3trk_output1_shared_tracks_pair_dR_sig_diff_shared_tracks_ZnonC->Fill(avg_dR_track_pair / avg_dR_spread_track_pair, int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-								h_at_least_3trk_output1_shared_tracks_pair_dR_ZnonC->Fill(avg_dR_track_pair);
-								h_2D_at_least_3trk_output1_shared_tracks_pair_dR_diff_shared_tracks_ZnonC->Fill(avg_dR_track_pair, int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-								h_at_least_3trk_output1_shared_tracks_pair_dR_err_ZnonC->Fill(avg_dR_spread_track_pair);
-								h_2D_at_least_3trk_output1_shared_tracks_pair_dR_err_diff_shared_tracks_ZnonC->Fill(avg_dR_spread_track_pair, int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZnonC->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-								h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_ZnonC->Fill(int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-					                       // std::cout << __LINE__ << std::endl; 			
-								if (avg_dR_track_pair < 0.2) {
-									h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZnonCdRinjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-									h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZnonCdRinjet->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-									h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_ZnonCdRinjet->Fill(int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-
-								}
-								
-								else {
-									h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZnonCdRoutjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-									h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZnonCdRoutjet->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-									h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_ZnonCdRoutjet->Fill(int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-
-								}
-                                                               // std::cout << __LINE__ << std::endl; 
-
-							}
-                                                        //std::cout << __LINE__ << std::endl;
-							if (0 < int(sv1_i_sharedjet_which_idx.size()) - int(sv0_i_sharedjet_which_idx.size())) {
-								h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZnonC->Fill((sum_pt_i_sv1 - sum_pt_i_sv0) / (sum_pt_i_sv1 + sum_pt_i_sv0));
-								h_at_least_3trk_output1_shared_tracks_pair_dR_sig_ZnonC->Fill(avg_dR_track_pair / avg_dR_spread_track_pair);
-								h_2D_at_least_3trk_output1_shared_tracks_pair_dR_sig_diff_shared_tracks_ZnonC->Fill(avg_dR_track_pair / avg_dR_spread_track_pair, int(sv1_i_sharedjet_which_idx.size()) - int(sv0_i_sharedjet_which_idx.size()));
-								h_at_least_3trk_output1_shared_tracks_pair_dR_ZnonC->Fill(avg_dR_track_pair);
-								h_2D_at_least_3trk_output1_shared_tracks_pair_dR_diff_shared_tracks_ZnonC->Fill(avg_dR_track_pair, int(sv1_i_sharedjet_which_idx.size()) - int(sv0_i_sharedjet_which_idx.size()));
-								h_at_least_3trk_output1_shared_tracks_pair_dR_err_ZnonC->Fill(avg_dR_spread_track_pair);
-								h_2D_at_least_3trk_output1_shared_tracks_pair_dR_err_diff_shared_tracks_ZnonC->Fill( avg_dR_spread_track_pair, int(sv1_i_sharedjet_which_idx.size()) - int(sv0_i_sharedjet_which_idx.size()));
-								h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZnonC->Fill(median_tk_vtx_dist_sig_sv1 - median_tk_vtx_dist_sig_sv0);
-								h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_ZnonC->Fill(int(sv1_i_sharedjet_which_idx.size()) - int(sv0_i_sharedjet_which_idx.size()));
-								
-								if (avg_dR_track_pair < 0.2) {
-									h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZnonCdRinjet->Fill((sum_pt_i_sv1 - sum_pt_i_sv0) / (sum_pt_i_sv1 + sum_pt_i_sv0));
-									h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZnonCdRinjet->Fill(median_tk_vtx_dist_sig_sv1 - median_tk_vtx_dist_sig_sv0);
-									h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_ZnonCdRinjet->Fill(int(sv1_i_sharedjet_which_idx.size()) - int(sv0_i_sharedjet_which_idx.size()));
-
-
-								}
-								
-								else {
-									h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZnonCdRoutjet->Fill((sum_pt_i_sv1 - sum_pt_i_sv0) / (sum_pt_i_sv1 + sum_pt_i_sv0));
-									h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZnonCdRoutjet->Fill(median_tk_vtx_dist_sig_sv1 - median_tk_vtx_dist_sig_sv0);
-									h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_ZnonCdRoutjet->Fill(int(sv1_i_sharedjet_which_idx.size()) - int(sv0_i_sharedjet_which_idx.size()));
-
-								}
-
-							}
-                                                        //std::cout << __LINE__ << std::endl; 
-							//case ZC: equal SVa/b 	 (SV0 - SV1)
-							if (int(sv0_i_sharedjet_which_idx.size()) == int(sv1_i_sharedjet_which_idx.size())) {
-								h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZC->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-								h_at_least_3trk_output1_shared_tracks_pair_dR_sig_ZC->Fill(avg_dR_track_pair / avg_dR_spread_track_pair);
-								h_2D_at_least_3trk_output1_shared_tracks_pair_dR_sig_shared_tracks_ZC->Fill(avg_dR_track_pair / avg_dR_spread_track_pair, int(sv0_i_sharedjet_which_idx.size()));
-								h_at_least_3trk_output1_shared_tracks_pair_dR_ZC->Fill(avg_dR_track_pair);
-								h_2D_at_least_3trk_output1_shared_tracks_pair_dR_shared_tracks_ZC->Fill(avg_dR_track_pair, int(sv0_i_sharedjet_which_idx.size()));
-								h_at_least_3trk_output1_shared_tracks_pair_dR_err_ZC->Fill(avg_dR_spread_track_pair);
-								h_2D_at_least_3trk_output1_shared_tracks_pair_dR_err_shared_tracks_ZC->Fill(avg_dR_spread_track_pair, int(sv0_i_sharedjet_which_idx.size()));
-								h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZC->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-								h_at_least_3trk_output1_shared_tracks_pair_shared_tracks_ZC->Fill(int(sv0_i_sharedjet_which_idx.size()));
-
-								if (avg_dR_track_pair < 0.2) {
-									h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZCdRinjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-									h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZCdRinjet->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-
-								}
-								else {
-									h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZCdRoutjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-									h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZCdRoutjet->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-								}
-
-							}
-                                                        //std::cout << __LINE__ << std::endl; 
-
-							//case ZO: every shared-jets	 (SV0 - SV1)
-							h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZO->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-							h_at_least_3trk_output1_shared_tracks_pair_dR_sig_ZO->Fill(avg_dR_track_pair / avg_dR_spread_track_pair);
-							h_2D_at_least_3trk_output1_shared_tracks_pair_dR_sig_2x_shared_tracks_ZO->Fill(avg_dR_track_pair / avg_dR_spread_track_pair, int(sv0_i_sharedjet_which_idx.size()));
-							h_2D_at_least_3trk_output1_shared_tracks_pair_dR_sig_2x_shared_tracks_ZO->Fill(avg_dR_track_pair / avg_dR_spread_track_pair, int(sv1_i_sharedjet_which_idx.size()));
-							h_at_least_3trk_output1_shared_tracks_pair_dR_ZO->Fill(avg_dR_track_pair);
-							h_2D_at_least_3trk_output1_shared_tracks_pair_dR_2x_shared_tracks_ZO->Fill(avg_dR_track_pair, int(sv0_i_sharedjet_which_idx.size()));
-							h_2D_at_least_3trk_output1_shared_tracks_pair_dR_2x_shared_tracks_ZO->Fill(avg_dR_track_pair, int(sv1_i_sharedjet_which_idx.size()));
-							h_at_least_3trk_output1_shared_tracks_pair_dR_err_ZO->Fill(avg_dR_spread_track_pair);
-							h_2D_at_least_3trk_output1_shared_tracks_pair_dR_err_2x_shared_tracks_ZO->Fill(avg_dR_spread_track_pair, int(sv0_i_sharedjet_which_idx.size()));
-							h_2D_at_least_3trk_output1_shared_tracks_pair_dR_err_2x_shared_tracks_ZO->Fill(avg_dR_spread_track_pair, int(sv1_i_sharedjet_which_idx.size()));
-
-							h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZO->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-							h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_ZO->Fill(int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-							h_2D_at_least_3trk_output1_shared_tracks_pair_shared_tracks_ZO->Fill(int(sv0_i_sharedjet_which_idx.size()), int(sv1_i_sharedjet_which_idx.size()));
-
-							if (avg_dR_track_pair < 0.2) {
-								h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZOdRinjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-								h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZOdRinjet->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-								h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_ZOdRinjet->Fill(int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-
-							}
-							
-							else {
-								h_at_least_3trk_output1_shared_tracks_pair_asym_sum_pT_ZOdRoutjet->Fill((sum_pt_i_sv0 - sum_pt_i_sv1) / (sum_pt_i_sv0 + sum_pt_i_sv1));
-								h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZOdRoutjet->Fill(median_tk_vtx_dist_sig_sv0 - median_tk_vtx_dist_sig_sv1);
-								h_at_least_3trk_output1_shared_tracks_pair_diff_shared_tracks_ZOdRoutjet->Fill(int(sv0_i_sharedjet_which_idx.size()) - int(sv1_i_sharedjet_which_idx.size()));
-
-							}
-
-
-
-						}
-					}
-
-				
-
-					std::vector<int> sv1_diff;
-					std::vector<int> sv0_diff;
-
-
-					if (sum_pt_i_sv0 >= sum_pt_i_sv1) {
-						//std::cout << " sv0 is selected " << std::endl;
-						std::set_difference(sv1_sum_pt_track_which_idx.begin(), sv1_sum_pt_track_which_idx.end(), sv1_i_sharedjet_which_idx.begin(), sv1_i_sharedjet_which_idx.end(),
-						std::inserter(sv1_diff, sv1_diff.begin()));
-						sv1_sum_pt_track_which_idx = sv1_diff;
-						if (avg_dR_track_pair / avg_dR_spread_track_pair < 1)
-							sv1_sum_pt_only_dR_track_which_idx = sv1_diff;
-					}
-					else {
-						//std::cout << " sv1 is selected " << std::endl;
-						std::set_difference(sv0_sum_pt_track_which_idx.begin(), sv0_sum_pt_track_which_idx.end(), sv0_i_sharedjet_which_idx.begin(), sv0_i_sharedjet_which_idx.end(),
-						std::inserter(sv0_diff, sv0_diff.begin()));
-						sv0_sum_pt_track_which_idx = sv0_diff;
-						if (avg_dR_track_pair / avg_dR_spread_track_pair < 1)
-							sv0_sum_pt_only_dR_track_which_idx = sv0_diff;
-					}
-
-					/*
-					sv1_diff = {};
-					sv0_diff = {};
-
-
-					if (median_tk_vtx_dist_sv1 >= median_tk_vtx_dist_sv0) {
-						//std::cout << " sv0 is selected " << std::endl;
-						std::set_difference(sv1_median_tk_vtx_dist_track_which_idx.begin(), sv1_median_tk_vtx_dist_track_which_idx.end(), sv1_i_sharedjet_which_idx.begin(), sv1_i_sharedjet_which_idx.end(),
-							std::inserter(sv1_diff, sv1_diff.begin()));
-						sv1_median_tk_vtx_dist_track_which_idx = sv1_diff;
-						if (avg_dR_track_pair / avg_dR_spread_track_pair < 1)
-							sv1_median_tk_vtx_dist_only_dR_track_which_idx = sv1_diff;
-					}
-					else {
-						//std::cout << " sv1 is selected " << std::endl;
-						std::set_difference(sv0_median_tk_vtx_dist_track_which_idx.begin(), sv0_median_tk_vtx_dist_track_which_idx.end(), sv0_i_sharedjet_which_idx.begin(), sv0_i_sharedjet_which_idx.end(),
-							std::inserter(sv0_diff, sv0_diff.begin()));
-						sv0_median_tk_vtx_dist_track_which_idx = sv0_diff;
-						if (avg_dR_track_pair / avg_dR_spread_track_pair < 1)
-							sv0_median_tk_vtx_dist_only_dR_track_which_idx = sv0_diff;
-					}
-					*/
-
-					// if X case only
-					sv1_diff = {};
-					sv0_diff = {};
-
-					if (dBV1 > 0.0100 && dBV0 > 0.0100 && bs2derr0 < 0.0025 && bs2derr1 < 0.0025 && sv0_i_sharedjet_which_idx.size() == 1 && sv1_i_sharedjet_which_idx.size() == 1) {
-
-						if (sv0_total_track_which_idx.size() >= 5 && sv1_total_track_which_idx.size() >= 5) { //PK: tbs<->bkg
-							nsv_onlyX = 2;
-							reco::TransientTrack lonesv0_track;
-							int lonesv0_idx = sv0_i_sharedjet_which_idx[0] - 1;
-							lonesv0_track = tt_builder->build(tks_v0[lonesv0_idx]);
-							std::pair<bool, Measurement1D> lone_tk_vtx0_dist = track_dist(lonesv0_track, v0);
-							X_i_sharedjet_lone_tk_vtx0_dist_sig.push_back(lone_tk_vtx0_dist.second.significance());
-							X_i_sharedjet_lone_tk_vtx0_dist.push_back(lone_tk_vtx0_dist.second.value());
-							X_i_sharedjet_lone_tk_vtx0_dist_err.push_back(lone_tk_vtx0_dist.second.error());
-
-							reco::TransientTrack lonesv1_track;
-							int lonesv1_idx = sv1_i_sharedjet_which_idx[0] - 1;
-							lonesv1_track = tt_builder->build(tks_v1[lonesv1_idx]);
-							std::pair<bool, Measurement1D> lone_tk_vtx1_dist = track_dist(lonesv1_track, v1);
-							X_i_sharedjet_lone_tk_vtx1_dist_sig.push_back(lone_tk_vtx1_dist.second.significance());
-							X_i_sharedjet_lone_tk_vtx1_dist.push_back(lone_tk_vtx1_dist.second.value());
-							X_i_sharedjet_lone_tk_vtx1_dist_err.push_back(lone_tk_vtx1_dist.second.error());
-							
-							if (fabs(reco::deltaPhi(sv0_i_sharedjet_tk_phi[0], sv1_i_sharedjet_tk_phi[0])) < 1.5) {
-								std::set_difference(sv1_only_X_track_which_idx.begin(), sv1_only_X_track_which_idx.end(), sv1_i_sharedjet_which_idx.begin(), sv1_i_sharedjet_which_idx.end(),
-									std::inserter(sv1_diff, sv1_diff.begin()));
-								sv1_only_X_track_which_idx = sv1_diff;
-
-								std::set_difference(sv0_only_X_track_which_idx.begin(), sv0_only_X_track_which_idx.end(), sv0_i_sharedjet_which_idx.begin(), sv0_i_sharedjet_which_idx.end(),
-									std::inserter(sv0_diff, sv0_diff.begin()));
-								sv0_only_X_track_which_idx = sv0_diff;
-							}
-
-							
-						}
-					}
-					// end X case only 
-
-					// if Y case only
-					sv1_diff = {};
-					sv0_diff = {};
-					
-					if ((dBV1 > 0.0100 && dBV0 > 0.0100 && bs2derr0 < 0.0025 && bs2derr1 < 0.0025 && sv0_i_sharedjet_which_idx.size() > 1 && sv1_i_sharedjet_which_idx.size() == 1) || (dBV1 > 0.0100 && dBV0 > 0.0100 && bs2derr0 < 0.0025 && bs2derr1 < 0.0025 && sv1_i_sharedjet_which_idx.size() > 1 && sv0_i_sharedjet_which_idx.size() == 1)) {
-						
-						if (sv0_total_track_which_idx.size() >= 5 && sv1_total_track_which_idx.size() >= 5) { //PK: tbs<->bkg
-							nsv_sumpT_onlyY = 2;
-							if (sum_pt_i_sv0 >= sum_pt_i_sv1) {
-								//std::cout << " sv0 is selected " << std::endl;
-								std::set_difference(sv1_sum_pT_only_Y_track_which_idx.begin(), sv1_sum_pT_only_Y_track_which_idx.end(), sv1_i_sharedjet_which_idx.begin(), sv1_i_sharedjet_which_idx.end(),
-									std::inserter(sv1_diff, sv1_diff.begin()));
-								sv1_sum_pT_only_Y_track_which_idx = sv1_diff;
-
-							}
-							else {
-								//std::cout << " sv1 is selected " << std::endl;
-								std::set_difference(sv0_sum_pT_only_Y_track_which_idx.begin(), sv0_sum_pT_only_Y_track_which_idx.end(), sv0_i_sharedjet_which_idx.begin(), sv0_i_sharedjet_which_idx.end(),
-									std::inserter(sv0_diff, sv0_diff.begin()));
-								sv0_sum_pT_only_Y_track_which_idx = sv0_diff;
-
-							}
-						}
-					}
-
-					sv1_diff = {};
-					sv0_diff = {};
-
-					if ((dBV1 > 0.0100 && dBV0 > 0.0100 && bs2derr0 < 0.0025 && bs2derr1 < 0.0025 && sv0_i_sharedjet_which_idx.size() > 1 && sv1_i_sharedjet_which_idx.size() == 1) || (dBV1 > 0.0100 && dBV0 > 0.0100 && bs2derr0 < 0.0025 && bs2derr1 < 0.0025 && sv1_i_sharedjet_which_idx.size() > 1 && sv0_i_sharedjet_which_idx.size() == 1)) {
-
-						if (sv0_total_track_which_idx.size() >= 5 && sv1_total_track_which_idx.size() >= 5) {  //PK: tbs<->bkg
-							nsv_lonetrk_onlyY = 2; 
-							if (sv0_i_sharedjet_which_idx.size() > sv1_i_sharedjet_which_idx.size()) {
-								//std::cout << " sv0 is selected " << std::endl;
-								std::set_difference(sv1_shared_ntrack_only_Y_track_which_idx.begin(), sv1_shared_ntrack_only_Y_track_which_idx.end(), sv1_i_sharedjet_which_idx.begin(), sv1_i_sharedjet_which_idx.end(),
-									std::inserter(sv1_diff, sv1_diff.begin()));
-								sv1_shared_ntrack_only_Y_track_which_idx = sv1_diff;
-
-							}
-							else {
-								//std::cout << " sv1 is selected " << std::endl;
-								std::set_difference(sv0_shared_ntrack_only_Y_track_which_idx.begin(), sv0_shared_ntrack_only_Y_track_which_idx.end(), sv0_i_sharedjet_which_idx.begin(), sv0_i_sharedjet_which_idx.end(),
-									std::inserter(sv0_diff, sv0_diff.begin()));
-								sv0_shared_ntrack_only_Y_track_which_idx = sv0_diff;
-
-							}
-						}
-					}
-
-					//end Y case only 
-					sv1_diff = {};
-					sv0_diff = {};
-
-					
-					if (median_tk_vtx_dist_sig_sv1 >= median_tk_vtx_dist_sig_sv0) {
-						//std::cout << " sv0 is selected " << std::endl;
-						std::set_difference(sv1_median_tk_vtx_dist_sig_track_which_idx.begin(), sv1_median_tk_vtx_dist_sig_track_which_idx.end(), sv1_i_sharedjet_which_idx.begin(), sv1_i_sharedjet_which_idx.end(),
-							std::inserter(sv1_diff, sv1_diff.begin()));
-						sv1_median_tk_vtx_dist_sig_track_which_idx = sv1_diff;
-						if (avg_dR_track_pair / avg_dR_spread_track_pair < 1) 
-							sv1_median_tk_vtx_dist_sig_only_dR_track_which_idx = sv1_diff;
-							
-					}
-					else {
-						//std::cout << " sv1 is selected " << std::endl;
-						std::set_difference(sv0_median_tk_vtx_dist_sig_track_which_idx.begin(), sv0_median_tk_vtx_dist_sig_track_which_idx.end(), sv0_i_sharedjet_which_idx.begin(), sv0_i_sharedjet_which_idx.end(),
-							std::inserter(sv0_diff, sv0_diff.begin()));
-						sv0_median_tk_vtx_dist_sig_track_which_idx = sv0_diff;
-						if (avg_dR_track_pair / avg_dR_spread_track_pair < 1)
-							sv0_median_tk_vtx_dist_sig_only_dR_track_which_idx = sv0_diff;
-					}
-
-                                        sv1_diff = {};
-                                        sv0_diff = {};
-
-					if (avg_dR_track_pair / avg_dR_spread_track_pair < 1) {
-						if (median_tk_vtx_dist_sig_sv1 > 2 && median_tk_vtx_dist_sig_sv0 > 2) {
-							if (median_tk_vtx_dist_sig_sv1 >= median_tk_vtx_dist_sig_sv0) {
-								//std::cout << " sv0 is selected " << std::endl;
-								std::set_difference(sv1_median_tk_vtx_dist_2sig_only_dR_track_which_idx.begin(), sv1_median_tk_vtx_dist_2sig_only_dR_track_which_idx.end(), sv1_i_sharedjet_which_idx.begin(), sv1_i_sharedjet_which_idx.end(),
-									std::inserter(sv1_diff, sv1_diff.begin()));
-								sv1_median_tk_vtx_dist_2sig_only_dR_track_which_idx = sv1_diff;
-								
-							}
-							else {
-								//std::cout << " sv1 is selected " << std::endl;
-								std::set_difference(sv0_median_tk_vtx_dist_2sig_only_dR_track_which_idx.begin(), sv0_median_tk_vtx_dist_2sig_only_dR_track_which_idx.end(), sv0_i_sharedjet_which_idx.begin(), sv0_i_sharedjet_which_idx.end(),
-									std::inserter(sv0_diff, sv0_diff.begin()));
-								sv0_median_tk_vtx_dist_2sig_only_dR_track_which_idx = sv0_diff;
-								
-							}
-
-						}
-						if (median_tk_vtx_dist_sig_sv1 > 2 && median_tk_vtx_dist_sig_sv0 <= 2) {
-							std::set_difference(sv1_median_tk_vtx_dist_2sig_only_dR_track_which_idx.begin(), sv1_median_tk_vtx_dist_2sig_only_dR_track_which_idx.end(), sv1_i_sharedjet_which_idx.begin(), sv1_i_sharedjet_which_idx.end(),
-								std::inserter(sv1_diff, sv1_diff.begin()));
-							sv1_median_tk_vtx_dist_2sig_only_dR_track_which_idx = sv1_diff;
-						}
-						if (median_tk_vtx_dist_sig_sv0 > 2 && median_tk_vtx_dist_sig_sv1 <= 2) {
-							std::set_difference(sv0_median_tk_vtx_dist_2sig_only_dR_track_which_idx.begin(), sv0_median_tk_vtx_dist_2sig_only_dR_track_which_idx.end(), sv0_i_sharedjet_which_idx.begin(), sv0_i_sharedjet_which_idx.end(),
-								std::inserter(sv0_diff, sv0_diff.begin()));
-							sv0_median_tk_vtx_dist_2sig_only_dR_track_which_idx = sv0_diff;
-						}
-					}
-					
-
+				else {
+					sv_ascending_total_ntrack.insert(it_ntracks, ntracks);
+					sv_ascending_vtxidx.insert(it_vtx, vtxidx);
 				}
-
 				
+			}
 			
 
-				if (X_nsharedjets > 0 && Y_nsharedjets > 0) {
-					h_2D_qualify_most_track_vertices_XandY_nsharedjet->Fill(X_nsharedjets, Y_nsharedjets);
-				}
-
-				Measurement1D dBV0_Meas1D = vertex_dist_2d.distance(v0, fake_bs_vtx);
-				double dBV0 = dBV0_Meas1D.value();
-				double bs2derr0 = dBV0_Meas1D.error();
-
-				Measurement1D dBV1_Meas1D = vertex_dist_2d.distance(v1, fake_bs_vtx);
-				double dBV1 = dBV1_Meas1D.value();
-				double bs2derr1 = dBV1_Meas1D.error();
-				Measurement1D v_dist = vertex_dist(v0, v1);
-
-				if (dBV1 > 0.0100 && dBV0 > 0.0100 && bs2derr0 < 0.0025 && bs2derr1 < 0.0025 && v0.nTracks() >= 5 && v1.nTracks() >= 5) {	 //PK: tbs<->bkg
-					nsv_sumpT = 2;
-					nsv_lonetrk = 2;
-					nsv_sumpTandX = 2;
-					nsv_lonetrkandX = 2;
-					sv0_sumpTandX = 1;
-					sv0_lonetrkandX = 1;
-					sv1_sumpTandX = 1;
-					sv1_lonetrkandX = 1;
-					h_qualify_svdist2d_three_bins->Fill(v_dist.value());
-					h_qualify_most_track_vertices_nsharedjet->Fill(nsharedjets);
-				}
-					
-
-				//--------------------------------------------------------
-
-				std::vector<reco::TransientTrack> nosharedjets_v0_ttks;
-				for (unsigned int i = 0, ie = sv0_sum_pt_track_which_idx.size(); i < ie; ++i) {
-					reco::TransientTrack v0_track;
-					int idx = sv0_sum_pt_track_which_idx[i] - 1;
-					v0_track = tt_builder->build(tks_v0[idx]);
-					nosharedjets_v0_ttks.push_back(v0_track);
-				}
-
-				reco::Vertex nosharedjets_v0;
-
-				for (const TransientVertex& tv : kv_reco_dropin(nosharedjets_v0_ttks))
-					nosharedjets_v0 = reco::Vertex(tv);
-
-				/*
-				if (nosharedjets_v0.nTracks() > 0) {
-					for (unsigned int i = 0, ie = sv0_sum_pt_track_which_idx.size(); i < ie; ++i) {
-						reco::TransientTrack v0_track;
-						int idx = sv0_sum_pt_track_which_idx[i] - 1;
-						v0_track = tt_builder->build(tks_v0[idx]);
-						std::pair<bool, Measurement1D> tk_vtx_dist = track_dist(v0_track, nosharedjets_v0);
-						//std::cout << "  " << i + 1 << " shared track's phi: " << tks_v0[idx]->phi() << " shared track's pt: " << tks_v0[idx]->pt() << " shared track's sig_dxy: " << tk_vtx_dist.second.significance() << std::endl;
-					}
-				}
-				*/
-
-
-
-
-				std::vector<reco::TransientTrack> nosharedjets_v1_ttks;
-				for (unsigned int i = 0, ie = sv1_sum_pt_track_which_idx.size(); i < ie; ++i) {
-					reco::TransientTrack v1_track;
-					int idx = sv1_sum_pt_track_which_idx[i] - 1;
-					v1_track = tt_builder->build(tks_v1[idx]);
-					nosharedjets_v1_ttks.push_back(v1_track);
-				}
-
-				reco::Vertex nosharedjets_v1;
-				for (const TransientVertex& tv : kv_reco_dropin(nosharedjets_v1_ttks))
-					nosharedjets_v1 = reco::Vertex(tv);
-
-				/*
-				if (nosharedjets_v1.nTracks() > 0) {
-					for (unsigned int i = 0, ie = sv1_sum_pt_track_which_idx.size(); i < ie; ++i) {
-						reco::TransientTrack v1_track;
-						int idx = sv1_sum_pt_track_which_idx[i] - 1;
-						v1_track = tt_builder->build(tks_v1[idx]);
-						std::pair<bool, Measurement1D> tk_vtx_dist = track_dist(v1_track, nosharedjets_v1);
-						//std::cout << "  " << i + 1 << " shared track's phi: " << tks_v1[idx]->phi() << " shared track's pt: " << tks_v1[idx]->pt() << " shared track's sig_dxy: " << tk_vtx_dist.second.significance() << std::endl;
-					}
-				}
-				*/
-
-				dBV0_Meas1D = vertex_dist_2d.distance(nosharedjets_v0, fake_bs_vtx);
-				dBV0 = dBV0_Meas1D.value();
-			    bs2derr0 = dBV0_Meas1D.error();
-
-				dBV1_Meas1D = vertex_dist_2d.distance(nosharedjets_v1, fake_bs_vtx);
-				dBV1 = dBV1_Meas1D.value();
-				bs2derr1 = dBV1_Meas1D.error();
-				Measurement1D v_dist_noshare_sum_pT = vertex_dist(nosharedjets_v0, nosharedjets_v1);
-
-				if (dBV1 > 0.0100 && dBV0 > 0.0100 && bs2derr0 < 0.0025 && bs2derr1 < 0.0025 && nosharedjets_v0.nTracks() >= 5 && nosharedjets_v1.nTracks() >= 5)
-					h_qualify_by_sum_pT_svdist2d_three_bins->Fill(v_dist_noshare_sum_pT.value());
-
-
-				//--------------------------------------------------------
-
-				std::vector<reco::TransientTrack> nosharedjets_only_dR_v0_ttks;
-				for (unsigned int i = 0, ie = sv0_sum_pt_only_dR_track_which_idx.size(); i < ie; ++i) {
-					reco::TransientTrack v0_track;
-					int idx = sv0_sum_pt_only_dR_track_which_idx[i] - 1;
-					v0_track = tt_builder->build(tks_v0[idx]);
-					nosharedjets_only_dR_v0_ttks.push_back(v0_track);
-				}
-
-				reco::Vertex nosharedjets_only_dR_v0;
-
-				for (const TransientVertex& tv : kv_reco_dropin(nosharedjets_only_dR_v0_ttks))
-					nosharedjets_only_dR_v0 = reco::Vertex(tv);
-
-				std::vector<reco::TransientTrack> nosharedjets_only_dR_v1_ttks;
-				for (unsigned int i = 0, ie = sv1_sum_pt_only_dR_track_which_idx.size(); i < ie; ++i) {
-					reco::TransientTrack v1_track;
-					int idx = sv1_sum_pt_only_dR_track_which_idx[i] - 1;
-					v1_track = tt_builder->build(tks_v1[idx]);
-					nosharedjets_only_dR_v1_ttks.push_back(v1_track);
-				}
-
-				reco::Vertex nosharedjets_only_dR_v1;
-
-				for (const TransientVertex& tv : kv_reco_dropin(nosharedjets_only_dR_v1_ttks))
-					nosharedjets_only_dR_v1 = reco::Vertex(tv);
-
-				dBV0_Meas1D = vertex_dist_2d.distance(nosharedjets_only_dR_v0, fake_bs_vtx);
-				dBV0 = dBV0_Meas1D.value();
-				bs2derr0 = dBV0_Meas1D.error();
-
-				dBV1_Meas1D = vertex_dist_2d.distance(nosharedjets_only_dR_v1, fake_bs_vtx);
-				dBV1 = dBV1_Meas1D.value();
-				bs2derr1 = dBV1_Meas1D.error();
-				Measurement1D v_dist_noshare_sum_pT_only_dR = vertex_dist(nosharedjets_only_dR_v0, nosharedjets_only_dR_v1);
-
-				if (dBV1 > 0.0100 && dBV0 > 0.0100 && bs2derr0 < 0.0025 && bs2derr1 < 0.0025 && nosharedjets_only_dR_v0.nTracks() >= 5 && nosharedjets_only_dR_v1.nTracks() >= 5)
-					h_qualify_only_small_dR_by_sum_pT_svdist2d_three_bins->Fill(v_dist_noshare_sum_pT_only_dR.value());
-				
-				//------------------------------------------------------------
-
-				/*
-				
-				std::vector<reco::TransientTrack> nosharedjets_med_dist_v0_ttks;
-				for (unsigned int i = 0, ie = sv0_median_tk_vtx_dist_track_which_idx.size(); i < ie; ++i) {
-					reco::TransientTrack v0_track;
-					int idx = sv0_median_tk_vtx_dist_track_which_idx[i] - 1;
-					v0_track = tt_builder->build(tks_v0[idx]);
-					nosharedjets_med_dist_v0_ttks.push_back(v0_track);
-				}
-
-				reco::Vertex nosharedjets_med_dist_v0;
-
-				for (const TransientVertex& tv : kv_reco_dropin(nosharedjets_med_dist_v0_ttks))
-					nosharedjets_med_dist_v0 = reco::Vertex(tv);
-
-				std::vector<reco::TransientTrack> nosharedjets_med_dist_v1_ttks;
-				for (unsigned int i = 0, ie = sv1_median_tk_vtx_dist_track_which_idx.size(); i < ie; ++i) {
-					reco::TransientTrack v1_track;
-					int idx = sv1_median_tk_vtx_dist_track_which_idx[i] - 1;
-					v1_track = tt_builder->build(tks_v1[idx]);
-					nosharedjets_med_dist_v1_ttks.push_back(v1_track);
-				}
-
-				reco::Vertex nosharedjets_med_dist_v1;
-
-				for (const TransientVertex& tv : kv_reco_dropin(nosharedjets_med_dist_v1_ttks))
-					nosharedjets_med_dist_v1 = reco::Vertex(tv);
-
-				dBV0_Meas1D = vertex_dist_2d.distance(nosharedjets_med_dist_v0, fake_bs_vtx);
-				dBV0 = dBV0_Meas1D.value();
-				bs2derr0 = dBV0_Meas1D.error();
-
-				dBV1_Meas1D = vertex_dist_2d.distance(nosharedjets_med_dist_v1, fake_bs_vtx);
-				dBV1 = dBV1_Meas1D.value();
-				bs2derr1 = dBV1_Meas1D.error();
-				Measurement1D v_dist_noshare_med_dist = vertex_dist(nosharedjets_med_dist_v0, nosharedjets_med_dist_v1);
-
-				if (dBV1 > 0.0100 && dBV0 > 0.0100 && bs2derr0 < 0.0025 && bs2derr1 < 0.0025 && nosharedjets_med_dist_v0.nTracks() >= 5 && nosharedjets_med_dist_v1.nTracks() >= 5)
-					h_qualify_by_median_tkvtxdist_svdist2d_three_bins->Fill(v_dist_noshare_med_dist.value());
-				
-				//------------------------------------------------------------
-
-				std::vector<reco::TransientTrack> nosharedjets_med_dist_only_dR_v0_ttks;
-				for (unsigned int i = 0, ie = sv0_median_tk_vtx_dist_only_dR_track_which_idx.size(); i < ie; ++i) {
-					reco::TransientTrack v0_track;
-					int idx = sv0_median_tk_vtx_dist_only_dR_track_which_idx[i] - 1;
-					v0_track = tt_builder->build(tks_v0[idx]);
-					nosharedjets_med_dist_only_dR_v0_ttks.push_back(v0_track);
-				}
-
-				reco::Vertex nosharedjets_med_dist_only_dR_v0;
-
-				for (const TransientVertex& tv : kv_reco_dropin(nosharedjets_med_dist_only_dR_v0_ttks))
-					nosharedjets_med_dist_only_dR_v0 = reco::Vertex(tv);
-
-				std::vector<reco::TransientTrack> nosharedjets_med_dist_only_dR_v1_ttks;
-				for (unsigned int i = 0, ie = sv1_median_tk_vtx_dist_only_dR_track_which_idx.size(); i < ie; ++i) {
-					reco::TransientTrack v1_track;
-					int idx = sv1_median_tk_vtx_dist_only_dR_track_which_idx[i] - 1;
-					v1_track = tt_builder->build(tks_v1[idx]);
-					nosharedjets_med_dist_only_dR_v1_ttks.push_back(v1_track);
-				}
-
-				reco::Vertex nosharedjets_med_dist_only_dR_v1;
-
-				for (const TransientVertex& tv : kv_reco_dropin(nosharedjets_med_dist_only_dR_v1_ttks))
-					nosharedjets_med_dist_only_dR_v1 = reco::Vertex(tv);
-
-				dBV0_Meas1D = vertex_dist_2d.distance(nosharedjets_med_dist_only_dR_v0, fake_bs_vtx);
-				dBV0 = dBV0_Meas1D.value();
-				bs2derr0 = dBV0_Meas1D.error();
-
-				dBV1_Meas1D = vertex_dist_2d.distance(nosharedjets_med_dist_only_dR_v1, fake_bs_vtx);
-				dBV1 = dBV1_Meas1D.value();
-				bs2derr1 = dBV1_Meas1D.error();
-				Measurement1D v_dist_only_dR_noshare_med_dist = vertex_dist(nosharedjets_med_dist_only_dR_v0, nosharedjets_med_dist_only_dR_v1);
-
-				if (dBV1 > 0.0100 && dBV0 > 0.0100 && bs2derr0 < 0.0025 && bs2derr1 < 0.0025 && nosharedjets_med_dist_only_dR_v0.nTracks() >= 5 && nosharedjets_med_dist_only_dR_v1.nTracks() >= 5)
-					h_qualify_only_small_dR_by_median_tkvtxdist_svdist2d_three_bins->Fill(v_dist_only_dR_noshare_med_dist.value());
-
-				*/
-				//------------------------------------------------------------
-
-				std::vector<reco::TransientTrack> nosharedjets_onlyX_v0_ttks;
-				for (unsigned int i = 0, ie = sv0_only_X_track_which_idx.size(); i < ie; ++i) {
-					reco::TransientTrack v0_track;
-					int idx = sv0_only_X_track_which_idx[i] - 1;
-					v0_track = tt_builder->build(tks_v0[idx]);
-					nosharedjets_onlyX_v0_ttks.push_back(v0_track);
-				}
-
-				reco::Vertex nosharedjets_onlyX_v0;
-
-				for (const TransientVertex& tv : kv_reco_dropin_nocut(nosharedjets_onlyX_v0_ttks))
-					nosharedjets_onlyX_v0 = reco::Vertex(tv);
-
-				std::vector<reco::TransientTrack> nosharedjets_onlyX_v1_ttks;
-				for (unsigned int i = 0, ie = sv1_only_X_track_which_idx.size(); i < ie; ++i) {
-					reco::TransientTrack v1_track;
-					int idx = sv1_only_X_track_which_idx[i] - 1;
-					v1_track = tt_builder->build(tks_v1[idx]);
-					nosharedjets_onlyX_v1_ttks.push_back(v1_track);
-				}
-
-				reco::Vertex nosharedjets_onlyX_v1;
-
-				for (const TransientVertex& tv : kv_reco_dropin_nocut(nosharedjets_onlyX_v1_ttks))
-					nosharedjets_onlyX_v1 = reco::Vertex(tv);
-
-				double v0_chi2 = v0.normalizedChi2();
-				double v0_ndof = v0.ndof();
-
-				double v1_chi2 = v1.normalizedChi2();
-				double v1_ndof = v1.ndof();
-
-				double nosharedjets_onlyX_v0_chi2 = nosharedjets_onlyX_v0.normalizedChi2();
-				double nosharedjets_onlyX_v0_ndof = nosharedjets_onlyX_v0.ndof();
-
-				double nosharedjets_onlyX_v1_chi2 = nosharedjets_onlyX_v1.normalizedChi2();
-				double nosharedjets_onlyX_v1_ndof = nosharedjets_onlyX_v1.ndof();
-
-				double shift_unnorm_chi2_v0 = (nosharedjets_onlyX_v0_chi2 * nosharedjets_onlyX_v0_ndof) - (v0_chi2 * v0_ndof);
-				double shift_unnorm_chi2_v1 = (nosharedjets_onlyX_v1_chi2 * nosharedjets_onlyX_v1_ndof) - (v1_chi2 * v1_ndof);
-
-				
-
-
-
-				if (sv0_only_X_track_which_idx.size() < sv0_total_track_which_idx.size() && shift_unnorm_chi2_v0 > shift_unnorm_chi2_v1 ) {  
-
-					h_at_least_5trk_output1_shared_tracks_pair_shift_unnorm_chi2_X->Fill(shift_unnorm_chi2_v0);
-					h_at_least_5trk_output1_shared_tracks_pair_old_unnorm_chi2_X->Fill(v0_chi2 * v0_ndof);
-					h_at_least_5trk_output1_shared_tracks_pair_new_unnorm_chi2_X->Fill(nosharedjets_onlyX_v0_chi2 * nosharedjets_onlyX_v0_ndof);
-
-					if (nosharedjets_onlyX_v0.nTracks() < 5 || nosharedjets_onlyX_v0_chi2  > 5) {  //PK: tbs<->bkg
-						
-						nsv_onlyX -= 1;
-						sv0_sumpTandX -=-1;
-						sv0_lonetrkandX -=1;
-					}
-
-
-
-				}
-
-				if (sv1_only_X_track_which_idx.size() < sv1_total_track_which_idx.size() && shift_unnorm_chi2_v1 > shift_unnorm_chi2_v0 ) {
-
-					h_at_least_5trk_output1_shared_tracks_pair_shift_unnorm_chi2_X->Fill(shift_unnorm_chi2_v1);
-					h_at_least_5trk_output1_shared_tracks_pair_old_unnorm_chi2_X->Fill(v1_chi2* v1_ndof);
-					h_at_least_5trk_output1_shared_tracks_pair_new_unnorm_chi2_X->Fill(nosharedjets_onlyX_v1_chi2* nosharedjets_onlyX_v1_ndof);
-
-					if (nosharedjets_onlyX_v1.nTracks() < 5 || nosharedjets_onlyX_v1_chi2  > 5) {  //PK: tbs<->bkg
-						
-						nsv_onlyX -= 1;
-						sv1_sumpTandX -= -1;
-						sv1_lonetrkandX -= 1;
-					}
-				}
-
-				
-				if (nsv_onlyX >= 0) {
-					h_qualify_most_track_vertices_X_nsharedjet->Fill(X_nsharedjets);
-					h_at_least_5trk_output1_shared_tracks_pair_X_nsv_X->Fill(nsv_onlyX);
-					h_2D_most_5trk_track_vertices_X_Deltachi2_SV0_SV1->Fill(shift_unnorm_chi2_v0, shift_unnorm_chi2_v1);
-					h_at_least_5trk_output1_shared_tracks_pair_vtx01_dPhi_X->Fill(fabs(reco::deltaPhi(phi0, phi1)));
-
-					if ((shift_unnorm_chi2_v0 >= 0 || shift_unnorm_chi2_v1 >= 0) && (nosharedjets_onlyX_v0.nTracks() > 0) && (nosharedjets_onlyX_v1.nTracks() > 0)) {
-						std::cout << "MFVVertexer " << module_label << " run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << std::endl;
-						std::cout << "shift in v0: " << shift_unnorm_chi2_v0 << std::endl;
-						std::cout << "chi2 of v0: " << v0_chi2 * v0_ndof << std::endl;
-						std::cout << "ndof of v0: " << v0_ndof << std::endl;
-						
-						for (unsigned int i = 0, ie = X_i_sharedjet_lone_tk_vtx0_dist.size(); i < ie; ++i) {
-							std::cout << "sv0's " << i << "{1,1} shared jet" << std::endl;
-							std::cout << "miss_dist_sig of lone trk to v0: " << X_i_sharedjet_lone_tk_vtx0_dist_sig[i] << std::endl;
-							std::cout << "miss_dist_value of lone trk to v0: " << X_i_sharedjet_lone_tk_vtx0_dist[i] << std::endl;
-							std::cout << "miss_dist_error of lone trk to v0: " << X_i_sharedjet_lone_tk_vtx0_dist_err[i] << std::endl;
-						}
-						
-						std::cout << "shift in v1: " << shift_unnorm_chi2_v1 << std::endl;
-						std::cout << "chi2 of v1: " << v1_chi2 * v1_ndof << std::endl;
-						std::cout << "ndof of v1: " << v1_ndof << std::endl;
-						for (unsigned int i = 0, ie = X_i_sharedjet_lone_tk_vtx1_dist.size(); i < ie; ++i) {
-							std::cout << "sv1's " << i << "{1,1} shared jet" << std::endl;
-							std::cout << "miss_dist_sig of lone trk to v1: " << X_i_sharedjet_lone_tk_vtx1_dist_sig[i] << std::endl;
-							std::cout << "miss_dist_value of lone trk to v1: " << X_i_sharedjet_lone_tk_vtx1_dist[i] << std::endl;
-							std::cout << "miss_dist_error of lone trk to v1: " << X_i_sharedjet_lone_tk_vtx1_dist_err[i] << std::endl;
-						}
-					}
-
-					if ((shift_unnorm_chi2_v0 < -50 || shift_unnorm_chi2_v1 < -50) && (nosharedjets_onlyX_v0.nTracks() > 0) && (nosharedjets_onlyX_v1.nTracks() > 0)) {
-						std::cout << "MFVVertexer " << module_label << " run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << std::endl;
-						std::cout << "shift in v0: " << shift_unnorm_chi2_v0 << std::endl;
-						std::cout << "chi2 of v0: " << v0_chi2 * v0_ndof << std::endl;
-						std::cout << "ndof of v0: " << v0_ndof << std::endl;
-						for (unsigned int i = 0, ie = X_i_sharedjet_lone_tk_vtx0_dist.size(); i < ie; ++i) {
-							std::cout << "sv0's " << i << "{1,1} shared jet" << std::endl;
-							std::cout << "miss_dist_sig of lone trk to v0: " << X_i_sharedjet_lone_tk_vtx0_dist_sig[i] << std::endl;
-							std::cout << "miss_dist_value of lone trk to v0: " << X_i_sharedjet_lone_tk_vtx0_dist[i] << std::endl;
-							std::cout << "miss_dist_error of lone trk to v0: " << X_i_sharedjet_lone_tk_vtx0_dist_err[i] << std::endl;
-						}
-						std::cout << "shift in v1: " << shift_unnorm_chi2_v1 << std::endl;
-						std::cout << "chi2 of v1: " << v1_chi2 * v1_ndof << std::endl;
-						std::cout << "ndof of v1: " << v1_ndof << std::endl;
-						for (unsigned int i = 0, ie = X_i_sharedjet_lone_tk_vtx1_dist.size(); i < ie; ++i) {
-							std::cout << "sv1's " << i << "{1,1} shared jet" << std::endl;
-							std::cout << "miss_dist_sig of lone trk to v1: " << X_i_sharedjet_lone_tk_vtx1_dist_sig[i] << std::endl;
-							std::cout << "miss_dist_value of lone trk to v1: " << X_i_sharedjet_lone_tk_vtx1_dist[i] << std::endl;
-							std::cout << "miss_dist_error of lone trk to v1: " << X_i_sharedjet_lone_tk_vtx1_dist_err[i] << std::endl;
-						}
-					}
-					
-
-					// case Xa
-					if (sv0_total_track_which_idx.size() == 5 && sv1_total_track_which_idx.size() == 5) {
-						h_qualify_most_5trk_track_vertices_Xa_nsharedjet->Fill(Xa_nsharedjets);
-						h_2D_most_5trk_track_vertices_Xa_Deltachi2_SV0_SV1->Fill(shift_unnorm_chi2_v0, shift_unnorm_chi2_v1);
-						h_at_least_5trk_output1_shared_tracks_pair_vtx01_dPhi_Xa->Fill(fabs(reco::deltaPhi(phi0, phi1)));
-					}
-					//case Xc
-					else if (sv0_total_track_which_idx.size() > 5 && sv1_total_track_which_idx.size() > 5) {
-						h_qualify_most_5trk_track_vertices_Xc_nsharedjet->Fill(Xc_nsharedjets);
-						h_2D_most_5trk_track_vertices_Xc_Deltachi2_SV0_SV1->Fill(shift_unnorm_chi2_v0, shift_unnorm_chi2_v1);
-						h_at_least_5trk_output1_shared_tracks_pair_vtx01_dPhi_Xc->Fill(fabs(reco::deltaPhi(phi0, phi1)));
-					}
-					//case Xb
-					else {
-						h_qualify_most_5trk_track_vertices_Xb_nsharedjet->Fill(Xb_nsharedjets);
-						h_2D_most_5trk_track_vertices_Xb_Deltachi2_SV0_SV1->Fill(shift_unnorm_chi2_v0, shift_unnorm_chi2_v1);
-						h_at_least_5trk_output1_shared_tracks_pair_vtx01_dPhi_Xb->Fill(fabs(reco::deltaPhi(phi0, phi1)));
-					}
-
-				}
-
-				
-
-				//------------------------------------------------------------
-
-				std::vector<reco::TransientTrack> nosharedjets_sumpT_onlyY_v0_ttks;
-				for (unsigned int i = 0, ie = sv0_sum_pT_only_Y_track_which_idx.size(); i < ie; ++i) {
-					reco::TransientTrack v0_track;
-					int idx = sv0_sum_pT_only_Y_track_which_idx[i] - 1;
-					v0_track = tt_builder->build(tks_v0[idx]);
-					nosharedjets_sumpT_onlyY_v0_ttks.push_back(v0_track);
-				}
-
-				reco::Vertex nosharedjets_sumpT_onlyY_v0;
-
-				for (const TransientVertex& tv : kv_reco_dropin_nocut(nosharedjets_sumpT_onlyY_v0_ttks))
-					nosharedjets_sumpT_onlyY_v0 = reco::Vertex(tv);
-
-				std::vector<reco::TransientTrack> nosharedjets_sumpT_onlyY_v1_ttks;
-				for (unsigned int i = 0, ie = sv1_sum_pT_only_Y_track_which_idx.size(); i < ie; ++i) {
-					reco::TransientTrack v1_track;
-					int idx = sv1_sum_pT_only_Y_track_which_idx[i] - 1;
-					v1_track = tt_builder->build(tks_v1[idx]);
-					nosharedjets_sumpT_onlyY_v1_ttks.push_back(v1_track);
-				}
-
-				reco::Vertex nosharedjets_sumpT_onlyY_v1;
-
-				for (const TransientVertex& tv : kv_reco_dropin_nocut(nosharedjets_sumpT_onlyY_v1_ttks))
-					nosharedjets_sumpT_onlyY_v1 = reco::Vertex(tv);
-
-
-				double nosharedjets_sumpT_onlyY_v0_chi2 = nosharedjets_sumpT_onlyY_v0.normalizedChi2();
-				double nosharedjets_sumpT_onlyY_v0_ndof = nosharedjets_sumpT_onlyY_v0.ndof();
-
-				double nosharedjets_sumpT_onlyY_v1_chi2 = nosharedjets_sumpT_onlyY_v1.normalizedChi2();
-				double nosharedjets_sumpT_onlyY_v1_ndof = nosharedjets_sumpT_onlyY_v1.ndof();
-
-				shift_unnorm_chi2_v0 = (nosharedjets_sumpT_onlyY_v0_chi2 * nosharedjets_sumpT_onlyY_v0_ndof) - (v0_chi2 * v0_ndof);
-				shift_unnorm_chi2_v1 = (nosharedjets_sumpT_onlyY_v1_chi2 * nosharedjets_sumpT_onlyY_v1_ndof) - (v1_chi2 * v1_ndof);
-				
-				
-				
-				if (sv0_sum_pT_only_Y_track_which_idx.size() < sv0_total_track_which_idx.size()) {
-					
-					//std::cout << "{SUM PT}" << std::endl;
-					//std::cout << "v0 ntrack: " << sv0_total_track_which_idx.size() << " # of shared jet: " << nsharedjets << " norm-chi2: " << v0_chi2 << " ndof: " << v0_ndof << std::endl;
-					//std::cout << "after removing only {1,n>1} shared jets by sum pY" << std::endl;
-					//std::cout << "new v0 ntrack: " << sv0_sum_pT_only_Y_track_which_idx.size() << " new v1 ntrack: " << sv1_sum_pT_only_Y_track_which_idx.size() << " new norm-chi2: " << nosharedjets_sumpT_onlyY_v0_chi2 << " new ndof: " << nosharedjets_sumpT_onlyY_v0_ndof << std::endl;
-					//std::cout << "new v0 non-norm chi2 ( " << nosharedjets_sumpT_onlyY_v0_chi2 * nosharedjets_sumpT_onlyY_v0_ndof << " ) - v0 non-norm chi2 ( " << v0_chi2 * v0_ndof << " ) = " << shift_unnorm_chi2_v0 << std::endl;
-					h_at_least_5trk_output1_shared_tracks_pair_shift_unnorm_chi2_by_sumpT_Y->Fill(shift_unnorm_chi2_v0);
-					h_at_least_5trk_output1_shared_tracks_pair_old_unnorm_chi2_by_sumpT_Y->Fill(v0_chi2* v0_ndof);
-					h_at_least_5trk_output1_shared_tracks_pair_new_unnorm_chi2_by_sumpT_Y->Fill(nosharedjets_sumpT_onlyY_v0_chi2* nosharedjets_sumpT_onlyY_v0_ndof);
-
-					if (nosharedjets_sumpT_onlyY_v0.nTracks() < 5 || nosharedjets_sumpT_onlyY_v0_chi2 > 5) {	 //PK: tbs<->bkg
-						nsv_sumpT -= 1;
-						nsv_sumpT_onlyY -= 1;
-						sv0_sumpTandX -= 1;
-					}
-
-					
-
-				}
-
-				if (sv1_sum_pT_only_Y_track_which_idx.size() < sv1_total_track_which_idx.size()) {
-	
-					h_at_least_5trk_output1_shared_tracks_pair_shift_unnorm_chi2_by_sumpT_Y->Fill(shift_unnorm_chi2_v1);
-					h_at_least_5trk_output1_shared_tracks_pair_old_unnorm_chi2_by_sumpT_Y->Fill(v1_chi2* v1_ndof);
-					h_at_least_5trk_output1_shared_tracks_pair_new_unnorm_chi2_by_sumpT_Y->Fill(nosharedjets_sumpT_onlyY_v1_chi2* nosharedjets_sumpT_onlyY_v1_ndof);
-
-					if (nosharedjets_sumpT_onlyY_v1.nTracks() < 5 || nosharedjets_sumpT_onlyY_v1_chi2 > 5) {	//PK: tbs<->bkg
-						nsv_sumpT -= 1;
-						nsv_sumpT_onlyY -= 1;
-						sv1_sumpTandX -= 1;
-					}
-				}
-
-				sv0_sumpTandX = 1 - (sv0_sumpTandX <= 0);
-				sv1_sumpTandX = 1 - (sv1_sumpTandX <= 0);
-				if (nsv_sumpTandX == 2) {
-					h_at_least_5trk_output1_shared_tracks_pair_XYZ_nsv_by_sumpT_YandX->Fill(sv0_sumpTandX + sv1_sumpTandX);
-				}
-				if (nsv_sumpT >= 0) {  
-					h_at_least_5trk_output1_shared_tracks_pair_XYZ_nsv_by_sumpT_Y->Fill(nsv_sumpT);
-				}
-				if (nsv_sumpT_onlyY >= 0) {
-					h_qualify_most_track_vertices_Y_nsharedjet->Fill(Y_nsharedjets);
-					h_at_least_5trk_output1_shared_tracks_pair_Y_nsv_by_sumpT_Y->Fill(nsv_sumpT_onlyY);
-				}
-
-				//------------------------------------------------------------
-
-				std::vector<reco::TransientTrack> nosharedjets_shared_ntrack_onlyY_v0_ttks;
-				for (unsigned int i = 0, ie = sv0_shared_ntrack_only_Y_track_which_idx.size(); i < ie; ++i) {
-					reco::TransientTrack v0_track;
-					int idx = sv0_shared_ntrack_only_Y_track_which_idx[i] - 1;
-					v0_track = tt_builder->build(tks_v0[idx]);
-					nosharedjets_shared_ntrack_onlyY_v0_ttks.push_back(v0_track);
-				}
-
-				reco::Vertex nosharedjets_shared_ntrack_onlyY_v0;
-
-				for (const TransientVertex& tv : kv_reco_dropin_nocut(nosharedjets_shared_ntrack_onlyY_v0_ttks))
-					nosharedjets_shared_ntrack_onlyY_v0 = reco::Vertex(tv);
-
-				std::vector<reco::TransientTrack> nosharedjets_shared_ntrack_onlyY_v1_ttks;
-				for (unsigned int i = 0, ie = sv1_shared_ntrack_only_Y_track_which_idx.size(); i < ie; ++i) {
-					reco::TransientTrack v1_track;
-					int idx = sv1_shared_ntrack_only_Y_track_which_idx[i] - 1;
-					v1_track = tt_builder->build(tks_v1[idx]);
-					nosharedjets_shared_ntrack_onlyY_v1_ttks.push_back(v1_track);
-				}
-
-				reco::Vertex nosharedjets_shared_ntrack_onlyY_v1;
-
-				for (const TransientVertex& tv : kv_reco_dropin_nocut(nosharedjets_shared_ntrack_onlyY_v1_ttks))
-					nosharedjets_shared_ntrack_onlyY_v1 = reco::Vertex(tv);
-
-
-				double nosharedjets_shared_ntrack_onlyY_v0_chi2 = nosharedjets_shared_ntrack_onlyY_v0.normalizedChi2();
-				double nosharedjets_shared_ntrack_onlyY_v0_ndof = nosharedjets_shared_ntrack_onlyY_v0.ndof();
-
-				double nosharedjets_shared_ntrack_onlyY_v1_chi2 = nosharedjets_shared_ntrack_onlyY_v1.normalizedChi2();
-				double nosharedjets_shared_ntrack_onlyY_v1_ndof = nosharedjets_shared_ntrack_onlyY_v1.ndof();
-
-				shift_unnorm_chi2_v0 = (nosharedjets_shared_ntrack_onlyY_v0_chi2 * nosharedjets_shared_ntrack_onlyY_v0_ndof) - (v0_chi2 * v0_ndof);
-				shift_unnorm_chi2_v1 = (nosharedjets_shared_ntrack_onlyY_v1_chi2 * nosharedjets_shared_ntrack_onlyY_v1_ndof) - (v1_chi2 * v1_ndof);
-
-				
-				
-				if (sv0_shared_ntrack_only_Y_track_which_idx.size() < sv0_total_track_which_idx.size()) {
-                                        //std::cout << "{SHARED NTRACK}" << std::endl;
-					//std::cout << "v0 ntrack: " << sv0_total_track_which_idx.size() << " # of shared jet: " << nsharedjets << " norm-chi2: " << v0_chi2 << " ndof: " << v0_ndof << std::endl;
-					//std::cout << "after removing only {1,n>1} shared jets by one shared ntrack" << std::endl;
-					//std::cout << "new v0 ntrack: " << sv0_shared_ntrack_only_Y_track_which_idx.size() << " new v1 ntrack: " << sv1_shared_ntrack_only_Y_track_which_idx.size() << " new norm-chi2: " << nosharedjets_shared_ntrack_onlyY_v0_chi2 << " new ndof: " << nosharedjets_shared_ntrack_onlyY_v0_ndof << std::endl;
-					//std::cout << "new v0 non-norm chi2 ( " << nosharedjets_shared_ntrack_onlyY_v0_chi2 * nosharedjets_shared_ntrack_onlyY_v0_ndof << " ) - v0 non-norm chi2 ( " << v0_chi2 * v0_ndof << " ) = " << shift_unnorm_chi2_v0 << std::endl;
-					h_at_least_5trk_output1_shared_tracks_pair_shift_unnorm_chi2_by_shared_ntrack_Y->Fill(shift_unnorm_chi2_v0);
-					h_at_least_5trk_output1_shared_tracks_pair_old_unnorm_chi2_by_shared_ntrack_Y->Fill(v0_chi2*v0_ndof);
-					h_at_least_5trk_output1_shared_tracks_pair_new_unnorm_chi2_by_shared_ntrack_Y->Fill(nosharedjets_shared_ntrack_onlyY_v0_chi2* nosharedjets_shared_ntrack_onlyY_v0_ndof);
-
-					if (nosharedjets_shared_ntrack_onlyY_v0.nTracks() < 5 || nosharedjets_shared_ntrack_onlyY_v0_chi2 > 5) {	 //PK: tbs<->bkg 
-						nsv_lonetrk -= 1;
-						nsv_lonetrk_onlyY -= 1;
-						sv0_lonetrkandX -= 1;
-					}
-					
-				}
-
-				if (sv1_shared_ntrack_only_Y_track_which_idx.size() < sv1_total_track_which_idx.size()) {
-					h_at_least_5trk_output1_shared_tracks_pair_shift_unnorm_chi2_by_shared_ntrack_Y->Fill(shift_unnorm_chi2_v1);
-					h_at_least_5trk_output1_shared_tracks_pair_old_unnorm_chi2_by_shared_ntrack_Y->Fill(v1_chi2*v1_ndof);
-					h_at_least_5trk_output1_shared_tracks_pair_new_unnorm_chi2_by_shared_ntrack_Y->Fill(nosharedjets_shared_ntrack_onlyY_v1_chi2* nosharedjets_shared_ntrack_onlyY_v1_ndof);
-
-					if (nosharedjets_shared_ntrack_onlyY_v1.nTracks() < 5 || nosharedjets_shared_ntrack_onlyY_v1_chi2 > 5) {	 //PK: tbs<->bkg
-						nsv_lonetrk -= 1;
-						nsv_lonetrk_onlyY -= 1;
-						sv1_lonetrkandX -= 1;
-					}
-
-				}
-
-				sv0_lonetrkandX = 1 - (sv0_lonetrkandX <= 0);
-				sv1_lonetrkandX = 1 - (sv1_lonetrkandX <= 0);
-				if (nsv_lonetrkandX == 2) {
-					h_at_least_5trk_output1_shared_tracks_pair_XYZ_nsv_by_shared_ntrack_YandX->Fill(sv0_lonetrkandX + sv1_lonetrkandX);
-				}
-				if (nsv_lonetrk >= 0) {	
-					h_at_least_5trk_output1_shared_tracks_pair_XYZ_nsv_by_shared_ntrack_Y->Fill(nsv_lonetrk);
-				}
-				if (nsv_lonetrk_onlyY >= 0) {
-					h_at_least_5trk_output1_shared_tracks_pair_Y_nsv_by_shared_ntrack_Y->Fill(nsv_lonetrk_onlyY);
-				}
-
-				//------------------------------------------------------------
-
-				std::vector<reco::TransientTrack> nosharedjets_med_dist_sig_v0_ttks;
-				for (unsigned int i = 0, ie = sv0_median_tk_vtx_dist_sig_track_which_idx.size(); i < ie; ++i) {
-					reco::TransientTrack v0_track;
-					int idx = sv0_median_tk_vtx_dist_sig_track_which_idx[i] - 1;
-					v0_track = tt_builder->build(tks_v0[idx]);
-					nosharedjets_med_dist_sig_v0_ttks.push_back(v0_track);
-				}
-
-				reco::Vertex nosharedjets_med_dist_sig_v0;
-
-				for (const TransientVertex& tv : kv_reco_dropin(nosharedjets_med_dist_sig_v0_ttks))
-					nosharedjets_med_dist_sig_v0 = reco::Vertex(tv);
-
-				std::vector<reco::TransientTrack> nosharedjets_med_dist_sig_v1_ttks;
-				for (unsigned int i = 0, ie = sv1_median_tk_vtx_dist_sig_track_which_idx.size(); i < ie; ++i) {
-					reco::TransientTrack v1_track;
-					int idx = sv1_median_tk_vtx_dist_sig_track_which_idx[i] - 1;
-					v1_track = tt_builder->build(tks_v1[idx]);
-					nosharedjets_med_dist_sig_v1_ttks.push_back(v1_track);
-				}
-
-				reco::Vertex nosharedjets_med_dist_sig_v1;
-
-				for (const TransientVertex& tv : kv_reco_dropin(nosharedjets_med_dist_sig_v1_ttks))
-					nosharedjets_med_dist_sig_v1 = reco::Vertex(tv);
-
-				dBV0_Meas1D = vertex_dist_2d.distance(nosharedjets_med_dist_sig_v0, fake_bs_vtx);
-				dBV0 = dBV0_Meas1D.value();
-				bs2derr0 = dBV0_Meas1D.error();
-
-				dBV1_Meas1D = vertex_dist_2d.distance(nosharedjets_med_dist_sig_v1, fake_bs_vtx);
-				dBV1 = dBV1_Meas1D.value();
-				bs2derr1 = dBV1_Meas1D.error();
-				Measurement1D v_dist_sig_noshare_med_dist = vertex_dist(nosharedjets_med_dist_sig_v0, nosharedjets_med_dist_sig_v1);
-
-				if (dBV1 > 0.0100 && dBV0 > 0.0100 && bs2derr0 < 0.0025 && bs2derr1 < 0.0025 && nosharedjets_med_dist_sig_v0.nTracks() >= 5 && nosharedjets_med_dist_sig_v1.nTracks() >= 5)
-					h_qualify_by_median_tkvtxdistsig_svdist2d_three_bins->Fill(v_dist_sig_noshare_med_dist.value());
-
-				//------------------------------------------------------------
-
-				std::vector<reco::TransientTrack> nosharedjets_med_dist_sig_only_dR_v0_ttks;
-				for (unsigned int i = 0, ie = sv0_median_tk_vtx_dist_sig_only_dR_track_which_idx.size(); i < ie; ++i) {
-					reco::TransientTrack v0_track;
-					int idx = sv0_median_tk_vtx_dist_sig_only_dR_track_which_idx[i] - 1;
-					v0_track = tt_builder->build(tks_v0[idx]);
-					nosharedjets_med_dist_sig_only_dR_v0_ttks.push_back(v0_track);
-				}
-
-				reco::Vertex nosharedjets_med_dist_sig_only_dR_v0;
-
-				for (const TransientVertex& tv : kv_reco_dropin(nosharedjets_med_dist_sig_only_dR_v0_ttks))
-					nosharedjets_med_dist_sig_only_dR_v0 = reco::Vertex(tv);
-
-				std::vector<reco::TransientTrack> nosharedjets_med_dist_sig_only_dR_v1_ttks;
-				for (unsigned int i = 0, ie = sv1_median_tk_vtx_dist_sig_only_dR_track_which_idx.size(); i < ie; ++i) {
-					reco::TransientTrack v1_track;
-					int idx = sv1_median_tk_vtx_dist_sig_only_dR_track_which_idx[i] - 1;
-					v1_track = tt_builder->build(tks_v1[idx]);
-					nosharedjets_med_dist_sig_only_dR_v1_ttks.push_back(v1_track);
-				}
-
-				reco::Vertex nosharedjets_med_dist_sig_only_dR_v1;
-
-				for (const TransientVertex& tv : kv_reco_dropin(nosharedjets_med_dist_sig_only_dR_v1_ttks))
-					nosharedjets_med_dist_sig_only_dR_v1 = reco::Vertex(tv);
-
-				dBV0_Meas1D = vertex_dist_2d.distance(nosharedjets_med_dist_sig_only_dR_v0, fake_bs_vtx);
-				dBV0 = dBV0_Meas1D.value();
-				bs2derr0 = dBV0_Meas1D.error();
-
-				dBV1_Meas1D = vertex_dist_2d.distance(nosharedjets_med_dist_sig_only_dR_v1, fake_bs_vtx);
-				dBV1 = dBV1_Meas1D.value();
-				bs2derr1 = dBV1_Meas1D.error();
-				Measurement1D v_dist_sig_only_dR_noshare_med_dist = vertex_dist(nosharedjets_med_dist_sig_only_dR_v0, nosharedjets_med_dist_sig_only_dR_v1);
-
-				if (dBV1 > 0.0100 && dBV0 > 0.0100 && bs2derr0 < 0.0025 && bs2derr1 < 0.0025 && nosharedjets_med_dist_sig_only_dR_v0.nTracks() >= 5 && nosharedjets_med_dist_sig_only_dR_v1.nTracks() >= 5)
-					h_qualify_only_small_dR_by_median_tkvtxdistsig_svdist2d_three_bins->Fill(v_dist_sig_only_dR_noshare_med_dist.value());
-
-				//---------------------------------------------------------------
-
-
-				std::vector<reco::TransientTrack> nosharedjets_med_dist_2sig_only_dR_v0_ttks;
-				for (unsigned int i = 0, ie = sv0_median_tk_vtx_dist_2sig_only_dR_track_which_idx.size(); i < ie; ++i) {
-					reco::TransientTrack v0_track;
-					int idx = sv0_median_tk_vtx_dist_2sig_only_dR_track_which_idx[i] - 1;
-					v0_track = tt_builder->build(tks_v0[idx]);
-					nosharedjets_med_dist_2sig_only_dR_v0_ttks.push_back(v0_track);
-				}
-
-				reco::Vertex nosharedjets_med_dist_2sig_only_dR_v0;
-
-				for (const TransientVertex& tv : kv_reco_dropin(nosharedjets_med_dist_2sig_only_dR_v0_ttks))
-					nosharedjets_med_dist_2sig_only_dR_v0 = reco::Vertex(tv);
-
-				std::vector<reco::TransientTrack> nosharedjets_med_dist_2sig_only_dR_v1_ttks;
-				for (unsigned int i = 0, ie = sv1_median_tk_vtx_dist_2sig_only_dR_track_which_idx.size(); i < ie; ++i) {
-					reco::TransientTrack v1_track;
-					int idx = sv1_median_tk_vtx_dist_2sig_only_dR_track_which_idx[i] - 1;
-					v1_track = tt_builder->build(tks_v1[idx]);
-					nosharedjets_med_dist_2sig_only_dR_v1_ttks.push_back(v1_track);
-				}
-
-				reco::Vertex nosharedjets_med_dist_2sig_only_dR_v1;
-
-				for (const TransientVertex& tv : kv_reco_dropin(nosharedjets_med_dist_2sig_only_dR_v1_ttks))
-					nosharedjets_med_dist_2sig_only_dR_v1 = reco::Vertex(tv);
-
-				dBV0_Meas1D = vertex_dist_2d.distance(nosharedjets_med_dist_2sig_only_dR_v0, fake_bs_vtx);
-				dBV0 = dBV0_Meas1D.value();
-				bs2derr0 = dBV0_Meas1D.error();
-
-				dBV1_Meas1D = vertex_dist_2d.distance(nosharedjets_med_dist_2sig_only_dR_v1, fake_bs_vtx);
-				dBV1 = dBV1_Meas1D.value();
-				bs2derr1 = dBV1_Meas1D.error();
-				Measurement1D v_dist_2sig_only_dR_noshare_med_dist = vertex_dist(nosharedjets_med_dist_2sig_only_dR_v0, nosharedjets_med_dist_2sig_only_dR_v1);
-
-				if (dBV1 > 0.0100 && dBV0 > 0.0100 && bs2derr0 < 0.0025 && bs2derr1 < 0.0025 && nosharedjets_med_dist_2sig_only_dR_v0.nTracks() >= 5 && nosharedjets_med_dist_2sig_only_dR_v1.nTracks() >= 5)
-					h_qualify_only_small_dR_by_2sigma_median_tkvtxdistsig_svdist2d_three_bins->Fill(v_dist_2sig_only_dR_noshare_med_dist.value());
-
-
-
-	
-
-
-				
-                                //v0 = nosharedjets_med_dist_2sig_only_dR_v0;
-				                //v1 = nosharedjets_med_dist_2sig_only_dR_v1;
-                                //v0 = nosharedjets_v0;
-                                //v1 = nosharedjets_v1;
-                                //v0 = nosharedjets_only_dR_v0;
-                                //v1 = nosharedjets_only_dR_v1;
-                                //std::cout << "after shared-jet mitigation opt3shj7chi5: " << std::endl;
-                                //std::cout << "vtx0 ntracks: " << v0.nTracks() << std::endl;
-                                //std::cout << "vtx1 ntracks: " << v1.nTracks() << std::endl;
-
-			}
-
-			else {
-				if (dBV1 > 0.0100&& dBV0 > 0.0100 && bs2derr0 < 0.0025 && bs2derr1 < 0.0025 && v0.nTracks() >= 5 && v1.nTracks() >= 5){
-				track_vec tks_v0 = vertex_track_vec(v0);
-				std::vector<int> sv0_total_track_which_idx = sv_total_track_which_idx[first_ntracks_vtxidx];
-				std::vector<reco::TransientTrack> good_v0_ttks;
-				for (unsigned int i = 1, ie = sv0_total_track_which_idx.size(); i < ie; ++i) {
-					reco::TransientTrack v0_track;
-					int idx = sv0_total_track_which_idx[i] - 1;
-					v0_track = tt_builder->build(tks_v0[idx]);
-					good_v0_ttks.push_back(v0_track);
-				}
-
-				reco::Vertex good_v0;
-
-				for (const TransientVertex& tv : kv_reco_dropin(good_v0_ttks))
-					good_v0 = reco::Vertex(tv);
-
-				track_vec tks_v1 = vertex_track_vec(v1);
-				std::vector<int> sv1_total_track_which_idx = sv_total_track_which_idx[second_ntracks_vtxidx];
-				std::vector<reco::TransientTrack> good_v1_ttks;
-				for (unsigned int i = 0, ie = sv1_total_track_which_idx.size(); i < ie; ++i) {
-					reco::TransientTrack v1_track;
-					int idx = sv1_total_track_which_idx[i] - 1;
-					v1_track = tt_builder->build(tks_v1[idx]);
-					good_v1_ttks.push_back(v1_track);
-				}
-
-				reco::Vertex good_v1;
-
-				for (const TransientVertex& tv : kv_reco_dropin(good_v1_ttks))
-					good_v1 = reco::Vertex(tv);
-
-				double v0_chi2 = v0.normalizedChi2();
-				double v0_ndof = v0.ndof();
-
-				double v1_chi2 = v1.normalizedChi2();
-				double v1_ndof = v1.ndof();
-
-				double good_v0_chi2 = good_v0.normalizedChi2();
-				double good_v0_ndof = good_v0.ndof();
-
-				double good_v1_chi2 = good_v1.normalizedChi2();
-				double good_v1_ndof = good_v1.ndof();
-
-				double shift_unnorm_chi2_v0 = (good_v0_chi2 * good_v0_ndof) - (v0_chi2 * v0_ndof);
-				double shift_unnorm_chi2_v1 = (good_v1_chi2 * good_v1_ndof) - (v1_chi2 * v1_ndof);
-
-				h_at_least_5trk_output1_no_shared_tracks_pair_shift_unnorm_chi2->Fill(shift_unnorm_chi2_v0);
-				h_at_least_5trk_output1_no_shared_tracks_pair_shift_unnorm_chi2->Fill(shift_unnorm_chi2_v1);
-				h_2D_at_least_5trk_output1_no_shared_tracks_pair_ntrack_unnorm_chi2->Fill(v0.nTracks(), v0_chi2* v0_ndof);
-				h_2D_at_least_5trk_output1_no_shared_tracks_pair_ntrack_unnorm_chi2->Fill(v1.nTracks(), v1_chi2* v1_ndof);
-				//h_2Dpfx_at_least_5trk_output1_no_shared_tracks_pair_ntrack_unnorm_chi2->Fill(v0.nTracks(), v0_chi2* v0_ndof);
-				//h_2Dpfx_at_least_5trk_output1_no_shared_tracks_pair_ntrack_unnorm_chi2->Fill(v1.nTracks(), v1_chi2* v1_ndof);
-			}
-
-            }
+			sv_total_track_which_trkidx.push_back(track_idx);
+			sv_total_ntrack.push_back(ntracks);
+			sv_match_tracktojet_which_trkidx.push_back(tracktojet_which_trkidx);
+			sv_match_tracktojet_which_jetidx.push_back(tracktojet_which_jetidx);
+		    vtxidx++;
+			
 
 		}
+
+		//std::cout << "size of vertices (before shj mitigation): " << vertices->size() << std::endl;
+	
+		if (vertices->size() >= 2) {
+			
+			for (size_t i = 0; i < sv_ascending_vtxidx.size(); i++) {
+				const size_t vtxidx0 = sv_ascending_vtxidx[i];
+				reco::Vertex& sv0 = vertices->at(vtxidx0);
+				double sv0x = sv0.x() - bsx;
+				double sv0y = sv0.y() - bsy;
+                double phi0 = atan2(sv0y, sv0x);
+				//track_vec tks_sv0 = vertex_track_vec(sv0);
+				//std::cout << "-----loop #" << i << " -----" << std::endl;
+				//std::cout << "sv0'idx: " << vtxidx0 << std::endl;
+				//std::cout << "sv0'ntrack: " << sv0.nTracks() << std::endl;
+				for (size_t j = i + 1; j < sv_ascending_vtxidx.size(); j++) {
+					const size_t vtxidx1 = sv_ascending_vtxidx[j];
+					reco::Vertex& sv1 = vertices->at(vtxidx1);
+					double sv1x = sv1.x() - bsx;
+					double sv1y = sv1.y() - bsy;
+					double phi1 = atan2(sv1y, sv1x);
+					//track_vec tks_sv1 = vertex_track_vec(sv1);
+					//std::cout << "sv1'idx: " << vtxidx1 << std::endl;
+					//std::cout << "sv1'ntrack: " << sv1.nTracks() << std::endl;
+					// if they share a jet or not as a a pair (boolean,X+Y nsharedjets) from a function
+					if (sv0.nTracks() > 2 && sv1.nTracks() > 2) {
+
+						std::pair<bool, std::vector<std::vector<size_t>>> sharedjet_tool = sharedjets(vtxidx0, vtxidx1, sv_match_tracktojet_which_jetidx, sv_match_tracktojet_which_trkidx);
+						// loop thru {1,1}+{1,n} nsharedjets and remove just one shared track from v0 if a |dPhi(v0,one shared track)| > pi/2 
+						if (sharedjet_tool.first) {
+							//std::cout << "start shj implementation to {1,1} and {1,n}" << std::endl;
+							std::vector<std::vector<size_t>> sv_lonesharedtrack_which_trkidx = sharedjet_tool.second;
+							std::vector<size_t> sv0_lonesharedtrack_which_trkidx = sv_lonesharedtrack_which_trkidx[0];
+							std::vector<size_t> sv1_lonesharedtrack_which_trkidx = sv_lonesharedtrack_which_trkidx[1];
+							//std::cout << "size of set of lone shared tracks per sv0: " << sv0_lonesharedtrack_which_trkidx.size() << std::endl;
+							//std::cout << "size of set of lone shared tracks per sv1: " << sv1_lonesharedtrack_which_trkidx.size() << std::endl;
+							for (size_t k = 0; k < sv0_lonesharedtrack_which_trkidx.size(); k++) {
+								track_vec tks_sv0 = sv_total_track_which_trk_vec[vtxidx0];
+								size_t idx = sv0_lonesharedtrack_which_trkidx[k];
+								h_resolve_shared_jets_lonetrk_dPhi->Fill(fabs(reco::deltaPhi(tks_sv0[idx]->phi(), phi0)));
+								if (fabs(reco::deltaPhi(tks_sv0[idx]->phi(), phi0)) > 3.14 / 2) {
+									h_resolve_shared_jets_removedtrk_dPhi->Fill(fabs(reco::deltaPhi(tks_sv0[idx]->phi(), phi0)));
+									h2D_vtx_ntrack_resolve_shared_jets_removedtrk_dPhi->Fill(sv_total_track_which_trkidx[vtxidx0].size(), fabs(reco::deltaPhi(tks_sv0[idx]->phi(), phi0)));
+									sv_total_track_which_trkidx[vtxidx0].erase(std::remove(sv_total_track_which_trkidx[vtxidx0].begin(), sv_total_track_which_trkidx[vtxidx0].end(), idx),
+										sv_total_track_which_trkidx[vtxidx0].end());
+								}
+							}
+							for (size_t k = 0; k < sv1_lonesharedtrack_which_trkidx.size(); k++) {
+								track_vec tks_sv1 = sv_total_track_which_trk_vec[vtxidx1];
+								size_t idx = sv1_lonesharedtrack_which_trkidx[k];
+								h_resolve_shared_jets_lonetrk_dPhi->Fill(fabs(reco::deltaPhi(tks_sv1[idx]->phi(), phi1)));
+								if (fabs(reco::deltaPhi(tks_sv1[idx]->phi(), phi1)) > 3.14 / 2) {
+									h_resolve_shared_jets_removedtrk_dPhi->Fill(fabs(reco::deltaPhi(tks_sv1[idx]->phi(), phi1)));
+									h2D_vtx_ntrack_resolve_shared_jets_removedtrk_dPhi->Fill(sv_total_track_which_trkidx[vtxidx1].size(), fabs(reco::deltaPhi(tks_sv1[idx]->phi(), phi1)));
+									sv_total_track_which_trkidx[vtxidx1].erase(std::remove(sv_total_track_which_trkidx[vtxidx1].begin(), sv_total_track_which_trkidx[vtxidx1].end(), idx),
+										sv_total_track_which_trkidx[vtxidx1].end());
+								}
+							}
+
+							//std::cout << "sv0'idx: " << vtxidx0 << std::endl;
+							//std::cout << "sv0'ntrack before: " << sv_total_track_which_trkidx[vtxidx0].size() << std::endl;
+							//std::cout << "sv1'idx: " << vtxidx1 << std::endl;
+							//std::cout << "sv1'ntrack before: " << sv_total_track_which_trkidx[vtxidx1].size() << std::endl;
+
+							track_set  sv0_resolved_sharedtracks_trkset;
+							for (unsigned int i = 0; i < sv_total_track_which_trkidx[vtxidx0].size(); ++i) {
+								int idx = sv_total_track_which_trkidx[vtxidx0][i];
+								track_vec tks_sv0 = sv_total_track_which_trk_vec[vtxidx0];
+								sv0_resolved_sharedtracks_trkset.insert(tks_sv0[idx]);
+
+							}
+							std::vector<reco::TransientTrack> sv0_resolved_sharedtracks_ttks;
+							for (auto tk : sv0_resolved_sharedtracks_trkset)
+								sv0_resolved_sharedtracks_ttks.push_back(tt_builder->build(tk));
+
+							reco::Vertex sv0_resolved_sharedtracks;
+
+							for (const TransientVertex& tv : kv_reco_dropin(sv0_resolved_sharedtracks_ttks))
+								sv0_resolved_sharedtracks = reco::Vertex(tv);
+
+							sv0 = sv0_resolved_sharedtracks;
+							
+							//std::cout << "sv0'idx: " << vtxidx0 << std::endl;
+							//std::cout << "sv0'ntrack after: " << sv0.nTracks() << std::endl;
+
+
+							track_set  sv1_resolved_sharedtracks_trkset;
+							for (unsigned int i = 0; i < sv_total_track_which_trkidx[vtxidx1].size(); ++i) {
+								int idx = sv_total_track_which_trkidx[vtxidx1][i];
+								//std::cout << "sv1'trk idx: " << idx << std::endl;
+								track_vec tks_sv1 = sv_total_track_which_trk_vec[vtxidx1];
+								sv1_resolved_sharedtracks_trkset.insert(tks_sv1[idx]);
+							
+							}
+							
+							std::vector<reco::TransientTrack> sv1_resolved_sharedtracks_ttks;
+							for (auto tk : sv1_resolved_sharedtracks_trkset) 
+								sv1_resolved_sharedtracks_ttks.push_back(tt_builder->build(tk));
+				
+							
+							reco::Vertex sv1_resolved_sharedtracks;
+							
+							for (const TransientVertex& tv : kv_reco_dropin(sv1_resolved_sharedtracks_ttks))
+								sv1_resolved_sharedtracks = reco::Vertex(tv);
+							
+							sv1 = sv1_resolved_sharedtracks;
+							
+							//std::cout << "sv1'idx: " << vtxidx1 << std::endl;
+							//std::cout << "sv1'ntrack after: " << sv1.nTracks() << std::endl;
+
+							
+
+						}
+					}
+					 
+
+				}
+
+				
+			}
+			
+		}
+		//std::cout << "size of vertices (after shj mitigation): " << vertices->size() << std::endl;
+		
+		std::set<int> trackicity;
+		for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
+			track_set tracks[2];
+			ivtx[0] = v[0] - vertices->begin();
+			tracks[0] = vertex_track_set(*v[0]);
+			
+			if (tracks[0].size() < 2) {
+				if (verbose)
+					printf("resolve_shared_jets: vertex-0 #%lu is down to one track, junking it\n", ivtx[0]);
+				v[0] = vertices->erase(v[0]) - 1;
+				++n_output2_onetracks;
+				continue;
+			}
+
+			
+
+			if (tracks[0].size() < v[0]->nTracks()) {
+				std::cout << "duplicate tracks in vertexer" << std::endl;
+				std::vector<reco::TransientTrack> sv_nonduplicate_ttks; 
+				for (const reco::TrackRef& itk : vertex_track_set(*v[0])) {
+					if (itk.isNonnull())
+						sv_nonduplicate_ttks.push_back(tt_builder->build(itk));
+					
+				}
+
+				for (const TransientVertex& tv : kv_reco_dropin(sv_nonduplicate_ttks))
+					*v[0] = reco::Vertex(tv);
+			}
+
+		}
+		
+		
 	}
 
-	if (histos_output2) {
+	if (resolve_shared_jets && histos_output2) {
 		std::map<reco::TrackRef, int> track_use;
 		int count_5trk_vertices = 0;
                 //std::cout << "yes histos_output2" << std::endl;
@@ -4207,7 +1888,6 @@ h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZnonC->Fill(
 				else
 					track_use[r] = 1;
 			}
-
 			h_output2_vertex_ntracks->Fill(ntracks);
 			if (ntracks >= 5) {
 				count_5trk_vertices++;
@@ -4252,7 +1932,10 @@ h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZnonC->Fill(
 
 		}
 
+
 		h_n_at_least_5trk_output2_vertices->Fill(count_5trk_vertices);
+		h_output2_n_onetracks->Fill(n_output2_onetracks);
+		
 
 	}
 
@@ -4262,13 +1945,114 @@ h_at_least_3trk_output1_shared_tracks_pair_diff_median_tkvtxdistsig_ZnonC->Fill(
 
   finish(event, seed_tracks, std::move(vertices), std::move(vpeffs), vpeffs_tracks);
 }
+std::pair<bool, std::vector<std::vector<size_t>>> MFVVertexer::sharedjets(const int vtx0idx, const int vtx1idx, const std::vector < std::vector<int>>& sv_match_tracktojet_which_jetidx, const std::vector < std::vector<int>>& sv_match_tracktojet_which_trkidx) {
+
+	bool shared_jet = std::find_first_of(sv_match_tracktojet_which_jetidx[vtx0idx].begin(), sv_match_tracktojet_which_jetidx[vtx0idx].end(), sv_match_tracktojet_which_jetidx[vtx1idx].begin(), sv_match_tracktojet_which_jetidx[vtx1idx].end()) != sv_match_tracktojet_which_jetidx[vtx0idx].end();
+
+	std::vector<std::vector<size_t>> sv_lonesharedtrack_which_trkidx;
+	std::vector<size_t> sv0_lonesharedtrack_which_trkidx;
+	std::vector<size_t> sv1_lonesharedtrack_which_trkidx;
+
+	if (shared_jet) {
+
+		int nsharedjets = 0;
+
+
+		std::vector<std::vector<int>> sv_match_tracktojet_which_temp_jetidx = sv_match_tracktojet_which_jetidx;
+		std::vector<std::vector<int> >sv0_match_sharedjettotrack_which_trkidx;
+		std::vector<std::vector<int> >sv1_match_sharedjettotrack_which_trkidx;
+
+		std::vector<int> sv0_match_tracktojet_which_jetidx = sv_match_tracktojet_which_jetidx[vtx0idx];
+		std::vector<int> sv0_match_tracktojet_which_trkidx = sv_match_tracktojet_which_trkidx[vtx0idx];
+		std::vector<int> sv0_match_sharedjettotrack_which_temp_trkidx;
+
+		std::vector<int> sv1_match_tracktojet_which_jetidx = sv_match_tracktojet_which_jetidx[vtx1idx];
+		std::vector<int> sv1_match_tracktojet_which_trkidx = sv_match_tracktojet_which_trkidx[vtx1idx];
+		std::vector<int> sv1_match_sharedjettotrack_which_temp_trkidx;
+
+
+		while (std::find_first_of(sv_match_tracktojet_which_temp_jetidx[vtx0idx].begin(), sv_match_tracktojet_which_temp_jetidx[vtx0idx].end(), sv_match_tracktojet_which_temp_jetidx[vtx1idx].begin(), sv_match_tracktojet_which_temp_jetidx[vtx1idx].end()) != sv_match_tracktojet_which_temp_jetidx[vtx0idx].end()) {
+			nsharedjets++;
+			std::vector<int>::iterator it = std::find_first_of(sv_match_tracktojet_which_temp_jetidx[vtx0idx].begin(), sv_match_tracktojet_which_temp_jetidx[vtx0idx].end(), sv_match_tracktojet_which_temp_jetidx[vtx1idx].begin(), sv_match_tracktojet_which_temp_jetidx[vtx1idx].end());
+			int it_idx = std::distance(sv_match_tracktojet_which_temp_jetidx[vtx0idx].begin(), it);
+			int jet_index = sv_match_tracktojet_which_temp_jetidx[vtx0idx].at(it_idx);
+			
+			sv_match_tracktojet_which_temp_jetidx[vtx0idx].erase(std::remove(sv_match_tracktojet_which_temp_jetidx[vtx0idx].begin(), sv_match_tracktojet_which_temp_jetidx[vtx0idx].end(), jet_index), sv_match_tracktojet_which_temp_jetidx[vtx0idx].end());
+			sv_match_tracktojet_which_temp_jetidx[vtx1idx].erase(std::remove(sv_match_tracktojet_which_temp_jetidx[vtx1idx].begin(), sv_match_tracktojet_which_temp_jetidx[vtx1idx].end(), jet_index), sv_match_tracktojet_which_temp_jetidx[vtx1idx].end());
+
+			// start collecting shared tracks of sv0 for each shared jet
+			std::multimap<int, size_t> sv0_m;
+			for (size_t k = 0; k < sv0_match_tracktojet_which_jetidx.size(); k++) 
+				if (sv0_match_tracktojet_which_jetidx[k] == jet_index) { sv0_m.insert({ sv0_match_tracktojet_which_jetidx[k], k }); }
+
+			for (auto it = sv0_m.begin(); it != sv0_m.end(); )
+			{
+				auto p = sv0_m.equal_range(it->first);
+
+				while (p.first != p.second)
+				{
+
+					sv0_match_sharedjettotrack_which_temp_trkidx.push_back(sv0_match_tracktojet_which_trkidx[p.first++->second]);
+					//std::cout << "with jet index: " << jet_index << "idx is appended to a sv0 temp list: " << sv0_match_sharedjettotrack_which_temp_trkidx.back() << std::endl;
+				}
+				it = p.second;
+
+			}
+
+			sv0_match_sharedjettotrack_which_trkidx.push_back(sv0_match_sharedjettotrack_which_temp_trkidx);
+
+			// start collecting shared tracks of sv1 for each shared jet
+			std::multimap<int, size_t> sv1_m;
+			for (size_t k = 0; k < sv1_match_tracktojet_which_jetidx.size(); k++)
+				if (sv1_match_tracktojet_which_jetidx[k] == jet_index) { sv1_m.insert({ sv1_match_tracktojet_which_jetidx[k], k }); }
+
+			for (auto it = sv1_m.begin(); it != sv1_m.end(); )
+			{
+				auto p = sv1_m.equal_range(it->first);
+
+				while (p.first != p.second)
+				{
+
+					sv1_match_sharedjettotrack_which_temp_trkidx.push_back(sv1_match_tracktojet_which_trkidx[p.first++->second]);
+					//std::cout << "with jet index: " << jet_index << "idx is appended to a sv1 temp list: " << sv1_match_sharedjettotrack_which_temp_trkidx.back() << std::endl;
+				}
+				it = p.second;
+
+			}
+
+			sv1_match_sharedjettotrack_which_trkidx.push_back(sv1_match_sharedjettotrack_which_temp_trkidx);
+
+			if (sv0_match_sharedjettotrack_which_temp_trkidx.size() == 1) {
+				//std::cout << "idx of sv0's shared track in the sharedjet tool: " << sv0_match_sharedjettotrack_which_temp_trkidx[0] << std::endl;
+				sv0_lonesharedtrack_which_trkidx.push_back(sv0_match_sharedjettotrack_which_temp_trkidx[0]);
+			}
+			if (sv1_match_sharedjettotrack_which_temp_trkidx.size() == 1) {
+				//std::cout << "idx of sv1's shared track in the sharedjet tool: " << sv1_match_sharedjettotrack_which_temp_trkidx[0] << std::endl;
+				sv1_lonesharedtrack_which_trkidx.push_back(sv1_match_sharedjettotrack_which_temp_trkidx[0]);
+			}
+
+			sv0_match_sharedjettotrack_which_temp_trkidx = {};
+			sv1_match_sharedjettotrack_which_temp_trkidx = {};
+			
+
+
+		}
+		sv_lonesharedtrack_which_trkidx.push_back(sv0_lonesharedtrack_which_trkidx);
+		sv_lonesharedtrack_which_trkidx.push_back(sv1_lonesharedtrack_which_trkidx);
+	}
+	bool shared_jet_specialcase = (sv0_lonesharedtrack_which_trkidx.size() != 0 || sv1_lonesharedtrack_which_trkidx.size() != 0);
+	return std::pair<bool, std::vector<std::vector<size_t>>>(
+		shared_jet_specialcase,
+		sv_lonesharedtrack_which_trkidx);
+}
+
 bool MFVVertexer::match_track_jet(const reco::Track& tk, const pat::Jet& matchjet, const pat::JetCollection& jets, const int& idx) {
 	//if (reco::deltaR2(tk, jet)>0.16) return false;
 	
         if (verbose) {
 		std::cout << "jet track matching..." << std::endl;
 		std::cout << "  target track pt " << tk.pt() << " eta " << tk.eta() << " phi " << tk.phi() << std::endl;
-	}
+	    }
 	
 	
 		double match_thres = 1.3;                                                                                                                                                           int jet_index = 255;                                                                                                                                                                for (size_t j = 0; j < jets.size(); ++j) {
