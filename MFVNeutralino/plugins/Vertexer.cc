@@ -1627,7 +1627,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 		edm::Handle<pat::JetCollection> jets;
 		event.getByToken(shared_jet_token, jets);
 
-		//std::cout << " run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
+		std::cout << " run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
 
 
 		std::vector<std::vector<size_t> > sv_total_track_which_trkidx;
@@ -1719,25 +1719,25 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 				double sv0y = sv0.y() - bsy;
                 double phi0 = atan2(sv0y, sv0x);
 				//track_vec tks_sv0 = vertex_track_vec(sv0);
-				//std::cout << "-----loop #" << i << " -----" << std::endl;
-				//std::cout << "sv0'idx: " << vtxidx0 << std::endl;
-				//std::cout << "sv0'ntrack: " << sv0.nTracks() << std::endl;
-				for (size_t j = i + 1; j < sv_ascending_vtxidx.size(); j++) {
+				std::cout << "-----loop #" << i << " -----" << std::endl;
+				std::cout << "sv0'idx: " << vtxidx0 << std::endl;
+				std::cout << "sv0'ntrack: " << sv0.nTracks() << std::endl;
+				for (size_t j = 0; j < sv_ascending_vtxidx.size() && j!=i; j++) {
 					const size_t vtxidx1 = sv_ascending_vtxidx[j];
 					reco::Vertex& sv1 = vertices->at(vtxidx1);
 					double sv1x = sv1.x() - bsx;
 					double sv1y = sv1.y() - bsy;
 					double phi1 = atan2(sv1y, sv1x);
 					//track_vec tks_sv1 = vertex_track_vec(sv1);
-					//std::cout << "sv1'idx: " << vtxidx1 << std::endl;
-					//std::cout << "sv1'ntrack: " << sv1.nTracks() << std::endl;
+					std::cout << "sv1'idx: " << vtxidx1 << std::endl;
+					std::cout << "sv1'ntrack: " << sv1.nTracks() << std::endl;
 					// if they share a jet or not as a a pair (boolean,X+Y nsharedjets) from a function
-					if (sv0.nTracks() > 2 && sv1.nTracks() > 2) {
+					if (sv0.nTracks() > 1 && sv1.nTracks() > 1) {
 
 						std::pair<bool, std::vector<std::vector<size_t>>> sharedjet_tool = sharedjets(vtxidx0, vtxidx1, sv_match_tracktojet_which_jetidx, sv_match_tracktojet_which_trkidx);
 						// loop thru {1,1}+{1,n} nsharedjets and remove just one shared track from v0 if a |dPhi(v0,one shared track)| > pi/2 
 						if (sharedjet_tool.first) {
-							//std::cout << "start shj implementation to {1,1} and {1,n}" << std::endl;
+							std::cout << "start shj implementation to {1,1} and {1,n}" << std::endl;
 							std::vector<std::vector<size_t>> sv_lonesharedtrack_which_trkidx = sharedjet_tool.second;
 							std::vector<size_t> sv0_lonesharedtrack_which_trkidx = sv_lonesharedtrack_which_trkidx[0];
 							std::vector<size_t> sv1_lonesharedtrack_which_trkidx = sv_lonesharedtrack_which_trkidx[1];
@@ -1789,10 +1789,10 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
 							sv0 = sv0_resolved_sharedtracks;
 							
-							//std::cout << "sv0'idx: " << vtxidx0 << std::endl;
-							//std::cout << "sv0'ntrack after: " << sv0.nTracks() << std::endl;
+							std::cout << "sv0'idx: " << vtxidx0 << std::endl;
+							std::cout << "sv0'ntrack after: " << sv0.nTracks() << std::endl;
 
-
+							/*
 							track_set  sv1_resolved_sharedtracks_trkset;
 							for (unsigned int i = 0; i < sv_total_track_which_trkidx[vtxidx1].size(); ++i) {
 								int idx = sv_total_track_which_trkidx[vtxidx1][i];
@@ -1813,9 +1813,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 								sv1_resolved_sharedtracks = reco::Vertex(tv);
 							
 							sv1 = sv1_resolved_sharedtracks;
-							
-							//std::cout << "sv1'idx: " << vtxidx1 << std::endl;
-							//std::cout << "sv1'ntrack after: " << sv1.nTracks() << std::endl;
+							*/
+							std::cout << "sv1'idx: " << vtxidx1 << std::endl;
+							std::cout << "sv1'ntrack after: " << sv1.nTracks() << std::endl;
 
 							
 
