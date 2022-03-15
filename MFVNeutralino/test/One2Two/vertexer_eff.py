@@ -2,7 +2,9 @@ import os
 from JMTucker.Tools.ROOTTools import *
 
 version = 'V27m'
+#version = 'V28Bm'
 path = '/uscms_data/d2/tucker/crab_dirs/VertexerPairEffs' + version.capitalize()
+#path = '/uscms_data/d3/shogan/crab_dirs/VertexerPairEffs' + version.capitalize()
 
 set_style()
 
@@ -14,7 +16,7 @@ def write(font, size, x, y, text):
     w.DrawLatex(x, y, text)
     return w
 
-for is_mc in False, True:
+for is_mc in True,:
     for year in 2017, 2018, '2017p8':
         in_fn = os.path.join(path, ('background_%s.root' if is_mc else 'JetHT%s.root') % year)
         in_f = ROOT.TFile(in_fn)

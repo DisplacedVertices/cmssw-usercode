@@ -1,7 +1,7 @@
 from JMTucker.Tools.ROOTTools import *
 
 class PerSignal:
-    tau_names = {100: '100 #mum', 300: '300 #mum', 1000: '1 mm', 10000: '10 mm', 30000: '30 mm', 100000: '100 mm'}
+    tau_names = {100: '100 #mum', 300: '300 #mum', 1000: '1 mm', 10000: '10 mm', 30000: '30 mm', 100000: '100 mm', 1000000: '1000 mm'}
 
     @classmethod
     def clear_samples(_, samples):

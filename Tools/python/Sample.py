@@ -17,6 +17,7 @@ xrootd_sites = {
     'T2_US_Florida': 'root://cmsio5.rc.ufl.edu/',
     'T2_US_MIT': 'root://xrootd.cmsaf.mit.edu/',
     'T2_US_UCSD': 'root://redirector.t2.ucsd.edu/',
+    'T2_US_Vanderbilt': 'root://xrootd-vanderbilt.sites.opensciencegrid.org/',
     }
 
 ########################################################################
@@ -112,6 +113,8 @@ class Sample(object):
         elif len(args) == 0:
             args = ('/%s/None/None' % self.datasets['main'].dataset.split('/')[1], -1)
         self.datasets[c] = Dataset(*args, **kwargs)
+        if self.name == 'NMSSM_XToYHTo4b_MX_1100_2017':
+            print(self.datasets[c])
 
     def job_control(self, conf_obj):
         return self.datasets[self.curr_dataset].job_control(conf_obj)

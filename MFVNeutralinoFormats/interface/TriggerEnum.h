@@ -27,8 +27,15 @@ namespace mfv {
   };
 
     enum {
-      b_hltDoubleCaloBJets100eta2p3, b_hltBTagCalo80x6CSVp0p92DoubleWithMatching, b_hltDoublePFJets100Eta2p3, b_hltDoublePFJets100Eta2p3MaxDeta1p6, // Filters for 2017 di-bjet trigger
-      n_filter_paths // = 4
+      // Filters for 2017 di-bjet trigger
+      b_hltDoubleCaloBJets100eta2p3, b_hltBTagCalo80x6CSVp0p92DoubleWithMatching, b_hltDoublePFJets100Eta2p3, b_hltDoublePFJets100Eta2p3MaxDeta1p6,
+
+      // Filters for 2017 tri-bjet trigger
+      b_hltQuadCentralJet30, b_hltCaloQuadJet30HT300, b_hltBTagCaloCSVp05Double, b_hltPFCentralJetLooseIDQuad30, b_hlt1PFCentralJetLooseID75, b_hlt2PFCentralJetLooseID60,
+      b_hlt3PFCentralJetLooseID45, b_hlt4PFCentralJetLooseID40, b_hltPFCentralJetsLooseIDQuad30HT300, b_hltBTagPFCSVp070Triple,
+
+      // bookkeeping
+      n_filter_paths // = 14
     };
       
 

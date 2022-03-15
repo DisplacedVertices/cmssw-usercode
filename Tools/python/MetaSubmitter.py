@@ -222,8 +222,9 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
     elif jobtype == 'ntuple' or jobtype == 'trackmover':
         # Shed/presel_splitting.py
         d = {'miniaod': {
-                'signal':           ( 1,     200),
+                'signal':           ( 1,    7400),
                 'JetHT':            (15, 1350000),
+                'qcdht0200_2017':   (50, 3130000),
                 'qcdht0300_2017':   (50, 3130000),
                 'qcdht0500_2017':   (50, 3130000),
                 'qcdht0700_2017':   (50, 3130000),
@@ -235,6 +236,10 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
                 'ttbarht0800_2017': ( 3,   45000),
                 'ttbarht1200_2017': ( 3,   32500),
                 'ttbarht2500_2017': ( 3,   27500),
+                'NMSSM_XToYHTo4b_MX_1100_2017': (3, 27500),
+                'zz_2017':          (20,  100000),
+                'wz_2017':          (40,  100000),
+                'ww_2017':          (40,  200000),
                 'qcdht0300_2018':   (50, 3130000),
                 'qcdht0500_2018':   (50, 3130000),
                 'qcdht0700_2018':   (50, 3130000),

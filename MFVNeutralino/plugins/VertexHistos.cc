@@ -47,6 +47,10 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH2F* h_sv_rz;
   TH1F* h_svdist2d;
   TH1F* h_svdist3d;
+  TH1F* h_sum_bsbs2ddist;
+  TH1F* h_sum_all_bsbs2ddist;
+  TH1F* h_sum_bs3ddist;
+  TH1F* h_sqsum_bsbs2ddist;
   TH2F* h_sv0pvdz_v_sv1pvdz;
   TH2F* h_sv0pvdzsig_v_sv1pvdzsig;
   TH1F* h_absdeltaphi01;
@@ -346,8 +350,12 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   h_sv_xz = fs->make<TH2F>("h_sv_xz", ";SV x (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
   h_sv_yz = fs->make<TH2F>("h_sv_yz", ";SV y (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
   h_sv_rz = fs->make<TH2F>("h_sv_rz", ";SV r (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
-  h_svdist2d = fs->make<TH1F>("h_svdist2d", ";dist2d(sv #0, #1) (cm);arb. units", 500, 0, 1);
-  h_svdist3d = fs->make<TH1F>("h_svdist3d", ";dist3d(sv #0, #1) (cm);arb. units", 500, 0, 1);
+  h_svdist2d = fs->make<TH1F>("h_svdist2d", ";dist2d(sv #0, #1) (cm);arb. units", 500, 0, 2);
+  h_svdist3d = fs->make<TH1F>("h_svdist3d", ";dist3d(sv #0, #1) (cm);arb. units", 500, 0, 2);
+  h_sum_bsbs2ddist = fs->make<TH1F>("h_sum_bsbs2ddist", ";sum(dBV(sv #0), dBV(sv #1));arb. units", 500, 0, 2);
+  h_sum_all_bsbs2ddist = fs->make<TH1F>("h_sum_all_bsbs2ddist", ";#Sigma all SV d_{BV} (cm);arb. units", 500, 0, 2);
+  h_sum_bs3ddist = fs->make<TH1F>("h_sum_bs3ddist", ";(3D) d_{BV}^{0} + d_{BV}^{1} ;arb. units", 500, 0, 20);
+  h_sqsum_bsbs2ddist = fs->make<TH1F>("h_sqsum_bsbs2ddist", ";sq sum(dBV(sv #0), dBV(sv #1));arb. units", 500, 0, 2);
   h_sv0pvdz_v_sv1pvdz = fs->make<TH2F>("h_sv0pvdz_v_sv1pvdz", ";sv #1 dz to PV (cm);sv #0 dz to PV (cm)", 100, 0, 0.5, 100, 0, 0.5);
   h_sv0pvdzsig_v_sv1pvdzsig = fs->make<TH2F>("h_sv0pvdzsig_v_sv1pvdzsig", ";N#sigma(sv #1 dz to PV);sv N#sigma(#0 dz to PV)", 100, 0, 50, 100, 0, 50);
   h_absdeltaphi01 = fs->make<TH1F>("h_absdeltaphi01", ";abs(delta(phi of sv #0, phi of sv #1));arb. units", 315, 0, 3.15);
@@ -375,6 +383,8 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   const double bsz = mevent->bsz;
   const math::XYZPoint bs(bsx, bsy, bsz);
   const math::XYZPoint pv(mevent->pvx, mevent->pvy, mevent->pvz);
+
+  double all_sumdbv = 0.0;
 
   edm::Handle<MFVVertexAuxCollection> auxes;
   event.getByToken(vertex_token, auxes);
@@ -735,8 +745,13 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     const MFVVertexAux& sv1 = auxes->at(1);
     double svdist2d = mag(sv0.x - sv1.x, sv0.y - sv1.y);
     double svdist3d = mag(sv0.x - sv1.x, sv0.y - sv1.y, sv0.z - sv1.z);
+    double bs3ddist0 = mag(sv0.x - mevent->bsx_at_z(sv0.z), sv0.y - mevent->bsy_at_z(sv0.z), (float)(sv0.z-bsz));
+    double bs3ddist1 = mag(sv1.x - mevent->bsx_at_z(sv1.z), sv1.y - mevent->bsy_at_z(sv1.z), (float)(sv1.z-bsz));
     h_svdist2d->Fill(svdist2d, w);
     h_svdist3d->Fill(svdist3d, w);
+    h_sum_bsbs2ddist->Fill(mag(sv0.x - mevent->bsx_at_z(sv0.z), sv0.y - mevent->bsy_at_z(sv0.z)) + mag(sv1.x - mevent->bsx_at_z(sv1.z), sv1.y - mevent->bsy_at_z(sv1.z)));
+    h_sum_bs3ddist->Fill(bs3ddist0 + bs3ddist1);
+    h_sqsum_bsbs2ddist->Fill(hypot(mag(sv0.x - mevent->bsx_at_z(sv0.z), sv0.y - mevent->bsy_at_z(sv0.z)), mag(sv1.x - mevent->bsx_at_z(sv1.z), sv1.y - mevent->bsy_at_z(sv1.z))));
     h_sv0pvdz_v_sv1pvdz->Fill(sv0.pvdz(), sv1.pvdz(), w);
     h_sv0pvdzsig_v_sv1pvdzsig->Fill(sv0.pvdzsig(), sv1.pvdzsig(), w);
     double phi0 = atan2(sv0.y - bsy, sv0.x - bsx);
@@ -753,6 +768,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     for (int isv = 0; isv < nsv; ++isv) {
       const MFVVertexAux& aux = auxes->at(isv);
       const int ntracks = aux.ntracks();
+      all_sumdbv += mag(aux.x - mevent->bsx_at_z(aux.z), aux.y - mevent->bsy_at_z(aux.z));
 
       std::vector<int> track_which_jet;
       for (int i = 0; i < ntracks; ++i) {
@@ -773,6 +789,8 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       }
       sv_track_which_jet.push_back(track_which_jet);
     }
+
+   h_sum_all_bsbs2ddist->Fill(all_sumdbv, w);
 
     bool shared_jet = std::find_first_of (sv_track_which_jet[0].begin(), sv_track_which_jet[0].end(), sv_track_which_jet[1].begin(), sv_track_which_jet[1].end()) != sv_track_which_jet[0].end();
     h_sv_shared_jets->Fill(shared_jet, w);

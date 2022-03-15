@@ -1,10 +1,10 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version_ = 'V27'
-use_btag_triggers = False
+ntuple_version_ = 'V29'
+use_btag_triggers = True
 if use_btag_triggers : 
-    ntuple_version_ += "B" # for "Btag triggers"; also includes DisplacedDijet triggers
+    ntuple_version_ += "A" # for "Btag triggers"; also includes DisplacedDijet triggers
 ntuple_version_use = ntuple_version_ + 'm'
 dataset = 'ntuple' + ntuple_version_use.lower()
 
@@ -96,7 +96,7 @@ class NtupleSettings(CMSSWSettings):
         self.prepare_vis = False
         self.keep_all = False
         self.keep_gen = False
-        self.event_filter = True
+        self.event_filter = False #FIXME
 
     @property
     def version(self):
@@ -305,7 +305,8 @@ def ntuple_process(settings):
 def signals_no_event_filter_modifier(sample):
     if sample.is_signal:
         if use_btag_triggers :
-            magic = "event_filter = 'bjets OR displaced dijet veto HT'"
+            #magic = "event_filter = 'bjets OR displaced dijet veto HT'"
+            magic = "event_filter = 'bjets OR displaced dijet'"
         else :
             magic = "event_filter = 'jets only'"
         to_replace = [(magic, 'event_filter = False', 'tuple template does not contain the magic string "%s"' % magic)]

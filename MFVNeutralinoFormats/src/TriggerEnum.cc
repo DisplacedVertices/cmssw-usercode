@@ -74,18 +74,47 @@ namespace mfv {
     "Flag_CSCTightHalo2015Filter"
   };
 
+
   const char* filter_paths[mfv::n_filter_paths] = {
+    // 2017 di-bjet trigger filter names
     "hltDoubleCaloBJets100eta2p3",
     "hltBTagCalo80x6CSVp0p92DoubleWithMatching",
     "hltDoublePFJets100Eta2p3",
-    "hltDoublePFJets100Eta2p3MaxDeta1p6"
+    "hltDoublePFJets100Eta2p3MaxDeta1p6",
+
+    // 2017 tri-bjet trigger filter names
+    "hltQuadCentralJet30",
+    "hltCaloQuadJet30HT300", 
+    "hltBTagCaloCSVp05Double", 
+    "hltPFCentralJetLooseIDQuad30", 
+    "hlt1PFCentralJetLooseID75", 
+    "hlt2PFCentralJetLooseID60",
+    "hlt3PFCentralJetLooseID45", 
+    "hlt4PFCentralJetLooseID40", 
+    "hltPFCentralJetsLooseIDQuad30HT300", 
+    "hltBTagPFCSVp070Triple",
+
   };
 
   const int filter_nreqs[mfv::n_filter_paths] = {
+    // 2017 di-bjet trigger
     2,
     2,
     2,
-    1
+    1,
+
+    // 2017 tri-bjet trigger
+    4,
+    300, // this is an HT filter
+    2,
+    4,
+    1,
+    2,
+    3,
+    4,
+    300, // this is an HT filter
+    3
+
   };
 
 }

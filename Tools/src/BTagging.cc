@@ -19,7 +19,8 @@ namespace jmt {
       if (old)
         return jet.bDiscriminator("pfCombinedInclusiveSecondaryVertexV2BJetTags"); // CSVv2
       else
-        return jet.bDiscriminator("pfDeepFlavourJetTags:probb") + jet.bDiscriminator("pfDeepFlavourJetTags:probbb") + jet.bDiscriminator("pfDeepFlavourJetTags:problepb"); // DeepFlavour
+        //return jet.bDiscriminator("pfDeepFlavourJetTags:probb") + jet.bDiscriminator("pfDeepFlavourJetTags:probbb") + jet.bDiscriminator("pfDeepFlavourJetTags:problepb"); // DeepFlavour
+        return jet.bDiscriminator("pfDeepFlavourJetTags:probb"); // DeepFlavour (first term only)
     }
 
     bool is_tagged(const pat::Jet& jet, int wp, bool old) {

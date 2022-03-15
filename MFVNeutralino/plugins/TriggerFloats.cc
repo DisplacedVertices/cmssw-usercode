@@ -59,6 +59,8 @@ namespace {
 }
 
 void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) {
+  // Print info for a few weird events
+  //bool alt_print = ((event.id().event() == 18208) or (event.id().event() == 18428) or (event.id().event() == 18440) or (event.id().event() == 18482) or (event.id().event() == 18535));
   if (prints) std::cout << "TriggerFloats run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
 
   edm::Handle<edm::TriggerResults> trigger_results;
@@ -306,12 +308,19 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
     
 }
 
-
     obj.unpackNamesAndLabels(event, *trigger_results);
     for (unsigned h = 0; h < obj.filterLabels().size(); ++h){
       for (unsigned j = 0; j < mfv::n_filter_paths; ++j) {
-        if (mfv::filter_paths[j] == obj.filterLabels()[h])
+
+        // If we see a filter we're looking for and it's NOT an HT/MHT filter, then just tally it
+        if ((mfv::filter_paths[j] == obj.filterLabels()[h]) and (obj.filterIds()[0] != 90) and (obj.filterIds()[0] != 89)) {
           npass_filter[j]++;
+        }
+
+        // If we see a filter we're looking for and it is an HT filter (id = 89), then we'll check the HT
+        else if ((mfv::filter_paths[j] == obj.filterLabels()[h]) and (obj.filterIds()[0] == 89)) {
+            npass_filter[j] += obj.pt();
+        }
       }
     }        
 
@@ -386,7 +395,11 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
         // Note that all of the bjet triggers use PF jets for the kinematics, and the
         // b-tagging discriminants aren't currently available in AODs, so this is
         // sufficient for the trigger matching for now
-        if(obj.collection() == "hltAK4PFJetsCorrected::HLT"){
+        if (obj.collection() == "hltAK4CaloJetsCorrected::HLT"){
+          std::cout << "pushing back hltcalojets" << std::endl;
+          floats->hltcalojets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
+        }
+        else if(obj.collection() == "hltAK4PFJetsCorrected::HLT"){
           floats->hltpfjets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
         }
         else if(obj.collection() == "hltDisplacedHLTCaloJetCollectionProducerLowPt::HLT" || obj.collection() == "hltDisplacedHLTCaloJetCollectionProducerMidPt::HLT"){
@@ -482,10 +495,12 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
     }
 
   if (prints) {
-    printf("# all jets: %lu  selected: %i (>20GeV: %i) jetpt1: %f  2: %f  ht: %f\n", jets->size(), floats->njets(), floats->njets(20), floats->jetpt1(), floats->jetpt2(), floats->ht);
+    printf("# all jets: %lu  selected: %i (>30GeV: %i) jetpt1: %f  2: %f  ht(30): %f\n", jets->size(), floats->njets(), floats->njets(30), floats->jetpt1(), floats->jetpt2(), floats->htptgt30);
     for (int i = 0; i < mfv::n_filter_paths; ++i)
       printf("%s,  npass: %i   Trigger Passed: %i \n", mfv::filter_paths[i], npass_filter[i], floats->FLTdecisions[i]);
   }
+//  if (npass_filter[5] > 0)
+//    printf("[%i, %f]\n", npass_filter[5], floats->htptgt30);
 
   event.put(std::move(floats));
 }

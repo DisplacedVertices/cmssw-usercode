@@ -161,13 +161,14 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       return false;
 
     if (apply_presel == 2) {
-      if (!mevent->pass_hlt(mfv::b_HLT_Ele35_WPTight_Gsf) && !mevent->pass_hlt(mfv::b_HLT_IsoMu27))
+      if (!mevent->pass_hlt(mfv::b_HLT_IsoMu27))
+      //if (!mevent->pass_hlt(mfv::b_HLT_Ele35_WPTight_Gsf) && !mevent->pass_hlt(mfv::b_HLT_IsoMu27))
         return false;
 
       // JMTBAD match to lepton that triggered
       // JMTBAD real turnon value
-      if (mevent->pass_hlt(mfv::b_HLT_Ele35_WPTight_Gsf) && mevent->first_lep_pass(MFVEvent::lep_el).Pt() < 35)
-        return false;
+      //if (mevent->pass_hlt(mfv::b_HLT_Ele35_WPTight_Gsf) && mevent->first_lep_pass(MFVEvent::lep_el).Pt() < 35)
+      //  return false;
 
       if (mevent->pass_hlt(mfv::b_HLT_IsoMu27) && mevent->first_lep_pass(MFVEvent::lep_mu).Pt() < 27)
         return false;
@@ -190,7 +191,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (apply_presel == 4) {
 
       // Veto events which pass HT trigger and offline HT > 1200 GeV, to keep orthogonal with apply_presel == 1
-      if(satisfiesTrigger(mevent, mfv::b_HLT_PFHT1050)) return false;
+      //if(satisfiesTrigger(mevent, mfv::b_HLT_PFHT1050)) return false;
 
       bool success = false;
       for(size_t trig : mfv::HTOrBjetOrDisplacedDijetTriggers){
@@ -218,7 +219,8 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (apply_trigger == 1 && !mevent->pass_hlt(mfv::b_HLT_PFHT1050))
       return false;
 
-    if (apply_trigger == 2 && !mevent->pass_hlt(mfv::b_HLT_Ele35_WPTight_Gsf) && !mevent->pass_hlt(mfv::b_HLT_IsoMu27))
+    if (apply_trigger == 2 && !mevent->pass_hlt(mfv::b_HLT_IsoMu27))
+    //if (apply_trigger == 2 && !mevent->pass_hlt(mfv::b_HLT_Ele35_WPTight_Gsf) && !mevent->pass_hlt(mfv::b_HLT_IsoMu27))
       return false;
 
     if (apply_trigger == 3){

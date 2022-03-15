@@ -88,6 +88,7 @@ private:
   TH2F* h_neutralino_daughters_dxy_dBV;
   TH1F* h_llp_daughters_phi;
   TH1F* h_llp_daughters_mass;
+  TH1F* h_llp_daughter_b_dphi;
   TH1F* h_lsp_max_dR;
   TH1F* h_lsp_min_dR;
   TH1F* h_neutralino_daughters_jets_dR;
@@ -112,6 +113,15 @@ private:
   TH2F* h_bquarks_avgeta_dphi;
   TH1F* h_bquarks_dR;
   TH2F* h_bquarks_dR_dphi;
+
+  TH1F* h_higgs_pt;
+  TH1F* h_higgs_eta;
+  TH1F* h_higgs_phi;
+  TH1F* h_higgs_energy;
+  TH1F* h_higgs_llpchild_dphi;
+
+  TH1F* h_z_dilept_sumpt;
+  TH2F* h_z_dilept_pt2d;
 
   TH1F* h_npartons_in_acc;
 
@@ -393,6 +403,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   h_neutralino_daughters_dxy_dBV = fs->make<TH2F>("h_neutralino_daughters_dxy_dBV", ";LSP 2D distance;dxy of partons", 500, 0, 5, 400, -0.2, 0.2);
   h_llp_daughters_phi = fs->make<TH1F>("h_llp_daughters_phi", ";#phi of partons;fraction of LLP daughter partons", 50, -4, 4);
   h_llp_daughters_mass = fs->make<TH1F>("h_llp_daughters_mass", ";#mass of partons;fraction of LLP daughter partons", 50, 0, 100);
+  h_llp_daughter_b_dphi = fs->make<TH1F>("h_llp_daughter_b_dphi", ";abs. #Delta #phi between daughter b quarks;arb. units", 32, 0, 3.2);
   h_lsp_max_dR = fs->make<TH1F>("h_lsp_max_dR", ";max #DeltaR between partons;Events/0.05", 100, 0, 5);
   h_lsp_min_dR = fs->make<TH1F>("h_lsp_min_dR", ";min #DeltaR between partons;Events/0.05", 100, 0, 5);
   h_neutralino_daughters_jets_dR = fs->make<TH1F>("h_neutralino_daughters_jets_dR", ";#DeltaR between partons and jets;parton-jet pairs/0.05", 100, 0, 5);
@@ -413,7 +424,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   h_nbhadronsvsbquarks = fs->make<TH2F>("h_nbhadronsvsbquarks", ";number of b quarks;number of b hadrons", 20, 0, 20, 20, 0, 20);
   h_nbhadronsvsbquarks_wcuts = fs->make<TH2F>("h_nbhadronsvsbquarks_wcuts", "", 20, 0, 20, 20, 0, 20);
   h_nbquarks = fs->make<TH1F>("h_nbquarks", ";number of b quarks;Events", 20, 0, 20);
-  h_bquarks_pt = fs->make<TH1F>("h_bquarks_pt", ";b quarks p_{T} (GeV);arb. units", 100, 0, 500);
+  h_bquarks_pt = fs->make<TH1F>("h_bquarks_pt", ";b quarks p_{T} (GeV);arb. units", 100, 0, 1000);
   h_bquarks_eta = fs->make<TH1F>("h_bquarks_eta", ";b quarks #eta;arb. units", 50, -4, 4);
   h_bquarks_phi = fs->make<TH1F>("h_bquarks_phi", ";b quarks #phi;arb. units", 50, -3.15, 3.15);
   h_bquarks_energy = fs->make<TH1F>("h_bquarks_energy", ";b quarks energy (GeV);arb. units", 200, 0, 2000);
@@ -426,6 +437,15 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   h_bquarks_avgeta_dphi = fs->make<TH2F>("h_bquarks_avgeta_dphi", "events with two bquarks;#Delta#phi;avg #eta", 50, -3.15, 3.15, 50, -4, 4);
   h_bquarks_dR = fs->make<TH1F>("h_bquarks_dR", "events with two bquarks;#Delta R;Events/0.14", 50, 0, 7);
   h_bquarks_dR_dphi = fs->make<TH2F>("h_bquarks_dR_dphi", "events with two bquarks;#Delta#phi;#Delta R", 50, -3.15, 3.15, 50, 0, 7);
+
+  h_higgs_pt = fs->make<TH1F>("h_higgs_pt", ";higgs p_{T} (GeV);arb. units", 100, 0, 500);
+  h_higgs_eta = fs->make<TH1F>("h_higgs_eta", ";higgs #eta;arb. units", 50, -4, 4);
+  h_higgs_phi = fs->make<TH1F>("h_higgs_phi", ";higgs #phi;arb. units", 50, -3.15, 3.15);
+  h_higgs_energy = fs->make<TH1F>("h_higgs_energy", ";higgs energy (GeV);arb. units", 200, 0, 2000);
+  h_higgs_llpchild_dphi = fs->make<TH1F>("h_higgs_llpchild_dphi", ";abs #Delta #phi between Higgs llp daughters;arb. units", 32, 0, 3.15);
+
+  h_z_dilept_sumpt = fs->make<TH1F>("h_z_dilept_sumpt", ";#Sigma pt of Z's daughter leptons [GeV]; arb.units", 100, 0, 500); 
+  h_z_dilept_pt2d =  fs->make<TH2F>("h_z_dilept_pt2d", ";pt of Z's first daughter lepton [GeV]; pt of Z's scnd daughter lepton [GeV]", 100, 0, 500, 100, 0, 500);
 
   h_npartons_in_acc = fs->make<TH1F>("h_npartons_in_acc", ";number of LSP daughters in acceptance;Events", 40, 0, 40);
   h_npartons_60 = fs->make<TH1F>("h_npartons_60", ";number of partons with E_{T} > 60 GeV;Events", 40, 0, 40);
@@ -480,6 +500,13 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
 }
 
 void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup) {
+
+
+  const double o_tau_from = 10000./1000.;
+  const double o_tau_to = 10000./10000.;
+  auto tau_weight = [&](double tau) { return o_tau_to/o_tau_from * exp((o_tau_from - o_tau_to) * tau); };
+  double w_evt = 1.0;
+
   setup.getData(pdt);
 
   edm::Handle<reco::GenParticleCollection> gen_particles;
@@ -517,8 +544,6 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
       reco::GenParticleRef lsp = mci->primaries()[i];
       const double lspbeta  = lsp->p()/lsp->energy();
       const double lspbetagamma = lspbeta/sqrt(1-lspbeta*lspbeta);
-      h_lspbeta->Fill(lspbeta);
-      h_lspbetagamma->Fill(lspbetagamma);
 
       const std::vector<reco::GenParticleRef> particles = mci->visible(i);
       const int npar = particles.size();
@@ -546,8 +571,14 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
       }
       
       const double ctau = r3d[0]/lspbetagamma;
-      h_ctau->Fill(ctau);
-      h_ctaubig->Fill(ctau);
+      double w_llp = tau_weight(ctau);
+
+      std::cout << w_llp << std::endl;
+
+      h_ctau->Fill(ctau, w_llp);
+      h_ctaubig->Fill(ctau, w_llp);
+      h_lspbeta->Fill(lspbeta, w_llp);
+      h_lspbetagamma->Fill(lspbetagamma, w_llp);
 
       float min_deta =  1e99;
       float max_deta = -1e99;
@@ -577,33 +608,37 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
           if (dR > max_dR)
             max_dR = dR;
         }
-        h_llp_daughters_pt->Fill(pT);
-        h_llp_daughters_mass->Fill(mass);
-        h_llp_daughters_phi->Fill(phi);
-        h_llp_daughters_eta->Fill(eta);
+        h_llp_daughters_pt->Fill(pT, w_llp);
+        h_llp_daughters_mass->Fill(mass, w_llp);
+        h_llp_daughters_phi->Fill(phi, w_llp);
+        h_llp_daughters_eta->Fill(eta, w_llp);
       }
 
-      h_min_deta->Fill(min_deta);
-      h_max_deta->Fill(max_deta);
-      h_min_dphi->Fill(min_dphi);
-      h_max_dphi->Fill(max_dphi);
-      h_min_dR->Fill(min_dR);
-      h_max_dR->Fill(max_dR);
-      h_min_dR_vs_lspbeta->Fill(lspbeta, min_dR);
-      h_max_dR_vs_lspbeta->Fill(lspbeta, max_dR);
-      h_min_dR_vs_lspbetagamma->Fill(lspbetagamma, min_dR);
-      h_max_dR_vs_lspbetagamma->Fill(lspbetagamma, max_dR);
+      h_min_deta->Fill(min_deta, w_llp);
+      h_max_deta->Fill(max_deta, w_llp);
+      h_min_dphi->Fill(min_dphi, w_llp);
+      h_max_dphi->Fill(max_dphi, w_llp);
+      h_min_dR->Fill(min_dR, w_llp);
+      h_max_dR->Fill(max_dR, w_llp);
+      h_min_dR_vs_lspbeta->Fill(lspbeta, min_dR, w_llp);
+      h_max_dR_vs_lspbeta->Fill(lspbeta, max_dR, w_llp);
+      h_min_dR_vs_lspbetagamma->Fill(lspbetagamma, min_dR, w_llp);
+      h_max_dR_vs_lspbetagamma->Fill(lspbetagamma, max_dR, w_llp);
+        
+      w_evt *= w_llp;    
     }
 
-    h_lsp_dist2d->Fill(mci->dvv());
-    h_lsp_dist3d->Fill(mci->d3d());
+    std::cout << w_evt << std::endl;
+
+    h_lsp_dist2d->Fill(mci->dvv(), w_evt);
+    h_lsp_dist3d->Fill(mci->d3d(), w_evt);
 
     TVector3 lsp_mom_0 = make_tlv(*mci->primaries()[0]).Vect();
     TVector3 lsp_mom_1 = make_tlv(*mci->primaries()[1]).Vect();
-    h_lsp_angle3->Fill(lsp_mom_0.Dot(lsp_mom_1)/lsp_mom_0.Mag()/lsp_mom_1.Mag());
+    h_lsp_angle3->Fill(lsp_mom_0.Dot(lsp_mom_1)/lsp_mom_0.Mag()/lsp_mom_1.Mag(), w_evt);
     lsp_mom_0.SetZ(0);
     lsp_mom_1.SetZ(0);
-    h_lsp_angle2->Fill(lsp_mom_0.Dot(lsp_mom_1)/lsp_mom_0.Mag()/lsp_mom_1.Mag());
+    h_lsp_angle2->Fill(lsp_mom_0.Dot(lsp_mom_1)/lsp_mom_0.Mag()/lsp_mom_1.Mag(), w_evt);
 
     int npartons_in_acc = 0;
     int npartons_60 = 0;
@@ -613,8 +648,8 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
       if (p->pt() > 60 && fabs(p->eta()) < 2.5)
         ++npartons_60;
     }
-    h_npartons_in_acc->Fill(npartons_in_acc);
-    h_npartons_60->Fill(npartons_60);
+    h_npartons_in_acc->Fill(npartons_in_acc, w_evt);
+    h_npartons_60->Fill(npartons_60, w_evt);
     
     if (mci->type() == mfv::mci_MFVtbs) { // || mci->type() == mci_Ttbar) {
       for (int i = 0; i < 2; ++i) {
@@ -642,19 +677,19 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
         float lsp_min_dR =  1e99;
         float lsp_max_dR = -1e99;
         for (int j = 0; j < lsp_ndau; ++j) {
-          h_neutralino_daughters_pt->Fill(lsp_daughters[j]->pt());
-          h_neutralino_daughters_eta->Fill(lsp_daughters[j]->eta());
+          h_neutralino_daughters_pt->Fill(lsp_daughters[j]->pt(), w_evt);
+          h_neutralino_daughters_eta->Fill(lsp_daughters[j]->eta(), w_evt);
           h_neutralino_daughters_dxy->Fill(mag(mci->strange(i)->vx() - mci->lsp(i)->vx(), mci->strange(i)->vy() - mci->lsp(i)->vy()) * sin(lsp_daughters[j]->phi() - atan2(mci->strange(i)->vy() - mci->lsp(i)->vy(), mci->strange(i)->vx() - mci->lsp(i)->vx())));
-          h_neutralino_daughters_dxy_dBV->Fill(mag(mci->strange(i)->vx() - mci->lsp(i)->vx(), mci->strange(i)->vy() - mci->lsp(i)->vy()), mag(mci->strange(i)->vx() - mci->lsp(i)->vx(), mci->strange(i)->vy() - mci->lsp(i)->vy()) * sin(lsp_daughters[j]->phi() - atan2(mci->strange(i)->vy() - mci->lsp(i)->vy(), mci->strange(i)->vx() - mci->lsp(i)->vx())));
+          h_neutralino_daughters_dxy_dBV->Fill(mag(mci->strange(i)->vx() - mci->lsp(i)->vx(), mci->strange(i)->vy() - mci->lsp(i)->vy()), mag(mci->strange(i)->vx() - mci->lsp(i)->vx(), mci->strange(i)->vy() - mci->lsp(i)->vy()) * sin(lsp_daughters[j]->phi() - atan2(mci->strange(i)->vy() - mci->lsp(i)->vy(), mci->strange(i)->vx() - mci->lsp(i)->vx())), w_evt);
 
           int nmatch = 0;
           for (const reco::GenJet& jet : *gen_jets) {
-            h_neutralino_daughters_jets_dR->Fill(reco::deltaR(*lsp_daughters[j], jet));
+            h_neutralino_daughters_jets_dR->Fill(reco::deltaR(*lsp_daughters[j], jet), w_evt);
             if (reco::deltaR(*lsp_daughters[j], jet) < 0.4) {
               ++nmatch;
             }
           }
-          h_neutralino_daughters_jets_nmatch->Fill(nmatch);
+          h_neutralino_daughters_jets_nmatch->Fill(nmatch, w_evt);
 
           if (is_neutrino(lsp_daughters[j]) || fabs(lsp_daughters[j]->eta()) > 2.5) continue;
 
@@ -682,9 +717,9 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
           }
         }
 
-        h_lsp_ntracks->Fill(lsp_ntracks);
-        h_lsp_min_dR->Fill(lsp_min_dR);
-        h_lsp_max_dR->Fill(lsp_max_dR);
+        h_lsp_ntracks->Fill(lsp_ntracks, w_evt);
+        h_lsp_min_dR->Fill(lsp_min_dR, w_evt);
+        h_lsp_max_dR->Fill(lsp_max_dR, w_evt);
       }
 
 
@@ -731,10 +766,10 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
       }
       if (!has_b_dau) {
         ++nbquarks;
-        h_bquarks_pt->Fill(gen.pt());
-        h_bquarks_eta->Fill(gen.eta());
-        h_bquarks_phi->Fill(gen.phi());
-        h_bquarks_energy->Fill(gen.energy());
+        h_bquarks_pt->Fill(gen.pt(), w_evt);
+        h_bquarks_eta->Fill(gen.eta(), w_evt);
+        h_bquarks_phi->Fill(gen.phi(), w_evt);
+        h_bquarks_energy->Fill(gen.energy(), w_evt);
         bquarks_ids.push_back(gen.pdgId());
         bquarks_eta.push_back(gen.eta());
         bquarks_phi.push_back(gen.phi());
@@ -742,6 +777,53 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
           ++nbquarks_wcuts;
         }
       }
+    }
+
+    if (abs(gen.pdgId()) == 1000006) {  // Loop over stops
+        std::vector<double> daughter_b_phi;
+        for (size_t i = 0, ie = gen.numberOfDaughters(); i < ie; ++i) {
+            if (abs(gen.daughter(i)->pdgId()) == 5) {
+                daughter_b_phi.push_back(gen.daughter(i)->phi());
+            }
+        }
+        if (daughter_b_phi.size() == 2) {
+            h_llp_daughter_b_dphi->Fill(fabs(reco::deltaPhi(daughter_b_phi[0], daughter_b_phi[1])), w_evt);
+        }
+    }
+
+    if (abs(gen.pdgId()) == 25) { // loop over higgses
+        h_higgs_pt  -> Fill(gen.pt(), w_evt);
+        h_higgs_eta -> Fill(gen.eta(), w_evt);
+        h_higgs_phi -> Fill(gen.phi(), w_evt);
+        h_higgs_energy -> Fill(gen.energy(), w_evt);
+
+        std::vector<double> daughter_llp_phi;
+    
+        for (size_t i = 0, ie = gen.numberOfDaughters(); i < ie; ++i){
+            if (abs(gen.daughter(i)->pdgId()) > 1000000) {
+                daughter_llp_phi.push_back(gen.daughter(i)->phi());
+            }
+        }
+
+        if (daughter_llp_phi.size() == 2) {
+            h_higgs_llpchild_dphi->Fill(fabs(reco::deltaPhi(daughter_llp_phi[0], daughter_llp_phi[1])), w_evt);
+        }
+    }
+
+
+    if (abs(gen.pdgId()) == 23) { // loop over Z bosons
+        std::vector<double> daughter_lepton_pt;
+
+        for (size_t i = 0, ie = gen.numberOfDaughters(); i < ie; ++i) {   
+            if ((abs(gen.daughter(i)->pdgId()) == 11) or ((abs(gen.daughter(i)->pdgId()) == 13))) {
+                daughter_lepton_pt.push_back(gen.daughter(i)->pt());
+            }
+        }
+
+        if (daughter_lepton_pt.size() == 2) {
+            h_z_dilept_pt2d -> Fill(daughter_lepton_pt[0], daughter_lepton_pt[1], w_evt);
+            h_z_dilept_sumpt -> Fill (daughter_lepton_pt[0] + daughter_lepton_pt[1], w_evt);
+        }
     }
 
     if (is_bhadron(&gen)) {
@@ -761,22 +843,22 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     }
   }
 
-  h_nbhadronsvsbquarks->Fill(nbquarks, nbhadrons);
-  h_nbhadronsvsbquarks_wcuts->Fill(nbquarks_wcuts, nbhadrons_wcuts);
-  h_nbquarks->Fill(nbquarks);
+  h_nbhadronsvsbquarks->Fill(nbquarks, nbhadrons, w_evt);
+  h_nbhadronsvsbquarks_wcuts->Fill(nbquarks_wcuts, nbhadrons_wcuts, w_evt);
+  h_nbquarks->Fill(nbquarks, w_evt);
   if (bquarks_ids.size() == 2) {
     double dphi = reco::deltaPhi(bquarks_phi[0], bquarks_phi[1]);
     double deta = bquarks_eta[0] - bquarks_eta[1];
     double avgeta = (bquarks_eta[0] + bquarks_eta[1]) / 2;
     double dR = reco::deltaR(bquarks_eta[0], bquarks_phi[0], bquarks_eta[1], bquarks_phi[1]);
-    h_bquarks_absdphi->Fill(fabs(dphi));
-    h_bquarks_dphi->Fill(dphi);
-    h_bquarks_deta->Fill(deta);
-    h_bquarks_deta_dphi->Fill(dphi, deta);
-    h_bquarks_avgeta->Fill(avgeta);
-    h_bquarks_avgeta_dphi->Fill(dphi, avgeta);
-    h_bquarks_dR->Fill(dR);
-    h_bquarks_dR_dphi->Fill(dphi, dR);
+    h_bquarks_absdphi->Fill(fabs(dphi), w_evt);
+    h_bquarks_dphi->Fill(dphi, w_evt);
+    h_bquarks_deta->Fill(deta, w_evt);
+    h_bquarks_deta_dphi->Fill(dphi, deta, w_evt);
+    h_bquarks_avgeta->Fill(avgeta, w_evt);
+    h_bquarks_avgeta_dphi->Fill(dphi, avgeta, w_evt);
+    h_bquarks_dR->Fill(dR, w_evt);
+    h_bquarks_dR_dphi->Fill(dphi, dR, w_evt);
   }
 
   int njets = 0;
@@ -816,40 +898,40 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 
     float fchg = float(nchg)/jet.nConstituents();
 
-    Jets->Fill(&jet);
-    JetAuxE->Fill(jet.auxiliaryEnergy());
-    JetEmE->Fill(jet.emEnergy());
-    JetHadE->Fill(jet.hadEnergy());
-    JetInvE->Fill(jet.invisibleEnergy());
-    JetNConstituents->Fill(jet.nConstituents());
-    JetNChargedConst->Fill(nchg);
-    JetFChargedConst->Fill(fchg);
-    JetNtracksPt->Fill(jet.pt(), nchg);
-    JetNtracksptgt3Pt->Fill(jet.pt(), ntracksptgt3);
+    Jets->Fill(&jet, w_evt);
+    JetAuxE->Fill(jet.auxiliaryEnergy(), w_evt);
+    JetEmE->Fill(jet.emEnergy(), w_evt);
+    JetHadE->Fill(jet.hadEnergy(), w_evt);
+    JetInvE->Fill(jet.invisibleEnergy(), w_evt);
+    JetNConstituents->Fill(jet.nConstituents(), w_evt);
+    JetNChargedConst->Fill(nchg, w_evt);
+    JetFChargedConst->Fill(fchg, w_evt);
+    JetNtracksPt->Fill(jet.pt(), nchg, w_evt);
+    JetNtracksptgt3Pt->Fill(jet.pt(), ntracksptgt3, w_evt);
 
     fill_by_label(JetIds, id != 0 ? pdt->particle(id)->name() : "N/A");
 
     if (id == 5) {
       ++nbjets;
 
-      BJets->Fill(&jet);
-      BJetAuxE->Fill(jet.auxiliaryEnergy());
-      BJetEmE->Fill(jet.emEnergy());
-      BJetHadE->Fill(jet.hadEnergy());
-      BJetInvE->Fill(jet.invisibleEnergy());
-      BJetNConstituents->Fill(jet.nConstituents());
-      BJetNChargedConst->Fill(nchg);
-      BJetFChargedConst->Fill(fchg);
+      BJets->Fill(&jet, w_evt);
+      BJetAuxE->Fill(jet.auxiliaryEnergy(), w_evt);
+      BJetEmE->Fill(jet.emEnergy(), w_evt);
+      BJetHadE->Fill(jet.hadEnergy(), w_evt);
+      BJetInvE->Fill(jet.invisibleEnergy(), w_evt);
+      BJetNConstituents->Fill(jet.nConstituents(), w_evt);
+      BJetNChargedConst->Fill(nchg, w_evt);
+      BJetFChargedConst->Fill(fchg, w_evt);
     }      
   }
-  NJets->Fill(njets);
-  NBJets->Fill(nbjets);
-  h_njets_60->Fill(njets60);
-  h_njets_40->Fill(njets40); 
-  h_njets_30->Fill(njets30);
-  h_njets_20->Fill(njets20); 
-  h_ht->Fill(ht);
-  h_ht40->Fill(ht40);
+  NJets->Fill(njets, w_evt);
+  NBJets->Fill(nbjets, w_evt);
+  h_njets_60->Fill(njets60, w_evt);
+  h_njets_40->Fill(njets40, w_evt); 
+  h_njets_30->Fill(njets30, w_evt);
+  h_njets_20->Fill(njets20, w_evt); 
+  h_ht->Fill(ht, w_evt);
+  h_ht40->Fill(ht40, w_evt);
 }
 
 DEFINE_FWK_MODULE(MFVGenHistos);

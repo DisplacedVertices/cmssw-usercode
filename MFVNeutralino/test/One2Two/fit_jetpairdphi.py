@@ -2,14 +2,16 @@
 
 from JMTucker.Tools.ROOTTools import *
 
-is_mc = False
-year = '2017p8'
+is_mc = True
+year = '2017'
+#version = 'V28Bm'
 version = 'V27m'
 
 set_style()
 ps = plot_saver(plot_dir('fit_jetpairdphi%s%s_%s' % (version.capitalize(), '' if is_mc else '_data', year)), size=(700,700), log=False, root=False)
 
-fn = '/uscms_data/d2/tucker/crab_dirs/Histos%s/background_%s.root' % (version.capitalize(), year)
+fn = '/uscms_data/d3/shogan/scratch/old/result.root'
+#fn = '/uscms_data/d2/tucker/crab_dirs/Histos%s/background_%s.root' % (version.capitalize(), year)
 if not is_mc:
   fn = '/uscms_data/d2/tucker/crab_dirs/Histos%s/100pc/JetHT%s.root' % (version.capitalize(), year)
 

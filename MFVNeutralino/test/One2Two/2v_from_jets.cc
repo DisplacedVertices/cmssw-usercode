@@ -1,30 +1,5 @@
 /*
- * This program constructs the background template from one-vertex events.
- * Set the input parameters at the top of the method construct_dvvc().
- * Set which combinations of input parameters to run in main().
- * To run: compile with the Makefile (make); execute (./2v_from_jets.exe); delete the .exe (make clean).
- *
- * Here are details on each of the input parameters:
- * which filepath?
- *  - Provide the filepath to the MiniTree directory.
- *
- * which samples?
- *  - The MC and data samples and weights are set in static arrays; edit nbkg if necessary.
- *  - For the 2017 MC samples the weights calculated assume an integrated luminosity of 41.53 fb^-1 and the number of events run on for each sample:
-samples -i <<EOF
-for sample in qcd_samples_2017 + ttbar_samples_2017:
-    nevents = sample.nevents('/uscms_data/d2/tucker/crab_dirs/MiniTreeV22m/%s.root' % sample.name)
-    print '%20s %6.1f %9d %10.3g' % (sample.name, sample.xsec, nevents, 41530.*sample.xsec/nevents)
-EOF
- *  - For the background template only the relative weights are relevant because we only construct the shape; the normalization comes from the fit.
- *  - Todo: MC weights and data samples for 2018.
- *  - If the samples array is modified, ibkg_begin and ibkg_end should also be modified.
- *
- * which ntracks?
- *  - This sets the treepath and shouldn't need to be modified.  (For Ntk3or4 two-vertex event is considered to be 4-track x 3-track if ntk0==4 and ntk1==3.)
- *
- * deltaphi input
- *  - Run fit_jetpairdphi.py to get the values of dphi_pdf_c, dphi_pdf_a.
+ dphi_pdf_c, dphi_pdf_a.
  *  - Todo: update for 2017 (the current values are from 2015+2016 data).
  *
  * efficiency input
@@ -49,8 +24,8 @@ EOF
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
-int dvv_nbins = 40;
-double dvv_bin_width = 0.01;
+int dvv_nbins = 500;
+double dvv_bin_width = 0.004;
 std::vector<TString> cb_cbbar_vector = {};
 
 struct ConstructDvvcParameters {
@@ -128,7 +103,8 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   const char* file_path; //which filepath?
   if (p.is_mc()) {
-    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV27m";
+    //file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV27m";
+    file_path = "/uscms_data/d3/shogan/crab_dirs/MiniTreeNomVtxV29Bm/";
   } else if (p.only_10pc()) {
     file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV27m";
   } else {
@@ -202,7 +178,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   double dphi_pdf_c; double dphi_pdf_e = 2; double dphi_pdf_a; //deltaphi input
   if (p.is_mc()) {
-    if (p.year() == "2017")         { dphi_pdf_c = 1.31; dphi_pdf_a = 4.60; }
+    if (p.year() == "2017")         { dphi_pdf_c = 1.17; dphi_pdf_a = 4.67; }
     else if (p.year() == "2018")    { dphi_pdf_c = 1.38; dphi_pdf_a = 3.77; }
     else if (p.year() == "2017p8")  { dphi_pdf_c = 1.34; dphi_pdf_a = 4.18; }
     else { fprintf(stderr, "bad year"); exit(1); }
@@ -246,6 +222,9 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   TH1D* h_1v_dbv = new TH1D("h_1v_dbv", "only-one-vertex events;d_{BV} (cm);events", 1250, 0, 2.5);
   TH1D* h_1v_dbv0 = new TH1D("h_1v_dbv0", "only-one-vertex events;d_{BV}^{0} (cm);events", 1250, 0, 2.5);
   TH1D* h_1v_dbv1 = new TH1D("h_1v_dbv1", "only-one-vertex events;d_{BV}^{1} (cm);events", 1250, 0, 2.5);
+  TH1D* h_1v_3d_dbv = new TH1D("h_1v_3d_dbv", "only-one-vertex events;3D d_{BV} (cm);events", 1250, 0, 12.5);
+  TH1D* h_1v_3d_dbv0 = new TH1D("h_1v_3d_dbv0", "only-one-vertex events;3D d_{BV}^{0} (cm);events", 1250, 0, 12.5);
+  TH1D* h_1v_3d_dbv1 = new TH1D("h_1v_3d_dbv1", "only-one-vertex events;3D d_{BV}^{1} (cm);events", 1250, 0, 12.5);
   TH1F* h_1v_phiv = new TH1F("h_1v_phiv", "only-one-vertex events;vertex #phi;events", 50, -3.15, 3.15);
   TH1D* h_1v_npu = new TH1D("h_1v_npu", "only-one-vertex events;# PU interactions;events", 100, 0, 100);
   TH1F* h_1v_njets = new TH1F("h_1v_njets", "only-one-vertex events;number of jets;events", 20, 0, 20);
@@ -304,8 +283,9 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
       const float w = weights[i] * nt.weight;
       if (nt.nvtx == 1) {
         h_1v_dbv->Fill(sqrt(nt.x0*nt.x0 + nt.y0*nt.y0), w);
-        if (nt.ntk0 >= min_ntracks0 && nt.ntk0 <= max_ntracks0) h_1v_dbv0->Fill(sqrt(nt.x0*nt.x0 + nt.y0*nt.y0), w);
-        if (nt.ntk0 >= min_ntracks1 && nt.ntk0 <= max_ntracks1) h_1v_dbv1->Fill(sqrt(nt.x0*nt.x0 + nt.y0*nt.y0), w);
+        h_1v_3d_dbv->Fill(sqrt(nt.x0*nt.x0 + nt.y0*nt.y0 + nt.z0*nt.z0), w);
+        if (nt.ntk0 >= min_ntracks0 && nt.ntk0 <= max_ntracks0) {h_1v_dbv0->Fill(sqrt(nt.x0*nt.x0 + nt.y0*nt.y0), w); h_1v_3d_dbv0->Fill(sqrt(nt.x0*nt.x0 + nt.y0*nt.y0 + nt.z0*nt.z0), w);}
+        if (nt.ntk0 >= min_ntracks1 && nt.ntk0 <= max_ntracks1) {h_1v_dbv1->Fill(sqrt(nt.x0*nt.x0 + nt.y0*nt.y0), w); h_1v_3d_dbv1->Fill(sqrt(nt.x0*nt.x0 + nt.y0*nt.y0 + nt.z0*nt.z0), w);}
         h_1v_phiv->Fill(atan2(nt.y0,nt.x0), w);
         h_1v_npu->Fill(nt.npu, w);
         h_1v_njets->Fill(nt.njets, w);
@@ -352,9 +332,21 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
         h->SetBinContent(ibin, 0);
       }
 
+
+  // check for negative bins in dbv histograms that we throw from below--JMTBAD set zero, only wrong ~by a little
+  for (TH1* h : { h_1v_3d_dbv0, h_1v_3d_dbv1})
+    for (int ibin = 0; ibin <= h->GetNbinsX()+1; ++ibin)
+      if (h->GetBinContent(ibin) < 0) {
+        printf("\e[1;31mdbv histogram %s has negative content %f in bin %i\e[0m\n", h->GetName(), h->GetBinContent(ibin), ibin);
+        h->SetBinContent(ibin, 0);
+      }
+
   //construct dvvc
   TH1F* h_c1v_dbv = new TH1F("h_c1v_dbv", "constructed from only-one-vertex events;d_{BV} (cm);vertices", 1250, 0, 2.5);
   TH1F* h_c1v_dvv = new TH1F("h_c1v_dvv", "constructed from only-one-vertex events;d_{VV} (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
+  TH1F* h_c1v_sumdbv = new TH1F("h_c1v_sumdbv", "constructed from only-one-vertex events;d_{BV}0 + d_{BV}1 (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
+  TH1F* h_c1v_sum3ddbv = new TH1F("h_c1v_sum3ddbv", "constructed from only-one-vertex events; 3D d_{BV}0 + d_{BV}1 (cm);events", dvv_nbins, 0, 10 * dvv_nbins * dvv_bin_width);
+  TH1F* h_c1v_sqsumdbv = new TH1F("h_c1v_sqsumdbv", "constructed from only-one-vertex events;hypot(d_{BV}0, d_{BV}1) (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
   TH1F* h_c1v_absdphivv = new TH1F("h_c1v_absdphivv", "constructed from only-one-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
   TH1F* h_c1v_dbv0 = new TH1F("h_c1v_dbv0", "constructed from only-one-vertex events;d_{BV}^{0} (cm);events", 1250, 0, 2.5);
   TH1F* h_c1v_dbv1 = new TH1F("h_c1v_dbv1", "constructed from only-one-vertex events;d_{BV}^{1} (cm);events", 1250, 0, 2.5);
@@ -395,6 +387,8 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   for (int ij = 0; ij < nsamples; ++ij) {
     double dbv0 = h_1v_dbv0->GetRandom();
     double dbv1 = h_1v_dbv1->GetRandom();
+    double dbv0_3d = h_1v_3d_dbv0->GetRandom();
+    double dbv1_3d = h_1v_3d_dbv1->GetRandom();
     h_c1v_dbv->Fill(dbv0);
     h_c1v_dbv->Fill(dbv1);
 
@@ -425,6 +419,9 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
     if (dvvc > dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width) dvvc = dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width;
     h_c1v_dvv->Fill(dvvc, prob);
+    h_c1v_sumdbv->Fill(dbv0 + dbv1, prob);
+    h_c1v_sum3ddbv->Fill(dbv0_3d + dbv1_3d, prob);
+    h_c1v_sqsumdbv->Fill(sqrt(dbv0*dbv0 + dbv1*dbv1), prob);
     h_c1v_absdphivv->Fill(fabs(dphi), prob);
     h_c1v_dbv0->Fill(dbv0, prob);
     h_c1v_dbv1->Fill(dbv1, prob);
@@ -474,6 +471,9 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   h_c1v_dbv->Write();
   h_c1v_dvv->Scale(1./h_c1v_dvv->Integral());
   h_c1v_dvv->Write();
+  h_c1v_sumdbv->Write();
+  h_c1v_sum3ddbv->Write();
+  h_c1v_sqsumdbv->Write();
   h_c1v_absdphivv->Write();
   h_c1v_dbv0->Write();
   h_c1v_dbv1->Write();
@@ -536,6 +536,9 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   delete h_1v_dbv;
   delete h_1v_dbv0;
   delete h_1v_dbv1;
+  delete h_1v_3d_dbv;
+  delete h_1v_3d_dbv0;
+  delete h_1v_3d_dbv1;
   delete h_1v_phiv;
   delete h_1v_npu;
   delete h_1v_njets;
@@ -555,6 +558,9 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   delete c_absdphivv;
   delete h_c1v_dbv;
   delete h_c1v_dvv;
+  delete h_c1v_sumdbv;
+  delete h_c1v_sum3ddbv;
+  delete h_c1v_sqsumdbv;
   delete h_c1v_absdphivv;
   delete h_c1v_dbv0;
   delete h_c1v_dbv1;
@@ -639,10 +645,10 @@ int main(int argc, const char* argv[]) {
   */
   for (const char* year : {"2017", "2018", "2017p8"}) {
     for (int ntracks : {3, 4, 5, 7, 8, 9}) {
-      ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks).is_mc(false);
-      construct_dvvc(pars2,                             TString::Format("2v_from_jets_data_%s_%dtrack_default_%s.root", year, ntracks, version));
-      construct_dvvc(pars2.btags(1),                    TString::Format("2v_from_jets_data_%s_%dtrack_btags_%s.root", year, ntracks, version));
-      construct_dvvc(pars2.btags(0),                    TString::Format("2v_from_jets_data_%s_%dtrack_nobtags_%s.root", year, ntracks, version));
+      ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks).is_mc(true);
+      construct_dvvc(pars2,                             TString::Format("2v_from_jets_mc_%s_%dtrack_default_%s.root", year, ntracks, version));
+      construct_dvvc(pars2.btags(1),                    TString::Format("2v_from_jets_mc_%s_%dtrack_btags_%s.root", year, ntracks, version));
+      construct_dvvc(pars2.btags(0),                    TString::Format("2v_from_jets_mc_%s_%dtrack_nobtags_%s.root", year, ntracks, version));
 //      construct_dvvc(pars2.btags(1).vary_dphi(true),    TString::Format("2v_from_jets_data_%s_%dtrack_vary_dphi_btags_%s.root", year, ntracks, version));
 //      construct_dvvc(pars2.btags(0).vary_dphi(true),    TString::Format("2v_from_jets_data_%s_%dtrack_vary_dphi_nobtags_%s.root", year, ntracks, version));
 //      construct_dvvc(pars2.btags(1).vary_eff(true),     TString::Format("2v_from_jets_data_%s_%dtrack_vary_eff_btags_%s.root", year, ntracks, version));

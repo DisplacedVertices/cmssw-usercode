@@ -222,6 +222,12 @@ struct MFVEvent {
   std::vector<float> jet_energy;
   std::vector<float> jet_gen_energy;
 
+  // Shaun
+  std::vector<float> calo_jet_pt;
+  std::vector<float> calo_jet_eta;
+  std::vector<float> calo_jet_phi;
+  std::vector<float> calo_jet_energy;
+
   TLorentzVector jet_p4(int w) const {
     TLorentzVector v;
     v.SetPtEtaPhiE(jet_pt[w], jet_eta[w], jet_phi[w], jet_energy[w]);
@@ -247,6 +253,9 @@ struct MFVEvent {
   void jet_hlt_push_back(const reco::Candidate& jet, const std::vector<TLorentzVector>& hltjets, bool is_displaced_calojets);
 
   float jet_ht(float min_jet_pt=0.f) const { return std::accumulate(jet_pt.begin(), jet_pt.end(), 0.f,
+                                                                    [min_jet_pt](float init, float b) { if (b > min_jet_pt) init += b; return init; }); }
+
+  float calo_jet_ht(float min_jet_pt=0.f) const { return std::accumulate(calo_jet_pt.begin(), calo_jet_pt.end(), 0.f,
                                                                     [min_jet_pt](float init, float b) { if (b > min_jet_pt) init += b; return init; }); }
 
   float jet_ST_sum() const {

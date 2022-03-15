@@ -1,6 +1,7 @@
 #include "CommonTools/Utils/interface/StringCutObjectSelector.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
+#include "DataFormats/JetReco/interface/CaloJetCollection.h" // Shaun
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
@@ -42,6 +43,7 @@ private:
   const edm::EDGetTokenT<GenEventInfoProduct> gen_info_token;
   const edm::EDGetTokenT<std::vector<double>> gen_vertex_token;
   const edm::EDGetTokenT<reco::GenJetCollection> gen_jets_token;
+  const edm::EDGetTokenT<reco::CaloJetCollection> calo_jets_token; // Shaun
   const edm::EDGetTokenT<reco::GenParticleCollection> gen_particles_token;
   const edm::EDGetTokenT<mfv::MCInteraction> mci_token;
   const edm::EDGetTokenT<std::vector<PileupSummaryInfo> > pileup_summary_token;
@@ -81,6 +83,7 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     gen_info_token(consumes<GenEventInfoProduct>(cfg.getParameter<edm::InputTag>("gen_info_src"))),
     gen_vertex_token(consumes<std::vector<double>>(cfg.getParameter<edm::InputTag>("gen_vertex_src"))),
     gen_jets_token(consumes<reco::GenJetCollection>(cfg.getParameter<edm::InputTag>("gen_jets_src"))),
+    calo_jets_token(consumes<reco::CaloJetCollection>(cfg.getParameter<edm::InputTag>("calo_jets_src"))), // Shaun
     gen_particles_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("gen_particles_src"))),
     mci_token(consumes<mfv::MCInteraction>(cfg.getParameter<edm::InputTag>("mci_src"))),
     pileup_summary_token(consumes<std::vector<PileupSummaryInfo> >(cfg.getParameter<edm::InputTag>("pileup_info_src"))),
@@ -440,6 +443,16 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       }
     }
   }
+
+  edm::Handle<reco::CaloJetCollection> calo_jets; // Shaun
+  event.getByToken(calo_jets_token, calo_jets); // Shaun
+  for (const reco::CaloJet& cjet : *calo_jets) { // Shaun
+    mevent->calo_jet_pt.push_back(cjet.pt());
+    mevent->calo_jet_eta.push_back(cjet.eta());
+    mevent->calo_jet_phi.push_back(cjet.phi());
+    mevent->calo_jet_energy.push_back(cjet.energy());
+  }
+
 
   //////////////////////////////////////////////////////////////////////
 

@@ -90,6 +90,11 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_jet_energy;
   TH1F* h_jet_ht;
   TH1F* h_jet_ht_40;
+  TH1F* h_calo_jet_pt[MAX_NJETS+1];
+  TH1F* h_calo_jet_eta[MAX_NJETS+1];
+  TH1F* h_calo_jet_phi[MAX_NJETS+1];
+  TH1F* h_calo_jet_ht;
+  TH1F* h_calo_jet_ht40;
 
   TH1F* h_jet_pairdphi;
   TH1F* h_jet_pairdeta;
@@ -237,6 +242,15 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_jet_energy = fs->make<TH1F>("h_jet_energy", ";jets energy (GeV);jets/10 GeV", 200, 0, 2000);
   h_jet_ht = fs->make<TH1F>("h_jet_ht", ";H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
   h_jet_ht_40 = fs->make<TH1F>("h_jet_ht_40", ";H_{T} of jets with p_{T} > 40 GeV;events/25 GeV", 200, 0, 5000);
+
+  for (int i = 0; i < MAX_NJETS+1; ++i) {
+    TString ijet = i == MAX_NJETS ? TString("all") : TString::Format("%i", i);
+    h_calo_jet_pt[i] = fs->make<TH1F>(TString::Format("h_calo_jet_pt_%s", ijet.Data()), TString::Format(";p_{T} of calo jet #%s (GeV);events/10 GeV", ijet.Data()), 200, 0, 2000);
+    h_calo_jet_eta[i] = fs->make<TH1F>(TString::Format("h_calo_jet_eta_%s", ijet.Data()), TString::Format(";#eta of calo jet #%s;events/0.05", ijet.Data()), 120, -3, 3);
+    h_calo_jet_phi[i] = fs->make<TH1F>(TString::Format("h_calo_jet_phi_%s", ijet.Data()), TString::Format(";#phi of calo jet #%s;events/0.063", ijet.Data()), 100, -3.1416, 3.1416);
+  }
+  h_calo_jet_ht    = fs->make<TH1F>("h_calo_jet_ht",      ";H_{T} of all calo jets;events/25 GeV", 200, 0, 5000);
+  h_calo_jet_ht40  = fs->make<TH1F>("h_calo_jet_ht40",    ";H_{T} of all calo jets w/ p_{T} > 40GeV;events/25 GeV", 200, 0, 5000);
 
   h_jet_pairdphi = fs->make<TH1F>("h_jet_pairdphi", ";jet pair #Delta#phi (rad);jet pairs/.063", 100, -3.1416, 3.1416);
   h_jet_pairdeta = fs->make<TH1F>("h_jet_pairdeta", ";jet pair #Delta#eta ;jet pairs/.1", 100, -5.0, 5.0);
@@ -425,6 +439,20 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       h_jet_pairdr->Fill(reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->jet_eta[jjet], mevent->jet_phi[jjet]), w);
     }
   }
+
+  for (size_t icjet = 0; icjet < mevent->calo_jet_pt.size(); ++icjet) {
+    h_calo_jet_pt[MAX_NJETS]->Fill(mevent->calo_jet_pt[icjet], w);
+    h_calo_jet_eta[MAX_NJETS]->Fill(mevent->calo_jet_eta[icjet], w);
+    h_calo_jet_phi[MAX_NJETS]->Fill(mevent->calo_jet_phi[icjet], w);
+
+    if (icjet >= MAX_NJETS) continue;
+
+    h_calo_jet_pt[icjet]->Fill(mevent->calo_jet_pt[icjet], w);
+    h_calo_jet_eta[icjet]->Fill(mevent->calo_jet_eta[icjet], w);
+    h_calo_jet_phi[icjet]->Fill(mevent->calo_jet_phi[icjet], w);
+  }
+  h_calo_jet_ht->Fill(mevent->calo_jet_ht(30), w);
+  h_calo_jet_ht40->Fill(mevent->calo_jet_ht(40), w);
 
   for (int i = 0; i < 2; ++i) {
     h_nmuons[i]->Fill(mevent->nmu(i), w);

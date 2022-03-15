@@ -26,11 +26,11 @@ displaced_dijet_paths = [
     ]
 
 lepton_paths = [
-    "HLT_Ele35_WPTight_Gsf_v*",
-    "HLT_Ele115_CaloIdVT_GsfTrkIdT_v*",
-    "HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165_v*",
+    #"HLT_Ele35_WPTight_Gsf_v*",
+    #"HLT_Ele115_CaloIdVT_GsfTrkIdT_v*",
+    #"HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165_v*",
     "HLT_IsoMu27_v*",
-    "HLT_Mu50_v*",
+    #"HLT_Mu50_v*",
     ]
 
 cross_paths = [
@@ -51,6 +51,12 @@ mfvTriggerFilterLeptonsOnly = mfvTriggerFilter.clone(HLTPaths = lepton_paths)
 
 mfvTriggerFilterHTORBjetsORDisplacedDijet = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone(
         HLTPaths = jet_paths + bjet_paths + displaced_dijet_paths,
+        andOr = True, # OR
+        throw = False,
+        )
+
+mfvTriggerFilterBjetsORDisplacedDijet = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone(
+        HLTPaths = bjet_paths + displaced_dijet_paths,
         andOr = True, # OR
         throw = False,
         )
