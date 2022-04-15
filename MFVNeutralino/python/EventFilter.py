@@ -7,7 +7,7 @@ def setup_event_filter(process,
                        event_filter = False,
                        event_filter_jes_mult = 2,
                        event_filter_name = 'mfvEventFilter',
-                       event_filter_require_vertex = True,
+                       event_filter_require_vertex = True, 
                        input_is_miniaod = False,
                        mode = None,
                        sequence_name = 'mfvEventFilterSequence',
@@ -128,12 +128,6 @@ def setup_event_filter(process,
                     process.load('JMTucker.Tools.UnpackedCandidateTracks_cfi')
                     process.mfvVertexTracks.tracks_src = 'jmtUnpackedCandidateTracks'
                     process.jmtRescaledTracks.tracks_src = 'jmtUnpackedCandidateTracks' # JMTBAD use rescaled tracks
-            vertexFilter = cms.EDFilter('VertexSelector', src = cms.InputTag('mfvVertices'), cut = cms.string('nTracks > 2'), filter = cms.bool(False))
-            setattr(process, event_filter_name + 'W1Vtx', vertexFilter)
-            if input_is_miniaod:
-                overall *= process.goodOfflinePrimaryVertices * process.jmtUnpackedCandidateTracks * process.mfvVertexSequenceBare * vertexFilter
-            else:
-                overall *= process.goodOfflinePrimaryVertices                                      * process.mfvVertexSequenceBare * vertexFilter
 
     setattr(process, sequence_name, overall)
 

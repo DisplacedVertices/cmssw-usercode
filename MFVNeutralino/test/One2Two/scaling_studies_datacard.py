@@ -4,6 +4,9 @@ import sys
 import ROOT; ROOT.gROOT.SetBatch()
 from signal_efficiency import SignalEfficiencyCombiner
 
+scale_signal = [1,1,1] # signal's scale factors in three bins
+scale_bkg = [1,1,1] # background's scale factors in three bins
+
 if 'bkg_fully_correlated' in sys.argv:
     bkg_correlation = 'fully'
 if 'bkg_yearwise_correlated' in sys.argv:
@@ -171,7 +174,7 @@ def make(isample):
         return [h.GetBinContent(ib) for ib in xrange(1,3+1)]
     def get(n):
         return h2l(combiner.f.Get(n))
-    def st(x, typ=float):
+    def st(x, typ=float, rescale_new_config=False):
         if type(x) in (list,tuple):
             l = x
         elif type(x) == str:
@@ -180,18 +183,27 @@ def make(isample):
             l = h2l(x)
         else:
             raise ValueError('duh %r' % x)
-        fmt = '%.9g' if typ == float else '%s'
-        return ' '.join(fmt % typ(v) for v in l)
+        fmt = '%.9g' if typ == float else '%s'    
+       
+        if rescale_new_config :
+            if "h_bkg_dvv_rebin_" in x :
+                return ' '.join(fmt % typ(l[i]*scale_bkg[i]) for i in range(len(l)))
+            else :
+                return ' '.join(fmt % typ(l[i]*scale_signal[i]) for i in range(len(l)))
+        else :
+            return ' '.join(fmt % typ(v) for v in l)
 
     for year in years:
-        setattr(r, 'observed_%s'    % year, st('h_observed_%s'      % year))
-        setattr(r, 'bkg_rate_%s'    % year, st('h_bkg_dvv_rebin_%s' % year))
-        setattr(r, 'sig_rate_%s'    % year, st(r.hs_dvv_rebin[year]))
+        rescale_new_config=True
+        #setattr(r, 'observed_%s'    % year, st('h_observed_%s'      % year)) # FIXME note this is only removed for Peace's studies of signal/background eff!
+        setattr(r, 'observed_%s'    % year, st('h_bkg_dvv_rebin_%s' % year, rescale_new_config=rescale_new_config))
+        setattr(r, 'bkg_rate_%s'    % year, st('h_bkg_dvv_rebin_%s' % year, rescale_new_config=rescale_new_config))
+        setattr(r, 'sig_rate_%s'    % year, st(r.hs_dvv_rebin[year], rescale_new_config=rescale_new_config))
         setattr(r, 'sig_uncert_%s'  % year, st(r.hs_uncert[year]))
 
         ngen = r.ngens[year]
         setattr(r, 'ngen_%s'        % year, str(ngen))
-        setattr(r, 'sigmc_alpha_%s' % year, st([x / ngen for x in r.rates[year]]))
+        setattr(r, 'sigmc_alpha_%s' % year, st([x / ngen for x in r.rates[year]],rescale_new_config=rescale_new_config))
 
         bkg_uncert = get('h_bkg_uncert_%s' % year)
         setattr(r, 'bkg_uncert_%s' % year, bkg_uncert)
