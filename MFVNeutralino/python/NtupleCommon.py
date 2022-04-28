@@ -80,10 +80,11 @@ def minitree_only(process, mode, settings, output_commands):
 
         process.TFileService.fileName = 'minintuple.root'
 
+#updated event_filter : takes in two modes; the default and rp_mode, indexed at 0 & 1 respectfully  
 def event_filter(process, mode, settings, output_commands, **kwargs):
-    if mode:
+    if mode[0] or mode[1]:
         from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-        setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode, **kwargs)
+        setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode[0], rp_mode=mode[1], **kwargs)
 
 ########################################################################
 
@@ -97,6 +98,8 @@ class NtupleSettings(CMSSWSettings):
         self.keep_all = False
         self.keep_gen = False
         self.event_filter = True
+        self.randpars_filter = False
+
 
     @property
     def version(self):
@@ -286,7 +289,7 @@ def miniaod_ntuple_process(settings):
     mods = [
         (prepare_vis,    settings.prepare_vis),
         (run_n_tk_seeds, settings.run_n_tk_seeds),
-        (event_filter,   settings.event_filter),
+        (event_filter,   [settings.event_filter, settings.randpars_filter]),
         (minitree_only,  settings.minitree_only),
         ]
     for modifier, mode in mods:
@@ -301,6 +304,27 @@ def ntuple_process(settings):
         return miniaod_ntuple_process(settings)
     else:
         return aod_ntuple_process(settings)
+
+# Used for samples stored in inclusive miniaods; currently set up for ZH and Wplus
+# may need to change to handle different naming conventions 
+def signal_uses_random_pars_modifier(sample): 
+    to_replace = []
+
+    if sample.is_signal:
+        if sample.name.startswith('ZH_') or sample.name.startswith('Wplus'):
+            magic_randpar = 'randpars_filter = False'
+            
+            decay = sample.name[sample.name.find('_')+1 : sample.name.find('_Z')]
+            
+            if sample.tau < 1000 :
+                ctau = float(sample.tau)/1000
+                ctau = str(ctau).replace('.', 'p')
+            else :
+                ctau = str(sample.tau/1000)
+                
+            to_replace.append((magic_randpar, "randpars_filter = 'randpar %s M%i_ct%s-'" % (decay, sample.mass, ctau), 'tuple template does not contain the magic string "%s"' % magic_randpar))
+    return [], to_replace
+
 
 def signals_no_event_filter_modifier(sample):
     if sample.is_signal:

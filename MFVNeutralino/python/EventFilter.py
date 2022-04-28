@@ -8,6 +8,11 @@ def setup_event_filter(process,
                        event_filter_jes_mult = 2,
                        event_filter_name = 'mfvEventFilter',
                        event_filter_require_vertex = True,
+                       rp_filter = False,
+                       rp_mode = None,
+                       rp_mass = -1,
+                       rp_ctau = '',
+                       rp_dcay = '',
                        input_is_miniaod = False,
                        mode = None,
                        sequence_name = 'mfvEventFilterSequence',
@@ -58,6 +63,19 @@ def setup_event_filter(process,
             raise ValueError('bad mode %r' % mode)
         event_filter = True
 
+    if rp_mode :
+        event_filter = True
+        event_filter_require_vertex = False
+        event_filter_jes_mult = 0
+        rp_filter = True
+        rp_mass = (int)(rp_mode[rp_mode.find('M')+1 : rp_mode.find('_')])
+        rp_ctau = rp_mode[rp_mode.find('t')+1 : rp_mode.find('-')]
+        rp_dcay = rp_mode[rp_mode.find('H') : rp_mode.find(' M')]
+
+        print(rp_dcay, rp_mass, rp_ctau)
+
+    
+
     if trigger_filter == 'jets only':
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterJetsOnly as triggerFilter
     elif trigger_filter == 'bjets only':
@@ -91,8 +109,14 @@ def setup_event_filter(process,
             from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterHTORBjetsORDisplacedDijet as eventFilter
         elif event_filter == 'bjets OR displaced dijet veto HT':
             from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterBjetsORDisplacedDijetVetoHT as eventFilter
+
+        #currently either rp_filter is on OR event_filter is on; cannot have both
         elif event_filter is True:
-            from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilter as eventFilter
+            if rp_filter:
+                from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterRandomParameters as eventFilter
+            else :
+                from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilter as eventFilter
+        
         elif event_filter is not False:
             raise ValueError('event_filter must be one of ("jets only", "leptons only", "HT OR bjets OR displaced dijet", "bjets OR displaced dijet veto HT", True, False)')
 
@@ -104,6 +128,13 @@ def setup_event_filter(process,
             eventFilter.muons_src = 'slimmedMuons'
             eventFilter.electrons_src = 'slimmedElectrons'
         setattr(process, event_filter_name, eventFilter)
+
+        if rp_filter:
+            print "In EventFilter.py conditional"
+            eventFilter.randpar_mass = rp_mass
+            eventFilter.randpar_ctau = rp_ctau
+            eventFilter.randpar_dcay = rp_dcay
+            eventFilter.parse_randpars = True
 
         if event_filter_jes_mult > 0:
             from JMTucker.Tools.JetShifter_cfi import jmtJetShifter as jetShifter
