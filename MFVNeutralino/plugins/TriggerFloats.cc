@@ -337,6 +337,8 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
     if (is_ht) {
       if (obj.collection() == "hltPFHTJet30::HLT")
         floats->hltht = obj.pt();
+      else if (obj.collection() == "hltHtMhtCaloJetsQuadC30::HLT")
+        floats->hltcaloht = obj.pt();
     }
     else if (is_electron || is_muon) {
       // for HT above we didn't check the path, there's always only one
@@ -378,28 +380,29 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
     }
     else if (is_jet) {
       obj.unpackNamesAndLabels(event, *trigger_results);
-      const std::vector<std::string>& pathNamesAll  = obj.pathNames(false);
-      int ipath = -1;
-      for (const std::string& p : pathNamesAll) {
-        for (int i = 0; i < mfv::n_hlt_paths; ++i){
-          if (helper.path_same_without_version(p, mfv::hlt_paths[i])) {
-            ipath = i;
-            break;
-          }
-        }
-        if (ipath != -1) break;
-      }
+//      const std::vector<std::string>& pathNamesAll  = obj.pathNames(false);
+//      int ipath = -1;
+//      for (const std::string& p : pathNamesAll) {
+//        for (int i = 0; i < mfv::n_hlt_paths; ++i){
+//          if (helper.path_same_without_version(p, mfv::hlt_paths[i])) {
+//            ipath = i;
+//            break;
+//          }
+//        }
+//        if (ipath != -1) break;
+//      }
 
-      if (ipath != -1) {
+      //if (ipath != -1) {
 
         // Note that all of the bjet triggers use PF jets for the kinematics, and the
         // b-tagging discriminants aren't currently available in AODs, so this is
         // sufficient for the trigger matching for now
         if (obj.collection() == "hltAK4CaloJetsCorrected::HLT"){
-          std::cout << "pushing back hltcalojets" << std::endl;
+          //std::cout << "pushing back hltcalojets" << std::endl;
           floats->hltcalojets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
         }
         else if(obj.collection() == "hltAK4PFJetsCorrected::HLT"){
+          //std::cout << "pushing back hltpfjets" << std::endl;
           floats->hltpfjets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
         }
         else if(obj.collection() == "hltDisplacedHLTCaloJetCollectionProducerLowPt::HLT" || obj.collection() == "hltDisplacedHLTCaloJetCollectionProducerMidPt::HLT"){
@@ -409,15 +412,15 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
           floats->hltidpassedcalojets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
         }
 
-        if (prints) {
-          std::cout << "TriggerFloats jet object for path " << mfv::hlt_paths[ipath]
-                    << " pt " << obj.pt() << " eta " << obj.eta() << " phi " << obj.phi()
-                    << " collection: " << obj.collection() << " ids (# = " << obj.filterIds().size() << "):";
-          for (auto id : obj.filterIds())
-            std::cout << " " << id;
-          std::cout << "\n";
-        }
-      }
+//        if (prints) {
+//          std::cout << "TriggerFloats jet object for path " << mfv::hlt_paths[ipath]
+//                    << " pt " << obj.pt() << " eta " << obj.eta() << " phi " << obj.phi()
+//                    << " collection: " << obj.collection() << " ids (# = " << obj.filterIds().size() << "):";
+//          for (auto id : obj.filterIds())
+//            std::cout << " " << id;
+//          std::cout << "\n";
+//        }
+      //}
     }
   }
 

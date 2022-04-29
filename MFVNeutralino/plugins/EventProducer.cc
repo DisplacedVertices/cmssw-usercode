@@ -279,6 +279,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   mevent->l1_myhtt = triggerfloats->myhtt;
   mevent->l1_myhttwbug = triggerfloats->myhttwbug;
   mevent->hlt_ht = triggerfloats->hltht;
+  mevent->hlt_caloht = triggerfloats->hltcaloht;
 
   assert(triggerfloats->L1decisions.size() == mfv::n_l1_paths);
   for (size_t i = 0; i < mfv::n_l1_paths; ++i) {
@@ -381,6 +382,12 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
     mevent->jet_pudisc.push_back(jet.userFloat("pileupJetId:fullDiscriminant")); // to be removed and put into _id when working points defined
     mevent->jet_pt.push_back(jet.pt());
+    mevent->jet_NHF.push_back(jet.neutralHadronEnergyFraction());                      // neutral hadron energy fraction
+    mevent->jet_CHF.push_back(jet.chargedHadronEnergyFraction());                      // charged hadron energy fraction
+    mevent->jet_NEMF.push_back(jet.neutralEmEnergyFraction());                         // neutral EM energy fraction
+    mevent->jet_CEMF.push_back(jet.chargedEmEnergyFraction());                         // charged EM energy fraction
+    mevent->jet_MUF.push_back(jet.muonEnergyFraction());                               // muon energy fraction
+    mevent->jet_NCST.push_back(jet.chargedMultiplicity() + jet.neutralMultiplicity()); // number of constituents
     mevent->jet_raw_pt.push_back(jet.pt()*jet.jecFactor("Uncorrected"));
     mevent->jet_bdisc_old.push_back(jmt::BTagging::discriminator(jet, true));
     mevent->jet_bdisc.push_back(jmt::BTagging::discriminator(jet));
@@ -391,7 +398,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
     // match trigger and offline jets
     mevent->jet_hlt_push_back(jet, triggerfloats->hltpfjets, false);
-    mevent->jet_hlt_push_back(jet, triggerfloats->hltdisplacedcalojets, true);
+    mevent->jet_hlt_push_back(jet, triggerfloats->hltcalojets, true);
 
     int bdisc_level = 0;
     for (int i = 0; i < 3; ++i)
@@ -452,6 +459,34 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->calo_jet_phi.push_back(cjet.phi());
     mevent->calo_jet_energy.push_back(cjet.energy());
   }
+
+
+  //////////////////////////////////////////////////////////////////////
+  
+  for (const TLorentzVector& jp4 : triggerfloats->hltpfjets) {
+    
+    mevent->hlt_pf_jet_pt.push_back(jp4.Pt());
+    mevent->hlt_pf_jet_eta.push_back(jp4.Eta());
+    mevent->hlt_pf_jet_phi.push_back(jp4.Phi());
+    mevent->hlt_pf_jet_energy.push_back(jp4.E());
+
+  }
+  
+  for (const TLorentzVector& cp4 : triggerfloats->hltcalojets) {
+    
+    mevent->hlt_calo_jet_pt.push_back(cp4.Pt());
+    mevent->hlt_calo_jet_eta.push_back(cp4.Eta());
+    mevent->hlt_calo_jet_phi.push_back(cp4.Phi());
+    mevent->hlt_calo_jet_energy.push_back(cp4.E());
+
+  } 
+
+ for (const TLorentzVector& pp4 : triggerfloats->hltidpassedcalojets) {
+    mevent->hlt_idp_calo_jet_pt.push_back(pp4.Pt());
+    mevent->hlt_idp_calo_jet_eta.push_back(pp4.Eta());
+    mevent->hlt_idp_calo_jet_phi.push_back(pp4.Phi());
+    mevent->hlt_idp_calo_jet_energy.push_back(pp4.E());
+ }
 
 
   //////////////////////////////////////////////////////////////////////

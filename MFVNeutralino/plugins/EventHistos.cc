@@ -37,6 +37,8 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_minlspdist2d;
   TH1F* h_lspdist2d;
   TH1F* h_lspdist3d;
+  TH1F* h_gen_bs2ddist;
+  TH2F* h_gen_bsxdist_bsydist;
 
   TH1F* h_hlt_bits;
   TH1F* h_l1_bits;
@@ -87,6 +89,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_jet_pt[MAX_NJETS+1];
   TH1F* h_jet_eta[MAX_NJETS+1];
   TH1F* h_jet_phi[MAX_NJETS+1];
+
   TH1F* h_jet_energy;
   TH1F* h_jet_ht;
   TH1F* h_jet_ht_40;
@@ -95,6 +98,23 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_calo_jet_phi[MAX_NJETS+1];
   TH1F* h_calo_jet_ht;
   TH1F* h_calo_jet_ht40;
+
+  TH1F* h_online_calo_jet_ht;
+  TH1F* h_online_pf_jet_ht;
+  TH2F* h_online_offline_calo_jet_ht;
+  TH2F* h_online_offline_pf_jet_ht;
+
+  TH1F* h_online_calojet_pt;
+  TH1F* h_online_pfjet_pt;
+  TH1F* h_offline_calojet_pt;
+  TH1F* h_offline_pfjet_pt;
+  TH2F* h_online_offline_calojet_pt;
+  TH2F* h_online_offline_pfjet_pt[MAX_NJETS+1];
+
+  TH2F* h_ncalojet_online_offline;
+  TH2F* h_ncalojet_idp_online_offline;
+  TH2F* h_calojet_ndiff_htdiff;
+  TH2F* h_idp_calojet_ndiff_htdiff;
 
   TH1F* h_jet_pairdphi;
   TH1F* h_jet_pairdeta;
@@ -170,10 +190,12 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_minlspdist2d = fs->make<TH1F>("h_minlspdist2d", ";min dist2d(gen vtx #i) (cm);events/0.1 mm", 200, 0, 2);
   h_lspdist2d = fs->make<TH1F>("h_lspdist2d", ";dist2d(gen vtx #0, #1) (cm);events/0.1 mm", 200, 0, 2);
   h_lspdist3d = fs->make<TH1F>("h_lspdist3d", ";dist3d(gen vtx #0, #1) (cm);events/0.1 mm", 200, 0, 2);
+  h_gen_bs2ddist = fs->make<TH1F>("h_gen_bs2ddist", ";dist2d(gen vtx, beamspot) (cm);arb. units", 500, 0, 2.5);
+  h_gen_bsxdist_bsydist = fs->make<TH2F>("h_gen_bsxdist_bsydist", "; x-dist(gen vtx, beamspot) (cm); y-dist(gen vtx, beamspot)", 500, -0.5, 0.5, 500, -0.5, 0.5);
 
   h_hlt_bits = fs->make<TH1F>("h_hlt_bits", ";;events", 2*mfv::n_hlt_paths+1, 0, 2*mfv::n_hlt_paths+1);
   h_l1_bits  = fs->make<TH1F>("h_l1_bits",  ";;events", 2*mfv::n_l1_paths +1, 0, 2*mfv::n_l1_paths +1);
-  //h_filter_bits  = fs->make<TH1F>("h_filter_bits",  ";;events", 2*mfv::n_filter_paths +1, 0, 2*mfv::n_filter_paths +1);
+  h_filter_bits  = fs->make<TH1F>("h_filter_bits",  ";;events", 2*mfv::n_filter_paths +1, 0, 2*mfv::n_filter_paths +1);
   h_filter_bits  = fs->make<TH1F>("h_filter_bits",  ";;events", mfv::n_filter_paths +1, 0, mfv::n_filter_paths +1);
 
   h_hlt_bits->GetXaxis()->SetBinLabel(1, "nevents");
@@ -236,9 +258,10 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   for (int i = 0; i < MAX_NJETS+1; ++i) {
     TString ijet = i == MAX_NJETS ? TString("all") : TString::Format("%i", i);
     h_jet_pt[i] = fs->make<TH1F>(TString::Format("h_jet_pt_%s", ijet.Data()), TString::Format(";p_{T} of jet #%s (GeV);events/10 GeV", ijet.Data()), 200, 0, 2000);
-    h_jet_eta[i] = fs->make<TH1F>(TString::Format("h_jet_eta_%s", ijet.Data()), TString::Format(";#eta of jet #%s (GeV);events/0.05", ijet.Data()), 120, -3, 3);
-    h_jet_phi[i] = fs->make<TH1F>(TString::Format("h_jet_phi_%s", ijet.Data()), TString::Format(";#phi of jet #%s (GeV);events/0.063", ijet.Data()), 100, -3.1416, 3.1416);
+    h_jet_eta[i] = fs->make<TH1F>(TString::Format("h_jet_eta_%s", ijet.Data()), TString::Format(";absv#eta of jet #%s;events/bin", ijet.Data()), 120, 0, 6);
+    h_jet_phi[i] = fs->make<TH1F>(TString::Format("h_jet_phi_%s", ijet.Data()), TString::Format(";#phi of jet #%s;events/bin", ijet.Data()), 100, -3.1416, 3.1416);
   }
+
   h_jet_energy = fs->make<TH1F>("h_jet_energy", ";jets energy (GeV);jets/10 GeV", 200, 0, 2000);
   h_jet_ht = fs->make<TH1F>("h_jet_ht", ";H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
   h_jet_ht_40 = fs->make<TH1F>("h_jet_ht_40", ";H_{T} of jets with p_{T} > 40 GeV;events/25 GeV", 200, 0, 5000);
@@ -246,11 +269,36 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   for (int i = 0; i < MAX_NJETS+1; ++i) {
     TString ijet = i == MAX_NJETS ? TString("all") : TString::Format("%i", i);
     h_calo_jet_pt[i] = fs->make<TH1F>(TString::Format("h_calo_jet_pt_%s", ijet.Data()), TString::Format(";p_{T} of calo jet #%s (GeV);events/10 GeV", ijet.Data()), 200, 0, 2000);
-    h_calo_jet_eta[i] = fs->make<TH1F>(TString::Format("h_calo_jet_eta_%s", ijet.Data()), TString::Format(";#eta of calo jet #%s;events/0.05", ijet.Data()), 120, -3, 3);
+    h_calo_jet_eta[i] = fs->make<TH1F>(TString::Format("h_calo_jet_eta_%s", ijet.Data()), TString::Format(";abs #eta of calo jet #%s;events/0.05", ijet.Data()), 120, 0, 6);
     h_calo_jet_phi[i] = fs->make<TH1F>(TString::Format("h_calo_jet_phi_%s", ijet.Data()), TString::Format(";#phi of calo jet #%s;events/0.063", ijet.Data()), 100, -3.1416, 3.1416);
   }
+
   h_calo_jet_ht    = fs->make<TH1F>("h_calo_jet_ht",      ";H_{T} of all calo jets;events/25 GeV", 200, 0, 5000);
   h_calo_jet_ht40  = fs->make<TH1F>("h_calo_jet_ht40",    ";H_{T} of all calo jets w/ p_{T} > 40GeV;events/25 GeV", 200, 0, 5000);
+
+  h_online_calo_jet_ht    = fs->make<TH1F>("h_online_calo_jet_ht",      ";H_{T} of online calo jets;events/25 GeV", 200, 0, 5000);
+  h_online_pf_jet_ht    = fs->make<TH1F>("h_online_pf_jet_ht",      ";H_{T} of online PF jets;events/25 GeV", 200, 0, 5000);
+  h_online_offline_calo_jet_ht = fs->make<TH2F>("h_online_offline_calo_jet_ht", ";H_{T} of online calojets; H_{T} of offline calojets", 200, 0, 5000, 200, 0, 5000);
+  h_online_offline_pf_jet_ht = fs->make<TH2F>("h_online_offline_pf_jet_ht", ";H_{T} of online PF jets; H_{T} of offline PF jets", 200, 0, 5000, 200, 0, 5000);
+
+  h_online_calojet_pt = fs->make<TH1F>("h_online_calojet_pt", ";p_{T} of matched online calojets (GeV);events/bins", 200, 0, 1000);
+  h_online_pfjet_pt   = fs->make<TH1F>("h_online_pfjet_pt", ";p_{T} of matched online PF jets (GeV);events/bins", 200, 0, 1000);
+
+  h_offline_calojet_pt = fs->make<TH1F>("h_offline_calojet_pt", ";p_{T} of matched offline calojets (GeV);events/bins", 200, 0, 1000);
+  h_offline_pfjet_pt   = fs->make<TH1F>("h_offline_pfjet_pt", ";p_{T} of matched offline PF jets (GeV);events/bins", 200, 0, 1000);
+
+  h_online_offline_calojet_pt = fs->make<TH2F>("h_online_offline_calojet_pt", ";p_{T} of matched online calojets (GeV); p_{T} of matched offline calojets (GeV)", 200, 0, 1000, 200, 0, 1000);
+
+  for (int i = 0; i < MAX_NJETS+1; ++i) {
+    TString ijet = i == MAX_NJETS ? TString("all") : TString::Format("%i", i);
+    h_online_offline_pfjet_pt[i] = fs->make<TH2F>(TString::Format("h_online_offline_pfjet_pt_%s", ijet.Data()), TString::Format(";p_{T} of online PF jet #%s (GeV); p_{T} of offline PF jet #%s (GeV)", ijet.Data(), ijet.Data()), 200, 0, 1000, 200, 0, 1000);
+  }
+
+  h_ncalojet_online_offline = fs->make<TH2F>("h_ncalojet_online_offline", ";N(ak4CaloJetsCorrected);  N(slimmedCaloJets)", 60, 0, 60, 60, 0, 60);
+  h_ncalojet_idp_online_offline = fs->make<TH2F>("h_ncalojet_idp_online_offline", ";N(ak4CaloJetsCorrectedIdPassed); N(slimmedCaloJets)", 60, 0, 60, 60, 0, 60);
+  h_calojet_ndiff_htdiff = fs->make<TH2F>("h_calojet_ndiff_htdiff", ";N(ak4CaloJetsCorrected) - N(slimmedCaloJets); HT(Online) - HT(Offline) (GeV)", 100, -50, 50, 300, -300, 300); 
+  h_idp_calojet_ndiff_htdiff = fs->make<TH2F>("h_idp_calojet_ndiff_htdiff", ";N(ak4CaloJetsCorrectedIdPassed) - N(slimmedCaloJets); HT(Online) - HT(Offline) (GeV)", 100, -50, 50, 300, -300, 300);
+
 
   h_jet_pairdphi = fs->make<TH1F>("h_jet_pairdphi", ";jet pair #Delta#phi (rad);jet pairs/.063", 100, -3.1416, 3.1416);
   h_jet_pairdeta = fs->make<TH1F>("h_jet_pairdeta", ";jet pair #Delta#eta ;jet pairs/.1", 100, -5.0, 5.0);
@@ -313,6 +361,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
 }
 
 void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
+
   edm::Handle<MFVEvent> mevent;
   event.getByToken(mevent_token, mevent);
 
@@ -338,7 +387,16 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       h_bquark_pairdeta->Fill(std::max(mevent->gen_bquarks[i].Eta(), mevent->gen_bquarks[j].Eta()) - std::min(mevent->gen_bquarks[i].Eta(),  mevent->gen_bquarks[j].Eta()), w);
     }
   }
-
+  for (int igenv = 0; igenv < 2; ++igenv) {
+    double genx = mevent->gen_lsp_decay[igenv*3+0];
+    double geny = mevent->gen_lsp_decay[igenv*3+1];
+    double genz = mevent->gen_lsp_decay[igenv*3+2];
+    double genbs2ddist = mevent->mag(genx - mevent->bsx_at_z(genz),
+                                     geny - mevent->bsy_at_z(genz) 
+        );
+    h_gen_bs2ddist->Fill(genbs2ddist, w);
+    h_gen_bsxdist_bsydist->Fill(genx - mevent->bsx_at_z(genz), geny - mevent->bsy_at_z(genz), w);
+  }
   h_minlspdist2d->Fill(mevent->minlspdist2d(), w);
   h_lspdist2d->Fill(mevent->lspdist2d(), w);
   h_lspdist3d->Fill(mevent->lspdist3d(), w);
@@ -418,18 +476,21 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   for (int i = 0; i < MAX_NJETS; ++i) {
     h_jet_pt[i]->Fill(mevent->nth_jet_pt(i), w);
-    h_jet_eta[i]->Fill(mevent->nth_jet_eta(i), w);
+    h_jet_eta[i]->Fill(fabs(mevent->nth_jet_eta(i)), w);
     h_jet_phi[i]->Fill(mevent->nth_jet_phi(i), w);
   }
   h_jet_ht->Fill(mevent->jet_ht(mfv::min_jet_pt), w);
   h_jet_ht_40->Fill(mevent->jet_ht(40), w);
 
+  float alt_pf_ht = 0.0;
+  unsigned int n_online_pfjets = mevent->hlt_pf_jet_pt.size();
   for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
     if (mevent->jet_pt[ijet] < mfv::min_jet_pt)
       continue;
     h_jet_pt[MAX_NJETS]->Fill(mevent->jet_pt[ijet], w);
-    h_jet_eta[MAX_NJETS]->Fill(mevent->jet_eta[ijet], w);
+    h_jet_eta[MAX_NJETS]->Fill(fabs(mevent->jet_eta[ijet]), w);
     h_jet_phi[MAX_NJETS]->Fill(mevent->jet_phi[ijet], w);
+
     h_jet_energy->Fill(mevent->jet_energy[ijet], w);
     for (size_t jjet = ijet+1; jjet < mevent->jet_id.size(); ++jjet) {
       if (mevent->jet_pt[jjet] < mfv::min_jet_pt)
@@ -438,18 +499,90 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       h_jet_pairdeta->Fill(std::max(mevent->jet_eta[ijet], mevent->jet_eta[jjet]) - std::min(mevent->jet_eta[ijet], mevent->jet_eta[jjet]), w);
       h_jet_pairdr->Fill(reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->jet_eta[jjet], mevent->jet_phi[jjet]), w);
     }
+
+    if (ijet > n_online_pfjets) {
+      continue;
+    }
+    else {
+      h_online_offline_pfjet_pt[ijet]->Fill(mevent->jet_pt[ijet], mevent->hlt_pf_jet_pt[ijet], w);
+    }
+
+    // Find closest match between online/offline pfjets
+    TLorentzVector offline_vec(mevent->jet_pt[ijet], mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->jet_energy[ijet]);
+    if (fabs(mevent->jet_eta[ijet]) > 2.5) continue;
+    if (mevent->jet_pt[ijet] > 30.0) alt_pf_ht += mevent->jet_pt[ijet];
+    float match_dR = 1.0;
+    float match_online_pt  = -1.0;
+    float match_offline_pt = -1.0;
+
+    for (unsigned int ojet = 0; ojet < n_online_pfjets; ojet++) {
+        TLorentzVector online_vec(mevent->hlt_pf_jet_pt[ojet], mevent->hlt_pf_jet_eta[ojet], mevent->hlt_pf_jet_phi[ojet], mevent->hlt_pf_jet_energy[ojet]);
+        float temp_dR = offline_vec.DeltaR(online_vec);
+        
+        if (temp_dR < match_dR) {
+          match_dR = temp_dR;
+          match_online_pt  = online_vec.Pt();
+          match_offline_pt = offline_vec.Pt();
+        }
+    }
+    
+    h_online_pfjet_pt->Fill(match_online_pt, w);
+    h_offline_pfjet_pt->Fill(match_offline_pt, w);
+    h_online_offline_pfjet_pt[MAX_NJETS]->Fill(match_online_pt, match_offline_pt, w);
+
   }
+
+  // Shaun FIXME - Alternative definition of HT (jets must have |eta| < 2.5)
+  float alt_calo_ht = 0.0;
+  for (size_t ijet = 0; ijet < mevent->calo_jet_pt.size(); ijet++) {
+    if ((mevent->calo_jet_pt[ijet] > 30.0) and ( fabs(mevent->calo_jet_eta[ijet]) < 2.5)) alt_calo_ht += mevent->calo_jet_pt[ijet];
+  }
+
+  h_online_calo_jet_ht->Fill(mevent->hlt_caloht, w);
+  h_online_pf_jet_ht->Fill(mevent->hlt_ht, w);
+
+  h_online_offline_calo_jet_ht->Fill(mevent->hlt_caloht, alt_calo_ht, w);
+  h_online_offline_pf_jet_ht->Fill(mevent->hlt_ht, alt_pf_ht, w);
+
+  h_ncalojet_online_offline->Fill(mevent->hlt_calo_jet_pt.size(), mevent->calo_jet_pt.size(), w);
+  h_ncalojet_idp_online_offline->Fill(mevent->hlt_idp_calo_jet_pt.size(), mevent->calo_jet_pt.size(), w);
+  h_calojet_ndiff_htdiff->Fill((int)(mevent->hlt_calo_jet_pt.size() - mevent->calo_jet_pt.size()), mevent->hlt_caloht - alt_calo_ht, w);
+  h_idp_calojet_ndiff_htdiff->Fill((int)(mevent->hlt_idp_calo_jet_pt.size() - mevent->calo_jet_pt.size()), mevent->hlt_caloht - alt_calo_ht, w);
 
   for (size_t icjet = 0; icjet < mevent->calo_jet_pt.size(); ++icjet) {
     h_calo_jet_pt[MAX_NJETS]->Fill(mevent->calo_jet_pt[icjet], w);
-    h_calo_jet_eta[MAX_NJETS]->Fill(mevent->calo_jet_eta[icjet], w);
+    h_calo_jet_eta[MAX_NJETS]->Fill(fabs(mevent->calo_jet_eta[icjet]), w);
     h_calo_jet_phi[MAX_NJETS]->Fill(mevent->calo_jet_phi[icjet], w);
 
     if (icjet >= MAX_NJETS) continue;
 
     h_calo_jet_pt[icjet]->Fill(mevent->calo_jet_pt[icjet], w);
-    h_calo_jet_eta[icjet]->Fill(mevent->calo_jet_eta[icjet], w);
+    h_calo_jet_eta[icjet]->Fill(fabs(mevent->calo_jet_eta[icjet]), w);
     h_calo_jet_phi[icjet]->Fill(mevent->calo_jet_phi[icjet], w);
+
+    // Find closest match between online/offline calojets
+    TLorentzVector offline_vec(mevent->calo_jet_pt[icjet], mevent->calo_jet_eta[icjet], mevent->calo_jet_phi[icjet], mevent->calo_jet_energy[icjet]);
+    float match_dR = 1.0;
+    float match_online_pt  = -1.0;
+    float match_offline_pt = -1.0;
+    int n_online_calojets = mevent->hlt_calo_jet_pt.size();
+
+    for (int ojet = 0; ojet < n_online_calojets; ojet++) {
+        TLorentzVector online_vec(mevent->hlt_calo_jet_pt[ojet], mevent->hlt_calo_jet_eta[ojet], mevent->hlt_calo_jet_phi[ojet], mevent->hlt_calo_jet_energy[ojet]);
+        float temp_dR = offline_vec.DeltaR(online_vec);
+        
+        if (temp_dR < match_dR) {
+          match_dR = temp_dR;
+          match_online_pt  = online_vec.Pt();
+          match_offline_pt = offline_vec.Pt();
+        }
+    }
+    
+    h_online_calojet_pt->Fill(match_online_pt, w);
+    h_offline_calojet_pt->Fill(match_offline_pt, w);
+    h_online_offline_calojet_pt->Fill(match_online_pt, match_offline_pt, w);
+
+
   }
   h_calo_jet_ht->Fill(mevent->calo_jet_ht(30), w);
   h_calo_jet_ht40->Fill(mevent->calo_jet_ht(40), w);
