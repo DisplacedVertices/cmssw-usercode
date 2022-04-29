@@ -11,6 +11,7 @@
 #include "JMTucker/Tools/interface/Utilities.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h" 
 
 class MFVEventHistos : public edm::EDAnalyzer {
  public:
@@ -19,6 +20,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
 
  private:
   const edm::EDGetTokenT<MFVEvent> mevent_token;
+  const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_token; 
   const edm::EDGetTokenT<double> weight_token;
 
   TH1F* h_w;
@@ -43,12 +45,12 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_filter_bits;
 
   TH1F* h_npu;
-
+  TH1F* h_svntracks;
   TH1F* h_bsx;
   TH1F* h_bsy;
   TH1F* h_bsz;
   TH1F* h_bsphi;
-
+  TH1F* h_nsv;
   TH1F* h_npv;
   TH1F* h_pvx;
   TH1F* h_pvy;
@@ -145,6 +147,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
 
 MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   : mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
+    vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src")))
 {
   edm::Service<TFileService> fs;
@@ -165,7 +168,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_minlspdist2d = fs->make<TH1F>("h_minlspdist2d", ";min dist2d(gen vtx #i) (cm);events/0.1 mm", 200, 0, 2);
   h_lspdist2d = fs->make<TH1F>("h_lspdist2d", ";dist2d(gen vtx #0, #1) (cm);events/0.1 mm", 200, 0, 2);
   h_lspdist3d = fs->make<TH1F>("h_lspdist3d", ";dist3d(gen vtx #0, #1) (cm);events/0.1 mm", 200, 0, 2);
-
+  h_svntracks = fs->make<TH1F>("h_svntracks", ";# of tracks in secondary vertex;events/3", 100, 0, 300);
   h_hlt_bits = fs->make<TH1F>("h_hlt_bits", ";;events", 2*mfv::n_hlt_paths+1, 0, 2*mfv::n_hlt_paths+1);
   h_l1_bits  = fs->make<TH1F>("h_l1_bits",  ";;events", 2*mfv::n_l1_paths +1, 0, 2*mfv::n_l1_paths +1);
   //h_filter_bits  = fs->make<TH1F>("h_filter_bits",  ";;events", 2*mfv::n_filter_paths +1, 0, 2*mfv::n_filter_paths +1);
@@ -193,7 +196,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_bsy = fs->make<TH1F>("h_bsy", ";beamspot y (cm);events/10 #mum", 200, -0.1, 0.1);
   h_bsz = fs->make<TH1F>("h_bsz", ";beamspot z (cm);events/400 #mum", 200, -4, 4);
   h_bsphi = fs->make<TH1F>("h_bsphi", ";beamspot #phi (rad);events/.063", 100, -3.1416, 3.1416);
-
+  h_nsv = fs->make<TH1F>("h_nsv", ";# of secondary vertices;events", 50, 0, 50);
   h_npv = fs->make<TH1F>("h_npv", ";# of primary vertices;events", 120, 0, 120);
   h_pvx = fs->make<TH1F>("h_pvx", ";primary vertex x (cm);events/2 #mum", 200, -0.02, 0.02);
   h_pvy = fs->make<TH1F>("h_pvy", ";primary vertex y (cm);events/2 #mum", 200, -0.02, 0.02);
@@ -354,7 +357,15 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_bsy->Fill(mevent->bsy, w);
   h_bsz->Fill(mevent->bsz, w);
   h_bsphi->Fill(atan2(mevent->bsy, mevent->bsx), w);
-
+  edm::Handle<MFVVertexAuxCollection> auxes;
+  event.getByToken(vertex_token, auxes);
+  const int nsv = int(auxes->size());
+  h_nsv->Fill(nsv, w);  
+  for (int isv = 0; isv < nsv; ++isv) {
+    const MFVVertexAux& aux = auxes->at(isv);
+    const int ntracks = aux.ntracks();
+    h_svntracks->Fill(ntracks, w); 
+  }
   h_npv->Fill(mevent->npv, w);
   for (auto h : { h_pvx, h_pvxwide }) h->Fill(mevent->pvx - mevent->bsx_at_z(mevent->pvz), w);
   for (auto h : { h_pvy, h_pvywide }) h->Fill(mevent->pvy - mevent->bsy_at_z(mevent->pvz), w);

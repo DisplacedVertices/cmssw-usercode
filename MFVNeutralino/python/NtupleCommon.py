@@ -198,7 +198,7 @@ def aod_ntuple_process(settings):
                          process.mfvTriggerFloats *
                          process.mfvEvent)
     
-    process.vertexFilterNtuple = cms.EDFilter('VertexSelector', src = cms.InputTag('mfvVertices'), cut = cms.string('nTracks > 2'), filter = cms.bool(settings.event_filter_require_vertex)) 
+    process.vertexFilterNtuple = cms.EDFilter('VertexSelector', src = cms.InputTag('mfvVertices'), cut = cms.string('nTracks > 2'), filter = cms.bool(settings.event_filter and settings.event_filter_require_vertex)) 
     process.mfvEvent.misc_srcs = [x for x in process.mfvEvent.misc_srcs if x.moduleLabel != 'prefiringweight'] # JMTBAD doesn't work with miniaod-on-fly here
 
     output_commands = make_output_commands(process, settings)
@@ -266,7 +266,7 @@ def miniaod_ntuple_process(settings):
     for x in process.mfvVerticesToJets, process.mfvVerticesAuxTmp, process.mfvVerticesAuxPresel:
         x.track_ref_getter.input_is_miniaod = True
     
-    process.vertexFilterNtuple = cms.EDFilter('VertexSelector', src = cms.InputTag('mfvVertices'), cut = cms.string('nTracks > 2'), filter = cms.bool(settings.event_filter_require_vertex)) 
+    process.vertexFilterNtuple = cms.EDFilter('VertexSelector', src = cms.InputTag('mfvVertices'), cut = cms.string('nTracks > 2'), filter = cms.bool( settings.event_filter and settings.event_filter_require_vertex)) 
     process.mfvEvent.input_is_miniaod = True
     process.mfvEvent.gen_particles_src = 'prunedGenParticles' # no idea if this lets gen_bquarks, gen_leptons work--may want the packed ones that have status 1 particles
     process.mfvEvent.gen_jets_src = 'slimmedGenJets'
