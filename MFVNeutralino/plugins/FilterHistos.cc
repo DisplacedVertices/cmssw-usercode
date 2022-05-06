@@ -1,4 +1,5 @@
 #include "TH2F.h"
+#include "TH3F.h"
 #include "TRandom3.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/Math/interface/deltaR.h"
@@ -42,6 +43,7 @@ class MFVFilterHistos : public edm::EDAnalyzer {
   TH1F* h_hlt_bits;
   TH1F* h_l1_bits;
   TH1F* h_filter_bits;
+  TH2F* h_filter_bit_matrix;
 
   TH2F* h_jet_pt[MAX_NJETS+1];
   TH2F* h_jet_eta[MAX_NJETS+1];
@@ -51,6 +53,8 @@ class MFVFilterHistos : public edm::EDAnalyzer {
   TH2F* h_jet_ht_40;
   TH2F* h_jet_maxdeta;
   TH2F* h_jet_mindeta;
+
+  TH3F* h_online_offline_pfjet_pt[MAX_NJETS+1];
 
   TH2F* h_calo_jet_pt[MAX_NJETS+1];
   TH2F* h_calo_jet_eta[MAX_NJETS+1];
@@ -67,25 +71,21 @@ class MFVFilterHistos : public edm::EDAnalyzer {
   TH2F* h_hlt_calo_jet_eta[MAX_NJETS+1];
   TH2F* h_hlt_calo_jet_ht;
 
-  TH2F* h_hlt_idp_calo_jet_pt[MAX_NJETS+1];
-  TH2F* h_hlt_idp_calo_jet_eta[MAX_NJETS+1];
-
-  TH2F* h_thresh_jet_bsc[MAX_NJETS+1];
-  TH2F* h_thresh_jet_old_bsc[MAX_NJETS+1];
-
   TH2F* h_bdisc_0;
   TH2F* h_bdisc_1;
-  TH2F* h_pt_by_bdisc_0;
-  TH2F* h_pt_by_bdisc_1;
-  TH2F* h_threshold_bdisc_0;
-  TH2F* h_threshold_bdisc_1;
+  TH2F* h_bdisc_2;
+
+  TH2F* h_thresh_bdisc_0;
+  TH2F* h_thresh_bdisc_1;
+  TH2F* h_thresh_bdisc_2;
 
   TH2F* h_old_bdisc_0;
   TH2F* h_old_bdisc_1;
-  TH2F* h_pt_by_old_bdisc_0;
-  TH2F* h_pt_by_old_bdisc_1;
-  TH2F* h_threshold_old_bdisc_0;
-  TH2F* h_threshold_old_bdisc_1;
+  TH2F* h_old_bdisc_2;
+
+  TH2F* h_thresh_old_bdisc_0;
+  TH2F* h_thresh_old_bdisc_1;
+  TH2F* h_thresh_old_bdisc_2;
 
 };
 
@@ -116,6 +116,8 @@ MFVFilterHistos::MFVFilterHistos(const edm::ParameterSet& cfg)
   h_hlt_bits = fs->make<TH1F>("h_hlt_bits", ";;events", 2*mfv::n_hlt_paths+1, 0, 2*mfv::n_hlt_paths+1);
   h_l1_bits  = fs->make<TH1F>("h_l1_bits",  ";;events", 2*mfv::n_l1_paths +1, 0, 2*mfv::n_l1_paths +1);
   h_filter_bits  = fs->make<TH1F>("h_filter_bits",  ";;events", mfv::n_filter_paths +1, 0, mfv::n_filter_paths +1);
+  h_filter_bit_matrix = fs->make<TH2F>("h_filter_bit_matrix", ";;", mfv::n_filter_paths, 0, mfv::n_filter_paths, mfv::n_filter_paths, 0, mfv::n_filter_paths);
+  
 
   h_hlt_bits->GetXaxis()->SetBinLabel(1, "nevents");
   for (int i = 0; i < mfv::n_hlt_paths; ++i) {
@@ -131,6 +133,8 @@ MFVFilterHistos::MFVFilterHistos(const edm::ParameterSet& cfg)
   h_filter_bits->GetXaxis()->SetBinLabel(1, "nevents");
   for (int i = 0; i < mfv::n_filter_paths; ++i) {
     h_filter_bits->GetXaxis()->SetBinLabel(i+2, TString::Format(" pass %s", mfv::filter_paths[i]));
+    h_filter_bit_matrix->GetXaxis()->SetBinLabel(i+1, TString::Format(" pass %s", mfv::filter_paths[i]));
+    h_filter_bit_matrix->GetYaxis()->SetBinLabel(i+1, TString::Format(" pass %s", mfv::filter_paths[i]));
   }
 
   for (int i = 0; i < MAX_NJETS+1; ++i) {
@@ -145,11 +149,8 @@ MFVFilterHistos::MFVFilterHistos(const edm::ParameterSet& cfg)
     h_hlt_jet_eta[i] = fs->make<TH2F>(TString::Format("h_hlt_jet_eta_%s", ijet.Data()), TString::Format(";;abs #eta of HLT PF jet #%s", ijet.Data()), 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 120, 0, 6);
     h_hlt_calo_jet_pt[i] = fs->make<TH2F>(TString::Format("h_hlt_calo_jet_pt_%s", ijet.Data()), TString::Format(";;p_{T} of HLT calojet #%s (GeV)", ijet.Data()), 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 200, 0, 400);
     h_hlt_calo_jet_eta[i] = fs->make<TH2F>(TString::Format("h_hlt_calo_jet_eta_%s", ijet.Data()), TString::Format(";;abs #eta of HLT calojet #%s", ijet.Data()), 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 120, 0, 6);
-    h_hlt_idp_calo_jet_pt[i] = fs->make<TH2F>(TString::Format("h_hlt_idp_calo_jet_pt_%s", ijet.Data()), TString::Format(";;p_{T} of HLT idp calojet #%s (GeV)", ijet.Data()), 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 200, 0, 400);
-    h_hlt_idp_calo_jet_eta[i] = fs->make<TH2F>(TString::Format("h_hlt_idp_calo_jet_eta_%s", ijet.Data()), TString::Format(";;abs #eta of HLT idp calojet #%s", ijet.Data()), 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 120, 0, 6);
 
-    h_thresh_jet_bsc[i] = fs->make<TH2F>(TString::Format( "h_thresh_jet_bsc_%s", ijet.Data()), TString::Format(";;DeepCSV of thresholdjet #%s (GeV)", ijet.Data()), 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 20, 0, 1.0);
-    h_thresh_jet_old_bsc[i] = fs->make<TH2F>(TString::Format( "h_thresh_jet_old_bsc_%s", ijet.Data()), TString::Format(";;CSVv2 of thresholdjet #%s (GeV)", ijet.Data()), 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 20, 0, 1.0);
+    h_online_offline_pfjet_pt[i] = fs->make<TH3F>(TString::Format("h_online_offline_pfjet_pt_%s", ijet.Data()), TString::Format(";p_{T} of online PF jet #%s (GeV); p_{T} of offline PF jet #%s (GeV)", ijet.Data(), ijet.Data()), 200, 0, 1000, 200, 0, 1000, 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths);
   }
 
   h_jet_energy = fs->make<TH2F>("h_jet_energy", ";;jets energy (GeV)", 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 300, 0, 1200);
@@ -167,23 +168,22 @@ MFVFilterHistos::MFVFilterHistos(const edm::ParameterSet& cfg)
   h_hlt_jet_ht = fs->make<TH2F>("h_hlt_jet_ht", ";;H_{T} of HLT PF jets", 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 300, 0, 1200);
   h_hlt_calo_jet_ht = fs->make<TH2F>("h_hlt_calo_jet_ht", ";;H_{T} of HLT calojets", 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 300, 0, 1200);
 
-  h_bdisc_0 = fs->make<TH2F>("h_bdisc_0", ";;max jet DeepCSV", 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 50, 0, 1.0);
-  h_bdisc_1 = fs->make<TH2F>("h_bdisc_1", ";;2nd largest jet DeepCSV", 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 50, 0, 1.0);
+  h_bdisc_0 = fs->make<TH2F>("h_bdisc_0", ";;max jet DeepFlavour", 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 50, 0, 1.0);
+  h_bdisc_1 = fs->make<TH2F>("h_bdisc_1", ";;2nd largest jet DeepFlavour", 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 50, 0, 1.0);
+  h_bdisc_2 = fs->make<TH2F>("h_bdisc_2", ";;3rd largest jet DeepFlavour", 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 50, 0, 1.0);
 
-  h_pt_by_bdisc_0 = fs->make<TH2F>("h_pt_by_bdisc_0", ";;pT of jet with max jet DeepCSV", 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 200, 0, 400);
-  h_pt_by_bdisc_1 = fs->make<TH2F>("h_pt_by_bdisc_1", ";;pT of jet with 2nd largest jet DeepCSV", 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 200, 0, 400);
+  h_thresh_bdisc_0 = fs->make<TH2F>("h_thresh_bdisc_0", ";;max threshold jet DeepFlavour", 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 100, 0, 1.0);
+  h_thresh_bdisc_1 = fs->make<TH2F>("h_thresh_bdisc_1", ";;2nd largest threshold jet DeepFlavour", 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 100, 0, 1.0);
+  h_thresh_bdisc_2 = fs->make<TH2F>("h_thresh_bdisc_2", ";;3rd largest threshold jet DeepFlavour", 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 100, 0, 1.0);
 
-  h_threshold_bdisc_0 = fs->make<TH2F>("h_threshold_bdisc_0", ";;max ThresholdJet DeepCSV", 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 50, 0, 1.0);
-  h_threshold_bdisc_1 = fs->make<TH2F>("h_threshold_bdisc_1", ";;2nd largest ThresholdJet DeepCSV", 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 50, 0, 1.0);
+  h_old_bdisc_0 = fs->make<TH2F>("h_old_bdisc_0", ";;max jet CSVv2", 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 100, 0, 1.0);
+  h_old_bdisc_1 = fs->make<TH2F>("h_old_bdisc_1", ";;2nd largest jet CSVv2", 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 100, 0, 1.0);
+  h_old_bdisc_2 = fs->make<TH2F>("h_old_bdisc_2", ";;3rd largest jet CSVv2", 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 100, 0, 1.0);
 
-  h_old_bdisc_0 = fs->make<TH2F>("h_old_bdisc_0", ";;max jet CSVv2", 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 50, 0, 1.0);
-  h_old_bdisc_1 = fs->make<TH2F>("h_old_bdisc_1", ";;2nd largest jet CSVv2", 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 50, 0, 1.0);
+  h_thresh_old_bdisc_0 = fs->make<TH2F>("h_thresh_old_bdisc_0", ";;max threshold jet CSVv2", 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 100, 0, 1.0);
+  h_thresh_old_bdisc_1 = fs->make<TH2F>("h_thresh_old_bdisc_1", ";;2nd largest threshold jet CSVv2", 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 100, 0, 1.0);
+  h_thresh_old_bdisc_2 = fs->make<TH2F>("h_thresh_old_bdisc_2", ";;3rd largest threshold jet CSVv2", 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 100, 0, 1.0);
 
-  h_pt_by_old_bdisc_0 = fs->make<TH2F>("h_pt_by_old_bdisc_0", ";;pT of jet with max jet CSVv2", 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 200, 0, 400);
-  h_pt_by_old_bdisc_1 = fs->make<TH2F>("h_pt_by_old_bdisc_1", ";;pT of jet with 2nd largest jet CSVv2", 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 200, 0, 400);
-
-  h_threshold_old_bdisc_0 = fs->make<TH2F>("h_threshold_old_bdisc_0", ";;max ThresholdJet CSVv2", 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 50, 0, 1.0);
-  h_threshold_old_bdisc_1 = fs->make<TH2F>("h_threshold_old_bdisc_1", ";;2nd largest ThresholdJet CSVv2", 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 50, 0, 1.0);
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -202,17 +202,10 @@ MFVFilterHistos::MFVFilterHistos(const edm::ParameterSet& cfg)
 
   h_bdisc_0->GetXaxis()->SetBinLabel(1, "no filter");
   h_bdisc_1->GetXaxis()->SetBinLabel(1, "no filter");
-  h_pt_by_bdisc_0->GetXaxis()->SetBinLabel(1, "no filter");
-  h_pt_by_bdisc_1->GetXaxis()->SetBinLabel(1, "no filter");
-  h_threshold_bdisc_0->GetXaxis()->SetBinLabel(1, "no filter");
-  h_threshold_bdisc_1->GetXaxis()->SetBinLabel(1, "no filter");
 
   h_old_bdisc_0->GetXaxis()->SetBinLabel(1, "no filter");
   h_old_bdisc_1->GetXaxis()->SetBinLabel(1, "no filter");
-  h_pt_by_old_bdisc_0->GetXaxis()->SetBinLabel(1, "no filter");
-  h_pt_by_old_bdisc_1->GetXaxis()->SetBinLabel(1, "no filter");
-  h_threshold_old_bdisc_0->GetXaxis()->SetBinLabel(1, "no filter");
-  h_threshold_old_bdisc_1->GetXaxis()->SetBinLabel(1, "no filter");
+  h_old_bdisc_2->GetXaxis()->SetBinLabel(1, "no filter");
 
   for (int i = 0; i < mfv::n_filter_paths; ++i) {
     h_jet_energy->GetXaxis()->SetBinLabel(i+2, TString::Format("  %s", mfv::filter_paths[i]));
@@ -228,17 +221,10 @@ MFVFilterHistos::MFVFilterHistos(const edm::ParameterSet& cfg)
 
     h_bdisc_0->GetXaxis()->SetBinLabel(i+2, TString::Format("  %s", mfv::filter_paths[i]));
     h_bdisc_1->GetXaxis()->SetBinLabel(i+2, TString::Format("  %s", mfv::filter_paths[i]));
-    h_pt_by_bdisc_0->GetXaxis()->SetBinLabel(i+2, TString::Format("  %s", mfv::filter_paths[i]));
-    h_pt_by_bdisc_1->GetXaxis()->SetBinLabel(i+2, TString::Format("  %s", mfv::filter_paths[i]));
-    h_threshold_bdisc_0->GetXaxis()->SetBinLabel(i+2, TString::Format("  %s", mfv::filter_paths[i]));
-    h_threshold_bdisc_1->GetXaxis()->SetBinLabel(i+2, TString::Format("  %s", mfv::filter_paths[i]));
 
     h_old_bdisc_0->GetXaxis()->SetBinLabel(i+2, TString::Format("  %s", mfv::filter_paths[i]));
     h_old_bdisc_1->GetXaxis()->SetBinLabel(i+2, TString::Format("  %s", mfv::filter_paths[i]));
-    h_pt_by_old_bdisc_0->GetXaxis()->SetBinLabel(i+2, TString::Format("  %s", mfv::filter_paths[i]));
-    h_pt_by_old_bdisc_1->GetXaxis()->SetBinLabel(i+2, TString::Format("  %s", mfv::filter_paths[i]));
-    h_threshold_old_bdisc_0->GetXaxis()->SetBinLabel(i+2, TString::Format("  %s", mfv::filter_paths[i]));
-    h_threshold_old_bdisc_1->GetXaxis()->SetBinLabel(i+2, TString::Format("  %s", mfv::filter_paths[i]));
+    h_old_bdisc_2->GetXaxis()->SetBinLabel(i+2, TString::Format("  %s", mfv::filter_paths[i]));
   }
 
 }
@@ -254,6 +240,28 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   event.getByToken(weight_token, weight);
   const double w = *weight;
 
+  std::vector<float> jet_bscores_old = mevent->jet_bdisc_old;
+  sort(jet_bscores_old.begin(), jet_bscores_old.end(), std::greater<float>());
+
+  // Shaun FIXME  -- Avoid events with poor online CaloHT
+  if (mevent->hlt_caloht < 300) return;
+
+  // Shaun FIXME  -- Only plot events which LOOK like the pass the hltBTagCaloCSV filter (filt #6), but don't
+  if ((mevent->pass_filter(6)) or (jet_bscores_old.size() < 2) or (jet_bscores_old[1] < 0.7))
+    return;
+
+  // Shaun FIXME  -- Only plot events which LOOK like they pass the hltBTagPFCSV filter (filt #13), but don't
+  //if ((mevent->pass_filter(13)) or (jet_bscores_old.size() < 3) or (jet_bscores_old[2] < 0.7))
+  //  return;
+
+  // Shaun FIXME  -- Only plot events which LOOK like they pass the hltBTagPFCSV filter (filt #13), AND DO
+  //if ( (jet_bscores_old.size() < 3) or not ((mevent->pass_filter(13)) and (jet_bscores_old[2] > 0.7)) )
+  //  return;
+
+  // Shaun FIXME  -- Only plot events which LOOK like they pass the hltBTagCaloCSV filter (filt #6), AND DO
+  //if ( (jet_bscores_old.size() < 2) or not ((mevent->pass_filter(6)) and (jet_bscores_old[1] > 0.7)) )
+  //  return;
+
   int require_L1  = is_dibjet ? di_bitL1 : tri_bitL1;
   int min_filtjets        = is_dibjet ? di_minfiltjets : tri_minfiltjets;
   float min_filtjetpt     = is_dibjet ? di_minfiltjetpt : tri_minfiltjetpt;
@@ -262,20 +270,6 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   const int nhltpfjets = mevent->hlt_pf_jet_pt.size();
   const int nhltcalojets = mevent->hlt_calo_jet_pt.size();
-  const int nhltidpcalojets = mevent->hlt_idp_calo_jet_pt.size();
-  float bscore_0 = 0.0;
-  float bscore_1 = 0.0;
-  float pt_by_bscore_0 = -1.0;
-  float pt_by_bscore_1 = -1.0;
-  float threshold_bscore_0 = -0.5;
-  float threshold_bscore_1 = -0.5;
-
-  float old_bscore_0 = 0.0;
-  float old_bscore_1 = 0.0;
-  float pt_by_old_bscore_0 = -1.0;
-  float pt_by_old_bscore_1 = -1.0;
-  float threshold_old_bscore_0 = -0.5;
-  float threshold_old_bscore_1 = -0.5;
 
   float alt_pf_ht = 0.0;
   float alt_calo_ht = 0.0;
@@ -285,9 +279,10 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   int filtjet_passes = 0;
   int calofiltjet_passes = 0;
   std::vector<float> jet_bscores     = mevent->jet_bdisc;
-  std::vector<float> jet_bscores_old = mevent->jet_bdisc_old;
-
-  //std::cout << "ak4Corrected: " << nhltcalojets << "   ak4CorrectedIDPassed: " << nhltidpcalojets << "   slimmedCalo: " << mevent->calo_jet_pt.size() << std::endl;
+  //std::vector<float> jet_bscores_old = mevent->jet_bdisc_old;
+  std::vector<float> thresh_bscores;
+  std::vector<float> thresh_bscores_old;
+  //sort(jet_bscores_old.begin(), jet_bscores_old.end(), std::greater<float>());
 
   // Fill some basic hltbits/L1bits/filtbits histograms
   h_hlt_bits->Fill(0., w);
@@ -303,6 +298,12 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   }
   for (int i = 0; i < mfv::n_filter_paths; ++i) {
     if (mevent->pass_filter (i)) h_filter_bits->Fill(i+1, w);
+
+    for (int j = 0; j < mfv::n_filter_paths; ++j) {
+      if (mevent->pass_filter(i) and mevent->pass_filter(j)) {
+        h_filter_bit_matrix->Fill(i, j, w);
+      }
+    }
   }
 
 
@@ -315,39 +316,6 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     float filtjet_pt = mevent->nth_jet_pt(i);
     float filtjet_abseta = fabs(mevent->nth_jet_eta(i));
     float filtjet_bscore = jet_bscores[i];
-    float filtjet_old_bscore = jet_bscores_old[i];
-
-    // Get the two highest bscores and old_bscores of ThresholdJets
-    if (filtjet_pt > min_pt_for_bfilter) { 
-      if (filtjet_bscore > threshold_bscore_0){
-        threshold_bscore_1 = threshold_bscore_0;
-        threshold_bscore_0 = filtjet_bscore;
-      }
-
-      if (filtjet_old_bscore > threshold_old_bscore_0){
-        threshold_old_bscore_1 = threshold_old_bscore_0;
-        threshold_old_bscore_0 = filtjet_old_bscore;
-      }
-    }
-
-    // Get the two highest bscores in event (not just ThresholdJets)!
-    if (filtjet_bscore > bscore_0) {
-      bscore_1 = bscore_0;
-      bscore_0 = filtjet_bscore;
-
-      pt_by_bscore_1 = pt_by_bscore_0;
-      pt_by_bscore_0 = filtjet_pt;
-    }
-
-    // Get the two highest old_bscores in event (not just ThresholdJets)!
-    if (filtjet_old_bscore > bscore_0) {
-      old_bscore_1 = old_bscore_0;
-      old_bscore_0 = filtjet_old_bscore;
-
-      pt_by_old_bscore_1 = pt_by_old_bscore_0;
-      pt_by_old_bscore_0 = filtjet_pt;
-    }
-
 
     // Also, calculate max and min jet deta
     if (filtjet_pt > min_pt_for_deta) {
@@ -363,13 +331,28 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       }
     }
 
-    // Also, calculate alternate PF HT (that is, HT of jets with |eta| < 2.5)
-    if ((mevent->nth_jet_pt(i) > 30.0) and (fabs(mevent->nth_jet_eta(i)) < 2.5)) alt_pf_ht += mevent->nth_jet_pt(i);
+    // Let's call a jet with |eta| < 2.5 and pT > 30 a 'threshold jet'
+    // Find the HT of these threshold jets, and record their bscores.
+    if ((mevent->nth_jet_pt(i) > 30.0) and (fabs(mevent->nth_jet_eta(i)) < 2.5)) {
+        alt_pf_ht += mevent->nth_jet_pt(i);
+        thresh_bscores.push_back(jet_bscores[i]);
+        thresh_bscores_old.push_back(jet_bscores_old[i]);
+    }
 
     // Ensure that the event passes some minimum cuts.
     if ((filtjet_pt > min_filtjetpt) && (filtjet_abseta < max_filtjeteta) && (filtjet_bscore > min_filtjetbscore)) // Do we use old_bscore or just bscore?
       filtjet_passes++;
   }
+
+  // Do some more sorting of bscore lists
+  sort(jet_bscores.begin(), jet_bscores.end(), std::greater<float>());
+  sort(thresh_bscores.begin(), thresh_bscores.end(), std::greater<float>());
+  sort(thresh_bscores_old.begin(), thresh_bscores_old.end(), std::greater<float>());
+
+  //std::cout << "\n# in jet_bscores:        " << jet_bscores.size() << std::endl;
+  //std::cout << "# in jet_bscores_old:    " << jet_bscores_old.size() << std::endl;
+  //std::cout << "# in thresh_bscores:     " << thresh_bscores.size() << std::endl;
+  //std::cout << "# in thresh_bscores_old: " << thresh_bscores_old.size() << std::endl;
 
   // Calculate alternate CaloHT (|eta| < 2.5), and cound how many decent calojets we have
   for (int i = 0, icjets = mevent->calo_jet_pt.size(); i < icjets; i++) {
@@ -422,17 +405,8 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         h_hlt_jet_eta[k]->Fill(i+1, (nhltpfjets > k ? fabs(mevent->hlt_pf_jet_eta[k]) : -1.0), w);
         h_hlt_calo_jet_pt[k]->Fill(i+1, (nhltcalojets > k ? mevent->hlt_calo_jet_pt[k] : -1.0), w);         
         h_hlt_calo_jet_eta[k]->Fill(i+1, (nhltcalojets > k ? fabs(mevent->hlt_calo_jet_eta[k]) : -1.0), w);
-        h_hlt_idp_calo_jet_pt[k]->Fill(i+1, (nhltidpcalojets > k ? mevent->hlt_idp_calo_jet_pt[k] : -1.0), w);         
-        h_hlt_idp_calo_jet_eta[k]->Fill(i+1, (nhltidpcalojets > k ? fabs(mevent->hlt_idp_calo_jet_eta[k]) : -1.0), w);
 
-        if (mevent->nth_jet_pt(k) > min_pt_for_bfilter) {
-          h_thresh_jet_bsc[k]->Fill(i+1, jet_bscores[k], w);
-          h_thresh_jet_old_bsc[k]->Fill(i+1, jet_bscores_old[k], w);
-        }
-        else {
-          h_thresh_jet_bsc[k]->Fill(i+1, -999.0, w);
-          h_thresh_jet_old_bsc[k]->Fill(i+1, -999.0, w);
-        }
+        h_online_offline_pfjet_pt[k]->Fill((nhltpfjets > k ? mevent->hlt_pf_jet_pt[k] : -1.0), mevent->nth_jet_pt(k), i+1, w);
 
         if (mevent->calo_jet_pt.size() == 0) continue;
 
@@ -461,29 +435,22 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       h_hlt_calo_jet_ht->Fill(i+1, mevent->hlt_caloht, w);
       h_hlt_jet_ht->Fill(i+1, mevent->hlt_ht, w);
 
-      h_bdisc_0->Fill(i+1, bscore_0, w);
-      h_bdisc_1->Fill(i+1, bscore_1, w);
+      h_bdisc_0->Fill(i+1, jet_bscores[0], w);
+      h_bdisc_1->Fill(i+1, jet_bscores[1], w);
+      h_bdisc_2->Fill(i+1, jet_bscores[2], w);
 
-      h_old_bdisc_0->Fill(i+1, old_bscore_0, w);
-      h_old_bdisc_1->Fill(i+1, old_bscore_1, w);
+      h_thresh_bdisc_0->Fill(i+1, (thresh_bscores.size() > 0 ? thresh_bscores[0] : -0.1), w);
+      h_thresh_bdisc_1->Fill(i+1, (thresh_bscores.size() > 1 ? thresh_bscores[1] : -0.1), w);
+      h_thresh_bdisc_2->Fill(i+1, (thresh_bscores.size() > 2 ? thresh_bscores[2] : -0.1), w);
 
-      if (bscore_0 > 0.85)  h_pt_by_bdisc_0->Fill(i+1, pt_by_bscore_0, w);
-      else h_pt_by_bdisc_0->Fill(i+1, -1.0, w);
+      h_old_bdisc_0->Fill(i+1, jet_bscores_old[0], w);
+      h_old_bdisc_1->Fill(i+1, jet_bscores_old[1], w);
+      h_old_bdisc_2->Fill(i+1, jet_bscores_old[2], w);
 
-      if (bscore_1 > 0.85)  h_pt_by_bdisc_1->Fill(i+1, pt_by_bscore_1, w);
-      else h_pt_by_bdisc_1->Fill(i+1, -1.0, w);
+      h_thresh_old_bdisc_0->Fill(i+1, (thresh_bscores_old.size() > 0 ? thresh_bscores_old[0] : -0.1), w);
+      h_thresh_old_bdisc_1->Fill(i+1, (thresh_bscores_old.size() > 1 ? thresh_bscores_old[1] : -0.1), w);
+      h_thresh_old_bdisc_2->Fill(i+1, (thresh_bscores_old.size() > 2 ? thresh_bscores_old[2] : -0.1), w);
 
-      if (old_bscore_0 > 0.85) h_pt_by_old_bdisc_0->Fill(i+1, pt_by_old_bscore_0, w);
-      else h_pt_by_old_bdisc_0->Fill(i+1, -1.0, w);
-
-      if (old_bscore_1 > 0.85) h_pt_by_old_bdisc_1->Fill(i+1, pt_by_old_bscore_1, w);
-      else h_pt_by_old_bdisc_1->Fill(i+1, -1.0, w);
-
-      h_threshold_bdisc_0->Fill(i+1, threshold_bscore_0, w);
-      h_threshold_bdisc_1->Fill(i+1, threshold_bscore_1, w);
-
-      h_threshold_old_bdisc_0->Fill(i+1, threshold_old_bscore_0, w);
-      h_threshold_old_bdisc_1->Fill(i+1, threshold_old_bscore_1, w);
     }
   }
 

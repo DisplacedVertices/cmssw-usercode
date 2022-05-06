@@ -196,7 +196,6 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_hlt_bits = fs->make<TH1F>("h_hlt_bits", ";;events", 2*mfv::n_hlt_paths+1, 0, 2*mfv::n_hlt_paths+1);
   h_l1_bits  = fs->make<TH1F>("h_l1_bits",  ";;events", 2*mfv::n_l1_paths +1, 0, 2*mfv::n_l1_paths +1);
   h_filter_bits  = fs->make<TH1F>("h_filter_bits",  ";;events", 2*mfv::n_filter_paths +1, 0, 2*mfv::n_filter_paths +1);
-  h_filter_bits  = fs->make<TH1F>("h_filter_bits",  ";;events", mfv::n_filter_paths +1, 0, mfv::n_filter_paths +1);
 
   h_hlt_bits->GetXaxis()->SetBinLabel(1, "nevents");
   for (int i = 0; i < mfv::n_hlt_paths; ++i) {
@@ -368,6 +367,29 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   edm::Handle<double> weight;
   event.getByToken(weight_token, weight);
   const double w = *weight;
+
+  std::vector<float> jet_bscores_old = mevent->jet_bdisc_old;
+  sort(jet_bscores_old.begin(), jet_bscores_old.end(), std::greater<float>());
+
+  // Shaun FIXME  -- Avoid events with poor online CaloHT
+  if (mevent->hlt_caloht < 300) return;
+
+  // Shaun FIXME  -- Only plot events which LOOK like the pass the hltBTagCaloCSV filter (filt #6), but don't
+  if ((mevent->pass_filter(6)) or (jet_bscores_old.size() < 2) or (jet_bscores_old[1] < 0.7))
+    return;
+  
+  // Shaun FIXME  -- Only plot events which LOOK like they pass the hltBTagPFCSV filter (filt #13), but don't
+  //if ((mevent->pass_filter(13)) or (jet_bscores_old.size() < 3) or (jet_bscores_old[2] < 0.7))
+  //  return;
+
+  // Shaun FIXME  -- Only plot events which LOOK like they pass the hltBTagPFCSV filter (filt #13), AND DO
+  //if ( (jet_bscores_old.size() < 3) or not ((mevent->pass_filter(13)) and (jet_bscores_old[2] > 0.7)) )
+  //  return;
+ 
+  // Shaun FIXME  -- Only plot events which LOOK like they pass the hltBTagCaloCSV filter (filt #6), AND DO
+  //if ( (jet_bscores_old.size() < 2) or not ((mevent->pass_filter(6)) and (jet_bscores_old[1] > 0.7)) )
+  //  return;
+
   h_w->Fill(w);
 
   //////////////////////////////////////////////////////////////////////////////

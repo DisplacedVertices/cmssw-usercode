@@ -394,14 +394,15 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
 }
 
 bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig) const {
-  if(!mevent->pass_hlt(trig)) return false;
+
+  //if(!mevent->pass_hlt(trig)) return false;
 
   // note that if these weren't pT ordered, we'd have to be more careful in the loops...
   int njets = mevent->njets(20);
 
   // note that this could be loosened if desired
-  //int nbtaggedjets = mevent->nbtags(jmt::BTagging::tight); Shaun
-  //
+  //int nbtaggedjets = mevent->nbtags(jmt::BTagging::tight); //Shaun
+
   int nbtaggedjets = 0;
   for(size_t i = 0, ie = mevent->jet_bdisc_old.size(); i < ie; i++) {
     if (mevent->jet_bdisc_old[i] > 0.9693) nbtaggedjets++; // 0.9693 is the tight WP for CSV algo
