@@ -44,9 +44,15 @@ class MFVFilterHistos : public edm::EDAnalyzer {
   TH1F* h_l1_bits;
   TH1F* h_filter_bits;
   TH2F* h_filter_bit_matrix;
+  TH2F* h_seqfilt_bit_matrix;
 
   TH2F* h_jet_pt[MAX_NJETS+1];
   TH2F* h_jet_eta[MAX_NJETS+1];
+
+  TH2F* h_bsort_jet_pt[MAX_NJETS+1];
+  TH2F* h_bsort_jet_eta[MAX_NJETS+1];
+  TH2F* h_bsort_jet_csv[MAX_NJETS+1];
+
   TH2F* h_jet_energy;
   TH2F* h_jet_ht;
   TH2F* h_jet_ht_alt;
@@ -117,6 +123,7 @@ MFVFilterHistos::MFVFilterHistos(const edm::ParameterSet& cfg)
   h_l1_bits  = fs->make<TH1F>("h_l1_bits",  ";;events", 2*mfv::n_l1_paths +1, 0, 2*mfv::n_l1_paths +1);
   h_filter_bits  = fs->make<TH1F>("h_filter_bits",  ";;events", mfv::n_filter_paths +1, 0, mfv::n_filter_paths +1);
   h_filter_bit_matrix = fs->make<TH2F>("h_filter_bit_matrix", ";;", mfv::n_filter_paths, 0, mfv::n_filter_paths, mfv::n_filter_paths, 0, mfv::n_filter_paths);
+  h_seqfilt_bit_matrix = fs->make<TH2F>("h_seqfilt_bit_matrix", ";sequential;non-sequential", mfv::n_filter_paths, 0, mfv::n_filter_paths, mfv::n_filter_paths, 0, mfv::n_filter_paths);
   
 
   h_hlt_bits->GetXaxis()->SetBinLabel(1, "nevents");
@@ -135,6 +142,8 @@ MFVFilterHistos::MFVFilterHistos(const edm::ParameterSet& cfg)
     h_filter_bits->GetXaxis()->SetBinLabel(i+2, TString::Format(" pass %s", mfv::filter_paths[i]));
     h_filter_bit_matrix->GetXaxis()->SetBinLabel(i+1, TString::Format(" pass %s", mfv::filter_paths[i]));
     h_filter_bit_matrix->GetYaxis()->SetBinLabel(i+1, TString::Format(" pass %s", mfv::filter_paths[i]));
+    h_seqfilt_bit_matrix->GetXaxis()->SetBinLabel(i+1, TString::Format(" pass %s", mfv::filter_paths[i]));
+    h_seqfilt_bit_matrix->GetYaxis()->SetBinLabel(i+1, TString::Format(" pass %s", mfv::filter_paths[i]));
   }
 
   for (int i = 0; i < MAX_NJETS+1; ++i) {
@@ -142,6 +151,11 @@ MFVFilterHistos::MFVFilterHistos(const edm::ParameterSet& cfg)
     TString ijet = i == MAX_NJETS ? TString("all") : TString::Format("%i", i);
     h_jet_pt[i] = fs->make<TH2F>(TString::Format("h_jet_pt_%s", ijet.Data()), TString::Format(";;p_{T} of jet #%s (GeV)", ijet.Data()), 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 200, 0, 400);
     h_jet_eta[i] = fs->make<TH2F>(TString::Format("h_jet_eta_%s", ijet.Data()), TString::Format(";;abs #eta of jet #%s", ijet.Data()), 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 120, 0, 6);
+
+    h_bsort_jet_pt[i] = fs->make<TH2F>(TString::Format("h_bsort_jet_pt_%s", ijet.Data()), TString::Format(";;p_{T} of jet  w/ #%s-highest CSV (GeV)", ijet.Data()), 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 200, 0, 400);
+    h_bsort_jet_eta[i] = fs->make<TH2F>(TString::Format("h_bsort_jet_eta_%s", ijet.Data()), TString::Format(";;abs #eta of jet w/ #%s-highest CSV", ijet.Data()), 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 120, 0, 6);
+    h_bsort_jet_csv[i] = fs->make<TH2F>(TString::Format("h_bsort_jet_csv_%s", ijet.Data()), TString::Format(";;CSV of jet #%s-highest CSV", ijet.Data()), 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 100, 0, 1.0);
+
     h_calo_jet_pt[i] = fs->make<TH2F>(TString::Format("h_calo_jet_pt_%s", ijet.Data()), TString::Format(";;p_{T} of calojet #%s (GeV)", ijet.Data()), 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 200, 0, 400);
     h_calo_jet_eta[i] = fs->make<TH2F>(TString::Format("h_calo_jet_eta_%s", ijet.Data()), TString::Format(";;abs #eta of calojet #%s", ijet.Data()), 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 120, 0, 6);
 
@@ -232,6 +246,13 @@ MFVFilterHistos::MFVFilterHistos(const edm::ParameterSet& cfg)
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+struct Jet_BHelper {
+    float pt  = 0.0;
+    float eta = 0.0;
+    float phi = 0.0;
+    float csv = 0.0;
+};
+
 void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   edm::Handle<MFVEvent> mevent;
   event.getByToken(mevent_token, mevent);
@@ -240,26 +261,33 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   event.getByToken(weight_token, weight);
   const double w = *weight;
 
-  std::vector<float> jet_bscores_old = mevent->jet_bdisc_old;
-  sort(jet_bscores_old.begin(), jet_bscores_old.end(), std::greater<float>());
+  // Get copy of jets sorted by bscore
+  Jet_BHelper jetHelper[MAX_NJETS];
+  for (int i=0; i < MAX_NJETS; i++) {
+    jetHelper[i].pt  = mevent->nth_jet_pt(i);
+    jetHelper[i].eta = mevent->nth_jet_eta(i);
+    jetHelper[i].phi = mevent->nth_jet_phi(i);
+    jetHelper[i].csv = (i < (int)(mevent->jet_bdisc_old.size()) ? mevent->jet_bdisc_old[i] : -9.9);
+  }
+  std::sort(jetHelper, jetHelper+MAX_NJETS, [](Jet_BHelper const &a, Jet_BHelper &b) -> bool{ return a.csv > b.csv; } );
 
   // Shaun FIXME  -- Avoid events with poor online CaloHT
-  if (mevent->hlt_caloht < 300) return;
+  if (not (mevent->pass_filter(4) and mevent->pass_filter(5))) return;
 
   // Shaun FIXME  -- Only plot events which LOOK like the pass the hltBTagCaloCSV filter (filt #6), but don't
-  if ((mevent->pass_filter(6)) or (jet_bscores_old.size() < 2) or (jet_bscores_old[1] < 0.7))
+  if ((mevent->pass_filter(6)) or (jetHelper[1].csv < 0.5))
     return;
 
   // Shaun FIXME  -- Only plot events which LOOK like they pass the hltBTagPFCSV filter (filt #13), but don't
-  //if ((mevent->pass_filter(13)) or (jet_bscores_old.size() < 3) or (jet_bscores_old[2] < 0.7))
+  //if ((mevent->pass_filter(13)) or (jetHelper[2].csv < 0.7))
   //  return;
 
   // Shaun FIXME  -- Only plot events which LOOK like they pass the hltBTagPFCSV filter (filt #13), AND DO
-  //if ( (jet_bscores_old.size() < 3) or not ((mevent->pass_filter(13)) and (jet_bscores_old[2] > 0.7)) )
+  //if not ((mevent->pass_filter(13)) and (jetHelper[2].csv > 0.7)) 
   //  return;
 
   // Shaun FIXME  -- Only plot events which LOOK like they pass the hltBTagCaloCSV filter (filt #6), AND DO
-  //if ( (jet_bscores_old.size() < 2) or not ((mevent->pass_filter(6)) and (jet_bscores_old[1] > 0.7)) )
+  //if (not ((mevent->pass_filter(6)) and (jetHelper[1].csv > 0.5)))
   //  return;
 
   int require_L1  = is_dibjet ? di_bitL1 : tri_bitL1;
@@ -279,10 +307,10 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   int filtjet_passes = 0;
   int calofiltjet_passes = 0;
   std::vector<float> jet_bscores     = mevent->jet_bdisc;
-  //std::vector<float> jet_bscores_old = mevent->jet_bdisc_old;
+  std::vector<float> jet_bscores_old = mevent->jet_bdisc_old;
   std::vector<float> thresh_bscores;
   std::vector<float> thresh_bscores_old;
-  //sort(jet_bscores_old.begin(), jet_bscores_old.end(), std::greater<float>());
+  sort(jet_bscores_old.begin(), jet_bscores_old.end(), std::greater<float>());
 
   // Fill some basic hltbits/L1bits/filtbits histograms
   h_hlt_bits->Fill(0., w);
@@ -307,9 +335,7 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   }
 
 
-  // Negatively-weighted events throw off future code. Disable for now
-  // Also, if no b-tagged jets, skip
-  //if ((w < 0) || (std::size(jet_bscores) == 0)) return;
+  // Ignore events with no bscores
   if ((std::size(jet_bscores) == 0)) return;
 
   for (int i = 0; i < MAX_NJETS; ++i) {
@@ -348,11 +374,6 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   sort(jet_bscores.begin(), jet_bscores.end(), std::greater<float>());
   sort(thresh_bscores.begin(), thresh_bscores.end(), std::greater<float>());
   sort(thresh_bscores_old.begin(), thresh_bscores_old.end(), std::greater<float>());
-
-  //std::cout << "\n# in jet_bscores:        " << jet_bscores.size() << std::endl;
-  //std::cout << "# in jet_bscores_old:    " << jet_bscores_old.size() << std::endl;
-  //std::cout << "# in thresh_bscores:     " << thresh_bscores.size() << std::endl;
-  //std::cout << "# in thresh_bscores_old: " << thresh_bscores_old.size() << std::endl;
 
   // Calculate alternate CaloHT (|eta| < 2.5), and cound how many decent calojets we have
   for (int i = 0, icjets = mevent->calo_jet_pt.size(); i < icjets; i++) {
@@ -401,12 +422,24 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       for (int k = 0; k < MAX_NJETS; ++k) {
         h_jet_pt[k]->Fill(i+1, mevent->nth_jet_pt(k), w);
         h_jet_eta[k]->Fill(i+1, fabs(mevent->nth_jet_eta(k)), w);
+
+        h_bsort_jet_pt[k]->Fill(i+1, jetHelper[k].pt, w);
+        h_bsort_jet_eta[k]->Fill(i+1, fabs(jetHelper[k].eta), w);
+        h_bsort_jet_eta[k]->Fill(i+1, jetHelper[k].csv, w);
+
         h_hlt_jet_pt[k]->Fill(i+1, (nhltpfjets > k ? mevent->hlt_pf_jet_pt[k] : -1.0), w);         
         h_hlt_jet_eta[k]->Fill(i+1, (nhltpfjets > k ? fabs(mevent->hlt_pf_jet_eta[k]) : -1.0), w);
+
         h_hlt_calo_jet_pt[k]->Fill(i+1, (nhltcalojets > k ? mevent->hlt_calo_jet_pt[k] : -1.0), w);         
         h_hlt_calo_jet_eta[k]->Fill(i+1, (nhltcalojets > k ? fabs(mevent->hlt_calo_jet_eta[k]) : -1.0), w);
 
         h_online_offline_pfjet_pt[k]->Fill((nhltpfjets > k ? mevent->hlt_pf_jet_pt[k] : -1.0), mevent->nth_jet_pt(k), i+1, w);
+
+        // Fill sequential filter bit matrix. Note that the fill indices are slightly different
+        // i = sequential index.   n = non-sequential index
+        for (int n=0; n < mfv::n_filter_paths; ++n) {
+            if (mevent->pass_filter(n)) h_seqfilt_bit_matrix->Fill(i, n, w);
+        }
 
         if (mevent->calo_jet_pt.size() == 0) continue;
 

@@ -90,6 +90,11 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_jet_eta[MAX_NJETS+1];
   TH1F* h_jet_phi[MAX_NJETS+1];
 
+  TH1F* h_bsort_jet_pt[MAX_NJETS+1];
+  TH1F* h_bsort_jet_eta[MAX_NJETS+1];
+  TH1F* h_bsort_jet_phi[MAX_NJETS+1];
+  TH1F* h_bsort_jet_csv[MAX_NJETS+1];
+
   TH1F* h_jet_energy;
   TH1F* h_jet_ht;
   TH1F* h_jet_ht_40;
@@ -259,6 +264,11 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
     h_jet_pt[i] = fs->make<TH1F>(TString::Format("h_jet_pt_%s", ijet.Data()), TString::Format(";p_{T} of jet #%s (GeV);events/10 GeV", ijet.Data()), 200, 0, 2000);
     h_jet_eta[i] = fs->make<TH1F>(TString::Format("h_jet_eta_%s", ijet.Data()), TString::Format(";absv#eta of jet #%s;events/bin", ijet.Data()), 120, 0, 6);
     h_jet_phi[i] = fs->make<TH1F>(TString::Format("h_jet_phi_%s", ijet.Data()), TString::Format(";#phi of jet #%s;events/bin", ijet.Data()), 100, -3.1416, 3.1416);
+
+    h_bsort_jet_pt[i] = fs->make<TH1F>(TString::Format("h_bsort_jet_pt_%s", ijet.Data()), TString::Format(";p_{T} of jet w/ #%s highest CSV (GeV);events/10 GeV", ijet.Data()), 200, 0, 2000);
+    h_bsort_jet_eta[i] = fs->make<TH1F>(TString::Format("h_bsort_jet_eta_%s", ijet.Data()), TString::Format(";absv#eta of jet w/ #%s highest CSV;events/bin", ijet.Data()), 130, 0, 2.6);
+    h_bsort_jet_phi[i] = fs->make<TH1F>(TString::Format("h_bsort_jet_phi_%s", ijet.Data()), TString::Format(";#phi of jet w/ #%s highest CSV;events/bin", ijet.Data()), 100, -3.1416, 3.1416);
+    h_bsort_jet_csv[i] = fs->make<TH1F>(TString::Format("h_bsort_jet_csv_%s", ijet.Data()), TString::Format(";CSV of jet w/ #%s highest CSV;events/bin", ijet.Data()), 100, 0, 1.0);
   }
 
   h_jet_energy = fs->make<TH1F>("h_jet_energy", ";jets energy (GeV);jets/10 GeV", 200, 0, 2000);
@@ -359,7 +369,16 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   }
 }
 
+struct Jet_BHelper {
+    float pt  = 0.0;
+    float eta = 0.0;
+    float phi = 0.0;
+    float csv = 0.0;
+};
+
 void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
+
+
 
   edm::Handle<MFVEvent> mevent;
   event.getByToken(mevent_token, mevent);
@@ -368,26 +387,32 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   event.getByToken(weight_token, weight);
   const double w = *weight;
 
-  std::vector<float> jet_bscores_old = mevent->jet_bdisc_old;
-  sort(jet_bscores_old.begin(), jet_bscores_old.end(), std::greater<float>());
+  Jet_BHelper jetHelper[MAX_NJETS];
+  for (int i=0; i < MAX_NJETS; i++) {
+    jetHelper[i].pt  = mevent->nth_jet_pt(i);
+    jetHelper[i].eta = fabs(mevent->nth_jet_eta(i));
+    jetHelper[i].phi = mevent->nth_jet_phi(i);
+    jetHelper[i].csv = (i < (int)(mevent->jet_bdisc_old.size()) ? mevent->jet_bdisc_old[i] : -9.9);
+  }
+  std::sort(jetHelper, jetHelper+MAX_NJETS, [](Jet_BHelper const &a, Jet_BHelper &b) -> bool{ return a.csv > b.csv; } );
 
   // Shaun FIXME  -- Avoid events with poor online CaloHT
-  if (mevent->hlt_caloht < 300) return;
+  if (not (mevent->pass_filter(4) and mevent->pass_filter(5))) return;
 
   // Shaun FIXME  -- Only plot events which LOOK like the pass the hltBTagCaloCSV filter (filt #6), but don't
-  if ((mevent->pass_filter(6)) or (jet_bscores_old.size() < 2) or (jet_bscores_old[1] < 0.7))
+  if ((mevent->pass_filter(6)) or (jetHelper[1].csv < 0.5))
     return;
-  
+
   // Shaun FIXME  -- Only plot events which LOOK like they pass the hltBTagPFCSV filter (filt #13), but don't
-  //if ((mevent->pass_filter(13)) or (jet_bscores_old.size() < 3) or (jet_bscores_old[2] < 0.7))
+  //if ((mevent->pass_filter(13)) or (jetHelper[2].csv < 0.7))
   //  return;
 
   // Shaun FIXME  -- Only plot events which LOOK like they pass the hltBTagPFCSV filter (filt #13), AND DO
-  //if ( (jet_bscores_old.size() < 3) or not ((mevent->pass_filter(13)) and (jet_bscores_old[2] > 0.7)) )
+  //if not ((mevent->pass_filter(13)) and (jetHelper[2].csv > 0.7)) 
   //  return;
- 
+
   // Shaun FIXME  -- Only plot events which LOOK like they pass the hltBTagCaloCSV filter (filt #6), AND DO
-  //if ( (jet_bscores_old.size() < 2) or not ((mevent->pass_filter(6)) and (jet_bscores_old[1] > 0.7)) )
+  //if (not ((mevent->pass_filter(6)) and (jetHelper[1].csv > 0.5)))
   //  return;
 
   h_w->Fill(w);
@@ -501,6 +526,14 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_jet_eta[i]->Fill(fabs(mevent->nth_jet_eta(i)), w);
     h_jet_phi[i]->Fill(mevent->nth_jet_phi(i), w);
   }
+
+  for (int i = 0; i < MAX_NJETS; ++i) {
+    h_bsort_jet_pt[i]->Fill(jetHelper[i].pt, w);
+    h_bsort_jet_eta[i]->Fill(jetHelper[i].eta, w);
+    h_bsort_jet_phi[i]->Fill(jetHelper[i].phi, w);
+    h_bsort_jet_csv[i]->Fill(jetHelper[i].csv, w);
+  }
+
   h_jet_ht->Fill(mevent->jet_ht(mfv::min_jet_pt), w);
   h_jet_ht_40->Fill(mevent->jet_ht(40), w);
 
@@ -512,6 +545,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_jet_pt[MAX_NJETS]->Fill(mevent->jet_pt[ijet], w);
     h_jet_eta[MAX_NJETS]->Fill(fabs(mevent->jet_eta[ijet]), w);
     h_jet_phi[MAX_NJETS]->Fill(mevent->jet_phi[ijet], w);
+
 
     h_jet_energy->Fill(mevent->jet_energy[ijet], w);
     for (size_t jjet = ijet+1; jjet < mevent->jet_id.size(); ++jjet) {

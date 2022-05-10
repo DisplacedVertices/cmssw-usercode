@@ -15,7 +15,7 @@ mfvEventFilter = cms.EDFilter('MFVEventFilter',
                               electron_cut = jtupleParams.electronCut,
                               min_electron_pt = cms.double(999),
                               min_nleptons = cms.int32(1),
-                              debug = cms.untracked.bool(True),
+                              debug = cms.untracked.bool(False),
                               )
 
 mfvEventFilterJetsOnly = mfvEventFilter.clone(mode = 'jets only')

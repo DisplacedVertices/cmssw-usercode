@@ -679,8 +679,12 @@ for x in bjet_samples_2017:
 for x in bjet_samples_2017 + qcd_samples_2017 + ttbar_samples_2017:
     x.add_dataset("ntuplev29bm")
 
-for x in mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + bjet_samples_2017 + HToSSTodddd_samples_2017 + goofin_2017: 
+for x in mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + bjet_samples_2017 + HToSSTodddd_samples_2017 + goofin_2017 + ttbar_samples_2017: 
     x.add_dataset("ntuplev29am")
+
+for x in mfv_signal_samples_2017 + HToSSTodddd_samples_2017 + bjet_samples_2017:
+    x.add_dataset("ntuplev30am")
+    x.add_dataset("ntuplev30lm")
 
 
 ########
@@ -737,10 +741,10 @@ condorable = {
 
 _seen = set()
 for site, d in condorable.iteritems():
-    print site, "\n-------------------------"
-    for entry in d['miniaod']:
-        print entry.name
-    print '\n'
+    #print site, "\n-------------------------"
+    #for entry in d['miniaod']:
+    #    print entry.name
+    #print '\n'
     if not xrootd_sites.has_key(site):
         raise ValueError('need entry in xrootd_sites for %s' % site)
     for ds, samples in d.iteritems():

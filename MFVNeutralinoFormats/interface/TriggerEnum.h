@@ -50,15 +50,16 @@ namespace mfv {
   // For use in the Bjet/DisplacedDijet trigger studies
   static const std::vector<size_t> HTOrBjetOrDisplacedDijetTriggers = {
     // HT trigger
-    mfv::b_HLT_PFHT1050,
+    //mfv::b_HLT_PFHT1050,
     // bjet triggers 2017 - only use the first two, since they contribute most of the efficiency
-    mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33, mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0, 
+    //mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33, mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0, 
+    mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0,
     //mfv::b_HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2, mfv::b_HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2, mfv::b_HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5,
     // bjet triggers 2018 - only use the first two, since they contribute most of the efficiency
-    mfv::b_HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71, mfv::b_HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5, 
+    //mfv::b_HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71, mfv::b_HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5, 
     //mfv::b_HLT_PFHT400_FivePFJet_100_100_60_30_30_DoublePFBTagDeepCSV_4p5, mfv::b_HLT_PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94, mfv::b_HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59,
     // displaced dijet triggers
-    mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack, mfv::b_HLT_HT650_DisplacedDijet60_Inclusive
+    //mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack, mfv::b_HLT_HT650_DisplacedDijet60_Inclusive
   };
 }
 

@@ -12,6 +12,7 @@ namespace mfv {
     float myhtt;
     float myhttwbug;
     float hltht;
+    float hltcaloht;
     std::vector<TLorentzVector> hltpfjets;
     int nhltpfjets() const { return hltpfjets.size(); }
     std::vector<TLorentzVector> hltcalojets;

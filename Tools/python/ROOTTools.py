@@ -315,6 +315,7 @@ class HorGValues:
                 a.x != b.x or \
                 a.exl != b.exl or \
                 a.exh != b.exh: # why did I not require equal abscissae before?
+            print(a, b)
             raise ValueError('incompatible objects to divide')
 
     def filter(self, keep):
@@ -588,6 +589,9 @@ def compare_hists(ps, samples, **kwargs):
         m_o = False if (is2d or profiled) else move_overflows(name, hist_list, None)
 
         if len(hists) > 1 and ratio(name, hist_list, None) and (not is2d or profiled):
+            print(name_clean)
+            if name_clean in ['h_hlt_bits', 'h_filter_bits', 'h_met', 'h_sv_all_rescale_bsbs2ddist', 'h_sv_xz', 'h_svdist2d', 'h_svdist3d'] or name_clean.startswith('h_jet_eta_'):
+                continue
             ratios_plot(name_clean,
                         hists,
                         plot_saver=ps,

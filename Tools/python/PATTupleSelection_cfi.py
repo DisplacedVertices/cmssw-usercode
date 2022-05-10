@@ -16,6 +16,17 @@ jet_cuts = (
     '(abs(eta) >= 2.4 || (chargedEmEnergyFraction < 0.80 && chargedHadronEnergyFraction > 0. && chargedMultiplicity > 0))',
     )
 
+#jet_cuts = (
+#    'pt > 20',
+#    'abs(eta) < 2.5',
+#    'numberOfDaughters > 1',
+#    'neutralHadronEnergyFraction < 0.99',
+#    'neutralEmEnergyFraction < 0.99',
+#    'muonEnergyFraction < 0.99',
+#    '(abs(eta) >= 2.4 || (chargedEmEnergyFraction < 0.99 && chargedHadronEnergyFraction > 0. && chargedMultiplicity > 0))',
+#    )
+
+
 muon_cuts = (
     'isPFMuon',
     'isGlobalMuon',

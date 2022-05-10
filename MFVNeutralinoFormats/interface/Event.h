@@ -26,7 +26,7 @@ struct MFVEvent {
     gen_valid = 0;
     npv = pv_ntracks = pv_ntracksloose = 0;
     gen_flavor_code = 0;
-    gen_weight = l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = npu = bsx = bsy = bsz = bsdxdz = bsdydz = bswidthx = bswidthy = pvx = pvy = pvz = pvcxx = pvcxy = pvcxz = pvcyy = pvcyz = pvczz = pv_score = metx = mety = 0;
+    gen_weight = l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = hlt_caloht = npu = bsx = bsy = bsz = bsdxdz = bsdydz = bswidthx = bswidthy = pvx = pvy = pvz = pvcxx = pvcxy = pvcxz = pvcyy = pvcyz = pvczz = pv_score = metx = mety = 0;
     for (int i = 0; i < 2; ++i) {
       gen_lsp_pt[i] = gen_lsp_eta[i] = gen_lsp_phi[i] = gen_lsp_mass[i] = 0;
       gen_decay_type[i] = 0;
@@ -155,6 +155,7 @@ struct MFVEvent {
   float l1_myhtt;
   float l1_myhttwbug;
   float hlt_ht;
+  float hlt_caloht;
 
   uint64_t pass_;
   uint64_t pass_hlt_bits() const { return pass_ & ((1UL << mfv::n_hlt_paths) - 1UL); }
@@ -221,12 +222,34 @@ struct MFVEvent {
   std::vector<float> jet_phi;
   std::vector<float> jet_energy;
   std::vector<float> jet_gen_energy;
+  std::vector<float> jet_NHF;
+  std::vector<float> jet_CHF;
+  std::vector<float> jet_NEMF;
+  std::vector<float> jet_CEMF;
+  std::vector<float> jet_MUF;
+  std::vector<float> jet_NCST;
+
 
   // Shaun
   std::vector<float> calo_jet_pt;
   std::vector<float> calo_jet_eta;
   std::vector<float> calo_jet_phi;
   std::vector<float> calo_jet_energy;
+
+  std::vector<float> hlt_calo_jet_pt;
+  std::vector<float> hlt_calo_jet_eta;
+  std::vector<float> hlt_calo_jet_phi;
+  std::vector<float> hlt_calo_jet_energy;
+
+  std::vector<float> hlt_idp_calo_jet_pt;
+  std::vector<float> hlt_idp_calo_jet_eta;
+  std::vector<float> hlt_idp_calo_jet_phi;
+  std::vector<float> hlt_idp_calo_jet_energy;
+
+  std::vector<float> hlt_pf_jet_pt;
+  std::vector<float> hlt_pf_jet_eta;
+  std::vector<float> hlt_pf_jet_phi;
+  std::vector<float> hlt_pf_jet_energy;
 
   TLorentzVector jet_p4(int w) const {
     TLorentzVector v;
