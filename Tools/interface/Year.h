@@ -1,7 +1,7 @@
 #ifndef JMTucker_Tools_interface_Year_h
 #define JMTucker_Tools_interface_Year_h
 
-#define MFVNEUTRALINO_2017
+#define MFVNEUTRALINO_2018
 
 #define MFVNEUTRALINO_YEARS {2017, 2018}
 

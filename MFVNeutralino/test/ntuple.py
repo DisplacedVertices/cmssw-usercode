@@ -18,11 +18,13 @@ else :
 
 settings.randpars_filter = False
 # if want to test local : 
-#settings.randpars_filter = 'randpar HToSSTobbbb M15_ct10-'
+#settings.randpars_filter = 'randpar HToSSTodddd M07_ct0p05-'
+
 
 process = ntuple_process(settings)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
 sample_files(process, 'mfv_neu_tau001000um_M1200_2018', dataset, 1)
+
 max_events(process, 1000)
 cmssw_from_argv(process)
 
@@ -34,7 +36,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=not settings.run_n_tk_seeds, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used
     else :
         samples = pick_samples(dataset, qcd=False, ttbar=False, data=False, all_signal=not settings.run_n_tk_seeds)
-
+        
     set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2017p8.json'), limit_ttbar=True)
 
     ms = MetaSubmitter(settings.batch_name(), dataset=dataset)

@@ -311,16 +311,16 @@ def signal_uses_random_pars_modifier(sample):
     to_replace = []
 
     if sample.is_signal:
-        if sample.name.startswith('ZH_') or sample.name.startswith('Wplus'):
+        if sample.is_rp :
             magic_randpar = 'randpars_filter = False'
-            
-            decay = sample.name[sample.name.find('_')+1 : sample.name.find('_Z')]
-            
-            if sample.tau < 1000 :
-                ctau = float(sample.tau)/1000
+            decay = sample.name.split('_')[1]
+
+            ctau = float(sample.tau)/1000
+            if ctau < 1 :
                 ctau = str(ctau).replace('.', 'p')
             else :
-                ctau = str(sample.tau/1000)
+                ctau = str(ctau).replace('.', 'p')
+                ctau = ctau.replace('p0', '')
                 
             to_replace.append((magic_randpar, "randpars_filter = 'randpar %s M%i_ct%s-'" % (decay, sample.mass, ctau), 'tuple template does not contain the magic string "%s"' % magic_randpar))
     return [], to_replace

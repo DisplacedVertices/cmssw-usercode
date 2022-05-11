@@ -82,8 +82,8 @@ bool MFVEventFilter::filter(edm::Event& event, const edm::EventSetup&) {
     std::string str_ctau = "ctauS-" + randpar_ctau;
     std::string str_dcay = randpar_dcay;
     std::string comp_string_Zn = "ZH_" + str_dcay + "_ZToLL_MH-125_" + str_mass + "_" + str_ctau + "_TuneCP5_13TeV-powheg-pythia8";
-    std::string comp_string_Wp = "WplusH_HToSSTodddd_WToLNu_MH-125_" + str_mass + "_" + str_ctau + "_TuneCP5_13TeV-powheg-pythia8";
-    if (not ((comp_string_Wp == rp_config_desc) or (comp_string_Zn == rp_config_desc))) {
+    std::string comp_string_Wp = "WplusH_" + str_dcay + "_WToLNu_MH-125_" + str_mass + "_" + str_ctau + "_TuneCP5_13TeV-powheg-pythia8";std::string comp_string_Wm = "WminusH_" + str_dcay + "_WToLNu_MH-125_" + str_mass + "_" + str_ctau + "_TuneCP5_13TeV-powheg-pythia8";
+    if (not ((comp_string_Wp == rp_config_desc) or (comp_string_Zn == rp_config_desc) or (comp_string_Wm == rp_config_desc))) {
       return false;
     }
     else {

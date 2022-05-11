@@ -223,6 +223,7 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
         # Shed/presel_splitting.py
         d = {'miniaod': {
                 'signal':           ( 1,     200),
+                'rp_signal':        ( 1,    3000),
                 'JetHT':            (15, 1350000),
                 'qcdht0300_2017':   (50, 3130000),
                 'qcdht0500_2017':   (50, 3130000),
@@ -258,8 +259,12 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
             if 'JetHT' in name:
                 name = 'JetHT'
             elif sample.is_signal:
-                name = 'signal'
-                sample.split_by = 'events'
+                if sample.is_rp :
+                    name = 'rp_signal'
+                    sample.split_by = 'events'
+                else :
+                    name = 'signal'
+                    sample.split_by = 'events'
 
             sample.files_per, sample.events_per = d[dataset].get(name, (50, 100000))
 
