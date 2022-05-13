@@ -272,11 +272,11 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   std::sort(jetHelper, jetHelper+MAX_NJETS, [](Jet_BHelper const &a, Jet_BHelper &b) -> bool{ return a.csv > b.csv; } );
 
   // Shaun FIXME  -- Avoid events with poor online CaloHT
-  if (not (mevent->pass_filter(4) and mevent->pass_filter(5))) return;
+  //if (not (mevent->pass_filter(4) and mevent->pass_filter(5))) return;
 
   // Shaun FIXME  -- Only plot events which LOOK like the pass the hltBTagCaloCSV filter (filt #6), but don't
-  if ((mevent->pass_filter(6)) or (jetHelper[1].csv < 0.5))
-    return;
+  //if ((mevent->pass_filter(6)) or (jetHelper[1].csv < 0.5))
+  //  return;
 
   // Shaun FIXME  -- Only plot events which LOOK like they pass the hltBTagPFCSV filter (filt #13), but don't
   //if ((mevent->pass_filter(13)) or (jetHelper[2].csv < 0.7))
@@ -406,7 +406,10 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     // FIXME SHAUN, is there a more compact way of doing this?
     else {
       for (int j = 4; j <= i; ++j) {
-        if (not mevent->pass_filter(j)) {
+        int jtemp = j;
+        if ((jtemp >= 6) and (jtemp < 13)) jtemp++;   // Skip the CaloBTag filter at first
+        if (j == 12) jtemp = 6;                       // Then, place it back in the 2nd-to-last spot
+        if (not mevent->pass_filter(jtemp)) {
           passes_seq_filters = false;
         }
       }

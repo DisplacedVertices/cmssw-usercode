@@ -397,11 +397,11 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   std::sort(jetHelper, jetHelper+MAX_NJETS, [](Jet_BHelper const &a, Jet_BHelper &b) -> bool{ return a.csv > b.csv; } );
 
   // Shaun FIXME  -- Avoid events with poor online CaloHT
-  if (not (mevent->pass_filter(4) and mevent->pass_filter(5))) return;
+  //if (not (mevent->pass_filter(4) and mevent->pass_filter(5))) return;
 
   // Shaun FIXME  -- Only plot events which LOOK like the pass the hltBTagCaloCSV filter (filt #6), but don't
-  if ((mevent->pass_filter(6)) or (jetHelper[1].csv < 0.5))
-    return;
+  //if ((mevent->pass_filter(6)) or (jetHelper[1].csv < 0.5))
+  //  return;
 
   // Shaun FIXME  -- Only plot events which LOOK like they pass the hltBTagPFCSV filter (filt #13), but don't
   //if ((mevent->pass_filter(13)) or (jetHelper[2].csv < 0.7))

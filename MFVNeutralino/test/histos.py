@@ -3,7 +3,7 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 is_mc = True # for blinding
 
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers
-#sample_files(process, 'mfv_stopdbardbar_tau000300um_M0600_2017' if is_mc else 'JetHT2017B', 'ntuplev29am', 1)
+sample_files(process, 'ttbar_2017' if is_mc else 'JetHT2017B', 'ntuplev30am', 10)
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
 
@@ -26,13 +26,15 @@ process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts) # just trigge
 process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts * process.mfvFilterHistosNoCuts) # just trigger for now
 
 process.mfvEventHistosPreSel = process.mfvEventHistos.clone()
+process.mfvFilterHistosPreSel = process.mfvFilterHistos.clone()
 process.mfvAnalysisCutsPreSel = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)
-process.pEventPreSel = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvEventHistosPreSel)
+process.pEventPreSel = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvEventHistosPreSel * process.mfvFilterHistosPreSel)
 
 nm1s = [
-    ('Bsbs2ddist', 'min_bsbs2ddist = 0'),
     ('Bs2derr',    'max_rescale_bs2derr = 1e9'),
     ]
+
+nm1s = []
 
 ntks = [5,3,4,7,8,9]
 nvs = [0,1,2]
@@ -60,7 +62,7 @@ for ntk in ntks:
 
     exec '''
 process.EX1mfvAnalysisCutsOnlyOneVtx = process.mfvAnalysisCuts.clone(EX2min_nvertex = 1, max_nvertex = 1)
-process.EX1mfvAnalysisCutsFullSel    = process.mfvAnalysisCuts.clone(EX2EX3)
+process.EX1mfvAnalysisCutsFullSel    = process.mfvAnalysisCuts.clone(EX2min_nvertex = 2, max_nvertex = 20)
 process.EX1mfvAnalysisCutsSigReg     = process.mfvAnalysisCuts.clone(EX2EX3min_svdist2d = 0.04)
 
 process.EX1mfvEventHistosOnlyOneVtx = process.mfvEventHistos.clone()
@@ -126,9 +128,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
     if use_btag_triggers :
-        #samples = pick_samples(dataset, qcd=True, ttbar=False, span_signal=True, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used
-        #samples =  Samples.mfv_signal_samples_2017 + Samples.mfv_stopdbardbar_samples_2017
-        samples =  Samples.HToSSTodddd_samples_2017 + Samples.bjet_samples_2017
+        samples =  Samples.HToSSTodddd_samples_2017 + Samples.mfv_signal_samples_2017
+        #samples =  Samples.bjet_samples_2017
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
     else :
         #samples = pick_samples(dataset)
@@ -137,7 +138,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
 
-    cs = CondorSubmitter('HistosThreshJets' + version,
+    cs = CondorSubmitter('HistosV30TmTriBjetQS1',
+    #cs = CondorSubmitter('HistosV30TmTriBjetDflt',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,

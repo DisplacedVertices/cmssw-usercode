@@ -8,7 +8,7 @@ from JMTucker.MFVNeutralino.PerSignal import PerSignal
 
 filter_hist_dir = ''
 di_or_tri = ''
-use_presel = False
+use_presel = True
 
 if use_presel:
     filter_hist_dir = 'mfvFilterHistosPreSel'
@@ -17,7 +17,7 @@ else:
 
 # 0: filters for di-bjet  trigger
 # 1: filters for tri-bjet trigger
-filter_opt = 1
+filter_opt = 0
 
 if filter_opt == 0:
     n_cols = 2
@@ -46,9 +46,9 @@ use_effective = True
 #zn = '/uscms_data/d3/shogan/crab_dirs/HistosDFLavV30Tm' + di_or_tri + 'BjetOnly/ggHToSSTodddd_tau1mm_M40_2017.root'    # Red curve
 #an = '/uscms_data/d3/shogan/crab_dirs/HistosDFLavV30Tm' + di_or_tri + 'BjetOnly/ttbar_2017.root'    # Red curve
 
-fn = '/uscms_data/d3/shogan/crab_dirs/HistosV30TmTriBjetGoofin/mfv_neu_tau000300um_M0400_2017.root'    # Black curve
-zn = '/uscms_data/d3/shogan/crab_dirs/HistosV30TmTriBjetGoofin/ggHToSSTodddd_tau1mm_M40_2017.root'    # Red curve
-an = '/uscms_data/d3/shogan/crab_dirs/HistosV30TmTriBjetGoofin/ttbar_2017.root'    # Red curve
+fn = '/uscms_data/d3/shogan/crab_dirs/HistosV30TmDiBjet4Hard/mfv_neu_tau000300um_M0400_2017.root'    # Black curve
+zn = '/uscms_data/d3/shogan/crab_dirs/HistosV30TmDiBjet4Hard/ggHToSSTodddd_tau1mm_M40_2017.root'    # Red curve
+an = '/uscms_data/d3/shogan/crab_dirs/HistosV30TmDiBjet4Hard/ttbar_2017.root'    # Red curve
 
 f = ROOT.TFile(fn)
 t = f.Get(filter_hist_dir)

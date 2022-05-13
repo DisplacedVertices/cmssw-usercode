@@ -1,0 +1,412 @@
+<FrameworkJobReport>
+<FallbackAttempt Pfn="root://cmsxrootd.fnal.gov//store/mc/RunIIFall17MiniAODv2/ZH_HToSSTodddd_ZToLL_MH-125_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/PU2017_12Apr2018_rp_94X_mc2017_realistic_v14-v1/20000/08147CA4-A914-EA11-ACAD-F01FAFE5FB02.root" Lfn="/store/mc/RunIIFall17MiniAODv2/ZH_HToSSTodddd_ZToLL_MH-125_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/PU2017_12Apr2018_rp_94X_mc2017_realistic_v14-v1/20000/08147CA4-A914-EA11-ACAD-F01FAFE5FB02.root" />
+<![CDATA[
+An exception of category 'FileOpenError' occurred while
+   [0] Calling StorageFactory::open()
+   [1] Calling XrdFile::open()
+Exception Message:
+Failed to open the file 'root://cmsxrootd-site.fnal.gov//store/mc/RunIIFall17MiniAODv2/ZH_HToSSTodddd_ZToLL_MH-125_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/PU2017_12Apr2018_rp_94X_mc2017_realistic_v14-v1/20000/08147CA4-A914-EA11-ACAD-F01FAFE5FB02.root'
+   Additional Info:
+      [a] XrdCl::File::Open(name='root://cmsxrootd-site.fnal.gov//store/mc/RunIIFall17MiniAODv2/ZH_HToSSTodddd_ZToLL_MH-125_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/PU2017_12Apr2018_rp_94X_mc2017_realistic_v14-v1/20000/08147CA4-A914-EA11-ACAD-F01FAFE5FB02.root', flags=0x10, permissions=0660) => error '[ERROR] Server responded with an error: [3011] No servers are available to read the file.
+' (errno=3011, code=400). No additional data servers were found.
+      [b] Last URL tried: root://cmsxrootd-site.fnal.gov:1094//store/mc/RunIIFall17MiniAODv2/ZH_HToSSTodddd_ZToLL_MH-125_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/PU2017_12Apr2018_rp_94X_mc2017_realistic_v14-v1/20000/08147CA4-A914-EA11-ACAD-F01FAFE5FB02.root?tried=
+      [c] Problematic data server: cmsxrootd-site.fnal.gov:1094
+      [d] Disabled source: cmsxrootd-site.fnal.gov:1094
+
+]]>
+<AnalysisFile>
+  <FileName>/uscms/homes/s/shogan/work/DisplacedVertices/mfv_946p1/src/JMTucker/MFVNeutralino/test/vertex_histos.root</FileName>
+  <Source  Value="TFileService" />
+</AnalysisFile>
+
+<InputFile>
+<State  Value="closed"/>
+<LFN>/store/mc/RunIIFall17MiniAODv2/ZH_HToSSTodddd_ZToLL_MH-125_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/PU2017_12Apr2018_rp_94X_mc2017_realistic_v14-v1/20000/08147CA4-A914-EA11-ACAD-F01FAFE5FB02.root</LFN>
+<PFN>root://cmsxrootd.fnal.gov//store/mc/RunIIFall17MiniAODv2/ZH_HToSSTodddd_ZToLL_MH-125_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/PU2017_12Apr2018_rp_94X_mc2017_realistic_v14-v1/20000/08147CA4-A914-EA11-ACAD-F01FAFE5FB02.root</PFN>
+<Catalog></Catalog>
+<ModuleLabel>source</ModuleLabel>
+<GUID>08147CA4-A914-EA11-ACAD-F01FAFE5FB02</GUID>
+<Branches>
+  <Branch>CSCDetIdCSCSegmentsOwnedRangeMap_slimmedMuons__PAT.</Branch>
+  <Branch>CTPPSLocalTrackLites_ctppsLocalTrackLiteProducer__RECO.</Branch>
+  <Branch>DTChamberIdDTRecSegment4DsOwnedRangeMap_slimmedMuons__PAT.</Branch>
+  <Branch>EcalRecHitsSorted_reducedEgamma_reducedEBRecHits_PAT.</Branch>
+  <Branch>EcalRecHitsSorted_reducedEgamma_reducedEERecHits_PAT.</Branch>
+  <Branch>EcalRecHitsSorted_reducedEgamma_reducedESRecHits_PAT.</Branch>
+  <Branch>GenEventInfoProduct_generator__SIM.</Branch>
+  <Branch>GlobalAlgBlkBXVector_gtStage2Digis__RECO.</Branch>
+  <Branch>GlobalExtBlkBXVector_gtStage2Digis__RECO.</Branch>
+  <Branch>HcalNoiseSummary_hcalnoise__RECO.</Branch>
+  <Branch>L1GlobalTriggerReadoutRecord_gtDigis__RECO.</Branch>
+  <Branch>LumiScalerss_scalersRawToDigi__RECO.</Branch>
+  <Branch>PileupSummaryInfos_slimmedAddPileupInfo__PAT.</Branch>
+  <Branch>Strings_slimmedPatTrigger_filterLabels_PAT.</Branch>
+  <Branch>double_fixedGridRhoAll__RECO.</Branch>
+  <Branch>double_fixedGridRhoFastjetAll__RECO.</Branch>
+  <Branch>double_fixedGridRhoFastjetAllCalo__RECO.</Branch>
+  <Branch>double_fixedGridRhoFastjetCentral__RECO.</Branch>
+  <Branch>double_fixedGridRhoFastjetCentralCalo__RECO.</Branch>
+  <Branch>double_fixedGridRhoFastjetCentralChargedPileUp__RECO.</Branch>
+  <Branch>double_fixedGridRhoFastjetCentralNeutral__RECO.</Branch>
+  <Branch>edmTriggerResults_TriggerResults__HLT.</Branch>
+  <Branch>edmTriggerResults_TriggerResults__PAT.</Branch>
+  <Branch>edmTriggerResults_TriggerResults__RECO.</Branch>
+  <Branch>edmTriggerResults_TriggerResults__SIM.</Branch>
+  <Branch>float_genParticles_t0_HLT.</Branch>
+  <Branch>float_genParticles_t0_SIM.</Branch>
+  <Branch>floatROOTMathCartesian3DROOTMathDefaultCoordinateSystemTagROOTMathPositionVector3D_genParticles_xyz0_HLT.</Branch>
+  <Branch>floatROOTMathCartesian3DROOTMathDefaultCoordinateSystemTagROOTMathPositionVector3D_genParticles_xyz0_SIM.</Branch>
+  <Branch>floatedmValueMap_offlineSlimmedPrimaryVertices__PAT.</Branch>
+  <Branch>l1tEGammaBXVector_caloStage2Digis_EGamma_RECO.</Branch>
+  <Branch>l1tEtSumBXVector_caloStage2Digis_EtSum_RECO.</Branch>
+  <Branch>l1tJetBXVector_caloStage2Digis_Jet_RECO.</Branch>
+  <Branch>l1tMuonBXVector_gmtStage2Digis_Muon_RECO.</Branch>
+  <Branch>l1tTauBXVector_caloStage2Digis_Tau_RECO.</Branch>
+  <Branch>patCompositeCandidates_oniaPhotonCandidates_conversions_PAT.</Branch>
+  <Branch>patElectrons_slimmedElectrons__PAT.</Branch>
+  <Branch>patIsolatedTracks_isolatedTracks__PAT.</Branch>
+  <Branch>patJets_slimmedJets__PAT.</Branch>
+  <Branch>patJets_slimmedJetsAK8__PAT.</Branch>
+  <Branch>patJets_slimmedJetsAK8PFPuppiSoftDropPacked_SubJets_PAT.</Branch>
+  <Branch>patJets_slimmedJetsPuppi__PAT.</Branch>
+  <Branch>patMETs_slimmedMETs__PAT.</Branch>
+  <Branch>patMETs_slimmedMETsNoHF__PAT.</Branch>
+  <Branch>patMETs_slimmedMETsPuppi__PAT.</Branch>
+  <Branch>patMuons_slimmedMuons__PAT.</Branch>
+  <Branch>patPackedCandidates_lostTracks__PAT.</Branch>
+  <Branch>patPackedCandidates_lostTracks_eleTracks_PAT.</Branch>
+  <Branch>patPackedCandidates_packedPFCandidates__PAT.</Branch>
+  <Branch>patPackedGenParticles_packedGenParticles__PAT.</Branch>
+  <Branch>patPackedTriggerPrescales_patTrigger__PAT.</Branch>
+  <Branch>patPackedTriggerPrescales_patTrigger_l1max_PAT.</Branch>
+  <Branch>patPackedTriggerPrescales_patTrigger_l1min_PAT.</Branch>
+  <Branch>patPhotons_slimmedOOTPhotons__PAT.</Branch>
+  <Branch>patPhotons_slimmedPhotons__PAT.</Branch>
+  <Branch>patTaus_slimmedTaus__PAT.</Branch>
+  <Branch>patTaus_slimmedTausBoosted__PAT.</Branch>
+  <Branch>patTriggerObjectStandAlones_slimmedPatTrigger__PAT.</Branch>
+  <Branch>recoBaseTagInfosOwned_slimmedJetsPuppi_tagInfos_PAT.</Branch>
+  <Branch>recoBeamHaloSummary_BeamHaloSummary__RECO.</Branch>
+  <Branch>recoBeamSpot_offlineBeamSpot__RECO.</Branch>
+  <Branch>recoCSCHaloData_CSCHaloData__RECO.</Branch>
+  <Branch>recoCaloClusters_reducedEgamma_reducedEBEEClusters_PAT.</Branch>
+  <Branch>recoCaloClusters_reducedEgamma_reducedESClusters_PAT.</Branch>
+  <Branch>recoCaloClusters_reducedEgamma_reducedOOTEBEEClusters_PAT.</Branch>
+  <Branch>recoCaloClusters_reducedEgamma_reducedOOTESClusters_PAT.</Branch>
+  <Branch>recoCaloJets_slimmedCaloJets__PAT.</Branch>
+  <Branch>recoConversions_reducedEgamma_reducedConversions_PAT.</Branch>
+  <Branch>recoConversions_reducedEgamma_reducedSingleLegConversions_PAT.</Branch>
+  <Branch>recoDeDxHitInfos_isolatedTracks__PAT.</Branch>
+  <Branch>recoDeDxHitInfosedmAssociation_isolatedTracks__PAT.</Branch>
+  <Branch>recoGenJets_slimmedGenJets__PAT.</Branch>
+  <Branch>recoGenJets_slimmedGenJetsAK8__PAT.</Branch>
+  <Branch>recoGenJets_slimmedGenJetsAK8SoftDropSubJets__PAT.</Branch>
+  <Branch>recoGenMETs_genMetTrue__HLT.</Branch>
+  <Branch>recoGenMETs_genMetTrue__SIM.</Branch>
+  <Branch>recoGenParticles_genPUProtons_genPUProtons_HLT.</Branch>
+  <Branch>recoGenParticles_prunedGenParticles__PAT.</Branch>
+  <Branch>recoGsfElectronCores_reducedEgamma_reducedGedGsfElectronCores_PAT.</Branch>
+  <Branch>recoGsfTracks_reducedEgamma_reducedGsfTracks_PAT.</Branch>
+  <Branch>recoJetFlavourInfoMatchingCollection_slimmedGenJetsFlavourInfos__PAT.</Branch>
+  <Branch>recoPhotonCores_reducedEgamma_reducedGedPhotonCores_PAT.</Branch>
+  <Branch>recoPhotonCores_reducedEgamma_reducedOOTPhotonCores_PAT.</Branch>
+  <Branch>recoSuperClusters_reducedEgamma_reducedOOTSuperClusters_PAT.</Branch>
+  <Branch>recoSuperClusters_reducedEgamma_reducedSuperClusters_PAT.</Branch>
+  <Branch>recoVertexCompositePtrCandidates_slimmedKshortVertices__PAT.</Branch>
+  <Branch>recoVertexCompositePtrCandidates_slimmedLambdaVertices__PAT.</Branch>
+  <Branch>recoVertexCompositePtrCandidates_slimmedSecondaryVertices__PAT.</Branch>
+  <Branch>recoVertexs_offlineSlimmedPrimaryVertices__PAT.</Branch>
+  <Branch>uint_bunchSpacingProducer__PAT.</Branch>
+</Branches>
+<InputType>primaryFiles</InputType>
+<InputSourceClass>PoolSource</InputSourceClass>
+<EventsRead>539</EventsRead>
+<Runs>
+<Run ID="1">
+   <LumiSection ID="63"/>
+   <LumiSection ID="153"/>
+   <LumiSection ID="159"/>
+   <LumiSection ID="168"/>
+   <LumiSection ID="205"/>
+   <LumiSection ID="665"/>
+   <LumiSection ID="666"/>
+   <LumiSection ID="721"/>
+</Run>
+
+</Runs>
+</InputFile>
+
+<File>
+<State  Value="closed"/>
+<LFN></LFN>
+<PFN>ntuple.root</PFN>
+<Catalog></Catalog>
+<ModuleLabel>out</ModuleLabel>
+<GUID>EA861360-6E32-EC11-80B6-001A4AF11EEA</GUID>
+<Branches>
+  <Branch>patPackedGenParticles_packedGenParticles__PAT.</Branch>
+  <Branch>recoGenJets_slimmedGenJets__PAT.</Branch>
+  <Branch>recoGenParticles_prunedGenParticles__PAT.</Branch>
+  <Branch>MFVEvent_mfvEvent__Ntuple.</Branch>
+  <Branch>MFVVertexAuxs_mfvVerticesAux__Ntuple.</Branch>
+</Branches>
+<OutputModuleClass>PoolOutputModule</OutputModuleClass>
+<TotalEvents>2</TotalEvents>
+
+<DataType>MC</DataType>
+
+<BranchHash>943fd569d1e268be8d1c73583d566937</BranchHash>
+
+<Runs>
+<Run ID="1">
+   <LumiSection ID="63" NEvents="1"/>
+   <LumiSection ID="153" NEvents="0"/>
+   <LumiSection ID="159" NEvents="1"/>
+   <LumiSection ID="168" NEvents="0"/>
+   <LumiSection ID="205" NEvents="0"/>
+   <LumiSection ID="665" NEvents="0"/>
+   <LumiSection ID="666" NEvents="0"/>
+   <LumiSection ID="721" NEvents="0"/>
+</Run>
+
+</Runs>
+
+<Inputs>
+<Input>
+  <LFN>/store/mc/RunIIFall17MiniAODv2/ZH_HToSSTodddd_ZToLL_MH-125_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/PU2017_12Apr2018_rp_94X_mc2017_realistic_v14-v1/20000/08147CA4-A914-EA11-ACAD-F01FAFE5FB02.root</LFN>
+  <PFN>root://cmsxrootd.fnal.gov//store/mc/RunIIFall17MiniAODv2/ZH_HToSSTodddd_ZToLL_MH-125_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/PU2017_12Apr2018_rp_94X_mc2017_realistic_v14-v1/20000/08147CA4-A914-EA11-ACAD-F01FAFE5FB02.root</PFN>
+  <FastCopying>0</FastCopying>
+</Input>
+</Inputs>
+</File>
+<ReadBranches>
+<Branch Name="GenEventInfoProduct_generator__SIM." ReadCount="539" />
+<Branch Name="GlobalAlgBlkBXVector_gtStage2Digis__RECO." ReadCount="2" />
+<Branch Name="PileupSummaryInfos_slimmedAddPileupInfo__PAT." ReadCount="2" />
+<Branch Name="double_fixedGridRhoFastjetAll__RECO." ReadCount="12" />
+<Branch Name="edmTriggerResults_TriggerResults__HLT." ReadCount="539" />
+<Branch Name="floatedmValueMap_offlineSlimmedPrimaryVertices__PAT." ReadCount="12" />
+<Branch Name="l1tEtSumBXVector_caloStage2Digis_EtSum_RECO." ReadCount="2" />
+<Branch Name="l1tJetBXVector_caloStage2Digis_Jet_RECO." ReadCount="2" />
+<Branch Name="patElectrons_slimmedElectrons__PAT." ReadCount="12" />
+<Branch Name="patJets_slimmedJets__PAT." ReadCount="12" />
+<Branch Name="patMETs_slimmedMETs__PAT." ReadCount="2" />
+<Branch Name="patMuons_slimmedMuons__PAT." ReadCount="12" />
+<Branch Name="patPackedCandidates_lostTracks__PAT." ReadCount="12" />
+<Branch Name="patPackedCandidates_packedPFCandidates__PAT." ReadCount="12" />
+<Branch Name="patPackedGenParticles_packedGenParticles__PAT." ReadCount="2" />
+<Branch Name="patPhotons_slimmedPhotons__PAT." ReadCount="2" />
+<Branch Name="patTriggerObjectStandAlones_slimmedPatTrigger__PAT." ReadCount="2" />
+<Branch Name="recoBeamSpot_offlineBeamSpot__RECO." ReadCount="12" />
+<Branch Name="recoCaloClusters_reducedEgamma_reducedEBEEClusters_PAT." ReadCount="6" />
+<Branch Name="recoGenJets_slimmedGenJets__PAT." ReadCount="2" />
+<Branch Name="recoGenParticles_prunedGenParticles__PAT." ReadCount="2" />
+<Branch Name="recoGsfElectronCores_reducedEgamma_reducedGedGsfElectronCores_PAT." ReadCount="6" />
+<Branch Name="recoGsfTracks_reducedEgamma_reducedGsfTracks_PAT." ReadCount="6" />
+<Branch Name="recoSuperClusters_reducedEgamma_reducedSuperClusters_PAT." ReadCount="6" />
+<Branch Name="recoVertexs_offlineSlimmedPrimaryVertices__PAT." ReadCount="12" />
+</ReadBranches>
+<PerformanceReport>
+  <PerformanceSummary Metric="StorageStatistics">
+    <Metric Name="Parameter-untracked-bool-enabled" Value="true"/>
+    <Metric Name="Parameter-untracked-bool-prefetching" Value="false"/>
+    <Metric Name="Parameter-untracked-bool-stats" Value="true"/>
+    <Metric Name="Parameter-untracked-string-cacheHint" Value="auto-detect"/>
+    <Metric Name="Parameter-untracked-string-readHint" Value="auto-detect"/>
+    <Metric Name="ROOT-tfile-read-totalMegabytes" Value="1.12805"/>
+    <Metric Name="ROOT-tfile-write-totalMegabytes" Value="0"/>
+    <Metric Name="Timing-file-close-maxMsecs" Value="0.028384"/>
+    <Metric Name="Timing-file-close-minMsecs" Value="0.028384"/>
+    <Metric Name="Timing-file-close-numOperations" Value="1"/>
+    <Metric Name="Timing-file-close-numSuccessfulOperations" Value="1"/>
+    <Metric Name="Timing-file-close-totalMegabytes" Value="0"/>
+    <Metric Name="Timing-file-close-totalMsecs" Value="0.028384"/>
+    <Metric Name="Timing-file-construct-maxMsecs" Value="0.001743"/>
+    <Metric Name="Timing-file-construct-minMsecs" Value="8e-05"/>
+    <Metric Name="Timing-file-construct-numOperations" Value="3"/>
+    <Metric Name="Timing-file-construct-numSuccessfulOperations" Value="3"/>
+    <Metric Name="Timing-file-construct-totalMegabytes" Value="0"/>
+    <Metric Name="Timing-file-construct-totalMsecs" Value="0.002014"/>
+    <Metric Name="Timing-file-flush-maxMsecs" Value="315.471"/>
+    <Metric Name="Timing-file-flush-minMsecs" Value="0.35044"/>
+    <Metric Name="Timing-file-flush-numOperations" Value="3"/>
+    <Metric Name="Timing-file-flush-numSuccessfulOperations" Value="3"/>
+    <Metric Name="Timing-file-flush-totalMegabytes" Value="0"/>
+    <Metric Name="Timing-file-flush-totalMsecs" Value="326.399"/>
+    <Metric Name="Timing-file-open-maxMsecs" Value="11.1726"/>
+    <Metric Name="Timing-file-open-minMsecs" Value="0.840297"/>
+    <Metric Name="Timing-file-open-numOperations" Value="3"/>
+    <Metric Name="Timing-file-open-numSuccessfulOperations" Value="3"/>
+    <Metric Name="Timing-file-open-totalMegabytes" Value="0"/>
+    <Metric Name="Timing-file-open-totalMsecs" Value="12.9736"/>
+    <Metric Name="Timing-file-position-maxMsecs" Value="0.035407"/>
+    <Metric Name="Timing-file-position-minMsecs" Value="0.00016"/>
+    <Metric Name="Timing-file-position-numOperations" Value="7951"/>
+    <Metric Name="Timing-file-position-numSuccessfulOperations" Value="7951"/>
+    <Metric Name="Timing-file-position-totalMegabytes" Value="0"/>
+    <Metric Name="Timing-file-position-totalMsecs" Value="2.23044"/>
+    <Metric Name="Timing-file-prefetch-maxMsecs" Value="0"/>
+    <Metric Name="Timing-file-prefetch-minMsecs" Value="0"/>
+    <Metric Name="Timing-file-prefetch-numOperations" Value="0"/>
+    <Metric Name="Timing-file-prefetch-numSuccessfulOperations" Value="0"/>
+    <Metric Name="Timing-file-prefetch-totalMegabytes" Value="0"/>
+    <Metric Name="Timing-file-prefetch-totalMsecs" Value="0"/>
+    <Metric Name="Timing-file-read-maxMsecs" Value="0.345652"/>
+    <Metric Name="Timing-file-read-minMsecs" Value="0.00032"/>
+    <Metric Name="Timing-file-read-numOperations" Value="4572"/>
+    <Metric Name="Timing-file-read-numSuccessfulOperations" Value="4572"/>
+    <Metric Name="Timing-file-read-totalMegabytes" Value="6.26743"/>
+    <Metric Name="Timing-file-read-totalMsecs" Value="6.37257"/>
+    <Metric Name="Timing-file-readv-maxMsecs" Value="0"/>
+    <Metric Name="Timing-file-readv-minMsecs" Value="0"/>
+    <Metric Name="Timing-file-readv-numOperations" Value="0"/>
+    <Metric Name="Timing-file-readv-numSuccessfulOperations" Value="0"/>
+    <Metric Name="Timing-file-readv-totalMegabytes" Value="0"/>
+    <Metric Name="Timing-file-readv-totalMsecs" Value="0"/>
+    <Metric Name="Timing-file-write-maxMsecs" Value="0.112886"/>
+    <Metric Name="Timing-file-write-minMsecs" Value="0.000632"/>
+    <Metric Name="Timing-file-write-numOperations" Value="667"/>
+    <Metric Name="Timing-file-write-numSuccessfulOperations" Value="667"/>
+    <Metric Name="Timing-file-write-totalMegabytes" Value="2.34018"/>
+    <Metric Name="Timing-file-write-totalMsecs" Value="2.7287"/>
+    <Metric Name="Timing-file-writev-maxMsecs" Value="0"/>
+    <Metric Name="Timing-file-writev-minMsecs" Value="0"/>
+    <Metric Name="Timing-file-writev-numOperations" Value="0"/>
+    <Metric Name="Timing-file-writev-numSuccessfulOperations" Value="0"/>
+    <Metric Name="Timing-file-writev-totalMegabytes" Value="0"/>
+    <Metric Name="Timing-file-writev-totalMsecs" Value="0"/>
+    <Metric Name="Timing-root-close-maxMsecs" Value="0.109008"/>
+    <Metric Name="Timing-root-close-minMsecs" Value="0.109008"/>
+    <Metric Name="Timing-root-close-numOperations" Value="1"/>
+    <Metric Name="Timing-root-close-numSuccessfulOperations" Value="1"/>
+    <Metric Name="Timing-root-close-totalMegabytes" Value="0"/>
+    <Metric Name="Timing-root-close-totalMsecs" Value="0.109008"/>
+    <Metric Name="Timing-root-construct-maxMsecs" Value="6e-05"/>
+    <Metric Name="Timing-root-construct-minMsecs" Value="6e-05"/>
+    <Metric Name="Timing-root-construct-numOperations" Value="1"/>
+    <Metric Name="Timing-root-construct-numSuccessfulOperations" Value="1"/>
+    <Metric Name="Timing-root-construct-totalMegabytes" Value="0"/>
+    <Metric Name="Timing-root-construct-totalMsecs" Value="6e-05"/>
+    <Metric Name="Timing-root-open-maxMsecs" Value="2602.58"/>
+    <Metric Name="Timing-root-open-minMsecs" Value="2602.58"/>
+    <Metric Name="Timing-root-open-numOperations" Value="2"/>
+    <Metric Name="Timing-root-open-numSuccessfulOperations" Value="1"/>
+    <Metric Name="Timing-root-open-totalMegabytes" Value="0"/>
+    <Metric Name="Timing-root-open-totalMsecs" Value="2602.58"/>
+    <Metric Name="Timing-root-position-maxMsecs" Value="0.005631"/>
+    <Metric Name="Timing-root-position-minMsecs" Value="2.9e-05"/>
+    <Metric Name="Timing-root-position-numOperations" Value="1103"/>
+    <Metric Name="Timing-root-position-numSuccessfulOperations" Value="1103"/>
+    <Metric Name="Timing-root-position-totalMegabytes" Value="0"/>
+    <Metric Name="Timing-root-position-totalMsecs" Value="0.163317"/>
+    <Metric Name="Timing-root-prefetch-maxMsecs" Value="0"/>
+    <Metric Name="Timing-root-prefetch-minMsecs" Value="0"/>
+    <Metric Name="Timing-root-prefetch-numOperations" Value="12"/>
+    <Metric Name="Timing-root-prefetch-numSuccessfulOperations" Value="0"/>
+    <Metric Name="Timing-root-prefetch-totalMegabytes" Value="0"/>
+    <Metric Name="Timing-root-prefetch-totalMsecs" Value="0"/>
+    <Metric Name="Timing-root-read-maxMsecs" Value="284.278"/>
+    <Metric Name="Timing-root-read-minMsecs" Value="36.6968"/>
+    <Metric Name="Timing-root-read-numOperations" Value="554"/>
+    <Metric Name="Timing-root-read-numSuccessfulOperations" Value="554"/>
+    <Metric Name="Timing-root-read-totalMegabytes" Value="2.7162"/>
+    <Metric Name="Timing-root-read-totalMsecs" Value="20974.6"/>
+    <Metric Name="Timing-root-readv-maxMsecs" Value="910.019"/>
+    <Metric Name="Timing-root-readv-minMsecs" Value="37.4038"/>
+    <Metric Name="Timing-root-readv-numOperations" Value="15"/>
+    <Metric Name="Timing-root-readv-numSuccessfulOperations" Value="15"/>
+    <Metric Name="Timing-root-readv-totalMegabytes" Value="49.8688"/>
+    <Metric Name="Timing-root-readv-totalMsecs" Value="3125.34"/>
+    <Metric Name="Timing-root-stagein-maxMsecs" Value="1.23565"/>
+    <Metric Name="Timing-root-stagein-minMsecs" Value="1.23565"/>
+    <Metric Name="Timing-root-stagein-numOperations" Value="1"/>
+    <Metric Name="Timing-root-stagein-numSuccessfulOperations" Value="1"/>
+    <Metric Name="Timing-root-stagein-totalMegabytes" Value="0"/>
+    <Metric Name="Timing-root-stagein-totalMsecs" Value="1.23565"/>
+    <Metric Name="Timing-root-write-maxMsecs" Value="0"/>
+    <Metric Name="Timing-root-write-minMsecs" Value="0"/>
+    <Metric Name="Timing-root-write-numOperations" Value="0"/>
+    <Metric Name="Timing-root-write-numSuccessfulOperations" Value="0"/>
+    <Metric Name="Timing-root-write-totalMegabytes" Value="0"/>
+    <Metric Name="Timing-root-write-totalMsecs" Value="0"/>
+    <Metric Name="Timing-root-writev-maxMsecs" Value="0"/>
+    <Metric Name="Timing-root-writev-minMsecs" Value="0"/>
+    <Metric Name="Timing-root-writev-numOperations" Value="0"/>
+    <Metric Name="Timing-root-writev-numSuccessfulOperations" Value="0"/>
+    <Metric Name="Timing-root-writev-totalMegabytes" Value="0"/>
+    <Metric Name="Timing-root-writev-totalMsecs" Value="0"/>
+    <Metric Name="Timing-tstoragefile-close-maxMsecs" Value="0.113848"/>
+    <Metric Name="Timing-tstoragefile-close-minMsecs" Value="0.034666"/>
+    <Metric Name="Timing-tstoragefile-close-numOperations" Value="2"/>
+    <Metric Name="Timing-tstoragefile-close-numSuccessfulOperations" Value="2"/>
+    <Metric Name="Timing-tstoragefile-close-totalMegabytes" Value="0"/>
+    <Metric Name="Timing-tstoragefile-close-totalMsecs" Value="0.148514"/>
+    <Metric Name="Timing-tstoragefile-construct-maxMsecs" Value="4226.13"/>
+    <Metric Name="Timing-tstoragefile-construct-minMsecs" Value="3.31097"/>
+    <Metric Name="Timing-tstoragefile-construct-numOperations" Value="5"/>
+    <Metric Name="Timing-tstoragefile-construct-numSuccessfulOperations" Value="4"/>
+    <Metric Name="Timing-tstoragefile-construct-totalMegabytes" Value="0"/>
+    <Metric Name="Timing-tstoragefile-construct-totalMsecs" Value="4333.61"/>
+    <Metric Name="Timing-tstoragefile-flush-maxMsecs" Value="315.473"/>
+    <Metric Name="Timing-tstoragefile-flush-minMsecs" Value="0.351152"/>
+    <Metric Name="Timing-tstoragefile-flush-numOperations" Value="3"/>
+    <Metric Name="Timing-tstoragefile-flush-numSuccessfulOperations" Value="3"/>
+    <Metric Name="Timing-tstoragefile-flush-totalMegabytes" Value="0"/>
+    <Metric Name="Timing-tstoragefile-flush-totalMsecs" Value="326.403"/>
+    <Metric Name="Timing-tstoragefile-read-maxMsecs" Value="284.283"/>
+    <Metric Name="Timing-tstoragefile-read-minMsecs" Value="0.000521"/>
+    <Metric Name="Timing-tstoragefile-read-numOperations" Value="5126"/>
+    <Metric Name="Timing-tstoragefile-read-numSuccessfulOperations" Value="5126"/>
+    <Metric Name="Timing-tstoragefile-read-totalMegabytes" Value="8.98363"/>
+    <Metric Name="Timing-tstoragefile-read-totalMsecs" Value="20982.9"/>
+    <Metric Name="Timing-tstoragefile-readActual-maxMsecs" Value="910.021"/>
+    <Metric Name="Timing-tstoragefile-readActual-minMsecs" Value="0.000421"/>
+    <Metric Name="Timing-tstoragefile-readActual-numOperations" Value="5141"/>
+    <Metric Name="Timing-tstoragefile-readActual-numSuccessfulOperations" Value="5141"/>
+    <Metric Name="Timing-tstoragefile-readActual-totalMegabytes" Value="58.8525"/>
+    <Metric Name="Timing-tstoragefile-readActual-totalMsecs" Value="24107.4"/>
+    <Metric Name="Timing-tstoragefile-readAsync-maxMsecs" Value="0"/>
+    <Metric Name="Timing-tstoragefile-readAsync-minMsecs" Value="0"/>
+    <Metric Name="Timing-tstoragefile-readAsync-numOperations" Value="12"/>
+    <Metric Name="Timing-tstoragefile-readAsync-numSuccessfulOperations" Value="0"/>
+    <Metric Name="Timing-tstoragefile-readAsync-totalMegabytes" Value="0"/>
+    <Metric Name="Timing-tstoragefile-readAsync-totalMsecs" Value="0"/>
+    <Metric Name="Timing-tstoragefile-readViaCache-maxMsecs" Value="0"/>
+    <Metric Name="Timing-tstoragefile-readViaCache-minMsecs" Value="0"/>
+    <Metric Name="Timing-tstoragefile-readViaCache-numOperations" Value="538"/>
+    <Metric Name="Timing-tstoragefile-readViaCache-numSuccessfulOperations" Value="0"/>
+    <Metric Name="Timing-tstoragefile-readViaCache-totalMegabytes" Value="0"/>
+    <Metric Name="Timing-tstoragefile-readViaCache-totalMsecs" Value="0"/>
+    <Metric Name="Timing-tstoragefile-seek-maxMsecs" Value="0.035627"/>
+    <Metric Name="Timing-tstoragefile-seek-minMsecs" Value="0.00012"/>
+    <Metric Name="Timing-tstoragefile-seek-numOperations" Value="6330"/>
+    <Metric Name="Timing-tstoragefile-seek-numSuccessfulOperations" Value="6330"/>
+    <Metric Name="Timing-tstoragefile-seek-totalMegabytes" Value="0"/>
+    <Metric Name="Timing-tstoragefile-seek-totalMsecs" Value="2.7176"/>
+    <Metric Name="Timing-tstoragefile-stat-maxMsecs" Value="0.012845"/>
+    <Metric Name="Timing-tstoragefile-stat-minMsecs" Value="0.000492"/>
+    <Metric Name="Timing-tstoragefile-stat-numOperations" Value="677"/>
+    <Metric Name="Timing-tstoragefile-stat-numSuccessfulOperations" Value="677"/>
+    <Metric Name="Timing-tstoragefile-stat-totalMegabytes" Value="0"/>
+    <Metric Name="Timing-tstoragefile-stat-totalMsecs" Value="0.725393"/>
+    <Metric Name="Timing-tstoragefile-write-maxMsecs" Value="0.1146"/>
+    <Metric Name="Timing-tstoragefile-write-minMsecs" Value="0.000872"/>
+    <Metric Name="Timing-tstoragefile-write-numOperations" Value="667"/>
+    <Metric Name="Timing-tstoragefile-write-numSuccessfulOperations" Value="667"/>
+    <Metric Name="Timing-tstoragefile-write-totalMegabytes" Value="2.34018"/>
+    <Metric Name="Timing-tstoragefile-write-totalMsecs" Value="2.93594"/>
+    <Metric Name="Timing-tstoragefile-writeActual-maxMsecs" Value="0.113888"/>
+    <Metric Name="Timing-tstoragefile-writeActual-minMsecs" Value="0.000741"/>
+    <Metric Name="Timing-tstoragefile-writeActual-numOperations" Value="667"/>
+    <Metric Name="Timing-tstoragefile-writeActual-numSuccessfulOperations" Value="667"/>
+    <Metric Name="Timing-tstoragefile-writeActual-totalMegabytes" Value="2.34018"/>
+    <Metric Name="Timing-tstoragefile-writeActual-totalMsecs" Value="2.82585"/>
+    <Metric Name="Timing-tstoragefile-writeViaCache-maxMsecs" Value="0"/>
+    <Metric Name="Timing-tstoragefile-writeViaCache-minMsecs" Value="0"/>
+    <Metric Name="Timing-tstoragefile-writeViaCache-numOperations" Value="667"/>
+    <Metric Name="Timing-tstoragefile-writeViaCache-numSuccessfulOperations" Value="0"/>
+    <Metric Name="Timing-tstoragefile-writeViaCache-totalMegabytes" Value="0"/>
+    <Metric Name="Timing-tstoragefile-writeViaCache-totalMsecs" Value="0"/>
+  </PerformanceSummary>
+</PerformanceReport>
+</FrameworkJobReport>

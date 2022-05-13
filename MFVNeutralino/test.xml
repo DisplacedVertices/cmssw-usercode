@@ -1,0 +1,12 @@
+<FrameworkJobReport>
+<FrameworkError ExitStatus="7002" Type="Fatal Exception" >
+<![CDATA[
+An exception of category 'ConfigFileReadError' occurred while
+   [0] Processing the python configuration file named ntuple.py
+Exception Message:
+python encountered the error: <type 'exceptions.IOError'>
+[Errno 2] No such file or directory: 'ntuple.py'
+
+]]>
+</FrameworkError>
+</FrameworkJobReport>

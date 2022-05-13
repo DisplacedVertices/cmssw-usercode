@@ -3,7 +3,7 @@ import FWCore.ParameterSet.Config as cms
 mfvFilterHistos = cms.EDAnalyzer('MFVFilterHistos',
                                 mevent_src = cms.InputTag('mfvEvent'),
                                 weight_src = cms.InputTag('mfvWeight'),
-                                is_dibjet           = cms.bool(False),
+                                is_dibjet           = cms.bool(True),
 
                                 # Parameters used iff is_dibjet = True
                                 di_bitL1             = cms.int32(20),
