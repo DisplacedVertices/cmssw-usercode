@@ -427,7 +427,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
       }
     case mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0 :
       {
-        if(mevent->jet_ht(30) < 450 || njets < 4) return false;
+        if(mevent->jet_ht(30) < 425 || njets < 4) return false;
         if(nloosebjets < 3) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
