@@ -1,0 +1,23 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  current_branch: $(echo ${{ github.ref }} | sed -E 's|refs/[a-zA-Z]+/||')
+  current_user: ${{ github.actor }}
+
+jobs:
+
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Take a look around
+      run: pwd && ls -alh
+    - name: Run a CVMFS Docker image and run the setup script
+      run: docker run  -t -P --device /dev/fuse --cap-add SYS_ADMIN --security-opt apparmor:unconfined -e CVMFS_MOUNTS="cms.cern.ch" --entrypoint "/bin/bash" aperloff/cms-cvmfs-docker:light -c "/run.sh -c \"wget https://raw.githubusercontent.com/DisplacedVertices/cmssw-usercode/master/initial_setup.sh && chmod +x initial_setup.sh && source initial_setup.sh \" && cvmfs_config wipecache"
