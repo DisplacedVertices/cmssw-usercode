@@ -1126,7 +1126,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           h_noshare_vertex_paird2d->Fill(mag(vx - vjx, vy - vjy));
           h_noshare_vertex_pairdphi->Fill(fabs(reco::deltaPhi(phi, phij)));
         }
-
       }
     }
 
@@ -1194,19 +1193,14 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
             if (verbose)
               printf("          dist < %7.3f || sig < %7.3f, breaking to merge\n", merge_anyway_dist, merge_anyway_sig);
 
-
-
             std::vector<reco::TransientTrack> ttks;
 
             for (int i = 0; i < 2; ++i) {
-
-
               for (auto tk : vertex_track_set(*v[i])) {
 
                 ttks.push_back(tt_builder->build(tk));
 
               }
-
             }
 
 
@@ -1215,7 +1209,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
             {
               merged_vertices.push_back(reco::Vertex(tv));
 
-
               for (auto it = merged_vertices[0].tracks_begin(), ite = merged_vertices[0].tracks_end(); it != ite; ++it) {
 
                 reco::TransientTrack seed_track;
@@ -1223,8 +1216,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
                 std::pair<bool, Measurement1D> tk_vtx_dist = track_dist(seed_track, merged_vertices[0]);
 
               }
-
-
             }
 
 
@@ -1259,18 +1250,12 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
               v[1] = vertices->erase(v[1]) - 1;
 
             }
-
           }
         }
-
       }
 
-
       for (nv[0] = vertices->begin(); nv[0] != vertices->end(); ++nv[0]) {
-
-
         for (nv[1] = nv[0] + 1; nv[1] != vertices->end(); ++nv[1]) {
-
 
           Measurement1D nv_dist = vertex_dist(*nv[0], *nv[1]);
           if (verbose)
@@ -1278,10 +1263,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
 
         }
-
       }
     }
-
   }
 
   //////////////////////////////////////////////////////////////////////
