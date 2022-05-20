@@ -198,7 +198,6 @@ class MFVVertexer : public edm::EDProducer {
     TH1F* h_noshare_vertex_tkvtxdisterr_before_do_track_refinement;
     TH1F* h_noshare_vertex_tkvtxdistsig_before_do_track_refinement;
 
-
     TH1F* h_n_noshare_vertices;
     TH1F* h_noshare_vertex_ntracks;
     TH1F* h_noshare_vertex_mass;
@@ -217,7 +216,6 @@ class MFVVertexer : public edm::EDProducer {
     TH1F* h_max_noshare_track_multiplicity;
     TH1F* h_n_output_vertices;
     TH1F* h_n_at_least_5trk_output_vertices;
-
 
     TH1F* h_noshare_trackrefine_sigmacut_vertex_chi2;
     TH1F* h_noshare_trackrefine_sigmacut_vertex_tkvtxdistsig;
@@ -298,9 +296,6 @@ class MFVVertexer : public edm::EDProducer {
     TH1F* h_output2_vertex_pairdphi;
 
     TH1F* h_output2_n_onetracks;
-
-
-
 };
 
 MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
@@ -973,6 +968,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       if (verbose)
         printf("no-share vertex #%3lu: ntracks: %i chi2/dof: %7.3f dof: %7.3f pos: <%7.3f, %7.3f, %7.3f>  rho: %7.3f  phi: %7.3f  r: %7.3f\n", i, ntracks, vchi2, vndof, vx, vy, vz, rho, phi, r);
 
+      // FIXME JPR continue review from here!
       if (do_track_refinement) {
 
         track_set set_trackrefine_sigmacut_tks;
@@ -993,13 +989,11 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           h_noshare_vertex_tkvtxdisterr_before_do_track_refinement->Fill(tkvtx_dist_before_do_track_refinement.error());
           h_noshare_vertex_tkvtxdistsig_before_do_track_refinement->Fill(tkvtx_dist_before_do_track_refinement.significance());
 
-
           if (tk_vtx_dist.second.significance() < trackrefine_sigmacut) {
             set_trackrefine_sigmacut_tks.insert(it->castTo<reco::TrackRef>());
-
           }
-        }
 
+        }
 
         for (auto tk : set_trackrefine_sigmacut_tks) {
           trackrefine_sigmacut_ttks.push_back(tt_builder->build(tk));
@@ -1033,15 +1027,12 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           set_trackrefine_trimmax_tks.insert(it->castTo<reco::TrackRef>());
         }
 
-
-
         int n_trackrefine_trimmax = 0;
         reco::Vertex trackrefine_trimmax_v = trackrefine_sigmacut_v;
 
         for (auto tk : set_trackrefine_trimmax_tks) {
           trackrefine_trimmax_ttks.push_back(tt_builder->build(tk));
         }
-
 
         while (trackrefine_trimmax_ttks.size() > 2 && *std::max_element(trackrefine_trim_ttks_missdist_sig.begin(), trackrefine_trim_ttks_missdist_sig.end()) > trackrefine_trimmax) {
           ++n_trackrefine_trimmax;
@@ -1056,7 +1047,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           // while we still find a track with max miss distance significance larger than trackrefine_trimmax, we trim it out, namely trimmax, and refit a new vertex until the max miss distance significance is under trackrefine_trimmax
           for (const TransientVertex& tv : kv_reco_dropin(trackrefine_trimmax_ttks))
             trackrefine_trimmax_v = reco::Vertex(tv);
-
 
           double trackrefine_trimmax_v1x = trackrefine_trimmax_v.position().x() - bsx;
           double trackrefine_trimmax_v1y = trackrefine_trimmax_v.position().y() - bsy;
@@ -1077,9 +1067,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
         }
 
-
         if (verbose) printf("   trimming the trimmax track from a vertex w/ # of trimming: %i\n", n_trackrefine_trimmax);
-
 
         double trackrefine_trimmax_vchi2 = trackrefine_trimmax_v.normalizedChi2();
         h_noshare_trackrefine_trimmax_vertex_chi2->Fill(trackrefine_trimmax_vchi2);
@@ -1087,7 +1075,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         for (unsigned int j = 0, je = trackrefine_trim_ttks_missdist_sig.size(); j < je; ++j) {
           h_noshare_trackrefine_trimmax_vertex_tkvtxdistsig->Fill(trackrefine_trim_ttks_missdist_sig[j]);
         }
-
 
         // the end of track refinement in two steps -- (1) sigmacut and (2) trimmax
         // we replace the noshare vertex by the vertex after the track refinement
@@ -1203,7 +1190,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
               }
             }
 
-
             reco::VertexCollection merged_vertices;
             for (const TransientVertex& tv : kv_reco_dropin(ttks))
             {
@@ -1218,7 +1204,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
               }
             }
 
-
             if (verbose) {
               printf("      got %lu new vertices out of the av fit\n", merged_vertices.size());
               printf("      these track sets:");
@@ -1229,7 +1214,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
               }
               printf("\n");
             }
-
 
             if (merged_vertices.size() == 1)
             {
@@ -1248,7 +1232,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
               //std::cout << "check no mem out of ranges (after) : " << v[1] - vertices->begin() << std::endl;
 
               v[1] = vertices->erase(v[1]) - 1;
-
             }
           }
         }
@@ -1260,8 +1243,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           Measurement1D nv_dist = vertex_dist(*nv[0], *nv[1]);
           if (verbose)
             printf("  new vertex dist (2d? %i) %7.3f  sig %7.3f\n", use_2d_vertex_dist, nv_dist.value(), nv_dist.significance());
-
-
         }
       }
     }
@@ -1318,7 +1299,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         }
       }
     }
-
   }
 
 
@@ -1738,7 +1718,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
                 track_vec tks_sv0 = sv_total_track_which_trk_vec[vtxidx0];
                 size_t idx = sv0_lonesharedtrack_which_trkidx[k];
                 h_resolve_shared_jets_lonetrkvtx_dphi->Fill(fabs(reco::deltaPhi(tks_sv0[idx]->phi(), phi0)));
-                if (fabs(reco::deltaPhi(tks_sv0[idx]->phi(), phi0)) > 3.14 / 2) {
+                if (fabs(reco::deltaPhi(tks_sv0[idx]->phi(), phi0)) > M_PI / 2) {
                   sv_total_track_which_trkidx[vtxidx0].erase(std::remove(sv_total_track_which_trkidx[vtxidx0].begin(), sv_total_track_which_trkidx[vtxidx0].end(), idx),
                       sv_total_track_which_trkidx[vtxidx0].end());
                 }
@@ -1767,18 +1747,12 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
               sv0 = sv0_resolved_sharedtracks;
               if (verbose) {
                 printf("sv0'idx: %lu with ntrack after: %u",vtxidx0, sv0.nTracks());
-                printf("sv1'idx: %lu with ntrack after: %u",vtxidx1, sv1.nTracks());                                                                               }
-
-
+                printf("sv1'idx: %lu with ntrack after: %u",vtxidx1, sv1.nTracks());
+              }
             }
           }
-
-
         }
-
-
       }
-
     }
 
     std::set<int> trackicity;
@@ -1803,16 +1777,12 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         for (const reco::TrackRef& itk : vertex_track_set(*v[0])) {
           if (itk.isNonnull())
             sv_nonduplicate_ttks.push_back(tt_builder->build(itk));
-
         }
 
         for (const TransientVertex& tv : kv_reco_dropin(sv_nonduplicate_ttks))
           *v[0] = reco::Vertex(tv);
       }
-
     }
-
-
   }
 
   if (resolve_shared_jets && histos_output2) {
@@ -1886,11 +1856,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
     }
 
-
     h_n_at_least_5trk_output2_vertices->Fill(count_5trk_vertices);
     h_output2_n_onetracks->Fill(n_output2_onetracks);
-
-
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -1899,6 +1866,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
   finish(event, seed_tracks, std::move(vertices), std::move(vpeffs), vpeffs_tracks);
 }
+
 std::pair<bool, std::vector<std::vector<size_t>>> MFVVertexer::sharedjets(const int vtx0idx, const int vtx1idx, const std::vector < std::vector<int>>& sv_match_tracktojet_which_jetidx, const std::vector < std::vector<int>>& sv_match_tracktojet_which_trkidx) {
 
   bool shared_jet = std::find_first_of(sv_match_tracktojet_which_jetidx[vtx0idx].begin(), sv_match_tracktojet_which_jetidx[vtx0idx].end(), sv_match_tracktojet_which_jetidx[vtx1idx].begin(), sv_match_tracktojet_which_jetidx[vtx1idx].end()) != sv_match_tracktojet_which_jetidx[vtx0idx].end();
@@ -1911,7 +1879,6 @@ std::pair<bool, std::vector<std::vector<size_t>>> MFVVertexer::sharedjets(const 
 
     int nsharedjets = 0;
 
-
     std::vector<std::vector<int>> sv_match_tracktojet_which_temp_jetidx = sv_match_tracktojet_which_jetidx;
     std::vector<std::vector<int> >sv0_match_sharedjettotrack_which_trkidx;
     std::vector<std::vector<int> >sv1_match_sharedjettotrack_which_trkidx;
@@ -1923,7 +1890,6 @@ std::pair<bool, std::vector<std::vector<size_t>>> MFVVertexer::sharedjets(const 
     std::vector<int> sv1_match_tracktojet_which_jetidx = sv_match_tracktojet_which_jetidx[vtx1idx];
     std::vector<int> sv1_match_tracktojet_which_trkidx = sv_match_tracktojet_which_trkidx[vtx1idx];
     std::vector<int> sv1_match_sharedjettotrack_which_temp_trkidx;
-
 
     while (std::find_first_of(sv_match_tracktojet_which_temp_jetidx[vtx0idx].begin(), sv_match_tracktojet_which_temp_jetidx[vtx0idx].end(), sv_match_tracktojet_which_temp_jetidx[vtx1idx].begin(), sv_match_tracktojet_which_temp_jetidx[vtx1idx].end()) != sv_match_tracktojet_which_temp_jetidx[vtx0idx].end()) {
       nsharedjets++;
@@ -1984,8 +1950,6 @@ std::pair<bool, std::vector<std::vector<size_t>>> MFVVertexer::sharedjets(const 
       sv0_match_sharedjettotrack_which_temp_trkidx = {};
       sv1_match_sharedjettotrack_which_temp_trkidx = {};
 
-
-
     }
     sv_lonesharedtrack_which_trkidx.push_back(sv0_lonesharedtrack_which_trkidx);
     sv_lonesharedtrack_which_trkidx.push_back(sv1_lonesharedtrack_which_trkidx);
@@ -1997,15 +1961,15 @@ std::pair<bool, std::vector<std::vector<size_t>>> MFVVertexer::sharedjets(const 
 }
 
 bool MFVVertexer::match_track_jet(const reco::Track& tk, const pat::Jet& matchjet, const pat::JetCollection& jets, const int& idx) {
-  //if (reco::deltaR2(tk, jet)>0.16) return false;
 
   if (verbose) {
     std::cout << "jet track matching..." << std::endl;
     std::cout << "  target track pt " << tk.pt() << " eta " << tk.eta() << " phi " << tk.phi() << std::endl;
   }
 
-
-  double match_thres = 1.3;                                                                                                                                                           int jet_index = 255;                                                                                                                                                                for (size_t j = 0; j < jets.size(); ++j) {
+  double match_thres = 1.3;
+  int jet_index = 255;
+  for (size_t j = 0; j < jets.size(); ++j) {
     for (size_t idau = 0, idaue = jets[j].numberOfDaughters(); idau < idaue; ++idau) {
       const reco::Candidate* dau = jets[j].daughter(idau);
       if (dau->charge() == 0)
@@ -2038,7 +2002,6 @@ bool MFVVertexer::match_track_jet(const reco::Track& tk, const pat::Jet& matchje
   if (jet_index == idx){
     return true;
   }
-
 
   return false;
 }
