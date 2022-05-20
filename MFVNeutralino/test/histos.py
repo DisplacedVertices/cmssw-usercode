@@ -111,7 +111,7 @@ process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     
             evt_hst = process.mfvEventHistos.clone()
             evt_hst_name = '%sevtHst%iVNo' % (EX1, nv) + name
 
-            vtx_hst = process.mfvVertexHistos.clone(vertex_src = vtx_name)
+            vtx_hst = process.mfvVertexHistos.clone(vertex_src = vtx_name) # be aware of VertexHistosPreSel folders that can have tight vertex selection cuts applied from vertex_src
             vtx_hst_name = '%svtxHst%iVNo' % (EX1, nv) + name
 
             setattr(process, vtx_name, vtx)

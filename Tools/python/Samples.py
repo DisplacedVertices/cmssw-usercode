@@ -417,7 +417,7 @@ for x in __all__:
             exec '%s = sample' % sample.name
             __all__.append(sample.name)
 
-span_signal_samples_2017 = [eval('mfv_%s_tau%06ium_M%04i_2017' % (a,b,c)) for a in ('neu','stopdbardbar') for b in (300,1000,10000) for c in (400,800,1600,3000)]
+span_signal_samples_2017 = [eval('mfv_%s_tau%06ium_M%04i_2017' % ('stopdbardbar',b,c)) for b in (300,1000,10000) for c in (400,800,3000)]
 span_signal_samples_2018 = [eval('mfv_%s_tau%06ium_M%04i_2018' % (a,b,c)) for a in ('neu','stopdbardbar') for b in (300,1000,10000) for c in (400,800,1600,3000)]
 
 _alls = [
@@ -622,6 +622,7 @@ for sample in HToSSTodddd_samples_2017 :
 
 ########
 # ntuples
+for x in ggHToSSTodddd_tau100mm_M15_2017, ggHToSSTodddd_tau10mm_M15_2017, ggHToSSTodddd_tau1mm_M15_2017, ggHToSSTodddd_tau100mm_M40_2017, ggHToSSTodddd_tau10mm_M40_2017, ggHToSSTodddd_tau1mm_M40_2017, ggHToSSTodddd_tau100mm_M55_2017, ggHToSSTodddd_tau10mm_M55_2017, ggHToSSTodddd_tau1mm_M55_2017:                                                                    x.add_dataset("ntupleulrequestv27bm")
 ########
 
 for x in data_samples_2017 + qcd_samples_2017 + data_samples_2018 + qcd_samples_2018:
@@ -687,13 +688,13 @@ condorable = {
         "miniaod": [qcdht1500_2017, qcdht2000_2017, dyjetstollM10_2017, qcdmupt15_2017, qcdht0300_2018, qcdht0700_2018, ttbarht0800_2018,
                     JetHT2017B, JetHT2017D, JetHT2017F, JetHT2018A, JetHT2018B, JetHT2018D,
                     mfv_neu_tau000100um_M0600_2017, mfv_neu_tau000300um_M0400_2017, mfv_neu_tau000300um_M0800_2017, mfv_neu_tau000300um_M3000_2017, mfv_neu_tau010000um_M0400_2017, mfv_neu_tau010000um_M0800_2017, mfv_neu_tau010000um_M1600_2017, mfv_neu_tau030000um_M0800_2017, mfv_neu_tau030000um_M3000_2017, mfv_stopdbardbar_tau000100um_M0600_2017, mfv_stopdbardbar_tau000100um_M1600_2017, mfv_stopdbardbar_tau000300um_M1200_2017, mfv_stopdbardbar_tau001000um_M0400_2017, mfv_stopdbardbar_tau001000um_M1200_2017, mfv_stopdbardbar_tau001000um_M3000_2017, mfv_stopdbardbar_tau010000um_M0800_2017, mfv_stopdbardbar_tau010000um_M3000_2017, mfv_stopdbardbar_tau030000um_M1200_2017, mfv_stopdbardbar_tau030000um_M1600_2017,
-                    mfv_neu_tau001000um_M0800_2018, mfv_stopdbardbar_tau000100um_M1600_2018, mfv_stopdbardbar_tau000300um_M0400_2018, mfv_stopdbardbar_tau000300um_M1600_2018, mfv_stopdbardbar_tau010000um_M1200_2018, mfv_stopdbardbar_tau010000um_M3000_2018, mfv_stopdbardbar_tau030000um_M1600_2018, SingleMuon2017F, ggHToSSTobbbb_tau10mm_M15_2017, ggHToSSTodddd_tau1mm_M15_2017, ggHToSSTodddd_tau1000mm_M40_2017],
+                    mfv_neu_tau001000um_M0800_2018, mfv_stopdbardbar_tau000100um_M1600_2018, mfv_stopdbardbar_tau000300um_M0400_2018, mfv_stopdbardbar_tau000300um_M1600_2018, mfv_stopdbardbar_tau010000um_M1200_2018, mfv_stopdbardbar_tau010000um_M3000_2018, mfv_stopdbardbar_tau030000um_M1600_2018, SingleMuon2017F, ggHToSSTobbbb_tau10mm_M15_2017, ggHToSSTodddd_tau1mm_M15_2017, ggHToSSTodddd_tau1000mm_M40_2017, ggHToSSTodddd_tau1mm_M55_2017, ggHToSSTobbbb_tau100mm_M40_2017],
         },
     "T2_DE_DESY": {
         "miniaod": [JetHT2017C, JetHT2017E, JetHT2018C, SingleMuon2017D],
         },
     "T2_US_MIT": {
-        "miniaod": [qcdht0500_2018, ttHbb_2017, ggHToSSTobbbb_tau1000mm_M40_2017, ggHToSSTobbbb_tau100mm_M40_2017, ggHToSSTodddd_tau1000mm_M15_2017, ggHToSSTodddd_tau1mm_M55_2017],
+        "miniaod": [qcdht0500_2018, ttHbb_2017, ggHToSSTobbbb_tau1000mm_M40_2017, ggHToSSTodddd_tau1000mm_M15_2017],
         },
     "T2_US_Florida": {
         "miniaod": [ttbar_2018, ttZext_2017, qcdht0700_2017, qcdht0500_2017],

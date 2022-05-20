@@ -5,7 +5,7 @@ from JMTucker.MFVNeutralino.NtupleCommon import *
 settings = NtupleSettings()
 settings.is_mc = True
 settings.is_miniaod = True
-
+settings.event_filter_require_vertex = True
 settings.run_n_tk_seeds = False
 settings.minitree_only = False
 settings.prepare_vis = False
@@ -29,8 +29,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if use_btag_triggers :
         samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=not settings.run_n_tk_seeds, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used
     else :
-        samples = pick_samples(dataset, qcd=False, ttbar=False, data=False, all_signal=not settings.run_n_tk_seeds)
-
+        #samples = pick_samples(dataset, qcd=False, ttbar=False, data=False, all_signal=not settings.run_n_tk_seeds)
+        samples = pick_samples(dataset,qcd=False,ttbar=False, data=False, span_signal=True, all_signal=False) 
+    
     set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2017p8.json'), limit_ttbar=True)
 
     ms = MetaSubmitter(settings.batch_name(), dataset=dataset)

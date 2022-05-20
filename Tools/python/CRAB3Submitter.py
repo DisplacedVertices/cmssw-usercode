@@ -136,7 +136,7 @@ class CRABSubmitter:
         self.cfg_template.General.workArea = self.batch_dir
         self.cfg_template.JobType.pluginName = 'Analysis' # JMTBAD PrivateMC -- also needs cfg.Data.primaryDataset, splitting EventBased, unitsPerJob, totalUnits
         self.cfg_template.JobType.allowUndistributedCMSSW = True
-
+        self.cfg_template.Data.outLFNDirBase = '/store/group/lpclonglived/%s' % (self.username)
         if input_files:
             if type(input_files) == str:
                 input_files = [input_files]

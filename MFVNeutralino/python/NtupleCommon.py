@@ -1,7 +1,7 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version_ = 'V27'
+ntuple_version_ = 'REUsNewVtxV27'
 use_btag_triggers = False
 if use_btag_triggers : 
     ntuple_version_ += "B" # for "Btag triggers"; also includes DisplacedDijet triggers
@@ -83,7 +83,7 @@ def minitree_only(process, mode, settings, output_commands):
 def event_filter(process, mode, settings, output_commands, **kwargs):
     if mode:
         from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-        setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode, **kwargs)
+        setup_event_filter(process, event_filter_require_vertex=settings.event_filter_require_vertex,input_is_miniaod=settings.is_miniaod, mode=mode, **kwargs)
 
 ########################################################################
 
@@ -194,9 +194,11 @@ def aod_ntuple_process(settings):
 
     process.p = cms.Path(process.goodOfflinePrimaryVertices *
                          process.mfvVertexSequence *
+                         process.vertexFilterNtuple *
                          process.mfvTriggerFloats *
                          process.mfvEvent)
-
+    
+    process.vertexFilterNtuple = cms.EDFilter('VertexSelector', src = cms.InputTag('mfvVertices'), cut = cms.string('nTracks > 2'), filter = cms.bool(settings.event_filter and settings.event_filter_require_vertex)) 
     process.mfvEvent.misc_srcs = [x for x in process.mfvEvent.misc_srcs if x.moduleLabel != 'prefiringweight'] # JMTBAD doesn't work with miniaod-on-fly here
 
     output_commands = make_output_commands(process, settings)
@@ -263,7 +265,8 @@ def miniaod_ntuple_process(settings):
 
     for x in process.mfvVerticesToJets, process.mfvVerticesAuxTmp, process.mfvVerticesAuxPresel:
         x.track_ref_getter.input_is_miniaod = True
-
+    
+    process.vertexFilterNtuple = cms.EDFilter('VertexSelector', src = cms.InputTag('mfvVertices'), cut = cms.string('nTracks > 2'), filter = cms.bool( settings.event_filter and settings.event_filter_require_vertex)) 
     process.mfvEvent.input_is_miniaod = True
     process.mfvEvent.gen_particles_src = 'prunedGenParticles' # no idea if this lets gen_bquarks, gen_leptons work--may want the packed ones that have status 1 particles
     process.mfvEvent.gen_jets_src = 'slimmedGenJets'
@@ -278,6 +281,7 @@ def miniaod_ntuple_process(settings):
                          process.mfvTriggerFloats *
                          process.jmtUnpackedCandidateTracks *
                          process.mfvVertexSequence *
+                         process.vertexFilterNtuple *
                          process.prefiringweight *
                          process.mfvEvent)
 

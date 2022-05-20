@@ -265,7 +265,7 @@ def crab_get_output_dir(working_dir):
     else:
         assert not cfg.Data.publication
         publish_name = rq['RequestName'].split(username + '_')[1] # maybe?
-    return '/store/user/%s/%s/%s/%s' % (username, primary_dataset, publish_name, timestamp)
+    return '/store/group/lpclonglived/%s/%s/%s/%s' % (os.environ['USER'], primary_dataset, publish_name, timestamp)
 
 def crab_log_open(working_dir):
     fn = os.path.join(working_dir, 'crab.log')

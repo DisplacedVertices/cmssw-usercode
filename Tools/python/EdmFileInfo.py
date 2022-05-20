@@ -49,7 +49,7 @@ class EdmFileInfo(object):
 
     def __init__(self, fn, trees=None):
         self.fn = fn
-        if fn.startswith('/store/user'):
+        if (fn.startswith('/store/user') or (fn.startswith('/store/group'))):
             fn = 'root://cmseos.fnal.gov/' + fn
         elif fn.startswith('/store'):
             fn = 'root://cmsxrootd.fnal.gov/' + fn
