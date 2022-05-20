@@ -187,12 +187,16 @@ class MFVVertexer : public edm::EDProducer {
     TH1F* h_seed_vertex_pairdphi;
     TH1F* h_n_resets;
     TH1F* h_n_onetracks;
-    TH1F* h_noshare_vertex_tkvtxdist;	// vertices after do_track_refinement if do_track_refinement turned on 
-    TH1F* h_noshare_vertex_tkvtxdisterr;	// vertices after do_track_refinement if do_track_refinement turned on 
-    TH1F* h_noshare_vertex_tkvtxdistsig;	 // vertices after do_track_refinement if do_track_refinement turned on 
-    TH1F* h_noshare_vertex_tkvtxdist_before_do_track_refinement;	 // vertices before do_track_refinement if do_track_refinement turned on 
-    TH1F* h_noshare_vertex_tkvtxdisterr_before_do_track_refinement;	// vertices before do_track_refinement if do_track_refinement turned on 
-    TH1F* h_noshare_vertex_tkvtxdistsig_before_do_track_refinement;	 // vertices before do_track_refinement if do_track_refinement turned on
+
+    // vertices after do_track_refinement (if do_track_refinement turned on)
+    TH1F* h_noshare_vertex_tkvtxdist;
+    TH1F* h_noshare_vertex_tkvtxdisterr;
+    TH1F* h_noshare_vertex_tkvtxdistsig;
+
+    // vertices before do_track_refinement (if do_track_refinement turned on)
+    TH1F* h_noshare_vertex_tkvtxdist_before_do_track_refinement;
+    TH1F* h_noshare_vertex_tkvtxdisterr_before_do_track_refinement;
+    TH1F* h_noshare_vertex_tkvtxdistsig_before_do_track_refinement;
 
 
     TH1F* h_n_noshare_vertices;
