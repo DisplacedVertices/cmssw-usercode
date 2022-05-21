@@ -663,7 +663,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   int n_resets = 0;
   int n_onetracks = 0;
   std::vector<reco::Vertex>::iterator v[2];
-  std::vector<reco::Vertex>::iterator nv[2];
   size_t ivtx[2];
   for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
     track_set tracks[2];
@@ -1237,12 +1236,15 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         }
       }
 
-      for (nv[0] = vertices->begin(); nv[0] != vertices->end(); ++nv[0]) {
-        for (nv[1] = nv[0] + 1; nv[1] != vertices->end(); ++nv[1]) {
+      // Printouts of new vertex distance when using verbose mode
+      if (verbose) {
+        std::vector<reco::Vertex>::iterator nv[2];
+        for (nv[0] = vertices->begin(); nv[0] != vertices->end(); ++nv[0]) {
+          for (nv[1] = nv[0] + 1; nv[1] != vertices->end(); ++nv[1]) {
 
-          Measurement1D nv_dist = vertex_dist(*nv[0], *nv[1]);
-          if (verbose)
+            Measurement1D nv_dist = vertex_dist(*nv[0], *nv[1]);
             printf("  new vertex dist (2d? %i) %7.3f  sig %7.3f\n", use_2d_vertex_dist, nv_dist.value(), nv_dist.significance());
+          }
         }
       }
     }
