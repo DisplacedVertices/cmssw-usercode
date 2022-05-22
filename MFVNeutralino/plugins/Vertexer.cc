@@ -1222,7 +1222,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
                 printf(" |dPhi(vtx0,vtx1) between a merging pair is %4.3f \n", fabs(reco::deltaPhi(phi0, phi1)));
                 printf(" # of tracks per vtx0 is %u \n", v[0]->nTracks());
                 printf(" # of tracks per vtx1 is %u \n", v[1]->nTracks());
-                printf(" ---------------- merge the two vertices if chi2/dof < 8 ----------------- \n");
+                printf(" ---------------- merge the two vertices if chi2/dof < 5 ----------------- \n");
                 printf(" # of tracks per a new merged vertex is %u \n", merged_vertices[0].nTracks());
               }
 
