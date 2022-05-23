@@ -24,9 +24,9 @@ process.mfvFilterHistosNoCuts = process.mfvFilterHistos.clone()
 process.mfvEventHistosNoCuts = process.mfvEventHistos.clone()
 process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts * process.mfvFilterHistosNoCuts) # just trigger for now
 
-process.mfvEventHistosEvtFilt = process.mfvEventHistos.clone()
-process.mfvAnalysisCutsEvtFilt = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)
-process.pEventEvtFilt = cms.Path(common * process.mfvAnalysisCutsEvtFilt * process.mfvEventHistosEvtFilt)
+process.mfvEventHistosPreSelEvtFilt = process.mfvEventHistos.clone()
+process.mfvAnalysisCutsPreSelEvtFilt = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)
+process.pEventPreSelEvtFilt = cms.Path(common * process.mfvAnalysisCutsPreSelEvtFilt * process.mfvEventHistosPreSelEvtFilt)
 
 nm1s = [
     ('Bsbs2ddist', 'min_bsbs2ddist = 0'),
@@ -66,12 +66,12 @@ process.EX1mfvEventHistosOnlyOneVtx = process.mfvEventHistos.clone()
 process.EX1mfvEventHistosFullSel    = process.mfvEventHistos.clone()
 process.EX1mfvEventHistosSigReg     = process.mfvEventHistos.clone()
 
-process.EX1mfvVertexHistosEvtFiltVtxSel     = process.mfvVertexHistos.clone(EX2)
+process.EX1mfvVertexHistosPreSelEvtFiltVtxSel     = process.mfvVertexHistos.clone(EX2)
 process.EX1mfvVertexHistosOnlyOneVtx = process.mfvVertexHistos.clone(EX2)
 process.EX1mfvVertexHistosFullSel    = process.mfvVertexHistos.clone(EX2)
 process.EX1mfvVertexHistosSigReg     = process.mfvVertexHistos.clone(EX2)
 
-process.EX1pEvtFiltVtxSel     = cms.Path(common * process.mfvAnalysisCutsEvtFiltVtxSel                                              * process.EX1mfvVertexHistosEvtFiltVtxSel)
+process.EX1pPreSelEvtFiltVtxSel     = cms.Path(common * process.mfvAnalysisCutsPreSelEvtFiltVtxSel                                              * process.EX1mfvVertexHistosPreSelEvtFiltVtxSel)
 process.EX1pOnlyOneVtx = cms.Path(common * process.EX1mfvAnalysisCutsOnlyOneVtx * process.EX1mfvEventHistosOnlyOneVtx * process.EX1mfvVertexHistosOnlyOneVtx)
 '''.replace('EX1', EX1).replace('EX2', EX2).replace('EX3', EX3)
 

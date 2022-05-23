@@ -173,7 +173,6 @@ class MFVVertexer : public edm::EDProducer {
     TH1F* h_n_resets;
     TH1F* h_n_onetracks;
 
-
     TH1F* h_noshare_vertex_tkvtxdist;
     TH1F* h_noshare_vertex_tkvtxdisterr;
     TH1F* h_noshare_vertex_tkvtxdistsig;
@@ -181,8 +180,6 @@ class MFVVertexer : public edm::EDProducer {
     TH1F* h_noshare_vertex_tkvtxdist_before_do_track_refinement;
     TH1F* h_noshare_vertex_tkvtxdisterr_before_do_track_refinement;
     TH1F* h_noshare_vertex_tkvtxdistsig_before_do_track_refinement;
-
-
 
     TH1F* h_n_noshare_vertices;
     TH1F* h_noshare_vertex_ntracks;
@@ -201,10 +198,8 @@ class MFVVertexer : public edm::EDProducer {
     TH1F* h_noshare_track_multiplicity;
     TH1F* h_max_noshare_track_multiplicity;
 
-
     TH1F* h_n_output_vertices;
     TH1F* h_n_at_least_5trk_output_vertices;
-
 
     TH1F* h_noshare_trackrefine_sigmacut_vertex_chi2;
     TH1F* h_noshare_trackrefine_sigmacut_vertex_tkvtxdistsig;
@@ -213,8 +208,6 @@ class MFVVertexer : public edm::EDProducer {
     TH1F* h_noshare_trackrefine_trimmax_vertex_chi2;
     TH1F* h_noshare_trackrefine_trimmax_vertex_tkvtxdistsig;
     TH1F* h_noshare_trackrefine_trimmax_vertex_distr_shift;
-
-
 
     TH1F* h_output_afterdzfit_vertex_tkvtxdist;
     TH1F* h_output_afterdzfit_vertex_tkvtxdisterr;
@@ -236,8 +229,6 @@ class MFVVertexer : public edm::EDProducer {
     TH1F* h_output_afterdzfit_vertex_paird2d;
     TH1F* h_output_afterdzfit_vertex_paird2dsig;
     TH1F* h_output_afterdzfit_vertex_pairdphi;
-
-
 
     TH1F* h_output_aftermerge_vertex_tkvtxdist;
     TH1F* h_output_aftermerge_vertex_tkvtxdisterr;
@@ -265,12 +256,7 @@ class MFVVertexer : public edm::EDProducer {
     TH1F* h_output_aftermerge_potential_merged_vertex_nm1_bs2derr;
     TH1F* h_output_aftermerge_potential_merged_vertex_nm1_bsbs2ddist;
 
-
-
-
     TH1F* h_resolve_shared_jets_lonetrkvtx_dphi;
-
-
 
     TH1F* h_output_aftersharedjets_vertex_tkvtxdist;
     TH1F* h_output_aftersharedjets_vertex_tkvtxdisterr;
@@ -294,7 +280,6 @@ class MFVVertexer : public edm::EDProducer {
     TH1F* h_output_aftersharedjets_vertex_pairdphi;
 
     TH1F* h_output_aftersharedjets_n_onetracks;
-
 
 };
 
