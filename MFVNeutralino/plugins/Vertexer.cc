@@ -944,7 +944,11 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     h_n_noshare_vertices->Fill(vertices->size());
   }
 
-  if (histos_noshare || verbose || do_track_refinement) {
+
+  // Debugging plots for track refinement and noshare histos: 
+  // These steps are sequential within the loop, but nested in their own `if` statements below.
+  // (useful e.g. if one wants to look at the noshare plots during the track refinement)
+  if (do_track_refinement || histos_noshare) {
     std::map<reco::TrackRef, int> track_use;
     for (size_t i = 0, ie = vertices->size(); i < ie; ++i) {
       reco::Vertex& v = vertices->at(i);
