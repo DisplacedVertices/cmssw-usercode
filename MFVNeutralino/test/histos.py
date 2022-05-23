@@ -24,9 +24,9 @@ process.mfvFilterHistosNoCuts = process.mfvFilterHistos.clone()
 process.mfvEventHistosNoCuts = process.mfvEventHistos.clone()
 process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts * process.mfvFilterHistosNoCuts) # just trigger for now
 
-process.mfvEventHistosPreSel = process.mfvEventHistos.clone()
-process.mfvAnalysisCutsPreSel = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)
-process.pEventPreSel = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvEventHistosPreSel)
+process.mfvEventHistosEvtFilt = process.mfvEventHistos.clone()
+process.mfvAnalysisCutsEvtFilt = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)
+process.pEventEvtFilt = cms.Path(common * process.mfvAnalysisCutsEvtFilt * process.mfvEventHistosEvtFilt)
 
 nm1s = [
     ('Bsbs2ddist', 'min_bsbs2ddist = 0'),
@@ -66,12 +66,12 @@ process.EX1mfvEventHistosOnlyOneVtx = process.mfvEventHistos.clone()
 process.EX1mfvEventHistosFullSel    = process.mfvEventHistos.clone()
 process.EX1mfvEventHistosSigReg     = process.mfvEventHistos.clone()
 
-process.EX1mfvVertexHistosPreSel     = process.mfvVertexHistos.clone(EX2)
+process.EX1mfvVertexHistosEvtFiltVtxSel     = process.mfvVertexHistos.clone(EX2)
 process.EX1mfvVertexHistosOnlyOneVtx = process.mfvVertexHistos.clone(EX2)
 process.EX1mfvVertexHistosFullSel    = process.mfvVertexHistos.clone(EX2)
 process.EX1mfvVertexHistosSigReg     = process.mfvVertexHistos.clone(EX2)
 
-process.EX1pPreSel     = cms.Path(common * process.mfvAnalysisCutsPreSel                                              * process.EX1mfvVertexHistosPreSel)
+process.EX1pEvtFiltVtxSel     = cms.Path(common * process.mfvAnalysisCutsEvtFiltVtxSel                                              * process.EX1mfvVertexHistosEvtFiltVtxSel)
 process.EX1pOnlyOneVtx = cms.Path(common * process.EX1mfvAnalysisCutsOnlyOneVtx * process.EX1mfvEventHistosOnlyOneVtx * process.EX1mfvVertexHistosOnlyOneVtx)
 '''.replace('EX1', EX1).replace('EX2', EX2).replace('EX3', EX3)
 
@@ -111,7 +111,7 @@ process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     
             evt_hst = process.mfvEventHistos.clone()
             evt_hst_name = '%sevtHst%iVNo' % (EX1, nv) + name
 
-            vtx_hst = process.mfvVertexHistos.clone(vertex_src = vtx_name) # be aware of VertexHistosPreSel folders that can have tight vertex selection cuts applied from vertex_src
+            vtx_hst = process.mfvVertexHistos.clone(vertex_src = vtx_name)
             vtx_hst_name = '%svtxHst%iVNo' % (EX1, nv) + name
 
             setattr(process, vtx_name, vtx)

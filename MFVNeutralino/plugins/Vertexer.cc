@@ -27,291 +27,275 @@
 #include "JMTucker/Tools/interface/Utilities.h"
 
 class MFVVertexer : public edm::EDProducer {
-public:
-	MFVVertexer(const edm::ParameterSet&);
-	virtual void produce(edm::Event&, const edm::EventSetup&);
+  public:
+    MFVVertexer(const edm::ParameterSet&);
+    virtual void produce(edm::Event&, const edm::EventSetup&);
 
-private:
-	typedef std::set<reco::TrackRef> track_set;
-	typedef std::vector<reco::TrackRef> track_vec;
+  private:
+    typedef std::set<reco::TrackRef> track_set;
+    typedef std::vector<reco::TrackRef> track_vec;
 
-	std::pair<bool, std::vector<std::vector<size_t>>> sharedjets(const int vtx0idx, const int vtx1idx, const std::vector < std::vector<int>>& sv_match_tracktojet_which_jetidx, const std::vector < std::vector<int>>& sv_match_tracktojet_which_trkidx);
-	bool match_track_jet(const reco::Track& tk, const pat::Jet& jet, const pat::JetCollection& jets, const int& idx);
+    std::pair<bool, std::vector<std::vector<size_t>>> sharedjets(const int vtx0idx, const int vtx1idx, const std::vector < std::vector<int>>& sv_match_tracktojet_which_jetidx, const std::vector < std::vector<int>>& sv_match_tracktojet_which_trkidx);
+    bool match_track_jet(const reco::Track& tk, const pat::Jet& jet, const pat::JetCollection& jets, const int& idx);
 
-	void finish(edm::Event&, const std::vector<reco::TransientTrack>&, std::unique_ptr<reco::VertexCollection>, std::unique_ptr<VertexerPairEffs>, const std::vector<std::pair<track_set, track_set>>&);
+    void finish(edm::Event&, const std::vector<reco::TransientTrack>&, std::unique_ptr<reco::VertexCollection>, std::unique_ptr<VertexerPairEffs>, const std::vector<std::pair<track_set, track_set>>&);
 
-	template <typename T>
-	void print_track_set(const T& ts) const {
-		for (auto r : ts)
-			printf(" %u", r.key());
-	}
+    template <typename T>
+      void print_track_set(const T& ts) const {
+        for (auto r : ts)
+          printf(" %u", r.key());
+      }
 
-	template <typename T>
-	void print_track_set(const T & ts, const reco::Vertex & v) const {
-		for (auto r : ts)
-			printf(" %u%s", r.key(), (v.trackWeight(r) < mfv::track_vertex_weight_min ? "!" : ""));
-	}
+    template <typename T>
+      void print_track_set(const T & ts, const reco::Vertex & v) const {
+        for (auto r : ts)
+          printf(" %u%s", r.key(), (v.trackWeight(r) < mfv::track_vertex_weight_min ? "!" : ""));
+      }
 
-	void print_track_set(const reco::Vertex & v) const {
-		for (auto r = v.tracks_begin(), re = v.tracks_end(); r != re; ++r)
-			printf(" %lu%s", r->key(), (v.trackWeight(*r) < mfv::track_vertex_weight_min ? "!" : ""));
-	}
+    void print_track_set(const reco::Vertex & v) const {
+      for (auto r = v.tracks_begin(), re = v.tracks_end(); r != re; ++r)
+        printf(" %lu%s", r->key(), (v.trackWeight(*r) < mfv::track_vertex_weight_min ? "!" : ""));
+    }
 
-	bool is_track_subset(const track_set & a, const track_set & b) const {
-		bool is_subset = true;
-		const track_set& smaller = a.size() <= b.size() ? a : b;
-		const track_set& bigger = a.size() <= b.size() ? b : a;
+    bool is_track_subset(const track_set & a, const track_set & b) const {
+      bool is_subset = true;
+      const track_set& smaller = a.size() <= b.size() ? a : b;
+      const track_set& bigger = a.size() <= b.size() ? b : a;
 
-		for (auto t : smaller)
-			if (bigger.count(t) < 1) {
-				is_subset = false;
-				break;
-			}
+      for (auto t : smaller)
+        if (bigger.count(t) < 1) {
+          is_subset = false;
+          break;
+        }
 
-		return is_subset;
-	}
+      return is_subset;
+    }
 
-	track_set vertex_track_set(const reco::Vertex & v, const double min_weight = mfv::track_vertex_weight_min) const {
-		track_set result;
+    track_set vertex_track_set(const reco::Vertex & v, const double min_weight = mfv::track_vertex_weight_min) const {
+      track_set result;
 
-		for (auto it = v.tracks_begin(), ite = v.tracks_end(); it != ite; ++it) {
-			const double w = v.trackWeight(*it);
-			const bool use = w >= min_weight;
-			assert(use);
-			//if (verbose) ("trk #%2i pt %6.3f eta %6.3f phi %6.3f dxy %6.3f dz %6.3f w %5.3f  use? %i\n", int(it-v.tracks_begin()), (*it)->pt(), (*it)->eta(), (*it)->phi(), (*it)->dxy(), (*it)->dz(), w, use);
-			if (use)
-				result.insert(it->castTo<reco::TrackRef>());
-		}
+      for (auto it = v.tracks_begin(), ite = v.tracks_end(); it != ite; ++it) {
+        const double w = v.trackWeight(*it);
+        const bool use = w >= min_weight;
+        assert(use);
+        //if (verbose) ("trk #%2i pt %6.3f eta %6.3f phi %6.3f dxy %6.3f dz %6.3f w %5.3f  use? %i\n", int(it-v.tracks_begin()), (*it)->pt(), (*it)->eta(), (*it)->phi(), (*it)->dxy(), (*it)->dz(), w, use);
+        if (use)
+          result.insert(it->castTo<reco::TrackRef>());
+      }
 
-		return result;
-	}
+      return result;
+    }
 
-	track_vec vertex_track_vec(const reco::Vertex & v, const double min_weight = mfv::track_vertex_weight_min) const {
-		track_set s = vertex_track_set(v, min_weight);
-		return track_vec(s.begin(), s.end());
-	}
+    track_vec vertex_track_vec(const reco::Vertex & v, const double min_weight = mfv::track_vertex_weight_min) const {
+      track_set s = vertex_track_set(v, min_weight);
+      return track_vec(s.begin(), s.end());
+    }
 
-	Measurement1D vertex_dist(const reco::Vertex & v0, const reco::Vertex & v1) const {
-		if (use_2d_vertex_dist)
-			return vertex_dist_2d.distance(v0, v1);
-		else
-			return vertex_dist_3d.distance(v0, v1);
-	}
+    Measurement1D vertex_dist(const reco::Vertex & v0, const reco::Vertex & v1) const {
+      if (use_2d_vertex_dist)
+        return vertex_dist_2d.distance(v0, v1);
+      else
+        return vertex_dist_3d.distance(v0, v1);
+    }
 
-	Measurement1D miss_dist(const reco::Vertex & sv, const AlgebraicVector3 & ref, const AlgebraicVector3 & mom) {
-		// miss distance is magnitude of (jet direction (= n) cross (tv - sv) ( = d))
-		// to calculate uncertainty, use |n X d|^2 = (|n||d|)^2 - (n . d)^2
-		AlgebraicVector3 n = ROOT::Math::Unit(mom);
-		AlgebraicVector3 d(sv.x() - ref(0),
-			sv.y() - ref(1),
-			sv.z() - ref(2));
-		AlgebraicVector3 n_cross_d = ROOT::Math::Cross(n, d);
-		double n_dot_d = ROOT::Math::Dot(n, d);
-		double val = ROOT::Math::Mag(n_cross_d);
-		AlgebraicVector3 jac(2 * d(0) - 2 * n_dot_d * n(0),
-			2 * d(1) - 2 * n_dot_d * n(1),
-			2 * d(2) - 2 * n_dot_d * n(2));
-		return Measurement1D(val, sqrt(ROOT::Math::Similarity(jac, sv.covariance())) / 1 / val); // modified err from 2->1 b/c 1 SV instead of 2 SVs
-	}
+    std::pair<bool, Measurement1D> track_dist(const reco::TransientTrack & t, const reco::Vertex & v) const {
+      if (use_2d_track_dist)
+        return IPTools::absoluteTransverseImpactParameter(t, v);
+      else
+        return IPTools::absoluteImpactParameter3D(t, v);
+    }
 
-	std::pair<bool, Measurement1D> track_dist(const reco::TransientTrack & t, const reco::Vertex & v) const {
-		if (use_2d_track_dist)
-			return IPTools::absoluteTransverseImpactParameter(t, v);
-		else
-			return IPTools::absoluteImpactParameter3D(t, v);
-	}
+    VertexDistanceXY vertex_dist_2d;
+    VertexDistance3D vertex_dist_3d;
+    std::unique_ptr<KalmanVertexFitter> kv_reco;
 
-	VertexDistanceXY vertex_dist_2d;
-	VertexDistance3D vertex_dist_3d;
-	std::unique_ptr<KalmanVertexFitter> kv_reco;
+    std::vector<TransientVertex> kv_reco_dropin(std::vector<reco::TransientTrack> & ttks) {
+      if (ttks.size() < 2)
+        return std::vector<TransientVertex>();
+      std::vector<TransientVertex> v(1, kv_reco->vertex(ttks));
+      if (v[0].normalisedChiSquared() > 5)
+        return std::vector<TransientVertex>();
+      return v;
+    }
 
-	std::vector<TransientVertex> kv_reco_dropin(std::vector<reco::TransientTrack> & ttks) {
-		if (ttks.size() < 2)
-			return std::vector<TransientVertex>();
-		std::vector<TransientVertex> v(1, kv_reco->vertex(ttks));
-		if (v[0].normalisedChiSquared() > 5)
-			return std::vector<TransientVertex>();
-		return v;
-	}
+    std::vector<TransientVertex> kv_reco_dropin_nocut(std::vector<reco::TransientTrack> & ttks) {
+      if (ttks.size() < 2)
+        return std::vector<TransientVertex>();
+      std::vector<TransientVertex> v(1, kv_reco->vertex(ttks));
+      return v;
+    }
+    const bool do_track_refinement;
+    const bool resolve_split_vertices_loose;
+    const bool resolve_split_vertices_tight;
+    const bool investigate_merged_vertices;
+    const bool resolve_shared_jets;
+    const edm::EDGetTokenT<pat::JetCollection> shared_jet_token;
+    const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
+    const edm::EDGetTokenT<std::vector<reco::TrackRef>> seed_tracks_token;
+    const int n_tracks_per_seed_vertex;
+    const double max_seed_vertex_chi2;
+    const bool use_2d_vertex_dist;
+    const bool use_2d_track_dist;
+    const double merge_anyway_dist;
+    const double merge_anyway_sig;
+    const double merge_shared_dist;
+    const double merge_shared_sig;
+    const double max_track_vertex_dist;
+    const double max_track_vertex_sig;
+    const double min_track_vertex_sig_to_remove;
+    const bool remove_one_track_at_a_time;
+    const double max_nm1_refit_dist3;
+    const double max_nm1_refit_distz;
+    const int max_nm1_refit_count;
+    const double trackrefine_sigmacut;
+    const double trackrefine_trimmax;
+    const bool histos;
+    const bool histos_noshare;
+    const bool histos_output_afterdzfit;
+    const bool histos_output_aftermerge;
+    const bool histos_output_aftersharedjets;
+    const bool verbose;
+    const std::string module_label;
 
-	std::vector<TransientVertex> kv_reco_dropin_nocut(std::vector<reco::TransientTrack> & ttks) {
-		if (ttks.size() < 2)
-			return std::vector<TransientVertex>();
-		std::vector<TransientVertex> v(1, kv_reco->vertex(ttks));
-		return v;
-	}
-	const bool do_track_refinement;
-	const bool resolve_split_vertices_loose;
-	const bool resolve_split_vertices_tight;
-	const bool investigate_merged_vertices;
-	const bool resolve_shared_jets;
-	const edm::EDGetTokenT<pat::JetCollection> shared_jet_token;
-	const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
-	const edm::EDGetTokenT<std::vector<reco::TrackRef>> seed_tracks_token;
-	const int n_tracks_per_seed_vertex;
-	const double max_seed_vertex_chi2;
-	const bool use_2d_vertex_dist;
-	const bool use_2d_track_dist;
-	const double merge_anyway_dist;
-	const double merge_anyway_sig;
-	const double merge_shared_dist;
-	const double merge_shared_sig;
-	const double max_track_vertex_dist;
-	const double max_track_vertex_sig;
-	const double min_track_vertex_sig_to_remove;
-	const bool remove_one_track_at_a_time;
-	const double max_nm1_refit_dist3;
-	const double max_nm1_refit_distz;
-	const int max_nm1_refit_count;
-	const double trackrefine_sigmacut;
-	const double trackrefine_trimmax;
-	const bool histos;
-	const bool histos_noshare;
-	const bool histos_output_afterdzfit;
-	const bool histos_output_aftermerge;
-	const bool histos_output_aftersharedjets;
-	const bool verbose;
-	const std::string module_label;
 
-	
-	TH1F* h_n_seed_vertices;
-	TH1F* h_seed_vertex_track_weights;
-	TH1F* h_seed_vertex_chi2;
-	TH1F* h_seed_vertex_ndof;
-	TH1F* h_seed_vertex_x;
-	TH1F* h_seed_vertex_y;
-	TH1F* h_seed_vertex_rho;
-	TH1F* h_seed_vertex_phi;
-	TH1F* h_seed_vertex_z;
-	TH1F* h_seed_vertex_r;
-	TH1F* h_seed_vertex_paird2d;
-	TH1F* h_seed_vertex_pairdphi;
-	TH1F* h_n_resets;
-	TH1F* h_n_onetracks;
+    TH1F* h_n_seed_vertices;
+    TH1F* h_seed_vertex_track_weights;
+    TH1F* h_seed_vertex_chi2;
+    TH1F* h_seed_vertex_ndof;
+    TH1F* h_seed_vertex_x;
+    TH1F* h_seed_vertex_y;
+    TH1F* h_seed_vertex_rho;
+    TH1F* h_seed_vertex_phi;
+    TH1F* h_seed_vertex_z;
+    TH1F* h_seed_vertex_r;
+    TH1F* h_seed_vertex_paird2d;
+    TH1F* h_seed_vertex_pairdphi;
+    TH1F* h_n_resets;
+    TH1F* h_n_onetracks;
 
-		
-	TH1F* h_noshare_vertex_tkvtxdist;
-	TH1F* h_noshare_vertex_tkvtxdisterr;
-	TH1F* h_noshare_vertex_tkvtxdistsig;
 
-	TH1F* h_noshare_vertex_tkvtxdist_before_do_track_refinement;
-	TH1F* h_noshare_vertex_tkvtxdisterr_before_do_track_refinement;
-	TH1F* h_noshare_vertex_tkvtxdistsig_before_do_track_refinement;
-		
+    TH1F* h_noshare_vertex_tkvtxdist;
+    TH1F* h_noshare_vertex_tkvtxdisterr;
+    TH1F* h_noshare_vertex_tkvtxdistsig;
 
-		
-	TH1F* h_n_noshare_vertices;
-	TH1F* h_noshare_vertex_ntracks;
-	TH1F* h_noshare_vertex_mass;
-	TH1F* h_noshare_vertex_track_weights;
-	TH1F* h_noshare_vertex_chi2;
-	TH1F* h_noshare_vertex_ndof;
-	TH1F* h_noshare_vertex_x;
-	TH1F* h_noshare_vertex_y;
-	TH1F* h_noshare_vertex_rho;
-	TH1F* h_noshare_vertex_phi;
-	TH1F* h_noshare_vertex_z;
-	TH1F* h_noshare_vertex_r;
-	TH1F* h_noshare_vertex_paird2d;
-	TH1F* h_noshare_vertex_pairdphi;
-	TH1F* h_noshare_track_multiplicity;
-	TH1F* h_max_noshare_track_multiplicity;
-		
+    TH1F* h_noshare_vertex_tkvtxdist_before_do_track_refinement;
+    TH1F* h_noshare_vertex_tkvtxdisterr_before_do_track_refinement;
+    TH1F* h_noshare_vertex_tkvtxdistsig_before_do_track_refinement;
 
-	TH1F* h_n_output_vertices;
-	TH1F* h_n_at_least_5trk_output_vertices;
 
-		
-	TH1F* h_noshare_trackrefine_sigmacut_vertex_chi2;
-	TH1F* h_noshare_trackrefine_sigmacut_vertex_tkvtxdistsig;
-	TH1F* h_noshare_trackrefine_sigmacut_vertex_distr_shift;
 
-	TH1F* h_noshare_trackrefine_trimmax_vertex_chi2;
-	TH1F* h_noshare_trackrefine_trimmax_vertex_tkvtxdistsig;
-	TH1F* h_noshare_trackrefine_trimmax_vertex_distr_shift;
-		
+    TH1F* h_n_noshare_vertices;
+    TH1F* h_noshare_vertex_ntracks;
+    TH1F* h_noshare_vertex_mass;
+    TH1F* h_noshare_vertex_track_weights;
+    TH1F* h_noshare_vertex_chi2;
+    TH1F* h_noshare_vertex_ndof;
+    TH1F* h_noshare_vertex_x;
+    TH1F* h_noshare_vertex_y;
+    TH1F* h_noshare_vertex_rho;
+    TH1F* h_noshare_vertex_phi;
+    TH1F* h_noshare_vertex_z;
+    TH1F* h_noshare_vertex_r;
+    TH1F* h_noshare_vertex_paird2d;
+    TH1F* h_noshare_vertex_pairdphi;
+    TH1F* h_noshare_track_multiplicity;
+    TH1F* h_max_noshare_track_multiplicity;
 
-		
-	TH1F* h_output_afterdzfit_vertex_tkvtxdist;
-	TH1F* h_output_afterdzfit_vertex_tkvtxdisterr;
-	TH1F* h_output_afterdzfit_vertex_tkvtxdistsig;
-	TH1F* h_n_at_least_5trk_output_afterdzfit_vertices;
-	TH1F* h_output_afterdzfit_vertex_nm1_bsbs2ddist;
-	TH1F* h_output_afterdzfit_vertex_nm1_bs2derr;
-	TH1F* h_output_afterdzfit_vertex_ntracks;
-	TH1F* h_output_afterdzfit_vertex_mass;
-	TH1F* h_output_afterdzfit_vertex_track_weights;
-	TH1F* h_output_afterdzfit_vertex_chi2;
-	TH1F* h_output_afterdzfit_vertex_ndof;
-	TH1F* h_output_afterdzfit_vertex_x;
-	TH1F* h_output_afterdzfit_vertex_y;
-	TH1F* h_output_afterdzfit_vertex_rho;
-	TH1F* h_output_afterdzfit_vertex_phi;
-	TH1F* h_output_afterdzfit_vertex_z;
-	TH1F* h_output_afterdzfit_vertex_r;
-	TH1F* h_output_afterdzfit_vertex_paird2d;
-	TH1F* h_output_afterdzfit_vertex_paird2dsig;
-	TH1F* h_output_afterdzfit_vertex_pairdphi;
-		
 
-		
-	TH1F* h_output_aftermerge_vertex_tkvtxdist;
-	TH1F* h_output_aftermerge_vertex_tkvtxdisterr;
-	TH1F* h_output_aftermerge_vertex_tkvtxdistsig;
-	TH1F* h_n_at_least_5trk_output_aftermerge_vertices;
-	TH1F* h_output_aftermerge_vertex_nm1_bsbs2ddist;
-	TH1F* h_output_aftermerge_vertex_nm1_bs2derr;
-	TH1F* h_output_aftermerge_vertex_ntracks;
-	TH1F* h_output_aftermerge_vertex_mass;
-	TH1F* h_output_aftermerge_vertex_track_weights;
-	TH1F* h_output_aftermerge_vertex_chi2;
-	TH1F* h_output_aftermerge_vertex_ndof;
-	TH1F* h_output_aftermerge_vertex_x;
-	TH1F* h_output_aftermerge_vertex_y;
-	TH1F* h_output_aftermerge_vertex_rho;
-	TH1F* h_output_aftermerge_vertex_phi;
-	TH1F* h_output_aftermerge_vertex_z;
-	TH1F* h_output_aftermerge_vertex_r;
-	TH1F* h_output_aftermerge_vertex_paird2d;
-	TH1F* h_output_aftermerge_vertex_paird2dsig;
-	TH1F* h_output_aftermerge_vertex_pairdphi;
-			
-	TH1F* h_output_aftermerge_potential_merged_vertex_nm1_chi2;
-	TH1F* h_output_aftermerge_potential_merged_vertex_nm1_ntracks;
-	TH1F* h_output_aftermerge_potential_merged_vertex_nm1_bs2derr;
-	TH1F* h_output_aftermerge_potential_merged_vertex_nm1_bsbs2ddist;
-			
-		
+    TH1F* h_n_output_vertices;
+    TH1F* h_n_at_least_5trk_output_vertices;
 
-		
-	TH1F* h_resolve_shared_jets_lonetrkvtx_dphi;
-		
 
-		
-	TH1F* h_output_aftersharedjets_vertex_tkvtxdist;
-	TH1F* h_output_aftersharedjets_vertex_tkvtxdisterr;
-	TH1F* h_output_aftersharedjets_vertex_tkvtxdistsig;
-	TH1F* h_n_at_least_5trk_output_aftersharedjets_vertices;
-	TH1F* h_output_aftersharedjets_vertex_nm1_bsbs2ddist;
-	TH1F* h_output_aftersharedjets_vertex_nm1_bs2derr;
-	TH1F* h_output_aftersharedjets_vertex_ntracks;
-	TH1F* h_output_aftersharedjets_vertex_mass;
-	TH1F* h_output_aftersharedjets_vertex_track_weights;
-	TH1F* h_output_aftersharedjets_vertex_chi2;
-	TH1F* h_output_aftersharedjets_vertex_ndof;
-	TH1F* h_output_aftersharedjets_vertex_x;
-	TH1F* h_output_aftersharedjets_vertex_y;
-	TH1F* h_output_aftersharedjets_vertex_rho;
-	TH1F* h_output_aftersharedjets_vertex_phi;
-	TH1F* h_output_aftersharedjets_vertex_z;
-	TH1F* h_output_aftersharedjets_vertex_r;
-	TH1F* h_output_aftersharedjets_vertex_paird2d;
-	TH1F* h_output_aftersharedjets_vertex_paird2dsig;
-	TH1F* h_output_aftersharedjets_vertex_pairdphi;
+    TH1F* h_noshare_trackrefine_sigmacut_vertex_chi2;
+    TH1F* h_noshare_trackrefine_sigmacut_vertex_tkvtxdistsig;
+    TH1F* h_noshare_trackrefine_sigmacut_vertex_distr_shift;
 
-	TH1F* h_output_aftersharedjets_n_onetracks;
-		
-	
+    TH1F* h_noshare_trackrefine_trimmax_vertex_chi2;
+    TH1F* h_noshare_trackrefine_trimmax_vertex_tkvtxdistsig;
+    TH1F* h_noshare_trackrefine_trimmax_vertex_distr_shift;
+
+
+
+    TH1F* h_output_afterdzfit_vertex_tkvtxdist;
+    TH1F* h_output_afterdzfit_vertex_tkvtxdisterr;
+    TH1F* h_output_afterdzfit_vertex_tkvtxdistsig;
+    TH1F* h_n_at_least_5trk_output_afterdzfit_vertices;
+    TH1F* h_output_afterdzfit_vertex_nm1_bsbs2ddist;
+    TH1F* h_output_afterdzfit_vertex_nm1_bs2derr;
+    TH1F* h_output_afterdzfit_vertex_ntracks;
+    TH1F* h_output_afterdzfit_vertex_mass;
+    TH1F* h_output_afterdzfit_vertex_track_weights;
+    TH1F* h_output_afterdzfit_vertex_chi2;
+    TH1F* h_output_afterdzfit_vertex_ndof;
+    TH1F* h_output_afterdzfit_vertex_x;
+    TH1F* h_output_afterdzfit_vertex_y;
+    TH1F* h_output_afterdzfit_vertex_rho;
+    TH1F* h_output_afterdzfit_vertex_phi;
+    TH1F* h_output_afterdzfit_vertex_z;
+    TH1F* h_output_afterdzfit_vertex_r;
+    TH1F* h_output_afterdzfit_vertex_paird2d;
+    TH1F* h_output_afterdzfit_vertex_paird2dsig;
+    TH1F* h_output_afterdzfit_vertex_pairdphi;
+
+
+
+    TH1F* h_output_aftermerge_vertex_tkvtxdist;
+    TH1F* h_output_aftermerge_vertex_tkvtxdisterr;
+    TH1F* h_output_aftermerge_vertex_tkvtxdistsig;
+    TH1F* h_n_at_least_5trk_output_aftermerge_vertices;
+    TH1F* h_output_aftermerge_vertex_nm1_bsbs2ddist;
+    TH1F* h_output_aftermerge_vertex_nm1_bs2derr;
+    TH1F* h_output_aftermerge_vertex_ntracks;
+    TH1F* h_output_aftermerge_vertex_mass;
+    TH1F* h_output_aftermerge_vertex_track_weights;
+    TH1F* h_output_aftermerge_vertex_chi2;
+    TH1F* h_output_aftermerge_vertex_ndof;
+    TH1F* h_output_aftermerge_vertex_x;
+    TH1F* h_output_aftermerge_vertex_y;
+    TH1F* h_output_aftermerge_vertex_rho;
+    TH1F* h_output_aftermerge_vertex_phi;
+    TH1F* h_output_aftermerge_vertex_z;
+    TH1F* h_output_aftermerge_vertex_r;
+    TH1F* h_output_aftermerge_vertex_paird2d;
+    TH1F* h_output_aftermerge_vertex_paird2dsig;
+    TH1F* h_output_aftermerge_vertex_pairdphi;
+
+    TH1F* h_output_aftermerge_potential_merged_vertex_nm1_chi2;
+    TH1F* h_output_aftermerge_potential_merged_vertex_nm1_ntracks;
+    TH1F* h_output_aftermerge_potential_merged_vertex_nm1_bs2derr;
+    TH1F* h_output_aftermerge_potential_merged_vertex_nm1_bsbs2ddist;
+
+
+
+
+    TH1F* h_resolve_shared_jets_lonetrkvtx_dphi;
+
+
+
+    TH1F* h_output_aftersharedjets_vertex_tkvtxdist;
+    TH1F* h_output_aftersharedjets_vertex_tkvtxdisterr;
+    TH1F* h_output_aftersharedjets_vertex_tkvtxdistsig;
+    TH1F* h_n_at_least_5trk_output_aftersharedjets_vertices;
+    TH1F* h_output_aftersharedjets_vertex_nm1_bsbs2ddist;
+    TH1F* h_output_aftersharedjets_vertex_nm1_bs2derr;
+    TH1F* h_output_aftersharedjets_vertex_ntracks;
+    TH1F* h_output_aftersharedjets_vertex_mass;
+    TH1F* h_output_aftersharedjets_vertex_track_weights;
+    TH1F* h_output_aftersharedjets_vertex_chi2;
+    TH1F* h_output_aftersharedjets_vertex_ndof;
+    TH1F* h_output_aftersharedjets_vertex_x;
+    TH1F* h_output_aftersharedjets_vertex_y;
+    TH1F* h_output_aftersharedjets_vertex_rho;
+    TH1F* h_output_aftersharedjets_vertex_phi;
+    TH1F* h_output_aftersharedjets_vertex_z;
+    TH1F* h_output_aftersharedjets_vertex_r;
+    TH1F* h_output_aftersharedjets_vertex_paird2d;
+    TH1F* h_output_aftersharedjets_vertex_paird2dsig;
+    TH1F* h_output_aftersharedjets_vertex_pairdphi;
+
+    TH1F* h_output_aftersharedjets_n_onetracks;
+
+
 };
 
 MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
@@ -378,128 +362,128 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_n_onetracks                    = fs->make<TH1F>("h_n_onetracks",                    "",  5,   0,     5);
 
     h_n_noshare_vertices             = fs->make<TH1F>("h_n_noshare_vertices",             ";# of noshare vertices", 20,   0,    50);
-	
-	if (do_track_refinement) {
-		h_noshare_vertex_tkvtxdist = fs->make<TH1F>("h_noshare_vertex_tkvtxdist", ";tkvtxdist (cm.)", 20, 0, 0.1);
-		h_noshare_vertex_tkvtxdisterr = fs->make<TH1F>("h_noshare_vertex_tkvtxdisterr", ";tkvtxdisterr (cm.)", 20, 0, 0.1);
-		h_noshare_vertex_tkvtxdistsig = fs->make<TH1F>("h_noshare_vertex_tkvtxdistsig", ";tkvtxdistsig", 20, 0, 6);
-		h_noshare_vertex_tkvtxdist_before_do_track_refinement = fs->make<TH1F>("h_noshare_vertex_tkvtxdist_before_do_track_refinement", ";tkvtxdist (cm.)", 20, 0, 0.1);
-		h_noshare_vertex_tkvtxdisterr_before_do_track_refinement = fs->make<TH1F>("h_noshare_vertex_tkvtxdisterr_before_do_track_refinement", ";tkvtxdisterr (cm.)", 20, 0, 0.1);
-		h_noshare_vertex_tkvtxdistsig_before_do_track_refinement = fs->make<TH1F>("h_noshare_vertex_tkvtxdistsig_before_do_track_refinement", ";tkvtxdistsig", 20, 0, 6);
-	}
 
-	if (histos_noshare) {
-		h_noshare_vertex_ntracks = fs->make<TH1F>("h_noshare_vertex_ntracks", ";ntracks/vtx", 30, 0, 30);
-		h_noshare_vertex_mass = fs->make<TH1F>("h_noshare_vertex_mass", ";mass/vtx (GeV)", 20, 0, 1000);
-		h_noshare_vertex_track_weights = fs->make<TH1F>("h_noshare_vertex_track_weights", ";vertex track weights", 21, 0, 1.05);
-		h_noshare_vertex_chi2 = fs->make<TH1F>("h_noshare_vertex_chi2", ";normalized chi2", 20, 0, max_seed_vertex_chi2);
-		h_noshare_vertex_ndof = fs->make<TH1F>("h_noshare_vertex_ndof", ";ndof", 10, 0, 20);
-		h_noshare_vertex_x = fs->make<TH1F>("h_noshare_vertex_x", ";vtxbsdist_x (cm.)", 20, -1, 1);
-		h_noshare_vertex_y = fs->make<TH1F>("h_noshare_vertex_y", ";vtxbsdist_y (cm.)", 20, -1, 1);
-		h_noshare_vertex_rho = fs->make<TH1F>("h_noshare_vertex_rho", ";vtx rho", 20, 0, 2);
-		h_noshare_vertex_phi = fs->make<TH1F>("h_noshare_vertex_phi", ";vtx phi", 20, -3.15, 3.15);
-		h_noshare_vertex_z = fs->make<TH1F>("h_noshare_vertex_z", ";vtxbsdist_z (cm.)", 20, -20, 20);
-		h_noshare_vertex_r = fs->make<TH1F>("h_noshare_vertex_r", ";vtxbsdist_r (cm.)", 20, 0, 2);
-		h_noshare_vertex_paird2d = fs->make<TH1F>("h_noshare_vertex_paird2d", ";svdist2d (cm.) every pair", 100, 0, 0.2);
-		h_noshare_vertex_pairdphi = fs->make<TH1F>("h_noshare_vertex_pairdphi", ";dPhi(vtx0,vtx1) every pair", 100, -3.14, 3.14);
-		h_noshare_track_multiplicity = fs->make<TH1F>("h_noshare_track_multiplicity", "", 20, 0, 40);
-		h_max_noshare_track_multiplicity = fs->make<TH1F>("h_max_noshare_track_multiplicity", "", 20, 0, 40);
-	}
+    if (do_track_refinement) {
+      h_noshare_vertex_tkvtxdist = fs->make<TH1F>("h_noshare_vertex_tkvtxdist", ";tkvtxdist (cm.)", 20, 0, 0.1);
+      h_noshare_vertex_tkvtxdisterr = fs->make<TH1F>("h_noshare_vertex_tkvtxdisterr", ";tkvtxdisterr (cm.)", 20, 0, 0.1);
+      h_noshare_vertex_tkvtxdistsig = fs->make<TH1F>("h_noshare_vertex_tkvtxdistsig", ";tkvtxdistsig", 20, 0, 6);
+      h_noshare_vertex_tkvtxdist_before_do_track_refinement = fs->make<TH1F>("h_noshare_vertex_tkvtxdist_before_do_track_refinement", ";tkvtxdist (cm.)", 20, 0, 0.1);
+      h_noshare_vertex_tkvtxdisterr_before_do_track_refinement = fs->make<TH1F>("h_noshare_vertex_tkvtxdisterr_before_do_track_refinement", ";tkvtxdisterr (cm.)", 20, 0, 0.1);
+      h_noshare_vertex_tkvtxdistsig_before_do_track_refinement = fs->make<TH1F>("h_noshare_vertex_tkvtxdistsig_before_do_track_refinement", ";tkvtxdistsig", 20, 0, 6);
+    }
 
-	h_n_output_vertices = fs->make<TH1F>("h_n_output_vertices", ";# of output vertices", 50, 0, 50);
-	h_n_at_least_5trk_output_vertices = fs->make<TH1F>("h_n_at_least_5trk_output_vertices", ";# of output vertices w/ >=5trk/vtx", 20, 0, 20);
+    if (histos_noshare) {
+      h_noshare_vertex_ntracks = fs->make<TH1F>("h_noshare_vertex_ntracks", ";ntracks/vtx", 30, 0, 30);
+      h_noshare_vertex_mass = fs->make<TH1F>("h_noshare_vertex_mass", ";mass/vtx (GeV)", 20, 0, 1000);
+      h_noshare_vertex_track_weights = fs->make<TH1F>("h_noshare_vertex_track_weights", ";vertex track weights", 21, 0, 1.05);
+      h_noshare_vertex_chi2 = fs->make<TH1F>("h_noshare_vertex_chi2", ";normalized chi2", 20, 0, max_seed_vertex_chi2);
+      h_noshare_vertex_ndof = fs->make<TH1F>("h_noshare_vertex_ndof", ";ndof", 10, 0, 20);
+      h_noshare_vertex_x = fs->make<TH1F>("h_noshare_vertex_x", ";vtxbsdist_x (cm.)", 20, -1, 1);
+      h_noshare_vertex_y = fs->make<TH1F>("h_noshare_vertex_y", ";vtxbsdist_y (cm.)", 20, -1, 1);
+      h_noshare_vertex_rho = fs->make<TH1F>("h_noshare_vertex_rho", ";vtx rho", 20, 0, 2);
+      h_noshare_vertex_phi = fs->make<TH1F>("h_noshare_vertex_phi", ";vtx phi", 20, -3.15, 3.15);
+      h_noshare_vertex_z = fs->make<TH1F>("h_noshare_vertex_z", ";vtxbsdist_z (cm.)", 20, -20, 20);
+      h_noshare_vertex_r = fs->make<TH1F>("h_noshare_vertex_r", ";vtxbsdist_r (cm.)", 20, 0, 2);
+      h_noshare_vertex_paird2d = fs->make<TH1F>("h_noshare_vertex_paird2d", ";svdist2d (cm.) every pair", 100, 0, 0.2);
+      h_noshare_vertex_pairdphi = fs->make<TH1F>("h_noshare_vertex_pairdphi", ";dPhi(vtx0,vtx1) every pair", 100, -3.14, 3.14);
+      h_noshare_track_multiplicity = fs->make<TH1F>("h_noshare_track_multiplicity", "", 20, 0, 40);
+      h_max_noshare_track_multiplicity = fs->make<TH1F>("h_max_noshare_track_multiplicity", "", 20, 0, 40);
+    }
+
+    h_n_output_vertices = fs->make<TH1F>("h_n_output_vertices", ";# of output vertices", 50, 0, 50);
+    h_n_at_least_5trk_output_vertices = fs->make<TH1F>("h_n_at_least_5trk_output_vertices", ";# of output vertices w/ >=5trk/vtx", 20, 0, 20);
 
 
-	if (do_track_refinement) {
-		h_noshare_trackrefine_sigmacut_vertex_chi2 = fs->make<TH1F>("h_noshare_trackrefine_sigmacut_vertex_chi2", ";chi2/dof", 20, 0, max_seed_vertex_chi2);
-		h_noshare_trackrefine_sigmacut_vertex_tkvtxdistsig = fs->make<TH1F>("h_noshare_trackrefine_sigmacut_vertex_tkvtxdistsig", ";missdist sig", 20, 0, 6);
-		h_noshare_trackrefine_sigmacut_vertex_distr_shift = fs->make<TH1F>("h_noshare_trackrefine_sigmacut_vertex_distr_shift", ";vtx after sigmacut'r - vtx before sigmacut'r (cm)", 20, -0.08, 0.08);
+    if (do_track_refinement) {
+      h_noshare_trackrefine_sigmacut_vertex_chi2 = fs->make<TH1F>("h_noshare_trackrefine_sigmacut_vertex_chi2", ";chi2/dof", 20, 0, max_seed_vertex_chi2);
+      h_noshare_trackrefine_sigmacut_vertex_tkvtxdistsig = fs->make<TH1F>("h_noshare_trackrefine_sigmacut_vertex_tkvtxdistsig", ";missdist sig", 20, 0, 6);
+      h_noshare_trackrefine_sigmacut_vertex_distr_shift = fs->make<TH1F>("h_noshare_trackrefine_sigmacut_vertex_distr_shift", ";vtx after sigmacut'r - vtx before sigmacut'r (cm)", 20, -0.08, 0.08);
 
-		h_noshare_trackrefine_trimmax_vertex_chi2 = fs->make<TH1F>("h_noshare_trackrefine_trimmax_vertex_chi2", ";chi2/dof", 20, 0, max_seed_vertex_chi2);
-		h_noshare_trackrefine_trimmax_vertex_tkvtxdistsig = fs->make<TH1F>("h_noshare_trackrefine_trimmax_vertex_tkvtxdistsig", ";missdist sig", 20, 0, 6);
-		h_noshare_trackrefine_trimmax_vertex_distr_shift = fs->make<TH1F>("h_noshare_trackrefine_trimmax_vertex_distr_shift", ";vtx after trimmax'r - vtx before trimmax'r (cm)", 20, -0.08, 0.08);
-	}
+      h_noshare_trackrefine_trimmax_vertex_chi2 = fs->make<TH1F>("h_noshare_trackrefine_trimmax_vertex_chi2", ";chi2/dof", 20, 0, max_seed_vertex_chi2);
+      h_noshare_trackrefine_trimmax_vertex_tkvtxdistsig = fs->make<TH1F>("h_noshare_trackrefine_trimmax_vertex_tkvtxdistsig", ";missdist sig", 20, 0, 6);
+      h_noshare_trackrefine_trimmax_vertex_distr_shift = fs->make<TH1F>("h_noshare_trackrefine_trimmax_vertex_distr_shift", ";vtx after trimmax'r - vtx before trimmax'r (cm)", 20, -0.08, 0.08);
+    }
 
-	if (histos_output_afterdzfit) {
-		h_n_at_least_5trk_output_afterdzfit_vertices = fs->make<TH1F>("h_n_at_least_5trk_output_afterdzfit_vertices", ";# of >=5trk-vertices", 20, 0, 20);
-		h_output_afterdzfit_vertex_nm1_bsbs2ddist = fs->make<TH1F>("h_output_afterdzfit_vertex_nm1_bsbs2ddist", ";dBV (cm.) w/ n-1 cuts applied", 100, 0, 1.0);
-		h_output_afterdzfit_vertex_nm1_bs2derr = fs->make<TH1F>("h_output_afterdzfit_vertex_nm1_bs2derr", ";bs2derr (cm.) w/ n-1 cuts applied", 20, 0, 0.05);
-		h_output_afterdzfit_vertex_tkvtxdist = fs->make<TH1F>("h_output_afterdzfit_vertex_tkvtxdist", ";tkvtxdist (cm.)", 20, 0, 0.1);
-		h_output_afterdzfit_vertex_tkvtxdisterr = fs->make<TH1F>("h_output_afterdzfit_vertex_tkvtxdisterr", ";tkvtxdisterr (cm.)", 20, 0, 0.1);
-		h_output_afterdzfit_vertex_tkvtxdistsig = fs->make<TH1F>("h_output_afterdzfit_vertex_tkvtxdistsig", ";tkvtxdistsig", 20, 0, 6);
-		h_output_afterdzfit_vertex_ntracks = fs->make<TH1F>("h_output_afterdzfit_vertex_ntracks", ";ntracks/vtx", 30, 0, 30);
-		h_output_afterdzfit_vertex_mass = fs->make<TH1F>("h_output_afterdzfit_vertex_mass", ";mass/vtx (GeV)", 20, 0, 1000);
-		h_output_afterdzfit_vertex_track_weights = fs->make<TH1F>("h_output_afterdzfit_vertex_track_weights", ";vertex track weights", 21, 0, 1.05);
-		h_output_afterdzfit_vertex_chi2 = fs->make<TH1F>("h_output_afterdzfit_vertex_chi2", ";normalized chi2", 20, 0, max_seed_vertex_chi2);
-		h_output_afterdzfit_vertex_ndof = fs->make<TH1F>("h_output_afterdzfit_vertex_ndof", ";ndof", 10, 0, 20);
-		h_output_afterdzfit_vertex_x = fs->make<TH1F>("h_output_afterdzfit_vertex_x", ";vtxbsdist_x (cm.)", 20, -1, 1);
-		h_output_afterdzfit_vertex_y = fs->make<TH1F>("h_output_afterdzfit_vertex_y", ";vtxbsdist_y (cm.)", 20, -1, 1);
-		h_output_afterdzfit_vertex_rho = fs->make<TH1F>("h_output_afterdzfit_vertex_rho", ";vtx rho", 20, 0, 2);
-		h_output_afterdzfit_vertex_phi = fs->make<TH1F>("h_output_afterdzfit_vertex_phi", ";vtx phi", 20, -3.15, 3.15);
-		h_output_afterdzfit_vertex_z = fs->make<TH1F>("h_output_afterdzfit_vertex_z", ";vtxbsdist_z (cm.)", 20, -20, 20);
-		h_output_afterdzfit_vertex_r = fs->make<TH1F>("h_output_afterdzfit_vertex_r", ";vtxbsdist_r (cm.)", 20, 0, 2);
-		h_output_afterdzfit_vertex_paird2d = fs->make<TH1F>("h_output_afterdzfit_vertex_paird2d", ";svdist2d (cm.) every pair", 100, 0, 0.2);
-		h_output_afterdzfit_vertex_paird2dsig = fs->make<TH1F>("h_output_afterdzfit_vertex_paird2dsig", ";svdist2d significance every pair", 100, 0, 20);
-		h_output_afterdzfit_vertex_pairdphi = fs->make<TH1F>("h_output_afterdzfit_vertex_pairdphi", ";dPhi(vtx0,vtx1) every pair", 100, -3.14, 3.14);
-	}
+    if (histos_output_afterdzfit) {
+      h_n_at_least_5trk_output_afterdzfit_vertices = fs->make<TH1F>("h_n_at_least_5trk_output_afterdzfit_vertices", ";# of >=5trk-vertices", 20, 0, 20);
+      h_output_afterdzfit_vertex_nm1_bsbs2ddist = fs->make<TH1F>("h_output_afterdzfit_vertex_nm1_bsbs2ddist", ";dBV (cm.) w/ n-1 cuts applied", 100, 0, 1.0);
+      h_output_afterdzfit_vertex_nm1_bs2derr = fs->make<TH1F>("h_output_afterdzfit_vertex_nm1_bs2derr", ";bs2derr (cm.) w/ n-1 cuts applied", 20, 0, 0.05);
+      h_output_afterdzfit_vertex_tkvtxdist = fs->make<TH1F>("h_output_afterdzfit_vertex_tkvtxdist", ";tkvtxdist (cm.)", 20, 0, 0.1);
+      h_output_afterdzfit_vertex_tkvtxdisterr = fs->make<TH1F>("h_output_afterdzfit_vertex_tkvtxdisterr", ";tkvtxdisterr (cm.)", 20, 0, 0.1);
+      h_output_afterdzfit_vertex_tkvtxdistsig = fs->make<TH1F>("h_output_afterdzfit_vertex_tkvtxdistsig", ";tkvtxdistsig", 20, 0, 6);
+      h_output_afterdzfit_vertex_ntracks = fs->make<TH1F>("h_output_afterdzfit_vertex_ntracks", ";ntracks/vtx", 30, 0, 30);
+      h_output_afterdzfit_vertex_mass = fs->make<TH1F>("h_output_afterdzfit_vertex_mass", ";mass/vtx (GeV)", 20, 0, 1000);
+      h_output_afterdzfit_vertex_track_weights = fs->make<TH1F>("h_output_afterdzfit_vertex_track_weights", ";vertex track weights", 21, 0, 1.05);
+      h_output_afterdzfit_vertex_chi2 = fs->make<TH1F>("h_output_afterdzfit_vertex_chi2", ";normalized chi2", 20, 0, max_seed_vertex_chi2);
+      h_output_afterdzfit_vertex_ndof = fs->make<TH1F>("h_output_afterdzfit_vertex_ndof", ";ndof", 10, 0, 20);
+      h_output_afterdzfit_vertex_x = fs->make<TH1F>("h_output_afterdzfit_vertex_x", ";vtxbsdist_x (cm.)", 20, -1, 1);
+      h_output_afterdzfit_vertex_y = fs->make<TH1F>("h_output_afterdzfit_vertex_y", ";vtxbsdist_y (cm.)", 20, -1, 1);
+      h_output_afterdzfit_vertex_rho = fs->make<TH1F>("h_output_afterdzfit_vertex_rho", ";vtx rho", 20, 0, 2);
+      h_output_afterdzfit_vertex_phi = fs->make<TH1F>("h_output_afterdzfit_vertex_phi", ";vtx phi", 20, -3.15, 3.15);
+      h_output_afterdzfit_vertex_z = fs->make<TH1F>("h_output_afterdzfit_vertex_z", ";vtxbsdist_z (cm.)", 20, -20, 20);
+      h_output_afterdzfit_vertex_r = fs->make<TH1F>("h_output_afterdzfit_vertex_r", ";vtxbsdist_r (cm.)", 20, 0, 2);
+      h_output_afterdzfit_vertex_paird2d = fs->make<TH1F>("h_output_afterdzfit_vertex_paird2d", ";svdist2d (cm.) every pair", 100, 0, 0.2);
+      h_output_afterdzfit_vertex_paird2dsig = fs->make<TH1F>("h_output_afterdzfit_vertex_paird2dsig", ";svdist2d significance every pair", 100, 0, 20);
+      h_output_afterdzfit_vertex_pairdphi = fs->make<TH1F>("h_output_afterdzfit_vertex_pairdphi", ";dPhi(vtx0,vtx1) every pair", 100, -3.14, 3.14);
+    }
 
-	if (histos_output_aftermerge) {
-		h_n_at_least_5trk_output_aftermerge_vertices = fs->make<TH1F>("h_n_at_least_5trk_output_aftermerge_vertices", ";# of >=5trk-vertices", 20, 0, 20);
-		h_output_aftermerge_vertex_nm1_bsbs2ddist = fs->make<TH1F>("h_output_aftermerge_vertex_nm1_bsbs2ddist", ";dBV (cm.) w/ n-1 cuts applied", 100, 0, 1.0);
-		h_output_aftermerge_vertex_nm1_bs2derr = fs->make<TH1F>("h_output_aftermerge_vertex_nm1_bs2derr", ";bs2derr (cm.) w/ n-1 cuts applied", 20, 0, 0.05);
-		h_output_aftermerge_vertex_tkvtxdist = fs->make<TH1F>("h_output_aftermerge_vertex_tkvtxdist", ";tkvtxdist (cm.)", 20, 0, 0.1);
-		h_output_aftermerge_vertex_tkvtxdisterr = fs->make<TH1F>("h_output_aftermerge_vertex_tkvtxdisterr", ";tkvtxdisterr (cm.)", 20, 0, 0.1);
-		h_output_aftermerge_vertex_tkvtxdistsig = fs->make<TH1F>("h_output_aftermerge_vertex_tkvtxdistsig", ";tkvtxdistsig", 20, 0, 6);
-		h_output_aftermerge_vertex_ntracks = fs->make<TH1F>("h_output_aftermerge_vertex_ntracks", ";ntracks/vtx", 30, 0, 30);
-		h_output_aftermerge_vertex_mass = fs->make<TH1F>("h_output_aftermerge_vertex_mass", ";mass/vtx (GeV)", 20, 0, 1000);
-		h_output_aftermerge_vertex_track_weights = fs->make<TH1F>("h_output_aftermerge_vertex_track_weights", ";vertex track weights", 21, 0, 1.05);
-		h_output_aftermerge_vertex_chi2 = fs->make<TH1F>("h_output_aftermerge_vertex_chi2", ";normalized chi2", 20, 0, max_seed_vertex_chi2);
-		h_output_aftermerge_vertex_ndof = fs->make<TH1F>("h_output_aftermerge_vertex_ndof", ";ndof", 10, 0, 20);
-		h_output_aftermerge_vertex_x = fs->make<TH1F>("h_output_aftermerge_vertex_x", ";vtxbsdist_x (cm.)", 20, -1, 1);
-		h_output_aftermerge_vertex_y = fs->make<TH1F>("h_output_aftermerge_vertex_y", ";vtxbsdist_y (cm.)", 20, -1, 1);
-		h_output_aftermerge_vertex_rho = fs->make<TH1F>("h_output_aftermerge_vertex_rho", ";vtx rho", 20, 0, 2);
-		h_output_aftermerge_vertex_phi = fs->make<TH1F>("h_output_aftermerge_vertex_phi", ";vtx phi", 20, -3.15, 3.15);
-		h_output_aftermerge_vertex_z = fs->make<TH1F>("h_output_aftermerge_vertex_z", ";vtxbsdist_z (cm.)", 20, -20, 20);
-		h_output_aftermerge_vertex_r = fs->make<TH1F>("h_output_aftermerge_vertex_r", ";vtxbsdist_r (cm.)", 20, 0, 2);
-		h_output_aftermerge_vertex_paird2d = fs->make<TH1F>("h_output_aftermerge_vertex_paird2d", ";svdist2d (cm.) every pair", 100, 0, 0.2);
-		h_output_aftermerge_vertex_paird2dsig = fs->make<TH1F>("h_output_aftermerge_vertex_paird2dsig", ";svdist2d significance every pair", 100, 0, 20);
-		h_output_aftermerge_vertex_pairdphi = fs->make<TH1F>("h_output_aftermerge_vertex_pairdphi", ";dPhi(vtx0,vtx1) every pair", 100, -3.14, 3.14);
-		if (investigate_merged_vertices) {
-			h_output_aftermerge_potential_merged_vertex_nm1_chi2 = fs->make<TH1F>("h_output_aftermerge_potential_merged_vertex_nm1_chi2", ";normalized chi2 w/ n-1 cuts applied", 20, 0, 20);
-			h_output_aftermerge_potential_merged_vertex_nm1_ntracks = fs->make<TH1F>("h_output_aftermerge_potential_merged_vertex_nm1_ntracks", ";ntracks/vtx w/ n-1 cuts applied", 30, 0, 30);
-			h_output_aftermerge_potential_merged_vertex_nm1_bs2derr = fs->make<TH1F>("h_output_aftermerge_potential_merged_vertex_nm1_bs2derr", ";bs2derr (cm.) w/ n-1 cuts applied", 20, 0, 0.05);
-			h_output_aftermerge_potential_merged_vertex_nm1_bsbs2ddist = fs->make<TH1F>("h_output_aftermerge_potential_merged_vertex_nm1_bsbs2ddist", ";dBV (cm.) w/ n-1 cuts applied", 100, 0, 1.0);
-		}
-	}
+    if (histos_output_aftermerge) {
+      h_n_at_least_5trk_output_aftermerge_vertices = fs->make<TH1F>("h_n_at_least_5trk_output_aftermerge_vertices", ";# of >=5trk-vertices", 20, 0, 20);
+      h_output_aftermerge_vertex_nm1_bsbs2ddist = fs->make<TH1F>("h_output_aftermerge_vertex_nm1_bsbs2ddist", ";dBV (cm.) w/ n-1 cuts applied", 100, 0, 1.0);
+      h_output_aftermerge_vertex_nm1_bs2derr = fs->make<TH1F>("h_output_aftermerge_vertex_nm1_bs2derr", ";bs2derr (cm.) w/ n-1 cuts applied", 20, 0, 0.05);
+      h_output_aftermerge_vertex_tkvtxdist = fs->make<TH1F>("h_output_aftermerge_vertex_tkvtxdist", ";tkvtxdist (cm.)", 20, 0, 0.1);
+      h_output_aftermerge_vertex_tkvtxdisterr = fs->make<TH1F>("h_output_aftermerge_vertex_tkvtxdisterr", ";tkvtxdisterr (cm.)", 20, 0, 0.1);
+      h_output_aftermerge_vertex_tkvtxdistsig = fs->make<TH1F>("h_output_aftermerge_vertex_tkvtxdistsig", ";tkvtxdistsig", 20, 0, 6);
+      h_output_aftermerge_vertex_ntracks = fs->make<TH1F>("h_output_aftermerge_vertex_ntracks", ";ntracks/vtx", 30, 0, 30);
+      h_output_aftermerge_vertex_mass = fs->make<TH1F>("h_output_aftermerge_vertex_mass", ";mass/vtx (GeV)", 20, 0, 1000);
+      h_output_aftermerge_vertex_track_weights = fs->make<TH1F>("h_output_aftermerge_vertex_track_weights", ";vertex track weights", 21, 0, 1.05);
+      h_output_aftermerge_vertex_chi2 = fs->make<TH1F>("h_output_aftermerge_vertex_chi2", ";normalized chi2", 20, 0, max_seed_vertex_chi2);
+      h_output_aftermerge_vertex_ndof = fs->make<TH1F>("h_output_aftermerge_vertex_ndof", ";ndof", 10, 0, 20);
+      h_output_aftermerge_vertex_x = fs->make<TH1F>("h_output_aftermerge_vertex_x", ";vtxbsdist_x (cm.)", 20, -1, 1);
+      h_output_aftermerge_vertex_y = fs->make<TH1F>("h_output_aftermerge_vertex_y", ";vtxbsdist_y (cm.)", 20, -1, 1);
+      h_output_aftermerge_vertex_rho = fs->make<TH1F>("h_output_aftermerge_vertex_rho", ";vtx rho", 20, 0, 2);
+      h_output_aftermerge_vertex_phi = fs->make<TH1F>("h_output_aftermerge_vertex_phi", ";vtx phi", 20, -3.15, 3.15);
+      h_output_aftermerge_vertex_z = fs->make<TH1F>("h_output_aftermerge_vertex_z", ";vtxbsdist_z (cm.)", 20, -20, 20);
+      h_output_aftermerge_vertex_r = fs->make<TH1F>("h_output_aftermerge_vertex_r", ";vtxbsdist_r (cm.)", 20, 0, 2);
+      h_output_aftermerge_vertex_paird2d = fs->make<TH1F>("h_output_aftermerge_vertex_paird2d", ";svdist2d (cm.) every pair", 100, 0, 0.2);
+      h_output_aftermerge_vertex_paird2dsig = fs->make<TH1F>("h_output_aftermerge_vertex_paird2dsig", ";svdist2d significance every pair", 100, 0, 20);
+      h_output_aftermerge_vertex_pairdphi = fs->make<TH1F>("h_output_aftermerge_vertex_pairdphi", ";dPhi(vtx0,vtx1) every pair", 100, -3.14, 3.14);
+      if (investigate_merged_vertices) {
+        h_output_aftermerge_potential_merged_vertex_nm1_chi2 = fs->make<TH1F>("h_output_aftermerge_potential_merged_vertex_nm1_chi2", ";normalized chi2 w/ n-1 cuts applied", 20, 0, 20);
+        h_output_aftermerge_potential_merged_vertex_nm1_ntracks = fs->make<TH1F>("h_output_aftermerge_potential_merged_vertex_nm1_ntracks", ";ntracks/vtx w/ n-1 cuts applied", 30, 0, 30);
+        h_output_aftermerge_potential_merged_vertex_nm1_bs2derr = fs->make<TH1F>("h_output_aftermerge_potential_merged_vertex_nm1_bs2derr", ";bs2derr (cm.) w/ n-1 cuts applied", 20, 0, 0.05);
+        h_output_aftermerge_potential_merged_vertex_nm1_bsbs2ddist = fs->make<TH1F>("h_output_aftermerge_potential_merged_vertex_nm1_bsbs2ddist", ";dBV (cm.) w/ n-1 cuts applied", 100, 0, 1.0);
+      }
+    }
 
-	if (resolve_shared_jets) {
-		h_resolve_shared_jets_lonetrkvtx_dphi = fs->make<TH1F>("h_resolve_shared_jets_lonetrkvtx_dphi", ";|dPhi(vtx,a lone track)|", 20, 0, 3.15);
-	}
+    if (resolve_shared_jets) {
+      h_resolve_shared_jets_lonetrkvtx_dphi = fs->make<TH1F>("h_resolve_shared_jets_lonetrkvtx_dphi", ";|dPhi(vtx,a lone track)|", 20, 0, 3.15);
+    }
 
-	if (histos_output_aftersharedjets) {
-		h_n_at_least_5trk_output_aftersharedjets_vertices = fs->make<TH1F>("h_n_at_least_5trk_output_aftersharedjets_vertices", ";# of >=5trk-vertices", 20, 0, 20);
-		h_output_aftersharedjets_vertex_nm1_bsbs2ddist = fs->make<TH1F>("h_output_aftersharedjets_vertex_nm1_bsbs2ddist", ";dBV (cm.) w/ n-1 cuts applied", 100, 0, 1.0);
-		h_output_aftersharedjets_vertex_nm1_bs2derr = fs->make<TH1F>("h_output_aftersharedjets_vertex_nm1_bs2derr", ";bs2derr (cm.) w/ n-1 cuts applied", 20, 0, 0.05);
-		h_output_aftersharedjets_vertex_tkvtxdist = fs->make<TH1F>("h_output_aftersharedjets_vertex_tkvtxdist", ";tkvtxdist (cm.)", 20, 0, 0.1);
-		h_output_aftersharedjets_vertex_tkvtxdisterr = fs->make<TH1F>("h_output_aftersharedjets_vertex_tkvtxdisterr", ";tkvtxdisterr (cm.)", 20, 0, 0.1);
-		h_output_aftersharedjets_vertex_tkvtxdistsig = fs->make<TH1F>("h_output_aftersharedjets_vertex_tkvtxdistsig", ";tkvtxdistsig", 20, 0, 6);
-		h_output_aftersharedjets_vertex_ntracks = fs->make<TH1F>("h_output_aftersharedjets_vertex_ntracks", ";ntracks/vtx", 30, 0, 30);
-		h_output_aftersharedjets_vertex_mass = fs->make<TH1F>("h_output_aftersharedjets_vertex_mass", ";mass/vtx (GeV)", 20, 0, 1000);
-		h_output_aftersharedjets_vertex_track_weights = fs->make<TH1F>("h_output_aftersharedjets_vertex_track_weights", ";vertex track weights", 21, 0, 1.05);
-		h_output_aftersharedjets_vertex_chi2 = fs->make<TH1F>("h_output_aftersharedjets_vertex_chi2", ";normalized chi2", 20, 0, max_seed_vertex_chi2);
-		h_output_aftersharedjets_vertex_ndof = fs->make<TH1F>("h_output_aftersharedjets_vertex_ndof", ";ndof", 10, 0, 20);
-		h_output_aftersharedjets_vertex_x = fs->make<TH1F>("h_output_aftersharedjets_vertex_x", ";vtxbsdist_x (cm.)", 20, -1, 1);
-		h_output_aftersharedjets_vertex_y = fs->make<TH1F>("h_output_aftersharedjets_vertex_y", ";vtxbsdist_y (cm.)", 20, -1, 1);
-		h_output_aftersharedjets_vertex_rho = fs->make<TH1F>("h_output_aftersharedjets_vertex_rho", ";vtx rho", 20, 0, 2);
-		h_output_aftersharedjets_vertex_phi = fs->make<TH1F>("h_output_aftersharedjets_vertex_phi", ";vtx phi", 20, -3.15, 3.15);
-		h_output_aftersharedjets_vertex_z = fs->make<TH1F>("h_output_aftersharedjets_vertex_z", ";vtxbsdist_z (cm.)", 20, -20, 20);
-		h_output_aftersharedjets_vertex_r = fs->make<TH1F>("h_output_aftersharedjets_vertex_r", ";vtxbsdist_r (cm.)", 20, 0, 2);
-		h_output_aftersharedjets_vertex_paird2d = fs->make<TH1F>("h_output_aftersharedjets_vertex_paird2d", ";svdist2d (cm.) every pair", 100, 0, 0.2);
-		h_output_aftersharedjets_vertex_paird2dsig = fs->make<TH1F>("h_output_aftersharedjets_vertex_paird2dsig", ";svdist2d significance every pair", 100, 0, 20);
-		h_output_aftersharedjets_vertex_pairdphi = fs->make<TH1F>("h_output_aftersharedjets_vertex_pairdphi", ";dPhi(vtx0,vtx1) every pair", 100, -3.14, 3.14);
+    if (histos_output_aftersharedjets) {
+      h_n_at_least_5trk_output_aftersharedjets_vertices = fs->make<TH1F>("h_n_at_least_5trk_output_aftersharedjets_vertices", ";# of >=5trk-vertices", 20, 0, 20);
+      h_output_aftersharedjets_vertex_nm1_bsbs2ddist = fs->make<TH1F>("h_output_aftersharedjets_vertex_nm1_bsbs2ddist", ";dBV (cm.) w/ n-1 cuts applied", 100, 0, 1.0);
+      h_output_aftersharedjets_vertex_nm1_bs2derr = fs->make<TH1F>("h_output_aftersharedjets_vertex_nm1_bs2derr", ";bs2derr (cm.) w/ n-1 cuts applied", 20, 0, 0.05);
+      h_output_aftersharedjets_vertex_tkvtxdist = fs->make<TH1F>("h_output_aftersharedjets_vertex_tkvtxdist", ";tkvtxdist (cm.)", 20, 0, 0.1);
+      h_output_aftersharedjets_vertex_tkvtxdisterr = fs->make<TH1F>("h_output_aftersharedjets_vertex_tkvtxdisterr", ";tkvtxdisterr (cm.)", 20, 0, 0.1);
+      h_output_aftersharedjets_vertex_tkvtxdistsig = fs->make<TH1F>("h_output_aftersharedjets_vertex_tkvtxdistsig", ";tkvtxdistsig", 20, 0, 6);
+      h_output_aftersharedjets_vertex_ntracks = fs->make<TH1F>("h_output_aftersharedjets_vertex_ntracks", ";ntracks/vtx", 30, 0, 30);
+      h_output_aftersharedjets_vertex_mass = fs->make<TH1F>("h_output_aftersharedjets_vertex_mass", ";mass/vtx (GeV)", 20, 0, 1000);
+      h_output_aftersharedjets_vertex_track_weights = fs->make<TH1F>("h_output_aftersharedjets_vertex_track_weights", ";vertex track weights", 21, 0, 1.05);
+      h_output_aftersharedjets_vertex_chi2 = fs->make<TH1F>("h_output_aftersharedjets_vertex_chi2", ";normalized chi2", 20, 0, max_seed_vertex_chi2);
+      h_output_aftersharedjets_vertex_ndof = fs->make<TH1F>("h_output_aftersharedjets_vertex_ndof", ";ndof", 10, 0, 20);
+      h_output_aftersharedjets_vertex_x = fs->make<TH1F>("h_output_aftersharedjets_vertex_x", ";vtxbsdist_x (cm.)", 20, -1, 1);
+      h_output_aftersharedjets_vertex_y = fs->make<TH1F>("h_output_aftersharedjets_vertex_y", ";vtxbsdist_y (cm.)", 20, -1, 1);
+      h_output_aftersharedjets_vertex_rho = fs->make<TH1F>("h_output_aftersharedjets_vertex_rho", ";vtx rho", 20, 0, 2);
+      h_output_aftersharedjets_vertex_phi = fs->make<TH1F>("h_output_aftersharedjets_vertex_phi", ";vtx phi", 20, -3.15, 3.15);
+      h_output_aftersharedjets_vertex_z = fs->make<TH1F>("h_output_aftersharedjets_vertex_z", ";vtxbsdist_z (cm.)", 20, -20, 20);
+      h_output_aftersharedjets_vertex_r = fs->make<TH1F>("h_output_aftersharedjets_vertex_r", ";vtxbsdist_r (cm.)", 20, 0, 2);
+      h_output_aftersharedjets_vertex_paird2d = fs->make<TH1F>("h_output_aftersharedjets_vertex_paird2d", ";svdist2d (cm.) every pair", 100, 0, 0.2);
+      h_output_aftersharedjets_vertex_paird2dsig = fs->make<TH1F>("h_output_aftersharedjets_vertex_paird2dsig", ";svdist2d significance every pair", 100, 0, 20);
+      h_output_aftersharedjets_vertex_pairdphi = fs->make<TH1F>("h_output_aftersharedjets_vertex_pairdphi", ";dPhi(vtx0,vtx1) every pair", 100, -3.14, 3.14);
 
-		h_output_aftersharedjets_n_onetracks = fs->make<TH1F>("h_output_aftersharedjets_n_onetracks", "", 5, 0, 5);
-	}
+      h_output_aftersharedjets_n_onetracks = fs->make<TH1F>("h_output_aftersharedjets_n_onetracks", "", 5, 0, 5);
+    }
   }
 }
 
