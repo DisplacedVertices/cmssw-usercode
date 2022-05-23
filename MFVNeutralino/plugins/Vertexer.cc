@@ -345,18 +345,18 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
   if (histos) {
     edm::Service<TFileService> fs;
 
-    h_n_seed_vertices                = fs->make<TH1F>("h_n_seed_vertices",                "",  50,   0,    200);
-    h_seed_vertex_track_weights      = fs->make<TH1F>("h_seed_vertex_track_weights",      "",  21,   0,      1.05);
-    h_seed_vertex_chi2               = fs->make<TH1F>("h_seed_vertex_chi2",               "",  20,   0, max_seed_vertex_chi2);
-    h_seed_vertex_ndof               = fs->make<TH1F>("h_seed_vertex_ndof",               "",  10,   0,     20);
-    h_seed_vertex_x                  = fs->make<TH1F>("h_seed_vertex_x",                  "", 20,  -1,      1);
-    h_seed_vertex_y                  = fs->make<TH1F>("h_seed_vertex_y",                  "", 20,  -1,      1);
-    h_seed_vertex_rho                = fs->make<TH1F>("h_seed_vertex_rho",                "", 20,   0,      2);
-    h_seed_vertex_phi                = fs->make<TH1F>("h_seed_vertex_phi",                "",  20,  -3.15,   3.15);
-    h_seed_vertex_z                  = fs->make<TH1F>("h_seed_vertex_z",                  "",  20, -20,     20);
-    h_seed_vertex_r                  = fs->make<TH1F>("h_seed_vertex_r",                  "", 20,   0,      2);
-    h_seed_vertex_paird2d            = fs->make<TH1F>("h_seed_vertex_paird2d",            "", 20,   0,      0.2);
-    h_seed_vertex_pairdphi           = fs->make<TH1F>("h_seed_vertex_pairdphi",           "", 20,  0,   3.14);
+    h_n_seed_vertices                = fs->make<TH1F>("h_n_seed_vertices",                ";# of seed vertices",  50,   0,    200);
+    h_seed_vertex_track_weights      = fs->make<TH1F>("h_seed_vertex_track_weights",      ";seed vertex's track weights",  21,   0,      1.05);
+    h_seed_vertex_chi2               = fs->make<TH1F>("h_seed_vertex_chi2",               ";normalized chi2",  20,   0, max_seed_vertex_chi2);
+    h_seed_vertex_ndof               = fs->make<TH1F>("h_seed_vertex_ndof",               ";ndof",  10,   0,     20);
+    h_seed_vertex_x                  = fs->make<TH1F>("h_seed_vertex_x",                  ";vtxbsdist_x (cm.)", 20,  -1,      1);
+    h_seed_vertex_y                  = fs->make<TH1F>("h_seed_vertex_y",                  ";vtxbsdist_y (cm.)", 20,  -1,      1);
+    h_seed_vertex_rho                = fs->make<TH1F>("h_seed_vertex_rho",                ";vtx rho", 20,   0,      2);
+    h_seed_vertex_phi                = fs->make<TH1F>("h_seed_vertex_phi",                ";vtx phi",  20,  -3.15,   3.15);
+    h_seed_vertex_z                  = fs->make<TH1F>("h_seed_vertex_z",                  ";vtxbsdist_z (cm.)",  20, -20,     20);
+    h_seed_vertex_r                  = fs->make<TH1F>("h_seed_vertex_r",                  ";vtxbsdist_r (cm.)", 20,   0,      2);
+    h_seed_vertex_paird2d            = fs->make<TH1F>("h_seed_vertex_paird2d",            ";svdist2d (cm.) every pair", 100,   0,      0.2);
+    h_seed_vertex_pairdphi           = fs->make<TH1F>("h_seed_vertex_pairdphi",           ";dPhi(vtx0,vtx1) every pair", 100,  -3.14,   3.14);
 
     h_n_resets                       = fs->make<TH1F>("h_n_resets",                       "", 50,   0,   500);
     h_n_onetracks                    = fs->make<TH1F>("h_n_onetracks",                    "",  5,   0,     5);
@@ -381,8 +381,8 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_noshare_vertex_phi             = fs->make<TH1F>("h_noshare_vertex_phi",             ";vtx phi", 20,  -3.15,   3.15);
     h_noshare_vertex_z               = fs->make<TH1F>("h_noshare_vertex_z",               ";vtxbsdist_z (cm.)", 20, -20,     20);
     h_noshare_vertex_r               = fs->make<TH1F>("h_noshare_vertex_r",               ";vtxbsdist_r (cm.)", 20,   0,      2);
-    h_noshare_vertex_paird2d         = fs->make<TH1F>("h_noshare_vertex_paird2d",            ";svdist2d (cm.) every pair", 20,   0,      0.2);
-    h_noshare_vertex_pairdphi        = fs->make<TH1F>("h_noshare_vertex_pairdphi",           ";|dPhi(vtx0,vtx1)| every pair", 20,  0,   3.15);
+    h_noshare_vertex_paird2d         = fs->make<TH1F>("h_noshare_vertex_paird2d",            ";svdist2d (cm.) every pair", 100,   0,      0.2);
+    h_noshare_vertex_pairdphi        = fs->make<TH1F>("h_noshare_vertex_pairdphi",           ";dPhi(vtx0,vtx1) every pair", 100,  -3.14,   3.14);
     h_noshare_track_multiplicity     = fs->make<TH1F>("h_noshare_track_multiplicity",     "",  20,   0,     40);
     h_max_noshare_track_multiplicity = fs->make<TH1F>("h_max_noshare_track_multiplicity", "",  20,   0,     40);
     h_n_output_vertices           = fs->make<TH1F>("h_n_output_vertices",           ";# of output vertices", 50, 0, 50);
@@ -414,9 +414,9 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_output0_vertex_phi = fs->make<TH1F>("h_output0_vertex_phi", ";vtx phi", 20, -3.15, 3.15);
     h_output0_vertex_z = fs->make<TH1F>("h_output0_vertex_z", ";vtxbsdist_z (cm.)", 20, -20, 20);
     h_output0_vertex_r = fs->make<TH1F>("h_output0_vertex_r", ";vtxbsdist_r (cm.)", 20, 0, 2);
-    h_output0_vertex_paird2d = fs->make<TH1F>("h_output0_vertex_paird2d", ";svdist2d (cm.) every pair", 20, 0, 0.2);
-    h_output0_vertex_paird2dsig = fs->make<TH1F>("h_output0_vertex_paird2dsig", ";svdist2d significance every pair", 20, 0, 20);
-    h_output0_vertex_pairdphi = fs->make<TH1F>("h_output0_vertex_pairdphi", ";|dPhi(vtx0,vtx1)| every pair", 20, 0, 3.15);
+    h_output0_vertex_paird2d = fs->make<TH1F>("h_output0_vertex_paird2d", ";svdist2d (cm.) every pair", 100, 0, 0.2);
+    h_output0_vertex_paird2dsig = fs->make<TH1F>("h_output0_vertex_paird2dsig", ";svdist2d significance every pair", 100, 0, 20);
+    h_output0_vertex_pairdphi = fs->make<TH1F>("h_output0_vertex_pairdphi", ";dPhi(vtx0,vtx1) every pair", 100, -3.14, 3.14);
 
     h_n_at_least_5trk_output1_vertices = fs->make<TH1F>("h_n_at_least_5trk_output1_vertices", ";# of >=5trk-vertices", 20, 0, 20);
     h_output1_vertex_nm1_bsbs2ddist = fs->make<TH1F>("h_output1_vertex_nm1_bsbs2ddist", ";dBV (cm.) w/ n-1 cuts applied", 100, 0, 1.0);
@@ -435,9 +435,9 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_output1_vertex_phi = fs->make<TH1F>("h_output1_vertex_phi", ";vtx phi", 20, -3.15, 3.15);
     h_output1_vertex_z = fs->make<TH1F>("h_output1_vertex_z", ";vtxbsdist_z (cm.)", 20, -20, 20);
     h_output1_vertex_r = fs->make<TH1F>("h_output1_vertex_r", ";vtxbsdist_r (cm.)", 20, 0, 2);
-    h_output1_vertex_paird2d = fs->make<TH1F>("h_output1_vertex_paird2d", ";svdist2d (cm.) every pair", 20, 0, 0.2);
-    h_output1_vertex_paird2dsig = fs->make<TH1F>("h_output1_vertex_paird2dsig", ";svdist2d significance every pair", 20, 0, 20);
-    h_output1_vertex_pairdphi = fs->make<TH1F>("h_output1_vertex_pairdphi", ";|dPhi(vtx0,vtx1)| every pair", 20, 0, 3.15);
+    h_output1_vertex_paird2d = fs->make<TH1F>("h_output1_vertex_paird2d", ";svdist2d (cm.) every pair", 100, 0, 0.2);
+    h_output1_vertex_paird2dsig = fs->make<TH1F>("h_output1_vertex_paird2dsig", ";svdist2d significance every pair", 100, 0, 20);
+    h_output1_vertex_pairdphi = fs->make<TH1F>("h_output1_vertex_pairdphi", ";dPhi(vtx0,vtx1) every pair", 100, -3.14, 3.14);
 
     h_output1_potential_merged_vertex_nm1_chi2 = fs->make<TH1F>("h_output1_potential_merged_vertex_nm1_chi2", ";normalized chi2 w/ n-1 cuts applied", 20, 0, 20);
     h_output1_potential_merged_vertex_nm1_ntracks = fs->make<TH1F>("h_output1_potential_merged_vertex_nm1_ntracks", ";ntracks/vtx w/ n-1 cuts applied", 30, 0, 30);
@@ -464,9 +464,9 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_output2_vertex_phi = fs->make<TH1F>("h_output2_vertex_phi", ";vtx phi", 20, -3.15, 3.15);
     h_output2_vertex_z = fs->make<TH1F>("h_output2_vertex_z", ";vtxbsdist_z (cm.)", 20, -20, 20);
     h_output2_vertex_r = fs->make<TH1F>("h_output2_vertex_r", ";vtxbsdist_r (cm.)", 20, 0, 2);
-    h_output2_vertex_paird2d = fs->make<TH1F>("h_output2_vertex_paird2d", ";svdist2d (cm.) every pair", 20, 0, 0.2);
-    h_output2_vertex_paird2dsig = fs->make<TH1F>("h_output2_vertex_paird2dsig", ";svdist2d significance every pair", 20, 0, 20);
-    h_output2_vertex_pairdphi = fs->make<TH1F>("h_output2_vertex_pairdphi", ";|dPhi(vtx0,vtx1)| every pair", 20, 0, 3.15);
+    h_output2_vertex_paird2d = fs->make<TH1F>("h_output2_vertex_paird2d", ";svdist2d (cm.) every pair", 100, 0, 0.2);
+    h_output2_vertex_paird2dsig = fs->make<TH1F>("h_output2_vertex_paird2dsig", ";svdist2d significance every pair", 100, 0, 20);
+    h_output2_vertex_pairdphi = fs->make<TH1F>("h_output2_vertex_pairdphi", ";dPhi(vtx0,vtx1) every pair", 100, -3.14, 3.14);
 
     h_output2_n_onetracks = fs->make<TH1F>("h_output2_n_onetracks", "", 5, 0, 5);
   }
@@ -639,7 +639,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         const double v1y = v1->position().y() - bsy;
         const double phi1 = atan2(v1y, v1x);
         h_seed_vertex_paird2d->Fill(mag(v0x - v1x, v0y - v1y));
-        h_seed_vertex_pairdphi->Fill(fabs(reco::deltaPhi(phi0, phi1)));
+        h_seed_vertex_pairdphi->Fill(reco::deltaPhi(phi0, phi1));
       }
     }
   }
@@ -1110,7 +1110,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           const double vjy = vj.position().y() - bsy;
           const double phij = atan2(vjy, vjx);
           h_noshare_vertex_paird2d->Fill(mag(vx - vjx, vy - vjy));
-          h_noshare_vertex_pairdphi->Fill(fabs(reco::deltaPhi(phi, phij)));
+          h_noshare_vertex_pairdphi->Fill(reco::deltaPhi(phi, phij));
         }
       }
     }
@@ -1375,7 +1375,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         Measurement1D v_dist = vertex_dist(vj, v);
         h_output0_vertex_paird2d->Fill(mag(vx - vjx, vy - vjy));
         h_output0_vertex_paird2dsig->Fill(v_dist.significance());
-        h_output0_vertex_pairdphi->Fill(fabs(reco::deltaPhi(phi, phij)));
+        h_output0_vertex_pairdphi->Fill(reco::deltaPhi(phi, phij));
       }
 
 
@@ -1574,7 +1574,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         Measurement1D v_dist = vertex_dist(vj, v);
         h_output1_vertex_paird2d->Fill(mag(vx - vjx, vy - vjy));
         h_output1_vertex_paird2dsig->Fill(v_dist.significance());
-        h_output1_vertex_pairdphi->Fill(fabs(reco::deltaPhi(phi, phij)));
+        h_output1_vertex_pairdphi->Fill(reco::deltaPhi(phi, phij));
       }
 
     }
@@ -1853,7 +1853,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         Measurement1D v_dist = vertex_dist(vj, v);
         h_output2_vertex_paird2d->Fill(mag(vx - vjx, vy - vjy));
         h_output2_vertex_paird2dsig->Fill(v_dist.significance());
-        h_output2_vertex_pairdphi->Fill(fabs(reco::deltaPhi(phi, phij)));
+        h_output2_vertex_pairdphi->Fill(reco::deltaPhi(phi, phij));
       }
 
     }
