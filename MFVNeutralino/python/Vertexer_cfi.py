@@ -73,8 +73,8 @@ mfvVertices = cms.EDProducer('MFVVertexer',
                              trackrefine_trimmax = cms.double(5), # track refinement criteria (*only* if do_track_refinement = True)
                              histos = cms.untracked.bool(True),
                              histos_noshare = cms.untracked.bool(True),   # make plots of no shared-track vertices 
-                             histos_output0 = cms.untracked.bool(True),   # make plots of output vertices after the default vertexing 
-                             histos_output1 = cms.untracked.bool(True),   # make plots of output vertices after the default vertexing  + new merging routine turned on
-                             histos_output2 = cms.untracked.bool(True),   # make plots of output vertices after the default vertexing  + new merging routine turned on  + shared-jet mitigation turned on 
+                             histos_output_afterdzfit = cms.untracked.bool(True),   # make plots of output vertices after the default vertexing 
+                             histos_output_aftermerge = cms.untracked.bool(True),   # make plots of output vertices after the default vertexing  + new merging routine turned on
+                             histos_output_aftersharedjets = cms.untracked.bool(True),   # make plots of output vertices after the default vertexing  + new merging routine turned on  + shared-jet mitigation turned on 
                              verbose = cms.untracked.bool(False),
                              )
