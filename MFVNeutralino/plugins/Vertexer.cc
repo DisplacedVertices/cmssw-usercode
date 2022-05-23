@@ -971,7 +971,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       if (verbose)
         printf("no-share vertex #%3lu: ntracks: %i chi2/dof: %7.3f dof: %7.3f pos: <%7.3f, %7.3f, %7.3f>  rho: %7.3f  phi: %7.3f  r: %7.3f\n", i, ntracks, vchi2, vndof, vx, vy, vz, rho, phi, r);
 
-      // FIXME JPR continue review from here!
       if (do_track_refinement) {
 
         track_set set_trackrefine_sigmacut_tks;
@@ -1135,9 +1134,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       h_max_noshare_track_multiplicity->Fill(max_noshare_track_multiplicity);
   }
 
-  //////////////////////////////////////////////////////////////////////
-  // Merge vertices that are still "close". JMTBAD this doesn't do anything currently, only run in verbose mode
-  //////////////////////////////////////////////////////////////////////
+  //////////////////////////////////////////////////////////////////////////////////////////////
+  // Merge vertices that are still "close" in 2D, aka "loose" merging (typically off by default)
+  //////////////////////////////////////////////////////////////////////////////////////////////
 
   if (verbose)
     printf("fun2! before merge loop, # vertices = %lu\n", vertices->size());
@@ -1147,7 +1146,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     if (merge_anyway_sig > 0 || merge_anyway_dist > 0) {
       double v0x;
       double v0y;
-      //double v0z;
       double phi0;
 
       for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
@@ -1155,7 +1153,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
         double v1x;
         double v1y;
-        //double v1z;
         double phi1;
 
         for (v[1] = v[0] + 1; v[1] != vertices->end(); ++v[1]) {
@@ -1172,11 +1169,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
           v0x = v[0]->x() - bsx;
           v0y = v[0]->y() - bsy;
-          //v0z = v[0]->z() - bsz;
           phi0 = atan2(v0y, v0x);
           v1x = v[1]->x() - bsx;
           v1y = v[1]->y() - bsy;
-          //v1z = v[1]->z() - bsz;
           phi1 = atan2(v1y, v1x);
 
           if (v_dist.value() < merge_anyway_dist || v_dist.significance() < merge_anyway_sig) {
@@ -1308,6 +1303,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   }
 
 
+  // FIXME JPR continue review from here!
   if (histos_output0) {
     std::map<reco::TrackRef, int> track_use;
     int count_5trk_vertices = 0;
