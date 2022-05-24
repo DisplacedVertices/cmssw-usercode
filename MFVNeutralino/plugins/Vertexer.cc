@@ -1612,7 +1612,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
     std::vector<track_vec> sv_total_track_which_trk_vec;
 
-    std::vector<int> vertex_ntracks;
     size_t vtxidx = 0;
     for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
       std::vector<size_t> track_idx;
@@ -1637,7 +1636,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       }
 
       unsigned int ntracks = static_cast<unsigned int>(track_idx.size());
-      vertex_ntracks.push_back(ntracks);
 
       if (vtxidx == 0) {
         sv_ascending_total_ntrack.push_back(ntracks);
