@@ -1656,11 +1656,13 @@ bool MFVVertexer::match_track_jet(const reco::Track& tk, const pat::Jet& matchje
     std::cout << "  target track pt " << tk.pt() << " eta " << tk.eta() << " phi " << tk.phi() << std::endl;
   }
 
-  // arbitrary threshold, but idea is to minimize [1+delta(pT)] * [1+delta(eta)] * [1+delta(phi)] in order to match the track to the jet
+  // Arbitrary threshold, but idea is to minimize [1+delta(pT)] * [1+delta(eta)] * [1+delta(phi)] in order to match the track to the jet
   double match_thres = 1.3;
   int jet_index = 255;
   for (size_t j = 0; j < jets.size(); ++j) {
     for (size_t idau = 0, idaue = jets[j].numberOfDaughters(); idau < idaue; ++idau) {
+
+      // Note that the usage of both PFCandidates and PackedCandidates is copied from EventProducer.cc; see comments there for subtleties related to this (largely AOD vs. MiniAOD)
       const reco::Candidate* dau = jets[j].daughter(idau);
       if (dau->charge() == 0)
         continue;
@@ -1673,7 +1675,7 @@ bool MFVVertexer::match_track_jet(const reco::Track& tk, const pat::Jet& matchje
       }
       else {
         const pat::PackedCandidate* pk = dynamic_cast<const pat::PackedCandidate*>(dau);
-        if (pk && pk->charge() && pk->hasTrackDetails())
+        if (pk && pk->charge() != 0 && pk->hasTrackDetails())
           jtk = &pk->pseudoTrack();
       }
       if (jtk) {
