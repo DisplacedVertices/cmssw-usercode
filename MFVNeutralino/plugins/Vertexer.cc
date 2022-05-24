@@ -36,6 +36,9 @@ class MFVVertexer : public edm::EDProducer {
     typedef std::vector<reco::TrackRef> track_vec;
 
     std::pair<bool, std::vector<std::vector<size_t>>> sharedjets(const int vtx0idx, const int vtx1idx, const std::vector < std::vector<int>>& sv_match_tracktojet_which_jetidx, const std::vector < std::vector<int>>& sv_match_tracktojet_which_trkidx);
+    bool hasCommonElement(std::vector<int> vec0, std::vector<int> vec1);
+    std::vector<int>::iterator getFirstCommonElement(std::vector<int>& vec0, std::vector<int>& vec1);
+    void eraseElement(std::vector<int>& vec, int idx);
     bool match_track_jet(const reco::Track& tk, const pat::Jet& jet, const pat::JetCollection& jets, const int& idx);
 
     void finish(edm::Event&, const std::vector<reco::TransientTrack>&, std::unique_ptr<reco::VertexCollection>, std::unique_ptr<VertexerPairEffs>, const std::vector<std::pair<track_set, track_set>>&);
@@ -1558,7 +1561,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
 std::pair<bool, std::vector<std::vector<size_t>>> MFVVertexer::sharedjets(const int vtx0idx, const int vtx1idx, const std::vector < std::vector<int>>& sv_match_tracktojet_which_jetidx, const std::vector < std::vector<int>>& sv_match_tracktojet_which_trkidx) {
 
-  bool shared_jet = std::find_first_of(sv_match_tracktojet_which_jetidx[vtx0idx].begin(), sv_match_tracktojet_which_jetidx[vtx0idx].end(), sv_match_tracktojet_which_jetidx[vtx1idx].begin(), sv_match_tracktojet_which_jetidx[vtx1idx].end()) != sv_match_tracktojet_which_jetidx[vtx0idx].end();
+  bool shared_jet = hasCommonElement(sv_match_tracktojet_which_jetidx[vtx0idx], sv_match_tracktojet_which_jetidx[vtx1idx]);
 
   std::vector<std::vector<size_t>> sv_lonesharedtrack_which_trkidx;
   std::vector<size_t> sv0_lonesharedtrack_which_trkidx;
@@ -1569,8 +1572,8 @@ std::pair<bool, std::vector<std::vector<size_t>>> MFVVertexer::sharedjets(const 
     int nsharedjets = 0;
 
     std::vector<std::vector<int>> sv_match_tracktojet_which_temp_jetidx = sv_match_tracktojet_which_jetidx;
-    std::vector<std::vector<int> >sv0_match_sharedjettotrack_which_trkidx;
-    std::vector<std::vector<int> >sv1_match_sharedjettotrack_which_trkidx;
+    std::vector<std::vector<int>> sv0_match_sharedjettotrack_which_trkidx;
+    std::vector<std::vector<int>> sv1_match_sharedjettotrack_which_trkidx;
 
     std::vector<int> sv0_match_tracktojet_which_jetidx = sv_match_tracktojet_which_jetidx[vtx0idx];
     std::vector<int> sv0_match_tracktojet_which_trkidx = sv_match_tracktojet_which_trkidx[vtx0idx];
@@ -1580,14 +1583,14 @@ std::pair<bool, std::vector<std::vector<size_t>>> MFVVertexer::sharedjets(const 
     std::vector<int> sv1_match_tracktojet_which_trkidx = sv_match_tracktojet_which_trkidx[vtx1idx];
     std::vector<int> sv1_match_sharedjettotrack_which_temp_trkidx;
 
-    while (std::find_first_of(sv_match_tracktojet_which_temp_jetidx[vtx0idx].begin(), sv_match_tracktojet_which_temp_jetidx[vtx0idx].end(), sv_match_tracktojet_which_temp_jetidx[vtx1idx].begin(), sv_match_tracktojet_which_temp_jetidx[vtx1idx].end()) != sv_match_tracktojet_which_temp_jetidx[vtx0idx].end()) {
+    while (hasCommonElement(sv_match_tracktojet_which_temp_jetidx[vtx0idx], sv_match_tracktojet_which_temp_jetidx[vtx1idx])) {
       nsharedjets++;
-      std::vector<int>::iterator it = std::find_first_of(sv_match_tracktojet_which_temp_jetidx[vtx0idx].begin(), sv_match_tracktojet_which_temp_jetidx[vtx0idx].end(), sv_match_tracktojet_which_temp_jetidx[vtx1idx].begin(), sv_match_tracktojet_which_temp_jetidx[vtx1idx].end());
+      std::vector<int>::iterator it = getFirstCommonElement(sv_match_tracktojet_which_temp_jetidx[vtx0idx], sv_match_tracktojet_which_temp_jetidx[vtx1idx]);
       int it_idx = std::distance(sv_match_tracktojet_which_temp_jetidx[vtx0idx].begin(), it);
       int jet_index = sv_match_tracktojet_which_temp_jetidx[vtx0idx].at(it_idx);
 
-      sv_match_tracktojet_which_temp_jetidx[vtx0idx].erase(std::remove(sv_match_tracktojet_which_temp_jetidx[vtx0idx].begin(), sv_match_tracktojet_which_temp_jetidx[vtx0idx].end(), jet_index), sv_match_tracktojet_which_temp_jetidx[vtx0idx].end());
-      sv_match_tracktojet_which_temp_jetidx[vtx1idx].erase(std::remove(sv_match_tracktojet_which_temp_jetidx[vtx1idx].begin(), sv_match_tracktojet_which_temp_jetidx[vtx1idx].end(), jet_index), sv_match_tracktojet_which_temp_jetidx[vtx1idx].end());
+      eraseElement(sv_match_tracktojet_which_temp_jetidx[vtx0idx], jet_index);
+      eraseElement(sv_match_tracktojet_which_temp_jetidx[vtx1idx], jet_index);
 
       // start collecting shared tracks of sv0 for each shared jet
       std::multimap<int, size_t> sv0_m;
@@ -1647,6 +1650,19 @@ std::pair<bool, std::vector<std::vector<size_t>>> MFVVertexer::sharedjets(const 
   return std::pair<bool, std::vector<std::vector<size_t>>>(
       shared_jet_specialcase,
       sv_lonesharedtrack_which_trkidx);
+}
+
+bool MFVVertexer::hasCommonElement(std::vector<int> vec0, std::vector<int> vec1) {
+  return getFirstCommonElement(vec0, vec1) != vec0.end();
+}
+
+std::vector<int>::iterator MFVVertexer::getFirstCommonElement(std::vector<int>& vec0, std::vector<int>& vec1) {
+  return std::find_first_of(vec0.begin(), vec0.end(), vec1.begin(), vec1.end());
+}
+
+void MFVVertexer::eraseElement(std::vector<int>& vec, int idx) {
+  vec.erase(std::remove(vec.begin(), vec.end(), idx), vec.end());
+  return;
 }
 
 bool MFVVertexer::match_track_jet(const reco::Track& tk, const pat::Jet& matchjet, const pat::JetCollection& jets, const int& idx) {
