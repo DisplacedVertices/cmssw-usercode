@@ -1305,7 +1305,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     std::map<reco::TrackRef, int> track_use;
     int count_5trk_vertices = 0;
 
-    typedef std::vector<reco::TrackRef> track_vec;
 
     const reco::Vertex fake_bs_vtx(beamspot->position(), beamspot->covariance3D());
 
@@ -1607,7 +1606,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     std::vector<std::vector<int> > sv_match_tracktojet_which_trkidx;
     std::vector<std::vector<int> > sv_match_tracktojet_which_jetidx;
 
-    typedef std::vector<reco::TrackRef> track_vec;
     const reco::Vertex fake_bs_vtx(beamspot->position(), beamspot->covariance3D());
 
     std::vector<track_vec> sv_total_track_which_trk_vec;
