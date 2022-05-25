@@ -180,14 +180,6 @@ class MFVVertexer : public edm::EDProducer {
     TH1F* h_n_resets;
     TH1F* h_n_onetracks;
 
-    TH1F* h_noshare_vertex_tkvtxdist;
-    TH1F* h_noshare_vertex_tkvtxdisterr;
-    TH1F* h_noshare_vertex_tkvtxdistsig;
-
-    TH1F* h_noshare_vertex_tkvtxdist_before_do_track_refinement;
-    TH1F* h_noshare_vertex_tkvtxdisterr_before_do_track_refinement;
-    TH1F* h_noshare_vertex_tkvtxdistsig_before_do_track_refinement;
-
     TH1F* h_n_noshare_vertices;
     TH1F* h_noshare_vertex_ntracks;
     TH1F* h_noshare_vertex_mass;
@@ -205,8 +197,13 @@ class MFVVertexer : public edm::EDProducer {
     TH1F* h_noshare_track_multiplicity;
     TH1F* h_max_noshare_track_multiplicity;
 
-    TH1F* h_n_output_vertices;
-    TH1F* h_n_at_least_5trk_output_vertices;
+    TH1F* h_noshare_vertex_tkvtxdist;
+    TH1F* h_noshare_vertex_tkvtxdisterr;
+    TH1F* h_noshare_vertex_tkvtxdistsig;
+
+    TH1F* h_noshare_vertex_tkvtxdist_before_do_track_refinement;
+    TH1F* h_noshare_vertex_tkvtxdisterr_before_do_track_refinement;
+    TH1F* h_noshare_vertex_tkvtxdistsig_before_do_track_refinement;
 
     TH1F* h_noshare_trackrefine_sigmacut_vertex_chi2;
     TH1F* h_noshare_trackrefine_sigmacut_vertex_tkvtxdistsig;
@@ -215,6 +212,9 @@ class MFVVertexer : public edm::EDProducer {
     TH1F* h_noshare_trackrefine_trimmax_vertex_chi2;
     TH1F* h_noshare_trackrefine_trimmax_vertex_tkvtxdistsig;
     TH1F* h_noshare_trackrefine_trimmax_vertex_distr_shift;
+
+    TH1F* h_n_output_vertices;
+    TH1F* h_n_at_least_5trk_output_vertices;
 
     TH1F* hs_output_vertex_tkvtxdist[stepEnum::N_STEPS];
     TH1F* hs_output_vertex_tkvtxdisterr[stepEnum::N_STEPS];
@@ -313,15 +313,6 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 
     h_n_noshare_vertices             = fs->make<TH1F>("h_n_noshare_vertices",             ";# of noshare vertices", 20,   0,    50);
 
-    if (do_track_refinement) {
-      h_noshare_vertex_tkvtxdist = fs->make<TH1F>("h_noshare_vertex_tkvtxdist", ";tkvtxdist (cm.)", 20, 0, 0.1);
-      h_noshare_vertex_tkvtxdisterr = fs->make<TH1F>("h_noshare_vertex_tkvtxdisterr", ";tkvtxdisterr (cm.)", 20, 0, 0.1);
-      h_noshare_vertex_tkvtxdistsig = fs->make<TH1F>("h_noshare_vertex_tkvtxdistsig", ";tkvtxdistsig", 20, 0, 6);
-      h_noshare_vertex_tkvtxdist_before_do_track_refinement = fs->make<TH1F>("h_noshare_vertex_tkvtxdist_before_do_track_refinement", ";tkvtxdist (cm.)", 20, 0, 0.1);
-      h_noshare_vertex_tkvtxdisterr_before_do_track_refinement = fs->make<TH1F>("h_noshare_vertex_tkvtxdisterr_before_do_track_refinement", ";tkvtxdisterr (cm.)", 20, 0, 0.1);
-      h_noshare_vertex_tkvtxdistsig_before_do_track_refinement = fs->make<TH1F>("h_noshare_vertex_tkvtxdistsig_before_do_track_refinement", ";tkvtxdistsig", 20, 0, 6);
-    }
-
     if (histos_noshare) {
       h_noshare_vertex_ntracks = fs->make<TH1F>("h_noshare_vertex_ntracks", ";ntracks/vtx", 30, 0, 30);
       h_noshare_vertex_mass = fs->make<TH1F>("h_noshare_vertex_mass", ";mass/vtx (GeV)", 20, 0, 1000);
@@ -338,13 +329,15 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
       h_noshare_vertex_pairdphi = fs->make<TH1F>("h_noshare_vertex_pairdphi", ";dPhi(vtx0,vtx1) every pair", 100, -3.14, 3.14);
       h_noshare_track_multiplicity = fs->make<TH1F>("h_noshare_track_multiplicity", "", 20, 0, 40);
       h_max_noshare_track_multiplicity = fs->make<TH1F>("h_max_noshare_track_multiplicity", "", 20, 0, 40);
+      h_noshare_vertex_tkvtxdist = fs->make<TH1F>("h_noshare_vertex_tkvtxdist", ";tkvtxdist (cm.)", 20, 0, 0.1);
+      h_noshare_vertex_tkvtxdisterr = fs->make<TH1F>("h_noshare_vertex_tkvtxdisterr", ";tkvtxdisterr (cm.)", 20, 0, 0.1);
+      h_noshare_vertex_tkvtxdistsig = fs->make<TH1F>("h_noshare_vertex_tkvtxdistsig", ";tkvtxdistsig", 20, 0, 6);
     }
 
-    h_n_output_vertices = fs->make<TH1F>("h_n_output_vertices", ";# of output vertices", 50, 0, 50);
-    h_n_at_least_5trk_output_vertices = fs->make<TH1F>("h_n_at_least_5trk_output_vertices", ";# of output vertices w/ >=5trk/vtx", 20, 0, 20);
-
-
     if (do_track_refinement) {
+      h_noshare_vertex_tkvtxdist_before_do_track_refinement = fs->make<TH1F>("h_noshare_vertex_tkvtxdist_before_do_track_refinement", ";tkvtxdist (cm.)", 20, 0, 0.1);
+      h_noshare_vertex_tkvtxdisterr_before_do_track_refinement = fs->make<TH1F>("h_noshare_vertex_tkvtxdisterr_before_do_track_refinement", ";tkvtxdisterr (cm.)", 20, 0, 0.1);
+      h_noshare_vertex_tkvtxdistsig_before_do_track_refinement = fs->make<TH1F>("h_noshare_vertex_tkvtxdistsig_before_do_track_refinement", ";tkvtxdistsig", 20, 0, 6);
       h_noshare_trackrefine_sigmacut_vertex_chi2 = fs->make<TH1F>("h_noshare_trackrefine_sigmacut_vertex_chi2", ";chi2/dof", 20, 0, max_seed_vertex_chi2);
       h_noshare_trackrefine_sigmacut_vertex_tkvtxdistsig = fs->make<TH1F>("h_noshare_trackrefine_sigmacut_vertex_tkvtxdistsig", ";missdist sig", 20, 0, 6);
       h_noshare_trackrefine_sigmacut_vertex_distr_shift = fs->make<TH1F>("h_noshare_trackrefine_sigmacut_vertex_distr_shift", ";vtx after sigmacut'r - vtx before sigmacut'r (cm)", 20, -0.08, 0.08);
@@ -353,6 +346,9 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
       h_noshare_trackrefine_trimmax_vertex_tkvtxdistsig = fs->make<TH1F>("h_noshare_trackrefine_trimmax_vertex_tkvtxdistsig", ";missdist sig", 20, 0, 6);
       h_noshare_trackrefine_trimmax_vertex_distr_shift = fs->make<TH1F>("h_noshare_trackrefine_trimmax_vertex_distr_shift", ";vtx after trimmax'r - vtx before trimmax'r (cm)", 20, -0.08, 0.08);
     }
+
+    h_n_output_vertices = fs->make<TH1F>("h_n_output_vertices", ";# of output vertices", 50, 0, 50);
+    h_n_at_least_5trk_output_vertices = fs->make<TH1F>("h_n_at_least_5trk_output_vertices", ";# of output vertices w/ >=5trk/vtx", 20, 0, 20);
 
     for(size_t step = 0; step < stepEnum::N_STEPS; ++step) {
 
