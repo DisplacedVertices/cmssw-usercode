@@ -1060,12 +1060,12 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       h_max_noshare_track_multiplicity->Fill(max_noshare_track_multiplicity);
   }
 
+
   //////////////////////////////////////////////////////////////////////////////////////////////
   // Merge vertices that are still "close" in 2D, aka "loose" merging (typically off by default)
   //////////////////////////////////////////////////////////////////////////////////////////////
-
   if (verbose)
-    printf("fun2! before merge loop, # vertices = %lu\n", vertices->size());
+    printf("fun2! before 'loose' merging loop, # vertices = %lu\n", vertices->size());
 
   if (resolve_split_vertices_loose) {
 
@@ -1167,10 +1167,10 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     }
   }
 
+
   //////////////////////////////////////////////////////////////////////
   // Drop tracks that "move" the vertex too much by refitting without each track.
   //////////////////////////////////////////////////////////////////////
-
   if (max_nm1_refit_dist3 > 0 || max_nm1_refit_distz > 0) {
     std::vector<int> refit_count(vertices->size(), 0);
 
@@ -1583,37 +1583,32 @@ std::pair<bool, std::vector<std::vector<size_t>>> MFVVertexer::sharedjets(const 
       for (size_t k = 0; k < sv0_match_tracktojet_which_jetidx.size(); k++)
         if (sv0_match_tracktojet_which_jetidx[k] == jet_index) { sv0_m.insert({ sv0_match_tracktojet_which_jetidx[k], k }); }
 
-      for (auto it = sv0_m.begin(); it != sv0_m.end(); )
-      {
+      for (auto it = sv0_m.begin(); it != sv0_m.end(); ) {
         auto p = sv0_m.equal_range(it->first);
 
-        while (p.first != p.second)
-        {
-
+        while (p.first != p.second) {
           sv0_match_sharedjettotrack_which_temp_trkidx.push_back(sv0_match_tracktojet_which_trkidx[p.first++->second]);
         }
         it = p.second;
-
       }
 
       sv0_match_sharedjettotrack_which_trkidx.push_back(sv0_match_sharedjettotrack_which_temp_trkidx);
 
       // start collecting shared tracks of sv1 for each shared jet
       std::multimap<int, size_t> sv1_m;
-      for (size_t k = 0; k < sv1_match_tracktojet_which_jetidx.size(); k++)
-        if (sv1_match_tracktojet_which_jetidx[k] == jet_index) { sv1_m.insert({ sv1_match_tracktojet_which_jetidx[k], k }); }
+      for (size_t k = 0; k < sv1_match_tracktojet_which_jetidx.size(); k++) {
+        if (sv1_match_tracktojet_which_jetidx[k] == jet_index) { 
+          sv1_m.insert({ sv1_match_tracktojet_which_jetidx[k], k });
+        }
+      }
 
-      for (auto it = sv1_m.begin(); it != sv1_m.end(); )
-      {
+      for (auto it = sv1_m.begin(); it != sv1_m.end(); ) {
         auto p = sv1_m.equal_range(it->first);
 
-        while (p.first != p.second)
-        {
-
+        while (p.first != p.second) {
           sv1_match_sharedjettotrack_which_temp_trkidx.push_back(sv1_match_tracktojet_which_trkidx[p.first++->second]);
         }
         it = p.second;
-
       }
 
       sv1_match_sharedjettotrack_which_trkidx.push_back(sv1_match_sharedjettotrack_which_temp_trkidx);
@@ -1627,7 +1622,6 @@ std::pair<bool, std::vector<std::vector<size_t>>> MFVVertexer::sharedjets(const 
 
       sv0_match_sharedjettotrack_which_temp_trkidx = {};
       sv1_match_sharedjettotrack_which_temp_trkidx = {};
-
     }
     sv_lonesharedtrack_which_trkidx.push_back(sv0_lonesharedtrack_which_trkidx);
     sv_lonesharedtrack_which_trkidx.push_back(sv1_lonesharedtrack_which_trkidx);
