@@ -1083,7 +1083,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
         for (v[1] = v[0] + 1; v[1] != vertices->end(); ++v[1]) {
 
-
           ivtx[1] = v[1] - vertices->begin();
 
           if (verbose)
@@ -1108,23 +1107,18 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
             for (int i = 0; i < 2; ++i) {
               for (auto tk : vertex_track_set(*v[i])) {
-
                 ttks.push_back(tt_builder->build(tk));
-
               }
             }
 
             reco::VertexCollection merged_vertices;
-            for (const TransientVertex& tv : kv_reco_dropin(ttks))
-            {
+            for (const TransientVertex& tv : kv_reco_dropin(ttks)) {
               merged_vertices.push_back(reco::Vertex(tv));
 
               for (auto it = merged_vertices[0].tracks_begin(), ite = merged_vertices[0].tracks_end(); it != ite; ++it) {
-
                 reco::TransientTrack seed_track;
                 seed_track = tt_builder->build(*it.operator*());
                 std::pair<bool, Measurement1D> tk_vtx_dist = track_dist(seed_track, merged_vertices[0]);
-
               }
             }
 
@@ -1139,9 +1133,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
               printf("\n");
             }
 
-            if (merged_vertices.size() == 1)
-            {
-
+            if (merged_vertices.size() == 1) {
               if (verbose) {
                 printf(" sv2ddist between a merging pair is %7.3f \n", v_dist.value());
                 printf(" |dPhi(vtx0,vtx1) between a merging pair is %4.3f \n", fabs(reco::deltaPhi(phi0, phi1)));
@@ -1232,15 +1224,15 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     fillCommonOutputHists(vertices, fake_bs_vtx, tt_builder, stepEnum::afterdzfit);
   }
 
-  //////////////////////////////////////////////////////////////////////
-  // Merge ever pair of output vertices that satisfy the following criteria to resolve split-vertices:
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////
+  // Merge every pair of output vertices that satisfy the following criteria to resolve split-vertices:
   //   - >=2trk/vtx
   //   - dBV > 100 um
   //   - |dPhi(vtx0,vtx1)| < 0.5 
   //   - svdist2d < 300 um
   // Note that the merged vertex must pass chi2/dof < 5
-  //////////////////////////////////////////////////////////////////////
-
+  ////////////////////////////////////////////////////////////////////////////////////////////////////
   if (resolve_split_vertices_tight) {
     int merge_pair_count = 0;
     reco::VertexCollection potential_merged_vertices;
@@ -1258,13 +1250,12 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           tracks[1] = vertex_track_set(*v[1]);
 
           Measurement1D v_dist = vertex_dist_2d.distance(*v[0], *v[1]);
+
           Measurement1D dBV0_Meas1D = vertex_dist_2d.distance(*v[0], fake_bs_vtx);
           double dBV0 = dBV0_Meas1D.value();
 
-
           Measurement1D dBV1_Meas1D = vertex_dist_2d.distance(*v[1], fake_bs_vtx);
           double dBV1 = dBV1_Meas1D.value();
-
 
           double v0x = v[0]->x() - bsx;
           double v0y = v[0]->y() - bsy;
@@ -1318,7 +1309,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
       if (merge)
         v[0] = vertices->begin() - 1;
-
     }
 
     if (investigate_merged_vertices && histos_output_aftermerge) {
@@ -1330,6 +1320,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         double dBV = dBV_Meas1D.value();
         double bs2derr = dBV_Meas1D.error();
 
+        // n-1 plots of the various cuts used (ntk, dBV, bs2derr, chi2)
         if (ntracks >= 5 && dBV > 0.01 && bs2derr < 0.0025) {
           h_output_aftermerge_potential_merged_vertex_nm1_chi2->Fill(vchi2);
         }
@@ -1361,10 +1352,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   //   - {1,1} shared jets have exactly one track to the jet from both vertices
   //   - {1,n} shared jets have one of the two vertices contributing exactly one track to the jet
   //////////////////////////////////////////////////////////////////////
-
-
-  int n_output_aftersharedjets_onetracks = 0;
-
   if (resolve_shared_jets) {
     edm::Handle<pat::JetCollection> jets;
     event.getByToken(shared_jet_token, jets);
@@ -1378,6 +1365,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     std::vector<std::vector<int> > sv_match_tracktojet_which_jetidx;
 
     std::vector<track_vec> sv_total_track_which_trk_vec;
+
+    int n_output_aftersharedjets_onetracks = 0;
 
     size_t vtxidx = 0;
     for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
@@ -1427,17 +1416,13 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           sv_ascending_total_ntrack.insert(it_ntracks, ntracks);
           sv_ascending_vtxidx.insert(it_vtx, vtxidx);
         }
-
       }
-
 
       sv_total_track_which_trkidx.push_back(track_idx);
       sv_total_ntrack.push_back(ntracks);
       sv_match_tracktojet_which_trkidx.push_back(tracktojet_which_trkidx);
       sv_match_tracktojet_which_jetidx.push_back(tracktojet_which_jetidx);
       vtxidx++;
-
-
     }
 
 
@@ -1545,12 +1530,13 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           *v[0] = reco::Vertex(tv);
       }
     }
+
+    if (histos_output_aftersharedjets) {
+      fillCommonOutputHists(vertices, fake_bs_vtx, tt_builder, stepEnum::aftersharedjets);
+      h_output_aftersharedjets_n_onetracks->Fill(n_output_aftersharedjets_onetracks);
+    }
   }
 
-  if (resolve_shared_jets && histos_output_aftersharedjets) {
-    fillCommonOutputHists(vertices, fake_bs_vtx, tt_builder, stepEnum::aftersharedjets);
-    h_output_aftersharedjets_n_onetracks->Fill(n_output_aftersharedjets_onetracks);
-  }
 
   //////////////////////////////////////////////////////////////////////
   // Put the output.
