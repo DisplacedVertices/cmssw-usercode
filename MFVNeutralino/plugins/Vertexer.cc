@@ -378,13 +378,11 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
       hs_output_vertex_pairdphi[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_pairdphi", ";dPhi(vtx0,vtx1) every pair", 100, -3.14, 3.14);
     }
 
-    if (histos_output_aftermerge) {
-      if (investigate_merged_vertices) {
-        h_output_aftermerge_potential_merged_vertex_nm1_chi2 = fs->make<TH1F>("h_output_aftermerge_potential_merged_vertex_nm1_chi2", ";normalized chi2 w/ n-1 cuts applied", 20, 0, 20);
-        h_output_aftermerge_potential_merged_vertex_nm1_ntracks = fs->make<TH1F>("h_output_aftermerge_potential_merged_vertex_nm1_ntracks", ";ntracks/vtx w/ n-1 cuts applied", 30, 0, 30);
-        h_output_aftermerge_potential_merged_vertex_nm1_bs2derr = fs->make<TH1F>("h_output_aftermerge_potential_merged_vertex_nm1_bs2derr", ";bs2derr (cm.) w/ n-1 cuts applied", 20, 0, 0.05);
-        h_output_aftermerge_potential_merged_vertex_nm1_bsbs2ddist = fs->make<TH1F>("h_output_aftermerge_potential_merged_vertex_nm1_bsbs2ddist", ";dBV (cm.) w/ n-1 cuts applied", 100, 0, 1.0);
-      }
+    if (investigate_merged_vertices) {
+      h_output_aftermerge_potential_merged_vertex_nm1_chi2 = fs->make<TH1F>("h_output_aftermerge_potential_merged_vertex_nm1_chi2", ";normalized chi2 w/ n-1 cuts applied", 20, 0, 20);
+      h_output_aftermerge_potential_merged_vertex_nm1_ntracks = fs->make<TH1F>("h_output_aftermerge_potential_merged_vertex_nm1_ntracks", ";ntracks/vtx w/ n-1 cuts applied", 30, 0, 30);
+      h_output_aftermerge_potential_merged_vertex_nm1_bs2derr = fs->make<TH1F>("h_output_aftermerge_potential_merged_vertex_nm1_bs2derr", ";bs2derr (cm.) w/ n-1 cuts applied", 20, 0, 0.05);
+      h_output_aftermerge_potential_merged_vertex_nm1_bsbs2ddist = fs->make<TH1F>("h_output_aftermerge_potential_merged_vertex_nm1_bsbs2ddist", ";dBV (cm.) w/ n-1 cuts applied", 100, 0, 1.0);
     }
 
     if (resolve_shared_jets) {
@@ -916,7 +914,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           if (tk_vtx_dist.second.significance() < trackrefine_sigmacut) {
             set_trackrefine_sigmacut_tks.insert(it->castTo<reco::TrackRef>());
           }
-
         }
 
         for (auto tk : set_trackrefine_sigmacut_tks) {
@@ -1233,7 +1230,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     int merge_pair_count = 0;
     reco::VertexCollection potential_merged_vertices;
 
-
     for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
 
       track_set tracks[2];
@@ -1277,9 +1273,11 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
               potential_merged_vertices.push_back(reco::Vertex(tv[0]));
               //std::cout << "ntrack in potental merged: " << potential_merged_vertices.back().nTracks() << std::endl;
             }
+
             reco::VertexCollection merged_vertices;
-            for (const TransientVertex& tv : kv_reco_dropin(ttks))
+            for (const TransientVertex& tv : kv_reco_dropin(ttks)) {
               merged_vertices.push_back(reco::Vertex(tv));
+            }
 
             if (merged_vertices.size() == 1 && vertex_track_set(merged_vertices[0], 0) == tracks_to_fit) {
 
@@ -1295,9 +1293,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
                 printf(" # of tracks per a new merged vertex is %u \n", merged_vertices[0].nTracks());
               }
 
-              v[1] = vertices->erase(v[1]) - 1;
+              v[1] = vertices->erase(v[1]) - 1; // erase and point the iterator at the previous entry
               *v[0] = reco::Vertex(merged_vertices[0]); // ok to use v[0] after the erase(v[1]) because v[0] is by construction before v[1]
-
             }
           }
         }
@@ -1307,7 +1304,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         v[0] = vertices->begin() - 1;
     }
 
-    if (investigate_merged_vertices && histos_output_aftermerge) {
+    if (investigate_merged_vertices) {
       for (size_t i = 0, ie = potential_merged_vertices.size(); i < ie; ++i) {
         reco::Vertex v = potential_merged_vertices[i];
         const int ntracks = v.nTracks();
