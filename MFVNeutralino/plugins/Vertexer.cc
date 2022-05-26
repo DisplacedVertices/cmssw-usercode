@@ -1444,6 +1444,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           if (sv0.nTracks() > 2 && sv1.nTracks() > 2) {
 
             std::pair<bool, std::vector<std::vector<size_t>>> sharedjet_tool = sharedjets(vtxidx0, vtxidx1, sv_match_tracktojet_which_jetidx, sv_match_tracktojet_which_trkidx);
+
             // loop thru {1,1}+{1,n} nsharedjets and remove just one shared track from v0 if a |dPhi(v0,one shared track)| > pi/2
             if (sharedjet_tool.first) {
               if (verbose)
@@ -1459,9 +1460,10 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
                 track_vec tks_sv0 = sv_total_track_which_trk_vec[vtxidx0];
                 size_t idx = sv0_lonesharedtrack_which_trkidx[k];
                 h_resolve_shared_jets_lonetrkvtx_dphi->Fill(fabs(reco::deltaPhi(tks_sv0[idx]->phi(), phi0)));
+
+                // drop the lone track pointing backwards from the vertex direction!
                 if (fabs(reco::deltaPhi(tks_sv0[idx]->phi(), phi0)) > M_PI / 2) {
-                  sv_total_track_which_trkidx[vtxidx0].erase(std::remove(sv_total_track_which_trkidx[vtxidx0].begin(), sv_total_track_which_trkidx[vtxidx0].end(), idx),
-                      sv_total_track_which_trkidx[vtxidx0].end());
+                  eraseElement(sv_total_track_which_trkidx[vtxidx0], idx);
                 }
               }
               if (verbose) {
