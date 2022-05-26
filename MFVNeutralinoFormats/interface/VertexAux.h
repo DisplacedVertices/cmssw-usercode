@@ -206,11 +206,10 @@ struct MFVVertexAux {
 
   float pvdz() const { return sqrt(pv3ddist*pv3ddist - pv2ddist*pv2ddist); }
   float pvdzerr() const {
-    // JMTBAD
-    float z = pvdz();
-    if (z == 0)
+    float pvz = pvdz();
+    if (pvz == 0)
       return -1;
-    return sqrt(pv3ddist*pv3ddist*pv3derr*pv3derr + pv2ddist*pv2ddist*pv2derr*pv2derr)/z;
+    return sqrt(pv3ddist*pv3ddist*pv3derr*pv3derr + pv2ddist*pv2ddist*pv2derr*pv2derr)/pvz;
   }
   float pvdzsig() const { return sig(pvdz(), pvdzerr()); }
 
@@ -220,9 +219,9 @@ struct MFVVertexAux {
   float costhmombs  (size_t i) const { return unbin(costhmombs_  [i], -1, 1); }
   float costhmompv2d(size_t i) const { return unbin(costhmompv2d_[i], -1, 1); }
   float costhmompv3d(size_t i) const { return unbin(costhmompv3d_[i], -1, 1); }
-  void costhmombs  (size_t i, float x) { costhmombs_  [i] = bin(x, -1, 1); }
-  void costhmompv2d(size_t i, float x) { costhmompv2d_[i] = bin(x, -1, 1); }
-  void costhmompv3d(size_t i, float x) { costhmompv3d_[i] = bin(x, -1, 1); }
+  void costhmombs  (size_t i, float xval) { costhmombs_  [i] = bin(xval, -1, 1); }
+  void costhmompv2d(size_t i, float xval) { costhmompv2d_[i] = bin(xval, -1, 1); }
+  void costhmompv3d(size_t i, float xval) { costhmompv3d_[i] = bin(xval, -1, 1); }
 
   float missdistpv   [mfv::NMomenta];
   float missdistpverr[mfv::NMomenta];
@@ -327,9 +326,9 @@ struct MFVVertexAux {
       n == track_cov.size();
   }
 
-  TLorentzVector track_p4(int i, float mass=0) const {
+  TLorentzVector track_p4(int i, float assumed_mass=0) const {
     TLorentzVector v;
-    v.SetXYZM(track_px[i], track_py[i], track_pz[i], mass);
+    v.SetXYZM(track_px[i], track_py[i], track_pz[i], assumed_mass);
     return v;
   }
 
@@ -555,12 +554,12 @@ struct MFVVertexAux {
   float maxtrackpt() const { return _max(track_pts(), false); }
 
   float maxmntrackpt(int n) const {
-    std::vector<float> pt = track_pts();
-    int nt = int(pt.size());
+    std::vector<float> tkpts = track_pts();
+    int nt = int(tkpts.size());
     if (n > nt - 1)
       return -1;
-    std::sort(pt.begin(), pt.end());
-    return pt[nt-1-n];
+    std::sort(tkpts.begin(), tkpts.end());
+    return tkpts[nt-1-n];
   }
 
   float trackptavg() const { return _avg(track_pts(), false); }
@@ -675,7 +674,7 @@ struct MFVVertexAux {
   float trackpairdzavg() const { return stats(this, trackpairdzs()).avg; }
   float trackpairdzrms() const { return stats(this, trackpairdzs()).rms; }
 
-  std::vector<float> trackpairmasses(float mass=0) const {
+  std::vector<float> trackpairmasses(float assumed_mass=0) const {
     std::vector<float> v;
     size_t n = ntracks();
     if (n >= 2)
@@ -683,7 +682,7 @@ struct MFVVertexAux {
         if (use_track(i))
           for (size_t j = i+1, je = n; j < je; ++j)
             if (use_track(j))
-              v.push_back((track_p4(i, mass) + track_p4(j, mass)).M());
+              v.push_back((track_p4(i, assumed_mass) + track_p4(j, assumed_mass)).M());
     return v;
   }
 
@@ -692,7 +691,7 @@ struct MFVVertexAux {
   float trackpairmassavg() const { return stats(this, trackpairmasses()).avg; }
   float trackpairmassrms() const { return stats(this, trackpairmasses()).rms; }
 
-  std::vector<float> tracktripmasses(float mass=0) const {
+  std::vector<float> tracktripmasses(float assumed_mass=0) const {
     std::vector<float> v;
     size_t n = ntracks();
     if (n >= 3)
@@ -702,7 +701,7 @@ struct MFVVertexAux {
             if (use_track(j))
               for (size_t k = j+1, ke = n; k < ke; ++k)
                 if (use_track(k))
-                  v.push_back((track_p4(i, mass) + track_p4(j, mass) + track_p4(k, mass)).M());
+                  v.push_back((track_p4(i, assumed_mass) + track_p4(j, assumed_mass) + track_p4(k, assumed_mass)).M());
     return v;
   }
 
@@ -711,7 +710,7 @@ struct MFVVertexAux {
   float tracktripmassavg() const { return stats(this, tracktripmasses()).avg; }
   float tracktripmassrms() const { return stats(this, tracktripmasses()).rms; }
 
-  std::vector<float> trackquadmasses(float mass=0) const {
+  std::vector<float> trackquadmasses(float assumed_mass=0) const {
     std::vector<float> v;
     size_t n = ntracks();
     if (n >= 4)
@@ -723,7 +722,7 @@ struct MFVVertexAux {
                 if (use_track(k))
                   for (size_t l = k+1, le = n; l < le; ++l)
                     if (use_track(l))
-                      v.push_back((track_p4(i, mass) + track_p4(j, mass) + track_p4(k, mass) + track_p4(l, mass)).M());
+                      v.push_back((track_p4(i, assumed_mass) + track_p4(j, assumed_mass) + track_p4(k, assumed_mass) + track_p4(l, assumed_mass)).M());
     return v;
   }
 

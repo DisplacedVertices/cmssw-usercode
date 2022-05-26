@@ -80,16 +80,16 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
 
     // JMTBAD use TracksSubNtupleFiller::which_jet?
     for (const pat::Jet& jet : nt_filler.jets_filler().jets(event)) {
-      double dist2min = 0.1;
+      double dist2jetmin = 0.1;
       int whichjet = -1;
 
       for (int j = 0, je = nt.jets().n(); j < je; ++j) {
-        const double dist2 = mag2(jet.pt()     - nt.jets().pt(j),
+        const double dist2jet = mag2(jet.pt()     - nt.jets().pt(j),
                                   jet.eta()    - nt.jets().eta(j),
                                   jet.phi()    - nt.jets().phi(j),
                                   jet.energy() - nt.jets().energy(j));
-        if (dist2 < dist2min) {
-          dist2min = dist2;
+        if (dist2jet < dist2jetmin) {
+          dist2jetmin = dist2jet;
           whichjet = j;
         }
       }
@@ -99,14 +99,14 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
       for (size_t idau = 0, idaue = jet.numberOfDaughters(); idau < idaue; ++idau) {
         const reco::Track* tk = jetDaughterTrack(jet, idau);
         if (tk) {
-          double dist2min = 0.1;
+          double dist2tkmin = 0.1;
           int whichtk = -1;
           for (size_t i = 0, ie = nt.tracks().n(); i < ie; ++i) {
-            const double dist2 = mag2(tk->charge() * tk->pt() - nt.tracks().qpt(i),
+            const double dist2tk = mag2(tk->charge() * tk->pt() - nt.tracks().qpt(i),
                                       tk->eta()               - nt.tracks().eta(i),
                                       tk->phi()               - nt.tracks().phi(i));
-            if (dist2 < dist2min) {
-              dist2min = dist2;
+            if (dist2tk < dist2tkmin) {
+              dist2tkmin = dist2tk;
               whichtk = i;
             }
           }
@@ -147,14 +147,14 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
       tks_push_back(*tk);
 
     for (const reco::Track& tk : *moved_tracks) {
-      double dist2min = 0.1;
+      double dist2tkmin = 0.1;
       int which = -1;
       for (int i = 0, ie = nt.tracks().n(); i < ie; ++i) {
-        const double dist2 = mag2(tk.charge() * tk.pt() - nt.tracks().qpt(i),
+        const double dist2tk = mag2(tk.charge() * tk.pt() - nt.tracks().qpt(i),
                                   tk.eta()              - nt.tracks().eta(i),
                                   tk.phi()              - nt.tracks().phi(i));
-        if (dist2 < dist2min) {
-          dist2min = dist2;
+        if (dist2tk < dist2tkmin) {
+          dist2tkmin = dist2tk;
           which = i;
         }
       }
@@ -168,16 +168,16 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
     }
 
     for (const pat::Jet& jet : nt_filler.jets_filler().jets(event)) {
-      double dist2min = 0.1;
+      double dist2jetmin = 0.1;
       int whichjet = -1;
 
       for (int j = 0, je = nt.jets().n(); j < je; ++j) {
-        const double dist2 = mag2(jet.pt()     - nt.jets().pt(j),
+        const double dist2jet = mag2(jet.pt()     - nt.jets().pt(j),
                                   jet.eta()    - nt.jets().eta(j),
                                   jet.phi()    - nt.jets().phi(j),
                                   jet.energy() - nt.jets().energy(j));
-        if (dist2 < dist2min) {
-          dist2min = dist2;
+        if (dist2jet < dist2jetmin) {
+          dist2jetmin = dist2jet;
           whichjet = j;
         }
       }
@@ -207,26 +207,26 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
     const size_t nmovedjets = jets_used->size() + bjets_used->size();
     std::vector<int> whichs(nmovedjets, -1);
 
-    int i = -1;
+    int idx = -1;
     for (const pat::JetCollection* jets : { &*jets_used, &*bjets_used }) {
       for (const pat::Jet& jet : *jets) {
-        ++i;
-        double dist2min = 0.1;
+        ++idx;
+        double dist2jetmin = 0.1;
         int which = -1;
 
         for (size_t j = 0, je = nt.jets().n(); j < je; ++j) {
-          const double dist2 = mag2(jet.pt()     - nt.jets().pt(j),
+          const double dist2jet = mag2(jet.pt()     - nt.jets().pt(j),
                                     jet.eta()    - nt.jets().eta(j),
                                     jet.phi()    - nt.jets().phi(j),
                                     jet.energy() - nt.jets().energy(j));
-          if (dist2 < dist2min) {
-            dist2min = dist2;
+          if (dist2jet < dist2jetmin) {
+            dist2jetmin = dist2jet;
             which = j;
           }
         }
 
         assert(which != -1);
-        whichs[i] = which;
+        whichs[idx] = which;
         nt.set_jet_moved(which);
       }
     }
