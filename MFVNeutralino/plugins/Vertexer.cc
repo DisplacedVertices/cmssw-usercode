@@ -1368,23 +1368,20 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       std::vector<int> tracktojet_which_jetidx;
       track_vec tks = vertex_track_vec(*v[0]);
       sv_total_track_which_trk_vec.push_back(tks);
-      size_t i = 0;
-      for (const reco::TrackRef& itk : tks) {
+      for (size_t i = 0; i < tks.size(); ++i) {
+        const reco::TrackRef& itk = tks[i];
         track_idx.push_back(i);
         for (size_t j = 0; j < jets->size(); ++j) {
-          int jet_index = static_cast<int>(j);
-          if (match_track_jet(*itk, (*jets)[j], *jets, jet_index)) {
+          if (match_track_jet(*itk, (*jets)[j], *jets, j)) {
             tracktojet_which_trkidx.push_back(i);
             tracktojet_which_jetidx.push_back(j);
             if (verbose)
               printf(" track %u matched with a jet %lu \n", tks[i].key(), j);
           }
-
         }
-        i++;
       }
 
-      unsigned int ntracks = static_cast<unsigned int>(track_idx.size());
+      unsigned int ntracks = track_idx.size();
 
       if (vtxidx == 0) {
         sv_ascending_total_ntrack.push_back(ntracks);
@@ -1497,7 +1494,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       }
     }
 
-    std::set<int> trackicity;
     for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
       track_set tracks[2];
       ivtx[0] = v[0] - vertices->begin();
