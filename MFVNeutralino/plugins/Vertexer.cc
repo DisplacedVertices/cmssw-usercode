@@ -876,6 +876,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     for (size_t i = 0, ie = vertices->size(); i < ie; ++i) {
       reco::Vertex& v = vertices->at(i);
       const int ntracks = v.nTracks();
+	  const double vmass = v.p4().mass();
       const double vchi2 = v.normalizedChi2();
       const double vndof = v.ndof();
       const double vx = v.position().x() - bsx;
@@ -1017,6 +1018,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           h_noshare_vertex_tkvtxdistsig->Fill(tk_vtx_dist.second.significance());
         }
 
+		h_noshare_vertex_mass->Fill(vmass);
         h_noshare_vertex_chi2->Fill(vchi2);
         h_noshare_vertex_ndof->Fill(vndof);
         h_noshare_vertex_x->Fill(vx);
@@ -1695,6 +1697,7 @@ void MFVVertexer::fillCommonOutputHists(std::unique_ptr<reco::VertexCollection>&
   for (size_t i = 0, ie = vertices->size(); i < ie; ++i) {
     reco::Vertex& v = vertices->at(i);
     const int ntracks = v.nTracks();
+    const double vmass = v.p4().mass();
     const double vchi2 = v.normalizedChi2();
     const double vndof = v.ndof();
     const double vx = v.position().x() - bsx;
@@ -1736,6 +1739,7 @@ void MFVVertexer::fillCommonOutputHists(std::unique_ptr<reco::VertexCollection>&
       hs_output_vertex_tkvtxdistsig[step]->Fill(tk_vtx_dist.second.significance());
     }
 
+	hs_output_vertex_mass[step]->Fill(vmass);
     hs_output_vertex_chi2[step]->Fill(vchi2);
     hs_output_vertex_ndof[step]->Fill(vndof);
     hs_output_vertex_x[step]->Fill(vx);
