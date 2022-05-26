@@ -38,7 +38,8 @@ class MFVVertexer : public edm::EDProducer {
     std::pair<bool, std::vector<std::vector<size_t>>> sharedjets(const int vtx0idx, const int vtx1idx, const std::vector < std::vector<int>>& sv_match_tracktojet_which_jetidx, const std::vector < std::vector<int>>& sv_match_tracktojet_which_trkidx);
     bool hasCommonElement(std::vector<int> vec0, std::vector<int> vec1);
     std::vector<int>::iterator getFirstCommonElement(std::vector<int>& vec0, std::vector<int>& vec1);
-    void eraseElement(std::vector<int>& vec, int idx);
+    template <typename T> void eraseElement(std::vector<T>& vec, int idx);
+
     bool match_track_jet(const reco::Track& tk, const pat::Jet& jet, const pat::JetCollection& jets, const int& idx);
 
     void finish(edm::Event&, const std::vector<reco::TransientTrack>&, std::unique_ptr<reco::VertexCollection>, std::unique_ptr<VertexerPairEffs>, const std::vector<std::pair<track_set, track_set>>&);
@@ -1633,7 +1634,8 @@ std::vector<int>::iterator MFVVertexer::getFirstCommonElement(std::vector<int>& 
   return std::find_first_of(vec0.begin(), vec0.end(), vec1.begin(), vec1.end());
 }
 
-void MFVVertexer::eraseElement(std::vector<int>& vec, int idx) {
+template <typename T>
+void MFVVertexer::eraseElement(std::vector<T>& vec, int idx) {
   vec.erase(std::remove(vec.begin(), vec.end(), idx), vec.end());
   return;
 }
