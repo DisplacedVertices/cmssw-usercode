@@ -239,8 +239,6 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.bs2derr1 = v1.bs2derr;
     nt.rescale_bs2derr1 = v1.rescale_bs2derr;
   }
-  else
-    return;
 
   tree->Fill();
 }
