@@ -1299,23 +1299,23 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
                 printf(" # of tracks per a new merged vertex is %u \n", merged_vertices[0].nTracks());
               }
 
-              v[1] = vertices->erase(v[1]) - 1; // erase and point the iterator at the previous entry
-              *v[0] = reco::Vertex(merged_vertices[0]); // ok to use v[0] after the erase(v[1]) because v[0] is by construction before v[1]
+              v[1] = vertices->erase(v[1]) - 1; // (1) erase and point the iterator at the previous entry
+              *v[0] = reco::Vertex(merged_vertices[0]); // (2) updated v[0] (ok to use v[0] after the erase(v[1]) because v[0] is by construction before v[1])
             }
           }
         }
       }
-
-      if (merge)
-        v[0] = vertices->begin() - 1;
+	  // going through all the pairs of of v[1] and a fixed v[0] for merging, if merge happens (1) each v[1] is erased (2) v[0] is updated (recurring until exit loop) (3) reset the combination again
+	  if (merge)
+		  v[0] = vertices->begin() - 1; // (3) reset the combination if a valid merge happens 
     }
 
     if (investigate_merged_vertices) {
       for (size_t i = 0, ie = potential_merged_vertices.size(); i < ie; ++i) {
-        reco::Vertex v = potential_merged_vertices[i];
-        const int ntracks = v.nTracks();
-        const double vchi2 = v.normalizedChi2();
-        Measurement1D dBV_Meas1D = vertex_dist_2d.distance(v, fake_bs_vtx);
+        reco::Vertex vpm = potential_merged_vertices[i];
+        const int ntracks = vpm.nTracks();
+        const double vchi2 = vpm.normalizedChi2();
+        Measurement1D dBV_Meas1D = vertex_dist_2d.distance(vpm, fake_bs_vtx);
         double dBV = dBV_Meas1D.value();
         double bs2derr = dBV_Meas1D.error();
 
@@ -1423,19 +1423,19 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
     if (vertices->size() >= 2) {
 
-      for (size_t i = 0; i < sv_ascending_vtxidx.size(); i++) {
-        const size_t vtxidx0 = sv_ascending_vtxidx[i];
+      for (size_t vtxi = 0; vtxi < sv_ascending_vtxidx.size(); vtxi++) {
+        const size_t vtxidx0 = sv_ascending_vtxidx[vtxi];
         reco::Vertex& sv0 = vertices->at(vtxidx0);
         double sv0x = sv0.x() - bsx;
         double sv0y = sv0.y() - bsy;
         double phi0 = atan2(sv0y, sv0x);
         if (verbose){
-          printf("-----loop # %lu ----- \n", i);
+          printf("-----loop # %lu ----- \n", vtxi);
           printf(" sv0'idx: %lu \n", vtxidx0);
           printf(" sv0'ntrack: %u \n", sv0.nTracks());
         }
         for (size_t j = 0; j < sv_ascending_vtxidx.size(); j++) {
-          if (i == j) continue;
+          if (vtxi == j) continue;
           const size_t vtxidx1 = sv_ascending_vtxidx[j];
           reco::Vertex& sv1 = vertices->at(vtxidx1);
           if (verbose){
@@ -1475,8 +1475,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
               }
 
               track_set  sv0_resolved_sharedtracks_trkset;
-              for (unsigned int i = 0; i < sv_total_track_which_trkidx[vtxidx0].size(); ++i) {
-                int idx = sv_total_track_which_trkidx[vtxidx0][i];
+              for (unsigned int trk0_i = 0; trk0_i < sv_total_track_which_trkidx[vtxidx0].size(); ++trk0_i) {
+                int idx = sv_total_track_which_trkidx[vtxidx0][trk0_i];
                 track_vec tks_sv0 = sv_total_track_which_trk_vec[vtxidx0];
                 sv0_resolved_sharedtracks_trkset.insert(tks_sv0[idx]);
 
@@ -1579,12 +1579,12 @@ std::pair<bool, std::vector<std::vector<size_t>>> MFVVertexer::sharedjets(const 
       for (size_t k = 0; k < sv0_match_jetidx.size(); k++)
         if (sv0_match_jetidx[k] == jet_index) { sv0_m.insert({ sv0_match_jetidx[k], k });}
 
-      for (auto it = sv0_m.begin(); it != sv0_m.end(); ) {
-        auto p = sv0_m.equal_range(it->first); // p has p.first as a lower bound and p.second as an upper bound of jet index value in map but if all jet index are the same p.second will not be the same as p.first  
+      for (auto it0 = sv0_m.begin(); it0 != sv0_m.end(); ) {
+        auto p = sv0_m.equal_range(it0->first); // p has p.first as a lower bound and p.second as an upper bound of jet index value in map but if all jet index are the same p.second will not be the same as p.first  
         while (p.first != p.second) { 
           sv0_match_temp_trkidx.push_back(sv0_match_trkidx[p.first++->second]); // create a subset of tracks for this shared jet and this sv0  
         }
-        it = p.second;
+        it0 = p.second;
       }
 
       sv0_match_sharedjet_trkidx.push_back(sv0_match_temp_trkidx);
@@ -1597,13 +1597,13 @@ std::pair<bool, std::vector<std::vector<size_t>>> MFVVertexer::sharedjets(const 
         }
       }
 
-      for (auto it = sv1_m.begin(); it != sv1_m.end(); ) {
-        auto p = sv1_m.equal_range(it->first);
+      for (auto it1 = sv1_m.begin(); it1 != sv1_m.end(); ) {
+        auto p = sv1_m.equal_range(it1->first);
 
         while (p.first != p.second) {
           sv1_match_temp_trkidx.push_back(sv1_match_trkidx[p.first++->second]);
         }
-        it = p.second;
+        it1 = p.second;
       }
 
       sv1_match_sharedjet_trkidx.push_back(sv1_match_temp_trkidx);
