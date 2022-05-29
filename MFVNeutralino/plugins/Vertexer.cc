@@ -35,7 +35,7 @@ class MFVVertexer : public edm::EDProducer {
     typedef std::set<reco::TrackRef> track_set;
     typedef std::vector<reco::TrackRef> track_vec;
 
-    std::pair<bool, std::vector<std::vector<size_t>>> sharedjets(const int vtx0idx, const int vtx1idx, const std::vector < std::vector<int>>& sv_match_tracktojet_which_jetidx, const std::vector < std::vector<int>>& sv_match_tracktojet_which_trkidx);
+    std::pair<bool, std::vector<std::vector<size_t>>> sharedjets(const int vtx0idx, const int vtx1idx, const std::vector < std::vector<int>>& sv_match_jetidx, const std::vector < std::vector<int>>& sv_match_trkidx);
     bool hasCommonElement(std::vector<int> vec0, std::vector<int> vec1);
     std::vector<int>::iterator getFirstCommonElement(std::vector<int>& vec0, std::vector<int>& vec1);
     template <typename T> void eraseElement(std::vector<T>& vec, int idx);
@@ -298,7 +298,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 
     h_n_seed_vertices                = fs->make<TH1F>("h_n_seed_vertices",                ";# of seed vertices",  50,   0,    200);
     h_seed_vertex_track_weights      = fs->make<TH1F>("h_seed_vertex_track_weights",      ";seed vertex's track weights",  21,   0,      1.05);
-    h_seed_vertex_chi2               = fs->make<TH1F>("h_seed_vertex_chi2",               ";normalized chi2",  20,   0, max_seed_vertex_chi2);
+    h_seed_vertex_chi2               = fs->make<TH1F>("h_seed_vertex_chi2",               ";normalized chi2",  10,   0, 10);
     h_seed_vertex_ndof               = fs->make<TH1F>("h_seed_vertex_ndof",               ";ndof",  10,   0,     20);
     h_seed_vertex_x                  = fs->make<TH1F>("h_seed_vertex_x",                  ";vtxbsdist_x (cm.)", 20,  -1,      1);
     h_seed_vertex_y                  = fs->make<TH1F>("h_seed_vertex_y",                  ";vtxbsdist_y (cm.)", 20,  -1,      1);
@@ -318,7 +318,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
       h_noshare_vertex_ntracks = fs->make<TH1F>("h_noshare_vertex_ntracks", ";ntracks/vtx", 30, 0, 30);
       h_noshare_vertex_mass = fs->make<TH1F>("h_noshare_vertex_mass", ";mass/vtx (GeV)", 20, 0, 1000);
       h_noshare_vertex_track_weights = fs->make<TH1F>("h_noshare_vertex_track_weights", ";vertex track weights", 21, 0, 1.05);
-      h_noshare_vertex_chi2 = fs->make<TH1F>("h_noshare_vertex_chi2", ";normalized chi2", 20, 0, max_seed_vertex_chi2);
+      h_noshare_vertex_chi2 = fs->make<TH1F>("h_noshare_vertex_chi2", ";normalized chi2", 10, 0, 10);
       h_noshare_vertex_ndof = fs->make<TH1F>("h_noshare_vertex_ndof", ";ndof", 10, 0, 20);
       h_noshare_vertex_x = fs->make<TH1F>("h_noshare_vertex_x", ";vtxbsdist_x (cm.)", 20, -1, 1);
       h_noshare_vertex_y = fs->make<TH1F>("h_noshare_vertex_y", ";vtxbsdist_y (cm.)", 20, -1, 1);
@@ -339,11 +339,11 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
       h_noshare_vertex_tkvtxdist_before_do_track_refinement = fs->make<TH1F>("h_noshare_vertex_tkvtxdist_before_do_track_refinement", ";tkvtxdist (cm.)", 20, 0, 0.1);
       h_noshare_vertex_tkvtxdisterr_before_do_track_refinement = fs->make<TH1F>("h_noshare_vertex_tkvtxdisterr_before_do_track_refinement", ";tkvtxdisterr (cm.)", 20, 0, 0.1);
       h_noshare_vertex_tkvtxdistsig_before_do_track_refinement = fs->make<TH1F>("h_noshare_vertex_tkvtxdistsig_before_do_track_refinement", ";tkvtxdistsig", 20, 0, 6);
-      h_noshare_trackrefine_sigmacut_vertex_chi2 = fs->make<TH1F>("h_noshare_trackrefine_sigmacut_vertex_chi2", ";chi2/dof", 20, 0, max_seed_vertex_chi2);
+      h_noshare_trackrefine_sigmacut_vertex_chi2 = fs->make<TH1F>("h_noshare_trackrefine_sigmacut_vertex_chi2", ";chi2/dof", 10, 0, 10);
       h_noshare_trackrefine_sigmacut_vertex_tkvtxdistsig = fs->make<TH1F>("h_noshare_trackrefine_sigmacut_vertex_tkvtxdistsig", ";missdist sig", 20, 0, 6);
       h_noshare_trackrefine_sigmacut_vertex_distr_shift = fs->make<TH1F>("h_noshare_trackrefine_sigmacut_vertex_distr_shift", ";vtx after sigmacut'r - vtx before sigmacut'r (cm)", 20, -0.08, 0.08);
 
-      h_noshare_trackrefine_trimmax_vertex_chi2 = fs->make<TH1F>("h_noshare_trackrefine_trimmax_vertex_chi2", ";chi2/dof", 20, 0, max_seed_vertex_chi2);
+      h_noshare_trackrefine_trimmax_vertex_chi2 = fs->make<TH1F>("h_noshare_trackrefine_trimmax_vertex_chi2", ";chi2/dof", 10, 0, 10);
       h_noshare_trackrefine_trimmax_vertex_tkvtxdistsig = fs->make<TH1F>("h_noshare_trackrefine_trimmax_vertex_tkvtxdistsig", ";missdist sig", 20, 0, 6);
       h_noshare_trackrefine_trimmax_vertex_distr_shift = fs->make<TH1F>("h_noshare_trackrefine_trimmax_vertex_distr_shift", ";vtx after trimmax'r - vtx before trimmax'r (cm)", 20, -0.08, 0.08);
     }
@@ -366,7 +366,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
       hs_output_vertex_ntracks[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_ntracks", ";ntracks/vtx", 30, 0, 30);
       hs_output_vertex_mass[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_mass", ";mass/vtx (GeV)", 20, 0, 1000);
       hs_output_vertex_track_weights[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_track_weights", ";vertex track weights", 21, 0, 1.05);
-      hs_output_vertex_chi2[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_chi2", ";normalized chi2", 20, 0, max_seed_vertex_chi2);
+      hs_output_vertex_chi2[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_chi2", ";normalized chi2", 10, 0, 10);
       hs_output_vertex_ndof[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_ndof", ";ndof", 10, 0, 20);
       hs_output_vertex_x[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_x", ";vtxbsdist_x (cm.)", 20, -1, 1);
       hs_output_vertex_y[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_y", ";vtxbsdist_y (cm.)", 20, -1, 1);
@@ -1191,7 +1191,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         for (size_t j = 0; j < ntks; ++j)
           if (j != i)
             ttks[j - (j >= i)] = tt_builder->build(tks[j]);
-
         reco::Vertex vnm1(TransientVertex(kv_reco->vertex(ttks)));
         const double dist3_2 = mag2(vnm1.x() - v[0]->x(), vnm1.y() - v[0]->y(), vnm1.z() - v[0]->z());
         const double distz = mag(vnm1.z() - v[0]->z());
@@ -1214,8 +1213,14 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         }
       }
     }
+    iv = 0; //some vertices after dz refiting have normalized chi2 > 5
+    for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0], ++iv) {
+       if ((*v[0]).chi2() > 5) {
+         v[0] = vertices->erase(v[0]) - 1;
+         continue;
+       }
+    }
   }
-
   if (histos_output_afterdzfit){
     fillCommonOutputHists(vertices, fake_bs_vtx, tt_builder, stepEnum::afterdzfit);
   }
@@ -1230,7 +1235,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   // Note that the merged vertex must pass chi2/dof < 5
   ////////////////////////////////////////////////////////////////////////////////////////////////////
   if (resolve_split_vertices_tight) {
-    int merge_pair_count = 0;
     reco::VertexCollection potential_merged_vertices;
 
     for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
@@ -1284,7 +1288,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
             if (merged_vertices.size() == 1 && vertex_track_set(merged_vertices[0], 0) == tracks_to_fit) {
 
-              merge_pair_count += 1;
               merge = true;
 
               if (verbose) {
@@ -1292,7 +1295,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
                 printf(" |dPhi(vtx0,vtx1) between a merging pair is %4.3f \n", fabs(reco::deltaPhi(phi0, phi1)));
                 printf(" # of tracks per vtx0 is %u \n", v[0]->nTracks());
                 printf(" # of tracks per vtx1 is %u \n", v[1]->nTracks());
-                printf(" ---------------- merge the two vertices if chi2/dof < 8 ----------------- \n");
+                printf(" ---------------- merge the two vertices if chi2/dof < 5 ----------------- \n");
                 printf(" # of tracks per a new merged vertex is %u \n", merged_vertices[0].nTracks());
               }
 
@@ -1352,15 +1355,15 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     edm::Handle<pat::JetCollection> jets;
     event.getByToken(shared_jet_token, jets);
 
-    std::vector<std::vector<size_t> > sv_total_track_which_trkidx;
-    std::vector<unsigned int> sv_total_ntrack;
-    std::vector<unsigned int> sv_ascending_total_ntrack;
-    std::vector<size_t> sv_ascending_vtxidx;
+    std::vector<std::vector<size_t> > sv_total_track_which_trkidx; // a vector of each sv's track indx 
+    std::vector<unsigned int> sv_ascending_total_ntrack; // a vector of ascending number of total tracks per vertex 
+    std::vector<size_t> sv_ascending_vtxidx; // a vector of vertex index corresponding to the order of ascending total tracks in sv_ascending_total_ntrack 
 
-    std::vector<std::vector<int> > sv_match_tracktojet_which_trkidx;
-    std::vector<std::vector<int> > sv_match_tracktojet_which_jetidx;
 
-    std::vector<track_vec> sv_total_track_which_trk_vec;
+    std::vector<std::vector<int> > sv_match_trkidx; // a vector of each sv's track indx to keep a record of a track matching with a jet  
+    std::vector<std::vector<int> > sv_match_jetidx; // a vector of each sv's jet indx to keep a record of a jet that matches with a track at the same iterator  
+
+    std::vector<track_vec> sv_total_track_which_trk_vec; // a vector of each sv's track_vec object 
 
     int n_output_aftersharedjets_onetracks = 0;
 
@@ -1412,9 +1415,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       }
 
       sv_total_track_which_trkidx.push_back(track_idx);
-      sv_total_ntrack.push_back(ntracks);
-      sv_match_tracktojet_which_trkidx.push_back(tracktojet_which_trkidx);
-      sv_match_tracktojet_which_jetidx.push_back(tracktojet_which_jetidx);
+      sv_match_trkidx.push_back(tracktojet_which_trkidx);
+      sv_match_jetidx.push_back(tracktojet_which_jetidx);
       vtxidx++;
     }
 
@@ -1444,22 +1446,22 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           // only consider a pair with at least 3 tracks per vertex
           if (sv0.nTracks() > 2 && sv1.nTracks() > 2) {
 
-            std::pair<bool, std::vector<std::vector<size_t>>> sharedjet_tool = sharedjets(vtxidx0, vtxidx1, sv_match_tracktojet_which_jetidx, sv_match_tracktojet_which_trkidx);
+            std::pair<bool, std::vector<std::vector<size_t>>> sharedjet_tool = sharedjets(vtxidx0, vtxidx1, sv_match_jetidx, sv_match_trkidx);
 
             // loop thru {1,1}+{1,n} nsharedjets and remove just one shared track from v0 if a |dPhi(v0,one shared track)| > pi/2
             if (sharedjet_tool.first) {
               if (verbose)
                 printf("start shj implementation to {1,1} and {1,n} \n");
-              std::vector<std::vector<size_t>> sv_lonesharedtrack_which_trkidx = sharedjet_tool.second;
-              std::vector<size_t> sv0_lonesharedtrack_which_trkidx = sv_lonesharedtrack_which_trkidx[0];
-              std::vector<size_t> sv1_lonesharedtrack_which_trkidx = sv_lonesharedtrack_which_trkidx[1];
+              std::vector<std::vector<size_t>> sv_lonesharedtrack_trkidx = sharedjet_tool.second;
+              std::vector<size_t> sv0_lonesharedtrack_trkidx = sv_lonesharedtrack_trkidx[0];
+              std::vector<size_t> sv1_lonesharedtrack_trkidx = sv_lonesharedtrack_trkidx[1];
               if (verbose) {
-                printf("size of set of lone shared tracks per sv0: %lu \n", sv0_lonesharedtrack_which_trkidx.size());
-                printf("size of set of lone shared tracks per sv1: %lu \n", sv1_lonesharedtrack_which_trkidx.size());
+                printf("size of set of lone shared tracks per sv0: %lu \n", sv0_lonesharedtrack_trkidx.size());
+                printf("size of set of lone shared tracks per sv1: %lu \n", sv1_lonesharedtrack_trkidx.size());
               }
-              for (size_t k = 0; k < sv0_lonesharedtrack_which_trkidx.size(); k++) {
+              for (size_t k = 0; k < sv0_lonesharedtrack_trkidx.size(); k++) {
                 track_vec tks_sv0 = sv_total_track_which_trk_vec[vtxidx0];
-                size_t idx = sv0_lonesharedtrack_which_trkidx[k];
+                size_t idx = sv0_lonesharedtrack_trkidx[k];
                 h_resolve_shared_jets_lonetrkvtx_dphi->Fill(fabs(reco::deltaPhi(tks_sv0[idx]->phi(), phi0)));
 
                 // drop the lone track pointing backwards from the vertex direction!
@@ -1539,60 +1541,59 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   finish(event, seed_tracks, std::move(vertices), std::move(vpeffs), vpeffs_tracks);
 }
 
-std::pair<bool, std::vector<std::vector<size_t>>> MFVVertexer::sharedjets(const int vtx0idx, const int vtx1idx, const std::vector < std::vector<int>>& sv_match_tracktojet_which_jetidx, const std::vector < std::vector<int>>& sv_match_tracktojet_which_trkidx) {
+std::pair<bool, std::vector<std::vector<size_t>>> MFVVertexer::sharedjets(const int vtx0idx, const int vtx1idx, const std::vector < std::vector<int>>& sv_match_jetidx, const std::vector < std::vector<int>>& sv_match_trkidx) {
 
-  bool shared_jet = hasCommonElement(sv_match_tracktojet_which_jetidx[vtx0idx], sv_match_tracktojet_which_jetidx[vtx1idx]);
+  bool shared_jet = hasCommonElement(sv_match_jetidx[vtx0idx], sv_match_jetidx[vtx1idx]);
 
-  std::vector<std::vector<size_t>> sv_lonesharedtrack_which_trkidx;
-  std::vector<size_t> sv0_lonesharedtrack_which_trkidx;
-  std::vector<size_t> sv1_lonesharedtrack_which_trkidx;
+  std::vector<std::vector<size_t>> sv_lonesharedtrack_trkidx;
+  std::vector<size_t> sv0_lonesharedtrack_trkidx;
+  std::vector<size_t> sv1_lonesharedtrack_trkidx;
 
   if (shared_jet) {
 
     int nsharedjets = 0;
 
-    std::vector<std::vector<int>> sv_match_tracktojet_which_temp_jetidx = sv_match_tracktojet_which_jetidx;
-    std::vector<std::vector<int>> sv0_match_sharedjettotrack_which_trkidx;
-    std::vector<std::vector<int>> sv1_match_sharedjettotrack_which_trkidx;
+    std::vector<std::vector<int>> sv_match_temp_jetidx = sv_match_jetidx;
+    std::vector<std::vector<int>> sv0_match_sharedjet_trkidx;
+    std::vector<std::vector<int>> sv1_match_sharedjet_trkidx;
 
-    std::vector<int> sv0_match_tracktojet_which_jetidx = sv_match_tracktojet_which_jetidx[vtx0idx];
-    std::vector<int> sv0_match_tracktojet_which_trkidx = sv_match_tracktojet_which_trkidx[vtx0idx];
-    std::vector<int> sv0_match_sharedjettotrack_which_temp_trkidx;
+    std::vector<int> sv0_match_jetidx = sv_match_jetidx[vtx0idx];
+    std::vector<int> sv0_match_trkidx = sv_match_trkidx[vtx0idx];
+    std::vector<int> sv0_match_temp_trkidx;
 
-    std::vector<int> sv1_match_tracktojet_which_jetidx = sv_match_tracktojet_which_jetidx[vtx1idx];
-    std::vector<int> sv1_match_tracktojet_which_trkidx = sv_match_tracktojet_which_trkidx[vtx1idx];
-    std::vector<int> sv1_match_sharedjettotrack_which_temp_trkidx;
+    std::vector<int> sv1_match_jetidx = sv_match_jetidx[vtx1idx];
+    std::vector<int> sv1_match_trkidx = sv_match_trkidx[vtx1idx];
+    std::vector<int> sv1_match_temp_trkidx;
 
-    while (hasCommonElement(sv_match_tracktojet_which_temp_jetidx[vtx0idx], sv_match_tracktojet_which_temp_jetidx[vtx1idx])) {
+    while (hasCommonElement(sv_match_temp_jetidx[vtx0idx], sv_match_temp_jetidx[vtx1idx])) {
       nsharedjets++;
-      std::vector<int>::iterator it = getFirstCommonElement(sv_match_tracktojet_which_temp_jetidx[vtx0idx], sv_match_tracktojet_which_temp_jetidx[vtx1idx]);
-      int it_idx = std::distance(sv_match_tracktojet_which_temp_jetidx[vtx0idx].begin(), it);
-      int jet_index = sv_match_tracktojet_which_temp_jetidx[vtx0idx].at(it_idx);
+      std::vector<int>::iterator sharedjet_it = getFirstCommonElement(sv_match_temp_jetidx[vtx0idx], sv_match_temp_jetidx[vtx1idx]);
+      int sharedjet_it_idx = std::distance(sv_match_temp_jetidx[vtx0idx].begin(), sharedjet_it);
+      int jet_index = sv_match_temp_jetidx[vtx0idx].at(sharedjet_it_idx);
 
-      eraseElement(sv_match_tracktojet_which_temp_jetidx[vtx0idx], jet_index);
-      eraseElement(sv_match_tracktojet_which_temp_jetidx[vtx1idx], jet_index);
+      eraseElement(sv_match_temp_jetidx[vtx0idx], jet_index);
+      eraseElement(sv_match_temp_jetidx[vtx1idx], jet_index);
 
-      // start collecting shared tracks of sv0 for each shared jet
-      std::multimap<int, size_t> sv0_m;
-      for (size_t k = 0; k < sv0_match_tracktojet_which_jetidx.size(); k++)
-        if (sv0_match_tracktojet_which_jetidx[k] == jet_index) { sv0_m.insert({ sv0_match_tracktojet_which_jetidx[k], k }); }
+      // start collecting shared tracks of sv0 for each shared jet (FIXME: worth investigating if we can get rid of the complication of mapping because *_match_jetidx has 1-1 to *_match_trkidx)
+      std::multimap<int, size_t> sv0_m; // a map of pairs between {jet index, its index in sv0_match_jetidx} 
+      for (size_t k = 0; k < sv0_match_jetidx.size(); k++)
+        if (sv0_match_jetidx[k] == jet_index) { sv0_m.insert({ sv0_match_jetidx[k], k });}
 
       for (auto it = sv0_m.begin(); it != sv0_m.end(); ) {
-        auto p = sv0_m.equal_range(it->first);
-
-        while (p.first != p.second) {
-          sv0_match_sharedjettotrack_which_temp_trkidx.push_back(sv0_match_tracktojet_which_trkidx[p.first++->second]);
+        auto p = sv0_m.equal_range(it->first); // p has p.first as a lower bound and p.second as an upper bound of jet index value in map but if all jet index are the same p.second will not be the same as p.first  
+        while (p.first != p.second) { 
+          sv0_match_temp_trkidx.push_back(sv0_match_trkidx[p.first++->second]); // create a subset of tracks for this shared jet and this sv0  
         }
         it = p.second;
       }
 
-      sv0_match_sharedjettotrack_which_trkidx.push_back(sv0_match_sharedjettotrack_which_temp_trkidx);
+      sv0_match_sharedjet_trkidx.push_back(sv0_match_temp_trkidx);
 
       // start collecting shared tracks of sv1 for each shared jet
       std::multimap<int, size_t> sv1_m;
-      for (size_t k = 0; k < sv1_match_tracktojet_which_jetidx.size(); k++) {
-        if (sv1_match_tracktojet_which_jetidx[k] == jet_index) { 
-          sv1_m.insert({ sv1_match_tracktojet_which_jetidx[k], k });
+      for (size_t k = 0; k < sv1_match_jetidx.size(); k++) {
+        if (sv1_match_jetidx[k] == jet_index) { 
+          sv1_m.insert({ sv1_match_jetidx[k], k });
         }
       }
 
@@ -1600,30 +1601,30 @@ std::pair<bool, std::vector<std::vector<size_t>>> MFVVertexer::sharedjets(const 
         auto p = sv1_m.equal_range(it->first);
 
         while (p.first != p.second) {
-          sv1_match_sharedjettotrack_which_temp_trkidx.push_back(sv1_match_tracktojet_which_trkidx[p.first++->second]);
+          sv1_match_temp_trkidx.push_back(sv1_match_trkidx[p.first++->second]);
         }
         it = p.second;
       }
 
-      sv1_match_sharedjettotrack_which_trkidx.push_back(sv1_match_sharedjettotrack_which_temp_trkidx);
+      sv1_match_sharedjet_trkidx.push_back(sv1_match_temp_trkidx);
 
-      if (sv0_match_sharedjettotrack_which_temp_trkidx.size() == 1) {
-        sv0_lonesharedtrack_which_trkidx.push_back(sv0_match_sharedjettotrack_which_temp_trkidx[0]);
+      if (sv0_match_temp_trkidx.size() == 1) {
+        sv0_lonesharedtrack_trkidx.push_back(sv0_match_temp_trkidx[0]);
       }
-      if (sv1_match_sharedjettotrack_which_temp_trkidx.size() == 1) {
-        sv1_lonesharedtrack_which_trkidx.push_back(sv1_match_sharedjettotrack_which_temp_trkidx[0]);
+      if (sv1_match_temp_trkidx.size() == 1) {
+        sv1_lonesharedtrack_trkidx.push_back(sv1_match_temp_trkidx[0]);
       }
 
-      sv0_match_sharedjettotrack_which_temp_trkidx = {};
-      sv1_match_sharedjettotrack_which_temp_trkidx = {};
+      sv0_match_temp_trkidx = {};
+      sv1_match_temp_trkidx = {};
     }
-    sv_lonesharedtrack_which_trkidx.push_back(sv0_lonesharedtrack_which_trkidx);
-    sv_lonesharedtrack_which_trkidx.push_back(sv1_lonesharedtrack_which_trkidx);
+    sv_lonesharedtrack_trkidx.push_back(sv0_lonesharedtrack_trkidx);
+    sv_lonesharedtrack_trkidx.push_back(sv1_lonesharedtrack_trkidx);
   }
-  bool shared_jet_specialcase = (sv0_lonesharedtrack_which_trkidx.size() != 0 || sv1_lonesharedtrack_which_trkidx.size() != 0);
+  bool shared_jet_specialcase = (sv0_lonesharedtrack_trkidx.size() != 0 || sv1_lonesharedtrack_trkidx.size() != 0);
   return std::pair<bool, std::vector<std::vector<size_t>>>(
       shared_jet_specialcase,
-      sv_lonesharedtrack_which_trkidx);
+      sv_lonesharedtrack_trkidx);
 }
 
 bool MFVVertexer::hasCommonElement(std::vector<int> vec0, std::vector<int> vec1) {
