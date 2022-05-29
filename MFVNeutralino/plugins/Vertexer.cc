@@ -1355,7 +1355,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     edm::Handle<pat::JetCollection> jets;
     event.getByToken(shared_jet_token, jets);
 
-    std::vector<std::vector<size_t> > sv_total_track_which_trkidx; // a vector of each sv's track indx 
+    std::vector<std::vector<size_t> > sv_total_track_which_trkidx; // a vector of each sv's track indx
+    // we need ascending vectors of vertices based on their total tracks in order to speed up the shared-jet algorithm because the less-track vertex is more likely to be removed first after a single shared-jet track is removed, reducing the size of vertices to loop thru.  
     std::vector<unsigned int> sv_ascending_total_ntrack; // a vector of ascending number of total tracks per vertex 
     std::vector<size_t> sv_ascending_vtxidx; // a vector of vertex index corresponding to the order of ascending total tracks in sv_ascending_total_ntrack 
 
@@ -1389,20 +1390,21 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
       unsigned int ntracks = track_idx.size();
 
-      if (vtxidx == 0) {
+      if (vtxidx == 0) { // start creating the ascening vector of sorted number of total tracks and its corresponding vertex index
         sv_ascending_total_ntrack.push_back(ntracks);
         sv_ascending_vtxidx.push_back(vtxidx);
       }
-      else {
+      else { // the algorithm continues after the first vertex is added to the vector 
 
         std::vector<unsigned int>::iterator it_ntracks = sv_ascending_total_ntrack.end();
         std::vector<size_t>::iterator it_vtx = sv_ascending_vtxidx.end();
+        // finding an iterator that points to a position that ntrack is just less than or equal to itself from the back to the front
         while (it_ntracks != sv_ascending_total_ntrack.begin() && ntracks <= sv_ascending_total_ntrack[std::distance(sv_ascending_total_ntrack.begin(), it_ntracks)-1])
         {
           --it_ntracks;
           --it_vtx;
         }
-
+        // adding a vertex at the end if it has higher ntrack. otherwise, insert it before an iterator pointing to a position that this ntrack is smaller than itself 
         if (it_ntracks == sv_ascending_total_ntrack.end() && ntracks > sv_ascending_total_ntrack[std::distance(sv_ascending_total_ntrack.begin(), it_ntracks)]) {
           sv_ascending_total_ntrack.push_back(ntracks);
           sv_ascending_vtxidx.push_back(vtxidx);
@@ -1541,6 +1543,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   finish(event, seed_tracks, std::move(vertices), std::move(vpeffs), vpeffs_tracks);
 }
 
+// this function will only return false only if shared jets between the given vertex pair contribute multiple shared-jet tracks to 'both' vertices (not a special case we consider).   
 std::pair<bool, std::vector<std::vector<size_t>>> MFVVertexer::sharedjets(const int vtx0idx, const int vtx1idx, const std::vector < std::vector<int>>& sv_match_jetidx, const std::vector < std::vector<int>>& sv_match_trkidx) {
 
   bool shared_jet = hasCommonElement(sv_match_jetidx[vtx0idx], sv_match_jetidx[vtx1idx]);
