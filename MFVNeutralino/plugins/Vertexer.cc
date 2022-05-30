@@ -1424,7 +1424,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
 
     if (vertices->size() >= 2) {
-
+      // double for loops to double counts the sv0 and sv1 pairing. The code always remove 'lone shared tracks' from (multiple) special shared jets to sv0 in each round as long as they are not compatible to sv0. Otherwise, the sv1 from the earlier round will be considered again (double count) to have the tracks being removed or not. 
       for (size_t vtxi = 0; vtxi < sv_ascending_vtxidx.size(); vtxi++) {
         const size_t vtxidx0 = sv_ascending_vtxidx[vtxi];
         reco::Vertex& sv0 = vertices->at(vtxidx0);
@@ -1436,9 +1436,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           printf(" sv0'idx: %lu \n", vtxidx0);
           printf(" sv0'ntrack: %u \n", sv0.nTracks());
         }
-        for (size_t j = 0; j < sv_ascending_vtxidx.size(); j++) {
-          if (vtxi == j) continue;
-          const size_t vtxidx1 = sv_ascending_vtxidx[j];
+        for (size_t vtxj = 0; vtxj < sv_ascending_vtxidx.size(); vtxj++) {
+          if (vtxi == vtxj) continue;
+          const size_t vtxidx1 = sv_ascending_vtxidx[vtxj];
           reco::Vertex& sv1 = vertices->at(vtxidx1);
           if (verbose){
             printf(" sv1'idx: %lu \n", vtxidx1);
@@ -1492,7 +1492,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
               for (const TransientVertex& tv : kv_reco_dropin(sv0_resolved_sharedtracks_ttks))
                 sv0_resolved_sharedtracks = reco::Vertex(tv);
 
-              sv0 = sv0_resolved_sharedtracks;
+              sv0 = sv0_resolved_sharedtracks; // update sv0 after non-compatible 'lone shared tracks' from some special shared jets are removed 
               if (verbose) {
                 printf("sv0'idx: %lu with ntrack after: %u",vtxidx0, sv0.nTracks());
                 printf("sv1'idx: %lu with ntrack after: %u",vtxidx1, sv1.nTracks());
