@@ -167,11 +167,15 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   MFVVertexAuxCollection vertices;
 
-  for (const MFVVertexAux& v : *input_vertices)
+  for (const MFVVertexAux& v : *input_vertices) {
     vertices.push_back(xform_vertex(*mevent, v));
+   // nt.evt_vertices.push_back(v);
+  }
 
   h_nsv->Fill(input_vertices->size());
   h_nsvsel->Fill(vertices.size());
+
+  nt.vertices = vertices;
 
   if (vertices.size() == 1) {
     const MFVVertexAux& v0 = vertices[0];
