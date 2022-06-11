@@ -135,6 +135,10 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     }
   }
 
+  nt.gen_pv_x0 = mevent->gen_pv[0];
+  nt.gen_pv_y0 = mevent->gen_pv[1];
+  nt.gen_pv_z0 = mevent->gen_pv[2];
+
   for (int i = 0; i < 2; ++i) {
     const double z = mevent->gen_lsp_decay[i*3+2];
     nt.gen_x[i] = mevent->gen_lsp_decay[i*3+0] - mevent->bsx_at_z(z);
@@ -169,7 +173,6 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   for (const MFVVertexAux& v : *input_vertices) {
     vertices.push_back(xform_vertex(*mevent, v));
-   // nt.evt_vertices.push_back(v);
   }
 
   h_nsv->Fill(input_vertices->size());

@@ -30,8 +30,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=not settings.run_n_tk_seeds, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used
     else :
         #samples = pick_samples(dataset, qcd=False, ttbar=False, data=False, all_signal=not settings.run_n_tk_seeds)
-        samples = pick_samples(dataset,qcd=False,ttbar=False, data=False, span_signal=True, all_signal=False) 
-    
+        #samples = pick_samples(dataset,qcd=False,ttbar=False, data=False, span_signal=True, all_signal=False) 
+        #samples = [getattr(Samples, 'ggHToSSTodddd_tau1mm_M55_2017')] 
+        samples = [getattr(Samples, 'mfv_stopdbardbar_tau010000um_M0800_2017')]
     set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2017p8.json'), limit_ttbar=True)
 
     ms = MetaSubmitter(settings.batch_name(), dataset=dataset)

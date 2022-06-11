@@ -22,6 +22,9 @@ namespace mfv {
     gen_flavor_code = pass_hlt = npv = npu = njets = nvtx = ntk0 = ntk1 = 0;
     l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = bsx = bsy = bsz = bsdxdz = bsdydz = pvx = pvy = pvz = weight = ren_weight_up = ren_weight_dn = fac_weight_up = fac_weight_dn = x0 = y0 = z0 = bs2derr0 = rescale_bs2derr0 = x1 = y1 = z1 = bs2derr1 = rescale_bs2derr1 = 0;
     genmatch0 = genmatch1 = 0;
+    gen_pv_x0 = 0;
+    gen_pv_y0 = 0;
+    gen_pv_z0 = 0;
     for (int i = 0; i < 2; ++i)
       gen_x[i] = gen_y[i] = gen_z[i] = gen_lsp_pt[i] = gen_lsp_eta[i] = gen_lsp_phi[i] = gen_lsp_mass[i] = 0;
     gen_daughters.clear();
@@ -470,6 +473,9 @@ namespace mfv {
     tree->Branch("displaced_jet_hlt_eta", nt.displaced_jet_hlt_eta, "displaced_jet_hlt_eta[njets]/F");
     tree->Branch("displaced_jet_hlt_phi", nt.displaced_jet_hlt_phi, "displaced_jet_hlt_phi[njets]/F");
     tree->Branch("displaced_jet_hlt_energy", nt.displaced_jet_hlt_energy, "displaced_jet_hlt_energy[njets]/F");
+    tree->Branch("gen_pv_x0", &nt.gen_pv_x0);
+    tree->Branch("gen_pv_y0", &nt.gen_pv_y0);
+    tree->Branch("gen_pv_z0", &nt.gen_pv_z0);
     tree->Branch("gen_x", nt.gen_x, "gen_x[2]/F");
     tree->Branch("gen_y", nt.gen_y, "gen_y[2]/F");
     tree->Branch("gen_z", nt.gen_z, "gen_z[2]/F");
@@ -572,6 +578,9 @@ namespace mfv {
     tree->SetBranchAddress("displaced_jet_hlt_eta", nt.displaced_jet_hlt_eta);
     tree->SetBranchAddress("displaced_jet_hlt_phi", nt.displaced_jet_hlt_phi);
     tree->SetBranchAddress("displaced_jet_hlt_energy", nt.displaced_jet_hlt_energy);
+    tree->SetBranchAddress("gen_pv_x0", &nt.gen_pv_x0);
+    tree->SetBranchAddress("gen_pv_y0", &nt.gen_pv_y0);
+    tree->SetBranchAddress("gen_pv_z0", &nt.gen_pv_z0);
     tree->SetBranchAddress("gen_x", nt.gen_x);
     tree->SetBranchAddress("gen_y", nt.gen_y);
     tree->SetBranchAddress("gen_z", nt.gen_z);
