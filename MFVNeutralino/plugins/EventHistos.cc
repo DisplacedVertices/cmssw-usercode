@@ -109,12 +109,20 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH2F* h_online_offline_calo_jet_ht;
   TH2F* h_online_offline_pf_jet_ht;
 
+  TH2F* h_online_offline_pf_jet_deta_0;
+  TH2F* h_online_offline_pf_jet_dphi_0;
+
   TH1F* h_online_calojet_pt;
   TH1F* h_online_pfjet_pt;
   TH1F* h_offline_calojet_pt;
   TH1F* h_offline_pfjet_pt;
   TH2F* h_online_offline_calojet_pt;
   TH2F* h_online_offline_pfjet_pt[MAX_NJETS+1];
+  TH2F* h_online_offline_pfjet_eta[MAX_NJETS+1];
+  TH2F* h_online_offline_pfjet_phi[MAX_NJETS+1];
+  TH1F* h_online_offline_pfjet_dpt[MAX_NJETS+1];
+  TH1F* h_online_offline_pfjet_deta[MAX_NJETS+1];
+  TH1F* h_online_offline_pfjet_dphi[MAX_NJETS+1];
 
   TH2F* h_ncalojet_online_offline;
   TH2F* h_ncalojet_idp_online_offline;
@@ -301,6 +309,11 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   for (int i = 0; i < MAX_NJETS+1; ++i) {
     TString ijet = i == MAX_NJETS ? TString("all") : TString::Format("%i", i);
     h_online_offline_pfjet_pt[i] = fs->make<TH2F>(TString::Format("h_online_offline_pfjet_pt_%s", ijet.Data()), TString::Format(";p_{T} of online PF jet #%s (GeV); p_{T} of offline PF jet #%s (GeV)", ijet.Data(), ijet.Data()), 200, 0, 1000, 200, 0, 1000);
+    h_online_offline_pfjet_eta[i] = fs->make<TH2F>(TString::Format("h_online_offline_pfjet_eta_%s", ijet.Data()), TString::Format(";#eta of online PF jet #%s; #eta of offline PF jet #%s", ijet.Data(), ijet.Data()), 200, -3, 3, 200, -3, 3);
+    h_online_offline_pfjet_phi[i] = fs->make<TH2F>(TString::Format("h_online_offline_pfjet_phi_%s", ijet.Data()), TString::Format(";#phi of online PF jet #%s; #phi of offline PF jet #%s", ijet.Data(), ijet.Data()), 200, -3.1416, 3.1416, 200, -3.1416, 3.1416);
+    h_online_offline_pfjet_dpt[i] = fs->make<TH1F>(TString::Format("h_online_offline_pfjet_dpt_%s", ijet.Data()), TString::Format(";#Deltap_{T} (online-offline) of PF jet #%s (GeV);entries/bin", ijet.Data()), 200, -100.0, 100.0);
+    h_online_offline_pfjet_deta[i] = fs->make<TH1F>(TString::Format("h_online_offline_pfjet_deta_%s", ijet.Data()), TString::Format(";#Delta#eta (online-offline) of PF jet #%s;entries/bin", ijet.Data()), 200, -1.0, 1.0);
+    h_online_offline_pfjet_dphi[i] = fs->make<TH1F>(TString::Format("h_online_offline_pfjet_dphi_%s", ijet.Data()), TString::Format(";#Delta#phi (online-offline) of PF jet #%s;entries/bin", ijet.Data()), 200, -1.0, 1.0);
   }
 
   h_ncalojet_online_offline = fs->make<TH2F>("h_ncalojet_online_offline", ";N(ak4CaloJetsCorrected);  N(slimmedCaloJets)", 60, 0, 60, 60, 0, 60);
@@ -378,8 +391,6 @@ struct Jet_BHelper {
 
 void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
-
-
   edm::Handle<MFVEvent> mevent;
   event.getByToken(mevent_token, mevent);
 
@@ -396,24 +407,25 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   }
   std::sort(jetHelper, jetHelper+MAX_NJETS, [](Jet_BHelper const &a, Jet_BHelper &b) -> bool{ return a.csv > b.csv; } );
 
-  // Shaun FIXME  -- Avoid events with poor online CaloHT
-  //if (not (mevent->pass_filter(4) and mevent->pass_filter(5))) return;
+  // Do some quick HLT/RECO matching
 
-  // Shaun FIXME  -- Only plot events which LOOK like the pass the hltBTagCaloCSV filter (filt #6), but don't
-  //if ((mevent->pass_filter(6)) or (jetHelper[1].csv < 0.5))
-  //  return;
+  const int nhltpfjets = mevent->hlt_pf_jet_pt.size();
+  const int nrecopfjets = mevent->jet_pt.size();
+  for (int i=0, ipmax = 4; i < ipmax; i++) {
+    float hlt_eta = (nhltpfjets > i ? mevent->hlt_pf_jet_eta[i] : -99.0);
+    float hlt_phi = (nhltpfjets > i ? mevent->hlt_pf_jet_phi[i] : -99.0);
 
-  // Shaun FIXME  -- Only plot events which LOOK like they pass the hltBTagPFCSV filter (filt #13), but don't
-  //if ((mevent->pass_filter(13)) or (jetHelper[2].csv < 0.7))
-  //  return;
+    float reco_eta = (nrecopfjets > i ? mevent->jet_eta[i] : 99.0);
+    float reco_phi = (nrecopfjets > i ? mevent->jet_phi[i] : 99.0);
 
-  // Shaun FIXME  -- Only plot events which LOOK like they pass the hltBTagPFCSV filter (filt #13), AND DO
-  //if not ((mevent->pass_filter(13)) and (jetHelper[2].csv > 0.7)) 
-  //  return;
+    float temp_deta = fabs(reco_eta - hlt_eta);
+    float temp_dphi = fabs(reco_phi - hlt_phi);
 
-  // Shaun FIXME  -- Only plot events which LOOK like they pass the hltBTagCaloCSV filter (filt #6), AND DO
-  //if (not ((mevent->pass_filter(6)) and (jetHelper[1].csv > 0.5)))
-  //  return;
+    if ((temp_deta > 0.05) or (temp_dphi > 0.05)){
+      return;
+    }
+  }
+
 
   h_w->Fill(w);
 
@@ -539,6 +551,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   float alt_pf_ht = 0.0;
   unsigned int n_online_pfjets = mevent->hlt_pf_jet_pt.size();
+  std::cout << "\n\n-------- PF-Jet Dump --------" << std::endl;
   for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
     if (mevent->jet_pt[ijet] < mfv::min_jet_pt)
       continue;
@@ -549,18 +562,38 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
     h_jet_energy->Fill(mevent->jet_energy[ijet], w);
     for (size_t jjet = ijet+1; jjet < mevent->jet_id.size(); ++jjet) {
-      if (mevent->jet_pt[jjet] < mfv::min_jet_pt)
-        continue;
+      //if (mevent->jet_pt[jjet] < mfv::min_jet_pt)
+      //  continue;
       h_jet_pairdphi->Fill(reco::deltaPhi(mevent->jet_phi[ijet], mevent->jet_phi[jjet]), w);
       h_jet_pairdeta->Fill(std::max(mevent->jet_eta[ijet], mevent->jet_eta[jjet]) - std::min(mevent->jet_eta[ijet], mevent->jet_eta[jjet]), w);
       h_jet_pairdr->Fill(reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->jet_eta[jjet], mevent->jet_phi[jjet]), w);
     }
 
-    if (ijet > n_online_pfjets) {
-      continue;
+    float tmp_pt_h  = 0.0;
+    float tmp_eta_h = 0.0;
+    float tmp_phi_h = 0.0;
+    float tmp_pt_r  = mevent->jet_pt[ijet];
+    float tmp_eta_r = mevent->jet_eta[ijet];
+    float tmp_phi_r = mevent->jet_phi[ijet];
+
+    if (ijet <= n_online_pfjets) {
+      tmp_pt_h  = mevent->hlt_pf_jet_pt[ijet];
+      tmp_eta_h = mevent->hlt_pf_jet_eta[ijet];
+      tmp_phi_h = mevent->hlt_pf_jet_phi[ijet];
     }
-    else {
-      h_online_offline_pfjet_pt[ijet]->Fill(mevent->jet_pt[ijet], mevent->hlt_pf_jet_pt[ijet], w);
+
+    //DEBUG
+    printf("HLT#%i  pt: %5.2f  eta: %5.2f  phi %5.2f         RECO#%i  pt: %5.2f  eta: %5.2f  phi %5.2f \n", (int)(ijet), tmp_pt_h, tmp_eta_h, tmp_phi_h, (int)(ijet), tmp_pt_r, tmp_eta_r, tmp_phi_r);
+
+    if (ijet > n_online_pfjets) continue;
+
+    if ((fabs(mevent->hlt_pf_jet_eta[ijet] - mevent->jet_eta[ijet]) > 0.0) and (fabs(mevent->hlt_pf_jet_phi[ijet] - mevent->jet_phi[ijet]) > 0.0)){
+      h_online_offline_pfjet_pt[ijet]->Fill(mevent->hlt_pf_jet_pt[ijet], mevent->jet_pt[ijet], w);
+      h_online_offline_pfjet_eta[ijet]->Fill(mevent->hlt_pf_jet_eta[ijet], mevent->jet_eta[ijet], w);
+      h_online_offline_pfjet_phi[ijet]->Fill(mevent->hlt_pf_jet_phi[ijet], mevent->jet_phi[ijet], w);
+      h_online_offline_pfjet_dpt[ijet]->Fill(mevent->hlt_pf_jet_pt[ijet] - mevent->jet_pt[ijet], w);
+      h_online_offline_pfjet_deta[ijet]->Fill(mevent->hlt_pf_jet_eta[ijet] - mevent->jet_eta[ijet], w);
+      h_online_offline_pfjet_dphi[ijet]->Fill(mevent->hlt_pf_jet_phi[ijet] - mevent->jet_phi[ijet], w);
     }
 
     // Find closest match between online/offline pfjets
@@ -584,7 +617,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     
     h_online_pfjet_pt->Fill(match_online_pt, w);
     h_offline_pfjet_pt->Fill(match_offline_pt, w);
-    h_online_offline_pfjet_pt[MAX_NJETS]->Fill(match_online_pt, match_offline_pt, w);
+    //h_online_offline_pfjet_pt[MAX_NJETS]->Fill(match_online_pt, match_offline_pt, w);
 
   }
 

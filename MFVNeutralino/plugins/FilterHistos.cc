@@ -271,25 +271,6 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   }
   std::sort(jetHelper, jetHelper+MAX_NJETS, [](Jet_BHelper const &a, Jet_BHelper &b) -> bool{ return a.csv > b.csv; } );
 
-  // Shaun FIXME  -- Avoid events with poor online CaloHT
-  //if (not (mevent->pass_filter(4) and mevent->pass_filter(5))) return;
-
-  // Shaun FIXME  -- Only plot events which LOOK like the pass the hltBTagCaloCSV filter (filt #6), but don't
-  //if ((mevent->pass_filter(6)) or (jetHelper[1].csv < 0.5))
-  //  return;
-
-  // Shaun FIXME  -- Only plot events which LOOK like they pass the hltBTagPFCSV filter (filt #13), but don't
-  //if ((mevent->pass_filter(13)) or (jetHelper[2].csv < 0.7))
-  //  return;
-
-  // Shaun FIXME  -- Only plot events which LOOK like they pass the hltBTagPFCSV filter (filt #13), AND DO
-  //if not ((mevent->pass_filter(13)) and (jetHelper[2].csv > 0.7)) 
-  //  return;
-
-  // Shaun FIXME  -- Only plot events which LOOK like they pass the hltBTagCaloCSV filter (filt #6), AND DO
-  //if (not ((mevent->pass_filter(6)) and (jetHelper[1].csv > 0.5)))
-  //  return;
-
   int require_L1  = is_dibjet ? di_bitL1 : tri_bitL1;
   int min_filtjets        = is_dibjet ? di_minfiltjets : tri_minfiltjets;
   float min_filtjetpt     = is_dibjet ? di_minfiltjetpt : tri_minfiltjetpt;
@@ -302,6 +283,7 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   float alt_pf_ht = 0.0;
   float alt_calo_ht = 0.0;
 
+  bool  pass_onoff_pfjet_match = true;
   float max_jetdeta = 0.0;
   float min_jetdeta = 9.9;
   int filtjet_passes = 0;
@@ -368,6 +350,7 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     // Ensure that the event passes some minimum cuts.
     if ((filtjet_pt > min_filtjetpt) && (filtjet_abseta < max_filtjeteta) && (filtjet_bscore > min_filtjetbscore)) // Do we use old_bscore or just bscore?
       filtjet_passes++;
+
   }
 
   // Do some more sorting of bscore lists
@@ -381,10 +364,28 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     if ((mevent->calo_jet_pt[i] > min_filtjetpt) and (fabs(mevent->calo_jet_eta[i]) < max_filtjeteta)) calofiltjet_passes++;
   }
 
+  // Are there matches between online PFjets and offline PFjets?
+  for (int i=0, ipmax = 4; i < ipmax; i++) {
+    float hlt_eta = (nhltpfjets > i ? mevent->hlt_pf_jet_eta[i] : -99.0);
+    float hlt_phi = (nhltpfjets > i ? mevent->hlt_pf_jet_phi[i] : -99.0);
+
+    float temp_deta = fabs(mevent->jet_eta[i] - hlt_eta);
+    float temp_dphi = fabs(mevent->jet_phi[i] - hlt_phi);
+
+    if ((temp_deta > 0.05) or (temp_dphi > 0.05)){
+      pass_onoff_pfjet_match = false;
+      break;
+    }
+  }
 
   // Don't do anything else if we don't have enough good jets or calojets
-  if ((filtjet_passes < min_filtjets))// or (calofiltjet_passes < min_filtjets))
+  if ((filtjet_passes < min_filtjets) or (not pass_onoff_pfjet_match))
     return;
+
+
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
   // Begin loop that sees if the event passes a filter and fills 2D histograms
   for (int i = -1; i < mfv::n_filter_paths; ++i){
@@ -406,10 +407,7 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     // FIXME SHAUN, is there a more compact way of doing this?
     else {
       for (int j = 4; j <= i; ++j) {
-        int jtemp = j;
-        if ((jtemp >= 6) and (jtemp < 13)) jtemp++;   // Skip the CaloBTag filter at first
-        if (j == 12) jtemp = 6;                       // Then, place it back in the 2nd-to-last spot
-        if (not mevent->pass_filter(jtemp)) {
+        if (not mevent->pass_filter(j)) {
           passes_seq_filters = false;
         }
       }

@@ -7,8 +7,8 @@ jet_paths = [
 
 bjet_paths = [
     # bjet triggers 2017 - only use the first two, since they contribute most of the efficiency
-    "HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33_v*",
-    #"HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0_v*",
+    #"HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33_v*",
+    "HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0_v*",
     #"HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2_v*",
     #"HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_v*",
     #"HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5_v*",

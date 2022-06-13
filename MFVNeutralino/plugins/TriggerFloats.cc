@@ -59,8 +59,6 @@ namespace {
 }
 
 void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) {
-  // Print info for a few weird events
-  //bool alt_print = ((event.id().event() == 18208) or (event.id().event() == 18428) or (event.id().event() == 18440) or (event.id().event() == 18482) or (event.id().event() == 18535));
   if (prints) std::cout << "TriggerFloats run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
 
   edm::Handle<edm::TriggerResults> trigger_results;

@@ -407,7 +407,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
   int nbtaggedjets = 0;
   int nhardbjets   = 0;
   for(size_t i = 0, ie = mevent->jet_bdisc_old.size(); i < ie; i++) {
-    if (mevent->jet_bdisc_old[i] > 0.9693) { // 0.9693 is the tight WP for CSV algo
+    if (mevent->jet_bdisc_old[i] > 0.7) { // 0.9693 is the tight WP for CSV algo
       nbtaggedjets++;
       if (mevent->jet_pt[i] > 80.0) {
         nhardbjets++;
@@ -441,19 +441,19 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
       }
     case mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0 :
       {
-        if(mevent->jet_ht(30) < 425 || njets < 4) return false;
-        //if(nbtaggedjets < 3) return false;
+        //if(mevent->jet_ht(30) < 425 || njets < 4) return false;
+        if(nbtaggedjets < 3) return false;
         for(int j0 = 0; j0 < njets; ++j0){
-          if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 100) continue;
+          if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 90) continue;
 
           for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 90) continue;
+            if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 70) continue;
 
             for(int j2 = j1+1; j2 < njets; ++j2){
-              if(!jet_hlt_match(mevent, j2) || mevent->jet_pt[j2] < 70) continue;
+              if(!jet_hlt_match(mevent, j2) || mevent->jet_pt[j2] < 55) continue;
 
               for(int j3 = j2+1; j3 < njets; ++j3){
-                if(!jet_hlt_match(mevent, j3) || mevent->jet_pt[j3] < 70) continue;
+                if(!jet_hlt_match(mevent, j3) || mevent->jet_pt[j3] < 50) continue;
 
                 passed_kinematics = true;
               }
