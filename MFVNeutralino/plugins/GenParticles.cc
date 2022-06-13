@@ -261,11 +261,9 @@ bool MFVGenParticles::try_MFVtbs(mfv::MCInteraction& mc, const edm::Handle<reco:
   
   if (h.valid()) {
     mc.set(h, type);
-    std::cout << "true" << std::endl;
     return true;
   }
   else{
-    std::cout << "false" << std::endl;
     return false;
   }
 }
@@ -296,11 +294,9 @@ bool MFVGenParticles::try_Ttbar(mfv::MCInteraction& mc, const edm::Handle<reco::
 
   if (h.valid()) {
     mc.set(h);
-    std::cout << "true" << std::endl;
     return true;
   }
   else{
-    std::cout << "false" << std::endl;
     return false;
   }
 }
@@ -439,11 +435,9 @@ bool MFVGenParticles::try_MFVthree(mfv::MCInteraction& mc, const edm::Handle<rec
 
   if (h.valid()) {
     mc.set(h, type);
-    std::cout << "true" << std::endl;
     return true;
   }
   else{
-    std::cout << "false" << std::endl;
     return false;
   }
 }
@@ -485,11 +479,9 @@ bool MFVGenParticles::try_XX4j(mfv::MCInteraction& mc, const edm::Handle<reco::G
 
   if (h.valid()) {
     mc.set(h);
-    std::cout << "true" << std::endl;
     return true;
   }
   else{
-    std::cout << "false" << std::endl;
     return false;
   }
 }
@@ -550,26 +542,9 @@ bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<rec
     if      (quark == 4) type = mfv::mci_MFVccbar;
     else if (quark == 5) type = mfv::mci_MFVbbbar;
     mc.set(h, type);
-    std::cout << "true" << std::endl;
-    double sum_ss_energy = 0.0;
-    double sum_first_sec_dddd_energy = 0.0;
-    double sum_last_sec_dddd_energy = 0.0;
-    double sum_first_vis_dddd_energy = 0.0;
-    double sum_last_vis_dddd_energy = 0.0;
-    for (auto r : mc.primaries()){sum_ss_energy = sum_ss_energy + r->energy();}
-    for (auto r : mc.secondaries()){sum_first_sec_dddd_energy = sum_first_sec_dddd_energy + first_candidate(r)->energy();
-      sum_last_sec_dddd_energy = sum_last_sec_dddd_energy + r->energy();
-      }
-    for (auto r : mc.visible()){sum_first_vis_dddd_energy = sum_first_vis_dddd_energy + first_candidate(r)->energy();                                                                     sum_last_vis_dddd_energy = sum_last_vis_dddd_energy + r->energy();                                       }
-    std::cout<< "sum of SS energy: " << sum_ss_energy << std::endl;
-    std::cout << "sum of first sec dddd energy: " << sum_first_sec_dddd_energy << std::endl;
-    std::cout << "sum of last sec dddd energy: " << sum_last_sec_dddd_energy << std::endl;
-    std::cout << "sum of first vis dddd energy: " << sum_first_vis_dddd_energy << std::endl;
-    std::cout << "sum of last vis dddd energy: " << sum_last_vis_dddd_energy << std::endl; 
     return true;
   }
   else{
-    std::cout << "false" << std::endl;
     return false;
   }
 }
@@ -649,11 +624,9 @@ bool MFVGenParticles::try_stopdbardbar(mfv::MCInteraction& mc, const edm::Handle
     mfv::MCInteractions_t type = mfv::mci_stopdbardbar;
     if (quark == -5) type = mfv::mci_stopbbarbbar;
     mc.set(h, type);
-    std::cout << "true" << std::endl;
     return true;
   }
   else{
-    std::cout << "false" << std::endl;
     return false;
   }
 }
@@ -703,11 +676,9 @@ bool MFVGenParticles::try_MFVlq(mfv::MCInteraction& mc, const edm::Handle<reco::
 
   if (h.valid()) {
     mc.set(h);
-    std::cout << "true" << std::endl;
     return true;
   }
   else{
-    std::cout << "false" << std::endl;
     return false;
   }
 }
@@ -745,7 +716,6 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
     }
 
     if (debug) printf("MFVGenParticles::analyze: lsp_id %i\n", lsp_id);
-    std::cout << " run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n"; 
     // the order of these tries is important, at least that MFVtbses come before Ttbar
     try_MFVtbs  (*mc, gen_particles, 5, 3) || // tbs
     try_MFVtbs  (*mc, gen_particles, 1, 3) || // tds
