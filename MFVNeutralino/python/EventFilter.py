@@ -110,7 +110,8 @@ def setup_event_filter(process,
         elif event_filter == 'bjets OR displaced dijet veto HT':
             from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterBjetsORDisplacedDijetVetoHT as eventFilter
 
-        #currently either rp_filter is on OR event_filter is on; cannot have both
+        # for rp filter to be correctly applied, must have event_filter to TRUE;
+        # currently cannot have both rp_filter AND event filter 
         elif event_filter is True:
             if rp_filter:
                 from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterRandomParameters as eventFilter

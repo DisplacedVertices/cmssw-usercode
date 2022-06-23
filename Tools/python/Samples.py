@@ -571,21 +571,20 @@ WmH_HToSSTo4Tau_WToLNu_samples_2018 = [
     MCSample('WmH_HToSSTo4Tau_WToLNu_tau100000um_M55_2018', '/WminusH_HToSSTo4Tau_WToLNu_MH-125_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v1/MINIAODSIM', 1499427),
 ]
 
-# #INVALID
-# WmH_HToSSTobbbb_WToLNu_samples_2018 = [
-#     MCSample('WmH_HToSSTobbbb_WToLNu_tau000050um_M15_2018', '/WminusH_HToSSTobbbb_WToLNu_MH-125_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v1/MINIAODSIM', 2300912),
-#     MCSample('WmH_HToSSTobbbb_WToLNu_tau001000um_M15_2018', '/WminusH_HToSSTobbbb_WToLNu_MH-125_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v1/MINIAODSIM', 2300912),
-#     MCSample('WmH_HToSSTobbbb_WToLNu_tau010000um_M15_2018', '/WminusH_HToSSTobbbb_WToLNu_MH-125_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v1/MINIAODSIM', 2300912),
-#     MCSample('WmH_HToSSTobbbb_WToLNu_tau100000um_M15_2018', '/WminusH_HToSSTobbbb_WToLNu_MH-125_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v1/MINIAODSIM', 2300912),
-#     MCSample('WmH_HToSSTobbbb_WToLNu_tau000050um_M40_2018', '/WminusH_HToSSTobbbb_WToLNu_MH-125_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v1/MINIAODSIM', 2300912),
-#     MCSample('WmH_HToSSTobbbb_WToLNu_tau001000um_M40_2018', '/WminusH_HToSSTobbbb_WToLNu_MH-125_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v1/MINIAODSIM', 2300912),
-#     MCSample('WmH_HToSSTobbbb_WToLNu_tau010000um_M40_2018', '/WminusH_HToSSTobbbb_WToLNu_MH-125_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v1/MINIAODSIM', 2300912),
-#     MCSample('WmH_HToSSTobbbb_WToLNu_tau100000um_M40_2018', '/WminusH_HToSSTobbbb_WToLNu_MH-125_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v1/MINIAODSIM', 2300912),
-#     MCSample('WmH_HToSSTobbbb_WToLNu_tau000050um_M55_2018', '/WminusH_HToSSTobbbb_WToLNu_MH-125_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v1/MINIAODSIM', 2300912),
-#     MCSample('WmH_HToSSTobbbb_WToLNu_tau001000um_M55_2018', '/WminusH_HToSSTobbbb_WToLNu_MH-125_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v1/MINIAODSIM', 2300912),
-#     MCSample('WmH_HToSSTobbbb_WToLNu_tau010000um_M55_2018', '/WminusH_HToSSTobbbb_WToLNu_MH-125_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v1/MINIAODSIM', 2300912),
-#     MCSample('WmH_HToSSTobbbb_WToLNu_tau100000um_M55_2018', '/WminusH_HToSSTobbbb_WToLNu_MH-125_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v1/MINIAODSIM', 2300912),
-# ]
+WmH_HToSSTobbbb_WToLNu_samples_2018 = [
+    MCSample('WmH_HToSSTobbbb_WToLNu_tau000050um_M15_2018', '/WminusH_HToSSTobbbb_WToLNu_MH-125_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v2/MINIAODSIM', 1149932),
+    MCSample('WmH_HToSSTobbbb_WToLNu_tau001000um_M15_2018', '/WminusH_HToSSTobbbb_WToLNu_MH-125_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v2/MINIAODSIM', 1149932),
+    MCSample('WmH_HToSSTobbbb_WToLNu_tau010000um_M15_2018', '/WminusH_HToSSTobbbb_WToLNu_MH-125_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v2/MINIAODSIM', 1149932),
+    MCSample('WmH_HToSSTobbbb_WToLNu_tau100000um_M15_2018', '/WminusH_HToSSTobbbb_WToLNu_MH-125_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v2/MINIAODSIM', 1149932),
+    MCSample('WmH_HToSSTobbbb_WToLNu_tau000050um_M40_2018', '/WminusH_HToSSTobbbb_WToLNu_MH-125_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v2/MINIAODSIM', 1149932),
+    MCSample('WmH_HToSSTobbbb_WToLNu_tau001000um_M40_2018', '/WminusH_HToSSTobbbb_WToLNu_MH-125_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v2/MINIAODSIM', 1149932),
+    MCSample('WmH_HToSSTobbbb_WToLNu_tau010000um_M40_2018', '/WminusH_HToSSTobbbb_WToLNu_MH-125_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v2/MINIAODSIM', 1149932),
+    MCSample('WmH_HToSSTobbbb_WToLNu_tau100000um_M40_2018', '/WminusH_HToSSTobbbb_WToLNu_MH-125_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v2/MINIAODSIM', 1149932),
+    MCSample('WmH_HToSSTobbbb_WToLNu_tau000050um_M55_2018', '/WminusH_HToSSTobbbb_WToLNu_MH-125_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v2/MINIAODSIM', 1149932),
+    MCSample('WmH_HToSSTobbbb_WToLNu_tau001000um_M55_2018', '/WminusH_HToSSTobbbb_WToLNu_MH-125_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v2/MINIAODSIM', 1149932),
+    MCSample('WmH_HToSSTobbbb_WToLNu_tau010000um_M55_2018', '/WminusH_HToSSTobbbb_WToLNu_MH-125_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v2/MINIAODSIM', 1149932),
+    MCSample('WmH_HToSSTobbbb_WToLNu_tau100000um_M55_2018', '/WminusH_HToSSTobbbb_WToLNu_MH-125_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v2/MINIAODSIM', 1149932),
+]
 
 WmH_HToSSTodddd_WToLNu_samples_2018 = [
     MCSample('WmH_HToSSTodddd_WToLNu_tau000050um_M07_2018', '/WminusH_HToSSTodddd_WToLNu_MH-125_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-rp_102X_upgrade2018_realistic_v15-v1/MINIAODSIM', 1533189),
@@ -684,7 +683,7 @@ __all__ = [
     'WpH_HToSSTobbbb_WToLNu_samples_2018',
     'WpH_HToSSTodddd_WToLNu_samples_2018',
     'WmH_HToSSTo4Tau_WToLNu_samples_2018',
-    #'WmH_HToSSTobbbb_WToLNu_samples_2018',
+    'WmH_HToSSTobbbb_WToLNu_samples_2018',
     'WmH_HToSSTodddd_WToLNu_samples_2018',
     'data_samples_2017',
     'auxiliary_data_samples_2017',
@@ -925,8 +924,8 @@ for sample in WpH_HToSSTodddd_WToLNu_samples_2017 :
     
 for sample in WmH_HToSSTo4Tau_WToLNu_samples_2018 :
     sample.add_dataset('miniaod', sample.dataset, sample.nevents_orig)
-# for sample in WmH_HToSSTobbbb_WToLNu_samples_2018 :
-#     sample.add_dataset('miniaod', sample.dataset, sample.nevents_orig)
+for sample in WmH_HToSSTobbbb_WToLNu_samples_2018 :
+    sample.add_dataset('miniaod', sample.dataset, sample.nevents_orig)
 for sample in WmH_HToSSTodddd_WToLNu_samples_2018 :
     sample.add_dataset('miniaod', sample.dataset, sample.nevents_orig)
 for sample in WpH_HToSSTo4Tau_WToLNu_samples_2018 :

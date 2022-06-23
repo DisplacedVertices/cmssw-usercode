@@ -305,7 +305,7 @@ def ntuple_process(settings):
     else:
         return aod_ntuple_process(settings)
 
-# Used for samples stored in inclusive miniaods; currently set up for ZH and Wplus
+# Used for samples stored in inclusive miniaods; currently set up for ZH, Wplus & Wminus
 # may need to change to handle different naming conventions 
 def signal_uses_random_pars_modifier(sample): 
     to_replace = []
@@ -315,6 +315,9 @@ def signal_uses_random_pars_modifier(sample):
             magic_randpar = 'randpars_filter = False'
             decay = sample.name.split('_')[1]
 
+            # need some nuance with formatting ctau from float -> string to correctly match to the comparison string
+            # if ctau < 1 : e.g. want 0p1, 0p05 mm
+            # if ctau > 1 : e.g. want 10, 30 mm
             ctau = float(sample.tau)/1000
             if ctau < 1 :
                 ctau = str(ctau).replace('.', 'p')

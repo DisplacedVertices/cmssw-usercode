@@ -16,6 +16,7 @@ if use_btag_triggers :
 else :
     settings.event_filter = 'jets only'
 
+# see readme for randpars
 settings.randpars_filter = False
 # if want to test local : 
 #settings.randpars_filter = 'randpar HToSSTodddd M07_ct0p05-'

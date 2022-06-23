@@ -72,6 +72,7 @@ bool MFVEventFilter::filter(edm::Event& event, const edm::EventSetup&) {
   const edm::LuminosityBlock& lumi = event.getLuminosityBlock();
 
   // If pertinent, parse randpar configuration
+  // the randpar filter WILL supersede the base eventFilter. Thus, only one filter is allowed to be applied 
   if (parse_randpars) {
     
     edm::Handle<GenLumiInfoHeader> gen_header;
@@ -82,7 +83,9 @@ bool MFVEventFilter::filter(edm::Event& event, const edm::EventSetup&) {
     std::string str_ctau = "ctauS-" + randpar_ctau;
     std::string str_dcay = randpar_dcay;
     std::string comp_string_Zn = "ZH_" + str_dcay + "_ZToLL_MH-125_" + str_mass + "_" + str_ctau + "_TuneCP5_13TeV-powheg-pythia8";
-    std::string comp_string_Wp = "WplusH_" + str_dcay + "_WToLNu_MH-125_" + str_mass + "_" + str_ctau + "_TuneCP5_13TeV-powheg-pythia8";std::string comp_string_Wm = "WminusH_" + str_dcay + "_WToLNu_MH-125_" + str_mass + "_" + str_ctau + "_TuneCP5_13TeV-powheg-pythia8";
+    std::string comp_string_Wp = "WplusH_" + str_dcay + "_WToLNu_MH-125_" + str_mass + "_" + str_ctau + "_TuneCP5_13TeV-powheg-pythia8";
+    std::string comp_string_Wm = "WminusH_" + str_dcay + "_WToLNu_MH-125_" + str_mass + "_" + str_ctau + "_TuneCP5_13TeV-powheg-pythia8";
+    
     if (not ((comp_string_Wp == rp_config_desc) or (comp_string_Zn == rp_config_desc) or (comp_string_Wm == rp_config_desc))) {
       return false;
     }
