@@ -184,6 +184,47 @@ _add_ds("miniaod", {
 
 ################################################################################
 
+_add_ds("ntupleulv1am", {
+'mfv_neu_tau000100um_M0200_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-200_CTau-100um_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171141", 33),
+'mfv_neu_tau000300um_M0200_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-200_CTau-300um_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171158", 28),
+'mfv_neu_tau010000um_M0200_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-200_CTau-10mm_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171213", 7),
+'mfv_neu_tau030000um_M0200_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-200_CTau-30mm_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171227", 9),
+'mfv_neu_tau000100um_M0300_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-100um_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171242", 37),
+'mfv_neu_tau000300um_M0300_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-300um_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171256", 27),
+'mfv_neu_tau001000um_M0300_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-1mm_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171310", 11),
+'mfv_neu_tau010000um_M0300_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-10mm_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171328", 5),
+'mfv_neu_tau030000um_M0300_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-300_CTau-30mm_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171349", 12),
+'mfv_neu_tau000100um_M0400_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-100um_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171410", 36),
+'mfv_neu_tau001000um_M0400_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-1mm_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171433", 9),
+'mfv_neu_tau010000um_M0400_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-10mm_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171508", 5),
+'mfv_neu_tau030000um_M0400_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-30mm_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171528", 9),
+'mfv_neu_tau000100um_M0600_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-600_CTau-100um_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171548", 34),
+'mfv_neu_tau000300um_M0600_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-600_CTau-300um_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171618", 18),
+'mfv_neu_tau001000um_M0600_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-600_CTau-1mm_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171644", 7),
+'mfv_neu_tau010000um_M0600_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-600_CTau-10mm_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171658", 3),
+'mfv_neu_tau030000um_M0600_2017': _fromnum0("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-600_CTau-30mm_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171714", 5),
+'mfv_neu_tau000300um_M0800_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-300um_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171731", 18),
+'mfv_neu_tau001000um_M0800_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-1mm_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171745", 4),
+'mfv_neu_tau010000um_M0800_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171759", 4),
+'mfv_neu_tau030000um_M0800_2017': (4, ['/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-30mm_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171814/0000/ntuple_%i.root' % i for i in chain(xrange(1,3), xrange(4,6))]),
+'mfv_neu_tau000100um_M1200_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-100um_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171828", 39),
+'mfv_neu_tau000300um_M1200_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-300um_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171842", 13),
+'mfv_neu_tau001000um_M1200_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-1mm_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171856", 4),
+'mfv_neu_tau010000um_M1200_2017': (1, ['/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-10mm_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171910/0000/ntuple_1.root']),
+'mfv_neu_tau030000um_M1200_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1200_CTau-30mm_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171925", 3),
+'mfv_neu_tau000100um_M1600_2017': (35, ['/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-100um_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171941/0000/ntuple_%i.root' % i for i in chain(xrange(2,26), xrange(27,38))]),
+'mfv_neu_tau000300um_M1600_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-300um_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_171955", 14),
+'mfv_neu_tau001000um_M1600_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-1mm_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_172008", 3),
+'mfv_neu_tau010000um_M1600_2017': (2, ['/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-10mm_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_172022/0000/ntuple_%i.root' % i for i in [1, 3]]),
+'mfv_neu_tau030000um_M1600_2017': (3, ['/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-30mm_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_172038/0000/ntuple_%i.root' % i for i in [1, 3, 5]]),
+'mfv_neu_tau000100um_M3000_2017': (34, ['/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-3000_CTau-100um_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_172052/0000/ntuple_%i.root' % i for i in chain(xrange(1,11), xrange(12,36))]),
+'mfv_neu_tau000300um_M3000_2017': (13, ['/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-3000_CTau-300um_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_172106/0000/ntuple_%i.root' % i for i in chain(xrange(1,13), [14])]),
+'mfv_neu_tau030000um_M3000_2017': (1, ['/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-3000_CTau-30mm_TuneCP5_13TeV-pythia8/NtupleULV1Am_NoEF_2017/220418_172149/0000/ntuple_2.root']),
+})
+
+
+################################################################################
+
 if __name__ == '__main__':
     import sys, re
 
