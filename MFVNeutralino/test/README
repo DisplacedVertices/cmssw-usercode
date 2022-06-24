@@ -1,0 +1,85 @@
+This is the README for : running over different scripts in the framework 
+     Additionally the random parameter scheme (rp) is described in detail
+
+
+####################################################################################################################################################
+
+ntuple.py
+
+-- Creation of tuples with vertexing and event information
+-- the settings are declared in python/NtupleCommon.py
+
+-> run locally :             $ cmsRun ntuple.py
+-> submit over condor/crab : $ python ntuple.py submit
+-> to monitor condor jobs :  $ condor_q
+-> after jobs finish :       $ mpublish --partial --dataset <NtupleVersion> /path/to/ntuples |& tee log_mpublish_<NtupleVersion>
+
+         
+	 A) EVENT FILTER : During this stage, no event filter is applied. This is done via the signals_no_event_filter_modifier.
+	 For this to work when running jobs over condor/crab, settings.event_filter should be defined as either : 'jets only', 'leptons only' etc.
+	 The pset modifier will then search for this string and replace it with 'False'.
+
+
+	 B) RANDOM PARAMETER FILTER (RP) : If the sample was centrally produced using a random parameter scheme in which all configuration points
+	 (mass, lifetime) are grouped into one inclusive file, this filter MUST be applied. To apply this filter when running jobs over condor/crab,
+	 settings.randpars_filter should be defined as : 'False'. Then, the pset modifer will correctly replace it with the following syntax :
+	 'randpar <decay> M<mass>_ct<lifetime>-'
+
+	 e.g.
+	 randpar HToSSTodddd M07_ct0p05-
+	 randpar HToSSTobbbb M55_ct10-
+
+	 -- To do a local test run before submission while keeping the randpars_filter, settings.randpars_filter should be defined as
+   	 'randpar <decay> M<mass>_ct<lifetime>-', as described above
+
+
+	 --> Note: You cannot have BOTH the event filter AND the rp filter applied. If you do, the event filter will be overwritten with the rp filter
+	     [as of the construction of this README] 
+
+
+####################################################################################################################################################
+
+minitree.py
+
+-- Slim Tuples down to Minitrees (input is ntuples created in above step) 
+-- different minitrees are defined in python/MiniTree_cff.py
+-- Output can be used for signal_eff.py (trigger + preselection + vertex selection efficiency) 
+
+-> run locally :             $ cmsRun minitree.py
+-> submit over condor/crab : $ python minitree.py submit
+-> after jobs finish :       $ mhadd /path/to/crabdirs/directory/<MiniTreeVersion> --ignore-done 
+
+
+####################################################################################################################################################
+
+histos.py
+
+-- More distributions of vertex and event information (input is ntuples created in above step) 
+-- Can make different subdirectories with different cuts (e.g. ntracks, nm1)
+-- Output can be used for comparehists.py
+
+
+-> run locally :             $ cmsRun histos.py
+-> submit over condor/crab : $ python histos.py submit
+-> after jobs finish :       $ mhadd /path/to/crabdirs/directory/<HistosVersion> --ignore-done
+
+
+####################################################################################################################################################
+
+Trigger Studies :
+
+filtercheck.py
+
+--Saves two distributions : 1. number of triggers  2. number of triggers that pass in an event
+--output to be used to run over TriggerStudies/signal_eff.py (just trigger efficiency)
+
+-> run locally :             $ cmsRun filtercheck.py
+-> submit over condor/crab : $ python filtercheck.py submit
+-> after jobs finish :       $ mhadd /path/to/crabdirs/directory/<TrigFiltCHeckVersion> --ignore-done
+
+
+
+   When using the RP scheme, the random parameter filter needs to be applied in this step to obtain the correct trigger efficiency.
+   The same syntax for rp filter as ntuple.py is used here when submitting jobs to condor or running locally.
+
+

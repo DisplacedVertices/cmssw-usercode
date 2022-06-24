@@ -1,10 +1,17 @@
 import sys
 from JMTucker.Tools.BasicAnalyzer_cfg import *
+from JMTucker.MFVNeutralino.NtupleCommon import signal_uses_random_pars_modifier
 
 settings = CMSSWSettings()
 settings.is_mc = True
 settings.is_miniaod = True
 settings.cross = '' # 2017to2018' # 2017to2017p8'
+
+#for submission to condor
+randpars_filter = False
+#for testing local :
+#randpars_filter = 'randpar HToSSTobbbb M15_ct10-'
+
 
 sample_files(process, 'qcdht1000_2017', 'miniaod')
 geometry_etc(process, settings)
@@ -12,7 +19,7 @@ tfileservice(process, 'filtercheck.root')
 cmssw_from_argv(process)
 
 from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-sef = lambda *a,**kwa: setup_event_filter(process, *a, input_is_miniaod=True, **kwa)
+sef = lambda *a,**kwa: setup_event_filter(process, *a, input_is_miniaod=True, rp_mode = randpars_filter, **kwa)
 sef('pTrigger', mode = 'trigger jets only')
 sef('pTriggerBjets', mode = 'trigger bjets only',name_ex = 'bjets')
 sef('pTriggerDispDijet', mode = 'trigger displaced dijet only',name_ex = 'displaced_dijet')
@@ -28,7 +35,7 @@ if len(process.mfvTriggerFilter.HLTPaths) > 1:
         getattr(process, filt_name).HLTPaths = [x]
 
 import JMTucker.Tools.SimpleTriggerEfficiency_cfi as SimpleTriggerEfficiency
-SimpleTriggerEfficiency.setup_endpath(process)
+SimpleTriggerEfficiency.setup_endpath(process, randpars_filter)
 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
@@ -44,5 +51,5 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         #samples = Samples.all_signal_samples_2018
 
     ms = MetaSubmitter('TrigFiltCheckV1', dataset='miniaod')
-    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, npu_filter_modifier(settings.is_miniaod), per_sample_pileup_weights_modifier(cross=settings.cross))
+    ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, npu_filter_modifier(settings.is_miniaod), per_sample_pileup_weights_modifier(cross=settings.cross), signal_uses_random_pars_modifier)
     ms.submit(samples)
