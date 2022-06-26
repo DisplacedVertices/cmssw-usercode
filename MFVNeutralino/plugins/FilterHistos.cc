@@ -1,6 +1,7 @@
 #include "TH2F.h"
 #include "TH3F.h"
 #include "TRandom3.h"
+#include "TVector2.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
@@ -45,9 +46,12 @@ class MFVFilterHistos : public edm::EDAnalyzer {
   TH1F* h_filter_bits;
   TH2F* h_filter_bit_matrix;
   TH2F* h_seqfilt_bit_matrix;
+  TH2F* h_below_thresh_passes;
 
   TH2F* h_jet_pt[MAX_NJETS+1];
   TH2F* h_jet_eta[MAX_NJETS+1];
+
+  TH2F* h_matchjet_pt[MAX_NJETS+1];
 
   TH2F* h_bsort_jet_pt[MAX_NJETS+1];
   TH2F* h_bsort_jet_eta[MAX_NJETS+1];
@@ -124,6 +128,7 @@ MFVFilterHistos::MFVFilterHistos(const edm::ParameterSet& cfg)
   h_filter_bits  = fs->make<TH1F>("h_filter_bits",  ";;events", mfv::n_filter_paths +1, 0, mfv::n_filter_paths +1);
   h_filter_bit_matrix = fs->make<TH2F>("h_filter_bit_matrix", ";;", mfv::n_filter_paths, 0, mfv::n_filter_paths, mfv::n_filter_paths, 0, mfv::n_filter_paths);
   h_seqfilt_bit_matrix = fs->make<TH2F>("h_seqfilt_bit_matrix", ";sequential;non-sequential", mfv::n_filter_paths, 0, mfv::n_filter_paths, mfv::n_filter_paths, 0, mfv::n_filter_paths);
+  h_below_thresh_passes = fs->make<TH2F>("h_below_thresh_passes", ";# passes below threshold n; # passes below threshold n", 4, 0, 4, 4, 0, 4);
   
 
   h_hlt_bits->GetXaxis()->SetBinLabel(1, "nevents");
@@ -151,6 +156,8 @@ MFVFilterHistos::MFVFilterHistos(const edm::ParameterSet& cfg)
     TString ijet = i == MAX_NJETS ? TString("all") : TString::Format("%i", i);
     h_jet_pt[i] = fs->make<TH2F>(TString::Format("h_jet_pt_%s", ijet.Data()), TString::Format(";;p_{T} of jet #%s (GeV)", ijet.Data()), 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 200, 0, 400);
     h_jet_eta[i] = fs->make<TH2F>(TString::Format("h_jet_eta_%s", ijet.Data()), TString::Format(";;abs #eta of jet #%s", ijet.Data()), 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 120, 0, 6);
+
+    h_matchjet_pt[i] = fs->make<TH2F>(TString::Format("h_matchjet_pt_%s", ijet.Data()), TString::Format(";;p_{T} of offline jet closest to HLT jet #%s (GeV)", ijet.Data()), 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 200, 0, 400);
 
     h_bsort_jet_pt[i] = fs->make<TH2F>(TString::Format("h_bsort_jet_pt_%s", ijet.Data()), TString::Format(";;p_{T} of jet  w/ #%s-highest CSV (GeV)", ijet.Data()), 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 200, 0, 400);
     h_bsort_jet_eta[i] = fs->make<TH2F>(TString::Format("h_bsort_jet_eta_%s", ijet.Data()), TString::Format(";;abs #eta of jet w/ #%s-highest CSV", ijet.Data()), 1+mfv::n_filter_paths, 0, 1+mfv::n_filter_paths, 120, 0, 6);
@@ -246,11 +253,11 @@ MFVFilterHistos::MFVFilterHistos(const edm::ParameterSet& cfg)
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-struct Jet_BHelper {
-    float pt  = 0.0;
-    float eta = 0.0;
-    float phi = 0.0;
-    float csv = 0.0;
+struct Jet_Helper {
+    float pt  = -1.0;
+    float eta = -1.0;
+    float phi = -1.0;
+    float csv = -1.0;
 };
 
 void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
@@ -260,25 +267,55 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   edm::Handle<double> weight;
   event.getByToken(weight_token, weight);
   const double w = *weight;
+  const int nhltpfjets = mevent->hlt_pf_jet_pt.size();
+  const int nhltcalojets = mevent->hlt_calo_jet_pt.size();
 
   // Get copy of jets sorted by bscore
-  Jet_BHelper jetHelper[MAX_NJETS];
+  Jet_Helper jetBHelper[MAX_NJETS];
   for (int i=0; i < MAX_NJETS; i++) {
-    jetHelper[i].pt  = mevent->nth_jet_pt(i);
-    jetHelper[i].eta = mevent->nth_jet_eta(i);
-    jetHelper[i].phi = mevent->nth_jet_phi(i);
-    jetHelper[i].csv = (i < (int)(mevent->jet_bdisc_old.size()) ? mevent->jet_bdisc_old[i] : -9.9);
+    jetBHelper[i].pt  = mevent->nth_jet_pt(i);
+    jetBHelper[i].eta = mevent->nth_jet_eta(i);
+    jetBHelper[i].phi = mevent->nth_jet_phi(i);
+    jetBHelper[i].csv = (i < (int)(mevent->jet_bdisc_old.size()) ? mevent->jet_bdisc_old[i] : -9.9);
   }
-  std::sort(jetHelper, jetHelper+MAX_NJETS, [](Jet_BHelper const &a, Jet_BHelper &b) -> bool{ return a.csv > b.csv; } );
+  std::sort(jetBHelper, jetBHelper+MAX_NJETS, [](Jet_Helper const &a, Jet_Helper &b) -> bool{ return a.csv > b.csv; } );
+
+  // Make set of offline jets (only 4 deep) sorted by which online jet they match to
+//  Jet_Helper jetPairHelper[4];
+//  for (int i=0; i < 4; i++) {
+//    if (i > nhltpfjets) break; 
+//    if (mevent->hlt_pf_jet_pt[i] < 10.0) break;
+//    float tmp_max_dR = 0.3;
+//
+//    TVector3 online_vec(0.0, 0.0, 0.0);
+//    
+//    online_vec.SetPtEtaPhi(mevent->hlt_pf_jet_pt[i], mevent->hlt_pf_jet_eta[i], mevent->hlt_pf_jet_phi[i]);
+//
+//    for (int j=0; j < 7; j++) {
+//      TVector3 offline_vec(0.0, 0.0, 0.0);
+//      offline_vec.SetPtEtaPhi(mevent->nth_jet_pt(j), mevent->nth_jet_eta(j), mevent->nth_jet_phi(j));
+//      //std::cout << "Debug 6" << std::endl;
+//      //std::cout << "Offline (vec)" << j << ": " << offline_vec.Pt() << "  " << offline_vec.Eta() << "  " << offline_vec.Phi() << std::endl;  
+//      //std::cout << "Offline (ntp)" << j << ": " << mevent->nth_jet_pt(j) << "  " << mevent->nth_jet_eta(j) << "  " << mevent->nth_jet_phi(j) << std::endl;  
+//      //std::cout << "Online  (vec)" << i << ": " << online_vec.Pt() << "  " << online_vec.Eta() << "  " << online_vec.Phi() << std::endl;  
+//      //std::cout << "Online  (ntp)" << i << ": " << mevent->hlt_pf_jet_pt[i] << "  " << mevent->hlt_pf_jet_eta[i] << "  " << mevent->hlt_pf_jet_phi[i] << std::endl;  
+//      float this_dR = online_vec.DeltaR(offline_vec);
+//      //std::cout << "Debug 7" << std::endl;
+//      if (this_dR < tmp_max_dR){
+//        tmp_max_dR = this_dR;
+//        jetPairHelper[i].pt = mevent->nth_jet_pt(j);
+//        jetPairHelper[i].eta = mevent->nth_jet_eta(j);
+//        jetPairHelper[i].phi = mevent->nth_jet_phi(j);
+//      }
+//    }
+//  }
+  
 
   int require_L1  = is_dibjet ? di_bitL1 : tri_bitL1;
   int min_filtjets        = is_dibjet ? di_minfiltjets : tri_minfiltjets;
   float min_filtjetpt     = is_dibjet ? di_minfiltjetpt : tri_minfiltjetpt;
   float max_filtjeteta    = is_dibjet ? di_maxfiltjeteta : tri_maxfiltjeteta;
   float min_filtjetbscore = is_dibjet ? di_minfiltjetbdisc : tri_minfiltjetbdisc;
-
-  const int nhltpfjets = mevent->hlt_pf_jet_pt.size();
-  const int nhltcalojets = mevent->hlt_calo_jet_pt.size();
 
   float alt_pf_ht = 0.0;
   float alt_calo_ht = 0.0;
@@ -365,18 +402,18 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   }
 
   // Are there matches between online PFjets and offline PFjets?
-  for (int i=0, ipmax = 4; i < ipmax; i++) {
-    float hlt_eta = (nhltpfjets > i ? mevent->hlt_pf_jet_eta[i] : -99.0);
-    float hlt_phi = (nhltpfjets > i ? mevent->hlt_pf_jet_phi[i] : -99.0);
-
-    float temp_deta = fabs(mevent->jet_eta[i] - hlt_eta);
-    float temp_dphi = fabs(mevent->jet_phi[i] - hlt_phi);
-
-    if ((temp_deta > 0.05) or (temp_dphi > 0.05)){
-      pass_onoff_pfjet_match = false;
-      break;
-    }
-  }
+//  for (int i=0, ipmax = 4; i < ipmax; i++) {
+//    float hlt_eta = (nhltpfjets > i ? mevent->hlt_pf_jet_eta[i] : -99.0);
+//    float hlt_phi = (nhltpfjets > i ? mevent->hlt_pf_jet_phi[i] : -99.0);
+//
+//    float temp_deta = fabs(mevent->jet_eta[i] - hlt_eta);
+//    float temp_dphi = fabs(mevent->jet_phi[i] - hlt_phi);
+//
+//    if ((temp_deta > 0.33) or (temp_dphi > 0.33)){
+//      pass_onoff_pfjet_match = false;
+//      break;
+//    }
+//  }
 
   // Don't do anything else if we don't have enough good jets or calojets
   if ((filtjet_passes < min_filtjets) or (not pass_onoff_pfjet_match))
@@ -420,13 +457,69 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
     // If the event passes filters in series, then fill the 2D histograms appropriately
     if (passes_seq_filters) {
+
+      switch (i+1){
+
+        case 10:
+          if (not (mevent->nth_jet_pt(0) < 75.0)) { break; }
+          if ((mevent->nth_jet_pt(1) < 60.0) and (mevent->pass_filter(11))) { h_below_thresh_passes->Fill(0., 1., w); }
+          if ((mevent->nth_jet_pt(2) < 45.0) and (mevent->pass_filter(12))) { h_below_thresh_passes->Fill(0., 2., w); }
+          if ((mevent->nth_jet_pt(3) < 40.0) and (mevent->pass_filter(13))) { h_below_thresh_passes->Fill(0., 3., w); }
+          h_below_thresh_passes->Fill(0., 0., w);
+          break;
+
+        case 11:
+          if (not (mevent->nth_jet_pt(1) < 60.0)) { break; }
+          if ((mevent->nth_jet_pt(2) < 45.0) and (mevent->pass_filter(12))) { h_below_thresh_passes->Fill(1., 2., w); }
+          if ((mevent->nth_jet_pt(3) < 40.0) and (mevent->pass_filter(13))) { h_below_thresh_passes->Fill(1., 3., w); }
+          h_below_thresh_passes->Fill(1., 1., w);
+          break;
+
+        case 12:
+          if (not (mevent->nth_jet_pt(2) < 45.0)) { break; }
+          if ((mevent->nth_jet_pt(3) < 40.0) and (mevent->pass_filter(13))) { h_below_thresh_passes->Fill(2., 3., w); }
+          h_below_thresh_passes->Fill(2., 2., w);
+          break;
+
+        case 13:
+          if (mevent->nth_jet_pt(3) < 40.0) { h_below_thresh_passes->Fill(3., 3., w); }
+          break;
+
+      }
+
+      // Part of debug statements for below-threshold passes
+//      if ((i+1 == 10) and (mevent->nth_jet_pt(0) < 75.0)) {
+//        printf("\nDEBUG DUMP!!!!\n");
+//        for (int n=0; n < nhltpfjets; n++) {
+//          if (fabs(mevent->hlt_pf_jet_eta[n] > 3.0) or (mevent->hlt_pf_jet_pt[n] < 15.0)) continue;
+//          double  tmp_dr = 0.5;
+//          int best_match = 99;
+//          for (int k=0; k < MAX_NJETS; k++){
+//            double temp_deta = fabs(mevent->hlt_pf_jet_eta[n] - mevent->nth_jet_eta(k));
+//            double temp_dphi = fabs(TVector2::Phi_mpi_pi(mevent->hlt_pf_jet_phi[n] - mevent->nth_jet_phi(k)));
+//            if (std::hypot(temp_deta, temp_dphi) < tmp_dr) { tmp_dr = std::hypot(temp_deta, temp_dphi); best_match = k; }
+//          }
+//          printf("Online  #%i     pt:%5.2f    eta:%5.2f   phi:%5.2f      best match: #%i \n", n, mevent->hlt_pf_jet_pt[n], mevent->hlt_pf_jet_eta[n], mevent->hlt_pf_jet_phi[n], best_match);
+//        }
+//      printf("-----------------------------------------\n");
+//      }
+
       for (int k = 0; k < MAX_NJETS; ++k) {
+        // Part of debug statements for below-threshold passes
+//        if ((i+1 == 10) and (mevent->nth_jet_pt(0) < 75.0)) {
+//          printf("Offline #%i     pt:%5.2f    eta:%5.2f   phi:%5.2f \n", k, mevent->nth_jet_pt(k), mevent->nth_jet_eta(k), mevent->nth_jet_phi(k));
+//        }
+
         h_jet_pt[k]->Fill(i+1, mevent->nth_jet_pt(k), w);
         h_jet_eta[k]->Fill(i+1, fabs(mevent->nth_jet_eta(k)), w);
 
-        h_bsort_jet_pt[k]->Fill(i+1, jetHelper[k].pt, w);
-        h_bsort_jet_eta[k]->Fill(i+1, fabs(jetHelper[k].eta), w);
-        h_bsort_jet_eta[k]->Fill(i+1, jetHelper[k].csv, w);
+        //if (k < 4) {
+        //  h_matchjet_pt[k]->Fill(i+1, jetPairHelper[k].pt, w);
+        //}
+
+        h_bsort_jet_pt[k]->Fill(i+1, jetBHelper[k].pt, w);
+        h_bsort_jet_eta[k]->Fill(i+1, fabs(jetBHelper[k].eta), w);
+        h_bsort_jet_eta[k]->Fill(i+1, jetBHelper[k].csv, w);
 
         h_hlt_jet_pt[k]->Fill(i+1, (nhltpfjets > k ? mevent->hlt_pf_jet_pt[k] : -1.0), w);         
         h_hlt_jet_eta[k]->Fill(i+1, (nhltpfjets > k ? fabs(mevent->hlt_pf_jet_eta[k]) : -1.0), w);
