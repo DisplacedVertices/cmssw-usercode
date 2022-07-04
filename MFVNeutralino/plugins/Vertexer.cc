@@ -875,22 +875,22 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   if (do_track_refinement || histos_noshare) {
     std::map<reco::TrackRef, int> track_use;
     for (size_t i = 0, ie = vertices->size(); i < ie; ++i) {
-      reco::Vertex& v = vertices->at(i);
-      const int ntracks = v.nTracks();
-	  const double vmass = v.p4().mass();
-      const double vchi2 = v.normalizedChi2();
-      const double vndof = v.ndof();
-      const double vx = v.position().x() - bsx;
-      const double vy = v.position().y() - bsy;
-      const double vz = v.position().z() - bsz;
+      reco::Vertex& v_trf = vertices->at(i);
+      const int ntracks = v_trf.nTracks();
+	  const double vmass = v_trf.p4().mass();
+      const double vchi2 = v_trf.normalizedChi2();
+      const double vndof = v_trf.ndof();
+      const double vx = v_trf.position().x() - bsx;
+      const double vy = v_trf.position().y() - bsy;
+      const double vz = v_trf.position().z() - bsz;
       const double rho = mag(vx, vy);
       const double phi = atan2(vy, vx);
       const double r = mag(vx, vy, vz);
-      for (const auto& r : vertex_track_set(v)) {
-        if (track_use.find(r) != track_use.end())
-          track_use[r] += 1;
+      for (const auto& tk : vertex_track_set(v_trf)) {
+        if (track_use.find(tk) != track_use.end())
+          track_use[tk] += 1;
         else
-          track_use[r] = 1;
+          track_use[tk] = 1;
       }
 
       if (verbose)
@@ -903,11 +903,11 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         track_set set_trackrefine_trimmax_tks;
         std::vector<reco::TransientTrack> trackrefine_trimmax_ttks;
         std::vector<double> trackrefine_trim_ttks_missdist_sig;
-        for (auto it = v.tracks_begin(), ite = v.tracks_end(); it != ite; ++it) {
+        for (auto it = v_trf.tracks_begin(), ite = v_trf.tracks_end(); it != ite; ++it) {
 
           reco::TransientTrack seed_track;
           seed_track = tt_builder->build(*it.operator*());
-          std::pair<bool, Measurement1D> tk_vtx_dist = track_dist(seed_track, v);
+          std::pair<bool, Measurement1D> tk_vtx_dist = track_dist(seed_track, v_trf);
 
           h_noshare_vertex_tkvtxdist_before_do_track_refinement->Fill(tk_vtx_dist.second.value());
           h_noshare_vertex_tkvtxdisterr_before_do_track_refinement->Fill(tk_vtx_dist.second.error());
@@ -923,8 +923,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         }
 
         // if tracks's miss distance significance is larger than trackrefine_sigmacut, we first remove all those tracks and refit a new vertex
-        double trackrefine_sigmacut_v0x = v.position().x() - bsx;
-        double trackrefine_sigmacut_v0y = v.position().y() - bsy;
+        double trackrefine_sigmacut_v0x = v_trf.position().x() - bsx;
+        double trackrefine_sigmacut_v0y = v_trf.position().y() - bsy;
         double trackrefine_sigmacut_v0r = mag(trackrefine_sigmacut_v0x, trackrefine_sigmacut_v0y);
 
         reco::Vertex trackrefine_sigmacut_v;
@@ -1001,19 +1001,19 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
         // the end of track refinement in two steps -- (1) sigmacut and (2) trimmax
         // we replace the noshare vertex by the vertex after the track refinement
-        v = trackrefine_trimmax_v;
+        v_trf = trackrefine_trimmax_v;
       }
 
 
       if (histos_noshare) {
         h_noshare_vertex_ntracks->Fill(ntracks);
 
-        for (auto it = v.tracks_begin(), ite = v.tracks_end(); it != ite; ++it) {
-          h_noshare_vertex_track_weights->Fill(v.trackWeight(*it));
+        for (auto it = v_trf.tracks_begin(), ite = v_trf.tracks_end(); it != ite; ++it) {
+          h_noshare_vertex_track_weights->Fill(v_trf.trackWeight(*it));
 
           reco::TransientTrack seed_track;
           seed_track = tt_builder->build(*it.operator*());
-          std::pair<bool, Measurement1D> tk_vtx_dist = track_dist(seed_track, v);
+          std::pair<bool, Measurement1D> tk_vtx_dist = track_dist(seed_track, v_trf);
           h_noshare_vertex_tkvtxdist->Fill(tk_vtx_dist.second.value());
           h_noshare_vertex_tkvtxdisterr->Fill(tk_vtx_dist.second.error());
           h_noshare_vertex_tkvtxdistsig->Fill(tk_vtx_dist.second.significance());
@@ -1624,6 +1624,7 @@ std::pair<bool, std::vector<std::vector<size_t>>> MFVVertexer::sharedjets(const 
     sv_lonesharedtrack_trkidx.push_back(sv0_lonesharedtrack_trkidx);
     sv_lonesharedtrack_trkidx.push_back(sv1_lonesharedtrack_trkidx);
   }
+  //boolean below is a selector for mitigating only 1:1 and 1:n shared-jet cases. Feel free to set it to true for considering all shared-jet cases including the n:m case
   bool shared_jet_specialcase = (sv0_lonesharedtrack_trkidx.size() != 0 || sv1_lonesharedtrack_trkidx.size() != 0);
   return std::pair<bool, std::vector<std::vector<size_t>>>(
       shared_jet_specialcase,
@@ -1703,7 +1704,7 @@ void MFVVertexer::fillCommonOutputHists(std::unique_ptr<reco::VertexCollection>&
   const double bsz = fake_bs_vtx.position().z();
 
   for (size_t i = 0, ie = vertices->size(); i < ie; ++i) {
-    reco::Vertex& v = vertices->at(i);
+    const reco::Vertex& v = vertices->at(i);
     const int ntracks = v.nTracks();
     const double vmass = v.p4().mass();
     const double vchi2 = v.normalizedChi2();
@@ -1714,11 +1715,11 @@ void MFVVertexer::fillCommonOutputHists(std::unique_ptr<reco::VertexCollection>&
     const double rho = mag(vx, vy);
     const double phi = atan2(vy, vx);
     const double r = mag(vx, vy, vz);
-    for (const auto& r : vertex_track_set(v)) {
-      if (track_use.find(r) != track_use.end())
-        track_use[r] += 1;
+    for (const auto& tk : vertex_track_set(v)) {
+      if (track_use.find(tk) != track_use.end())
+        track_use[tk] += 1;
       else
-        track_use[r] = 1;
+        track_use[tk] = 1;
     }
 
     hs_output_vertex_ntracks[step]->Fill(ntracks);
