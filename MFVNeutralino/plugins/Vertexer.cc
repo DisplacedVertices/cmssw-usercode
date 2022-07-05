@@ -39,7 +39,7 @@ class MFVVertexer : public edm::EDProducer {
     bool hasCommonElement(std::vector<int> vec0, std::vector<int> vec1);
     std::vector<int>::iterator getFirstCommonElement(std::vector<int>& vec0, std::vector<int>& vec1);
     template <typename T> void eraseElement(std::vector<T>& vec, int idx);
-
+    void createSetofSharedJetTracks(std::vector<std::vector<int>>& vec_sharedjet_track_idx, std::vector<size_t>& vec_special_sharedjet_track_idx, std::vector<int>& vec_all_track_idx, std::vector<int>& vec_sharedjet_idx, int sharedjet_idx); 
     bool match_track_jet(const reco::Track& tk, const pat::Jet& jet, const pat::JetCollection& jets, const int& idx);
 
     void finish(edm::Event&, const std::vector<reco::TransientTrack>&, std::unique_ptr<reco::VertexCollection>, std::unique_ptr<VertexerPairEffs>, const std::vector<std::pair<track_set, track_set>>&);
@@ -1548,9 +1548,9 @@ std::pair<bool, std::vector<std::vector<size_t>>> MFVVertexer::sharedjets(const 
 
   bool shared_jet = hasCommonElement(sv_match_jetidx[vtx0idx], sv_match_jetidx[vtx1idx]);
 
-  std::vector<std::vector<size_t>> sv_lonesharedtrack_trkidx;
-  std::vector<size_t> sv0_lonesharedtrack_trkidx;
-  std::vector<size_t> sv1_lonesharedtrack_trkidx;
+  std::vector<std::vector<size_t>> sv_match_special_sharedjet_trkidx;
+  std::vector<size_t> sv0_match_special_sharedjet_trkidx;
+  std::vector<size_t> sv1_match_special_sharedjet_trkidx;
 
   if (shared_jet) {
 
@@ -1562,11 +1562,9 @@ std::pair<bool, std::vector<std::vector<size_t>>> MFVVertexer::sharedjets(const 
 
     std::vector<int> sv0_match_jetidx = sv_match_jetidx[vtx0idx];
     std::vector<int> sv0_match_trkidx = sv_match_trkidx[vtx0idx];
-    std::vector<int> sv0_match_temp_trkidx;
 
     std::vector<int> sv1_match_jetidx = sv_match_jetidx[vtx1idx];
     std::vector<int> sv1_match_trkidx = sv_match_trkidx[vtx1idx];
-    std::vector<int> sv1_match_temp_trkidx;
 
     while (hasCommonElement(sv_match_temp_jetidx[vtx0idx], sv_match_temp_jetidx[vtx1idx])) {
       nsharedjets++;
@@ -1577,58 +1575,21 @@ std::pair<bool, std::vector<std::vector<size_t>>> MFVVertexer::sharedjets(const 
       eraseElement(sv_match_temp_jetidx[vtx0idx], jet_index);
       eraseElement(sv_match_temp_jetidx[vtx1idx], jet_index);
 
-      // start collecting shared tracks of sv0 for each shared jet (FIXME: worth investigating if we can get rid of the complication of mapping because *_match_jetidx has 1-1 to *_match_trkidx)
-      std::multimap<int, size_t> sv0_m; // a map of pairs between {jet index, its index in sv0_match_jetidx} 
-      for (size_t k = 0; k < sv0_match_jetidx.size(); k++)
-        if (sv0_match_jetidx[k] == jet_index) { sv0_m.insert({ sv0_match_jetidx[k], k });}
-
-      for (auto it0 = sv0_m.begin(); it0 != sv0_m.end(); ) {
-        auto p = sv0_m.equal_range(it0->first); // p has p.first as a lower bound and p.second as an upper bound of jet index value in map but if all jet index are the same p.second will not be the same as p.first  
-        while (p.first != p.second) { 
-          sv0_match_temp_trkidx.push_back(sv0_match_trkidx[p.first++->second]); // create a subset of tracks for this shared jet and this sv0  
-        }
-        it0 = p.second;
-      }
-
-      sv0_match_sharedjet_trkidx.push_back(sv0_match_temp_trkidx);
+      // start collecting shared tracks of sv0 for each shared jet
+      createSetofSharedJetTracks(sv0_match_sharedjet_trkidx, sv0_match_special_sharedjet_trkidx, sv0_match_trkidx, sv0_match_jetidx, jet_index);
 
       // start collecting shared tracks of sv1 for each shared jet
-      std::multimap<int, size_t> sv1_m;
-      for (size_t k = 0; k < sv1_match_jetidx.size(); k++) {
-        if (sv1_match_jetidx[k] == jet_index) { 
-          sv1_m.insert({ sv1_match_jetidx[k], k });
-        }
-      }
+      createSetofSharedJetTracks(sv1_match_sharedjet_trkidx, sv1_match_special_sharedjet_trkidx, sv1_match_trkidx, sv1_match_jetidx, jet_index);
 
-      for (auto it1 = sv1_m.begin(); it1 != sv1_m.end(); ) {
-        auto p = sv1_m.equal_range(it1->first);
-
-        while (p.first != p.second) {
-          sv1_match_temp_trkidx.push_back(sv1_match_trkidx[p.first++->second]);
-        }
-        it1 = p.second;
-      }
-
-      sv1_match_sharedjet_trkidx.push_back(sv1_match_temp_trkidx);
-
-      if (sv0_match_temp_trkidx.size() == 1) {
-        sv0_lonesharedtrack_trkidx.push_back(sv0_match_temp_trkidx[0]);
-      }
-      if (sv1_match_temp_trkidx.size() == 1) {
-        sv1_lonesharedtrack_trkidx.push_back(sv1_match_temp_trkidx[0]);
-      }
-
-      sv0_match_temp_trkidx = {};
-      sv1_match_temp_trkidx = {};
     }
-    sv_lonesharedtrack_trkidx.push_back(sv0_lonesharedtrack_trkidx);
-    sv_lonesharedtrack_trkidx.push_back(sv1_lonesharedtrack_trkidx);
+    sv_match_special_sharedjet_trkidx.push_back(sv0_match_special_sharedjet_trkidx);
+    sv_match_special_sharedjet_trkidx.push_back(sv1_match_special_sharedjet_trkidx);
   }
   //boolean below is a selector for mitigating only 1:1 and 1:n shared-jet cases. Feel free to set it to true for considering all shared-jet cases including the n:m case
-  bool shared_jet_specialcase = (sv0_lonesharedtrack_trkidx.size() != 0 || sv1_lonesharedtrack_trkidx.size() != 0);
+  bool shared_jet_specialcase = (sv0_match_special_sharedjet_trkidx.size() != 0 || sv1_match_special_sharedjet_trkidx.size() != 0);
   return std::pair<bool, std::vector<std::vector<size_t>>>(
       shared_jet_specialcase,
-      sv_lonesharedtrack_trkidx);
+      sv_match_special_sharedjet_trkidx);
 }
 
 bool MFVVertexer::hasCommonElement(std::vector<int> vec0, std::vector<int> vec1) {
@@ -1642,6 +1603,28 @@ std::vector<int>::iterator MFVVertexer::getFirstCommonElement(std::vector<int>& 
 template <typename T>
 void MFVVertexer::eraseElement(std::vector<T>& vec, int idx) {
   vec.erase(std::remove(vec.begin(), vec.end(), idx), vec.end());
+  return;
+}
+
+
+void MFVVertexer::createSetofSharedJetTracks(std::vector<std::vector<int>>& vec_sharedjet_track_idx, std::vector<size_t>& vec_special_sharedjet_track_idx, std::vector<int>& vec_all_track_idx, std::vector<int>& vec_sharedjet_idx, int sharedjet_idx){
+  std::vector<int> temp_match_trkidx_per_sharedjet_idx = {};
+  std::multimap<int, size_t> map_sharedjet_idx_to_it; // a map of pairs between {jet index, its index in sv0_match_jetidx} 
+  for (size_t k = 0; k < vec_sharedjet_idx.size(); k++)
+    if (vec_sharedjet_idx[k] == sharedjet_idx) { map_sharedjet_idx_to_it.insert({ vec_sharedjet_idx[k], k });}
+
+  for (auto it = map_sharedjet_idx_to_it.begin(); it != map_sharedjet_idx_to_it.end(); ) {
+    auto p = map_sharedjet_idx_to_it.equal_range(it->first); // p has p.first as a lower bound and p.second as an upper bound of jet index value in map but if all jet index are the same p.second will not be the same as p.first  
+    while (p.first != p.second) { 
+      temp_match_trkidx_per_sharedjet_idx.push_back(vec_all_track_idx[p.first++->second]); // create a subset of tracks for this shared jet and this vertex 
+    }
+    it = p.second;
+  }
+
+  vec_sharedjet_track_idx.push_back(temp_match_trkidx_per_sharedjet_idx);
+  if (temp_match_trkidx_per_sharedjet_idx.size() == 1) { 
+    vec_special_sharedjet_track_idx.push_back(temp_match_trkidx_per_sharedjet_idx[0]);
+  }
   return;
 }
 
