@@ -298,7 +298,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 
     h_n_seed_vertices                = fs->make<TH1F>("h_n_seed_vertices",                ";# of seed vertices",  50,   0,    200);
     h_seed_vertex_track_weights      = fs->make<TH1F>("h_seed_vertex_track_weights",      ";seed vertex's track weights",  21,   0,      1.05);
-    h_seed_vertex_chi2               = fs->make<TH1F>("h_seed_vertex_chi2",               ";normalized chi2",  10,   0, 10);
+    h_seed_vertex_chi2               = fs->make<TH1F>("h_seed_vertex_chi2",               ";normalized chi2",  40,   0, 10);
     h_seed_vertex_ndof               = fs->make<TH1F>("h_seed_vertex_ndof",               ";ndof",  10,   0,     20);
     h_seed_vertex_x                  = fs->make<TH1F>("h_seed_vertex_x",                  ";vtxbsdist_x (cm.)", 20,  -1,      1);
     h_seed_vertex_y                  = fs->make<TH1F>("h_seed_vertex_y",                  ";vtxbsdist_y (cm.)", 20,  -1,      1);
@@ -318,7 +318,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
       h_noshare_vertex_ntracks = fs->make<TH1F>("h_noshare_vertex_ntracks", ";ntracks/vtx", 30, 0, 30);
       h_noshare_vertex_mass = fs->make<TH1F>("h_noshare_vertex_mass", ";mass/vtx (GeV)", 20, 0, 1000);
       h_noshare_vertex_track_weights = fs->make<TH1F>("h_noshare_vertex_track_weights", ";vertex track weights", 21, 0, 1.05);
-      h_noshare_vertex_chi2 = fs->make<TH1F>("h_noshare_vertex_chi2", ";normalized chi2", 10, 0, 10);
+      h_noshare_vertex_chi2 = fs->make<TH1F>("h_noshare_vertex_chi2", ";normalized chi2", 40, 0, 10);
       h_noshare_vertex_ndof = fs->make<TH1F>("h_noshare_vertex_ndof", ";ndof", 10, 0, 20);
       h_noshare_vertex_x = fs->make<TH1F>("h_noshare_vertex_x", ";vtxbsdist_x (cm.)", 20, -1, 1);
       h_noshare_vertex_y = fs->make<TH1F>("h_noshare_vertex_y", ";vtxbsdist_y (cm.)", 20, -1, 1);
@@ -366,7 +366,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
       hs_output_vertex_ntracks[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_ntracks", ";ntracks/vtx", 30, 0, 30);
       hs_output_vertex_mass[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_mass", ";mass/vtx (GeV)", 20, 0, 1000);
       hs_output_vertex_track_weights[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_track_weights", ";vertex track weights", 21, 0, 1.05);
-      hs_output_vertex_chi2[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_chi2", ";normalized chi2", 10, 0, 10);
+      hs_output_vertex_chi2[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_chi2", ";normalized chi2", 40, 0, 10);
       hs_output_vertex_ndof[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_ndof", ";ndof", 10, 0, 20);
       hs_output_vertex_x[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_x", ";vtxbsdist_x (cm.)", 20, -1, 1);
       hs_output_vertex_y[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_y", ";vtxbsdist_y (cm.)", 20, -1, 1);
@@ -380,7 +380,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     }
 
     if (investigate_merged_vertices) {
-      h_output_aftermerge_potential_merged_vertex_nm1_chi2 = fs->make<TH1F>("h_output_aftermerge_potential_merged_vertex_nm1_chi2", ";normalized chi2 w/ n-1 cuts applied", 20, 0, 20);
+      h_output_aftermerge_potential_merged_vertex_nm1_chi2 = fs->make<TH1F>("h_output_aftermerge_potential_merged_vertex_nm1_chi2", ";normalized chi2 w/ n-1 cuts applied", 80, 0, 20);
       h_output_aftermerge_potential_merged_vertex_nm1_ntracks = fs->make<TH1F>("h_output_aftermerge_potential_merged_vertex_nm1_ntracks", ";ntracks/vtx w/ n-1 cuts applied", 30, 0, 30);
       h_output_aftermerge_potential_merged_vertex_nm1_bs2derr = fs->make<TH1F>("h_output_aftermerge_potential_merged_vertex_nm1_bs2derr", ";bs2derr (cm.) w/ n-1 cuts applied", 20, 0, 0.05);
       h_output_aftermerge_potential_merged_vertex_nm1_bsbs2ddist = fs->make<TH1F>("h_output_aftermerge_potential_merged_vertex_nm1_bsbs2ddist", ";dBV (cm.) w/ n-1 cuts applied", 100, 0, 1.0);
