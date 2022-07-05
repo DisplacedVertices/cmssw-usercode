@@ -1510,14 +1510,14 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
       if (tracks[0].size() < 2) {
         if (verbose)
-          printf("resolve_shared_jets: vertex-0 #%lu is down to one track, junking it\n", ivtx[0]);
+          throw cms::Exception("1-trk vtx in Vertexer") << "at vertex index: " << ivtx[0];
         v[0] = vertices->erase(v[0]) - 1;
         ++n_output_aftersharedjets_onetracks;
         continue;
       }
 
       if (tracks[0].size() < v[0]->nTracks()) {
-        std::cout << "duplicate tracks in vertexer" << std::endl;
+        throw cms::Exception("inconsistent total tracks per vertex in Vertexer") << "please check for duplicated tracks ";
         std::vector<reco::TransientTrack> sv_nonduplicate_ttks;
         for (const reco::TrackRef& itk : vertex_track_set(*v[0])) {
           if (itk.isNonnull())
