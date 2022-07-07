@@ -129,6 +129,13 @@ def setup_event_filter(process,
                     process.mfvVertexTracks.tracks_src = 'jmtUnpackedCandidateTracks'
                     process.jmtRescaledTracks.tracks_src = 'jmtUnpackedCandidateTracks' # JMTBAD use rescaled tracks
 
+            vertexFilter = cms.EDFilter('VertexSelector', src = cms.InputTag('mfvVertices'), cut = cms.string('nTracks > 2'), filter = cms.bool(True))
+            setattr(process, event_filter_name + 'W1Vtx', vertexFilter)
+            if input_is_miniaod:
+                overall *= process.goodOfflinePrimaryVertices * process.updatedJetsSeqMiniAOD * process.selectedPatJets * process.jmtUnpackedCandidateTracks * process.mfvVertexSequenceBare * vertexFilter
+            else:
+                overall *= process.goodOfflinePrimaryVertices * process.updatedJetsSeqMiniAOD * process.selectedPatJets                                      * process.mfvVertexSequenceBare * vertexFilter
+
     setattr(process, sequence_name, overall)
 
     if not path_name:
