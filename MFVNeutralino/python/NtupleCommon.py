@@ -308,8 +308,6 @@ def ntuple_process(settings):
 # Used for samples stored in inclusive miniaods; currently set up for ZH, Wplus & Wminus
 # may need to change to handle different naming conventions 
 def signal_uses_random_pars_modifier(sample): 
-    to_replace = []
-
     if sample.is_signal:
         if sample.is_rp :
             magic_randpar = 'randpars_filter = False'
@@ -325,7 +323,11 @@ def signal_uses_random_pars_modifier(sample):
                 ctau = str(ctau).replace('.', 'p')
                 ctau = ctau.replace('p0', '')
                 
-            to_replace.append((magic_randpar, "randpars_filter = 'randpar %s M%i_ct%s-'" % (decay, sample.mass, ctau), 'tuple template does not contain the magic string "%s"' % magic_randpar))
+            to_replace = [(magic_randpar, "randpars_filter = 'randpar %s M%i_ct%s-'" % (decay, sample.mass, ctau), 'tuple template does not contain the magic string "%s"' % magic_randpar)]
+        else :
+            to_replace = []
+    else :
+        to_replace = []
     return [], to_replace
 
 
