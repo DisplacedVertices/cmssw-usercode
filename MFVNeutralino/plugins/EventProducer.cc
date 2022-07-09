@@ -418,7 +418,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       }
       else {
         const pat::PackedCandidate* pk = dynamic_cast<const pat::PackedCandidate*>(dau);
-        if (pk && pk->charge() && pk->hasTrackDetails())
+        if (pk && pk->charge() != 0 && pk->hasTrackDetails())
           tk = &pk->pseudoTrack();
       }
 

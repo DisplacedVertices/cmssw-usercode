@@ -5,7 +5,6 @@ from JMTucker.MFVNeutralino.NtupleCommon import *
 settings = NtupleSettings()
 settings.is_mc = True
 settings.is_miniaod = True
-
 settings.run_n_tk_seeds = False
 settings.minitree_only = False
 settings.prepare_vis = False
@@ -24,9 +23,8 @@ settings.randpars_filter = False
 
 process = ntuple_process(settings)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
-sample_files(process, 'mfv_neu_tau001000um_M1200_2018', dataset, 1)
-
-max_events(process, 1000)
+sample_files(process, 'mfv_neu_tau001000um_M1200_2017', dataset, 1)
+max_events(process, 100)
 cmssw_from_argv(process)
 
 

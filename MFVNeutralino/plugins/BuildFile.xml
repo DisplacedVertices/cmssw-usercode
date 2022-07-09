@@ -25,3 +25,4 @@
   <use name="JMTucker/MFVNeutralino"/>
   <use name="JMTucker/Tools"/>
 </library>
+<!--Flags CXXFLAGS="-Wshadow"/-->
