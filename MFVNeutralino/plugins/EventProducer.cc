@@ -113,7 +113,6 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
 
 void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
   std::unique_ptr<MFVEvent> mevent(new MFVEvent);
-
   edm::Handle<reco::BeamSpot> beamspot;
   event.getByToken(beamspot_token, beamspot);
   mevent->bsx = beamspot->x0();
@@ -221,7 +220,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
     if (mci->valid()) {
       mevent->gen_valid = true;
-
       assert(mci->primaries().size() == 2);
       for (int i = 0; i < 2; ++i) {
         mevent->gen_lsp_pt  [i] = mci->primaries()[i]->pt();
@@ -235,8 +233,8 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
         mevent->gen_lsp_decay[i*3+2] = p.z;
 
         mevent->gen_decay_type[i] = mci->decay_type()[i];
-
-        for (const reco::GenParticleRef& s : mci->secondaries(i)) {
+        for (const reco::GenParticleRef& s_temp : mci->secondaries(i)) {
+          reco::GenParticle* s = (reco::GenParticle*)first_candidate(&*s_temp); 
           mevent->gen_daughters.push_back(MFVEvent::p4(s->pt(), s->eta(), s->phi(), s->mass()));
           mevent->gen_daughter_id.push_back(s->pdgId());
         }
@@ -418,7 +416,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       }
       else {
         const pat::PackedCandidate* pk = dynamic_cast<const pat::PackedCandidate*>(dau);
-        if (pk && pk->charge() != 0 && pk->hasTrackDetails())
+        if (pk && pk->charge()!=0 && pk->hasTrackDetails())
           tk = &pk->pseudoTrack();
       }
 
