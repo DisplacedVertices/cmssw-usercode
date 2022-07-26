@@ -71,7 +71,7 @@ process.EX1mfvVertexHistosOnlyOneVtx = process.mfvVertexHistos.clone(EX2)
 process.EX1mfvVertexHistosFullSel    = process.mfvVertexHistos.clone(EX2)
 process.EX1mfvVertexHistosSigReg     = process.mfvVertexHistos.clone(EX2)
 
-process.EX1pPreSelEvtFiltVtxSel     = cms.Path(common * process.mfvAnalysisCutsPreSelEvtFiltVtxSel                                              * process.EX1mfvVertexHistosPreSelEvtFiltVtxSel)
+process.EX1pPreSelEvtFiltVtxSel     = cms.Path(common * process.mfvAnalysisCutsPreSelEvtFilt * process.EX1mfvVertexHistosPreSelEvtFiltVtxSel)
 process.EX1pOnlyOneVtx = cms.Path(common * process.EX1mfvAnalysisCutsOnlyOneVtx * process.EX1mfvEventHistosOnlyOneVtx * process.EX1mfvVertexHistosOnlyOneVtx)
 '''.replace('EX1', EX1).replace('EX2', EX2).replace('EX3', EX3)
 

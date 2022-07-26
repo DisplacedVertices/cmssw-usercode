@@ -1215,7 +1215,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     }
     iv = 0; //some vertices after dz refiting have normalized chi2 > 5
     for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0], ++iv) {
-       if ((*v[0]).chi2() > 5) {
+       if ((*v[0]).normalizedChi2() > 5) {
          v[0] = vertices->erase(v[0]) - 1;
          continue;
        }
