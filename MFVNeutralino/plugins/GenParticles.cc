@@ -185,7 +185,7 @@ bool MFVGenParticles::try_MFVtbs(mfv::MCInteraction& mc, const edm::Handle<reco:
       h.lsps[0] = lsp;
     else {
       if (reco::deltaR(*h.lsps[0], gen) < 0.001)
-	throw cms::Exception("BadAssumption", "may have found same LSP twice based on deltaR < 0.001");
+         edm::LogWarning("GenParticles") << "BadAssumption; may have found same LSP twice based on deltaR < 0.001" ;
       which = 1;
       h.lsps[1] = lsp;
     }
@@ -361,7 +361,7 @@ bool MFVGenParticles::try_MFVthree(mfv::MCInteraction& mc, const edm::Handle<rec
       h.p[0] = lsp;
     else {
       if (reco::deltaR(*h.p[0], gen) < 0.001)
-	throw cms::Exception("BadAssumption", "may have found same LSP twice based on deltaR < 0.001");
+        edm::LogWarning("GenParticles") << "BadAssumption; may have found same LSP twice based on deltaR < 0.001" ;
       which = 1;
       h.p[1] = lsp;
     }
@@ -508,7 +508,7 @@ bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<rec
       h.p[0] = ref;
     else {
       if (reco::deltaR(*h.p[0], gen) < 0.001)
-	throw cms::Exception("BadAssumption", "may have found same LSP twice based on deltaR < 0.001");
+        edm::LogWarning("GenParticles") << "BadAssumption; may have found same LSP twice based on deltaR < 0.001" ;
       which = 1;
       h.p[1] = ref;
     }
@@ -572,7 +572,7 @@ bool MFVGenParticles::try_stopdbardbar(mfv::MCInteraction& mc, const edm::Handle
           h.p[0] = ref;
         else {
           if (reco::deltaR(*h.p[0], gen) < 0.001)
-            throw cms::Exception("BadAssumption", "may have found same LSP twice based on deltaR < 0.001");
+            edm::LogWarning("GenParticles") << "BadAssumption; may have found same LSP twice based on deltaR < 0.001" ;
           which = 1;
           h.p[1] = ref;
         }
@@ -704,7 +704,7 @@ bool MFVGenParticles::try_splitSUSY(mfv::MCInteraction& mc, const edm::Handle<re
         h.p[0] = ref;
       else {
         if (reco::deltaR(*h.p[0], gen) < 0.001)
-          throw cms::Exception("BadAssumption", "may have found same LSP twice based on deltaR < 0.001");
+          edm::LogWarning("GenParticles") << "BadAssumption; may have found same LSP twice based on deltaR < 0.001" ;
         which = 1;
         h.p[1] = ref;
       }

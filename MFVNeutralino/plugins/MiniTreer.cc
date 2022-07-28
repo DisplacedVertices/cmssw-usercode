@@ -136,6 +136,10 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     }
   }
 
+  nt.gen_pv_x0 = mevent->gen_pv[0];
+  nt.gen_pv_y0 = mevent->gen_pv[1];
+  nt.gen_pv_z0 = mevent->gen_pv[2];
+
   for (int i = 0; i < 2; ++i) {
     const double z = mevent->gen_lsp_decay[i*3+2];
     nt.gen_x[i] = mevent->gen_lsp_decay[i*3+0] - mevent->bsx_at_z(z);
@@ -168,11 +172,14 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   MFVVertexAuxCollection vertices;
 
-  for (const MFVVertexAux& v : *input_vertices)
+  for (const MFVVertexAux& v : *input_vertices) {
     vertices.push_back(xform_vertex(*mevent, v));
+  }
 
   h_nsv->Fill(input_vertices->size());
   h_nsvsel->Fill(vertices.size());
+
+  nt.vertices = vertices;
 
   if (vertices.size() == 1) {
     const MFVVertexAux& v0 = vertices[0];
@@ -239,6 +246,7 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
     nt.rescale_bs2derr0 = v0.rescale_bs2derr;
     nt.bs2derr1 = v1.bs2derr;
     nt.rescale_bs2derr1 = v1.rescale_bs2derr;
+    
   }
   else
     return;

@@ -6,9 +6,9 @@ from PhysicsTools.PatUtils.l1PrefiringWeightProducer_cfi import l1PrefiringWeigh
 prefiringweight= l1PrefiringWeightProducer.clone(
     TheJets = cms.InputTag("updatedJetsMiniAOD"), #this should be the slimmedJets collection with up to date JECs !
     L1Maps = cms.string("L1PrefiringMaps.root"),
-    DataEra = cms.string('UL2017BtoF'),
+    DataEraECAL = cms.string('UL2017BtoF'),
     UseJetEMPt = cms.bool(False),
-    PrefiringRateSystematicUncty = cms.double(0.2),
-    SkipWarnings = False
+    PrefiringRateSystematicUnctyECAL = cms.double(0.2)
+    #SkipWarnings = True
     )
 

@@ -236,7 +236,8 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
         mevent->gen_decay_type[i] = mci->decay_type()[i];
 
-        for (const reco::GenParticleRef& s : mci->secondaries(i)) {
+        for (const reco::GenParticleRef& s_temp : mci->secondaries(i)) {
+          reco::GenParticle* s = (reco::GenParticle*)first_candidate(&*s_temp);
           mevent->gen_daughters.push_back(MFVEvent::p4(s->pt(), s->eta(), s->phi(), s->mass()));
           mevent->gen_daughter_id.push_back(s->pdgId());
         }

@@ -2,7 +2,7 @@ from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
 ntuple_version_ = 'ULV1_keeptk'
-lsp_id = 1000021 # should do that in a smarter way
+lsp_id = 1000021 # should do that in a smarter way would be -1 if not MET
 use_btag_triggers = False
 use_MET_triggers = True
 if use_btag_triggers : 
@@ -250,7 +250,7 @@ def miniaod_ntuple_process(settings):
     process.load('PhysicsTools.PatAlgos.selectionLayer1.electronSelector_cfi')
     process.load('JMTucker.Tools.AnalysisEras_cff')
     process.load('JMTucker.Tools.GoodPrimaryVertices_cfi')
-    process.load('JMTucker.Tools.L1ECALPrefiringWeightProducer_cfi')
+    process.load('JMTucker.Tools.L1PrefiringWeightProducer_cfi')
     process.load('JMTucker.Tools.MCStatProducer_cff')
     process.load('JMTucker.Tools.UpdatedJets_cff')
     process.load('JMTucker.Tools.PATTupleSelection_cfi')

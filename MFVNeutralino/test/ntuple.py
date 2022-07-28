@@ -21,6 +21,7 @@ else :
 
 process = ntuple_process(settings)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
+#input_files(process, '/eos/uscms/store/user/shogan/stop_bbarbbar_miniaod/mfv_stopbbarbbar_tau001000um_M1200_2017/miniaod_0.root') 
 sample_files(process, 'qcdht2000_year', dataset, 1)
 max_events(process, 1000)
 cmssw_from_argv(process)

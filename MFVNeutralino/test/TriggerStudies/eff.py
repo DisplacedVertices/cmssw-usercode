@@ -55,7 +55,7 @@ else:
 process.weightSeq = cms.Sequence(process.jmtWeightMiniAOD)
 
 if weight_l1ecal and settings.is_mc and settings.year == 2017 and settings.cross == '':
-    process.load('JMTucker.Tools.L1ECALPrefiringWeightProducer_cfi')
+    process.load('JMTucker.Tools.L1PrefiringWeightProducer_cfi')
     if 'separate' in weight_l1ecal:
         w = process.jmtWeightMiniAODL1Ecal = process.jmtWeightMiniAOD.clone()
         process.weightSeq.insert(0, process.prefiringweight * process.jmtWeightMiniAODL1Ecal)

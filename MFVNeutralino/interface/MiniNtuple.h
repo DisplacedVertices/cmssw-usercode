@@ -4,7 +4,7 @@
 #include "Math/SMatrix.h"
 #include "TLorentzVector.h"
 #include "TTree.h"
-
+#include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #define JMT_STANDALONE_BTAGGING
 #include "JMTucker/Tools/interface/BTagging.h"
 
@@ -77,7 +77,10 @@ namespace mfv {
     int nbtags_tight() const { return nbtags(jmt::BTagging::discriminator_min(jmt::BTagging::tight)); }
     int nbtags_medium() const { return nbtags(jmt::BTagging::discriminator_min(jmt::BTagging::medium)); }
     int nbtags_loose() const { return nbtags(jmt::BTagging::discriminator_min(jmt::BTagging::loose)); }
-
+    
+    float gen_pv_x0;
+    float gen_pv_y0;
+    float gen_pv_z0;
     float gen_x[2];
     float gen_y[2];
     float gen_z[2];
@@ -95,6 +98,8 @@ namespace mfv {
     std::vector<int>* p_gen_daughter_id;
     std::vector<TLorentzVector>* p_gen_bquarks;
     std::vector<TLorentzVector>* p_gen_leptons;
+    
+    MFVVertexAuxCollection vertices;
 
     unsigned char nvtx;
     unsigned char ntk0;
