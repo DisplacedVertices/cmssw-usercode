@@ -47,6 +47,10 @@ class MFVFilterHistos : public edm::EDAnalyzer {
   TH1F* h_filter_bits;
   TH2F* h_filter_bit_matrix;
   TH2F* h_seqfilt_bit_matrix;
+  TH1F* h_filt_nsurvive;
+  TH1F* h_reused_jets;
+  
+  TH1F* h_filtjet_hlt_dR;
 
   TH1F* h_filter_07_den;
   TH1F* h_filter_07_num;
@@ -94,8 +98,11 @@ MFVFilterHistos::MFVFilterHistos(const edm::ParameterSet& cfg)
   h_filter_bits  = fs->make<TH1F>("h_filter_bits",  ";;events", mfv::n_filter_paths +1, 0, mfv::n_filter_paths +1);
   h_filter_bit_matrix = fs->make<TH2F>("h_filter_bit_matrix", ";;", mfv::n_filter_paths, 0, mfv::n_filter_paths, mfv::n_filter_paths, 0, mfv::n_filter_paths);
   h_seqfilt_bit_matrix = fs->make<TH2F>("h_seqfilt_bit_matrix", ";sequential;non-sequential", mfv::n_filter_paths, 0, mfv::n_filter_paths, mfv::n_filter_paths, 0, mfv::n_filter_paths);
+  h_filt_nsurvive = fs->make<TH1F>("h_filt_nsurvive", ";;nevents", mfv::n_filter_paths+3-4, 0, mfv::n_filter_paths+3-4);
+  h_reused_jets = fs->make<TH1F>("h_reused_jets", ";reused offline jet in evt?; nevents", 2, 0, 1.1);
   
 
+  //---------- Start setting some x-axis labels
   h_hlt_bits->GetXaxis()->SetBinLabel(1, "nevents");
   for (int i = 0; i < mfv::n_hlt_paths; ++i) {
     h_hlt_bits->GetXaxis()->SetBinLabel(1+2*i+1, TString::Format("found %s", mfv::hlt_paths[i]));
@@ -108,13 +115,27 @@ MFVFilterHistos::MFVFilterHistos(const edm::ParameterSet& cfg)
   }
 
   h_filter_bits->GetXaxis()->SetBinLabel(1, "nevents");
+
+  h_filt_nsurvive->GetXaxis()->SetBinLabel(1, "starting number");
+  h_filt_nsurvive->GetXaxis()->SetBinLabel(2, "after filt. presel");
+  h_filt_nsurvive->GetXaxis()->SetBinLabel(3, "after L1 trigger");
+
+  h_reused_jets->GetXaxis()->SetBinLabel(1, "No");
+  h_reused_jets->GetXaxis()->SetBinLabel(2, "Yes");
+  
   for (int i = 0; i < mfv::n_filter_paths; ++i) {
     h_filter_bits->GetXaxis()->SetBinLabel(i+2, TString::Format(" pass %s", mfv::filter_paths[i]));
+    if (i >= 4) {
+      h_filt_nsurvive->GetXaxis()->SetBinLabel(i+4-4, TString::Format("pass %s", mfv::filter_paths[i]));
+    }
     h_filter_bit_matrix->GetXaxis()->SetBinLabel(i+1, TString::Format(" pass %s", mfv::filter_paths[i]));
     h_filter_bit_matrix->GetYaxis()->SetBinLabel(i+1, TString::Format(" pass %s", mfv::filter_paths[i]));
     h_seqfilt_bit_matrix->GetXaxis()->SetBinLabel(i+1, TString::Format(" pass %s", mfv::filter_paths[i]));
     h_seqfilt_bit_matrix->GetYaxis()->SetBinLabel(i+1, TString::Format(" pass %s", mfv::filter_paths[i]));
   }
+  //---------- End setting some x-axis labels
+
+  h_filtjet_hlt_dR = fs->make<TH1F>("h_filtjet_hlt_dR", ";#DeltaR between offline jet and matching HLT jet;entries", 100, 0.0, 1.0);
 
   h_filter_07_den = fs->make<TH1F>("h_filter_07_den", "before PFCentralLooseJetIDQuad30; p_{T} of 4th-leading jet (GeV); entries", 200, 0, 300);
   h_filter_07_num = fs->make<TH1F>("h_filter_07_num", "after  PFCentralLooseJetIDQuad30; p_{T} of 4th-leading jet (GeV); entries", 200, 0, 300);
@@ -138,12 +159,10 @@ MFVFilterHistos::MFVFilterHistos(const edm::ParameterSet& cfg)
 
 struct Jet_Pair_Helper {
     float off_pt  = -1.0;
-    //float off_eta = -1.0;
-    //float off_phi = -1.0;
-
     float hlt_pt  = -1.0;
-    //float hlt_eta = -1.0;
-    //float hlt_phi = -1.0;
+    float hlt_eta = -1.0;
+    float hlt_phi = -1.0;
+    int   off_i   = -2;
 };
 
 void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
@@ -160,33 +179,58 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
 
   // Just seeing what happens if we skip negatively-weighted events
-  //if (w < 0.0) return;
+  // if (w < 0.0) return;
 
   // Do some matching before online and offline stuff
   std::vector<Jet_Pair_Helper> pfjethelper;
+
+
+  // THIS BLOCK OF CODE IS FOR THE FATCONE MATCHING
+//  for (int i=0; i < nhltpfjets; i++) {
+//    if      (mevent->nth_jet_pt(i) < 20.0) continue;
+//    if      (fabs(mevent->nth_jet_eta(i)) > 2.5) continue;
+//    //if      (mevent->nth_jet_pt(i) < 30.0 and mevent->jet_pudisc[i] < 0.18) continue;
+//    //else if (mevent->nth_jet_pt(i) < 50.0 and mevent->jet_pudisc[i] < 0.61) continue;
+//
+//    Jet_Pair_Helper temp_helper;
+//    temp_helper.hlt_pt  = mevent->jet_hlt_pt[i];
+//    temp_helper.hlt_eta = mevent->jet_hlt_eta[i];
+//    temp_helper.hlt_phi = mevent->jet_hlt_phi[i];
+//    temp_helper.off_pt  = mevent->jet_pt[i];
+//    temp_helper.off_i   = i;
+//    
+//    pfjethelper.push_back(temp_helper);
+//  }
+
+
+  // THIS BLOCK OF CODE IS FOR THE SKINNYCONE MATCHING
   for (int i=0; i < nhltpfjets; i++) {
-    if (pfjethelper.size() == 4) break;
-    Jet_Pair_Helper temp_helper;
-    float match_dR = 0.5;
     float hlt_eta = mevent->hlt_pf_jet_eta[i];
     float hlt_phi = mevent->hlt_pf_jet_phi[i];
+    float hlt_pt  = mevent->hlt_pf_jet_pt[i];
+    float match_pt  = 0.0;
+    bool debug = false;
     
-    for (int j=0; j < nofflinepfjets; j++) {
-      float temp_deta = fabs(mevent->jet_eta[j] - hlt_eta);
-      float temp_dphi = fabs(TVector2::Phi_mpi_pi(mevent->jet_phi[j] - hlt_phi));
-      float temp_dR   = std::hypot(temp_deta, temp_dphi);
 
-      if (temp_dR < match_dR) {
-        temp_helper.off_pt = mevent->jet_pt[j];
-        temp_helper.hlt_pt = mevent->hlt_pf_jet_pt[i];
-        match_dR = temp_dR;
-      } 
+    for (int j=0; j < nofflinepfjets; j++) {
+      float off_eta = mevent->nth_jet_eta(j);
+      float off_phi = mevent->nth_jet_phi(j);
+      float off_pt  = mevent->nth_jet_pt(j);
+
+      if ((reco::deltaR(hlt_eta, hlt_phi, off_eta, off_phi) < 0.14) and (off_pt > match_pt)) {
+        match_pt = off_pt;
+        debug = true;
+      }
     }
-    if (temp_helper.hlt_pt > 1.0)
-      pfjethelper.push_back(temp_helper);
+
+    if (not debug) continue;
+
+    Jet_Pair_Helper temp_helper;
+    temp_helper.hlt_pt = hlt_pt;
+    temp_helper.off_pt = match_pt;
+    pfjethelper.push_back(temp_helper);
   }
 
-  
   // Initialize filter study preselection parameters
   int require_L1  = is_dibjet ? di_bitL1 : tri_bitL1;
   int min_filtjets        = is_dibjet ? di_minfiltjets : tri_minfiltjets;
@@ -194,17 +238,12 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   float max_filtjeteta    = is_dibjet ? di_maxfiltjeteta : tri_maxfiltjeteta;
   float min_filtjetbscore = is_dibjet ? di_minfiltjetbdisc : tri_minfiltjetbdisc;
 
-  bool  pass_onoff_pfjet_match = true;
-  //bool  pass_onoff_calojet_match = true;
-  //float max_jetdeta = 0.0;
-  //float min_jetdeta = 9.9;
-  int filtjet_passes = 0;
-  //int calofiltjet_passes = 0;
 
   // Fill some basic hltbits/L1bits/filtbits histograms
   h_hlt_bits->Fill(0., w);
   h_l1_bits->Fill(0., w);
   h_filter_bits->Fill(0., w);
+  h_filt_nsurvive->Fill(0., w);
   for (int i = 0; i < mfv::n_hlt_paths; ++i) {
     if (mevent->found_hlt(i)) h_hlt_bits->Fill(1+2*i,   w);
     if (mevent->pass_hlt (i)) h_hlt_bits->Fill(1+2*i+1, w);
@@ -227,143 +266,78 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   // Ignore events with no bscores
   if ((std::size(mevent->jet_bdisc) == 0)) return;
 
-  for (int i = 0; i < MAX_NJETS; ++i) {
-    float filtjet_pt = mevent->nth_jet_pt(i);
-    float filtjet_abseta = fabs(mevent->nth_jet_eta(i));
-    float filtjet_bscore = mevent->jet_bdisc[i];
-
-     // Ensure that the event passes some minimum cuts.
-    if ((filtjet_pt > min_filtjetpt) && (filtjet_abseta < max_filtjeteta) && (filtjet_bscore > min_filtjetbscore)) // Do we use old_bscore or just bscore?
-      filtjet_passes++;
+  // Don't do anything else if we don't have enough good jets or calojets
+  if (pfjethelper.size() >= 4) {
+    h_filt_nsurvive->Fill(1, w);
+  }
+  else {
+    return;
   }
 
-  // Are there matches between online PFjets and offline PFjets?
-//  for (int i=0, ipmax = 4; i < ipmax; i++) {
-//    float hlt_eta = (nhltpfjets > i ? mevent->hlt_pf_jet_eta[i] : -99.0);
-//    float hlt_phi = (nhltpfjets > i ? mevent->hlt_pf_jet_phi[i] : -99.0);
-//
-//    float temp_deta = fabs(mevent->jet_eta[i] - hlt_eta);
-//    float temp_dphi = fabs(mevent->jet_phi[i] - hlt_phi);
-//
-//    if ((temp_deta > 0.33) or (temp_dphi > 0.33)){
-//      pass_onoff_pfjet_match = false;
-//      break;
-//    }
-//  }
+  // See if an offline jet is the best match to multiple online jets
+  int reused_jet = 0;
+  for (unsigned int i=0; i < 3; i++) {
+  //for (unsigned int i=0; i < pfjethelper.size()-2; i++) {
+    float phi0 = pfjethelper[i].hlt_phi;
+    float eta0 = pfjethelper[i].hlt_eta;
+    for (unsigned int j=i+1; j < 4; j++) {
+    //for (unsigned int j=i+1; j < pfjethelper.size()-1; j++) {
+      float phi1 = pfjethelper[j].hlt_phi;
+      float eta1 = pfjethelper[j].hlt_eta;
+      float tmp_dR = reco::deltaR(eta0, phi0, eta1, phi1);
+   
+      if (tmp_dR < 0.01) {
+        reused_jet = 1;
+      }
+    } 
+  }
+  h_reused_jets->Fill(reused_jet, w);
 
-  // Don't do anything else if we don't have enough good jets or calojets
-  if ((filtjet_passes < min_filtjets) or (not pass_onoff_pfjet_match) or (not mevent->pass_l1(require_L1)))
-    return;
 
-  // Don't do anything else if not enough matches between online and offline jets
-//  if (pfjethelper.size() < 4)
-//    return;
+  if (mevent->pass_l1(require_L1)) h_filt_nsurvive->Fill(2, w);
+  else return;
 
-//  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-//  // We'll just take the easy way out for the first filters (for now)
-//  for (int i = 4; i < 8; i++) { if (not (mevent->pass_filter(i))) return; }
-//
-//                  //jet#   0  1  2  3
-//  int filter_errors = 0;
-//
-//  h_filter_07_den->Fill(mevent->nth_jet_pt(3), w);
-//
-//  if (pfjethelper[3].hlt_pt > 30.0) {
-//    h_filter_07_num->Fill(mevent->nth_jet_pt(3), w);
-//    h_filter_08_den->Fill(mevent->nth_jet_pt(0), w);
-//
-//    if (pfjethelper[0].hlt_pt > 75.0) {
-//      h_filter_08_num->Fill(mevent->nth_jet_pt(0), w);
-//      h_filter_09_den->Fill(mevent->nth_jet_pt(1), w);
-//
-//      if (mevent->nth_jet_pt(0) < 55.0) filter_errors = filter_errors ^ 1;     
-//
-//      if (pfjethelper[1].hlt_pt > 60.0) {
-//        h_filter_09_num->Fill(mevent->nth_jet_pt(1), w);
-//        h_filter_10_den->Fill(mevent->nth_jet_pt(2), w);
-//
-//        if (mevent->nth_jet_pt(1) < 45.0) filter_errors = filter_errors ^ 2;     
-//
-//        if (pfjethelper[2].hlt_pt > 45.0) {
-//          h_filter_10_num->Fill(mevent->nth_jet_pt(2), w);
-//          h_filter_11_den->Fill(mevent->nth_jet_pt(3), w);
-//
-//          if (mevent->nth_jet_pt(1) < 35.0) filter_errors = filter_errors ^ 4;     
-//
-//          if (pfjethelper[3].hlt_pt > 40.0) {
-//            h_filter_11_num->Fill(mevent->nth_jet_pt(3), w);
-//
-//            if (mevent->nth_jet_pt(1) < 32.0) filter_errors = filter_errors ^ 8;
-//          }
-//        }
-//      }
-//    }
-//  }
-
+//  h_filt_nsurvive->Fill(2, w);
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
   // We'll just take the easy way out for the first filters (for now)
-  for (int i = 4; i < 8; i++) { if (not (mevent->pass_filter(i))) return; }
+  for (int i = 4; i < 8; i++) {
+    if (not (mevent->pass_filter(i))) return;
+    h_filt_nsurvive->Fill(i-1, w);
+  }
 
-                  //jet#   0  1  2  3
-  int filter_errors = 0;
+  for (int i = 8; i < mfv::n_filter_paths; i++) {
+    if (not (mevent->pass_filter(i))) break;
+    h_filt_nsurvive->Fill(i-1, w);
+  }
 
-  h_filter_07_den->Fill(mevent->nth_jet_pt(3), w);
+  h_filter_07_den->Fill(pfjethelper[3].off_pt, w);
 
-  if (mevent->jet_hlt_pt[3] > 30.0) {
-    h_filter_07_num->Fill(mevent->nth_jet_pt(3), w);
-    h_filter_08_den->Fill(mevent->nth_jet_pt(0), w);
+  if (pfjethelper[3].hlt_pt > 30.0) {
+    h_filter_07_num->Fill(pfjethelper[3].off_pt, w);
+    h_filter_08_den->Fill(pfjethelper[0].off_pt, w);
 
-    if (mevent->jet_hlt_pt[0] > 75.0) {
-      h_filter_08_num->Fill(mevent->nth_jet_pt(0), w);
-      h_filter_09_den->Fill(mevent->nth_jet_pt(1), w);
+    if (pfjethelper[0].hlt_pt > 75.0) {
+      h_filter_08_num->Fill(pfjethelper[0].off_pt, w);
+      h_filter_09_den->Fill(pfjethelper[1].off_pt, w);
 
-//      if (mevent->nth_jet_pt(0) < 55.0) filter_errors = filter_errors ^ 1;     
+      if (pfjethelper[1].hlt_pt > 60.0) {
+        h_filter_09_num->Fill(pfjethelper[1].off_pt, w);
+        h_filter_10_den->Fill(pfjethelper[2].off_pt, w);
 
-      if (mevent->jet_hlt_pt[1] > 60.0) {
-        h_filter_09_num->Fill(mevent->nth_jet_pt(1), w);
-        h_filter_10_den->Fill(mevent->nth_jet_pt(2), w);
+        if (pfjethelper[2].hlt_pt > 45.0) {
+          h_filter_10_num->Fill(pfjethelper[2].off_pt, w);
+          h_filter_11_den->Fill(pfjethelper[3].off_pt, w);
 
-//        if (mevent->nth_jet_pt(1) < 45.0) filter_errors = filter_errors ^ 2;     
+          if (pfjethelper[3].hlt_pt > 40.0) {
+            h_filter_11_num->Fill(pfjethelper[3].off_pt, w);
 
-        if (mevent->jet_hlt_pt[2] > 45.0) {
-          h_filter_10_num->Fill(mevent->nth_jet_pt(2), w);
-          h_filter_11_den->Fill(mevent->nth_jet_pt(3), w);
-
-//          if (mevent->nth_jet_pt(1) < 35.0) filter_errors = filter_errors ^ 4;     
-
-          if (mevent->jet_hlt_pt[3] > 40.0) {
-            h_filter_11_num->Fill(mevent->nth_jet_pt(3), w);
-
-//            if (mevent->nth_jet_pt(1) < 32.0) filter_errors = filter_errors ^ 8;
           }
         }
       }
     }
   }
-
-
-
-  // DEBUG #########################################################################################################
-  if (filter_errors > 0) {
-    std::cout << "\n\n-------- PF-Jet Dump --------" << std::endl;
-    std::cout << "\n Misbehavior bits: " << std::bitset<4>(filter_errors) << std::endl;
-    printf("#offline PFjets: %i     #online PFjets: %i \n", (int)(mevent->jet_id.size()), nhltpfjets);
-  
-  
-    printf("\nOnline Jets\n------------------------------\n");
-    for (int i=0; i < nhltpfjets; i++) {
-      printf("Jet %i     pT: %5.2f   eta: %5.2f  phi: %5.2f \n", i, mevent->hlt_pf_jet_pt[i], mevent->hlt_pf_jet_eta[i], mevent->hlt_pf_jet_phi[i]);
-    }
-  
-    printf("\nOffline Jets\n------------------------------\n");
-    for (int i=0; i < nofflinepfjets; i++) {
-      printf("Jet %i     pT: %5.2f   eta: %5.2f  phi: %5.2f\n", i, mevent->jet_pt[i], mevent->jet_eta[i], mevent->jet_phi[i]);
-    }
-  }
-    
- 
 }
 
 DEFINE_FWK_MODULE(MFVFilterHistos);
