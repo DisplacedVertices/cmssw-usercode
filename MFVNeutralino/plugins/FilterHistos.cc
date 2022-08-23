@@ -171,6 +171,8 @@ struct Jet_Pair_Helper {
     float hlt_pt  = -1.0;
     float hlt_eta = -1.0;
     float hlt_phi = -1.0;
+
+    int off_i = -2;
 };
 
 void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
@@ -186,12 +188,11 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   // Do some matching of online and offline jets
   std::vector<Jet_Pair_Helper> pfjethelper;
   bool skinny_cone = false;
-  bool use_puid    = false;
-  for (int i=0; i < nofflinepfjets; i++) {
-    float off_eta = mevent->nth_jet_eta(i);
-    float off_phi = mevent->nth_jet_phi(i);
-    float off_pt  = mevent->nth_jet_pt(i);
-    float off_pudisc = mevent->jet_pudisc[i];
+  bool use_puid    = true;
+  for (int i=0; i < nhltpfjets; i++) {
+    float hlt_eta    = mevent->hlt_pf_jet_eta[i];
+    float hlt_phi    = mevent->hlt_pf_jet_phi[i];
+    float hlt_pt     = mevent->hlt_pf_jet_pt[i];
     float match_pt  = 0.0;
     float match_eta = 0.0;
     float match_phi = 0.0;
@@ -199,22 +200,25 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     float next_dR   = -0.2;
     bool  ensure_match = false;
 
-    if      ((use_puid) and (off_pt < 30.0) and (off_pudisc < 0.18)) continue;
-    else if ((use_puid) and (off_pt < 50.0) and (off_pudisc < 0.61)) continue;    
 
-    for (int j=0; j < nhltpfjets; j++) {
+    for (int j=0; j < nofflinepfjets; j++) {
       bool  is_match = false;
-      float hlt_eta    = mevent->hlt_pf_jet_eta[j];
-      float hlt_phi    = mevent->hlt_pf_jet_phi[j];
-      float hlt_pt     = mevent->hlt_pf_jet_pt[j];
+      float off_eta = mevent->nth_jet_eta(j);
+      float off_phi = mevent->nth_jet_phi(j);
+      float off_pt  = mevent->nth_jet_pt(j);
+      float off_pudisc = mevent->jet_pudisc[j];
+
+      if      ((off_pt < 25.0) or (fabs(off_eta) > 2.4)) continue;
+      if      ((use_puid) and (off_pt < 30.0) and (off_pudisc < 0.18)) continue;
+      else if ((use_puid) and (off_pt < 50.0) and (off_pudisc < 0.61)) continue;    
     
       if (skinny_cone) { is_match = ((reco::deltaR(hlt_eta, hlt_phi, off_eta, off_phi) < 0.14) and (off_pt > match_pt)); }
       else             { is_match = ((reco::deltaR(hlt_eta, hlt_phi, off_eta, off_phi) < match_dR)); }
 
       if (is_match) {
-        match_pt  = hlt_pt;
-        match_eta = hlt_eta;
-        match_phi = hlt_phi;
+        match_pt  = off_pt;
+        //match_eta = off_eta;
+        //match_phi = off_phi;
         next_dR  = match_dR;
         match_dR = reco::deltaR(hlt_eta, hlt_phi, off_eta, off_phi);
         ensure_match = true;
@@ -224,10 +228,10 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     if (not ensure_match) continue;
 
     Jet_Pair_Helper temp_helper;
-    temp_helper.hlt_pt  = match_pt;
-    temp_helper.hlt_eta = match_eta;
-    temp_helper.hlt_phi = match_phi;
-    temp_helper.off_pt = off_pt;
+    temp_helper.hlt_pt  = hlt_pt;
+    temp_helper.hlt_eta = hlt_eta;
+    temp_helper.hlt_phi = hlt_phi;
+    temp_helper.off_pt = match_pt;
     pfjethelper.push_back(temp_helper);
 
     h_jet_match_dR->Fill(match_dR, w);
@@ -235,11 +239,10 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   }
 
   // Initialize filter study preselection parameters
-  int require_L1  = is_dibjet ? di_bitL1 : tri_bitL1;
-  int min_filtjets        = is_dibjet ? di_minfiltjets : tri_minfiltjets;
-  float min_filtjetpt     = is_dibjet ? di_minfiltjetpt : tri_minfiltjetpt;
-  float max_filtjeteta    = is_dibjet ? di_maxfiltjeteta : tri_maxfiltjeteta;
-  float min_filtjetbscore = is_dibjet ? di_minfiltjetbdisc : tri_minfiltjetbdisc;
+  //int min_filtjets        = is_dibjet ? di_minfiltjets : tri_minfiltjets;
+  //float min_filtjetpt     = is_dibjet ? di_minfiltjetpt : tri_minfiltjetpt;
+  //float max_filtjeteta    = is_dibjet ? di_maxfiltjeteta : tri_maxfiltjeteta;
+  //float min_filtjetbscore = is_dibjet ? di_minfiltjetbdisc : tri_minfiltjetbdisc;
 
 
   // Fill some basic hltbits/L1bits/filtbits histograms
@@ -280,16 +283,8 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   // See if an offline jet is the best match to multiple online jets
   int reused_jet = 0;
   for (unsigned int i=0; i < 3; i++) {
-    float phi0 = pfjethelper[i].hlt_phi;
-    float eta0 = pfjethelper[i].hlt_eta;
     for (unsigned int j=i+1; j < 4; j++) {
-      float phi1 = pfjethelper[j].hlt_phi;
-      float eta1 = pfjethelper[j].hlt_eta;
-      float tmp_dR = reco::deltaR(eta0, phi0, eta1, phi1);
-
-      if (tmp_dR < 0.01) {
-        reused_jet = 1;
-      } 
+      if ((pfjethelper[i].off_i == pfjethelper[j].off_i) and (pfjethelper[i].off_i != -2)) { reused_jet = 1; }
     }
   }
   h_reused_jets->Fill(reused_jet, w);
