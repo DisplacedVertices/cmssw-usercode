@@ -24,7 +24,6 @@ class MFVJetTksHistos : public edm::EDAnalyzer {
  private:
   const edm::EDGetTokenT<MFVEvent> mevent_token;
   const edm::EDGetTokenT<double> weight_token;
-  const edm::EDGetTokenT<reco::GenParticleCollection> gen_token;
 
   TH1F* h_w;
 
@@ -43,6 +42,18 @@ class MFVJetTksHistos : public edm::EDAnalyzer {
   TH1F* h_jet_tks_dR[CATEGORIES];  
   TH1F* h_jet_tks_nsigmadxy[CATEGORIES];  
   TH1F* h_jet_tks_nsigmadxyz[CATEGORIES];  
+  TH1F* h_jet_sum_nsigmadxy[CATEGORIES];  
+  TH1F* h_jet_sum_nsigmadxyz[CATEGORIES];  
+
+  TH1F* h_jet_tk_nsigmadxy_avg[CATEGORIES];
+  TH1F* h_jet_tk_nsigmadxy_med[CATEGORIES];
+  TH1F* h_jet_tk_nsigmadxy_0[CATEGORIES];
+  TH1F* h_jet_tk_nsigmadxy_1[CATEGORIES];
+
+  TH1F* h_jet_tk_nsigmadxyz_avg[CATEGORIES];
+  TH1F* h_jet_tk_nsigmadxyz_med[CATEGORIES];
+  TH1F* h_jet_tk_nsigmadxyz_0[CATEGORIES];
+  TH1F* h_jet_tk_nsigmadxyz_1[CATEGORIES];
 
   TH1F* h_jet_sumtk_pt_ratio[CATEGORIES];
   TH1F* h_jet_sumtk_dR[CATEGORIES];
@@ -50,8 +61,9 @@ class MFVJetTksHistos : public edm::EDAnalyzer {
 
 MFVJetTksHistos::MFVJetTksHistos(const edm::ParameterSet& cfg)
   : mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
-    weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
-    gen_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("gen_src")))
+    weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src")))
+//    weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
+//    gen_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("gen_src")))
 
 {
   edm::Service<TFileService> fs;
@@ -68,13 +80,25 @@ MFVJetTksHistos::MFVJetTksHistos(const edm::ParameterSet& cfg)
     h_jet_bdisc[i] = fs->make<TH1F>(TString::Format("h_jet_bdisc_%s", bres.Data()), TString::Format(";DeepJet of jets that %s b-tag;events/bin", bres.Data()), 100, 0, 1.0);
     h_jet_bdisc_old[i] = fs->make<TH1F>(TString::Format("h_jet_bdisc_old_%s", bres.Data()), TString::Format(";CSV of jets that %s b-tag;events/bin", bres.Data()), 100, 0, 1.0);
 
-    h_jet_tks_pt[i] = fs->make<TH1F>(TString::Format("h_jet_tks_pt_%s", bres.Data()), TString::Format(";p_{T} of tks in jets that %s b-tag (GeV);events/bin", bres.Data()), 200, 0, 40);
-    h_jet_tks_pt_rel[i] = fs->make<TH1F>(TString::Format("h_jet_tks_ptrel_%s", bres.Data()), TString::Format(";rel p_{T} of tks in jets that %s b-tag (GeV);events/bin", bres.Data()), 200, 0, 20);
-    h_jet_tks_eta[i] = fs->make<TH1F>(TString::Format("h_jet_tks_eta_%s", bres.Data()), TString::Format(";abs #eta of tks in jets that %s b-tag;events/bin", bres.Data()), 100, 0, 4);
-    h_jet_tks_eta_rel[i] = fs->make<TH1F>(TString::Format("h_jet_tks_etarel_%s", bres.Data()), TString::Format(";rel #eta of tks in jets that %s b-tag;events/bin", bres.Data()), 300, 0, 10);
-    h_jet_tks_dR[i] = fs->make<TH1F>(TString::Format("h_jet_tks_dR_%s", bres.Data()), TString::Format(";dR between jet and tks in jets - %s b-tag;events/bin", bres.Data()), 100, 0, 0.6);
-    h_jet_tks_nsigmadxy[i] = fs->make<TH1F>(TString::Format("h_jet_tks_nsigmadxy_%s", bres.Data()), TString::Format("; n #sigma(dxy) of tks in jets which %s b-tag;events/bin", bres.Data()), 150, 0, 15);
+    h_jet_tks_pt[i] = fs->make<TH1F>(TString::Format("h_jet_tks_pt_%s", bres.Data()), TString::Format(";p_{T} of all tks in jets that %s b-tag (GeV);events/bin", bres.Data()), 200, 0, 40);
+    h_jet_tks_pt_rel[i] = fs->make<TH1F>(TString::Format("h_jet_tks_ptrel_%s", bres.Data()), TString::Format(";rel p_{T} of all tks in jets that %s b-tag (GeV);events/bin", bres.Data()), 200, 0, 20);
+    h_jet_tks_eta[i] = fs->make<TH1F>(TString::Format("h_jet_tks_eta_%s", bres.Data()), TString::Format(";abs #eta of all tks in jets that %s b-tag;events/bin", bres.Data()), 100, 0, 4);
+    h_jet_tks_eta_rel[i] = fs->make<TH1F>(TString::Format("h_jet_tks_etarel_%s", bres.Data()), TString::Format(";rel #eta of all tks in jets that %s b-tag;events/bin", bres.Data()), 300, 0, 10);
+    h_jet_tks_dR[i] = fs->make<TH1F>(TString::Format("h_jet_tks_dR_%s", bres.Data()), TString::Format(";dR between jet and all tks in jets - %s b-tag;events/bin", bres.Data()), 100, 0, 0.6);
+    h_jet_tks_nsigmadxy[i] = fs->make<TH1F>(TString::Format("h_jet_tks_nsigmadxy_%s", bres.Data()), TString::Format("; n #sigma(dxy) of all tks in jets which %s b-tag;events/bin", bres.Data()), 150, 0, 15);
     h_jet_tks_nsigmadxyz[i] = fs->make<TH1F>(TString::Format("h_jet_tks_nsigmadxyz_%s", bres.Data()), TString::Format("; n#sigma(dxyz) of tks in jets which %s b-tag;events/bin", bres.Data()), 150, 0, 15);
+    h_jet_sum_nsigmadxy[i] = fs->make<TH1F>(TString::Format("h_jet_sum_nsigmadxy_%s", bres.Data()), TString::Format(";#Sigma n#sigma(dxy) of tks in jets which %s b-tag;events/bin", bres.Data()), 500, 0, 1500);
+    h_jet_sum_nsigmadxyz[i] = fs->make<TH1F>(TString::Format("h_jet_sum_nsigmadxyz_%s", bres.Data()), TString::Format(";#Sigman#sigma(dxyz) of tks in jets which %s b-tag;events/bin", bres.Data()), 500, 0, 1500);
+
+    h_jet_tk_nsigmadxy_avg[i] = fs->make<TH1F>(TString::Format("h_jet_tk_nsigmadxy_avg_%s", bres.Data()), TString::Format("; avg n#sigma(dxy) of tks in jets which %s b-tag; events/bin", bres.Data()), 300, 0, 30);
+    h_jet_tk_nsigmadxy_med[i] = fs->make<TH1F>(TString::Format("h_jet_tk_nsigmadxy_med_%s", bres.Data()), TString::Format("; median n#sigma(dxy) of tks in jets which %s b-tag; events/bin", bres.Data()), 300, 0, 30);
+    h_jet_tk_nsigmadxy_0[i] = fs->make<TH1F>(TString::Format("h_jet_tk_nsigmadxy_0_%s", bres.Data()), TString::Format("; max n#sigma(dxy) of tks in jets which %s b-tag; events/bin", bres.Data()), 300, 0, 150);
+    h_jet_tk_nsigmadxy_1[i] = fs->make<TH1F>(TString::Format("h_jet_tk_nsigmadxy_1_%s", bres.Data()), TString::Format("; 2nd-leading n#sigma(dxy) of tks in jets which %s b-tag; events/bin", bres.Data()), 300, 0, 150);
+
+    h_jet_tk_nsigmadxyz_avg[i] = fs->make<TH1F>(TString::Format("h_jet_tk_nsigmadxyz_avg_%s", bres.Data()), TString::Format("; avg n#sigma(dxyz) of tks in jets which %s b-tag; events/bin", bres.Data()), 300, 0, 30);
+    h_jet_tk_nsigmadxyz_med[i] = fs->make<TH1F>(TString::Format("h_jet_tk_nsigmadxyz_med_%s", bres.Data()), TString::Format("; median n#sigma(dxyz) of tks in jets which %s b-tag; events/bin", bres.Data()), 300, 0, 30);
+    h_jet_tk_nsigmadxyz_0[i] = fs->make<TH1F>(TString::Format("h_jet_tk_nsigmadxyz_0_%s", bres.Data()), TString::Format("; max n#sigma(dxyz) of tks in jets which %s b-tag; events/bin", bres.Data()), 300, 0, 150);
+    h_jet_tk_nsigmadxyz_1[i] = fs->make<TH1F>(TString::Format("h_jet_tk_nsigmadxyz_1_%s", bres.Data()), TString::Format("; 2nd-leading n#sigma(dxyz) of tks in jets which %s b-tag; events/bin", bres.Data()), 300, 0, 150);
 
     h_jet_sumtk_pt_ratio[i] = fs->make<TH1F>(TString::Format("h_jet_sumtk_pt_ratio_%s", bres.Data()), TString::Format(";pT(jet tracks) / pT(jet) - %s b-tag;events/bin", bres.Data()), 100, 0, 4);
     h_jet_sumtk_dR[i] = fs->make<TH1F>(TString::Format("h_jet_sumtk_dR_%s", bres.Data()), TString::Format(";dR between jet and tks in jets - %s b-tag;events/bin", bres.Data()), 100, 0, 0.6);
@@ -82,46 +106,67 @@ MFVJetTksHistos::MFVJetTksHistos(const edm::ParameterSet& cfg)
 
 }
 
+struct Track_Helper {
+  float dr     = -9.9;
+  float dz     = -9.9;
+  float drerr  = -9.9;
+  float dzerr  = -9.9;
+  float drz    = -9.9;
+  float drzerr = -9.9;
+};
+
 void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   edm::Handle<MFVEvent> mevent;
   event.getByToken(mevent_token, mevent);
 
-  edm::Handle<reco::GenParticleCollection> gen_particles;
-  event.getByToken(gen_token, gen_particles);
-
   edm::Handle<double> weight;
   event.getByToken(weight_token, weight);
   const double w = *weight;
-  float bcut = 0.7;
-
   h_w->Fill(w);
 
   //////////////////////////////////////////////////////////////////////////////
 
   for (int i = 0; i < mevent->njets(); ++i) {
-    bool jet_has_qrk_match = false;
-    float b      = (i < (int)(mevent->jet_bdisc_old.size()) ? mevent->jet_bdisc_old[i] : -9.9);
-    int   n_hist = b > bcut ? 0 : (b > 0.0 ? 1 : -9);
-    if (n_hist == -9) continue;
+    bool matches_online_bjet = false;
+    bool matches_online_calo = false;
+    float sum_nsigmadxy = 0.0;
+    float sum_nsigmadxyz = 0.0;
+
+    //float b      = (i < (int)(mevent->jet_bdisc_old.size()) ? mevent->jet_bdisc_old[i] : -9.9);
+    //int   n_hist = b > bcut ? 0 : (b > 0.0 ? 1 : -9);
+    //if (n_hist == -9) continue;
  
+    float off_pt  = mevent->nth_jet_pt(i);
+    float off_eta = mevent->nth_jet_eta(i);
+    float off_phi = mevent->nth_jet_phi(i);
+
+    if (off_pt < 30.0) continue;
+
     TVector3 jet_vector;
-    jet_vector.SetPtEtaPhi(mevent->nth_jet_pt(i), mevent->nth_jet_eta(i), mevent->nth_jet_phi(i));       
+    jet_vector.SetPtEtaPhi(mevent->nth_jet_pt(i), off_eta, off_phi);       
     jet_vector.SetMag(1.0);
 
-    for (const reco::GenParticle& gen : *gen_particles) {
-       if (abs(gen.pdgId()) != 1) continue;
-
-       TVector3 qrk_vector;
-       qrk_vector.SetPtEtaPhi(gen.pt(), gen.eta(), gen.phi());
-
-       if ((qrk_vector.DeltaR(jet_vector) < 0.4) and (fabs(((gen.pt() - mevent->nth_jet_pt(i))/gen.pt())) < 0.2))
-         jet_has_qrk_match = true;
-       
-    }
     
-    if (not jet_has_qrk_match)
-      continue;
+    int n_online_calojets = mevent->hlt_pf_jet_pt.size();
+    for (int j=0; j < n_online_calojets; j++) {
+        float hlt_eta = mevent->hlt_pf_jet_eta[j];
+        float hlt_phi = mevent->hlt_pf_jet_phi[j];
+
+        if(reco::deltaR(hlt_eta, hlt_phi, off_eta, off_phi) < 0.14) { matches_online_calo = true; }
+    }
+
+    if (not matches_online_calo) continue;
+
+    int n_online_bjets = mevent->hlt_pfforbtag_jet_pt.size();
+    for (int j=0; j < n_online_bjets; j++) {
+        float hlt_eta = mevent->hlt_pfforbtag_jet_eta[j];
+        float hlt_phi = mevent->hlt_pfforbtag_jet_phi[j];
+
+        if(reco::deltaR(hlt_eta, hlt_phi, off_eta, off_phi) < 0.14) { matches_online_bjet = true; }
+    }
+
+    int n_hist = matches_online_bjet ? 0 : 1;
     
     TVector3 jet_sumtk_vector;
     jet_sumtk_vector.SetPtEtaPhi(0.0, 0.0, 0.0);
@@ -133,9 +178,10 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_jet_bdisc[n_hist]->Fill((i < (int)(mevent->jet_bdisc.size()) ? mevent->jet_bdisc[i] : -9.9), w);
     h_jet_bdisc_old[n_hist]->Fill((i < (int)(mevent->jet_bdisc_old.size()) ? mevent->jet_bdisc_old[i] : -9.9), w);
 
+
+    std::vector<Track_Helper> trackhelper;
     for (size_t ntk = 0 ; ntk < mevent->n_jet_tracks_all() ; ntk++) {
        if (mevent->jet_track_which_jet[ntk] == i) {
-
          // Vars needed to get 3D IP dist significance
          float dr = mevent->jet_track_dxy[ntk];
          float dz = mevent->jet_track_dz[ntk];
@@ -145,15 +191,26 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
          // Calculate 3D IP dist significance
          float drz = std::hypot(dr, dz);
          float drzerr = std::hypot(dr*drerr/drz , dz*dzerr/drz);
-         
+
+         // Add the above variables to a temporary Track_Helper instance. Then, append it.
+         Track_Helper temp_helper;
+         temp_helper.dr = dr;
+         temp_helper.dz = dz;
+         temp_helper.drerr = drerr;
+         temp_helper.dzerr = dzerr;
+         temp_helper.drz = drz;
+         temp_helper.drzerr = drzerr;
+         trackhelper.push_back(temp_helper);
 
          TVector3 tk_vector;
          tk_vector.SetPtEtaPhi(fabs(mevent->jet_track_qpt[ntk]), mevent->jet_track_eta[ntk], mevent->jet_track_phi[ntk]);
 
          jet_sumtk_vector += tk_vector;        
-
+         sum_nsigmadxy  += fabs(dr/drerr);
+         sum_nsigmadxyz += fabs(drz/drzerr);
+            
+        
          float pt_rel = (tk_vector.Cross(jet_vector)).Mag();
-         //float pt_rel = perp.Mag();
          float eta_rel = std::atanh( tk_vector.Dot(jet_vector) / tk_vector.Mag() );
 
          h_jet_tks_pt[n_hist]->Fill(fabs(mevent->jet_track_qpt[ntk]), w);
@@ -164,6 +221,56 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
          h_jet_tks_nsigmadxy[n_hist]->Fill(fabs(dr/drerr), w);
          h_jet_tks_nsigmadxyz[n_hist]->Fill(fabs(drz/drzerr), w);
        }
+
+       h_jet_sum_nsigmadxy[n_hist]->Fill(sum_nsigmadxy, w);
+       h_jet_sum_nsigmadxyz[n_hist]->Fill(sum_nsigmadxyz, w);
+
+    }
+
+    // Sort the tracks in the jet by nsigma(dxyz)
+    std::sort(trackhelper.begin(), trackhelper.end(), [](Track_Helper const &a, Track_Helper &b) -> bool{ return fabs(a.dr/a.drerr) > fabs(b.dr/b.drerr); } );
+    //std::sort(trackhelper.begin(), trackhelper.end(), [](Track_Helper const &a, Track_Helper &b) -> bool{ return fabs(a.drz/a.drzerr) > fabs(b.drz/b.drzerr); } );
+
+    // Calculate mean and median nsigmadxy
+    int njtks = trackhelper.size();
+    if (njtks > 0) {
+      float med_nsigmadxy = -2.0;
+      float avg_nsigmadxy = 0.0;
+
+      float med_nsigmadxyz = -2.0;
+      float avg_nsigmadxyz = 0.0;
+       
+      if (njtks % 2 == 0) { 
+        med_nsigmadxy = fabs((trackhelper[njtks/2 - 1].dr / trackhelper[njtks/2 - 1].drerr) + (trackhelper[njtks/2].dr / trackhelper[njtks/2].drerr))/2;
+        med_nsigmadxyz = fabs((trackhelper[njtks/2 - 1].drz / trackhelper[njtks/2 - 1].drzerr) + (trackhelper[njtks/2].drz / trackhelper[njtks/2].drzerr))/2;
+      }
+      else {
+        med_nsigmadxy = fabs( trackhelper[njtks/2].dr / trackhelper[njtks/2].drerr );
+        med_nsigmadxyz = fabs( trackhelper[njtks/2].drz / trackhelper[njtks/2].drzerr );
+      }
+
+      for (int it=0; it < njtks; it++) {
+        avg_nsigmadxy += fabs(trackhelper[it].dr / trackhelper[it].drerr);
+        avg_nsigmadxyz += fabs(trackhelper[it].drz / trackhelper[it].drzerr);
+      }
+      avg_nsigmadxy /= njtks;
+      avg_nsigmadxyz /= njtks;
+
+      // Plot mean and median nsigmadxy
+      h_jet_tk_nsigmadxy_avg[n_hist]->Fill(avg_nsigmadxy, w);
+      h_jet_tk_nsigmadxy_med[n_hist]->Fill(med_nsigmadxy, w);
+
+      h_jet_tk_nsigmadxyz_avg[n_hist]->Fill(avg_nsigmadxyz, w);
+      h_jet_tk_nsigmadxyz_med[n_hist]->Fill(med_nsigmadxyz, w);
+
+      // While we're at it, plot max nsigmadxy
+      h_jet_tk_nsigmadxy_0[n_hist]->Fill(fabs(trackhelper[0].dr / trackhelper[0].drerr), w);
+      h_jet_tk_nsigmadxyz_0[n_hist]->Fill(fabs(trackhelper[0].drz / trackhelper[0].drzerr), w);
+    }
+
+    if (njtks > 1) {
+    h_jet_tk_nsigmadxy_1[n_hist]->Fill(fabs(trackhelper[1].dr / trackhelper[1].drerr), w);
+    h_jet_tk_nsigmadxyz_1[n_hist]->Fill(fabs(trackhelper[1].drz / trackhelper[1].drzerr), w);
     }
 
     h_jet_sumtk_pt_ratio[n_hist]->Fill(mevent->nth_jet_pt(i) / jet_sumtk_vector.Pt(), w);
