@@ -25,6 +25,7 @@ class MFVFilterHistos : public edm::EDAnalyzer {
   const edm::EDGetTokenT<double> weight_token;
 
   static const int MAX_NJETS = 10;
+  static const int N_PROXIES = 20;
   const bool is_dibjet;
 
   const int di_bitL1;
@@ -52,7 +53,7 @@ class MFVFilterHistos : public edm::EDAnalyzer {
   TH1F* h_next_match_dR;
 
   TH1F* h_filt_nsurvive;
-  TH1F* h_reused_jets;
+  TH2F* h_filt_nsurvive_grid;
   
   TH1F* h_filtjet_hlt_dR;
 
@@ -70,6 +71,9 @@ class MFVFilterHistos : public edm::EDAnalyzer {
 
   TH1F* h_filter_11_den;
   TH1F* h_filter_11_num;
+
+  TH1F* h_filter_12_den;
+  TH1F* h_filter_12_num;
 
 };
 
@@ -107,8 +111,8 @@ MFVFilterHistos::MFVFilterHistos(const edm::ParameterSet& cfg)
   h_next_match_dR = fs->make<TH1F>("h_next_match_dR", ";#DeltaR between matching HLT jet and 2nd closest offline jet;entries", 80, 0, 0.401);
 
 
-  h_filt_nsurvive = fs->make<TH1F>("h_filt_nsurvive", ";;nevents", mfv::n_filter_paths+3-4, 0, mfv::n_filter_paths+3-4);
-  h_reused_jets = fs->make<TH1F>("h_reused_jets", ";reused offline jet in evt?; nevents", 2, 0, 1.1);
+  h_filt_nsurvive      = fs->make<TH1F>("h_filt_nsurvive",      ";;nevents", mfv::n_filter_paths+3-4, 0, mfv::n_filter_paths+3-4);
+  h_filt_nsurvive_grid = fs->make<TH2F>("h_filt_nsurvive_grid", ";;# HLT-btag proxies", mfv::n_filter_paths+3-4, 0, mfv::n_filter_paths+3-4, N_PROXIES, 0, N_PROXIES);
   
 
   //---------- Start setting some x-axis labels
@@ -129,13 +133,15 @@ MFVFilterHistos::MFVFilterHistos(const edm::ParameterSet& cfg)
   h_filt_nsurvive->GetXaxis()->SetBinLabel(2, "after filt. presel");
   h_filt_nsurvive->GetXaxis()->SetBinLabel(3, "after L1 trigger");
 
-  h_reused_jets->GetXaxis()->SetBinLabel(1, "No");
-  h_reused_jets->GetXaxis()->SetBinLabel(2, "Yes");
-  
+  h_filt_nsurvive_grid->GetXaxis()->SetBinLabel(1, "starting number");
+  h_filt_nsurvive_grid->GetXaxis()->SetBinLabel(2, "after filt. presel");
+  h_filt_nsurvive_grid->GetXaxis()->SetBinLabel(3, "after L1 trigger");
+
   for (int i = 0; i < mfv::n_filter_paths; ++i) {
     h_filter_bits->GetXaxis()->SetBinLabel(i+2, TString::Format(" pass %s", mfv::filter_paths[i]));
     if (i >= 4) {
       h_filt_nsurvive->GetXaxis()->SetBinLabel(i+4-4, TString::Format("pass %s", mfv::filter_paths[i]));
+      h_filt_nsurvive_grid->GetXaxis()->SetBinLabel(i+4-4, TString::Format("pass %s", mfv::filter_paths[i]));
     }
     h_filter_bit_matrix->GetXaxis()->SetBinLabel(i+1, TString::Format(" pass %s", mfv::filter_paths[i]));
     h_filter_bit_matrix->GetYaxis()->SetBinLabel(i+1, TString::Format(" pass %s", mfv::filter_paths[i]));
@@ -160,6 +166,9 @@ MFVFilterHistos::MFVFilterHistos(const edm::ParameterSet& cfg)
 
   h_filter_11_den = fs->make<TH1F>("h_filter_11_den", "before 4PFCentralLooseJetID40; p_{T} of 4th-leading jet (GeV); entries", 200, 0, 300);
   h_filter_11_num = fs->make<TH1F>("h_filter_11_num", "after  4PFCentralLooseJetID40; p_{T} of 4th-leading jet (GeV); entries", 200, 0, 300);
+
+  h_filter_12_den = fs->make<TH1F>("h_filter_12_den", "before PFCentralJetsLooseIDQuad30HT300; p_{T} of 4th-leading jet (GeV); entries", 250, 0, 500);
+  h_filter_12_num = fs->make<TH1F>("h_filter_12_num", "after  PFCentralJetsLooseIDQuad30HT300; p_{T} of 4th-leading jet (GeV); entries", 250, 0, 500);
 
 }
 
@@ -187,8 +196,8 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   // Do some matching of online and offline jets
   std::vector<Jet_Pair_Helper> pfjethelper;
-  bool skinny_cone = false;
-  bool use_puid    = true;
+  bool skinny_cone = true;
+  bool use_puid    = false;
   for (int i=0; i < nhltpfjets; i++) {
     float hlt_eta    = mevent->hlt_pf_jet_eta[i];
     float hlt_phi    = mevent->hlt_pf_jet_phi[i];
@@ -238,18 +247,14 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_next_match_dR->Fill(next_dR, w);
   }
 
-  // Initialize filter study preselection parameters
-  //int min_filtjets        = is_dibjet ? di_minfiltjets : tri_minfiltjets;
-  //float min_filtjetpt     = is_dibjet ? di_minfiltjetpt : tri_minfiltjetpt;
-  //float max_filtjeteta    = is_dibjet ? di_maxfiltjeteta : tri_maxfiltjeteta;
-  //float min_filtjetbscore = is_dibjet ? di_minfiltjetbdisc : tri_minfiltjetbdisc;
-
-
   // Fill some basic hltbits/L1bits/filtbits histograms
   h_hlt_bits->Fill(0., w);
   h_l1_bits->Fill(0., w);
   h_filter_bits->Fill(0., w);
   h_filt_nsurvive->Fill(0., w);
+  for (int p=0; p < N_PROXIES; p++) {
+    h_filt_nsurvive_grid->Fill(0., p, w);
+  }
   for (int i = 0; i < mfv::n_hlt_paths; ++i) {
     if (mevent->found_hlt(i)) h_hlt_bits->Fill(1+2*i,   w);
     if (mevent->pass_hlt (i)) h_hlt_bits->Fill(1+2*i+1, w);
@@ -272,65 +277,103 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   // Ignore events with no bscores
   if ((std::size(mevent->jet_bdisc) == 0)) return;
 
-  // Don't do anything else if we don't have enough good jets or calojets
-  if (pfjethelper.size() >= 4) {
-    h_filt_nsurvive->Fill(1, w);
+  // Count number of btagged jets
+  int nbtaggedjets = 0;
+  for(size_t i = 0, ie = mevent->jet_bdisc_old.size(); i < ie; i++) {
+    if (mevent->jet_bdisc_old[i] > 0.80) { // 0.9693 is the tight WP for CSV algo
+      nbtaggedjets++;
+    }
   }
-  else {
+
+
+  // Don't do anything else if we don't have enough good jets or calojets
+  bool pass_filtsel = false;
+  int  filtsel_opt  = 0;   // 0 = MinSel,  1 = HalfSel,  2 = FullSel
+  if ( filtsel_opt == 0 and nofflinepfjets >= 4) { pass_filtsel = true; }
+
+  else if ( filtsel_opt == 1
+      and mevent->nth_jet_pt(0) > 85.0 
+      and mevent->nth_jet_pt(1) > 65.0 
+      and mevent->nth_jet_pt(2) > 50.0 
+      and mevent->nth_jet_pt(3) > 45.0 
+      and mevent->jet_ht(mfv::min_jet_pt) > 365.0) { pass_filtsel = true; }
+
+  else if (    filtsel_opt == 2
+      and mevent->nth_jet_pt(0) > 85.0 
+      and mevent->nth_jet_pt(1) > 65.0 
+      and mevent->nth_jet_pt(2) > 50.0 
+      and mevent->nth_jet_pt(3) > 45.0 
+      and mevent->jet_ht(mfv::min_jet_pt) > 365.0 
+      and nbtaggedjets >= 3) { pass_filtsel = true; }
+
+
+  if (pass_filtsel) { 
+    h_filt_nsurvive->Fill(1, w);
+    h_filt_nsurvive->Fill(2, w);
+    for (int p=0; p < N_PROXIES; p++) {
+      if (nbtaggedjets != p) continue;
+      h_filt_nsurvive_grid->Fill(1, p, w);
+      h_filt_nsurvive_grid->Fill(2, p, w);
+    }
+  }
+  else { 
     return;
   }
 
-  // See if an offline jet is the best match to multiple online jets
-  int reused_jet = 0;
-  for (unsigned int i=0; i < 3; i++) {
-    for (unsigned int j=i+1; j < 4; j++) {
-      if ((pfjethelper[i].off_i == pfjethelper[j].off_i) and (pfjethelper[i].off_i != -2)) { reused_jet = 1; }
-    }
-  }
-  h_reused_jets->Fill(reused_jet, w);
-
-  h_filt_nsurvive->Fill(2, w);
+  
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
   // We'll just take the easy way out for the first filters (for now)
   for (int i = 4; i < 7; i++) {
-    if (not (mevent->pass_filter(i))) return;
+    if (i != 6 and not (mevent->pass_filter(i))) {return;}
     h_filt_nsurvive->Fill(i-1, w);
+    for (int p=0; p < N_PROXIES; p++) {
+      if (nbtaggedjets != p) continue;
+      h_filt_nsurvive_grid->Fill(i-1, p, w);
+    }
   }
 
   for (int i = 7; i < mfv::n_filter_paths; i++) {
     if (not (mevent->pass_filter(i))) break;
     h_filt_nsurvive->Fill(i-1, w);
+    for (int p=0; p < N_PROXIES; p++) {
+      if (nbtaggedjets != p) continue;
+      h_filt_nsurvive_grid->Fill(i-1, p, w);
+    }
   }
 
-  h_filter_07_den->Fill(pfjethelper[3].off_pt, w);
+  h_filter_07_den->Fill(mevent->nth_jet_pt(3), w);
 
-  if (mevent->pass_filter(7)) {
-  //if (pfjethelper[3].hlt_pt > 30.0) {
-    h_filter_07_num->Fill(pfjethelper[3].off_pt, w);
-    h_filter_08_den->Fill(pfjethelper[0].off_pt, w);
+  //if (mevent->pass_filter(7)) {
+  if (mevent->jet_hlt_pt[3] > 30.0) {
+    h_filter_07_num->Fill(mevent->nth_jet_pt(3), w);
+    h_filter_08_den->Fill(mevent->nth_jet_pt(0), w);
 
-    if (mevent->pass_filter(8)) {
-    //if (pfjethelper[0].hlt_pt > 75.0) {
-      h_filter_08_num->Fill(pfjethelper[0].off_pt, w);
-      h_filter_09_den->Fill(pfjethelper[1].off_pt, w);
+    //if (mevent->pass_filter(8)) {
+    if (mevent->jet_hlt_pt[0] > 75.0) {
+      h_filter_08_num->Fill(mevent->nth_jet_pt(0), w);
+      h_filter_09_den->Fill(mevent->nth_jet_pt(1), w);
 
-      if (mevent->pass_filter(9)) {
-      //if (pfjethelper[1].hlt_pt > 60.0) {
-        h_filter_09_num->Fill(pfjethelper[1].off_pt, w);
-        h_filter_10_den->Fill(pfjethelper[2].off_pt, w);
+      //if (mevent->pass_filter(9)) {
+      if (mevent->jet_hlt_pt[1] > 60.0) {
+        h_filter_09_num->Fill(mevent->nth_jet_pt(1), w);
+        h_filter_10_den->Fill(mevent->nth_jet_pt(2), w);
 
-        if (mevent->pass_filter(10)) {
-        //if (pfjethelper[2].hlt_pt > 45.0) {
-          h_filter_10_num->Fill(pfjethelper[2].off_pt, w);
-          h_filter_11_den->Fill(pfjethelper[3].off_pt, w);
+        //if (mevent->pass_filter(10)) {
+        if (mevent->jet_hlt_pt[2] > 45.0) {
+          h_filter_10_num->Fill(mevent->nth_jet_pt(2), w);
+          h_filter_11_den->Fill(mevent->nth_jet_pt(3), w);
 
-          if (mevent->pass_filter(11)) {
-          //if (pfjethelper[3].hlt_pt > 40.0) {
-            h_filter_11_num->Fill(pfjethelper[3].off_pt, w);
+          //if (mevent->pass_filter(11)) {
+          if (mevent->jet_hlt_pt[3] > 40.0) {
+            h_filter_11_num->Fill(mevent->nth_jet_pt(3), w);
+            h_filter_12_den->Fill(mevent->jet_ht(mfv::min_jet_pt), w);
 
+            if (mevent->pass_filter(12)) {
+              h_filter_12_num->Fill(mevent->jet_ht(mfv::min_jet_pt), w);
+            }
           }
         }
       }
