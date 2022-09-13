@@ -24,10 +24,13 @@ class MFVJetTksHistos : public edm::EDAnalyzer {
  private:
   const edm::EDGetTokenT<MFVEvent> mevent_token;
   const edm::EDGetTokenT<double> weight_token;
+  const edm::EDGetTokenT<reco::GenParticleCollection> gen_token;
+
 
   TH1F* h_w;
 
-  static const int CATEGORIES = 2;
+  static const int CATEGORIES = 3;
+  static const int ALL = 2;
   TH1F* h_jet_pt[CATEGORIES];
   TH1F* h_jet_eta[CATEGORIES];
   TH1F* h_jet_phi[CATEGORIES];
@@ -57,13 +60,14 @@ class MFVJetTksHistos : public edm::EDAnalyzer {
 
   TH1F* h_jet_sumtk_pt_ratio[CATEGORIES];
   TH1F* h_jet_sumtk_dR[CATEGORIES];
+
+  TH2F* h_proxy_grid[CATEGORIES];
 };
 
 MFVJetTksHistos::MFVJetTksHistos(const edm::ParameterSet& cfg)
   : mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
-    weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src")))
-//    weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
-//    gen_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("gen_src")))
+    weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
+    gen_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("gen_src")))
 
 {
   edm::Service<TFileService> fs;
@@ -72,7 +76,7 @@ MFVJetTksHistos::MFVJetTksHistos(const edm::ParameterSet& cfg)
 
 
   for (int i = 0; i < CATEGORIES; ++i) {
-    TString bres = i == 1 ? TString("fail") : TString("pass");
+    TString bres = i == 1 ? TString("fail") : (i == 0 ? TString("pass") : TString("all"));
     h_jet_pt[i] = fs->make<TH1F>(TString::Format("h_jet_pt_%s", bres.Data()), TString::Format(";p_{T} of jets that %s b-tag(GeV);events/10 GeV", bres.Data()), 200, 0, 800);
     h_jet_eta[i] = fs->make<TH1F>(TString::Format("h_jet_eta_%s", bres.Data()), TString::Format(";absv#eta of jets that %s b-tag;events/bin", bres.Data()), 120, 0, 2.5);
     h_jet_phi[i] = fs->make<TH1F>(TString::Format("h_jet_phi_%s", bres.Data()), TString::Format(";#phi of jets that %s b-tag;events/bin", bres.Data()), 100, -3.1416, 3.1416);
@@ -102,6 +106,8 @@ MFVJetTksHistos::MFVJetTksHistos(const edm::ParameterSet& cfg)
 
     h_jet_sumtk_pt_ratio[i] = fs->make<TH1F>(TString::Format("h_jet_sumtk_pt_ratio_%s", bres.Data()), TString::Format(";pT(jet tracks) / pT(jet) - %s b-tag;events/bin", bres.Data()), 100, 0, 4);
     h_jet_sumtk_dR[i] = fs->make<TH1F>(TString::Format("h_jet_sumtk_dR_%s", bres.Data()), TString::Format(";dR between jet and tks in jets - %s b-tag;events/bin", bres.Data()), 100, 0, 0.6);
+    
+    h_proxy_grid[i] = fs->make<TH2F>(TString::Format("h_proxy_grid_%s", bres.Data()), ";b-score cut value; >=3 offline proxies?", 100, 0, 1, 2, 0, 1.2);
   }
 
 }
@@ -120,34 +126,67 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   edm::Handle<MFVEvent> mevent;
   event.getByToken(mevent_token, mevent);
 
+  edm::Handle<reco::GenParticleCollection> gen_particles;
+  event.getByToken(gen_token, gen_particles);
+
   edm::Handle<double> weight;
   event.getByToken(weight_token, weight);
+
   const double w = *weight;
   h_w->Fill(w);
 
   //////////////////////////////////////////////////////////////////////////////
+  
+  // Ugly loop... but I'm using it to get foresight of the 2 highest-CSV jets
+  // These will correspond to the real bjets in a ttbar event
+  int real_b_i_0 = -1;
+  int real_b_i_1 = -1;
+  float real_b_csv_0 = -1.0;
+  float real_b_csv_1 = -1.0;
+  for (int i=0; i < mevent->njets(); ++i) {
+    //FIXME!! Just pick out the two highest CSV scores and save their indices!
+    if (mevent->jet_bdisc_old[i] > real_b_csv_0) {
+      real_b_i_1   = real_b_i_0;
+      real_b_csv_1 = real_b_csv_0;
+      real_b_i_0   = i;
+      real_b_csv_0 = mevent->jet_bdisc_old[i];
+    }
+    else if (mevent->jet_bdisc_old[i] > real_b_csv_1) {
+      real_b_i_1   = i;
+      real_b_csv_1 = mevent->jet_bdisc_old[i];
+    }
+  }
+
 
   for (int i = 0; i < mevent->njets(); ++i) {
     bool matches_online_bjet = false;
     bool matches_online_calo = false;
+
+    bool matches_gen_bjet = false;
+
     float sum_nsigmadxy = 0.0;
     float sum_nsigmadxyz = 0.0;
 
-    //float b      = (i < (int)(mevent->jet_bdisc_old.size()) ? mevent->jet_bdisc_old[i] : -9.9);
-    //int   n_hist = b > bcut ? 0 : (b > 0.0 ? 1 : -9);
-    //if (n_hist == -9) continue;
- 
     float off_pt  = mevent->nth_jet_pt(i);
     float off_eta = mevent->nth_jet_eta(i);
     float off_phi = mevent->nth_jet_phi(i);
 
     if (off_pt < 30.0) continue;
+    if (not (i == real_b_i_1 or i == real_b_i_0)) continue;
 
     TVector3 jet_vector;
     jet_vector.SetPtEtaPhi(mevent->nth_jet_pt(i), off_eta, off_phi);       
     jet_vector.SetMag(1.0);
 
-    
+    // See if this jet matches to a gen-level bjet
+//    for (size_t ib = 0; ib < mevent->gen_bquarks.size() ; ib++) {
+//      float gen_b_eta = mevent->gen_bquarks[ib].Eta();
+//      float gen_b_phi = mevent->gen_bquarks[ib].Phi();
+//
+//      if(reco::deltaR(gen_b_eta, gen_b_phi, off_eta, off_phi) < 0.14) { matches_gen_bjet = true; }
+//    }
+
+    // See if this jet matches to an online calojet (probably yes)
     int n_online_calojets = mevent->hlt_pf_jet_pt.size();
     for (int j=0; j < n_online_calojets; j++) {
         float hlt_eta = mevent->hlt_pf_jet_eta[j];
@@ -156,8 +195,10 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         if(reco::deltaR(hlt_eta, hlt_phi, off_eta, off_phi) < 0.14) { matches_online_calo = true; }
     }
 
+    // If for some weird reason, there's no match btwn online/offline jets, skip this jet
     if (not matches_online_calo) continue;
 
+    // See if this jet matches to some HLT jet which passes the btag filters
     int n_online_bjets = mevent->hlt_pfforbtag_jet_pt.size();
     for (int j=0; j < n_online_bjets; j++) {
         float hlt_eta = mevent->hlt_pfforbtag_jet_eta[j];
@@ -178,10 +219,18 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_jet_bdisc[n_hist]->Fill((i < (int)(mevent->jet_bdisc.size()) ? mevent->jet_bdisc[i] : -9.9), w);
     h_jet_bdisc_old[n_hist]->Fill((i < (int)(mevent->jet_bdisc_old.size()) ? mevent->jet_bdisc_old[i] : -9.9), w);
 
+    h_jet_pt[ALL]->Fill(mevent->nth_jet_pt(i), w);
+    h_jet_eta[ALL]->Fill(fabs(mevent->nth_jet_eta(i)), w);
+    h_jet_phi[ALL]->Fill(mevent->nth_jet_phi(i), w);
+    h_jet_ntks[ALL]->Fill((int)(mevent->n_jet_tracks(i)));
+    h_jet_bdisc[ALL]->Fill((i < (int)(mevent->jet_bdisc.size()) ? mevent->jet_bdisc[i] : -9.9), w);
+    h_jet_bdisc_old[ALL]->Fill((i < (int)(mevent->jet_bdisc_old.size()) ? mevent->jet_bdisc_old[i] : -9.9), w);
+
 
     std::vector<Track_Helper> trackhelper;
     for (size_t ntk = 0 ; ntk < mevent->n_jet_tracks_all() ; ntk++) {
        if (mevent->jet_track_which_jet[ntk] == i) {
+
          // Vars needed to get 3D IP dist significance
          float dr = mevent->jet_track_dxy[ntk];
          float dz = mevent->jet_track_dz[ntk];
@@ -220,10 +269,21 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
          h_jet_tks_dR[n_hist]->Fill(tk_vector.DeltaR(jet_vector), w);
          h_jet_tks_nsigmadxy[n_hist]->Fill(fabs(dr/drerr), w);
          h_jet_tks_nsigmadxyz[n_hist]->Fill(fabs(drz/drzerr), w);
+
+         h_jet_tks_pt[ALL]->Fill(fabs(mevent->jet_track_qpt[ntk]), w);
+         h_jet_tks_pt_rel[ALL]->Fill(pt_rel, w);
+         h_jet_tks_eta[ALL]->Fill(fabs(mevent->jet_track_eta[ntk]), w);
+         h_jet_tks_eta_rel[ALL]->Fill(eta_rel, w);
+         h_jet_tks_dR[ALL]->Fill(tk_vector.DeltaR(jet_vector), w);
+         h_jet_tks_nsigmadxy[ALL]->Fill(fabs(dr/drerr), w);
+         h_jet_tks_nsigmadxyz[ALL]->Fill(fabs(drz/drzerr), w);
        }
 
        h_jet_sum_nsigmadxy[n_hist]->Fill(sum_nsigmadxy, w);
        h_jet_sum_nsigmadxyz[n_hist]->Fill(sum_nsigmadxyz, w);
+
+       h_jet_sum_nsigmadxy[ALL]->Fill(sum_nsigmadxy, w);
+       h_jet_sum_nsigmadxyz[ALL]->Fill(sum_nsigmadxyz, w);
 
     }
 
@@ -259,28 +319,63 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       // Plot mean and median nsigmadxy
       h_jet_tk_nsigmadxy_avg[n_hist]->Fill(avg_nsigmadxy, w);
       h_jet_tk_nsigmadxy_med[n_hist]->Fill(med_nsigmadxy, w);
+      h_jet_tk_nsigmadxy_avg[ALL]->Fill(avg_nsigmadxy, w);
+      h_jet_tk_nsigmadxy_med[ALL]->Fill(med_nsigmadxy, w);
 
       h_jet_tk_nsigmadxyz_avg[n_hist]->Fill(avg_nsigmadxyz, w);
       h_jet_tk_nsigmadxyz_med[n_hist]->Fill(med_nsigmadxyz, w);
+      h_jet_tk_nsigmadxyz_avg[ALL]->Fill(avg_nsigmadxyz, w);
+      h_jet_tk_nsigmadxyz_med[ALL]->Fill(med_nsigmadxyz, w);
 
       // While we're at it, plot max nsigmadxy
       h_jet_tk_nsigmadxy_0[n_hist]->Fill(fabs(trackhelper[0].dr / trackhelper[0].drerr), w);
       h_jet_tk_nsigmadxyz_0[n_hist]->Fill(fabs(trackhelper[0].drz / trackhelper[0].drzerr), w);
+      h_jet_tk_nsigmadxy_0[ALL]->Fill(fabs(trackhelper[0].dr / trackhelper[0].drerr), w);
+      h_jet_tk_nsigmadxyz_0[ALL]->Fill(fabs(trackhelper[0].drz / trackhelper[0].drzerr), w);
     }
 
     if (njtks > 1) {
     h_jet_tk_nsigmadxy_1[n_hist]->Fill(fabs(trackhelper[1].dr / trackhelper[1].drerr), w);
     h_jet_tk_nsigmadxyz_1[n_hist]->Fill(fabs(trackhelper[1].drz / trackhelper[1].drzerr), w);
+    h_jet_tk_nsigmadxy_1[ALL]->Fill(fabs(trackhelper[1].dr / trackhelper[1].drerr), w);
+    h_jet_tk_nsigmadxyz_1[ALL]->Fill(fabs(trackhelper[1].drz / trackhelper[1].drzerr), w);
     }
 
     h_jet_sumtk_pt_ratio[n_hist]->Fill(mevent->nth_jet_pt(i) / jet_sumtk_vector.Pt(), w);
     h_jet_sumtk_dR[n_hist]->Fill(jet_vector.DeltaR(jet_sumtk_vector), w);
+    h_jet_sumtk_pt_ratio[ALL]->Fill(mevent->nth_jet_pt(i) / jet_sumtk_vector.Pt(), w);
+    h_jet_sumtk_dR[ALL]->Fill(jet_vector.DeltaR(jet_sumtk_vector), w);
     
   }
 
   //////////////////////////////////////////////////////////////////////////////
 
+  for (int b = 0; b < 100; b++) {
+    float b_cut = (b * 0.01)+0.00001;
+    int   n_proxies = 0; // Number of jets passing whatever the proxy is
+    int   n_passes  = 0; // Number of jets matching to an HLT bjet
+    int n_online_bjets = mevent->hlt_pfforbtag_jet_pt.size();
 
+    for (int i = 0; i < mevent->njets(); i++) {
+      float b_disc = (i < (int)(mevent->jet_bdisc_old.size()) ? mevent->jet_bdisc_old[i] : -9.9);
+      if (b_disc < 0.0 or mevent->nth_jet_pt(i) < 30.0) continue;
+      if (b_disc > b_cut) n_proxies++;
+
+      float off_eta = mevent->nth_jet_eta(i);
+      float off_phi = mevent->nth_jet_phi(i);
+
+      for (int j=0; j < n_online_bjets; j++) {
+          float hlt_eta = mevent->hlt_pfforbtag_jet_eta[j];
+          float hlt_phi = mevent->hlt_pfforbtag_jet_phi[j];
+          if(reco::deltaR(hlt_eta, hlt_phi, off_eta, off_phi) < 0.14) n_passes++;
+      }
+    }
+
+    float y_bin  = n_proxies >= 3 ? 1.0 : 0.0;
+    int n_hist = n_online_bjets >= 3 ? 0 : 1;   // If this collection has at least three members, then there's enough HLT bjets to pass
+    h_proxy_grid[n_hist]->Fill(b_cut, y_bin, w);
+    
+  }
 
 }
 DEFINE_FWK_MODULE(MFVJetTksHistos);
