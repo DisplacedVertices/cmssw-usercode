@@ -156,7 +156,7 @@ void MFVGenParticles::set_Ttbar_decay(mfv::MCInteractionHolderTtbar& mc, const e
 }
 
 bool MFVGenParticles::try_MFVtbs(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles, int t1, int t2) const {
-  if (true) printf("MFVGenParticles::try_MFVtbs\n");
+  if (debug) printf("MFVGenParticles::try_MFVtbs\n");
 
   assert(t1 == 5 || t1 == 1);
   assert(t2 == 3 || t2 == 5);
@@ -269,7 +269,7 @@ bool MFVGenParticles::try_MFVtbs(mfv::MCInteraction& mc, const edm::Handle<reco:
 }
 
 bool MFVGenParticles::try_Ttbar(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles) const {
-  if (true) printf("MFVGenParticles::try_Ttbar\n");
+  if (debug) printf("MFVGenParticles::try_Ttbar\n");
 
   mfv::MCInteractionHolderTtbar h;
 
@@ -302,7 +302,7 @@ bool MFVGenParticles::try_Ttbar(mfv::MCInteraction& mc, const edm::Handle<reco::
 }
 
 bool MFVGenParticles::try_MFVthree(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles, int t1, int t2, int t3) const {
-  if (true) printf("MFVGenParticles::try_MFVthree %i %i %i\n", t1, t2, t3);
+  if (debug) printf("MFVGenParticles::try_MFVthree %i %i %i\n", t1, t2, t3);
 
   mfv::MCInteractions_t type = mfv::mci_invalid;
   int doubled_id = 0;
@@ -443,7 +443,7 @@ bool MFVGenParticles::try_MFVthree(mfv::MCInteraction& mc, const edm::Handle<rec
 }
 
 bool MFVGenParticles::try_XX4j(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles) const {
-  if (true) printf("MFVGenParticles::try_XX4j\n");
+  if (debug) printf("MFVGenParticles::try_XX4j\n");
 
   mfv::MCInteractionHolderXX4j h;
 
@@ -487,7 +487,7 @@ bool MFVGenParticles::try_XX4j(mfv::MCInteraction& mc, const edm::Handle<reco::G
 }
 
 bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles, int quark) const {
-  if (true) printf("MFVGenParticles::try_MFVdijet quark=%i\n", quark);
+  if (debug) printf("MFVGenParticles::try_MFVdijet quark=%i\n", quark);
   assert(quark == 1 || quark == 4 || quark == 5);
 
   mfv::MCInteractionHolderPair h;
@@ -550,7 +550,7 @@ bool MFVGenParticles::try_MFVdijet(mfv::MCInteraction& mc, const edm::Handle<rec
 }
 
 bool MFVGenParticles::try_stopdbardbar(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles, int quark) const {
-  if (true) printf("MFVGenParticles::try_stopdbardbar quark=%i\n", quark);
+  if (debug) printf("MFVGenParticles::try_stopdbardbar quark=%i\n", quark);
   assert(quark == -1 || quark == -5);
 
   mfv::MCInteractionHolderPair h;
@@ -632,7 +632,7 @@ bool MFVGenParticles::try_stopdbardbar(mfv::MCInteraction& mc, const edm::Handle
 }
 
 bool MFVGenParticles::try_MFVlq(mfv::MCInteraction& mc, const edm::Handle<reco::GenParticleCollection>& gen_particles) const {
-  if (true) printf("MFVGenParticles::try_MFVlq\n");
+  if (debug) printf("MFVGenParticles::try_MFVlq\n");
 
   mfv::MCInteractionHolderMFVlq h;
 
