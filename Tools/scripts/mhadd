@@ -32,6 +32,8 @@ parser.add_argument('-r', '--remove-originals', action='store_true', default=Fal
                     help='Remove the original files.')
 parser.add_argument('-v', '--verbose', action='store_true', default=False,
                     help='Print more info.')
+parser.add_argument('-s', '--submit', action='store_true', default=False,
+                    help='submits hadd jobs to condor')
 
 options = parser.parse_args()
 
@@ -72,6 +74,7 @@ def hadd_(is_crab, *args, **kwargs):
     kwargs['chunk_size'] = options.chunk_size
     kwargs['pattern'] = options.pattern
     kwargs['range_filter'] = options.range
+    kwargs['submit'] = options.submit
 
     if is_crab:
         kwargs['lpc_shortcut'] = options.lpc_shortcut

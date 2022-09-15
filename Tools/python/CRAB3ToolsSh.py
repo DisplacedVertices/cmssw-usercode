@@ -106,10 +106,10 @@ def crab_hadd_files(working_dir, lpc_shortcut=False, **kwargs):
 
     return expected, files
 
-def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None, lpc_shortcut=False, range_filter=None):
+def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None, lpc_shortcut=False, range_filter=None, submit=False):
     working_dir, new_name, new_dir = crab_hadd_args(working_dir, new_name, new_dir)
     expected, files = crab_hadd_files(working_dir, lpc_shortcut, range_filter=range_filter)
-    result = HaddBatchResult('crab', working_dir, new_name, new_dir, expected, files)
+    result = HaddBatchResult('crab', working_dir, new_name, new_dir, expected, files, submit)
     print '%s: expecting %i files if all jobs succeeded' % (working_dir, expected)
 
     if pattern:
@@ -157,7 +157,7 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
         if result.success and not new_name.startswith('root://'):
             os.chmod(new_name, 0644)
     else:
-        result.success = hadd(new_name, files)
+        result.success = hadd(new_name, files, submit)
 
     if automatic_splitting:
         n = norm_from_file(new_name)
