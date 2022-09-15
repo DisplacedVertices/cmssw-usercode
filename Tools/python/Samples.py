@@ -46,6 +46,8 @@ def _decay(sample):
         'mfv_xxddbar': r'X \rightarrow d\bar{d}',
         'mfv_stopdbardbar': r'\tilde{t} \rightarrow \bar{d}\bar{d}',
         'mfv_stopbbarbbar': r'\tilde{t} \rightarrow \bar{b}\bar{b}',
+        'mfv_stoplb': r'\tilde{t} \rightarrow lb',
+        'mfv_stopld': r'\tilde{t} \rightarrow ld', 
         'mfv_splitSUSY': r'\tilde{g} \rightarrow qq\tilde{\chi}',
         'ggHToSSTobbbb' : r'ggH \rightarrow SS \rightarrow b\bar{b}b\bar{b}',
         'ggHToSSTodddd' : r'ggH \rightarrow SS \rightarrow d\bar{d}d\bar{d}',
@@ -98,9 +100,26 @@ qcd_samples_sum_2017 = [
     SumSample('qcdht0500sum_2017', qcd_samples_2017[2:4]),
     ]
 
+qcd_lep_samples_2017 = [
+    MCSample('qcdempt015_2017', '/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v1/AODSIM',   7966910, nice='QCD,  15 < #hat{p}_{T} <  20 GeV, EM enriched', color=801, syst_frac=0.20, xsec=1.324e6),
+    MCSample('qcdmupt15_2017',  '/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v1/AODSIM',  17716270, nice='QCD, #hat{p}_{T} > 20 GeV, #mu p_{T} > 15 GeV', color=801, syst_frac=0.20, xsec=2.39e5),
+    MCSample('qcdempt020_2017', '/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v1/AODSIM',   14166147, nice='QCD,  20 < #hat{p}_{T} <  30 GeV, EM enriched', color=801, syst_frac=0.20, xsec=4.896e6),
+    MCSample('qcdempt030_2017', '/QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM',   8784542, nice='QCD,  30 < #hat{p}_{T} <  50 GeV, EM enriched', color=801, syst_frac=0.20, xsec=6.447e6),
+    MCSample('qcdempt050_2017', '/QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM',   10590542, nice='QCD,  50 < #hat{p}_{T} <  80 GeV, EM enriched', color=801, syst_frac=0.20, xsec=1.988e6),
+    MCSample('qcdempt080_2017', '/QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM',   9615795, nice='QCD,  80 < #hat{p}_{T} < 120 GeV, EM enriched', color=801, syst_frac=0.20, xsec=3.675e5),
+    MCSample('qcdempt120_2017', '/QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM',  9904245, nice='QCD, 120 < #hat{p}_{T} < 170 GeV, EM enriched', color=801, syst_frac=0.20, xsec=6.659e4),
+    MCSample('qcdempt170_2017', '/QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM',  3678200, nice='QCD, 170 < #hat{p}_{T} < 300 GeV, EM enriched', color=801, syst_frac=0.20, xsec=1.662e4),
+    MCSample('qcdempt300_2017', '/QCD_Pt-300toInf_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM',  2214934, nice='QCD, #hat{p}_{T} > 300 GeV, EM enriched',       color=801, syst_frac=0.20, xsec=1104.0),
+    MCSample('qcdbctoept020_2017', '/QCD_Pt_20to30_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM',      14248556, nice='QCD,  20 < #hat{p}_{T} <  30 GeV, HF electrons', color=801, syst_frac=0.20, xsec=3.038e5),
+    MCSample('qcdbctoept030_2017', '/QCD_Pt_30to80_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM',      15656025, nice='QCD,  30 < #hat{p}_{T} <  80 GeV, HF electrons', color=801, syst_frac=0.20, xsec=3.623e5),
+    MCSample('qcdbctoept080_2017', '/QCD_Pt_80to170_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM',     16158199, nice='QCD,  80 < #hat{p}_{T} < 170 GeV, HF electrons', color=801, syst_frac=0.20, xsec=3.37e4),
+    MCSample('qcdbctoept170_2017', '/QCD_Pt_170to250_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM',    15940531, nice='QCD, 170 < #hat{p}_{T} < 250 GeV, HF electrons', color=801, syst_frac=0.20, xsec=2.125e3),
+    MCSample('qcdbctoept250_2017', '/QCD_Pt_250toInf_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v3/AODSIM',    16028600, nice='QCD, #hat{p}_{T} > 250 GeV, HF electrons',       color=801, syst_frac=0.20, xsec=562.5),
+    ]
+    
 # ttbar with HT slices not available for UL now
 ttbar_samples_2017 = [
-    ]
+]
 bjet_samples_2017 = [
     ]
 
@@ -112,6 +131,12 @@ leptonic_samples_2017 = [
 
 met_samples_2017 = [
     MCSample('ttbar_2017',     '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM',    249133364, nice='t#bar{t}',                   color=4,   syst_frac=0.15, xsec=831.76),
+    ]
+
+diboson_samples_2017 = [
+    MCSample('ww_2017', '/WW_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 15883000, nice='WW', color = 9, syst_frac=0.10, xsec=75.8),
+    MCSample('zz_2017', '/ZZ_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 2708000, nice='ZZ', color = 9, syst_frac=0.10, xsec=12.140),
+    MCSample('wz_2017', '/WZ_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 7898000, nice='WZ', color =9, syst_frac=0.10, xsec=27.6)
     ]
 
 Zvv_samples_2017 = [
@@ -231,6 +256,24 @@ qcd_samples_sum_2018 = [
     SumSample('qcdht0200sum_2018', qcd_samples_2017[0:2]),
     ]
 
+qcd_lep_samples_2018 = [
+    MCSample('qcdmupt15_2018',  '/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/RunIISummer20UL18RECO-106X_upgrade2018_realistic_v11_L1v1-v2/AODSIM',    17494100, nice='QCD, #hat{p}_{T} > 20 GeV, #mu p_{T} > 15 GeV', color=801, syst_frac=0.20, xsec=2.39e5),
+    MCSample('qcdempt015_2018', '/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL18RECO-106X_upgrade2018_realistic_v11_L1v1-v1/AODSIM',    7899865, nice='QCD,  15 < #hat{p}_{T} <  20 GeV, EM enriched', color=801, syst_frac=0.20, xsec=1.324e6),
+    MCSample('qcdempt020_2018', '/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL18RECO-106X_upgrade2018_realistic_v11_L1v1-v2/AODSIM',    14328846, nice='QCD,  20 < #hat{p}_{T} <  30 GeV, EM enriched', color=801, syst_frac=0.20, xsec=4.896e6),
+    MCSample('qcdempt030_2018', '/QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL18RECO-106X_upgrade2018_realistic_v11_L1v1-v2/AODSIM',    8574589, nice='QCD,  30 < #hat{p}_{T} <  50 GeV, EM enriched', color=801, syst_frac=0.20, xsec=6.447e6),
+    MCSample('qcdempt050_2018', '/QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL18RECO-106X_upgrade2018_realistic_v11_L1v1-v2/AODSIM',    10524400, nice='QCD,  50 < #hat{p}_{T} <  80 GeV, EM enriched', color=801, syst_frac=0.20, xsec=1.988e6),
+    MCSample('qcdempt080_2018', '/QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL18RECO-106X_upgrade2018_realistic_v11_L1v1-v2/AODSIM',    9468372, nice='QCD,  80 < #hat{p}_{T} < 120 GeV, EM enriched', color=801, syst_frac=0.20, xsec=3.675e5),
+    MCSample('qcdempt120_2018', '/QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL18RECO-106X_upgrade2018_realistic_v11_L1v1-v2/AODSIM',   9677904, nice='QCD, 120 < #hat{p}_{T} < 170 GeV, EM enriched', color=801, syst_frac=0.20, xsec=6.659e4),
+    MCSample('qcdempt170_2018', '/QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL18RECO-106X_upgrade2018_realistic_v11_L1v1-v2/AODSIM',   3714642, nice='QCD, 170 < #hat{p}_{T} < 300 GeV, EM enriched', color=801, syst_frac=0.20, xsec=1.662e4),
+    MCSample('qcdempt300_2018', '/QCD_Pt-300toInf_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL18RECO-106X_upgrade2018_realistic_v11_L1v1-v2/AODSIM',   2215994, nice='QCD, #hat{p}_{T} > 300 GeV, EM enriched',       color=801, syst_frac=0.20, xsec=1104.0),
+    MCSample('qcdbctoept015_2018',  '/QCD_Pt_15to20_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL18RECO-106X_upgrade2018_realistic_v11_L1v1-v1/AODSIM',      16549971, nice='QCD,  15 < #hat{p}_{T} <  20 GeV, HF electrons', color=801, syst_frac=0.20, xsec=1.862e5),
+    MCSample('qcdbctoept020_2018',  '/QCD_Pt_20to30_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL18RECO-106X_upgrade2018_realistic_v11_L1v1-v2/AODSIM',      14155888, nice='QCD,  20 < #hat{p}_{T} <  30 GeV, HF electrons', color=801, syst_frac=0.20, xsec=3.038e5),
+    MCSample('qcdbctoept030_2018',  '/QCD_Pt_30to80_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL18RECO-106X_upgrade2018_realistic_v11_L1v1-v2/AODSIM',      15457051, nice='QCD,  30 < #hat{p}_{T} <  80 GeV, HF electrons', color=801, syst_frac=0.20, xsec=3.623e5),
+    MCSample('qcdbctoept080_2018',  '/QCD_Pt_80to170_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL18RECO-106X_upgrade2018_realistic_v11_L1v1-v2/AODSIM',     15677743, nice='QCD,  80 < #hat{p}_{T} < 170 GeV, HF electrons', color=801, syst_frac=0.20, xsec=3.37e4),
+    MCSample('qcdbctoept170_2018',  '/QCD_Pt_170to250_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL18RECO-106X_upgrade2018_realistic_v11_L1v1-v3/AODSIM',    15821622, nice='QCD, 170 < #hat{p}_{T} < 250 GeV, HF electrons', color=801, syst_frac=0.20, xsec=2.125e3),
+    MCSample('qcdbctoept250_2018',  '/QCD_Pt_250toInf_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL18RECO-106X_upgrade2018_realistic_v11_L1v1-v3/AODSIM',    16072180, nice='QCD, #hat{p}_{T} > 250 GeV, HF electrons',       color=801, syst_frac=0.20, xsec=562.5),
+    ]
+
 ttbar_samples_2018 = []
 
 bjet_samples_2018 = []
@@ -257,7 +300,21 @@ Zvv_samples_2018 = [
 
 mfv_splitSUSY_samples_2018 = []
 
-all_signal_samples_2018 = mfv_splitSUSY_samples_2018
+mfv_stopld_samples_2018 = [
+    MCSample('mfv_stopld_tau000100um_M0200_2018', '/DisplacedSUSY_stopToLD_M_200_0p1mm_TuneCP5_13TeV-pythia8/awarden-RunIISummer20UL18_MiniAOD-dd00e8e5190104a7aafdc4fba9805483/USER', 4089),
+    MCSample('mfv_stopld_tau000300um_M0200_2018', '/DisplacedSUSY_stopToLD_M_200_0p3mm_TuneCP5_13TeV-pythia8/awarden-RunIISummer20UL18_MiniAOD-dd00e8e5190104a7aafdc4fba9805483/USER', 4050),
+    MCSample('mfv_stopld_tau000100um_M0600_2018', '/DisplacedSUSY_stopToLD_M_600_0p1mm_TuneCP5_13TeV-pythia8/awarden-RunIISummer20UL18_MiniAOD-dd00e8e5190104a7aafdc4fba9805483/USER', 2821),
+    MCSample('mfv_stopld_tau000300um_M0600_2018', '/DisplacedSUSY_stopToLD_M_600_0p3mm_TuneCP5_13TeV-pythia8/awarden-RunIISummer20UL18_MiniAOD-dd00e8e5190104a7aafdc4fba9805483/USER', 2802),
+    MCSample('mfv_stopld_tau000100um_M1000_2018', '/DisplacedSUSY_stopToLD_M_1000_0p1mm_TuneCP5_13TeV-pythia8/awarden-RunIISummer20UL18_MiniAOD-dd00e8e5190104a7aafdc4fba9805483/USER', 2579),
+    MCSample('mfv_stopld_tau000300um_M1000_2018', '/DisplacedSUSY_stopToLD_M_1000_0p3mm_TuneCP5_13TeV-pythia8/awarden-RunIISummer20UL18_MiniAOD-dd00e8e5190104a7aafdc4fba9805483/USER', 2604),
+   # MCSample('mfv_stopld_tau001000um_M1000_2018', '/DisplacedSUSY_stopToLD_M_1000_1mm_TuneCP5_13TeV-pythia8/awarden-RunIISummer20UL18_MiniAOD-dd00e8e5190104a7aafdc4fba9805483/USER', 2555),
+    MCSample('mfv_stopld_tau000100um_M1600_2018', '/DisplacedSUSY_stopToLD_M_1600_0p1mm_TuneCP5_13TeV-pythia8/awarden-RunIISummer20UL18_MiniAOD-dd00e8e5190104a7aafdc4fba9805483/USER', 2472),
+    MCSample('mfv_stopld_tau000300um_M1600_2018', '/DisplacedSUSY_stopToLD_M_1600_0p3mm_TuneCP5_13TeV-pythia8/awarden-RunIISummer20UL18_MiniAOD-dd00e8e5190104a7aafdc4fba9805483/USER', 2478),
+    ]
+
+
+#all_signal_samples_2018 = mfv_splitSUSY_samples_2018
+all_signal_samples_2018 = mfv_stopld_samples_2018
 ########
 # data
 ########
@@ -272,6 +329,20 @@ data_samples_2017 = [                                                       # in
 
 #FIXME: may need to reorganize how data is loaded for different cases
 JetHT_data_samples_2017 = []
+
+Lepton_data_samples_2017 = [
+    DataSample('SingleMuon2017B', '/SingleMuon/Run2017B-09Aug2019_UL2017-v1/AOD'),
+    DataSample('SingleMuon2017C', '/SingleMuon/Run2017C-09Aug2019_UL2017-v1/AOD'),
+    DataSample('SingleMuon2017D', '/SingleMuon/Run2017D-09Aug2019_UL2017-v1/AOD'),
+    DataSample('SingleMuon2017E', '/SingleMuon/Run2017E-09Aug2019_UL2017-v1/AOD'),
+    DataSample('SingleMuon2017F', '/SingleMuon/Run2017F-09Aug2019_UL2017-v1/AOD'),
+    DataSample('SingleElectron2017B', '/SingleElectron/Run2017B-09Aug2019_UL2017-v1/AOD'),
+    DataSample('SingleElectron2017C', '/SingleElectron/Run2017C-09Aug2019_UL2017-v1/AOD'),
+    DataSample('SingleElectron2017D', '/SingleElectron/Run2017D-09Aug2019_UL2017-v1/AOD'),
+    DataSample('SingleElectron2017E', '/SingleElectron/Run2017E-09Aug2019_UL2017-v1/AOD'),
+    DataSample('SingleElectron2017F', '/SingleElectron/Run2017F-09Aug2019_UL2017_rsb-v2/AOD'),
+    ]
+    
 
 auxiliary_data_samples_2017 = [
     DataSample('SingleMuon2017B', '/SingleMuon/Run2017B-09Aug2019_UL2017-v1/AOD'),
@@ -289,7 +360,8 @@ singleelectron_data_samples_2017 = [
     DataSample('SingleElectron2017F', '/SingleElectron/Run2017F-09Aug2019_UL2017_rsb-v2/AOD'),
 ]
 
-data_samples_2018 = [
+#Switching data with auxiliary data
+auxiliary_data_samples_2018 = [
     DataSample('MET2018A', '/MET/Run2018A-12Nov2019_UL2018-v3/AOD'),  
     DataSample('MET2018B', '/MET/Run2018B-12Nov2019_UL2018-v3/AOD'),  
     DataSample('MET2018C', '/MET/Run2018C-12Nov2019_UL2018_rsb-v1/AOD'), 
@@ -299,7 +371,7 @@ data_samples_2018 = [
 #FIXME: may need to reorganize how data is loaded for different cases
 JetHT_data_samples_2018 = []
 
-auxiliary_data_samples_2018 = [
+data_samples_2018 = [
     DataSample('SingleMuon2018A', '/SingleMuon/Run2018A-12Nov2019_UL2018-v3/AOD'),
     DataSample('SingleMuon2018B', '/SingleMuon/Run2018B-12Nov2019_UL2018-v3/AOD'),
     DataSample('SingleMuon2018C', '/SingleMuon/Run2018C-12Nov2019_UL2018-v3/AOD'),
@@ -326,9 +398,11 @@ _adbp3 = partial(_adbp, dbs_inst='phys03')
 __all__ = [
     'qcd_samples_2017',
     'qcd_samples_sum_2017',
+    'qcd_lep_samples_2017',
     'ttbar_samples_2017',
     'bjet_samples_2017',
     'leptonic_samples_2017',
+    'diboson_samples_2017',
     'met_samples_2017',
     'Zvv_samples_2017',
     'mfv_splitSUSY_samples_2017',
@@ -339,16 +413,19 @@ __all__ = [
     'HToSSTodddd_samples_2017',
     'qcd_samples_2018',
     'qcd_samples_sum_2018',
+    'qcd_lep_samples_2018',
     'ttbar_samples_2018',
     'bjet_samples_2018',
     'leptonic_samples_2018',
     'met_samples_2018',
     'Zvv_samples_2018',
     'mfv_splitSUSY_samples_2018',
+    'mfv_stopld_samples_2018',
     'data_samples_2017',
     'JetHT_data_samples_2017',
-    'auxiliary_data_samples_2017',
-    'singleelectron_data_samples_2017',
+    'Lepton_data_samples_2017',
+    #'auxiliary_data_samples_2017',
+    #'singleelectron_data_samples_2017',
     'data_samples_2018',
     'JetHT_data_samples_2018',
     'auxiliary_data_samples_2018',
@@ -394,7 +471,7 @@ for x in _alls:
 # miniaod
 ########
 
-for sample in data_samples_2017 + auxiliary_data_samples_2017 + singleelectron_data_samples_2017:
+for sample in data_samples_2017 + Lepton_data_samples_2017: #auxiliary_data_samples_2017 + singleelectron_data_samples_2017:
     sample.add_dataset('miniaod', sample.dataset.replace('AOD', 'MINIAOD'))
 for sample in data_samples_2018 + auxiliary_data_samples_2018 + egamma_data_samples_2018:
     sample.add_dataset('miniaod', sample.dataset.replace('AOD', 'MINIAOD'))
@@ -407,6 +484,23 @@ qcdht0700_2017.add_dataset('miniaod', '/QCD_HT700to1000_TuneCP5_PSWeights_13TeV-
 qcdht1000_2017.add_dataset('miniaod', '/QCD_HT1000to1500_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 15346629)
 qcdht1500_2017.add_dataset('miniaod', '/QCD_HT1500to2000_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v1/MINIAODSIM',    7497684)
 qcdht2000_2017.add_dataset('miniaod', '/QCD_HT2000toInf_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM',  5457021)
+
+qcdmupt15_2017.add_dataset('miniaod', '/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v1/MINIAODSIM', 17580112)
+qcdempt015_2017.add_dataset('miniaod', '/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v1/MINIAODSIM', 7908107)
+qcdempt020_2017.add_dataset('miniaod', '/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v1/MINIAODSIM', 14146285)
+qcdempt030_2017.add_dataset('miniaod', '/QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 8784542)
+qcdempt050_2017.add_dataset('miniaod', '/QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 10590542)
+qcdempt080_2017.add_dataset('miniaod', '/QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 9615719)
+qcdempt120_2017.add_dataset('miniaod', '/QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 9892235)
+qcdempt170_2017.add_dataset('miniaod', '/QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 3681297)
+qcdempt300_2017.add_dataset('miniaod', '/QCD_Pt-300toInf_EMEnriched_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 2214934)
+qcdbctoept020_2017.add_dataset('miniaod', '/QCD_Pt_20to30_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 14156589)
+qcdbctoept030_2017.add_dataset('miniaod', '/QCD_Pt_30to80_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 15153568)
+qcdbctoept080_2017.add_dataset('miniaod', '/QCD_Pt_80to170_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 15908608)
+qcdbctoept170_2017.add_dataset('miniaod', '/QCD_Pt_170to250_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 15588245)
+qcdbctoept250_2017.add_dataset('miniaod', '/QCD_Pt_250toInf_bcToE_TuneCP5_13TeV_pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v3/MINIAODSIM', 15557421)
+ 
+    
 ttbar_2017.add_dataset('miniaod', '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 249143052)
 #ttbarht0600_2017.add_dataset('miniaod', '/TTJets_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM',    81507662)
 #ttbarht0800_2017.add_dataset('miniaod', '/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM',   40191637)
@@ -425,6 +519,9 @@ zjetstonunuht0800_2017.add_dataset('miniaod', '/ZJetsToNuNu_HT-800To1200_TuneCP5
 zjetstonunuht1200_2017.add_dataset('miniaod', '/ZJetsToNuNu_HT-1200To2500_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v1/MINIAODSIM', 267125)
 zjetstonunuht2500_2017.add_dataset('miniaod', '/ZJetsToNuNu_HT-2500ToInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v1/MINIAODSIM', 172487)
 
+ww_2017.add_dataset('miniaod', '/WW_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 15883000)
+wz_2017.add_dataset('miniaod', '/ZZ_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 2708000)
+zz_2017.add_dataset('miniaod', '/WZ_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 7898000)
 
 # the 2018 samples have 'MLM' in them so this works still, ugh
 qcdht0200_2018.add_dataset('miniaod', '/QCD_HT200to300_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL18MiniAOD-106X_upgrade2018_realistic_v11_L1v1-v2/MINIAODSIM', 22826901)
@@ -500,10 +597,65 @@ for sample in HToSSTobbbb_samples_2017 + HToSSTodddd_samples_2017:
     sample.add_dataset('miniaod', sample.dataset, sample.nevents_orig)
 for sample in HToSSTodddd_samples_2017 :
     sample.add_dataset('miniaod', sample.dataset, sample.nevents_orig)
+for sample in mfv_stopld_samples_2018 :
+    sample.add_dataset('miniaod', sample.dataset, sample.nevents_orig)
 
 ########
 # ntuples
 ########
+#is this the correct ntuple version? 
+#mfv_stopld_tau001000um_M1000_2018
+#for x in mfv_stopld_tau000100um_M0200_2018, mfv_stopld_tau000300um_M0200_2018, mfv_stopld_tau000100um_M0600_2018, mfv_stopld_tau000300um_M0600_2018, mfv_stopld_tau000100um_M1000_2018, mfv_stopld_tau000300um_M1000_2018, mfv_stopld_tau000100um_M1600_2018, mfv_stopld_tau000300um_M1600_2018:                                                                                                                                                  
+#    x.add_dataset("ntupleulv1lepm")
+
+
+# #for tracking tree : cut 0
+# for x in ttbar_2017:
+#     x.add_dataset("trackingtreerulv1_lepm_cut0")
+for x in qcdempt015_2017, qcdmupt15_2017, qcdempt020_2017, qcdempt030_2017, qcdempt050_2017, qcdempt080_2017, qcdempt120_2017, qcdempt170_2017, qcdempt300_2017, qcdbctoept020_2017, qcdbctoept030_2017, qcdbctoept080_2017, qcdbctoept170_2017, qcdbctoept250_2017, wjetstolnu_2017, dyjetstollM10_2017, dyjetstollM50_2017, ttbar_2017, ww_2017, zz_2017, wz_2017, SingleMuon2017B, SingleMuon2017C, SingleMuon2017D, SingleMuon2017E, SingleMuon2017F, SingleElectron2017B, SingleElectron2017C, SingleElectron2017D, SingleElectron2017E, SingleElectron2017F:
+    x.add_dataset("trackingtreerulv1_lepm_cut0")
+
+#For tracking tree : cut 0
+# including info on leptons and lepton tracks
+for x in wjetstolnu_2017, dyjetstollM10_2017, dyjetstollM50_2017, SingleMuon2017B, SingleMuon2017C, SingleMuon2017D, SingleMuon2017E, SingleMuon2017F, SingleElectron2017B, SingleElectron2017C, SingleElectron2017D, SingleElectron2017E, SingleElectron2017F:
+    x.add_dataset("trackingtreerulv1_lepm_wlep")
+
+#including info on leptons (including lepton sel tracks & good lepton sel tracks 
+for x in wjetstolnu_2017, dyjetstollM10_2017, dyjetstollM50_2017, SingleMuon2017B, SingleMuon2017C, SingleMuon2017D, SingleMuon2017E, SingleMuon2017F, SingleElectron2017B, SingleElectron2017C, SingleElectron2017D, SingleElectron2017E, SingleElectron2017F:
+    x.add_dataset("trackingtreerulv1_lepm_wsellep")
+    
+#for tracking tree : cut 1
+for x in wjetstolnu_2017, dyjetstollM10_2017, dyjetstollM50_2017:
+    x.add_dataset("trackingtreerulv1_lepm_cut1")
+    
+#bakcground mc vs data (only single lepton triggers used) 
+qcdmupt15_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-a0e559ed691b9ba065183ce34b4d6106/USER', 985)
+qcdempt020_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-84408862823d6968fd890862da0d49b2/USER', 0)
+qcdempt030_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-7db081dba1d39226de5de2eea02e41d3/USER', 1)
+qcdempt050_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-5dc866fd0d951550e62c26721b796af2/USER', 2)
+qcdempt080_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-fcc1efe099b4d9a07a1e00baab9762b4/USER', 16)
+qcdempt120_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-2cea27cdaadd2421bc6a21e5693462f5/USER', 25)
+qcdempt170_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-46a7c4774f49303236df584aebfd2749/USER', 19)
+qcdbctoept020_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt_20to30_bcToE_TuneCP5_13TeV_pythia8/awarden-NtupleULV1Lepm_2017-9766de266b7ac90ce15868ee7c83b90a/USER', 3)
+qcdbctoept030_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt_30to80_bcToE_TuneCP5_13TeV_pythia8/awarden-NtupleULV1Lepm_2017-ee19d520c8b663773bb3137a0a593d59/USER', 22)
+qcdbctoept080_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt_80to170_bcToE_TuneCP5_13TeV_pythia8/awarden-NtupleULV1Lepm_2017-b258e3358ddb16518aebce917e89f6d0/USER', 127)
+qcdbctoept170_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt_170to250_bcToE_TuneCP5_13TeV_pythia8/awarden-NtupleULV1Lepm_2017-45aa456833854841dc220e4781205803/USER', 254)
+qcdbctoept250_2017.add_dataset('ntupleulv1lepm', '/QCD_Pt_250toInf_bcToE_TuneCP5_13TeV_pythia8/awarden-NtupleULV1Lepm_2017-19ea96c21beccbec48123f2a87f7da56/USER', 225)
+wjetstolnu_2017.add_dataset('ntupleulv1lepm', '/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/awarden-NtupleULV1Lepm_2017-2a9d14a75057a2560ebdc7a043162c80/USER', 15086)
+dyjetstollM10_2017.add_dataset('ntupleulv1lepm', '/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/awarden-NtupleULV1Lepm_2017-0258fd3aaebbe51ab595a2958eb34147/USER', 620)
+dyjetstollM50_2017.add_dataset('ntupleulv1lepm', '/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/awarden-NtupleULV1Lepm_2017-541a5b29e0584826721d00f6a8f1f3ca/USER', 47108)
+ww_2017.add_dataset('ntupleulv1lepm', '/WW_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-4426673a03f6d0e98154aa4c197eca5d/USER', 5428)
+zz_2017.add_dataset('ntupleulv1lepm', '/WZ_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-836ba84ef310ba8aa80d049840b8ab52/USER', 4911)
+wz_2017.add_dataset('ntupleulv1lepm', '/ZZ_TuneCP5_13TeV-pythia8/awarden-NtupleULV1Lepm_2017-3e09513b56d2b31d08d63c947bfb8a7e/USER', 1800)
+SingleMuon2017C.add_dataset('ntupleulv1lepm', '/SingleMuon/awarden-NtupleULV1Lepm_2017-ee46985df5e00f16f85663aec6b35211/USER', 21458)
+SingleMuon2017E.add_dataset('ntupleulv1lepm', '/SingleMuon/awarden-NtupleULV1Lepm_2017-098e227518fc33335cef81109c342887/USER', 23991)
+SingleMuon2017F.add_dataset('ntupleulv1lepm', '/SingleMuon/awarden-NtupleULV1Lepm_2017-5ac1f06debba0541ff3bb1890f902adc/USER', 24597)
+SingleElectron2017C.add_dataset('ntupleulv1lepm', '/SingleElectron/awarden-NtupleULV1Lepm_2017-2ccfd2e730c1a6c2e84728d94a6ce605/USER', 8845)
+SingleElectron2017F.add_dataset('ntupleulv1lepm', '/SingleElectron/awarden-NtupleULV1Lepm_2017-d2f51bcb845d79fddcfab238bb3fc4d2/USER', 7572)
+for x in ttbar_2017, SingleMuon2017B, SingleMuon2017D, SingleElectron2017B, SingleElectron2017D, SingleElectron2017E:
+    x.add_dataset("ntupleulv1lepm")
+
+
 
 ########
 # automatic condor declarations for ntuples
@@ -514,7 +666,9 @@ for s in registry.all():
         for ds4 in 'ntuple', 'nr_':
             if ds.startswith(ds4):
                 s.datasets[ds].condor = True
-                s.datasets[ds].xrootd_url = xrootd_sites['T3_US_FNALLPC']
+                #s.datasets[ds].xrootd_url = xrootd_sites['T3_US_FNALLPC']
+                s.datasets[ds].xrootd_url = xrootd_sites['T2_US_Wisconsin']
+                
 
 ########
 # other condor declarations, generate condorable dict with Shed/condor_list.py
@@ -528,7 +682,13 @@ condorable = {
         "miniaod": mfv_splitSUSY_samples_2017 + mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + mfv_stopbbarbbar_samples_2017
         },
     "T1_US_FNAL_Disk": {
-        "miniaod": [EGamma2018A, EGamma2018B, SingleMuon2017B, SingleMuon2017D, SingleElectron2017B, SingleElectron2017D, SingleElectron2017E, MET2018D, qcdht0300_2018, qcdht0700_2018, qcdht1000_2018, qcdht1500_2018, zjetstonunuht2500_2018, qcdht0200_2017, qcdht0500_2017, qcdht0700_2017, qcdht0300_2017, ttbar_2017],
+        "miniaod": [EGamma2018A, EGamma2018B, SingleMuon2017B, SingleMuon2017D, SingleMuon2017E, SingleElectron2017B, SingleElectron2017D, SingleElectron2017E, MET2018D, qcdht0300_2018, qcdht0700_2018, qcdht1000_2018, qcdht1500_2018, zjetstonunuht2500_2018, qcdht0200_2017, qcdht0500_2017, qcdht0700_2017, qcdht0300_2017, ttbar_2017],
+        },
+    "T2_US_Wisconsin": {
+        "miniaod": mfv_stopld_samples_2018
+        },
+    "T2_US_Purdue": {
+        "miniaod" : [SingleElectron2017C],
         },
 }
 
@@ -564,7 +724,8 @@ for ds in 'main', 'miniaod':
     #    s.datasets[ds].notes['buggedpileup2017'] = True
 
     # set up jsons
-    for y,ss in (2017, data_samples_2017 + auxiliary_data_samples_2017 + singleelectron_data_samples_2017), (2018, data_samples_2018 + auxiliary_data_samples_2018 + egamma_data_samples_2018):
+    #for y,ss in (2017, data_samples_2017 + auxiliary_data_samples_2017 + singleelectron_data_samples_2017), (2018, data_samples_2018 + auxiliary_data_samples_2018 + egamma_data_samples_2018):
+    for y,ss in (2017, data_samples_2017 + Lepton_data_samples_2017), (2018, data_samples_2018 + auxiliary_data_samples_2018 + egamma_data_samples_2018):
         for s in ss:
             s.datasets[ds].json      = json_path('ana_%s.json'      % y)
             s.datasets[ds].json_10pc = json_path('ana_%s_10pc.json' % y)

@@ -3,8 +3,10 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 debug = 'debug' in sys.argv
 
-sample_files(process, 'mfv_neu_tau010000um_M1200_2017', 'main', 1)
-tfileservice(process, 'gen_histos.root')
+#sample_files(process, 'mfv_neu_tau010000um_M1200_2017', 'main', 1)
+sample_files(process, 'mfv_stopld_tau001000um_M1000_2018', 'miniaod', 5)
+#tfileservice(process, 'gen_histos.root')
+tfileservice(process, 'stopld_genhisto_M1000_1mm.root')
 file_event_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.GenParticles_cff')
@@ -129,7 +131,10 @@ StopStopTo2Dbar2Dbar_M_800_CTau_300um /store/user/tucker/cfgtest/StopStopTo2Dbar
 StopStopTo2Dbar2Dbar_M_800_CTau_30mm /store/user/tucker/cfgtest/StopStopTo2Dbar2Dbar_M_800_CTau_30mm.root 10000
 ''', condor=True)
 
-    ms = MetaSubmitter('GenHistos_Test%i'%year)
+    samples = pick_samples(dataset, all_signal = True)
+
+    ms = MetaSubmitter('GenHistos_Test%i'%year, dataset=dataset)
+    ms.condor.stageout_files = 'all'
     ms.submit(samples)
 
 elif __name__ == '__main__' and hasattr(sys, 'argv') and 'validate' in sys.argv:

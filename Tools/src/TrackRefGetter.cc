@@ -13,8 +13,9 @@ namespace jmt {
 
     last_cacheIdentifier = event.cacheIdentifier();
 
-    if (input_is_miniaod)
+    if (input_is_miniaod) 
       event.getByToken(unpacked_candidate_tracks_map_token, unpacked_candidate_tracks_map);
+
     for (size_t i = 0, ie = tracks_maps_tokens.size(); i < ie; ++i)
       event.getByToken(tracks_maps_tokens[i], tracks_maps[i]);
 
@@ -97,9 +98,44 @@ namespace jmt {
           r.push_back(tk);
       }
     }
-
+    
     return r;
   }
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  std::vector<reco::TrackRef> TrackRefGetter::mutracks(const edm::Event& event, const pat::Muon& mu) {
+    setup_event(event);
+    std::vector<reco::TrackRef> r;
+
+    
+    reco::TrackRef tk = mu.muonBestTrack();
+    if (verbose) {
+      std::cout << " mu " << mu.pt() << "," << mu.eta() << "," << mu.phi() << " ";
+      std::cout << "\n";
+      std::cout << " tkmu " << tk->pt() << "," << tk->eta() << "," << tk->phi() << " ";
+      std::cout << "\n";
+    }
+    //r.push_back(tk);
+    // for (auto m : tracks_maps)
+    //  tk = m->find(tk);
+
+    //   if (tk.isNonnull()) {
+    
+    r.push_back(tk);
+    
+    // if (verbose) {
+    // 	std::cout << "    in map -> track " << tk->charge()*tk->pt() << "," << tk->eta() << "," << tk->phi() << "," << tk->dxy() << "," << tk->dz() << " ";
+    // 	std::cout << "\n";
+    //   }
+    // }
+    
+    return r;
+  }
+ 
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
 
   std::vector<std::pair<reco::TrackRef,int>> TrackRefGetter::tracks(const edm::Event& event, const reco::VertexRef& v) {
     setup_event(event);
@@ -141,29 +177,18 @@ namespace jmt {
     }
     return has;
   }
-
+  
   int TrackRefGetter::has_track(const edm::Event& e, const reco::VertexRef& v, const reco::TrackRef& tk) {
     for (auto rq : tracks(e,v))
       if (rq.first == tk)
         return rq.second;
     return -1;
   }
-  
-  /*size_t TrackRefGetter::ijet(const edm::Event& event, const pat::JetCollection& jets, const reco::TrackRef& tk) {
-    for (size_t i = 0, ie = jets.size(); i < ie; ++i)
-      for (reco::TrackRef r : tracks(event, jets[i]))
-        if (r == tk)
-          return i;
 
-    return size_t(-1);
+  // pointless ?
+  bool TrackRefGetter::is_mutrack(const edm::Event& e, const pat::Muon& mu, const reco::TrackRef& tk) {
+    const auto ms = mutracks(e, mu);
+    const bool ismuon= std::find(ms.begin(), ms.end(), tk) != ms.end();
+    return ismuon;
   }
-
-  size_t TrackRefGetter::ivertex(const edm::Event& event, const reco::VertexCollection& vertices, const reco::TrackRef& tk) {
-    for (size_t i = 0, ie = vertices->size(); i < ie; ++i)
-      for (reco::TrackRef r : tracks(event, vertices[i], 0))
-        if (r == tk)
-          return i;
-
-    return size_t(-1);
-  }*/
 }

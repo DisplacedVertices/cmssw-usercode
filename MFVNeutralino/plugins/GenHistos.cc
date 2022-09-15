@@ -33,7 +33,9 @@ private:
 
   TH1F* h_valid;
 
-  TH1F* NumLeptons;
+  //TH1F* NumLeptons;
+  // TH1F* NumDowns;
+  TH1F* DaughterID;
   TH2F* DecayType;
 
   BasicKinematicHistsFactory* bkh_factory;
@@ -61,8 +63,14 @@ private:
   TH1F* h_lsp_dist3d;
   TH1F* h_lsp_angle2;
   TH1F* h_lsp_angle3;
+  TH1F* h_lsp_vx;
+  TH1F* h_lsp_vy;
 
   TH2F* h_vtx[5];
+  //TH1F* h_vtx_vx[5];
+  //TH1F* h_vtx_vy[5];
+  // TH1F* h_vtx_dx[5];
+  // TH1F* h_vtx_dy[5];
   TH1F* h_r2d[5];
   TH1F* h_r3d[5];
   TH1F* h_ctau;
@@ -70,6 +78,8 @@ private:
   TH2F* h_r3d_bhadron_v_bquark;
   TH1F* h_lspbeta;
   TH1F* h_lspbetagamma;
+  TH1F* h_lspbetagammactau;
+  TH1F* h_lspbetagammactau_b;
   TH1F* h_max_deta;
   TH1F* h_min_deta;
   TH1F* h_max_dphi;
@@ -114,6 +124,11 @@ private:
   TH2F* h_bquarks_dR_dphi;
 
   TH1F* h_npartons_in_acc;
+  TH1F* h_gen_pdgID;
+  TH1F* h_gen_pdgID_posLarge;
+  TH1F* h_gen_pdgID_negLarge;
+  TH1F* h_gen_pdgID_posExLarge;
+
 
   TH1F* h_npartons_60;
   TH1F* h_njets_60;
@@ -160,8 +175,11 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
 
   h_valid = fs->make<TH1F>("h_valid", "", 2, 0, 2);
 
-  NumLeptons = fs->make<TH1F>("NumLeptons", "", 3, 0, 3);
-  NumLeptons->SetTitle(";number of leptons from top decays;events");
+  //  NumLeptons = fs->make<TH1F>("NumLeptons", ";number of leptons;Events", 5, 0, 5);
+  //  NumDowns = fs->make<TH1F>("NumDowns", ";number of down quarks;Events", 5, 0, 5);
+  DaughterID = fs->make<TH1F>("DaughterID", ";daughter genpdgID;Events", 40, -20, 20);
+  
+  //NumLeptons->SetTitle(";number of leptons from top decays;events");
   DecayType = fs->make<TH2F>("DecayType", "", 6, 0, 6, 6, 0, 6);
   DecayType->SetTitle(";decay mode 0;decay mode 1");
 
@@ -362,9 +380,16 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   h_lsp_angle2 = fs->make<TH1F>("h_lsp_angle2", ";cos(angle in r-#phi plane) between LSP momenta;Events/0.01", 202, -1.01, 1.01);
   h_lsp_angle3 = fs->make<TH1F>("h_lsp_angle3", ";cos(3D angle) between LSP momenta;Events/0.01", 202, -1.01, 1.01);
 
+  h_lsp_vx = fs->make<TH1F>("h_lsp_vx", ";vx position of LSP (cm);Events/0.01 cm", 200, -1, 1);
+  h_lsp_vy = fs->make<TH1F>("h_lsp_vy", ";vy position of LSP (cm);Events/0.01 cm", 200, -1, 1);
+
   const char* names[9] = {"lsp", "strange", "bottom", "bhadron", "from21", "from22", "fromq", "from21only", "from22only"};
   for (int i = 0; i < 5; ++i) {
     h_vtx[i] = fs->make<TH2F>(TString::Format("h_vtx_%s", names[i]), TString::Format(";%s vx (cm); %s vy (cm)", names[i], names[i]), 200, -1, 1, 200, -1, 1);
+    // h_vtx_vy[i] = fs->make<TH1F>(TString::Format("h_vtx_vy%s", names[i]), TString::Format("; %s vy (cm);Events/0.01 cm", names[i]), 200, -1, 1);
+    // h_vtx_vx[i] = fs->make<TH1F>(TString::Format("h_vtx_vx%s", names[i]), TString::Format(";%s vx (cm);Events/0.01 cm", names[i]), 200, -1, 1);
+    // h_vtx_dy[i] = fs->make<TH1F>(TString::Format("h_vtx_dy%s", names[i]), TString::Format("; %s vy - y0 (cm);Events/0.01 cm", names[i]), 200, -1, 1);
+    // h_vtx_dx[i] = fs->make<TH1F>(TString::Format("h_vtx_dx%s", names[i]), TString::Format(";%s vx - x0 (cm);Events/0.01 cm", names[i]), 200, -1, 1);
     h_r2d[i] = fs->make<TH1F>(TString::Format("h_r2d_%s", names[i]), TString::Format(";%s 2D distance (cm);Events/0.01 cm", names[i]), 500, 0, 5);
     h_r3d[i] = fs->make<TH1F>(TString::Format("h_r3d_%s", names[i]), TString::Format(";%s 3D distance (cm);Events/0.01 cm", names[i]), 500, 0, 5);
   }
@@ -374,6 +399,8 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   h_r3d_bhadron_v_bquark = fs->make<TH2F>("h_r3d_bhadron_v_bquark", ";b quark 3D distance (cm);b hadron 3D distance (cm)", 100, 0, 2, 100, 0, 2);
   h_lspbeta = fs->make<TH1F>("h_lspbeta", ";LSP #beta;Events/0.01", 100, 0, 1);
   h_lspbetagamma = fs->make<TH1F>("h_lspbetagamma", ";LSP #beta#gamma;Events/0.1", 100, 0, 10);
+  h_lspbetagammactau = fs->make<TH1F>("h_lspbetagammactau", ";LSP #beta#gamma c#tau;Events/0.001", 1000, 0, 1);
+  h_lspbetagammactau_b = fs->make<TH1F>("h_lspbetagammactau_b", ";LSP #beta#gamma c#tau;Events/0.001", 1000, 0, 1);
 
   h_max_dphi = fs->make<TH1F>("h_max_dphi", ";max |#Delta#phi| between partons;Events/0.05", 100, 0, 5);
   h_min_dphi = fs->make<TH1F>("h_min_dphi", ";min |#Delta#phi| between partons;Events/0.05", 100, 0, 5);
@@ -429,12 +456,17 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
 
   h_npartons_in_acc = fs->make<TH1F>("h_npartons_in_acc", ";number of LSP daughters in acceptance;Events", 40, 0, 40);
   h_npartons_60 = fs->make<TH1F>("h_npartons_60", ";number of partons with E_{T} > 60 GeV;Events", 40, 0, 40);
+  h_gen_pdgID = fs->make<TH1F>("h_gen_pdgID", ";gen particle pdgID;Events", 402, -201, 201);
+  h_gen_pdgID_posLarge = fs->make<TH1F>("h_gen_pdgID_posLarge", ";gen particle pdgID;Events", 302, 201, 501);
+  h_gen_pdgID_negLarge = fs->make<TH1F>("h_gen_pdgID_negLarge", ";gen particle pdgID;Events", 302, -501, -201);
+  h_gen_pdgID_posExLarge = fs->make<TH1F>("h_gen_pdgID_posExLarge", ";gen particle pdgID;Events", 501, 2200, 2701);
+
   h_njets_60 = fs->make<TH1F>("h_njets_60", ";number of jets with E_{T} > 60 GeV;Events", 20, 0, 20);
   h_njets_40 = fs->make<TH1F>("h_njets_40", ";number of jets with E_{T} > 40 GeV;Events", 20, 0, 20); 
   h_njets_30 = fs->make<TH1F>("h_njets_30", ";number of jets with E_{T} > 30 GeV;Events", 20, 0, 20);
   h_njets_20 = fs->make<TH1F>("h_njets_20", ";number of jets with E_{T} > 20 GeV;Events", 20, 0, 20);
-  h_ht = fs->make<TH1F>("h_ht", ";#SigmaH_{T} of jets with E_{T} > 20 GeV;Events/100 GeV", 100, 0, 2000);
-  h_ht40 = fs->make<TH1F>("h_ht40", ";#SigmaH_{T} of jets with E_{T} > 40 GeV;Events/100 GeV", 100, 0, 2000);
+  h_ht = fs->make<TH1F>("h_ht", ";#SigmaH_{T} of jets with E_{T} > 20 GeV;Events/100 GeV", 100, 0, 10000);
+  h_ht40 = fs->make<TH1F>("h_ht40", ";#SigmaH_{T} of jets with E_{T} > 40 GeV;Events/100 GeV", 100, 0, 10000);
 
   NJets = fs->make<TH1F>("NJets", ";number of jets;Events", 20, 0, 20);
   Jets = bkh_factory->make("Jets", "gen jets");
@@ -510,7 +542,9 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     mci_warned = true;
   }
   else {
-    NumLeptons->Fill(mci->num_leptonic());
+    
+      
+    //NumLeptons->Fill(mci->num_leptonic());
     DecayType->Fill(mci->decay_type()[0], mci->decay_type()[1]);
 
     for (int i = 0; i < 2; ++i) {
@@ -519,6 +553,17 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
       const double lspbetagamma = lspbeta/sqrt(1-lspbeta*lspbeta);
       h_lspbeta->Fill(lspbeta);
       h_lspbetagamma->Fill(lspbetagamma);
+      h_lsp_vx->Fill(lsp->vx());
+      h_lsp_vy->Fill(lsp->vy());
+
+      const std::vector<reco::GenParticleRef> daughter  = mci->secondaries(i);
+      // const int dauID = daughter->pdgID();
+      for (int j = 0; j < 2; ++j) {
+      	DaughterID->Fill(daughter[j]->pdgId());
+      }
+
+      
+   
 
       const std::vector<reco::GenParticleRef> particles = mci->visible(i);
       const int npar = particles.size();
@@ -536,11 +581,16 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
         r2d[j] = mag(dx[j], dy[j]);
         r3d[j] = mag(dx[j], dy[j], dz[j]);
 
+
         // don't fill most of the plots for cases w/ two visible particles; the plots assume the visible particles are ordered according to names[9] above.
         // certainly not true for e.g. H->LLPs, LLP->b bbar. The LLP decay positions are correct, so only fill for j == 0
         // FIXME consider improving!
-        if (j > 0 && npar == 2) continue;
+	if (j > 0 && npar == 2) continue;
         h_vtx[j]->Fill(dx[j], dy[j]);
+	//	h_vtx_dy[j]->Fill(dy[j]);
+	//	h_vtx_dx[j]->Fill(dx[j]);
+	//	h_vtx_vy[j]->Fill(particles[j]->vy());
+	//	h_vtx_vx[j]->Fill(particles[j]->vx());	
         h_r2d[j]->Fill(r2d[j]);
         h_r3d[j]->Fill(r3d[j]);
       }
@@ -548,7 +598,9 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
       const double ctau = r3d[0]/lspbetagamma;
       h_ctau->Fill(ctau);
       h_ctaubig->Fill(ctau);
-
+      h_lspbetagammactau->Fill(r3d[0]);
+      h_lspbetagammactau_b->Fill(lspbetagamma * ctau);
+      
       float min_deta =  1e99;
       float max_deta = -1e99;
       float min_dphi =  1e99;
@@ -615,7 +667,22 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
     }
     h_npartons_in_acc->Fill(npartons_in_acc);
     h_npartons_60->Fill(npartons_60);
+
     
+    for (const reco::GenParticle& gen : *gen_particles) {
+      h_gen_pdgID->Fill(gen.pdgId());
+      if (gen.pdgId() > 200) {
+	h_gen_pdgID_posLarge->Fill(gen.pdgId());
+      }
+      if (gen.pdgId() > 2200) {
+	h_gen_pdgID_posExLarge->Fill(gen.pdgId());
+      }
+      if (gen.pdgId() < -200) {
+	h_gen_pdgID_negLarge->Fill(gen.pdgId());
+      }
+    }
+       
+
     if (mci->type() == mfv::mci_MFVtbs) { // || mci->type() == mci_Ttbar) {
       for (int i = 0; i < 2; ++i) {
         fill(Lsps           [i], &*mci->lsp(i));
@@ -697,6 +764,14 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
         fill(Downs          [i], &*mci->down(i));
       }
     }
+    // if (mci->type() == mfv::mci_stoplq) {
+    //   for (int i = 0; i < 2; ++i) {
+    //  	fill(Lsps           [i], &*mci->lsp(i));
+    //  	fill(Downs          [i], &*mci->down(i));
+    //  	fill(Bottoms        [i], &*mci->primary_bottom(i));
+    //   }
+    // }
+    
     else if (mci->type() == mfv::mci_XX4j || mci->type() == mfv::mci_MFVddbar || mci->type() == mfv::mci_MFVbbbar || mci->type() == mfv::mci_MFVlq || mci->type() == mfv::mci_stopdbardbar) {
       for (int i = 0; i < 2; ++i) {
         fill(Hs[i], &*mci->primaries()[i]);

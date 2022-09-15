@@ -225,6 +225,7 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
                 'signal':           ( 1,     200),
                 'JetHT':            (15, 1350000),
                 'MET':              (15, 1350000),
+                'Lepton':           (15, 1350000),
                 'qcdht0300_2017':   (5, 3130000),
                 'qcdht0500_2017':   (3, 3130000),
                 'qcdht0700_2017':   (5, 3130000),
@@ -262,6 +263,8 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
                 name = 'JetHT'
             elif 'MET' in name:
                 name = 'MET'
+            elif 'Lepton' in name:
+                name = 'Lepton'
             elif sample.is_signal:
                 name = 'signal'
                 sample.split_by = 'events'
@@ -310,15 +313,15 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
 ####
 
 def pick_samples(dataset, both_years=False,
-                 qcd=False, ttbar=False, all_signal=False, data=False, leptonic=False, bjet=False,  
-                 splitSUSY=False, Zvv=False, met=False,
+                 qcd=False, qcd_lep=False, ttbar=False, all_signal=False, data=False, Lepton_data=False, leptonic=False, bjet=False,  
+                 splitSUSY=False, Zvv=False, met=False, diboson=False,
                  span_signal=False):
 
     if span_signal:
         print 'cannot use both span and all_signal, turning off the latter'
         all_signal = False
 
-    argnames = 'qcd', 'ttbar', 'all_signal', 'span_signal', 'data', 'leptonic', 'bjet', 'splitSUSY', 'Zvv', 'met'
+    argnames = 'qcd', 'qcd_lep', 'ttbar', 'all_signal', 'span_signal', 'data', 'Lepton_data', 'leptonic', 'bjet', 'splitSUSY', 'Zvv', 'met', 'diboson'
     args = dict([(a,eval(a)) for a in argnames])
     if not set(args.values()).issubset([True, False, 'only']):
         raise ValueError('arg must be one of True, False, "only"')
@@ -338,6 +341,7 @@ def pick_samples(dataset, both_years=False,
     samples = []
     for a in argnames:
         if args[a]:
+            print a
             for yr in years:
                 samples += getattr(Samples, '%s_samples_%i' % (a, yr))
     return [s for s in samples if s.has_dataset(dataset)]

@@ -213,7 +213,9 @@ namespace jmt {
     p_maxpxhit_ = 0;
     p_which_jet_ = 0;
     p_which_pv_ = 0;
-    p_which_sv_ = 0;
+    //p_which_sv_ = 0;
+    p_ismu_  = 0;
+    p_isel_ = 0;
     p_misc_ = 0;
   }
 
@@ -239,7 +241,9 @@ namespace jmt {
     maxpxhit_.clear();
     which_jet_.clear();
     which_pv_.clear();
-    which_sv_.clear();
+    // which_sv_.clear();
+    ismu_.clear();
+    isel_.clear();
     misc_.clear();
   }
 
@@ -265,7 +269,9 @@ namespace jmt {
     t->Branch(TString::Format("%s_maxpxhit", pfx()), &maxpxhit_);
     t->Branch(TString::Format("%s_which_jet", pfx()), &which_jet_);
     t->Branch(TString::Format("%s_which_pv", pfx()), &which_pv_);
-    t->Branch(TString::Format("%s_which_sv", pfx()), &which_sv_);
+    // t->Branch(TString::Format("%s_which_sv", pfx()), &which_sv_);
+    t->Branch(TString::Format("%s_ismu", pfx()), &ismu_);
+    t->Branch(TString::Format("%s_isel", pfx()), &isel_);
     t->Branch(TString::Format("%s_misc", pfx()), &misc_);
 
     t->SetAlias(TString::Format("n%ss", pfx()), TString::Format("%s_qpt@.size()", pfx()));
@@ -307,7 +313,9 @@ namespace jmt {
     t->SetBranchAddress(TString::Format("%s_maxpxhit", pfx()), &p_maxpxhit_);
     t->SetBranchAddress(TString::Format("%s_which_jet", pfx()), &p_which_jet_);
     t->SetBranchAddress(TString::Format("%s_which_pv", pfx()), &p_which_pv_);
-    t->SetBranchAddress(TString::Format("%s_which_sv", pfx()), &p_which_sv_);
+    // t->SetBranchAddress(TString::Format("%s_which_sv", pfx()), &p_which_sv_);
+    t->SetBranchAddress(TString::Format("%s_ismu", pfx()), &p_ismu_);
+    t->SetBranchAddress(TString::Format("%s_isel", pfx()), &p_isel_);
     t->SetBranchAddress(TString::Format("%s_misc", pfx()), &p_misc_);
   }
 
@@ -333,7 +341,9 @@ namespace jmt {
     maxpxhit_ = *p_maxpxhit_;
     which_jet_ = *p_which_jet_;
     which_pv_ = *p_which_pv_;
-    which_sv_ = *p_which_sv_;
+    //which_sv_ = *p_which_sv_;
+    ismu_ = *p_ismu_;
+    isel_ = *p_isel_;
     misc_ = *p_misc_;
   }
 
@@ -401,7 +411,6 @@ namespace jmt {
     misc_ = *p_misc_;
   }
 
-  ////
 
   PFSubNtuple::PFSubNtuple() {
     set_pfx("pf");
@@ -422,4 +431,315 @@ namespace jmt {
     t->SetBranchAddress(TString::Format("%s_met_x", pfx()), &met_x_);
     t->SetBranchAddress(TString::Format("%s_met_y", pfx()), &met_y_);
   }
+
+  //////
+  MuonsSubNtuple::MuonsSubNtuple() {
+    set_pfx("muons");
+    clear();
+    p_qpt_ = 0;
+    p_eta_ = 0;
+    p_phi_ = 0;
+    p_isLoose_ = 0;
+    p_isMed_ = 0;
+    p_isTight_ = 0;
+    p_iso_ = 0;
+    p_vx_ = 0;
+    p_vy_ = 0;
+    p_vz_ = 0;
+    p_cov_00_ = 0;
+    p_cov_11_ = 0;
+    p_cov_14_ = 0;
+    p_cov_22_ = 0;
+    p_cov_23_ = 0;
+    p_cov_33_ = 0;
+    p_cov_34_ = 0;
+    p_cov_44_ = 0;
+    p_chi2dof_ = 0;
+    p_hp_ = 0;
+    p_minhit_ = 0;
+    p_maxhit_ = 0;
+    p_maxpxhit_ = 0;
+  }
+
+  void MuonsSubNtuple::clear() {
+    qpt_.clear();
+    eta_.clear();
+    phi_.clear();
+    isLoose_.clear();
+    isMed_.clear();
+    isTight_.clear();
+    iso_.clear();
+    vx_.clear();
+    vy_.clear();
+    vz_.clear();
+    cov_00_.clear();
+    cov_11_.clear();
+    cov_14_.clear();
+    cov_22_.clear();
+    cov_23_.clear();
+    cov_33_.clear();
+    cov_34_.clear();
+    cov_44_.clear();
+    chi2dof_.clear();
+    hp_.clear();
+    minhit_.clear();
+    maxhit_.clear();
+    maxpxhit_.clear();
+
+  }
+
+  void MuonsSubNtuple::write_to_tree(TTree* t) {
+    t->Branch(TString::Format("%s_qpt", pfx()), &qpt_);
+    t->Branch(TString::Format("%s_eta", pfx()), &eta_);
+    t->Branch(TString::Format("%s_phi", pfx()), &phi_);
+    t->Branch(TString::Format("%s_isLoose", pfx()), &isLoose_);
+    t->Branch(TString::Format("%s_isMed", pfx()), &isMed_);
+    t->Branch(TString::Format("%s_isTight", pfx()), &isTight_);
+    t->Branch(TString::Format("%s_iso", pfx()), &iso_);
+    t->Branch(TString::Format("%s_vx", pfx()), &vx_);
+    t->Branch(TString::Format("%s_vy", pfx()), &vy_);
+    t->Branch(TString::Format("%s_vz", pfx()), &vz_);
+    t->Branch(TString::Format("%s_cov_00", pfx()), &cov_00_);
+    t->Branch(TString::Format("%s_cov_11", pfx()), &cov_11_);
+    t->Branch(TString::Format("%s_cov_14", pfx()), &cov_14_);
+    t->Branch(TString::Format("%s_cov_22", pfx()), &cov_22_);
+    t->Branch(TString::Format("%s_cov_23", pfx()), &cov_23_);
+    t->Branch(TString::Format("%s_cov_33", pfx()), &cov_33_);
+    t->Branch(TString::Format("%s_cov_34", pfx()), &cov_34_);
+    t->Branch(TString::Format("%s_cov_44", pfx()), &cov_44_);
+    t->Branch(TString::Format("%s_chi2dof", pfx()), &chi2dof_);
+    t->Branch(TString::Format("%s_hp", pfx()), &hp_);
+    t->Branch(TString::Format("%s_minhit", pfx()), &minhit_);
+    t->Branch(TString::Format("%s_maxhit", pfx()), &maxhit_);
+    t->Branch(TString::Format("%s_maxpxhit", pfx()), &maxpxhit_);
+
+    t->SetAlias(TString::Format("%s_q", pfx_), TString::Format("%s_qpt > 0 ? 1 : -1", pfx()));
+    t->SetAlias(TString::Format("%s_pt", pfx_), TString::Format("abs(%s_qpt)", pfx()));
+    t->SetAlias(TString::Format("%s_npxhits", pfx_), TString::Format("%s_hp & 0x7", pfx()));
+    t->SetAlias(TString::Format("%s_nsthits", pfx_), TString::Format("(%s_hp >> 3) & 0x1f", pfx()));
+    t->SetAlias(TString::Format("%s_npxlayers", pfx_), TString::Format("(%s_hp >> 8) & 0x7", pfx()));
+    t->SetAlias(TString::Format("%s_nstlayers", pfx_), TString::Format("(%s_hp >> 11) & 0x1f", pfx()));
+    t->SetAlias(TString::Format("%s_nhits", pfx_), TString::Format("%s_npxhits + %s_nsthits", pfx(), pfx()));
+    t->SetAlias(TString::Format("%s_nlayers", pfx_), TString::Format("%s_npxlayers + %s_nstlayers", pfx(), pfx()));
+    t->SetAlias(TString::Format("%s_min_r", pfx_), TString::Format("%s_minhit & 0xf", pfx()));
+    t->SetAlias(TString::Format("%s_min_z", pfx_), TString::Format("%s_minhit >> 4", pfx()));
+    t->SetAlias(TString::Format("%s_max_r", pfx_), TString::Format("%s_maxhit & 0xf", pfx()));
+    t->SetAlias(TString::Format("%s_max_z", pfx_), TString::Format("%s_maxhit >> 4", pfx()));
+    t->SetAlias(TString::Format("%s_maxpx_r", pfx_), TString::Format("%s_maxpxhit & 0xf", pfx()));
+    t->SetAlias(TString::Format("%s_maxpx_z", pfx_), TString::Format("%s_maxpxhit >> 4", pfx()));
+    
+  }
+
+  void MuonsSubNtuple::read_from_tree(TTree* t) {
+    t->SetBranchAddress(TString::Format("%s_qpt", pfx()), &p_qpt_);
+    t->SetBranchAddress(TString::Format("%s_eta", pfx()), &p_eta_);
+    t->SetBranchAddress(TString::Format("%s_phi", pfx()), &p_phi_);
+    t->SetBranchAddress(TString::Format("%s_isLoose", pfx()), &p_isLoose_);
+    t->SetBranchAddress(TString::Format("%s_isMed", pfx()), &p_isMed_);
+    t->SetBranchAddress(TString::Format("%s_isTight", pfx()), &p_isTight_);
+    t->SetBranchAddress(TString::Format("%s_iso", pfx()), &p_iso_);
+    t->SetBranchAddress(TString::Format("%s_vx", pfx()), &p_vx_);
+    t->SetBranchAddress(TString::Format("%s_vy", pfx()), &p_vy_);
+    t->SetBranchAddress(TString::Format("%s_vz", pfx()), &p_vz_);
+    t->SetBranchAddress(TString::Format("%s_cov_00", pfx()), &p_cov_00_);
+    t->SetBranchAddress(TString::Format("%s_cov_11", pfx()), &p_cov_11_);
+    t->SetBranchAddress(TString::Format("%s_cov_14", pfx()), &p_cov_14_);
+    t->SetBranchAddress(TString::Format("%s_cov_22", pfx()), &p_cov_22_);
+    t->SetBranchAddress(TString::Format("%s_cov_23", pfx()), &p_cov_23_);
+    t->SetBranchAddress(TString::Format("%s_cov_33", pfx()), &p_cov_33_);
+    t->SetBranchAddress(TString::Format("%s_cov_34", pfx()), &p_cov_34_);
+    t->SetBranchAddress(TString::Format("%s_cov_44", pfx()), &p_cov_44_);
+    t->SetBranchAddress(TString::Format("%s_chi2dof", pfx()), &p_chi2dof_);
+    t->SetBranchAddress(TString::Format("%s_hp", pfx()), &p_hp_);
+    t->SetBranchAddress(TString::Format("%s_minhit", pfx()), &p_minhit_);
+    t->SetBranchAddress(TString::Format("%s_maxhit", pfx()), &p_maxhit_);
+    t->SetBranchAddress(TString::Format("%s_maxpxhit", pfx()), &p_maxpxhit_);
+  }
+  
+  void MuonsSubNtuple::copy_vectors() {
+    qpt_ = *p_qpt_;
+    eta_ = *p_eta_;
+    phi_ = *p_phi_;
+    isLoose_ = *p_isLoose_;
+    isMed_ = *p_isMed_;
+    isTight_ = *p_isTight_;
+    iso_ = *p_iso_;
+    vx_ = *p_vx_;
+    vy_ = *p_vy_;
+    vz_ = *p_vz_;
+    cov_00_ = *p_cov_00_;
+    cov_11_ = *p_cov_11_;
+    cov_14_ = *p_cov_14_;
+    cov_22_ = *p_cov_22_;
+    cov_23_ = *p_cov_23_;
+    cov_33_ = *p_cov_33_;
+    cov_34_ = *p_cov_34_;
+    cov_44_ = *p_cov_44_;
+    chi2dof_ = *p_chi2dof_;
+    hp_ = *p_hp_;
+    minhit_ = *p_minhit_;
+    maxhit_ = *p_maxhit_;
+    maxpxhit_ = *p_maxpxhit_;
+  }
+    
+
+  ////
+  ElectronsSubNtuple::ElectronsSubNtuple() {
+    set_pfx("electrons");
+    clear();
+    p_qpt_ = 0;
+    p_eta_ = 0;
+    p_phi_ = 0;
+    p_isVeto_ = 0;
+    p_isLoose_ = 0;
+    p_isMed_ = 0;
+    p_isTight_ = 0;
+    p_iso_ = 0;
+    p_passveto_ = 0;
+    p_vx_ = 0;
+    p_vy_ = 0;
+    p_vz_ = 0;
+    p_cov_00_ = 0;
+    p_cov_11_ = 0;
+    p_cov_14_ = 0;
+    p_cov_22_ = 0;
+    p_cov_23_ = 0;
+    p_cov_33_ = 0;
+    p_cov_34_ = 0;
+    p_cov_44_ = 0;
+    p_chi2dof_ = 0;
+    p_hp_ = 0;
+    p_minhit_ = 0;
+    p_maxhit_ = 0;
+    p_maxpxhit_ = 0;
+  }
+  
+  void ElectronsSubNtuple::clear() {
+    qpt_.clear();
+    eta_.clear();
+    phi_.clear();
+    isVeto_.clear();
+    isLoose_.clear();
+    isMed_.clear();
+    isTight_.clear();
+    iso_.clear();
+    passveto_.clear();
+    vx_.clear();
+    vy_.clear();
+    vz_.clear();
+    cov_00_.clear();
+    cov_11_.clear();
+    cov_14_.clear();
+    cov_22_.clear();
+    cov_23_.clear();
+    cov_33_.clear();
+    cov_34_.clear();
+    cov_44_.clear();
+    chi2dof_.clear();
+    hp_.clear();
+    minhit_.clear();
+    maxhit_.clear();
+    maxpxhit_.clear();
+  }
+
+  void ElectronsSubNtuple::write_to_tree(TTree* t) {
+    t->Branch(TString::Format("%s_qpt", pfx()), &qpt_);
+    t->Branch(TString::Format("%s_eta", pfx()), &eta_);
+    t->Branch(TString::Format("%s_phi", pfx()), &phi_);
+    t->Branch(TString::Format("%s_isVeto", pfx()), &isVeto_);
+    t->Branch(TString::Format("%s_isLoose", pfx()), &isLoose_);
+    t->Branch(TString::Format("%s_isMed", pfx()), &isMed_);
+    t->Branch(TString::Format("%s_isTight", pfx()), &isTight_);
+    t->Branch(TString::Format("%s_iso", pfx()), &iso_);
+    t->Branch(TString::Format("%s_passveto", pfx()), &passveto_);
+    t->Branch(TString::Format("%s_vx", pfx()), &vx_);
+    t->Branch(TString::Format("%s_vy", pfx()), &vy_);
+    t->Branch(TString::Format("%s_vz", pfx()), &vz_);
+    t->Branch(TString::Format("%s_cov_00", pfx()), &cov_00_);
+    t->Branch(TString::Format("%s_cov_11", pfx()), &cov_11_);
+    t->Branch(TString::Format("%s_cov_14", pfx()), &cov_14_);
+    t->Branch(TString::Format("%s_cov_22", pfx()), &cov_22_);
+    t->Branch(TString::Format("%s_cov_23", pfx()), &cov_23_);
+    t->Branch(TString::Format("%s_cov_33", pfx()), &cov_33_);
+    t->Branch(TString::Format("%s_cov_34", pfx()), &cov_34_);
+    t->Branch(TString::Format("%s_cov_44", pfx()), &cov_44_);
+    t->Branch(TString::Format("%s_chi2dof", pfx()), &chi2dof_);
+    t->Branch(TString::Format("%s_hp", pfx()), &hp_);
+    t->Branch(TString::Format("%s_minhit", pfx()), &minhit_);
+    t->Branch(TString::Format("%s_maxhit", pfx()), &maxhit_);
+    t->Branch(TString::Format("%s_maxpxhit", pfx()), &maxpxhit_);
+
+    t->SetAlias(TString::Format("n%ss", pfx()), TString::Format("%s_qpt@.size()", pfx()));
+    t->SetAlias(TString::Format("%s_q", pfx_), TString::Format("%s_qpt > 0 ? 1 : -1", pfx()));
+    t->SetAlias(TString::Format("%s_pt", pfx_), TString::Format("abs(%s_qpt)", pfx()));
+    t->SetAlias(TString::Format("%s_npxhits", pfx_), TString::Format("%s_hp & 0x7", pfx()));
+    t->SetAlias(TString::Format("%s_nsthits", pfx_), TString::Format("(%s_hp >> 3) & 0x1f", pfx()));
+    t->SetAlias(TString::Format("%s_npxlayers", pfx_), TString::Format("(%s_hp >> 8) & 0x7", pfx()));
+    t->SetAlias(TString::Format("%s_nstlayers", pfx_), TString::Format("(%s_hp >> 11) & 0x1f", pfx()));
+    t->SetAlias(TString::Format("%s_nhits", pfx_), TString::Format("%s_npxhits + %s_nsthits", pfx(), pfx()));
+    t->SetAlias(TString::Format("%s_nlayers", pfx_), TString::Format("%s_npxlayers + %s_nstlayers", pfx(), pfx()));
+    t->SetAlias(TString::Format("%s_min_r", pfx_), TString::Format("%s_minhit & 0xf", pfx()));
+    t->SetAlias(TString::Format("%s_min_z", pfx_), TString::Format("%s_minhit >> 4", pfx()));
+    t->SetAlias(TString::Format("%s_max_r", pfx_), TString::Format("%s_maxhit & 0xf", pfx()));
+    t->SetAlias(TString::Format("%s_max_z", pfx_), TString::Format("%s_maxhit >> 4", pfx()));
+    t->SetAlias(TString::Format("%s_maxpx_r", pfx_), TString::Format("%s_maxpxhit & 0xf", pfx()));
+    t->SetAlias(TString::Format("%s_maxpx_z", pfx_), TString::Format("%s_maxpxhit >> 4", pfx()));
+    
+  }
+
+  void ElectronsSubNtuple::read_from_tree(TTree* t) {
+    t->SetBranchAddress(TString::Format("%s_qpt", pfx()), &p_qpt_);
+    t->SetBranchAddress(TString::Format("%s_eta", pfx()), &p_eta_);
+    t->SetBranchAddress(TString::Format("%s_phi", pfx()), &p_phi_);
+    t->SetBranchAddress(TString::Format("%s_isVeto", pfx()), &p_isVeto_);
+    t->SetBranchAddress(TString::Format("%s_isLoose", pfx()), &p_isLoose_);
+    t->SetBranchAddress(TString::Format("%s_isMed", pfx()), &p_isMed_);
+    t->SetBranchAddress(TString::Format("%s_isTight", pfx()), &p_isTight_);
+    t->SetBranchAddress(TString::Format("%s_iso", pfx()), &p_iso_);
+    t->SetBranchAddress(TString::Format("%s_passveto", pfx()), &p_passveto_);
+    t->SetBranchAddress(TString::Format("%s_vx", pfx()), &p_vx_);
+    t->SetBranchAddress(TString::Format("%s_vy", pfx()), &p_vy_);
+    t->SetBranchAddress(TString::Format("%s_vz", pfx()), &p_vz_);
+    t->SetBranchAddress(TString::Format("%s_cov_00", pfx()), &p_cov_00_);
+    t->SetBranchAddress(TString::Format("%s_cov_11", pfx()), &p_cov_11_);
+    t->SetBranchAddress(TString::Format("%s_cov_14", pfx()), &p_cov_14_);
+    t->SetBranchAddress(TString::Format("%s_cov_22", pfx()), &p_cov_22_);
+    t->SetBranchAddress(TString::Format("%s_cov_23", pfx()), &p_cov_23_);
+    t->SetBranchAddress(TString::Format("%s_cov_33", pfx()), &p_cov_33_);
+    t->SetBranchAddress(TString::Format("%s_cov_34", pfx()), &p_cov_34_);
+    t->SetBranchAddress(TString::Format("%s_cov_44", pfx()), &p_cov_44_);
+    t->SetBranchAddress(TString::Format("%s_chi2dof", pfx()), &p_chi2dof_);
+    t->SetBranchAddress(TString::Format("%s_hp", pfx()), &p_hp_);
+    t->SetBranchAddress(TString::Format("%s_minhit", pfx()), &p_minhit_);
+    t->SetBranchAddress(TString::Format("%s_maxhit", pfx()), &p_maxhit_);
+    t->SetBranchAddress(TString::Format("%s_maxpxhit", pfx()), &p_maxpxhit_);
+  }
+  void ElectronsSubNtuple::copy_vectors() {
+    qpt_ = *p_qpt_;
+    eta_ = *p_eta_;
+    phi_ = *p_phi_;
+    isVeto_ = *p_isVeto_;
+    isLoose_ = *p_isLoose_;
+    isMed_ = *p_isMed_;
+    isTight_ = *p_isTight_;
+    iso_ = *p_iso_;
+    passveto_ = *p_passveto_;
+    vx_ = *p_vx_;
+    vy_ = *p_vy_;
+    vz_ = *p_vz_;
+    cov_00_ = *p_cov_00_;
+    cov_11_ = *p_cov_11_;
+    cov_14_ = *p_cov_14_;
+    cov_22_ = *p_cov_22_;
+    cov_23_ = *p_cov_23_;
+    cov_33_ = *p_cov_33_;
+    cov_34_ = *p_cov_34_;
+    cov_44_ = *p_cov_44_;
+    chi2dof_ = *p_chi2dof_;
+    hp_ = *p_hp_;
+    minhit_ = *p_minhit_;
+    maxhit_ = *p_maxhit_;
+    maxpxhit_ = *p_maxpxhit_;
+  }
+
 }

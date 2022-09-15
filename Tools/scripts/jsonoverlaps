@@ -11,6 +11,9 @@ fns = sys.argv[1:]
 for fna,fnb in combinations(fns, 2):
     lla = LumiList(fna)
     llb = LumiList(fnb)
+    # y = lla | llb
+    # y.writeJSON(fileName='new.json')
+    # print colors.bold('made new json file')
     x = lla & llb
     if x.compactList:
         ret += 1

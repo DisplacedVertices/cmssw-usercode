@@ -22,6 +22,7 @@ echo realjob $realjob job $job start at $(date)
 
 export SCRAM_ARCH=__SCRAM_ARCH__
 source /cvmfs/cms.cern.ch/cmsset_default.sh
+export XRD_NETWORKSTACK=IPv4
 
 scram project CMSSW __CMSSW_VERSION__ 2>&1 > /dev/null
 scramexit=$?
@@ -99,6 +100,8 @@ arguments = $(Process)
 Output = stdout.$(Process)
 Error = stderr.$(Process)
 Log = log.$(Process)
+request_memory = 2 GB
+requirements = TARGET.HAS_OSG_WN_CLIENT =?= TRUE
 stream_output = false
 stream_error = false
 notification = never
@@ -247,7 +250,8 @@ def get(i): return _l[i]
             crab_renew_proxy_if_needed()
             self.get_proxy = False
 
-        username = os.environ['USER']
+        # username = os.environ['USER']
+        username = 'awarden'
         self.timestamp = datetime.now()
         #os.system('mkdir -p /tmp/%s' % username)
 
@@ -319,7 +323,8 @@ def get(i): return _l[i]
                 stageout_user = username # JMTBAD use getUsernameFromSiteDB?
                 if stageout_path:
                     stageout_path = '/' + stageout_path
-                stageout_path = 'root://cmseos.fnal.gov//store/user/' + stageout_user + stageout_path
+               # stageout_path = 'root://cmseos.fnal.gov//store/user/' + stageout_user + stageout_path
+                stageout_path = 'root://cmsxrootd.hep.wisc.edu//store/user/' + stageout_user + stageout_path
                 if not publish_name:
                     publish_name = batch_name.replace('/', '_')
                 stageout_path += '/$(<cs_primaryds)/' + publish_name + '/$(<cs_timestamp)/$(printf "%04i" $(($job/1000)) )'
@@ -350,7 +355,8 @@ def get(i): return _l[i]
 
     def normalize_fns(self, fns):
         # JMTBAD fall back to global redirector
-        return ['root://cmseos.fnal.gov/' + x for x in fns if x.startswith('/store')]
+        #return ['root://cmseos.fnal.gov/' + x for x in fns if x.startswith('/store')]
+        return ['root://cmsxrootd.hep.wisc.edu/' + x for x in fns if x.startswith('/store')]
 
     def filelist(self, sample, working_dir):
         # JMTBAD are there performance problems by not matching the json to the files per job?

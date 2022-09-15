@@ -1,10 +1,11 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 debug = 'debug' in sys.argv
-dataset = 'miniaod' if 'miniaod' in sys.argv else 'main'
-
+#dataset = 'miniaod' if 'miniaod' in sys.argv else 'main'
+dataset = 'miniaod'
 tfileservice(process, 'gen_particles.root')
-sample_files(process, 'mfv_ddbar_tau01000um_M1600', dataset)
+#sample_files(process, 'mfv_ddbar_tau01000um_M1600', dataset)
+sample_files(process, 'mfv_stopld_tau001000um_M1000_2018', dataset)
 max_events(process, 1000)
 file_event_from_argv(process)
 

@@ -7,6 +7,10 @@
 #include "DataFormats/Math/interface/Point3D.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/HitPattern.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/TriggerEnum.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/MCInteractions.h"
+
+#include "DataFormats/MuonReco/interface/Muon.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 
 namespace reco { class Track; class Candidate; }
 
@@ -103,6 +107,7 @@ struct MFVEvent {
   std::vector<TLorentzVector> gen_daughters;
   std::vector<int> gen_daughter_id;
 
+  
   TLorentzVector gen_lsp_p4(int w) const {
     return p4(gen_lsp_pt[w], gen_lsp_eta[w], gen_lsp_phi[w], gen_lsp_mass[w]);
   }
@@ -156,6 +161,8 @@ struct MFVEvent {
   float l1_myhtt;
   float l1_myhttwbug;
   float hlt_ht;
+
+  
 
   uint64_t pass_;
   uint64_t pass_hlt_bits() const { return pass_ & ((1UL << mfv::n_hlt_paths) - 1UL); }
@@ -321,90 +328,130 @@ struct MFVEvent {
   float metNoMu() const { return mag(metNoMux, metNoMuy); }
   float metNoMuphi() const { return atan2(metNoMuy, metNoMux); }
 
-  typedef ushort lep_id_t;
-  enum { lep_mu, lep_el };
-  enum { lep_mu_ispf, lep_mu_isglobal, lep_mu_chi2dof, lep_mu_trklayers, lep_mu_muhits, lep_mu_pxhits, lep_mu_stations, n_lep_mu_idrequired, n_lep_mu_idbits=n_lep_mu_idrequired };
-  enum { lep_el_sigmaietaieta, lep_el_deta, lep_el_dphi, lep_el_hovere, lep_el_einvmpinv, lep_el_missinghits, n_lep_el_idrequired, lep_el_conversionveto=n_lep_el_idrequired, lep_el_ctftrack, n_lep_el_idbits };
-  static_assert(n_lep_mu_idbits < sizeof(lep_id_t)*8, "too many lep_mu bits");
-  static_assert(n_lep_el_idbits < sizeof(lep_id_t)*8, "too many lep_el bits");
-  static const lep_id_t lep_el_bit = 1 << (sizeof(lep_id_t)*8 - 1);
-  static lep_id_t encode_el_id(lep_id_t id) { return id |= lep_el_bit; }
-  static lep_id_t encode_mu_id(lep_id_t id) { return id; }
+ // leptons 
+  std::vector<float> muon_pt;
+  std::vector<float> muon_eta;
+  std::vector<float> muon_phi;
+  std::vector<float> muon_pt_err;
+  std::vector<float> muon_eta_err;
+  std::vector<float> muon_phi_err;
+  std::vector<float> muon_x;
+  std::vector<float> muon_y;
+  std::vector<float> muon_z;
+  std::vector<float> muon_lxy;
+  std::vector<float> muon_l;
+  std::vector<float> muon_iso;
+  std::vector<float> muon_dxy;
+  std::vector<float> muon_dz;
+  std::vector<float> muon_dxybs;
+  std::vector<float> muon_dxyerr;
+  std::vector<float> muon_dzerr;
+  std::vector<float> muon_chi2dof;
 
-  std::vector<lep_id_t> lep_id_; // bit field: msb: 0 = mu, 1 = el, remaining bits are according to the enums above
-  std::vector<float> lep_qpt;
-  int lep_q(int i) const { return lep_qpt[i] > 0 ? 1 : -1; }
-  float lep_pt(int i) const { return fabs(lep_qpt[i]); }
-  std::vector<float> lep_eta;
-  std::vector<float> lep_phi;
-  std::vector<float> lep_dxy;
-  std::vector<float> lep_dxybs;
-  std::vector<float> lep_dz;
-  std::vector<float> lep_pt_err;
-  std::vector<float> lep_eta_err;
-  std::vector<float> lep_phi_err;
-  std::vector<float> lep_dxy_err;
-  std::vector<float> lep_dz_err;
-  std::vector<float> lep_chi2dof;
-  std::vector<mfv::HitPattern::value_t> lep_hp_;
-  mfv::HitPattern lep_hp(int i) const { return mfv::HitPattern(lep_hp_[i]); }
-  void lep_hp_push_back(int npxh, int nsth, int npxl, int nstl) { lep_hp_.push_back(mfv::HitPattern(npxh, nsth, npxl, nstl).value); }
-  int lep_npxhits(int i) const { return lep_hp(i).npxhits(); }
-  int lep_nsthits(int i) const { return lep_hp(i).nsthits(); }
-  int lep_nhits(int i) const { return lep_hp(i).nhits(); }
-  int lep_npxlayers(int i) const { return lep_hp(i).npxlayers(); }
-  int lep_nstlayers(int i) const { return lep_hp(i).nstlayers(); }
-  int lep_nlayers(int i) const { return lep_hp(i).nlayers(); }
-  std::vector<float> lep_iso;
-  std::vector<float> lep_hlt_pt;
-  std::vector<float> lep_hlt_eta;
-  std::vector<float> lep_hlt_phi;
+  std::vector<float> electron_pt;
+  std::vector<float> electron_eta;
+  std::vector<float> electron_phi;
+  std::vector<float> electron_pt_err;
+  std::vector<float> electron_eta_err;
+  std::vector<float> electron_phi_err;
+  std::vector<float> electron_x;
+  std::vector<float> electron_y;
+  std::vector<float> electron_z;
+  std::vector<float> electron_lxy;
+  std::vector<float> electron_l;
+  std::vector<float> electron_dxy;
+  std::vector<float> electron_dz;
+  std::vector<float> electron_dxybs;
+  std::vector<float> electron_dxyerr;
+  std::vector<float> electron_dzerr;
+  std::vector<float> electron_chi2dof;
 
-  void lep_push_back(lep_id_t id,
-                     const reco::Candidate& lep,
-                     const reco::Track& trk,
-                     const double iso,
-                     const std::vector<TLorentzVector>& hltleps,
-                     const math::XYZPoint& beamspot,
-                     const math::XYZPoint& primary_vertex);
 
-  size_t nlep() const { return lep_id_.size(); }
+  std::vector<float> electron_isEB;
+  std::vector<float> electron_isEE;
+  std::vector<float> electron_sigmaIetaIeta5x5;
+  std::vector<float> electron_dEtaAtVtx;
+  std::vector<float> electron_dPhiAtVtx;
+  std::vector<float> electron_HE;
+  std::vector<float> electron_ooEmooP;
+  std::vector<float> electron_expectedMissingInnerHits;
+  std::vector<float> electron_passveto;
+  std::vector<float> electron_iso;
 
-  bool is_electron (size_t w) const { return lep_id_[w] & lep_el_bit; }
-  bool is_muon     (size_t w) const { return !is_electron(w); }
-  bool pass_lep_sel(size_t w, lep_id_t skip=0) const {
-    const int nreq = is_electron(w) ? int(n_lep_el_idrequired) : int(n_lep_mu_idrequired);
-    for (int i = 0; i < nreq; ++i)
-      if (!(skip & (1<<i)) && !(lep_id_[w] & (1<<i)))
-        return false;
-    return true;
-  }
+  //isolation variables
+  std::vector<float> electron_had_iso;
+  std::vector<float> electron_neutral_iso;
+  std::vector<float> electron_photon_iso;
+  std::vector<float> electron_corr;
+  std::vector<float> muon_had_iso;
+  std::vector<float> muon_neutral_iso;
+  std::vector<float> muon_photon_iso;
+  std::vector<float> muon_PU_corr;
 
-  TLorentzVector lep_p4(size_t w) const {
-    const float mass = is_electron(w) ? 0.000511 : 0.106;
-    return p4(lep_pt(w), lep_eta[w], lep_phi[w], mass);
-  }
+  std::vector<std::vector<int>> electron_ID;
+  std::vector<std::vector<int>> muon_ID;
+  
+  
+  void muon_push_back(const reco::Muon& muon,
+		      const reco::Track& trk,
+		      const float iso,
+		      const math::XYZPoint& beamspot,
+		      const math::XYZPoint& primary_vertex);
 
-  TLorentzVector first_lep_pass(int type) const {
-    for (size_t w = 0, we = nlep(); w < we; ++w)
-      if (is_electron(w) == (type == lep_el))
-        if (pass_lep_sel(w))
-          return lep_p4(w);
-    return TLorentzVector();
-  }
+  void electron_push_back(const reco::GsfElectron& electron,
+			  const reco::Track& trk,
+			  const float iso,
+			  const math::XYZPoint& beamspot,
+			  const math::XYZPoint& primary_vertex);
 
-  int nlep(int type, bool sel) const {
-    int n = 0;
-    for (size_t w = 0, we = nlep(); w < we; ++w)
-      if (is_electron(w) == (type == lep_el))
-        if (!sel || pass_lep_sel(w))
-          ++n;
-    return n;
-  }
+  void muon_pfiso_push_back(const float muhad_iso,
+			    const float muneut_iso,
+			    const float muphoton_iso,
+			    const float PU_corr);
 
-  int nmu (bool sel) const { return nlep(lep_mu, sel); }
-  int nel (bool sel) const { return nlep(lep_el, sel); }
-  int nlep(bool sel) const { return nmu(sel) + nel(sel); }
+  void electron_pfiso_push_back(const float elhad_iso,
+				const float elneut_iso,
+				const float elphoton_iso,
+				const float elcorr);
+
+  void ele_ID_push_back(const reco::GsfElectron& electron,
+			const bool h_Escaled,
+			const float ooEmooP,
+			const int expectedMissingInnerHits,
+			const float iso,
+			const bool passveto);
+  
+  std::vector<mfv::HitPattern::value_t> muon_hp_;
+  mfv::HitPattern muon_hp(int i) const { return mfv::HitPattern(muon_hp_[i]); }
+  void muon_hp_push_back(int npxh, int nsth, int npxl, int nstl) { muon_hp_.push_back(mfv::HitPattern(npxh, nsth, npxl, nstl).value); }
+  int muon_npxhits(int i) const { return muon_hp(i).npxhits(); }
+  int muon_nsthits(int i) const { return muon_hp(i).nsthits(); }
+  int muon_nhits(int i) const { return muon_hp(i).nhits(); }
+  int muon_npxlayers(int i) const { return muon_hp(i).npxlayers(); }
+  int muon_nstlayers(int i) const { return muon_hp(i).nstlayers(); }
+  int muon_nlayers(int i) const { return muon_hp(i).nlayers(); }
+
+
+  std::vector<mfv::HitPattern::value_t> electron_hp_;
+  mfv::HitPattern electron_hp(int i) const { return mfv::HitPattern(electron_hp_[i]); }
+  void electron_hp_push_back(int npxh, int nsth, int npxl, int nstl) { electron_hp_.push_back(mfv::HitPattern(npxh, nsth, npxl, nstl).value); }
+  int electron_npxhits(int i) const { return electron_hp(i).npxhits(); }
+  int electron_nsthits(int i) const { return electron_hp(i).nsthits(); }
+  int electron_nhits(int i) const { return electron_hp(i).nhits(); }
+  int electron_npxlayers(int i) const { return electron_hp(i).npxlayers(); }
+  int electron_nstlayers(int i) const { return electron_hp(i).nstlayers(); }
+  int electron_nlayers(int i) const { return electron_hp(i).nlayers(); }
+
+  int nmuons() const { return int(muon_pt.size()); }
+  int nelectrons() const { return int(electron_pt.size()); }
+  int nlep() const { return nmuons() + nelectrons(); }
+
+  int nmuons(float min_muon_pt) const { return std::count_if(muon_pt.begin(), muon_pt.end(),
+                                                           [min_muon_pt](float c) { return c > min_muon_pt; }); }
+  int nelectrons(float min_electron_pt) const { return std::count_if(electron_pt.begin(), electron_pt.end(),
+                                                           [min_electron_pt](float d) { return d > min_electron_pt; }); }
+
+  /////////////////////////////////////////////////////
 
   size_t n_vertex_seed_tracks() const { return vertex_seed_track_chi2dof.size(); }
   std::vector<float> vertex_seed_track_chi2dof;

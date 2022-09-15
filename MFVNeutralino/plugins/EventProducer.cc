@@ -41,6 +41,8 @@ private:
   const edm::EDGetTokenT<pat::PackedCandidateCollection> packed_candidates_token;
   const edm::EDGetTokenT<GenEventInfoProduct> gen_info_token;
   const edm::EDGetTokenT<std::vector<double>> gen_vertex_token;
+  //const edm::EDGetTokenT<std::vector<double>> secondaries_token;
+  //const edm::EDGetTokenT<std::vector<double>> primaries_token;
   const edm::EDGetTokenT<reco::GenJetCollection> gen_jets_token;
   const edm::EDGetTokenT<reco::GenParticleCollection> gen_particles_token;
   const edm::EDGetTokenT<mfv::MCInteraction> mci_token;
@@ -71,6 +73,36 @@ namespace {
   }
 }
 
+//electron helper function
+bool cutBasedIDHelper(pat::Electron el, double dEtaIn, double dPhiIn, double full5x5_sigmaIetaIeta, double ooEmooP, int expectedMissingInnerHits) {
+
+  float dEtaIn_ = el.deltaEtaSuperClusterTrackAtVtx();
+  float dPhiIn_ = el.deltaPhiSuperClusterTrackAtVtx();
+  float full5x5_sigmaIetaIeta_ = el.full5x5_sigmaIetaIeta();
+
+  //if statements protects against cases in which ecalEnergy == inf or zero (always
+  // the case for electrons below 5 GeV in miniAOD) 
+  float ooEmooP_ = 0;
+  if (el.ecalEnergy() == 0){
+    ooEmooP_ = 1e30;
+  }
+  else if (!std::isfinite(el.ecalEnergy())){
+    ooEmooP_ = 1e30;
+  }
+  else {
+    ooEmooP_ = fabs(1.0/el.ecalEnergy() - el.eSuperClusterOverP()/el.ecalEnergy() );
+  }
+  
+  int expectedMissingInnerHits_ = el.gsfTrack()->hitPattern().numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS);
+  
+  return (fabs(dEtaIn_) < dEtaIn
+	  && fabs(dPhiIn_) < dPhiIn
+	  && full5x5_sigmaIetaIeta_ < full5x5_sigmaIetaIeta
+	  && fabs(ooEmooP_) < ooEmooP
+	  && expectedMissingInnerHits_ <= expectedMissingInnerHits);
+}
+
+
 MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
   : input_is_miniaod(cfg.getParameter<bool>("input_is_miniaod")),
     triggerfloats_token(consumes<mfv::TriggerFloats>(cfg.getParameter<edm::InputTag>("triggerfloats_src"))),
@@ -80,6 +112,8 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     packed_candidates_token(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("packed_candidates_src"))),
     gen_info_token(consumes<GenEventInfoProduct>(cfg.getParameter<edm::InputTag>("gen_info_src"))),
     gen_vertex_token(consumes<std::vector<double>>(cfg.getParameter<edm::InputTag>("gen_vertex_src"))),
+    //secondaries_token(consumes<std::vector<double>>(cfg.getParameter<edm::InputTag>("secondaries_src"))),
+    //primaries_token(consumes<std::vector<double>>(cfg.getParameter<edm::InputTag>("primaries_src"))),
     gen_jets_token(consumes<reco::GenJetCollection>(cfg.getParameter<edm::InputTag>("gen_jets_src"))),
     gen_particles_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("gen_particles_src"))),
     mci_token(consumes<mfv::MCInteraction>(cfg.getParameter<edm::InputTag>("mci_src"))),
@@ -92,9 +126,9 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     electrons_token(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("electrons_src"))),
     use_vertex_seed_tracks(cfg.getParameter<edm::InputTag>("vertex_seed_tracks_src").label() != ""),
     vertex_seed_tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("vertex_seed_tracks_src"))),
-    muon_selectors(cuts2selectors<pat::Muon>(cfg.getParameter<std::vector<std::string>>("muon_cuts"))),
-    electron_EB_selectors(cuts2selectors<pat::Electron>(cfg.getParameter<std::vector<std::string>>("electron_EB_cuts"))),
-    electron_EE_selectors(cuts2selectors<pat::Electron>(cfg.getParameter<std::vector<std::string>>("electron_EE_cuts"))),
+    // muon_selectors(cuts2selectors<pat::Muon>(cfg.getParameter<std::vector<std::string>>("muon_cuts"))),
+    // electron_EB_selectors(cuts2selectors<pat::Electron>(cfg.getParameter<std::vector<std::string>>("electron_EB_cuts"))),
+    // electron_EE_selectors(cuts2selectors<pat::Electron>(cfg.getParameter<std::vector<std::string>>("electron_EE_cuts"))),
     electron_effective_areas(cfg.getParameter<edm::FileInPath>("electron_effective_areas").fullPath()),
     lightweight(cfg.getParameter<bool>("lightweight"))
 {
@@ -102,10 +136,6 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     misc_tokens.push_back(consumes<double>(src));
 
   produces<MFVEvent>();
-  assert(muon_selectors.size() == MFVEvent::n_lep_mu_idrequired);
-  assert(MFVEvent::n_lep_mu_idrequired == MFVEvent::n_lep_mu_idbits);
-  assert(electron_EB_selectors.size() == electron_EE_selectors.size());
-  assert(electron_EB_selectors.size() == MFVEvent::n_lep_el_idrequired);
 
   // setup LHAPDF for scale uncertainties
   lhapdf = mfv::setupLHAPDF();
@@ -217,7 +247,15 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     edm::Handle<mfv::MCInteraction> mci;
     event.getByToken(mci_token, mci);
 
+    // mevent->secondaries = mci->secondaries;
+    // mevent->primaries = mci->primaries;
+
     std::vector<reco::GenParticleRef> mci_lep;
+
+    // edm::Handle<std::vector<double>> secondaries;
+    // event.getByToken(secondaries_token, secondaries);
+    // edm::Handle<std::vector<double>> primaries;
+    // event.getByToken(secondaries_token, primaries);
 
     if (mci->valid()) {
       mevent->gen_valid = true;
@@ -229,19 +267,28 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
         mevent->gen_lsp_phi [i] = mci->primaries()[i]->phi();
         mevent->gen_lsp_mass[i] = mci->primaries()[i]->mass();
 
-        auto p = mci->decay_point(i);
-        mevent->gen_lsp_decay[i*3+0] = p.x;
-        mevent->gen_lsp_decay[i*3+1] = p.y;
-        mevent->gen_lsp_decay[i*3+2] = p.z;
 
-        mevent->gen_decay_type[i] = mci->decay_type()[i];
+	auto p = mci->decay_point(i);
+	mevent->gen_lsp_decay[i*3+0] = p.x;
+	mevent->gen_lsp_decay[i*3+1] = p.y;
+	mevent->gen_lsp_decay[i*3+2] = p.z;
+
+	mevent->gen_decay_type[i] = mci->decay_type()[i];
 
         for (const reco::GenParticleRef& s : mci->secondaries(i)) {
           mevent->gen_daughters.push_back(MFVEvent::p4(s->pt(), s->eta(), s->phi(), s->mass()));
           mevent->gen_daughter_id.push_back(s->pdgId());
         }
       }
+      
+      // for (const reco::GenParticleRef& p : *primaries) {
+      // 	mevent->gen_lsp.push_back(MFVEvent::p4(p->pt(), p->eta(), p->phi(), p->mass()));
+      // }
 
+      // for (const reco::GenParticeRef& s : *secondaries) {
+      // 	mevent->gen_daughters.push_back(MFVEvent::p4(s->pt(), s->eta(), s->phi(), s->mass()));
+      // 	mevent->gen_daughter_id.push_back(s->pdgId());
+      // }
       mci_lep = mci->light_leptons();
     }
 
@@ -377,10 +424,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   edm::Handle<pat::JetCollection> jets;
   event.getByToken(jets_token, jets);
 
-  edm::Handle<double> rho;
-  event.getByToken(rho_token, rho);
-
-
   for (int jjet = 0, jjete = int(jets->size()); jjet < jjete; ++jjet) {
     const pat::Jet& jet = jets->at(jjet);
 
@@ -449,48 +492,100 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     }
   }
 
-  //////////////////////////////////////////////////////////////////////
-
+//////////////////////////////////////////////////////////////////////
+  
   edm::Handle<pat::MuonCollection> muons;
   event.getByToken(muons_token, muons);
-
+  
   for (const pat::Muon& muon : *muons) {
-    MFVEvent::lep_id_t id = 0;
-    for (int i = 0, ie = muon_selectors.size(); i < ie; ++i)
-      if (muon_selectors[i](muon))
-        id |= 1 << i;
 
-    const float iso = (muon.pfIsolationR04().sumChargedHadronPt + std::max(0., muon.pfIsolationR04().sumNeutralHadronEt + muon.pfIsolationR04().sumPhotonEt - 0.5*muon.pfIsolationR04().sumPUPt))/muon.pt();
+    if (muon.pt() > 5 && abs(muon.eta()) < 2.4) {
+      bool isLooseMuon = muon.passed(reco::Muon::CutBasedIdLoose);
+      bool isMedMuon = muon.passed(reco::Muon::CutBasedIdMedium);
+      bool isTightMuon = muon.passed(reco::Muon::CutBasedIdTight);
 
-    mevent->lep_push_back(MFVEvent::encode_mu_id(id), muon, *muon.bestTrack(), iso, triggerfloats->hltmuons, beamspot->position(muon.bestTrack()->vz()), primary_vertex_position);
+      const float iso = (muon.pfIsolationR04().sumChargedHadronPt + std::max(0., muon.pfIsolationR04().sumNeutralHadronEt + muon.pfIsolationR04().sumPhotonEt -0.5*muon.pfIsolationR04().sumPUPt))/muon.pt();
+
+      
+      std::vector<int> muID;
+      muID.push_back(isLooseMuon);
+      muID.push_back(isMedMuon);
+      muID.push_back(isTightMuon);
+
+      //keep : muon ID, standard muon info (pt, eta, position, etc.), and pfiso info
+      mevent->muon_ID.push_back(muID);
+
+      mevent->muon_push_back(muon,
+			     *muon.bestTrack(),
+			     iso,
+			     beamspot->position(muon.bestTrack()->vz()),
+			     primary_vertex_position);
+      
+      mevent->muon_pfiso_push_back(muon.pfIsolationR04().sumChargedHadronPt,
+				   muon.pfIsolationR04().sumNeutralHadronEt,
+				   muon.pfIsolationR04().sumPhotonEt,
+				   muon.pfIsolationR04().sumPUPt);
+      
+    }
   }
+
+  ////////////////////////////////////////////////////////////////////
+  edm::Handle<double> rho;
+  event.getByToken(rho_token, rho);
 
   edm::Handle<pat::ElectronCollection> electrons;
   event.getByToken(electrons_token, electrons);
-  
+
   for (const pat::Electron& electron : *electrons) {
-    if (!electron.isEB() && !electron.isEE()) continue;
-    auto electron_selectors = electron.isEB() ? electron_EB_selectors : electron_EE_selectors;
 
-    MFVEvent::lep_id_t id = 0;
-    for (int i = 0, ie = electron_selectors.size(); i < ie; ++i) {
-      if (i == MFVEvent::lep_el_hovere) continue; // skip for below code
-      if (electron_selectors[i](electron))
-        id |= 1 << i;
+    if (electron.pt() > 5 && abs(electron.eta()) < 2.4) {
+    
+      bool h_Escaled = electron.hadronicOverEm() < (electron.isEB() ? 0.05 + 1.12 + 0.0368 * *rho : 0.0414 + 0.5 + 0.201 * *rho) / electron.superCluster()->energy();
+      float ooEmooP = fabs(1.0/electron.ecalEnergy() - electron.eSuperClusterOverP()/electron.ecalEnergy() );
+      int expectedMissingInnerHits = electron.gsfTrack()->hitPattern().numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS);
+
+      const auto pfIso = electron.pfIsolationVariables();
+      const float eA = electron_effective_areas.getEffectiveArea(fabs(electron.superCluster()->eta()));
+      const float iso = (pfIso.sumChargedHadronPt + std::max(0., pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - *rho*eA)) / electron.pt();
+
+
+      bool isVetoEl = electron.electronID("cutBasedElectronID-Fall17-94X-V2-veto");
+      bool isLooseEl = electron.electronID("cutBasedElectronID-Fall17-94X-V2-loose");
+      bool isMedEl = electron.electronID("cutBasedElectronID-Fall17-94X-V2-medium");
+      bool isTightEl = electron.electronID("cutBasedElectronID-Fall17-94X-V2-tight");
+
+      const bool passveto = electron.passConversionVeto();
+
+
+      //similarly for electron : keep ID (including specific cuts pertaining to ID), standard ele info, pfiso 
+      std::vector<int> eleID;
+      eleID.push_back(isVetoEl);
+      eleID.push_back(isLooseEl);
+      eleID.push_back(isMedEl);
+      eleID.push_back(isTightEl);
+		       
+      mevent->electron_ID.push_back(eleID);
+
+      mevent->ele_ID_push_back(electron,
+			       h_Escaled,
+			       ooEmooP,
+			       expectedMissingInnerHits,
+			       iso,
+			       passveto);
+
+      mevent->electron_push_back(electron,
+				 *electron.gsfTrack(),
+				 iso,
+				 beamspot->position(electron.gsfTrack()->vz()),
+				 primary_vertex_position);
+			
+
+      mevent->electron_pfiso_push_back(pfIso.sumChargedHadronPt,
+				       pfIso.sumNeutralHadronEt,
+				       pfIso.sumPhotonEt,
+				       *rho*eA);
+
     }
-
-    if (electron.hadronicOverEm() < 0.05 + (electron.isEB() ? 1.12 + 0.0368 * *rho : 0.5 + 0.201 * *rho) / electron.superCluster()->energy())
-      id |= 1 << MFVEvent::lep_el_hovere;
-    if (electron.passConversionVeto())
-      id |= 1 << MFVEvent::lep_el_conversionveto;
-    if (electron.closestCtfTrackRef().isNonnull())
-      id |= 1 << MFVEvent::lep_el_ctftrack;
-
-    const auto pfIso = electron.pfIsolationVariables();
-    const float eA = electron_effective_areas.getEffectiveArea(fabs(electron.superCluster()->eta()));
-    const float iso = pfIso.sumChargedHadronPt + std::max(0., pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - *rho*eA) / electron.pt();
-
-    mevent->lep_push_back(MFVEvent::encode_el_id(id), electron, *electron.gsfTrack(), iso, triggerfloats->hltelectrons, beamspot->position(electron.gsfTrack()->vz()), primary_vertex_position);
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -580,22 +675,62 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->displaced_jet_hlt_energy.clear();
     mevent->metx = 0;
     mevent->mety = 0;
-    mevent->lep_id_.clear();
-    mevent->lep_qpt.clear();
-    mevent->lep_eta.clear();
-    mevent->lep_phi.clear();
-    mevent->lep_dxy.clear();
-    mevent->lep_dxybs.clear();
-    mevent->lep_dz.clear();
-    mevent->lep_pt_err.clear();
-    mevent->lep_eta_err.clear();
-    mevent->lep_phi_err.clear();
-    mevent->lep_dxy_err.clear();
-    mevent->lep_dz_err.clear();
-    mevent->lep_iso.clear();
-    mevent->lep_hlt_pt.clear();
-    mevent->lep_hlt_eta.clear();
-    mevent->lep_hlt_phi.clear();
+    
+    mevent->muon_pt.clear();
+    mevent->muon_eta.clear();
+    mevent->muon_phi.clear();
+    mevent->muon_x.clear();
+    mevent->muon_y.clear();
+    mevent->muon_z.clear();
+    mevent->muon_lxy.clear();
+    mevent->muon_l.clear();
+    mevent->muon_iso.clear();
+    mevent->muon_pt_err.clear();
+    mevent->muon_eta_err.clear();
+    mevent->muon_phi_err.clear();
+    mevent->muon_dxy.clear();
+    mevent->muon_dz.clear();
+    mevent->muon_dxybs.clear();
+    mevent->muon_dxyerr.clear();
+    mevent->muon_dzerr.clear();
+    mevent->muon_ID.clear();
+    mevent->muon_had_iso.clear();
+    mevent->muon_neutral_iso.clear();
+    mevent->muon_photon_iso.clear();
+    mevent->muon_PU_corr.clear();
+
+    mevent->electron_pt.clear();
+    mevent->electron_eta.clear();
+    mevent->electron_phi.clear();
+    mevent->electron_x.clear();
+    mevent->electron_y.clear();
+    mevent->electron_z.clear();
+    mevent->electron_lxy.clear();
+    mevent->electron_l.clear();
+    mevent->electron_pt_err.clear();
+    mevent->electron_eta_err.clear();
+    mevent->electron_phi_err.clear();
+    mevent->electron_dxy.clear();
+    mevent->electron_dz.clear();
+    mevent->electron_dxybs.clear();
+    mevent->electron_dxyerr.clear();
+    mevent->electron_dzerr.clear();
+    mevent->electron_ID.clear();
+    mevent->electron_isEB.clear();
+    mevent->electron_isEE.clear();
+    mevent->electron_sigmaIetaIeta5x5.clear();
+    mevent->electron_dEtaAtVtx.clear();
+    mevent->electron_dPhiAtVtx.clear();
+    mevent->electron_HE.clear();
+    mevent->electron_ooEmooP.clear();
+    mevent->electron_expectedMissingInnerHits.clear();
+    mevent->electron_passveto.clear();
+    mevent->electron_iso.clear();
+    mevent->electron_had_iso.clear();
+    mevent->electron_neutral_iso.clear();
+    mevent->electron_photon_iso.clear();
+    mevent->electron_corr.clear();
+
     mevent->vertex_seed_track_chi2dof.clear();
     mevent->vertex_seed_track_qpt.clear();
     mevent->vertex_seed_track_eta.clear();

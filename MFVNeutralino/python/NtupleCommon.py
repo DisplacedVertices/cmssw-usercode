@@ -1,14 +1,18 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version_ = 'ULV1_keeptk'
-lsp_id = 1000021 # should do that in a smarter way
+ntuple_version_ = 'ULV1_TEST'
+lsp_id = 1000009 # should do that in a smarter way; currently for stop
 use_btag_triggers = False
-use_MET_triggers = True
+use_MET_triggers = False
+use_Lepton_triggers = True
+use_DisplacedLepton_triggers = False
 if use_btag_triggers : 
     ntuple_version_ += "B" # for "Btag triggers"; also includes DisplacedDijet triggers
 elif use_MET_triggers :
     ntuple_version_ += "MET"
+elif use_Lepton_triggers :
+    ntuple_version_ += "Lep"
 ntuple_version_use = ntuple_version_ + 'm'
 dataset = 'ntuple' + ntuple_version_use.lower()
 
@@ -87,11 +91,13 @@ def minitree_only(process, mode, settings, output_commands):
 
         process.TFileService.fileName = 'minintuple.root'
 
-def event_filter(process, mode, settings, output_commands, **kwargs):
-    if mode:
-        from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
-        setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode, event_filter_require_vertex = True, **kwargs)
 
+#updated event_filter : takes in two modes, the default/original and the rp_mode, indexed at 0 and 1 respectfully
+def event_filter(process, mode, settings, output_commands, **kwargs):
+    if mode[0] or mode[1]:
+        from JMTucker.MFVNeutralino.EventFilter import setup_event_filter
+        setup_event_filter(process, input_is_miniaod=settings.is_miniaod, mode=mode[0], rp_mode=mode[1], **kwargs)
+        
 ########################################################################
 
 class NtupleSettings(CMSSWSettings):
@@ -105,6 +111,7 @@ class NtupleSettings(CMSSWSettings):
         self.keep_gen = False
         self.keep_tk = False
         self.event_filter = True
+        self.randpars_filter = False
 
     @property
     def version(self):
@@ -256,7 +263,7 @@ def miniaod_ntuple_process(settings):
     process.load('JMTucker.Tools.PATTupleSelection_cfi')
     process.load('JMTucker.Tools.WeightProducer_cfi')
     process.load('JMTucker.Tools.UnpackedCandidateTracks_cfi')
-    process.load('JMTucker.Tools.METBadPFMuonDzFilter_cfi')
+   # process.load('JMTucker.Tools.METBadPFMuonDzFilter_cfi')
     process.load('JMTucker.MFVNeutralino.Vertexer_cff')
     process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
     process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
@@ -274,7 +281,7 @@ def miniaod_ntuple_process(settings):
     # change made to use corrected MET
     process.mfvTriggerFloats.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple')
     if not settings.is_mc:
-      process.mfvTriggerFloats.met_filters_src = cms.InputTag('TriggerResults', '', 'RECO')
+        process.mfvTriggerFloats.met_filters_src = cms.InputTag('TriggerResults', '', 'RECO')
     process.mfvTriggerFloats.isMC = settings.is_mc
     process.mfvTriggerFloats.year = settings.year
 
@@ -298,7 +305,8 @@ def miniaod_ntuple_process(settings):
     process.mfvEvent.gen_jets_src = 'slimmedGenJets'
     process.mfvEvent.pileup_info_src = 'slimmedAddPileupInfo'
     process.mfvEvent.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple')
-
+    #process.mfvEvent.met_src = 'slimmedMETs'
+    
     # MET correction and filters
     # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETUncertaintyPrescription#PF_MET
     from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
@@ -309,7 +317,7 @@ def miniaod_ntuple_process(settings):
 
     process.p = cms.Path(process.goodOfflinePrimaryVertices *
                          process.updatedJetsSeqMiniAOD *
-                         process.BadPFMuonFilterUpdateDz *
+                         #process.BadPFMuonFilterUpdateDz *
                          process.fullPatMetSequence *
                          process.selectedPatJets *
                          process.selectedPatMuons *
@@ -325,7 +333,8 @@ def miniaod_ntuple_process(settings):
     mods = [
         (prepare_vis,    settings.prepare_vis),
         (run_n_tk_seeds, settings.run_n_tk_seeds),
-        (event_filter,   settings.event_filter),
+        (event_filter,    [settings.event_filter, settings.randpars_filter]),
+        #(event_filter,   settings.event_filter),
         (minitree_only,  settings.minitree_only),
         ]
     for modifier, mode in mods:
@@ -341,10 +350,27 @@ def ntuple_process(settings):
     else:
         return aod_ntuple_process(settings)
 
+def signal_uses_random_pars_modifier(sample): # Used for samples stored in inclusive miniaods
+    to_replace = []
+
+    if sample.is_signal:
+        if sample.name.startswith('ZH_') or sample.name.startswith('Wplus'):
+            magic_randpar = 'randpars_filter = False'
+            
+            decay = sample.name[sample.name.find('_')+1 : sample.name.find('_Z')]
+            # special case : 50um is referenced as 0p05 in config string
+            ctau = '%s' % (sample.tau/1000)
+            if ctau == '0.05' :
+                ctau = '0p05'
+            to_replace.append((magic_randpar, "randpars_filter = 'randpar %s M%i_ct%s-'" % (decay, sample.mass, ctau), 'tuple template does not contain the magic string "%s"' % magic_randpar))
+    return [], to_replace
+
 def signals_no_event_filter_modifier(sample):
     if sample.is_signal:
         if use_btag_triggers :
             magic = "event_filter = 'bjets OR displaced dijet veto HT'"
+        elif use_Lepton_triggers :
+            magic ="event_filter = 'leptons only'"
         else :
             magic = "event_filter = 'jets only'"
         to_replace = [(magic, 'event_filter = False', 'tuple template does not contain the magic string "%s"' % magic)]

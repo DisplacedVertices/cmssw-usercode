@@ -126,6 +126,86 @@ namespace jmt {
            0);
   }
 
+   void NtupleAdd(MuonsSubNtuple& nt, const pat::Muon& mu) {
+
+     reco::TrackRef mtk = mu.globalTrack();
+     
+     bool isLooseMuon = mu.passed(reco::Muon::CutBasedIdLoose);
+     bool isMedMuon = mu.passed(reco::Muon::CutBasedIdMedium);
+     bool isTightMuon = mu.passed(reco::Muon::CutBasedIdTight);
+
+     const float iso = (mu.pfIsolationR04().sumChargedHadronPt + std::max(0., mu.pfIsolationR04().sumNeutralHadronEt + mu.pfIsolationR04().sumPhotonEt -0.5*mu.pfIsolationR04().sumPUPt))/mu.pt();
+     
+     if(!mtk.isNull()) {
+
+       const reco::HitPattern& hp = mtk->hitPattern();
+
+       TrackerSpaceExtents te;
+       NumExtents ex    = te.numExtentInRAndZ(hp, TrackerSpaceExtents::AllowAll);
+       NumExtents ex_px = te.numExtentInRAndZ(hp, TrackerSpaceExtents::PixelOnly);
+       
+       nt.add(mu.charge(), mu.pt(), mu.eta(), mu.phi(), isLooseMuon, isMedMuon, isTightMuon, iso,
+	      mtk->vx(), mtk->vy(), mtk->vz(),
+	      mtk->covariance(0,0), mtk->covariance(1,1), mtk->covariance(1,4), mtk->covariance(2,2), mtk->covariance(2,3),
+	      mtk->covariance(3,3), mtk->covariance(3,4), mtk->covariance(4,4), mtk->normalizedChi2(),
+	      hp.numberOfValidPixelHits(),
+	      hp.numberOfValidStripHits(),
+	      hp.pixelLayersWithMeasurement(),
+	      hp.stripLayersWithMeasurement(),
+	      ex.min_r < 2e9 ? ex.min_r : 0,
+	      ex.min_z < 2e9 ? ex.min_z : 0,
+	      ex.max_r > -2e9 ? ex.max_r : 0,
+	      ex.max_z > -2e9 ? ex.max_z : 0,
+	      ex_px.max_r > -2e9 ? ex_px.max_r : 0,
+	      ex_px.max_z > -2e9 ? ex_px.max_z : 0
+	      );
+     }
+  }
+
+  void NtupleAdd(ElectronsSubNtuple& nt, const pat::Electron& el, double rho, float eA) {
+  //void NtupleAdd(ElectronsSubNtuple& nt, const pat::Electron& el, double rho) {
+    
+    reco::GsfTrackRef etk = el.gsfTrack();
+
+    const bool passveto = el.passConversionVeto();
+    
+    bool isVetoEl = el.electronID("cutBasedElectronID-Fall17-94X-V2-veto");
+    bool isLooseEl = el.electronID("cutBasedElectronID-Fall17-94X-V2-loose");
+    bool isMedEl = el.electronID("cutBasedElectronID-Fall17-94X-V2-medium");
+    bool isTightEl = el.electronID("cutBasedElectronID-Fall17-94X-V2-tight");
+
+    const auto pfIso = el.pfIsolationVariables();
+    //const float eA = electron_effective_areas.getEffectiveArea(fabs(el.superCluster()->eta()));
+    const float iso = (pfIso.sumChargedHadronPt + std::max(0., pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - rho*eA)) / el.pt();
+    //const float iso = (pfIso.sumChargedHadronPt + std::max(0., pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - rho)) / el.pt();
+
+    if (!etk.isNull()) {
+      
+      const reco::HitPattern& hp = etk->hitPattern();
+
+      TrackerSpaceExtents te;
+      NumExtents ex    = te.numExtentInRAndZ(hp, TrackerSpaceExtents::AllowAll);
+      NumExtents ex_px = te.numExtentInRAndZ(hp, TrackerSpaceExtents::PixelOnly);
+
+      nt.add(el.charge(), el.pt(), el.eta(), el.phi(), isVetoEl, isLooseEl, isMedEl, isTightEl, iso, passveto,
+	     etk->vx(), etk->vy(), etk->vz(),
+	     etk->covariance(0,0), etk->covariance(1,1), etk->covariance(1,4), etk->covariance(2,2), etk->covariance(2,3),
+	     etk->covariance(3,3), etk->covariance(3,4), etk->covariance(4,4), etk->normalizedChi2(),
+	     hp.numberOfValidPixelHits(),
+	     hp.numberOfValidStripHits(),
+	     hp.pixelLayersWithMeasurement(),
+	     hp.stripLayersWithMeasurement(),
+	     ex.min_r < 2e9 ? ex.min_r : 0,
+	     ex.min_z < 2e9 ? ex.min_z : 0,
+	     ex.max_r > -2e9 ? ex.max_r : 0,
+	     ex.max_z > -2e9 ? ex.max_z : 0,
+	     ex_px.max_r > -2e9 ? ex_px.max_r : 0,
+	     ex_px.max_z > -2e9 ? ex_px.max_z : 0
+	     );
+    }
+  }
+  
+
   void JetsSubNtupleFiller::operator()(const edm::Event& e) {
     auto js = jets(e);
     i2nti_.assign(js.size(), -1);
@@ -141,7 +221,31 @@ namespace jmt {
     nt_.set(mets_->at(0).px(), mets_->at(0).py());
   }
 
-  void NtupleAdd(TracksSubNtuple& nt, const reco::Track& tk, int which_jet, int which_pv, int which_sv, unsigned misc) {
+  void MuonsSubNtupleFiller::operator()(const edm::Event& e) {
+    auto ms = muons(e);
+    i2nti_.assign(ms.size(), -1);
+    for (size_t i = 0, ie = ms.size(); i < ie; ++i) {
+      i2nti_[i] = nt_.n();
+      NtupleAdd(nt_, ms[i]);
+    }
+  }
+
+  void ElectronsSubNtupleFiller::operator()(const edm::Event& e) {
+    auto es = electrons(e);
+    auto r = *rho(e);
+    i2nti_.assign(es.size(), -1);
+    for (size_t i = 0, ie = es.size(); i < ie; ++i) {
+      const float eA = electron_effective_areas.getEffectiveArea(fabs(es[i].superCluster()->eta()));
+      //float eta = fabs(es[i].superCluster()->eta());
+      //float eA = effArea(eta);
+      i2nti_[i] = nt_.n();
+      NtupleAdd(nt_, es[i], r, eA);
+      // NtupleAdd(nt_, es[i], r);
+    }
+  }
+
+  // void NtupleAdd(TracksSubNtuple& nt, const reco::Track& tk, int which_jet, int which_pv, int which_sv, bool ismu, bool isel, unsigned misc) {
+  void NtupleAdd(TracksSubNtuple& nt, const reco::Track& tk, int which_jet, int which_pv, bool ismu, bool isel, int which_sv, unsigned misc) {
     const reco::HitPattern& hp = tk.hitPattern();
 
     TrackerSpaceExtents te;
@@ -162,7 +266,9 @@ namespace jmt {
            ex.max_z > -2e9 ? ex.max_z : 0,
            ex_px.max_r > -2e9 ? ex_px.max_r : 0,
            ex_px.max_z > -2e9 ? ex_px.max_z : 0,
-           which_jet, which_pv, which_sv, misc
+           which_jet, which_pv, ismu, isel,
+	   which_sv,
+	   misc
            );
   }
 
@@ -185,7 +291,7 @@ namespace jmt {
     }
     return which_jet;
   }
-
+  
   int TracksSubNtupleFiller::which_pv(const edm::Event& e, PrimaryVerticesSubNtupleFiller* vf, reco::TrackRef& tk) {
     int which_pv = -1;
     if (vf) {
@@ -203,13 +309,167 @@ namespace jmt {
     return which_pv;
   }
 
-  void TracksSubNtupleFiller::operator()(const edm::Event& e, JetsSubNtupleFiller* jf, PrimaryVerticesSubNtupleFiller* vf, BeamspotSubNtupleFiller* bf) {
+  
+  bool TracksSubNtupleFiller::ismu(const edm::Event& e, MuonsSubNtupleFiller* mf, reco::TrackRef& tk) {
+    bool ismu = false;
+    
+    auto ms = mf->muons(e);
+    // std::cout << "we have " << ms.size() << " muons in our event" << std::endl;
+    std::vector<reco::TrackRef> r;
+    for (size_t m = 0, me = ms.size(); m < me; ++m) {
+      
+      // switching from muonBestTrack to globalTrack
+      //reco::TrackRef mtk = ms[m].muonBestTrack();
+
+      reco::TrackRef mtk = ms[m].globalTrack();
+
+      
+      // if (!ms[m].muonBestTrack().isNull()) {
+      if (!ms[m].globalTrack().isNull()) {
+
+	if (mtk->pt() > 1) {
+	  // std::cout << " tkmu " << mtk->pt() << "," << mtk->eta() << "," << mtk->phi() << " ";
+	  // std::cout << "\n";
+	  r.push_back(mtk);
+	}
+      }
+    }
+    
+    for (size_t j = 0, je = r.size(); j < je; ++j) {
+      double dr = reco::deltaR(tk->eta(), tk->phi(), r[j]->eta(), r[j]->phi());
+      if (dr < 0.001 ) {
+	ismu = true;
+	//	std::cout << "delataR = " << dr << std::endl;
+	//	std::cout << " tk " << tk->pt() << "," << tk->eta() << "," << tk->phi() << " ";
+	//	std::cout << "\n";
+      }
+    }
+    return ismu;
+  }
+
+
+  
+  bool TracksSubNtupleFiller::isel(const edm::Event& e, ElectronsSubNtupleFiller* ef, reco::TrackRef& tk) {
+    bool isel = false;
+
+    auto es = ef->electrons(e);
+    //std::cout << "we have " << es.size() << " electrons in our event" << std::endl;
+
+    std::vector<reco::GsfTrackRef> r;
+    for (size_t e = 0, ee = es.size(); e < ee; ++e) {
+      
+    //  reco::TrackRef etk = es[e].closestCtfTrackRef();
+      reco::GsfTrackRef etk = es[e].gsfTrack();
+      
+      //if (!es[e].closestCtfTrackRef().isNull()) {
+      if (!es[e].gsfTrack().isNull()) {
+	if (etk->pt() > 1) {
+	  //std::cout << " tkel " << etk->pt() << "," << etk->eta() << "," << etk->phi() << " ";
+	  // std::cout << "\n";
+	  r.push_back(etk);
+	}
+      }
+    }
+      
+       
+    
+    for (size_t j = 0, je = r.size(); j < je; ++j) {
+      double dr = reco::deltaR(tk->eta(), tk->phi(), r[j]->eta(), r[j]->phi());
+      if (dr < 0.0001 ) {
+	//	std::cout << "delataR = " << dr << std::endl;
+	//std::cout << " tk " << tk->pt() << "," << tk->eta() << "," << tk->phi() << " ";
+	//	std::cout << "\n";
+	isel = true;
+      }
+    }
+    
+    return isel;
+  }
+
+  
+
+  void TracksSubNtupleFiller::operator()(const edm::Event& e, JetsSubNtupleFiller* jf, PrimaryVerticesSubNtupleFiller* vf, BeamspotSubNtupleFiller* bf, MuonsSubNtupleFiller* mf, ElectronsSubNtupleFiller* ef) {
     auto h = htracks(e);
+
+
+    // //double check (printouts from the boolean is a mess)
+    //  auto ms = mf->muons(e);
+    // std::cout << "we have " << ms.size() << " muons in our event" << std::endl;
+    // std::vector<reco::TrackRef> r;
+    // for (size_t m = 0, me = ms.size(); m < me; ++m) {
+      
+    //   reco::TrackRef mtk = ms[m].globalTrack();
+
+      
+    //   if (!ms[m].globalTrack().isNull()) {
+
+    // 	if (mtk->pt() > 1) {
+    // 	  std::cout << " tkmu " << mtk->pt() << "," << mtk->eta() << "," << mtk->phi() << " ";
+    // 	  std::cout << "\n";
+    // 	  r.push_back(mtk);
+    // 	}
+    //   }
+    // }
+
+
+    // auto es = ef->electrons(e);
+    // std::cout << "we have " << es.size() << " electrons in our event" << std::endl;
+
+    // std::vector<reco::GsfTrackRef> rr;
+    // for (size_t e = 0, ee = es.size(); e < ee; ++e) {
+      
+    //   reco::GsfTrackRef etk = es[e].gsfTrack();
+      
+    //   if (!es[e].gsfTrack().isNull()) {
+    // 	if (etk->pt() > 1) {
+    // 	  std::cout << " tkel " << etk->pt() << "," << etk->eta() << "," << etk->phi() << " ";
+    // 	  std::cout << "\n";
+    // 	  rr.push_back(etk);
+    // 	}
+    //   }
+    // }
+    
+  
+
+    
+    
     for (size_t i = 0, ie = h->size(); i < ie; ++i) {
       reco::TrackRef tk(h, i);
-      if (!cut(*tk, e, bf))
-        NtupleAdd(nt_, *tk, which_jet(e,jf,tk), which_pv(e,vf,tk));
+      if (!cut(*tk, e, bf)) {
+
+	// // testing muons 
+	// for (size_t j = 0, je = r.size(); j < je; ++j) {
+	//   double dr = reco::deltaR(tk->eta(), tk->phi(), r[j]->eta(), r[j]->phi());
+	//   if (dr < 0.001 ) {
+	//     std::cout << "delataR = " << dr << std::endl;
+	//     std::cout << " tk " << tk->pt() << "," << tk->eta() << "," << tk->phi() << " ";
+	//     std::cout << "\n";
+	//   }
+	// }
+	// //
+	// // testing electrons 
+	// for (size_t j = 0, je = rr.size(); j < je; ++j) {
+	//   double dr = reco::deltaR(tk->eta(), tk->phi(), rr[j]->eta(), rr[j]->phi());
+	//   if (dr < 0.001 ) {
+	//     std::cout << "delataR = " << dr << std::endl;
+	//     std::cout << " tk " << tk->pt() << "," << tk->eta() << "," << tk->phi() << " ";
+	//     std::cout << "\n";
+	//   }
+	// }
+	// //
+	
+	if (ismu(e,mf,tk) && isel(e,ef,tk)) {
+	  //std::cout << "Uh oh.... found a track that matched to both an electron and muon." << std::endl;
+	  //in the case that track matches to both a muon & electron, resort to matching to the muon. 
+	  NtupleAdd(nt_, *tk, which_jet(e,jf,tk), which_pv(e,vf,tk), ismu(e,mf,tk), false);
+	}
+	else {
+	  NtupleAdd(nt_, *tk, which_jet(e,jf,tk), which_pv(e,vf,tk), ismu(e,mf,tk), isel(e,ef,tk));
+	  
+	}
+      }  
     }
+    // std::cout << " ---------------------------------------- " << std::endl;
   }
 
   void TrackingAndJetsNtupleFiller::operator()(const edm::Event& e) {
@@ -218,7 +478,9 @@ namespace jmt {
     pvs_filler_(e, p_.pvs_subtract_bs() ? &bs() : 0);
     jets_filler_(e);
     pf_filler_(e);
+    muons_filler_(e);
+    electrons_filler_(e);
     if (p_.fill_tracks())
-      tracks_filler_(e, &jets_filler_, &pvs_filler_, &bs_filler_);
+      tracks_filler_(e, &jets_filler_, &pvs_filler_, &bs_filler_, &muons_filler_, &electrons_filler_);
   }
 }

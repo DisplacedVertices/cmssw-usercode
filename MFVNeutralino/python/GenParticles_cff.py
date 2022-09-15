@@ -5,6 +5,6 @@ mfvGenParticles = cms.EDProducer('MFVGenParticles',
                                  beamspot_src = cms.InputTag('offlineBeamSpot'),
                                  last_flag_check = cms.bool(False), # needs to be false now that we're using MiniAOD
                                  debug = cms.untracked.bool(False),
-                                 histos = cms.untracked.bool(False),
+                                 histos = cms.untracked.bool(True),
                                  lsp_id = cms.untracked.int32(-1)
                                  )

@@ -14,6 +14,8 @@ def doit(*x):
     in_ll = LumiList(ll_fn).getLumis()
     
     intlumis, intlumi_sum = intlumi_from_brilcalc_csv(lumi_fn, False)
+    print intlumi_sum
+    print check_intlumi_sum
     assert abs(intlumi_sum - check_intlumi_sum) < 1e6
        
     tot = 0.
@@ -30,6 +32,9 @@ def doit(*x):
     print 'tot = %f, picked %i lumis' % (tot, len(out_ll))
     LumiList(lumis=out_ll).writeJSON(out_fn)
 
-for year, intlumi in (2017, 41.480), (2018, 59.688):
-    for pc in 10, 1:
-        doit('ana_%s.json' % year, '/uscms/home/ali/nobackup/LLP/CornellCode/mfv_10_6_20/src/JMTucker/MFVNeutralino/test/jsons/json_UL/%s.byls.csv.gz' % year, intlumi, pc/100., 'ana_%s_%spc.json' % (year, pc))
+#for year, intlumi in (2017, 41.480), (2018, 59.688):
+#    for pc in 10, 1:
+#        doit('ana_%s.json' % year, '/uscms/home/ali/nobackup/LLP/CornellCode/mfv_10_6_20/src/JMTucker/MFVNeutralino/test/jsons/json_UL/%s.byls.csv.gz' % year, intlumi, pc/100., 'ana_%s_%spc.json' % (year, pc))
+#for year, intlumi in (2017, 41.480):
+for pc in 10, 1:
+    doit('ana_2017_SingleLept.json', '/afs/hep.wisc.edu/home/acwarden/work/llp/mfv_1068p1/src/JMTucker/MFVNeutralino/test/jsons/json_UL/SingleLep/2017.byls.csv.gz', 41.480, pc/100., 'ana_SingleLept_2017_%spc.json' % (pc))

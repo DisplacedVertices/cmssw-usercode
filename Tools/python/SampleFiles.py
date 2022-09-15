@@ -66,6 +66,10 @@ def _fromnum0(path, n, but=[], fnbase='ntuple', add=[], numbereddirs=True): # co
     l = _fromnumlist(path, xrange(n), but, fnbase, add, numbereddirs)
     return (len(l), l)
 
+def _fromnum2(path, n, but=[], fnbase='ntuple', add=[], numbereddirs=True): # messed up crab job 
+    l = _fromnumlist(path, xrange(2,n+1), but, fnbase, add, numbereddirs)
+    return (len(l), l)
+
 def _frommerge(path, n):
     assert path.endswith('/merge') and path.count('/merge') == 1
     return (n, [path.replace('/merge', '/merge%s_0.root') % s for s in [''] + ['%03i' % x for x in xrange(1,n)]])
@@ -106,7 +110,8 @@ def get_local_fns(name, ds, num=-1):
     fns = _d[(name, ds)][1]
     if num > 0:
         fns = fns[:num]
-    return [('root://cmseos.fnal.gov/' + fn) if fn.startswith('/store/user') else fn for fn in fns]
+    #return [('root://cmsxrootd.fnal.gov/' + fn) if fn.startswith('/store/user') else fn for fn in fns]
+    return [('root://cmsxrootd.hep.wisc.edu/' + fn) if fn.startswith('/store/user') else fn for fn in fns]
 
 def set_process(process, name, ds, num=-1):
     process.source.fileNames = get_local_fns(name, ds, num)
@@ -138,6 +143,19 @@ for name, ds, fns in _removed:
         _remove_file(name, ds, fn)
 
 ################################################################################
+
+# _add_ds("miniaod",{
+#     'qcdmupt15_2017': (1, ['/store/mc/RunIISummer20UL17MiniAOD/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v1/100000/034AE4F2-7180-7F40-81D6-740D15738CBA.root'])
+# })
+
+# _add_ds("miniaod",{
+#     'wjetstolnu_2017': (1, ['/store/mc/RunIISummer20UL17MiniAODv2/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v1/00000/0434B82A-0702-3645-9019-624DBC8A79E6.root'])
+# })
+
+# _add_ds("miniaod", {
+#     'qcdht0200_2017': (1, ['/store/mc/RunIISummer19UL18MiniAODv2/QCD_HT200to300_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/MINIAODSIM/106X_upgrade2018_realistic_v16_L1v1-v1/270000/007919B8-D4A9-0D45-A55A-172C009CFB81.root'])
+# })
+
 
 _add_ds("miniaod", {
   'mfv_splitSUSY_tau000001000um_M1200_1100_2017':_fromnum1("/store/user/ali/splitSUSY_M1200_1100_ctau1p0_TuneCP2_13TeV_pythia8/RunIISummer20UL17_MiniAOD/210813_015111/0000/", 50, fnbase="MiniAOD", numbereddirs=False),
@@ -180,6 +198,140 @@ _add_ds("miniaod", {
   'mfv_stopbbarbbar_tau001000um_M0600_2017':_fromnum1("/store/user/shogan/StopStopbarTo2Bbar2B_M-600_CTau-1mm_TuneCP5_13TeV-pythia8/RunIISummer20UL17_MiniAOD/211207_195334/0000", 3, fnbase="MiniAOD", numbereddirs=False),
   'mfv_stopbbarbbar_tau001000um_M0800_2017':_fromnum1("/store/user/shogan/StopStopbarTo2Bbar2B_M-800_CTau-1mm_TuneCP5_13TeV-pythia8/RunIISummer20UL17_MiniAOD/211207_195357/0000", 4, fnbase="MiniAOD", numbereddirs=False),
 
+})
+
+_add_ds("miniaod", {
+    'mfv_stopld_tau000100um_M0200_2018':_fromnum1("/store/user/awarden/DisplacedSUSY_stopToLD_M_200_0p1mm_TuneCP5_13TeV-pythia8/RunIISummer20UL18_MiniAOD/220518_074408/0000", 5, fnbase="MiniAOD", numbereddirs=False),
+    'mfv_stopld_tau000300um_M0200_2018':_fromnum1("/store/user/awarden/DisplacedSUSY_stopToLD_M_200_0p3mm_TuneCP5_13TeV-pythia8/RunIISummer20UL18_MiniAOD/220518_074523/0000", 10, fnbase="MiniAOD", numbereddirs=False),
+    'mfv_stopld_tau000100um_M0600_2018':_fromnum1("/store/user/awarden/DisplacedSUSY_stopToLD_M_600_0p1mm_TuneCP5_13TeV-pythia8/RunIISummer20UL18_MiniAOD/220518_074432/0000", 5, fnbase="MiniAOD", numbereddirs=False),
+    'mfv_stopld_tau000300um_M0600_2018':_fromnum1("/store/user/awarden/DisplacedSUSY_stopToLD_M_600_0p3mm_TuneCP5_13TeV-pythia8/RunIISummer20UL18_MiniAOD/220518_074542/0000", 5, fnbase="MiniAOD", numbereddirs=False),
+    'mfv_stopld_tau000100um_M1000_2018':_fromnum2("/store/user/awarden/DisplacedSUSY_stopToLD_M_1000_0p1mm_TuneCP5_13TeV-pythia8/RunIISummer20UL18_MiniAOD/220518_074449/0000", 5, fnbase="MiniAOD", numbereddirs=False),
+    'mfv_stopld_tau000300um_M1000_2018':_fromnum1("/store/user/awarden/DisplacedSUSY_stopToLD_M_1000_0p3mm_TuneCP5_13TeV-pythia8/RunIISummer20UL18_MiniAOD/220518_074558/0000", 5, fnbase="MiniAOD", numbereddirs=False),
+    'mfv_stopld_tau001000um_M1000_2018':_fromnum1("/store/user/awarden/DisplacedSUSY_stopToLD_M_1000_1mm_TuneCP5_13TeV-pythia8/RunIISummer20UL18_MiniAOD/220518_073950/0000", 5, fnbase="MiniAOD", numbereddirs=False),
+    'mfv_stopld_tau000100um_M1600_2018':_fromnum1("/store/user/awarden/DisplacedSUSY_stopToLD_M_1600_0p1mm_TuneCP5_13TeV-pythia8/RunIISummer20UL18_MiniAOD/220518_074506/0000", 5, fnbase="MiniAOD", numbereddirs=False),
+    'mfv_stopld_tau000300um_M1600_2018':_fromnum2("/store/user/awarden/DisplacedSUSY_stopToLD_M_1600_0p3mm_TuneCP5_13TeV-pythia8/RunIISummer20UL18_MiniAOD/220518_074615/0000", 5, fnbase="MiniAOD", numbereddirs=False),
+})
+
+
+_add_ds("ntupleulv1lepm", {
+'mfv_stopld_tau000100um_M0200_2018': _fromnum0("/store/user/awarden/DisplacedSUSY_stopToLD_M_200_0p1mm_TuneCP5_13TeV-pythia8/NtupleULV1Lepm_2018/220523_063334", 21),
+'mfv_stopld_tau000300um_M0200_2018': _fromnum0("/store/user/awarden/DisplacedSUSY_stopToLD_M_200_0p3mm_TuneCP5_13TeV-pythia8/NtupleULV1Lepm_2018/220523_063335", 21),
+'mfv_stopld_tau000100um_M0600_2018': _fromnum0("/store/user/awarden/DisplacedSUSY_stopToLD_M_600_0p1mm_TuneCP5_13TeV-pythia8/NtupleULV1Lepm_2018/220523_063336", 15),
+'mfv_stopld_tau000300um_M0600_2018': _fromnum0("/store/user/awarden/DisplacedSUSY_stopToLD_M_600_0p3mm_TuneCP5_13TeV-pythia8/NtupleULV1Lepm_2018/220523_063337", 15),
+'mfv_stopld_tau000100um_M1000_2018': _fromnum0("/store/user/awarden/DisplacedSUSY_stopToLD_M_1000_0p1mm_TuneCP5_13TeV-pythia8/NtupleULV1Lepm_2018/220523_093252", 11),
+'mfv_stopld_tau000300um_M1000_2018': _fromnum0("/store/user/awarden/DisplacedSUSY_stopToLD_M_1000_0p3mm_TuneCP5_13TeV-pythia8/NtupleULV1Lepm_2018/220523_063339", 14),
+'mfv_stopld_tau001000um_M1000_2018': _fromnum0("/store/user/awarden/DisplacedSUSY_stopToLD_M_1000_0p1mm_TuneCP5_13TeV-pythia8/NtupleULV1Lepm_2018/220523_063340", 13),
+'mfv_stopld_tau000100um_M1600_2018': _fromnum0("/store/user/awarden/DisplacedSUSY_stopToLD_M_1600_0p1mm_TuneCP5_13TeV-pythia8/NtupleULV1Lepm_2018/220523_063341", 12),
+'mfv_stopld_tau000300um_M1600_2018': _fromnum0("/store/user/awarden/DisplacedSUSY_stopToLD_M_1600_0p3mm_TuneCP5_13TeV-pythia8/NtupleULV1Lepm_2018/220523_093256", 10),
+})
+
+_add_ds("ntupleulv1lepm", {
+'qcdmupt15_2017': (172, ['/store/user/awarden/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/NtupleULV1Lepm_2017/220701_133510/0000/ntuple_%i.root' % i for i in chain(xrange(1,24), xrange(25,27), xrange(28,30), xrange(31,176))]),
+'qcdempt020_2017': (125, ['/store/user/awarden/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV-pythia8/NtupleULV1Lepm_2017/220701_133526/0000/ntuple_%i.root' % i for i in chain(xrange(1,118), xrange(119,127))]),
+'qcdempt030_2017': (50, ['/store/user/awarden/QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8/NtupleULV1Lepm_2017/220701_133542/0000/ntuple_%i.root' % i for i in chain(xrange(1,50), [51])]),
+'qcdempt050_2017': _fromnum1("/store/user/awarden/QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8/NtupleULV1Lepm_2017/220701_133559", 48),
+'qcdempt080_2017': _fromnum1("/store/user/awarden/QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV-pythia8/NtupleULV1Lepm_2017/220701_133615", 48),
+'qcdempt120_2017': (61, ['/store/user/awarden/QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV-pythia8/NtupleULV1Lepm_2017/220701_133631/0000/ntuple_%i.root' % i for i in chain(xrange(1,7), xrange(8,63))]),
+'qcdempt170_2017': (27, ['/store/user/awarden/QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8/NtupleULV1Lepm_2017/220701_133648/0000/ntuple_%i.root' % i for i in chain(xrange(1,6), xrange(7,29))]),
+'qcdbctoept020_2017': (66, ['/store/user/awarden/QCD_Pt_20to30_bcToE_TuneCP5_13TeV_pythia8/NtupleULV1Lepm_2017/220701_133706/0000/ntuple_%i.root' % i for i in chain(xrange(1,6), xrange(7,31), xrange(32,69))]),
+'qcdbctoept030_2017': (72, ['/store/user/awarden/QCD_Pt_30to80_bcToE_TuneCP5_13TeV_pythia8/NtupleULV1Lepm_2017/220701_133724/0000/ntuple_%i.root' % i for i in chain(xrange(1,20), xrange(21,39), xrange(40,42), xrange(45,77), [43])]),
+'qcdbctoept080_2017': (52, ['/store/user/awarden/QCD_Pt_80to170_bcToE_TuneCP5_13TeV_pythia8/NtupleULV1Lepm_2017/220701_133741/0000/ntuple_%i.root' % i for i in chain(xrange(1,8), xrange(9,54))]),
+'qcdbctoept170_2017': (66, ['/store/user/awarden/QCD_Pt_170to250_bcToE_TuneCP5_13TeV_pythia8/NtupleULV1Lepm_2017/220701_133758/0000/ntuple_%i.root' % i for i in chain(xrange(1,12), xrange(15,70))]),
+'qcdbctoept250_2017': (37, ['/store/user/awarden/QCD_Pt_250toInf_bcToE_TuneCP5_13TeV_pythia8/NtupleULV1Lepm_2017/220701_133816/0000/ntuple_%i.root' % i for i in chain(xrange(1,5), xrange(6,8), xrange(15,44), [10, 12])]),
+'wjetstolnu_2017': (174, ['/store/user/awarden/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleULV1Lepm_2017/220701_133833/0000/ntuple_%i.root' % i for i in chain(xrange(1,21), xrange(22,103), xrange(105,178))]),
+'dyjetstollM10_2017': (151, ['/store/user/awarden/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleULV1Lepm_2017/220701_133852/0000/ntuple_%i.root' % i for i in chain(xrange(1,16), xrange(17,44), xrange(45,96), xrange(97,155))]),
+'dyjetstollM50_2017': _fromnum1("/store/user/awarden/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleULV1Lepm_2017/220701_133909", 127),
+'ttbar_2017': _fromnum0("/store/user/awarden/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleULV1Lepm_2017/220701_084008", 1019),
+'ww_2017': _fromnum1("/store/user/awarden/WW_TuneCP5_13TeV-pythia8/NtupleULV1Lepm_2017/220701_133927", 34),
+'zz_2017': _fromnum1("/store/user/awarden/WZ_TuneCP5_13TeV-pythia8/NtupleULV1Lepm_2017/220701_133949", 18),
+'wz_2017': _fromnum1("/store/user/awarden/ZZ_TuneCP5_13TeV-pythia8/NtupleULV1Lepm_2017/220701_134007", 20),
+'SingleMuon2017B': (116, ['/store/user/awarden/SingleMuon/NtupleULV1Lepm_2017/220704_050430/0000/ntuple_%i.root' % i for i in chain(xrange(25), xrange(26,80), xrange(81,96), xrange(97,119))]),
+'SingleMuon2017C': (150, ['/store/user/awarden/SingleMuon/NtupleULV1Lepm_2017/220705_164022/0000/ntuple_%i.root' % i for i in chain(xrange(1,19), xrange(20,84), xrange(85,94), xrange(95,154))]),
+'SingleMuon2017D': (67, ['/store/user/awarden/SingleMuon/NtupleULV1Lepm_2017/220704_050431/0000/ntuple_%i.root' % i for i in chain(xrange(30), xrange(31,68))]),
+'SingleMuon2017E': (153, ['/store/user/awarden/SingleMuon/NtupleULV1Lepm_2017/220704_100333/0000/ntuple_%i.root' % i for i in chain(xrange(1,77), xrange(78,98), xrange(99,103), xrange(104,126), xrange(127,158))]),
+'SingleMuon2017F': (213, ['/store/user/awarden/SingleMuon/NtupleULV1Lepm_2017/220704_100352/0000/ntuple_%i.root' % i for i in chain(xrange(1,4), xrange(5,37), xrange(38,62), xrange(63,89), xrange(90,133), xrange(134,143), xrange(144,220))]),
+'SingleElectron2017B': (63, ['/store/user/awarden/SingleElectron/NtupleULV1Lepm_2017/220704_050432/0000/ntuple_%i.root' % i for i in chain(xrange(24), xrange(25,64))]),
+'SingleElectron2017C': (121, ['/store/user/awarden/SingleElectron/NtupleULV1Lepm_2017/220704_100410/0000/ntuple_%i.root' % i for i in chain(xrange(1,31), xrange(32,71), xrange(72,88), xrange(89,125))]),
+'SingleElectron2017D': (49, ['/store/user/awarden/SingleElectron/NtupleULV1Lepm_2017/220704_050433/0000/ntuple_%i.root' % i for i in chain(xrange(14), xrange(15,50))]),
+'SingleElectron2017E': (114, ['/store/user/awarden/SingleElectron/NtupleULV1Lepm_2017/220704_050434/0000/ntuple_%i.root' % i for i in chain(xrange(16), xrange(17,24), xrange(25,60), xrange(61,69), xrange(70,73), xrange(74,92), xrange(93,120))]),
+'SingleElectron2017F': (165, ['/store/user/awarden/SingleElectron/NtupleULV1Lepm_2017/220704_100428/0000/ntuple_%i.root' % i for i in chain(xrange(1,7), xrange(9,17), xrange(18,25), xrange(26,37), xrange(38,41), xrange(42,103), xrange(104,110), xrange(111,118), xrange(119,135), xrange(136,140), xrange(141,154), xrange(155,178))]),
+})
+
+# _add_ds("trackingtreerulv1_lepm_cut0", {
+# 'ttbar_2017': (143, ['/store/user/awarden/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/TrackingTreerULV1_Lepm_cut0_2017/220715_042306/0000/trackingtreer_%i.root' % i for i in chain(xrange(110), xrange(113,115), xrange(118,120), xrange(125,127), xrange(129,132), xrange(213,215), xrange(240,242), xrange(250,253), [111, 116, 123, 135, 143, 151, 153, 165, 202, 204, 206, 219, 223, 227, 233, 235, 254])]),
+# })
+_add_ds("trackingtreerulv1_lepm_cut0", {
+'qcdempt015_2017': _fromnum1("/store/user/awarden/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/TrackingTreerULV1_Lepm_cut0_2017/220721_155305", 39, fnbase="trackingtreer"),
+'qcdmupt15_2017': (171, ['/store/user/awarden/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/TrackingTreerULV1_Lepm_cut0_2017/220721_155320/0000/trackingtreer_%i.root' % i for i in chain(xrange(1,15), xrange(16,25), xrange(26,51), xrange(52,156), xrange(157,176))]),
+'qcdempt020_2017': _fromnum1("/store/user/awarden/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV-pythia8/TrackingTreerULV1_Lepm_cut0_2017/220721_155334", 123, fnbase="trackingtreer"),
+'qcdempt030_2017': (46, ['/store/user/awarden/QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8/TrackingTreerULV1_Lepm_cut0_2017/220721_155347/0000/trackingtreer_%i.root' % i for i in chain(xrange(1,46), [47])]),
+'qcdempt050_2017': (41, ['/store/user/awarden/QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8/TrackingTreerULV1_Lepm_cut0_2017/220721_155401/0000/trackingtreer_%i.root' % i for i in chain(xrange(1,41), [42])]),
+'qcdempt080_2017': _fromnum0("/store/user/awarden/QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV-pythia8/TrackingTreerULV1_Lepm_cut0_2017/220721_155415", 41, fnbase="trackingtreer"),
+'qcdempt120_2017': (55, ['/store/user/awarden/QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV-pythia8/TrackingTreerULV1_Lepm_cut0_2017/220721_155429/0000/trackingtreer_%i.root' % i for i in chain(xrange(1,5), xrange(6,57))]),
+'qcdempt170_2017': _fromnum1("/store/user/awarden/QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8/TrackingTreerULV1_Lepm_cut0_2017/220721_155444", 27, fnbase="trackingtreer"),
+'qcdempt300_2017': _fromnum1("/store/user/awarden/QCD_Pt-300toInf_EMEnriched_TuneCP5_13TeV-pythia8/TrackingTreerULV1_Lepm_cut0_2017/220721_155458", 19, fnbase="trackingtreer"),
+'qcdbctoept020_2017': (64, ['/store/user/awarden/QCD_Pt_20to30_bcToE_TuneCP5_13TeV_pythia8/TrackingTreerULV1_Lepm_cut0_2017/220721_155512/0000/trackingtreer_%i.root' % i for i in chain(xrange(1,10), xrange(11,66))]),
+'qcdbctoept030_2017': _fromnum1("/store/user/awarden/QCD_Pt_30to80_bcToE_TuneCP5_13TeV_pythia8/TrackingTreerULV1_Lepm_cut0_2017/220721_155526", 69, fnbase="trackingtreer"),
+'qcdbctoept080_2017': (50, ['/store/user/awarden/QCD_Pt_80to170_bcToE_TuneCP5_13TeV_pythia8/TrackingTreerULV1_Lepm_cut0_2017/220721_155540/0000/trackingtreer_%i.root' % i for i in chain(xrange(1,50), [51])]),
+'qcdbctoept170_2017': (60, ['/store/user/awarden/QCD_Pt_170to250_bcToE_TuneCP5_13TeV_pythia8/TrackingTreerULV1_Lepm_cut0_2017/220721_155556/0000/trackingtreer_%i.root' % i for i in chain(xrange(1,14), xrange(15,62))]),
+'qcdbctoept250_2017': (32, ['/store/user/awarden/QCD_Pt_250toInf_bcToE_TuneCP5_13TeV_pythia8/TrackingTreerULV1_Lepm_cut0_2017/220721_155609/0000/trackingtreer_%i.root' % i for i in chain(xrange(1,9), xrange(15,38), [13])]),
+'wjetstolnu_2017': (125, ['/store/user/awarden/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/TrackingTreerULV1_Lepm_cut0_2017/220715_092212/0000/trackingtreer_%i.root' % i for i in chain(xrange(1,26), xrange(28,121), xrange(122,129))]),
+'dyjetstollM10_2017': (106, ['/store/user/awarden/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/TrackingTreerULV1_Lepm_cut0_2017/220715_092234/0000/trackingtreer_%i.root' % i for i in chain(xrange(1,20), xrange(21,108))]),
+'dyjetstollM50_2017': (57, ['/store/user/awarden/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/TrackingTreerULV1_Lepm_cut0_2017/220715_092259/0000/trackingtreer_%i.root' % i for i in chain(xrange(1,7), xrange(10,15), xrange(19,23), xrange(24,27), xrange(35,43), xrange(45,50), xrange(51,55), xrange(56,70), xrange(71,75), [8, 17, 29, 32])]),
+'ttbar_2017': (143, ['/store/user/awarden/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/TrackingTreerULV1_Lepm_cut0_2017/220715_042306/0000/trackingtreer_%i.root' % i for i in chain(xrange(110), xrange(113,115), xrange(118,120), xrange(125,127), xrange(129,132), xrange(213,215), xrange(240,242), xrange(250,253), [111, 116, 123, 135, 143, 151, 153, 165, 202, 204, 206, 219, 223, 227, 233, 235, 254])]),
+'ww_2017': (19, ['/store/user/awarden/WW_TuneCP5_13TeV-pythia8/TrackingTreerULV1_Lepm_cut0_2017/220721_155627/0000/trackingtreer_%i.root' % i for i in chain(xrange(1,3), xrange(4,17), xrange(18,21), [22])]),
+'zz_2017': _fromnum1("/store/user/awarden/WZ_TuneCP5_13TeV-pythia8/TrackingTreerULV1_Lepm_cut0_2017/220721_155641", 13, fnbase="trackingtreer"),
+'wz_2017': _fromnum1("/store/user/awarden/ZZ_TuneCP5_13TeV-pythia8/TrackingTreerULV1_Lepm_cut0_2017/220721_155655", 19, fnbase="trackingtreer"),
+'SingleMuon2017B': _fromnum0("/store/user/awarden/SingleMuon/TrackingTreerULV1_Lepm_cut0_2017/220721_105656", 60, fnbase="trackingtreer"),
+'SingleMuon2017C': (72, ['/store/user/awarden/SingleMuon/TrackingTreerULV1_Lepm_cut0_2017/220722_122209/0000/trackingtreer_%i.root' % i for i in chain(xrange(1,62), xrange(66,68), xrange(71,79), [64])]),
+'SingleMuon2017D': _fromnum0("/store/user/awarden/SingleMuon/TrackingTreerULV1_Lepm_cut0_2017/220721_105658", 34, fnbase="trackingtreer"),
+'SingleMuon2017E': (84, ['/store/user/awarden/SingleMuon/TrackingTreerULV1_Lepm_cut0_2017/220721_105659/0000/trackingtreer_%i.root' % i for i in chain(xrange(5), xrange(6,33), xrange(34,86))]),
+'SingleMuon2017F': (104, ['/store/user/awarden/SingleMuon/TrackingTreerULV1_Lepm_cut0_2017/220722_122223/0000/trackingtreer_%i.root' % i for i in chain(xrange(1,3), xrange(4,14), xrange(15,33), xrange(34,59), xrange(60,91), xrange(92,98), xrange(99,111))]),
+'SingleElectron2017B': _fromnum0("/store/user/awarden/SingleElectron/TrackingTreerULV1_Lepm_cut0_2017/220721_105701", 32, fnbase="trackingtreer"),
+'SingleElectron2017C': (62, ['/store/user/awarden/SingleElectron/TrackingTreerULV1_Lepm_cut0_2017/220721_105702/0000/trackingtreer_%i.root' % i for i in chain(xrange(2), xrange(3,51), xrange(52,64))]),
+'SingleElectron2017D': _fromnum0("/store/user/awarden/SingleElectron/TrackingTreerULV1_Lepm_cut0_2017/220721_105703", 25, fnbase="trackingtreer"),
+'SingleElectron2017E': _fromnum0("/store/user/awarden/SingleElectron/TrackingTreerULV1_Lepm_cut0_2017/220721_105704", 60, fnbase="trackingtreer"),
+'SingleElectron2017F': (87, ['/store/user/awarden/SingleElectron/TrackingTreerULV1_Lepm_cut0_2017/220722_122238/0000/trackingtreer_%i.root' % i for i in chain(xrange(1,11), xrange(12,20), xrange(21,40), xrange(41,49), xrange(50,92))]),
+})
+
+# tracking treer cut 0 but with lepton info; event filter and trigger filter were applied
+_add_ds("trackingtreerulv1_lepm_wlep", {
+'wjetstolnu_2017': (117, ['/store/user/awarden/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/TrackingTreerULV1_Lepm_wlep_2017/220907_100104/0000/trackingtreer_%i.root' % i for i in chain(xrange(1,26), xrange(27,119))]),
+'dyjetstollM10_2017': (95, ['/store/user/awarden/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/TrackingTreerULV1_Lepm_wlep_2017/220907_100120/0000/trackingtreer_%i.root' % i for i in chain(xrange(1,20), xrange(23,28), xrange(29,33), xrange(34,101))]),
+'dyjetstollM50_2017': (60, ['/store/user/awarden/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/TrackingTreerULV1_Lepm_wlep_2017/220907_100134/0000/trackingtreer_%i.root' % i for i in chain(xrange(1,7), xrange(8,19), xrange(20,23), xrange(24,27), xrange(41,67), xrange(70,75), [28, 30, 32, 37, 39, 68])]),
+'SingleMuon2017B': _fromnum0("/store/user/awarden/SingleMuon/TrackingTreerULV1_Lepm_wlep_2017/220907_063427", 60, fnbase="trackingtreer"),
+'SingleMuon2017C': (72, ['/store/user/awarden/SingleMuon/TrackingTreerULV1_Lepm_wlep_2017/220907_100033/0000/trackingtreer_%i.root' % i for i in chain(xrange(1,6), xrange(8,10), xrange(11,22), xrange(24,65), xrange(66,79))]),
+'SingleMuon2017D': _fromnum0("/store/user/awarden/SingleMuon/TrackingTreerULV1_Lepm_wlep_2017/220907_063428", 34, fnbase="trackingtreer"),
+'SingleMuon2017E': (84, ['/store/user/awarden/SingleMuon/TrackingTreerULV1_Lepm_wlep_2017/220907_063429/0000/trackingtreer_%i.root' % i for i in chain(xrange(5), xrange(6,82), xrange(83,86))]),
+'SingleMuon2017F': (90, ['/store/user/awarden/SingleMuon/TrackingTreerULV1_Lepm_wlep_2017/220907_100048/0000/trackingtreer_%i.root' % i for i in chain(xrange(1,16), xrange(17,21), xrange(22,44), xrange(45,50), xrange(51,54), xrange(58,63), xrange(71,77), xrange(78,80), xrange(83,89), xrange(90,96), xrange(97,105), xrange(108,110), [55, 64, 66, 69, 81, 106])]),
+'SingleElectron2017B': _fromnum0("/store/user/awarden/SingleElectron/TrackingTreerULV1_Lepm_wlep_2017/220907_063430", 32, fnbase="trackingtreer"),
+'SingleElectron2017C': (63, ['/store/user/awarden/SingleElectron/TrackingTreerULV1_Lepm_wlep_2017/220907_063431/0000/trackingtreer_%i.root' % i for i in chain(xrange(46), xrange(47,64))]),
+'SingleElectron2017D': _fromnum0("/store/user/awarden/SingleElectron/TrackingTreerULV1_Lepm_wlep_2017/220907_063432", 25, fnbase="trackingtreer"),
+'SingleElectron2017E': _fromnum0("/store/user/awarden/SingleElectron/TrackingTreerULV1_Lepm_wlep_2017/220907_063433", 60, fnbase="trackingtreer"),
+'SingleElectron2017F': (81, ['/store/user/awarden/SingleElectron/TrackingTreerULV1_Lepm_wlep_2017/220907_090445/0000/trackingtreer_%i.root' % i for i in chain(xrange(1,10), xrange(11,14), xrange(15,17), xrange(18,23), xrange(24,34), xrange(37,54), xrange(55,62), xrange(64,91), [35])]),
+})
+
+#Newest tracking treer cut 0 with sel lepton tracks & good lepton sel tracks; event filter and trigger filter were applied
+_add_ds("trackingtreerulv1_lepm_wsellep", {
+'wjetstolnu_2017': (114, ['/store/user/awarden/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/TrackingTreerULV1_Lepm_wsellep_2017/220913_200259/0000/trackingtreer_%i.root' % i for i in chain(xrange(1,6), xrange(7,18), xrange(19,27), xrange(28,118))]),
+'dyjetstollM10_2017': (90, ['/store/user/awarden/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/TrackingTreerULV1_Lepm_wsellep_2017/220913_200316/0000/trackingtreer_%i.root' % i for i in chain(xrange(1,3), xrange(4,17), xrange(24,98), [21])]),
+'dyjetstollM50_2017': (59, ['/store/user/awarden/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/TrackingTreerULV1_Lepm_wsellep_2017/220913_200331/0000/trackingtreer_%i.root' % i for i in chain(xrange(1,3), xrange(4,7), xrange(10,13), xrange(14,22), xrange(25,27), xrange(28,30), xrange(36,38), xrange(43,75), [8, 23, 32, 39, 41])]),                                                                                                                                                                                              
+'SingleMuon2017B': _fromnum0("/store/user/awarden/SingleMuon/TrackingTreerULV1_Lepm_wsellep_2017/220913_150334", 60, fnbase="trackingtreer"),
+'SingleMuon2017C': _fromnum1("/store/user/awarden/SingleMuon/TrackingTreerULV1_Lepm_wsellep_2017/220913_200213", 78, fnbase="trackingtreer"),
+'SingleMuon2017D': _fromnum0("/store/user/awarden/SingleMuon/TrackingTreerULV1_Lepm_wsellep_2017/220913_150335", 34, fnbase="trackingtreer"),
+'SingleMuon2017E': _fromnum0("/store/user/awarden/SingleMuon/TrackingTreerULV1_Lepm_wsellep_2017/220913_150336", 86, fnbase="trackingtreer"),
+'SingleMuon2017F': _fromnum1("/store/user/awarden/SingleMuon/TrackingTreerULV1_Lepm_wsellep_2017/220913_200228", 109, fnbase="trackingtreer"),
+'SingleElectron2017B': _fromnum0("/store/user/awarden/SingleElectron/TrackingTreerULV1_Lepm_wsellep_2017/220913_150337", 32, fnbase="trackingtreer"),
+'SingleElectron2017C': (51, ['/store/user/awarden/SingleElectron/TrackingTreerULV1_Lepm_wsellep_2017/220913_150338/0000/trackingtreer_%i.root' % i for i in chain(xrange(7), xrange(9,21), xrange(22,28), xrange(30,37), xrange(38,41), xrange(44,50), xrange(51,53), xrange(54,57), xrange(58,61), [42, 63])]),                                                                                                                                                                                                                             
+'SingleElectron2017D': _fromnum0("/store/user/awarden/SingleElectron/TrackingTreerULV1_Lepm_wsellep_2017/220913_150339", 25, fnbase="trackingtreer"),
+'SingleElectron2017E': _fromnum0("/store/user/awarden/SingleElectron/TrackingTreerULV1_Lepm_wsellep_2017/220913_150340", 60, fnbase="trackingtreer"),
+'SingleElectron2017F': _fromnum1("/store/user/awarden/SingleElectron/TrackingTreerULV1_Lepm_wsellep_2017/220913_200245", 90, fnbase="trackingtreer"),
+})
+
+_add_ds("trackingtreerulv1_lepm_cut1", {
+'wjetstolnu_2017': (122, ['/store/user/awarden/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/TrackingTreerULV1_Lepm_cut1_2017/220719_120543/0000/trackingtreer_%i.root' % i for i in chain(xrange(1,15), xrange(16,26), xrange(27,31), xrange(33,107), xrange(108,116), xrange(117,129))]),
+'dyjetstollM10_2017': (101, ['/store/user/awarden/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/TrackingTreerULV1_Lepm_cut1_2017/220719_120558/0000/trackingtreer_%i.root' % i for i in chain(xrange(1,5), xrange(6,20), xrange(22,24), xrange(27,69), xrange(70,108), [25])]),
+'dyjetstollM50_2017': (56, ['/store/user/awarden/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/TrackingTreerULV1_Lepm_cut1_2017/220719_120612/0000/trackingtreer_%i.root' % i for i in chain(xrange(1,7), xrange(8,12), xrange(13,24), xrange(25,27), xrange(44,75), [32, 36])]),
 })
 
 ################################################################################

@@ -162,7 +162,7 @@ namespace jmt {
         std::ostringstream o;
         o << "from JMTucker.Tools.MetaSubmitter import *\n"
           << "dataset = '" << submit_dataset_ << "'\n"
-          << "samples = pick_samples(dataset, both_years=True, " << submit_samples_ << ")\n"
+          << "samples = pick_samples(dataset, both_years=False, " << submit_samples_ << ")\n"
           << "NtupleReader_submit('" << submit_batch_ << "', dataset, samples, exe_fn='" << submit_exe_ << "', output_fn='" << out_fn_ << "')\n";
 
         std::cout << o.str();

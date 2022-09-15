@@ -29,7 +29,7 @@ displaced_dijet_paths = [
     "HLT_HT430_DisplacedDijet40_DisplacedTrack_v*",
     "HLT_HT650_DisplacedDijet60_Inclusive_v*",
     ]
-
+#currently on 2017; for 2018 will need to change
 lepton_paths = [
     "HLT_Ele35_WPTight_Gsf_v*",
     "HLT_Ele115_CaloIdVT_GsfTrkIdT_v*",
@@ -37,6 +37,18 @@ lepton_paths = [
     "HLT_IsoMu27_v*",
     "HLT_Mu50_v*",
     ]
+
+muon_paths = [
+    "HLT_IsoMu27_v*",
+    "HLT_Mu50_v*",
+    ]
+displaced_lepton_paths = [
+    "HLT_Mu43NoFiltersNoVtx_Photon43_CaloIdL_v*",
+    "HLT_Diphoton30_22_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass90_v*",
+    "HLT_DoublePhoton70_v*",
+    "HLT_DoubleMu43NoFiltersNoVtx_v*",
+    ]
+
 
 cross_paths = [
     "HLT_Ele15_IsoVVVL_PFHT450_v*", # JMTBAD these two cross triggers are rendered useless with the offline ht and lepton pt cuts imposed in eventFilter
@@ -54,6 +66,7 @@ mfvTriggerFilterMETOnly = mfvTriggerFilter.clone(HLTPaths = MET_paths)
 mfvTriggerFilterBJetsOnly = mfvTriggerFilter.clone(HLTPaths = bjet_paths)
 mfvTriggerFilterDisplacedDijetOnly = mfvTriggerFilter.clone(HLTPaths = displaced_dijet_paths)
 mfvTriggerFilterLeptonsOnly = mfvTriggerFilter.clone(HLTPaths = lepton_paths)
+mfvTriggerFilterMuonsOnly = mfvTriggerFilter.clone(HLTPaths = muon_paths)
 
 mfvTriggerFilterHTORBjetsORDisplacedDijet = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone(
         HLTPaths = jet_paths + bjet_paths + displaced_dijet_paths,
@@ -63,6 +76,12 @@ mfvTriggerFilterHTORBjetsORDisplacedDijet = HLTrigger.HLTfilters.hltHighLevel_cf
 
 mfvTriggerFilterBjetsORDisplacedDijetVetoHT = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone(
         HLTPaths = bjet_paths + displaced_dijet_paths,
+        andOr = True, # OR
+        throw = False,
+        )
+
+mfvTriggerFilterDispLeptonsORSingleLeptons = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone(
+        HLTPaths = displaced_lepton_paths + lepton_paths,
         andOr = True, # OR
         throw = False,
         )

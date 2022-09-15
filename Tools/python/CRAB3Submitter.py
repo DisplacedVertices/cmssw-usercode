@@ -52,7 +52,8 @@ class CRABSubmitter:
                  dataset = 'main',
                  lumi_mask = None,
                  job_control_from_sample = False,
-                 storage_site = 'T3_US_FNALLPC',
+                 #storage_site = 'T3_US_FNALLPC',
+                 storage_site = 'T2_US_Wisconsin',
                  publish_name = '',
                  aaa = False,
                  fnallpc = False,
@@ -185,8 +186,10 @@ class CRABSubmitter:
 
         if storage_site.lower() == 'cornell':
             self.cfg_template.Site.storageSite = 'T3_US_Cornell'
-        elif storage_site.lower() == 'fnal':
+        elif storage_site.lower() == 'fnl':
             self.cfg_template.Site.storageSite = 'T3_US_FNALLPC'
+        elif storage_site.lower() == 'wisconsin':
+            self.cfg_template.Site.storageSite = 'T2_US_Wisconsin'
         else:
             self.cfg_template.Site.storageSite = storage_site
 

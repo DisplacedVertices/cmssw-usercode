@@ -26,11 +26,22 @@ namespace mfv {
     "HLT_PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94_v",
     "HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59_v",
 
+    //2018 lepton triggers
+    "HLT_Ele32_WPTight_Gsf_v",
+    "HLT_IsoMu24_v",
+
     // Displaced Dijet triggers
     "HLT_HT430_DisplacedDijet40_DisplacedTrack_v",
     "HLT_HT650_DisplacedDijet60_Inclusive_v",
     //"HLT_PFMET120_PFMHT120_IDTight_v",
     "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v",
+
+    //Displaced Lepton triggers
+    "HLT_Mu43NoFiltersNoVtx_Photon43_CaloIdL_v",
+    "HLT_Diphoton30_22_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass90_v",
+    "HLT_DoublePhoton70_v",
+    "HLT_DoubleMu43NoFiltersNoVtx_v",
+
 
   };
 

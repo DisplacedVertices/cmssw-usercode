@@ -8,6 +8,11 @@ def setup_event_filter(process,
                        event_filter_jes_mult = 2,
                        event_filter_name = 'mfvEventFilter',
                        event_filter_require_vertex = True,
+                       rp_filter = False,
+                       rp_mode = None,
+                       rp_mass = -1,
+                       rp_ctau = '',
+                       rp_dcay = '',
                        input_is_miniaod = False,
                        mode = None,
                        sequence_name = 'mfvEventFilterSequence',
@@ -39,6 +44,16 @@ def setup_event_filter(process,
         trigger_filter = event_filter = 'jets only'
     elif mode == 'leptons only':
         trigger_filter = event_filter = 'leptons only'
+
+    elif mode == 'muons only':
+        trigger_filter = 'muons only'
+        event_filter = 'leptons only'
+    elif mode == 'displeptons only':
+        trigger_filter = 'displeptons only',
+        event_filter = 'leptons only'
+    elif mode == 'displeptons OR leptons':
+        trigger_filter = 'displeptons OR leptons'
+        event_filter = 'leptons only'
     elif mode == 'met only':
         trigger_filter = event_filter = 'met only'
     elif mode == 'HT OR bjets OR displaced dijet':
@@ -80,6 +95,13 @@ def setup_event_filter(process,
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterBjetsORDisplacedDijetVetoHT as triggerFilter
     elif trigger_filter == 'leptons only':
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterLeptonsOnly as triggerFilter
+        
+    elif trigger_filter == 'muons only':
+        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterMuonsOnly as triggerFilter
+    elif trigger_filter == 'displeptons only':
+        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterDisplacedLeptons as triggerFilter
+    elif trigger_filter == 'displeptons OR leptons':
+        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterDispLeptonsORSingleLeptons as triggerFilter
     elif trigger_filter is True:
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilter as triggerFilter
     elif trigger_filter is not False:
@@ -155,7 +177,9 @@ def setup_event_filter(process,
         getattr(process, path_name).insert(0, overall)
     else:
         setattr(process, path_name, cms.Path(overall))
+        
 
     if hasattr(process, 'out'):
         assert not hasattr(process.out, 'SelectEvents')
         process.out.SelectEvents = cms.untracked.PSet(SelectEvents = cms.vstring(path_name))
+        

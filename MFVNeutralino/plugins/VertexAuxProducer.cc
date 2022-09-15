@@ -404,17 +404,17 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       if (sv.trackWeight(tri) < mfv::track_vertex_weight_min)
         continue;
 
-      assert(muons->size() <= 128);
-      assert(electrons->size() <= 128);
-      for (size_t i = 0, ie = muons->size(); i < ie; ++i)
-        if (muons->at(i).track() == trref)
-          aux.which_lep.push_back(i);
-      if (aux.which_lep.size() == 0) // if a muon matched, don't check for electrons
-        for (size_t i = 0, ie = electrons->size(); i < ie; ++i)
-          if (electrons->at(i).closestCtfTrackRef() == trref)
-            aux.which_lep.push_back(i | (1<<7));
+      // assert(muons->size() <= 128);
+      // assert(electrons->size() <= 128);
+      // for (size_t i = 0, ie = muons->size(); i < ie; ++i)
+      //   if (muons->at(i).track() == trref)
+      //     aux.which_lep.push_back(i);
+      // if (aux.which_lep.size() == 0) // if a muon matched, don't check for electrons
+      //   for (size_t i = 0, ie = electrons->size(); i < ie; ++i)
+      //     if (electrons->at(i).closestCtfTrackRef() == trref)
+      //       aux.which_lep.push_back(i | (1<<7));
 
-      costhtkmomvtxdisps.push_back(jmt::costh3(tri->momentum(), pv2sv));
+      // costhtkmomvtxdisps.push_back(jmt::costh3(tri->momentum(), pv2sv));
 
       const uchar nhitsbehind = 0; //int2uchar(tracker_extents.numHitsBehind(tri->hitPattern(), sv_r, sv_z));
 

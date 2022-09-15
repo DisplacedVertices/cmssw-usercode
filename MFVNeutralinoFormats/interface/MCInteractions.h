@@ -5,7 +5,7 @@
 
 namespace mfv {
   // "tu" == tau but tau is a reserved string in our sample names
-  enum MCInteractions_t { mci_invalid, mci_Ttbar, mci_MFVtbs, mci_MFVtds, mci_MFVtbb, mci_MFVuds, mci_MFVude, mci_MFVudmu, mci_MFVudtu,  mci_MFVudb, mci_MFVcds, mci_MFVcdb, mci_MFVubb, mci_XX4j, mci_MFVlq, mci_stopdbardbar, mci_stopbbarbbar, mci_MFVddbar, mci_MFVccbar, mci_MFVbbbar, mci_MFVsplitsusy };
+  enum MCInteractions_t { mci_invalid, mci_Ttbar, mci_MFVtbs, mci_MFVtds, mci_MFVtbb, mci_MFVuds, mci_MFVude, mci_MFVudmu, mci_MFVudtu,  mci_MFVudb, mci_MFVcds, mci_MFVcdb, mci_MFVubb, mci_XX4j, mci_MFVlq, mci_stopdbardbar, mci_stopbbarbbar, mci_MFVddbar, mci_MFVccbar, mci_MFVbbbar, mci_MFVsplitsusy, mci_stoplq };
 
   struct MCInteractionHolderTtbar {
     virtual ~MCInteractionHolderTtbar() {}
@@ -39,6 +39,7 @@ namespace mfv {
   struct MCInteractionHolderMFVuds  : public MCInteractionHolderThruple {};
   struct MCInteractionHolderMFVudmu : public MCInteractionHolderThruple {};
   struct MCInteractionHolderMFVsplitsusy : public MCInteractionHolderThruple {};
+  
 
   struct MCInteractionHolderPair {
     bool valid() const;
@@ -51,6 +52,7 @@ namespace mfv {
   struct MCInteractionHolderXX4j     : public MCInteractionHolderPair {};
   struct MCInteractionHolderMFVlq    : public MCInteractionHolderPair {};
   struct MCInteractionHolderMFVddbar : public MCInteractionHolderPair {};
+  struct MCInteractionHolderMFV_stoplq : public MCInteractionHolderPair {};
 
   class MCInteraction {
   public:
@@ -68,6 +70,7 @@ namespace mfv {
     void set(const MCInteractionHolderXX4j&);
     void set(const MCInteractionHolderMFVlq&);
     void set(const MCInteractionHolderMFVddbar&);
+    void set(const MCInteractionHolderMFV_stoplq&);
 
     int type() const { return type_; }
     bool valid() const { return type_ != mci_invalid; }

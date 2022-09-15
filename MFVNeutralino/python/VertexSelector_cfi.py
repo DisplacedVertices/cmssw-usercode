@@ -103,8 +103,8 @@ mfvSelectedVerticesExtraLoose = mfvSelectedVertices.clone(
 
 mfvSelectedVerticesLoose = mfvSelectedVertices.clone(
     mevent_src = 'mfvEvent',
-    min_ntracks = 3,
-    min_bsbs2ddist = 0.005,
+    min_ntracks = 5,
+    min_bsbs2ddist = 0.01,
     max_rescale_bs2derr = 0.05,
     )
 
@@ -116,20 +116,32 @@ mfvSelectedVerticesTight = mfvSelectedVertices.clone(
     max_rescale_bs2derr = 0.0025,
     )
 
+
 mfvSelectedVerticesTightMinNtk3 = mfvSelectedVerticesTight.clone(min_ntracks = 3)
+mfvSelectedVerticesTightMinNtk4 = mfvSelectedVerticesTight.clone(min_ntracks = 4)
 mfvSelectedVerticesTightNtk3    = mfvSelectedVerticesTight.clone(min_ntracks = 3, max_ntracks = 3)
-mfvSelectedVerticesTightNtk4    = mfvSelectedVerticesTight.clone(min_ntracks = 4, max_ntracks = 4)
-mfvSelectedVerticesTightNtk3or4 = mfvSelectedVerticesTight.clone(min_ntracks = 3, max_ntracks = 4)
-mfvSelectedVerticesTightNtk3or5 = mfvSelectedVerticesTight.clone(min_ntracks = 3, max_ntracks = 5)
-mfvSelectedVerticesTightNtk4or5 = mfvSelectedVerticesTight.clone(min_ntracks = 4, max_ntracks = 5)
+# mfvSelectedVerticesTightNtk4    = mfvSelectedVerticesTight.clone(min_ntracks = 4, max_ntracks = 4)
+# mfvSelectedVerticesTightNtk3or4 = mfvSelectedVerticesTight.clone(min_ntracks = 3, max_ntracks = 4)
+# mfvSelectedVerticesTightNtk3or5 = mfvSelectedVerticesTight.clone(min_ntracks = 3, max_ntracks = 5)
+# mfvSelectedVerticesTightNtk4or5 = mfvSelectedVerticesTight.clone(min_ntracks = 4, max_ntracks = 5)
 mfvSelectedVerticesTightNtk5    = mfvSelectedVerticesTight.clone() # for looping convenience
+
+mfvSelectedVerticesLooseMinNtk3 = mfvSelectedVerticesLoose.clone(min_ntracks = 3)
+mfvSelectedVerticesLooseMinNtk4 = mfvSelectedVerticesLoose.clone(min_ntracks = 4)
+mfvSelectedVerticesLoosetNtk5    = mfvSelectedVerticesLoose.clone() # for looping convenience
 
 mfvSelectedVerticesSeq = cms.Sequence(
     mfvSelectedVerticesExtraLoose *
     mfvSelectedVerticesTight *
     mfvSelectedVerticesTightNtk3 *
-    mfvSelectedVerticesTightNtk4 *
-    mfvSelectedVerticesTightNtk3or4 *
-    mfvSelectedVerticesTightNtk3or5 *
-    mfvSelectedVerticesTightNtk4or5
+    #mfvSelectedVerticesTightNtk4 *
+    mfvSelectedVerticesTightMinNtk3 *
+    mfvSelectedVerticesTightMinNtk4 *
+    mfvSelectedVerticesLooseMinNtk3 *
+    mfvSelectedVerticesLooseMinNtk4 *
+    mfvSelectedVerticesLoose 
+    # mfvSelectedVerticesTightNtk3or4 *
+    # mfvSelectedVerticesTightNtk3or5 *
+    # mfvSelectedVerticesTightNtk4or5
     )
+

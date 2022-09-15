@@ -55,6 +55,10 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH1D* h_tracks_original_algo[max_tk_type];
   TH1D* h_tracks_chi2dof[max_tk_type];
   TH1D* h_tracks_pt[max_tk_type];
+  TH1D* h_tracks_pt_loweta[max_tk_type];
+  TH1D* h_tracks_pt_higheta[max_tk_type];
+  TH1D* h_tracks_pt_bin1[max_tk_type];
+  TH1D* h_tracks_pt_bin2[max_tk_type];
   TH1D* h_tracks_eta[max_tk_type];
   TH1D* h_tracks_phi[max_tk_type];
   TH1D* h_tracks_vx[max_tk_type];
@@ -62,6 +66,8 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH1D* h_tracks_vz[max_tk_type];
   TH1D* h_tracks_vphi[max_tk_type];
   TH1D* h_tracks_dxy[max_tk_type];
+  TH1D* h_tracks_dxy_bin1[max_tk_type];
+  TH1D* h_tracks_dxy_bin2[max_tk_type];
   TH1D* h_tracks_absdxy[max_tk_type];
   TH1D* h_tracks_dz[max_tk_type];
   TH1D* h_tracks_dzpv[max_tk_type];
@@ -74,6 +80,7 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH1D* h_tracks_qp_dxy[max_tk_type];
   TH1D* h_tracks_qm_dxy[max_tk_type];
   TH1D* h_tracks_dxy_zslices[max_tk_type][6];
+  TH1D* h_tracks_dxy_ptslices[max_tk_type][6];
 
   TH1D* h_tracks_min_r[max_tk_type];
   TH1D* h_tracks_npxlayers[max_tk_type];
@@ -86,11 +93,14 @@ class TrackerMapper : public edm::EDAnalyzer {
 
   TH2D* h_tracks_nstlayers_v_eta[max_tk_type];
   TH2D* h_tracks_dxy_v_eta[max_tk_type];
+  TH2D* h_tracks_dxy_v_pt[max_tk_type];
   TH2D* h_tracks_dxy_v_nstlayers[max_tk_type];
   TH2D* h_tracks_dxyerr_v_eta[max_tk_type];
+  TH2D* h_tracks_dxyerr_v_pt[max_tk_type];
   TH2D* h_tracks_dxyerr_v_nstlayers[max_tk_type];
   TH2D* h_tracks_dxyerr_v_dxy[max_tk_type];
   TH2D* h_tracks_nsigmadxy_v_eta[max_tk_type];
+  TH2D* h_tracks_nsigmadxy_v_pt[max_tk_type];
   TH2D* h_tracks_nsigmadxy_v_nstlayers[max_tk_type];
   TH2D* h_tracks_nsigmadxy_v_dxy[max_tk_type];
   TH2D* h_tracks_nsigmadxy_v_dxyerr[max_tk_type];
@@ -112,6 +122,7 @@ class TrackerMapper : public edm::EDAnalyzer {
   TH2D* h_nm1_tracks_dxyerr_v_npxlayers[2];
   TH2D* h_nm1_tracks_dxyerr_v_nstlayers[2];
   TH2D* h_nm1_tracks_dxyerr_v_min_r[2];
+  TH2D* h_nm1_tracks_nsigmadxy_v_pt[2];
 
   TH2D* h_dxyerr_v_ptcut[2];
   TH2D* h_dxyerr_v_npxlayerscut[2];
@@ -167,6 +178,11 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
     h_tracks_original_algo[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_original_algo", ex[i]), TString::Format(";%s tracks original algo;events", ex[i]), 50, 0, 50);
     h_tracks_chi2dof[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_chi2dof", ex[i]), TString::Format("%s tracks;tracks #chi^{2}/dof;arb. units", ex[i]), 20, 0, 20);
     h_tracks_pt[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_pt", ex[i]), TString::Format("%s tracks;tracks pt;arb. units", ex[i]), 200, 0, 20);
+    h_tracks_pt_loweta[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_pt_loweta", ex[i]), TString::Format("%s tracks;tracks pt;arb. units", ex[i]), 200, 0, 20);
+    h_tracks_pt_higheta[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_pt_higheta", ex[i]), TString::Format("%s tracks;tracks pt;arb. units", ex[i]), 200, 0, 20);
+    h_tracks_pt_bin1[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_pt_bin1", ex[i]), TString::Format("%s tracks;tracks pt;arb. units", ex[i]), 200, 0, 20);
+    h_tracks_pt_bin2[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_pt_bin2", ex[i]), TString::Format("%s tracks;tracks pt;arb. units", ex[i]), 200, 0, 20);
+
     h_tracks_phi[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_phi", ex[i]), TString::Format("%s tracks;tracks phi;arb. units", ex[i]), 50, -3.15, 3.15);
     h_tracks_eta[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_eta", ex[i]), TString::Format("%s tracks;tracks eta;arb. units", ex[i]), 50, -4, 4);
     h_tracks_vx[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_vx", ex[i]), TString::Format("%s tracks;tracks vx - beamspot x;arb. units", ex[i]), 400, -0.2, 0.2);
@@ -174,6 +190,8 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
     h_tracks_vz[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_vz", ex[i]), TString::Format("%s tracks;tracks vz - beamspot z;arb. units", ex[i]), 400, -20, 20);
     h_tracks_vphi[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_vphi", ex[i]), TString::Format("%s tracks;tracks vphi w.r.t. beamspot;arb. units", ex[i]), 50, -3.15, 3.15);
     h_tracks_dxy[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_dxy", ex[i]), TString::Format("%s tracks;tracks dxy to beamspot;arb. units", ex[i]), 400, -0.2, 0.2);
+    h_tracks_dxy_bin1[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_dxy_bin1", ex[i]), TString::Format("%s tracks;tracks dxy to beamspot;arb. units", ex[i]), 400, -0.2, 0.2);
+    h_tracks_dxy_bin2[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_dxy_bin2", ex[i]), TString::Format("%s tracks;tracks dxy to beamspot;arb. units", ex[i]), 400, -0.2, 0.2);
     h_tracks_absdxy[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_absdxy", ex[i]), TString::Format("%s tracks;tracks |dxy| to beamspot;arb. units", ex[i]), 200, 0, 0.2);
     h_tracks_dz[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_dz", ex[i]), TString::Format("%s tracks;tracks dz to beamspot;arb. units", ex[i]), 400, -20, 20);
     h_tracks_dzpv[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_dzpv", ex[i]), TString::Format("%s tracks;tracks dz to PV;arb. units", ex[i]), 400, -20, 20);
@@ -187,6 +205,7 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
     h_tracks_qm_dxy[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_qm_dxy", ex[i]), TString::Format("%s tracks;q=-1 tracks dxy to beamspot;arb. units", ex[i]), 400, -0.2, 0.2);
     for (int j = 0; j < 6; ++j) {
       h_tracks_dxy_zslices[i][j] = fs->make<TH1D>(TString::Format("h_%s_tracks_dxy_z%d", ex[i], j), TString::Format("%s tracks z%d;tracks dxy to beamspot;arb. units", ex[i], j), 400, -0.2, 0.2);
+      h_tracks_dxy_ptslices[i][j] = fs->make<TH1D>(TString::Format("h_%s_tracks_dxy_pt%d", ex[i], j), TString::Format("%s tracks pt%d;tracks dxy to beamspot;arb. units", ex[i], j), 400, -0.2, 0.2);
     }
 
     h_tracks_min_r[i] = fs->make<TH1D>(TString::Format("h_%s_tracks_min_r", ex[i]), TString::Format("%s tracks;tracks min_r;arb. units", ex[i]), 20, 0, 20);
@@ -200,11 +219,14 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
 
     h_tracks_nstlayers_v_eta[i] = fs->make<TH2D>(TString::Format("h_%s_tracks_nstlayers_v_eta", ex[i]), TString::Format("%s tracks;tracks eta;tracks nstlayers", ex[i]), 80, -4, 4, 20, 0, 20);
     h_tracks_dxy_v_eta[i] = fs->make<TH2D>(TString::Format("h_%s_tracks_dxy_v_eta", ex[i]), TString::Format("%s tracks;tracks eta;tracks dxy to beamspot", ex[i]), 80, -4, 4, 400, -0.2, 0.2);
+    h_tracks_dxy_v_pt[i] = fs->make<TH2D>(TString::Format("h_%s_tracks_dxy_v_pt", ex[i]), TString::Format("%s tracks;tracks pt;tracks dxy to beamspot", ex[i]), 200, 0, 20, 400, -0.2, 0.2);
     h_tracks_dxy_v_nstlayers[i] = fs->make<TH2D>(TString::Format("h_%s_tracks_dxy_v_nstlayers", ex[i]), TString::Format("%s tracks;tracks nstlayers;tracks dxy to beamspot", ex[i]), 20, 0, 20, 400, -0.2, 0.2);
     h_tracks_dxyerr_v_eta[i] = fs->make<TH2D>(TString::Format("h_%s_tracks_dxyerr_v_eta", ex[i]), TString::Format("%s tracks;tracks eta;tracks dxyerr", ex[i]), 80, -4, 4, 200, 0, 0.2);
+    h_tracks_dxyerr_v_pt[i] = fs->make<TH2D>(TString::Format("h_%s_tracks_dxyerr_v_pt", ex[i]), TString::Format("%s tracks;tracks pt;tracks dxyerr", ex[i]), 200, 0, 20, 200, 0, 0.2);
     h_tracks_dxyerr_v_nstlayers[i] = fs->make<TH2D>(TString::Format("h_%s_tracks_dxyerr_v_nstlayers", ex[i]), TString::Format("%s tracks;tracks nstlayers;tracks dxyerr", ex[i]), 20, 0, 20, 200, 0, 0.2);
     h_tracks_dxyerr_v_dxy[i] = fs->make<TH2D>(TString::Format("h_%s_tracks_dxyerr_v_dxy", ex[i]), TString::Format("%s tracks;tracks dxy to beamspot;tracks dxyerr", ex[i]), 400, -0.2, 0.2, 200, 0, 0.2);
     h_tracks_nsigmadxy_v_eta[i] = fs->make<TH2D>(TString::Format("h_%s_tracks_nsigmadxy_v_eta", ex[i]), TString::Format("%s tracks;tracks eta;tracks nsigmadxy", ex[i]), 80, -4, 4, 200, 0, 20);
+    h_tracks_nsigmadxy_v_pt[i] = fs->make<TH2D>(TString::Format("h_%s_tracks_nsigmadxy_v_pt", ex[i]), TString::Format("%s tracks;tracks pt;tracks nsigmadxy", ex[i]), 200, 0, 20, 200, 0, 20);
     h_tracks_nsigmadxy_v_nstlayers[i] = fs->make<TH2D>(TString::Format("h_%s_tracks_nsigmadxy_v_nstlayers", ex[i]), TString::Format("%s tracks;tracks nstlayers;tracks nsigmadxy", ex[i]), 20, 0, 20, 200, 0, 20);
     h_tracks_nsigmadxy_v_dxy[i] = fs->make<TH2D>(TString::Format("h_%s_tracks_nsigmadxy_v_dxy", ex[i]), TString::Format("%s tracks;tracks dxy to beamspot;tracks nsigmadxy", ex[i]), 400, -0.2, 0.2, 200, 0, 20);
     h_tracks_nsigmadxy_v_dxyerr[i] = fs->make<TH2D>(TString::Format("h_%s_tracks_nsigmadxy_v_dxyerr", ex[i]), TString::Format("%s tracks;tracks dxyerr;tracks nsigmadxy", ex[i]), 200, 0, 0.2, 200, 0, 20);
@@ -231,6 +253,7 @@ TrackerMapper::TrackerMapper(const edm::ParameterSet& cfg)
     h_nm1_tracks_dxyerr_v_npxlayers[i] = fs->make<TH2D>(TString::Format("h_nm1_%s_tracks_dxyerr_v_npxlayers", ex3[i]), TString::Format("nm1 %s tracks;tracks npxlayers;tracks dxyerr", ex3[i]), 20, 0, 20, 200, 0, 0.2);
     h_nm1_tracks_dxyerr_v_nstlayers[i] = fs->make<TH2D>(TString::Format("h_nm1_%s_tracks_dxyerr_v_nstlayers", ex3[i]), TString::Format("nm1 %s tracks;tracks nstlayers;tracks dxyerr", ex3[i]), 20, 0, 20, 200, 0, 0.2);
     h_nm1_tracks_dxyerr_v_min_r[i] = fs->make<TH2D>(TString::Format("h_nm1_%s_tracks_dxyerr_v_min_r", ex3[i]), TString::Format("nm1 %s tracks;tracks min_r;tracks dxyerr", ex3[i]), 20, 0, 20, 200, 0, 0.2);
+    h_nm1_tracks_nsigmadxy_v_pt[i] = fs->make<TH2D>(TString::Format("h_nm1_%s_tracks_nsigmadxy_v_pt", ex3[i]), TString::Format("nm1 %s tracks;tracks pt;tracks nsigmadxy", ex3[i]), 200, 0, 20, 200, 0, 20);
   }
 
   const char* ex2[2] = {"all", "nm1"};
@@ -254,6 +277,7 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
   const double w = *weight;
   h_w->Fill(w);
 
+ 
   typedef std::pair<int, reco::Candidate::PolarLorentzVector> heavy_flavor_t;
   std::vector<heavy_flavor_t> heavy_flavor;
 
@@ -316,6 +340,21 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
 
     reco::TransientTrack ttk(tt_builder->build(tk));
 
+    if (tk.dxyError() < 0.124 && tk.dxyError() >= 0.123) {
+      std::cout << "dxyError "<< tk.dxyError() << std::endl;
+      std::cout << "track pt "<< tk.pt() << " track dxy "<< tk.dxy(*beamspot) << " Track eta " << tk.eta() << std::endl;
+      std::cout << "track dz err " << tk.dzError() << std::endl;
+      std::cout << " ------------------------------------------------------ " << std::endl;
+    }
+    
+    else if (tk.dxyError() < 0.026 && tk.dxyError() >= 0.025) {
+
+      std::cout << "dxyError "<< tk.dxyError() << std::endl;
+      std::cout << "track pt "<< tk.pt() << " track dxy "<< tk.dxy(*beamspot) << " Track eta " << tk.eta() << std::endl;
+      std::cout << "track dz err " << tk.dzError() << std::endl;
+      std::cout << " ------------------------------------------------------ " << std::endl;
+    }
+    
     TrackerSpaceExtents tracker_extents;
     const double pt = tk.pt();
     int min_r = 2000000000;
@@ -372,6 +411,7 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
 	h_nm1_tracks_pt[i]->Fill(pt, w);
 	h_nm1_tracks_dxy_v_pt[i]->Fill(pt, dxy, w);
 	h_nm1_tracks_dxyerr_v_pt[i]->Fill(pt, tk.dxyError(), w);
+	h_nm1_tracks_nsigmadxy_v_pt[i]->Fill(pt, nsigmadxy, w);
       }
       if (min_r_nm1_sel) {
 	h_nm1_tracks_min_r[i]->Fill(min_r, w);
@@ -455,6 +495,9 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
       h_tracks_chi2dof[i]->Fill(tk.normalizedChi2(), w);
       h_tracks_pt[i]->Fill(tk.pt(), w);
       h_tracks_eta[i]->Fill(tk.eta(), w);
+      if (abs(tk.eta()) <= 1.5) h_tracks_pt_loweta[i]->Fill(tk.pt(), w);
+      if (abs(tk.eta()) >  1.5) h_tracks_pt_higheta[i]->Fill(tk.pt(), w);
+         
       h_tracks_phi[i]->Fill(tk.phi(), w);
       h_tracks_vx[i]->Fill(tk.vx() - bsx, w);
       h_tracks_vy[i]->Fill(tk.vy() - bsy, w);
@@ -464,6 +507,24 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
       h_tracks_dz[i]->Fill(tk.dz(beamspot->position()), w);
       if (pv) h_tracks_dzpv[i]->Fill(tk.dz(pv->position()), w);
       h_tracks_dxyerr[i]->Fill(tk.dxyError(), w);
+      
+      if (tk.dxyError() < 0.026 && tk.dxyError() >= 0.025) {
+	h_tracks_pt_bin1[i]->Fill(tk.pt(), w);
+	h_tracks_dxy_bin1[i]->Fill(tk.dxy(*beamspot), w);
+	// std::cout << "dxyError "<< tk.dxyError() << std::endl;
+	// std::cout << "track pt "<< tk.pt() << " track dxy "<< tk.dxy(*beamspot) << " Track eta " << tk.eta() << std::endl;
+	// std::cout << "track dz err " << tk.dzError() << std::endl;
+		
+	// std::cout << " ------------------------------------------------------ " << std::endl;
+      }
+      else if (tk.dxyError() < 0.124 && tk.dxyError() >= 0.123) {
+	h_tracks_pt_bin2[i]->Fill(tk.pt(), w);
+	h_tracks_dxy_bin2[i]->Fill(tk.dxy(*beamspot), w);
+	// std::cout << "dxyError "<< tk.dxyError() << std::endl;
+	// std::cout << "track pt "<< tk.pt() << " track dxy "<< tk.dxy(*beamspot) << " Track eta " << tk.eta() << std::endl;
+	// std::cout << "track dz err " << tk.dzError() << std::endl;
+	// std::cout << " ------------------------------------------------------ " << std::endl;
+      }
       h_tracks_dzerr[i]->Fill(tk.dzError(), w);
       h_tracks_nhits[i]->Fill(tk.hitPattern().numberOfValidHits(), w);
       h_tracks_npxhits[i]->Fill(tk.hitPattern().numberOfValidPixelHits(), w);
@@ -480,6 +541,14 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
       if (z>2 && z<5)   h_tracks_dxy_zslices[i][4]->Fill(dxy, w);
       if (z>5)          h_tracks_dxy_zslices[i][5]->Fill(dxy, w);
 
+      
+      if (pt<2)         h_tracks_dxy_ptslices[i][0]->Fill(dxy, w);
+      if (pt>2 && pt<4) h_tracks_dxy_ptslices[i][1]->Fill(dxy, w);
+      if (pt>4 && pt<6)  h_tracks_dxy_ptslices[i][2]->Fill(dxy, w);
+      if (pt>6 && pt<10)   h_tracks_dxy_ptslices[i][3]->Fill(dxy, w);
+      if (pt>10 && pt<14)   h_tracks_dxy_ptslices[i][4]->Fill(dxy, w);
+      if (pt>14)          h_tracks_dxy_ptslices[i][5]->Fill(dxy, w);
+      
       h_tracks_min_r[i]->Fill(min_r, w);
       h_tracks_npxlayers[i]->Fill(npxlayers, w);
       h_tracks_nstlayers[i]->Fill(nstlayers, w);
@@ -493,11 +562,14 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
 
       h_tracks_nstlayers_v_eta[i]->Fill(tk.eta(), nstlayers, w);
       h_tracks_dxy_v_eta[i]->Fill(tk.eta(), dxy, w);
+      h_tracks_dxy_v_pt[i]->Fill(tk.pt(), dxy, w);
       h_tracks_dxy_v_nstlayers[i]->Fill(nstlayers, dxy, w);
       h_tracks_dxyerr_v_eta[i]->Fill(tk.eta(), tk.dxyError(), w);
+      h_tracks_dxyerr_v_pt[i]->Fill(tk.pt(), tk.dxyError(), w);
       h_tracks_dxyerr_v_nstlayers[i]->Fill(nstlayers, tk.dxyError(), w);
       h_tracks_dxyerr_v_dxy[i]->Fill(dxy, tk.dxyError(), w);
       h_tracks_nsigmadxy_v_eta[i]->Fill(tk.eta(), nsigmadxy, w);
+      h_tracks_nsigmadxy_v_pt[i]->Fill(tk.pt(), nsigmadxy, w);
       h_tracks_nsigmadxy_v_nstlayers[i]->Fill(nstlayers, nsigmadxy, w);
       h_tracks_nsigmadxy_v_dxy[i]->Fill(dxy, nsigmadxy, w);
       h_tracks_nsigmadxy_v_dxyerr[i]->Fill(tk.dxyError(), nsigmadxy, w);
@@ -512,6 +584,8 @@ void TrackerMapper::analyze(const edm::Event& event, const edm::EventSetup& setu
     for (int j = 0; j < reco::TrackBase::qualitySize; ++j)
       h_ntracks_quality[i][j]->Fill(ntracks_quality[i][j], w);
   }
+
+    
 }
 
 DEFINE_FWK_MODULE(TrackerMapper);

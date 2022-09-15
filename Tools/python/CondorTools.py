@@ -313,10 +313,10 @@ def cs_hadd_files(working_dir, **kwargs):
         files = files[a:b:c]
     return expected, files
 
-def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None, range_filter=None):
+def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None, range_filter=None, submit=False):
     working_dir, new_name, new_dir = cs_hadd_args(working_dir, new_name, new_dir)
     expected, files = cs_hadd_files(working_dir, range_filter=range_filter)
-    result = HaddBatchResult('condor', working_dir, new_name, new_dir, expected, files)
+    result = HaddBatchResult('condor', working_dir, new_name, new_dir, expected, files, submit)
     print '%s: expecting %i files if all jobs succeeded' % (working_dir, expected)
 
     if pattern:
@@ -351,7 +351,7 @@ def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chun
         if result.success and not new_name.startswith('root://'):
             os.chmod(new_name, 0644)
     else:
-        result.success = hadd(new_name, files)
+        result.success = hadd(new_name, files, submit)
 
     return result
 

@@ -17,14 +17,6 @@ root_file_dir = 'afs/hep.wisc.edu/home/acwarden/crabdirs/Histos%s' % version
 set_style()
 ps = plot_saver(plot_dir('data_mc_comp_%s_%s' % (year, version)))
 
-# qcd_samples = Samples.qcd_samples_2017[1:]
-# ttbar_samples = Samples.ttbar_samples_2017
-# signal_sample = Samples.mfv_neu_tau001000um_M0800_2017
-# data_samples = [] # Samples.data_samples_2017
-# background_samples = ttbar_samples + qcd_samples
-# lumi = ac.int_lumi_2017 * ac.scale_factor_2017
-# lumi_nice = ac.int_lumi_nice_2017
-
 if year == '2018':
     qcd_samples = Samples.qcd_samples_2018
     ttbar_samples = []
@@ -47,36 +39,32 @@ if year == '2017':
     qcd_samples = Samples.qcd_lep_samples_2017
     ttbar_samples = Samples.met_samples_2017
     leptonic_samples = Samples.leptonic_samples_2017
-    wjet_sample = Samples.leptonic_samples_2017[0]
+    wjet_samples = [Samples.leptonic_samples_2017[0]]
     dyjet_samples = Samples.leptonic_samples_2017[1:]
     diboson_samples = Samples.diboson_samples_2017
-    data_samples = Samples.auxiliary_data_samples_2017
+    data_samples = Samples.Lepton_data_samples_2017
     signal_sample = []
-    background_samples = qcd_samples + ttbar_samples + leptonic_samples + diboson_samples
+    #background_samples = qcd_samples + ttbar_samples + leptonic_samples + diboson_samples
+    background_samples = diboson_samples + ttbar_samples + qcd_samples + dyjet_samples + wjet_samples
     lumi = ac.int_lumi_2017 * ac.scale_factor_2017 * 0.10
     lumi_nice = ac.int_lumi_nice_2017
 
-
-#kBlue-9, kBlue-3, kMagenta-3, kMagenta+3
-
+#kblue-9 -3 magenta-3 +3
 for s in diboson_samples:
     s.join_info = True, 'Diboson', ROOT.kBlue-9
+for s in qcd_samples:
+    s.join_info = True, 'QCD lept enriched', ROOT.kMagenta+3
 for s in ttbar_samples:
     s.join_info = True, 't#bar{t}', ROOT.kBlue-3
-for s in qcd_samples:
-    s.join_info = True, 'QCD lept enriched', ROOT.kMagenta-3
-for s in leptonic_samples:
-    s.join_info = True, 'W+jets; DY', ROOT.kMagenta+3
+for s in dyjet_samples:
+    s.join_info = True, 'DY+jets', ROOT.kMagenta-3
+for s in wjet_samples:
+    s.join_info = True, 'W+jets', ROOT.kPink-3
 
 
-#signal_samples = [signal_sample]
-#signal_sample.nice_name = 'Signal: #sigma = 1 fb, c#tau = 1 mm, M = 800 GeV'
-#signal_sample.color = 8
-
+tracker_sel = ["all", "sel", "seed"]
 C = partial(data_mc_comparison,
             background_samples = background_samples,
-           # signal_samples = signal_samples,
-           # data_samples = [],
             signal_samples = [],
             data_samples = data_samples,
             plot_saver = ps,
@@ -84,14 +72,14 @@ C = partial(data_mc_comparison,
             int_lumi = lumi,
             int_lumi_nice = lumi_nice,
             canvas_top_margin = 0.08,
-            poisson_intervals = True,
-            legend_pos = (0.48, 0.78, 0.88, 0.88),
+            poisson_intervals = False,
+            legend_pos = (0.66, 0.78, 0.96, 0.88),
             enable_legend = True,
             res_fit = False,
-            verbose = True,
+            verbose = False,
             background_uncertainty = ('MC stat. uncertainty', 0, 1, 3254),
-            preliminary = True,
-            simulation = True,
+            preliminary = False,
+            simulation = False,
             )
 
 #C('ntuple_njets',
@@ -340,219 +328,60 @@ C = partial(data_mc_comparison,
 #   y_title = 'Events/200 #mum',
 #   y_range = (1e-2, 10),
 #   )
-
-C('track_pt',
-  file_path = os.path.join('/afs/hep.wisc.edu/home/acwarden/crabdirs/TrackerMapperV1UL', '%(name)s.root'),
-  histogram_path = 'TrackerMapper/h_all_tracks_pt',
-  x_title = 'Track p_{T} (GeV)',
-  y_title = 'Tracks/0.1 GeV',
-  y_range = (1, 1e10),
-  #cut_line = ((1, 0, 1, 2.8e10), 2, 5, 1),
-)
-
-#if year == '2016':
-#    C('track_pt',
-#      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV2', '%(name)s.root'),
-#      histogram_path = 'TrackerMapper/h_nm1_tracks_pt',
-#      x_title = 'Track p_{T} (GeV)',
-#      y_title = 'Tracks/0.1 GeV',
-#      y_range = (1, 1e10),
-#      cut_line = ((1, 0, 1, 2.8e10), 2, 5, 1),
-#      )
-#
-#    C('track_min_r',
-#      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV2', '%(name)s.root'),
-#      histogram_path = 'TrackerMapper/h_nm1_tracks_min_r',
-#      x_title = 'Minimum layer number',
-#      y_title = 'Tracks',
-#      y_range = (1, 1e10),
-#      cut_line = ((2, 0, 2, 2.8e10), 2, 5, 1),
-#      )
-#
-#    C('track_npxlayers',
-#      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV2', '%(name)s.root'),
-#      histogram_path = 'TrackerMapper/h_nm1_tracks_npxlayers',
-#      x_title = 'Number of pixel layers',
-#      y_title = 'Tracks',
-#      y_range = (1, 1e10),
-#      cut_line = ((2, 0, 2, 2.8e10), 2, 5, 1),
-#      )
-#
-#    C('track_nstlayers_etalt2',
-#      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV2', '%(name)s.root'),
-#      histogram_path = 'TrackerMapper/h_nm1_tracks_nstlayers_etalt2',
-#      x_title = 'Number of strip layers (|#eta| < 2)',
-#      y_title = 'Tracks',
-#      y_range = (1, 1e10),
-#      cut_line = ((6, 0, 6, 2.8e10), 2, 5, 1),
-#      )
-#
-#    C('track_nstlayers_etagt2',
-#      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV2', '%(name)s.root'),
-#      histogram_path = 'TrackerMapper/h_nm1_tracks_nstlayers_etagt2',
-#      x_title = 'Number of strip layers (|#eta| #geq 2)',
-#      y_title = 'Tracks',
-#      y_range = (1, 1e10),
-#      cut_line = ((7, 0, 7, 2.8e10), 2, 5, 1),
-#      )
-#
-#    C('track_nsigmadxy',
-#      file_path = os.path.join('/uscms_data/d1/jchu/crab_dirs/mfv_8025/TrackerMapperV2', '%(name)s.root'),
-#      histogram_path = 'TrackerMapper/h_nm1_tracks_nsigmadxy',
-#      x_title = 'N#sigma(dxy)',
-#      y_title = 'Tracks',
-#      x_range = (0, 10),
-#      y_range = (1, 1e10),
-#      cut_line = ((4, 0, 4, 2.8e10), 2, 5, 1),
-#      )
-#
-
-
-#C('100pc_3t1v_ntracks',
-#  histogram_path = 'Ntk3vtxHst1VNoNtracks/h_sv_all_ntracks',
-#  x_title = 'Number of tracks per vertex',
-#  y_title = 'Vertices',
-#  y_range = (1, 1e6),
-#  cut_line = ((5, 0, 5, 2.1e6), 2, 5, 1),
-#  )
-#
-#C('100pc_3t1v_bs2derr',
-#  histogram_path = 'Ntk3vtxHst1VNoBs2derr/h_sv_all_bs2derr',
-#  x_title = 'Uncertainty in d_{BV} (cm)',
-#  y_title = 'Vertices/5 #mum',
-#  y_range = (1, 1e6),
-#  cut_line = ((0.0025, 0, 0.0025, 2.1e6), 2, 5, 1),
-#  )
-#
-#C('100pc_3t1v_dbv',
-#  histogram_path = 'Ntk3vtxHst1VNoBsbs2ddist/h_sv_all_bsbs2ddist',
-#  x_title = 'd_{BV} (cm)',
-#  y_title = 'Vertices/50 #mum',
-#  x_range = (0, 0.4),
-#  y_range = (1, 1e6),
-#  cut_line = ((0.01, 0, 0.01, 2.1e6), 2, 5, 1),
-#  )
-#
-#C('100pc_3t1v_onevtx_dbv',
-#  histogram_path = 'Ntk3mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist',
-#  x_title = 'd_{BV} (cm)',
-#  y_title = 'Vertices/50 #mum',
-#  x_range = (0, 0.4),
-#  y_range = (1, 1e6),
-#  )
-#
-#C('100pc_3t1v_onevtx_dbv_unzoom',
-#  histogram_path = 'Ntk3mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist',
-#  x_title = 'd_{BV} (cm)',
-#  y_title = 'Vertices/50 #mum',
-#  y_range = (1, 1e6),
-#  )
-#
-#C('100pc_3t2v_dvv',
-#  histogram_path = 'Ntk3mfvVertexHistosFullSel/h_svdist2d',
-#  rebin = 5,
-#  x_title = 'd_{VV} (cm)',
-#  y_title = 'Events/100 #mum',
-#  x_range = (0, 0.4),
-#  y_range = (1e-1, 1e3),
-#  )
-#
-#C('100pc_4t1v_ntracks',
-#  histogram_path = 'Ntk4vtxHst1VNoNtracks/h_sv_all_ntracks',
-#  x_title = 'Number of tracks per vertex',
-#  y_title = 'Vertices',
-#  y_range = (1, 1e6),
-#  cut_line = ((5, 0, 5, 2.1e6), 2, 5, 1),
-#  )
-#
-#C('100pc_4t1v_bs2derr',
-#  histogram_path = 'Ntk4vtxHst1VNoBs2derr/h_sv_all_bs2derr',
-#  x_title = 'Uncertainty in d_{BV} (cm)',
-#  y_title = 'Vertices/5 #mum',
-#  y_range = (1, 1e6),
-#  cut_line = ((0.0025, 0, 0.0025, 2.1e6), 2, 5, 1),
-#  )
-#
-#C('100pc_4t1v_dbv',
-#  histogram_path = 'Ntk4vtxHst1VNoBsbs2ddist/h_sv_all_bsbs2ddist',
-#  x_title = 'd_{BV} (cm)',
-#  y_title = 'Vertices/50 #mum',
-#  x_range = (0, 0.4),
-#  y_range = (1, 1e6),
-#  cut_line = ((0.01, 0, 0.01, 2.1e6), 2, 5, 1),
-#  )
-#
-#C('100pc_4t1v_onevtx_dbv',
-#  histogram_path = 'Ntk4mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist',
-#  x_title = 'd_{BV} (cm)',
-#  y_title = 'Vertices/50 #mum',
-#  x_range = (0, 0.4),
-#  y_range = (1, 1e6),
-#  )
-#
-#C('100pc_4t1v_onevtx_dbv_unzoom',
-#  histogram_path = 'Ntk4mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist',
-#  x_title = 'd_{BV} (cm)',
-#  y_title = 'Vertices/50 #mum',
-#  y_range = (1, 1e6),
-#  )
-#
-#C('100pc_4t2v_dvv',
-#  histogram_path = 'Ntk4mfvVertexHistosFullSel/h_svdist2d',
-#  rebin = 5,
-#  x_title = 'd_{VV} (cm)',
-#  y_title = 'Events/100 #mum',
-#  x_range = (0, 0.4),
-#  y_range = (1e-1, 1e3),
-#  res_fit = False,
-#  )
-#
-#C('100pc_5t1v_ntracks',
-#  histogram_path = 'vtxHst1VNoNtracks/h_sv_all_ntracks',
-#  x_title = 'Number of tracks per vertex',
-#  y_title = 'Vertices',
-#  y_range = (1, 1e6),
-#  cut_line = ((5, 0, 5, 2.1e6), 2, 5, 1),
-#  )
-#
-#C('100pc_5t1v_bs2derr',
-#  histogram_path = 'vtxHst1VNoBs2derr/h_sv_all_bs2derr',
-#  x_title = 'Uncertainty in d_{BV} (cm)',
-#  y_title = 'Vertices/5 #mum',
-#  y_range = (1, 1e6),
-#  cut_line = ((0.0025, 0, 0.0025, 2.1e6), 2, 5, 1),
-#  )
-#
-#C('100pc_5t1v_dbv',
-#  histogram_path = 'vtxHst1VNoBsbs2ddist/h_sv_all_bsbs2ddist',
-#  x_title = 'd_{BV} (cm)',
-#  y_title = 'Vertices/50 #mum',
-#  x_range = (0, 0.4),
-#  y_range = (1, 1e6),
-#  cut_line = ((0.01, 0, 0.01, 2.1e6), 2, 5, 1),
-#  )
-#
-#C('100pc_5t1v_onevtx_dbv',
-#  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist',
-#  x_title = 'd_{BV} (cm)',
-#  y_title = 'Vertices/50 #mum',
-#  x_range = (0, 0.4),
-#  y_range = (1, 1e6),
-#  )
-#
-#C('100pc_5t1v_onevtx_dbv_unzoom',
-#  histogram_path = 'mfvVertexHistosOnlyOneVtx/h_sv_all_bsbs2ddist',
-#  x_title = 'd_{BV} (cm)',
-#  y_title = 'Vertices/50 #mum',
-#  y_range = (1, 1e6),
-#  )
-#
-#C('100pc_5t2v_dvv',
-#  histogram_path = 'mfvVertexHistosFullSel/h_svdist2d',
-#  rebin = 5,
-#  x_title = 'd_{VV} (cm)',
-#  y_title = 'Events/100 #mum',
-#  x_range = (0, 0.4),
-#  y_range = (1e-1, 1e3),
-#  res_fit = False,
-#  )
+for track in tracker_sel : 
+    C( track +'_track_pt',
+      file_path = os.path.join('/afs/hep.wisc.edu/home/acwarden/crabdirs/TrackerMapperV1UL', '%(name)s.root'),
+      histogram_path = 'TrackerMapper/h_' + track + '_tracks_pt',
+      x_title = track + 'track p_{T} (GeV)',
+      y_title = 'Tracks/0.1 GeV',
+      y_range = (1, 1e10),
+    )
+    C( track +'_track_eta',
+      file_path = os.path.join('/afs/hep.wisc.edu/home/acwarden/crabdirs/TrackerMapperV1UL', '%(name)s.root'),
+      histogram_path = 'TrackerMapper/h_' + track + '_tracks_eta',
+      x_title = track + 'track eta',
+      y_title = 'Tracks/0.1 GeV',
+      y_range = (1, 6e8),
+    )
+    C( track +'_track_phi',
+      file_path = os.path.join('/afs/hep.wisc.edu/home/acwarden/crabdirs/TrackerMapperV1UL', '%(name)s.root'),
+      histogram_path = 'TrackerMapper/h_' + track + '_tracks_phi',
+      x_title = track + 'track phi',
+      y_title = 'Tracks/0.1 GeV',
+      y_range = (1, 4e8),
+    )
+    C( track +'_track_npxhits',
+      file_path = os.path.join('/afs/hep.wisc.edu/home/acwarden/crabdirs/TrackerMapperV1UL', '%(name)s.root'),
+      histogram_path = 'TrackerMapper/h_' + track + '_tracks_npxhits',
+      x_title = track + 'track npxhits',
+      y_title = 'Tracks/0.1 GeV',
+      y_range = (1, 3e9),
+    )
+    C( track +'_track_nsthits',
+      file_path = os.path.join('/afs/hep.wisc.edu/home/acwarden/crabdirs/TrackerMapperV1UL', '%(name)s.root'),
+      histogram_path = 'TrackerMapper/h_' + track + '_tracks_nsthits',
+      x_title = track + 'track nsthits',
+      y_title = 'Tracks/0.1 GeV',
+      y_range = (1, 2e9),
+    )
+    C( track +'_track_dxy',
+       file_path = os.path.join('/afs/hep.wisc.edu/home/acwarden/crabdirs/TrackerMapperV1UL', '%(name)s.root'),
+       histogram_path = 'TrackerMapper/h_' + track + '_tracks_dxy',
+       x_title = track + 'track dxy to beamspot',
+       y_title = 'Tracks/0.1 GeV',
+       y_range = (1, 1e10),
+    )
+    C( track +'_track_dxyerr',
+       file_path = os.path.join('/afs/hep.wisc.edu/home/acwarden/crabdirs/TrackerMapperV1UL', '%(name)s.root'),
+       histogram_path = 'TrackerMapper/h_' + track + '_tracks_dxyerr',
+       x_title = track + 'track dxyerr',
+       y_title = 'Tracks/0.1 GeV',
+       y_range = (1, 1e10),
+    )
+    C( track +'_track_nsigmadxy',
+       file_path = os.path.join('/afs/hep.wisc.edu/home/acwarden/crabdirs/TrackerMapperV1UL', '%(name)s.root'),
+       histogram_path = 'TrackerMapper/h_' + track + '_tracks_nsigmadxy',
+       x_title = track + 'track nsigmadxy',
+       y_title = 'Tracks/0.1 GeV',
+       y_range = (1, 1e10),
+    )

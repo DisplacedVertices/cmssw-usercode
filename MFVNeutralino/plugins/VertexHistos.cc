@@ -145,7 +145,7 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("max_nm1_refit_dist2", "maximum n-1 refit distance (2D) (cm)", 1000, 0, 1);
   hs.add("max_nm1_refit_distz", "maximum n-1 refit z distance (cm)", 1000, 0, 1);
 
-  hs.add("nlep", "# leptons", 10, 0, 10);
+  // hs.add("nlep", "# leptons", 10, 0, 10);
 
   hs.add("ntracks",                       "# of tracks/SV",                                                               40,    0,      40);
   hs.add("ntracksptgt3",                  "# of tracks/SV w/ p_{T} > 3 GeV",                                              40,    0,      40);
@@ -431,6 +431,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   }
   h_sv_nsv_nmatchjet->Fill(nmatched_0+nmatched_1, nsv, w);
 
+
   for (int isv = 0; isv < nsv; ++isv) {
     const MFVVertexAux& aux = auxes->at(isv);
     const int ntracks = aux.ntracks();
@@ -520,7 +521,7 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         {"max_nm1_refit_dist2", max_nm1_refit_dist2},
         {"max_nm1_refit_distz", max_nm1_refit_distz},
 
-        {"nlep",                    aux.which_lep.size()},
+	// {"nlep",                    aux.which_lep.size()},
         {"ntracks",                 ntracks},
         {"ntracksptgt3",            aux.ntracksptgt(3)},
         {"ntracksptgt10",           aux.ntracksptgt(10)},

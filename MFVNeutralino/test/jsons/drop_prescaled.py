@@ -11,11 +11,20 @@ from JMTucker.Tools.general import intlumi_from_brilcalc_csv as parse
 # brilcalc lumi -i 2018.json -o 2018.byls.csv --byls --normtag=normtag_2018.json ; gzip 2018.byls.csv
 # brilcalc lumi -i 2018.json -o 2018.byls.HLT_PFHT1050.csv --byls --normtag=normtag_2018.json --hltpath=HLT_PFHT1050_v\* ; gzip 2018.byls.HLT_PFHT1050.csv
 
+# ils = [
+#     (2017, (parse('/uscms/home/ali/nobackup/LLP/CornellCode/mfv_10_6_20/src/JMTucker/MFVNeutralino/test/jsons/json_UL/2017.byls.csv.gz',              False),
+#             parse('/uscms/home/ali/nobackup/LLP/CornellCode/mfv_10_6_20/src/JMTucker/MFVNeutralino/test/jsons/json_UL/2017.byls.HLT_PFMETNoMu120_PFMHTNoMu120_IDTight.csv.gz', True))),
+#     (2018, (parse('/uscms/home/ali/nobackup/LLP/CornellCode/mfv_10_6_20/src/JMTucker/MFVNeutralino/test/jsons/json_UL/2018.byls.csv.gz',              False),
+#             parse('/uscms/home/ali/nobackup/LLP/CornellCode/mfv_10_6_20/src/JMTucker/MFVNeutralino/test/jsons/json_UL/2018.byls.HLT_PFMETNoMu120_PFMHTNoMu120_IDTight.csv.gz', True))),
+#     ]
+
 ils = [
-    (2017, (parse('/uscms/home/ali/nobackup/LLP/CornellCode/mfv_10_6_20/src/JMTucker/MFVNeutralino/test/jsons/json_UL/2017.byls.csv.gz',              False),
-            parse('/uscms/home/ali/nobackup/LLP/CornellCode/mfv_10_6_20/src/JMTucker/MFVNeutralino/test/jsons/json_UL/2017.byls.HLT_PFMETNoMu120_PFMHTNoMu120_IDTight.csv.gz', True))),
-    (2018, (parse('/uscms/home/ali/nobackup/LLP/CornellCode/mfv_10_6_20/src/JMTucker/MFVNeutralino/test/jsons/json_UL/2018.byls.csv.gz',              False),
-            parse('/uscms/home/ali/nobackup/LLP/CornellCode/mfv_10_6_20/src/JMTucker/MFVNeutralino/test/jsons/json_UL/2018.byls.HLT_PFMETNoMu120_PFMHTNoMu120_IDTight.csv.gz', True))),
+    (2017, (parse('/afs/hep.wisc.edu/home/acwarden/work/llp/mfv_1068p1/src/JMTucker/MFVNeutralino/test/jsons/json_UL/SingleLep/2017.byls.csv.gz',    False),
+           # parse('/afs/hep.wisc.edu/home/acwarden/work/llp/mfv_1068p1/src/JMTucker/MFVNeutralino/test/jsons/json_UL/SingleLep/2017.byls.HLT_IsoMu27.csv.gz', True))),
+           # parse('/afs/hep.wisc.edu/home/acwarden/work/llp/mfv_1068p1/src/JMTucker/MFVNeutralino/test/jsons/json_UL/SingleLep/2017.byls.HLT_Mu50.csv.gz', True))),
+           # parse('/afs/hep.wisc.edu/home/acwarden/work/llp/mfv_1068p1/src/JMTucker/MFVNeutralino/test/jsons/json_UL/SingleLep/2017.byls.HLT_Ele35_WPTight_Gsf.csv.gz', True))),
+           # parse('/afs/hep.wisc.edu/home/acwarden/work/llp/mfv_1068p1/src/JMTucker/MFVNeutralino/test/jsons/json_UL/SingleLep/2017.byls.HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165.csv.gz', True))),
+            parse('/afs/hep.wisc.edu/home/acwarden/work/llp/mfv_1068p1/src/JMTucker/MFVNeutralino/test/jsons/json_UL/SingleLep/2017.byls.HLT_Ele115_CaloIdVT_GsfTrkIdT.csv.gz', True)))
     ]
 
 for year, ((wohlt, wohlt_sum), (whlt, whlt_sum)) in ils:
@@ -29,4 +38,4 @@ for year, ((wohlt, wohlt_sum), (whlt, whlt_sum)) in ils:
             print run_ls, wohlt_l, whlt_l
         else:
             good_run_lses.append(run_ls)
-    LumiList(lumis=good_run_lses).writeJSON('ana_%i.json' % year)
+    LumiList(lumis=good_run_lses).writeJSON('ana_%i_ele115.json' % year)
