@@ -52,6 +52,7 @@ mfvVertices = cms.EDProducer('MFVVertexer',
                              investigate_merged_vertices = cms.bool(False), # investigate quality cuts on merged vertices from tight merging 
                              resolve_shared_jets = cms.bool(True),       # shared-jet mitigation
                              resolve_shared_jets_src = cms.InputTag('selectedPatJets'), 
+                             extrapolate_ghost_tracks = cms.bool(True), # allow vertices to form by ghost tracks after shared-jet mitigation 
                              beamspot_src = cms.InputTag('offlineBeamSpot'),
                              seed_tracks_src = cms.InputTag('mfvVertexTracks', 'seed'),
                              n_tracks_per_seed_vertex = cms.int32(2),

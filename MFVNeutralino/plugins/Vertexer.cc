@@ -138,6 +138,7 @@ class MFVVertexer : public edm::EDProducer {
     const bool investigate_merged_vertices;
     const bool resolve_shared_jets;
     const edm::EDGetTokenT<pat::JetCollection> shared_jet_token;
+    const bool extrapolate_ghost_tracks;
     const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
     const edm::EDGetTokenT<std::vector<reco::TrackRef>> seed_tracks_token;
     const int n_tracks_per_seed_vertex;
@@ -258,6 +259,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     investigate_merged_vertices(cfg.getParameter<bool>("investigate_merged_vertices")),
     resolve_shared_jets(cfg.getParameter<bool>("resolve_shared_jets")),
     shared_jet_token(resolve_shared_jets ? consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("resolve_shared_jets_src")) : edm::EDGetTokenT<pat::JetCollection>()),
+    extrapolate_ghost_tracks(cfg.getParameter<bool>("extrapolate_ghost_tracks")),
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     seed_tracks_token(consumes<std::vector<reco::TrackRef>>(cfg.getParameter<edm::InputTag>("seed_tracks_src"))),
     n_tracks_per_seed_vertex(cfg.getParameter<int>("n_tracks_per_seed_vertex")),
@@ -1533,6 +1535,52 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       fillCommonOutputHists(vertices, fake_bs_vtx, tt_builder, stepEnum::aftersharedjets);
       h_output_aftersharedjets_n_onetracks->Fill(n_output_aftersharedjets_onetracks);
     }
+  }
+
+  //
+
+  //
+  if (extrapolate_ghost_tracks) {
+	  for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
+
+		  track_set tracks[2];
+		  tracks[0] = vertex_track_set(*v[0]);
+
+		  bool form_ghost_vtx = false;
+		  for (v[1] = v[0] + 1; v[1] != vertices->end(); ++v[1]) {
+			  if (vertices->size() >= 2 && v[0]->nTracks() >= 2 && v[1]->nTracks() >= 2) {
+
+				  tracks[1] = vertex_track_set(*v[1]);
+
+				  Measurement1D v_dist = vertex_dist_2d.distance(*v[0], *v[1]);
+
+				  Measurement1D dBV0_Meas1D = vertex_dist_2d.distance(*v[0], fake_bs_vtx);
+				  double dBV0 = dBV0_Meas1D.value();
+
+				  Measurement1D dBV1_Meas1D = vertex_dist_2d.distance(*v[1], fake_bs_vtx);
+				  double dBV1 = dBV1_Meas1D.value();
+
+				  double v0x = v[0]->x() - bsx;
+				  double v0y = v[0]->y() - bsy;
+
+				  double phi0 = atan2(v0y, v0x);
+
+				  double v1x = v[1]->x() - bsx;
+				  double v1y = v[1]->y() - bsy;
+
+				  double phi1 = atan2(v1y, v1x);
+
+				  //FIXME: Find the ghost tracks and form a ghost vertex here
+			  }
+		  }
+
+		  // going through all the pairs of of v[1] and a fixed v[0] for merging, if merge happens (1) each v[1] is erased (2) v[0] is updated (recurring until exit loop) (3) reset the combination again
+		  if (form_ghost_vtx)
+			  v[0] = vertices->begin() - 1; // (3) reset the combination if a valid merge happens
+
+	  }
+
+
   }
 
 
