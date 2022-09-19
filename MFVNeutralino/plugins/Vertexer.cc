@@ -18,6 +18,8 @@
 #include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
 #include "RecoVertex/VertexTools/interface/VertexDistance3D.h"
 #include "RecoVertex/VertexTools/interface/VertexDistanceXY.h"
+#include "RecoVertex/GhostTrackFitter/interface/GhostTrackFitter.h"
+#include "RecoVertex/VertexPrimitives/interface/ConvertToFromReco.h"
 #include "TrackingTools/IPTools/interface/IPTools.h"
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
@@ -34,6 +36,7 @@ class MFVVertexer : public edm::EDProducer {
   private:
     typedef std::set<reco::TrackRef> track_set;
     typedef std::vector<reco::TrackRef> track_vec;
+    typedef math::Error<5>::type CovarianceMatrix;
 
     std::pair<bool, std::vector<std::vector<size_t>>> sharedjets(const size_t vtx0idx, const size_t vtx1idx, const std::vector < std::vector<size_t>>& sv_match_jetidx, const std::vector < std::vector<size_t>>& sv_match_trkidx);
     bool hasCommonElement(std::vector<size_t> vec0, std::vector<size_t> vec1);
@@ -116,6 +119,7 @@ class MFVVertexer : public edm::EDProducer {
     VertexDistanceXY vertex_dist_2d;
     VertexDistance3D vertex_dist_3d;
     std::unique_ptr<KalmanVertexFitter> kv_reco;
+    std::unique_ptr<reco::GhostTrackFitter> ghostTrackFitter;
 
     std::vector<TransientVertex> kv_reco_dropin(std::vector<reco::TransientTrack> & ttks) {
       if (ttks.size() < 2)
@@ -253,6 +257,7 @@ class MFVVertexer : public edm::EDProducer {
 MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
   : 
     kv_reco(new KalmanVertexFitter(cfg.getParameter<edm::ParameterSet>("kvr_params"), cfg.getParameter<edm::ParameterSet>("kvr_params").getParameter<bool>("doSmoothing"))),
+    ghostTrackFitter(new reco::GhostTrackFitter()),
     do_track_refinement(cfg.getParameter<bool>("do_track_refinement")),
     resolve_split_vertices_loose(cfg.getParameter<bool>("resolve_split_vertices_loose")),
     resolve_split_vertices_tight(cfg.getParameter<bool>("resolve_split_vertices_tight")),
@@ -1021,7 +1026,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           h_noshare_vertex_tkvtxdistsig->Fill(tk_vtx_dist.second.significance());
         }
 
-		h_noshare_vertex_mass->Fill(vmass);
+        h_noshare_vertex_mass->Fill(vmass);
         h_noshare_vertex_chi2->Fill(vchi2);
         h_noshare_vertex_ndof->Fill(vndof);
         h_noshare_vertex_x->Fill(vx);
@@ -1217,10 +1222,10 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     }
     iv = 0; //some vertices after dz refiting have normalized chi2 > 5
     for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0], ++iv) {
-       if ((*v[0]).normalizedChi2() > 5) {
-         v[0] = vertices->erase(v[0]) - 1;
-         continue;
-       }
+      if ((*v[0]).normalizedChi2() > 5) {
+        v[0] = vertices->erase(v[0]) - 1;
+        continue;
+      }
     }
   }
   if (histos_output_afterdzfit){
@@ -1307,9 +1312,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           }
         }
       }
-	  // going through all the pairs of of v[1] and a fixed v[0] for merging, if merge happens (1) each v[1] is erased (2) v[0] is updated (recurring until exit loop) (3) reset the combination again
-	  if (merge)
-		  v[0] = vertices->begin() - 1; // (3) reset the combination if a valid merge happens 
+      // going through all the pairs of of v[1] and a fixed v[0] for merging, if merge happens (1) each v[1] is erased (2) v[0] is updated (recurring until exit loop) (3) reset the combination again
+      if (merge)
+        v[0] = vertices->begin() - 1; // (3) reset the combination if a valid merge happens 
     }
 
     if (investigate_merged_vertices) {
@@ -1541,44 +1546,44 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
   //
   if (extrapolate_ghost_tracks) {
-	  for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
+    for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
 
-		  track_set tracks[2];
-		  tracks[0] = vertex_track_set(*v[0]);
+      track_set tracks[2];
+      tracks[0] = vertex_track_set(*v[0]);
 
-		  bool form_ghost_vtx = false;
-		  for (v[1] = v[0] + 1; v[1] != vertices->end(); ++v[1]) {
-			  if (vertices->size() >= 2 && v[0]->nTracks() >= 2 && v[1]->nTracks() >= 2) {
+      bool form_ghost_vtx = false;
+      for (v[1] = v[0] + 1; v[1] != vertices->end(); ++v[1]) {
+        if (vertices->size() >= 2 && v[0]->nTracks() >= 2 && v[1]->nTracks() >= 2) {
 
-				  tracks[1] = vertex_track_set(*v[1]);
+          tracks[1] = vertex_track_set(*v[1]);
 
-				  Measurement1D v_dist = vertex_dist_2d.distance(*v[0], *v[1]);
+          Measurement1D v_dist = vertex_dist_2d.distance(*v[0], *v[1]);
 
-				  Measurement1D dBV0_Meas1D = vertex_dist_2d.distance(*v[0], fake_bs_vtx);
-				  double dBV0 = dBV0_Meas1D.value();
+          Measurement1D dBV0_Meas1D = vertex_dist_2d.distance(*v[0], fake_bs_vtx);
+          double dBV0 = dBV0_Meas1D.value();
 
-				  Measurement1D dBV1_Meas1D = vertex_dist_2d.distance(*v[1], fake_bs_vtx);
-				  double dBV1 = dBV1_Meas1D.value();
+          Measurement1D dBV1_Meas1D = vertex_dist_2d.distance(*v[1], fake_bs_vtx);
+          double dBV1 = dBV1_Meas1D.value();
 
-				  double v0x = v[0]->x() - bsx;
-				  double v0y = v[0]->y() - bsy;
+          double v0x = v[0]->x() - bsx;
+          double v0y = v[0]->y() - bsy;
 
-				  double phi0 = atan2(v0y, v0x);
+          double phi0 = atan2(v0y, v0x);
 
-				  double v1x = v[1]->x() - bsx;
-				  double v1y = v[1]->y() - bsy;
+          double v1x = v[1]->x() - bsx;
+          double v1y = v[1]->y() - bsy;
 
-				  double phi1 = atan2(v1y, v1x);
+          double phi1 = atan2(v1y, v1x);
 
-				  //FIXME: Find the ghost tracks and form a ghost vertex here
-			  }
-		  }
+          //FIXME: Find the ghost tracks and form a ghost vertex here
+        }
+      }
 
-		  // going through all the pairs of of v[1] and a fixed v[0] for merging, if merge happens (1) each v[1] is erased (2) v[0] is updated (recurring until exit loop) (3) reset the combination again
-		  if (form_ghost_vtx)
-			  v[0] = vertices->begin() - 1; // (3) reset the combination if a valid merge happens
+      // going through all the pairs of of v[1] and a fixed v[0] for merging, if merge happens (1) each v[1] is erased (2) v[0] is updated (recurring until exit loop) (3) reset the combination again
+      if (form_ghost_vtx)
+        v[0] = vertices->begin() - 1; // (3) reset the combination if a valid merge happens
 
-	  }
+    }
 
 
   }
@@ -1769,7 +1774,7 @@ void MFVVertexer::fillCommonOutputHists(std::unique_ptr<reco::VertexCollection>&
       hs_output_vertex_tkvtxdistsig[step]->Fill(tk_vtx_dist.second.significance());
     }
 
-	hs_output_vertex_mass[step]->Fill(vmass);
+    hs_output_vertex_mass[step]->Fill(vmass);
     hs_output_vertex_chi2[step]->Fill(vchi2);
     hs_output_vertex_ndof[step]->Fill(vndof);
     hs_output_vertex_x[step]->Fill(vx);
