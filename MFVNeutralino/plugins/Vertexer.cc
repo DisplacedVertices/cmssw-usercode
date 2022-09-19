@@ -1542,50 +1542,183 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     }
   }
 
-  //
 
-  //
+  // form ghost vertices from pairs of vertices whose trajectories form a common decay point
   if (extrapolate_ghost_tracks) {
     for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
 
+      // setup track_sets
       track_set tracks[2];
       tracks[0] = vertex_track_set(*v[0]);
 
+      // compute dBV
+      Measurement1D dBV0_Meas1D = vertex_dist_2d.distance(*v[0], fake_bs_vtx);
+      double dBV0 = dBV0_Meas1D.value();
+
+      // skip this below 0.01 cm, i.e. 100 microns
+      if(dBV0 < 0.01) 
+        continue;
+
+      // compute vertex x, y, phi positions
+      double v0x = v[0]->x() - bsx;
+      double v0y = v[0]->y() - bsy;
+      double phi0 = atan2(v0y, v0x);
+
+      // now loop through all vertex pairs, and try to form ghost vertex:
       bool form_ghost_vtx = false;
       for (v[1] = v[0] + 1; v[1] != vertices->end(); ++v[1]) {
-        if (vertices->size() >= 2 && v[0]->nTracks() >= 2 && v[1]->nTracks() >= 2) {
 
-          tracks[1] = vertex_track_set(*v[1]);
+        // only consider cases w/ two vertices, with at least two tracks each
+        if (vertices->size() < 2 || v[0]->nTracks() < 2 || v[1]->nTracks() < 2) continue;
 
-          Measurement1D v_dist = vertex_dist_2d.distance(*v[0], *v[1]);
+        // track_set for vertex we are looping over
+        tracks[1] = vertex_track_set(*v[1]);
 
-          Measurement1D dBV0_Meas1D = vertex_dist_2d.distance(*v[0], fake_bs_vtx);
-          double dBV0 = dBV0_Meas1D.value();
+        // aka dVV
+        Measurement1D v_dist = vertex_dist_2d.distance(*v[0], *v[1]);
 
-          Measurement1D dBV1_Meas1D = vertex_dist_2d.distance(*v[1], fake_bs_vtx);
-          double dBV1 = dBV1_Meas1D.value();
+        // compute dBV
+        Measurement1D dBV1_Meas1D = vertex_dist_2d.distance(*v[1], fake_bs_vtx);
+        double dBV1 = dBV1_Meas1D.value();
 
-          double v0x = v[0]->x() - bsx;
-          double v0y = v[0]->y() - bsy;
+        // skip this below 0.01 cm, i.e. 100 microns
+        if(dBV1 < 0.01) 
+          continue;
 
-          double phi0 = atan2(v0y, v0x);
+        // compute vertex x, y, phi positions
+        double v1x = v[1]->x() - bsx;
+        double v1y = v[1]->y() - bsy;
+        double phi1 = atan2(v1y, v1x);
 
-          double v1x = v[1]->x() - bsx;
-          double v1y = v[1]->y() - bsy;
+        // FIXME only consider re-vertexing when nearby in dphi: should study if this would help us. let's leave it in for now, but keep in mind that the threshold is completely arbitrary
+        if(fabs(reco::deltaPhi(phi0, phi1)) > 0.3) continue;
 
-          double phi1 = atan2(v1y, v1x);
+        // now: trace the trajectories back. do a Kalman fit of the trajectories, and see if they:
+        // a) have a nice chi2
+        // b) form a vertex with dBV > 100 microns
+        //
+        // if both are satisfied, then vertex all of the tracks together
 
-          //FIXME: Find the ghost tracks and form a ghost vertex here
+        GlobalVector trajectory_sv[2];
+        std::vector<reco::TransientTrack> ttks[2];
+
+        // for the ghosts
+        std::vector<reco::TransientTrack> gttks;
+
+        // fill the TransientTracks, SV trajectories, etc., and fit the ghost tracks
+        for(int isv = 0; isv < 2; ++isv) {
+          for(auto trkref : tracks[isv]) {
+            GlobalVector trajectory_trk = GlobalVector(trkref->px(), trkref->py(), trkref->pz());
+            trajectory_sv[isv] += trajectory_trk;
+            ttks[isv].push_back(tt_builder->build(trkref));
+          }
+
+          // FIXME be sure to debug and check all these! and of course remove printouts or put into a debug mode eventually
+          // ghostTrackFitter uses vtx position and error as a prior, SV trajectory as a direction, a cone size of 0.05 (FIXME arbitrarily chosen? worth studying--also note the fitter can alternatively take a "directionError" as input, based on a GlobalError which may be similar to the GlobalVector for the ghost trajectory), and the set of vtx tracks as input
+          reco::GhostTrack ghost = ghostTrackFitter->fit(RecoVertex::convertPos(v[isv]->position()), RecoVertex::convertError(v[isv]->error()), trajectory_sv[isv], 0.05, ttks[isv]);
+          std::cout << "chi2, ndof: " << ghost.chi2() << ", " << ghost.ndof() << std::endl;
+          reco::Track gt = reco::Track(ghost);
+          std::cout << "px,py,pz: " << gt.px() << ", " << gt.py() << ", " << gt.pz() << std::endl;
+          gttks.push_back(tt_builder->build(gt));
+        }
+
+        // with our ghost tracks in hand, we can fit them into a common ghost vertex:
+        std::vector<TransientVertex> ghost_vertices(1, kv_reco->vertex(gttks));
+        std::cout << "ghost_vertices.size() " << ghost_vertices.size() << std::endl;
+
+        // loop over ghost vertices (of which there are either zero or one at this stage)
+        for(auto gvtx : ghost_vertices) {
+
+          std::cout << "sv0 chi2 " << v[0]->normalizedChi2() << ", sv1 chi2 " << v[1]->normalizedChi2() << std::endl;
+          std::cout << "gvtx chi2 " << gvtx.normalisedChiSquared() << std::endl;
+
+          // veto those with negative chi2/ndof (FIXME why are they negative again? FIXME and should we remove those with chi2/ndof > 5 here as well?)
+          if(gvtx.normalisedChiSquared() < 0) continue;
+          std::cout << "sv0 dBV " << dBV0 << ", sv1 dBV " << dBV1 << std::endl;
+          std::cout << "gvtx dBV " << mag(gvtx.position().x() - bsx, gvtx.position().y() - bsy) << std::endl;
+
+          // cast the ghost vertex from TransientVertex to reco::Vertex
+          // FIXME may be able to do this at an earlier stage in this loop
+          reco::Vertex reco_gvtx = reco::Vertex(gvtx);
+
+          const auto d_gvtx = vertex_dist_2d.distance(reco_gvtx, fake_bs_vtx);
+
+          std::cout << "sv0 dBV " << dBV0_Meas1D.value() << ", sv1 dBV " << dBV1_Meas1D.value() << " (confirmation)" << std::endl;
+          std::cout << "gvtx dBV " << d_gvtx.value() << " (confirmation)" << std::endl;
+
+          std::cout << "sv0 bs2derr " << dBV0_Meas1D.error() << ", sv1 bs2derr " << dBV1_Meas1D.error() << std::endl;
+          std::cout << "gvtx bs2derr " << d_gvtx.error() << std::endl;
+
+          std::cout << "sv0 ntk " << v[0]->tracksSize() << "sv1 ntk " << v[1]->tracksSize() << std::endl;
+          std::cout << "gvtx ntk " << reco_gvtx.tracksSize() << std::endl;
+
+          std::cout << "sv0 valid " << v[0]->isValid() << "sv1 valid " << v[1]->isValid() << std::endl;
+          std::cout << "gvtx valid " << reco_gvtx.isValid() << std::endl;
+
+          // FIXME this is to remove all (ghost) tracks from the vertex
+          reco_gvtx.removeTracks();
+          std::cout << "gvtx removed ntk " << reco_gvtx.tracksSize() << std::endl;
+          std::cout << "gvtx removed valid " << reco_gvtx.isValid() << std::endl;
+
+          for(int i = 0; i < 2; ++i) {
+            for(auto it = v[i]->tracks_begin(), ite = v[i]->tracks_end(); it != ite; ++it) {
+              const reco::TrackBaseRef& baseref = *it;
+              // FIXME may need to veto tracks with small weights? or maybe already done? add printouts to check
+              float w = v[i]->trackWeight(baseref);
+
+              // FIXME ... and this is to add all (real) tracks back into the vertex! so that we can pass our ntk requirements, etc.
+              // I think this worked when I implemented it a while back, but it would be good to check
+              reco_gvtx.add(baseref, w);
+            }
+          }
+
+          // FIXME note vtx may no longer say that it is "valid", so should make sure we don't rely on that (we very well may!!!!)
+          std::cout << "gvtx added ntk " << reco_gvtx.tracksSize() << std::endl;
+          std::cout << "gvtx added valid " << reco_gvtx.isValid() << std::endl;
+          const auto d_gvtx_new = vertex_dist_2d.distance(reco_gvtx, fake_bs_vtx);
+          std::cout << "gvtx added dBV " << d_gvtx_new.value() << std::endl;
+          std::cout << "gvtx added bs2derr " << d_gvtx_new.error() << std::endl;
+
+          // FIXME okay! we have our ghost vertex. but now the issue is that bs2derr is too large to be useful. next step is to compute a more meaningful bs2derr that can be used in place of the one determined from just the two ghost trajectories. This may be the nontrivial part that remains, since we are using only two ghost tracks here--they may be very precise, but bs2derr will be large w/ only two tracks as input. 
+          // FIXME another idea: we may even want to retain the original vertices as "sub-vertices" for further studies
+          // FIXME: now save this vertex so that it can be used further (this is the part that I forget about, but Peace has done recently for the split vtx merging! please add it here! and I suppose somewhere we must set form_ghost_vtx = true. but should be careful about whether this all happens in this loop or in the sv0 loop)
+
+
+
+          // Now some checks:
+
+          // collection of combined tracks from the two vertices, for a check:
+          // one could consider using the ghost vertex from above to assess the chi2, and then vertex ALL of the tracks from the two vertices via the Kalman fitter. then ntk and bs2derr come for free, and even if the chi2 fit is poor for this "combined" vertex, we at least have a sensible value to use. but this does bias our dBV value, and also may be less precise given that the b-quarks could decay quite far apart. this idea seems unlikely to be worthwhile, but the code snippet is kept for now
+          std::vector<reco::TransientTrack> combined_ttks;
+          for(int i = 0; i < 2; ++i) {
+            for(auto ttk : ttks[i]) {
+              combined_ttks.push_back(ttk);
+            }
+          }
+
+          // try to form a combined vertex naively, based on the combined set of all tracks--as expected, it rarely succeeds, because they are sufficiently separated that no vtx is formed
+          std::vector<TransientVertex> combined_vertices = kv_reco_dropin(combined_ttks);
+          std::cout << "combined_vertices.size() " << combined_vertices.size() << std::endl;
+          for (auto comb : combined_vertices) {
+            std::cout << "comb chi2 " << comb.normalisedChiSquared() << std::endl;
+            if(comb.normalisedChiSquared() < 0) continue;
+            std::cout << "comb dBV " << mag(comb.position().x() - bsx, comb.position().y() - bsy) << std::endl;
+
+            reco::Vertex reco_comb = reco::Vertex(comb);
+
+            const auto d_comb = vertex_dist_2d.distance(reco_comb, fake_bs_vtx);
+            std::cout << "comb dBV " << d_comb.value() << " (confirmation)" << std::endl;
+            std::cout << "comb bs2derr " << d_comb.error() << std::endl;
+          }
         }
       }
 
+      // FIXME should this be inside of the loop, so that we allow ourselves to merge with all possible pairs? maybe not, but need to think. also, does this allow the new vertex to be considered for further merging, or not?
       // going through all the pairs of of v[1] and a fixed v[0] for merging, if merge happens (1) each v[1] is erased (2) v[0] is updated (recurring until exit loop) (3) reset the combination again
       if (form_ghost_vtx)
         v[0] = vertices->begin() - 1; // (3) reset the combination if a valid merge happens
 
     }
-
-
   }
 
 
