@@ -3,7 +3,10 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 is_mc = True # for blinding
 
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers
-sample_files(process, 'ttbar_2017' if is_mc else 'JetHT2017B', 'ntuplev30am', 10)
+sample_files(process, 'ggHToSSTodddd_tau1mm_M40_2017' if is_mc else 'JetHT2017B', 'ntuplev31am', 15)
+#sample_files(process, 'ggHToSSTodddd_tau1mm_M55_2017' if is_mc else 'JetHT2017B', 'ntuplev31am', 15)
+#sample_files(process, 'mfv_neu_tau001000um_M0400_2017' if is_mc else 'JetHT2017B', 'ntuplev30am', 10)
+#sample_files(process, 'ttbar_2017' if is_mc else 'JetHT2017B', 'ntuplev31am', 5)
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
 
@@ -12,6 +15,7 @@ process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
 process.load('JMTucker.MFVNeutralino.VertexHistos_cfi')
 process.load('JMTucker.MFVNeutralino.EventHistos_cfi')
 process.load('JMTucker.MFVNeutralino.FilterHistos_cfi')
+process.load('JMTucker.MFVNeutralino.JetTksHistos_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 
 import JMTucker.Tools.SimpleTriggerResults_cfi as SimpleTriggerResults
@@ -20,15 +24,18 @@ SimpleTriggerResults.setup_endpath(process, weight_src='mfvWeight')
 common = cms.Sequence(process.mfvSelectedVerticesSeq * process.mfvWeight)
 
 process.mfvFilterHistosNoCuts = process.mfvFilterHistos.clone()
+process.mfvJetTksHistosNoCuts = process.mfvJetTksHistos.clone()
+process.mfvEventHistosNoCuts  = process.mfvEventHistos.clone()
 
-process.mfvEventHistosNoCuts = process.mfvEventHistos.clone()
 process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts) # just trigger for now
-process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts * process.mfvFilterHistosNoCuts) # just trigger for now
+#process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts * process.mfvFilterHistosNoCuts) # just trigger for now
+process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts * process.mfvFilterHistosNoCuts * process.mfvJetTksHistosNoCuts) # just trigger for now
 
-process.mfvEventHistosPreSel = process.mfvEventHistos.clone()
+process.mfvEventHistosPreSel  = process.mfvEventHistos.clone()
 process.mfvFilterHistosPreSel = process.mfvFilterHistos.clone()
+process.mfvJetTksHistosPreSel = process.mfvJetTksHistos.clone()
 process.mfvAnalysisCutsPreSel = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)
-process.pEventPreSel = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvEventHistosPreSel * process.mfvFilterHistosPreSel)
+process.pEventPreSel = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvEventHistosPreSel * process.mfvFilterHistosPreSel * process.mfvJetTksHistosNoCuts)
 
 nm1s = [
     ('Bs2derr',    'max_rescale_bs2derr = 1e9'),
@@ -36,7 +43,7 @@ nm1s = [
 
 nm1s = []
 
-ntks = [5,3,4,7,8,9]
+ntks = [5,3,4]#,7,8,9]
 nvs = [0,1,2]
 
 for ntk in ntks:
@@ -69,19 +76,28 @@ process.EX1mfvEventHistosOnlyOneVtx = process.mfvEventHistos.clone()
 process.EX1mfvEventHistosFullSel    = process.mfvEventHistos.clone()
 process.EX1mfvEventHistosSigReg     = process.mfvEventHistos.clone()
 
+process.EX1mfvFilterHistosOnlyOneVtx = process.mfvFilterHistos.clone()
+process.EX1mfvFilterHistosFullSel    = process.mfvFilterHistos.clone()
+process.EX1mfvFilterHistosSigReg     = process.mfvFilterHistos.clone()
+
+process.EX1mfvJetTksHistosOnlyOneVtx = process.mfvJetTksHistos.clone()
+process.EX1mfvJetTksHistosFullSel    = process.mfvJetTksHistos.clone()
+process.EX1mfvJetTksHistosSigReg     = process.mfvJetTksHistos.clone()
+
 process.EX1mfvVertexHistosPreSel     = process.mfvVertexHistos.clone(EX2)
 process.EX1mfvVertexHistosOnlyOneVtx = process.mfvVertexHistos.clone(EX2)
 process.EX1mfvVertexHistosFullSel    = process.mfvVertexHistos.clone(EX2)
 process.EX1mfvVertexHistosSigReg     = process.mfvVertexHistos.clone(EX2)
 
 process.EX1pPreSel     = cms.Path(common * process.mfvAnalysisCutsPreSel                                              * process.EX1mfvVertexHistosPreSel)
-process.EX1pOnlyOneVtx = cms.Path(common * process.EX1mfvAnalysisCutsOnlyOneVtx * process.EX1mfvEventHistosOnlyOneVtx * process.EX1mfvVertexHistosOnlyOneVtx)
+process.EX1pOnlyOneVtx = cms.Path(common * process.EX1mfvAnalysisCutsOnlyOneVtx * process.EX1mfvEventHistosOnlyOneVtx * process.EX1mfvFilterHistosOnlyOneVtx * process.EX1mfvJetTksHistosOnlyOneVtx * process.EX1mfvVertexHistosOnlyOneVtx)
 '''.replace('EX1', EX1).replace('EX2', EX2).replace('EX3', EX3)
 
     if 2 in nvs:
+    #if False:
         exec '''
-process.EX1pFullSel    = cms.Path(common * process.EX1mfvAnalysisCutsFullSel    * process.EX1mfvEventHistosFullSel    * process.EX1mfvVertexHistosFullSel)
-process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     * process.EX1mfvEventHistosSigReg     * process.EX1mfvVertexHistosSigReg)
+process.EX1pFullSel    = cms.Path(common * process.EX1mfvAnalysisCutsFullSel    * process.EX1mfvEventHistosFullSel    * process.EX1mfvFilterHistosFullSel    * process.EX1mfvJetTksHistosFullSel * process.EX1mfvVertexHistosFullSel)
+process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     * process.EX1mfvEventHistosSigReg     * process.EX1mfvFilterHistosSigReg     * process.EX1mfvJetTksHistosSigReg  * process.EX1mfvVertexHistosSigReg)
 '''.replace('EX1', EX1)
 
     for name, cut in nm1s:
@@ -128,7 +144,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
     if use_btag_triggers :
-        samples =  Samples.HToSSTodddd_samples_2017 + Samples.mfv_signal_samples_2017
+        samples =  Samples.HToSSTodddd_samples_2017# + Samples.mfv_signal_samples_2017
         #samples =  Samples.bjet_samples_2017
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
     else :
@@ -138,8 +154,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
 
-    cs = CondorSubmitter('HistosV30TmTriBjetQS1',
-    #cs = CondorSubmitter('HistosV30TmTriBjetDflt',
+    cs = CondorSubmitter('HistosV30CSVAlt3Tight',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,
