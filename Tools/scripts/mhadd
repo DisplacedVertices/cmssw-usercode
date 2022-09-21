@@ -53,6 +53,7 @@ if options.only_notdones:
     options.ignore_done = True
     options.overwrite = True
 
+
 ########################################################################
 
 wds = options.positional
@@ -114,22 +115,42 @@ def hadd_(is_crab, *args, **kwargs):
         if options.overwrite:
             print colors.yellow('overwriting existing file %s' % new_name)
             rm(new_name)
+        
         else:
             log_fn = new_name + '.haddlog'
+            log_fn_submit = new_name.replace('.root', '') + '.log'
+                        
             if on_eos:
                 log_fn = eos.fusemount(log_fn)
             njobs = hadd_files(working_dir, **kwargs)[0]
+            
             if not exists(log_fn):
                 log_njobs = 1 # assume 1 file copied
-            else:
+                
+            ## helpers to determine which log is present and which is not : submit log for jobs that were submitted to condor
+            ## and haddlog for those that were not
+            s_log = exists(log_fn_submit) and not exists(log_fn)
+            h_log = exists(log_fn) and not exists(log_fn_submit)
+
+            if s_log:
+                 if os.stat(new_name).st_size != 0 :
+                     print colors.boldred('skipping existing file %s which has already been submitted to condor succesfully' % new_name)
+                 #if the root file is created and it is zero, try to run again?      
+                 else:
+                     rm(new_name)
+
+            elif h_log:
                 p = HaddlogParser(log_fn)
                 log_njobs = p.num_sources
-            if log_njobs != njobs:
-                print colors.boldred('skipping existing file %s (for which num sources %i != njobs %i)' % (new_name, log_njobs, njobs))
+
+                if (log_njobs != njobs):
+                    print colors.boldred('skipping existing file %s (for which num sources %i != njobs %i)' % (new_name, log_njobs, njobs))
+                               
             else:
                 if options.verbose:
                     print colors.yellow('skipping existing file %s (which looks complete by njobs and haddlog)' % new_name)
             return
+                
 
     result = hadd(*args, **kwargs)
 

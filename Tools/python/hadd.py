@@ -44,51 +44,33 @@ def haddcondor(dir_hadd_target, flist):
     """If submit == True, hadd jobs are sent to condor. A condor 
     submission file is created for a given input dataset. These 
     are then submitted to condor, where haddOnWorker.py is called 
-    in order to do the hadding. There is the option to hadd fewer 
-    files together. Edit the path to the executable to work on 
-    personal space.
+    in order to do the hadding.
     """
     #splitting up the arguments into the hadd directory and input dataset
     dir_hadd, target = dir_hadd_target.rsplit("/", 1)
-
+    dir_executable = os.path.dirname(os.path.abspath(__file__))
+    
     target = target.replace('.root','')
-    nTotal = len(flist)
-    nLoops = 0
-
-    while len(flist) > 0 :
-        strNLoops = str(nLoops)
-
-        #nItemsToPop = 10
-        nItemsToPop = 200
-
-        inputFiles = ''
-
-        for i in xrange(nItemsToPop) :
-            if len(flist) > 0 :
-                fstr = flist.pop()
-                inputFiles = inputFiles + ' ' + fstr
-
-        #prefixStr = dir_hadd+'/'+target+'-'+strNLoops
-        prefixStr = dir_hadd+'/'+target
-
-        #condorFile = open(dir_hadd+'/submit_'+strNLoops, 'w')
-        condorFile = open(dir_hadd+'/submit_'+target, 'w')
-        condorFile.write('executable       = /afs/hep.wisc.edu/home/acwarden/work/llp/mfv_1068p1/src/JMTucker/Tools/python/haddOnWorker.py\n')
-
-        condorFile.write('universe         = vanilla\n')
-        condorFile.write('log              = '+prefixStr+'.log\n')
-        condorFile.write('output           = '+prefixStr+'.out\n')
-        condorFile.write('error            = '+prefixStr+'.err\n')
-        condorFile.write('arguments        = '+prefixStr+'.root ' + inputFiles + '\n')
-        condorFile.write('getenv           = True\n')
-
-
-        condorFile.write('queue\n')
-        condorFile.close()
-
-        #args = ['condor_submit '+dir_hadd+'/submit_'+target+'-'+strNLoops]
-        args = ['condor_submit '+dir_hadd+'/submit_'+target]
-        p = subprocess.Popen(args =args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+    inputFiles = " ".join(flist)
+    prefixStr = dir_hadd+'/'+target
+        
+    condorFile = open(dir_hadd+'/submit_'+target, 'w')
+    condorFile.write('universe              = vanilla\n')
+    condorFile.write('executable            = '+dir_executable+'/haddOnWorker.py\n')
+    condorFile.write('arguments             = '+prefixStr+'.root ' + inputFiles + '\n')
+    condorFile.write('log                   = '+prefixStr+'.log\n')
+    condorFile.write('output                = '+prefixStr+'.out\n')
+    condorFile.write('error                 = '+prefixStr+'.err\n')
+    condorFile.write('should_transfer_files = yes\n')
+    condorFile.write('getenv                = True\n')
+    
+    condorFile.write('queue\n')
+    condorFile.close()
+    
+    args = ['condor_submit '+dir_hadd+'/submit_'+target]
+    p = subprocess.Popen(args =args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+    
+    print p.stdout.read()
         
     return p
 
@@ -117,6 +99,7 @@ def hadd(output_fn, input_fns, submit):
     assert stderr is None
 
     ## output files for the non-submit case
+    
     if not submit : 
         log_fn = output_fn + '.haddlog'
         is_eos = '/store/' in output_fn # ugh
@@ -133,7 +116,6 @@ def hadd(output_fn, input_fns, submit):
 
     if p.returncode != 0:
         print colors.error('PROBLEM hadding %s' % output_fn)
-        #print p.stdout.read()
         return False
 
     #more output for non-submit case
