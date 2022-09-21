@@ -1591,6 +1591,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         double phi1 = atan2(v1y, v1x);
 
         // FIXME only consider re-vertexing when nearby in dphi: should study if this would help us. let's leave it in for now, but keep in mind that the threshold is completely arbitrary
+        // FIXME probably this is fine for H->LLP with boosted LLPs, but maybe not as good for heavier, slow moving LLPs that decay to b-quarks with wide angles between the b-quarks. 
         if(fabs(reco::deltaPhi(phi0, phi1)) > 0.3) continue;
 
         // now: trace the trajectories back. do a Kalman fit of the trajectories, and see if they:
