@@ -1631,9 +1631,14 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
           std::cout << "sv0 chi2 " << v[0]->normalizedChi2() << ", sv1 chi2 " << v[1]->normalizedChi2() << std::endl;
           std::cout << "gvtx chi2 " << gvtx.normalisedChiSquared() << std::endl;
+          std::cout << "gvtx valid " << gvtx.isValid() << std::endl;
 
-          // veto those with negative chi2/ndof (FIXME why are they negative again? FIXME and should we remove those with chi2/ndof > 5 here as well?)
-          if(gvtx.normalisedChiSquared() < 0) continue;
+          // only consider valid vertices (where the Kalman filter did not fail)
+          if(!gvtx.isValid()) continue;
+
+          // veto those with negative chi2/ndof (FIXME why are they negative again? maybe this was just to remove the -NaN cases, but now I'll do that via isValid)
+          //if(gvtx.normalisedChiSquared() < 0) continue;
+
           std::cout << "sv0 dBV " << dBV0 << ", sv1 dBV " << dBV1 << std::endl;
           std::cout << "gvtx dBV " << mag(gvtx.position().x() - bsx, gvtx.position().y() - bsy) << std::endl;
 
@@ -1672,7 +1677,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
             }
           }
 
-          // FIXME note vtx may no longer say that it is "valid", so should make sure we don't rely on that (we very well may!!!!)
+          // FIXME note vtx may no longer say that it is "valid" at this stage, so should make sure we don't rely on that (we very well may!!!!) OH or maybe the invalid ones are all bogus?
           std::cout << "gvtx added ntk " << reco_gvtx.tracksSize() << std::endl;
           std::cout << "gvtx added valid " << reco_gvtx.isValid() << std::endl;
           const auto d_gvtx_new = vertex_dist_2d.distance(reco_gvtx, fake_bs_vtx);
@@ -1701,7 +1706,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           std::cout << "combined_vertices.size() " << combined_vertices.size() << std::endl;
           for (auto comb : combined_vertices) {
             std::cout << "comb chi2 " << comb.normalisedChiSquared() << std::endl;
-            if(comb.normalisedChiSquared() < 0) continue;
+            //if(comb.normalisedChiSquared() < 0) continue;
+            if(!comb.isValid()) continue;
             std::cout << "comb dBV " << mag(comb.position().x() - bsx, comb.position().y() - bsy) << std::endl;
 
             reco::Vertex reco_comb = reco::Vertex(comb);
