@@ -10,10 +10,11 @@ settings.minitree_only = False
 settings.prepare_vis = False
 settings.keep_all = False
 settings.keep_gen = False
-if use_btag_triggers :
-    settings.event_filter = 'bjets OR displaced dijet veto HT' # for new trigger studies
-else :
-    settings.event_filter = 'jets only'
+#if use_btag_triggers :
+#    settings.event_filter = 'bjets OR displaced dijet veto HT' # for new trigger studies
+#else :
+#    settings.event_filter = 'jets only'
+settings.event_filter = False
 
 # see readme for randpars
 settings.randpars_filter = False
@@ -23,7 +24,7 @@ settings.randpars_filter = False
 
 process = ntuple_process(settings)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
-sample_files(process, 'mfv_neu_tau001000um_M1200_2017', dataset, 1)
+sample_files(process, 'ggHToSSTobbbb_tau1mm_M55_2017', dataset, 1)
 max_events(process, 100)
 cmssw_from_argv(process)
 
