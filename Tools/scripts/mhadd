@@ -145,8 +145,13 @@ def hadd_(is_crab, *args, **kwargs):
 
                 if (log_njobs != njobs):
                     print colors.boldred('skipping existing file %s (for which num sources %i != njobs %i)' % (new_name, log_njobs, njobs))
+                else :
+                    print colors.boldred('skipping existing file %s which has already been hadded succesfully' % new_name)
                                
             else:
+                #assume that the last case to consider is the one in which files are copied over (which do not produce any log but the .root file does exist)
+                print colors.boldred('skipping existing file %s (for which num sources %i = njobs %i)' % (new_name, log_njobs, njobs))
+                
                 if options.verbose:
                     print colors.yellow('skipping existing file %s (which looks complete by njobs and haddlog)' % new_name)
             return
