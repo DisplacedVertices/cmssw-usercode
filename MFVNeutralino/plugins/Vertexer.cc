@@ -1718,6 +1718,13 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           std::cout << "gvtx added dBV " << d_gvtx_new.value() << std::endl;
           std::cout << "gvtx added bs2derr " << d_gvtx_new.error() << std::endl;
 
+          // FIXME this is where the v[0] is updated by a ghost vtx while the v[1] is erased 
+	  if (d_gvtx_new.value() > 0.01 &&  reco_gvtx.tracksSize() >= 2) {
+	      form_ghost_vtx = true;
+	      v[1] = vertices->erase(v[1]) - 1; // (1) erase and point the iterator at the previous entry
+	      *v[0] = reco_gvtx; // (2) updated v[0] (ok to use v[0] after the erase(v[1]) because v[0] is by construction before v[1])
+	  }
+
           // FIXME okay! we have our ghost vertex. but now the issue is that bs2derr is too large to be useful. next step is to compute a more meaningful bs2derr that can be used in place of the one determined from just the two ghost trajectories. This may be the nontrivial part that remains, since we are using only two ghost tracks here--they may be very precise, but bs2derr will be large w/ only two tracks as input. 
           // FIXME another idea: we may even want to retain the original vertices as "sub-vertices" for further studies
           // FIXME: now save this vertex so that it can be used further (this is the part that I forget about, but Peace has done recently for the split vtx merging! please add it here! and I suppose somewhere we must set form_ghost_vtx = true. but should be careful about whether this all happens in this loop or in the sv0 loop)
