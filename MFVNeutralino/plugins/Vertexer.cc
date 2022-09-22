@@ -1606,6 +1606,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         // for the ghosts
         std::vector<reco::TransientTrack> gttks;
 
+        // if we want to try fitting ghosts + non-ghosts simultaneously (not likely to work, but okay)
+        std::vector<reco::TransientTrack> all_ttks;
+
         // fill the TransientTracks, SV trajectories, etc., and fit the ghost tracks
         for(int isv = 0; isv < 2; ++isv) {
           for(auto trkref : tracks[isv]) {
@@ -1616,15 +1619,45 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
           // FIXME be sure to debug and check all these! and of course remove printouts or put into a debug mode eventually
           // ghostTrackFitter uses vtx position and error as a prior, SV trajectory as a direction, a cone size of 0.05 (FIXME arbitrarily chosen? worth studying--also note the fitter can alternatively take a "directionError" as input, based on a GlobalError which may be similar to the GlobalVector for the ghost trajectory), and the set of vtx tracks as input
-          reco::GhostTrack ghost = ghostTrackFitter->fit(RecoVertex::convertPos(v[isv]->position()), RecoVertex::convertError(v[isv]->error()), trajectory_sv[isv], 0.05, ttks[isv]);
+          double coneSize = 0.05;
+          //double coneSize = 0.3; // NOTE! The outputs actually do depend on the coneSize
+         
+          /*
+          // Or using a variable cone size based on the max_dR/2 among tracks:
+          double max_dR = -1;
+          for(auto trkref1 : tracks[isv]) {
+            for(auto trkref2 : tracks[isv]) {
+              if(trkref1 == trkref2) continue;
+
+              double dR = reco::deltaR(*trkref1, *trkref2);
+              if(dR > max_dR) max_dR = dR;
+            }
+          }
+          double coneSize = max_dR / 2; // since we got the max separation via max_dR
+          std::cout << "coneSize: " << coneSize << std::endl;
+          */
+
+          reco::GhostTrack ghost = ghostTrackFitter->fit(RecoVertex::convertPos(v[isv]->position()), RecoVertex::convertError(v[isv]->error()), trajectory_sv[isv], coneSize, ttks[isv]);
+          
           std::cout << "chi2, ndof: " << ghost.chi2() << ", " << ghost.ndof() << std::endl;
           reco::Track gt = reco::Track(ghost);
           std::cout << "px,py,pz: " << gt.px() << ", " << gt.py() << ", " << gt.pz() << std::endl;
           gttks.push_back(tt_builder->build(gt));
         }
 
+        // fill all_ttks
+        for(int ttks_idx = 0; ttks_idx < 2 ; ++ttks_idx) {
+          for(auto ttk : ttks[ttks_idx]) {
+            all_ttks.push_back(ttk);
+          }
+        }
+        for(auto gttk : gttks) {
+          all_ttks.push_back(gttk);
+        }
+
         // with our ghost tracks in hand, we can fit them into a common ghost vertex:
-        std::vector<TransientVertex> ghost_vertices(1, kv_reco->vertex(gttks));
+        std::vector<TransientVertex> ghost_vertices(1, kv_reco->vertex(gttks)); // Use only the two ghostTracks to find a vertex--issue is that bs2derr gets smaller w/ more ntks, but here we only use two "tracks" for the Kalman fit
+        //std::vector<TransientVertex> ghost_vertices(1, kv_reco->vertex(all_ttks)); // Use the two ghostTracks AND the other tracks from the two SVs to find a common vertex--here, bs2derr should get sufficiently small, but the chi2 seems to blow up (which makes sense given that there isn't a common intersection point among ALL of these tracks!). From printouts, it seemed like
         std::cout << "ghost_vertices.size() " << ghost_vertices.size() << std::endl;
 
         // loop over ghost vertices (of which there are either zero or one at this stage)
