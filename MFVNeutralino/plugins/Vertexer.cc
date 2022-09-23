@@ -27,6 +27,7 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexerPairEff.h"
 #include "JMTucker/MFVNeutralino/interface/VertexerParams.h"
 #include "JMTucker/Tools/interface/Utilities.h"
+#include "DataFormats/Math/interface/PtEtaPhiMass.h"
 
 class MFVVertexer : public edm::EDProducer {
   public:
@@ -252,6 +253,29 @@ class MFVVertexer : public edm::EDProducer {
 
     TH1F* h_output_aftersharedjets_n_onetracks;
 
+	TH1F* h_output_gvtx_all_dR_tracks_tv0;
+	TH1F* h_output_gvtx_all_dR_tracks_tv1;
+
+	TH1F* h_output_gvtx_dR_tracks_tv0;
+	TH1F* h_output_gvtx_dR_tracks_tv1;
+
+	TH1F* h_output_gvtx_dR_tracks_gtrk0;
+	TH1F* h_output_gvtx_dR_tracks_gtrk1;
+
+	TH1F* h_output_gvtx_dphi_tv0_tv1;
+
+	TH1F* h_output_gvtx_tv0_bs2derr;
+	TH1F* h_output_gvtx_tv0_ntrack;
+	TH1F* h_output_gvtx_tv1_bs2derr;
+	TH1F* h_output_gvtx_tv1_ntrack;
+
+	TH2F* h_2D_output_gvtx_dR_tv0_gtrk0_bs2derr0;
+	TH2F* h_2D_output_gvtx_dR_tv1_gtrk1_bs2derr1;
+	
+
+	TH1F* h_output_gvtx_vertices;
+
+
 };
 
 MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
@@ -400,6 +424,36 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     if (histos_output_aftersharedjets) {
       h_output_aftersharedjets_n_onetracks = fs->make<TH1F>("h_output_aftersharedjets_n_onetracks", "", 5, 0, 5);
     }
+
+	if (extrapolate_ghost_tracks) {
+
+		h_output_gvtx_all_dR_tracks_tv0 = fs->make<TH1F>("h_output_gvtx_all_dR_tracks_tv0", "before a ghost vertex is formed;dR(tv0,track)", 200, 0, 3.15);
+		h_output_gvtx_all_dR_tracks_tv1 = fs->make<TH1F>("h_output_gvtx_all_dR_tracks_tv1", "before a ghost vertex is formed;dR(tv1,track)", 200, 0, 3.15);
+		
+		h_output_gvtx_dR_tracks_tv0 = fs->make<TH1F>("h_output_gvtx_dR_tracks_tv0", "after a ghost vertex is formed;dR(tv0,track)", 200, 0, 3.15);
+		h_output_gvtx_dR_tracks_tv1 = fs->make<TH1F>("h_output_gvtx_dR_tracks_tv1", "after a ghost vertex is formed;dR(tv1,track)", 200, 0, 3.15);
+		h_output_gvtx_dR_tracks_gtrk0 = fs->make<TH1F>("h_output_gvtx_dR_tracks_gtrk0", "after a ghost vertex is formed;dR(gtrk0,track)", 200, 0, 3.15);
+		h_output_gvtx_dR_tracks_gtrk1 = fs->make<TH1F>("h_output_gvtx_dR_tracks_gtrk1", "after a ghost vertex is formed;dR(gtrk1,track)", 200, 0, 3.15);
+
+		h_output_gvtx_dphi_tv0_tv1 = fs->make<TH1F>("h_output_gvtx_dphi_tv0_tv1", "after a ghost vertex is formed;|dR(tv0,tv1)|", 200, 0, 3.15);
+
+		h_output_gvtx_tv0_bs2derr = fs->make<TH1F>("h_output_gvtx_tv0_bs2derr", "after a ghost vertex is formed;tv0's bs2derr(cm)", 200, 0, 0.05);
+		h_output_gvtx_tv1_bs2derr = fs->make<TH1F>("h_output_gvtx_tv1_bs2derr", "after a ghost vertex is formed;tv1's bs2derr(cm)", 200, 0, 0.05);
+
+		h_output_gvtx_tv0_ntrack = fs->make<TH1F>("h_output_gvtx_tv0_ntrack", "after a ghost vertex is formed;tv0's ntrack", 20, 0, 20);
+		h_output_gvtx_tv1_ntrack = fs->make<TH1F>("h_output_gvtx_tv1_ntrack", "after a ghost vertex is formed;tv1's ntrack", 20, 0, 20);
+
+		h_output_gvtx_vertices = fs->make<TH1F>("h_output_gvtx_vertices", ";;events", 4, 0, 4);
+		h_output_gvtx_vertices->GetXaxis()->SetBinLabel(1, "nevents");
+		const char* gvtx_filter[2] = { "qualified pairs","ghost vertices"};
+		for (int i = 0; i < 2; ++i) { 
+			h_output_gvtx_vertices->GetXaxis()->SetBinLabel(i + 2, TString::Format(" pass %s", gvtx_filter[i]));
+		}
+
+		h_2D_output_gvtx_dR_tv0_gtrk0_bs2derr0 = fs->make<TH2F>("h_2D_output_gvtx_dR_tv0_gtrk0_bs2derr0", "after a ghost vertex is formed;dR(tv0,gtrk0); tv0's bs2derr(cm)", 50, 0, 1.0, 100, 0, 0.05);
+		h_2D_output_gvtx_dR_tv1_gtrk1_bs2derr1 = fs->make<TH2F>("h_2D_output_gvtx_dR_tv1_gtrk1_bs2derr1", "after a ghost vertex is formed;dR(tv1,gtrk1); tv1's bs2derr(cm)", 50, 0, 1.0, 100, 0, 0.05);
+
+	}
   }
 }
 
@@ -565,6 +619,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       const double v0x = v0->position().x() - bsx;
       const double v0y = v0->position().y() - bsy;
       const double phi0 = atan2(v0y, v0x);
+	  
       for (std::vector<reco::Vertex>::const_iterator v1 = v0 + 1; v1 != vertices->end(); ++v1) {
         const double v1x = v1->position().x() - bsx;
         const double v1y = v1->position().y() - bsy;
@@ -1554,6 +1609,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       // compute dBV
       Measurement1D dBV0_Meas1D = vertex_dist_2d.distance(*v[0], fake_bs_vtx);
       double dBV0 = dBV0_Meas1D.value();
+	  double bs2derr0 = dBV0_Meas1D.error();
 
       // skip this below 0.01 cm, i.e. 100 microns
       if(dBV0 < 0.01) 
@@ -1562,7 +1618,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       // compute vertex x, y, phi positions
       double v0x = v[0]->x() - bsx;
       double v0y = v[0]->y() - bsy;
+	  double v0z = v[0]->z() - bsz;
       double phi0 = atan2(v0y, v0x);
+	  const double eta0 = etaFromXYZ(v0x, v0y, v0z);
 
       // now loop through all vertex pairs, and try to form ghost vertex:
       bool form_ghost_vtx = false;
@@ -1580,6 +1638,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         // compute dBV
         Measurement1D dBV1_Meas1D = vertex_dist_2d.distance(*v[1], fake_bs_vtx);
         double dBV1 = dBV1_Meas1D.value();
+		double bs2derr1 = dBV1_Meas1D.error();
 
         // skip this below 0.01 cm, i.e. 100 microns
         if(dBV1 < 0.01) 
@@ -1588,7 +1647,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         // compute vertex x, y, phi positions
         double v1x = v[1]->x() - bsx;
         double v1y = v[1]->y() - bsy;
+		double v1z = v[1]->z() - bsz;
         double phi1 = atan2(v1y, v1x);
+		const double eta1 = etaFromXYZ(v1x, v1y, v1z);
 
         // FIXME only consider re-vertexing when nearby in dphi: should study if this would help us. let's leave it in for now, but keep in mind that the threshold is completely arbitrary
         // FIXME probably this is fine for H->LLP with boosted LLPs, but maybe not as good for heavier, slow moving LLPs that decay to b-quarks with wide angles between the b-quarks. 
@@ -1605,9 +1666,19 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
         // for the ghosts
         std::vector<reco::TransientTrack> gttks;
+		std::vector<reco::Track> gtks;
 
         // if we want to try fitting ghosts + non-ghosts simultaneously (not likely to work, but okay)
         std::vector<reco::TransientTrack> all_ttks;
+
+		for (auto it = v[0]->tracks_begin(), ite = v[0]->tracks_end(); it != ite; ++it) {
+			reco::TrackRef tk = it->castTo<reco::TrackRef>();
+			h_output_gvtx_all_dR_tracks_tv0->Fill(reco::deltaR(eta0, phi0, tk->eta(), tk->phi()));
+		}
+		for (auto it = v[1]->tracks_begin(), ite = v[1]->tracks_end(); it != ite; ++it) {
+			reco::TrackRef tk = it->castTo<reco::TrackRef>();
+			h_output_gvtx_all_dR_tracks_tv1->Fill(reco::deltaR(eta1, phi1, tk->eta(), tk->phi()));
+		}
 
         // fill the TransientTracks, SV trajectories, etc., and fit the ghost tracks
         for(int isv = 0; isv < 2; ++isv) {
@@ -1636,11 +1707,12 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           double coneSize = max_dR / 2; // since we got the max separation via max_dR
           std::cout << "coneSize: " << coneSize << std::endl;
           */
-
+		  
           reco::GhostTrack ghost = ghostTrackFitter->fit(RecoVertex::convertPos(v[isv]->position()), RecoVertex::convertError(v[isv]->error()), trajectory_sv[isv], coneSize, ttks[isv]);
           
           std::cout << "chi2, ndof: " << ghost.chi2() << ", " << ghost.ndof() << std::endl;
           reco::Track gt = reco::Track(ghost);
+		  gtks.push_back(gt);
           std::cout << "px,py,pz: " << gt.px() << ", " << gt.py() << ", " << gt.pz() << std::endl;
           gttks.push_back(tt_builder->build(gt));
         }
@@ -1661,6 +1733,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         std::cout << "ghost_vertices.size() " << ghost_vertices.size() << std::endl;
 
         // loop over ghost vertices (of which there are either zero or one at this stage)
+		h_output_gvtx_vertices->Fill(0);
         for(auto gvtx : ghost_vertices) {
 
           std::cout << "sv0 chi2 " << v[0]->normalizedChi2() << ", sv1 chi2 " << v[1]->normalizedChi2() << std::endl;
@@ -1721,8 +1794,32 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           // FIXME this is where the v[0] is updated by a ghost vtx while the v[1] is erased 
 	  if (d_gvtx_new.value() > 0.01 &&  reco_gvtx.tracksSize() >= 2) {
 	      form_ghost_vtx = true;
+		  h_output_gvtx_tv0_ntrack->Fill(v[0]->nTracks());
+		  h_output_gvtx_tv1_ntrack->Fill(v[1]->nTracks());
+
+		  for (auto it = v[0]->tracks_begin(), ite = v[0]->tracks_end(); it != ite; ++it) {
+			  reco::TrackRef tk = it->castTo<reco::TrackRef>();
+			  h_output_gvtx_dR_tracks_tv0->Fill(reco::deltaR(eta0, phi0, tk->eta(), tk->phi()));
+			  h_output_gvtx_dR_tracks_gtrk0->Fill(reco::deltaR(gtks[0].eta(), gtks[0].phi(), tk->eta(), tk->phi()));
+		  }
+		  for (auto it = v[1]->tracks_begin(), ite = v[1]->tracks_end(); it != ite; ++it) {
+			  reco::TrackRef tk = it->castTo<reco::TrackRef>();
+			  h_output_gvtx_dR_tracks_tv1->Fill(reco::deltaR(eta1, phi1, tk->eta(), tk->phi()));
+			  h_output_gvtx_dR_tracks_gtrk1->Fill(reco::deltaR(gtks[1].eta(), gtks[1].phi(), tk->eta(), tk->phi()));
+		  }
+
+		  h_2D_output_gvtx_dR_tv0_gtrk0_bs2derr0->Fill(reco::deltaR(gtks[0].eta(), gtks[0].phi(), eta0, phi0),bs2derr0);
+		  h_2D_output_gvtx_dR_tv1_gtrk1_bs2derr1->Fill(reco::deltaR(gtks[1].eta(), gtks[1].phi(), eta1, phi1), bs2derr1);
+
 	      v[1] = vertices->erase(v[1]) - 1; // (1) erase and point the iterator at the previous entry
 	      *v[0] = reco_gvtx; // (2) updated v[0] (ok to use v[0] after the erase(v[1]) because v[0] is by construction before v[1])
+
+		  h_output_gvtx_dphi_tv0_tv1->Fill(fabs(reco::deltaPhi(phi0, phi1)));
+
+		  h_output_gvtx_tv0_bs2derr->Fill(bs2derr0);
+		  h_output_gvtx_tv1_bs2derr->Fill(bs2derr1);
+
+		  h_output_gvtx_vertices->Fill(1);
 	  }
 
           // FIXME okay! we have our ghost vertex. but now the issue is that bs2derr is too large to be useful. next step is to compute a more meaningful bs2derr that can be used in place of the one determined from just the two ghost trajectories. This may be the nontrivial part that remains, since we are using only two ghost tracks here--they may be very precise, but bs2derr will be large w/ only two tracks as input. 
