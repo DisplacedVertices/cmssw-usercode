@@ -14,6 +14,9 @@
 #include "JMTucker/Tools/interface/Utilities.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 
 class MFVFilterHistos : public edm::EDAnalyzer {
  public:
@@ -23,11 +26,15 @@ class MFVFilterHistos : public edm::EDAnalyzer {
  private:
   const edm::EDGetTokenT<MFVEvent> mevent_token;
   const edm::EDGetTokenT<double> weight_token;
+  const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_token;
 
   static const int MAX_NJETS = 10;
   static const int N_PROXIES = 20;
   const bool is_dibjet;
 
+  const double offline_csv;
+  const double skew_dR_cut;
+  const double btag_pt_cut;
   const int di_bitL1;
   const int di_minfiltjets;
   const double di_minfiltjetpt;
@@ -80,7 +87,11 @@ class MFVFilterHistos : public edm::EDAnalyzer {
 MFVFilterHistos::MFVFilterHistos(const edm::ParameterSet& cfg)
   : mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
     weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
+    vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     is_dibjet(cfg.getParameter<bool>("is_dibjet")),
+    offline_csv(cfg.getParameter<double>("offline_csv")),
+    skew_dR_cut(cfg.getParameter<double>("skew_dR_cut")),
+    btag_pt_cut(cfg.getParameter<double>("btag_pt_cut")),
     di_bitL1(cfg.getParameter<int>("di_bitL1")),
     di_minfiltjets(cfg.getParameter<int>("di_minfiltjets")),
     di_minfiltjetpt(cfg.getParameter<double>("di_minfiltjetpt")),
@@ -167,8 +178,8 @@ MFVFilterHistos::MFVFilterHistos(const edm::ParameterSet& cfg)
   h_filter_11_den = fs->make<TH1F>("h_filter_11_den", "before 4PFCentralLooseJetID40; p_{T} of 4th-leading jet (GeV); entries", 200, 0, 300);
   h_filter_11_num = fs->make<TH1F>("h_filter_11_num", "after  4PFCentralLooseJetID40; p_{T} of 4th-leading jet (GeV); entries", 200, 0, 300);
 
-  h_filter_12_den = fs->make<TH1F>("h_filter_12_den", "before PFCentralJetsLooseIDQuad30HT300; p_{T} of 4th-leading jet (GeV); entries", 250, 0, 500);
-  h_filter_12_num = fs->make<TH1F>("h_filter_12_num", "after  PFCentralJetsLooseIDQuad30HT300; p_{T} of 4th-leading jet (GeV); entries", 250, 0, 500);
+  h_filter_12_den = fs->make<TH1F>("h_filter_12_den", "before PFCentralJetsLooseIDQuad30HT300; p_{T} of 4th-leading jet (GeV); entries", 300, 0, 900);
+  h_filter_12_num = fs->make<TH1F>("h_filter_12_num", "after  PFCentralJetsLooseIDQuad30HT300; p_{T} of 4th-leading jet (GeV); entries", 300, 0, 900);
 
 }
 
@@ -184,6 +195,19 @@ struct Jet_Pair_Helper {
     int off_i = -2;
 };
 
+struct Jet_Loc_Helper {
+    float vtx_jet_pt  = -9.9;
+    float vtx_jet_eta = -9.9;
+    float vtx_jet_phi = -9.9;
+    float vtx_pt   = -9.9;
+    float vtx_eta  = -9.9;
+    float vtx_phi  = -9.9;
+    float vtx_dx  = -9.9;
+    float vtx_dy  = -9.9;
+    float vtx_dz  = -9.9;
+};
+
+
 void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   edm::Handle<MFVEvent> mevent;
   event.getByToken(mevent_token, mevent);
@@ -191,13 +215,18 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   edm::Handle<double> weight;
   event.getByToken(weight_token, weight);
   const double w = *weight;
+
+  edm::Handle<MFVVertexAuxCollection> auxes;
+  event.getByToken(vertex_token, auxes);
+  const int nsv = int(auxes->size());
+
   const int nhltpfjets = mevent->hlt_pf_jet_pt.size();
   const int nofflinepfjets = mevent->jet_pt.size();
 
   // Do some matching of online and offline jets
   std::vector<Jet_Pair_Helper> pfjethelper;
-  bool skinny_cone = true;
-  bool use_puid    = false;
+  bool skinny_cone = false;
+  bool use_puid    = true;
   for (int i=0; i < nhltpfjets; i++) {
     float hlt_eta    = mevent->hlt_pf_jet_eta[i];
     float hlt_phi    = mevent->hlt_pf_jet_phi[i];
@@ -247,6 +276,39 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     h_next_match_dR->Fill(next_dR, w);
   }
 
+
+  // Prepare the helpers which match SVs and jets
+  std::vector<Jet_Loc_Helper> jet_loc_helper;
+  for (int isv = 0; isv < nsv; isv++) {
+      const MFVVertexAux& aux = auxes->at(isv);
+
+      // The index [0] indicates that we're using ntracks to assoc.
+      // a jet to a vertex. No need to worry about this right now.
+      const std::vector<float> my_pts  = aux.jet_pt[0];
+      const std::vector<float> my_etas = aux.jet_eta[0];
+      const std::vector<float> my_phis = aux.jet_phi[0];
+      int npt = int(my_pts.size());
+
+      for (int ij=0; ij < npt; ij++) {
+          Jet_Loc_Helper tmp_loc_helper;
+          tmp_loc_helper.vtx_jet_pt  = my_pts[ij];
+          tmp_loc_helper.vtx_jet_eta = my_etas[ij];
+          tmp_loc_helper.vtx_jet_phi = my_phis[ij];
+
+          // The index [2] indicates use tracks+jet to get pt/eta/phi
+          tmp_loc_helper.vtx_pt  = aux.pt[2];
+          tmp_loc_helper.vtx_eta = aux.eta[2];
+          tmp_loc_helper.vtx_phi = aux.phi[2];
+
+          tmp_loc_helper.vtx_dx  = aux.x - mevent->bsx_at_z(aux.z);
+          tmp_loc_helper.vtx_dy  = aux.y - mevent->bsy_at_z(aux.z);
+          tmp_loc_helper.vtx_dz  = aux.z - mevent->bsz;
+          
+          jet_loc_helper.push_back(tmp_loc_helper);
+      }
+  } 
+
+
   // Fill some basic hltbits/L1bits/filtbits histograms
   h_hlt_bits->Fill(0., w);
   h_l1_bits->Fill(0., w);
@@ -278,17 +340,48 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   if ((std::size(mevent->jet_bdisc) == 0)) return;
 
   // Count number of btagged jets
-  int nbtaggedjets = 0;
+  int nbtaggedjets      = 0;  // Jets which pass CSV req
+  int naltbjets         = 0;  // Jets which pass CSV + angular reqs
+  int nselectionjets    = 0;  // Dummy class that will take one of the above two values
   for(size_t i = 0, ie = mevent->jet_bdisc_old.size(); i < ie; i++) {
-    if (mevent->jet_bdisc_old[i] > 0.80) { // 0.9693 is the tight WP for CSV algo
-      nbtaggedjets++;
-    }
+      bool passes_bscore = false;
+      if (mevent->jet_bdisc_old[i] > offline_csv) { // 0.9693 is the tight WP for CSV algo
+        passes_bscore = true;
+      }
+  
+      // While here, let's get some SV information
+      float closest_helper_dR  = 4.0;
+      float closest_vtx_dR  = 4.0;
+      //float closest_vtx_deta = -9.0;
+      //float closest_vtx_dphi = -9.0;
+      for (auto helper : jet_loc_helper) {
+          float temp_dR = reco::deltaR(helper.vtx_jet_eta, helper.vtx_jet_phi, mevent->nth_jet_eta(i), mevent->nth_jet_phi(i));
+          if (temp_dR < closest_helper_dR) {
+              closest_helper_dR = temp_dR;
+              //closest_vtx_deta = fabs(helper.vtx_eta - mevent->nth_jet_eta(i));
+              //closest_vtx_dphi = fabs(TVector2::Phi_mpi_pi(helper.vtx_phi - mevent->nth_jet_phi(i)));
+              closest_vtx_dR = reco::deltaR(helper.vtx_eta, helper.vtx_phi, mevent->nth_jet_eta(i), mevent->nth_jet_phi(i));
+          }
+      }
+  
+      if (passes_bscore) {
+          nbtaggedjets++;
+          //if (mevent->nth_jet_pt(i) > 25.0 && closest_vtx_dR < 0.6 && closest_vtx_deta < 0.8 && closest_vtx_dphi < 0.8 && fabs(mevent->nth_jet_eta(i)) < 2.0) {
+          if (mevent->nth_jet_pt(i) > btag_pt_cut) {
+              naltbjets++;
+          }
+          if (false) {
+            std::cout << closest_vtx_dR << std::endl;
+          }
+      }
+
   }
 
+  nselectionjets = naltbjets;
 
   // Don't do anything else if we don't have enough good jets or calojets
   bool pass_filtsel = false;
-  int  filtsel_opt  = 0;   // 0 = MinSel,  1 = HalfSel,  2 = FullSel
+  int  filtsel_opt  = 1;   // 0 = MinSel,  1 = HalfSel,  2 = FullSel, 3 = NoSel
   if ( filtsel_opt == 0 and nofflinepfjets >= 4) { pass_filtsel = true; }
 
   else if ( filtsel_opt == 1
@@ -296,22 +389,24 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       and mevent->nth_jet_pt(1) > 65.0 
       and mevent->nth_jet_pt(2) > 50.0 
       and mevent->nth_jet_pt(3) > 45.0 
-      and mevent->jet_ht(mfv::min_jet_pt) > 365.0) { pass_filtsel = true; }
+      and mevent->jet_ht(30.0) > 365.0) { pass_filtsel = true; }
 
-  else if (    filtsel_opt == 2
+  else if ( filtsel_opt == 2
       and mevent->nth_jet_pt(0) > 85.0 
       and mevent->nth_jet_pt(1) > 65.0 
       and mevent->nth_jet_pt(2) > 50.0 
       and mevent->nth_jet_pt(3) > 45.0 
-      and mevent->jet_ht(mfv::min_jet_pt) > 365.0 
+      and mevent->jet_ht(30.0) > 365.0 
       and nbtaggedjets >= 3) { pass_filtsel = true; }
+
+  else if ( filtsel_opt == 3) { pass_filtsel = true; }
 
 
   if (pass_filtsel) { 
     h_filt_nsurvive->Fill(1, w);
     h_filt_nsurvive->Fill(2, w);
     for (int p=0; p < N_PROXIES; p++) {
-      if (nbtaggedjets != p) continue;
+      if (nselectionjets != p) continue;
       h_filt_nsurvive_grid->Fill(1, p, w);
       h_filt_nsurvive_grid->Fill(2, p, w);
     }
@@ -320,59 +415,88 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     return;
   }
 
+//  if (mevent->pass_l1(9)) {   // L1 bit #9 is the dominant part of the L1 seed
+//    h_filt_nsurvive->Fill(2, w);
+//    for (int p=0; p < N_PROXIES; p++) {
+//      if (nselectionjets != p) continue;
+//      h_filt_nsurvive_grid->Fill(2, p, w);
+//    }
+//  }
+//  else {
+//    return;
+//  }
   
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
+  // Some bools
+  bool use_direct_comp = false;
+  bool pass_07 = use_direct_comp ? (pfjethelper[3].hlt_pt > 30.0) : (mevent->pass_filter(7));
+  bool pass_08 = use_direct_comp ? (pfjethelper[0].hlt_pt > 75.0) : (mevent->pass_filter(8));
+  bool pass_09 = use_direct_comp ? (pfjethelper[1].hlt_pt > 60.0) : (mevent->pass_filter(9));
+  bool pass_10 = use_direct_comp ? (pfjethelper[2].hlt_pt > 45.0) : (mevent->pass_filter(10));
+  bool pass_11 = use_direct_comp ? (pfjethelper[3].hlt_pt > 40.0) : (mevent->pass_filter(11));
+
+  // Fill some floats based on which filter-passing method is used
+  float pt0 = use_direct_comp ? pfjethelper[0].off_pt : mevent->nth_jet_pt(0);
+  float pt1 = use_direct_comp ? pfjethelper[1].off_pt : mevent->nth_jet_pt(1);
+  float pt2 = use_direct_comp ? pfjethelper[2].off_pt : mevent->nth_jet_pt(2);
+  float pt3 = use_direct_comp ? pfjethelper[3].off_pt : mevent->nth_jet_pt(3);
+
   // We'll just take the easy way out for the first filters (for now)
   for (int i = 4; i < 7; i++) {
-    if (i != 6 and not (mevent->pass_filter(i))) {return;}
+    //if (not (mevent->pass_filter(i))) {return;}
+    if (i != 6 and not (mevent->pass_filter(i))) {return;} // Skip di-btag filter
     h_filt_nsurvive->Fill(i-1, w);
     for (int p=0; p < N_PROXIES; p++) {
-      if (nbtaggedjets != p) continue;
+      if (nselectionjets != p) continue;
       h_filt_nsurvive_grid->Fill(i-1, p, w);
     }
   }
 
   for (int i = 7; i < mfv::n_filter_paths; i++) {
-    if (not (mevent->pass_filter(i))) break;
+    if      (i==7  and not (pass_07)) break;
+    else if (i==8  and not (pass_08)) break;
+    else if (i==9  and not (pass_09)) break;
+    else if (i==10 and not (pass_10)) break;
+    else if (i==11 and not (pass_11)) break;
+    else if (not mevent->pass_filter(i)) break;
+
     h_filt_nsurvive->Fill(i-1, w);
+
     for (int p=0; p < N_PROXIES; p++) {
-      if (nbtaggedjets != p) continue;
+      if (nselectionjets != p) continue;
       h_filt_nsurvive_grid->Fill(i-1, p, w);
     }
   }
 
-  h_filter_07_den->Fill(mevent->nth_jet_pt(3), w);
+  if ( filtsel_opt == 3) { return; }
 
-  //if (mevent->pass_filter(7)) {
-  if (mevent->jet_hlt_pt[3] > 30.0) {
-    h_filter_07_num->Fill(mevent->nth_jet_pt(3), w);
-    h_filter_08_den->Fill(mevent->nth_jet_pt(0), w);
+  h_filter_07_den->Fill(pt3, w);
 
-    //if (mevent->pass_filter(8)) {
-    if (mevent->jet_hlt_pt[0] > 75.0) {
-      h_filter_08_num->Fill(mevent->nth_jet_pt(0), w);
-      h_filter_09_den->Fill(mevent->nth_jet_pt(1), w);
+  if (pass_07) {
+    h_filter_07_num->Fill(pt3, w);
+    h_filter_08_den->Fill(pt0, w);
 
-      //if (mevent->pass_filter(9)) {
-      if (mevent->jet_hlt_pt[1] > 60.0) {
-        h_filter_09_num->Fill(mevent->nth_jet_pt(1), w);
-        h_filter_10_den->Fill(mevent->nth_jet_pt(2), w);
+    if (pass_08) {
+      h_filter_08_num->Fill(pt0, w);
+      h_filter_09_den->Fill(pt1, w);
 
-        //if (mevent->pass_filter(10)) {
-        if (mevent->jet_hlt_pt[2] > 45.0) {
-          h_filter_10_num->Fill(mevent->nth_jet_pt(2), w);
-          h_filter_11_den->Fill(mevent->nth_jet_pt(3), w);
+      if (pass_09) {
+        h_filter_09_num->Fill(pt1, w);
+        h_filter_10_den->Fill(pt2, w);
 
-          //if (mevent->pass_filter(11)) {
-          if (mevent->jet_hlt_pt[3] > 40.0) {
-            h_filter_11_num->Fill(mevent->nth_jet_pt(3), w);
-            h_filter_12_den->Fill(mevent->jet_ht(mfv::min_jet_pt), w);
+        if (pass_10) {
+          h_filter_10_num->Fill(pt2, w);
+          h_filter_11_den->Fill(pt3, w);
+
+          if (pass_11) {
+            h_filter_11_num->Fill(pt3, w);
+            h_filter_12_den->Fill(mevent->jet_ht(30.0), w);
 
             if (mevent->pass_filter(12)) {
-              h_filter_12_num->Fill(mevent->jet_ht(mfv::min_jet_pt), w);
+              h_filter_12_num->Fill(mevent->jet_ht(30.0), w);
             }
           }
         }

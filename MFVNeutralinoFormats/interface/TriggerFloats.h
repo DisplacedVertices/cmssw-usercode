@@ -21,6 +21,8 @@ namespace mfv {
     int nhltdisplacedcalojets() const { return hltdisplacedcalojets.size(); }
     std::vector<TLorentzVector> hltidpassedcalojets;
     int nhltidpassedcalojets() const { return hltidpassedcalojets.size(); }
+    std::vector<TLorentzVector> hltpfjetsforbtag;
+    int nhltpfjetsforbtag() const { return hltpfjetsforbtag.size(); }
     std::vector<TLorentzVector> hltelectrons;
     std::vector<TLorentzVector> hltmuons;
     std::vector<int> L1decisions;

@@ -102,6 +102,10 @@ struct MFVVertexAux {
   std::vector<float> nm1_bs2derr;
 
   uchar njets[mfv::NJetsByUse];
+  std::vector<float> jet_pt    [mfv::NJetsByUse];
+  std::vector<float> jet_eta   [mfv::NJetsByUse];
+  std::vector<float> jet_phi   [mfv::NJetsByUse];
+  std::vector<float> jet_energy[mfv::NJetsByUse];
 
   float pt  [mfv::NMomenta];
   float eta [mfv::NMomenta];

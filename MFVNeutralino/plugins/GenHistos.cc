@@ -573,8 +573,6 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
       const double ctau = r3d[0]/lspbetagamma;
       double w_llp = tau_weight(ctau);
 
-      std::cout << w_llp << std::endl;
-
       h_ctau->Fill(ctau, w_llp);
       h_ctaubig->Fill(ctau, w_llp);
       h_lspbeta->Fill(lspbeta, w_llp);
@@ -627,8 +625,6 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
         
       w_evt *= w_llp;    
     }
-
-    std::cout << w_evt << std::endl;
 
     h_lsp_dist2d->Fill(mci->dvv(), w_evt);
     h_lsp_dist3d->Fill(mci->d3d(), w_evt);

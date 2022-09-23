@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include "TH2F.h"
 #include "TRandom3.h"
 #include "TVector2.h"
@@ -16,6 +17,9 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/MCInteractions.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 
 class MFVJetTksHistos : public edm::EDAnalyzer {
  public:
@@ -25,6 +29,7 @@ class MFVJetTksHistos : public edm::EDAnalyzer {
  private:
   const edm::EDGetTokenT<MFVEvent> mevent_token;
   const edm::EDGetTokenT<double> weight_token;
+  const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_token;
   const edm::EDGetTokenT<reco::GenParticleCollection> gen_token;
 
   static const int CATEGORIES = 5;
@@ -78,6 +83,7 @@ class MFVJetTksHistos : public edm::EDAnalyzer {
 MFVJetTksHistos::MFVJetTksHistos(const edm::ParameterSet& cfg)
   : mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
     weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
+    vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     gen_token(consumes<reco::GenParticleCollection>(cfg.getParameter<edm::InputTag>("gen_src"))),
     offline_csv(cfg.getParameter<double>("offline_csv"))
 
@@ -92,9 +98,9 @@ MFVJetTksHistos::MFVJetTksHistos(const edm::ParameterSet& cfg)
     h_jet_eta[i] = fs->make<TH1F>(TString::Format("h_jet_eta_%s", bres.Data()), TString::Format(";absv#eta of jets that %s b-tag;events/bin", bres.Data()), 120, 0, 2.5);
     h_jet_phi[i] = fs->make<TH1F>(TString::Format("h_jet_phi_%s", bres.Data()), TString::Format(";#phi of jets that %s b-tag;events/bin", bres.Data()), 100, -3.1416, 3.1416);
     h_jet_dbv[i] = fs->make<TH1F>(TString::Format("h_jet_dbv_%s", bres.Data()), TString::Format(";d_{BV} of jets that %s b-tag;events/bin", bres.Data()), 100, 0.0, 2.0);
-    h_jet_skeweta[i] = fs->make<TH1F>(TString::Format("h_jet_skeweta_%s", bres.Data()), TString::Format(";#Delta#eta(jet, disp) for jets that %s b-tag;events/bin", bres.Data()), 120, 0, 3.0);
+    h_jet_skeweta[i] = fs->make<TH1F>(TString::Format("h_jet_skeweta_%s", bres.Data()), TString::Format(";#Delta#eta(jet, disp) for jets that %s b-tag;events/bin", bres.Data()), 120, 0, 3.0); // Original nBins = 120
     h_jet_skewphi[i] = fs->make<TH1F>(TString::Format("h_jet_skewphi_%s", bres.Data()), TString::Format(";#Delta#phi(jet, disp) for jets that %s b-tag;events/bin", bres.Data()), 100, -3.1416, 3.1416);
-    h_jet_skew_dR[i] = fs->make<TH1F>(TString::Format("h_jet_skew_dR_%s", bres.Data()), TString::Format(";#DeltaR(jet, disp) for jets that %s b-tag;events/bin", bres.Data()), 100, 0, 1.6);
+    h_jet_skew_dR[i] = fs->make<TH1F>(TString::Format("h_jet_skew_dR_%s", bres.Data()), TString::Format(";#DeltaR(jet, disp) for jets that %s b-tag;events/bin", bres.Data()), 100, 0, 1.6); // Original nBins = 100
     h_jet_ntks[i] = fs->make<TH1F>(TString::Format("h_jet_ntks_%s", bres.Data()), TString::Format(";#tks in jets that %s b-tag;events/bin", bres.Data()), 40, 0, 40);
     h_jet_bdisc[i] = fs->make<TH1F>(TString::Format("h_jet_bdisc_%s", bres.Data()), TString::Format(";DeepJet of jets that %s b-tag;events/bin", bres.Data()), 100, 0, 1.0);
     h_jet_bdisc_old[i] = fs->make<TH1F>(TString::Format("h_jet_bdisc_old_%s", bres.Data()), TString::Format(";CSV of jets that %s b-tag;events/bin", bres.Data()), 100, 0, 1.0);
@@ -128,12 +134,24 @@ MFVJetTksHistos::MFVJetTksHistos(const edm::ParameterSet& cfg)
 }
 
 struct Track_Helper {
-  float dr     = -9.9;
-  float dz     = -9.9;
-  float drerr  = -9.9;
-  float dzerr  = -9.9;
-  float drz    = -9.9;
-  float drzerr = -9.9;
+    float dr     = -9.9;
+    float dz     = -9.9;
+    float drerr  = -9.9;
+    float dzerr  = -9.9;
+    float drz    = -9.9;
+    float drzerr = -9.9;
+};
+
+struct Jet_Loc_Helper {
+    float vtx_jet_pt  = -9.9;
+    float vtx_jet_eta = -9.9;
+    float vtx_jet_phi = -9.9;
+    float vtx_pt   = -9.9;
+    float vtx_eta  = -9.9;
+    float vtx_phi  = -9.9;
+    float vtx_dx  = -9.9;
+    float vtx_dy  = -9.9;
+    float vtx_dz  = -9.9;
 };
 
 void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
@@ -146,13 +164,50 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   
     edm::Handle<double> weight;
     event.getByToken(weight_token, weight);
+
+    edm::Handle<MFVVertexAuxCollection> auxes;
+    event.getByToken(vertex_token, auxes);
+    const int nsv = int(auxes->size());
   
     const double w = *weight;
     h_w->Fill(w);
   
+
+    std::vector<Jet_Loc_Helper> jet_loc_helper;
+    for (int isv = 0; isv < nsv; isv++) {
+        const MFVVertexAux& aux = auxes->at(isv);
+
+        // The index [0] indicates that we're using ntracks to assoc.
+        // a jet to a vertex. No need to worry about this right now.
+        const std::vector<float> my_pts  = aux.jet_pt[0];
+        const std::vector<float> my_etas = aux.jet_eta[0];
+        const std::vector<float> my_phis = aux.jet_phi[0];
+        int npt = int(my_pts.size());
+
+        for (int ij=0; ij < npt; ij++) {
+            Jet_Loc_Helper tmp_loc_helper;
+            tmp_loc_helper.vtx_jet_pt  = my_pts[ij];
+            tmp_loc_helper.vtx_jet_eta = my_etas[ij];
+            tmp_loc_helper.vtx_jet_phi = my_phis[ij];
+
+            // The index [2] indicates use tracks+jet to get pt/eta/phi
+            tmp_loc_helper.vtx_pt  = aux.pt[2];
+            tmp_loc_helper.vtx_eta = aux.eta[2];
+            tmp_loc_helper.vtx_phi = aux.phi[2];
+
+            tmp_loc_helper.vtx_dx  = aux.x - mevent->bsx_at_z(aux.z);
+            tmp_loc_helper.vtx_dy  = aux.y - mevent->bsy_at_z(aux.z);
+            tmp_loc_helper.vtx_dz  = aux.z - mevent->bsz;
+            
+            jet_loc_helper.push_back(tmp_loc_helper);
+        }
+    } 
+
     for (int i = 0; i < mevent->njets(); ++i) {
         bool matches_online_bjet = false;
         bool matches_online_calo = false;
+
+        if (mevent->jet_bdisc_old[i] < offline_csv || mevent->nth_jet_pt(i) < 30.0) continue;
     
         std::vector<int> fill_hists;
         fill_hists.push_back(ALL);     // Always fill histo #0
@@ -191,57 +246,44 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
             if(reco::deltaR(hlt_eta, hlt_phi, off_eta, off_phi) < 0.14) { matches_online_bjet = true; }
         }
     
+        // Which histograms do we need to fill?
         fill_hists.push_back(matches_online_bjet ? PASS_HLT : FAIL_HLT);
         fill_hists.push_back(mevent->jet_bdisc_old[i] > offline_csv ? PASS_OFF : FAIL_OFF);
         
-        TVector3 jet_sumtk_vector;
-        jet_sumtk_vector.SetPtEtaPhi(0.0, 0.0, 0.0);
-    
-        
-        // Try and find the point that this jet originates from. First, find the matching decay daughter
-        int   ndau = (int)(mevent->gen_daughters.size());
-        int   llp_i_closest  = -1;
-        int   dau_i_closest  = -1;
-        float dau_dr_closest = 4.0;
-        for (int idau=0; idau < ndau; idau++) {
-            TLorentzVector temp_dau = mevent->gen_daughters[idau];
-            float temp_dR = reco::deltaR(temp_dau.Eta(), temp_dau.Phi(), off_eta, off_phi);
+        // Try and find the point that this jet originates from. Do this by finding the closest instance of jet_loc_helper
+        float closest_helper_dR  = 4.0;
+        float closest_vtx_eta = -9.0;
+        float closest_vtx_phi = -9.0;
+        for (auto helper : jet_loc_helper) {
+            float temp_dR = reco::deltaR(helper.vtx_jet_eta, helper.vtx_jet_phi, off_eta, off_phi);
+            if (temp_dR < closest_helper_dR) {
+                closest_helper_dR = temp_dR;
+                jet_dbv = std::hypot(helper.vtx_dx, helper.vtx_dy);
 
-            if (temp_dR < dau_dr_closest) {
-                dau_i_closest  = idau;
-                dau_dr_closest = temp_dR;
+                closest_vtx_eta = helper.vtx_eta;
+                closest_vtx_phi = helper.vtx_phi;
             }
         }
+        float closest_vtx_dR = reco::deltaR(closest_vtx_eta, closest_vtx_phi, off_eta, off_phi);
 
-        // Try and find the point that this jet originates from. Now, find the production point of the decay daughter
-
-        // If dau_i_closest is in the second half of all daughters, then it belongs to LLP 1
-        if (dau_i_closest >= ndau/2) {
-            jet_dbv = mag(mevent->gen_lsp_decay[1*3+0] - mevent->gen_pv[0], mevent->gen_lsp_decay[1*3+1] - mevent->gen_pv[1]);
-            llp_i_closest = 1;
-        }
-
-        // Otherwise, it belongs to LLP 0
-        else {
-            jet_dbv = mag(mevent->gen_lsp_decay[0*3+0] - mevent->gen_pv[0], mevent->gen_lsp_decay[0*3+1] - mevent->gen_pv[1]);
-            llp_i_closest = 0;
-        }
-            
         // Fill the pre-determined histograms
         for (auto n_hist : fill_hists) {
              h_jet_pt[n_hist]->Fill(mevent->nth_jet_pt(i), w);
              h_jet_eta[n_hist]->Fill(fabs(mevent->nth_jet_eta(i)), w);
              h_jet_phi[n_hist]->Fill(mevent->nth_jet_phi(i), w);
              h_jet_dbv[n_hist]->Fill(jet_dbv, w);
-             h_jet_skeweta[n_hist]->Fill(fabs(mevent->gen_lsp_eta[llp_i_closest] - off_eta), w);
-             h_jet_skewphi[n_hist]->Fill(TVector2::Phi_mpi_pi(off_phi-mevent->gen_lsp_phi[llp_i_closest]), w);
-             h_jet_skew_dR[n_hist]->Fill(reco::deltaR(mevent->gen_lsp_eta[llp_i_closest], mevent->gen_lsp_phi[llp_i_closest], off_eta, off_phi), w);
+             h_jet_skeweta[n_hist]->Fill(fabs(closest_vtx_eta - off_eta), w);
+             h_jet_skewphi[n_hist]->Fill(TVector2::Phi_mpi_pi(closest_vtx_phi - off_phi), w);
+             h_jet_skew_dR[n_hist]->Fill(closest_vtx_dR, w);
              h_jet_ntks[n_hist]->Fill((int)(mevent->n_jet_tracks(i)));
              h_jet_bdisc[n_hist]->Fill((i < (int)(mevent->jet_bdisc.size()) ? mevent->jet_bdisc[i] : -9.9), w);
              h_jet_bdisc_old[n_hist]->Fill((i < (int)(mevent->jet_bdisc_old.size()) ? mevent->jet_bdisc_old[i] : -9.9), w);
         }
     
         // Start the track portion of this code
+        TVector3 jet_sumtk_vector;
+        jet_sumtk_vector.SetPtEtaPhi(0.0, 0.0, 0.0);
+
         std::vector<Track_Helper> trackhelper;
         for (size_t ntk = 0 ; ntk < mevent->n_jet_tracks_all() ; ntk++) {
             if (mevent->jet_track_which_jet[ntk] == i) {

@@ -441,19 +441,19 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
       }
     case mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0 :
       {
-        //if(mevent->jet_ht(30) < 425 || njets < 4) return false;
+        if(mevent->jet_ht(30) < 365 || njets < 4) return false;
         if(nbtaggedjets < 3) return false;
         for(int j0 = 0; j0 < njets; ++j0){
-          if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 90) continue;
+          if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 85) continue;
 
           for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 70) continue;
+            if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 65) continue;
 
             for(int j2 = j1+1; j2 < njets; ++j2){
-              if(!jet_hlt_match(mevent, j2) || mevent->jet_pt[j2] < 55) continue;
+              if(!jet_hlt_match(mevent, j2) || mevent->jet_pt[j2] < 50) continue;
 
               for(int j3 = j2+1; j3 < njets; ++j3){
-                if(!jet_hlt_match(mevent, j3) || mevent->jet_pt[j3] < 50) continue;
+                if(!jet_hlt_match(mevent, j3) || mevent->jet_pt[j3] < 45 || mevent->jet_pudisc[j3] < 0.61) continue;
 
                 passed_kinematics = true;
               }

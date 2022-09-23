@@ -1012,7 +1012,8 @@ _add_ds("ntuplev30am", {
 'ggHToSSTodddd_tau100mm_M55_2017': (26, ['/store/user/shogan/ggH_HToSSTodddd_MH-125_MS-55_ctauS-100_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV30Am_NoEF_2017/220404_064449/0000/ntuple_9.root'] + ['/store/user/shogan/ggH_HToSSTodddd_MH-125_MS-55_ctauS-100_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV30Am_NoEF_2017/220401_155340/0000/ntuple_%i.root' % i for i in chain(xrange(9), xrange(10,26))]),
 'ggHToSSTodddd_tau10mm_M55_2017': (24, ['/store/user/shogan/ggH_HToSSTodddd_MH-125_MS-55_ctauS-10_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV30Am_NoEF_2017/220401_155341/0000/ntuple_%i.root' % i for i in chain(xrange(16), xrange(17,24))] + ['/store/user/shogan/ggH_HToSSTodddd_MH-125_MS-55_ctauS-10_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV30Am_NoEF_2017/220404_064442/0000/ntuple_16.root']),
 'ggHToSSTodddd_tau1mm_M55_2017': (26, ['/store/user/shogan/ggH_HToSSTodddd_MH-125_MS-55_ctauS-1_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV30Am_NoEF_2017/220404_064506/0000/ntuple_%i.root' % i for i in chain(xrange(2,4), xrange(5,26))] + ['/store/user/shogan/ggH_HToSSTodddd_MH-125_MS-55_ctauS-1_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV30Am_NoEF_2017/220401_155342/0000/ntuple_%i.root' % i for i in chain(xrange(2), [4])]),
-'ttbar_2017': (23, ['/store/user/shogan/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleV30m_2017/220404_114952/0000/ntuple_%i.root' % i for i in chain(xrange(2,5), xrange(22,29), xrange(31,35), xrange(46,51), [6, 18, 39, 53])]),
+#'ttbar_2017': (23, ['/store/user/shogan/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleV30m_2017/220404_114952/0000/ntuple_%i.root' % i for i in chain(xrange(2,5), xrange(22,29), xrange(31,35), xrange(46,51), [6, 18, 39, 53])]),
+'ttbar_2017': (52, ['/store/user/shogan/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleV30m_2017/220404_114952/0000/ntuple_%i.root' % i for i in chain(xrange(1,21), xrange(22,54))]),
 })
 
 
@@ -1056,6 +1057,22 @@ _add_ds("ntuplev30lm", {
 'mfv_neu_tau000100um_M3000_2017': _fromnum0("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-3000_CTau-100um_TuneCP2_13TeV-pythia8/NtupleV30LooseIDBm_NoEF_2017/220426_115554", 14),
 'mfv_neu_tau000300um_M3000_2017': (9, ['/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-3000_CTau-300um_TuneCP2_13TeV-pythia8/NtupleV30LooseIDBm_NoEF_2017/220426_115600/0000/ntuple_%i.root' % i for i in chain(xrange(2), xrange(5,8), [3, 9, 11, 13])]),
 'ttbar_2017': (45, ['/store/user/shogan/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleV30LooseIDm_2017/220426_165913/0000/ntuple_%i.root' % i for i in chain(xrange(6,21), xrange(22,30), xrange(31,53))]),
+})
+
+
+_add_ds("ntuplev31am", {
+'ggHToSSTodddd_tau1mm_M55_2017': _fromnum0("/store/user/shogan/ggH_HToSSTodddd_MH-125_MS-55_ctauS-1_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV31Am_NoEF_2017/220916_135254", 26),
+'ggHToSSTodddd_tau1mm_M40_2017': _fromnum0("/store/user/shogan/ggH_HToSSTodddd_MH-125_MS-40_ctauS-1_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV31Am_NoEF_2017/220916_135255", 24),
+'ggHToSSTodddd_tau1mm_M15_2017': _fromnum0("/store/user/shogan/ggH_HToSSTodddd_MH-125_MS-15_ctauS-1_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV31Am_NoEF_2017/220916_135256", 24),
+'ggHToSSTodddd_tau10mm_M55_2017': _fromnum0("/store/user/shogan/ggH_HToSSTodddd_MH-125_MS-55_ctauS-10_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV31Am_NoEF_2017/220916_135257", 24),
+'ggHToSSTodddd_tau10mm_M40_2017': _fromnum0("/store/user/shogan/ggH_HToSSTodddd_MH-125_MS-40_ctauS-10_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV31Am_NoEF_2017/220916_135258", 26),
+'ggHToSSTodddd_tau10mm_M15_2017': _fromnum0("/store/user/shogan/ggH_HToSSTodddd_MH-125_MS-15_ctauS-10_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV31Am_NoEF_2017/220916_135259", 28),
+'ggHToSSTodddd_tau100mm_M55_2017': _fromnum0("/store/user/shogan/ggH_HToSSTodddd_MH-125_MS-55_ctauS-100_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV31Am_NoEF_2017/220916_135300", 26),
+'ggHToSSTodddd_tau100mm_M40_2017': _fromnum0("/store/user/shogan/ggH_HToSSTodddd_MH-125_MS-40_ctauS-100_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV31Am_NoEF_2017/220916_135301", 25),
+'ggHToSSTodddd_tau100mm_M15_2017': _fromnum0("/store/user/shogan/ggH_HToSSTodddd_MH-125_MS-15_ctauS-100_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV31Am_NoEF_2017/220916_135302", 22),
+'ggHToSSTodddd_tau1000mm_M55_2017': _fromnum0("/store/user/shogan/ggH_HToSSTodddd_MH-125_MS-55_ctauS-1000_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV31Am_NoEF_2017/220916_135303", 32),
+'ggHToSSTodddd_tau1000mm_M40_2017': _fromnum0("/store/user/shogan/ggH_HToSSTodddd_MH-125_MS-40_ctauS-1000_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV31Am_NoEF_2017/220916_135304", 28),
+'ggHToSSTodddd_tau1000mm_M15_2017': _fromnum0("/store/user/shogan/ggH_HToSSTodddd_MH-125_MS-15_ctauS-1000_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV31Am_NoEF_2017/220916_135305", 23),
 })
 
 

@@ -409,6 +409,15 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
         else if(obj.collection() == "hltAK4CaloJetsCorrectedIDPassed::HLT") {
           floats->hltidpassedcalojets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
         }
+        else if(obj.collection() == "hltPFJetForBtag::HLT") {
+          bool save_this_jet = false;
+          for (auto label : obj.filterLabels()) {
+            if (label == "hltBTagPFCSVp070Triple") { save_this_jet = true; }
+          }
+          if (save_this_jet) {
+            floats->hltpfjetsforbtag.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
+          }
+        }
 
 //        if (prints) {
 //          std::cout << "TriggerFloats jet object for path " << mfv::hlt_paths[ipath]

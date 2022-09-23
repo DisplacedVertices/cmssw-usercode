@@ -246,6 +246,11 @@ struct MFVEvent {
   std::vector<float> hlt_idp_calo_jet_phi;
   std::vector<float> hlt_idp_calo_jet_energy;
 
+  std::vector<float> hlt_pfforbtag_jet_pt;
+  std::vector<float> hlt_pfforbtag_jet_eta;
+  std::vector<float> hlt_pfforbtag_jet_phi;
+  std::vector<float> hlt_pfforbtag_jet_energy;
+
   std::vector<float> hlt_pf_jet_pt;
   std::vector<float> hlt_pf_jet_eta;
   std::vector<float> hlt_pf_jet_phi;

@@ -400,6 +400,9 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->jet_hlt_push_back(jet, triggerfloats->hltpfjets, false);
     mevent->jet_hlt_push_back(jet, triggerfloats->hltcalojets, true);
 
+    // push back the pfbjets
+    mevent->jet_hlt_push_back(jet, triggerfloats->hltcalojets, true);
+
     int bdisc_level = 0;
     for (int i = 0; i < 3; ++i)
       if (jmt::BTagging::is_tagged(jet, i))
@@ -488,6 +491,12 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->hlt_idp_calo_jet_energy.push_back(pp4.E());
  }
 
+ for (const TLorentzVector& bp4 : triggerfloats->hltpfjetsforbtag) {
+    mevent->hlt_pfforbtag_jet_pt.push_back(bp4.Pt());
+    mevent->hlt_pfforbtag_jet_eta.push_back(bp4.Eta());
+    mevent->hlt_pfforbtag_jet_phi.push_back(bp4.Phi());
+    mevent->hlt_pfforbtag_jet_energy.push_back(bp4.E());
+ }
 
   //////////////////////////////////////////////////////////////////////
 

@@ -100,6 +100,14 @@ process.EX1pFullSel    = cms.Path(common * process.EX1mfvAnalysisCutsFullSel    
 process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     * process.EX1mfvEventHistosSigReg     * process.EX1mfvFilterHistosSigReg     * process.EX1mfvJetTksHistosSigReg  * process.EX1mfvVertexHistosSigReg)
 '''.replace('EX1', EX1)
 
+    for ptcut in [20., 25., 30., 35., 40., 45., 50.]:
+        EX4 = 'PtCut%i' % int(ptcut)
+        EX5 = 'btag_pt_cut = ' + str(ptcut)
+        exec '''
+process.EX1mfvFilterHistosSigRegEX4   = process.mfvFilterHistos.clone(EX5)
+process.EX1pSigRegEX4     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg      * process.EX1mfvFilterHistosSigRegEX4)
+'''.replace('EX1', EX1).replace('EX4', EX4).replace('EX5', EX5)
+
     for name, cut in nm1s:
         evt_cut = ''
         if type(cut) == tuple:
@@ -154,7 +162,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
 
-    cs = CondorSubmitter('HistosV30CSVAlt3Tight',
+    cs = CondorSubmitter('HistosV30CSVMediumPTVars',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,

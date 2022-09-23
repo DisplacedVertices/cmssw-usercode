@@ -1,5 +1,6 @@
 #include "TH2F.h"
 #include "TRandom3.h"
+#include "TVector2.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
@@ -116,6 +117,10 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_online_pfjet_pt;
   TH1F* h_offline_calojet_pt;
   TH1F* h_offline_pfjet_pt;
+  TH1F* h_offline_pfjet_t0;
+  TH1F* h_offline_pfjet_t1;
+  TH1F* h_offline_pfjet_t2;
+  TH1F* h_offline_pfjet_t3;
   TH2F* h_online_offline_calojet_pt;
   TH2F* h_online_offline_pfjet_pt[MAX_NJETS+1];
   TH2F* h_online_offline_pfjet_eta[MAX_NJETS+1];
@@ -301,8 +306,12 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_online_calojet_pt = fs->make<TH1F>("h_online_calojet_pt", ";p_{T} of matched online calojets (GeV);events/bins", 200, 0, 1000);
   h_online_pfjet_pt   = fs->make<TH1F>("h_online_pfjet_pt", ";p_{T} of matched online PF jets (GeV);events/bins", 200, 0, 1000);
 
-  h_offline_calojet_pt = fs->make<TH1F>("h_offline_calojet_pt", ";p_{T} of matched offline calojets (GeV);events/bins", 200, 0, 1000);
-  h_offline_pfjet_pt   = fs->make<TH1F>("h_offline_pfjet_pt", ";p_{T} of matched offline PF jets (GeV);events/bins", 200, 0, 1000);
+  h_offline_calojet_pt = fs->make<TH1F>("h_offline_calojet_pt", ";p_{T} of matched offline calojets (GeV);events/bins", 200, 0, 300);
+  h_offline_pfjet_pt   = fs->make<TH1F>("h_offline_pfjet_pt", ";p_{T} of matched offline PF jets (GeV);events/bins", 200, 0, 300);
+  h_offline_pfjet_t0   = fs->make<TH1F>("h_offline_pfjet_t0", ";p_{T} of matched offline PF jets (GeV);events/bins", 200, 0, 300);
+  h_offline_pfjet_t1   = fs->make<TH1F>("h_offline_pfjet_t1", ";p_{T} of matched offline PF jets (GeV);events/bins", 200, 0, 300);
+  h_offline_pfjet_t2   = fs->make<TH1F>("h_offline_pfjet_t2", ";p_{T} of matched offline PF jets (GeV);events/bins", 200, 0, 300);
+  h_offline_pfjet_t3   = fs->make<TH1F>("h_offline_pfjet_t3", ";p_{T} of matched offline PF jets (GeV);events/bins", 200, 0, 300);
 
   h_online_offline_calojet_pt = fs->make<TH2F>("h_online_offline_calojet_pt", ";p_{T} of matched online calojets (GeV); p_{T} of matched offline calojets (GeV)", 200, 0, 1000, 200, 0, 1000);
 
@@ -407,29 +416,10 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   }
   std::sort(jetHelper, jetHelper+MAX_NJETS, [](Jet_BHelper const &a, Jet_BHelper &b) -> bool{ return a.csv > b.csv; } );
 
-  // Do some quick HLT/RECO matching
-
-  const int nhltpfjets = mevent->hlt_pf_jet_pt.size();
-  const int nrecopfjets = mevent->jet_pt.size();
-  for (int i=0, ipmax = 4; i < ipmax; i++) {
-    float hlt_eta = (nhltpfjets > i ? mevent->hlt_pf_jet_eta[i] : -99.0);
-    float hlt_phi = (nhltpfjets > i ? mevent->hlt_pf_jet_phi[i] : -99.0);
-
-    float reco_eta = (nrecopfjets > i ? mevent->jet_eta[i] : 99.0);
-    float reco_phi = (nrecopfjets > i ? mevent->jet_phi[i] : 99.0);
-
-    float temp_deta = fabs(reco_eta - hlt_eta);
-    float temp_dphi = fabs(reco_phi - hlt_phi);
-
-    if ((temp_deta > 0.05) or (temp_dphi > 0.05)){
-      return;
-    }
-  }
-
-
   h_w->Fill(w);
 
   //////////////////////////////////////////////////////////////////////////////
+
 
   h_gen_decay->Fill(mevent->gen_decay_type[0], mevent->gen_decay_type[1], w);
   h_gen_flavor_code->Fill(mevent->gen_flavor_code, w);
@@ -551,7 +541,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   float alt_pf_ht = 0.0;
   unsigned int n_online_pfjets = mevent->hlt_pf_jet_pt.size();
-  std::cout << "\n\n-------- PF-Jet Dump --------" << std::endl;
+
   for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
     if (mevent->jet_pt[ijet] < mfv::min_jet_pt)
       continue;
@@ -569,25 +559,10 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       h_jet_pairdr->Fill(reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->jet_eta[jjet], mevent->jet_phi[jjet]), w);
     }
 
-    float tmp_pt_h  = 0.0;
-    float tmp_eta_h = 0.0;
-    float tmp_phi_h = 0.0;
-    float tmp_pt_r  = mevent->jet_pt[ijet];
-    float tmp_eta_r = mevent->jet_eta[ijet];
-    float tmp_phi_r = mevent->jet_phi[ijet];
-
-    if (ijet <= n_online_pfjets) {
-      tmp_pt_h  = mevent->hlt_pf_jet_pt[ijet];
-      tmp_eta_h = mevent->hlt_pf_jet_eta[ijet];
-      tmp_phi_h = mevent->hlt_pf_jet_phi[ijet];
-    }
-
-    //DEBUG
-    printf("HLT#%i  pt: %5.2f  eta: %5.2f  phi %5.2f         RECO#%i  pt: %5.2f  eta: %5.2f  phi %5.2f \n", (int)(ijet), tmp_pt_h, tmp_eta_h, tmp_phi_h, (int)(ijet), tmp_pt_r, tmp_eta_r, tmp_phi_r);
-
     if (ijet > n_online_pfjets) continue;
 
-    if ((fabs(mevent->hlt_pf_jet_eta[ijet] - mevent->jet_eta[ijet]) > 0.0) and (fabs(mevent->hlt_pf_jet_phi[ijet] - mevent->jet_phi[ijet]) > 0.0)){
+//    if ((fabs(mevent->hlt_pf_jet_eta[ijet] - mevent->jet_eta[ijet]) > 0.0) and (fabs(mevent->hlt_pf_jet_phi[ijet] - mevent->jet_phi[ijet]) > 0.0)){
+    if (false) { //FIXME
       h_online_offline_pfjet_pt[ijet]->Fill(mevent->hlt_pf_jet_pt[ijet], mevent->jet_pt[ijet], w);
       h_online_offline_pfjet_eta[ijet]->Fill(mevent->hlt_pf_jet_eta[ijet], mevent->jet_eta[ijet], w);
       h_online_offline_pfjet_phi[ijet]->Fill(mevent->hlt_pf_jet_phi[ijet], mevent->jet_phi[ijet], w);
@@ -597,27 +572,31 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     }
 
     // Find closest match between online/offline pfjets
-    TLorentzVector offline_vec(mevent->jet_pt[ijet], mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->jet_energy[ijet]);
-    if (fabs(mevent->jet_eta[ijet]) > 2.5) continue;
     if (mevent->jet_pt[ijet] > 30.0) alt_pf_ht += mevent->jet_pt[ijet];
-    float match_dR = 1.0;
+    if (fabs(mevent->jet_eta[ijet]) > 2.5) continue;
+    float match_dR = 0.5;
     float match_online_pt  = -1.0;
     float match_offline_pt = -1.0;
 
     for (unsigned int ojet = 0; ojet < n_online_pfjets; ojet++) {
-        TLorentzVector online_vec(mevent->hlt_pf_jet_pt[ojet], mevent->hlt_pf_jet_eta[ojet], mevent->hlt_pf_jet_phi[ojet], mevent->hlt_pf_jet_energy[ojet]);
-        float temp_dR = offline_vec.DeltaR(online_vec);
-        
+        double temp_deta = fabs(mevent->hlt_pf_jet_eta[ojet] - mevent->nth_jet_eta(ijet));
+        double temp_dphi = fabs(TVector2::Phi_mpi_pi(mevent->hlt_pf_jet_phi[ojet] - mevent->nth_jet_phi(ijet)));
+        double temp_dR   = std::hypot(temp_deta, temp_dphi);
+
         if (temp_dR < match_dR) {
           match_dR = temp_dR;
-          match_online_pt  = online_vec.Pt();
-          match_offline_pt = offline_vec.Pt();
+          match_online_pt  = mevent->hlt_pf_jet_pt[ojet];
+          match_offline_pt = mevent->nth_jet_pt(ijet);
         }
     }
     
     h_online_pfjet_pt->Fill(match_online_pt, w);
     h_offline_pfjet_pt->Fill(match_offline_pt, w);
-    //h_online_offline_pfjet_pt[MAX_NJETS]->Fill(match_online_pt, match_offline_pt, w);
+
+    if (match_online_pt > 75.0) h_offline_pfjet_t0->Fill(match_offline_pt, w);
+    if (match_online_pt > 60.0) h_offline_pfjet_t1->Fill(match_offline_pt, w);
+    if (match_online_pt > 45.0) h_offline_pfjet_t2->Fill(match_offline_pt, w);
+    if (match_online_pt > 40.0) h_offline_pfjet_t3->Fill(match_offline_pt, w);
 
   }
 
