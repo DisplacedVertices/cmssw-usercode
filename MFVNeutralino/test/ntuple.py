@@ -21,8 +21,9 @@ else :
 
 process = ntuple_process(settings)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
-sample_files(process, 'ttbar_2017', dataset, 5)
-#input_files(process, '/uscms_data/d3/shogan/scratch/filter_studies/ggH_HtoSS_SStodddd_miniaod_M40_ct1mm.root')
+#sample_files(process, 'JetHT2017C', dataset, 5)
+#sample_files(process, 'ttbar_2017', dataset, 1)
+input_files(process, '/uscms_data/d3/shogan/scratch/filter_studies/ggH_HtoSS_SStodddd_miniaod_M40_ct1mm.root')
 #input_files(process, '/uscms_data/d3/shogan/scratch/emerging_jets/EmergingJets_mX-1000-m_dpi-1-ctau_dpi-1_2017_num0.root')
 max_events(process, 7200)
 cmssw_from_argv(process)
@@ -33,7 +34,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     if use_btag_triggers :
         #samples = pick_samples(dataset, qcd=True, ttbar=True, all_signal=not settings.run_n_tk_seeds, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used
-        samples = Samples.mfv_signal_samples_2017 + Samples.HToSSTodddd_samples_2017
+        samples = Samples.mfv_signal_samples_2017 + Samples.mfv_stopdbardbar_samples_2017
     else :
         #samples = pick_samples(dataset, qcd=False, ttbar=False, data=False, all_signal=not settings.run_n_tk_seeds)
         samples = Samples.bjet_samples_2017

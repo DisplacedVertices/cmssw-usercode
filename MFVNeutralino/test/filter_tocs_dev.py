@@ -8,7 +8,7 @@ from JMTucker.MFVNeutralino.PerSignal import PerSignal
 
 filter_hist_dir = ''
 di_or_tri = ''
-use_presel = True
+use_presel = False
 
 if use_presel:
     filter_hist_dir = 'mfvFilterHistosPreSel'
@@ -17,7 +17,7 @@ else:
 
 # 0: filters for di-bjet  trigger
 # 1: filters for tri-bjet trigger
-filter_opt = 0
+filter_opt = 1
 
 if filter_opt == 0:
     n_cols = 2
@@ -32,23 +32,23 @@ if filter_opt == 1:
     n_rows = 3
     loop_range  = range(5,15)
     ind_offset  = 4
-    rebin = 2
+    rebin = 4
     di_or_tri = 'Tri'
 
 set_style()
 version = 'test'
-ps = plot_saver(plot_dir('filter_tocs_%s' % version), size=(1000,600), pdf=False, log=False)
+ps = plot_saver(plot_dir('filter_tocs_%s' % version), size=(2400,1800), pdf=False, log=False)
 
 alpha = 1.0 - 0.6827
 use_effective = True
 
 #fn = '/uscms_data/d3/shogan/crab_dirs/HistosDFLavV30Tm' + di_or_tri + 'BjetOnly/mfv_neu_tau000300um_M0400_2017.root'    # Black curve
 #zn = '/uscms_data/d3/shogan/crab_dirs/HistosDFLavV30Tm' + di_or_tri + 'BjetOnly/ggHToSSTodddd_tau1mm_M40_2017.root'    # Red curve
-#an = '/uscms_data/d3/shogan/crab_dirs/HistosDFLavV30Tm' + di_or_tri + 'BjetOnly/ttbar_2017.root'    # Red curve
+#an = '/uscms_data/d3/shogan/crab_dirs/HistosDFLavV30Tm' + di_or_tri + 'BjetOnly/ttbar_2017.root'    # Blue curve
 
-fn = '/uscms_data/d3/shogan/crab_dirs/HistosV30TmDiBjet4Hard/mfv_neu_tau000300um_M0400_2017.root'    # Black curve
-zn = '/uscms_data/d3/shogan/crab_dirs/HistosV30TmDiBjet4Hard/ggHToSSTodddd_tau1mm_M40_2017.root'    # Red curve
-an = '/uscms_data/d3/shogan/crab_dirs/HistosV30TmDiBjet4Hard/ttbar_2017.root'    # Red curve
+fn = '/uscms_data/d3/shogan/crab_dirs/HistosV30TmTriBjetOnOffMatch/mfv_neu_tau000300um_M0400_2017.root'    # Black curve
+zn = '/uscms_data/d3/shogan/crab_dirs/HistosV30TmTriBjetOnOffMatch/ggHToSSTodddd_tau1mm_M40_2017.root'    # Red curve
+an = '/uscms_data/d3/shogan/crab_dirs/HistosV30TmTriBjetOnOffMatch/ttbar_2017.root'    # Blue curve
 
 f = ROOT.TFile(fn)
 t = f.Get(filter_hist_dir)
@@ -86,14 +86,14 @@ for h_n in hist_names:
     print(h_n)
     skip_this_hist = False
 
-    for mystr in ['all', 'energy', '5', '6', '7', '8', '9', '10', 'bit', 'idp', 'pt_by_', 'online_offline', 'bsort']:
+    for mystr in ['all', 'energy', '5', '6', '7', '8', '9', '10', 'bit', 'idp', 'pt_by_', 'online_offline', 'bsort', 'match']:
         if mystr in h_n:
             skip_this_hist = True
 
     if skip_this_hist:
         continue
     
-    c1 = ROOT.TCanvas('c1', '', 1600,1000)
+    c1 = ROOT.TCanvas('c1', '', 2400,1800)
     c1.Divide(n_cols, n_rows)
 
     h = t.Get(h_n)
@@ -204,4 +204,12 @@ for k in loop_range:
     print 'eff_z: ', round(n_num_z/n_den_z, 6)
     print 'eff_a: ', round(n_num_a/n_den_a, 6)
 
+
+passes = [x.Get(filter_hist_dir).Get('h_hlt_bits').GetBinContent(21) for x in [f, z, a]]
+totals = [x.Get(filter_hist_dir).Get('h_hlt_bits').GetBinContent(1) for x in [f, z, a]]
+#totals = [x.Get('mfvFilterHistosNoCuts').Get('h_hlt_bits').GetBinContent(1) for x in [f, z, a]]
+
+print '\ntrig_eff_f: ' , round(passes[0]/totals[0], 6), "    npass: ", round(passes[0] , 2)
+print 'trig_eff_z: ' , round(passes[1]/totals[1], 6), "    npass: ", round(passes[1] , 2)
+print 'trig_eff_a: ' , round(passes[2]/totals[2], 6), "    npass: ", round(passes[2] , 2)
 
