@@ -269,6 +269,12 @@ class MFVVertexer : public edm::EDProducer {
 	TH1F* h_output_gvtx_tv1_bs2derr;
 	TH1F* h_output_gvtx_tv1_ntrack;
 
+	TH1F* h_output_gvtx_sv_nchi2;
+	TH1F* h_output_gvtx_sv_ntrack;
+	TH1F* h_output_gvtx_sv_dBV;
+	TH1F* h_output_gvtx_sv_bs2derr;
+	TH1F* h_output_gvtx_sv_isValid;
+
 	TH2F* h_2D_output_gvtx_dR_tv0_gtrk0_bs2derr0;
 	TH2F* h_2D_output_gvtx_dR_tv1_gtrk1_bs2derr1;
 	
@@ -435,7 +441,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 		h_output_gvtx_dR_tracks_gtrk0 = fs->make<TH1F>("h_output_gvtx_dR_tracks_gtrk0", "after a ghost vertex is formed;dR(gtrk0,track)", 200, 0, 3.15);
 		h_output_gvtx_dR_tracks_gtrk1 = fs->make<TH1F>("h_output_gvtx_dR_tracks_gtrk1", "after a ghost vertex is formed;dR(gtrk1,track)", 200, 0, 3.15);
 
-		h_output_gvtx_dphi_tv0_tv1 = fs->make<TH1F>("h_output_gvtx_dphi_tv0_tv1", "after a ghost vertex is formed;|dR(tv0,tv1)|", 200, 0, 3.15);
+		h_output_gvtx_dphi_tv0_tv1 = fs->make<TH1F>("h_output_gvtx_dphi_tv0_tv1", "after a ghost vertex is formed;|dphi(tv0,tv1)|", 200, 0, 3.15);
 
 		h_output_gvtx_tv0_bs2derr = fs->make<TH1F>("h_output_gvtx_tv0_bs2derr", "after a ghost vertex is formed;tv0's bs2derr(cm)", 200, 0, 0.05);
 		h_output_gvtx_tv1_bs2derr = fs->make<TH1F>("h_output_gvtx_tv1_bs2derr", "after a ghost vertex is formed;tv1's bs2derr(cm)", 200, 0, 0.05);
@@ -443,11 +449,16 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 		h_output_gvtx_tv0_ntrack = fs->make<TH1F>("h_output_gvtx_tv0_ntrack", "after a ghost vertex is formed;tv0's ntrack", 20, 0, 20);
 		h_output_gvtx_tv1_ntrack = fs->make<TH1F>("h_output_gvtx_tv1_ntrack", "after a ghost vertex is formed;tv1's ntrack", 20, 0, 20);
 
-		h_output_gvtx_vertices = fs->make<TH1F>("h_output_gvtx_vertices", ";;events", 4, 0, 4);
-		h_output_gvtx_vertices->GetXaxis()->SetBinLabel(1, "nevents");
+		h_output_gvtx_sv_ntrack = fs->make<TH1F>("h_output_gvtx_sv_ntrack", "after a ghost vertex is formed;ghost sv's ntrack", 20, 0, 20);
+		h_output_gvtx_sv_nchi2 = fs->make<TH1F>("h_output_gvtx_sv_nchi2", "after a ghost vertex is formed;ghost sv's chi2/dof", 100, 0, 10);
+		h_output_gvtx_sv_dBV = fs->make<TH1F>("h_output_gvtx_sv_dBV", "after a ghost vertex is formed;ghost sv's dBV", 300, 0, 3);
+		h_output_gvtx_sv_bs2derr = fs->make<TH1F>("h_output_gvtx_sv_bs2derr", "after a ghost vertex is formed;ghost sv's bs2derr", 200, 0, 0.05);
+		h_output_gvtx_sv_isValid = fs->make<TH1F>("h_output_gvtx_sv_isValid", "after a ghost vertex is formed;is ghost sv valid?", 2, 0, 2);
+
+		h_output_gvtx_vertices = fs->make<TH1F>("h_output_gvtx_vertices", ";;events", 2, 0, 2);
 		const char* gvtx_filter[2] = { "qualified pairs","ghost vertices"};
 		for (int i = 0; i < 2; ++i) { 
-			h_output_gvtx_vertices->GetXaxis()->SetBinLabel(i + 2, TString::Format(" pass %s", gvtx_filter[i]));
+			h_output_gvtx_vertices->GetXaxis()->SetBinLabel(i + 1, TString::Format(" total %s", gvtx_filter[i]));
 		}
 
 		h_2D_output_gvtx_dR_tv0_gtrk0_bs2derr0 = fs->make<TH2F>("h_2D_output_gvtx_dR_tv0_gtrk0_bs2derr0", "after a ghost vertex is formed;dR(tv0,gtrk0); tv0's bs2derr(cm)", 50, 0, 1.0, 100, 0, 0.05);
@@ -1616,11 +1627,11 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         continue;
 
       // compute vertex x, y, phi positions
-      double v0x = v[0]->x() - bsx;
-      double v0y = v[0]->y() - bsy;
-	  double v0z = v[0]->z() - bsz;
+      double v0x = v[0]->x();
+      double v0y = v[0]->y();
+      double v0z = v[0]->z();
       double phi0 = atan2(v0y, v0x);
-	  const double eta0 = etaFromXYZ(v0x, v0y, v0z);
+      const double eta0 = etaFromXYZ(v0x, v0y, v0z);
 
       // now loop through all vertex pairs, and try to form ghost vertex:
       bool form_ghost_vtx = false;
@@ -1645,16 +1656,16 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           continue;
 
         // compute vertex x, y, phi positions
-        double v1x = v[1]->x() - bsx;
-        double v1y = v[1]->y() - bsy;
-		double v1z = v[1]->z() - bsz;
+        double v1x = v[1]->x();
+        double v1y = v[1]->y();
+        double v1z = v[1]->z();
         double phi1 = atan2(v1y, v1x);
-		const double eta1 = etaFromXYZ(v1x, v1y, v1z);
+        const double eta1 = etaFromXYZ(v1x, v1y, v1z);
 
         // FIXME only consider re-vertexing when nearby in dphi: should study if this would help us. let's leave it in for now, but keep in mind that the threshold is completely arbitrary
         // FIXME probably this is fine for H->LLP with boosted LLPs, but maybe not as good for heavier, slow moving LLPs that decay to b-quarks with wide angles between the b-quarks. 
         if(fabs(reco::deltaPhi(phi0, phi1)) > 0.3) continue;
-
+		h_output_gvtx_vertices->Fill(0);
         // now: trace the trajectories back. do a Kalman fit of the trajectories, and see if they:
         // a) have a nice chi2
         // b) form a vertex with dBV > 100 microns
@@ -1710,11 +1721,13 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 		  
           reco::GhostTrack ghost = ghostTrackFitter->fit(RecoVertex::convertPos(v[isv]->position()), RecoVertex::convertError(v[isv]->error()), trajectory_sv[isv], coneSize, ttks[isv]);
           
-          std::cout << "chi2, ndof: " << ghost.chi2() << ", " << ghost.ndof() << std::endl;
-          reco::Track gt = reco::Track(ghost);
-		  gtks.push_back(gt);
-          std::cout << "px,py,pz: " << gt.px() << ", " << gt.py() << ", " << gt.pz() << std::endl;
-          gttks.push_back(tt_builder->build(gt));
+		  if (verbose) {
+			  std::cout << "chi2, ndof: " << ghost.chi2() << ", " << ghost.ndof() << std::endl;
+			  reco::Track gt = reco::Track(ghost);
+			  gtks.push_back(gt);
+			  std::cout << "px,py,pz: " << gt.px() << ", " << gt.py() << ", " << gt.pz() << std::endl;
+			  gttks.push_back(tt_builder->build(gt));
+		  }
         }
 
         // fill all_ttks
@@ -1730,24 +1743,29 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         // with our ghost tracks in hand, we can fit them into a common ghost vertex:
         std::vector<TransientVertex> ghost_vertices(1, kv_reco->vertex(gttks)); // Use only the two ghostTracks to find a vertex--issue is that bs2derr gets smaller w/ more ntks, but here we only use two "tracks" for the Kalman fit
         //std::vector<TransientVertex> ghost_vertices(1, kv_reco->vertex(all_ttks)); // Use the two ghostTracks AND the other tracks from the two SVs to find a common vertex--here, bs2derr should get sufficiently small, but the chi2 seems to blow up (which makes sense given that there isn't a common intersection point among ALL of these tracks!). From printouts, it seemed like
-        std::cout << "ghost_vertices.size() " << ghost_vertices.size() << std::endl;
+		if (verbose) {
+			std::cout << "ghost_vertices.size() " << ghost_vertices.size() << std::endl;
+		}
 
         // loop over ghost vertices (of which there are either zero or one at this stage)
-		h_output_gvtx_vertices->Fill(0);
+		
         for(auto gvtx : ghost_vertices) {
 
-          std::cout << "sv0 chi2 " << v[0]->normalizedChi2() << ", sv1 chi2 " << v[1]->normalizedChi2() << std::endl;
-          std::cout << "gvtx chi2 " << gvtx.normalisedChiSquared() << std::endl;
-          std::cout << "gvtx valid " << gvtx.isValid() << std::endl;
+			if (verbose) {
+				std::cout << "sv0 chi2 " << v[0]->normalizedChi2() << ", sv1 chi2 " << v[1]->normalizedChi2() << std::endl;
+				std::cout << "gvtx chi2 " << gvtx.normalisedChiSquared() << std::endl;
+				std::cout << "gvtx valid " << gvtx.isValid() << std::endl;
+			}
 
           // only consider valid vertices (where the Kalman filter did not fail)
           if(!gvtx.isValid()) continue;
 
           // veto those with negative chi2/ndof (FIXME why are they negative again? maybe this was just to remove the -NaN cases, but now I'll do that via isValid)
           //if(gvtx.normalisedChiSquared() < 0) continue;
-
-          std::cout << "sv0 dBV " << dBV0 << ", sv1 dBV " << dBV1 << std::endl;
-          std::cout << "gvtx dBV " << mag(gvtx.position().x() - bsx, gvtx.position().y() - bsy) << std::endl;
+		  if (verbose) {
+			  std::cout << "sv0 dBV " << dBV0 << ", sv1 dBV " << dBV1 << std::endl;
+			  std::cout << "gvtx dBV " << mag(gvtx.position().x() - bsx, gvtx.position().y() - bsy) << std::endl;
+		  }
 
           // cast the ghost vertex from TransientVertex to reco::Vertex
           // FIXME may be able to do this at an earlier stage in this loop
@@ -1755,22 +1773,24 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
           const auto d_gvtx = vertex_dist_2d.distance(reco_gvtx, fake_bs_vtx);
 
-          std::cout << "sv0 dBV " << dBV0_Meas1D.value() << ", sv1 dBV " << dBV1_Meas1D.value() << " (confirmation)" << std::endl;
-          std::cout << "gvtx dBV " << d_gvtx.value() << " (confirmation)" << std::endl;
+		  if (verbose) {
+			  std::cout << "sv0 dBV " << dBV0_Meas1D.value() << ", sv1 dBV " << dBV1_Meas1D.value() << " (confirmation)" << std::endl;
+			  std::cout << "gvtx dBV " << d_gvtx.value() << " (confirmation)" << std::endl;
 
-          std::cout << "sv0 bs2derr " << dBV0_Meas1D.error() << ", sv1 bs2derr " << dBV1_Meas1D.error() << std::endl;
-          std::cout << "gvtx bs2derr " << d_gvtx.error() << std::endl;
+			  std::cout << "sv0 bs2derr " << dBV0_Meas1D.error() << ", sv1 bs2derr " << dBV1_Meas1D.error() << std::endl;
+			  std::cout << "gvtx bs2derr " << d_gvtx.error() << std::endl;
 
-          std::cout << "sv0 ntk " << v[0]->tracksSize() << "sv1 ntk " << v[1]->tracksSize() << std::endl;
-          std::cout << "gvtx ntk " << reco_gvtx.tracksSize() << std::endl;
+			  std::cout << "sv0 ntk " << v[0]->tracksSize() << "sv1 ntk " << v[1]->tracksSize() << std::endl;
+			  std::cout << "gvtx ntk " << reco_gvtx.tracksSize() << std::endl;
 
-          std::cout << "sv0 valid " << v[0]->isValid() << "sv1 valid " << v[1]->isValid() << std::endl;
-          std::cout << "gvtx valid " << reco_gvtx.isValid() << std::endl;
+			  std::cout << "sv0 valid " << v[0]->isValid() << "sv1 valid " << v[1]->isValid() << std::endl;
+			  std::cout << "gvtx valid " << reco_gvtx.isValid() << std::endl;
 
-          // FIXME this is to remove all (ghost) tracks from the vertex
-          reco_gvtx.removeTracks();
-          std::cout << "gvtx removed ntk " << reco_gvtx.tracksSize() << std::endl;
-          std::cout << "gvtx removed valid " << reco_gvtx.isValid() << std::endl;
+			  // FIXME this is to remove all (ghost) tracks from the vertex
+			  reco_gvtx.removeTracks();
+			  std::cout << "gvtx removed ntk " << reco_gvtx.tracksSize() << std::endl;
+			  std::cout << "gvtx removed valid " << reco_gvtx.isValid() << std::endl;
+		  }
 
           for(int i = 0; i < 2; ++i) {
             for(auto it = v[i]->tracks_begin(), ite = v[i]->tracks_end(); it != ite; ++it) {
@@ -1785,11 +1805,14 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           }
 
           // FIXME note vtx may no longer say that it is "valid" at this stage, so should make sure we don't rely on that (we very well may!!!!) OH or maybe the invalid ones are all bogus?
-          std::cout << "gvtx added ntk " << reco_gvtx.tracksSize() << std::endl;
-          std::cout << "gvtx added valid " << reco_gvtx.isValid() << std::endl;
-          const auto d_gvtx_new = vertex_dist_2d.distance(reco_gvtx, fake_bs_vtx);
-          std::cout << "gvtx added dBV " << d_gvtx_new.value() << std::endl;
-          std::cout << "gvtx added bs2derr " << d_gvtx_new.error() << std::endl;
+		  const auto d_gvtx_new = vertex_dist_2d.distance(reco_gvtx, fake_bs_vtx);
+
+		  if (verbose) {
+			  std::cout << "gvtx added ntk " << reco_gvtx.tracksSize() << std::endl;
+			  std::cout << "gvtx added valid " << reco_gvtx.isValid() << std::endl;
+			  std::cout << "gvtx added dBV " << d_gvtx_new.value() << std::endl;
+			  std::cout << "gvtx added bs2derr " << d_gvtx_new.error() << std::endl;
+		  }
 
           // FIXME this is where the v[0] is updated by a ghost vtx while the v[1] is erased 
 	  if (d_gvtx_new.value() > 0.01 &&  reco_gvtx.tracksSize() >= 2) {
@@ -1819,6 +1842,13 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 		  h_output_gvtx_tv0_bs2derr->Fill(bs2derr0);
 		  h_output_gvtx_tv1_bs2derr->Fill(bs2derr1);
 
+		  h_output_gvtx_sv_ntrack->Fill(v[0]->nTracks());
+		  h_output_gvtx_sv_nchi2->Fill(v[0]->normalizedChi2());
+		  const auto d_gsv = vertex_dist_2d.distance(*v[0], fake_bs_vtx);
+		  h_output_gvtx_sv_dBV->Fill(d_gsv.value());
+		  h_output_gvtx_sv_bs2derr->Fill(d_gsv.error());
+		  h_output_gvtx_sv_isValid->Fill(v[0]->isValid());
+
 		  h_output_gvtx_vertices->Fill(1);
 	  }
 
@@ -1840,20 +1870,22 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           }
 
           // try to form a combined vertex naively, based on the combined set of all tracks--as expected, it rarely succeeds, because they are sufficiently separated that no vtx is formed
-          std::vector<TransientVertex> combined_vertices = kv_reco_dropin(combined_ttks);
-          std::cout << "combined_vertices.size() " << combined_vertices.size() << std::endl;
-          for (auto comb : combined_vertices) {
-            std::cout << "comb chi2 " << comb.normalisedChiSquared() << std::endl;
-            //if(comb.normalisedChiSquared() < 0) continue;
-            if(!comb.isValid()) continue;
-            std::cout << "comb dBV " << mag(comb.position().x() - bsx, comb.position().y() - bsy) << std::endl;
+		  if (verbose) {
+			  std::vector<TransientVertex> combined_vertices = kv_reco_dropin(combined_ttks);
+			  std::cout << "combined_vertices.size() " << combined_vertices.size() << std::endl;
+			  for (auto comb : combined_vertices) {
+				  std::cout << "comb chi2 " << comb.normalisedChiSquared() << std::endl;
+				  //if(comb.normalisedChiSquared() < 0) continue;
+				  if (!comb.isValid()) continue;
+				  std::cout << "comb dBV " << mag(comb.position().x() - bsx, comb.position().y() - bsy) << std::endl;
 
-            reco::Vertex reco_comb = reco::Vertex(comb);
+				  reco::Vertex reco_comb = reco::Vertex(comb);
 
-            const auto d_comb = vertex_dist_2d.distance(reco_comb, fake_bs_vtx);
-            std::cout << "comb dBV " << d_comb.value() << " (confirmation)" << std::endl;
-            std::cout << "comb bs2derr " << d_comb.error() << std::endl;
-          }
+				  const auto d_comb = vertex_dist_2d.distance(reco_comb, fake_bs_vtx);
+				  std::cout << "comb dBV " << d_comb.value() << " (confirmation)" << std::endl;
+				  std::cout << "comb bs2derr " << d_comb.error() << std::endl;
+			  }
+		  }
         }
       }
 
