@@ -449,7 +449,7 @@ def get(i): return _l[i]
                 for line in submit_out.split('\n'):
                     if line.startswith('Attempting to submit jobs to '):
                         schedd = line.strip().replace('Attempting to submit jobs to ', '')
-                        assert schedd in cls.schedds
+                        #assert schedd in cls.schedds
             for line in submit_out.split('\n'):
                 if 'job(s) submitted to cluster' in line:
                     ok = True

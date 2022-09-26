@@ -783,6 +783,54 @@ _add_ds("ntuplev28bm_ntkseeds", {
 'singletop_tchan_antitop_2017': _fromnum1("/store/user/jreicher/ST_t-channel_antitop_4f_inclusiveDecays_TuneCP5_13TeV-powhegV2-madspin-pythia8/NtupleV28Bm_NTkSeeds_2017/201009_220010", 2, fnbase="ntkseeds"),
 })
 
+_add_ds("ntuplev29m", {
+'qcdht0700_2017': _fromnum0("/store/user/pkotamni/QCD_HT700to1000_TuneCP5_13TeV-madgraph-pythia8/NtupleV29m_2017/220724_094319", 16),
+'qcdht1000_2017': (26, ['/store/user/pkotamni/QCD_HT1000to1500_TuneCP5_13TeV-madgraph-pythia8/NtupleV29m_2017/220724_094320/0000/ntuple_%i.root' % i for i in chain(xrange(1,11), xrange(14,16), xrange(17,22), xrange(23,31), [12])]),
+'qcdht1500_2017': _fromnum0("/store/user/pkotamni/QCD_HT1500to2000_TuneCP5_13TeV-madgraph-pythia8/NtupleV29m_2017/220724_094321", 63),
+'qcdht2000_2017': _fromnum0("/store/user/pkotamni/QCD_HT2000toInf_TuneCP5_13TeV-madgraph-pythia8/NtupleV29m_2017/220724_094322", 30),
+'ttbarht0600_2017': _fromnum1("/store/user/pkotamni/TTJets_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV29m_2017/220724_094323", 3),
+'ttbarht0800_2017': _fromnum0("/store/user/pkotamni/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV29m_2017/220724_094324", 3),
+'ttbarht1200_2017': (1, ['/store/user/pkotamni/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV29m_2017/220724_094325/0000/ntuple_0.root']),
+'ttbarht2500_2017': (1, ['/store/user/pkotamni/TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8/NtupleV29m_2017/220724_094326/0000/ntuple_0.root']),
+'mfv_neu_tau000300um_M0400_2017': _fromnum0("/store/user/pkotamni/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-300um_TuneCP2_13TeV-pythia8/NtupleV29m_2017/220724_094327", 500),
+'mfv_neu_tau000300um_M0800_2017': _fromnum0("/store/user/pkotamni/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-300um_TuneCP2_13TeV-pythia8/NtupleV29m_2017/220724_094328", 500),
+'mfv_neu_tau000300um_M1600_2017': _fromnum0("/store/user/pkotamni/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-300um_TuneCP2_13TeV-pythia8/NtupleV29m_2017/220724_094329", 500),
+'mfv_neu_tau000300um_M3000_2017': _fromnum0("/store/user/pkotamni/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-3000_CTau-300um_TuneCP2_13TeV-pythia8/NtupleV29m_2017/220724_094330", 490),
+'mfv_neu_tau001000um_M0400_2017': _fromnum0("/store/user/pkotamni/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-1mm_TuneCP2_13TeV-pythia8/NtupleV29m_2017/220724_094331", 500),
+'mfv_neu_tau001000um_M0800_2017': _fromnum0("/store/user/pkotamni/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-1mm_TuneCP2_13TeV-pythia8/NtupleV29m_2017/220724_094332", 500),
+'mfv_neu_tau001000um_M1600_2017': _fromnum0("/store/user/pkotamni/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-1mm_TuneCP2_13TeV-pythia8/NtupleV29m_2017/220724_094333", 500),
+'mfv_neu_tau001000um_M3000_2017': _fromnum0("/store/user/pkotamni/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-3000_CTau-1mm_TuneCP2_13TeV-pythia8/NtupleV29m_2017/220724_094334", 490),
+'mfv_neu_tau010000um_M0400_2017': _fromnum0("/store/user/pkotamni/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-400_CTau-10mm_TuneCP2_13TeV-pythia8/NtupleV29m_2017/220724_094335", 500),
+'mfv_neu_tau010000um_M0800_2017': _fromnum0("/store/user/pkotamni/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-800_CTau-10mm_TuneCP2_13TeV-pythia8/NtupleV29m_2017/220724_094336", 500),
+'mfv_neu_tau010000um_M1600_2017': _fromnum0("/store/user/pkotamni/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-1600_CTau-10mm_TuneCP2_13TeV-pythia8/NtupleV29m_2017/220724_094337", 500),
+'mfv_neu_tau010000um_M3000_2017': _fromnum0("/store/user/pkotamni/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-3000_CTau-10mm_TuneCP2_13TeV-pythia8/NtupleV29m_2017/220724_094338", 490),
+'mfv_stopdbardbar_tau000300um_M0400_2017': _fromnum0("/store/user/pkotamni/StopStopbarTo2Dbar2D_M-400_CTau-300um_TuneCP2_13TeV-pythia8/NtupleV29m_2017/220724_094339", 500),
+'mfv_stopdbardbar_tau000300um_M0800_2017': _fromnum0("/store/user/pkotamni/StopStopbarTo2Dbar2D_M-800_CTau-300um_TuneCP2_13TeV-pythia8/NtupleV29m_2017/220724_094340", 500),
+'mfv_stopdbardbar_tau000300um_M1600_2017': _fromnum0("/store/user/pkotamni/StopStopbarTo2Dbar2D_M-1600_CTau-300um_TuneCP2_13TeV-pythia8/NtupleV29m_2017/220724_094341", 500),
+'mfv_stopdbardbar_tau000300um_M3000_2017': _fromnum0("/store/user/pkotamni/StopStopbarTo2Dbar2D_M-3000_CTau-300um_TuneCP2_13TeV-pythia8/NtupleV29m_2017/220724_094342", 500),
+'mfv_stopdbardbar_tau001000um_M0400_2017': _fromnum0("/store/user/pkotamni/StopStopbarTo2Dbar2D_M-400_CTau-1mm_TuneCP2_13TeV-pythia8/NtupleV29m_2017/220724_094343", 500),
+'mfv_stopdbardbar_tau001000um_M0800_2017': _fromnum0("/store/user/pkotamni/StopStopbarTo2Dbar2D_M-800_CTau-1mm_TuneCP2_13TeV-pythia8/NtupleV29m_2017/220724_094344", 500),
+'mfv_stopdbardbar_tau001000um_M1600_2017': _fromnum0("/store/user/pkotamni/StopStopbarTo2Dbar2D_M-1600_CTau-1mm_TuneCP2_13TeV-pythia8/NtupleV29m_2017/220724_094345", 500),
+'mfv_stopdbardbar_tau001000um_M3000_2017': (468, ['/store/user/pkotamni/StopStopbarTo2Dbar2D_M-3000_CTau-1mm_TuneCP2_13TeV-pythia8/NtupleV29m_2017/220724_094346/0000/ntuple_%i.root' % i for i in chain(xrange(20), xrange(21,38), xrange(39,50), xrange(51,67), xrange(68,74), xrange(75,80), xrange(81,89), xrange(90,128), xrange(129,148), xrange(149,158), xrange(159,166), xrange(167,170), xrange(171,181), xrange(182,206), xrange(207,234), xrange(235,269), xrange(270,278), xrange(279,285), xrange(286,292), xrange(293,298), xrange(301,320), xrange(321,336), xrange(337,342), xrange(343,372), xrange(373,411), xrange(412,418), xrange(420,429), xrange(430,456), xrange(457,462), xrange(463,491), xrange(492,500), [299])]),
+'mfv_stopdbardbar_tau010000um_M0400_2017': _fromnum0("/store/user/pkotamni/StopStopbarTo2Dbar2D_M-400_CTau-10mm_TuneCP2_13TeV-pythia8/NtupleV29m_2017/220724_094347", 500),
+'mfv_stopdbardbar_tau010000um_M0800_2017': _fromnum0("/store/user/pkotamni/StopStopbarTo2Dbar2D_M-800_CTau-10mm_TuneCP2_13TeV-pythia8/NtupleV29m_2017/220723_201634", 490),
+'mfv_stopdbardbar_tau010000um_M1600_2017': _fromnum0("/store/user/pkotamni/StopStopbarTo2Dbar2D_M-1600_CTau-10mm_TuneCP2_13TeV-pythia8/NtupleV29m_2017/220724_094349", 20),
+'mfv_stopdbardbar_tau010000um_M3000_2017': (465, ['/store/user/pkotamni/StopStopbarTo2Dbar2D_M-3000_CTau-10mm_TuneCP2_13TeV-pythia8/NtupleV29m_2017/220724_094350/0000/ntuple_%i.root' % i for i in chain(xrange(12), xrange(13,21), xrange(22,30), xrange(31,36), xrange(37,39), xrange(40,57), xrange(58,80), xrange(81,89), xrange(90,98), xrange(99,114), xrange(115,153), xrange(154,197), xrange(200,217), xrange(218,224), xrange(225,256), xrange(257,268), xrange(269,277), xrange(278,280), xrange(281,300), xrange(301,304), xrange(305,322), xrange(323,340), xrange(341,354), xrange(355,363), xrange(366,379), xrange(380,403), xrange(404,437), xrange(440,453), xrange(454,464), xrange(465,470), xrange(471,481), xrange(482,490), xrange(491,500), [198, 364, 438])]),
+'ggHToSSTobbbb_tau10mm_M15_2017': _fromnum0("/store/user/pkotamni/ggH_HToSSTobbbb_MH-125_MS-15_ctauS-10_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV29m_2017/220724_094859", 787),
+'ggHToSSTobbbb_tau1mm_M15_2017': _fromnum0("/store/user/pkotamni/ggH_HToSSTobbbb_MH-125_MS-15_ctauS-1_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV29m_2017/220724_094856", 843),
+'ggHToSSTobbbb_tau10mm_M40_2017': _fromnum0("/store/user/pkotamni/ggH_HToSSTobbbb_MH-125_MS-40_ctauS-10_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV29m_2017/220724_094900", 871),
+'ggHToSSTobbbb_tau1mm_M40_2017': _fromnum0("/store/user/pkotamni/ggH_HToSSTobbbb_MH-125_MS-40_ctauS-1_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV29m_2017/220724_094857", 777),
+'ggHToSSTobbbb_tau10mm_M55_2017': _fromnum0("/store/user/pkotamni/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-10_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV29m_2017/220724_094901", 816),
+'ggHToSSTobbbb_tau1mm_M55_2017': _fromnum0("/store/user/pkotamni/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-1_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV29m_2017/220724_094858", 912),
+'ggHToSSTodddd_tau10mm_M15_2017': _fromnum0("/store/user/pkotamni/ggH_HToSSTodddd_MH-125_MS-15_ctauS-10_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV29m_2017/220724_094905", 1013),
+'ggHToSSTodddd_tau1mm_M15_2017': _fromnum0("/store/user/pkotamni/ggH_HToSSTodddd_MH-125_MS-15_ctauS-1_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV29m_2017/220724_094902", 852),
+'ggHToSSTodddd_tau10mm_M40_2017': _fromnum0("/store/user/pkotamni/ggH_HToSSTodddd_MH-125_MS-40_ctauS-10_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV29m_2017/220724_094906", 956),
+'ggHToSSTodddd_tau1mm_M40_2017': _fromnum0("/store/user/pkotamni/ggH_HToSSTodddd_MH-125_MS-40_ctauS-1_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV29m_2017/220724_094903", 885),
+'ggHToSSTodddd_tau10mm_M55_2017': _fromnum0("/store/user/pkotamni/ggH_HToSSTodddd_MH-125_MS-55_ctauS-10_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV29m_2017/220724_094907", 859),
+})
+
+
+
 ################################################################################
 
 if __name__ == '__main__':

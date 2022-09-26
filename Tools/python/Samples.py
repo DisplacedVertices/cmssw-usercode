@@ -702,7 +702,8 @@ for x in __all__:
             exec '%s = sample' % sample.name
             __all__.append(sample.name)
 
-span_signal_samples_2017 = [eval('mfv_%s_tau%06ium_M%04i_2017' % (a,b,c)) for a in ('neu','stopdbardbar') for b in (300,1000,10000) for c in (400,800,1600,3000)]
+#span_signal_samples_2017 = [eval('mfv_%s_tau%06ium_M%04i_2017' % (a,b,c)) for a in ('neu','stopdbardbar') for b in (300,1000,10000) for c in (400,800,1600,3000)]
+span_signal_samples_2017 = [eval('ggHToSSTobbbb_tau%imm_M%i_2017' % (b,c)) for b in (1,10) for c in (15,40,55)]
 span_signal_samples_2018 = [eval('mfv_%s_tau%06ium_M%04i_2018' % (a,b,c)) for a in ('neu','stopdbardbar') for b in (300,1000,10000) for c in (400,800,1600,3000)]
 
 _alls = [
@@ -937,6 +938,8 @@ for sample in WpH_HToSSTodddd_WToLNu_samples_2018 :
 
 ########
 # ntuples
+for x in qcdht0700_2017, qcdht1000_2017, qcdht1500_2017, qcdht2000_2017, ttbarht0600_2017, ttbarht0800_2017, ttbarht1200_2017, ttbarht2500_2017, mfv_neu_tau000300um_M0400_2017, mfv_neu_tau000300um_M0800_2017, mfv_neu_tau000300um_M1600_2017, mfv_neu_tau000300um_M3000_2017, mfv_neu_tau001000um_M0400_2017, mfv_neu_tau001000um_M0800_2017, mfv_neu_tau001000um_M1600_2017, mfv_neu_tau001000um_M3000_2017, mfv_neu_tau010000um_M0400_2017, mfv_neu_tau010000um_M0800_2017, mfv_neu_tau010000um_M1600_2017, mfv_neu_tau010000um_M3000_2017, mfv_stopdbardbar_tau000300um_M0400_2017, mfv_stopdbardbar_tau000300um_M0800_2017, mfv_stopdbardbar_tau000300um_M1600_2017, mfv_stopdbardbar_tau000300um_M3000_2017, mfv_stopdbardbar_tau001000um_M0400_2017, mfv_stopdbardbar_tau001000um_M0800_2017, mfv_stopdbardbar_tau001000um_M1600_2017, mfv_stopdbardbar_tau001000um_M3000_2017, mfv_stopdbardbar_tau010000um_M0400_2017, mfv_stopdbardbar_tau010000um_M0800_2017, mfv_stopdbardbar_tau010000um_M1600_2017, mfv_stopdbardbar_tau010000um_M3000_2017, ggHToSSTobbbb_tau10mm_M15_2017, ggHToSSTobbbb_tau1mm_M15_2017, ggHToSSTobbbb_tau10mm_M40_2017, ggHToSSTobbbb_tau1mm_M40_2017, ggHToSSTobbbb_tau10mm_M55_2017, ggHToSSTobbbb_tau1mm_M55_2017, ggHToSSTodddd_tau10mm_M15_2017, ggHToSSTodddd_tau1mm_M15_2017, ggHToSSTodddd_tau10mm_M40_2017, ggHToSSTodddd_tau1mm_M40_2017, ggHToSSTodddd_tau10mm_M55_2017:
+    x.add_dataset("ntuplev29m")
 ########
 
 for x in data_samples_2017 + qcd_samples_2017 + data_samples_2018 + qcd_samples_2018:
