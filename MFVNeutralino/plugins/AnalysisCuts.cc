@@ -284,7 +284,8 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (nsv < min_nvertex || nsv > max_nvertex)
       return false;
 
-    const bool two_vertex_cuts_on =
+    const bool two_vertex_cuts_on = false;
+    /*
       ntracks01_0 > 0 ||
       ntracks01_1 > 0 ||
       min_ntracks01 > 0 ||
@@ -309,7 +310,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       max_ntrackssharedwpvs01 < 100000 ||
       max_fractrackssharedwpv01 < 1e6 ||
       max_fractrackssharedwpvs01 < 1e6;
-
+    */
     if (two_vertex_cuts_on) {
       if (nsv < 2)
         return false;
