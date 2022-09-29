@@ -3,7 +3,10 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 debug = 'debug' in sys.argv
 
-#sample_files(process, 'mfv_neu_tau010000um_M1200_2017', 'main', 1)
+sample_files(process, 'mfv_neu_tau010000um_M1200_2017', 'main', 1)
+#input_files(process, 'C47DA2BF-B0FF-EA11-A2BC-001E67586629.root') #HSSbbbb 1mm 55GeV
+#input_files(process, '02F9E1F8-1BF9-EA11-A44E-0242AC1C0501.root') #HSSbbbb 1mm 15GeV
+#max_events(process, 400)
 tfileservice(process, 'gen_histos.root')
 file_event_from_argv(process)
 

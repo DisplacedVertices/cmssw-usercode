@@ -427,12 +427,12 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   }
 
-  if (nsv >= 4) {
+  if (true) {
 	  std::vector<size_t> vec_bvtx_match = {};
 	  double bsvpair0_pT = 0;
 	  double bsvpair1_pT = 0;
-	  for (size_t k = 0; k < 4; ++k) {
-
+	  for (int k = 0; k < nsv; ++k) {
+                  
 		  double diff_sv_dR = 200;
 		  double isv_b = 0;
 		  for (int isv = 0; isv < nsv; ++isv) {
@@ -457,7 +457,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 		  unsigned int b_ntrack = baux.ntracks();
 		  h_gvtx_bquark_ntrack->Fill(b_ntrack, w);
 
-		  if (k == 0 || k == 1) {
+		  if (vec_bvtx_match.size() == 1 || vec_bvtx_match.size() == 2) {
 
 
 			  for (unsigned j = 0; j < b_ntrack; ++j) {
@@ -466,7 +466,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 				  h_gvtx_all_dR_tracks_bquark_llp0->Fill(reco::deltaR(mevent->gen_daughters[k].Eta(), mevent->gen_daughters[k].Phi(), baux.track_eta[j], baux.track_phi[j]), w);
 			  }
 
-			  if (k == 1) {
+			  if (vec_bvtx_match.size() == 2) {
 				  double genllp_pT = mevent->gen_lsp_pt[0];
 				  double diff_sv_pT = bsvpair0_pT - genllp_pT;
 				  const MFVVertexAux& b0aux = auxes->at(vec_bvtx_match[0]);
@@ -481,7 +481,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
 		  }
                   
-		  if (k == 2 || k == 3) {
+		  if (vec_bvtx_match.size() > 2) {
 
 			  for (unsigned j = 0; j < b_ntrack; ++j) {
 				  bsvpair1_pT += baux.track_pt(j);
@@ -489,7 +489,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 				  h_gvtx_all_dR_tracks_bquark_llp1->Fill(reco::deltaR(mevent->gen_daughters[k].Eta(), mevent->gen_daughters[k].Phi(), baux.track_eta[j], baux.track_phi[j]), w);
 			  }
 
-			  if (k == 3) {
+			  if (vec_bvtx_match.size() == 4) {
 				  double genllp_pT = mevent->gen_lsp_pt[1];
 				  double diff_sv_pT = bsvpair0_pT - genllp_pT;
 				  const MFVVertexAux& b2aux = auxes->at(vec_bvtx_match[2]);

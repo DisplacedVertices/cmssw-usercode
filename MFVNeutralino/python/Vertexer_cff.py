@@ -10,10 +10,10 @@ from JMTucker.Tools.RescaledTracks_cfi import jmtRescaledTracks
 mfvSelectedVerticesTmp = mfvSelectedVertices.clone(vertex_aux_src = 'mfvVerticesAuxTmp',
                                                    produce_refs = True,
                                                    vertex_src = 'mfvVertices',
-                                                   min_ntracks = 3)
+                                                   min_ntracks = 2) #FIXME : for matching b-quarks and b-SVs that are loose 
 
 mfvVerticesAuxPresel = mfvVerticesAux
-mfvVerticesAux = mfvSelectedVertices.clone(vertex_aux_src = 'mfvVerticesAuxPresel', min_ntracks = 3)
+mfvVerticesAux = mfvSelectedVertices.clone(vertex_aux_src = 'mfvVerticesAuxPresel', min_ntracks = 2) #FIXME : for matching b-quarks and b-SVs that are loose
 
 mfvVertexSequenceBare = cms.Sequence(
     jmtRescaledTracks *
