@@ -177,6 +177,168 @@ namespace mfv {
     return p;
   }
 
+  std::vector < MCInteraction::Point> MCInteraction::b_llp0_decay_points() const {
+	  std::vector < MCInteraction::Point> vec_p;
+	  std::vector<double> vec_c_nonb_decay = {};
+
+	  if (primaries_.size() == 2 and secondaries_.size() == 4) {
+		  int c_daus = 0;
+		  for (auto p : secondaries_) {
+			  c_daus += 1;
+			  if (p->numberOfDaughters() == 0 || c_daus == 3 || c_daus == 4)
+				  continue;
+			  for (size_t i = 0, ie = p->numberOfDaughters(); i < ie; ++i) {
+				  auto can_gdau = p->daughter(i);
+				  reco::GenParticle* gdau = (reco::GenParticle*)can_gdau;
+				  int gdau_pdgID = gdau->pdgId();
+				  double gdau_dist3d = sqrt(pow(gdau->vx() - p->vx(), 2) + pow(gdau->vy() - p->vy(), 2) + pow(gdau->vz() - p->vz(), 2));
+				  int gdau_btag = 0;
+				  MCInteraction::Point gdau_p;
+				  gdau_p.x = gdau->vx();
+				  gdau_p.y = gdau->vy();
+				  gdau_p.z = gdau->vz();
+				  if ((int(gdau_pdgID / 100) - (int(gdau_pdgID / 1000) * 10) == 5) || (int(-1 * gdau_pdgID / 100) - (int(-1 * gdau_pdgID / 1000) * 10) == 5) || fabs(gdau_pdgID) == 5) {
+					  gdau_btag = 5;
+				  }
+				  else {
+					  gdau_btag = 999;
+					  if (gdau_dist3d > 0 && (!std::count(vec_c_nonb_decay.begin(), vec_c_nonb_decay.end(), gdau_dist3d))) {
+						  vec_c_nonb_decay.push_back(gdau_dist3d);
+						  vec_p.push_back(gdau_p);
+					  }
+				  }
+				  for (size_t j = 0, je = p->daughter(i)->numberOfDaughters(); j < je; ++j) {
+					  auto can_ggdau = p->daughter(i)->daughter(j);
+					  reco::GenParticle* ggdau = (reco::GenParticle*)can_ggdau;
+					  int ggdau_pdgID = ggdau->pdgId();
+					  int ggdau_btag = 0;
+					  double ggdau_dist3d = sqrt(pow(ggdau->vx() - p->vx(), 2) + pow(ggdau->vy() - p->vy(), 2) + pow(ggdau->vz() - p->vz(), 2));
+					  MCInteraction::Point ggdau_p;
+					  ggdau_p.x = ggdau->vx();
+					  ggdau_p.y = ggdau->vy();
+					  ggdau_p.z = ggdau->vz();
+					  if ((int(ggdau_pdgID / 100) - (int(ggdau_pdgID / 1000) * 10) == 5) || (int(-1 * ggdau_pdgID / 100) - (int(-1 * ggdau_pdgID / 1000) * 10) == 5) || fabs(ggdau_pdgID) == 5) {
+						  ggdau_btag = 5;
+					  }
+					  else {
+						  ggdau_btag = 999;
+						  if (ggdau_dist3d > 0 && (!std::count(vec_c_nonb_decay.begin(), vec_c_nonb_decay.end(), ggdau_dist3d))) {
+							  if (gdau_btag == 5) {
+								  vec_c_nonb_decay.push_back(ggdau_dist3d);
+								  vec_p.push_back(ggdau_p);
+							  }
+						  }
+					  }
+					  for (size_t k = 0, ke = p->daughter(i)->daughter(j)->numberOfDaughters(); k < ke; ++k) {
+						  auto can_gggdau = p->daughter(i)->daughter(j)->daughter(k);
+						  reco::GenParticle* gggdau = (reco::GenParticle*)can_gggdau;
+						  int gggdau_pdgID = gggdau->pdgId();
+						  double gggdau_dist3d = sqrt(pow(gggdau->vx() - p->vx(), 2) + pow(gggdau->vy() - p->vy(), 2) + pow(gggdau->vz() - p->vz(), 2));
+						  MCInteraction::Point gggdau_p;
+						  gggdau_p.x = gggdau->vx();
+						  gggdau_p.y = gggdau->vy();
+						  gggdau_p.z = gggdau->vz();
+						  if (!((int(gggdau_pdgID / 100) - (int(gggdau_pdgID / 1000) * 10) == 5) || (int(-1 * gggdau_pdgID / 100) - (int(-1 * gggdau_pdgID / 1000) * 10) == 5) || fabs(gggdau_pdgID) == 5)) {
+							  if (gggdau_dist3d > 0 && (!std::count(vec_c_nonb_decay.begin(), vec_c_nonb_decay.end(), gggdau_dist3d))) {
+								  if (ggdau_btag == 5 && gdau_btag == 5) {
+									  vec_c_nonb_decay.push_back(gggdau_dist3d);
+									  vec_p.push_back(gggdau_p);
+								  }
+
+							  }
+
+						  }
+
+					  }
+				  }
+			  }
+		  }
+	  }
+	  return vec_p;
+
+  }
+
+  std::vector < MCInteraction::Point> MCInteraction::b_llp1_decay_points() const {
+	  std::vector < MCInteraction::Point> vec_p;
+	  std::vector<double> vec_c_nonb_decay = {};
+	  
+	  if (primaries_.size() == 2 and secondaries_.size() == 4) {
+		  int c_daus = 0;
+		  for (auto p : secondaries_) {
+			  c_daus += 1;
+			  if (p->numberOfDaughters() == 0 || c_daus == 1 || c_daus == 2)
+				  continue;
+			  for (size_t i = 0, ie = p->numberOfDaughters(); i < ie; ++i) {
+				  auto can_gdau = p->daughter(i);
+				  reco::GenParticle* gdau = (reco::GenParticle*)can_gdau;
+				  int gdau_pdgID = gdau->pdgId();
+				  double gdau_dist3d = sqrt(pow(gdau->vx() - p->vx(), 2) + pow(gdau->vy() - p->vy(), 2) + pow(gdau->vz() - p->vz(), 2));
+				  int gdau_btag = 0;
+				  MCInteraction::Point gdau_p;
+				  gdau_p.x = gdau->vx();
+				  gdau_p.y = gdau->vy();
+				  gdau_p.z = gdau->vz();
+				  if ((int(gdau_pdgID / 100) - (int(gdau_pdgID / 1000) * 10) == 5) || (int(-1 * gdau_pdgID / 100) - (int(-1 * gdau_pdgID / 1000) * 10) == 5) || fabs(gdau_pdgID) == 5) {
+					  gdau_btag = 5;
+				  }
+				  else {
+					  gdau_btag = 999;
+					  if (gdau_dist3d > 0 && (!std::count(vec_c_nonb_decay.begin(), vec_c_nonb_decay.end(), gdau_dist3d))) {
+						  vec_c_nonb_decay.push_back(gdau_dist3d);
+						  vec_p.push_back(gdau_p);
+					  }
+				  }
+				  for (size_t j = 0, je = p->daughter(i)->numberOfDaughters(); j < je; ++j) {
+					  auto can_ggdau = p->daughter(i)->daughter(j);
+					  reco::GenParticle* ggdau = (reco::GenParticle*)can_ggdau;
+					  int ggdau_pdgID = ggdau->pdgId();
+					  int ggdau_btag = 0;
+					  double ggdau_dist3d = sqrt(pow(ggdau->vx() - p->vx(), 2) + pow(ggdau->vy() - p->vy(), 2) + pow(ggdau->vz() - p->vz(), 2));
+					  MCInteraction::Point ggdau_p;
+					  ggdau_p.x = ggdau->vx();
+					  ggdau_p.y = ggdau->vy();
+					  ggdau_p.z = ggdau->vz();
+					  if ((int(ggdau_pdgID / 100) - (int(ggdau_pdgID / 1000) * 10) == 5) || (int(-1 * ggdau_pdgID / 100) - (int(-1 * ggdau_pdgID / 1000) * 10) == 5) || fabs(ggdau_pdgID) == 5) {
+						  ggdau_btag = 5;
+					  }
+					  else {
+						  ggdau_btag = 999;
+						  if (ggdau_dist3d > 0 && (!std::count(vec_c_nonb_decay.begin(), vec_c_nonb_decay.end(), ggdau_dist3d))) {
+							  if (gdau_btag == 5) {
+								  vec_c_nonb_decay.push_back(ggdau_dist3d);
+								  vec_p.push_back(ggdau_p);
+							  }
+						  }
+					  }
+					  for (size_t k = 0, ke = p->daughter(i)->daughter(j)->numberOfDaughters(); k < ke; ++k) {
+						  auto can_gggdau = p->daughter(i)->daughter(j)->daughter(k);
+						  reco::GenParticle* gggdau = (reco::GenParticle*)can_gggdau;
+						  int gggdau_pdgID = gggdau->pdgId();
+						  double gggdau_dist3d = sqrt(pow(gggdau->vx() - p->vx(), 2) + pow(gggdau->vy() - p->vy(), 2) + pow(gggdau->vz() - p->vz(), 2));
+						  MCInteraction::Point gggdau_p;
+						  gggdau_p.x = gggdau->vx();
+						  gggdau_p.y = gggdau->vy();
+						  gggdau_p.z = gggdau->vz();
+						  if (!((int(gggdau_pdgID / 100) - (int(gggdau_pdgID / 1000) * 10) == 5) || (int(-1 * gggdau_pdgID / 100) - (int(-1 * gggdau_pdgID / 1000) * 10) == 5) || fabs(gggdau_pdgID) == 5)) {
+							  if (gggdau_dist3d > 0 && (!std::count(vec_c_nonb_decay.begin(), vec_c_nonb_decay.end(), gggdau_dist3d))) {
+								  if (ggdau_btag == 5 && gdau_btag == 5) {
+									  vec_c_nonb_decay.push_back(gggdau_dist3d);
+									  vec_p.push_back(gggdau_p);
+								  }
+
+							  }
+
+						  }
+
+					  }
+				  }
+			  }
+		  }
+	  }
+	  return vec_p;
+
+  }
+
   double MCInteraction::dvv() const {
     auto p0 = decay_point(0);
     auto p1 = decay_point(1);
@@ -192,7 +354,6 @@ namespace mfv {
                 pow(p0.z - p1.z, 2));
   }
 }
-
 ////
 
 std::ostream& operator<<(std::ostream& o, const mfv::MCInteraction& x) {

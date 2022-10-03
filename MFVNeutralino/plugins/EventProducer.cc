@@ -232,6 +232,9 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
         mevent->gen_lsp_decay[i*3+1] = p.y;
         mevent->gen_lsp_decay[i*3+2] = p.z;
 
+			
+		
+
         mevent->gen_decay_type[i] = mci->decay_type()[i];
         for (const reco::GenParticleRef& s_temp : mci->secondaries(i)) {
           reco::GenParticle* s = (reco::GenParticle*)first_candidate(&*s_temp); 
@@ -239,10 +242,20 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
           mevent->gen_daughter_id.push_back(s->pdgId());
         }
       }
-
+      auto vec_bp_llp0 = mci->b_llp0_decay_points();  
+      for (size_t i = 0; i < vec_bp_llp0.size(); ++i) {
+         mevent->gen_b_llp0_decay.push_back(vec_bp_llp0[i].x);
+         mevent->gen_b_llp0_decay.push_back(vec_bp_llp0[i].y);
+         mevent->gen_b_llp0_decay.push_back(vec_bp_llp0[i].z);
+	  }
+	  auto vec_bp_llp1 = mci->b_llp1_decay_points();
+      for (size_t i = 0; i < vec_bp_llp1.size(); ++i) {
+         mevent->gen_b_llp1_decay.push_back(vec_bp_llp1[i].x);
+	 mevent->gen_b_llp1_decay.push_back(vec_bp_llp1[i].y);
+	 mevent->gen_b_llp1_decay.push_back(vec_bp_llp1[i].z);
+	  }
       mci_lep = mci->light_leptons();
     }
-
     for (const reco::GenParticle& gen : *gen_particles) {
       if (gen.pt() < 1)
         continue;
@@ -264,7 +277,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
         mevent->gen_leptons.push_back(MFVEvent::p4(gen.pt(), gen.eta(), gen.phi(), gen.mass()));
     }
   }
-
   //////////////////////////////////////////////////////////////////////
 
   edm::Handle<mfv::TriggerFloats> triggerfloats;
@@ -526,15 +538,19 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
     mevent->gen_valid = 0;
     mevent->gen_flavor_code = 0;
-    for (int i = 0; i < 2; ++i) {
-      mevent->gen_lsp_pt[i] = mevent->gen_lsp_eta[i] = mevent->gen_lsp_phi[i] = mevent->gen_lsp_mass[i] = 0;
-      mevent->gen_decay_type[i] = 0;
-      for (int j = 0; j < 3; ++j)
-        mevent->gen_lsp_decay[i*3+j] = 0;
-    }
+	for (int i = 0; i < 2; ++i) {
+		mevent->gen_lsp_pt[i] = mevent->gen_lsp_eta[i] = mevent->gen_lsp_phi[i] = mevent->gen_lsp_mass[i] = 0;
+		mevent->gen_decay_type[i] = 0;
+		for (int j = 0; j < 3; ++j)
+			mevent->gen_lsp_decay[i * 3 + j] = 0;
+
+	}
+
     for (int i = 0; i < 3; ++i) {
       mevent->gen_pv[i] = 0;
     }
+	mevent->gen_b_llp0_decay.clear();
+	mevent->gen_b_llp1_decay.clear();
     mevent->gen_bquarks.clear();
     mevent->gen_leptons.clear();
     mevent->gen_jets.clear();
@@ -610,5 +626,4 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   event.put(std::move(mevent));
 }
-
 DEFINE_FWK_MODULE(MFVEventProducer);

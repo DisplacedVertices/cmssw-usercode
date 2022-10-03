@@ -30,8 +30,9 @@ struct MFVEvent {
     for (int i = 0; i < 2; ++i) {
       gen_lsp_pt[i] = gen_lsp_eta[i] = gen_lsp_phi[i] = gen_lsp_mass[i] = 0;
       gen_decay_type[i] = 0;
-      for (int j = 0; j < 3; ++j)
+      for (int j = 0; j < 3; ++j){
         gen_lsp_decay[i*3+j] = 0;
+      }
     }
     for (int i = 0; i < 3; ++i) {
       gen_pv[i] = 0;
@@ -98,6 +99,8 @@ struct MFVEvent {
   float gen_lsp_phi[2];
   float gen_lsp_mass[2];
   float gen_lsp_decay[2*3];
+  std::vector<float> gen_b_llp0_decay;
+  std::vector<float> gen_b_llp1_decay;
   uchar gen_decay_type[2];
   std::vector<TLorentzVector> gen_daughters;
   std::vector<int> gen_daughter_id;
@@ -110,6 +113,18 @@ struct MFVEvent {
     return TVector3(gen_lsp_decay[w*3+0] - gen_pv[0],
                     gen_lsp_decay[w*3+1] - gen_pv[1],
                     gen_lsp_decay[w*3+2] - gen_pv[2]);
+  }
+
+  TVector3 gen_b_llp0_flight(int w) const {
+    return TVector3(gen_b_llp0_decay[w*3+0] - gen_lsp_decay[0],
+                    gen_b_llp0_decay[w*3+1] - gen_lsp_decay[1],
+                    gen_b_llp0_decay[w*3+2] - gen_lsp_decay[2]);
+  }
+
+  TVector3 gen_b_llp1_flight(int w) const {
+    return TVector3(gen_b_llp1_decay[w*3+0] - gen_lsp_decay[3],
+                    gen_b_llp1_decay[w*3+1] - gen_lsp_decay[4],
+                    gen_b_llp1_decay[w*3+2] - gen_lsp_decay[5]);
   }
 
   TLorentzVector gen_lsp_p4_vis(int w) const {

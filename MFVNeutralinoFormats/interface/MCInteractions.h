@@ -72,6 +72,8 @@ namespace mfv {
     bool valid() const { return type_ != mci_invalid; }
 
     Point decay_point(size_t) const;
+    std::vector < MCInteraction::Point> b_llp0_decay_points() const;
+    std::vector < MCInteraction::Point> b_llp1_decay_points() const;
     double dvv() const;
     double d3d() const;
 
@@ -79,7 +81,6 @@ namespace mfv {
     GenRefs secondaries(int=-1) const;
     GenRefs visible(int=-1) const;
     GenRefs light_leptons(int=-1) const;
-
     int num_leptonic() const { return num_leptonic_; }
     std::vector<int> decay_type() const { return decay_type_; }
 
