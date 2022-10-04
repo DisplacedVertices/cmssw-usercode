@@ -5,6 +5,7 @@
 import re
 from JMTucker.Tools.CRAB3ToolsBase import *
 from JMTucker.Tools.hadd import HaddBatchResult, hadd
+from JMTucker.Tools.hadd_on_condor import hadd_on_condor
 if crab_global_options.support_automatic_splitting:
     from JMTucker.Tools.Sample import fn_to_sample, norm_from_file
     from JMTucker.Tools import Samples, colors
@@ -106,7 +107,7 @@ def crab_hadd_files(working_dir, lpc_shortcut=False, **kwargs):
 
     return expected, files
 
-def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None, lpc_shortcut=False, range_filter=None, submit=False):
+def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None, lpc_shortcut=False, range_filter=None, submit=False, cmssw_tar_path=''):
     working_dir, new_name, new_dir = crab_hadd_args(working_dir, new_name, new_dir)
     expected, files = crab_hadd_files(working_dir, lpc_shortcut, range_filter=range_filter)
     result = HaddBatchResult('crab', working_dir, new_name, new_dir, expected, files, submit)
@@ -157,8 +158,11 @@ def crab_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, ch
         if result.success and not new_name.startswith('root://'):
             os.chmod(new_name, 0644)
     else:
-        result.success = hadd(new_name, files, submit)
-
+        if not submit:
+            result.success = hadd(new_name, files)
+        else:
+            result.success = hadd_on_condor(new_name, working_dir, cmssw_tar_path, files)
+            
     if automatic_splitting:
         n = norm_from_file(new_name)
         sn, s = fn_to_sample(Samples, new_name)
