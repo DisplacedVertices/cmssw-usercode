@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 
 import os, subprocess, tempfile, re
+import ROOT 
 from datetime import datetime
 from JMTucker.Tools import colors, eos
 
 class HaddBatchResult(object):
-    def __init__(self, kind, working_dir, new_name, new_dir, expected, files):
+    def __init__(self, kind, working_dir, new_name, new_dir, expected, files, submit):
         self.success = True
         self.kind = kind
         self.working_dir = working_dir
@@ -13,6 +14,7 @@ class HaddBatchResult(object):
         self.new_dir = new_dir
         self.expected = expected
         self.files = files
+        self.submit = submit
 
 class HaddlogParser(object):
     target_re = re.compile(r'hadd Target file: (.*)')
@@ -47,7 +49,6 @@ def hadd(output_fn, input_fns):
     other problems reported by hadd. If so, prints an error to
     stdout. Returns true if success.
     """
-    
     l = len(input_fns)
     start = datetime.now()
     print 'hadding %i files to %s at %s' % (l, output_fn, start)
@@ -56,7 +57,7 @@ def hadd(output_fn, input_fns):
     p = subprocess.Popen(args=args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout, stderr = p.communicate()
     assert stderr is None
-
+    
     log_fn = output_fn + '.haddlog'
     is_eos = '/store/' in output_fn # ugh
     while eos.exists(log_fn) if is_eos else os.path.exists(log_fn):
