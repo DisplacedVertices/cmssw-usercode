@@ -1,5 +1,5 @@
 #SHADOWDEPS = $(wildcard $(CMSSW_BASE)/src/JMTucker/MFVNeutralinoFormats/*/TriggerEnum*) /cvmfs/cms.cern.ch/$(SCRAM_ARCH)/external/tbb/2019_U3-pafccj/lib/libtbb.so.2 /cvmfs/cms.cern.ch/$(SCRAM_ARCH)/external/clhep/2.4.0.0-pafccj2/lib/libCLHEP.so $(CMSSW_RELEASE_BASE)/lib/$(SCRAM_ARCH)/*.so $(CMSSW_BASE)/lib/$(SCRAM_ARCH)/*.so
-SHADOWDEPS = $(wildcard $(CMSSW_BASE)/src/JMTucker/MFVNeutralinoFormats/*/TriggerEnum*) /cvmfs/cms.cern.ch/$(SCRAM_ARCH)/external/tbb/2019_U3-pafccj/lib/libtbb.so.2 /cvmfs/cms.cern.ch/$(SCRAM_ARCH)/external/clhep/2.4.0.0-pafccj2/lib/libCLHEP.so $(CMSSW_RELEASE_BASE)/lib/$(SCRAM_ARCH)/libDataFormats*.so $(CMSSW_BASE)/lib/$(SCRAM_ARCH)/*.so
+SHADOWDEPS = $(wildcard $(CMSSW_BASE)/src/JMTucker/MFVNeutralinoFormats/*/TriggerEnum*) /cvmfs/cms.cern.ch/$(SCRAM_ARCH)/external/tbb/2019_U3-pafccj/lib/libtbb.so.2 /cvmfs/cms.cern.ch/$(SCRAM_ARCH)/external/clhep/2.4.0.0-pafccj2/lib/libCLHEP.so $(CMSSW_RELEASE_BASE)/lib/$(SCRAM_ARCH)/libDataFormatsCommon.so $(CMSSW_RELEASE_BASE)/lib/$(SCRAM_ARCH)/libDataFormatsCandidate.so $(CMSSW_BASE)/lib/$(SCRAM_ARCH)/*.so
 
 
 ROOTFLAGS=$(shell root-config --cflags --libs)
