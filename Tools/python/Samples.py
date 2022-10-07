@@ -850,6 +850,7 @@ for sample in data_samples_2017 + auxiliary_data_samples_2017 + singleelectron_d
 for sample in data_samples_2018 + auxiliary_data_samples_2018 + egamma_data_samples_2018:
     sample.add_dataset('miniaod', sample.dataset.replace('AOD', 'MINIAOD'))
 
+
 qcdht0200_2017.add_dataset('miniaod', '/QCD_HT200to300_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 57721120)
 qcdht0300_2017.add_dataset('miniaod', '/QCD_HT300to500_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM',   57191140)
 qcdht0500_2017.add_dataset('miniaod', '/QCD_HT500to700_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM',  9188310)
@@ -923,7 +924,6 @@ mfv_splitSUSY_tau000000300um_M2400_2300_2017.add_dataset('miniaod', '/splitSUSY_
 mfv_splitSUSY_tau000010000um_M2400_2300_2017.add_dataset('miniaod', '/splitSUSY_M2400_2300_ctau10p0_TuneCP2_13TeV_pythia8/lian-RunIISummer20UL17_MiniAOD-e67f9b5d033cede4d000433a2a96d4fb/USER', 10000)
 mfv_splitSUSY_tau000001000um_M2400_2300_2017.add_dataset('miniaod', '/splitSUSY_M2400_2300_ctau1p0_TuneCP2_13TeV_pythia8/lian-RunIISummer20UL17_MiniAOD-e67f9b5d033cede4d000433a2a96d4fb/USER', 10000)
 
-
 #for s in all_signal_samples_2016APV + all_signal_samplesall_signal_samples_2016APV + all_signal_samples_2016:
 for s in all_signal_samples_2016:
     _set_signal_stuff(s)
@@ -946,8 +946,8 @@ for sample in mfv_signal_samples_2018 + mfv_stopdbardbar_samples_2018 + mfv_stop
 # ntuples
 ########
 
-for x in mfv_signal_samples_2017:
-    x.add_dataset('ntupleulv1am')
+for x in all_signal_samples_2017 + all_signal_samples_2018:
+    x.add_dataset('ntupleulv1bm')
 
 ########
 # automatic condor declarations for ntuples
@@ -963,7 +963,7 @@ for s in registry.all():
 ########
 # other condor declarations, generate condorable dict with Shed/condor_list.py
 ########
-# be careful about the list, some samples are distributed at different samples so it won't work
+# be careful about the list, some samples are distributed at different sites so it won't work
 condorable = {
     "T2_DE_DESY": {
         "miniaod": [EGamma2018D, MET2017E, MET2018A, MET2018B, SingleMuon2018A, SingleMuon2018B, SingleMuon2018C, SingleMuon2018D, wjetstolnu_2018, dyjetstollM10_2018, dyjetstollM50_2018, ttbar_2018, zjetstonunuht0100_2018, zjetstonunuht0200_2018, zjetstonunuht0400_2018, zjetstonunuht0600_2018, zjetstonunuht0800_2018, zjetstonunuht1200_2018],
@@ -971,8 +971,11 @@ condorable = {
     "T3_US_FNALLPC": {
         "miniaod": mfv_splitSUSY_samples_2017
         },
+    "T2_IN_TIFR": {
+        "miniaod": [mfv_stopbbarbbar_tau001000um_M0800_2018,]
+        },
     "T1_US_FNAL_Disk": {
-        "miniaod": [EGamma2018A, EGamma2018B, SingleMuon2017B, SingleMuon2017D, SingleElectron2017B, SingleElectron2017D, SingleElectron2017E, MET2018D, qcdht0300_2018, qcdht0700_2018, qcdht1000_2018, qcdht1500_2018, zjetstonunuht2500_2018, qcdht0200_2017, qcdht0500_2017, qcdht0700_2017, qcdht0300_2017, ttbar_2017,
+        "miniaod": [EGamma2018A, EGamma2018B, SingleMuon2017B, SingleMuon2017D, SingleElectron2017B, SingleElectron2017D, SingleElectron2017E, MET2018D, #qcdht0300_2018, qcdht0700_2018, qcdht1000_2018, qcdht1500_2018, zjetstonunuht2500_2018, qcdht0200_2017, qcdht0500_2017, qcdht0700_2017, qcdht0300_2017, ttbar_2017,
         ]},
 }
 
