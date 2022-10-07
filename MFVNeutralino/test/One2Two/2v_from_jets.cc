@@ -258,6 +258,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   TH1F* h_2v_dbv = new TH1F("h_2v_dbv", "two-vertex events;d_{BV} (cm);vertices", 1250, 0, 2.5);
   TH2F* h_2v_dbv1_dbv0 = new TH2F("h_2v_dbv1_dbv0", "two-vertex events;d_{BV}^{0} (cm);d_{BV}^{1} (cm)", 1250, 0, 2.5, 1250, 0, 2.5);
   TH1F* h_2v_dvv = new TH1F("h_2v_dvv", "two-vertex events;d_{VV} (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
+  TH1F* h_2v_sumdbv = new TH1F("h_2v_sumdbv", "two-vertex events; #Sigma(d_{BV})  (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
   TH1F* h_2v_dphivv = new TH1F("h_2v_dphivv", "two-vertex events;#Delta#phi_{VV};events", 10, -3.15, 3.15);
   TH1F* h_2v_absdphivv = new TH1F("h_2v_absdphivv", "two-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
   TH1D* h_2v_npu = new TH1D("h_2v_npu", "two-vertex events;# PU interactions;events", 100, 0, 100);
@@ -332,6 +333,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
         double dvv = sqrt((nt.x0-nt.x1)*(nt.x0-nt.x1) + (nt.y0-nt.y1)*(nt.y0-nt.y1));
         if (dvv > dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width) dvv = dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width;
         h_2v_dvv->Fill(dvv, w);
+        h_2v_sumdbv->Fill(dbv0+dbv1, w);
         double dphi = TVector2::Phi_mpi_pi(atan2(nt.y0,nt.x0)-atan2(nt.y1,nt.x1));
         h_2v_dphivv->Fill(dphi, w);
         h_2v_absdphivv->Fill(fabs(dphi), w);
@@ -355,6 +357,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   //construct dvvc
   TH1F* h_c1v_dbv = new TH1F("h_c1v_dbv", "constructed from only-one-vertex events;d_{BV} (cm);vertices", 1250, 0, 2.5);
   TH1F* h_c1v_dvv = new TH1F("h_c1v_dvv", "constructed from only-one-vertex events;d_{VV} (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
+  TH1F* h_c1v_sumdbv = new TH1F("h_c1v_sumdbv", "constructed from only-one-vertex events;#Sigma(d_{BV}) (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
   TH1F* h_c1v_absdphivv = new TH1F("h_c1v_absdphivv", "constructed from only-one-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
   TH1F* h_c1v_dbv0 = new TH1F("h_c1v_dbv0", "constructed from only-one-vertex events;d_{BV}^{0} (cm);events", 1250, 0, 2.5);
   TH1F* h_c1v_dbv1 = new TH1F("h_c1v_dbv1", "constructed from only-one-vertex events;d_{BV}^{1} (cm);events", 1250, 0, 2.5);
@@ -425,6 +428,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
     if (dvvc > dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width) dvvc = dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width;
     h_c1v_dvv->Fill(dvvc, prob);
+    h_c1v_sumdbv->Fill(dbv0 + dbv1, prob);
     h_c1v_absdphivv->Fill(fabs(dphi), prob);
     h_c1v_dbv0->Fill(dbv0, prob);
     h_c1v_dbv1->Fill(dbv1, prob);
@@ -467,6 +471,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   h_2v_dbv->Write();
   h_2v_dbv1_dbv0->Write();
   h_2v_dvv->Write();
+  h_2v_sumdbv->Write();
   h_2v_dphivv->Write();
   h_2v_absdphivv->Write();
   h_2v_npu->Write();
@@ -474,6 +479,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   h_c1v_dbv->Write();
   h_c1v_dvv->Scale(1./h_c1v_dvv->Integral());
   h_c1v_dvv->Write();
+  h_c1v_sumdbv->Write();
   h_c1v_absdphivv->Write();
   h_c1v_dbv0->Write();
   h_c1v_dbv1->Write();
@@ -548,6 +554,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   delete h_2v_dbv;
   delete h_2v_dbv1_dbv0;
   delete h_2v_dvv;
+  delete h_2v_sumdbv;
   delete h_2v_dphivv;
   delete h_2v_absdphivv;
   delete h_2v_npu;
@@ -555,6 +562,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   delete c_absdphivv;
   delete h_c1v_dbv;
   delete h_c1v_dvv;
+  delete h_c1v_sumdbv;
   delete h_c1v_absdphivv;
   delete h_c1v_dbv0;
   delete h_c1v_dbv1;
@@ -613,7 +621,7 @@ int main(int argc, const char* argv[]) {
 
   // production version
   const char* version = "V27m";
-  /*
+  
   for (const char* year : {"2017","2018","2017p8"}) {
     for (int ntracks : {3, 4, 5}) {
       ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks);
@@ -636,19 +644,19 @@ int main(int argc, const char* argv[]) {
 //      construct_dvvc(pars2.min_npu(37).max_npu(255),            TString::Format("2v_from_jets_%s_%dtrack_npu37to255_%s.root", year, ntracks, version));
     }
   }
-  */
-  for (const char* year : {"2017", "2018", "2017p8"}) {
-    for (int ntracks : {3, 4, 5, 7, 8, 9}) {
-      ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks).is_mc(false);
-      construct_dvvc(pars2,                             TString::Format("2v_from_jets_data_%s_%dtrack_default_%s.root", year, ntracks, version));
-      construct_dvvc(pars2.btags(1),                    TString::Format("2v_from_jets_data_%s_%dtrack_btags_%s.root", year, ntracks, version));
-      construct_dvvc(pars2.btags(0),                    TString::Format("2v_from_jets_data_%s_%dtrack_nobtags_%s.root", year, ntracks, version));
+  
+//  for (const char* year : {"2017", "2018", "2017p8"}) {
+//    for (int ntracks : {3, 4, 5, 7, 8, 9}) {
+//      ConstructDvvcParameters pars2 = pars.year(year).ntracks(ntracks).is_mc(false);
+//      construct_dvvc(pars2,                             TString::Format("2v_from_jets_data_%s_%dtrack_default_%s.root", year, ntracks, version));
+//      construct_dvvc(pars2.btags(1),                    TString::Format("2v_from_jets_data_%s_%dtrack_btags_%s.root", year, ntracks, version));
+//      construct_dvvc(pars2.btags(0),                    TString::Format("2v_from_jets_data_%s_%dtrack_nobtags_%s.root", year, ntracks, version));
 //      construct_dvvc(pars2.btags(1).vary_dphi(true),    TString::Format("2v_from_jets_data_%s_%dtrack_vary_dphi_btags_%s.root", year, ntracks, version));
 //      construct_dvvc(pars2.btags(0).vary_dphi(true),    TString::Format("2v_from_jets_data_%s_%dtrack_vary_dphi_nobtags_%s.root", year, ntracks, version));
 //      construct_dvvc(pars2.btags(1).vary_eff(true),     TString::Format("2v_from_jets_data_%s_%dtrack_vary_eff_btags_%s.root", year, ntracks, version));
 //      construct_dvvc(pars2.btags(0).vary_eff(true),     TString::Format("2v_from_jets_data_%s_%dtrack_vary_eff_nobtags_%s.root", year, ntracks, version));
-    }
-  }
+//    }
+//  }
 
   // For use in bquark_fraction.py
   std::ofstream outfile;
