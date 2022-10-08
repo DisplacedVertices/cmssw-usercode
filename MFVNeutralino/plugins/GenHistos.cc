@@ -29,6 +29,14 @@ private:
   const edm::EDGetTokenT<mfv::MCInteraction> mci_token;
   bool mci_warned;
 
+  bool isBhadron(int pdgID);
+  bool isBquark(int pdgID);
+  bool isBvtx(int pdgID, double dist3d, std::vector<int> vec_btag);
+  reco::GenParticle* valid_dau(auto parent, reco::GenParticle* dau, double thes_dR);
+  size_t mindR_dau(int nth_chain, auto parent, std::vector<double>& vec_first_dR, std::vector<double>& vec_second_dR);
+  bool Is_bdecay_done(int nth_chain, const reco::GenParticleRef& bquark, auto parent, std::vector<int>& vec_btag, std::vector<double>& vec_first_dR, std::vector<double>& vec_second_dR, std::vector<double>& vec_decay);
+  void print_bchain(int num, auto init_p);
+
   edm::ESHandle<ParticleDataTable> pdt;
 
   TH1F* h_valid;
@@ -113,6 +121,14 @@ private:
   TH1F* h_bquarks_dR;
   TH2F* h_bquarks_dR_dphi;
 
+  TH1I* h_n_gen_bvtx;
+  TH1F* h_missing_dau_to_gdau_mindR;
+  TH1F* h_missing_gdau_to_ggdau_mindR;
+  TH1F* h_dau_to_gdau_mindR;
+  TH1F* h_gdau_to_ggdau_mindR;
+  TH1F* h_dau_select_edge_b_decay_dist3d_from_llp;
+  TH1F* h_dau_select_b_decay_dist3d_from_llp;
+
   TH1I* h_gdau_bhadrons_pdgID; 
   TH1I* h_gdau_nonbhadrons_pdgID;
   TH1F* h_gdau_bhadrons_dist3d_from_llp;
@@ -132,6 +148,7 @@ private:
   TH1F* h_ggdau_select_b_decay_dist3d_from_llp;
 
   TH1I* h_gggdau_bhadrons_pdgID;
+  TH1I* h_gggdau_for_ggggdau_bhadrons_pdgID;
   TH1I* h_gggdau_nonbhadrons_pdgID;
   TH1F* h_gggdau_bhadrons_dist3d_from_llp;
   TH1F* h_gggdau_nonbhadrons_dist3d_from_llp;
@@ -455,6 +472,15 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   h_bquarks_dR = fs->make<TH1F>("h_bquarks_dR", "events with two bquarks;#Delta R;Events/0.14", 50, 0, 7);
   h_bquarks_dR_dphi = fs->make<TH2F>("h_bquarks_dR_dphi", "events with two bquarks;#Delta#phi;#Delta R", 50, -3.15, 3.15, 50, 0, 7);
 
+  h_n_gen_bvtx = fs->make<TH1I>("h_n_gen_bvtx", ";# of GEN b-vertices (from non-b hadrons); events/1", 40, 0, 40);
+  h_missing_dau_to_gdau_mindR = fs->make<TH1F>("h_missing_dau_to_gdau_mindR", "found < 4 b-vertices;minimum dR of a b-quark and its daughter; arb. units", 140, 0, 7.0);
+  h_missing_gdau_to_ggdau_mindR = fs->make<TH1F>("h_missing_gdau_to_ggdau_mindR", "found < 4 b-vertices;minimum dR of b-quark's daughter and its granddaughter; arb. units", 140, 0, 7.0);
+  h_dau_to_gdau_mindR = fs->make<TH1F>("h_dau_to_gdau_mindR", ";minimum dR of a b-quark and its daughter; arb. units", 140, 0, 7.0);
+  h_gdau_to_ggdau_mindR = fs->make<TH1F>("h_gdau_to_ggdau_mindR", ";minimum dR of b-quark's daughter and its granddaughter; arb. units", 140, 0, 7.0);
+  h_dau_select_edge_b_decay_dist3d_from_llp = fs->make<TH1F>("h_dau_select_edge_b_decay_dist3d_from_llp", "multiple dau stage w.r.t LLP (final product still a b-hadron); displaced b-quark vtx from an LLP decay position (cm);b-vtx/0.0025 cm", 500, 0, 1);
+  h_dau_select_b_decay_dist3d_from_llp = fs->make<TH1F>("h_dau_select_b_decay_dist3d_from_llp", "multiple dau stage w.r.t LLP; displaced b-quark vtx from an LLP decay position (cm);b-vtx/0.0025 cm", 500, 0, 1);
+
+
   h_gdau_bhadrons_pdgID = fs->make<TH1I>("h_gdau_bhadrons_pdgID", "gdau stage w.r.t LLP;pdg id of b-hadron;jets", 10000, -5000, 5000);
   h_gdau_nonbhadrons_pdgID = fs->make<TH1I>("h_gdau_nonbhadrons_pdgID", "gdau stage w.r.t LLP;pdg id of non b-hadron;jets", 10000, -5000, 5000);
   h_gdau_bhadrons_dist3d_from_llp = fs->make<TH1F>("h_gdau_bhadrons_dist3d_from_llp", "gdau stage w.r.t LLP;3D distance of b-hadrom from LLP decay positions (cm);b-hadron/0.0025 cm", 500, 0, 1);
@@ -475,6 +501,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   h_ggdau_select_b_decay_dist3d_from_llp = fs->make<TH1F>("h_ggdau_select_b_decay_dist3d_from_llp", "ggdau stage w.r.t LLP; displaced b-quark vtx from an LLP decay positions (cm);b-vtx/0.0025 cm", 500, 0, 1);
 
   h_gggdau_bhadrons_pdgID = fs->make<TH1I>("h_gggdau_bhadrons_pdgID", "gggdau stage w.r.t LLP;pdg id of b-hadron;jets", 10000, -5000, 5000);
+  h_gggdau_for_ggggdau_bhadrons_pdgID = fs->make<TH1I>("h_gggdau_for_ggggdau_bhadrons_pdgID", "gggdau stage w.r.t LLP;pdg id of b-hadron stisfying b-decays;jets", 10000, -5000, 5000);
   h_gggdau_nonbhadrons_pdgID = fs->make<TH1I>("h_gggdau_nonbhadrons_pdgID", "gggdau stage w.r.t LLP;pdg id of non b-hadron;jets", 10000, -5000, 5000);
   h_gggdau_bhadrons_dist3d_from_llp = fs->make<TH1F>("h_gggdau_bhadrons_dist3d_from_llp", "gggdau stage w.r.t LLP;3D distance of b-hadrom from LLP decay positions (cm);b-hadron/0.0025 cm", 500, 0, 1);
   h_gggdau_nonbhadrons_dist3d_from_llp = fs->make<TH1F>("h_gggdau_nonbhadrons_dist3d_from_llp", "gggdau stage w.r.t LLP;3D distance of non b-hadrom from LLP decay positions (cm);non b-hadron/0.0025 cm", 500, 0, 1);
@@ -666,102 +693,166 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 	// BEGIN: Hunt for b-quark decay points 
 	if (mci->valid()) {
 		
+		/*
 		std::vector<double> vec_c_gdau_b_decay = {};
 		std::vector<double> vec_c_gdau_nonb_decay = {};
 		std::vector<double> vec_c_ggdau_b_decay = {};
 		std::vector<double> vec_c_ggdau_nonb_decay = {};
 		std::vector<double> vec_c_gggdau_b_decay = {};
 		std::vector<double> vec_c_gggdau_nonb_decay = {};
-		
+		std::vector<double> vec_c_b_decay = {};
+		*/
+		std::vector<double> vec_c_nonb_decay = {};
+		std::vector<double> vec_c_nonb_dR_dau = {};
+		std::vector<double> vec_c_nonb_dR_gdau = {};
+		/*
+		std::vector<int> vec_c_nonb_pdgID = {};
+		std::vector<int> vec_c_nonb_ndaus = {};
+		std::vector<int> vec_c_nonb_parent_pdgID = {};
+		*/
+		//bool has_weird_b = false;
+
 		if (mci->primaries().size() == 2 and mci->secondaries().size() == 4) {
+			
 			for (auto p : mci->secondaries()) {
-				/*
-				num_dau += 1;
-				reco::GenParticleRef lsp;
-				if (num_dau == 1 || num_dau == 2)
-					lsp = mci->primaries()[0];
-				if (num_dau == 3 || num_dau == 4)
-					lsp = mci->primaries()[1];
-				*/
 				
+				//bool has_one_match_bvtx = false;
+				std::vector<int> vec_dau_btag = {};
 				if (p->numberOfDaughters() == 0)
 					continue;
+
+				//std::cout << __LINE__ << std::endl;
+				Is_bdecay_done(1, p, p, vec_dau_btag, vec_c_nonb_dR_dau, vec_c_nonb_dR_gdau, vec_c_nonb_decay);
+				/*
+				if (std::count(vec_dau_btag.begin(), vec_dau_btag.end(), 5.0) > 3)
+					has_weird_b = true;
+				
+					std::cout << "investigating a b-chain w/ all b-quarks in the chain " << std::endl;
+					for (size_t n = 0, ne = vec_c_nonb_decay.size(); n < ne; ++n) {
+						std::cout << " displ (cm) " << vec_c_nonb_decay[n] << std::endl;
+					}
+					for (size_t n = 0, ne = vec_c_nonb_dR_dau.size(); n < ne; ++n) {
+						h_dR_valid_dau->Fill(vec_c_nonb_dR_dau[n]);
+						std::cout << " dau dR " << vec_c_nonb_dR_dau[n] << std::endl;
+					}
+					print_bchain(1, p);
+				}
+				*/
+			
+				//std::cout << __LINE__ << std::endl;
+				//auto can_dau = p;
+				/*
 				for (size_t i = 0, ie = p->numberOfDaughters(); i < ie; ++i) {
 					// gdau stage
-					auto gdau = p->daughter(i);
+					auto gdau = p->daughter(i);   
+					double dau_dR = reco::deltaR(gdau->eta(), gdau->phi(), p->eta(), p->phi());
+					if (valid_dau(p, (reco::GenParticle*)gdau, 100.0) == nullptr)
+						continue;
 					int gdau_pdgID = gdau->pdgId();
 					double gdau_dist3d = sqrt(pow(gdau->vx() - p->vx(), 2) + pow(gdau->vy() - p->vy(), 2) + pow(gdau->vz() - p->vz(), 2));
 					int gdau_btag = 0;
-					if ((int(gdau_pdgID / 100) - (int(gdau_pdgID / 1000) * 10) == 5 ) || (int(-1 * gdau_pdgID / 100) - (int(-1 * gdau_pdgID / 1000) * 10) == 5) || fabs(gdau_pdgID) == 5) {
-                                                //std::cout << " b-hadron gdau_pdgID : " << gdau_pdgID << std::endl;
+					if (isBhadron(gdau_pdgID)) {
 						h_gdau_bhadrons_pdgID->Fill(gdau_pdgID);
 						h_gdau_bhadrons_dist3d_from_llp->Fill(gdau_dist3d);
 						gdau_btag = 5;
-						if (gdau_dist3d > 0 && !std::count(vec_c_gdau_b_decay.begin(), vec_c_gdau_b_decay.end(), gdau_dist3d)) {
+						if (isBvtx(gdau_pdgID, gdau_dist3d)) {
 							vec_c_gdau_b_decay.push_back(gdau_dist3d);
+							vec_c_b_decay.push_back(gdau_dist3d);
 							h_gdau_select_edge_b_decay_dist3d_from_llp->Fill(gdau_dist3d);
 						}
 					}
 					else {
-						//std::cout << " non b-hadron gdau_pdgID : " << gdau_pdgID << std::endl;
 						h_gdau_nonbhadrons_pdgID->Fill(gdau_pdgID);
 						h_gdau_nonbhadrons_dist3d_from_llp->Fill(gdau_dist3d);
 						gdau_btag = 999;
-						if (gdau_dist3d > 0 && !std::count(vec_c_gdau_nonb_decay.begin(), vec_c_gdau_nonb_decay.end(), gdau_dist3d)) {
+						if (isBvtx(gdau_pdgID, gdau_dist3d) && has_one_match_bvtx == false) {
+							has_one_match_bvtx = true;
 							vec_c_gdau_nonb_decay.push_back(gdau_dist3d);
+							vec_c_nonb_dR_dau.push_back(dau_dR);
+							vec_c_nonb_decay.push_back(gdau_dist3d);
+							vec_c_nonb_pdgID.push_back(gdau_pdgID);
+							vec_c_nonb_ndaus.push_back(gdau->numberOfDaughters());
+							vec_c_nonb_parent_pdgID.push_back(p->pdgId());
 							h_gdau_select_b_decay_dist3d_from_llp->Fill(gdau_dist3d);
+							
 						}
 					}
 
 					for (size_t j = 0, je = p->daughter(i)->numberOfDaughters(); j < je; ++j) {
 						// ggdau stage
 						auto ggdau = p->daughter(i)->daughter(j);
+						if (valid_dau(gdau, (reco::GenParticle*)ggdau, 100.0) == nullptr)
+							continue;
 						int ggdau_pdgID = ggdau->pdgId();
 						int ggdau_btag = 0;
 						double ggdau_dist3d = sqrt(pow(ggdau->vx() - p->vx(), 2) + pow(ggdau->vy() - p->vy(), 2) + pow(ggdau->vz() - p->vz(), 2));
-						if ((int(ggdau_pdgID / 100) - (int(ggdau_pdgID / 1000) * 10) == 5) || (int(-1 * ggdau_pdgID / 100) - (int(-1 * ggdau_pdgID / 1000) * 10) == 5) || fabs(ggdau_pdgID) == 5) {
+						if (isBhadron(ggdau_pdgID)) {
 							h_ggdau_bhadrons_pdgID->Fill(ggdau_pdgID);
 							h_ggdau_bhadrons_dist3d_from_llp->Fill(ggdau_dist3d);
 							ggdau_btag = 5;
-							if (ggdau_dist3d > 0 && !std::count(vec_c_ggdau_b_decay.begin(), vec_c_ggdau_b_decay.end(), ggdau_dist3d)) {
-								vec_c_ggdau_b_decay.push_back(ggdau_dist3d);
-								if (gdau_btag == 5)
+							if (isBvtx(ggdau_pdgID, ggdau_dist3d)) {
+								if (gdau_btag == 5) {
+									vec_c_b_decay.push_back(ggdau_dist3d);
+									vec_c_ggdau_b_decay.push_back(ggdau_dist3d);
 									h_ggdau_select_edge_b_decay_dist3d_from_llp->Fill(ggdau_dist3d);
+								}
 							}
 						}
 						else {
 							h_ggdau_nonbhadrons_pdgID->Fill(ggdau_pdgID);
 							h_ggdau_nonbhadrons_dist3d_from_llp->Fill(ggdau_dist3d);
 							ggdau_btag = 999;
-							if (ggdau_dist3d > 0 && !std::count(vec_c_ggdau_nonb_decay.begin(), vec_c_ggdau_nonb_decay.end(), ggdau_dist3d)) {
-								vec_c_ggdau_nonb_decay.push_back(ggdau_dist3d);
-								if (gdau_btag == 5)
+							if (isBvtx(ggdau_pdgID, ggdau_dist3d) && has_one_match_bvtx == false) {
+								if (gdau_btag == 5) {
+									has_one_match_bvtx = true;
+									vec_c_nonb_decay.push_back(ggdau_dist3d);
+									vec_c_nonb_dR_dau.push_back(dau_dR);
+									vec_c_nonb_pdgID.push_back(ggdau_pdgID);
+									vec_c_nonb_ndaus.push_back(ggdau->numberOfDaughters());
+									vec_c_nonb_parent_pdgID.push_back(gdau_pdgID);
+									vec_c_ggdau_nonb_decay.push_back(ggdau_dist3d);
 									h_ggdau_select_b_decay_dist3d_from_llp->Fill(ggdau_dist3d);
+									
+								}
 							}
 						}
 
 						for (size_t k = 0, ke = p->daughter(i)->daughter(j)->numberOfDaughters(); k < ke; ++k) {
 							// gggdau stage
 							auto gggdau = p->daughter(i)->daughter(j)->daughter(k);
+							if (valid_dau(ggdau, (reco::GenParticle*)gggdau, 100.0) == nullptr)
+								continue;
 							int gggdau_pdgID = gggdau->pdgId();
 							double gggdau_dist3d = sqrt(pow(gggdau->vx() - p->vx(), 2) + pow(gggdau->vy() - p->vy(), 2) + pow(gggdau->vz() - p->vz(), 2));
-							if ((int(gggdau_pdgID / 100) - (int(gggdau_pdgID / 1000) * 10) == 5) || (int(-1 * gggdau_pdgID / 100) - (int(-1 * gggdau_pdgID / 1000) * 10) == 5) || fabs(gggdau_pdgID) == 5) {
+							if (isBhadron(gggdau_pdgID)) {
 								h_gggdau_bhadrons_pdgID->Fill(gggdau_pdgID);
 								h_gggdau_bhadrons_dist3d_from_llp->Fill(gggdau_dist3d);
-								if (gggdau_dist3d > 0 && !std::count(vec_c_gggdau_b_decay.begin(), vec_c_gggdau_b_decay.end(), gggdau_dist3d)) {
-									vec_c_gggdau_b_decay.push_back(gggdau_dist3d);
+								if (isBvtx(gggdau_pdgID, gggdau_dist3d)) {
 									if (ggdau_btag == 5 && gdau_btag == 5) {
+										vec_c_b_decay.push_back(gggdau_dist3d);
+										vec_c_gggdau_b_decay.push_back(gggdau_dist3d);
 										h_gggdau_select_edge_b_decay_dist3d_from_llp->Fill(gggdau_dist3d);
 									}
 								}
+
+								if (ggdau_btag == 5 && gdau_btag == 5)
+									h_gggdau_for_ggggdau_bhadrons_pdgID->Fill(gggdau->pdgId());
 							}
 							else {
 								h_gggdau_nonbhadrons_pdgID->Fill(gggdau_pdgID);
 								h_gggdau_nonbhadrons_dist3d_from_llp->Fill(gggdau_dist3d);
-								if (gggdau_dist3d > 0 && !std::count(vec_c_gggdau_nonb_decay.begin(), vec_c_gggdau_nonb_decay.end(), gggdau_dist3d)) {
-									vec_c_gggdau_nonb_decay.push_back(gggdau_dist3d);
-									if (ggdau_btag == 5 && gdau_btag == 5)
+								if (isBvtx(gggdau_pdgID, gggdau_dist3d) && has_one_match_bvtx == false) {
+									if (ggdau_btag == 5 && gdau_btag == 5) {
+										has_one_match_bvtx = true;
+										vec_c_nonb_decay.push_back(gggdau_dist3d);
+										vec_c_nonb_dR_dau.push_back(dau_dR);
+										vec_c_nonb_pdgID.push_back(gggdau_pdgID);
+										vec_c_nonb_ndaus.push_back(gggdau->numberOfDaughters());
+										vec_c_nonb_parent_pdgID.push_back(ggdau_pdgID);
+										vec_c_gggdau_nonb_decay.push_back(gggdau_dist3d);
 										h_gggdau_select_b_decay_dist3d_from_llp->Fill(gggdau_dist3d);
+										
+									}
                                                               
 								}
 								    
@@ -770,14 +861,81 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 						}
 					}
 				}
+				*/
 			}
 		}
+
+		
+		if (vec_c_nonb_decay.size() != 4) {
+			std::cout << "investigating events w/ # of GEN b-vertices of " << vec_c_nonb_decay.size() << std::endl;
+			for (size_t n = 0, ne = vec_c_nonb_decay.size(); n < ne; ++n) {
+				std::cout << " displ (cm) " << vec_c_nonb_decay[n] << std::endl;
+			}
+			std::cout << "min dR from b-quark to its daus" << std::endl;
+			for (size_t n = 0, ne = vec_c_nonb_dR_dau.size(); n < ne; ++n) {
+				h_missing_dau_to_gdau_mindR->Fill(vec_c_nonb_dR_dau[n]);
+				std::cout << " dau dR " << vec_c_nonb_dR_dau[n] << std::endl;
+			}
+			std::cout << "min dR from b-quark daus to its gdaus" << std::endl;
+			for (size_t n = 0, ne = vec_c_nonb_dR_gdau.size(); n < ne; ++n) {
+				h_missing_gdau_to_ggdau_mindR->Fill(vec_c_nonb_dR_dau[n]);
+				std::cout << " gdau dR " << vec_c_nonb_dR_gdau[n] << std::endl;
+			}
+			for (auto p : mci->secondaries()) {
+				std::cout << "dau " << " id " << p->pdgId() << " #gdaus " << p->numberOfDaughters() << " pt " << p->pt() << " eta " << p->eta() << " phi " << p->phi() << " mass " << p->mass() << std::endl;
+				for (size_t i = 0, ie = p->numberOfDaughters(); i < ie; ++i) {
+					
+					auto gdau = p->daughter(i);
+					double dau_dR = reco::deltaR(gdau->eta(), gdau->phi(), p->eta(), p->phi());
+
+					double gdau_dist3d = sqrt(pow(gdau->vx() - p->vx(), 2) + pow(gdau->vy() - p->vy(), 2) + pow(gdau->vz() - p->vz(), 2));
+					std::cout << "    gdau " << " displ (cm) " << gdau_dist3d << " id " << gdau->pdgId() << " #ggdaus " << gdau->numberOfDaughters() <<  " pt " << gdau->pt() << " eta " << gdau->eta() << " phi " << gdau->phi() << " mass " << gdau->mass() << std::endl;
+					std::cout << "    gdau dR " << dau_dR << std::endl;
+					for (size_t j = 0, je = gdau->numberOfDaughters(); j < je; ++j) {
+						auto ggdau = gdau->daughter(j);
+						double gdau_dR = reco::deltaR(ggdau->eta(), ggdau->phi(), gdau->eta(), gdau->phi());
+
+						double ggdau_dist3d = sqrt(pow(ggdau->vx() - p->vx(), 2) + pow(ggdau->vy() - p->vy(), 2) + pow(ggdau->vz() - p->vz(), 2));
+						std::cout << "        ggdau " << " displ (cm) " << ggdau_dist3d << " id " << ggdau->pdgId() << " #gggdaus " << ggdau->numberOfDaughters() << " pt " << ggdau->pt() << " eta " << ggdau->eta() << " phi " << ggdau->phi() << " mass " << ggdau->mass() << std::endl;
+						std::cout << "        ggdau dR " << gdau_dR << std::endl;
+						for (size_t k = 0, ke = ggdau->numberOfDaughters(); k < ke; ++k) {
+							auto gggdau = ggdau->daughter(k);
+							double gggdau_dist3d = sqrt(pow(gggdau->vx() - p->vx(), 2) + pow(gggdau->vy() - p->vy(), 2) + pow(gggdau->vz() - p->vz(), 2));
+							std::cout << "           gggdau " << " displ (cm) " << gggdau_dist3d << " id " << gggdau->pdgId() << " #ggggdaus " << gggdau->numberOfDaughters() << " pt " << gggdau->pt() << " eta " << gggdau->eta() << " phi " << gggdau->phi() << " mass " << gggdau->mass() << std::endl;
+							for (size_t l = 0, le = gggdau->numberOfDaughters(); l < le; ++l) {
+								auto ggggdau = gggdau->daughter(l);
+								double ggggdau_dist3d = sqrt(pow(ggggdau->vx() - p->vx(), 2) + pow(ggggdau->vy() - p->vy(), 2) + pow(ggggdau->vz() - p->vz(), 2));
+								std::cout << "                ggggdau " << " displ (cm) " << ggggdau_dist3d << " id " << gggdau->pdgId() << " #gggggdaus " << ggggdau->numberOfDaughters() << " pt " << ggggdau->pt() << " eta " << ggggdau->eta() << " phi " << ggggdau->phi() << " mass " << ggggdau->mass() << std::endl;
+								for (size_t m = 0, me = ggggdau->numberOfDaughters(); m < me; ++m) {
+									auto gggggdau = ggggdau->daughter(m);
+									double gggggdau_dist3d = sqrt(pow(gggggdau->vx() - p->vx(), 2) + pow(gggggdau->vy() - p->vy(), 2) + pow(gggggdau->vz() - p->vz(), 2));
+									std::cout << "                   gggggdau " << " displ (cm) " << gggggdau_dist3d << " id " << gggggdau->pdgId() << " ggggggdaus " << gggggdau->numberOfDaughters() << " pt " << gggggdau->pt() << " eta " << gggggdau->eta() << " phi " << gggggdau->phi() << " mass " << gggggdau->mass() << std::endl;
+									for (size_t n = 0, ne = gggggdau->numberOfDaughters(); n < ne; ++n) {
+										auto ggggggdau = gggggdau->daughter(n);
+										double ggggggdau_dist3d = sqrt(pow(ggggggdau->vx() - p->vx(), 2) + pow(ggggggdau->vy() - p->vy(), 2) + pow(ggggggdau->vz() - p->vz(), 2));
+										std::cout << "                        ggggggdau " << " displ (cm) " << ggggggdau_dist3d << " id " << ggggggdau->pdgId() << " gggggggdaus " << ggggggdau->numberOfDaughters() << " pt " << ggggggdau->pt() << " eta " << ggggggdau->eta() << " phi " << ggggggdau->phi() << " mass " << ggggggdau->mass() << std::endl;
+
+									}
+								}
+							}
+						}
+					}
+				}
+
+			}
+			
+
+		}
+		
+		h_n_gen_bvtx->Fill(vec_c_nonb_decay.size());
+		/*
 		h_gdau_n_b_decay_points->Fill(vec_c_gdau_b_decay.size());
 		h_gdau_n_non_b_decay_points->Fill(vec_c_gdau_nonb_decay.size());
 		h_ggdau_n_b_decay_points->Fill(vec_c_ggdau_b_decay.size());
 		h_ggdau_n_non_b_decay_points->Fill(vec_c_ggdau_nonb_decay.size());
 		h_gggdau_n_b_decay_points->Fill(vec_c_gggdau_b_decay.size());
 		h_gggdau_n_non_b_decay_points->Fill(vec_c_gggdau_nonb_decay.size());
+		*/
 	}
 	// END: Hunt for b-quark decay points 
 	
@@ -1027,6 +1185,117 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   h_njets_20->Fill(njets20); 
   h_ht->Fill(ht);
   h_ht40->Fill(ht40);
+}
+
+bool MFVGenHistos::isBhadron(int pdgID) {
+	return (int(fabs(pdgID)/100) % 10) == 5 || (int(fabs(pdgID) / 1000) % 10) == 5;
+}
+
+bool MFVGenHistos::isBquark(int pdgID) {
+	return fabs(pdgID) == 5;
+}
+
+bool MFVGenHistos::isBvtx(int pdgID, double dist3d, std::vector<int> vec_btag) {
+	
+    for (size_t i = 0, ie = vec_btag.size() - 1; i < ie; ++i) {
+		if (!(abs(vec_btag[i]) == 5 || (vec_btag[i] == 21 && vec_btag[i+1] == -5)))
+			return false;
+	}
+	
+		
+	return dist3d > 0 && fabs(pdgID) != 11;
+}
+
+reco::GenParticle* MFVGenHistos::valid_dau(auto parent, reco::GenParticle* dau, double thes_dR) {
+	double dau_dR = reco::deltaR(dau->eta(), dau->phi(), parent->eta(), parent->phi());
+	//h_dR_valid_dau->Fill(dau_dR);
+	if (dau_dR < thes_dR)
+		return dau;
+	else
+		return nullptr;
+}
+
+size_t MFVGenHistos::mindR_dau(int nth_chain, auto parent, std::vector<double>& vec_first_dR, std::vector<double>& vec_second_dR) {
+	double mindR = 200;
+	size_t idx_mindR = 0;
+	for (size_t i = 0, ie = parent->numberOfDaughters(); i < ie; ++i) {
+		auto dau = parent->daughter(i);
+	    double dau_dR = reco::deltaR(dau->eta(), dau->phi(), parent->eta(), parent->phi());
+		if (dau_dR < mindR) {
+			mindR = dau_dR;
+			idx_mindR = i;
+		}
+	}
+	if (nth_chain == 1) {
+		vec_first_dR.push_back(mindR);
+		h_dau_to_gdau_mindR->Fill(mindR);
+	}
+	if (nth_chain == 2) {
+		vec_second_dR.push_back(mindR);
+		h_gdau_to_ggdau_mindR->Fill(mindR);
+	}
+	return idx_mindR;
+}
+
+void MFVGenHistos::print_bchain(int num, auto init_p) {
+
+		for (size_t i = 0, ie = init_p->numberOfDaughters(); i < ie; ++i) {
+			auto dau = init_p->daughter(i);
+			double dau_dist3d = sqrt(pow(dau->vx() - init_p->vx(), 2) + pow(dau->vy() - init_p->vy(), 2) + pow(dau->vz() - init_p->vz(), 2));
+			std::cout << "g x " << num << " dau " << " displ (cm) " << dau_dist3d << " id " << dau->pdgId() << " #daus " << dau->numberOfDaughters() << " pt " << dau->pt() << " eta " << dau->eta() << " phi " << dau->phi() << " mass " << dau->mass() << std::endl;
+			if (dau_dist3d == 0.0)
+				print_bchain(num + 1, dau);
+		}
+		return;
+}
+
+
+bool MFVGenHistos::Is_bdecay_done(int nth_chain, const reco::GenParticleRef& bquark, auto parent, std::vector<int>& vec_btag, std::vector<double>& vec_first_dR, std::vector<double>& vec_second_dR, std::vector<double>& vec_decay) {
+
+	for (size_t i = 0, ie = parent->numberOfDaughters(); i < ie; ++i) {
+		// gdau stage
+		if ((nth_chain == 1  && (i != mindR_dau(nth_chain, parent, vec_first_dR, vec_second_dR))) || (nth_chain == 2 && (i != mindR_dau(nth_chain, parent, vec_first_dR, vec_second_dR))))
+			 continue;
+		auto dau = parent->daughter(i);
+		//double dau_dR = reco::deltaR(dau->eta(), dau->phi(), bquark->eta(), bquark->phi());
+		//if (valid_dau(parent, (reco::GenParticle*)dau, 100.0) == nullptr)
+		//	continue;
+		int dau_pdgID = dau->pdgId();
+		double dau_dist3d = sqrt(pow(dau->vx() - bquark->vx(), 2) + pow(dau->vy() - bquark->vy(), 2) + pow(dau->vz() - bquark->vz(), 2));
+		
+		if (isBhadron(dau_pdgID)) {
+			vec_btag.push_back(-5);
+			if (isBvtx(dau_pdgID, dau_dist3d, vec_btag)) {
+				vec_decay.push_back(dau_dist3d);
+				h_dau_select_edge_b_decay_dist3d_from_llp->Fill(dau_dist3d);
+				break;
+			}
+		}
+		else if (isBquark(dau_pdgID)) {
+			vec_btag.push_back(5);
+			/*
+			if (isBvtx(dau_pdgID, dau_dist3d, vec_btag)) {
+				h_dau_select_edge_b_decay_dist3d_from_llp->Fill(dau_dist3d);
+			}
+			*/
+		}
+		else if (dau_pdgID == 21) {
+			vec_btag.push_back(21);
+		}
+		else {
+			vec_btag.push_back(999);
+			if (isBvtx(dau_pdgID, dau_dist3d, vec_btag)) {
+				vec_decay.push_back(dau_dist3d);
+				h_dau_select_b_decay_dist3d_from_llp->Fill(dau_dist3d);
+				break;
+			}
+			
+		}
+		
+		return Is_bdecay_done(nth_chain+1,bquark, dau, vec_btag, vec_first_dR, vec_second_dR, vec_decay);
+	}
+	
+	return true;
 }
 
 DEFINE_FWK_MODULE(MFVGenHistos);

@@ -11,7 +11,7 @@ cmssw_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
-#process.load('JMTucker.MFVNeutralino.VertexHistos_cfi')
+process.load('JMTucker.MFVNeutralino.VertexHistos_cfi')
 process.load('JMTucker.MFVNeutralino.EventHistos_cfi')
 process.load('JMTucker.MFVNeutralino.FilterHistos_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
@@ -30,7 +30,6 @@ process.pPreSelEvtFilt = cms.Path(common * process.mfvAnalysisCutsPreSelEvtFilt 
 
 
 
-"""
 nm1s = [
     ('Bsbs2ddist', 'min_bsbs2ddist = 0'),
     ('Bs2derr',    'max_rescale_bs2derr = 1e9'),
@@ -123,7 +122,7 @@ process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     
             setattr(process, vtx_hst_name, vtx_hst)
             setattr(process, '%sp%iV' % (EX1, nv) + name, cms.Path(process.mfvWeight * vtx * ana * evt_hst * vtx_hst))
 
-"""
+
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
@@ -132,12 +131,13 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
     else :
         #samples = pick_samples(dataset)
-        samples = [getattr(Samples, 'ggHToSSTobbbb_tau10mm_M15_2017')] 
+        samples = [getattr(Samples, 'ggHToSSTodddd_tau10mm_M55_2017')] 
+        #samples = pick_samples(dataset,qcd=False,ttbar=False, data=False, span_signal=True, all_signal=False) 
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
 
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
 
-    cs = CondorSubmitter('HistosGvtx' + version,
+    cs = CondorSubmitter('HistosGvtx2' + version,
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,

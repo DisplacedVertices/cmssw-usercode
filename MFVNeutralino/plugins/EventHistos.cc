@@ -45,6 +45,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   //FIXME: ghost-track vertex study
   TH1F* h_n_gen_bvtx;
   // only find 4 b-quarks 
+  TH1F* h_4bvtx_nsv;
   TH1F* h_gvtx_nsv;
   TH1F* h_gvtx_llp_pairdphi;
   TH1F* h_gvtx_llp_pairdist2d;
@@ -57,6 +58,24 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_gvtx_diff_pT_bpair_llp1;
   TH1F* h_gvtx_diff_phi_bquark_bvtx;
   TH1F* h_gvtx_diff_eta_bquark_bvtx;
+  // GEN-level info of bquark matching with tracks from jets 
+  TH1F* h_gvtx_bquark_before_match_dR_jets;
+  TH1F* h_gvtx_bquark_match_njet;
+  TH1F* h_gvtx_bquark_match_nbjet;
+  TH1F* h_gvtx_bquark_match_jet_ntrack;
+  TH1F* h_gvtx_bquark_match_bjet_ntrack;
+  TH1F* h_gvtx_bquark_before_match_dR_svs;
+  TH1F* h_gvtx_bquark_match_nsv;
+  TH1F* h_gvtx_bquark_match_sv_ntrack;
+  TH1F* h_gvtx_msv_ntrack;
+  TH1F* h_gvtx_dist3d_msv_bquark;
+  TH1F* h_gvtx_dPhi_msv_bquark;
+  TH1F* h_gvtx_msv_bs2derr;
+  TH1F* h_gvtx_msv_dBV;
+  TH1F* h_gvtx_msv_nchi2;
+  TH1F* h_gvtx_msv_gen3ddist;
+
+  // END
   TH1F* h_gvtx_bquark_pairdphi0;
   TH1F* h_gvtx_nonbquark_pairdphi0;
   TH1F* h_gvtx_nonbquark_pairdist3d0;
@@ -220,13 +239,14 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_bquark_pairdeta = fs->make<TH1F>("h_bquark_pairdeta", ";bquark pair #Delta#eta (rad);bquark pairs/.1", 100, -5.0, 5.0);
 
   // overview 
-  h_n_gen_bvtx = fs->make<TH1F>("h_n_gen_bvtx", ";# of GEN b-vertices (from non-b hadrons);arb. units", 40, 0, 40);
+  h_n_gen_bvtx = fs->make<TH1F>("h_n_gen_bvtx", ";# of GEN b-vertices (from non-b hadrons); events/1", 40, 0, 40);
+  h_4bvtx_nsv = fs->make<TH1F>("h_4bvtx_nsv", "req. exact 4 GEN b-vertices;# of (loose) secondary vertices; events/1", 40, 0, 40);
   // only find 4 b-vertices and at least 4 loose SVs  
-  h_gvtx_nsv = fs->make<TH1F>("h_gvtx_nsv", ";# of (loose) secondary vertices;arb. units", 40, 0, 40);
+  h_gvtx_nsv = fs->make<TH1F>("h_gvtx_nsv", "req. exact 4 GEN b-vertices && nsv>=4 ;# of (loose) secondary vertices; events/1", 40, 0, 40);
   h_gvtx_llp_pairdphi = fs->make<TH1F>("h_gvtx_llp_pairdphi", ";LLP pair |#Delta#phi| (rad);events/.031", 100, 0, 3.1416);
   h_gvtx_llp_pairdist2d = fs->make<TH1F>("h_gvtx_llp_pairdist2d", ";dist2d(gen vtx #0, #1) (cm);events/.01 mm", 1000, 0, 10);
   h_gvtx_llp_pairdist3d = fs->make<TH1F>("h_gvtx_llp_pairdist3d", ";dist3d(gen vtx #0, #1) (cm);events/.01 mm", 1000, 0, 10);
-  h_gvtx_bquark_betagamma = fs->make<TH1F>("h_gvtx_bquark_betagamma", "; b-quark #beta#gamma; 4 x events / 0.1", 100, 0, 10);
+  h_gvtx_bquark_betagamma = fs->make<TH1F>("h_gvtx_bquark_betagamma", "; b-quark #beta#gamma; 4 x events / 0.1", 100, 0, 100);
   h_gvtx_nonbquark_r3d = fs->make<TH1F>("h_gvtx_nonbquark_r3d", ";dist3d(GEN b-vtx, LLP) (cm);events/.01 mm", 1000, 0, 10);
   //h_gvtx_bquark_dBV = fs->make<TH1F>("h_gvtx_bquark_dBV", "found 4 b-quarks;dist2d(b-quark,beam spot) (cm)", 400, 0, 4);
 
@@ -235,6 +255,26 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_gvtx_diff_pT_bpair_llp1 = fs->make<TH1F>("h_gvtx_diff_pT_bpair_llp1", "; b-quark pair p_{T} - LLP1 p_{T}(GeV);events/1 GeV", 100, -50, 50);
   h_gvtx_diff_phi_bquark_bvtx = fs->make<TH1F>("h_gvtx_diff_phi_bquark_bvtx", ";#phi(b-quark) - #phi(b-vtx)  (rad);4 x events/.031", 200, -3.1416, 3.1416);
   h_gvtx_diff_eta_bquark_bvtx = fs->make<TH1F>("h_gvtx_diff_eta_bquark_bvtx", ";#eta(b-quark) - #eta(b-vtx)  (rad);4 x events/.031", 200, -3.1416, 3.1416);
+  // GEN-level info of bquark matching with tracks from jets 
+  h_gvtx_bquark_before_match_dR_jets = fs->make<TH1F>("h_gvtx_bquark_before_match_dR_jets", "Before req. dR < 0.5;dR(GEN b-quark,a match-jet);arb. units", 200, 0.0, 3.1416);
+  h_gvtx_bquark_match_njet = fs->make<TH1F>("h_gvtx_bquark_match_njet", ";# of jets within dR < 0.5; 4 x events/1", 40, 0, 40);
+  h_gvtx_bquark_match_nbjet = fs->make<TH1F>("h_gvtx_bquark_match_nbjet", ";# of loose b-jets within dR < 0.5; 4 x events/1", 40, 0, 40);
+  h_gvtx_bquark_match_jet_ntrack = fs->make<TH1F>("h_gvtx_bquark_match_jet_ntrack", ";# of tracks from match-jets within dR < 0.5; 4 x events/1", 80, 0, 80);
+  h_gvtx_bquark_match_bjet_ntrack = fs->make<TH1F>("h_gvtx_bquark_match_bjet_ntrack", ";# of tracks from match-bjets within dR < 0.5; 4 x events/1", 80, 0, 80);
+  h_gvtx_bquark_before_match_dR_svs = fs->make<TH1F>("h_gvtx_bquark_before_match_dR_svs", "Before req. dR < 0.5;dR(GEN b-quark,a match-sv);arb. units", 200, 0.0, 3.1416);
+  h_gvtx_bquark_match_nsv = fs->make<TH1F>("h_gvtx_bquark_match_nsv", ";# of SVs within dR < 0.5 ; 4 x events/1", 40, 0, 40);
+  h_gvtx_bquark_match_sv_ntrack = fs->make<TH1F>("h_gvtx_bquark_match_sv_ntrack", ";# of tracks from match-SVs within dR < 0.5; 4 x events/1", 40, 0, 40);
+  h_gvtx_dist3d_msv_bquark = fs->make<TH1F>("h_gvtx_dist3d_msv_bquark", ";dist3d(GEN b-vtx,match-sv) (cm)", 200, 0, 0.6);
+  h_gvtx_dPhi_msv_bquark = fs->make<TH1F>("h_gvtx_dPhi_msv_bquark", ";|dPhi(GEN b-vtx,match-sv)|", 200, 0, 3.15);
+  h_gvtx_msv_ntrack = fs->make<TH1F>("h_gvtx_msv_ntrack", ";# of tracks per match-sv;", 50, 0, 50);
+  h_gvtx_msv_bs2derr = fs->make<TH1F>("h_gvtx_msv_bs2derr", ";match-sv's bs2derr(cm)", 200, 0, 0.02);
+  h_gvtx_msv_dBV = fs->make<TH1F>("h_gvtx_msv_dBV", ";match-sv's dBV(cm)", 200, 0, 3.0);
+  h_gvtx_msv_gen3ddist = fs->make<TH1F>("h_gvtx_msv_gen3ddist", "; dist3d(match-sv, closest gen LLP-vtx) (cm)", 200, 0, 0.6);
+  h_gvtx_msv_nchi2 = fs->make<TH1F>("h_gvtx_msv_nchi2", ";match-sv #chi^{2}/dof;", 10, 0, 10);
+
+
+
+  // END
   h_gvtx_bquark_pairdphi0 = fs->make<TH1F>("h_gvtx_bquark_pairdphi0", ";|#Delta#phi| (rad) of b-quark pair per LLP0 ;events/.031", 100, 0, 3.1416);
   h_gvtx_nonbquark_pairdphi0 = fs->make<TH1F>("h_gvtx_nonbquark_pairdphi0", "; |#Delta#phi| (rad) of GEN b-vertex pair per LLP0 ;events/.031", 100, 0, 3.1416);
   h_gvtx_nonbquark_pairdist2d0 = fs->make<TH1F>("h_gvtx_nonbquark_pairdist2d0", ";dist2d(gen b-vtx #0, #1) (cm);events/.01 mm", 1000, 0, 10);
@@ -248,12 +288,12 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_gvtx_bsv_pairdphi0 = fs->make<TH1F>("h_gvtx_bsv_pairdphi0", ";|#Delta#phi| (rad) of b-sv pair per LLP0;events/.031", 100, 0, 3.1416);
   h_gvtx_bsv_pairdphi1 = fs->make<TH1F>("h_gvtx_bsv_pairdphi1", ";|#Delta#phi| (rad) of b-sv pair per LLP1 ;events/.031", 100, 0, 3.1416);
   h_gvtx_bsv_ntrack = fs->make<TH1F>("h_gvtx_bsv_ntrack", ";# of tracks per b-sv;", 50, 0, 50);
-  h_gvtx_bsv_bs2derr = fs->make<TH1F>("h_gvtx_bsv_bs2derr", ";b-sv's bs2derr(cm)", 200, 0, 0.05);
+  h_gvtx_bsv_bs2derr = fs->make<TH1F>("h_gvtx_bsv_bs2derr", ";b-sv's bs2derr(cm)", 200, 0, 0.02);
   h_gvtx_bsv_dBV = fs->make<TH1F>("h_gvtx_bsv_dBV", ";b-sv's dBV(cm)", 200, 0, 3.0);
-  h_gvtx_bsv_gen3ddist = fs->make<TH1F>("h_gvtx_bsv_gen3ddist", "is a b-sv actually an LLP-sv?; dist3d(b-sv, closest gen LLP-vtx) (cm)", 200, 0, 3.0);
+  h_gvtx_bsv_gen3ddist = fs->make<TH1F>("h_gvtx_bsv_gen3ddist", "is a b-sv actually an LLP-sv?; dist3d(b-sv, closest gen LLP-vtx) (cm)", 200, 0, 0.6);
   h_gvtx_bsv_nchi2 = fs->make<TH1F>("h_gvtx_bsv_nchi2", ";b-sv #chi^{2}/dof;", 10, 0, 10);
 
-  h_gvtx_dist3d_bsv_bquark = fs->make<TH1F>("h_gvtx_dist3d_bsv_bquark", ";matched dist3d(gen b-vtx,b-sv) (cm)", 200, 0, 3.15);
+  h_gvtx_dist3d_bsv_bquark = fs->make<TH1F>("h_gvtx_dist3d_bsv_bquark", ";matched dist3d(gen b-vtx,b-sv) (cm)", 200, 0, 0.6);
   h_gvtx_dPhi_bsv_bquark = fs->make<TH1F>("h_gvtx_dPhi_bsv_bquark", ";matched |dPhi(gen b-vtx,b-sv)|", 200, 0, 3.15);
 
   h_gvtx_all_dR_tracks_bquark_llp0 = fs->make<TH1F>("h_gvtx_all_dR_tracks_bquark_llp0", ";dR(gen b-vtx,b-sv track) per LLP0", 200, 0, 3.15);
@@ -438,72 +478,140 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   // overview before studies 
   h_n_gen_bvtx->Fill(int((mevent->gen_b_llp0_decay.size()+ mevent->gen_b_llp1_decay.size())/3), w);
-  // only 4 b-vertices and >=4 loose-SVs per event  
-  if (mevent->gen_b_llp0_decay.size() == 6 && mevent->gen_b_llp1_decay.size() == 6 && nsv >= 4) {
-	  h_gvtx_nsv->Fill(nsv, w);
-	  h_gvtx_llp_pairdphi->Fill(fabs(reco::deltaPhi(mevent->gen_lsp_phi[0], mevent->gen_lsp_phi[1])), w);
-      h_gvtx_llp_pairdist2d->Fill(mevent->lspdist2d(), w);
-      h_gvtx_llp_pairdist3d->Fill(mevent->lspdist3d(), w);
+  // only 4 b-vertices and >=4 loose-SVs per event 
+  if (mevent->gen_b_llp0_decay.size() == 6 && mevent->gen_b_llp1_decay.size() == 6) {
+	  h_4bvtx_nsv->Fill(nsv, w);
+	  if (nsv >= 4) {
+		  h_gvtx_nsv->Fill(nsv, w);
+		  h_gvtx_llp_pairdphi->Fill(fabs(reco::deltaPhi(mevent->gen_lsp_phi[0], mevent->gen_lsp_phi[1])), w);
+		  h_gvtx_llp_pairdist2d->Fill(mevent->lspdist2d(), w);
+		  h_gvtx_llp_pairdist3d->Fill(mevent->lspdist3d(), w);
 
-	  for (size_t k = 0; k < 2; ++k) {
-		  if (k == 0) {
-			  double genllp_pT = mevent->gen_lsp_pt[k];
-			  double bpair_pT = mevent->gen_daughters[0].Pt() + mevent->gen_daughters[1].Pt();
-			  double diff_pT = bpair_pT - genllp_pT;
-			  double pairdphi = fabs(reco::deltaPhi(mevent->gen_daughters[0].Phi(), mevent->gen_daughters[1].Phi()));
-			  double pairdphi_nonb = fabs(reco::deltaPhi(mevent->gen_b_llp0_flight(0).Phi(), mevent->gen_b_llp0_flight(1).Phi()));
-			  double pairdist3d0 = sqrt(pow(mevent->gen_b_llp0_decay[0] - mevent->gen_b_llp0_decay[3], 2) + pow(mevent->gen_b_llp0_decay[1] - mevent->gen_b_llp0_decay[4], 2) + pow(mevent->gen_b_llp0_decay[2] - mevent->gen_b_llp0_decay[5], 2));
-			  double pairdist2d0 = sqrt(pow(mevent->gen_b_llp0_decay[0] - mevent->gen_b_llp0_decay[3], 2) + pow(mevent->gen_b_llp0_decay[1] - mevent->gen_b_llp0_decay[4], 2));
+		  for (size_t k = 0; k < 2; ++k) {
+			  if (k == 0) {
+				  double genllp_pT = mevent->gen_lsp_pt[k];
+				  double bpair_pT = mevent->gen_daughters[0].Pt() + mevent->gen_daughters[1].Pt();
+				  double diff_pT = bpair_pT - genllp_pT;
+				  double pairdphi = fabs(reco::deltaPhi(mevent->gen_daughters[0].Phi(), mevent->gen_daughters[1].Phi()));
+				  double pairdphi_nonb = fabs(reco::deltaPhi(mevent->gen_b_llp0_flight(0).Phi(), mevent->gen_b_llp0_flight(1).Phi()));
+				  double pairdist3d0 = sqrt(pow(mevent->gen_b_llp0_decay[0] - mevent->gen_b_llp0_decay[3], 2) + pow(mevent->gen_b_llp0_decay[1] - mevent->gen_b_llp0_decay[4], 2) + pow(mevent->gen_b_llp0_decay[2] - mevent->gen_b_llp0_decay[5], 2));
+				  double pairdist2d0 = sqrt(pow(mevent->gen_b_llp0_decay[0] - mevent->gen_b_llp0_decay[3], 2) + pow(mevent->gen_b_llp0_decay[1] - mevent->gen_b_llp0_decay[4], 2));
 
-			  h_gvtx_diff_pT_bpair_llp0->Fill(diff_pT, w);
-			  h_gvtx_diff_phi_bquark_bvtx->Fill(reco::deltaPhi(mevent->gen_daughters[0].Phi(), mevent->gen_b_llp0_flight(0).Phi()), w);
-			  h_gvtx_diff_phi_bquark_bvtx->Fill(reco::deltaPhi(mevent->gen_daughters[1].Phi(), mevent->gen_b_llp0_flight(1).Phi()), w);
-			  h_gvtx_diff_eta_bquark_bvtx->Fill(etaFromXYZ(mevent->gen_lsp_decay[0] - mevent->gen_b_llp0_decay[0], mevent->gen_lsp_decay[1] - mevent->gen_b_llp0_decay[1], mevent->gen_lsp_decay[2] - mevent->gen_b_llp0_decay[2]) , w);
-			  h_gvtx_diff_eta_bquark_bvtx->Fill(etaFromXYZ(mevent->gen_lsp_decay[0] - mevent->gen_b_llp0_decay[3], mevent->gen_lsp_decay[1] - mevent->gen_b_llp0_decay[4], mevent->gen_lsp_decay[2] - mevent->gen_b_llp0_decay[5]), w);
-			  double b0beta = mevent->gen_daughters[0].P() / mevent->gen_daughters[0].Energy();
-			  double b0betagamma = b0beta / sqrt(1 - b0beta * b0beta);
-			  h_gvtx_bquark_betagamma->Fill(b0betagamma, w);
-			  double b1beta = mevent->gen_daughters[1].P() / mevent->gen_daughters[1].Energy();
-			  double b1betagamma = b1beta / sqrt(1 - b1beta * b1beta);
-			  h_gvtx_bquark_betagamma->Fill(b1betagamma, w);
-			  h_gvtx_nonbquark_r3d->Fill(mag(mevent->gen_b_llp0_decay[0] - mevent->gen_lsp_decay[0], mevent->gen_b_llp0_decay[1] - mevent->gen_lsp_decay[1], mevent->gen_b_llp0_decay[2] - mevent->gen_lsp_decay[2]), w);
-			  h_gvtx_nonbquark_r3d->Fill(mag(mevent->gen_b_llp0_decay[3] - mevent->gen_lsp_decay[0], mevent->gen_b_llp0_decay[4] - mevent->gen_lsp_decay[1], mevent->gen_b_llp0_decay[5] - mevent->gen_lsp_decay[2]), w);
-			  h_gvtx_bquark_pairdphi0->Fill(pairdphi, w);
-			  h_gvtx_nonbquark_pairdphi0->Fill(pairdphi_nonb, w);
-			  h_gvtx_nonbquark_pairdist3d0->Fill(pairdist3d0, w);
-			  h_gvtx_nonbquark_pairdist2d0->Fill(pairdist2d0, w);
+				  h_gvtx_diff_pT_bpair_llp0->Fill(diff_pT, w);
+				  h_gvtx_diff_phi_bquark_bvtx->Fill(reco::deltaPhi(mevent->gen_daughters[0].Phi(), mevent->gen_b_llp0_flight(0).Phi()), w);
+				  h_gvtx_diff_phi_bquark_bvtx->Fill(reco::deltaPhi(mevent->gen_daughters[1].Phi(), mevent->gen_b_llp0_flight(1).Phi()), w);
+				  h_gvtx_diff_eta_bquark_bvtx->Fill(etaFromXYZ(mevent->gen_lsp_decay[0] - mevent->gen_b_llp0_decay[0], mevent->gen_lsp_decay[1] - mevent->gen_b_llp0_decay[1], mevent->gen_lsp_decay[2] - mevent->gen_b_llp0_decay[2]), w);
+				  h_gvtx_diff_eta_bquark_bvtx->Fill(etaFromXYZ(mevent->gen_lsp_decay[0] - mevent->gen_b_llp0_decay[3], mevent->gen_lsp_decay[1] - mevent->gen_b_llp0_decay[4], mevent->gen_lsp_decay[2] - mevent->gen_b_llp0_decay[5]), w);
+				  double b0beta = mevent->gen_daughters[0].P() / mevent->gen_daughters[0].Energy();
+				  double b0betagamma = b0beta / sqrt(1 - b0beta * b0beta);
+				  h_gvtx_bquark_betagamma->Fill(b0betagamma, w);
+				  double b1beta = mevent->gen_daughters[1].P() / mevent->gen_daughters[1].Energy();
+				  double b1betagamma = b1beta / sqrt(1 - b1beta * b1beta);
+				  h_gvtx_bquark_betagamma->Fill(b1betagamma, w);
+				  h_gvtx_nonbquark_r3d->Fill(mag(mevent->gen_b_llp0_decay[0] - mevent->gen_lsp_decay[0], mevent->gen_b_llp0_decay[1] - mevent->gen_lsp_decay[1], mevent->gen_b_llp0_decay[2] - mevent->gen_lsp_decay[2]), w);
+				  h_gvtx_nonbquark_r3d->Fill(mag(mevent->gen_b_llp0_decay[3] - mevent->gen_lsp_decay[0], mevent->gen_b_llp0_decay[4] - mevent->gen_lsp_decay[1], mevent->gen_b_llp0_decay[5] - mevent->gen_lsp_decay[2]), w);
+				  h_gvtx_bquark_pairdphi0->Fill(pairdphi, w);
+				  h_gvtx_nonbquark_pairdphi0->Fill(pairdphi_nonb, w);
+				  h_gvtx_nonbquark_pairdist3d0->Fill(pairdist3d0, w);
+				  h_gvtx_nonbquark_pairdist2d0->Fill(pairdist2d0, w);
+
+			  }
+			  else {
+				  double genllp_pT = mevent->gen_lsp_pt[k];
+				  double bpair_pT = mevent->gen_daughters[2].Pt() + mevent->gen_daughters[3].Pt();
+				  double diff_pT = bpair_pT - genllp_pT;
+				  double pairdphi = fabs(reco::deltaPhi(mevent->gen_daughters[2].Phi(), mevent->gen_daughters[3].Phi()));
+				  double pairdphi_nonb = fabs(reco::deltaPhi(mevent->gen_b_llp1_flight(0).Phi(), mevent->gen_b_llp1_flight(1).Phi()));
+				  double pairdist3d1 = sqrt(pow(mevent->gen_b_llp1_decay[0] - mevent->gen_b_llp1_decay[3], 2) + pow(mevent->gen_b_llp1_decay[1] - mevent->gen_b_llp1_decay[4], 2) + pow(mevent->gen_b_llp1_decay[2] - mevent->gen_b_llp1_decay[5], 2));
+				  double pairdist2d1 = sqrt(pow(mevent->gen_b_llp1_decay[0] - mevent->gen_b_llp1_decay[3], 2) + pow(mevent->gen_b_llp1_decay[1] - mevent->gen_b_llp1_decay[4], 2));
+
+				  h_gvtx_diff_pT_bpair_llp1->Fill(diff_pT, w);
+				  h_gvtx_diff_phi_bquark_bvtx->Fill(reco::deltaPhi(mevent->gen_daughters[2].Phi(), mevent->gen_b_llp1_flight(0).Phi()), w);
+				  h_gvtx_diff_phi_bquark_bvtx->Fill(reco::deltaPhi(mevent->gen_daughters[3].Phi(), mevent->gen_b_llp1_flight(1).Phi()), w);
+				  h_gvtx_diff_eta_bquark_bvtx->Fill(etaFromXYZ(mevent->gen_lsp_decay[3] - mevent->gen_b_llp1_decay[0], mevent->gen_lsp_decay[4] - mevent->gen_b_llp1_decay[1], mevent->gen_lsp_decay[5] - mevent->gen_b_llp1_decay[2]), w);
+				  h_gvtx_diff_eta_bquark_bvtx->Fill(etaFromXYZ(mevent->gen_lsp_decay[3] - mevent->gen_b_llp1_decay[3], mevent->gen_lsp_decay[4] - mevent->gen_b_llp1_decay[4], mevent->gen_lsp_decay[5] - mevent->gen_b_llp1_decay[5]), w);
+				  double b2beta = mevent->gen_daughters[2].P() / mevent->gen_daughters[2].Energy();
+				  double b2betagamma = b2beta / sqrt(1 - b2beta * b2beta);
+				  h_gvtx_bquark_betagamma->Fill(b2betagamma, w);
+				  double b3beta = mevent->gen_daughters[3].P() / mevent->gen_daughters[3].Energy();
+				  double b3betagamma = b3beta / sqrt(1 - b3beta * b3beta);
+				  h_gvtx_bquark_betagamma->Fill(b3betagamma, w);
+				  h_gvtx_nonbquark_r3d->Fill(mag(mevent->gen_b_llp1_decay[0] - mevent->gen_lsp_decay[3], mevent->gen_b_llp1_decay[1] - mevent->gen_lsp_decay[4], mevent->gen_b_llp1_decay[2] - mevent->gen_lsp_decay[5]), w);
+				  h_gvtx_nonbquark_r3d->Fill(mag(mevent->gen_b_llp1_decay[3] - mevent->gen_lsp_decay[3], mevent->gen_b_llp1_decay[4] - mevent->gen_lsp_decay[4], mevent->gen_b_llp1_decay[5] - mevent->gen_lsp_decay[5]), w);
+				  h_gvtx_bquark_pairdphi1->Fill(pairdphi, w);
+				  h_gvtx_nonbquark_pairdphi1->Fill(pairdphi_nonb, w);
+				  h_gvtx_nonbquark_pairdist3d1->Fill(pairdist3d1, w);
+				  h_gvtx_nonbquark_pairdist2d1->Fill(pairdist2d1, w);
+			  }
+
+			  double match_dR_threshold = 0.5;
+			  for (size_t dau = 0; dau < 2; ++dau) {
+				  int match_njets = 0;
+				  int match_nbjets = 0;
+				  int match_jet_ntrack = 0;
+				  int match_bjet_ntrack = 0;
+				  for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+					  if (mevent->jet_pt[ijet] < mfv::min_jet_pt)
+						  continue;
+					  h_gvtx_bquark_before_match_dR_jets->Fill(reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->gen_daughters[k * 2 + dau].Eta(), mevent->gen_daughters[k * 2 + dau].Phi()), w);
+					  if (match_dR_threshold > reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->gen_daughters[k * 2 + dau].Eta(), mevent->gen_daughters[k * 2 + dau].Phi())) {
+						  match_njets++;
+						  int jet_ntrack = 0;
+						  for (unsigned j = 0; j < mevent->jet_track_which_jet.size(); ++j) {
+							  if (ijet == mevent->jet_track_which_jet[j]) {
+								  jet_ntrack++;
+							  }
+						  }
+						  match_jet_ntrack += jet_ntrack;
+						  if (mevent->is_btagged(ijet, 0)) {		   // loose b-tag
+							  match_nbjets++;
+							  match_bjet_ntrack += jet_ntrack;
+						  }
+					  }
+					  
+					  
+				  }
+				  h_gvtx_bquark_match_njet->Fill(match_njets, w);
+				  h_gvtx_bquark_match_nbjet->Fill(match_nbjets, w);
+				  h_gvtx_bquark_match_jet_ntrack->Fill(match_jet_ntrack, w);
+				  h_gvtx_bquark_match_bjet_ntrack->Fill(match_bjet_ntrack, w);
+
+				  int match_nsv = 0;
+				  int match_sv_ntrack = 0;
+				  for (int isv = 0; isv < nsv; ++isv) {
+					  const MFVVertexAux& maux = auxes->at(isv);
+					  double msv_phi = atan2(maux.y - mevent->pvy, maux.x - mevent->pvx);
+					  double msv_eta = etaFromXYZ(maux.x - mevent->pvx, maux.y - mevent->pvy, maux.z - mevent->pvz);
+					  h_gvtx_bquark_before_match_dR_svs->Fill(reco::deltaR(msv_eta, msv_phi, mevent->gen_daughters[k * 2 + dau].Eta(), mevent->gen_daughters[k * 2 + dau].Phi()), w);
+					  if (match_dR_threshold > reco::deltaR(msv_eta, msv_phi, mevent->gen_daughters[k * 2 + dau].Eta(), mevent->gen_daughters[k * 2 + dau].Phi())) {
+						  match_nsv++;
+						  match_sv_ntrack += maux.ntracks();
+						  double msv_dist3d = 0;
+						  if (k == 0) {
+							  msv_dist3d = sqrt(pow(maux.x - mevent->gen_b_llp0_decay[dau * 3 + 0], 2) + pow(maux.y - mevent->gen_b_llp0_decay[dau * 3 + 1], 2) + pow(maux.z - mevent->gen_b_llp0_decay[dau * 3 + 2], 2));
+							  h_gvtx_dPhi_msv_bquark->Fill(fabs(reco::deltaPhi(msv_phi, mevent->gen_b_llp0_flight(dau).Phi())), w);
+						  }
+						  else {
+							  msv_dist3d = sqrt(pow(maux.x - mevent->gen_b_llp1_decay[dau * 3 + 0], 2) + pow(maux.y - mevent->gen_b_llp1_decay[dau * 3 + 1], 2) + pow(maux.z - mevent->gen_b_llp1_decay[dau * 3 + 2], 2));
+							  h_gvtx_dPhi_msv_bquark->Fill(fabs(reco::deltaPhi(msv_phi, mevent->gen_b_llp1_flight(dau).Phi())), w);
+						  }
+						  h_gvtx_dist3d_msv_bquark->Fill(msv_dist3d,w);
+						  h_gvtx_msv_ntrack->Fill(maux.ntracks(), w);
+						  h_gvtx_msv_bs2derr->Fill(maux.bs2derr, w);
+						  h_gvtx_msv_dBV->Fill(mevent->bs2ddist(maux), w);
+						  h_gvtx_msv_gen3ddist->Fill(maux.gen3ddist, w);
+						  h_gvtx_msv_nchi2->Fill(maux.chi2dof(), w);
+					  }
+				  }
+				  h_gvtx_bquark_match_nsv->Fill(match_nsv, w);
+				  h_gvtx_bquark_match_sv_ntrack->Fill(match_sv_ntrack, w);
+			  }
 		  }
-		  else {
-			  double genllp_pT = mevent->gen_lsp_pt[k];
-			  double bpair_pT = mevent->gen_daughters[2].Pt() + mevent->gen_daughters[3].Pt();
-			  double diff_pT = bpair_pT - genllp_pT;
-			  double pairdphi = fabs(reco::deltaPhi(mevent->gen_daughters[2].Phi(), mevent->gen_daughters[3].Phi()));
-			  double pairdphi_nonb = fabs(reco::deltaPhi(mevent->gen_b_llp1_flight(0).Phi(), mevent->gen_b_llp1_flight(1).Phi()));
-			  double pairdist3d1 = sqrt(pow(mevent->gen_b_llp1_decay[0] - mevent->gen_b_llp1_decay[3], 2) + pow(mevent->gen_b_llp1_decay[1] - mevent->gen_b_llp1_decay[4], 2) + pow(mevent->gen_b_llp1_decay[2] - mevent->gen_b_llp1_decay[5], 2));
-			  double pairdist2d1 = sqrt(pow(mevent->gen_b_llp1_decay[0] - mevent->gen_b_llp1_decay[3], 2) + pow(mevent->gen_b_llp1_decay[1] - mevent->gen_b_llp1_decay[4], 2));
-
-			  h_gvtx_diff_pT_bpair_llp1->Fill(diff_pT, w);
-			  h_gvtx_diff_phi_bquark_bvtx->Fill(reco::deltaPhi(mevent->gen_daughters[2].Phi(), mevent->gen_b_llp1_flight(0).Phi()), w);
-			  h_gvtx_diff_phi_bquark_bvtx->Fill(reco::deltaPhi(mevent->gen_daughters[3].Phi(), mevent->gen_b_llp1_flight(1).Phi()), w);
-			  h_gvtx_diff_eta_bquark_bvtx->Fill(etaFromXYZ(mevent->gen_lsp_decay[3] - mevent->gen_b_llp1_decay[0], mevent->gen_lsp_decay[4] - mevent->gen_b_llp1_decay[1], mevent->gen_lsp_decay[5] - mevent->gen_b_llp1_decay[2]), w);
-			  h_gvtx_diff_eta_bquark_bvtx->Fill(etaFromXYZ(mevent->gen_lsp_decay[3] - mevent->gen_b_llp1_decay[3], mevent->gen_lsp_decay[4] - mevent->gen_b_llp1_decay[4], mevent->gen_lsp_decay[5] - mevent->gen_b_llp1_decay[5]), w);
-			  double b2beta = mevent->gen_daughters[2].P() / mevent->gen_daughters[2].Energy();
-			  double b2betagamma = b2beta / sqrt(1 - b2beta * b2beta);
-			  h_gvtx_bquark_betagamma->Fill(b2betagamma, w);
-			  double b3beta = mevent->gen_daughters[3].P() / mevent->gen_daughters[3].Energy();
-			  double b3betagamma = b3beta / sqrt(1 - b3beta * b3beta);
-			  h_gvtx_bquark_betagamma->Fill(b3betagamma, w);
-			  h_gvtx_nonbquark_r3d->Fill(mag(mevent->gen_b_llp1_decay[0] - mevent->gen_lsp_decay[3], mevent->gen_b_llp1_decay[1] - mevent->gen_lsp_decay[4], mevent->gen_b_llp1_decay[2] - mevent->gen_lsp_decay[5]), w);
-			  h_gvtx_nonbquark_r3d->Fill(mag(mevent->gen_b_llp1_decay[3] - mevent->gen_lsp_decay[3], mevent->gen_b_llp1_decay[4] - mevent->gen_lsp_decay[4], mevent->gen_b_llp1_decay[5] - mevent->gen_lsp_decay[5]), w);
-			  h_gvtx_bquark_pairdphi1->Fill(pairdphi, w);
-			  h_gvtx_nonbquark_pairdphi1->Fill(pairdphi_nonb, w);
-			  h_gvtx_nonbquark_pairdist3d1->Fill(pairdist3d1, w);
-			  h_gvtx_nonbquark_pairdist2d1->Fill(pairdist2d1, w);
-		  }
-	  }
 
 
-	  
+
+
+
 		  std::vector<size_t> vec_bvtx_match = {};
 		  double bsvpair0_pT = 0;
 		  double bsvpair1_pT = 0;
@@ -525,22 +633,24 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
 			  vec_bvtx_match.push_back(isv_b);
 			  const MFVVertexAux& baux = auxes->at(vec_bvtx_match[k]);
-			  double bsv_phi = atan2(baux.y - mevent->pvy, baux.x - mevent->pvx);
-			  double bsv_eta = etaFromXYZ(baux.x - mevent->pvx, baux.y - mevent->pvy, baux.z - mevent->pvz);
-			  double bsv_dist3d = sqrt(pow(baux.x - mevent->gen_b_llp0_decay[k * 3 + 0], 2) + pow(baux.y - mevent->gen_b_llp0_decay[k * 3 + 1], 2) + pow(baux.z - mevent->gen_b_llp0_decay[k * 3 + 2], 2));
-			  h_gvtx_dist3d_bsv_bquark->Fill(bsv_dist3d, w);
-			  h_gvtx_dPhi_bsv_bquark->Fill(fabs(reco::deltaPhi(bsv_phi, mevent->gen_b_llp0_flight(k).Phi())), w);
-			  
-			  h_gvtx_bsv_ntrack->Fill(baux.ntracks(), w);
-			  h_gvtx_bsv_bs2derr->Fill(baux.bs2derr,w);
-			  h_gvtx_bsv_dBV->Fill(mevent->bs2ddist(baux), w);
-			  h_gvtx_bsv_gen3ddist->Fill(baux.gen3ddist, w);
-			  h_gvtx_bsv_nchi2->Fill(baux.chi2dof(), w);
+			  if (baux.gen3ddist > 0.0150 && baux.bs2derr > 0.0050) {
+				  double bsv_phi = atan2(baux.y - mevent->pvy, baux.x - mevent->pvx);
+				  double bsv_eta = etaFromXYZ(baux.x - mevent->pvx, baux.y - mevent->pvy, baux.z - mevent->pvz);
+				  double bsv_dist3d = sqrt(pow(baux.x - mevent->gen_b_llp0_decay[k * 3 + 0], 2) + pow(baux.y - mevent->gen_b_llp0_decay[k * 3 + 1], 2) + pow(baux.z - mevent->gen_b_llp0_decay[k * 3 + 2], 2));
+				  h_gvtx_dist3d_bsv_bquark->Fill(bsv_dist3d, w);
+				  h_gvtx_dPhi_bsv_bquark->Fill(fabs(reco::deltaPhi(bsv_phi, mevent->gen_b_llp0_flight(k).Phi())), w);
 
-			  for (int j = 0; j < baux.ntracks(); ++j) {
-				  bsvpair0_pT += baux.track_pt(j);
-				  h_gvtx_all_dR_tracks_bsv_llp0->Fill(reco::deltaR(bsv_eta, bsv_phi, baux.track_eta[j], baux.track_phi[j]), w);
-				  h_gvtx_all_dR_tracks_bquark_llp0->Fill(reco::deltaR(mevent->gen_b_llp0_flight(k).Eta(), mevent->gen_b_llp0_flight(k).Phi(), baux.track_eta[j], baux.track_phi[j]), w);
+				  h_gvtx_bsv_ntrack->Fill(baux.ntracks(), w);
+				  h_gvtx_bsv_bs2derr->Fill(baux.bs2derr, w);
+				  h_gvtx_bsv_dBV->Fill(mevent->bs2ddist(baux), w);
+				  h_gvtx_bsv_gen3ddist->Fill(baux.gen3ddist, w);
+				  h_gvtx_bsv_nchi2->Fill(baux.chi2dof(), w);
+
+				  for (int j = 0; j < baux.ntracks(); ++j) {
+					  bsvpair0_pT += baux.track_pt(j);
+					  h_gvtx_all_dR_tracks_bsv_llp0->Fill(reco::deltaR(bsv_eta, bsv_phi, baux.track_eta[j], baux.track_phi[j]), w);
+					  h_gvtx_all_dR_tracks_bquark_llp0->Fill(reco::deltaR(mevent->gen_b_llp0_flight(k).Eta(), mevent->gen_b_llp0_flight(k).Phi(), baux.track_eta[j], baux.track_phi[j]), w);
+				  }
 			  }
 
 		  }
@@ -574,23 +684,25 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 			  }
 
 			  vec_bvtx_match.push_back(isv_b);
-			  const MFVVertexAux& baux = auxes->at(vec_bvtx_match[k]);
-			  double bsv_phi = atan2(baux.y - mevent->pvy, baux.x - mevent->pvx);
-			  double bsv_eta = etaFromXYZ(baux.x - mevent->pvx, baux.y - mevent->pvy, baux.z - mevent->pvz);
-			  double bsv_dist3d = sqrt(pow(baux.x - mevent->gen_b_llp1_decay[k * 3 + 0], 2) + pow(baux.y - mevent->gen_b_llp1_decay[k * 3 + 1], 2) + pow(baux.z - mevent->gen_b_llp1_decay[k * 3 + 2], 2));
-			  h_gvtx_dist3d_bsv_bquark->Fill(bsv_dist3d, w);
-			  h_gvtx_dPhi_bsv_bquark->Fill(fabs(reco::deltaPhi(bsv_phi, mevent->gen_b_llp1_flight(k).Phi())), w);
+			  const MFVVertexAux& baux = auxes->at(vec_bvtx_match[k + 2]);
+			  if (baux.gen3ddist > 0.0150 && baux.bs2derr > 0.0050) {
+				  double bsv_phi = atan2(baux.y - mevent->pvy, baux.x - mevent->pvx);
+				  double bsv_eta = etaFromXYZ(baux.x - mevent->pvx, baux.y - mevent->pvy, baux.z - mevent->pvz);
+				  double bsv_dist3d = sqrt(pow(baux.x - mevent->gen_b_llp1_decay[k * 3 + 0], 2) + pow(baux.y - mevent->gen_b_llp1_decay[k * 3 + 1], 2) + pow(baux.z - mevent->gen_b_llp1_decay[k * 3 + 2], 2));
+				  h_gvtx_dist3d_bsv_bquark->Fill(bsv_dist3d, w);
+				  h_gvtx_dPhi_bsv_bquark->Fill(fabs(reco::deltaPhi(bsv_phi, mevent->gen_b_llp1_flight(k).Phi())), w);
 
-			  h_gvtx_bsv_ntrack->Fill(baux.ntracks(), w);
-			  h_gvtx_bsv_bs2derr->Fill(baux.bs2derr, w);
-			  h_gvtx_bsv_dBV->Fill(mevent->bs2ddist(baux), w);
-			  h_gvtx_bsv_gen3ddist->Fill(baux.gen3ddist, w);
-			  h_gvtx_bsv_nchi2->Fill(baux.chi2dof(), w);
+				  h_gvtx_bsv_ntrack->Fill(baux.ntracks(), w);
+				  h_gvtx_bsv_bs2derr->Fill(baux.bs2derr, w);
+				  h_gvtx_bsv_dBV->Fill(mevent->bs2ddist(baux), w);
+				  h_gvtx_bsv_gen3ddist->Fill(baux.gen3ddist, w);
+				  h_gvtx_bsv_nchi2->Fill(baux.chi2dof(), w);
 
-			  for (int j = 0; j < baux.ntracks(); ++j) {
-				  bsvpair1_pT += baux.track_pt(j);
-				  h_gvtx_all_dR_tracks_bsv_llp1->Fill(reco::deltaR(bsv_eta, bsv_phi, baux.track_eta[j], baux.track_phi[j]), w);
-				  h_gvtx_all_dR_tracks_bquark_llp1->Fill(reco::deltaR(mevent->gen_b_llp1_flight(k).Eta(), mevent->gen_b_llp1_flight(k).Phi(), baux.track_eta[j], baux.track_phi[j]), w);
+				  for (int j = 0; j < baux.ntracks(); ++j) {
+					  bsvpair1_pT += baux.track_pt(j);
+					  h_gvtx_all_dR_tracks_bsv_llp1->Fill(reco::deltaR(bsv_eta, bsv_phi, baux.track_eta[j], baux.track_phi[j]), w);
+					  h_gvtx_all_dR_tracks_bquark_llp1->Fill(reco::deltaR(mevent->gen_b_llp1_flight(k).Eta(), mevent->gen_b_llp1_flight(k).Phi(), baux.track_eta[j], baux.track_phi[j]), w);
+				  }
 			  }
 
 		  }
@@ -606,9 +718,9 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 			  h_gvtx_diff_pT_bsvpair_llp1->Fill(diff_sv_pT, w);
 			  h_gvtx_bsv_pairdphi1->Fill(svpairdphi, w);
 		  }
-	  
+
+	  }
   }
-	  
 
   h_minlspdist2d->Fill(mevent->minlspdist2d(), w);
   h_lspdist2d->Fill(mevent->lspdist2d(), w);
