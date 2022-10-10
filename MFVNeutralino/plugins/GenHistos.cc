@@ -1,5 +1,7 @@
 #include "TH1F.h"
 #include "TH2F.h"
+#include "DataFormats/Math/interface/Point3D.h"
+#include "DataFormats/Math/interface/PtEtaPhiMass.h"
 #include "TLorentzVector.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
@@ -36,7 +38,7 @@ private:
   bool isValidLeptonic(auto parent, int pdgID);
   bool isBvtx(auto parent, int pdgID, double dist3d, std::vector<int> vec_pdgID);
   size_t mindR_dau(int &nth_chain, auto parent, std::vector<double>& vec_first_dR, std::vector<double>& vec_second_dR, std::vector<size_t>& excl_idx_first_dRmin, std::vector<size_t>& excl_idx_second_dRmin);
-  bool Is_bdecay_done(int &nth_chain, const reco::GenParticleRef& bquark, auto parent, std::vector<int>& vec_pdgID, std::vector<double>& vec_first_dR, std::vector<double>& vec_second_dR, std::vector<double>& vec_decay, std::vector<size_t>& excl_idx_first_dRmin, std::vector<size_t>& excl_idx_second_dRmin);
+  bool Is_bdecay_done(int &nth_chain, const reco::GenParticleRef& bquark, auto parent, std::vector<reco::GenParticle*>& vec_gen_particle, std::vector<int>& vec_pdgID, std::vector<double>& vec_first_dR, std::vector<double>& vec_second_dR, std::vector<double>& vec_decay, std::vector<size_t>& excl_idx_first_dRmin, std::vector<size_t>& excl_idx_second_dRmin);
  
   edm::ESHandle<ParticleDataTable> pdt;
 
@@ -122,42 +124,19 @@ private:
   TH1F* h_bquarks_dR;
   TH2F* h_bquarks_dR_dphi;
 
-  TH1I* h_n_gen_bvtx;
-  TH1F* h_missing_dau_to_gdau_mindR;
-  TH1F* h_missing_gdau_to_ggdau_mindR;
-  TH1F* h_dau_to_gdau_mindR;
-  TH1F* h_gdau_to_ggdau_mindR;
-  TH1F* h_dau_select_edge_b_decay_dist3d_from_llp;
-  TH1F* h_dau_select_b_decay_dist3d_from_llp;
+  TH1I* h_n_gen_bvtx;	// # of b-vertices per event
+  TH1F* h_dau_to_gdau_mindR;   // a set of four minimum dR saved within the recursive function at the chain of b-quark to daus 
+  TH1F* h_gdau_to_ggdau_mindR;	// a set of four minimum dR saved within the recursive function at the chain of b-quark's daus to gdaus
+  TH1F* h_dau_select_edge_b_decay_dist3d_from_llp; //  b-vtx (from b hadrons) decay lengths 
+  TH1F* h_dau_select_b_decay_dist3d_from_llp;  	// b-vtx (from non-b hadrons) decay lengths 
+  TH1F* h_dau_select_b_decay_dR_by_vec_nonb_had_to_b_quarks; // dR between non-b hadrons and its b-quark 
+  TH1F* h_dau_select_b_decay_dphi_by_vec_nonb_had_to_b_quarks;	  // dphi between non-b hadrons and its b-quark 
+  TH1F* h_dau_select_b_decay_dphi_by_pt_nonb_had_to_b_quarks;	  // dphi between non-b hadrons and its b-quark by decay points
+  TH1F* h_dau_select_b_decay_deta_by_pt_nonb_had_to_b_quarks;	  // deta between non-b hadrons and its b-quark by decay points
+  TH1F* h_dau_select_b_decay_absdphi_by_vec_two_nonb_had_per_llp;	  // |dphi| between two non-b hadrons per llp
+  TH1F* h_dau_select_b_decay_absdphi_by_pt_two_nonb_had_per_llp;	  // |dphi| between two non-b hadrons per llp by decay points
+  TH1F* h_dau_select_b_decay_absdeta_by_pt_two_nonb_had_per_llp;	  // |deta| between two non-b hadrons per llp by decay points
 
-  TH1I* h_gdau_bhadrons_pdgID; 
-  TH1I* h_gdau_nonbhadrons_pdgID;
-  TH1F* h_gdau_bhadrons_dist3d_from_llp;
-  TH1F* h_gdau_nonbhadrons_dist3d_from_llp;
-  TH1F* h_gdau_n_b_decay_points;
-  TH1F* h_gdau_n_non_b_decay_points;
-  TH1F* h_gdau_select_edge_b_decay_dist3d_from_llp;
-  TH1F* h_gdau_select_b_decay_dist3d_from_llp;
-
-  TH1I* h_ggdau_bhadrons_pdgID;
-  TH1I* h_ggdau_nonbhadrons_pdgID;
-  TH1F* h_ggdau_bhadrons_dist3d_from_llp;
-  TH1F* h_ggdau_nonbhadrons_dist3d_from_llp;
-  TH1F* h_ggdau_n_b_decay_points;
-  TH1F* h_ggdau_n_non_b_decay_points;
-  TH1F* h_ggdau_select_edge_b_decay_dist3d_from_llp;
-  TH1F* h_ggdau_select_b_decay_dist3d_from_llp;
-
-  TH1I* h_gggdau_bhadrons_pdgID;
-  TH1I* h_gggdau_for_ggggdau_bhadrons_pdgID;
-  TH1I* h_gggdau_nonbhadrons_pdgID;
-  TH1F* h_gggdau_bhadrons_dist3d_from_llp;
-  TH1F* h_gggdau_nonbhadrons_dist3d_from_llp;
-  TH1F* h_gggdau_n_b_decay_points;
-  TH1F* h_gggdau_n_non_b_decay_points;
-  TH1F* h_gggdau_select_edge_b_decay_dist3d_from_llp;
-  TH1F* h_gggdau_select_b_decay_dist3d_from_llp;
-  
 
   TH1F* h_npartons_in_acc;
 
@@ -474,44 +453,19 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   h_bquarks_dR_dphi = fs->make<TH2F>("h_bquarks_dR_dphi", "events with two bquarks;#Delta#phi;#Delta R", 50, -3.15, 3.15, 50, 0, 7);
 
   h_n_gen_bvtx = fs->make<TH1I>("h_n_gen_bvtx", ";# of GEN b-vertices (from non-b hadrons); events/1", 40, 0, 40);
-  h_missing_dau_to_gdau_mindR = fs->make<TH1F>("h_missing_dau_to_gdau_mindR", "found < 4 b-vertices;minimum dR of a b-quark and its daughter; arb. units", 140, 0, 7.0);
-  h_missing_gdau_to_ggdau_mindR = fs->make<TH1F>("h_missing_gdau_to_ggdau_mindR", "found < 4 b-vertices;minimum dR of b-quark's daughter and its granddaughter; arb. units", 140, 0, 7.0);
   h_dau_to_gdau_mindR = fs->make<TH1F>("h_dau_to_gdau_mindR", ";minimum dR of a b-quark and its daughter; arb. units", 140, 0, 7.0);
   h_gdau_to_ggdau_mindR = fs->make<TH1F>("h_gdau_to_ggdau_mindR", ";minimum dR of b-quark's daughter and its granddaughter; arb. units", 140, 0, 7.0);
   h_dau_select_edge_b_decay_dist3d_from_llp = fs->make<TH1F>("h_dau_select_edge_b_decay_dist3d_from_llp", "multiple dau stage w.r.t LLP (final product still a b-hadron); displaced b-quark vtx from an LLP decay position (cm);b-vtx/0.0025 cm", 500, 0, 1);
   h_dau_select_b_decay_dist3d_from_llp = fs->make<TH1F>("h_dau_select_b_decay_dist3d_from_llp", "multiple dau stage w.r.t LLP; displaced b-quark vtx from an LLP decay position (cm);b-vtx/0.0025 cm", 500, 0, 1);
+  h_dau_select_b_decay_dR_by_vec_nonb_had_to_b_quarks = fs->make<TH1F>("h_dau_select_b_decay_dR_by_vec_nonb_had_to_b_quarks", ";#Delta R between a non-b hadron and b-quark; arb. units", 140, 0, 7.0);
+  h_dau_select_b_decay_dphi_by_vec_nonb_had_to_b_quarks = fs->make<TH1F>("h_dau_select_b_decay_dphi_by_vec_nonb_had_to_b_quarks", ";#phi a non-b hadron - #phi b-quark; arb. units", 50, -3.15, 3.15);
+  h_dau_select_b_decay_dphi_by_pt_nonb_had_to_b_quarks = fs->make<TH1F>("h_dau_select_b_decay_dphi_by_pt_nonb_had_to_b_quarks", ";#phi a non-b hadron's vtx - #phi b-quark's vtx; arb. units", 50, -3.15, 3.15);
+  h_dau_select_b_decay_deta_by_pt_nonb_had_to_b_quarks = fs->make<TH1F>("h_dau_select_b_decay_deta_by_pt_nonb_had_to_b_quarks", ";#eta a non-b hadron's vtx - #eta b-quark's vtx; arb. units", 50, -3.15, 3.15);
+  h_dau_select_b_decay_absdphi_by_vec_two_nonb_had_per_llp = fs->make<TH1F>("h_dau_select_b_decay_absdphi_by_vec_two_nonb_had_per_llp", ";|#Delta #phi| of a pair of non-b hadrons; arb. units", 100, 0, 3.15);
+  h_dau_select_b_decay_absdphi_by_pt_two_nonb_had_per_llp = fs->make<TH1F>("h_dau_select_b_decay_absdphi_by_pt_two_nonb_had_per_llp", ";|#Delta #phi| of vertices by a pair of non-b hadrons; arb. units", 100, 0, 3.15);
+  h_dau_select_b_decay_absdeta_by_pt_two_nonb_had_per_llp = fs->make<TH1F>("h_dau_select_b_decay_absdeta_by_pt_two_nonb_had_per_llp", ";|#Delta #eta| of vertices by a pair of non-b hadrons; arb. units", 100, 0, 3.15);
 
-
-  h_gdau_bhadrons_pdgID = fs->make<TH1I>("h_gdau_bhadrons_pdgID", "gdau stage w.r.t LLP;pdg id of b-hadron;jets", 10000, -5000, 5000);
-  h_gdau_nonbhadrons_pdgID = fs->make<TH1I>("h_gdau_nonbhadrons_pdgID", "gdau stage w.r.t LLP;pdg id of non b-hadron;jets", 10000, -5000, 5000);
-  h_gdau_bhadrons_dist3d_from_llp = fs->make<TH1F>("h_gdau_bhadrons_dist3d_from_llp", "gdau stage w.r.t LLP;3D distance of b-hadrom from LLP decay positions (cm);b-hadron/0.0025 cm", 500, 0, 1);
-  h_gdau_nonbhadrons_dist3d_from_llp = fs->make<TH1F>("h_gdau_nonbhadrons_dist3d_from_llp", "gdau stage w.r.t LLP;3D distance of non b-hadrom from LLP decay positions (cm);non b-hadron/0.0025 cm", 500, 0, 1);
-  h_gdau_n_b_decay_points = fs->make<TH1F>("h_gdau_n_b_decay_points", "gdau stage w.r.t LLP; # of non-zero b-decay points at this stage;events", 10, 0, 10);
-  h_gdau_n_non_b_decay_points = fs->make<TH1F>("h_gdau_n_non_b_decay_points", "gdau stage w.r.t LLP; # of non-zero non b-decay points at this stage;events", 10, 0, 10);
-  h_gdau_select_edge_b_decay_dist3d_from_llp = fs->make<TH1F>("h_gdau_select_edge_b_decay_dist3d_from_llp", "gdau stage w.r.t LLP (final product still a b-hadron); displaced b-quark vtx from an LLP decay position (cm);b-vtx/0.0025 cm", 500, 0, 1);
-  h_gdau_select_b_decay_dist3d_from_llp = fs->make<TH1F>("h_gdau_select_b_decay_dist3d_from_llp", "gdau stage w.r.t LLP; displaced b-quark vtx from an LLP decay position (cm);b-vtx/0.0025 cm", 500, 0, 1);
-
-
-  h_ggdau_bhadrons_pdgID = fs->make<TH1I>("h_ggdau_bhadrons_pdgID", "ggdau stage w.r.t LLP;pdg id of b-hadron;jets", 10000, -5000, 5000);
-  h_ggdau_nonbhadrons_pdgID = fs->make<TH1I>("h_ggdau_nonbhadrons_pdgID", "ggdau stage w.r.t LLP;pdg id of non b-hadron;jets", 10000, -5000, 5000);
-  h_ggdau_bhadrons_dist3d_from_llp = fs->make<TH1F>("h_ggdau_bhadrons_dist3d_from_llp", "ggdau stage w.r.t LLP;3D distance of b-hadrom from LLP decay positions (cm);b-hadron/0.0025 cm", 500, 0, 1);
-  h_ggdau_nonbhadrons_dist3d_from_llp = fs->make<TH1F>("h_ggdau_nonbhadrons_dist3d_from_llp", "ggdau stage w.r.t LLP;3D distance of non b-hadrom from LLP decay positions (cm);non b-hadron/0.0025 cm", 500, 0, 1);
-  h_ggdau_n_b_decay_points = fs->make<TH1F>("h_ggdau_n_b_decay_points", "ggdau stage w.r.t LLP; # of non-zero b-decay points at this stage;events", 10, 0, 10);
-  h_ggdau_n_non_b_decay_points = fs->make<TH1F>("h_ggdau_n_non_b_decay_points", "ggdau stage w.r.t LLP; # of non-zero non b-decay points at this stage;events", 10, 0, 10);
-  h_ggdau_select_edge_b_decay_dist3d_from_llp = fs->make<TH1F>("h_ggdau_select_edge_b_decay_dist3d_from_llp", "ggdau stage w.r.t LLP (final product still a b-hadron); displaced b-quark vtx from an LLP decay position (cm);b-vtx/0.0025 cm", 500, 0, 1);
-  h_ggdau_select_b_decay_dist3d_from_llp = fs->make<TH1F>("h_ggdau_select_b_decay_dist3d_from_llp", "ggdau stage w.r.t LLP; displaced b-quark vtx from an LLP decay positions (cm);b-vtx/0.0025 cm", 500, 0, 1);
-
-  h_gggdau_bhadrons_pdgID = fs->make<TH1I>("h_gggdau_bhadrons_pdgID", "gggdau stage w.r.t LLP;pdg id of b-hadron;jets", 10000, -5000, 5000);
-  h_gggdau_for_ggggdau_bhadrons_pdgID = fs->make<TH1I>("h_gggdau_for_ggggdau_bhadrons_pdgID", "gggdau stage w.r.t LLP;pdg id of b-hadron stisfying b-decays;jets", 10000, -5000, 5000);
-  h_gggdau_nonbhadrons_pdgID = fs->make<TH1I>("h_gggdau_nonbhadrons_pdgID", "gggdau stage w.r.t LLP;pdg id of non b-hadron;jets", 10000, -5000, 5000);
-  h_gggdau_bhadrons_dist3d_from_llp = fs->make<TH1F>("h_gggdau_bhadrons_dist3d_from_llp", "gggdau stage w.r.t LLP;3D distance of b-hadrom from LLP decay positions (cm);b-hadron/0.0025 cm", 500, 0, 1);
-  h_gggdau_nonbhadrons_dist3d_from_llp = fs->make<TH1F>("h_gggdau_nonbhadrons_dist3d_from_llp", "gggdau stage w.r.t LLP;3D distance of non b-hadrom from LLP decay positions (cm);non b-hadron/0.0025 cm", 500, 0, 1);
-  h_gggdau_n_b_decay_points = fs->make<TH1F>("h_gggdau_n_b_decay_points", "gggdau stage w.r.t LLP; # of non-zero b-decay points at this stage;events", 10, 0, 10);
-  h_gggdau_n_non_b_decay_points = fs->make<TH1F>("h_gggdau_n_non_b_decay_points", "gggdau stage w.r.t LLP; # of non-zero non b-decay points at this stage;events", 10, 0, 10);
-  h_gggdau_select_edge_b_decay_dist3d_from_llp = fs->make<TH1F>("h_gggdau_select_edge_b_decay_dist3d_from_llp", "gggdau stage w.r.t LLP (final product still a b-hadron); displaced b-quark vtx from an LLP decay position (cm);b-vtx/0.0025 cm", 500, 0, 1);
-  h_gggdau_select_b_decay_dist3d_from_llp = fs->make<TH1F>("h_gggdau_select_b_decay_dist3d_from_llp", "gggdau stage w.r.t LLP; displaced b-quark vtx from LLP decay positions (cm);b-vtx/0.0025 cm", 500, 0, 1);
-
-
+  
   h_npartons_in_acc = fs->make<TH1F>("h_npartons_in_acc", ";number of LSP daughters in acceptance;Events", 40, 0, 40);
   h_npartons_60 = fs->make<TH1F>("h_npartons_60", ";number of partons with E_{T} > 60 GeV;Events", 40, 0, 40);
   h_njets_60 = fs->make<TH1F>("h_njets_60", ";number of jets with E_{T} > 60 GeV;Events", 20, 0, 20);
@@ -696,11 +650,53 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 		std::vector<double> vec_c_nonb_decay = {};
 		std::vector<double> vec_c_nonb_dR_dau = {};
 		std::vector<double> vec_c_nonb_dR_gdau = {};
+		std::vector<reco::GenParticle*> vec_c_nonb_gen_particle = {};
+		// an effort to sort a set of b-quarks by their number of daughters 
+		//std::vector<size_t> vec_ascending_total_bdaus; // a vector of ascending number of total daughters per b-quark  
+		//std::vector<size_t> vec_ascending_total_bdaus_idx; // a vector of vertex index corresponding to the order of ascending total daughters in vec_ascending_total_bdaus
+
 		
 
 		if (mci->primaries().size() == 2 and mci->secondaries().size() == 4) {
 			size_t nth_bquark = 0;
+			
+			// an effort to sort a set of b-quarks by their number of daughters before running a b-vertex finding algorithm 
+			/*
+			size_t idx = 0;
 			for (auto p : mci->secondaries()) {
+				if (idx == 0) {
+					vec_ascending_total_bdaus.push_back(p->numberOfDaughters());
+					vec_ascending_total_bdaus_idx.push_back(idx);
+				}
+				else {
+					std::vector<size_t>::iterator it_bdaus = vec_ascending_total_bdaus.end();
+					std::vector<size_t>::iterator it_idx = vec_ascending_total_bdaus_idx.end();
+					// finding an iterator that points to a position that bdaus is just less than or equal to itself from the back to the front
+					while (it_bdaus != vec_ascending_total_bdaus.begin() && p->numberOfDaughters() <= vec_ascending_total_bdaus[std::distance(vec_ascending_total_bdaus.begin(), it_bdaus) - 1])
+					{
+						--it_bdaus;
+						--it_idx;
+					}
+					// adding a b-quark at the end if it has higher daus. otherwise, insert it before an iterator pointing to a position that this daus is smaller than itself 
+					if (it_bdaus == vec_ascending_total_bdaus.end() && p->numberOfDaughters() > vec_ascending_total_bdaus[std::distance(vec_ascending_total_bdaus.begin(), it_bdaus)]) {
+						vec_ascending_total_bdaus.push_back(p->numberOfDaughters());
+						vec_ascending_total_bdaus_idx.push_back(idx);
+					}
+
+					else {
+						vec_ascending_total_bdaus.insert(it_bdaus, p->numberOfDaughters());
+						vec_ascending_total_bdaus_idx.insert(it_idx, idx);
+					}
+				}
+				idx++;
+
+			}
+			*/
+
+			for (auto p : mci->secondaries()) {
+			//for( size_t ib = 0, ibe = vec_ascending_total_bdaus_idx.size(); ib < ibe; ++ib){
+			//	auto p = mci->secondaries()[vec_ascending_total_bdaus_idx[ib]];
+				TVector3 llp_flight = TVector3(p->vx(), p->vy(), p->vz());
 				nth_bquark += 1;
 				bool catch_b_vtx = false;
 				std::vector<int> vec_dau_pdgID = {};
@@ -721,8 +717,10 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 						break;
 					}
 					
-					if (vec_c_nonb_decay.size() == nth_bquark && std::count(vec_c_nonb_decay.begin(), vec_c_nonb_decay.end(), vec_c_nonb_decay[nth_bquark - 1]) > 1)
+					if (vec_c_nonb_decay.size() == nth_bquark && std::count(vec_c_nonb_decay.begin(), vec_c_nonb_decay.end(), vec_c_nonb_decay[nth_bquark - 1]) > 1) {
 						vec_c_nonb_decay.pop_back();
+						vec_c_nonb_gen_particle.pop_back();
+					}
 					if (vec_c_nonb_dR_dau.size() > vec_c_nonb_decay.size())
 						vec_c_nonb_dR_dau.pop_back();
 					while (vec_c_nonb_dR_gdau.size() != 0 && vec_c_nonb_dR_gdau.size() == vec_c_nonb_dR_dau.size())
@@ -735,7 +733,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 						vec_dau_pdgID = {};
 						nth_chain = 1;
 
-						catch_b_vtx = Is_bdecay_done(nth_chain, p, p, vec_dau_pdgID, vec_c_nonb_dR_dau, vec_c_nonb_dR_gdau, vec_c_nonb_decay, excl_idx_first_dRmin, excl_idx_second_dRmin);
+						catch_b_vtx = Is_bdecay_done(nth_chain, p, p, vec_c_nonb_gen_particle, vec_dau_pdgID, vec_c_nonb_dR_dau, vec_c_nonb_dR_gdau, vec_c_nonb_decay, excl_idx_first_dRmin, excl_idx_second_dRmin);
 					}
 					else {
 						count_while_2 += 1;
@@ -744,7 +742,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 							vec_dau_pdgID.pop_back();
 						nth_chain = 2;
 						
-						catch_b_vtx = Is_bdecay_done(nth_chain, p, p->daughter(idx_first_chain), vec_dau_pdgID, vec_c_nonb_dR_dau, vec_c_nonb_dR_gdau, vec_c_nonb_decay, excl_idx_first_dRmin, excl_idx_second_dRmin);
+						catch_b_vtx = Is_bdecay_done(nth_chain, p, p->daughter(idx_first_chain), vec_c_nonb_gen_particle, vec_dau_pdgID, vec_c_nonb_dR_dau, vec_c_nonb_dR_gdau, vec_c_nonb_decay, excl_idx_first_dRmin, excl_idx_second_dRmin);
 						
 					}
 					
@@ -775,6 +773,21 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 					h_gdau_to_ggdau_mindR->Fill(vec_c_nonb_dR_gdau[nth_bquark - 1]);
 					if (!isBhadron(vec_dau_pdgID[vec_dau_pdgID.size() - 1])) {
 						h_dau_select_b_decay_dist3d_from_llp->Fill(vec_c_nonb_decay[nth_bquark - 1]);
+						h_dau_select_b_decay_dR_by_vec_nonb_had_to_b_quarks->Fill(reco::deltaR(vec_c_nonb_gen_particle[nth_bquark - 1]->eta(), vec_c_nonb_gen_particle[nth_bquark - 1]->phi(), p->eta(), p->phi())); // dR between non-b hadrons and its b-quark 
+						h_dau_select_b_decay_dphi_by_vec_nonb_had_to_b_quarks->Fill(reco::deltaPhi(vec_c_nonb_gen_particle[nth_bquark - 1]->phi(), p->phi()));	  // dphi between non-b hadrons and its b-quark 
+						double eta_nonb_b = etaFromXYZ(vec_c_nonb_gen_particle[nth_bquark - 1]->vx() - p->vx(), vec_c_nonb_gen_particle[nth_bquark - 1]->vy() - p->vy(), vec_c_nonb_gen_particle[nth_bquark - 1]->vz() - p->vz());
+						TVector3 b_flight = TVector3(vec_c_nonb_gen_particle[nth_bquark - 1]->vx() - p->vx(), vec_c_nonb_gen_particle[nth_bquark - 1]->vy() - p->vy(), vec_c_nonb_gen_particle[nth_bquark - 1]->vz() - p->vz());
+						h_dau_select_b_decay_dphi_by_pt_nonb_had_to_b_quarks->Fill(reco::deltaPhi(b_flight.Phi(), llp_flight.Phi()));;	  // dphi between non-b hadrons and its b-quark by decay points
+						h_dau_select_b_decay_deta_by_pt_nonb_had_to_b_quarks->Fill(eta_nonb_b);;	  // deta between non-b hadrons and its b-quark by decay points
+
+						if (nth_bquark == 2 || nth_bquark == 4) {
+							double eta_two_nonb = etaFromXYZ(vec_c_nonb_gen_particle[nth_bquark - 1]->vx() - vec_c_nonb_gen_particle[nth_bquark - 2]->vx(), vec_c_nonb_gen_particle[nth_bquark - 1]->vy() - vec_c_nonb_gen_particle[nth_bquark - 2]->vy(), vec_c_nonb_gen_particle[nth_bquark - 1]->vz() - vec_c_nonb_gen_particle[nth_bquark - 2]->vz());
+							h_dau_select_b_decay_absdphi_by_vec_two_nonb_had_per_llp->Fill(fabs(reco::deltaPhi(vec_c_nonb_gen_particle[nth_bquark - 1]->phi(), vec_c_nonb_gen_particle[nth_bquark - 2]->phi())));	  // |dphi| between two non-b hadrons per llp
+							TVector3 another_b_flight = TVector3(vec_c_nonb_gen_particle[nth_bquark - 2]->vx() - p->vx(), vec_c_nonb_gen_particle[nth_bquark - 2]->vy() - p->vy(), vec_c_nonb_gen_particle[nth_bquark - 2]->vz() - p->vz());
+							h_dau_select_b_decay_absdphi_by_pt_two_nonb_had_per_llp->Fill(fabs(reco::deltaPhi(b_flight.Phi(), another_b_flight.Phi())));	  // |dphi| between two non-b hadrons per llp by decay points
+							h_dau_select_b_decay_absdeta_by_pt_two_nonb_had_per_llp->Fill(fabs(eta_two_nonb));	  // |deta| between two non-b hadrons per llp by decay points
+
+						}
 					}
 					else {
 						h_dau_select_edge_b_decay_dist3d_from_llp->Fill(vec_c_nonb_decay[nth_bquark - 1]);
@@ -797,6 +810,15 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
                 
 		if (vec_c_nonb_decay.size() != 4 || issue_count > 0) {
            std::cout << "WARNING!: # of b-vertices = " << vec_c_nonb_decay.size()  << "w/ repeated count = " << issue_count << std::endl;
+		   /*
+		   std::cout << "sorted number of b-daus in a vec of size "<< vec_ascending_total_bdaus_idx.size() << "is the following... " << std::endl;
+		   for (size_t ib = 0, ibe = vec_ascending_total_bdaus_idx.size(); ib < ibe; ++ib) {
+			   //auto p = mci->secondaries(vec_ascending_total_bdaus_idx[ib]);
+			   //size_t num_daus = p->numberOfDaughters(); 
+			   std::cout << vec_ascending_total_bdaus[ib] << std::endl;
+			   
+		   }
+		   */
            if (check_issue) {
 
 				std::cout << "investigating events w/ # of GEN b-vertices of " << vec_c_nonb_decay.size() << std::endl;
@@ -862,14 +884,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
 		}
 		
 		h_n_gen_bvtx->Fill(vec_c_nonb_decay.size());
-		/*
-		h_gdau_n_b_decay_points->Fill(vec_c_gdau_b_decay.size());
-		h_gdau_n_non_b_decay_points->Fill(vec_c_gdau_nonb_decay.size());
-		h_ggdau_n_b_decay_points->Fill(vec_c_ggdau_b_decay.size());
-		h_ggdau_n_non_b_decay_points->Fill(vec_c_ggdau_nonb_decay.size());
-		h_gggdau_n_b_decay_points->Fill(vec_c_gggdau_b_decay.size());
-		h_gggdau_n_non_b_decay_points->Fill(vec_c_gggdau_nonb_decay.size());
-		*/
+		
 	}
 	// END: Hunt for b-quark decay points 
 	
@@ -1198,7 +1213,7 @@ size_t MFVGenHistos::mindR_dau(int &nth_chain, auto parent, std::vector<double>&
 }
 
 
-bool MFVGenHistos::Is_bdecay_done(int &nth_chain, const reco::GenParticleRef& bquark, auto parent, std::vector<int>& vec_pdgID, std::vector<double>& vec_first_dR, std::vector<double>& vec_second_dR, std::vector<double>& vec_decay, std::vector<size_t>& excl_idx_first_dRmin, std::vector<size_t>& excl_idx_second_dRmin) {
+bool MFVGenHistos::Is_bdecay_done(int &nth_chain, const reco::GenParticleRef& bquark, auto parent, std::vector<reco::GenParticle*>& vec_gen_particle, std::vector<int>& vec_pdgID, std::vector<double>& vec_first_dR, std::vector<double>& vec_second_dR, std::vector<double>& vec_decay, std::vector<size_t>& excl_idx_first_dRmin, std::vector<size_t>& excl_idx_second_dRmin) {
 
 	
 	for (size_t i = 0, ie = parent->numberOfDaughters(); i < ie; ++i) {
@@ -1233,13 +1248,14 @@ bool MFVGenHistos::Is_bdecay_done(int &nth_chain, const reco::GenParticleRef& bq
 				if (!isBquark(dau_pdgID)) {
 					if (isBvtx(parent, dau_pdgID, dau_dist3d, vec_pdgID)) {
 						vec_decay.push_back(dau_dist3d);
+						vec_gen_particle.push_back((reco::GenParticle*)dau);
 						break;
 					}
 				}
 			}
 			
 			nth_chain += 1;
-			return Is_bdecay_done(nth_chain, bquark, dau, vec_pdgID, vec_first_dR, vec_second_dR, vec_decay, excl_idx_first_dRmin, excl_idx_second_dRmin);
+			return Is_bdecay_done(nth_chain, bquark, dau, vec_gen_particle, vec_pdgID, vec_first_dR, vec_second_dR, vec_decay, excl_idx_first_dRmin, excl_idx_second_dRmin);
 	}
 
 	return true;
