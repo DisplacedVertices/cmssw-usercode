@@ -38,6 +38,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_lspdist2d;
   TH1F* h_lspdist3d;
   TH1F* h_gen_bs2ddist;
+  TH2F* h_gen_bsxdist_bsydist;
   TH1F* h_llp_dphi;
   TH1F* h_nmatchjet_llp;
   TH1F* h_llp_pt_vecsum;
@@ -178,6 +179,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_lspdist2d = fs->make<TH1F>("h_lspdist2d", ";dist2d(gen vtx #0, #1) (cm);events/0.1 mm", 200, 0, 2);
   h_lspdist3d = fs->make<TH1F>("h_lspdist3d", ";dist3d(gen vtx #0, #1) (cm);events/0.1 mm", 200, 0, 2);
   h_gen_bs2ddist = fs->make<TH1F>("h_gen_bs2ddist", ";dist2d(gen vtx, beamspot) (cm);arb. units", 500, 0, 2.5);
+  h_gen_bsxdist_bsydist = fs->make<TH2F>("h_gen_bsxdist_bsydist", "; x-dist(gen vtx, beamspot) (cm); y-dist(gen vtx, beamspot)", 500, -0.5, 0.5, 500, -0.5, 0.5);
   h_llp_dphi = fs->make<TH1F>("h_llp_dphi", ";delta #phi (rad); arb. unit", 100, -3.1416, 3.1416);
   h_nmatchjet_llp = fs->make<TH1F>("h_nmatchjet_llp", ";# matched jet/LLP; arb. unit", 10,0,10);
   h_llp_pt_vecsum = fs->make<TH1F>("h_llp_pt_vecsum", ";vector sum of LLP p_{T}; arb. unit", 100, 0, 1000);
@@ -327,6 +329,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_w->Fill(w);
   h_eventid->Fill(event.id().event());
 
+
   //////////////////////////////////////////////////////////////////////////////
 
   h_gen_decay->Fill(mevent->gen_decay_type[0], mevent->gen_decay_type[1], w);
@@ -351,6 +354,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
                                      geny - mevent->bsy_at_z(genz) 
         );
     h_gen_bs2ddist->Fill(genbs2ddist, w);
+    h_gen_bsxdist_bsydist->Fill(genx - mevent->bsx_at_z(genz), geny - mevent->bsy_at_z(genz), w);
   }
 
   h_minlspdist2d->Fill(mevent->minlspdist2d(), w);
@@ -501,7 +505,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   for (int i = 0; i < MAX_NJETS; ++i) {
     h_jet_pt[i]->Fill(mevent->nth_jet_pt(i), w);
-    h_jet_eta[i]->Fill(mevent->nth_jet_eta(i), w);
+    h_jet_eta[i]->Fill(fabs(mevent->nth_jet_eta(i)), w);
     h_jet_phi[i]->Fill(mevent->nth_jet_phi(i), w);
   }
   h_jet_ht->Fill(mevent->jet_ht(mfv::min_jet_pt), w);
@@ -511,7 +515,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     if (mevent->jet_pt[ijet] < mfv::min_jet_pt)
       continue;
     h_jet_pt[MAX_NJETS]->Fill(mevent->jet_pt[ijet], w);
-    h_jet_eta[MAX_NJETS]->Fill(mevent->jet_eta[ijet], w);
+    h_jet_eta[MAX_NJETS]->Fill(fabs(mevent->jet_eta[ijet]), w);
     h_jet_phi[MAX_NJETS]->Fill(mevent->jet_phi[ijet], w);
     h_jet_energy->Fill(mevent->jet_energy[ijet], w);
     for (size_t jjet = ijet+1; jjet < mevent->jet_id.size(); ++jjet) {

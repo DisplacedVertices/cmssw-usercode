@@ -26,7 +26,7 @@ struct MFVEvent {
     gen_valid = 0;
     npv = pv_ntracks = pv_ntracksloose = 0;
     gen_flavor_code = 0;
-    gen_weight = l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = npu = bsx = bsy = bsz = bsdxdz = bsdydz = bswidthx = bswidthy = pvx = pvy = pvz = pvcxx = pvcxy = pvcxz = pvcyy = pvcyz = pvczz = pv_score = metx = mety = metNoMux = metNoMuy = met_calo = 0;
+    gen_weight = l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = hlt_caloht = npu = bsx = bsy = bsz = bsdxdz = bsdydz = bswidthx = bswidthy = pvx = pvy = pvz = pvcxx = pvcxy = pvcxz = pvcyy = pvcyz = pvczz = pv_score = metx = mety = metNoMux = metNoMuy = met_calo = 0;
     pass_metfilters = false;
     for (int i = 0; i < 2; ++i) {
       gen_lsp_pt[i] = gen_lsp_eta[i] = gen_lsp_phi[i] = gen_lsp_mass[i] = 0;
@@ -156,6 +156,7 @@ struct MFVEvent {
   float l1_myhtt;
   float l1_myhttwbug;
   float hlt_ht;
+  float hlt_caloht;
 
   uint64_t pass_;
   uint64_t pass_hlt_bits() const { return pass_ & ((1UL << mfv::n_hlt_paths) - 1UL); }
@@ -167,6 +168,10 @@ struct MFVEvent {
   void pass_l1(size_t i, bool x)          { assert(i < mfv::n_l1_paths);    i += 2*mfv::n_hlt_paths;                             set_bit(pass_, i, x); }
   bool found_l1(size_t i)           const { assert(i < mfv::n_l1_paths);    i += 2*mfv::n_hlt_paths + mfv::n_l1_paths;   return test_bit(pass_, i   ); }
   void found_l1(size_t i, bool x)         { assert(i < mfv::n_l1_paths);    i += 2*mfv::n_hlt_paths + mfv::n_l1_paths;           set_bit(pass_, i, x); }
+  bool pass_filter(size_t i)            const { assert(i < mfv::n_filter_paths);    i += 2*mfv::n_filter_paths;                     return test_bit(pass_, i   ); }
+  void pass_filter(size_t i, bool x)          { assert(i < mfv::n_filter_paths);    i += 2*mfv::n_filter_paths;                             set_bit(pass_, i, x); }
+  bool found_filter(size_t i)           const { assert(i < mfv::n_filter_paths);    i += 2*mfv::n_filter_paths;   return test_bit(pass_, i   ); }
+  void found_filter(size_t i, bool x)         { assert(i < mfv::n_filter_paths);    i += 2*mfv::n_filter_paths;           set_bit(pass_, i, x); }
 
   float npu;
 
@@ -219,6 +224,31 @@ struct MFVEvent {
   std::vector<float> jet_energy;
   std::vector<float> jet_gen_energy;
 
+  std::vector<float> calo_jet_pt;
+  std::vector<float> calo_jet_eta;
+  std::vector<float> calo_jet_phi;
+  std::vector<float> calo_jet_energy;
+
+  std::vector<float> hlt_calo_jet_pt;
+  std::vector<float> hlt_calo_jet_eta;
+  std::vector<float> hlt_calo_jet_phi;
+  std::vector<float> hlt_calo_jet_energy;
+
+  std::vector<float> hlt_idp_calo_jet_pt;
+  std::vector<float> hlt_idp_calo_jet_eta;
+  std::vector<float> hlt_idp_calo_jet_phi;
+  std::vector<float> hlt_idp_calo_jet_energy;
+
+  std::vector<float> hlt_pfforbtag_jet_pt;
+  std::vector<float> hlt_pfforbtag_jet_eta;
+  std::vector<float> hlt_pfforbtag_jet_phi;
+  std::vector<float> hlt_pfforbtag_jet_energy;
+
+  std::vector<float> hlt_pf_jet_pt;
+  std::vector<float> hlt_pf_jet_eta;
+  std::vector<float> hlt_pf_jet_phi;
+  std::vector<float> hlt_pf_jet_energy;
+
   TLorentzVector jet_p4(int w) const {
     TLorentzVector v;
     v.SetPtEtaPhiE(jet_pt[w], jet_eta[w], jet_phi[w], jet_energy[w]);
@@ -244,6 +274,9 @@ struct MFVEvent {
   void jet_hlt_push_back(const reco::Candidate& jet, const std::vector<TLorentzVector>& hltjets, bool is_displaced_calojets);
 
   float jet_ht(float min_jet_pt=0.f) const { return std::accumulate(jet_pt.begin(), jet_pt.end(), 0.f,
+                                                                    [min_jet_pt](float init, float b) { if (b > min_jet_pt) init += b; return init; }); }
+
+  float calo_jet_ht(float min_jet_pt=0.f) const { return std::accumulate(calo_jet_pt.begin(), calo_jet_pt.end(), 0.f,
                                                                     [min_jet_pt](float init, float b) { if (b > min_jet_pt) init += b; return init; }); }
 
   float jet_ST_sum() const {

@@ -946,7 +946,7 @@ for sample in mfv_signal_samples_2018 + mfv_stopdbardbar_samples_2018 + mfv_stop
 # ntuples
 ########
 
-for x in all_signal_samples_2017 + all_signal_samples_2018:
+for x in all_signal_samples_2017 + all_signal_samples_2018 + qcd_samples_2017 + qcd_samples_2018:
     x.add_dataset('ntupleulv1bm')
 
 ########

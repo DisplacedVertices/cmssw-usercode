@@ -12,20 +12,33 @@ namespace mfv {
     float myhtt;
     float myhttwbug;
     float hltht;
+    float hltcaloht;
+    std::vector<TLorentzVector> hltpfjets;
+    int nhltpfjets() const { return hltpfjets.size(); }
+
+    std::vector<TLorentzVector> hltcalojets;
+    int nhltcalojets() const { return hltcalojets.size(); }
+
+    std::vector<TLorentzVector> hltdisplacedcalojets;
+    int nhltdisplacedcalojets() const { return hltdisplacedcalojets.size(); }
+
+    std::vector<TLorentzVector> hltidpassedcalojets;
+    int nhltidpassedcalojets() const { return hltidpassedcalojets.size(); }
+
+    std::vector<TLorentzVector> hltpfjetsforbtag;
+    int nhltpfjetsforbtag() const { return hltpfjetsforbtag.size(); }
+
     float met_pt;
     float met_phi;
     float met_pt_calo;
     float met_pt_nomu;
     float met_phi_nomu;
     bool pass_metfilters;
-    std::vector<TLorentzVector> hltpfjets;
-    int nhltpfjets() const { return hltpfjets.size(); }
-    std::vector<TLorentzVector> hltdisplacedcalojets;
-    int nhltdisplacedcalojets() const { return hltdisplacedcalojets.size(); }
     std::vector<TLorentzVector> hltelectrons;
     std::vector<TLorentzVector> hltmuons;
     std::vector<int> L1decisions;
     std::vector<int> HLTdecisions;
+    std::vector<int> FLTdecisions;
 
     // related offline stuff 
     int nalljets;
@@ -45,6 +58,7 @@ namespace mfv {
       met_pt_calo(-1), met_pt_nomu(-1), met_phi_nomu(-1), pass_metfilters(false),
       L1decisions(n_l1_paths, -1),
       HLTdecisions(n_hlt_paths, -1),
+      FLTdecisions(n_filter_paths, -1),
       nalljets(0), htall(0), ht(0), htptgt30(0)
     {}
   };

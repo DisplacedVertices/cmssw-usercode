@@ -28,11 +28,31 @@ namespace mfv {
     n_l1_paths // = 29
   };
 
+  enum {
+    // Filters for 2017 di-bjet trigger (some are shared with 2018)
+    b_hltDoubleCaloBJets100eta2p3, b_hltBTagCalo80x6CSVp0p92DoubleWithMatching, b_hltDoublePFJets100Eta2p3, b_hltDoublePFJets100Eta2p3MaxDeta1p6,
+
+    // Filters unique to 2018 di-bjet trigger
+    b_hltBTagCaloDeepCSV0p71Double6Jets80, b_hltDoublePFJets116Eta2p3, b_hltDoublePFJets116Eta2p3MaxDeta1p6, 
+
+    // Filters for 2017 tri-bjet trigger (some are shared with 2018)
+    b_hltQuadCentralJet30, b_hltCaloQuadJet30HT300, b_hltBTagCaloCSVp05Double, b_hltPFCentralJetLooseIDQuad30, b_hlt1PFCentralJetLooseID75, b_hlt2PFCentralJetLooseID60,
+    b_hlt3PFCentralJetLooseID45, b_hlt4PFCentralJetLooseID40, b_hltPFCentralJetsLooseIDQuad30HT300, b_hltBTagPFCSVp070Triple,
+    
+    // Filters unique to 2018 tri-bjet trigger
+    b_hltCaloQuadJet30HT320, b_hltBTagCaloDeepCSVp17Double, hltPFCentralJetsLooseIDQuad30HT330, hltBTagPFDeepCSV4p5Triple,
+
+    // bookkeeping
+    n_filter_paths // = 21
+  };
+
   static_assert(n_hlt_paths + n_l1_paths <= 64, "too many paths");
 
   extern const char* hlt_paths[n_hlt_paths];
   extern const char* l1_paths[n_l1_paths];
   extern const char* clean_paths[n_clean_paths];
+  extern const char* filter_paths[n_filter_paths];
+  extern const int   filter_nreqs[n_filter_paths];
 
   // For use in the Bjet/DisplacedDijet trigger studies
   static const std::vector<size_t> HTOrBjetOrDisplacedDijetTriggers = {

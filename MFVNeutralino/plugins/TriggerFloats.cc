@@ -107,6 +107,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   edm::Handle<reco::VertexCollection> primary_vertices;
   event.getByToken(primary_vertex_token, primary_vertices);
 
+  short int npass_filter[mfv::n_filter_paths] = {0};
   const pat::MET& met = mets->at(0);
   double met_pt_origin = met.pt();
   double met_phi_origin = met.phi();
@@ -383,6 +384,20 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
         is_jet = true;
     }
 
+    obj.unpackNamesAndLabels(event, *trigger_results);
+    for (unsigned h = 0; h < obj.filterLabels().size(); ++h){
+      for (unsigned j = 0; j < mfv::n_filter_paths; ++j) {
+        // If we see a filter we're looking for and it's NOT an HT/MHT filter, then just tally it
+        if ((mfv::filter_paths[j] == obj.filterLabels()[h]) and (obj.filterIds()[0] != 90) and (obj.filterIds()[0] != 89)) {
+            npass_filter[j]++;
+        }
+         // If we see a filter we're looking for and it is an HT filter (id = 89), then we'll check the HT
+        else if ((mfv::filter_paths[j] == obj.filterLabels()[h]) and (obj.filterIds()[0] == 89)) {
+            npass_filter[j] += obj.pt();
+        }
+      }
+    }
+
     if (prints) printf(" is_l1 %i is_ht %i is_cluster %i is_photon %i is_muon %i is_jet %i\n", is_l1, is_ht, is_cluster, is_photon, is_muon, is_jet);
 
     if (is_l1) assert(nids == 1 && !is_ht && !is_cluster && !is_photon && !is_muon && !is_jet);
@@ -396,7 +411,10 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
     if (is_ht) {
       if (obj.collection() == "hltPFHTJet30::HLT")
         floats->hltht = obj.pt();
+      else if (obj.collection() == "hltHtMhtCaloJetsQuadC30::HLT")
+        floats->hltcaloht = obj.pt();
     }
+
     else if (is_electron || is_muon) {
       // for HT above we didn't check the path, there's always only one
       // HT object. there can be many trigger electrons/muons, only store
@@ -454,11 +472,26 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
         // Note that all of the bjet triggers use PF jets for the kinematics, and the
         // b-tagging discriminants aren't currently available in AODs, so this is
         // sufficient for the trigger matching for now
+        if(obj.collection() == "hltAK4CaloJetsCorrected::HLT"){
+          floats->hltcalojets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
+        }
         if(obj.collection() == "hltAK4PFJetsCorrected::HLT"){
           floats->hltpfjets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
         }
         else if(obj.collection() == "hltDisplacedHLTCaloJetCollectionProducerLowPt::HLT" || obj.collection() == "hltDisplacedHLTCaloJetCollectionProducerMidPt::HLT"){
           floats->hltdisplacedcalojets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
+        }
+        else if(obj.collection() == "hltAK4CaloJetsCorrectedIDPassed::HLT") {
+          floats->hltidpassedcalojets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
+        }
+        else if(obj.collection() == "hltPFJetForBtag::HLT") {
+          bool save_this_jet = false;
+          for (auto label : obj.filterLabels()) {
+            if (label == "hltBTagPFCSVp070Triple") { save_this_jet = true; }
+          }
+          if (save_this_jet) {
+            floats->hltpfjetsforbtag.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
+          }
         }
 
         if (prints) {
@@ -529,6 +562,13 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
       printf("L1  bit %2i %20s: %2i\n", i, mfv::l1_paths[i], floats->L1decisions[i]);
   }
 
+  for (int i = 0; i < mfv::n_filter_paths; ++i) { 
+    if (npass_filter[i] >= mfv::filter_nreqs[i])
+      floats->FLTdecisions[i] = true;
+    else
+      floats->FLTdecisions[i] = false;
+  }
+
   edm::Handle<pat::JetCollection> jets;
   event.getByToken(jets_token, jets);
 
@@ -545,8 +585,11 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
       if (pt > 40) floats->ht += pt;
     }
 
-  if (prints)
-    printf("# all jets: %lu  selected: %i (>20GeV: %i) jetpt1: %f  2: %f  ht: %f\n", jets->size(), floats->njets(), floats->njets(20), floats->jetpt1(), floats->jetpt2(), floats->ht);
+  if (prints) {
+    printf("# all jets: %lu  selected: %i (>30GeV: %i) jetpt1: %f  2: %f  ht(30): %f\n", jets->size(), floats->njets(), floats->njets(30), floats->jetpt1(), floats->jetpt2(), floats->htptgt30);
+    for (int i = 0; i < mfv::n_filter_paths; ++i)
+      printf("%s,  npass: %i   Trigger Passed: %i \n", mfv::filter_paths[i], npass_filter[i], floats->FLTdecisions[i]);
+  }
 
   event.put(std::move(floats));
 }

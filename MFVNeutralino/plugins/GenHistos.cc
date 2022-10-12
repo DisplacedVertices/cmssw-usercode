@@ -33,6 +33,10 @@ private:
 
   TH1F* h_valid;
 
+  TH1F* h_gen_vtx_x;
+  TH1F* h_gen_vtx_y;
+  TH1F* h_gen_vtx_z;
+
   TH1F* NumLeptons;
   TH2F* DecayType;
 
@@ -159,6 +163,9 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   edm::Service<TFileService> fs;
 
   h_valid = fs->make<TH1F>("h_valid", "", 2, 0, 2);
+  h_gen_vtx_x = fs->make<TH1F>("h_gen_vtx_x", ";h_gen_vtx_x;nentries", 400, -0.3, 0.3);
+  h_gen_vtx_y = fs->make<TH1F>("h_gen_vtx_y", ";h_gen_vtx_y;nentries", 400, -0.3, 0.3);
+  h_gen_vtx_z = fs->make<TH1F>("h_gen_vtx_z", ";h_gen_vtx_z;nentries", 500, -5, 5);
 
   NumLeptons = fs->make<TH1F>("NumLeptons", "", 3, 0, 3);
   NumLeptons->SetTitle(";number of leptons from top decays;events");
@@ -365,11 +372,11 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   const char* names[9] = {"lsp", "strange", "bottom", "bhadron", "from21", "from22", "fromq", "from21only", "from22only"};
   for (int i = 0; i < 5; ++i) {
     h_vtx[i] = fs->make<TH2F>(TString::Format("h_vtx_%s", names[i]), TString::Format(";%s vx (cm); %s vy (cm)", names[i], names[i]), 200, -1, 1, 200, -1, 1);
-    h_r2d[i] = fs->make<TH1F>(TString::Format("h_r2d_%s", names[i]), TString::Format(";%s 2D distance (cm);Events/0.01 cm", names[i]), 500, 0, 5);
-    h_r3d[i] = fs->make<TH1F>(TString::Format("h_r3d_%s", names[i]), TString::Format(";%s 3D distance (cm);Events/0.01 cm", names[i]), 500, 0, 5);
+    h_r2d[i] = fs->make<TH1F>(TString::Format("h_r2d_%s", names[i]), TString::Format(";%s 2D distance (cm);Events/0.01 cm", names[i]), 1000, 0, 5);
+    h_r3d[i] = fs->make<TH1F>(TString::Format("h_r3d_%s", names[i]), TString::Format(";%s 3D distance (cm);Events/0.01 cm", names[i]), 1000, 0, 5);
   }
 
-  h_ctau = fs->make<TH1F>("h_ctau", ";c#tau to LSP decay (cm);Events/50 #mum", 200, 0, 1);
+  h_ctau = fs->make<TH1F>("h_ctau", ";c#tau to LSP decay (cm);Events/50 #mum", 500, 0, 1);
   h_ctaubig = fs->make<TH1F>("h_ctaubig", ";c#tau to LSP decay (cm);Events/500 #mum", 200, 0, 10);
   h_r3d_bhadron_v_bquark = fs->make<TH2F>("h_r3d_bhadron_v_bquark", ";b quark 3D distance (cm);b hadron 3D distance (cm)", 100, 0, 2, 100, 0, 2);
   h_lspbeta = fs->make<TH1F>("h_lspbeta", ";LSP #beta;Events/0.01", 100, 0, 1);
@@ -503,6 +510,9 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   };
 
   h_valid->Fill(mci->valid());
+  h_gen_vtx_x->Fill(x0);
+  h_gen_vtx_y->Fill(y0);
+  h_gen_vtx_z->Fill(z0);
 
   if (!mci->valid()) {
     if (!mci_warned)

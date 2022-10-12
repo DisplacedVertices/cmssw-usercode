@@ -496,7 +496,7 @@ namespace mfv {
     tree->Branch("gen_leptons", &nt.gen_leptons, 32000, 0);
     tree->Branch("gen_jet_ht", &nt.gen_jet_ht);
     tree->Branch("gen_jet_ht40", &nt.gen_jet_ht40);
-    tree->Branch("vertices", &nt.vertices); 
+    //tree->Branch("vertices", &nt.vertices); 
     tree->Branch("nvtx", &nt.nvtx);
     tree->Branch("ntk0", &nt.ntk0);
     tree->Branch("tk0_qchi2", &nt.tk0_qchi2);
@@ -602,7 +602,7 @@ namespace mfv {
     tree->SetBranchAddress("gen_leptons", &nt.p_gen_leptons);
     tree->SetBranchAddress("gen_jet_ht", &nt.gen_jet_ht);
     tree->SetBranchAddress("gen_jet_ht40", &nt.gen_jet_ht40);
-    tree->SetBranchAddress("vertices",&nt.vertices);
+    //tree->SetBranchAddress("vertices",&nt.vertices);
     tree->SetBranchAddress("nvtx", &nt.nvtx);
     tree->SetBranchAddress("ntk0", &nt.ntk0);
     tree->SetBranchAddress("tk0_qchi2", &nt.p_tk0_qchi2);
@@ -648,6 +648,8 @@ namespace mfv {
     if (nt.p_gen_daughter_id) nnt->gen_daughter_id = *nt.p_gen_daughter_id;
     if (nt.p_gen_bquarks) nnt->gen_bquarks = *nt.p_gen_bquarks;
     if (nt.p_gen_leptons) nnt->gen_leptons = *nt.p_gen_leptons;
+
+    //nnt->vertices = nt.vertices;
     
     if (nt.p_tk0_qchi2) nnt->tk0_qchi2 = *nt.p_tk0_qchi2;
     if (nt.p_tk0_ndof ) nnt->tk0_ndof  = *nt.p_tk0_ndof;

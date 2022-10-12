@@ -49,7 +49,7 @@ EOF
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
-int dvv_nbins = 40;
+int dvv_nbins = 100;
 double dvv_bin_width = 0.01;
 std::vector<TString> cb_cbbar_vector = {};
 
@@ -128,13 +128,15 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   const char* file_path; //which filepath?
   if (p.is_mc()) {
-    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV27m";
+    file_path = "/uscms_data/d3/shogan/crab_dirs/MiniTreeTestULV1Bm";
+    //file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV27m";
   } else if (p.only_10pc()) {
     file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV27m";
   } else {
     file_path = "/uscms_data/d3/dquach/crab3dirs/MiniTreeV27m_moresidebands";
   }
 
+ std::cout << file_path << std::endl;
   const int nbkg = 27; //which samples?
   const char* samples[nbkg];
   float       weights[nbkg];
@@ -168,7 +170,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   int ibkg_begin; int ibkg_end;
   if (p.is_mc()) {
-    if (p.year() == "2017")         { ibkg_begin =  1; ibkg_end =  8; if (p.inject_signal()) ibkg_begin = 0; }
+    if (p.year() == "2017")         { ibkg_begin =  1; ibkg_end =  4; if (p.inject_signal()) ibkg_begin = 0; }
     else if (p.year() == "2018")    { ibkg_begin =  9; ibkg_end = 16; if (p.inject_signal()) ibkg_end = 17; }
     else if (p.year() == "2017p8")  { ibkg_begin =  1; ibkg_end = 16; if (p.inject_signal()) {ibkg_begin = 0; ibkg_end = 17;} }
     else { fprintf(stderr, "bad year"); exit(1); }
@@ -202,7 +204,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   double dphi_pdf_c; double dphi_pdf_e = 2; double dphi_pdf_a; //deltaphi input
   if (p.is_mc()) {
-    if (p.year() == "2017")         { dphi_pdf_c = 1.31; dphi_pdf_a = 4.60; }
+    if (p.year() == "2017")         { dphi_pdf_c = 1.40; dphi_pdf_a = 3.40; }
     else if (p.year() == "2018")    { dphi_pdf_c = 1.38; dphi_pdf_a = 3.77; }
     else if (p.year() == "2017p8")  { dphi_pdf_c = 1.34; dphi_pdf_a = 4.18; }
     else { fprintf(stderr, "bad year"); exit(1); }
@@ -258,11 +260,12 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   TH1F* h_2v_dbv = new TH1F("h_2v_dbv", "two-vertex events;d_{BV} (cm);vertices", 1250, 0, 2.5);
   TH2F* h_2v_dbv1_dbv0 = new TH2F("h_2v_dbv1_dbv0", "two-vertex events;d_{BV}^{0} (cm);d_{BV}^{1} (cm)", 1250, 0, 2.5, 1250, 0, 2.5);
   TH1F* h_2v_dvv = new TH1F("h_2v_dvv", "two-vertex events;d_{VV} (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
-  TH1F* h_2v_sumdbv = new TH1F("h_2v_sumdbv", "two-vertex events; #Sigma(d_{BV})  (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
+  TH1F* h_2v_sumdbv = new TH1F("h_2v_sumdbv", "two-vertex events; #Sigma(d_{BV})  (cm);events", 100, 0., 1.);
   TH1F* h_2v_dphivv = new TH1F("h_2v_dphivv", "two-vertex events;#Delta#phi_{VV};events", 10, -3.15, 3.15);
   TH1F* h_2v_absdphivv = new TH1F("h_2v_absdphivv", "two-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
   TH1D* h_2v_npu = new TH1D("h_2v_npu", "two-vertex events;# PU interactions;events", 100, 0, 100);
 
+  std::cout << "ibkg_begin: " << ibkg_begin << "  ibkg_end: " << ibkg_end << std::endl;
   for (int i = ibkg_begin; i <= ibkg_end; ++i) {
     mfv::MiniNtuple nt;
     TString fn = TString::Format("%s/%s.root", file_path, samples[i]);
@@ -357,7 +360,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   //construct dvvc
   TH1F* h_c1v_dbv = new TH1F("h_c1v_dbv", "constructed from only-one-vertex events;d_{BV} (cm);vertices", 1250, 0, 2.5);
   TH1F* h_c1v_dvv = new TH1F("h_c1v_dvv", "constructed from only-one-vertex events;d_{VV} (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
-  TH1F* h_c1v_sumdbv = new TH1F("h_c1v_sumdbv", "constructed from only-one-vertex events;#Sigma(d_{BV}) (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
+  TH1F* h_c1v_sumdbv = new TH1F("h_c1v_sumdbv", "constructed from only-one-vertex events;#Sigma(d_{BV}) (cm);events", 100, 0, 1.);
   TH1F* h_c1v_absdphivv = new TH1F("h_c1v_absdphivv", "constructed from only-one-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
   TH1F* h_c1v_dbv0 = new TH1F("h_c1v_dbv0", "constructed from only-one-vertex events;d_{BV}^{0} (cm);events", 1250, 0, 2.5);
   TH1F* h_c1v_dbv1 = new TH1F("h_c1v_dbv1", "constructed from only-one-vertex events;d_{BV}^{1} (cm);events", 1250, 0, 2.5);
@@ -479,6 +482,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   h_c1v_dbv->Write();
   h_c1v_dvv->Scale(1./h_c1v_dvv->Integral());
   h_c1v_dvv->Write();
+  h_c1v_sumdbv->Scale(1./h_c1v_sumdbv->Integral());
   h_c1v_sumdbv->Write();
   h_c1v_absdphivv->Write();
   h_c1v_dbv0->Write();

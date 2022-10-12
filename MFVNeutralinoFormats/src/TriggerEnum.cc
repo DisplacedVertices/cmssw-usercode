@@ -75,4 +75,72 @@ namespace mfv {
     "Flag_globalTightHalo2016Filter",
     "Flag_CSCTightHalo2015Filter"
   };
+
+
+  const char* filter_paths[mfv::n_filter_paths] = {
+
+    // 2017 di-bjet filter names
+    "hltDoubleCaloBJets100eta2p3", // also in 2018
+    "hltBTagCalo80x6CSVp0p92DoubleWithMatching",
+    "hltDoublePFJets100Eta2p3",
+    "hltDoublePFJets100Eta2p3MaxDeta1p6",
+
+    // 2018 di-bjet filter names
+    "hltBTagCaloDeepCSV0p71Double6Jets80",
+    "hltDoublePFJets116Eta2p3",
+    "hltDoublePFJets116Eta2p3MaxDeta1p6",
+
+    // 2017 tri-bjet filter names
+    "hltQuadCentralJet30",          // also in 2018
+    "hltCaloQuadJet30HT300",
+    "hltBTagCaloCSVp05Double",
+    "hltPFCentralJetLooseIDQuad30", // in 2018
+    "hlt1PFCentralJetLooseID75",    // in 2018
+    "hlt2PFCentralJetLooseID60",    // in 2018
+    "hlt3PFCentralJetLooseID45",    // in 2018
+    "hlt4PFCentralJetLooseID40",    // in 2018
+    "hltPFCentralJetsLooseIDQuad30HT300",
+    "hltBTagPFCSVp070Triple",
+
+    // 2018 tri-bjet filter names
+    "hltCaloQuadJet30HT320",
+    "hltBTagCaloDeepCSVp17Double",
+    "hltPFCentralJetsLooseIDQuad30HT330",
+    "hltBTagPFDeepCSV4p5Triple",
+
+  };
+
+  const int filter_nreqs[mfv::n_filter_paths] = {
+
+    // 2017 di-bjet trigger
+    2,
+    2,
+    2,
+    1,
+
+    // 2018 di-bjet trigger
+    2,
+    2,
+    1,
+
+    // 2017 tri-bjet trigger
+    4,
+    300, // this is an HT filter
+    2,
+    4,
+    1,
+    2,
+    3,
+    4,
+    300, // this is an HT filter
+    3,
+
+    // 2018 tri-bjet trigger
+    320, // this is an HT filter
+    2,
+    330, // this is an HT filter
+    3,
+
+  };
+
 }

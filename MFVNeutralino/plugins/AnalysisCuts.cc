@@ -35,7 +35,6 @@ private:
 
   const int apply_presel;
 
-  const bool require_met_filters;
   const bool require_bquarks;
   const int l1_bit;
   const int trigger_bit;
@@ -90,7 +89,6 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     use_mevent(mevent_src.label() != ""),
     apply_presel(cfg.getParameter<int>("apply_presel")),
-    require_met_filters(cfg.getParameter<bool>("require_met_filters")),
     require_bquarks(cfg.getParameter<bool>("require_bquarks")),
     l1_bit(apply_presel ? -1 : cfg.getParameter<int>("l1_bit")),
     trigger_bit(apply_presel ? -1 : cfg.getParameter<int>("trigger_bit")),
@@ -192,7 +190,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (apply_presel == 4) {
 
       // Veto events which pass HT trigger and offline HT > 1200 GeV, to keep orthogonal with apply_presel == 1
-      if(satisfiesTrigger(mevent, mfv::b_HLT_PFHT1050)) return false;
+      // if(satisfiesTrigger(mevent, mfv::b_HLT_PFHT1050)) return false; // FIXME
 
       bool success = false;
       for(size_t trig : mfv::HTOrBjetOrDisplacedDijetTriggers){
@@ -207,29 +205,6 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       }
       if(!success) return false;
     }
-
-    // MET trigger
-
-    if (apply_presel == 5) {
-
-      // Veto events which pass HT trigger and offline HT > 1200 GeV, to keep orthogonal with apply_presel == 1
-      if(satisfiesTrigger(mevent, mfv::b_HLT_PFHT1050)) return false;
-
-      if ( !satisfiesTrigger(mevent, mfv::b_HLT_PFMET120_PFMHT120_IDTight) ){
-        return false;
-      }
-    }
-
-    // Events with MET lower than threshold
-    if (apply_presel == 6) {
-      // Veto events which pass HT trigger and offline HT > 1200 GeV, to keep orthogonal with apply_presel == 1
-      if(satisfiesTrigger(mevent, mfv::b_HLT_PFHT1050)) return false;
-
-      if (mevent->met()>=150) return false;
-    }
-
-    if (require_met_filters && (!mevent->pass_metfilters))
-      return false;
 
     if (require_bquarks && mevent->gen_flavor_code != 2)
       return false;
@@ -542,12 +517,6 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
           }
         }
         return passed_kinematics;
-      }
-      case mfv::b_HLT_PFMET120_PFMHT120_IDTight :
-      {
-        //if(mevent->met() < 150 || njets < 2) return false; // cut on MET to avoid turn-on region, maybe cut value need to be determined
-        //if (njets < 2) return false;
-        return true;
       }
       default :
       {

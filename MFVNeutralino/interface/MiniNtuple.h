@@ -99,7 +99,7 @@ namespace mfv {
     std::vector<TLorentzVector>* p_gen_bquarks;
     std::vector<TLorentzVector>* p_gen_leptons;
     
-    MFVVertexAuxCollection vertices;
+    //MFVVertexAuxCollection vertices;
 
     unsigned char nvtx;
     unsigned char ntk0;

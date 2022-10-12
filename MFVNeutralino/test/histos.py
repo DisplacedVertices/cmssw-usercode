@@ -1,10 +1,10 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 is_mc = True # for blinding
-do_track = True # this can onlky be used for ntuple with keep_tk=True
+do_track = False # this can onlky be used for ntuple with keep_tk=True
 
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_MET_triggers
-sample_files(process, 'qcdht2000_2017' if is_mc else 'JetHT2017B', dataset, 1)
+#sample_files(process, 'mfv_neu_tau000300um_M0300_2017' if is_mc else 'JetHT2017B', dataset, 1)
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
 
@@ -13,6 +13,8 @@ process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
 process.load('JMTucker.MFVNeutralino.VertexHistos_cfi')
 process.load('JMTucker.MFVNeutralino.EventHistos_cfi')
 process.load('JMTucker.MFVNeutralino.TrackHistos_cfi')
+process.load('JMTucker.MFVNeutralino.FilterHistos_cfi')
+process.load('JMTucker.MFVNeutralino.JetTksHistos_cfi')
 process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
 
 import JMTucker.Tools.SimpleTriggerResults_cfi as SimpleTriggerResults
@@ -21,8 +23,10 @@ SimpleTriggerResults.setup_endpath(process, weight_src='mfvWeight')
 common = cms.Sequence(process.mfvSelectedVerticesSeq * process.mfvWeight)
 
 process.mfvEventHistosNoCuts = process.mfvEventHistos.clone()
+process.mfvJetTksHistosNoCuts = process.mfvJetTksHistos.clone()
+process.mfvFilterHistosNoCuts = process.mfvFilterHistos.clone()
 process.mfvVertexHistosNoCuts = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesExtraLoose')
-process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts) # just trigger for now
+process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts * process.mfvJetTksHistosNoCuts * process.mfvFilterHistosNoCuts) # just trigger for now
 process.pSkimSelVtx = cms.Path(common * process.mfvVertexHistosNoCuts)
 if do_track:
   process.mfvTrackHistosNoCuts = process.mfvTrackHistos.clone()
@@ -53,6 +57,7 @@ nm1s = [
     ]
 
 ntks = [5,3,4,7,8,9]
+#ntks = [5,]
 nvs = [0,1,2]
 
 for ntk in ntks:
@@ -100,6 +105,14 @@ process.EX1pFullSel    = cms.Path(common * process.EX1mfvAnalysisCutsFullSel    
 process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     * process.EX1mfvEventHistosSigReg     * process.EX1mfvVertexHistosSigReg)
 '''.replace('EX1', EX1)
 
+    for ptcut in [30.,]: #35., 40., 45., 50., 55., 60., 70., 80., 90., 100., 110.]:
+        EX4 = 'PtCut%i' % int(ptcut)
+        EX5 = 'btag_pt_cut = ' + str(ptcut)
+        exec ''' 
+process.EX1mfvFilterHistosSigRegEX4   = process.mfvFilterHistos.clone(EX5)
+process.EX1pSigRegEX4     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg      * process.EX1mfvFilterHistosSigRegEX4)
+'''.replace('EX1', EX1).replace('EX4', EX4).replace('EX5', EX5)
+
     for name, cut in nm1s:
         evt_cut = ''
         if type(cut) == tuple:
@@ -144,7 +157,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
     if use_btag_triggers :
-        samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=True, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used
+        samples = Samples.qcd_samples_2017
+        #samples = Samples.mfv_stopdbardbar_samples_2018
+        #samples = Samples.mfv_stopbbarbbar_samples_2018
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), half_mc_modifier())
     elif use_MET_triggers:
         samples = pick_samples(dataset, qcd=True, ttbar=False, data=False, leptonic=True, splitSUSY=True, Zvv=True, met=True, span_signal=False)
@@ -156,7 +171,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
 
-    cs = CondorSubmitter('Histos' + version,
+    cs = CondorSubmitter('Histos' + version + 'LooseDeepFlav',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,

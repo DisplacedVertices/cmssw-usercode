@@ -179,7 +179,7 @@ void MFVMiniTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_nsv->Fill(input_vertices->size());
   h_nsvsel->Fill(vertices.size());
 
-  nt.vertices = vertices;
+  //nt.vertices = vertices;
 
   if (vertices.size() == 1) {
     const MFVVertexAux& v0 = vertices[0];

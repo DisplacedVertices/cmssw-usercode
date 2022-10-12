@@ -1,0 +1,67 @@
+DEBUG 2022-04-11 15:51:10.399 UTC: 	 CRAB Client version: v3.220210
+DEBUG 2022-04-11 15:51:10.399 UTC: 	 Running on: Linux cmslpc160.fnal.gov 3.10.0-1160.53.1.el7.x86_64 #1 SMP Tue Jan 11 08:25:52 CST 2022 x86_64 x86_64 x86_64 GNU/Linux - Scientific Linux 7.9 (Nitrogen)
+DEBUG 2022-04-11 15:51:10.399 UTC: 	 Executing command: 'checkwrite'
+DEBUG 2022-04-11 15:51:10.400 UTC: 	 Found CRAB cache file /uscms/home/shogan/.crab3
+DEBUG 2022-04-11 15:51:10.402 UTC: 	 Checking credentials
+DEBUG 2022-04-11 15:51:10.403 UTC: 	 Found proxy file /uscms/home/shogan/x509up_u50569
+DEBUG 2022-04-11 15:51:10.403 UTC: 	 Making sure it has proper VOMS extension
+DEBUG 2022-04-11 15:51:10.403 UTC: 	 Executing command :
+ voms-proxy-info --vo --file /uscms/home/shogan/x509up_u50569
+DEBUG 2022-04-11 15:51:10.451 UTC: 	 output : cms
+
+ error: 
+ retcode : 0
+DEBUG 2022-04-11 15:51:10.451 UTC: 	 Getting proxy life time left
+DEBUG 2022-04-11 15:51:10.451 UTC: 	 Executing command :
+ voms-proxy-info --actimeleft --timeleft --file /uscms/home/shogan/x509up_u50569
+DEBUG 2022-04-11 15:51:10.486 UTC: 	 output : 355034
+355034
+
+ error: 
+ retcode : 0
+DEBUG 2022-04-11 15:51:10.487 UTC: 	 Proxy valid for 98:37:14 hours
+DEBUG 2022-04-11 15:51:10.487 UTC: 	 Command use: checkwrite
+DEBUG 2022-04-11 15:51:10.487 UTC: 	 Options use: ['--site=T3_US_FNALLPC']
+DEBUG 2022-04-11 15:51:10.487 UTC: 	 Instance is None
+DEBUG 2022-04-11 15:51:10.487 UTC: 	 Server base url is None
+DEBUG 2022-04-11 15:51:10.487 UTC: 	 Retrieving username ...
+DEBUG 2022-04-11 15:51:10.487 UTC: 	 Retrieving username from CRIC...
+DEBUG 2022-04-11 15:51:11.939 UTC: 	 username is shogan
+INFO 2022-04-11 15:51:11.939 UTC: 	 Will check write permission in the default location /store/user/<username>
+INFO 2022-04-11 15:51:11.940 UTC: 	 Validating LFN /store/user/shogan...
+INFO 2022-04-11 15:51:11.940 UTC: 	 LFN /store/user/shogan is valid.
+INFO 2022-04-11 15:51:11.967 UTC: 	 Will use `gfal-copy`, `gfal-rm` commands for checking write permissions
+INFO 2022-04-11 15:51:11.968 UTC: 	 Will check write permission in /store/user/shogan on site T3_US_FNALLPC
+INFO 2022-04-11 15:51:13.509 UTC: 	 Will use PFN: rucio 1.27.2
+gsiftp://cmseos-gridftp.fnal.gov:2811/eos/uscms/store/user/shogan/crab3checkwrite_20220411_105111/crab3checkwrite_20220411_105111.tmp
+INFO 2022-04-11 15:51:13.509 UTC: 	 
+Attempting to create (dummy) directory crab3checkwrite_20220411_105111 and copy (dummy) file crab3checkwrite_20220411_105111.tmp to /store/user/shogan
+
+INFO 2022-04-11 15:51:13.514 UTC: 	 Executing command: which scram >/dev/null 2>&1 && eval `scram unsetenv -sh`; gfal-copy -p -v -t 180 file:///uscms/homes/s/shogan/work/mfv_10627/src/JMTucker/Tools/crab3checkwrite_20220411_105111.tmp 'rucio 1.27.2
+gsiftp://cmseos-gridftp.fnal.gov:2811/eos/uscms/store/user/shogan/crab3checkwrite_20220411_105111/crab3checkwrite_20220411_105111.tmp'
+INFO 2022-04-11 15:51:13.514 UTC: 	 Please wait...
+INFO 2022-04-11 15:51:14.042 UTC: 	 
+Successfully created directory crab3checkwrite_20220411_105111 and copied file crab3checkwrite_20220411_105111.tmp to /store/user/shogan
+INFO 2022-04-11 15:51:14.042 UTC: 	 
+Attempting to delete file rucio 1.27.2
+gsiftp://cmseos-gridftp.fnal.gov:2811/eos/uscms/store/user/shogan/crab3checkwrite_20220411_105111/crab3checkwrite_20220411_105111.tmp
+
+INFO 2022-04-11 15:51:14.042 UTC: 	 Executing command: which scram >/dev/null 2>&1 && eval `scram unsetenv -sh`; gfal-rm -v -t 180 'rucio 1.27.2
+gsiftp://cmseos-gridftp.fnal.gov:2811/eos/uscms/store/user/shogan/crab3checkwrite_20220411_105111/crab3checkwrite_20220411_105111.tmp'
+INFO 2022-04-11 15:51:14.042 UTC: 	 Please wait...
+INFO 2022-04-11 15:51:14.323 UTC: 	 
+Successfully deleted file rucio 1.27.2
+gsiftp://cmseos-gridftp.fnal.gov:2811/eos/uscms/store/user/shogan/crab3checkwrite_20220411_105111/crab3checkwrite_20220411_105111.tmp
+INFO 2022-04-11 15:51:14.323 UTC: 	 
+Attempting to delete directory rucio 1.27.2
+gsiftp://cmseos-gridftp.fnal.gov:2811/eos/uscms/store/user/shogan/crab3checkwrite_20220411_105111/
+
+INFO 2022-04-11 15:51:14.323 UTC: 	 Executing command: which scram >/dev/null 2>&1 && eval `scram unsetenv -sh`; gfal-rm -r -v -t 180 'rucio 1.27.2
+gsiftp://cmseos-gridftp.fnal.gov:2811/eos/uscms/store/user/shogan/crab3checkwrite_20220411_105111/'
+INFO 2022-04-11 15:51:14.323 UTC: 	 Please wait...
+INFO 2022-04-11 15:51:14.605 UTC: 	 
+Successfully deleted directory rucio 1.27.2
+gsiftp://cmseos-gridftp.fnal.gov:2811/eos/uscms/store/user/shogan/crab3checkwrite_20220411_105111/
+INFO 2022-04-11 15:51:14.607 UTC: 	 
+Checkwrite Result:
+INFO 2022-04-11 15:51:14.607 UTC: 	 Success: Able to write in /store/user/shogan on site T3_US_FNALLPC

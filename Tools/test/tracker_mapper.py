@@ -10,7 +10,7 @@ max_events(process, 1000)
 report_every(process, 1000000)
 geometry_etc(process, which_global_tag(settings))
 tfileservice(process, 'tracker_mapper.root')
-sample_files(process, 'qcdht2000_2017', 'miniaod')
+sample_files(process, 'mfv_stopdbardbar_tau000300um_M0300_2017', 'miniaod', 1)
 file_event_from_argv(process)
 #want_summary(process)
 
@@ -85,7 +85,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     dataset = 'miniaod'
 
     if use_btag_triggers :
-        samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, bjet=False, span_signal=True) # no data currently; no sliced ttbar since inclusive is used
+#        samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, bjet=False, span_signal=True) # no data currently; no sliced ttbar since inclusive is used
+        samples = Samples.mfv_stopdbardbar_samples_2017
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
     else :
         samples = pick_samples(dataset, all_signal=False)
@@ -96,7 +97,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     outputname = 'TrackerMapper'
     if use_btag_triggers :
         outputname += 'BtagTriggered'
-    outputname += 'V1'
+    outputname += 'ULV1'
     ms = MetaSubmitter(outputname, dataset=dataset)
     ms.common.pset_modifier = pset_modifier
     ms.condor.stageout_files = 'all'

@@ -102,7 +102,6 @@ def get_fns(name, ds):
     return _d[(name,ds)][1]
 
 def get_local_fns(name, ds, num=-1):
-    print(_d.keys())
     fns = _d[(name, ds)][1]
     if num > 0:
         fns = fns[:num]
@@ -232,7 +231,29 @@ _add_ds("ntupleulv1am", {
 'mfv_stopbbarbbar_tau001000um_M0800_2017': _fromnum0("/store/user/shogan/StopStopbarTo2Bbar2B_M-800_CTau-1mm_TuneCP5_13TeV-pythia8/NtupleULV1_keeptkBm_2017/211208_143929", 32),
 })
 
+
 _add_ds("ntupleulv1bm", {
+# 2017+2018 qcd samples (partial) below this line
+#'qcdht0200_2017': _fromnum1("/store/user/shogan/QCD_HT200to300_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/NtupleULV1Bm_2017/221007_124939", 96),
+#'qcdht0300_2017': (31, ['/store/user/shogan/QCD_HT300to500_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/NtupleULV1Bm_2017/221007_124953/0000/ntuple_%i.root' % i for i in chain(xrange(17,19), xrange(59,61), xrange(227,229), [5, 15, 25, 39, 43, 53, 68, 73, 81, 86, 94, 101, 105, 120, 123, 144, 147, 159, 176, 180, 186, 196, 215, 222, 224])]),
+#'qcdht0500_2017': _fromnum1("/store/user/shogan/QCD_HT500to700_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/NtupleULV1Bm_2017/221007_125007", 82),
+#'qcdht0700_2017': _fromnum1("/store/user/shogan/QCD_HT700to1000_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/NtupleULV1Bm_2017/221007_125022", 229),
+#'qcdht1000_2017': _fromnum1("/store/user/shogan/QCD_HT1000to1500_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/NtupleULV1Bm_2017/221006_210043", 135),
+#'qcdht1500_2017': _fromnum1("/store/user/shogan/QCD_HT1500to2000_TuneCP5_PSWeights_13TeV-madgraph-pythia8/NtupleULV1Bm_2017/221006_210056", 240),
+#'qcdht2000_2017': (183, ['/store/user/shogan/QCD_HT2000toInf_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/NtupleULV1Bm_2017/221006_210109/0000/ntuple_%i.root' % i for i in chain(xrange(1,99), xrange(100,135), xrange(136,186))]),
+'qcdht0200_2017': _fromnum1("/store/user/shogan/QCD_HT200to300_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/NtupleULV1BTestm_2017/221011_191721", 96),
+'qcdht0300_2017': (2, ['/store/user/shogan/QCD_HT300to500_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/NtupleULV1BTestm_2017/221011_191734/0000/ntuple_%i.root' % i for i in [129, 180]]),
+'qcdht0500_2017': _fromnum1("/store/user/shogan/QCD_HT500to700_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/NtupleULV1BTestm_2017/221011_191747", 82),
+'qcdht0700_2017': _fromnum1("/store/user/shogan/QCD_HT700to1000_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/NtupleULV1BTestm_2017/221011_191814", 229),
+'qcdht1000_2017': _fromnum1("/store/user/shogan/QCD_HT1000to1500_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/NtupleULV1BTestm_2017/221011_191827", 135),
+'qcdht1500_2017': (239, ['/store/user/shogan/QCD_HT1500to2000_TuneCP5_PSWeights_13TeV-madgraph-pythia8/NtupleULV1BTestm_2017/221011_191840/0000/ntuple_%i.root' % i for i in chain(xrange(1,131), xrange(132,241))]),
+'qcdht2000_2017': (185, ['/store/user/shogan/QCD_HT2000toInf_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/NtupleULV1BTestm_2017/221011_191853/0000/ntuple_%i.root' % i for i in chain(xrange(1,153), xrange(154,187))]),
+'qcdht0200_2018': (32, ['/store/user/shogan/QCD_HT200to300_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/NtupleULV1Bm_2017/221006_210255/0000/ntuple_%i.root' % i for i in chain(xrange(5,8), xrange(16,24), xrange(30,34), xrange(35,38), xrange(39,42), xrange(43,45), xrange(46,48), [1, 3, 9, 11, 13, 27, 49])]),
+'qcdht0700_2018': (3, ['/store/user/shogan/QCD_HT700to1000_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/NtupleULV1Bm_2017/221007_124732/0000/ntuple_%i.root' % i for i in chain(xrange(4,6), [23])]),
+'qcdht1000_2018': (33, ['/store/user/shogan/QCD_HT1000to1500_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/NtupleULV1Bm_2017/221007_124806/0000/ntuple_%i.root' % i for i in chain(xrange(3,5), xrange(6,9), xrange(10,16), xrange(17,20), xrange(21,33), xrange(34,38), xrange(40,42), [1])]),
+'qcdht1500_2018': _fromnum1("/store/user/shogan/QCD_HT1500to2000_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/NtupleULV1Bm_2017/221007_124828", 69),
+
+# 2017 RPV Samples below this line
 'mfv_neu_tau000100um_M0200_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-200_CTau-100um_TuneCP5_13TeV-pythia8/NtupleULV1Bm_NoEF_2017/221003_195139", 32),
 'mfv_neu_tau000300um_M0200_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-200_CTau-300um_TuneCP5_13TeV-pythia8/NtupleULV1Bm_NoEF_2017/221003_195153", 26),
 'mfv_neu_tau010000um_M0200_2017': _fromnum1("/store/user/shogan/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-200_CTau-10mm_TuneCP5_13TeV-pythia8/NtupleULV1Bm_NoEF_2017/221003_195207", 7),

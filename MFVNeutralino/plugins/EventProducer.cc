@@ -1,6 +1,7 @@
 #include "CommonTools/Utils/interface/StringCutObjectSelector.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
+#include "DataFormats/JetReco/interface/CaloJetCollection.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
@@ -46,6 +47,7 @@ private:
   const edm::EDGetTokenT<mfv::MCInteraction> mci_token;
   const edm::EDGetTokenT<std::vector<PileupSummaryInfo> > pileup_summary_token;
   const edm::EDGetTokenT<pat::JetCollection> jets_token;
+  const edm::EDGetTokenT<reco::CaloJetCollection> calo_jets_token;
   const edm::EDGetTokenT<double> rho_token;
   const bool use_met;
   const edm::EDGetTokenT<pat::METCollection> met_token;
@@ -85,6 +87,7 @@ MFVEventProducer::MFVEventProducer(const edm::ParameterSet& cfg)
     mci_token(consumes<mfv::MCInteraction>(cfg.getParameter<edm::InputTag>("mci_src"))),
     pileup_summary_token(consumes<std::vector<PileupSummaryInfo> >(cfg.getParameter<edm::InputTag>("pileup_info_src"))),
     jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
+    calo_jets_token(consumes<reco::CaloJetCollection>(cfg.getParameter<edm::InputTag>("calo_jets_src"))),
     rho_token(consumes<double>(cfg.getParameter<edm::InputTag>("rho_src"))),
     use_met(cfg.getParameter<edm::InputTag>("met_src").label() != ""),
     met_token(consumes<pat::METCollection>(cfg.getParameter<edm::InputTag>("met_src"))),
@@ -277,6 +280,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   mevent->l1_myhtt = triggerfloats->myhtt;
   mevent->l1_myhttwbug = triggerfloats->myhttwbug;
   mevent->hlt_ht = triggerfloats->hltht;
+  mevent->hlt_caloht = triggerfloats->hltcaloht;
 
   assert(triggerfloats->L1decisions.size() == mfv::n_l1_paths);
   for (size_t i = 0; i < mfv::n_l1_paths; ++i) {
@@ -290,6 +294,13 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     const bool found = triggerfloats->HLTdecisions[i] != -1;
     mevent->found_hlt(i, found);
     mevent-> pass_hlt(i, found && triggerfloats->HLTdecisions[i]);
+  }
+
+  assert(triggerfloats->FLTdecisions.size() == mfv::n_filter_paths);
+  for (size_t i = 0; i < mfv::n_filter_paths; ++i) {
+    const bool found = triggerfloats->FLTdecisions[i] != -1;
+    mevent->found_filter(i, found);
+    mevent-> pass_filter(i, found && triggerfloats->FLTdecisions[i]);
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -397,7 +408,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
     // match trigger and offline jets
     mevent->jet_hlt_push_back(jet, triggerfloats->hltpfjets, false);
-    mevent->jet_hlt_push_back(jet, triggerfloats->hltdisplacedcalojets, true);
+    mevent->jet_hlt_push_back(jet, triggerfloats->hltcalojets, true);
 
     int bdisc_level = 0;
     for (int i = 0; i < 3; ++i)
@@ -449,6 +460,43 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       }
     }
   }
+
+  edm::Handle<reco::CaloJetCollection> calo_jets;
+  event.getByToken(calo_jets_token, calo_jets);
+  for (const reco::CaloJet& cjet : *calo_jets) {
+    mevent->calo_jet_pt.push_back(cjet.pt());
+    mevent->calo_jet_eta.push_back(cjet.eta());
+    mevent->calo_jet_phi.push_back(cjet.phi());
+    mevent->calo_jet_energy.push_back(cjet.energy());
+  }
+  for (const TLorentzVector& jp4 : triggerfloats->hltpfjets) {
+
+    mevent->hlt_pf_jet_pt.push_back(jp4.Pt());
+    mevent->hlt_pf_jet_eta.push_back(jp4.Eta());
+    mevent->hlt_pf_jet_phi.push_back(jp4.Phi());
+    mevent->hlt_pf_jet_energy.push_back(jp4.E());
+
+  }
+  for (const TLorentzVector& cp4 : triggerfloats->hltcalojets) {
+
+    mevent->hlt_calo_jet_pt.push_back(cp4.Pt());
+    mevent->hlt_calo_jet_eta.push_back(cp4.Eta());
+    mevent->hlt_calo_jet_phi.push_back(cp4.Phi());
+    mevent->hlt_calo_jet_energy.push_back(cp4.E());
+
+  } 
+ for (const TLorentzVector& pp4 : triggerfloats->hltidpassedcalojets) {
+    mevent->hlt_idp_calo_jet_pt.push_back(pp4.Pt());
+    mevent->hlt_idp_calo_jet_eta.push_back(pp4.Eta());
+    mevent->hlt_idp_calo_jet_phi.push_back(pp4.Phi());
+    mevent->hlt_idp_calo_jet_energy.push_back(pp4.E());
+ }
+ for (const TLorentzVector& bp4 : triggerfloats->hltpfjetsforbtag) {
+    mevent->hlt_pfforbtag_jet_pt.push_back(bp4.Pt());
+    mevent->hlt_pfforbtag_jet_eta.push_back(bp4.Eta());
+    mevent->hlt_pfforbtag_jet_phi.push_back(bp4.Phi());
+    mevent->hlt_pfforbtag_jet_energy.push_back(bp4.E());
+ }
 
   //////////////////////////////////////////////////////////////////////
 

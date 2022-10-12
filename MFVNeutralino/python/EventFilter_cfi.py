@@ -21,5 +21,5 @@ mfvEventFilter = cms.EDFilter('MFVEventFilter',
 mfvEventFilterJetsOnly = mfvEventFilter.clone(mode = 'jets only')
 mfvEventFilterLeptonsOnly = mfvEventFilter.clone(mode = 'leptons only')
 mfvEventFilterHTORBjetsORDisplacedDijet = mfvEventFilter.clone(mode = 'HT OR bjets OR displaced dijet', min_ht = cms.double(-1))
+mfvEventFilterBjetsORDisplacedDijet = mfvEventFilter.clone(mode = 'bjets OR displaced dijet', min_ht = cms.double(-1))
 mfvEventFilterBjetsORDisplacedDijetVetoHT = mfvEventFilter.clone(mode = 'bjets OR displaced dijet veto HT', min_ht = cms.double(-1))
-mfvEventFilterMETOnly = mfvEventFilter.clone(mode = 'MET only', min_ht = cms.double(-1))
