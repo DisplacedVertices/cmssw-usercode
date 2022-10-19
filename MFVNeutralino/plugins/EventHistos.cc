@@ -54,6 +54,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_gvtx_nonbquark_r3d;
   // BEGIN NEW
   TH1F* h_gvtx_bhad_nonbhad_dR;
+  TH2F* h_2D_gvtx_bhad_nonbhad_dR_and_pT;
   TH1F* h_gvtx_bhad_closest_jet_dR;
   TH1F* h_gvtx_bhad_jet_mindR_nonbhad_dR;
   TH1F* h_gvtx_bhad_nonbhad_jet_dR;
@@ -262,6 +263,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_gvtx_nonbquark_r3d = fs->make<TH1F>("h_gvtx_nonbquark_r3d", ";dist3d(GEN b-vtx, LLP) (cm);events/.01 mm", 1000, 0, 10);
   // BEGIN NEW
   h_gvtx_bhad_nonbhad_dR = fs->make<TH1F>("h_gvtx_bhad_nonbhad_dR", ";#Delta R between mom. of a GEN non-b hadron and GEN b-had; arb. units", 140, 0, 7.0);
+  h_2D_gvtx_bhad_nonbhad_dR_and_pT = fs->make<TH2F>("h_2D_gvtx_bhad_nonbhad_dR_and_pT", ";#Delta R between mom. of a GEN non-b hadron and GEN b-had; non-b hadron p_{T} (GeV); arb. units", 70, 0, 7.0, 50, 0, 100);
   h_gvtx_bhad_closest_jet_dR = fs->make<TH1F>("h_gvtx_bhad_closest_jet_dR", ";#Delta R between mom. of a closest RECO jet and a GEN b-had; arb. units", 140, 0, 7.0);
   h_gvtx_bhad_jet_mindR_nonbhad_dR = fs->make<TH1F>("h_gvtx_bhad_jet_mindR_nonbhad_dR", ";#Delta R between mom. of a closest RECO jet and a GEN non-b had; arb. units", 140, 0, 7.0);
   h_gvtx_bhad_nonbhad_jet_dR = fs->make<TH1F>("h_gvtx_bhad_nonbhad_jet_dR", ";#Delta R between mom. of a closest RECO jet to a GEN non-b had and GEN b had; arb. units", 140, 0, 7.0);
@@ -497,31 +499,30 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_n_gen_bvtx->Fill(int((mevent->gen_b_llp0_decay.size()+ mevent->gen_b_llp1_decay.size())/3), w);
   // only 4 b-vertices and >=4 loose-SVs per event 
   //
-  std::cout << __LINE__ << std::endl;
-  if (!(event.id().run() == 1 && event.luminosityBlock() == 317 && (event.id().event() == 226050 || event.id().event() == 226167))) {
-	  std::cout << __LINE__ << std::endl;
-	  std::cout << " run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
-	  if (mevent->gen_b_llp0_decay.size() == 6 && mevent->gen_b_llp1_decay.size() == 6) {
+  
+  
+	  
+  if (mevent->gen_bchain_nonb_had_eta.size() == 4) {
 		  h_4bvtx_nsv->Fill(nsv, w);
 		  for (size_t i = 0; i < 4; ++i) {
-			  h_gvtx_bhad_nonbhad_dR->Fill(reco::deltaR(mevent->gen_bchain_nonb_had_eta[i], mevent->gen_bchain_nonb_had_phi[i], mevent->gen_bchain_b_had_eta[i], mevent->gen_bchain_b_had_phi[i]), w);
-			  double mindR = 400;
-			  double mindR_nonb = 400;
-			  size_t matchnonb_ijet = 0;
-			  for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
-				  if (mevent->jet_pt[ijet] < mfv::min_jet_pt)
-					  continue;
-				  if (reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->gen_bchain_b_had_eta[i], mevent->gen_bchain_b_had_phi[i]) < mindR)
-					  mindR = reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->gen_bchain_b_had_eta[i], mevent->gen_bchain_b_had_phi[i]);
-				  if (reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->gen_bchain_nonb_had_eta[i], mevent->gen_bchain_nonb_had_phi[i]) < mindR) {
-					  mindR_nonb = reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->gen_bchain_nonb_had_eta[i], mevent->gen_bchain_nonb_had_phi[i]);
-					  matchnonb_ijet = ijet;
-				  }
+			  for (size_t j = 0; j < mevent->gen_bchain_nonb_had_eta[i].size(); ++j) {
+				  double dR = reco::deltaR(mevent->gen_bchain_nonb_had_eta[i][j], mevent->gen_bchain_nonb_had_phi[i][j], mevent->gen_bchain_b_had_eta[i], mevent->gen_bchain_b_had_phi[i]);
+				  h_gvtx_bhad_nonbhad_dR->Fill(dR, w);
+				  h_2D_gvtx_bhad_nonbhad_dR_and_pT->Fill(dR, mevent->gen_bchain_nonb_had_pt[i][j], w);
 			  }
-			  h_gvtx_bhad_closest_jet_dR->Fill(mindR, w);
-			  h_gvtx_bhad_jet_mindR_nonbhad_dR->Fill(mindR_nonb, w);
-			  h_gvtx_bhad_nonbhad_jet_dR->Fill(reco::deltaR(mevent->jet_eta[matchnonb_ijet], mevent->jet_phi[matchnonb_ijet], mevent->gen_bchain_nonb_had_eta[i], mevent->gen_bchain_nonb_had_phi[i]), w);
-			  std::cout << __LINE__ << std::endl;
+
+			  double mindR = 400;
+			  for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+			      if (mevent->jet_pt[ijet] < mfv::min_jet_pt)
+					continue;
+				  if (reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->gen_bchain_b_had_eta[i], mevent->gen_bchain_b_had_phi[i]) < mindR)
+					mindR = reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->gen_bchain_b_had_eta[i], mevent->gen_bchain_b_had_phi[i]);
+			  }
+			  if (mindR != 400)
+				h_gvtx_bhad_closest_jet_dR->Fill(mindR, w);
+			  //h_gvtx_bhad_jet_mindR_nonbhad_dR->Fill(mindR_nonb, w);
+		      //h_gvtx_bhad_nonbhad_jet_dR->Fill(reco::deltaR(mevent->jet_eta[matchnonb_ijet], mevent->jet_phi[matchnonb_ijet], mevent->gen_bchain_nonb_had_eta[i], mevent->gen_bchain_nonb_had_phi[i]), w);
+			  
 		  }
 
 		  if (nsv >= 4) {
@@ -764,7 +765,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
 		  }
 	  }
-  }
+  
   h_minlspdist2d->Fill(mevent->minlspdist2d(), w);
   h_lspdist2d->Fill(mevent->lspdist2d(), w);
   h_lspdist3d->Fill(mevent->lspdist3d(), w);

@@ -243,29 +243,41 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
         }
       }
 
-	  for (int i = 0; i < 4; ++i) {
-		  mevent->gen_bchain_b_had_pt[i] = mci->set_bdecay_hadron_chain()[i * 2]->pt();
-		  mevent->gen_bchain_nonb_had_pt[i] = mci->set_bdecay_hadron_chain()[(i * 2) + 1]->pt();
-		  mevent->gen_bchain_b_had_eta[i] = mci->set_bdecay_hadron_chain()[i * 2]->eta();
-		  mevent->gen_bchain_nonb_had_eta[i] = mci->set_bdecay_hadron_chain()[(i * 2) + 1]->eta();
-		  mevent->gen_bchain_b_had_phi[i] = mci->set_bdecay_hadron_chain()[i * 2]->phi();
-		  mevent->gen_bchain_nonb_had_phi[i] = mci->set_bdecay_hadron_chain()[(i * 2) + 1]->phi();
-		  mevent->gen_bchain_b_had_mass[i] = mci->set_bdecay_hadron_chain()[i * 2]->mass();
-		  mevent->gen_bchain_nonb_had_mass[i] = mci->set_bdecay_hadron_chain()[(i * 2) + 1]->mass();
+	  if (mci->set_bdecay_hadron_chain().size() == 4) {
+		  for (size_t i = 0; i < 4; ++i) {
+			  mevent->gen_bchain_b_had_pt[i] = mci->set_bdecay_hadron_chain()[i][0]->pt();
+			  mevent->gen_bchain_b_had_eta[i] = mci->set_bdecay_hadron_chain()[i][0]->eta();
+			  mevent->gen_bchain_b_had_phi[i] = mci->set_bdecay_hadron_chain()[i][0]->phi();
+			  mevent->gen_bchain_b_had_mass[i] = mci->set_bdecay_hadron_chain()[i][0]->mass();
+			  std::vector<float> gen_nonb_had_per_b_pt = {};
+			  std::vector<float> gen_nonb_had_per_b_eta = {};
+			  std::vector<float> gen_nonb_had_per_b_phi = {};
+			  std::vector<float> gen_nonb_had_per_b_mass = {};
+			  for (size_t j = 1; j < mci->set_bdecay_hadron_chain()[i].size(); ++j) {
+				  gen_nonb_had_per_b_pt.push_back(mci->set_bdecay_hadron_chain()[i][j]->pt());
+				  gen_nonb_had_per_b_eta.push_back(mci->set_bdecay_hadron_chain()[i][j]->eta());
+				  gen_nonb_had_per_b_phi.push_back(mci->set_bdecay_hadron_chain()[i][j]->phi());
+				  gen_nonb_had_per_b_mass.push_back(mci->set_bdecay_hadron_chain()[i][j]->mass());
+			  }
+			  mevent->gen_bchain_nonb_had_pt.push_back(gen_nonb_had_per_b_pt);
+			  mevent->gen_bchain_nonb_had_eta.push_back(gen_nonb_had_per_b_eta);
+			  mevent->gen_bchain_nonb_had_phi.push_back(gen_nonb_had_per_b_phi);
+			  mevent->gen_bchain_nonb_had_mass.push_back(gen_nonb_had_per_b_mass);
 
-	  }
+		  }
 
-      auto vec_bp_llp0 = mci->b_llp0_decay_points();  
-      for (size_t i = 0; i < vec_bp_llp0.size(); ++i) {
-         mevent->gen_b_llp0_decay.push_back(vec_bp_llp0[i].x);
-         mevent->gen_b_llp0_decay.push_back(vec_bp_llp0[i].y);
-		 mevent->gen_b_llp0_decay.push_back(vec_bp_llp0[i].z);
-	  }
-	  auto vec_bp_llp1 = mci->b_llp1_decay_points();
-      for (size_t i = 0; i < vec_bp_llp1.size(); ++i) {
-         mevent->gen_b_llp1_decay.push_back(vec_bp_llp1[i].x);
-		 mevent->gen_b_llp1_decay.push_back(vec_bp_llp1[i].y);
-		 mevent->gen_b_llp1_decay.push_back(vec_bp_llp1[i].z);
+		  auto vec_bp_llp0 = mci->b_llp0_decay_points();
+		  for (size_t i = 0; i < vec_bp_llp0.size(); ++i) {
+			  mevent->gen_b_llp0_decay.push_back(vec_bp_llp0[i].x);
+			  mevent->gen_b_llp0_decay.push_back(vec_bp_llp0[i].y);
+			  mevent->gen_b_llp0_decay.push_back(vec_bp_llp0[i].z);
+		  }
+		  auto vec_bp_llp1 = mci->b_llp1_decay_points();
+		  for (size_t i = 0; i < vec_bp_llp1.size(); ++i) {
+			  mevent->gen_b_llp1_decay.push_back(vec_bp_llp1[i].x);
+			  mevent->gen_b_llp1_decay.push_back(vec_bp_llp1[i].y);
+			  mevent->gen_b_llp1_decay.push_back(vec_bp_llp1[i].z);
+		  }
 	  }
       mci_lep = mci->light_leptons();
     }
@@ -561,7 +573,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
 	for (int i = 0; i < 4; ++i) {
 		mevent->gen_bchain_b_had_pt[i] = mevent->gen_bchain_b_had_eta[i] = mevent->gen_bchain_b_had_phi[i] = mevent->gen_bchain_b_had_mass[i] = 0;
-		mevent->gen_bchain_nonb_had_pt[i] = mevent->gen_bchain_nonb_had_eta[i] = mevent->gen_bchain_nonb_had_phi[i] = mevent->gen_bchain_nonb_had_mass[i] = 0;
 	}
 
     for (int i = 0; i < 3; ++i) {
@@ -569,6 +580,10 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     }
 	mevent->gen_b_llp0_decay.clear();
 	mevent->gen_b_llp1_decay.clear();
+	mevent->gen_bchain_nonb_had_pt.clear();
+	mevent->gen_bchain_nonb_had_eta.clear();
+	mevent->gen_bchain_nonb_had_phi.clear();
+	mevent->gen_bchain_nonb_had_mass.clear();
     mevent->gen_bquarks.clear();
     mevent->gen_leptons.clear();
     mevent->gen_jets.clear();
