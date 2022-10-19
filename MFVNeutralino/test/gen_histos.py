@@ -7,7 +7,7 @@ debug = 'debug' in sys.argv
 input_files(process, 'C47DA2BF-B0FF-EA11-A2BC-001E67586629.root') #HSSbbbb 1mm 55GeV
 #input_files(process, '02F9E1F8-1BF9-EA11-A44E-0242AC1C0501.root') #HSSbbbb 1mm 15GeV
 max_events(process, 400)
-tfileservice(process, 'gen_histos_HSSbbbb_1mm_55GeV.root')
+tfileservice(process, 'gen_histos_HSSbbbb_1mm_55GeV_bhad.root')
 file_event_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.GenParticles_cff')

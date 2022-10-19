@@ -72,6 +72,17 @@ namespace mfv {
     bool valid() const { return type_ != mci_invalid; }
 
     Point decay_point(size_t) const;
+    bool isBhadron(int pdgID) const;
+    bool isKaon(int pdgID) const;
+    bool isChadron(int pdgID) const;
+    bool isBquark(int pdgID) const;
+    bool isValidLeptonic(const reco::GenParticle* parent, int pdgID) const;
+    bool isBvtx(const reco::GenParticle* parent, int pdgID, double dist3d, std::vector<int> vec_pdgID) const;
+    size_t mindR_dau(int &nth_chain, const reco::GenParticle* parent, std::vector<size_t>& excl_idx_first_dRmin, std::vector<size_t>& excl_idx_second_dRmin) const;
+    bool Is_bdecay_done(int &nth_chain, const reco::GenParticle* bquark, const reco::GenParticle* parent, std::vector<int>& vec_pdgID, std::vector<double>& vec_decay,  std::vector<const reco::GenParticle*>& vec_nonb_p, std::vector<const reco::GenParticle*>& vec_b_p, std::vector<size_t>& excl_idx_first_dRmin, std::vector<size_t>& excl_idx_second_dRmin) const;
+    
+    std::vector <const reco::GenParticle*> set_bdecay_hadron_chain() const;
+  
     std::vector < MCInteraction::Point> b_llp0_decay_points() const;
     std::vector < MCInteraction::Point> b_llp1_decay_points() const;
     double dvv() const;
@@ -108,9 +119,10 @@ namespace mfv {
 
     int num_leptonic_;
     std::vector<int> decay_type_; // one for each of the primaries: 0,1,2 = e, mu, tau, 3 = hadronic
+    
   };
 }
 
-std::ostream& operator<<(std::ostream& o, const mfv::MCInteraction& x);
 
+std::ostream& operator<<(std::ostream& o, const mfv::MCInteraction& x);
 #endif

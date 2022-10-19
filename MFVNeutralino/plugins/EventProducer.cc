@@ -242,17 +242,30 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
           mevent->gen_daughter_id.push_back(s->pdgId());
         }
       }
+
+	  for (int i = 0; i < 4; ++i) {
+		  mevent->gen_bchain_b_had_pt[i] = mci->set_bdecay_hadron_chain()[i * 2]->pt();
+		  mevent->gen_bchain_nonb_had_pt[i] = mci->set_bdecay_hadron_chain()[(i * 2) + 1]->pt();
+		  mevent->gen_bchain_b_had_eta[i] = mci->set_bdecay_hadron_chain()[i * 2]->eta();
+		  mevent->gen_bchain_nonb_had_eta[i] = mci->set_bdecay_hadron_chain()[(i * 2) + 1]->eta();
+		  mevent->gen_bchain_b_had_phi[i] = mci->set_bdecay_hadron_chain()[i * 2]->phi();
+		  mevent->gen_bchain_nonb_had_phi[i] = mci->set_bdecay_hadron_chain()[(i * 2) + 1]->phi();
+		  mevent->gen_bchain_b_had_mass[i] = mci->set_bdecay_hadron_chain()[i * 2]->mass();
+		  mevent->gen_bchain_nonb_had_mass[i] = mci->set_bdecay_hadron_chain()[(i * 2) + 1]->mass();
+
+	  }
+
       auto vec_bp_llp0 = mci->b_llp0_decay_points();  
       for (size_t i = 0; i < vec_bp_llp0.size(); ++i) {
          mevent->gen_b_llp0_decay.push_back(vec_bp_llp0[i].x);
          mevent->gen_b_llp0_decay.push_back(vec_bp_llp0[i].y);
-         mevent->gen_b_llp0_decay.push_back(vec_bp_llp0[i].z);
+		 mevent->gen_b_llp0_decay.push_back(vec_bp_llp0[i].z);
 	  }
 	  auto vec_bp_llp1 = mci->b_llp1_decay_points();
       for (size_t i = 0; i < vec_bp_llp1.size(); ++i) {
          mevent->gen_b_llp1_decay.push_back(vec_bp_llp1[i].x);
-	 mevent->gen_b_llp1_decay.push_back(vec_bp_llp1[i].y);
-	 mevent->gen_b_llp1_decay.push_back(vec_bp_llp1[i].z);
+		 mevent->gen_b_llp1_decay.push_back(vec_bp_llp1[i].y);
+		 mevent->gen_b_llp1_decay.push_back(vec_bp_llp1[i].z);
 	  }
       mci_lep = mci->light_leptons();
     }
@@ -544,6 +557,11 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 		for (int j = 0; j < 3; ++j)
 			mevent->gen_lsp_decay[i * 3 + j] = 0;
 
+	}
+
+	for (int i = 0; i < 4; ++i) {
+		mevent->gen_bchain_b_had_pt[i] = mevent->gen_bchain_b_had_eta[i] = mevent->gen_bchain_b_had_phi[i] = mevent->gen_bchain_b_had_mass[i] = 0;
+		mevent->gen_bchain_nonb_had_pt[i] = mevent->gen_bchain_nonb_had_eta[i] = mevent->gen_bchain_nonb_had_phi[i] = mevent->gen_bchain_nonb_had_mass[i] = 0;
 	}
 
     for (int i = 0; i < 3; ++i) {

@@ -98,6 +98,14 @@ struct MFVEvent {
   float gen_lsp_eta[2];
   float gen_lsp_phi[2];
   float gen_lsp_mass[2];
+  float gen_bchain_b_had_pt[4];
+  float gen_bchain_nonb_had_pt[4];
+  float gen_bchain_b_had_eta[4];
+  float gen_bchain_nonb_had_eta[4];
+  float gen_bchain_b_had_phi[4];
+  float gen_bchain_nonb_had_phi[4];
+  float gen_bchain_b_had_mass[4];
+  float gen_bchain_nonb_had_mass[4];
   float gen_lsp_decay[2*3];
   std::vector<float> gen_b_llp0_decay;
   std::vector<float> gen_b_llp1_decay;
