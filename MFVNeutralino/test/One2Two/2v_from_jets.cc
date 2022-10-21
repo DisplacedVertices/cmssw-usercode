@@ -24,8 +24,8 @@
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
-int dvv_nbins = 500;
-double dvv_bin_width = 0.004;
+int dvv_nbins = 100;
+double dvv_bin_width = 0.01;
 std::vector<TString> cb_cbbar_vector = {};
 
 struct ConstructDvvcParameters {
@@ -103,8 +103,8 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   const char* file_path; //which filepath?
   if (p.is_mc()) {
-    //file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV27m";
-    file_path = "/uscms_data/d3/shogan/crab_dirs/MiniTreeNomVtxV29Bm/";
+    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV27m";
+    //file_path = "/uscms_data/d3/shogan/crab_dirs/MiniTreeNomVtxV29Bm/";
   } else if (p.only_10pc()) {
     file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV27m";
   } else {
@@ -144,7 +144,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   int ibkg_begin; int ibkg_end;
   if (p.is_mc()) {
-    if (p.year() == "2017")         { ibkg_begin =  1; ibkg_end =  8; if (p.inject_signal()) ibkg_begin = 0; }
+    if (p.year() == "2017")         { ibkg_begin =  1; ibkg_end =  4; if (p.inject_signal()) ibkg_begin = 0; }
     else if (p.year() == "2018")    { ibkg_begin =  9; ibkg_end = 16; if (p.inject_signal()) ibkg_end = 17; }
     else if (p.year() == "2017p8")  { ibkg_begin =  1; ibkg_end = 16; if (p.inject_signal()) {ibkg_begin = 0; ibkg_end = 17;} }
     else { fprintf(stderr, "bad year"); exit(1); }
@@ -344,7 +344,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   //construct dvvc
   TH1F* h_c1v_dbv = new TH1F("h_c1v_dbv", "constructed from only-one-vertex events;d_{BV} (cm);vertices", 1250, 0, 2.5);
   TH1F* h_c1v_dvv = new TH1F("h_c1v_dvv", "constructed from only-one-vertex events;d_{VV} (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
-  TH1F* h_c1v_sumdbv = new TH1F("h_c1v_sumdbv", "constructed from only-one-vertex events;d_{BV}0 + d_{BV}1 (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
+  TH1F* h_c1v_sumdbv = new TH1F("h_c1v_sumdbv", "constructed from only-one-vertex events;d_{BV}0 + d_{BV}1 (cm);events", 100, 0, 1.);
   TH1F* h_c1v_sum3ddbv = new TH1F("h_c1v_sum3ddbv", "constructed from only-one-vertex events; 3D d_{BV}0 + d_{BV}1 (cm);events", dvv_nbins, 0, 10 * dvv_nbins * dvv_bin_width);
   TH1F* h_c1v_sqsumdbv = new TH1F("h_c1v_sqsumdbv", "constructed from only-one-vertex events;hypot(d_{BV}0, d_{BV}1) (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
   TH1F* h_c1v_absdphivv = new TH1F("h_c1v_absdphivv", "constructed from only-one-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
@@ -471,6 +471,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   h_c1v_dbv->Write();
   h_c1v_dvv->Scale(1./h_c1v_dvv->Integral());
   h_c1v_dvv->Write();
+  h_c1v_sumdbv->Scale(1./h_c1v_sumdbv->Integral());
   h_c1v_sumdbv->Write();
   h_c1v_sum3ddbv->Write();
   h_c1v_sqsumdbv->Write();

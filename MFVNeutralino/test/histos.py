@@ -100,7 +100,7 @@ process.EX1pFullSel    = cms.Path(common * process.EX1mfvAnalysisCutsFullSel    
 process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     * process.EX1mfvEventHistosSigReg     * process.EX1mfvFilterHistosSigReg     * process.EX1mfvJetTksHistosSigReg  * process.EX1mfvVertexHistosSigReg)
 '''.replace('EX1', EX1)
 
-    for ptcut in [20., 25., 30., 35., 40., 45., 50.]:
+    for ptcut in [30., 35., 40., 45., 50., 55., 60., 70., 80., 90.]:
         EX4 = 'PtCut%i' % int(ptcut)
         EX5 = 'btag_pt_cut = ' + str(ptcut)
         exec '''
@@ -162,7 +162,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
 
-    cs = CondorSubmitter('HistosV30CSVMediumPTVars',
+    cs = CondorSubmitter('HistosV31DiBtagFilt01On',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,

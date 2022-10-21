@@ -24,10 +24,10 @@ else :
 
 def sample_ok(s):
     return True #s.mass not in (500,3000)
-#stopbbarbbar = [s for s in Samples.mfv_stopbbarbbar_samples_2017 if sample_ok(s)]
-stopbbarbbar = [s for s in Samples.ZH_HToSSTodddd_ZToll_samples_2017 if sample_ok(s)]
-stopdbardbar = [s for s in Samples.ZH_HToSSTodddd_ZToll_samples_2017 if sample_ok(s)]
-#stopdbardbar = [s for s in Samples.mfv_stopdbardbar_samples_2017 if sample_ok(s)]
+stopbbarbbar = [s for s in Samples.mfv_stopbbarbbar_samples_2017 if sample_ok(s)]
+#stopbbarbbar = [s for s in Samples.ZH_HToSSTodddd_ZToll_samples_2017 if sample_ok(s)]
+#stopdbardbar = [s for s in Samples.ZH_HToSSTodddd_ZToll_samples_2017 if sample_ok(s)]
+stopdbardbar = [s for s in Samples.mfv_stopdbardbar_samples_2017 if sample_ok(s)]
 
 def getit(f, n):
     hnum = f.Get('SimpleTriggerEfficiency/triggers_pass_num')

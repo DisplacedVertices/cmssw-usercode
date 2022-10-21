@@ -427,12 +427,12 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
         if(nhardbjets < 2) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
-          if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 130 || fabs(mevent->jet_eta[j0]) > 2.3) continue;
+          if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 125 || fabs(mevent->jet_eta[j0]) > 2.3) continue;
 
           for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 130 || fabs(mevent->jet_eta[j1]) > 2.3) continue;
+            if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 125 || fabs(mevent->jet_eta[j1]) > 2.3) continue;
 
-            if(fabs(mevent->jet_eta[j0] - mevent->jet_eta[j1]) < 1.6){
+            if(fabs(mevent->jet_eta[j0] - mevent->jet_eta[j1]) < 1.5){
               passed_kinematics = true;
             }
           }

@@ -7,8 +7,8 @@ mfvFilterHistos = cms.EDAnalyzer('MFVFilterHistos',
                                 is_dibjet           = cms.bool(False),
 
                                 #offline_csv = cms.double(0.01), # "No" CSV
-                                #offline_csv = cms.double(0.58), # Loose CSV
-                                offline_csv = cms.double(0.88), # Medium CSV
+                                offline_csv = cms.double(0.58), # Loose CSV
+                                #offline_csv = cms.double(0.88), # Medium CSV
                                 #offline_csv = cms.double(0.97), # Tight CSV
 
                                 skew_dR_cut = cms.double(1.6),

@@ -238,10 +238,11 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         if (not matches_online_calo) continue;
     
         // See if this jet matches to some HLT jet which passes the btag filters
-        int n_online_bjets = mevent->hlt_pfforbtag_jet_pt.size();
-        for (int j=0; j < n_online_bjets; j++) {
-            float hlt_eta = mevent->hlt_pfforbtag_jet_eta[j];
-            float hlt_phi = mevent->hlt_pfforbtag_jet_phi[j];
+        //int n_online_bjets = mevent->hlt_pfforbtag_jet_pt.size();
+        int n_hlt_calobjets = mevent->hlt_idp_calo_jet_pt.size();
+        for (int j=0; j < n_hlt_calobjets; j++) {
+            float hlt_eta = mevent->hlt_idp_calo_jet_eta[j];
+            float hlt_phi = mevent->hlt_idp_calo_jet_phi[j];
     
             if(reco::deltaR(hlt_eta, hlt_phi, off_eta, off_phi) < 0.14) { matches_online_bjet = true; }
         }
