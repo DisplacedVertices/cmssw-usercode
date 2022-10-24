@@ -44,6 +44,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
 
   //FIXME: ghost-track vertex study
   TH1F* h_n_gen_bvtx;
+  TH1I* h_artifact_bvtx_or_not;
   // only find 4 b-quarks 
   TH1F* h_4bvtx_nsv;
   TH1F* h_gvtx_nsv;
@@ -53,18 +54,24 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_gvtx_bquark_betagamma;
   TH1F* h_gvtx_nonbquark_r3d;
   // BEGIN NEW
-  TH1F* h_gvtx_bhad_nonbhad_dR;
-  TH2F* h_2D_gvtx_bhad_nonbhad_dR_and_pT;
-  TH1F* h_gvtx_bhad_closest_jet_dR;
-  TH1F* h_gvtx_bhad_jet_mindR_nonbhad_dR;
-  TH1F* h_gvtx_bhad_nonbhad_jet_dR;
-  // cut at dR(a jet, b-had) < 0.4 
-  TH1F* h_gvtx_njet;
-  TH1F* h_gvtx_ntrack_from_jets;
-  TH1F* h_gvtx_nsv_from_jets;
-  TH1F* h_gvtx_sum_pT_all_tracks;
-  TH1F* h_gvtx_sum_pT_tracks_leading_jet;
-  TH1F* h_gvtx_pT_all_tracks;
+
+  TH1F* h_gvtx_bquark_pT;
+  TH1F* h_gvtx_bhad_bquark_dR;
+  // cut w/ b-quark pT > 25 GeV imposed 
+  TH1F* h_gvtx_bhad_bquark_dR_wcut;
+  TH1F* h_gvtx_bhad_nonbhad_dR_wcut;
+  TH2F* h_2D_gvtx_bhad_bquark_dR_and_b_quark_pT_wcut;
+  TH2F* h_2D_gvtx_bhad_nonbhad_dR_and_pT_wcut;
+  TH2F* h_2D_gvtx_bhad_nonbhad_dR_and_b_quark_pT_wcut;
+  TH1F* h_gvtx_bhad_pT_wcut;
+  TH1F* h_gvtx_bhad_closest_jet_dR_wcut;
+  TH1F* h_gvtx_bhad_closest_jet_pT_wcut;
+  TH1F* h_gvtx_bhad_closest_jet_res_pT_wcut;
+  TH1F* h_gvtx_ntrack_from_jets_wcut;
+  TH1F* h_gvtx_sum_pT_all_tracks_wcut;
+  TH1F* h_gvtx_pT_all_tracks_wcut;
+  TH1F* h_gvtx_bsv_wcut;
+  TH1F* h_gvtx_min_sv_bvtx_dist3d_wcut;
   // END NEW
   // match a pair of b-quarks and LLP
   TH1F* h_gvtx_diff_pT_bpair_llp0;
@@ -252,7 +259,10 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_bquark_pairdeta = fs->make<TH1F>("h_bquark_pairdeta", ";bquark pair #Delta#eta (rad);bquark pairs/.1", 100, -5.0, 5.0);
 
   // overview 
+  h_gvtx_bquark_pT = fs->make<TH1F>("h_gvtx_bquark_pT", ";GEN b-quark p_{T} (GeV);arb. units", 100, 0, 200);
+  h_gvtx_bhad_bquark_dR = fs->make<TH1F>("h_gvtx_bhad_bquark_dR", ";#Delta R between mom. of a GEN b-quark and GEN b-had; arb. units", 140, 0, 7.0);
   h_n_gen_bvtx = fs->make<TH1F>("h_n_gen_bvtx", ";# of GEN b-vertices (from non-b hadrons); events/1", 40, 0, 40);
+  h_artifact_bvtx_or_not = fs->make<TH1I>("h_artifact_bvtx_or_not", "; 0 if no repeated b-vertices : 1 else; events/1", 2, 0, 2);
   h_4bvtx_nsv = fs->make<TH1F>("h_4bvtx_nsv", "req. exact 4 GEN b-vertices;# of (loose) secondary vertices; events/1", 40, 0, 40);
   // only find 4 b-vertices and at least 4 loose SVs  
   h_gvtx_nsv = fs->make<TH1F>("h_gvtx_nsv", "req. exact 4 GEN b-vertices && nsv>=4 ;# of (loose) secondary vertices; events/1", 40, 0, 40);
@@ -262,11 +272,24 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_gvtx_bquark_betagamma = fs->make<TH1F>("h_gvtx_bquark_betagamma", "; b-quark #beta#gamma; 4 x events / 0.1", 100, 0, 100);
   h_gvtx_nonbquark_r3d = fs->make<TH1F>("h_gvtx_nonbquark_r3d", ";dist3d(GEN b-vtx, LLP) (cm);events/.01 mm", 1000, 0, 10);
   // BEGIN NEW
-  h_gvtx_bhad_nonbhad_dR = fs->make<TH1F>("h_gvtx_bhad_nonbhad_dR", ";#Delta R between mom. of a GEN non-b hadron and GEN b-had; arb. units", 140, 0, 7.0);
-  h_2D_gvtx_bhad_nonbhad_dR_and_pT = fs->make<TH2F>("h_2D_gvtx_bhad_nonbhad_dR_and_pT", ";#Delta R between mom. of a GEN non-b hadron and GEN b-had; non-b hadron p_{T} (GeV); arb. units", 70, 0, 7.0, 50, 0, 100);
-  h_gvtx_bhad_closest_jet_dR = fs->make<TH1F>("h_gvtx_bhad_closest_jet_dR", ";#Delta R between mom. of a closest RECO jet and a GEN b-had; arb. units", 140, 0, 7.0);
-  h_gvtx_bhad_jet_mindR_nonbhad_dR = fs->make<TH1F>("h_gvtx_bhad_jet_mindR_nonbhad_dR", ";#Delta R between mom. of a closest RECO jet and a GEN non-b had; arb. units", 140, 0, 7.0);
-  h_gvtx_bhad_nonbhad_jet_dR = fs->make<TH1F>("h_gvtx_bhad_nonbhad_jet_dR", ";#Delta R between mom. of a closest RECO jet to a GEN non-b had and GEN b had; arb. units", 140, 0, 7.0);
+  
+  h_gvtx_bhad_bquark_dR_wcut = fs->make<TH1F>("h_gvtx_bhad_bquark_dR_wcut", "b-quark pT > 25 GeV;#Delta R between mom. of a GEN b-quark and GEN b-had; arb. units", 140, 0, 7.0);
+  h_gvtx_bhad_nonbhad_dR_wcut = fs->make<TH1F>("h_gvtx_bhad_nonbhad_dR_wcut", "b-quark pT > 25 GeV;#Delta R between mom. of a GEN non-b hadron and GEN b-had; arb. units", 140, 0, 7.0);
+  h_2D_gvtx_bhad_nonbhad_dR_and_pT_wcut = fs->make<TH2F>("h_2D_gvtx_bhad_nonbhad_dR_and_pT_wcut", "b-quark pT > 25 GeV;#Delta R between mom. of a GEN non-b hadron and GEN b-had; GEN non-b hadron p_{T} (GeV); arb. units", 70, 0, 2.0, 100, 0, 50);
+  h_2D_gvtx_bhad_nonbhad_dR_and_b_quark_pT_wcut = fs->make<TH2F>("h_2D_gvtx_bhad_nonbhad_dR_and_b_quark_pT_wcut", "b-quark pT > 25 GeV;#Delta R between mom. of a GEN non-b hadron and GEN b-had; GEN b-quark p_{T} (GeV); arb. units", 70, 0, 2.0, 200, 0, 200);
+  h_2D_gvtx_bhad_bquark_dR_and_b_quark_pT_wcut = fs->make<TH2F>("h_2D_gvtx_bhad_bquark_dR_and_b_quark_pT_wcut", "b-quark pT > 25 GeV;#Delta R between mom. of a GEN b-quark and GEN b-had; GEN b-quark p_{T} (GeV); arb. units", 70, 0, 2.0, 200, 0, 200);
+  h_gvtx_bhad_pT_wcut = fs->make<TH1F>("h_gvtx_bhad_pT_wcut", "b-quark pT > 25 GeV;GEN b-hadron p_{T} (GeV);arb. units", 100, 0, 200);
+  h_gvtx_bhad_closest_jet_dR_wcut = fs->make<TH1F>("h_gvtx_bhad_closest_jet_dR_wcut", "b-quark pT > 25 GeV;#Delta R between mom. of a closest RECO jet and a GEN b-had; arb. units", 70, 0, 7.0);
+  h_gvtx_bhad_closest_jet_pT_wcut = fs->make<TH1F>("h_gvtx_bhad_closest_jet_pT_wcut", "b-quark pT > 25 GeV;p_{T} a closest RECO jet; arb. units", 100, 0, 200);
+  h_gvtx_bhad_closest_jet_res_pT_wcut = fs->make<TH1F>("h_gvtx_bhad_closest_jet_res_pT_wcut", "b-quark pT > 25 GeV;p_{T} a closest RECO jet - p_{T} of a GEN b-quark; arb. units", 60, -30.0, 30.0);
+  
+  h_gvtx_ntrack_from_jets_wcut = fs->make<TH1F>("h_gvtx_ntrack_from_jets_wcut", "b-quark pT > 25 GeV;# of tracks per a matched jet;", 50, 0, 50);
+  h_gvtx_sum_pT_all_tracks_wcut = fs->make<TH1F>("h_gvtx_sum_pT_all_tracks_wcut", "b-quark pT > 25 GeV; sum p_{T} of macthed-jet tracks;", 100, 0, 200);
+  h_gvtx_pT_all_tracks_wcut = fs->make<TH1F>("h_gvtx_pT_all_tracks_wcut", "b-quark pT > 25 GeV; p_{T} of macthed-jet tracks (GeV);", 100, 0, 10);
+  h_gvtx_bsv_wcut = fs->make<TH1F>("h_gvtx_bsv_wcut", "b-quark pT > 25 GeV; nsv within #pi/2 of a b-hadron;", 20, 0, 20);
+  h_gvtx_min_sv_bvtx_dist3d_wcut = fs->make<TH1F>("h_gvtx_min_sv_bvtx_dist3d_wcut", "b-quark pT > 25 GeV; min(dist3d(RECO b-hadron sv, GEN b-vtx)) cm;", 100, 0, 2);
+  
+  
   // END NEW
 
   // match a pair of b-quarks and LLP
@@ -503,29 +526,91 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   
 	  
   if (mevent->gen_bchain_nonb_had_eta.size() == 4) {
-		  h_4bvtx_nsv->Fill(nsv, w);
-		  for (size_t i = 0; i < 4; ++i) {
+	  h_4bvtx_nsv->Fill(nsv, w);
+	  
+	  for (size_t i = 0; i < 4; ++i) {
+			  h_gvtx_bquark_pT->Fill(mevent->gen_daughters[i].Pt(), w);
+			  double dR_bquark = reco::deltaR(mevent->gen_daughters[i].Eta(), mevent->gen_daughters[i].Phi(), mevent->gen_bchain_b_had_eta[i], mevent->gen_bchain_b_had_phi[i]);
+
+			  h_gvtx_bhad_bquark_dR->Fill(dR_bquark, w);
+			  if (mevent->gen_daughters[i].Pt() < 25)
+				  continue;
+
+			  h_gvtx_bhad_bquark_dR_wcut->Fill(dR_bquark, w);
+			  h_gvtx_bhad_pT_wcut->Fill(mevent->gen_bchain_b_had_pt[i], w);
 			  for (size_t j = 0; j < mevent->gen_bchain_nonb_had_eta[i].size(); ++j) {
-				  double dR = reco::deltaR(mevent->gen_bchain_nonb_had_eta[i][j], mevent->gen_bchain_nonb_had_phi[i][j], mevent->gen_bchain_b_had_eta[i], mevent->gen_bchain_b_had_phi[i]);
-				  h_gvtx_bhad_nonbhad_dR->Fill(dR, w);
-				  h_2D_gvtx_bhad_nonbhad_dR_and_pT->Fill(dR, mevent->gen_bchain_nonb_had_pt[i][j], w);
+				  double dR_nonb = reco::deltaR(mevent->gen_bchain_nonb_had_eta[i][j], mevent->gen_bchain_nonb_had_phi[i][j], mevent->gen_bchain_b_had_eta[i], mevent->gen_bchain_b_had_phi[i]);
+				  h_gvtx_bhad_nonbhad_dR_wcut->Fill(dR_nonb, w);
+				  h_2D_gvtx_bhad_nonbhad_dR_and_pT_wcut->Fill(dR_nonb, mevent->gen_bchain_nonb_had_pt[i][j], w);
+				  h_2D_gvtx_bhad_nonbhad_dR_and_b_quark_pT_wcut->Fill(dR_nonb, mevent->gen_daughters[i].Pt(), w);
 			  }
+			  h_2D_gvtx_bhad_bquark_dR_and_b_quark_pT_wcut->Fill(dR_bquark, mevent->gen_daughters[i].Pt(), w);
 
-			  double mindR = 400;
+			  double mindR = 7.0;
+			  size_t bhad_jet = 0;
 			  for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
-			      if (mevent->jet_pt[ijet] < mfv::min_jet_pt)
-					continue;
-				  if (reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->gen_bchain_b_had_eta[i], mevent->gen_bchain_b_had_phi[i]) < mindR)
-					mindR = reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->gen_bchain_b_had_eta[i], mevent->gen_bchain_b_had_phi[i]);
+					  if (mevent->jet_pt[ijet] < 0.0)  // Jets have a cut at 20 GeV
+						  continue;
+					  if (reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->gen_bchain_b_had_eta[i], mevent->gen_bchain_b_had_phi[i]) < mindR) {
+						  mindR = reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->gen_bchain_b_had_eta[i], mevent->gen_bchain_b_had_phi[i]);
+						  bhad_jet = ijet;
+					  }
 			  }
-			  if (mindR != 400)
-				h_gvtx_bhad_closest_jet_dR->Fill(mindR, w);
-			  //h_gvtx_bhad_jet_mindR_nonbhad_dR->Fill(mindR_nonb, w);
-		      //h_gvtx_bhad_nonbhad_jet_dR->Fill(reco::deltaR(mevent->jet_eta[matchnonb_ijet], mevent->jet_phi[matchnonb_ijet], mevent->gen_bchain_nonb_had_eta[i], mevent->gen_bchain_nonb_had_phi[i]), w);
-			  
-		  }
+			  if (mindR != 7.0) {
+					  h_gvtx_bhad_closest_jet_pT_wcut->Fill(mevent->jet_pt[bhad_jet], w);
+					  h_gvtx_bhad_closest_jet_dR_wcut->Fill(mindR, w);
+					  h_gvtx_bhad_closest_jet_res_pT_wcut->Fill(mevent->jet_pt[bhad_jet] - mevent->gen_daughters[i].Pt(), w);
+					  size_t jet_ntrack = 0;
+					  double sum_track_pT = 0;
+					  for (size_t j = 0; j < mevent->jet_track_which_jet.size(); ++j) {
+						  if (bhad_jet == mevent->jet_track_which_jet[j]) {
+							  jet_ntrack++;
+							  sum_track_pT += mevent->jet_track_pt(j);
+							  h_gvtx_pT_all_tracks_wcut->Fill(mevent->jet_track_pt(j), w);
+						  }
+					  }
+					  h_gvtx_ntrack_from_jets_wcut->Fill(jet_ntrack, w);
+					  h_gvtx_sum_pT_all_tracks_wcut->Fill(sum_track_pT, w);
+			  }
 
-		  if (nsv >= 4) {
+			  size_t llp = -1;
+			  size_t count_bsv = 0;
+			  double min_dist3d = 5.0;
+			  double dist3d_to_bvtx = 0.0;
+			  double phi = 0.0;
+			
+			  for (int isv = 0; isv < nsv; ++isv) {
+					  const MFVVertexAux& aux = auxes->at(isv);
+					  if (i < 2) {
+						  llp = 0;
+						  phi = atan2(aux.y - mevent->gen_lsp_decay[1], aux.x - mevent->gen_lsp_decay[0]);
+						  //eta = etaFromXYZ(aux.x - -mevent->gen_lsp_decay[0], aux.y - -mevent->gen_lsp_decay[1], aux.z - -mevent->gen_lsp_decay[2]);
+					  }
+					  else {
+						  llp = 1;
+						  phi = atan2(aux.y - mevent->gen_lsp_decay[4], aux.x - mevent->gen_lsp_decay[3]);
+						  //eta = etaFromXYZ(aux.x - -mevent->gen_lsp_decay[3], aux.y - -mevent->gen_lsp_decay[4], aux.z - -mevent->gen_lsp_decay[5]);
+					  }
+					  if (fabs(reco::deltaPhi(phi, mevent->gen_bchain_b_had_phi[i])) > 3.14 / 2)
+						  continue;
+					  count_bsv++;
+					  if (llp == 0)
+						  dist3d_to_bvtx = sqrt(pow(aux.x - mevent->gen_b_llp0_decay[(i - (llp * 2)) * 3 + 0], 2) + pow(aux.y - mevent->gen_b_llp0_decay[(i - (llp * 2)) * 3 + 1], 2) + pow(aux.z - mevent->gen_b_llp0_decay[(i - (llp * 2)) * 3 + 2], 2));
+					  else
+						  dist3d_to_bvtx = sqrt(pow(aux.x - mevent->gen_b_llp1_decay[(i - (llp * 2)) * 3 + 0], 2) + pow(aux.y - mevent->gen_b_llp1_decay[(i - (llp * 2)) * 3 + 1], 2) + pow(aux.z - mevent->gen_b_llp1_decay[(i - (llp * 2)) * 3 + 2], 2));
+					  if (dist3d_to_bvtx < min_dist3d)
+						  min_dist3d = dist3d_to_bvtx;
+				  }
+
+			  h_gvtx_bsv_wcut->Fill(count_bsv, w);
+			  if (min_dist3d < 5.0)
+				  h_gvtx_min_sv_bvtx_dist3d_wcut->Fill(min_dist3d, w);
+			  
+
+	  }
+
+	 
+	  if (nsv >= 4) {
 			  h_gvtx_nsv->Fill(nsv, w);
 			  h_gvtx_llp_pairdphi->Fill(fabs(reco::deltaPhi(mevent->gen_lsp_phi[0], mevent->gen_lsp_phi[1])), w);
 			  h_gvtx_llp_pairdist2d->Fill(mevent->lspdist2d(), w);

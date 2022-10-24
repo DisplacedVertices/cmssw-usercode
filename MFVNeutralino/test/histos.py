@@ -6,6 +6,7 @@ from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, d
 #sample_files(process, 'qcdht2000_2017' if is_mc else 'JetHT2017B', dataset, 1)
 #input_files(process,'root://cmseos.fnal.gov//store/user/pkotamni/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-1_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleGEN4bV29m_NoEF_2017/220930_133700/0000/ntuple_0.root') 
 input_files(process, 'ntuple.root')
+#set_events(process,[(1,316,225103),(1,317,225977),(1,318,226463),(1,318,226726),(1,319,227243),(1,316,225301),(1,317,225875),(1,318,226463),(1,318,226696)])
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
 

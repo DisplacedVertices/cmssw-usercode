@@ -179,8 +179,13 @@ namespace mfv {
   }
 
 
-  bool MCInteraction::isBhadron(int pdgID) const {
-	  return (int(abs(pdgID) / 100) % 10) == 5 || (int(abs(pdgID) / 1000) % 10) == 5;
+  bool MCInteraction::isBhadron(const reco::GenParticle* bquark, int pdgID) const {
+	  bool is_valid = false;
+	  if ((int(abs(pdgID) / 100) % 10 == 5 && (bquark->pdgId() / abs(bquark->pdgId())) == -1 * (pdgID / abs(pdgID))) 	 // b_bar -> b-mesons or b -> anti b-mesons
+		  || (int(abs(pdgID) / 1000) % 10 == 5 && (bquark->pdgId() / abs(bquark->pdgId())) == (pdgID / abs(pdgID))))	 // b_bar -> b-baryons or b -> anti b-baryons
+		  is_valid = true;
+
+	  return is_valid;
   }
   bool MCInteraction::isBquark(int pdgID) const {
 	  return fabs(pdgID) == 5;
@@ -188,17 +193,17 @@ namespace mfv {
   bool MCInteraction::isValidLeptonic(const reco:: GenParticle* parent, int pdgID) const {
 	  bool found_lepton_pair = false;			// this is a photon radiated from a b-quark to l-l+ and two neutrinos 
 	  for (size_t i = 0, ie = parent->numberOfDaughters(); i < ie; ++i) {
-		  const reco::GenParticle* dau = (reco::GenParticle*) parent->daughter(i);
+		  const reco::GenParticle* dau = (const reco::GenParticle*) parent->daughter(i);
 		  if (pdgID == -1 * dau->pdgId() && (abs(pdgID) == 11 || abs(pdgID) == 13 || abs(pdgID) == 15))
 			  found_lepton_pair = true;
 	  }
 	  return !found_lepton_pair;
   }
-  bool MCInteraction::isBvtx(const reco::GenParticle* parent, int pdgID, double dist3d, std::vector<int> vec_pdgID) const {
+  bool MCInteraction::isBvtx(const reco::GenParticle* bquark, const reco::GenParticle* parent, int pdgID, double dist3d, std::vector<int> vec_pdgID) const {
 	  for (size_t i = 0, ie = vec_pdgID.size() - 1; i < ie; ++i) {
-		  if (!(isBhadron(abs(vec_pdgID[i])) == true  	  // the chain of b-hadrons
+		  if (!(isBhadron(bquark, vec_pdgID[i]) == true  	  // the chain of b-hadrons
 			  || isBquark(abs(vec_pdgID[i])) == true
-			  || (i < vec_pdgID.size() - 2 && vec_pdgID[i] == 21 && isBhadron(abs(vec_pdgID[i + 1])) == true)))	// allow gluons to b-mesons 
+			  || (i < vec_pdgID.size() - 2 && vec_pdgID[i] == 21 && isBhadron(bquark, vec_pdgID[i + 1]) == true)))	// allow gluons to b-mesons 
 			  return false;
 
 	  }
@@ -256,15 +261,15 @@ namespace mfv {
 		  int dau_pdgID = dau->pdgId();
 		  double dau_dist3d = sqrt(pow(dau->vx() - bquark->vx(), 2) + pow(dau->vy() - bquark->vy(), 2) + pow(dau->vz() - bquark->vz(), 2));
 		  vec_pdgID.push_back(dau_pdgID);
-		  if (isBhadron(dau_pdgID)) {
-			  if (isBvtx(parent, dau_pdgID, dau_dist3d, vec_pdgID)) {
+		  if (isBhadron(bquark, dau_pdgID)) {
+			  if (isBvtx(bquark, parent, dau_pdgID, dau_dist3d, vec_pdgID)) {
 				  vec_decay.push_back(dau_dist3d);
 				  break;
 			  }
 		  }
 		  else {
 			  if (!isBquark(dau_pdgID)) {
-				  if (isBvtx(parent, dau_pdgID, dau_dist3d, vec_pdgID)) {
+				  if (isBvtx(bquark, parent, dau_pdgID, dau_dist3d, vec_pdgID)) {
 					  std::vector <const reco::GenParticle*> vec_nonb_p = {};
 					  for (size_t j = 0, je = parent->numberOfDaughters(); j < je; ++j) {
 						  const reco::GenParticle* idau = (const reco::GenParticle*) parent->daughter(j);
@@ -309,7 +314,7 @@ namespace mfv {
 
 					  size_t num_daus = p->numberOfDaughters();
 
-					  if (excl_idx_first_dRmin.size() == num_daus) {
+					  if (excl_idx_first_dRmin.size() == num_daus && excl_idx_second_dRmin.size() == p->daughter(excl_idx_first_dRmin[excl_idx_first_dRmin.size() - 1])->numberOfDaughters()) {
 						  break;
 					  }
 
@@ -356,6 +361,9 @@ namespace mfv {
 					  }
 
 				  }
+
+
+
 
 			  }
 	  }
