@@ -240,6 +240,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
           reco::GenParticle* s = (reco::GenParticle*)first_candidate(&*s_temp); 
           mevent->gen_daughters.push_back(MFVEvent::p4(s->pt(), s->eta(), s->phi(), s->mass()));
           mevent->gen_daughter_id.push_back(s->pdgId());
+		  mevent->gen_daughter_ngdau.push_back(s->numberOfDaughters());
         }
       }
 
@@ -253,16 +254,25 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 			  std::vector<float> gen_nonb_had_per_b_eta = {};
 			  std::vector<float> gen_nonb_had_per_b_phi = {};
 			  std::vector<float> gen_nonb_had_per_b_mass = {};
+			  std::vector<float> gen_nonb_had_per_b_x = {};
+			  std::vector<float> gen_nonb_had_per_b_y = {};
+			  std::vector<float> gen_nonb_had_per_b_z = {};
 			  for (size_t j = 1; j < mci->set_bdecay_hadron_chain()[i].size(); ++j) {
 				  gen_nonb_had_per_b_pt.push_back(mci->set_bdecay_hadron_chain()[i][j]->pt());
 				  gen_nonb_had_per_b_eta.push_back(mci->set_bdecay_hadron_chain()[i][j]->eta());
 				  gen_nonb_had_per_b_phi.push_back(mci->set_bdecay_hadron_chain()[i][j]->phi());
 				  gen_nonb_had_per_b_mass.push_back(mci->set_bdecay_hadron_chain()[i][j]->mass());
+				  gen_nonb_had_per_b_x.push_back(mci->set_bdecay_hadron_chain()[i][j]->vx());
+				  gen_nonb_had_per_b_y.push_back(mci->set_bdecay_hadron_chain()[i][j]->vy());
+				  gen_nonb_had_per_b_z.push_back(mci->set_bdecay_hadron_chain()[i][j]->vz());
 			  }
 			  mevent->gen_bchain_nonb_had_pt.push_back(gen_nonb_had_per_b_pt);
 			  mevent->gen_bchain_nonb_had_eta.push_back(gen_nonb_had_per_b_eta);
 			  mevent->gen_bchain_nonb_had_phi.push_back(gen_nonb_had_per_b_phi);
 			  mevent->gen_bchain_nonb_had_mass.push_back(gen_nonb_had_per_b_mass);
+			  mevent->gen_bchain_nonb_had_x.push_back(gen_nonb_had_per_b_x);
+			  mevent->gen_bchain_nonb_had_y.push_back(gen_nonb_had_per_b_y);
+			  mevent->gen_bchain_nonb_had_z.push_back(gen_nonb_had_per_b_z);
 
 		  }
 
@@ -471,6 +481,14 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
         mevent->jet_track_phi_err.push_back(tk->phiError());
         mevent->jet_track_dxy_err.push_back(tk->dxyError());
         mevent->jet_track_dz_err.push_back(tk->dzError());
+        int min_r = 2000000000;
+        for (int i = 1; i <= 4; ++i){
+          if (tk->hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,i)) {
+            min_r = i;
+            break;
+          }
+        }
+        mevent->jet_track_hp_rmin.push_back(min_r);
         mevent->jet_track_hp_push_back(tk->hitPattern().numberOfValidPixelHits(), tk->hitPattern().numberOfValidStripHits(), tk->hitPattern().pixelLayersWithMeasurement(), tk->hitPattern().stripLayersWithMeasurement());
       }
     }
@@ -538,6 +556,14 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       mevent->vertex_seed_track_err_phi.push_back(tk.phiError());
       mevent->vertex_seed_track_err_dxy.push_back(tk.dxyError());
       mevent->vertex_seed_track_err_dz.push_back(tk.dzError());
+      int min_r = 2000000000;
+      for (int i = 1; i <= 4; ++i){
+        if (tk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,i)) {
+          min_r = i;
+          break;
+        }
+      }
+      mevent->vertex_seed_track_hp_rmin.push_back(min_r);
       mevent->vertex_seed_track_hp_push_back(tk.hitPattern().numberOfValidPixelHits(), tk.hitPattern().numberOfValidStripHits(), tk.hitPattern().pixelLayersWithMeasurement(), tk.hitPattern().stripLayersWithMeasurement());
     }
   }
@@ -584,12 +610,16 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 	mevent->gen_bchain_nonb_had_eta.clear();
 	mevent->gen_bchain_nonb_had_phi.clear();
 	mevent->gen_bchain_nonb_had_mass.clear();
+	mevent->gen_bchain_nonb_had_x.clear();
+	mevent->gen_bchain_nonb_had_y.clear();
+	mevent->gen_bchain_nonb_had_z.clear();
     mevent->gen_bquarks.clear();
     mevent->gen_leptons.clear();
     mevent->gen_jets.clear();
     mevent->gen_daughters.clear();
     mevent->gen_daughter_id.clear();
-    mevent->l1_htt = 0;
+	mevent->gen_daughter_ngdau.clear();
+	mevent->l1_htt = 0;
     mevent->l1_myhtt = 0;
     mevent->l1_myhttwbug = 0;
     mevent->hlt_ht = 0;
@@ -641,6 +671,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->vertex_seed_track_phi.clear();
     mevent->vertex_seed_track_dxy.clear();
     mevent->vertex_seed_track_dz.clear();
+    mevent->vertex_seed_track_hp_rmin.clear(); 
     mevent->vertex_seed_track_hp_.clear();
     mevent->jet_track_which_jet.clear();
     mevent->jet_track_chi2dof.clear();
@@ -654,6 +685,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->jet_track_phi_err.clear();
     mevent->jet_track_dxy_err.clear();
     mevent->jet_track_dz_err.clear();
+    mevent->jet_track_hp_rmin.clear();
     mevent->jet_track_hp_.clear();
   }
 

@@ -250,6 +250,15 @@ class MFVVertexer : public edm::EDProducer {
     TH1F* h_output_aftermerge_potential_merged_vertex_nm1_bsbs2ddist;
 
     TH1F* h_resolve_shared_jets_lonetrkvtx_dphi;
+	TH1F* h_resolve_shared_jets_track_match_pT;
+	TH1F* h_resolve_shared_jets_track_match_pT_etacut;
+	TH1F* h_resolve_shared_jets_track_match_pT_phicut;
+	TH1F* h_resolve_shared_jets_track_match_phi;
+	TH1F* h_resolve_shared_jets_track_match_phi_pTcut;
+	TH1F* h_resolve_shared_jets_track_match_phi_etacut;
+	TH1F* h_resolve_shared_jets_track_match_eta;
+	TH1F* h_resolve_shared_jets_track_match_eta_phicut;
+	TH1F* h_resolve_shared_jets_track_match_eta_pTcut;
 
     TH1F* h_output_aftersharedjets_n_onetracks;
 
@@ -425,7 +434,20 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 
     if (resolve_shared_jets) {
       h_resolve_shared_jets_lonetrkvtx_dphi = fs->make<TH1F>("h_resolve_shared_jets_lonetrkvtx_dphi", ";|dPhi(vtx,a lone track)|", 20, 0, 3.15);
-    }
+	  h_resolve_shared_jets_track_match_pT = fs->make<TH1F>("h_resolve_shared_jets_track_match_pT", ">=3trk vertices; |track #pT_{SV} - track #pT_{jet}| (GeV); arb. units", 100, 0, 0.005);
+	  h_resolve_shared_jets_track_match_pT_phicut = fs->make<TH1F>("h_resolve_shared_jets_track_match_pT_phicut", ">=3trk vertices && |track #phi_{SV} - track #phi_{jet}| < 0.0001; |track #pT_{SV} - track #pT_{jet}| (GeV); arb. units", 100, 0, 0.005);
+	  h_resolve_shared_jets_track_match_pT_etacut = fs->make<TH1F>("h_resolve_shared_jets_track_match_pT_etacut", ">=3trk vertices && |track #eta_{SV} - track #eta_{jet}| < 0.0001; |track #pT_{SV} - track #pT_{jet}| (GeV); arb. units", 100, 0, 0.005);
+
+	  h_resolve_shared_jets_track_match_phi = fs->make<TH1F>("h_resolve_shared_jets_track_match_phi", ">=3trk vertices; |track #phi_{SV} - track #phi_{jet}|; arb. units", 100, 0, 0.005);
+	  h_resolve_shared_jets_track_match_phi_etacut = fs->make<TH1F>("h_resolve_shared_jets_track_match_phi_etacut", ">=3trk vertices && |track #eta_{SV} - track #eta_{jet}| < 0.0001; |track #phi_{SV} - track #phi_{jet}|; arb. units", 100, 0, 0.005);
+	  h_resolve_shared_jets_track_match_phi_pTcut = fs->make<TH1F>("h_resolve_shared_jets_track_match_phi_pTcut", ">=3trk vertices && |track #pT_{SV} - track #pT_{jet}| < 0.0001; |track #phi_{SV} - track #phi_{jet}|; arb. units", 100, 0, 0.005);
+
+	  
+	  h_resolve_shared_jets_track_match_eta = fs->make<TH1F>("h_resolve_shared_jets_track_match_eta", ">=3trk vertices; |track #eta_{SV} - track #eta_{jet}|; arb. units", 100, 0, 0.005);
+	  h_resolve_shared_jets_track_match_eta_pTcut = fs->make<TH1F>("h_resolve_shared_jets_track_match_eta_pTcut", ">=3trk vertices && |track #pT_{SV} - track #pT_{jet}| < 0.0001; |track #eta_{SV} - track #eta_{jet}|; arb. units", 100, 0, 0.005);
+	  h_resolve_shared_jets_track_match_eta_phicut = fs->make<TH1F>("h_resolve_shared_jets_track_match_eta_phicut", ">=3trk vertices && |track #phi_{SV} - track #phi_{jet}| < 0.0001; |track #eta_{SV} - track #eta_{jet}|; arb. units", 100, 0, 0.005);
+
+	}
 
     if (histos_output_aftersharedjets) {
       h_output_aftersharedjets_n_onetracks = fs->make<TH1F>("h_output_aftersharedjets_n_onetracks", "", 5, 0, 5);
@@ -1442,61 +1464,60 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     int n_output_aftersharedjets_onetracks = 0;
 
     size_t vtxidx = 0;
-    for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
-      std::vector<size_t> track_idx;
-      std::vector<size_t> tracktojet_which_trkidx;
-      std::vector<size_t> tracktojet_which_jetidx;
-      track_vec tks = vertex_track_vec(*v[0]);
-      sv_total_track_which_trk_vec.push_back(tks);
-      for (size_t i = 0; i < tks.size(); ++i) {
-        const reco::TrackRef& itk = tks[i];
-        track_idx.push_back(i);
-        for (size_t j = 0; j < jets->size(); ++j) {
-          if (match_track_jet(*itk, (*jets)[j], *jets, j)) {
-            tracktojet_which_trkidx.push_back(i);
-            tracktojet_which_jetidx.push_back(j);
-            if (verbose)
-              printf(" track %u matched with a jet %lu \n", tks[i].key(), j);
-          }
-        }
-      }
+	if (vertices->size() >= 2) {
+	  for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
+			std::vector<size_t> track_idx;
+			std::vector<size_t> tracktojet_which_trkidx;
+			std::vector<size_t> tracktojet_which_jetidx;
+			track_vec tks = vertex_track_vec(*v[0]);
+			sv_total_track_which_trk_vec.push_back(tks);
+			for (size_t i = 0; i < tks.size(); ++i) {
+				const reco::TrackRef& itk = tks[i];
+				track_idx.push_back(i);
+				for (size_t j = 0; j < jets->size(); ++j) {
+					if (match_track_jet(*itk, (*jets)[j], *jets, j)) {
+						tracktojet_which_trkidx.push_back(i);
+						tracktojet_which_jetidx.push_back(j);
+						if (verbose)
+							printf(" track %u matched with a jet %lu \n", tks[i].key(), j);
+					}
+				}
+			}
 
-      unsigned int ntracks = track_idx.size();
+			unsigned int ntracks = track_idx.size();
 
-      if (vtxidx == 0) { // start creating the ascening vector of sorted number of total tracks and its corresponding vertex index
-        sv_ascending_total_ntrack.push_back(ntracks);
-        sv_ascending_vtxidx.push_back(vtxidx);
-      }
-      else { // the algorithm continues after the first vertex is added to the vector 
+			if (vtxidx == 0) { // start creating the ascening vector of sorted number of total tracks and its corresponding vertex index
+				sv_ascending_total_ntrack.push_back(ntracks);
+				sv_ascending_vtxidx.push_back(vtxidx);
+			}
+			else { // the algorithm continues after the first vertex is added to the vector 
 
-        std::vector<unsigned int>::iterator it_ntracks = sv_ascending_total_ntrack.end();
-        std::vector<size_t>::iterator it_vtx = sv_ascending_vtxidx.end();
-        // finding an iterator that points to a position that ntrack is just less than or equal to itself from the back to the front
-        while (it_ntracks != sv_ascending_total_ntrack.begin() && ntracks <= sv_ascending_total_ntrack[std::distance(sv_ascending_total_ntrack.begin(), it_ntracks)-1])
-        {
-          --it_ntracks;
-          --it_vtx;
-        }
-        // adding a vertex at the end if it has higher ntrack. otherwise, insert it before an iterator pointing to a position that this ntrack is smaller than itself 
-        if (it_ntracks == sv_ascending_total_ntrack.end() && ntracks > sv_ascending_total_ntrack[std::distance(sv_ascending_total_ntrack.begin(), it_ntracks)]) {
-          sv_ascending_total_ntrack.push_back(ntracks);
-          sv_ascending_vtxidx.push_back(vtxidx);
-        }
+				std::vector<unsigned int>::iterator it_ntracks = sv_ascending_total_ntrack.end();
+				std::vector<size_t>::iterator it_vtx = sv_ascending_vtxidx.end();
+				// finding an iterator that points to a position that ntrack is just less than or equal to itself from the back to the front
+				while (it_ntracks != sv_ascending_total_ntrack.begin() && ntracks <= sv_ascending_total_ntrack[std::distance(sv_ascending_total_ntrack.begin(), it_ntracks) - 1])
+				{
+					--it_ntracks;
+					--it_vtx;
+				}
+				// adding a vertex at the end if it has higher ntrack. otherwise, insert it before an iterator pointing to a position that this ntrack is smaller than itself 
+				if (it_ntracks == sv_ascending_total_ntrack.end() && ntracks > sv_ascending_total_ntrack[std::distance(sv_ascending_total_ntrack.begin(), it_ntracks)]) {
+					sv_ascending_total_ntrack.push_back(ntracks);
+					sv_ascending_vtxidx.push_back(vtxidx);
+				}
 
-        else {
-          sv_ascending_total_ntrack.insert(it_ntracks, ntracks);
-          sv_ascending_vtxidx.insert(it_vtx, vtxidx);
-        }
-      }
+				else {
+					sv_ascending_total_ntrack.insert(it_ntracks, ntracks);
+					sv_ascending_vtxidx.insert(it_vtx, vtxidx);
+				}
+			}
 
-      sv_total_track_which_trkidx.push_back(track_idx);
-      sv_match_trkidx.push_back(tracktojet_which_trkidx);
-      sv_match_jetidx.push_back(tracktojet_which_jetidx);
-      vtxidx++;
-    }
+			sv_total_track_which_trkidx.push_back(track_idx);
+			sv_match_trkidx.push_back(tracktojet_which_trkidx);
+			sv_match_jetidx.push_back(tracktojet_which_jetidx);
+			vtxidx++;
+		}
 
-
-    if (vertices->size() >= 2) {
       // double for loops to double counts the sv0 and sv1 pairing. The code always remove 'lone shared tracks' from (multiple) special shared jets to sv0 in each round as long as they are not compatible to sv0. Otherwise, the sv1 from the earlier round will be considered again (double count) to have the tracks being removed or not. 
       for (size_t vtxi = 0; vtxi < sv_ascending_vtxidx.size(); vtxi++) {
         const size_t vtxidx0 = sv_ascending_vtxidx[vtxi];
@@ -2013,6 +2034,24 @@ bool MFVVertexer::match_track_jet(const reco::Track& tk, const pat::Jet& matchje
         double a = fabs(tk.pt() - fabs(jtk->charge() * jtk->pt())) + 1;
         double b = fabs(tk.eta() - jtk->eta()) + 1;
         double c = fabs(tk.phi() - jtk->phi()) + 1;
+
+		h_resolve_shared_jets_track_match_pT->Fill(fabs(tk.pt() - fabs(jtk->charge() * jtk->pt())));
+		h_resolve_shared_jets_track_match_eta->Fill(fabs(tk.eta() - jtk->eta()));
+		h_resolve_shared_jets_track_match_phi->Fill(fabs(tk.phi() - jtk->phi()));
+
+		if (fabs(tk.phi() - jtk->phi()) < 0.0001) {
+			h_resolve_shared_jets_track_match_pT_phicut->Fill(fabs(tk.pt() - fabs(jtk->charge() * jtk->pt())));
+			h_resolve_shared_jets_track_match_eta_phicut->Fill(fabs(tk.eta() - jtk->eta()));
+		}
+		if (fabs(tk.eta() - jtk->eta()) < 0.0001) {
+			h_resolve_shared_jets_track_match_pT_etacut->Fill(fabs(tk.pt() - fabs(jtk->charge() * jtk->pt())));
+			h_resolve_shared_jets_track_match_phi_etacut->Fill(fabs(tk.phi() - jtk->phi()));
+		}
+		if (fabs(tk.pt() - fabs(jtk->charge() * jtk->pt())) < 0.0001) {
+			h_resolve_shared_jets_track_match_eta_pTcut->Fill(fabs(tk.eta() - jtk->eta()));
+			h_resolve_shared_jets_track_match_phi_pTcut->Fill(fabs(tk.phi() - jtk->phi()));
+		}
+
         if (verbose)
           std::cout << "  jet track pt " << jtk->pt() << " eta " << jtk->eta() << " phi " << jtk->phi() << " match abc " << a * b * c << std::endl;
         if (a * b * c < match_thres) {

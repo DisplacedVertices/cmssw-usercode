@@ -106,12 +106,16 @@ struct MFVEvent {
   std::vector<std::vector<float>> gen_bchain_nonb_had_phi;
   float gen_bchain_b_had_mass[4];
   std::vector<std::vector<float>> gen_bchain_nonb_had_mass;
+  std::vector<std::vector<float>> gen_bchain_nonb_had_x;
+  std::vector<std::vector<float>> gen_bchain_nonb_had_y;
+  std::vector<std::vector<float>> gen_bchain_nonb_had_z;
   float gen_lsp_decay[2*3];
   std::vector<float> gen_b_llp0_decay;
   std::vector<float> gen_b_llp1_decay;
   uchar gen_decay_type[2];
   std::vector<TLorentzVector> gen_daughters;
   std::vector<int> gen_daughter_id;
+  std::vector<size_t> gen_daughter_ngdau;
 
   TLorentzVector gen_lsp_p4(int w) const {
     return p4(gen_lsp_pt[w], gen_lsp_eta[w], gen_lsp_phi[w], gen_lsp_mass[w]);
@@ -438,6 +442,7 @@ struct MFVEvent {
   std::vector<float> vertex_seed_track_err_phi;
   std::vector<float> vertex_seed_track_err_dxy;
   std::vector<float> vertex_seed_track_err_dz;
+  std::vector<int> vertex_seed_track_hp_rmin; 
   std::vector<mfv::HitPattern::value_t> vertex_seed_track_hp_;
   mfv::HitPattern vertex_seed_track_hp(int i) const { return mfv::HitPattern(vertex_seed_track_hp_[i]); }
   void vertex_seed_track_hp_push_back(int npxh, int nsth, int npxl, int nstl) { vertex_seed_track_hp_.push_back(mfv::HitPattern(npxh, nsth, npxl, nstl).value); }
@@ -464,6 +469,7 @@ struct MFVEvent {
   std::vector<float> jet_track_phi_err;
   std::vector<float> jet_track_dxy_err;
   std::vector<float> jet_track_dz_err;
+  std::vector<int> jet_track_hp_rmin;
   std::vector<mfv::HitPattern::value_t> jet_track_hp_;
   mfv::HitPattern jet_track_hp(int i) const { return mfv::HitPattern(jet_track_hp_[i]); }
   void jet_track_hp_push_back(int npxh, int nsth, int npxl, int nstl) { jet_track_hp_.push_back(mfv::HitPattern(npxh, nsth, npxl, nstl).value); }
