@@ -150,21 +150,27 @@ void MFVJetEnergyHistos::analyze(const edm::Event& event, const edm::EventSetup&
       else if (aeta < 2.043) ind = 6;
       else if (aeta < 2.322) ind = 7;
       else if (aeta < 2.500) ind = 8;
-      else if (aeta < 2.853) ind = 9;
-      else if (aeta < 2.964) ind = 10;
-      else if (aeta < 3.139) ind = 11;
-      else if (aeta < 5.191) ind = 12;
+      else if (aeta < 2.650) ind = 9;
+      else if (aeta < 2.853) ind = 10;
+      else if (aeta < 2.964) ind = 11;
+      else if (aeta < 3.139) ind = 12;
+      else if (aeta < 5.191) ind = 13;
       else
 	throw cms::Exception("BadJet") << "JER jet with pt " << mevent->jet_pt[i] << " eta " << mevent->jet_eta[i] << " out of range?";
 
       // https://twiki.cern.ch/twiki/bin/view/CMS/JetResolution
-      // FIXME: not using it now, but need to change for UL in used
 #ifdef MFVNEUTRALINO_2017
-      const double sf[13] = {1.1432, 1.1815, 1.0989, 1.1137, 1.1307, 1.1600, 1.2393, 1.2604, 1.4085, 1.9909, 2.2923, 1.2696, 1.1542};
-      const double un[13] = {0.0222, 0.0484, 0.0456, 0.1397, 0.1470, 0.0976, 0.1909, 0.1501, 0.2020, 0.5684, 0.3743, 0.1089, 0.1524};
+      const double sf[14] = {1.1082, 1.1285, 1.0916, 1.1352, 1.2116, 1.0637, 1.0489, 1.1170, 1.1952, 1.0792, 1.3141, 1.4113, 1.2679, 1.0378};
+      const double un[14] = {0.0563, 0.0252, 0.0247, 0.0617, 0.0686, 0.0812, 0.0789, 0.0871, 0.0912, 0.1314, 0.0967, 0.2315, 0.0547};
 #elif defined(MFVNEUTRALINO_2018)
-      const double sf[13] = {1.15, 1.134, 1.102, 1.134, 1.104, 1.149, 1.148, 1.114, 1.347, 2.137, 1.65, 1.225, 1.082};
-      const double un[13] = {0.043, 0.08, 0.052, 0.112, 0.211, 0.159, 0.209, 0.191, 0.274, 0.524, 0.941, 0.194, 0.198};
+      const double sf[14] = {1.1436, 1.1538, 1.1481, 1.1304, 1.1590, 1.1628, 1.1423, 1.1479, 1.1360, 1.1911, 1.2919, 1.3851, 1.2670, 1.0367};
+      const double un[14] = {0.0104, 0.0347, 0.0363, 0.0687, 0.0141, 0.0554, 0.0447, 0.1086, 0.0619, 0.0870, 0.0732, 0.1504, 0.0607, 0.1575};
+#elif defined(MFVNEUTRALINO_20161)
+      const double sf[14] = {1.0910, 1.1084, 1.0833, 1.0684, 1.0556, 1.0155, 0.9889, 1.0213, 1.0084, 1.1146, 1.1637, 1.1994, 1.2023, 1.0063};
+      const double un[14] = {0.0227, 0.0176, 0.0215, 0.0347, 0.0340, 0.0249, 0.0211, 0.0393, 0.0492, 0.0987, 0.0687, 0.1063, 0.0347, 0.0458};
+#elif defined(MFVNEUTRALINO_20162)
+      const double sf[14] = {1.0993, 1.1228, 1.1000, 1.0881, 1.0761, 1.0452, 1.0670, 1.0352, 1.0471, 1.1365, 1.2011, 1.1662, 1.1599, 1.0672};
+      const double un[14] = {0.0132, 0.0317, 0.0267, 0.0933, 0.0382, 0.0538, 0.0344, 0.0477, 0.0488, 0.0672, 0.1996, 0.1008, 0.0316, 0.0453};
 #else
 #error bad year
 #endif
