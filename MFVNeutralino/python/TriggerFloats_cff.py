@@ -9,6 +9,7 @@ mfvTriggerFloats = cms.EDProducer('MFVTriggerFloats',
                                   met_filters_src = cms.InputTag('TriggerResults', '', 'PAT'),
                                   jets_src = cms.InputTag('selectedPatJets'), # slimmedJets when running directly on miniaod
                                   jet_cut = jtupleParams.jetCut,
+                                  #met_src = cms.InputTag('slimmedMETs'),
                                   met_src = cms.InputTag('slimmedMETs', '', 'BasicAnalyzer'),
                                   muons_src = cms.InputTag('slimmedMuons'),
                                   muon_cut = cms.string(jtupleParams.muonCut.value()),

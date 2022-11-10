@@ -2,7 +2,8 @@ import FWCore.ParameterSet.Config as cms
 from JMTucker.MFVNeutralino.NtupleCommon import use_btag_triggers, use_MET_triggers
 
 if use_btag_triggers:
-  apply_presel = cms.int32(4)
+  #apply_presel = cms.int32(4)
+  apply_presel = cms.int32(0) # FIXME
 elif use_MET_triggers:
   apply_presel = cms.int32(5)
 else:

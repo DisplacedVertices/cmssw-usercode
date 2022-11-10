@@ -2,8 +2,8 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.general import *
 import pandas as pd
 
-presel_path = '/uscms_data/d2/tucker/crab_dirs/PreselHistosV27m'
-sel_path = '/uscms_data/d3/dquach/crab3dirs/HistosV27m_moresidebands'
+presel_path = '/uscms_data/d3/shogan/crab_dirs/PreselHistosULV1Bm'
+sel_path = '/uscms_data/d3/shogan/crab_dirs/HistosULV1Bm_moreSB_looseVtx'
 data = bool_from_argv('data')
 year = '2017' if len(sys.argv) < 2 else sys.argv[1]
 varname = 'nom' if len(sys.argv) < 3 else sys.argv[2] # use the BTV variations to compute syst shifts on pred2v
@@ -57,10 +57,11 @@ for ntk in 3,4,5,7,8,9:
         cdict[ntk]['cb'] = 0
         cdict[ntk]['cbbar'] = 0
 
-npresel, enpresel = get_integral(presel_f.Get('mfvEventHistosJetPreSel/h_npu'))
+npresel, enpresel = get_integral(presel_f.Get('mfvEventHistosBJetDispJetPreSel/h_npu'))
 npresel  *= presel_scale
 enpresel *= presel_scale
-f0 = fracdict['presel']
+#f0 = fracdict['presel']
+f0 = 0.8
 
 print 'year:', year
 print 'presel events: %8.0f +- %4.0f' % (npresel, enpresel)
@@ -70,7 +71,8 @@ for ntk in 3,4,5:
     n1v, en1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
     n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
     n2v_poisson = poisson_interval(n2v)
-    f1 = fracdict[ntk]['1v']
+    #f1 = fracdict[ntk]['1v']
+    f1 = 0.98
     cb = cdict[ntk]['cb']
     cbbar = cdict[ntk]['cbbar']
     pred = n1v**2 / (npresel * (1-f0) * (f1 / (1-f1) + 1)**2) * ((f1 / (1 - f1))**2 * ((1 - f0) / f0) * cb + cbbar)

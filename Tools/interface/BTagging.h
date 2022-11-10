@@ -7,10 +7,10 @@ namespace jmt {
   namespace BTagging {
     enum { loose, medium, tight, nwp };
 
-    float discriminator_min(int wp, bool old=false);
-    bool is_tagged(double disc, int wp, bool old=false);
-    float discriminator(const pat::Jet& jet, bool old=false);
-    bool is_tagged(const pat::Jet& jet, int wp, bool old=false);
+    float discriminator_min(int wp, int tagger=2);
+    bool is_tagged(double disc, int wp, int tagger=2);
+    float discriminator(const pat::Jet& jet, int tagger=2);
+    bool is_tagged(const pat::Jet& jet, int wp, int tagger=2);
   }
 }
 

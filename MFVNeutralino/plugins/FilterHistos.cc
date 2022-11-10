@@ -378,15 +378,15 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
 
   // Ignore events with no bscores
-  if ((std::size(mevent->jet_bdisc) == 0)) return;
+  if ((std::size(mevent->jet_bdisc_deepflav) == 0)) return;
 
   // Count number of btagged jets
   int nbtaggedjets      = 0;  // Jets which pass CSV req
   int naltbjets         = 0;  // Jets which pass CSV + angular reqs
   int nselectionjets    = 0;  // Dummy class that will take one of the above two values
-  for(size_t i = 0, ie = mevent->jet_bdisc_old.size(); i < ie; i++) {
+  for(size_t i = 0, ie = mevent->jet_bdisc_deepcsv.size(); i < ie; i++) {
       bool passes_bscore = false;
-      if (mevent->jet_bdisc_old[i] > offline_csv) { // 0.9693 is the tight WP for CSV algo
+      if (mevent->jet_bdisc_deepcsv[i] > offline_csv) {
         passes_bscore = true;
       }
   
@@ -414,8 +414,8 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
       // While in this loop, let's sort jets by bscore
       Jet_BHelper tmp_bsort_helper;
-      if      (year == 2017) tmp_bsort_helper.bscore = mevent->jet_bdisc_old[i];
-      else if (year == 2018) tmp_bsort_helper.bscore = mevent->jet_bdisc[i];
+      if      (year == 2017) tmp_bsort_helper.bscore = mevent->jet_bdisc_deepcsv[i];
+      else if (year == 2018) tmp_bsort_helper.bscore = mevent->jet_bdisc_deepflav[i];
       bsort_helpers.push_back(tmp_bsort_helper);
 
   }

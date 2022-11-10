@@ -33,7 +33,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
     set_splitting(samples, dataset, 'minitree', data_json=json_path('ana_2017p8.json'))
 
-    cs = CondorSubmitter('MiniTreeTest' + version,
+    cs = CondorSubmitter('MiniTreePSFix' + version,
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,

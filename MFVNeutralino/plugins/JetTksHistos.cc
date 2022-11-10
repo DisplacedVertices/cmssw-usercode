@@ -51,8 +51,8 @@ class MFVJetTksHistos : public edm::EDAnalyzer {
   TH1F* h_jet_skewphi[CATEGORIES];
   TH1F* h_jet_skew_dR[CATEGORIES];
   TH1F* h_jet_ntks[CATEGORIES];
-  TH1F* h_jet_bdisc[CATEGORIES];
-  TH1F* h_jet_bdisc_old[CATEGORIES];
+  TH1F* h_jet_bdisc_deepflav[CATEGORIES];
+  TH1F* h_jet_bdisc_deepcsv[CATEGORIES];
 
   TH1F* h_jet_tks_pt[CATEGORIES];  
   TH1F* h_jet_tks_pt_rel[CATEGORIES];  
@@ -102,8 +102,8 @@ MFVJetTksHistos::MFVJetTksHistos(const edm::ParameterSet& cfg)
     h_jet_skewphi[i] = fs->make<TH1F>(TString::Format("h_jet_skewphi_%s", bres.Data()), TString::Format(";#Delta#phi(jet, disp) for jets that %s b-tag;events/bin", bres.Data()), 100, -3.1416, 3.1416);
     h_jet_skew_dR[i] = fs->make<TH1F>(TString::Format("h_jet_skew_dR_%s", bres.Data()), TString::Format(";#DeltaR(jet, disp) for jets that %s b-tag;events/bin", bres.Data()), 100, 0, 1.6); // Original nBins = 100
     h_jet_ntks[i] = fs->make<TH1F>(TString::Format("h_jet_ntks_%s", bres.Data()), TString::Format(";#tks in jets that %s b-tag;events/bin", bres.Data()), 40, 0, 40);
-    h_jet_bdisc[i] = fs->make<TH1F>(TString::Format("h_jet_bdisc_%s", bres.Data()), TString::Format(";DeepJet of jets that %s b-tag;events/bin", bres.Data()), 100, 0, 1.0);
-    h_jet_bdisc_old[i] = fs->make<TH1F>(TString::Format("h_jet_bdisc_old_%s", bres.Data()), TString::Format(";CSV of jets that %s b-tag;events/bin", bres.Data()), 100, 0, 1.0);
+    h_jet_bdisc_deepflav[i] = fs->make<TH1F>(TString::Format("h_jet_bdisc_deepflav_%s", bres.Data()), TString::Format(";DeepJet of jets that %s b-tag;events/bin", bres.Data()), 100, 0, 1.0);
+    h_jet_bdisc_deepcsv[i] = fs->make<TH1F>(TString::Format("h_jet_bdisc_deepcsv_%s", bres.Data()), TString::Format(";CSV of jets that %s b-tag;events/bin", bres.Data()), 100, 0, 1.0);
 
     h_jet_tks_pt[i] = fs->make<TH1F>(TString::Format("h_jet_tks_pt_%s", bres.Data()), TString::Format(";p_{T} of all tks in jets that %s b-tag (GeV);events/bin", bres.Data()), 200, 0, 40);
     h_jet_tks_pt_rel[i] = fs->make<TH1F>(TString::Format("h_jet_tks_ptrel_%s", bres.Data()), TString::Format(";rel p_{T} of all tks in jets that %s b-tag (GeV);events/bin", bres.Data()), 200, 0, 20);
@@ -207,7 +207,7 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         bool matches_online_bjet = false;
         bool matches_online_calo = false;
 
-        if (mevent->jet_bdisc_old[i] < offline_csv || mevent->nth_jet_pt(i) < 30.0) continue;
+        if (mevent->jet_bdisc_deepcsv[i] < offline_csv || mevent->nth_jet_pt(i) < 30.0) continue;
     
         std::vector<int> fill_hists;
         fill_hists.push_back(ALL);     // Always fill histo #0
@@ -249,7 +249,7 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     
         // Which histograms do we need to fill?
         fill_hists.push_back(matches_online_bjet ? PASS_HLT : FAIL_HLT);
-        fill_hists.push_back(mevent->jet_bdisc_old[i] > offline_csv ? PASS_OFF : FAIL_OFF);
+        fill_hists.push_back(mevent->jet_bdisc_deepcsv[i] > offline_csv ? PASS_OFF : FAIL_OFF);
         
         // Try and find the point that this jet originates from. Do this by finding the closest instance of jet_loc_helper
         float closest_helper_dR  = 4.0;
@@ -277,8 +277,8 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
              h_jet_skewphi[n_hist]->Fill(TVector2::Phi_mpi_pi(closest_vtx_phi - off_phi), w);
              h_jet_skew_dR[n_hist]->Fill(closest_vtx_dR, w);
              h_jet_ntks[n_hist]->Fill((int)(mevent->n_jet_tracks(i)));
-             h_jet_bdisc[n_hist]->Fill((i < (int)(mevent->jet_bdisc.size()) ? mevent->jet_bdisc[i] : -9.9), w);
-             h_jet_bdisc_old[n_hist]->Fill((i < (int)(mevent->jet_bdisc_old.size()) ? mevent->jet_bdisc_old[i] : -9.9), w);
+             h_jet_bdisc_deepflav[n_hist]->Fill((i < (int)(mevent->jet_bdisc_deepflav.size()) ? mevent->jet_bdisc_deepflav[i] : -9.9), w);
+             h_jet_bdisc_deepcsv[n_hist]->Fill((i < (int)(mevent->jet_bdisc_deepcsv.size()) ? mevent->jet_bdisc_deepcsv[i] : -9.9), w);
         }
     
         // Start the track portion of this code
@@ -404,7 +404,7 @@ void MFVJetTksHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         int n_online_bjets = mevent->hlt_pfforbtag_jet_pt.size();
     
         for (int i = 0; i < mevent->njets(); i++) {
-            float b_disc = (i < (int)(mevent->jet_bdisc_old.size()) ? mevent->jet_bdisc_old[i] : -9.9);
+            float b_disc = (i < (int)(mevent->jet_bdisc_deepcsv.size()) ? mevent->jet_bdisc_deepcsv[i] : -9.9);
             if (b_disc < 0.0 or mevent->nth_jet_pt(i) < 30.0) continue;
             if (b_disc > b_cut) n_proxies++;
       

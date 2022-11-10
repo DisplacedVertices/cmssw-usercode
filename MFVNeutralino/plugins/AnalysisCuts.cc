@@ -198,6 +198,10 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
         // skip HT trigger
         if(trig == mfv::b_HLT_PFHT1050) continue;
 
+        // skip Displ. Dijet Triggers for now
+        if(trig == mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack) continue;
+        if(trig == mfv::b_HLT_HT650_DisplacedDijet60_Inclusive) continue;
+
         if(satisfiesTrigger(mevent, trig)){
           success = true;
           break;
@@ -238,6 +242,10 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
 
         // skip HT trigger
         if(trig == mfv::b_HLT_PFHT1050) continue;
+
+        // skip Displ. Dijet Triggers for now
+        if(trig == mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack) continue;
+        if(trig == mfv::b_HLT_HT650_DisplacedDijet60_Inclusive) continue;
 
         if(mevent->pass_hlt(trig)){
           at_least_one_trigger_passed = true;
@@ -397,8 +405,14 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
   // note that if these weren't pT ordered, we'd have to be more careful in the loops...
   int njets = mevent->njets(20);
 
-  // note that this could be loosened if desired
-  int nbtaggedjets = mevent->nbtags(jmt::BTagging::tight);
+  // note that this could be loosened/tightened if desired
+  int nbtaggedjets = mevent->nbtags(jmt::BTagging::loose);
+  int medcsvtags     = 0;
+  int meddeepcsvtags = 0;
+  for(int j0 = 0; j0 < njets; j0++) {
+    if (mevent->jet_bdisc_csv[j0]     > jmt::BTagging::discriminator_min(1, 0)) medcsvtags++;
+    if (mevent->jet_bdisc_deepcsv[j0] > jmt::BTagging::discriminator_min(1, 1)) meddeepcsvtags++;
+  }
 
   // for the trigger chains where we need to do any detailed matching
   bool passed_kinematics = false;
@@ -408,8 +422,50 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
       return mevent->jet_ht(40) >= 1200 && mevent->njets(20) >= 4;
     case mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33 :
       {
-        if(njets < 4) return false;
-        if(nbtaggedjets < 2) return false;
+        //if(njets < 4) return false;
+        if(medcsvtags < 2) return false;
+
+        for(int j0 = 0; j0 < njets; ++j0){
+          if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 125) continue;
+
+          for(int j1 = j0+1; j1 < njets; ++j1){
+            if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 125) continue;
+
+            if(fabs(mevent->jet_eta[j0] - mevent->jet_eta[j1]) < 1.6){
+              passed_kinematics = true;
+            }
+          }
+        }
+        return passed_kinematics;
+      }
+    case mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0 :
+      {
+        if(mevent->jet_ht(30) < 350 || njets < 4) return false;
+        if(medcsvtags < 3) return false;
+
+        for(int j0 = 0; j0 < njets; ++j0){
+          if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 90) continue;
+
+          for(int j1 = j0+1; j1 < njets; ++j1){
+            if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 75) continue;
+
+            for(int j2 = j1+1; j2 < njets; ++j2){
+              if(!jet_hlt_match(mevent, j2) || mevent->jet_pt[j2] < 55) continue;
+
+              for(int j3 = j2+1; j3 < njets; ++j3){
+                if(!jet_hlt_match(mevent, j3) || mevent->jet_pt[j3] < 55) continue;
+
+                passed_kinematics = true;
+              }
+            }
+          }
+        }
+        return passed_kinematics;
+      }
+      case mfv::b_HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71 :
+      {
+        //if(njets < 4) return false;
+        if(meddeepcsvtags < 2) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
           if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 140) continue;
@@ -424,64 +480,22 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
         }
         return passed_kinematics;
       }
-    case mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0 :
-      {
-        if(mevent->jet_ht(30) < 450 || njets < 4) return false;
-        if(nbtaggedjets < 3) return false;
-
-        for(int j0 = 0; j0 < njets; ++j0){
-          if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 100) continue;
-
-          for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 85) continue;
-
-            for(int j2 = j1+1; j2 < njets; ++j2){
-              if(!jet_hlt_match(mevent, j2) || mevent->jet_pt[j2] < 70) continue;
-
-              for(int j3 = j2+1; j3 < njets; ++j3){
-                if(!jet_hlt_match(mevent, j3) || mevent->jet_pt[j3] < 65) continue;
-
-                passed_kinematics = true;
-              }
-            }
-          }
-        }
-        return passed_kinematics;
-      }
-      case mfv::b_HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71 :
-      {
-        if(njets < 4) return false;
-        if(nbtaggedjets < 2) return false;
-
-        for(int j0 = 0; j0 < njets; ++j0){
-          if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 156) continue;
-
-          for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 156) continue;
-
-            if(fabs(mevent->jet_eta[j0] - mevent->jet_eta[j1]) < 1.6){
-              passed_kinematics = true;
-            }
-          }
-        }
-        return passed_kinematics;
-      }
       case mfv::b_HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5 :
       {
-        if(mevent->jet_ht(30) < 480 || njets < 4) return false;
-        if(nbtaggedjets < 3) return false;
+        if(mevent->jet_ht(30) < 385 || njets < 4) return false;
+        if(meddeepcsvtags < 3) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
-          if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 115) continue;
+          if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 90) continue;
 
           for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 100) continue;
+            if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 75) continue;
 
             for(int j2 = j1+1; j2 < njets; ++j2){
-              if(!jet_hlt_match(mevent, j2) || mevent->jet_pt[j2] < 85) continue;
+              if(!jet_hlt_match(mevent, j2) || mevent->jet_pt[j2] < 55) continue;
 
               for(int j3 = j2+1; j3 < njets; ++j3){
-                if(!jet_hlt_match(mevent, j3) || mevent->jet_pt[j3] < 80) continue;
+                if(!jet_hlt_match(mevent, j3) || mevent->jet_pt[j3] < 55) continue;
 
                 passed_kinematics = true;
               }

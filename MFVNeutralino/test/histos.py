@@ -57,7 +57,6 @@ nm1s = [
     ]
 
 ntks = [5,3,4,7,8,9]
-#ntks = [5,]
 nvs = [0,1,2]
 
 for ntk in ntks:
@@ -105,13 +104,55 @@ process.EX1pFullSel    = cms.Path(common * process.EX1mfvAnalysisCutsFullSel    
 process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     * process.EX1mfvEventHistosSigReg     * process.EX1mfvVertexHistosSigReg)
 '''.replace('EX1', EX1)
 
-    for ptcut in [30.,]: #35., 40., 45., 50., 55., 60., 70., 80., 90., 100., 110.]:
-        EX4 = 'PtCut%i' % int(ptcut)
-        EX5 = 'btag_pt_cut = ' + str(ptcut)
-        exec ''' 
-process.EX1mfvFilterHistosSigRegEX4   = process.mfvFilterHistos.clone(EX5)
-process.EX1pSigRegEX4     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg      * process.EX1mfvFilterHistosSigRegEX4)
-'''.replace('EX1', EX1).replace('EX4', EX4).replace('EX5', EX5)
+#    for ptcut in [30., 40., 50., 60., 65., 70., 75., 80., 85., 90., 100., 110.]:
+#        EX4 = 'PtCut%i' % int(ptcut)
+#        EX5 = 'btag_pt_cut = ' + str(ptcut)
+#        exec ''' 
+#process.EX1mfvFilterHistosSigRegEX4   = process.mfvFilterHistos.clone(EX5)
+#process.EX1pSigRegEX4     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg      * process.EX1mfvFilterHistosSigRegEX4)
+#'''.replace('EX1', EX1).replace('EX4', EX4).replace('EX5', EX5)
+#
+#    for bs2derrcut in [25., 30., 35., 40., 45., 50., 55., 60., 65., 70., 75.]:
+#        name = 'Bs2derr%s' % str(int(bs2derrcut))
+#        #lowcut, hicut = str(bs2derrcut/1e4), str((bs2derrcut+5.0)/(1e4))
+#        #vtx = eval('process.mfvSelectedVerticesTight%s.clone(min_rescale_bs2derr = %s, max_rescale_bs2derr = %s)' % (EX1, lowcut, hicut))
+#        hicut = str(bs2derrcut/1e4)
+#        vtx = eval('process.mfvSelectedVerticesTight%s.clone(max_rescale_bs2derr = %s)' % (EX1, hicut))
+#        vtx_name = '%svtx' % EX1 + name
+#       
+#        evt_cut = ''
+#
+#        for nv in nvs:
+#            if nv == 0 and (bs2derrcut != '' or EX1 != ''):
+#                continue
+#
+#            ana = eval('process.mfvAnalysisCuts.clone(%s)' % evt_cut)
+#            ana.vertex_src = vtx_name
+#            if nv == 1:
+#                ana.max_nvertex = nv
+#            ana.min_nvertex = nv
+#            if nv == 2 and ntk == 7:
+#                ana.min_ntracks01 = ana.max_ntracks01 = 7
+#            if nv == 2 and ntk == 8:
+#                ana.ntracks01_0 = 5
+#                ana.ntracks01_1 = 3
+#            if nv == 2 and ntk == 9:
+#                ana.ntracks01_0 = 5
+#                ana.ntracks01_1 = 4
+#            ana_name = '%sana%iV' % (EX1, nv) + name
+#
+#            evt_hst = process.mfvEventHistos.clone()
+#            evt_hst_name = '%sevtHst%iV' % (EX1, nv) + name
+#
+#            vtx_hst = process.mfvVertexHistos.clone(vertex_src = vtx_name)
+#            vtx_hst_name = '%svtxHst%iV' % (EX1, nv) + name
+#
+#            setattr(process, vtx_name, vtx)
+#            setattr(process, ana_name, ana)
+#            setattr(process, evt_hst_name, evt_hst)
+#            setattr(process, vtx_hst_name, vtx_hst)
+#            setattr(process, '%sp%iV' % (EX1, nv) + name, cms.Path(process.mfvWeight * vtx * ana * evt_hst * vtx_hst))
+
 
     for name, cut in nm1s:
         evt_cut = ''
@@ -157,9 +198,11 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
     if use_btag_triggers :
-        samples = Samples.qcd_samples_2017
-        #samples = Samples.mfv_stopdbardbar_samples_2018
+        #samples = Samples.mfv_signal_samples_2017
+        samples = Samples.mfv_stopdbardbar_samples_2017
         #samples = Samples.mfv_stopbbarbbar_samples_2018
+        #samples = Samples.qcd_samples_2017 + Samples.ttbar_samples_2017
+        #samples = Samples.HToSSTodddd_samples_2018
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), half_mc_modifier())
     elif use_MET_triggers:
         samples = pick_samples(dataset, qcd=True, ttbar=False, data=False, leptonic=True, splitSUSY=True, Zvv=True, met=True, span_signal=False)
@@ -171,7 +214,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
 
-    cs = CondorSubmitter('Histos' + version + 'LooseDeepFlav',
+    cs = CondorSubmitter('Histos' + version + '_noPS_medVtx',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,
