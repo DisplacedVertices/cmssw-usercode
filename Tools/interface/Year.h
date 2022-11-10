@@ -1,14 +1,19 @@
 #ifndef JMTucker_Tools_interface_Year_h
 #define JMTucker_Tools_interface_Year_h
 
-#define MFVNEUTRALINO_2017
+#define MFVNEUTRALINO_20162
 
-#define MFVNEUTRALINO_YEARS {2017, 2018}
+#define MFVNEUTRALINO_YEARS {2017, 2018, 20161, 20162}
+// 20161 = Pre-VFP      20162 = Post-VFP
 
 #ifdef MFVNEUTRALINO_2017
 #define MFVNEUTRALINO_YEAR   2017
 #elif defined(MFVNEUTRALINO_2018)
 #define MFVNEUTRALINO_YEAR   2018
+#elif defined(MFVNEUTRALINO_20161)
+#define MFVNEUTRALINO_YEAR   20161
+#elif defined(MFVNEUTRALINO_20162)
+#define MFVNEUTRALINO_YEAR   20162
 #else
 #error bad year
 #endif

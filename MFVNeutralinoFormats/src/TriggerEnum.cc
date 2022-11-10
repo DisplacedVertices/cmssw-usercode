@@ -26,11 +26,20 @@ namespace mfv {
     "HLT_PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94_v",
     "HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59_v",
 
-    // Displaced Dijet triggers
+    // 2017 + 2018 Displaced Dijet triggers
     "HLT_HT430_DisplacedDijet40_DisplacedTrack_v",
     "HLT_HT650_DisplacedDijet60_Inclusive_v",
-    "HLT_HT350_DisplacedDijet40_DisplacedTrack",
 
+    // 2016 Displaced Dijet Triggers
+    "HLT_HT350_DisplacedDijet40_DisplacedTrack",
+    "HLT_HT650_DisplacedDijet80_Inclusive",
+
+    // 2016 Bjet triggers
+    "HLT_QuadJet45_TripleBTagCSV_p087",
+    "HLT_DoubleJet90_Double30_TripleBTagCSV_p087",
+    "HLT_DoubleJetsC100_DoubleBTagCSV_p014_DoublePFJetsC100MaxDeta1p6",
+
+    // MET trigger
     "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v",
 
   };

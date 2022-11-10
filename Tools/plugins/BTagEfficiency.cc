@@ -131,6 +131,22 @@ void JMTBTagEfficiency::analyze(const edm::Event& event, const edm::EventSetup&)
         h_scalefactor[kind][2]->Fill(0.864506+2.79354/sqrt(x), *w);
       }
     }
+#elif defined(MFVNEUTRALINO_20162)
+    {
+      if (kind == 2) {
+        h_scalefactor[kind][0]->Fill(0.90894+0.00422186*log(x+19)*log(x+18)*(3-0.460651*log(x+18)), *w);
+        h_scalefactor[kind][1]->Fill(0.927444+0.00257499*log(x+19)*log(x+18)*(3-0.459693*log(x+18)), *w);
+        h_scalefactor[kind][2]->Fill(0.916356+0.00221708*log(x+19)*log(x+18)*(3-0.443464*log(x+18)), *w);
+      } else if (kind == 1) {
+        h_scalefactor[kind][0]->Fill(0.90894+0.00422186*log(x+19)*log(x+18)*(3-0.460651*log(x+18)), *w);
+        h_scalefactor[kind][1]->Fill(0.927444+0.00257499*log(x+19)*log(x+18)*(3-0.459693*log(x+18)), *w);
+        h_scalefactor[kind][2]->Fill(0.916356+0.00221708*log(x+19)*log(x+18)*(3-0.443464*log(x+18)), *w);
+      } else {
+        h_scalefactor[kind][0]->Fill(0.433232+0.000825257*x+-2.47629e-07*x*x+11.4121/x, *w);
+        h_scalefactor[kind][1]->Fill(0.452033+0.000974984*x+-4.12462e-07*x*x+9.68473/x, *w);
+        h_scalefactor[kind][2]->Fill(1.17135+321.802/(pow(x,1.5))+-70.4986/x, *w);
+      }
+    }
 #else
 #error bad year
 #endif
