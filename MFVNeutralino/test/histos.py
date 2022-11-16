@@ -132,13 +132,13 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
     else :
         #samples = pick_samples(dataset)
-        samples = [getattr(Samples, 'ggHToSSTodddd_tau10mm_M55_2017')] 
+        samples = [getattr(Samples, 'ggHToSSTobbbb_tau1mm_M55_2017')] 
         #samples = pick_samples(dataset,qcd=False,ttbar=False, data=False, span_signal=True, all_signal=False) 
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
 
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
 
-    cs = CondorSubmitter('HistosGvtx2' + version,
+    cs = CondorSubmitter('HistosGvtx3' + version,
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,

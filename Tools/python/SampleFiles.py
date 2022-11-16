@@ -829,6 +829,7 @@ _add_ds("ntuplev29m", {
 'ggHToSSTodddd_tau10mm_M55_2017': _fromnum0("/store/user/pkotamni/ggH_HToSSTodddd_MH-125_MS-55_ctauS-10_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleV29m_2017/220724_094907", 859),
 })
 
+_add_ds("ntuplegen4bv29m", {                                                                                                                                                        'ggHToSSTobbbb_tau1mm_M55_2017': (904, ['/store/user/pkotamni/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-1_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleGEN4bV29m_NoEF_2017/221115_123139/0000/ntuple_%i.root' % i for i in chain(xrange(37), xrange(38,81), xrange(82,208), xrange(209,333), xrange(334,791), xrange(792,803), xrange(804,832), xrange(833,858), xrange(859,912))]),})
 
 ################################################################################
 
