@@ -156,7 +156,65 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_gvtx_is_medium_btag_per_bjet_or_not_wcut;
   TH1F* h_gvtx_is_medium_btag_per_non_bjet_or_not_wcut;
   TH1F* h_gvtx_is_loose_btag_per_bjet_or_not_wcut;
+  // investigate a GEN b-jet with either no loose b-tagged (a-type jet) or has loose b-tagged (b-type jet)
+  TH1F* h_gvtx_a_type_diff_pT_bquark_jet_wcut;
+  TH1F* h_gvtx_a_type_pT_jet_wcut;
+  TH1F* h_gvtx_a_type_eta_bquark_jet_wcut;
+  TH1F* h_gvtx_a_type_dR_bquark_wcut;
+  TH1F* h_gvtx_a_type_nbsv_wcut;
+  TH1F* h_gvtx_a_type_seed_ntrack_wcut;
+  TH1F* h_gvtx_a_type_all_ntrack_wcut;
+  TH1F* h_gvtx_a_type_all_tracks_pt_wcut;
+  TH1F* h_gvtx_a_type_all_tracks_sigmadxybs_wcut;
+  TH1F* h_gvtx_b_type_diff_pT_bquark_jet_wcut;
+  TH1F* h_gvtx_b_type_dR_bquark_wcut;
+  TH1F* h_gvtx_b_type_nbsv_wcut;
+  TH1F* h_gvtx_b_type_seed_ntrack_wcut;
+  TH1F* h_gvtx_b_type_all_ntrack_wcut;
+  TH1F* h_gvtx_b_type_all_tracks_pt_wcut;
+  TH1F* h_gvtx_b_type_all_tracks_sigmadxybs_wcut;
   TH1F* h_gvtx_is_loose_btag_per_non_bjet_or_not_wcut;
+  // investigate a non GEN b-jet with either no loose b-tagged (c-type jet) or has loose b-tagged (d-type jet)
+  TH1F* h_gvtx_c_type_dR_closest_lowpT_bquark_wcut;
+  TH1F* h_gvtx_sub_c_type_pT_bquark_wcut;
+  TH1F* h_gvtx_sub_c_type_pT_jet_wcut;
+  TH1F* h_gvtx_sub_c_type_eta_bquark_jet_wcut;
+  TH1F* h_gvtx_sub_c_type_nbsv_wcut;
+  TH1F* h_gvtx_sub_c_type_all_ntrack_wcut;
+  TH1F* h_gvtx_sub_c_type_seed_ntrack_wcut;
+  TH1F* h_gvtx_sub_c_type_all_tracks_pt_wcut;
+  TH1F* h_gvtx_sub_c_type_all_tracks_sigmadxybs_wcut;
+  TH1F* h_gvtx_sub_c_type_diff_pT_bquark_jet_wcut;
+  TH1F* h_gvtx_sub_c_type_dR_jets_close_bquark_wcut;
+  TH1F* h_gvtx_sub_c_type_E_ratio_close_bquark_wcut;
+  TH1F* h_gvtx_sub_c_type_pT_bquark_close_bquark_wcut;
+  TH1F* h_gvtx_sub_c_type_pT_jet_close_bquark_wcut;
+  TH1F* h_gvtx_fake_c_type_pT_bquark_wcut;
+  TH1F* h_gvtx_fake_c_type_pT_jet_wcut;
+  TH1F* h_gvtx_fake_c_type_eta_bquark_jet_wcut;
+  TH1F* h_gvtx_fake_c_type_nbsv_wcut;
+  TH1F* h_gvtx_fake_c_type_all_ntrack_wcut;
+  TH1F* h_gvtx_fake_c_type_seed_ntrack_wcut;
+  TH1F* h_gvtx_fake_c_type_all_tracks_pt_wcut;
+  TH1F* h_gvtx_fake_c_type_all_tracks_sigmadxybs_wcut;
+  TH1F* h_gvtx_fake_c_type_diff_pT_bquark_jet_wcut;
+  TH1F* h_gvtx_c_type_nbsv_wcut;
+  TH1F* h_gvtx_c_type_seed_ntrack_wcut;
+  TH1F* h_gvtx_c_type_all_ntrack_wcut;
+  TH1F* h_gvtx_c_type_all_tracks_pt_wcut;
+  TH1F* h_gvtx_c_type_all_tracks_sigmadxybs_wcut;
+  TH1F* h_gvtx_d_type_dR_closest_lowpT_bquark_wcut;
+  TH1F* h_gvtx_sub_d_type_pT_bquark_wcut;
+  TH1F* h_gvtx_sub_d_type_nbsv_wcut;
+  TH1F* h_gvtx_sub_d_type_seed_ntrack_wcut;
+  TH1F* h_gvtx_sub_d_type_all_tracks_pt_wcut;
+  TH1F* h_gvtx_sub_d_type_all_tracks_sigmadxybs_wcut;
+  TH1F* h_gvtx_sub_d_type_diff_pT_bquark_jet_wcut;
+  TH1F* h_gvtx_d_type_nbsv_wcut;
+  TH1F* h_gvtx_d_type_seed_ntrack_wcut;
+  TH1F* h_gvtx_d_type_all_ntrack_wcut;
+  TH1F* h_gvtx_d_type_all_tracks_pt_wcut;
+  TH1F* h_gvtx_d_type_all_tracks_sigmadxybs_wcut;
   TH1F* h_gvtx_denominator_nsv_wcut;
   TH2F* h_2D_gvtx_ntrack_bsv_and_jet_seed_ntrack_from_bsv_wcut;
   TH2F* h_2D_gvtx_ntrack_bsv_and_jet_seed_ntrack_from_tight_trkmatch_bsv_wcut;
@@ -350,7 +408,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   // overview
   h_gvtx_nsv = fs->make<TH1F>("h_gvtx_nsv", ";# of secondary vertices; events/1", 40, 0, 40);
   h_gvtx_sv_ntrack = fs->make<TH1F>("h_gvtx_sv_ntrack", ";# of tracks / SV; svs/1", 10, 0, 10);
-  h_gvtx_njet_bboost_wcut = fs->make<TH1F>("h_gvtx_njet_bboost_wcut", "all four b-decays w/ b-quark pT > 25 GeV ;# of jets;events/1", 20, 0, 20);
+  h_gvtx_njet_bboost_wcut = fs->make<TH1F>("h_gvtx_njet_bboost_wcut", "all four b-decays w/ b-quark pT > 20 GeV ;# of jets;events/1", 20, 0, 20);
   h_gvtx_bquark_pT = fs->make<TH1F>("h_gvtx_bquark_pT", ";GEN b-quark p_{T} (GeV);arb. units", 100, 0, 200);
   h_gvtx_bhad_bquark_dR = fs->make<TH1F>("h_gvtx_bhad_bquark_dR", ";#Delta R between mom. of a GEN b-quark and GEN b-had; arb. units", 70, 0, 2.0);
   h_2D_gvtx_bhad_bquark_dR_and_b_quark_pT = fs->make<TH2F>("h_2D_gvtx_bhad_bquark_dR_and_b_quark_pT", ";#Delta R between mom. of a GEN b-quark and GEN b-had; GEN b-quark p_{T} (GeV); arb. units", 70, 0, 2.0, 200, 0, 200);
@@ -362,63 +420,63 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_gvtx_nloosebsvplusbtaggedjet = fs->make<TH1F>("h_gvtx_nloosebsvplusbtaggedjet", ";# of loose-sv-btagged bjets;events/1", 10, 0, 10);
   
 
-  h_gvtx_bhad_bquark_dR_wcut = fs->make<TH1F>("h_gvtx_bhad_bquark_dR_wcut", "b-quark pT > 25 GeV;#Delta R between mom. of a GEN b-quark and GEN b-had; arb. units", 70, 0, 2.0);
-  h_gvtx_bhad_nonbhad_dR_wcut = fs->make<TH1F>("h_gvtx_bhad_nonbhad_dR_wcut", "b-quark pT > 25 GeV;#Delta R between mom. of a GEN non-b hadron and GEN b-had; arb. units", 70, 0, 2.0);
-  h_2D_gvtx_bhad_nonbhad_dR_and_pT_wcut = fs->make<TH2F>("h_2D_gvtx_bhad_nonbhad_dR_and_pT_wcut", "b-quark pT > 25 GeV;#Delta R between mom. of a GEN non-b hadron and GEN b-had; GEN non-b hadron p_{T} (GeV); arb. units", 70, 0, 2.0, 100, 0, 50);
-  h_2D_gvtx_bhad_nonbhad_dR_and_b_quark_pT_wcut = fs->make<TH2F>("h_2D_gvtx_bhad_nonbhad_dR_and_b_quark_pT_wcut", "b-quark pT > 25 GeV;#Delta R between mom. of a GEN non-b hadron and GEN b-had; GEN b-quark p_{T} (GeV); arb. units", 70, 0, 2.0, 200, 0, 200);
-  h_2D_gvtx_bhad_bquark_dR_and_b_quark_pT_wcut = fs->make<TH2F>("h_2D_gvtx_bhad_bquark_dR_and_b_quark_pT_wcut", "b-quark pT > 25 GeV;#Delta R between mom. of a GEN b-quark and GEN b-had; GEN b-quark p_{T} (GeV); arb. units", 70, 0, 2.0, 200, 0, 200);
-  h_gvtx_bhad_pT_wcut = fs->make<TH1F>("h_gvtx_bhad_pT_wcut", "b-quark pT > 25 GeV;GEN b-hadron p_{T} (GeV);arb. units", 20, 0, 200);
-  h_gvtx_bquark_pT_wcut = fs->make<TH1F>("h_gvtx_bquark_pT_wcut", "b-quark pT > 25 GeV;GEN b-quark p_{T} (GeV);arb. units", 20, 0, 200);
-  h_gvtx_bquark_jet_dR_wcut = fs->make<TH1F>("h_gvtx_bquark_jet_dR_wcut", "b-quark pT > 25 GeV;#Delta R between mom. of a closest RECO jet and a GEN b-quark; arb. units", 100, 0, 0.8);
-  h_gvtx_tail_dR_jet_eta_bquark_wcut = fs->make<TH1F>("h_gvtx_tail_dR_jet_eta_bquark_wcut", "b-quark pT > 25 GeV && #Delta R (closest matched-jet, b-quark) > 0.2; |#eta| of a GEN b-quark; arb. units", 100, 0, 3.0);
-  h_gvtx_peak_dR_jet_eta_bquark_wcut = fs->make<TH1F>("h_gvtx_peak_dR_jet_eta_bquark_wcut", "b-quark pT > 25 GeV && #Delta R (closest matched-jet, b-quark) < 0.2; |#eta| of a GEN b-quark; arb. units", 100, 0, 3.0);
-  h_gvtx_tail_dR_jet_pT_bquark_wcut = fs->make<TH1F>("h_gvtx_tail_dR_jet_pT_bquark_wcut", "b-quark pT > 25 GeV && #Delta R (closest matched-jet, b-quark) > 0.2; p_{T} of a GEN b-quark (GeV); arb. units", 200, 0, 200);
-  h_gvtx_peak_dR_jet_pT_bquark_wcut = fs->make<TH1F>("h_gvtx_peak_dR_jet_pT_bquark_wcut", "b-quark pT > 25 GeV && #Delta R (closest matched-jet, b-quark) < 0.2; p_{T} of a GEN b-quark (GeV); arb. units", 200, 0, 200);
-  h_gvtx_peak_dR_jet_pT_bjet_wcut = fs->make<TH1F>("h_gvtx_peak_dR_jet_pT_bjet_wcut", "b-quark pT > 25 GeV && #Delta R (closest matched-jet, b-quark) < 0.2; p_{T} of a b-jet (GeV); arb. units", 200, 0, 200);
-  h_gvtx_bquark_closest_jet_pT_wcut = fs->make<TH1F>("h_gvtx_bquark_closest_jet_pT_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;p_{T} a closest RECO jet w.r.t GEN b-quark; arb. units", 100, 0, 200);
-  h_gvtx_bquark_closest_jet_dR_wcut = fs->make<TH1F>("h_gvtx_bquark_closest_jet_dR_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;#Delta R between mom. of a closest RECO jet and a GEN b-quark; arb. units", 50, 0, 0.4);
-  h_gvtx_bquark_closest_jet_E_ratio_wcut = fs->make<TH1F>("h_gvtx_bquark_closest_jet_E_ratio_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;#frac{macthed jet energy}{b-quark energy}; arb. units", 60, 0.0, 3.0);
-  h_gvtx_bhad_closest_jet_dR_wcut = fs->make<TH1F>("h_gvtx_bhad_closest_jet_dR_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;#Delta R between mom. of a closest RECO jet and a GEN b-hadron; arb. units", 50, 0, 0.4);
-  h_gvtx_bhad_closest_jet_pT_wcut = fs->make<TH1F>("h_gvtx_bhad_closest_jet_pT_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;p_{T} a closest RECO jet w.r.t GEN b-hadron; arb. units", 100, 0, 200);
-  h_gvtx_bquark_closest_jet_res_pT_wcut = fs->make<TH1F>("h_gvtx_bquark_closest_jet_res_pT_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;sum track p_{T} of a closest RECO jet - p_{T} of a GEN b-quark; arb. units", 60, -30.0, 30.0);
-  h_2D_gvtx_bquark_closest_jet_dR_ndau_wcut = fs->make<TH2F>("h_2D_gvtx_bquark_closest_jet_dR_ndau_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;#Delta R between mom. of a closest RECO jet and a GEN b-quark; # of b-had daughters; arb. units", 70, 0, 7.0, 20, 0, 20);
-  h_gvtx_bquark_closest_dau_to_closest_jet_dR_wcut = fs->make<TH1F>("h_gvtx_bquark_closest_dau_to_closest_jet_dR_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;#Delta R between mom. of a closest RECO jet and its closest b-had dau; arb. units", 70, 0, 7.0);
-  h_gvtx_all_ntrack_from_jets_wcut = fs->make<TH1F>("h_gvtx_all_ntrack_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;# of tracks per a matched jet;", 50, 0, 50);
-  h_gvtx_jet_seed_ntrack_per_bjet_wcut = fs->make<TH1F>("h_gvtx_jet_seed_ntrack_per_bjet_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;# of seed tracks per a b-jet;", 50, 0, 50);
-  h_gvtx_jet_seed_ntrack_per_non_bjet_wcut = fs->make<TH1F>("h_gvtx_jet_seed_ntrack_per_non_bjet_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;# of seed tracks per a non b-jet;", 50, 0, 50);
-  h_gvtx_jet_seed_ntrack_per_tight_btag_wcut = fs->make<TH1F>("h_gvtx_jet_seed_ntrack_per_tight_btag_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;# of seed tracks per a tight-btagged jet;", 50, 0, 50);
-  h_gvtx_jet_seed_ntrack_per_non_tight_btag_wcut = fs->make<TH1F>("h_gvtx_jet_seed_ntrack_per_non_tight_btag_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;# of seed tracks per a non tight-btagged jet;", 50, 0, 50);
-  h_gvtx_jet_seed_ntrack_per_medium_btag_wcut = fs->make<TH1F>("h_gvtx_jet_seed_ntrack_per_medium_btag_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;# of seed tracks per a medium-btagged jet;", 50, 0, 50);
-  h_gvtx_jet_seed_ntrack_per_non_medium_btag_wcut = fs->make<TH1F>("h_gvtx_jet_seed_ntrack_per_non_medium_btag_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;# of seed tracks per a non medium-btagged jet;", 50, 0, 50);
-  h_gvtx_jet_seed_ntrack_per_loose_btag_wcut = fs->make<TH1F>("h_gvtx_jet_seed_ntrack_per_loose_btag_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;# of seed tracks per a loose-btagged jet;", 50, 0, 50);
-  h_gvtx_jet_seed_ntrack_per_non_loose_btag_wcut = fs->make<TH1F>("h_gvtx_jet_seed_ntrack_per_non_loose_btag_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;# of seed tracks per a non loose-btagged jet;", 50, 0, 50);
-  h_gvtx_jet_seed_ntrack_per_loose_bsv_jet_wcut = fs->make<TH1F>("h_gvtx_jet_seed_ntrack_per_loose_bsv_jet_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;# of seed tracks per a loose-bsv jet;", 50, 0, 50);
-  h_gvtx_jet_seed_ntrack_per_non_loose_bsv_jet_wcut = fs->make<TH1F>("h_gvtx_jet_seed_ntrack_per_non_loose_bsv_jet_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;# of seed tracks per a non loose-bsv jet;", 50, 0, 50);
-  h_gvtx_jet_seed_ntrack_per_loose_bsv_plus_btagged_jet_wcut = fs->make<TH1F>("h_gvtx_jet_seed_ntrack_per_loose_bsv_plus_btagged_jet_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;# of seed tracks per a loose-bsv-plus-btagged jet;", 50, 0, 50);
-  h_gvtx_jet_seed_ntrack_per_non_loose_bsv_plus_btagged_jet_wcut = fs->make<TH1F>("h_gvtx_jet_seed_ntrack_per_non_loose_bsv_plus_btagged_jet_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;# of seed tracks per a non loose-bsv-plus-btagged jet;", 50, 0, 50);
+  h_gvtx_bhad_bquark_dR_wcut = fs->make<TH1F>("h_gvtx_bhad_bquark_dR_wcut", "b-quark pT > 20 GeV;#Delta R between mom. of a GEN b-quark and GEN b-had; arb. units", 70, 0, 2.0);
+  h_gvtx_bhad_nonbhad_dR_wcut = fs->make<TH1F>("h_gvtx_bhad_nonbhad_dR_wcut", "b-quark pT > 20 GeV;#Delta R between mom. of a GEN non-b hadron and GEN b-had; arb. units", 70, 0, 2.0);
+  h_2D_gvtx_bhad_nonbhad_dR_and_pT_wcut = fs->make<TH2F>("h_2D_gvtx_bhad_nonbhad_dR_and_pT_wcut", "b-quark pT > 20 GeV;#Delta R between mom. of a GEN non-b hadron and GEN b-had; GEN non-b hadron p_{T} (GeV); arb. units", 70, 0, 2.0, 100, 0, 50);
+  h_2D_gvtx_bhad_nonbhad_dR_and_b_quark_pT_wcut = fs->make<TH2F>("h_2D_gvtx_bhad_nonbhad_dR_and_b_quark_pT_wcut", "b-quark pT > 20 GeV;#Delta R between mom. of a GEN non-b hadron and GEN b-had; GEN b-quark p_{T} (GeV); arb. units", 70, 0, 2.0, 200, 0, 200);
+  h_2D_gvtx_bhad_bquark_dR_and_b_quark_pT_wcut = fs->make<TH2F>("h_2D_gvtx_bhad_bquark_dR_and_b_quark_pT_wcut", "b-quark pT > 20 GeV;#Delta R between mom. of a GEN b-quark and GEN b-had; GEN b-quark p_{T} (GeV); arb. units", 70, 0, 2.0, 200, 0, 200);
+  h_gvtx_bhad_pT_wcut = fs->make<TH1F>("h_gvtx_bhad_pT_wcut", "b-quark pT > 20 GeV;GEN b-hadron p_{T} (GeV);arb. units", 20, 0, 200);
+  h_gvtx_bquark_pT_wcut = fs->make<TH1F>("h_gvtx_bquark_pT_wcut", "b-quark pT > 20 GeV;GEN b-quark p_{T} (GeV);arb. units", 20, 0, 200);
+  h_gvtx_bquark_jet_dR_wcut = fs->make<TH1F>("h_gvtx_bquark_jet_dR_wcut", "b-quark pT > 20 GeV;#Delta R between mom. of a closest RECO jet and a GEN b-quark; arb. units", 100, 0, 0.8);
+  h_gvtx_tail_dR_jet_eta_bquark_wcut = fs->make<TH1F>("h_gvtx_tail_dR_jet_eta_bquark_wcut", "b-quark pT > 20 GeV && #Delta R (closest matched-jet, b-quark) > 0.2; |#eta| of a GEN b-quark; arb. units", 100, 0, 3.0);
+  h_gvtx_peak_dR_jet_eta_bquark_wcut = fs->make<TH1F>("h_gvtx_peak_dR_jet_eta_bquark_wcut", "b-quark pT > 20 GeV && #Delta R (closest matched-jet, b-quark) < 0.2; |#eta| of a GEN b-quark; arb. units", 100, 0, 3.0);
+  h_gvtx_tail_dR_jet_pT_bquark_wcut = fs->make<TH1F>("h_gvtx_tail_dR_jet_pT_bquark_wcut", "b-quark pT > 20 GeV && #Delta R (closest matched-jet, b-quark) > 0.2; p_{T} of a GEN b-quark (GeV); arb. units", 200, 0, 200);
+  h_gvtx_peak_dR_jet_pT_bquark_wcut = fs->make<TH1F>("h_gvtx_peak_dR_jet_pT_bquark_wcut", "b-quark pT > 20 GeV && #Delta R (closest matched-jet, b-quark) < 0.2; p_{T} of a GEN b-quark (GeV); arb. units", 200, 0, 200);
+  h_gvtx_peak_dR_jet_pT_bjet_wcut = fs->make<TH1F>("h_gvtx_peak_dR_jet_pT_bjet_wcut", "b-quark pT > 20 GeV && #Delta R (closest matched-jet, b-quark) < 0.2; p_{T} of a b-jet (GeV); arb. units", 200, 0, 200);
+  h_gvtx_bquark_closest_jet_pT_wcut = fs->make<TH1F>("h_gvtx_bquark_closest_jet_pT_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;p_{T} a closest RECO jet w.r.t GEN b-quark; arb. units", 100, 0, 200);
+  h_gvtx_bquark_closest_jet_dR_wcut = fs->make<TH1F>("h_gvtx_bquark_closest_jet_dR_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;#Delta R between mom. of a closest RECO jet and a GEN b-quark; arb. units", 50, 0, 0.4);
+  h_gvtx_bquark_closest_jet_E_ratio_wcut = fs->make<TH1F>("h_gvtx_bquark_closest_jet_E_ratio_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;#frac{macthed jet energy}{b-quark energy}; arb. units", 60, 0.0, 3.0);
+  h_gvtx_bhad_closest_jet_dR_wcut = fs->make<TH1F>("h_gvtx_bhad_closest_jet_dR_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;#Delta R between mom. of a closest RECO jet and a GEN b-hadron; arb. units", 50, 0, 0.4);
+  h_gvtx_bhad_closest_jet_pT_wcut = fs->make<TH1F>("h_gvtx_bhad_closest_jet_pT_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;p_{T} a closest RECO jet w.r.t GEN b-hadron; arb. units", 100, 0, 200);
+  h_gvtx_bquark_closest_jet_res_pT_wcut = fs->make<TH1F>("h_gvtx_bquark_closest_jet_res_pT_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;sum track p_{T} of a closest RECO jet - p_{T} of a GEN b-quark; arb. units", 60, -30.0, 30.0);
+  h_2D_gvtx_bquark_closest_jet_dR_ndau_wcut = fs->make<TH2F>("h_2D_gvtx_bquark_closest_jet_dR_ndau_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;#Delta R between mom. of a closest RECO jet and a GEN b-quark; # of b-had daughters; arb. units", 70, 0, 7.0, 20, 0, 20);
+  h_gvtx_bquark_closest_dau_to_closest_jet_dR_wcut = fs->make<TH1F>("h_gvtx_bquark_closest_dau_to_closest_jet_dR_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;#Delta R between mom. of a closest RECO jet and its closest b-had dau; arb. units", 70, 0, 7.0);
+  h_gvtx_all_ntrack_from_jets_wcut = fs->make<TH1F>("h_gvtx_all_ntrack_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;# of tracks per a matched jet;", 50, 0, 50);
+  h_gvtx_jet_seed_ntrack_per_bjet_wcut = fs->make<TH1F>("h_gvtx_jet_seed_ntrack_per_bjet_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;# of seed tracks per a b-jet;", 50, 0, 50);
+  h_gvtx_jet_seed_ntrack_per_non_bjet_wcut = fs->make<TH1F>("h_gvtx_jet_seed_ntrack_per_non_bjet_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;# of seed tracks per a non b-jet;", 50, 0, 50);
+  h_gvtx_jet_seed_ntrack_per_tight_btag_wcut = fs->make<TH1F>("h_gvtx_jet_seed_ntrack_per_tight_btag_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;# of seed tracks per a tight-btagged jet;", 50, 0, 50);
+  h_gvtx_jet_seed_ntrack_per_non_tight_btag_wcut = fs->make<TH1F>("h_gvtx_jet_seed_ntrack_per_non_tight_btag_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;# of seed tracks per a non tight-btagged jet;", 50, 0, 50);
+  h_gvtx_jet_seed_ntrack_per_medium_btag_wcut = fs->make<TH1F>("h_gvtx_jet_seed_ntrack_per_medium_btag_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;# of seed tracks per a medium-btagged jet;", 50, 0, 50);
+  h_gvtx_jet_seed_ntrack_per_non_medium_btag_wcut = fs->make<TH1F>("h_gvtx_jet_seed_ntrack_per_non_medium_btag_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;# of seed tracks per a non medium-btagged jet;", 50, 0, 50);
+  h_gvtx_jet_seed_ntrack_per_loose_btag_wcut = fs->make<TH1F>("h_gvtx_jet_seed_ntrack_per_loose_btag_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;# of seed tracks per a loose-btagged jet;", 50, 0, 50);
+  h_gvtx_jet_seed_ntrack_per_non_loose_btag_wcut = fs->make<TH1F>("h_gvtx_jet_seed_ntrack_per_non_loose_btag_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;# of seed tracks per a non loose-btagged jet;", 50, 0, 50);
+  h_gvtx_jet_seed_ntrack_per_loose_bsv_jet_wcut = fs->make<TH1F>("h_gvtx_jet_seed_ntrack_per_loose_bsv_jet_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;# of seed tracks per a loose-bsv jet;", 50, 0, 50);
+  h_gvtx_jet_seed_ntrack_per_non_loose_bsv_jet_wcut = fs->make<TH1F>("h_gvtx_jet_seed_ntrack_per_non_loose_bsv_jet_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;# of seed tracks per a non loose-bsv jet;", 50, 0, 50);
+  h_gvtx_jet_seed_ntrack_per_loose_bsv_plus_btagged_jet_wcut = fs->make<TH1F>("h_gvtx_jet_seed_ntrack_per_loose_bsv_plus_btagged_jet_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;# of seed tracks per a loose-bsv-plus-btagged jet;", 50, 0, 50);
+  h_gvtx_jet_seed_ntrack_per_non_loose_bsv_plus_btagged_jet_wcut = fs->make<TH1F>("h_gvtx_jet_seed_ntrack_per_non_loose_bsv_plus_btagged_jet_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;# of seed tracks per a non loose-bsv-plus-btagged jet;", 50, 0, 50);
 
-  h_gvtx_jet_seed_track_pT_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_track_pT_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;p_{T} of a seed track in a matched jet;", 20, 0, 10);
-  h_gvtx_jet_seed_track_sigmadxybs_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_track_sigmadxybs_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;#sigma_{dxy} of a seed track in a matched jet;", 40, -10, 10);
-  h_gvtx_jet_seed_track_npxlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_track_npxlayers_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;npxlayers of a seed track in a matched jet;", 12, 0, 12);
-  h_gvtx_jet_seed_track_nstlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_track_nstlayers_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;nstlayers of a seed track in a matched jet;", 28, 0, 28);
-  h_gvtx_jet_seed_track_rmin_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_track_rmin_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;r_{min} of a seed track in a matched jet;", 5, 0, 5);
-  h_gvtx_seed_track_pT_from_jets_wcut = fs->make<TH1F>("h_gvtx_seed_track_pT_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;p_{T} of a seed track from SVs in a matched jet;", 20, 0, 10);
-  h_gvtx_seed_track_sigmadxybs_from_jets_wcut = fs->make<TH1F>("h_gvtx_seed_track_sigmadxybs_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;#sigma_{dxy} of a seed track from SVs in a matched jet;", 40, -10, 10);
-  h_gvtx_seed_track_npxlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_seed_track_npxlayers_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;npxlayers of a seed track from SVs in a matched jet ;", 12, 0, 12);
-  h_gvtx_seed_track_nstlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_seed_track_nstlayers_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;nstlayers of a seed track from SVs in a matched jet;", 28, 0, 28);
-  h_gvtx_seed_track_rmin_from_jets_wcut = fs->make<TH1F>("h_gvtx_seed_track_rmin_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;r_{min} of a seed track from SVs in a matched jet;", 5, 0, 5);
+  h_gvtx_jet_seed_track_pT_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_track_pT_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;p_{T} of a seed track in a matched jet;", 20, 0, 10);
+  h_gvtx_jet_seed_track_sigmadxybs_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_track_sigmadxybs_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;#sigma_{dxy} of a seed track in a matched jet;", 40, -10, 10);
+  h_gvtx_jet_seed_track_npxlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_track_npxlayers_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;npxlayers of a seed track in a matched jet;", 12, 0, 12);
+  h_gvtx_jet_seed_track_nstlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_track_nstlayers_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;nstlayers of a seed track in a matched jet;", 28, 0, 28);
+  h_gvtx_jet_seed_track_rmin_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_track_rmin_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;r_{min} of a seed track in a matched jet;", 5, 0, 5);
+  h_gvtx_seed_track_pT_from_jets_wcut = fs->make<TH1F>("h_gvtx_seed_track_pT_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;p_{T} of a seed track from SVs in a matched jet;", 20, 0, 10);
+  h_gvtx_seed_track_sigmadxybs_from_jets_wcut = fs->make<TH1F>("h_gvtx_seed_track_sigmadxybs_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;#sigma_{dxy} of a seed track from SVs in a matched jet;", 40, -10, 10);
+  h_gvtx_seed_track_npxlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_seed_track_npxlayers_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;npxlayers of a seed track from SVs in a matched jet ;", 12, 0, 12);
+  h_gvtx_seed_track_nstlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_seed_track_nstlayers_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;nstlayers of a seed track from SVs in a matched jet;", 28, 0, 28);
+  h_gvtx_seed_track_rmin_from_jets_wcut = fs->make<TH1F>("h_gvtx_seed_track_rmin_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;r_{min} of a seed track from SVs in a matched jet;", 5, 0, 5);
 
-  h_gvtx_seed_ntrack_bsvs_from_jets_wcut = fs->make<TH1F>("h_gvtx_seed_ntrack_bsvs_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;# of seed tracks from SVs per a matched jet;", 50, 0, 50);
-  h_gvtx_seed_ntrack_per_bsv_from_jets_wcut = fs->make<TH1F>("h_gvtx_seed_ntrack_per_bsv_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;# of seed tracks per SV in a matched jet;", 10, 0, 10);
-  h_gvtx_sum_pT_all_tracks_from_jets_wcut = fs->make<TH1F>("h_gvtx_sum_pT_all_tracks_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; sum p_{T} of matched-jet tracks;", 25, 0, 200);
+  h_gvtx_seed_ntrack_bsvs_from_jets_wcut = fs->make<TH1F>("h_gvtx_seed_ntrack_bsvs_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;# of seed tracks from SVs per a matched jet;", 50, 0, 50);
+  h_gvtx_seed_ntrack_per_bsv_from_jets_wcut = fs->make<TH1F>("h_gvtx_seed_ntrack_per_bsv_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;# of seed tracks per SV in a matched jet;", 10, 0, 10);
+  h_gvtx_sum_pT_all_tracks_from_jets_wcut = fs->make<TH1F>("h_gvtx_sum_pT_all_tracks_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; sum p_{T} of matched-jet tracks;", 25, 0, 200);
   
-  h_gvtx_shared_bjet_or_not_wcut = fs->make<TH1F>("h_gvtx_shared_bjet_or_not_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; shared b-jets ?; arb. units", 3, 0, 3);
+  h_gvtx_shared_bjet_or_not_wcut = fs->make<TH1F>("h_gvtx_shared_bjet_or_not_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; shared b-jets ?; arb. units", 3, 0, 3);
 
   //sv investigation 
-  h_gvtx_sv_trkonly_mom_jet_mom_dR_wcut = fs->make<TH1F>("h_gvtx_sv_trkonly_mom_jet_mom_dR_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;#Delta R between mom. of a closest RECO jet and most-matched SV by tracks only; arb. units", 120, 0, 3);
-  h_gvtx_sv_jetbytrk_mom_jet_mom_dR_wcut = fs->make<TH1F>("h_gvtx_sv_jetbytrk_mom_jet_mom_dR_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;#Delta R between mom. of a closest RECO jet and most-matched SV by jet's ntrack; arb. units", 120, 0, 3);
-  h_gvtx_sv_trkplusjetbytrk_mom_jet_mom_dR_wcut = fs->make<TH1F>("h_gvtx_sv_trkplusjetbytrk_mom_jet_mom_dR_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;#Delta R between mom. of a closest RECO jet and most-matched SV by tracks + jet's ntrack; arb. units", 120, 0, 3);
-  h_gvtx_sv_displ_vec_jet_mom_dR_wcut = fs->make<TH1F>("h_gvtx_sv_displ_vec_jet_mom_dR_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;#Delta R between mom. of a closest RECO jet and most-matched SV by its displacement; arb. units", 120, 0, 3);
+  h_gvtx_sv_trkonly_mom_jet_mom_dR_wcut = fs->make<TH1F>("h_gvtx_sv_trkonly_mom_jet_mom_dR_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;#Delta R between mom. of a closest RECO jet and most-matched SV by tracks only; arb. units", 120, 0, 3);
+  h_gvtx_sv_jetbytrk_mom_jet_mom_dR_wcut = fs->make<TH1F>("h_gvtx_sv_jetbytrk_mom_jet_mom_dR_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;#Delta R between mom. of a closest RECO jet and most-matched SV by jet's ntrack; arb. units", 120, 0, 3);
+  h_gvtx_sv_trkplusjetbytrk_mom_jet_mom_dR_wcut = fs->make<TH1F>("h_gvtx_sv_trkplusjetbytrk_mom_jet_mom_dR_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;#Delta R between mom. of a closest RECO jet and most-matched SV by tracks + jet's ntrack; arb. units", 120, 0, 3);
+  h_gvtx_sv_displ_vec_jet_mom_dR_wcut = fs->make<TH1F>("h_gvtx_sv_displ_vec_jet_mom_dR_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;#Delta R between mom. of a closest RECO jet and most-matched SV by its displacement; arb. units", 120, 0, 3);
 
   /*
   h_2D_gvtx_sv_jetbytrk_mom_jet_mom_dR_jntrack_wtightcut = fs->make<TH2F>("h_2D_gvtx_sv_jetbytrk_mom_jet_mom_dR_jntrack_wtightcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay && Is jet of most-matched SV;#Delta R between mom. of a closest RECO jet and most-matched SV by jet's ntrack; ntrack in a jet from most-matched SV; arb. units", 120, 0, 3.0, 20, 0, 20);
@@ -432,99 +490,156 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_2D_gvtx_sv_jetbytrk_mom_jet_mom_dR_ngdau_wtightcut = fs->make<TH2F>("h_2D_gvtx_sv_jetbytrk_mom_jet_mom_dR_ngdau_wtightcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay && Is jet of most-matched SV;#Delta R between mom. of a closest RECO jet and most-matched SV by jet's ntrack; # of b-quark daughters; arb. units", 120, 0, 3.0, 20, 0, 20);
   */
 
-  h_gvtx_sv_trkonly_mom_bquark_mom_dR_wcut = fs->make<TH1F>("h_gvtx_sv_trkonly_mom_bquark_mom_dR_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;#Delta R between mom. of a GEN b-quark and most-matched SV by tracks only; arb. units", 120, 0, 3);
-  h_gvtx_sv_jetbytrk_mom_bquark_mom_dR_wcut = fs->make<TH1F>("h_gvtx_sv_jetbytrk_mom_bquark_mom_dR_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;#Delta R between mom. of a GEN b-quark and most-matched SV by jet's ntrack; arb. units", 120, 0, 3);
-  h_gvtx_sv_trkplusjetbytrk_mom_bquark_mom_dR_wcut = fs->make<TH1F>("h_gvtx_sv_trkplusjetbytrk_mom_bquark_mom_dR_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;#Delta R between mom. of a GEN b-quark and most-matched SV by tracks + jet's ntrack; arb. units", 120, 0, 3);
-  h_gvtx_sv_displ_vec_bquark_mom_dR_wcut = fs->make<TH1F>("h_gvtx_sv_displ_vec_bquark_mom_dR_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;#Delta R between mom. of a GEN b-quark and most-matched SV by its displacement; arb. units", 120, 0, 3);
+  h_gvtx_sv_trkonly_mom_bquark_mom_dR_wcut = fs->make<TH1F>("h_gvtx_sv_trkonly_mom_bquark_mom_dR_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;#Delta R between mom. of a GEN b-quark and most-matched SV by tracks only; arb. units", 120, 0, 3);
+  h_gvtx_sv_jetbytrk_mom_bquark_mom_dR_wcut = fs->make<TH1F>("h_gvtx_sv_jetbytrk_mom_bquark_mom_dR_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;#Delta R between mom. of a GEN b-quark and most-matched SV by jet's ntrack; arb. units", 120, 0, 3);
+  h_gvtx_sv_trkplusjetbytrk_mom_bquark_mom_dR_wcut = fs->make<TH1F>("h_gvtx_sv_trkplusjetbytrk_mom_bquark_mom_dR_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;#Delta R between mom. of a GEN b-quark and most-matched SV by tracks + jet's ntrack; arb. units", 120, 0, 3);
+  h_gvtx_sv_displ_vec_bquark_mom_dR_wcut = fs->make<TH1F>("h_gvtx_sv_displ_vec_bquark_mom_dR_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;#Delta R between mom. of a GEN b-quark and most-matched SV by its displacement; arb. units", 120, 0, 3);
 
-  h_gvtx_sv_bquark_closest_dist3d_wcut = fs->make<TH1F>("h_gvtx_sv_bquark_closest_dist3d_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;dist3d b/w a GEN b-quark and most-matched SV (cm); arb. units", 120, 0, 3);
+  h_gvtx_sv_bquark_closest_dist3d_wcut = fs->make<TH1F>("h_gvtx_sv_bquark_closest_dist3d_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;dist3d b/w a GEN b-quark and most-matched SV (cm); arb. units", 120, 0, 3);
   //match SVs with jet by sv_jetbytrk_mom_jet_mom_dR < 0.02
   //h_gvtx_sv_inv_mass_wcut = fs->make<TH1F>("h_gvtx_sv_inv_mass_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;invariant mass of a matched SV; SVs/1", 80, 0, 8);
-  h_gvtx_sv_bquark_dist3d_wcut = fs->make<TH1F>("h_gvtx_sv_bquark_dist3d_wcut", "b-quark pT > 25 GeV;dist3d b/w a GEN b-quark decay vtx and its closest SV (cm); arb. units", 120, 0, 3);
-  h_gvtx_bsv_dBV_wcut = fs->make<TH1F>("h_gvtx_bsv_dBV_wcut", "b-quark pT > 25 GeV; bs2dist (cm.); arb. units", 300, 0, 3);
-  h_gvtx_match_pT_wcut = fs->make<TH1F>("h_gvtx_match_pT_wcut", "b-quark pT > 25 GeV; |track #pT_{SV} - track #pT_{jet}| (GeV); arb. units", 100, 0, 0.005);
-  h_gvtx_match_pT_phicut_wcut = fs->make<TH1F>("h_gvtx_match_pT_phicut_wcut", "b-quark pT > 25 GeV && |track #phi_{SV} - track #phi_{jet}| < 0.0001; |track #pT_{SV} - track #pT_{jet}| (GeV); arb. units", 100, 0, 0.005);
-  h_gvtx_match_pT_etacut_wcut = fs->make<TH1F>("h_gvtx_match_pT_etacut_wcut", "b-quark pT > 25 GeV && |track #eta_{SV} - track #eta_{jet}| < 0.0001; |track #pT_{SV} - track #pT_{jet}| (GeV); arb. units", 100, 0, 0.005);
-  h_gvtx_match_eta_wcut = fs->make<TH1F>("h_gvtx_match_eta_wcut", "b-quark pT > 25 GeV; |track #eta_{SV} - track #eta_{jet}|; arb. units", 100, 0, 0.005);
-  h_gvtx_match_eta_phicut_wcut = fs->make<TH1F>("h_gvtx_match_eta_phicut_wcut", "b-quark pT > 25 GeV && |track #phi_{SV} - track #phi_{jet}| < 0.0001; |track #eta_{SV} - track #eta_{jet}| (GeV); arb. units", 100, 0, 0.005);
-  h_gvtx_match_eta_pTcut_wcut = fs->make<TH1F>("h_gvtx_match_eta_pTcut_wcut", "b-quark pT > 25 GeV && |track #pT_{SV} - track #pT_{jet}| < 0.0001; |track #eta_{SV} - track #eta_{jet}| (GeV); arb. units", 100, 0, 0.005);
-  h_gvtx_match_phi_wcut = fs->make<TH1F>("h_gvtx_match_phi_wcut", "b-quark pT > 25 GeV; |track #phi_{SV} - track #phi_{jet}|; arb. units", 100, 0, 0.005);
-  h_gvtx_match_phi_etacut_wcut = fs->make<TH1F>("h_gvtx_match_phi_etacut_wcut", "b-quark pT > 25 GeV && |track #eta_{SV} - track #eta_{jet}| < 0.0001; |track #phi_{SV} - track #phi_{jet}| (GeV); arb. units", 100, 0, 0.005);
-  h_gvtx_match_phi_pTcut_wcut = fs->make<TH1F>("h_gvtx_match_phi_pTcut_wcut", "b-quark pT > 25 GeV && |track #pT_{SV} - track #pT_{jet}| < 0.0001; |track #phi_{SV} - track #phi_{jet}| (GeV); arb. units", 100, 0, 0.005);
-  h_2D_gvtx_numerator_nbsv_bjets_wcut = fs->make<TH2F>("h_2D_gvtx_numerator_nbsv_bjets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; # of SVs matched with the b-jets; # bjets; arb. units", 20, 0, 20, 20, 0, 20);
-  h_2D_gvtx_numerator_tight_trkmatch_nbsv_bjets_wcut = fs->make<TH2F>("h_2D_gvtx_numerator_tight_trkmatch_nbsv_bjets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; # of bSVs; # bjets; events/1", 20, 0, 20, 20, 0, 20);
-  h_2D_gvtx_denominator_nbsv_bjets_wcut = fs->make<TH2F>("h_2D_gvtx_denominator_nbsv_bjets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; # of total SVs; # bjets; arb. units", 20, 0, 20, 20, 0, 20);
-  h_gvtx_nbsv_by_nsv_wcut = fs->make<TH1F>("h_gvtx_nbsv_by_nsv_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; #frac{# of SVs matched with the b-jets}{# of total SVs}; arb. units", 4, 0.0, 2.0);
-  h_gvtx_numerator_nbsv_wcut = fs->make<TH1F>("h_gvtx_numerator_nbsv_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; # of SVs matched with the b-jets; arb. units", 10, 0, 10);
-  h_gvtx_numerator_tight_trkmatch_nbsv_wcut = fs->make<TH1F>("h_gvtx_numerator_tight_trkmatch_nbsv_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; # of bSVs; arb. units", 10, 0, 10);
-  h_gvtx_tight_trkmatch_nbsv_per_bjet_wcut = fs->make<TH1F>("h_gvtx_tight_trkmatch_nbsv_per_bjet_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; # of bSVs per a b-jet; arb. units", 10, 0, 10);
-  h_gvtx_tight_trkmatch_nbsv_per_non_bjet_wcut = fs->make<TH1F>("h_gvtx_tight_trkmatch_nbsv_per_non_bjet_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; # of bSVs per a non b-jet; arb. units", 10, 0, 10);
-  h_gvtx_tight_trkmatch_nbsv_per_tight_btag_jet_wcut = fs->make<TH1F>("h_gvtx_tight_trkmatch_nbsv_per_tight_btag_jet_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; # of bSVs per a tight b-tagged jet; arb. units", 10, 0, 10);
-  h_gvtx_tight_trkmatch_nbsv_per_non_tight_btag_jet_wcut = fs->make<TH1F>("h_gvtx_tight_trkmatch_nbsv_per_non_tight_btag_jet_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; # of bSVs per a non tight b-tagged jet; arb. units", 10, 0, 10);
-  h_gvtx_tight_trkmatch_nbsv_per_medium_btag_jet_wcut = fs->make<TH1F>("h_gvtx_tight_trkmatch_nbsv_per_medium_btag_jet_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; # of bSVs per a medium b-tagged jet; arb. units", 10, 0, 10);
-  h_gvtx_tight_trkmatch_nbsv_per_non_medium_btag_jet_wcut = fs->make<TH1F>("h_gvtx_tight_trkmatch_nbsv_per_non_medium_btag_jet_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; # of bSVs per a non medium b-tagged jet; arb. units", 10, 0, 10);
-  h_gvtx_tight_trkmatch_nbsv_per_loose_btag_jet_wcut = fs->make<TH1F>("h_gvtx_tight_trkmatch_nbsv_per_loose_btag_jet_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; # of bSVs per a loose b-tagged jet; arb. units", 10, 0, 10);
-  h_gvtx_tight_trkmatch_nbsv_per_non_loose_btag_jet_wcut = fs->make<TH1F>("h_gvtx_tight_trkmatch_nbsv_per_non_loose_btag_jet_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; # of bSVs per a non loose b-tagged jet; arb. units", 10, 0, 10);
-  h_gvtx_tight_trkmatch_nbsv_per_loose_bsv_jet_wcut = fs->make<TH1F>("h_gvtx_tight_trkmatch_nbsv_per_loose_bsv_jet_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; # of bSVs per a loose-bsv jet; arb. units", 10, 0, 10);
-  h_gvtx_tight_trkmatch_nbsv_per_non_loose_bsv_jet_wcut = fs->make<TH1F>("h_gvtx_tight_trkmatch_nbsv_per_non_loose_bsv_jet_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; # of bSVs per a non loose-bsv jet; arb. units", 10, 0, 10);
-  h_gvtx_tight_trkmatch_nbsv_per_loose_bsv_plus_btagged_jet_wcut = fs->make<TH1F>("h_gvtx_tight_trkmatch_nbsv_per_loose_bsv_plus_btagged_jet_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; # of bSVs per a loose-bsv-plus-btagged jet; arb. units", 10, 0, 10);
-  h_gvtx_tight_trkmatch_nbsv_per_non_loose_bsv_plus_btagged_jet_wcut = fs->make<TH1F>("h_gvtx_tight_trkmatch_nbsv_per_non_loose_bsv_plus_btagged_jet_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; # of bSVs per a non loose-bsv-plus_btagged jet; arb. units", 10, 0, 10);
+  h_gvtx_sv_bquark_dist3d_wcut = fs->make<TH1F>("h_gvtx_sv_bquark_dist3d_wcut", "b-quark pT > 20 GeV;dist3d b/w a GEN b-quark decay vtx and its closest SV (cm); arb. units", 120, 0, 3);
+  h_gvtx_bsv_dBV_wcut = fs->make<TH1F>("h_gvtx_bsv_dBV_wcut", "b-quark pT > 20 GeV; bs2dist (cm.); arb. units", 300, 0, 3);
+  h_gvtx_match_pT_wcut = fs->make<TH1F>("h_gvtx_match_pT_wcut", "b-quark pT > 20 GeV; |track #pT_{SV} - track #pT_{jet}| (GeV); arb. units", 100, 0, 0.005);
+  h_gvtx_match_pT_phicut_wcut = fs->make<TH1F>("h_gvtx_match_pT_phicut_wcut", "b-quark pT > 20 GeV && |track #phi_{SV} - track #phi_{jet}| < 0.0001; |track #pT_{SV} - track #pT_{jet}| (GeV); arb. units", 100, 0, 0.005);
+  h_gvtx_match_pT_etacut_wcut = fs->make<TH1F>("h_gvtx_match_pT_etacut_wcut", "b-quark pT > 20 GeV && |track #eta_{SV} - track #eta_{jet}| < 0.0001; |track #pT_{SV} - track #pT_{jet}| (GeV); arb. units", 100, 0, 0.005);
+  h_gvtx_match_eta_wcut = fs->make<TH1F>("h_gvtx_match_eta_wcut", "b-quark pT > 20 GeV; |track #eta_{SV} - track #eta_{jet}|; arb. units", 100, 0, 0.005);
+  h_gvtx_match_eta_phicut_wcut = fs->make<TH1F>("h_gvtx_match_eta_phicut_wcut", "b-quark pT > 20 GeV && |track #phi_{SV} - track #phi_{jet}| < 0.0001; |track #eta_{SV} - track #eta_{jet}| (GeV); arb. units", 100, 0, 0.005);
+  h_gvtx_match_eta_pTcut_wcut = fs->make<TH1F>("h_gvtx_match_eta_pTcut_wcut", "b-quark pT > 20 GeV && |track #pT_{SV} - track #pT_{jet}| < 0.0001; |track #eta_{SV} - track #eta_{jet}| (GeV); arb. units", 100, 0, 0.005);
+  h_gvtx_match_phi_wcut = fs->make<TH1F>("h_gvtx_match_phi_wcut", "b-quark pT > 20 GeV; |track #phi_{SV} - track #phi_{jet}|; arb. units", 100, 0, 0.005);
+  h_gvtx_match_phi_etacut_wcut = fs->make<TH1F>("h_gvtx_match_phi_etacut_wcut", "b-quark pT > 20 GeV && |track #eta_{SV} - track #eta_{jet}| < 0.0001; |track #phi_{SV} - track #phi_{jet}| (GeV); arb. units", 100, 0, 0.005);
+  h_gvtx_match_phi_pTcut_wcut = fs->make<TH1F>("h_gvtx_match_phi_pTcut_wcut", "b-quark pT > 20 GeV && |track #pT_{SV} - track #pT_{jet}| < 0.0001; |track #phi_{SV} - track #phi_{jet}| (GeV); arb. units", 100, 0, 0.005);
+  h_2D_gvtx_numerator_nbsv_bjets_wcut = fs->make<TH2F>("h_2D_gvtx_numerator_nbsv_bjets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of SVs matched with the b-jets; # bjets; arb. units", 20, 0, 20, 20, 0, 20);
+  h_2D_gvtx_numerator_tight_trkmatch_nbsv_bjets_wcut = fs->make<TH2F>("h_2D_gvtx_numerator_tight_trkmatch_nbsv_bjets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of bSVs; # bjets; events/1", 20, 0, 20, 20, 0, 20);
+  h_2D_gvtx_denominator_nbsv_bjets_wcut = fs->make<TH2F>("h_2D_gvtx_denominator_nbsv_bjets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of total SVs; # bjets; arb. units", 20, 0, 20, 20, 0, 20);
+  h_gvtx_nbsv_by_nsv_wcut = fs->make<TH1F>("h_gvtx_nbsv_by_nsv_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; #frac{# of SVs matched with the b-jets}{# of total SVs}; arb. units", 4, 0.0, 2.0);
+  h_gvtx_numerator_nbsv_wcut = fs->make<TH1F>("h_gvtx_numerator_nbsv_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of SVs matched with the b-jets; arb. units", 10, 0, 10);
+  h_gvtx_numerator_tight_trkmatch_nbsv_wcut = fs->make<TH1F>("h_gvtx_numerator_tight_trkmatch_nbsv_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of bSVs; arb. units", 10, 0, 10);
+  h_gvtx_tight_trkmatch_nbsv_per_bjet_wcut = fs->make<TH1F>("h_gvtx_tight_trkmatch_nbsv_per_bjet_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of bSVs per a b-jet; arb. units", 10, 0, 10);
+  h_gvtx_tight_trkmatch_nbsv_per_non_bjet_wcut = fs->make<TH1F>("h_gvtx_tight_trkmatch_nbsv_per_non_bjet_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of bSVs per a non b-jet; arb. units", 10, 0, 10);
+  h_gvtx_tight_trkmatch_nbsv_per_tight_btag_jet_wcut = fs->make<TH1F>("h_gvtx_tight_trkmatch_nbsv_per_tight_btag_jet_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of bSVs per a tight b-tagged jet; arb. units", 10, 0, 10);
+  h_gvtx_tight_trkmatch_nbsv_per_non_tight_btag_jet_wcut = fs->make<TH1F>("h_gvtx_tight_trkmatch_nbsv_per_non_tight_btag_jet_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of bSVs per a non tight b-tagged jet; arb. units", 10, 0, 10);
+  h_gvtx_tight_trkmatch_nbsv_per_medium_btag_jet_wcut = fs->make<TH1F>("h_gvtx_tight_trkmatch_nbsv_per_medium_btag_jet_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of bSVs per a medium b-tagged jet; arb. units", 10, 0, 10);
+  h_gvtx_tight_trkmatch_nbsv_per_non_medium_btag_jet_wcut = fs->make<TH1F>("h_gvtx_tight_trkmatch_nbsv_per_non_medium_btag_jet_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of bSVs per a non medium b-tagged jet; arb. units", 10, 0, 10);
+  h_gvtx_tight_trkmatch_nbsv_per_loose_btag_jet_wcut = fs->make<TH1F>("h_gvtx_tight_trkmatch_nbsv_per_loose_btag_jet_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of bSVs per a loose b-tagged jet; arb. units", 10, 0, 10);
+  h_gvtx_tight_trkmatch_nbsv_per_non_loose_btag_jet_wcut = fs->make<TH1F>("h_gvtx_tight_trkmatch_nbsv_per_non_loose_btag_jet_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of bSVs per a non loose b-tagged jet; arb. units", 10, 0, 10);
+  h_gvtx_tight_trkmatch_nbsv_per_loose_bsv_jet_wcut = fs->make<TH1F>("h_gvtx_tight_trkmatch_nbsv_per_loose_bsv_jet_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of bSVs per a loose-bsv jet; arb. units", 10, 0, 10);
+  h_gvtx_tight_trkmatch_nbsv_per_non_loose_bsv_jet_wcut = fs->make<TH1F>("h_gvtx_tight_trkmatch_nbsv_per_non_loose_bsv_jet_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of bSVs per a non loose-bsv jet; arb. units", 10, 0, 10);
+  h_gvtx_tight_trkmatch_nbsv_per_loose_bsv_plus_btagged_jet_wcut = fs->make<TH1F>("h_gvtx_tight_trkmatch_nbsv_per_loose_bsv_plus_btagged_jet_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of bSVs per a loose-bsv-plus-btagged jet; arb. units", 10, 0, 10);
+  h_gvtx_tight_trkmatch_nbsv_per_non_loose_bsv_plus_btagged_jet_wcut = fs->make<TH1F>("h_gvtx_tight_trkmatch_nbsv_per_non_loose_bsv_plus_btagged_jet_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of bSVs per a non loose-bsv-plus_btagged jet; arb. units", 10, 0, 10);
 
-  h_gvtx_has_bSV_per_bjet_or_not_wcut = fs->make<TH1F>("h_gvtx_has_bSV_per_bjet_or_not_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; has at least one bSV per a b-jet or not ?; arb. units", 3, 0, 3);
-  h_gvtx_has_bSV_per_non_bjet_or_not_wcut = fs->make<TH1F>("h_gvtx_has_bSV_per_non_bjet_or_not_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; has at least one bSV per a non b-jet or not ?; arb. units", 3, 0, 3);
-  h_gvtx_is_tight_btag_per_bjet_or_not_wcut = fs->make<TH1F>("h_gvtx_is_tight_btag_per_bjet_or_not_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; is this b-jet also tight b-tagged ?; arb. units", 3, 0, 3);
-  h_gvtx_is_tight_btag_per_non_bjet_or_not_wcut = fs->make<TH1F>("h_gvtx_is_tight_btag_per_non_bjet_or_not_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; is this non b-jet also tight b-tagged ?; arb. units", 3, 0, 3);
-  h_gvtx_is_medium_btag_per_bjet_or_not_wcut = fs->make<TH1F>("h_gvtx_is_medium_btag_per_bjet_or_not_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; is this b-jet also medium b-tagged ?; arb. units", 3, 0, 3);
-  h_gvtx_is_medium_btag_per_non_bjet_or_not_wcut = fs->make<TH1F>("h_gvtx_is_medium_btag_per_non_bjet_or_not_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; is this non b-jet also medium b-tagged ?; arb. units", 3, 0, 3);
-  h_gvtx_is_loose_btag_per_bjet_or_not_wcut = fs->make<TH1F>("h_gvtx_is_loose_btag_per_bjet_or_not_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; is this b-jet also loose b-tagged ?; arb. units", 3, 0, 3);
-  h_gvtx_is_loose_btag_per_non_bjet_or_not_wcut = fs->make<TH1F>("h_gvtx_is_loose_btag_per_non_bjet_or_not_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; is this non b-jet also loose b-tagged ?; arb. units", 3, 0, 3);
-  h_gvtx_denominator_nsv_wcut = fs->make<TH1F>("h_gvtx_denominator_nsv_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; # of total SVs; arb. units", 10, 0, 10);
-  h_2D_gvtx_ntrack_bsv_and_jet_seed_ntrack_from_bsv_wcut = fs->make<TH2F>("h_2D_gvtx_ntrack_bsv_and_jet_seed_ntrack_from_bsv_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; # of total tracks of this SV; # of seed tracks in the b-jet from this SV; arb. units", 20, 0, 20, 20, 0, 20);
-  h_2D_gvtx_ntrack_bsv_and_jet_seed_ntrack_from_tight_trkmatch_bsv_wcut = fs->make<TH2F>("h_2D_gvtx_ntrack_bsv_and_jet_seed_ntrack_from_tight_trkmatch_bsv_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; # of total seed tracks/bSV; # of seed tracks in the b-jet from this bSV; arb. units", 20, 0, 20, 20, 0, 20);
+  h_gvtx_has_bSV_per_bjet_or_not_wcut = fs->make<TH1F>("h_gvtx_has_bSV_per_bjet_or_not_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; has at least one bSV per a b-jet or not ?; arb. units", 3, 0, 3);
+  h_gvtx_has_bSV_per_non_bjet_or_not_wcut = fs->make<TH1F>("h_gvtx_has_bSV_per_non_bjet_or_not_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; has at least one bSV per a non b-jet or not ?; arb. units", 3, 0, 3);
+  h_gvtx_is_tight_btag_per_bjet_or_not_wcut = fs->make<TH1F>("h_gvtx_is_tight_btag_per_bjet_or_not_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; is this b-jet also tight b-tagged ?; arb. units", 3, 0, 3);
+  h_gvtx_is_tight_btag_per_non_bjet_or_not_wcut = fs->make<TH1F>("h_gvtx_is_tight_btag_per_non_bjet_or_not_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; is this non b-jet also tight b-tagged ?; arb. units", 3, 0, 3);
+  h_gvtx_is_medium_btag_per_bjet_or_not_wcut = fs->make<TH1F>("h_gvtx_is_medium_btag_per_bjet_or_not_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; is this b-jet also medium b-tagged ?; arb. units", 3, 0, 3);
+  h_gvtx_is_medium_btag_per_non_bjet_or_not_wcut = fs->make<TH1F>("h_gvtx_is_medium_btag_per_non_bjet_or_not_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; is this non b-jet also medium b-tagged ?; arb. units", 3, 0, 3);
+  h_gvtx_is_loose_btag_per_bjet_or_not_wcut = fs->make<TH1F>("h_gvtx_is_loose_btag_per_bjet_or_not_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; is this b-jet also loose b-tagged ?; arb. units", 3, 0, 3);
+  h_gvtx_a_type_diff_pT_bquark_jet_wcut = fs->make<TH1F>("h_gvtx_a_type_diff_pT_bquark_jet_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;p_{T} of a type-a jet - p_{T} of a GEN b-quark; arb. units", 60, -30.0, 30.0);
+  h_gvtx_a_type_pT_jet_wcut = fs->make<TH1F>("h_gvtx_a_type_pT_jet_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;a type-a jet p_{T} (GeV);arb. units", 100, 0, 200);
+  h_gvtx_a_type_eta_bquark_jet_wcut = fs->make<TH1F>("h_gvtx_a_type_eta_bquark_jet_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; |#eta| of a GEN b-quark; arb. units", 100, 0, 3.0);
+  h_gvtx_a_type_dR_bquark_wcut = fs->make<TH1F>("h_gvtx_a_type_dR_bquark_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;#Delta R between mom. of a type-a jet and a GEN b-quark; arb. units", 50, 0, 0.4);
+  h_gvtx_a_type_nbsv_wcut = fs->make<TH1F>("h_gvtx_a_type_nbsv_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of bSVs in a type-a jets; arb. units", 10, 0, 10);
+  h_gvtx_a_type_seed_ntrack_wcut = fs->make<TH1F>("h_gvtx_a_type_seed_ntrack_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of seed tracks in a type-a jets; arb. units", 10, 0, 10);
+  h_gvtx_a_type_all_ntrack_wcut = fs->make<TH1F>("h_gvtx_a_type_all_ntrack_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of all tracks in a type-a jets; arb. units", 10, 0, 10);
+  h_gvtx_a_type_all_tracks_pt_wcut = fs->make<TH1F>("h_gvtx_a_type_all_tracks_pt_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;p_{T} of a track in a type-a jet;", 40, 0, 10);
+  h_gvtx_a_type_all_tracks_sigmadxybs_wcut = fs->make<TH1F>("h_gvtx_a_type_all_tracks_sigmadxybs_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;#sigma_{dxy} of a track in a type-a jet;", 40, -10, 10);
+  h_gvtx_b_type_diff_pT_bquark_jet_wcut = fs->make<TH1F>("h_gvtx_b_type_diff_pT_bquark_jet_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;p_{T} of a type-b jet - p_{T} of a GEN b-quark; arb. units", 60, -30.0, 30.0);
+  h_gvtx_b_type_dR_bquark_wcut = fs->make<TH1F>("h_gvtx_b_type_dR_bquark_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;#Delta R between mom. of a type-b jet and a GEN b-quark; arb. units", 50, 0, 0.4);
+  h_gvtx_b_type_nbsv_wcut = fs->make<TH1F>("h_gvtx_b_type_nbsv_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of bSVs in a type-b jets; arb. units", 10, 0, 10);
+  h_gvtx_b_type_seed_ntrack_wcut = fs->make<TH1F>("h_gvtx_b_type_seed_ntrack_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of seed tracks in a type-b jets; arb. units", 10, 0, 10);
+  h_gvtx_b_type_all_ntrack_wcut = fs->make<TH1F>("h_gvtx_b_type_all_ntrack_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of all tracks in a type-b jets; arb. units", 10, 0, 10);
+  h_gvtx_b_type_all_tracks_pt_wcut = fs->make<TH1F>("h_gvtx_b_type_all_tracks_pt_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;p_{T} of a track in a type-b jet;", 40, 0, 10);
+  h_gvtx_b_type_all_tracks_sigmadxybs_wcut = fs->make<TH1F>("h_gvtx_b_type_all_tracks_sigmadxybs_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;#sigma_{dxy} of a track in a type-b jet;", 40, -10, 10);
+  h_gvtx_is_loose_btag_per_non_bjet_or_not_wcut = fs->make<TH1F>("h_gvtx_is_loose_btag_per_non_bjet_or_not_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; is this non b-jet also loose b-tagged ?; arb. units", 3, 0, 3);
+  h_gvtx_c_type_dR_closest_lowpT_bquark_wcut = fs->make<TH1F>("h_gvtx_c_type_dR_closest_lowpT_bquark_wcut", "b-quark pT < 20 GeV;#Delta R between mom. of a type-c jet and a lowpT GEN b-quark; arb. units", 50, 0, 4.0);
+  h_gvtx_sub_c_type_eta_bquark_jet_wcut = fs->make<TH1F>("h_gvtx_sub_c_type_eta_bquark_jet_wcut", "b-quark pT > 20 GeV w/ 1-1 matched type-c jet to b-decay; |#eta| of a GEN b-quark; arb. units", 100, 0, 3.0);
+  h_gvtx_sub_c_type_pT_bquark_wcut = fs->make<TH1F>("h_gvtx_sub_c_type_pT_bquark_wcut", "b-quark pT < 20 GeV w/ 1-1 matched type-c jet to b-decay;GEN b-quark p_{T} (GeV);arb. units", 50, 0, 25);
+  h_gvtx_sub_c_type_pT_jet_wcut = fs->make<TH1F>("h_gvtx_sub_c_type_pT_jet_wcut", "b-quark pT < 20 GeV w/ 1-1 matched type-c jet to b-decay;a type-c jet p_{T} (GeV);arb. units", 100, 0, 200);
+  h_gvtx_sub_c_type_nbsv_wcut = fs->make<TH1F>("h_gvtx_sub_c_type_nbsv_wcut", "b-quark pT < 20 GeV w/ 1-1 matched type-c jet to b-decay; # of bSVs in a type-c jets; arb. units", 10, 0, 10);
+  h_gvtx_sub_c_type_all_ntrack_wcut = fs->make<TH1F>("h_gvtx_sub_c_type_all_ntrack_wcut", "b-quark pT < 20 GeV w/ 1-1 matched type-c jet to b-decay; # of all tracks in a type-c jet; arb. units", 10, 0, 10);
+  h_gvtx_sub_c_type_seed_ntrack_wcut = fs->make<TH1F>("h_gvtx_sub_c_type_seed_ntrack_wcut", "b-quark pT < 20 GeV w/ 1-1 matched type-c jet to b-decay; # of seed tracks in a type-c jet; arb. units", 10, 0, 10);
+  h_gvtx_sub_c_type_all_tracks_pt_wcut = fs->make<TH1F>("h_gvtx_sub_c_type_all_tracks_pt_wcut", "b-quark pT < 20 GeV w/ 1-1 matched type-c jet to b-decay;p_{T} of a track in a type-c jet;", 40, 0, 10);
+  h_gvtx_sub_c_type_all_tracks_sigmadxybs_wcut = fs->make<TH1F>("h_gvtx_sub_c_type_all_tracks_sigmadxybs_wcut", "b-quark pT < 20 GeV w/ 1-1 matched type-c jet to b-decay;#sigma_{dxy} of a track in a type-c jet;", 40, -10, 10);
+  h_gvtx_sub_c_type_diff_pT_bquark_jet_wcut = fs->make<TH1F>("h_gvtx_sub_c_type_diff_pT_bquark_jet_wcut", "b-quark pT < 20 GeV w/ 1-1 matched type-c jet to b-decay;p_{T} of a type-c jet - p_{T} of a lowpT GEN b-quark; arb. units", 60, -30.0, 30.0);
+  h_gvtx_sub_c_type_dR_jets_close_bquark_wcut = fs->make<TH1F>("h_gvtx_sub_c_type_dR_jets_close_bquark_wcut", "b-quark pT < 20 GeV w/ dR-0.4 b-quarks && w/ 1-1 matched type-c jet to b-decay;#Delta R between mom. of a type-c jet and a type-a jet w/ dR-0.4 b-quarks; arb. units", 50, 0, 4.0);
+  h_gvtx_sub_c_type_E_ratio_close_bquark_wcut = fs->make<TH1F>("h_gvtx_sub_c_type_E_ratio_close_bquark_wcut", "b-quark pT < 20 GeV w/ dR-0.4 b-quarks && w/ 1-1 matched type-c jet to b-decay;#frac{jet-pair energy}{b-quark pair energy}; arb. units", 60, 0.0, 3.0);
+  h_gvtx_sub_c_type_pT_bquark_close_bquark_wcut = fs->make<TH1F>("h_gvtx_sub_c_type_pT_bquark_close_bquark_wcut", "b-quark pT < 20 GeV w/ dR-0.4 b-quarks && w/ 1-1 matched type-c jet to b-decay;GEN b-quark p_{T} (GeV);arb. units", 50, 0, 25);
+  h_gvtx_sub_c_type_pT_jet_close_bquark_wcut = fs->make<TH1F>("h_gvtx_sub_c_type_pT_jet_close_bquark_wcut", "b-quark pT < 20 GeV w/ dR-0.4 b-quarks && w/ 1-1 matched type-c jet to b-decay; type-c jet p_{T} (GeV);arb. units", 100, 0, 200);
+  h_gvtx_fake_c_type_eta_bquark_jet_wcut = fs->make<TH1F>("h_gvtx_fake_c_type_eta_bquark_jet_wcut", "b-quark pT > 20 GeV w/ 1-1 matched fake type-c jet to b-decay; |#eta| of a GEN b-quark; arb. units", 100, 0, 3.0);
+  h_gvtx_fake_c_type_pT_bquark_wcut = fs->make<TH1F>("h_gvtx_fake_c_type_pT_bquark_wcut", "b-quark pT < 20 GeV w/ 1-1 matched fake type-c jet to b-decay;GEN b-quark p_{T} (GeV);arb. units", 50, 0, 25);
+  h_gvtx_fake_c_type_pT_jet_wcut = fs->make<TH1F>("h_gvtx_fake_c_type_pT_jet_wcut", "b-quark pT < 20 GeV w/ 1-1 matched fake type-c jet to b-decay; a fake type-c jet p_{T} (GeV);arb. units", 100, 0, 200);
+  h_gvtx_fake_c_type_nbsv_wcut = fs->make<TH1F>("h_gvtx_fake_c_type_nbsv_wcut", "b-quark pT < 20 GeV w/ 1-1 matched fake type-c jet to b-decay; # of bSVs in a fake type-c jet; arb. units", 10, 0, 10);
+  h_gvtx_fake_c_type_all_ntrack_wcut = fs->make<TH1F>("h_gvtx_fake_c_type_all_ntrack_wcut", "b-quark pT < 20 GeV w/ 1-1 matched fake type-c jet to b-decay; # of all tracks in a fake type-c jet; arb. units", 10, 0, 10);
+  h_gvtx_fake_c_type_seed_ntrack_wcut = fs->make<TH1F>("h_gvtx_fake_c_type_seed_ntrack_wcut", "b-quark pT < 20 GeV w/ 1-1 matched fake type-c jet to b-decay; # of seed tracks in a fake type-c jet; arb. units", 10, 0, 10);
+  h_gvtx_fake_c_type_all_tracks_pt_wcut = fs->make<TH1F>("h_gvtx_fake_c_type_all_tracks_pt_wcut", "b-quark pT < 20 GeV w/ 1-1 matched fake type-c jet to b-decay;p_{T} of a track in a fake type-c jet;", 40, 0, 10);
+  h_gvtx_fake_c_type_all_tracks_sigmadxybs_wcut = fs->make<TH1F>("h_gvtx_fake_c_type_all_tracks_sigmadxybs_wcut", "b-quark pT < 20 GeV w/ 1-1 matched fake type-c jet to b-decay;#sigma_{dxy} of a track in a fake type-c jet;", 40, -10, 10);
+  h_gvtx_fake_c_type_diff_pT_bquark_jet_wcut = fs->make<TH1F>("h_gvtx_fake_c_type_diff_pT_bquark_jet_wcut", "b-quark pT < 20 GeV w/ 1-1 matched fake type-c jet to b-decay;p_{T} of a fake type-c jet - p_{T} of a lowpT GEN b-quark; arb. units", 60, -30.0, 30.0);
+  h_gvtx_c_type_nbsv_wcut = fs->make<TH1F>("h_gvtx_c_type_nbsv_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of bSVs in a type-c jets; arb. units", 10, 0, 10);
+  h_gvtx_c_type_seed_ntrack_wcut = fs->make<TH1F>("h_gvtx_c_type_seed_ntrack_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of seed tracks in a type-c jet; arb. units", 10, 0, 10);
+  h_gvtx_c_type_all_ntrack_wcut = fs->make<TH1F>("h_gvtx_c_type_all_ntrack_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of all tracks in a type-c jet; arb. units", 10, 0, 10);
+  h_gvtx_c_type_all_tracks_pt_wcut = fs->make<TH1F>("h_gvtx_c_type_all_tracks_pt_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;p_{T} of a track in a type-c jet;", 40, 0, 10);
+  h_gvtx_c_type_all_tracks_sigmadxybs_wcut = fs->make<TH1F>("h_gvtx_c_type_all_tracks_sigmadxybs_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;#sigma_{dxy} of a track in a type-c jet;", 40, -10, 10);
+  h_gvtx_d_type_dR_closest_lowpT_bquark_wcut = fs->make<TH1F>("h_gvtx_d_type_dR_closest_lowpT_bquark_wcut", "b-quark pT < 20 GeV w/ 1-1 matched type-d jet to b-decay;#Delta R between mom. of a type-d jet and a lowpT GEN b-quark; arb. units", 50, 0, 4.0);
+  h_gvtx_sub_d_type_pT_bquark_wcut = fs->make<TH1F>("h_gvtx_sub_d_type_pT_bquark_wcut", "b-quark pT < 20 GeV w/ 1-1 matched type-d jet to b-decay ;GEN b-quark p_{T}(GeV);arb. units", 50, 0, 25);
+  h_gvtx_sub_d_type_nbsv_wcut = fs->make<TH1F>("h_gvtx_sub_d_type_nbsv_wcut", "b-quark pT < 20 GeV w/ 1-1 matched type-d jet to b-decay; # of bSVs in a type-d jets; arb. units", 10, 0, 10);
+  h_gvtx_sub_d_type_seed_ntrack_wcut = fs->make<TH1F>("h_gvtx_sub_d_type_seed_ntrack_wcut", "b-quark pT < 20 GeV w/ 1-1 matched type-d jet to b-decay; # of seed tracks in a type-d jets; arb. units", 10, 0, 10);
+  h_gvtx_sub_d_type_all_tracks_pt_wcut = fs->make<TH1F>("h_gvtx_sub_d_type_all_tracks_pt_wcut", "b-quark pT < 20 GeV w/ 1-1 matched type-d jet to b-decay;p_{T} of a track in a type-d jet;", 40, 0, 10);
+  h_gvtx_sub_d_type_all_tracks_sigmadxybs_wcut = fs->make<TH1F>("h_gvtx_sub_d_type_all_tracks_sigmadxybs_wcut", "b-quark pT < 20 GeV w/ 1-1 matched type-d jet to b-decay;#sigma_{dxy} of a track in a type-d jet;", 40, -10, 10);
+  h_gvtx_sub_d_type_diff_pT_bquark_jet_wcut = fs->make<TH1F>("h_gvtx_sub_d_type_diff_pT_bquark_jet_wcut", "b-quark pT < 20 GeV;p_{T} of a type-d jet - p_{T} of a lowpT GEN b-quark; arb. units", 60, -30.0, 30.0);
+  h_gvtx_d_type_nbsv_wcut = fs->make<TH1F>("h_gvtx_d_type_nbsv_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of bSVs in a type-d jets; arb. units", 10, 0, 10);
+  h_gvtx_d_type_seed_ntrack_wcut = fs->make<TH1F>("h_gvtx_d_type_seed_ntrack_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of seed tracks in a type-d jets; arb. units", 10, 0, 10);
+  h_gvtx_d_type_all_ntrack_wcut = fs->make<TH1F>("h_gvtx_d_type_all_ntrack_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of all tracks in a type-d jets; arb. units", 10, 0, 10);
+  h_gvtx_d_type_all_tracks_pt_wcut = fs->make<TH1F>("h_gvtx_d_type_all_tracks_pt_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;p_{T} of a track in a type-d jet;", 40, 0, 10);
+  h_gvtx_d_type_all_tracks_sigmadxybs_wcut = fs->make<TH1F>("h_gvtx_d_type_all_tracks_sigmadxybs_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;#sigma_{dxy} of a track in a type-d jet;", 40, -10, 10);
+
+  h_gvtx_denominator_nsv_wcut = fs->make<TH1F>("h_gvtx_denominator_nsv_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of total SVs; arb. units", 10, 0, 10);
+  h_2D_gvtx_ntrack_bsv_and_jet_seed_ntrack_from_bsv_wcut = fs->make<TH2F>("h_2D_gvtx_ntrack_bsv_and_jet_seed_ntrack_from_bsv_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of total tracks of this SV; # of seed tracks in the b-jet from this SV; arb. units", 20, 0, 20, 20, 0, 20);
+  h_2D_gvtx_ntrack_bsv_and_jet_seed_ntrack_from_tight_trkmatch_bsv_wcut = fs->make<TH2F>("h_2D_gvtx_ntrack_bsv_and_jet_seed_ntrack_from_tight_trkmatch_bsv_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; # of total seed tracks/bSV; # of seed tracks in the b-jet from this bSV; arb. units", 20, 0, 20, 20, 0, 20);
   
 
   //track investigation 
-  h_gvtx_all_track_pt_from_jets_wcut = fs->make<TH1F>("h_gvtx_all_track_pt_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; track p_{T} (GeV)", 20, 0, 10);
-  h_gvtx_all_track_sigmadxybs_from_jets_wcut = fs->make<TH1F>("h_gvtx_all_track_sigmadxybs_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; #sigma_{dxy}", 40, -10, 10);
-  h_gvtx_all_track_npxhits_from_jets_wcut = fs->make<TH1F>("h_gvtx_all_track_npxhits_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; npxhits", 12, 0, 12);
-  h_gvtx_all_track_nsthits_from_jets_wcut = fs->make<TH1F>("h_gvtx_all_track_nsthits_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; nsthits", 28, 0, 28);
-  h_gvtx_all_track_npxlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_all_track_npxlayers_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; npxlayers", 12, 0, 12);
-  h_gvtx_all_track_nstlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_all_track_nstlayers_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; nstlayers", 28, 0, 28);
-  h_gvtx_all_track_rmin_from_jets_wcut = fs->make<TH1F>("h_gvtx_all_track_rmin_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;r_{min};", 5, 0, 5);
+  h_gvtx_all_track_pt_from_jets_wcut = fs->make<TH1F>("h_gvtx_all_track_pt_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; track p_{T} (GeV)", 20, 0, 10);
+  h_gvtx_all_track_sigmadxybs_from_jets_wcut = fs->make<TH1F>("h_gvtx_all_track_sigmadxybs_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; #sigma_{dxy}", 40, -10, 10);
+  h_gvtx_all_track_npxhits_from_jets_wcut = fs->make<TH1F>("h_gvtx_all_track_npxhits_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; npxhits", 12, 0, 12);
+  h_gvtx_all_track_nsthits_from_jets_wcut = fs->make<TH1F>("h_gvtx_all_track_nsthits_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; nsthits", 28, 0, 28);
+  h_gvtx_all_track_npxlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_all_track_npxlayers_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; npxlayers", 12, 0, 12);
+  h_gvtx_all_track_nstlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_all_track_nstlayers_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; nstlayers", 28, 0, 28);
+  h_gvtx_all_track_rmin_from_jets_wcut = fs->make<TH1F>("h_gvtx_all_track_rmin_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;r_{min};", 5, 0, 5);
 
-  h_gvtx_jet_seed_nm1_pt_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_nm1_pt_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; track p_{T} (GeV) w/ n-1 cuts applied", 20, 0, 10);
-  h_gvtx_jet_seed_nm1_npxlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_nm1_npxlayers_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; npxlayers w/ n-1 cuts applied", 12, 0, 12);
-  h_gvtx_jet_seed_nm1_nstlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_nm1_nstlayers_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; nstlayers w/ n-1 cuts applied", 28, 0, 28);
-  h_gvtx_jet_seed_nm1_rmin_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_nm1_rmin_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; rmin w/ n-1 cuts applied", 5, 0, 5);
-  h_gvtx_jet_seed_nm1_sigmadxybs_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_nm1_sigmadxybs_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay; #sigma_{dxy} w/ n-1 cuts applied", 40, -10, 10);
+  h_gvtx_jet_seed_nm1_pt_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_nm1_pt_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; track p_{T} (GeV) w/ n-1 cuts applied", 20, 0, 10);
+  h_gvtx_jet_seed_nm1_npxlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_nm1_npxlayers_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; npxlayers w/ n-1 cuts applied", 12, 0, 12);
+  h_gvtx_jet_seed_nm1_nstlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_nm1_nstlayers_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; nstlayers w/ n-1 cuts applied", 28, 0, 28);
+  h_gvtx_jet_seed_nm1_rmin_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_nm1_rmin_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; rmin w/ n-1 cuts applied", 5, 0, 5);
+  h_gvtx_jet_seed_nm1_sigmadxybs_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_nm1_sigmadxybs_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; #sigma_{dxy} w/ n-1 cuts applied", 40, -10, 10);
 
-  h_gvtx_one_cut_ntrack_from_jets_wcut = fs->make<TH1F>("h_gvtx_one_cut_ntrack_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;# of 1-cut seed tracks per a matched jet;", 50, 0, 50);
-  h_gvtx_one_cut_track_pT_from_jets_wcut = fs->make<TH1F>("h_gvtx_one_cut_track_pT_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;p_{T} of a 1-cut seed track in a matched jet;", 20, 0, 10);
-  h_gvtx_one_cut_track_sigmadxybs_from_jets_wcut = fs->make<TH1F>("h_gvtx_one_cut_track_sigmadxybs_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;#sigma_{dxy} of a 1-cut seed track in a matched jet;", 40, -10, 10);
-  h_gvtx_one_cut_track_npxlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_one_cut_track_npxlayers_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;npxlayers of a 1-cut seed track in a matched jet;", 12, 0, 12);
-  h_gvtx_one_cut_track_nstlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_one_cut_track_nstlayers_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;nstlayers of a 1-cut seed track in a matched jet;", 28, 0, 28);
-  h_gvtx_one_cut_track_rmin_from_jets_wcut = fs->make<TH1F>("h_gvtx_one_cut_track_rmin_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;r_{min} of a 1-cut seed track in a matched jet;", 5, 0, 5);
+  h_gvtx_one_cut_ntrack_from_jets_wcut = fs->make<TH1F>("h_gvtx_one_cut_ntrack_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;# of 1-cut seed tracks per a matched jet;", 50, 0, 50);
+  h_gvtx_one_cut_track_pT_from_jets_wcut = fs->make<TH1F>("h_gvtx_one_cut_track_pT_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;p_{T} of a 1-cut seed track in a matched jet;", 20, 0, 10);
+  h_gvtx_one_cut_track_sigmadxybs_from_jets_wcut = fs->make<TH1F>("h_gvtx_one_cut_track_sigmadxybs_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;#sigma_{dxy} of a 1-cut seed track in a matched jet;", 40, -10, 10);
+  h_gvtx_one_cut_track_npxlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_one_cut_track_npxlayers_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;npxlayers of a 1-cut seed track in a matched jet;", 12, 0, 12);
+  h_gvtx_one_cut_track_nstlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_one_cut_track_nstlayers_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;nstlayers of a 1-cut seed track in a matched jet;", 28, 0, 28);
+  h_gvtx_one_cut_track_rmin_from_jets_wcut = fs->make<TH1F>("h_gvtx_one_cut_track_rmin_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;r_{min} of a 1-cut seed track in a matched jet;", 5, 0, 5);
 
-  h_gvtx_two_cut_ntrack_from_jets_wcut = fs->make<TH1F>("h_gvtx_two_cut_ntrack_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;# of 2-cut seed tracks per a matched jet;", 50, 0, 50);
-  h_gvtx_two_cut_track_pT_from_jets_wcut = fs->make<TH1F>("h_gvtx_two_cut_track_pT_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;p_{T} of a 2-cut seed track in a matched jet;", 20, 0, 10);
-  h_gvtx_two_cut_track_sigmadxybs_from_jets_wcut = fs->make<TH1F>("h_gvtx_two_cut_track_sigmadxybs_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;#sigma_{dxy} of a 2-cut seed track in a matched jet;", 40, -10, 10);
-  h_gvtx_two_cut_track_npxlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_two_cut_track_npxlayers_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;npxlayers of a 2-cut seed track in a matched jet;", 12, 0, 12);
-  h_gvtx_two_cut_track_nstlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_two_cut_track_nstlayers_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;nstlayers of a 2-cut seed track in a matched jet;", 28, 0, 28);
-  h_gvtx_two_cut_track_rmin_from_jets_wcut = fs->make<TH1F>("h_gvtx_two_cut_track_rmin_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;r_{min} of a 2-cut seed track in a matched jet;", 5, 0, 5);
+  h_gvtx_two_cut_ntrack_from_jets_wcut = fs->make<TH1F>("h_gvtx_two_cut_ntrack_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;# of 2-cut seed tracks per a matched jet;", 50, 0, 50);
+  h_gvtx_two_cut_track_pT_from_jets_wcut = fs->make<TH1F>("h_gvtx_two_cut_track_pT_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;p_{T} of a 2-cut seed track in a matched jet;", 20, 0, 10);
+  h_gvtx_two_cut_track_sigmadxybs_from_jets_wcut = fs->make<TH1F>("h_gvtx_two_cut_track_sigmadxybs_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;#sigma_{dxy} of a 2-cut seed track in a matched jet;", 40, -10, 10);
+  h_gvtx_two_cut_track_npxlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_two_cut_track_npxlayers_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;npxlayers of a 2-cut seed track in a matched jet;", 12, 0, 12);
+  h_gvtx_two_cut_track_nstlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_two_cut_track_nstlayers_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;nstlayers of a 2-cut seed track in a matched jet;", 28, 0, 28);
+  h_gvtx_two_cut_track_rmin_from_jets_wcut = fs->make<TH1F>("h_gvtx_two_cut_track_rmin_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;r_{min} of a 2-cut seed track in a matched jet;", 5, 0, 5);
 
-  h_gvtx_three_cut_ntrack_from_jets_wcut = fs->make<TH1F>("h_gvtx_three_cut_ntrack_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;# of 3-cut seed tracks per a matched jet;", 50, 0, 50);
-  h_gvtx_three_cut_track_pT_from_jets_wcut = fs->make<TH1F>("h_gvtx_three_cut_track_pT_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;p_{T} of a 3-cut seed track in a matched jet;", 20, 0, 10);
-  h_gvtx_three_cut_track_sigmadxybs_from_jets_wcut = fs->make<TH1F>("h_gvtx_three_cut_track_sigmadxybs_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;#sigma_{dxy} of a 3-cut seed track in a matched jet;", 40, -10, 10);
-  h_gvtx_three_cut_track_npxlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_three_cut_track_npxlayers_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;npxlayers of a 3-cut seed track in a matched jet;", 12, 0, 12);
-  h_gvtx_three_cut_track_nstlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_three_cut_track_nstlayers_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;nstlayers of a 3-cut seed track in a matched jet;", 28, 0, 28);
-  h_gvtx_three_cut_track_rmin_from_jets_wcut = fs->make<TH1F>("h_gvtx_three_cut_track_rmin_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;r_{min} of a 3-cut seed track in a matched jet;", 5, 0, 5);
+  h_gvtx_three_cut_ntrack_from_jets_wcut = fs->make<TH1F>("h_gvtx_three_cut_ntrack_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;# of 3-cut seed tracks per a matched jet;", 50, 0, 50);
+  h_gvtx_three_cut_track_pT_from_jets_wcut = fs->make<TH1F>("h_gvtx_three_cut_track_pT_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;p_{T} of a 3-cut seed track in a matched jet;", 20, 0, 10);
+  h_gvtx_three_cut_track_sigmadxybs_from_jets_wcut = fs->make<TH1F>("h_gvtx_three_cut_track_sigmadxybs_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;#sigma_{dxy} of a 3-cut seed track in a matched jet;", 40, -10, 10);
+  h_gvtx_three_cut_track_npxlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_three_cut_track_npxlayers_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;npxlayers of a 3-cut seed track in a matched jet;", 12, 0, 12);
+  h_gvtx_three_cut_track_nstlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_three_cut_track_nstlayers_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;nstlayers of a 3-cut seed track in a matched jet;", 28, 0, 28);
+  h_gvtx_three_cut_track_rmin_from_jets_wcut = fs->make<TH1F>("h_gvtx_three_cut_track_rmin_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;r_{min} of a 3-cut seed track in a matched jet;", 5, 0, 5);
 
-  h_gvtx_four_cut_ntrack_from_jets_wcut = fs->make<TH1F>("h_gvtx_four_cut_ntrack_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;# of 4-cut seed tracks per a matched jet;", 50, 0, 50);
-  h_gvtx_four_cut_track_pT_from_jets_wcut = fs->make<TH1F>("h_gvtx_four_cut_track_pT_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;p_{T} of a 4-cut seed track in a matched jet;", 20, 0, 10);
-  h_gvtx_four_cut_track_sigmadxybs_from_jets_wcut = fs->make<TH1F>("h_gvtx_four_cut_track_sigmadxybs_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;#sigma_{dxy} of a 4-cut seed track in a matched jet;", 40, -10, 10);
-  h_gvtx_four_cut_track_npxlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_four_cut_track_npxlayers_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;npxlayers of a 4-cut seed track in a matched jet;", 12, 0, 12);
-  h_gvtx_four_cut_track_nstlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_four_cut_track_nstlayers_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;nstlayers of a 4-cut seed track in a matched jet;", 28, 0, 28);
-  h_gvtx_four_cut_track_rmin_from_jets_wcut = fs->make<TH1F>("h_gvtx_four_cut_track_rmin_from_jets_wcut", "b-quark pT > 25 GeV w/ 1-1 matched jet to b-decay;r_{min} of a 4-cut seed track in a matched jet;", 5, 0, 5);
+  h_gvtx_four_cut_ntrack_from_jets_wcut = fs->make<TH1F>("h_gvtx_four_cut_ntrack_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;# of 4-cut seed tracks per a matched jet;", 50, 0, 50);
+  h_gvtx_four_cut_track_pT_from_jets_wcut = fs->make<TH1F>("h_gvtx_four_cut_track_pT_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;p_{T} of a 4-cut seed track in a matched jet;", 20, 0, 10);
+  h_gvtx_four_cut_track_sigmadxybs_from_jets_wcut = fs->make<TH1F>("h_gvtx_four_cut_track_sigmadxybs_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;#sigma_{dxy} of a 4-cut seed track in a matched jet;", 40, -10, 10);
+  h_gvtx_four_cut_track_npxlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_four_cut_track_npxlayers_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;npxlayers of a 4-cut seed track in a matched jet;", 12, 0, 12);
+  h_gvtx_four_cut_track_nstlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_four_cut_track_nstlayers_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;nstlayers of a 4-cut seed track in a matched jet;", 28, 0, 28);
+  h_gvtx_four_cut_track_rmin_from_jets_wcut = fs->make<TH1F>("h_gvtx_four_cut_track_rmin_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;r_{min} of a 4-cut seed track in a matched jet;", 5, 0, 5);
 
   
  
@@ -726,11 +841,13 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 		  size_t shared_bjet = 0;
 		  bool match_jet_event = false;
 		  bool all_bboost = true;
+		  std::vector<size_t> vec_lowpT_bquark = {};
 		  std::vector<size_t> vec_ibjet = {};
 		  std::vector<int> vec_ibsv = {};
 		  std::vector<int> vec_tight_trk_ibsv = {};
 		  size_t sum_nbsv_by_bjet = 0;
 		  std::vector<size_t> vec_bquark_jet = {};
+		  std::vector<size_t> vec_bquark = {};
 
 		  size_t nloosebsvjet = 0;
 		  size_t nloosebsvplusbtaggedjet = 0;
@@ -1088,8 +1205,9 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
 			  h_gvtx_bhad_bquark_dR->Fill(dR_bquark, w);
 			  h_2D_gvtx_bhad_bquark_dR_and_b_quark_pT->Fill(dR_bquark, mevent->gen_daughters[i].Pt(), w);
-			  if (mevent->gen_daughters[i].Pt() < 25) {
+			  if (mevent->gen_daughters[i].Pt() < 20) {
 				  all_bboost = false;
+				  vec_lowpT_bquark.push_back(i);
 				  continue;
 			  }
 
@@ -1129,7 +1247,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 				  h_gvtx_bhad_closest_jet_dR_wcut->Fill(mindR_bhad, w);
 			  }
 			  h_gvtx_bquark_jet_dR_wcut->Fill(mindR_bquark, w);
-			  if (mindR_bquark < 0.2) {
+			  if (mindR_bquark < 0.4) {
 
 				  h_gvtx_peak_dR_jet_eta_bquark_wcut->Fill(fabs(mevent->gen_daughters[i].Eta()), w);
 				  h_gvtx_peak_dR_jet_pT_bquark_wcut->Fill(mevent->gen_daughters[i].Pt(), w);
@@ -1141,6 +1259,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 				  std::vector<size_t> vec_tight_trk_isv = {};
 
 				  vec_bquark_jet.push_back(bquark_jet);
+				  vec_bquark.push_back(i);
 				  if (std::count(vec_bquark_jet.begin(), vec_bquark_jet.end(), vec_bquark_jet[i]) > 1)
 					  shared_bjet = 1;
 
@@ -1175,6 +1294,14 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 						  h_gvtx_all_track_npxlayers_from_jets_wcut->Fill(mevent->jet_track_npxlayers(j), w);
 						  h_gvtx_all_track_nstlayers_from_jets_wcut->Fill(mevent->jet_track_nstlayers(j), w);
 						  h_gvtx_all_track_rmin_from_jets_wcut->Fill(mevent->jet_track_hp_rmin[j], w);
+						  if (mevent->is_btagged(bquark_jet, 0)) {
+							  h_gvtx_a_type_all_tracks_pt_wcut->Fill(mevent->jet_track_pt(j), w);
+							  h_gvtx_a_type_all_tracks_sigmadxybs_wcut->Fill(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j], w);
+						  }
+						  else {
+							  h_gvtx_b_type_all_tracks_pt_wcut->Fill(mevent->jet_track_pt(j), w);
+							  h_gvtx_b_type_all_tracks_sigmadxybs_wcut->Fill(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j], w);
+						  }
 						  if (mevent->jet_track_npxlayers(j) > 1 && mevent->jet_track_nstlayers(j) > 5 && fabs(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j]) > 4 && mevent->jet_track_hp_rmin[j] == 1)
 							  h_gvtx_jet_seed_nm1_pt_from_jets_wcut->Fill(mevent->jet_track_pt(j), w);
 						  if (mevent->jet_track_nstlayers(j) > 5 && fabs(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j]) > 4 && mevent->jet_track_pt(j) > 1 && mevent->jet_track_hp_rmin[j] == 1)
@@ -1429,6 +1556,24 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 				  h_gvtx_is_medium_btag_per_bjet_or_not_wcut->Fill(mevent->is_btagged(bquark_jet, 1), w);
 				  h_gvtx_is_loose_btag_per_bjet_or_not_wcut->Fill(mevent->is_btagged(bquark_jet, 0), w);
 
+
+				  if (mevent->is_btagged(bquark_jet, 0)) {
+					  h_gvtx_a_type_diff_pT_bquark_jet_wcut->Fill(mevent->jet_pt[bquark_jet] - mevent->gen_daughters[i].Pt(), w);
+					  h_gvtx_a_type_dR_bquark_wcut->Fill(mindR_bquark, w);
+					  h_gvtx_a_type_nbsv_wcut->Fill(nbsv_by_bjet, w);
+					  h_gvtx_a_type_seed_ntrack_wcut->Fill(jet_seed_ntrack, w);
+					  h_gvtx_a_type_all_ntrack_wcut->Fill(jet_ntrack, w);
+					  h_gvtx_a_type_eta_bquark_jet_wcut->Fill(fabs(mevent->gen_daughters[i].Eta()), w);
+					  h_gvtx_a_type_pT_jet_wcut->Fill(mevent->jet_pt[bquark_jet], w);
+				  }
+				  else {
+					  h_gvtx_b_type_diff_pT_bquark_jet_wcut->Fill(mevent->jet_pt[bquark_jet] - mevent->gen_daughters[i].Pt(), w);
+					  h_gvtx_b_type_dR_bquark_wcut->Fill(mindR_bquark, w);
+					  h_gvtx_b_type_nbsv_wcut->Fill(nbsv_by_bjet, w);
+					  h_gvtx_b_type_seed_ntrack_wcut->Fill(jet_seed_ntrack, w);
+					  h_gvtx_b_type_all_ntrack_wcut->Fill(jet_ntrack, w);
+				  }
+
 				  sum_nbsv_by_bjet += nbsv_by_bjet;
 
 				  if (jet_onect_ntrack > 0)
@@ -1491,10 +1636,44 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 				  if (std::count(vec_ibjet.begin(), vec_ibjet.end(), ijet) > 0)  // this is a b-jet 
 					  continue;
 
+				  double mindR_bquark = 4.0;
+				  size_t ibquark = 0;
+				  for (size_t k = 0; k < vec_lowpT_bquark.size(); ++k) {
+					  double dR_bquark = reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->gen_daughters[vec_lowpT_bquark[k]].Eta(), mevent->gen_daughters[vec_lowpT_bquark[k]].Phi());
+					  if (dR_bquark < mindR_bquark) {
+						  mindR_bquark = dR_bquark;
+						  ibquark = vec_lowpT_bquark[k];
+					  }
+				  }
+
 				  std::vector<size_t> vec_tight_trk_isv = {};
 				  size_t jet_seed_ntrack = 0;
+				  size_t jet_ntrack = 0;
 				  for (size_t j = 0; j < mevent->jet_track_which_jet.size(); ++j) {
 					  if (ijet == mevent->jet_track_which_jet[j]) {
+						  jet_ntrack++;
+						  if (mevent->is_btagged(ijet, 0)) {
+							  h_gvtx_c_type_all_tracks_pt_wcut->Fill(mevent->jet_track_pt(j), w);
+							  h_gvtx_c_type_all_tracks_sigmadxybs_wcut->Fill(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j], w);
+							  if (mindR_bquark < 0.4) {
+								  h_gvtx_sub_c_type_all_tracks_pt_wcut->Fill(mevent->jet_track_pt(j), w);
+								  h_gvtx_sub_c_type_all_tracks_sigmadxybs_wcut->Fill(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j], w);
+							  }
+							  else {
+								  h_gvtx_fake_c_type_all_tracks_pt_wcut->Fill(mevent->jet_track_pt(j), w);
+								  h_gvtx_fake_c_type_all_tracks_sigmadxybs_wcut->Fill(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j], w);
+
+							  }
+						  }
+						  else {
+							  h_gvtx_d_type_all_tracks_pt_wcut->Fill(mevent->jet_track_pt(j), w);
+							  h_gvtx_d_type_all_tracks_sigmadxybs_wcut->Fill(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j], w);
+							  if (mindR_bquark < 0.4) {
+								  h_gvtx_sub_d_type_all_tracks_pt_wcut->Fill(mevent->jet_track_pt(j), w);
+								  h_gvtx_sub_d_type_all_tracks_sigmadxybs_wcut->Fill(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j], w);
+							  }
+							  
+						  }
 						  if (mevent->jet_track_npxlayers(j) > 1 && mevent->jet_track_nstlayers(j) > 5 && mevent->jet_track_pt(j) > 1 && fabs(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j]) > 4 && mevent->jet_track_hp_rmin[j] == 1) {
 							  jet_seed_ntrack ++;
 							  for (int isv = 0; isv < nsv; ++isv) {
@@ -1545,6 +1724,68 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 				  h_gvtx_is_tight_btag_per_non_bjet_or_not_wcut->Fill(mevent->is_btagged(ijet, 2), w);
 				  h_gvtx_is_medium_btag_per_non_bjet_or_not_wcut->Fill(mevent->is_btagged(ijet, 1), w);
 				  h_gvtx_is_loose_btag_per_non_bjet_or_not_wcut->Fill(mevent->is_btagged(ijet, 0), w);
+
+				  
+
+				  if (mevent->is_btagged(ijet, 0)) {
+					  h_gvtx_c_type_nbsv_wcut->Fill(nbsv_by_non_bjet, w);
+					  h_gvtx_c_type_seed_ntrack_wcut->Fill(jet_seed_ntrack, w);
+					  h_gvtx_c_type_all_ntrack_wcut->Fill(jet_ntrack, w);
+					  if (vec_lowpT_bquark.size() > 0) {
+						  h_gvtx_c_type_dR_closest_lowpT_bquark_wcut->Fill(mindR_bquark,w);
+						  if (mindR_bquark < 0.4) {
+							  h_gvtx_sub_c_type_pT_bquark_wcut->Fill(mevent->gen_daughters[ibquark].Pt(), w);
+							  h_gvtx_sub_c_type_diff_pT_bquark_jet_wcut->Fill(mevent->jet_pt[ijet] - mevent->gen_daughters[ibquark].Pt(), w);
+							  h_gvtx_sub_c_type_nbsv_wcut->Fill(nbsv_by_non_bjet, w);
+							  h_gvtx_sub_c_type_seed_ntrack_wcut->Fill(jet_seed_ntrack, w);
+							  h_gvtx_sub_c_type_all_ntrack_wcut->Fill(jet_ntrack, w);
+							  h_gvtx_sub_c_type_eta_bquark_jet_wcut->Fill(fabs(mevent->gen_daughters[ibquark].Eta()), w);
+							  h_gvtx_sub_c_type_pT_jet_wcut->Fill(mevent->jet_pt[ijet], w);
+							  double min_pair_bquark = 4.0;
+							  size_t jjet = 0;
+							  size_t jbquark = 0;
+                              for (size_t k = 0; k < vec_bquark_jet.size(); ++k) {
+								  double pair_bquark = reco::deltaR(mevent->gen_daughters[vec_bquark[k]].Eta(), mevent->gen_daughters[vec_bquark[k]].Phi(), mevent->gen_daughters[ibquark].Eta(), mevent->gen_daughters[ibquark].Phi());
+								  if (pair_bquark < min_pair_bquark) {
+									  min_pair_bquark = pair_bquark;
+									  jjet = vec_bquark_jet[k];
+									  jbquark = vec_bquark[k];
+								  }
+
+							  }
+							  if (min_pair_bquark < 0.4) {
+								  h_gvtx_sub_c_type_dR_jets_close_bquark_wcut->Fill(reco::deltaR(mevent->jet_eta[jjet], mevent->jet_phi[jjet], mevent->jet_eta[ijet], mevent->jet_phi[ijet]), w);
+								  h_gvtx_sub_c_type_E_ratio_close_bquark_wcut->Fill((mevent->jet_energy[jjet] + mevent->jet_energy[ijet]) / (mevent->gen_daughters[ibquark].Energy() + mevent->gen_daughters[jbquark].Energy()), w);
+								  h_gvtx_sub_c_type_pT_bquark_close_bquark_wcut->Fill(mevent->gen_daughters[jbquark].Pt(), w);
+								  h_gvtx_sub_c_type_pT_jet_close_bquark_wcut->Fill(mevent->jet_pt[jjet], w);
+							  }
+						  }
+						  else {
+							  h_gvtx_fake_c_type_pT_bquark_wcut->Fill(mevent->gen_daughters[ibquark].Pt(), w);
+							  h_gvtx_fake_c_type_diff_pT_bquark_jet_wcut->Fill(mevent->jet_pt[ijet] - mevent->gen_daughters[ibquark].Pt(), w);
+							  h_gvtx_fake_c_type_nbsv_wcut->Fill(nbsv_by_non_bjet, w);
+							  h_gvtx_fake_c_type_seed_ntrack_wcut->Fill(jet_seed_ntrack, w);
+							  h_gvtx_fake_c_type_all_ntrack_wcut->Fill(jet_ntrack, w);
+							  h_gvtx_fake_c_type_eta_bquark_jet_wcut->Fill(fabs(mevent->gen_daughters[ibquark].Eta()), w);
+							  h_gvtx_fake_c_type_pT_jet_wcut->Fill(mevent->jet_pt[ijet], w);
+						  }
+					  }
+
+				  }
+				  else {
+					  h_gvtx_d_type_nbsv_wcut->Fill(nbsv_by_non_bjet, w);
+					  h_gvtx_d_type_seed_ntrack_wcut->Fill(jet_seed_ntrack, w);
+					  h_gvtx_d_type_all_ntrack_wcut->Fill(jet_ntrack, w);
+					  if (vec_lowpT_bquark.size() > 0) {
+						  h_gvtx_d_type_dR_closest_lowpT_bquark_wcut->Fill(mindR_bquark, w);
+						  if (mindR_bquark < 0.4) {
+							  h_gvtx_sub_d_type_pT_bquark_wcut->Fill(mevent->gen_daughters[ibquark].Pt(), w);
+							  h_gvtx_sub_d_type_diff_pT_bquark_jet_wcut->Fill(mevent->jet_pt[ijet] - mevent->gen_daughters[ibquark].Pt(), w);
+							  h_gvtx_sub_d_type_nbsv_wcut->Fill(nbsv_by_non_bjet, w);
+							  h_gvtx_sub_d_type_seed_ntrack_wcut->Fill(jet_seed_ntrack, w);
+						  }
+					  }
+				  }
 
 
 		  }
