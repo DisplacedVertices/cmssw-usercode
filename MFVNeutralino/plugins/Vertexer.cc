@@ -13,6 +13,7 @@
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
+#include "JMTucker/Tools/interface/BTagging.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
@@ -44,9 +45,10 @@ class MFVVertexer : public edm::EDProducer {
     std::vector<size_t>::iterator getFirstCommonElement(std::vector<size_t>& vec0, std::vector<size_t>& vec1);
     template <typename T> void eraseElement(std::vector<T>& vec, size_t idx);
     void createSetofSharedJetTracks(std::vector<std::vector<size_t>>& vec_sharedjet_track_idx, std::vector<size_t>& vec_special_sharedjet_track_idx, std::vector<size_t>& vec_all_track_idx, std::vector<size_t>& vec_sharedjet_idx, size_t sharedjet_idx); 
-    bool match_track_jet(const reco::Track& tk, const pat::Jet& jet, const pat::JetCollection& jets, const size_t& idx);
+	static uchar encode_jet_id(int pu_level, int bdisc_level, int hadron_flavor);
+	bool match_track_jet(const reco::Track& tk, const pat::Jet& jet, const pat::JetCollection& jets, const size_t& idx);
 
-    void finish(edm::Event&, const std::vector<reco::TransientTrack>&, std::unique_ptr<reco::VertexCollection>, std::unique_ptr<VertexerPairEffs>, const std::vector<std::pair<track_set, track_set>>&);
+    void finish(edm::Event&, const std::vector<reco::TransientTrack>&, const std::vector<reco::TransientTrack>&, std::unique_ptr<reco::VertexCollection>, std::unique_ptr<VertexerPairEffs>, const std::vector<std::pair<track_set, track_set>>&);
 
     enum stepEnum{afterdzfit, aftermerge, aftersharedjets, N_STEPS};
     std::vector<TString> stepStrs = {"afterdzfit", "aftermerge", "aftersharedjets", "N_STEPS"};
@@ -144,8 +146,10 @@ class MFVVertexer : public edm::EDProducer {
     const bool resolve_shared_jets;
     const edm::EDGetTokenT<pat::JetCollection> shared_jet_token;
     const bool extrapolate_ghost_tracks;
+	const edm::EDGetTokenT<pat::JetCollection> ghost_track_jet_token;
     const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
     const edm::EDGetTokenT<std::vector<reco::TrackRef>> seed_tracks_token;
+	const edm::EDGetTokenT<std::vector<reco::TrackRef>> all_tracks_token;
     const int n_tracks_per_seed_vertex;
     const double max_seed_vertex_chi2;
     const bool use_2d_vertex_dist;
@@ -250,15 +254,6 @@ class MFVVertexer : public edm::EDProducer {
     TH1F* h_output_aftermerge_potential_merged_vertex_nm1_bsbs2ddist;
 
     TH1F* h_resolve_shared_jets_lonetrkvtx_dphi;
-	TH1F* h_resolve_shared_jets_track_match_pT;
-	TH1F* h_resolve_shared_jets_track_match_pT_etacut;
-	TH1F* h_resolve_shared_jets_track_match_pT_phicut;
-	TH1F* h_resolve_shared_jets_track_match_phi;
-	TH1F* h_resolve_shared_jets_track_match_phi_pTcut;
-	TH1F* h_resolve_shared_jets_track_match_phi_etacut;
-	TH1F* h_resolve_shared_jets_track_match_eta;
-	TH1F* h_resolve_shared_jets_track_match_eta_phicut;
-	TH1F* h_resolve_shared_jets_track_match_eta_pTcut;
 
     TH1F* h_output_aftersharedjets_n_onetracks;
 
@@ -278,17 +273,16 @@ class MFVVertexer : public edm::EDProducer {
 	TH1F* h_output_gvtx_tv1_bs2derr;
 	TH1F* h_output_gvtx_tv1_ntrack;
 
-	TH1F* h_output_gvtx_sv_nchi2;
-	TH1F* h_output_gvtx_sv_ntrack;
-	TH1F* h_output_gvtx_sv_dBV;
-	TH1F* h_output_gvtx_sv_bs2derr;
-	TH1F* h_output_gvtx_sv_isValid;
-
 	TH2F* h_2D_output_gvtx_dR_tv0_gtrk0_bs2derr0;
 	TH2F* h_2D_output_gvtx_dR_tv1_gtrk1_bs2derr1;
 	
 
 	TH1F* h_output_gvtx_vertices;
+
+	TH1F* h_output_gvtx_bjets;
+	TH1F* h_output_gvtx_bjet_all_tracks;
+	TH1F* h_output_gvtx_bjet_seed_tracks;
+	TH1F* h_output_gvtx_bjet_bSVs;
 
 
 };
@@ -304,9 +298,11 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     resolve_shared_jets(cfg.getParameter<bool>("resolve_shared_jets")),
     shared_jet_token(resolve_shared_jets ? consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("resolve_shared_jets_src")) : edm::EDGetTokenT<pat::JetCollection>()),
     extrapolate_ghost_tracks(cfg.getParameter<bool>("extrapolate_ghost_tracks")),
-    beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
+	ghost_track_jet_token(extrapolate_ghost_tracks ? consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("ghost_track_bjets_src")) : edm::EDGetTokenT<pat::JetCollection>()),
+	beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     seed_tracks_token(consumes<std::vector<reco::TrackRef>>(cfg.getParameter<edm::InputTag>("seed_tracks_src"))),
-    n_tracks_per_seed_vertex(cfg.getParameter<int>("n_tracks_per_seed_vertex")),
+	all_tracks_token(consumes<std::vector<reco::TrackRef>>(cfg.getParameter<edm::InputTag>("all_tracks_src"))),
+	n_tracks_per_seed_vertex(cfg.getParameter<int>("n_tracks_per_seed_vertex")),
     max_seed_vertex_chi2(cfg.getParameter<double>("max_seed_vertex_chi2")),
     use_2d_vertex_dist(cfg.getParameter<bool>("use_2d_vertex_dist")),
     use_2d_track_dist(cfg.getParameter<bool>("use_2d_track_dist")),
@@ -337,6 +333,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
   produces<reco::VertexCollection>();
   produces<VertexerPairEffs>();
   produces<reco::TrackCollection>("seed"); // JMTBAD remove me
+  produces<reco::TrackCollection>("all");
   produces<reco::TrackCollection>("inVertices");
 
   if (histos) {
@@ -434,20 +431,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 
     if (resolve_shared_jets) {
       h_resolve_shared_jets_lonetrkvtx_dphi = fs->make<TH1F>("h_resolve_shared_jets_lonetrkvtx_dphi", ";|dPhi(vtx,a lone track)|", 20, 0, 3.15);
-	  h_resolve_shared_jets_track_match_pT = fs->make<TH1F>("h_resolve_shared_jets_track_match_pT", ">=3trk vertices; |track #pT_{SV} - track #pT_{jet}| (GeV); arb. units", 100, 0, 0.005);
-	  h_resolve_shared_jets_track_match_pT_phicut = fs->make<TH1F>("h_resolve_shared_jets_track_match_pT_phicut", ">=3trk vertices && |track #phi_{SV} - track #phi_{jet}| < 0.0001; |track #pT_{SV} - track #pT_{jet}| (GeV); arb. units", 100, 0, 0.005);
-	  h_resolve_shared_jets_track_match_pT_etacut = fs->make<TH1F>("h_resolve_shared_jets_track_match_pT_etacut", ">=3trk vertices && |track #eta_{SV} - track #eta_{jet}| < 0.0001; |track #pT_{SV} - track #pT_{jet}| (GeV); arb. units", 100, 0, 0.005);
-
-	  h_resolve_shared_jets_track_match_phi = fs->make<TH1F>("h_resolve_shared_jets_track_match_phi", ">=3trk vertices; |track #phi_{SV} - track #phi_{jet}|; arb. units", 100, 0, 0.005);
-	  h_resolve_shared_jets_track_match_phi_etacut = fs->make<TH1F>("h_resolve_shared_jets_track_match_phi_etacut", ">=3trk vertices && |track #eta_{SV} - track #eta_{jet}| < 0.0001; |track #phi_{SV} - track #phi_{jet}|; arb. units", 100, 0, 0.005);
-	  h_resolve_shared_jets_track_match_phi_pTcut = fs->make<TH1F>("h_resolve_shared_jets_track_match_phi_pTcut", ">=3trk vertices && |track #pT_{SV} - track #pT_{jet}| < 0.0001; |track #phi_{SV} - track #phi_{jet}|; arb. units", 100, 0, 0.005);
-
-	  
-	  h_resolve_shared_jets_track_match_eta = fs->make<TH1F>("h_resolve_shared_jets_track_match_eta", ">=3trk vertices; |track #eta_{SV} - track #eta_{jet}|; arb. units", 100, 0, 0.005);
-	  h_resolve_shared_jets_track_match_eta_pTcut = fs->make<TH1F>("h_resolve_shared_jets_track_match_eta_pTcut", ">=3trk vertices && |track #pT_{SV} - track #pT_{jet}| < 0.0001; |track #eta_{SV} - track #eta_{jet}|; arb. units", 100, 0, 0.005);
-	  h_resolve_shared_jets_track_match_eta_phicut = fs->make<TH1F>("h_resolve_shared_jets_track_match_eta_phicut", ">=3trk vertices && |track #phi_{SV} - track #phi_{jet}| < 0.0001; |track #eta_{SV} - track #eta_{jet}|; arb. units", 100, 0, 0.005);
-
-	}
+    }
 
     if (histos_output_aftersharedjets) {
       h_output_aftersharedjets_n_onetracks = fs->make<TH1F>("h_output_aftersharedjets_n_onetracks", "", 5, 0, 5);
@@ -463,7 +447,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 		h_output_gvtx_dR_tracks_gtrk0 = fs->make<TH1F>("h_output_gvtx_dR_tracks_gtrk0", "after a ghost vertex is formed;dR(gtrk0,track)", 200, 0, 3.15);
 		h_output_gvtx_dR_tracks_gtrk1 = fs->make<TH1F>("h_output_gvtx_dR_tracks_gtrk1", "after a ghost vertex is formed;dR(gtrk1,track)", 200, 0, 3.15);
 
-		h_output_gvtx_dphi_tv0_tv1 = fs->make<TH1F>("h_output_gvtx_dphi_tv0_tv1", "after a ghost vertex is formed;|dphi(tv0,tv1)|", 200, 0, 3.15);
+		h_output_gvtx_dphi_tv0_tv1 = fs->make<TH1F>("h_output_gvtx_dphi_tv0_tv1", "after a ghost vertex is formed;|dR(tv0,tv1)|", 200, 0, 3.15);
 
 		h_output_gvtx_tv0_bs2derr = fs->make<TH1F>("h_output_gvtx_tv0_bs2derr", "after a ghost vertex is formed;tv0's bs2derr(cm)", 200, 0, 0.05);
 		h_output_gvtx_tv1_bs2derr = fs->make<TH1F>("h_output_gvtx_tv1_bs2derr", "after a ghost vertex is formed;tv1's bs2derr(cm)", 200, 0, 0.05);
@@ -471,16 +455,16 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 		h_output_gvtx_tv0_ntrack = fs->make<TH1F>("h_output_gvtx_tv0_ntrack", "after a ghost vertex is formed;tv0's ntrack", 20, 0, 20);
 		h_output_gvtx_tv1_ntrack = fs->make<TH1F>("h_output_gvtx_tv1_ntrack", "after a ghost vertex is formed;tv1's ntrack", 20, 0, 20);
 
-		h_output_gvtx_sv_ntrack = fs->make<TH1F>("h_output_gvtx_sv_ntrack", "after a ghost vertex is formed;ghost sv's ntrack", 20, 0, 20);
-		h_output_gvtx_sv_nchi2 = fs->make<TH1F>("h_output_gvtx_sv_nchi2", "after a ghost vertex is formed;ghost sv's chi2/dof", 100, 0, 10);
-		h_output_gvtx_sv_dBV = fs->make<TH1F>("h_output_gvtx_sv_dBV", "after a ghost vertex is formed;ghost sv's dBV", 300, 0, 3);
-		h_output_gvtx_sv_bs2derr = fs->make<TH1F>("h_output_gvtx_sv_bs2derr", "after a ghost vertex is formed;ghost sv's bs2derr", 200, 0, 0.05);
-		h_output_gvtx_sv_isValid = fs->make<TH1F>("h_output_gvtx_sv_isValid", "after a ghost vertex is formed;is ghost sv valid?", 2, 0, 2);
+		h_output_gvtx_vertices = fs->make<TH1F>("h_output_gvtx_vertices", ";;events", 4, 0, 4);
+		h_output_gvtx_vertices->GetXaxis()->SetBinLabel(1, "nevents");
+		h_output_gvtx_bjets = fs->make<TH1F>("h_output_gvtx_bjets", ";# of loose-btagged jets; events", 10, 0, 10);
+		h_output_gvtx_bjet_all_tracks = fs->make<TH1F>("h_output_gvtx_bjet_all_tracks", ";# of all tracks per a loose-btagged jet; events", 50, 0, 50);
+		h_output_gvtx_bjet_seed_tracks = fs->make<TH1F>("h_output_gvtx_bjet_seed_tracks", ";# of seed tracks per a loose-btagged jet; events", 50, 0, 50);
+		h_output_gvtx_bjet_bSVs = fs->make<TH1F>("h_output_gvtx_bjet_bSVs", ";# bSVs per a loose-btagged jet; events", 10, 0, 10);
 
-		h_output_gvtx_vertices = fs->make<TH1F>("h_output_gvtx_vertices", ";;events", 2, 0, 2);
 		const char* gvtx_filter[2] = { "qualified pairs","ghost vertices"};
 		for (int i = 0; i < 2; ++i) { 
-			h_output_gvtx_vertices->GetXaxis()->SetBinLabel(i + 1, TString::Format(" total %s", gvtx_filter[i]));
+			h_output_gvtx_vertices->GetXaxis()->SetBinLabel(i + 2, TString::Format(" pass %s", gvtx_filter[i]));
 		}
 
 		h_2D_output_gvtx_dR_tv0_gtrk0_bs2derr0 = fs->make<TH2F>("h_2D_output_gvtx_dR_tv0_gtrk0_bs2derr0", "after a ghost vertex is formed;dR(tv0,gtrk0); tv0's bs2derr(cm)", 50, 0, 1.0, 100, 0, 0.05);
@@ -490,13 +474,15 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
   }
 }
 
-void MFVVertexer::finish(edm::Event& event, const std::vector<reco::TransientTrack>& seed_tracks, std::unique_ptr<reco::VertexCollection> vertices, std::unique_ptr<VertexerPairEffs> vpeffs, const std::vector<std::pair<track_set, track_set>>& vpeffs_tracks) {
+void MFVVertexer::finish(edm::Event& event, const std::vector<reco::TransientTrack>& seed_tracks, const std::vector<reco::TransientTrack>& all_tracks, std::unique_ptr<reco::VertexCollection> vertices, std::unique_ptr<VertexerPairEffs> vpeffs, const std::vector<std::pair<track_set, track_set>>& vpeffs_tracks) {
   std::unique_ptr<reco::TrackCollection> tracks_seed      (new reco::TrackCollection);
+  std::unique_ptr<reco::TrackCollection> tracks_all(new reco::TrackCollection);
   std::unique_ptr<reco::TrackCollection> tracks_inVertices(new reco::TrackCollection);
 
   if (verbose) printf("finish:\nseed tracks:\n");
 
   std::map<std::pair<unsigned, unsigned>, unsigned char> seed_track_ref_map;
+  std::map<std::pair<unsigned, unsigned>, unsigned char> all_track_ref_map;
   unsigned char itk = 0;
   for (const reco::TransientTrack& ttk : seed_tracks) {
     tracks_seed->push_back(ttk.track());
@@ -504,6 +490,14 @@ void MFVVertexer::finish(edm::Event& event, const std::vector<reco::TransientTra
     seed_track_ref_map[std::make_pair(tk.id().id(), tk.key())] = uint2uchar_clamp(itk++);
 
     if (verbose) printf("id: %i key: %lu pt: %f\n", tk.id().id(), tk.key(), tk->pt());
+  }
+
+  for (const reco::TransientTrack& ttk : all_tracks) {
+	  tracks_all->push_back(ttk.track());
+	  const reco::TrackBaseRef& tk(ttk.trackBaseRef());
+	  all_track_ref_map[std::make_pair(tk.id().id(), tk.key())] = uint2uchar_clamp(itk++);
+
+	  if (verbose) printf("id: %i key: %lu pt: %f\n", tk.id().id(), tk.key(), tk->pt());
   }
 
   assert(vpeffs->size() == vpeffs_tracks.size());
@@ -535,6 +529,7 @@ void MFVVertexer::finish(edm::Event& event, const std::vector<reco::TransientTra
   event.put(std::move(vertices));
   event.put(std::move(vpeffs));
   event.put(std::move(tracks_seed),       "seed");
+  event.put(std::move(tracks_all),        "all");
   event.put(std::move(tracks_inVertices), "inVertices");
 }
 
@@ -563,6 +558,17 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     seed_track_ref_map[tk] = seed_tracks.size() - 1;
   }
 
+  edm::Handle<std::vector<reco::TrackRef>> all_track_refs;
+  event.getByToken(all_tracks_token, all_track_refs);
+
+  std::vector<reco::TransientTrack> all_tracks;
+  std::map<reco::TrackRef, size_t> all_track_ref_map;
+
+  for (const reco::TrackRef& tk : *all_track_refs) {
+	  all_tracks.push_back(tt_builder->build(tk));
+	  all_track_ref_map[tk] = all_tracks.size() - 1;
+  }
+
   const size_t ntk = seed_tracks.size();
   if (verbose)
     printf("n_seed_tracks: %5lu\n", ntk);
@@ -579,7 +585,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   if (ntk == 0) {
     if (verbose)
       printf("no seed tracks -> putting empty vertex collection into event\n");
-    finish(event, seed_tracks, std::move(vertices), std::move(vpeffs), vpeffs_tracks);
+    finish(event, seed_tracks, all_tracks, std::move(vertices), std::move(vpeffs), vpeffs_tracks);
     return;
   }
 
@@ -1464,60 +1470,61 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
     int n_output_aftersharedjets_onetracks = 0;
 
     size_t vtxidx = 0;
-	if (vertices->size() >= 2) {
-	  for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
-			std::vector<size_t> track_idx;
-			std::vector<size_t> tracktojet_which_trkidx;
-			std::vector<size_t> tracktojet_which_jetidx;
-			track_vec tks = vertex_track_vec(*v[0]);
-			sv_total_track_which_trk_vec.push_back(tks);
-			for (size_t i = 0; i < tks.size(); ++i) {
-				const reco::TrackRef& itk = tks[i];
-				track_idx.push_back(i);
-				for (size_t j = 0; j < jets->size(); ++j) {
-					if (match_track_jet(*itk, (*jets)[j], *jets, j)) {
-						tracktojet_which_trkidx.push_back(i);
-						tracktojet_which_jetidx.push_back(j);
-						if (verbose)
-							printf(" track %u matched with a jet %lu \n", tks[i].key(), j);
-					}
-				}
-			}
+    for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
+      std::vector<size_t> track_idx;
+      std::vector<size_t> tracktojet_which_trkidx;
+      std::vector<size_t> tracktojet_which_jetidx;
+      track_vec tks = vertex_track_vec(*v[0]);
+      sv_total_track_which_trk_vec.push_back(tks);
+      for (size_t i = 0; i < tks.size(); ++i) {
+        const reco::TrackRef& itk = tks[i];
+        track_idx.push_back(i);
+        for (size_t j = 0; j < jets->size(); ++j) {
+          if (match_track_jet(*itk, (*jets)[j], *jets, j)) {
+            tracktojet_which_trkidx.push_back(i);
+            tracktojet_which_jetidx.push_back(j);
+            if (verbose)
+              printf(" track %u matched with a jet %lu \n", tks[i].key(), j);
+          }
+        }
+      }
 
-			unsigned int ntracks = track_idx.size();
+      unsigned int ntracks = track_idx.size();
 
-			if (vtxidx == 0) { // start creating the ascening vector of sorted number of total tracks and its corresponding vertex index
-				sv_ascending_total_ntrack.push_back(ntracks);
-				sv_ascending_vtxidx.push_back(vtxidx);
-			}
-			else { // the algorithm continues after the first vertex is added to the vector 
+      if (vtxidx == 0) { // start creating the ascening vector of sorted number of total tracks and its corresponding vertex index
+        sv_ascending_total_ntrack.push_back(ntracks);
+        sv_ascending_vtxidx.push_back(vtxidx);
+      }
+      else { // the algorithm continues after the first vertex is added to the vector 
 
-				std::vector<unsigned int>::iterator it_ntracks = sv_ascending_total_ntrack.end();
-				std::vector<size_t>::iterator it_vtx = sv_ascending_vtxidx.end();
-				// finding an iterator that points to a position that ntrack is just less than or equal to itself from the back to the front
-				while (it_ntracks != sv_ascending_total_ntrack.begin() && ntracks <= sv_ascending_total_ntrack[std::distance(sv_ascending_total_ntrack.begin(), it_ntracks) - 1])
-				{
-					--it_ntracks;
-					--it_vtx;
-				}
-				// adding a vertex at the end if it has higher ntrack. otherwise, insert it before an iterator pointing to a position that this ntrack is smaller than itself 
-				if (it_ntracks == sv_ascending_total_ntrack.end() && ntracks > sv_ascending_total_ntrack[std::distance(sv_ascending_total_ntrack.begin(), it_ntracks)]) {
-					sv_ascending_total_ntrack.push_back(ntracks);
-					sv_ascending_vtxidx.push_back(vtxidx);
-				}
+        std::vector<unsigned int>::iterator it_ntracks = sv_ascending_total_ntrack.end();
+        std::vector<size_t>::iterator it_vtx = sv_ascending_vtxidx.end();
+        // finding an iterator that points to a position that ntrack is just less than or equal to itself from the back to the front
+        while (it_ntracks != sv_ascending_total_ntrack.begin() && ntracks <= sv_ascending_total_ntrack[std::distance(sv_ascending_total_ntrack.begin(), it_ntracks)-1])
+        {
+          --it_ntracks;
+          --it_vtx;
+        }
+        // adding a vertex at the end if it has higher ntrack. otherwise, insert it before an iterator pointing to a position that this ntrack is smaller than itself 
+        if (it_ntracks == sv_ascending_total_ntrack.end() && ntracks > sv_ascending_total_ntrack[std::distance(sv_ascending_total_ntrack.begin(), it_ntracks)]) {
+          sv_ascending_total_ntrack.push_back(ntracks);
+          sv_ascending_vtxidx.push_back(vtxidx);
+        }
 
-				else {
-					sv_ascending_total_ntrack.insert(it_ntracks, ntracks);
-					sv_ascending_vtxidx.insert(it_vtx, vtxidx);
-				}
-			}
+        else {
+          sv_ascending_total_ntrack.insert(it_ntracks, ntracks);
+          sv_ascending_vtxidx.insert(it_vtx, vtxidx);
+        }
+      }
 
-			sv_total_track_which_trkidx.push_back(track_idx);
-			sv_match_trkidx.push_back(tracktojet_which_trkidx);
-			sv_match_jetidx.push_back(tracktojet_which_jetidx);
-			vtxidx++;
-		}
+      sv_total_track_which_trkidx.push_back(track_idx);
+      sv_match_trkidx.push_back(tracktojet_which_trkidx);
+      sv_match_jetidx.push_back(tracktojet_which_jetidx);
+      vtxidx++;
+    }
 
+
+    if (vertices->size() >= 2) {
       // double for loops to double counts the sv0 and sv1 pairing. The code always remove 'lone shared tracks' from (multiple) special shared jets to sv0 in each round as long as they are not compatible to sv0. Otherwise, the sv1 from the earlier round will be considered again (double count) to have the tracks being removed or not. 
       for (size_t vtxi = 0; vtxi < sv_ascending_vtxidx.size(); vtxi++) {
         const size_t vtxidx0 = sv_ascending_vtxidx[vtxi];
@@ -1632,6 +1639,81 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
   // form ghost vertices from pairs of vertices whose trajectories form a common decay point
   if (extrapolate_ghost_tracks) {
+
+	  // alternative of ghost-track vertexing is utilizing tracks from b-jets to form ghost vertices
+	  edm::Handle<pat::JetCollection> jjets;
+	  event.getByToken(ghost_track_jet_token, jjets);
+
+	  std::vector<reco::TransientTrack> bttks;
+	  std::vector<reco::Track> btks;
+	  std::vector<reco::TransientTrack> seed_bttks;
+	  std::vector<reco::Track> seed_btks;
+	  
+	  std::vector<std::vector<size_t>> vec_bsv_vtxidx_per_bjet; // a vector of vertex index corresponding vertices that are bSVs 
+
+	  int count_bjet = 0;
+	  for (size_t ijet = 0; ijet < jjets->size(); ++ijet) {
+		  const pat::Jet& jet = jjets->at(ijet);
+		  int bdisc_level = 0;
+		  std::vector<size_t> bsv_vtxidx_per_bjet = {};
+		  for (int i = 0; i < 3; ++i) {
+			  if (jmt::BTagging::is_tagged(jet, i))
+				  bdisc_level = i + 1;
+		  }
+		  bool is_loose_btagged = encode_jet_id(0, bdisc_level, jet.hadronFlavour());
+		  if (is_loose_btagged) {
+			  count_bjet++;
+
+			  // matching any tracks 
+			  for (size_t j = 0; j < all_tracks.size(); ++j) {
+				  const reco::TransientTrack& ttk = all_tracks[j];
+
+				  if (match_track_jet(ttk.track(), (*jjets)[ijet], *jjets, ijet)) {
+					  bttks.push_back(ttk);
+					  btks.push_back(ttk.track());
+
+				  }
+			  }
+			  h_output_gvtx_bjet_all_tracks->Fill(bttks.size());
+
+			  // matching only seed tracks 
+			  for (size_t j = 0; j < seed_tracks.size(); ++j) {
+				  const reco::TransientTrack& seed_ttk = seed_tracks[j];
+
+				  if (match_track_jet(seed_ttk.track(), (*jjets)[ijet], *jjets, ijet)) {
+					  seed_bttks.push_back(seed_ttk);
+					  seed_btks.push_back(seed_ttk.track());
+
+				  }
+			  }
+			  h_output_gvtx_bjet_seed_tracks->Fill(seed_bttks.size());
+
+			  size_t vtxidx = 0;
+
+			  for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
+				  
+				  track_vec tks = vertex_track_vec(*v[0]);
+				  size_t count_matched_tks = 0;
+				  for (size_t j = 0; j < tks.size(); ++j) {
+					  const reco::TrackRef& itk = tks[j];
+					  
+					  if (match_track_jet(*itk, (*jjets)[ijet], *jjets, ijet)) {
+						  count_matched_tks++;
+					  }
+					  
+				  }
+				  // a bSV is the one with all tracks to the boose-tagged bjet are from its vertex 
+				  if (count_matched_tks == v[0]->nTracks())
+					  bsv_vtxidx_per_bjet.push_back(vtxidx);
+				  vtxidx++;
+			  }
+			  vec_bsv_vtxidx_per_bjet.push_back(bsv_vtxidx_per_bjet);
+			  h_output_gvtx_bjet_bSVs->Fill(bsv_vtxidx_per_bjet.size());
+		  }
+	  }
+
+	  h_output_gvtx_bjets->Fill(count_bjet);
+
     for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
 
       // setup track_sets
@@ -1648,11 +1730,11 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         continue;
 
       // compute vertex x, y, phi positions
-      double v0x = v[0]->x();
-      double v0y = v[0]->y();
-      double v0z = v[0]->z();
+      double v0x = v[0]->x() - bsx;
+      double v0y = v[0]->y() - bsy;
+	  double v0z = v[0]->z() - bsz;
       double phi0 = atan2(v0y, v0x);
-      const double eta0 = etaFromXYZ(v0x, v0y, v0z);
+	  const double eta0 = etaFromXYZ(v0x, v0y, v0z);
 
       // now loop through all vertex pairs, and try to form ghost vertex:
       bool form_ghost_vtx = false;
@@ -1677,16 +1759,16 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           continue;
 
         // compute vertex x, y, phi positions
-        double v1x = v[1]->x();
-        double v1y = v[1]->y();
-        double v1z = v[1]->z();
+        double v1x = v[1]->x() - bsx;
+        double v1y = v[1]->y() - bsy;
+		double v1z = v[1]->z() - bsz;
         double phi1 = atan2(v1y, v1x);
-        const double eta1 = etaFromXYZ(v1x, v1y, v1z);
+		const double eta1 = etaFromXYZ(v1x, v1y, v1z);
 
         // FIXME only consider re-vertexing when nearby in dphi: should study if this would help us. let's leave it in for now, but keep in mind that the threshold is completely arbitrary
         // FIXME probably this is fine for H->LLP with boosted LLPs, but maybe not as good for heavier, slow moving LLPs that decay to b-quarks with wide angles between the b-quarks. 
         if(fabs(reco::deltaPhi(phi0, phi1)) > 0.3) continue;
-		h_output_gvtx_vertices->Fill(0);
+
         // now: trace the trajectories back. do a Kalman fit of the trajectories, and see if they:
         // a) have a nice chi2
         // b) form a vertex with dBV > 100 microns
@@ -1742,13 +1824,13 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 		  
           reco::GhostTrack ghost = ghostTrackFitter->fit(RecoVertex::convertPos(v[isv]->position()), RecoVertex::convertError(v[isv]->error()), trajectory_sv[isv], coneSize, ttks[isv]);
           
-		  if (verbose) {
-			  std::cout << "chi2, ndof: " << ghost.chi2() << ", " << ghost.ndof() << std::endl;
-			  reco::Track gt = reco::Track(ghost);
-			  gtks.push_back(gt);
-			  std::cout << "px,py,pz: " << gt.px() << ", " << gt.py() << ", " << gt.pz() << std::endl;
-			  gttks.push_back(tt_builder->build(gt));
-		  }
+		  if (verbose)
+			std::cout << "chi2, ndof: " << ghost.chi2() << ", " << ghost.ndof() << std::endl;
+          reco::Track gt = reco::Track(ghost);
+		  gtks.push_back(gt);
+		  if (verbose)
+            std::cout << "px,py,pz: " << gt.px() << ", " << gt.py() << ", " << gt.pz() << std::endl;
+          gttks.push_back(tt_builder->build(gt));
         }
 
         // fill all_ttks
@@ -1764,25 +1846,26 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
         // with our ghost tracks in hand, we can fit them into a common ghost vertex:
         std::vector<TransientVertex> ghost_vertices(1, kv_reco->vertex(gttks)); // Use only the two ghostTracks to find a vertex--issue is that bs2derr gets smaller w/ more ntks, but here we only use two "tracks" for the Kalman fit
         //std::vector<TransientVertex> ghost_vertices(1, kv_reco->vertex(all_ttks)); // Use the two ghostTracks AND the other tracks from the two SVs to find a common vertex--here, bs2derr should get sufficiently small, but the chi2 seems to blow up (which makes sense given that there isn't a common intersection point among ALL of these tracks!). From printouts, it seemed like
-		if (verbose) {
-			std::cout << "ghost_vertices.size() " << ghost_vertices.size() << std::endl;
-		}
+		
+		if (verbose)
+		  std::cout << "ghost_vertices.size() " << ghost_vertices.size() << std::endl;
 
         // loop over ghost vertices (of which there are either zero or one at this stage)
-		
+		h_output_gvtx_vertices->Fill(0);
         for(auto gvtx : ghost_vertices) {
 
-			if (verbose) {
+		  if (verbose) {
 				std::cout << "sv0 chi2 " << v[0]->normalizedChi2() << ", sv1 chi2 " << v[1]->normalizedChi2() << std::endl;
 				std::cout << "gvtx chi2 " << gvtx.normalisedChiSquared() << std::endl;
 				std::cout << "gvtx valid " << gvtx.isValid() << std::endl;
-			}
+		  }
 
           // only consider valid vertices (where the Kalman filter did not fail)
           if(!gvtx.isValid()) continue;
 
           // veto those with negative chi2/ndof (FIXME why are they negative again? maybe this was just to remove the -NaN cases, but now I'll do that via isValid)
           //if(gvtx.normalisedChiSquared() < 0) continue;
+
 		  if (verbose) {
 			  std::cout << "sv0 dBV " << dBV0 << ", sv1 dBV " << dBV1 << std::endl;
 			  std::cout << "gvtx dBV " << mag(gvtx.position().x() - bsx, gvtx.position().y() - bsy) << std::endl;
@@ -1806,9 +1889,10 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
 			  std::cout << "sv0 valid " << v[0]->isValid() << "sv1 valid " << v[1]->isValid() << std::endl;
 			  std::cout << "gvtx valid " << reco_gvtx.isValid() << std::endl;
-
+		  }
 			  // FIXME this is to remove all (ghost) tracks from the vertex
 			  reco_gvtx.removeTracks();
+		  if (verbose) {
 			  std::cout << "gvtx removed ntk " << reco_gvtx.tracksSize() << std::endl;
 			  std::cout << "gvtx removed valid " << reco_gvtx.isValid() << std::endl;
 		  }
@@ -1826,11 +1910,12 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           }
 
           // FIXME note vtx may no longer say that it is "valid" at this stage, so should make sure we don't rely on that (we very well may!!!!) OH or maybe the invalid ones are all bogus?
-		  const auto d_gvtx_new = vertex_dist_2d.distance(reco_gvtx, fake_bs_vtx);
-
 		  if (verbose) {
 			  std::cout << "gvtx added ntk " << reco_gvtx.tracksSize() << std::endl;
 			  std::cout << "gvtx added valid " << reco_gvtx.isValid() << std::endl;
+		  }
+          const auto d_gvtx_new = vertex_dist_2d.distance(reco_gvtx, fake_bs_vtx);
+		  if (verbose) {
 			  std::cout << "gvtx added dBV " << d_gvtx_new.value() << std::endl;
 			  std::cout << "gvtx added bs2derr " << d_gvtx_new.error() << std::endl;
 		  }
@@ -1863,13 +1948,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 		  h_output_gvtx_tv0_bs2derr->Fill(bs2derr0);
 		  h_output_gvtx_tv1_bs2derr->Fill(bs2derr1);
 
-		  h_output_gvtx_sv_ntrack->Fill(v[0]->nTracks());
-		  h_output_gvtx_sv_nchi2->Fill(v[0]->normalizedChi2());
-		  const auto d_gsv = vertex_dist_2d.distance(*v[0], fake_bs_vtx);
-		  h_output_gvtx_sv_dBV->Fill(d_gsv.value());
-		  h_output_gvtx_sv_bs2derr->Fill(d_gsv.error());
-		  h_output_gvtx_sv_isValid->Fill(v[0]->isValid());
-
 		  h_output_gvtx_vertices->Fill(1);
 	  }
 
@@ -1891,22 +1969,25 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
           }
 
           // try to form a combined vertex naively, based on the combined set of all tracks--as expected, it rarely succeeds, because they are sufficiently separated that no vtx is formed
-		  if (verbose) {
-			  std::vector<TransientVertex> combined_vertices = kv_reco_dropin(combined_ttks);
-			  std::cout << "combined_vertices.size() " << combined_vertices.size() << std::endl;
-			  for (auto comb : combined_vertices) {
-				  std::cout << "comb chi2 " << comb.normalisedChiSquared() << std::endl;
-				  //if(comb.normalisedChiSquared() < 0) continue;
-				  if (!comb.isValid()) continue;
-				  std::cout << "comb dBV " << mag(comb.position().x() - bsx, comb.position().y() - bsy) << std::endl;
+          std::vector<TransientVertex> combined_vertices = kv_reco_dropin(combined_ttks);
+		  if (verbose)
+			std::cout << "combined_vertices.size() " << combined_vertices.size() << std::endl;
+          for (auto comb : combined_vertices) {
+			if (verbose)
+              std::cout << "comb chi2 " << comb.normalisedChiSquared() << std::endl;
+            //if(comb.normalisedChiSquared() < 0) continue;
+            if(!comb.isValid()) continue;
+			if (verbose)
+              std::cout << "comb dBV " << mag(comb.position().x() - bsx, comb.position().y() - bsy) << std::endl;
 
-				  reco::Vertex reco_comb = reco::Vertex(comb);
+            reco::Vertex reco_comb = reco::Vertex(comb);
 
-				  const auto d_comb = vertex_dist_2d.distance(reco_comb, fake_bs_vtx);
-				  std::cout << "comb dBV " << d_comb.value() << " (confirmation)" << std::endl;
-				  std::cout << "comb bs2derr " << d_comb.error() << std::endl;
-			  }
-		  }
+            const auto d_comb = vertex_dist_2d.distance(reco_comb, fake_bs_vtx);
+			if (verbose) {
+				std::cout << "comb dBV " << d_comb.value() << " (confirmation)" << std::endl;
+				std::cout << "comb bs2derr " << d_comb.error() << std::endl;
+			}
+          }
         }
       }
 
@@ -1923,7 +2004,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   // Put the output.
   //////////////////////////////////////////////////////////////////////
 
-  finish(event, seed_tracks, std::move(vertices), std::move(vpeffs), vpeffs_tracks);
+  finish(event, seed_tracks, all_tracks, std::move(vertices), std::move(vpeffs), vpeffs_tracks);
 }
 
 // this function will only return false only if shared jets between the given vertex pair contribute multiple shared-jet tracks to 'both' vertices (not a special case we consider).   
@@ -2034,24 +2115,6 @@ bool MFVVertexer::match_track_jet(const reco::Track& tk, const pat::Jet& matchje
         double a = fabs(tk.pt() - fabs(jtk->charge() * jtk->pt())) + 1;
         double b = fabs(tk.eta() - jtk->eta()) + 1;
         double c = fabs(tk.phi() - jtk->phi()) + 1;
-
-		h_resolve_shared_jets_track_match_pT->Fill(fabs(tk.pt() - fabs(jtk->charge() * jtk->pt())));
-		h_resolve_shared_jets_track_match_eta->Fill(fabs(tk.eta() - jtk->eta()));
-		h_resolve_shared_jets_track_match_phi->Fill(fabs(tk.phi() - jtk->phi()));
-
-		if (fabs(tk.phi() - jtk->phi()) < 0.0001) {
-			h_resolve_shared_jets_track_match_pT_phicut->Fill(fabs(tk.pt() - fabs(jtk->charge() * jtk->pt())));
-			h_resolve_shared_jets_track_match_eta_phicut->Fill(fabs(tk.eta() - jtk->eta()));
-		}
-		if (fabs(tk.eta() - jtk->eta()) < 0.0001) {
-			h_resolve_shared_jets_track_match_pT_etacut->Fill(fabs(tk.pt() - fabs(jtk->charge() * jtk->pt())));
-			h_resolve_shared_jets_track_match_phi_etacut->Fill(fabs(tk.phi() - jtk->phi()));
-		}
-		if (fabs(tk.pt() - fabs(jtk->charge() * jtk->pt())) < 0.0001) {
-			h_resolve_shared_jets_track_match_eta_pTcut->Fill(fabs(tk.eta() - jtk->eta()));
-			h_resolve_shared_jets_track_match_phi_pTcut->Fill(fabs(tk.phi() - jtk->phi()));
-		}
-
         if (verbose)
           std::cout << "  jet track pt " << jtk->pt() << " eta " << jtk->eta() << " phi " << jtk->phi() << " match abc " << a * b * c << std::endl;
         if (a * b * c < match_thres) {
@@ -2066,6 +2129,17 @@ bool MFVVertexer::match_track_jet(const reco::Track& tk, const pat::Jet& matchje
   }
 
   return false;
+}
+
+uchar MFVVertexer::encode_jet_id(int pu_level, int bdisc_level, int hadron_flavor) {
+	assert(pu_level == 0); assert(pu_level >= 0 && pu_level <= 3);
+	assert(hadron_flavor == 0 || hadron_flavor == 4 || hadron_flavor == 5);
+	assert(bdisc_level >= 0 && bdisc_level <= 3);
+
+	if (hadron_flavor == 4) hadron_flavor = 1;
+	else if (hadron_flavor == 5) hadron_flavor = 2;
+
+	return (hadron_flavor << 4) | (bdisc_level << 2) | pu_level;
 }
 
 void MFVVertexer::fillCommonOutputHists(std::unique_ptr<reco::VertexCollection>& vertices, const reco::Vertex& fake_bs_vtx, edm::ESHandle<TransientTrackBuilder>& tt_builder, size_t step) {

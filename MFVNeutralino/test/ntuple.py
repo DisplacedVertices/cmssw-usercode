@@ -26,7 +26,7 @@ process = ntuple_process(settings)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
 #sample_files(process, 'ggHToSSTobbbb_tau1mm_M55_2017', dataset, 1)
 input_files(process, 'C47DA2BF-B0FF-EA11-A2BC-001E67586629.root')
-max_events(process, 400)
+max_events(process, 50)
 cmssw_from_argv(process)
 
 
