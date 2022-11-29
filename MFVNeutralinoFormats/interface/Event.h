@@ -249,7 +249,39 @@ struct MFVEvent {
   std::vector<float> jet_phi;
   std::vector<float> jet_energy;
   std::vector<float> jet_gen_energy;
+  std::vector<float> jet_NHF;
+  std::vector<float> jet_CHF;
+  std::vector<float> jet_NEMF;
+  std::vector<float> jet_CEMF;
+  std::vector<float> jet_MUF;
+  std::vector<float> jet_NCST;
 
+
+  // Shaun
+  std::vector<float> calo_jet_pt;
+  std::vector<float> calo_jet_eta;
+  std::vector<float> calo_jet_phi;
+  std::vector<float> calo_jet_energy;
+
+  std::vector<float> hlt_calo_jet_pt;
+  std::vector<float> hlt_calo_jet_eta;
+  std::vector<float> hlt_calo_jet_phi;
+  std::vector<float> hlt_calo_jet_energy;
+
+  std::vector<float> hlt_idp_calo_jet_pt;
+  std::vector<float> hlt_idp_calo_jet_eta;
+  std::vector<float> hlt_idp_calo_jet_phi;
+  std::vector<float> hlt_idp_calo_jet_energy;
+
+  std::vector<float> hlt_pfforbtag_jet_pt;
+  std::vector<float> hlt_pfforbtag_jet_eta;
+  std::vector<float> hlt_pfforbtag_jet_phi;
+  std::vector<float> hlt_pfforbtag_jet_energy;
+
+  std::vector<float> hlt_pf_jet_pt;
+  std::vector<float> hlt_pf_jet_eta;
+  std::vector<float> hlt_pf_jet_phi;
+  std::vector<float> hlt_pf_jet_energy;
   TLorentzVector jet_p4(int w) const {
     TLorentzVector v;
     v.SetPtEtaPhiE(jet_pt[w], jet_eta[w], jet_phi[w], jet_energy[w]);
@@ -276,7 +308,7 @@ struct MFVEvent {
 
   float jet_ht(float min_jet_pt=0.f) const { return std::accumulate(jet_pt.begin(), jet_pt.end(), 0.f,
                                                                     [min_jet_pt](float init, float b) { if (b > min_jet_pt) init += b; return init; }); }
-
+  float calo_jet_ht(float min_jet_pt=0.f) const { return std::accumulate(calo_jet_pt.begin(), calo_jet_pt.end(), 0.f,                                                                                                                                   [min_jet_pt](float init, float b) { if (b > min_jet_pt) init += b; return init; }); } 
   float jet_ST_sum() const {
     double sum = 0;
     for (size_t ijet = 0; ijet < jet_id.size(); ++ijet) {
