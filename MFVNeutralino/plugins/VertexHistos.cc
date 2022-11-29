@@ -1,4 +1,5 @@
 #include "TH2.h"
+#include "TH3.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -47,7 +48,9 @@ class MFVVertexHistos : public edm::EDAnalyzer {
   TH2F* h_sv_rz;
   TH1F* h_svdist2d;
   TH1F* h_svdist3d;
-  TH1F* h_sum_bsbs2ddist;
+  TH1F* h_sumdbv;
+  TH2F* h_sumdbv_trigcomb;
+  TH3F* h_dbv0dbv1_trgbit;
   TH1F* h_sum_all_bsbs2ddist;
   TH1F* h_sum_bs3ddist;
   TH1F* h_sqsum_bsbs2ddist;
@@ -352,7 +355,9 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   h_sv_rz = fs->make<TH2F>("h_sv_rz", ";SV r (cm);SV z (cm)", 100, -4, 4, 100, -25, 25);
   h_svdist2d = fs->make<TH1F>("h_svdist2d", ";dist2d(sv #0, #1) (cm);arb. units", 500, 0, 2);
   h_svdist3d = fs->make<TH1F>("h_svdist3d", ";dist3d(sv #0, #1) (cm);arb. units", 500, 0, 2);
-  h_sum_bsbs2ddist = fs->make<TH1F>("h_sum_bsbs2ddist", ";sum(dBV(sv #0), dBV(sv #1));arb. units", 500, 0, 2);
+  h_sumdbv = fs->make<TH1F>("h_sumdbv", ";#Sigma(d_{BV}) (cm);arb. units", 400, 0, 4);
+  h_sumdbv_trigcomb = fs->make<TH2F>("h_sumdbv_trigcomb", ";#Sigma(d_{BV}) (cm);", 400, 0, 4, 8, 0, 8);
+  h_dbv0dbv1_trgbit = fs->make<TH3F>("h_dbv0dbv1_trgbit", ";;;", 200, 0, 2, 200, 0, 2, 8, 0, 8);
   h_sum_all_bsbs2ddist = fs->make<TH1F>("h_sum_all_bsbs2ddist", ";#Sigma all SV d_{BV} (cm);arb. units", 500, 0, 2);
   h_sum_bs3ddist = fs->make<TH1F>("h_sum_bs3ddist", ";(3D) d_{BV}^{0} + d_{BV}^{1} ;arb. units", 500, 0, 20);
   h_sqsum_bsbs2ddist = fs->make<TH1F>("h_sqsum_bsbs2ddist", ";sq sum(dBV(sv #0), dBV(sv #1));arb. units", 500, 0, 2);
@@ -741,16 +746,42 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   //////////////////////////////////////////////////////////////////////
 
   if (nsv >= 2) {
+    bool pass_dd = false;
+    bool pass_bjet = false;
+    bool pass_trig = false;
     const MFVVertexAux& sv0 = auxes->at(0);
     const MFVVertexAux& sv1 = auxes->at(1);
     double svdist2d = mag(sv0.x - sv1.x, sv0.y - sv1.y);
     double svdist3d = mag(sv0.x - sv1.x, sv0.y - sv1.y, sv0.z - sv1.z);
-    double bs3ddist0 = mag(sv0.x - mevent->bsx_at_z(sv0.z), sv0.y - mevent->bsy_at_z(sv0.z), (float)(sv0.z-bsz));
-    double bs3ddist1 = mag(sv1.x - mevent->bsx_at_z(sv1.z), sv1.y - mevent->bsy_at_z(sv1.z), (float)(sv1.z-bsz));
     h_svdist2d->Fill(svdist2d, w);
     h_svdist3d->Fill(svdist3d, w);
-    h_sum_bsbs2ddist->Fill(mag(sv0.x - mevent->bsx_at_z(sv0.z), sv0.y - mevent->bsy_at_z(sv0.z)) + mag(sv1.x - mevent->bsx_at_z(sv1.z), sv1.y - mevent->bsy_at_z(sv1.z)));
-    h_sum_bs3ddist->Fill(bs3ddist0 + bs3ddist1);
+    double dbv0 = mag(sv0.x, sv0.y);
+    double dbv1 = mag(sv1.x, sv1.y);
+    h_sumdbv->Fill(dbv0 + dbv1, w);
+
+    h_sumdbv_trigcomb->Fill(dbv0 + dbv1 , 0., w);
+    h_dbv0dbv1_trgbit->Fill(dbv0, dbv1, 0., w);
+    for (int jt=18; jt<20; jt++){
+      if (mevent->pass_hlt(jt)) {
+        h_sumdbv_trigcomb->Fill(dbv0 + dbv1, float(jt-17)+0.1, w); 
+        h_dbv0dbv1_trgbit->Fill(dbv0, dbv1, float(jt-17)+0.1, w);
+        pass_trig = true;
+        pass_dd   = true;
+      }   
+    }   
+    for (int jt=8; jt<10; jt++){
+      if (mevent->pass_hlt(jt)) {
+        h_sumdbv_trigcomb->Fill(dbv0 + dbv1, float(jt-4)+0.1, w); 
+        h_dbv0dbv1_trgbit->Fill(dbv0, dbv1, float(jt-4)+0.1, w);
+        pass_trig = true;
+        pass_bjet = true;
+      }   
+    }   
+
+    if (pass_dd)   { h_sumdbv_trigcomb->Fill(dbv0 + dbv1, 3.1, w); h_dbv0dbv1_trgbit->Fill(dbv0, dbv1, 3.1, w); }
+    if (pass_bjet) { h_sumdbv_trigcomb->Fill(dbv0 + dbv1, 6.1, w); h_dbv0dbv1_trgbit->Fill(dbv0, dbv1, 6.1, w); }
+    if (pass_trig) { h_sumdbv_trigcomb->Fill(dbv0 + dbv1, 7.1, w); h_dbv0dbv1_trgbit->Fill(dbv0, dbv1, 7.1, w); }
+
     h_sqsum_bsbs2ddist->Fill(hypot(mag(sv0.x - mevent->bsx_at_z(sv0.z), sv0.y - mevent->bsy_at_z(sv0.z)), mag(sv1.x - mevent->bsx_at_z(sv1.z), sv1.y - mevent->bsy_at_z(sv1.z))));
     h_sv0pvdz_v_sv1pvdz->Fill(sv0.pvdz(), sv1.pvdz(), w);
     h_sv0pvdzsig_v_sv1pvdzsig->Fill(sv0.pvdzsig(), sv1.pvdzsig(), w);

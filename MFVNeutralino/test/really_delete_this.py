@@ -16,8 +16,8 @@ ps = plot_saver(plot_dir('filter_tocs_%s' % version), size=(1000,800), pdf=False
 filter_hist_dir = 'mfvFilterHistosNoCuts'
 
 
-fn = 'ggH_1mm_M55_minsel.root'
-gn = 'ttbar_minsel.root'
+fn = '/uscms_data/d3/shogan/crab_dirs/HistosV31TriBtagFilt/ggHToSSTodddd_tau1mm_M40_2017.root'
+gn = '/uscms_data/d3/shogan/crab_dirs/HistosV31TriBtagFilt/ggHToSSTodddd_tau1mm_M55_2017.root'
 
 
 f = ROOT.TFile(fn)
@@ -26,7 +26,7 @@ t = f.Get(filter_hist_dir)
 g = ROOT.TFile(gn)
 v = g.Get(filter_hist_dir)
 
-for hist in ['h_filter_07', 'h_filter_08', 'h_filter_09', 'h_filter_10', 'h_filter_11']:
+for hist in ['h_filter_07', 'h_filter_08', 'h_filter_09', 'h_filter_10', 'h_filter_11', 'h_filter_12']:
 
     c1 = ROOT.TCanvas('c1', '', 1000, 800)
 

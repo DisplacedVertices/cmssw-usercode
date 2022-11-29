@@ -396,7 +396,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
 
 bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig) const {
 
-  //if(!mevent->pass_hlt(trig)) return false;
+  if(!mevent->pass_hlt(trig)) return false;
 
   // note that if these weren't pT ordered, we'd have to be more careful in the loops...
   int njets = mevent->njets(20);
@@ -407,7 +407,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
   int nbtaggedjets = 0;
   int nhardbjets   = 0;
   for(size_t i = 0, ie = mevent->jet_bdisc_old.size(); i < ie; i++) {
-    if (mevent->jet_bdisc_old[i] > 0.7) { // 0.9693 is the tight WP for CSV algo
+    if (mevent->jet_bdisc_old[i] > 0.8838) { // 0.9693 is the tight WP for CSV algo
       nbtaggedjets++;
       if (mevent->jet_pt[i] > 80.0) {
         nhardbjets++;
@@ -432,7 +432,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
           for(int j1 = j0+1; j1 < njets; ++j1){
             if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 125 || fabs(mevent->jet_eta[j1]) > 2.3) continue;
 
-            if(fabs(mevent->jet_eta[j0] - mevent->jet_eta[j1]) < 1.5){
+            if(fabs(mevent->jet_eta[j0] - mevent->jet_eta[j1]) < 1.6){
               passed_kinematics = true;
             }
           }
@@ -441,19 +441,19 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
       }
     case mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0 :
       {
-        if(mevent->jet_ht(30) < 365 || njets < 4) return false;
+        if(mevent->jet_ht(30) < 350 || njets < 4) return false;
         if(nbtaggedjets < 3) return false;
         for(int j0 = 0; j0 < njets; ++j0){
-          if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 85) continue;
+          if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 90) continue;
 
           for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 65) continue;
+            if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 75) continue;
 
             for(int j2 = j1+1; j2 < njets; ++j2){
-              if(!jet_hlt_match(mevent, j2) || mevent->jet_pt[j2] < 50) continue;
+              if(!jet_hlt_match(mevent, j2) || mevent->jet_pt[j2] < 55) continue;
 
               for(int j3 = j2+1; j3 < njets; ++j3){
-                if(!jet_hlt_match(mevent, j3) || mevent->jet_pt[j3] < 45 || mevent->jet_pudisc[j3] < 0.61) continue;
+                if(!jet_hlt_match(mevent, j3) || mevent->jet_pt[j3] < 55) continue;
 
                 passed_kinematics = true;
               }
@@ -508,10 +508,10 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
         if(mevent->jet_ht(40) < 580 || njets < 4) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
-          if(!displaced_jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 80) continue;
+          if(!displaced_jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 60) continue;
 
           for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!displaced_jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 80) continue;
+            if(!displaced_jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 60) continue;
             passed_kinematics = true;
           }
         }
@@ -522,10 +522,10 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
         if(mevent->jet_ht(40) < 800 || njets < 4) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
-          if(!displaced_jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 100) continue;
+          if(!displaced_jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 80) continue;
 
           for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!displaced_jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 100) continue;
+            if(!displaced_jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 80) continue;
             passed_kinematics = true;
           }
         }
