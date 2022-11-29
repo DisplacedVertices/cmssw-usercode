@@ -283,6 +283,7 @@ class MFVVertexer : public edm::EDProducer {
 	TH1F* h_output_gvtx_bjet_all_tracks;
 	TH1F* h_output_gvtx_bjet_seed_tracks;
 	TH1F* h_output_gvtx_bjet_bSVs;
+	TH1F* h_output_gvtx_bjet_bSV_ntrack;
 
 
 };
@@ -461,6 +462,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 		h_output_gvtx_bjet_all_tracks = fs->make<TH1F>("h_output_gvtx_bjet_all_tracks", ";# of all tracks per a loose-btagged jet; events", 50, 0, 50);
 		h_output_gvtx_bjet_seed_tracks = fs->make<TH1F>("h_output_gvtx_bjet_seed_tracks", ";# of seed tracks per a loose-btagged jet; events", 50, 0, 50);
 		h_output_gvtx_bjet_bSVs = fs->make<TH1F>("h_output_gvtx_bjet_bSVs", ";# bSVs per a loose-btagged jet; events", 10, 0, 10);
+		h_output_gvtx_bjet_bSV_ntrack = fs->make<TH1F>("h_output_gvtx_bjet_bSV_ntrack", ";# of seed tracks per a bSV; events", 50, 0, 50);
 
 		const char* gvtx_filter[2] = { "qualified pairs","ghost vertices"};
 		for (int i = 0; i < 2; ++i) { 
@@ -1649,6 +1651,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 	  std::vector<reco::TransientTrack> seed_bttks;
 	  std::vector<reco::Track> seed_btks;
 	  
+	  std::vector<size_t> vec_bjetidx;
 	  std::vector<std::vector<size_t>> vec_bsv_vtxidx_per_bjet; // a vector of vertex index corresponding vertices that are bSVs 
 
 	  int count_bjet = 0;
@@ -1663,7 +1666,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 		  bool is_loose_btagged = encode_jet_id(0, bdisc_level, jet.hadronFlavour());
 		  if (is_loose_btagged) {
 			  count_bjet++;
-
+			  vec_bjetidx.push_back(ijet);
 			  // matching any tracks 
 			  for (size_t j = 0; j < all_tracks.size(); ++j) {
 				  const reco::TransientTrack& ttk = all_tracks[j];
@@ -1703,8 +1706,10 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 					  
 				  }
 				  // a bSV is the one with all tracks to the boose-tagged bjet are from its vertex 
-				  if (count_matched_tks == v[0]->nTracks())
+				  if (count_matched_tks == v[0]->nTracks()) {
 					  bsv_vtxidx_per_bjet.push_back(vtxidx);
+					  h_output_gvtx_bjet_bSV_ntrack->Fill(v[0]->nTracks());
+				  }
 				  vtxidx++;
 			  }
 			  vec_bsv_vtxidx_per_bjet.push_back(bsv_vtxidx_per_bjet);
@@ -1714,6 +1719,29 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
 	  h_output_gvtx_bjets->Fill(count_bjet);
 
+	std::vector<size_t> vec_bjet_i_paired = {};
+	std::vector<size_t> vec_bjet_j_paired = {};
+	if (count_bjet >= 2) {
+		for (size_t i = 0; i < vec_bjetidx.size(); ++i) {
+		    if (std::count(vec_bjet_j_paired.begin(), vec_bjet_j_paired.end(), vec_bjetidx[i]) > 0)
+				continue; 
+			double min_jetpairdR = 0.0;
+			const pat::Jet& jet_i = jjets->at(vec_bjetidx[i]);
+			for (size_t j = i+1; j < vec_bjetidx.size(); ++j) {	
+				if (std::count(vec_bjet_i_paired.begin(), vec_bjet_i_paired.end(), vec_bjetidx[j]) > 0)
+					continue;
+				const pat::Jet& jet_j = jjets->at(vec_bjetidx[j]);
+				double jetpairdR  = reco::deltaR(jet_i.eta(), jet_i.phi(), jet_j.eta(), jet_j.phi());
+				if (jetpairdR < min_jetpairdR && std::count(vec_bjet_i_paired.begin(), vec_bjet_i_paired.end(), vec_bjetidx[i]) == 0 && std::count(vec_bjet_j_paired.begin(), vec_bjet_j_paired.end(), vec_bjetidx[j]) == 0) {
+					min_jetpairdR = jetpairdR;
+					vec_bjet_i_paired.push_back(vec_bjetidx[i]);
+					vec_bjet_j_paired.push_back(vec_bjetidx[j]);
+				}
+
+			}
+		}
+		
+	}
     for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
 
       // setup track_sets
@@ -2090,7 +2118,7 @@ bool MFVVertexer::match_track_jet(const reco::Track& tk, const pat::Jet& matchje
   }
 
   // Arbitrary threshold, but idea is to minimize [1+delta(pT)] * [1+delta(eta)] * [1+delta(phi)] in order to match the track to the jet
-  double match_thres = 1.3;
+  //double match_thres = 1.3;
   size_t jet_index = 255;
   for (size_t j = 0; j < jets.size(); ++j) {
     for (size_t idau = 0, idaue = jets[j].numberOfDaughters(); idau < idaue; ++idau) {
@@ -2117,10 +2145,17 @@ bool MFVVertexer::match_track_jet(const reco::Track& tk, const pat::Jet& matchje
         double c = fabs(tk.phi() - jtk->phi()) + 1;
         if (verbose)
           std::cout << "  jet track pt " << jtk->pt() << " eta " << jtk->eta() << " phi " << jtk->phi() << " match abc " << a * b * c << std::endl;
-        if (a * b * c < match_thres) {
+        /*
+		if (a * b * c < match_thres) {
           match_thres = a * b * c;
           jet_index = j;
         }
+		*/
+		if (fabs(tk.pt() - fabs(jtk->charge() * jtk->pt())) < 0.0001 &&
+			fabs(tk.eta() - jtk->eta()) < 0.0001 &&
+			fabs(tk.phi() - jtk->phi()) < 0.0001) {
+			jet_index = j;
+		}
       }
     }
   }
