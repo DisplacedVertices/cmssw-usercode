@@ -1,5 +1,6 @@
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/MCInteractions.h"
+#include "DataFormats/Math/interface/deltaR.h"
 
 namespace mfv {
   bool MCInteractionHolderTtbar::valid() const {
@@ -177,6 +178,254 @@ namespace mfv {
     return p;
   }
 
+
+  bool MCInteraction::isBhadron(const reco::GenParticle* bquark, int pdgID) const {
+	  bool is_valid = false;
+	  if ((int(abs(pdgID) / 100) % 10 == 5 && (bquark->pdgId() / abs(bquark->pdgId())) == -1 * (pdgID / abs(pdgID))) 	 // b_bar -> b-mesons or b -> anti b-mesons
+		  || (int(abs(pdgID) / 1000) % 10 == 5 && (bquark->pdgId() / abs(bquark->pdgId())) == (pdgID / abs(pdgID))))	 // b_bar -> b-baryons or b -> anti b-baryons
+		  is_valid = true;
+
+	  return is_valid;
+  }
+  bool MCInteraction::isBquark(int pdgID) const {
+	  return fabs(pdgID) == 5;
+  }
+  bool MCInteraction::isValidLeptonic(const reco:: GenParticle* parent, int pdgID) const {
+	  bool found_lepton_pair = false;			// this is a photon radiated from a b-quark to l-l+ and two neutrinos 
+	  for (size_t i = 0, ie = parent->numberOfDaughters(); i < ie; ++i) {
+		  const reco::GenParticle* dau = (const reco::GenParticle*) parent->daughter(i);
+		  if (pdgID == -1 * dau->pdgId() && (abs(pdgID) == 11 || abs(pdgID) == 13 || abs(pdgID) == 15))
+			  found_lepton_pair = true;
+	  }
+	  return !found_lepton_pair;
+  }
+  bool MCInteraction::isBvtx(const reco::GenParticle* bquark, const reco::GenParticle* parent, int pdgID, double dist3d, std::vector<int> vec_pdgID) const {
+	  for (size_t i = 0, ie = vec_pdgID.size() - 1; i < ie; ++i) {
+		  if (!(isBhadron(bquark, vec_pdgID[i]) == true  	  // the chain of b-hadrons
+			  || isBquark(abs(vec_pdgID[i])) == true
+			  || (i < vec_pdgID.size() - 2 && vec_pdgID[i] == 21 && isBhadron(bquark, vec_pdgID[i + 1]) == true)))	// allow gluons to b-mesons 
+			  return false;
+
+	  }
+
+	 
+	  return dist3d > 0 && isValidLeptonic(parent, pdgID);
+  }
+
+  size_t MCInteraction::mindR_dau(int& nth_chain, const reco::GenParticle* parent, std::vector<size_t> & excl_idx_first_dRmin, std::vector<size_t> & excl_idx_second_dRmin) const {
+
+	  double mindR = 200;
+	  size_t idx_mindR = 0;
+	  for (size_t i = 0, ie = parent->numberOfDaughters(); i < ie; ++i) {
+
+
+		  if (nth_chain == 1 && std::count(excl_idx_first_dRmin.begin(), excl_idx_first_dRmin.end(), i) == 1)
+			  continue;
+
+		  if (nth_chain == 2 && std::count(excl_idx_second_dRmin.begin(), excl_idx_second_dRmin.end(), i) == 1)
+			  continue;
+
+		  const reco::GenParticle* dau = (const reco::GenParticle*) parent->daughter(i);
+		  
+		  double dau_dR = reco::deltaR(dau->eta(), dau->phi(), parent->eta(), parent->phi());
+		  if (dau_dR < mindR) {
+			  mindR = dau_dR;
+			  idx_mindR = i;
+		  }
+	  }
+	  return idx_mindR;
+  }
+
+  bool MCInteraction::Is_bdecay_done(int& nth_chain, const reco::GenParticle* bquark, const reco::GenParticle* parent, std::vector<int> & vec_pdgID, std::vector<double> & vec_decay, std::vector<std::vector<const reco::GenParticle*>> & vec_of_vec_nonb_p, std::vector<const reco::GenParticle*>& vec_b_p, std::vector<size_t> & excl_idx_first_dRmin, std::vector<size_t> & excl_idx_second_dRmin) const {
+
+
+	  for (size_t i = 0, ie = parent->numberOfDaughters(); i < ie; ++i) {
+		  // gdau stage
+		  if (nth_chain == 2 && excl_idx_second_dRmin.size() == parent->numberOfDaughters())
+			  break;
+
+		  if (nth_chain == 1 || nth_chain == 2) {
+			  if (i != mindR_dau(nth_chain, parent, excl_idx_first_dRmin, excl_idx_second_dRmin))
+				  continue;
+		  }
+		  if (nth_chain == 1 && std::count(excl_idx_first_dRmin.begin(), excl_idx_first_dRmin.end(), i) == 0) {
+			  excl_idx_first_dRmin.push_back(i);
+			  excl_idx_second_dRmin = {};
+		  }
+		  if (nth_chain == 2 && std::count(excl_idx_second_dRmin.begin(), excl_idx_second_dRmin.end(), i) == 0) {
+			  excl_idx_second_dRmin.push_back(i);
+		  }
+
+		  const reco::GenParticle* dau = (const reco::GenParticle*) parent->daughter(i);
+
+		  int dau_pdgID = dau->pdgId();
+		  double dau_dist3d = sqrt(pow(dau->vx() - bquark->vx(), 2) + pow(dau->vy() - bquark->vy(), 2) + pow(dau->vz() - bquark->vz(), 2));
+		  vec_pdgID.push_back(dau_pdgID);
+		  if (isBhadron(bquark, dau_pdgID)) {
+			  if (isBvtx(bquark, parent, dau_pdgID, dau_dist3d, vec_pdgID)) {
+				  vec_decay.push_back(dau_dist3d);
+				  break;
+			  }
+		  }
+		  else {
+			  if (!isBquark(dau_pdgID)) {
+				  if (isBvtx(bquark, parent, dau_pdgID, dau_dist3d, vec_pdgID)) {
+					  std::vector <const reco::GenParticle*> vec_nonb_p = {};
+					  for (size_t j = 0, je = parent->numberOfDaughters(); j < je; ++j) {
+						  const reco::GenParticle* idau = (const reco::GenParticle*) parent->daughter(j);
+						  vec_nonb_p.push_back(idau);
+					  }
+					  vec_of_vec_nonb_p.push_back(vec_nonb_p);
+					  vec_b_p.push_back(parent);
+					  vec_decay.push_back(dau_dist3d);
+					  break;
+				  }
+			  }
+		  }
+
+		  nth_chain += 1;
+		  return Is_bdecay_done(nth_chain, bquark, dau, vec_pdgID, vec_decay, vec_of_vec_nonb_p, vec_b_p, excl_idx_first_dRmin, excl_idx_second_dRmin);
+	  }
+	  return true;
+  }
+
+
+  std::vector < std::vector <const reco::GenParticle*>> MCInteraction::set_bdecay_hadron_chain() const{
+	  std::vector < std::vector <const reco::GenParticle*>> vec_of_vec_c_nonb_had_gen_particle = {};
+	  std::vector <const reco::GenParticle*> vec_c_b_had_gen_particle = {};
+	  std::vector < std::vector <const reco::GenParticle*>> vec_c_chain_had_gen_particle = {};
+	  std::vector<double> vec_c_nonb_decay = {};
+
+	  if (primaries_.size() == 2 and secondaries_.size() == 4) {
+			  size_t nth_bquark = 0;
+			  for (auto genref_p : secondaries_) {
+				  nth_bquark += 1;
+				  bool catch_b_vtx = false;
+				  std::vector<int> vec_dau_pdgID = {};
+				  std::vector<size_t> excl_idx_first_dRmin = {};
+				  std::vector<size_t> excl_idx_second_dRmin = {};
+				  int nth_chain = 1;
+				  const reco::GenParticle* p = genref_p.get();
+				  if (p->numberOfDaughters() == 0)
+					  continue;
+				  int count_while_1 = 0;
+				  int count_while_2 = 0;
+				  while (!catch_b_vtx || (vec_c_nonb_decay.size() != nth_bquark || (vec_c_nonb_decay.size() == nth_bquark && std::count(vec_c_nonb_decay.begin(), vec_c_nonb_decay.end(), vec_c_nonb_decay[nth_bquark - 1]) > 1))) {
+
+					  size_t num_daus = p->numberOfDaughters();
+
+					  if (excl_idx_first_dRmin.size() == num_daus && excl_idx_second_dRmin.size() == p->daughter(excl_idx_first_dRmin[excl_idx_first_dRmin.size() - 1])->numberOfDaughters()) {
+						  break;
+					  }
+
+					  if (vec_c_nonb_decay.size() == nth_bquark && std::count(vec_c_nonb_decay.begin(), vec_c_nonb_decay.end(), vec_c_nonb_decay[nth_bquark - 1]) > 1) {
+						  vec_of_vec_c_nonb_had_gen_particle.pop_back();
+						  vec_c_b_had_gen_particle.pop_back();
+						  vec_c_nonb_decay.pop_back();
+					  }
+
+					  if (nth_chain == 1 || (excl_idx_first_dRmin.size() > 0 && excl_idx_second_dRmin.size() == p->daughter(excl_idx_first_dRmin[excl_idx_first_dRmin.size() - 1])->numberOfDaughters())) {
+						  count_while_1 += 1;
+
+						  vec_dau_pdgID = {};
+						  nth_chain = 1;
+						  catch_b_vtx = Is_bdecay_done(nth_chain, p, p, vec_dau_pdgID, vec_c_nonb_decay, vec_of_vec_c_nonb_had_gen_particle, vec_c_b_had_gen_particle, excl_idx_first_dRmin, excl_idx_second_dRmin);
+					  }
+					  else {
+						  count_while_2 += 1;
+						  size_t idx_first_chain = excl_idx_first_dRmin[excl_idx_first_dRmin.size() - 1];
+						  while (vec_dau_pdgID.size() != 1)
+							  vec_dau_pdgID.pop_back();
+						  nth_chain = 2;
+						  catch_b_vtx = Is_bdecay_done(nth_chain, p, (const reco::GenParticle*) p->daughter(idx_first_chain), vec_dau_pdgID, vec_c_nonb_decay, vec_of_vec_c_nonb_had_gen_particle, vec_c_b_had_gen_particle, excl_idx_first_dRmin, excl_idx_second_dRmin);
+
+					  }
+
+					  if (count_while_1 == 10 || count_while_2 == 10) {
+						  std::cout << "STUCK:" << " 2 " << count_while_2 << " 1 " << count_while_1 << std::endl;
+						  std::cout << "nth b-quark : " << nth_bquark << " b-vertices : " << vec_c_nonb_decay.size() << std::endl;
+						  int n = int(vec_c_nonb_decay.size()) - 1;
+						  std::cout << "so far we have..." << std::endl;
+						  while (!(n < 0)) {
+							  std::cout << n << "th b-quark displ (cm) " << vec_c_nonb_decay[n] << std::endl;
+							  n--;
+						  }
+						  std::cout << "1th chain exclusion size : " << excl_idx_first_dRmin.size() << " is equal to # of b-quark's daus ?" << num_daus << std::endl;
+						  std::cout << "the current chain is down to " << nth_chain << std::endl;
+						  std::cout << "so as its history size " << vec_dau_pdgID.size() << std::endl;
+						  std::cout << "with its 2th chain exclusion size : " << excl_idx_second_dRmin.size() << std::endl;
+						  if (excl_idx_first_dRmin.size() != 0)
+							  std::cout << "hopefully the 2nd is not yet equal to # of b-quark's gdaus" << p->daughter(excl_idx_first_dRmin[excl_idx_first_dRmin.size() - 1])->numberOfDaughters() << std::endl;
+
+						  break;
+					  }
+
+				  }
+
+
+
+
+			  }
+	  }
+	  if (vec_c_nonb_decay.size() == 4) {
+		  for (size_t i = 0, ie = vec_c_b_had_gen_particle.size(); i < ie; ++i) {
+			  std::vector <const reco::GenParticle*> vec_c_chain_had_per_b = {};
+			  vec_c_chain_had_per_b.push_back(vec_c_b_had_gen_particle[i]);
+			  for (size_t j = 0, je = vec_of_vec_c_nonb_had_gen_particle[i].size(); j < je; ++j) {
+				  vec_c_chain_had_per_b.push_back(vec_of_vec_c_nonb_had_gen_particle[i][j]);
+			  }
+			  vec_c_chain_had_gen_particle.push_back(vec_c_chain_had_per_b);
+		  }
+	  }
+
+	  return vec_c_chain_had_gen_particle;
+  }
+  
+  std::vector < MCInteraction::Point> MCInteraction::b_llp0_decay_points() const {
+	  
+	  std::vector<MCInteraction::Point > vec_c_mcp = {};
+	  std::vector < std::vector <const reco::GenParticle*>> hadron_chains = set_bdecay_hadron_chain();
+	  if (hadron_chains.size() == 4) {
+		  if (primaries_.size() == 2 and secondaries_.size() == 4) {
+			  size_t nth_bquark = 0;
+			  for (auto p : secondaries_) {
+				  MCInteraction::Point dau_p;
+				  nth_bquark += 1;
+				  if (p->numberOfDaughters() == 0 || nth_bquark == 3 || nth_bquark == 4)
+					  continue;
+				  dau_p.x = hadron_chains[nth_bquark - 1][1]->vx();
+				  dau_p.y = hadron_chains[nth_bquark - 1][1]->vy();
+				  dau_p.z = hadron_chains[nth_bquark - 1][1]->vz();
+				  vec_c_mcp.push_back(dau_p);
+			  }
+		  }
+	  }
+	  return vec_c_mcp;
+
+  }
+
+  std::vector < MCInteraction::Point> MCInteraction::b_llp1_decay_points() const {	
+	  std::vector<MCInteraction::Point> vec_c_mcp = {};
+	  std::vector < std::vector <const reco::GenParticle*>> hadron_chains = set_bdecay_hadron_chain();
+	  if (hadron_chains.size() == 4) {
+		  if (primaries_.size() == 2 and secondaries_.size() == 4) {
+			  size_t nth_bquark = 0;
+			  for (auto p : secondaries_) {
+				  MCInteraction::Point dau_p;
+				  nth_bquark += 1;
+				  if (p->numberOfDaughters() == 0 || nth_bquark == 1 || nth_bquark == 2)
+					  continue;
+				  dau_p.x = hadron_chains[nth_bquark - 1][1]->vx();
+				  dau_p.y = hadron_chains[nth_bquark - 1][1]->vy();
+				  dau_p.z = hadron_chains[nth_bquark - 1][1]->vz();
+				  vec_c_mcp.push_back(dau_p);
+			  }
+		  }
+	  }
+	  return vec_c_mcp;
+
+  }
+  
   double MCInteraction::dvv() const {
     auto p0 = decay_point(0);
     auto p1 = decay_point(1);
@@ -192,8 +441,8 @@ namespace mfv {
                 pow(p0.z - p1.z, 2));
   }
 }
-
 ////
+
 
 std::ostream& operator<<(std::ostream& o, const mfv::MCInteraction& x) {
   using std::setw;
@@ -251,6 +500,8 @@ std::ostream& operator<<(std::ostream& o, const mfv::MCInteraction& x) {
 
   return o;
 }
+
+
 
 #if 0
 
