@@ -26,12 +26,13 @@ struct MFVEvent {
     gen_valid = 0;
     npv = pv_ntracks = pv_ntracksloose = 0;
     gen_flavor_code = 0;
-    gen_weight = l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = hlt_caloht = npu = bsx = bsy = bsz = bsdxdz = bsdydz = bswidthx = bswidthy = pvx = pvy = pvz = pvcxx = pvcxy = pvcxz = pvcyy = pvcyz = pvczz = pv_score = metx = mety = 0;
+    gen_weight = l1_htt = l1_myhtt = l1_myhttwbug = hlt_ht = npu = bsx = bsy = bsz = bsdxdz = bsdydz = bswidthx = bswidthy = pvx = pvy = pvz = pvcxx = pvcxy = pvcxz = pvcyy = pvcyz = pvczz = pv_score = metx = mety = 0;
     for (int i = 0; i < 2; ++i) {
       gen_lsp_pt[i] = gen_lsp_eta[i] = gen_lsp_phi[i] = gen_lsp_mass[i] = 0;
       gen_decay_type[i] = 0;
-      for (int j = 0; j < 3; ++j)
+      for (int j = 0; j < 3; ++j){
         gen_lsp_decay[i*3+j] = 0;
+      }
     }
     for (int i = 0; i < 3; ++i) {
       gen_pv[i] = 0;
@@ -97,10 +98,24 @@ struct MFVEvent {
   float gen_lsp_eta[2];
   float gen_lsp_phi[2];
   float gen_lsp_mass[2];
+  float gen_bchain_b_had_pt[4];
+  std::vector<std::vector<float>> gen_bchain_nonb_had_pt;
+  float gen_bchain_b_had_eta[4];
+  std::vector<std::vector<float>> gen_bchain_nonb_had_eta;
+  float gen_bchain_b_had_phi[4];
+  std::vector<std::vector<float>> gen_bchain_nonb_had_phi;
+  float gen_bchain_b_had_mass[4];
+  std::vector<std::vector<float>> gen_bchain_nonb_had_mass;
+  std::vector<std::vector<float>> gen_bchain_nonb_had_x;
+  std::vector<std::vector<float>> gen_bchain_nonb_had_y;
+  std::vector<std::vector<float>> gen_bchain_nonb_had_z;
   float gen_lsp_decay[2*3];
+  std::vector<float> gen_b_llp0_decay;
+  std::vector<float> gen_b_llp1_decay;
   uchar gen_decay_type[2];
   std::vector<TLorentzVector> gen_daughters;
   std::vector<int> gen_daughter_id;
+  std::vector<size_t> gen_daughter_ngdau;
 
   TLorentzVector gen_lsp_p4(int w) const {
     return p4(gen_lsp_pt[w], gen_lsp_eta[w], gen_lsp_phi[w], gen_lsp_mass[w]);
@@ -110,6 +125,18 @@ struct MFVEvent {
     return TVector3(gen_lsp_decay[w*3+0] - gen_pv[0],
                     gen_lsp_decay[w*3+1] - gen_pv[1],
                     gen_lsp_decay[w*3+2] - gen_pv[2]);
+  }
+
+  TVector3 gen_b_llp0_flight(int w) const {
+    return TVector3(gen_b_llp0_decay[w*3+0] - gen_lsp_decay[0],
+                    gen_b_llp0_decay[w*3+1] - gen_lsp_decay[1],
+                    gen_b_llp0_decay[w*3+2] - gen_lsp_decay[2]);
+  }
+
+  TVector3 gen_b_llp1_flight(int w) const {
+    return TVector3(gen_b_llp1_decay[w*3+0] - gen_lsp_decay[3],
+                    gen_b_llp1_decay[w*3+1] - gen_lsp_decay[4],
+                    gen_b_llp1_decay[w*3+2] - gen_lsp_decay[5]);
   }
 
   TLorentzVector gen_lsp_p4_vis(int w) const {
@@ -155,7 +182,7 @@ struct MFVEvent {
   float l1_myhtt;
   float l1_myhttwbug;
   float hlt_ht;
-  float hlt_caloht;
+  float hlt_caloht; 
 
   uint64_t pass_;
   uint64_t pass_hlt_bits() const { return pass_ & ((1UL << mfv::n_hlt_paths) - 1UL); }
@@ -255,7 +282,6 @@ struct MFVEvent {
   std::vector<float> hlt_pf_jet_eta;
   std::vector<float> hlt_pf_jet_phi;
   std::vector<float> hlt_pf_jet_energy;
-
   TLorentzVector jet_p4(int w) const {
     TLorentzVector v;
     v.SetPtEtaPhiE(jet_pt[w], jet_eta[w], jet_phi[w], jet_energy[w]);
@@ -282,10 +308,7 @@ struct MFVEvent {
 
   float jet_ht(float min_jet_pt=0.f) const { return std::accumulate(jet_pt.begin(), jet_pt.end(), 0.f,
                                                                     [min_jet_pt](float init, float b) { if (b > min_jet_pt) init += b; return init; }); }
-
-  float calo_jet_ht(float min_jet_pt=0.f) const { return std::accumulate(calo_jet_pt.begin(), calo_jet_pt.end(), 0.f,
-                                                                    [min_jet_pt](float init, float b) { if (b > min_jet_pt) init += b; return init; }); }
-
+  float calo_jet_ht(float min_jet_pt=0.f) const { return std::accumulate(calo_jet_pt.begin(), calo_jet_pt.end(), 0.f,                                                                                                                                   [min_jet_pt](float init, float b) { if (b > min_jet_pt) init += b; return init; }); } 
   float jet_ST_sum() const {
     double sum = 0;
     for (size_t ijet = 0; ijet < jet_id.size(); ++ijet) {
@@ -452,6 +475,7 @@ struct MFVEvent {
   std::vector<float> vertex_seed_track_err_phi;
   std::vector<float> vertex_seed_track_err_dxy;
   std::vector<float> vertex_seed_track_err_dz;
+  std::vector<int> vertex_seed_track_hp_rmin; 
   std::vector<mfv::HitPattern::value_t> vertex_seed_track_hp_;
   mfv::HitPattern vertex_seed_track_hp(int i) const { return mfv::HitPattern(vertex_seed_track_hp_[i]); }
   void vertex_seed_track_hp_push_back(int npxh, int nsth, int npxl, int nstl) { vertex_seed_track_hp_.push_back(mfv::HitPattern(npxh, nsth, npxl, nstl).value); }
@@ -478,6 +502,7 @@ struct MFVEvent {
   std::vector<float> jet_track_phi_err;
   std::vector<float> jet_track_dxy_err;
   std::vector<float> jet_track_dz_err;
+  std::vector<int> jet_track_hp_rmin;
   std::vector<mfv::HitPattern::value_t> jet_track_hp_;
   mfv::HitPattern jet_track_hp(int i) const { return mfv::HitPattern(jet_track_hp_[i]); }
   void jet_track_hp_push_back(int npxh, int nsth, int npxl, int nstl) { jet_track_hp_.push_back(mfv::HitPattern(npxh, nsth, npxl, nstl).value); }

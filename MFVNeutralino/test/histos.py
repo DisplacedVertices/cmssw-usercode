@@ -7,6 +7,7 @@ sample_files(process, 'ggHToSSTodddd_tau1mm_M40_2017' if is_mc else 'JetHT2017B'
 #sample_files(process, 'ggHToSSTodddd_tau1mm_M55_2017' if is_mc else 'JetHT2017B', 'ntuplev31am', 15)
 #sample_files(process, 'mfv_neu_tau001000um_M0400_2017' if is_mc else 'JetHT2017B', 'ntuplev30am', 10)
 #sample_files(process, 'ttbar_2017' if is_mc else 'JetHT2017B', 'ntuplev31am', 5)
+input_files(process, 'ntuple.root')
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
 

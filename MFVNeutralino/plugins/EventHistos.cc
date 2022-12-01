@@ -1,8 +1,9 @@
 #include "TH2F.h"
 #include "TRandom3.h"
-#include "TVector2.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/Math/interface/deltaR.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -12,17 +13,25 @@
 #include "JMTucker/Tools/interface/Utilities.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
+#include "DataFormats/Math/interface/PtEtaPhiMass.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
+#include "TLorentzVector.h"
+#include "DataFormats/Math/interface/Point3D.h"
 
 class MFVEventHistos : public edm::EDAnalyzer {
  public:
   explicit MFVEventHistos(const edm::ParameterSet&);
   void analyze(const edm::Event&, const edm::EventSetup&);
-
+  
  private:
   const edm::EDGetTokenT<MFVEvent> mevent_token;
   const edm::EDGetTokenT<double> weight_token;
+  const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_token;
+  const int max_ntrackplots;
+  const bool do_scatterplots;
 
   TH1F* h_w;
+  TH1F* h_nsv;
 
   TH2F* h_gen_decay;
   TH1F* h_gen_flavor_code;
@@ -35,11 +44,91 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_bquark_pairdphi;
   TH1F* h_bquark_pairdeta;
 
+  //FIXME: ghost-track vertex study
+  TH1F* h_n_gen_bvtx;
+  TH1F* h_gvtx_nsv;
+  TH1F* h_gvtx_sv_ntrack;
+  TH1F* h_gvtx_njet;
+  TH1F* h_gvtx_nbquarkjet_wcut;
+  TH1F* h_gvtx_nloosebtaggedjet_wcut;
+  TH1F* h_gvtx_nloosebtaggedjet_bboost_wcut;
+  TH1F* h_gvtx_shared_loosebtaggedjet_or_not_bboost_wcut;
+  
+  // cut w/ b-quark pT > 25 GeV imposed 
+  TH1F* h_gvtx_all_ntrack_from_jets_wcut;
+  
+  TH1F* h_gvtx_jet_seed_track_pT_from_jets_wcut;
+  TH1F* h_gvtx_jet_seed_track_sigmadxybs_from_jets_wcut;
+  TH1F* h_gvtx_jet_seed_track_npxlayers_from_jets_wcut;
+  TH1F* h_gvtx_jet_seed_track_nstlayers_from_jets_wcut;
+  TH1F* h_gvtx_jet_seed_track_rmin_from_jets_wcut;
+  
+  TH1F* h_gvtx_shared_bjet_or_not;
+  TH1F* h_gvtx_shared_loosebtaggedjet_or_not;
+
+  
+  TH1F* h_gvtx_shared_loosebtaggedjet_nm1_bquarkjet_or_not;
+  TH1F* h_gvtx_no_shared_loosebtaggedjet_nm1_bquarkjet_or_not;
+  TH1F* h_gvtx_no_matched_loosebtaggedjet_nm1_bquarkjet_or_not;
+  TH1F* h_gvtx_shared_loosebtaggedjet_nm1_nbsv;
+  TH1F* h_gvtx_no_shared_loosebtaggedjet_nm1_nbsv;
+  TH1F* h_gvtx_no_matched_loosebtaggedjet_nm1_nbsv;
+  TH1F* h_gvtx_shared_loosebtaggedjet_nm1_nloosebsv;
+  TH1F* h_gvtx_no_shared_loosebtaggedjet_nm1_nloosebsv;
+  TH1F* h_gvtx_no_matched_loosebtaggedjet_nm1_nloosebsv;
+  TH2F* h_2D_gvtx_shared_loosebtaggedjet_nm1_ntrack_loosebsv;
+  TH2F* h_2D_gvtx_no_shared_loosebtaggedjet_nm1_ntrack_loosebsv;
+  TH2F* h_2D_gvtx_no_matched_loosebtaggedjet_nm1_ntrack_loosebsv;
+
+  TH1F* h_gvtx_nm1_nsigmadxy_pass_event_ratio_npotentialbsv_nbquark;
+  TH1F* h_gvtx_nm1_nsigmadxy_seed_tracks_per_no_shared_jet;
+  TH1F* h_gvtx_nm1_nsigmadxy_seed_tracks_per_no_matched_jet;
+  TH1F* h_gvtx_nm1_nsigmadxy_seed_tracks_per_shared_jet;
+
+  TH1F* h_gvtx_pass_event_ratio_npotentialbsv_nbquark;
+  TH1F* h_gvtx_seed_tracks_per_no_shared_jet;
+  TH1F* h_gvtx_seed_tracks_per_no_matched_jet;
+  TH1F* h_gvtx_seed_tracks_per_shared_jet;
+
+  TH1F* h_gvtx_nm1_pT_pass_event_ratio_npotentialbsv_nbquark;
+  TH1F* h_gvtx_nm1_pT_seed_tracks_per_no_shared_jet;
+  TH1F* h_gvtx_nm1_pT_seed_tracks_per_no_matched_jet;
+  TH1F* h_gvtx_nm1_pT_seed_tracks_per_shared_jet;
+
+  TH1F* h_gvtx_nm1_nsigmadxy_npotentialsv;
+  TH1F* h_gvtx_nm1_pT_npotentialsv;
+  TH1F* h_gvtx_seed_npotentialsv;
+  
+  
+
+  TH1F* h_gvtx_sv_bquark_closest_dist3d_wcut;
+  
+  TH1F* h_gvtx_is_tight_btag_per_bjet_or_not_wcut;
+  TH1F* h_gvtx_is_medium_btag_per_bjet_or_not_wcut;
+  TH1F* h_gvtx_is_loose_btag_per_bjet_or_not_wcut;
+  
+  TH1F* h_gvtx_sv_bquark_dist3d_wcut;
+ 
+  //track investigation 
+  TH1F* h_gvtx_all_track_pt_from_jets_wcut;
+  TH1F* h_gvtx_all_track_sigmadxybs_from_jets_wcut;
+  TH1F* h_gvtx_all_track_npxhits_from_jets_wcut;
+  TH1F* h_gvtx_all_track_nsthits_from_jets_wcut;
+  TH1F* h_gvtx_all_track_npxlayers_from_jets_wcut;
+  TH1F* h_gvtx_all_track_nstlayers_from_jets_wcut;
+  TH1F* h_gvtx_all_track_rmin_from_jets_wcut;
+  TH1F* h_gvtx_jet_seed_nm1_pt_from_jets_wcut;
+  TH1F* h_gvtx_jet_seed_nm1_npxlayers_from_jets_wcut;
+  TH1F* h_gvtx_jet_seed_nm1_nstlayers_from_jets_wcut;
+  TH1F* h_gvtx_jet_seed_nm1_rmin_from_jets_wcut;
+  TH1F* h_gvtx_jet_seed_nm1_sigmadxybs_from_jets_wcut;
+
+
+  //////////////////////////////////////// 
+
   TH1F* h_minlspdist2d;
   TH1F* h_lspdist2d;
   TH1F* h_lspdist3d;
-  TH1F* h_gen_bs2ddist;
-  TH2F* h_gen_bsxdist_bsydist;
 
   TH1F* h_hlt_bits;
   TH1F* h_l1_bits;
@@ -90,49 +179,9 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_jet_pt[MAX_NJETS+1];
   TH1F* h_jet_eta[MAX_NJETS+1];
   TH1F* h_jet_phi[MAX_NJETS+1];
-
-  TH1F* h_bsort_jet_pt[MAX_NJETS+1];
-  TH1F* h_bsort_jet_eta[MAX_NJETS+1];
-  TH1F* h_bsort_jet_phi[MAX_NJETS+1];
-  TH1F* h_bsort_jet_csv[MAX_NJETS+1];
-
   TH1F* h_jet_energy;
   TH1F* h_jet_ht;
   TH1F* h_jet_ht_40;
-  TH1F* h_calo_jet_pt[MAX_NJETS+1];
-  TH1F* h_calo_jet_eta[MAX_NJETS+1];
-  TH1F* h_calo_jet_phi[MAX_NJETS+1];
-  TH1F* h_calo_jet_ht;
-  TH1F* h_calo_jet_ht40;
-
-  TH1F* h_online_calo_jet_ht;
-  TH1F* h_online_pf_jet_ht;
-  TH2F* h_online_offline_calo_jet_ht;
-  TH2F* h_online_offline_pf_jet_ht;
-
-  TH2F* h_online_offline_pf_jet_deta_0;
-  TH2F* h_online_offline_pf_jet_dphi_0;
-
-  TH1F* h_online_calojet_pt;
-  TH1F* h_online_pfjet_pt;
-  TH1F* h_offline_calojet_pt;
-  TH1F* h_offline_pfjet_pt;
-  TH1F* h_offline_pfjet_t0;
-  TH1F* h_offline_pfjet_t1;
-  TH1F* h_offline_pfjet_t2;
-  TH1F* h_offline_pfjet_t3;
-  TH2F* h_online_offline_calojet_pt;
-  TH2F* h_online_offline_pfjet_pt[MAX_NJETS+1];
-  TH2F* h_online_offline_pfjet_eta[MAX_NJETS+1];
-  TH2F* h_online_offline_pfjet_phi[MAX_NJETS+1];
-  TH1F* h_online_offline_pfjet_dpt[MAX_NJETS+1];
-  TH1F* h_online_offline_pfjet_deta[MAX_NJETS+1];
-  TH1F* h_online_offline_pfjet_dphi[MAX_NJETS+1];
-
-  TH2F* h_ncalojet_online_offline;
-  TH2F* h_ncalojet_idp_online_offline;
-  TH2F* h_calojet_ndiff_htdiff;
-  TH2F* h_idp_calojet_ndiff_htdiff;
 
   TH1F* h_jet_pairdphi;
   TH1F* h_jet_pairdeta;
@@ -188,11 +237,16 @@ class MFVEventHistos : public edm::EDAnalyzer {
 
 MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   : mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
-    weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src")))
+	weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
+	vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
+	max_ntrackplots(cfg.getParameter<int>("max_ntrackplots")),
+	do_scatterplots(cfg.getParameter<bool>("do_scatterplots"))
 {
+
   edm::Service<TFileService> fs;
 
   h_w = fs->make<TH1F>("h_w", ";event weight;events/0.1", 100, 0, 10);
+  h_nsv = fs->make<TH1F>("h_nsv", ";# of (loose) secondary vertices;arb. units", 40, 0, 40);
 
   h_gen_decay = fs->make<TH2F>("h_gen_decay", "0-2=e,mu,tau, 3=h;decay code #0;decay code #1", 4, 0, 4, 4, 0, 4);
   h_gen_flavor_code = fs->make<TH1F>("h_gen_flavor_code", ";quark flavor composition;events", 3, 0, 3);
@@ -205,15 +259,89 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_bquark_pairdphi = fs->make<TH1F>("h_bquark_pairdphi", ";bquark pair #Delta#phi (rad);bquark pairs/.063", 100, -3.1416, 3.1416);
   h_bquark_pairdeta = fs->make<TH1F>("h_bquark_pairdeta", ";bquark pair #Delta#eta (rad);bquark pairs/.1", 100, -5.0, 5.0);
 
+  // overview
+  h_gvtx_nsv = fs->make<TH1F>("h_gvtx_nsv", ";# of secondary vertices; events/1", 40, 0, 40);
+  h_gvtx_sv_ntrack = fs->make<TH1F>("h_gvtx_sv_ntrack", ";# of tracks / SV; svs/1", 10, 0, 10);
+  h_gvtx_nloosebtaggedjet_bboost_wcut = fs->make<TH1F>("h_gvtx_nloosebtaggedjet_bboost_wcut", "all four b-decays w/ b-quark pT > 20 GeV ;# of loose-btagged jets;events/1", 20, 0, 20);
+  h_gvtx_shared_loosebtaggedjet_or_not_bboost_wcut = fs->make<TH1F>("h_gvtx_shared_loosebtaggedjet_or_not_bboost_wcut", "all four b-decays w/ b-quark pT > 20 GeV; shared loose-btagged-jets ?; arb. units", 3, 0, 3);
+  h_n_gen_bvtx = fs->make<TH1F>("h_n_gen_bvtx", ";# of GEN b-vertices (from non-b hadrons); events/1", 40, 0, 40);
+  h_gvtx_njet = fs->make<TH1F>("h_gvtx_njet", ";# of jets;events/1", 10, 0, 10);
+  h_gvtx_nbquarkjet_wcut = fs->make<TH1F>("h_gvtx_nbquarkjet_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;# of b-quark jets;events/1", 10, 0, 10);
+  h_gvtx_nloosebtaggedjet_wcut = fs->make<TH1F>("h_gvtx_nloosebtaggedjet_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;# of loose-btagged jets;events/1", 10, 0, 10);
+
+  h_gvtx_all_ntrack_from_jets_wcut = fs->make<TH1F>("h_gvtx_all_ntrack_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;# of tracks per a matched jet;", 50, 0, 50);
+  
+  h_gvtx_jet_seed_track_pT_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_track_pT_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;p_{T} of a seed track in a matched jet;", 20, 0, 10);
+  h_gvtx_jet_seed_track_sigmadxybs_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_track_sigmadxybs_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;#sigma_{dxy} of a seed track in a matched jet;", 40, -10, 10);
+  h_gvtx_jet_seed_track_npxlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_track_npxlayers_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;npxlayers of a seed track in a matched jet;", 12, 0, 12);
+  h_gvtx_jet_seed_track_nstlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_track_nstlayers_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;nstlayers of a seed track in a matched jet;", 28, 0, 28);
+  h_gvtx_jet_seed_track_rmin_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_track_rmin_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;r_{min} of a seed track in a matched jet;", 5, 0, 5);
+  
+  h_gvtx_shared_bjet_or_not = fs->make<TH1F>("h_gvtx_shared_bjet_or_not", "; shared b-jets ?; arb. units", 3, 0, 3);
+  h_gvtx_shared_loosebtaggedjet_or_not = fs->make<TH1F>("h_gvtx_shared_loosebtaggedjet_or_not", "; shared loose-btagged-jets ?; arb. units", 3, 0, 3);
+  
+  h_gvtx_shared_loosebtaggedjet_nm1_bquarkjet_or_not = fs->make<TH1F>("h_gvtx_shared_loosebtaggedjet_nm1_bquarkjet_or_not", "a loose-btagged jet is matched by at least two b-quarks; also the closest jet to a b-quark?; arb. units", 3, 0, 3);
+  h_gvtx_no_shared_loosebtaggedjet_nm1_bquarkjet_or_not = fs->make<TH1F>("h_gvtx_no_shared_loosebtaggedjet_nm1_bquarkjet_or_not", "a loose-btagged jet is matched by only one b-quark; also the closest jet to a b-quark?; arb. units", 3, 0, 3);
+  h_gvtx_no_matched_loosebtaggedjet_nm1_bquarkjet_or_not = fs->make<TH1F>("h_gvtx_no_matched_loosebtaggedjet_nm1_bquarkjet_or_not", "a loose-btagged jet is not matched by any b-quarks; also the closest jet to a b-quark?; arb. units", 3, 0, 3);
+  h_gvtx_shared_loosebtaggedjet_nm1_nbsv = fs->make<TH1F>("h_gvtx_shared_loosebtaggedjet_nm1_nbsv", "a loose-btagged jet is matched by at least two b-quarks; # of SVs with all tracks in a loose-btagged jet (bSVs); arb. units", 5, 0, 5);
+  h_gvtx_no_shared_loosebtaggedjet_nm1_nbsv = fs->make<TH1F>("h_gvtx_no_shared_loosebtaggedjet_nm1_nbsv", "a loose-btagged jet is matched by only one b-quark; # of SVs with all tracks in a loose-btagged jet (bSVs); arb. units", 5, 0, 5);
+  h_gvtx_no_matched_loosebtaggedjet_nm1_nbsv = fs->make<TH1F>("h_gvtx_no_matched_loosebtaggedjet_nm1_nbsv", "a loose-btagged jet is not matched by any b-quarks; # of SVs with all tracks in a loose-btagged jet (bSVs); arb. units", 5, 0, 5);
+  h_gvtx_shared_loosebtaggedjet_nm1_nloosebsv = fs->make<TH1F>("h_gvtx_shared_loosebtaggedjet_nm1_nloosebsv", "a loose-btagged jet is matched by at least two b-quarks; # of SVs with some tracks in a loose-btagged jet (loose-bSVs); arb. units", 5, 0, 5);
+  h_gvtx_no_shared_loosebtaggedjet_nm1_nloosebsv = fs->make<TH1F>("h_gvtx_no_shared_loosebtaggedjet_nm1_nloosebsv", "a loose-btagged jet is matched by only one b-quark; # of SVs with some tracks in a loose-btagged jet (loose-bSVs); arb. units", 5, 0, 5);
+  h_gvtx_no_matched_loosebtaggedjet_nm1_nloosebsv = fs->make<TH1F>("h_gvtx_no_matched_loosebtaggedjet_nm1_nloosebsv", "a loose-btagged jet is not matched by any b-quarks; # of SVs with some tracks in a loose-btagged jet (loose-bSVs); arb. units", 5, 0, 5);
+  h_2D_gvtx_shared_loosebtaggedjet_nm1_ntrack_loosebsv = fs->make<TH2F>("h_2D_gvtx_shared_loosebtaggedjet_nm1_ntrack_loosebsv", "a loose-btagged jet is matched by at least two b-quarks; # of seed tracks / a loose-bSV; # of a loose-bSV's seed tracks in a loose-btagged jet; arb. units", 50, 0, 50, 50, 0, 50);
+  h_2D_gvtx_no_shared_loosebtaggedjet_nm1_ntrack_loosebsv = fs->make<TH2F>("h_2D_gvtx_no_shared_loosebtaggedjet_nm1_ntrack_loosebsv", "a loose-btagged jet is matched by only one b-quark; # of seed tracks / a loose-bSV; # of a loose-bSV's seed tracks in a loose-btagged jet; arb. units", 50, 0, 50, 50, 0, 50);
+  h_2D_gvtx_no_matched_loosebtaggedjet_nm1_ntrack_loosebsv = fs->make<TH2F>("h_2D_gvtx_no_matched_loosebtaggedjet_nm1_ntrack_loosebsv", "a loose-btagged jet is not matched by any b-quarks; # of seed tracks / a loose-bSV; # of a loose-bSV's seed tracks in a loose-btagged jet; arb. units", 50, 0, 50, 50, 0, 50);
+
+  
+  h_gvtx_nm1_nsigmadxy_pass_event_ratio_npotentialbsv_nbquark = fs->make<TH1F>("h_gvtx_nm1_nsigmadxy_pass_event_ratio_npotentialbsv_nbquark", "Events for vertexing w/ criteria (1); #frac{# of potential bSVs w/ 100% vtxing eff.}{# of b-quarks w/ pT > 20 GeV}; arb. units", 10, 0, 1);
+  h_gvtx_nm1_nsigmadxy_seed_tracks_per_no_shared_jet = fs->make<TH1F>("h_gvtx_nm1_nsigmadxy_seed_tracks_per_no_shared_jet", ";# of n-nsigmadxy seed tracks per a loose-btagged jet matched w/ a b-quark;", 50, 0, 50);
+  h_gvtx_nm1_nsigmadxy_seed_tracks_per_no_matched_jet = fs->make<TH1F>("h_gvtx_nm1_nsigmadxy_seed_tracks_per_no_matched_jet", ";# of n-nsigmadxy seed tracks per a loose-btagged w/ no matched b-quark;", 50, 0, 50);
+  h_gvtx_nm1_nsigmadxy_seed_tracks_per_shared_jet = fs->make<TH1F>("h_gvtx_nm1_nsigmadxy_seed_tracks_per_shared_jet", ";# of n-nsigmadxy seed tracks per a loose-btagged jet matched w/ >=2 b-quarks;", 50, 0, 50);
+  h_gvtx_pass_event_ratio_npotentialbsv_nbquark = fs->make<TH1F>("h_gvtx_pass_event_ratio_npotentialbsv_nbquark", "Events for vertexing w/ criteria (2); #frac{# of potential bSVs w/ 100% vtxing eff.}{# of b-quarks w/ pT > 20 GeV}; arb. units", 10, 0, 1);
+  h_gvtx_seed_tracks_per_no_shared_jet = fs->make<TH1F>("h_gvtx_seed_tracks_per_no_shared_jet", ";# of seed tracks per a loose-btagged jet matched w/ a b-quark;", 50, 0, 50);
+  h_gvtx_seed_tracks_per_no_matched_jet = fs->make<TH1F>("h_gvtx_seed_tracks_per_no_matched_jet", ";# of seed tracks per a loose-btagged jet w/ no matched b-quark;", 50, 0, 50);
+  h_gvtx_seed_tracks_per_shared_jet = fs->make<TH1F>("h_gvtx_seed_tracks_per_shared_jet", ";# of seed tracks per a loose-btagged jet matched w/ >= 2 b-quarks;", 50, 0, 50);
+  h_gvtx_nm1_pT_pass_event_ratio_npotentialbsv_nbquark = fs->make<TH1F>("h_gvtx_nm1_pT_pass_event_ratio_npotentialbsv_nbquark", "Events for vertexing w/ criteria (3); #frac{# of potential bSVs w/ 100% vtxing eff.}{# of b-quarks w/ pT > 20 GeV}; arb. units", 10, 0, 1);
+  h_gvtx_nm1_pT_seed_tracks_per_no_shared_jet = fs->make<TH1F>("h_gvtx_nm1_pT_seed_tracks_per_no_shared_jet", ";# of n-pT seed tracks per a loose-btagged jet matched w/ a b-quark;", 50, 0, 50);
+  h_gvtx_nm1_pT_seed_tracks_per_no_matched_jet = fs->make<TH1F>("h_gvtx_nm1_pT_seed_tracks_per_no_matched_jet", ";# of n-pT seed tracks per a loose-btagged jet matched w/ no matched b-quark;", 50, 0, 50);
+  h_gvtx_nm1_pT_seed_tracks_per_shared_jet = fs->make<TH1F>("h_gvtx_nm1_pT_seed_tracks_per_shared_jet", ";# of n-pT seed tracks per a loose-btagged jet matched w/ >=2 b-quarks;", 50, 0, 50);
+  
+  h_gvtx_nm1_nsigmadxy_npotentialsv = fs->make<TH1F>("h_gvtx_nm1_nsigmadxy_npotentialsv", "with 100% vtxing eff.;# of potential SVs reconstructed from n-nsigmadxy seed tracks", 5, 0, 5);
+  h_gvtx_nm1_pT_npotentialsv = fs->make<TH1F>("h_gvtx_nm1_pT_npotentialsv", "with 100% vtxing eff.;# of potential SVs reconstructed from n-pT seed tracks", 5, 0, 5);
+  h_gvtx_seed_npotentialsv = fs->make<TH1F>("h_gvtx_seed_npotentialsv", "with 100% vtxing eff.;# of potential SVs reconstructed from seed tracks", 5, 0, 5);
+
+  h_gvtx_sv_bquark_closest_dist3d_wcut = fs->make<TH1F>("h_gvtx_sv_bquark_closest_dist3d_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;dist3d b/w a GEN b-quark and most-matched SV (cm); arb. units", 120, 0, 3);
+  
+  h_gvtx_sv_bquark_dist3d_wcut = fs->make<TH1F>("h_gvtx_sv_bquark_dist3d_wcut", "b-quark pT > 20 GeV;dist3d b/w a GEN b-quark decay vtx and its closest SV (cm); arb. units", 120, 0, 3);
+  h_gvtx_is_tight_btag_per_bjet_or_not_wcut = fs->make<TH1F>("h_gvtx_is_tight_btag_per_bjet_or_not_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; is this b-jet also tight b-tagged ?; arb. units", 3, 0, 3);
+  h_gvtx_is_medium_btag_per_bjet_or_not_wcut = fs->make<TH1F>("h_gvtx_is_medium_btag_per_bjet_or_not_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; is this b-jet also medium b-tagged ?; arb. units", 3, 0, 3);
+  h_gvtx_is_loose_btag_per_bjet_or_not_wcut = fs->make<TH1F>("h_gvtx_is_loose_btag_per_bjet_or_not_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; is this b-jet also loose b-tagged ?; arb. units", 3, 0, 3);
+  
+  //track investigation 
+  h_gvtx_all_track_pt_from_jets_wcut = fs->make<TH1F>("h_gvtx_all_track_pt_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; track p_{T} (GeV)", 20, 0, 10);
+  h_gvtx_all_track_sigmadxybs_from_jets_wcut = fs->make<TH1F>("h_gvtx_all_track_sigmadxybs_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; #sigma_{dxy}", 40, -10, 10);
+  h_gvtx_all_track_npxhits_from_jets_wcut = fs->make<TH1F>("h_gvtx_all_track_npxhits_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; npxhits", 12, 0, 12);
+  h_gvtx_all_track_nsthits_from_jets_wcut = fs->make<TH1F>("h_gvtx_all_track_nsthits_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; nsthits", 28, 0, 28);
+  h_gvtx_all_track_npxlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_all_track_npxlayers_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; npxlayers", 12, 0, 12);
+  h_gvtx_all_track_nstlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_all_track_nstlayers_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; nstlayers", 28, 0, 28);
+  h_gvtx_all_track_rmin_from_jets_wcut = fs->make<TH1F>("h_gvtx_all_track_rmin_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay;r_{min};", 5, 0, 5);
+
+  h_gvtx_jet_seed_nm1_pt_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_nm1_pt_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; track p_{T} (GeV) w/ n-1 cuts applied", 20, 0, 10);
+  h_gvtx_jet_seed_nm1_npxlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_nm1_npxlayers_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; npxlayers w/ n-1 cuts applied", 12, 0, 12);
+  h_gvtx_jet_seed_nm1_nstlayers_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_nm1_nstlayers_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; nstlayers w/ n-1 cuts applied", 28, 0, 28);
+  h_gvtx_jet_seed_nm1_rmin_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_nm1_rmin_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; rmin w/ n-1 cuts applied", 5, 0, 5);
+  h_gvtx_jet_seed_nm1_sigmadxybs_from_jets_wcut = fs->make<TH1F>("h_gvtx_jet_seed_nm1_sigmadxybs_from_jets_wcut", "b-quark pT > 20 GeV w/ 1-1 matched jet to b-decay; #sigma_{dxy} w/ n-1 cuts applied", 40, -10, 10);
+
+
   h_minlspdist2d = fs->make<TH1F>("h_minlspdist2d", ";min dist2d(gen vtx #i) (cm);events/0.1 mm", 200, 0, 2);
   h_lspdist2d = fs->make<TH1F>("h_lspdist2d", ";dist2d(gen vtx #0, #1) (cm);events/0.1 mm", 200, 0, 2);
   h_lspdist3d = fs->make<TH1F>("h_lspdist3d", ";dist3d(gen vtx #0, #1) (cm);events/0.1 mm", 200, 0, 2);
-  h_gen_bs2ddist = fs->make<TH1F>("h_gen_bs2ddist", ";dist2d(gen vtx, beamspot) (cm);arb. units", 500, 0, 2.5);
-  h_gen_bsxdist_bsydist = fs->make<TH2F>("h_gen_bsxdist_bsydist", "; x-dist(gen vtx, beamspot) (cm); y-dist(gen vtx, beamspot)", 500, -0.5, 0.5, 500, -0.5, 0.5);
 
   h_hlt_bits = fs->make<TH1F>("h_hlt_bits", ";;events", 2*mfv::n_hlt_paths+1, 0, 2*mfv::n_hlt_paths+1);
   h_l1_bits  = fs->make<TH1F>("h_l1_bits",  ";;events", 2*mfv::n_l1_paths +1, 0, 2*mfv::n_l1_paths +1);
-  h_filter_bits  = fs->make<TH1F>("h_filter_bits",  ";;events", 2*mfv::n_filter_paths +1, 0, 2*mfv::n_filter_paths +1);
+  //h_filter_bits  = fs->make<TH1F>("h_filter_bits",  ";;events", 2*mfv::n_filter_paths +1, 0, 2*mfv::n_filter_paths +1);
+  h_filter_bits  = fs->make<TH1F>("h_filter_bits",  ";;events", mfv::n_filter_paths +1, 0, mfv::n_filter_paths +1);
 
   h_hlt_bits->GetXaxis()->SetBinLabel(1, "nevents");
   for (int i = 0; i < mfv::n_hlt_paths; ++i) {
@@ -275,61 +403,12 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   for (int i = 0; i < MAX_NJETS+1; ++i) {
     TString ijet = i == MAX_NJETS ? TString("all") : TString::Format("%i", i);
     h_jet_pt[i] = fs->make<TH1F>(TString::Format("h_jet_pt_%s", ijet.Data()), TString::Format(";p_{T} of jet #%s (GeV);events/10 GeV", ijet.Data()), 200, 0, 2000);
-    h_jet_eta[i] = fs->make<TH1F>(TString::Format("h_jet_eta_%s", ijet.Data()), TString::Format(";absv#eta of jet #%s;events/bin", ijet.Data()), 120, 0, 6);
-    h_jet_phi[i] = fs->make<TH1F>(TString::Format("h_jet_phi_%s", ijet.Data()), TString::Format(";#phi of jet #%s;events/bin", ijet.Data()), 100, -3.1416, 3.1416);
-
-    h_bsort_jet_pt[i] = fs->make<TH1F>(TString::Format("h_bsort_jet_pt_%s", ijet.Data()), TString::Format(";p_{T} of jet w/ #%s highest CSV (GeV);events/10 GeV", ijet.Data()), 200, 0, 2000);
-    h_bsort_jet_eta[i] = fs->make<TH1F>(TString::Format("h_bsort_jet_eta_%s", ijet.Data()), TString::Format(";absv#eta of jet w/ #%s highest CSV;events/bin", ijet.Data()), 130, 0, 2.6);
-    h_bsort_jet_phi[i] = fs->make<TH1F>(TString::Format("h_bsort_jet_phi_%s", ijet.Data()), TString::Format(";#phi of jet w/ #%s highest CSV;events/bin", ijet.Data()), 100, -3.1416, 3.1416);
-    h_bsort_jet_csv[i] = fs->make<TH1F>(TString::Format("h_bsort_jet_csv_%s", ijet.Data()), TString::Format(";CSV of jet w/ #%s highest CSV;events/bin", ijet.Data()), 100, 0, 1.0);
+    h_jet_eta[i] = fs->make<TH1F>(TString::Format("h_jet_eta_%s", ijet.Data()), TString::Format(";#eta of jet #%s (GeV);events/0.05", ijet.Data()), 120, -3, 3);
+    h_jet_phi[i] = fs->make<TH1F>(TString::Format("h_jet_phi_%s", ijet.Data()), TString::Format(";#phi of jet #%s (GeV);events/0.063", ijet.Data()), 100, -3.1416, 3.1416);
   }
-
   h_jet_energy = fs->make<TH1F>("h_jet_energy", ";jets energy (GeV);jets/10 GeV", 200, 0, 2000);
   h_jet_ht = fs->make<TH1F>("h_jet_ht", ";H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
   h_jet_ht_40 = fs->make<TH1F>("h_jet_ht_40", ";H_{T} of jets with p_{T} > 40 GeV;events/25 GeV", 200, 0, 5000);
-
-  for (int i = 0; i < MAX_NJETS+1; ++i) {
-    TString ijet = i == MAX_NJETS ? TString("all") : TString::Format("%i", i);
-    h_calo_jet_pt[i] = fs->make<TH1F>(TString::Format("h_calo_jet_pt_%s", ijet.Data()), TString::Format(";p_{T} of calo jet #%s (GeV);events/10 GeV", ijet.Data()), 200, 0, 2000);
-    h_calo_jet_eta[i] = fs->make<TH1F>(TString::Format("h_calo_jet_eta_%s", ijet.Data()), TString::Format(";abs #eta of calo jet #%s;events/0.05", ijet.Data()), 120, 0, 6);
-    h_calo_jet_phi[i] = fs->make<TH1F>(TString::Format("h_calo_jet_phi_%s", ijet.Data()), TString::Format(";#phi of calo jet #%s;events/0.063", ijet.Data()), 100, -3.1416, 3.1416);
-  }
-
-  h_calo_jet_ht    = fs->make<TH1F>("h_calo_jet_ht",      ";H_{T} of all calo jets;events/25 GeV", 200, 0, 5000);
-  h_calo_jet_ht40  = fs->make<TH1F>("h_calo_jet_ht40",    ";H_{T} of all calo jets w/ p_{T} > 40GeV;events/25 GeV", 200, 0, 5000);
-
-  h_online_calo_jet_ht    = fs->make<TH1F>("h_online_calo_jet_ht",      ";H_{T} of online calo jets;events/25 GeV", 200, 0, 5000);
-  h_online_pf_jet_ht    = fs->make<TH1F>("h_online_pf_jet_ht",      ";H_{T} of online PF jets;events/25 GeV", 200, 0, 5000);
-  h_online_offline_calo_jet_ht = fs->make<TH2F>("h_online_offline_calo_jet_ht", ";H_{T} of online calojets; H_{T} of offline calojets", 200, 0, 5000, 200, 0, 5000);
-  h_online_offline_pf_jet_ht = fs->make<TH2F>("h_online_offline_pf_jet_ht", ";H_{T} of online PF jets; H_{T} of offline PF jets", 200, 0, 5000, 200, 0, 5000);
-
-  h_online_calojet_pt = fs->make<TH1F>("h_online_calojet_pt", ";p_{T} of matched online calojets (GeV);events/bins", 200, 0, 1000);
-  h_online_pfjet_pt   = fs->make<TH1F>("h_online_pfjet_pt", ";p_{T} of matched online PF jets (GeV);events/bins", 200, 0, 1000);
-
-  h_offline_calojet_pt = fs->make<TH1F>("h_offline_calojet_pt", ";p_{T} of matched offline calojets (GeV);events/bins", 200, 0, 300);
-  h_offline_pfjet_pt   = fs->make<TH1F>("h_offline_pfjet_pt", ";p_{T} of matched offline PF jets (GeV);events/bins", 200, 0, 300);
-  h_offline_pfjet_t0   = fs->make<TH1F>("h_offline_pfjet_t0", ";p_{T} of matched offline PF jets (GeV);events/bins", 200, 0, 300);
-  h_offline_pfjet_t1   = fs->make<TH1F>("h_offline_pfjet_t1", ";p_{T} of matched offline PF jets (GeV);events/bins", 200, 0, 300);
-  h_offline_pfjet_t2   = fs->make<TH1F>("h_offline_pfjet_t2", ";p_{T} of matched offline PF jets (GeV);events/bins", 200, 0, 300);
-  h_offline_pfjet_t3   = fs->make<TH1F>("h_offline_pfjet_t3", ";p_{T} of matched offline PF jets (GeV);events/bins", 200, 0, 300);
-
-  h_online_offline_calojet_pt = fs->make<TH2F>("h_online_offline_calojet_pt", ";p_{T} of matched online calojets (GeV); p_{T} of matched offline calojets (GeV)", 200, 0, 1000, 200, 0, 1000);
-
-  for (int i = 0; i < MAX_NJETS+1; ++i) {
-    TString ijet = i == MAX_NJETS ? TString("all") : TString::Format("%i", i);
-    h_online_offline_pfjet_pt[i] = fs->make<TH2F>(TString::Format("h_online_offline_pfjet_pt_%s", ijet.Data()), TString::Format(";p_{T} of online PF jet #%s (GeV); p_{T} of offline PF jet #%s (GeV)", ijet.Data(), ijet.Data()), 200, 0, 1000, 200, 0, 1000);
-    h_online_offline_pfjet_eta[i] = fs->make<TH2F>(TString::Format("h_online_offline_pfjet_eta_%s", ijet.Data()), TString::Format(";#eta of online PF jet #%s; #eta of offline PF jet #%s", ijet.Data(), ijet.Data()), 200, -3, 3, 200, -3, 3);
-    h_online_offline_pfjet_phi[i] = fs->make<TH2F>(TString::Format("h_online_offline_pfjet_phi_%s", ijet.Data()), TString::Format(";#phi of online PF jet #%s; #phi of offline PF jet #%s", ijet.Data(), ijet.Data()), 200, -3.1416, 3.1416, 200, -3.1416, 3.1416);
-    h_online_offline_pfjet_dpt[i] = fs->make<TH1F>(TString::Format("h_online_offline_pfjet_dpt_%s", ijet.Data()), TString::Format(";#Deltap_{T} (online-offline) of PF jet #%s (GeV);entries/bin", ijet.Data()), 200, -100.0, 100.0);
-    h_online_offline_pfjet_deta[i] = fs->make<TH1F>(TString::Format("h_online_offline_pfjet_deta_%s", ijet.Data()), TString::Format(";#Delta#eta (online-offline) of PF jet #%s;entries/bin", ijet.Data()), 200, -1.0, 1.0);
-    h_online_offline_pfjet_dphi[i] = fs->make<TH1F>(TString::Format("h_online_offline_pfjet_dphi_%s", ijet.Data()), TString::Format(";#Delta#phi (online-offline) of PF jet #%s;entries/bin", ijet.Data()), 200, -1.0, 1.0);
-  }
-
-  h_ncalojet_online_offline = fs->make<TH2F>("h_ncalojet_online_offline", ";N(ak4CaloJetsCorrected);  N(slimmedCaloJets)", 60, 0, 60, 60, 0, 60);
-  h_ncalojet_idp_online_offline = fs->make<TH2F>("h_ncalojet_idp_online_offline", ";N(ak4CaloJetsCorrectedIdPassed); N(slimmedCaloJets)", 60, 0, 60, 60, 0, 60);
-  h_calojet_ndiff_htdiff = fs->make<TH2F>("h_calojet_ndiff_htdiff", ";N(ak4CaloJetsCorrected) - N(slimmedCaloJets); HT(Online) - HT(Offline) (GeV)", 100, -50, 50, 300, -300, 300); 
-  h_idp_calojet_ndiff_htdiff = fs->make<TH2F>("h_idp_calojet_ndiff_htdiff", ";N(ak4CaloJetsCorrectedIdPassed) - N(slimmedCaloJets); HT(Online) - HT(Offline) (GeV)", 100, -50, 50, 300, -300, 300);
-
 
   h_jet_pairdphi = fs->make<TH1F>("h_jet_pairdphi", ";jet pair #Delta#phi (rad);jet pairs/.063", 100, -3.1416, 3.1416);
   h_jet_pairdeta = fs->make<TH1F>("h_jet_pairdeta", ";jet pair #Delta#eta ;jet pairs/.1", 100, -5.0, 5.0);
@@ -391,35 +470,23 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   }
 }
 
-struct Jet_BHelper {
-    float pt  = 0.0;
-    float eta = 0.0;
-    float phi = 0.0;
-    float csv = 0.0;
-};
-
 void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
-
   edm::Handle<MFVEvent> mevent;
   event.getByToken(mevent_token, mevent);
+
+  edm::Handle<MFVVertexAuxCollection> auxes;
+  event.getByToken(vertex_token, auxes);
+
+  
+  const int nsv = int(auxes->size());
 
   edm::Handle<double> weight;
   event.getByToken(weight_token, weight);
   const double w = *weight;
-
-  Jet_BHelper jetHelper[MAX_NJETS];
-  for (int i=0; i < MAX_NJETS; i++) {
-    jetHelper[i].pt  = mevent->nth_jet_pt(i);
-    jetHelper[i].eta = fabs(mevent->nth_jet_eta(i));
-    jetHelper[i].phi = mevent->nth_jet_phi(i);
-    jetHelper[i].csv = (i < (int)(mevent->jet_bdisc_old.size()) ? mevent->jet_bdisc_old[i] : -9.9);
-  }
-  std::sort(jetHelper, jetHelper+MAX_NJETS, [](Jet_BHelper const &a, Jet_BHelper &b) -> bool{ return a.csv > b.csv; } );
-
   h_w->Fill(w);
 
+  h_nsv->Fill(nsv, w);
   //////////////////////////////////////////////////////////////////////////////
-
 
   h_gen_decay->Fill(mevent->gen_decay_type[0], mevent->gen_decay_type[1], w);
   h_gen_flavor_code->Fill(mevent->gen_flavor_code, w);
@@ -436,16 +503,391 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       h_bquark_pairdeta->Fill(std::max(mevent->gen_bquarks[i].Eta(), mevent->gen_bquarks[j].Eta()) - std::min(mevent->gen_bquarks[i].Eta(),  mevent->gen_bquarks[j].Eta()), w);
     }
   }
-  for (int igenv = 0; igenv < 2; ++igenv) {
-    double genx = mevent->gen_lsp_decay[igenv*3+0];
-    double geny = mevent->gen_lsp_decay[igenv*3+1];
-    double genz = mevent->gen_lsp_decay[igenv*3+2];
-    double genbs2ddist = mevent->mag(genx - mevent->bsx_at_z(genz),
-                                     geny - mevent->bsy_at_z(genz) 
-        );
-    h_gen_bs2ddist->Fill(genbs2ddist, w);
-    h_gen_bsxdist_bsydist->Fill(genx - mevent->bsx_at_z(genz), geny - mevent->bsy_at_z(genz), w);
+
+  // overview before studies 
+  h_n_gen_bvtx->Fill(int((mevent->gen_b_llp0_decay.size()+ mevent->gen_b_llp1_decay.size())/3), w);
+  
+  
+  
+	  
+  if (mevent->gen_bchain_nonb_had_eta.size() == 4) {
+
+	  for (int isv = 0; isv < nsv; ++isv) {
+
+		  const MFVVertexAux& aux = auxes->at(isv);
+		  h_gvtx_sv_ntrack->Fill(aux.ntracks(), w);
+	  }
+	  h_gvtx_nsv->Fill(nsv, w);
+	  if (nsv > 0) {
+		  h_gvtx_njet->Fill(mevent->njets(20), w);
+		  for (int i = 0; i < 3; ++i) {
+			  h_nbtags[i]->Fill(mevent->nbtags(i), w);
+			  h_nbtags_v_bquark_code[i]->Fill(mevent->gen_flavor_code, mevent->nbtags(i), w);
+		  }
+
+
+		  size_t shared_bjet = 0;
+		  size_t shared_loosebtaggedjet = 0;
+
+		  bool all_bboost = true;
+		  std::vector<size_t> vec_lowpT_bquark = {};
+		  
+		  std::vector<size_t> vec_bquark_jet = {};
+		  std::vector<size_t> vec_bquark_jet_no_duplicate = {};
+		  std::vector<size_t> vec_loosebtagged_jet_no_duplicate = {};
+		  
+		  std::vector<size_t> vec_no_shared_loosebtaggedjet_nm1_dxy_or_not = {};
+		  std::vector<size_t> vec_shared_loosebtaggedjet_nm1_dxy_or_not = {};
+
+		  std::vector<size_t> vec_no_shared_loosebtaggedjet_nm1_pT_or_not = {};
+		  std::vector<size_t> vec_shared_loosebtaggedjet_nm1_pT_or_not = {};
+		  
+		  // start imposing a b-qaurk with pT > 20 GeV to get a "b-quark" jet or our GEN jet 
+		  for (size_t i = 0; i < 4; ++i) {
+              if (mevent->gen_daughters[i].Pt() < 20) {
+				  all_bboost = false;
+				  vec_lowpT_bquark.push_back(i);
+				  continue;
+			  }
+
+			  double mindR_bquark = 4.0;
+			  size_t bquark_jet = 0;
+			  for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+				  if (mevent->jet_pt[ijet] < 20.0)  // Jets have a cut at 20 GeV
+					  continue;
+				  
+				  if (reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->gen_daughters[i].Eta(), mevent->gen_daughters[i].Phi()) < mindR_bquark) {
+					  mindR_bquark = reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->gen_daughters[i].Eta(), mevent->gen_daughters[i].Phi());
+					  bquark_jet = ijet;
+				  }
+
+
+			  }
+
+			  // condition we have found a GEN bjet matching with a b-quark with pT > 20 GeV 
+			  if (mindR_bquark < 0.4) {
+
+				  
+				  vec_bquark_jet.push_back(bquark_jet);
+				  vec_bquark_jet_no_duplicate.push_back(bquark_jet);
+				  if (std::count(vec_bquark_jet.begin(), vec_bquark_jet.end(), bquark_jet) == 2) {
+					  shared_bjet = 1;
+					  vec_bquark_jet_no_duplicate.pop_back();
+				  }
+
+				 
+				  double mindR_dau = 0.4;
+				  for (size_t j = 0; j < mevent->gen_bchain_nonb_had_eta[i].size(); ++j) {
+					  double dR_dau = reco::deltaR(mevent->gen_bchain_nonb_had_eta[i][j], mevent->gen_bchain_nonb_had_phi[i][j], mevent->jet_eta[bquark_jet], mevent->jet_phi[bquark_jet]);
+					  if (dR_dau < mindR_dau) {
+						  mindR_dau = dR_dau;
+					  }
+				  }
+
+				  
+				  size_t jet_all_ntrack = 0;
+				  size_t jet_seed_ntrack = 0;
+				  
+				  for (size_t j = 0; j < mevent->jet_track_which_jet.size(); ++j) {
+					  if (bquark_jet == mevent->jet_track_which_jet[j]) {
+						  jet_all_ntrack++;
+						  h_gvtx_all_track_pt_from_jets_wcut->Fill(mevent->jet_track_pt(j), w);
+						  h_gvtx_all_track_sigmadxybs_from_jets_wcut->Fill(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j], w);
+						  h_gvtx_all_track_npxhits_from_jets_wcut->Fill(mevent->jet_track_npxhits(j), w);
+						  h_gvtx_all_track_nsthits_from_jets_wcut->Fill(mevent->jet_track_nsthits(j), w);
+						  h_gvtx_all_track_npxlayers_from_jets_wcut->Fill(mevent->jet_track_npxlayers(j), w);
+						  h_gvtx_all_track_nstlayers_from_jets_wcut->Fill(mevent->jet_track_nstlayers(j), w);
+						  h_gvtx_all_track_rmin_from_jets_wcut->Fill(mevent->jet_track_hp_rmin[j], w);
+						  
+						  if (mevent->jet_track_npxlayers(j) > 1 && mevent->jet_track_nstlayers(j) > 5 && fabs(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j]) > 4 && mevent->jet_track_hp_rmin[j] == 1)
+							  h_gvtx_jet_seed_nm1_pt_from_jets_wcut->Fill(mevent->jet_track_pt(j), w);
+						  if (mevent->jet_track_nstlayers(j) > 5 && fabs(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j]) > 4 && mevent->jet_track_pt(j) > 1 && mevent->jet_track_hp_rmin[j] == 1)
+							  h_gvtx_jet_seed_nm1_npxlayers_from_jets_wcut->Fill(mevent->jet_track_npxlayers(j), w);
+						  if (mevent->jet_track_npxlayers(j) > 1 && fabs(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j]) > 4 && mevent->jet_track_pt(j) > 1 && mevent->jet_track_hp_rmin[j] == 1)
+							  h_gvtx_jet_seed_nm1_nstlayers_from_jets_wcut->Fill(mevent->jet_track_nstlayers(j), w);
+						  if (mevent->jet_track_npxlayers(j) > 1 && mevent->jet_track_nstlayers(j) > 5 && mevent->jet_track_pt(j) > 1 && mevent->jet_track_hp_rmin[j] == 1)
+							  h_gvtx_jet_seed_nm1_sigmadxybs_from_jets_wcut->Fill(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j], w);
+
+						  if (mevent->jet_track_npxlayers(j) > 1 && mevent->jet_track_nstlayers(j) > 5 && mevent->jet_track_pt(j) > 1 && fabs(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j]) > 4)
+							  h_gvtx_jet_seed_nm1_rmin_from_jets_wcut->Fill(mevent->jet_track_hp_rmin[j], w);
+
+						  
+										  
+						  if (fabs(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j]) > 4) {
+							  jet_seed_ntrack++;
+							  h_gvtx_jet_seed_track_pT_from_jets_wcut->Fill(mevent->jet_track_pt(j), w);
+							  h_gvtx_jet_seed_track_sigmadxybs_from_jets_wcut->Fill(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j], w);
+							  h_gvtx_jet_seed_track_npxlayers_from_jets_wcut->Fill(mevent->jet_track_npxlayers(j), w);
+						      h_gvtx_jet_seed_track_nstlayers_from_jets_wcut->Fill(mevent->jet_track_nstlayers(j), w);
+							  h_gvtx_jet_seed_track_rmin_from_jets_wcut->Fill(mevent->jet_track_hp_rmin[j], w);			  
+						  }
+									  
+								  
+							  
+						  
+
+					  }
+				  }
+
+				  
+				  h_gvtx_is_tight_btag_per_bjet_or_not_wcut->Fill(mevent->is_btagged(bquark_jet, 2), w);
+				  h_gvtx_is_medium_btag_per_bjet_or_not_wcut->Fill(mevent->is_btagged(bquark_jet, 1), w);
+				  h_gvtx_is_loose_btag_per_bjet_or_not_wcut->Fill(mevent->is_btagged(bquark_jet, 0), w);
+
+
+				  if (jet_all_ntrack > 0)
+					  h_gvtx_all_ntrack_from_jets_wcut->Fill(jet_all_ntrack, w);
+				  
+			  }
+			  
+			  // trying to get a resolution of 3d distance b/w GEN b-decay vertex and reconstructed vertex 
+			  double min_sv_dist3d_bvtx = 100;
+			  for (int isv = 0; isv < nsv; ++isv) {
+				  const MFVVertexAux& aux = auxes->at(isv);
+
+				  double dR_b_sv_dist3d = 0.0;
+				  if (i == 0) {
+					  dR_b_sv_dist3d = sqrt(pow(mevent->gen_b_llp0_decay[0] - aux.x, 2) + pow(mevent->gen_b_llp0_decay[1] - aux.y, 2) + pow(mevent->gen_b_llp0_decay[2] - aux.z, 2));
+				  }
+				  else if (i == 1) {
+					  dR_b_sv_dist3d = sqrt(pow(mevent->gen_b_llp0_decay[3] - aux.x, 2) + pow(mevent->gen_b_llp0_decay[4] - aux.y, 2) + pow(mevent->gen_b_llp0_decay[5] - aux.z, 2));
+				  }
+				  else if (i == 2) {
+					  dR_b_sv_dist3d = sqrt(pow(mevent->gen_b_llp1_decay[0] - aux.x, 2) + pow(mevent->gen_b_llp1_decay[1] - aux.y, 2) + pow(mevent->gen_b_llp1_decay[2] - aux.z, 2));
+				  }
+				  else {
+					  dR_b_sv_dist3d = sqrt(pow(mevent->gen_b_llp1_decay[3] - aux.x, 2) + pow(mevent->gen_b_llp1_decay[4] - aux.y, 2) + pow(mevent->gen_b_llp1_decay[5] - aux.z, 2));
+				  }
+
+				  if (min_sv_dist3d_bvtx > dR_b_sv_dist3d) {
+					  min_sv_dist3d_bvtx = dR_b_sv_dist3d;
+				  }
+			  }
+
+			  h_gvtx_sv_bquark_dist3d_wcut->Fill(min_sv_dist3d_bvtx, w);
+
+
+		  }
+
+		  h_gvtx_nbquarkjet_wcut->Fill(vec_bquark_jet_no_duplicate.size(), w);
+		  
+		  // no cuts on GEN-level are applied, looking at all loose-btagged jets 
+		  for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+			  if (mevent->jet_pt[ijet] < 0.0)  // Jets have a cut at 20 GeV
+				  continue;
+
+
+			  if (mevent->is_btagged(ijet, 0)) {
+
+				  std::vector<size_t> vec_isv_btag0_jet = {};
+				  size_t jet_seed_ntrack = 0;
+				  size_t jet_nm1_nsigmadxy_seed_ntrack = 0;
+				  size_t jet_nm1_pT_seed_ntrack = 0;
+				  for (size_t j = 0; j < mevent->jet_track_which_jet.size(); ++j) {
+					  if (ijet == mevent->jet_track_which_jet[j]) {
+						  if (mevent->jet_track_npxlayers(j) > 1 && mevent->jet_track_nstlayers(j) > 5 && mevent->jet_track_pt(j) > 1 && mevent->jet_track_hp_rmin[j] == 1) {
+							  jet_nm1_nsigmadxy_seed_ntrack++;
+							  if (fabs(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j]) > 4) {
+								  jet_seed_ntrack++;
+
+								  for (int isv = 0; isv < nsv; ++isv) {
+
+									  const MFVVertexAux& aux = auxes->at(isv);
+
+									  for (int itk = 0; itk < aux.ntracks(); ++itk) {
+
+
+										  if (fabs(aux.track_pt(itk) - fabs(mevent->jet_track_qpt[j])) < 0.0001 &&
+											  fabs(aux.track_eta[itk] - mevent->jet_track_eta[j]) < 0.0001 &&
+											  fabs(aux.track_phi[itk] - mevent->jet_track_phi[j]) < 0.0001) {
+											  vec_isv_btag0_jet.push_back(isv);
+										  }
+									  }
+
+								  }
+
+							  }
+						  }
+
+						  if (mevent->jet_track_npxlayers(j) > 1 && mevent->jet_track_nstlayers(j) > 5 && mevent->jet_track_pt(j) > 0.5 && fabs(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j]) > 4 && mevent->jet_track_hp_rmin[j] == 1) {
+							  jet_nm1_pT_seed_ntrack++;
+						  }
+
+
+					  }
+				  }
+
+				  int nbsv_by_btag0_jet = 0;
+				  int nloosebsv_by_btag0_jet = 0;
+				  std::vector<size_t> vec_ntrack_loosebsv = {};
+				  std::vector<size_t> vec_jet_seedtrack_loosebsv = {};
+
+				  for (int isv = 0; isv < nsv; ++isv) {
+					  const MFVVertexAux& aux = auxes->at(isv);
+					  int jet_seed_ntrack_from_trk_bsv = std::count(vec_isv_btag0_jet.begin(), vec_isv_btag0_jet.end(), isv);
+					  if (jet_seed_ntrack_from_trk_bsv == aux.ntracks()) {
+						  nbsv_by_btag0_jet++;
+					  }
+					  if (jet_seed_ntrack_from_trk_bsv >= 1) {
+						  nloosebsv_by_btag0_jet++;
+						  vec_ntrack_loosebsv.push_back(aux.ntracks());
+						  vec_jet_seedtrack_loosebsv.push_back(jet_seed_ntrack_from_trk_bsv);
+					  }
+					  
+
+				  }
+
+				  int count_match = 0;
+				  for (size_t i = 0; i < 4; ++i) {
+					  if (reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->gen_daughters[i].Eta(), mevent->gen_daughters[i].Phi()) < 0.4) {
+						  count_match++;
+						  if (std::count(vec_loosebtagged_jet_no_duplicate.begin(), vec_loosebtagged_jet_no_duplicate.end(), ijet) == 0) {
+							  vec_loosebtagged_jet_no_duplicate.push_back(ijet);
+						  }
+					  }
+				  }
+				  if (count_match >= 2) {
+					  shared_loosebtaggedjet = 1;
+					  h_gvtx_seed_tracks_per_shared_jet->Fill(jet_seed_ntrack, w);
+					  h_gvtx_nm1_nsigmadxy_seed_tracks_per_shared_jet->Fill(jet_nm1_nsigmadxy_seed_ntrack, w);
+					  h_gvtx_nm1_pT_seed_tracks_per_shared_jet->Fill(jet_nm1_pT_seed_ntrack, w);
+
+					  if (jet_nm1_nsigmadxy_seed_ntrack >= 5) {
+						  vec_shared_loosebtaggedjet_nm1_dxy_or_not.push_back(0);
+					  }
+
+					  if (jet_nm1_pT_seed_ntrack >= 5) {
+						  vec_shared_loosebtaggedjet_nm1_pT_or_not.push_back(0);
+					  }
+					  
+					  if (jet_seed_ntrack >= 5) {
+						  vec_shared_loosebtaggedjet_nm1_dxy_or_not.push_back(1);
+					  }
+
+					  h_gvtx_shared_loosebtaggedjet_nm1_nbsv->Fill(nbsv_by_btag0_jet, w);
+					  h_gvtx_shared_loosebtaggedjet_nm1_nloosebsv->Fill(nloosebsv_by_btag0_jet, w);
+
+					  for (size_t i = 0; i < vec_ntrack_loosebsv.size(); ++i) {
+						  h_2D_gvtx_shared_loosebtaggedjet_nm1_ntrack_loosebsv->Fill(vec_ntrack_loosebsv[i], vec_jet_seedtrack_loosebsv[i], w);
+					  }
+
+					  if (std::count(vec_bquark_jet_no_duplicate.begin(), vec_bquark_jet_no_duplicate.end(), ijet) == 1)
+						 h_gvtx_shared_loosebtaggedjet_nm1_bquarkjet_or_not->Fill(1.0, w);
+					  else
+						 h_gvtx_shared_loosebtaggedjet_nm1_bquarkjet_or_not->Fill(0.0, w);
+
+				  }
+				  else if (count_match == 1) {
+					  h_gvtx_seed_tracks_per_no_shared_jet->Fill(jet_seed_ntrack, w);
+					  h_gvtx_nm1_nsigmadxy_seed_tracks_per_no_shared_jet->Fill(jet_nm1_nsigmadxy_seed_ntrack, w);
+					  h_gvtx_nm1_pT_seed_tracks_per_no_shared_jet->Fill(jet_nm1_pT_seed_ntrack, w);
+
+					  if (jet_nm1_nsigmadxy_seed_ntrack >= 3) {
+						  vec_no_shared_loosebtaggedjet_nm1_dxy_or_not.push_back(0);
+					  }
+
+					  if (jet_nm1_pT_seed_ntrack >= 3) {
+						  vec_no_shared_loosebtaggedjet_nm1_pT_or_not.push_back(0);
+					  }
+
+					  if (jet_seed_ntrack >= 3) {
+						  vec_no_shared_loosebtaggedjet_nm1_dxy_or_not.push_back(1);
+					  }
+
+					  h_gvtx_no_shared_loosebtaggedjet_nm1_nbsv->Fill(nbsv_by_btag0_jet, w);
+					  h_gvtx_no_shared_loosebtaggedjet_nm1_nloosebsv->Fill(nloosebsv_by_btag0_jet, w);
+
+					  for (size_t i = 0; i < vec_ntrack_loosebsv.size(); ++i) {
+						  h_2D_gvtx_no_shared_loosebtaggedjet_nm1_ntrack_loosebsv->Fill(vec_ntrack_loosebsv[i], vec_jet_seedtrack_loosebsv[i], w);
+					  }
+
+					  if (std::count(vec_bquark_jet_no_duplicate.begin(), vec_bquark_jet_no_duplicate.end(), ijet) == 1)
+						  h_gvtx_no_shared_loosebtaggedjet_nm1_bquarkjet_or_not->Fill(1.0, w);
+					  else
+						  h_gvtx_no_shared_loosebtaggedjet_nm1_bquarkjet_or_not->Fill(0.0, w);
+				  }
+
+				  else {
+
+					  h_gvtx_seed_tracks_per_no_matched_jet->Fill(jet_seed_ntrack, w);
+					  h_gvtx_nm1_nsigmadxy_seed_tracks_per_no_matched_jet->Fill(jet_nm1_nsigmadxy_seed_ntrack, w);
+					  h_gvtx_nm1_pT_seed_tracks_per_no_matched_jet->Fill(jet_nm1_pT_seed_ntrack, w);
+
+					  if (jet_nm1_nsigmadxy_seed_ntrack >= 3) {
+						  vec_no_shared_loosebtaggedjet_nm1_dxy_or_not.push_back(0);
+					  }
+
+					  if (jet_nm1_pT_seed_ntrack >= 3) {
+						  vec_no_shared_loosebtaggedjet_nm1_pT_or_not.push_back(0);
+					  }
+
+					  if (jet_seed_ntrack >= 3) {
+						  vec_no_shared_loosebtaggedjet_nm1_dxy_or_not.push_back(1);
+					  }
+
+					  h_gvtx_no_matched_loosebtaggedjet_nm1_nbsv->Fill(nbsv_by_btag0_jet, w);
+					  h_gvtx_no_matched_loosebtaggedjet_nm1_nloosebsv->Fill(nloosebsv_by_btag0_jet, w);
+
+					  for (size_t i = 0; i < vec_ntrack_loosebsv.size(); ++i) {
+						  h_2D_gvtx_no_matched_loosebtaggedjet_nm1_ntrack_loosebsv->Fill(vec_ntrack_loosebsv[i], vec_jet_seedtrack_loosebsv[i], w);
+					  }
+
+					  if (std::count(vec_bquark_jet_no_duplicate.begin(), vec_bquark_jet_no_duplicate.end(), ijet) == 1)
+						  h_gvtx_no_matched_loosebtaggedjet_nm1_bquarkjet_or_not->Fill(1.0, w);
+					  else
+						  h_gvtx_no_matched_loosebtaggedjet_nm1_bquarkjet_or_not->Fill(0.0, w);
+
+				  }
+
+
+			  }
+
+		  }
+
+		  h_gvtx_nloosebtaggedjet_wcut->Fill(vec_loosebtagged_jet_no_duplicate.size(), w);
+
+		  if (all_bboost == true) {
+			  h_gvtx_nloosebtaggedjet_bboost_wcut->Fill(mevent->nbtags(0), w);
+			  h_gvtx_shared_loosebtaggedjet_or_not_bboost_wcut->Fill(shared_loosebtaggedjet, w);
+		  }
+		  h_gvtx_shared_bjet_or_not->Fill(shared_bjet, w);
+		  h_gvtx_shared_loosebtaggedjet_or_not->Fill(shared_loosebtaggedjet, w);
+
+		  // in the following estimate of resonstructed bSVs nd LLPs, we don't require no shared loose b-tagged jet	to match to a b-quark 
+
+		  size_t count_no_shared_jet_pass_nm1_dxy = std::count(vec_no_shared_loosebtaggedjet_nm1_dxy_or_not.begin(), vec_no_shared_loosebtaggedjet_nm1_dxy_or_not.end(), 0);
+		  size_t count_no_shared_jet_pass_nm1_pT = std::count(vec_no_shared_loosebtaggedjet_nm1_pT_or_not.begin(), vec_no_shared_loosebtaggedjet_nm1_pT_or_not.end(), 0);
+		  size_t count_no_shared_jet_pass_seed = std::count(vec_no_shared_loosebtaggedjet_nm1_dxy_or_not.begin(), vec_no_shared_loosebtaggedjet_nm1_dxy_or_not.end(), 1);
+		  size_t count_shared_jet_pass_nm1_dxy = std::count(vec_shared_loosebtaggedjet_nm1_dxy_or_not.begin(), vec_shared_loosebtaggedjet_nm1_dxy_or_not.end(), 0);
+		  size_t count_shared_jet_pass_nm1_pT = std::count(vec_shared_loosebtaggedjet_nm1_pT_or_not.begin(), vec_shared_loosebtaggedjet_nm1_pT_or_not.end(), 0);
+		  size_t count_shared_jet_pass_seed = std::count(vec_shared_loosebtaggedjet_nm1_dxy_or_not.begin(), vec_shared_loosebtaggedjet_nm1_dxy_or_not.end(), 1);
+
+		  if (vec_no_shared_loosebtaggedjet_nm1_dxy_or_not.size() > 0 || vec_shared_loosebtaggedjet_nm1_dxy_or_not.size() > 0) {
+
+			  if (count_no_shared_jet_pass_nm1_dxy >= 1 || count_shared_jet_pass_nm1_dxy >= 1) {
+				  h_gvtx_nm1_nsigmadxy_pass_event_ratio_npotentialbsv_nbquark->Fill((count_no_shared_jet_pass_nm1_dxy + (2*(count_shared_jet_pass_nm1_dxy)))/(4.0 - vec_lowpT_bquark.size()), w);
+			  }
+
+			  if (count_no_shared_jet_pass_nm1_pT >= 1 || count_shared_jet_pass_nm1_pT >= 1) {
+				  h_gvtx_nm1_pT_pass_event_ratio_npotentialbsv_nbquark->Fill((count_no_shared_jet_pass_nm1_pT + (2 * (count_shared_jet_pass_nm1_pT)))/( 4.0 - vec_lowpT_bquark.size()), w);
+			  }
+
+
+			  if (count_no_shared_jet_pass_seed >= 1 || count_shared_jet_pass_seed >= 1) {
+				  h_gvtx_pass_event_ratio_npotentialbsv_nbquark->Fill((count_no_shared_jet_pass_seed + (2 * (count_shared_jet_pass_seed)))/( 4.0 - vec_lowpT_bquark.size()), w);
+			  }
+
+
+		  }
+
+		  h_gvtx_nm1_nsigmadxy_npotentialsv->Fill(count_no_shared_jet_pass_nm1_dxy / 2.0 + count_shared_jet_pass_nm1_dxy, w);
+		  h_gvtx_nm1_pT_npotentialsv->Fill(count_no_shared_jet_pass_nm1_pT / 2.0 + count_shared_jet_pass_nm1_pT, w);
+		  h_gvtx_seed_npotentialsv->Fill(count_no_shared_jet_pass_seed / 2.0 + count_shared_jet_pass_seed, w);
+	  }
+
   }
+	  
+  
   h_minlspdist2d->Fill(mevent->minlspdist2d(), w);
   h_lspdist2d->Fill(mevent->lspdist2d(), w);
   h_lspdist3d->Fill(mevent->lspdist3d(), w);
@@ -525,135 +967,27 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   for (int i = 0; i < MAX_NJETS; ++i) {
     h_jet_pt[i]->Fill(mevent->nth_jet_pt(i), w);
-    h_jet_eta[i]->Fill(fabs(mevent->nth_jet_eta(i)), w);
+    h_jet_eta[i]->Fill(mevent->nth_jet_eta(i), w);
     h_jet_phi[i]->Fill(mevent->nth_jet_phi(i), w);
   }
-
-  for (int i = 0; i < MAX_NJETS; ++i) {
-    h_bsort_jet_pt[i]->Fill(jetHelper[i].pt, w);
-    h_bsort_jet_eta[i]->Fill(jetHelper[i].eta, w);
-    h_bsort_jet_phi[i]->Fill(jetHelper[i].phi, w);
-    h_bsort_jet_csv[i]->Fill(jetHelper[i].csv, w);
-  }
-
   h_jet_ht->Fill(mevent->jet_ht(mfv::min_jet_pt), w);
   h_jet_ht_40->Fill(mevent->jet_ht(40), w);
-
-  float alt_pf_ht = 0.0;
-  unsigned int n_online_pfjets = mevent->hlt_pf_jet_pt.size();
 
   for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
     if (mevent->jet_pt[ijet] < mfv::min_jet_pt)
       continue;
     h_jet_pt[MAX_NJETS]->Fill(mevent->jet_pt[ijet], w);
-    h_jet_eta[MAX_NJETS]->Fill(fabs(mevent->jet_eta[ijet]), w);
+    h_jet_eta[MAX_NJETS]->Fill(mevent->jet_eta[ijet], w);
     h_jet_phi[MAX_NJETS]->Fill(mevent->jet_phi[ijet], w);
-
-
     h_jet_energy->Fill(mevent->jet_energy[ijet], w);
     for (size_t jjet = ijet+1; jjet < mevent->jet_id.size(); ++jjet) {
-      //if (mevent->jet_pt[jjet] < mfv::min_jet_pt)
-      //  continue;
+      if (mevent->jet_pt[jjet] < mfv::min_jet_pt)
+        continue;
       h_jet_pairdphi->Fill(reco::deltaPhi(mevent->jet_phi[ijet], mevent->jet_phi[jjet]), w);
       h_jet_pairdeta->Fill(std::max(mevent->jet_eta[ijet], mevent->jet_eta[jjet]) - std::min(mevent->jet_eta[ijet], mevent->jet_eta[jjet]), w);
       h_jet_pairdr->Fill(reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->jet_eta[jjet], mevent->jet_phi[jjet]), w);
     }
-
-    if (ijet > n_online_pfjets) continue;
-
-//    if ((fabs(mevent->hlt_pf_jet_eta[ijet] - mevent->jet_eta[ijet]) > 0.0) and (fabs(mevent->hlt_pf_jet_phi[ijet] - mevent->jet_phi[ijet]) > 0.0)){
-    if (false) { //FIXME
-      h_online_offline_pfjet_pt[ijet]->Fill(mevent->hlt_pf_jet_pt[ijet], mevent->jet_pt[ijet], w);
-      h_online_offline_pfjet_eta[ijet]->Fill(mevent->hlt_pf_jet_eta[ijet], mevent->jet_eta[ijet], w);
-      h_online_offline_pfjet_phi[ijet]->Fill(mevent->hlt_pf_jet_phi[ijet], mevent->jet_phi[ijet], w);
-      h_online_offline_pfjet_dpt[ijet]->Fill(mevent->hlt_pf_jet_pt[ijet] - mevent->jet_pt[ijet], w);
-      h_online_offline_pfjet_deta[ijet]->Fill(mevent->hlt_pf_jet_eta[ijet] - mevent->jet_eta[ijet], w);
-      h_online_offline_pfjet_dphi[ijet]->Fill(mevent->hlt_pf_jet_phi[ijet] - mevent->jet_phi[ijet], w);
-    }
-
-    // Find closest match between online/offline pfjets
-    if (mevent->jet_pt[ijet] > 30.0) alt_pf_ht += mevent->jet_pt[ijet];
-    if (fabs(mevent->jet_eta[ijet]) > 2.5) continue;
-    float match_dR = 0.5;
-    float match_online_pt  = -1.0;
-    float match_offline_pt = -1.0;
-
-    for (unsigned int ojet = 0; ojet < n_online_pfjets; ojet++) {
-        double temp_deta = fabs(mevent->hlt_pf_jet_eta[ojet] - mevent->nth_jet_eta(ijet));
-        double temp_dphi = fabs(TVector2::Phi_mpi_pi(mevent->hlt_pf_jet_phi[ojet] - mevent->nth_jet_phi(ijet)));
-        double temp_dR   = std::hypot(temp_deta, temp_dphi);
-
-        if (temp_dR < match_dR) {
-          match_dR = temp_dR;
-          match_online_pt  = mevent->hlt_pf_jet_pt[ojet];
-          match_offline_pt = mevent->nth_jet_pt(ijet);
-        }
-    }
-    
-    h_online_pfjet_pt->Fill(match_online_pt, w);
-    h_offline_pfjet_pt->Fill(match_offline_pt, w);
-
-    if (match_online_pt > 75.0) h_offline_pfjet_t0->Fill(match_offline_pt, w);
-    if (match_online_pt > 60.0) h_offline_pfjet_t1->Fill(match_offline_pt, w);
-    if (match_online_pt > 45.0) h_offline_pfjet_t2->Fill(match_offline_pt, w);
-    if (match_online_pt > 40.0) h_offline_pfjet_t3->Fill(match_offline_pt, w);
-
   }
-
-  // Shaun FIXME - Alternative definition of HT (jets must have |eta| < 2.5)
-  float alt_calo_ht = 0.0;
-  for (size_t ijet = 0; ijet < mevent->calo_jet_pt.size(); ijet++) {
-    if ((mevent->calo_jet_pt[ijet] > 30.0) and ( fabs(mevent->calo_jet_eta[ijet]) < 2.5)) alt_calo_ht += mevent->calo_jet_pt[ijet];
-  }
-
-  h_online_calo_jet_ht->Fill(mevent->hlt_caloht, w);
-  h_online_pf_jet_ht->Fill(mevent->hlt_ht, w);
-
-  h_online_offline_calo_jet_ht->Fill(mevent->hlt_caloht, alt_calo_ht, w);
-  h_online_offline_pf_jet_ht->Fill(mevent->hlt_ht, alt_pf_ht, w);
-
-  h_ncalojet_online_offline->Fill(mevent->hlt_calo_jet_pt.size(), mevent->calo_jet_pt.size(), w);
-  h_ncalojet_idp_online_offline->Fill(mevent->hlt_idp_calo_jet_pt.size(), mevent->calo_jet_pt.size(), w);
-  h_calojet_ndiff_htdiff->Fill((int)(mevent->hlt_calo_jet_pt.size() - mevent->calo_jet_pt.size()), mevent->hlt_caloht - alt_calo_ht, w);
-  h_idp_calojet_ndiff_htdiff->Fill((int)(mevent->hlt_idp_calo_jet_pt.size() - mevent->calo_jet_pt.size()), mevent->hlt_caloht - alt_calo_ht, w);
-
-  for (size_t icjet = 0; icjet < mevent->calo_jet_pt.size(); ++icjet) {
-    h_calo_jet_pt[MAX_NJETS]->Fill(mevent->calo_jet_pt[icjet], w);
-    h_calo_jet_eta[MAX_NJETS]->Fill(fabs(mevent->calo_jet_eta[icjet]), w);
-    h_calo_jet_phi[MAX_NJETS]->Fill(mevent->calo_jet_phi[icjet], w);
-
-    if (icjet >= MAX_NJETS) continue;
-
-    h_calo_jet_pt[icjet]->Fill(mevent->calo_jet_pt[icjet], w);
-    h_calo_jet_eta[icjet]->Fill(fabs(mevent->calo_jet_eta[icjet]), w);
-    h_calo_jet_phi[icjet]->Fill(mevent->calo_jet_phi[icjet], w);
-
-    // Find closest match between online/offline calojets
-    TLorentzVector offline_vec(mevent->calo_jet_pt[icjet], mevent->calo_jet_eta[icjet], mevent->calo_jet_phi[icjet], mevent->calo_jet_energy[icjet]);
-    float match_dR = 1.0;
-    float match_online_pt  = -1.0;
-    float match_offline_pt = -1.0;
-    int n_online_calojets = mevent->hlt_calo_jet_pt.size();
-
-    for (int ojet = 0; ojet < n_online_calojets; ojet++) {
-        TLorentzVector online_vec(mevent->hlt_calo_jet_pt[ojet], mevent->hlt_calo_jet_eta[ojet], mevent->hlt_calo_jet_phi[ojet], mevent->hlt_calo_jet_energy[ojet]);
-        float temp_dR = offline_vec.DeltaR(online_vec);
-        
-        if (temp_dR < match_dR) {
-          match_dR = temp_dR;
-          match_online_pt  = online_vec.Pt();
-          match_offline_pt = offline_vec.Pt();
-        }
-    }
-    
-    h_online_calojet_pt->Fill(match_online_pt, w);
-    h_offline_calojet_pt->Fill(match_offline_pt, w);
-    h_online_offline_calojet_pt->Fill(match_online_pt, match_offline_pt, w);
-
-
-  }
-  h_calo_jet_ht->Fill(mevent->calo_jet_ht(30), w);
-  h_calo_jet_ht40->Fill(mevent->calo_jet_ht(40), w);
 
   for (int i = 0; i < 2; ++i) {
     h_nmuons[i]->Fill(mevent->nmu(i), w);
@@ -677,11 +1011,12 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   h_met->Fill(mevent->met(), w);
   h_metphi->Fill(mevent->metphi(), w);
-
+  /*
   for (int i = 0; i < 3; ++i) {
     h_nbtags[i]->Fill(mevent->nbtags(i), w);
     h_nbtags_v_bquark_code[i]->Fill(mevent->gen_flavor_code, mevent->nbtags(i), w);
   }
+  */
   const int ibtag = 2; // tight only
   for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
     if (mevent->jet_pt[ijet] < mfv::min_jet_pt)
