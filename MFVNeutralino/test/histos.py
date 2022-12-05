@@ -184,8 +184,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
     if use_btag_triggers :
-        samples =  Samples.HToSSTodddd_samples_2017# + Samples.mfv_signal_samples_2017
+        #samples =  Samples.HToSSTodddd_samples_2017# + Samples.mfv_signal_samples_2017
         #samples =  Samples.bjet_samples_2017
+        samples = [getattr(Samples, 'ggHToSSTodddd_tau10mm_M15_2017')] 
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
     else :
         #samples = pick_samples(dataset)
@@ -194,7 +195,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
 
-    cs = CondorSubmitter('HistosV31_nobs2derrFix',
+    cs = CondorSubmitter('HistosH4dOnly' + version,
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,
