@@ -3,7 +3,7 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 is_mc = True # for blinding
 
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers
-sample_files(process, 'ggHToSSTodddd_tau1mm_M40_2017' if is_mc else 'JetHT2017B', 'ntuplev31am', 5)
+#sample_files(process, 'ggHToSSTodddd_tau1mm_M40_2017' if is_mc else 'JetHT2017B', 'ntuplev31am', 5)
 #sample_files(process, 'ggHToSSTodddd_tau1mm_M55_2017' if is_mc else 'JetHT2017B', 'ntuplev31am', 15)
 #sample_files(process, 'mfv_neu_tau001000um_M0400_2017' if is_mc else 'JetHT2017B', 'ntuplev30am', 10)
 #sample_files(process, 'ttbar_2017' if is_mc else 'JetHT2017B', 'ntuplev31am', 5)
@@ -187,7 +187,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if use_btag_triggers :
         #samples =  Samples.HToSSTodddd_samples_2017# + Samples.mfv_signal_samples_2017
         #samples =  Samples.bjet_samples_2017
-        samples = [getattr(Samples, 'ggHToSSTobbbb_tau1mm_M55_2017')]  
+        samples = [getattr(Samples, 'ggHToSSTobbbb_tau10mm_M15_2017')]  
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
     else :
         #samples = pick_samples(dataset)

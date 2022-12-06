@@ -28,7 +28,8 @@ dataset = 'miniaod' if settings.is_miniaod else 'main'
 input_files(process, 'C47DA2BF-B0FF-EA11-A2BC-001E67586629.root') #H4b 1mm 55GeV
 max_events(process, 400)
 cmssw_from_argv(process)
-
+silence_messages(process, ['TwoTrackMinimumDistanceHelixLine']) 
+silence_messages(process, ['TwoTrackMinimumDistance']) 
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
@@ -36,7 +37,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if use_btag_triggers :
         #samples = pick_samples(dataset, qcd=True, ttbar=True, all_signal=not settings.run_n_tk_seeds, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used
         #samples = Samples.mfv_signal_samples_2017 + Samples.mfv_stopdbardbar_samples_2017
-        samples = [getattr(Samples, 'ggHToSSTodddd_tau10mm_M15_2017')]  
+        samples = [getattr(Samples, 'ggHToSSTobbbb_tau10mm_M15_2017')]  
     else :
         #samples = pick_samples(dataset, qcd=False, ttbar=False, data=False, all_signal=not settings.run_n_tk_seeds)
         samples = Samples.bjet_samples_2017
