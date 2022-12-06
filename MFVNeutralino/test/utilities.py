@@ -12,11 +12,14 @@ _presel_s = '_leptonpresel' if _leptonpresel else '_btagpresel' if _btagpresel e
 
 def cmd_hadd_vertexer_histos():
     ntuple = sys.argv[2]
+    samples = Samples.registry.from_argv( Samples.all_signal_samples_2017)
+    """
     samples = Samples.registry.from_argv(
             Samples.data_samples_2015 + \
             Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015 + \
             Samples.data_samples + \
             Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext)
+    """
     for s in samples:
         s.set_curr_dataset(ntuple)
         hadd(s.name + '.root', ['root://cmseos.fnal.gov/' + fn.replace('ntuple', 'vertex_histos') for fn in s.filenames])

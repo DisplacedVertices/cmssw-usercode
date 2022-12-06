@@ -1981,29 +1981,29 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 						  for (auto llpvtx : llp_vertices) {
 							  if (!llpvtx.isValid()) continue;
 							  reco::Vertex reco_llpvtx = reco::Vertex(llpvtx);
-							  if (reco_llpvtx.nTracks() > 1) {
-								  vertices->push_back(reco_llpvtx);
-								  Measurement1D dBV_Meas1D = vertex_dist_2d.distance(reco_llpvtx, fake_bs_vtx);
-								  double dBV = dBV_Meas1D.value();
-								  double bs2derr = dBV_Meas1D.error();
+							  if (reco_llpvtx.nTracks() == 1) continue;
+							  vertices->push_back(reco_llpvtx);
+							  Measurement1D dBV_Meas1D = vertex_dist_2d.distance(reco_llpvtx, fake_bs_vtx);
+							  double dBV = dBV_Meas1D.value();
+							  double bs2derr = dBV_Meas1D.error();
 
-								  h_output_gvtx_twobdecay_reco_llpvtx_by_refit_normchi2->Fill(reco_llpvtx.normalizedChi2());
-								  h_2D_output_gvtx_twobdecay_reco_llpvtx_by_refit_normchi2_ntrack->Fill(reco_llpvtx.normalizedChi2(), reco_llpvtx.nTracks());
-								  h_2D_output_gvtx_twobdecay_reco_llpvtx_by_refit_normchi2_bs2derr->Fill(reco_llpvtx.normalizedChi2(), bs2derr);
+							  h_output_gvtx_twobdecay_reco_llpvtx_by_refit_normchi2->Fill(reco_llpvtx.normalizedChi2());
+							  h_2D_output_gvtx_twobdecay_reco_llpvtx_by_refit_normchi2_ntrack->Fill(reco_llpvtx.normalizedChi2(), reco_llpvtx.nTracks());
+							  h_2D_output_gvtx_twobdecay_reco_llpvtx_by_refit_normchi2_bs2derr->Fill(reco_llpvtx.normalizedChi2(), bs2derr);
 
-								  for (auto it = reco_llpvtx.tracks_begin(), ite = reco_llpvtx.tracks_end(); it != ite; ++it) {
+							  for (auto it = reco_llpvtx.tracks_begin(), ite = reco_llpvtx.tracks_end(); it != ite; ++it) {
 
-									  reco::TransientTrack seed_track;
-									  seed_track = tt_builder->build(*it.operator*());
-									  std::pair<bool, Measurement1D> tk_vtx_dist = track_dist(seed_track, reco_llpvtx);
+								  reco::TransientTrack seed_track;
+								  seed_track = tt_builder->build(*it.operator*());
+								  std::pair<bool, Measurement1D> tk_vtx_dist = track_dist(seed_track, reco_llpvtx);
 
-									  h_output_gvtx_twobdecay_reco_llpvtx_by_refit_track_miss_dist->Fill(tk_vtx_dist.second.value());
-									  h_output_gvtx_twobdecay_reco_llpvtx_by_refit_track_miss_dist_significance->Fill(tk_vtx_dist.second.significance());
-								  }
-
-								  h_output_gvtx_twobdecay_reco_llpvtx_by_refit_dBV->Fill(dBV);
-								  h_output_gvtx_twobdecay_reco_llpvtx_by_refit_bs2derr->Fill(bs2derr);
+							      h_output_gvtx_twobdecay_reco_llpvtx_by_refit_track_miss_dist->Fill(tk_vtx_dist.second.value());
+								  h_output_gvtx_twobdecay_reco_llpvtx_by_refit_track_miss_dist_significance->Fill(tk_vtx_dist.second.significance());
 							  }
+
+							  h_output_gvtx_twobdecay_reco_llpvtx_by_refit_dBV->Fill(dBV);
+							  h_output_gvtx_twobdecay_reco_llpvtx_by_refit_bs2derr->Fill(bs2derr);
+							  
 							  
 						  }
 					  }
@@ -2030,9 +2030,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 							  double dBV = dBV_Meas1D.value();
 							  double bs2derr = dBV_Meas1D.error();
 
-							  h_output_gvtx_twobdecay_reco_llpvtx_by_refit_normchi2->Fill(reco_bvtx.normalizedChi2());
-							  h_2D_output_gvtx_twobdecay_reco_llpvtx_by_refit_normchi2_ntrack->Fill(reco_bvtx.normalizedChi2(), reco_bvtx.nTracks());
-							  h_2D_output_gvtx_twobdecay_reco_llpvtx_by_refit_normchi2_bs2derr->Fill(reco_bvtx.normalizedChi2(), bs2derr);
+							  h_output_gvtx_onebdecay_reco_bvtx_by_refit_normchi2->Fill(reco_bvtx.normalizedChi2());
+							  h_2D_output_gvtx_onebdecay_reco_bvtx_by_refit_normchi2_ntrack->Fill(reco_bvtx.normalizedChi2(), reco_bvtx.nTracks());
+							  h_2D_output_gvtx_onebdecay_reco_bvtx_by_refit_normchi2_bs2derr->Fill(reco_bvtx.normalizedChi2(), bs2derr);
 
 							  for (auto it = reco_bvtx.tracks_begin(), ite = reco_bvtx.tracks_end(); it != ite; ++it) {
 
@@ -2040,12 +2040,12 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 								  seed_track = tt_builder->build(*it.operator*());
 								  std::pair<bool, Measurement1D> tk_vtx_dist = track_dist(seed_track, reco_bvtx);
 
-								  h_output_gvtx_twobdecay_reco_llpvtx_by_refit_track_miss_dist->Fill(tk_vtx_dist.second.value());
-								  h_output_gvtx_twobdecay_reco_llpvtx_by_refit_track_miss_dist_significance->Fill(tk_vtx_dist.second.significance());
+								  h_output_gvtx_onebdecay_reco_bvtx_by_refit_track_miss_dist->Fill(tk_vtx_dist.second.value());
+								  h_output_gvtx_onebdecay_reco_bvtx_by_refit_track_miss_dist_significance->Fill(tk_vtx_dist.second.significance());
 							  }
 
-							  h_output_gvtx_twobdecay_reco_llpvtx_by_refit_dBV->Fill(dBV);
-							  h_output_gvtx_twobdecay_reco_llpvtx_by_refit_bs2derr->Fill(bs2derr);
+							  h_output_gvtx_onebdecay_reco_bvtx_by_refit_dBV->Fill(dBV);
+							  h_output_gvtx_onebdecay_reco_bvtx_by_refit_bs2derr->Fill(bs2derr);
 							  
 						  }
 
@@ -2061,9 +2061,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 						  double dBV = dBV_Meas1D.value();
 						  double bs2derr = dBV_Meas1D.error();
 
-						  h_output_gvtx_twobdecay_reco_llpvtx_by_refit_normchi2->Fill(v.normalizedChi2());
-						  h_2D_output_gvtx_twobdecay_reco_llpvtx_by_refit_normchi2_ntrack->Fill(v.normalizedChi2(), v.nTracks());
-						  h_2D_output_gvtx_twobdecay_reco_llpvtx_by_refit_normchi2_bs2derr->Fill(v.normalizedChi2(), bs2derr);
+						  h_output_gvtx_onebdecay_reco_bvtx_by_SV_normchi2->Fill(v.normalizedChi2());
+						  h_2D_output_gvtx_onebdecay_reco_bvtx_by_SV_normchi2_ntrack->Fill(v.normalizedChi2(), v.nTracks());
+						  h_2D_output_gvtx_onebdecay_reco_bvtx_by_SV_normchi2_bs2derr->Fill(v.normalizedChi2(), bs2derr);
 
 						  for (auto it = v.tracks_begin(), ite = v.tracks_end(); it != ite; ++it) {
 
@@ -2071,12 +2071,12 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 							  seed_track = tt_builder->build(*it.operator*());
 							  std::pair<bool, Measurement1D> tk_vtx_dist = track_dist(seed_track, v);
 
-							  h_output_gvtx_twobdecay_reco_llpvtx_by_refit_track_miss_dist->Fill(tk_vtx_dist.second.value());
-							  h_output_gvtx_twobdecay_reco_llpvtx_by_refit_track_miss_dist_significance->Fill(tk_vtx_dist.second.significance());
+							  h_output_gvtx_onebdecay_reco_bvtx_by_SV_track_miss_dist->Fill(tk_vtx_dist.second.value());
+							  h_output_gvtx_onebdecay_reco_bvtx_by_SV_track_miss_dist_significance->Fill(tk_vtx_dist.second.significance());
 						  }
 
-						  h_output_gvtx_twobdecay_reco_llpvtx_by_refit_dBV->Fill(dBV);
-						  h_output_gvtx_twobdecay_reco_llpvtx_by_refit_bs2derr->Fill(bs2derr);
+						  h_output_gvtx_onebdecay_reco_bvtx_by_SV_dBV->Fill(dBV);
+						  h_output_gvtx_onebdecay_reco_bvtx_by_SV_bs2derr->Fill(bs2derr);
 						  
 					  }
 
@@ -2252,6 +2252,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 							vec_bvtx_i_paired.push_back(i);
 							vec_bvtx_j_paired.push_back(j);
 							
+							if (reco_gvtx.nTracks() == 1) continue;
+
 							if (vec_reco_bvtx_idx_per_bjet[i].size() == 1 && vec_reco_bvtx_idx_per_bjet[j].size() == 1) {
 								//vertices->erase(vertices->at(vec_reco_bvtx_idx_per_bjet[i][0]));
 								vertices->erase(vertices->begin() + vec_reco_bvtx_idx_per_bjet[i][0]);
@@ -2265,8 +2267,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 								vertices->at(vec_reco_bvtx_idx_per_bjet[j][0]) = reco_gvtx;
 							}
 							else {
-								if (reco_gvtx.nTracks() > 1)
-									vertices->push_back(reco_gvtx);
+								vertices->push_back(reco_gvtx);
 							}
 
 							Measurement1D dBV_Meas1D = vertex_dist_2d.distance(reco_gvtx, fake_bs_vtx);
