@@ -16,6 +16,7 @@ mfvVerticesAuxPresel = mfvVerticesAux
 mfvVerticesAux = mfvSelectedVertices.clone(vertex_aux_src = 'mfvVerticesAuxPresel', min_ntracks = 2) #FIXME : for matching b-quarks and b-SVs that are loose
 
 mfvVertexSequenceBare = cms.Sequence(
+    mfvGenParticles * 
     jmtRescaledTracks *
     mfvVertexTracks *
     mfvVertices
@@ -23,7 +24,6 @@ mfvVertexSequenceBare = cms.Sequence(
 
 mfvVertexSequence = cms.Sequence(
     mfvVertexSequenceBare *
-    mfvGenParticles *
     mfvVerticesAuxTmp *
     mfvSelectedVerticesTmp *
     mfvVerticesToJets *
