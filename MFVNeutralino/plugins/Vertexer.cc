@@ -295,6 +295,8 @@ class MFVVertexer : public edm::EDProducer {
 	TH1F* h_output_gvtx_twobdecay_jet_nloosebSVs;
 	TH1F* h_output_gvtx_twobdecay_nm1_nsigmadxy_jet_ntrack;
 	TH1F* h_output_gvtx_twobdecay_jet_pT;
+	TH1F* h_output_gvtx_twobdecay_b_pair_dist3d;
+	TH1F* h_output_gvtx_twobdecay_b_pair_bigdist3d;
 
 	//if merging SVs
 	TH1F* h_output_gvtx_twobdecay_reco_llpvtx_by_SVs_normchi2;
@@ -304,6 +306,9 @@ class MFVVertexer : public edm::EDProducer {
 	TH1F* h_output_gvtx_twobdecay_reco_llpvtx_by_SVs_track_miss_dist_significance;
 	TH1F* h_output_gvtx_twobdecay_reco_llpvtx_by_SVs_dBV;
 	TH1F* h_output_gvtx_twobdecay_reco_llpvtx_by_SVs_bs2derr;
+	TH1F* h_output_gvtx_twobdecay_by_SVs_matched_gen_nSVs;
+	TH1F* h_output_llp_gvtx_twobdecay_by_SVs_dist3dgenllp;
+	TH1F* h_output_b_gvtx_twobdecay_by_SVs_dist3dgenb;
 	//if refitting
 	TH1F* h_output_gvtx_twobdecay_reco_llpvtx_by_refit_normchi2;
 	TH2F* h_2D_output_gvtx_twobdecay_reco_llpvtx_by_refit_normchi2_ntrack;
@@ -312,6 +317,9 @@ class MFVVertexer : public edm::EDProducer {
 	TH1F* h_output_gvtx_twobdecay_reco_llpvtx_by_refit_track_miss_dist_significance;
 	TH1F* h_output_gvtx_twobdecay_reco_llpvtx_by_refit_dBV;
 	TH1F* h_output_gvtx_twobdecay_reco_llpvtx_by_refit_bs2derr;
+	TH1F* h_output_gvtx_twobdecay_by_refit_matched_gen_nSVs;
+	TH1F* h_output_llp_gvtx_twobdecay_by_refit_dist3dgenllp;
+	TH1F* h_output_b_gvtx_twobdecay_by_refit_dist3dgenb;
 	
 
 	//plots for one-b-decay jets 
@@ -319,6 +327,8 @@ class MFVVertexer : public edm::EDProducer {
 	TH1F* h_output_gvtx_onebdecay_jet_nloosebSVs;
 	TH1F* h_output_gvtx_onebdecay_nm1_nsigmadxy_jet_ntrack;
 	TH1F* h_output_gvtx_onebdecay_jet_pT;
+	TH1F* h_output_gvtx_onebdecay_b_pair_dist3d;
+	TH1F* h_output_gvtx_onebdecay_b_pair_bigdist3d;
 
 	//if use one SV
 	TH1F* h_output_gvtx_onebdecay_reco_bvtx_by_SV_normchi2;
@@ -328,6 +338,10 @@ class MFVVertexer : public edm::EDProducer {
 	TH1F* h_output_gvtx_onebdecay_reco_bvtx_by_SV_track_miss_dist_significance;
 	TH1F* h_output_gvtx_onebdecay_reco_bvtx_by_SV_dBV;
 	TH1F* h_output_gvtx_onebdecay_reco_bvtx_by_SV_bs2derr;
+	TH1F* h_output_gvtx_onebdecay_by_SV_matched_gen_nSVs;
+	TH1F* h_output_llp_gvtx_onebdecay_by_SV_dist3dgenllp;
+	TH1F* h_output_b_gvtx_onebdecay_by_SV_dist3dgenb;
+
 	//if refitting
 	TH1F* h_output_gvtx_onebdecay_reco_bvtx_by_refit_normchi2;
 	TH2F* h_2D_output_gvtx_onebdecay_reco_bvtx_by_refit_normchi2_ntrack;
@@ -336,13 +350,10 @@ class MFVVertexer : public edm::EDProducer {
 	TH1F* h_output_gvtx_onebdecay_reco_bvtx_by_refit_track_miss_dist_significance;
 	TH1F* h_output_gvtx_onebdecay_reco_bvtx_by_refit_dBV;
 	TH1F* h_output_gvtx_onebdecay_reco_bvtx_by_refit_bs2derr;
-	TH1F* h_output_gvtx_onebdecay_reco_bvtx_by_refit_dist3dgenb;
-	TH1F* h_output_gvtx_onebdecay_reco_bvtx_by_refit_mindR_bquark;
-	TH1F* h_output_gvtx_onebdecay_matched_reco_bvtx_by_refit_dist3dgenb;
-	TH1F* h_output_gvtx_onebdecay_matched_reco_bvtx_by_refit_track_miss_dist;
-	TH1F* h_output_gvtx_onebdecay_matched_reco_bvtx_by_refit_track_miss_dist_significance;
-	TH2F* h_2D_output_gvtx_onebdecay_matched_reco_bvtx_by_refit_normchi2_ntrack;
-	TH2F* h_2D_output_gvtx_onebdecay_matched_reco_bvtx_by_refit_normchi2_bs2derr;
+	TH1F* h_output_gvtx_onebdecay_by_refit_matched_gen_nSVs;
+	TH1F* h_output_llp_gvtx_onebdecay_by_refit_dist3dgenllp;
+	TH1F* h_output_b_gvtx_onebdecay_by_refit_dist3dgenb;
+	
 
 	// ghost-track vertexing from a pair of reco-bvtx
 	TH1F* h_output_gvtx_two_onebdecay_mindPhi;	   //comparable with random angles in 1mm 55GeV and boosted in 10mm 15GeV 
@@ -355,16 +366,26 @@ class MFVVertexer : public edm::EDProducer {
 	TH1F* h_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_bs2derr;
 
 	// all output vertices
-	TH1F* h_output_gvtx_output_vertex_normchi2;
-	TH2F* h_2D_output_gvtx_output_vertex_normchi2_ntrack;
-	TH2F* h_2D_output_gvtx_output_vertex_normchi2_bs2derr;
-	TH1F* h_output_gvtx_output_vertex_track_miss_dist;
-	TH1F* h_output_gvtx_output_vertex_track_miss_dist_significance;
-	TH1F* h_output_gvtx_output_vertex_dBV;
-	TH1F* h_output_gvtx_output_vertex_bs2derr;
-	TH1F* h_output_gvtx_output_vertex_dist3dgenllp;
-	TH1F* h_output_gvtx_output_vertex_dist3dgenb;
-	TH1F* h_output_gvtx_output_vertex_mindPhi_bquark;
+	TH1F* h_output_vertex_ntrack;
+	TH1F* h_output_llp_dphi;
+	TH1F* h_output_llp0_b_dphi;
+	TH1F* h_output_llp1_b_dphi;
+	TH1F* h_output_llp_dist3d;
+	TH1F* h_output_llp0_b_dist3d;
+	TH1F* h_output_llp1_b_dist3d;
+	TH1F* h_output_at_least_3trk_vertex_bquark_closest_dist3d_vtx;
+	TH1F* h_output_at_least_3trk_vertex_normchi2;
+	TH2F* h_2D_output_at_least_3trk_vertex_normchi2_ntrack;
+	TH2F* h_2D_output_at_least_3trk_vertex_normchi2_bs2derr;
+	TH1F* h_output_at_least_3trk_vertex_track_miss_dist;
+	TH1F* h_output_at_least_3trk_vertex_track_miss_dist_significance;
+	TH1F* h_output_at_least_3trk_vertex_dBV;
+	TH1F* h_output_at_least_3trk_vertex_bs2derr;
+	TH1F* h_output_at_least_3trk_llp_vertex_dist3dgenllp;
+	TH1F* h_output_at_least_3trk_b_vertex_dist3dgenb;
+	TH1F* h_output_at_least_3trk_all_vertex_dist3dgenllp;
+	TH1F* h_output_at_least_3trk_all_vertex_dist3dgenb;
+	TH1F* h_output_at_least_3trk_vertex_mindPhi_bquark;
 	
 
 
@@ -550,13 +571,16 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 		h_output_gvtx_bjet_loosebSVs = fs->make<TH1F>("h_output_gvtx_bjet_loosebSVs", ";# loose-bSVs per a loose-btagged jet; events", 10, 0, 10);
 
 		//plots for two-b-decay jets 
+
 		h_output_gvtx_twobdecay_njet = fs->make<TH1F>("h_output_gvtx_twobdecay_njet", ";# of two-b-decay jets; events", 10, 0, 10);
 		h_output_gvtx_twobdecay_jet_nloosebSVs = fs->make<TH1F>("h_output_gvtx_twobdecay_jet_nloosebSVs", ";# loose bSVs; two-b-decay jets", 10, 0, 10);
 		h_output_gvtx_twobdecay_nm1_nsigmadxy_jet_ntrack = fs->make<TH1F>("h_output_gvtx_twobdecay_nm1_nsigmadxy_jet_ntrack", ";# relaxed seed tracks by nsigmadxy; two-b-decay jets", 10, 0, 10);
 		h_output_gvtx_twobdecay_jet_pT = fs->make<TH1F>("h_output_gvtx_twobdecay_jet_pT", ";a two-b-decay jet p_{T}; two-b-decay jets", 75, 0, 150);
+		h_output_gvtx_twobdecay_b_pair_dist3d = fs->make<TH1F>("h_output_gvtx_twobdecay_b_pair_dist3d", ";b-quark pair dist3d in a two-b-decay jet (cm.);b-quark pairs/.025", 120, 0, 3.0);
+		h_output_gvtx_twobdecay_b_pair_bigdist3d = fs->make<TH1F>("h_output_gvtx_twobdecay_b_pair_bigdist3d", ";b-quark pair dist3d in a two-b-decay jet (cm.);b-quark pairs/.005", 100, 0, 0.5);
 
 
-		//if merging SVs
+		//if merging SVs		
 		h_output_gvtx_twobdecay_reco_llpvtx_by_SVs_normchi2 = fs->make<TH1F>("h_output_gvtx_twobdecay_reco_llpvtx_by_SVs_normchi2", ";normalized chi2; per RECO-llpvtx by merging loose bSVs ", 80, 0, 20);
 		h_2D_output_gvtx_twobdecay_reco_llpvtx_by_SVs_normchi2_ntrack = fs->make<TH2F>("h_2D_output_gvtx_twobdecay_reco_llpvtx_by_SVs_normchi2_ntrack", ";normalized chi2; ntrack per a RECO-llpvtx by merging loose bSVs ", 80, 0, 20, 10, 0, 10);
 		h_2D_output_gvtx_twobdecay_reco_llpvtx_by_SVs_normchi2_bs2derr = fs->make<TH2F>("h_2D_output_gvtx_twobdecay_reco_llpvtx_by_SVs_normchi2_bs2derr", ";normalized chi2; bs2derr (cm.) per a RECO-llpvtx by merging loose bSVs ", 80, 0, 20, 50, 0, 0.05);
@@ -564,6 +588,10 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 		h_output_gvtx_twobdecay_reco_llpvtx_by_SVs_track_miss_dist_significance = fs->make<TH1F>("h_output_gvtx_twobdecay_reco_llpvtx_by_SVs_track_miss_dist_significance", ";track miss-dist significance; per a RECO-llpvtx by merging loose bSVs", 20, 0, 6);
 		h_output_gvtx_twobdecay_reco_llpvtx_by_SVs_dBV = fs->make<TH1F>("h_output_gvtx_twobdecay_reco_llpvtx_by_SVs_dBV", ";dBV (cm.); per a RECO-llpvtx by merging loose bSVs", 120, 0, 3.0);
 		h_output_gvtx_twobdecay_reco_llpvtx_by_SVs_bs2derr = fs->make<TH1F>("h_output_gvtx_twobdecay_reco_llpvtx_by_SVs_bs2derr", ";bs2derr(cm.); per a RECO-llpvtx by merging loose bSVs", 50, 0, 0.05);
+		h_output_gvtx_twobdecay_by_SVs_matched_gen_nSVs = fs->make<TH1F>("h_output_gvtx_twobdecay_by_SVs_matched_gen_nSVs", ";# of output vertices (by merging loose bSVs); per a two-b-decay jet with matched b-quark(s)", 10, 0, 10);
+		h_output_llp_gvtx_twobdecay_by_SVs_dist3dgenllp = fs->make<TH1F>("h_output_llp_gvtx_twobdecay_by_SVs_dist3dgenllp", "given matched b-quark(s): a vtx is closer to GEN llp-decay;dist3d(a new vtx, GEN llp-decay) cm.;  per a RECO-llpvtx by merging loose bSVs", 50, 0, 0.1);
+		h_output_b_gvtx_twobdecay_by_SVs_dist3dgenb = fs->make<TH1F>("h_output_b_gvtx_twobdecay_by_SVs_dist3dgenb", "given matched b-quark(s): a vtx is closer to GEN b-decay;dist3d(a new vtx, GEN b-decay) cm.;  per a RECO-llpvtx by merging loose bSVs", 50, 0, 0.1);
+
 
 		//if refitting
 		h_output_gvtx_twobdecay_reco_llpvtx_by_refit_normchi2 = fs->make<TH1F>("h_output_gvtx_twobdecay_reco_llpvtx_by_refit_normchi2", ";normalized chi2; per RECO-llpvtx by refitting relaxed seed tracks ", 80, 0, 20);
@@ -573,13 +601,18 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 		h_output_gvtx_twobdecay_reco_llpvtx_by_refit_track_miss_dist_significance = fs->make<TH1F>("h_output_gvtx_twobdecay_reco_llpvtx_by_refit_track_miss_dist_significance", ";track miss-dist significance; per a RECO-llpvtx by refitting relaxed seed tracks", 20, 0, 6);
 		h_output_gvtx_twobdecay_reco_llpvtx_by_refit_dBV = fs->make<TH1F>("h_output_gvtx_twobdecay_reco_llpvtx_by_refit_dBV", ";dBV (cm.); per a RECO-llpvtx by refitting relaxed seed tracks", 120, 0, 3.0);
 		h_output_gvtx_twobdecay_reco_llpvtx_by_refit_bs2derr = fs->make<TH1F>("h_output_gvtx_twobdecay_reco_llpvtx_by_refit_bs2derr", ";bs2derr(cm.); per a RECO-llpvtx by refitting relaxed seed tracks", 50, 0, 0.05);
+		h_output_gvtx_twobdecay_by_refit_matched_gen_nSVs = fs->make<TH1F>("h_output_gvtx_twobdecay_by_refit_matched_gen_nSVs", ";# of output vertices (by refitting relaxed seed tracks); per a two-b-decay jet with matched b-quark(s)", 10, 0, 10);
+		h_output_llp_gvtx_twobdecay_by_refit_dist3dgenllp = fs->make<TH1F>("h_output_llp_gvtx_twobdecay_by_refit_dist3dgenllp", "given matched b-quark(s): a vtx is closer to GEN llp-decay;dist3d(a new vtx, GEN llp-decay) cm.;  per a RECO-llpvtx by refitting relaxed seed tracks", 50, 0, 0.1);
+		h_output_b_gvtx_twobdecay_by_refit_dist3dgenb = fs->make<TH1F>("h_output_b_gvtx_twobdecay_by_refit_dist3dgenb", "given matched b-quark(s): a vtx is closer to GEN b-decay;dist3d(a new vtx, GEN b-decay) cm.;  per a RECO-llpvtx by refitting relaxed seed tracks", 50, 0, 0.1);
 
 
-		//plots for one-b-decay jets 
+		//plots for one-b-decay jets
 		h_output_gvtx_onebdecay_njet = fs->make<TH1F>("h_output_gvtx_onebdecay_njet", ";# of one-b-decay jets; events", 10, 0, 10);
 		h_output_gvtx_onebdecay_jet_nloosebSVs = fs->make<TH1F>("h_output_gvtx_onebdecay_jet_nloosebSVs", ";# loose bSVs; one-b-decay jets", 10, 0, 10);
 		h_output_gvtx_onebdecay_nm1_nsigmadxy_jet_ntrack = fs->make<TH1F>("h_output_gvtx_onebdecay_nm1_nsigmadxy_jet_ntrack", ";# relaxed seed tracks by nsigmadxy; one-b-decay jets", 10, 0, 10);
 		h_output_gvtx_onebdecay_jet_pT = fs->make<TH1F>("h_output_gvtx_onebdecay_jet_pT", ";a one-b-decay jet p_{T}; one-b-decay jets", 75, 0, 150);
+		h_output_gvtx_onebdecay_b_pair_dist3d = fs->make<TH1F>("h_output_gvtx_onebdecay_b_pair_dist3d", ";b-quark pair dist3d in a one-b-decay jet (cm.);b-quark pairs/.025", 120, 0, 3);
+		h_output_gvtx_onebdecay_b_pair_bigdist3d = fs->make<TH1F>("h_output_gvtx_onebdecay_b_pair_bigdist3d", ";b-quark pair dist3d in a one-b-decay jet (cm.);b-quark pairs/.005", 100, 0, 0.5);
 
 
 		//if use one SV
@@ -590,6 +623,10 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 		h_output_gvtx_onebdecay_reco_bvtx_by_SV_track_miss_dist_significance = fs->make<TH1F>("h_output_gvtx_onebdecay_reco_bvtx_by_SV_track_miss_dist_significance", ";track miss-dist significance; per a RECO-bvtx by a loose bSV", 20, 0, 6);
 		h_output_gvtx_onebdecay_reco_bvtx_by_SV_dBV = fs->make<TH1F>("h_output_gvtx_onebdecay_reco_bvtx_by_SV_dBV", ";dBV (cm.); per a RECO-bvtx by a loose bSV", 120, 0, 3.0);
 		h_output_gvtx_onebdecay_reco_bvtx_by_SV_bs2derr = fs->make<TH1F>("h_output_gvtx_onebdecay_reco_bvtx_by_SV_bs2derr", ";bs2derr(cm.); per a RECO-bvtx by a loose bSV", 50, 0, 0.05);
+		h_output_gvtx_onebdecay_by_SV_matched_gen_nSVs = fs->make<TH1F>("h_output_gvtx_onebdecay_by_SV_matched_gen_nSVs", ";# of output vertices (by a loose bSV); per a one-b-decay jet with matched b-quark(s)", 10, 0, 10);
+		h_output_llp_gvtx_onebdecay_by_SV_dist3dgenllp = fs->make<TH1F>("h_output_llp_gvtx_onebdecay_by_SV_dist3dgenllp", "given matched b-quark(s): a vtx is closer to GEN llp-decay;dist3d(a new vtx, GEN llp-decay) cm.;  per a RECO-bvtx by a loose bSV", 50, 0, 0.1);
+		h_output_b_gvtx_onebdecay_by_SV_dist3dgenb = fs->make<TH1F>("h_output_b_gvtx_onebdecay_by_SV_dist3dgenb", "given matched b-quark(s): a vtx is closer to GEN b-decay;dist3d(a new vtx, GEN b-decay) cm.;  per a RECO-bvtx by a loose bSV", 50, 0, 0.1);
+
 
 		//if refitting
 		h_output_gvtx_onebdecay_reco_bvtx_by_refit_normchi2 = fs->make<TH1F>("h_output_gvtx_onebdecay_reco_bvtx_by_refit_normchi2", ";normalized chi2; per RECO-bvtx by refitting relaxed seed tracks ", 80, 0, 20);
@@ -599,37 +636,23 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 		h_output_gvtx_onebdecay_reco_bvtx_by_refit_track_miss_dist_significance = fs->make<TH1F>("h_output_gvtx_onebdecay_reco_bvtx_by_refit_track_miss_dist_significance", ";track miss-dist significance; per a RECO-bvtx by refitting relaxed seed tracks", 20, 0, 6);
 		h_output_gvtx_onebdecay_reco_bvtx_by_refit_dBV = fs->make<TH1F>("h_output_gvtx_onebdecay_reco_bvtx_by_refit_dBV", ";dBV (cm.); per a RECO-bvtx by refitting relaxed seed tracks", 120, 0, 3.0);
 		h_output_gvtx_onebdecay_reco_bvtx_by_refit_bs2derr = fs->make<TH1F>("h_output_gvtx_onebdecay_reco_bvtx_by_refit_bs2derr", ";bs2derr(cm.); per a RECO-bvtx by refitting relaxed seed tracks", 50, 0, 0.05);
-		h_output_gvtx_onebdecay_reco_bvtx_by_refit_dist3dgenb = fs->make<TH1F>("h_output_gvtx_onebdecay_reco_bvtx_by_refit_dist3dgenb", ";dist3d(reco-bvtx, GEN b-decay matched w/ jet) cm.; per a refitted b-vertex in a GEN-matched jet", 120, 0, 3.0);
-		h_output_gvtx_onebdecay_reco_bvtx_by_refit_mindR_bquark = fs->make<TH1F>("h_output_gvtx_onebdecay_reco_bvtx_by_refit_mindR_bquark", ";min deltaR(one-b-decay jet, b-quark); per a RECO-bvtx by refitting relaxed seed tracks", 100, 0, 3.0);
-		h_output_gvtx_onebdecay_matched_reco_bvtx_by_refit_dist3dgenb = fs->make<TH1F>("h_output_gvtx_onebdecay_matched_reco_bvtx_by_refit_dist3dgenb", "min deltaR(one-b-decay jet, b-quark) < 0.4 ;dist3d(reco-bvtx, GEN b-decay matched w/ jet) cm.; per a refitted b-vertex in a GEN-matched jet", 120, 0, 3.0);
-		h_output_gvtx_onebdecay_matched_reco_bvtx_by_refit_track_miss_dist = fs->make<TH1F>("h_output_gvtx_onebdecay_matched_reco_bvtx_by_refit_track_miss_dist", "min deltaR(one-b-decay jet, b-quark) < 0.4;track miss-dist (cm.); per a refitted b-vertex in a GEN-matched jet", 100, 0, 2.0);
-		h_output_gvtx_onebdecay_matched_reco_bvtx_by_refit_track_miss_dist_significance = fs->make<TH1F>("h_output_gvtx_onebdecay_matched_reco_bvtx_by_refit_track_miss_dist_significance", "min deltaR(one-b-decay jet, b-quark) < 0.4;track miss-dist significance; per a refitted b-vertex in a GEN-matched jet", 20, 0, 6);
-		h_2D_output_gvtx_onebdecay_matched_reco_bvtx_by_refit_normchi2_ntrack = fs->make<TH2F>("h_2D_output_gvtx_onebdecay_matched_reco_bvtx_by_refit_normchi2_ntrack", "min deltaR(one-b-decay jet, b-quark) < 0.4;normalized chi2; ntrack per a refitted b-vertex in a GEN-matched jet ", 80, 0, 20, 10, 0, 10);
-		h_2D_output_gvtx_onebdecay_matched_reco_bvtx_by_refit_normchi2_bs2derr = fs->make<TH2F>("h_2D_output_gvtx_onebdecay_matched_reco_bvtx_by_refit_normchi2_bs2derr", "min deltaR(one-b-decay jet, b-quark) < 0.4;normalized chi2; bs2derr (cm.) per a refitted b-vertex in a GEN-matched jet ", 80, 0, 20, 50, 0, 0.05);
+		h_output_gvtx_onebdecay_by_refit_matched_gen_nSVs = fs->make<TH1F>("h_output_gvtx_onebdecay_by_refit_matched_gen_nSVs", ";# of output vertices (by refitting relaxed seed tracks); per a one-b-decay jet with matched b-quark(s)", 10, 0, 10);
+		h_output_llp_gvtx_onebdecay_by_refit_dist3dgenllp = fs->make<TH1F>("h_output_llp_gvtx_onebdecay_by_refit_dist3dgenllp", "given matched b-quark(s): a vtx is closer to GEN llp-decay;dist3d(a new vtx, GEN llp-decay) cm.;  per a RECO-bvtx by refitting relaxed seed tracks", 50, 0, 0.1);
+		h_output_b_gvtx_onebdecay_by_refit_dist3dgenb = fs->make<TH1F>("h_output_b_gvtx_onebdecay_by_refit_dist3dgenb", "given matched b-quark(s): a vtx is closer to GEN b-decay;dist3d(a new vtx, GEN b-decay) cm.;  per a RECO-bvtx by refitting relaxed seed tracks", 50, 0, 0.1);
 
-
+		
 		// ghost-track vertexing from a pair of reco-bvtx
 		h_output_gvtx_two_onebdecay_mindPhi = fs->make<TH1F>("h_output_gvtx_two_onebdecay_mindPhi", ";dPhi(bvtx0,bvtx1) of a minimum pair", 100, 0, 3.14);	   //comparable with random angles in 1mm 55GeV and boosted in 10mm 15GeV 
 		
-		h_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_normchi2 = fs->make<TH1F>("h_output_gvtx_two_onebdecay_reco_bvtx_by_ghvtx_normchi2", ";normalized chi2; per RECO-llpvtx by ghost-vertexing two bvtx", 80, 0, 20);
-		h_2D_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_normchi2_ntrack = fs->make<TH2F>("h_2D_output_gvtx_two_onebdecay_reco_bvtx_by_ghvtx_normchi2_ntrack", ";normalized chi2; ntrack per a RECO-llpvtx by ghost-vertexing two bvtx ", 80, 0, 20, 10, 0, 10);
-		h_2D_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_normchi2_bs2derr = fs->make<TH2F>("h_2D_output_gvtx_two_onebdecay_reco_bvtx_by_ghvtx_normchi2_bs2derr", ";normalized chi2; bs2derr (cm.) per a RECO-llpvtx by ghost-vertexing two bvtx ", 80, 0, 20, 50, 0, 0.05);
+		h_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_normchi2 = fs->make<TH1F>("h_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_normchi2", ";normalized chi2; per RECO-llpvtx by ghost-vertexing two bvtx", 80, 0, 20);
+		h_2D_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_normchi2_ntrack = fs->make<TH2F>("h_2D_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_normchi2_ntrack", ";normalized chi2; ntrack per a RECO-llpvtx by ghost-vertexing two bvtx ", 80, 0, 20, 10, 0, 10);
+		h_2D_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_normchi2_bs2derr = fs->make<TH2F>("h_2D_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_normchi2_bs2derr", ";normalized chi2; bs2derr (cm.) per a RECO-llpvtx by ghost-vertexing two bvtx ", 80, 0, 20, 50, 0, 0.05);
 		h_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_track_miss_dist = fs->make<TH1F>("h_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_track_miss_dist", ";track miss-dist (cm.); per a RECO-bvtx by refitting relaxed seed tracks", 100, 0, 2.0);
 		h_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_track_miss_dist_significance = fs->make<TH1F>("h_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_track_miss_dist_significance", ";track miss-dist significance; per a RECO-bvtx by refitting relaxed seed tracks", 20, 0, 6);
 		h_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_dBV = fs->make<TH1F>("h_output_gvtx_two_onebdecay_reco_bvtx_by_ghvtx_dBV", ";dBV (cm.); per a RECO-llpvtx by ghost-vertexing two bvtx", 120, 0, 3.0);
 		h_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_bs2derr = fs->make<TH1F>("h_output_gvtx_two_onebdecay_reco_bvtx_by_ghvtx_bs2derr", ";bs2derr(cm.); per a RECO-llpvtx by ghost-vertexing two bvtx", 50, 0, 0.05);
 
-		h_output_gvtx_output_vertex_normchi2 = fs->make<TH1F>("h_output_gvtx_output_vertex_normchi2", ";normalized chi2; per an output vertex after ghost-vtxing ", 80, 0, 20);
-		h_2D_output_gvtx_output_vertex_normchi2_ntrack = fs->make<TH2F>("h_2D_output_gvtx_output_vertex_normchi2_ntrack", ";normalized chi2; ntrack per an output vertex after ghost-vtxing ", 80, 0, 20, 10, 0, 10);
-		h_2D_output_gvtx_output_vertex_normchi2_bs2derr = fs->make<TH2F>("h_2D_output_gvtx_output_vertex_normchi2_bs2derr", ";normalized chi2; bs2derr (cm.) per an output vertex after ghost-vtxing ", 80, 0, 20, 50, 0, 0.05);
-		h_output_gvtx_output_vertex_track_miss_dist = fs->make<TH1F>("h_output_gvtx_output_vertex_track_miss_dist", ";track miss-dist (cm.);  per an output vertex after ghost-vtxing", 100, 0, 2.0);
-		h_output_gvtx_output_vertex_track_miss_dist_significance = fs->make<TH1F>("h_output_gvtx_output_vertex_track_miss_dist_significance", ";track miss-dist significance;  per an output vertex after ghost-vtxing", 20, 0, 6);
-		h_output_gvtx_output_vertex_dBV = fs->make<TH1F>("h_output_gvtx_output_vertex_dBV", ";dBV (cm.);  per an output vertex after ghost-vtxing", 120, 0, 3.0);
-		h_output_gvtx_output_vertex_bs2derr = fs->make<TH1F>("h_output_gvtx_output_vertex_bs2derr", ";bs2derr(cm.);  per an output vertex after ghost-vtxing", 50, 0, 0.05);
-		h_output_gvtx_output_vertex_dist3dgenllp = fs->make<TH1F>("h_output_gvtx_output_vertex_dist3dgenllp", ";dist3d(output vtx, GEN llp-decay from min dPhi b-quark) cm.;  per an output vertex after ghost-vtxing", 120, 0, 3.0);
-		h_output_gvtx_output_vertex_dist3dgenb = fs->make<TH1F>("h_output_gvtx_output_vertex_dist3dgenb", ";dist3d(output vtx, GEN b-decay from min dPhi b-quark) cm.;  per an output vertex after ghost-vtxing", 120, 0, 3.0);
-		h_output_gvtx_output_vertex_mindPhi_bquark = fs->make<TH1F>("h_output_gvtx_output_vertex_mindPhi_bquark", ";min |deltaPhi(one-b-decay jet, b-quark)|;  per an output vertex after ghost-vtxing", 100, 0, 3.0);
-
+		
 
 		const char* gvtx_filter[2] = { "qualified pairs","ghost vertices"};
 		for (int i = 0; i < 2; ++i) { 
@@ -641,6 +664,28 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 		h_2D_output_gvtx_dR_tv1_gtrk1_bs2derr1 = fs->make<TH2F>("h_2D_output_gvtx_dR_tv1_gtrk1_bs2derr1", "after a ghost vertex is formed;dR(tv1,gtrk1); tv1's bs2derr(cm)", 50, 0, 1.0, 100, 0, 0.05);
 
 	}
+	
+	h_output_vertex_ntrack = fs->make<TH1F>("h_output_vertex_ntrack", ";# of tracks per a vertex; per a >=3trk output vertex ", 20, 0, 20);
+	h_output_llp_dphi = fs->make<TH1F>("h_output_llp_dphi", ";llp pair |#Delta#phi| (rad);llp pairs/.063", 50, 0, 3.1416);
+	h_output_llp0_b_dphi = fs->make<TH1F>("h_output_llp0_b_dphi", ";b-quark pair from llp0 |#Delta#phi| (rad);bquark pairs/.063", 50, 0, 3.1416);
+	h_output_llp1_b_dphi = fs->make<TH1F>("h_output_llp1_b_dphi", ";b-quark pair from llp1 |#Delta#phi| (rad);bquark pairs/.063", 50, 0, 3.1416);
+	h_output_llp_dist3d = fs->make<TH1F>("h_output_llp_dist3d", ";llp pair dist3d (cm.);llp pairs/.025", 120, 0, 3);
+	h_output_llp0_b_dist3d = fs->make<TH1F>("h_output_llp0_b_dist3d", ";b-quark pair from llp0 dist3d (cm.);b-quark pairs/.025", 120, 0, 3);
+	h_output_llp1_b_dist3d = fs->make<TH1F>("h_output_llp1_b_dist3d", ";b-quark pair from llp1 dist3d (cm.);b-quark pairs/.025", 120, 0, 3);
+	h_output_at_least_3trk_vertex_bquark_closest_dist3d_vtx = fs->make<TH1F>("h_output_at_least_3trk_vertex_bquark_closest_dist3d_vtx", ";dist3d b/w a GEN b-quark decay vtx and its closest >=3trk vtx (cm); arb. units", 50, 0, 0.1);
+    h_output_at_least_3trk_vertex_normchi2 = fs->make<TH1F>("h_output_at_least_3trk_vertex_normchi2", ";normalized chi2; per a >=3trk output vertex ", 80, 0, 20);
+	h_2D_output_at_least_3trk_vertex_normchi2_ntrack = fs->make<TH2F>("h_2D_output_at_least_3trk_vertex_normchi2_ntrack", ";normalized chi2; ntrack per a >=3trk output vertex", 80, 0, 20, 10, 0, 10);
+	h_2D_output_at_least_3trk_vertex_normchi2_bs2derr = fs->make<TH2F>("h_2D_output_at_least_3trk_vertex_normchi2_bs2derr", ";normalized chi2; bs2derr (cm.) per a >=3trk output vertex", 80, 0, 20, 50, 0, 0.05);
+	h_output_at_least_3trk_vertex_track_miss_dist = fs->make<TH1F>("h_output_at_least_3trk_vertex_track_miss_dist", ";track miss-dist (cm.);  per a >=3trk output vertex", 100, 0, 2.0);
+	h_output_at_least_3trk_vertex_track_miss_dist_significance = fs->make<TH1F>("h_output_at_least_3trk_vertex_track_miss_dist_significance", ";track miss-dist significance;  per a >=3trk output vertex", 20, 0, 6);
+	h_output_at_least_3trk_vertex_dBV = fs->make<TH1F>("h_output_at_least_3trk_vertex_dBV", ";dBV (cm.);  per a >=3trk output vertex", 120, 0, 3.0);
+	h_output_at_least_3trk_vertex_bs2derr = fs->make<TH1F>("h_output_at_least_3trk_vertex_bs2derr", ";bs2derr(cm.);  per a >=3trk output vertex", 50, 0, 0.05);
+	h_output_at_least_3trk_llp_vertex_dist3dgenllp = fs->make<TH1F>("h_output_at_least_3trk_llp_at_least_3trk_vertex_dist3dgenllp", "given a min |deltaPhi(output vtx, b-quark)|: a vtx is closer to GEN llp-decay;dist3d(a >=3trk output vtx, GEN llp-decay) cm.;  per an output vertex", 50, 0, 0.1);
+	h_output_at_least_3trk_b_vertex_dist3dgenb = fs->make<TH1F>("h_output_at_least_3trk_b_vertex_dist3dgenb", "given a min |deltaPhi(output vtx, b-quark)|: a vtx is closer to GEN b-decay;dist3d(output vtx, GEN b-decay) cm.;  per a >=3trk output vertex", 50, 0, 0.1);
+	h_output_at_least_3trk_all_vertex_dist3dgenllp = fs->make<TH1F>("h_output_at_least_3trk_all_vertex_dist3dgenllp", "given a min |deltaPhi(output vtx, b-quark)|;dist3d(output vtx, GEN llp-decay) cm.;  per a >=3trk output vertex", 50, 0, 0.1);
+	h_output_at_least_3trk_all_vertex_dist3dgenb = fs->make<TH1F>("h_output_at_least_3trk_all_vertex_dist3dgenb", "given a min |deltaPhi(output vtx, b-quark)|;dist3d(output vtx, GEN b-decay) cm.;  per a >=3trk output vertex", 50, 0, 0.1);
+	h_output_at_least_3trk_vertex_mindPhi_bquark = fs->make<TH1F>("h_output_at_least_3trk_vertex_mindPhi_bquark", ";min |deltaPhi(output vtx, b-quark)|;  per a >=3trk output vertex", 100, 0, 3.0);
+
   }
 }
 
@@ -1811,7 +1856,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
 
   // form ghost vertices from pairs of vertices whose trajectories form a common decay point
-  if (extrapolate_ghost_tracks) {
+  if (extrapolate_ghost_tracks && mci->set_bdecay_hadron_chain().size() == 4 ) {
 
 	  // alternative of ghost-track vertexing is utilizing tracks from b-jets to form ghost vertices
 	  edm::Handle<pat::JetCollection> jjets;
@@ -1934,10 +1979,46 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 					  h_output_gvtx_twobdecay_jet_nloosebSVs->Fill(loosebsv_vtxidx_per_bjet.size());
 					  h_output_gvtx_twobdecay_nm1_nsigmadxy_jet_ntrack->Fill(nm1_nsigmadxy_bttks.size());
 					  h_output_gvtx_twobdecay_jet_pT->Fill(jet.pt());
+					  
+					  std::vector<size_t> vec_jet_idx_matched_genbvtx = {};
+					  std::vector<size_t> vec_jet_idx_matched_genllpvtx = {};
+					  for (int i = 0; i < 2; ++i) {	 //an index of GEN llps 
+						  int count_match = 0;
+						  size_t genbvtx_idx = 0;
+						  for (const reco::GenParticleRef& s_temp : mci->secondaries(i)) {
+							  reco::GenParticle* s = (reco::GenParticle*) & *s_temp;
+							  if (reco::deltaR(jet.eta(), jet.phi(), s->eta(), s->phi()) < 0.4) {
+								  count_match++;
+								  vec_jet_idx_matched_genbvtx.push_back(genbvtx_idx);
+								  vec_jet_idx_matched_genllpvtx.push_back(i);
+							  }
+							  genbvtx_idx++;
+						  }
+						  if (count_match == 2) {  // a loose b-tagged jet considered as a two-b-decay jet has exactly two b-quarks matched
+							  
+							  if (i == 0) {
+								  auto vec_bp_llp0 = mci->b_llp0_decay_points();
+								  double b_pair_dist3d = mag(vec_bp_llp0[0].x - vec_bp_llp0[1].x, vec_bp_llp0[0].y - vec_bp_llp0[1].y, vec_bp_llp0[0].z - vec_bp_llp0[1].z);
+								  h_output_gvtx_twobdecay_b_pair_dist3d->Fill(b_pair_dist3d);
+								  h_output_gvtx_twobdecay_b_pair_bigdist3d->Fill(b_pair_dist3d);
+							  }
+							  else {
+								  auto vec_bp_llp1 = mci->b_llp1_decay_points();
+								  double b_pair_dist3d = mag(vec_bp_llp1[0].x - vec_bp_llp1[1].x, vec_bp_llp1[0].y - vec_bp_llp1[1].y, vec_bp_llp1[0].z - vec_bp_llp1[1].z);
+								  h_output_gvtx_twobdecay_b_pair_dist3d->Fill(b_pair_dist3d);
+								  h_output_gvtx_twobdecay_b_pair_bigdist3d->Fill(b_pair_dist3d);
+							  }
+						  }
+					  }
+
+					  
+					  
+
 					  //1.1 merging >=2 loose bSVs 
 					  bool merge = false;
 					  if (loosebsv_vtxidx_per_bjet.size() > 1) {
 						  size_t v0_idx = 0;
+						  size_t count_new_vtx = 0; 
 						  for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
 							  if (std::count(loosebsv_vtxidx_per_bjet.begin(), loosebsv_vtxidx_per_bjet.end(), v0_idx) == 0) continue;
 							  track_set tracks[2];
@@ -1979,6 +2060,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
 											  v[1] = vertices->erase(v[1]) - 1; // (1) erase and point the iterator at the previous entry
 											  *v[0] = reco::Vertex(merged_vertices[0]); // (2) updated v[0] (ok to use v[0] after the erase(v[1]) because v[0] is by construction before v[1])
+											  count_new_vtx++;
 											  Measurement1D dBV_Meas1D = vertex_dist_2d.distance(*v[0], fake_bs_vtx);
 											  double dBV = dBV_Meas1D.value();
 											  double bs2derr = dBV_Meas1D.error();
@@ -2000,6 +2082,41 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 											  h_output_gvtx_twobdecay_reco_llpvtx_by_SVs_dBV->Fill(dBV);
 											  h_output_gvtx_twobdecay_reco_llpvtx_by_SVs_bs2derr->Fill(bs2derr);
 
+											  double mindist3d = 0.5;
+											  int gen_match_id = 99; 
+											  for (size_t igen = 0; igen < 2; ++igen) {
+												  if (std::count(vec_jet_idx_matched_genllpvtx.begin(), vec_jet_idx_matched_genllpvtx.end(), igen) == 0) continue;
+												  auto llp_p = mci->decay_point(igen);
+												  double dist3d_llp = mag(llp_p.x - v[0]->x(), llp_p.y - v[0]->y(), llp_p.z - v[0]->z());
+												  if (dist3d_llp < mindist3d) {
+													  gen_match_id = igen; 
+													  mindist3d = dist3d_llp;
+												  }
+
+												  for (size_t jgen = 0; jgen < 2; ++jgen) {
+													  if (std::count(vec_jet_idx_matched_genbvtx.begin(), vec_jet_idx_matched_genbvtx.end(), jgen) == 0) continue;
+													  
+													  double dist3d_b = 0;
+													  if (igen == 0) {
+														  auto vec_bp_llp0 = mci->b_llp0_decay_points();
+														  dist3d_b = mag(vec_bp_llp0[jgen].x - v[0]->x(), vec_bp_llp0[jgen].y - v[0]->y(), vec_bp_llp0[jgen].z - v[0]->z());
+													  }
+													  else {
+														  auto vec_bp_llp1 = mci->b_llp1_decay_points();
+														  dist3d_b = mag(vec_bp_llp1[jgen].x - v[0]->x(), vec_bp_llp1[jgen].y - v[0]->y(), vec_bp_llp1[jgen].z - v[0]->z());
+													  }
+													  if (dist3d_b < mindist3d) {
+														  gen_match_id = -1*jgen;
+														  mindist3d = dist3d_b;
+													  }
+												  }
+											  }
+											  if (gen_match_id != 99) {
+												  if (gen_match_id > 0)	h_output_llp_gvtx_twobdecay_by_SVs_dist3dgenllp->Fill(mindist3d);
+												  else h_output_b_gvtx_twobdecay_by_SVs_dist3dgenb->Fill(mindist3d);
+											  }
+
+
 										  }
 									  }
 								  }
@@ -2012,19 +2129,19 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 							  }
 							  v0_idx++;
 						  }
-
+						  h_output_gvtx_twobdecay_by_SVs_matched_gen_nSVs->Fill(count_new_vtx);
 
 					  }
 					  //1.2 refitting available relaxed seed tracks 
 					  else {
 						  
-						  
-						  std::vector<TransientVertex> llp_vertices(1, kv_reco->vertex(nm1_nsigmadxy_bttks));
-						  for (auto llpvtx : llp_vertices) {
+					      size_t count_new_vtx = 0;
+						  for (auto llpvtx : kv_reco_dropin(nm1_nsigmadxy_bttks)) {
 							  if (!llpvtx.isValid()) continue;
 							  reco::Vertex reco_llpvtx = reco::Vertex(llpvtx);
 							  if (reco_llpvtx.nTracks() == 1) continue;
 							  vertices->push_back(reco_llpvtx);
+							  count_new_vtx++; 
 							  Measurement1D dBV_Meas1D = vertex_dist_2d.distance(reco_llpvtx, fake_bs_vtx);
 							  double dBV = dBV_Meas1D.value();
 							  double bs2derr = dBV_Meas1D.error();
@@ -2045,9 +2162,44 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
 							  h_output_gvtx_twobdecay_reco_llpvtx_by_refit_dBV->Fill(dBV);
 							  h_output_gvtx_twobdecay_reco_llpvtx_by_refit_bs2derr->Fill(bs2derr);
+
+							  double mindist3d = 0.5;
+							  int gen_match_id = 99;
+							  for (size_t igen = 0; igen < 2; ++igen) {
+								  if (std::count(vec_jet_idx_matched_genllpvtx.begin(), vec_jet_idx_matched_genllpvtx.end(), igen) == 0) continue;
+								  auto llp_p = mci->decay_point(igen);
+								  double dist3d_llp = mag(llp_p.x - reco_llpvtx.position().x(), llp_p.y - reco_llpvtx.position().y(), llp_p.z - reco_llpvtx.position().z());
+								  if (dist3d_llp < mindist3d) {
+									  gen_match_id = igen;
+									  mindist3d = dist3d_llp;
+								  }
+
+								  for (size_t jgen = 0; jgen < 2; ++jgen) {
+									  if (std::count(vec_jet_idx_matched_genbvtx.begin(), vec_jet_idx_matched_genbvtx.end(), jgen) == 0) continue;
+									  
+									  double dist3d_b = 0;
+									  if (igen == 0) {
+										  auto vec_bp_llp0 = mci->b_llp0_decay_points();
+										  dist3d_b = mag(vec_bp_llp0[jgen].x - reco_llpvtx.position().x(), vec_bp_llp0[jgen].y - reco_llpvtx.position().y(), vec_bp_llp0[jgen].z - reco_llpvtx.position().z());
+									  }
+									  else {
+										  auto vec_bp_llp1 = mci->b_llp1_decay_points();
+										  dist3d_b = mag(vec_bp_llp1[jgen].x - reco_llpvtx.position().x(), vec_bp_llp1[jgen].y - reco_llpvtx.position().y(), vec_bp_llp1[jgen].z - reco_llpvtx.position().z());
+									  }
+									  if (dist3d_b < mindist3d) {
+										  gen_match_id = -1 * jgen;
+										  mindist3d = dist3d_b;
+									  }
+								  }
+							  }
+							  if (gen_match_id != 99) {
+								  if (gen_match_id > 0)	h_output_llp_gvtx_twobdecay_by_refit_dist3dgenllp->Fill(mindist3d);
+								  else h_output_b_gvtx_twobdecay_by_refit_dist3dgenb->Fill(mindist3d);
+							  }
 							  
 							  
 						  }
+						  h_output_gvtx_twobdecay_by_refit_matched_gen_nSVs->Fill(count_new_vtx);
 					  }
 					  
 				  }
@@ -2058,16 +2210,51 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 					  h_output_gvtx_onebdecay_jet_nloosebSVs->Fill(loosebsv_vtxidx_per_bjet.size());
 					  h_output_gvtx_onebdecay_nm1_nsigmadxy_jet_ntrack->Fill(nm1_nsigmadxy_bttks.size());
 					  h_output_gvtx_onebdecay_jet_pT->Fill(jet.pt());
+
+
+					  std::vector<size_t> vec_jet_idx_matched_genbvtx = {};
+					  std::vector<size_t> vec_jet_idx_matched_genllpvtx = {};
+					  for (int i = 0; i < 2; ++i) {	 //an index of GEN llps 
+						  int count_match = 0;
+						  size_t genbvtx_idx = 0;
+						  for (const reco::GenParticleRef& s_temp : mci->secondaries(i)) {
+							  reco::GenParticle* s = (reco::GenParticle*) & *s_temp;
+							  if (reco::deltaR(jet.eta(), jet.phi(), s->eta(), s->phi()) < 0.4) {
+								  count_match++;
+								  vec_jet_idx_matched_genbvtx.push_back(genbvtx_idx);
+								  vec_jet_idx_matched_genllpvtx.push_back(i);
+							  }
+							  genbvtx_idx++;
+						  }
+						  if (count_match == 2) {  // a loose b-tagged jet considered as a one-b-decay jet has exactly two b-quarks matched
+
+							  if (i == 0) {
+								  auto vec_bp_llp0 = mci->b_llp0_decay_points();
+								  double b_pair_dist3d = mag(vec_bp_llp0[0].x - vec_bp_llp0[1].x, vec_bp_llp0[0].y - vec_bp_llp0[1].y, vec_bp_llp0[0].z - vec_bp_llp0[1].z);
+								  h_output_gvtx_onebdecay_b_pair_dist3d->Fill(b_pair_dist3d);
+								  h_output_gvtx_onebdecay_b_pair_bigdist3d->Fill(b_pair_dist3d);
+							  }
+							  else {
+								  auto vec_bp_llp1 = mci->b_llp1_decay_points();
+								  double b_pair_dist3d = mag(vec_bp_llp1[0].x - vec_bp_llp1[1].x, vec_bp_llp1[0].y - vec_bp_llp1[1].y, vec_bp_llp1[0].z - vec_bp_llp1[1].z);
+								  h_output_gvtx_onebdecay_b_pair_dist3d->Fill(b_pair_dist3d);
+								  h_output_gvtx_onebdecay_b_pair_bigdist3d->Fill(b_pair_dist3d);
+							  }
+						  }
+					  }
+
 					  // 2.1 refitting available seed tracks 
 					  if (loosebsv_vtxidx_per_bjet.size() == 0) {
 
-						  std::vector<TransientVertex> b_vertices(1, kv_reco->vertex(nm1_nsigmadxy_bttks));
-						  for (auto bvtx : b_vertices) {
+						  size_t count_new_vtx = 0;
+
+						  for (auto bvtx : kv_reco_dropin(nm1_nsigmadxy_bttks)) {
 							  if (!bvtx.isValid()) continue;
 							  reco::Vertex reco_bvtx = reco::Vertex(bvtx);
 							  if (reco_bvtx.nTracks() == 1) continue;
 							  vec_reco_bvtx_per_bjet.push_back(reco_bvtx);
 							  vec_reco_bvtx_idx_per_bjet.push_back(loosebsv_vtxidx_per_bjet);
+							  count_new_vtx++; 
 							  Measurement1D dBV_Meas1D = vertex_dist_2d.distance(reco_bvtx, fake_bs_vtx);
 							  double dBV = dBV_Meas1D.value();
 							  double bs2derr = dBV_Meas1D.error();
@@ -2089,57 +2276,56 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 							  h_output_gvtx_onebdecay_reco_bvtx_by_refit_dBV->Fill(dBV);
 							  h_output_gvtx_onebdecay_reco_bvtx_by_refit_bs2derr->Fill(bs2derr);
 
-							  double dist3d_bvtx_match_bdecay_by_bjet = 0.0; 
-							  double mindR_bquark = 4.0;
+							  double mindist3d = 0.5;
+							  int gen_match_id = 99;
+							  for (size_t igen = 0; igen < 2; ++igen) {
+								  if (std::count(vec_jet_idx_matched_genllpvtx.begin(), vec_jet_idx_matched_genllpvtx.end(), igen) == 0) continue;
+								  auto llp_p = mci->decay_point(igen);
+								  double dist3d_llp = mag(llp_p.x - reco_bvtx.position().x(), llp_p.y - reco_bvtx.position().y(), llp_p.z - reco_bvtx.position().z());
+								  if (dist3d_llp < mindist3d) {
+									  gen_match_id = igen;
+									  mindist3d = dist3d_llp;
+								  }
 
-							  if (mci->set_bdecay_hadron_chain().size() == 4) {
-								  for (int i = 0; i < 2; ++i) {	 //an index of GEN llps 
-									  size_t j = 0;  //an index of GEN b-quarks 
-									  for (const reco::GenParticleRef& s_temp : mci->secondaries(i)) {
-										  if (reco::deltaR(jet.eta(), jet.phi(), s_temp->eta(), s_temp->phi()) < mindR_bquark) {
-											  mindR_bquark = reco::deltaR(jet.eta(), jet.phi(), s_temp->eta(), s_temp->phi());
-											  if (i == 0) {
-												  auto vec_bp_llp0 = mci->b_llp0_decay_points();
-												  dist3d_bvtx_match_bdecay_by_bjet = mag(vec_bp_llp0[j].x - reco_bvtx.position().x(), vec_bp_llp0[j].y - reco_bvtx.position().y(), vec_bp_llp0[j].z - reco_bvtx.position().z());
-											  }
-											  else {
-												  auto vec_bp_llp1 = mci->b_llp1_decay_points();
-												  dist3d_bvtx_match_bdecay_by_bjet = mag(vec_bp_llp1[j].x - reco_bvtx.position().x(), vec_bp_llp1[j].y - reco_bvtx.position().y(), vec_bp_llp1[j].z - reco_bvtx.position().z());
-											  }
-											  
-										  }
-										  j++;
+								  for (size_t jgen = 0; jgen < 2; ++jgen) {
+									  if (std::count(vec_jet_idx_matched_genbvtx.begin(), vec_jet_idx_matched_genbvtx.end(), jgen) == 0) continue;
+									  
+									  double dist3d_b = 0;
+									  if (igen == 0) {
+										  auto vec_bp_llp0 = mci->b_llp0_decay_points();
+										  dist3d_b = mag(vec_bp_llp0[jgen].x - reco_bvtx.position().x(), vec_bp_llp0[jgen].y - reco_bvtx.position().y(), vec_bp_llp0[jgen].z - reco_bvtx.position().z());
+									  }
+									  else {
+										  auto vec_bp_llp1 = mci->b_llp1_decay_points();
+										  dist3d_b = mag(vec_bp_llp1[jgen].x - reco_bvtx.position().x(), vec_bp_llp1[jgen].y - reco_bvtx.position().y(), vec_bp_llp1[jgen].z - reco_bvtx.position().z());
+									  }
+									  if (dist3d_b < mindist3d) {
+										  gen_match_id = -1 * jgen;
+										  mindist3d = dist3d_b;
 									  }
 								  }
 							  }
-
-							  h_output_gvtx_onebdecay_reco_bvtx_by_refit_dist3dgenb->Fill(dist3d_bvtx_match_bdecay_by_bjet);
-							  h_output_gvtx_onebdecay_reco_bvtx_by_refit_mindR_bquark->Fill(mindR_bquark);
-							  if (mindR_bquark < 0.4) {
-								  h_output_gvtx_onebdecay_matched_reco_bvtx_by_refit_dist3dgenb->Fill(dist3d_bvtx_match_bdecay_by_bjet);
-								  h_2D_output_gvtx_onebdecay_matched_reco_bvtx_by_refit_normchi2_ntrack->Fill(reco_bvtx.normalizedChi2(), reco_bvtx.nTracks());
-								  h_2D_output_gvtx_onebdecay_matched_reco_bvtx_by_refit_normchi2_bs2derr->Fill(reco_bvtx.normalizedChi2(), bs2derr);
-								  for (auto it = reco_bvtx.tracks_begin(), ite = reco_bvtx.tracks_end(); it != ite; ++it) {
-
-									  reco::TransientTrack seed_track;
-									  seed_track = tt_builder->build(*it.operator*());
-									  std::pair<bool, Measurement1D> tk_vtx_dist = track_dist(seed_track, reco_bvtx);
-
-									  h_output_gvtx_onebdecay_matched_reco_bvtx_by_refit_track_miss_dist->Fill(tk_vtx_dist.second.value());
-									  h_output_gvtx_onebdecay_matched_reco_bvtx_by_refit_track_miss_dist_significance->Fill(tk_vtx_dist.second.significance());
-								  }
+							  if (gen_match_id != 99) {
+								  if (gen_match_id > 0)	h_output_llp_gvtx_onebdecay_by_refit_dist3dgenllp->Fill(mindist3d);
+								  else h_output_b_gvtx_onebdecay_by_refit_dist3dgenb->Fill(mindist3d);
 							  }
+
 							  
 						  }
+						  h_output_gvtx_onebdecay_by_refit_matched_gen_nSVs->Fill(count_new_vtx);
 
 					  }
 					  // 2.2 take one loose bSV as a b-decay vtx  
 					  
 					  else
 					  {
+
+						  size_t count_new_vtx = 0;
+
 						  const reco::Vertex& v = vertices->at(loosebsv_vtxidx_per_bjet[0]);
 						  vec_reco_bvtx_per_bjet.push_back(v);
 						  vec_reco_bvtx_idx_per_bjet.push_back(loosebsv_vtxidx_per_bjet);
+						  count_new_vtx++;
 						  Measurement1D dBV_Meas1D = vertex_dist_2d.distance(v, fake_bs_vtx);
 						  double dBV = dBV_Meas1D.value();
 						  double bs2derr = dBV_Meas1D.error();
@@ -2160,7 +2346,42 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
 						  h_output_gvtx_onebdecay_reco_bvtx_by_SV_dBV->Fill(dBV);
 						  h_output_gvtx_onebdecay_reco_bvtx_by_SV_bs2derr->Fill(bs2derr);
+
+						  double mindist3d = 0.5;
+						  int gen_match_id = 99;
+						  for (size_t igen = 0; igen < 2; ++igen) {
+							  if (std::count(vec_jet_idx_matched_genllpvtx.begin(), vec_jet_idx_matched_genllpvtx.end(), igen) == 0) continue;
+							  auto llp_p = mci->decay_point(igen);
+							  double dist3d_llp = mag(llp_p.x - v.position().x(), llp_p.y - v.position().y(), llp_p.z - v.position().z());
+							  if (dist3d_llp < mindist3d) {
+								  gen_match_id = igen;
+								  mindist3d = dist3d_llp;
+							  }
+
+							  for (size_t jgen = 0; jgen < 2; ++jgen) {
+								  if (std::count(vec_jet_idx_matched_genbvtx.begin(), vec_jet_idx_matched_genbvtx.end(), jgen) == 0) continue;
+								  
+								  double dist3d_b = 0;
+								  if (igen == 0) {
+									  auto vec_bp_llp0 = mci->b_llp0_decay_points();
+									  dist3d_b = mag(vec_bp_llp0[jgen].x - v.position().x(), vec_bp_llp0[jgen].y - v.position().y(), vec_bp_llp0[jgen].z - v.position().z());
+								  }
+								  else {
+									  auto vec_bp_llp1 = mci->b_llp1_decay_points();
+									  dist3d_b = mag(vec_bp_llp1[jgen].x - v.position().x(), vec_bp_llp1[jgen].y - v.position().y(), vec_bp_llp1[jgen].z - v.position().z());
+								  }
+								  if (dist3d_b < mindist3d) {
+									  gen_match_id = -1 * jgen;
+									  mindist3d = dist3d_b;
+								  }
+							  }
+						  }
+						  if (gen_match_id != 99) {
+							  if (gen_match_id > 0)	h_output_llp_gvtx_onebdecay_by_SV_dist3dgenllp->Fill(mindist3d);
+							  else h_output_b_gvtx_onebdecay_by_SV_dist3dgenb->Fill(mindist3d);
+						  }
 						  
+						  h_output_gvtx_onebdecay_by_SV_matched_gen_nSVs->Fill(count_new_vtx);
 					  }
 
 
@@ -2174,290 +2395,219 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 	  h_output_gvtx_twobdecay_njet->Fill(count_twobdecay_jet);
 	  h_output_gvtx_onebdecay_njet->Fill(count_onebdecay_jet);
 	  
-	  
-	std::vector<size_t> vec_bvtx_i_paired = {};
-	std::vector<size_t> vec_bvtx_j_paired = {};
-	if (vec_reco_bvtx_per_bjet.size() >= 2) {
-		for (size_t i = 0; i < vec_reco_bvtx_per_bjet.size(); ++i) {
-			if (std::count(vec_bvtx_j_paired.begin(), vec_bvtx_j_paired.end(), i) == 1) continue;
+	// still has a code issue
+	if (false) {
+	    std::vector<size_t> vec_bvtx_i_paired = {};
+		std::vector<size_t> vec_bvtx_j_paired = {};
+		if (vec_reco_bvtx_per_bjet.size() >= 2) {
+			  for (size_t i = 0; i < vec_reco_bvtx_per_bjet.size(); ++i) {
+				  if (std::count(vec_bvtx_j_paired.begin(), vec_bvtx_j_paired.end(), i) == 1) continue;
 
-			double min_bvtxpairdPhi = M_PI/2;
-			const reco::Vertex& v0 = vec_reco_bvtx_per_bjet[i];
-			track_set tracks[2];
-			tracks[0] = vertex_track_set(v0);
-			// compute vertex x, y, phi positions
-		    double v0x = v0.x() - bsx;
-			double v0y = v0.y() - bsy;
-			double v0z = v0.z() - bsz;
-			double phi0 = atan2(v0y, v0x);
-			const double eta0 = etaFromXYZ(v0x, v0y, v0z);
-			// now loop through all vertex pairs, and try to form ghost vertex:
-			for (size_t j = i+1; j < vec_reco_bvtx_per_bjet.size(); ++j) {
-				if (std::count(vec_bvtx_i_paired.begin(), vec_bvtx_i_paired.end(), j) == 1) continue;
+				  double min_bvtxpairdPhi = M_PI;	  //V30 and V29 would have PI/2
+				  const reco::Vertex & v0 = vec_reco_bvtx_per_bjet[i];
+				  track_set tracks[2];
+				  tracks[0] = vertex_track_set(v0);
+				  // compute vertex x, y, phi positions
+				  double v0x = v0.x() - bsx;
+				  double v0y = v0.y() - bsy;
+				  double v0z = v0.z() - bsz;
+				  double phi0 = atan2(v0y, v0x);
+				  const double eta0 = etaFromXYZ(v0x, v0y, v0z);
+				  // now loop through all vertex pairs, and try to form ghost vertex:
+				  for (size_t j = i + 1; j < vec_reco_bvtx_per_bjet.size(); ++j) {
+					  if (std::count(vec_bvtx_i_paired.begin(), vec_bvtx_i_paired.end(), j) == 1) continue;
 
-				const reco::Vertex& v1 = vec_reco_bvtx_per_bjet[j];
-				// compute vertex x, y, phi positions
-				double v1x = v1.x() - bsx;
-				double v1y = v1.y() - bsy;
-				double v1z = v1.z() - bsz;
-				double phi1 = atan2(v1y, v1x);
-				const double eta1 = etaFromXYZ(v1x, v1y, v1z);
-				// only consider cases w/ two vertices, with at least two tracks each
-				if (v0.nTracks() < 2 || v1.nTracks() < 2) continue;
-
-				
-				double bvtxpairdPhi = fabs(reco::deltaPhi(phi0, phi1));
-				if (bvtxpairdPhi < min_bvtxpairdPhi) {
-					
-					GlobalVector trajectory_sv[2];
-					std::vector<reco::TransientTrack> ttks[2];
-
-					// for the ghosts
-					std::vector<reco::TransientTrack> gttks;
-					std::vector<reco::Track> gtks;
-
-					// if we want to try fitting ghosts + non-ghosts simultaneously (not likely to work, but okay)
-					std::vector<reco::TransientTrack> all_ttks;
-					
-					for (auto it = v0.tracks_begin(), ite = v0.tracks_end(); it != ite; ++it) {
-						reco::TrackRef tk = it->castTo<reco::TrackRef>();
-						h_output_gvtx_all_dR_tracks_tv0->Fill(reco::deltaR(eta0, phi0, tk->eta(), tk->phi()));
-					}
-
-					for (auto trkref : tracks[0]) {
-						GlobalVector trajectory_trk = GlobalVector(trkref->px(), trkref->py(), trkref->pz());
-						trajectory_sv[0] += trajectory_trk;
-						ttks[0].push_back(tt_builder->build(trkref));
-					}
+					  const reco::Vertex & v1 = vec_reco_bvtx_per_bjet[j];
+					  // compute vertex x, y, phi positions
+					  double v1x = v1.x() - bsx;
+					  double v1y = v1.y() - bsy;
+					  double v1z = v1.z() - bsz;
+					  double phi1 = atan2(v1y, v1x);
+					  const double eta1 = etaFromXYZ(v1x, v1y, v1z);
+					  // only consider cases w/ two vertices, with at least two tracks each
+					  if (v0.nTracks() < 2 || v1.nTracks() < 2) continue;
 
 
-					// FIXME be sure to debug and check all these! and of course remove printouts or put into a debug mode eventually
-					// ghostTrackFitter uses vtx position and error as a prior, SV trajectory as a direction, a cone size of 0.05 (FIXME arbitrarily chosen? worth studying--also note the fitter can alternatively take a "directionError" as input, based on a GlobalError which may be similar to the GlobalVector for the ghost trajectory), and the set of vtx tracks as input
-					double coneSize = 0.05;
-					reco::GhostTrack ghost0 = ghostTrackFitter->fit(RecoVertex::convertPos(v0.position()), RecoVertex::convertError(v0.error()), trajectory_sv[0], coneSize, ttks[0]);
+					  double bvtxpairdPhi = fabs(reco::deltaPhi(phi0, phi1));
+					  if (bvtxpairdPhi < min_bvtxpairdPhi) {
 
-					if (verbose)
-						std::cout << "chi2, ndof: " << ghost0.chi2() << ", " << ghost0.ndof() << std::endl;
-					reco::Track gt0 = reco::Track(ghost0);
-					gtks.push_back(gt0);
-					if (verbose)
-						std::cout << "px,py,pz: " << gt0.px() << ", " << gt0.py() << ", " << gt0.pz() << std::endl;
-					gttks.push_back(tt_builder->build(gt0));
+						  GlobalVector trajectory_sv[2];
+						  std::vector<reco::TransientTrack> ttks[2];
 
-					for (auto it = v1.tracks_begin(), ite = v1.tracks_end(); it != ite; ++it) {
-						reco::TrackRef tk = it->castTo<reco::TrackRef>();
-						h_output_gvtx_all_dR_tracks_tv1->Fill(reco::deltaR(eta1, phi1, tk->eta(), tk->phi()));
-					}
-					
+						  // for the ghosts
+						  std::vector<reco::TransientTrack> gttks;
+						  std::vector<reco::Track> gtks;
 
-					for (auto trkref : tracks[0]) {
-						GlobalVector trajectory_trk = GlobalVector(trkref->px(), trkref->py(), trkref->pz());
-						trajectory_sv[0] += trajectory_trk;
-						ttks[0].push_back(tt_builder->build(trkref));
-					}
+						  // if we want to try fitting ghosts + non-ghosts simultaneously (not likely to work, but okay)
+						  std::vector<reco::TransientTrack> all_ttks;
 
-					reco::GhostTrack ghost1 = ghostTrackFitter->fit(RecoVertex::convertPos(v1.position()), RecoVertex::convertError(v1.error()), trajectory_sv[1], coneSize, ttks[1]);
+						  for (auto it = v0.tracks_begin(), ite = v0.tracks_end(); it != ite; ++it) {
+							  reco::TrackRef tk = it->castTo<reco::TrackRef>();
+							  h_output_gvtx_all_dR_tracks_tv0->Fill(reco::deltaR(eta0, phi0, tk->eta(), tk->phi()));
+						  }
 
-					if (verbose)
-						std::cout << "chi2, ndof: " << ghost1.chi2() << ", " << ghost1.ndof() << std::endl;
-					reco::Track gt1 = reco::Track(ghost1);
-					gtks.push_back(gt1);
-					if (verbose)
-						std::cout << "px,py,pz: " << gt1.px() << ", " << gt1.py() << ", " << gt1.pz() << std::endl;
-					gttks.push_back(tt_builder->build(gt1));
-
-					
-					// fill all_ttks
-					for (int ttks_idx = 0; ttks_idx < 2; ++ttks_idx) {
-						for (auto ttk : ttks[ttks_idx]) {
-							all_ttks.push_back(ttk);
-						}
-					}
-					for (auto gttk : gttks) {
-						all_ttks.push_back(gttk);
-					}
-					
-					// with our ghost tracks in hand, we can fit them into a common ghost vertex:
-					std::vector<TransientVertex> ghost_vertices(1, kv_reco->vertex(gttks)); // Use only the two ghostTracks to find a vertex--issue is that bs2derr gets smaller w/ more ntks, but here we only use two "tracks" for the Kalman fit
-					//std::vector<TransientVertex> ghost_vertices(1, kv_reco->vertex(all_ttks)); // Use the two ghostTracks AND the other tracks from the two SVs to find a common vertex--here, bs2derr should get sufficiently small, but the chi2 seems to blow up (which makes sense given that there isn't a common intersection point among ALL of these tracks!). From printouts, it seemed like
-
-					if (verbose)
-						std::cout << "ghost_vertices.size() " << ghost_vertices.size() << std::endl;
-
-					
-					for (auto gvtx : ghost_vertices) {
-
-						if (verbose) {
-							std::cout << "sv0 chi2 " << v0.normalizedChi2() << ", sv1 chi2 " << v1.normalizedChi2() << std::endl;
-							std::cout << "gvtx chi2 " << gvtx.normalisedChiSquared() << std::endl;
-							std::cout << "gvtx valid " << gvtx.isValid() << std::endl;
-						}
-
-						// only consider valid vertices (where the Kalman filter did not fail)
-						if (!gvtx.isValid()) continue;
-
-						// veto those with negative chi2/ndof (FIXME why are they negative again? maybe this was just to remove the -NaN cases, but now I'll do that via isValid)
-						//if(gvtx.normalisedChiSquared() < 0) continue;
-
-						
-						// cast the ghost vertex from TransientVertex to reco::Vertex
-						// FIXME may be able to do this at an earlier stage in this loop
-						reco::Vertex reco_gvtx = reco::Vertex(gvtx);
-						// FIXME this is to remove all (ghost) tracks from the vertex
-						reco_gvtx.removeTracks();
-						
-						for (auto it = v0.tracks_begin(), ite = v0.tracks_end(); it != ite; ++it) {
-							const reco::TrackBaseRef& baseref = *it;
-							// FIXME may need to veto tracks with small weights? or maybe already done? add printouts to check
-							float w = v0.trackWeight(baseref);
-
-							// FIXME ... and this is to add all (real) tracks back into the vertex! so that we can pass our ntk requirements, etc.
-							// I think this worked when I implemented it a while back, but it would be good to check
-							reco_gvtx.add(baseref, w);
-						}
-						for (auto it = v1.tracks_begin(), ite = v1.tracks_end(); it != ite; ++it) {
-							const reco::TrackBaseRef& baseref = *it;
-							// FIXME may need to veto tracks with small weights? or maybe already done? add printouts to check
-							float w = v1.trackWeight(baseref);
-
-							// FIXME ... and this is to add all (real) tracks back into the vertex! so that we can pass our ntk requirements, etc.
-							// I think this worked when I implemented it a while back, but it would be good to check
-							reco_gvtx.add(baseref, w);
-						}
-						
-
-						const auto d_gvtx_new = vertex_dist_2d.distance(reco_gvtx, fake_bs_vtx);
-						
-						if (d_gvtx_new.value() > 0.01 && reco_gvtx.tracksSize() >= 2) {
-							
-							min_bvtxpairdPhi = bvtxpairdPhi;
-							h_output_gvtx_two_onebdecay_mindPhi->Fill(min_bvtxpairdPhi);
-							vec_bvtx_i_paired.push_back(i);
-							vec_bvtx_j_paired.push_back(j);
-							
-							if (reco_gvtx.nTracks() == 1) continue;
-
-							if (vec_reco_bvtx_idx_per_bjet[i].size() == 1 && vec_reco_bvtx_idx_per_bjet[j].size() == 1) {
-								//vertices->erase(vertices->at(vec_reco_bvtx_idx_per_bjet[i][0]));
-								vertices->erase(vertices->begin() + vec_reco_bvtx_idx_per_bjet[i][0]);
-							    //eraseElement(vertices, vec_reco_bvtx_idx_per_bjet[i][0]);
-								vertices->at(vec_reco_bvtx_idx_per_bjet[j][0]) = reco_gvtx;
-							}
-							else if (vec_reco_bvtx_idx_per_bjet[i].size() == 1 ) {
-								vertices->at(vec_reco_bvtx_idx_per_bjet[i][0]) = reco_gvtx;
-							}
-							else if (vec_reco_bvtx_idx_per_bjet[j].size() == 1){
-								vertices->at(vec_reco_bvtx_idx_per_bjet[j][0]) = reco_gvtx;
-							}
-							else {
-								vertices->push_back(reco_gvtx);
-							}
-
-							Measurement1D dBV_Meas1D = vertex_dist_2d.distance(reco_gvtx, fake_bs_vtx);
-							double dBV = dBV_Meas1D.value();
-							double bs2derr = dBV_Meas1D.error();
-
-							h_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_normchi2->Fill(reco_gvtx.normalizedChi2());
-							h_2D_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_normchi2_ntrack->Fill(reco_gvtx.normalizedChi2(), reco_gvtx.nTracks());
-							h_2D_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_normchi2_bs2derr->Fill(reco_gvtx.normalizedChi2(), bs2derr);
-
-							for (auto it = reco_gvtx.tracks_begin(), ite = reco_gvtx.tracks_end(); it != ite; ++it) {
-
-								reco::TransientTrack seed_track;
-								seed_track = tt_builder->build(*it.operator*());
-								std::pair<bool, Measurement1D> tk_vtx_dist = track_dist(seed_track, reco_gvtx);
-
-								h_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_track_miss_dist->Fill(tk_vtx_dist.second.value());
-								h_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_track_miss_dist_significance->Fill(tk_vtx_dist.second.significance());
-							}
-
-							h_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_dBV->Fill(dBV);
-							h_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_bs2derr->Fill(bs2derr);
-						}
-
-					}
+						  for (auto trkref : tracks[0]) {
+							  GlobalVector trajectory_trk = GlobalVector(trkref->px(), trkref->py(), trkref->pz());
+							  trajectory_sv[0] += trajectory_trk;
+							  ttks[0].push_back(tt_builder->build(trkref));
+						  }
 
 
+						  // FIXME be sure to debug and check all these! and of course remove printouts or put into a debug mode eventually
+						  // ghostTrackFitter uses vtx position and error as a prior, SV trajectory as a direction, a cone size of 0.05 (FIXME arbitrarily chosen? worth studying--also note the fitter can alternatively take a "directionError" as input, based on a GlobalError which may be similar to the GlobalVector for the ghost trajectory), and the set of vtx tracks as input
+						  double coneSize = 0.05;
+						  reco::GhostTrack ghost0 = ghostTrackFitter->fit(RecoVertex::convertPos(v0.position()), RecoVertex::convertError(v0.error()), trajectory_sv[0], coneSize, ttks[0]);
 
-				}
+						  if (verbose)
+							  std::cout << "chi2, ndof: " << ghost0.chi2() << ", " << ghost0.ndof() << std::endl;
+						  reco::Track gt0 = reco::Track(ghost0);
+						  gtks.push_back(gt0);
+						  if (verbose)
+							  std::cout << "px,py,pz: " << gt0.px() << ", " << gt0.py() << ", " << gt0.pz() << std::endl;
+						  gttks.push_back(tt_builder->build(gt0));
 
-			}
-		}
-		
+						  for (auto it = v1.tracks_begin(), ite = v1.tracks_end(); it != ite; ++it) {
+							  reco::TrackRef tk = it->castTo<reco::TrackRef>();
+							  h_output_gvtx_all_dR_tracks_tv1->Fill(reco::deltaR(eta1, phi1, tk->eta(), tk->phi()));
+						  }
+
+
+						  for (auto trkref : tracks[0]) {
+							  GlobalVector trajectory_trk = GlobalVector(trkref->px(), trkref->py(), trkref->pz());
+							  trajectory_sv[0] += trajectory_trk;
+							  ttks[0].push_back(tt_builder->build(trkref));
+						  }
+
+						  reco::GhostTrack ghost1 = ghostTrackFitter->fit(RecoVertex::convertPos(v1.position()), RecoVertex::convertError(v1.error()), trajectory_sv[1], coneSize, ttks[1]);
+
+						  if (verbose)
+							  std::cout << "chi2, ndof: " << ghost1.chi2() << ", " << ghost1.ndof() << std::endl;
+						  reco::Track gt1 = reco::Track(ghost1);
+						  gtks.push_back(gt1);
+						  if (verbose)
+							  std::cout << "px,py,pz: " << gt1.px() << ", " << gt1.py() << ", " << gt1.pz() << std::endl;
+						  gttks.push_back(tt_builder->build(gt1));
+
+
+						  // fill all_ttks
+						  for (int ttks_idx = 0; ttks_idx < 2; ++ttks_idx) {
+							  for (auto ttk : ttks[ttks_idx]) {
+								  all_ttks.push_back(ttk);
+							  }
+						  }
+						  for (auto gttk : gttks) {
+							  all_ttks.push_back(gttk);
+						  }
+
+						  // with our ghost tracks in hand, we can fit them into a common ghost vertex:
+						  std::vector<TransientVertex> ghost_vertices(1, kv_reco->vertex(gttks)); // Use only the two ghostTracks to find a vertex--issue is that bs2derr gets smaller w/ more ntks, but here we only use two "tracks" for the Kalman fit
+						  //std::vector<TransientVertex> ghost_vertices(1, kv_reco->vertex(all_ttks)); // Use the two ghostTracks AND the other tracks from the two SVs to find a common vertex--here, bs2derr should get sufficiently small, but the chi2 seems to blow up (which makes sense given that there isn't a common intersection point among ALL of these tracks!). From printouts, it seemed like
+
+						  if (verbose)
+							  std::cout << "ghost_vertices.size() " << ghost_vertices.size() << std::endl;
+
+
+						  for (auto gvtx : ghost_vertices) {
+
+							  if (verbose) {
+								  std::cout << "sv0 chi2 " << v0.normalizedChi2() << ", sv1 chi2 " << v1.normalizedChi2() << std::endl;
+								  std::cout << "gvtx chi2 " << gvtx.normalisedChiSquared() << std::endl;
+								  std::cout << "gvtx valid " << gvtx.isValid() << std::endl;
+							  }
+
+							  // only consider valid vertices (where the Kalman filter did not fail)
+							  if (!gvtx.isValid()) continue;
+
+							  // veto those with negative chi2/ndof (FIXME why are they negative again? maybe this was just to remove the -NaN cases, but now I'll do that via isValid)
+							  //if(gvtx.normalisedChiSquared() < 0) continue;
+
+
+							  // cast the ghost vertex from TransientVertex to reco::Vertex
+							  // FIXME may be able to do this at an earlier stage in this loop
+							  reco::Vertex reco_gvtx = reco::Vertex(gvtx);
+							  // FIXME this is to remove all (ghost) tracks from the vertex
+							  reco_gvtx.removeTracks();
+
+							  for (auto it = v0.tracks_begin(), ite = v0.tracks_end(); it != ite; ++it) {
+								  const reco::TrackBaseRef& baseref = *it;
+								  // FIXME may need to veto tracks with small weights? or maybe already done? add printouts to check
+								  float w = v0.trackWeight(baseref);
+
+								  // FIXME ... and this is to add all (real) tracks back into the vertex! so that we can pass our ntk requirements, etc.
+								  // I think this worked when I implemented it a while back, but it would be good to check
+								  reco_gvtx.add(baseref, w);
+							  }
+							  for (auto it = v1.tracks_begin(), ite = v1.tracks_end(); it != ite; ++it) {
+								  const reco::TrackBaseRef& baseref = *it;
+								  // FIXME may need to veto tracks with small weights? or maybe already done? add printouts to check
+								  float w = v1.trackWeight(baseref);
+
+								  // FIXME ... and this is to add all (real) tracks back into the vertex! so that we can pass our ntk requirements, etc.
+								  // I think this worked when I implemented it a while back, but it would be good to check
+								  reco_gvtx.add(baseref, w);
+							  }
+
+
+							  const auto d_gvtx_new = vertex_dist_2d.distance(reco_gvtx, fake_bs_vtx);
+
+							  if (d_gvtx_new.value() > 0.01 && reco_gvtx.tracksSize() >= 2) {
+
+								  min_bvtxpairdPhi = bvtxpairdPhi;
+								  h_output_gvtx_two_onebdecay_mindPhi->Fill(min_bvtxpairdPhi);
+								  vec_bvtx_i_paired.push_back(i);
+								  vec_bvtx_j_paired.push_back(j);
+
+								  if (reco_gvtx.nTracks() == 1) continue;
+
+								  if (vec_reco_bvtx_idx_per_bjet[i].size() == 1 && vec_reco_bvtx_idx_per_bjet[j].size() == 1) {
+									  //vertices->erase(vertices->at(vec_reco_bvtx_idx_per_bjet[i][0]));
+									  vertices->erase(vertices->begin() + vec_reco_bvtx_idx_per_bjet[i][0]);
+									  //eraseElement(vertices, vec_reco_bvtx_idx_per_bjet[i][0]);
+									  vertices->at(vec_reco_bvtx_idx_per_bjet[j][0]) = reco_gvtx;
+								  }
+								  else if (vec_reco_bvtx_idx_per_bjet[i].size() == 1) {
+									  vertices->at(vec_reco_bvtx_idx_per_bjet[i][0]) = reco_gvtx;
+								  }
+								  else if (vec_reco_bvtx_idx_per_bjet[j].size() == 1) {
+									  vertices->at(vec_reco_bvtx_idx_per_bjet[j][0]) = reco_gvtx;
+								  }
+								  else {
+									  vertices->push_back(reco_gvtx);
+								  }
+
+								  Measurement1D dBV_Meas1D = vertex_dist_2d.distance(reco_gvtx, fake_bs_vtx);
+								  double dBV = dBV_Meas1D.value();
+								  double bs2derr = dBV_Meas1D.error();
+
+								  h_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_normchi2->Fill(reco_gvtx.normalizedChi2());
+								  h_2D_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_normchi2_ntrack->Fill(reco_gvtx.normalizedChi2(), reco_gvtx.nTracks());
+								  h_2D_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_normchi2_bs2derr->Fill(reco_gvtx.normalizedChi2(), bs2derr);
+
+								  for (auto it = reco_gvtx.tracks_begin(), ite = reco_gvtx.tracks_end(); it != ite; ++it) {
+
+									  reco::TransientTrack seed_track;
+									  seed_track = tt_builder->build(*it.operator*());
+									  std::pair<bool, Measurement1D> tk_vtx_dist = track_dist(seed_track, reco_gvtx);
+
+									  h_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_track_miss_dist->Fill(tk_vtx_dist.second.value());
+									  h_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_track_miss_dist_significance->Fill(tk_vtx_dist.second.significance());
+								  }
+
+								  h_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_dBV->Fill(dBV);
+								  h_output_gvtx_two_onebdecay_reco_llpvtx_by_ghvtx_bs2derr->Fill(bs2derr);
+							  }
+
+						  }
+
+
+
+					  }
+
+				  }
+			  }
+
+		  }
 	}
-	
-	for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
-
-		// setup track_sets
-		track_set tracks[2];
-		tracks[0] = vertex_track_set(*v[0]);
-
-
-		if (v[0]->nTracks() < 3) continue;
-		Measurement1D dBV_Meas1D = vertex_dist_2d.distance(*v[0], fake_bs_vtx);
-		double dBV = dBV_Meas1D.value();
-		double bs2derr = dBV_Meas1D.error();
-		// compute vertex x, y, phi positions
-		double v0x = v[0]->x() - bsx;
-		double v0y = v[0]->y() - bsy;
-		//double v0z = v[0]->z() - bsz;
-		double phi0 = atan2(v0y, v0x);
-
-		h_output_gvtx_output_vertex_normchi2->Fill(v[0]->normalizedChi2());
-		h_2D_output_gvtx_output_vertex_normchi2_ntrack->Fill(v[0]->normalizedChi2(), v[0]->nTracks());
-		h_2D_output_gvtx_output_vertex_normchi2_bs2derr->Fill(v[0]->normalizedChi2(), bs2derr);
-
-		for (auto it = v[0]->tracks_begin(), ite = v[0]->tracks_end(); it != ite; ++it) {
-
-			reco::TransientTrack seed_track;
-			seed_track = tt_builder->build(*it.operator*());
-			std::pair<bool, Measurement1D> tk_vtx_dist = track_dist(seed_track, *v[0]);
-
-			h_output_gvtx_output_vertex_track_miss_dist->Fill(tk_vtx_dist.second.value());
-			h_output_gvtx_output_vertex_track_miss_dist_significance->Fill(tk_vtx_dist.second.significance());
-		}
-
-		h_output_gvtx_output_vertex_dBV->Fill(dBV);
-		h_output_gvtx_output_vertex_bs2derr->Fill(bs2derr);
-
-		double dist3d_vtx_match_bdecay_by_bquark = 0.0;
-		double dist3d_vtx_match_llpdecay_by_bquark = 0.0;
-		double mindPhi_bquark = M_PI;
-
-		if (mci->set_bdecay_hadron_chain().size() == 4) {
-			for (int i = 0; i < 2; ++i) {	 //an index of GEN llps 
-				size_t j = 0;  //an index of GEN b-quarks 
-				for (const reco::GenParticleRef& s_temp : mci->secondaries(i)) {
-					if (fabs(reco::deltaPhi(phi0, s_temp->phi())) < mindPhi_bquark) {
-						mindPhi_bquark = fabs(reco::deltaPhi(phi0, s_temp->phi()));
-						if (i == 0) {
-							auto vec_bp_llp0 = mci->b_llp0_decay_points();
-							dist3d_vtx_match_bdecay_by_bquark = mag(vec_bp_llp0[j].x - v[0]->x(), vec_bp_llp0[j].y - v[0]->y(), vec_bp_llp0[j].z - v[0]->z()); dist3d_vtx_match_bdecay_by_bquark = mag(vec_bp_llp0[j].x - v[0]->x(), vec_bp_llp0[j].y - v[0]->y(), vec_bp_llp0[j].z - v[0]->z());
-							
-						}
-						else {
-							auto vec_bp_llp1 = mci->b_llp1_decay_points();
-							dist3d_vtx_match_bdecay_by_bquark = mag(vec_bp_llp1[j].x - v[0]->x(), vec_bp_llp1[j].y - v[0]->y(), vec_bp_llp1[j].z - v[0]->z());
-							
-						}
-						auto p = mci->decay_point(i);
-						dist3d_vtx_match_llpdecay_by_bquark = mag(p.x - v[0]->x(), p.y - v[0]->y(), p.z - v[0]->z());
-
-					}
-					j++;
-				}
-			}
-		}
-
-		if (dist3d_vtx_match_bdecay_by_bquark < dist3d_vtx_match_llpdecay_by_bquark)
-			h_output_gvtx_output_vertex_dist3dgenb->Fill(dist3d_vtx_match_bdecay_by_bquark);
-		else
-		    h_output_gvtx_output_vertex_dist3dgenllp->Fill(dist3d_vtx_match_llpdecay_by_bquark);
-		h_output_gvtx_output_vertex_mindPhi_bquark->Fill(mindPhi_bquark);
-
-
-	}
-	
 	if (false) {
 		for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
 
@@ -2746,9 +2896,148 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   }
 
 
+
   //////////////////////////////////////////////////////////////////////
   // Put the output.
   //////////////////////////////////////////////////////////////////////
+
+  // trying to get a resolution of 3d distance b/w GEN b-decay vertex and reconstructed vertex 
+  if (vertices->size() > 0 && mci->set_bdecay_hadron_chain().size() == 4) {
+	  std::vector<size_t> vec_bquark_idx_bsv = {};
+	  double llp_phi0 = mci->primaries()[0]->phi();
+	  double llp_phi1 = mci->primaries()[1]->phi();
+	  double dPhi_llp_pair = fabs(reco::deltaPhi(llp_phi0, llp_phi1));
+	  h_output_llp_dphi->Fill(dPhi_llp_pair);
+	  auto llp_p0 = mci->decay_point(0);
+	  auto llp_p1 = mci->decay_point(1);
+	  h_output_llp_dist3d->Fill(mag(llp_p0.x - llp_p1.x, llp_p0.y - llp_p1.y, llp_p0.z - llp_p1.z));
+	  for (int i = 0; i < 2; ++i) {	 //an index of GEN llps 
+		  const reco::GenParticleRef& s0_temp = mci->secondaries(i)[0];
+		  reco::GenParticle* s0 = (reco::GenParticle*) & *s0_temp;
+		  const reco::GenParticleRef& s1_temp = mci->secondaries(i)[1];
+		  reco::GenParticle* s1 = (reco::GenParticle*)&*s1_temp;
+		  double dPhi_b_pair = fabs(reco::deltaPhi(s0->phi(), s1->phi()));
+		  if (i == 0) {
+			  h_output_llp0_b_dphi->Fill(dPhi_b_pair);
+			  auto vec_bp_llp0 = mci->b_llp0_decay_points();
+			  double b_pair_dist3d = mag(vec_bp_llp0[0].x - vec_bp_llp0[1].x, vec_bp_llp0[0].y - vec_bp_llp0[1].y, vec_bp_llp0[0].z - vec_bp_llp0[1].z);
+			  h_output_llp0_b_dist3d->Fill(b_pair_dist3d);
+		  }
+		  else {
+			  h_output_llp1_b_dphi->Fill(dPhi_b_pair);
+			  auto vec_bp_llp1 = mci->b_llp1_decay_points();
+			  double b_pair_dist3d = mag(vec_bp_llp1[0].x - vec_bp_llp1[1].x, vec_bp_llp1[0].y - vec_bp_llp1[1].y, vec_bp_llp1[0].z - vec_bp_llp1[1].z);
+			  h_output_llp1_b_dist3d->Fill(b_pair_dist3d);
+		  }
+		  for (int j = 0; j < 2; ++j) {	 //an index of GEN b-quarks 
+			  
+			  double min_sv_dist3d_bvtx = 100;
+			  size_t idx_bsv = 99;
+			  size_t isv = 0;
+			  for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
+				  if (std::count(vec_bquark_idx_bsv.begin(), vec_bquark_idx_bsv.end(), isv) == 1)
+					  continue;
+
+				  if (v[0]->nTracks() < 3) continue;
+				  double b_sv_dist3d = 0.0;
+
+				  if (i == 0) {
+					  auto vec_bp_llp0 = mci->b_llp0_decay_points();
+					  b_sv_dist3d = mag(vec_bp_llp0[j].x - v[0]->x(), vec_bp_llp0[j].y - v[0]->y(), vec_bp_llp0[j].z - v[0]->z()); 
+				  }
+				  else {
+					  auto vec_bp_llp1 = mci->b_llp1_decay_points();
+					  b_sv_dist3d = mag(vec_bp_llp1[j].x - v[0]->x(), vec_bp_llp1[j].y - v[0]->y(), vec_bp_llp1[j].z - v[0]->z());
+
+				  }
+
+				  if (min_sv_dist3d_bvtx > b_sv_dist3d) {
+					  idx_bsv = isv;
+					  min_sv_dist3d_bvtx = b_sv_dist3d;
+				  }
+				  isv++;
+
+			  }
+			  if (idx_bsv != 99) {
+				  vec_bquark_idx_bsv.push_back(idx_bsv);
+				  h_output_at_least_3trk_vertex_bquark_closest_dist3d_vtx->Fill(min_sv_dist3d_bvtx);
+			  }
+		  }
+	  }
+  }
+
+  for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
+
+	  // setup track_sets
+	  track_set tracks[2];
+	  tracks[0] = vertex_track_set(*v[0]);
+
+	  h_output_vertex_ntrack->Fill(v[0]->nTracks());
+	  if (v[0]->nTracks() < 3) continue;
+	  Measurement1D dBV_Meas1D = vertex_dist_2d.distance(*v[0], fake_bs_vtx);
+	  double dBV = dBV_Meas1D.value();
+	  double bs2derr = dBV_Meas1D.error();
+	  // compute vertex x, y, phi positions
+	  double v0x = v[0]->x() - bsx;
+	  double v0y = v[0]->y() - bsy;
+	  //double v0z = v[0]->z() - bsz;
+	  double phi0 = atan2(v0y, v0x);
+
+	  h_output_at_least_3trk_vertex_normchi2->Fill(v[0]->normalizedChi2());
+	  h_2D_output_at_least_3trk_vertex_normchi2_ntrack->Fill(v[0]->normalizedChi2(), v[0]->nTracks());
+	  h_2D_output_at_least_3trk_vertex_normchi2_bs2derr->Fill(v[0]->normalizedChi2(), bs2derr);
+
+	  for (auto it = v[0]->tracks_begin(), ite = v[0]->tracks_end(); it != ite; ++it) {
+
+		  reco::TransientTrack seed_track;
+		  seed_track = tt_builder->build(*it.operator*());
+		  std::pair<bool, Measurement1D> tk_vtx_dist = track_dist(seed_track, *v[0]);
+
+		  h_output_at_least_3trk_vertex_track_miss_dist->Fill(tk_vtx_dist.second.value());
+		  h_output_at_least_3trk_vertex_track_miss_dist_significance->Fill(tk_vtx_dist.second.significance());
+	  }
+
+	  h_output_at_least_3trk_vertex_dBV->Fill(dBV);
+	  h_output_at_least_3trk_vertex_bs2derr->Fill(bs2derr);
+
+	  double dist3d_vtx_match_bdecay_by_bquark = 0.0;
+	  double dist3d_vtx_match_llpdecay_by_bquark = 0.0;
+	  double mindPhi_bquark = M_PI;
+
+	  if (mci->set_bdecay_hadron_chain().size() == 4) {
+		  for (int i = 0; i < 2; ++i) {	 //an index of GEN llps 
+			  size_t j = 0;  //an index of GEN b-quarks 
+			  for (const reco::GenParticleRef& s_temp : mci->secondaries(i)) {
+				  if (fabs(reco::deltaPhi(phi0, s_temp->phi())) < mindPhi_bquark) {
+					  mindPhi_bquark = fabs(reco::deltaPhi(phi0, s_temp->phi()));
+					  if (i == 0) {
+						  auto vec_bp_llp0 = mci->b_llp0_decay_points();
+						  dist3d_vtx_match_bdecay_by_bquark = mag(vec_bp_llp0[j].x - v[0]->x(), vec_bp_llp0[j].y - v[0]->y(), vec_bp_llp0[j].z - v[0]->z()); dist3d_vtx_match_bdecay_by_bquark = mag(vec_bp_llp0[j].x - v[0]->x(), vec_bp_llp0[j].y - v[0]->y(), vec_bp_llp0[j].z - v[0]->z());
+
+					  }
+					  else {
+						  auto vec_bp_llp1 = mci->b_llp1_decay_points();
+						  dist3d_vtx_match_bdecay_by_bquark = mag(vec_bp_llp1[j].x - v[0]->x(), vec_bp_llp1[j].y - v[0]->y(), vec_bp_llp1[j].z - v[0]->z());
+
+					  }
+					  auto p = mci->decay_point(i);
+					  dist3d_vtx_match_llpdecay_by_bquark = mag(p.x - v[0]->x(), p.y - v[0]->y(), p.z - v[0]->z());
+
+				  }
+				  j++;
+			  }
+		  }
+	  }
+
+	  if (dist3d_vtx_match_bdecay_by_bquark < dist3d_vtx_match_llpdecay_by_bquark)
+		  h_output_at_least_3trk_b_vertex_dist3dgenb->Fill(dist3d_vtx_match_bdecay_by_bquark);
+	  else
+		  h_output_at_least_3trk_llp_vertex_dist3dgenllp->Fill(dist3d_vtx_match_llpdecay_by_bquark);
+	  h_output_at_least_3trk_vertex_mindPhi_bquark->Fill(mindPhi_bquark);
+	  h_output_at_least_3trk_all_vertex_dist3dgenb->Fill(dist3d_vtx_match_bdecay_by_bquark);
+	  h_output_at_least_3trk_all_vertex_dist3dgenllp->Fill(dist3d_vtx_match_llpdecay_by_bquark);
+
+  }
 
   finish(event, seed_tracks, all_tracks, std::move(vertices), std::move(vpeffs), vpeffs_tracks);
 }
