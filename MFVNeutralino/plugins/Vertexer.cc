@@ -574,7 +574,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 
 		h_output_gvtx_twobdecay_njet = fs->make<TH1F>("h_output_gvtx_twobdecay_njet", ";# of two-b-decay jets; events", 10, 0, 10);
 		h_output_gvtx_twobdecay_jet_nloosebSVs = fs->make<TH1F>("h_output_gvtx_twobdecay_jet_nloosebSVs", ";# loose bSVs; two-b-decay jets", 10, 0, 10);
-		h_output_gvtx_twobdecay_nm1_nsigmadxy_jet_ntrack = fs->make<TH1F>("h_output_gvtx_twobdecay_nm1_nsigmadxy_jet_ntrack", ";# relaxed seed tracks by nsigmadxy; two-b-decay jets", 10, 0, 10);
+		h_output_gvtx_twobdecay_nm1_nsigmadxy_jet_ntrack = fs->make<TH1F>("h_output_gvtx_twobdecay_nm1_nsigmadxy_jet_ntrack", ";# relaxed seed tracks by nsigmadxy; two-b-decay jets", 50, 0, 50);
 		h_output_gvtx_twobdecay_jet_pT = fs->make<TH1F>("h_output_gvtx_twobdecay_jet_pT", ";a two-b-decay jet p_{T}; two-b-decay jets", 75, 0, 150);
 		h_output_gvtx_twobdecay_b_pair_dist3d = fs->make<TH1F>("h_output_gvtx_twobdecay_b_pair_dist3d", ";b-quark pair dist3d in a two-b-decay jet (cm.);b-quark pairs/.025", 120, 0, 3.0);
 		h_output_gvtx_twobdecay_b_pair_bigdist3d = fs->make<TH1F>("h_output_gvtx_twobdecay_b_pair_bigdist3d", ";b-quark pair dist3d in a two-b-decay jet (cm.);b-quark pairs/.005", 100, 0, 0.5);
@@ -609,7 +609,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 		//plots for one-b-decay jets
 		h_output_gvtx_onebdecay_njet = fs->make<TH1F>("h_output_gvtx_onebdecay_njet", ";# of one-b-decay jets; events", 10, 0, 10);
 		h_output_gvtx_onebdecay_jet_nloosebSVs = fs->make<TH1F>("h_output_gvtx_onebdecay_jet_nloosebSVs", ";# loose bSVs; one-b-decay jets", 10, 0, 10);
-		h_output_gvtx_onebdecay_nm1_nsigmadxy_jet_ntrack = fs->make<TH1F>("h_output_gvtx_onebdecay_nm1_nsigmadxy_jet_ntrack", ";# relaxed seed tracks by nsigmadxy; one-b-decay jets", 10, 0, 10);
+		h_output_gvtx_onebdecay_nm1_nsigmadxy_jet_ntrack = fs->make<TH1F>("h_output_gvtx_onebdecay_nm1_nsigmadxy_jet_ntrack", ";# relaxed seed tracks by nsigmadxy; one-b-decay jets", 50, 0, 50);
 		h_output_gvtx_onebdecay_jet_pT = fs->make<TH1F>("h_output_gvtx_onebdecay_jet_pT", ";a one-b-decay jet p_{T}; one-b-decay jets", 75, 0, 150);
 		h_output_gvtx_onebdecay_b_pair_dist3d = fs->make<TH1F>("h_output_gvtx_onebdecay_b_pair_dist3d", ";b-quark pair dist3d in a one-b-decay jet (cm.);b-quark pairs/.025", 120, 0, 3);
 		h_output_gvtx_onebdecay_b_pair_bigdist3d = fs->make<TH1F>("h_output_gvtx_onebdecay_b_pair_bigdist3d", ";b-quark pair dist3d in a one-b-decay jet (cm.);b-quark pairs/.005", 100, 0, 0.5);
@@ -1886,6 +1886,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 				  bdisc_level = i + 1;
 		  }
 		  bool is_loose_btagged = encode_jet_id(0, bdisc_level, jet.hadronFlavour());
+		  
+
 		  if (is_loose_btagged) {
 			  count_bjet++;
 			  vec_bjetidx_per_bjet.push_back(ijet);
@@ -1973,8 +1975,26 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 			  
 			  //identify two types of b-jets 
 			  if (nm1_nsigmadxy_bttks.size() > 1) {
+
+				  bool is_two_b_decay_jet = false;
+				  for (int i = 0; i < 2; ++i) {	 //an index of GEN llps 
+					  int count_match = 0;
+					  size_t genbvtx_idx = 0;
+					  for (const reco::GenParticleRef& s_temp : mci->secondaries(i)) {
+						  reco::GenParticle* s = (reco::GenParticle*) & *s_temp;
+						  if (reco::deltaR(jet.eta(), jet.phi(), s->eta(), s->phi()) < 0.4) {
+							  count_match++;
+						  }
+						  genbvtx_idx++;
+					  }
+					  if (count_match == 2)   // a jet considered as a two-b-decay jet has exactly two b-quarks matched
+						  is_two_b_decay_jet = true;
+
+				  }
+
 				  //(1) two - b - decay jet
-				  if ((loosebsv_vtxidx_per_bjet.size() > 1) || (loosebsv_vtxidx_per_bjet.size() == 1 && nm1_nsigmadxy_bttks.size() >= 5)) {
+				  if (is_two_b_decay_jet){//(loosebsv_vtxidx_per_bjet.size() > 1) || (loosebsv_vtxidx_per_bjet.size() == 1 && nm1_nsigmadxy_bttks.size() >= 5)) {
+					  
 					  count_twobdecay_jet++;
 					  h_output_gvtx_twobdecay_jet_nloosebSVs->Fill(loosebsv_vtxidx_per_bjet.size());
 					  h_output_gvtx_twobdecay_nm1_nsigmadxy_jet_ntrack->Fill(nm1_nsigmadxy_bttks.size());
