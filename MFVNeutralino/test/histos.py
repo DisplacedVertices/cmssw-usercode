@@ -187,7 +187,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if use_btag_triggers :
         #samples =  Samples.HToSSTodddd_samples_2017# + Samples.mfv_signal_samples_2017
         #samples =  Samples.bjet_samples_2017
-        samples = [getattr(Samples, 'ggHToSSTobbbb_tau10mm_M15_2017')]  
+        samples = [getattr(Samples, 'ggHToSSTobbbb_tau1mm_M55_2017')]  
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
     else :
         #samples = pick_samples(dataset)

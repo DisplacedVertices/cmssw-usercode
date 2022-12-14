@@ -54,6 +54,7 @@ mfvVertices = cms.EDProducer('MFVVertexer',
                              resolve_shared_jets_src = cms.InputTag('selectedPatJets'), 
                              extrapolate_ghost_tracks = cms.bool(True), # allow vertices to form by ghost tracks after shared-jet mitigation 
                              ghost_track_bjets_src = cms.InputTag('selectedPatJets'),
+                             tracks_src = cms.InputTag('jmtRescaledTracks'), 
                              beamspot_src = cms.InputTag('offlineBeamSpot'),
                              seed_tracks_src = cms.InputTag('mfvVertexTracks', 'seed'),
                              all_tracks_src = cms.InputTag('mfvVertexTracks', 'all'),
