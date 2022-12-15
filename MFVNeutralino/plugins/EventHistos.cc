@@ -102,6 +102,10 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_jet_ht;
   TH1F* h_jet_ht_40;
 
+  TH1F* h_calojet_pt[MAX_NJETS+1];
+  TH1F* h_calojet_eta[MAX_NJETS+1];
+  TH1F* h_calojet_phi[MAX_NJETS+1];
+
   TH1F* h_jet_pairdphi;
   TH1F* h_jet_pairdr;
 
@@ -260,6 +264,9 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
     h_jet_eta[i] = fs->make<TH1F>(TString::Format("h_jet_eta_%s", ijet.Data()), TString::Format(";#eta of jet #%s (GeV);events/0.05", ijet.Data()), 120, -3, 3);
     h_jet_phi[i] = fs->make<TH1F>(TString::Format("h_jet_phi_%s", ijet.Data()), TString::Format(";#phi of jet #%s (GeV);events/0.063", ijet.Data()), 100, -3.1416, 3.1416);
     h_jet_nseedtrack[i] = fs->make<TH1F>(TString::Format("h_jet_nseedtrack_%s", ijet.Data()), TString::Format(";jet #%s number of seed tracks;arb. units", ijet.Data()), 50, 0, 50);
+    h_calojet_pt[i] = fs->make<TH1F>(TString::Format("h_calojet_pt_%s", ijet.Data()), TString::Format(";p_{T} of calojet #%s (GeV);events/10 GeV", ijet.Data()), 200, 0, 2000);
+    h_calojet_eta[i] = fs->make<TH1F>(TString::Format("h_calojet_eta_%s", ijet.Data()), TString::Format(";#eta of calojet #%s (GeV);events/0.05", ijet.Data()), 120, -3, 3);
+    h_calojet_phi[i] = fs->make<TH1F>(TString::Format("h_calojet_phi_%s", ijet.Data()), TString::Format(";#phi of calojet #%s (GeV);events/0.063", ijet.Data()), 100, -3.1416, 3.1416);
   }
   h_jet_energy = fs->make<TH1F>("h_jet_energy", ";jets energy (GeV);jets/10 GeV", 200, 0, 2000);
   h_jet_ht = fs->make<TH1F>("h_jet_ht", ";H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
@@ -520,10 +527,15 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_njets->Fill(mevent->njets(), w);
   h_njets20->Fill(mevent->njets(20), w);
 
+
+  int ncalojets = mevent->calo_jet_pt.size();
   for (int i = 0; i < MAX_NJETS; ++i) {
     h_jet_pt[i]->Fill(mevent->nth_jet_pt(i), w);
     h_jet_eta[i]->Fill(fabs(mevent->nth_jet_eta(i)), w);
     h_jet_phi[i]->Fill(mevent->nth_jet_phi(i), w);
+    h_calojet_pt[i]->Fill(i < ncalojets  ? mevent->calo_jet_pt[i] : -9.9,        w);
+    h_calojet_eta[i]->Fill(i < ncalojets ? fabs(mevent->calo_jet_eta[i]) : -9.9, w);
+    h_calojet_phi[i]->Fill(i < ncalojets ? mevent->calo_jet_phi[i] : -9.9,       w);
   }
   h_jet_ht->Fill(mevent->jet_ht(mfv::min_jet_pt), w);
   h_jet_ht_40->Fill(mevent->jet_ht(40), w);
@@ -541,6 +553,12 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       h_jet_pairdphi->Fill(reco::deltaPhi(mevent->jet_phi[ijet], mevent->jet_phi[jjet]), w);
       h_jet_pairdr->Fill(reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->jet_eta[jjet], mevent->jet_phi[jjet]), w);
     }
+  }
+
+  for (int i = 0; i < ncalojets; i++) {
+    h_calojet_pt[MAX_NJETS]->Fill(i < ncalojets  ? mevent->calo_jet_pt[i] : -9.9,        w);
+    h_calojet_eta[MAX_NJETS]->Fill(i < ncalojets ? fabs(mevent->calo_jet_eta[i]) : -9.9, w);
+    h_calojet_phi[MAX_NJETS]->Fill(i < ncalojets ? mevent->calo_jet_phi[i] : -9.9,       w);
   }
 
   for (int i = 0; i < 2; ++i) {

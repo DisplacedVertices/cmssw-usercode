@@ -72,6 +72,7 @@ private:
   TH1F* h_ctau;
   TH1F* h_ctaubig;
   TH2F* h_r3d_bhadron_v_bquark;
+  TH1F* h_lspmass;
   TH1F* h_lspbeta;
   TH1F* h_lspbetagamma;
   TH1F* h_max_deta;
@@ -124,7 +125,8 @@ private:
   TH1F* h_njets_40;
   TH1F* h_njets_30;
   TH1F* h_njets_20;
-  TH1F* h_ht;
+  TH1F* h_ht20;
+  TH1F* h_ht30;
   TH1F* h_ht40;
 
   TH1F* NJets;
@@ -379,6 +381,7 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   h_ctau = fs->make<TH1F>("h_ctau", ";c#tau to LSP decay (cm);Events/50 #mum", 500, 0, 1);
   h_ctaubig = fs->make<TH1F>("h_ctaubig", ";c#tau to LSP decay (cm);Events/500 #mum", 200, 0, 10);
   h_r3d_bhadron_v_bquark = fs->make<TH2F>("h_r3d_bhadron_v_bquark", ";b quark 3D distance (cm);b hadron 3D distance (cm)", 100, 0, 2, 100, 0, 2);
+  h_lspmass = fs->make<TH1F>("h_lspmass", ";LSP mass;Events/bin", 500, 0, 500);
   h_lspbeta = fs->make<TH1F>("h_lspbeta", ";LSP #beta;Events/0.01", 100, 0, 1);
   h_lspbetagamma = fs->make<TH1F>("h_lspbetagamma", ";LSP #beta#gamma;Events/0.1", 100, 0, 10);
 
@@ -440,7 +443,8 @@ MFVGenHistos::MFVGenHistos(const edm::ParameterSet& cfg)
   h_njets_40 = fs->make<TH1F>("h_njets_40", ";number of jets with E_{T} > 40 GeV;Events", 20, 0, 20); 
   h_njets_30 = fs->make<TH1F>("h_njets_30", ";number of jets with E_{T} > 30 GeV;Events", 20, 0, 20);
   h_njets_20 = fs->make<TH1F>("h_njets_20", ";number of jets with E_{T} > 20 GeV;Events", 20, 0, 20);
-  h_ht = fs->make<TH1F>("h_ht", ";#SigmaH_{T} of jets with E_{T} > 20 GeV;Events/100 GeV", 100, 0, 2000);
+  h_ht20 = fs->make<TH1F>("h_ht20", ";#SigmaH_{T} of jets with E_{T} > 20 GeV;Events/100 GeV", 100, 0, 2000);
+  h_ht30 = fs->make<TH1F>("h_ht30", ";#SigmaH_{T} of jets with E_{T} > 30 GeV;Events/100 GeV", 100, 0, 2000);
   h_ht40 = fs->make<TH1F>("h_ht40", ";#SigmaH_{T} of jets with E_{T} > 40 GeV;Events/100 GeV", 100, 0, 2000);
 
   NJets = fs->make<TH1F>("NJets", ";number of jets;Events", 20, 0, 20);
@@ -527,6 +531,7 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
       reco::GenParticleRef lsp = mci->primaries()[i];
       const double lspbeta  = lsp->p()/lsp->energy();
       const double lspbetagamma = lspbeta/sqrt(1-lspbeta*lspbeta);
+      h_lspmass->Fill(lsp->mass());
       h_lspbeta->Fill(lspbeta);
       h_lspbetagamma->Fill(lspbetagamma);
 
@@ -795,17 +800,19 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   int njets40 = 0;
   int njets30 = 0;
   int njets20 = 0; 
-  float ht = 0, ht40 = 0;
+  float ht = 0, ht30 = 0, ht40 = 0;
   for (const reco::GenJet& jet : *gen_jets) {
-    if (jet.pt() < 20 || fabs(jet.eta()) > 2.5)
+    if (jet.pt() < 20)// || fabs(jet.eta()) > 2.5)
       continue;
 
     ++njets;
     ht += jet.pt();
     if (jet.pt() > 20)
       ++njets20;
-    if (jet.pt() > 30)
+    if (jet.pt() > 30){
+      ht30 += jet.pt();
       ++njets30;
+    }
     if (jet.pt() > 40){
       ht40 += jet.pt();
       ++njets40;
@@ -858,7 +865,8 @@ void MFVGenHistos::analyze(const edm::Event& event, const edm::EventSetup& setup
   h_njets_40->Fill(njets40); 
   h_njets_30->Fill(njets30);
   h_njets_20->Fill(njets20); 
-  h_ht->Fill(ht);
+  h_ht20->Fill(ht);
+  h_ht30->Fill(ht30);
   h_ht40->Fill(ht40);
 }
 
