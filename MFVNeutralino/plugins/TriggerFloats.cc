@@ -593,7 +593,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   if (prints) {
     printf("# all jets: %lu  selected: %i (>30GeV: %i) jetpt1: %f  2: %f  ht(30): %f\n", jets->size(), floats->njets(), floats->njets(30), floats->jetpt1(), floats->jetpt2(), floats->htptgt30);
     for (int i = 0; i < mfv::n_filter_paths; ++i)
-      printf("%s,  npass: %i   Trigger Passed: %i \n", mfv::filter_paths[i], npass_filter[i], floats->FLTdecisions[i]);
+      printf("%s,  npass: %i   Filter Passed: %i \n", mfv::filter_paths[i], npass_filter[i], floats->FLTdecisions[i]);
   }
 
   event.put(std::move(floats));
