@@ -31,13 +31,13 @@ namespace mfv {
     "HLT_HT650_DisplacedDijet60_Inclusive_v",
 
     // 2016 Displaced Dijet Triggers
-    "HLT_HT350_DisplacedDijet40_DisplacedTrack",
-    "HLT_HT650_DisplacedDijet80_Inclusive",
+    "HLT_HT350_DisplacedDijet40_DisplacedTrack_v",
+    "HLT_HT650_DisplacedDijet80_Inclusive_v",
 
     // 2016 Bjet triggers
-    "HLT_QuadJet45_TripleBTagCSV_p087",
-    "HLT_DoubleJet90_Double30_TripleBTagCSV_p087",
-    "HLT_DoubleJetsC100_DoubleBTagCSV_p014_DoublePFJetsC100MaxDeta1p6",
+    "HLT_QuadJet45_TripleBTagCSV_p087_v",
+    "HLT_DoubleJet90_Double30_TripleBTagCSV_p087_v",
+    "HLT_DoubleJetsC100_DoubleBTagCSV_p014_DoublePFJetsC100MaxDeta1p6_v",
 
     // MET trigger
     "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v",
@@ -118,6 +118,43 @@ namespace mfv {
     "hltPFCentralJetsLooseIDQuad30HT330",
     "hltBTagPFDeepCSV4p5Triple",
 
+    // 2017/8 DispDijet+DispTrack Filter names
+    "hltHT430",
+    "hltDoubleCentralCaloJetpt40",
+    "hltTwoPromptHLTL3DisplacedDijetFullTracksHLTCaloJetTagFilterLowPt",
+    "hltL4PromptDisplacedDijetFullTracksHLTCaloJetTagFilterLowPt",
+    "hltL4DisplacedDijetFullTracksHLTCaloJetTagFilterLowPt",
+
+    // 2017/8 Inclusive DispDijet filter names
+    "hltHT650",
+    "hltDoubleCentralCaloJetpt60", 
+    "hltTwoPromptHLTL3DisplacedDijetFullTracksHLTCaloJetTagFilterMidPt",
+    "hltL4PromptDisplacedDijetFullTracksHLTCaloJetTagFilterMidPt",
+
+    // 2016 DispDijet + DispTrack filter names
+    "hltHT350",
+
+    // 2016 Inclusive DispDijet filter names
+    "hltDoubleCentralCaloJetpt80",
+    "hltTwoPromptHLTL3DisplacedDijetFullTracksHLTCaloJetTagFilter",
+    "hltL4PromptDisplacedDijetFullTracksHLTCaloJetTagFilter",
+
+    // 2016 first tri-bjet trigger filter names
+    "hltQuadCentralJet45",
+    "hltBTagCaloCSVp087Triple",
+    "hltQuadPFCentralJetLooseID45",
+
+    // 2016 second tri-bjet trigger filter names
+    "hltDoubleCentralJet90",
+    "hltQuadPFCentralJetLooseID30",
+    "hltDoublePFCentralJetLooseID90",
+
+    // 2016 di-bjet trigger filter names
+    "hltDoubleJetsC100",
+    "hltBTagCaloCSVp014DoubleWithMatching",
+    "hltDoublePFJetsC100",
+    "hltDoublePFJetsC100MaxDeta1p6",
+
   };
 
   const int filter_nreqs[mfv::n_filter_paths] = {
@@ -150,6 +187,43 @@ namespace mfv {
     2,
     330, // this is an HT filter
     3,
+
+    // 2017/8 DD+DTk Trigger
+    430,
+    2,
+    2,
+    2,
+    2,
+
+    // 2017/8 Inc DD Trigger
+    650,
+    2,
+    2,
+    2,
+
+    // 2016 DD+DTk Trigger
+    350,
+
+    // 2016 Inc DD Trigger
+    2,
+    2,
+    2,
+        
+    // 2016 Tri-bjet trigger #1
+    4,
+    3,
+    4,
+        
+    // 2016 Tri-bjet trigger #2
+    2,
+    4,
+    2,
+
+    // 2016 Di-bjet trigger
+    2,
+    2,
+    2,
+    1,
 
   };
 

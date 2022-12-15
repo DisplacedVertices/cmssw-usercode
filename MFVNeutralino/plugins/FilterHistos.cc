@@ -85,6 +85,17 @@ class MFVFilterHistos : public edm::EDAnalyzer {
   TH1F* h_tri_filter_08[N_CAT];
   TH1F* h_tri_filter_09[N_CAT];
 
+  TH1F* h_dd_dtk_filter_00[N_CAT];
+  TH1F* h_dd_dtk_filter_01[N_CAT];
+  TH1F* h_dd_dtk_filter_02[N_CAT];
+  TH1F* h_dd_dtk_filter_03[N_CAT];
+  TH1F* h_dd_dtk_filter_04[N_CAT];
+
+  TH1F* h_dd_inc_filter_00[N_CAT];
+  TH1F* h_dd_inc_filter_01[N_CAT];
+  TH1F* h_dd_inc_filter_02[N_CAT];
+  TH1F* h_dd_inc_filter_03[N_CAT];
+
 
 };
 
@@ -193,6 +204,17 @@ MFVFilterHistos::MFVFilterHistos(const edm::ParameterSet& cfg)
     h_tri_filter_07[i] = fs->make<TH1F>(TString::Format("h_tri_filter_07_%s", bres.Data()), "4th-Leading PFJet PT Filter; p_{T} of 4th-leading jet (GeV); entries",   100, 0,  300);
     h_tri_filter_08[i] = fs->make<TH1F>(TString::Format("h_tri_filter_08_%s", bres.Data()), "PFHT Filter; HT(30) GeV; entries",                                       100, 0, 1000);
     h_tri_filter_09[i] = fs->make<TH1F>(TString::Format("h_tri_filter_09_%s", bres.Data()), "Tri-Btag Filter; 3rd-highest PFJet bscore; entries",                      50, 0,  1.0);
+
+    h_dd_dtk_filter_00[i] = fs->make<TH1F>(TString::Format("h_dd_dtk_filter_00_%s", bres.Data()), "CaloHT430 Filter; CaloHT(40) (GeV); entries",                           100, 0, 1000);
+    h_dd_dtk_filter_01[i] = fs->make<TH1F>(TString::Format("h_dd_dtk_filter_01_%s", bres.Data()), "Two CaloPT>40 Filter; 2nd-highest jet pT (GeV); entries",                100, 0, 300);
+    h_dd_dtk_filter_02[i] = fs->make<TH1F>(TString::Format("h_dd_dtk_filter_02_%s", bres.Data()), "First prompt tk filter; 2nd smallest prompt tk multiplicity; entries",     30, 0, 30);
+    h_dd_dtk_filter_03[i] = fs->make<TH1F>(TString::Format("h_dd_dtk_filter_03_%s", bres.Data()), "Second prompt tk filter; 2nd smallest prompt tk multiplicity",             30, 0, 30);
+    h_dd_dtk_filter_04[i] = fs->make<TH1F>(TString::Format("h_dd_dtk_filter_04_%s", bres.Data()), "Displaced tk filter; 2nd largest disp track multiplicity; entries",        30, 0, 30);
+
+    h_dd_inc_filter_00[i] = fs->make<TH1F>(TString::Format("h_dd_inc_filter_00_%s", bres.Data()), "CaloHT650 Filter; CaloHT(40) (GeV); entries",                           100, 0, 1000);
+    h_dd_inc_filter_01[i] = fs->make<TH1F>(TString::Format("h_dd_inc_filter_01_%s", bres.Data()), "Two CaloPT>60 Filter; 2nd-highest jet pT (GeV); entries",                100, 0, 300);
+    h_dd_inc_filter_02[i] = fs->make<TH1F>(TString::Format("h_dd_inc_filter_02_%s", bres.Data()), "First prompt tk filter; 2nd smallest prompt tk multiplicity; entries",     30, 0, 30);
+    h_dd_inc_filter_03[i] = fs->make<TH1F>(TString::Format("h_dd_inc_filter_03_%s", bres.Data()), "Second prompt tk filter; 2nd smallest prompt tk multiplicity",             30, 0, 30);
   
   }
 
@@ -208,6 +230,11 @@ struct Jet_Pair_Helper {
     float hlt_phi = -1.0;
 
     int off_i = -2;
+};
+
+struct Jet_Track_Helper {
+    int nprompt = 0;
+    int ndisp   = 0;
 };
 
 struct Jet_Loc_Helper {
@@ -239,68 +266,59 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   edm::Handle<MFVVertexAuxCollection> auxes;
   event.getByToken(vertex_token, auxes);
-  const int nsv = int(auxes->size());
 
-  const int nhltpfjets = mevent->hlt_pf_jet_pt.size();
   const int nofflinepfjets = mevent->jet_pt.size();
   double min_threshjet_deta = 99.9;
   std::vector<Jet_BHelper> bsort_helpers;
   std::vector<Jet_Pair_Helper> pfjethelper;
+  std::vector<Jet_Track_Helper> jet_track_helper;
 
-  // Do some matching of online and offline jets
-  int year = ul_year;
-  bool skinny_cone = false;
-  bool use_puid    = true;
-  for (int i=0; i < nhltpfjets; i++) {
-    float hlt_eta    = mevent->hlt_pf_jet_eta[i];
-    float hlt_phi    = mevent->hlt_pf_jet_phi[i];
-    float hlt_pt     = mevent->hlt_pf_jet_pt[i];
-    float match_pt  = 0.0;
-    float match_eta = 0.0;
-    float match_phi = 0.0;
-    float match_dR  = 0.4;
-    float next_dR   = -0.2;
-    bool  ensure_match = false;
+  // Find some relevant information about prompt/seed track multiplicity
+  for (int i=0; i < nofflinepfjets; i++) {
+    if (mevent->nth_jet_pt(i) < 40.0 or fabs(mevent->nth_jet_eta(i) > 2.0)) continue;    
+    int jet_tks_nprompt    = 0;
+    int jet_tks_ndisplaced = 0;
+    Jet_Track_Helper tmp_track_helper;
 
+    for (size_t ntk = 0 ; ntk < mevent->n_jet_tracks_all() ; ntk++) {
+      if (mevent->jet_track_pt(ntk) < 1.0) continue;
+      if (mevent->jet_track_which_jet[ntk] != i) continue;
+      float tk_dxy       = mevent->jet_track_dxy[ntk];
+      float tk_nsigmadxy = fabs(tk_dxy/mevent->jet_track_dxy_err[ntk]);
 
-    for (int j=0; j < nofflinepfjets; j++) {
-      bool  is_match = false;
-      float off_eta = mevent->nth_jet_eta(j);
-      float off_phi = mevent->nth_jet_phi(j);
-      float off_pt  = mevent->nth_jet_pt(j);
-      float off_pudisc = mevent->jet_pudisc[j];
-
-      if (false) std::cout << match_eta << match_phi << std::endl;
-
-      if      ((off_pt < 25.0) or (fabs(off_eta) > 2.4)) continue;
-      if      ((use_puid) and (off_pt < 30.0) and (off_pudisc < 0.18)) continue;
-      else if ((use_puid) and (off_pt < 50.0) and (off_pudisc < 0.61)) continue;    
-    
-      if (skinny_cone) { is_match = ((reco::deltaR(hlt_eta, hlt_phi, off_eta, off_phi) < 0.14) and (off_pt > match_pt)); }
-      else             { is_match = ((reco::deltaR(hlt_eta, hlt_phi, off_eta, off_phi) < match_dR)); }
-
-      if (is_match) {
-        match_pt  = off_pt;
-        //match_eta = off_eta;
-        //match_phi = off_phi;
-        next_dR  = match_dR;
-        match_dR = reco::deltaR(hlt_eta, hlt_phi, off_eta, off_phi);
-        ensure_match = true;
-      }
+      if (tk_dxy < 0.1) jet_tks_nprompt++;
+      if (tk_dxy > 0.05 and tk_nsigmadxy > 5.0) jet_tks_ndisplaced++;
     }
-
-    if (not ensure_match) continue;
-
-    Jet_Pair_Helper temp_helper;
-    temp_helper.hlt_pt  = hlt_pt;
-    temp_helper.hlt_eta = hlt_eta;
-    temp_helper.hlt_phi = hlt_phi;
-    temp_helper.off_pt = match_pt;
-    pfjethelper.push_back(temp_helper);
-
-    h_jet_match_dR->Fill(match_dR, w);
-    h_next_match_dR->Fill(next_dR, w);
+    
+    tmp_track_helper.ndisp   = jet_tks_ndisplaced;
+    tmp_track_helper.nprompt = jet_tks_nprompt; 
+    jet_track_helper.push_back(tmp_track_helper);
   }
+
+  // Get the second-highest pT calo jet within |eta| < 2.0 (for dd triggers)
+  // Also, the calo_jet_ht variable in Event.h considers ALL calojets in event; we only want those with |eta| < 2.5
+  // So let's calculate an alternative calo_ht
+  float scnd_leading_cent_calo_pt = -2.0;
+  float alt_calo_ht = 0.0;
+  bool  skip_first = true;
+  for (int i=0, ie=mevent->calo_jet_pt.size(); i < ie; i++) {
+    // Calculating alt_calo_ht
+    if (fabs(mevent->calo_jet_eta[i] < 2.5 and mevent->calo_jet_pt[i] > 40.0)) alt_calo_ht += mevent->calo_jet_pt[i];
+
+    // Getting second-leading central calojet pT
+    if (fabs(mevent->calo_jet_eta[i] > 2.0)) continue;     // skip if not a central jet
+    if (skip_first) { skip_first = false; continue; }      // skip if this is the leading central calojet
+    else            { scnd_leading_cent_calo_pt = mevent->calo_jet_pt[i]; break; }
+  }
+
+  // First, sort jets by DECREASING number of displaced tracks, then record the second entry 
+  std::sort(jet_track_helper.begin(), jet_track_helper.end(), [](Jet_Track_Helper const &a, Jet_Track_Helper &b) -> bool{ return a.ndisp > b.ndisp; } );
+  int second_most_disp_tks = jet_track_helper.size() >= 2 ? jet_track_helper[1].ndisp : -9;
+
+  // Now, sort jets by INCREASING number of prompt tracks, then record the second entry
+  std::sort(jet_track_helper.begin(), jet_track_helper.end(), [](Jet_Track_Helper const &a, Jet_Track_Helper &b) -> bool{ return a.nprompt < b.nprompt; } );
+  int second_least_prompt_tks = jet_track_helper.size() >= 2 ? jet_track_helper[1].nprompt : 999;
+
 
   // Find min deta between pairs of threshold (high Pt) jets
   for (int i=0; i < nofflinepfjets-1; i++) {
@@ -315,41 +333,8 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
           if (fabs(eta_i - eta_j) < min_threshjet_deta) {
               min_threshjet_deta = fabs(eta_i-eta_j);
           }
-
       }
   }
-
-  // Prepare the helpers which match SVs and jets
-  std::vector<Jet_Loc_Helper> jet_loc_helper;
-  for (int isv = 0; isv < nsv; isv++) {
-      const MFVVertexAux& aux = auxes->at(isv);
-
-      // The index [0] indicates that we're using ntracks to assoc.
-      // a jet to a vertex. No need to worry about this right now.
-      const std::vector<float> my_pts  = aux.jet_pt[0];
-      const std::vector<float> my_etas = aux.jet_eta[0];
-      const std::vector<float> my_phis = aux.jet_phi[0];
-      int npt = int(my_pts.size());
-
-      for (int ij=0; ij < npt; ij++) {
-          Jet_Loc_Helper tmp_loc_helper;
-          tmp_loc_helper.vtx_jet_pt  = my_pts[ij];
-          tmp_loc_helper.vtx_jet_eta = my_etas[ij];
-          tmp_loc_helper.vtx_jet_phi = my_phis[ij];
-
-          // The index [2] indicates use tracks+jet to get pt/eta/phi
-          tmp_loc_helper.vtx_pt  = aux.pt[2];
-          tmp_loc_helper.vtx_eta = aux.eta[2];
-          tmp_loc_helper.vtx_phi = aux.phi[2];
-
-          tmp_loc_helper.vtx_dx  = aux.x - mevent->bsx_at_z(aux.z);
-          tmp_loc_helper.vtx_dy  = aux.y - mevent->bsy_at_z(aux.z);
-          tmp_loc_helper.vtx_dz  = aux.z - mevent->bsz;
-          
-          jet_loc_helper.push_back(tmp_loc_helper);
-      }
-  } 
-
 
   // Fill some basic hltbits/L1bits/filtbits histograms
   h_hlt_bits->Fill(0., w);
@@ -376,46 +361,22 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     }
   }
 
-
   // Ignore events with no bscores
   if ((std::size(mevent->jet_bdisc_deepflav) == 0)) return;
 
   // Count number of btagged jets
-  int nbtaggedjets      = 0;  // Jets which pass CSV req
   int naltbjets         = 0;  // Jets which pass CSV + angular reqs
   int nselectionjets    = 0;  // Dummy class that will take one of the above two values
   for(size_t i = 0, ie = mevent->jet_bdisc_deepcsv.size(); i < ie; i++) {
-      bool passes_bscore = false;
-      if (mevent->jet_bdisc_deepcsv[i] > offline_csv) {
-        passes_bscore = true;
-      }
+      //bool passes_bscore = false;
+      //if (mevent->jet_bdisc_deepcsv[i] > offline_csv) {
+      //  passes_bscore = true;
+      //}
   
-      // While here, let's get some SV information
-      float closest_helper_dR  = 4.0;
-      float closest_vtx_dR  = 4.0;
-      for (auto helper : jet_loc_helper) {
-          float temp_dR = reco::deltaR(helper.vtx_jet_eta, helper.vtx_jet_phi, mevent->nth_jet_eta(i), mevent->nth_jet_phi(i));
-          if (temp_dR < closest_helper_dR) {
-              closest_helper_dR = temp_dR;
-              closest_vtx_dR = reco::deltaR(helper.vtx_eta, helper.vtx_phi, mevent->nth_jet_eta(i), mevent->nth_jet_phi(i));
-          }
-      }
-  
-      if (passes_bscore) {
-          nbtaggedjets++;
-          if (mevent->nth_jet_pt(i) > btag_pt_cut) {
-              naltbjets++;
-          }
-          if (false) {
-            std::cout << closest_vtx_dR << std::endl;
-          }
-      }
-
-
       // While in this loop, let's sort jets by bscore
       Jet_BHelper tmp_bsort_helper;
-      if      (year == 2017) tmp_bsort_helper.bscore = mevent->jet_bdisc_deepcsv[i];
-      else if (year == 2018) tmp_bsort_helper.bscore = mevent->jet_bdisc_deepflav[i];
+      if      (ul_year == 2017) tmp_bsort_helper.bscore = mevent->jet_bdisc_deepcsv[i];
+      else if (ul_year == 2018) tmp_bsort_helper.bscore = mevent->jet_bdisc_deepflav[i];
       bsort_helpers.push_back(tmp_bsort_helper);
 
   }
@@ -425,60 +386,33 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   nselectionjets = naltbjets;
 
-  // See if this event satisfies the various presels established
-  bool pass_17_di_ps = (year == 2017 and mevent->nth_jet_pt(1) > 125.0 and min_threshjet_deta < 1.60);
-  bool pass_18_di_ps = (year == 2018 and mevent->nth_jet_pt(1) > 140.0 and min_threshjet_deta < 1.55);
-
-  bool pass_17_tri_ps = (year == 2017 and mevent->nth_jet_pt(0) > 85. and mevent->nth_jet_pt(1) > 65. and mevent->nth_jet_pt(2) > 50. and mevent->nth_jet_pt(3) > 45. and mevent->jet_ht(30) > 365.);
-  bool pass_18_tri_ps = (year == 2018 and mevent->nth_jet_pt(0) > 90. and mevent->nth_jet_pt(1) > 70. and mevent->nth_jet_pt(2) > 55. and mevent->nth_jet_pt(3) > 50. and mevent->jet_ht(30) > 395.);
-
-  bool pass_di_ps_and_trig  = ((year == 2017 and pass_17_di_ps  and mevent->pass_hlt(8)) or (year == 2018 and pass_18_di_ps  and mevent->pass_hlt(13)));
-  bool pass_tri_ps_and_trig = ((year == 2017 and pass_17_tri_ps and mevent->pass_hlt(9)) or (year == 2018 and pass_18_tri_ps and mevent->pass_hlt(14)));
-
-  if (pass_di_ps_and_trig or pass_tri_ps_and_trig) {
-    h_btag_trig_pass_kine->Fill(pass_di_ps_and_trig - pass_tri_ps_and_trig, w);
-  }
-
-  if ((pass_di_ps_and_trig and nselectionjets >= 2) or (pass_tri_ps_and_trig and nselectionjets >= 3)) {
-    h_btag_trig_pass_all->Fill((pass_di_ps_and_trig and nselectionjets >= 2) - (pass_tri_ps_and_trig and nselectionjets >= 3), w);
-  }
-
-  
-
-
-//  if (mevent->pass_l1(20)) {   // L1 bit #20 is the only seed for this trig
-//    h_filt_nsurvive->Fill(2, w);
-//    for (int p=0; p < N_PROXIES; p++) {
-//      if (nselectionjets != p) continue;
-//      h_filt_nsurvive_grid->Fill(2, p, w);
-//    }
-//  }
-//  else {
-//    return;
-//  }
-  
-
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  std::vector<bool> di_filtres;
-  std::vector<bool> tri_filtres;
+  std::vector<bool> di_filt_res;
+  std::vector<bool> tri_filt_res;
+  std::vector<bool> dd_dtk_filt_res;
+  std::vector<bool> dd_inc_filt_res;
 
-  if (year == 2017) {
-    di_filtres = { mevent->pass_filter(0), mevent->pass_filter(1), mevent->pass_filter(2), mevent->pass_filter(3) };
-    tri_filtres = { mevent->pass_filter(7), mevent->pass_filter(8), mevent->pass_filter(9), mevent->pass_filter(10), mevent->pass_filter(11), mevent->pass_filter(12),
+  if (ul_year == 2017) {
+    di_filt_res =     { mevent->pass_filter(0), mevent->pass_filter(1), mevent->pass_filter(2), mevent->pass_filter(3) };
+    tri_filt_res =    { mevent->pass_filter(7), mevent->pass_filter(8), mevent->pass_filter(9), mevent->pass_filter(10), mevent->pass_filter(11), mevent->pass_filter(12),
                                       mevent->pass_filter(13), mevent->pass_filter(14), mevent->pass_filter(15), mevent->pass_filter(16) };
+    dd_dtk_filt_res = { mevent->pass_filter(21), mevent->pass_filter(22), mevent->pass_filter(23), mevent->pass_filter(24), mevent->pass_filter(25) };
+    dd_inc_filt_res = { mevent->pass_filter(26), mevent->pass_filter(27), mevent->pass_filter(28), mevent->pass_filter(29) };
   }
 
-  if (year == 2018) {
-    di_filtres = { mevent->pass_filter(0), mevent->pass_filter(4), mevent->pass_filter(5), mevent->pass_filter(6) };
-    tri_filtres = { mevent->pass_filter(7), mevent->pass_filter(17), mevent->pass_filter(18), mevent->pass_filter(10), mevent->pass_filter(11), mevent->pass_filter(12),
+  if (ul_year == 2018) {
+    di_filt_res     = { mevent->pass_filter(0), mevent->pass_filter(4), mevent->pass_filter(5), mevent->pass_filter(6) };
+    tri_filt_res    = { mevent->pass_filter(7), mevent->pass_filter(17), mevent->pass_filter(18), mevent->pass_filter(10), mevent->pass_filter(11), mevent->pass_filter(12),
                                       mevent->pass_filter(13), mevent->pass_filter(14), mevent->pass_filter(19), mevent->pass_filter(20) };
+    dd_dtk_filt_res = { mevent->pass_filter(21), mevent->pass_filter(22), mevent->pass_filter(23), mevent->pass_filter(24), mevent->pass_filter(25) };
+    dd_inc_filt_res = { mevent->pass_filter(26), mevent->pass_filter(27), mevent->pass_filter(28), mevent->pass_filter(29) };
   }
 
   // Fill the dijet portion of h_filt_nsurvive_grid
   for (int i=1; i < 7; i++) {
     if (i==1) {
-      if (pass_17_di_ps or pass_18_di_ps) {
+      if (true) {
         for (int p=0; p < N_PROXIES; p++) {
           if (nselectionjets != p) continue;
           h_filt_nsurvive_grid->Fill(i, p, w);
@@ -488,7 +422,7 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     }
 
     else if (i==2) {
-      if ((year == 2017 and true) or (year == 2018 and true)) {  // FIXME replace the 'trues' with L1 bits if desired
+      if (true) {  // FIXME replace the 'trues' with L1 bits if desired
         for (int p=0; p < N_PROXIES; p++) {
           if (nselectionjets != p) continue;
           h_filt_nsurvive_grid->Fill(i, p, w);
@@ -497,7 +431,7 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       else break;
     }
 
-    else if (di_filtres[i-3]) {
+    else if (di_filt_res[i-3]) {
       for (int p=0; p < N_PROXIES; p++) {
         if (nselectionjets != p) continue;
         h_filt_nsurvive_grid->Fill(i, p, w);
@@ -509,7 +443,7 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   // Fill the tri-bjet portion of h_filt_nsurvive_grid
   for (int i=7; i < 19; i++) {
     if (i==7) {
-      if (pass_17_tri_ps or pass_18_tri_ps) {
+      if (true) {
         for (int p=0; p < N_PROXIES; p++) {
           if (nselectionjets != p) continue;
           h_filt_nsurvive_grid->Fill(i, p, w);
@@ -519,7 +453,7 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     }
 
     else if (i==8) {
-      if ((year == 2017 and true) or (year == 2018 and true)) { // FIXME replace the 'trues' with L1 bits if desired
+      if ((ul_year == 2017 and true) or (ul_year == 2018 and true)) { // FIXME replace the 'trues' with L1 bits if desired
         for (int p=0; p < N_PROXIES; p++) {
           if (nselectionjets != p) continue;
           h_filt_nsurvive_grid->Fill(i, p, w);
@@ -528,7 +462,7 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       else break;
     }
 
-    else if (tri_filtres[i-9]) {
+    else if (tri_filt_res[i-9]) {
       for (int p=0; p < N_PROXIES; p++) {
         if (nselectionjets != p) continue;
         h_filt_nsurvive_grid->Fill(i, p, w);
@@ -539,64 +473,67 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
 
   // Welcome to nested conditional hell >:)
+  //
+  // First up, all of the di-bjet filters
   h_di_filter_00[DEN]->Fill(mevent->nth_jet_pt(1), w);
-  if (di_filtres[0]) {
+  if (di_filt_res[0]) {
     h_di_filter_00[NUM]->Fill(mevent->nth_jet_pt(1), w);
     h_di_filter_01[DEN]->Fill(bsort_helpers[1].bscore, w);
     
-    if (di_filtres[1]) {
+    if (di_filt_res[1]) {
       h_di_filter_01[NUM]->Fill(bsort_helpers[1].bscore, w);
       h_di_filter_02[DEN]->Fill(mevent->nth_jet_pt(1), w);
 
-      if (di_filtres[2]) {
+      if (di_filt_res[2]) {
         h_di_filter_02[NUM]->Fill(mevent->nth_jet_pt(1), w);
         h_di_filter_03[DEN]->Fill(min_threshjet_deta, w);
         
-        if (di_filtres[3]) {
+        if (di_filt_res[3]) {
           h_di_filter_03[NUM]->Fill(min_threshjet_deta, w);
         }
       }
     }
   }
 
+  // Next, all of the tri-bjet filters
   h_tri_filter_00[DEN]->Fill(mevent->nth_jet_pt(3), w);
-  if (tri_filtres[0]) {
+  if (tri_filt_res[0]) {
     h_tri_filter_00[NUM]->Fill(mevent->nth_jet_pt(3), w);
     h_tri_filter_01[DEN]->Fill(mevent->jet_ht(30), w);
     
-    if (tri_filtres[1]) {
+    if (tri_filt_res[1]) {
       h_tri_filter_01[NUM]->Fill(mevent->jet_ht(30), w);
       h_tri_filter_02[DEN]->Fill(bsort_helpers[1].bscore, w);
 
-      if (tri_filtres[2]) {
+      if (tri_filt_res[2]) {
         h_tri_filter_02[NUM]->Fill(bsort_helpers[1].bscore, w);
         h_tri_filter_03[DEN]->Fill(mevent->nth_jet_pt(3), w);
         
-        if (tri_filtres[3]) {
+        if (tri_filt_res[3]) {
           h_tri_filter_03[NUM]->Fill(mevent->nth_jet_pt(3), w);
           h_tri_filter_04[DEN]->Fill(mevent->nth_jet_pt(0), w);
 
-          if (tri_filtres[4]) {
+          if (tri_filt_res[4]) {
             h_tri_filter_04[NUM]->Fill(mevent->nth_jet_pt(0), w);
             h_tri_filter_05[DEN]->Fill(mevent->nth_jet_pt(1), w);
             
-            if (tri_filtres[5]) {
+            if (tri_filt_res[5]) {
               h_tri_filter_05[NUM]->Fill(mevent->nth_jet_pt(1), w);
               h_tri_filter_06[DEN]->Fill(mevent->nth_jet_pt(2), w);
             
-              if (tri_filtres[6]) {
+              if (tri_filt_res[6]) {
                 h_tri_filter_06[NUM]->Fill(mevent->nth_jet_pt(2), w);
                 h_tri_filter_07[DEN]->Fill(mevent->nth_jet_pt(3), w);
 
-                if (tri_filtres[7]) {
+                if (tri_filt_res[7]) {
                   h_tri_filter_07[NUM]->Fill(mevent->nth_jet_pt(3), w);
                   h_tri_filter_08[DEN]->Fill(mevent->jet_ht(30), w);
                 
-                  if (tri_filtres[8]) {
+                  if (tri_filt_res[8]) {
                     h_tri_filter_08[NUM]->Fill(mevent->jet_ht(30), w);
                     h_tri_filter_09[DEN]->Fill(bsort_helpers[2].bscore, w);
 
-                    if (tri_filtres[9]) {
+                    if (tri_filt_res[9]) {
                       h_tri_filter_09[NUM]->Fill(bsort_helpers[2].bscore, w);
 
                     }
@@ -609,8 +546,55 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       }
     }
   }
+
+  // Now, the displaced dijet + displaced track filters:
+  h_dd_dtk_filter_00[DEN]->Fill(alt_calo_ht, w);
+  if (dd_dtk_filt_res[0]) {
+    h_dd_dtk_filter_00[NUM]->Fill(alt_calo_ht, w);
+    h_dd_dtk_filter_01[DEN]->Fill(scnd_leading_cent_calo_pt, w);
+
+    if (dd_dtk_filt_res[1]) {
+      h_dd_dtk_filter_01[NUM]->Fill(scnd_leading_cent_calo_pt, w);
+      h_dd_dtk_filter_02[DEN]->Fill(second_least_prompt_tks, w);
+
+      if (dd_dtk_filt_res[2]) {
+        h_dd_dtk_filter_02[NUM]->Fill(second_least_prompt_tks, w);
+        h_dd_dtk_filter_03[DEN]->Fill(second_least_prompt_tks, w);
+
+        if (dd_dtk_filt_res[3]) {
+          h_dd_dtk_filter_03[NUM]->Fill(second_least_prompt_tks, w);
+          h_dd_dtk_filter_04[DEN]->Fill(second_most_disp_tks, w);
+
+          if (dd_dtk_filt_res[4]) {
+            h_dd_dtk_filter_04[NUM]->Fill(second_most_disp_tks, w);
+          }
+        }
+      }
+    }
+  }
+
+  // Now, the inclusive displaced dijet filters:
+  h_dd_inc_filter_00[DEN]->Fill(alt_calo_ht, w);
+  if (dd_inc_filt_res[0]) {
+    h_dd_inc_filter_00[NUM]->Fill(alt_calo_ht, w);
+    h_dd_inc_filter_01[DEN]->Fill(scnd_leading_cent_calo_pt, w);
+
+    if (dd_inc_filt_res[1]) {
+      h_dd_inc_filter_01[NUM]->Fill(scnd_leading_cent_calo_pt, w);
+      h_dd_inc_filter_02[DEN]->Fill(second_least_prompt_tks, w);
+
+      if (dd_inc_filt_res[2]) {
+        h_dd_inc_filter_02[NUM]->Fill(second_least_prompt_tks, w);
+        h_dd_inc_filter_03[DEN]->Fill(second_least_prompt_tks, w);
+
+        if (dd_inc_filt_res[3]) {
+          h_dd_inc_filter_03[NUM]->Fill(second_least_prompt_tks, w);
+        }
+      }
+    }
+  }
   // Done with nested conditional hell
-  // SHAUN: There is probably a better way to do all of this
+  // SHAUN: There has got to be a better way to do all of this
 }
 
 DEFINE_FWK_MODULE(MFVFilterHistos);

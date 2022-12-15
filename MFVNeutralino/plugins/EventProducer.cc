@@ -299,8 +299,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   assert(triggerfloats->FLTdecisions.size() == mfv::n_filter_paths);
   for (size_t i = 0; i < mfv::n_filter_paths; ++i) {
     const bool found = triggerfloats->FLTdecisions[i] != -1;
-    mevent->found_filter(i, found);
-    mevent-> pass_filter(i, found && triggerfloats->FLTdecisions[i]);
+    mevent->pass_filter(i, found && triggerfloats->FLTdecisions[i]);
   }
 
   //////////////////////////////////////////////////////////////////////
