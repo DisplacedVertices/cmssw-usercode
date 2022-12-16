@@ -102,7 +102,7 @@ process.EX1pFullSel    = cms.Path(common * process.EX1mfvAnalysisCutsFullSel    
 process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     * process.EX1mfvEventHistosSigReg     * process.EX1mfvFilterHistosSigReg     * process.EX1mfvJetTksHistosSigReg  * process.EX1mfvVertexHistosSigReg)
 '''.replace('EX1', EX1)
 
-    for bs2derrcut in [25., 30., 35., 40., 45., 50., 55., 60., 65., 70., 75.]:
+    for bs2derrcut in [25., 30., 35., 40., 45., 50., 55., 60., 65., 70., 75., 1000000.]:
         name = 'Bs2derr%s' % str(int(bs2derrcut))
         hicut = str(bs2derrcut/1e4)
         vtx = eval('process.mfvSelectedVerticesTight%s.clone(max_rescale_bs2derr = %s)' % (EX1, hicut))
@@ -196,7 +196,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
 
-    cs = CondorSubmitter('Histos' + version,
+    cs = CondorSubmitter('HistosNtk3' + version,
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,
