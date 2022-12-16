@@ -128,7 +128,7 @@ process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     
                 ana.ntracks01_0 = 5
                 ana.ntracks01_1 = 4
             ana_name = '%sana%iV' % (EX1, nv) + name
-
+            
             evt_hst = process.mfvEventHistos.clone()
             evt_hst_name = '%sevtHst%iV' % (EX1, nv) + name
 
@@ -187,7 +187,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if use_btag_triggers :
         #samples =  Samples.HToSSTodddd_samples_2017# + Samples.mfv_signal_samples_2017
         #samples =  Samples.bjet_samples_2017
-        samples = [getattr(Samples, 'ggHToSSTobbbb_tau1mm_M55_2017')]  
+        samples = [getattr(Samples, 'ggHToSSTobbbb_tau10mm_M15_2017')]  
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
     else :
         #samples = pick_samples(dataset)
@@ -196,7 +196,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
 
-    cs = CondorSubmitter('HistosNtk3' + version,
+    cs = CondorSubmitter('HistosNoBs2derrNtk3' + version,
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,
