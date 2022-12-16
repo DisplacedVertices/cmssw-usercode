@@ -645,7 +645,7 @@ _adbp('miniaod', '/StopStopbarTo2Dbar2D_M-3000_CTau-30mm_TuneCP2_13TeV_2018-pyth
 ########
 # ntuples
 for x in ggHToSSTobbbb_tau1mm_M15_2017, ggHToSSTobbbb_tau1mm_M55_2017, ggHToSSTobbbb_tau10mm_M15_2017:
-    x.add_dataset("ntuplegvtxbjetv41am_noef")
+    x.add_dataset("ntuplegvtxbjetv41am")
 ########
 
 for x in data_samples_2017 + qcd_samples_2017 + data_samples_2018 + qcd_samples_2018:

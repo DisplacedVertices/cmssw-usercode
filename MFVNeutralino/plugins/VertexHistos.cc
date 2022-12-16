@@ -134,7 +134,7 @@ MFVVertexHistos::MFVVertexHistos(const edm::ParameterSet& cfg)
   hs.add("rescale_d2_big", "rescaled-fit - nominal SV (2D) (cm)", 100, 0, 4);
   hs.add("rescale_d3", "rescaled-fit - nominal SV (3D) (cm)", 100, 0, 1e-3);
   hs.add("rescale_d3_big", "rescaled-fit - nominal SV (3D) (cm)", 100, 0, 4);
-  hs.add("rescale_bsbs2ddist", "rescaled-fit d_{BV} (cm)", 500, 0, 2.5);
+  hs.add("rescale_bsbs2ddist", "rescaled-fit d_{BV} (cm)", 100, 0, 0.5);
   hs.add("rescale_bs2derr", "rescaled-fit #sigma(dist2d(SV, beamspot)) (cm)", 1000, 0, 0.05);
 
   hs.add("max_nm1_refit_dist3_wbad", "maximum n-1 refit distance (3D) (cm)", 1001, -0.001, 1);

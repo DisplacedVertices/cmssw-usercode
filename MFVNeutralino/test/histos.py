@@ -196,7 +196,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
 
-    cs = CondorSubmitter('Histos' + version,
+    cs = CondorSubmitter('HistosNtk3' + version,
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,
