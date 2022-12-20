@@ -51,6 +51,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_gvtx_njet;
   TH1F* h_gvtx_nbquarkjet;
   TH1F* h_gvtx_nloosebtaggedjet;
+  TH1F* h_gvtx_nloosebtaggedOR3seedtrkjet;
   TH1F* h_gvtx_shared_GEN_bjet_or_not;
 
   //track investigation 
@@ -63,6 +64,10 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_gvtx_seed_tracks_per_GEN_bjet;
   TH1F* h_gvtx_nm1_pT_seed_tracks_per_GEN_bjet;
   TH1F* h_gvtx_nm1_nsigmadxy_seed_tracks_per_GEN_bjet;
+  TH1F* h_gvtx_all_tracks_per_NONGEN_bjet;
+  TH1F* h_gvtx_seed_tracks_per_NONGEN_bjet;
+  TH1F* h_gvtx_nm1_pT_seed_tracks_per_NONGEN_bjet;
+  TH1F* h_gvtx_nm1_nsigmadxy_seed_tracks_per_NONGEN_bjet;
   TH1F* h_gvtx_all_track_pt_from_GEN_bjets;
   TH1F* h_gvtx_all_track_sigmadxybs_from_GEN_bjets;
   TH1F* h_gvtx_all_track_npxhits_from_GEN_bjets;
@@ -112,6 +117,9 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_gvtx_shared_loosebtaggedjet_nm1_bigdist3d_bpair;
   TH1F* h_gvtx_no_shared_loosebtaggedjet_nm1_jet_pT;
   TH1F* h_gvtx_no_matched_loosebtaggedjet_nm1_jet_pT;
+
+  TH1F* h_gvtx_three_categories_loosebtaggedjet;
+  TH1F* h_gvtx_three_categories_3tightseedjet;
 
   TH1F* h_gvtx_nm1_nsigmadxy_seed_tracks_per_no_shared_jet;
   TH1F* h_gvtx_nm1_nsigmadxy_seed_tracks_per_no_matched_jet;
@@ -270,6 +278,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_gvtx_njet = fs->make<TH1F>("h_gvtx_njet", ";# of jets;events/1", 10, 0, 10);
   h_gvtx_nbquarkjet = fs->make<TH1F>("h_gvtx_nbquarkjet", ";# of b-quark jets;events/1", 10, 0, 10);
   h_gvtx_nloosebtaggedjet = fs->make<TH1F>("h_gvtx_nloosebtaggedjet", ";# of loose-btagged jets;events/1", 10, 0, 10);
+  h_gvtx_nloosebtaggedOR3seedtrkjet = fs->make<TH1F>("h_gvtx_nloosebtaggedOR3seedtrkjet", ";# of loose-btagged or >=3 seed-track jets ;events/1", 10, 0, 10);
 
   
   h_gvtx_shared_GEN_bjet_or_not = fs->make<TH1F>("h_gvtx_shared_GEN_bjet_or_not", "; any b-quarks jets matching to multiple b-quarks ?; arb. units", 3, 0, 3);
@@ -298,6 +307,16 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_gvtx_shared_loosebtaggedjet_nm1_bigdist3d_bpair = fs->make<TH1F>("h_gvtx_shared_loosebtaggedjet_nm1_bigdist3d_bpair", "a loose-btagged jet is matched by at least two b-quarks; a dist3d between b-quarks from the same llp; arb. units", 100, 0, 0.5);
   h_gvtx_no_shared_loosebtaggedjet_nm1_jet_pT = fs->make<TH1F>("h_gvtx_no_shared_loosebtaggedjet_nm1_jet_pT", "a loose-btagged jet is matched by only one b-quark; a b-jet pT; arb. units", 75, 0, 150);
   h_gvtx_no_matched_loosebtaggedjet_nm1_jet_pT = fs->make<TH1F>("h_gvtx_no_matched_loosebtaggedjet_nm1_jet_pT", "a loose-btagged jet is not matched by any b-quark; a b-jet pT; arb. units", 75, 0, 150);
+
+  h_gvtx_three_categories_loosebtaggedjet = fs->make<TH1F>("h_gvtx_three_categories_loosebtaggedjet", "; ; # of loose btagged jets", 4, 0, 4);
+  h_gvtx_three_categories_3tightseedjet = fs->make<TH1F>("h_gvtx_three_categories_3tightseedjet", "; ; # of >=3 seed-track jets", 4, 0, 4);
+
+  h_gvtx_three_categories_loosebtaggedjet->GetXaxis()->SetBinLabel(1, TString::Format(" only loose-btagged"));
+  h_gvtx_three_categories_loosebtaggedjet->GetXaxis()->SetBinLabel(2, TString::Format(" loose-btagged & >=3 seed-track"));
+  h_gvtx_three_categories_loosebtaggedjet->GetXaxis()->SetBinLabel(3, TString::Format(" only >=3 seed-track"));
+  h_gvtx_three_categories_3tightseedjet->GetXaxis()->SetBinLabel(1, TString::Format(" only loose-btagged"));
+  h_gvtx_three_categories_3tightseedjet->GetXaxis()->SetBinLabel(2, TString::Format(" loose-btagged & >=3 seed-track"));
+  h_gvtx_three_categories_3tightseedjet->GetXaxis()->SetBinLabel(3, TString::Format(" only >=3 seed-track"));
 
   h_gvtx_all_tracks_per_loosebtaggedjet = fs->make<TH1F>("h_gvtx_all_tracks_per_loosebtaggedjet", ";# of tracks per a loose b-tagged jet;", 50, 0, 50);
   h_gvtx_seed_tracks_per_loosebtaggedjet = fs->make<TH1F>("h_gvtx_seed_tracks_per_loosebtaggedjet", ";# of seed tracks per a loose b-tagged jet;", 50, 0, 50);
@@ -330,6 +349,10 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_gvtx_seed_tracks_per_GEN_bjet = fs->make<TH1F>("h_gvtx_seed_tracks_per_GEN_bjet", ";# of seed tracks per a b-quark jet;", 50, 0, 50);
   h_gvtx_nm1_pT_seed_tracks_per_GEN_bjet = fs->make<TH1F>("h_gvtx_nm1_pT_seed_tracks_per_GEN_bjet", ";# of n-pT seed tracks per a b-quark jet;", 50, 0, 50);
   h_gvtx_nm1_nsigmadxy_seed_tracks_per_GEN_bjet = fs->make<TH1F>("h_gvtx_nm1_nsigmadxy_seed_tracks_per_GEN_bjet", ";# of n-nsigmadxy seed tracks per a b-quark jet;", 50, 0, 50);
+  h_gvtx_all_tracks_per_NONGEN_bjet = fs->make<TH1F>("h_gvtx_all_tracks_per_NONGEN_bjet", ";# of tracks per a non b-quark jet;", 50, 0, 50);
+  h_gvtx_seed_tracks_per_NONGEN_bjet = fs->make<TH1F>("h_gvtx_seed_tracks_per_NONGEN_bjet", ";# of seed tracks per a non b-quark jet;", 50, 0, 50);
+  h_gvtx_nm1_pT_seed_tracks_per_NONGEN_bjet = fs->make<TH1F>("h_gvtx_nm1_pT_seed_tracks_per_NONGEN_bjet", ";# of n-pT seed tracks per a nonb-quark jet;", 50, 0, 50);
+  h_gvtx_nm1_nsigmadxy_seed_tracks_per_NONGEN_bjet = fs->make<TH1F>("h_gvtx_nm1_nsigmadxy_seed_tracks_per_NONGEN_bjet", ";# of n-nsigmadxy seed tracks per a non b-quark jet;", 50, 0, 50);
   h_gvtx_all_track_pt_from_GEN_bjets = fs->make<TH1F>("h_gvtx_all_track_pt_from_GEN_bjets", "; track p_{T} (GeV) in b-quark jets", 20, 0, 10);
   h_gvtx_all_track_sigmadxybs_from_GEN_bjets = fs->make<TH1F>("h_gvtx_all_track_sigmadxybs_from_GEN_bjets", "; #sigma_{dxy} in b-quark jets", 40, -10, 10);
   h_gvtx_all_track_npxhits_from_GEN_bjets = fs->make<TH1F>("h_gvtx_all_track_npxhits_from_GEN_bjets", "; npxhits in b-quark jets", 12, 0, 12);
@@ -567,14 +590,6 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 			  }
 
 
-			  double mindR_dau = 0.4;
-			  for (size_t j = 0; j < mevent->gen_bchain_nonb_had_eta[i].size(); ++j) {
-				  double dR_dau = reco::deltaR(mevent->gen_bchain_nonb_had_eta[i][j], mevent->gen_bchain_nonb_had_phi[i][j], mevent->jet_eta[bquark_jet], mevent->jet_phi[bquark_jet]);
-				  if (dR_dau < mindR_dau) {
-					  mindR_dau = dR_dau;
-				  }
-			  }
-
 
 			  size_t jet_all_ntrack = 0;
 			  size_t jet_seed_ntrack = 0;
@@ -631,7 +646,39 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
 
 		  }
+		  
   
+	  }
+
+	  for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+		  if (std::count(vec_bquark_jet_no_duplicate.begin(), vec_bquark_jet_no_duplicate.end(), ijet) == 1)  // this jet is a GEN jet 
+			  continue;
+		  
+		  size_t jet_all_ntrack = 0;
+		  size_t jet_seed_ntrack = 0;
+		  size_t jet_nm1_nsigmadxy_seed_ntrack = 0;
+		  size_t jet_nm1_pT_seed_ntrack = 0;
+
+		  for (size_t j = 0; j < mevent->jet_track_which_jet.size(); ++j) {
+			  
+				  jet_all_ntrack++;
+				  if (mevent->jet_track_npxlayers(j) > 1 && mevent->jet_track_nstlayers(j) > 5 && mevent->jet_track_pt(j) > 1 && mevent->jet_track_hp_rmin[j] == 1) {
+					  jet_nm1_nsigmadxy_seed_ntrack++;
+					  if (fabs(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j]) > 4) {
+						  jet_seed_ntrack++;
+					  }
+				  }
+				  if (mevent->jet_track_npxlayers(j) > 1 && mevent->jet_track_nstlayers(j) > 5 && mevent->jet_track_pt(j) > 0.5 && fabs(mevent->jet_track_dxy[j] / mevent->jet_track_dxy_err[j]) > 4 && mevent->jet_track_hp_rmin[j] == 1) {
+					  jet_nm1_pT_seed_ntrack++;
+				  }
+
+		  }
+
+		  h_gvtx_all_tracks_per_NONGEN_bjet->Fill(jet_all_ntrack, w);
+		  h_gvtx_seed_tracks_per_NONGEN_bjet->Fill(jet_seed_ntrack, w);
+		  h_gvtx_nm1_nsigmadxy_seed_tracks_per_NONGEN_bjet->Fill(jet_nm1_nsigmadxy_seed_ntrack, w);
+		  h_gvtx_nm1_pT_seed_tracks_per_NONGEN_bjet->Fill(jet_nm1_pT_seed_ntrack, w);
+
 	  }
 
 	  std::vector<size_t> vec_no_shared_loosebtaggedjet_nm1_dxy_or_not = {};
@@ -641,6 +688,8 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 	  std::vector<size_t> vec_shared_loosebtaggedjet_nm1_pT_or_not = {};
 
 	  int count_loosebtagged_jet = 0;
+	  int count_loosebtaggedOR3seedtrk_jet = 0;
+	  bool is_loosebtaggedOR3seedtrk_jet = false; 
 	  // no cuts on GEN-level are applied, looking at all loose-btagged jets  
 	  for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
 
@@ -690,13 +739,30 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 		   h_gvtx_nm1_nsigmadxy_seed_tracks_per_jet->Fill(jet_nm1_nsigmadxy_seed_ntrack, w);
 		   h_gvtx_nm1_pT_seed_tracks_per_jet->Fill(jet_nm1_pT_seed_ntrack, w);
 
+		   if (jet_seed_ntrack >= 3) { //FIXME
+			   is_loosebtaggedOR3seedtrk_jet = true; 
+			   if (mevent->is_btagged(ijet, 0)) {
+				   h_gvtx_three_categories_3tightseedjet->Fill(1.0, w);
+			   }
+			   else {
+				   h_gvtx_three_categories_3tightseedjet->Fill(2.0, w);
+			   }
+		   }
+
 		   if (mevent->is_btagged(ijet, 0)) {
+			  is_loosebtaggedOR3seedtrk_jet = true;
 			  count_loosebtagged_jet++;
 			  h_gvtx_all_tracks_per_loosebtaggedjet->Fill(jet_all_ntrack, w);
 			  h_gvtx_seed_tracks_per_loosebtaggedjet->Fill(jet_seed_ntrack, w);
 			  h_gvtx_nm1_nsigmadxy_seed_tracks_per_loosebtaggedjet->Fill(jet_nm1_nsigmadxy_seed_ntrack, w);
 			  h_gvtx_nm1_pT_seed_tracks_per_loosebtaggedjet->Fill(jet_nm1_pT_seed_ntrack, w);
 
+			  if (jet_seed_ntrack < 3) { //FIXME
+				  h_gvtx_three_categories_loosebtaggedjet->Fill(0.0, w);
+			  }
+			  else {
+				  h_gvtx_three_categories_loosebtaggedjet->Fill(1.0, w);
+			  }
 
 
 			  /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -909,10 +975,14 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
 		  }
 
+		   if (is_loosebtaggedOR3seedtrk_jet)
+			  count_loosebtaggedOR3seedtrk_jet++;
+
 	  }
 
 	  h_gvtx_nbquarkjet->Fill(vec_bquark_jet_no_duplicate.size(), w);
 	  h_gvtx_nloosebtaggedjet->Fill(count_loosebtagged_jet, w);
+	  h_gvtx_nloosebtaggedOR3seedtrkjet->Fill(count_loosebtaggedOR3seedtrk_jet, w);
 	  h_gvtx_shared_GEN_bjet_or_not->Fill(shared_bjet, w);
 
 
@@ -938,7 +1008,6 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 				  b_sv_dist3d = sqrt(pow(mevent->gen_b_llp1_decay[3] - aux.x, 2) + pow(mevent->gen_b_llp1_decay[4] - aux.y, 2) + pow(mevent->gen_b_llp1_decay[5] - aux.z, 2));
 			  }
 			  if (min_sv_genbdist3d > b_sv_dist3d) {
-				  //idx_bsv = isv;
 				  min_sv_genbdist3d = b_sv_dist3d;
 			  }
 		  }
@@ -957,7 +1026,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 	  if (min_sv_genbdist3d < 0.2)
 		  h_gvtx_sv_all_genb3ddist->Fill(min_sv_genbdist3d, w);
 	  if (min_sv_genllpdist3d < 0.2)
-		  h_gvtx_sv_all_genb3ddist->Fill(min_sv_genbdist3d, w);
+		  h_gvtx_sv_all_genllp3ddist->Fill(min_sv_genllpdist3d, w);
 
   }
 	  
