@@ -215,7 +215,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     }
     if (saw_c && mevent->gen_flavor_code == 0)
       mevent->gen_flavor_code = 1;
-
+	
     edm::Handle<mfv::MCInteraction> mci;
     event.getByToken(mci_token, mci);
 
@@ -225,6 +225,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       mevent->gen_valid = true;
       assert(mci->primaries().size() == 2);
       for (int i = 0; i < 2; ++i) {
+		mevent->gen_lsps.push_back(MFVEvent::p4(mci->primaries()[i]->pt(), mci->primaries()[i]->eta(), mci->primaries()[i]->phi(), mci->primaries()[i]->mass()));
         mevent->gen_lsp_pt  [i] = mci->primaries()[i]->pt();
         mevent->gen_lsp_eta [i] = mci->primaries()[i]->eta();
         mevent->gen_lsp_phi [i] = mci->primaries()[i]->phi();
@@ -278,7 +279,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 			  mevent->gen_bchain_nonb_had_z.push_back(gen_nonb_had_per_b_z);
 
 		  }
-
+		 
 		  auto vec_bp_llp0 = mci->b_llp0_decay_points();
 		  for (size_t i = 0; i < vec_bp_llp0.size(); ++i) {
 			  mevent->gen_b_llp0_decay.push_back(vec_bp_llp0[i].x);
@@ -294,6 +295,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 	  }
       mci_lep = mci->light_leptons();
     }
+	
     for (const reco::GenParticle& gen : *gen_particles) {
       if (gen.pt() < 1)
         continue;
@@ -643,6 +645,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
     mevent->gen_valid = 0;
     mevent->gen_flavor_code = 0;
+	mevent->gen_lsps.clear();
 	for (int i = 0; i < 2; ++i) {
 		mevent->gen_lsp_pt[i] = mevent->gen_lsp_eta[i] = mevent->gen_lsp_phi[i] = mevent->gen_lsp_mass[i] = 0;
 		mevent->gen_decay_type[i] = 0;

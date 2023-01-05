@@ -182,6 +182,7 @@ class MFVVertexer : public edm::EDProducer {
 	jmt::TrackRescaler track_rescaler;
 
     TH1F* h_n_seed_vertices;
+	TH1F* h_n_seed_tracks;
     TH1F* h_seed_vertex_track_weights;
     TH1F* h_seed_vertex_chi2;
     TH1F* h_seed_vertex_ndof;
@@ -449,7 +450,8 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     edm::Service<TFileService> fs;
 
     h_n_seed_vertices                = fs->make<TH1F>("h_n_seed_vertices",                ";# of seed vertices",  50,   0,    200);
-    h_seed_vertex_track_weights      = fs->make<TH1F>("h_seed_vertex_track_weights",      ";seed vertex's track weights",  21,   0,      1.05);
+	h_n_seed_tracks                  = fs->make<TH1F>("h_n_seed_tracks",                  ";# of seed tracks", 200, 0, 200);
+	h_seed_vertex_track_weights      = fs->make<TH1F>("h_seed_vertex_track_weights",      ";seed vertex's track weights",  21,   0,      1.05);
     h_seed_vertex_chi2               = fs->make<TH1F>("h_seed_vertex_chi2",               ";normalized chi2",  40,   0, 10);
     h_seed_vertex_ndof               = fs->make<TH1F>("h_seed_vertex_ndof",               ";ndof",  10,   0,     20);
     h_seed_vertex_x                  = fs->make<TH1F>("h_seed_vertex_x",                  ";vtxbsdist_x (cm.)", 20,  -1,      1);
@@ -789,6 +791,11 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   std::vector<reco::TransientTrack> nm1_nsigmadxy_bttks;
   std::vector<reco::Track> nm1_nsigmadxy_btks;
 
+  for (const reco::TrackRef& tk : *seed_track_refs) {
+	  seed_tracks.push_back(tt_builder->build(tk));
+	  seed_track_ref_map[tk] = seed_tracks.size() - 1;
+  }
+
   if (extrapolate_ghost_tracks) {
 
 	  // alternative of ghost-track vertexing is utilizing tracks from b-jets to form ghost vertices
@@ -811,13 +818,24 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 		  }
 		  bool is_loose_btagged = encode_jet_id(0, bdisc_level, jet.hadronFlavour());
 
+		  size_t n_match_seed_tracks = 0;
+		  for (size_t j = 0; j < seed_tracks.size(); ++j) {
+			  const reco::TransientTrack& ttk = seed_tracks[j];
 
-		  if (is_loose_btagged) {
+			  if (match_track_jet(ttk.track(), (*jjets)[ijet], *jjets, ijet)) {
+				  n_match_seed_tracks++;
+			  }
+		  }
+
+		  bool is_extra_bjet = (n_match_seed_tracks >= 1);
+
+
+		  if (is_loose_btagged || is_extra_bjet) {
 			  count_bjet++;
 
 			  // matching any tracks 
-			  
-			  
+
+
 			  for (size_t j = 0; j < all_tracks.size(); ++j) {
 				  const reco::TransientTrack& ttk = all_tracks[j];
 
@@ -851,15 +869,10 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
 				  }
 			  }
-			  
+
 		  }
 	  }
 	  h_output_gvtx_bjets->Fill(count_bjet);
-  }
-
-  for (const reco::TrackRef& tk : *seed_track_refs) {
-	  seed_tracks.push_back(tt_builder->build(tk));
-	  seed_track_ref_map[tk] = seed_tracks.size() - 1;
   }
 
   if (extrapolate_ghost_tracks) {
@@ -872,7 +885,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   const size_t ntk = seed_tracks.size();
   if (verbose)
     printf("n_seed_tracks: %5lu\n", ntk);
-
+  h_n_seed_tracks->Fill(ntk);
   edm::Handle<mfv::MCInteraction> mci;
   event.getByToken(mci_token, mci);
 

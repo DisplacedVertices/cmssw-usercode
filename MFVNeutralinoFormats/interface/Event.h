@@ -68,6 +68,7 @@ struct MFVEvent {
 
   float gen_weight;
   uchar gen_flavor_code;
+  std::vector<TLorentzVector> gen_lsps; 
   float gen_pv[3];
   std::vector<TLorentzVector> gen_bquarks;
   std::vector<TLorentzVector> gen_leptons;
