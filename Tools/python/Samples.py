@@ -531,6 +531,18 @@ mfv_stopbbarbbar_samples_2017 = [
 ]
 
 HToSSTobbbb_samples_2017 = [
+    MCSample('ggHToSSTobbbb_tau100um_M55_2017', '/ggH_HToSSTobbbb_MH-125_MS-55_ctauS0p1_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 500000), 
+    MCSample('ggHToSSTobbbb_tau1mm_M55_2017', '/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 500000), 
+    MCSample('ggHToSSTobbbb_tau10mm_M55_2017', '/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 500000),
+    MCSample('ggHToSSTobbbb_tau100mm_M55_2017', '/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-100_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 500000), 
+    MCSample('ggHToSSTobbbb_tau100um_M40_2017', '/ggH_HToSSTobbbb_MH-125_MS-40_ctauS0p1_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 500000), 
+    MCSample('ggHToSSTobbbb_tau1mm_M40_2017', '/ggH_HToSSTobbbb_MH-125_MS-40_ctauS-1_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 500000), 
+    MCSample('ggHToSSTobbbb_tau10mm_M40_2017', '/ggH_HToSSTobbbb_MH-125_MS-40_ctauS-10_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 500000),
+    MCSample('ggHToSSTobbbb_tau100mm_M40_2017', '/ggH_HToSSTobbbb_MH-125_MS-40_ctauS-100_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 500000), 
+    MCSample('ggHToSSTobbbb_tau100um_M15_2017', '/ggH_HToSSTobbbb_MH-125_MS-15_ctauS0p1_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 500000),
+    MCSample('ggHToSSTobbbb_tau1mm_M15_2017', '/ggH_HToSSTobbbb_MH-125_MS-15_ctauS-1_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 500000),
+    MCSample('ggHToSSTobbbb_tau10mm_M15_2017', '/ggH_HToSSTobbbb_MH-125_MS-15_ctauS-10_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 500000),
+    MCSample('ggHToSSTobbbb_tau100mm_M15_2017', '/ggH_HToSSTobbbb_MH-125_MS-15_ctauS-100_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 500000), 
 ]
 
 HToSSTodddd_samples_2017 = [
@@ -701,7 +713,7 @@ HToSSTodddd_samples_2018 = [
     MCSample('ggHToSSTodddd_tau1mm_M40_2018', '/ggH_HToSSTodddd_MH-125_MS-40_ctauS-1_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM', 181513),
 ]
 
-all_signal_samples_2018 = mfv_signal_samples_2018 + mfv_stopdbardbar_samples_2018 + mfv_stopbbarbbar_samples_2018 + mfv_splitSUSY_samples_2018 + HToSSTodddd_samples_2018
+all_signal_samples_2018 = mfv_signal_samples_2018 + mfv_stopdbardbar_samples_2018 + mfv_stopbbarbbar_samples_2018 + mfv_splitSUSY_samples_2018 + HToSSTodddd_samples_2018 
 ########
 # data
 ########
@@ -940,7 +952,7 @@ for s in all_signal_samples_2018:
 for sample in mfv_signal_samples_2016 + mfv_stopdbardbar_samples_2016 + mfv_stopbbarbbar_samples_2016:
     sample.add_dataset('miniaod', sample.dataset, sample.nevents_orig)
 
-for sample in mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + mfv_stopbbarbbar_samples_2017:
+for sample in mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + mfv_stopbbarbbar_samples_2017 + HToSSTobbbb_samples_2017:
     sample.add_dataset('miniaod', sample.dataset, sample.nevents_orig)
 
 for sample in mfv_signal_samples_2018 + mfv_stopdbardbar_samples_2018 + mfv_stopbbarbbar_samples_2018 + HToSSTodddd_samples_2018:
