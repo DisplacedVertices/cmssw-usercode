@@ -199,7 +199,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     if use_btag_triggers :
         #samples = Samples.mfv_signal_samples_2017
-        samples = Samples.mfv_stopdbardbar_samples_2017
+        #samples = Samples.mfv_stopdbardbar_samples_2017
+        samples = Samples.ttbar_samples_2017 
         #samples = Samples.mfv_stopbbarbbar_samples_2018
         #samples = Samples.qcd_samples_2017 + Samples.ttbar_samples_2017
         #samples = Samples.HToSSTodddd_samples_2018
@@ -214,7 +215,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
 
-    cs = CondorSubmitter('Histos' + version + '_noPS_medVtx',
+    cs = CondorSubmitter('HistosNoBs2derrNtk3' + version,
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,

@@ -307,11 +307,13 @@ _add_ds("ntupleulv1bm", {
 'mfv_stopbbarbbar_tau000300um_M3000_2017': _fromnum1("/store/user/shogan/StopStopbarTo2Bbar2B_M-3000_CTau-300um_TuneCP5_13TeV-pythia8/NtupleUL17V1Bm_NoEF_2017/221104_211241", 21),
 'mfv_stopbbarbbar_tau001000um_M3000_2017': (1, ['/store/user/shogan/StopStopbarTo2Bbar2B_M-3000_CTau-1mm_TuneCP5_13TeV-pythia8/NtupleUL17V1Bm_NoEF_2017/221104_211255/0000/ntuple_3.root']),
 'mfv_stopbbarbbar_tau030000um_M3000_2017': (2, ['/store/user/shogan/StopStopbarTo2Bbar2B_M-3000_CTau-30mm_TuneCP5_13TeV-pythia8/NtupleUL17V1Bm_NoEF_2017/221104_211323/0000/ntuple_%i.root' % i for i in [1, 3]]),
+})
 
 
+_add_ds("ntupleulgvtxbjetv43bm", {                                                                                                                                                 'ttbar_2017': _fromnum1("/store/user/pekotamn/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleULGvtxBjetV43Bm_20162/230106_212717", 1019),
+})
 # 2018 RPV Signal Samples
 
-})
 ################################################################################
 
 if __name__ == '__main__':

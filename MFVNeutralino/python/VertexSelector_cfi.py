@@ -111,9 +111,9 @@ mfvSelectedVerticesLoose = mfvSelectedVertices.clone(
 mfvSelectedVerticesTight = mfvSelectedVertices.clone(
     mevent_src = 'mfvEvent',
     exclude_beampipe = True,
-    min_ntracks = 5,
+    min_ntracks = 3, # default 5 
     min_bsbs2ddist = 0.01,
-    max_rescale_bs2derr = 0.0025,
+    max_rescale_bs2derr = 100, # default 0.0025
     )
 
 mfvSelectedVerticesTightMinNtk3 = mfvSelectedVerticesTight.clone(min_ntracks = 3)

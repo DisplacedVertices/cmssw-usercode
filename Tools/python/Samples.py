@@ -960,6 +960,7 @@ for sample in mfv_signal_samples_2018 + mfv_stopdbardbar_samples_2018 + mfv_stop
 
 ########
 # ntuples
+ttbar_2017.add_dataset('ntupleulgvtxbjetv43bm', '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/pekotamn-NtupleULGvtxBjetV43Bm_20162-bc8ac37be8b67f00883c3454c34beb70/USER', 14080529) 
 ########
 
 for x in all_signal_samples_2017 + all_signal_samples_2018 + qcd_samples_2017 + qcd_samples_2018 + ttbar_samples_2017 + ttbar_samples_2018:
@@ -991,7 +992,7 @@ condorable = {
         "miniaod": [mfv_stopbbarbbar_tau001000um_M0800_2018,]
         },
     "T1_US_FNAL_Disk": {
-        "miniaod": [EGamma2018A, EGamma2018B, SingleMuon2017B, SingleMuon2017D, SingleElectron2017B, SingleElectron2017D, SingleElectron2017E, MET2018D, #qcdht0300_2018, qcdht0700_2018, qcdht1000_2018, qcdht1500_2018, zjetstonunuht2500_2018, qcdht0200_2017, qcdht0500_2017, qcdht0700_2017, qcdht0300_2017, ttbar_2017,
+        "miniaod": [EGamma2018A, EGamma2018B, SingleMuon2017B, SingleMuon2017D, SingleElectron2017B, SingleElectron2017D, SingleElectron2017E, MET2018D, ttbar_2017, #qcdht0300_2018, qcdht0700_2018, qcdht1000_2018, qcdht1500_2018, zjetstonunuht2500_2018, qcdht0200_2017, qcdht0500_2017, qcdht0700_2017, qcdht0300_2017,
         ]},
 }
 
