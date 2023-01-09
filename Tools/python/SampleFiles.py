@@ -309,9 +309,15 @@ _add_ds("ntupleulv1bm", {
 'mfv_stopbbarbbar_tau030000um_M3000_2017': (2, ['/store/user/shogan/StopStopbarTo2Bbar2B_M-3000_CTau-30mm_TuneCP5_13TeV-pythia8/NtupleUL17V1Bm_NoEF_2017/221104_211323/0000/ntuple_%i.root' % i for i in [1, 3]]),
 })
 
-
-_add_ds("ntupleulgvtxbjetv43bm", {                                                                                                                                                 'ttbar_2017': _fromnum1("/store/user/pekotamn/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleULGvtxBjetV43Bm_20162/230106_212717", 1019),
+_add_ds("ntupleulgvtxbjetv29bm", {                                                                                                                                                  'ttbar_2017': (1017, ['/store/user/pekotamn/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleULGvtxBjetV29Bm_20162/230108_172511' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in chain(xrange(1,13), xrange(14,30), xrange(31,1020))]),                                                                                                                                  }) 
+_add_ds("ntupleulgvtxbjetv43bm", {                                                                                                                                                 
+'ttbar_2017': (1017, ['/store/user/pekotamn/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleULGvtxBjetV43Bm_20162/230106_212717' + '/%04i/ntuple_%i.root' % (i/1000,i) for i in chain(xrange(1,13), xrange(14,30), xrange(31,1020))]), 
 })
+
+_add_ds("ntupleulgvtxbjetv29bm", {                                                                                                                                                  'ggHToSSTobbbb_tau10mm_M55_2017': _fromnum1("/store/user/pekotamn/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/NtupleULGvtxBjetV29Bm_NoEF_20162/230108_172656", 89),                                                                                                                                                                              'ggHToSSTobbbb_tau100mm_M55_2017': _fromnum1("/store/user/pekotamn/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-100_TuneCP5_13TeV-powheg-pythia8/NtupleULGvtxBjetV29Bm_NoEF_20162/230108_172710", 87),                                                                                                                                                                            }) 
+
+_add_ds("ntupleulgvtxbjetv43bm", {                                                                                                                                                  'ggHToSSTobbbb_tau10mm_M55_2017': _fromnum1("/store/user/pekotamn/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/NtupleULGvtxBjetV43Bm_NoEF_20162/230107_223805", 89),                                                                                                                                                                              'ggHToSSTobbbb_tau100mm_M55_2017': _fromnum1("/store/user/pekotamn/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-100_TuneCP5_13TeV-powheg-pythia8/NtupleULGvtxBjetV43Bm_NoEF_20162/230107_223817", 87),                                                                                                                                                                            }) 
+
 # 2018 RPV Signal Samples
 
 ################################################################################
