@@ -5,8 +5,8 @@ do_track = False # this can onlky be used for ntuple with keep_tk=True
 
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_MET_triggers
 #sample_files(process, 'mfv_neu_tau000300um_M0300_2017' if is_mc else 'JetHT2017B', dataset, 1)
-sample_files(process, 'ttbar_2017', dataset, 1) 
-max_events(process, 100) 
+sample_files(process, 'ggHToSSTobbbb_tau10mm_M55_2017', dataset, 1) 
+max_events(process, 5000) 
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
 
@@ -218,7 +218,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
 
-    cs = CondorSubmitter('HistosNoBs2derrNtk3' + version,
+    cs = CondorSubmitter('Histos' + version,
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,
