@@ -5,6 +5,8 @@ do_track = False # this can onlky be used for ntuple with keep_tk=True
 
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_MET_triggers
 #sample_files(process, 'mfv_neu_tau000300um_M0300_2017' if is_mc else 'JetHT2017B', dataset, 1)
+sample_files(process, 'ttbar_2017', dataset, 1) 
+max_events(process, 100) 
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
 

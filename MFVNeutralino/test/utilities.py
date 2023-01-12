@@ -15,11 +15,13 @@ def cmd_hadd_vertexer_histos():
     ntuple = sys.argv[2]
     print(ntuple)
     samples = Samples.registry.from_argv(
-            Samples.qcd_samples_2017 + Samples.met_samples_2017 + Samples.Zvv_samples_2017 + Samples.mfv_splitSUSY_samples_M2000_2017
+            #Samples.qcd_samples_2017 + Samples.met_samples_2017 + Samples.Zvv_samples_2017 + Samples.mfv_splitSUSY_samples_M2000_2017 + Samples.ttbar_samples
             #Samples.data_samples_2015 + \
             #Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015 + \
             #Samples.data_samples + \
             #Samples.ttbar_samples + Samples.qcd_samples + Samples.qcd_samples_ext
+            #Samples.ttbar_samples_2017
+            Samples.HToSSTobbbb_samples_2017
     )
     for s in samples:
         s.set_curr_dataset(ntuple)
