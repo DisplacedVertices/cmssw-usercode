@@ -1857,6 +1857,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 				  int genbvtx_idx = 0;
 				  for (const reco::GenParticleRef& s_temp : mci->secondaries(i)) {
 					  reco::GenParticle* s = (reco::GenParticle*) & *s_temp;
+					  std::cout << "bquark dR : " << reco::deltaR(jet.eta(), jet.phi(), s->eta(), s->phi()) << std::endl;
 					  if (reco::deltaR(jet.eta(), jet.phi(), s->eta(), s->phi()) < min_dR_bquark) {
 						  min_dR_bquark = reco::deltaR(jet.eta(), jet.phi(), s->eta(), s->phi());
 						  llp_idx = i;
@@ -1865,6 +1866,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 					  genbvtx_idx++;
 				  }
 			  }
+			  
 			  if (min_dR_bquark < 0.4 && llp_idx != -1) {
 				 auto llp_p = mci->decay_point(llp_idx);
 				 llpvtx_x = llp_p.x;
@@ -1947,6 +1949,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 							  h_output_gvtx_evt_bSV_track_miss_dist->Fill(tk_vtx_dist.second.value());
 							  h_output_gvtx_evt_bSV_track_miss_dist_significance->Fill(tk_vtx_dist.second.significance());
 						  }
+
+						  std::cout << "llp_x : " << llpvtx_x << "llp_y : " << llpvtx_y << "llp_z : " << llpvtx_z << std::endl;
 
 						  if (llpvtx_x != 0 && llpvtx_y != 0 && llpvtx_z != 0) {
 							  double dist3d_llp = mag(llpvtx_x - v[0]->x(), llpvtx_y - v[0]->y(), llpvtx_z - v[0]->z());
