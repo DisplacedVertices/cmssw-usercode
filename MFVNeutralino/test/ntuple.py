@@ -23,9 +23,10 @@ else :
 process = ntuple_process(settings)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
 #input_files(process, '/eos/uscms/store/user/shogan/stop_bbarbbar_miniaod/mfv_stopbbarbbar_tau001000um_M1200_2017/miniaod_0.root') 
-input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/ggH_HToSSTodddd_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/2810000/E7A20FF5-DA78-ED47-8E67-942D97330917.root')
+#input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/2810000/E7A20FF5-DA78-ED47-8E67-942D97330917.root')
+input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/80000/16319EFC-7589-2841-BBBE-6E2B6BE2D981.root')
 #sample_files(process, 'mfv_stopbbarbbar_tau001000um_M0800_2018', dataset, 1)
-max_events(process, 50)
+max_events(process, 100)
 cmssw_from_argv(process)
 
 
@@ -35,9 +36,9 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if use_btag_triggers :
         #samples = pick_samples(dataset, qcd=False, ttbar=True, data=False) # no data currently; no sliced ttbar since inclusive is used
         #samples = Samples.mfv_signal_samples_2018 + Samples.mfv_stopdbardbar_samples_2018 + Samples.mfv_stopbbarbbar_samples_2018
-        #samples = [getattr(Samples, 'ggHToSSTobbbb_tau1mm_M55_2017')]   
+        samples = [getattr(Samples, 'ggHToSSTobbbb_tau10mm_M55_2017')]   
         #samples = [getattr(Samples, 'qcdht0200_2017')] 
-        samples = Samples.HToSSTobbbb_samples_2017
+        #samples = Samples.HToSSTobbbb_samples_2017
         #samples = Samples.ttbar_samples_2017
         #samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2018
     elif use_MET_triggers :
