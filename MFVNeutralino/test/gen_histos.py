@@ -4,6 +4,8 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 debug = 'debug' in sys.argv
 
 #sample_files(process, 'mfv_stopdbardbar_tau001000um_M0600_2017', 'miniaod', 1)
+input_files(process, 'C47DA2BF-B0FF-EA11-A2BC-001E67586629.root') #H4b 1mm 55GeV
+max_events(process, 20)
 #sample_files(process, 'ttbar_2017', 'miniaod', 1 )
 #sample_files(process, 'ggHToSSTobbbb_tau1mm_M40_2017', 'miniaod', 10)
 #sample_files(process, 'mfv_neu_tau001000um_M0400_2017', 'miniaod', 10)
