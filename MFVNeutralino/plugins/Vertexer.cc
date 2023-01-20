@@ -276,14 +276,17 @@ class MFVVertexer : public edm::EDProducer {
 
 	TH1F* h_output_gvtx_tv0_bs2derr;
 	TH1F* h_output_gvtx_tv0_ntrack;
+	TH1F* h_output_gvtx_tv0_dist3dgenb; 
 	TH1F* h_output_gvtx_tv1_bs2derr;
 	TH1F* h_output_gvtx_tv1_ntrack;
+	TH1F* h_output_gvtx_tv1_dist3dgenb;
 
 	TH2F* h_2D_output_gvtx_dR_tv0_gtrk0_bs2derr0;
 	TH2F* h_2D_output_gvtx_dR_tv1_gtrk1_bs2derr1;
 	
 
 	TH1F* h_output_gvtx_vertices;
+	TH1F* h_output_gvtx_vertex_closest_dist3dgenllp;
 
 
 	TH1F* h_output_gvtx_bjets;
@@ -516,17 +519,19 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 		h_output_gvtx_tv1_bs2derr = fs->make<TH1F>("h_output_gvtx_tv1_bs2derr", "after a ghost vertex is formed;tv1's bs2derr(cm)", 200, 0, 0.05);
 
 		h_output_gvtx_tv0_ntrack = fs->make<TH1F>("h_output_gvtx_tv0_ntrack", "after a ghost vertex is formed;tv0's ntrack", 20, 0, 20);
+		h_output_gvtx_tv0_dist3dgenb = fs->make<TH1F>("h_output_gvtx_tv0_dist3dgenb", "after a ghost vertex is formed;dist3d(tv0, GEN b-decay) cm.", 50, 0, 0.03);
 		h_output_gvtx_tv1_ntrack = fs->make<TH1F>("h_output_gvtx_tv1_ntrack", "after a ghost vertex is formed;tv1's ntrack", 20, 0, 20);
+		h_output_gvtx_tv1_dist3dgenb = fs->make<TH1F>("h_output_gvtx_tv1_dist3dgenb", "after a ghost vertex is formed;dist3d(tv1, GEN b-decay) cm.", 50, 0, 0.03);
 
-		h_output_gvtx_vertices = fs->make<TH1F>("h_output_gvtx_vertices", ";;events", 4, 0, 4);
+		h_output_gvtx_vertices = fs->make<TH1F>("h_output_gvtx_vertices", ";;events", 3, 0, 3);
 		h_output_gvtx_vertices->GetXaxis()->SetBinLabel(1, "nevents");
 		h_output_gvtx_bjets = fs->make<TH1F>("h_output_gvtx_bjets", ";# of loose-btagged jets; events", 10, 0, 10);
 		
 
-		const char* gvtx_filter[2] = { "qualified pairs","ghost vertices"};
-		for (int i = 0; i < 2; ++i) { 
-			h_output_gvtx_vertices->GetXaxis()->SetBinLabel(i + 2, TString::Format(" pass %s", gvtx_filter[i]));
-		}
+		const char* gvtx_filter[1] = { "ghost vertices"};
+		h_output_gvtx_vertices->GetXaxis()->SetBinLabel(2, TString::Format(" formed %s", gvtx_filter[0]));
+		h_output_gvtx_vertex_closest_dist3dgenllp = fs->make<TH1F>("h_output_gvtx_vertex_closest_dist3dgenllp", "after a ghost vertex is formed;closest (gvtx, GEN llp-decay) cm.", 50, 0, 0.03);
+
 
 		
 		h_2D_output_gvtx_dR_tv0_gtrk0_bs2derr0 = fs->make<TH2F>("h_2D_output_gvtx_dR_tv0_gtrk0_bs2derr0", "after a ghost vertex is formed;dR(tv0,gtrk0); tv0's bs2derr(cm)", 50, 0, 1.0, 100, 0, 0.05);
@@ -1831,6 +1836,10 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 	  std::vector<std::vector<size_t>> vec_bsv_vtxidx_per_bjet; // a vector of vertex index corresponding vertices that are bSVs 
 	  std::vector<size_t> vec_bsv_vtxidx_per_evt;
 
+	  std::vector<size_t> vec_bvtxidx;
+	  std::vector<size_t> vec_dist3dgenb; 
+	  
+	  
 	  for (size_t ijet = 0; ijet < jjets->size(); ++ijet) {
 		  const pat::Jet& jet = jjets->at(ijet);
 		  int bdisc_level = 0;
@@ -1840,16 +1849,18 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 				  bdisc_level = i + 1;
 		  }
 		  bool is_loose_btagged = encode_jet_id(0, bdisc_level, jet.hadronFlavour());
+		  
 		  if (is_loose_btagged) {
+			  
+			  vec_bjetidx.push_back(ijet);
+
+			  // matching the b-decay point 
 			  double llpvtx_x = 0.0;
 			  double llpvtx_y = 0.0;
 			  double llpvtx_z = 0.0;
 			  double bvtx_x = 0.0;
 			  double bvtx_y = 0.0;
 			  double bvtx_z = 0.0;
-			  vec_bjetidx.push_back(ijet);
-
-			  // matching the b-decay point 
 			  double min_dR_bquark = 0.4; 
 			  int llp_idx = -1;
 			  int b_idx = -1;
@@ -1857,7 +1868,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 				  int genbvtx_idx = 0;
 				  for (const reco::GenParticleRef& s_temp : mci->secondaries(i)) {
 					  reco::GenParticle* s = (reco::GenParticle*) & *s_temp;
-					  std::cout << "bquark dR : " << reco::deltaR(jet.eta(), jet.phi(), s->eta(), s->phi()) << std::endl;
 					  if (reco::deltaR(jet.eta(), jet.phi(), s->eta(), s->phi()) < min_dR_bquark) {
 						  min_dR_bquark = reco::deltaR(jet.eta(), jet.phi(), s->eta(), s->phi());
 						  llp_idx = i;
@@ -1867,7 +1877,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 				  }
 			  }
 			  
-			  if (min_dR_bquark < 0.4 && llp_idx != -1) {
+			  if (min_dR_bquark < 0.4 && llp_idx != -1 && mci->set_bdecay_hadron_chain().size() == 4) {
 				 auto llp_p = mci->decay_point(llp_idx);
 				 llpvtx_x = llp_p.x;
 				 llpvtx_y = llp_p.y;
@@ -1950,8 +1960,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 							  h_output_gvtx_evt_bSV_track_miss_dist_significance->Fill(tk_vtx_dist.second.significance());
 						  }
 
-						  std::cout << "llp_x : " << llpvtx_x << "llp_y : " << llpvtx_y << "llp_z : " << llpvtx_z << std::endl;
-
 						  if (llpvtx_x != 0 && llpvtx_y != 0 && llpvtx_z != 0) {
 							  double dist3d_llp = mag(llpvtx_x - v[0]->x(), llpvtx_y - v[0]->y(), llpvtx_z - v[0]->z());
 							  double dist3d_b = mag(bvtx_x - v[0]->x(), bvtx_y - v[0]->y(), bvtx_z - v[0]->z());
@@ -1961,7 +1969,12 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 							  else {
 								  h_output_gvtx_evt_bSV_closer_dist3dgenb->Fill(dist3d_b);
                               }
+							  if (dist3d_b < 0.02) {
+								  vec_bvtxidx.push_back(vtxidx);
+								  vec_dist3dgenb.push_back(dist3d_b);
+							  }
 						  }
+						  
                       }
 					  h_output_gvtx_bjet_bSV_ntrack->Fill(v[0]->nTracks());
 				  }
@@ -1972,10 +1985,13 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 		  }
 	  }
 	  h_output_gvtx_evt_bSVs->Fill(vec_bsv_vtxidx_per_evt.size());
-
+	  
   // form ghost vertices from pairs of vertices whose trajectories form a common decay point
-  if (extrapolate_ghost_tracks) {
+  if (extrapolate_ghost_tracks && vec_bvtxidx.size() > 1 && mci->set_bdecay_hadron_chain().size() == 4) {
+	  size_t vtx0idx = 0;
 	  for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
+
+		  if (std::count(vec_bvtxidx.begin(), vec_bvtxidx.end(), vtx0idx) == 0) continue;
 
 		  // setup track_sets
 		  track_set tracks[2];
@@ -1999,7 +2015,10 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
 		  // now loop through all vertex pairs, and try to form ghost vertex:
 		  bool form_ghost_vtx = false;
+		  size_t vtx1idx = 0;
 		  for (v[1] = v[0] + 1; v[1] != vertices->end(); ++v[1]) {
+
+			  if (std::count(vec_bvtxidx.begin(), vec_bvtxidx.end(), vtx1idx) == 0) continue;
 
 			  // only consider cases w/ two vertices, with at least two tracks each
 			  if (vertices->size() < 2 || v[0]->nTracks() < 2 || v[1]->nTracks() < 2) continue;
@@ -2184,7 +2203,19 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 				  if (d_gvtx_new.value() > 0.01 && reco_gvtx.tracksSize() >= 2) {
 					  form_ghost_vtx = true;
 					  h_output_gvtx_tv0_ntrack->Fill(v[0]->nTracks());
+					  auto tv0_it = find(vec_bvtxidx.begin(), vec_bvtxidx.end(), vtx0idx);
+					  int tv0_idx = tv0_it - vec_bvtxidx.begin();
+					  h_output_gvtx_tv0_dist3dgenb->Fill(vec_dist3dgenb[tv0_idx]);
 					  h_output_gvtx_tv1_ntrack->Fill(v[1]->nTracks());
+					  auto tv1_it = find(vec_bvtxidx.begin(), vec_bvtxidx.end(), vtx0idx);
+					  int tv1_idx = tv1_it - vec_bvtxidx.begin();
+					  h_output_gvtx_tv1_dist3dgenb->Fill(vec_dist3dgenb[tv1_idx]);
+
+
+					  h_output_gvtx_dphi_tv0_tv1->Fill(fabs(reco::deltaPhi(phi0, phi1)));
+
+					  h_output_gvtx_tv0_bs2derr->Fill(bs2derr0);
+					  h_output_gvtx_tv1_bs2derr->Fill(bs2derr1);
 
 					  for (auto it = v[0]->tracks_begin(), ite = v[0]->tracks_end(); it != ite; ++it) {
 						  reco::TrackRef tk = it->castTo<reco::TrackRef>();
@@ -2203,12 +2234,25 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 					  v[1] = vertices->erase(v[1]) - 1; // (1) erase and point the iterator at the previous entry
 					  *v[0] = reco_gvtx; // (2) updated v[0] (ok to use v[0] after the erase(v[1]) because v[0] is by construction before v[1])
 
-					  h_output_gvtx_dphi_tv0_tv1->Fill(fabs(reco::deltaPhi(phi0, phi1)));
+					  eraseElement(vec_bvtxidx, tv1_idx);
+					  eraseElement(vec_dist3dgenb, tv1_idx);
+                      h_output_gvtx_vertices->Fill(1);
+					  auto llp0_p = mci->decay_point(0);
+					  double llp0vtx_x = llp0_p.x;
+					  double llp0vtx_y = llp0_p.y;
+					  double llp0vtx_z = llp0_p.z;
+					  auto llp1_p = mci->decay_point(1);
+					  double llp1vtx_x = llp1_p.x;
+					  double llp1vtx_y = llp1_p.y;
+					  double llp1vtx_z = llp1_p.z;
+					  double dist3dgenllp0 = mag(llp0vtx_x - v[0]->x(), llp0vtx_y - v[0]->y(), llp0vtx_z - v[0]->z());
+					  double dist3dgenllp1 = mag(llp1vtx_x - v[0]->x(), llp1vtx_y - v[0]->y(), llp1vtx_z - v[0]->z());
 
-					  h_output_gvtx_tv0_bs2derr->Fill(bs2derr0);
-					  h_output_gvtx_tv1_bs2derr->Fill(bs2derr1);
+					  if (dist3dgenllp0 < dist3dgenllp1)
+						  h_output_gvtx_vertex_closest_dist3dgenllp->Fill(dist3dgenllp0);
+					  else
+						  h_output_gvtx_vertex_closest_dist3dgenllp->Fill(dist3dgenllp1);
 
-					  h_output_gvtx_vertices->Fill(1);
 				  }
 
 				  // FIXME okay! we have our ghost vertex. but now the issue is that bs2derr is too large to be useful. next step is to compute a more meaningful bs2derr that can be used in place of the one determined from just the two ghost trajectories. This may be the nontrivial part that remains, since we are using only two ghost tracks here--they may be very precise, but bs2derr will be large w/ only two tracks as input. 
@@ -2248,7 +2292,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 						  std::cout << "comb bs2derr " << d_comb.error() << std::endl;
 					  }
 				  }
-			  }
+			  }	 
+			  vtx1idx++;
 		  }
 
 		  // FIXME should this be inside of the loop, so that we allow ourselves to merge with all possible pairs? maybe not, but need to think. also, does this allow the new vertex to be considered for further merging, or not?
@@ -2256,7 +2301,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 		  if (form_ghost_vtx)
 			  v[0] = vertices->begin() - 1; // (3) reset the combination if a valid merge happens
 
-	  }	 
+		  vtx0idx++;
+      }	 
 	  
 	  
   }
