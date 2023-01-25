@@ -6,6 +6,10 @@
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -14,9 +18,9 @@
 #include "JMTucker/Tools/interface/Utilities.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/Event.h"
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
-#include "DataFormats/VertexReco/interface/Vertex.h"
-#include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
+#include "JMTucker/Tools/interface/AnalysisEras.h"
+#include "JMTucker/Tools/interface/TrackRescaler.h"
 
 class MFVFilterHistos : public edm::EDAnalyzer {
  public:
@@ -27,6 +31,7 @@ class MFVFilterHistos : public edm::EDAnalyzer {
   const edm::EDGetTokenT<MFVEvent> mevent_token;
   const edm::EDGetTokenT<double> weight_token;
   const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_token;
+  const edm::EDGetTokenT<reco::TrackCollection> track_token;
 
   static const int MAX_NJETS = 10;
   static const int N_PROXIES = 20;
@@ -54,6 +59,8 @@ class MFVFilterHistos : public edm::EDAnalyzer {
   const double min_pt_for_deta;
   const double min_pt_for_bfilter;
 
+  jmt::TrackRescaler track_rescaler;
+
   TH1F* h_hlt_bits;
   TH1F* h_l1_bits;
   TH1F* h_filter_bits;
@@ -64,6 +71,13 @@ class MFVFilterHistos : public edm::EDAnalyzer {
 
   TH1F* h_jet_match_dR;
   TH1F* h_next_match_dR;
+
+  TH1F* h_calojet_nprmpt_tks;
+  TH1F* h_calojet_ndisp_tks;
+  TH2F* h_calojet_pt_nprmpt_tks;
+  TH2F* h_calojet_pt_ndisp_tks;
+  TH1F* h_calojet_matched_nprmpt_tks;
+  TH1F* h_calojet_matched_ndisp_tks;
 
   TH2F* h_filt_nsurvive_grid;
   
@@ -103,6 +117,7 @@ MFVFilterHistos::MFVFilterHistos(const edm::ParameterSet& cfg)
   : mevent_token(consumes<MFVEvent>(cfg.getParameter<edm::InputTag>("mevent_src"))),
     weight_token(consumes<double>(cfg.getParameter<edm::InputTag>("weight_src"))),
     vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
+    track_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("track_src"))),
     ul_year(cfg.getParameter<int>("ul_year")),
     is_dibjet(cfg.getParameter<bool>("is_dibjet")),
     offline_csv(cfg.getParameter<double>("offline_csv")),
@@ -139,6 +154,12 @@ MFVFilterHistos::MFVFilterHistos(const edm::ParameterSet& cfg)
   h_jet_match_dR = fs->make<TH1F>("h_jet_match_dR", ";#DeltaR between matching HLT/offline jets;entries", 80, 0, 0.401);
   h_next_match_dR = fs->make<TH1F>("h_next_match_dR", ";#DeltaR between matching HLT jet and 2nd closest offline jet;entries", 80, 0, 0.401);
 
+  h_calojet_nprmpt_tks = fs->make<TH1F>("h_calojet_nprmpt_tks", ";# of prompt tks in calojets;entries", 100, 0, 100);
+  h_calojet_ndisp_tks  = fs->make<TH1F>("h_calojet_ndisp_tks", ";# of displaced tks in calojets;entries", 100, 0, 100);
+  h_calojet_pt_nprmpt_tks = fs->make<TH2F>("h_calojet_pt_nprmpt_tks", ";calojet pT (GeV); # of prompt tks in calojet", 100, 0, 400, 100, 0, 100);
+  h_calojet_pt_ndisp_tks  = fs->make<TH2F>("h_calojet_pt_ndisp_tks", ";calojet pT (GeV); # of displaced tks in calojet", 100, 0, 400, 100, 0, 100);
+  h_calojet_matched_nprmpt_tks = fs->make<TH1F>("h_calojet_matched_nprmpt_tks", ";# of prompt tks in calojets matched @ HLT;entries", 100, 0, 100);
+  h_calojet_matched_ndisp_tks  = fs->make<TH1F>("h_calojet_matched_ndisp_tks", ";# of displaced tks in calojets matched @ HLT;entries", 100, 0, 100);
 
   h_filt_nsurvive_grid = fs->make<TH2F>("h_filt_nsurvive_grid", ";;# HLT-btag proxies", 19, 0, 19, N_PROXIES, 0, N_PROXIES);
   
@@ -235,6 +256,9 @@ struct Jet_Pair_Helper {
 struct Jet_Track_Helper {
     int nprompt = 0;
     int ndisp   = 0;
+    bool matches_hlt_calo_jet    = false;
+    bool matches_hlt_nprompt_jet = false;
+    bool matches_hlt_ndisp_jet   = false;
 };
 
 struct Jet_Loc_Helper {
@@ -267,6 +291,20 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   edm::Handle<MFVVertexAuxCollection> auxes;
   event.getByToken(vertex_token, auxes);
 
+  edm::Handle<reco::TrackCollection> tracks;
+  event.getByToken(track_token, tracks);
+
+  const int track_rescaler_which = jmt::TrackRescaler::w_JetHT; // JMTBAD which rescaling if ever a different one
+  track_rescaler.setup(!event.isRealData() && track_rescaler_which != -1,
+                       jmt::AnalysisEras::pick(event.id().event()),
+                       //jmt::AnalysisEras::pick(event, this),
+                       track_rescaler_which);
+
+  double bsx = mevent->bsx;
+  double bsy = mevent->bsy;
+  double bsz = mevent->bsz;
+  const math::XYZPoint bs(bsx, bsy, bsz);
+
   const int nofflinepfjets = mevent->jet_pt.size();
   double min_threshjet_deta = 99.9;
   std::vector<Jet_BHelper> bsort_helpers;
@@ -274,48 +312,87 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   std::vector<Jet_Track_Helper> jet_track_helper;
 
   // Find some relevant information about prompt/seed track multiplicity
-  for (int i=0; i < nofflinepfjets; i++) {
-    if (mevent->nth_jet_pt(i) < 40.0 or fabs(mevent->nth_jet_eta(i) > 2.0)) continue;    
+  for (int i=0, ie=mevent->calo_jet_eta.size(); i < ie; i++) {
+    if (mevent->calo_jet_pt[i] < 40.0 or fabs(mevent->calo_jet_eta[i] > 2.0)) continue;    
     int jet_tks_nprompt    = 0;
     int jet_tks_ndisplaced = 0;
+    bool matches_hlt_calojet = false;
+    bool matches_promptk_jet = false;
+    bool matches_disptk_jet  = false;
     Jet_Track_Helper tmp_track_helper;
 
-    for (size_t ntk = 0 ; ntk < mevent->n_jet_tracks_all() ; ntk++) {
-      if (mevent->jet_track_pt(ntk) < 1.0) continue;
-      if (mevent->jet_track_which_jet[ntk] != i) continue;
-      float tk_dxy       = mevent->jet_track_dxy[ntk];
-      float tk_nsigmadxy = fabs(tk_dxy/mevent->jet_track_dxy_err[ntk]);
+    for (size_t ntk = 0, ntke=tracks->size(); ntk < ntke; ntk++) {
+      const reco::TrackRef& tk = reco::TrackRef(tracks, ntk);
+      const auto rs = track_rescaler.scale(*tk);
 
-      if (tk_dxy < 0.1) jet_tks_nprompt++;
-      if (tk_dxy > 0.05 and tk_nsigmadxy > 5.0) jet_tks_ndisplaced++;
+      if (tk->pt() < 1.0) continue;
+      if (reco::deltaR(mevent->calo_jet_eta[i], mevent->calo_jet_phi[i], tk->eta(), tk->phi()) > 0.4) continue;
+      const double dxybs = tk->dxy(bs);
+      const double rescaled_dxyerr = rs.rescaled_tk.dxyError();
+      const double rescaled_sigmadxybs = dxybs / rescaled_dxyerr;
+
+      if (dxybs < 0.1) jet_tks_nprompt++;
+      if (dxybs > 0.05 and rescaled_sigmadxybs > 5.0) jet_tks_ndisplaced++;
     }
-    
+
+    for (int j=0, je=mevent->hlt_calo_jet_eta.size(); j < je; j++) {
+      if (reco::deltaR(mevent->calo_jet_eta[i], mevent->calo_jet_phi[i], mevent->hlt_calo_jet_eta[j], mevent->hlt_calo_jet_phi[j]) < 0.4) matches_hlt_calojet = true;
+    }
+
+    // See if this calojet matches to one which passes the prompt track tag
+    for (int j=0, je=mevent->hlt_calo_jet_lowpt_fewprompt_pt.size(); j < je; j++) {
+      double test_jet_eta = mevent->hlt_calo_jet_lowpt_fewprompt_eta[j];
+      double test_jet_phi = mevent->hlt_calo_jet_lowpt_fewprompt_phi[j];
+      if (reco::deltaR(mevent->calo_jet_eta[i], mevent->calo_jet_phi[i], test_jet_eta, test_jet_phi) < 0.4) {
+        matches_promptk_jet = true;
+        break;
+      }
+    }
+
+    // See if this calojet matches to one which passes the prompt track tag
+    for (int j=0, je=mevent->hlt_calo_jet_lowpt_wdisptks_pt.size(); j < je; j++) {
+      double test_jet_eta = mevent->hlt_calo_jet_lowpt_wdisptks_eta[j];
+      double test_jet_phi = mevent->hlt_calo_jet_lowpt_wdisptks_phi[j];
+      if (reco::deltaR(mevent->calo_jet_eta[i], mevent->calo_jet_phi[i], test_jet_eta, test_jet_phi) < 0.4) {
+        matches_disptk_jet = true;
+        break;
+      }
+    }
+
+   
     tmp_track_helper.ndisp   = jet_tks_ndisplaced;
     tmp_track_helper.nprompt = jet_tks_nprompt; 
+    tmp_track_helper.matches_hlt_calo_jet    = matches_hlt_calojet;
+    tmp_track_helper.matches_hlt_nprompt_jet = matches_promptk_jet;
+    tmp_track_helper.matches_hlt_ndisp_jet   = matches_disptk_jet; 
+
     jet_track_helper.push_back(tmp_track_helper);
+    h_calojet_pt_nprmpt_tks->Fill(mevent->calo_jet_pt[i], jet_tks_nprompt, w);
+    h_calojet_pt_ndisp_tks->Fill(mevent->calo_jet_pt[i], jet_tks_ndisplaced, w);
+
+
   }
 
   // Get the second-highest pT calo jet within |eta| < 2.0 (for dd triggers)
-  // Also, the calo_jet_ht variable in Event.h considers ALL calojets in event; we only want those with |eta| < 2.5
-  // So let's calculate an alternative calo_ht
-  float scnd_leading_cent_calo_pt = -2.0;
-  float alt_calo_ht = 0.0;
+  // Also, the hlt_calo_jet_ht variable in Event.h considers ALL calojets in event; we only want those with |eta| < 2.5
+  float scnd_leading_cent_hlt_calo_pt = -2.0;
+  float alt_hlt_calo_ht = 0.0;
   bool  skip_first = true;
-  for (int i=0, ie=mevent->calo_jet_pt.size(); i < ie; i++) {
-    // Calculating alt_calo_ht
-    if (fabs(mevent->calo_jet_eta[i] < 2.5 and mevent->calo_jet_pt[i] > 40.0)) alt_calo_ht += mevent->calo_jet_pt[i];
+  for (int i=0, ie=mevent->hlt_calo_jet_pt.size(); i < ie; i++) {
+    // Calculating alt_hlt_calo_ht
+    if (fabs(mevent->hlt_calo_jet_eta[i]) < 2.5 and mevent->hlt_calo_jet_pt[i] > 40.0) alt_hlt_calo_ht += mevent->hlt_calo_jet_pt[i];
 
     // Getting second-leading central calojet pT
-    if (fabs(mevent->calo_jet_eta[i] > 2.0)) continue;     // skip if not a central jet
+    if (fabs(mevent->hlt_calo_jet_eta[i] > 2.0)) continue;     // skip if not a central jet
     if (skip_first) { skip_first = false; continue; }      // skip if this is the leading central calojet
-    else            { scnd_leading_cent_calo_pt = mevent->calo_jet_pt[i]; break; }
+    else            { scnd_leading_cent_hlt_calo_pt = mevent->hlt_calo_jet_pt[i]; break; }
   }
 
-  // First, sort jets by DECREASING number of displaced tracks, then record the second entry 
+  // Sort jets by DECREASING number of displaced tracks, then record the second entry 
   std::sort(jet_track_helper.begin(), jet_track_helper.end(), [](Jet_Track_Helper const &a, Jet_Track_Helper &b) -> bool{ return a.ndisp > b.ndisp; } );
   int second_most_disp_tks = jet_track_helper.size() >= 2 ? jet_track_helper[1].ndisp : -9;
 
-  // Now, sort jets by INCREASING number of prompt tracks, then record the second entry
+  // Sort jets by INCREASING number of prompt tracks, then record the second entry
   std::sort(jet_track_helper.begin(), jet_track_helper.end(), [](Jet_Track_Helper const &a, Jet_Track_Helper &b) -> bool{ return a.nprompt < b.nprompt; } );
   int second_least_prompt_tks = jet_track_helper.size() >= 2 ? jet_track_helper[1].nprompt : 999;
 
@@ -385,6 +462,8 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   std::sort(bsort_helpers.begin(), bsort_helpers.end(), [](Jet_BHelper const &a, Jet_BHelper &b) -> bool{ return a.bscore > b.bscore; } );
 
   nselectionjets = naltbjets;
+
+
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -548,14 +627,21 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   }
 
   // Now, the displaced dijet + displaced track filters:
-  h_dd_dtk_filter_00[DEN]->Fill(alt_calo_ht, w);
+  h_dd_dtk_filter_00[DEN]->Fill(alt_hlt_calo_ht, w);
   if (dd_dtk_filt_res[0]) {
-    h_dd_dtk_filter_00[NUM]->Fill(alt_calo_ht, w);
-    h_dd_dtk_filter_01[DEN]->Fill(scnd_leading_cent_calo_pt, w);
+    h_dd_dtk_filter_00[NUM]->Fill(alt_hlt_calo_ht, w);
+    h_dd_dtk_filter_01[DEN]->Fill(scnd_leading_cent_hlt_calo_pt, w);
 
     if (dd_dtk_filt_res[1]) {
-      h_dd_dtk_filter_01[NUM]->Fill(scnd_leading_cent_calo_pt, w);
+      h_dd_dtk_filter_01[NUM]->Fill(scnd_leading_cent_hlt_calo_pt, w);
       h_dd_dtk_filter_02[DEN]->Fill(second_least_prompt_tks, w);
+
+      for (auto helper : jet_track_helper) {
+        if (not helper.matches_hlt_calo_jet) continue;
+        
+        h_calojet_nprmpt_tks->Fill(helper.nprompt, w);
+        if (helper.matches_hlt_nprompt_jet) h_calojet_matched_nprmpt_tks->Fill(helper.nprompt, w);
+      }
 
       if (dd_dtk_filt_res[2]) {
         h_dd_dtk_filter_02[NUM]->Fill(second_least_prompt_tks, w);
@@ -564,6 +650,13 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
         if (dd_dtk_filt_res[3]) {
           h_dd_dtk_filter_03[NUM]->Fill(second_least_prompt_tks, w);
           h_dd_dtk_filter_04[DEN]->Fill(second_most_disp_tks, w);
+
+          for (auto helper : jet_track_helper) {
+            if (not helper.matches_hlt_calo_jet) continue;
+            
+            h_calojet_ndisp_tks->Fill(helper.ndisp, w);
+            if (helper.matches_hlt_ndisp_jet) h_calojet_matched_ndisp_tks->Fill(helper.ndisp, w);
+          }
 
           if (dd_dtk_filt_res[4]) {
             h_dd_dtk_filter_04[NUM]->Fill(second_most_disp_tks, w);
@@ -574,13 +667,13 @@ void MFVFilterHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   }
 
   // Now, the inclusive displaced dijet filters:
-  h_dd_inc_filter_00[DEN]->Fill(alt_calo_ht, w);
+  h_dd_inc_filter_00[DEN]->Fill(alt_hlt_calo_ht, w);
   if (dd_inc_filt_res[0]) {
-    h_dd_inc_filter_00[NUM]->Fill(alt_calo_ht, w);
-    h_dd_inc_filter_01[DEN]->Fill(scnd_leading_cent_calo_pt, w);
+    h_dd_inc_filter_00[NUM]->Fill(alt_hlt_calo_ht, w);
+    h_dd_inc_filter_01[DEN]->Fill(scnd_leading_cent_hlt_calo_pt, w);
 
     if (dd_inc_filt_res[1]) {
-      h_dd_inc_filter_01[NUM]->Fill(scnd_leading_cent_calo_pt, w);
+      h_dd_inc_filter_01[NUM]->Fill(scnd_leading_cent_hlt_calo_pt, w);
       h_dd_inc_filter_02[DEN]->Fill(second_least_prompt_tks, w);
 
       if (dd_inc_filt_res[2]) {
