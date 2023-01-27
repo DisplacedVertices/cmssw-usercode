@@ -9,7 +9,7 @@ settings.is_miniaod = True
 settings.run_n_tk_seeds = False
 settings.minitree_only = False
 settings.prepare_vis = False
-settings.keep_all = True
+settings.keep_all = False
 settings.keep_gen = False
 settings.keep_tk = False
 if use_btag_triggers :
@@ -23,9 +23,16 @@ else :
 process = ntuple_process(settings)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
 #input_files(process, '/eos/uscms/store/user/shogan/stop_bbarbbar_miniaod/mfv_stopbbarbbar_tau001000um_M1200_2017/miniaod_0.root') 
-input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/ggH_HToSSTodddd_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/2810000/E7A20FF5-DA78-ED47-8E67-942D97330917.root')
+#input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/ggH_HToSSTodddd_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/2810000/E7A20FF5-DA78-ED47-8E67-942D97330917.root')
 #sample_files(process, 'mfv_stopbbarbbar_tau001000um_M0800_2018', dataset, 1)
-max_events(process, 50)
+#input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/80000/16319EFC-7589-2841-BBBE-6E2B6BE2D981.root')
+#input_files(process, '/store/mc/RunIISummer20UL17MiniAOD/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v2/280000/CF9901F4-E55A-DA47-92BF-FF5655474366.root')
+#input_files(process, '/store/mc/RunIISummer20UL17MiniAOD/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v2/240000/CF9901F4-E55A-DA47-92BF-FF5655474366.root')
+#max_events(process, 500)
+#set_events(process,[(1,12059,31316583),(1,12334,32031295),(1,12414,32239128)])
+#set_events(process,[(1,96841,251495186),(1,96842,251498167),(1,96858,251539215),(1,96880,251596874),(1,96906,25166354),(1,96890,251623124),(1,96976,251844633)])  
+#set_events(process,[(1,12334,32031295),(1,12414,32239128)])
+#set_events(process,[(1,96494,250593956)])
 cmssw_from_argv(process)
 
 
@@ -35,10 +42,10 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if use_btag_triggers :
         #samples = pick_samples(dataset, qcd=False, ttbar=True, data=False) # no data currently; no sliced ttbar since inclusive is used
         #samples = Samples.mfv_signal_samples_2018 + Samples.mfv_stopdbardbar_samples_2018 + Samples.mfv_stopbbarbbar_samples_2018
-        #samples = [getattr(Samples, 'ggHToSSTobbbb_tau1mm_M55_2017')]   
+        #samples = [getattr(Samples, 'ggHToSSTobbbb_tau1mm_M55_2018')]   
         #samples = [getattr(Samples, 'qcdht0200_2017')] 
-        samples = Samples.HToSSTobbbb_samples_2017
-        #samples = Samples.ttbar_samples_2017
+        #samples = Samples.HToSSTobbbb_samples_2017
+        samples = Samples.ttbar_samples_2017
         #samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2018
     elif use_MET_triggers :
         samples = pick_samples(dataset, qcd=True, ttbar=False, data=False, leptonic=True, splitSUSY=True, Zvv=True, met=True, span_signal=False)

@@ -799,7 +799,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   if (extrapolate_ghost_tracks) {
 
 	  // alternative of ghost-track vertexing is utilizing tracks from b-jets to form ghost vertices
-	  edm::Handle<pat::JetCollection> jjets;
+	  std::cout << "MFVVertexer " << module_label << " run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
+          edm::Handle<pat::JetCollection> jjets;
 	  event.getByToken(ghost_track_jet_token, jjets);
 	  edm::Handle<reco::TrackCollection> tracks;
 	  event.getByToken(tracks_token, tracks);
@@ -824,21 +825,31 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
 			  if (match_track_jet(ttk.track(), (*jjets)[ijet], *jjets, ijet)) {
 				  n_match_seed_tracks++;
+				  const double dxybs = ttk.track().dxy(*beamspot);
+				  const auto rs = track_rescaler.scale(ttk.track());
+				  const double rescaled_dxyerr = rs.rescaled_tk.dxyError();
+				  const double rescaled_sigmadxybs = dxybs / rescaled_dxyerr;
 			  }
 		  }
 
-		  bool is_extra_bjet = (n_match_seed_tracks >= 1);
+		  bool is_extra_bjet = false; //(n_match_seed_tracks >= 1);
 
 
 		  if (is_loose_btagged || is_extra_bjet) {
 			  count_bjet++;
 
 			  // matching any tracks 
-
-
+			  
+                          if (is_loose_btagged)
+				  std::cout << "  jet's type  : loose-btagged" << " jet idx : " << ijet << " jet's pT : " << jet.pt() << " jet's eta : " << jet.eta() << " jet's phi : " << jet.phi() << std::endl;
+			  else
+				  std::cout << "  jet's type  : extra jet" << " jet idx : " << ijet << " jet's pT : " << jet.pt() << " jet's eta : " << jet.eta() << " jet's phi : " << jet.phi() << std::endl;
+                          
+		  }
+		  else{
 			  for (size_t j = 0; j < all_tracks.size(); ++j) {
 				  const reco::TransientTrack& ttk = all_tracks[j];
-
+				  const reco::TrackBaseRef& tk(ttk.trackBaseRef());
 				  if (match_track_jet(ttk.track(), (*jjets)[ijet], *jjets, ijet)) {
 
 					  const double pt = ttk.track().pt();
@@ -2023,7 +2034,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 		  }
 	  }
   }
+  */
 
+  std::cout << "number of vertices : " << vertices->size() << std::endl;
   for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
 
 	  // setup track_sets
@@ -2031,7 +2044,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 	  tracks[0] = vertex_track_set(*v[0]);
 
 	  h_output_vertex_ntrack->Fill(v[0]->nTracks());
-	  if (v[0]->nTracks() < 3) continue;
+	  //if (v[0]->nTracks() < 3) continue;
+	  std::cout << "  vtx's ntrack : " << v[0]->nTracks() << std::endl;
 	  Measurement1D dBV_Meas1D = vertex_dist_2d.distance(*v[0], fake_bs_vtx);
 	  double dBV = dBV_Meas1D.value();
 	  double bs2derr = dBV_Meas1D.error();
@@ -2040,7 +2054,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 	  double v0y = v[0]->y() - bsy;
 	  //double v0z = v[0]->z() - bsz;
 	  double phi0 = atan2(v0y, v0x);
-
+          std::cout << "  vtx's dBV : " << dBV << std::endl;
+	  std::cout << "  vtx's bs2derr : " << bs2derr << std::endl;
+	  std::cout << "  vtx's chi2/nof : " << v[0]->normalizedChi2() << std::endl;
 	  h_output_at_least_3trk_vertex_normchi2->Fill(v[0]->normalizedChi2());
 	  h_2D_output_at_least_3trk_vertex_normchi2_ntrack->Fill(v[0]->normalizedChi2(), v[0]->nTracks());
 	  h_2D_output_at_least_3trk_vertex_normchi2_bs2derr->Fill(v[0]->normalizedChi2(), bs2derr);
@@ -2050,7 +2066,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 		  reco::TransientTrack seed_track;
 		  seed_track = tt_builder->build(*it.operator*());
 		  std::pair<bool, Measurement1D> tk_vtx_dist = track_dist(seed_track, *v[0]);
-
+		  const reco::TrackBaseRef& tk(seed_track.trackBaseRef());
 		  h_output_at_least_3trk_vertex_track_miss_dist->Fill(tk_vtx_dist.second.value());
 		  h_output_at_least_3trk_vertex_track_miss_dist_significance->Fill(tk_vtx_dist.second.significance());
 	  }
@@ -2058,6 +2074,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 	  h_output_at_least_3trk_vertex_dBV->Fill(dBV);
 	  h_output_at_least_3trk_vertex_bs2derr->Fill(bs2derr);
 
+	  /*
 	  double dist3d_vtx_match_bdecay_by_bquark = 0.0;
 	  double dist3d_vtx_match_llpdecay_by_bquark = 0.0;
 	  double mindPhi_bquark = M_PI;
@@ -2094,9 +2111,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 	  h_output_at_least_3trk_vertex_mindPhi_bquark->Fill(mindPhi_bquark);
 	  h_output_at_least_3trk_all_vertex_dist3dgenb->Fill(dist3d_vtx_match_bdecay_by_bquark);
 	  h_output_at_least_3trk_all_vertex_dist3dgenllp->Fill(dist3d_vtx_match_llpdecay_by_bquark);
-
+	  */
   }
-  */
+  
 
   finish(event, seed_tracks, all_tracks, std::move(vertices), std::move(vpeffs), vpeffs_tracks);
 }

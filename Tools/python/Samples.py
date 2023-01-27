@@ -713,6 +713,9 @@ HToSSTodddd_samples_2018 = [
     MCSample('ggHToSSTodddd_tau1mm_M40_2018', '/ggH_HToSSTodddd_MH-125_MS-40_ctauS-1_pT75_TuneCP5_13TeV-powheg-pythia8/RunIIAutumn18MiniAOD-102X_upgrade2018_realistic_v15-v1/MINIAODSIM', 181513),
 ]
 
+HToSSTobbbb_samples_2018 = [
+    MCSample('ggHToSSTobbbb_tau1mm_M55_2018', '/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/RunIISummer20UL18MiniAODv2-106X_upgrade2018_realistic_v16_L1v1-v2/MINIAODSIM', 500000),
+    ]
 all_signal_samples_2018 = mfv_signal_samples_2018 + mfv_stopdbardbar_samples_2018 + mfv_stopbbarbbar_samples_2018 + mfv_splitSUSY_samples_2018 + HToSSTodddd_samples_2018 
 ########
 # data
@@ -955,18 +958,21 @@ for sample in mfv_signal_samples_2016 + mfv_stopdbardbar_samples_2016 + mfv_stop
 for sample in mfv_signal_samples_2017 + mfv_stopdbardbar_samples_2017 + mfv_stopbbarbbar_samples_2017 + HToSSTobbbb_samples_2017:
     sample.add_dataset('miniaod', sample.dataset, sample.nevents_orig)
 
-for sample in mfv_signal_samples_2018 + mfv_stopdbardbar_samples_2018 + mfv_stopbbarbbar_samples_2018 + HToSSTodddd_samples_2018:
+for sample in mfv_signal_samples_2018 + mfv_stopdbardbar_samples_2018 + mfv_stopbbarbbar_samples_2018 + HToSSTobbbb_samples_2018:
     sample.add_dataset('miniaod', sample.dataset, sample.nevents_orig)
 
 ########
 # ntuples
+#ttbar_2017.add_dataset("ntupleulgvtxbjetv29bm")
 #ttbar_2017.add_dataset('ntupleulgvtxbjetv43bm', '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/pekotamn-NtupleULGvtxBjetV43Bm_20162-bc8ac37be8b67f00883c3454c34beb70/USER', 14080529) 
-#ttbar_2017.add_dataset('ntupleulgvtxbjetv29bm', '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/pekotamn-NtupleULGvtxBjetV29Bm_20162-6aca0b1df8c5c42596ef55dba218cb02/USER', 1559977)   
-ggHToSSTobbbb_tau10mm_M55_2017.add_dataset('ntupleulgvtxbjetv29bm', '/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/pekotamn-NtupleULGvtxBjetV29Bm_NoEF_20162-449267eab6323f6133ead26c6761807e/USER', 504650)
-#ggHToSSTobbbb_tau100mm_M55_2017.add_dataset('ntupleulgvtxbjetv29bm', '/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-100_TuneCP5_13TeV-powheg-pythia8/pekotamn-NtupleULGvtxBjetV29Bm_NoEF_20162-afb23aaf6c21f1b7221fd049485f2a0a/USER', 525450)
+ttbar_2017.add_dataset("ntupleulgvtxbjetv41evtdisplbm") 
+#ttbar_2017.add_dataset("ntupleulgvtxbjet17v43bm")
+#ggHToSSTobbbb_tau10mm_M55_2017.add_dataset('ntupleulgvtxbjetv29bm', '/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/pekotamn-NtupleULGvtxBjetV29Bm_NoEF_2017-d852a66a4fd177f767a70aacd96a492b/USER', 504650)
+#ggHToSSTobbbb_tau10mm_M55_2017.add_dataset('ntupleulgvtxbjet17v43bm', '/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/pekotamn-NtupleULGvtxBjet17V43Bm_NoEF_2017-adb15984fb5ee9eac876de33d8d08ae1/USER', 504650)
 #ggHToSSTobbbb_tau10mm_M55_2017.add_dataset('ntupleulgvtxbjetv43bm', '/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/pekotamn-NtupleULGvtxBjetV43Bm_NoEF_20162-86e39cc89456aca2fa62605abe7e671a/USER', 504650)
 #ggHToSSTobbbb_tau100mm_M55_2017.add_dataset('ntupleulgvtxbjetv43bm', '/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-100_TuneCP5_13TeV-powheg-pythia8/pekotamn-NtupleULGvtxBjetV43Bm_NoEF_20162-ed7ab65cda3d5a054dc825aa39da4016/USER', 525450)
 ########
+#ggHToSSTobbbb_tau10mm_M55_2017.add_dataset('ntupleulgvtxbjetv41bm', '/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/pekotamn-NtupleULGvtxBjetV41Bm_NoEF_2017-43d8cd0c91a49811f8ddd795cc932875/USER', 504650) 
 
 for x in all_signal_samples_2017 + all_signal_samples_2018 + qcd_samples_2017 + qcd_samples_2018 + ttbar_samples_2017 + ttbar_samples_2018:
     x.add_dataset('ntupleulv1bm')

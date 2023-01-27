@@ -5,7 +5,9 @@ do_track = False # this can onlky be used for ntuple with keep_tk=True
 
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_MET_triggers
 #sample_files(process, 'mfv_neu_tau000300um_M0300_2017' if is_mc else 'JetHT2017B', dataset, 1)
-sample_files(process, 'ggHToSSTobbbb_tau10mm_M55_2017', dataset, 1) 
+#sample_files(process, 'ttbar_2017', dataset, 485) 
+input_files(process,'/store/user/pkotamni/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleULGvtxBjetV41Bm_PrepareVis_NoEF_2017/230126_231919/0000/ntuple_100.root')
+#input_files(process,'ntuple.root')
 max_events(process, 5000) 
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
@@ -202,11 +204,11 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if use_btag_triggers :
         #samples = Samples.mfv_signal_samples_2017
         #samples = Samples.mfv_stopdbardbar_samples_2017
-        #samples = Samples.ttbar_samples_2017 
+        samples = Samples.ttbar_samples_2017 
         #samples = Samples.mfv_stopbbarbbar_samples_2018
         #samples = Samples.qcd_samples_2017 + Samples.ttbar_samples_2017
         #samples = Samples.HToSSTobbbb_samples_2017
-        samples = [getattr(Samples, 'ggHToSSTobbbb_tau10mm_M55_2017')]  
+        #samples = [getattr(Samples, 'ggHToSSTobbbb_tau10mm_M55_2017')]  
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), half_mc_modifier())
     elif use_MET_triggers:
         samples = pick_samples(dataset, qcd=True, ttbar=False, data=False, leptonic=True, splitSUSY=True, Zvv=True, met=True, span_signal=False)
@@ -218,7 +220,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
 
-    cs = CondorSubmitter('Histos' + version,
+    cs = CondorSubmitter('HistosEvtDispl2' + version,
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,

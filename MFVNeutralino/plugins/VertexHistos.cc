@@ -449,6 +449,9 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   }
   h_sv_nsv_nmatchjet->Fill(nmatched_0+nmatched_1, nsv, w);
 
+  std::cout << " run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
+  
+  int count_quality_sv = 0;
   for (int isv = 0; isv < nsv; ++isv) {
     const MFVVertexAux& aux = auxes->at(isv);
     const int ntracks = aux.ntracks();
@@ -819,6 +822,21 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
     }
 
     fill(h_sv, isv, v, w);
+    if (ntracks >= 5 && mag(aux.x - mevent->bsx_at_z(aux.z), aux.y - mevent->bsy_at_z(aux.z)) > 0.01 && aux.rescale_bs2derr < 0.0025)
+        count_quality_sv++;
+  }
+
+  if (count_quality_sv >= 2) {
+	for (int isv = 0; isv < nsv; ++isv) {
+		const MFVVertexAux& aux = auxes->at(isv);
+		const int ntracks = aux.ntracks();
+		if (ntracks >= 5 && mag(aux.x - mevent->bsx_at_z(aux.z), aux.y - mevent->bsy_at_z(aux.z)) > 0.01 && aux.rescale_bs2derr < 0.0025) {
+                    std::cout << "  vtx's ntrack : " << ntracks << std::endl;
+		    std::cout << "  vtx's dBV : " << mag(aux.x - mevent->bsx_at_z(aux.z), aux.y - mevent->bsy_at_z(aux.z)) << std::endl;
+		    std::cout << "  vtx's bs2derr : " << aux.rescale_bs2derr << std::endl;
+                }
+
+	}
   }
 
   //////////////////////////////////////////////////////////////////////
