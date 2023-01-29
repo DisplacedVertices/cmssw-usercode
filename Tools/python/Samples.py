@@ -965,7 +965,7 @@ for sample in mfv_signal_samples_2018 + mfv_stopdbardbar_samples_2018 + mfv_stop
 # ntuples
 #ttbar_2017.add_dataset("ntupleulgvtxbjetv29bm")
 #ttbar_2017.add_dataset('ntupleulgvtxbjetv43bm', '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/pekotamn-NtupleULGvtxBjetV43Bm_20162-bc8ac37be8b67f00883c3454c34beb70/USER', 14080529) 
-ttbar_2017.add_dataset("ntupleulgvtxbjetv41evtdisplbm") 
+ttbar_2017.add_dataset("ntupleulgvtxbjetv41bm") 
 #ttbar_2017.add_dataset("ntupleulgvtxbjet17v43bm")
 #ggHToSSTobbbb_tau10mm_M55_2017.add_dataset('ntupleulgvtxbjetv29bm', '/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/pekotamn-NtupleULGvtxBjetV29Bm_NoEF_2017-d852a66a4fd177f767a70aacd96a492b/USER', 504650)
 #ggHToSSTobbbb_tau10mm_M55_2017.add_dataset('ntupleulgvtxbjet17v43bm', '/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-10_TuneCP5_13TeV-powheg-pythia8/pekotamn-NtupleULGvtxBjet17V43Bm_NoEF_2017-adb15984fb5ee9eac876de33d8d08ae1/USER', 504650)

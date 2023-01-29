@@ -1,7 +1,7 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version_ = 'ULGvtxBjetV41EvtDispl'
+ntuple_version_ = 'ULGvtxBjetV41'
 lsp_id = -1 # should do that in a smarter way would be -1 if not MET
 use_btag_triggers = True
 use_MET_triggers = False
