@@ -204,11 +204,11 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     if use_btag_triggers :
         #samples = Samples.mfv_signal_samples_2017
         #samples = Samples.mfv_stopdbardbar_samples_2017
-        samples = Samples.ttbar_samples_2017 
+        #samples = Samples.ttbar_samples_2017 
         #samples = Samples.mfv_stopbbarbbar_samples_2018
         #samples = Samples.qcd_samples_2017 + Samples.ttbar_samples_2017
         #samples = Samples.HToSSTobbbb_samples_2017
-        #samples = [getattr(Samples, 'ggHToSSTobbbb_tau10mm_M55_2017')]  
+        samples = [getattr(Samples, 'ggHToSSTobbbb_tau10mm_M55_2017')]  
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), half_mc_modifier())
     elif use_MET_triggers:
         samples = pick_samples(dataset, qcd=True, ttbar=False, data=False, leptonic=True, splitSUSY=True, Zvv=True, met=True, span_signal=False)
