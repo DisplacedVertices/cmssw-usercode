@@ -8,8 +8,8 @@ settings.is_miniaod = True
 
 settings.run_n_tk_seeds = False
 settings.minitree_only = False
-settings.prepare_vis = True
-settings.keep_all = False
+settings.prepare_vis = False
+settings.keep_all = True
 settings.keep_gen = False
 settings.keep_tk = False
 if use_btag_triggers :
@@ -39,8 +39,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         #samples = Samples.mfv_signal_samples_2018 + Samples.mfv_stopdbardbar_samples_2018 + Samples.mfv_stopbbarbbar_samples_2018
         #samples = [getattr(Samples, 'ggHToSSTobbbb_tau1mm_M55_2018')]   
         #samples = [getattr(Samples, 'qcdht0200_2017')] 
-        #samples = Samples.HToSSTobbbb_samples_2017
-        samples = Samples.ttbar_samples_2017
+        samples = Samples.HToSSTobbbb_samples_2018
+        #samples = Samples.ttbar_samples_2017
         #samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2018
     elif use_MET_triggers :
         samples = pick_samples(dataset, qcd=True, ttbar=False, data=False, leptonic=True, splitSUSY=True, Zvv=True, met=True, span_signal=False)
