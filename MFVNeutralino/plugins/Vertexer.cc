@@ -825,10 +825,6 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
 			  if (match_track_jet(ttk.track(), (*jjets)[ijet], *jjets, ijet)) {
 				  n_match_seed_tracks++;
-				  const double dxybs = ttk.track().dxy(*beamspot);
-				  const auto rs = track_rescaler.scale(ttk.track());
-				  const double rescaled_dxyerr = rs.rescaled_tk.dxyError();
-				  const double rescaled_sigmadxybs = dxybs / rescaled_dxyerr;
 			  }
 		  }
 
@@ -845,11 +841,10 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 			  else
 				  std::cout << "  jet's type  : extra jet" << " jet idx : " << ijet << " jet's pT : " << jet.pt() << " jet's eta : " << jet.eta() << " jet's phi : " << jet.phi() << std::endl;
                           
-		  }
-		  else{
+
 			  for (size_t j = 0; j < all_tracks.size(); ++j) {
 				  const reco::TransientTrack& ttk = all_tracks[j];
-				  const reco::TrackBaseRef& tk(ttk.trackBaseRef());
+
 				  if (match_track_jet(ttk.track(), (*jjets)[ijet], *jjets, ijet)) {
 
 					  const double pt = ttk.track().pt();
