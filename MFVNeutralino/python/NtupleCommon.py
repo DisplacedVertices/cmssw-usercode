@@ -1,7 +1,7 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version_ = 'GvtxBjetV43'
+ntuple_version_ = 'GvtxBjetV29'
 use_btag_triggers = True
 if use_btag_triggers : 
     ntuple_version_ += "A" # for "Btag triggers"; also includes DisplacedDijet triggers

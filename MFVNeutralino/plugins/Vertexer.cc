@@ -827,7 +827,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 			  }
 		  }
 
-		  bool is_extra_bjet = (n_match_seed_tracks >= 1);
+		  bool is_extra_bjet = false; //(n_match_seed_tracks >= 1);
 
 
 		  if (is_loose_btagged || is_extra_bjet) {
