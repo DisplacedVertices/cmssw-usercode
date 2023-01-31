@@ -2,6 +2,7 @@
 #include "DataFormats/JetReco/interface/PFJetCollection.h"
 #include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
+#include "RecoEgamma/EgammaTools/interface/EffectiveAreas.h"
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -40,13 +41,19 @@ class MFVVertexAuxProducer : public edm::EDProducer {
   std::unique_ptr<KalmanVertexFitter> kv_reco;
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertex_token;
-  const edm::EDGetTokenT<pat::MuonCollection> muons_token;
-  const edm::EDGetTokenT<pat::ElectronCollection> electrons_token;
   const edm::EDGetTokenT<std::vector<double> > gen_vertices_token;
   const edm::EDGetTokenT<reco::VertexCollection> vertex_token;
   const std::string sv_to_jets_src;
   edm::EDGetTokenT<mfv::JetVertexAssociation> sv_to_jets_token[mfv::NJetsByUse];
   jmt::TrackRefGetter track_ref_getter;
+  const std::string sv_to_muons_src;
+  edm::EDGetTokenT<mfv::MuonVertexAssociation> sv_to_muons_token;
+  const std::string sv_to_ele_src;
+  edm::EDGetTokenT<mfv::ElectronVertexAssociation> sv_to_ele_token;
+  const edm::EDGetTokenT<pat::MuonCollection> muons_token;
+  const edm::EDGetTokenT<pat::ElectronCollection> electrons_token;
+  const edm::EDGetTokenT<double> rho_token;
+  EffectiveAreas electron_effective_areas;
   const mfv::VertexAuxSorter sorter;
   const bool verbose;
   const std::string module_label;
@@ -55,14 +62,13 @@ class MFVVertexAuxProducer : public edm::EDProducer {
   VertexDistance3D distcalc_3d;
   Measurement1D gen_dist(const reco::Vertex&, const std::vector<double>& gen, const bool use3d);
   Measurement1D miss_dist(const reco::Vertex&, const reco::Vertex&, const math::XYZTLorentzVector& mom);
+
 };
 
 MFVVertexAuxProducer::MFVVertexAuxProducer(const edm::ParameterSet& cfg)
   : kv_reco(new KalmanVertexFitter(cfg.getParameter<edm::ParameterSet>("kvr_params"), cfg.getParameter<edm::ParameterSet>("kvr_params").getParameter<bool>("doSmoothing"))),
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     primary_vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertex_src"))),
-    muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
-    electrons_token(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("electrons_src"))),
     gen_vertices_token(consumes<std::vector<double> >(cfg.getParameter<edm::InputTag>("gen_vertices_src"))),
     vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     sv_to_jets_src(cfg.getParameter<std::string>("sv_to_jets_src")),
@@ -70,12 +76,21 @@ MFVVertexAuxProducer::MFVVertexAuxProducer(const edm::ParameterSet& cfg)
     track_ref_getter(cfg.getParameter<std::string>("@module_label"),
                          cfg.getParameter<edm::ParameterSet>("track_ref_getter"),
                          consumesCollector()),
+    sv_to_muons_src(cfg.getParameter<std::string>("sv_to_muons_src")),
+    sv_to_ele_src(cfg.getParameter<std::string>("sv_to_ele_src")),
+    muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
+    electrons_token(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("electrons_src"))),
+    rho_token(consumes<double>(cfg.getParameter<edm::InputTag>("rho_src"))),
+    electron_effective_areas(cfg.getParameter<edm::FileInPath>("electron_effective_areas").fullPath()),
     sorter(cfg.getParameter<std::string>("sort_by")),
     verbose(cfg.getUntrackedParameter<bool>("verbose", false)),
     module_label(cfg.getParameter<std::string>("@module_label"))
 {
   for (int i = 0; i < mfv::NJetsByUse; ++i)
     sv_to_jets_token[i] = consumes<mfv::JetVertexAssociation>(edm::InputTag(sv_to_jets_src, mfv::jetsby_names[i])); // JMTBAD yuck, rethink
+
+  sv_to_muons_token = consumes<mfv::MuonVertexAssociation>(edm::InputTag(sv_to_muons_src, mfv::muonsby_name));
+  sv_to_ele_token = consumes<mfv::ElectronVertexAssociation>(edm::InputTag(sv_to_ele_src, mfv::electronsby_name));
 
   produces<std::vector<MFVVertexAux> >();
 }
@@ -146,12 +161,24 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
   }
 
   //////////////////////////////////////////////////////////////////////
+ const bool use_sv_to_muons = sv_to_muons_src != "dummy";
+  edm::Handle<mfv::MuonVertexAssociation> sv_to_muons;
+  if (use_sv_to_muons)
+    event.getByToken(sv_to_muons_token, sv_to_muons);
+
+  const bool use_sv_to_ele = sv_to_ele_src != "dummy";
+  edm::Handle<mfv::ElectronVertexAssociation> sv_to_ele;
+  if (use_sv_to_ele)
+    event.getByToken(sv_to_ele_token, sv_to_ele);
 
   edm::Handle<pat::MuonCollection> muons;
   event.getByToken(muons_token, muons);
-
+  
   edm::Handle<pat::ElectronCollection> electrons;
   event.getByToken(electrons_token, electrons);
+
+  edm::Handle<double> rho;
+  event.getByToken(rho_token, rho);
 
   //////////////////////////////////////////////////////////////////////
 
@@ -181,8 +208,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     const reco::VertexRef svref(secondary_vertices, isv);
     MFVVertexAux& aux = auxes->at(isv);
     aux.which = int2uchar(isv);
-    aux.which_lep.clear();
-
+    
     aux.x = sv.x();
     aux.y = sv.y();
     aux.z = sv.z();
@@ -288,6 +314,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     std::vector<math::XYZTLorentzVector> p4s(mfv::NMomenta);
     p4s[mfv::PTracksOnly] = p4s[mfv::PJetsByNtracks] = p4s[mfv::PTracksPlusJetsByNtracks] = sv.p4();
 
+ 
     for (int i = 0; i < mfv::NJetsByUse; ++i)
       aux.njets[i] = 0;
 
@@ -372,6 +399,150 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
         aux.costhjetmomvtxdisprms(-2);
       }
     }
+    aux.nelectrons = 0;
+    aux.nmuons = 0;
+    aux.nleptons = 0;
+
+    //setting up everything for calculating transverse impact parameter between lepton and sv 
+    std::pair<bool, Measurement1D> mu_vtx_dist;
+    std::pair<bool, Measurement1D> ele_vtx_dist;
+    std::vector<reco::TransientTrack> mu_ttracks;
+    std::vector<reco::TransientTrack> ele_ttracks;
+    std::pair<bool, Measurement1D> matchedmu_vtx_dist;
+    std::pair<bool, Measurement1D> matchedele_vtx_dist;
+    std::vector<reco::TransientTrack> matchedmu_ttracks;
+    std::vector<reco::TransientTrack> matchedele_ttracks;
+    
+    if (use_sv_to_ele) {
+      const int nele = sv_to_ele->numberOfAssociations(svref);
+      aux.nelectrons = nele;
+      aux.nleptons = nele;
+      if (verbose) printf("    nele %i:\n", nele);
+      //getting all info from matched electron; including transverse IP 
+      if (nele > 0) {
+        const edm::RefVector<pat::ElectronCollection>& electronref = (*sv_to_ele)[svref];
+        for (int iel = 0; iel < nele; ++iel) {
+          reco::GsfTrackRef etk = electronref[iel]->gsfTrack();
+          if (!etk.isNull()) {
+            matchedele_ttracks.push_back(tt_builder->build(etk));    
+          
+            const auto pfIso = electronref[iel]->pfIsolationVariables();
+            const float eA = electron_effective_areas.getEffectiveArea(fabs(electronref[iel]->superCluster()->eta()));
+            const float iso = (pfIso.sumChargedHadronPt + std::max(0., pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - *rho*eA)) / electronref[iel]->pt();
+
+
+            bool isVetoEl = electronref[iel]->electronID("cutBasedElectronID-Fall17-94X-V2-veto");
+            bool isLooseEl = electronref[iel]->electronID("cutBasedElectronID-Fall17-94X-V2-loose");
+            bool isMedEl = electronref[iel]->electronID("cutBasedElectronID-Fall17-94X-V2-medium");
+            bool isTightEl = electronref[iel]->electronID("cutBasedElectronID-Fall17-94X-V2-tight");
+
+            aux.electron_iso.push_back(iso);
+            std::vector<int> eleID;
+            eleID.push_back(isVetoEl);
+            eleID.push_back(isLooseEl);
+            eleID.push_back(isMedEl);
+            eleID.push_back(isTightEl);
+            
+            aux.electron_ID.push_back(eleID);
+
+            aux.electron_pt.push_back(electronref[iel]->pt());
+            aux.electron_eta.push_back(electronref[iel]->eta());
+            aux.electron_phi.push_back(electronref[iel]->phi());
+            aux.electron_x.push_back(etk->vx());
+            aux.electron_y.push_back(etk->vy());
+            aux.electron_z.push_back(etk->vz());
+            if (primary_vertex != 0) {
+              aux.electron_dxy.push_back(etk->dxy(primary_vertex->position()));
+              aux.electron_dz.push_back(etk->dz(primary_vertex->position()));
+            }
+            aux.electron_dxybs.push_back(etk->dxy(beamspot->position()));
+            aux.electron_dxyerr.push_back(etk->dxyError());
+            aux.electron_dzerr.push_back(etk->dzError());
+          }
+        }
+      }
+      //now also getting transverse IP from all electrons (not just matched)
+      for (const pat::Electron& electron : *electrons) {
+        reco::GsfTrackRef etk = electron.gsfTrack();
+        if (!etk.isNull()) {
+          ele_ttracks.push_back(tt_builder->build(etk));
+        }
+      }
+    }
+
+    if (use_sv_to_muons) {
+      const int nmu = sv_to_muons->numberOfAssociations(svref);
+      aux.nmuons = nmu;
+      aux.nleptons += nmu;
+      if (verbose) printf("    nmu %i:\n", nmu);
+      if (nmu > 0) {
+        const edm::RefVector<pat::MuonCollection>& muonref = (*sv_to_muons)[svref];
+        for (int imu = 0; imu < nmu; ++imu) {
+          reco::TrackRef mtk = muonref[imu]->innerTrack();
+          if (!mtk.isNull()) {
+            matchedmu_ttracks.push_back(tt_builder->build(mtk));    
+          
+            const float iso = (muonref[imu]->pfIsolationR04().sumChargedHadronPt + std::max(0., muonref[imu]->pfIsolationR04().sumNeutralHadronEt + muonref[imu]->pfIsolationR04().sumPhotonEt -0.5*muonref[imu]->pfIsolationR04().sumPUPt))/muonref[imu]->pt();
+            aux.muon_iso.push_back(iso);
+
+            bool isLooseMuon = muonref[imu]->passed(reco::Muon::CutBasedIdLoose);
+            bool isMedMuon = muonref[imu]->passed(reco::Muon::CutBasedIdMedium);
+            bool isTightMuon = muonref[imu]->passed(reco::Muon::CutBasedIdTight);
+
+            std::vector<int> muID;
+            muID.push_back(isLooseMuon);
+            muID.push_back(isMedMuon);
+            muID.push_back(isTightMuon);
+
+            aux.muon_ID.push_back(muID);
+
+            aux.muon_pt.push_back(muonref[imu]->pt());
+            aux.muon_eta.push_back(muonref[imu]->eta());
+            aux.muon_phi.push_back(muonref[imu]->phi());
+            aux.muon_x.push_back(mtk->vx());
+            aux.muon_y.push_back(mtk->vy());
+            aux.muon_z.push_back(mtk->vz());
+            if (primary_vertex != 0) {
+              aux.muon_dxy.push_back(mtk->dxy(primary_vertex->position()));
+              aux.muon_dz.push_back(mtk->dz(primary_vertex->position()));
+            }
+            aux.muon_dxybs.push_back(mtk->dxy(beamspot->position()));
+            aux.muon_dxyerr.push_back(mtk->dxyError());
+            aux.muon_dzerr.push_back(mtk->dzError());
+          }
+        }
+      }
+      for (const pat::Muon& muon : *muons) {
+        reco::TrackRef mtk = muon.innerTrack();
+        if (!mtk.isNull()) {
+          mu_ttracks.push_back(tt_builder->build(mtk));
+        }
+      }
+    }
+    for (auto ettk : ele_ttracks) {
+      ele_vtx_dist = IPTools::absoluteTransverseImpactParameter(ettk, sv);
+      aux.elevtxtip.push_back(ele_vtx_dist.second.value());
+      aux.elevtxtiperr.push_back(ele_vtx_dist.second.error());
+      aux.elevtxtipsig.push_back(ele_vtx_dist.second.significance());
+    }
+    for (auto mettk : matchedele_ttracks ) {
+      matchedele_vtx_dist = IPTools::absoluteTransverseImpactParameter(mettk, sv);
+      aux.matchedelevtxtip.push_back(matchedele_vtx_dist.second.value());
+      aux.matchedelevtxtiperr.push_back(matchedele_vtx_dist.second.error());
+      aux.matchedelevtxtipsig.push_back(matchedele_vtx_dist.second.significance());
+    }
+    for (auto mttk : mu_ttracks ) {
+      mu_vtx_dist = IPTools::absoluteTransverseImpactParameter(mttk, sv);
+      aux.muvtxtip.push_back(mu_vtx_dist.second.value());
+      aux.muvtxtiperr.push_back(mu_vtx_dist.second.error());
+      aux.muvtxtipsig.push_back(mu_vtx_dist.second.significance());
+    }
+    for (auto mmttk : matchedmu_ttracks ) {
+      matchedmu_vtx_dist = IPTools::absoluteTransverseImpactParameter(mmttk, sv);
+      aux.matchedmuvtxtip.push_back(matchedmu_vtx_dist.second.value());
+      aux.matchedmuvtxtiperr.push_back(matchedmu_vtx_dist.second.error());
+      aux.matchedmuvtxtipsig.push_back(matchedmu_vtx_dist.second.significance());
+    }
 
     if (verbose) printf("    momenta:\n");
     for (int i = 0; i < mfv::NMomenta; ++i) {
@@ -404,17 +575,7 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       if (sv.trackWeight(tri) < mfv::track_vertex_weight_min)
         continue;
 
-      // assert(muons->size() <= 128);
-      // assert(electrons->size() <= 128);
-      // for (size_t i = 0, ie = muons->size(); i < ie; ++i)
-      //   if (muons->at(i).track() == trref)
-      //     aux.which_lep.push_back(i);
-      // if (aux.which_lep.size() == 0) // if a muon matched, don't check for electrons
-      //   for (size_t i = 0, ie = electrons->size(); i < ie; ++i)
-      //     if (electrons->at(i).closestCtfTrackRef() == trref)
-      //       aux.which_lep.push_back(i | (1<<7));
-
-      // costhtkmomvtxdisps.push_back(jmt::costh3(tri->momentum(), pv2sv));
+      costhtkmomvtxdisps.push_back(jmt::costh3(tri->momentum(), pv2sv));
 
       const uchar nhitsbehind = 0; //int2uchar(tracker_extents.numHitsBehind(tri->hitPattern(), sv_r, sv_z));
 

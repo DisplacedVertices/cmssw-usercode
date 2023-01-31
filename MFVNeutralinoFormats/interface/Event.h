@@ -451,6 +451,14 @@ struct MFVEvent {
   int nelectrons(float min_electron_pt) const { return std::count_if(electron_pt.begin(), electron_pt.end(),
                                                            [min_electron_pt](float d) { return d > min_electron_pt; }); }
 
+  float nth_ele_pt (int w) const { return nelectrons() > w ? electron_pt [w] :   -1.f; }
+  float nth_ele_eta(int w) const { return nelectrons() > w ? electron_eta[w] : -999.f; }
+  float nth_ele_phi(int w) const { return nelectrons() > w ? electron_phi[w] : -999.f; }
+
+  float nth_mu_pt (int w) const { return nmuons() > w ? muon_pt [w] :   -1.f; }
+  float nth_mu_eta(int w) const { return nmuons() > w ? muon_eta[w] : -999.f; }
+  float nth_mu_phi(int w) const { return nmuons() > w ? muon_phi[w] : -999.f; }
+
   /////////////////////////////////////////////////////
 
   size_t n_vertex_seed_tracks() const { return vertex_seed_track_chi2dof.size(); }

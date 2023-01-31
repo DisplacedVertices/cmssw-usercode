@@ -7,6 +7,7 @@
 #include "DataFormats/TrackReco/interface/TrackBase.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "JMTucker/MFVNeutralinoFormats/interface/JetVertexAssociation.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/LeptonVertexAssociation.h"
 
 struct MFVVertexAux {
   typedef unsigned char uchar;
@@ -53,10 +54,9 @@ struct MFVVertexAux {
       costhmombs_[i] = costhmompv2d_[i] = costhmompv3d_[i] = 0;
       pt[i] = eta[i] = phi[i] = mass[i] = missdistpv[i] = missdistpverr[i] = 0;
     }
+    nmuons = 0;
+    nelectrons = 0;
   }
-
-  uchar which;
-  std::vector<uchar> which_lep; // electrons have 7th bit set
 
   float x;
   float y;
@@ -107,6 +107,55 @@ struct MFVVertexAux {
   float eta [mfv::NMomenta];
   float phi [mfv::NMomenta];
   float mass[mfv::NMomenta];
+
+  int nelectrons;
+  int nmuons;
+  int nleptons;
+
+  std::vector<float> muon_pt;
+  std::vector<float> muon_eta;
+  std::vector<float> muon_phi;
+  std::vector<float> muon_x;
+  std::vector<float> muon_y;
+  std::vector<float> muon_z;
+  std::vector<float> muon_dxy;
+  std::vector<float> muon_dz;
+  std::vector<float> muon_dxybs;
+  std::vector<float> muon_dxyerr;
+  std::vector<float> muon_dzerr;
+  std::vector<float> muon_iso;
+  std::vector<std::vector<int>> muon_ID;
+
+  std::vector<float> electron_pt;
+  std::vector<float> electron_eta;
+  std::vector<float> electron_phi;
+  std::vector<float> electron_x;
+  std::vector<float> electron_y;
+  std::vector<float> electron_z;
+  std::vector<float> electron_dxy;
+  std::vector<float> electron_dz;
+  std::vector<float> electron_dxybs;
+  std::vector<float> electron_dxyerr;
+  std::vector<float> electron_dzerr;
+  std::vector<float> electron_iso;
+  std::vector<std::vector<int>> electron_ID;
+
+// there are both leptons that match and those that do not match 
+// when considering the transverse impact parameter between lepton and vertex 
+  std::vector<float> elevtxtip;
+  std::vector<float> matchedelevtxtip;
+  std::vector<float> muvtxtip;
+  std::vector<float> matchedmuvtxtip; 
+  std::vector<float> elevtxtiperr;
+  std::vector<float> matchedelevtxtiperr;
+  std::vector<float> muvtxtiperr;
+  std::vector<float> matchedmuvtxtiperr; 
+  std::vector<float> elevtxtipsig;
+  std::vector<float> matchedelevtxtipsig;
+  std::vector<float> muvtxtipsig;
+  std::vector<float> matchedmuvtxtipsig; 
+  
+
 
   TLorentzVector p4(int w=0) const {
     TLorentzVector v;

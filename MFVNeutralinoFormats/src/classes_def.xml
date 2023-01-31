@@ -3,12 +3,29 @@
     <field name="transientMap_" transient="true"/>
   </class>
   <class name="edm::Wrapper<edm::AssociationMap<edm::OneToMany<std::vector<reco::Vertex>,std::vector<pat::Jet>, unsigned int > > >"/>
+
+  <class name="edm::AssociationMap<edm::OneToMany<std::vector<reco::Vertex>,std::vector<pat::Electron>, unsigned int > >">
+    <field name="transientMap_" transient="true"/>
+  </class>
+  <class name="edm::Wrapper<edm::AssociationMap<edm::OneToMany<std::vector<reco::Vertex>,std::vector<pat::Electron>, unsigned int > > >"/>
+
+  <class name="edm::AssociationMap<edm::OneToMany<std::vector<reco::Vertex>,std::vector<pat::Muon>, unsigned int > >">
+    <field name="transientMap_" transient="true"/>
+  </class>
+  <class name="edm::Wrapper<edm::AssociationMap<edm::OneToMany<std::vector<reco::Vertex>,std::vector<pat::Muon>, unsigned int > > >"/>
+  
   <class name="edm::helpers::KeyVal<edm::Ref<std::vector<reco::Vertex>,reco::Vertex,edm::refhelper::FindUsingAdvance<std::vector<reco::Vertex>,reco::Vertex> >,edm::RefVector<std::vector<pat::Jet>,pat::Jet,edm::refhelper::FindUsingAdvance<std::vector<pat::Jet>,pat::Jet> > >"/>
   <class name="edm::helpers::KeyVal<edm::RefProd<std::vector<reco::Vertex> >,edm::RefProd<std::vector<pat::Jet> > >"/>
   <class name="std::map<unsigned int,edm::helpers::KeyVal<edm::Ref<std::vector<reco::Vertex>,reco::Vertex,edm::refhelper::FindUsingAdvance<std::vector<reco::Vertex>,reco::Vertex> >,edm::RefVector<std::vector<pat::Jet>,pat::Jet,edm::refhelper::FindUsingAdvance<std::vector<pat::Jet>,pat::Jet> > > >"/>
   <class name="edm::RefProd<std::vector<pat::Jet> >"/>
   <class name="edm::Wrapper<edm::RefVector<std::vector<reco::Vertex>,reco::Vertex,edm::refhelper::FindUsingAdvance<std::vector<reco::Vertex>,reco::Vertex> > >"/>
   <class name="edm::Wrapper<std::vector<edm::Ref<std::vector<reco::Track>,reco::Track,edm::refhelper::FindUsingAdvance<std::vector<reco::Track>,reco::Track> > > >"/>
+
+  <class name="edm::helpers::KeyVal<edm::RefProd<vector<reco::Vertex> >,edm::RefProd<vector<pat::Electron> > >"/>
+  <class name="edm::RefProd<std::vector<pat::Electron> >"/>
+
+  <class name="edm::helpers::KeyVal<edm::RefProd<vector<reco::Vertex> >,edm::RefProd<vector<pat::Muon> > >"/>
+  <class name="edm::RefProd<std::vector<pat::Muon> >"/>
 
   <class name="std::vector<TLorentzVector>"/>
   <class name="edm::Wrapper<std::vector<TLorentzVector> >"/>

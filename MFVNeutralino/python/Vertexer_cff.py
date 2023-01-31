@@ -5,6 +5,7 @@ from JMTucker.MFVNeutralino.Vertexer_cfi import mfvVertexTracksGen, mfvVertexTra
 from JMTucker.MFVNeutralino.VertexAuxProducer_cfi import mfvVerticesAuxTmp, mfvVerticesAux
 from JMTucker.MFVNeutralino.VertexSelector_cfi import mfvSelectedVertices
 from JMTucker.MFVNeutralino.JetVertexAssociator_cfi import mfvVerticesToJets
+from JMTucker.MFVNeutralino.LeptonVertexAssociator_cfi import mfvVerticesToLeptons
 from JMTucker.Tools.RescaledTracks_cfi import jmtRescaledTracks
 
 mfvSelectedVerticesTmp = mfvSelectedVertices.clone(vertex_aux_src = 'mfvVerticesAuxTmp',
@@ -34,6 +35,7 @@ mfvVertexSequence = cms.Sequence(
     mfvVerticesAuxTmp *
     mfvSelectedVerticesTmp *
     mfvVerticesToJets *
+    mfvVerticesToLeptons *
     mfvVerticesAuxPresel *
     mfvVerticesAux
     )
