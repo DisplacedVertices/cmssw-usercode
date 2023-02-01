@@ -96,7 +96,8 @@ mfvSelectedVertices = cms.EDProducer('MFVVertexSelector',
 
 mfvSelectedVerticesLoose = mfvSelectedVertices.clone(
     mevent_src = 'mfvEvent',
-    min_ntracks = 2,
+    exclude_beampipe = True,
+    min_ntracks = 3,
     min_bsbs2ddist = 0.01,
     max_rescale_bs2derr = 1000,
     )
@@ -104,9 +105,9 @@ mfvSelectedVerticesLoose = mfvSelectedVertices.clone(
 mfvSelectedVerticesTight = mfvSelectedVertices.clone(
     mevent_src = 'mfvEvent',
     exclude_beampipe = True,
-    min_ntracks = 3, #temp #5
+    min_ntracks = 5,
     min_bsbs2ddist = 0.01,
-    max_rescale_bs2derr = 1000, #temp #0.0080
+    max_rescale_bs2derr = 0.0025,
     )
 
 mfvSelectedVerticesTightMinNtk3 = mfvSelectedVerticesTight.clone(min_ntracks = 3)

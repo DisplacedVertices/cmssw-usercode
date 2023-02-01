@@ -25,7 +25,6 @@ dataset = 'miniaod' if settings.is_miniaod else 'main'
 sample_files(process, 'ttbar_2017', dataset, 1)
 #input_files(process, '/uscms_data/d3/shogan/scratch/filter_studies/ggH_HtoSS_SStodddd_miniaod_M40_ct1mm.root')
 #input_files(process, '/uscms_data/d3/shogan/scratch/emerging_jets/EmergingJets_mX-1000-m_dpi-1-ctau_dpi-1_2017_num0.root')
-#input_files(process, 'C47DA2BF-B0FF-EA11-A2BC-001E67586629.root') #H4b 1mm 55GeV
 max_events(process, 50)
 cmssw_from_argv(process)
 silence_messages(process, ['TwoTrackMinimumDistanceHelixLine']) 

@@ -51,6 +51,11 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_llp_gammabeta;
   TH1F* h_gvtx_nsv;
   TH1F* h_gvtx_sv_ntrack;
+  TH1F* h_gvtx_nbsv;
+  TH1F* h_gvtx_bsv_ntrack;
+  TH1F* h_gvtx_bsv_rescale_bsbs2ddist; 
+  TH1F* h_gvtx_bsv_rescale_bs2derr;
+  TH1F* h_gvtx_bsv_genb3ddist; 
   TH1F* h_gvtx_njet;
   TH1F* h_gvtx_nbquarkjet;
   TH1F* h_gvtx_nloosebtaggedjet;
@@ -277,6 +282,11 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   // overview
   h_gvtx_nsv = fs->make<TH1F>("h_gvtx_nsv", ";# of secondary vertices; events/1", 40, 0, 40);
   h_gvtx_sv_ntrack = fs->make<TH1F>("h_gvtx_sv_ntrack", ";# of tracks / SV; svs/1", 10, 0, 10);
+  h_gvtx_nbsv = fs->make<TH1F>("h_gvtx_nbsv", ";# of bSV; events/1", 40, 0, 40);
+  h_gvtx_bsv_ntrack = fs->make<TH1F>("h_gvtx_bsv_ntrack", ";# of tracks / bSV; bSVs/1", 10, 0, 10);
+  h_gvtx_bsv_rescale_bsbs2ddist = fs->make<TH1F>("h_gvtx_bsv_rescale_bsbs2ddist", "rescaled-fit d_{BV} of bSV (cm)", 1000, 0, 2.5);
+  h_gvtx_bsv_rescale_bs2derr = fs->make<TH1F>("h_gvtx_bsv_rescale_bsbs2ddist", "rescaled-fit #sigma(dist2d(bSV, beamspot)) (cm)", 1000, 0, 0.05);
+  h_gvtx_bsv_genb3ddist = fs->make<TH1F>("h_gvtx_bsv_genb3ddist", ";dist3d(bSV, closest gen b-decay vtx) (cm); arb. units", 200, 0, 0.2);
   h_n_gen_bvtx = fs->make<TH1F>("h_n_gen_bvtx", ";# of GEN b-vertices (from non-b hadrons); events/1", 40, 0, 40);
   h_llp_r3d = fs->make<TH1F>("h_llp_r3d", ";dist3d(PV, GEN-llp decay point) (cm);events/0.1 mm", 200, 0, 2);
   h_llp_ctau = fs->make<TH1F>("h_llp_ctau", ";llp's ctau (cm);events/0.1 mm", 200, 0, 2);
@@ -575,6 +585,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
 	  std::vector<size_t> vec_bquark_jet = {};
 	  std::vector<size_t> vec_bquark_jet_no_duplicate = {};
+	  std::vector<size_t> vec_bsv_idx_no_duplicate = {};
 	  std::vector<size_t> vec_loosebtagged_jet_no_duplicate = {};
 
 	  for (size_t i = 0; i < 4; ++i) {
@@ -583,7 +594,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 		  for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
 			  if (mevent->jet_pt[ijet] < 20.0)  // Jets have a cut at 20 GeV
 				  continue;
-
+			  // finding a GEN bjet for each b-quark by minimum dR
 			  if (reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->gen_daughters[i].Eta(), mevent->gen_daughters[i].Phi()) < mindR_bquark) {
 				  mindR_bquark = reco::deltaR(mevent->jet_eta[ijet], mevent->jet_phi[ijet], mevent->gen_daughters[i].Eta(), mevent->gen_daughters[i].Phi());
 				  bquark_jet = ijet;
@@ -792,6 +803,8 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 				  int jet_seed_ntrack_from_trk_bsv = std::count(vec_isv_btag0_jet.begin(), vec_isv_btag0_jet.end(), isv);
 				  if (jet_seed_ntrack_from_trk_bsv == aux.ntracks()) {
 					  nbsv_by_btag0_jet++;
+					  if (std::count(vec_bsv_idx_no_duplicate.begin(), vec_bsv_idx_no_duplicate.end(), isv) == 0)
+						  vec_bsv_idx_no_duplicate.push_back(isv);
 				  }
 				  if (jet_seed_ntrack_from_trk_bsv >= 1) {
 					  nloosebsv_by_btag0_jet++;
@@ -987,7 +1000,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
 			  /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-		  }
+		   }
 
 		   if (is_loosebtaggedOR3seedtrk_jet)
 			  count_loosebtaggedOR3seedtrk_jet++;
@@ -999,6 +1012,39 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 	  h_gvtx_nloosebtaggedOR3seedtrkjet->Fill(count_loosebtaggedOR3seedtrk_jet, w);
 	  h_gvtx_shared_GEN_bjet_or_not->Fill(shared_bjet, w);
 
+	  h_gvtx_nbsv->Fill(vec_bsv_idx_no_duplicate.size(), w);
+
+	  for (size_t ibv = 0; ibv < vec_bsv_idx_no_duplicate.size(); ++ibv) {
+		  const MFVVertexAux& aux = auxes->at(vec_bsv_idx_no_duplicate[ibv]);
+		  h_gvtx_bsv_ntrack->Fill(aux.ntracks(), w);
+		  h_gvtx_bsv_rescale_bsbs2ddist->Fill(mag(aux.x - mevent->bsx_at_z(aux.z), aux.y - mevent->bsy_at_z(aux.z)), w);
+		  h_gvtx_bsv_rescale_bs2derr->Fill(aux.rescale_bs2derr, w);
+
+		  double min_sv_genbdist3d = 0.2;
+		  // trying to get a resolution of 3d distance b/w GEN b-decay vertex and reconstructed vertex 
+		  for (size_t i = 0; i < 4; ++i) {
+			  double b_sv_dist3d = 0.0;
+			  if (i == 0) {
+				  b_sv_dist3d = sqrt(pow(mevent->gen_b_llp0_decay[0] - aux.x, 2) + pow(mevent->gen_b_llp0_decay[1] - aux.y, 2) + pow(mevent->gen_b_llp0_decay[2] - aux.z, 2));
+			  }
+			  else if (i == 1) {
+				  b_sv_dist3d = sqrt(pow(mevent->gen_b_llp0_decay[3] - aux.x, 2) + pow(mevent->gen_b_llp0_decay[4] - aux.y, 2) + pow(mevent->gen_b_llp0_decay[5] - aux.z, 2));
+			  }
+			  else if (i == 2) {
+				  b_sv_dist3d = sqrt(pow(mevent->gen_b_llp1_decay[0] - aux.x, 2) + pow(mevent->gen_b_llp1_decay[1] - aux.y, 2) + pow(mevent->gen_b_llp1_decay[2] - aux.z, 2));
+			  }
+			  else {
+				  b_sv_dist3d = sqrt(pow(mevent->gen_b_llp1_decay[3] - aux.x, 2) + pow(mevent->gen_b_llp1_decay[4] - aux.y, 2) + pow(mevent->gen_b_llp1_decay[5] - aux.z, 2));
+			  }
+			  if (min_sv_genbdist3d > b_sv_dist3d) {
+				  min_sv_genbdist3d = b_sv_dist3d;
+			  }
+		  }
+
+		  if (min_sv_genbdist3d < 0.2)
+			  h_gvtx_bsv_genb3ddist->Fill(min_sv_genbdist3d, w);
+
+	  }
 
 	  double min_sv_genbdist3d = 0.2;
 	  double min_sv_genllpdist3d = 0.2;

@@ -7,8 +7,9 @@ from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, d
 #sample_files(process, 'ggHToSSTodddd_tau1mm_M55_2017' if is_mc else 'JetHT2017B', 'ntuplev31am', 15)
 #sample_files(process, 'mfv_neu_tau001000um_M0400_2017' if is_mc else 'JetHT2017B', 'ntuplev30am', 10)
 #sample_files(process, 'ttbar_2017' if is_mc else 'JetHT2017B', 'ntuplev31am', 5)
-input_files(process, 'ntuple.root')
-tfileservice(process, 'histos.root')
+#input_files(process, 'root://cmsxrootd-site.fnal.gov//store/user/pkotamni/ggH_HToSSTobbbb_MH-125_MS-55_ctauS-1_pT75_TuneCP5_13TeV-powheg-pythia8/NtupleGvtxBjetV29Am_NoEF_2017/230130_133950/0000/ntuple_0.root')
+input_files(process, 'root://cmsxrootd.fnal.gov//store/user/pekotamn/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleGvtxBjetV29Am_2017/230108_170032/0000/ntuple_1.root')
+tfileservice(process, 'histos_ttbar.root')
 cmssw_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.VertexSelector_cfi')
