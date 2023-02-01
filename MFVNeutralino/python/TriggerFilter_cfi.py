@@ -5,22 +5,28 @@ jet_paths = [
     "HLT_PFHT1050_v*",
     ]
 
+low_HT_paths = [
+    "HLT_HT425_v*",
+    ]
+
 bjet_paths = [
-    # bjet triggers 2017 - only use the first two, since they contribute most of the efficiency
+    # bjet triggers 2016
+    "HLT_QuadJet45_TripleBTagCSV_p087_v*", 
+    "HLT_DoubleJet90_Double30_TripleBTagCSV_p087_v*",
+    "HLT_DoubleJetsC100_DoubleBTagCSV_p014_DoublePFJetsC100MaxDeta1p6_v*",
+    # bjet triggers 2017
     "HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33_v*",
     "HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0_v*",
-    #"HLT_PFHT380_SixPFJet32_DoublePFBTagDeepCSV_2p2_v*",
-    #"HLT_PFHT380_SixPFJet32_DoublePFBTagCSV_2p2_v*",
-    #"HLT_PFHT430_SixPFJet40_PFBTagCSV_1p5_v*",
-    # bjet triggers 2018  - only use the first two, since they contribute most of the efficiency
+    # bjet triggers 2018
     "HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71_v*",
     "HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5_v*",
-    #"HLT_PFHT400_FivePFJet_100_100_60_30_30_DoublePFBTagDeepCSV_4p5_v*",
-    #"HLT_PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94_v*",
-    #"HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59_v*",
     ]
 
 displaced_dijet_paths = [
+    # displaced dijet triggers 2016
+    "HLT_HT350_DisplacedDijet40_DisplacedTrack_v",
+    "HLT_HT650_DisplacedDijet80_Inclusive_v",
+    # displaced dijet triggers 2017/2018
     "HLT_HT430_DisplacedDijet40_DisplacedTrack_v*",
     "HLT_HT650_DisplacedDijet60_Inclusive_v*",
     ]
@@ -45,6 +51,7 @@ mfvTriggerFilter = HLTrigger.HLTfilters.hltHighLevel_cfi.hltHighLevel.clone(
     )
 
 mfvTriggerFilterJetsOnly = mfvTriggerFilter.clone(HLTPaths = jet_paths)
+mfvTriggerFilterLowHT    = mfvTriggerFilter.clone(HLTPaths = low_HT_paths)
 mfvTriggerFilterBJetsOnly = mfvTriggerFilter.clone(
         HLTPaths = bjet_paths,
         andOr = True,

@@ -93,6 +93,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
 
   TH1F* h_njets;
   TH1F* h_njets20;
+  TH1F* h_ncalojets;
   static const int MAX_NJETS = 10;
   TH1F* h_jet_pt[MAX_NJETS+1];
   TH1F* h_jet_eta[MAX_NJETS+1];
@@ -105,6 +106,7 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_calojet_pt[MAX_NJETS+1];
   TH1F* h_calojet_eta[MAX_NJETS+1];
   TH1F* h_calojet_phi[MAX_NJETS+1];
+  TH2F* h_calojet_i_pt;
 
   TH1F* h_jet_pairdphi;
   TH1F* h_jet_pairdr;
@@ -258,6 +260,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
 
   h_njets = fs->make<TH1F>("h_njets", ";# of jets;events", 30, 0, 30);
   h_njets20 = fs->make<TH1F>("h_njets20", ";# of jets w. p_{T} > 20 GeV;events", 20, 0, 20);
+  h_ncalojets = fs->make<TH1F>("h_ncalojets", ";# of calojets;events", 30, 0, 30);
   for (int i = 0; i < MAX_NJETS+1; ++i) {
     TString ijet = i == MAX_NJETS ? TString("all") : TString::Format("%i", i);
     h_jet_pt[i] = fs->make<TH1F>(TString::Format("h_jet_pt_%s", ijet.Data()), TString::Format(";p_{T} of jet #%s (GeV);events/10 GeV", ijet.Data()), 200, 0, 2000);
@@ -268,6 +271,7 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
     h_calojet_eta[i] = fs->make<TH1F>(TString::Format("h_calojet_eta_%s", ijet.Data()), TString::Format(";#eta of calojet #%s (GeV);events/0.05", ijet.Data()), 120, -3, 3);
     h_calojet_phi[i] = fs->make<TH1F>(TString::Format("h_calojet_phi_%s", ijet.Data()), TString::Format(";#phi of calojet #%s (GeV);events/0.063", ijet.Data()), 100, -3.1416, 3.1416);
   }
+  h_calojet_i_pt = fs->make<TH2F>("h_calojet_i_pt", ";calojet index;calojet pT (GeV)", 30, 0, 30, 200, 0, 1000);
   h_jet_energy = fs->make<TH1F>("h_jet_energy", ";jets energy (GeV);jets/10 GeV", 200, 0, 2000);
   h_jet_ht = fs->make<TH1F>("h_jet_ht", ";H_{T} of jets (GeV);events/25 GeV", 200, 0, 5000);
   h_jet_ht_40 = fs->make<TH1F>("h_jet_ht_40", ";H_{T} of jets with p_{T} > 40 GeV;events/25 GeV", 200, 0, 5000);
@@ -458,6 +462,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_hlt_bit_grid->Fill(0., 0., w);
   h_l1_bits->Fill(0., w);
   for (int i = 0; i < mfv::n_hlt_paths; ++i) {
+    //std::cout << mfv::hlt_paths[i] << "  Found: " << mevent->found_hlt(i) << "  Pass: " << mevent->pass_hlt(i) << std::endl;
     if (mevent->found_hlt(i)) h_hlt_bits->Fill(1+2*i,   w);
     if (mevent->pass_hlt (i)) {
       h_hlt_bits->Fill(1+2*i+1, w);
@@ -528,15 +533,23 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_njets20->Fill(mevent->njets(20), w);
 
 
-  int ncalojets = mevent->calo_jet_pt.size();
+  int ncalojets     = mevent->calo_jet_pt.size();
+
   for (int i = 0; i < MAX_NJETS; ++i) {
     h_jet_pt[i]->Fill(mevent->nth_jet_pt(i), w);
     h_jet_eta[i]->Fill(fabs(mevent->nth_jet_eta(i)), w);
     h_jet_phi[i]->Fill(mevent->nth_jet_phi(i), w);
-    h_calojet_pt[i]->Fill(i < ncalojets  ? mevent->calo_jet_pt[i] : -9.9,        w);
-    h_calojet_eta[i]->Fill(i < ncalojets ? fabs(mevent->calo_jet_eta[i]) : -9.9, w);
-    h_calojet_phi[i]->Fill(i < ncalojets ? mevent->calo_jet_phi[i] : -9.9,       w);
   }
+
+  for (int i=0; i < ncalojets; i++) {
+    h_calojet_pt[i]->Fill(mevent->calo_jet_pt[i],         w);
+    h_calojet_eta[i]->Fill(fabs(mevent->calo_jet_eta[i]), w);
+    h_calojet_phi[i]->Fill(mevent->calo_jet_phi[i],       w);
+    h_calojet_i_pt->Fill(i, mevent->calo_jet_pt[i], w);
+  }
+
+  h_ncalojets->Fill(ncalojets, w);
+
   h_jet_ht->Fill(mevent->jet_ht(mfv::min_jet_pt), w);
   h_jet_ht_40->Fill(mevent->jet_ht(40), w);
 

@@ -32,7 +32,7 @@ namespace jmt {
       }
 
       const auto rs = track_rescaler.scale(tk);
-      auto pass_nsigmadxy = [&](const reco::Track& tk) { return fabs(tk.dxy(*bs)) / tk.dxyError() > 4; };
+      auto pass_nsigmadxy = [&](const reco::Track& tk) { return fabs(tk.dxy(*bs)) / tk.dxyError() > 4.0; };
       if (use_rescaled == 0) {
         if (!pass_nsigmadxy(tk))
           return false;

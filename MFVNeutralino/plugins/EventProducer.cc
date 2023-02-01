@@ -463,40 +463,67 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 
   edm::Handle<reco::CaloJetCollection> calo_jets;
   event.getByToken(calo_jets_token, calo_jets);
+
   for (const reco::CaloJet& cjet : *calo_jets) {
     mevent->calo_jet_pt.push_back(cjet.pt());
     mevent->calo_jet_eta.push_back(cjet.eta());
     mevent->calo_jet_phi.push_back(cjet.phi());
     mevent->calo_jet_energy.push_back(cjet.energy());
   }
-  for (const TLorentzVector& jp4 : triggerfloats->hltpfjets) {
 
+  for (const TLorentzVector& jp4 : triggerfloats->hltpfjets) {
     mevent->hlt_pf_jet_pt.push_back(jp4.Pt());
     mevent->hlt_pf_jet_eta.push_back(jp4.Eta());
     mevent->hlt_pf_jet_phi.push_back(jp4.Phi());
     mevent->hlt_pf_jet_energy.push_back(jp4.E());
 
   }
-  for (const TLorentzVector& cp4 : triggerfloats->hltcalojets) {
 
+  for (const TLorentzVector& cp4 : triggerfloats->hltcalojets) {
     mevent->hlt_calo_jet_pt.push_back(cp4.Pt());
     mevent->hlt_calo_jet_eta.push_back(cp4.Eta());
     mevent->hlt_calo_jet_phi.push_back(cp4.Phi());
     mevent->hlt_calo_jet_energy.push_back(cp4.E());
 
   } 
- for (const TLorentzVector& pp4 : triggerfloats->hltidpassedcalojets) {
-    mevent->hlt_idp_calo_jet_pt.push_back(pp4.Pt());
-    mevent->hlt_idp_calo_jet_eta.push_back(pp4.Eta());
-    mevent->hlt_idp_calo_jet_phi.push_back(pp4.Phi());
-    mevent->hlt_idp_calo_jet_energy.push_back(pp4.E());
- }
- for (const TLorentzVector& bp4 : triggerfloats->hltpfjetsforbtag) {
-    mevent->hlt_pfforbtag_jet_pt.push_back(bp4.Pt());
-    mevent->hlt_pfforbtag_jet_eta.push_back(bp4.Eta());
-    mevent->hlt_pfforbtag_jet_phi.push_back(bp4.Phi());
-    mevent->hlt_pfforbtag_jet_energy.push_back(bp4.E());
- }
+
+  for (const TLorentzVector& pp4 : triggerfloats->hltidpassedcalojets) {
+     mevent->hlt_idp_calo_jet_pt.push_back(pp4.Pt());
+     mevent->hlt_idp_calo_jet_eta.push_back(pp4.Eta());
+     mevent->hlt_idp_calo_jet_phi.push_back(pp4.Phi());
+     mevent->hlt_idp_calo_jet_energy.push_back(pp4.E());
+  }
+
+  for (const TLorentzVector& bp4 : triggerfloats->hltpfjetsforbtag) {
+     mevent->hlt_pfforbtag_jet_pt.push_back(bp4.Pt());
+     mevent->hlt_pfforbtag_jet_eta.push_back(bp4.Eta());
+     mevent->hlt_pfforbtag_jet_phi.push_back(bp4.Phi());
+     mevent->hlt_pfforbtag_jet_energy.push_back(bp4.E());
+  }
+
+
+  for (const TLorentzVector& ap4 : triggerfloats->hltcalojets_lowpt_fewprompt) {
+     mevent->hlt_calo_jet_lowpt_fewprompt_pt.push_back(ap4.Pt());
+     mevent->hlt_calo_jet_lowpt_fewprompt_eta.push_back(ap4.Eta());
+     mevent->hlt_calo_jet_lowpt_fewprompt_phi.push_back(ap4.Phi());
+     mevent->hlt_calo_jet_lowpt_fewprompt_energy.push_back(ap4.E());
+  }
+
+
+  for (const TLorentzVector& dp4 : triggerfloats->hltcalojets_lowpt_wdisptks) {
+     mevent->hlt_calo_jet_lowpt_wdisptks_pt.push_back(dp4.Pt());
+     mevent->hlt_calo_jet_lowpt_wdisptks_eta.push_back(dp4.Eta());
+     mevent->hlt_calo_jet_lowpt_wdisptks_phi.push_back(dp4.Phi());
+     mevent->hlt_calo_jet_lowpt_wdisptks_energy.push_back(dp4.E());
+  }
+
+
+  for (const TLorentzVector& mp4 : triggerfloats->hltcalojets_midpt_fewprompt) {
+     mevent->hlt_calo_jet_midpt_fewprompt_pt.push_back(mp4.Pt());
+     mevent->hlt_calo_jet_midpt_fewprompt_eta.push_back(mp4.Eta());
+     mevent->hlt_calo_jet_midpt_fewprompt_phi.push_back(mp4.Phi());
+     mevent->hlt_calo_jet_midpt_fewprompt_energy.push_back(mp4.E());
+  }
 
   //////////////////////////////////////////////////////////////////////
 

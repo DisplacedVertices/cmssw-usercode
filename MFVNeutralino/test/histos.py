@@ -4,7 +4,7 @@ is_mc = True # for blinding
 do_track = False # this can onlky be used for ntuple with keep_tk=True
 
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_MET_triggers
-#sample_files(process, 'mfv_neu_tau000300um_M0300_2017' if is_mc else 'JetHT2017B', dataset, 1)
+sample_files(process, 'ggHToSSTodddd_tau1mm_M55_2017' if is_mc else 'JetHT2017B', dataset, 10)
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
 
@@ -24,37 +24,22 @@ common = cms.Sequence(process.mfvSelectedVerticesSeq * process.mfvWeight)
 
 process.mfvEventHistosNoCuts = process.mfvEventHistos.clone()
 process.mfvJetTksHistosNoCuts = process.mfvJetTksHistos.clone()
-process.mfvFilterHistosNoCuts = process.mfvFilterHistos.clone()
-process.mfvVertexHistosNoCuts = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesExtraLoose')
-process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts * process.mfvJetTksHistosNoCuts * process.mfvFilterHistosNoCuts) # just trigger for now
-process.pSkimSelVtx = cms.Path(common * process.mfvVertexHistosNoCuts)
+#process.mfvVertexHistosNoCuts = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesExtraLoose')
+process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts * process.mfvJetTksHistosNoCuts) # just trigger for now
+#process.pSkimSelVtx = cms.Path(common * process.mfvVertexHistosNoCuts)
 if do_track:
   process.mfvTrackHistosNoCuts = process.mfvTrackHistos.clone()
-  process.pTrackNoCut = cms.Path(common * process.mfvTrackHistos)
-
-process.mfvEventHistosExtraLoose = process.mfvEventHistos.clone()
-process.mfvAnalysisCutsExtraLoose = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesExtraLoose', min_nvertex = 1)
-process.mfvVertexHistosExtraLoose = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesExtraLoose')
-process.pEventExtraLoose = cms.Path(common * process.mfvAnalysisCutsExtraLoose * process.mfvEventHistosExtraLoose)
-process.pExtraLoose = cms.Path(common * process.mfvAnalysisCutsExtraLoose * process.mfvVertexHistosExtraLoose)
-if do_track:
-  process.mfvTrackHistosExtraLoose = process.mfvTrackHistos.clone()
-  process.pTrackExtraLoose = cms.Path(common * process.mfvAnalysisCutsExtraLoose * process.mfvTrackHistosExtraLoose)
-
-process.mfvEventHistosExtraLooseOnlyOneVtx = process.mfvEventHistos.clone()
-process.mfvAnalysisCutsExtraLooseOnlyOneVtx = process.mfvAnalysisCuts.clone(vertex_src = 'mfvSelectedVerticesExtraLoose', min_nvertex = 1, max_nvertex = 1)
-process.mfvVertexHistosExtraLooseOnlyOneVtx = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesExtraLoose')
-process.pEventExtraLooseOnlyOneVtx = cms.Path(common * process.mfvAnalysisCutsExtraLooseOnlyOneVtx * process.mfvEventHistosExtraLooseOnlyOneVtx)
-process.pExtraLooseOnlyOneVtx = cms.Path(common * process.mfvAnalysisCutsExtraLooseOnlyOneVtx * process.mfvVertexHistosExtraLooseOnlyOneVtx)
+  process.mfvFilterHistosNoCuts = process.mfvFilterHistos.clone()
+  process.pTrackNoCut = cms.Path(common * process.mfvTrackHistos * process.mfvFilterHistosNoCuts)
 
 process.mfvEventHistosPreSel = process.mfvEventHistos.clone()
 process.mfvAnalysisCutsPreSel = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)
 process.pEventPreSel = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvEventHistosPreSel)
 
-nm1s = [
-    ('Bsbs2ddist', 'min_bsbs2ddist = 0'),
-    ('Bs2derr',    'max_rescale_bs2derr = 1e9'),
-    ]
+nm1s = []
+#    ('Bsbs2ddist', 'min_bsbs2ddist = 0'),
+#    ('Bs2derr',    'max_rescale_bs2derr = 1e9'),
+#    ]
 
 ntks = [5,3,4,7,8,9]
 nvs = [0,1,2]
@@ -104,56 +89,6 @@ process.EX1pFullSel    = cms.Path(common * process.EX1mfvAnalysisCutsFullSel    
 process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     * process.EX1mfvEventHistosSigReg     * process.EX1mfvVertexHistosSigReg)
 '''.replace('EX1', EX1)
 
-#    for ptcut in [30., 40., 50., 60., 65., 70., 75., 80., 85., 90., 100., 110.]:
-#        EX4 = 'PtCut%i' % int(ptcut)
-#        EX5 = 'btag_pt_cut = ' + str(ptcut)
-#        exec ''' 
-#process.EX1mfvFilterHistosSigRegEX4   = process.mfvFilterHistos.clone(EX5)
-#process.EX1pSigRegEX4     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg      * process.EX1mfvFilterHistosSigRegEX4)
-#'''.replace('EX1', EX1).replace('EX4', EX4).replace('EX5', EX5)
-#
-#    for bs2derrcut in [25., 30., 35., 40., 45., 50., 55., 60., 65., 70., 75.]:
-#        name = 'Bs2derr%s' % str(int(bs2derrcut))
-#        #lowcut, hicut = str(bs2derrcut/1e4), str((bs2derrcut+5.0)/(1e4))
-#        #vtx = eval('process.mfvSelectedVerticesTight%s.clone(min_rescale_bs2derr = %s, max_rescale_bs2derr = %s)' % (EX1, lowcut, hicut))
-#        hicut = str(bs2derrcut/1e4)
-#        vtx = eval('process.mfvSelectedVerticesTight%s.clone(max_rescale_bs2derr = %s)' % (EX1, hicut))
-#        vtx_name = '%svtx' % EX1 + name
-#       
-#        evt_cut = ''
-#
-#        for nv in nvs:
-#            if nv == 0 and (bs2derrcut != '' or EX1 != ''):
-#                continue
-#
-#            ana = eval('process.mfvAnalysisCuts.clone(%s)' % evt_cut)
-#            ana.vertex_src = vtx_name
-#            if nv == 1:
-#                ana.max_nvertex = nv
-#            ana.min_nvertex = nv
-#            if nv == 2 and ntk == 7:
-#                ana.min_ntracks01 = ana.max_ntracks01 = 7
-#            if nv == 2 and ntk == 8:
-#                ana.ntracks01_0 = 5
-#                ana.ntracks01_1 = 3
-#            if nv == 2 and ntk == 9:
-#                ana.ntracks01_0 = 5
-#                ana.ntracks01_1 = 4
-#            ana_name = '%sana%iV' % (EX1, nv) + name
-#
-#            evt_hst = process.mfvEventHistos.clone()
-#            evt_hst_name = '%sevtHst%iV' % (EX1, nv) + name
-#
-#            vtx_hst = process.mfvVertexHistos.clone(vertex_src = vtx_name)
-#            vtx_hst_name = '%svtxHst%iV' % (EX1, nv) + name
-#
-#            setattr(process, vtx_name, vtx)
-#            setattr(process, ana_name, ana)
-#            setattr(process, evt_hst_name, evt_hst)
-#            setattr(process, vtx_hst_name, vtx_hst)
-#            setattr(process, '%sp%iV' % (EX1, nv) + name, cms.Path(process.mfvWeight * vtx * ana * evt_hst * vtx_hst))
-
-
     for name, cut in nm1s:
         evt_cut = ''
         if type(cut) == tuple:
@@ -198,12 +133,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
     if use_btag_triggers :
-        #samples = Samples.mfv_signal_samples_2017
-        samples = Samples.mfv_stopdbardbar_samples_2017
-        #samples = Samples.mfv_stopbbarbbar_samples_2018
-        #samples = Samples.qcd_samples_2017 + Samples.ttbar_samples_2017
-        #samples = Samples.HToSSTodddd_samples_2018
-        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), half_mc_modifier())
+        samples = Samples.HToSSTodddd_samples_2017
+        pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
     elif use_MET_triggers:
         samples = pick_samples(dataset, qcd=True, ttbar=False, data=False, leptonic=True, splitSUSY=True, Zvv=True, met=True, span_signal=False)
         #samples = pick_samples(dataset, qcd=False, ttbar=False, data=False, leptonic=False, splitSUSY=True, Zvv=False, met=False, span_signal=False)
@@ -214,7 +145,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
 
-    cs = CondorSubmitter('Histos' + version + '_noPS_medVtx',
+    cs = CondorSubmitter('Histos' + version,
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,

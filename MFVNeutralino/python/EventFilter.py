@@ -63,6 +63,9 @@ def setup_event_filter(process,
         event_filter = 'met only'
         trigger_filter = False
         event_filter_require_vertex = True
+    elif mode == 'low HT online track test':
+        event_filter = trigger_filter = 'low HT online track test'
+        event_filter_require_vertex = False
     elif mode:
         if mode is not True:
             raise ValueError('bad mode %r' % mode)
@@ -84,10 +87,12 @@ def setup_event_filter(process,
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterBjetsORDisplacedDijet as triggerFilter
     elif trigger_filter == 'leptons only':
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterLeptonsOnly as triggerFilter
+    elif trigger_filter == 'low HT online track test':
+        from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilterLowHT as triggerFilter
     elif trigger_filter is True:
         from JMTucker.MFVNeutralino.TriggerFilter_cfi import mfvTriggerFilter as triggerFilter
     elif trigger_filter is not False:
-        raise ValueError('trigger_filter %r bad: must be one of ("jets only", "leptons only", "bjets only", "met only", "displaced dijet only", "HT OR bjets OR displaced dijet", "bjets OR displaced dijet veto HT", True, False)' % trigger_filter)
+        raise ValueError('trigger_filter %r bad: must be one of ("jets only", "leptons only", "bjets only", "met only", "displaced dijet only", "HT OR bjets OR displaced dijet", "bjets OR displaced dijet veto HT", "low HT online track test", True, False)' % trigger_filter)
 
     overall = cms.Sequence()
 
@@ -109,10 +114,12 @@ def setup_event_filter(process,
             from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterBjetsORDisplacedDijet as eventFilter
         elif event_filter == 'met only':
             from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterMETOnly as eventFilter
+        elif event_filter == 'low HT online track test':
+            from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilterLowHT as eventFilter
         elif event_filter is True:
             from JMTucker.MFVNeutralino.EventFilter_cfi import mfvEventFilter as eventFilter
         elif event_filter is not False:
-            raise ValueError('event_filter must be one of ("jets only", "leptons only", "HT OR bjets OR displaced dijet", "bjets OR displaced dijet", "bjets OR displaced dijet veto HT", True, False)')
+            raise ValueError('event_filter must be one of ("jets only", "leptons only", "HT OR bjets OR displaced dijet", "bjets OR displaced dijet", "bjets OR displaced dijet veto HT", "low HT online track test", True, False)')
 
         eventFilter = eventFilter.clone()
         if input_is_miniaod:

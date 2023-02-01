@@ -37,6 +37,7 @@ def get_f_t(x, min_ntracks=5, tree_path='trees'):
         raise IOError("couldn't get tree from %s for ntks=%s" % (input_fn, min_ntracks))
     t.SetAlias('jetht', 'Sum$((jet_pt>40)*jet_pt)')
     t.SetAlias('svdist', 'sqrt((x0-x1)**2 + (y0-y1)**2)')
+    t.SetAlias('sumdbv', 'sqrt((x0**2)+(y0**2)) + sqrt((x1**2)+(y1**2))')
     t.SetAlias('svdphi', 'TVector2::Phi_mpi_pi(atan2(y0,x0)-atan2(y1,x1))')
     t.SetAlias('svdz',   'z0 - z1')
     if min_ntracks >= 5:

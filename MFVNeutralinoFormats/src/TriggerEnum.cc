@@ -42,6 +42,9 @@ namespace mfv {
     // MET trigger
     "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v",
 
+    // Low-HT trigger to study filters requiring HLT tracks
+    "HLT_HT425_v",
+
   };
 
   const char* l1_paths[mfv::n_l1_paths] = {

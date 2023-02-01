@@ -164,7 +164,7 @@ struct MFVEvent {
   uint64_t pass_;
   uint64_t pass_hlt_bits() const { return pass_ & ((1UL << mfv::n_hlt_paths) - 1UL); }
   uint64_t l1pass_;
-  uint64_t pass_l1_bits() const { return pass_ & ((1UL << mfv::n_l1_paths) - 1UL); }
+  uint64_t pass_l1_bits() const { return l1pass_ & ((1UL << mfv::n_l1_paths) - 1UL); }
   uint64_t filtpass_;
   uint64_t pass_filt_bits() const { return filtpass_ & ((1UL << mfv::n_filter_paths) - 1UL); }
 
@@ -257,6 +257,21 @@ struct MFVEvent {
   std::vector<float> hlt_pf_jet_eta;
   std::vector<float> hlt_pf_jet_phi;
   std::vector<float> hlt_pf_jet_energy;
+
+  std::vector<float> hlt_calo_jet_lowpt_fewprompt_pt;
+  std::vector<float> hlt_calo_jet_lowpt_fewprompt_eta;
+  std::vector<float> hlt_calo_jet_lowpt_fewprompt_phi;
+  std::vector<float> hlt_calo_jet_lowpt_fewprompt_energy;
+
+  std::vector<float> hlt_calo_jet_lowpt_wdisptks_pt;
+  std::vector<float> hlt_calo_jet_lowpt_wdisptks_eta;
+  std::vector<float> hlt_calo_jet_lowpt_wdisptks_phi;
+  std::vector<float> hlt_calo_jet_lowpt_wdisptks_energy;
+
+  std::vector<float> hlt_calo_jet_midpt_fewprompt_pt;
+  std::vector<float> hlt_calo_jet_midpt_fewprompt_eta;
+  std::vector<float> hlt_calo_jet_midpt_fewprompt_phi;
+  std::vector<float> hlt_calo_jet_midpt_fewprompt_energy;
 
   TLorentzVector jet_p4(int w) const {
     TLorentzVector v;

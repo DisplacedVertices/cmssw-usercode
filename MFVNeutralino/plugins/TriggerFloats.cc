@@ -110,55 +110,6 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   event.getByToken(primary_vertex_token, primary_vertices);
 
   short int npass_filter[mfv::n_filter_paths] = {0};
-//  std::cout << "Here 0" << std::endl;
-//  std::cout << "mets type: " << typeid(mets).name() << std::endl;
-//  const pat::MET& met = mets->at(0); // This line is breaking things for presel.py
-//  std::cout << "Here 1" << std::endl;
-//  double met_pt_origin = met.pt();
-//  double met_phi_origin = met.phi();
-//  std::pair<double,double> met_corrected = jmt::METXYCorr_Met_MetPhi(met_pt_origin, met_phi_origin, event.id().event(), year, isMC, primary_vertices->size()); // year and isMC need to be modified
-//  double met_pt = met_corrected.first;
-//  double met_phi = met_corrected.second;
-//  double met_px = met_pt*std::cos(met_phi);
-//  double met_py = met_pt*std::sin(met_phi);
-//  for (const pat::Muon& muon : *muons) {
-//    double muon_px = muon.px();
-//    double muon_py = muon.py();
-//    //if (muon_selector(muon)){
-//    if (muon.passed(reco::Muon::CutBasedIdTight)) {
-//      met_px = met_px + muon_px;
-//      met_py = met_py + muon_py;
-//    }
-//  }
-//  double met_nomu_pt = hypotf(met_px,met_py);
-//  double met_nomu_phi = atan2(met_px,met_py);
-//
-//  // check met filters
-//  std::vector<bool> pass_met_filters(metfilternames.size(), false);
-//  for (unsigned int i = 0, n = metFilters->size(); i < n; ++i) {
-//    for (unsigned int j = 0; j<metfilternames.size(); ++j){
-//      if ( names.triggerName(i) == metfilternames[j] ){
-//        pass_met_filters[j] = metFilters->accept(i);
-//        if (prints)
-//          std::cout << metfilternames[j] << " " << metFilters->accept(i) <<std::endl;
-//      }
-//    }
-//  }
-//  edm::Handle<bool> passBadPFMuonFilterUpdateDz;
-//  event.getByToken(badPFMuonFilterUpdateDz_token,passBadPFMuonFilterUpdateDz);
-//  bool _passBadPFMuonFilterUpdateDz = (*passBadPFMuonFilterUpdateDz );
-//  bool pass_all_metfilters = _passBadPFMuonFilterUpdateDz;
-//  for (const auto& pf:pass_met_filters){
-//    pass_all_metfilters = pass_all_metfilters && pf;
-//  }
-//  if (prints){
-//    std::cout << "Total results: ";
-//    for (const auto& fr:pass_met_filters){
-//      std::cout << fr << " ";
-//    }
-//    std::cout << _passBadPFMuonFilterUpdateDz << std::endl;
-//    std::cout << std::endl;
-//  }
 
   int i2pt_first[2] = {0};
   int i2htt[2] = {0};
@@ -472,14 +423,31 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
         if (ipath != -1) break;
       }
 
+      // FIXME - keep all hlt CaloJetsCorrected objects for now. Move this into the following conditional when done
+      if(obj.collection() == "hltAK4CaloJetsCorrected::HLT"){
+        floats->hltcalojets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
+      }
+
+      // Low(er)-momentum calo jets with not very many prompt tracks
+      if(obj.collection() == "hltDisplacedHLTCaloJetCollectionProducerLowPt::HLT") {
+        floats->hltcalojets_lowpt_fewprompt.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
+      }
+
+      // Low(er)-momentum calo jets with at least one displaced track
+      if(obj.collection() == "hltIter02DisplacedHLTCaloJetCollectionProducerLowPt::HLT") {
+        floats->hltcalojets_lowpt_wdisptks.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
+      }
+
+      // Mid-momentum calo hets with not very many prompt tracks (Kinda redundant, can delete. But I'll keep for now) 
+      if(obj.collection() == "hltDisplacedHLTCaloJetCollectionProducerMidPt::HLT") {
+        floats->hltcalojets_midpt_fewprompt.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
+      }
+
       if (ipath != -1) {
 
         // Note that all of the bjet triggers use PF jets for the kinematics, and the
         // b-tagging discriminants aren't currently available in AODs, so this is
         // sufficient for the trigger matching for now
-        if(obj.collection() == "hltAK4CaloJetsCorrected::HLT"){
-          floats->hltcalojets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
-        }
         if(obj.collection() == "hltAK4PFJetsCorrected::HLT"){
           floats->hltpfjets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
         }

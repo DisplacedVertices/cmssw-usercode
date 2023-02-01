@@ -190,13 +190,26 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (apply_presel == 4) {
 
       // Veto events which pass HT trigger and offline HT > 1200 GeV, to keep orthogonal with apply_presel == 1
-      // if(satisfiesTrigger(mevent, mfv::b_HLT_PFHT1050)) return false; // FIXME
+      if(satisfiesTrigger(mevent, mfv::b_HLT_PFHT1050)) return false;
 
       bool success = false;
       for(size_t trig : mfv::HTOrBjetOrDisplacedDijetTriggers){
 
-        // skip HT trigger
-        if(trig == mfv::b_HLT_PFHT1050) continue;
+        if(satisfiesTrigger(mevent, trig)){
+          success = true;
+          break;
+        }
+      }
+      if(!success) return false;
+    }
+
+    if (apply_presel == 6) {
+
+      bool success = false;
+      for(size_t trig : mfv::HTOrBjetOrDisplacedDijetTriggers){
+
+        // remain agnostic to the HT1050 trigger
+        if (trig == mfv::b_HLT_PFHT1050) continue;
 
         if(satisfiesTrigger(mevent, trig)){
           success = true;
@@ -238,10 +251,6 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
 
         // skip HT trigger
         if(trig == mfv::b_HLT_PFHT1050) continue;
-
-        // skip Displ. Dijet Triggers for now
-        //if(trig == mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack) continue;
-        //if(trig == mfv::b_HLT_HT650_DisplacedDijet60_Inclusive) continue;
 
         if(mevent->pass_hlt(trig)){
           at_least_one_trigger_passed = true;
@@ -404,8 +413,8 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
   // note that this could be loosened/tightened if desired
   int medcsvtags      = 0;
   int meddeepcsvtags  = 0;
-  int hardcsvtags     = 0;
-  int harddeepcsvtags = 0;
+  int hardmedcsvtags     = 0;
+  int hardmeddeepcsvtags = 0;
 
   float alt_calo_ht = 0.0; // To account for the fact that calo_jet_ht uses jets up to eta 5.0. We don't want that
   for (int ic=0, ice=mevent->calo_jet_pt.size(); ic < ice; ic++) {
@@ -415,11 +424,11 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
   for(int j0 = 0; j0 < njets; j0++) {
     if (mevent->jet_bdisc_csv[j0]     > jmt::BTagging::discriminator_min(1, 0)){
        medcsvtags++;
-       if (mevent->jet_pt[j0] > 80.0) hardcsvtags++;
+       if (mevent->jet_pt[j0] > 80.0) hardmedcsvtags++;
     }
     if (mevent->jet_bdisc_deepcsv[j0] > jmt::BTagging::discriminator_min(1, 1)){ 
       meddeepcsvtags++; 
-      if (mevent->jet_pt[j0] > 80.0) harddeepcsvtags++;
+      if (mevent->jet_pt[j0] > 80.0) hardmeddeepcsvtags++;
     }
   }
 
@@ -432,8 +441,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
 
     case mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33 :
       {
-        //if(njets < 4) return false;
-        if(hardcsvtags < 2) return false;
+        if(hardmedcsvtags < 2) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
           if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 125) continue;
@@ -476,8 +484,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
 
     case mfv::b_HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71 :
     {
-      //if(njets < 4) return false;
-      if(meddeepcsvtags < 2) return false;
+      if(hardmeddeepcsvtags < 2) return false;
 
       for(int j0 = 0; j0 < njets; ++j0){
         if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 140) continue;
@@ -523,10 +530,12 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
       if(alt_calo_ht < 500 || njets < 2) return false;
 
       for(int j0 = 0; j0 < njets; ++j0){
-        if(!displaced_jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 50) continue;
+        //if(!displaced_jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 50) continue; //FIXME
+        if(mevent->jet_pt[j0] < 50) continue;
 
         for(int j1 = j0+1; j1 < njets; ++j1){
-          if(!displaced_jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 50) continue;
+          //if(!displaced_jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 50) continue; //FIXME
+          if(mevent->jet_pt[j1] < 50) continue;
           passed_kinematics = true;
         }
       }
@@ -536,12 +545,13 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
     case mfv::b_HLT_HT650_DisplacedDijet60_Inclusive :
     {
       if(alt_calo_ht < 700 || njets < 2) return false;
-
       for(int j0 = 0; j0 < njets; ++j0){
-        if(!displaced_jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 80) continue;
+        //if(!displaced_jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 80) continue; //FIXME
+        if(mevent->jet_pt[j0] < 80) continue;
 
         for(int j1 = j0+1; j1 < njets; ++j1){
-          if(!displaced_jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 80) continue;
+          //if(!displaced_jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 80) continue; //FIXME
+          if(mevent->jet_pt[j1] < 80) continue;
           passed_kinematics = true;
         }
       }
@@ -581,7 +591,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
     case mfv::b_HLT_QuadJet45_TripleBTagCSV_p087 :
     {
       if(mevent->jet_ht(30) < 180 || njets < 4) return false;
-      //if(meddeepcsvtags < 3) return false;
+      if(medcsvtags < 3) return false;
 
       for(int j0 = 0; j0 < njets; ++j0){
         if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 45) continue;
@@ -607,7 +617,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
     case mfv::b_HLT_DoubleJet90_Double30_TripleBTagCSV_p087 :
     {
       if(mevent->jet_ht(30) < 200 || njets < 4) return false;
-      //if(meddeepcsvtags < 3) return false;
+      if(medcsvtags < 3) return false;
 
       for(int j0 = 0; j0 < njets; ++j0){
         if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 90) continue;
@@ -631,8 +641,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
 
     case mfv::b_HLT_DoubleJetsC100_DoubleBTagCSV_p014_DoublePFJetsC100MaxDeta1p6 :
     {
-      //if(njets < 4) return false;
-      //if(meddeepcsvtags < 2) return false;
+      if(hardmedcsvtags < 2) return false;
 
       for(int j0 = 0; j0 < njets; ++j0){
         if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 100) continue;

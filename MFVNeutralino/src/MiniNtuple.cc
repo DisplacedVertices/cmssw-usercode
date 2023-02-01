@@ -541,6 +541,7 @@ namespace mfv {
     tree->SetAlias("phi0",  "atan2(y0,x0)");
     tree->SetAlias("phi1",  "atan2(y1,x1)");
     tree->SetAlias("svdist",  "(nvtx >= 2) * sqrt((x0-x1)**2 + (y0-y1)**2)");
+    tree->SetAlias("sumdbv",  "(nvtx >= 2) * sqrt(x0**2 + y0**2) + sqrt(x1**2 + y1**2)");
     tree->SetAlias("svdphi",  "(nvtx >= 2) * TVector2::Phi_mpi_pi(atan2(y0,x0)-atan2(y1,x1))");
     tree->SetAlias("svdz",    "(nvtx >= 2) * (z0 - z1)");
   }

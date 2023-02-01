@@ -26,6 +26,7 @@ class VertexerPairEff {
 
   float d2d() const { return (point(0) - point(1)).rho(); }
   float d3d() const { return (point(0) - point(1)).r();   }
+  float s2d() const { return (point(0).rho() + point(1).rho()); }
 
   unsigned kind() const { return kind_; }
   void kind(unsigned k) { kind_ |= k; }

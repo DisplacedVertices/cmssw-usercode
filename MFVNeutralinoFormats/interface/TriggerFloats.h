@@ -19,6 +19,15 @@ namespace mfv {
     std::vector<TLorentzVector> hltcalojets;
     int nhltcalojets() const { return hltcalojets.size(); }
 
+    std::vector<TLorentzVector> hltcalojets_lowpt_fewprompt;
+    int nhltcalojets_lowpt_fewprompt() const { return hltcalojets_lowpt_fewprompt.size(); }
+
+    std::vector<TLorentzVector> hltcalojets_lowpt_wdisptks;
+    int nhltcalojets_lowpt_wdisptks() const { return hltcalojets_lowpt_wdisptks.size(); }
+
+    std::vector<TLorentzVector> hltcalojets_midpt_fewprompt;
+    int nhltcalojets_midpt_fewprompt() const { return hltcalojets_midpt_fewprompt.size(); }
+
     std::vector<TLorentzVector> hltdisplacedcalojets;
     int nhltdisplacedcalojets() const { return hltdisplacedcalojets.size(); }
 

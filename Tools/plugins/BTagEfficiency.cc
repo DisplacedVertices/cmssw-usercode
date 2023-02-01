@@ -131,6 +131,22 @@ void JMTBTagEfficiency::analyze(const edm::Event& event, const edm::EventSetup&)
         h_scalefactor[kind][2]->Fill(0.864506+2.79354/sqrt(x), *w);
       }
     }
+#elif defined(MFVNEUTRALINO_20161)
+    {
+      if (kind == 2) {
+        h_scalefactor[kind][0]->Fill(1.0007*(1.+0.000290434*x)/(1.+0.000349262*x), *w);
+        h_scalefactor[kind][1]->Fill(0.999371*(1.+-0.000161133*x)/(1.+-7.92031e-05*x), *w);
+        h_scalefactor[kind][2]->Fill(0.926873*(1.+0.0282033*x)/(1.+0.0260373*x), *w);
+      } else if (kind == 1) {
+        h_scalefactor[kind][0]->Fill(1.0007*(1.+0.000290434*x)/(1.+0.000349262*x), *w);
+        h_scalefactor[kind][1]->Fill(0.999371*(1.+-0.000161133*x)/(1.+-7.92031e-05*x), *w);
+        h_scalefactor[kind][2]->Fill(0.926873*(1.+0.0282033*x)/(1.+0.0260373*x), *w);
+      } else {
+        h_scalefactor[kind][0]->Fill(1.33091+6.62324e-05*x+-1.19411e-07*x*x+-1.84379/x, *w);
+        h_scalefactor[kind][1]->Fill(1.33806+0.000233452*x+9.35591e-09*x*x+2.43996/x, *w);
+        h_scalefactor[kind][2]->Fill(1.41865+92.0563/(pow(x,1.5))+-9.85825/x, *w);
+      }
+    }
 #elif defined(MFVNEUTRALINO_20162)
     {
       if (kind == 2) {

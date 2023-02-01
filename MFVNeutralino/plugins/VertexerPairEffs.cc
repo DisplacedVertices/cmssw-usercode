@@ -24,6 +24,9 @@ class MFVVertexerPairEffs : public edm::EDAnalyzer {
   TH1D* h_pairs_d2d[6][6];
   TH1D* h_merge_d2d[6][6];
   TH1D* h_erase_d2d[6][6];
+  TH1D* h_pairs_s2d[6][6];
+  TH1D* h_merge_s2d[6][6];
+  TH1D* h_erase_s2d[6][6];
 };
 
 MFVVertexerPairEffs::MFVVertexerPairEffs(const edm::ParameterSet& cfg)
@@ -47,6 +50,10 @@ MFVVertexerPairEffs::MFVVertexerPairEffs(const edm::ParameterSet& cfg)
       h_pairs_d2d[i][j] = fs->make<TH1D>(TString::Format("h_pairs_d2d_mintk%i_maxtk%i", i, j), "", 4000, 0, 4);
       h_merge_d2d[i][j] = fs->make<TH1D>(TString::Format("h_merge_d2d_mintk%i_maxtk%i", i, j), "", 4000, 0, 4);
       h_erase_d2d[i][j] = fs->make<TH1D>(TString::Format("h_erase_d2d_mintk%i_maxtk%i", i, j), "", 4000, 0, 4);
+
+      h_pairs_s2d[i][j] = fs->make<TH1D>(TString::Format("h_pairs_s2d_mintk%i_maxtk%i", i, j), "", 4000, 0, 4);
+      h_merge_s2d[i][j] = fs->make<TH1D>(TString::Format("h_merge_s2d_mintk%i_maxtk%i", i, j), "", 4000, 0, 4);
+      h_erase_s2d[i][j] = fs->make<TH1D>(TString::Format("h_erase_s2d_mintk%i_maxtk%i", i, j), "", 4000, 0, 4);
     }
   }
 }
@@ -65,6 +72,7 @@ void MFVVertexerPairEffs::analyze(const edm::Event& event, const edm::EventSetup
   double n_erase[6][6] = {{0}};
 
   std::vector<float> d2ds;
+  std::vector<float> s2ds;
 
 
   if (verbose) printf("\nrun = %u, lumi = %u, event = %llu, npveffs = %d\n", event.id().run(), event.luminosityBlock(), event.id().event(), nvpeffs);
@@ -77,6 +85,7 @@ void MFVVertexerPairEffs::analyze(const edm::Event& event, const edm::EventSetup
     assert(ntk_min >= 2 && ntk_max <= 5 && ntk_min <= ntk_max);
 
     const double d2d = vpeff.d2d();
+    const double s2d = vpeff.s2d();
     const double w = *weight * vpeff.weight();
 
     if (!allow_duplicate_pairs) {
@@ -89,6 +98,7 @@ void MFVVertexerPairEffs::analyze(const edm::Event& event, const edm::EventSetup
       }
       if (seen) continue;
       d2ds.push_back(d2d);
+      s2ds.push_back(s2d);
     }
 
     if (verbose) {
@@ -108,6 +118,11 @@ void MFVVertexerPairEffs::analyze(const edm::Event& event, const edm::EventSetup
     h_pairs_d2d[0][ntk_max]->Fill(d2d, w);
     h_pairs_d2d[ntk_min][ntk_max]->Fill(d2d, w);
 
+    h_pairs_s2d[0][0]->Fill(s2d, w);
+    h_pairs_s2d[ntk_min][0]->Fill(s2d, w);
+    h_pairs_s2d[0][ntk_max]->Fill(s2d, w);
+    h_pairs_s2d[ntk_min][ntk_max]->Fill(s2d, w);
+
     if (vpeff.kind() & VertexerPairEff::merge) {
       n_merge[0][0] += w;
       n_merge[ntk_min][0] += w;
@@ -118,6 +133,11 @@ void MFVVertexerPairEffs::analyze(const edm::Event& event, const edm::EventSetup
       h_merge_d2d[ntk_min][0]->Fill(d2d, w);
       h_merge_d2d[0][ntk_max]->Fill(d2d, w);
       h_merge_d2d[ntk_min][ntk_max]->Fill(d2d, w);
+
+      h_merge_s2d[0][0]->Fill(s2d, w);
+      h_merge_s2d[ntk_min][0]->Fill(s2d, w);
+      h_merge_s2d[0][ntk_max]->Fill(s2d, w);
+      h_merge_s2d[ntk_min][ntk_max]->Fill(s2d, w);
     }
 
     if (vpeff.kind() & VertexerPairEff::erase) {
@@ -130,6 +150,11 @@ void MFVVertexerPairEffs::analyze(const edm::Event& event, const edm::EventSetup
       h_erase_d2d[ntk_min][0]->Fill(d2d, w);
       h_erase_d2d[0][ntk_max]->Fill(d2d, w);
       h_erase_d2d[ntk_min][ntk_max]->Fill(d2d, w);
+
+      h_erase_s2d[0][0]->Fill(s2d, w);
+      h_erase_s2d[ntk_min][0]->Fill(s2d, w);
+      h_erase_s2d[0][ntk_max]->Fill(s2d, w);
+      h_erase_s2d[ntk_min][ntk_max]->Fill(s2d, w);
     }
   }
 

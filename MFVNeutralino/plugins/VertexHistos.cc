@@ -417,8 +417,6 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   int calojetsptpass = 0;
   for (int i=0; i < ncalojets; i++) { if (mevent->calo_jet_pt[i] > 60.0) calojetsptpass++; }
   
-  if (calojetsptpass != 5) return;
-    
 
   // matching jets with gen quarks from LLPs and fill a 2D histogram with nsv vs. # total number of jets matched to LLPs
   double nmatched_0 = 0;
