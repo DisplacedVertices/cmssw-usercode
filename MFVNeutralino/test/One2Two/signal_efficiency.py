@@ -66,8 +66,8 @@ class SignalEfficiencyCombiner:
         ngens = [0] * self.nyears
         hs_dbv = [None] * self.nyears
         hs_dphi = [None] * self.nyears
-        hs_dvv = [None] * self.nyears
-        hs_dvv_rebin = [None] * self.nyears
+        hs_sumdbv = [None] * self.nyears
+        hs_sumdbv_rebin = [None] * self.nyears
         hs_uncert = None # don't add these between inputs so we just set from the first input
 
         def _deyear(n):
@@ -101,13 +101,13 @@ class SignalEfficiencyCombiner:
 
             hs_dbv       = _add_hs(hs_dbv,       inp.get('dbv',       isample))
             hs_dphi      = _add_hs(hs_dphi,      inp.get('dphi',      isample))
-            hs_dvv       = _add_hs(hs_dvv,       inp.get('dvv',       isample))
-            hs_dvv_rebin = _add_hs(hs_dvv_rebin, inp.get('dvv_rebin', isample))
+            hs_sumdbv       = _add_hs(hs_sumdbv,       inp.get('sumdbv',       isample))
+            hs_sumdbv_rebin = _add_hs(hs_sumdbv_rebin, inp.get('sumdbv_rebin', isample))
 
             if hs_uncert is None:
                 hs_uncert = inp.get('uncert', isample)
 
-        rates = [tuple(h.GetBinContent(ib) for ib in xrange(1,h.GetNbinsX()+1)) for h in hs_dvv_rebin]
+        rates = [tuple(h.GetBinContent(ib) for ib in xrange(1,h.GetNbinsX()+1)) for h in hs_sumdbv_rebin]
         rate = [sum(r) for r in zip(*rates)]
 
         uncerts = [tuple(h.GetBinContent(ib) for ib in xrange(1,h.GetNbinsX()+1)) for h in hs_uncert]
@@ -124,8 +124,8 @@ class SignalEfficiencyCombiner:
                       ngens = yearit(ngens),
                       hs_dbv = yearit(hs_dbv),
                       hs_dphi = yearit(hs_dphi),
-                      hs_dvv = yearit(hs_dvv),
-                      hs_dvv_rebin = yearit(hs_dvv_rebin),
+                      hs_sumdbv = yearit(hs_sumdbv),
+                      hs_sumdbv_rebin = yearit(hs_sumdbv_rebin),
                       hs_uncert = yearit(hs_uncert),
 
                       rates = yearit(rates),
@@ -134,8 +134,8 @@ class SignalEfficiencyCombiner:
 
                       h_dbv = _add_h(hs_dbv),
                       h_dphi = _add_h(hs_dphi),
-                      h_dvv = _add_h(hs_dvv),
-                      h_dvv_rebin = _add_h(hs_dvv_rebin),
+                      h_sumdbv = _add_h(hs_sumdbv),
+                      h_sumdbv_rebin = _add_h(hs_sumdbv_rebin),
 
                       total_sig_rate = total_sig_rate,
                       total_int_lumi = total_int_lumi,

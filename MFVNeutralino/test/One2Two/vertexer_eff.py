@@ -1,8 +1,8 @@
 import os
 from JMTucker.Tools.ROOTTools import *
 
-version = 'V27m'
-path = '/uscms_data/d2/tucker/crab_dirs/VertexerPairEffs' + version.capitalize()
+version = 'ULV1Bm'
+path = '/uscms_data/d3/shogan/crab_dirs/VertexerPairEffs' + version
 
 set_style()
 
@@ -14,8 +14,9 @@ def write(font, size, x, y, text):
     w.DrawLatex(x, y, text)
     return w
 
-for is_mc in False, True:
-    for year in 2017, 2018, '2017p8':
+for is_mc in True,: #False:
+    #for year in 2017,:#, 2018, '2017p8':
+    for year in 2018,:
         in_fn = os.path.join(path, ('background_%s.root' if is_mc else 'JetHT%s.root') % year)
         in_f = ROOT.TFile(in_fn)
 
@@ -26,9 +27,9 @@ for is_mc in False, True:
 
             for itk in 3,4,5:
                 d = in_f.Get('mfvVertexerPairEffs%iTkSeed' % itk if ntkseeds else 'mfvVertexerPairEffs')
-                h_merge = d.Get('h_merge_d2d_mintk0_maxtk%i' % itk)
-                h_erase = d.Get('h_erase_d2d_mintk0_maxtk%i' % itk)
-                h_pairs = d.Get('h_pairs_d2d_mintk0_maxtk%i' % itk)
+                h_merge = d.Get('h_merge_s2d_mintk0_maxtk%i' % itk)
+                h_erase = d.Get('h_erase_s2d_mintk0_maxtk%i' % itk)
+                h_pairs = d.Get('h_pairs_s2d_mintk0_maxtk%i' % itk)
 
                 for h in h_merge, h_erase, h_pairs:
                     h.Rebin(10)
@@ -43,7 +44,7 @@ for is_mc in False, True:
                     for i in xrange(1, h.GetNbinsX()+2):
                         h.SetBinContent(i, 1-h.GetBinContent(i))
 #                    h.Scale(1./h.GetBinContent(h.GetNbinsX()))
-                    h.SetTitle('maxtk%i%s;d_{VV} (cm);efficiency' % (itk, ' merge' if is_merge else ''))
+                    h.SetTitle('maxtk%i%s;#Sigma(d_{BV}) (cm);efficiency' % (itk, ' merge' if is_merge else ''))
                     h.GetYaxis().SetRangeUser(0,1.05)
                     h.SetLineColor(ROOT.kBlue if is_merge else ROOT.kGreen+2)
                     h.SetStats(0)
