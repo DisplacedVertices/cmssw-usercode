@@ -201,13 +201,8 @@ void MFVPrinter::analyze(const edm::Event& event, const edm::EventSetup& setup) 
       printf("                   %11s %11.3g %11.3g\n", "", v.cyy, v.cyz);
       printf("                   %11s %11s %11.3g\n", "", "", v.czz);
       printf("chi2/ndf: %11.3g = %11.3g / %11.3g\n", v.chi2dof(), v.chi2, v.ndof());
-      printf("nlep associated: %lu\n", v.which_lep.size());
-      if (v.which_lep.size()) {
-        printf("which:\n");
-        for (uchar i : v.which_lep)
-          printf("%u ", i);
-        printf("\n");
-      }
+      printf("nmu associated: %i\n", v.nmuons);
+      printf("nele associated: %i\n", v.nelectrons);
       printf("njets (%i types): ", mfv::NJetsByUse);
       for (uchar i : v.njets)
         printf("%u ", i);

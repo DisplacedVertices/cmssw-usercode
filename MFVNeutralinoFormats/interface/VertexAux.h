@@ -57,7 +57,8 @@ struct MFVVertexAux {
     nmuons = 0;
     nelectrons = 0;
   }
-
+  uchar which;
+  
   float x;
   float y;
   float z;
