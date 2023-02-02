@@ -216,6 +216,8 @@ namespace jmt {
     //p_which_sv_ = 0;
     p_ismu_  = 0;
     p_isel_ = 0;
+    p_isgoodmu_  = 0;
+    p_isgoodel_ = 0;
     p_misc_ = 0;
   }
 
@@ -244,6 +246,8 @@ namespace jmt {
     // which_sv_.clear();
     ismu_.clear();
     isel_.clear();
+    isgoodmu_.clear();
+    isgoodel_.clear();
     misc_.clear();
   }
 
@@ -272,6 +276,8 @@ namespace jmt {
     // t->Branch(TString::Format("%s_which_sv", pfx()), &which_sv_);
     t->Branch(TString::Format("%s_ismu", pfx()), &ismu_);
     t->Branch(TString::Format("%s_isel", pfx()), &isel_);
+    t->Branch(TString::Format("%s_isgoodmu", pfx()), &isgoodmu_);
+    t->Branch(TString::Format("%s_isgoodel", pfx()), &isgoodel_);
     t->Branch(TString::Format("%s_misc", pfx()), &misc_);
 
     t->SetAlias(TString::Format("n%ss", pfx()), TString::Format("%s_qpt@.size()", pfx()));
@@ -316,6 +322,8 @@ namespace jmt {
     // t->SetBranchAddress(TString::Format("%s_which_sv", pfx()), &p_which_sv_);
     t->SetBranchAddress(TString::Format("%s_ismu", pfx()), &p_ismu_);
     t->SetBranchAddress(TString::Format("%s_isel", pfx()), &p_isel_);
+    t->SetBranchAddress(TString::Format("%s_isgoodmu", pfx()), &p_isgoodmu_);
+    t->SetBranchAddress(TString::Format("%s_isgoodel", pfx()), &p_isgoodel_);
     t->SetBranchAddress(TString::Format("%s_misc", pfx()), &p_misc_);
   }
 
@@ -344,6 +352,8 @@ namespace jmt {
     //which_sv_ = *p_which_sv_;
     ismu_ = *p_ismu_;
     isel_ = *p_isel_;
+    isgoodmu_ = *p_isgoodmu_;
+    isgoodel_ = *p_isgoodel_;
     misc_ = *p_misc_;
   }
 

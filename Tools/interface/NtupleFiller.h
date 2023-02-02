@@ -186,14 +186,12 @@ namespace jmt {
     const edm::Handle<pat::ElectronCollection>& helectrons(const edm::Event& e) {e.getByToken(token_, electrons_); return electrons_; }
     const edm::Handle<double>& rho(const edm::Event& e) {e.getByToken(rho_token_, rho_); return rho_; }
     const pat::ElectronCollection& electrons(const edm::Event& e) { return *helectrons(e); }
-    //float effArea(float eta) const { return electron_effective_areas.getEffectiveArea(eta); }
     void operator()(const edm::Event&);
     int i2nti(size_t i) const { return i2nti_[i]; }
   };
 
   
-  // void NtupleAdd(TracksSubNtuple&, const reco::Track&, int which_jet=-1, int which_pv=-1, int which_sv=-1, bool ismu=false, bool isel=false, unsigned misc=0);
-  void NtupleAdd(TracksSubNtuple&, const reco::Track&, int which_jet=-1, int which_pv=-1, bool ismu=false, bool isel=false, int which_sv=-1, unsigned misc=0);
+  void NtupleAdd(TracksSubNtuple&, const reco::Track&, int which_jet=-1, int which_pv=-1, bool ismu=false, bool isel=false, bool isgoodmu=false, bool isgoodel=false, int which_sv=-1, unsigned misc=0);
   typedef bool (*tracks_cut_fcn)(const reco::Track&);
 
   class TracksSubNtupleFiller {
@@ -204,6 +202,11 @@ namespace jmt {
     tracks_cut_fcn cut_;
     edm::Handle<reco::TrackCollection> tracks_;
     jmt::TrackRefGetter trg_;
+    const edm::EDGetTokenT<double> rho_token_;
+    edm::Handle<double> rho_;
+    EffectiveAreas electron_effective_areas;
+
+    
   public:
     TracksSubNtupleFiller(TracksSubNtuple& nt, const edm::ParameterSet& cfg, edm::ConsumesCollector&& cc, int cut_level = -1, tracks_cut_fcn cut=0)
       : nt_(nt),
@@ -211,7 +214,10 @@ namespace jmt {
         token_(cc.consumes<reco::TrackCollection>(tag_)),
         cut_level_(cut_level),
         cut_(cut),
-        trg_("TracksSubNtupleFiller", cfg.getParameter<edm::ParameterSet>("track_ref_getter"), std::move(cc))
+        trg_("TracksSubNtupleFiller", cfg.getParameter<edm::ParameterSet>("track_ref_getter"), std::move(cc)),
+	rho_token_(cc.consumes<double>(cfg.getParameter<edm::InputTag>("rho_src"))),
+	electron_effective_areas(cfg.getParameter<edm::FileInPath>("electron_effective_areas").fullPath())
+
     {}
     bool cut(const reco::Track&, const edm::Event&, BeamspotSubNtupleFiller* =0) const;
     const edm::Handle<reco::TrackCollection>& htracks(const edm::Event& e) { e.getByToken(token_, tracks_); return tracks_; }
@@ -220,6 +226,9 @@ namespace jmt {
     int which_pv(const edm::Event&, PrimaryVerticesSubNtupleFiller*, reco::TrackRef&);
     bool ismu(const edm::Event&, MuonsSubNtupleFiller*, reco::TrackRef&);
     bool isel(const edm::Event&, ElectronsSubNtupleFiller*, reco::TrackRef&);
+    bool isGoodMu(const edm::Event&, MuonsSubNtupleFiller*, reco::TrackRef&);
+    const edm::Handle<double>& rho(const edm::Event& e) {e.getByToken(rho_token_, rho_); return rho_; }
+    bool isGoodEl(const edm::Event&, ElectronsSubNtupleFiller*, reco::TrackRef&);
     void operator()(const edm::Event&, JetsSubNtupleFiller* =0, PrimaryVerticesSubNtupleFiller* =0, BeamspotSubNtupleFiller* =0, MuonsSubNtupleFiller* =0, ElectronsSubNtupleFiller* =0);
   };
 

@@ -277,7 +277,7 @@ namespace jmt {
              float chi2dof,
              int npxh, int nsth, int npxl, int nstl,
              int minhit_r, int minhit_z, int maxhit_r, int maxhit_z, int maxpxhit_r, int maxpxhit_z,
-             int which_jet, int which_pv, bool ismu, bool isel,
+             int which_jet, int which_pv, bool ismu, bool isel, bool isgoodmu, bool isgoodel,
 	     int which_sv,
              unsigned misc) {
       qpt_.push_back(q*pt);
@@ -317,6 +317,8 @@ namespace jmt {
       which_sv_.push_back(which_sv < 0 || which_sv > 255 ? 255 : which_sv);
       ismu_.push_back(ismu);
       isel_.push_back(isel);
+      isgoodmu_.push_back(isgoodmu);
+      isgoodel_.push_back(isgoodel);
       misc_.push_back(misc);
     }
 
@@ -345,6 +347,8 @@ namespace jmt {
     uchar    which_sv (int i) const { return p_get(i, which_sv_,  p_which_sv_  ); }
     bool     ismu     (int i) const { return p_get(i, ismu_,      p_ismu_      ); }
     bool     isel     (int i) const { return p_get(i, isel_,      p_isel_      ); }
+    bool     isgoodmu     (int i) const { return p_get(i, isgoodmu_,      p_isgoodmu_      ); }
+    bool     isgoodel     (int i) const { return p_get(i, isgoodel_,      p_isgoodel_      ); }
     
     unsigned misc     (int i) const { return p_get(i, misc_,      p_misc_      ); }
 
@@ -452,6 +456,8 @@ namespace jmt {
     vuchar which_sv_;    vuchar* p_which_sv_;
     vbool  ismu_;        vbool* p_ismu_;
     vbool  isel_;        vbool* p_isel_;
+    vbool  isgoodmu_;        vbool* p_isgoodmu_;
+    vbool  isgoodel_;        vbool* p_isgoodel_;
     vunsigned misc_;     vunsigned* p_misc_;
   };
 
