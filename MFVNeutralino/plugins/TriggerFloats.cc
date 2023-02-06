@@ -34,13 +34,13 @@ private:
   const edm::EDGetTokenT<GlobalAlgBlkBxCollection> l1_results_token;
   const edm::EDGetTokenT<edm::TriggerResults> trigger_results_token;
   const edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> trigger_objects_token;
-  const edm::EDGetTokenT<edm::TriggerResults> met_filters_token;
+  //const edm::EDGetTokenT<edm::TriggerResults> met_filters_token;
   const edm::EDGetTokenT<bool> badPFMuonFilterUpdateDz_token;
 
   const edm::EDGetTokenT<pat::JetCollection> jets_token;
   const StringCutObjectSelector<pat::Jet> jet_selector;
 
-  const edm::EDGetTokenT<pat::METCollection> met_token;
+  //const edm::EDGetTokenT<pat::METCollection> met_token;
   const edm::EDGetTokenT<pat::MuonCollection> muons_token;
   const StringCutObjectSelector<pat::Muon> muon_selector;
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertex_token;
@@ -56,11 +56,11 @@ MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
     l1_results_token(consumes<GlobalAlgBlkBxCollection>(cfg.getParameter<edm::InputTag>("l1_results_src"))),
     trigger_results_token(consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("trigger_results_src"))),
     trigger_objects_token(consumes<pat::TriggerObjectStandAloneCollection>(cfg.getParameter<edm::InputTag>("trigger_objects_src"))),
-    met_filters_token(consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("met_filters_src"))),
+    //met_filters_token(consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("met_filters_src"))),
     badPFMuonFilterUpdateDz_token(consumes<bool>(edm::InputTag("BadPFMuonFilterUpdateDz"))),
     jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
     jet_selector(cfg.getParameter<std::string>("jet_cut")),
-    met_token(consumes<pat::METCollection>(cfg.getParameter<edm::InputTag>("met_src"))),
+    //met_token(consumes<pat::METCollection>(cfg.getParameter<edm::InputTag>("met_src"))),
     muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
     muon_selector(cfg.getParameter<std::string>("muon_cut")),
     primary_vertex_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertex_src"))),
@@ -82,10 +82,10 @@ namespace {
 void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) {
   if (prints) std::cout << "TriggerFloats run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
 
-  std::vector<std::string> metfilternames = {"Flag_goodVertices", "Flag_globalSuperTightHalo2016Filter", "Flag_HBHENoiseFilter", "Flag_HBHENoiseIsoFilter", "Flag_EcalDeadCellTriggerPrimitiveFilter", "Flag_BadPFMuonFilter", "Flag_eeBadScFilter", "Flag_ecalBadCalibFilter"};
-  edm::Handle<edm::TriggerResults> metFilters;
-  event.getByToken(met_filters_token, metFilters);
-  const edm::TriggerNames &names = event.triggerNames(*metFilters);
+  //std::vector<std::string> metfilternames = {"Flag_goodVertices", "Flag_globalSuperTightHalo2016Filter", "Flag_HBHENoiseFilter", "Flag_HBHENoiseIsoFilter", "Flag_EcalDeadCellTriggerPrimitiveFilter", "Flag_BadPFMuonFilter", "Flag_eeBadScFilter", "Flag_ecalBadCalibFilter"};
+  //edm::Handle<edm::TriggerResults> metFilters;
+  //event.getByToken(met_filters_token, metFilters);
+  //const edm::TriggerNames &names = event.triggerNames(*metFilters);
 
   edm::Handle<edm::TriggerResults> trigger_results;
   event.getByToken(trigger_results_token, trigger_results);
@@ -98,8 +98,10 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   edm::Handle<l1t::JetBxCollection> l1_jets;
   event.getByToken(l1_jets_token, l1_jets);
 
-  edm::Handle<pat::METCollection> mets;
-  event.getByToken(met_token, mets);
+
+  //edm::Handle<pat::METCollection> mets;
+  //event.getByToken(met_token, mets);
+
 
   edm::Handle<pat::MuonCollection> muons;
   event.getByToken(muons_token, muons);
@@ -107,52 +109,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   edm::Handle<reco::VertexCollection> primary_vertices;
   event.getByToken(primary_vertex_token, primary_vertices);
 
-  const pat::MET& met = mets->at(0);
-  double met_pt_origin = met.pt();
-  double met_phi_origin = met.phi();
-  std::pair<double,double> met_corrected = jmt::METXYCorr_Met_MetPhi(met_pt_origin, met_phi_origin, event.id().event(), year, isMC, primary_vertices->size()); // year and isMC need to be modified
-  double met_pt = met_corrected.first;
-  double met_phi = met_corrected.second;
-  double met_px = met_pt*std::cos(met_phi);
-  double met_py = met_pt*std::sin(met_phi);
-  for (const pat::Muon& muon : *muons) {
-    double muon_px = muon.px();
-    double muon_py = muon.py();
-    //if (muon_selector(muon)){
-    if (muon.passed(reco::Muon::CutBasedIdTight)) {
-      met_px = met_px + muon_px;
-      met_py = met_py + muon_py;
-    }
-  }
-  double met_nomu_pt = hypotf(met_px,met_py);
-  double met_nomu_phi = atan2(met_px,met_py);
-
-  // check met filters
-  std::vector<bool> pass_met_filters(metfilternames.size(), false);
-  for (unsigned int i = 0, n = metFilters->size(); i < n; ++i) {
-    for (unsigned int j = 0; j<metfilternames.size(); ++j){
-      if ( names.triggerName(i) == metfilternames[j] ){
-        pass_met_filters[j] = metFilters->accept(i);
-        if (prints)
-          std::cout << metfilternames[j] << " " << metFilters->accept(i) <<std::endl;
-      }
-    }
-  }
-  edm::Handle<bool> passBadPFMuonFilterUpdateDz;
-  event.getByToken(badPFMuonFilterUpdateDz_token,passBadPFMuonFilterUpdateDz);
-  bool _passBadPFMuonFilterUpdateDz = (*passBadPFMuonFilterUpdateDz );
-  bool pass_all_metfilters = _passBadPFMuonFilterUpdateDz;
-  for (const auto& pf:pass_met_filters){
-    pass_all_metfilters = pass_all_metfilters && pf;
-  }
-  if (prints){
-    std::cout << "Total results: ";
-    for (const auto& fr:pass_met_filters){
-      std::cout << fr << " ";
-    }
-    std::cout << _passBadPFMuonFilterUpdateDz << std::endl;
-    std::cout << std::endl;
-  }
+  short int npass_filter[mfv::n_filter_paths] = {0};
 
   int i2pt_first[2] = {0};
   int i2htt[2] = {0};
@@ -383,6 +340,20 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
         is_jet = true;
     }
 
+    obj.unpackNamesAndLabels(event, *trigger_results);
+    for (unsigned h = 0; h < obj.filterLabels().size(); ++h){
+      for (unsigned j = 0; j < mfv::n_filter_paths; ++j) {
+        // If we see a filter we're looking for and it's NOT an HT/MHT filter, then just tally it
+        if ((mfv::filter_paths[j] == obj.filterLabels()[h]) and (obj.filterIds()[0] != 90) and (obj.filterIds()[0] != 89)) {
+            npass_filter[j]++;
+        }
+         // If we see a filter we're looking for and it is an HT filter (id = 89), then we'll check the HT
+        else if ((mfv::filter_paths[j] == obj.filterLabels()[h]) and (obj.filterIds()[0] == 89)) {
+            npass_filter[j] += obj.pt();
+        }
+      }
+    }
+
     if (prints) printf(" is_l1 %i is_ht %i is_cluster %i is_photon %i is_muon %i is_jet %i\n", is_l1, is_ht, is_cluster, is_photon, is_muon, is_jet);
 
     if (is_l1) assert(nids == 1 && !is_ht && !is_cluster && !is_photon && !is_muon && !is_jet);
@@ -396,7 +367,10 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
     if (is_ht) {
       if (obj.collection() == "hltPFHTJet30::HLT")
         floats->hltht = obj.pt();
+      else if (obj.collection() == "hltHtMhtCaloJetsQuadC30::HLT")
+        floats->hltcaloht = obj.pt();
     }
+
     else if (is_electron || is_muon) {
       // for HT above we didn't check the path, there's always only one
       // HT object. there can be many trigger electrons/muons, only store
@@ -449,6 +423,26 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
         if (ipath != -1) break;
       }
 
+      // FIXME - keep all hlt CaloJetsCorrected objects for now. Move this into the following conditional when done
+      if(obj.collection() == "hltAK4CaloJetsCorrected::HLT"){
+        floats->hltcalojets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
+      }
+
+      // Low(er)-momentum calo jets with not very many prompt tracks
+      if(obj.collection() == "hltDisplacedHLTCaloJetCollectionProducerLowPt::HLT") {
+        floats->hltcalojets_lowpt_fewprompt.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
+      }
+
+      // Low(er)-momentum calo jets with at least one displaced track
+      if(obj.collection() == "hltIter02DisplacedHLTCaloJetCollectionProducerLowPt::HLT") {
+        floats->hltcalojets_lowpt_wdisptks.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
+      }
+
+      // Mid-momentum calo hets with not very many prompt tracks (Kinda redundant, can delete. But I'll keep for now) 
+      if(obj.collection() == "hltDisplacedHLTCaloJetCollectionProducerMidPt::HLT") {
+        floats->hltcalojets_midpt_fewprompt.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
+      }
+
       if (ipath != -1) {
 
         // Note that all of the bjet triggers use PF jets for the kinematics, and the
@@ -459,6 +453,18 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
         }
         else if(obj.collection() == "hltDisplacedHLTCaloJetCollectionProducerLowPt::HLT" || obj.collection() == "hltDisplacedHLTCaloJetCollectionProducerMidPt::HLT"){
           floats->hltdisplacedcalojets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
+        }
+        else if(obj.collection() == "hltAK4CaloJetsCorrectedIDPassed::HLT") {
+          floats->hltidpassedcalojets.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
+        }
+        else if(obj.collection() == "hltPFJetForBtag::HLT") {
+          bool save_this_jet = false;
+          for (auto label : obj.filterLabels()) {
+            if (label == "hltBTagPFCSVp070Triple") { save_this_jet = true; }
+          }
+          if (save_this_jet) {
+            floats->hltpfjetsforbtag.push_back(p4(obj.pt(), obj.eta(), obj.phi(), obj.energy()));
+          }
         }
 
         if (prints) {
@@ -483,12 +489,12 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   floats->l1htt = etsumhelper.TotalHt();
   floats->myhtt = my_htt;
   floats->myhttwbug = my_htt_wbug;
-  floats->met_pt = met_pt;
-  floats->met_phi = met_phi;
-  floats->met_pt_calo = met.caloMETPt();
-  floats->met_pt_nomu = met_nomu_pt;
-  floats->met_phi_nomu = met_nomu_phi;
-  floats->pass_metfilters = pass_all_metfilters;
+//  floats->met_pt = met_pt;
+//  floats->met_phi = met_phi;
+//  floats->met_pt_calo = met.caloMETPt();
+//  floats->met_pt_nomu = met_nomu_pt;
+//  floats->met_phi_nomu = met_nomu_phi;
+//  floats->pass_metfilters = pass_all_metfilters;
 
   if (prints)
     printf("TriggerFloats: hltht = %f\n", floats->hltht);
@@ -529,6 +535,13 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
       printf("L1  bit %2i %20s: %2i\n", i, mfv::l1_paths[i], floats->L1decisions[i]);
   }
 
+  for (int i = 0; i < mfv::n_filter_paths; ++i) { 
+    if (npass_filter[i] >= mfv::filter_nreqs[i])
+      floats->FLTdecisions[i] = true;
+    else
+      floats->FLTdecisions[i] = false;
+  }
+
   edm::Handle<pat::JetCollection> jets;
   event.getByToken(jets_token, jets);
 
@@ -545,8 +558,11 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
       if (pt > 40) floats->ht += pt;
     }
 
-  if (prints)
-    printf("# all jets: %lu  selected: %i (>20GeV: %i) jetpt1: %f  2: %f  ht: %f\n", jets->size(), floats->njets(), floats->njets(20), floats->jetpt1(), floats->jetpt2(), floats->ht);
+  if (prints) {
+    printf("# all jets: %lu  selected: %i (>30GeV: %i) jetpt1: %f  2: %f  ht(30): %f\n", jets->size(), floats->njets(), floats->njets(30), floats->jetpt1(), floats->jetpt2(), floats->htptgt30);
+    for (int i = 0; i < mfv::n_filter_paths; ++i)
+      printf("%s,  npass: %i   Filter Passed: %i \n", mfv::filter_paths[i], npass_filter[i], floats->FLTdecisions[i]);
+  }
 
   event.put(std::move(floats));
 }

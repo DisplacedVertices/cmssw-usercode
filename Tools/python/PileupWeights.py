@@ -21,6 +21,7 @@ pileup_weights = _parse()
 
 def get_pileup_weights(sample, cross=None):
     from JMTucker.Tools.Year import year
+    print("Sample:" , sample, "year: ", year)
     weights = pileup_weights.get(sample, pileup_weights[year])
     if cross:
         cross = 'cross_%s' % cross

@@ -35,7 +35,6 @@ private:
 
   const int apply_presel;
 
-  const bool require_met_filters;
   const bool require_bquarks;
   const int l1_bit;
   const int trigger_bit;
@@ -90,7 +89,6 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     use_mevent(mevent_src.label() != ""),
     apply_presel(cfg.getParameter<int>("apply_presel")),
-    require_met_filters(cfg.getParameter<bool>("require_met_filters")),
     require_bquarks(cfg.getParameter<bool>("require_bquarks")),
     l1_bit(apply_presel ? -1 : cfg.getParameter<int>("l1_bit")),
     trigger_bit(apply_presel ? -1 : cfg.getParameter<int>("trigger_bit")),
@@ -197,9 +195,6 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       bool success = false;
       for(size_t trig : mfv::HTOrBjetOrDisplacedDijetTriggers){
 
-        // skip HT trigger
-        if(trig == mfv::b_HLT_PFHT1050) continue;
-
         if(satisfiesTrigger(mevent, trig)){
           success = true;
           break;
@@ -208,28 +203,21 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       if(!success) return false;
     }
 
-    // MET trigger
-
-    if (apply_presel == 5) {
-
-      // Veto events which pass HT trigger and offline HT > 1200 GeV, to keep orthogonal with apply_presel == 1
-      if(satisfiesTrigger(mevent, mfv::b_HLT_PFHT1050)) return false;
-
-      if ( !satisfiesTrigger(mevent, mfv::b_HLT_PFMET120_PFMHT120_IDTight) ){
-        return false;
-      }
-    }
-
-    // Events with MET lower than threshold
     if (apply_presel == 6) {
-      // Veto events which pass HT trigger and offline HT > 1200 GeV, to keep orthogonal with apply_presel == 1
-      if(satisfiesTrigger(mevent, mfv::b_HLT_PFHT1050)) return false;
 
-      if (mevent->met()>=150) return false;
+      bool success = false;
+      for(size_t trig : mfv::HTOrBjetOrDisplacedDijetTriggers){
+
+        // remain agnostic to the HT1050 trigger
+        if (trig == mfv::b_HLT_PFHT1050) continue;
+
+        if(satisfiesTrigger(mevent, trig)){
+          success = true;
+          break;
+        }
+      }
+      if(!success) return false;
     }
-
-    if (require_met_filters && (!mevent->pass_metfilters))
-      return false;
 
     if (require_bquarks && mevent->gen_flavor_code != 2)
       return false;
@@ -422,8 +410,27 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
   // note that if these weren't pT ordered, we'd have to be more careful in the loops...
   int njets = mevent->njets(20);
 
-  // note that this could be loosened if desired
-  int nbtaggedjets = mevent->nbtags(jmt::BTagging::tight);
+  // note that this could be loosened/tightened if desired
+  int medcsvtags      = 0;
+  int meddeepcsvtags  = 0;
+  int hardmedcsvtags     = 0;
+  int hardmeddeepcsvtags = 0;
+
+  float alt_calo_ht = 0.0; // To account for the fact that calo_jet_ht uses jets up to eta 5.0. We don't want that
+  for (int ic=0, ice=mevent->calo_jet_pt.size(); ic < ice; ic++) {
+    if (mevent->calo_jet_pt[ic] > 40.0 and fabs(mevent->calo_jet_eta[ic]) < 2.5) alt_calo_ht += mevent->calo_jet_pt[ic];
+  }
+
+  for(int j0 = 0; j0 < njets; j0++) {
+    if (mevent->jet_bdisc_csv[j0]     > jmt::BTagging::discriminator_min(1, 0)){
+       medcsvtags++;
+       if (mevent->jet_pt[j0] > 80.0) hardmedcsvtags++;
+    }
+    if (mevent->jet_bdisc_deepcsv[j0] > jmt::BTagging::discriminator_min(1, 1)){ 
+      meddeepcsvtags++; 
+      if (mevent->jet_pt[j0] > 80.0) hardmeddeepcsvtags++;
+    }
+  }
 
   // for the trigger chains where we need to do any detailed matching
   bool passed_kinematics = false;
@@ -431,16 +438,16 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
   switch(trig){
     case mfv::b_HLT_PFHT1050 :
       return mevent->jet_ht(40) >= 1200 && mevent->njets(20) >= 4;
+
     case mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33 :
       {
-        if(njets < 4) return false;
-        if(nbtaggedjets < 2) return false;
+        if(hardmedcsvtags < 2) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
-          if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 140) continue;
+          if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 125) continue;
 
           for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 140) continue;
+            if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 125) continue;
 
             if(fabs(mevent->jet_eta[j0] - mevent->jet_eta[j1]) < 1.6){
               passed_kinematics = true;
@@ -449,22 +456,23 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
         }
         return passed_kinematics;
       }
+
     case mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0 :
       {
-        if(mevent->jet_ht(30) < 450 || njets < 4) return false;
-        if(nbtaggedjets < 3) return false;
+        if(mevent->jet_ht(30) < 350 || njets < 4) return false;
+        if(medcsvtags < 3) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
-          if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 100) continue;
+          if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 90) continue;
 
           for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 85) continue;
+            if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 75) continue;
 
             for(int j2 = j1+1; j2 < njets; ++j2){
-              if(!jet_hlt_match(mevent, j2) || mevent->jet_pt[j2] < 70) continue;
+              if(!jet_hlt_match(mevent, j2) || mevent->jet_pt[j2] < 55) continue;
 
               for(int j3 = j2+1; j3 < njets; ++j3){
-                if(!jet_hlt_match(mevent, j3) || mevent->jet_pt[j3] < 65) continue;
+                if(!jet_hlt_match(mevent, j3) || mevent->jet_pt[j3] < 55) continue;
 
                 passed_kinematics = true;
               }
@@ -473,86 +481,186 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
         }
         return passed_kinematics;
       }
-      case mfv::b_HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71 :
-      {
-        if(njets < 4) return false;
-        if(nbtaggedjets < 2) return false;
 
-        for(int j0 = 0; j0 < njets; ++j0){
-          if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 156) continue;
+    case mfv::b_HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71 :
+    {
+      if(hardmeddeepcsvtags < 2) return false;
 
-          for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 156) continue;
+      for(int j0 = 0; j0 < njets; ++j0){
+        if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 140) continue;
 
-            if(fabs(mevent->jet_eta[j0] - mevent->jet_eta[j1]) < 1.6){
+        for(int j1 = j0+1; j1 < njets; ++j1){
+          if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 140) continue;
+
+          if(fabs(mevent->jet_eta[j0] - mevent->jet_eta[j1]) < 1.6){
+            passed_kinematics = true;
+          }
+        }
+      }
+      return passed_kinematics;
+    }
+
+    case mfv::b_HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5 :
+    {
+      if(mevent->jet_ht(30) < 385 || njets < 4) return false;
+      if(meddeepcsvtags < 3) return false;
+
+      for(int j0 = 0; j0 < njets; ++j0){
+        if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 90) continue;
+
+        for(int j1 = j0+1; j1 < njets; ++j1){
+          if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 75) continue;
+
+          for(int j2 = j1+1; j2 < njets; ++j2){
+            if(!jet_hlt_match(mevent, j2) || mevent->jet_pt[j2] < 55) continue;
+
+            for(int j3 = j2+1; j3 < njets; ++j3){
+              if(!jet_hlt_match(mevent, j3) || mevent->jet_pt[j3] < 55) continue;
+
               passed_kinematics = true;
             }
           }
         }
-        return passed_kinematics;
       }
-      case mfv::b_HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5 :
-      {
-        if(mevent->jet_ht(30) < 480 || njets < 4) return false;
-        if(nbtaggedjets < 3) return false;
+      return passed_kinematics;
+    }
 
-        for(int j0 = 0; j0 < njets; ++j0){
-          if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 115) continue;
+    case mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack :
+    {
+      if(alt_calo_ht < 500 || njets < 2) return false;
 
-          for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 100) continue;
+      for(int j0 = 0; j0 < njets; ++j0){
+        //if(!displaced_jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 50) continue; //FIXME
+        if(mevent->jet_pt[j0] < 50) continue;
 
-            for(int j2 = j1+1; j2 < njets; ++j2){
-              if(!jet_hlt_match(mevent, j2) || mevent->jet_pt[j2] < 85) continue;
+        for(int j1 = j0+1; j1 < njets; ++j1){
+          //if(!displaced_jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 50) continue; //FIXME
+          if(mevent->jet_pt[j1] < 50) continue;
+          passed_kinematics = true;
+        }
+      }
+      return passed_kinematics;
+    }
 
-              for(int j3 = j2+1; j3 < njets; ++j3){
-                if(!jet_hlt_match(mevent, j3) || mevent->jet_pt[j3] < 80) continue;
+    case mfv::b_HLT_HT650_DisplacedDijet60_Inclusive :
+    {
+      if(alt_calo_ht < 700 || njets < 2) return false;
+      for(int j0 = 0; j0 < njets; ++j0){
+        //if(!displaced_jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 80) continue; //FIXME
+        if(mevent->jet_pt[j0] < 80) continue;
 
-                passed_kinematics = true;
-              }
+        for(int j1 = j0+1; j1 < njets; ++j1){
+          //if(!displaced_jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 80) continue; //FIXME
+          if(mevent->jet_pt[j1] < 80) continue;
+          passed_kinematics = true;
+        }
+      }
+      return passed_kinematics;
+    }
+
+    // Start 2016 bjet and displaced dijet triggers here
+    case mfv::b_HLT_HT350_DisplacedDijet40_DisplacedTrack :
+    {
+      if(alt_calo_ht < 350 || njets < 2) return false;
+
+      for(int j0 = 0; j0 < njets; ++j0){
+        if(!displaced_jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 40) continue;
+
+        for(int j1 = j0+1; j1 < njets; ++j1){
+          if(!displaced_jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 40) continue;
+          passed_kinematics = true;
+        }
+      }
+      return passed_kinematics;
+    }
+    case mfv::b_HLT_HT650_DisplacedDijet80_Inclusive :
+    {
+      if(alt_calo_ht < 650 || njets < 2) return false;
+
+      for(int j0 = 0; j0 < njets; ++j0){
+        if(!displaced_jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 80) continue;
+
+        for(int j1 = j0+1; j1 < njets; ++j1){
+          if(!displaced_jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 80) continue;
+          passed_kinematics = true;
+        }
+      }
+      return passed_kinematics;
+    }
+
+    case mfv::b_HLT_QuadJet45_TripleBTagCSV_p087 :
+    {
+      if(mevent->jet_ht(30) < 180 || njets < 4) return false;
+      if(medcsvtags < 3) return false;
+
+      for(int j0 = 0; j0 < njets; ++j0){
+        if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 45) continue;
+
+        for(int j1 = j0+1; j1 < njets; ++j1){
+          if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 45) continue;
+
+          for(int j2 = j1+1; j2 < njets; ++j2){
+            if(!jet_hlt_match(mevent, j2) || mevent->jet_pt[j2] < 45) continue;
+
+            for(int j3 = j2+1; j3 < njets; ++j3){
+              if(!jet_hlt_match(mevent, j3) || mevent->jet_pt[j3] < 45) continue;
+
+              passed_kinematics = true;
             }
           }
         }
-        return passed_kinematics;
       }
-      case mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack :
-      {
-        if(mevent->jet_ht(40) < 580 || njets < 4) return false;
+      return passed_kinematics;
 
-        for(int j0 = 0; j0 < njets; ++j0){
-          if(!displaced_jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 80) continue;
+    }
 
-          for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!displaced_jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 80) continue;
+    case mfv::b_HLT_DoubleJet90_Double30_TripleBTagCSV_p087 :
+    {
+      if(mevent->jet_ht(30) < 200 || njets < 4) return false;
+      if(medcsvtags < 3) return false;
+
+      for(int j0 = 0; j0 < njets; ++j0){
+        if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 90) continue;
+
+        for(int j1 = j0+1; j1 < njets; ++j1){
+          if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 90) continue;
+
+          for(int j2 = j1+1; j2 < njets; ++j2){
+            if(!jet_hlt_match(mevent, j2) || mevent->jet_pt[j2] < 30) continue;
+
+            for(int j3 = j2+1; j3 < njets; ++j3){
+              if(!jet_hlt_match(mevent, j3) || mevent->jet_pt[j3] < 30) continue;
+
+              passed_kinematics = true;
+            }
+          }
+        }
+      }
+      return passed_kinematics;
+    }
+
+    case mfv::b_HLT_DoubleJetsC100_DoubleBTagCSV_p014_DoublePFJetsC100MaxDeta1p6 :
+    {
+      if(hardmedcsvtags < 2) return false;
+
+      for(int j0 = 0; j0 < njets; ++j0){
+        if(!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 100) continue;
+
+        for(int j1 = j0+1; j1 < njets; ++j1){
+          if(!jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 100) continue;
+
+          if(fabs(mevent->jet_eta[j0] - mevent->jet_eta[j1]) < 1.6){
             passed_kinematics = true;
           }
         }
-        return passed_kinematics;
       }
-      case mfv::b_HLT_HT650_DisplacedDijet60_Inclusive :
-      {
-        if(mevent->jet_ht(40) < 800 || njets < 4) return false;
-
-        for(int j0 = 0; j0 < njets; ++j0){
-          if(!displaced_jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 100) continue;
-
-          for(int j1 = j0+1; j1 < njets; ++j1){
-            if(!displaced_jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 100) continue;
-            passed_kinematics = true;
-          }
-        }
-        return passed_kinematics;
-      }
-      case mfv::b_HLT_PFMET120_PFMHT120_IDTight :
-      {
-        //if(mevent->met() < 150 || njets < 2) return false; // cut on MET to avoid turn-on region, maybe cut value need to be determined
-        //if (njets < 2) return false;
-        return true;
-      }
-      default :
-      {
-        throw std::invalid_argument(std::string(mfv::hlt_paths[trig]) + " not implemented in satisfiesTrigger");
-      }
+      return passed_kinematics;
+    }
+    
+    default :
+    {
+      throw std::invalid_argument(std::string(mfv::hlt_paths[trig]) + " not implemented in satisfiesTrigger");
+    }
   }
 
   return false;

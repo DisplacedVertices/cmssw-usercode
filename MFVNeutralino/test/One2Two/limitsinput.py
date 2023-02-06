@@ -9,7 +9,10 @@ set_style()
 
 class Params(object):
     def __init__(self):
-        self.bins = to_array(0., 0.04, 0.07, 4)
+        # Currently, bin size is 0.004, so make self.bins multiples of that value
+        self.step = 0.004
+        self.ns   = 20
+        self.bins = to_array(0., 0.040+(self.step*self.ns), 0.10+(self.step*self.ns), 4.)
         self.nbins = len(self.bins)-1
         # 2015 is included in 2016. We scale/sum up 2015, 2016hip, 2016nonhip below, instead of that being done separately in
         # SignalEfficiencyCombiner--this simplifies the datacard and plot making downstream.
@@ -123,13 +126,14 @@ def make_bkg(f):
     def bkg_fn(year, which='default'):
         path = '/uscms/home/tucker/public/mfv/'
         if year == '2016':
-            return path + '2v_from_jets_data_2015p6_5track_default_v15_v5.root'
+            return '2v_from_jets_2017_5track_btags_V27m.root'
+            #return path + '2v_from_jets_data_2015p6_5track_default_v15_v5.root'
         else:
             if which == 'c':
                 which = 'btag_corrected_nom'
             else:
                 assert which == 'default'
-            return path + '2v_from_jets_data_%s_5track_%s_V27m.root' % (year, which)
+            return '2v_from_jets_2017_5track_btags_V27m.root'
 
     def bkg_f(year, which='default', _c={}):
         k = year, which
@@ -152,17 +156,19 @@ def make_bkg(f):
             h_observed.SetBinContent(i+1, v)
     
         h_bkg_dbv = to_TH1D( bkg_f(year).Get('h_1v_dbv'),  'h_bkg_dbv_%s' % year)
-        h_bkg_dvv = to_TH1D(cbkg_f(year).Get('h_c1v_dvv'), 'h_bkg_dvv_%s' % year)
+        h_bkg_sumdbv = to_TH1D(cbkg_f(year).Get('h_c1v_sumdbv'), 'h_bkg_sumdbv_%s' % year)
 
         h_bkg_dbv.Scale(bkg_n1v[y]/get_integral(h_bkg_dbv)[0])
-        h_bkg_dvv.Scale(bkg_n2v[y]/get_integral(h_bkg_dvv)[0])
+        h_bkg_sumdbv.Scale(bkg_n2v[y]/get_integral(h_bkg_sumdbv)[0])
 
-        h = h_bkg_dvv_rebin = h_bkg_dvv.Rebin(gp.nbins, 'h_bkg_dvv_rebin_%s' % year, gp.bins)
-        move_overflow_into_last_bin(h_bkg_dvv_rebin)
-        for i in xrange(gp.nbins):
-            if abs(bkg_c1v[y][i] - h.GetBinContent(i+1)/bkg_n2v[y]) > 0.001:
-                print y,i, bkg_c1v[y][i], h.GetBinContent(i+1)/bkg_n1v[y]
-                assert 0
+        h = h_bkg_sumdbv_rebin = h_bkg_sumdbv.Rebin(gp.nbins, 'h_bkg_sumdbv_rebin_%s' % year, gp.bins)
+        move_overflow_into_last_bin(h_bkg_sumdbv_rebin)
+        # FIXME this commented block didn't work while running on 17+18 UL samples. Figure out why
+        # and fix it
+        #for i in xrange(gp.nbins):
+        #    if abs(bkg_c1v[y][i] - h.GetBinContent(i+1)/bkg_n2v[y]) > 0.001:
+        #        print y,i, bkg_c1v[y][i], h.GetBinContent(i+1)/bkg_n1v[y]
+        #        assert 0
 
         h_bkg_uncert = ROOT.TH1D('h_bkg_uncert_%s' % year, '', gp.nbins, gp.bins)
         h_bkg_stat_uncert = ROOT.TH1D('h_bkg_uncert_stat_%s' % year, '', gp.nbins, gp.bins)
@@ -175,7 +181,7 @@ def make_bkg(f):
             h_bkg_syst_uncert.SetBinContent(i+1, v)
 
         f.cd()            
-        for h in h_int_lumi, h_observed, h_bkg_dbv, h_bkg_dvv, h_bkg_dvv_rebin, h_bkg_uncert, h_bkg_stat_uncert, h_bkg_syst_uncert:
+        for h in h_int_lumi, h_observed, h_bkg_dbv, h_bkg_sumdbv, h_bkg_sumdbv_rebin, h_bkg_uncert, h_bkg_stat_uncert, h_bkg_syst_uncert:
             h.SetTitle('')
             h.Write()
 
@@ -323,10 +329,10 @@ def make_signals_2015p6(f, name_list):
             ngens = [1e-3/h.GetBinContent(2) for h in norms]
             ngentot = sum(ngens[1:]) # hip/nonhip are the only independent samples, 2015 is just 2016 that we rescale
 
-            for n in 'dbv', 'dphi', 'dvv', 'dvv_rebin':
+            for n in 'dbv', 'dphi', 'sumdbv', 'sumdbv_rebin':
                 hs = _hs(old_bn + n)
                 for h,ng,sf,il in zip(hs, ngens, sfs, int_lumis):
-                    if n == 'dbv' or n == 'dvv':
+                    if n == 'dbv' or n == 'sumdbv':
                         h.Rebin(10) # did too many bins last time
                     h.Scale(sf(mass) * 1e-3 * il / ng)
 
@@ -484,8 +490,9 @@ def sig_uncert_2017p8(name_year, debug=False):
 
 def make_signals_2017p8(f, name_list):
     # 2017,8 are from minitrees (the 100kevt official samples) and scanpack.
-    scanpack_list = '/uscms/home/tucker/public/mfv/scanpacks/2017p8/scanpack1D_4_4p7_4p8.merged.list.gz'
-    trees = '/uscms_data/d2/tucker/crab_dirs/MiniTreeV27m/mfv*.root'
+    #scanpack_list = '/uscms/home/tucker/public/mfv/scanpacks/2017p8/scanpack1D_4_4p7_4p8.merged.list.gz'
+    scanpack_list = ''
+    trees = '/uscms_data/d3/shogan/crab_dirs/MiniTreeULV1Bm/*.root'
     title = []
     sigs = {}
 
@@ -537,13 +544,13 @@ def make_signals_2017p8(f, name_list):
 
         ROOT.TH1.AddDirectory(1) # the Draw>> output goes off into the ether without this stupid crap
         h_dbv  = ROOT.TH1D(n('dbv'),  '', 1250, 0, 2.5)
-        h_dvv  = ROOT.TH1D(n('dvv'),  '', 400, 0, 4)
+        h_sumdbv  = ROOT.TH1D(n('sumdbv'),  '', 400, 0, 4)
         h_dphi = ROOT.TH1D(n('dphi'), '', 10, -3.15, 3.15)
         t.Draw('dist0>>%s'  % n('dbv'),  'weight*(limitsinput_pass && nvtx==1)')
-        t.Draw('svdist>>%s' % n('dvv'),  'weight*(limitsinput_pass && nvtx>=2)')
+        t.Draw('sumdbv>>%s' % n('sumdbv'),  'weight*(limitsinput_pass && nvtx>=2)')
         t.Draw('svdphi>>%s' % n('dphi'), 'weight*(limitsinput_pass && nvtx>=2)')
         ROOT.TH1.AddDirectory(0)
-        for h in h_dbv, h_dvv, h_dphi:
+        for h in h_dbv, h_sumdbv, h_dphi:
             h.SetDirectory(0)
             h.Scale(scale)
             if 'dbv' in h.GetTitle():
@@ -551,8 +558,8 @@ def make_signals_2017p8(f, name_list):
             else:
                 h.Scale(data_mc_scale**2)
         
-        h_dvv_rebin = h_dvv.Rebin(gp.nbins, n('dvv_rebin'), gp.bins)
-        move_overflow_into_last_bin(h_dvv_rebin)
+        h_sumdbv_rebin = h_sumdbv.Rebin(gp.nbins, n('sumdbv_rebin'), gp.bins)
+        move_overflow_into_last_bin(h_sumdbv_rebin)
 
         h_ngen = ROOT.TH1D(n('ngen'), '', 1,0,1)
         h_ngen.SetBinContent(1, ngen)
@@ -562,7 +569,7 @@ def make_signals_2017p8(f, name_list):
             h_uncert.SetBinContent(i+1, v)
         
         f.cd()
-        for h in h_dbv, h_dphi, h_dvv, h_dvv_rebin, h_uncert, h_ngen:
+        for h in h_dbv, h_dphi, h_sumdbv, h_sumdbv_rebin, h_uncert, h_ngen:
             h.SetTitle(name_year)
             h.Write()
 
@@ -582,7 +589,7 @@ def make():
     make_bkg(f)
 
     name_list = {}
-    make_signals_2015p6(f, name_list)
+    #make_signals_2015p6(f, name_list)
     make_signals_2017p8(f, name_list)
 
     title = name_list.pop('title')
@@ -624,19 +631,19 @@ def ngen(f, isample, year):
 '''
 def h_dbv(f, isample):
     return f.Get('h_signal_%i_dbv' % isample)
-def h_dvv(f, isample):
-    return f.Get('h_signal_%i_dvv_rebin' % isample)
+def h_sumdbv(f, isample):
+    return f.Get('h_signal_%i_sumdbv_rebin' % isample)
 
 def i1v(f, isample):
     return h_dbv(f, isample).GetEntries()
 def i2v(f, isample):
-    return h_dvv(f, isample).GetEntries()
+    return h_sumdbv(f, isample).GetEntries()
 
 def n1v(f, isample):
     h = h_dbv(f, isample)
     return h.Integral(0, h.GetNbinsX()+2)
 def n2v(f, isample):
-    h = h_dvv(f, isample)
+    h = h_sumdbv(f, isample)
     return h.Integral(0, h.GetNbinsX()+2)
 
 def _eff(fcn, f, isample):
@@ -685,7 +692,7 @@ def draw():
         return h
     
     for which_name, which in whiches: 
-        hbkg = fmt(f.Get('h_bkg_dvv'), 'bkg', ROOT.kBlack)
+        hbkg = fmt(f.Get('h_bkg_sumdbv'), 'bkg', ROOT.kBlack)
         hbkg.Draw('hist e')
         hbkg.GetYaxis().SetRangeUser(0,1.5)
 
@@ -694,7 +701,7 @@ def draw():
         leg.AddEntry(hbkg, 'Background template d_{VV}^{C}', 'LE')
 
         for isample, color, title in which:
-            h = fmt(f.Get('h_signal_%i_dvv' % isample), title, color)
+            h = fmt(f.Get('h_signal_%i_sumdbv' % isample), title, color)
             h.Draw('hist e same')
             leg.AddEntry(h, title, 'LE')
 
@@ -733,8 +740,8 @@ def compare(fn1, fn2, outbase):
     h_eff2v = make_h_fcn('eff2v', eff2v)
     h_dbvmean = make_h_fcn('dbvmean', lambda f,isample: (h_dbv(f,isample).GetMean(), h_dbv(f,isample).GetMeanError()))
     h_dbvrms  = make_h_fcn('dbvrms',  lambda f,isample: (h_dbv(f,isample).GetRMS(),  h_dbv(f,isample).GetRMSError() ))
-    h_dvvmean = make_h_fcn('dvvmean', lambda f,isample: (h_dvv(f,isample).GetMean(), h_dvv(f,isample).GetMeanError()))
-    h_dvvrms  = make_h_fcn('dvvrms',  lambda f,isample: (h_dvv(f,isample).GetRMS(),  h_dvv(f,isample).GetRMSError() ))
+    h_sumdbvmean = make_h_fcn('sumdbvmean', lambda f,isample: (h_sumdbv(f,isample).GetMean(), h_sumdbv(f,isample).GetMeanError()))
+    h_sumdbvrms  = make_h_fcn('sumdbvrms',  lambda f,isample: (h_sumdbv(f,isample).GetRMS(),  h_sumdbv(f,isample).GetRMSError() ))
 
     all_stat_same, all_same = True, True
 

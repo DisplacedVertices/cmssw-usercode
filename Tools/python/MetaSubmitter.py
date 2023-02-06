@@ -222,7 +222,7 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
     elif jobtype == 'ntuple' or jobtype == 'trackmover':
         # Shed/presel_splitting.py
         d = {'miniaod': {
-                'signal':           ( 1,     200),
+                'signal':           ( 5,    7500),
                 'JetHT':            (15, 1350000),
                 'MET':              (15, 1350000),
                 'qcdht0300_2017':   (5, 3130000),

@@ -48,8 +48,9 @@ namespace mfv {
     float jet_phi[50];
     float jet_energy[50];
     unsigned char jet_id[50];
-    float jet_bdisc_old[50];
-    float jet_bdisc[50];
+    float jet_bdisc_csv[50];
+    float jet_bdisc_deepcsv[50];
+    float jet_bdisc_deepflav[50];
     float jet_hlt_pt[50];
     float jet_hlt_eta[50];
     float jet_hlt_phi[50];
@@ -70,7 +71,7 @@ namespace mfv {
     }
     float ht(float min_jet_pt=40.) const;
     bool is_btagged(int i, float min_bdisc=jmt::BTagging::discriminator_min(jmt::BTagging::tight)) const;
-    int nbtags_(float min_bdisc, bool old) const;
+    int nbtags_(float min_bdisc, int tagger) const;
     int nbtags_old(float min_bdisc) const { return nbtags_(min_bdisc, true); }
     int nbtags(float min_bdisc) const { return nbtags_(min_bdisc, false); }
 
@@ -99,7 +100,7 @@ namespace mfv {
     std::vector<TLorentzVector>* p_gen_bquarks;
     std::vector<TLorentzVector>* p_gen_leptons;
     
-    MFVVertexAuxCollection vertices;
+    //MFVVertexAuxCollection vertices;
 
     unsigned char nvtx;
     unsigned char ntk0;

@@ -184,9 +184,13 @@ def make(isample):
         return ' '.join(fmt % typ(v) for v in l)
 
     for year in years:
+        #setattr(r, 'observed_%s'    % year, st('h_observed_%s'      % year))
+        #setattr(r, 'bkg_rate_%s'    % year, st('h_bkg_dvv_rebin_%s' % year))
+        #setattr(r, 'sig_rate_%s'    % year, st(r.hs_dvv_rebin[year]))
+        #setattr(r, 'sig_uncert_%s'  % year, st(r.hs_uncert[year]))
         setattr(r, 'observed_%s'    % year, st('h_observed_%s'      % year))
-        setattr(r, 'bkg_rate_%s'    % year, st('h_bkg_dvv_rebin_%s' % year))
-        setattr(r, 'sig_rate_%s'    % year, st(r.hs_dvv_rebin[year]))
+        setattr(r, 'bkg_rate_%s'    % year, st('h_bkg_sumdbv_rebin_%s' % year))
+        setattr(r, 'sig_rate_%s'    % year, st(r.hs_sumdbv_rebin[year]))
         setattr(r, 'sig_uncert_%s'  % year, st(r.hs_uncert[year]))
 
         ngen = r.ngens[year]

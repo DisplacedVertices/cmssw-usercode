@@ -591,7 +591,7 @@ def compare_hists(ps, samples, **kwargs):
             ratios_plot(name_clean,
                         hists,
                         plot_saver=ps,
-                        res_fit=False,
+                        res_fit='pol1',
                         res_divide_opt={'confint': propagate_ratio, 'force_le_1': False},
                         statbox_size=stat_size(name, hist_list, None),
                         res_y_range=0.15,

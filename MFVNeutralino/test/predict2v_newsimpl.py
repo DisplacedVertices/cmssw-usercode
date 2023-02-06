@@ -2,9 +2,11 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.general import *
 import pandas as pd
 
-presel_path = '/uscms_data/d2/tucker/crab_dirs/PreselHistosV27m'
+#presel_path = '/uscms_data/d2/tucker/crab_dirs/PreselHistosV27m'
 #sel_path = '/uscms_data/d3/dquach/crab3dirs/HistosV27m_moresidebands'
-sel_path = '/uscms/home/pkotamni/nobackup/crabdirs/Histos2trkmergedV27m' 
+#sel_path = '/uscms/home/pkotamni/nobackup/crabdirs/Histos2trkmergedV27m' 
+presel_path = '/uscms_data/d3/shogan/crab_dirs/PreselHistosFixUL18V1Bm'
+sel_path = '/uscms_data/d3/shogan/crab_dirs/HistosULV1Bm_moreSB_tightVtx'
 data = bool_from_argv('data')
 year = '2017' if len(sys.argv) < 2 else sys.argv[1]
 varname = 'nom' if len(sys.argv) < 3 else sys.argv[2] # use the BTV variations to compute syst shifts on pred2v
@@ -17,7 +19,10 @@ print_pred_n2v_propagated_stat_err = True
 if data:
     fn, presel_scale = 'JetHT%s.root' % year, 1.
 else:
-    fn, presel_scale = 'background_%s.root' % year, 1.
+    fn, presel_scale = 'ttbar_%s.root' % year, 0.14
+    #fn, presel_scale = 'background_%s.root' % year, 1.
+
+sel_scale = 0.14
 
 def propagate_product(x, y, ex, ey):
     p = x * y
@@ -61,7 +66,9 @@ for ntk in 3,4,5,7,8,9:
 npresel, enpresel = get_integral(presel_f.Get('mfvEventHistosJetPreSel/h_npu'))
 npresel  *= presel_scale
 enpresel *= presel_scale
-f0 = fracdict['presel']
+f0 = 0.8 #FIXME
+#f0 = fracdict['presel']
+
 
 print 'year:', year
 print 'presel events: %8.0f +- %4.0f' % (npresel, enpresel)
@@ -79,8 +86,13 @@ sum2_en1v = 0 #the quadratic sum of errors due each 1-vtx input(MC or observed)
 for ntk in 3,4,5:
     n1v, en1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
     n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
+    n1v  *= sel_scale
+    en1v *= sel_scale
+    n2v  *= sel_scale
+    en2v *= sel_scale
     sum_n1v += n1v
-    f1 = fracdict[ntk]['1v']
+    f1 = 0.98 #FIXME
+    #f1 = fracdict[ntk]['1v']
     alpha = ((f0 - f1)*(f0 - f1)) - (f0*(f0-1)) #simplified alphas by assume Cb and Cbbar are about the same for all track multiplicities  
     alpha_nn[ntk] = alpha
     sum_rest += (n2v/alpha)
@@ -106,6 +118,12 @@ for ntk in 'Ntk3or4','Ntk3or5', 'Ntk4or5':
     n1v0, en1v0 = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % tracks[0]))
     n1v1, en1v1 = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % tracks[1]))
     n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ntk))
+    n1v0*=sel_scale
+    en1v0*=sel_scale
+    n1v1*=sel_scale
+    en1v1*=sel_scale
+    n2v*=sel_scale
+    en2v*=sel_scale
     alpha = ((f0 - f1[0])*(f0 - f1[1])) - (f0*(f0-1)) #simplified alphas by assume Cb and Cbbar are about the same for all track multiplicities     
     alpha_nm[ntk] = alpha
     sum_rest += (n2v/alpha)
@@ -116,11 +134,15 @@ for ntk in 'Ntk3or4','Ntk3or5', 'Ntk4or5':
 for ntk in 3,4,5:
     n1v, en1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
     n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
+    n1v  *= sel_scale
+    en1v *= sel_scale
+    n2v  *= sel_scale
+    en2v *= sel_scale
     n2v_poisson = poisson_interval(n2v)
     f1 = fracdict[ntk]['1v']
     cb = cdict[ntk]['cb']
     cbbar = cdict[ntk]['cbbar']
-    print 'start printing out beta + e_beta'
+    #print 'start printing out beta + e_beta'
     effn1v = n1v/sum_n1v
     eeffn1v = effn1v * math.sqrt( (en1v/n1v)**2 + ((sum2_en1v)/(sum_n1v**2)))
     #pred = n1v**2 / (npresel * (1-f0) * (f1 / (1-f1) + 1)**2) * ((f1 / (1 - f1))**2 * ((1 - f0) / f0) * cb + cbbar)
@@ -134,7 +156,7 @@ for ntk in 3,4,5:
         #pred_n2v_propagated_stat_err = 2 * (n1v * n1v / npresel) * (f1 * f1 / f0) * cb * math.sqrt( 1./(n1v*f1) ) + 2 * (n1v * n1v / npresel) * ( (1-f1) * (1-f1) / (1-f0) ) * cbbar * math.sqrt( 1./(n1v * (1-f1)) )
         pred_n2v_propagated_stat_err = pred * math.sqrt((eeffn1v/effn1v)**2 + (eeffn1v/effn1v)**2 + (sum2_erest/(sum_rest**2)))
         epred = pred_n2v_propagated_stat_err
-        print "pred_n2v_propagated_stat_err %8.3f (%8.3f percent)" % (pred_n2v_propagated_stat_err, (100*pred_n2v_propagated_stat_err/pred))
+        #print "pred_n2v_propagated_stat_err %8.3f (%8.3f percent)" % (pred_n2v_propagated_stat_err, (100*pred_n2v_propagated_stat_err/pred))
     print '%8.0f +- %4.0f %8.3f %8.3f %8.3f %9.3f +- %6.3f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.2f +- %.2f PI: [%4.2f, %4.2f]' % (n1v, en1v, f1, cb, cbbar, pred, epred, n2v, en2v, n2v_poisson[0], n2v_poisson[1], rat, erat, eratl, erath)
 print
 print '%16s %16s %8s %8s %8s %8s %19s %15s %35s' % ('n1v0', 'n1v1', 'f1_0', 'f1_1', 'cb', 'cbbar', 'pred n2v', 'n2v', 'ratio')
@@ -153,6 +175,12 @@ for ntk in 'Ntk3or4','Ntk3or5', 'Ntk4or5':
     n1v0, en1v0 = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % tracks[0]))
     n1v1, en1v1 = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % tracks[1]))
     n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ntk))
+    n1v0*=sel_scale
+    en1v0*=sel_scale
+    n1v1*=sel_scale
+    en1v1*=sel_scale
+    n2v*=sel_scale
+    en2v*=sel_scale
     cb = cdict[ntktot]['cb']
     cbbar = cdict[ntktot]['cbbar']
     n2v_poisson = poisson_interval(n2v)
@@ -171,6 +199,6 @@ for ntk in 'Ntk3or4','Ntk3or5', 'Ntk4or5':
         #pred_n2v_propagated_stat_err = (n1v0 * n1v1 / npresel) * (f1[0] * f1[1] / f0) * cb * math.sqrt( 1./(n1v0*f1[0]) + 1./(n1v1*f1[1]) ) + (n1v0 * n1v1 / npresel) * ( (1-f1[0]) * (1-f1[1]) / (1-f0) ) * cbbar * math.sqrt( 1./(n1v0 * (1-f1[0])) + 1./(n1v1 * (1-f1[1]))  )
         pred_n2v_propagated_stat_err = pred * math.sqrt((eeffn1v0/effn1v0)**2 + (eeffn1v1/effn1v1)**2 + (sum2_erest/(sum_rest**2)))
         epred = pred_n2v_propagated_stat_err    
-        print "pred_n2v_propagated_stat_err %8.3f (%8.3f percent)" % (pred_n2v_propagated_stat_err, (100*pred_n2v_propagated_stat_err/pred))
+        #print "pred_n2v_propagated_stat_err %8.3f (%8.3f percent)" % (pred_n2v_propagated_stat_err, (100*pred_n2v_propagated_stat_err/pred))
     print '%8.0f +- %4.0f %8.0f +- %4.0f %8.3f %8.3f %8.3f %8.3f %9.3f +- %6.3f %7.1f +- %4.1f  PI: [%5.1f, %5.1f] %7.2f +- %4.2f PI: [%4.2f, %4.2f]' % (n1v0, en1v0, n1v1, en1v1, f1[0], f1[1], cb, cbbar, pred, epred, n2v, en2v, n2v_poisson[0], n2v_poisson[1], rat, erat, eratl, erath)
 

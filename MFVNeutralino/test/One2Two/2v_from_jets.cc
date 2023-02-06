@@ -49,7 +49,7 @@ EOF
 #include "TVector2.h"
 #include "JMTucker/MFVNeutralino/interface/MiniNtuple.h"
 
-int dvv_nbins = 40;
+int dvv_nbins = 100;
 double dvv_bin_width = 0.01;
 std::vector<TString> cb_cbbar_vector = {};
 
@@ -75,7 +75,7 @@ struct ConstructDvvcParameters {
       is_mc_(true),
       only_10pc_(false),
       inject_signal_(false),
-      year_("2017"),
+      year_("2017p8"),
       ntracks_(5),
       bquarks_(-1),
       btags_(-1),
@@ -128,7 +128,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   const char* file_path; //which filepath?
   if (p.is_mc()) {
-    file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV27m";
+    file_path = "/uscms_data/d3/shogan/crab_dirs/MiniTreeULV1Bm";
   } else if (p.only_10pc()) {
     file_path = "/uscms_data/d2/tucker/crab_dirs/MiniTreeV27m";
   } else {
@@ -138,53 +138,59 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   const int nbkg = 27; //which samples?
   const char* samples[nbkg];
   float       weights[nbkg];
-  samples[0]  = "mfv_neu_tau001000um_M0800_2017"; weights[0]  = 0.00083;
-  samples[1]  = "qcdht0700_2017";                 weights[1]  = 5.53;
-  samples[2]  = "qcdht1000_2017";                 weights[2]  = 2.7;
-  samples[3]  = "qcdht1500_2017";                 weights[3]  = 0.353;
-  samples[4]  = "qcdht2000_2017";                 weights[4]  = 0.141;
-  samples[5]  = "ttbarht0600_2017";               weights[5]  = 0.123;
-  samples[6]  = "ttbarht0800_2017";               weights[6]  = 0.0959;
-  samples[7]  = "ttbarht1200_2017";               weights[7]  = 0.0664;
-  samples[8]  = "ttbarht2500_2017";               weights[8]  = 0.0339;
-  samples[9]  = "qcdht0700_2018";                 weights[9]  = 8.71;
-  samples[10] = "qcdht1000_2018";                 weights[10] = 4.34;
-  samples[11] = "qcdht1500_2018";                 weights[11] = 0.539;
-  samples[12] = "qcdht2000_2018";                 weights[12] = 0.22;
-  samples[13] = "ttbarht0600_2018";               weights[13] = 0.151;
-  samples[14] = "ttbarht0800_2018";               weights[14] = 0.134;
-  samples[15] = "ttbarht1200_2018";               weights[15] = 0.163;
-  samples[16] = "ttbarht2500_2018";               weights[16] = 0.0136;
-  samples[17] = "mfv_neu_tau001000um_M0400_2018"; weights[17] = 0.00119;
-  samples[18] = "JetHT2017B";                     weights[18] = 1;
-  samples[19] = "JetHT2017C";                     weights[19] = 1;
-  samples[20] = "JetHT2017D";                     weights[20] = 1;
-  samples[21] = "JetHT2017E";                     weights[21] = 1;
-  samples[22] = "JetHT2017F";                     weights[22] = 1;
-  samples[23] = "JetHT2018A";                     weights[23] = 1;
-  samples[24] = "JetHT2018B";                     weights[24] = 1;
-  samples[25] = "JetHT2018C";                     weights[25] = 1;
-  samples[26] = "JetHT2018D";                     weights[26] = 1;
+
+  // FIXME these weights are based off of the number of finished ntuples (which is
+  // close to, but not necessarily 100% of ntuples). When it comes time to do the
+  // final studies, we'll need to make sure ALL ntuples/minitrees finish, and then
+  // update some of the weights
+  samples[0]  = "mfv_neu_tau001000um_M0800_2017";  weights[0]  = 0.00083;
+  samples[1]  = "qcdht0200_2017";                  weights[1]  = 1148.46;
+  samples[2]  = "qcdht0300_2017";                  weights[2]  = 251.99;
+  samples[3]  = "qcdht0500_2017";                  weights[3]  = 135.6;
+  samples[4]  = "qcdht0700_2017";                  weights[4]  = 6.24;
+  samples[5]  = "qcdht1000_2017";                  weights[5]  = 2.96;
+  samples[6]  = "qcdht1500_2017";                  weights[6]  = 0.54;
+  samples[7]  = "qcdht2000_2017";                  weights[7]  = 0.17;
+  samples[8]  = "ttbar_2017";                      weights[8]  = 0.14;
+  samples[9]  = "qcdht0200_2018";                  weights[9]  = 1658.9;
+  samples[10] = "qcdht0200ext_2018";               weights[10] = 1658.9;
+  samples[11] = "qcdht0300_2018";                  weights[11] = 482.34;
+  samples[12] = "qcdht0500_2018";                  weights[12] = 30.62;
+  samples[13] = "qcdht0700_2018";                  weights[13] = 8.01;
+  samples[14] = "qcdht1000_2018";                  weights[14] = 6.86;
+  samples[15] = "qcdht1500_2018";                  weights[15] = 0.56;
+  samples[16] = "qcdht2000_2018";                  weights[16] = 0.29;
+  samples[17] = "ttbar_2018";                      weights[17] = 0.15;
+  samples[18] = "mfv_neu_tau001000um_M0400_2018";  weights[18] = 0.00119;
+  samples[19] = "JetHT2017B";                      weights[19] = 1;
+  samples[20] = "JetHT2017C";                      weights[20] = 1;
+  samples[21] = "JetHT2017D";                      weights[21] = 1;
+  samples[22] = "JetHT2017E";                      weights[22] = 1;
+  samples[23] = "JetHT2017F";                      weights[23] = 1;
+  samples[24] = "JetHT2018A";                      weights[24] = 1;
+  samples[25] = "JetHT2018B";                      weights[25] = 1;
+  samples[26] = "JetHT2018C";                      weights[26] = 1;
+  samples[27] = "JetHT2018D";                      weights[27] = 1;
 
   int ibkg_begin; int ibkg_end;
   if (p.is_mc()) {
     if (p.year() == "2017")         { ibkg_begin =  1; ibkg_end =  8; if (p.inject_signal()) ibkg_begin = 0; }
-    else if (p.year() == "2018")    { ibkg_begin =  9; ibkg_end = 16; if (p.inject_signal()) ibkg_end = 17; }
-    else if (p.year() == "2017p8")  { ibkg_begin =  1; ibkg_end = 16; if (p.inject_signal()) {ibkg_begin = 0; ibkg_end = 17;} }
+    else if (p.year() == "2018")    { ibkg_begin =  9; ibkg_end = 17; if (p.inject_signal()) ibkg_end = 18; }
+    else if (p.year() == "2017p8")  { ibkg_begin =  1; ibkg_end = 17; if (p.inject_signal()) {ibkg_begin = 0; ibkg_end = 18;} }
     else { fprintf(stderr, "bad year"); exit(1); }
   } else {
-    if (p.year() == "2017")         { ibkg_begin = 18; ibkg_end = 22; }
-    else if (p.year() == "2018")    { ibkg_begin = 23; ibkg_end = 26; }
-    else if (p.year() == "2017p8")  { ibkg_begin = 18; ibkg_end = 26; }
-    else if (p.year() == "2017B")   { ibkg_begin = 18; ibkg_end = 18; }
-    else if (p.year() == "2017C")   { ibkg_begin = 19; ibkg_end = 19; }
-    else if (p.year() == "2017D")   { ibkg_begin = 20; ibkg_end = 20; }
-    else if (p.year() == "2017E")   { ibkg_begin = 21; ibkg_end = 21; }
-    else if (p.year() == "2017F")   { ibkg_begin = 22; ibkg_end = 22; }
-    else if (p.year() == "2018A")   { ibkg_begin = 23; ibkg_end = 23; }
-    else if (p.year() == "2018B")   { ibkg_begin = 24; ibkg_end = 24; }
-    else if (p.year() == "2018C")   { ibkg_begin = 25; ibkg_end = 25; }
-    else if (p.year() == "2018D")   { ibkg_begin = 26; ibkg_end = 26; }
+    if (p.year() == "2017")         { ibkg_begin = 19; ibkg_end = 23; }
+    else if (p.year() == "2018")    { ibkg_begin = 24; ibkg_end = 27; }
+    else if (p.year() == "2017p8")  { ibkg_begin = 19; ibkg_end = 27; }
+    else if (p.year() == "2017B")   { ibkg_begin = 19; ibkg_end = 19; }
+    else if (p.year() == "2017C")   { ibkg_begin = 20; ibkg_end = 20; }
+    else if (p.year() == "2017D")   { ibkg_begin = 21; ibkg_end = 21; }
+    else if (p.year() == "2017E")   { ibkg_begin = 22; ibkg_end = 22; }
+    else if (p.year() == "2017F")   { ibkg_begin = 23; ibkg_end = 23; }
+    else if (p.year() == "2018A")   { ibkg_begin = 24; ibkg_end = 24; }
+    else if (p.year() == "2018B")   { ibkg_begin = 25; ibkg_end = 25; }
+    else if (p.year() == "2018C")   { ibkg_begin = 26; ibkg_end = 26; }
+    else if (p.year() == "2018D")   { ibkg_begin = 27; ibkg_end = 27; }
     else { fprintf(stderr, "bad year"); exit(1); }
   }
 
@@ -202,7 +208,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   double dphi_pdf_c; double dphi_pdf_e = 2; double dphi_pdf_a; //deltaphi input
   if (p.is_mc()) {
-    if (p.year() == "2017")         { dphi_pdf_c = 1.31; dphi_pdf_a = 4.60; }
+    if (p.year() == "2017")         { dphi_pdf_c = 1.40; dphi_pdf_a = 3.40; }
     else if (p.year() == "2018")    { dphi_pdf_c = 1.38; dphi_pdf_a = 3.77; }
     else if (p.year() == "2017p8")  { dphi_pdf_c = 1.34; dphi_pdf_a = 4.18; }
     else { fprintf(stderr, "bad year"); exit(1); }
@@ -225,9 +231,9 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   const char* vpeffs_version; //efficiency input
   if (p.only_10pc()) {
-    vpeffs_version = "V27m";
+    vpeffs_version = "ULV1Bm";
   } else {
-    vpeffs_version = "V27m";
+    vpeffs_version = "ULV1Bm";
   }
   TString eff_file_name = TString::Format("vpeffs%s_%s_%s%s.root", p.is_mc() ? "" : "_data", p.year().c_str(), vpeffs_version, p.vary_eff() ? "_ntkseeds" : "");
 
@@ -244,6 +250,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   //fill only-one-vertex dBV distribution
   TH1D* h_1v_dbv = new TH1D("h_1v_dbv", "only-one-vertex events;d_{BV} (cm);events", 1250, 0, 2.5);
+  TH2D* h_1v_xy  = new TH2D("h_1v_xy", "only-one-vertex events;x0 (cm);y0 (cm)", 250, -1.0, 1.0, 250, -1.0, 1.0);
   TH1D* h_1v_dbv0 = new TH1D("h_1v_dbv0", "only-one-vertex events;d_{BV}^{0} (cm);events", 1250, 0, 2.5);
   TH1D* h_1v_dbv1 = new TH1D("h_1v_dbv1", "only-one-vertex events;d_{BV}^{1} (cm);events", 1250, 0, 2.5);
   TH1F* h_1v_phiv = new TH1F("h_1v_phiv", "only-one-vertex events;vertex #phi;events", 50, -3.15, 3.15);
@@ -258,11 +265,12 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   TH1F* h_2v_dbv = new TH1F("h_2v_dbv", "two-vertex events;d_{BV} (cm);vertices", 1250, 0, 2.5);
   TH2F* h_2v_dbv1_dbv0 = new TH2F("h_2v_dbv1_dbv0", "two-vertex events;d_{BV}^{0} (cm);d_{BV}^{1} (cm)", 1250, 0, 2.5, 1250, 0, 2.5);
   TH1F* h_2v_dvv = new TH1F("h_2v_dvv", "two-vertex events;d_{VV} (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
-  TH1F* h_2v_sumdbv = new TH1F("h_2v_sumdbv", "two-vertex events; #Sigma(d_{BV})  (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
+  TH1F* h_2v_sumdbv = new TH1F("h_2v_sumdbv", "two-vertex events; #Sigma(d_{BV})  (cm);events", 100, 0., 1.);
   TH1F* h_2v_dphivv = new TH1F("h_2v_dphivv", "two-vertex events;#Delta#phi_{VV};events", 10, -3.15, 3.15);
   TH1F* h_2v_absdphivv = new TH1F("h_2v_absdphivv", "two-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
   TH1D* h_2v_npu = new TH1D("h_2v_npu", "two-vertex events;# PU interactions;events", 100, 0, 100);
 
+  std::cout << "ibkg_begin: " << ibkg_begin << "  ibkg_end: " << ibkg_end << std::endl;
   for (int i = ibkg_begin; i <= ibkg_end; ++i) {
     mfv::MiniNtuple nt;
     TString fn = TString::Format("%s/%s.root", file_path, samples[i]);
@@ -305,6 +313,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
       const float w = weights[i] * nt.weight;
       if (nt.nvtx == 1) {
         h_1v_dbv->Fill(sqrt(nt.x0*nt.x0 + nt.y0*nt.y0), w);
+        h_1v_xy->Fill(nt.x0, nt.y0, w);
         if (nt.ntk0 >= min_ntracks0 && nt.ntk0 <= max_ntracks0) h_1v_dbv0->Fill(sqrt(nt.x0*nt.x0 + nt.y0*nt.y0), w);
         if (nt.ntk0 >= min_ntracks1 && nt.ntk0 <= max_ntracks1) h_1v_dbv1->Fill(sqrt(nt.x0*nt.x0 + nt.y0*nt.y0), w);
         h_1v_phiv->Fill(atan2(nt.y0,nt.x0), w);
@@ -356,8 +365,8 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
   //construct dvvc
   TH1F* h_c1v_dbv = new TH1F("h_c1v_dbv", "constructed from only-one-vertex events;d_{BV} (cm);vertices", 1250, 0, 2.5);
-  TH1F* h_c1v_dvv = new TH1F("h_c1v_dvv", "constructed from only-one-vertex events;d_{VV} (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
-  TH1F* h_c1v_sumdbv = new TH1F("h_c1v_sumdbv", "constructed from only-one-vertex events;#Sigma(d_{BV}) (cm);events", dvv_nbins, 0, dvv_nbins * dvv_bin_width);
+  TH1F* h_c1v_dvv = new TH1F("h_c1v_dvv", "constructed from only-one-vertex events;d_{VV} (cm);events", 500, 0, 2.);
+  TH1F* h_c1v_sumdbv = new TH1F("h_c1v_sumdbv", "constructed from only-one-vertex events;#Sigma(d_{BV}) (cm);events", 500, 0, 2.);
   TH1F* h_c1v_absdphivv = new TH1F("h_c1v_absdphivv", "constructed from only-one-vertex events;|#Delta#phi_{VV}|;events", 5, 0, 3.15);
   TH1F* h_c1v_dbv0 = new TH1F("h_c1v_dbv0", "constructed from only-one-vertex events;d_{BV}^{0} (cm);events", 1250, 0, 2.5);
   TH1F* h_c1v_dbv1 = new TH1F("h_c1v_dbv1", "constructed from only-one-vertex events;d_{BV}^{1} (cm);events", 1250, 0, 2.5);
@@ -403,7 +412,8 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
     double dphi = f_dphi->GetRandom();
 
-    double dvvc = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(dphi));
+    double dvvc   = sqrt(dbv0*dbv0 + dbv1*dbv1 - 2*dbv0*dbv1*cos(dphi));
+    double sumdbv = dbv0 + dbv1;
 
     if (p.vary_dphi()) {
       double dphi2 = i_dphi2->GetX(i_dphi->Eval(dphi), 0, M_PI);
@@ -423,7 +433,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
 
     double prob = 1;
     if (p.clearing_from_eff()) {
-      prob = h_eff->GetBinContent(h_eff->FindBin(dvvc));
+      prob = h_eff->GetBinContent(h_eff->FindBin(sumdbv));
     }
 
     if (dvvc > dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width) dvvc = dvv_nbins * dvv_bin_width - 0.5*dvv_bin_width;
@@ -457,6 +467,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   TFile* fh = TFile::Open(out_fn, "recreate");
 
   h_1v_dbv->Write();
+  h_1v_xy->Write();
   h_1v_dbv0->Write();
   h_1v_dbv1->Write();
   h_1v_phiv->Write();
@@ -479,6 +490,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   h_c1v_dbv->Write();
   h_c1v_dvv->Scale(1./h_c1v_dvv->Integral());
   h_c1v_dvv->Write();
+  h_c1v_sumdbv->Scale(1./h_c1v_sumdbv->Integral());
   h_c1v_sumdbv->Write();
   h_c1v_absdphivv->Write();
   h_c1v_dbv0->Write();
@@ -540,6 +552,7 @@ void construct_dvvc(ConstructDvvcParameters p, const char* out_fn) {
   fh->Close();
 
   delete h_1v_dbv;
+  delete h_1v_xy;
   delete h_1v_dbv0;
   delete h_1v_dbv1;
   delete h_1v_phiv;

@@ -33,7 +33,7 @@ namespace mfv {
     gen_leptons.clear();
     gen_jet_ht = gen_jet_ht40 = 0;
     for (int i = 0; i < 50; ++i) {
-      jet_pt[i] = jet_eta[i] = jet_phi[i] = jet_energy[i] = jet_bdisc[i] = 0;
+      jet_pt[i] = jet_eta[i] = jet_phi[i] = jet_energy[i] = jet_bdisc_deepflav[i] = jet_bdisc_deepcsv[i] = jet_bdisc_csv[i] = 0;
       jet_hlt_pt[i] = jet_hlt_eta[i] = jet_hlt_phi[i] = jet_hlt_energy[i] = 0;
       displaced_jet_hlt_pt[i] = displaced_jet_hlt_eta[i] = displaced_jet_hlt_phi[i] = displaced_jet_hlt_energy[i] = 0;
       jet_id[i] = 0;
@@ -70,12 +70,12 @@ namespace mfv {
   }
 
   bool MiniNtuple::is_btagged(int i, float min_bdisc) const {
-    return jet_bdisc[i] >= min_bdisc;
+    return jet_bdisc_deepflav[i] >= min_bdisc;
   }
 
-  int MiniNtuple::nbtags_(float min_bdisc, bool old) const {
+  int MiniNtuple::nbtags_(float min_bdisc, int tagger) const {
     int sum = 0;
-    const float* bdisc = old ? jet_bdisc_old : jet_bdisc;
+    const float* bdisc = tagger==0 ? jet_bdisc_csv : tagger==1 ? jet_bdisc_deepcsv : jet_bdisc_deepflav;
     for (int i = 0; i < njets; ++i)
       if (bdisc[i] >= min_bdisc)
         ++sum;
@@ -470,8 +470,9 @@ namespace mfv {
     tree->Branch("jet_phi", nt.jet_phi, "jet_phi[njets]/F");
     tree->Branch("jet_energy", nt.jet_energy, "jet_energy[njets]/F");
     tree->Branch("jet_id", nt.jet_id, "jet_id[njets]/b");
-    tree->Branch("jet_bdisc_old", nt.jet_bdisc_old, "jet_bdisc_old[njets]/F");
-    tree->Branch("jet_bdisc", nt.jet_bdisc, "jet_bdisc[njets]/F");
+    tree->Branch("jet_bdisc_csv", nt.jet_bdisc_csv, "jet_bdisc_csv[njets]/F");
+    tree->Branch("jet_bdisc_deepcsv", nt.jet_bdisc_deepcsv, "jet_bdisc_deepcsv[njets]/F");
+    tree->Branch("jet_bdisc_deepflav", nt.jet_bdisc_deepflav, "jet_bdisc_deepflav[njets]/F");
     tree->Branch("jet_hlt_pt", nt.jet_hlt_pt, "jet_hlt_pt[njets]/F");
     tree->Branch("jet_hlt_eta", nt.jet_hlt_eta, "jet_hlt_eta[njets]/F");
     tree->Branch("jet_hlt_phi", nt.jet_hlt_phi, "jet_hlt_phi[njets]/F");
@@ -496,7 +497,7 @@ namespace mfv {
     tree->Branch("gen_leptons", &nt.gen_leptons, 32000, 0);
     tree->Branch("gen_jet_ht", &nt.gen_jet_ht);
     tree->Branch("gen_jet_ht40", &nt.gen_jet_ht40);
-    tree->Branch("vertices", &nt.vertices); 
+    //tree->Branch("vertices", &nt.vertices); 
     tree->Branch("nvtx", &nt.nvtx);
     tree->Branch("ntk0", &nt.ntk0);
     tree->Branch("tk0_qchi2", &nt.tk0_qchi2);
@@ -540,6 +541,7 @@ namespace mfv {
     tree->SetAlias("phi0",  "atan2(y0,x0)");
     tree->SetAlias("phi1",  "atan2(y1,x1)");
     tree->SetAlias("svdist",  "(nvtx >= 2) * sqrt((x0-x1)**2 + (y0-y1)**2)");
+    tree->SetAlias("sumdbv",  "(nvtx >= 2) * sqrt(x0**2 + y0**2) + sqrt(x1**2 + y1**2)");
     tree->SetAlias("svdphi",  "(nvtx >= 2) * TVector2::Phi_mpi_pi(atan2(y0,x0)-atan2(y1,x1))");
     tree->SetAlias("svdz",    "(nvtx >= 2) * (z0 - z1)");
   }
@@ -576,8 +578,9 @@ namespace mfv {
     tree->SetBranchAddress("jet_phi", nt.jet_phi);
     tree->SetBranchAddress("jet_energy", nt.jet_energy);
     tree->SetBranchAddress("jet_id", nt.jet_id);
-    tree->SetBranchAddress("jet_bdisc_old", nt.jet_bdisc_old);
-    tree->SetBranchAddress("jet_bdisc", nt.jet_bdisc);
+    tree->SetBranchAddress("jet_bdisc_csv", nt.jet_bdisc_csv);
+    tree->SetBranchAddress("jet_bdisc_deepcsv", nt.jet_bdisc_deepcsv);
+    tree->SetBranchAddress("jet_bdisc_deepflav", nt.jet_bdisc_deepflav);
     tree->SetBranchAddress("jet_hlt_pt", nt.jet_hlt_pt);
     tree->SetBranchAddress("jet_hlt_eta", nt.jet_hlt_eta);
     tree->SetBranchAddress("jet_hlt_phi", nt.jet_hlt_phi);
@@ -602,7 +605,7 @@ namespace mfv {
     tree->SetBranchAddress("gen_leptons", &nt.p_gen_leptons);
     tree->SetBranchAddress("gen_jet_ht", &nt.gen_jet_ht);
     tree->SetBranchAddress("gen_jet_ht40", &nt.gen_jet_ht40);
-    tree->SetBranchAddress("vertices",&nt.vertices);
+    //tree->SetBranchAddress("vertices",&nt.vertices);
     tree->SetBranchAddress("nvtx", &nt.nvtx);
     tree->SetBranchAddress("ntk0", &nt.ntk0);
     tree->SetBranchAddress("tk0_qchi2", &nt.p_tk0_qchi2);
@@ -648,6 +651,8 @@ namespace mfv {
     if (nt.p_gen_daughter_id) nnt->gen_daughter_id = *nt.p_gen_daughter_id;
     if (nt.p_gen_bquarks) nnt->gen_bquarks = *nt.p_gen_bquarks;
     if (nt.p_gen_leptons) nnt->gen_leptons = *nt.p_gen_leptons;
+
+    //nnt->vertices = nt.vertices;
     
     if (nt.p_tk0_qchi2) nnt->tk0_qchi2 = *nt.p_tk0_qchi2;
     if (nt.p_tk0_ndof ) nnt->tk0_ndof  = *nt.p_tk0_ndof;

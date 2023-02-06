@@ -4,7 +4,7 @@ debug = 'debug' in sys.argv
 dataset = 'miniaod' if 'miniaod' in sys.argv else 'main'
 
 tfileservice(process, 'gen_particles.root')
-sample_files(process, 'mfv_ddbar_tau01000um_M1600', dataset)
+#sample_files(process, 'mfv_ddbar_tau01000um_M1600', dataset)
 max_events(process, 1000)
 file_event_from_argv(process)
 

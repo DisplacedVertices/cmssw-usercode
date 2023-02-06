@@ -11,7 +11,7 @@ del process.outp
 del process.p
 
 dataset = 'miniaod' if settings.is_miniaod else 'main'
-sample_files(process, 'qcdht2000_2017' if settings.is_mc else 'JetHT2017F', dataset, 1)
+#sample_files(process, 'qcdht2000_2017' if settings.is_mc else 'JetHT2017F', dataset, 1)
 cmssw_from_argv(process)
 
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi')
@@ -24,7 +24,7 @@ process.mfvWeight.throw_if_no_mcstat = False
 
 process.mfvAnalysisCutsJet    = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False, apply_presel = 1)
 process.mfvAnalysisCutsLepton = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False, apply_presel = 2)
-process.mfvAnalysisCutsBJetDispJetVetoHT = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False, apply_presel = 4)
+process.mfvAnalysisCutsBJet   = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False, apply_presel = 4)
 
 process.preSeq = cms.Sequence(process.goodOfflinePrimaryVertices *
                               process.updatedJetsSeqMiniAOD *
@@ -46,11 +46,11 @@ def doit(name):
     setattr(process, '%sJetPreSel'       % name, obj.clone())
     setattr(process, '%sLeptonTriggered' % name, obj.clone())
     setattr(process, '%sLeptonPreSel'    % name, obj.clone())
-    setattr(process, '%sBJetDispJetVetoHTTriggered'    % name, obj.clone())
-    setattr(process, '%sBJetDispJetVetoHTPreSel'       % name, obj.clone())
+    setattr(process, '%sBJetTriggered'    % name, obj.clone())
+    setattr(process, '%sBJetPreSel'       % name, obj.clone())
     setattr(process, 'p%sJet' % name, cms.Path(process.mfvTriggerFilterJetsOnly    * process.preSeq * getattr(process, '%sJetTriggered'    % name) * process.mfvAnalysisCutsJet    * getattr(process, '%sJetPreSel'    % name)))
     setattr(process, 'p%sLep' % name, cms.Path(process.mfvTriggerFilterLeptonsOnly * process.preSeq * getattr(process, '%sLeptonTriggered' % name) * process.mfvAnalysisCutsLepton * getattr(process, '%sLeptonPreSel' % name)))
-    setattr(process, 'p%sBJetDispJetVetoHT' % name, cms.Path(process.mfvTriggerFilterBjetsORDisplacedDijetVetoHT * process.preSeq * getattr(process, '%sBJetDispJetVetoHTTriggered'    % name) * process.mfvAnalysisCutsBJetDispJetVetoHT * getattr(process, '%sBJetDispJetVetoHTPreSel'    % name)))
+    setattr(process, 'p%sBJet' % name, cms.Path(process.mfvTriggerFilterBjetsORDisplacedDijet * process.preSeq * getattr(process, '%sBJetTriggered'    % name) * process.mfvAnalysisCutsBJet * getattr(process, '%sBJetPreSel'    % name)))
 
 doit('mfvEventHistos')
 if not settings.is_mc:
@@ -61,7 +61,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
     if use_btag_triggers :
-        samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used
+        #samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, bjet=True) # no data currently; no sliced ttbar since inclusive is used
+        samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017 + Samples.ttbar_samples_2018 + Samples.qcd_samples_2018
         pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier())
     else :
         samples = pick_samples(dataset, all_signal=False)
@@ -69,7 +70,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, dataset, 'ntuple', data_json=json_path('ana_2017p8.json'), limit_ttbar=True)
 
-    ms = MetaSubmitter('PreselHistos' + settings.version, dataset=dataset)
+    ms = MetaSubmitter('PreselHistosFix' + settings.version, dataset=dataset)
     ms.common.pset_modifier = pset_modifier
     ms.condor.stageout_files = 'all'
     ms.submit(samples)

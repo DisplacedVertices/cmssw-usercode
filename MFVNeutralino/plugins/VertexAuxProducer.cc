@@ -312,6 +312,10 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
           for (int ijet = 0; ijet < njets; ++ijet) {
             if (verbose) printf("        %i <%f,%f,%f,%f>\n", ijet, jets[ijet]->pt(), jets[ijet]->eta(), jets[ijet]->phi(), jets[ijet]->energy());
+            aux.jet_pt    [i_jet_assoc].push_back(jets[ijet]->pt());
+            aux.jet_eta   [i_jet_assoc].push_back(jets[ijet]->eta());
+            aux.jet_phi   [i_jet_assoc].push_back(jets[ijet]->phi());
+            aux.jet_energy[i_jet_assoc].push_back(jets[ijet]->energy());
             p4s[1+i_jet_assoc] += jets[ijet]->p4();
 
             for (auto r : track_ref_getter.tracks(event, *jets[ijet])) {

@@ -4,6 +4,7 @@
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "FWCore/Common/interface/TriggerNames.h"
 #include "FWCore/Framework/interface/Event.h"
+#include <iostream>
 
 struct TriggerHelper {
   const edm::TriggerResults& trigger_results;
