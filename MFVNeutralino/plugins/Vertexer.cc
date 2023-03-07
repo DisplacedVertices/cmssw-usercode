@@ -263,6 +263,22 @@ class MFVVertexer : public edm::EDProducer {
 
     TH1F* h_output_aftersharedjets_n_onetracks;
 
+	TH1F* h_output_genllpdist3d;
+	TH1F* h_output_genllpabsdphi;
+	TH1F* h_output_dau_dxy;
+	TH1F* h_output_dau_min_dxy;
+	TH1F* h_output_genllpdist3d_with_two_5trk_vtx;
+	TH1F* h_output_dau_min_dxy_llp_with_two_5trk_vtx;
+	TH1F* h_output_genllpdist3d_with_5trk_vtx;
+	TH1F* h_output_dau_min_dxy_llp_with_5trk_vtx;
+	TH1F* h_output_dau_gendist3d_with_5trk_vtx; 
+	TH1F* h_output_dau_min_dxy_llp_with_small_vtx;
+	TH1F* h_output_minabsdphi_small_vtx_5trk_vtx;
+	TH2F* h_output_minabsdphi_small_vtx_5trk_vtx_nseedtrack;
+	TH2F* h_output_minabsdphi_small_vtx_5trk_vtx_dau_min_dxy;
+	TH1F* h_output_svdist3d_small_vtx_5trk_vtx;
+	TH1F* h_output_ntrack_small_vtx_5trk_vtx;
+
 	TH1F* h_output_gvtx_all_dR_tracks_tv0;
 	TH1F* h_output_gvtx_all_dR_tracks_tv1;
 
@@ -443,6 +459,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
   produces<reco::VertexCollection>();
   produces<VertexerPairEffs>();
   produces<reco::TrackCollection>("seed"); // JMTBAD remove me
+  produces<reco::TrackCollection>("relaxseed");
   produces<reco::TrackCollection>("all");
   produces<reco::TrackCollection>("inVertices");
 
@@ -547,6 +564,23 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     if (histos_output_aftersharedjets) {
       h_output_aftersharedjets_n_onetracks = fs->make<TH1F>("h_output_aftersharedjets_n_onetracks", "", 5, 0, 5);
     }
+
+	h_output_genllpdist3d = fs->make<TH1F>("h_output_genllpdist3d", ";dist3d (llp0, llp1) (cm.)", 100, 0, 3.0);
+	h_output_genllpabsdphi = fs->make<TH1F>("h_output_genllpabsdphi", ";|dPhi(llp0, llp1)| (rad.)", 100, 0, 3.15);
+	h_output_dau_dxy = fs->make<TH1F>("h_output_dau_dxy", ";dau's dxy (cm.)", 100, -0.2, 0.2);
+	h_output_dau_min_dxy = fs->make<TH1F>("h_output_dau_min_dxy", ";min(|dau's dxy|) (cm.)", 50, 0, 0.2);
+	h_output_genllpdist3d_with_two_5trk_vtx = fs->make<TH1F>("h_output_genllpdist3d_with_two_5trk_vtx", "there are at least two >=5trk-vtx;dist3d (llp0, llp1) (cm.)", 100, 0, 3.0);
+	h_output_dau_min_dxy_llp_with_two_5trk_vtx = fs->make<TH1F>("h_output_dau_min_dxy_llp_with_two_5trk_vtx", "there are at least two >=5trk-vtx;min(|dau's dxy|) (cm.)", 50, 0, 0.2);
+	h_output_genllpdist3d_with_5trk_vtx = fs->make<TH1F>("h_output_genllpdist3d_with_5trk_vtx", "there is only one >=5trk-vtx;dist3d (llp0, llp1) (cm.)", 100, 0, 3.0);
+	h_output_dau_min_dxy_llp_with_5trk_vtx = fs->make<TH1F>("h_output_dau_min_dxy_llp_with_5trk_vtx", ">=5trk-vtx is closer to this llp ;min(|dau's dxy|) (cm.)", 50, 0, 0.2);
+	h_output_dau_gendist3d_with_5trk_vtx = fs->make<TH1F>("h_output_dau_gendist3d_with_5trk_vtx", ">=5trk-vtx is closer to this llp ;3ddist to a closer llp (cm.)", 50, 0, 0.2);
+	h_output_dau_min_dxy_llp_with_small_vtx = fs->make<TH1F>("h_output_dau_min_dxy_llp_with_small_vtx", "the other llp has no >=5trk-vtx to match;min(|dau's dxy|) (cm.)", 50, 0, 0.2);
+	h_output_minabsdphi_small_vtx_5trk_vtx = fs->make<TH1F>("h_output_minabsdphi_small_vtx_5trk_vtx", ";min|dPhi(<5trk vtx, >=5trk vtx matched to llps)| (rad.)", 100, 0, 3.15);
+	h_output_minabsdphi_small_vtx_5trk_vtx_nseedtrack = fs->make<TH2F>("h_output_minabsdphi_small_vtx_5trk_vtx_nseedtrack", ";min|dPhi(<5trk vtx, >=5trk vtx matched to llps)| (rad.); # of seed tracks", 100, 0, 3.15, 30, 0, 30);
+	h_output_minabsdphi_small_vtx_5trk_vtx_dau_min_dxy = fs->make<TH2F>("h_output_minabsdphi_small_vtx_5trk_vtx_dau_min_dxy", ";min|dPhi(<5trk vtx, >=5trk vtx matched to llps)| (rad.); min(|dau's dxy|) (cm.)", 100, 0, 3.15, 50, 0, 0.2);
+	h_output_svdist3d_small_vtx_5trk_vtx = fs->make<TH1F>("h_output_svdist3d_small_vtx_5trk_vtx", "; svdist3d(<5trk vtx w/ minabsdphi, >=5trk vtx matched to llps)", 100, 0, 3.15);
+	h_output_ntrack_small_vtx_5trk_vtx = fs->make<TH1F>("h_output_ntrack_small_vtx_5trk_vtx", "; ntrack of <5trk vtx w/ minabsdphi", 100, 0, 3.15);
+
 
 	if (extrapolate_ghost_tracks) {
 
@@ -697,6 +731,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 
 void MFVVertexer::finish(edm::Event& event, const std::vector<reco::TransientTrack>& seed_tracks, const std::vector<reco::TransientTrack>& all_tracks, std::unique_ptr<reco::VertexCollection> vertices, std::unique_ptr<VertexerPairEffs> vpeffs, const std::vector<std::pair<track_set, track_set>>& vpeffs_tracks) {
   std::unique_ptr<reco::TrackCollection> tracks_seed      (new reco::TrackCollection);
+  std::unique_ptr<reco::TrackCollection> tracks_relaxseed (new reco::TrackCollection);
   std::unique_ptr<reco::TrackCollection> tracks_all(new reco::TrackCollection);
   std::unique_ptr<reco::TrackCollection> tracks_inVertices(new reco::TrackCollection);
 
@@ -713,12 +748,41 @@ void MFVVertexer::finish(edm::Event& event, const std::vector<reco::TransientTra
     if (verbose) printf("id: %i key: %lu pt: %f\n", tk.id().id(), tk.key(), tk->pt());
   }
 
+  edm::Handle<reco::BeamSpot> beamspot;
+  event.getByToken(beamspot_token, beamspot);
   for (const reco::TransientTrack& ttk : all_tracks) {
 	  tracks_all->push_back(ttk.track());
 	  const reco::TrackBaseRef& tk(ttk.trackBaseRef());
 	  all_track_ref_map[std::make_pair(tk.id().id(), tk.key())] = uint2uchar_clamp(itk++);
 
+
 	  if (verbose) printf("id: %i key: %lu pt: %f\n", tk.id().id(), tk.key(), tk->pt());
+        
+          const double pt = ttk.track().pt();
+          const int npxlayers = ttk.track().hitPattern().pixelLayersWithMeasurement();
+          const int nstlayers = ttk.hitPattern().stripLayersWithMeasurement();
+          const double dxybs = ttk.track().dxy(*beamspot);
+          const auto rs = track_rescaler.scale(ttk.track());
+          const double rescaled_dxyerr = rs.rescaled_tk.dxyError();
+          const double rescaled_sigmadxybs = dxybs / rescaled_dxyerr;
+          int min_r = 2000000000;
+          for (int i = 1; i <= 4; ++i)
+                  if (ttk.track().hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel, i)) {
+                          min_r = i;
+                          break;
+          }
+  
+          const bool is_relax_seed =
+                  fabs(rescaled_sigmadxybs) > 3.0 &&
+                  pt > 1.0 &&
+                  npxlayers >= 2 &&
+                  nstlayers >= 6 &&
+                  (1 == 999 || min_r <= 1);
+          if (is_relax_seed) {
+                  tracks_relaxseed->push_back(ttk.track()); 
+          }
+          
+ 
   }
 
   assert(vpeffs->size() == vpeffs_tracks.size());
@@ -750,6 +814,7 @@ void MFVVertexer::finish(edm::Event& event, const std::vector<reco::TransientTra
   event.put(std::move(vertices));
   event.put(std::move(vpeffs));
   event.put(std::move(tracks_seed),       "seed");
+  event.put(std::move(tracks_relaxseed),  "relaxseed");
   event.put(std::move(tracks_all),        "all");
   event.put(std::move(tracks_inVertices), "inVertices");
 }
@@ -796,10 +861,11 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 	  seed_track_ref_map[tk] = seed_tracks.size() - 1;
   }
 
+  //std::cout << "MFVVertexer " << module_label << " run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n"; 
   if (extrapolate_ghost_tracks) {
 
 	  // alternative of ghost-track vertexing is utilizing tracks from b-jets to form ghost vertices
-	  edm::Handle<pat::JetCollection> jjets;
+          edm::Handle<pat::JetCollection> jjets;
 	  event.getByToken(ghost_track_jet_token, jjets);
 	  edm::Handle<reco::TrackCollection> tracks;
 	  event.getByToken(tracks_token, tracks);
@@ -834,6 +900,10 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 			  count_bjet++;
 
 			  // matching any tracks 
+                          if (is_loose_btagged)
+                              std::cout << "  jet's type  : loose-btagged" << " jet idx : " << ijet << " jet's pT : " << jet.pt() << " jet's eta : " << jet.eta() << " jet's phi : " << jet.phi() << std::endl;
+                          else
+                              std::cout << "  jet's type  : extra jet" << " jet idx : " << ijet << " jet's pT : " << jet.pt() << " jet's eta : " << jet.eta() << " jet's phi : " << jet.phi() << std::endl;
 
 
 			  for (size_t j = 0; j < all_tracks.size(); ++j) {
@@ -2023,6 +2093,37 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 	  }
   }
 
+  //std::cout << "*** START GEN-level information ***" << std::endl; 
+  /* 
+  auto llp_p0 = mci->decay_point(0);
+  auto llp_p1 = mci->decay_point(1);
+  double min_dau_dxy = 99.0;
+  for (int i = 0; i < 2; ++i) {  //an index of GEN llps 
+         for (int j = 0; j < 2; ++j){
+              const reco::GenParticleRef& s_temp = mci->secondaries(i)[j];
+              reco::GenParticle* s = (reco::GenParticle*) & *s_temp;
+              double d_dxy = mag(s->vx() - mci->lsp(i)->vx(), s->vy() - mci->lsp(i)->vy()) * sin(s->phi() - atan2(s->vy() - mci->lsp(i)->vy(), s->vx() - mci->lsp(i)->vx()));
+              //std::cout << " d-quark #" << (i*2) + j << " dxy(cm): " << d_dxy << " pT (GeV): " << s->pt() << std::endl;
+			  h_output_dau_dxy->Fill(d_dxy);
+			  if (fabs(d_dxy) < min_dau_dxy)
+				  min_dau_dxy = fabs(d_dxy); 
+         }
+  }
+  double genllpdist3d = mag(llp_p0.x - llp_p1.x, llp_p0.y - llp_p1.y, llp_p0.z - llp_p1.z);
+  //std::cout << " dist3d llp01 (cm) " << genllpdist3d << std::endl;
+
+  h_output_genllpdist3d->Fill(genllpdist3d);
+  double llp_phi0 = mci->primaries()[0]->phi();
+  double llp_phi1 = mci->primaries()[1]->phi();
+  double dPhi_llp_pair = fabs(reco::deltaPhi(llp_phi0, llp_phi1));
+  h_output_genllpabsdphi->Fill(dPhi_llp_pair);
+  h_output_dau_min_dxy->Fill(min_dau_dxy);
+  //std::cout << " lsp 3ddist (cm): " << genllpdist3d << std::endl;
+  //std::cout << "*** END GEN-level information ***" << std::endl;
+  //std::cout << "number of vertices : " << vertices->size() << std::endl;
+
+  std::vector<size_t> vec_fat_vtx_idx = {};
+  size_t vtx_idx = 0;
   for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
 
 	  // setup track_sets
@@ -2030,7 +2131,8 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 	  tracks[0] = vertex_track_set(*v[0]);
 
 	  h_output_vertex_ntrack->Fill(v[0]->nTracks());
-	  if (v[0]->nTracks() < 3) continue;
+	  //std::cout << "  vtx's ntrack : " << v[0]->nTracks() << std::endl;
+          //if (v[0]->nTracks() < 3) continue;
 	  Measurement1D dBV_Meas1D = vertex_dist_2d.distance(*v[0], fake_bs_vtx);
 	  double dBV = dBV_Meas1D.value();
 	  double bs2derr = dBV_Meas1D.error();
@@ -2040,9 +2142,17 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 	  //double v0z = v[0]->z() - bsz;
 	  double phi0 = atan2(v0y, v0x);
 
-	  h_output_at_least_3trk_vertex_normchi2->Fill(v[0]->normalizedChi2());
+	  //std::cout << "  vtx's dBV : " << dBV << std::endl;
+      //std::cout << "  vtx's bs2derr : " << bs2derr << std::endl;
+      //std::cout << "  vtx's chi2/nof : " << v[0]->normalizedChi2() << std::endl;
+      h_output_at_least_3trk_vertex_normchi2->Fill(v[0]->normalizedChi2());
 	  h_2D_output_at_least_3trk_vertex_normchi2_ntrack->Fill(v[0]->normalizedChi2(), v[0]->nTracks());
 	  h_2D_output_at_least_3trk_vertex_normchi2_bs2derr->Fill(v[0]->normalizedChi2(), bs2derr);
+	  if (v[0]->nTracks() >= 5)
+		  vec_fat_vtx_idx.push_back(vtx_idx);
+      
+
+	  
 
 	  for (auto it = v[0]->tracks_begin(), ite = v[0]->tracks_end(); it != ite; ++it) {
 
@@ -2093,9 +2203,105 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 	  h_output_at_least_3trk_vertex_mindPhi_bquark->Fill(mindPhi_bquark);
 	  h_output_at_least_3trk_all_vertex_dist3dgenb->Fill(dist3d_vtx_match_bdecay_by_bquark);
 	  h_output_at_least_3trk_all_vertex_dist3dgenllp->Fill(dist3d_vtx_match_llpdecay_by_bquark);
-
+	  vtx_idx++;
   }
 
+  
+  double min_dphi_small_vtx = 99;
+  int small_vtx_ntrack = 99;
+  double small_vtx_svdist3d = 99;
+  if (vec_fat_vtx_idx.size() == 1) {
+	  h_output_genllpdist3d_with_5trk_vtx->Fill(genllpdist3d);
+	  size_t vtx_idx = 0;
+	  const reco::Vertex& v0 = vertices->at(vec_fat_vtx_idx[0]);
+	  double v0x = v0.position().x() - bsx;
+	  double v0y = v0.position().y() - bsy;
+	  double v0z = v0.position().z() - bsz;
+	  double phi0 = atan2(v0y, v0x);
+	  
+	  for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0]) {
+		  if (vec_fat_vtx_idx[0] != vtx_idx) continue;
+		  double v1x = v[0]->x() - bsx;
+		  double v1y = v[0]->y() - bsy;
+		  double v1z = v[0]->z() - bsz;
+		  double phi1 = atan2(v1y, v1x);
+		  
+		  //std::cout << "                     : vtx's ntrack : " << v[1]->nTracks() << std::endl; 
+		  //std::cout << "                     : vtx's dphi(vtx0, vtx1) : " << fabs(reco::deltaPhi(phi0, phi1)) << std::endl;
+		  //std::cout << "                     : vtx's svdist3d (cm) : " << mag(v1x-v0x, v1y-v0y, v1z-v0z) << std::endl; 
+		  if (fabs(reco::deltaPhi(phi0, phi1)) < min_dphi_small_vtx) {
+			  min_dphi_small_vtx = fabs(reco::deltaPhi(phi0, phi1));
+			  small_vtx_ntrack = v[0]->nTracks();
+			  small_vtx_svdist3d = mag(v1x - v0x, v1y - v0y, v1z - v0z);
+		  }
+		  vtx_idx++;
+	  }
+
+
+	  if (mag(llp_p0.x - v0.position().x(), llp_p0.y - v0.position().y(), llp_p0.z - v0.position().z()) < mag(llp_p1.x - v0.position().x(), llp_p1.y - v0.position().y(), llp_p1.z - v0.position().z())) {
+		  double min_5trkvtx_dau_dxy = 99;
+		  for (int j = 0; j < 2; ++j) {
+			  const reco::GenParticleRef& s_temp = mci->secondaries(0)[j];
+			  reco::GenParticle* s = (reco::GenParticle*) & *s_temp;
+			  double d_dxy = mag(s->vx() - mci->lsp(0)->vx(), s->vy() - mci->lsp(0)->vy()) * sin(s->phi() - atan2(s->vy() - mci->lsp(0)->vy(), s->vx() - mci->lsp(0)->vx()));
+			  //std::cout << " d-quark #" << (i*2) + j << " dxy(cm): " << d_dxy << " pT (GeV): " << s->pt() << std::endl;
+			  if (fabs(d_dxy) < min_5trkvtx_dau_dxy)
+				  min_5trkvtx_dau_dxy = fabs(d_dxy);
+		  }
+		  h_output_dau_min_dxy_llp_with_5trk_vtx->Fill(min_5trkvtx_dau_dxy);
+		  h_output_dau_gendist3d_with_5trk_vtx->Fill(mag(llp_p0.x - v0.position().x(), llp_p0.y - v0.position().y(), llp_p0.z - v0.position().z()));
+		  double min_smllvtx_dau_dxy = 99;
+		  for (int j = 0; j < 2; ++j) {
+			  const reco::GenParticleRef& s_temp = mci->secondaries(1)[j];
+			  reco::GenParticle* s = (reco::GenParticle*) & *s_temp;
+			  double d_dxy = mag(s->vx() - mci->lsp(1)->vx(), s->vy() - mci->lsp(1)->vy()) * sin(s->phi() - atan2(s->vy() - mci->lsp(1)->vy(), s->vx() - mci->lsp(1)->vx()));
+			  //std::cout << " d-quark #" << (i*2) + j << " dxy(cm): " << d_dxy << " pT (GeV): " << s->pt() << std::endl;
+			  if (fabs(d_dxy) < min_smllvtx_dau_dxy)
+				  min_smllvtx_dau_dxy = fabs(d_dxy);
+		  }
+		  h_output_dau_min_dxy_llp_with_small_vtx->Fill(min_smllvtx_dau_dxy);
+	  }
+	  else {
+		  double min_5trkvtx_dau_dxy = 99;
+		  for (int j = 0; j < 2; ++j) {
+			  const reco::GenParticleRef& s_temp = mci->secondaries(1)[j];
+			  reco::GenParticle* s = (reco::GenParticle*) & *s_temp;
+			  double d_dxy = mag(s->vx() - mci->lsp(1)->vx(), s->vy() - mci->lsp(1)->vy()) * sin(s->phi() - atan2(s->vy() - mci->lsp(1)->vy(), s->vx() - mci->lsp(1)->vx()));
+			  //std::cout << " d-quark #" << (i*2) + j << " dxy(cm): " << d_dxy << " pT (GeV): " << s->pt() << std::endl;
+			  if (fabs(d_dxy) < min_5trkvtx_dau_dxy)
+				  min_5trkvtx_dau_dxy = fabs(d_dxy);
+		  }
+		  h_output_dau_min_dxy_llp_with_5trk_vtx->Fill(min_5trkvtx_dau_dxy);
+		  h_output_dau_gendist3d_with_5trk_vtx->Fill(mag(llp_p1.x - v0.position().x(), llp_p1.y - v0.position().y(), llp_p1.z - v0.position().z()));
+		  double min_smllvtx_dau_dxy = 99;
+		  for (int j = 0; j < 2; ++j) {
+			  const reco::GenParticleRef& s_temp = mci->secondaries(0)[j];
+			  reco::GenParticle* s = (reco::GenParticle*) & *s_temp;
+			  double d_dxy = mag(s->vx() - mci->lsp(0)->vx(), s->vy() - mci->lsp(0)->vy()) * sin(s->phi() - atan2(s->vy() - mci->lsp(0)->vy(), s->vx() - mci->lsp(0)->vx()));
+			  //std::cout << " d-quark #" << (i*2) + j << " dxy(cm): " << d_dxy << " pT (GeV): " << s->pt() << std::endl;
+			  if (fabs(d_dxy) < min_smllvtx_dau_dxy)
+				  min_smllvtx_dau_dxy = fabs(d_dxy);
+		  }
+		  h_output_dau_min_dxy_llp_with_small_vtx->Fill(min_smllvtx_dau_dxy);
+
+	  }
+
+
+	  h_output_minabsdphi_small_vtx_5trk_vtx->Fill(min_dphi_small_vtx);
+	  h_output_minabsdphi_small_vtx_5trk_vtx_nseedtrack->Fill(min_dphi_small_vtx, seed_tracks.size());
+	  h_output_minabsdphi_small_vtx_5trk_vtx_dau_min_dxy->Fill(min_dphi_small_vtx, min_dau_dxy);
+	  h_output_svdist3d_small_vtx_5trk_vtx->Fill(small_vtx_svdist3d);
+	  h_output_ntrack_small_vtx_5trk_vtx->Fill(small_vtx_ntrack);
+  }
+
+  if (vec_fat_vtx_idx.size() >= 2) {
+	  h_output_genllpdist3d_with_two_5trk_vtx->Fill(genllpdist3d);
+	  h_output_dau_min_dxy_llp_with_two_5trk_vtx->Fill(min_dau_dxy);
+  }
+  */
+  
+
+  std::cout << " vertex->size() " << vertices->size() << std::endl;
   finish(event, seed_tracks, all_tracks, std::move(vertices), std::move(vpeffs), vpeffs_tracks);
 }
 

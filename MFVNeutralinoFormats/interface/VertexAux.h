@@ -51,7 +51,7 @@ struct MFVVertexAux {
       njets[i] = 0;
     for (int i = 0; i < mfv::NMomenta; ++i) {
       costhmombs_[i] = costhmompv2d_[i] = costhmompv3d_[i] = 0;
-      pt[i] = eta[i] = phi[i] = mass[i] = missdistpv[i] = missdistpverr[i] = 0;
+      pt[i] = eta[i] = phi[i] = mass[i] = missdistpv[i] = missdistpverr[i] = missdistsv0[i] = missdistsv0err[i] = 0;
     }
   }
 
@@ -231,7 +231,10 @@ struct MFVVertexAux {
   float missdistpv   [mfv::NMomenta];
   float missdistpverr[mfv::NMomenta];
   float missdistpvsig(int w) const { return sig(missdistpv[w], missdistpverr[w]); }
-
+  float missdistsv0   [mfv::NMomenta];
+  float missdistsv0err[mfv::NMomenta];
+  float missdistsv0sig(int w) const { return sig(missdistsv0[w], missdistsv0err[w]); }
+  
   std::vector<uchar> track_w_;
   std::vector<bool> track_q_;
   std::vector<unsigned> track_hp_;
@@ -252,6 +255,10 @@ struct MFVVertexAux {
   std::vector<float> track_pt_err;
   std::vector<float> track_eta;
   std::vector<float> track_phi;
+  std::vector<float> track_tkdist_val;
+  std::vector<float> track_tkdist_sig;
+  std::vector<float> track_tkdisttosv1_val;
+  std::vector<float> track_tkdisttosv1_sig;
 
   void  track_weight(int i, float w) { assert(w >= 0 && w <= 1); _set(track_w_, i, uchar(w*255)); }
   float track_weight(int i) const { return float(track_w_[i])/255.f; }

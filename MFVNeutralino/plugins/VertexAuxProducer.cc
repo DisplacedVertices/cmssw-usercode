@@ -27,6 +27,7 @@
 #include "JMTucker/Tools/interface/Math.h"
 #include "JMTucker/Tools/interface/TrackRefGetter.h"
 #include "JMTucker/Tools/interface/TrackRescaler.h"
+#include "TrackingTools/IPTools/interface/IPTools.h"
 #include "JMTucker/Tools/interface/StatCalculator.h"
 #include "JMTucker/Tools/interface/Utilities.h"
 
@@ -55,6 +56,7 @@ class MFVVertexAuxProducer : public edm::EDProducer {
   VertexDistance3D distcalc_3d;
   Measurement1D gen_dist(const reco::Vertex&, const std::vector<double>& gen, const bool use3d);
   Measurement1D miss_dist(const reco::Vertex&, const reco::Vertex&, const math::XYZTLorentzVector& mom);
+  std::pair<bool, Measurement1D> track_dist(const reco::TransientTrack & t, const reco::Vertex & v); 
 };
 
 MFVVertexAuxProducer::MFVVertexAuxProducer(const edm::ParameterSet& cfg)
@@ -108,6 +110,10 @@ Measurement1D MFVVertexAuxProducer::miss_dist(const reco::Vertex& v0, const reco
                        2*d(1) - 2*n_dot_d*n(1),
                        2*d(2) - 2*n_dot_d*n(2));
   return Measurement1D(val, sqrt(ROOT::Math::Similarity(jac, v0.covariance() + v1.covariance())) / 2 / val);
+}
+
+std::pair<bool, Measurement1D> MFVVertexAuxProducer::track_dist(const reco::TransientTrack & t, const reco::Vertex & v) { //use 3d by default
+  return IPTools::absoluteImpactParameter3D(t, v);
 }
 
 void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& setup) {
@@ -175,11 +181,39 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
   std::unique_ptr<std::vector<MFVVertexAux> > auxes(new std::vector<MFVVertexAux>(nsv));
   std::set<int> trackicity;
-
-  for (int isv = 0; isv < nsv; ++isv) {
+  std::vector<size_t> sort_ntrack = {};
+  std::vector<size_t> sort_irawsv = {};
+  for (int isv = 0; isv < nsv; ++isv){
+      const reco::Vertex& sv = secondary_vertices->at(isv);
+      size_t ntracks = sv.nTracks();
+      if (isv == 0) { 
+        sort_ntrack.push_back(ntracks);
+        sort_irawsv.push_back(isv);
+      }
+      else { 
+        std::vector<size_t>::iterator it_ntracks = sort_ntrack.end();
+        std::vector<size_t>::iterator it_vtx = sort_irawsv.end();
+        while (it_ntracks != sort_ntrack.begin() && ntracks <= sort_ntrack[std::distance(sort_ntrack.begin(), it_ntracks)-1])
+        {
+          --it_ntracks;
+          --it_vtx;
+        }
+        if (it_ntracks == sort_ntrack.end() && ntracks > sort_ntrack[std::distance(sort_ntrack.begin(), it_ntracks)]) {
+          sort_ntrack.push_back(ntracks);
+          sort_irawsv.push_back(isv);
+        }
+        else {
+          sort_ntrack.insert(it_ntracks, ntracks);
+          sort_irawsv.insert(it_vtx, isv);
+        }
+      }
+  }
+  for (int irawsv = 0; irawsv < nsv; ++irawsv) {
+    int isv = sort_irawsv[nsv-irawsv-1];
     const reco::Vertex& sv = secondary_vertices->at(isv);
+    const reco::Vertex& sv0 = secondary_vertices->at(sort_irawsv[nsv-1]); 
     const reco::VertexRef svref(secondary_vertices, isv);
-    MFVVertexAux& aux = auxes->at(isv);
+    MFVVertexAux& aux = auxes->at(irawsv);
     aux.which = int2uchar(isv);
     aux.which_lep.clear();
 
@@ -277,7 +311,6 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
         if (verbose) printf(" -> chi2 %f x %f y %f z %f\n", aux.nm1_chi2[i], aux.nm1_x[i], aux.nm1_y[i], aux.nm1_z[i]);
       }
     }
-
     if (verbose) printf("v#%i at %f,%f,%f ndof %.1f\n", isv, aux.x, aux.y, aux.z, sv.ndof());
 
     math::XYZVector bs2sv = sv.position() - beamspot->position();
@@ -393,10 +426,10 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
     auto trke = sv.tracks_end();
 
     std::vector<double> costhtkmomvtxdisps;
-
     if (verbose) printf("    tracks %i:\n", int(trke-trkb));
     for (auto trki = trkb; trki != trke; ++trki) {
       const reco::TrackBaseRef& tri = *trki;
+      const reco::TransientTrack sedtri = tt_builder->build(**trki);
       const reco::TrackRef& trref = tri.castTo<reco::TrackRef>();
       const math::XYZTLorentzVector tri_p4(tri->px(), tri->py(), tri->pz(), tri->p());
 
@@ -453,6 +486,15 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       aux.track_pt_err.push_back(tri->ptError());
       aux.track_eta.push_back(tri->eta());
       aux.track_phi.push_back(tri->phi());
+      std::pair<bool, Measurement1D> tkdist = track_dist(sedtri, sv);
+      aux.track_tkdist_val.push_back(tkdist.second.value());
+      aux.track_tkdist_sig.push_back(tkdist.second.significance());
+      if (nsv >= 2 && irawsv == 0){
+         const reco::Vertex& sv1 = secondary_vertices->at(sort_irawsv[nsv-2]);
+         std::pair<bool, Measurement1D> tkdist_tosv1 = track_dist(sedtri, sv1);
+         aux.track_tkdisttosv1_val.push_back(tkdist_tosv1.second.value());
+         aux.track_tkdisttosv1_sig.push_back(tkdist_tosv1.second.significance());
+      }
     }
 
     jmt::StatCalculator costhtkmomvtxdisp(costhtkmomvtxdisps);
@@ -499,6 +541,9 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
           auto mdpv = miss_dist(*primary_vertex, sv, mom);
           aux.missdistpv[i] = mdpv.value();
           aux.missdistpverr[i] = mdpv.error();
+          auto mdsv0 = miss_dist(sv0, sv, mom);
+          aux.missdistsv0[i] = mdsv0.value();
+          aux.missdistsv0err[i] = mdsv0.error();
         }
       }
     }
@@ -507,7 +552,6 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
   }
 
   sorter.sort(*auxes);
-
   event.put(std::move(auxes));
 }
 

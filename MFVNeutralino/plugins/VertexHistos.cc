@@ -391,7 +391,6 @@ void MFVVertexHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
   const int nsv = int(auxes->size());
   h_nsv->Fill(nsv, w);
-
   for (int isv = 0; isv < nsv; ++isv) {
     const MFVVertexAux& aux = auxes->at(isv);
     const int ntracks = aux.ntracks();

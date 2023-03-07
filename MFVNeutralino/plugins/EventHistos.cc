@@ -32,6 +32,45 @@ class MFVEventHistos : public edm::EDAnalyzer {
 
   TH1F* h_w;
   TH1F* h_nsv;
+  TH2F* h_2D_ntrk0_ntrk1; 
+  // for a cross-check 
+  TH1F* h_signal_evt_min_dau_dxy;
+  TH1F* h_signal_evt_gendist3d_vtx0;
+  TH1F* h_signal_evt_gendist3d_vtx1;
+  TH1F* h_signal_evt_llp01_gendist3d;
+  TH1F* h_signal_evt_vtx01_dist3d;
+  TH1F* h_signal_evt_vtx01_dist3dsig;
+  TH1F* h_signal_evt_vtx0_seedtrk_dxybs;
+  TH1F* h_signal_evt_vtx0_seedtrk_missdist;
+  TH1F* h_signal_evt_vtx0_seedtrk_missdistsig;
+  TH1F* h_signal_evt_vtx0_mass;
+  TH1F* h_signal_evt_vtx0_pT;
+  TH1F* h_signal_evt_vtx0_bs2derr;
+  TH1F* h_signal_evt_vtx0_dbv;
+
+  // for improvement of signal eff. 
+  TH1F* h_potential_evt_min_dau_dxy;
+  TH1F* h_potential_evt_gendist3d_vtx0;
+  TH1F* h_potential_evt_gendist3d_vtx1;
+  TH1F* h_potential_evt_llp01_gendist3d;
+  TH1F* h_potential_evt_vtx01_dist3d;
+  TH1F* h_potential_evt_vtx01_dist3dsig;
+  TH1F* h_potential_evt_vtx0_seedtrk_dxybs;
+  TH1F* h_potential_evt_vtx0_seedtrk_missdist;
+  TH1F* h_potential_evt_vtx0_seedtrk_missdistsig;
+  TH1F* h_potential_evt_vtx1_seedtrk_dxybs;
+  TH1F* h_potential_evt_vtx1_seedtrk_missdist;
+  TH1F* h_potential_evt_vtx1_seedtrk_missdistsig;
+  TH2F* h_2D_potential_evt_vtx0_seedtrk_missdist_other_missdist;
+  TH2F* h_2D_potential_evt_vtx0_seedtrk_missdistsig_other_missdistsig;
+  TH1F* h_potential_evt_vtx0_mass;
+  TH1F* h_potential_evt_vtx0_pT;
+  TH1F* h_potential_evt_vtx0_bs2derr;
+  TH1F* h_potential_evt_vtx0_dbv;
+  TH1F* h_potential_evt_vtx1_mass;
+  TH1F* h_potential_evt_vtx1_pT;
+  TH1F* h_potential_evt_vtx1_bs2derr;
+  TH1F* h_potential_evt_vtx1_dbv;
 
   TH2F* h_gen_decay;
   TH1F* h_gen_flavor_code;
@@ -267,6 +306,47 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
 
   h_w = fs->make<TH1F>("h_w", ";event weight;events/0.1", 100, 0, 10);
   h_nsv = fs->make<TH1F>("h_nsv", ";# of (loose) secondary vertices;arb. units", 40, 0, 40);
+  h_2D_ntrk0_ntrk1 = fs->make<TH2F>("h_2D_ntrk0_ntrk1", ";# of tracks per vtx0; # of tracks per vtx1;arb. units", 20, 0, 20, 20, 0, 20);
+
+  // for a cross-check 
+  h_signal_evt_min_dau_dxy = fs->make<TH1F>("h_signal_evt_min_dau_dxy", "signal-like events;min(|dau's dxy|) (cm.)", 50, 0, 0.2);
+  h_signal_evt_gendist3d_vtx0 = fs->make<TH1F>("h_signal_evt_gendist3d_vtx0", "signal-like events; gendist3d(closest llp-vtx, vtx0) (cm.)", 50, 0, 0.2);
+  h_signal_evt_gendist3d_vtx1 = fs->make<TH1F>("h_signal_evt_gendist3d_vtx1", "signal-like events; gendist3d(closest llp-vtx, vtx1) (cm.)", 50, 0, 0.2);
+  h_signal_evt_llp01_gendist3d = fs->make<TH1F>("h_signal_evt_llp01_gendist3d", "signal-like events; gendist3d(llp0, llp1) (cm.)", 50, 0, 0.2);
+  h_signal_evt_vtx01_dist3d = fs->make<TH1F>("h_signal_evt_vtx01_dist3d", "signal-like events; dist3d(vtx0, vtx1) (cm.)", 50, 0, 0.2);
+  h_signal_evt_vtx01_dist3dsig = fs->make<TH1F>("h_signal_evt_vtx01_dist3dsig", "signal-like events; n#sigma dist3d(vtx0, vtx1) ", 80, 0, 10.0);
+  h_signal_evt_vtx0_seedtrk_dxybs = fs->make<TH1F>("h_signal_evt_vtx0_seedtrk_dxybs", "signal-like events;vtx0 seed track's dxybs (cm.)", 100, -0.2, 0.2);
+  h_signal_evt_vtx0_seedtrk_missdist = fs->make<TH1F>("h_signal_evt_vtx0_seedtrk_missdist", "signal-like events;vtx0 seed track's missdist (cm.)", 50, 0, 0.2);
+  h_signal_evt_vtx0_seedtrk_missdistsig = fs->make<TH1F>("h_signal_evt_vtx0_seedtrk_missdistsig", "signal-like events;vtx0 seed track's n#sigma missdist", 80, 0, 10.0);
+  h_signal_evt_vtx0_mass = fs->make<TH1F>("h_signal_evt_vtx0_mass", "signal-like events;vtx0 tracks-plus-jets-by-ntracks mass (GeV); ", 100, 0, 80);
+  h_signal_evt_vtx0_pT = fs->make<TH1F>("h_signal_evt_vtx0_pT", "signal-like events;vtx0 tracks-plus-jets-by-ntracks p_{T} (GeV); ", 100, 0, 80);
+  h_signal_evt_vtx0_dbv = fs->make<TH1F>("h_signal_evt_vtx0_dbv", "signal-like events;dBV/vtx0 (cm.); ", 120, 0, 3.0);
+  h_signal_evt_vtx0_bs2derr = fs->make<TH1F>("h_signal_evt_vtx0_bs2derr", "signal-like events;bs2derr/vtx0(cm.); ", 50, 0, 0.05);
+
+  // for improvement of signal eff. 
+  h_potential_evt_min_dau_dxy = fs->make<TH1F>("h_potential_evt_min_dau_dxy", "potentially-recover events;min(|dau's dxy|) (cm.)", 50, 0, 0.2);
+  h_potential_evt_gendist3d_vtx0 = fs->make<TH1F>("h_potential_evt_gendist3d_vtx0", "potentially-recover events; gendist3d(closest llp-vtx, vtx0) (cm.)", 50, 0, 0.2);
+  h_potential_evt_gendist3d_vtx1 = fs->make<TH1F>("h_potential_evt_gendist3d_vtx1", "potentially-recover events; gendist3d(closest llp-vtx, vtx1) (cm.)", 50, 0, 0.2);
+  h_potential_evt_llp01_gendist3d = fs->make<TH1F>("h_potential_evt_llp01_gendist3d", "potentially-recover events; gendist3d(llp0, llp1) (cm.)", 50, 0, 0.2);
+  h_potential_evt_vtx01_dist3d = fs->make<TH1F>("h_potential_evt_vtx01_dist3d", "potentially-recover events; dist3d(vtx0, vtx1) (cm.)", 50, 0, 0.2);
+  h_potential_evt_vtx01_dist3dsig = fs->make<TH1F>("h_potential_evt_vtx01_dist3dsig", "potentially-recover events; n#sigma dist3d(vtx0, vtx1) ", 80, 0, 10.0);
+  h_potential_evt_vtx0_seedtrk_dxybs = fs->make<TH1F>("h_potential_evt_vtx0_seedtrk_dxybs", "potentially-recover events;vtx0 seed track's dxybs (cm.)", 100, -0.2, 0.2);
+  h_potential_evt_vtx0_seedtrk_missdist = fs->make<TH1F>("h_potential_evt_vtx0_seedtrk_missdist", "potentially-recover events;vtx0 seed track's missdist (cm.)", 50, 0, 0.2);
+  h_potential_evt_vtx0_seedtrk_missdistsig = fs->make<TH1F>("h_potential_evt_vtx0_seedtrk_missdistsig", "potentially-recover events;vtx0 seed track's n#sigma missdist", 80, 0, 10.0);
+  h_potential_evt_vtx1_seedtrk_dxybs = fs->make<TH1F>("h_potential_evt_vtx1_seedtrk_dxybs", "potentially-recover events;vtx1 seed track's dxybs (cm.)", 100, -0.2, 0.2);
+  h_potential_evt_vtx1_seedtrk_missdist = fs->make<TH1F>("h_potential_evt_vtx1_seedtrk_missdist", "potentially-recover events;vtx1 seed track's missdist (cm.)", 50, 0, 0.2);
+  h_potential_evt_vtx1_seedtrk_missdistsig = fs->make<TH1F>("h_potential_evt_vtx1_seedtrk_missdistsig", "potentially-recover events;vtx1 seed track's n#sigma missdist", 80, 0, 10.0);
+  h_2D_potential_evt_vtx0_seedtrk_missdist_other_missdist = fs->make<TH2F>("h_2D_potential_evt_vtx0_seedtrk_missdist_other_missdist", ";vtx0 seed track's missdist to vtx0 (cm.); vtx0 seed track's missdist to vtx1 (cm.);arb. units", 20, 0, 0.2, 20, 0, 0.2);
+  h_2D_potential_evt_vtx0_seedtrk_missdistsig_other_missdistsig = fs->make<TH2F>("h_2D_potential_evt_vtx0_seedtrk_missdistsig_other_missdistsig", ";vtx0 seed track's n#sigma missdist to vtx0; vtx0 seed track's n#sigma missdist to vtx1;arb. units", 30, 0, 10.0, 30, 0, 10.0);
+  h_potential_evt_vtx0_mass = fs->make<TH1F>("h_potential_evt_vtx0_mass", "potentially-recover events;vtx0 tracks-plus-jets-by-ntracks mass (GeV); ", 100, 0, 80);
+  h_potential_evt_vtx0_pT = fs->make<TH1F>("h_potential_evt_vtx0_pT", "potentially-recover events;vtx0 tracks-plus-jets-by-ntracks p_{T} (GeV); ", 100, 0, 80);
+  h_potential_evt_vtx0_dbv = fs->make<TH1F>("h_potential_evt_vtx0_dbv", "potentially-recover events;dBV/vtx0 (cm.); ", 120, 0, 3.0);
+  h_potential_evt_vtx0_bs2derr = fs->make<TH1F>("h_potential_evt_vtx0_bs2derr", "potentially-recover events;bs2derr/vtx0 (cm.); ", 50, 0, 0.05);
+  h_potential_evt_vtx1_mass = fs->make<TH1F>("h_potential_evt_vtx1_mass", "potentially-recover events;vtx1 tracks-plus-jets-by-ntracks mass (GeV); ", 100, 0, 80);
+  h_potential_evt_vtx1_pT = fs->make<TH1F>("h_potential_evt_vtx1_pT", "potentially-recover events;vtx1 tracks-plus-jets-by-ntracks p_{T} (GeV); ", 100, 0, 80);
+  h_potential_evt_vtx1_dbv = fs->make<TH1F>("h_potential_evt_vtx1_dbv", "potentially-recover events;dBV/vtx1 (cm.); ", 120, 0, 3.0);
+  h_potential_evt_vtx1_bs2derr = fs->make<TH1F>("h_potential_evt_vtx1_bs2derr", "potentially-recover events;bs2derr/vtx1 (cm.); ", 50, 0, 0.05);
+
 
   h_gen_decay = fs->make<TH2F>("h_gen_decay", "0-2=e,mu,tau, 3=h;decay code #0;decay code #1", 4, 0, 4, 4, 0, 4);
   h_gen_flavor_code = fs->make<TH1F>("h_gen_flavor_code", ";quark flavor composition;events", 3, 0, 3);
@@ -536,6 +616,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   h_w->Fill(w);
 
   h_nsv->Fill(nsv, w);
+  //std::cout << "MFVEventHistos "  << " run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n"; 
   //////////////////////////////////////////////////////////////////////////////
 
   h_gen_decay->Fill(mevent->gen_decay_type[0], mevent->gen_decay_type[1], w);
@@ -557,18 +638,207 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   // overview before studies 
   h_n_gen_bvtx->Fill(int((mevent->gen_b_llp0_decay.size()+ mevent->gen_b_llp1_decay.size())/3), w);
   
-    
-  if (mevent->gen_bchain_nonb_had_eta.size() == 4) {
+  const double r3d0 = mag(mevent->gen_lsp_decay[0] - mevent->gen_pv[0], mevent->gen_lsp_decay[1] - mevent->gen_pv[1], mevent->gen_lsp_decay[2] - mevent->gen_pv[2]);
+  const double lspbeta0 = mevent->gen_lsps[0].P() / mevent->gen_lsps[0].Energy();
+  const double lspbetagamma0 = lspbeta0 / sqrt(1 - lspbeta0 * lspbeta0);
+  //const double ctau0 = r3d0 / lspbetagamma0;
 
-	  const double r3d = mag(mevent->gen_lsp_decay[0] - mevent->gen_pv[0], mevent->gen_lsp_decay[1] - mevent->gen_pv[1], mevent->gen_lsp_decay[2] - mevent->gen_pv[2]);
+  const double r3d1 = mag(mevent->gen_lsp_decay[3] - mevent->gen_pv[0], mevent->gen_lsp_decay[4] - mevent->gen_pv[1], mevent->gen_lsp_decay[5] - mevent->gen_pv[2]);
+  const double lspbeta1 = mevent->gen_lsps[1].P() / mevent->gen_lsps[1].Energy();
+  const double lspbetagamma1 = lspbeta1 / sqrt(1 - lspbeta1 * lspbeta1);
+  //const double ctau1 = r3d1 / lspbetagamma1;
+
+  //std::cout << "*** START GEN-level information ***" << std::endl; 
+  double min_dist3d_genlsp0sv = 5.0;
+  int isv_llp0 = -99;
+  //int gensv0_ntrack = 0;
+  double min_dist3d_genlsp1sv = 5.0;
+  int isv_llp1 = -99;
+  //int gensv1_ntrack = 0;
+  double gendist3dvtx0 = 5.0;
+  double gendist3dvtx1 = 5.0;
+
+  for (int isv = 0; isv < nsv; ++isv) {
+	  const MFVVertexAux& aux = auxes->at(isv);
+	  double genlsp0_dist3d = mag(mevent->gen_lsp_decay[0] - aux.x, mevent->gen_lsp_decay[1] - aux.y, mevent->gen_lsp_decay[2] - aux.z);
+	  double genlsp1_dist3d = mag(mevent->gen_lsp_decay[3] - aux.x, mevent->gen_lsp_decay[4] - aux.y, mevent->gen_lsp_decay[5] - aux.z);
+	  if (genlsp0_dist3d < min_dist3d_genlsp0sv) {
+		  isv_llp0 = isv; 
+		  min_dist3d_genlsp0sv = genlsp0_dist3d;
+          //gensv0_ntrack = aux.ntracks();
+	  }
+	  if (genlsp1_dist3d < min_dist3d_genlsp1sv) {
+		  isv_llp1 = isv;
+		  min_dist3d_genlsp1sv = genlsp1_dist3d;
+          //gensv1_ntrack = aux.ntracks();
+	  }
+
+	  if (isv == 0 && nsv >= 2) {
+		  const MFVVertexAux& aux1 = auxes->at(1);
+
+		  if (genlsp0_dist3d < genlsp1_dist3d) {
+			  gendist3dvtx0 = genlsp0_dist3d;
+			  gendist3dvtx1 = mag(mevent->gen_lsp_decay[3] - aux1.x, mevent->gen_lsp_decay[4] - aux1.y, mevent->gen_lsp_decay[5] - aux1.z);
+		  }
+		  else {
+			  gendist3dvtx0 = genlsp1_dist3d;
+			  gendist3dvtx1 = mag(mevent->gen_lsp_decay[0] - aux1.x, mevent->gen_lsp_decay[1] - aux1.y, mevent->gen_lsp_decay[2] - aux1.z);
+
+		  }
+	  }
+  }
+
+  
+
+  if (nsv > 1) {
+	  const MFVVertexAux& aux0 = auxes->at(0);
+	  const MFVVertexAux& aux1 = auxes->at(1);
+	  h_2D_ntrk0_ntrk1->Fill(aux0.ntracks(), aux1.ntracks());
+	  
+	  double min_dau_dxy = 99.0;
+	  for (int i = 0; i < 2; ++i) {  //an index of GEN llps 
+		  for (int j = i*2; j < i*2 + 2; ++j) {
+			  double d_dxy = mag(mevent->gen_lsp_decay[i*3 + 0] - mevent->gen_pv[0], mevent->gen_lsp_decay[i*3 + 1] - mevent->gen_pv[1]) * sin(mevent->gen_daughters[j].Phi() - atan2(mevent->gen_lsp_decay[i * 3 + 1] - mevent->gen_pv[1], mevent->gen_lsp_decay[i * 3 + 0] - mevent->gen_pv[0]));
+			  //std::cout << " d-quark #" <<  j << " dxy(cm): " << d_dxy << " pT (GeV): " << mevent->gen_daughters[j].Pt() << std::endl;
+			  if (fabs(d_dxy) < min_dau_dxy)
+				  min_dau_dxy = fabs(d_dxy);
+		  }
+		  
+	  }
+	  double genllpdist3d = mag(mevent->gen_lsp_decay[0] - mevent->gen_lsp_decay[3], mevent->gen_lsp_decay[1] - mevent->gen_lsp_decay[4], mevent->gen_lsp_decay[2] - mevent->gen_lsp_decay[5]);
+	  //std::cout << " dist3d llp01 (cm) " << genllpdist3d << std::endl;
+
+	  
+	  
+	  if (aux0.ntracks() >= 5 && aux1.ntracks() >= 5) {
+			  h_signal_evt_min_dau_dxy->Fill(min_dau_dxy, w);
+			  h_signal_evt_gendist3d_vtx0->Fill(gendist3dvtx0, w);
+			  h_signal_evt_gendist3d_vtx1->Fill(gendist3dvtx1, w);
+			  h_signal_evt_llp01_gendist3d->Fill(genllpdist3d, w);
+			  h_signal_evt_vtx01_dist3d->Fill(aux1.missdistsv0[mfv::PTracksPlusJetsByNtracks], w);
+			  h_signal_evt_vtx01_dist3dsig->Fill(aux1.missdistsv0sig(mfv::PTracksPlusJetsByNtracks), w);
+			  h_signal_evt_vtx0_mass->Fill(aux0.mass[mfv::PTracksPlusJetsByNtracks], w);
+			  h_signal_evt_vtx0_pT->Fill(aux0.pt[mfv::PTracksPlusJetsByNtracks], w);
+			  h_signal_evt_vtx0_dbv->Fill(mag(aux0.x - mevent->bsx_at_z(aux0.z), aux0.y - mevent->bsy_at_z(aux0.z)), w);
+			  h_signal_evt_vtx0_bs2derr->Fill(aux0.rescale_bs2derr, w);
+			  for (int i = 0; i < aux0.ntracks(); ++i) {
+				  h_signal_evt_vtx0_seedtrk_dxybs->Fill(aux0.track_dxy[i], w);
+				  h_signal_evt_vtx0_seedtrk_missdist->Fill(aux0.track_tkdist_val[i], w);
+				  h_signal_evt_vtx0_seedtrk_missdistsig->Fill(aux0.track_tkdist_sig[i], w);
+			  }
+	  }
+	  else if (aux0.ntracks() >= 5 && aux1.ntracks() < 5) {
+			  h_potential_evt_min_dau_dxy->Fill(min_dau_dxy, w);
+			  h_potential_evt_gendist3d_vtx0->Fill(gendist3dvtx0, w);
+			  h_potential_evt_gendist3d_vtx1->Fill(gendist3dvtx1, w);
+			  h_potential_evt_llp01_gendist3d->Fill(genllpdist3d, w);
+			  h_potential_evt_vtx01_dist3d->Fill(aux1.missdistsv0[mfv::PTracksPlusJetsByNtracks], w);
+			  h_potential_evt_vtx01_dist3dsig->Fill(aux1.missdistsv0sig(mfv::PTracksPlusJetsByNtracks), w);
+			  h_potential_evt_vtx0_mass->Fill(aux0.mass[mfv::PTracksPlusJetsByNtracks], w);
+			  h_potential_evt_vtx0_pT->Fill(aux0.pt[mfv::PTracksPlusJetsByNtracks], w);
+			  h_potential_evt_vtx0_dbv->Fill(mag(aux0.x - mevent->bsx_at_z(aux0.z), aux0.y - mevent->bsy_at_z(aux0.z)), w);
+			  h_potential_evt_vtx0_bs2derr->Fill(aux0.rescale_bs2derr, w);
+			  h_potential_evt_vtx1_mass->Fill(aux1.mass[mfv::PTracksPlusJetsByNtracks], w);
+			  h_potential_evt_vtx1_pT->Fill(aux1.pt[mfv::PTracksPlusJetsByNtracks], w);
+			  h_potential_evt_vtx1_dbv->Fill(mag(aux1.x - mevent->bsx_at_z(aux1.z), aux1.y - mevent->bsy_at_z(aux1.z)), w);
+			  h_potential_evt_vtx1_bs2derr->Fill(aux1.rescale_bs2derr, w);
+			  
+			  for (int i = 0; i < aux0.ntracks(); ++i) {
+				  h_potential_evt_vtx0_seedtrk_dxybs->Fill(aux0.track_dxy[i], w);
+				  h_potential_evt_vtx0_seedtrk_missdist->Fill(aux0.track_tkdist_val[i], w);
+				  h_potential_evt_vtx0_seedtrk_missdistsig->Fill(aux0.track_tkdist_sig[i], w);
+				  h_2D_potential_evt_vtx0_seedtrk_missdist_other_missdist->Fill(aux0.track_tkdist_val[i], aux0.track_tkdisttosv1_val[i], w);
+				  h_2D_potential_evt_vtx0_seedtrk_missdistsig_other_missdistsig->Fill(aux0.track_tkdist_sig[i], aux0.track_tkdisttosv1_sig[i], w);
+
+			  }
+			  for (int i = 0; i < aux1.ntracks(); ++i) {
+				  h_potential_evt_vtx1_seedtrk_dxybs->Fill(aux1.track_dxy[i], w);
+				  h_potential_evt_vtx1_seedtrk_missdist->Fill(aux1.track_tkdist_val[i], w);
+				  h_potential_evt_vtx1_seedtrk_missdistsig->Fill(aux1.track_tkdist_sig[i], w);
+
+			  }
+			  
+	  }
+	  
+  }
+  
+  std::vector<std::vector<int> > sv_track_which_jet;
+  std::vector<std::vector<int> > sv_track_which_track;
+  for (int isv = 0; isv < nsv; ++isv) { 
+	  const MFVVertexAux& aux = auxes->at(isv);
+	  const int ntracks = aux.ntracks();
+	  std::vector<int> track_which_jet;
+          std::vector<int> track_which_track;
+	  for (int i = 0; i < ntracks; ++i) { 
+		  //double match_threshold = 1.3;
+	      int jet_index = 255;
+	      for (unsigned j = 0; j < mevent->jet_track_which_jet.size(); ++j) { 
+			  //double a = fabs(aux.track_pt(i) - fabs(mevent->jet_track_qpt[j])) + 1;
+			  //double b = fabs(aux.track_eta[i] - mevent->jet_track_eta[j]) + 1;
+			  //double c = fabs(aux.track_phi[i] - mevent->jet_track_phi[j]) + 1;
+			  if (fabs(aux.track_pt(i) - fabs(mevent->jet_track_qpt[j])) < 0.0001 
+				  && fabs(aux.track_eta[i] - mevent->jet_track_eta[j]) < 0.0001 
+				  && fabs(aux.track_phi[i] - mevent->jet_track_phi[j]) < 0.0001) {
+				  jet_index = mevent->jet_track_which_jet[j];
+			  } 
+	      }
+	      if (jet_index != 255) { 
+		  track_which_jet.push_back((int)jet_index);
+                  track_which_track.push_back(i);
+
+	      } 
+	  }
+	  sv_track_which_jet.push_back(track_which_jet);
+          sv_track_which_track.push_back(track_which_track);
+  }
+
+  double llp0_flight_mom_phi = mevent->gen_lsp_p4(0).Vect().DeltaPhi(mevent->gen_lsp_flight(0));
+  //std::cout << "llp0 : energy (GeV) = " << mevent->gen_lsps[0].Energy() << " betagamma = " << lspbetagamma0 << " r3d (cm) " << r3d0 << " dphi(GEN mom, GEN flight) " << llp0_flight_mom_phi << std::endl;
+  if (isv_llp0 != -99) {
+	  const MFVVertexAux& aux = auxes->at(isv_llp0);
+          TVector3 vtx_flight = TVector3(aux.x - mevent->bsx_at_z(aux.z), aux.y - mevent->bsy_at_z(aux.z), aux.z - mevent->bsz);
+          double vtx_flight_mom_phi = aux.p4(mfv::PTracksOnly).Vect().DeltaPhi(vtx_flight); 
+          //std::cout << "     :  found closest sv! " << "idx = " << isv_llp0 << " ntrack = " << gensv0_ntrack << " dist3d (cm) = " << min_dist3d_genlsp0sv << " dphi(vtx mom, vtx flight) " << vtx_flight_mom_phi << std::endl;
+          for (size_t i = 0; i < sv_track_which_jet[isv_llp0].size(); ++i) {
+                  int ijet = sv_track_which_jet[isv_llp0][i];
+                  int itrack = sv_track_which_track[isv_llp0][i];
+                  //std::cout << "     :  track's dxy : " <<  aux.track_dxy[itrack]; 
+		  //std::cout << "     :  jet's idx : "  << ijet << " jet's pT : " << mevent->jet_pt[ijet] << " jet's eta : " << mevent->jet_eta[ijet] << " jet's phi : " << mevent->jet_phi[ijet] << std::endl;
+		  //std::cout << "     :  loose-btagged jet? : " << mevent->is_btagged(ijet, 0) << std::endl;
+	  }
+  }
+  double llp1_flight_mom_phi = mevent->gen_lsp_p4(1).Vect().DeltaPhi(mevent->gen_lsp_flight(1));
+  //std::cout << "llp1 : energy (GeV) = " << mevent->gen_lsps[1].Energy() << " betagamma = " << lspbetagamma1 << " r3d (cm) " << r3d1 << " dphi(GEN mom, GEN flight) " << llp1_flight_mom_phi << std::endl;
+  if (isv_llp1 != -99) {
+          const MFVVertexAux& aux = auxes->at(isv_llp1); 
+          TVector3 vtx_flight = TVector3(aux.x - mevent->bsx_at_z(aux.z), aux.y - mevent->bsy_at_z(aux.z), aux.z - mevent->bsz);
+          double vtx_flight_mom_phi = aux.p4(mfv::PTracksOnly).Vect().DeltaPhi(vtx_flight);
+          //std::cout << "     :  found closest sv! " << "idx = " << isv_llp1 << " ntrack = " << gensv1_ntrack << " dist3d (cm) = " << min_dist3d_genlsp1sv << " dphi(vtx mom, vtx flight) " << vtx_flight_mom_phi << std::endl;
+          for (size_t i = 0; i < sv_track_which_jet[isv_llp1].size(); ++i) {
+                  int ijet = sv_track_which_jet[isv_llp1][i];
+                  int itrack = sv_track_which_track[isv_llp1][i];
+                  //std::cout << "     :  track's dxy : " <<  aux.track_dxy[itrack]; 
+		  //std::cout << "     :  jet's idx : " << ijet << " jet's pT : " << mevent->jet_pt[ijet] << " jet's eta : " << mevent->jet_eta[ijet] << " jet's phi : " << mevent->jet_phi[ijet] << std::endl;
+		  //std::cout << "     :  loose-btagged jet? : " << mevent->is_btagged(ijet, 0) << std::endl;
+	  }
+  }
+  //std::cout << "*** END GEN-level information ***" << std::endl;
+
+  /*
+  if (mevent->gen_bchain_nonb_had_eta.size() == 4 && nsv > 0) {
+
+	  std::cout << __LINE__ << std::endl;
+          const double r3d = mag(mevent->gen_lsp_decay[0] - mevent->gen_pv[0], mevent->gen_lsp_decay[1] - mevent->gen_pv[1], mevent->gen_lsp_decay[2] - mevent->gen_pv[2]);
 	  const double lspbeta = mevent->gen_lsps[0].P() / mevent->gen_lsps[0].Energy();
 	  const double lspbetagamma = lspbeta / sqrt(1 - lspbeta * lspbeta);
 	  const double ctau = r3d / lspbetagamma;
-	  h_llp_r3d->Fill(r3d, w);
+	  std::cout << __LINE__ << std::endl; 
+          h_llp_r3d->Fill(r3d, w);
 	  h_llp_ctau->Fill(ctau, w);
 	  h_llp_gammabeta->Fill(lspbetagamma, w);
 
-	  for (int isv = 0; isv < nsv; ++isv) {
+	  std::cout << __LINE__ << std::endl; 
+          for (int isv = 0; isv < nsv; ++isv) {
 
 		  const MFVVertexAux& aux = auxes->at(isv);
 		  h_gvtx_sv_ntrack->Fill(aux.ntracks(), w);
@@ -580,7 +850,8 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 		  h_nbtags_v_bquark_code[i]->Fill(mevent->gen_flavor_code, mevent->nbtags(i), w);
 	  }
 
-	  size_t shared_bjet = 0;
+	  std::cout << __LINE__ << std::endl;
+          size_t shared_bjet = 0;
 	  
 
 	  std::vector<size_t> vec_bquark_jet = {};
@@ -675,7 +946,8 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   
 	  }
 
-	  for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
+	  std::cout << __LINE__ << std::endl;
+          for (size_t ijet = 0; ijet < mevent->jet_id.size(); ++ijet) {
 		  if (std::count(vec_bquark_jet_no_duplicate.begin(), vec_bquark_jet_no_duplicate.end(), ijet) == 1)  // this jet is a GEN jet 
 			  continue;
 		  
@@ -712,7 +984,8 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 	  std::vector<size_t> vec_no_shared_loosebtaggedjet_nm1_pT_or_not = {};
 	  std::vector<size_t> vec_shared_loosebtaggedjet_nm1_pT_or_not = {};
 
-	  int count_loosebtagged_jet = 0;
+	  std::cout << __LINE__ << std::endl;
+          int count_loosebtagged_jet = 0;
 	  int count_loosebtaggedOR3seedtrk_jet = 0;
 	  bool is_loosebtaggedOR3seedtrk_jet = false; 
 	  // no cuts on GEN-level are applied, looking at all loose-btagged jets  
@@ -1007,7 +1280,8 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
 	  }
 
-	  h_gvtx_nbquarkjet->Fill(vec_bquark_jet_no_duplicate.size(), w);
+	  std::cout << __LINE__ << std::endl;
+          h_gvtx_nbquarkjet->Fill(vec_bquark_jet_no_duplicate.size(), w);
 	  h_gvtx_nloosebtaggedjet->Fill(count_loosebtagged_jet, w);
 	  h_gvtx_nloosebtaggedOR3seedtrkjet->Fill(count_loosebtaggedOR3seedtrk_jet, w);
 	  h_gvtx_shared_GEN_bjet_or_not->Fill(shared_bjet, w);
@@ -1046,7 +1320,8 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 
 	  }
 
-	  double min_sv_genbdist3d = 0.2;
+	  std::cout << __LINE__ << std::endl;
+          double min_sv_genbdist3d = 0.2;
 	  double min_sv_genllpdist3d = 0.2;
 	  for (int isv = 0; isv < nsv; ++isv) {
 		  const MFVVertexAux& aux = auxes->at(isv);
@@ -1089,8 +1364,8 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
 		  h_gvtx_sv_all_genllp3ddist->Fill(min_sv_genllpdist3d, w);
 
   }
-	  
-  
+  */
+	
   h_minlspdist2d->Fill(mevent->minlspdist2d(), w);
   h_lspdist2d->Fill(mevent->lspdist2d(), w);
   h_lspdist3d->Fill(mevent->lspdist3d(), w);
