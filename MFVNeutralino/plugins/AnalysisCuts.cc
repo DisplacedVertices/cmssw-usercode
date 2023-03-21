@@ -7,6 +7,7 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
 #include "JMTucker/Tools/interface/BTagging.h"
+#include "JMTucker/Tools/interface/Year.h"
 
 class MFVAnalysisCuts : public edm::EDFilter {
 public:
@@ -36,6 +37,10 @@ private:
   const int apply_presel;
 
   const bool require_bquarks;
+  const bool require_trigbit;
+  const int  trigbit_tostudy;
+  const int calo_seed_threshold;
+  const int calo_prompt_threshold;
   const int l1_bit;
   const int trigger_bit;
   const int apply_trigger;
@@ -90,6 +95,10 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     use_mevent(mevent_src.label() != ""),
     apply_presel(cfg.getParameter<int>("apply_presel")),
     require_bquarks(cfg.getParameter<bool>("require_bquarks")),
+    require_trigbit(cfg.getParameter<bool>("require_trigbit")),
+    trigbit_tostudy(cfg.getParameter<int>("trigbit_tostudy")),
+    calo_seed_threshold(cfg.getParameter<int>("calo_seed_threshold")),
+    calo_prompt_threshold(cfg.getParameter<int>("calo_prompt_threshold")),
     l1_bit(apply_presel ? -1 : cfg.getParameter<int>("l1_bit")),
     trigger_bit(apply_presel ? -1 : cfg.getParameter<int>("trigger_bit")),
     apply_trigger(apply_presel ? 0 : cfg.getParameter<int>("apply_trigger")),
@@ -208,8 +217,18 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       bool success = false;
       for(size_t trig : mfv::HTOrBjetOrDisplacedDijetTriggers){
 
-        // remain agnostic to the HT1050 trigger
+        // remain agnostic to the HT1050 trigger and bjet triggers
         if (trig == mfv::b_HLT_PFHT1050) continue;
+
+        if (trigbit_tostudy < 9999 and int(trig) != trigbit_tostudy) continue;
+
+        // uncomment to remain agnostic to the bjet triggers
+        //if (trig == mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33) continue;
+        //if (trig == mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0) continue;
+       
+        // uncomment to remain agnostic to the displaced dijet triggers
+        //if (trig == mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack) continue;
+        //if (trig == mfv::b_HLT_HT650_DisplacedDijet60_Inclusive) continue;
 
         if(satisfiesTrigger(mevent, trig)){
           success = true;
@@ -405,10 +424,21 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
 }
 
 bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig) const {
-  if(!mevent->pass_hlt(trig)) return false;
+  if(require_trigbit and !mevent->pass_hlt(trig)) return false;
+  
+  // Get a shorthand for the current year
+  int year = int(MFVNEUTRALINO_YEAR);
 
   // note that if these weren't pT ordered, we'd have to be more careful in the loops...
-  int njets = mevent->njets(20);
+  int njets     = mevent->njets(20);
+  int ncalojets = mevent->calo_jet_pt.size();
+  int nseedtkd_cjets = 0;
+  int nprompttkd_cjets = 0;
+  int seedtk_thresh    = calo_seed_threshold;  // Require >=2 cjets with >=seedtk_thresh seed tracks
+  int prompttk_thresh  = calo_prompt_threshold;  // Require >=2 cjets with <=prompttk_thresh prompt tracks
+
+  // for counting seed tracks in calojets
+  const size_t n_vertex_seed_tracks = mevent->n_vertex_seed_tracks();
 
   // note that this could be loosened/tightened if desired
   int medcsvtags      = 0;
@@ -417,16 +447,38 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
   int hardmeddeepcsvtags = 0;
 
   float alt_calo_ht = 0.0; // To account for the fact that calo_jet_ht uses jets up to eta 5.0. We don't want that
-  for (int ic=0, ice=mevent->calo_jet_pt.size(); ic < ice; ic++) {
+
+  // Calculate alt_calo_ht and get ncalojets above seed track threshold
+  for (int ic=0; ic < ncalojets; ic++) {
+    int calojet_nseedtks   = 0;
+    int calojet_nprompttks = 0;
     if (mevent->calo_jet_pt[ic] > 40.0 and fabs(mevent->calo_jet_eta[ic]) < 2.5) alt_calo_ht += mevent->calo_jet_pt[ic];
+
+    if (mevent->calo_jet_pt[ic] < 50.0 or fabs(mevent->calo_jet_eta[ic]) > 2.0) continue;
+    // Get the number of seed tracks within dR < 0.4
+    for (size_t itk = 0; itk < n_vertex_seed_tracks; ++itk) {
+        if (mevent->vertex_seed_track_dxy[itk] < 0.02) continue;
+        double this_dR = reco::deltaR(mevent->calo_jet_eta[ic], mevent->calo_jet_phi[ic], mevent->vertex_seed_track_eta[itk], mevent->vertex_seed_track_phi[itk]);
+        if (this_dR < 0.4) calojet_nseedtks++;
+    }
+
+    for (size_t itk = 0; itk < mevent->n_jet_tracks_all(); itk++) {
+        if (not (fabs(mevent->jet_track_qpt[itk]) > 1.0 and fabs(mevent->jet_track_dxy[itk]) < 0.1)) continue;
+        double this_dR = reco::deltaR(mevent->calo_jet_eta[ic], mevent->calo_jet_phi[ic], mevent->jet_track_eta[itk], mevent->jet_track_phi[itk]);
+
+        if (this_dR < 0.4) calojet_nprompttks++;
+    }
+
+    if (calojet_nseedtks   >= seedtk_thresh)   nseedtkd_cjets++;
+    if (calojet_nprompttks <= prompttk_thresh) nprompttkd_cjets++;
   }
 
   for(int j0 = 0; j0 < njets; j0++) {
-    if (mevent->jet_bdisc_csv[j0]     > jmt::BTagging::discriminator_min(1, 0)){
+    if (mevent->jet_bdisc_csv[j0]     > jmt::BTagging::discriminator_min(0, 0)){
        medcsvtags++;
        if (mevent->jet_pt[j0] > 80.0) hardmedcsvtags++;
     }
-    if (mevent->jet_bdisc_deepcsv[j0] > jmt::BTagging::discriminator_min(1, 1)){ 
+    if (mevent->jet_bdisc_deepcsv[j0] > jmt::BTagging::discriminator_min(0, 1)){ 
       meddeepcsvtags++; 
       if (mevent->jet_pt[j0] > 80.0) hardmeddeepcsvtags++;
     }
@@ -441,6 +493,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
 
     case mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33 :
       {
+        if(year != 2017) return false;
         if(hardmedcsvtags < 2) return false;
 
         for(int j0 = 0; j0 < njets; ++j0){
@@ -459,6 +512,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
 
     case mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0 :
       {
+        if(year != 2017) return false;
         if(mevent->jet_ht(30) < 350 || njets < 4) return false;
         if(medcsvtags < 3) return false;
 
@@ -484,6 +538,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
 
     case mfv::b_HLT_DoublePFJets116MaxDeta1p6_DoubleCaloBTagDeepCSV_p71 :
     {
+      if(year != 2018) return false;
       if(hardmeddeepcsvtags < 2) return false;
 
       for(int j0 = 0; j0 < njets; ++j0){
@@ -502,6 +557,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
 
     case mfv::b_HLT_PFHT330PT30_QuadPFJet_75_60_45_40_TriplePFBTagDeepCSV_4p5 :
     {
+      if(year != 2018) return false;
       if(mevent->jet_ht(30) < 385 || njets < 4) return false;
       if(meddeepcsvtags < 3) return false;
 
@@ -527,15 +583,16 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
 
     case mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack :
     {
-      if(alt_calo_ht < 500 || njets < 2) return false;
+      if(year != 2018 and year != 2017) return false;
+      if(alt_calo_ht < 500 || ncalojets < 2 || nseedtkd_cjets < 1 || nprompttkd_cjets < 2) return false;
 
-      for(int j0 = 0; j0 < njets; ++j0){
+      for(int j0 = 0; j0 < ncalojets; ++j0){
         //if(!displaced_jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 50) continue; //FIXME
-        if(mevent->jet_pt[j0] < 50) continue;
+        if(mevent->calo_jet_pt[j0] < 50 || fabs(mevent->calo_jet_eta[j0]) > 2.0) continue;
 
-        for(int j1 = j0+1; j1 < njets; ++j1){
+        for(int j1 = j0+1; j1 < ncalojets; ++j1){
           //if(!displaced_jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 50) continue; //FIXME
-          if(mevent->jet_pt[j1] < 50) continue;
+          if(mevent->calo_jet_pt[j1] < 50 || fabs(mevent->calo_jet_eta[j0]) > 2.0) continue;
           passed_kinematics = true;
         }
       }
@@ -544,14 +601,15 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
 
     case mfv::b_HLT_HT650_DisplacedDijet60_Inclusive :
     {
-      if(alt_calo_ht < 700 || njets < 2) return false;
-      for(int j0 = 0; j0 < njets; ++j0){
+      if(year != 2018 and year != 2017) return false;
+      if(alt_calo_ht < 700 || ncalojets < 2 || nprompttkd_cjets < 2) return false;
+      for(int j0 = 0; j0 < ncalojets; ++j0){
         //if(!displaced_jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 80) continue; //FIXME
-        if(mevent->jet_pt[j0] < 80) continue;
+        if(mevent->calo_jet_pt[j0] < 80 || fabs(mevent->calo_jet_eta[j0]) > 2.0) continue;
 
         for(int j1 = j0+1; j1 < njets; ++j1){
           //if(!displaced_jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 80) continue; //FIXME
-          if(mevent->jet_pt[j1] < 80) continue;
+          if(mevent->calo_jet_pt[j1] < 80 || fabs(mevent->calo_jet_eta[j0]) > 2.0) continue;
           passed_kinematics = true;
         }
       }
@@ -561,6 +619,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
     // Start 2016 bjet and displaced dijet triggers here
     case mfv::b_HLT_HT350_DisplacedDijet40_DisplacedTrack :
     {
+      if(year != 20161 and year != 20162) return false;
       if(alt_calo_ht < 350 || njets < 2) return false;
 
       for(int j0 = 0; j0 < njets; ++j0){
@@ -575,6 +634,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
     }
     case mfv::b_HLT_HT650_DisplacedDijet80_Inclusive :
     {
+      if(year != 20161 and year != 20162) return false;
       if(alt_calo_ht < 650 || njets < 2) return false;
 
       for(int j0 = 0; j0 < njets; ++j0){
@@ -590,6 +650,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
 
     case mfv::b_HLT_QuadJet45_TripleBTagCSV_p087 :
     {
+      if(year != 20161 and year != 20162) return false;
       if(mevent->jet_ht(30) < 180 || njets < 4) return false;
       if(medcsvtags < 3) return false;
 
@@ -616,6 +677,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
 
     case mfv::b_HLT_DoubleJet90_Double30_TripleBTagCSV_p087 :
     {
+      if(year != 20161 and year != 20162) return false;
       if(mevent->jet_ht(30) < 200 || njets < 4) return false;
       if(medcsvtags < 3) return false;
 
@@ -641,6 +703,7 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
 
     case mfv::b_HLT_DoubleJetsC100_DoubleBTagCSV_p014_DoublePFJetsC100MaxDeta1p6 :
     {
+      if(year != 20161 and year != 20162) return false;
       if(hardmedcsvtags < 2) return false;
 
       for(int j0 = 0; j0 < njets; ++j0){

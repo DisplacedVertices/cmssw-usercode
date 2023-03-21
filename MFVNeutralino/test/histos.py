@@ -1,10 +1,10 @@
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 is_mc = True # for blinding
-do_track = False # this can onlky be used for ntuple with keep_tk=True
+do_track = True # this can only be used for ntuple with keep_tk=True
 
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_MET_triggers
-sample_files(process, 'ggHToSSTodddd_tau1mm_M55_2017' if is_mc else 'JetHT2017B', dataset, 10)
+sample_files(process, 'mfv_neu_tau010000um_M0300_2017' if is_mc else 'JetHT2017B', dataset, 10)
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
 
@@ -25,6 +25,7 @@ common = cms.Sequence(process.mfvSelectedVerticesSeq * process.mfvWeight)
 process.mfvEventHistosNoCuts = process.mfvEventHistos.clone()
 process.mfvJetTksHistosNoCuts = process.mfvJetTksHistos.clone()
 #process.mfvVertexHistosNoCuts = process.mfvVertexHistos.clone(vertex_src = 'mfvSelectedVerticesExtraLoose')
+#process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts) # just trigger for now
 process.pSkimSel = cms.Path(common * process.mfvEventHistosNoCuts * process.mfvJetTksHistosNoCuts) # just trigger for now
 #process.pSkimSelVtx = cms.Path(common * process.mfvVertexHistosNoCuts)
 if do_track:
@@ -33,15 +34,32 @@ if do_track:
   process.pTrackNoCut = cms.Path(common * process.mfvTrackHistos * process.mfvFilterHistosNoCuts)
 
 process.mfvEventHistosPreSel = process.mfvEventHistos.clone()
+process.mfvFilterHistosPreSel = process.mfvFilterHistos.clone()
 process.mfvAnalysisCutsPreSel = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False)
-process.pEventPreSel = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvEventHistosPreSel)
+process.pEventPreSel = cms.Path(common * process.mfvAnalysisCutsPreSel * process.mfvEventHistosPreSel * process.mfvFilterHistosPreSel)
+
+process.mfvFilterHistosPreSelDiBjet = process.mfvFilterHistos.clone()
+process.mfvAnalysisCutsPreSelDiBjet = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False, trigbit_tostudy = 8,    calo_seed_threshold = 4, calo_prompt_threshold = 4)
+process.pEventPreSelDiBjet = cms.Path(common * process.mfvAnalysisCutsPreSelDiBjet * process.mfvFilterHistosPreSelDiBjet)
+
+process.mfvFilterHistosPreSelTriBjet = process.mfvFilterHistos.clone()
+process.mfvAnalysisCutsPreSelTriBjet = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False, trigbit_tostudy = 9,    calo_seed_threshold = 4, calo_prompt_threshold = 4)
+process.pEventPreSelTriBjet = cms.Path(common * process.mfvAnalysisCutsPreSelTriBjet * process.mfvFilterHistosPreSelTriBjet)
+
+process.mfvFilterHistosPreSelLowHT = process.mfvFilterHistos.clone()
+process.mfvAnalysisCutsPreSelLowHT = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False, trigbit_tostudy = 18,    calo_seed_threshold = 4, calo_prompt_threshold = 4)
+process.pEventPreSelLowHT = cms.Path(common * process.mfvAnalysisCutsPreSelLowHT * process.mfvFilterHistosPreSelLowHT)
+
+process.mfvFilterHistosPreSelHighHT = process.mfvFilterHistos.clone()
+process.mfvAnalysisCutsPreSelHighHT = process.mfvAnalysisCuts.clone(apply_vertex_cuts = False, trigbit_tostudy = 19,    calo_seed_threshold = 4, calo_prompt_threshold = 4)
+process.pEventPreSelHighHT = cms.Path(common * process.mfvAnalysisCutsPreSelHighHT * process.mfvFilterHistosPreSelHighHT)
 
 nm1s = []
 #    ('Bsbs2ddist', 'min_bsbs2ddist = 0'),
 #    ('Bs2derr',    'max_rescale_bs2derr = 1e9'),
 #    ]
 
-ntks = [5,3,4,7,8,9]
+ntks = [5,]#,3,4,7,8,9]
 nvs = [0,1,2]
 
 for ntk in ntks:
@@ -127,13 +145,53 @@ process.EX1pSigReg     = cms.Path(common * process.EX1mfvAnalysisCutsSigReg     
             setattr(process, evt_hst_name, evt_hst)
             setattr(process, vtx_hst_name, vtx_hst)
             setattr(process, '%sp%iV' % (EX1, nv) + name, cms.Path(process.mfvWeight * vtx * ana * evt_hst * vtx_hst))
-
+    
+#    for nseed in [0, 1, 2, 3, 4, 5, 6]:
+#        if (ntk != 5):
+#            continue
+#        
+#        ana = process.mfvAnalysisCuts.clone()
+#        ana.require_trigbit = True
+#        ana.calo_seed_threshold = nseed
+#        ana.calo_prompt_threshold = 9999
+#        ana_name = 'anaCaloSeed%iNum' % (nseed)
+#
+#        vtx = process.mfvSelectedVerticesTight.clone()
+#        vtx_hst = process.mfvVertexHistos.clone()
+#        vtx_hst_name = 'vtxHstCaloSeed%iNum' % (nseed)
+#
+#        setattr(process, 'test', vtx)
+#        setattr(process, ana_name, ana)
+#        setattr(process, vtx_hst_name, vtx_hst)
+#        setattr(process, 'caloSeed%iNum' % (nseed), cms.Path(process.mfvWeight * vtx * ana * vtx_hst))
+#
+#    for nseed in [0, 1, 2, 3, 4, 5, 6]:
+#        if (ntk != 5):
+#            continue
+#        
+#        ana = process.mfvAnalysisCuts.clone()
+#        ana.calo_seed_threshold = nseed
+#        ana.calo_prompt_threshold = 9999
+#        ana.require_trigbit = False
+#        ana_name = 'anaCaloSeed%iDen' % (nseed)
+#
+#        vtx = process.mfvSelectedVerticesTight.clone()
+#        vtx_hst = process.mfvVertexHistos.clone()
+#        vtx_hst_name = 'vtxHstCaloSeed%iDen' % (nseed)
+#
+#        setattr(process, 'test', vtx)
+#        setattr(process, ana_name, ana)
+#        setattr(process, vtx_hst_name, vtx_hst)
+#        setattr(process, 'caloSeed%iDen' % (nseed), cms.Path(process.mfvWeight * vtx * ana * vtx_hst))
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
     if use_btag_triggers :
-        samples = Samples.HToSSTodddd_samples_2017
+        #samples = Samples.ttbar_samples_2017 + Samples.qcd_samples_2017
+        #samples = Samples.HToSSTodddd_samples_2017 + Samples.mfv_signal_samples_2017
+        #samples = Samples.mfv_stopdbardbar_samples_2017
+        samples = Samples.mfv_signal_samples_lowmass_2017# + Samples.HToSSTodddd_samples_2017
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())
     elif use_MET_triggers:
         samples = pick_samples(dataset, qcd=True, ttbar=False, data=False, leptonic=True, splitSUSY=True, Zvv=True, met=True, span_signal=False)
@@ -145,7 +203,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     set_splitting(samples, dataset, 'histos', data_json=json_path('ana_2017p8.json'))
 
-    cs = CondorSubmitter('Histos' + version,
+    cs = CondorSubmitter('Histos' + version + '_ughJetTkHists',
                          ex = year,
                          dataset = dataset,
                          pset_modifier = pset_modifier,
