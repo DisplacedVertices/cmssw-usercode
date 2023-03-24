@@ -18,9 +18,9 @@ private:
   // bool satisfiesLepTrigger(size_t) const;
   
   struct Mode {
-    enum mode_t { either, jets_only, leptons_only, HT_OR_bjets_OR_displaced_dijet, bjets_OR_displaced_dijet_veto_HT, MET_only };
+    enum mode_t { either, jets_only, leptons_only, HT_OR_bjets_OR_displaced_dijet, bjets_OR_displaced_dijet_veto_HT, MET_only, lep_OR_displaced_lep};
     const mode_t mode;
-    Mode(const std::string& m) : mode(m == "MET only" ? MET_only : m == "bjets_OR_displaced_dijet_veto_HT" ? bjets_OR_displaced_dijet_veto_HT : m == "HT OR bjets OR displaced dijet" ? HT_OR_bjets_OR_displaced_dijet : m == "leptons only" ? leptons_only : m == "jets only" ? jets_only : either) {}
+    Mode(const std::string& m) : mode(m == "MET only" ? MET_only : m == "bjets_OR_displaced_dijet_veto_HT" ? bjets_OR_displaced_dijet_veto_HT : m == "HT OR bjets OR displaced dijet" ? HT_OR_bjets_OR_displaced_dijet : m == "leptons only" ? leptons_only : m == "lep or displaced lep" ? lep_OR_displaced_lep : m == "jets only" ? jets_only : either) {}
     bool operator==(mode_t m) const { return mode == m; }
   };
   const Mode mode;
@@ -99,7 +99,7 @@ bool MFVEventFilter::filter(edm::Event& event, const edm::EventSetup&) {
     }
   }
 
-
+  //jets 
   int njets = 0;
   double ht = 0;
   for (const pat::Jet& jet : *jets)
@@ -113,17 +113,7 @@ bool MFVEventFilter::filter(edm::Event& event, const edm::EventSetup&) {
 
   if (debug) printf("MFVEventFilter: njets: %i  ht: %f pass? %i\n", njets, ht, jets_pass);
 
-  if (mode == Mode::jets_only)
-    return jets_pass;
-  else if (mode == Mode::either && jets_pass)
-    return true;
-  else if (mode == Mode::HT_OR_bjets_OR_displaced_dijet || mode == Mode::bjets_OR_displaced_dijet_veto_HT)
-    return true;
-  else if (mode == Mode::MET_only)
-    return true;
-  // else if (mode == Mode::leptons_only)
-  //  return true;
-
+  //leptons 
   edm::Handle<pat::MuonCollection> muons;
   edm::Handle<pat::ElectronCollection> electrons;
   event.getByToken(muons_token, muons);
@@ -143,10 +133,10 @@ bool MFVEventFilter::filter(edm::Event& event, const edm::EventSetup&) {
       const float iso = (muon.pfIsolationR04().sumChargedHadronPt + std::max(0., muon.pfIsolationR04().sumNeutralHadronEt + muon.pfIsolationR04().sumPhotonEt -0.5*muon.pfIsolationR04().sumPUPt))/muon.pt();
 
       if (isMedMuon && iso < 0.15) {
-  	++nmuons;
-      }
-    }
-  }
+  	    ++nmuons;
+      } 
+    } 
+  } 
 
   for (const pat::Electron& electron : *electrons) {
     // if (electron_selector(electron) && electron.pt() > min_electron_pt)
@@ -160,18 +150,29 @@ bool MFVEventFilter::filter(edm::Event& event, const edm::EventSetup&) {
       const bool passveto = electron.passConversionVeto();
 
       if (isTightEl && passveto && iso < 0.10) {
-  	++nelectrons;
-      }
-    }
-  }
+  	    ++nelectrons;
+      } 
+    } 
+  } 
   
   const bool leptons_pass = nmuons + nelectrons >= min_nleptons;
   
 
   if (debug) printf("MFVEventFilter: nmuons: %i nelectrons: %i pass? %i\n", nmuons, nelectrons, leptons_pass);
 
-  return leptons_pass;
-}
-  
+  //return leptons_pass;
 
+  if (mode == Mode::jets_only)
+    return jets_pass;
+  else if (mode == Mode::either && jets_pass)
+    return true;
+  else if (mode == Mode::HT_OR_bjets_OR_displaced_dijet || mode == Mode::bjets_OR_displaced_dijet_veto_HT)
+    return true;
+  else if (mode == Mode::MET_only)
+    return true;
+  else if (mode == Mode::leptons_only || mode == Mode::lep_OR_displaced_lep)
+    return leptons_pass && jets_pass;
+  else return true; // catch-all
+
+} 
 DEFINE_FWK_MODULE(MFVEventFilter);

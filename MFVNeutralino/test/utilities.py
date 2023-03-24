@@ -123,14 +123,12 @@ def cmd_rm_mc_parts():
                     print y
                     os.remove(y)
 
-def _background_samples(trigeff=False, year=2017):
-    if _leptonpresel or trigeff:
-        #x = ['ttbar', 'wjetstolnu', 'dyjetstollM10', 'dyjetstollM50', 'qcdmupt15']
+def _background_samples(trigeff=False, year=2018):
+    if _leptonpresel:
         x = ['ttbar', 'wjetstolnu', 'dyjetstollM10', 'dyjetstollM50', 'qcdmupt15', 'ww', 'wz', 'zz']
-        if not trigeff:
-           # x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]]
-            x += ['qcdempt%03i' % x for x in [20,30,50,80,120,170]]
-            x += ['qcdbctoept%03i' % x for x in [20,30,80,170,250]]
+        x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]]
+        x += ['qcdempt%03i' % x for x in [20,30,50,80,120,170]]
+        x += ['qcdbctoept%03i' % x for x in [20,30,80,170,250]]
     elif _btagpresel:
         x = ['qcdht%04i' % x for x in [300, 500, 700, 1000, 1500, 2000]]
         x += ['ttbar']
@@ -147,7 +145,7 @@ def _background_samples(trigeff=False, year=2017):
         x += ['ttbarht%04i' % x for x in [600, 800, 1200, 2500]]
     return x
 
-def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=2017):
+def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=2018):
     cwd = os.getcwd()
     ok = True
     if year_to_use==-1:

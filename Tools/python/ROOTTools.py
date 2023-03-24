@@ -517,6 +517,7 @@ def compare_hists(ps, samples, **kwargs):
         name_clean = name.replace('/','_').replace('#','n')
 
         hists = [dir.Get(name) for _,dir,_ in samples]
+        
 
         is3d = all_same([issubclass(type(hist), ROOT.TH3) for hist in hists], "for name %s, some samples' histograms are TH3, and some are not" % name)
         if is3d:
@@ -553,9 +554,6 @@ def compare_hists(ps, samples, **kwargs):
                 hist.Sumw2() # for correct error bars post scaling
             hist.cah_integral = hist.Integral(0, hist.GetNbinsX()+1) if not is2d else 0.
             hist.cah_scaling = scaling(name, hist_list, hist.cah_sample_name)
-         #   if hist.cah_sample_name.startswith('data') :
-          #      hist.cah_scaling = 1
-          #  print hist.cah_sample_name, hist.cah_scaling
            
         nostat = no_stats(name, hist_list, None)
         for hist in hists:
@@ -563,11 +561,11 @@ def compare_hists(ps, samples, **kwargs):
 
             if not is2d and hist.cah_scaling is not None :
                 if hist.cah_scaling > 0 and hist.cah_integral > 0:
-                    if hist.cah_sample_name.startswith('data') :
-                        hist.Scale(1.)
-                    else :
-                        hist.Scale(0.10)
-                   # hist.Scale(hist.cah_scaling/hist.cah_integral)
+                    # if hist.cah_sample_name.startswith('data') :
+                    #     hist.Scale(1.)
+                    # else :
+                    #     hist.Scale(0.10)
+                   hist.Scale(hist.cah_scaling/hist.cah_integral)
                 else:
                     hist.Scale(abs(hist.cah_scaling))
             if nostat:
@@ -625,7 +623,9 @@ def compare_hists(ps, samples, **kwargs):
             ps.c.Update()
             if not no_stats(name, hist_list, None):
                 ss = stat_size(name, hist_list, None)
+                #print ss 
                 for i, hist in enumerate(hists):
+                    #print hist, i, hist.cah_color
                     differentiate_stat_box(hist, i, hist.cah_color, ss)
 
             leg = legend(name, hist_list, None)
@@ -686,7 +686,8 @@ def data_mc_comparison(name,
                        canvas_left_margin = 0.12,
                        canvas_right_margin = 0.08,
                        join_info_override = None,
-                       stack_draw_cmd = 'hist',
+                       #stack_draw_cmd = 'hist',
+                       stack_draw_cmd = 'pfc plc hist',
                        move_overflows = 'under over',
                        rebin = True,
                        bin_width_to = None,
@@ -706,8 +707,8 @@ def data_mc_comparison(name,
                        data_marker_style = 20,
                        data_marker_size = 0.8,
                       # data_line_width = 3,
-                       #data_draw_cmd = 'hist',
-                       data_draw_cmd = 'pe',
+                       data_draw_cmd = 'hist',
+                       #data_draw_cmd = 'pe',
                        res_divide_opt = 'n pois',
                        res_line_width = 2,
                        res_line_color = ROOT.kBlue+3,
@@ -728,6 +729,7 @@ def data_mc_comparison(name,
                        background_uncertainty = None,
                        preliminary = False,
                        simulation = False,
+                       palette = 55,
                        ):
     """
     Put the histograms for the background samples into a THStack, with
@@ -817,6 +819,7 @@ def data_mc_comparison(name,
                 sample._datamccomp_file_path = file_path
                 sample._datamccomp_filename = file_path % sample
                 sample._datamccomp_file = ROOT.TFile(sample._datamccomp_filename)
+               # print file_path
                 if sample not in data_samples and fcn_for_nevents_check is not None:
                     if fcn_for_nevents_check(sample, sample._datamccomp_file) != sample.nevents:
                         raise ValueError('wrong number of events for %s' % sample.name)
@@ -917,10 +920,12 @@ def data_mc_comparison(name,
     legend_entries = []
     stack = ROOT.THStack('s_datamc_' + name, '')
     sum_background = None
+    ROOT.gStyle.SetPalette(palette)
     for sample in background_samples:
-        join, nice_name, color = sample.join_info if join_info_override is None else join_info_override(sample)
-        sample.hist.SetLineColor(color)
-        sample.hist.SetFillColor(color)
+        #join, nice_name, color = sample.join_info if join_info_override is None else join_info_override(sample)
+        join, nice_name = sample.join_info if join_info_override is None else join_info_override(sample)
+       # sample.hist.SetLineColor(color)
+        #sample.hist.SetFillColor(color)
         if nice_name not in [l[1] for l in legend_entries] or not join:
             legend_entries.append((sample.hist, nice_name, 'F'))
         stack.Add(sample.hist)

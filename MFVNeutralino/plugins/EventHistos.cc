@@ -30,6 +30,9 @@ class MFVEventHistos : public edm::EDAnalyzer {
   TH1F* h_gen_jets;
   TH1F* h_gen_daughters;
   TH1F* h_gen_daughter_id;
+  // closest dR between reco lepton & gen lepton
+  TH1F* h_gen_ele_closestdR;
+  TH1F* h_gen_mu_closestdR;
 
   TH1F* h_nbquarks;
   TH1F* h_bquark_pt;
@@ -209,6 +212,8 @@ MFVEventHistos::MFVEventHistos(const edm::ParameterSet& cfg)
   h_gen_jets = fs->make<TH1F>("h_gen_jets", ";gen level jets; events", 10, 0, 10);
   h_gen_daughters = fs->make<TH1F>("h_gen_daughters", ";gen daughters; events", 10, 0, 10);
   h_gen_daughter_id = fs->make<TH1F>("h_gen_daughter_id", ";gen daughter id; events", 40, -20, 20);
+  h_gen_ele_closestdR = fs->make<TH1F>("h_gen_ele_closestdR", ";dR between closest reco ele and gen ele; events", 200, 0, 0.2);
+  h_gen_mu_closestdR = fs->make<TH1F>("h_gen_mu_closestdR", ";dR between closest reco mu and gen mu; events", 200, 0, 0.2);
 
   h_nbquarks = fs->make<TH1F>("h_nbquarks", ";# of bquarks;events", 20, 0, 20);
   h_bquark_pt = fs->make<TH1F>("h_bquark_pt", ";bquarks p_{T} (GeV);bquarks/10 GeV", 100, 0, 1000);
@@ -413,6 +418,7 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   //////////////////////////////////////////////////////////////////////////////
 
   h_gen_decay->Fill(mevent->gen_decay_type[0], mevent->gen_decay_type[1], w);
+
   h_gen_flavor_code->Fill(mevent->gen_flavor_code, w);
 
   const size_t ngenlep = mevent->gen_leptons.size();
@@ -421,13 +427,40 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   const size_t ngenjet = mevent->gen_jets.size();
   h_gen_jets->Fill(ngenjet, w);
 
-  //these aren't being filled 
   const size_t ngendaughter = mevent->gen_daughters.size();
   h_gen_daughters->Fill(ngendaughter, w);
   for (size_t i = 0; i < ngendaughter; ++i) {
-    
     h_gen_daughter_id->Fill(mevent->gen_daughter_id[i], w);
+
+    if (abs(mevent->gen_daughter_id[i]) == 11) {
+      double gd_eta = mevent->gen_daughters[i].Eta();
+      double gd_phi = mevent->gen_daughters[i].Phi();
+      //double mindR2 = 999.0;
+      std::vector<double> mindR2;
+      for (int ie=0; ie<mevent->nelectrons(); ++ie){
+        double dR2 = reco::deltaR2(mevent->nth_ele_eta(ie), mevent->nth_ele_phi(ie), gd_eta, gd_phi);
+        // if (dR2 < mindR2) {
+        //   dR2 = mindR2;
+        // }
+        mindR2.push_back(dR2);
+      }
+      if (mevent->nelectrons() !=0)
+        h_gen_ele_closestdR->Fill(*min_element(mindR2.begin(), mindR2.end()), w);
+    }
+    else if (abs(mevent->gen_daughter_id[i]) == 13 ) {
+      double gd_eta = mevent->gen_daughters[i].Eta();
+      double gd_phi = mevent->gen_daughters[i].Phi();
+      //double mindR2 = 999.0;
+      std::vector<double> mindR2;
+      for (int im=0; im<mevent->nmuons(); ++im){
+        double dR2 = reco::deltaR2(mevent->nth_mu_eta(im), mevent->nth_mu_phi(im), gd_eta, gd_phi);
+        mindR2.push_back(dR2);
+      }
+      if (mevent->nmuons() !=0)
+        h_gen_mu_closestdR->Fill(*min_element(mindR2.begin(), mindR2.end()), w);
+    }
   }
+
 
   const size_t nbquarks = mevent->gen_bquarks.size();
   h_nbquarks->Fill(nbquarks, w);
@@ -466,10 +499,11 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   double nmatched_0 = 0;
   double nmatched_1 = 0;
   for (size_t i=0; i<mevent->gen_daughters.size(); ++i){
-    if (abs(mevent->gen_daughter_id[i])==1000022){
-      // FIXME: this part only works for splitSUSY because of the pdgID and the number of daughters from each LLP
-      // get pT for neutralinos from the decay of gluino
-      // this only works for splitSUSY samples because it's looking for neutralino(1000022) as gen_daughter
+    if (abs(mevent->gen_daughter_id[i])==1000006){
+      // FIXME: this part only works for DispSUSY because of the pdgID and the number of daughters from each LLP
+      // get pT for neutralinos from the decay of gluino --ignoring for now
+      // this only works for splitSUSY samples because it's looking for stop(1000006) as gen_daughter
+      // see vertex histos for the lepton distributions
       if (decaylsp0_pt>0){
         decaylsp1_pt = mevent->gen_daughters[i].Pt();
       }
@@ -478,24 +512,19 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
       }
     }
     else{
-      // In splitSUSY model, if a decayed daughter is not neutralino, then it will be a quark
       // match jets to gen quarks from LLP decay
       double gd_eta = mevent->gen_daughters[i].Eta();
       double gd_phi = mevent->gen_daughters[i].Phi();
-      //double dR2_min = 999;
       int n_matched = 0;
       double pt_sum = 0;
       for (int ij = 0; ij<MAX_NJETS; ++ij){
         double dR2 = (mevent->nth_jet_eta(ij)-gd_eta)*(mevent->nth_jet_eta(ij)-gd_eta)+(mevent->nth_jet_phi(ij)-gd_phi)*(mevent->nth_jet_phi(ij)-gd_phi);
-        //if (dR2_min>dR2){
-        //  dR2_min = dR2;
-        //}
         if (dR2<0.16){
           n_matched += 1;
           pt_sum += mevent->nth_jet_pt(ij);
         }
       }
-      if (i<3){
+      if (i<2){
         // daughter from the first LLP
         nmatched_0 += n_matched;
         if (decay_quarks0_pt[0]>=0){
@@ -627,10 +656,6 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   std::vector<int> nmuons{ 0, 0, 0 };
   std::vector<int> nelectrons{ 0, 0, 0, 0 };
 
-  // std::vector<int> nselmu{ 0, 0, 0 };
-  // std::vector<int> nselel{ 0, 0, 0, 0 };
-    
-  
   //placeholder 2d vector to be able to fill nsellepton histo for all the different cases; 1st is el, 2nd is mu
   std::vector<std::vector<int>> nlept_idx{
   					  { 0, 1 },
@@ -708,7 +733,6 @@ void MFVEventHistos::analyze(const edm::Event& event, const edm::EventSetup&) {
   for (int l = 0; l < 6; ++l) {
       h_nleptons_pass_[l]->Fill((nmuons[nlept_idx[l][0]] + nelectrons[nlept_idx[l][1]]), w);
   }
-
 
   // // now to check the relation between jets and electrons/muons
   // // only considering selected leptons (pt, eta, iso) 
