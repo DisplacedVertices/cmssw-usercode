@@ -321,7 +321,7 @@ def pick_samples(dataset, both_years=False,
         print 'cannot use both span and all_signal, turning off the latter'
         all_signal = False
 
-    argnames = 'qcd', 'qcd_lep', 'ttbar', 'all_signal', 'span_signal', 'data', 'Lepton_data', 'leptonic', 'bjet', 'splitSUSY', 'Zvv', 'met', 'diboson'
+    argnames = 'qcd', 'qcd_lep', 'ttbar', 'all_signal', 'span_signal', 'data', 'Lepton_data', 'leptonic', 'bjet', 'splitSUSY', 'Zvv', 'met', 'diboson',
     args = dict([(a,eval(a)) for a in argnames])
     if not set(args.values()).issubset([True, False, 'only']):
         raise ValueError('arg must be one of True, False, "only"')
@@ -336,7 +336,7 @@ def pick_samples(dataset, both_years=False,
             if a2 != a:
                 args[a2] = False
 
-    years = [2017, 2018] if both_years else [year]
+    years = [20161, 20162, 2017, 2018] if both_years else [year]
 
     samples = []
     for a in argnames:
