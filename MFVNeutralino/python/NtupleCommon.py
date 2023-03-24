@@ -1,12 +1,12 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version_ = 'ULV1_TEST'
-lsp_id = 1000009 # should do that in a smarter way; currently for stop
+ntuple_version_ = 'ULV1'
+lsp_id = 1000006 # should do that in a smarter way; currently for stop
 use_btag_triggers = False
 use_MET_triggers = False
 use_Lepton_triggers = True
-use_DisplacedLepton_triggers = False
+
 if use_btag_triggers : 
     ntuple_version_ += "B" # for "Btag triggers"; also includes DisplacedDijet triggers
 elif use_MET_triggers :
@@ -305,7 +305,7 @@ def miniaod_ntuple_process(settings):
     process.mfvEvent.gen_jets_src = 'slimmedGenJets'
     process.mfvEvent.pileup_info_src = 'slimmedAddPileupInfo'
     process.mfvEvent.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple')
-    #process.mfvEvent.met_src = 'slimmedMETs'
+    process.mfvEvent.met_src = 'slimmedMETs'
     
     # MET correction and filters
     # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETUncertaintyPrescription#PF_MET

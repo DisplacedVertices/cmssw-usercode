@@ -7,7 +7,6 @@
 #include "JMTucker/MFVNeutralinoFormats/interface/VertexAux.h"
 #include "JMTucker/MFVNeutralino/interface/EventTools.h"
 #include "JMTucker/Tools/interface/BTagging.h"
-#include "JMTucker/Tools/interface/Year.h"
 
 class MFVAnalysisCuts : public edm::EDFilter {
 public:
@@ -16,7 +15,7 @@ public:
 private:
   virtual bool filter(edm::Event&, const edm::EventSetup&);
   bool satisfiesTrigger(edm::Handle<MFVEvent>, size_t) const;
-  bool satisfiesLepTrigger(edm::Handle<MFVEvent>, std::string yr, size_t) const;
+  bool satisfiesLepTrigger(edm::Handle<MFVEvent>, size_t) const;
   bool satisfiesDispLepTrigger(edm::Handle<MFVEvent>, size_t) const;
 
   bool jet_hlt_match(edm::Handle<MFVEvent> mevent, int i, float min_jet_pt=20.) const {
@@ -35,14 +34,15 @@ private:
   const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_token;
   
   const bool use_mevent;
-  const std::string year;
   const int apply_presel;
+
   const bool require_met_filters;
   const bool require_bquarks;
   const int l1_bit;
   const int trigger_bit;
   const int apply_trigger;
   const bool apply_displacedlepton_triggers;
+  const bool require_displaced_lepton;
   const bool apply_cleaning_filters;
   const int min_npv;
   const int max_npv;
@@ -91,7 +91,6 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     mevent_token(consumes<MFVEvent>(mevent_src)),
     vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     use_mevent(mevent_src.label() != ""),
-    year(cfg.getParameter<std::string>("year")),
     apply_presel(cfg.getParameter<int>("apply_presel")),
     require_met_filters(cfg.getParameter<bool>("require_met_filters")),
     require_bquarks(cfg.getParameter<bool>("require_bquarks")),
@@ -99,6 +98,7 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     trigger_bit(apply_presel ? -1 : cfg.getParameter<int>("trigger_bit")),
     apply_trigger(apply_presel ? 0 : cfg.getParameter<int>("apply_trigger")),
     apply_displacedlepton_triggers(cfg.getParameter<bool>("apply_displacedlepton_triggers")),
+    require_displaced_lepton(cfg.getParameter<bool>("require_displaced_lepton")),
     apply_cleaning_filters(cfg.getParameter<bool>("apply_cleaning_filters")),
     min_npv(cfg.getParameter<int>("min_npv")),
     max_npv(cfg.getParameter<int>("max_npv")),
@@ -111,7 +111,8 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     max_nbtags(cfg.getParameter<std::vector<int> >("max_nbtags")),
     min_ht(cfg.getParameter<double>("min_ht")),
     max_ht(cfg.getParameter<double>("max_ht")),
-    min_nleptons(cfg.getParameter<int>("min_nleptons")),    apply_vertex_cuts(cfg.getParameter<bool>("apply_vertex_cuts")),
+    min_nleptons(cfg.getParameter<int>("min_nleptons")),    
+    apply_vertex_cuts(cfg.getParameter<bool>("apply_vertex_cuts")),
     min_nvertex(cfg.getParameter<int>("min_nvertex")),
     max_nvertex(cfg.getParameter<int>("max_nvertex")),
     ntracks01_0(cfg.getParameter<int>("ntracks01_0")),
@@ -169,21 +170,22 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (apply_presel == 2) {
       bool success = false;
       for(size_t trig : mfv::LeptonTriggers){
-	if(satisfiesLepTrigger(mevent, year, trig)) { 
-	  success = true;
-	  break;
-	}
+      	if(satisfiesLepTrigger(mevent, trig)) { 
+	         success = true;
+	         break;
+        }
       }
-      if (apply_displacedlepton_triggers) {
-	for(size_t trig : mfv::DisplacedLeptonTriggers){
-	  if(satisfiesDispLepTrigger(mevent, trig)) { 
-	    success = true;
-	    break;
-	  }
-	}
-      }
+      // if we want to consider displaced lepton triggers, to make it a logical OR, we need the single lepton triggers to fail. 
+      if (apply_displacedlepton_triggers && success == false) {
+	      for(size_t trig : mfv::DisplacedLeptonTriggers){
+	        if(satisfiesDispLepTrigger(mevent, trig)) { 
+	          success = true;
+	          break;
+          }
+	      } 
+	    } 
       if(!success) return false;
-    }
+    } 
 
     // HT or Bjet or DisplacedDijet trigger && offline presel
     if (apply_presel == 3) {
@@ -238,6 +240,29 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
       if (mevent->met()>=150) return false;
     }
 
+    if (require_displaced_lepton) { 
+      int nmuons     = mevent->nmuons();
+      int nelectrons = mevent->nelectrons();
+
+      bool displaced_success = false;
+      for(int ie=0; ie < nelectrons; ++ie){
+        if (abs(mevent->electron_dxybs[ie]) > 0.01) {
+          displaced_success = true;
+          break; 
+        }
+      } 
+      //to keep things short, only consider looping through muons if havent found a displaced electron
+      if (!displaced_success) { 
+        for(int im=0; im < nmuons; ++im){
+          if (abs(mevent->muon_dxybs[im] > 0.01)) {
+            displaced_success = true;
+            break;
+          }
+        }
+      }
+      if (!displaced_success) return false;
+    }
+
     if (require_met_filters && (!mevent->pass_metfilters))
       return false;
 
@@ -255,20 +280,19 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
 
     if (apply_trigger == 2) {
       bool at_least_one_trigger_passed = false;
-      // for(size_t trig : mfv::LeptonOrDisplacedLeptonTriggers){
       for(size_t trig : mfv::LeptonTriggers){
-	if(mevent->pass_hlt(trig)){
-	  at_least_one_trigger_passed = true;
-	  break;
-	}
+	      if(mevent->pass_hlt(trig)){
+	        at_least_one_trigger_passed = true;
+	         break;
+	      }
       }
       if(apply_displacedlepton_triggers){
-	for(size_t trig : mfv::DisplacedLeptonTriggers){
-	  if(mevent->pass_hlt(trig)){
-	    at_least_one_trigger_passed = true;
-	    break;
-	  }
-	}
+	      for(size_t trig : mfv::DisplacedLeptonTriggers){
+	        if(mevent->pass_hlt(trig)){
+	          at_least_one_trigger_passed = true;
+	           break;
+	        }
+	      }
       }
       if(!at_least_one_trigger_passed) return false;
     }
@@ -330,7 +354,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     event.getByToken(vertex_token, vertices);
 
     const int nsv = int(vertices->size());
-    if (nsv < min_nvertex || nsv > max_nvertex)
+    if (nsv < min_nvertex || nsv > max_nvertex) 
       return false;
 
     const bool two_vertex_cuts_on =
@@ -441,65 +465,59 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
 }
 
 //splitting up the satisfieslep trigger into muon/ele trigger 
-bool MFVAnalysisCuts::satisfiesLepTrigger(edm::Handle<MFVEvent> mevent, std::string year, size_t trig) const { 
+bool MFVAnalysisCuts::satisfiesLepTrigger(edm::Handle<MFVEvent> mevent, size_t trig) const { 
   if(!mevent->pass_hlt(trig)) return false;
 
   int nmuons     = mevent->nmuons();
   int nelectrons = mevent->nelectrons();
   int njets      = mevent->njets(20);
     
-  // since each lepton trigger has different pts need to be careful to match the resulting lepton(s) + jets (when applicable)
   bool passed_kinematics = false;
 
-  // switched to 2017 -- TODO: make it easier to switch between 2018 and 2017
   switch(trig){
-  case mfv::b_HLT_Ele35_WPTight_Gsf :
-    // case mfv::b_HLT_Ele32_WPTight_Gsf :
+  //case mfv::b_HLT_Ele35_WPTight_Gsf :
+  case mfv::b_HLT_Ele32_WPTight_Gsf :
     {
       for(int ie =0; ie < nelectrons; ++ie){
-      //if (mevent->electron_pt[ie] < 35) continue;
-	if (mevent->electron_pt[ie] < 37) continue;
-	if (mevent->electron_ID[ie][3] == 1) {
-	  if (abs(mevent->electron_eta[ie]) < 2.4) { 
-	    if (mevent->electron_iso[ie] < 0.10) {
-	      passed_kinematics = true;
-	    }
-	  }
-	}
+        if (mevent->electron_pt[ie] < 35) continue;
+	//if (mevent->electron_pt[ie] < 38) continue;
+	      if (mevent->electron_ID[ie][3] == 1) {
+	        if (abs(mevent->electron_eta[ie]) < 2.4) { 
+	          if (mevent->electron_iso[ie] < 0.10) {
+	            passed_kinematics = true;
+	          } 
+	        }
+	      }
       }
       return passed_kinematics;
     }
 
   case mfv::b_HLT_IsoMu27 :
-    // case mfv::b_HLT_IsoMu24 :
     {
       for(int im =0; im < nmuons; ++im) {
-	//	if (mevent->muon_pt[im] < 26) continue;
-	if (mevent->muon_pt[im] < 29) continue;
-	if (mevent->muon_ID[im][1] == 1) {
-	  if (abs(mevent->muon_eta[im]) < 2.4) {
-	    if (mevent->muon_iso[im] < 0.15) {
-	      passed_kinematics = true;
-	    }
-	  }
-	}
+		    if (mevent->muon_pt[im] < 29) continue;
+	      if (mevent->muon_ID[im][1] == 1) {
+	        if (abs(mevent->muon_eta[im]) < 2.4) {
+	          if (mevent->muon_iso[im] < 0.15) {
+	            passed_kinematics = true;
+	          }
+	        }
+	      }
       }
       return passed_kinematics;
-
     }
-  
   
   case mfv::b_HLT_Mu50 :
     {
       for(int im=0; im < nmuons; ++im) {
-	if (mevent->muon_pt[im] < 53) continue;
-	if (mevent->muon_ID[im][1] == 1) {
-	  if (abs(mevent->muon_eta[im]) < 2.4) {
-	    if (mevent->muon_iso[im] < 0.15) {
-	      passed_kinematics = true;
-	    }
-	  }
-	}
+	    if (mevent->muon_pt[im] < 53) continue;
+	      if (mevent->muon_ID[im][1] == 1) {
+	        if (abs(mevent->muon_eta[im]) < 2.4) {
+	          if (mevent->muon_iso[im] < 0.15) {
+	            passed_kinematics = true;
+	          }
+	        }
+	      }
       }
       return passed_kinematics;
     }
@@ -507,14 +525,14 @@ bool MFVAnalysisCuts::satisfiesLepTrigger(edm::Handle<MFVEvent> mevent, std::str
   case mfv::b_HLT_Ele115_CaloIdVT_GsfTrkIdT :
     {
       for(int ie =0; ie < nelectrons; ++ie){
-	if (mevent->electron_pt[ie] < 120) continue;
-	if (mevent->electron_ID[ie][3] == 1) {
-	  if (abs(mevent->electron_eta[ie]) < 2.4) { 
-	    if (mevent->electron_iso[ie] < 0.10) {
-	      passed_kinematics = true;
-	    }
-	  }
-	}
+	      if (mevent->electron_pt[ie] < 120) continue;
+	      if (mevent->electron_ID[ie][3] == 1) {
+	        if (abs(mevent->electron_eta[ie]) < 2.4) { 
+	          if (mevent->electron_iso[ie] < 0.10) {
+	            passed_kinematics = true;
+	          }
+	        }
+	      }
       }
       return passed_kinematics;
     }
@@ -522,17 +540,17 @@ bool MFVAnalysisCuts::satisfiesLepTrigger(edm::Handle<MFVEvent> mevent, std::str
   case  mfv::b_HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165 :
     {
       for(int ie =0; ie < nelectrons; ++ie){
-	if (mevent->electron_pt[ie] < 55) continue;
-	if (mevent->electron_ID[ie][3] == 1) {
-	  if (abs(mevent->electron_eta[ie]) < 2.4) { 
-	    if (mevent->electron_iso[ie] < 0.10) {
-	      for(int j0=0; j0 < njets; ++j0){
-		if (!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 170) continue;
-		passed_kinematics = true;
+	      if (mevent->electron_pt[ie] < 55) continue;
+	      if (mevent->electron_ID[ie][3] == 1) {
+	        if (abs(mevent->electron_eta[ie]) < 2.4) { 
+	          if (mevent->electron_iso[ie] < 0.10) {
+	            for(int j0=0; j0 < njets; ++j0){
+		            if (!jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 170) continue;
+		            passed_kinematics = true;
+	            }
+	          }
+	        }
 	      }
-	    }
-	  }
-	}
       }
       return passed_kinematics;
     }
