@@ -231,7 +231,7 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
                 'qcdht1000_2017':   ( 3,  551000),
                 'qcdht1500_2017':   ( 1,  186000),
                 'qcdht2000_2017':   ( 1,  202000),
-                'ttbar_2017':       ( 5, 3040000),
+                'ttbar_2017':       (50, 3040000),
                 'ttbarht0600_2017': ( 5,   71500),
                 'ttbarht0800_2017': ( 3,   45000),
                 'ttbarht1200_2017': ( 3,   32500),
@@ -260,6 +260,10 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
 
             if 'JetHT' in name:
                 name = 'JetHT'
+            elif 'BTagCSV' in name:
+                name = 'BTagCSV'
+            elif 'DisplacedJet' in name:
+                name = 'DisplacedJet'
             elif 'MET' in name:
                 name = 'MET'
             elif sample.is_signal:
@@ -282,6 +286,9 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
             sample.set_curr_dataset(dataset)
             sample.split_by = 'files'
             sample.files_per = default_files_per 
+
+            if 'BTagCSV' in sample.name or 'DisplacedJet' in sample.name:
+                sample.files_per = int(round(sample.files_per / 3.))
 
     else:
         raise ValueError("don't know anything about jobtype %s" % jobtype)
@@ -310,7 +317,7 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
 ####
 
 def pick_samples(dataset, both_years=False,
-                 qcd=False, ttbar=False, all_signal=False, data=False, leptonic=False, bjet=False,  
+                 qcd=False, ttbar=False, all_signal=False, data=False, BTagCSV_data=False, DisplacedJet_data=False, leptonic=False, bjet=False,  
                  splitSUSY=False, Zvv=False, met=False,
                  span_signal=False):
 
@@ -318,7 +325,7 @@ def pick_samples(dataset, both_years=False,
         print 'cannot use both span and all_signal, turning off the latter'
         all_signal = False
 
-    argnames = 'qcd', 'ttbar', 'all_signal', 'span_signal', 'data', 'leptonic', 'bjet', 'splitSUSY', 'Zvv', 'met'
+    argnames = 'qcd', 'ttbar', 'all_signal', 'span_signal', 'data', 'JetHT_data', 'BTagCSV_data', 'DisplacedJet_data', 'leptonic', 'bjet', 'splitSUSY', 'Zvv', 'met'
     args = dict([(a,eval(a)) for a in argnames])
     if not set(args.values()).issubset([True, False, 'only']):
         raise ValueError('arg must be one of True, False, "only"')
@@ -340,6 +347,7 @@ def pick_samples(dataset, both_years=False,
         if args[a]:
             for yr in years:
                 samples += getattr(Samples, '%s_samples_%i' % (a, yr))
+    print([s.name for s in samples])
     return [s for s in samples if s.has_dataset(dataset)]
 
 ####
