@@ -202,7 +202,8 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
   std::unique_ptr<std::vector<MFVVertexAux> > auxes(new std::vector<MFVVertexAux>(nsv));
   std::set<int> trackicity;
-
+  std::set<std::pair<int, int>> buffer_trackicity; // buffer against duplicate keys due to obtaining & using > 1 track collections 
+                                                  // the buffer will be storing the track id & track key 
   for (int isv = 0; isv < nsv; ++isv) {
     const reco::Vertex& sv = secondary_vertices->at(isv);
     const reco::VertexRef svref(secondary_vertices, isv);
@@ -567,10 +568,18 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       const reco::TrackRef& trref = tri.castTo<reco::TrackRef>();
       const math::XYZTLorentzVector tri_p4(tri->px(), tri->py(), tri->pz(), tri->p());
 
-      if (trackicity.count(tri.key()) > 0)
+
+      if (buffer_trackicity.count({tri.key(), tri.id().id()}) > 0)
         throw cms::Exception("VertexAuxProducer") << "trackicity > 1";
-      else
-        trackicity.insert(tri.key());
+      else 
+        buffer_trackicity.insert({tri.key(), tri.id().id()});
+  
+      // if (trackicity.count(tri.key()) > 0)
+      //   throw cms::Exception("VertexAuxProducer") << "trackicity > 1";
+      // else {
+      //   trackicity.insert(tri.key());
+      // }
+
 
       if (sv.trackWeight(tri) < mfv::track_vertex_weight_min)
         continue;

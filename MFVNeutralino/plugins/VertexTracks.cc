@@ -34,7 +34,10 @@ private:
   const edm::EDGetTokenT<reco::VertexCollection> primary_vertices_token;
   const bool disregard_event;
   const bool use_tracks;
+  const bool use_separated_leptons;
   const edm::EDGetTokenT<reco::TrackCollection> tracks_token;
+  const edm::EDGetTokenT<reco::TrackCollection> electron_tracks_token;
+  const edm::EDGetTokenT<reco::TrackCollection> muon_tracks_token;
   const bool save_quality_tracks;
   const bool match_jets;
   const edm::EDGetTokenT<pat::JetCollection> match_jet_token;
@@ -56,9 +59,11 @@ private:
   const double min_track_dxy;
   const double min_track_sigmadxy;
   const double min_track_rescaled_sigmadxy;
+  const double min_leptrack_rescaled_sigmadxy;
   const double min_track_rescaled_sigmadxy_loose;
   const double min_track_sigmadxypv;
   const int min_track_hit_r;
+  const int min_leptrack_hit_r;
   const int min_track_nhits;
   const int min_track_npxhits;
   const int min_track_npxlayers;
@@ -118,7 +123,10 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
     primary_vertices_token(consumes<reco::VertexCollection>(cfg.getParameter<edm::InputTag>("primary_vertices_src"))),
     disregard_event(cfg.getParameter<bool>("disregard_event")),
     use_tracks(cfg.getParameter<bool>("use_tracks")),
+    use_separated_leptons(cfg.getParameter<bool>("use_separated_leptons")),
     tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("tracks_src"))),
+    electron_tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("electron_tracks_src"))),
+    muon_tracks_token(consumes<reco::TrackCollection>(cfg.getParameter<edm::InputTag>("muon_tracks_src"))),
     save_quality_tracks(cfg.getParameter<bool>("save_quality_tracks")),
     match_jets(cfg.getParameter<bool>("match_jets")),
     match_jet_token(match_jets ? consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("match_jet_src")) : edm::EDGetTokenT<pat::JetCollection>()),
@@ -140,9 +148,11 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
     min_track_dxy(cfg.getParameter<double>("min_track_dxy")),
     min_track_sigmadxy(cfg.getParameter<double>("min_track_sigmadxy")),
     min_track_rescaled_sigmadxy(cfg.getParameter<double>("min_track_rescaled_sigmadxy")),
+    min_leptrack_rescaled_sigmadxy(cfg.getParameter<double>("min_leptrack_rescaled_sigmadxy")),
     min_track_rescaled_sigmadxy_loose(cfg.getParameter<double>("min_track_rescaled_sigmadxy_loose")),
     min_track_sigmadxypv(cfg.getParameter<double>("min_track_sigmadxypv")),
     min_track_hit_r(cfg.getParameter<int>("min_track_hit_r")),
+    min_leptrack_hit_r(cfg.getParameter<int>("min_leptrack_hit_r")),
     min_track_nhits(cfg.getParameter<int>("min_track_nhits")),
     min_track_npxhits(cfg.getParameter<int>("min_track_npxhits")),
     min_track_npxlayers(cfg.getParameter<int>("min_track_npxlayers")),
@@ -171,6 +181,10 @@ MFVVertexTracks::MFVVertexTracks(const edm::ParameterSet& cfg)
 
   produces<std::vector<reco::TrackRef>>("all");
   produces<std::vector<reco::TrackRef>>("seed");
+  produces<std::vector<reco::TrackRef>>("allele");
+  produces<std::vector<reco::TrackRef>>("eleseed");
+  produces<std::vector<reco::TrackRef>>("allmu");
+  produces<std::vector<reco::TrackRef>>("museed");
   produces<reco::TrackCollection>("seed");
   produces<std::vector<reco::TrackRef>>("quality");
   produces<reco::TrackCollection>("quality");
@@ -255,9 +269,14 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
 
   std::unique_ptr<std::vector<reco::TrackRef>> all_tracks (new std::vector<reco::TrackRef>);
   std::unique_ptr<std::vector<reco::TrackRef>> seed_tracks(new std::vector<reco::TrackRef>);
+  std::unique_ptr<std::vector<reco::TrackRef>> all_electron_tracks (new std::vector<reco::TrackRef>);
+  std::unique_ptr<std::vector<reco::TrackRef>> all_muon_tracks (new std::vector<reco::TrackRef>);
+  std::unique_ptr<std::vector<reco::TrackRef>> electron_seed_tracks(new std::vector<reco::TrackRef>);
+  std::unique_ptr<std::vector<reco::TrackRef>> muon_seed_tracks(new std::vector<reco::TrackRef>);
   std::unique_ptr<reco::TrackCollection> seed_tracks_copy(new reco::TrackCollection);
   std::unique_ptr<std::vector<reco::TrackRef>> quality_tracks(new std::vector<reco::TrackRef>);
   std::unique_ptr<reco::TrackCollection> quality_tracks_copy(new reco::TrackCollection);
+
   std::vector<reco::TrackRef> seed_track_loose;
 
   if (!disregard_event) {
@@ -267,6 +286,19 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
       for (size_t i = 0, ie = tracks->size(); i < ie; ++i)
         all_tracks->push_back(reco::TrackRef(tracks, i));
     }
+    if (use_separated_leptons) { 
+      edm::Handle<reco::TrackCollection> muon_tracks;
+      event.getByToken(muon_tracks_token, muon_tracks);
+      for (size_t i = 0, im = muon_tracks->size(); i < im; ++i) 
+        all_muon_tracks->push_back(reco::TrackRef(muon_tracks, i));
+
+      edm::Handle<reco::TrackCollection> electron_tracks;
+      event.getByToken(electron_tracks_token, electron_tracks);
+      for (size_t i = 0, ie = electron_tracks->size(); i < ie; ++i) 
+        all_electron_tracks->push_back(reco::TrackRef(electron_tracks, i));
+    }
+    
+    
     else if (use_non_pv_tracks || use_non_pvs_tracks) {
       std::map<reco::TrackRef, std::vector<std::pair<int, float> > > tracks_in_pvs;
       for (size_t i = 0, ie = primary_vertices->size(); i < ie; ++i) {
@@ -380,6 +412,7 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
 
     bool use = no_track_cuts || is_second_track || [&]() {
 
+      //this is for low pt leptons & general tracks 
       const bool use_cheap =
         pt > min_track_pt &&
         fabs(dxybs) > min_track_dxy &&
@@ -392,6 +425,7 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
         npxlayers >= min_track_npxlayers &&
         nstlayers >= min_track_nstlayers &&
         (min_track_hit_r == 999 || min_r <= min_track_hit_r);
+
 
       if (!use_cheap) return false;
 
@@ -608,9 +642,181 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
       }
     }
   }
+  // now we get to do this all over for lepton tracks ... (with electrons and muons separate) 
+  if (use_separated_leptons) {
+    for (size_t i = 0, im = all_muon_tracks->size(); i < im; ++i) {
+      const reco::TrackRef& mtk = (*all_muon_tracks)[i];
+      //this will need to be changed once we have a different(?) track rescaler for leptons ... 
+      const auto rs = track_rescaler.scale(*mtk);
 
-  if (verbose)
+      //copy/calculate the cheap things but now for muons ... 
+      //const double p = mtk->p(); //don't need it yet 
+      const double pt = mtk->pt();
+      const double dxybs = mtk->dxy(*beamspot);
+      const double dxypv = primary_vertex ? mtk->dxy(primary_vertex->position()) : 1e99;
+      const double dxyerr = mtk->dxyError();
+      const double rescaled_dxyerr = rs.rescaled_tk.dxyError();
+      const double sigmadxybs = dxybs / dxyerr;
+      const double rescaled_sigmadxybs = dxybs / rescaled_dxyerr;
+      const double sigmadxypv = dxypv / dxyerr;
+      const int nhits = mtk->hitPattern().numberOfValidHits();
+      const int npxhits = mtk->hitPattern().numberOfValidPixelHits();
+      const int nsthits = mtk->hitPattern().numberOfValidStripHits(); 
+      const int npxlayers = mtk->hitPattern().pixelLayersWithMeasurement();
+      const int nstlayers = mtk->hitPattern().stripLayersWithMeasurement();
+      int min_r = 2000000000;
+      for (int i = 1; i <= 4; ++i)
+        if (mtk->hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,i)) {
+          min_r = i;
+          break;
+        }
+      bool use_mu = no_track_cuts || [&]() {
+
+        const bool use_cheap =
+          pt > min_track_pt &&
+          fabs(dxybs) > min_track_dxy &&
+          dxyerr < max_track_dxyerr &&
+          fabs(sigmadxybs) > min_track_sigmadxy &&
+          fabs(rescaled_sigmadxybs) > min_leptrack_rescaled_sigmadxy &&
+          fabs(sigmadxypv) > min_track_sigmadxypv &&
+          nhits >= min_track_nhits &&
+          npxhits >= min_track_npxhits &&
+          npxlayers >= min_track_npxlayers &&
+          nstlayers >= min_track_nstlayers &&
+          (min_track_hit_r == 999 || min_r <= min_leptrack_hit_r);
+
+        if (!use_cheap) return false;
+
+        if (primary_vertex && (max_track_dxyipverr > 0 || max_track_d3dipverr > 0)) {
+          reco::TransientTrack ttk = tt_builder->build(mtk);
+          if (max_track_dxyipverr > 0) {
+            auto dxy_ipv = IPTools::absoluteTransverseImpactParameter(ttk, *primary_vertex); if (!dxy_ipv.first || dxy_ipv.second.error() >= max_track_dxyipverr) return false;
+          }
+          if (max_track_d3dipverr > 0) {
+            auto d3d_ipv = IPTools::absoluteImpactParameter3D        (ttk, *primary_vertex); if (!d3d_ipv.first || d3d_ipv.second.error() >= max_track_d3dipverr) return false;
+          }
+        }
+
+        return true;
+      }();
+
+      if (use_mu) {
+        //for soft muons, require regular cuts 
+        if (pt < 20.0 ) {
+          if (fabs(rescaled_sigmadxybs) > min_track_rescaled_sigmadxy ) {
+            if (min_r <= min_track_hit_r) {
+              seed_tracks->push_back(mtk);
+              muon_seed_tracks->push_back(mtk);
+              seed_tracks_copy->push_back(*mtk);
+
+            }
+          }
+        }
+        // relax cuts for muons w/ pt >=20 GeV (relaxed nsigma & minr)
+        else if (pt >= 20.0 ){
+        seed_tracks->push_back(mtk);
+        muon_seed_tracks->push_back(mtk);
+        seed_tracks_copy->push_back(*mtk);
+        }
+      }  
+
+      if (verbose) {
+        printf("track %5lu: pt: %10.3f +- %10.3f eta: %10.3f +- %10.3f phi: %10.3f +- %10.3f dxy: %10.5f +- %10.5f (-> nsig %5.3f, rescaled: %10.5f +- %10.5f -> nsig %10.3f) dz: %10.3f +- %10.3f nhits: %3i/%3i/%3i nlayers: %3i/%3i/%3i ", i, pt, mtk->ptError(), mtk->eta(), mtk->etaError(), mtk->phi(), mtk->phiError(), dxybs, dxyerr, fabs(sigmadxybs), dxybs, rescaled_dxyerr, fabs(rescaled_sigmadxybs), mtk->dz(), mtk->dzError(), npxhits, nsthits, nhits, npxlayers, nstlayers, npxlayers + nstlayers);
+        if (use_mu)
+          printf(" muon selected for seed! (#%lu)", seed_tracks->size()-1);
+        printf("\n");
+      }
+      
+    }
+    for (size_t i = 0, ie = all_electron_tracks->size(); i < ie; ++i) {
+      const reco::TrackRef& etk = (*all_electron_tracks)[i];
+      //this will need to be changed once we have a different(?) track rescaler for leptons ... ?
+      const auto rs = track_rescaler.scale(*etk);
+
+      //copy/calculate the cheap things but now for muons ... 
+      //const double p = etk->p(); //don't need it yet
+      const double pt = etk->pt();
+      const double dxybs = etk->dxy(*beamspot);
+      const double dxypv = primary_vertex ? etk->dxy(primary_vertex->position()) : 1e99;
+      const double dxyerr = etk->dxyError();
+      const double rescaled_dxyerr = rs.rescaled_tk.dxyError();
+      const double sigmadxybs = dxybs / dxyerr;
+      const double rescaled_sigmadxybs = dxybs / rescaled_dxyerr;
+      const double sigmadxypv = dxypv / dxyerr;
+      const int nhits = etk->hitPattern().numberOfValidHits();
+      const int npxhits = etk->hitPattern().numberOfValidPixelHits();
+      const int nsthits = etk->hitPattern().numberOfValidStripHits(); 
+      const int npxlayers = etk->hitPattern().pixelLayersWithMeasurement();
+      const int nstlayers = etk->hitPattern().stripLayersWithMeasurement();
+      int min_r = 2000000000;
+      for (int i = 1; i <= 4; ++i)
+        if (etk->hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,i)) {
+          min_r = i;
+          break;
+        }
+      bool use_ele = no_track_cuts || [&]() {
+
+        const bool use_cheap =
+          pt > min_track_pt &&
+          fabs(dxybs) > min_track_dxy &&
+          dxyerr < max_track_dxyerr &&
+          fabs(sigmadxybs) > min_track_sigmadxy &&
+          fabs(rescaled_sigmadxybs) > min_leptrack_rescaled_sigmadxy &&
+          fabs(sigmadxypv) > min_track_sigmadxypv &&
+          nhits >= min_track_nhits &&
+          npxhits >= min_track_npxhits &&
+          npxlayers >= min_track_npxlayers &&
+          nstlayers >= min_track_nstlayers &&
+          (min_track_hit_r == 999 || min_r <= min_leptrack_hit_r);
+
+        if (!use_cheap) return false;
+
+        if (primary_vertex && (max_track_dxyipverr > 0 || max_track_d3dipverr > 0)) {
+          reco::TransientTrack ttk = tt_builder->build(etk);
+          if (max_track_dxyipverr > 0) {
+            auto dxy_ipv = IPTools::absoluteTransverseImpactParameter(ttk, *primary_vertex); if (!dxy_ipv.first || dxy_ipv.second.error() >= max_track_dxyipverr) return false;
+          }
+          if (max_track_d3dipverr > 0) {
+            auto d3d_ipv = IPTools::absoluteImpactParameter3D        (ttk, *primary_vertex); if (!d3d_ipv.first || d3d_ipv.second.error() >= max_track_d3dipverr) return false;
+          }
+        }
+
+        return true;
+      }();
+      if (use_ele) {
+        //require regular cuts if lepton is 'soft'
+        if (pt < 20.0 ) {
+          if (fabs(rescaled_sigmadxybs) > min_track_rescaled_sigmadxy ) {
+            if (min_r <= min_track_hit_r) {
+              seed_tracks->push_back(etk);
+              electron_seed_tracks->push_back(etk);
+              seed_tracks_copy->push_back(*etk);
+            }
+          }
+        }
+        // relax cuts if lepton has pt >= 20 (relaxed nsigma & minr)
+        else if (pt >= 20.0 ){
+          seed_tracks->push_back(etk);
+          electron_seed_tracks->push_back(etk);
+          seed_tracks_copy->push_back(*etk);
+
+        }
+      }
+      if (verbose) {
+        printf("track %5lu: pt: %10.3f +- %10.3f eta: %10.3f +- %10.3f phi: %10.3f +- %10.3f dxy: %10.5f +- %10.5f (-> nsig %5.3f, rescaled: %10.5f +- %10.5f -> nsig %10.3f) dz: %10.3f +- %10.3f nhits: %3i/%3i/%3i nlayers: %3i/%3i/%3i ", i, pt, etk->ptError(), etk->eta(), etk->etaError(), etk->phi(), etk->phiError(), dxybs, dxyerr, fabs(sigmadxybs), dxybs, rescaled_dxyerr, fabs(rescaled_sigmadxybs), etk->dz(), etk->dzError(), npxhits, nsthits, nhits, npxlayers, nstlayers, npxlayers + nstlayers);
+        if (use_ele)
+          printf(" ele selected for seed! (#%lu)", seed_tracks->size()-1);
+        printf("\n");
+      }
+    }
+  }
+
+  if (verbose) {
     printf("n_all_tracks: %5lu   n_seed_tracks: %5lu\n", all_tracks->size(), seed_tracks->size());
+    printf("n_all_muon_tracks: %5lu   n_muon_seed_tracks: %5lu\n", all_muon_tracks->size(), muon_seed_tracks->size());
+    printf("n_all_electron_tracks: %5lu   n_electron_seed_tracks: %5lu\n", all_electron_tracks->size(), electron_seed_tracks->size());
+
+  }
   if (histos) {
     h_n_all_tracks->Fill(all_tracks->size());
     h_n_seed_tracks->Fill(seed_tracks->size());
@@ -623,6 +829,13 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
   event.put(std::move(seed_tracks_copy), "seed");
   event.put(std::move(quality_tracks), "quality");
   event.put(std::move(quality_tracks_copy), "quality");
+
+  if (use_separated_leptons) {
+    event.put(std::move(all_electron_tracks), "allele");
+    event.put(std::move(all_muon_tracks), "allmu");
+    event.put(std::move(electron_seed_tracks), "eleseed");
+    event.put(std::move(muon_seed_tracks), "museed");
+  }
 
   return pass_min_n_seed_tracks;
 }
