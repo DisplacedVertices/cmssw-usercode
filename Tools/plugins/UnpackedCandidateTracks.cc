@@ -17,7 +17,7 @@ private:
   const edm::EDGetTokenT<pat::PackedCandidateCollection> packed_candidates_token;
   const edm::EDGetTokenT<pat::MuonCollection> muons_token;
   const edm::EDGetTokenT<pat::ElectronCollection> electrons_token;
-  const bool remove_lepton_overlap;
+  const bool separate_leptons;
   const bool add_lost_candidates;
   const edm::EDGetTokenT<pat::PackedCandidateCollection> lost_candidates_token;
   const int cut_level;
@@ -90,7 +90,7 @@ JMTUnpackedCandidateTracks::JMTUnpackedCandidateTracks(const edm::ParameterSet& 
   : packed_candidates_token(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("packed_candidates_src"))),
     muons_token(consumes<pat::MuonCollection>(cfg.getParameter<edm::InputTag>("muons_src"))),
     electrons_token(consumes<pat::ElectronCollection>(cfg.getParameter<edm::InputTag>("electrons_src"))),
-    remove_lepton_overlap(cfg.getParameter<bool>("separate_leptons")),
+    separate_leptons(cfg.getParameter<bool>("separate_leptons")),
     add_lost_candidates(cfg.getParameter<bool>("add_lost_candidates")),
     lost_candidates_token(consumes<pat::PackedCandidateCollection>(cfg.getParameter<edm::InputTag>("lost_candidates_src"))),
     cut_level(cfg.getParameter<int>("cut_level")),
