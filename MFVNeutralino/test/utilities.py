@@ -15,7 +15,8 @@ def cmd_hadd_vertexer_histos():
     ntuple = sys.argv[2]
     print(ntuple)
     samples = Samples.registry.from_argv(
-            Samples.qcd_samples_2017 + Samples.met_samples_2017 + Samples.Zvv_samples_2017 + Samples.mfv_splitSUSY_samples_M2000_2017
+            #Samples.qcd_samples_2017 + Samples.met_samples_2017 + Samples.Zvv_samples_2017 + Samples.mfv_splitSUSY_samples_M2000_2017 + 
+            Samples.WplusHToSSTodddd_samples_2017 + Samples.met_samples_2017 + Samples.qcd_lep_samples_2017 + Samples.leptonic_samples_2017 + Samples.diboson_samples_2017 
             #Samples.data_samples_2015 + \
             #Samples.ttbar_samples_2015 + Samples.qcd_samples_2015 + Samples.qcd_samples_ext_2015 + \
             #Samples.data_samples + \
@@ -125,12 +126,12 @@ def cmd_rm_mc_parts():
 
 def _background_samples(trigeff=False, year=2017):
     if _leptonpresel or trigeff:
-        #x = ['ttbar', 'wjetstolnu', 'dyjetstollM10', 'dyjetstollM50', 'qcdmupt15']
-        x = ['ttbar', 'wjetstolnu', 'dyjetstollM10', 'dyjetstollM50', 'qcdmupt15', 'ww', 'wz', 'zz']
+        #x = ['ttbar', 'wjetstolnu', 'dyjetstollM10', 'qcdmupt15', 'ww', 'wz', 'zz'] #dyjetstollM50
+        x = ['ttbar', 'dyjetstollM50', 'qcdmupt15', 'ww', 'wz', 'zz'] #'wjetstolnu', 'dyjetstollM10',
         if not trigeff:
-           # x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]]
-            x += ['qcdempt%03i' % x for x in [20,30,50,80,120,170]]
-            x += ['qcdbctoept%03i' % x for x in [20,30,80,170,250]]
+            x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]] 
+            #x += ['qcdempt%03i' % x for x in [20,50,80,170]] 
+            x += ['qcdbctoept%03i' % x for x in [20,30,80,170,250]] 
     elif _btagpresel:
         x = ['qcdht%04i' % x for x in [300, 500, 700, 1000, 1500, 2000]]
         x += ['ttbar']

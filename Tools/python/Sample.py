@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, sys
+import os, sys, re
 from collections import defaultdict
 from fnmatch import fnmatch
 from JMTucker.Tools import DBS
@@ -8,16 +8,17 @@ from JMTucker.Tools import DBS
 ########################################################################
 
 xrootd_sites = {
-    'T3_US_FNALLPC': 'root://cmseos.fnal.gov/',
+    'T3_US_FNALLPC': 'root://cmsxrootd-site.fnal.gov/',
     'T1_US_FNAL_Disk': 'root://cmsxrootd-site.fnal.gov/',
     'T2_US_Nebraska': 'root://cmsxrootd.fnal.gov/',
-   # 'T2_US_Wisconsin': 'root://pubxrootd.hep.wisc.edu/',
-    'T2_US_Wisconsin': 'root://cmsxrootd.hep.wisc.edu/',
+    'T2_US_Wisconsin': 'root://cmsxrootd-site.fnal.gov/',
     'T2_US_Purdue': 'root://xrootd.rcac.purdue.edu/',
     'T2_DE_DESY': 'root://dcache-cms-xrootd.desy.de/',
+    'T2_BR_SPRACE': 'root://osg-se.sprace.org.br/',
     'T2_US_Florida': 'root://cmsio5.rc.ufl.edu/',
     'T2_US_MIT': 'root://xrootd.cmsaf.mit.edu/',
     'T2_US_UCSD': 'root://redirector.t2.ucsd.edu/',
+    'T2_IN_TIFR': 'root://xrootd-cms.infn.it/',
     'global_redirect': 'root://cmsxrootd.fnal.gov/',
     }
 
@@ -334,15 +335,16 @@ class SamplesRegistry:
         assert not self.d_lists.has_key(name)
         self.d_lists[name] = l
 
-    def by_primary_dataset(self, pd):
+    def by_primary_dataset(self, pd, yr):
         x = []
         for s in self.all():
-            if s.primary_dataset == pd:
+            if s.primary_dataset == pd and yr in s.name:
                 x.append(s)
         return x
 
     def add_dataset_by_primary(self, ds_name, dataset, nevents_orig=-1, **kwargs):
-        x = self.by_primary_dataset(dataset.split('/')[1])
+        yr = re.search('([\d+.-]+)(UL)([\d+.-]+)', dataset.split('/')[2]).group(0).replace('UL','')  #Disgusting regex to extract year
+        x = self.by_primary_dataset(dataset.split('/')[1], yr)
         if len(x) != 1:
             raise ValueError('could not find sample for %s by primary dataset: %r' % (dataset, x))
         sample = x[0]

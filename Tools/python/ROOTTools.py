@@ -458,7 +458,7 @@ def compare_hists(ps, samples, **kwargs):
     scaling = lambda name, hists, curr: {'ttbar': 1, 'signal': 0.01}[curr]
     """
 
-     # options
+    # options
     recurse        = kwargs.get('recurse',        False)
     sort_names     = kwargs.get('sort_names',     False)
     show_progress  = kwargs.get('show_progress',  10)
@@ -539,8 +539,7 @@ def compare_hists(ps, samples, **kwargs):
                 assert pf in 'xXyY'
                 profiled = True
                 hists = [(hist.ProfileY if pf in 'yY' else hist.ProfileX)('%s_%s_pfx' % (hist.GetName(), sample_name)) for hist, (sample_name,_,_) in zip(hists, samples)]
-                hists = [hist.Rebin(5) for hist in hists]
-                    
+
         for hist, (sample_name, dir, color) in zip(hists, samples):
             # Store these data in the histogram object so we don't
             # have to cross-reference later. If we give them unique
@@ -553,21 +552,14 @@ def compare_hists(ps, samples, **kwargs):
                 hist.Sumw2() # for correct error bars post scaling
             hist.cah_integral = hist.Integral(0, hist.GetNbinsX()+1) if not is2d else 0.
             hist.cah_scaling = scaling(name, hist_list, hist.cah_sample_name)
-         #   if hist.cah_sample_name.startswith('data') :
-          #      hist.cah_scaling = 1
-          #  print hist.cah_sample_name, hist.cah_scaling
-           
+
         nostat = no_stats(name, hist_list, None)
         for hist in hists:
             hist.SetLineWidth(2)
 
-            if not is2d and hist.cah_scaling is not None :
+            if not is2d and hist.cah_scaling is not None:
                 if hist.cah_scaling > 0 and hist.cah_integral > 0:
-                    if hist.cah_sample_name.startswith('data') :
-                        hist.Scale(1.)
-                    else :
-                        hist.Scale(0.10)
-                   # hist.Scale(hist.cah_scaling/hist.cah_integral)
+                    hist.Scale(hist.cah_scaling/hist.cah_integral)
                 else:
                     hist.Scale(abs(hist.cah_scaling))
             if nostat:
@@ -599,7 +591,7 @@ def compare_hists(ps, samples, **kwargs):
             ratios_plot(name_clean,
                         hists,
                         plot_saver=ps,
-                        res_fit=False,
+                        res_fit='pol1',
                         res_divide_opt={'confint': propagate_ratio, 'force_le_1': False},
                         statbox_size=stat_size(name, hist_list, None),
                         res_y_range=0.15,
@@ -688,7 +680,7 @@ def data_mc_comparison(name,
                        join_info_override = None,
                        stack_draw_cmd = 'hist',
                        move_overflows = 'under over',
-                       rebin = True,
+                       rebin = None,
                        bin_width_to = None,
                        poisson_intervals = False,
                        x_title = '',
@@ -704,9 +696,7 @@ def data_mc_comparison(name,
                        signal_line_width = 3,
                        signal_draw_cmd = 'hist',
                        data_marker_style = 20,
-                       data_marker_size = 0.8,
-                      # data_line_width = 3,
-                       #data_draw_cmd = 'hist',
+                       data_marker_size = 1.3,
                        data_draw_cmd = 'pe',
                        res_divide_opt = 'n pois',
                        res_line_width = 2,
@@ -720,7 +710,7 @@ def data_mc_comparison(name,
                        res_y_label_size = 0.035,
                        res_y_range = (0., 3.),
                        res_draw_cmd = 'apez',
-                       res_fit = False,
+                       res_fit = True,
                        legend_pos = None,
                        enable_legend = True,
                        verbose = False,
@@ -839,9 +829,6 @@ def data_mc_comparison(name,
             xax = None
 
             if sample not in data_samples:
-                print sample.partial_weight(sample._datamccomp_file) * int_lumi
-               # print sample.nevents
-        
                 sample.hist.Scale(sample.partial_weight(sample._datamccomp_file) * int_lumi)
                 if int_lumi_bkg_scale is not None and sample not in signal_samples:
                     sample.hist.Scale(int_lumi_bkg_scale)
@@ -928,6 +915,7 @@ def data_mc_comparison(name,
             sum_background = sample.hist.Clone('sum_background_' + name)
         else:
             sum_background.Add(sample.hist)
+
         if verbose:
             integ = get_integral(sample.hist, 0)
             if integ[0] == 0:
@@ -985,8 +973,6 @@ def data_mc_comparison(name,
     if data_sample is not None:
         data_sample.hist.SetMarkerStyle(data_marker_style)
         data_sample.hist.SetMarkerSize(data_marker_size)
-        # data_sample.hist.SetLineColor(ROOT.kBlack)
-        #data_sample.hist.SetLineWidth(data_line_width)
         if poisson_intervals:
             data_sample.hist_poissoned = poisson_intervalize(data_sample.hist, rescales=bin_width_to_scales)
             data_sample.hist_poissoned.SetMarkerStyle(data_marker_style)
@@ -994,7 +980,7 @@ def data_mc_comparison(name,
             data_sample.hist_poissoned.Draw(data_draw_cmd)
         else:
             data_sample.hist.Draw('same ' + data_draw_cmd)
-            
+
     if enable_legend and legend_pos is not None:
         legend_entries.reverse()
         legend = ROOT.TLegend(*legend_pos)
@@ -1605,8 +1591,6 @@ def plot_dir(x='', make=False, temp=False):
         d = '/publicweb/j/joeyr/plots'
     elif 'fnal.gov' in hostname and username == 'ali':
         d = '/publicweb/a/ali/'
-    elif 'wisc.edu' in hostname and username == 'acwarden':
-        d = '/afs/hep.wisc.edu/home/acwarden/plots/'
     if d:
         x = os.path.join(d,x)
     else:

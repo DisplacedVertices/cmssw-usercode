@@ -16,7 +16,7 @@ public:
 private:
   virtual bool filter(edm::Event&, const edm::EventSetup&);
   bool satisfiesTrigger(edm::Handle<MFVEvent>, size_t) const;
-  bool satisfiesLepTrigger(edm::Handle<MFVEvent>, std::string yr, size_t) const;
+  bool satisfiesLepTrigger(edm::Handle<MFVEvent>, size_t) const;
   bool satisfiesDispLepTrigger(edm::Handle<MFVEvent>, size_t) const;
 
   bool jet_hlt_match(edm::Handle<MFVEvent> mevent, int i, float min_jet_pt=20.) const {
@@ -35,7 +35,7 @@ private:
   const edm::EDGetTokenT<MFVVertexAuxCollection> vertex_token;
   
   const bool use_mevent;
-  const std::string year;
+  //const std::string year;
   const int apply_presel;
   const bool require_met_filters;
   const bool require_bquarks;
@@ -91,7 +91,7 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     mevent_token(consumes<MFVEvent>(mevent_src)),
     vertex_token(consumes<MFVVertexAuxCollection>(cfg.getParameter<edm::InputTag>("vertex_src"))),
     use_mevent(mevent_src.label() != ""),
-    year(cfg.getParameter<std::string>("year")),
+    //year(cfg.getParameter<std::string>("year")),
     apply_presel(cfg.getParameter<int>("apply_presel")),
     require_met_filters(cfg.getParameter<bool>("require_met_filters")),
     require_bquarks(cfg.getParameter<bool>("require_bquarks")),
@@ -169,7 +169,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     if (apply_presel == 2) {
       bool success = false;
       for(size_t trig : mfv::LeptonTriggers){
-	if(satisfiesLepTrigger(mevent, year, trig)) { 
+	if(satisfiesLepTrigger(mevent, trig)) { 
 	  success = true;
 	  break;
 	}
@@ -441,7 +441,7 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
 }
 
 //splitting up the satisfieslep trigger into muon/ele trigger 
-bool MFVAnalysisCuts::satisfiesLepTrigger(edm::Handle<MFVEvent> mevent, std::string year, size_t trig) const { 
+bool MFVAnalysisCuts::satisfiesLepTrigger(edm::Handle<MFVEvent> mevent, size_t trig) const { 
   if(!mevent->pass_hlt(trig)) return false;
 
   int nmuons     = mevent->nmuons();

@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 from JMTucker.MFVNeutralino.NtupleCommon import use_btag_triggers, use_MET_triggers, use_Lepton_triggers, use_DisplacedLepton_triggers
-from JMTucker.Tools.Year import year
+#from JMTucker.Tools.Year import year
 
 if use_btag_triggers:
   apply_presel = cms.int32(4)
@@ -13,7 +13,7 @@ else:
 
 mfvAnalysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                mevent_src = cms.InputTag('mfvEvent'),
-                               year = cms.string(year),
+                               #year = cms.string(year),
                                apply_presel = apply_presel,  # 1 = jets, 2 = el/mu, 3 = jets OR bjet/displaced dijet triggers, 4 = bjet/displaced dijet triggers veto HT trigger, 5 = MET trigger
                                require_met_filters = cms.bool(True) if use_MET_triggers else cms.bool(False),
                                require_bquarks = cms.bool(False),

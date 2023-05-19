@@ -52,7 +52,7 @@ struct MFVVertexAux {
       njets[i] = 0;
     for (int i = 0; i < mfv::NMomenta; ++i) {
       costhmombs_[i] = costhmompv2d_[i] = costhmompv3d_[i] = 0;
-      pt[i] = eta[i] = phi[i] = mass[i] = missdistpv[i] = missdistpverr[i] = 0;
+      pt[i] = eta[i] = phi[i] = mass[i] = missdistpv[i] = missdistpverr[i] = missdistsv0[i] = missdistsv0err[i] = 0;
     }
     nmuons = 0;
     nelectrons = 0;
@@ -277,7 +277,10 @@ struct MFVVertexAux {
   float missdistpv   [mfv::NMomenta];
   float missdistpverr[mfv::NMomenta];
   float missdistpvsig(int w) const { return sig(missdistpv[w], missdistpverr[w]); }
-
+  float missdistsv0   [mfv::NMomenta];
+  float missdistsv0err[mfv::NMomenta];
+  float missdistsv0sig(int w) const { return sig(missdistsv0[w], missdistsv0err[w]); }
+  
   std::vector<uchar> track_w_;
   std::vector<bool> track_q_;
   std::vector<unsigned> track_hp_;
@@ -298,6 +301,14 @@ struct MFVVertexAux {
   std::vector<float> track_pt_err;
   std::vector<float> track_eta;
   std::vector<float> track_phi;
+  std::vector<float> track_tkdist_val;
+  std::vector<float> track_tkdist_sig;
+  std::vector<float> track_tkdisttosv1_val; //only if nsv >=2 and nonempty only to sv0
+  std::vector<float> track_tkdisttosv1_sig; //only if nsv >=2 and nonempty only to sv0
+  std::vector<float> outsed_track_tkdist_val;
+  std::vector<float> outsed_track_tkdist_sig;
+  std::vector<float> outsed_track_dxy; //only if nsv > 0 and nonempty only to sv0
+  std::vector<float> outsed_track_nsigmadxy; //only if nsv > 0 and nonempty only to sv0 
 
   void  track_weight(int i, float w) { assert(w >= 0 && w <= 1); _set(track_w_, i, uchar(w*255)); }
   float track_weight(int i) const { return float(track_w_[i])/255.f; }

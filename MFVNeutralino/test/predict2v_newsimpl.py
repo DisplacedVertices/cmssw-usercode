@@ -2,9 +2,11 @@ from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools.general import *
 import pandas as pd
 
-presel_path = '/uscms_data/d2/tucker/crab_dirs/PreselHistosV27m'
+#presel_path = '/uscms_data/d2/tucker/crab_dirs/PreselHistosV27m'
 #sel_path = '/uscms_data/d3/dquach/crab3dirs/HistosV27m_moresidebands'
-sel_path = '/uscms/home/pkotamni/nobackup/crabdirs/Histos2trkmergedV27m' 
+presel_path = '/uscms/home/pkotamni/nobackup/crabdirs/HistosTkRecdBV0p02StudyHalfMCULV30Lepm'
+#presel_path = '/uscms_data/d2/tucker/crab_dirs/PreselHistosV27m'
+sel_path = '/uscms/home/pkotamni/nobackup/crabdirs/HistosTkRecdBV0p02StudyHalfMCULV30Lepm' 
 data = bool_from_argv('data')
 year = '2017' if len(sys.argv) < 2 else sys.argv[1]
 varname = 'nom' if len(sys.argv) < 3 else sys.argv[2] # use the BTV variations to compute syst shifts on pred2v
@@ -17,7 +19,7 @@ print_pred_n2v_propagated_stat_err = True
 if data:
     fn, presel_scale = 'JetHT%s.root' % year, 1.
 else:
-    fn, presel_scale = 'background_%s.root' % year, 1.
+    fn, presel_scale = 'background_leptonpresel_%s.root' % year, 1.
 
 def propagate_product(x, y, ex, ey):
     p = x * y
@@ -58,7 +60,7 @@ for ntk in 3,4,5,7,8,9:
         cdict[ntk]['cb'] = 0
         cdict[ntk]['cbbar'] = 0
 
-npresel, enpresel = get_integral(presel_f.Get('mfvEventHistosJetPreSel/h_npu'))
+npresel, enpresel = get_integral(presel_f.Get('mfvEventHistosPreSel/h_w'))
 npresel  *= presel_scale
 enpresel *= presel_scale
 f0 = fracdict['presel']
@@ -77,8 +79,8 @@ sum_n2v = 0 #total input(MC or observed) 2-vtx events
 sum2_en2v =0 #the quadratic sum of errors due each 2-vtx input(MC or observed) 
 sum2_en1v = 0 #the quadratic sum of errors due each 1-vtx input(MC or observed) 
 for ntk in 3,4,5:
-    n1v, en1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
-    n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
+    n1v, en1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_w' % ('' if ntk == 5 else 'Ntk%s'% ntk)))
+    n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_w' % ('' if ntk == 5 else 'Ntk%s'% ntk)))
     sum_n1v += n1v
     f1 = fracdict[ntk]['1v']
     alpha = ((f0 - f1)*(f0 - f1)) - (f0*(f0-1)) #simplified alphas by assume Cb and Cbbar are about the same for all track multiplicities  
@@ -103,9 +105,9 @@ for ntk in 'Ntk3or4','Ntk3or5', 'Ntk4or5':
         else:
             tracks[i] = 'Ntk%s' % n
             f1.append(fracdict[n]['1v'])
-    n1v0, en1v0 = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % tracks[0]))
-    n1v1, en1v1 = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % tracks[1]))
-    n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ntk))
+    n1v0, en1v0 = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_w' % tracks[0]))
+    n1v1, en1v1 = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_w' % tracks[1]))
+    n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_w' % ntk))
     alpha = ((f0 - f1[0])*(f0 - f1[1])) - (f0*(f0-1)) #simplified alphas by assume Cb and Cbbar are about the same for all track multiplicities     
     alpha_nm[ntk] = alpha
     sum_rest += (n2v/alpha)
@@ -114,8 +116,8 @@ for ntk in 'Ntk3or4','Ntk3or5', 'Ntk4or5':
     sum2_en2v += (en2v**2) 
 
 for ntk in 3,4,5:
-    n1v, en1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
-    n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
+    n1v, en1v = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_w' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
+    n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_w' % ('' if ntk == 5 else 'Ntk%s' % ntk)))
     n2v_poisson = poisson_interval(n2v)
     f1 = fracdict[ntk]['1v']
     cb = cdict[ntk]['cb']
@@ -150,9 +152,9 @@ for ntk in 'Ntk3or4','Ntk3or5', 'Ntk4or5':
         else:
             tracks[i] = 'Ntk%s' % n
             f1.append(fracdict[n]['1v'])
-    n1v0, en1v0 = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % tracks[0]))
-    n1v1, en1v1 = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_npu' % tracks[1]))
-    n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_npu' % ntk))
+    n1v0, en1v0 = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_w' % tracks[0]))
+    n1v1, en1v1 = get_integral(sel_f.Get('%smfvEventHistosOnlyOneVtx/h_w' % tracks[1]))
+    n2v, en2v = get_integral(sel_f.Get('%smfvEventHistosFullSel/h_w' % ntk))
     cb = cdict[ntktot]['cb']
     cbbar = cdict[ntktot]['cbbar']
     n2v_poisson = poisson_interval(n2v)

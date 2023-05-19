@@ -1,8 +1,8 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version_ = 'ULV1_TEST'
-lsp_id = 1000009 # should do that in a smarter way; currently for stop
+ntuple_version_ = 'ULV30' #'ULV30'
+lsp_id = -1 #1000009 # should do that in a smarter way; currently for stop if not -1
 use_btag_triggers = False
 use_MET_triggers = False
 use_Lepton_triggers = True
@@ -257,7 +257,7 @@ def miniaod_ntuple_process(settings):
     process.load('PhysicsTools.PatAlgos.selectionLayer1.electronSelector_cfi')
     process.load('JMTucker.Tools.AnalysisEras_cff')
     process.load('JMTucker.Tools.GoodPrimaryVertices_cfi')
-    process.load('JMTucker.Tools.L1ECALPrefiringWeightProducer_cfi')
+    process.load('JMTucker.Tools.L1PrefiringWeightProducer_cfi')
     process.load('JMTucker.Tools.MCStatProducer_cff')
     process.load('JMTucker.Tools.UpdatedJets_cff')
     process.load('JMTucker.Tools.PATTupleSelection_cfi')
@@ -292,7 +292,7 @@ def miniaod_ntuple_process(settings):
     process.mfvGenParticles.lsp_id = lsp_id
     process.mfvGenParticles.debug = False
 
-    process.mfvVertexTracks.min_track_rescaled_sigmadxy = 4.0
+    process.mfvVertexTracks.min_track_rescaled_sigmadxy = 4.0 #FIXME default is 4 
     process.mfvVertexTracks.min_track_pt = 1.0
 
     process.jmtRescaledTracks.tracks_src = 'jmtUnpackedCandidateTracks'
