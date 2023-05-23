@@ -317,7 +317,7 @@ def set_splitting(samples, dataset, jobtype='default', data_json=None, default_f
 ####
 
 def pick_samples(dataset, both_years=False,
-                 qcd=False, ttbar=False, all_signal=False, data=False, BTagCSV_data=False, DisplacedJet_data=False, leptonic=False, bjet=False,  
+                 qcd=False, ttbar=False, all_signal=False, data=False, JetHT_data=False, BTagCSV_data=False, DisplacedJet_data=False, leptonic=False, bjet=False,  
                  splitSUSY=False, Zvv=False, met=False,
                  span_signal=False):
 
