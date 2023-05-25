@@ -494,7 +494,7 @@ mfv_signal_samples_2017 = [
     MCSample('mfv_neu_tau030000um_M3000_2017', '/GluinoGluinoToNeutralinoNeutralinoTo2T2B2S_M-3000_CTau-30mm_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v1/MINIAODSIM', 15000),
 ]
 
-mfv_signal_samples_lowmass_2017 = mfv_signal_samples_2017[2:9]
+mfv_signal_samples_lowmass_2017 = [mfv_signal_samples_2017[2], mfv_signal_samples_2017[7]]
 
 mfv_stopdbardbar_samples_2017 = [
     MCSample('mfv_stopdbardbar_tau000100um_M0200_2017', '/StopStopbarTo2Dbar2D_M-200_CTau-100um_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 200000),
@@ -537,6 +537,7 @@ mfv_stopdbardbar_samples_2017 = [
     MCSample('mfv_stopdbardbar_tau030000um_M3000_2017', '/StopStopbarTo2Dbar2D_M-3000_CTau-30mm_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v1/MINIAODSIM', 20000),
 ]
 
+mfv_stopdbardbar_samples_lowmass_2017 = [mfv_stopdbardbar_samples_2017[3], mfv_stopdbardbar_samples_2017[8]]
 
 mfv_stopbbarbbar_samples_2017 = [
     MCSample('mfv_stopbbarbbar_tau000100um_M0200_2017', '/StopStopbarTo2Bbar2B_M-200_CTau-100um_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v3/MINIAODSIM', 200000),
@@ -579,6 +580,8 @@ mfv_stopbbarbbar_samples_2017 = [
     MCSample('mfv_stopbbarbbar_tau010000um_M3000_2017', '/StopStopbarTo2Bbar2B_M-3000_CTau-10mm_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v1/MINIAODSIM', 13000),
     MCSample('mfv_stopbbarbbar_tau030000um_M3000_2017', '/StopStopbarTo2Bbar2B_M-3000_CTau-30mm_TuneCP5_13TeV-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v1/MINIAODSIM', 20000),
 ]
+
+mfv_stopbbarbbar_samples_lowmass_2017 = [mfv_stopbbarbbar_samples_2017[3], mfv_stopbbarbbar_samples_2017[8]]
 
 HToSSTobbbb_samples_2017 = [
 ]
@@ -774,7 +777,43 @@ all_signal_samples_2018 = mfv_signal_samples_2018 + mfv_stopdbardbar_samples_201
 # data
 ########
 
-data_samples_2017 = [                                                       # in dataset      in json          int lumi avail (/fb)
+data_samples_2016APV = []
+
+JetHT_data_samples_2016APV = []
+
+BTagCSV_data_samples_2016APV = [
+    DataSample('BTagCSV2016APVB', '/BTagCSV/Run2016B-21Feb2020_ver2_UL2016_HIPM-v1/AOD'),
+    DataSample('BTagCSV2016APVC', '/BTagCSV/Run2016C-21Feb2020_UL2016_HIPM-v1/AOD'),
+    DataSample('BTagCSV2016APVD', '/BTagCSV/Run2016D-21Feb2020_UL2016_HIPM-v1/AOD'),
+    DataSample('BTagCSV2016APVE', '/BTagCSV/Run2016E-21Feb2020_UL2016_HIPM-v1/AOD'),
+    DataSample('BTagCSV2016APVF', '/BTagCSV/Run2016F-21Feb2020_UL2016_HIPM-v1/AOD'),
+]
+
+DisplacedJet_data_samples_2016APV = [
+    DataSample('DisplacedJet2016APVB', '/DisplacedJet/Run2016B-21Feb2020_ver2_UL2016_HIPM-v1/AOD'),
+    DataSample('DisplacedJet2016APVC', '/DisplacedJet/Run2016C-21Feb2020_UL2016_HIPM-v1/AOD'),
+    DataSample('DisplacedJet2016APVD', '/DisplacedJet/Run2016D-21Feb2020_UL2016_HIPM-v1/AOD'),
+    DataSample('DisplacedJet2016APVE', '/DisplacedJet/Run2016E-21Feb2020_UL2016_HIPM-v1/AOD'),
+    DataSample('DisplacedJet2016APVF', '/DisplacedJet/Run2016F-21Feb2020_UL2016_HIPM-v1/AOD'),
+]
+
+data_samples_2016 = []
+
+JetHT_data_samples_2016 = []
+
+BTagCSV_data_samples_2016 = [
+    DataSample('BTagCSV2016F', '/BTagCSV/Run2016F-21Feb2020_UL2016-v1/AOD'),
+    DataSample('BTagCSV2016G', '/BTagCSV/Run2016G-21Feb2020_UL2016-v1/AOD'),
+    DataSample('BTagCSV2016H', '/BTagCSV/Run2016H-21Feb2020_UL2016-v1/AOD'),
+]
+
+DisplacedJet_data_samples_2016 = [
+    DataSample('DisplacedJet2016F', '/DisplacedJet/Run2016F-21Feb2020_UL2016-v1/AOD'),
+    DataSample('DisplacedJet2016G', '/DisplacedJet/Run2016G-21Feb2020_UL2016-v1/AOD'),
+    DataSample('DisplacedJet2016H', '/DisplacedJet/Run2016H-21Feb2020_UL2016-v1/AOD'),
+]
+
+data_samples_2017 = [   
     DataSample('MET2017B', '/MET/Run2017B-09Aug2019_UL2017_rsb-v1/AOD'),  
     DataSample('MET2017C', '/MET/Run2017C-09Aug2019_UL2017_rsb-v1/AOD'),  
     DataSample('MET2017D', '/MET/Run2017D-09Aug2019_UL2017_rsb-v1/AOD'),  
@@ -844,6 +883,9 @@ DisplacedJet_data_samples_2018 = [
     DataSample('DisplacedJet2018D', '/DisplacedJet/Run2018D-15Feb2022_UL2018-v1/AOD'),
     ]
 
+BTagCSV_data_samples_2018 = [
+]
+
 auxiliary_data_samples_2018 = [
     DataSample('SingleMuon2018A', '/SingleMuon/Run2018A-12Nov2019_UL2018-v3/AOD'),
     DataSample('SingleMuon2018B', '/SingleMuon/Run2018B-12Nov2019_UL2018-v3/AOD'),
@@ -876,9 +918,17 @@ __all__ = [
     'ttbar_samples_2016',
     'mfv_stopdbardbar_samples_2016APV',
     #'mfv_stopbbarbbar_samples_2016APV',
+    'data_samples_2016APV',
+    'JetHT_data_samples_2016APV',
+    'BTagCSV_data_samples_2016APV',
+    'DisplacedJet_data_samples_2016APV',
     'mfv_signal_samples_2016',
     'mfv_stopdbardbar_samples_2016',
     'mfv_stopbbarbbar_samples_2016',
+    'data_samples_2016',
+    'JetHT_data_samples_2016',
+    'BTagCSV_data_samples_2016',
+    'DisplacedJet_data_samples_2016',
     'qcd_samples_2017',
     'qcd_samples_sum_2017',
     'ttbar_samples_2017',
@@ -911,6 +961,7 @@ __all__ = [
     'mfv_stopbbarbbar_samples_2018',
     'data_samples_2018',
     'JetHT_data_samples_2018',
+    'BTagCSV_data_samples_2018',
     'DisplacedJet_data_samples_2018',
     'auxiliary_data_samples_2018',
     'egamma_data_samples_2018',
@@ -956,6 +1007,44 @@ for x in _alls:
 ########
 # miniaod
 ########
+#    DataSample('BTagCSV2016APVB', '/BTagCSV/Run2016B-21Feb2020_ver2_UL2016_HIPM-v1/AOD'),
+#    DataSample('BTagCSV2016APVC', '/BTagCSV/Run2016C-21Feb2020_UL2016_HIPM-v1/AOD'),
+#    DataSample('BTagCSV2016APVD', '/BTagCSV/Run2016D-21Feb2020_UL2016_HIPM-v1/AOD'),
+#    DataSample('BTagCSV2016APVE', '/BTagCSV/Run2016E-21Feb2020_UL2016_HIPM-v1/AOD'),
+#    DataSample('BTagCSV2016APVF', '/BTagCSV/Run2016F-21Feb2020_UL2016_HIPM-v1/AOD'),
+#
+#    DataSample('DisplacedJet2016APVB', '/DisplacedJet/Run2016B-21Feb2020_ver2_UL2016_HIPM-v1/AOD'),
+#    DataSample('DisplacedJet2016APVC', '/DisplacedJet/Run2016C-21Feb2020_UL2016_HIPM-v1/AOD'),
+#    DataSample('DisplacedJet2016APVD', '/DisplacedJet/Run2016D-21Feb2020_UL2016_HIPM-v1/AOD'),
+#    DataSample('DisplacedJet2016APVE', '/DisplacedJet/Run2016E-21Feb2020_UL2016_HIPM-v1/AOD'),
+#    DataSample('DisplacedJet2016APVF', '/DisplacedJet/Run2016F-21Feb2020_UL2016_HIPM-v1/AOD'),
+#
+#    DataSample('BTagCSV2016F', '/BTagCSV/Run2016F-21Feb2020_UL2016-v1/AOD'),
+#    DataSample('BTagCSV2016G', '/BTagCSV/Run2016G-21Feb2020_UL2016-v1/AOD'),
+#    DataSample('BTagCSV2016H', '/BTagCSV/Run2016H-21Feb2020_UL2016-v1/AOD'),
+#
+#    DataSample('DisplacedJet2016F', '/DisplacedJet/Run2016F-21Feb2020_UL2016-v1/AOD'),
+#    DataSample('DisplacedJet2016G', '/DisplacedJet/Run2016G-21Feb2020_UL2016-v1/AOD'),
+#    DataSample('DisplacedJet2016H', '/DisplacedJet/Run2016H-21Feb2020_UL2016-v1/AOD'),
+
+BTagCSV2016APVB.add_dataset('miniaod', '/BTagCSV/Run2016B-ver2_HIPM_UL2016_MiniAODv2-v1/MINIAOD', 77890616)
+BTagCSV2016APVC.add_dataset('miniaod', '/BTagCSV/Run2016C-HIPM_UL2016_MiniAODv2-v1/MINIAOD', 30358567)
+BTagCSV2016APVD.add_dataset('miniaod', '/BTagCSV/Run2016D-HIPM_UL2016_MiniAODv2-v1/MINIAOD', 56527008)
+BTagCSV2016APVE.add_dataset('miniaod', '/BTagCSV/Run2016E-HIPM_UL2016_MiniAODv2-v1/MINIAOD ', 60415444)
+BTagCSV2016APVF.add_dataset('miniaod', '/BTagCSV/Run2016F-HIPM_UL2016_MiniAODv2-v1/MINIAOD', 32756402)
+DisplacedJet2016APVB.add_dataset('miniaod', '/DisplacedJet/Run2016B-ver2_HIPM_UL2016_MiniAODv2-v1/MINIAOD', 48235859)
+DisplacedJet2016APVC.add_dataset('miniaod', '/DisplacedJet/Run2016C-HIPM_UL2016_MiniAODv2-v2/MINIAOD',  18797203)
+DisplacedJet2016APVD.add_dataset('miniaod', '/DisplacedJet/Run2016D-HIPM_UL2016_MiniAODv2-v1/MINIAOD', 21670726)
+DisplacedJet2016APVE.add_dataset('miniaod', '/DisplacedJet/Run2016E-HIPM_UL2016_MiniAODv2-v1/MINIAOD', 19309129)
+DisplacedJet2016APVF.add_dataset('miniaod', '/DisplacedJet/Run2016F-HIPM_UL2016_MiniAODv2-v1/MINIAOD', 9676958)
+
+BTagCSV2016F.add_dataset('miniaod', '/BTagCSV/Run2016F-UL2016_MiniAODv2-v2/MINIAOD ', 4852270)
+BTagCSV2016G.add_dataset('miniaod', '/BTagCSV/Run2016G-UL2016_MiniAODv2-v1/MINIAOD', 100826567)
+BTagCSV2016H.add_dataset('miniaod', '/BTagCSV/Run2016H-UL2016_MiniAODv2-v2/MINIAOD', 65172853)
+DisplacedJet2016F.add_dataset('miniaod', '/DisplacedJet/Run2016F-UL2016_MiniAODv2-v1/MINIAOD', 1050503)
+DisplacedJet2016G.add_dataset('miniaod', '/DisplacedJet/Run2016G-UL2016_MiniAODv2-v1/MINIAOD', 18289323)
+DisplacedJet2016H.add_dataset('miniaod', '/DisplacedJet/Run2016H-UL2016_MiniAODv2-v1/MINIAOD', 19846835)
+
 
 for sample in data_samples_2017 + JetHT_data_samples_2017 + BTagCSV_data_samples_2017 + DisplacedJet_data_samples_2017 + auxiliary_data_samples_2017 + singleelectron_data_samples_2017:
     sample.add_dataset('miniaod', sample.dataset.replace('AOD', 'MINIAOD'))
@@ -1087,18 +1176,10 @@ for x in qcd_samples_2017 + ttbar_samples_2017 + BTagCSV_data_samples_2017 + Dis
     x.add_dataset('nr_trackingtreer_ul17')
 
 for x in all_signal_samples_2016 + all_signal_samples_2017 + all_signal_samples_2018 + qcd_samples_2017 + qcd_samples_2018 + ttbar_samples_2017 + ttbar_samples_2018:
-    x.add_dataset('ntupleulv1bm')
-
-for x in qcd_samples_2017 + ttbar_samples_2017 + qcd_samples_2018:
-    x.add_dataset('ntupleulv1bm_ntkseeds')
+    x.add_dataset('ntupleulv4bm')
 
 for x in ttbar_samples_2017 + all_signal_samples_2017:
     x.add_dataset('peace_test')
-
-for x in ttbar_samples_2017 + qcd_samples_2017 + all_signal_samples_2017:
-#for x in HToSSTodddd_samples_2017 + ttbar_samples_2017 + qcd_samples_2017 + all_signal_samples_2017:
-    x.add_dataset('ntupleul17v1bm')
-    x.add_dataset('ntupleul17v2bm')
 
 ########
 # automatic condor declarations for ntuples
@@ -1214,3 +1295,23 @@ if __name__ == '__main__':
             il = s.int_lumi_orig / 1000
             nfn = len(s.filenames)
             print s.name, nfn, il, '->', int(400/il*nfn), int(400/il*s.nevents_orig)
+
+    if 1:
+        fns     = []
+        weights = []
+        for s in qcd_samples_2018 + ttbar_samples_2018:
+            s.set_curr_dataset('miniaod')
+            il = 64.0
+            pw = s.partial_weight_orig
+            n  = s.nevents_orig
+            xs = s.xsec*1000
+            w  = round(xs*il/n, 2)
+            fns.append(s.name+'.root')
+            weights.append(str(w))
+        outstr = 'mergeTFileServiceHistograms -o CHANGEME.root -w '
+
+        outstr += ",".join(weights)
+        outstr += " -i "
+        outstr += " ".join(fns)
+        
+        print outstr
