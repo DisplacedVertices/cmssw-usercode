@@ -213,7 +213,7 @@ namespace jmt {
     p_maxpxhit_ = 0;
     p_which_jet_ = 0;
     p_which_pv_ = 0;
-    //p_which_sv_ = 0;
+    p_which_sv_ = 0;
     p_ismu_  = 0;
     p_isel_ = 0;
     p_isgoodmu_  = 0;
@@ -243,7 +243,7 @@ namespace jmt {
     maxpxhit_.clear();
     which_jet_.clear();
     which_pv_.clear();
-    // which_sv_.clear();
+    which_sv_.clear();
     ismu_.clear();
     isel_.clear();
     isgoodmu_.clear();
@@ -273,7 +273,7 @@ namespace jmt {
     t->Branch(TString::Format("%s_maxpxhit", pfx()), &maxpxhit_);
     t->Branch(TString::Format("%s_which_jet", pfx()), &which_jet_);
     t->Branch(TString::Format("%s_which_pv", pfx()), &which_pv_);
-    // t->Branch(TString::Format("%s_which_sv", pfx()), &which_sv_);
+    t->Branch(TString::Format("%s_which_sv", pfx()), &which_sv_);
     t->Branch(TString::Format("%s_ismu", pfx()), &ismu_);
     t->Branch(TString::Format("%s_isel", pfx()), &isel_);
     t->Branch(TString::Format("%s_isgoodmu", pfx()), &isgoodmu_);
@@ -319,7 +319,7 @@ namespace jmt {
     t->SetBranchAddress(TString::Format("%s_maxpxhit", pfx()), &p_maxpxhit_);
     t->SetBranchAddress(TString::Format("%s_which_jet", pfx()), &p_which_jet_);
     t->SetBranchAddress(TString::Format("%s_which_pv", pfx()), &p_which_pv_);
-    // t->SetBranchAddress(TString::Format("%s_which_sv", pfx()), &p_which_sv_);
+    t->SetBranchAddress(TString::Format("%s_which_sv", pfx()), &p_which_sv_);
     t->SetBranchAddress(TString::Format("%s_ismu", pfx()), &p_ismu_);
     t->SetBranchAddress(TString::Format("%s_isel", pfx()), &p_isel_);
     t->SetBranchAddress(TString::Format("%s_isgoodmu", pfx()), &p_isgoodmu_);
@@ -349,7 +349,7 @@ namespace jmt {
     maxpxhit_ = *p_maxpxhit_;
     which_jet_ = *p_which_jet_;
     which_pv_ = *p_which_pv_;
-    //which_sv_ = *p_which_sv_;
+    which_sv_ = *p_which_sv_;
     ismu_ = *p_ismu_;
     isel_ = *p_isel_;
     isgoodmu_ = *p_isgoodmu_;

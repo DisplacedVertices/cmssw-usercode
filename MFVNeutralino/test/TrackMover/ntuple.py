@@ -6,9 +6,17 @@ from JMTucker.MFVNeutralino.NtupleCommon import *
 settings = NtupleSettings()
 settings.is_mc = True
 settings.is_miniaod = True
-settings.event_filter = 'jets only novtx'
+settings.event_filter = 'leptons only novtx'
 
-version = settings.version + 'v1'
+version = settings.version + 'v2'
+
+# for stat extension
+#version = settings.version + 'ext1'
+#version = settings.version + 'ext2'
+#version = settings.version + 'ext3'
+#version = settings.version + 'ext4'
+#version = settings.version + 'ext5'
+#version = settings.version + 'ext6'
 
 cfgs = named_product(njets = [2,3],
                      nbjets = [0,1,2],
@@ -16,13 +24,24 @@ cfgs = named_product(njets = [2,3],
                      angle = [0.2], #, 0.1, 0.3],
                      )
 
+# Only needed stat ext for (3,2) events
+#cfgs = named_product(njets = [3],
+#                     nbjets = [2],
+#                     nsigmadxy = [4.0],
+#                     angle = [0.2], #, 0.1, 0.3],
+#                     )
+
 ####
 
 process = ntuple_process(settings)
 tfileservice(process, 'movedtree.root')
-max_events(process, 100)
+#max_events(process, 100)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
-sample_files(process, 'qcdht2000_year', dataset, 1)
+#input_files(process, '/store/mc/RunIISummer20UL17MiniAOD/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v2/280000/BB6E40E3-1F43-6C41-AEF8-5A7B96D0C5E5.root')
+#input_files(process, '/store/mc/RunIISummer20UL17MiniAOD/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v1/100000/034AE4F2-7180-7F40-81D6-740D15738CBA.root')
+#input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/120001/4724838F-73AF-F040-9290-AC3B1CA485A7.root')
+#sample_files(process, 'qcdbctoept080_2017', dataset, 1)
+
 cmssw_from_argv(process)
 
 ####
@@ -42,6 +61,19 @@ process.mfvWeight.throw_if_no_mcstat = False
 process.p = cms.Path(process.mfvEventFilterSequence * process.goodOfflinePrimaryVertices)
 random_dict = {'jmtRescaledTracks': 1031}
 
+if version.endswith('ext1') :
+    random_dict = {'jmtRescaledTracks': 1991}
+elif version.endswith('ext2') :
+    random_dict = {'jmtRescaledTracks': 2930}
+elif version.endswith('ext3') :
+    random_dict = {'jmtRescaledTracks': 5770}
+elif version.endswith('ext4') :
+    random_dict = {'jmtRescaledTracks': 2892}
+elif version.endswith('ext5') :
+    random_dict = {'jmtRescaledTracks': 7809}
+elif version.endswith('ext6') :
+    random_dict = {'jmtRescaledTracks': 6586}
+
 for icfg, cfg in enumerate(cfgs):
     ex = '%i%i' % (cfg.njets, cfg.nbjets)
     #ex += ('nsig%.2f' % cfg.nsigmadxy).replace('.', 'p')
@@ -53,6 +85,19 @@ for icfg, cfg in enumerate(cfgs):
     assert not any([hasattr(process, x) for x in tracks_name, auxes_name, tree_name])
 
     random_dict[tracks_name] = 13068 + icfg
+
+    if version.endswith('ext1') :
+        random_dict[tracks_name] = 12991 + icfg
+    elif version.endswith('ext2') :
+        random_dict[tracks_name] = 10675 + icfg
+    elif version.endswith('ext3') :
+        random_dict[tracks_name] = 25423 + icfg
+    elif version.endswith('ext4') :
+        random_dict[tracks_name] = 27709 + icfg
+    elif version.endswith('ext5') :
+        random_dict[tracks_name] = 14456 + icfg
+    elif version.endswith('ext6') :
+        random_dict[tracks_name] = 12670 + icfg
 
     tracks = cms.EDProducer('MFVTrackMover',
                             tracks_src = cms.InputTag('jmtRescaledTracks'),
@@ -100,8 +145,11 @@ random_service(process, random_dict)
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
-    samples = pick_samples(dataset, all_signal=False)
-    set_splitting(samples, dataset, 'trackmover', data_json=json_path('ana_2017p8.json'), limit_ttbar=True)
+    #samples = pick_samples(dataset, all_signal=False)
+
+    #samples = [getattr(Samples, 'qcdbctoept080_2017')]
+    samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=True, leptonic=True, met=True, diboson=True, Lepton_data=True)
+    set_splitting(samples, dataset, 'trackmover', data_json=json_path('ana_SingleLept_2017_10pc.json'), limit_ttbar=True)
 
     ms = MetaSubmitter('TrackMover' + version, dataset=dataset)
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier())

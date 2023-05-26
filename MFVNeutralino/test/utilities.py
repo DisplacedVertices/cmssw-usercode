@@ -126,8 +126,8 @@ def cmd_rm_mc_parts():
 
 def _background_samples(trigeff=False, year=2017):
     if _leptonpresel or trigeff:
-        #x = ['ttbar', 'wjetstolnu', 'dyjetstollM10', 'qcdmupt15', 'ww', 'wz', 'zz'] #dyjetstollM50
-        x = ['ttbar', 'dyjetstollM50', 'qcdmupt15', 'ww', 'wz', 'zz'] #'wjetstolnu', 'dyjetstollM10',
+        #x = ['ttbar', 'wjetstolnu', 'dyjetstollM10', 'dyjetstollM50', 'qcdmupt15', 'ww', 'wz', 'zz']
+        x = ['ttbar', 'dyjetstollM10','dyjetstollM50', 'qcdmupt15', 'ww', 'wz', 'zz'] #'wjetstolnu'
         if not trigeff:
             x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]] 
             #x += ['qcdempt%03i' % x for x in [20,50,80,170]] 

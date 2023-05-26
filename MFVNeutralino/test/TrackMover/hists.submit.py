@@ -1,8 +1,14 @@
 from JMTucker.Tools.MetaSubmitter import *
+from JMTucker.Tools.BasicAnalyzer_cfg import *
+from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers
 
-version = 'v27mv1'
+version = 'ulv30lepmv2'
 dataset = 'nr_trackmover' + version
-samples = pick_samples(dataset, both_years=True, all_signal=False)
+#input_files(process, 'movedtree.root')
+#samples = [getattr(Samples, 'qcdbctoept080_2017')]
+#samples = [getattr(Samples, 'example_ttbar_2017')]
+samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=True, leptonic=False, met=False, diboson=False, Lepton_data=True)
+#samples = pick_samples(dataset, both_years=True, all_signal=False)
 
 for nl in 2,: # 3:
     for nb in 0,: # 1, 2:

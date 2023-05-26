@@ -428,6 +428,10 @@ leptonic_samples_2017 = [
     MCSample('dyjetstollM50_2017',    '/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v1/AODSIM',          103599638, nice='DY + jets #rightarrow ll, M > 50 GeV', color= 32, syst_frac=0.10, xsec=5.34e3),
     ]
 
+example_samples_ttbar_2017 = [
+    MCSample('example_ttbar_2017',     '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/AODSIM',  249133364, nice='t#bar{t}',                   color=4,   syst_frac=0.15, xsec=831.76), 
+    ]
+
 met_samples_2017 = [
     #MCSample('ttbar_2017',     '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM',    249133364, nice='t#bar{t}',                   color=4,   syst_frac=0.15, xsec=831.76),
     MCSample('ttbar_2017',     '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/AODSIM',  249133364, nice='t#bar{t}',                   color=4,   syst_frac=0.15, xsec=831.76), 
@@ -1012,6 +1016,7 @@ __all__ = [
     'mfv_stopld_samples_20161',
     'mfv_stoplb_samples_20162',
     'mfv_stopld_samples_20162',
+    'example_samples_ttbar_2017',
     'qcd_samples_2017',
     'qcd_samples_sum_2017',
     'qcd_lep_samples_2017',
@@ -1266,6 +1271,33 @@ for s in all_signal_samples_2018:
 #is this the correct ntuple version? 
 #mfv_stopld_tau001000um_M1000_2018
 #for x in mfv_stopld_tau000100um_M0200_2018, mfv_stopld_tau000300um_M0200_2018, mfv_stopld_tau000100um_M0600_2018, mfv_stopld_tau000300um_M0600_2018, mfv_stopld_tau000100um_M1000_2018, mfv_stopld_tau000300um_M1000_2018, mfv_stopld_tau000100um_M1600_2018, mfv_stopld_tau000300um_M1600_2018:                                                                                                                                                  
+example_ttbar_2017.add_dataset('nr_trackmoverulv30lepmv2')
+qcdempt015_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+qcdmupt15_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+qcdempt020_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+qcdempt030_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+qcdempt050_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+qcdempt080_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+qcdempt120_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+qcdempt170_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+qcdempt300_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+qcdbctoept020_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+qcdbctoept030_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+qcdbctoept080_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+qcdbctoept170_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+qcdbctoept250_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+wjetstolnu_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+dyjetstollM10_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+dyjetstollM50_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+ww_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+zz_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+wz_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+SingleMuon2017C.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+SingleMuon2017F.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+SingleElectron2017F.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+for x in SingleMuon2017B, SingleMuon2017D, SingleMuon2017E, SingleElectron2017B, SingleElectron2017D:
+    x.add_dataset("nr_trackmoverulv30lepmv2")
+
 #    x.add_dataset("ntupleulv1lepm")
 #WplusHToSSTodddd_tau1mm_M55_2017.add_dataset('ntupleulsed2ndxyv29lepm', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/pekotamn-NtupleULsed2ndxyV29Lepm_2017-1ea75a506c8d2d1e690db79eb01e9fee/USER', 48991)
 """
@@ -1317,6 +1349,29 @@ WplusHToSSTodddd_tau1mm_M55_2017.add_dataset('ntupleultkrec0p9v30lepm', '/WplusH
 ttbar_2017.add_dataset("ntupleultkrec0p9v30lepm")
 """
 
+"""
+qcdempt015_2017.add_dataset('ntupleuloffshjv30lepm', '/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/pekotamn-NtupleULoffshjV30Lepm_2017-6d20d00f6c5ebc9510bd8f377a244a84/USER', 0)
+qcdmupt15_2017.add_dataset('ntupleuloffshjv30lepm', '/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/pekotamn-NtupleULoffshjV30Lepm_2017-8678ca1ffcefb50a8541d53235ed2942/USER', 1039)
+qcdempt020_2017.add_dataset('ntupleuloffshjv30lepm', '/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV-pythia8/pekotamn-NtupleULoffshjV30Lepm_2017-6f46d948f7d88215cb915e18518736d2/USER', 0)
+qcdempt030_2017.add_dataset('ntupleuloffshjv30lepm', '/QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8/pekotamn-NtupleULoffshjV30Lepm_2017-fe2b2f0359b1d3bdd8f8df7fb9d8cbac/USER', 1)
+qcdempt050_2017.add_dataset('ntupleuloffshjv30lepm', '/QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8/pekotamn-NtupleULoffshjV30Lepm_2017-7e639af6eedd5c9895267bc00ce276dd/USER', 3)
+qcdempt080_2017.add_dataset('ntupleuloffshjv30lepm', '/QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV-pythia8/pekotamn-NtupleULoffshjV30Lepm_2017-f66b16f2753a2bd37ce98aac93ef70f2/USER', 16)
+qcdempt120_2017.add_dataset('ntupleuloffshjv30lepm', '/QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV-pythia8/pekotamn-NtupleULoffshjV30Lepm_2017-d778ca5ee72babbb748ae3fb11fed51e/USER', 27)
+qcdbctoept020_2017.add_dataset('ntupleuloffshjv30lepm', '/QCD_Pt_20to30_bcToE_TuneCP5_13TeV_pythia8/pekotamn-NtupleULoffshjV30Lepm_2017-422a3e901e2960cc60fc69073b302967/USER', 3)
+qcdbctoept030_2017.add_dataset('ntupleuloffshjv30lepm', '/QCD_Pt_30to80_bcToE_TuneCP5_13TeV_pythia8/pekotamn-NtupleULoffshjV30Lepm_2017-fc7b953679563de5613873e1bbb81161/USER', 18)
+qcdbctoept080_2017.add_dataset('ntupleuloffshjv30lepm', '/QCD_Pt_80to170_bcToE_TuneCP5_13TeV_pythia8/pekotamn-NtupleULoffshjV30Lepm_2017-5701906e1a7ccc1f21989fb6d9bea9d6/USER', 158)
+qcdbctoept170_2017.add_dataset('ntupleuloffshjv30lepm', '/QCD_Pt_170to250_bcToE_TuneCP5_13TeV_pythia8/pekotamn-NtupleULoffshjV30Lepm_2017-441b6760314191f963570754443c34eb/USER', 329)
+qcdbctoept250_2017.add_dataset('ntupleuloffshjv30lepm', '/QCD_Pt_250toInf_bcToE_TuneCP5_13TeV_pythia8/pekotamn-NtupleULoffshjV30Lepm_2017-9cb58053cb0897ddd2b03925fbc1946c/USER', 387)
+wjetstolnu_2017.add_dataset('ntupleuloffshjv30lepm', '/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/pekotamn-NtupleULoffshjV30Lepm_2017-66a3468c10265803f09abeb56759cffd/USER', 15541)
+dyjetstollM10_2017.add_dataset('ntupleuloffshjv30lepm', '/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/pekotamn-NtupleULoffshjV30Lepm_2017-0fa2945620f50558eea5cef278655850/USER', 623)
+dyjetstollM50_2017.add_dataset('ntupleuloffshjv30lepm', '/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/pekotamn-NtupleULoffshjV30Lepm_2017-63c14ad83a67de765612db4f2f646292/USER', 53700)
+ww_2017.add_dataset('ntupleuloffshjv30lepm', '/WW_TuneCP5_13TeV-pythia8/pekotamn-NtupleULoffshjV30Lepm_2017-039c2a18d30b0ba429aa542226914030/USER', 5744)
+zz_2017.add_dataset('ntupleuloffshjv30lepm', '/WZ_TuneCP5_13TeV-pythia8/pekotamn-NtupleULoffshjV30Lepm_2017-33d99ce1e1ac4bde5df3f706aa465abc/USER', 5113)
+wz_2017.add_dataset('ntupleuloffshjv30lepm', '/ZZ_TuneCP5_13TeV-pythia8/pekotamn-NtupleULoffshjV30Lepm_2017-a5237143b49548c5fbd29b068544b45b/USER', 2001)
+ttbar_2017.add_dataset("ntupleuloffshjv30lepm")
+"""
+
+"""
 qcdempt015_2017.add_dataset('ntupleulv30lepm', '/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/pekotamn-NtupleULV30Lepm_2017-9978bb4b98cfc56ae5630fa1bd7044b3/USER', 0)
 qcdmupt15_2017.add_dataset('ntupleulv30lepm', '/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/pekotamn-NtupleULV30Lepm_2017-8dc0271a6c5ba30b5ac810c9fe35fdc1/USER', 1064)
 qcdempt020_2017.add_dataset('ntupleulv30lepm', '/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV-pythia8/pekotamn-NtupleULV30Lepm_2017-cd60535f6f08e120b12215558713503e/USER', 0)
@@ -1345,7 +1400,7 @@ WplusHToSSTodddd_tau30mm_M55_2017.add_dataset('ntupleulv30lepm', '/WplusH_HToSST
 WplusHToSSTodddd_tau1mm_M55_2017.add_dataset('ntupleulv30lepm', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/pekotamn-NtupleULV30Lepm_2017-cbbf712451aef07fd4a0ba890552b5fc/USER', 49991)
 WplusHToSSTodddd_tau300um_M55_2017.add_dataset('ntupleulv30lepm', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-0p3_TuneCP5_13TeV-powheg-pythia8/pekotamn-NtupleULV30Lepm_2017-bbe91de2f33c8d866685c55d4767669a/USER', 49995)
 ttbar_2017.add_dataset("ntupleulv30lepm")
-
+"""
 
 """
 qcdempt015_2017.add_dataset('ntupleulsed3p5ndxyv29lepm', '/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/pekotamn-NtupleULsed3p5ndxyV29Lepm_2017-c85b19e0cc795becea0ebfb1df7ea777/USER', 0)
