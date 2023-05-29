@@ -8,7 +8,7 @@ set_style()
 ROOT.TH1.AddDirectory(0)
 
 def get_em(fn, scale=1., alpha=1-0.6827):
-    f = ROOT.TFile(fn)
+    f = ROOT.TFile.Open(fn)
     d = {}
     integ = None
     l = []

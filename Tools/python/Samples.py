@@ -1272,32 +1272,37 @@ for s in all_signal_samples_2018:
 #mfv_stopld_tau001000um_M1000_2018
 #for x in mfv_stopld_tau000100um_M0200_2018, mfv_stopld_tau000300um_M0200_2018, mfv_stopld_tau000100um_M0600_2018, mfv_stopld_tau000300um_M0600_2018, mfv_stopld_tau000100um_M1000_2018, mfv_stopld_tau000300um_M1000_2018, mfv_stopld_tau000100um_M1600_2018, mfv_stopld_tau000300um_M1600_2018:                                                                                                                                                  
 example_ttbar_2017.add_dataset('nr_trackmoverulv30lepmv2')
-qcdempt015_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
-qcdmupt15_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
-qcdempt020_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
-qcdempt030_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
-qcdempt050_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
-qcdempt080_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
-qcdempt120_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
-qcdempt170_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
-qcdempt300_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
-qcdbctoept020_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
-qcdbctoept030_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
-qcdbctoept080_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
-qcdbctoept170_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
-qcdbctoept250_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
-wjetstolnu_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
-dyjetstollM10_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
-dyjetstollM50_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
-ww_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
-zz_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
-wz_2017.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
-SingleMuon2017C.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
-SingleMuon2017F.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
-SingleElectron2017F.add_dataset('nr_trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
-for x in SingleMuon2017B, SingleMuon2017D, SingleMuon2017E, SingleElectron2017B, SingleElectron2017D:
-    x.add_dataset("nr_trackmoverulv30lepmv2")
 
+
+for x in WplusHToSSTodddd_tau30mm_M55_2017, WplusHToSSTodddd_tau1mm_M55_2017, WplusHToSSTodddd_tau300um_M55_2017:
+    x.add_dataset("trackmovermctruthulv30lepmv2")
+
+#qcdmupt15_2017, qcdempt020_2017, qcdempt120_2017, dyjetstollM50_2017
+qcdempt015_2017.add_dataset('trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+qcdmupt15_2017.add_dataset('trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+qcdempt020_2017.add_dataset('trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+qcdempt030_2017.add_dataset('trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+qcdempt050_2017.add_dataset('trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+qcdempt080_2017.add_dataset('trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+qcdempt120_2017.add_dataset('trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+qcdempt170_2017.add_dataset('trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+qcdempt300_2017.add_dataset('trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+qcdbctoept020_2017.add_dataset('trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+qcdbctoept030_2017.add_dataset('trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+qcdbctoept080_2017.add_dataset('trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+qcdbctoept170_2017.add_dataset('trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+qcdbctoept250_2017.add_dataset('trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+wjetstolnu_2017.add_dataset('trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+dyjetstollM10_2017.add_dataset('trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+dyjetstollM50_2017.add_dataset('trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+ww_2017.add_dataset('trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+zz_2017.add_dataset('trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+wz_2017.add_dataset('trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+SingleMuon2017C.add_dataset('trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+SingleMuon2017F.add_dataset('trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+SingleElectron2017F.add_dataset('trackmoverulv30lepmv2', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+for x in ttbar_2017, SingleElectron2017C:
+    x.add_dataset("trackmoverulv30lepmv2")
 #    x.add_dataset("ntupleulv1lepm")
 #WplusHToSSTodddd_tau1mm_M55_2017.add_dataset('ntupleulsed2ndxyv29lepm', '/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/pekotamn-NtupleULsed2ndxyV29Lepm_2017-1ea75a506c8d2d1e690db79eb01e9fee/USER', 48991)
 """
@@ -1751,7 +1756,7 @@ condorable = {
         
         },
     "T1_US_FNAL_Disk": {
-        "miniaod": [SingleMuon2017B, SingleMuon2017D, SingleMuon2017E, SingleElectron2017B, SingleElectron2017D, SingleElectron2017E, MET2018D, qcdht0300_2018, qcdht0700_2018, qcdht1000_2018, qcdht1500_2018, zjetstonunuht2500_2018, qcdht0200_2017, qcdht0500_2017, qcdht0700_2017, qcdht0300_2017,ttbar_2017, ttbar_2018,], 
+        "miniaod": [MET2018D, qcdht0300_2018, qcdht0700_2018, qcdht1000_2018, qcdht1500_2018, zjetstonunuht2500_2018, qcdht0200_2017, qcdht0500_2017, qcdht0700_2017, qcdht0300_2017,ttbar_2017, ttbar_2018,], #[SingleMuon2017B, SingleMuon2017D, SingleMuon2017E, SingleElectron2017B, SingleElectron2017D, SingleElectron2017E, 
 
                     #mfv_stoplb_tau010000um_M1000_2017, mfv_stoplb_tau000300um_M1200_2017, mfv_stoplb_tau010000um_M1200_2017, mfv_stoplb_tau001000um_M1200_2017, mfv_stoplb_tau000300um_M1600_2017, mfv_stoplb_tau001000um_M1600_2017, mfv_stoplb_tau000100um_M0300_2017, mfv_stoplb_tau000300um_M0300_2017, mfv_stoplb_tau001000um_M0300_2017, mfv_stoplb_tau001000um_M0400_2017, mfv_stoplb_tau010000um_M0600_2017, mfv_stopld_tau000300um_M1000_2017, mfv_stopld_tau010000um_M1000_2017, mfv_stopld_tau010000um_M1200_2017, mfv_stopld_tau001000um_M1400_2017, mfv_stopld_tau000300um_M1600_2017, mfv_stopld_tau010000um_M0200_2017, mfv_stopld_tau000300um_M0300_2017, mfv_stopld_tau001000um_M0400_2017, mfv_stopld_tau000300um_M0600_2017, mfv_stopld_tau010000um_M0600_2017, mfv_stopld_tau001000um_M0600_2017, mfv_stopld_tau010000um_M0800_2017, mfv_stoplb_tau010000um_M1200_2018, mfv_stoplb_tau001000um_M1200_2018, mfv_stoplb_tau010000um_M1400_2018, mfv_stoplb_tau001000um_M1400_2018, mfv_stoplb_tau010000um_M1600_2018, mfv_stoplb_tau001000um_M1600_2018, mfv_stoplb_tau001000um_M0200_2018, mfv_stoplb_tau010000um_M0300_2018, mfv_stoplb_tau010000um_M0400_2018, mfv_stoplb_tau001000um_M0400_2018, mfv_stoplb_tau001000um_M0600_2018, mfv_stoplb_tau000300um_M0800_2018, mfv_stoplb_tau001000um_M0800_2018, mfv_stopld_tau000300um_M1000_2018, mfv_stopld_tau000300um_M1200_2018, mfv_stopld_tau000100um_M1400_2018, mfv_stopld_tau000100um_M1600_2018, mfv_stopld_tau010000um_M1600_2018, mfv_stopld_tau000300um_M0200_2018, mfv_stopld_tau001000um_M0200_2018, mfv_stopld_tau001000um_M0300_2018, mfv_stopld_tau000300um_M0400_2018, mfv_stopld_tau001000um_M0600_2018],
         },

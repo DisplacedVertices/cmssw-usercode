@@ -75,7 +75,7 @@ def cmd_hadd_data():
 
         have = []
         year_eras = [
-            ('2017', 'BCDEF'),
+            ('2017', 'CF'), #misisng BDE
             ('2018', 'ABCD'),
             ]
 
@@ -126,12 +126,12 @@ def cmd_rm_mc_parts():
 
 def _background_samples(trigeff=False, year=2017):
     if _leptonpresel or trigeff:
-        #x = ['ttbar', 'wjetstolnu', 'dyjetstollM10', 'dyjetstollM50', 'qcdmupt15', 'ww', 'wz', 'zz']
-        x = ['ttbar', 'dyjetstollM10','dyjetstollM50', 'qcdmupt15', 'ww', 'wz', 'zz'] #'wjetstolnu'
+        x = ['ttbar', 'wjetstolnu', 'dyjetstollM10', 'dyjetstollM50','qcdmupt15', 'ww', 'wz', 'zz'] 
+        #x = ['ttbar', 'dyjetstollM10','dyjetstollM50', 'qcdmupt15', 'ww', 'wz', 'zz'] #'wjetstolnu'
         if not trigeff:
             x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]] 
             #x += ['qcdempt%03i' % x for x in [20,50,80,170]] 
-            x += ['qcdbctoept%03i' % x for x in [20,30,80,170,250]] 
+            x += ['qcdbctoept%03i' % x for x in [30,80,170,250]] #20 
     elif _btagpresel:
         x = ['qcdht%04i' % x for x in [300, 500, 700, 1000, 1500, 2000]]
         x += ['ttbar']

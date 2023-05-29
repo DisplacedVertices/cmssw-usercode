@@ -403,7 +403,7 @@ int main(int argc, char** argv) {
     // First part of the preselection: our offline jet requirements
     // (mostly applied in ntupling step) plus only look at move
     // vectors ~inside the beampipe // JMTBAD the 2.0 cm requirement isn't exact
-    if (jets.ht() < 1200 || jets.nminpt() < 4 || movedist2 < 0.01 || movedist2 > 2.0)
+    if (movedist2 < 0.01 || movedist2 > 2.0) //FIXME
       NR_loop_cont(w);
 
     int nmovedjets = 0, jet_sumntracks = 0;

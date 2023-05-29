@@ -5,7 +5,7 @@ int main(int argc, char** argv) {
 
   jmt::NtupleReader<mfv::MovedTracksNtuple> nr;
   namespace po = boost::program_options;
-  nr.init_options("mfvMovedTreeMCTruth/t", "TrackMoverMCTruthHistsV27m", "nr_trackmovermctruthv27mv1")
+  nr.init_options("mfvMovedTreeMCTruth/t", "TrackMoverMCTruthHistsUlv30lepmv2", "trackmovermctruthulv30lepmv2", "all_signal = True")
     ("min-lspdist3", po::value<double>(&min_lspdist3)->default_value(0.02), "min distance between LSP decays to use event")
     ;
 
@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
     // First part of the preselection: our offline jet requirements
     // plus require the lsps to be far enough apart that they don't
     // interfere with each other in reconstruction
-    if (!gen.valid() || jets.ht() < 1200 || jets.nminpt() < 4 || gen.lspdist3() < min_lspdist3)
+    if (!gen.valid() || gen.lspdist3() < min_lspdist3) //FIXME 
       NR_loop_cont(w);
 
     for (numdens& nd : nds)
