@@ -262,7 +262,7 @@ int main(int argc, char** argv) {
           continue;
 
         const bool pass_ntracks = vs.ntracks(i) >= 5;
-        const bool pass_bs2derr = vs.bs2derr(i) < 0.0025; // JMTBAD rescale_bs2derr
+        const bool pass_bs2derr = vs.bs2derr(i) < 0.0050; // JMTBAD rescale_bs2derr // FIXME
 
         if (1)                             { set_it_if_first(first_vtx_to_pass[0], i); ++n_pass_nocuts;  }
         if (pass_ntracks)                  { set_it_if_first(first_vtx_to_pass[1], i); ++n_pass_ntracks; }

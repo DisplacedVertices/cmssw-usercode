@@ -482,7 +482,7 @@ def compare_hists(ps, samples, **kwargs):
     y_range        = _get('y_range',        None)
     move_overflows = _get('move_overflows', 'under over')
     profile        = _get('profile',        None)
-
+    move_stat_box  = _get('move_stat_box', (0.15,0.15,0.55,0.25))
     ###
 
     proto_dir = samples[0][1]
@@ -588,13 +588,18 @@ def compare_hists(ps, samples, **kwargs):
         m_o = False if (is2d or profiled) else move_overflows(name, hist_list, None)
 
         if len(hists) > 1 and ratio(name, hist_list, None) and (not is2d or profiled):
+            for hist in hists:
+                if y_r:
+                    hist.SetMinimum(y_r[0]+((y_r[0]==0)*1e-12))
+                    hist.SetMaximum(y_r[1])
             ratios_plot(name_clean,
                         hists,
                         plot_saver=ps,
-                        res_fit='pol1',
+                        res_fit=False,
                         res_divide_opt={'confint': propagate_ratio, 'force_le_1': False},
                         statbox_size=stat_size(name, hist_list, None),
                         res_y_range=0.15,
+                        #res_y_range=(0,5.0),
                         x_range = x_r,
                         move_overflows = m_o,
                         )
@@ -607,6 +612,9 @@ def compare_hists(ps, samples, **kwargs):
                 if not is2d or profiled:
                     if x_r:
                         hist.GetXaxis().SetRangeUser(*x_r)
+                    if y_r:
+                        hist.SetMinimum(y_r[0]+((y_r[0]==0)*1e-12))
+                        hist.SetMaximum(y_r[1])
                     move_overflows_into_visible_bins(hist, m_o)
                 elif is2d:
                     if x_r:
@@ -671,6 +679,7 @@ def data_mc_comparison(name,
                        int_lumi_bkg_scale = None,
                        int_lumi_nice = None,
                        normalize_to_data = None,
+                       normalize_to_unity = None,
                        canvas_title = '',
                        canvas_size = (700, 840),
                        canvas_top_margin = 0.01,
@@ -694,6 +703,7 @@ def data_mc_comparison(name,
                        y_range = (None, None),
                        signal_color_override = None,
                        signal_line_width = 3,
+                       signal_scale = 1.,
                        signal_draw_cmd = 'hist',
                        data_marker_style = 20,
                        data_marker_size = 1.3,
@@ -806,7 +816,7 @@ def data_mc_comparison(name,
                 # fcn_for_nevents_check specified).
                 sample._datamccomp_file_path = file_path
                 sample._datamccomp_filename = file_path % sample
-                sample._datamccomp_file = ROOT.TFile(sample._datamccomp_filename)
+                sample._datamccomp_file = ROOT.TFile.Open(sample._datamccomp_filename)
                 if sample not in data_samples and fcn_for_nevents_check is not None:
                     if fcn_for_nevents_check(sample, sample._datamccomp_file) != sample.nevents:
                         raise ValueError('wrong number of events for %s' % sample.name)
@@ -880,6 +890,13 @@ def data_mc_comparison(name,
             print 'normalize_to_data scaling to equal area: data %f bkg %f sf %f' % (data_integ, bkg_integ, data_integ / bkg_integ)
             for sample in background_samples:
                 sample.hist.Scale(data_integ / bkg_integ)
+    if normalize_to_unity:
+        bkg_integ = sum(get_integral(sample.hist)[0] for sample in background_samples)
+        for sample in background_samples:
+            sample.hist.Scale(1.0 / bkg_integ)
+        for sample in signal_samples:
+            sig_integ = get_integral(sample.hist)[0]
+            sample.hist.Scale(1.0 / sig_integ)
 
     #####################
 
@@ -962,6 +979,7 @@ def data_mc_comparison(name,
     for sample in signal_samples:
         sample.hist.SetLineColor(sample.color if signal_color_override is None else signal_color_override(sample))
         sample.hist.SetLineWidth(signal_line_width)
+        sample.hist.Scale(signal_scale)
         sample.hist.Draw('same ' + signal_draw_cmd)
         if verbose:
             integ = get_integral(sample.hist, 0)
@@ -1005,8 +1023,10 @@ def data_mc_comparison(name,
     if cut_line is not None:
         cut_line_coords, cut_line_color, cut_line_width, cut_line_style = cut_line
         if type(cut_line_coords) in (float, int):
-            cut_line_coords = (cut_line_coords, stack.GetMinimum(),
-                               cut_line_coords, stack.GetMaximum())
+            #cut_line_coords = (cut_line_coords, stack.GetMinimum(),
+            #                   cut_line_coords, stack.GetMaximum())
+            cut_line_coords = (cut_line_coords, canvas.GetUymin(),
+                               cut_line_coords, canvas.GetUymax())
         cut_line = ROOT.TLine(*cut_line_coords)
         cut_line.SetLineColor(cut_line_color)
         cut_line.SetLineWidth(cut_line_width)
@@ -1591,8 +1611,8 @@ def plot_dir(x='', make=False, temp=False):
         d = '/publicweb/j/joeyr/plots'
     elif 'fnal.gov' in hostname and username == 'ali':
         d = '/publicweb/a/ali/'
-    elif 'fnal.gov' in hostname and username =='pkotamni':
-        d = '~'
+    elif 'fnal.gov' in hostname and username == 'pkotamni':
+        d = '~/nobackup/crabdirs/'
     if d:
         x = os.path.join(d,x)
     else:
@@ -1607,7 +1627,7 @@ def plot_dir(x='', make=False, temp=False):
 class plot_saver:
     i = 0
     
-    def __init__(self, plot_dir=None, html=True, log=True, root=True, root_log=False, pdf=False, pdf_log=False, C=False, C_log=False, size=(820,630), per_page=-1, canvas_margins=None):
+    def __init__(self, plot_dir=None, html=True, log=True, root=True, root_log=False, pdf=False, pdf_log=False, C=False, C_log=False, size=(820,630), per_page=-1, canvas_margins=(0.05,0.10,0.10,0.20)):#canvas_margins=(0.05,0.10,0.10,0.20)
         self.c = ROOT.TCanvas('c%i' % plot_saver.i, '', *size)
         if canvas_margins is not None:
             if type(canvas_margins) == int or type(canvas_margins) == float:
@@ -1839,9 +1859,11 @@ def ratios_plot(name,
                 res_fcns = [],
                 legend = None,
                 move_overflows = 'under over',
+                move_stat_box = (0.15,0.15,0.55,0.25),
                 draw_normalized = False,
                 statbox_size = None,
                 which_ratios = 'first', # 'first' or 'pairs'
+                logx=None,
                 ):
     '''With n hists/graphs, draw them and the n-1 ratios to hists[0].
     hists can be a list of just the hists/graphs, or it can be a list
@@ -1887,6 +1909,8 @@ def ratios_plot(name,
     canvas.SetBottomMargin(canvas_bottom_margin)
     canvas.SetLeftMargin(canvas_left_margin)
     canvas.SetRightMargin(canvas_right_margin)
+    if logx:
+        canvas.SetLogx()
 
     if plot_saver is not None:
         plot_saver.old_c = plot_saver.c
@@ -1968,6 +1992,8 @@ def ratios_plot(name,
     ratio_pad.SetFillColor(0)
     ratio_pad.SetFillStyle(0)
     ratio_pad.Draw()
+    if logx:
+        ratio_pad.SetLogx()
     ratio_pad.cd(0)
 
     ratios = []
@@ -1983,7 +2009,7 @@ def ratios_plot(name,
         min_r, max_r = 1e99, -1e99
         for h0,h in pairs_for_ratios:
             v1, v2 = histogram_divide_values(h, h0, True)
-            xa, xb = h.GetBinLowEdge(h.GetXaxis().GetFirst()), h.GetBinLowEdge(h.GetXaxis().GetLast())
+            xa, xb = h.GetXaxis().GetBinLowEdge(h.GetXaxis().GetFirst()), h.GetXaxis().GetBinLowEdge(h.GetXaxis().GetLast()) #FIXME: this doesn't work for TGraph without GetXaxis
             rs = [v1.y[i] / v2.y[i] for i in xrange(v2.n) if v2.y[i] != 0. and xa < v1.x[i] < xb]
             if rs:
                 min_r = min(min_r, min(rs))
@@ -2127,7 +2153,7 @@ def real_hist_min(h, return_bin=False, user_range=None):
         return m
 
 def root_fns_from_argv():
-    return [x for x in sys.argv[1:] if os.path.isfile(x) and x.endswith('.root')]
+  return [x for x in sys.argv[1:] if (os.path.isfile(x) or x.startswith('root://')) and x.endswith('.root')]
 
 def set_style(date_pages=False):
     ROOT.TH1.SetDefaultSumw2() # when would we ever not want to?

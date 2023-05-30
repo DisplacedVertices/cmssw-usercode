@@ -6,7 +6,7 @@ from efficiencies import efficiencies as effs
 cutsets = ['nocuts','ntracks','all']
 
 set_style()
-ps = plot_saver(plot_dir('TrackMover_V21mV2_effs'), size=(600,600), log=False)
+ps = plot_saver(plot_dir('TrackMoverHistsUlv30lepmv2_20_effs'), size=(600,600), log=False)
 
 def p(name, title, data, mc):
     print name
@@ -36,8 +36,8 @@ def p(name, title, data, mc):
 
 for cutset in cutsets:
     for tau in 100,300,1000,10000,30000:
-      for njets in 2: #,3:
-        for nbjets in 0: #,1,2:
+      for njets in 2,: #,3:
+        for nbjets in 0,: #,1,2:
                 name = '%s_tau%06ium_%i%i' % (cutset, tau, njets, nbjets)
                 title = '%s, #tau = %s, n_{l} = %i, n_{b} = %i;nsigmadxy cut;efficiency' % (cutset, {100:'100 #mum', 300:'300 #mum', 1000:'1 mm', 10000:'10 mm', 30000:'30 mm'}[tau], njets, nbjets)
                 nsigs = [4.]

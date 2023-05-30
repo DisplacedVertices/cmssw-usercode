@@ -541,7 +541,7 @@ int main(int argc, char** argv) {
       vtx_z       = vs.z(ivtx);
 
       const bool pass_ntracks = vs.ntracks(ivtx) >= 5;
-      const bool pass_bs2derr = vs.bs2derr(ivtx) < 0.0025; // JMTBAD use rescale_bs2derr and in plots below
+      const bool pass_bs2derr = vs.bs2derr(ivtx) < 0.0050; // JMTBAD use rescale_bs2derr and in plots below //FIXME 
 
       if (1)                            { set_it_if_first(first_vtx_to_pass[0], ivtx); ++n_pass_nocuts;  }
       if (pass_ntracks)                 { set_it_if_first(first_vtx_to_pass[1], ivtx); ++n_pass_ntracks; }
