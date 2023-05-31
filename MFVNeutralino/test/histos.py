@@ -12,6 +12,7 @@ from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, d
 #input_files(process, '/store/user/pekotamn/QCD_Pt_30to80_bcToE_TuneCP5_13TeV_pythia8/NtupleULV30Lepm_2017/230504_170632/0000/ntuple_1.root')
 #input_files(process, '/store/user/pekotamn/DisplacedSUSY_stopToLD_M_400_10mm_TuneCP5_13TeV-madgraph-pythia8/NtupleULV30Lepm_2017/230504_182600/0000/ntuple_1.root')
 #input_files(process, 'ntuple.root')
+input_files(process, '/store/user/pkotamni/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleULV30Lepm_2017/230504_120905/0000/ntuple_12.root')
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
 
@@ -73,8 +74,8 @@ nm1s = [
     ('Bs2derr',    'max_rescale_bs2derr = 1e9'),
     ]
 
-ntks = [5,3,4,7,8,9]
-nvs = [0,1,2]
+ntks = [] #5,3,4,7,8,9]
+nvs = [] #0,1,2]
 
 for ntk in ntks:
     if ntk == 5:

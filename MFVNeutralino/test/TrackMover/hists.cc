@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
     numdens("all")
   };
 
-  enum { k_movedist2, k_movedist3, k_movevectoreta, k_npv, k_pvx, k_pvy, k_pvz, k_pvrho, k_pvntracks, k_pvscore, k_ht, k_jet_asymm, k_jetpt0_asymm, k_jetpt1_asymm, k_jeteta0_asymm, k_jeteta1_asymm, k_jetdr_asymm, k_nalltracks, k_nmovedtracks, k_nseedtracks, k_npreseljets, k_npreselbjets, k_jeti01, k_jetp01, k_pt0, k_pt1, k_jetpt01, k_jeteta01, k_jetphi01, k_jetsume, k_jetdrmax, k_jetdravg, k_jetdetamax, k_jetdetaavg, k_jetdphimax, k_jetdphiavg, k_jet0_tkdrmax, k_jet1_tkdrmax, k_jet0_tkdravg, k_jet1_tkdravg, k_jet_dphi_deta_avg, k_jdphi_nmovedtks, k_jdeta_nmovedtks, k_jdr_nmovedtks, k_jtheta0_nmovedtks, k_jetmovea3d01, k_jetmovea3d_v_jetp, k_jetmovea3d0_v_movevectoreta, k_jetmovea3d1_v_movevectoreta, k_jeta3dmax, k_angle0, k_angle1, k_dphi_j0_mv, k_dphi_j1_mv, k_deta_j0_mv, k_deta_j1_mv, k_dphi_j0_mv_jdeta, k_jetsumntracks, k_jetntracks01, k_jetntracks_v_jetp, k_jetnseedtracks01, k_nvtx, k_vtxbs2derr, k_vtxbs2derr_avgtkdr, k_vtxbs2derr_jdeta, k_vtxbs2derr_dphi_j0_mv, k_vtxbs2derr_jdr, k_vtxeta, k_vtxz };
+  enum { k_movedist2, k_movedist3, k_movevectoreta, k_npv, k_pvx, k_pvy, k_pvz, k_pvrho, k_pvntracks, k_pvscore, k_ht, k_jet_asymm, k_vtx_unc, k_jet_dr, k_jet_deta, k_jet_dphi, k_jet_dind, k_pt0, k_pt1, k_ntks_j0, k_ntks_j1, k_nmovedtracks, k_dphi_sum_j_mv, k_deta_sum_j_mv, k_jetpt0_asymm, k_jetpt1_asymm, k_jeteta0_asymm, k_jeteta1_asymm, k_jetdr_asymm, k_nalltracks, k_nseedtracks, k_npreseljets, k_npreselbjets, k_jeti01, k_jetp01, k_jetpt01, k_jeteta01, k_jetphi01, k_jetsume, k_jetdrmax, k_jetdravg, k_jetdetamax, k_jetdetaavg, k_jetdphimax, k_jetdphiavg, k_jet0_tkdrmax, k_jet1_tkdrmax, k_jet0_tkdravg, k_jet1_tkdravg, k_jet_dphi_deta_avg, k_jdphi_nmovedtks, k_jdeta_nmovedtks, k_jdr_nmovedtks, k_jtheta0_nmovedtks, k_jetmovea3d01, k_jetmovea3d_v_jetp, k_jetmovea3d0_v_movevectoreta, k_jetmovea3d1_v_movevectoreta, k_jeta3dmax, k_angle0, k_angle1, k_dphi_j0_mv, k_dphi_j1_mv, k_deta_j0_mv, k_deta_j1_mv, k_dphi_j0_mv_jdeta, k_jetsumntracks, k_jetntracks01, k_jetntracks_v_jetp, k_jetnseedtracks01, k_nvtx, k_vtxbs2derr, k_vtxbs2derr_avgtkdr, k_vtxbs2derr_jdeta, k_vtxbs2derr_dphi_j0_mv, k_vtxbs2derr_jdr, k_vtxeta, k_vtxz };
 
   for (numdens& nd : nds) {
     nd.book(k_movedist2, "movedist2", ";movement 2-dist;events/0.01 cm", 200, 0, 2);
@@ -85,22 +85,31 @@ int main(int argc, char** argv) {
     nd.book(k_pvscore, "pvscore", ";PV #Sigma p_{T}^{2} (GeV^{2});events/200 GeV^{2}", 200, 0, 40000);
     nd.book(k_ht, "ht", ";H_{T} (GeV);events/50 GeV", 50, 0, 2500);
     nd.book(k_jet_asymm, "jet_asymm", ";Jet asymmetry A_{J}; arb. units", 25, 0, 1);
-
-    nd.book(k_jetpt0_asymm, "jetpt0_asymm", ";jet p_{T} 0; jet asymm. A_{J}", 50, 0, 1000, 25, 0, 1);
+	nd.book(k_vtx_unc, "vtx_unc", ";dist3d(move vector, vtx) cm; arb. units", 100, 0, 0.1);
+	nd.book(k_jet_dr, "jet_dr", ";jets #DeltaR; arb. units", 70, 0, 7);
+	nd.book(k_jet_deta, "jet_deta", ";jets #DeltaEta; arb. units", 70, 0, 7);
+	nd.book(k_jet_dphi, "jet_dphi", ";jets #DeltaPhi; arb. units", 70, 0, 7);
+	nd.book(k_jet_dind, "jet_dind", ";jets #DeltaIndex; arb. units", 20, 0, 20);
+	nd.book(k_pt0, "pt0", ";Pt of jet0 [GeV]", 50, 0, 1000);
+	nd.book(k_pt1, "pt1", ";Pt of jet1 [GeV]", 50, 0, 1000);
+	nd.book(k_ntks_j0, "ntks_j0", ";Ntks in jet0", 50, 0, 50);
+	nd.book(k_ntks_j1, "ntks_j1", ";Ntks in jet1", 50, 0, 50);
+	nd.book(k_nmovedtracks, "nmovedtracks", ";# moved tracks;events/2", 120, 0, 120);
+	nd.book(k_dphi_sum_j_mv, "dphi_sum_j_mv", ";abs #Delta #phi between jet0+jet1 and move vec;events/bin", 63, 0, M_PI);
+	nd.book(k_deta_sum_j_mv, "deta_sum_j_mv", ";abs #Delta #eta between jet0+jet1 and move vec;events/bin", 25, 0, 4);
+	
+	nd.book(k_jetpt0_asymm, "jetpt0_asymm", ";jet p_{T} 0; jet asymm. A_{J}", 50, 0, 1000, 25, 0, 1);
     nd.book(k_jetpt1_asymm, "jetpt1_asymm", ";jet p_{T} 1; jet asymm. A_{J}", 50, 0, 1000, 25, 0, 1);
     nd.book(k_jeteta0_asymm, "jeteta0_asymm", ";jet #eta 0; jet asymm. A_{J}", 100, -4, 4, 25, 0, 1);
     nd.book(k_jeteta1_asymm, "jeteta1_asymm", ";jet #eta 1; jet asymm. A_{J}", 100, -4, 4, 25, 0, 1);
     nd.book(k_jetdr_asymm, "jetdr_asymm", ";jets #DeltaR; jet asymm. A_{J}", 70, 0, 7, 25, 0, 1);
     nd.book(k_nalltracks, "nalltracks", ";# all tracks;events/10", 200, 0, 2000);
-    nd.book(k_nmovedtracks, "nmovedtracks", ";# moved tracks;events/2", 120, 0, 120);
     nd.book(k_nseedtracks, "nseedtracks", ";# selected tracks;events", 80, 0, 80);
     nd.book(k_npreseljets, "npreseljets", ";# preselected jets;events/1", 20, 0, 20);
     nd.book(k_npreselbjets, "npreselbjets", ";# preselected b jets;events/1", 20, 0, 20);
     nd.book(k_jeti01, "jeti01", ";jet i 0 (GeV);jet i 1 (GeV);events", 15, 0, 15, 15, 0, 15);
     nd.book(k_jetp01, "jetp01", ";jet 0 momentum (GeV);jet 1 momentum (GeV)", 200, 0, 2000, 200, 0, 2000);
     nd.book(k_jetpt01, "jetpt01", ";jet p_{T} 0 (GeV);jet p_{T} 1 (GeV)", 50, 0, 1000, 50, 0, 1000);
-    nd.book(k_pt0,     "pt0",     ";Pt of jet0 [GeV]", 50, 0, 1000);
-    nd.book(k_pt1,     "pt1",     ";Pt of jet1 [GeV]", 50, 0, 1000);
     nd.book(k_jeteta01, "jeteta01", ";jet #eta 0 (GeV);jet #eta 1 (GeV)", 100, -4, 4, 100, -4, 4);
     nd.book(k_jetphi01, "jetphi01", ";jet #phi 0 (GeV);jet #phi 1 (GeV)", 126, -M_PI, M_PI, 126, -M_PI, M_PI);
     nd.book(k_jetsume, "jetsume", ";#Sigma jet energy (GeV);events/5 GeV", 200, 0, 1000);
@@ -494,6 +503,11 @@ int main(int argc, char** argv) {
 
     const double jet_asymm = (jet_pt[0] - jet_pt[1]) / (jet_pt[0] + jet_pt[1]);
     const double jet_dr = jet_p4[0].DeltaR(jet_p4[1]);
+	const double jet_dphi = jet_p4[0].DeltaPhi(jet_p4[1]);
+	const double jet_deta = fabs(jet_p4[0].Eta() - jet_p4[1].Eta());
+	const double jet_dind = fabs(jet_i[1] - jet_i[0]);
+	const double jet_mv_dphi_sum = move_vector.DeltaPhi((jet_p4[0] + jet_p4[1]).Vect());
+	const double jet_mv_deta_sum = fabs((jet_p4[0] + jet_p4[1]).Eta() - move_vector.Eta());
 
     const double jet_nseedtracks_max = std::max(jet_nseedtracks[0], jet_nseedtracks[1]);
     const double jet_nseedtracks_min = std::min(jet_nseedtracks[0], jet_nseedtracks[1]);
@@ -501,8 +515,8 @@ int main(int argc, char** argv) {
     const double jet_pt_min = std::min(jet_pt[0], jet_pt[1]);
 
     // The rest of the preselection: signal-mocking cuts (only implemented for dijet truth case)
-    if ((jet_i[1] - jet_i[0]) > 3 || jet_pt[1] < 125 || jet_dr < 1.0)
-      NR_loop_cont(w);
+    //if ((jet_i[1] - jet_i[0]) > 3 || jet_pt[1] < 125 || jet_dr < 1.0) //FIXME
+    //  NR_loop_cont(w);
 
     const int nvtx = vs.n();
     std::vector<double> vtxs_anglemax(nvtx, 0);
@@ -526,15 +540,16 @@ int main(int argc, char** argv) {
     int n_pass_nocuts = 0;
     int n_pass_ntracks = 0;
     int n_pass_all = 0;
+	double dist2move = -9.9;
 
     double vtx_bs2derr = 0, vtx_eta = 0, vtx_z = 0; // JMTBAD ??? these end up with what???
     std::vector<int> first_vtx_to_pass(num_numdens, -1);
     auto set_it_if_first = [](int& to_set, int to_set_to) { if (to_set == -1) to_set = to_set_to; };
 
     for (int ivtx = 0; ivtx < nvtx; ++ivtx) {
-      const double dist2move = (vs.pos(ivtx) - nt.tm().move_pos()).Mag();
-      if (dist2move > 0.0084)
-        continue;
+      dist2move = (vs.pos(ivtx) - nt.tm().move_pos()).Mag();
+      //if (dist2move > 0.0084) //FIXME 
+        //continue;
 
       vtx_bs2derr = vs.bs2derr(ivtx); // JMTBAD ???
       vtx_eta     = vs.eta(ivtx);
@@ -571,21 +586,30 @@ int main(int argc, char** argv) {
       nd.den(k_pvscore, pvs.score(0));
       nd.den(k_ht, jets.ht());
       nd.den(k_jet_asymm, jet_asymm);
-      nd.den(k_jetpt0_asymm, jet_pt_max, jet_asymm);
+	  nd.den(k_vtx_unc, dist2move);
+	  nd.den(k_jet_dr, jet_dr);
+	  nd.den(k_jet_deta, jet_deta);
+	  nd.den(k_jet_dphi, jet_dphi);
+	  nd.den(k_jet_dind, jet_dind);
+	  nd.den(k_pt0, jet_pt[0]);
+	  nd.den(k_pt1, jet_pt[1]);
+	  nd.den(k_ntks_j0, jet_ntracks[0]);
+	  nd.den(k_ntks_j1, jet_ntracks[1]);
+	  nd.den(k_nmovedtracks, nt.tm().nmovedtracks());
+	  nd.den(k_dphi_sum_j_mv, fabs(jet_mv_dphi_sum));
+	  nd.den(k_deta_sum_j_mv, jet_mv_deta_sum);
+	  nd.den(k_jetpt0_asymm, jet_pt_max, jet_asymm);
       nd.den(k_jetpt1_asymm, jet_pt_min, jet_asymm);
       nd.den(k_jeteta0_asymm, jet_eta[0], jet_asymm);
       nd.den(k_jeteta1_asymm, jet_eta[1], jet_asymm);
       nd.den(k_jetdr_asymm, jet_dr, jet_asymm);
       nd.den(k_nalltracks, nt.tm().nalltracks());
-      nd.den(k_nmovedtracks, nt.tm().nmovedtracks());
       nd.den(k_nseedtracks, nseedtracks);
       nd.den(k_npreseljets, nt.tm().npreseljets());
       nd.den(k_npreselbjets, nt.tm().npreselbjets());
       nd.den(k_jeti01, jet_i[0], jet_i[1]);
       nd.den(k_jetp01, jet_p[0], jet_p[1]);
       nd.den(k_jetpt01, jet_pt[0], jet_pt[1]);
-      nd.den(k_pt0, jet_pt[0]);
-      nd.den(k_pt1, jet_pt[1]);
       nd.den(k_jeteta01, jet_eta[0], jet_eta[1]);
       nd.den(k_jetphi01, jet_phi[0], jet_phi[1]);
       nd.den(k_jetsume, jet_sume);
@@ -720,21 +744,30 @@ int main(int argc, char** argv) {
       nd.num(k_pvscore, pvs.score(0));
       nd.num(k_ht, jets.ht());
       nd.num(k_jet_asymm, jet_asymm);
-      nd.num(k_jetpt0_asymm, jet_pt[0], jet_asymm);
+	  nd.num(k_vtx_unc, dist2move);
+	  nd.num(k_jet_dr, jet_dr);
+	  nd.num(k_jet_deta, jet_deta);
+	  nd.num(k_jet_dphi, jet_dphi);
+	  nd.num(k_jet_dind, jet_dind);
+	  nd.num(k_pt0, jet_pt[0]);
+	  nd.num(k_pt1, jet_pt[1]);
+	  nd.num(k_ntks_j0, jet_ntracks[0]);
+	  nd.num(k_ntks_j1, jet_ntracks[1]);
+	  nd.num(k_nmovedtracks, nt.tm().nmovedtracks());
+	  nd.num(k_dphi_sum_j_mv, fabs(jet_mv_dphi_sum));
+	  nd.num(k_deta_sum_j_mv, jet_mv_deta_sum);
+	  nd.num(k_jetpt0_asymm, jet_pt[0], jet_asymm);
       nd.num(k_jetpt1_asymm, jet_pt[1], jet_asymm);
       nd.num(k_jeteta0_asymm, jet_eta[0], jet_asymm);
       nd.num(k_jeteta1_asymm, jet_eta[1], jet_asymm);
       nd.num(k_jetdr_asymm, jet_dr, jet_asymm);
       nd.num(k_nalltracks, nt.tm().nalltracks());
-      nd.num(k_nmovedtracks, nt.tm().nmovedtracks());
       nd.num(k_nseedtracks, nseedtracks);
       nd.num(k_npreseljets, nt.tm().npreseljets());
       nd.num(k_npreselbjets, nt.tm().npreselbjets());
       nd.num(k_jeti01, jet_i[0], jet_i[1]);
       nd.num(k_jetp01, jet_p[0], jet_p[1]);
       nd.num(k_jetpt01, jet_pt[0], jet_pt[1]);
-      nd.num(k_pt0, jet_pt[0]);
-      nd.num(k_pt1, jet_pt[1]);
       nd.num(k_jeteta01, jet_eta[0], jet_eta[1]);
       nd.num(k_jetphi01, jet_phi[0], jet_phi[1]);
       nd.num(k_jetsume, jet_sume);

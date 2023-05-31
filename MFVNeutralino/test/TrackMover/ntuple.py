@@ -40,6 +40,7 @@ dataset = 'miniaod' if settings.is_miniaod else 'main'
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAOD/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v2/280000/BB6E40E3-1F43-6C41-AEF8-5A7B96D0C5E5.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAOD/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v1/100000/034AE4F2-7180-7F40-81D6-740D15738CBA.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/120001/4724838F-73AF-F040-9290-AC3B1CA485A7.root')
+input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/120001/DE019DB3-A431-7546-8BC1-30ABC37AD495.root')
 #sample_files(process, 'qcdbctoept080_2017', dataset, 1)
 
 cmssw_from_argv(process)
@@ -105,8 +106,8 @@ for icfg, cfg in enumerate(cfgs):
                             packed_candidates_src = cms.InputTag('packedPFCandidates'),
                             jets_src = cms.InputTag('selectedPatJets'),
                             track_ref_getter = jmtTrackRefGetter,
-                            min_jet_pt = cms.double(50),
-                            min_jet_ntracks = cms.uint32(4),
+                            min_jet_pt = cms.double(50), #FIXME
+                            min_jet_ntracks = cms.uint32(4), #FIXME
                             njets = cms.uint32(cfg.njets),
                             nbjets = cms.uint32(cfg.nbjets),
                             tau = cms.double(1.),
