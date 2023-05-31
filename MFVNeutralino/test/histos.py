@@ -3,7 +3,7 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 is_mc = True # for blinding
 do_track = False # this can onlky be used for ntuple with keep_tk=True
 
-from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_MET_triggers, use_Lepton_triggers
+from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_MET_triggers, use_Muon_triggers, use_Electron_triggers
 #sample_files(process, 'qcdht2000_2017' if is_mc else 'JetHT2017B', dataset, 1)
 #sample_files(process, 'qcdmupt15_2017' if is_mc else 'SingleMuon2017B', dataset, 1)
 #sample_files(process, 'mfv_stopld_tau030000um_M0800_2017', dataset, 1)
@@ -13,6 +13,7 @@ from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, d
 #input_files(process, '/store/user/pekotamn/DisplacedSUSY_stopToLD_M_400_10mm_TuneCP5_13TeV-madgraph-pythia8/NtupleULV30Lepm_2017/230504_182600/0000/ntuple_1.root')
 #input_files(process, 'ntuple.root')
 input_files(process, '/store/user/pkotamni/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleULV30Lepm_2017/230504_120905/0000/ntuple_12.root')
+max_events(process, 1000)
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
 
@@ -171,12 +172,15 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = pick_samples(dataset, qcd=True, ttbar=False, data=False, leptonic=True, splitSUSY=True, Zvv=True, met=True, span_signal=False)
         #samples = pick_samples(dataset, qcd=False, ttbar=False, data=False, leptonic=False, splitSUSY=True, Zvv=False, met=False, span_signal=False)
         pset_modifier = chain_modifiers(is_mc_modifier)
-    elif use_Lepton_triggers :
+    elif use_Muon_triggers :
         samples = pick_samples(dataset, qcd=True, all_signal=False, qcd_lep = True, leptonic=True, met=True, diboson=True, Lepton_data=False )
         #samples = pick_samples(dataset, qcd=False, all_signal=True, qcd_lep = False, leptonic=False, met=False, diboson=False, Lepton_data=False )
         #samples = [getattr(Samples, 'WplusHToSSTodddd_tau1mm_M55_2017')]   
         #samples = [getattr(Samples, 'mfv_stopld_tau030000um_M0800_2017')]
         #samples = [getattr(Samples, 'qcdempt020_2017')]
+        pset_modifier = chain_modifiers(is_mc_modifier, half_mc_modifier())
+    elif use_Electron_triggers :
+        samples = pick_samples(dataset, qcd=True, all_signal=False, qcd_lep = True, leptonic=True, met=True, diboson=True, Lepton_data=False)
         pset_modifier = chain_modifiers(is_mc_modifier, half_mc_modifier())
     else :
         samples = pick_samples(dataset)

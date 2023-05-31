@@ -5,14 +5,17 @@ ntuple_version_ = 'ULV30'
 lsp_id = -1 #1000009 # should do that in a smarter way; currently for stop if not -1
 use_btag_triggers = False
 use_MET_triggers = False
-use_Lepton_triggers = True
+use_Muon_triggers = True
+use_Electron_triggers = False
 use_DisplacedLepton_triggers = False
 if use_btag_triggers : 
     ntuple_version_ += "B" # for "Btag triggers"; also includes DisplacedDijet triggers
 elif use_MET_triggers :
     ntuple_version_ += "MET"
-elif use_Lepton_triggers :
-    ntuple_version_ += "Lep"
+elif use_Muon_triggers :
+    ntuple_version_ += "LepMu"
+elif use_Electron_triggers :
+    ntuple_version_ += "LepEle"
 ntuple_version_use = ntuple_version_ + 'm'
 dataset = 'ntuple' + ntuple_version_use.lower()
 
@@ -369,8 +372,10 @@ def signals_no_event_filter_modifier(sample):
     if sample.is_signal:
         if use_btag_triggers :
             magic = "event_filter = 'bjets OR displaced dijet veto HT'"
-        elif use_Lepton_triggers :
-            magic ="event_filter = 'leptons only'"
+        elif use_Muon_triggers :
+            magic ="event_filter = 'muons only'"
+        elif use_Electron_triggers :
+            magic ="event_filter = 'electrons only'"
         else :
             magic = "event_filter = 'jets only'"
         to_replace = [(magic, 'event_filter = False', 'tuple template does not contain the magic string "%s"' % magic)]

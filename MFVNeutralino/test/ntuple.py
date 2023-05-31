@@ -16,8 +16,10 @@ if use_btag_triggers :
     settings.event_filter = 'bjets OR displaced dijet veto HT' # for new trigger studies
 elif use_MET_triggers :
     settings.event_filter = 'met only'
-elif use_Lepton_triggers :
-    settings.event_filter = 'leptons only'
+elif use_Muon_triggers :
+    settings.event_filter = 'muon only'
+elif use_Electron_triggers :
+    settings.event_filter = 'electron only'
 else :
     settings.event_filter = 'jets only'
 
@@ -47,11 +49,13 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     # if use_MET_triggers :
     #     samples = pick_samples(dataset, qcd=True, ttbar=False, data=False, leptonic=True, splitSUSY=True, Zvv=True, met=True, span_signal=False)
 
-    if use_Lepton_triggers :
+    if use_Muon_triggers :
         #samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=True, leptonic=True, met=True, diboson=True, Lepton_data=False)
         samples = [getattr(Samples, 'qcdbctoept080_2017')]
         #samples = [getattr(Samples, 'WplusHToSSTodddd_tau1mm_M55_2017')] 
         #samples = [getattr(Samples, 'mfv_stoplb_tau001000um_M0400_2017')] 
+    elif use_Electron_triggers :
+        samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=True, leptonic=True, met=True, diboson=True, Lepton_data=False)
     else :
         samples = pick_samples(dataset, qcd=False, ttbar=False, data=False, all_signal=not settings.run_n_tk_seeds)
 

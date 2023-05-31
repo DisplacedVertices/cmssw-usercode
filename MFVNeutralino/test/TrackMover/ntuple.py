@@ -129,7 +129,7 @@ for icfg, cfg in enumerate(cfgs):
                           mover_src = cms.string(tracks_name),
                           vertices_src = cms.InputTag(auxes_name),
                           max_dist2move = cms.double(0.02),
-                          apply_presel = cms.bool(True),
+                          apply_presel = cms.bool(True), #not a usual preselection cuts -- TM moved-jet cuts
                           njets_req = cms.uint32(cfg.njets),
                           nbjets_req = cms.uint32(cfg.nbjets),
                           for_mctruth = cms.bool(False),

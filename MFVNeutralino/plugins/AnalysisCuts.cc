@@ -44,6 +44,8 @@ private:
   const int apply_trigger;
   const bool apply_displacedlepton_triggers;
   const bool apply_cleaning_filters;
+  const bool apply_muons_only;
+  const bool apply_electrons_only;
   const int min_npv;
   const int max_npv;
   const double min_npu;
@@ -100,6 +102,8 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     apply_trigger(apply_presel ? 0 : cfg.getParameter<int>("apply_trigger")),
     apply_displacedlepton_triggers(cfg.getParameter<bool>("apply_displacedlepton_triggers")),
     apply_cleaning_filters(cfg.getParameter<bool>("apply_cleaning_filters")),
+    apply_muons_only(cfg.getParameter<bool>("apply_muons_only")),
+    apply_electrons_only(cfg.getParameter<bool>("apply_electrons_only")),
     min_npv(cfg.getParameter<int>("min_npv")),
     max_npv(cfg.getParameter<int>("max_npv")),
     min_npu(cfg.getParameter<double>("min_npu")),
@@ -141,6 +145,8 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
 {
   if (apply_cleaning_filters)
     throw cms::Exception("NotImplemented", "cleaning filters not yet implemented");
+  if (apply_muons_only && apply_electrons_only)
+    throw cms::Exception("ConflictLeptons ", "pick either use_Muon_triggers or use_Electron_triggers for orthogonality");
 }
 
 namespace {
@@ -174,12 +180,20 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
 	  break;
 	}
       }
-      if (success) return true; //avoid double counting an event that fires both lepton triggers and keep it in muon selection  
-      for(size_t trig : mfv::ElectronTriggers){
-	if(satisfiesLepTrigger(mevent, trig)) { 
-	  success = true;
-          break;
-	}
+      if (success && apply_muons_only) return true; //avoid double counting an event that fires both lepton triggers and keep it in muon selection  
+      
+      if (apply_electrons_only){
+        if (success){ //double-count event 
+          success = false;
+        }
+        else{
+          for(size_t trig : mfv::ElectronTriggers){
+            if(satisfiesLepTrigger(mevent, trig)) { 
+	      success = true;
+              break;
+	    }
+          }
+        }
       }
       if (apply_displacedlepton_triggers) {
 	for(size_t trig : mfv::DisplacedLeptonTriggers){
@@ -269,12 +283,19 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
 	  break;
 	}
       }
-      if(at_least_one_trigger_passed) return true; //avoid double counting an event that fires both lepton triggers and keep it in muon selection  
-      for(size_t trig : mfv::ElectronTriggers){
-	if(mevent->pass_hlt(trig)) { 
-          at_least_one_trigger_passed = true;
-          break;
-	}
+      if(at_least_one_trigger_passed && apply_muons_only) return true; //avoid double counting an event that fires both lepton triggers and keep it in muon selection  
+      if (apply_electrons_only){ 
+        if(at_least_one_trigger_passed){ //double-count events
+          at_least_one_trigger_passed = false;
+        }
+        else {
+          for(size_t trig : mfv::ElectronTriggers){
+	    if(mevent->pass_hlt(trig)) { 
+              at_least_one_trigger_passed = true;
+              break;
+	    }
+          }
+        }
       }
       if(apply_displacedlepton_triggers){
 	for(size_t trig : mfv::DisplacedLeptonTriggers){
