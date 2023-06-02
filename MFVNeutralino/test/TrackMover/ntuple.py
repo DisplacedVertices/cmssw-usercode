@@ -6,9 +6,10 @@ from JMTucker.MFVNeutralino.NtupleCommon import *
 settings = NtupleSettings()
 settings.is_mc = True
 settings.is_miniaod = True
-settings.event_filter = 'leptons only novtx'
+#settings.event_filter = 'electrons only novtx'
+settings.event_filter = 'muons only novtx'
 
-version = settings.version + 'v2'
+version = settings.version + 'v3'
 
 # for stat extension
 #version = settings.version + 'ext1'
@@ -35,12 +36,13 @@ cfgs = named_product(njets = [2,3],
 
 process = ntuple_process(settings)
 tfileservice(process, 'movedtree.root')
-#max_events(process, 100)
+max_events(process, 100)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAOD/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v2/280000/BB6E40E3-1F43-6C41-AEF8-5A7B96D0C5E5.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAOD/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v1/100000/034AE4F2-7180-7F40-81D6-740D15738CBA.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/120001/4724838F-73AF-F040-9290-AC3B1CA485A7.root')
-input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/120001/DE019DB3-A431-7546-8BC1-30ABC37AD495.root')
+#input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/120001/DE019DB3-A431-7546-8BC1-30ABC37AD495.root')
+input_files(process, '~/nobackup/crabdirs/TTJets_UL2017_MINIAOD.root')
 #sample_files(process, 'qcdbctoept080_2017', dataset, 1)
 
 cmssw_from_argv(process)
@@ -148,8 +150,8 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
 
     #samples = pick_samples(dataset, all_signal=False)
 
-    #samples = [getattr(Samples, 'qcdbctoept080_2017')]
-    samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=True, leptonic=True, met=True, diboson=True, Lepton_data=True)
+    samples = [getattr(Samples, 'ttbar_2017')]
+    #samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=True, leptonic=True, met=True, diboson=True, Lepton_data=True)
     set_splitting(samples, dataset, 'trackmover', data_json=json_path('ana_SingleLept_2017_10pc.json'), limit_ttbar=True)
 
     ms = MetaSubmitter('TrackMover' + version, dataset=dataset)

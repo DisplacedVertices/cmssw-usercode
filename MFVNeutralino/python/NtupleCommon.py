@@ -5,8 +5,8 @@ ntuple_version_ = 'ULV30'
 lsp_id = -1 #1000009 # should do that in a smarter way; currently for stop if not -1
 use_btag_triggers = False
 use_MET_triggers = False
-use_Muon_triggers = True
-use_Electron_triggers = False
+use_Muon_triggers = False
+use_Electron_triggers = True
 use_DisplacedLepton_triggers = False
 if use_btag_triggers : 
     ntuple_version_ += "B" # for "Btag triggers"; also includes DisplacedDijet triggers
@@ -370,16 +370,20 @@ def signal_uses_random_pars_modifier(sample): # Used for samples stored in inclu
 
 def signals_no_event_filter_modifier(sample):
     if sample.is_signal:
+        print("is signal")
         if use_btag_triggers :
             magic = "event_filter = 'bjets OR displaced dijet veto HT'"
         elif use_Muon_triggers :
             magic ="event_filter = 'muons only'"
+            print("signal : turn on muon trig")
         elif use_Electron_triggers :
-            magic ="event_filter = 'electrons only'"
+            magic ="event_filter = 'electrons only veto muons'"
+            print("signal : turn on ele trig")
         else :
             magic = "event_filter = 'jets only'"
         to_replace = [(magic, 'event_filter = False', 'tuple template does not contain the magic string "%s"' % magic)]
     else:
+        print("not signal")
         to_replace = []
     return [], to_replace
 

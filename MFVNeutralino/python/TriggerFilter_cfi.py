@@ -29,25 +29,43 @@ displaced_dijet_paths = [
     "HLT_HT430_DisplacedDijet40_DisplacedTrack_v*",
     "HLT_HT650_DisplacedDijet60_Inclusive_v*",
     ]
-#currently on 2017; for 2018 will need to change
+
+#For 2017 :
 lepton_paths = [
-    "HLT_Ele35_WPTight_Gsf_v*",
-    "HLT_Ele115_CaloIdVT_GsfTrkIdT_v*",
-    "HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165_v*",
-    "HLT_IsoMu27_v*",
-    "HLT_Mu50_v*",
-    ]
+     "HLT_Ele35_WPTight_Gsf_v*",
+     "HLT_Ele115_CaloIdVT_GsfTrkIdT_v*",
+     "HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165_v*",
+     "HLT_IsoMu27_v*",
+     "HLT_Mu50_v*"
+ ]
 
 muon_paths = [
-    "HLT_IsoMu27_v*",
-    "HLT_Mu50_v*",
-    ]
+     "HLT_IsoMu27_v*",
+     "HLT_Mu50_v*"
+]
 
 electron_paths = [
-    "HLT_Ele35_WPTight_Gsf_v*",
-    "HLT_Ele115_CaloIdVT_GsfTrkIdT_v*",
-    "HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165_v*",
-    ]
+     "HLT_Ele35_WPTight_Gsf_v*",
+     "HLT_Ele115_CaloIdVT_GsfTrkIdT_v*",
+     "HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165_v*",
+]
+#For 2018 :
+#lepton_paths = [
+#    "HLT_Ele32_WPTight_Gsf_v*",
+#    "HLT_Ele115_CaloIdVT_GsfTrkIdT_v*",
+#    "HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165_v*",
+#    "HLT_IsoMu27_v*",
+#    "HLT_Mu50_v*"
+#]
+
+#For 2016 :
+# lepton_paths = [
+#     "HLT_Ele27_WPTight_Gsf_v*",
+#     "HLT_Ele115_CaloIdVT_GsfTrkIdT_v*",
+#     "HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165_v*",
+#     "HLT_IsoMu27_v*",
+#     "HLT_Mu50_v*"
+# ]
 
 displaced_lepton_paths = [
     "HLT_Mu43NoFiltersNoVtx_Photon43_CaloIdL_v*",
@@ -72,7 +90,6 @@ mfvTriggerFilterJetsOnly = mfvTriggerFilter.clone(HLTPaths = jet_paths)
 mfvTriggerFilterMETOnly = mfvTriggerFilter.clone(HLTPaths = MET_paths)
 mfvTriggerFilterBJetsOnly = mfvTriggerFilter.clone(HLTPaths = bjet_paths)
 mfvTriggerFilterDisplacedDijetOnly = mfvTriggerFilter.clone(HLTPaths = displaced_dijet_paths)
-mfvTriggerFilterLeptonsOnly = mfvTriggerFilter.clone(HLTPaths = lepton_paths)
 mfvTriggerFilterMuonsOnly = mfvTriggerFilter.clone(HLTPaths = muon_paths)
 mfvTriggerFilterElectronsOnly = mfvTriggerFilter.clone(HLTPaths = electron_paths)
 

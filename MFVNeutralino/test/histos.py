@@ -11,7 +11,7 @@ from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, d
 #input_files(process, '/store/user/pekotamn/WW_TuneCP5_13TeV-pythia8/NtupleULV29Lepm_2017/230318_133820/0000/ntuple_1.root')
 #input_files(process, '/store/user/pekotamn/QCD_Pt_30to80_bcToE_TuneCP5_13TeV_pythia8/NtupleULV30Lepm_2017/230504_170632/0000/ntuple_1.root')
 #input_files(process, '/store/user/pekotamn/DisplacedSUSY_stopToLD_M_400_10mm_TuneCP5_13TeV-madgraph-pythia8/NtupleULV30Lepm_2017/230504_182600/0000/ntuple_1.root')
-#input_files(process, 'ntuple.root')
+#input_files(process, 'ntuple_wplus1mm55gev.root')
 input_files(process, '/store/user/pkotamni/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/NtupleULV30Lepm_2017/230504_120905/0000/ntuple_12.root')
 max_events(process, 1000)
 tfileservice(process, 'histos.root')

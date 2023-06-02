@@ -67,6 +67,12 @@ namespace mfv {
     //muon triggers
     mfv::b_HLT_IsoMu27, mfv::b_HLT_Mu50,
   };
+  static const std::vector<size_t> LeptonTriggers = {
+    //electron + muon triggers
+    mfv::b_HLT_Ele35_WPTight_Gsf,
+    mfv::b_HLT_Ele115_CaloIdVT_GsfTrkIdT, mfv::b_HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165,
+    mfv::b_HLT_IsoMu27, mfv::b_HLT_Mu50,
+  };
   static const std::vector<size_t> DisplacedLeptonTriggers = {
     //displaced dilepton triggers
     mfv::b_HLT_Mu43NoFiltersNoVtx_Photon43_CaloIdL, mfv::b_HLT_Diphoton30_22_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass90,
