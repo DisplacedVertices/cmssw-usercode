@@ -889,7 +889,7 @@ DisplacedJet_data_samples_2018 = [
 BTagCSV_data_samples_2018 = [
 ]
 
-auxiliary_data_samples_2018 = [
+SingleMuon_data_samples_2018 = [
     DataSample('SingleMuon2018A', '/SingleMuon/Run2018A-12Nov2019_UL2018-v3/AOD'),
     DataSample('SingleMuon2018B', '/SingleMuon/Run2018B-12Nov2019_UL2018-v3/AOD'),
     DataSample('SingleMuon2018C', '/SingleMuon/Run2018C-12Nov2019_UL2018-v3/AOD'),
@@ -966,7 +966,7 @@ __all__ = [
     'JetHT_data_samples_2018',
     'BTagCSV_data_samples_2018',
     'DisplacedJet_data_samples_2018',
-    'auxiliary_data_samples_2018',
+    'SingleMuon_data_samples_2018',
     'egamma_data_samples_2018',
 
     'registry',
@@ -1048,7 +1048,6 @@ DisplacedJet2016F.add_dataset('miniaod', '/DisplacedJet/Run2016F-UL2016_MiniAODv
 DisplacedJet2016G.add_dataset('miniaod', '/DisplacedJet/Run2016G-UL2016_MiniAODv2-v1/MINIAOD', 18289323)
 DisplacedJet2016H.add_dataset('miniaod', '/DisplacedJet/Run2016H-UL2016_MiniAODv2-v1/MINIAOD', 19846835)
 
-
 BTagCSV2017B.add_dataset('miniaod', '/BTagCSV/Run2017B-UL2017_MiniAODv2-v1/MINIAOD', 1808836)
 BTagCSV2017C.add_dataset('miniaod', '/BTagCSV/Run2017C-UL2017_MiniAODv2-v1/MINIAOD', 34491540)
 BTagCSV2017D.add_dataset('miniaod', '/BTagCSV/Run2017D-UL2017_MiniAODv2-v1/MINIAOD', 7967055)
@@ -1059,9 +1058,23 @@ DisplacedJet2017D.add_dataset('miniaod', '/DisplacedJet/Run2017D-UL2017_MiniAODv
 DisplacedJet2017E.add_dataset('miniaod', '/DisplacedJet/Run2017E-UL2017_MiniAODv2-v1/MINIAOD', 4236217)
 DisplacedJet2017F.add_dataset('miniaod', '/DisplacedJet/Run2017F-UL2017_MiniAODv2-v1/MINIAOD', 12072872)
 
+JetHT2018A.add_dataset('miniaod', '/JetHT/Run2018A-15Feb2022_UL2018-v2/MINIAOD', 171502033)
+JetHT2018B.add_dataset('miniaod', '/JetHT/Run2018B-UL2018_MiniAODv2_GT36-v1/MINIAOD', 78253065)
+JetHT2018C.add_dataset('miniaod', '/JetHT/Run2018C-UL2018_MiniAODv2_GT36-v1/MINIAOD', 70027804)
+JetHT2018D.add_dataset('miniaod', '/JetHT/Run2018D-UL2018_MiniAODv2_GT36-v1/MINIAOD', 355774350)
+DisplacedJet2018A.add_dataset('miniaod', '/DisplacedJet/Run2018A-UL2018_MiniAODv2_GT36-v1/MINIAOD', 4657376)
+DisplacedJet2018B.add_dataset('miniaod', '/DisplacedJet/Run2018B-UL2018_MiniAODv2_GT36-v1/MINIAOD', 2207166)
+DisplacedJet2018C.add_dataset('miniaod', '/DisplacedJet/Run2018C-UL2018_MiniAODv2_GT36-v1/MINIAOD', 2072089)
+DisplacedJet2018D.add_dataset('miniaod', '/DisplacedJet/Run2018D-UL2018_MiniAODv2_GT36-v1/MINIAOD', 11049758)
+SingleMuon2018A.add_dataset('miniaod', '/SingleMuon/Run2018A-UL2018_MiniAODv2_GT36-v1/MINIAOD', 241596817)
+SingleMuon2018B.add_dataset('miniaod', '/SingleMuon/Run2018B-UL2018_MiniAODv2_GT36-v2/MINIAOD', 119918017)
+SingleMuon2018C.add_dataset('miniaod', '/SingleMuon/Run2018C-UL2018_MiniAODv2_GT36-v3/MINIAOD', 110032072)
+SingleMuon2018D.add_dataset('miniaod', '/SingleMuon/Run2018D-UL2018_MiniAODv2_GT36-v1/MINIAOD', 513884680)
+
+
 for sample in data_samples_2017 + JetHT_data_samples_2017 + singleelectron_data_samples_2017 + SingleMuon_data_samples_2017:
     sample.add_dataset('miniaod', sample.dataset.replace('AOD', 'MINIAOD'))
-for sample in data_samples_2018 + JetHT_data_samples_2018 + DisplacedJet_data_samples_2018 + egamma_data_samples_2018 + auxiliary_data_samples_2018:
+for sample in data_samples_2018 + egamma_data_samples_2018:
     sample.add_dataset('miniaod', sample.dataset.replace('AOD', 'MINIAOD'))
 
 qcdht0100_2016APV.add_dataset('miniaod', '/QCD_HT100to200_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer20UL16MiniAODAPV-106X_mcRun2_asymptotic_preVFP_v8-v1/MINIAODSIM', 73633197)
@@ -1266,7 +1279,7 @@ for ds in 'main', 'miniaod':
     #    s.datasets[ds].notes['buggedpileup2017'] = True
 
     # set up jsons
-    for y,ss in (2017, data_samples_2017 + SingleMuon_data_samples_2017 + singleelectron_data_samples_2017 + JetHT_data_samples_2017 + BTagCSV_data_samples_2017), (2018, data_samples_2018 + auxiliary_data_samples_2018 + egamma_data_samples_2018):
+    for y,ss in (2017, data_samples_2017 + SingleMuon_data_samples_2017 + singleelectron_data_samples_2017 + JetHT_data_samples_2017 + BTagCSV_data_samples_2017), (2018, data_samples_2018 + SingleMuon_data_samples_2018 + egamma_data_samples_2018):
         for s in ss:
             s.datasets[ds].json      = json_path('ana_%s.json'      % y)
             s.datasets[ds].json_10pc = json_path('ana_%s_10pc.json' % y)
