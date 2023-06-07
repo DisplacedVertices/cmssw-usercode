@@ -393,7 +393,7 @@ qcd_samples_2017 = [
     MCSample('qcdht0200_2017', '/QCD_HT200to300_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM', 57816581, nice='QCD, 200 < H_{T} < 300 GeV',  color=802, syst_frac=0.20, xsec=1.554e6),
     MCSample('qcdht0300_2017', '/QCD_HT300to500_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM', 57097305, nice='QCD, 300 < H_{T} < 500 GeV',  color=803, syst_frac=0.20, xsec=3.226e5), #xsec not available
     MCSample('qcdht0500_2017', '/QCD_HT500to700_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM', 9183471, nice='QCD, 500 < H_{T} < 700 GeV', color=804, syst_frac=0.20, xsec=3.028e4),
-    #MCSample('qcdht0500ext_2017', '/QCD_HT500to700_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17RECO-106X_mc2017_realistic_v6_ext1-v1/AODSIM', 59037642, nice='QCD, 500 < H_{T} < 700 GeV', color=804, syst_frac=0.20, xsec=3.028e4),
+    MCSample('qcdht0500ext_2017', '/QCD_HT500to700_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17RECO-106X_mc2017_realistic_v6_ext1-v1/AODSIM', 59037642, nice='QCD, 500 < H_{T} < 700 GeV', color=804, syst_frac=0.20, xsec=3.028e4),
     MCSample('qcdht0700_2017', '/QCD_HT700to1000_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM', 45774525, nice='QCD, 700 < H_{T} < 1000 GeV',  color=805, syst_frac=0.20, xsec=6.392e3),
     MCSample('qcdht1000_2017', '/QCD_HT1000to1500_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM', 15420054, nice='QCD, 1000 < H_{T} < 1500 GeV', color=806, syst_frac=0.20, xsec=1.096e3), #xsec not available
     MCSample('qcdht1500_2017', '/QCD_HT1500to2000_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v1/AODSIM',     7711548, nice='QCD, 1500 < H_{T} < 2000 GeV', color=807, syst_frac=0.20, xsec=99.0), #xsec not available
@@ -845,12 +845,15 @@ DisplacedJet_data_samples_2017 = [
     DataSample('DisplacedJet2017F', '/DisplacedJet/Run2017F-09Aug2019_UL2017-v1/AOD'),
     ]
 
-auxiliary_data_samples_2017 = [
-    DataSample('SingleMuon2017B', '/SingleMuon/Run2017B-09Aug2019_UL2017-v1/AOD'),
-    DataSample('SingleMuon2017C', '/SingleMuon/Run2017C-09Aug2019_UL2017-v1/AOD'),
-    DataSample('SingleMuon2017D', '/SingleMuon/Run2017D-09Aug2019_UL2017-v1/AOD'),
-    DataSample('SingleMuon2017E', '/SingleMuon/Run2017E-09Aug2019_UL2017-v1/AOD'),
-    DataSample('SingleMuon2017F', '/SingleMuon/Run2017F-09Aug2019_UL2017-v1/AOD'),
+DisplacedJet_data_eraD = [DisplacedJet_data_samples_2017[1]]
+
+SingleMuon_data_samples_2017 = [
+    DataSample('SingleMuon2017B', '/SingleMuon/Run2017B-15Feb2022_UL2017-v1/AOD'),
+    DataSample('SingleMuon2017C', '/SingleMuon/Run2017C-15Feb2022_UL2017-v1/AOD'),
+    DataSample('SingleMuon2017D', '/SingleMuon/Run2017D-15Feb2022_UL2017-v1/AOD'),
+    DataSample('SingleMuon2017E', '/SingleMuon/Run2017E-15Feb2022_UL2017-v1/AOD'),
+    DataSample('SingleMuon2017F', '/SingleMuon/Run2017F-15Feb2022_UL2017-v1/AOD'),
+    DataSample('SingleMuon2017G', '/SingleMuon/Run2017G-15Feb2022_UL2017-v1/AOD'),
     ]
 
 singleelectron_data_samples_2017 = [
@@ -954,7 +957,7 @@ __all__ = [
     'JetHT_data_samples_2017',
     'BTagCSV_data_samples_2017',
     'DisplacedJet_data_samples_2017',
-    'auxiliary_data_samples_2017',
+    'SingleMuon_data_samples_2017',
     'singleelectron_data_samples_2017',
     'mfv_signal_samples_2018',
     'mfv_stopdbardbar_samples_2018',
@@ -1046,9 +1049,19 @@ DisplacedJet2016G.add_dataset('miniaod', '/DisplacedJet/Run2016G-UL2016_MiniAODv
 DisplacedJet2016H.add_dataset('miniaod', '/DisplacedJet/Run2016H-UL2016_MiniAODv2-v1/MINIAOD', 19846835)
 
 
-for sample in data_samples_2017 + JetHT_data_samples_2017 + BTagCSV_data_samples_2017 + DisplacedJet_data_samples_2017 + auxiliary_data_samples_2017 + singleelectron_data_samples_2017:
+BTagCSV2017B.add_dataset('miniaod', '/BTagCSV/Run2017B-UL2017_MiniAODv2-v1/MINIAOD', 1808836)
+BTagCSV2017C.add_dataset('miniaod', '/BTagCSV/Run2017C-UL2017_MiniAODv2-v1/MINIAOD', 34491540)
+BTagCSV2017D.add_dataset('miniaod', '/BTagCSV/Run2017D-UL2017_MiniAODv2-v1/MINIAOD', 7967055)
+BTagCSV2017E.add_dataset('miniaod', '/BTagCSV/Run2017E-UL2017_MiniAODv2-v1/MINIAOD', 17175226)
+BTagCSV2017F.add_dataset('miniaod', '/BTagCSV/Run2017F-UL2017_MiniAODv2-v1/MINIAOD', 75677461)
+DisplacedJet2017C.add_dataset('miniaod', '/DisplacedJet/Run2017C-UL2017_MiniAODv2-v2/MINIAOD', 3547633)
+DisplacedJet2017D.add_dataset('miniaod', '/DisplacedJet/Run2017D-UL2017_MiniAODv2-v1/MINIAOD', 1690572)
+DisplacedJet2017E.add_dataset('miniaod', '/DisplacedJet/Run2017E-UL2017_MiniAODv2-v1/MINIAOD', 4236217)
+DisplacedJet2017F.add_dataset('miniaod', '/DisplacedJet/Run2017F-UL2017_MiniAODv2-v1/MINIAOD', 12072872)
+
+for sample in data_samples_2017 + JetHT_data_samples_2017 + singleelectron_data_samples_2017 + SingleMuon_data_samples_2017:
     sample.add_dataset('miniaod', sample.dataset.replace('AOD', 'MINIAOD'))
-for sample in data_samples_2018 + JetHT_data_samples_2018 + DisplacedJet_data_samples_2018 + auxiliary_data_samples_2018 + egamma_data_samples_2018:
+for sample in data_samples_2018 + JetHT_data_samples_2018 + DisplacedJet_data_samples_2018 + egamma_data_samples_2018 + auxiliary_data_samples_2018:
     sample.add_dataset('miniaod', sample.dataset.replace('AOD', 'MINIAOD'))
 
 qcdht0100_2016APV.add_dataset('miniaod', '/QCD_HT100to200_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer20UL16MiniAODAPV-106X_mcRun2_asymptotic_preVFP_v8-v1/MINIAODSIM', 73633197)
@@ -1074,12 +1087,22 @@ ttbar_2016.add_dataset('miniaod', '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/Ru
 qcdht0200_2017.add_dataset('miniaod', '/QCD_HT200to300_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 57721120)
 qcdht0300_2017.add_dataset('miniaod', '/QCD_HT300to500_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM',   57191140)
 qcdht0500_2017.add_dataset('miniaod', '/QCD_HT500to700_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM',  9188310)
-#qcdht0500ext_2017.add_dataset('miniaod', '/QCD_HT500to700_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAOD-106X_mc2017_realistic_v6_ext1-v1/MINIAODSIM',  57880117)
-#qcdht0700_2017.add_dataset('miniaod', '/QCD_HT700to1000_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAODv2-106X_mc2017_realistic_v9-v1/MINIAODSIM',  45812757)
-qcdht0700_2017.add_dataset('miniaod', '/QCD_HT700to1000_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM',  45812757)
+qcdht0500ext_2017.add_dataset('miniaod', '/QCD_HT500to700_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAOD-106X_mc2017_realistic_v6_ext1-v1/MINIAODSIM',  57880117)
+qcdht0700_2017.add_dataset('miniaod', '/QCD_HT700to1000_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAODv2-106X_mc2017_realistic_v9-v1/MINIAODSIM',  45812757)
+#qcdht0700_2017.add_dataset('miniaod', '/QCD_HT700to1000_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM',  45812757)
 qcdht1000_2017.add_dataset('miniaod', '/QCD_HT1000to1500_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 15346629)
 qcdht1500_2017.add_dataset('miniaod', '/QCD_HT1500to2000_TuneCP5_PSWeights_13TeV-madgraph-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v1/MINIAODSIM',    7497684)
 qcdht2000_2017.add_dataset('miniaod', '/QCD_HT2000toInf_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM',  5457021)
+
+#qcdht0200_2017.add_dataset('miniaod', '/QCD_HT200to300_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAODv2-106X_mc2017_realistic_v9-v1/MINIAODSIM', 57456603)
+#qcdht0300_2017.add_dataset('miniaod', '/QCD_HT300to500_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAODv2-106X_mc2017_realistic_v9-v1/MINIAODSIM', 56497917)
+#qcdht0500_2017.add_dataset('miniaod', '/QCD_HT500to700_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAODv2-106X_mc2017_realistic_v9-v1/MINIAODSIM', 9183471)
+#qcdht0500ext_2017.add_dataset('miniaod', '/QCD_HT500to700_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAODv2-106X_mc2017_realistic_v9_ext1-v1/MINIAODSIM', 57758634)
+#qcdht0700_2017.add_dataset('miniaod', '/QCD_HT700to1000_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAODv2-106X_mc2017_realistic_v9-v1/MINIAODSIM',  45812757)
+#qcdht1000_2017.add_dataset('miniaod', '/QCD_HT1000to1500_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAODv2-106X_mc2017_realistic_v9-v1/MINIAODSIM', 15250184)
+#qcdht1500_2017.add_dataset('miniaod', '/QCD_HT1500to2000_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAODv2-106X_mc2017_realistic_v9-v1/MINIAODSIM', 10581460)
+#qcdht2000_2017.add_dataset('miniaod', '/QCD_HT2000toInf_TuneCP5_PSWeights_13TeV-madgraphMLM-pythia8/RunIISummer19UL17MiniAODv2-106X_mc2017_realistic_v9-v1/MINIAODSIM',  5451735)
+
 ttbar_2017.add_dataset('miniaod', '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 249143052)
 #ttbarht0600_2017.add_dataset('miniaod', '/TTJets_HT-600to800_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM',    81507662)
 #ttbarht0800_2017.add_dataset('miniaod', '/TTJets_HT-800to1200_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM',   40191637)
@@ -1175,7 +1198,7 @@ for sample in mfv_signal_samples_2018 + mfv_stopdbardbar_samples_2018 + mfv_stop
 for x in qcd_samples_2017 + ttbar_samples_2017 + BTagCSV_data_samples_2017 + DisplacedJet_data_samples_2017:
     x.add_dataset('nr_trackingtreer_ul17')
 
-for x in all_signal_samples_2016 + all_signal_samples_2017 + all_signal_samples_2018 + qcd_samples_2017 + qcd_samples_2018 + ttbar_samples_2017 + ttbar_samples_2018:
+for x in all_signal_samples_2016 + all_signal_samples_2017 + all_signal_samples_2018 + qcd_samples_2017 + qcd_samples_2018 + ttbar_samples_2017 + ttbar_samples_2018 + SingleMuon_data_samples_2017:
     x.add_dataset('ntupleulv4bm')
 
 for x in ttbar_samples_2017 + all_signal_samples_2017:
@@ -1207,7 +1230,7 @@ condorable = {
         "miniaod": [mfv_stopbbarbbar_tau001000um_M0800_2018,]
         },
     "T1_US_FNAL_Disk": {
-        "miniaod": [EGamma2018A, EGamma2018B, SingleMuon2017B, SingleMuon2017D, SingleElectron2017B, SingleElectron2017D, SingleElectron2017E, MET2018D, #qcdht0300_2018, qcdht0700_2018, qcdht1000_2018, qcdht1500_2018, zjetstonunuht2500_2018, qcdht0200_2017, qcdht0500_2017, qcdht0700_2017, qcdht0300_2017, ttbar_2017,
+        "miniaod": [EGamma2018A, EGamma2018B, SingleElectron2017B, SingleElectron2017D, SingleElectron2017E, MET2018D, #qcdht0300_2018, qcdht0700_2018, qcdht1000_2018, qcdht1500_2018, zjetstonunuht2500_2018, qcdht0200_2017, qcdht0500_2017, qcdht0700_2017, qcdht0300_2017, ttbar_2017,
         ]},
 }
 
@@ -1243,7 +1266,7 @@ for ds in 'main', 'miniaod':
     #    s.datasets[ds].notes['buggedpileup2017'] = True
 
     # set up jsons
-    for y,ss in (2017, data_samples_2017 + auxiliary_data_samples_2017 + singleelectron_data_samples_2017 + JetHT_data_samples_2017 + BTagCSV_data_samples_2017), (2018, data_samples_2018 + auxiliary_data_samples_2018 + egamma_data_samples_2018):
+    for y,ss in (2017, data_samples_2017 + SingleMuon_data_samples_2017 + singleelectron_data_samples_2017 + JetHT_data_samples_2017 + BTagCSV_data_samples_2017), (2018, data_samples_2018 + auxiliary_data_samples_2018 + egamma_data_samples_2018):
         for s in ss:
             s.datasets[ds].json      = json_path('ana_%s.json'      % y)
             s.datasets[ds].json_10pc = json_path('ana_%s_10pc.json' % y)
@@ -1299,7 +1322,7 @@ if __name__ == '__main__':
     if 1:
         fns     = []
         weights = []
-        for s in qcd_samples_2018 + ttbar_samples_2018:
+        for s in qcd_samples_2017 + ttbar_samples_2017:
             s.set_curr_dataset('miniaod')
             il = 64.0
             pw = s.partial_weight_orig
