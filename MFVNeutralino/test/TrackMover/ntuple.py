@@ -9,7 +9,7 @@ settings.is_miniaod = True
 #settings.event_filter = 'electrons only novtx'
 settings.event_filter = 'muons only novtx'
 
-version = settings.version + 'v3'
+version = settings.version + 'v4'
 
 # for stat extension
 #version = settings.version + 'ext1'
@@ -19,8 +19,8 @@ version = settings.version + 'v3'
 #version = settings.version + 'ext5'
 #version = settings.version + 'ext6'
 
-cfgs = named_product(njets = [2,3],
-                     nbjets = [0,1,2],
+cfgs = named_product(njets = [2], #FIXME
+                     nbjets = [0], #FIXME
                      nsigmadxy = [4.0],
                      angle = [0.2], #, 0.1, 0.3],
                      )
@@ -36,13 +36,13 @@ cfgs = named_product(njets = [2,3],
 
 process = ntuple_process(settings)
 tfileservice(process, 'movedtree.root')
-max_events(process, 100)
+#max_events(process, 100)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAOD/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v2/280000/BB6E40E3-1F43-6C41-AEF8-5A7B96D0C5E5.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAOD/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v1/100000/034AE4F2-7180-7F40-81D6-740D15738CBA.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/120001/4724838F-73AF-F040-9290-AC3B1CA485A7.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/120001/DE019DB3-A431-7546-8BC1-30ABC37AD495.root')
-input_files(process, '~/nobackup/crabdirs/TTJets_UL2017_MINIAOD.root')
+#input_files(process, '~/nobackup/crabdirs/TTJets_UL2017_MINIAOD.root')
 #sample_files(process, 'qcdbctoept080_2017', dataset, 1)
 
 cmssw_from_argv(process)
@@ -108,8 +108,8 @@ for icfg, cfg in enumerate(cfgs):
                             packed_candidates_src = cms.InputTag('packedPFCandidates'),
                             jets_src = cms.InputTag('selectedPatJets'),
                             track_ref_getter = jmtTrackRefGetter,
-                            min_jet_pt = cms.double(50), #FIXME
-                            min_jet_ntracks = cms.uint32(4), #FIXME
+                            min_jet_pt = cms.double(0.0), #FIXMEi : 50GeV
+                            min_jet_ntracks = cms.uint32(2), #FIXME : 4 tracks
                             njets = cms.uint32(cfg.njets),
                             nbjets = cms.uint32(cfg.nbjets),
                             tau = cms.double(1.),
@@ -147,11 +147,9 @@ random_service(process, random_dict)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
-
-    #samples = pick_samples(dataset, all_signal=False)
-
-    samples = [getattr(Samples, 'ttbar_2017')]
+    samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=False, leptonic=False, met=False, diboson=False, Lepton_data=True)
     #samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=True, leptonic=True, met=True, diboson=True, Lepton_data=True)
+    
     set_splitting(samples, dataset, 'trackmover', data_json=json_path('ana_SingleLept_2017_10pc.json'), limit_ttbar=True)
 
     ms = MetaSubmitter('TrackMover' + version, dataset=dataset)

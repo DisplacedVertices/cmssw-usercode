@@ -381,41 +381,96 @@ _add_ds("ntupleulv29lepm", {
 })
 
 
+
+
+_add_ds("nr_trackmoverulv30lepmv2", {
+  'example_ttbar_2017':(1, ['/store/user/pekotamn/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/movedtree_%i.root' % i for i in xrange(0,1)]),
+})
+
+_add_ds("trackmovermctruthulv30lepmumv3", {
+'WplusHToSSTodddd_tau30mm_M55_2017': _fromnum1("/store/user/pekotamn/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-30_TuneCP5_13TeV-powheg-pythia8/TrackMoverMCTruthULV30LepMumv3_2017/230602_151351", 48, fnbase="mctruth"),
+'WplusHToSSTodddd_tau1mm_M55_2017': _fromnum0("/store/user/pkotamni/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/TrackMoverMCTruthULV30LepMumv3/230601_201335", 250, fnbase="mctruth"),
+'WplusHToSSTodddd_tau300um_M55_2017': _fromnum0("/store/user/pkotamni/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-0p3_TuneCP5_13TeV-powheg-pythia8/TrackMoverMCTruthULV30LepMumv3/230601_201420", 250, fnbase="mctruth"),
+})
+
+
+
+_add_ds("trackmoverulv30lepmumv4", {
+'qcdempt015_2017': _fromnum1("/store/user/pekotamn/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/TrackMoverULV30LepMumv4_2017/230607_031929", 48, fnbase="movedtree"),
+'qcdmupt15_2017': _fromnum1("/store/user/pekotamn/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/TrackMoverULV30LepMumv4_2017/230607_031949", 156, fnbase="movedtree"),
+'qcdempt020_2017': _fromnum1("/store/user/pekotamn/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV-pythia8/TrackMoverULV30LepMumv4_2017/230607_032009", 103, fnbase="movedtree"),
+'qcdempt030_2017': _fromnum1("/store/user/pekotamn/QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8/TrackMoverULV30LepMumv4_2017/230607_032031", 69, fnbase="movedtree"),
+'qcdempt050_2017': _fromnum1("/store/user/pekotamn/QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8/TrackMoverULV30LepMumv4_2017/230607_032052", 76, fnbase="movedtree"),
+'qcdempt080_2017': _fromnum1("/store/user/pekotamn/QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV-pythia8/TrackMoverULV30LepMumv4_2017/230607_032112", 69, fnbase="movedtree"),
+'qcdempt120_2017': _fromnum1("/store/user/pekotamn/QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV-pythia8/TrackMoverULV30LepMumv4_2017/230607_032133", 87, fnbase="movedtree"),
+'qcdempt170_2017': _fromnum1("/store/user/pekotamn/QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8/TrackMoverULV30LepMumv4_2017/230607_032153", 37, fnbase="movedtree"),
+'qcdempt300_2017': _fromnum1("/store/user/pekotamn/QCD_Pt-300toInf_EMEnriched_TuneCP5_13TeV-pythia8/TrackMoverULV30LepMumv4_2017/230607_032213", 24, fnbase="movedtree"),
+'qcdbctoept020_2017': (92, ['/store/user/pekotamn/QCD_Pt_20to30_bcToE_TuneCP5_13TeV_pythia8/TrackMoverULV30LepMumv4_2017/230607_032233/0000/movedtree_%i.root' % i for i in chain(xrange(1,46), xrange(47,94))]),
+'qcdbctoept030_2017': _fromnum1("/store/user/pekotamn/QCD_Pt_30to80_bcToE_TuneCP5_13TeV_pythia8/TrackMoverULV30LepMumv4_2017/230607_032253", 89, fnbase="movedtree"),
+'qcdbctoept080_2017': (84, ['/store/user/pekotamn/QCD_Pt_80to170_bcToE_TuneCP5_13TeV_pythia8/TrackMoverULV30LepMumv4_2017/230607_032313/0000/movedtree_%i.root' % i for i in chain(xrange(1,47), xrange(48,86))]),
+'qcdbctoept170_2017': _fromnum1("/store/user/pekotamn/QCD_Pt_170to250_bcToE_TuneCP5_13TeV_pythia8/TrackMoverULV30LepMumv4_2017/230607_032333", 91, fnbase="movedtree"),
+'qcdbctoept250_2017': _fromnum1("/store/user/pekotamn/QCD_Pt_250toInf_bcToE_TuneCP5_13TeV_pythia8/TrackMoverULV30LepMumv4_2017/230607_032353", 79, fnbase="movedtree"),
+'wjetstolnu_2017': (403, ['/store/user/pekotamn/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/TrackMoverULV30LepMumv4_2017/230607_032421/0000/movedtree_%i.root' % i for i in chain(xrange(1,212), xrange(213,405))]),
+'dyjetstollM10_2017': _fromnum1("/store/user/pekotamn/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/TrackMoverULV30LepMumv4_2017/230607_032441", 393, fnbase="movedtree"),
+'dyjetstollM50_2017': (434, ['/store/user/pekotamn/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/TrackMoverULV30LepMumv4_2017/230607_032501/0000/movedtree_%i.root' % i for i in chain(xrange(1,290), xrange(291,311), xrange(314,316), xrange(317,411), xrange(412,440), [312])]),
+'ttbar_2017': (1466, ['/store/user/pkotamni/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/TrackMoverULV30LepMumv4_2017/230606_222604' + '/%04i/movedtree_%i.root' % (i/1000,i) for i in chain(xrange(69), xrange(70,160), xrange(163,219), xrange(220,343), xrange(344,365), xrange(366,537), xrange(538,645), xrange(646,677), xrange(678,861), xrange(862,1140), xrange(1141,1165), xrange(1166,1250), xrange(1251,1269), xrange(1270,1449), xrange(1450,1472), xrange(1473,1482), [161])]),
+'ww_2017': _fromnum1("/store/user/pekotamn/WW_TuneCP5_13TeV-pythia8/TrackMoverULV30LepMumv4_2017/230607_032521", 94, fnbase="movedtree"),
+'zz_2017': _fromnum1("/store/user/pekotamn/ZZ_TuneCP5_13TeV-pythia8/TrackMoverULV30LepMumv4_2017/230607_032541", 25, fnbase="movedtree"),
+'wz_2017': (42, ['/store/user/pekotamn/WZ_TuneCP5_13TeV-pythia8/TrackMoverULV30LepMumv4_2017/230607_032602/0000/movedtree_%i.root' % i for i in chain(xrange(1,35), xrange(36,44))]),
+'SingleMuon2017B': _fromnum1("/store/user/pekotamn/SingleMuon/TrackMoverULV30LepMumv4_2017/230607_031535", 325, fnbase="movedtree"),
+'SingleMuon2017C': _fromnum1("/store/user/pekotamn/SingleMuon/TrackMoverULV30LepMumv4_2017/230607_031557", 505, fnbase="movedtree"),
+#'SingleMuon2017D': (207, ['/store/user/pekotamn/SingleMuon/TrackMoverULV30LepMumv4_2017/230607_031618/0000/movedtree_%i.root' % i for i in chain(xrange(1,34), xrange(35,66), xrange(67,121), xrange(122,159), xrange(160,182), xrange(183,190), xrange(191,214))]),
+'SingleMuon2017E': (495, ['/store/user/pekotamn/SingleMuon/TrackMoverULV30LepMumv4_2017/230607_031639/0000/movedtree_%i.root' % i for i in chain(xrange(1,341), xrange(342,491), xrange(492,498))]),
+'SingleMuon2017F': _fromnum1("/store/user/pekotamn/SingleMuon/TrackMoverULV30LepMumv4_2017/230607_031659", 725, fnbase="movedtree"),
+'SingleElectron2017B': _fromnum1("/store/user/pekotamn/SingleElectron/TrackMoverULV30LepMumv4_2017/230607_031720", 200, fnbase="movedtree"),
+'SingleElectron2017C': _fromnum1("/store/user/pekotamn/SingleElectron/TrackMoverULV30LepMumv4_2017/230607_160643", 408, fnbase="movedtree"),
+#'SingleElectron2017D': _fromnum1("/store/user/pekotamn/SingleElectron/TrackMoverULV30LepMumv4_2017/230607_031741", 163, fnbase="movedtree"),
+'SingleElectron2017E': (358, ['/store/user/pekotamn/SingleElectron/TrackMoverULV30LepMumv4_2017/230607_031803/0000/movedtree_%i.root' % i for i in chain(xrange(1,43), xrange(48,117), xrange(118,144), xrange(145,154), xrange(157,182), xrange(183,233), xrange(234,238), xrange(239,270), xrange(271,277), xrange(278,280), xrange(281,293), xrange(294,305), xrange(306,343), xrange(344,355), xrange(356,376), [44, 46, 155])]),
+'SingleElectron2017F': _fromnum1("/store/user/pekotamn/SingleElectron/TrackMoverULV30LepMumv4_2017/230607_031823", 576, fnbase="movedtree"),
+})
+
+
+_add_ds("trackmoverulv30lepelemv4", {
+'qcdempt015_2017': _fromnum1("/store/user/pekotamn/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/TrackMoverULV30LepElemv4_2017/230607_033610", 48, fnbase="movedtree"),
+'qcdmupt15_2017': _fromnum1("/store/user/pekotamn/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/TrackMoverULV30LepElemv4_2017/230607_033630", 156, fnbase="movedtree"),
+'qcdempt020_2017': _fromnum1("/store/user/pekotamn/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV-pythia8/TrackMoverULV30LepElemv4_2017/230607_033653", 103, fnbase="movedtree"),
+'qcdempt030_2017': _fromnum1("/store/user/pekotamn/QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8/TrackMoverULV30LepElemv4_2017/230607_033715", 69, fnbase="movedtree"),
+'qcdempt050_2017': _fromnum1("/store/user/pekotamn/QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8/TrackMoverULV30LepElemv4_2017/230607_033736", 76, fnbase="movedtree"),
+'qcdempt080_2017': _fromnum1("/store/user/pekotamn/QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV-pythia8/TrackMoverULV30LepElemv4_2017/230607_033756", 69, fnbase="movedtree"),
+'qcdempt120_2017': _fromnum1("/store/user/pekotamn/QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV-pythia8/TrackMoverULV30LepElemv4_2017/230607_033816", 87, fnbase="movedtree"),
+'qcdempt170_2017': _fromnum1("/store/user/pekotamn/QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8/TrackMoverULV30LepElemv4_2017/230607_033836", 37, fnbase="movedtree"),
+'qcdempt300_2017': _fromnum1("/store/user/pekotamn/QCD_Pt-300toInf_EMEnriched_TuneCP5_13TeV-pythia8/TrackMoverULV30LepElemv4_2017/230607_033856", 24, fnbase="movedtree"),
+'qcdbctoept020_2017': (92, ['/store/user/pekotamn/QCD_Pt_20to30_bcToE_TuneCP5_13TeV_pythia8/TrackMoverULV30LepElemv4_2017/230607_033916/0000/movedtree_%i.root' % i for i in chain(xrange(1,46), xrange(47,94))]),
+'qcdbctoept030_2017': _fromnum1("/store/user/pekotamn/QCD_Pt_30to80_bcToE_TuneCP5_13TeV_pythia8/TrackMoverULV30LepElemv4_2017/230607_033936", 89, fnbase="movedtree"),
+'qcdbctoept080_2017': (84, ['/store/user/pekotamn/QCD_Pt_80to170_bcToE_TuneCP5_13TeV_pythia8/TrackMoverULV30LepElemv4_2017/230607_033956/0000/movedtree_%i.root' % i for i in chain(xrange(1,47), xrange(48,86))]),
+'qcdbctoept170_2017': _fromnum1("/store/user/pekotamn/QCD_Pt_170to250_bcToE_TuneCP5_13TeV_pythia8/TrackMoverULV30LepElemv4_2017/230607_034016", 91, fnbase="movedtree"),
+'qcdbctoept250_2017': _fromnum1("/store/user/pekotamn/QCD_Pt_250toInf_bcToE_TuneCP5_13TeV_pythia8/TrackMoverULV30LepElemv4_2017/230607_034037", 79, fnbase="movedtree"),
+'wjetstolnu_2017': (403, ['/store/user/pekotamn/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/TrackMoverULV30LepElemv4_2017/230607_034406/0000/movedtree_%i.root' % i for i in chain(xrange(1,212), xrange(213,405))]),
+'dyjetstollM10_2017': _fromnum1("/store/user/pekotamn/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/TrackMoverULV30LepElemv4_2017/230607_034426", 393, fnbase="movedtree"),
+'dyjetstollM50_2017': (434, ['/store/user/pekotamn/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/TrackMoverULV30LepElemv4_2017/230607_034446/0000/movedtree_%i.root' % i for i in chain(xrange(1,290), xrange(291,311), xrange(314,316), xrange(317,411), xrange(412,440), [312])]),
+#'ttbar_2017': (1467, ['/store/user/pkotamni/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/TrackMoverULV30LepElemv4_2017/230606_224548' + '/%04i/movedtree_%i.root' % (i/1000,i) for i in chain(xrange(68), xrange(69,160), xrange(163,219), xrange(220,343), xrange(344,365), xrange(366,537), xrange(538,645), xrange(646,677), xrange(678,861), xrange(862,1167), xrange(1168,1250), xrange(1251,1269), xrange(1270,1449), xrange(1450,1472), xrange(1473,1482), [161])]),
+'ttbar_2017': (1466, ['/store/user/pkotamni/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/TrackMoverULV30LepElemv4_2017/230607_034446' + '/%04i/movedtree_%i.root' % (i/1000,i) for i in chain(xrange(69), xrange(70,160), xrange(163,219), xrange(220,343), xrange(344,365), xrange(366,537), xrange(538,645), xrange(646,677), xrange(678,861), xrange(862,1140), xrange(1141,1165), xrange(1166,1250), xrange(1251,1269), xrange(1270,1449), xrange(1450,1472), xrange(1473,1482), [161])]),
+'ww_2017': _fromnum1("/store/user/pekotamn/WW_TuneCP5_13TeV-pythia8/TrackMoverULV30LepElemv4_2017/230607_034506", 94, fnbase="movedtree"),
+'zz_2017': _fromnum1("/store/user/pekotamn/ZZ_TuneCP5_13TeV-pythia8/TrackMoverULV30LepElemv4_2017/230607_034525", 25, fnbase="movedtree"),
+'wz_2017': (42, ['/store/user/pekotamn/WZ_TuneCP5_13TeV-pythia8/TrackMoverULV30LepElemv4_2017/230607_034546/0000/movedtree_%i.root' % i for i in chain(xrange(1,35), xrange(36,44))]),
+'SingleMuon2017B': _fromnum1("/store/user/pekotamn/SingleMuon/TrackMoverULV30LepElemv4_2017/230607_034058", 325, fnbase="movedtree"),
+'SingleMuon2017C': _fromnum1("/store/user/pekotamn/SingleMuon/TrackMoverULV30LepElemv4_2017/230607_034118", 505, fnbase="movedtree"),
+#'SingleMuon2017D': (206, ['/store/user/pekotamn/SingleMuon/TrackMoverULV30LepElemv4_2017/230607_034138/0000/movedtree_%i.root' % i for i in chain(xrange(1,34), xrange(35,66), xrange(67,121), xrange(122,159), xrange(160,162), xrange(163,182), xrange(183,190), xrange(191,214))]),
+'SingleMuon2017E': (495, ['/store/user/pekotamn/SingleMuon/TrackMoverULV30LepElemv4_2017/230607_034159/0000/movedtree_%i.root' % i for i in chain(xrange(1,341), xrange(342,491), xrange(492,498))]),
+'SingleMuon2017F': _fromnum1("/store/user/pekotamn/SingleMuon/TrackMoverULV30LepElemv4_2017/230607_034220", 725, fnbase="movedtree"),
+'SingleElectron2017B': _fromnum1("/store/user/pekotamn/SingleElectron/TrackMoverULV30LepElemv4_2017/230607_034241", 200, fnbase="movedtree"),
+'SingleElectron2017C': _fromnum1("/store/user/pekotamn/SingleElectron/TrackMoverULV30LepElemv4_2017/230607_160525", 408, fnbase="movedtree"),
+#'SingleElectron2017D': (27, ['/store/user/pekotamn/SingleElectron/TrackMoverULV30LepElemv4_2017/230607_034303/0000/movedtree_%i.root' % i for i in chain(xrange(27,30), xrange(35,37), xrange(50,52), [1, 8, 18, 24, 31, 38, 40, 54, 56, 71, 80, 96, 101, 115, 119, 126, 132, 134, 139, 147])]),
+'SingleElectron2017E': (358, ['/store/user/pekotamn/SingleElectron/TrackMoverULV30LepElemv4_2017/230607_034323/0000/movedtree_%i.root' % i for i in chain(xrange(1,43), xrange(48,117), xrange(118,144), xrange(145,154), xrange(157,182), xrange(183,233), xrange(234,238), xrange(239,270), xrange(271,277), xrange(278,280), xrange(281,293), xrange(294,305), xrange(306,343), xrange(344,355), xrange(356,376), [44, 46, 155])]),
+'SingleElectron2017F': _fromnum1("/store/user/pekotamn/SingleElectron/TrackMoverULV30LepElemv4_2017/230607_034345", 576, fnbase="movedtree"),
+})
+
+
 _add_ds("trackmovermctruthulv30lepmv2", {
 'WplusHToSSTodddd_tau30mm_M55_2017': _fromnum0("/store/user/pkotamni/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-30_TuneCP5_13TeV-powheg-pythia8/TrackMoverMCTruthULV30Lepmv2/230528_172352", 240, fnbase="mctruth"),
 'WplusHToSSTodddd_tau1mm_M55_2017': _fromnum0("/store/user/pkotamni/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-1_TuneCP5_13TeV-powheg-pythia8/TrackMoverMCTruthULV30Lepmv2/230528_172412", 250, fnbase="mctruth"),
 'WplusHToSSTodddd_tau300um_M55_2017': _fromnum0("/store/user/pkotamni/WplusH_HToSSTodddd_WToLNu_MH-125_MS-55_ctauS-0p3_TuneCP5_13TeV-powheg-pythia8/TrackMoverMCTruthULV30Lepmv2/230528_172435", 250, fnbase="mctruth"),
 })
-
-
-_add_ds("trackmoverulv30lepmv2", {
-'qcdempt015_2017': _fromnum1("/store/user/pekotamn/QCD_Pt-15to20_EMEnriched_TuneCP5_13TeV-pythia8/TrackMoverULV30Lepmv2_2017/230526_011538", 48, fnbase="movedtree"),
-'qcdmupt15_2017': (154, ['/store/user/pekotamn/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/TrackMoverULV30Lepmv2_2017/230526_011558/0000/movedtree_%i.root' % i for i in chain(xrange(1,129), xrange(130,156))]),
-'qcdempt020_2017': (104, ['/store/user/pekotamn/QCD_Pt-20to30_EMEnriched_TuneCP5_13TeV-pythia8/TrackMoverULV30Lepmv2_2017/230526_011632/0000/movedtree_%i.root' % i for i in chain(xrange(1,95), xrange(96,106))]),
-'qcdempt030_2017': _fromnum1("/store/user/pekotamn/QCD_Pt-30to50_EMEnriched_TuneCP5_13TeV-pythia8/TrackMoverULV30Lepmv2_2017/230526_011653", 69, fnbase="movedtree"),
-'qcdempt050_2017': _fromnum1("/store/user/pekotamn/QCD_Pt-50to80_EMEnriched_TuneCP5_13TeV-pythia8/TrackMoverULV30Lepmv2_2017/230526_011714", 77, fnbase="movedtree"),
-'qcdempt080_2017': _fromnum1("/store/user/pekotamn/QCD_Pt-80to120_EMEnriched_TuneCP5_13TeV-pythia8/TrackMoverULV30Lepmv2_2017/230526_011734", 70, fnbase="movedtree"),
-'qcdempt120_2017': (85, ['/store/user/pekotamn/QCD_Pt-120to170_EMEnriched_TuneCP5_13TeV-pythia8/TrackMoverULV30Lepmv2_2017/230526_011757/0000/movedtree_%i.root' % i for i in chain(xrange(1,31), xrange(32,87))]),
-'qcdempt170_2017': _fromnum1("/store/user/pekotamn/QCD_Pt-170to300_EMEnriched_TuneCP5_13TeV-pythia8/TrackMoverULV30Lepmv2_2017/230526_011822", 38, fnbase="movedtree"),
-'qcdempt300_2017': _fromnum1("/store/user/pekotamn/QCD_Pt-300toInf_EMEnriched_TuneCP5_13TeV-pythia8/TrackMoverULV30Lepmv2_2017/230526_011842", 24, fnbase="movedtree"),
-'qcdbctoept020_2017': _fromnum1("/store/user/pekotamn/QCD_Pt_20to30_bcToE_TuneCP5_13TeV_pythia8/TrackMoverULV30Lepmv2_2017/230526_011904", 94, fnbase="movedtree"),
-'qcdbctoept030_2017': _fromnum1("/store/user/pekotamn/QCD_Pt_30to80_bcToE_TuneCP5_13TeV_pythia8/TrackMoverULV30Lepmv2_2017/230526_011924", 90, fnbase="movedtree"),
-'qcdbctoept080_2017': _fromnum1("/store/user/pekotamn/QCD_Pt_80to170_bcToE_TuneCP5_13TeV_pythia8/TrackMoverULV30Lepmv2_2017/230526_002801", 85, fnbase="movedtree"),
-'qcdbctoept170_2017': _fromnum1("/store/user/pekotamn/QCD_Pt_170to250_bcToE_TuneCP5_13TeV_pythia8/TrackMoverULV30Lepmv2_2017/230526_011946", 91, fnbase="movedtree"),
-'qcdbctoept250_2017': _fromnum1("/store/user/pekotamn/QCD_Pt_250toInf_bcToE_TuneCP5_13TeV_pythia8/TrackMoverULV30Lepmv2_2017/230526_012007", 79, fnbase="movedtree"),
-'wjetstolnu_2017': _fromnum1("/store/user/pekotamn/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/TrackMoverULV30Lepmv2_2017/230526_012135", 404, fnbase="movedtree"),
-'dyjetstollM10_2017': _fromnum1("/store/user/pekotamn/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/TrackMoverULV30Lepmv2_2017/230526_012155", 393, fnbase="movedtree"),
-'dyjetstollM50_2017': (437, ['/store/user/pekotamn/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/TrackMoverULV30Lepmv2_2017/230526_012215/0000/movedtree_%i.root' % i for i in chain(xrange(1,310), xrange(311,439))]),
-'ttbar_2017': (1479, ['/store/user/pkotamni/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/TrackMoverULV30Lepmv2_2017/230525_202324' + '/%04i/movedtree_%i.root' % (i/1000,i) for i in chain(xrange(68), xrange(69,160), xrange(161,742), xrange(743,1482))]),
-'ww_2017': _fromnum1("/store/user/pekotamn/WW_TuneCP5_13TeV-pythia8/TrackMoverULV30Lepmv2_2017/230526_012235", 94, fnbase="movedtree"),
-'zz_2017': _fromnum1("/store/user/pekotamn/WZ_TuneCP5_13TeV-pythia8/TrackMoverULV30Lepmv2_2017/230526_012255", 43, fnbase="movedtree"),
-'wz_2017': _fromnum1("/store/user/pekotamn/ZZ_TuneCP5_13TeV-pythia8/TrackMoverULV30Lepmv2_2017/230526_012316", 25, fnbase="movedtree"),
-'SingleMuon2017C': _fromnum1("/store/user/pekotamn/SingleMuon/TrackMoverULV30Lepmv2_2017/230526_012030", 505, fnbase="movedtree"),
-'SingleMuon2017F': _fromnum1("/store/user/pekotamn/SingleMuon/TrackMoverULV30Lepmv2_2017/230526_012051", 725, fnbase="movedtree"),
-'SingleElectron2017C': _fromnum0("/store/user/pkotamni/SingleElectron/TrackMoverULV30Lepmv2_2017/230528_092346", 427, fnbase="movedtree"),
-'SingleElectron2017F': _fromnum1("/store/user/pekotamn/SingleElectron/TrackMoverULV30Lepmv2_2017/230526_012114", 576, fnbase="movedtree"),
-})
-
 
 
 _add_ds("ntupleuloffshjv30lepm", {

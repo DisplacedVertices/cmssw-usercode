@@ -75,7 +75,7 @@ def cmd_hadd_data():
 
         have = []
         year_eras = [
-            ('2017', 'CF'), #misisng BDE
+            ('2017', 'BCFE'), #missing D
             ('2018', 'ABCD'),
             ]
 
@@ -126,14 +126,10 @@ def cmd_rm_mc_parts():
 
 def _background_samples(trigeff=False, year=2017):
     if _leptonpresel or trigeff:
-        x = ['ttbar', 'wjetstolnu', 'dyjetstollM10', 'dyjetstollM50','qcdmupt15', 'ww', 'wz', 'zz'] 
-        #x =  ['ttbar', 'wjetstolnu', 'dyjetstollM10', 'ww', 'wz', 'zz'] 
-        #x = ['ttbar', 'dyjetstollM10','dyjetstollM50', 'qcdmupt15', 'ww', 'wz', 'zz'] #'wjetstolnu'
+        x = []#FIXME['ttbar', 'wjetstolnu', 'dyjetstollM10', 'dyjetstollM50','qcdmupt15', 'ww', 'wz', 'zz'] 
         if not trigeff:
-            x += ['qcdempt%03i' % x for x in [15,30,50,80,120,170,300]] #20 
-            #x += ['qcdempt%03i' % x for x in [15,30,50,80,170,300]] 
-            #x += ['qcdempt%03i' % x for x in [20,50,80,170]] 
-            x += ['qcdbctoept%03i' % x for x in [30,80,170,250]] #20 
+            x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]] 
+            x += ['qcdbctoept%03i' % x for x in [20,30,80,170,250]]
     elif _btagpresel:
         x = ['qcdht%04i' % x for x in [300, 500, 700, 1000, 1500, 2000]]
         x += ['ttbar']
@@ -186,7 +182,7 @@ def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=20
     else:
         if year_to_use==2017:
             year_s = '_2017'
-            scale = -AnalysisConstants.int_lumi_2017 * AnalysisConstants.scale_factor_2017
+            scale = 1 # FIXME-AnalysisConstants.int_lumi_2017 * AnalysisConstants.scale_factor_2017
         elif year_to_use==2018:
             year_s = '_2018'
             scale = -AnalysisConstants.int_lumi_2018 * AnalysisConstants.scale_factor_2018
@@ -209,13 +205,13 @@ def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=20
             else:
                 files2.append(fn)
         if files2:
-            cmd = 'samples merge %f background%s%s.root ' % (scale, _presel_s, year_s)
+            cmd = 'samples merge %f qcd%s%s.root ' % (scale, _presel_s, year_s) #FIXME
             cmd += ' '.join(files2)
             print cmd
             if os.system(cmd) != 0:
                 ok = False
         if ok:
-            print ("{0} background merged!".format(year))
+            print ("{0} qcd merged!".format(year)) #FIXME
 
     #only work for 2017 data now
     #if ok:
@@ -274,10 +270,10 @@ def cmd_effsprint(year_to_use=2017):
 
 
 def cmd_histos():
-    cmd_report_data()
+    #cmd_report_data()
     cmd_hadd_data()
     cmd_merge_background()
-    cmd_effsprint()
+    #cmd_effsprint()
 
 def cmd_presel():
     cmd_report_data()

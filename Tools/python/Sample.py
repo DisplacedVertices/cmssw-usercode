@@ -9,10 +9,10 @@ from JMTucker.Tools import DBS
 
 xrootd_sites = {
     'T3_US_FNALLPC': 'root://cmseos.fnal.gov/',
-    'T1_US_FNAL_Disk': 'root://cmsxrootd-site.fnal.gov/',
+    'T1_US_FNAL_Disk': 'root://cmsxrootd.fnal.gov/', #'root://cmsxrootd-site.fnal.gov/',
     'T2_US_Nebraska': 'root://cmsxrootd.fnal.gov/',
-    'T2_US_Wisconsin': 'root://pubxrootd.hep.wisc.edu/',
-    'T2_US_Purdue': 'root://xrootd.rcac.purdue.edu/',
+    'T2_US_Wisconsin': 'root://cmsxrootd.fnal.gov/', #root://pubxrootd.hep.wisc.edu/',
+    'T2_US_Purdue': 'root://cmsxrootd.fnal.gov/', #root://xrootd.rcac.purdue.edu/',
     'T2_DE_DESY': 'root://dcache-cms-xrootd.desy.de/',
     'T2_BR_SPRACE': 'root://osg-se.sprace.org.br/',
     'T2_US_Florida': 'root://cmsio5.rc.ufl.edu/',

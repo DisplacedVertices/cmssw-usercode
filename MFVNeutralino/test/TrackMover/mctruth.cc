@@ -5,7 +5,7 @@ int main(int argc, char** argv) {
 
   jmt::NtupleReader<mfv::MovedTracksNtuple> nr;
   namespace po = boost::program_options;
-  nr.init_options("mfvMovedTreeMCTruth/t", "TrackMoverMCTruthHistsUlv30lepmv2", "trackmovermctruthulv30lepmv2", "all_signal = True")
+  nr.init_options("mfvMovedTreeMCTruth/t", "TrackMoverMCTruthHistsUlv30lepMumv4", "trackmovermctruthulv30lepmumv3", "all_signal = True")
     ("min-lspdist3", po::value<double>(&min_lspdist3)->default_value(0.02), "min distance between LSP decays to use event")
     ;
 
@@ -51,18 +51,18 @@ int main(int argc, char** argv) {
     nd.book(k_pvrho, "pvrho", ";PV #rho (cm);events/1 #mum", 200, 0, 0.02);
     nd.book(k_pvntracks, "pvntracks", ";PV # tracks;events/2", 200, 0, 400);
     nd.book(k_pvscore, "pvscore", ";PV #Sigma p_{T}^{2} (GeV^{2});events/200 GeV^{2}", 200, 0, 40000);
-    nd.book(k_ht, "ht", ";#Sigma H_{T} (GeV);events/50 GeV", 50, 0, 2500);
-	nd.book(k_njets, "njets", ";# jets;events/1", 40, 0, 40);
+    nd.book(k_ht, "ht", ";#Sigma H_{T} (GeV);events/50 GeV", 20, 0, 1000);
+	nd.book(k_njets, "njets", ";# jets;events/1", 20, 0, 20);
     nd.book(k_jet_asymm, "jet_asymm", ";Jet asymmetry A_{J}; arb. units", 25, 0, 1);
 	nd.book(k_vtx_unc, "vtx_unc", ";dist3d(move vector, vtx); arb. units", 100, 0, 0.1);
 	nd.book(k_jet_dr, "jet_dr", ";jets #DeltaR; arb. units", 70, 0, 7);
 	nd.book(k_jet_deta, "jet_deta", ";jets #DeltaEta; arb. units", 70, 0, 7);
-	nd.book(k_jet_dphi, "jet_dphi", ";jets #DeltaPhi; arb. units", 70, 0, 7);
+	nd.book(k_jet_dphi, "jet_dphi", ";jets #DeltaPhi; arb. units", 70, -3.5, 3.5);
 	nd.book(k_jet_dind, "jet_dind", ";jets #DeltaIndex; arb. units", 20, 0, 20);
-	nd.book(k_pt0, "pt0", ";Pt of jet0 [GeV]", 50, 0, 1000);
-	nd.book(k_pt1, "pt1", ";Pt of jet1 [GeV]", 50, 0, 1000);
-	nd.book(k_ntks_j0, "ntks_j0", ";Ntks in jet0", 50, 0, 50);
-	nd.book(k_ntks_j1, "ntks_j1", ";Ntks in jet1", 50, 0, 50);
+	nd.book(k_pt0, "pt0", ";Pt of jet0 [GeV]", 25, 0, 500);
+	nd.book(k_pt1, "pt1", ";Pt of jet1 [GeV]", 25, 0, 500);
+	nd.book(k_ntks_j0, "ntks_j0", ";Ntks in jet0", 25, 0, 25);
+	nd.book(k_ntks_j1, "ntks_j1", ";Ntks in jet1", 25, 0, 25);
 	nd.book(k_nmovedtracks, "nmovedtracks", ";# moved tracks;events/2", 120, 0, 120);
 	nd.book(k_dphi_sum_j_mv, "dphi_sum_j_mv", ";abs #Delta #phi between jet0+jet1 and move vec;events/bin", 63, 0, M_PI);
 	nd.book(k_deta_sum_j_mv, "deta_sum_j_mv", ";abs #Delta #eta between jet0+jet1 and move vec;events/bin", 25, 0, 4);
