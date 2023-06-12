@@ -886,8 +886,13 @@ DisplacedJet_data_samples_2018 = [
     DataSample('DisplacedJet2018D', '/DisplacedJet/Run2018D-15Feb2022_UL2018-v1/AOD'),
     ]
 
+# FIXME we could just put them here and drop from the JetHT list
 BTagCSV_data_samples_2018 = [
-]
+    #DataSample('JetHT2018A', '/JetHT/Run2018A-15Feb2022_UL2018-v2/AOD'),
+    #DataSample('JetHT2018B', '/JetHT/Run2018B-15Feb2022_UL2018-v1/AOD'),
+    #DataSample('JetHT2018C', '/JetHT/Run2018C-15Feb2022_UL2018-v1/AOD'),
+    #DataSample('JetHT2018D', '/JetHT/Run2018D-15Feb2022_UL2018-v1/AOD'),
+    ]
 
 SingleMuon_data_samples_2018 = [
     DataSample('SingleMuon2018A', '/SingleMuon/Run2018A-12Nov2019_UL2018-v3/AOD'),
@@ -1033,7 +1038,7 @@ for x in _alls:
 BTagCSV2016APVB.add_dataset('miniaod', '/BTagCSV/Run2016B-ver2_HIPM_UL2016_MiniAODv2-v1/MINIAOD', 77890616)
 BTagCSV2016APVC.add_dataset('miniaod', '/BTagCSV/Run2016C-HIPM_UL2016_MiniAODv2-v1/MINIAOD', 30358567)
 BTagCSV2016APVD.add_dataset('miniaod', '/BTagCSV/Run2016D-HIPM_UL2016_MiniAODv2-v1/MINIAOD', 56527008)
-BTagCSV2016APVE.add_dataset('miniaod', '/BTagCSV/Run2016E-HIPM_UL2016_MiniAODv2-v1/MINIAOD ', 60415444)
+BTagCSV2016APVE.add_dataset('miniaod', '/BTagCSV/Run2016E-HIPM_UL2016_MiniAODv2-v1/MINIAOD', 60415444)
 BTagCSV2016APVF.add_dataset('miniaod', '/BTagCSV/Run2016F-HIPM_UL2016_MiniAODv2-v1/MINIAOD', 32756402)
 DisplacedJet2016APVB.add_dataset('miniaod', '/DisplacedJet/Run2016B-ver2_HIPM_UL2016_MiniAODv2-v1/MINIAOD', 48235859)
 DisplacedJet2016APVC.add_dataset('miniaod', '/DisplacedJet/Run2016C-HIPM_UL2016_MiniAODv2-v2/MINIAOD',  18797203)
@@ -1041,7 +1046,7 @@ DisplacedJet2016APVD.add_dataset('miniaod', '/DisplacedJet/Run2016D-HIPM_UL2016_
 DisplacedJet2016APVE.add_dataset('miniaod', '/DisplacedJet/Run2016E-HIPM_UL2016_MiniAODv2-v1/MINIAOD', 19309129)
 DisplacedJet2016APVF.add_dataset('miniaod', '/DisplacedJet/Run2016F-HIPM_UL2016_MiniAODv2-v1/MINIAOD', 9676958)
 
-BTagCSV2016F.add_dataset('miniaod', '/BTagCSV/Run2016F-UL2016_MiniAODv2-v2/MINIAOD ', 4852270)
+BTagCSV2016F.add_dataset('miniaod', '/BTagCSV/Run2016F-UL2016_MiniAODv2-v2/MINIAOD', 4852270)
 BTagCSV2016G.add_dataset('miniaod', '/BTagCSV/Run2016G-UL2016_MiniAODv2-v1/MINIAOD', 100826567)
 BTagCSV2016H.add_dataset('miniaod', '/BTagCSV/Run2016H-UL2016_MiniAODv2-v2/MINIAOD', 65172853)
 DisplacedJet2016F.add_dataset('miniaod', '/DisplacedJet/Run2016F-UL2016_MiniAODv2-v1/MINIAOD', 1050503)
