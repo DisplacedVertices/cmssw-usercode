@@ -424,6 +424,7 @@ bjet_samples_2017 = [
 
 leptonic_samples_2017 = [
     MCSample('wjetstolnu_2017',       '/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v1/AODSIM', 81551529, nice='W + jets #rightarrow l#nu', color=  9, syst_frac=0.10, xsec=5.294e4),
+    MCSample('wjetstolnu_amcatnlo_2017','/WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 26838734, nice='NLO W + jets #rightarrow l#nu', color= 38, syst_fac=0.10, xsec=6.735e4),
     MCSample('dyjetstollM10_2017',    '/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v2/AODSIM',                  70516252, nice='DY + jets #rightarrow ll, 10 < M < 50 GeV', color= 29, syst_frac=0.10, xsec=1.58e4),
     MCSample('dyjetstollM50_2017',    '/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17RECO-106X_mc2017_realistic_v6-v1/AODSIM',          103599638, nice='DY + jets #rightarrow ll, M > 50 GeV', color= 32, syst_frac=0.10, xsec=5.34e3),
     ]
@@ -1141,6 +1142,7 @@ ttbar_2017.add_dataset('miniaod', '/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/Ru
 #ttbarht1200_2017.add_dataset('miniaod', '/TTJets_HT-1200to2500_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v1/MINIAODSIM',  13214871)
 #ttbarht2500_2017.add_dataset('miniaod', '/TTJets_HT-2500toInf_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017_12Apr2018_94X_mc2017_realistic_v14-v3/MINIAODSIM',    5155687)
 wjetstolnu_2017.add_dataset('miniaod', '/WJetsToLNu_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v1/MINIAODSIM', 81254459)
+wjetstolnu_amcatnlo_2017.add_dataset('miniaod', '/WJetsToLNu_TuneCP5_13TeV-amcatnloFXFX-pythia8/RunIISummer20UL17MiniAODv2-106X_mc2017_realistic_v9-v2/MINIAODSIM', 26838734)
 dyjetstollM10_2017.add_dataset('miniaod', '/DYJetsToLL_M-10to50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v2/MINIAODSIM', 70530127)
 dyjetstollM50_2017.add_dataset('miniaod', '/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIISummer20UL17MiniAOD-106X_mc2017_realistic_v6-v1/MINIAODSIM', 103287684)
 #dyjetstollM50ext_2017.add_dataset('miniaod', '/DYJetsToLL_M-50_TuneCP5_13TeV-madgraphMLM-pythia8/RunIIFall17MiniAODv2-PU2017RECOSIMstep_12Apr2018_94X_mc2017_realistic_v14_ext1-v1/MINIAODSIM', 49125561)
@@ -1271,13 +1273,13 @@ for s in all_signal_samples_2018:
 #is this the correct ntuple version? 
 #mfv_stopld_tau001000um_M1000_2018
 #for x in mfv_stopld_tau000100um_M0200_2018, mfv_stopld_tau000300um_M0200_2018, mfv_stopld_tau000100um_M0600_2018, mfv_stopld_tau000300um_M0600_2018, mfv_stopld_tau000100um_M1000_2018, mfv_stopld_tau000300um_M1000_2018, mfv_stopld_tau000100um_M1600_2018, mfv_stopld_tau000300um_M1600_2018:                                                                                                                                                  
-example_ttbar_2017.add_dataset('nr_trackmoverulv30lepmv2')
+example_ttbar_2017.add_dataset('trackmoverulv30lepmv2')
 
 
 for x in WplusHToSSTodddd_tau30mm_M55_2017, WplusHToSSTodddd_tau1mm_M55_2017, WplusHToSSTodddd_tau300um_M55_2017:
     x.add_dataset("trackmovermctruthulv30lepmumv3")
 
-
+"""
 qcdempt015_2017.add_dataset('trackmoverulv30lepelemv4', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
 qcdmupt15_2017.add_dataset('trackmoverulv30lepelemv4', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
 qcdempt020_2017.add_dataset('trackmoverulv30lepelemv4', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
@@ -1293,6 +1295,7 @@ qcdbctoept080_2017.add_dataset('trackmoverulv30lepelemv4', '/FakeDataset/fakefil
 qcdbctoept170_2017.add_dataset('trackmoverulv30lepelemv4', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
 qcdbctoept250_2017.add_dataset('trackmoverulv30lepelemv4', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
 wjetstolnu_2017.add_dataset('trackmoverulv30lepelemv4', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+wjetstolnu_amcatnlo_2017.add_dataset('trackmoverulv30lepelemv4', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
 dyjetstollM10_2017.add_dataset('trackmoverulv30lepelemv4', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
 dyjetstollM50_2017.add_dataset('trackmoverulv30lepelemv4', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
 ww_2017.add_dataset('trackmoverulv30lepelemv4', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
@@ -1309,9 +1312,9 @@ SingleElectron2017C.add_dataset('trackmoverulv30lepelemv4', '/FakeDataset/fakefi
 SingleElectron2017E.add_dataset('trackmoverulv30lepelemv4', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
 SingleElectron2017F.add_dataset('trackmoverulv30lepelemv4', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
 ttbar_2017.add_dataset("trackmoverulv30lepelemv4")
-
-
 """
+
+
 qcdempt015_2017.add_dataset('trackmoverulv30lepmumv4', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
 qcdmupt15_2017.add_dataset('trackmoverulv30lepmumv4', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
 qcdempt020_2017.add_dataset('trackmoverulv30lepmumv4', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
@@ -1327,6 +1330,7 @@ qcdbctoept080_2017.add_dataset('trackmoverulv30lepmumv4', '/FakeDataset/fakefile
 qcdbctoept170_2017.add_dataset('trackmoverulv30lepmumv4', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
 qcdbctoept250_2017.add_dataset('trackmoverulv30lepmumv4', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
 wjetstolnu_2017.add_dataset('trackmoverulv30lepmumv4', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+wjetstolnu_amcatnlo_2017.add_dataset('trackmoverulv30lepmumv4', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
 dyjetstollM10_2017.add_dataset('trackmoverulv30lepmumv4', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
 dyjetstollM50_2017.add_dataset('trackmoverulv30lepmumv4', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
 ww_2017.add_dataset('trackmoverulv30lepmumv4', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
@@ -1343,7 +1347,6 @@ SingleElectron2017C.add_dataset('trackmoverulv30lepmumv4', '/FakeDataset/fakefil
 SingleElectron2017E.add_dataset('trackmoverulv30lepmumv4', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
 SingleElectron2017F.add_dataset('trackmoverulv30lepmumv4', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
 ttbar_2017.add_dataset("trackmoverulv30lepmumv4")
-"""
 
 
 #    x.add_dataset("ntupleulv1lepm")

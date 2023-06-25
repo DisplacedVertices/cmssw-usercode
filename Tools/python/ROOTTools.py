@@ -667,14 +667,14 @@ def cut(*cuts):
     return ' && '.join('(%s)' % c.strip() for c in cuts if c.strip())
 
 def data_mc_comparison(name,
+                       hists,
                        background_samples,
                        signal_samples = [],
                        data_samples = [],
+                       bkg_partial_weights = [],
+                       sig_partial_weights = [],
                        output_fn = None,
                        plot_saver = None,
-                       histogram_path = None,
-                       file_path = None,
-                       fcn_for_nevents_check = None,
                        int_lumi = None,
                        int_lumi_bkg_scale = None,
                        int_lumi_nice = None,
@@ -682,7 +682,7 @@ def data_mc_comparison(name,
                        normalize_to_unity = None,
                        canvas_title = '',
                        canvas_size = (700, 840),
-                       canvas_top_margin = 0.01,
+                       canvas_top_margin = 0.1,
                        canvas_bottom_margin = 0.3,
                        canvas_left_margin = 0.12,
                        canvas_right_margin = 0.08,
@@ -700,14 +700,16 @@ def data_mc_comparison(name,
                        y_title_size = 0.04,
                        y_label_size = 0.035,
                        x_range = None,
-                       y_range = (None, None),
+                       #y_range = (None, None),
+                       y_range_min = None, 
+                       y_range_max = None,
                        signal_color_override = None,
                        signal_line_width = 3,
                        signal_scale = 1.,
                        signal_draw_cmd = 'hist',
                        data_marker_style = 20,
                        data_marker_size = 1.3,
-                       data_draw_cmd = 'pe',
+                       data_draw_cmd = 'hist',
                        res_divide_opt = 'n pois',
                        res_line_width = 2,
                        res_line_color = ROOT.kBlue+3,
@@ -723,6 +725,7 @@ def data_mc_comparison(name,
                        res_fit = True,
                        legend_pos = None,
                        enable_legend = True,
+                       statbox_size = None,
                        verbose = False,
                        cut_line = None,
                        background_uncertainty = None,
@@ -745,17 +748,6 @@ def data_mc_comparison(name,
     some are hardcoded for now, so fiddling with them may screw things
     up, or not produce the expected behavior. JMTBAD
     
-    If histogram_path, file_path, and int_lumi are not supplied, all
-    of the Sample objects must have a member object named 'hist' that
-    has the histogram preloaded. Otherwise:
-
-    - file_path must be of the format
-    'filesystem/path/to/root/files/filename_%(name)s.root', with name
-    being taken from the Sample object.
-
-    - histogram_path is the path to the histogram inside the ROOT
-    files, e.g. 'histos/RecoJets/njets'.
-
     - int_lumi is the integrated luminosity to scale the MC to, in
     pb^-1. Then the overall scale factor is int_lumi *
     Sample.partial_weight, which already must include number of
@@ -784,92 +776,69 @@ def data_mc_comparison(name,
     JMTBAD finish documentation
     """
 
+
+
     all_samples = background_samples + signal_samples
     if data_samples:
          all_samples.extend(data_samples)
-
+    
+    
     # Sanity checks on the parameters.
     if output_fn is None and plot_saver is None:
         raise ValueError('at least one of output_fn, plot_saver must be supplied')
     elif output_fn is not None and plot_saver is not None:
         raise ValueError('only one of output_fn and plot_saver may be supplied')
 
-    check_params = (file_path is None, histogram_path is None, int_lumi is None)
-    if any(check_params) and not all(check_params):
-        raise ValueError('must supply all of file_path, histogram_path, int_lumi or none of them')
+    first_binning = None
+    bin_width_to_scales = None
+    bkg_ct = 0
+    for sample in all_samples:
+        # Get the histogram, normalize, rebin, and move the
+        # overflow to the last bin.
+        sample.hist = sample
+        xax = sample.hist.GetXaxis()
+        if not first_binning:
+            first_binning = [None] # ibin starts at 1
+            for ibin in xrange(1, xax.GetNbins()+2):
+                first_binning.append(xax.GetBinLowEdge(ibin))
+        else:
+            for ibin in xrange(1, xax.GetNbins()+2):
+                if abs(first_binning[ibin] - xax.GetBinLowEdge(ibin)) > 1e-6:
+                    raise ValueError('inconsistent binning')
+        xax = None
+        move_overflows_into_visible_bins(sample.hist, move_overflows)
 
-    if file_path is None:
-        # Sanity check that all the samples have the hist preloaded.
-        for sample in all_samples:
-            if not hasattr(sample, 'hist') or not issubclass(type(sample.hist), ROOT.TH1):
-                raise ValueError('all sample objects must have hist preloaded if file_path is not supplied')
-    else:
-        # Sanity check needed for the TFile caching below.
-        previous_file_paths = list(set(vars(sample).get('file_path', None) for sample in all_samples))
-        previous_file_paths_ok = len(previous_file_paths) == 1 and previous_file_paths[0] is not None
-        first_binning = None
-        bin_width_to_scales = None
-        for sample in all_samples:
-            if not previous_file_paths_ok:
-                # Cache the TFile and do basic check on the sample
-                # that the number of events is correct (if
-                # fcn_for_nevents_check specified).
-                sample._datamccomp_file_path = file_path
-                sample._datamccomp_filename = file_path % sample
-                sample._datamccomp_file = ROOT.TFile.Open(sample._datamccomp_filename)
-                if sample not in data_samples and fcn_for_nevents_check is not None:
-                    if fcn_for_nevents_check(sample, sample._datamccomp_file) != sample.nevents:
-                        raise ValueError('wrong number of events for %s' % sample.name)
-
-            # Get the histogram, normalize, rebin, and move the
-            # overflow to the last bin.
-            sample.hist = sample._datamccomp_file.Get(histogram_path)
-            if not issubclass(type(sample.hist), ROOT.TH1):
-                raise RuntimeError('histogram %s not found in %s' % (histogram_path, sample._datamccomp_filename))
-
-            xax = sample.hist.GetXaxis()
-            if not first_binning:
-                first_binning = [None] # ibin starts at 1
-                for ibin in xrange(1, xax.GetNbins()+2):
-                    first_binning.append(xax.GetBinLowEdge(ibin))
+        if rebin is not None:
+            sample.hist_before_rebin = sample.hist
+            rebin_name = sample.hist.GetName() + '_rebinned'
+            if type(rebin) in (list, tuple):
+                rebin = array('d', rebin)
+            if type(rebin) == array:
+                if rebin[-1] > sample.hist.GetXaxis().GetXmax():
+                    raise ValueError('rebin_last %f greater than axis max (ROOT will handle this arbitrarily)' % (rebin[-1], sample.hist.GetXaxis().GetXmax()))
+                sample.hist = sample.hist.Rebin(len(rebin)-1, rebin_name, rebin)
             else:
-                for ibin in xrange(1, xax.GetNbins()+2):
-                    if abs(first_binning[ibin] - xax.GetBinLowEdge(ibin)) > 1e-6:
-                        raise ValueError('inconsistent binning')
-            xax = None
-
-            if sample not in data_samples:
-                sample.hist.Scale(sample.partial_weight(sample._datamccomp_file) * int_lumi)
-                if int_lumi_bkg_scale is not None and sample not in signal_samples:
-                    sample.hist.Scale(int_lumi_bkg_scale)
-
-            move_overflows_into_visible_bins(sample.hist, move_overflows)
-
-            if rebin is not None:
-                sample.hist_before_rebin = sample.hist
-                rebin_name = sample.hist.GetName() + '_rebinned'
-                if type(rebin) in (list, tuple):
-                    rebin = array('d', rebin)
-                if type(rebin) == array:
-                    if rebin[-1] > sample.hist.GetXaxis().GetXmax():
-                        raise ValueError('rebin_last %f greater than axis max (ROOT will handle this arbitrarily)' % (rebin[-1], sample.hist.GetXaxis().GetXmax()))
-                    sample.hist = sample.hist.Rebin(len(rebin)-1, rebin_name, rebin)
-                else:
-                    sample.hist = sample.hist.Rebin(rebin, rebin_name)
+                sample.hist = sample.hist.Rebin(rebin, rebin_name)
             
-            if bin_width_to:
-                if bin_width_to_scales is None:
-                    bin_width_to_scales = [None]
-                    for ibin in xrange(1, sample.hist.GetNbinsX()+1):
-                        bin_width_to_scales.append(sample.hist.GetXaxis().GetBinWidth(ibin) / bin_width_to)
+        if bin_width_to:
+            if bin_width_to_scales is None:
+                bin_width_to_scales = [None]
+                for ibin in xrange(1, sample.hist.GetNbinsX()+1):
+                    bin_width_to_scales.append(sample.hist.GetXaxis().GetBinWidth(ibin) / bin_width_to)
 
-                with TH1EntriesProtector(sample.hist) as _:
-                    for ibin in xrange(1, sample.hist.GetNbinsX()+1):
-                        c = sample.hist.GetBinContent(ibin)
-                        e = sample.hist.GetBinError(ibin)
-                        sc = bin_width_to_scales[ibin]
-                        sample.hist.SetBinContent(ibin, c / sc)
-                        sample.hist.SetBinError  (ibin, e / sc)
+            with TH1EntriesProtector(sample.hist) as _:
+                for ibin in xrange(1, sample.hist.GetNbinsX()+1):
+                    c = sample.hist.GetBinContent(ibin)
+                    e = sample.hist.GetBinError(ibin)
+                    sc = bin_width_to_scales[ibin]
+                    sample.hist.SetBinContent(ibin, c / sc)
+                    sample.hist.SetBinError  (ibin, e / sc)
+
+        intl = get_integral(sample.hist)[0]
+        if sample not in data_samples:
+            if len(bkg_partial_weights) > 0 and sample not in signal_samples:
+                sample.hist.Scale(bkg_partial_weights[bkg_ct] * int_lumi)
+                bkg_ct += 1
 
     # Use the first data sample to cache the summed histogram for all
     # the data.
@@ -877,19 +846,20 @@ def data_mc_comparison(name,
     if len(data_samples) >= 1:
         print 'len data samples', len(data_samples)
         data_sample = data_samples[0]
+        data_sample.hist = data_sample
         print 'integ', get_integral(data_sample.hist)[0]
         for ds in data_samples[1:]:
             data_sample.hist.Add(ds.hist)
             print 'integ', get_integral(data_sample.hist)[0]
 
         if normalize_to_data:
-            data_integ = get_integral(data_sample.hist)[0]
+            data_integ = get_integral(data_sample)[0]
             if data_integ == 0:
                 data_integ = 1
-            bkg_integ = sum(get_integral(sample.hist)[0] for sample in background_samples)
+            bkg_integ = sum(get_integral(sample)[0] for sample in background_samples)
             print 'normalize_to_data scaling to equal area: data %f bkg %f sf %f' % (data_integ, bkg_integ, data_integ / bkg_integ)
             for sample in background_samples:
-                sample.hist.Scale(data_integ / bkg_integ)
+                sample.Scale(data_integ / bkg_integ)
     if normalize_to_unity:
         bkg_integ = sum(get_integral(sample.hist)[0] for sample in background_samples)
         for sample in background_samples:
@@ -918,13 +888,60 @@ def data_mc_comparison(name,
     if verbose:
         print name
 
+
+    _hists, draw_cmds = [], []
+    for x in hists:
+        if type(x) in (tuple,list):
+            h,dc = x
+            assert type(dc) == str
+            _hists.append(h)
+            draw_cmds.append(dc)
+        else:
+            _hists.append(x)
+            draw_cmds.append('')
+    hists = _hists
+
+    are_hists  = all(h.Class().GetName().startswith('TH1') or h.Class().GetName().startswith('TProfile') for h in hists)
+    draw_normalized = None 
+    for i,(h,dc) in enumerate(zip(hists, draw_cmds)):
+
+        if are_hists and statbox_size is not None:
+            if move_overflows:
+                move_overflows_into_visible_bins(h, move_overflows)
+            if draw_normalized:
+                h.v = h.GetMaximum() / h.Integral(0,h.GetNbinsX()+1)
+            else:
+                h.v = h.GetMaximum()
+    if are_hists and statbox_size is not None:
+        for i,h in enumerate(sorted(hists, key=lambda h: h.v, reverse=True)):
+            cmd = h.DrawNormalized if draw_normalized else h.Draw
+            dc = draw_cmds[i]
+            if i == 0:
+                if dc: # Draw never liked Draw('')
+                    cmd(dc)
+                else:
+                    cmd()
+            else:
+                cmd('sames ' + dc)
+
+
+    if are_hists:
+        canvas.Update()
+        if statbox_size is None:
+            for h in hists:
+                h.SetStats(0)
+        else:
+            for i,h in enumerate(hists):
+                differentiate_stat_box(h, i, new_size=statbox_size)
+    
+
     legend_entries = []
     stack = ROOT.THStack('s_datamc_' + name, '')
     sum_background = None
+    bkg_ct = 0
     for sample in background_samples:
-        join, nice_name, color = sample.join_info if join_info_override is None else join_info_override(sample)
-        sample.hist.SetLineColor(color)
-        sample.hist.SetFillColor(color)
+        sample.hist = sample 
+        nice_name = sample.hist.GetName()
         if nice_name not in [l[1] for l in legend_entries] or not join:
             legend_entries.append((sample.hist, nice_name, 'F'))
         stack.Add(sample.hist)
@@ -936,13 +953,13 @@ def data_mc_comparison(name,
         if verbose:
             integ = get_integral(sample.hist, 0)
             if integ[0] == 0:
-                print sample.name, '<', 3 * sample.partial_weight(sample._datamccomp_file) * int_lumi, '@95%CL'
+                print sample.name, '<', 3 * bkg_partial_weights[bkg_ct] * int_lumi, '@95%CL'
             else:
                 print sample.name, integ
                 for ibin in xrange(0, sample.hist.GetNbinsX()+2):
                     print '   %6i %15.6f +- %15.6f' % (ibin, sample.hist.GetBinContent(ibin), sample.hist.GetBinError(ibin))
-
-    stack.Draw(stack_draw_cmd)
+        bkg_ct += 1
+    stack.Draw('same ' + stack_draw_cmd)
     stack.SetTitle(';%s;%s' % (x_title, y_title))
 
     if data_sample is not None:
@@ -970,34 +987,34 @@ def data_mc_comparison(name,
 
     if x_range is not None:
         stack.GetXaxis().SetLimits(*x_range)
-    y_range_min, y_range_max = y_range
     if y_range_min is not None:
         stack.SetMinimum(y_range_min)
     if y_range_max is not None:
         stack.SetMaximum(y_range_max)
 
+    sig_ct = 0
     for sample in signal_samples:
-        sample.hist.SetLineColor(sample.color if signal_color_override is None else signal_color_override(sample))
-        sample.hist.SetLineWidth(signal_line_width)
-        sample.hist.Scale(signal_scale)
+        #sample.Scale(signal_scale)
+        sample.hist = sample 
+        sample.name = sample.hist.GetName()
         sample.hist.Draw('same ' + signal_draw_cmd)
         if verbose:
             integ = get_integral(sample.hist, 0)
             if integ[0] == 0:
-                print sample.name, '<', 3 * sample.partial_weight(sample._datamccomp_file) * int_lumi, '@95%CL'
+                print sample.name, '<', 3 * sig_partial_weights[sig_ct] * int_lumi, '@95%CL' 
             else:
                 print sample.name, integ
+        sig_ct += 1
 
     if data_sample is not None:
-        data_sample.hist.SetMarkerStyle(data_marker_style)
-        data_sample.hist.SetMarkerSize(data_marker_size)
+        data_sample.hist = data_sample
         if poisson_intervals:
             data_sample.hist_poissoned = poisson_intervalize(data_sample.hist, rescales=bin_width_to_scales)
             data_sample.hist_poissoned.SetMarkerStyle(data_marker_style)
             data_sample.hist_poissoned.SetMarkerSize(data_marker_size)
             data_sample.hist_poissoned.Draw(data_draw_cmd)
         else:
-            data_sample.hist.Draw('same ' + data_draw_cmd)
+            data_sample.Draw('same ' + data_draw_cmd)
 
     if enable_legend and legend_pos is not None:
         legend_entries.reverse()
@@ -1005,20 +1022,59 @@ def data_mc_comparison(name,
         legend.SetTextFont(42)
         legend.SetBorderSize(0)
         if data_sample is not None:
-            legend.AddEntry(data_sample.hist, 'Data', 'LPE')
+            data_sample.nice_name = data_sample.GetName()
+            legend.AddEntry(data_sample, data_sample.nice_name, 'L')
         for l in legend_entries:
             legend.AddEntry(*l)
         if background_uncertainty is not None:
             legend.AddEntry(sum_background_uncert, bkg_uncert_label, 'F')
         for sample in signal_samples:
-            if '\\' in sample.nice_name:
-                legend.AddEntry(sample.hist, sample.nice_name.split('\\')[0], 'L')
-                legend.AddEntry(sample.hist, sample.nice_name.split('\\')[1], '')
-            else:
-                legend.AddEntry(sample.hist, sample.nice_name, 'L')
+            sample.nice_name = sample.hist.GetName()
+            legend.AddEntry(sample.hist, sample.nice_name, 'L')
         legend.Draw()
     else:
         legend = None
+    
+
+    """
+    _hists, draw_cmds = [], []
+    for x in hists:
+        if type(x) in (tuple,list):
+            h,dc = x
+            assert type(dc) == str
+            _hists.append(h)
+            draw_cmds.append(dc)
+        else:
+            _hists.append(x)
+            draw_cmds.append('')
+    hists = _hists
+
+    are_hists  = all(h.Class().GetName().startswith('TH1') or h.Class().GetName().startswith('TProfile') for h in hists)
+    draw_normalized = None 
+    for i,(h,dc) in enumerate(zip(hists, draw_cmds)):
+
+        if are_hists and statbox_size is not None:
+            if move_overflows:
+                move_overflows_into_visible_bins(h, move_overflows)
+            if draw_normalized:
+                h.v = h.GetMaximum() / h.Integral(0,h.GetNbinsX()+1)
+            else:
+                h.v = h.GetMaximum()
+    if are_hists and statbox_size is not None:
+        for i,h in enumerate(sorted(hists, key=lambda h: h.v, reverse=True)):
+            cmd = h.DrawNormalized if draw_normalized else h.Draw
+            dc = draw_cmds[i]
+            cmd('sames ' + dc) 
+
+    if are_hists:
+        canvas.Update()
+        if statbox_size is None:
+            for h in hists:
+                h.SetStats(0)
+        else:
+            for i,h in enumerate(hists):
+                differentiate_stat_box(h, i, new_size=statbox_size)
+    """   
 
     if cut_line is not None:
         cut_line_coords, cut_line_color, cut_line_width, cut_line_style = cut_line
@@ -1065,7 +1121,9 @@ def data_mc_comparison(name,
         print 'bkg  integral:', sum_background.Integral(0, sum_background.GetNbinsX()+1)
         print
 
+    
     ratio_pad, res_g, old_opt_fit = None, None, None
+    
     if data_sample is not None:
         ratio_pad = ROOT.TPad('ratio_pad_' + name, '', 0, 0, 1, 1)
         ratio_pad.SetTopMargin(1-canvas_bottom_margin + 0.015)
@@ -1116,17 +1174,17 @@ def data_mc_comparison(name,
             #fit_stat_box.SetX2NDC(0)
             #fit_stat_box.SetY1NDC(0)
             #fit_stat_box.SetY2NDC(0)
-
+    
     if plot_saver is not None:
         plot_saver.save(name)
         plot_saver.c = plot_saver.old_c
         plot_saver.c.cd()
     elif output_fn is not None:
         canvas.SaveAs(output_fn)
-
+    
     if old_opt_fit is not None:
         ROOT.gStyle.SetOptFit(old_opt_fit)
-
+    
     return canvas, stack, sum_background, legend, ratio_pad, res_g
 
 def detree(t, branches='run:lumi:event', cut='', xform=lambda x: tuple(int(y) for y in x), delete_tmp=True, save_fn=None):
@@ -1176,7 +1234,8 @@ def differentiate_stat_box(hist, movement=1, new_color=None, new_size=None, colo
     s = hist.FindObject('stats')
     if not s:
         return
-
+    ROOT.gStyle.SetOptStat(2211)
+    
     if color_from_hist:
         new_color = hist.GetLineColor()
 

@@ -543,7 +543,9 @@ def merge(samples, output='merge.root', norm_to=1., norm_path=''):
         if norm_path:
             sample.norm_path = norm_path
         weights.append(sample.partial_weight(sample.fn))
-
+        print(sample.name)
+        print(sample.partial_weight(sample.fn))
+    print("sum weights : "+str(sum(weights)))
     if norm_to > 0:
         norm_to /= sum(weights)
     else:

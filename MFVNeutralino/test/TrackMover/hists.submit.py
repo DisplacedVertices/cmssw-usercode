@@ -2,7 +2,7 @@ from JMTucker.Tools.MetaSubmitter import *
 from JMTucker.Tools.BasicAnalyzer_cfg import *
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers
 
-version = 'ulv30lepelemv4'
+version = 'ulv30lepmumv4'
 dataset = 'trackmover' + version
 samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=True, leptonic=True, met=True, diboson=True, Lepton_data=True)
 #samples = [getattr(Samples, 'example_ttbar_2017')]

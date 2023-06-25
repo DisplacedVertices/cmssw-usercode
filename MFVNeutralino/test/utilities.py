@@ -126,7 +126,7 @@ def cmd_rm_mc_parts():
 
 def _background_samples(trigeff=False, year=2017):
     if _leptonpresel or trigeff:
-        x = []#FIXME['ttbar', 'wjetstolnu', 'dyjetstollM10', 'dyjetstollM50','qcdmupt15', 'ww', 'wz', 'zz'] 
+        x = ['qcdmupt15'] #,'ttbar', 'wjetstolnu', 'wjetstolnu_amcatnlo', 'dyjetstollM10', 'dyjetstollM50','qcdmupt15', 'ww', 'wz', 'zz'] #FIXME 
         if not trigeff:
             x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]] 
             x += ['qcdbctoept%03i' % x for x in [20,30,80,170,250]]
@@ -182,7 +182,7 @@ def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=20
     else:
         if year_to_use==2017:
             year_s = '_2017'
-            scale = 1 # FIXME-AnalysisConstants.int_lumi_2017 * AnalysisConstants.scale_factor_2017
+            scale = -AnalysisConstants.int_lumi_2017 * AnalysisConstants.scale_factor_2017
         elif year_to_use==2018:
             year_s = '_2018'
             scale = -AnalysisConstants.int_lumi_2018 * AnalysisConstants.scale_factor_2018
@@ -207,6 +207,7 @@ def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=20
         if files2:
             cmd = 'samples merge %f qcd%s%s.root ' % (scale, _presel_s, year_s) #FIXME
             cmd += ' '.join(files2)
+            print("scale is "+str(scale))
             print cmd
             if os.system(cmd) != 0:
                 ok = False

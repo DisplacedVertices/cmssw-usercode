@@ -7,7 +7,7 @@ from JMTucker.Tools.ROOTTools import *
 set_style()
 ROOT.TH1.AddDirectory(0)
 
-variables = ['_movedist2_','_ht_','_njets_','_jet_asymm_','_vtx_unc_','_jet_dr_','_jet_deta_','_jet_dphi_','_jet_dind_','_pt0_','_pt1_','_ntks_j0_','_ntks_j1_','_nmovedtracks_','_dphi_sum_j_mv_'] 
+variables = ['_movedist2_','_ht_','_njets_', '_nmuons_', '_muon_pT_', '_muon_abseta_', '_muon_iso_', '_muon_absdxy_', '_neles_', '_ele_pT', '_ele_abseta_', '_ele_iso_', '_ele_absdxy_', '_jet_asymm_','_vtx_unc_','_jet_dr_','_jet_deta_','_jet_dphi_','_jet_dind_','_pt0_','_pt1_','_ntks_j0_','_ntks_j1_','_nmovedtracks_','_dphi_sum_j_mv_'] 
 
 def get_em(fn, scale=1., alpha=1-0.6827):
     f = ROOT.TFile.Open(fn)
@@ -117,7 +117,7 @@ def get_em(fn, scale=1., alpha=1-0.6827):
 
     return f, l, d, c, integ
 
-def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='wjets.root', fn5='signal.root'):
+def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='wjets.root', fn5 = 'wjets_amcatnlo.root', fn6='signal.root', Isshort='dummy', whichlep='Muon'):
     assert ex
     ps = plot_saver(plot_dir('TrackMover_' + ex), size=(600,600), log=False)
 
@@ -132,6 +132,7 @@ def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='wjets
     f_3, l_3, d_3, c_3, integ_3 = get_em(fn3)
     f_4, l_4, d_4, c_4, integ_4 = get_em(fn4)
     f_5, l_5, d_5, c_5, integ_5 = get_em(fn5)
+    f_6, l_6, d_6, c_6, integ_6 = get_em(fn6)
     l = l_1
 
     scale = integ_1 / integ_2
@@ -146,18 +147,24 @@ def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='wjets
         mc   = d_2[name]
         mc2  = d_3[name]
         mc3  = d_4[name]
-        signal = d_5[name]
-        tot = (data, mc, mc2, mc3, signal)
+        mc4 = d_5[name]
+        signal = d_6[name]
+        tot = (data, mc, mc2, mc3, mc4, signal)
          
         if name.endswith('_den'): #or (not name.endswith('_num') and not name.endswith('_den')):
-            data.Scale(1/integ_1)
-            dat.SetTitle()
+            
+            ROOT.gStyle.SetOptStat(2211) #FIXME
+          
+            if (whichlep == "Muon"):
+              data.SetName("SingleMuon 2017")
+            else:
+              data.SetName("SingleElectron 2017")
             data.SetLineWidth(2)
             data.SetMarkerStyle(20)
             data.SetMarkerSize(0.8)
             data.SetLineColor(ROOT.kBlack)
 
-            mc.Scale(1/integ_2)
+            mc.SetName("MC ttbar 2017")
             mc.SetFillStyle(3001)
             mc.SetMarkerStyle(24)
             mc.SetMarkerSize(0.8)
@@ -165,7 +172,7 @@ def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='wjets
             mc.SetLineColor(8)
             mc.SetFillColor(8)
 
-            mc2.Scale(1/integ_3)
+            mc2.SetName("MC combined QCD 2017")
             mc2.SetFillStyle(3001)
             mc2.SetMarkerStyle(24)
             mc2.SetMarkerSize(0.8)
@@ -173,37 +180,51 @@ def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='wjets
             mc2.SetLineColor(6)
             mc2.SetFillColor(6)
             
-            mc3.Scale(1/integ_4)
+            mc3.SetName("MC (W+->lnu)+jets 2017")
             mc3.SetFillStyle(3001)
             mc3.SetMarkerStyle(24)
             mc3.SetMarkerSize(0.8)
             mc3.SetMarkerColor(2)
             mc3.SetLineColor(2)
             mc3.SetFillColor(2)
+
+            mc4.SetName("MC NLO (W+->lnu)+jets 2017")
+            mc4.SetFillStyle(3001)
+            mc4.SetMarkerStyle(24)
+            mc4.SetMarkerSize(0.8)
+            mc4.SetMarkerColor(2)
+            mc4.SetLineColor(46)
+            mc4.SetFillColor(46)
             
-            signal.Scale(1/integ_5)
-            signal.SetFillStyle(3001)
+            signal.SetName("MC (W+->lnu)H->4d 2017")
+            signal.SetLineWidth(2)
             signal.SetMarkerStyle(24)
             signal.SetMarkerSize(0.8)
             signal.SetMarkerColor(4)
             signal.SetLineColor(4)
-            signal.SetFillColor(4)
             
             x_range = None
             y_range = None
-            objs = [mc, data, signal]
+            hist_objs = [data, mc, mc3, mc4, mc2, signal]
             statbox_size = (0.2,0.2)
             if name.endswith('_den'):
                 for g in tot:
                     g.GetYaxis().SetTitle('# of entries')
-                objs = [(mc, 'PE2'), (data, 'P'), (mc2, 'P'), (mc3, 'P'),(signal, 'P')]
+                #objs = [(mc3, 'PE2'), (data, 'P'), (mc2, 'P'), (mc, 'P'),(signal, 'P')]
+                #objs = [(mc3, 'PE2'), (mc2, 'P'), (mc, 'P')]
+                objs = [mc3, mc4, mc2, mc]
                 #y_range = (0, 1.05)
-                statbox_size = (0.2,0.2)
+                statbox_size = (0.2,0.1)
             if 'bs2derr' in name:
                 x_range = (0, 0.01)
+            if '_vtx_unc_' in name:
+                x_range = (0,0.03)
+            if Isshort == "short" and '_movedist2_' in name:
+                x_range = (0,0.5)
 
+            """ 
             ratios_plot(name,
-                        objs,
+                        hist_objs,
                         plot_saver=ps,
                         x_range=x_range,
                         y_range=y_range,
@@ -214,11 +235,30 @@ def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='wjets
                         res_lines=1.,
                         statbox_size=statbox_size,
                         )
-
+            
+            """ 
+            data_mc_comparison(name,
+                        hist_objs,
+                        background_samples = objs,
+                        signal_samples = [signal],
+                        data_samples = [data],
+                        bkg_partial_weights = [0.000652195555232, 0.00250943282198, 1.0/(40163.29), 3.40297010442e-06],
+                        sig_partial_weights = [5.65661819127e-08],
+                        plot_saver=ps,
+                        int_lumi = 40163.29*0.1, #for 2017 only
+                        normalize_to_data = False,
+                        canvas_size = (600, 600),
+                        x_title = mc.GetXaxis().GetTitle(), 
+                        x_range=x_range,
+                        #legend_pos = (0.5,0.7,0.88,0.9),
+                        y_range_max=y_range,
+                        statbox_size=statbox_size,
+                        )
+            
 if __name__ == '__main__':
     import sys
-    if len(sys.argv) < 7:
-        sys.exit('usage: python draw.py tag_for_plots fn1 fn2 f3 f4 f5[fn2 scale factor]')
+    if len(sys.argv) < 9:
+        sys.exit('usage: python draw.py tag_for_plots fn1 fn2 f3 f4 f5 f6[fn2 scale factor] tag_for_300um tag_which_lep')
 
     ex = sys.argv[1]
     fn1 = sys.argv[2]
@@ -226,6 +266,9 @@ if __name__ == '__main__':
     fn3 = sys.argv[4]
     fn4 = sys.argv[5]
     fn5 = sys.argv[6]
-    if len(sys.argv) > 7:
-        mc_scale_factor = float(sys.argv[7])
-    comp(ex, fn1, fn2, fn3, fn4, fn5)
+    fn6 = sys.argv[7]
+    Isshort = sys.argv[8]
+    whichlep = sys.argv[9]
+    if len(sys.argv) > 10:
+        mc_scale_factor = float(sys.argv[10])
+    comp(ex, fn1, fn2, fn3, fn4, fn5, fn6, Isshort, whichlep)

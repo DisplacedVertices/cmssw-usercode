@@ -17,6 +17,8 @@ int main(int argc, char** argv) {
   auto& bs = nt.bs();
   auto& pvs = nt.pvs();
   auto& jets = nt.jets();
+  auto& muons = nt.muons();
+  auto& electrons = nt.electrons();
   //auto& tks = nt.tracks();
   auto& gen = nt.gentruth();
   auto& vs = nt.vertices();
@@ -32,7 +34,7 @@ int main(int argc, char** argv) {
     numdens("all")
   };
 
-  enum { k_decay_x, k_decay_y, k_decay_z, k_decay_xy, k_lspdist2, k_lspdist3, k_lspdistz, k_movedist2, k_movedist3, k_lspeta,k_lsppt, k_npv, k_pvz, k_pvrho, k_pvntracks, k_pvscore, k_ht, k_njets, k_jet_asymm, k_vtx_unc, k_jet_dr, k_jet_deta, k_jet_dphi, k_jet_dind, k_pt0, k_pt1, k_ntks_j0, k_ntks_j1, k_nmovedtracks, k_dphi_sum_j_mv, k_deta_sum_j_mv, k_dphi_sum_q_mv, k_jetpt0_asymm, k_jetpt1_asymm, k_jeteta0_asymm, k_jeteta1_asymm, k_jetdr_asymm, k_jetdravg, k_angle0, k_angle1, k_dphi_j0_mv, k_dphi_j1_mv, k_deta_j0_mv, k_deta_j1_mv, k_dphi_q0_mv, k_dphi_q1_mv, k_jetdphimax, k_jetdetamax, k_qrkdphimax, k_jetdphi_mveta, k_jetmovea3d01, k_jeteta01, k_jetpt01, k_pt_angle0, k_pt_angle1, k_eta_angle0, k_eta_angle1};
+  enum { k_decay_x, k_decay_y, k_decay_z, k_decay_xy, k_lspdist2, k_lspdist3, k_lspdistz, k_movedist2, k_movedist3, k_lspeta,k_lsppt, k_npv, k_pvz, k_pvrho, k_pvntracks, k_pvscore, k_ht, k_njets, k_nmuons, k_muon_pT, k_muon_abseta, k_muon_iso, k_muon_absdxy, k_neles, k_ele_pT, k_ele_abseta, k_ele_iso, k_ele_absdxy, k_jet_asymm, k_vtx_unc, k_jet_dr, k_jet_deta, k_jet_dphi, k_jet_dind, k_pt0, k_pt1, k_ntks_j0, k_ntks_j1, k_nmovedtracks, k_dphi_sum_j_mv, k_deta_sum_j_mv, k_dphi_sum_q_mv, k_jetpt0_asymm, k_jetpt1_asymm, k_jeteta0_asymm, k_jeteta1_asymm, k_jetdr_asymm, k_jetdravg, k_angle0, k_angle1, k_dphi_j0_mv, k_dphi_j1_mv, k_deta_j0_mv, k_deta_j1_mv, k_dphi_q0_mv, k_dphi_q1_mv, k_jetdphimax, k_jetdetamax, k_qrkdphimax, k_jetdphi_mveta, k_jetmovea3d01, k_jeteta01, k_jetpt01, k_pt_angle0, k_pt_angle1, k_eta_angle0, k_eta_angle1};
 
   for (numdens& nd : nds) {
     nd.book(k_decay_x,  "decay_x" , ";SV Decay X-pos [cm]; arb. units", 100, -4, 4);
@@ -53,7 +55,17 @@ int main(int argc, char** argv) {
     nd.book(k_pvscore, "pvscore", ";PV #Sigma p_{T}^{2} (GeV^{2});events/200 GeV^{2}", 200, 0, 40000);
     nd.book(k_ht, "ht", ";#Sigma H_{T} (GeV);events/50 GeV", 20, 0, 1000);
 	nd.book(k_njets, "njets", ";# jets;events/1", 20, 0, 20);
-    nd.book(k_jet_asymm, "jet_asymm", ";Jet asymmetry A_{J}; arb. units", 25, 0, 1);
+	nd.book(k_nmuons, "nmuons", ";# passed offline-sel muons;events/1", 10, 0, 10);
+	nd.book(k_muon_pT, "muon_pT", ";muons p_{T} (GeV);events/1", 50, 0, 200);
+	nd.book(k_muon_abseta, "muon_abseta", ";muons |#eta|; arb. units", 70, 0, 3.5);
+	nd.book(k_muon_iso, "muon_iso", ";muons iso;events/1", 200, 0, 0.15);
+	nd.book(k_muon_absdxy, "muon_absdxy", ";muons |dxy| cm; arb. units", 80, 0, 0.2);
+	nd.book(k_neles, "neles", ";# passed offline-sel electrons;events/1", 10, 0, 10);
+	nd.book(k_ele_pT, "ele_pT", ";electrons p_{T} (GeV);events/1", 50, 0, 200);
+	nd.book(k_ele_abseta, "ele_abseta", ";electrons |#eta|; arb. units", 70, 0, 3.5);
+	nd.book(k_ele_iso, "ele_iso", ";electrons iso;events/1", 200, 0, 0.15);
+	nd.book(k_ele_absdxy, "ele_absdxy", ";electrons |dxy| cm; arb. units", 80, 0, 0.2);
+	nd.book(k_jet_asymm, "jet_asymm", ";Jet asymmetry A_{J}; arb. units", 25, 0, 1);
 	nd.book(k_vtx_unc, "vtx_unc", ";dist3d(move vector, vtx); arb. units", 100, 0, 0.1);
 	nd.book(k_jet_dr, "jet_dr", ";jets #DeltaR; arb. units", 70, 0, 7);
 	nd.book(k_jet_deta, "jet_deta", ";jets #DeltaEta; arb. units", 70, 0, 7);
@@ -123,12 +135,20 @@ int main(int argc, char** argv) {
     for (numdens& nd : nds)
       nd.setw(w);
 
+
     const size_t nvtx = vs.n();
     const double lspdist2 = gen.lspdist2();
     const double lspdist3 = gen.lspdist3();
     const double lspdistz = gen.lspdistz();
 
-    // Instantiate some jet & quark variables to be filled later
+    // Instantiate some jet, leptons & quark variables to be filled later
+	int nselmuons = 0, nseleles = 0;
+	double muon_pT = -99, ele_pT = -99;
+	double muon_abseta = -99, ele_abseta = -99;
+	double muon_iso = 99, ele_iso = 99;
+	double muon_absdxy = -99, ele_absdxy = -99;
+
+
     float   jet_aj = -9.9, jet_dr = -9.9, jet_deta = -9.9, jet_dphi = -9.9, jet_dind = -9.9, jet_pt_0 = -9.9, jet_pt_1 = -9.9;
     float   jet_eta_0 = -9.9, jet_eta_1 = -9.9;
     double  jet0_lsp_angle = -9.9, jet1_lsp_angle = -9.9;
@@ -155,6 +175,27 @@ int main(int argc, char** argv) {
 
       if (dijet) {
         //assert(abs(gen.id(ilsp)) == 1000006); // stop pair production
+
+
+		for (int i = 0, ie = muons.n(); i < ie; ++i) {
+			if (muons.pt(i) > 29.0 && abs(muons.eta(i)) < 2.4 && muons.isMed(i) && muons.iso(i) < 0.15) {
+				  nselmuons += 1;
+				  muon_pT = muons.pt(i);
+				  muon_abseta = abs(muons.eta(i));
+				  muon_iso = muons.iso(i);
+				  muon_absdxy = abs(muons.dxy(i));
+			}
+		}
+
+		for (int i = 0, ie = electrons.n(); i < ie; ++i) {
+			if (electrons.pt(i) > 38.0 && abs(electrons.eta(i)) < 2.4 && electrons.isTight(i) && electrons.passveto(i) && electrons.iso(i) < 0.1) {
+				  nseleles += 1;
+				  ele_pT = electrons.pt(i);
+				  ele_abseta = abs(electrons.eta(i));
+				  ele_iso = electrons.iso(i);
+				  ele_absdxy = abs(electrons.dxy(i));
+			}
+		}
 
         // Match decay daughters to the closest (by dR) reconstructed jet
         std::vector<int> closest_jets(2,-1), quark_assoc(2,-1);
@@ -253,6 +294,16 @@ int main(int argc, char** argv) {
         nd.den(k_pvscore, pvs.score(0));
         nd.den(k_ht, jets.ht());
 		nd.den(k_njets, jets.n());
+		nd.den(k_nmuons, nselmuons);
+		nd.den(k_muon_pT, muon_pT);
+		nd.den(k_muon_abseta, muon_abseta);
+		nd.den(k_muon_iso, muon_iso);
+		nd.den(k_muon_absdxy, muon_absdxy);
+		nd.den(k_neles, nseleles);
+		nd.den(k_ele_pT, ele_pT);
+		nd.den(k_ele_abseta, ele_abseta);
+		nd.den(k_ele_iso, ele_iso);
+		nd.den(k_ele_absdxy, ele_absdxy);
         nd.den(k_jet_asymm, jet_aj);
 		nd.den(k_vtx_unc, dist2move);
 		nd.den(k_jet_dr, jet_dr);
@@ -337,6 +388,16 @@ int main(int argc, char** argv) {
         nd.num(k_pvscore, pvs.score(0));
         nd.num(k_ht, jets.ht());
 		nd.num(k_njets, jets.n());
+		nd.num(k_nmuons, nselmuons);
+		nd.num(k_muon_pT, muon_pT);
+		nd.num(k_muon_abseta, muon_abseta);
+		nd.num(k_muon_iso, muon_iso);
+		nd.num(k_muon_absdxy, muon_absdxy);
+		nd.num(k_neles, nseleles);
+		nd.num(k_ele_pT, ele_pT);
+		nd.num(k_ele_abseta, ele_abseta);
+		nd.num(k_ele_iso, ele_iso);
+		nd.num(k_ele_absdxy, ele_absdxy);
         nd.num(k_jet_asymm, jet_aj);
 		nd.num(k_vtx_unc, dist2move);
 		nd.num(k_jet_dr, jet_dr);
