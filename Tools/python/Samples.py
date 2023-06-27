@@ -1299,6 +1299,7 @@ qcdbctoept250_2017.add_dataset('trackmoverulv30lepmumv5', '/FakeDataset/fakefile
 wjetstolnu_2017.add_dataset('trackmoverulv30lepmumv5', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
 wjetstolnu_amcatnlo_2017.add_dataset('trackmoverulv30lepmumv5', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
 dyjetstollM10_2017.add_dataset('trackmoverulv30lepmumv5', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
+dyjetstollM50_2017.add_dataset('trackmoverulv30lepmumv5', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
 ww_2017.add_dataset('trackmoverulv30lepmumv5', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
 zz_2017.add_dataset('trackmoverulv30lepmumv5', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
 wz_2017.add_dataset('trackmoverulv30lepmumv5', '/FakeDataset/fakefile-FakePublish-5b6a581e4ddd41b130711a045d5fecb9/USER', -1)
