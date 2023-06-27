@@ -40,7 +40,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
 
     #samples = pick_samples(dataset, all_signal='only')
-    samples = [getattr(Samples, 'WplusHToSSTodddd_tau30mm_M55_2017')] 
+    samples = [getattr(Samples, 'ZHToSSTodddd_tau1mm_M55_2017')] 
     set_splitting(samples, dataset, 'ntuple')
     """
     cs = CondorSubmitter('TrackMoverMCTruth' + version,

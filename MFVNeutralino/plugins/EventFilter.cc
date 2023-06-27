@@ -125,6 +125,10 @@ bool MFVEventFilter::filter(edm::Event& event, const edm::EventSetup&) {
   
   for (const pat::Muon& muon : *muons) {
     //if (muon_selector(muon) && muon.pt() > min_muon_pt)
+    reco::TrackRef mtk = muon.globalTrack();
+    if (mtk.isNull()){
+      continue;
+    }
     if (muon.pt() > min_muon_pt && abs(muon.eta()) < 2.4) {
 
       //new muon selector : is cut based medium & iso < 0.15
@@ -149,6 +153,10 @@ bool MFVEventFilter::filter(edm::Event& event, const edm::EventSetup&) {
       for (const pat::Electron& electron : *electrons) {
         // if (electron_selector(electron) && electron.pt() > min_electron_pt)
         //new electron selector : is cut based tight & iso < 0.10
+        reco::GsfTrackRef etk = electron.gsfTrack();
+        if (etk.isNull()){
+          continue;
+        }
         if (electron.pt() > min_electron_pt && abs(electron.eta()) < 2.4) {
       
           bool isTightEl = electron.electronID("cutBasedElectronID-Fall17-94X-V1-tight");

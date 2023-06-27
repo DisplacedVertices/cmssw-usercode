@@ -75,7 +75,7 @@ def cmd_hadd_data():
 
         have = []
         year_eras = [
-            ('2017', 'BCFE'), #missing D
+            ('2017', 'BCDFE'), 
             ('2018', 'ABCD'),
             ]
 
@@ -126,7 +126,8 @@ def cmd_rm_mc_parts():
 
 def _background_samples(trigeff=False, year=2017):
     if _leptonpresel or trigeff:
-        x = ['qcdmupt15'] #,'ttbar', 'wjetstolnu', 'wjetstolnu_amcatnlo', 'dyjetstollM10', 'dyjetstollM50','qcdmupt15', 'ww', 'wz', 'zz'] #FIXME 
+        x = ['qcdmupt15'] #,'ttbar', 'wjetstolnu_amcatnlo', 'dyjetstollM10', 'dyjetstollM50', 'ww', 'wz', 'zz'] #FIXME 
+        #x = ['ttbar', 'ww', 'wz', 'zz'] #FIXME 
         if not trigeff:
             x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]] 
             x += ['qcdbctoept%03i' % x for x in [20,30,80,170,250]]

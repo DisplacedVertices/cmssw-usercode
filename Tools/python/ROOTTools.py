@@ -985,13 +985,14 @@ def data_mc_comparison(name,
         sum_background_uncert.Draw('E2 same')
         stack.SetMaximum(stack.GetMaximum() * (1.1 + extra_bkg_uncert_frac))
 
+    
     if x_range is not None:
         stack.GetXaxis().SetLimits(*x_range)
     if y_range_min is not None:
         stack.SetMinimum(y_range_min)
     if y_range_max is not None:
         stack.SetMaximum(y_range_max)
-
+    
     sig_ct = 0
     for sample in signal_samples:
         #sample.Scale(signal_scale)
