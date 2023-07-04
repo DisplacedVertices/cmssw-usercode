@@ -4,8 +4,22 @@ namespace mfv {
   // be sure these end in _v
   const char* hlt_paths[mfv::n_hlt_paths] = {
     "HLT_PFHT1050_v",
-    "HLT_Ele15_IsoVVVL_PFHT450_v",
-    "HLT_Mu15_IsoVVVL_PFHT450_v",
+
+    // lepton triggers 
+    "HLT_Ele27_WPTight_Gsf_v",
+    "HLT_Ele32_WPTight_Gsf_v",
+    "HLT_Ele35_WPTight_Gsf_v",
+    "HLT_Ele115_CaloIdVT_GsfTrkIdT_v",
+    "HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165_v",
+    "HLT_IsoMu24_v",
+    "HLT_IsoMu27_v",
+    "HLT_Mu50_v",
+
+    // // displaced lepton triggers 
+    "HLT_Mu43NoFiltersNoVtx_Photon43_CaloIdL_v",
+    "HLT_Diphoton30_22_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass90_v",
+    "HLT_DoublePhoton70_v",
+    "HLT_DoubleMu43NoFiltersNoVtx_v",
 
     // 2017 bjet triggers
     "HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33_v",
@@ -21,30 +35,24 @@ namespace mfv {
     "HLT_PFHT400_SixPFJet32_DoublePFBTagDeepCSV_2p94_v",
     "HLT_PFHT450_SixPFJet36_PFBTagDeepCSV_1p59_v",
 
-    //Lepton triggers 
-    "HLT_Ele35_WPTight_Gsf_v",
-    "HLT_Ele115_CaloIdVT_GsfTrkIdT_v",
-    "HLT_Ele50_CaloIdVT_GsfTrkIdT_PFJet165_v",
-    "HLT_IsoMu27_v",
-    "HLT_Mu50_v",
-
-    //2018 and 2016 Single Ele trigger
-    "HLT_Ele32_WPTight_Gsf_v",
-    "HLT_Ele27_WPTight_Gsf_v",
-
-
-    // Displaced Dijet triggers
+    // 2017 + 2018 Displaced Dijet triggers
     "HLT_HT430_DisplacedDijet40_DisplacedTrack_v",
     "HLT_HT650_DisplacedDijet60_Inclusive_v",
-    //"HLT_PFMET120_PFMHT120_IDTight_v",
+
+    // 2016 Displaced Dijet Triggers
+    "HLT_HT350_DisplacedDijet40_DisplacedTrack_v",
+    "HLT_HT650_DisplacedDijet80_Inclusive_v",
+
+    // 2016 Bjet triggers
+    "HLT_QuadJet45_TripleBTagCSV_p087_v",
+    "HLT_DoubleJet90_Double30_TripleBTagCSV_p087_v",
+    "HLT_DoubleJetsC100_DoubleBTagCSV_p014_DoublePFJetsC100MaxDeta1p6_v",
+
+    // MET trigger
     "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight_v",
 
-    //Displaced Lepton triggers
-    "HLT_Mu43NoFiltersNoVtx_Photon43_CaloIdL_v",
-    "HLT_Diphoton30_22_R9Id_OR_IsoCaloId_AND_HE_R9Id_Mass90_v",
-    "HLT_DoublePhoton70_v",
-    "HLT_DoubleMu43NoFiltersNoVtx_v",
-
+    // Low-HT trigger to study filters requiring HLT tracks
+    //"HLT_HT425_v",
 
   };
 
@@ -89,4 +97,5 @@ namespace mfv {
     "Flag_globalTightHalo2016Filter",
     "Flag_CSCTightHalo2015Filter"
   };
+
 }
