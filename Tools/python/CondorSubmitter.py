@@ -99,10 +99,6 @@ arguments = $(Process)
 Output = stdout.$(Process)
 Error = stderr.$(Process)
 Log = log.$(Process)
-request_memory = 3 GB
-request_disk = 3 GB
-requirements = TARGET.HAS_OSG_WN_CLIENT =?= TRUE
-requirements = TARGET.OpSysMajorVer == 7
 stream_output = false
 stream_error = false
 notification = never
