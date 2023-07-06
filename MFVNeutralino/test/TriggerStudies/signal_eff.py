@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import os
 from JMTucker.Tools.ROOTTools import *
 from JMTucker.Tools import Samples

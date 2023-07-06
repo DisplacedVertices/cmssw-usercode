@@ -1,8 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 from JMTucker.Tools.PATTupleSelection_cfi import jtupleParams
 
-#currently setting up to work with basic event filter; electron & muon pt > 5 
-# for single lepton : min 2 jets; min 1 lepton
 
 mfvEventFilter = cms.EDFilter('MFVEventFilter',
                               mode = cms.string('either'),
@@ -13,10 +11,10 @@ mfvEventFilter = cms.EDFilter('MFVEventFilter',
                               min_ht = cms.double(1200),
                               muons_src = cms.InputTag('selectedPatMuons'),
                               muon_cut = jtupleParams.muonCut,
-                              min_muon_pt = cms.double(5),
+                              min_muon_pt = cms.double(20),
                               electrons_src = cms.InputTag('selectedPatElectrons'),
                               electron_cut = jtupleParams.electronCut,
-                              min_electron_pt = cms.double(5),
+                              min_electron_pt = cms.double(20),
                               min_nleptons = cms.int32(1),
                               rho_src = cms.InputTag('fixedGridRhoFastjetAll'),
                               electron_effective_areas = cms.FileInPath('RecoEgamma/ElectronIdentification/data/Fall17/effAreaElectrons_cone03_pfNeuHadronsAndPhotons_92X.txt'),
@@ -28,7 +26,7 @@ mfvEventFilter = cms.EDFilter('MFVEventFilter',
                               )
 
 mfvEventFilterJetsOnly = mfvEventFilter.clone(mode = 'jets only')
-mfvEventFilterLeptonsOnly = mfvEventFilter.clone(mode = 'leptons only', min_ht = cms.double(-1), min_njets = cms.int32(2), min_pt_for_ht = cms.double(-1))
+mfvEventFilterLeptonsOnly = mfvEventFilter.clone(mode = 'leptons only', min_ht = cms.double(-1), min_njets = cms.int32(1), min_pt_for_ht = cms.double(-1))
 mfvEventFilterLepORDisplacedLep = mfvEventFilter.clone(mode = 'lep OR displaced lep', min_ht = cms.double(-1), min_njets = cms.int32(2), min_pt_for_ht = cms.double(-1))
 mfvEventFilterHTORBjetsORDisplacedDijet = mfvEventFilter.clone(mode = 'HT OR bjets OR displaced dijet', min_ht = cms.double(-1))
 mfvEventFilterBjetsORDisplacedDijetVetoHT = mfvEventFilter.clone(mode = 'bjets OR displaced dijet veto HT', min_ht = cms.double(-1))

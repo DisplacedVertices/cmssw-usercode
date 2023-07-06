@@ -18,8 +18,8 @@ cov = ['dxyerr', 'dszerr']
 etabins = ['lt1p5', 'gt1p5']
 #make better bin organization for use 
 #eta < 1.5
-lep_bins_lt1p5 = [x for x in range(20, 70, 10)]
-lep_bins_lt1p5 += [x for x in range(70, 120, 20)]
+lep_bins_lt1p5 = [x for x in range(20, 60, 10)]
+lep_bins_lt1p5 += [x for x in range(60, 120, 20)]
 lep_bins_lt1p5 += [x for x in range(120, 240, 40)]
 
 seltracks_bins_lt1p5 = [x for x in range(0, 10, 2)]
@@ -29,9 +29,9 @@ seltracks_bins_lt1p5 += [x for x in range(60, 140, 40)]
 seltracks_bins_lt1p5 += [x for x in range(140,260,60)]
 
 #eta > 1.5 
-ele_bins_gt1p5 = [x for x in range(20, 70, 10)]
-ele_bins_gt1p5 += [x for x in range(70, 120, 20)]
-ele_bins_gt1p5 += [x for x in range(120, 240, 40)]
+ele_bins_gt1p5 = [x for x in range(20, 60, 10)]
+ele_bins_gt1p5 += [x for x in range(60, 100, 20)]
+ele_bins_gt1p5 += [x for x in range(100, 250, 50)]
                     
 #good muons 
 mu_bins_gt1p5 = [x for x in range(20, 80, 5)]
@@ -58,17 +58,17 @@ datasets = ['SingleLepton%(yr)s%(era)s' % locals() for yr in [year] for era in e
 
 
 
-# hn = 'h_pass_muon_tracks_%s_v_pt'
-# track = 'pass_mu'
-hn = 'h_pass_ele_tracks_%s_v_pt'
-track = 'pass_ele'
+hn = 'h_pass_muon_tracks_%s_v_pt'
+track = 'pass_mu'
+# hn = 'h_pass_ele_tracks_%s_v_pt'
+# track = 'pass_ele'
 #hn_1d = 'h_pass_ele_tracks_pt'
 # hn = 'h_sel_nolep_tracks_%s_v_pt'
 # track = 'sel_track'
 #pt_slices = ['pt_20', 'pt_40', 'pt_60', 'pt_90', 'pt_130', 'pt_200']
 
-is_muon = False
-is_ele = True
+is_muon = True
+is_ele = False
 is_seltracks = False
 
 fn_string = '/afs/hep.wisc.edu/home/acwarden/crabdirs/TrackingTreerULV1_Lepm_cut0_eta%s_2018_wsellep/%s.root'
@@ -284,16 +284,21 @@ def fit_func_dict(cov, etabin):
                         # 'SingleLepton2017F':'(x>=20 && x<=200)*pol1(0)'
                         
                         #Good Muon
-                        # 'SingleLepton2018A':'(x>=20 && x<=80)*pol1(0) + (x>80 && x<=200)*pol1(2)',
-                        # 'SingleLepton2018B':'(x>=20 && x<=80)*pol1(0) + (x>80 && x<=200)*pol1(2)',
-                        # 'SingleLepton2018C':'(x>=20 && x<=80)*pol1(0) + (x>80 && x<=200)*pol1(2)',
-                        # 'SingleLepton2018D':'(x>=20 && x<=80)*pol1(0) + (x>80 && x<=200)*pol1(2)',
+                        # 'SingleLepton2018A':'(x>=20 && x<=60)*pol1(0) + (x>=60 && x<=200)*pol1(2)',
+                        # 'SingleLepton2018B':'(x>=20 && x<=60)*pol1(0) + (x>=60 && x<=200)*pol1(2)',
+                        # 'SingleLepton2018C':'(x>=20 && x<=60)*pol1(0) + (x>=60 && x<=200)*pol1(2)',
+                        # 'SingleLepton2018D':'(x>=20 && x<=60)*pol1(0) + (x>=60 && x<=200)*pol1(2)',
+                        
+                        'SingleLepton2018A':'(x>=20 && x<=200)*pol1(0)',
+                        'SingleLepton2018B':'(x>=20 && x<=200)*pol1(0)',
+                        'SingleLepton2018C':'(x>=20 && x<=200)*pol1(0)',
+                        'SingleLepton2018D':'(x>=20 && x<=200)*pol1(0)'
                         
                         #Good Electron
-                        'SingleLepton2018A':'(x>=20 && x<=70)*pol2(0) + (x>70 && x<=200)*pol1(3)',
-                        'SingleLepton2018B':'(x>=20 && x<=70)*pol2(0) + (x>70 && x<=200)*pol1(3)',
-                        'SingleLepton2018C':'(x>=20 && x<=70)*pol2(0) + (x>70 && x<=200)*pol1(3)',
-                        'SingleLepton2018D':'(x>=20 && x<=70)*pol2(0) + (x>70 && x<=200)*pol1(3)',
+                        # 'SingleLepton2018A':'(x>=20 && x<=60)*pol2(0) + (x>=60 && x<=200)*pol1(3)',
+                        # 'SingleLepton2018B':'(x>=20 && x<=60)*pol2(0) + (x>=60 && x<=200)*pol1(3)',
+                        # 'SingleLepton2018C':'(x>=20 && x<=60)*pol2(0) + (x>=60 && x<=200)*pol1(3)',
+                        # 'SingleLepton2018D':'(x>=20 && x<=60)*pol2(0) + (x>=60 && x<=200)*pol1(3)',
                         
                         # # Group C) sel tracks 
                         # 'SingleLepton2017B':'(x<=5)*pol2(0) + (x>5 && x<=40)*pol1(3) + (x>40 && x<=200)*pol1(5)', 
@@ -301,10 +306,10 @@ def fit_func_dict(cov, etabin):
                         # 'SingleLepton2017D':'(x<=5)*pol2(0) + (x>5 && x<=200)*pol1(3)',
                         # 'SingleLepton2017E':'(x<=5)*pol2(0) + (x>5 && x<=25)*pol1(3) + (x>25 && x<=200)*pol1(5)',
                         # 'SingleLepton2017F':'(x<=5)*pol2(0) + (x>5 && x<=200)*pol1(3)'
-                        # 'SingleLepton2018A':'(x<=4)*pol1(0) + (x>4 && x<=18)*pol1(2) + (x>18 && x<=200)*pol2(4)',
-                        # 'SingleLepton2018B':'(x<=4)*pol1(0) + (x>4 && x<=18)*pol1(2) + (x>18 &&x<=200)*pol2(4)', 
-                        # 'SingleLepton2018C':'(x<=4)*pol1(0) + (x>4 && x<=18)*pol1(2) + (x>18 && x<=200)*pol2(4)', 
-                        # 'SingleLepton2018D':'(x<=4)*pol1(0) + (x>4 && x<=18)*pol1(2) + (x>18 && x<=200)*pol2(4)' 
+                        # 'SingleLepton2018A':'(x<=4)*pol1(0) + (x>=4 && x<=18)*pol1(2) + (x>=18 && x<=200)*pol2(4)',
+                        # 'SingleLepton2018B':'(x<=4)*pol1(0) + (x>=4 && x<=18)*pol1(2) + (x>=18 &&x<=200)*pol2(4)', 
+                        # 'SingleLepton2018C':'(x<=4)*pol1(0) + (x>=4 && x<=18)*pol1(2) + (x>=18 && x<=200)*pol2(4)', 
+                        # 'SingleLepton2018D':'(x<=4)*pol1(0) + (x>=4 && x<=18)*pol1(2) + (x>=18 && x<=200)*pol2(4)' 
 
             }
        # dxyerr gt1p5
@@ -327,16 +332,21 @@ def fit_func_dict(cov, etabin):
                         # 'SingleLepton2017F':'(x>=20 && x<=200)*pol1(0)'
                         
                         #Good Muon
-                        # 'SingleLepton2018A':'(x>=20 && x<=55)*pol1(0) + (x>55 && x<=200)*pol1(2)',
-                        # 'SingleLepton2018B':'(x>=20 && x<=55)*pol1(0) + (x>55 && x<=200)*pol1(2)',
-                        # 'SingleLepton2018C':'(x>=20 && x<=55)*pol1(0) + (x>55 && x<=200)*pol1(2)',
-                        # 'SingleLepton2018D':'(x>=20 && x<=55)*pol1(0) + (x>55 && x<=200)*pol1(2)'
+                        # 'SingleLepton2018A':'(x>=20 && x<=60)*pol1(0) + (x>=60 && x<=200)*pol1(2)',
+                        # 'SingleLepton2018B':'(x>=20 && x<=60)*pol1(0) + (x>=60 && x<=200)*pol1(2)',
+                        # 'SingleLepton2018C':'(x>=20 && x<=60)*pol1(0) + (x>=60 && x<=200)*pol1(2)',
+                        # 'SingleLepton2018D':'(x>=20 && x<=60)*pol1(0) + (x>=60 && x<=200)*pol1(2)',
+                        
+                        'SingleLepton2018A':'(x>=20 && x<=200)*pol1(0)',
+                        'SingleLepton2018B':'(x>=20 && x<=200)*pol1(0)',
+                        'SingleLepton2018C':'(x>=20 && x<=200)*pol1(0)',
+                        'SingleLepton2018D':'(x>=20 && x<=200)*pol1(0)'
                         
                         #Good Electron
-                        'SingleLepton2018A':'(x>=20 && x<=70)*pol2(0) + (x>70 && x<=200)*pol2(3)', # 65 -> 70
-                        'SingleLepton2018B':'(x>=20 && x<=65)*pol2(0) + (x>65 && x<=200)*pol2(3)',
-                        'SingleLepton2018C':'(x>=20 && x<=70)*pol2(0) + (x>70 && x<=200)*pol2(3)',
-                        'SingleLepton2018D':'(x>=20 && x<=65)*pol2(0) + (x>65 && x<=200)*pol2(3)'
+                        # 'SingleLepton2018A':'(x>=20 && x<=70)*pol2(0) + (x>=70 && x<=200)*pol2(3)', # 65 -> 70
+                        # 'SingleLepton2018B':'(x>=20 && x<=65)*pol2(0) + (x>=65 && x<=200)*pol2(3)',
+                        # 'SingleLepton2018C':'(x>=20 && x<=70)*pol2(0) + (x>=70 && x<=200)*pol2(3)',
+                        # 'SingleLepton2018D':'(x>=20 && x<=65)*pol2(0) + (x>=65 && x<=200)*pol2(3)'
 
                         # sel tracks 
                         # 'SingleLepton2017B':'(x<=5)*pol2(0) + (x>5 && x<=12)*pol2(3) + (x>12 && x<=45)*pol1(6) + (x>45 && x<=200)*pol1(8)',
@@ -344,10 +354,10 @@ def fit_func_dict(cov, etabin):
                         # 'SingleLepton2017D':'(x<=5)*pol2(0) + (x>5 && x<=10)*pol2(3) + (x>10 && x<=45)*pol1(6) + (x>45 && x<=200)*pol1(8)', 
                         # 'SingleLepton2017E':'(x<=5)*pol2(0) + (x>5 && x<=12)*pol2(3) + (x>12 && x<=200)*pol1(6)',
                         # 'SingleLepton2017F':'(x<=5)*pol2(0) + (x>5 && x<=11)*pol2(3) + (x>11 && x<=200)*pol1(6)'
-                        # 'SingleLepton2018A':'(x<=4)*pol1(0) + (x>4 && x<=11)*pol2(2) + (x>11 && x<=200)*pol2(5)',
-                        # 'SingleLepton2018B':'(x<=4)*pol1(0) + (x>4 && x<=12)*pol2(2) + (x>12 && x<=200)*pol2(5)', 
-                        # 'SingleLepton2018C':'(x<=4)*pol1(0) + (x>4 && x<=12)*pol2(2) + (x>12 && x<=200)*pol2(5)', 
-                        # 'SingleLepton2018D':'(x<=4)*pol1(0) + (x>4 && x<=12)*pol2(2) + (x>12 && x<=200)*pol2(5)' 
+                        # 'SingleLepton2018A':'(x<=4)*pol1(0) + (x>=4 && x<=11)*pol2(2) + (x>=11 && x<=200)*pol2(5)',
+                        # 'SingleLepton2018B':'(x<=4)*pol1(0) + (x>=4 && x<=12)*pol2(2) + (x>=12 && x<=200)*pol2(5)', 
+                        # 'SingleLepton2018C':'(x<=4)*pol1(0) + (x>=4 && x<=12)*pol2(2) + (x>=12 && x<=200)*pol2(5)', 
+                        # 'SingleLepton2018D':'(x<=4)*pol1(0) + (x>=4 && x<=12)*pol2(2) + (x>=12 && x<=200)*pol2(5)' 
 
                         }
   
@@ -381,10 +391,10 @@ def fit_func_dict(cov, etabin):
                         # 'SingleLepton2017D':'(x<=5)*pol2(0) + (x>5 && x<=200)*pol1(3)',
                         # 'SingleLepton2017E':'(x<=5)*pol2(0) + (x>5 && x<=200)*pol1(3)',
                         # 'SingleLepton2017F':'(x<=5)*pol2(0) + (x>5 && x<=200)*pol1(3)',
-                        # 'SingleLepton2018A':'(x<=4)*pol1(0) + (x>4 && x<=10)*pol1(2) + (x>10 && x<=22)*pol1(4) + (x>22 && x<=200)*pol2(6)',
-                        # 'SingleLepton2018B':'(x<=4)*pol1(0) + (x>4 && x<=9)*pol2(2) + (x>9 && x<=200)*pol2(5)',
-                        # 'SingleLepton2018C':'(x<=4)*pol1(0) + (x>4 && x<=9)*pol1(2) + (x>9 && x<=200)*pol1(4)', 
-                        # 'SingleLepton2018D':'(x<=3)*pol1(0) + (x>3 && x<=9)*pol1(2) + (x>9 && x<=200)*pol2(5)' 
+                        # 'SingleLepton2018A':'(x<=4)*pol1(0) + (x>=4 && x<=10)*pol1(2) + (x>=10 && x<=22)*pol1(4) + (x>=22 && x<=200)*pol2(6)',
+                        # 'SingleLepton2018B':'(x<=4)*pol1(0) + (x>=4 && x<=10)*pol1(2) + (x>=10 && x<=200)*pol2(4)',
+                        # 'SingleLepton2018C':'(x<=4)*pol1(0) + (x>=4 && x<=10)*pol1(2) + (x>=10 && x<=200)*pol1(4)', 
+                        # 'SingleLepton2018D':'(x<=3)*pol1(0) + (x>3 && x<=8)*pol1(2) + (x>=8 && x<=200)*pol1(4)' 
 
                         }
         #dsz err gt1p5
@@ -405,17 +415,22 @@ def fit_func_dict(cov, etabin):
                         # 'SingleLepton2017E':'(x>=20 && x<=200)*pol1(0)',
                         # 'SingleLepton2017F':'(x>=20 && x<=200)*pol1(0)'
                         
-                        #Good Muon
-                        'SingleLepton2018A':'(x>=20 && x<=60)*pol2(0) + (x>60 && x<=200)*pol1(3)',
-                        'SingleLepton2018B':'(x>=20 && x<=60)*pol2(0) + (x>60 && x<=200)*pol1(3)',
-                        'SingleLepton2018C':'(x>=20 && x<=60)*pol2(0) + (x>60 && x<=200)*pol1(3)',
-                        'SingleLepton2018D':'(x>=20 && x<=60)*pol2(0) + (x>60 && x<=200)*pol1(3)',
+                        # #Good Muon
+                        # 'SingleLepton2018A':'(x>=20 && x<=60)*pol2(0) + (x>=60 && x<=200)*pol1(3)',
+                        # 'SingleLepton2018B':'(x>=20 && x<=60)*pol2(0) + (x>=60 && x<=200)*pol1(3)',
+                        # 'SingleLepton2018C':'(x>=20 && x<=60)*pol2(0) + (x>=60 && x<=200)*pol1(3)',
+                        # 'SingleLepton2018D':'(x>=20 && x<=60)*pol2(0) + (x>=60 && x<=200)*pol1(3)',
+                        
+                        'SingleLepton2018A':'(x>=20 && x<=200)*pol1(0)',
+                        'SingleLepton2018B':'(x>=20 && x<=200)*pol1(0)',
+                        'SingleLepton2018C':'(x>=20 && x<=200)*pol1(0)',
+                        'SingleLepton2018D':'(x>=20 && x<=200)*pol1(0)',
                         
                         #Good Electron
-                        'SingleLepton2018A':'(x>=20 && x<=65)*pol2(0) + (x>65 && x<=200)*pol2(3)',
-                        'SingleLepton2018B':'(x>=20 && x<=65)*pol2(0) + (x>65 && x<=200)*pol2(3)',
-                        'SingleLepton2018C':'(x>=20 && x<=65)*pol2(0) + (x>65 && x<=200)*pol2(3)',
-                        'SingleLepton2018D':'(x>=20 && x<=65)*pol2(0) + (x>65 && x<=200)*pol2(3)'
+                        # 'SingleLepton2018A':'(x>=20 && x<=65)*pol2(0) + (x>=65 && x<=200)*pol2(3)',
+                        # 'SingleLepton2018B':'(x>=20 && x<=65)*pol2(0) + (x>=65 && x<=200)*pol2(3)',
+                        # 'SingleLepton2018C':'(x>=20 && x<=65)*pol2(0) + (x>=65 && x<=200)*pol2(3)',
+                        # 'SingleLepton2018D':'(x>=20 && x<=65)*pol2(0) + (x>=65 && x<=200)*pol2(3)'
 
                         
                         # #Group C) sel tracks 
@@ -424,10 +439,10 @@ def fit_func_dict(cov, etabin):
                         # 'SingleLepton2017D':'(x<=5)*pol2(0) + (x>5 && x<=15)*pol2(3) + (x>15 && x<=200)*pol1(6)',
                         # 'SingleLepton2017E':'(x<=5)*pol2(0) + (x>5 && x<=15)*pol1(3) + (x>15 && x<=200)*pol1(6)', 
                         # 'SingleLepton2017F':'(x<=5)*pol2(0) + (x>5 && x<=19)*pol2(3) + (x>19 && x<=200)*pol1(6)'
-                        # 'SingleLepton2018A':'(x<=4)*pol1(0) + (x>4 && x<=10)*pol1(2) + (x>10 && x<=22)*pol1(4) + (x>22 && x<=200)*pol2(6)',
-                        # 'SingleLepton2018B':'(x<=4)*pol1(0) + (x>4 && x<=25)*pol1(2) + (x>25 && x<=200)*pol2(4)',
-                        # 'SingleLepton2018C':'(x<=4)*pol1(0) + (x>4 && x<=10)*pol1(2) + (x>10 && x<=18)*pol1(4) + (x>18 && x<=200)*pol2(6)', 
-                        # 'SingleLepton2018D':'(x<=4)*pol1(0) + (x>4 && x<=10)*pol2(2) + (x>10 && x<=200)*pol2(5)'
+                        # 'SingleLepton2018A':'(x<=4)*pol1(0) + (x>=4 && x<=10)*pol1(2) + (x>=10 && x<=22)*pol1(4) + (x>=22 && x<=200)*pol2(6)',
+                        # 'SingleLepton2018B':'(x<=4)*pol1(0) + (x>=4 && x<=25)*pol1(2) + (x>=25 && x<=200)*pol2(4)',
+                        # 'SingleLepton2018C':'(x<=4)*pol1(0) + (x>=4 && x<=10)*pol1(2) + (x>=10 && x<=18)*pol1(4) + (x>=18 && x<=200)*pol2(6)', 
+                        # 'SingleLepton2018D':'(x<=4)*pol1(0) + (x>=4 && x<=10)*pol2(2) + (x>=10 && x<=200)*pol2(5)'
 
                         }
             

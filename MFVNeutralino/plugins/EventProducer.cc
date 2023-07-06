@@ -274,7 +274,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
 	mevent->gen_lsp_decay[i*3+2] = p.z;
 
 	mevent->gen_decay_type[i] = mci->decay_type()[i];
-
+  if (mci->secondaries(i).size() == 0) std::cout << "warning : found no gen daughters..." << std::endl;
         for (const reco::GenParticleRef& s : mci->secondaries(i)) {
           mevent->gen_daughters.push_back(MFVEvent::p4(s->pt(), s->eta(), s->phi(), s->mass()));
           mevent->gen_daughter_id.push_back(s->pdgId());
@@ -309,8 +309,16 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
         if (!has_b_dau)
           mevent->gen_bquarks.push_back(TLorentzVector(gen.px(), gen.py(), gen.pz(), gen.energy()));
       }
-      else if ((id == 11 || id == 13) && (gen.status() == 1 || (gen.status() >= 21 && gen.status() <= 29)))
+      //if ((id == 11) && (gen.status() == 1 || (gen.status() >= 21 && gen.status() <= 29))) {
+      if (id == 11) {
+        mevent->gen_electrons.push_back(MFVEvent::p4(gen.pt(), gen.eta(), gen.phi(), gen.mass()));
         mevent->gen_leptons.push_back(MFVEvent::p4(gen.pt(), gen.eta(), gen.phi(), gen.mass()));
+      }
+      //else if ((id == 13) && (gen.status() == 1 || (gen.status() >= 21 && gen.status() <= 29))) {
+      else if (id == 13) {
+        mevent->gen_muons.push_back(MFVEvent::p4(gen.pt(), gen.eta(), gen.phi(), gen.mass()));
+        mevent->gen_leptons.push_back(MFVEvent::p4(gen.pt(), gen.eta(), gen.phi(), gen.mass()));
+      }
     }
   }
 
@@ -537,7 +545,6 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   event.getByToken(electrons_token, electrons);
 
   for (const pat::Electron& electron : *electrons) {
-
     if (electron.pt() > 5 && abs(electron.eta()) < 2.4) {
     
       bool h_Escaled = electron.hadronicOverEm() < (electron.isEB() ? 0.05 + 1.12 + 0.0368 * *rho : 0.0414 + 0.5 + 0.201 * *rho) / electron.superCluster()->energy();
@@ -555,8 +562,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       bool isTightEl = electron.electronID("cutBasedElectronID-Fall17-94X-V2-tight");
 
       const bool passveto = electron.passConversionVeto();
-
-
+      
       //similarly for electron : keep ID (including specific cuts pertaining to ID), standard ele info, pfiso 
       std::vector<int> eleID;
       eleID.push_back(isVetoEl);
@@ -564,6 +570,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
       eleID.push_back(isMedEl);
       eleID.push_back(isTightEl);
 		       
+
       mevent->electron_ID.push_back(eleID);
 
       mevent->ele_ID_push_back(electron,
@@ -642,6 +649,8 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     }
     mevent->gen_bquarks.clear();
     mevent->gen_leptons.clear();
+    mevent->gen_electrons.clear();
+    mevent->gen_muons.clear();
     mevent->gen_jets.clear();
     mevent->gen_daughters.clear();
     mevent->gen_daughter_id.clear();
@@ -698,6 +707,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->muon_neutral_iso.clear();
     mevent->muon_photon_iso.clear();
     mevent->muon_PU_corr.clear();
+    mevent->muon_minr.clear();
 
     mevent->electron_pt.clear();
     mevent->electron_eta.clear();
@@ -730,6 +740,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->electron_neutral_iso.clear();
     mevent->electron_photon_iso.clear();
     mevent->electron_corr.clear();
+    mevent->electron_minr.clear();
 
     mevent->vertex_seed_track_chi2dof.clear();
     mevent->vertex_seed_track_qpt.clear();

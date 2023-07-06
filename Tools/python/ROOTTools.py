@@ -689,7 +689,7 @@ def data_mc_comparison(name,
                        #stack_draw_cmd = 'hist',
                        stack_draw_cmd = 'pfc plc hist',
                        move_overflows = 'under over',
-                       rebin = True,
+                       rebin = None,
                        bin_width_to = None,
                        poisson_intervals = False,
                        x_title = '',
@@ -922,10 +922,10 @@ def data_mc_comparison(name,
     sum_background = None
     ROOT.gStyle.SetPalette(palette)
     for sample in background_samples:
-        #join, nice_name, color = sample.join_info if join_info_override is None else join_info_override(sample)
-        join, nice_name = sample.join_info if join_info_override is None else join_info_override(sample)
-       # sample.hist.SetLineColor(color)
-        #sample.hist.SetFillColor(color)
+        join, nice_name, color = sample.join_info if join_info_override is None else join_info_override(sample)
+        #join, nice_name = sample.join_info if join_info_override is None else join_info_override(sample)
+        sample.hist.SetLineColor(color)
+        sample.hist.SetFillColor(color)
         if nice_name not in [l[1] for l in legend_entries] or not join:
             legend_entries.append((sample.hist, nice_name, 'F'))
         stack.Add(sample.hist)

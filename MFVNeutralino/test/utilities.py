@@ -126,9 +126,9 @@ def cmd_rm_mc_parts():
 def _background_samples(trigeff=False, year=2018):
     if _leptonpresel:
         x = ['ttbar', 'wjetstolnu', 'dyjetstollM10', 'dyjetstollM50', 'qcdmupt15', 'ww', 'wz', 'zz']
-        x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]]
-        x += ['qcdempt%03i' % x for x in [20,30,50,80,120,170]]
-        x += ['qcdbctoept%03i' % x for x in [20,30,80,170,250]]
+        #x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]]
+        x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170]]
+        x += ['qcdbctoept%03i' % x for x in [15,20,30,80,170,250]]
     elif _btagpresel:
         x = ['qcdht%04i' % x for x in [300, 500, 700, 1000, 1500, 2000]]
         x += ['ttbar']

@@ -97,14 +97,17 @@ MFVVertexAuxProducer::MFVVertexAuxProducer(const edm::ParameterSet& cfg)
 
 Measurement1D MFVVertexAuxProducer::gen_dist(const reco::Vertex& sv, const std::vector<double>& gen, const bool use3d) {
   jmt::MinValue d;
-  for (int i = 0; i < 2; ++i)
+  for (int i = 0; i < 2; ++i) {
+
     d(jmt::mag(        sv.x() - gen[i*3],
                        sv.y() - gen[i*3+1],
                use3d ? sv.z() - gen[i*3+2] : 0));
+  }
   AlgebraicVector3 v(sv.x(), sv.y(), use3d ? sv.z() : 0);
   const double dist2 = ROOT::Math::Mag2(v);
   const double sim  = ROOT::Math::Similarity(v, sv.covariance());
   const double ed = dist2 != 0 ? sqrt(sim/dist2) : 0;
+
   return Measurement1D(d, ed);
 }
 
@@ -122,6 +125,7 @@ Measurement1D MFVVertexAuxProducer::miss_dist(const reco::Vertex& v0, const reco
   AlgebraicVector3 jac(2*d(0) - 2*n_dot_d*n(0),
                        2*d(1) - 2*n_dot_d*n(1),
                        2*d(2) - 2*n_dot_d*n(2));
+
   return Measurement1D(val, sqrt(ROOT::Math::Similarity(jac, v0.covariance() + v1.covariance())) / 2 / val);
 }
 

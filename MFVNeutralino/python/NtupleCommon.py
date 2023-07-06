@@ -1,7 +1,7 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-ntuple_version_ = 'ULV1'
+ntuple_version_ = 'ULV5'
 lsp_id = 1000006 # should do that in a smarter way; currently for stop
 use_btag_triggers = False
 use_MET_triggers = False
@@ -291,9 +291,8 @@ def miniaod_ntuple_process(settings):
     #for splitSUSY
     process.mfvGenParticles.lsp_id = lsp_id
     process.mfvGenParticles.debug = False
-
-    process.mfvVertexTracks.min_track_rescaled_sigmadxy = 4.0
-    process.mfvVertexTracks.min_track_pt = 1.0
+    # process.mfvVertexTracks.min_track_rescaled_sigmadxy = 4.0
+    # process.mfvVertexTracks.min_track_pt = 1.0
 
     process.jmtRescaledTracks.tracks_src = 'jmtUnpackedCandidateTracks'
 
