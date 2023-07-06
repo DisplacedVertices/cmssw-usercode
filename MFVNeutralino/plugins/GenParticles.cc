@@ -863,18 +863,16 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
       // If there is a neutralino or stop in the first event, assume that's the
       // LSP id wanted. Otherwise, default to looking for gluino. This
       // isn't relevant for some signals.
-      //lsp_id = 1000021;
       lsp_id = 1000006;
-      for (int i = 0, ie = int(gen_particles->size()); i < ie; ++i)
-	if      (gen_particles->at(i).pdgId() == 1000022) { lsp_id = 1000022; break; }
+      for (int i = 0, ie = int(gen_particles->size()); i < ie; ++i) {
+	      if      (gen_particles->at(i).pdgId() == 1000022) { lsp_id = 1000022; break; }
         else if (gen_particles->at(i).pdgId() == 1000006) { lsp_id = 1000006; break; }
         else if (gen_particles->at(i).pdgId() == 9000006) { lsp_id = 9000006; break; }
-
-      for (int i = 0, ie = int(gen_particles->size()); i < ie; ++i)
-	if (debug) std::cout<< gen_particles->at(i).pdgId()<<std::endl;
-
+      }
+      for (int i = 0, ie = int(gen_particles->size()); i < ie; ++i) {
+	      if (debug) std::cout<< gen_particles->at(i).pdgId()<<std::endl;
+      }
     }
-
     if (debug) printf("MFVGenParticles::analyze: lsp_id %i\n", lsp_id);
     
     // the order of these tries is important, at least that MFVtbses come before Ttbar

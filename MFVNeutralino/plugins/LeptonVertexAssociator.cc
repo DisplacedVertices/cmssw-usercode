@@ -121,12 +121,12 @@ void MFVLeptonVertexAssociator::produce(edm::Event& event, const edm::EventSetup
   // lepton, determine if it matches to a track in a vertex. 
   //
 
-  // Possible TODO : 
+  // Possible TODO :
   // Try taking closest in cos(angle between lepton momentum and
   // (TV-SV)), as well as the distance of closest approach ("miss
   // distance").
 
-  // have the index == muon, but the value is which vertex the muon is 
+  // have the index == muon, but the value is which vertex the muon is
   // associated to (which starts at 0) 
   std::vector<int> mu_index_in_vertex(n_muons, -1);
   std::vector<int> el_index_in_vertex(n_electrons, -1);

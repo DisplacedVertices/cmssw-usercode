@@ -99,14 +99,17 @@ MFVVertexAuxProducer::MFVVertexAuxProducer(const edm::ParameterSet& cfg)
 
 Measurement1D MFVVertexAuxProducer::gen_dist(const reco::Vertex& sv, const std::vector<double>& gen, const bool use3d) {
   jmt::MinValue d;
-  for (int i = 0; i < 2; ++i)
+  for (int i = 0; i < 2; ++i) {
+
     d(jmt::mag(        sv.x() - gen[i*3],
                        sv.y() - gen[i*3+1],
                use3d ? sv.z() - gen[i*3+2] : 0));
+  }
   AlgebraicVector3 v(sv.x(), sv.y(), use3d ? sv.z() : 0);
   const double dist2 = ROOT::Math::Mag2(v);
   const double sim  = ROOT::Math::Similarity(v, sv.covariance());
   const double ed = dist2 != 0 ? sqrt(sim/dist2) : 0;
+
   return Measurement1D(d, ed);
 }
 
@@ -124,6 +127,7 @@ Measurement1D MFVVertexAuxProducer::miss_dist(const reco::Vertex& v0, const reco
   AlgebraicVector3 jac(2*d(0) - 2*n_dot_d*n(0),
                        2*d(1) - 2*n_dot_d*n(1),
                        2*d(2) - 2*n_dot_d*n(2));
+
   return Measurement1D(val, sqrt(ROOT::Math::Similarity(jac, v0.covariance() + v1.covariance())) / 2 / val);
 }
 
@@ -207,38 +211,9 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
 
   std::unique_ptr<std::vector<MFVVertexAux> > auxes(new std::vector<MFVVertexAux>(nsv));
   std::set<int> trackicity;
-  std::vector<size_t> sort_ntrack = {};
-  std::vector<size_t> sort_irawsv = {};
-  for (int isv = 0; isv < nsv; ++isv){
-      const reco::Vertex& sv = secondary_vertices->at(isv);
-      size_t ntracks = sv.nTracks();
-      if (isv == 0) { 
-        sort_ntrack.push_back(ntracks);
-        sort_irawsv.push_back(isv);
-      }
-      else { 
-        std::vector<size_t>::iterator it_ntracks = sort_ntrack.end();
-        std::vector<size_t>::iterator it_vtx = sort_irawsv.end();
-        while (it_ntracks != sort_ntrack.begin() && ntracks <= sort_ntrack[std::distance(sort_ntrack.begin(), it_ntracks)-1])
-        {
-          --it_ntracks;
-          --it_vtx;
-        }
-        if (it_ntracks == sort_ntrack.end() && ntracks > sort_ntrack[std::distance(sort_ntrack.begin(), it_ntracks)]) {
-          sort_ntrack.push_back(ntracks);
-          sort_irawsv.push_back(isv);
-        }
-        else {
-          sort_ntrack.insert(it_ntracks, ntracks);
-          sort_irawsv.insert(it_vtx, isv);
-        }
-      }
-  }
-  edm::Handle<reco::TrackCollection> vertex_seed_tracks;
-  event.getByToken(vertex_seed_tracks_token, vertex_seed_tracks);
-  std::vector<size_t> vec_outsedtki;
-  for (int irawsv = 0; irawsv < nsv; ++irawsv) {
-    int isv = sort_irawsv[nsv-irawsv-1];
+  std::set<std::pair<int, int>> buffer_trackicity; // buffer against duplicate keys due to obtaining & using > 1 track collections 
+                                                  // the buffer will be storing the track id & track key 
+  for (int isv = 0; isv < nsv; ++isv) {
     const reco::Vertex& sv = secondary_vertices->at(isv);
     const reco::Vertex& sv0 = secondary_vertices->at(sort_irawsv[nsv-1]); 
     const reco::VertexRef svref(secondary_vertices, isv);
@@ -618,10 +593,18 @@ void MFVVertexAuxProducer::produce(edm::Event& event, const edm::EventSetup& set
       const reco::TrackRef& trref = tri.castTo<reco::TrackRef>();
       const math::XYZTLorentzVector tri_p4(tri->px(), tri->py(), tri->pz(), tri->p());
 
-      if (trackicity.count(tri.key()) > 0)
+
+      if (buffer_trackicity.count({tri.key(), tri.id().id()}) > 0)
         throw cms::Exception("VertexAuxProducer") << "trackicity > 1";
-      else
-        trackicity.insert(tri.key());
+      else 
+        buffer_trackicity.insert({tri.key(), tri.id().id()});
+  
+      // if (trackicity.count(tri.key()) > 0)
+      //   throw cms::Exception("VertexAuxProducer") << "trackicity > 1";
+      // else {
+      //   trackicity.insert(tri.key());
+      // }
+
 
       if (sv.trackWeight(tri) < mfv::track_vertex_weight_min)
         continue;

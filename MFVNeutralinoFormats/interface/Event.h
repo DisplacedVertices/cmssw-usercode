@@ -11,6 +11,7 @@
 
 #include "DataFormats/MuonReco/interface/Muon.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
+#include "DataFormats/BeamSpot/interface/BeamSpot.h"
 
 namespace reco { class Track; class Candidate; }
 
@@ -75,6 +76,8 @@ struct MFVEvent {
   float gen_pv[3];
   std::vector<TLorentzVector> gen_bquarks;
   std::vector<TLorentzVector> gen_leptons;
+  std::vector<TLorentzVector> gen_electrons;
+  std::vector<TLorentzVector> gen_muons;
   std::vector<TLorentzVector> gen_jets;
 
   int gen_lepton_id(int which) { // same convention as reco lep_id below, el=1, mu=0
@@ -347,6 +350,7 @@ struct MFVEvent {
   std::vector<float> muon_dxyerr;
   std::vector<float> muon_dzerr;
   std::vector<float> muon_chi2dof;
+  std::vector<float> muon_minr;
 
   std::vector<float> electron_pt;
   std::vector<float> electron_eta;
@@ -365,6 +369,7 @@ struct MFVEvent {
   std::vector<float> electron_dxyerr;
   std::vector<float> electron_dzerr;
   std::vector<float> electron_chi2dof;
+  std::vector<float> electron_minr;
 
 
   std::vector<float> electron_isEB;
@@ -454,10 +459,16 @@ struct MFVEvent {
   float nth_ele_pt (int w) const { return nelectrons() > w ? electron_pt [w] :   -1.f; }
   float nth_ele_eta(int w) const { return nelectrons() > w ? electron_eta[w] : -999.f; }
   float nth_ele_phi(int w) const { return nelectrons() > w ? electron_phi[w] : -999.f; }
+  float nth_ele_dxybs(int w) const { return nelectrons() > w ? electron_dxybs[w] : -999.f; }
+  float nth_ele_dxyerr(int w) const { return nelectrons() > w ? electron_dxyerr[w] : -999.f; }
+  float nth_ele_nsigmadxy(int w) const { return nelectrons() > w ? electron_dxybs[w]/electron_dxyerr[w] : -999.f; }
 
   float nth_mu_pt (int w) const { return nmuons() > w ? muon_pt [w] :   -1.f; }
   float nth_mu_eta(int w) const { return nmuons() > w ? muon_eta[w] : -999.f; }
   float nth_mu_phi(int w) const { return nmuons() > w ? muon_phi[w] : -999.f; }
+  float nth_mu_dxybs(int w) const { return nmuons() > w ? muon_dxybs[w] : -999.f; }
+  float nth_mu_dxyerr(int w) const { return nmuons() > w ? muon_dxyerr[w] : -999.f; }
+  float nth_mu_nsigmadxy(int w) const { return nmuons() > w ? muon_dxybs[w]/muon_dxyerr[w] : -999.f; }
 
   /////////////////////////////////////////////////////
 

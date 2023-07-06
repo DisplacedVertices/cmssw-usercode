@@ -102,41 +102,6 @@ namespace jmt {
     return r;
   }
 
-  /////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-  std::vector<reco::TrackRef> TrackRefGetter::mutracks(const edm::Event& event, const pat::Muon& mu) {
-    setup_event(event);
-    std::vector<reco::TrackRef> r;
-
-    
-    reco::TrackRef tk = mu.muonBestTrack();
-    if (verbose) {
-      std::cout << " mu " << mu.pt() << "," << mu.eta() << "," << mu.phi() << " ";
-      std::cout << "\n";
-      std::cout << " tkmu " << tk->pt() << "," << tk->eta() << "," << tk->phi() << " ";
-      std::cout << "\n";
-    }
-    //r.push_back(tk);
-    // for (auto m : tracks_maps)
-    //  tk = m->find(tk);
-
-    //   if (tk.isNonnull()) {
-    
-    r.push_back(tk);
-    
-    // if (verbose) {
-    // 	std::cout << "    in map -> track " << tk->charge()*tk->pt() << "," << tk->eta() << "," << tk->phi() << "," << tk->dxy() << "," << tk->dz() << " ";
-    // 	std::cout << "\n";
-    //   }
-    // }
-    
-    return r;
-  }
- 
-
-  /////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
-
   std::vector<std::pair<reco::TrackRef,int>> TrackRefGetter::tracks(const edm::Event& event, const reco::VertexRef& v) {
     setup_event(event);
     std::vector<std::pair<reco::TrackRef,int>> r;
@@ -183,12 +148,5 @@ namespace jmt {
       if (rq.first == tk)
         return rq.second;
     return -1;
-  }
-
-  // pointless ?
-  bool TrackRefGetter::is_mutrack(const edm::Event& e, const pat::Muon& mu, const reco::TrackRef& tk) {
-    const auto ms = mutracks(e, mu);
-    const bool ismuon= std::find(ms.begin(), ms.end(), tk) != ms.end();
-    return ismuon;
   }
 }

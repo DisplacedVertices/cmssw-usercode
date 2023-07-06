@@ -1,21 +1,34 @@
 import FWCore.ParameterSet.Config as cms
+<<<<<<< HEAD
 from JMTucker.MFVNeutralino.NtupleCommon import use_btag_triggers, use_MET_triggers, use_Muon_triggers, use_Electron_triggers, use_DisplacedLepton_triggers
 #from JMTucker.Tools.Year import year
+=======
+from JMTucker.MFVNeutralino.NtupleCommon import use_btag_triggers, use_MET_triggers, use_Lepton_triggers
+from JMTucker.Tools.Year import year
+>>>>>>> UL_Lepton
 
 if use_btag_triggers:
   apply_presel = cms.int32(4)
 elif use_MET_triggers:
   apply_presel = cms.int32(5)
+<<<<<<< HEAD
 elif use_Muon_triggers:
   apply_presel = cms.int32(2)
 elif use_Electron_triggers:
+=======
+#if do not want to use triggers, set apply_presel to 0
+elif use_Lepton_triggers:
+>>>>>>> UL_Lepton
   apply_presel = cms.int32(2)
 else:
   apply_presel = cms.int32(1)
 
 mfvAnalysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                mevent_src = cms.InputTag('mfvEvent'),
+<<<<<<< HEAD
                                #year = cms.string(year),
+=======
+>>>>>>> UL_Lepton
                                apply_presel = apply_presel,  # 1 = jets, 2 = el/mu, 3 = jets OR bjet/displaced dijet triggers, 4 = bjet/displaced dijet triggers veto HT trigger, 5 = MET trigger
                                require_met_filters = cms.bool(True) if use_MET_triggers else cms.bool(False),
                                require_bquarks = cms.bool(False),
@@ -23,7 +36,8 @@ mfvAnalysisCuts = cms.EDFilter('MFVAnalysisCuts',
                                l1_bit = cms.int32(-1),
                                trigger_bit = cms.int32(-1),
                                apply_trigger = cms.int32(0),
-                               apply_displacedlepton_triggers = cms.bool(use_DisplacedLepton_triggers),
+                               apply_displacedlepton_triggers = cms.bool(False),
+                               require_displaced_lepton = cms.bool(False),
                                apply_cleaning_filters = cms.bool(False),
                                apply_muons_only = cms.bool(True) if use_Muon_triggers else cms.bool(False),
                                apply_electrons_only = cms.bool(True) if use_Electron_triggers else cms.bool(False), 

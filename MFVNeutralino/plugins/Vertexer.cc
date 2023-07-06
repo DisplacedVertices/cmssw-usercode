@@ -46,8 +46,8 @@ class MFVVertexer : public edm::EDProducer {
 
     void finish(edm::Event&, const std::vector<reco::TransientTrack>&, const std::vector<reco::TransientTrack>&, std::unique_ptr<reco::VertexCollection>, std::unique_ptr<VertexerPairEffs>, const std::vector<std::pair<track_set, track_set>>&);
 
-    enum stepEnum{afterdzfit, aftermerge, aftersharedjets, aftertrackattach, N_STEPS};
-    std::vector<TString> stepStrs = {"afterdzfit", "aftermerge", "aftersharedjets", "aftertrackattach", "N_STEPS"};
+    enum stepEnum{beforedzfit, afterdzfit, aftermerge, aftersharedjets, aftertrackattach, N_STEPS};
+    std::vector<TString> stepStrs = {"beforedzfit","afterdzfit", "aftermerge", "aftersharedjets", "aftertrackattach", "N_STEPS"};
     void fillCommonOutputHists(std::unique_ptr<reco::VertexCollection>& vertices, const reco::Vertex& fake_bs_vtx, edm::ESHandle<TransientTrackBuilder>& tt_builder, size_t step);
 
     template <typename T>
@@ -143,6 +143,8 @@ class MFVVertexer : public edm::EDProducer {
     const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
     const edm::EDGetTokenT<std::vector<reco::TrackRef>> seed_tracks_token;
     const edm::EDGetTokenT<std::vector<reco::TrackRef>> all_tracks_token;
+    const edm::EDGetTokenT<std::vector<reco::TrackRef>> museed_tracks_token;
+    const edm::EDGetTokenT<std::vector<reco::TrackRef>> eleseed_tracks_token; 
     const int n_tracks_per_seed_vertex;
     const double max_seed_vertex_chi2;
     const bool use_2d_vertex_dist;
@@ -165,6 +167,7 @@ class MFVVertexer : public edm::EDProducer {
     const double trackrefine_trimmax;
     const bool histos;
     const bool histos_noshare;
+    const bool histos_output_beforedzfit;
     const bool histos_output_afterdzfit;
     const bool histos_output_aftermerge;
     const bool histos_output_aftersharedjets;
@@ -290,6 +293,8 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     seed_tracks_token(consumes<std::vector<reco::TrackRef>>(cfg.getParameter<edm::InputTag>("seed_tracks_src"))),
     all_tracks_token(consumes<std::vector<reco::TrackRef>>(cfg.getParameter<edm::InputTag>("all_tracks_src"))),
+    museed_tracks_token(consumes<std::vector<reco::TrackRef>>(cfg.getParameter<edm::InputTag>("muon_seed_tracks_src"))),
+    eleseed_tracks_token(consumes<std::vector<reco::TrackRef>>(cfg.getParameter<edm::InputTag>("electron_seed_tracks_src"))),
     n_tracks_per_seed_vertex(cfg.getParameter<int>("n_tracks_per_seed_vertex")),
     max_seed_vertex_chi2(cfg.getParameter<double>("max_seed_vertex_chi2")),
     use_2d_vertex_dist(cfg.getParameter<bool>("use_2d_vertex_dist")),
@@ -312,7 +317,8 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     trackrefine_trimmax(cfg.getParameter<double>("trackrefine_trimmax")),
     histos(cfg.getUntrackedParameter<bool>("histos", false)),
     histos_noshare(cfg.getUntrackedParameter<bool>("histos_noshare", false)),
-    histos_output_afterdzfit(cfg.getUntrackedParameter<bool>("histos_output_afterdzfit", false)),
+    histos_output_beforedzfit(cfg.getUntrackedParameter<bool>("histos_output_beforedzfit", true)),
+    histos_output_afterdzfit(cfg.getUntrackedParameter<bool>("histos_output_afterdzfit", true)),
     histos_output_aftermerge(cfg.getUntrackedParameter<bool>("histos_output_aftermerge", false)),
     histos_output_aftersharedjets(cfg.getUntrackedParameter<bool>("histos_output_aftersharedjets", false)),
 	histos_output_aftertrackattach(cfg.getUntrackedParameter<bool>("histos_output_aftertrackattach", false)),
@@ -407,6 +413,7 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
 
     for(size_t step = 0; step < stepEnum::N_STEPS; ++step) {
 
+      if (step == stepEnum::beforedzfit      && !histos_output_beforedzfit)      continue;
       if (step == stepEnum::afterdzfit      && !histos_output_afterdzfit)      continue;
       if (step == stepEnum::aftermerge      && !histos_output_aftermerge)      continue;
       if (step == stepEnum::aftersharedjets && !histos_output_aftersharedjets) continue;
@@ -609,6 +616,13 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 	  all_track_ref_map[tk] = all_tracks.size() - 1;
   }
   
+  
+  edm::Handle<std::vector<reco::TrackRef>> muon_seed_track_refs;
+  event.getByToken(museed_tracks_token, muon_seed_track_refs);
+
+  edm::Handle<std::vector<reco::TrackRef>> electron_seed_track_refs;
+  event.getByToken(eleseed_tracks_token, electron_seed_track_refs);
+   
   edm::Handle<std::vector<reco::TrackRef>> quality_track_refs;
   if (track_attachment)
     event.getByToken(quality_tracks_token, quality_track_refs);
@@ -1321,6 +1335,9 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   }
 
 
+  if (histos_output_beforedzfit){
+    fillCommonOutputHists(vertices, fake_bs_vtx, tt_builder, stepEnum::beforedzfit);
+  }
   //////////////////////////////////////////////////////////////////////
   // Drop tracks that "move" the vertex too much by refitting without each track.
   //////////////////////////////////////////////////////////////////////

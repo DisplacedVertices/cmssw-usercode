@@ -18,11 +18,15 @@ set_style()
 ps = plot_saver(plot_dir('data_mc_comp_%s_%s' % (year, version)))
 
 if year == '2018':
-    qcd_samples = Samples.qcd_samples_2018
-    ttbar_samples = []
-    signal_sample = Samples.mfv_neu_tau001000um_M0800_2017
+    qcd_samples = Samples.qcd_lep_samples_2018
+    ttbar_samples = Samples.met_samples_2018
+    #leptonic_samples = Samples.leptonic_samples_2018
+    wjet_samples = [Samples.leptonic_samples_2018[0]]
+    dyjet_samples = Samples.leptonic_samples_2018[1:]
+    diboson_samples = Samples.diboson_samples_2018
+    signal_sample = Samples.mfv_stoplb_tau001000um_M1000_2018
     data_samples = [] # Samples.data_samples_2017
-    background_samples = qcd_samples
+    background_samples = diboson_samples + ttbar_samples + qcd_samples + dyjet_samples + wjet_samples
     lumi = ac.int_lumi_2018 * ac.scale_factor_2018
     lumi_nice = ac.int_lumi_nice_2018
 
@@ -62,7 +66,8 @@ for s in wjet_samples:
     s.join_info = True, 'W+jets', ROOT.kPink-3
 
 
-tracker_sel = ["all", "sel", "seed"]
+#tracker_sel = ["all", "sel", "seed"]
+tracker_sel = ["all_nolep", "sel_nolep", "seed_nolep", "ele_all", "ele_sel", "ele_seed", "mu_all", "mu_sel", "mu_seed"]
 C = partial(data_mc_comparison,
             background_samples = background_samples,
             signal_samples = [],
@@ -330,56 +335,56 @@ C = partial(data_mc_comparison,
 #   )
 for track in tracker_sel : 
     C( track +'_track_pt',
-      file_path = os.path.join('/afs/hep.wisc.edu/home/acwarden/crabdirs/TrackerMapperV1UL', '%(name)s.root'),
+      file_path = os.path.join('/afs/hep.wisc.edu/home/acwarden/crabdirs/LepTrackerMapperV1UL_wdxyerr_study', '%(name)s.root'),
       histogram_path = 'TrackerMapper/h_' + track + '_tracks_pt',
       x_title = track + 'track p_{T} (GeV)',
       y_title = 'Tracks/0.1 GeV',
       y_range = (1, 1e10),
     )
     C( track +'_track_eta',
-      file_path = os.path.join('/afs/hep.wisc.edu/home/acwarden/crabdirs/TrackerMapperV1UL', '%(name)s.root'),
+      file_path = os.path.join('/afs/hep.wisc.edu/home/acwarden/crabdirs/LepTrackerMapperV1UL_wdxyerr_study', '%(name)s.root'),
       histogram_path = 'TrackerMapper/h_' + track + '_tracks_eta',
       x_title = track + 'track eta',
       y_title = 'Tracks/0.1 GeV',
       y_range = (1, 6e8),
     )
     C( track +'_track_phi',
-      file_path = os.path.join('/afs/hep.wisc.edu/home/acwarden/crabdirs/TrackerMapperV1UL', '%(name)s.root'),
+      file_path = os.path.join('/afs/hep.wisc.edu/home/acwarden/crabdirs/LepTrackerMapperV1UL_wdxyerr_study', '%(name)s.root'),
       histogram_path = 'TrackerMapper/h_' + track + '_tracks_phi',
       x_title = track + 'track phi',
       y_title = 'Tracks/0.1 GeV',
       y_range = (1, 4e8),
     )
     C( track +'_track_npxhits',
-      file_path = os.path.join('/afs/hep.wisc.edu/home/acwarden/crabdirs/TrackerMapperV1UL', '%(name)s.root'),
+      file_path = os.path.join('/afs/hep.wisc.edu/home/acwarden/crabdirs/LepTrackerMapperV1UL_wdxyerr_study', '%(name)s.root'),
       histogram_path = 'TrackerMapper/h_' + track + '_tracks_npxhits',
       x_title = track + 'track npxhits',
       y_title = 'Tracks/0.1 GeV',
       y_range = (1, 3e9),
     )
     C( track +'_track_nsthits',
-      file_path = os.path.join('/afs/hep.wisc.edu/home/acwarden/crabdirs/TrackerMapperV1UL', '%(name)s.root'),
+      file_path = os.path.join('/afs/hep.wisc.edu/home/acwarden/crabdirs/LepTrackerMapperV1UL_wdxyerr_study', '%(name)s.root'),
       histogram_path = 'TrackerMapper/h_' + track + '_tracks_nsthits',
       x_title = track + 'track nsthits',
       y_title = 'Tracks/0.1 GeV',
       y_range = (1, 2e9),
     )
     C( track +'_track_dxy',
-       file_path = os.path.join('/afs/hep.wisc.edu/home/acwarden/crabdirs/TrackerMapperV1UL', '%(name)s.root'),
+       file_path = os.path.join('/afs/hep.wisc.edu/home/acwarden/crabdirs/LepTrackerMapperV1UL_wdxyerr_study', '%(name)s.root'),
        histogram_path = 'TrackerMapper/h_' + track + '_tracks_dxy',
        x_title = track + 'track dxy to beamspot',
        y_title = 'Tracks/0.1 GeV',
        y_range = (1, 1e10),
     )
     C( track +'_track_dxyerr',
-       file_path = os.path.join('/afs/hep.wisc.edu/home/acwarden/crabdirs/TrackerMapperV1UL', '%(name)s.root'),
+       file_path = os.path.join('/afs/hep.wisc.edu/home/acwarden/crabdirs/LepTrackerMapperV1UL_wdxyerr_study', '%(name)s.root'),
        histogram_path = 'TrackerMapper/h_' + track + '_tracks_dxyerr',
        x_title = track + 'track dxyerr',
        y_title = 'Tracks/0.1 GeV',
        y_range = (1, 1e10),
     )
     C( track +'_track_nsigmadxy',
-       file_path = os.path.join('/afs/hep.wisc.edu/home/acwarden/crabdirs/TrackerMapperV1UL', '%(name)s.root'),
+       file_path = os.path.join('/afs/hep.wisc.edu/home/acwarden/crabdirs/LepTrackerMapperV1UL_wdxyerr_study', '%(name)s.root'),
        histogram_path = 'TrackerMapper/h_' + track + '_tracks_nsigmadxy',
        x_title = track + 'track nsigmadxy',
        y_title = 'Tracks/0.1 GeV',

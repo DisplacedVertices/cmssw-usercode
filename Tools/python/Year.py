@@ -11,6 +11,6 @@ for line in open(os.path.join(os.environ['CMSSW_BASE'], 'src/JMTucker/Tools/inte
         assert year is None
         year = int(mo.group(1))
 
-assert year in (2017, 2018)
+assert year in (2017, 2018, 20161, 20162)
 
 __all__ = ['year']
