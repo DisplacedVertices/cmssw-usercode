@@ -31,6 +31,10 @@ private:
 
   void finish(edm::Event&, const std::vector<reco::TransientTrack>&, std::unique_ptr<reco::VertexCollection>, std::unique_ptr<VertexerPairEffs>, const std::vector<std::pair<track_set, track_set>>&);
 
+  enum stepEnum{beforedzfit, afterdzfit, N_STEPS};
+  std::vector<TString> stepStrs = {"beforedzfit", "afterdzfit", "N_STEPS"};
+  void fillCommonOutputHists(std::unique_ptr<reco::VertexCollection>& vertices, const reco::Vertex& fake_bs_vtx, edm::ESHandle<TransientTrackBuilder>& tt_builder, size_t step);
+  
   template <typename T>
   void print_track_set(const T& ts) const {
     for (auto r : ts)
@@ -61,10 +65,9 @@ private:
 
     return is_subset;
   }
-
+  
   track_set vertex_track_set(const reco::Vertex& v, const double min_weight = mfv::track_vertex_weight_min) const {
     track_set result;
-
     for (auto it = v.tracks_begin(), ite = v.tracks_end(); it != ite; ++it) {
       const double w = v.trackWeight(*it);
       const bool use = w >= min_weight;
@@ -112,6 +115,8 @@ private:
 
   const edm::EDGetTokenT<reco::BeamSpot> beamspot_token;
   const edm::EDGetTokenT<std::vector<reco::TrackRef>> seed_tracks_token;
+  const edm::EDGetTokenT<std::vector<reco::TrackRef>> museed_tracks_token;
+  const edm::EDGetTokenT<std::vector<reco::TrackRef>> eleseed_tracks_token;
   const int n_tracks_per_seed_vertex;
   const double max_seed_vertex_chi2;
   const bool use_2d_vertex_dist;
@@ -129,10 +134,13 @@ private:
   const bool remove_one_track_at_a_time;
   const double max_nm1_refit_dist3;
   const double max_nm1_refit_distz;
+  const bool ignore_lep_in_refit_distz;
   const double max_nm1_refit_distz_error;
   const double max_nm1_refit_distz_sig;
   const int max_nm1_refit_count;
   const bool histos;
+  const bool histos_output_beforedzfit;
+  const bool histos_output_afterdzfit;
   const bool verbose;
   const std::string module_label;
 
@@ -180,12 +188,50 @@ private:
   TH1F* h_output_vertex_x;
   TH1F* h_output_vertex_y;
   TH1F* h_output_vertex_z;
+
+  TH1F* h_n_at_least_3trk_output_vertices;
+  TH1F* h_n_at_least_4trk_output_vertices;
+
+  TH1F* hs_output_vertex_tkvtxdist[stepEnum::N_STEPS];
+  TH1F* hs_output_vertex_tkvtxdisterr[stepEnum::N_STEPS];
+  TH1F* hs_output_vertex_tkvtxdistsig[stepEnum::N_STEPS];
+  TH1F* hs_n_at_least_3trk_output_vertices[stepEnum::N_STEPS];
+  TH1F* hs_n_at_least_4trk_output_vertices[stepEnum::N_STEPS];
+  TH1F* hs_output_vertex_nm1_bsbs2ddist[stepEnum::N_STEPS];
+  TH1F* hs_output_vertex_nm1_bs2derr[stepEnum::N_STEPS];
+  TH1F* hs_output_vertex_ntracks[stepEnum::N_STEPS];
+  TH1F* hs_output_vertex_neletracks[stepEnum::N_STEPS];
+  TH1F* hs_output_vertex_nmutracks[stepEnum::N_STEPS];
+  TH1F* hs_output_vertex_hasele[stepEnum::N_STEPS];
+  TH1F* hs_output_vertex_hasmu[stepEnum::N_STEPS];
+  TH1F* hs_output_vertex_nleptracks_ptgt20[stepEnum::N_STEPS];
+  TH1F* hs_output_vertex_mass[stepEnum::N_STEPS];
+  TH1F* hs_output_vertex_track_weights[stepEnum::N_STEPS];
+  TH1F* hs_output_vertex_chi2[stepEnum::N_STEPS];
+  TH1F* hs_output_vertex_ndof[stepEnum::N_STEPS];
+  TH1F* hs_output_vertex_x[stepEnum::N_STEPS];
+  TH1F* hs_output_vertex_y[stepEnum::N_STEPS];
+  TH1F* hs_output_vertex_rho[stepEnum::N_STEPS];
+  TH1F* hs_output_vertex_phi[stepEnum::N_STEPS];
+  TH1F* hs_output_vertex_z[stepEnum::N_STEPS];
+  TH1F* hs_output_vertex_zerr[stepEnum::N_STEPS];
+  TH1F* hs_output_vertex_r[stepEnum::N_STEPS];
+  TH1F* hs_output_vertex_paird2d[stepEnum::N_STEPS];
+  TH1F* hs_output_vertex_paird2dsig[stepEnum::N_STEPS];
+  TH1F* hs_output_vertex_pairdphi[stepEnum::N_STEPS];
+
+  TH1F* h_deltaz_justfromlep;
+  TH1F* h_deltax_justfromlep;
+  TH1F* h_deltay_justfromlep;
+
 };
 
 MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
   : kv_reco(new KalmanVertexFitter(cfg.getParameter<edm::ParameterSet>("kvr_params"), cfg.getParameter<edm::ParameterSet>("kvr_params").getParameter<bool>("doSmoothing"))),
     beamspot_token(consumes<reco::BeamSpot>(cfg.getParameter<edm::InputTag>("beamspot_src"))),
     seed_tracks_token(consumes<std::vector<reco::TrackRef>>(cfg.getParameter<edm::InputTag>("seed_tracks_src"))),
+    museed_tracks_token(consumes<std::vector<reco::TrackRef>>(cfg.getParameter<edm::InputTag>("muon_seed_tracks_src"))),
+    eleseed_tracks_token(consumes<std::vector<reco::TrackRef>>(cfg.getParameter<edm::InputTag>("electron_seed_tracks_src"))),
     n_tracks_per_seed_vertex(cfg.getParameter<int>("n_tracks_per_seed_vertex")),
     max_seed_vertex_chi2(cfg.getParameter<double>("max_seed_vertex_chi2")),
     use_2d_vertex_dist(cfg.getParameter<bool>("use_2d_vertex_dist")),
@@ -203,10 +249,13 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     remove_one_track_at_a_time(cfg.getParameter<bool>("remove_one_track_at_a_time")),
     max_nm1_refit_dist3(cfg.getParameter<double>("max_nm1_refit_dist3")),
     max_nm1_refit_distz(cfg.getParameter<double>("max_nm1_refit_distz")),
+    ignore_lep_in_refit_distz(cfg.getParameter<bool>("ignore_lep_in_refit_distz")),
     max_nm1_refit_distz_error(cfg.getParameter<double>("max_nm1_refit_distz_error")),
     max_nm1_refit_distz_sig(cfg.getParameter<double>("max_nm1_refit_distz_sig")),
     max_nm1_refit_count(cfg.getParameter<int>("max_nm1_refit_count")),
     histos(cfg.getUntrackedParameter<bool>("histos", false)),
+    histos_output_beforedzfit(cfg.getUntrackedParameter<bool>("histos_output_beforedzfit", true)),
+    histos_output_afterdzfit(cfg.getUntrackedParameter<bool>("histos_output_afterdzfit", true)),
     verbose(cfg.getUntrackedParameter<bool>("verbose", false)),
     module_label(cfg.getParameter<std::string>("@module_label"))
 {
@@ -260,13 +309,52 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     h_noshare_nm1refit_dz_dzerr      = fs->make<TH2F>("h_noshare_nm1refit_dz_dzerr",      "", 100, 0, 0.1, 100, 0, 0.1);
     h_max_noshare_track_multiplicity = fs->make<TH1F>("h_max_noshare_track_multiplicity", "",  40,   0,     40);
     h_n_output_vertices              = fs->make<TH1F>("h_n_output_vertices",              "", 50, 0, 50);
+    h_n_at_least_3trk_output_vertices = fs->make<TH1F>("h_n_at_least_3trk_output_vertices", ";# of output vertices w/ >=3trk/vtx", 20, 0, 20);
+    h_n_at_least_4trk_output_vertices = fs->make<TH1F>("h_n_at_least_4trk_output_vertices", ";# of output vertices w/ >=4trk/vtx", 20, 0, 20);
     h_output_vertex_ntracks          = fs->make<TH1F>("h_output_vertex_ntracks",          "",  30,  0, 30);
     h_output_vertex_chi2             = fs->make<TH1F>("h_output_vertex_chi2",             "", 20,   0, max_seed_vertex_chi2);
     h_output_vertex_ndof             = fs->make<TH1F>("h_output_vertex_ndof",             "", 10,   0,     20);
     h_output_vertex_normchi2         = fs->make<TH1F>("h_output_vertex_normchi2",         "", 50,   0, max_seed_vertex_chi2);
-    h_output_vertex_x                = fs->make<TH1F>("h_output_vertex_x",                "", 100,  -1,      1);
-    h_output_vertex_y                = fs->make<TH1F>("h_output_vertex_y",                "", 100,  -1,      1);
-    h_output_vertex_z                = fs->make<TH1F>("h_output_vertex_z",                "", 40, -20,     20);
+    h_output_vertex_x                = fs->make<TH1F>("h_output_vertex_x",                "", 200,  -1,      1);
+    h_output_vertex_y                = fs->make<TH1F>("h_output_vertex_y",                "", 200,  -1,      1);
+    h_output_vertex_z                = fs->make<TH1F>("h_output_vertex_z",                "", 500,  0,     50);
+    h_deltaz_justfromlep             = fs->make<TH1F>("h_deltaz_justfromlep",             "", 400,  0,      2);
+    h_deltax_justfromlep             = fs->make<TH1F>("h_deltax_justfromlep",             "", 400,  0,      2);
+    h_deltay_justfromlep             = fs->make<TH1F>("h_deltay_justfromlep",             "", 400,  0,      2);
+  
+    for(size_t step = 0; step < stepEnum::N_STEPS; ++step) {
+
+      if (step == stepEnum::beforedzfit      && !histos_output_beforedzfit)      continue;
+      if ( step == stepEnum::afterdzfit  && !histos_output_afterdzfit)      continue;
+
+      hs_n_at_least_3trk_output_vertices[step] = fs->make<TH1F>("h_n_at_least_3trk_output_"+stepStrs[step]+"_vertices", ";# of >=3trk-vertices", 20, 0, 20);
+      hs_n_at_least_4trk_output_vertices[step] = fs->make<TH1F>("h_n_at_least_4trk_output_"+stepStrs[step]+"_vertices", ";# of >=4trk-vertices", 20, 0, 20);
+      hs_output_vertex_nm1_bsbs2ddist[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_nm1_bsbs2ddist", ";dBV (cm.) w/ n-1 cuts applied", 100, 0, 1.0);
+      hs_output_vertex_nm1_bs2derr[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_nm1_bs2derr", ";bs2derr (cm.) w/ n-1 cuts applied", 20, 0, 0.05);
+      hs_output_vertex_tkvtxdist[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_tkvtxdist", ";tkvtxdist (cm.)", 20, 0, 0.1);
+      hs_output_vertex_tkvtxdisterr[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_tkvtxdisterr", ";tkvtxdisterr (cm.)", 20, 0, 0.1);
+      hs_output_vertex_tkvtxdistsig[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_tkvtxdistsig", ";tkvtxdistsig", 20, 0, 6);
+      hs_output_vertex_ntracks[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_ntracks", ";ntracks/vtx", 30, 0, 30);
+      hs_output_vertex_neletracks[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_neletracks", ";neletracks/vtx", 30, 0, 30);
+      hs_output_vertex_nmutracks[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_nmutracks", ";nmutracks/vtx", 30, 0, 30);
+      hs_output_vertex_hasmu[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_hasmu", ";Does the SV have a mu?", 2, 0, 2);
+      hs_output_vertex_hasele[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_hasele", ";Does the SV have an ele?", 2, 0, 2);
+      hs_output_vertex_nleptracks_ptgt20[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_nleptracks_ptgt20", ";nleptracks/vtx w/ pt >= 20GeV", 5, 0, 5);
+      hs_output_vertex_mass[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_mass", ";mass/vtx (GeV)", 20, 0, 1000);
+      hs_output_vertex_track_weights[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_track_weights", ";vertex track weights", 21, 0, 1.05);
+      hs_output_vertex_chi2[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_chi2", ";normalized chi2", 40, 0, 10);
+      hs_output_vertex_ndof[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_ndof", ";ndof", 10, 0, 20);
+      hs_output_vertex_x[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_x", ";vtxbsdist_x (cm.)", 20, -1, 1);
+      hs_output_vertex_y[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_y", ";vtxbsdist_y (cm.)", 20, -1, 1);
+      hs_output_vertex_rho[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_rho", ";vtx rho", 20, 0, 2);
+      hs_output_vertex_phi[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_phi", ";vtx phi", 20, -3.15, 3.15);
+      hs_output_vertex_z[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_z", ";vtxbsdist_z (cm.)", 400, -20, 20);
+      hs_output_vertex_zerr[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_zerr", ";vtx_dist_zerr (cm.)", 40, 0, 1);
+      hs_output_vertex_r[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_r", ";vtxbsdist_r (cm.)", 20, 0, 2);
+      hs_output_vertex_paird2d[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_paird2d", ";svdist2d (cm.) every pair", 100, 0, 0.2);
+      hs_output_vertex_paird2dsig[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_paird2dsig", ";svdist2d significance every pair", 100, 0, 20);
+      hs_output_vertex_pairdphi[step] = fs->make<TH1F>("h_output_"+stepStrs[step]+"_vertex_pairdphi", ";dPhi(vtx0,vtx1) every pair", 100, -3.14, 3.14);
+    }
   }
 }
 
@@ -323,12 +411,20 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   const double bsx = beamspot->position().x();
   const double bsy = beamspot->position().y();
   const double bsz = beamspot->position().z();
+  const reco::Vertex fake_bs_vtx(beamspot->position(), beamspot->covariance3D());
+
 
   edm::ESHandle<TransientTrackBuilder> tt_builder;
   setup.get<TransientTrackRecord>().get("TransientTrackBuilder", tt_builder);
 
   edm::Handle<std::vector<reco::TrackRef>> seed_track_refs;
   event.getByToken(seed_tracks_token, seed_track_refs);
+
+  edm::Handle<std::vector<reco::TrackRef>> muon_seed_track_refs;
+  event.getByToken(museed_tracks_token, muon_seed_track_refs);
+
+  edm::Handle<std::vector<reco::TrackRef>> electron_seed_track_refs;
+  event.getByToken(eleseed_tracks_token, electron_seed_track_refs);
 
   edm::Handle<std::vector<reco::TrackRef>> quality_track_refs;
   if (track_attachment)
@@ -1074,10 +1170,15 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
       }
     }
   }
+  if (histos_output_beforedzfit){
+    fillCommonOutputHists(vertices, fake_bs_vtx, tt_builder, stepEnum::beforedzfit);
+  }
 
   //////////////////////////////////////////////////////////////////////
   // Drop tracks that "move" the vertex too much by refitting without each track.
   //////////////////////////////////////////////////////////////////////
+  //if the track is a lepton (key == 154 or 155) don't do the refitting. 
+  //I believe specificially, 154 are electrons. 155 are muons 
 
   if (max_nm1_refit_dist3 > 0 || max_nm1_refit_distz > 0) {
   //if (max_nm1_refit_dist3 > 0 || max_nm1_refit_distz > 0 || max_nm1_refit_distz_sig > 0) {
@@ -1095,38 +1196,56 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
 
       if (verbose) {
         printf("doing n-%i refit on vertex at %7.4f %7.4f %7.4f with %lu tracks\n", refit_count[iv]+1, v[0]->x(), v[0]->y(), v[0]->z(), ntks);
-        for (size_t i = 0; i < ntks; ++i)
+        for (size_t i = 0; i < ntks; ++i) {
           printf("  refit %lu will drop tk pt %7.4f +- %7.4f eta %7.4f +- %7.4f phi %7.4f +- %7.4f dxy %7.4f +- %7.4f dz %7.4f +- %7.4f\n", i, tks[i]->pt(), tks[i]->ptError(), tks[i]->eta(), tks[i]->etaError(), tks[i]->phi(), tks[i]->phiError(), tks[i]->dxy(), tks[i]->dxyError(), tks[i]->dz(), tks[i]->dzError());
+          if (ignore_lep_in_refit_distz) {
+            if ( (tks[i].id().id() == 155 || tks[i].id().id() == 154) && abs(tks[i]->pt()) >= 20.0 ) 
+              printf("  refit %lu will SKIP tk pt %7.4f +- %7.4f eta %7.4f +- %7.4f phi %7.4f +- %7.4f dxy %7.4f +- %7.4f dz %7.4f +- %7.4f\n", i, tks[i]->pt(), tks[i]->ptError(), tks[i]->eta(), tks[i]->etaError(), tks[i]->phi(), tks[i]->phiError(), tks[i]->dxy(), tks[i]->dxyError(), tks[i]->dz(), tks[i]->dzError());
+          }
+        }
       }
 
-      std::vector<reco::TransientTrack> ttks(ntks-1);
+      std::vector<reco::TransientTrack> ttks(ntks - 1);
+      //loops over all tracks 
       for (size_t i = 0; i < ntks; ++i) {
-        for (size_t j = 0; j < ntks; ++j)
-          if (j != i)
-            ttks[j-(j>=i)] = tt_builder->build(tks[j]);
+        // we want to : NOT DROP leptons 
+        if ( ! ((tks[i].id().id() == 155 || tks[i].id().id() == 154) && abs(tks[i]->pt()) >= 20.0 ) ) {
+          for (size_t j = 0; j < ntks; ++j)
+            if (j != i)
+              ttks[j - (j >= i)] = tt_builder->build(tks[j]);
+        
+          reco::Vertex vnm1(TransientVertex(kv_reco->vertex(ttks)));
+          const double dist3_2 = mag2(vnm1.x() - v[0]->x(), vnm1.y() - v[0]->y(), vnm1.z() - v[0]->z());
+          const double distz = mag(vnm1.z() - v[0]->z());
+          if (verbose) printf("  refit %lu chi2 %7.4f vtx %7.4f %7.4f %7.4f dist3 %7.4f distz %7.4f\n", i, vnm1.chi2(), vnm1.x(), vnm1.y(), vnm1.z(), sqrt(dist3_2), distz);
+          if (vnm1.chi2() < 0 ||
+              (max_nm1_refit_dist3 > 0 && mag2(vnm1.x() - v[0]->x(), vnm1.y() - v[0]->y(), vnm1.z() - v[0]->z()) > pow(max_nm1_refit_dist3, 2)) ||
+              (max_nm1_refit_distz > 0 && distz > max_nm1_refit_distz)) {
+            if (verbose) {
+              printf("    replacing");
+              if (refit_count[iv] < max_nm1_refit_count - 1)
+                printf(" and reconsidering");
+              printf("\n");
+            }
 
-        reco::Vertex vnm1(TransientVertex(kv_reco->vertex(ttks)));
-        const double dist3_2 = mag2(vnm1.x() - v[0]->x(), vnm1.y() - v[0]->y(), vnm1.z() - v[0]->z());
-        const double distz = mag(vnm1.z() - v[0]->z());
-        if (verbose) printf("  refit %lu chi2 %7.4f vtx %7.4f %7.4f %7.4f dist3 %7.4f distz %7.4f \n", i, vnm1.chi2(), vnm1.x(), vnm1.y(), vnm1.z(), sqrt(dist3_2), distz);
-
-        if (vnm1.chi2() < 0 ||
-            (max_nm1_refit_dist3 > 0 && mag2(vnm1.x() - v[0]->x(), vnm1.y() - v[0]->y(), vnm1.z() - v[0]->z()) > pow(max_nm1_refit_dist3, 2)) ||
-            (max_nm1_refit_distz > 0 && distz > max_nm1_refit_distz)) {
-          if (verbose) {
-            printf("    replacing");
-            if (refit_count[iv] < max_nm1_refit_count - 1)
-              printf(" and reconsidering");
-            printf("\n");
+            *v[0] = vnm1;
+            ++refit_count[iv];
+            --v[0], --iv;
+            break;
           }
-
-          *v[0] = vnm1;
-          ++refit_count[iv];
-          --v[0], --iv;
-          break;
         }
       }
     }
+    iv = 0; //some vertices after dz refiting have normalized chi2 > 5
+    for (v[0] = vertices->begin(); v[0] != vertices->end(); ++v[0], ++iv) {
+       if ((*v[0]).normalizedChi2() > 5) {
+         v[0] = vertices->erase(v[0]) - 1;
+         continue;
+       }
+    }
+  }
+  if (histos_output_afterdzfit){
+    fillCommonOutputHists(vertices, fake_bs_vtx, tt_builder, stepEnum::afterdzfit);
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -1134,7 +1253,7 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   //////////////////////////////////////////////////////////////////////
 
   if (histos) {
-    for (const reco::Vertex& v : *vertices) {
+    for (const reco::Vertex& v : *vertices) { 
       h_output_vertex_ntracks->Fill(v.tracksSize());
       h_output_vertex_chi2->Fill(v.chi2());
       h_output_vertex_ndof->Fill(v.ndof());
@@ -1146,5 +1265,113 @@ void MFVVertexer::produce(edm::Event& event, const edm::EventSetup& setup) {
   }
   finish(event, seed_tracks, std::move(vertices), std::move(vpeffs), vpeffs_tracks);
 }
+
+void MFVVertexer::fillCommonOutputHists(std::unique_ptr<reco::VertexCollection>& vertices, const reco::Vertex& fake_bs_vtx, edm::ESHandle<TransientTrackBuilder>& tt_builder, size_t step) {
+
+  std::map<reco::TrackRef, int> track_use;
+  int count_3trk_vertices = 0;
+  int count_4trk_vertices = 0;
+  int count_vertex_wele = 0;
+  int count_vertex_wmu = 0;
+
+  const double bsx = fake_bs_vtx.position().x();
+  const double bsy = fake_bs_vtx.position().y();
+  const double bsz = fake_bs_vtx.position().z();
+
+  for (size_t i = 0, ie = vertices->size(); i < ie; ++i) {
+    const reco::Vertex& v = vertices->at(i);
+    const int ntracks = v.nTracks();
+    const double vmass = v.p4().mass();
+    const double vchi2 = v.normalizedChi2();
+    const double vndof = v.ndof();
+    const double vx = v.position().x() - bsx;
+    const double vy = v.position().y() - bsy;
+    const double vz = v.position().z() - bsz;
+    const double rho = mag(vx, vy);
+    const double phi = atan2(vy, vx);
+    const double r = mag(vx, vy, vz);
+    int nleptracks = 0;
+    int nele_tks = 0;
+    int nmu_tks = 0;
+
+    for (const auto& tk : vertex_track_set(v)) {
+      if (tk.id().id() == 154 && tk->pt() >= 20.0)
+        nele_tks += 1;
+      if (tk.id().id() == 155 && tk->pt() >= 20.0) 
+        nmu_tks += 1;
+
+      if (tk.id().id() == 155 || tk.id().id() == 154) {
+        if (tk->pt() >= 20.0)
+          nleptracks += 1;
+      }
+      if (track_use.find(tk) != track_use.end())
+        track_use[tk] += 1;
+      else
+        track_use[tk] = 1;
+    }
+
+    hs_output_vertex_neletracks[step]->Fill(nele_tks);
+    hs_output_vertex_nmutracks[step]->Fill(nmu_tks);
+    hs_output_vertex_nleptracks_ptgt20[step]->Fill(nleptracks);
+    hs_output_vertex_ntracks[step]->Fill(ntracks);
+    if (nele_tks > 0 ) count_vertex_wele++;
+    if (nmu_tks > 0 ) count_vertex_wmu++;
+    if (ntracks >= 3) {
+      count_3trk_vertices++;
+      if (ntracks >= 4) 
+        count_4trk_vertices++;
+      Measurement1D dBV_Meas1D = vertex_dist_2d.distance(v, fake_bs_vtx);
+      double dBV = dBV_Meas1D.value();
+      double bs2derr = dBV_Meas1D.error();
+
+      if (vchi2 < 5 && ntracks >= 3 && bs2derr < 0.05) {
+        hs_output_vertex_nm1_bsbs2ddist[step]->Fill(dBV);
+      }
+      if (vchi2 < 5 && ntracks >= 3 && dBV > 0.01) {
+        hs_output_vertex_nm1_bs2derr[step]->Fill(bs2derr);
+      }
+    }
+
+    for (auto it = v.tracks_begin(), ite = v.tracks_end(); it != ite; ++it) {
+      hs_output_vertex_track_weights[step]->Fill(v.trackWeight(*it));
+
+      reco::TransientTrack seed_track;
+      seed_track = tt_builder->build(*it.operator*());
+      std::pair<bool, Measurement1D> tk_vtx_dist = track_dist(seed_track, v);
+      hs_output_vertex_tkvtxdist[step]->Fill(tk_vtx_dist.second.value());
+      hs_output_vertex_tkvtxdisterr[step]->Fill(tk_vtx_dist.second.error());
+      hs_output_vertex_tkvtxdistsig[step]->Fill(tk_vtx_dist.second.significance());
+
+    }
+
+	  hs_output_vertex_mass[step]->Fill(vmass);
+    hs_output_vertex_chi2[step]->Fill(vchi2);
+    hs_output_vertex_ndof[step]->Fill(vndof);
+    hs_output_vertex_x[step]->Fill(vx);
+    hs_output_vertex_y[step]->Fill(vy);
+    hs_output_vertex_rho[step]->Fill(rho);
+    hs_output_vertex_phi[step]->Fill(phi);
+    hs_output_vertex_z[step]->Fill(vz);
+    hs_output_vertex_zerr[step]->Fill(v.zError());
+    hs_output_vertex_r[step]->Fill(r);
+
+    for (size_t j = i + 1, je = vertices->size(); j < je; ++j) {
+      const reco::Vertex& vj = vertices->at(j);
+      const double vjx = vj.position().x() - bsx;
+      const double vjy = vj.position().y() - bsy;
+      const double phij = atan2(vjy, vjx);
+      Measurement1D v_dist = vertex_dist(vj, v);
+      hs_output_vertex_paird2d[step]->Fill(mag(vx - vjx, vy - vjy));
+      hs_output_vertex_paird2dsig[step]->Fill(v_dist.significance());
+      hs_output_vertex_pairdphi[step]->Fill(reco::deltaPhi(phi, phij));
+    }
+  }
+
+  hs_n_at_least_3trk_output_vertices[step]->Fill(count_3trk_vertices);
+  hs_n_at_least_4trk_output_vertices[step]->Fill(count_4trk_vertices);
+  hs_output_vertex_hasele[step]->Fill(count_vertex_wele);
+  hs_output_vertex_hasmu[step]->Fill(count_vertex_wmu);
+}
+
 
 DEFINE_FWK_MODULE(MFVVertexer);
