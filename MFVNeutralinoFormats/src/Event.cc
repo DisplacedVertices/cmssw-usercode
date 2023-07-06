@@ -2,6 +2,8 @@
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/BeamSpot/interface/BeamSpot.h"
+
 
 void MFVEvent::muon_push_back(const reco::Muon& muon,
 			      const reco::Track& trk,
@@ -39,7 +41,15 @@ void MFVEvent::muon_push_back(const reco::Muon& muon,
   		   trk.hitPattern().numberOfValidStripHits(),
   		   trk.hitPattern().pixelLayersWithMeasurement(),
                    trk.hitPattern().stripLayersWithMeasurement());
-   
+  
+  int min_r = 2000000000;
+  for (int i = 1; i <= 4; ++i) {
+    if (trk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,i)) {
+      min_r = i;
+      break;
+    }
+  }
+  muon_minr.push_back(min_r);
   
 }
 
@@ -76,6 +86,14 @@ void MFVEvent::electron_push_back(const reco::GsfElectron& electron,
    			 trk.hitPattern().pixelLayersWithMeasurement(),
    			 trk.hitPattern().stripLayersWithMeasurement());
    
+  int min_r = 2000000000;
+  for (int i = 1; i <= 4; ++i) {
+    if (trk.hitPattern().hasValidHitInPixelLayer(PixelSubdetector::PixelBarrel,i)) {
+      min_r = i;
+      break;
+    }
+  }
+  electron_minr.push_back(min_r);
 
 }
 
