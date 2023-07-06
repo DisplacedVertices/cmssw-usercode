@@ -28,12 +28,10 @@ jmtNtupleFillerMiniAOD = jmtNtupleFiller.clone(
     weight_src = 'jmtWeightMiniAOD',
     pileup_info_src = 'slimmedAddPileupInfo',
     mets_src = cms.InputTag('slimmedMETs'),
-    muons_src = cms.InputTag('slimmedMuons'),
-    electrons_src = cms.InputTag('slimmedElectrons'),
-    rho_src = cms.InputTag('fixedGridRhoFastjetAll'),
-    electron_effective_areas = cms.FileInPath('RecoEgamma/ElectronIdentification/data/Fall17/effAreaElectrons_cone03_pfNeuHadronsAndPhotons_92X.txt'),
     primary_vertices_src = 'offlineSlimmedPrimaryVertices',
     tracks_src = 'jmtUnpackedCandidateTracks',
+    muon_tracks_src = cms.InputTag('jmtUnpackedCandidateTracks', 'muons'),
+    electron_tracks_src = cms.InputTag('jmtUnpackedCandidateTracks', 'electrons'),
     track_ref_getter = jmtTrackRefGetterMiniAOD,
     )
 

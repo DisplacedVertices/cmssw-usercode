@@ -9,8 +9,8 @@ dataset = 'miniaod'
 #sample_files(process, 'qcdmupt15_2017', dataset)
 #sample_files(process, 'wjetstolnu_2017', dataset)
 #sample_files(process, 'qcdht2000_2017', dataset)
-sample_files(process, 'mfv_neu_tau001000um_M0800_2017', dataset)
-#sample_files(process, 'qcdbctoept020_2017', dataset)
+#sample_files(process, 'mfv_neu_tau001000um_M0800_2017', dataset)
+sample_files(process, 'ttbar_2018', dataset)
 cmssw_from_argv(process)
 
 process.load('PhysicsTools.PatAlgos.selectionLayer1.jetSelector_cfi')
@@ -27,7 +27,8 @@ process.selectedPatJets.cut = process.jtupleParams.jetCut
 
 process.tt = cms.EDAnalyzer('TrackingTreer',
                             process.jmtNtupleFillerMiniAOD,
-                            track_cut_level = cms.int32(0), # -1 = all, 0 = pt & pix & strip, 1 = 0 + min_r, 2 = 1 + nsigmadxybs
+                            track_cut_level = cms.int32(0), # -1 = all, 0 = pt & pix & strip, 1 = 0 + min_r, 2 = 1 + nsigmadxybs,
+                            use_separated_leptons = cms.bool(False)
                             )
 
 process.tt.track_ref_getter.tracks_maps_srcs = []
@@ -59,7 +60,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         samples = pick_samples(dataset, qcd=True, ttbar=False, all_signal=False, data=False, leptonic=False, bjet=False, splitSUSY=True, Zvv=True, met=True)
         pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier())
     elif use_Lepton_triggers :
-        samples = pick_samples(dataset, all_signal=False, qcd_lep=True, leptonic=True, met=False, diboson=True, data=False, Lepton_data=True)
+        samples = pick_samples(dataset, all_signal=False, qcd_lep=False, leptonic=False, met=True, diboson=False, data=False, Lepton_data=False)
         pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier())
     else :
         samples = pick_samples(dataset, all_signal=False)
@@ -69,7 +70,7 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
    # set_splitting(samples, dataset, 'default', data_json=json_path('ana_2017p8.json'), limit_ttbar=False)
     set_splitting(samples, dataset, 'default', data_json=json_path('ana_SingleLept_2018_10pc.json'), limit_ttbar=False)
 
-    ms = MetaSubmitter('TrackingTreerULV1_Lepm', dataset='miniaod')
+    ms = MetaSubmitter('TrackingTreerULV2_Lepm', dataset='miniaod')
     ms.common.pset_modifier = chain_modifiers(is_mc_modifier, era_modifier, per_sample_pileup_weights_modifier())
     ms.condor.stageout_files = 'all'
     ms.submit(samples)

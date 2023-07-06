@@ -7,13 +7,14 @@ int main(int argc, char** argv) {
   jmt::NtupleReader<jmt::TrackingAndJetsNtuple> nr;
   // nr.init_options("tt/t", "TrackingTreerHistsV23mv3", "nr_trackingtreerv23mv3", "ttbar=False, all_signal=False");
   //need to include scale type 
-  nr.init_options("tt/t", "TrackingTreerULV1_Lepm_cut0_etalt1p5_2018_wsellep", "trackingtreerulv1_lepm", "ttbar=False, leptonic=True, all_signal=False, qcd_lep=True, met=True, diboson=True, Lepton_data=True ");
+  nr.init_options("tt/t", "TrackingTreerULV2_Lepm_cut0_etalt1p5_2018_wsellep", "trackingtreerulv2_lepm", "ttbar=False, leptonic=False, all_signal=False, qcd_lep=False, met=False, diboson=False, Lepton_data=False ");
   //nr.init_options("tt/t", "TrackingTreerULV1_Lepm_etagt1p5_eraF_2017", "trackingtreerulv1_lepm_wsellep", "ttbar=False, leptonic=True, all_signal=False, qcd_lep=True, met=True, diboson=True, Lepton_data=False ");
   if (!nr.parse_options(argc, argv) || !nr.init()) return 1;
   auto& nt = nr.nt();
   auto& ntt = nt.tracks();
-  auto& ntm = nt.muons();
-  auto& nte = nt.electrons();
+  //try : mu_tracks() & ele_tracks()
+  auto& ntm = nt.mu_tracks();
+  auto& nte = nt.ele_tracks();
 
   TH1D* h_npv = new TH1D("h_npv", ";number of primary vertices", 50, 0, 50);
   TH1D* h_bsx = new TH1D("h_bsx", ";beamspot x", 400, -0.15, 0.15);
@@ -27,49 +28,92 @@ int main(int argc, char** argv) {
   TH2D* h_bsy_v_bsx = new TH2D("h_bsy_v_bsx", ";beamspot x;beamspot y", 4000, -1, 1, 4000, -1, 1);
   TH2D* h_pvy_v_pvx = new TH2D("h_pvy_v_pvx", ";pvx;pvy", 400, -1, 1, 400, -1, 1);
 
-  enum { pass_muon, pass_ele, max_lep_type };
-  TH1D* h_leptracks_pt[max_lep_type];
-  TH1D* h_leptracks_eta[max_lep_type];
-  TH1D* h_leptracks_phi[max_lep_type];
-  TH1D* h_leptracks_dxy[max_lep_type];
-  TH1D* h_leptracks_absdxy[max_lep_type];
-  TH1D* h_leptracks_dsz[max_lep_type];
-  TH1D* h_leptracks_dz[max_lep_type];
-  TH1D* h_leptracks_absnsigmadxy[max_lep_type];
-  TH1D* h_leptracks_nsigmadxy[max_lep_type];
-  TH1D* h_leptracks_nsigmadsz[max_lep_type];
-  TH1D* h_leptracks_dxyerr[max_lep_type];
-  //TH1D* h_leptracks_dxyerr_pt[max_lep_type][max_ptslice];
-  TH1D* h_leptracks_dxydszcov[max_lep_type];
-  TH1D* h_leptracks_absdxydszcov[max_lep_type];
-  TH1D* h_leptracks_dzerr[max_lep_type];
-  TH1D* h_leptracks_dszerr[max_lep_type];
-  TH1D* h_leptracks_lambdaerr[max_lep_type];
-  TH1D* h_leptracks_pterr[max_lep_type];
-  TH1D* h_leptracks_phierr[max_lep_type];
-  TH1D* h_leptracks_etaerr[max_lep_type];
-  TH2D* h_leptracks_dxyerr_v_pt[max_lep_type];
-  TH2D* h_leptracks_dxyerr_v_eta[max_lep_type];
-  TH2D* h_leptracks_dxyerr_v_phi[max_lep_type];
-  TH2D* h_leptracks_dszerr_v_pt[max_lep_type];
-  TH2D* h_leptracks_dszerr_v_eta[max_lep_type];
-  TH2D* h_leptracks_dszerr_v_phi[max_lep_type];
+  //going to first try with no extra selections; just the track selection
+  enum { ele_all, ele_sel, ele_seed, max_ele_type };
+  TH1D* h_eletracks_pt[max_ele_type];
+  TH1D* h_eletracks_eta[max_ele_type];
+  TH1D* h_eletracks_phi[max_ele_type];
+  TH1D* h_eletracks_dxy[max_ele_type];
+  //TH1D* h_eletracks_absdxy[max_ele_type];
+  TH1D* h_eletracks_dsz[max_ele_type];
+  TH1D* h_eletracks_dz[max_ele_type];
+  TH1D* h_eletracks_absnsigmadxy[max_ele_type];
+  TH1D* h_eletracks_nsigmadxy[max_ele_type];
+  TH1D* h_eletracks_nsigmadsz[max_ele_type];
+  TH1D* h_eletracks_dxyerr[max_ele_type];
+  //TH1D* h_eletracks_dxyerr_pt[max_ele_type][max_ptslice];
+  TH1D* h_eletracks_dxydszcov[max_ele_type];
+  TH1D* h_eletracks_absdxydszcov[max_ele_type];
+  TH1D* h_eletracks_dzerr[max_ele_type];
+  TH1D* h_eletracks_dszerr[max_ele_type];
+  TH1D* h_eletracks_lambdaerr[max_ele_type];
+  TH1D* h_eletracks_pterr[max_ele_type];
+  TH1D* h_eletracks_phierr[max_ele_type];
+  TH1D* h_eletracks_etaerr[max_ele_type];
+  TH2D* h_eletracks_dxyerr_v_pt[max_ele_type];
+  TH2D* h_eletracks_dxyerr_v_minr[max_ele_type];
+  TH2D* h_eletracks_dxyerr_v_eta[max_ele_type];
+  TH2D* h_eletracks_dxyerr_v_phi[max_ele_type];
+  TH2D* h_eletracks_dszerr_v_pt[max_ele_type];
+  TH2D* h_eletracks_dszerr_v_eta[max_ele_type];
+  TH2D* h_eletracks_dszerr_v_phi[max_ele_type];
 
-  TH2D* h_leptracks_dxydszcov_v_pt[max_lep_type];
-  TH2D* h_leptracks_dxydszcov_v_eta[max_lep_type];
-  TH2D* h_leptracks_dxydszcov_v_phi[max_lep_type];
-  TH2D* h_leptracks_absdxydszcov_v_pt[max_lep_type];
-  TH2D* h_leptracks_absdxydszcov_v_eta[max_lep_type];
-  TH2D* h_leptracks_absdxydszcov_v_phi[max_lep_type];
+  TH2D* h_eletracks_dxydszcov_v_pt[max_ele_type];
+  TH2D* h_eletracks_dxydszcov_v_eta[max_ele_type];
+  TH2D* h_eletracks_dxydszcov_v_phi[max_ele_type];
+  TH2D* h_eletracks_absdxydszcov_v_pt[max_ele_type];
+  TH2D* h_eletracks_absdxydszcov_v_eta[max_ele_type];
+  TH2D* h_eletracks_absdxydszcov_v_phi[max_ele_type];
+  TH2D* h_eletracks_eta_v_phi[max_ele_type];
+
+
+  enum { mu_all, mu_sel, mu_seed, max_mu_type };
+  TH1D* h_mutracks_pt[max_mu_type];
+  TH1D* h_mutracks_eta[max_mu_type];
+  TH1D* h_mutracks_phi[max_mu_type];
+  TH1D* h_mutracks_dxy[max_mu_type];
+  //TH1D* h_mutracks_absdxy[max_mu_type];
+  TH1D* h_mutracks_dsz[max_mu_type];
+  TH1D* h_mutracks_dz[max_mu_type];
+  TH1D* h_mutracks_absnsigmadxy[max_mu_type];
+  TH1D* h_mutracks_nsigmadxy[max_mu_type];
+  TH1D* h_mutracks_nsigmadsz[max_mu_type];
+  TH1D* h_mutracks_dxyerr[max_mu_type];
+  //TH1D* h_mutracks_dxyerr_pt[max_mu_type][max_ptslice];
+  TH1D* h_mutracks_dxydszcov[max_mu_type];
+  TH1D* h_mutracks_absdxydszcov[max_mu_type];
+  TH1D* h_mutracks_dzerr[max_mu_type];
+  TH1D* h_mutracks_dszerr[max_mu_type];
+  TH1D* h_mutracks_lambdaerr[max_mu_type];
+  TH1D* h_mutracks_pterr[max_mu_type];
+  TH1D* h_mutracks_phierr[max_mu_type];
+  TH1D* h_mutracks_etaerr[max_mu_type];
+  TH2D* h_mutracks_dxyerr_v_pt[max_mu_type];
+  TH2D* h_mutracks_dxyerr_v_minr[max_mu_type];
+  TH2D* h_mutracks_dxyerr_v_eta[max_mu_type];
+  TH2D* h_mutracks_dxyerr_v_phi[max_mu_type];
+  TH2D* h_mutracks_dszerr_v_pt[max_mu_type];
+  TH2D* h_mutracks_dszerr_v_eta[max_mu_type];
+  TH2D* h_mutracks_dszerr_v_phi[max_mu_type];
+
+  TH2D* h_mutracks_dxydszcov_v_pt[max_mu_type];
+  TH2D* h_mutracks_dxydszcov_v_eta[max_mu_type];
+  TH2D* h_mutracks_dxydszcov_v_phi[max_mu_type];
+  TH2D* h_mutracks_absdxydszcov_v_pt[max_mu_type];
+  TH2D* h_mutracks_absdxydszcov_v_eta[max_mu_type];
+  TH2D* h_mutracks_absdxydszcov_v_phi[max_mu_type];
+  TH2D* h_mutracks_eta_v_phi[max_mu_type];
+
 
   //the no lep corresponds to no GOOD lepton with pt > 20
-  enum { tk_all, tk_sel, tk_sel_nolep, tk_seed, max_tk_type };
+  // new : these now by default do not have leptons with pt ≥ 20 GeV
+  enum { tk_all, tk_sel, tk_seed, max_tk_type };
   TH1D* h_ntracks[max_tk_type];
   TH1D* h_tracks_pt[max_tk_type];
   TH1D* h_tracks_eta[max_tk_type];
   TH1D* h_tracks_phi[max_tk_type];
   TH1D* h_tracks_dxy[max_tk_type];
-  TH1D* h_tracks_absdxy[max_tk_type];
+  //TH1D* h_tracks_absdxy[max_tk_type];
   TH1D* h_tracks_dsz[max_tk_type];
   TH1D* h_tracks_dz[max_tk_type];
   // TH1D* h_tracks_dzpv[max_tk_type];
@@ -112,6 +156,7 @@ int main(int argc, char** argv) {
   TH2D* h_tracks_dxyerr_v_pt[max_tk_type];
   TH2D* h_tracks_dxyerr_v_eta[max_tk_type];
   TH2D* h_tracks_dxyerr_v_phi[max_tk_type];
+  TH2D* h_tracks_dxyerr_v_minr[max_tk_type];
   // TH2D* h_tracks_dxyerr_v_dxy[max_tk_type];
   // TH2D* h_tracks_dxyerr_v_dzpv[max_tk_type];
   // TH2D* h_tracks_dxyerr_v_npxlayers[max_tk_type];
@@ -141,14 +186,14 @@ int main(int argc, char** argv) {
 
   TH2D* h_tracks_eta_v_phi[max_tk_type];
   
-  const char* ex[max_tk_type] = {"all", "sel", "sel_nolep", "seed"};
+  const char* ex[max_tk_type] = {"all", "sel", "seed"};
   for (int i = 0; i < max_tk_type; ++i) {
     h_ntracks[i] = new TH1D(TString::Format("h_%s_ntracks", ex[i]), TString::Format(";number of %s tracks;events", ex[i]), 2000, 0, 2000);
     h_tracks_pt[i] = new TH1D(TString::Format("h_%s_tracks_pt", ex[i]), TString::Format("%s tracks;tracks pt (GeV);arb. units", ex[i]), 2000, 0, 200);
     h_tracks_eta[i] = new TH1D(TString::Format("h_%s_tracks_eta", ex[i]), TString::Format("%s tracks;tracks eta;arb. units", ex[i]), 50, -4, 4);
     h_tracks_phi[i] = new TH1D(TString::Format("h_%s_tracks_phi", ex[i]), TString::Format("%s tracks;tracks phi;arb. units", ex[i]), 315, -3.15, 3.15);
     h_tracks_dxy[i] = new TH1D(TString::Format("h_%s_tracks_dxy", ex[i]), TString::Format("%s tracks;tracks dxy to beamspot (cm);arb. units", ex[i]), 400, -0.2, 0.2);
-    h_tracks_absdxy[i] = new TH1D(TString::Format("h_%s_tracks_absdxy", ex[i]), TString::Format("%s tracks;tracks |dxy| to beamspot (cm);arb. units", ex[i]), 200, 0, 0.2);
+    //h_tracks_absdxy[i] = new TH1D(TString::Format("h_%s_tracks_absdxy", ex[i]), TString::Format("%s tracks;tracks |dxy| to beamspot (cm);arb. units", ex[i]), 200, 0, 0.2);
     h_tracks_dsz[i] = new TH1D(TString::Format("h_%s_tracks_dsz", ex[i]), TString::Format("%s tracks;tracks dsz (cm);arb. units", ex[i]), 400, -20, 20);
     h_tracks_dz[i] = new TH1D(TString::Format("h_%s_tracks_dz", ex[i]), TString::Format("%s tracks;tracks dz (cm);arb. units", ex[i]), 400, -20, 20);
     // h_tracks_dzpv[i] = new TH1D(TString::Format("h_%s_tracks_dzpv", ex[i]), TString::Format("%s tracks;tracks dz to PV (cm);arb. units", ex[i]), 400, -20, 20);
@@ -190,6 +235,7 @@ int main(int argc, char** argv) {
     h_tracks_dxyerr_v_pt[i] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_pt", ex[i]), TString::Format("%s tracks;tracks pt;tracks dxyerr", ex[i]), 2000, 0, 200, 2000, 0, 0.2);
     h_tracks_dxyerr_v_eta[i] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_eta", ex[i]), TString::Format("%s tracks;tracks eta;tracks dxyerr", ex[i]), 80, -4, 4, 2000, 0, 0.2);
     h_tracks_dxyerr_v_phi[i] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_phi", ex[i]), TString::Format("%s tracks;tracks phi;tracks dxyerr", ex[i]), 126, -3.15, 3.15, 200, 0, 0.2);
+    h_tracks_dxyerr_v_minr[i] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_minr", ex[i]), TString::Format("%s tracks;tracks minr;tracks dxyerrr", ex[i]), 10, 0, 10, 200, 0, 0.2);
     // h_tracks_dxyerr_v_dxy[i] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_dxy", ex[i]), TString::Format("%s tracks;tracks dxy to beamspot;tracks dxyerr", ex[i]), 400, -0.2, 0.2, 200, 0, 0.2);
     // h_tracks_dxyerr_v_dzpv[i] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_dzpv", ex[i]), TString::Format("%s tracks;tracks dz to PV;tracks dxyerr", ex[i]), 400, -20, 20, 200, 0, 0.2);
     // h_tracks_dxyerr_v_npxlayers[i] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_npxlayers", ex[i]), TString::Format("%s tracks;tracks npxlayers;tracks dxyerr", ex[i]), 10, 0, 10, 200, 0, 0.2);
@@ -222,42 +268,85 @@ int main(int argc, char** argv) {
   }
 
   //the pass mu and pass el is pt >= 20 
-  const char* lepex[max_lep_type] = {"pass_muon", "pass_ele"};
-  for (int j = 0; j < max_lep_type; ++j) {
-    h_leptracks_pt[j] = new TH1D(TString::Format("h_%s_tracks_pt", lepex[j]), TString::Format("%s tracks;tracks pt (GeV);arb. units", lepex[j]), 2000, 0, 200);
-    h_leptracks_eta[j] = new TH1D(TString::Format("h_%s_tracks_eta", lepex[j]), TString::Format("%s tracks;tracks eta;arb. units", lepex[j]), 50, -4, 4);
-    h_leptracks_phi[j] = new TH1D(TString::Format("h_%s_tracks_phi", lepex[j]), TString::Format("%s tracks;tracks phi;arb. units", lepex[j]), 315, -3.15, 3.15);
-    h_leptracks_dxy[j] = new TH1D(TString::Format("h_%s_tracks_dxy", lepex[j]), TString::Format("%s tracks;tracks dxy to beamspot (cm);arb. units", lepex[j]), 400, -0.2, 0.2);
-    h_leptracks_absdxy[j] = new TH1D(TString::Format("h_%s_tracks_absdxy", lepex[j]), TString::Format("%s tracks;tracks |dxy| to beamspot (cm);arb. units", lepex[j]), 200, 0, 0.2);
-    h_leptracks_dsz[j] = new TH1D(TString::Format("h_%s_tracks_dsz", lepex[j]), TString::Format("%s tracks;tracks dsz (cm);arb. units", lepex[j]), 400, -20, 20);
-    h_leptracks_dz[j] = new TH1D(TString::Format("h_%s_tracks_dz", lepex[j]), TString::Format("%s tracks;tracks dz (cm);arb. units", lepex[j]), 400, -20, 20);
-    h_leptracks_absnsigmadxy[j] = new TH1D(TString::Format("h_%s_tracks_absnsigmadxy", lepex[j]), TString::Format("%s tracks;tracks abs nsigmadxy;arb. units", lepex[j]), 400, 0, 40);
-    h_leptracks_nsigmadxy[j] = new TH1D(TString::Format("h_%s_tracks_nsigmadxy", lepex[j]), TString::Format("%s tracks;tracks nsigmadxy;arb. units", lepex[j]), 2000, -20, 20);
-    h_leptracks_nsigmadsz[j] = new TH1D(TString::Format("h_%s_tracks_nsigmadsz", lepex[j]), TString::Format("%s tracks;tracks nsigmadsz;arb. units", lepex[j]), 2000, -20, 20);
-    h_leptracks_dxyerr[j] = new TH1D(TString::Format("h_%s_tracks_dxyerr", lepex[j]), TString::Format("%s tracks;tracks dxyerr;arb. units", lepex[j]), 2000, 0, 0.2);
-    h_leptracks_dxydszcov[j] = new TH1D(TString::Format("h_%s_tracks_dxydszcov", lepex[j]), TString::Format("%s tracks;tracks dxy-dsz covariance;arb. units", lepex[j]), 2000, -0.00002, 0.00002);
-    h_leptracks_absdxydszcov[j] = new TH1D(TString::Format("h_%s_tracks_absdxydszcov", lepex[j]), TString::Format("%s tracks;tracks dxy-dsz covariance;arb. units", lepex[j]), 2000, 0, 0.00002);
-    h_leptracks_dzerr[j] = new TH1D(TString::Format("h_%s_tracks_dzerr", lepex[j]), TString::Format("%s tracks;tracks dzerr;arb. units", lepex[j]), 2000, 0, 0.2);
-    h_leptracks_dszerr[j] = new TH1D(TString::Format("h_%s_tracks_dszerr", lepex[j]), TString::Format("%s tracks;tracks dszerr;arb. units", lepex[j]), 2000, 0, 0.2);
-    h_leptracks_lambdaerr[j] = new TH1D(TString::Format("h_%s_tracks_lambdaerr", lepex[j]), TString::Format("%s tracks;tracks lambdaerr;arb. units", lepex[j]), 2000, 0, 0.2);
-    h_leptracks_pterr[j] = new TH1D(TString::Format("h_%s_tracks_pterr", lepex[j]), TString::Format("%s tracks;tracks pterr;arb. units", lepex[j]), 200, 0, 0.2);
-    h_leptracks_phierr[j] = new TH1D(TString::Format("h_%s_tracks_phierr", lepex[j]), TString::Format("%s tracks;tracks phierr;arb. units", lepex[j]), 200, 0, 0.2);
-    h_leptracks_etaerr[j] = new TH1D(TString::Format("h_%s_tracks_etaerr", lepex[j]), TString::Format("%s tracks;tracks etaerr;arb. units", lepex[j]), 200, 0, 0.2);
-    h_leptracks_dxyerr_v_pt[j] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_pt", lepex[j]), TString::Format("%s tracks;tracks pt;tracks dxyerr", lepex[j]), 2000, 0, 400, 2000, 0, 0.2);
-    h_leptracks_dxyerr_v_eta[j] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_eta", lepex[j]), TString::Format("%s tracks;tracks eta;tracks dxyerr", lepex[j]), 80, -4, 4, 2000, 0, 0.2);
-    h_leptracks_dxyerr_v_phi[j] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_phi", lepex[j]), TString::Format("%s tracks;tracks phi;tracks dxyerr", lepex[j]), 126, -3.15, 3.15, 200, 0, 0.2);
-    h_leptracks_dszerr_v_pt[j] = new TH2D(TString::Format("h_%s_tracks_dszerr_v_pt", lepex[j]), TString::Format("%s tracks;tracks pt;tracks dszerr", lepex[j]), 2000, 0, 400, 2000, 0, 0.2);
-    h_leptracks_dszerr_v_eta[j] = new TH2D(TString::Format("h_%s_tracks_dszerr_v_eta", lepex[j]), TString::Format("%s tracks;tracks eta;tracks dszerr", lepex[j]), 80, -4, 4, 2000, 0, 0.2);
-    h_leptracks_dszerr_v_phi[j] = new TH2D(TString::Format("h_%s_tracks_dszerr_v_phi", lepex[j]), TString::Format("%s tracks;tracks phi;tracks dszerr", lepex[j]), 126, -3.15, 3.15, 200, 0, 0.2);
+  const char* eleex[max_ele_type] = {"all_ele", "sel_ele", "seed_ele"};
+  for (int j = 0; j < max_ele_type; ++j) {
+    h_eletracks_pt[j] = new TH1D(TString::Format("h_%s_tracks_pt", eleex[j]), TString::Format("%s tracks;tracks pt (GeV);arb. units", eleex[j]), 2000, 0, 200);
+    h_eletracks_eta[j] = new TH1D(TString::Format("h_%s_tracks_eta", eleex[j]), TString::Format("%s tracks;tracks eta;arb. units", eleex[j]), 50, -4, 4);
+    h_eletracks_phi[j] = new TH1D(TString::Format("h_%s_tracks_phi", eleex[j]), TString::Format("%s tracks;tracks phi;arb. units", eleex[j]), 315, -3.15, 3.15);
+    h_eletracks_dxy[j] = new TH1D(TString::Format("h_%s_tracks_dxy", eleex[j]), TString::Format("%s tracks;tracks dxy to beamspot (cm);arb. units", eleex[j]), 400, -0.2, 0.2);
+    //h_eletracks_absdxy[j] = new TH1D(TString::Format("h_%s_tracks_absdxy", eleex[j]), TString::Format("%s tracks;tracks |dxy| to beamspot (cm);arb. units", eleex[j]), 200, 0, 0.2);
+    h_eletracks_dsz[j] = new TH1D(TString::Format("h_%s_tracks_dsz", eleex[j]), TString::Format("%s tracks;tracks dsz (cm);arb. units", eleex[j]), 400, -20, 20);
+    h_eletracks_dz[j] = new TH1D(TString::Format("h_%s_tracks_dz", eleex[j]), TString::Format("%s tracks;tracks dz (cm);arb. units", eleex[j]), 400, -20, 20);
+    h_eletracks_absnsigmadxy[j] = new TH1D(TString::Format("h_%s_tracks_absnsigmadxy", eleex[j]), TString::Format("%s tracks;tracks abs nsigmadxy;arb. units", eleex[j]), 400, 0, 40);
+    h_eletracks_nsigmadxy[j] = new TH1D(TString::Format("h_%s_tracks_nsigmadxy", eleex[j]), TString::Format("%s tracks;tracks nsigmadxy;arb. units", eleex[j]), 2000, -20, 20);
+    h_eletracks_nsigmadsz[j] = new TH1D(TString::Format("h_%s_tracks_nsigmadsz", eleex[j]), TString::Format("%s tracks;tracks nsigmadsz;arb. units", eleex[j]), 2000, -20, 20);
+    h_eletracks_dxyerr[j] = new TH1D(TString::Format("h_%s_tracks_dxyerr", eleex[j]), TString::Format("%s tracks;tracks dxyerr;arb. units", eleex[j]), 2000, 0, 0.2);
+    h_eletracks_dxydszcov[j] = new TH1D(TString::Format("h_%s_tracks_dxydszcov", eleex[j]), TString::Format("%s tracks;tracks dxy-dsz covariance;arb. units", eleex[j]), 2000, -0.00002, 0.00002);
+    h_eletracks_absdxydszcov[j] = new TH1D(TString::Format("h_%s_tracks_absdxydszcov", eleex[j]), TString::Format("%s tracks;tracks dxy-dsz covariance;arb. units", eleex[j]), 2000, 0, 0.00002);
+    h_eletracks_dzerr[j] = new TH1D(TString::Format("h_%s_tracks_dzerr", eleex[j]), TString::Format("%s tracks;tracks dzerr;arb. units", eleex[j]), 2000, 0, 0.2);
+    h_eletracks_dszerr[j] = new TH1D(TString::Format("h_%s_tracks_dszerr", eleex[j]), TString::Format("%s tracks;tracks dszerr;arb. units", eleex[j]), 2000, 0, 0.2);
+    h_eletracks_lambdaerr[j] = new TH1D(TString::Format("h_%s_tracks_lambdaerr", eleex[j]), TString::Format("%s tracks;tracks lambdaerr;arb. units", eleex[j]), 2000, 0, 0.2);
+    h_eletracks_pterr[j] = new TH1D(TString::Format("h_%s_tracks_pterr", eleex[j]), TString::Format("%s tracks;tracks pterr;arb. units", eleex[j]), 200, 0, 0.2);
+    h_eletracks_phierr[j] = new TH1D(TString::Format("h_%s_tracks_phierr", eleex[j]), TString::Format("%s tracks;tracks phierr;arb. units", eleex[j]), 200, 0, 0.2);
+    h_eletracks_etaerr[j] = new TH1D(TString::Format("h_%s_tracks_etaerr", eleex[j]), TString::Format("%s tracks;tracks etaerr;arb. units", eleex[j]), 200, 0, 0.2);
+    h_eletracks_dxyerr_v_pt[j] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_pt", eleex[j]), TString::Format("%s tracks;tracks pt;tracks dxyerr", eleex[j]), 2000, 0, 400, 2000, 0, 0.2);
+    h_eletracks_dxyerr_v_eta[j] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_eta", eleex[j]), TString::Format("%s tracks;tracks eta;tracks dxyerr", eleex[j]), 80, -4, 4, 2000, 0, 0.2);
+    h_eletracks_dxyerr_v_phi[j] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_phi", eleex[j]), TString::Format("%s tracks;tracks phi;tracks dxyerr", eleex[j]), 126, -3.15, 3.15, 200, 0, 0.2);
+    h_eletracks_dxyerr_v_minr[j] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_minr", eleex[j]), TString::Format("%s tracks;tracks minr;tracks dxyerrr", eleex[j]), 10, 0, 10, 200, 0, 0.2);
+    h_eletracks_dszerr_v_pt[j] = new TH2D(TString::Format("h_%s_tracks_dszerr_v_pt", eleex[j]), TString::Format("%s tracks;tracks pt;tracks dszerr", eleex[j]), 2000, 0, 400, 2000, 0, 0.2);
+    h_eletracks_dszerr_v_eta[j] = new TH2D(TString::Format("h_%s_tracks_dszerr_v_eta", eleex[j]), TString::Format("%s tracks;tracks eta;tracks dszerr", eleex[j]), 80, -4, 4, 2000, 0, 0.2);
+    h_eletracks_dszerr_v_phi[j] = new TH2D(TString::Format("h_%s_tracks_dszerr_v_phi", eleex[j]), TString::Format("%s tracks;tracks phi;tracks dszerr", eleex[j]), 126, -3.15, 3.15, 200, 0, 0.2);
     
-    h_leptracks_dxydszcov_v_pt[j] = new TH2D(TString::Format("h_%s_tracks_dxydszcov_v_pt", lepex[j]), TString::Format("%s tracks;tracks pt;tracks dxydszcov", lepex[j]), 2000, 0, 200, 2000, -0.00002, 0.00002);
-    h_leptracks_dxydszcov_v_eta[j] = new TH2D(TString::Format("h_%s_tracks_dxydszcov_v_eta", lepex[j]), TString::Format("%s tracks;tracks eta;tracks dxydszcov", lepex[j]), 80, -4, 4, 2000, -0.00002, 0.00002);
-    h_leptracks_dxydszcov_v_phi[j] = new TH2D(TString::Format("h_%s_tracks_dxydszcov_v_phi", lepex[j]), TString::Format("%s tracks;tracks phi;tracks dxydszcov", lepex[j]), 126, -3.15, 3.15, 200, -0.00002, 0.00002);
-    h_leptracks_absdxydszcov_v_pt[j] = new TH2D(TString::Format("h_%s_tracks_absdxydszcov_v_pt", lepex[j]), TString::Format("%s tracks;tracks pt;tracks dxydszcov", lepex[j]), 2000, 0, 200, 2000, 0, 0.00002);
-    h_leptracks_absdxydszcov_v_eta[j] = new TH2D(TString::Format("h_%s_tracks_absdxydszcov_v_eta", lepex[j]), TString::Format("%s tracks;tracks eta;tracks dxydszcov", lepex[j]), 80, -4, 4, 2000, 0, 0.00002);
-    h_leptracks_absdxydszcov_v_phi[j] = new TH2D(TString::Format("h_%s_tracks_absdxydszcov_v_phi", lepex[j]), TString::Format("%s tracks;tracks phi;tracks dxydszcov", lepex[j]), 126, -3.15, 3.15, 2000, 0, 0.00002);
+    h_eletracks_dxydszcov_v_pt[j] = new TH2D(TString::Format("h_%s_tracks_dxydszcov_v_pt", eleex[j]), TString::Format("%s tracks;tracks pt;tracks dxydszcov", eleex[j]), 2000, 0, 200, 2000, -0.00002, 0.00002);
+    h_eletracks_dxydszcov_v_eta[j] = new TH2D(TString::Format("h_%s_tracks_dxydszcov_v_eta", eleex[j]), TString::Format("%s tracks;tracks eta;tracks dxydszcov", eleex[j]), 80, -4, 4, 2000, -0.00002, 0.00002);
+    h_eletracks_dxydszcov_v_phi[j] = new TH2D(TString::Format("h_%s_tracks_dxydszcov_v_phi", eleex[j]), TString::Format("%s tracks;tracks phi;tracks dxydszcov", eleex[j]), 126, -3.15, 3.15, 200, -0.00002, 0.00002);
+    h_eletracks_absdxydszcov_v_pt[j] = new TH2D(TString::Format("h_%s_tracks_absdxydszcov_v_pt", eleex[j]), TString::Format("%s tracks;tracks pt;tracks dxydszcov", eleex[j]), 2000, 0, 200, 2000, 0, 0.00002);
+    h_eletracks_absdxydszcov_v_eta[j] = new TH2D(TString::Format("h_%s_tracks_absdxydszcov_v_eta", eleex[j]), TString::Format("%s tracks;tracks eta;tracks dxydszcov", eleex[j]), 80, -4, 4, 2000, 0, 0.00002);
+    h_eletracks_absdxydszcov_v_phi[j] = new TH2D(TString::Format("h_%s_tracks_absdxydszcov_v_phi", eleex[j]), TString::Format("%s tracks;tracks phi;tracks dxydszcov", eleex[j]), 126, -3.15, 3.15, 2000, 0, 0.00002);
+    h_eletracks_eta_v_phi[j] = new TH2D(TString::Format("h_%s_tracks_eta_v_phi", eleex[j]), TString::Format("%s tracks;tracks phi;tracks eta", eleex[j]), 126, -3.15, 3.15, 80, -4, 4);
 
   }
+
+  const char* muex[max_mu_type] = {"all_mu", "sel_mu", "seed_mu"};
+  for (int j = 0; j < max_mu_type; ++j) {
+    h_mutracks_pt[j] = new TH1D(TString::Format("h_%s_tracks_pt", muex[j]), TString::Format("%s tracks;tracks pt (GeV);arb. units", muex[j]), 2000, 0, 200);
+    h_mutracks_eta[j] = new TH1D(TString::Format("h_%s_tracks_eta", muex[j]), TString::Format("%s tracks;tracks eta;arb. units", muex[j]), 50, -4, 4);
+    h_mutracks_phi[j] = new TH1D(TString::Format("h_%s_tracks_phi", muex[j]), TString::Format("%s tracks;tracks phi;arb. units", muex[j]), 315, -3.15, 3.15);
+    h_mutracks_dxy[j] = new TH1D(TString::Format("h_%s_tracks_dxy", muex[j]), TString::Format("%s tracks;tracks dxy to beamspot (cm);arb. units", muex[j]), 400, -0.2, 0.2);
+   // h_mutracks_absdxy[j] = new TH1D(TString::Format("h_%s_tracks_absdxy", muex[j]), TString::Format("%s tracks;tracks |dxy| to beamspot (cm);arb. units", muex[j]), 200, 0, 0.2);
+    h_mutracks_dsz[j] = new TH1D(TString::Format("h_%s_tracks_dsz", muex[j]), TString::Format("%s tracks;tracks dsz (cm);arb. units", muex[j]), 400, -20, 20);
+    h_mutracks_dz[j] = new TH1D(TString::Format("h_%s_tracks_dz", muex[j]), TString::Format("%s tracks;tracks dz (cm);arb. units", muex[j]), 400, -20, 20);
+    h_mutracks_absnsigmadxy[j] = new TH1D(TString::Format("h_%s_tracks_absnsigmadxy", muex[j]), TString::Format("%s tracks;tracks abs nsigmadxy;arb. units", muex[j]), 400, 0, 40);
+    h_mutracks_nsigmadxy[j] = new TH1D(TString::Format("h_%s_tracks_nsigmadxy", muex[j]), TString::Format("%s tracks;tracks nsigmadxy;arb. units", muex[j]), 2000, -20, 20);
+    h_mutracks_nsigmadsz[j] = new TH1D(TString::Format("h_%s_tracks_nsigmadsz", muex[j]), TString::Format("%s tracks;tracks nsigmadsz;arb. units", muex[j]), 2000, -20, 20);
+    h_mutracks_dxyerr[j] = new TH1D(TString::Format("h_%s_tracks_dxyerr", muex[j]), TString::Format("%s tracks;tracks dxyerr;arb. units", muex[j]), 2000, 0, 0.2);
+    h_mutracks_dxydszcov[j] = new TH1D(TString::Format("h_%s_tracks_dxydszcov", muex[j]), TString::Format("%s tracks;tracks dxy-dsz covariance;arb. units", muex[j]), 2000, -0.00002, 0.00002);
+    h_mutracks_absdxydszcov[j] = new TH1D(TString::Format("h_%s_tracks_absdxydszcov", muex[j]), TString::Format("%s tracks;tracks dxy-dsz covariance;arb. units", muex[j]), 2000, 0, 0.00002);
+    h_mutracks_dzerr[j] = new TH1D(TString::Format("h_%s_tracks_dzerr", muex[j]), TString::Format("%s tracks;tracks dzerr;arb. units", muex[j]), 2000, 0, 0.2);
+    h_mutracks_dszerr[j] = new TH1D(TString::Format("h_%s_tracks_dszerr", muex[j]), TString::Format("%s tracks;tracks dszerr;arb. units", muex[j]), 2000, 0, 0.2);
+    h_mutracks_lambdaerr[j] = new TH1D(TString::Format("h_%s_tracks_lambdaerr", muex[j]), TString::Format("%s tracks;tracks lambdaerr;arb. units", muex[j]), 2000, 0, 0.2);
+    h_mutracks_pterr[j] = new TH1D(TString::Format("h_%s_tracks_pterr", muex[j]), TString::Format("%s tracks;tracks pterr;arb. units", muex[j]), 200, 0, 0.2);
+    h_mutracks_phierr[j] = new TH1D(TString::Format("h_%s_tracks_phierr", muex[j]), TString::Format("%s tracks;tracks phierr;arb. units", muex[j]), 200, 0, 0.2);
+    h_mutracks_etaerr[j] = new TH1D(TString::Format("h_%s_tracks_etaerr", muex[j]), TString::Format("%s tracks;tracks etaerr;arb. units", muex[j]), 200, 0, 0.2);
+    h_mutracks_dxyerr_v_pt[j] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_pt", muex[j]), TString::Format("%s tracks;tracks pt;tracks dxyerr", muex[j]), 2000, 0, 400, 2000, 0, 0.2);
+    h_mutracks_dxyerr_v_eta[j] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_eta", muex[j]), TString::Format("%s tracks;tracks eta;tracks dxyerr", muex[j]), 80, -4, 4, 2000, 0, 0.2);
+    h_mutracks_dxyerr_v_phi[j] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_phi", muex[j]), TString::Format("%s tracks;tracks phi;tracks dxyerr", muex[j]), 126, -3.15, 3.15, 200, 0, 0.2);
+    h_mutracks_dxyerr_v_minr[j] = new TH2D(TString::Format("h_%s_tracks_dxyerr_v_minr", muex[j]), TString::Format("%s tracks;tracks minr;tracks dxyerrr", muex[j]), 10, 0, 10, 200, 0, 0.2);
+    h_mutracks_dszerr_v_pt[j] = new TH2D(TString::Format("h_%s_tracks_dszerr_v_pt", muex[j]), TString::Format("%s tracks;tracks pt;tracks dszerr", muex[j]), 2000, 0, 400, 2000, 0, 0.2);
+    h_mutracks_dszerr_v_eta[j] = new TH2D(TString::Format("h_%s_tracks_dszerr_v_eta", muex[j]), TString::Format("%s tracks;tracks eta;tracks dszerr", muex[j]), 80, -4, 4, 2000, 0, 0.2);
+    h_mutracks_dszerr_v_phi[j] = new TH2D(TString::Format("h_%s_tracks_dszerr_v_phi", muex[j]), TString::Format("%s tracks;tracks phi;tracks dszerr", muex[j]), 126, -3.15, 3.15, 200, 0, 0.2);
+    
+    h_mutracks_dxydszcov_v_pt[j] = new TH2D(TString::Format("h_%s_tracks_dxydszcov_v_pt", muex[j]), TString::Format("%s tracks;tracks pt;tracks dxydszcov", muex[j]), 2000, 0, 200, 2000, -0.00002, 0.00002);
+    h_mutracks_dxydszcov_v_eta[j] = new TH2D(TString::Format("h_%s_tracks_dxydszcov_v_eta", muex[j]), TString::Format("%s tracks;tracks eta;tracks dxydszcov", muex[j]), 80, -4, 4, 2000, -0.00002, 0.00002);
+    h_mutracks_dxydszcov_v_phi[j] = new TH2D(TString::Format("h_%s_tracks_dxydszcov_v_phi", muex[j]), TString::Format("%s tracks;tracks phi;tracks dxydszcov", muex[j]), 126, -3.15, 3.15, 200, -0.00002, 0.00002);
+    h_mutracks_absdxydszcov_v_pt[j] = new TH2D(TString::Format("h_%s_tracks_absdxydszcov_v_pt", muex[j]), TString::Format("%s tracks;tracks pt;tracks dxydszcov", muex[j]), 2000, 0, 200, 2000, 0, 0.00002);
+    h_mutracks_absdxydszcov_v_eta[j] = new TH2D(TString::Format("h_%s_tracks_absdxydszcov_v_eta", muex[j]), TString::Format("%s tracks;tracks eta;tracks dxydszcov", muex[j]), 80, -4, 4, 2000, 0, 0.00002);
+    h_mutracks_absdxydszcov_v_phi[j] = new TH2D(TString::Format("h_%s_tracks_absdxydszcov_v_phi", muex[j]), TString::Format("%s tracks;tracks phi;tracks dxydszcov", muex[j]), 126, -3.15, 3.15, 2000, 0, 0.00002);
+    h_mutracks_eta_v_phi[j] = new TH2D(TString::Format("h_%s_tracks_eta_v_phi", muex[j]), TString::Format("%s tracks;tracks phi;tracks eta", muex[j]), 126, -3.15, 3.15, 80, -4, 4);
+
+  }
+
+
 
   auto fcn = [&]() {
     const double w = nr.weight();
@@ -280,28 +369,399 @@ int main(int argc, char** argv) {
     h_pvy_v_pvx->Fill(nt.pvs().x(0), nt.pvs().y(0), w);
 
     int ntracks[max_tk_type] = {0};
+    int neletracks[max_ele_type] = {0};
+    int nmutracks[max_mu_type] = {0};
 
-    // at the very least, we must create the dxyerr vs pt plot 
+    //////////////////////////////////////////////
+    ///                                        ///
+    /// old way to work with electrons & muons ///
+    ///                                        ///
+    //////////////////////////////////////////////
+
+
+    // for (int ie = 0, iee = nte.n(); ie < iee; ++ie) {
+    //   const double pt = nte.pt(ie);
+    //   const double dxybs = nte.dxybs(ie, nt.bs());
+    //   const float dsz = (nte.vz(ie)) * pt / nte.p(ie) - ((nte.vx(ie)) * nte.px(ie) + (nte.vy(ie)) * nte.py(ie)) / pt * nte.pz(ie) / nte.p(ie);
+    //   const float dz = nte.vz(ie) - (nte.vx(ie) * nte.px(ie) + nte.vy(ie) * nte.py(ie)) / pt * nte.pz(ie) / pt;
+    //   const int min_r = nte.min_r(ie);
+    //   const int npxlayers = nte.npxlayers(ie);
+    //   const int nstlayers = nte.nstlayers(ie);
+    //   //const double nsigmadxy = nte.nsigmadxybs(ie, nt.bs());
+
+    //   const bool eef[5] = {
+		// 	  pt >= 20,
+    //   	nte.eta(ie) < 2.4,
+    //   	nte.iso(ie) < 0.10,
+    //   	nte.passveto(ie),
+    //   	nte.isTight(ie)
+    //   };
+      
+    //   const bool pass_ele = eef[0] && eef[1] && eef[2] && eef[3] && eef[4];
+    //   //const bool pass_nm1ef = eef[1] && eef[2] && eef[3] && eef[4];
+      
+    //   const bool etagt1p5 = false;
+    //   bool etarange =false;
+    //   if (etagt1p5)
+    //     etarange = fabs(nte.eta(ie)) > 1.5;
+    //   else
+    //     etarange = fabs(nte.eta(ie)) < 1.5;
+
+    //   double rescaled_dxyerr_el = nte.err_dxy(ie);
+    //   double rescaled_dszerr_el = nte.err_dsz(ie);
+    //   double rescaled_dxydszcov_el = nte.cov_34(ie);
+
+    //   const bool rescale_tracks = false;
+    //   if (rescale_tracks) {
+    //     double dxyerr_scale_el = 1.;
+    //     double dszerr_scale_el = 1.;
+	
+    //     if (fabs(nte.eta(ie)) < 1.5) {
+    //       const double x = pt;
+
+	  //        //2017 B
+	  //       //electron 
+	  //       // const double e_dxy[2] = {1.2519894918062238, 0.00007487187197916488};
+	  //       // const double e_dsz[2] = {1.1378345538232282, 0.000015006579023894503}; 
+
+	  //       // dxyerr_scale_el = (x>=20&&x<=200)*(e_dxy[0]+e_dxy[1]*x);
+	  //       // dszerr_scale_el = (x>=20&&x<=200)*(e_dsz[0]+e_dsz[1]*x);
+          
+    //       // //2017 C
+    //       // //electron 
+    //       // const double e_dxy[2] = {1.2813251299194244, 0.0000980634546644231};
+    //       // const double e_dsz[2] = {1.2396626500193402, 0.0001031872972430143}; 
+
+    //       // dxyerr_scale_el = (x>=20&&x<=200)*(e_dxy[0]+e_dxy[1]*x);
+    //       // dszerr_scale_el = (x>=20&&x<=200)*(e_dsz[0]+e_dsz[1]*x);
+
+    //       // //2017 D
+    //       // //electron 
+    //       // const double e_dxy[2] = {1.2175109728215536, 0.00015468622838992613};
+    //       // const double e_dsz[2] = {1.193086410468232, 0.00009273527660223248}; 
+
+    //       // dxyerr_scale_el = (x>=20&&x<=200)*(e_dxy[0]+e_dxy[1]*x);
+    //       // dszerr_scale_el = (x>=20&&x<=200)*(e_dsz[0]+e_dsz[1]*x);
+          
+    //       // //2017 E
+    //       // //electron 
+    //       // const double e_dxy[2] = {1.1391061605726946, 0.000101181227594822};
+    //       // const double e_dsz[2] = {1.0759837837776636, 0.00012897972750002158}; 
+
+    //       // dxyerr_scale_el = (x>=20&&x<=200)*(e_dxy[0]+e_dxy[1]*x);
+    //       // dszerr_scale_el = (x>=20&&x<=200)*(e_dsz[0]+e_dsz[1]*x);
+         
+    //       // //2017 F
+    //       // //electron 
+    //       const double e_dxy[2] = {1.2163661067927056, 0.0001401403672766123};
+    //       const double e_dsz[2] = {1.1387132063959098, 0.00017118239591405043}; 
+
+    //       dxyerr_scale_el = (x>=20&&x<=200)*(e_dxy[0]+e_dxy[1]*x);
+    //       dszerr_scale_el = (x>=20&&x<=200)*(e_dsz[0]+e_dsz[1]*x);
+    //   	}
+    //   	else {
+    //   	  const double x = pt;
+	  
+    //       //2017 B
+    //       //electron 
+    //       // const double e_dxy[2] = {1.170410154026039, -0.00015029075777466504};
+    //       // const double e_dsz[2] = {1.1099677806775403, 0.00043288105494967803}; 
+
+    //       // dxyerr_scale_el = (x>=20&&x<=200)*(e_dxy[0]+e_dxy[1]*x);
+    //       // dszerr_scale_el = (x>=20&&x<=200)*(e_dsz[0]+e_dsz[1]*x);
+          
+    //       // //2017 C
+    //       // //electron 
+    //       // const double e_dxy[2] = {1.2057194508431224, 0.00012593984775844357};
+    //       // const double e_dsz[2] = {1.2565529221655773, 0.00039439387574306123}; 
+
+    //       // dxyerr_scale_el = (x>=20&&x<=200)*(e_dxy[0]+e_dxy[1]*x);
+    //       // dszerr_scale_el = (x>=20&&x<=200)*(e_dsz[0]+e_dsz[1]*x);
+      
+    //       // //2017 D
+    //       // //electron 
+    //       // const double e_dxy[2] = {1.1761188847482749, 0.0001398415228549936};
+    //       // const double e_dsz[2] = {1.116270698700518, 0.00061093509987282}; 
+
+    //       // dxyerr_scale_el = (x>=20&&x<=200)*(e_dxy[0]+e_dxy[1]*x);
+    //       // dszerr_scale_el = (x>=20&&x<=200)*(e_dsz[0]+e_dsz[1]*x);
+          
+    //       // //2017 E
+    //       // //electron 
+    //       // const double e_dxy[2] = {1.1648523225295881, 0.00010905658578916344};
+    //       // const double e_dsz[2] = {1.078683273620775, 0.0007123812217371458}; 
+
+    //       // dxyerr_scale_el = (x>=20&&x<=200)*(e_dxy[0]+e_dxy[1]*x);
+    //       // dszerr_scale_el = (x>=20&&x<=200)*(e_dsz[0]+e_dsz[1]*x);
+                
+    //       // //2017 F
+    //       // //electron 
+    //       const double e_dxy[2] = {1.3092795940264987, -0.00023650767360119604};
+    //       const double e_dsz[2] = {1.477456468774621, 0.00039462740911918627}; 
+
+    //       dxyerr_scale_el = (x>=20&&x<=200)*(e_dxy[0]+e_dxy[1]*x);
+    //       dszerr_scale_el = (x>=20&&x<=200)*(e_dsz[0]+e_dsz[1]*x);
+    //     }
+    //     //for electrons 
+    //     rescaled_dxyerr_el *= dxyerr_scale_el;
+    //     rescaled_dxydszcov_el *= sqrt(dxyerr_scale_el);
+    //     rescaled_dszerr_el *= dszerr_scale_el;
+    //     rescaled_dxydszcov_el *= sqrt(dszerr_scale_el);
+       
+    //   }
+    //   const double nsigmadxy_el = dxybs / rescaled_dxyerr_el;
+    //   if (pt > 1 && etarange && min_r <=1 && npxlayers >=2 && nstlayers >=6) {
+
+	  //     if (pass_ele) {
+    //       h_eletracks_pt[1]->Fill(pt, w);
+    //       h_eletracks_eta[1]->Fill(nte.eta(ie), w);
+    //       h_eletracks_phi[1]->Fill(nte.phi(ie), w);
+    //       h_eletracks_dxy[1]->Fill(dxybs, w);
+    //       h_eletracks_absdxy[1]->Fill(fabs(dxybs), w);
+    //       h_eletracks_dsz[1]->Fill(dsz, w);
+    //       h_eletracks_dz[1]->Fill(dz, w);
+    //       h_eletracks_dxyerr[1]->Fill(rescaled_dxyerr_el, w);
+
+    //       // if (pt<=20)             h_eletracks_dxyerr_pt[1][0]->Fill(nte.err_dxy(ie), w);
+    //       // if (pt>20 && pt<=40)    h_eletracks_dxyerr_pt[1][1]->Fill(nte.err_dxy(ie), w);
+    //       // if (pt>40 && pt<=60)    h_eletracks_dxyerr_pt[1][2]->Fill(nte.err_dxy(ie), w);
+    //       // if (pt>60 && pt<=90)    h_eletracks_dxyerr_pt[1][3]->Fill(nte.err_dxy(ie), w);
+    //       // if (pt>90 && pt<=130)   h_eletracks_dxyerr_pt[1][4]->Fill(nte.err_dxy(ie), w);
+    //       // if (pt>130 && pt<=200)  h_eletracks_dxyerr_pt[1][5]->Fill(nte.err_dxy(ie), w);
+    //       h_eletracks_absnsigmadxy[1]->Fill(nsigmadxy_el, w);
+    //       h_eletracks_nsigmadxy[1]->Fill(dxybs / rescaled_dxyerr_el, w);
+    //       h_eletracks_nsigmadsz[1]->Fill(dsz / rescaled_dszerr_el, w);
+    //       h_eletracks_dxydszcov[1]->Fill(rescaled_dxydszcov_el, w);
+    //       h_eletracks_absdxydszcov[1]->Fill(fabs(rescaled_dxydszcov_el), w);
+    //       h_eletracks_dzerr[1]->Fill(nte.err_dz(ie), w);
+    //       h_eletracks_dszerr[1]->Fill(rescaled_dszerr_el, w);
+    //       h_eletracks_lambdaerr[1]->Fill(nte.err_lambda(ie), w);
+    //       h_eletracks_pterr[1]->Fill(nte.err_pt(ie), w);
+    //       h_eletracks_phierr[1]->Fill(nte.err_phi(ie), w);
+    //       h_eletracks_etaerr[1]->Fill(nte.err_eta(ie), w);
+    //       // h_eletracks_dszerr_v_pt[1]->Fill(pt, nte.err_dsz(ie), w);
+    //       // h_eletracks_dxyerr_v_pt[1]->Fill(pt, nte.err_dxy(ie), w);
+    //       // h_eletracks_dxyerr_v_eta[1]->Fill(nte.eta(ie), nte.err_dxy(ie), w);
+    //       // h_eletracks_dxyerr_v_phi[1]->Fill(nte.phi(ie), nte.err_dxy(ie), w);
+    //       // h_eletracks_dszerr_v_eta[1]->Fill(nte.eta(ie), nte.err_dxy(ie), w);
+    //       // h_eletracks_dszerr_v_phi[1]->Fill(nte.phi(ie), nte.err_dxy(ie), w);
+
+    //       h_eletracks_dxyerr_v_pt[1]->Fill(pt, rescaled_dxyerr_el, w);
+    //       h_eletracks_dxyerr_v_eta[1]->Fill(nte.eta(ie), rescaled_dxyerr_el, w);
+    //       h_eletracks_dxyerr_v_phi[1]->Fill(nte.phi(ie), rescaled_dxyerr_el, w);
+    //       h_eletracks_dxyerr_v_minr[1]->Fill(nte.min_r(ie), rescaled_dxyerr_el, w);
+    //       h_eletracks_dszerr_v_pt[1]->Fill(pt, rescaled_dszerr_el, w);
+    //       h_eletracks_dszerr_v_eta[1]->Fill(nte.eta(ie), rescaled_dszerr_el, w);
+    //       h_eletracks_dszerr_v_phi[1]->Fill(nte.phi(ie), rescaled_dszerr_el, w);
+        
+    //       h_eletracks_dxydszcov_v_pt[1]->Fill(pt, rescaled_dxydszcov_el, w);
+    //       h_eletracks_dxydszcov_v_eta[1]->Fill(nte.eta(ie), rescaled_dxydszcov_el, w);
+    //       h_eletracks_dxydszcov_v_phi[1]->Fill(nte.phi(ie), rescaled_dxydszcov_el, w);
+    //       h_eletracks_absdxydszcov_v_pt[1]->Fill(pt, fabs(rescaled_dxydszcov_el), w);
+    //       h_eletracks_absdxydszcov_v_eta[1]->Fill(nte.eta(ie), fabs(rescaled_dxydszcov_el), w);
+    //       h_eletracks_absdxydszcov_v_phi[1]->Fill(nte.phi(ie), fabs(rescaled_dxydszcov_el), w);
+	  //     } 
+    //   }
+    // }
+    // for (int im = 0, ime = ntm.n(); im < ime; ++im) {
+    //   const double pt = ntm.pt(im);
+    //   const double dxybs = ntm.dxybs(im, nt.bs());
+    //   const float dsz = (ntm.vz(im)) * pt / ntm.p(im) - ((ntm.vx(im)) * ntm.px(im) + (ntm.vy(im)) * ntm.py(im)) / pt * ntm.pz(im) / ntm.p(im);
+    //   const float dz = ntm.vz(im) - (ntm.vx(im) * ntm.px(im) + ntm.vy(im) * ntm.py(im)) / pt * ntm.pz(im) / pt;
+    //   const int min_r = ntm.min_r(im);
+    //   const int npxlayers = ntm.npxlayers(im);
+    //   const int nstlayers = ntm.nstlayers(im);
+      
+    //   const bool mef[4] = {
+    //     pt >= 20,
+    //   	ntm.eta(im) < 2.4,
+    //   	ntm.iso(im) < 0.15,
+    //   	ntm.isMed(im)
+    //   };
+      
+    //   const bool pass_mu = mef[0] && mef[1] && mef[2] && mef[3];
+    //   //const bool pass_nm1mf = mef[1] && mef[2] && mef[3];
+
+    //   const bool etagt1p5 = false;
+    //   bool etarange =false;
+    //   if (etagt1p5)
+    //     etarange = fabs(ntm.eta(im)) > 1.5;
+    //   else
+    //     etarange = fabs(ntm.eta(im)) < 1.5;
+
+    //   double rescaled_dxyerr_mu = ntm.err_dxy(im);
+    //   double rescaled_dszerr_mu = ntm.err_dsz(im);
+    //   double rescaled_dxydszcov_mu = ntm.cov_34(im);
+
+    //   const bool rescale_tracks = false;
+    //   if (rescale_tracks) {
+    //     double dxyerr_scale_mu = 1.;
+    //     double dszerr_scale_mu = 1.;
+	
+    //     if (fabs(ntm.eta(im)) < 1.5) {
+    //       const double x = pt;
+
+	  //        //2017 B
+	  //       //muon
+	  //       // const double m_dxy[2] = {1.2148062639351913, 0.00012377341911564733};
+	  //       // const double m_dsz[2] = {1.1730021966468054, -0.000149736302669597}; 
+
+	  //       // dxyerr_scale_mu = (x>=20&&x<=200)*(m_dxy[0]+m_dxy[1]*x);
+	  //       // dszerr_scale_mu = (x>=20&&x<=200)*(m_dsz[0]+m_dsz[1]*x);
+	 
+    //       // //2017 C
+    //       // //muon
+    //       // const double m_dxy[2] = {1.2369182541723913, 0.00006638107717464939};
+    //       // const double m_dsz[2] = {1.2875566271184316, -0.00015059072827484053}; 
+
+    //       // dxyerr_scale_mu = (x>=20&&x<=200)*(m_dxy[0]+m_dxy[1]*x);
+    //       // dszerr_scale_mu = (x>=20&&x<=200)*(m_dsz[0]+m_dsz[1]*x);
+        
+    //       // //2017 D
+    //       // //muon
+    //       // const double m_dxy[2] = {1.2014547625589436, -0.0003230230107513707};
+    //       // const double m_dsz[2] = {1.2362920471954792, -0.0001124554074662925}; 
+
+    //       // dxyerr_scale_mu = (x>=20&&x<=200)*(m_dxy[0]+m_dxy[1]*x);
+    //       // dszerr_scale_mu = (x>=20&&x<=200)*(m_dsz[0]+m_dsz[1]*x);
+        
+    //       // //2017 E
+    //       // //muon
+    //       // const double m_dxy[2] = {1.1073581182642487, -0.0002688182632471052};
+    //       // const double m_dsz[2] = {1.1124654017857332, -0.00006862041740876568}; 
+
+    //       // dxyerr_scale_mu = (x>=20&&x<=200)*(m_dxy[0]+m_dxy[1]*x);
+    //       // dszerr_scale_mu = (x>=20&&x<=200)*(m_dsz[0]+m_dsz[1]*x);
+         
+    //       // //2017 F
+    //       // //muon
+    //       const double m_dxy[2] = {1.1855136718401231, -0.00008035979201444395};
+    //       const double m_dsz[2] = {1.1709976385402432, -0.00013193247852357447}; 
+
+    //       dxyerr_scale_mu = (x>=20&&x<=200)*(m_dxy[0]+m_dxy[1]*x);
+    //       dszerr_scale_mu = (x>=20&&x<=200)*(m_dsz[0]+m_dsz[1]*x);
+    //   	}
+    //   	else {
+    //   	  const double x = pt;
+	  
+    //       //2017 B
+    //       //muon
+    //       // const double m_dxy[2] = {1.2881888374900963, -0.0006996192395661432};
+    //       // const double m_dsz[2] = {1.0975750359065857, -0.00021900979665942163}; 
+
+    //       // dxyerr_scale_mu = (x>=20&&x<=200)*(m_dxy[0]+m_dxy[1]*x);
+    //       // dszerr_scale_mu = (x>=20&&x<=200)*(m_dsz[0]+m_dsz[1]*x);
+        
+    //       // //2017 C
+    //       // //muon
+    //       // const double m_dxy[2] = {1.3142661391870103, -0.0008179089771729025};
+    //       // const double m_dsz[2] = {1.2290616916291792, -0.00019044437771609073}; 
+
+    //       // dxyerr_scale_mu = (x>=20&&x<=200)*(m_dxy[0]+m_dxy[1]*x);
+    //       // dszerr_scale_mu = (x>=20&&x<=200)*(m_dsz[0]+m_dsz[1]*x);
+	 
+    //       // //2017 D
+    //       // //muon
+    //       // const double m_dxy[2] = {1.28569782063072, -0.0007018332128769147};
+    //       // const double m_dsz[2] = {1.1359875496520355, -0.00009653597906441966}; 
+
+    //       // dxyerr_scale_mu = (x>=20&&x<=200)*(m_dxy[0]+m_dxy[1]*x);
+    //       // dszerr_scale_mu = (x>=20&&x<=200)*(m_dsz[0]+m_dsz[1]*x);
+        
+    //       // //2017 E
+    //       // //muon
+    //       // const double m_dxy[2] = {1.241991737450876, -0.0005439955810617094};
+    //       // const double m_dsz[2] = {1.0999736323133213, -0.00014218890677155684}; 
+
+    //       // dxyerr_scale_mu = (x>=20&&x<=200)*(m_dxy[0]+m_dxy[1]*x);
+    //       // dszerr_scale_mu = (x>=20&&x<=200)*(m_dsz[0]+m_dsz[1]*x);
+        
+    //       // //2017 F
+    //       // //muon
+    //       const double m_dxy[2] = {1.3276007175478752, -0.0005551829741863527};
+    //       const double m_dsz[2] = {1.5071250531650895, -0.00033371136752079894}; 
+
+    //       dxyerr_scale_mu = (x>=20&&x<=200)*(m_dxy[0]+m_dxy[1]*x);
+    //       dszerr_scale_mu = (x>=20&&x<=200)*(m_dsz[0]+m_dsz[1]*x);
+    //     }
+    //     //for muons 
+    //     rescaled_dxyerr_mu *= dxyerr_scale_mu;
+    //     rescaled_dxydszcov_mu *= sqrt(dxyerr_scale_mu);
+    //     rescaled_dszerr_mu *= dszerr_scale_mu;
+    //     rescaled_dxydszcov_mu *= sqrt(dszerr_scale_mu);
+    //   }
+    //   const double nsigmadxy_mu = dxybs / rescaled_dxyerr_mu;
+      
+    //   if (pt > 1 && etarange && min_r <=1 && npxlayers >=2 && nstlayers >=6) {
+	
+	  //     if (pass_mu) {
+    //       h_eletracks_pt[0]->Fill(pt, w);
+    //       h_eletracks_eta[0]->Fill(ntm.eta(im), w);
+    //       h_eletracks_phi[0]->Fill(ntm.phi(im), w);
+    //       h_eletracks_dxy[0]->Fill(dxybs, w);
+    //       h_tracks_absdxy[0]->Fill(fabs(dxybs), w);
+    //       h_eletracks_dz[0]->Fill(dz, w);
+    //       h_eletracks_dsz[0]->Fill(dsz, w);
+
+    //       h_eletracks_dxyerr[0]->Fill(rescaled_dxyerr_mu, w);
+    //       h_eletracks_dxydszcov[0]->Fill(rescaled_dxydszcov_mu, w);
+    //       h_eletracks_absdxydszcov[0]->Fill(fabs(rescaled_dxydszcov_mu), w);
+    //       // if (pt<=20)             h_eletracks_dxyerr_pt[0][0]->Fill(ntm.err_dxy(im), w);
+    //       // if (pt>20 && pt<=40)    h_eletracks_dxyerr_pt[0][1]->Fill(ntm.err_dxy(im), w);
+    //       // if (pt>40 && pt<=60)    h_eletracks_dxyerr_pt[0][2]->Fill(ntm.err_dxy(im), w);
+    //       // if (pt>60 && pt<=90)    h_eletracks_dxyerr_pt[0][3]->Fill(ntm.err_dxy(im), w);
+    //       // if (pt>90 && pt<=130)   h_eletracks_dxyerr_pt[0][4]->Fill(ntm.err_dxy(im), w);
+    //       // if (pt>130 && pt<=200)  h_eletracks_dxyerr_pt[0][5]->Fill(ntm.err_dxy(im), w);
+    //       h_eletracks_absnsigmadxy[0]->Fill(nsigmadxy_mu, w);
+    //       h_eletracks_nsigmadxy[0]->Fill(dxybs / rescaled_dxyerr_mu, w);
+    //       h_eletracks_nsigmadsz[0]->Fill(dsz / rescaled_dszerr_mu, w);
+    //       h_eletracks_dszerr[0]->Fill(rescaled_dszerr_mu, w);
+    //       h_eletracks_lambdaerr[0]->Fill(ntm.err_lambda(im), w);
+    //       h_eletracks_pterr[0]->Fill(ntm.err_pt(im), w);
+    //       h_eletracks_phierr[0]->Fill(ntm.err_phi(im), w);
+    //       h_eletracks_etaerr[0]->Fill(ntm.err_eta(im), w);
+    //       // h_eletracks_dszerr_v_pt[0]->Fill(pt, ntm.err_dsz(im), w);
+    //       // h_eletracks_dxyerr_v_pt[0]->Fill(pt, ntm.err_dxy(im), w);
+    //       // h_eletracks_dxyerr_v_eta[0]->Fill(ntm.eta(im), ntm.err_dxy(im), w);
+    //       // h_eletracks_dxyerr_v_phi[0]->Fill(ntm.phi(im), ntm.err_dxy(im), w);
+    //       // h_eletracks_dszerr_v_eta[0]->Fill(ntm.eta(im), ntm.err_dxy(im), w);
+    //       // h_eletracks_dszerr_v_phi[0]->Fill(ntm.phi(im), ntm.err_dxy(im), w);
+
+          
+    //       h_eletracks_dxyerr_v_pt[0]->Fill(pt, rescaled_dxyerr_mu, w);
+    //       h_eletracks_dxyerr_v_eta[0]->Fill(ntm.eta(im), rescaled_dxyerr_mu, w);
+    //       h_eletracks_dxyerr_v_phi[0]->Fill(ntm.phi(im), rescaled_dxyerr_mu, w);
+    //       h_eletracks_dxyerr_v_minr[0]->Fill(ntm.min_r(im), rescaled_dxyerr_mu, w);
+
+    //       h_eletracks_dszerr_v_pt[0]->Fill(pt, rescaled_dszerr_mu, w);
+    //       h_eletracks_dszerr_v_eta[0]->Fill(ntm.eta(im), rescaled_dszerr_mu, w);
+    //       h_eletracks_dszerr_v_phi[0]->Fill(ntm.phi(im), rescaled_dszerr_mu, w);
+        
+    //       h_eletracks_dxydszcov_v_pt[0]->Fill(pt, rescaled_dxydszcov_mu, w);
+    //       h_eletracks_dxydszcov_v_eta[0]->Fill(ntm.eta(im), rescaled_dxydszcov_mu, w);
+    //       h_eletracks_dxydszcov_v_phi[0]->Fill(ntm.phi(im), rescaled_dxydszcov_mu, w);
+    //       h_eletracks_absdxydszcov_v_pt[0]->Fill(pt, fabs(rescaled_dxydszcov_mu), w);
+    //       h_eletracks_absdxydszcov_v_eta[0]->Fill(ntm.eta(im), fabs(rescaled_dxydszcov_mu), w);
+    //       h_eletracks_absdxydszcov_v_phi[0]->Fill(ntm.phi(im), fabs(rescaled_dxydszcov_mu), w);
+    //   	} 
+    //   }
+    // }
+
+    //////////////////////////////////////////////
+    ///                                        ///
+    /// new way to work with electrons & muons ///
+    ///  try 1 : no selections on lep tracks   ///
+    ///     besides usual track & pt ≥ 20      ///
+    //////////////////////////////////////////////
+
     for (int ie = 0, iee = nte.n(); ie < iee; ++ie) {
       const double pt = nte.pt(ie);
-      const double dxybs = nte.dxybs(ie, nt.bs());
-      const float dsz = (nte.vz(ie)) * pt / nte.p(ie) - ((nte.vx(ie)) * nte.px(ie) + (nte.vy(ie)) * nte.py(ie)) / pt * nte.pz(ie) / nte.p(ie);
-      const float dz = nte.vz(ie) - (nte.vx(ie) * nte.px(ie) + nte.vy(ie) * nte.py(ie)) / pt * nte.pz(ie) / pt;
       const int min_r = nte.min_r(ie);
+      const int losthits = nte.losthit(ie);
       const int npxlayers = nte.npxlayers(ie);
       const int nstlayers = nte.nstlayers(ie);
-      //const double nsigmadxy = nte.nsigmadxybs(ie, nt.bs());
-
-      const bool eef[5] = {
-			  pt >= 20,
-      	nte.eta(ie) < 2.4,
-      	nte.iso(ie) < 0.10,
-      	nte.passveto(ie),
-      	nte.isTight(ie)
-      };
-      
-      const bool pass_ele = eef[0] && eef[1] && eef[2] && eef[3] && eef[4];
-      //const bool pass_nm1ef = eef[1] && eef[2] && eef[3] && eef[4];
+      const double dxybs = nte.dxybs(ie, nt.bs());
+      //const double nsigmadxy = ntt.nsigmadxybs(itk, nt.bs());
       
       const bool etagt1p5 = false;
       bool etarange =false;
@@ -313,16 +773,15 @@ int main(int argc, char** argv) {
       double rescaled_dxyerr_el = nte.err_dxy(ie);
       double rescaled_dszerr_el = nte.err_dsz(ie);
       double rescaled_dxydszcov_el = nte.cov_34(ie);
-
+      
       const bool rescale_tracks = false;
       if (rescale_tracks) {
         double dxyerr_scale_el = 1.;
         double dszerr_scale_el = 1.;
 	
         if (fabs(nte.eta(ie)) < 1.5) {
-          const double x = pt;
-
-	         //2017 B
+         const double x = pt;
+          //2017 B
 	        //electron 
 	        // const double e_dxy[2] = {1.2519894918062238, 0.00007487187197916488};
 	        // const double e_dsz[2] = {1.1378345538232282, 0.000015006579023894503}; 
@@ -355,16 +814,16 @@ int main(int argc, char** argv) {
           // dszerr_scale_el = (x>=20&&x<=200)*(e_dsz[0]+e_dsz[1]*x);
          
           // //2017 F
-          // //electron 
-          const double e_dxy[2] = {1.2163661067927056, 0.0001401403672766123};
-          const double e_dsz[2] = {1.1387132063959098, 0.00017118239591405043}; 
+          //electron 
+        const double e_dxy[2] = {1.2163661067927056, 0.0001401403672766123};
+        const double e_dsz[2] = {1.1387132063959098, 0.00017118239591405043}; 
 
-          dxyerr_scale_el = (x>=20&&x<=200)*(e_dxy[0]+e_dxy[1]*x);
-          dszerr_scale_el = (x>=20&&x<=200)*(e_dsz[0]+e_dsz[1]*x);
+         dxyerr_scale_el = (x>=20&&x<=200)*(e_dxy[0]+e_dxy[1]*x);
+         dszerr_scale_el = (x>=20&&x<=200)*(e_dsz[0]+e_dsz[1]*x);
+
       	}
       	else {
       	  const double x = pt;
-	  
           //2017 B
           //electron 
           // const double e_dxy[2] = {1.170410154026039, -0.00015029075777466504};
@@ -373,118 +832,114 @@ int main(int argc, char** argv) {
           // dxyerr_scale_el = (x>=20&&x<=200)*(e_dxy[0]+e_dxy[1]*x);
           // dszerr_scale_el = (x>=20&&x<=200)*(e_dsz[0]+e_dsz[1]*x);
           
-          // //2017 C
-          // //electron 
+          //2017 C
+          //electron 
           // const double e_dxy[2] = {1.2057194508431224, 0.00012593984775844357};
           // const double e_dsz[2] = {1.2565529221655773, 0.00039439387574306123}; 
 
           // dxyerr_scale_el = (x>=20&&x<=200)*(e_dxy[0]+e_dxy[1]*x);
           // dszerr_scale_el = (x>=20&&x<=200)*(e_dsz[0]+e_dsz[1]*x);
       
-          // //2017 D
-          // //electron 
+          //2017 D
+          //electron 
           // const double e_dxy[2] = {1.1761188847482749, 0.0001398415228549936};
           // const double e_dsz[2] = {1.116270698700518, 0.00061093509987282}; 
 
           // dxyerr_scale_el = (x>=20&&x<=200)*(e_dxy[0]+e_dxy[1]*x);
           // dszerr_scale_el = (x>=20&&x<=200)*(e_dsz[0]+e_dsz[1]*x);
           
-          // //2017 E
-          // //electron 
+          //2017 E
+          //electron 
           // const double e_dxy[2] = {1.1648523225295881, 0.00010905658578916344};
           // const double e_dsz[2] = {1.078683273620775, 0.0007123812217371458}; 
 
           // dxyerr_scale_el = (x>=20&&x<=200)*(e_dxy[0]+e_dxy[1]*x);
           // dszerr_scale_el = (x>=20&&x<=200)*(e_dsz[0]+e_dsz[1]*x);
                 
-          // //2017 F
-          // //electron 
-          const double e_dxy[2] = {1.3092795940264987, -0.00023650767360119604};
-          const double e_dsz[2] = {1.477456468774621, 0.00039462740911918627}; 
+        //2017 F
+        //electron 
+        const double e_dxy[2] = {1.3092795940264987, -0.00023650767360119604};
+        const double e_dsz[2] = {1.477456468774621, 0.00039462740911918627}; 
 
-          dxyerr_scale_el = (x>=20&&x<=200)*(e_dxy[0]+e_dxy[1]*x);
-          dszerr_scale_el = (x>=20&&x<=200)*(e_dsz[0]+e_dsz[1]*x);
+        dxyerr_scale_el = (x>=20&&x<=200)*(e_dxy[0]+e_dxy[1]*x);
+        dszerr_scale_el = (x>=20&&x<=200)*(e_dsz[0]+e_dsz[1]*x);
+
         }
-        //for electrons 
         rescaled_dxyerr_el *= dxyerr_scale_el;
         rescaled_dxydszcov_el *= sqrt(dxyerr_scale_el);
         rescaled_dszerr_el *= dszerr_scale_el;
         rescaled_dxydszcov_el *= sqrt(dszerr_scale_el);
-       
       }
       const double nsigmadxy_el = dxybs / rescaled_dxyerr_el;
-      if (pt > 1 && etarange && min_r <=1 && npxlayers >=2 && nstlayers >=6) {
 
-	      if (pass_ele) {
-          h_leptracks_pt[1]->Fill(pt, w);
-          h_leptracks_eta[1]->Fill(nte.eta(ie), w);
-          h_leptracks_phi[1]->Fill(nte.phi(ie), w);
-          h_leptracks_dxy[1]->Fill(dxybs, w);
-          h_leptracks_absdxy[1]->Fill(fabs(dxybs), w);
-          h_leptracks_dsz[1]->Fill(dsz, w);
-          h_leptracks_dz[1]->Fill(dz, w);
-          h_leptracks_dxyerr[1]->Fill(rescaled_dxyerr_el, w);
+      // the pt cut should already be in place ... we will see 
+      const bool nm1[5] = {
+        pt > 1,
+        min_r <= 1 || (min_r == 2 && losthits == 0),
+        npxlayers >= 2,
+        nstlayers >= 6,
+        nsigmadxy_el > 3
+  
+      };
 
-          // if (pt<=20)             h_leptracks_dxyerr_pt[1][0]->Fill(nte.err_dxy(ie), w);
-          // if (pt>20 && pt<=40)    h_leptracks_dxyerr_pt[1][1]->Fill(nte.err_dxy(ie), w);
-          // if (pt>40 && pt<=60)    h_leptracks_dxyerr_pt[1][2]->Fill(nte.err_dxy(ie), w);
-          // if (pt>60 && pt<=90)    h_leptracks_dxyerr_pt[1][3]->Fill(nte.err_dxy(ie), w);
-          // if (pt>90 && pt<=130)   h_leptracks_dxyerr_pt[1][4]->Fill(nte.err_dxy(ie), w);
-          // if (pt>130 && pt<=200)  h_leptracks_dxyerr_pt[1][5]->Fill(nte.err_dxy(ie), w);
-          h_leptracks_absnsigmadxy[1]->Fill(nsigmadxy_el, w);
-          h_leptracks_nsigmadxy[1]->Fill(dxybs / rescaled_dxyerr_el, w);
-          h_leptracks_nsigmadsz[1]->Fill(dsz / rescaled_dszerr_el, w);
-          h_leptracks_dxydszcov[1]->Fill(rescaled_dxydszcov_el, w);
-          h_leptracks_absdxydszcov[1]->Fill(fabs(rescaled_dxydszcov_el), w);
-          h_leptracks_dzerr[1]->Fill(nte.err_dz(ie), w);
-          h_leptracks_dszerr[1]->Fill(rescaled_dszerr_el, w);
-          h_leptracks_lambdaerr[1]->Fill(nte.err_lambda(ie), w);
-          h_leptracks_pterr[1]->Fill(nte.err_pt(ie), w);
-          h_leptracks_phierr[1]->Fill(nte.err_phi(ie), w);
-          h_leptracks_etaerr[1]->Fill(nte.err_eta(ie), w);
-          // h_leptracks_dszerr_v_pt[1]->Fill(pt, nte.err_dsz(ie), w);
-          // h_leptracks_dxyerr_v_pt[1]->Fill(pt, nte.err_dxy(ie), w);
-          // h_leptracks_dxyerr_v_eta[1]->Fill(nte.eta(ie), nte.err_dxy(ie), w);
-          // h_leptracks_dxyerr_v_phi[1]->Fill(nte.phi(ie), nte.err_dxy(ie), w);
-          // h_leptracks_dszerr_v_eta[1]->Fill(nte.eta(ie), nte.err_dxy(ie), w);
-          // h_leptracks_dszerr_v_phi[1]->Fill(nte.phi(ie), nte.err_dxy(ie), w);
+      const bool sel = nm1[0] && nm1[1] && nm1[2] && nm1[3];
+      const bool seed = sel && nm1[4];
 
-          h_leptracks_dxyerr_v_pt[1]->Fill(pt, rescaled_dxyerr_el, w);
-          h_leptracks_dxyerr_v_eta[1]->Fill(nte.eta(ie), rescaled_dxyerr_el, w);
-          h_leptracks_dxyerr_v_phi[1]->Fill(nte.phi(ie), rescaled_dxyerr_el, w);
+      const bool tk_ok[max_ele_type] = { true, sel, seed };
+
+      for (int i = 0; i < max_ele_type; ++i) {
+	      if (!tk_ok[i] || !etarange) continue;
+        ++neletracks[i];
+
+        h_eletracks_pt[i]->Fill(pt, w);
+        h_eletracks_eta[i]->Fill(nte.eta(ie), w);
+        h_eletracks_phi[i]->Fill(nte.phi(ie), w);
+        h_eletracks_dxy[i]->Fill(dxybs, w);
+        h_eletracks_dsz[i]->Fill(nte.dsz(ie), w);
+        h_eletracks_dz[i]->Fill(nte.dz(ie), w);
+
+        h_eletracks_absnsigmadxy[i]->Fill(nsigmadxy_el, w);
+        h_eletracks_nsigmadxy[i]->Fill(dxybs / rescaled_dxyerr_el, w);
+        h_eletracks_nsigmadsz[i]->Fill(nte.dsz(ie) / rescaled_dszerr_el, w);
         
-          h_leptracks_dszerr_v_pt[1]->Fill(pt, rescaled_dszerr_el, w);
-          h_leptracks_dszerr_v_eta[1]->Fill(nte.eta(ie), rescaled_dszerr_el, w);
-          h_leptracks_dszerr_v_phi[1]->Fill(nte.phi(ie), rescaled_dszerr_el, w);
+        h_eletracks_dxyerr[i]->Fill(rescaled_dxyerr_el, w);
+        h_eletracks_dxydszcov[i]->Fill(rescaled_dxydszcov_el, w);
+        h_eletracks_absdxydszcov[i]->Fill(fabs(rescaled_dxydszcov_el), w);
+        h_eletracks_dzerr[i]->Fill(nte.err_dz(ie), w);
+        h_eletracks_dszerr[i]->Fill(rescaled_dszerr_el, w);
+        h_eletracks_lambdaerr[i]->Fill(nte.err_lambda(ie), w);
+        h_eletracks_pterr[i]->Fill(nte.err_pt(ie), w);
+        h_eletracks_phierr[i]->Fill(nte.err_phi(ie), w);
+        h_eletracks_etaerr[i]->Fill(nte.err_eta(ie), w);
+
+        h_eletracks_dxyerr_v_pt[i]->Fill(pt, rescaled_dxyerr_el, w);
+        h_eletracks_dxyerr_v_eta[i]->Fill(nte.eta(ie), rescaled_dxyerr_el, w);
+        h_eletracks_dxyerr_v_phi[i]->Fill(nte.phi(ie), rescaled_dxyerr_el, w);
+        h_eletracks_dxyerr_v_minr[i]->Fill(nte.min_r(ie), rescaled_dxyerr_el, w);
+
+        h_eletracks_dszerr_v_pt[i]->Fill(pt, rescaled_dszerr_el, w);
+        h_eletracks_dszerr_v_eta[i]->Fill(nte.eta(ie), rescaled_dszerr_el, w);
+        h_eletracks_dszerr_v_phi[i]->Fill(nte.phi(ie), rescaled_dszerr_el, w);
         
-          h_leptracks_dxydszcov_v_pt[1]->Fill(pt, rescaled_dxydszcov_el, w);
-          h_leptracks_dxydszcov_v_eta[1]->Fill(nte.eta(ie), rescaled_dxydszcov_el, w);
-          h_leptracks_dxydszcov_v_phi[1]->Fill(nte.phi(ie), rescaled_dxydszcov_el, w);
-          h_leptracks_absdxydszcov_v_pt[1]->Fill(pt, fabs(rescaled_dxydszcov_el), w);
-          h_leptracks_absdxydszcov_v_eta[1]->Fill(nte.eta(ie), fabs(rescaled_dxydszcov_el), w);
-          h_leptracks_absdxydszcov_v_phi[1]->Fill(nte.phi(ie), fabs(rescaled_dxydszcov_el), w);
-	      } 
+        h_eletracks_dxydszcov_v_pt[i]->Fill(pt, rescaled_dxydszcov_el, w);
+        h_eletracks_dxydszcov_v_eta[i]->Fill(nte.eta(ie), rescaled_dxydszcov_el, w);
+        h_eletracks_dxydszcov_v_phi[i]->Fill(nte.phi(ie), rescaled_dxydszcov_el, w);
+        h_eletracks_absdxydszcov_v_pt[i]->Fill(pt, fabs(rescaled_dxydszcov_el), w);
+        h_eletracks_absdxydszcov_v_eta[i]->Fill(nte.eta(ie), fabs(rescaled_dxydszcov_el), w);
+        h_eletracks_absdxydszcov_v_phi[i]->Fill(nte.phi(ie), fabs(rescaled_dxydszcov_el), w);
+        h_eletracks_eta_v_phi[i]->Fill(nte.phi(ie), nte.eta(ie), w);
       }
     }
-    for (int im = 0, ime = ntm.n(); im < ime; ++im) {
+
+    for (int im = 0, imm = ntm.n(); im < imm; ++im) {
       const double pt = ntm.pt(im);
-      const double dxybs = ntm.dxybs(im, nt.bs());
-      const float dsz = (ntm.vz(im)) * pt / ntm.p(im) - ((ntm.vx(im)) * ntm.px(im) + (ntm.vy(im)) * ntm.py(im)) / pt * ntm.pz(im) / ntm.p(im);
-      const float dz = ntm.vz(im) - (ntm.vx(im) * ntm.px(im) + ntm.vy(im) * ntm.py(im)) / pt * ntm.pz(im) / pt;
       const int min_r = ntm.min_r(im);
+      const int losthits = ntm.losthit(im);
       const int npxlayers = ntm.npxlayers(im);
       const int nstlayers = ntm.nstlayers(im);
+      const double dxybs = ntm.dxybs(im, nt.bs());
+      //const double nsigmadxy = ntt.nsigmadxybs(itk, nt.bs());
       
-      const bool mef[4] = {
-        pt >= 20,
-      	ntm.eta(im) < 2.4,
-      	ntm.iso(im) < 0.15,
-      	ntm.isMed(im)
-      };
-      
-      const bool pass_mu = mef[0] && mef[1] && mef[2] && mef[3];
-      //const bool pass_nm1mf = mef[1] && mef[2] && mef[3];
-
       const bool etagt1p5 = false;
       bool etarange =false;
       if (etagt1p5)
@@ -495,7 +950,7 @@ int main(int argc, char** argv) {
       double rescaled_dxyerr_mu = ntm.err_dxy(im);
       double rescaled_dszerr_mu = ntm.err_dsz(im);
       double rescaled_dxydszcov_mu = ntm.cov_34(im);
-
+      
       const bool rescale_tracks = false;
       if (rescale_tracks) {
         double dxyerr_scale_mu = 1.;
@@ -503,8 +958,7 @@ int main(int argc, char** argv) {
 	
         if (fabs(ntm.eta(im)) < 1.5) {
           const double x = pt;
-
-	         //2017 B
+	        //2017 B
 	        //muon
 	        // const double m_dxy[2] = {1.2148062639351913, 0.00012377341911564733};
 	        // const double m_dsz[2] = {1.1730021966468054, -0.000149736302669597}; 
@@ -536,17 +990,16 @@ int main(int argc, char** argv) {
           // dxyerr_scale_mu = (x>=20&&x<=200)*(m_dxy[0]+m_dxy[1]*x);
           // dszerr_scale_mu = (x>=20&&x<=200)*(m_dsz[0]+m_dsz[1]*x);
          
-          // //2017 F
-          // //muon
+          //2017 F
+          //muon
           const double m_dxy[2] = {1.1855136718401231, -0.00008035979201444395};
           const double m_dsz[2] = {1.1709976385402432, -0.00013193247852357447}; 
 
           dxyerr_scale_mu = (x>=20&&x<=200)*(m_dxy[0]+m_dxy[1]*x);
           dszerr_scale_mu = (x>=20&&x<=200)*(m_dsz[0]+m_dsz[1]*x);
-      	}
-      	else {
+        }
+        else {
       	  const double x = pt;
-	  
           //2017 B
           //muon
           // const double m_dxy[2] = {1.2881888374900963, -0.0006996192395661432};
@@ -555,16 +1008,16 @@ int main(int argc, char** argv) {
           // dxyerr_scale_mu = (x>=20&&x<=200)*(m_dxy[0]+m_dxy[1]*x);
           // dszerr_scale_mu = (x>=20&&x<=200)*(m_dsz[0]+m_dsz[1]*x);
         
-          // //2017 C
-          // //muon
+          //2017 C
+          //muon
           // const double m_dxy[2] = {1.3142661391870103, -0.0008179089771729025};
           // const double m_dsz[2] = {1.2290616916291792, -0.00019044437771609073}; 
 
           // dxyerr_scale_mu = (x>=20&&x<=200)*(m_dxy[0]+m_dxy[1]*x);
           // dszerr_scale_mu = (x>=20&&x<=200)*(m_dsz[0]+m_dsz[1]*x);
 	 
-          // //2017 D
-          // //muon
+          //2017 D
+          //muon
           // const double m_dxy[2] = {1.28569782063072, -0.0007018332128769147};
           // const double m_dsz[2] = {1.1359875496520355, -0.00009653597906441966}; 
 
@@ -579,75 +1032,80 @@ int main(int argc, char** argv) {
           // dxyerr_scale_mu = (x>=20&&x<=200)*(m_dxy[0]+m_dxy[1]*x);
           // dszerr_scale_mu = (x>=20&&x<=200)*(m_dsz[0]+m_dsz[1]*x);
         
-          // //2017 F
-          // //muon
+          //2017 F
+          //muon
           const double m_dxy[2] = {1.3276007175478752, -0.0005551829741863527};
           const double m_dsz[2] = {1.5071250531650895, -0.00033371136752079894}; 
 
           dxyerr_scale_mu = (x>=20&&x<=200)*(m_dxy[0]+m_dxy[1]*x);
           dszerr_scale_mu = (x>=20&&x<=200)*(m_dsz[0]+m_dsz[1]*x);
         }
-        //for muons 
         rescaled_dxyerr_mu *= dxyerr_scale_mu;
         rescaled_dxydszcov_mu *= sqrt(dxyerr_scale_mu);
         rescaled_dszerr_mu *= dszerr_scale_mu;
         rescaled_dxydszcov_mu *= sqrt(dszerr_scale_mu);
       }
       const double nsigmadxy_mu = dxybs / rescaled_dxyerr_mu;
-      
-      if (pt > 1 && etarange && min_r <=1 && npxlayers >=2 && nstlayers >=6) {
+
+      // the pt cut should already be in place ... we will see 
+      const bool nm1[5] = {
+	      pt > 1,
+	      min_r <= 1 || (min_r == 2 && losthits == 0),
+	      npxlayers >= 2,
+	      nstlayers >= 6,
+	      nsigmadxy_mu > 3
 	
-	      if (pass_mu) {
-          h_leptracks_pt[0]->Fill(pt, w);
-          h_leptracks_eta[0]->Fill(ntm.eta(im), w);
-          h_leptracks_phi[0]->Fill(ntm.phi(im), w);
-          h_leptracks_dxy[0]->Fill(dxybs, w);
-          h_tracks_absdxy[0]->Fill(fabs(dxybs), w);
-          h_leptracks_dz[0]->Fill(dz, w);
-          h_leptracks_dsz[0]->Fill(dsz, w);
+      };
 
-          h_leptracks_dxyerr[0]->Fill(rescaled_dxyerr_mu, w);
-          h_leptracks_dxydszcov[0]->Fill(rescaled_dxydszcov_mu, w);
-          h_leptracks_absdxydszcov[0]->Fill(fabs(rescaled_dxydszcov_mu), w);
-          // if (pt<=20)             h_leptracks_dxyerr_pt[0][0]->Fill(ntm.err_dxy(im), w);
-          // if (pt>20 && pt<=40)    h_leptracks_dxyerr_pt[0][1]->Fill(ntm.err_dxy(im), w);
-          // if (pt>40 && pt<=60)    h_leptracks_dxyerr_pt[0][2]->Fill(ntm.err_dxy(im), w);
-          // if (pt>60 && pt<=90)    h_leptracks_dxyerr_pt[0][3]->Fill(ntm.err_dxy(im), w);
-          // if (pt>90 && pt<=130)   h_leptracks_dxyerr_pt[0][4]->Fill(ntm.err_dxy(im), w);
-          // if (pt>130 && pt<=200)  h_leptracks_dxyerr_pt[0][5]->Fill(ntm.err_dxy(im), w);
-          h_leptracks_absnsigmadxy[0]->Fill(nsigmadxy_mu, w);
-          h_leptracks_nsigmadxy[0]->Fill(dxybs / rescaled_dxyerr_mu, w);
-          h_leptracks_nsigmadsz[0]->Fill(dsz / rescaled_dszerr_mu, w);
-          h_leptracks_dszerr[0]->Fill(rescaled_dszerr_mu, w);
-          h_leptracks_lambdaerr[0]->Fill(ntm.err_lambda(im), w);
-          h_leptracks_pterr[0]->Fill(ntm.err_pt(im), w);
-          h_leptracks_phierr[0]->Fill(ntm.err_phi(im), w);
-          h_leptracks_etaerr[0]->Fill(ntm.err_eta(im), w);
-          // h_leptracks_dszerr_v_pt[0]->Fill(pt, ntm.err_dsz(im), w);
-          // h_leptracks_dxyerr_v_pt[0]->Fill(pt, ntm.err_dxy(im), w);
-          // h_leptracks_dxyerr_v_eta[0]->Fill(ntm.eta(im), ntm.err_dxy(im), w);
-          // h_leptracks_dxyerr_v_phi[0]->Fill(ntm.phi(im), ntm.err_dxy(im), w);
-          // h_leptracks_dszerr_v_eta[0]->Fill(ntm.eta(im), ntm.err_dxy(im), w);
-          // h_leptracks_dszerr_v_phi[0]->Fill(ntm.phi(im), ntm.err_dxy(im), w);
+      const bool sel = nm1[0] && nm1[1] && nm1[2] && nm1[3];
+      const bool seed = sel && nm1[4];
 
-          
-          h_leptracks_dxyerr_v_pt[0]->Fill(pt, rescaled_dxyerr_mu, w);
-          h_leptracks_dxyerr_v_eta[0]->Fill(ntm.eta(im), rescaled_dxyerr_mu, w);
-          h_leptracks_dxyerr_v_phi[0]->Fill(ntm.phi(im), rescaled_dxyerr_mu, w);
+      const bool tk_ok[max_mu_type] = { true, sel, seed };
+
+      for (int i = 0; i < max_mu_type; ++i) {
+	      if (!tk_ok[i] || !etarange) continue;
+        ++nmutracks[i];
+
+        h_mutracks_pt[i]->Fill(pt, w);
+        h_mutracks_eta[i]->Fill(ntm.eta(im), w);
+        h_mutracks_phi[i]->Fill(ntm.phi(im), w);
+        h_mutracks_dxy[i]->Fill(dxybs, w);
+        h_mutracks_dsz[i]->Fill(ntm.dsz(im), w);
+        h_mutracks_dz[i]->Fill(ntm.dz(im), w);
+
+        h_mutracks_absnsigmadxy[i]->Fill(nsigmadxy_mu, w);
+        h_mutracks_nsigmadxy[i]->Fill(dxybs / rescaled_dxyerr_mu, w);
+        h_mutracks_nsigmadsz[i]->Fill(ntm.dsz(im) / rescaled_dszerr_mu, w);
         
-          h_leptracks_dszerr_v_pt[0]->Fill(pt, rescaled_dszerr_mu, w);
-          h_leptracks_dszerr_v_eta[0]->Fill(ntm.eta(im), rescaled_dszerr_mu, w);
-          h_leptracks_dszerr_v_phi[0]->Fill(ntm.phi(im), rescaled_dszerr_mu, w);
+        h_mutracks_dxyerr[i]->Fill(rescaled_dxyerr_mu, w);
+        h_mutracks_dxydszcov[i]->Fill(rescaled_dxydszcov_mu, w);
+        h_mutracks_absdxydszcov[i]->Fill(fabs(rescaled_dxydszcov_mu), w);
+        h_mutracks_dzerr[i]->Fill(ntm.err_dz(im), w);
+        h_mutracks_dszerr[i]->Fill(rescaled_dszerr_mu, w);
+        h_mutracks_lambdaerr[i]->Fill(ntm.err_lambda(im), w);
+        h_mutracks_pterr[i]->Fill(ntm.err_pt(im), w);
+        h_mutracks_phierr[i]->Fill(ntm.err_phi(im), w);
+        h_mutracks_etaerr[i]->Fill(ntm.err_eta(im), w);
+
+        h_mutracks_dxyerr_v_pt[i]->Fill(pt, rescaled_dxyerr_mu, w);
+        h_mutracks_dxyerr_v_eta[i]->Fill(ntm.eta(im), rescaled_dxyerr_mu, w);
+        h_mutracks_dxyerr_v_phi[i]->Fill(ntm.phi(im), rescaled_dxyerr_mu, w);
+        h_mutracks_dxyerr_v_minr[i]->Fill(ntm.min_r(im), rescaled_dxyerr_mu, w);
+
+        h_mutracks_dszerr_v_pt[i]->Fill(pt, rescaled_dszerr_mu, w);
+        h_mutracks_dszerr_v_eta[i]->Fill(ntm.eta(im), rescaled_dszerr_mu, w);
+        h_mutracks_dszerr_v_phi[i]->Fill(ntm.phi(im), rescaled_dszerr_mu, w);
         
-          h_leptracks_dxydszcov_v_pt[0]->Fill(pt, rescaled_dxydszcov_mu, w);
-          h_leptracks_dxydszcov_v_eta[0]->Fill(ntm.eta(im), rescaled_dxydszcov_mu, w);
-          h_leptracks_dxydszcov_v_phi[0]->Fill(ntm.phi(im), rescaled_dxydszcov_mu, w);
-          h_leptracks_absdxydszcov_v_pt[0]->Fill(pt, fabs(rescaled_dxydszcov_mu), w);
-          h_leptracks_absdxydszcov_v_eta[0]->Fill(ntm.eta(im), fabs(rescaled_dxydszcov_mu), w);
-          h_leptracks_absdxydszcov_v_phi[0]->Fill(ntm.phi(im), fabs(rescaled_dxydszcov_mu), w);
-      	} 
+        h_mutracks_dxydszcov_v_pt[i]->Fill(pt, rescaled_dxydszcov_mu, w);
+        h_mutracks_dxydszcov_v_eta[i]->Fill(ntm.eta(im), rescaled_dxydszcov_mu, w);
+        h_mutracks_dxydszcov_v_phi[i]->Fill(ntm.phi(im), rescaled_dxydszcov_mu, w);
+        h_mutracks_absdxydszcov_v_pt[i]->Fill(pt, fabs(rescaled_dxydszcov_mu), w);
+        h_mutracks_absdxydszcov_v_eta[i]->Fill(ntm.eta(im), fabs(rescaled_dxydszcov_mu), w);
+        h_mutracks_absdxydszcov_v_phi[i]->Fill(ntm.phi(im), fabs(rescaled_dxydszcov_mu), w);
+        h_mutracks_eta_v_phi[i]->Fill(ntm.phi(im), ntm.eta(im), w);
       }
     }
+
     for (int itk = 0, itke = ntt.n(); itk < itke; ++itk) {
       const double pt = ntt.pt(itk);
       const int min_r = ntt.min_r(itk);
@@ -784,14 +1242,14 @@ int main(int argc, char** argv) {
 
       const bool sel = nm1[0] && nm1[1] && nm1[2] && nm1[3];
       const bool seed = sel && nm1[4];
-      const bool goodmu = ntt.isgoodmu(itk) && pt > 20;
-      const bool goodel = ntt.isgoodel(itk) && pt > 20;
-      const bool sel_nolep = sel && !goodmu && !goodel;
+      //const bool goodmu = ntt.isgoodmu(itk) && pt > 20;
+      //const bool goodel = ntt.isgoodel(itk) && pt > 20;
+      //const bool sel_nolep = sel && !goodmu && !goodel;
 						    
       //const bool sel_nomu = sel && !ntt.ismu(itk);
       //const bool sel_noel = sel && !ntt.isel(itk);
       //      const bool tk_ok[max_tk_type] = { true, sel, sel_nolep, sel_nomu, sel_noel, seed };
-      const bool tk_ok[max_tk_type] = { true, sel, sel_nolep, seed };
+      const bool tk_ok[max_tk_type] = { true, sel, seed };
 
       //const bool high_purity = npxlayers == 4 && fabs(ntt.eta(itk)) < 0.8 && fabs(ntt.dz(itk)) < 10;
       //const bool etalt1p5 = fabs(ntt.eta(itk)) < 1.5;
@@ -801,7 +1259,6 @@ int main(int argc, char** argv) {
         ++ntracks[i];
 
       // JMTBAD separate plots for dxy, dxybs, dxypv, dz, dzpv
-
         h_tracks_pt[i]->Fill(pt, w);
         h_tracks_eta[i]->Fill(ntt.eta(itk), w);
         h_tracks_phi[i]->Fill(ntt.phi(itk), w);
@@ -879,7 +1336,8 @@ int main(int argc, char** argv) {
         h_tracks_dxyerr_v_pt[i]->Fill(pt, rescaled_dxyerr, w);
         h_tracks_dxyerr_v_eta[i]->Fill(ntt.eta(itk), rescaled_dxyerr, w);
         h_tracks_dxyerr_v_phi[i]->Fill(ntt.phi(itk), rescaled_dxyerr, w);
-        
+        h_tracks_dxyerr_v_minr[i]->Fill(ntt.min_r(itk), rescaled_dxyerr, w);
+
         h_tracks_dszerr_v_pt[i]->Fill(pt, rescaled_dszerr, w);
         h_tracks_dszerr_v_eta[i]->Fill(ntt.eta(itk), rescaled_dszerr, w);
         h_tracks_dszerr_v_phi[i]->Fill(ntt.phi(itk), rescaled_dszerr, w);
@@ -903,9 +1361,9 @@ int main(int argc, char** argv) {
       }
     }
 
-    for (int i = 0; i < max_tk_type; ++i)
+    for (int i = 0; i < max_tk_type; ++i) {
       h_ntracks[i]->Fill(ntracks[i], w);
-
+    }
     return std::make_pair(true, w);
   };
 
