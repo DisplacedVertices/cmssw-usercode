@@ -887,8 +887,6 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
         h_seed_track_nsthits->Fill(nsthits);
         h_seed_track_npxlayers->Fill(npxlayers);
         h_seed_track_nstlayers->Fill(nstlayers);
-        h_seed_track_eta_phi->Fill(eta, phi);
-        h_seed_track_npxlayers_minr->Fill(npxlayers, min_r);
         
       }
     }

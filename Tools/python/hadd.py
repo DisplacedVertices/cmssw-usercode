@@ -38,10 +38,6 @@ class HaddlogParser(object):
         self.num_sources = len(self.sources)
         self.files = self.sources.values()
 
-<<<<<<< HEAD
-=======
-
->>>>>>> UL_Lepton
 def hadd(output_fn, input_fns):
     """This is a simple wrapper around hadd that suppresses the stdout
     from hadd, only reporting a summary line of how many files were
@@ -73,7 +69,6 @@ def hadd(output_fn, input_fns):
     else:
         open(log_fn, 'wt').write(stdout)
 
-<<<<<<< HEAD
     log_fn = output_fn + '.haddlog'
     is_eos = '/store/' in output_fn # ugh
     while eos.exists(log_fn) if is_eos else os.path.exists(log_fn):
@@ -87,8 +82,6 @@ def hadd(output_fn, input_fns):
     else:
         open(log_fn, 'wt').write(stdout)
 
-=======
->>>>>>> UL_Lepton
     if p.returncode != 0:
         print colors.error('PROBLEM hadding %s' % output_fn)
         #print p.stdout.read()
@@ -99,11 +92,6 @@ def hadd(output_fn, input_fns):
     if max_file_num != l:
         print colors.error('PROBLEM hadding %s' % output_fn)
         return False
-<<<<<<< HEAD
-=======
-
-    return True    
->>>>>>> UL_Lepton
 
 
 __all__ = [

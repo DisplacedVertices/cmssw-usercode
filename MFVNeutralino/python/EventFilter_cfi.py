@@ -1,11 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 from JMTucker.Tools.PATTupleSelection_cfi import jtupleParams
 
-<<<<<<< HEAD
 #FIXME : update lepton minpT but need to study min_njets and min_ht
-=======
-
->>>>>>> UL_Lepton
 mfvEventFilter = cms.EDFilter('MFVEventFilter',
                               mode = cms.string('either'),
                               jets_src = cms.InputTag('selectedPatJets'),
@@ -30,13 +26,8 @@ mfvEventFilter = cms.EDFilter('MFVEventFilter',
                               )
 
 mfvEventFilterJetsOnly = mfvEventFilter.clone(mode = 'jets only')
-<<<<<<< HEAD
 mfvEventFilterMuonsOnly = mfvEventFilter.clone(mode = 'muons only', min_ht = cms.double(-1), min_njets = cms.int32(-1), min_pt_for_ht = cms.double(-1))
 mfvEventFilterElectronsOnlyVetoMuons = mfvEventFilter.clone(mode = 'electrons only veto muons', min_ht = cms.double(-1), min_njets = cms.int32(-1), min_pt_for_ht = cms.double(-1))
-=======
-mfvEventFilterLeptonsOnly = mfvEventFilter.clone(mode = 'leptons only', min_ht = cms.double(-1), min_njets = cms.int32(1), min_pt_for_ht = cms.double(-1))
-mfvEventFilterLepORDisplacedLep = mfvEventFilter.clone(mode = 'lep OR displaced lep', min_ht = cms.double(-1), min_njets = cms.int32(2), min_pt_for_ht = cms.double(-1))
->>>>>>> UL_Lepton
 mfvEventFilterHTORBjetsORDisplacedDijet = mfvEventFilter.clone(mode = 'HT OR bjets OR displaced dijet', min_ht = cms.double(-1))
 mfvEventFilterBjetsORDisplacedDijetVetoHT = mfvEventFilter.clone(mode = 'bjets OR displaced dijet veto HT', min_ht = cms.double(-1))
 mfvEventFilterMETOnly = mfvEventFilter.clone(mode = 'MET only', min_ht = cms.double(-1))

@@ -175,7 +175,6 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     // if use_DisplacedLepton_triggers is True, also consider Displaced Lepton && offline preselection
     if (apply_presel == 2) {
       bool success = false;
-<<<<<<< HEAD
       for(size_t trig : mfv::MuonTriggers){
 	if(satisfiesLepTrigger(mevent, trig)) { 
 	  success = true;
@@ -204,13 +203,6 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
 	    break;
 	  }
 	}
-=======
-      for(size_t trig : mfv::LeptonTriggers){
-      	if(satisfiesLepTrigger(mevent, trig)) { 
-	         success = true;
-	         break;
-        }
->>>>>>> UL_Lepton
       }
       // if we want to consider displaced lepton triggers, to make it a logical OR, we need the single lepton triggers to fail. 
       if (apply_displacedlepton_triggers && success == false) {
@@ -317,20 +309,11 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
 
     if (apply_trigger == 2) {
       bool at_least_one_trigger_passed = false;
-<<<<<<< HEAD
-      // for(size_t trig : mfv::LeptonOrDisplacedLeptonTriggers){
       for(size_t trig : mfv::MuonTriggers){
 	if(mevent->pass_hlt(trig)) { 
           at_least_one_trigger_passed = true;
 	  break;
 	}
-=======
-      for(size_t trig : mfv::LeptonTriggers){
-	      if(mevent->pass_hlt(trig)){
-	        at_least_one_trigger_passed = true;
-	         break;
-	      }
->>>>>>> UL_Lepton
       }
       if(at_least_one_trigger_passed && apply_muons_only) return true; //avoid double counting an event that fires both lepton triggers and keep it in muon selection  
       if (apply_electrons_only){ 

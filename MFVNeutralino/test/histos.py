@@ -3,14 +3,8 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 is_mc = True # for blinding
 do_track = False # this can onlky be used for ntuple with keep_tk=True
 
-<<<<<<< HEAD
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_MET_triggers, use_Muon_triggers, use_Electron_triggers
-max_events(process, 1000)
-=======
 #currently : keep histos slim -> do only Loose Vertices & NoCuts, Minntk = 3, 4, 5 
-from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_MET_triggers, use_Lepton_triggers
-
->>>>>>> UL_Lepton
 tfileservice(process, 'histos.root')
 cmssw_from_argv(process)
 
@@ -215,7 +209,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier(), half_mc_modifier())
     elif use_MET_triggers:
         samples = pick_samples(dataset, qcd=True, ttbar=False, data=False, leptonic=True, splitSUSY=True, Zvv=True, met=True, span_signal=False)
-<<<<<<< HEAD
         pset_modifier = chain_modifiers(is_mc_modifier)
     elif use_Muon_triggers :
         samples = pick_samples(dataset, qcd=True, all_signal=False, qcd_lep = True, leptonic=True, met=True, diboson=True, Lepton_data=False )
@@ -223,11 +216,6 @@ if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     elif use_Electron_triggers :
         samples = pick_samples(dataset, qcd=True, all_signal=False, qcd_lep = True, leptonic=True, met=True, diboson=True, Lepton_data=False)
         pset_modifier = chain_modifiers(is_mc_modifier, half_mc_modifier())
-=======
-    elif use_Lepton_triggers : 
-        samples = pick_samples(dataset, qcd=False, all_signal=False, qcd_lep = True, leptonic=False, met=False, diboson=False, Lepton_data=False )
-        pset_modifier = chain_modifiers(is_mc_modifier)
->>>>>>> UL_Lepton
     else :
         samples = pick_samples(dataset)
         pset_modifier = chain_modifiers(is_mc_modifier, per_sample_pileup_weights_modifier())

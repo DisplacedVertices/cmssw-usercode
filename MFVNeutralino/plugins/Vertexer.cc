@@ -321,8 +321,8 @@ MFVVertexer::MFVVertexer(const edm::ParameterSet& cfg)
     histos_output_afterdzfit(cfg.getUntrackedParameter<bool>("histos_output_afterdzfit", true)),
     histos_output_aftermerge(cfg.getUntrackedParameter<bool>("histos_output_aftermerge", false)),
     histos_output_aftersharedjets(cfg.getUntrackedParameter<bool>("histos_output_aftersharedjets", false)),
-	histos_output_aftertrackattach(cfg.getUntrackedParameter<bool>("histos_output_aftertrackattach", false)),
-	verbose(cfg.getUntrackedParameter<bool>("verbose", false)),
+    histos_output_aftertrackattach(cfg.getUntrackedParameter<bool>("histos_output_aftertrackattach", false)),
+    verbose(cfg.getUntrackedParameter<bool>("verbose", false)),
     module_label(cfg.getParameter<std::string>("@module_label"))
 {
   if (n_tracks_per_seed_vertex < 2 || n_tracks_per_seed_vertex > 5)

@@ -165,12 +165,17 @@ void MFVCutFlowHistos::analyze(const edm::Event& event, const edm::EventSetup&) 
       }
   }
 
-  for(size_t trig : mfv::LeptonTriggers) {
-    if(mevent->pass_hlt(trig)) {
+ 
+  for(size_t trig : mfv::MuonTriggers){
+    if(mevent->pass_hlt(trig)) { 
       pass_trigger = true;
     }
   }
-
+  for(size_t trig : mfv::ElectronTriggers){
+    if(mevent->pass_hlt(trig)) { 
+      pass_trigger = true;
+    }
+  }
 
   // looking to see if the gen daughter was reconstructed. If so, then will use later when looking at : 
   // vertices that should have leptons (both lepton + sv have been genmatched & reconstructed but the lepton is not in the SV)

@@ -2,13 +2,8 @@ from JMTucker.Tools.BasicAnalyzer_cfg import *
 
 is_mc = True # for blinding
 
-<<<<<<< HEAD
 from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_MET_triggers, use_Muon_triggers, use_Electron_triggers
 #sample_files(process, 'qcdht2000_2017' if is_mc else 'JetHT2017B', dataset, 1)
-=======
-from JMTucker.MFVNeutralino.NtupleCommon import ntuple_version_use as version, dataset, use_btag_triggers, use_MET_triggers, use_Lepton_triggers
-#sample_files(process, 'qcdht0200_2017' if is_mc else 'JetHT2017B', dataset, 1)
->>>>>>> UL_Lepton
 sample_files(process, 'mfv_stopld_tau000100um_M0200_2018' if is_mc else 'JetHT2017B', dataset, 1)
 tfileservice(process, 'minitree.root')
 cmssw_from_argv(process)

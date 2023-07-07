@@ -16,15 +16,9 @@ private:
   bool filter(edm::Event&, const edm::EventSetup&) override;
 
   struct Mode {
-<<<<<<< HEAD
     enum mode_t { either, jets_only, muons_only, electrons_only_veto_muons, HT_OR_bjets_OR_displaced_dijet, bjets_OR_displaced_dijet_veto_HT, MET_only, lep_OR_displaced_lep};
     const mode_t mode;
     Mode(const std::string& m) : mode(m == "MET only" ? MET_only : m == "bjets_OR_displaced_dijet_veto_HT" ? bjets_OR_displaced_dijet_veto_HT : m == "HT OR bjets OR displaced dijet" ? HT_OR_bjets_OR_displaced_dijet : m == "muons only" ? muons_only : m == "electrons only veto muons" ? electrons_only_veto_muons : m == "lep or displaced lep" ? lep_OR_displaced_lep : m == "jets only" ? jets_only : either) {}
-=======
-    enum mode_t { either, jets_only, leptons_only, HT_OR_bjets_OR_displaced_dijet, bjets_OR_displaced_dijet_veto_HT, MET_only, lep_OR_displaced_lep};
-    const mode_t mode;
-    Mode(const std::string& m) : mode(m == "MET only" ? MET_only : m == "bjets_OR_displaced_dijet_veto_HT" ? bjets_OR_displaced_dijet_veto_HT : m == "HT OR bjets OR displaced dijet" ? HT_OR_bjets_OR_displaced_dijet : m == "leptons only" ? leptons_only : m == "lep or displaced lep" ? lep_OR_displaced_lep : m == "jets only" ? jets_only : either) {}
->>>>>>> UL_Lepton
     bool operator==(mode_t m) const { return mode == m; }
   };
   const Mode mode;
@@ -145,7 +139,6 @@ bool MFVEventFilter::filter(edm::Event& event, const edm::EventSetup&) {
   	    ++nmuons;
       } 
     } 
-<<<<<<< HEAD
     leptons_pass = nmuons + nelectrons >= min_nleptons;
     if (leptons_pass)
       break;
@@ -183,30 +176,6 @@ bool MFVEventFilter::filter(edm::Event& event, const edm::EventSetup&) {
     }
   }
     
-=======
-  } 
-
-  for (const pat::Electron& electron : *electrons) {
-    // if (electron_selector(electron) && electron.pt() > min_electron_pt)
-    //new electron selector : is cut based tight & iso < 0.10
-    if (electron.pt() > min_electron_pt && abs(electron.eta()) < 2.4) {
-      
-      bool isTightEl = electron.electronID("cutBasedElectronID-Fall17-94X-V1-tight");
-      const auto pfIso = electron.pfIsolationVariables();
-      const float eA = electron_effective_areas.getEffectiveArea(fabs(electron.superCluster()->eta()));
-      const float iso = (pfIso.sumChargedHadronPt + std::max(0., pfIso.sumNeutralHadronEt + pfIso.sumPhotonEt - *rho*eA)) / electron.pt();
-      const bool passveto = electron.passConversionVeto();
-
-      if (isTightEl && passveto && iso < 0.10) {
-  	    ++nelectrons;
-      } 
-    } 
-  } 
-  
-  const bool leptons_pass = nmuons + nelectrons >= min_nleptons;
-  
->>>>>>> UL_Lepton
-
   if (debug) printf("MFVEventFilter: nmuons: %i nelectrons: %i pass? %i\n", nmuons, nelectrons, leptons_pass);
 
   //return leptons_pass;
@@ -219,17 +188,9 @@ bool MFVEventFilter::filter(edm::Event& event, const edm::EventSetup&) {
     return true;
   else if (mode == Mode::MET_only)
     return true;
-<<<<<<< HEAD
   else if (mode == Mode::muons_only || mode == Mode::electrons_only_veto_muons)
-=======
-  else if (mode == Mode::leptons_only || mode == Mode::lep_OR_displaced_lep)
->>>>>>> UL_Lepton
     return leptons_pass && jets_pass;
   else return true; // catch-all
 
 } 
-<<<<<<< HEAD
 DEFINE_FWK_MODULE(MFVEventFilter);
-=======
-DEFINE_FWK_MODULE(MFVEventFilter);
->>>>>>> UL_Lepton

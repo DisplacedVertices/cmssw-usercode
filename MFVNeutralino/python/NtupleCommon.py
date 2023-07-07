@@ -1,7 +1,6 @@
 from JMTucker.Tools.CMSSWTools import *
 from JMTucker.Tools.Year import year
 
-<<<<<<< HEAD
 ntuple_version_ = 'ULV30'
 lsp_id = -1 #1000009 # should do that in a smarter way; currently for stop if not -1
 use_btag_triggers = False
@@ -9,14 +8,6 @@ use_MET_triggers = False
 use_Muon_triggers = True
 use_Electron_triggers = False
 use_DisplacedLepton_triggers = False
-=======
-ntuple_version_ = 'ULV5'
-lsp_id = 1000006 # should do that in a smarter way; currently for stop
-use_btag_triggers = False
-use_MET_triggers = False
-use_Lepton_triggers = True
-
->>>>>>> UL_Lepton
 if use_btag_triggers : 
     ntuple_version_ += "B" # for "Btag triggers"; also includes DisplacedDijet triggers
 elif use_MET_triggers :
@@ -303,14 +294,8 @@ def miniaod_ntuple_process(settings):
     #for splitSUSY
     process.mfvGenParticles.lsp_id = lsp_id
     process.mfvGenParticles.debug = False
-<<<<<<< HEAD
-
-    process.mfvVertexTracks.min_track_rescaled_sigmadxy = 4.0 #FIXME default is 4 
-    process.mfvVertexTracks.min_track_pt = 1.0
-=======
     # process.mfvVertexTracks.min_track_rescaled_sigmadxy = 4.0
     # process.mfvVertexTracks.min_track_pt = 1.0
->>>>>>> UL_Lepton
 
     process.jmtRescaledTracks.tracks_src = 'jmtUnpackedCandidateTracks'
 
@@ -321,11 +306,7 @@ def miniaod_ntuple_process(settings):
     process.mfvEvent.gen_particles_src = 'prunedGenParticles' # no idea if this lets gen_bquarks, gen_leptons work--may want the packed ones that have status 1 particles
     process.mfvEvent.gen_jets_src = 'slimmedGenJets'
     process.mfvEvent.pileup_info_src = 'slimmedAddPileupInfo'
-<<<<<<< HEAD
     #process.mfvEvent.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple')
-=======
-    process.mfvEvent.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple')
->>>>>>> UL_Lepton
     process.mfvEvent.met_src = 'slimmedMETs'
     
     # MET correction and filters
