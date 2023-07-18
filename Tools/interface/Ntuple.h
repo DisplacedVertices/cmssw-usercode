@@ -271,13 +271,14 @@ namespace jmt {
     virtual void read_from_tree(TTree* tree);
     virtual void copy_vectors();
 
+    //will be storing the boolean value if the track is a lepton or not true == 1 false == 0;
     void add(int q, float pt, float eta, float phi, float vx, float vy, float vz,
              float cov_00, float cov_11, float cov_14, float cov_22, float cov_23, float cov_33, float cov_34, float cov_44,
              float chi2dof,
              int npxh, int nsth, int npxl, int nstl,
              int minhit_r, int minhit_z, int maxhit_r, int maxhit_z, int maxpxhit_r, int maxpxhit_z,
-             int which_jet, int which_pv, 
-	           int which_sv,
+             int which_jet, int which_pv, bool ismu, bool isel, bool isgoodmu, bool isgoodel,
+	     int which_sv,
              unsigned misc) {
       qpt_.push_back(q*pt);
       eta_.push_back(eta);
@@ -314,6 +315,10 @@ namespace jmt {
       which_jet_.push_back(which_jet < 0 || which_jet > 255 ? 255 : which_jet);
       which_pv_.push_back(which_pv < 0 || which_pv > 255 ? 255 : which_pv);
       which_sv_.push_back(which_sv < 0 || which_sv > 255 ? 255 : which_sv);
+      ismu_.push_back(ismu);
+      isel_.push_back(isel);
+      isgoodmu_.push_back(isgoodmu);
+      isgoodel_.push_back(isgoodel);
       misc_.push_back(misc);
     }
 
@@ -340,12 +345,19 @@ namespace jmt {
     uchar    which_jet(int i) const { return p_get(i, which_jet_, p_which_jet_ ); }
     uchar    which_pv (int i) const { return p_get(i, which_pv_,  p_which_pv_  ); }
     uchar    which_sv (int i) const { return p_get(i, which_sv_,  p_which_sv_  ); }
+    bool     ismu     (int i) const { return p_get(i, ismu_,      p_ismu_      ); }
+    bool     isel     (int i) const { return p_get(i, isel_,      p_isel_      ); }
+    bool     isgoodmu     (int i) const { return p_get(i, isgoodmu_,      p_isgoodmu_      ); }
+    bool     isgoodel     (int i) const { return p_get(i, isgoodel_,      p_isgoodel_      ); }
     
     unsigned misc     (int i) const { return p_get(i, misc_,      p_misc_      ); }
 
     void set_which_jet(int i, uchar x) { assert(0 == p_which_jet_); which_jet_[i] = x; }
     void set_which_pv(int i, uchar x) { assert(0 == p_which_pv_); which_pv_[i] = x; }
     void set_which_sv(int i, uchar x) { assert(0 == p_which_sv_); which_sv_[i] = x; }
+    // void set_ismu(int i, uchar x) {assert(0 == p_ismu_); ismu_[i] = x; }
+    // void set_isel(int i, uchar x) {assert(0 == p_isel_); isel_[i] = x; }
+    
     void set_misc(int i, unsigned x) { assert(0 == p_misc_); misc_[i] = x; }
 
     int q(int i) const { return qpt(i) > 0 ? 1 : -1; }
@@ -442,6 +454,10 @@ namespace jmt {
     vuchar which_jet_;   vuchar* p_which_jet_;
     vuchar which_pv_;    vuchar* p_which_pv_;
     vuchar which_sv_;    vuchar* p_which_sv_;
+    vbool  ismu_;        vbool* p_ismu_;
+    vbool  isel_;        vbool* p_isel_;
+    vbool  isgoodmu_;        vbool* p_isgoodmu_;
+    vbool  isgoodel_;        vbool* p_isgoodel_;
     vunsigned misc_;     vunsigned* p_misc_;
   };
 
@@ -541,26 +557,28 @@ namespace jmt {
     float met_y_;
   };
 
-  class MuTracksSubNtuple : public INtuple {
+  class MuonsSubNtuple : public INtuple {
   public:
-    MuTracksSubNtuple();
+    MuonsSubNtuple();
     virtual void clear();
     virtual void write_to_tree(TTree*);
     virtual void read_from_tree(TTree*);
     virtual void copy_vectors();
+
  
-    void add(int q, float pt, float eta, float phi, float vx, float vy, float vz,
+    void add(int q, float pt, float eta, float phi, bool isLoose, bool isMed, bool isTight, float iso,
+	     float vx, float vy, float vz,
              float cov_00, float cov_11, float cov_14, float cov_22, float cov_23, float cov_33, float cov_34, float cov_44,
              float chi2dof,
-             int npxh, int nsth, int npxl, int nstl, int losthit,
-             int minhit_r, int minhit_z, int maxhit_r, int maxhit_z, int maxpxhit_r, int maxpxhit_z
-            //  int which_jet, int which_pv,
-	          //  int which_sv,
-            //  unsigned misc
-            ) {
+	     int npxh, int nsth, int npxl, int nstl,
+             int minhit_r, int minhit_z, int maxhit_r, int maxhit_z, int maxpxhit_r, int maxpxhit_z) {
       qpt_.push_back(q*pt);
       eta_.push_back(eta);
       phi_.push_back(phi);
+      isLoose_.push_back(isLoose);
+      isMed_.push_back(isMed);
+      isTight_.push_back(isTight);
+      iso_.push_back(iso);
       vx_.push_back(vx);
       vy_.push_back(vy);
       vz_.push_back(vz);
@@ -573,7 +591,6 @@ namespace jmt {
       cov_34_.push_back(cov_34);
       cov_44_.push_back(cov_44);
       chi2dof_.push_back(chi2dof);
-      losthit_.push_back(losthit);
 
       assert(npxh >= 0 && nsth >= 0 && npxl >= 0 && nstl >= 0);
       if (npxh > 15) npxh = 15;
@@ -596,6 +613,10 @@ namespace jmt {
     float    qpt      (int i) const { return p_get(i, qpt_,       p_qpt_       ); }
     float    eta      (int i) const { return p_get(i, eta_,       p_eta_       ); }
     float    phi      (int i) const { return p_get(i, phi_,       p_phi_       ); }
+    bool     isLoose  (int i) const { return p_get(i, isLoose_,   p_isLoose_   ); }
+    bool     isMed    (int i) const { return p_get(i, isMed_,     p_isMed_     ); }
+    bool     isTight  (int i) const { return p_get(i, isTight_,   p_isTight_   ); }
+    float    iso      (int i) const { return p_get(i, iso_,       p_iso_       ); }
     float    vx       (int i) const { return p_get(i, vx_,        p_vx_        ); }
     float    vy       (int i) const { return p_get(i, vy_,        p_vy_        ); }
     float    vz       (int i) const { return p_get(i, vz_,        p_vz_        ); }
@@ -612,7 +633,6 @@ namespace jmt {
     uchar    minhit   (int i) const { return p_get(i, minhit_,    p_minhit_    ); }
     uchar    maxhit   (int i) const { return p_get(i, maxhit_,    p_maxhit_    ); }
     uchar    maxpxhit (int i) const { return p_get(i, maxpxhit_,  p_maxpxhit_  ); }
-    uchar    losthit  (int i) const { return p_get(i, losthit_,   p_losthit_   ); }
 
     int q(int i) const { return qpt(i) > 0 ? 1 : -1; }
     float pt(int i) const { return std::abs(qpt(i)); }
@@ -625,10 +645,6 @@ namespace jmt {
     float dxy(int i, float x=0, float y=0) const { return ((vy(i) - y) * px(i) - (vx(i) - x) * py(i)) / pt(i); }
     template <typename BS> float dxybs(int i, const BS& bs) const { return dxy(i, bs.x(vz(i)), bs.y(vz(i))); }
     template <typename BS> float nsigmadxybs(int i, const BS& bs) const { return std::abs(dxybs(i, bs) / err_dxy(i)); }
-    template <typename PV> float dxypv(int i, const PV& pv, int j=0) const { return dxy(i, pv.x(j), pv.y(j)); }
-    float dz(int i, float x=0, float y=0, float z=0) const { return (vz(i) - z) - ((vx(i) - x) * px(i) + (vy(i) - y) * py(i)) / pt(i) * pz(i) / pt(i); }
-    template <typename PV> float dzpv(int i, const PV& pv, int j=0) const { return dz(i, pv.x(j), pv.y(j), pv.z(j)); }
-    float dsz(int i, float x=0, float y=0, float z=0) const { return (vz(i) - z) * pt(i) / p(i) - ((vx(i) - x) * px(i) + (vy(i) - y) * py(i)) / pt(i) * pz(i) / p(i); }
     float cov(int i, int j, int k) const {
       if (j > k) { j = j^k; k = j^k; j = j^k; }
       switch (j*10 + k) {
@@ -666,14 +682,15 @@ namespace jmt {
     TVector3 p3(int i) const { return p3_(pt(i), eta(i), phi(i)); }
     TLorentzVector p4(int i, double m=0) const { return p4_m(pt(i), eta(i), phi(i), m); }
     bool pass_sel(int i) const { return pt(i) > 1 && min_r(i) <= 1 && npxlayers(i) >= 2 && nstlayers(i) >= 6; }
-    template <typename BS> bool pass_seed(int i, const BS& bs, float ns=4) const { return pass_sel(i) && nsigmadxybs(i,bs) > ns; }
-    int nsel() const { int c = 0; for (int i = 0, ie = n(); i < ie; ++i) if (pass_sel(i)) ++c; return c; }
-    template <typename BS> int nseed(const BS& bs) const { int c = 0; for (int i = 0, ie = n(); i < ie; ++i) if (pass_seed(i, bs)) ++c; return c; }
-
+    
   private:
     vfloat qpt_;         vfloat* p_qpt_;
     vfloat eta_;         vfloat* p_eta_;
     vfloat phi_;         vfloat* p_phi_;
+    vbool  isLoose_;     vbool* p_isLoose_;
+    vbool  isMed_;       vbool* p_isMed_;
+    vbool  isTight_;     vbool* p_isTight_;
+    vfloat iso_;         vfloat* p_iso_;
     vfloat vx_;          vfloat* p_vx_;
     vfloat vy_;          vfloat* p_vy_;
     vfloat vz_;          vfloat* p_vz_;
@@ -690,26 +707,31 @@ namespace jmt {
     vuchar minhit_;      vuchar* p_minhit_;
     vuchar maxhit_;      vuchar* p_maxhit_;
     vuchar maxpxhit_;    vuchar* p_maxpxhit_;
-    vuchar losthit_;     vuchar* p_losthit_;
   };
   
-  class EleTracksSubNtuple : public INtuple {
+  class ElectronsSubNtuple : public INtuple {
   public:
-    EleTracksSubNtuple();
+    ElectronsSubNtuple();
     virtual void clear();
     virtual void write_to_tree(TTree*);
     virtual void read_from_tree(TTree*);
     virtual void copy_vectors();
     
-    void add(int q, float pt, float eta, float phi, float vx, float vy, float vz,
+    void add(int q, float pt, float eta, float phi, bool isVeto, bool isLoose, bool isMed, bool isTight, float iso, bool passveto,
+	     float vx, float vy, float vz,
              float cov_00, float cov_11, float cov_14, float cov_22, float cov_23, float cov_33, float cov_34, float cov_44,
              float chi2dof,
-             int npxh, int nsth, int npxl, int nstl, int losthit,
-             int minhit_r, int minhit_z, int maxhit_r, int maxhit_z, int maxpxhit_r, int maxpxhit_z
-            ) {
+	     int npxh, int nsth, int npxl, int nstl,
+             int minhit_r, int minhit_z, int maxhit_r, int maxhit_z, int maxpxhit_r, int maxpxhit_z) {
       qpt_.push_back(q*pt);
       eta_.push_back(eta);
       phi_.push_back(phi);
+      isVeto_.push_back(isVeto);
+      isLoose_.push_back(isLoose);
+      isMed_.push_back(isMed);
+      isTight_.push_back(isTight);
+      iso_.push_back(iso);
+      passveto_.push_back(passveto);
       vx_.push_back(vx);
       vy_.push_back(vy);
       vz_.push_back(vz);
@@ -722,7 +744,6 @@ namespace jmt {
       cov_34_.push_back(cov_34);
       cov_44_.push_back(cov_44);
       chi2dof_.push_back(chi2dof);
-      losthit_.push_back(losthit);
 
       assert(npxh >= 0 && nsth >= 0 && npxl >= 0 && nstl >= 0);
       if (npxh > 15) npxh = 15;
@@ -739,13 +760,18 @@ namespace jmt {
       assert(maxpxhit_r >= 0 && maxpxhit_r <= 15);
       assert(maxpxhit_z >= 0 && maxpxhit_z <= 15);
       maxpxhit_.push_back((uchar(maxpxhit_z) << 4) | uchar(maxpxhit_r));
-
     }
     
     virtual int n() const { return p_size(qpt_, p_qpt_); }
     float    qpt      (int i) const { return p_get(i, qpt_,       p_qpt_       ); }
     float    eta      (int i) const { return p_get(i, eta_,       p_eta_       ); }
     float    phi      (int i) const { return p_get(i, phi_,       p_phi_       ); }
+    bool     isVeto   (int i) const { return p_get(i, isVeto_,    p_isVeto_    ); }
+    bool     isLoose  (int i) const { return p_get(i, isLoose_,   p_isLoose_   ); }
+    bool     isMed    (int i) const { return p_get(i, isMed_,     p_isMed_     ); }
+    bool     isTight  (int i) const { return p_get(i, isTight_,   p_isTight_   ); }
+    float    iso      (int i) const { return p_get(i, iso_,       p_iso_       ); }
+    bool     passveto (int i) const { return p_get(i, passveto_,  p_passveto_  ); }
     float    vx       (int i) const { return p_get(i, vx_,        p_vx_        ); }
     float    vy       (int i) const { return p_get(i, vy_,        p_vy_        ); }
     float    vz       (int i) const { return p_get(i, vz_,        p_vz_        ); }
@@ -762,7 +788,6 @@ namespace jmt {
     uchar    minhit   (int i) const { return p_get(i, minhit_,    p_minhit_    ); }
     uchar    maxhit   (int i) const { return p_get(i, maxhit_,    p_maxhit_    ); }
     uchar    maxpxhit (int i) const { return p_get(i, maxpxhit_,  p_maxpxhit_  ); }
-    uchar    losthit  (int i) const { return p_get(i, losthit_,   p_losthit_   ); }
 
     int q(int i) const { return qpt(i) > 0 ? 1 : -1; }
     float pt(int i) const { return std::abs(qpt(i)); }
@@ -775,10 +800,6 @@ namespace jmt {
     float dxy(int i, float x=0, float y=0) const { return ((vy(i) - y) * px(i) - (vx(i) - x) * py(i)) / pt(i); }
     template <typename BS> float dxybs(int i, const BS& bs) const { return dxy(i, bs.x(vz(i)), bs.y(vz(i))); }
     template <typename BS> float nsigmadxybs(int i, const BS& bs) const { return std::abs(dxybs(i, bs) / err_dxy(i)); }
-    template <typename PV> float dxypv(int i, const PV& pv, int j=0) const { return dxy(i, pv.x(j), pv.y(j)); }
-    float dz(int i, float x=0, float y=0, float z=0) const { return (vz(i) - z) - ((vx(i) - x) * px(i) + (vy(i) - y) * py(i)) / pt(i) * pz(i) / pt(i); }
-    template <typename PV> float dzpv(int i, const PV& pv, int j=0) const { return dz(i, pv.x(j), pv.y(j), pv.z(j)); }
-    float dsz(int i, float x=0, float y=0, float z=0) const { return (vz(i) - z) * pt(i) / p(i) - ((vx(i) - x) * px(i) + (vy(i) - y) * py(i)) / pt(i) * pz(i) / p(i); }
     float cov(int i, int j, int k) const {
       if (j > k) { j = j^k; k = j^k; j = j^k; }
       switch (j*10 + k) {
@@ -816,14 +837,17 @@ namespace jmt {
     TVector3 p3(int i) const { return p3_(pt(i), eta(i), phi(i)); }
     TLorentzVector p4(int i, double m=0) const { return p4_m(pt(i), eta(i), phi(i), m); }
     bool pass_sel(int i) const { return pt(i) > 1 && min_r(i) <= 1 && npxlayers(i) >= 2 && nstlayers(i) >= 6; }
-    template <typename BS> bool pass_seed(int i, const BS& bs, float ns=4) const { return pass_sel(i) && nsigmadxybs(i,bs) > ns; }
-    int nsel() const { int c = 0; for (int i = 0, ie = n(); i < ie; ++i) if (pass_sel(i)) ++c; return c; }
-    template <typename BS> int nseed(const BS& bs) const { int c = 0; for (int i = 0, ie = n(); i < ie; ++i) if (pass_seed(i, bs)) ++c; return c; }
-
-
+    
+  private:
     vfloat qpt_;         vfloat* p_qpt_;
     vfloat eta_;         vfloat* p_eta_;
     vfloat phi_;         vfloat* p_phi_;
+    vbool isVeto_;       vbool* p_isVeto_;
+    vbool isLoose_;      vbool* p_isLoose_;
+    vbool isMed_;        vbool* p_isMed_;
+    vbool isTight_;      vbool* p_isTight_;
+    vfloat iso_;         vfloat* p_iso_;
+    vbool passveto_;     vbool* p_passveto_;
     vfloat vx_;          vfloat* p_vx_;
     vfloat vy_;          vfloat* p_vy_;
     vfloat vz_;          vfloat* p_vz_;
@@ -840,7 +864,7 @@ namespace jmt {
     vuchar minhit_;      vuchar* p_minhit_;
     vuchar maxhit_;      vuchar* p_maxhit_;
     vuchar maxpxhit_;    vuchar* p_maxpxhit_;
-    vuchar losthit_;     vuchar* p_losthit_;
+    
   };
 
 
@@ -853,8 +877,6 @@ namespace jmt {
       bs().clear();
       pvs().clear();
       tracks().clear();
-      mu_tracks().clear();
-      ele_tracks().clear();
     }
 
     virtual void write_to_tree(TTree* t) {
@@ -862,8 +884,6 @@ namespace jmt {
       bs().write_to_tree(t);
       pvs().write_to_tree(t);
       tracks().write_to_tree(t);
-      mu_tracks().write_to_tree(t);
-      ele_tracks().write_to_tree(t);
     }
 
     virtual void read_from_tree(TTree* t) {
@@ -871,8 +891,6 @@ namespace jmt {
       bs().read_from_tree(t);
       pvs().read_from_tree(t);
       tracks().read_from_tree(t);
-      mu_tracks().read_from_tree(t);
-      ele_tracks().read_from_tree(t);
     }
 
     virtual void copy_vectors() {
@@ -880,30 +898,22 @@ namespace jmt {
       bs().copy_vectors();
       pvs().copy_vectors();
       tracks().copy_vectors();
-      mu_tracks().copy_vectors();
-      ele_tracks().copy_vectors();
     }
 
     BaseSubNtuple& base() { return base_; }
     BeamspotSubNtuple& bs() { return bs_; }
     PrimaryVerticesSubNtuple& pvs() { return pvs_; }
     TracksSubNtuple& tracks() { return tracks_; }
-    MuTracksSubNtuple& mu_tracks() { return mu_tracks_; }
-    EleTracksSubNtuple& ele_tracks() { return ele_tracks_; }
     const BaseSubNtuple& base() const { return base_; }
     const BeamspotSubNtuple& bs() const { return bs_; }
     const PrimaryVerticesSubNtuple& pvs() const { return pvs_; }
     const TracksSubNtuple& tracks() const { return tracks_; }
-    const MuTracksSubNtuple& mu_tracks() const { return mu_tracks_; }
-    const EleTracksSubNtuple& ele_tracks() const { return ele_tracks_; }
 
   private:
     BaseSubNtuple base_;
     BeamspotSubNtuple bs_;
     PrimaryVerticesSubNtuple pvs_;
     TracksSubNtuple tracks_;
-    MuTracksSubNtuple mu_tracks_;
-    EleTracksSubNtuple ele_tracks_;
   };
 
 
@@ -915,35 +925,49 @@ namespace jmt {
       TrackingNtuple::clear();
       jets().clear();
       pf().clear();
+      muons().clear();
+      electrons().clear();
     }
 
     virtual void write_to_tree(TTree* t) {
       TrackingNtuple::write_to_tree(t);
       jets().write_to_tree(t);
       pf().write_to_tree(t);
+      muons().write_to_tree(t);
+      electrons().write_to_tree(t);
     }
 
     virtual void read_from_tree(TTree* t) {
       TrackingNtuple::read_from_tree(t);
       jets().read_from_tree(t);
       pf().read_from_tree(t);
+      muons().read_from_tree(t);
+      electrons().read_from_tree(t);
     }
 
     virtual void copy_vectors() {
       TrackingNtuple::copy_vectors();
       jets().copy_vectors();
-      pf().copy_vectors();	
+      pf().copy_vectors();
+      muons().copy_vectors();
+      electrons().copy_vectors();
+	
     }
 
     JetsSubNtuple& jets() { return jets_; }
     PFSubNtuple& pf() { return pf_; }
+    MuonsSubNtuple& muons() { return muons_; }
+    ElectronsSubNtuple& electrons() { return electrons_; }
     const JetsSubNtuple& jets() const { return jets_; }
     const PFSubNtuple& pf() const { return pf_; }
+    const MuonsSubNtuple& muons() const { return muons_; }
+    const ElectronsSubNtuple& electrons() const { return electrons_; }
 
   private:
     JetsSubNtuple jets_;
     PFSubNtuple pf_;
-
+    MuonsSubNtuple muons_;
+    ElectronsSubNtuple electrons_;
   };
 }
 

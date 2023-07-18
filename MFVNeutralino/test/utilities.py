@@ -124,11 +124,13 @@ def cmd_rm_mc_parts():
                     print y
                     os.remove(y)
 
-def _background_samples(trigeff=False, year=2017): #FIXME
-    if _leptonpresel:
-        x = ['ttbar', 'wjetstolnu_amcatnlo', 'dyjetstollM10', 'dyjetstollM50', 'qcdmupt15', 'ww', 'wz', 'zz']
-        x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170]]
-        x += ['qcdbctoept%03i' % x for x in [15,20,30,80,170,250]]
+def _background_samples(trigeff=False, year=2017):
+    if _leptonpresel or trigeff:
+        x = ['qcdmupt15'] #,'ttbar', 'wjetstolnu_amcatnlo', 'dyjetstollM10', 'dyjetstollM50', 'ww', 'wz', 'zz'] #FIXME 
+        #x = ['ttbar', 'ww', 'wz', 'zz'] #FIXME 
+        if not trigeff:
+            x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]] 
+            x += ['qcdbctoept%03i' % x for x in [20,30,80,170,250]]
     elif _btagpresel:
         x = ['qcdht%04i' % x for x in [300, 500, 700, 1000, 1500, 2000]]
         x += ['ttbar']
@@ -145,7 +147,7 @@ def _background_samples(trigeff=False, year=2017): #FIXME
         x += ['ttbarht%04i' % x for x in [600, 800, 1200, 2500]]
     return x
 
-def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=2018):
+def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=2017):
     cwd = os.getcwd()
     ok = True
     if year_to_use==-1:
@@ -204,14 +206,14 @@ def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=20
             else:
                 files2.append(fn)
         if files2:
-            cmd = 'samples merge %f bkg%s%s.root ' % (scale, _presel_s, year_s) 
+            cmd = 'samples merge %f qcd%s%s.root ' % (scale, _presel_s, year_s) #FIXME
             cmd += ' '.join(files2)
             print("scale is "+str(scale))
             print cmd
             if os.system(cmd) != 0:
                 ok = False
         if ok:
-            print ("{0} bkg merged!".format(year)) 
+            print ("{0} qcd merged!".format(year)) #FIXME
 
     #only work for 2017 data now
     #if ok:

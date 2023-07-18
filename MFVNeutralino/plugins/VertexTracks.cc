@@ -847,7 +847,7 @@ bool MFVVertexTracks::filter(edm::Event& event, const edm::EventSetup& setup) {
       h_all_track_npxlayers->Fill(npxlayers);
       h_all_track_nstlayers->Fill(nstlayers);
 
-      const bool nm1[5] = {
+      const bool nm1[4] = {
         pt > min_track_pt,
         npxlayers >= min_track_npxlayers,
         nstlayers >= min_track_nstlayers,

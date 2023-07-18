@@ -150,7 +150,7 @@ def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='dyjet
         mc4 = d_5[name]
         #signal = d_6[name]
         tot = (data, mc, mc2, mc3, mc4)
-        if not name.startswith('nocuts_'): #or "muon" in name:
+        if not name.startswith('nocuts_') or "ele" in name:
             continue
         if name.endswith('_den'): #or (not name.endswith('_num') and not name.endswith('_den')):
             
@@ -184,7 +184,7 @@ def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='dyjet
             mc2.SetLineColor(6)
             mc2.SetFillColor(6)
             
-            mc3.SetName("MC Drell-Yan 10GeV 2017")
+            mc3.SetName("MC Drell-Yan 2017")
             mc3.ClearUnderflowAndOverflow()
             mc3.SetFillStyle(3001)
             mc3.SetMarkerStyle(24)
@@ -259,8 +259,8 @@ def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='dyjet
                         #signal_samples = [signal],
                         data_samples = [data],
                 
-                        bkg_partial_weights = [0.00250943282198, 0.000224017744928, 1.0/(40163.29), 1.0/(40163.29)],
-                        #wjetstolnu_amcatnlo_2017, dyjetstollM10_2017, combined qcd, dyjetstollM50_2017, etc.
+                        bkg_partial_weights = [0.00250943282198, 1.0/(40163.29), 1.0/(40163.29), 1.0/(40163.29)],
+                        #wjetstolnu_amcatnlo_2017, dyjetstollM10+50_2017, combined qcd, other bkg.
                         #sig_partial_weights = [5.65661819127e-08],
                         plot_saver=ps,
                         int_lumi = 40163.29*0.1, #for 2017 only

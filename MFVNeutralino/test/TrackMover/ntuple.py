@@ -9,7 +9,7 @@ settings.is_miniaod = True
 #settings.event_filter = 'electrons only novtx'
 settings.event_filter = 'muons only novtx'
 
-version = settings.version + 'v5'
+version = settings.version + 'v6'
 
 # for stat extension
 #version = settings.version + 'ext1'
@@ -44,7 +44,8 @@ dataset = 'miniaod' if settings.is_miniaod else 'main'
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/120001/DE019DB3-A431-7546-8BC1-30ABC37AD495.root')
 #input_files(process, '~/nobackup/crabdirs/TTJets_UL2017_MINIAOD.root')
 #sample_files(process, 'qcdbctoept080_2017', dataset, 1)
-
+#sample_files(process, 'qcdmupt15_2017', dataset, 1)
+#input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/120001/A8C3978F-4BE4-A844-BEE8-8DEE129A02B7.root')
 cmssw_from_argv(process)
 
 ####
@@ -147,8 +148,9 @@ random_service(process, random_dict)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
-    #samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=True, leptonic=True, met=True, diboson=True, Lepton_data=True)
-    samples = [getattr(Samples, 'dyjetstollM50_2017')]
+    samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=True, leptonic=True, met=True, diboson=True, Lepton_data=False)
+    #samples = [getattr(Samples, 'dyjetstollM50_2017')]
+    #samples = [getattr(Samples, 'qcdbctoept250_2017')]
     set_splitting(samples, dataset, 'trackmover', data_json=json_path('ana_SingleLept_2017_10pc.json'), limit_ttbar=True)
 
     ms = MetaSubmitter('TrackMover' + version, dataset=dataset)

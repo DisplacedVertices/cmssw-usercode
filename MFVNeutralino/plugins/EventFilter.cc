@@ -125,7 +125,7 @@ bool MFVEventFilter::filter(edm::Event& event, const edm::EventSetup&) {
   
   for (const pat::Muon& muon : *muons) {
     //if (muon_selector(muon) && muon.pt() > min_muon_pt)
-    reco::TrackRef mtk = muon.globalTrack();
+    reco::TrackRef mtk = muon.track();
     if (mtk.isNull()){
       continue;
     }
@@ -153,7 +153,7 @@ bool MFVEventFilter::filter(edm::Event& event, const edm::EventSetup&) {
       for (const pat::Electron& electron : *electrons) {
         // if (electron_selector(electron) && electron.pt() > min_electron_pt)
         //new electron selector : is cut based tight & iso < 0.10
-        reco::GsfTrackRef etk = electron.gsfTrack();
+        reco::TrackRef etk = electron.track();
         if (etk.isNull()){
           continue;
         }
@@ -176,6 +176,7 @@ bool MFVEventFilter::filter(edm::Event& event, const edm::EventSetup&) {
     }
   }
     
+
   if (debug) printf("MFVEventFilter: nmuons: %i nelectrons: %i pass? %i\n", nmuons, nelectrons, leptons_pass);
 
   //return leptons_pass;

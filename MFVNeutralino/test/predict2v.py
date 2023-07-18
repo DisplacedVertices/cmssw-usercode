@@ -3,9 +3,9 @@ from JMTucker.Tools.general import *
 import pandas as pd
 
 #presel_path = '/uscms_data/d2/tucker/crab_dirs/PreselHistosV27m'
-presel_path = '/uscms/home/pkotamni/nobackup/crabdirs/HistosAttrkTightdBVStudiesHalfMCULV29Lepm/'
+presel_path = '/uscms/home/pkotamni/nobackup/crabdirs/HistosHalfMCV2ULV30Lepm/'
 #sel_path = '/uscms_data/d3/dquach/crab3dirs/HistosV27m_moresidebands'
-sel_path = '/uscms/home/pkotamni/nobackup/crabdirs/HistosAttrkTightdBVStudiesHalfMCULV29Lepm/' 
+sel_path = '/uscms/home/pkotamni/nobackup/crabdirs/HistosHalfMCV2ULV30Lepm' 
 data = bool_from_argv('data')
 year = '2017' if len(sys.argv) < 2 else sys.argv[1]
 varname = 'nom' if len(sys.argv) < 3 else sys.argv[2] # use the BTV variations to compute syst shifts on pred2v
@@ -59,7 +59,7 @@ for ntk in 3,4,5,7,8,9:
         cdict[ntk]['cb'] = 0
         cdict[ntk]['cbbar'] = 0
 
-npresel, enpresel = get_integral(presel_f.Get('mfvEventHistosJetPreSel/h_npu'))
+npresel, enpresel = get_integral(presel_f.Get('mfvEventHistosPreSel/h_w'))
 npresel  *= presel_scale
 enpresel *= presel_scale
 f0 = fracdict['presel']

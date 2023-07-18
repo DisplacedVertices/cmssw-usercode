@@ -9,7 +9,6 @@ import xml.etree.ElementTree as ET
 from JMTucker.Tools.LumiJSONTools import fjr2ll
 from JMTucker.Tools.general import sub_popen, touch
 from JMTucker.Tools.hadd import HaddBatchResult, hadd
-from JMTucker.Tools.hadd_on_condor import hadd_on_condor
 from JMTucker.Tools import colors
 
 class CSHelpersException(Exception):
@@ -314,7 +313,7 @@ def cs_hadd_files(working_dir, **kwargs):
         files = files[a:b:c]
     return expected, files
 
-def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None, range_filter=None, submit=False, cmssw_tar_path=''):
+def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chunk_size=900, pattern=None, range_filter=None):
     working_dir, new_name, new_dir = cs_hadd_args(working_dir, new_name, new_dir)
     expected, files = cs_hadd_files(working_dir, range_filter=range_filter)
     result = HaddBatchResult('condor', working_dir, new_name, new_dir, expected, files)
@@ -352,11 +351,7 @@ def cs_hadd(working_dir, new_name=None, new_dir=None, raise_on_empty=False, chun
         if result.success and not new_name.startswith('root://'):
             os.chmod(new_name, 0644)
     else:
-        if not submit:
-            result.success = hadd(new_name, files)
-        else:
-            result.success = hadd_on_condor(new_name, working_dir, cmssw_tar_path, files)
-
+        result.success = hadd(new_name, files)
 
     return result
 

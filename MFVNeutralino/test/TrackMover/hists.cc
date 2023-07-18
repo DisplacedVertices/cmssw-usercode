@@ -459,7 +459,7 @@ int main(int argc, char** argv) {
 	bool has_Zboson = false;
 
 	for (int i = 0, ie = muons.n(); i < ie; ++i) {
-		if (muons.pt(i) > 29.0 && abs(muons.eta(i)) < 2.4 && muons.isMed(i) && muons.iso(i) < 0.15) {
+		if (muons.pt(i) > 20.0 && abs(muons.eta(i)) < 2.4 && muons.isMed(i) && muons.iso(i) < 0.15) {
 			nselmuons += 1;
 			if (nselmuons == 1) {
 				muon_pT = muons.pt(i);
@@ -497,7 +497,7 @@ int main(int argc, char** argv) {
 	tmpz_p4.SetPxPyPzE(0.0, 0.0, 0.0, 0.0);
 
 	for (int i = 0, ie = electrons.n(); i < ie; ++i) {
-		if (electrons.pt(i) > 38.0 && abs(electrons.eta(i)) < 2.4 && electrons.isTight(i) && electrons.passveto(i) && electrons.iso(i) < 0.1) {
+		if (electrons.pt(i) > 20.0 && abs(electrons.eta(i)) < 2.4 && electrons.isTight(i) && electrons.passveto(i) && electrons.iso(i) < 0.1) {
 			nseleles += 1;
 			if (nseleles == 1) {
 				ele_pT = electrons.pt(i);
