@@ -9,6 +9,8 @@ int main(int argc, char** argv) {
   if (!nr.parse_options(argc, argv) || !nr.init()) return 1;
   auto& nt = nr.nt();
   auto& ntt = nt.tracks();
+  //auto& pf = nt.pf();
+  auto& bs = nt.bs();
 
   ////
 
@@ -19,6 +21,8 @@ int main(int argc, char** argv) {
   TH1D* h_chi2dof[max_mass_type];
   TH1D* h_premass[max_mass_type];
   TH1D* h_mass[max_mass_type];
+  TH1D* h_x[max_mass_type];
+  TH1D* h_y[max_mass_type];
   TH1D* h_p[max_mass_type];
   TH1D* h_pt[max_mass_type];
   TH1D* h_eta[max_mass_type];
@@ -32,6 +36,8 @@ int main(int argc, char** argv) {
   TH1D* h_ct[max_mass_type];
   TH1D* h_ctau[max_mass_type];
   TH1D* h_rho[max_mass_type];
+  TH1D* h_dbv[max_mass_type];
+  TH1D* h_2ddist[max_mass_type];
   TH1D* h_tracks_pt[max_mass_type];
   TH1D* h_tracks_eta[max_mass_type];
   TH1D* h_tracks_phi[max_mass_type];
@@ -55,6 +61,7 @@ int main(int argc, char** argv) {
   TH1D* h_tracks_etaerr[max_mass_type];
   TH2D* h_tracks_dxyerr_v_pt[max_mass_type];
   TH2D* h_tracks_dszerr_v_pt[max_mass_type];
+  TH2D* h_xy[max_mass_type];
 
   for (int i = 0; i < max_mass_type; ++i) {
     TDirectory* d = nr.f_out().mkdir(mass_names[i]);
@@ -64,6 +71,8 @@ int main(int argc, char** argv) {
     h_chi2dof[i] = new TH1D("h_chi2dof", ";K0 candidate #chi^{2}/dof;cands/0.1", 70, 0, 7);
     h_premass[i] = new TH1D("h_premass", ";K0 candidate pre-fit mass (GeV);cands/5 MeV", 400, 0, 2);
     h_mass[i] = new TH1D("h_mass", ";K0 candidate mass (GeV);cands/5 MeV", 400, 0, 2);
+    h_x[i] = new TH1D("h_x", ";K0 candidate x (cm);cands/0.08 cm", 100, -4, 4);
+    h_y[i] = new TH1D("h_y", ";K0 candidate y (cm);cands/0.08 cm", 100, -4, 4);
     h_p[i] = new TH1D("h_p", ";K0 candidate p (GeV);cands/1 GeV", 200, 0, 200);
     h_pt[i] = new TH1D("h_pt", ";K0 candidate p_{T} (GeV);cands/1 GeV", 200, 0, 200);
     h_eta[i] = new TH1D("h_eta", ";K0 candidate #eta;cands/0.05", 100, -2.5, 2.5);
@@ -77,6 +86,8 @@ int main(int argc, char** argv) {
     h_ct[i] = new TH1D("h_ct", ";K0 candidate ct (cm);cands/0.005 cm", 400, 0, 2);
     h_ctau[i] = new TH1D("h_ctau", ";K0 candidate c#tau (cm);cands/0.005 cm", 400, 0, 2);
     h_rho[i] = new TH1D("h_rho", ";K0 candidate #rho (cm);cands/0.005 cm", 400, 0, 2);
+    h_dbv[i] = new TH1D("h_dbv", ";K0 candidate 2D distance from BS (cm);cands/0.005 cm", 400, 0, 2);
+    h_2ddist[i] = new TH1D("h_2ddist", ";K0 candidate 2D distance (cm);cands/0.005 cm", 400, 0, 2);
     h_tracks_pt[i] = new TH1D("h_tracks_pt", ";tracks pt;arb. units", 200, 0, 200);
     h_tracks_eta[i] = new TH1D("h_tracks_eta", ";tracks eta;arb. units", 50, -4, 4);
     h_tracks_phi[i] = new TH1D("h_tracks_phi", ";tracks phi;arb. units", 32, -3.15, 3.15);
@@ -100,6 +111,7 @@ int main(int argc, char** argv) {
     h_tracks_etaerr[i] = new TH1D("h_tracks_etaerr", ";tracks etaerr;arb. units", 200, 0, 0.2);
     h_tracks_dxyerr_v_pt[i] = new TH2D("h_tracks_dxyerr_v_pt", ";p_{T} (GeV);dxyerr (cm)", 2000, 0, 200, 2000, 0, 0.2);
     h_tracks_dszerr_v_pt[i] = new TH2D("h_tracks_dszerr_v_pt", ";p_{T} (GeV);dszerr (cm)", 2000, 0, 200, 2000, 0, 0.2);
+    h_xy[i] = new TH2D("h_xy", ";K0 candidate x (cm);K0 candidate y (cm)", 100, -4, 4, 100, -4, 4);
   }
 
   nr.f_out().cd();
@@ -116,7 +128,26 @@ int main(int argc, char** argv) {
 
     int nvtx[max_mass_type] = {0};
 
+    // FIXME 
+    // for the bjet triggered events, given the poor stats of QCD MC at low HT,
+    // we may want to consider a slightly higher HT cut than normal for the analysis.
+    // Probably 500 or 600 GeV would be enough to avoid having to rely on the qcdht < 500 GeV samples.
+    // For reference, some partial weights of low HT samples are:
+    // HT > 100 GeV: weight = 11595.694477
+    // HT > 200 GeV: weight = 1043.417825 
+    // HT > 300 GeV: weight = 252.476346
+    // HT > 500 GeV: weight = 20.938199
+    // 
+    // in addition: might consider vetoing large weights, since single events with, e.g., weight > 1000 or maybe even 100, cannot be useful in any distributions
+    //
+    // FIXME also should add in our offline requirements + trigger requirements regardless. 
+    
+    //if (pf.metnomu() < 200 || !(pf.passmetfilters()) || !(pf.passfakemetveto()))
+    //  NR_loop_cont(w);
+
     for (int isv = 0, isve = nt.svs().n(); isv < isve; ++isv) {
+
+
       const TVector3 pos = nt.svs().pos(isv);
       if (!jmt::Geometry::inside_beampipe(nr.is_mc(), pos.X(), pos.Y()))
         continue;
@@ -124,9 +155,14 @@ int main(int argc, char** argv) {
       const TVector3 flight = pos - pv;
       const TVector3 flight2(flight.X(), flight.Y(), 0);
       const double rho = flight.Perp();
+      const double dist2d = pos.Perp();
       const double deltazpv = flight.Z();
+      const double x = pos.X();
+      const double y = pos.Y();
+      const double dbv = std::hypot(x-bs.x(), y-bs.y());
 
       if (rho < 0.268) continue;
+      //if (dbv < 0.268) continue;
 
       const int itk = nt.svs().misc(isv) & 0xFFFF;
       const int jtk = nt.svs().misc(isv) >> 16;
@@ -170,6 +206,8 @@ int main(int argc, char** argv) {
         fill(h_chi2dof[imass], nt.svs().chi2dof(isv));
         fill(h_premass[imass], prep4.M());
         fill(h_mass[imass], mass);
+        fill(h_x[imass], x);
+        fill(h_y[imass], y);
         fill(h_p[imass], p4.P());
         fill(h_pt[imass], p4.Pt());
         fill(h_eta[imass], p4.Eta());
@@ -183,6 +221,9 @@ int main(int argc, char** argv) {
         fill(h_ct[imass], ct);
         fill(h_ctau[imass], ctau);
         fill(h_rho[imass], rho);
+        fill(h_dbv[imass], dbv);
+        fill(h_2ddist[imass], dist2d);
+        fill2(h_xy[imass], x, y);
 
         for (int tki : {itk, jtk}) {
           fill(h_tracks_pt[imass], ntt.pt(tki));
