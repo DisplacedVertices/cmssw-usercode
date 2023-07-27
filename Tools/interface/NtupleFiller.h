@@ -120,15 +120,15 @@ namespace jmt {
     PFSubNtuple& nt_;
     const edm::InputTag tag_;
     const edm::EDGetTokenT<pat::METCollection> token_;
-    edm::Handle<pat::METCollection> mets_;
+    //edm::Handle<pat::METCollection> mets_;
   public:
     PFSubNtupleFiller(PFSubNtuple& nt, const edm::ParameterSet& cfg, edm::ConsumesCollector&& cc)
-      : nt_(nt),
-        tag_(cfg.getParameter<edm::InputTag>("mets_src")),
-        token_(cc.consumes<pat::METCollection>(tag_))
+      : nt_(nt)
+        //tag_(cfg.getParameter<edm::InputTag>("mets_src")),
+        //token_(cc.consumes<pat::METCollection>(tag_))
     {}
     void operator()(const edm::Event&);
-    const pat::METCollection& mets() const { return *mets_; }
+    //const pat::METCollection& mets() const { return *mets_; }
   };
 
   void NtupleAdd(TracksSubNtuple&, const reco::Track&, int which_jet=-1, int which_pv=-1, int which_sv=-1, unsigned misc=0);

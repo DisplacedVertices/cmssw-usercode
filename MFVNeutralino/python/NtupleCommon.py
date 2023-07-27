@@ -272,7 +272,7 @@ def miniaod_ntuple_process(settings):
     #process.selectedPatElectrons.cut = '' # process.jtupleParams.electronCut
 
     # change made to use corrected MET
-    process.mfvTriggerFloats.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple')
+    #process.mfvTriggerFloats.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple')
     if not settings.is_mc:
       process.mfvTriggerFloats.met_filters_src = cms.InputTag('TriggerResults', '', 'RECO')
     process.mfvTriggerFloats.isMC = settings.is_mc
@@ -297,7 +297,7 @@ def miniaod_ntuple_process(settings):
     process.mfvEvent.gen_particles_src = 'prunedGenParticles' # no idea if this lets gen_bquarks, gen_leptons work--may want the packed ones that have status 1 particles
     process.mfvEvent.gen_jets_src = 'slimmedGenJets'
     process.mfvEvent.pileup_info_src = 'slimmedAddPileupInfo'
-    process.mfvEvent.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple')
+    #process.mfvEvent.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple')
 
     # MET correction and filters
     # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETUncertaintyPrescription#PF_MET
