@@ -26,9 +26,22 @@ def zerobias_modifier(sample):
 
 def era_modifier(sample):
     if not sample.is_mc:
-        mo = re.search(r'(201\d)([A-Z])', sample.name)
+
+        my_sample_name = sample.name
+        is2016APV = False
+        
+        if 'APV' in my_sample_name : 
+            my_sample_name.replace('APV','')
+            is2016APV = True
+
+        mo = re.search(r'(201\d)([A-Z])', my_sample_name)
         assert mo
         yr, era = mo.groups()
+
+        if int(yr) == 2016 :
+            if is2016APV : yr = 20161
+            else         : yr = 20162
+
         assert year == int(yr)
         magic = '\nsettings.is_mc ='
         return [], [(magic, ('\nsettings.era = "%s"' % era) + magic, 'trying to submit on data and no magic string %r' % magic)]
@@ -340,13 +353,15 @@ def pick_samples(dataset, both_years=False,
             if a2 != a:
                 args[a2] = False
 
-    years = [2017, 2018] if both_years else [year]
+    years = [20161, 20162, 2017, 2018] if both_years else [year]
 
     samples = []
     for a in argnames:
         if args[a]:
             for yr in years:
-                samples += getattr(Samples, '%s_samples_%i' % (a, yr))
+                if   yr == 20161 : yr = "2016APV"
+                elif yr == 20162 : yr = "2016"
+                samples += getattr(Samples, '%s_samples_%s' % (a, yr))
     print([s.name for s in samples])
     return [s for s in samples if s.has_dataset(dataset)]
 
