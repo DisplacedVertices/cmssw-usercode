@@ -38,9 +38,9 @@ private:
 
   const bool require_bquarks;
   const bool require_trigbit;
+  const bool dijet_agnostic;
+  const bool bjet_agnostic;
   const int  trigbit_tostudy;
-  const int calo_seed_threshold;
-  const int calo_prompt_threshold;
   const int l1_bit;
   const int trigger_bit;
   const int apply_trigger;
@@ -96,9 +96,9 @@ MFVAnalysisCuts::MFVAnalysisCuts(const edm::ParameterSet& cfg)
     apply_presel(cfg.getParameter<int>("apply_presel")),
     require_bquarks(cfg.getParameter<bool>("require_bquarks")),
     require_trigbit(cfg.getParameter<bool>("require_trigbit")),
+    dijet_agnostic(cfg.getParameter<bool>("dijet_agnostic")),
+    bjet_agnostic(cfg.getParameter<bool>("bjet_agnostic")),
     trigbit_tostudy(cfg.getParameter<int>("trigbit_tostudy")),
-    calo_seed_threshold(cfg.getParameter<int>("calo_seed_threshold")),
-    calo_prompt_threshold(cfg.getParameter<int>("calo_prompt_threshold")),
     l1_bit(apply_presel ? -1 : cfg.getParameter<int>("l1_bit")),
     trigger_bit(apply_presel ? -1 : cfg.getParameter<int>("trigger_bit")),
     apply_trigger(apply_presel ? 0 : cfg.getParameter<int>("apply_trigger")),
@@ -213,22 +213,20 @@ bool MFVAnalysisCuts::filter(edm::Event& event, const edm::EventSetup&) {
     }
 
     if (apply_presel == 6) {
-
       bool success = false;
       for(size_t trig : mfv::HTOrBjetOrDisplacedDijetTriggers){
 
-        // remain agnostic to the HT1050 trigger and bjet triggers
+        // remain agnostic to the HT1050 trigger
         if (trig == mfv::b_HLT_PFHT1050) continue;
+        if (trigbit_tostudy < 999 and int(trig) != trigbit_tostudy) continue;
 
-        if (trigbit_tostudy < 9999 and int(trig) != trigbit_tostudy) continue;
+        // uncomment to remain agnostic to bjet triggers
+        if (bjet_agnostic and trig == mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33) continue;
+        if (bjet_agnostic and trig == mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0) continue;
 
-        // uncomment to remain agnostic to the bjet triggers
-        //if (trig == mfv::b_HLT_DoublePFJets100MaxDeta1p6_DoubleCaloBTagCSV_p33) continue;
-        //if (trig == mfv::b_HLT_PFHT300PT30_QuadPFJet_75_60_45_40_TriplePFBTagCSV_3p0) continue;
-       
-        // uncomment to remain agnostic to the displaced dijet triggers
-        //if (trig == mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack) continue;
-        //if (trig == mfv::b_HLT_HT650_DisplacedDijet60_Inclusive) continue;
+        // uncomment to remain agnostic to displaced dijet triggers
+        if (dijet_agnostic and trig == mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack) continue;
+        if (dijet_agnostic and trig == mfv::b_HLT_HT650_DisplacedDijet60_Inclusive) continue;
 
         if(satisfiesTrigger(mevent, trig)){
           success = true;
@@ -432,45 +430,49 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
   // note that if these weren't pT ordered, we'd have to be more careful in the loops...
   int njets     = mevent->njets(20);
   int ncalojets = mevent->calo_jet_pt.size();
-  int nseedtkd_cjets = 0;
-  int nprompttkd_cjets = 0;
-  int seedtk_thresh    = calo_seed_threshold;  // Require >=2 cjets with >=seedtk_thresh seed tracks
-  int prompttk_thresh  = calo_prompt_threshold;  // Require >=2 cjets with <=prompttk_thresh prompt tracks
-
-  // for counting seed tracks in calojets
-  const size_t n_vertex_seed_tracks = mevent->n_vertex_seed_tracks();
 
   // note that this could be loosened/tightened if desired
   int medcsvtags      = 0;
   int meddeepcsvtags  = 0;
   int hardmedcsvtags     = 0;
   int hardmeddeepcsvtags = 0;
+  std::vector<int> calojet_ngood(2, 0); // Two entries (for different pT cuts, each start at 0)
 
+  std::vector<float> jettk_dxys;
+  std::vector<float> jettk_nsigmadxys;
+  
   float alt_calo_ht = 0.0; // To account for the fact that calo_jet_ht uses jets up to eta 5.0. We don't want that
 
-  // Calculate alt_calo_ht and get ncalojets above seed track threshold
+  // Calculate alt_calo_ht
   for (int ic=0; ic < ncalojets; ic++) {
-    int calojet_nseedtks   = 0;
-    int calojet_nprompttks = 0;
-    if (mevent->calo_jet_pt[ic] > 40.0 and fabs(mevent->calo_jet_eta[ic]) < 2.5) alt_calo_ht += mevent->calo_jet_pt[ic];
+    int calojet_njettks       = 0;
+    int calojet_njettks_dispd = 0;
+    if (mevent->calo_jet_pt[ic] > 30.0 and fabs(mevent->calo_jet_eta[ic]) < 2.5) alt_calo_ht += mevent->calo_jet_pt[ic];
 
-    if (mevent->calo_jet_pt[ic] < 50.0 or fabs(mevent->calo_jet_eta[ic]) > 2.0) continue;
-    // Get the number of seed tracks within dR < 0.4
-    for (size_t itk = 0; itk < n_vertex_seed_tracks; ++itk) {
-        if (mevent->vertex_seed_track_dxy[itk] < 0.02) continue;
-        double this_dR = reco::deltaR(mevent->calo_jet_eta[ic], mevent->calo_jet_phi[ic], mevent->vertex_seed_track_eta[itk], mevent->vertex_seed_track_phi[itk]);
-        if (this_dR < 0.4) calojet_nseedtks++;
-    }
+    // Don't do the following CPU-intensive for loop if it's not a relevant jet
+    if (mevent->calo_jet_pt[ic] < 40.0 or fabs(mevent->calo_jet_eta[ic]) > 2.0) continue;
 
     for (size_t itk = 0; itk < mevent->n_jet_tracks_all(); itk++) {
-        if (not (fabs(mevent->jet_track_qpt[itk]) > 1.0 and fabs(mevent->jet_track_dxy[itk]) < 0.1)) continue;
+        if (fabs(mevent->jet_track_qpt[itk]) < 1.0) continue;
         double this_dR = reco::deltaR(mevent->calo_jet_eta[ic], mevent->calo_jet_phi[ic], mevent->jet_track_eta[itk], mevent->jet_track_phi[itk]);
-
-        if (this_dR < 0.4) calojet_nprompttks++;
+        double this_tk_nsigmadxy = fabs(mevent->jet_track_dxy[itk]/mevent->jet_track_dxy_err[itk]); 
+        if (this_dR < 0.4) {
+           calojet_njettks++;
+           jettk_dxys.push_back(fabs(mevent->jet_track_dxy[itk]));
+           jettk_nsigmadxys.push_back(this_tk_nsigmadxy);
+           if (fabs(mevent->jet_track_dxy[itk]) > 0.05 and this_tk_nsigmadxy > 5.0) calojet_njettks_dispd++;
+        }
     }
 
-    if (calojet_nseedtks   >= seedtk_thresh)   nseedtkd_cjets++;
-    if (calojet_nprompttks <= prompttk_thresh) nprompttkd_cjets++;
+    std::sort(jettk_dxys.begin(), jettk_dxys.end());
+    bool pass_prompt_req   = jettk_dxys.size() >= 3 ? (jettk_dxys[2] > 0.1) : true;
+//  bool pass_disp_dxy_req = jettk_dxys.size() >= 1 ? (*max_element(std::begin(jettk_dxys), std::end(jettk_dxys)) > 0.05) : false;
+//  bool pass_disp_sig_req = jettk_nsigmadxys.size() >= 1 ? (*max_element(std::begin(jettk_nsigmadxys), std::end(jettk_nsigmadxys)) > 5.0) : false;
+    bool pass_disp_req     = calojet_njettks_dispd >= 1;
+
+    if (pass_prompt_req and pass_disp_req)                  calojet_ngood[0]++;
+    if (pass_prompt_req and mevent->calo_jet_pt[ic] > 60.0) calojet_ngood[1]++;
+
   }
 
   for(int j0 = 0; j0 < njets; j0++) {
@@ -584,35 +586,18 @@ bool MFVAnalysisCuts::satisfiesTrigger(edm::Handle<MFVEvent> mevent, size_t trig
     case mfv::b_HLT_HT430_DisplacedDijet40_DisplacedTrack :
     {
       if(year != 2018 and year != 2017) return false;
-      if(alt_calo_ht < 500 || ncalojets < 2 || nseedtkd_cjets < 1 || nprompttkd_cjets < 2) return false;
+      if(alt_calo_ht < 400 || ncalojets < 2 || calojet_ngood[0] < 2) return false;
 
-      for(int j0 = 0; j0 < ncalojets; ++j0){
-        //if(!displaced_jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 50) continue; //FIXME
-        if(mevent->calo_jet_pt[j0] < 50 || fabs(mevent->calo_jet_eta[j0]) > 2.0) continue;
-
-        for(int j1 = j0+1; j1 < ncalojets; ++j1){
-          //if(!displaced_jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 50) continue; //FIXME
-          if(mevent->calo_jet_pt[j1] < 50 || fabs(mevent->calo_jet_eta[j0]) > 2.0) continue;
-          passed_kinematics = true;
-        }
-      }
+      passed_kinematics = true;
       return passed_kinematics;
     }
 
     case mfv::b_HLT_HT650_DisplacedDijet60_Inclusive :
     {
       if(year != 2018 and year != 2017) return false;
-      if(alt_calo_ht < 700 || ncalojets < 2 || nprompttkd_cjets < 2) return false;
-      for(int j0 = 0; j0 < ncalojets; ++j0){
-        //if(!displaced_jet_hlt_match(mevent, j0) || mevent->jet_pt[j0] < 80) continue; //FIXME
-        if(mevent->calo_jet_pt[j0] < 80 || fabs(mevent->calo_jet_eta[j0]) > 2.0) continue;
-
-        for(int j1 = j0+1; j1 < njets; ++j1){
-          //if(!displaced_jet_hlt_match(mevent, j1) || mevent->jet_pt[j1] < 80) continue; //FIXME
-          if(mevent->calo_jet_pt[j1] < 80 || fabs(mevent->calo_jet_eta[j0]) > 2.0) continue;
-          passed_kinematics = true;
-        }
-      }
+      if(alt_calo_ht < 600 || ncalojets < 2 || calojet_ngood[1] < 2) return false;
+    
+      passed_kinematics = true;
       return passed_kinematics;
     }
 
