@@ -1591,6 +1591,8 @@ def plot_dir(x='', make=False, temp=False):
         d = '/publicweb/j/joeyr/plots'
     elif 'fnal.gov' in hostname and username == 'ali':
         d = '/publicweb/a/ali/'
+    elif 'fnal.gov' in hostname :
+        d = os.environ['HOME']+'/nobackup/DVplots/'
     if d:
         x = os.path.join(d,x)
     else:
