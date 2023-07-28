@@ -2,7 +2,7 @@ from JMTucker.Tools.MetaSubmitter import *
 
 # FIXME add bjet trigger cuts to the code
 dataset = 'k0ntupleulv1bmv2_summer20ul_miniaodv2'
-samples = pick_samples(dataset, both_years=True, qcd=True, ttbar=True, BTagCSV_data=True, all_signal=False)
+samples = pick_samples(dataset, both_years=True, qcd=True, ttbar=True, BTagCSV_data=True, all_signal=False, JetHT_data=True)
 NtupleReader_submit('hists_'+dataset, dataset, samples)
 
 #dataset = 'nr_k0ntuplev25mv1'
