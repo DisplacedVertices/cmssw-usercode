@@ -384,6 +384,16 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
   }
 
   //////////////////////////////////////////////////////////////////////
+  
+  //// Keep HLT track candidates
+  //for (const TLorentzVector& htk : triggerfloats->hlttracks) {
+  //    mevent->hlt_tk_pt.push_back(htk.Pt());
+  //    mevent->hlt_tk_eta.push_back(htk.Eta());
+  //    mevent->hlt_tk_phi.push_back(htk.Phi());
+  //    mevent->hlt_tk_energy.push_back(htk.E());
+  //}
+
+  //////////////////////////////////////////////////////////////////////
 
   edm::Handle<pat::JetCollection> jets;
   event.getByToken(jets_token, jets);
@@ -450,6 +460,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
         mevent->jet_track_eta.push_back(tk->eta());
         mevent->jet_track_phi.push_back(tk->phi());
         mevent->jet_track_dxy.push_back(tk->dxy(beamspot->position()));
+        mevent->jet_track_dxypv.push_back(tk->dxy(primary_vertex->position()));
         mevent->jet_track_dz.push_back(primary_vertex ? tk->dz(primary_vertex->position()) : 0);
         mevent->jet_track_pt_err.push_back(tk->ptError());
         mevent->jet_track_eta_err.push_back(tk->etaError());
@@ -685,6 +696,7 @@ void MFVEventProducer::produce(edm::Event& event, const edm::EventSetup& setup) 
     mevent->jet_track_eta.clear();
     mevent->jet_track_phi.clear();
     mevent->jet_track_dxy.clear();
+    mevent->jet_track_dxypv.clear();
     mevent->jet_track_dz.clear();
     mevent->jet_track_pt_err.clear();
     mevent->jet_track_eta_err.clear();

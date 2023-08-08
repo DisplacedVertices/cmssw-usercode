@@ -1,7 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
 mfvJetTksHistos = cms.EDAnalyzer('MFVJetTksHistos',
-                                gen_src     = cms.InputTag('prunedGenParticles'),
                                 vertex_src = cms.InputTag('mfvSelectedVerticesTight'),
                                 mevent_src  = cms.InputTag('mfvEvent'),
                                 weight_src  = cms.InputTag('mfvWeight'),
@@ -14,4 +13,8 @@ mfvJetTksHistos = cms.EDAnalyzer('MFVJetTksHistos',
                                 plot_hard_tks = cms.bool(False),
                                 trigger_bit = cms.int32(0),
                                 require_triggers = cms.bool(False),
+                                veto_bjet_events = cms.bool(False),
+                                require_tk_quality = cms.bool(True),
+                                require_gen_sumdbv = cms.bool(False),
+                                do_tk_filt_refactor = cms.bool(False),
                                 )

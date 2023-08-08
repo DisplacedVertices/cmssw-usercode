@@ -43,6 +43,7 @@ namespace mfv {
     float met_pt_nomu;
     float met_phi_nomu;
     bool pass_metfilters;
+    std::vector<TLorentzVector> hlttracks;
     std::vector<TLorentzVector> hltelectrons;
     std::vector<TLorentzVector> hltmuons;
     std::vector<int> L1decisions;

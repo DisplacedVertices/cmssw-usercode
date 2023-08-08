@@ -221,6 +221,11 @@ struct MFVEvent {
   float pv_z(size_t i) const { return i == 0 ? pvz : pvsz[i-1]; }
   float pv_score_(size_t i) const { return i == 0 ? pv_score : pvsscores[i-1]; } // JMTBAD oops, didn't bin in Producer
 
+  std::vector<float> hlt_tk_pt;
+  std::vector<float> hlt_tk_eta;
+  std::vector<float> hlt_tk_phi;
+  std::vector<float> hlt_tk_energy;
+
   std::vector<uchar> jet_id; // see encode_jet_id for definition
   std::vector<float> jet_bdisc_csv; // JMTBAD CSV for backward compatibility, to be removed
   std::vector<float> jet_bdisc_deepcsv; // JMTBAD CSV for backward compatibility, to be removed
@@ -497,6 +502,7 @@ struct MFVEvent {
   std::vector<float> jet_track_eta;
   std::vector<float> jet_track_phi;
   std::vector<float> jet_track_dxy;
+  std::vector<float> jet_track_dxypv;
   std::vector<float> jet_track_dz;
   std::vector<float> jet_track_pt_err;
   std::vector<float> jet_track_eta_err;
