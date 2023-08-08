@@ -9,11 +9,11 @@ os.system('mkdir %s' % batch)
 out_fn = os.path.join(batch, in_bn)
 sample = in_bn.replace('.root', '')
 
-ps = plot_saver(plot_dir('v0bkgsub_%s/%s' % (batch, sample)), size=(600,600))
+ps = plot_saver(plot_dir('k0bkgsub_%s/%s' % (batch, sample)), size=(600,600))
 
 # fit for s and b using sidebands
 
-in_f = ROOT.TFile(in_fn)
+in_f = ROOT.TFile.Open(in_fn)
 in_f.Get('massall/h_nvtx').Draw()
 ps.save('nvtx')
 in_f.Get('massall/h_premass').Draw()
@@ -164,6 +164,7 @@ scans = False
 variables = [
     ('h_chi2dof', 1, 1, None, -1),
     ('h_rho', 1, 1, None, 1),
+    ('h_dbv', 1, 1, None, 1),
     ('h_ct', 1, 1, None, 1),
     ('h_ctau', 1, 1, None, 1),
     ('h_p', 1, 1, None, -1),

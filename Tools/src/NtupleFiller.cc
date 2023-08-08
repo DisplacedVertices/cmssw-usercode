@@ -137,8 +137,8 @@ namespace jmt {
   }
 
   void PFSubNtupleFiller::operator()(const edm::Event& event) {
-    event.getByToken(token_, mets_);
-    nt_.set(mets_->at(0).px(), mets_->at(0).py());
+    //event.getByToken(token_, mets_);
+    //nt_.set(mets_->at(0).px(), mets_->at(0).py());
   }
 
   void NtupleAdd(TracksSubNtuple& nt, const reco::Track& tk, int which_jet, int which_pv, int which_sv, unsigned misc) {

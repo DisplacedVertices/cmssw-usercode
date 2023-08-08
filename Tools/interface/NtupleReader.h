@@ -205,7 +205,8 @@ namespace jmt {
       entries_run_ = entry_end_ - entry_start_;
       const double chunk_factor = double(entries_run_) / nentries_;
       const bool chunking_mc = is_mc() && num_chunks_ > 1;
-      assert(entry_start_ < entry_end_);
+      if(nentries_ != 0)
+        assert(entry_start_ < entry_end_);
 
       nt_->read_from_tree(t_);
 
