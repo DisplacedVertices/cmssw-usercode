@@ -1,0 +1,116 @@
+#!/usr/bin/env python
+
+import os, sys, argparse
+from fnmatch import fnmatch
+from pprint import pprint
+from itertools import chain, product, starmap
+from JMTucker.Tools.general import coderep_compactify_list, popen
+from JMTucker.Tools import colors
+
+def fn_ok(fn):
+    return fn.endswith('.root')
+
+def coderep_special(files):
+    bn = os.path.basename(files[0]).split('_')[0]
+    bases = set(fn.rsplit('/', 1)[0] for fn in files)
+    codes = []
+    check = []
+    if len(bases) == 1:
+        nums = [int(fn.rsplit('_',1)[1].split('.root')[0]) for fn in files]
+        cnums = coderep_compactify_list(nums)
+        if 'chain' not in cnums and cnums.count('xrange') == 1:
+            assert cnums.startswith('xrange(')
+            base = bases.pop()
+            from1 = cnums.startswith('xrange(1,')
+            s = '_fromnum%i("%s", %i)' % (1 if from1 else 0, base, len(files))
+            if bn != 'ntuple':
+                s = s.replace(')', ', fnbase="%s", numbereddirs=False)' % bn)
+            return s
+    for base in bases:
+        nums = [int(fn.rsplit('_',1)[1].split('.root')[0]) for fn in files if fn.startswith(base)]
+        if len(nums) == 1:
+            code = "['%s/%s_%i.root']" % (base, bn, nums[0])
+        else:
+            cnums = coderep_compactify_list(nums)
+            mn,mx = min(nums), max(nums)
+            code = "[%r + '/%s_%%i.root' %% (i) for i in %s]" % (base, bn, cnums)
+        codes.append(code)
+        check += eval(code)
+    #pprint(codes)
+    check.sort()
+    if sorted(set(check)) != check:
+        raise ValueError('I made the same file twice somehow')
+    if set(check) != set(files):
+        x = set(l); y = set(files); print 'x-y'; pprint(x-y); print 'y-x'; pprint(y-x)
+        raise ValueError('I am dumb')
+    code = ' + '.join(codes)
+    return code
+
+publish = {}
+samples = []
+toppath = sys.argv[1]
+
+# silly, but force a trailing slash
+toppath = toppath.rstrip('/') + '/'
+
+for dirname in popen('eos root://cmseos.fnal.gov ls /eos/uscms%s' % toppath).split() :
+    d = os.path.join(toppath + dirname + '/')
+
+    if not ("2016" in dirname or "2017" in dirname or "2018" in dirname) :
+        print "dirname (%s) does not have a year in it! let's skip for now" % dirname
+        continue
+
+    if 'HeavyHiggsToLLPTo' in dirname :
+        sample_chunks = dirname.split('_')
+        sample_chunks[0] = sample_chunks[0].replace('HeavyHiggsToLLPTo','mfv_HtoLLPto')
+        sample = sample_chunks[0] + "_tau" + sample_chunks[6] + "mm_M" + sample_chunks[2] + "_" + sample_chunks[4] + "_" + sample_chunks[7]
+        print sample
+    elif 'zPrime' in dirname :
+        sample_chunks = dirname.split('_')
+        sample_chunks[0] = sample_chunks[0].replace('zPrime','mfv_ZprimetoLLPto')
+        sample = sample_chunks[0] + sample_chunks[7] + "_tau" + sample_chunks[6] + "mm_M" + sample_chunks[2] + "_" + sample_chunks[4] + "_" + sample_chunks[8]
+        print sample
+    else :
+        print "only set up for subdirectories with sample names starting with 'HeavyHiggsToLLPTo' or 'zPrime'! this subdirectory is: %s" % dirname
+        continue
+
+    samples.append(sample)
+
+    files = []
+    files += [d + x.strip() for x in popen('eos root://cmseos.fnal.gov ls /eos/uscms%s%s' % (toppath, dirname)).split() if x.strip() and fn_ok(x.strip())]
+    #print files
+
+    code = coderep_special(files)
+    publish[sample] = (len(files), code if code is not None else files)
+
+# FIXME not yet using
+samples.sort()
+
+print
+print colors.bold('new entries for SampleFiles.py:')
+print '_add_ds("%s", {' % "miniaod"
+
+for k in sorted(publish.keys()) :
+    n,c = publish[k]
+    if type(c) == unicode:
+        c = str(c)
+    if type(c) == str:
+        if '_fromnum' in c:
+            if int(c.replace(')', '').split(',')[1]) != n:
+                print 'OOPS', n
+            print '%r: %s,' % (k, c)
+        else:
+            print '%r: (%i, %s),' % (k, n, c)
+    else:
+        print "'%s': (%i, %r)," % (k, n, c)
+print '})'
+print
+print
+
+print
+print colors.bold('new entries for Samples.py, to be added to appropriate lists:')
+for k in sorted(publish.keys()) :
+    n,c = publish[k]
+
+    nevents = n*500 # FIXME as of now, 500 events per MiniAOD is hardcoded
+    print "MCSample('%s', '/%s/None/USER', %s)," % (k, k, nevents)
