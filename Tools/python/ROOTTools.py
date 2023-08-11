@@ -1582,10 +1582,22 @@ def plot_dir(x='', make=False, temp=False):
 	d = '/publicweb/s/shogan/images'
     elif 'fnal.gov' in hostname and username == 'joeyr':
         d = '/publicweb/j/joeyr/plots'
+    elif 'fnal.gov' in hostname and username == 'ali':
+        d = '/publicweb/a/ali/'
+    elif 'fnal.gov' in hostname :
+        d = os.environ['HOME']+'/nobackup/DVplots/'
     if d:
         x = os.path.join(d,x)
     else:
-        raise NotImplementedError("can't handle host %s and user %s" % (hostname, username))
+        print "can't handle host %s and user %s, instead putting plots in $HOME/DVplots" % (hostname, username)
+        d = os.environ['HOME']+'/DVplots'
+        x = os.path.join(d,x)
+        try:
+            os.makedirs(x)
+        except OSError:
+            pass
+
+        #raise NotImplementedError("can't handle host %s and user %s" % (hostname, username))
     if make:
         try:
             os.makedirs(x)
