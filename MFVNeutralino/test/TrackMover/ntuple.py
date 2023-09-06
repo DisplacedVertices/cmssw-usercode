@@ -9,7 +9,7 @@ settings.is_miniaod = True
 #settings.event_filter = 'electrons only novtx'
 settings.event_filter = 'muons only novtx'
 
-version = settings.version + 'v6'
+version = settings.version + 'v9'
 
 # for stat extension
 #version = settings.version + 'ext1'
@@ -38,6 +38,7 @@ process = ntuple_process(settings)
 tfileservice(process, 'movedtree.root')
 #max_events(process, 100)
 dataset = 'miniaod' if settings.is_miniaod else 'main'
+#input_files(process, '/store/mc/RunIISummer20UL17MiniAOD/QCD_Pt-120To170_MuEnrichedPt5_TuneCP5_13TeV-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v2/100000/001DADAA-E598-A74D-8259-61340CA8E007.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAOD/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v2/280000/BB6E40E3-1F43-6C41-AEF8-5A7B96D0C5E5.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAOD/QCD_Pt-20_MuEnrichedPt15_TuneCP5_13TeV-pythia8/MINIAODSIM/106X_mc2017_realistic_v6-v1/100000/034AE4F2-7180-7F40-81D6-740D15738CBA.root')
 #input_files(process, '/store/mc/RunIISummer20UL17MiniAODv2/TTJets_TuneCP5_13TeV-amcatnloFXFX-pythia8/MINIAODSIM/106X_mc2017_realistic_v9-v2/120001/4724838F-73AF-F040-9290-AC3B1CA485A7.root')
@@ -62,7 +63,7 @@ process.load('JMTucker.Tools.WeightProducer_cfi')
 process.load('JMTucker.MFVNeutralino.WeightProducer_cfi') # JMTBAD
 process.mfvWeight.throw_if_no_mcstat = False
 
-process.p = cms.Path(process.mfvEventFilterSequence * process.goodOfflinePrimaryVertices)
+process.p = cms.Path(process.mfvEventFilterSequence * process.goodOfflinePrimaryVertices* process.BadPFMuonFilterUpdateDz * process.fullPatMetSequence * process.mfvTriggerFloats)
 random_dict = {'jmtRescaledTracks': 1031}
 
 if version.endswith('ext1') :
@@ -109,7 +110,7 @@ for icfg, cfg in enumerate(cfgs):
                             packed_candidates_src = cms.InputTag('packedPFCandidates'),
                             jets_src = cms.InputTag('selectedPatJets'),
                             track_ref_getter = jmtTrackRefGetter,
-                            min_jet_pt = cms.double(0.0), #FIXMEi : 50GeV
+                            min_jet_pt = cms.double(0), #FIXMEi : 50GeV
                             min_jet_ntracks = cms.uint32(2), #FIXME : 4 tracks
                             njets = cms.uint32(cfg.njets),
                             nbjets = cms.uint32(cfg.nbjets),
@@ -148,9 +149,10 @@ random_service(process, random_dict)
 
 if __name__ == '__main__' and hasattr(sys, 'argv') and 'submit' in sys.argv:
     from JMTucker.Tools.MetaSubmitter import *
-    samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=True, leptonic=True, met=True, diboson=True, Lepton_data=False)
-    #samples = [getattr(Samples, 'dyjetstollM50_2017')]
-    #samples = [getattr(Samples, 'qcdbctoept250_2017')]
+    #samples = pick_samples(dataset, qcd=False, data = False, all_signal = False, qcd_lep=True, leptonic=True, met=True, diboson=True, Lepton_data=True)
+    samples = [getattr(Samples, 'qcdpt120mupt5_2017')]
+    #samples = [getattr(Samples, 'wjetstolnu_amcatnlo_2017')]
+    #samples = [getattr(Samples, 'qcdmupt15_2017')]
     set_splitting(samples, dataset, 'trackmover', data_json=json_path('ana_SingleLept_2017_10pc.json'), limit_ttbar=True)
 
     ms = MetaSubmitter('TrackMover' + version, dataset=dataset)

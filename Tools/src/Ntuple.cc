@@ -430,17 +430,31 @@ namespace jmt {
   void PFSubNtuple::clear() {
     met_x_ = 0;
     met_y_ = 0;
+    metnomu_x_ = 0;
+    metnomu_y_ = 0;
+    passmetfilters_ = false;
+    passfakemetveto_ = false;
   }
-
+ 
   void PFSubNtuple::write_to_tree(TTree* t) {
     t->Branch(TString::Format("%s_met_x", pfx()), &met_x_);
     t->Branch(TString::Format("%s_met_y", pfx()), &met_y_);
+    t->Branch(TString::Format("%s_metnomu_x", pfx()), &metnomu_x_);
+    t->Branch(TString::Format("%s_metnomu_y", pfx()), &metnomu_y_);
+    t->Branch(TString::Format("%s_passmetfilters", pfx()), &passmetfilters_);
+    t->Branch(TString::Format("%s_passfakemetveto", pfx()), &passfakemetveto_);
+
   }
 
   void PFSubNtuple::read_from_tree(TTree* t) {
     t->SetBranchAddress(TString::Format("%s_met_x", pfx()), &met_x_);
     t->SetBranchAddress(TString::Format("%s_met_y", pfx()), &met_y_);
+    t->SetBranchAddress(TString::Format("%s_metnomu_x", pfx()), &metnomu_x_);
+    t->SetBranchAddress(TString::Format("%s_metnomu_y", pfx()), &metnomu_y_);
+    t->SetBranchAddress(TString::Format("%s_passmetfilters", pfx()), &passmetfilters_);
+    t->SetBranchAddress(TString::Format("%s_passfakemetveto", pfx()), &passfakemetveto_);
   }
+
 
   //////
   MuonsSubNtuple::MuonsSubNtuple() {

@@ -7,7 +7,8 @@ from JMTucker.Tools.ROOTTools import *
 set_style()
 ROOT.TH1.AddDirectory(0)
 
-variables = ['_movedist2_','_ht_','_njets_', '_nmuons_', '_muon_pT_', '_muon_abseta_', '_muon_iso_', '_muon_zoom_iso_', '_muon_absdxybs_', '_muon_nsigmadxybs_', '_neles_', '_ele_pT', '_ele_abseta_', '_ele_iso_', '_ele_zoom_iso_', '_ele_absdxybs_', '_ele_nsigmadxybs', '_met_pT_', '_w_pT_', '_w_mT_', '_z_pT_', '_z_m_', 'lnu_absphi', '_wjet_dphi_', '_zjet_dphi_', '_jet_asymm_','_vtx_unc_','_jet_dr_','_jet_deta_','_jet_dphi_','_jet_dind_','_pt0_','_pt1_','_ntks_j0_','_ntks_j1_','_nmovedtracks_','_dphi_sum_j_mv_'] 
+variables = ['_movedist2_','_ht_','_njets_', 'good', '_nmuons_', '_muon_pT_', '_muon_abseta_', '_muon_iso_', '_muon_absdxybs_', '_muon_absdz_', '_muon_nsigmadxybs_', '_met_pT_', '_w_mT_', '_w_pT_', 'lnu_absphi', 'ljet_absphi', 'wjet_dphi', 'nujet_absphi', '_jet_asymm_','_vtx_unc_','_jet_dr_','_jet_deta_','_jet_dphi_','_jet_dind_','_pt0_','_pt1_','_ntks_j0_','_ntks_j1_','_nmovedtracks_','_dphi_sum_j_mv_'] 
+
 
 def get_em(fn, scale=1., alpha=1-0.6827):
     f = ROOT.TFile.Open(fn)
@@ -117,7 +118,7 @@ def get_em(fn, scale=1., alpha=1-0.6827):
 
     return f, l, d, c, integ
 
-def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='dyjets.root', fn5 = 'wjets_amcatnlo.root', Isshort='dummy', whichlep='Muon'):
+def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='dyjets.root', fn5 = 'wjets_amcatnlo.root', fn6 = 'qcdmu15.root', fn7 = 'signal.root', fn8 = 'signal2.root', Isshort='dummy', whichlep='Muon'):
     assert ex
     ps = plot_saver(plot_dir('TrackMover_' + ex), size=(600,600), log=True)
 
@@ -132,7 +133,9 @@ def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='dyjet
     f_3, l_3, d_3, c_3, integ_3 = get_em(fn3)
     f_4, l_4, d_4, c_4, integ_4 = get_em(fn4)
     f_5, l_5, d_5, c_5, integ_5 = get_em(fn5)
-    #f_6, l_6, d_6, c_6, integ_6 = get_em(fn6)
+    f_6, l_6, d_6, c_6, integ_6 = get_em(fn6)
+    f_7, l_7, d_7, c_7, integ_7 = get_em(fn7)
+    f_8, l_8, d_8, c_8, integ_8 = get_em(fn8)
     l = l_1
 
     scale = integ_1 / integ_2
@@ -148,26 +151,28 @@ def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='dyjet
         mc2  = d_3[name]
         mc3  = d_4[name]
         mc4 = d_5[name]
-        #signal = d_6[name]
-        tot = (data, mc, mc2, mc3, mc4)
-        if not name.startswith('nocuts_') or "ele" in name:
+        mc5 = d_6[name]
+        signal = d_7[name]
+        signal2 = d_8[name]
+        tot = (data, mc, mc2, mc3, mc4, signal)
+        if not name.startswith('nocuts_') or "nm" in name:
             continue
         if name.endswith('_den'): #or (not name.endswith('_num') and not name.endswith('_den')):
-            
-            ROOT.gStyle.SetOptStat(2211) #FIXME
+            print(name) 
+            ROOT.gStyle.SetOptStat("iouRMen") #FIXME
           
             if (whichlep == "Muon"):
               data.SetName("SingleMuon 2017")
             else:
               data.SetName("SingleElectron 2017")
-            data.ClearUnderflowAndOverflow()
+            #data.ClearUnderflowAndOverflow()
             data.SetLineWidth(2)
             data.SetMarkerStyle(20)
             data.SetMarkerSize(0.8)
             data.SetLineColor(ROOT.kBlack)
            
             mc.SetName("MC other bkg. 2017")
-            mc.ClearUnderflowAndOverflow()
+            #mc.ClearUnderflowAndOverflow()
             mc.SetFillStyle(3001)
             mc.SetMarkerStyle(24)
             mc.SetMarkerSize(0.8)
@@ -175,8 +180,8 @@ def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='dyjet
             mc.SetLineColor(8)
             mc.SetFillColor(8)
 
-            mc2.SetName("MC combined QCD 2017")
-            mc2.ClearUnderflowAndOverflow()
+            mc2.SetName("MC combined QCD-EMEnrich 2017")
+            #mc2.ClearUnderflowAndOverflow()
             mc2.SetFillStyle(3001)
             mc2.SetMarkerStyle(24)
             mc2.SetMarkerSize(0.8)
@@ -185,7 +190,7 @@ def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='dyjet
             mc2.SetFillColor(6)
             
             mc3.SetName("MC Drell-Yan 2017")
-            mc3.ClearUnderflowAndOverflow()
+            #mc3.ClearUnderflowAndOverflow()
             mc3.SetFillStyle(3001)
             mc3.SetMarkerStyle(24)
             mc3.SetMarkerSize(0.8)
@@ -194,34 +199,48 @@ def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='dyjet
             mc3.SetFillColor(46)
 
             mc4.SetName("MC NLO (W+->lnu)+jets 2017")
-            mc4.ClearUnderflowAndOverflow()
+            #mc4.ClearUnderflowAndOverflow()
             mc4.SetFillStyle(3001)
             mc4.SetMarkerStyle(24)
             mc4.SetMarkerSize(0.8)
             mc4.SetMarkerColor(2)
             mc4.SetLineColor(2)
             mc4.SetFillColor(2)
+
+
+            mc5.SetName("MC combined QCD-MuEnrich Pt>5GeV 2017")
+            mc5.SetFillStyle(3001)
+            mc5.SetMarkerStyle(24)
+            mc5.SetMarkerSize(0.8)
+            mc5.SetMarkerColor(2)
+            mc5.SetLineColor(65)
+            mc5.SetFillColor(65)
             
-            """
-            signal.SetName("MC (W+->lnu)H->4d 2017")
-            signal.ClearUnderflowAndOverflow()
+
+            signal.SetName("MC (W->lnu)H->4d 1mm 55GeV 2017")
             signal.SetLineWidth(2)
             signal.SetMarkerStyle(24)
             signal.SetMarkerSize(0.8)
             signal.SetMarkerColor(4)
             signal.SetLineColor(4)
-            """
+            
+            signal2.SetName("MC (W->lnu)H->4d 1mm 15GeV 2017")
+            signal2.SetLineWidth(2)
+            signal2.SetMarkerStyle(24)
+            signal2.SetMarkerSize(0.8)
+            signal2.SetMarkerColor(51)
+            signal2.SetLineColor(51)
 
             x_range = None
             y_range = None
-            hist_objs = [data, mc4, mc3, mc2, mc]
+            hist_objs = [data, mc4, mc3, mc2, mc, mc5, signal]
             statbox_size = (0.2,0.2)
             if name.endswith('_den'):
                 for g in tot:
                     g.GetYaxis().SetTitle('# of entries')
                 #objs = [(mc3, 'PE2'), (data, 'P'), (mc2, 'P'), (mc, 'P'),(signal, 'P')]
                 #objs = [(mc3, 'PE2'), (mc2, 'P'), (mc, 'P')]
-                objs = [mc4, mc3, mc2, mc]
+                objs = [mc4, mc3, mc2, mc, mc5]
                 #y_range = (0, 1.05)
                 statbox_size = (0.2,0.1)
             if "bs2derr" in name:
@@ -256,10 +275,10 @@ def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='dyjet
             data_mc_comparison(name,
                         hist_objs,
                         background_samples = objs,
-                        #signal_samples = [signal],
+                        signal_samples = [signal,],
                         data_samples = [data],
                 
-                        bkg_partial_weights = [0.00250943282198, 1.0/(40163.29), 1.0/(40163.29), 1.0/(40163.29)],
+                        bkg_partial_weights = [0.00250943282198, 1.0/(40163.29), 1.0/(40163.29), 1.0/(40163.29), 1.0/(40163.29)], #7.97650435537],
                         #wjetstolnu_amcatnlo_2017, dyjetstollM10+50_2017, combined qcd, other bkg.
                         #sig_partial_weights = [5.65661819127e-08],
                         plot_saver=ps,
@@ -275,7 +294,7 @@ def comp(ex, fn1='data.root', fn2='ttbar.root', fn3='mergedqcd.root', fn4='dyjet
              
 if __name__ == '__main__':
     import sys
-    if len(sys.argv) < 9:
+    if len(sys.argv) < 12:
         sys.exit('usage: python draw.py tag_for_plots fn1 fn2 f3 f4 f5 f6[fn2 scale factor] tag_for_300um tag_which_lep')
 
     ex = sys.argv[1]
@@ -284,9 +303,11 @@ if __name__ == '__main__':
     fn3 = sys.argv[4]
     fn4 = sys.argv[5]
     fn5 = sys.argv[6]
-    #fn6 = sys.argv[7]
-    Isshort = sys.argv[7]
-    whichlep = sys.argv[8]
-    if len(sys.argv) > 9:
-        mc_scale_factor = float(sys.argv[9])
-    comp(ex, fn1, fn2, fn3, fn4, fn5, Isshort, whichlep)
+    fn6 = sys.argv[7]
+    fn7 = sys.argv[8]
+    fn8 = sys.argv[9]
+    Isshort = sys.argv[10]
+    whichlep = sys.argv[11]
+    if len(sys.argv) > 12:
+        mc_scale_factor = float(sys.argv[12])
+    comp(ex, fn1, fn2, fn3, fn4, fn5, fn6, fn7, fn8, Isshort, whichlep)

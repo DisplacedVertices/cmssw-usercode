@@ -35,7 +35,7 @@ private:
   const edm::EDGetTokenT<edm::TriggerResults> trigger_results_token;
   const edm::EDGetTokenT<pat::TriggerObjectStandAloneCollection> trigger_objects_token;
   const edm::EDGetTokenT<edm::TriggerResults> met_filters_token;
-  //const edm::EDGetTokenT<bool> badPFMuonFilterUpdateDz_token;
+  const edm::EDGetTokenT<bool> badPFMuonFilterUpdateDz_token;
 
   const edm::EDGetTokenT<pat::JetCollection> jets_token;
   const StringCutObjectSelector<pat::Jet> jet_selector;
@@ -57,7 +57,7 @@ MFVTriggerFloats::MFVTriggerFloats(const edm::ParameterSet& cfg)
     trigger_results_token(consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("trigger_results_src"))),
     trigger_objects_token(consumes<pat::TriggerObjectStandAloneCollection>(cfg.getParameter<edm::InputTag>("trigger_objects_src"))),
     met_filters_token(consumes<edm::TriggerResults>(cfg.getParameter<edm::InputTag>("met_filters_src"))),
-    //badPFMuonFilterUpdateDz_token(consumes<bool>(edm::InputTag("BadPFMuonFilterUpdateDz"))),
+    badPFMuonFilterUpdateDz_token(consumes<bool>(edm::InputTag("BadPFMuonFilterUpdateDz"))),
     jets_token(consumes<pat::JetCollection>(cfg.getParameter<edm::InputTag>("jets_src"))),
     jet_selector(cfg.getParameter<std::string>("jet_cut")),
     met_token(consumes<pat::METCollection>(cfg.getParameter<edm::InputTag>("met_src"))),
@@ -83,6 +83,9 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   if (prints) std::cout << "TriggerFloats run " << event.id().run() << " lumi " << event.luminosityBlock() << " event " << event.id().event() << "\n";
 
   std::vector<std::string> metfilternames = {"Flag_goodVertices", "Flag_globalSuperTightHalo2016Filter", "Flag_HBHENoiseFilter", "Flag_HBHENoiseIsoFilter", "Flag_EcalDeadCellTriggerPrimitiveFilter", "Flag_BadPFMuonFilter", "Flag_eeBadScFilter", "Flag_ecalBadCalibFilter"};
+  if ((year==20161) || (year==20162) ){
+     metfilternames = {"Flag_goodVertices", "Flag_globalSuperTightHalo2016Filter", "Flag_HBHENoiseFilter", "Flag_HBHENoiseIsoFilter", "Flag_EcalDeadCellTriggerPrimitiveFilter", "Flag_BadPFMuonFilter", "Flag_eeBadScFilter"};
+  }
   edm::Handle<edm::TriggerResults> metFilters;
   event.getByToken(met_filters_token, metFilters);
   const edm::TriggerNames &names = event.triggerNames(*metFilters);
@@ -138,21 +141,21 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
       }
     }
   }
-  // edm::Handle<bool> passBadPFMuonFilterUpdateDz;
-  // event.getByToken(badPFMuonFilterUpdateDz_token,passBadPFMuonFilterUpdateDz);
-  // bool _passBadPFMuonFilterUpdateDz = (*passBadPFMuonFilterUpdateDz );
-  // bool pass_all_metfilters = _passBadPFMuonFilterUpdateDz;
-  // for (const auto& pf:pass_met_filters){
-  //   pass_all_metfilters = pass_all_metfilters && pf;
-  // }
-  // if (prints){
-  //   std::cout << "Total results: ";
-  //   for (const auto& fr:pass_met_filters){
-  //     std::cout << fr << " ";
-  //   }
-  //   std::cout << _passBadPFMuonFilterUpdateDz << std::endl;
-  //   std::cout << std::endl;
-  // }
+  edm::Handle<bool> passBadPFMuonFilterUpdateDz;
+  event.getByToken(badPFMuonFilterUpdateDz_token,passBadPFMuonFilterUpdateDz);
+  bool _passBadPFMuonFilterUpdateDz = (*passBadPFMuonFilterUpdateDz );
+  bool pass_all_metfilters = _passBadPFMuonFilterUpdateDz;
+  for (const auto& pf:pass_met_filters){
+     pass_all_metfilters = pass_all_metfilters && pf;
+  }
+  if (prints){
+    std::cout << "Total results: ";
+    for (const auto& fr:pass_met_filters){
+       std::cout << fr << " ";
+    }
+    std::cout << _passBadPFMuonFilterUpdateDz << std::endl;
+    std::cout << std::endl;
+  }
 
   int i2pt_first[2] = {0};
   int i2htt[2] = {0};
@@ -488,7 +491,7 @@ void MFVTriggerFloats::produce(edm::Event& event, const edm::EventSetup& setup) 
   floats->met_pt_calo = met.caloMETPt();
   floats->met_pt_nomu = met_nomu_pt;
   floats->met_phi_nomu = met_nomu_phi;
-  //floats->pass_metfilters = pass_all_metfilters;
+  floats->pass_metfilters = pass_all_metfilters;
 
   if (prints)
     printf("TriggerFloats: hltht = %f\n", floats->hltht);

@@ -61,7 +61,6 @@ namespace {
 void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup&) {
   nt_filler.fill(event);
   gentruth_filler(event);
-
   auto tks_push_back = [&](const reco::Track& tk) { NtupleAdd(nt.tracks(), tk); };
 
   if (for_mctruth) {
@@ -289,7 +288,6 @@ void MFVMovedTracksTreer::analyze(const edm::Event& event, const edm::EventSetup
     if ((!for_mctruth && (nt.tm().npreseljets() < njets_req || nt.tm().npreselbjets() < nbjets_req))) // || nt.jets().ht() < 1000)
       return;
   }
-
   nt_filler.finalize();
 }
 

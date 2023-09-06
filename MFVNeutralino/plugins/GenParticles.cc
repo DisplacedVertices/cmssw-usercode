@@ -845,7 +845,6 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
   std::unique_ptr<reco::GenParticleCollection> primaries  (new reco::GenParticleCollection);
   std::unique_ptr<reco::GenParticleCollection> secondaries(new reco::GenParticleCollection);
   std::unique_ptr<reco::GenParticleCollection> visible    (new reco::GenParticleCollection);
-
   if (!event.isRealData()) {
     edm::Handle<reco::GenParticleCollection> gen_particles;
     event.getByToken(gen_particles_token, gen_particles);
@@ -945,7 +944,6 @@ void MFVGenParticles::produce(edm::Event& event, const edm::EventSetup&) {
   }
 
   if (debug) {
-    std::cout << "MFVGenParticles " << *mc << "MFVGenParticles decay_vertices:";
     for (double d : *decay_vertices)
       printf(" %6.3f", d);
     printf("\n");

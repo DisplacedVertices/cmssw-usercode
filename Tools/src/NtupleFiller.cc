@@ -164,8 +164,8 @@ namespace jmt {
 
   void NtupleAdd(ElectronsSubNtuple& nt, const pat::Electron& el, double rho, float eA) {
     
-    reco::TrackRef etk = el.track();
-
+    reco::GsfTrackRef etk = el.gsfTrack();
+    
     const bool passveto = el.passConversionVeto();
     
     bool isVetoEl = el.electronID("cutBasedElectronID-Fall17-94X-V2-veto");
@@ -214,8 +214,24 @@ namespace jmt {
   }
 
   void PFSubNtupleFiller::operator()(const edm::Event& event) {
-    event.getByToken(token_, mets_);
-    nt_.set(mets_->at(0).px(), mets_->at(0).py());
+    if (triggerfloats_available_){
+      event.getByToken(triggerfloats_token_, triggerfloats_);
+      double met_pt = triggerfloats_->met_pt;
+      double met_phi = triggerfloats_->met_phi;
+      double metx = met_pt*std::cos(met_phi);
+      double mety = met_pt*std::sin(met_phi);
+      double metnomu_pt = triggerfloats_->met_pt_nomu;
+      double metnomu_phi = triggerfloats_->met_phi_nomu;
+      double metnomux = metnomu_pt*std::cos(metnomu_phi);
+      double metnomuy = metnomu_pt*std::sin(metnomu_phi);
+      bool fakeMETveto = abs(triggerfloats_->met_pt-triggerfloats_->met_pt_calo)/triggerfloats_->met_pt_calo<0.5 ;
+      bool METfilters = triggerfloats_->pass_metfilters;
+      nt_.set(metx, mety, metnomux, metnomuy, METfilters, fakeMETveto);
+    }
+    else{
+      event.getByToken(token_, mets_);
+      nt_.set(mets_->at(0).px(), mets_->at(0).py());
+    }
   }
 
   void MuonsSubNtupleFiller::operator()(const edm::Event& e) {
@@ -336,12 +352,12 @@ namespace jmt {
 
     auto es = ef->electrons(e);
    
-    std::vector<reco::TrackRef> r;
+    std::vector<reco::GsfTrackRef> r;
     for (size_t e = 0, ee = es.size(); e < ee; ++e) {
       
-      reco::TrackRef etk = es[e].track();
+      reco::GsfTrackRef etk = es[e].gsfTrack(); 
       
-      if (!es[e].track().isNull()) {
+      if (!es[e].gsfTrack().isNull()) {
 	if (etk->pt() > 1) {
 	  r.push_back(etk);
 	}
@@ -399,13 +415,13 @@ namespace jmt {
     auto es = ef->electrons(e);
     auto rh = *rho(e);
 
-    std::vector<reco::TrackRef> r;
+    std::vector<reco::GsfTrackRef> r;
     
     for (size_t e = 0, ee = es.size(); e < ee; ++e) {
       
-      reco::TrackRef etk = es[e].track();
+      reco::GsfTrackRef etk = es[e].gsfTrack();
 
-      if (!es[e].track().isNull()) {
+      if (!es[e].gsfTrack().isNull()) {
 	
 	if (etk->pt() > 1) {
 	  if (etk->eta() < 2.4) {

@@ -153,7 +153,8 @@ bool MFVEventFilter::filter(edm::Event& event, const edm::EventSetup&) {
       for (const pat::Electron& electron : *electrons) {
         // if (electron_selector(electron) && electron.pt() > min_electron_pt)
         //new electron selector : is cut based tight & iso < 0.10
-        reco::TrackRef etk = electron.track();
+        reco::GsfTrackRef etk = electron.gsfTrack();
+        
         if (etk.isNull()){
           continue;
         }

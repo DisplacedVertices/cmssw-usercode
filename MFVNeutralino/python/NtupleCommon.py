@@ -77,7 +77,7 @@ def minitree_only(process, mode, settings, output_commands):
             process.load('JMTucker.MFVNeutralino.AnalysisCuts_cfi')
             from JMTucker.MFVNeutralino.Vertexer_cfi import kvr_params
             process.mfvMiniTree2 = cms.EDAnalyzer('MFVMiniTreer2',
-                                                  jmtNtupleFiller_pset(settings.is_miniaod, True),
+                                                  jmtNtupleFiller_pset(settings.is_miniaod, True, False), 
                                                   kvr_params = kvr_params,
                                                   vertices_src = cms.InputTag('mfvVertices'),
                                                   auxes_src = cms.InputTag('mfvVerticesAuxPresel'),
@@ -204,7 +204,7 @@ def aod_ntuple_process(settings):
     random_service(process, {'mfvVertexTracks': 1222})
     tfileservice(process, 'vertex_histos.root')
 
-    for x in process.patAlgosToolsTask, process.slimmingTask, process.packedPFCandidatesTask, process.patTask:#, process.pfNoPileUpJMETask:
+    for x in process.patAlgosToolsTask, process.slimmingTask, process.packedPFCandidatesTask, process.patTask, process.pfNoPileUpJMETask:
         x.remove(process.goodOfflinePrimaryVertices)
     process.load('JMTucker.Tools.AnalysisEras_cff')
     process.load('JMTucker.Tools.GoodPrimaryVertices_cfi')
@@ -266,7 +266,7 @@ def miniaod_ntuple_process(settings):
     process.load('JMTucker.Tools.PATTupleSelection_cfi')
     process.load('JMTucker.Tools.WeightProducer_cfi')
     process.load('JMTucker.Tools.UnpackedCandidateTracks_cfi')
-   # process.load('JMTucker.Tools.METBadPFMuonDzFilter_cfi')
+    process.load('JMTucker.Tools.METBadPFMuonDzFilter_cfi')
     process.load('JMTucker.MFVNeutralino.Vertexer_cff')
     process.load('JMTucker.MFVNeutralino.TriggerFilter_cfi')
     process.load('JMTucker.MFVNeutralino.TriggerFloats_cff')
@@ -282,7 +282,7 @@ def miniaod_ntuple_process(settings):
     #process.selectedPatElectrons.cut = '' # process.jtupleParams.electronCut
 
     # change made to use corrected MET
-    process.mfvTriggerFloats.met_src = cms.InputTag('slimmedMETs')#, '', 'Ntuple')
+    process.mfvTriggerFloats.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple') 
     if not settings.is_mc:
         process.mfvTriggerFloats.met_filters_src = cms.InputTag('TriggerResults', '', 'RECO')
     process.mfvTriggerFloats.isMC = settings.is_mc
@@ -306,21 +306,20 @@ def miniaod_ntuple_process(settings):
     process.mfvEvent.gen_particles_src = 'prunedGenParticles' # no idea if this lets gen_bquarks, gen_leptons work--may want the packed ones that have status 1 particles
     process.mfvEvent.gen_jets_src = 'slimmedGenJets'
     process.mfvEvent.pileup_info_src = 'slimmedAddPileupInfo'
-    #process.mfvEvent.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple')
-    process.mfvEvent.met_src = 'slimmedMETs'
+    process.mfvEvent.met_src = cms.InputTag('slimmedMETs', '', 'Ntuple') 
     
-    # MET correction and filters
+    # MET correction and filtersi 
     # https://twiki.cern.ch/twiki/bin/view/CMS/MissingETUncertaintyPrescription#PF_MET
-    #from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
-    #process.load("Configuration.StandardSequences.GeometryRecoDB_cff") 
-    #runMetCorAndUncFromMiniAOD(process,
-    #                           isData = not settings.is_mc,
-    #                           )
+    from PhysicsTools.PatUtils.tools.runMETCorrectionsAndUncertainties import runMetCorAndUncFromMiniAOD
+    process.load("Configuration.StandardSequences.GeometryRecoDB_cff") 
+    runMetCorAndUncFromMiniAOD(process,
+                               isData = not settings.is_mc,
+                               )
 
     process.p = cms.Path(process.goodOfflinePrimaryVertices *
                          process.updatedJetsSeqMiniAOD *
-                         #process.BadPFMuonFilterUpdateDz *
-                         #process.fullPatMetSequence *
+                         process.BadPFMuonFilterUpdateDz *
+                         process.fullPatMetSequence *
                          process.selectedPatJets *
                          process.selectedPatMuons *
                          process.selectedPatElectrons *

@@ -124,13 +124,23 @@ def cmd_rm_mc_parts():
                     print y
                     os.remove(y)
 
-def _background_samples(trigeff=False, year=2017):
-    if _leptonpresel or trigeff:
-        x = ['qcdmupt15'] #,'ttbar', 'wjetstolnu_amcatnlo', 'dyjetstollM10', 'dyjetstollM50', 'ww', 'wz', 'zz'] #FIXME 
-        #x = ['ttbar', 'ww', 'wz', 'zz'] #FIXME 
-        if not trigeff:
-            x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]] 
-            x += ['qcdbctoept%03i' % x for x in [20,30,80,170,250]]
+def _background_samples(trigeff=False, year=2017, bkg_tag='others'):
+    if _leptonpresel or trigeff: #FIXME
+        if (bkg_tag == 'dyjets'):
+            x = ['dyjetstollM10', 'dyjetstollM50'] 
+        elif bkg_tag == 'qcd':
+            x = []
+            if not trigeff:
+                x += ['qcdempt%03i' % x for x in [15,20,30,50,80,120,170,300]] 
+                x += ['qcdbctoept%03i' % x for x in [20,30,80,170,250]]
+        elif bkg_tag == 'qcdmupt5':
+            x = [] 
+            if not trigeff:
+                x += ['qcdpt%02imupt5' % x for x in [15,20,30,50,80]] 
+                x += ['qcdpt%03imupt5' % x for x in [120,170,300,470,600,800]] 
+                x += ['qcdpt1000mupt5']
+        else:
+            x = ['ttbar', 'ww', 'wz', 'zz'] 
     elif _btagpresel:
         x = ['qcdht%04i' % x for x in [300, 500, 700, 1000, 1500, 2000]]
         x += ['ttbar']
@@ -192,28 +202,29 @@ def cmd_merge_background(permissive=bool_from_argv('permissive'), year_to_use=20
   
         year = int(year_s[1:])
         print 'scaling to', year, scale
-  
-        files = _background_samples(year=year)
-        files = ['%s%s.root' % (x, year_s) for x in files]
-        files2 = []
-        for fn in files:
-            if not os.path.isfile(fn):
-                msg = '%s not found' % fn
-                if permissive:
-                    print msg
+        
+        for bkg_tag in ['others', 'qcd', 'qcdmupt5', 'dyjets'] : #FIXME
+            files = _background_samples(year=year, bkg_tag=bkg_tag)
+            files = ['%s%s.root' % (x, year_s) for x in files]
+            files2 = []
+            for fn in files:
+                if not os.path.isfile(fn):
+                    msg = '%s not found' % fn
+                    if permissive:
+                        print msg
+                    else:
+                        raise RuntimeError(msg)
                 else:
-                    raise RuntimeError(msg)
-            else:
-                files2.append(fn)
-        if files2:
-            cmd = 'samples merge %f qcd%s%s.root ' % (scale, _presel_s, year_s) #FIXME
-            cmd += ' '.join(files2)
-            print("scale is "+str(scale))
-            print cmd
-            if os.system(cmd) != 0:
-                ok = False
-        if ok:
-            print ("{0} qcd merged!".format(year)) #FIXME
+                    files2.append(fn)
+            if files2:
+                cmd = 'samples merge %f %s%s%s.root ' % (scale,bkg_tag,_presel_s, year_s) 
+                cmd += ' '.join(files2)
+                print("scale is "+str(scale))
+                print cmd
+                if os.system(cmd) != 0:
+                    ok = False
+            if ok:
+                print ("{0} {1} merged!".format(year, bkg_tag)) 
 
     #only work for 2017 data now
     #if ok:

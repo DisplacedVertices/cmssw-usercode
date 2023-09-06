@@ -544,6 +544,18 @@ namespace jmt {
     void set(float met_x, float met_y) {
       met_x_ = met_x;
       met_y_ = met_y;
+      metnomu_x_ = -1.0;
+      metnomu_y_ = -1.0;
+      passmetfilters_ = false;
+      passfakemetveto_ = false;
+    }
+    void set(float met_x, float met_y, float metnomu_x, float metnomu_y, bool passmetfilters, bool passfakemetveto) {
+      met_x_ = met_x;
+      met_y_ = met_y;
+      metnomu_x_ = metnomu_x;
+      metnomu_y_ = metnomu_y;
+      passmetfilters_ = passmetfilters;
+      passfakemetveto_ = passfakemetveto;
     }
 
     float met_x() const { return met_x_; }
@@ -552,10 +564,24 @@ namespace jmt {
     float met_phi() const { return std::atan2(met_y(), met_x()); }
     float met()     const { return std::hypot(met_y(), met_x()); }
 
+    float metnomu_x() const { return metnomu_x_; }
+    float metnomu_y() const { return metnomu_y_; }
+
+    float metnomu_phi() const { return std::atan2(metnomu_y(), metnomu_x()); }
+    float metnomu()     const { return std::hypot(metnomu_y(), metnomu_x()); }
+
+    bool passmetfilters() const { return passmetfilters_; }
+    bool passfakemetveto() const { return passfakemetveto_; }
+
   private:
     float met_x_;
     float met_y_;
+    float metnomu_x_;
+    float metnomu_y_;
+    bool passmetfilters_;
+    bool passfakemetveto_;
   };
+
 
   class MuonsSubNtuple : public INtuple {
   public:
@@ -645,6 +671,9 @@ namespace jmt {
     float dxy(int i, float x=0, float y=0) const { return ((vy(i) - y) * px(i) - (vx(i) - x) * py(i)) / pt(i); }
     template <typename BS> float dxybs(int i, const BS& bs) const { return dxy(i, bs.x(vz(i)), bs.y(vz(i))); }
     template <typename BS> float nsigmadxybs(int i, const BS& bs) const { return std::abs(dxybs(i, bs) / err_dxy(i)); }
+    float dz(int i, float x=0, float y=0, float z=0) const { return (vz(i) - z) - ((vx(i) - x) * px(i) + (vy(i) - y) * py(i)) / pt(i) * pz(i) / pt(i); }
+    template <typename PV> float dzpv(int i, const PV& pv, int j=0) const { return dz(i, pv.x(j), pv.y(j), pv.z(j)); }
+    float dsz(int i, float x=0, float y=0, float z=0) const { return (vz(i) - z) * pt(i) / p(i) - ((vx(i) - x) * px(i) + (vy(i) - y) * py(i)) / pt(i) * pz(i) / p(i); }
     float cov(int i, int j, int k) const {
       if (j > k) { j = j^k; k = j^k; j = j^k; }
       switch (j*10 + k) {
@@ -800,6 +829,9 @@ namespace jmt {
     float dxy(int i, float x=0, float y=0) const { return ((vy(i) - y) * px(i) - (vx(i) - x) * py(i)) / pt(i); }
     template <typename BS> float dxybs(int i, const BS& bs) const { return dxy(i, bs.x(vz(i)), bs.y(vz(i))); }
     template <typename BS> float nsigmadxybs(int i, const BS& bs) const { return std::abs(dxybs(i, bs) / err_dxy(i)); }
+    float dz(int i, float x=0, float y=0, float z=0) const { return (vz(i) - z) - ((vx(i) - x) * px(i) + (vy(i) - y) * py(i)) / pt(i) * pz(i) / pt(i); }
+    template <typename PV> float dzpv(int i, const PV& pv, int j=0) const { return dz(i, pv.x(j), pv.y(j), pv.z(j)); }
+    float dsz(int i, float x=0, float y=0, float z=0) const { return (vz(i) - z) * pt(i) / p(i) - ((vx(i) - x) * px(i) + (vy(i) - y) * py(i)) / pt(i) * pz(i) / p(i); }
     float cov(int i, int j, int k) const {
       if (j > k) { j = j^k; k = j^k; j = j^k; }
       switch (j*10 + k) {

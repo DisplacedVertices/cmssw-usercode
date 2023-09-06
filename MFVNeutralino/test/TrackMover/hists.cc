@@ -24,7 +24,6 @@ int main(int argc, char** argv) {
     ;
 
   if (!nr.parse_options(argc, argv)) return 1;
-  std::cout << " tau: " << itau << " btagsf: " << btagsf_weights << " ntks_weights: " << ntks_weights << "\n";
 
   if (!nr.init()) return 1;
   auto& nt = nr.nt();
@@ -74,7 +73,7 @@ int main(int argc, char** argv) {
     numdens("all")
   };
 
-  enum { k_movedist2, k_movedist3, k_movevectoreta, k_npv, k_pvx, k_pvy, k_pvz, k_pvrho, k_pvntracks, k_pvscore, k_ht, k_njets, k_nmuons, k_muon_pT, k_muon_abseta, k_muon_iso, k_muon_zoom_iso, k_muon_absdxybs, k_muon_nsigmadxybs, k_neles, k_ele_pT, k_ele_abseta, k_ele_iso, k_ele_zoom_iso, k_ele_absdxybs, k_ele_nsigmadxybs, k_met_pT, k_w_pT, k_w_mT, k_z_pT, k_z_m, k_lnu_absphi, k_wjet_dphi, k_zjet_dphi, k_jet_asymm, k_vtx_unc, k_jet_dr, k_jet_deta, k_jet_dphi, k_jet_dind, k_pt0, k_pt1, k_ntks_j0, k_ntks_j1, k_nmovedtracks, k_dphi_sum_j_mv, k_deta_sum_j_mv, k_jetpt0_asymm, k_jetpt1_asymm, k_jeteta0_asymm, k_jeteta1_asymm, k_jetdr_asymm, k_nalltracks, k_nseedtracks, k_npreseljets, k_npreselbjets, k_jeti01, k_jetp01, k_jetpt01, k_jeteta01, k_jetphi01, k_jetsume, k_jetdrmax, k_jetdravg, k_jetdetamax, k_jetdetaavg, k_jetdphimax, k_jetdphiavg, k_jet0_tkdrmax, k_jet1_tkdrmax, k_jet0_tkdravg, k_jet1_tkdravg, k_jet_dphi_deta_avg, k_jdphi_nmovedtks, k_jdeta_nmovedtks, k_jdr_nmovedtks, k_jtheta0_nmovedtks, k_jetmovea3d01, k_jetmovea3d_v_jetp, k_jetmovea3d0_v_movevectoreta, k_jetmovea3d1_v_movevectoreta, k_jeta3dmax, k_angle0, k_angle1, k_dphi_j0_mv, k_dphi_j1_mv, k_deta_j0_mv, k_deta_j1_mv, k_dphi_j0_mv_jdeta, k_jetsumntracks, k_jetntracks01, k_jetntracks_v_jetp, k_jetnseedtracks01, k_nvtx, k_vtxbs2derr, k_vtxbs2derr_avgtkdr, k_vtxbs2derr_jdeta, k_vtxbs2derr_dphi_j0_mv, k_vtxbs2derr_jdr, k_vtxeta, k_vtxz };
+  enum { k_movedist2, k_movedist3, k_movevectoreta, k_npv, k_pvx, k_pvy, k_pvz, k_pvrho, k_pvntracks, k_pvscore, k_ht, k_njets, k_nmuons, k_muon_pT, k_muon_abseta, k_muon_iso, k_muon_zoom_iso, k_muon_absdxybs, k_muon_absdz, k_muon_nsigmadxybs, k_neles, k_ele_pT, k_ele_abseta, k_ele_iso, k_ele_zoom_iso, k_ele_absdxybs, k_ele_absdz, k_ele_nsigmadxybs, k_met_pT, k_w_pT, k_w_mT, k_z_pT, k_z_m, k_lnu_absphi, k_ljet_absdr, k_nujet_absphi, k_wjet_dphi, k_zjet_dphi, k_jet_asymm, k_vtx_unc, k_jet_dr, k_jet_deta, k_jet_dphi, k_jet_dind, k_pt0, k_pt1, k_ntks_j0, k_ntks_j1, k_nmovedtracks, k_dphi_sum_j_mv, k_deta_sum_j_mv, k_jetpt0_asymm, k_jetpt1_asymm, k_jeteta0_asymm, k_jeteta1_asymm, k_jetdr_asymm, k_nalltracks, k_nseedtracks, k_npreseljets, k_npreselbjets, k_jeti01, k_jetp01, k_jetpt01, k_jeteta01, k_jetphi01, k_jetsume, k_jetdrmax, k_jetdravg, k_jetdetamax, k_jetdetaavg, k_jetdphimax, k_jetdphiavg, k_jet0_tkdrmax, k_jet1_tkdrmax, k_jet0_tkdravg, k_jet1_tkdravg, k_jet_dphi_deta_avg, k_jdphi_nmovedtks, k_jdeta_nmovedtks, k_jdr_nmovedtks, k_jtheta0_nmovedtks, k_jetmovea3d01, k_jetmovea3d_v_jetp, k_jetmovea3d0_v_movevectoreta, k_jetmovea3d1_v_movevectoreta, k_jeta3dmax, k_angle0, k_angle1, k_dphi_j0_mv, k_dphi_j1_mv, k_deta_j0_mv, k_deta_j1_mv, k_dphi_j0_mv_jdeta, k_jetsumntracks, k_jetntracks01, k_jetntracks_v_jetp, k_jetnseedtracks01, k_nvtx, k_vtxbs2derr, k_vtxbs2derr_avgtkdr, k_vtxbs2derr_jdeta, k_vtxbs2derr_dphi_j0_mv, k_vtxbs2derr_jdr, k_vtxeta, k_vtxz };
 
   for (numdens& nd : nds) {
     nd.book(k_movedist2, "movedist2", ";movement 2-dist;events/0.01 cm", 200, 0, 2);
@@ -95,6 +94,7 @@ int main(int argc, char** argv) {
 	nd.book(k_muon_iso, "muon_iso", ";muons iso;events/1", 200, 0, 0.15);
 	nd.book(k_muon_zoom_iso, "muon_zoom_iso", ";muons zoomed iso;events/1", 200, 0, 0.15);
 	nd.book(k_muon_absdxybs, "muon_absdxybs", ";muons |dxybs| cm; arb. units", 80, 0, 0.2);
+	nd.book(k_muon_absdz, "muon_absdz", ";muons |dz| cm; arb. units", 80, 0, 1.0);
 	nd.book(k_muon_nsigmadxybs, "muon_nsigmadxybs", ";muons n#sigma dxybs ; arb. units", 80, 0, 6.0);
 	nd.book(k_neles, "neles", ";# passed offline-sel electrons;events/1", 10, 0, 10);
 	nd.book(k_ele_pT, "ele_pT", ";electrons p_{T} (GeV);events/1", 50, 0, 200);
@@ -102,6 +102,7 @@ int main(int argc, char** argv) {
 	nd.book(k_ele_iso, "ele_iso", ";electrons iso;events/1", 200, 0, 0.15);
 	nd.book(k_ele_zoom_iso, "ele_zoom_iso", ";electrons zoomed iso;events/1", 200, 0, 0.15);
 	nd.book(k_ele_absdxybs, "ele_absdxybs", ";electrons |dxybs| cm; arb. units", 80, 0, 0.2);
+	nd.book(k_ele_absdz, "ele_absdz", ";electrons |dz| cm; arb. units", 80, 0, 1.0);
 	nd.book(k_ele_nsigmadxybs, "ele_nsigmadxybs", ";electrons n#sigma dxybs ; arb. units", 80, 0, 6.0);
 	nd.book(k_met_pT, "met_pT", ";missing p_{T} (GeV);events/1", 50, 0, 200);
 	nd.book(k_w_pT, "w_pT", ";RECO W boson's p_{T} (GeV);events/1", 50, 0, 200);
@@ -109,6 +110,8 @@ int main(int argc, char** argv) {
 	nd.book(k_z_pT, "z_pT", ";RECO Z boson's p_{T} (GeV);events/1", 50, 0, 200);
 	nd.book(k_z_m, "z_m", ";RECO Z boson's inv. mass (GeV);events/1", 50, 0, 150);
 	nd.book(k_lnu_absphi, "lnu_absphi", ";lepton-#nu |#DeltaPhi|; arb. units", 70, 0.0, 3.5);
+	nd.book(k_ljet_absdr, "ljet_absdr", ";lepton-closest-jet |#DeltaR|; arb. units", 70, 0.0, 3.5);
+	nd.book(k_nujet_absphi, "nujet_absphi", ";MET-closest-jet |#DeltaPhi|; arb. units", 70, 0.0, 3.5);
 	nd.book(k_wjet_dphi, "wjet_dphi", ";W-jet |#DeltaPhi|; arb. units", 70, 0.0, 3.5);
 	nd.book(k_zjet_dphi, "zjet_dphi", ";Z-jet |#DeltaPhi|; arb. units", 70, 0.0, 3.5);
 	nd.book(k_jet_asymm, "jet_asymm", ";Jet asymmetry A_{J}; arb. units", 25, 0, 1);
@@ -117,8 +120,8 @@ int main(int argc, char** argv) {
 	nd.book(k_jet_deta, "jet_deta", ";jets #DeltaEta; arb. units", 70, 0, 7);
 	nd.book(k_jet_dphi, "jet_dphi", ";jets #DeltaPhi; arb. units", 70, -3.5, 3.5);
 	nd.book(k_jet_dind, "jet_dind", ";jets #DeltaIndex; arb. units", 20, 0, 20);
-	nd.book(k_pt0, "pt0", ";Pt of jet0 [GeV]", 25, 0, 500);
-	nd.book(k_pt1, "pt1", ";Pt of jet1 [GeV]", 25, 0, 500);
+	nd.book(k_pt0, "pt0", ";Pt of jet0 [GeV]", 50, 0, 500);
+	nd.book(k_pt1, "pt1", ";Pt of jet1 [GeV]", 50, 0, 500);
 	nd.book(k_ntks_j0, "ntks_j0", ";Ntks in jet0", 25, 0, 25);
 	nd.book(k_ntks_j1, "ntks_j1", ";Ntks in jet1", 25, 0, 25);
 	nd.book(k_nmovedtracks, "nmovedtracks", ";# moved tracks;events/2", 120, 0, 120);
@@ -445,46 +448,69 @@ int main(int argc, char** argv) {
 
 	int nselmuons = 0;
 	double muon_pT = -99;
+	double muon_p = -99;
 	double muon_q = -99;
 	double muon_px = -99;
 	double muon_py = -99;
 	double muon_pz = -99;
 	double muon_abseta = -99;	 
 	double muon_iso = 99;
-	double muon_absdxybs = -99;	 
+	double muon_absdxybs = -99;
+	double muon_absdz = -99;
 	double muon_nsigmadxybs = -99;
 	TLorentzVector muon_p4;
 	TLorentzVector tmpz_p4;
-	TLorentzVector z_p4;
-	bool has_Zboson = false;
-
-	for (int i = 0, ie = muons.n(); i < ie; ++i) {
-		if (muons.pt(i) > 20.0 && abs(muons.eta(i)) < 2.4 && muons.isMed(i) && muons.iso(i) < 0.15) {
+	TLorentzVector zmumu_p4;
+	TLorentzVector zee_p4;
+	bool has_Zmumuboson = false;
+	bool has_Zeeboson = false;
+    bool has_Wboson = false;
+	
+        for (int i = 0, ie = muons.n(); i < ie; ++i) {
+            //FIXME cut on IPs in addition to IDs 
+			double tmp_muon_absdxybs = abs(muons.dxybs(i, bs));
+			double tmp_muon_absdz = muons.dzpv(i, pvs);
+                        //abs((muons.vz(i) - pvs.z(0)) - ((muons.vx(i) - pvs.x(0)) * muons.px(i) + (muons.vy(i) - pvs.y(0)) * muons.py(i)) / muons.pt(i) * muons.pz(i) / muons.pt(i));
+			bool muon_IP_cut = tmp_muon_absdxybs < 0.02 && tmp_muon_absdz < 0.5;
+		if (muon_IP_cut && muons.pt(i) > 29.0 && abs(muons.eta(i)) < 2.4 && muons.isMed(i) && muons.iso(i) < 0.15) {
 			nselmuons += 1;
 			if (nselmuons == 1) {
 				muon_pT = muons.pt(i);
+				muon_p = muons.p(i);
 				muon_px = muons.px(i);
 				muon_py = muons.py(i);
 				muon_pz = muons.pz(i);
-				muon_p4.SetPxPyPzE(muon_px, muon_py, muon_pz, muon_pT);
+				muon_p4.SetPxPyPzE(muon_px, muon_py, muon_pz, muon_p);
 				muon_q = muons.q(i);
 				muon_abseta = abs(muons.eta(i));
-				muon_iso = muons.iso(i);
 				muon_absdxybs = abs(muons.dxybs(i, bs));
+				muon_absdz =  muons.dzpv(i, pvs);
+                                //abs((muons.vz(i) - pvs.z(0)) - ((muons.vx(i) - pvs.x(0)) * muons.px(i) + (muons.vy(i) - pvs.y(0)) * muons.py(i)) / muons.pt(i) * muons.pz(i) / muons.pt(i));
+				muon_iso = muons.iso(i);
 				muon_nsigmadxybs = muons.nsigmadxybs(i, bs);
 				tmpz_p4 += muon_p4;
+
 			}
 			if (nselmuons > 0 && muon_q * muons.q(i) == -1) {
 				TLorentzVector antimuon_p4;
-				antimuon_p4.SetPxPyPzE(muons.px(i), muons.py(i), muons.pz(i), muons.pt(i));
+				antimuon_p4.SetPxPyPzE(muons.px(i), muons.py(i), muons.pz(i), muons.p(i));
 				tmpz_p4 += antimuon_p4;
-				has_Zboson = true; 
+				has_Zmumuboson = true; 
 			}
 		}
 	}
 
+	double z_m = -99, zmumu_m = -99; 
+	double z_pT = -99, zmumu_pT = -99;
+	if (has_Zmumuboson) {
+		zmumu_m = tmpz_p4.M();
+		zmumu_pT = tmpz_p4.Pt();
+		zmumu_p4 = tmpz_p4;
+	}
+
 	int nseleles = 0;
 	double ele_pT = -99;
+	double ele_p = -99;
 	double ele_q = -99;
 	double ele_px = -99;
 	double ele_py = -99;
@@ -492,62 +518,75 @@ int main(int argc, char** argv) {
 	double ele_abseta = -99;
 	double ele_iso = 99;
 	double ele_absdxybs = -99;
+	double ele_absdz = -99;
 	double ele_nsigmadxybs = -99;
 	TLorentzVector ele_p4;
 	tmpz_p4.SetPxPyPzE(0.0, 0.0, 0.0, 0.0);
 
 	for (int i = 0, ie = electrons.n(); i < ie; ++i) {
-		if (electrons.pt(i) > 20.0 && abs(electrons.eta(i)) < 2.4 && electrons.isTight(i) && electrons.passveto(i) && electrons.iso(i) < 0.1) {
+		double tmp_ele_abseta = abs(electrons.eta(i));
+		double tmp_ele_absdxybs = abs(electrons.dxybs(i, bs));
+		double tmp_ele_absdz = electrons.dzpv(i, pvs);  
+                //abs((electrons.vz(i) - pvs.z(0)) - ((electrons.vx(i) - pvs.x(0)) * electrons.px(i) + (electrons.vy(i) - pvs.y(0)) * electrons.py(i)) / electrons.pt(i) * electrons.pz(i) / electrons.pt(i));
+		bool ele_IP_cut = tmp_ele_abseta < 1.48 ? tmp_ele_absdxybs < 0.05 && tmp_ele_absdz < 0.1 : tmp_ele_absdxybs < 0.1 && tmp_ele_absdz < 0.2;
+		if (ele_IP_cut && electrons.pt(i) > 20.0 && abs(electrons.eta(i)) < 2.4 && electrons.isTight(i) && electrons.passveto(i) && electrons.iso(i) < 0.1) {
 			nseleles += 1;
 			if (nseleles == 1) {
 				ele_pT = electrons.pt(i);
+				ele_p = electrons.p(i);
 				ele_px = electrons.px(i);
 				ele_py = electrons.py(i);
 				ele_pz = electrons.pz(i);
-				ele_p4.SetPxPyPzE(ele_px, ele_py, ele_pz, ele_pT);
-				ele_q = electrons.q(i);
 				ele_abseta = abs(electrons.eta(i));
-				ele_iso = electrons.iso(i);
 				ele_absdxybs = abs(electrons.dxybs(i, bs));
+				ele_absdz = electrons.dzpv(i, pvs);
+                                //abs((electrons.vz(i) - pvs.z(0)) - ((electrons.vx(i) - pvs.x(0)) * electrons.px(i) + (electrons.vy(i) - pvs.y(0)) * electrons.py(i)) / electrons.pt(i) * electrons.pz(i) / electrons.pt(i));
+				ele_p4.SetPxPyPzE(ele_px, ele_py, ele_pz, ele_p);
+				ele_q = electrons.q(i);
+				ele_iso = electrons.iso(i);
 				ele_nsigmadxybs = electrons.nsigmadxybs(i, bs);
 				tmpz_p4 += ele_p4;
+
 			}
 			
 			if (nseleles > 0 && ele_q * electrons.q(i) == -1) {
 				TLorentzVector antiele_p4;
-				antiele_p4.SetPxPyPzE(electrons.px(i), electrons.py(i), electrons.pz(i), electrons.pt(i));
+				antiele_p4.SetPxPyPzE(electrons.px(i), electrons.py(i), electrons.pz(i), electrons.p(i));
 				tmpz_p4 += antiele_p4;
-				has_Zboson = true;
+				has_Zeeboson = true;
 			}
 		}
 	}
 
-	TLorentzVector met_p4(pf.met_x(), pf.met_y(), 0, std::hypot(pf.met_x(), pf.met_y()));
-	double met_pT = std::hypot(pf.met_x(), pf.met_y());
-	double lnu_absphi = -99;
-	double w_mT = -99, z_m = -99;
-	double w_pT = -99, z_pT = -99;
+        double met_pT = std::hypot(pf.met_x(), pf.met_y());
+        TLorentzVector met_p4;
+        met_p4.SetPtEtaPhiM(met_pT, 0, pf.met_phi(), 0);
+        double lnu_absphi = -99, ljet_absdr = -99, nujet_absphi = -99;
+	double w_mT = -99, zee_m = -99;
+	double w_pT = -99, zee_pT = -99;
 	TLorentzVector w_p4;
-
-	if (nselmuons > 0 && nseleles == 0) {
-		w_p4 = met_p4 + muon_p4;
-		w_pT = w_p4.Pt();
-		lnu_absphi = abs(muon_p4.DeltaPhi(met_p4));
-		w_mT = sqrt(2 * muon_pT * met_pT * (1 - cos(muon_p4.DeltaPhi(met_p4))));
+        
+	if (met_p4.Pt() > 25) {
+		if (nselmuons && !has_Zmumuboson) {
+			has_Wboson = true;
+			w_p4 = met_p4 + muon_p4;
+			w_pT = w_p4.Pt();
+			lnu_absphi = abs(muon_p4.DeltaPhi(met_p4));
+			w_mT = sqrt(2 * muon_pT * met_pT * (1 - cos(muon_p4.DeltaPhi(met_p4))));
+		}
+		else if (nseleles > 0 && nselmuons == 0 && !has_Zeeboson) {
+			has_Wboson = true;
+			w_p4 = met_p4 + ele_p4;
+			w_pT = w_p4.Pt();
+			lnu_absphi = abs(ele_p4.DeltaPhi(met_p4));
+			w_mT = sqrt(2 * muon_pT * met_pT * (1 - cos(muon_p4.DeltaPhi(met_p4))));
+		}
+        }
+	if (has_Zeeboson) {
+		zee_m = tmpz_p4.M();
+		zee_pT = tmpz_p4.Pt();
+		zee_p4 = tmpz_p4;
 	}
-	else if (nseleles > 0 && nselmuons == 0) {
-		w_p4 = met_p4 + ele_p4;
-		w_pT = w_p4.Pt();
-		lnu_absphi = abs(ele_p4.DeltaPhi(met_p4));
-		w_mT = sqrt(2 * ele_pT * met_pT * (1 - cos(ele_p4.DeltaPhi(met_p4))));
-
-	}
-	else if (has_Zboson) {
-		z_m = tmpz_p4.M();
-		z_pT = tmpz_p4.Pt();
-		z_p4 = tmpz_p4;
-	}
-
 
 
 
@@ -644,9 +683,28 @@ int main(int argc, char** argv) {
 	const double jet_dind = fabs(jet_i[1] - jet_i[0]);
 	const double jet_mv_dphi_sum = move_vector.DeltaPhi((jet_p4[0] + jet_p4[1]).Vect());
 	const double jet_mv_deta_sum = fabs((jet_p4[0] + jet_p4[1]).Eta() - move_vector.Eta());
-	const double wjet_dphi = w_p4.DeltaPhi(jet_p4[0] + jet_p4[1]);
-	const double zjet_dphi = z_p4.DeltaPhi(jet_p4[0] + jet_p4[1]);
-
+	double wjet_dphi = w_p4.DeltaPhi(jet_p4[0] + jet_p4[1]);
+	if (!has_Wboson) wjet_dphi = 99;
+	double zjet_dphi = 99;
+    if (has_Zmumuboson){
+        zjet_dphi = zmumu_p4.DeltaPhi(jet_p4[0] + jet_p4[1]);
+        z_m = zmumu_m;
+        z_pT = zmumu_pT;
+    }
+    else if (has_Zeeboson){
+        zjet_dphi = zee_p4.DeltaPhi(jet_p4[0] + jet_p4[1]);
+        z_m = zee_m;
+        z_pT = zee_pT;
+    }
+	if (met_p4.Pt() > 25){
+        if (nselmuons > 0) {
+			ljet_absdr = abs(muon_p4.DeltaR(jet_p4[0])) < abs(muon_p4.DeltaR(jet_p4[1])) ? abs(muon_p4.DeltaR(jet_p4[0])) : abs(muon_p4.DeltaR(jet_p4[1]));
+                }
+		else if ( nseleles > 0 && nselmuons == 0) {
+			ljet_absdr = abs(ele_p4.DeltaR(jet_p4[0])) < abs(ele_p4.DeltaR(jet_p4[1])) ? abs(ele_p4.DeltaR(jet_p4[0])) : abs(ele_p4.DeltaR(jet_p4[1]));
+                }
+		nujet_absphi = abs(met_p4.DeltaPhi(jet_p4[0])) < abs(met_p4.DeltaPhi(jet_p4[1])) ? abs(met_p4.DeltaPhi(jet_p4[0])) : abs(met_p4.DeltaPhi(jet_p4[1]));
+    }
     const double jet_nseedtracks_max = std::max(jet_nseedtracks[0], jet_nseedtracks[1]);
     const double jet_nseedtracks_min = std::min(jet_nseedtracks[0], jet_nseedtracks[1]);
     const double jet_pt_max = std::max(jet_pt[0], jet_pt[1]);
@@ -710,7 +768,6 @@ int main(int argc, char** argv) {
     ++nden;
     den += w;
     if (w < 0) { ++nnegden; negden += w; }
-
     for (numdens& nd : nds) {
       nd.den(k_movedist2, movedist2);
       nd.den(k_movedist3, movedist3);
@@ -730,6 +787,7 @@ int main(int argc, char** argv) {
 	  nd.den(k_muon_iso, muon_iso);
 	  if (muon_iso != 0.0) nd.den(k_muon_zoom_iso, muon_iso);
 	  nd.den(k_muon_absdxybs, muon_absdxybs);
+	  nd.den(k_muon_absdz, muon_absdz);
 	  nd.den(k_muon_nsigmadxybs, muon_nsigmadxybs);
 	  nd.den(k_neles, nseleles);
 	  nd.den(k_ele_pT, ele_pT);
@@ -737,13 +795,16 @@ int main(int argc, char** argv) {
 	  nd.den(k_ele_iso, ele_iso);
 	  if (ele_iso != 0.0) nd.den(k_ele_zoom_iso, ele_iso);
 	  nd.den(k_ele_absdxybs, ele_absdxybs);
+	  nd.den(k_ele_absdz, ele_absdz);
 	  nd.den(k_ele_nsigmadxybs, ele_nsigmadxybs);
-	  nd.den(k_met_pT, met_pT);
+	  if (met_pT > 25) nd.den(k_met_pT, met_pT);
 	  nd.den(k_w_pT, w_pT);
 	  nd.den(k_w_mT, w_mT);
 	  nd.den(k_z_pT, z_pT);
 	  nd.den(k_z_m, z_m);
 	  nd.den(k_lnu_absphi, lnu_absphi);
+	  nd.den(k_ljet_absdr, ljet_absdr);
+	  nd.den(k_nujet_absphi, nujet_absphi);
 	  nd.den(k_wjet_dphi, fabs(wjet_dphi));
 	  nd.den(k_zjet_dphi, fabs(zjet_dphi));
       nd.den(k_jet_asymm, jet_asymm);
@@ -892,7 +953,6 @@ int main(int argc, char** argv) {
     for (int i = 0; i < num_numdens; ++i) {
       if (!npasses[i]) continue;
       numdens& nd = nds[i];
-
       nd.num(k_movedist2, movedist2);
       nd.num(k_movedist3, movedist3);
       nd.num(k_movevectoreta, movevectoreta);
@@ -911,6 +971,7 @@ int main(int argc, char** argv) {
 	  nd.num(k_muon_iso, muon_iso);
 	  if (muon_iso != 0.0) nd.num(k_muon_zoom_iso, muon_iso);
 	  nd.num(k_muon_absdxybs, muon_absdxybs);
+	  nd.num(k_muon_absdz, muon_absdz);
 	  nd.num(k_muon_nsigmadxybs, muon_nsigmadxybs);
 	  nd.num(k_neles, nseleles);
 	  nd.num(k_ele_pT, ele_pT);
@@ -918,6 +979,7 @@ int main(int argc, char** argv) {
 	  nd.num(k_ele_iso, ele_iso);
 	  if (ele_iso != 0.0) nd.num(k_ele_zoom_iso, ele_iso);
 	  nd.num(k_ele_absdxybs, ele_absdxybs);
+	  nd.num(k_ele_absdz, ele_absdz);
 	  nd.num(k_ele_nsigmadxybs, ele_nsigmadxybs);
 	  nd.num(k_met_pT, met_pT);
 	  nd.num(k_w_pT, w_pT);
@@ -925,6 +987,8 @@ int main(int argc, char** argv) {
 	  nd.num(k_z_pT, z_pT);
 	  nd.num(k_z_m, z_m);
 	  nd.num(k_lnu_absphi, lnu_absphi);
+	  nd.num(k_ljet_absdr, ljet_absdr);
+	  nd.num(k_nujet_absphi, nujet_absphi);
 	  nd.num(k_wjet_dphi, fabs(wjet_dphi));
 	  nd.num(k_zjet_dphi, fabs(zjet_dphi));
       nd.num(k_jet_asymm, jet_asymm);

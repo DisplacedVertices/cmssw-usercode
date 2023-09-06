@@ -20,6 +20,7 @@
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "JMTucker/Tools/interface/Ntuple.h"
 #include "JMTucker/Tools/interface/TrackRefGetter.h"
+#include "JMTucker/MFVNeutralinoFormats/interface/TriggerFloats.h"
 
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
@@ -131,16 +132,23 @@ namespace jmt {
     const edm::InputTag tag_;
     const edm::EDGetTokenT<pat::METCollection> token_;
     edm::Handle<pat::METCollection> mets_;
+    const edm::InputTag triggerfloats_tag_;
+    bool triggerfloats_available_;
+    const edm::EDGetTokenT<mfv::TriggerFloats> triggerfloats_token_;
+    edm::Handle<mfv::TriggerFloats> triggerfloats_;
   public:
     PFSubNtupleFiller(PFSubNtuple& nt, const edm::ParameterSet& cfg, edm::ConsumesCollector&& cc)
       : nt_(nt),
         tag_(cfg.getParameter<edm::InputTag>("mets_src")),
-        token_(cc.consumes<pat::METCollection>(tag_))
+        token_(cc.consumes<pat::METCollection>(tag_)),
+        triggerfloats_tag_(cfg.getParameter<edm::InputTag>("triggerfloats_src")),
+        triggerfloats_available_(triggerfloats_tag_.label() != ""),
+        triggerfloats_token_( triggerfloats_available_ ? cc.consumes<mfv::TriggerFloats>(triggerfloats_tag_) : edm::EDGetTokenT<mfv::TriggerFloats>() )
     {}
     void operator()(const edm::Event&);
     const pat::METCollection& mets() const { return *mets_; }
   };
-  
+
   void NtupleAdd(MuonsSubNtuple&, const pat::Muon&);
 
   class MuonsSubNtupleFiller {
