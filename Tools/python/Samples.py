@@ -1099,13 +1099,13 @@ condorable = {
         "miniaod": [ttbar_2018, ttZext_2017, qcdht0700_2017, qcdht0500_2017],
         },
     "T2_US_Nebraska": {
-        "miniaod": [SingleMuon2017C, ttbar_2017, qcdht0300_2017, mfv_neu_tau030000um_M1600_2017],
+        "miniaod": [SingleMuon2017C, ttbar_2017, qcdht0300_2017],
         },
     "T2_US_Purdue": {
-        "miniaod": [mfv_stopdbardbar_tau000100um_M1200_2017],
+        "miniaod": [],
         },
     "T2_US_Wisconsin" : {
-        "miniaod": [ttZ_2017, mfv_stopdbardbar_tau000300um_M0600_2017],
+        "miniaod": [ttZ_2017],
         },
     }
 
